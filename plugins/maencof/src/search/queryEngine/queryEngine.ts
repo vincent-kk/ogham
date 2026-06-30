@@ -5,11 +5,23 @@
  * 온라인 검색 계층: 사전 계산된 가중치 + SA로 실시간 검색 수행.
  * 시간 제약: MCP 도구 호출 컨텍스트에서 100ms 이하 목표.
  */
+import {
+  KEYWORD_SEED_CAP,
+  PATH_PREFIX_MATCH_SCORE,
+  PATH_PREFIX_SEED_CAP,
+  PHRASE_CONTIGUITY_BONUS,
+} from '../../constants/queryEngine.js';
+import { WORD_BOUNDARY_SPLIT_REGEX } from '../../constants/regexes.js';
+import { SIBLING_FANOUT_CAP } from '../../constants/spreadingActivation.js';
 import { runSpreadingActivation } from '../../core/spreadingActivation/index.js';
 import type { SpreadingActivationParams } from '../../core/spreadingActivation/index.js';
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
-import type { ActivationResult, KnowledgeGraph } from '../../types/graph.js';
+import type {
+  ActivationResult,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 import { QueryCache } from '../queryCache/index.js';
 
 /** 시드 매칭 유형 */
@@ -88,6 +100,113 @@ function classifyMatch(
   return { score: 0.3, type: 'tag-prefix' };
 }
 
+/** 시드 문자열을 inverted-index 와 동일 경계로 토큰화한다 (lowercase, 공백 제외). */
+function tokenizeSeed(seed: string): string[] {
+  const tokens: string[] = [];
+  for (const part of seed.split(WORD_BOUNDARY_SPLIT_REGEX)) {
+    const lower = part.toLowerCase();
+    if (lower.length > 0) tokens.push(lower);
+  }
+  return tokens;
+}
+
+/** 분리자(공백/하이픈/언더스코어 등) 정규화된 phrase 형태로 변환 ("investment-fomo" == "investment fomo"). */
+function normalizePhrase(s: string): string {
+  return tokenizeSeed(s).join(' ');
+}
+
+/**
+ * 단일 토큰의 후보 노드 집합을 반환한다.
+ * invertedIndex 존재 시 term prefix 매칭, 없으면 title/tag substring 폴백.
+ */
+function candidatesForToken(graph: KnowledgeGraph, token: string): Set<NodeId> {
+  const ids = new Set<NodeId>();
+  if (graph.invertedIndex) {
+    for (const [term, nodeIds] of graph.invertedIndex) {
+      if (term.startsWith(token)) {
+        for (const id of nodeIds) ids.add(id);
+      }
+    }
+  } else {
+    for (const [id, node] of graph.nodes) {
+      const titleMatch = node.title.toLowerCase().includes(token);
+      const tagMatch = node.tags.some((tag) =>
+        tag.toLowerCase().includes(token),
+      );
+      if (titleMatch || tagMatch) ids.add(id);
+    }
+  }
+  return ids;
+}
+
+/** 후보 집합들의 교집합 (다토큰 AND). 빈 입력/빈 집합이면 빈 결과. */
+function intersectCandidateSets(sets: Set<NodeId>[]): Set<NodeId> {
+  if (sets.length === 0) return new Set();
+  let smallest = sets[0]!;
+  for (const s of sets) if (s.size < smallest.size) smallest = s;
+  const result = new Set<NodeId>();
+  for (const id of smallest) {
+    if (sets.every((s) => s.has(id))) result.add(id);
+  }
+  return result;
+}
+
+/**
+ * 시드 후보가 상한을 초과하면 pagerank 상위 cap 개로 줄인다 (동률은 id 사전순으로 결정적).
+ * 허브 태그·대형 폴더의 시드 폭발을 억제한다. 상한 이하이면 원본을 그대로 반환한다.
+ */
+function capSeedsByPagerank(
+  graph: KnowledgeGraph,
+  ids: NodeId[],
+  cap: number,
+): NodeId[] {
+  if (ids.length <= cap) return ids;
+  return ids
+    .map((id) => graph.nodes.get(id))
+    .filter((n): n is KnowledgeNode => n !== undefined)
+    .sort((a, b) => {
+      const pa = a.pagerank ?? 0;
+      const pb = b.pagerank ?? 0;
+      if (pb !== pa) return pb - pa;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    })
+    .slice(0, cap)
+    .map((n) => n.id);
+}
+
+/**
+ * 다토큰(AND) 시드의 매칭 점수를 산정한다.
+ * - 토큰별 classifyMatch 의 최저 점수(weakest-link)를 기본 점수로 사용.
+ * - 제목에 phrase 가 연속 등장하면 PHRASE_CONTIGUITY_BONUS 가산 (분리자 정규화 후 비교).
+ */
+function classifyMultiToken(
+  node: { title: string; tags: string[] },
+  tokens: string[],
+  phrase: string,
+): { score: number; type: MatchType } {
+  const titleNorm = normalizePhrase(node.title);
+  // 정규화된 제목이 phrase 와 완전 일치 → 단일 토큰 title-exact 와 동등하게 취급.
+  if (phrase.length > 0 && titleNorm === phrase) {
+    return { score: 1.0, type: 'title-exact' };
+  }
+
+  let minScore = 1.0;
+  let worstType: MatchType = 'title-word';
+  for (const token of tokens) {
+    const { score, type } = classifyMatch(node, token);
+    if (score < minScore) {
+      minScore = score;
+      worstType = type;
+    }
+  }
+  const contiguous = phrase.length > 0 && titleNorm.includes(phrase);
+  const score = Math.min(
+    1.0,
+    minScore + (contiguous ? PHRASE_CONTIGUITY_BONUS : 0),
+  );
+  return { score, type: contiguous ? 'title-word' : worstType };
+}
+
 function resolvePathSeed(
   graph: KnowledgeGraph,
   seed: string,
@@ -103,6 +222,28 @@ function resolvePathSeed(
         matchType: 'path-exact',
       });
     }
+    return;
+  }
+
+  // 정확 노드 부재 → 폴더 prefix 폴백: `seed/` 경계로 시작하는 노드를 폴더 멤버 시드로 채택.
+  // pagerank 상위 PATH_PREFIX_SEED_CAP 개로 상한(대형 폴더 클리크 시드 폭발 차단).
+  // path-exact 가 아닌 타입으로 분류 → 폴더 멤버가 결과에서 제외되지 않고 노출된다.
+  const prefix = seed.endsWith('/') ? seed : `${seed}/`;
+  const memberIds: NodeId[] = [];
+  for (const [id, node] of graph.nodes) {
+    if (node.path.startsWith(prefix)) memberIds.push(id);
+  }
+  if (memberIds.length === 0) return;
+
+  for (const id of capSeedsByPagerank(graph, memberIds, PATH_PREFIX_SEED_CAP)) {
+    const existing = bestScores.get(id);
+    if (!existing || existing.matchScore < PATH_PREFIX_MATCH_SCORE) {
+      bestScores.set(id, {
+        nodeId: id,
+        matchScore: PATH_PREFIX_MATCH_SCORE,
+        matchType: 'tag-exact',
+      });
+    }
   }
 }
 
@@ -111,29 +252,45 @@ function resolveKeywordSeed(
   seed: string,
   bestScores: Map<NodeId, ScoredSeed>,
 ): void {
-  const candidateIds = new Set<NodeId>();
-  const keyword = seed.toLowerCase();
+  const tokens = tokenizeSeed(seed);
+  if (tokens.length === 0) return;
 
-  if (graph.invertedIndex) {
-    for (const [term, nodeIds] of graph.invertedIndex) {
-      if (term.startsWith(keyword)) {
-        for (const id of nodeIds) candidateIds.add(id);
-      }
-    }
-  } else {
-    for (const [id, node] of graph.nodes) {
-      const titleMatch = node.title.toLowerCase().includes(keyword);
-      const tagMatch = node.tags.some((tag) =>
-        tag.toLowerCase().includes(keyword),
-      );
-      if (titleMatch || tagMatch) candidateIds.add(id);
-    }
-  }
+  const multiToken = tokens.length > 1;
+  const candidateIds = multiToken
+    ? intersectCandidateSets(tokens.map((t) => candidatesForToken(graph, t)))
+    : candidatesForToken(graph, tokens[0]!);
 
+  const phrase = multiToken ? normalizePhrase(seed) : '';
+
+  // 먼저 모든 후보를 매칭 품질로 분류한다. 시드 budget 은 분류 이후에 적용해야,
+  // pagerank 가 낮은 고품질(title) 매칭이 pagerank 높은 저품질(tag) 매칭에 밀려
+  // 탈락하는 것을 막는다 (title > tag 점수 갭 보존).
+  const scored: Array<{
+    id: NodeId;
+    score: number;
+    type: MatchType;
+    pagerank: number;
+  }> = [];
   for (const id of candidateIds) {
     const node = graph.nodes.get(id);
     if (!node) continue;
-    const { score, type } = classifyMatch(node, seed);
+    const { score, type } = multiToken
+      ? classifyMultiToken(node, tokens, phrase)
+      : classifyMatch(node, tokens[0]!);
+    scored.push({ id, score, type, pagerank: node.pagerank ?? 0 });
+  }
+
+  // 허브 토큰 시드 budget: score 우선 → pagerank → id 로 결정적 정렬 후 상위 K개만 채택.
+  // 균일 점수의 허브 태그(예: `security` 127노드)는 여전히 pagerank 로 캡되지만,
+  // 고품질 title 매칭은 점수 우선이므로 보존된다.
+  scored.sort(
+    (a, b) =>
+      b.score - a.score ||
+      b.pagerank - a.pagerank ||
+      (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+  );
+
+  for (const { id, score, type } of scored.slice(0, KEYWORD_SEED_CAP)) {
     const existing = bestScores.get(id);
     if (!existing || existing.matchScore < score) {
       bestScores.set(id, { nodeId: id, matchScore: score, matchType: type });
@@ -265,6 +422,7 @@ export function query(
       maxActiveNodes: 100,
       decayOverride: decay,
       seedActivations,
+      siblingFanoutCap: SIBLING_FANOUT_CAP,
     };
 
     // 확산 활성화 실행
