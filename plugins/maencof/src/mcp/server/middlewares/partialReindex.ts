@@ -63,14 +63,22 @@ export async function mergeStaleNodesIntoGraph(
 
   const replacedSourceIds = new Set<NodeId>();
   let anyDeleted = false;
-  const mutateDeltas: Array<{ freshNode: KnowledgeNode; oldNode: KnowledgeNode | undefined }> = [];
+  const mutateDeltas: Array<{
+    freshNode: KnowledgeNode;
+    oldNode: KnowledgeNode | undefined;
+  }> = [];
 
   for (const entry of toProcess) {
     if (entry.op === 'delete') {
       if (handleDelete(graph, pathToNodeId, entry.path)) anyDeleted = true;
       continue;
     }
-    const delta = await handleMutate(vaultPath, graph, pathToNodeId, entry.path);
+    const delta = await handleMutate(
+      vaultPath,
+      graph,
+      pathToNodeId,
+      entry.path,
+    );
     if (delta) mutateDeltas.push(delta);
   }
 
@@ -142,7 +150,10 @@ async function handleMutate(
   graph: KnowledgeGraph,
   pathToNodeId: Map<string, NodeId>,
   stalePath: string,
-): Promise<{ freshNode: KnowledgeNode; oldNode: KnowledgeNode | undefined } | null> {
+): Promise<{
+  freshNode: KnowledgeNode;
+  oldNode: KnowledgeNode | undefined;
+} | null> {
   let freshNode: KnowledgeNode | undefined;
   let oldNode: KnowledgeNode | undefined;
   try {
