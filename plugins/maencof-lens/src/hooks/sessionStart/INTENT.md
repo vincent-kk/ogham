@@ -1,6 +1,14 @@
 ## Purpose
 
-SessionStart 훅 구현. 설정 감지 후 볼트 상태 확인 및 스킬 가이드를 주입한다.
+SessionStart 훅 구현. 진입 시 spawn 없는 환경 자가진단(node/PATH/CLAUDE_PLUGIN_ROOT) 후, 설정이 있으면 볼트 상태를 확인하고 스킬 가이드를 주입한다.
+
+## Structure
+
+| File / Dir              | Role                                           |
+| ----------------------- | ---------------------------------------------- |
+| `sessionStart.ts`       | config 감지 → 볼트 상태 → 가이드/advisory 조립 |
+| `sessionStart.entry.ts` | esbuild 진입점 (진단 + 결과 stdout)            |
+| `probe/`                | spawn-free 환경 진단 (process.versions/env)    |
 
 ## Boundaries
 

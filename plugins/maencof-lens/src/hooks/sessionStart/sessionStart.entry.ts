@@ -4,15 +4,12 @@
  * Bundled to bridge/session-start.mjs.
  */
 import { logHookFailure } from "@ogham/cross-platform/error-log";
-import { selfProbe } from "@ogham/cross-platform/self-probe";
 
+import { probeEnvironment } from "./probe/probeEnvironment.js";
 import { runSessionStart } from "./sessionStart.js";
 
 async function main() {
-  // Diagnose node/git/PATH/CLAUDE_PLUGIN_ROOT on the first hook entry of a
-  // session. Errors append to ~/.claude/plugins/maencof-lens/error-log.json
-  // so silent hook failures (Windows PATH lacking node, etc.) are observable.
-  const probe = await selfProbe({ writeLog: true, pkg: "maencof-lens" });
+  const probe = probeEnvironment({ writeLog: true, pkg: "maencof-lens" });
 
   let result;
   try {
