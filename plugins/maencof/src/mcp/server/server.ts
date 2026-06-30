@@ -19,7 +19,10 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { VERSION } from '../../version.js';
 
 import { getVaultPath } from './graphCache/index.js';
-import { walkVaultForExternalChanges } from './middlewares/index.js';
+import {
+  triggerBootRebuildIfStale,
+  walkVaultForExternalChanges,
+} from './middlewares/index.js';
 import {
   registerActivityReadTools,
   registerCacheTools,
@@ -47,8 +50,10 @@ export function createServer(): McpServer {
  * Starts the MCP server with stdio transport.
  *
  * Boot 직후 walkVaultForExternalChanges를 detach하여 외부 편집(다른 프로세스가
- * vault 마크다운을 수정한 경우)의 stale 등록을 백그라운드에서 처리한다.
- * 이 walk은 절대 await하지 않으며 snapshot 부재 시 no-op이다.
+ * vault 마크다운을 수정한 경우)의 stale 등록을 백그라운드에서 처리하고,
+ * 그 직후 stale 이 있으면 background 증분 빌드를 1회 트리거한다 — 직전 세션의 미반영
+ * 변경(예: 핸드오프 문서)이 첫 read 전에 인덱싱되도록 한다. 둘 다 절대 await하지 않으며
+ * (부팅 비차단) snapshot/stale 부재 시 no-op이다.
  */
 export async function startServer(): Promise<void> {
   const server = createServer();
@@ -56,9 +61,12 @@ export async function startServer(): Promise<void> {
   await server.connect(transport);
 
   try {
-    walkVaultForExternalChanges(getVaultPath()).catch(() => {
-      /* fire-and-forget; failures are logged inside vault-walk */
-    });
+    const vaultPath = getVaultPath();
+    void walkVaultForExternalChanges(vaultPath)
+      .then(() => triggerBootRebuildIfStale(vaultPath))
+      .catch(() => {
+        /* fire-and-forget; failures are logged inside the concerns */
+      });
   } catch {
     /* getVaultPath() may throw on blocked global config paths; silent */
   }
