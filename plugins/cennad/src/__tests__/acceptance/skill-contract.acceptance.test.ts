@@ -15,7 +15,7 @@ describe('[acceptance] provider skill contracts', () => {
     (provider) => {
       const skill = readSkill(provider);
       expect(skill).toContain(
-        'mcp_tools_continue_conversation({ session_id, prompt, tier? })',
+        'mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt, tier? })',
       );
       expect(skill).toContain('Pass `tier` when supplied');
       expect(skill).not.toContain('Drop `tier`');
