@@ -6,10 +6,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `mcp_tools_config_get` | Load config.json for language/default project resolution (Step 1) |
-| `mcp_tools_run_create` | Create run directory, copy source, initialize state.json |
-| `mcp_tools_run_get` | Read current run state for precondition checks (declared-only) |
-| `mcp_tools_run_transition` | start_phase (validate) → complete_phase (validate) with result |
+| `mcp__plugin_imbas_tools__config_get` | Load config.json for language/default project resolution (Step 1) |
+| `mcp__plugin_imbas_tools__run_create` | Create run directory, copy source, initialize state.json |
+| `mcp__plugin_imbas_tools__run_get` | Read current run state for precondition checks (declared-only) |
+| `mcp__plugin_imbas_tools__run_transition` | start_phase (validate) → complete_phase (validate) with result |
 
 ### Jira Operations ([OP:])
 

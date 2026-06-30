@@ -22,7 +22,7 @@ The A/B/C subagent returns this handoff payload to its caller (the pipeline main
 
 ```yaml
 SubagentReturn:
-  committee: list<PersonaId> # elected by mcp_t_review_manage(elect-committee)
+  committee: list<PersonaId> # elected by mcp__plugin_filid_t__review_manage(elect-committee)
   deliberation_mode: DeliberationMode # see enum below
   failure_reason: FailureReason # see enum below; "none" when healthy
   paths_to_artifacts:
@@ -132,7 +132,7 @@ The authoritative column set (including formatting) is `templates.md` →
 | `debt_id`          | debt record id once promoted, else `—`                                                                   |
 
 Promotion rule: when `count` reaches **3** and `status` is `open`, the
-chairperson calls `mcp_t_debt_manage(action: "create", projectRoot,
+chairperson calls `mcp__plugin_filid_t__debt_manage(action: "create", projectRoot,
 debtItem: …)` with `severity: LOW`, sets `status: promoted`, and records
 the returned `debt_id`. Promoted keys are skipped on future appearances
 (no re-counting) — the advisory appendix never becomes an unbounded

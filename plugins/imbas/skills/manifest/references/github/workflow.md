@@ -14,7 +14,7 @@ Before any `gh issue create` call, verify the required labels exist.
    - `type:epic`, `type:story`, `type:task`, `type:subtask`
    - `status:todo`, `status:ready-for-dev`, `status:in-progress`, `status:in-review`, `status:done`
    - Any entries in `config.github.defaultLabels`
-   - All values from `config.labels` (6 lifecycle labels — load via `mcp_tools_config_get` field `"labels"`)
+   - All values from `config.labels` (6 lifecycle labels — load via `mcp__plugin_imbas_tools__config_get` field `"labels"`)
 3. For each missing label:
    ```bash
    gh label create <name> --repo <owner/repo> --color <rrggbb>
@@ -23,7 +23,7 @@ Before any `gh issue create` call, verify the required labels exist.
 4. **Fail-fast on 403**: if `gh label create` exits non-zero with "HTTP 403"
    or "resource not accessible":
    - Emit: `"gh label create failed: insufficient scopes. Run 'gh auth refresh -s repo' and retry."`
-   - Call `mcp_tools_run_transition` → `blocked` state.
+   - Call `mcp__plugin_imbas_tools__run_transition` → `blocked` state.
    - STOP. Do NOT proceed to `gh issue create`.
    See `label-bootstrap.md` for full protocol and `errors.md` for error taxonomy.
 
@@ -44,13 +44,13 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
    - DRIFT_STATE: closed unexpectedly → WARN "Issue `<ref>` is closed — expected open."
      Offer to skip or proceed.
 5. If any drift detected, display summary table and save reconciled manifest via
-   `mcp_tools_manifest_save` before Step 3.
+   `mcp__plugin_imbas_tools__manifest_save` before Step 3.
 6. Skip entirely for fresh runs (no `issue_ref` anywhere).
 
 ## Step 4 — Batch Execution (GitHub)
 
 CRITICAL: after EACH item creation, immediately save the manifest with the
-updated `status` / `issue_ref` via `mcp_tools_manifest_save`. Crash-recovery invariant.
+updated `status` / `issue_ref` via `mcp__plugin_imbas_tools__manifest_save`. Crash-recovery invariant.
 
 `issue_ref` format is always `owner/repo#<number>` (§1.3).
 
@@ -67,7 +67,7 @@ If manifest has `epic_ref == null` and an Epic entry exists:
      --label <config.labels.managed>
    ```
 2. Parse returned issue URL to extract number. Store `owner/repo#<N>` in `epic_ref`.
-3. `mcp_tools_manifest_save` immediately.
+3. `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 #### Phase 4b — Story Creation
 
@@ -82,7 +82,7 @@ For each story in `manifest.stories` where `status == "pending"`:
 2. If epic exists, update epic body to append `- [ ] <story_ref>` under `## Sub-tasks`
    via `gh api` PATCH (see `link-handling.md` §Task-list maintenance).
 3. Update story: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
-4. `mcp_tools_manifest_save` immediately.
+4. `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 #### Phase 4c — Link Creation
 
@@ -94,7 +94,7 @@ For each link in `manifest.links` where `status == "pending"`:
      appending `- <linkType>: <target_ref>`.
   3. Write reverse entry on target issue (see `link-handling.md` §Mapping table).
 - Update link `status`: `created` / `partial` / `failed`.
-- `mcp_tools_manifest_save` immediately.
+- `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 See `link-handling.md` for the full `## Links` grammar and bidirectional write protocol.
 
@@ -129,7 +129,7 @@ For each task in `manifest.tasks` where `status == "pending"`:
      --label <config.labels.managed>
    ```
 2. Update task: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
-3. `mcp_tools_manifest_save` immediately.
+3. `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 #### Step 2 — create_task_subtasks
 
@@ -143,7 +143,7 @@ For each task, for each subtask where `status == "pending"`:
    ```
 2. PATCH parent task body to append `- [ ] <subtask_ref>` under `## Sub-tasks`.
 3. Update subtask: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
-4. `mcp_tools_manifest_save` immediately.
+4. `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 #### Step 3 — create_links (task.blocks relations)
 
@@ -151,7 +151,7 @@ For each task, for each `blocked_story_id` in `task.blocks`:
 1. Resolve story `issue_ref` from `stories-manifest.json`.
 2. PATCH task body `## Links`: append `- blocks: <story_ref>`.
 3. PATCH story body `## Links`: append `- blocked-by: <task_ref>`.
-4. `mcp_tools_manifest_save` immediately.
+4. `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 #### Step 4 — create_story_subtasks
 
@@ -159,7 +159,7 @@ For each entry in `manifest.story_subtasks`, for each subtask where `status == "
 1. `gh issue create` with `type:subtask` + `<config.labels.managed>` labels, parent ref in body.
 2. PATCH parent story body `## Sub-tasks`: append `- [ ] <subtask_ref>`.
 3. Update subtask: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
-4. `mcp_tools_manifest_save` immediately.
+4. `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 #### Step 5 — add_feedback_comments
 
@@ -169,7 +169,7 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
    echo "<comment body>" | gh issue comment <N> --repo <owner/repo> --body-file -
    ```
 3. Update comment: `status = "created"`.
-4. `mcp_tools_manifest_save` immediately.
+4. `mcp__plugin_imbas_tools__manifest_save` immediately.
 
 IDEMPOTENCY: check `status` and `issue_ref` before creating. If `issue_ref`
 already exists → run drift check and skip if confirmed present.
@@ -195,8 +195,8 @@ See `../label-transitions.md` for the full transition table and idempotency rule
 
 ### Stories type (Phase 2.5)
 
-1. Load run state via `mcp_tools_run_get`.
-2. Load label config via `mcp_tools_config_get` with field `"labels"`.
+1. Load run state via `mcp__plugin_imbas_tools__run_get`.
+2. Load label config via `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
 3. For each created `issue_ref` in manifest (stories + epic):
    - If `split.pending_review === true`:
      ```bash
@@ -209,7 +209,7 @@ See `../label-transitions.md` for the full transition table and idempotency rule
 
 ### Devplan type (Phase 3.5)
 
-1. Load label config via `mcp_tools_config_get` with field `"labels"`.
+1. Load label config via `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
 2. Collect all parent story `issue_ref`s from `stories-manifest.json`.
 3. For each parent story `issue_ref`:
    ```bash

@@ -40,7 +40,7 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 ## Plugin Runtime
 
 - 스킬 이름에 플러그인 prefix 없음 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`) — 디렉토리 이름 = 스킬 이름
-- MCP 서버 이름은 `tools` — 스킬에서 `mcp_tools_<name>` 으로 참조
+- MCP 서버 이름은 `tools` — 스킬에서 `mcp__plugin_cennad_tools__<name>` 으로 참조
 - **훅 번들 cap**: 10 KB LIGHT (enforced by `scripts/buildHooks.mjs`). injectStatic / injectDynamic 모두 ~3.3 KB minified
 - **훅 번들 금지 import**: `zod`, `@modelcontextprotocol/sdk`, `fast-glob`, `lodash`, `moment`, `date-fns` — `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs` 가 강제
 

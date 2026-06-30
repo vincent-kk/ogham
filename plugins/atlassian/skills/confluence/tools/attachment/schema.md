@@ -13,7 +13,7 @@ V2-style logical paths — MCP rewrites to V1/DC form automatically.
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List | `mcp_tools_fetch` | GET | |
-| Upload | `mcp_tools_fetch` | POST | `content_type: "multipart/form-data"` (XSRF header auto-attached) |
-| Delete | `mcp_tools_fetch` | DELETE | |
-| Download | `mcp_tools_fetch` | GET | `accept_format: "raw"`, prefer `download` skill |
+| List | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Upload | `mcp__plugin_atlassian_tools__fetch` | POST | `content_type: "multipart/form-data"` (XSRF header auto-attached) |
+| Delete | `mcp__plugin_atlassian_tools__fetch` | DELETE | |
+| Download | `mcp__plugin_atlassian_tools__fetch` | GET | `accept_format: "raw"`, prefer `download` skill |

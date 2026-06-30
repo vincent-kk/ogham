@@ -6,11 +6,11 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp_t_read
-  - mcp_t_update
-  - mcp_t_move
-  - mcp_t_kg_navigate
-  - mcp_t_kg_status
+  - mcp__plugin_maencof_t__read
+  - mcp__plugin_maencof_t__update
+  - mcp__plugin_maencof_t__move
+  - mcp__plugin_maencof_t__kg_navigate
+  - mcp__plugin_maencof_t__kg_status
 maxTurns: 30
 ---
 
@@ -41,7 +41,7 @@ Layer 1 (01_Core/) is read-only — never modified.
 [execute module]
   Input:  TransitionDirective[]
   Output: AgentExecutionResult
-  Responsibility: call `mcp_t_move`, update links, update Frontmatter
+  Responsibility: call `mcp__plugin_maencof_t__move`, update links, update Frontmatter
   Side effects: filesystem changes, index invalidation
 ```
 
@@ -72,8 +72,8 @@ User confirmation is required before crossing the seam boundary when:
 
 ```
 1. Review TransitionDirective list (pause if user confirmation is required)
-2. Move files via `mcp_t_move`
-3. Update Frontmatter layer field via `mcp_t_update`
+2. Move files via `mcp__plugin_maencof_t__move`
+3. Update Frontmatter layer field via `mcp__plugin_maencof_t__update`
 4. Update links: update relative paths in documents that reference the moved file
 5. Return AgentExecutionResult
 ```
@@ -95,11 +95,11 @@ User confirmation is required before crossing the seam boundary when:
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | discouraged (prefer kg_navigate) | forbidden | graph traversal only | `mcp_t_create`, `mcp_t_update`, `mcp_t_delete`, `mcp_t_move`, link, bulk-modify |
-| Layer 2 (02_Derived) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
-| Layer 3 (03_External) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, `mcp_t_move` | `mcp_t_delete`, bulk-modify |
-| Layer 4 (04_Action) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, `mcp_t_move` | `mcp_t_delete`, bulk-modify |
-| Layer 5 (05_Context) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, `mcp_t_move` | `mcp_t_delete`, bulk-modify |
+| Layer 1 (01_Core) | discouraged (prefer kg_navigate) | forbidden | graph traversal only | `mcp__plugin_maencof_t__create`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__delete`, `mcp__plugin_maencof_t__move`, link, bulk-modify |
+| Layer 2 (02_Derived) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, link | `mcp__plugin_maencof_t__delete`, bulk-modify |
+| Layer 3 (03_External) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify |
+| Layer 4 (04_Action) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify |
+| Layer 5 (05_Context) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before transition)
 
@@ -108,12 +108,12 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 ## Constraints
 
 - **Layer 1 modification strictly forbidden** — blocked after `isLayer1Path()` check
-- **Layer 1 (01_Core/) direct read is discouraged** — `mcp_t_read` handler returns a warning but does not block the read. Prefer `mcp_t_kg_navigate` for L1 document information when possible
+- **Layer 1 (01_Core/) direct read is discouraged** — `mcp__plugin_maencof_t__read` handler returns a warning but does not block the read. Prefer `mcp__plugin_maencof_t__kg_navigate` for L1 document information when possible
 - **Maximum 5 transitions at a time** — prevents bulk-modify.
   The "5" counter applies to **user-visible document transitions** (distinct
-  `mcp_t_move` calls that relocate a source document). Consequential writes
-  required to keep the graph consistent — `mcp_t_update` on the moved file's
-  frontmatter (layer/sub_layer fields) and link-rewrite `mcp_t_update` calls
+  `mcp__plugin_maencof_t__move` calls that relocate a source document). Consequential writes
+  required to keep the graph consistent — `mcp__plugin_maencof_t__update` on the moved file's
+  frontmatter (layer/sub_layer fields) and link-rewrite `mcp__plugin_maencof_t__update` calls
   on documents that reference the moved file — are NOT counted against the
   limit. They are treated as bookkeeping for the primary move and share its
   approval.
@@ -127,11 +127,11 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 | Tool | Purpose |
 |------|---------|
-| `mcp_t_read` | Read document Frontmatter + content (Layer 1 제외 — L1은 kg_navigate로 간접 접근) |
-| `mcp_t_move` | Move file between Layers |
-| `mcp_t_update` | Update Frontmatter layer and confidence fields |
-| `mcp_t_kg_navigate` | Traverse inbound/outbound links |
-| `mcp_t_kg_status` | Check full vault status and stale-nodes |
+| `mcp__plugin_maencof_t__read` | Read document Frontmatter + content (Layer 1 제외 — L1은 kg_navigate로 간접 접근) |
+| `mcp__plugin_maencof_t__move` | Move file between Layers |
+| `mcp__plugin_maencof_t__update` | Update Frontmatter layer and confidence fields |
+| `mcp__plugin_maencof_t__kg_navigate` | Traverse inbound/outbound links |
+| `mcp__plugin_maencof_t__kg_status` | Check full vault status and stale-nodes |
 
 ---
 

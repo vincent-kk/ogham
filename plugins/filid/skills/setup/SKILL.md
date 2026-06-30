@@ -13,7 +13,7 @@ plugin: filid
 > marked `<!-- [INTERACTIVE] -->` points where a user decision is required.
 > After each phase completes, IMMEDIATELY proceed to the next.
 > NEVER yield the turn after an MCP tool call returns or between non-interactive phases.
-> Large tool responses (e.g., mcp_t_fractal_scan) are internal working data —
+> Large tool responses (e.g., mcp__plugin_filid_t__fractal_scan) are internal working data —
 > do NOT summarize them to the user. Skip phases with no work silently.
 > At `<!-- [INTERACTIVE] -->` markers, present the appropriate prompt
 > shape for `status.entries.length` (see Phase 0c), wait for the user's
@@ -63,7 +63,7 @@ Before Phase 0a, inspect the invocation arguments:
 ## Prerequisites — Environment Check
 
 Before starting the main workflow, check ast-grep availability by calling
-`mcp_t_ast_grep_search` with a trivial pattern (e.g., `pattern: "$X"`, `language: "typescript"`, `path: "."`).
+`mcp__plugin_filid_t__ast_grep_search` with a trivial pattern (e.g., `pattern: "$X"`, `language: "typescript"`, `path: "."`).
 
 - **Available**: Proceed silently — no message needed.
 - **Unavailable** (response contains "@ast-grep/napi is not available"):
@@ -79,11 +79,11 @@ Before starting the main workflow, check ast-grep availability by calling
 
 ### Phase 0a — Config Initialization
 
-Call `mcp_t_project_init({ path, language })` to ensure `.filid/config.json`
+Call `mcp__plugin_filid_t__project_init({ path, language })` to ensure `.filid/config.json`
 exists at the git root with the default 8-rule configuration. Pass the
 session's configured response language as `language` so generated docs and
 `[filid:lang]` match the user's locale (omit for English). Existing config is
-never overwritten. `mcp_t_project_init` does NOT touch `.claude/rules/` — that
+never overwritten. `mcp__plugin_filid_t__project_init` does NOT touch `.claude/rules/` — that
 is Phase 0b's job.
 See [sections/section-0-rule-docs.md — Phase 0a](./sections/section-0-rule-docs.md#phase-0a--config-initialization).
 
@@ -91,7 +91,7 @@ See [sections/section-0-rule-docs.md — Phase 0a](./sections/section-0-rule-doc
 
 ### Phase 0b — Rule Docs Status
 
-Call `mcp_t_rule_docs_sync({ action: "status", path })` to inspect deployed
+Call `mcp__plugin_filid_t__rule_docs_sync({ action: "status", path })` to inspect deployed
 rule docs and template drift. The response partitions rules into
 `status.entries[]` (optional — feeds Phase 0c UI) and `status.autoDeployed[]`
 (required — auto-synced silently). Each optional entry carries
@@ -129,7 +129,7 @@ response-mapping logic.
 
 ### Phase 0d — Rule Docs Sync
 
-Call `mcp_t_rule_docs_sync({ action: "sync", path, selections, resync })`.
+Call `mcp__plugin_filid_t__rule_docs_sync({ action: "sync", path, selections, resync })`.
 `selections` MUST be a raw `Record<string, boolean>` map (never a JSON string);
 `resync` MUST be a raw string array (or omitted). Surface a one-line summary
 from `result.copied / removed / updated / drift / unchanged / skipped`. When
@@ -142,16 +142,16 @@ proceed to Phase 1.**
 
 ### Phase 1 — Directory Scan
 
-Retrieve the complete project hierarchy using `mcp_t_fractal_scan`.
+Retrieve the complete project hierarchy using `mcp__plugin_filid_t__fractal_scan`.
 Build a working list of all directories from `tree.nodes` for classification.
 See [sections/section-1-directory-scan.md](./sections/section-1-directory-scan.md).
 
-**→ After `mcp_t_fractal_scan` returns — regardless of response size — extract `tree.nodes` as internal working data and immediately proceed to Phase 2. Do NOT summarize scan results to the user.**
+**→ After `mcp__plugin_filid_t__fractal_scan` returns — regardless of response size — extract `tree.nodes` as internal working data and immediately proceed to Phase 2. Do NOT summarize scan results to the user.**
 
 ### Phase 2 — Node Classification
 
 Classify each directory as fractal, organ, or pure-function using
-`mcp_t_fractal_navigate(action: "classify", path, entries)` (entries from Phase 1 scan) and priority-ordered decision rules.
+`mcp__plugin_filid_t__fractal_navigate(action: "classify", path, entries)` (entries from Phase 1 scan) and priority-ordered decision rules.
 See [sections/section-2-node-classification.md](./sections/section-2-node-classification.md).
 
 **→ After classifying all directories, immediately proceed to Phase 3.**
@@ -185,13 +185,13 @@ See [sections/section-5-validation-report.md](./sections/section-5-validation-re
 
 | Tool                     | Action     | Purpose                                                           |
 | ------------------------ | ---------- | ----------------------------------------------------------------- |
-| `mcp_t_project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)              |
-| `mcp_t_rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                         |
-| `mcp_t_rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)   |
-| `mcp_t_rule_docs_sync`   | `manifest` | (Optional) Fetch raw manifest for custom UI rendering             |
-| `mcp_t_fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy |
-| `mcp_t_fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function    |
-| `mcp_t_ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)         |
+| `mcp__plugin_filid_t__project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)              |
+| `mcp__plugin_filid_t__rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                         |
+| `mcp__plugin_filid_t__rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)   |
+| `mcp__plugin_filid_t__rule_docs_sync`   | `manifest` | (Optional) Fetch raw manifest for custom UI rendering             |
+| `mcp__plugin_filid_t__fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy |
+| `mcp__plugin_filid_t__fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function    |
+| `mcp__plugin_filid_t__ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)         |
 
 ## Options
 

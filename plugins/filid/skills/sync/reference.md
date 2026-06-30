@@ -5,11 +5,11 @@ structural drift synchronization skill. For the quick-start overview, see [SKILL
 
 ## Section 1 — Scan
 
-`drift-analyzer` calls `mcp_t_fractal_scan` to retrieve the full directory tree and current
+`drift-analyzer` calls `mcp__plugin_filid_t__fractal_scan` to retrieve the full directory tree and current
 node classifications.
 
 ```
-mcp_t_fractal_scan({ path: "<target-path>" })
+mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 ```
 
@@ -22,10 +22,10 @@ For each node, confirm:
 
 ## Section 2 — Detect & Classify
 
-`mcp_t_drift_detect` identifies all deviations from fractal principles.
+`mcp__plugin_filid_t__drift_detect` identifies all deviations from fractal principles.
 
 ```
-mcp_t_drift_detect({ path: "<target-path>", severity: "<level>" })
+mcp__plugin_filid_t__drift_detect({ path: "<target-path>", severity: "<level>" })
 // Returns: { drifts: DriftItem[], total: number, bySeverity: SeverityCount }
 ```
 
@@ -52,10 +52,10 @@ Each `DriftItem` fields:
 ## Section 3 — Plan & Approval
 
 `drift-analyzer` generates the correction plan. For reclassification candidates,
-`fractal-architect` uses `mcp_t_lca_resolve` to confirm the correct target location.
+`fractal-architect` uses `mcp__plugin_filid_t__lca_resolve` to confirm the correct target location.
 
 ```
-mcp_t_lca_resolve({ path: "<drifted-path>", moduleA: "<neighbor1>", moduleB: "<neighbor2>" })
+mcp__plugin_filid_t__lca_resolve({ path: "<drifted-path>", moduleA: "<neighbor1>", moduleB: "<neighbor2>" })
 // Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
 ```
 
@@ -121,10 +121,10 @@ for each drift-item with move/rename action:
     edit(file, replace(oldPath, newPath))
 ```
 
-After execution, `mcp_t_structure_validate` confirms correctness:
+After execution, `mcp__plugin_filid_t__structure_validate` confirms correctness:
 
 ```
-mcp_t_structure_validate({ path: "<target-path>" })
+mcp__plugin_filid_t__structure_validate({ path: "<target-path>" })
 // Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
 // (passed / violations live at report.result)
 ```
@@ -152,7 +152,7 @@ mcp_t_structure_validate({ path: "<target-path>" })
 | D005 | src/components/AuthWidget | move → src/features/auth/... | ✓ |
 
 ### Validation Result
-mcp_t_structure_validate: PASS
+mcp__plugin_filid_t__structure_validate: PASS
 - All imports resolvable: ✓
 - All fractal nodes have index.ts: ✓
 - Organ directory rules satisfied: ✓

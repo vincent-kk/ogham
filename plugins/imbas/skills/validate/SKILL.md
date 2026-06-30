@@ -20,7 +20,7 @@ plugin: imbas
 >
 > **HIGH-RISK YIELD POINTS**:
 >
-> - After `analyst` subagent returns `validation-report.md` content — chain `mcp_tools_run_transition(complete_phase)` in the same turn
+> - After `analyst` subagent returns `validation-report.md` content — chain `mcp__plugin_imbas_tools__run_transition(complete_phase)` in the same turn
 > - After Confluence page fetch — continue to markdown conversion without pause
 > - After gate evaluation (BLOCKED → STOP) — emit blocker report AND end execution in the same turn
 

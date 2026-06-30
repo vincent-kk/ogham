@@ -41,8 +41,8 @@ Permission mode and the per-tier model + effort mapping are managed via `/setup`
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt, tier? })`. Pass `tier` when supplied; otherwise omit it to use the provider's currently configured default.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'claude', prompt, tier? })`. `tier` is optional — omit to use the configured default.
+- With `--continue <session_id>` → `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt, tier? })`. Pass `tier` when supplied; otherwise omit it to use the provider's currently configured default.
+- Otherwise → `mcp__plugin_cennad_tools__start_conversation({ provider: 'claude', prompt, tier? })`. `tier` is optional — omit to use the configured default.
 
 ## Response handling
 

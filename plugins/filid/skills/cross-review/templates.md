@@ -2,7 +2,7 @@
 
 Canonical output file templates for Phase D artifacts and the PR comment
 format. The chairperson reads this file before writing `review-report.md`
-and `fix-requests.md`; the `mcp_t_review_manage(format-pr-comment)` MCP tool
+and `fix-requests.md`; the `mcp__plugin_filid_t__review_manage(format-pr-comment)` MCP tool
 consumes these conventions when assembling PR comments.
 
 ## Review Report Format (`review-report.md`)
@@ -116,7 +116,7 @@ still surfaced.
 
 When Phase D enters the fail dispatch (Step D.7 in `phases/phase-d-deliberation.md`),
 the chairperson MUST still write `review-report.md` so that the pipeline
-finalize stage and `mcp_t_review_manage(format-pr-comment)` can read a
+finalize stage and `mcp__plugin_filid_t__review_manage(format-pr-comment)` can read a
 consistent verdict field. Use this minimal variant alongside
 `rounds/failure.md`:
 
@@ -256,11 +256,11 @@ advisory key, updated in place:
   `session.md`), and a row whose `last_run_id` equals the current run id
   is skipped — see phase-d-deliberation.md Step D.6.2-adv.
 - `status: promoted` rows are never re-counted; `debt_id` records the
-  `mcp_t_debt_manage(create)` result.
+  `mcp__plugin_filid_t__debt_manage(create)` result.
 
 ## PR Comment Format
 
-Use `mcp_t_review_manage(action: "format-pr-comment")` to generate the PR
+Use `mcp__plugin_filid_t__review_manage(action: "format-pr-comment")` to generate the PR
 comment. The tool reads `review-report.md`, `structure-check.md`, and
 `fix-requests.md`, wraps each in collapsible `<details>` sections, and
 returns a ready-to-post markdown string in the `markdown` field. Post it

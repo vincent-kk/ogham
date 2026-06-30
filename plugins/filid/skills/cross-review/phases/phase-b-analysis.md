@@ -53,7 +53,7 @@ If `SCOPE=pr`, also run `gh pr view --json title,body` for intent context.
 First, scan the full project hierarchy to obtain node entries:
 
 ```
-mcp_t_fractal_scan(path: <PROJECT_ROOT>)
+mcp__plugin_filid_t__fractal_scan(path: <PROJECT_ROOT>)
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, ... }, ... }
 ```
 
@@ -65,7 +65,7 @@ its classified `type`, so the directory classification can be read directly:
 nodeType = SCAN_NODES.find(n => n.path === <directory>)?.type
 ```
 
-No additional `mcp_t_fractal_navigate(classify)` call is needed — `SCAN_NODES`
+No additional `mcp__plugin_filid_t__fractal_navigate(classify)` call is needed — `SCAN_NODES`
 is the single source of truth.
 
 Build a list of unique fractal paths affected by the change.
@@ -76,7 +76,7 @@ Detect whether any interface files (index.ts, public API) are modified.
 Call the deterministic committee election MCP tool:
 
 ```
-mcp_t_review_manage(
+mcp__plugin_filid_t__review_manage(
   action: "elect-committee",
   projectRoot: <PROJECT_ROOT>,
   changedFilesCount: <count>,
@@ -145,7 +145,7 @@ identically to `chairperson-forbidden`.
 ### B.4 — Ensure Review Directory
 
 ```
-mcp_t_review_manage(
+mcp__plugin_filid_t__review_manage(
   action: "ensure-dir",
   projectRoot: <PROJECT_ROOT>,
   branchName: <BRANCH>

@@ -24,5 +24,5 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Search (Cloud) | `mcp_tools_fetch` | POST | JQL in request body |
-| Search (Server) | `mcp_tools_fetch` | GET | JQL in query_params |
+| Search (Cloud) | `mcp__plugin_atlassian_tools__fetch` | POST | JQL in request body |
+| Search (Server) | `mcp__plugin_atlassian_tools__fetch` | GET | JQL in query_params |

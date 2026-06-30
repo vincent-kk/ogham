@@ -69,7 +69,7 @@ The script performs:
 
 ### Step 3 — Post-Migration Validation (optional)
 
-After execution, optionally run `mcp_t_structure_validate` to confirm compliance.
+After execution, optionally run `mcp__plugin_filid_t__structure_validate` to confirm compliance.
 
 ## Options
 

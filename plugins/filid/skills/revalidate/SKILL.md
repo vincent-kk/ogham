@@ -42,7 +42,7 @@ a final PASS/FAIL verdict. Optionally post the result as a PR comment.
 ### Step 1 — Branch Detection & File Loading
 
 1. Detect branch: `git branch --show-current` (Bash)
-2. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
+2. Normalize: `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 3. Load review files from `.filid/review/<normalized>/`:
    - `review-report.md` — original review findings
    - `fix-requests.md` — original fix requests
@@ -63,7 +63,7 @@ git diff <resolve_commit_sha>..HEAD --stat
 For semantic analysis on changed files:
 
 ```
-mcp_t_ast_analyze(source: <new>, oldSource: <old>, analysisType: "tree-diff")
+mcp__plugin_filid_t__ast_analyze(source: <new>, oldSource: <old>, analysisType: "tree-diff")
 ```
 
 **→ Immediately proceed to Steps 3-5 (parallel).**
@@ -101,7 +101,7 @@ claim judged FAIL in review) there is no metric count: write
 `pre_count: 1` (one broken claim). Fill `file_was_modified` from
 `git diff <resolve_commit_sha>..HEAD --name-only`.
 **Leave `post_count` and `status` as the literal string `TBD`** — do NOT
-re-run `mcp_t_structure_validate` from this subagent and do NOT judge
+re-run `mcp__plugin_filid_t__structure_validate` from this subagent and do NOT judge
 RESOLVED/UNRESOLVED from file diffs. If a row cannot be authored (fix
 metadata incomplete), still write a row with `post_count: TBD`,
 `status: TBD` and a `# incomplete: <reason>` line directly beneath it so
@@ -115,7 +115,7 @@ For each rejected fix with justification:
    - Hardcoded secrets — always FAIL regardless of justification
    - Circular dependencies — always FAIL regardless of justification
    - Security vulnerabilities (injection, auth bypass) — always FAIL regardless of justification
-2. Verify debt file was created via `mcp_t_debt_manage(list)`
+2. Verify debt file was created via `mcp__plugin_filid_t__debt_manage(list)`
 3. Mark as DEFERRED (valid) or UNCONSTITUTIONAL (invalid justification)
 
 ### Step 5 — Resolve Cleared Debt
@@ -123,13 +123,13 @@ For each rejected fix with justification:
 Check if any Delta changes also resolve existing debt items:
 
 ```
-mcp_t_debt_manage(action: "list", projectRoot: <project_root>)
+mcp__plugin_filid_t__debt_manage(action: "list", projectRoot: <project_root>)
 ```
 
 For each debt item whose `file_path` is in the Delta:
 
 1. Re-run the relevant MCP tool to check if the rule is now satisfied
-2. If satisfied: `mcp_t_debt_manage(action: "resolve", projectRoot: <root>, debtId: <id>)`
+2. If satisfied: `mcp__plugin_filid_t__debt_manage(action: "resolve", projectRoot: <root>, debtId: <id>)`
 
 ### Step 6 — Re-derive ledger + render verdict (Sequential — after Steps 3–5)
 
@@ -167,17 +167,17 @@ no row, synthesise a row with `post_count: <main-derived>`,
 `status: UNRESOLVED` and reason `auto-UNRESOLVED: ledger row absent`.
 
 **Step 6.4 — Independently re-derive post_count.** For each row, call
-`mcp_t_structure_validate(path=<target_path>)` (or the category-specific
+`mcp__plugin_filid_t__structure_validate(path=<target_path>)` (or the category-specific
 MCP tool for LCOM4/CC/3+12 — see table below). Filter violations by
 `ruleId == <rule_id>` and `path starts with <target_path>`. Write the
 integer count into `post_count`.
 
 | rule_id kind               | MCP tool                                                   | success =             |
 | -------------------------- | ---------------------------------------------------------- | --------------------- |
-| structure violation        | `mcp_t_structure_validate`                                 | 0 matching violations |
-| LCOM4 violation            | `mcp_t_ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
-| CC violation               | `mcp_t_ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
-| 3+12 violation             | `mcp_t_test_metrics(action: "check-312")`                  | PASS                  |
+| structure violation        | `mcp__plugin_filid_t__structure_validate`                                 | 0 matching violations |
+| LCOM4 violation            | `mcp__plugin_filid_t__ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
+| CC violation               | `mcp__plugin_filid_t__ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
+| 3+12 violation             | `mcp__plugin_filid_t__test_metrics(action: "check-312")`                  | PASS                  |
 | acceptance claim (`CLM-*`) | NONE — claim re-judgment (below)                           | claim judged PASS     |
 
 > **Claim re-judgment (rule_id matching `CLM-\d+`)**: measurement tools
@@ -225,7 +225,7 @@ the output template.
 
 Post verdict to PR if GitHub CLI is available:
 
-1. Call `mcp_t_review_manage(action: "format-revalidate-comment", projectRoot: <project_root>, branchName: <branch>)` to get the formatted markdown.
+1. Call `mcp__plugin_filid_t__review_manage(action: "format-revalidate-comment", projectRoot: <project_root>, branchName: <branch>)` to get the formatted markdown.
 2. Check: `gh auth status` (Bash)
 3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use the `markdown` field from the tool result as-is.
 4. If not authenticated: skip with info message.
@@ -243,7 +243,7 @@ Post verdict to PR if GitHub CLI is available:
 After Step 7, if the verdict is **PASS**:
 
 ```
-mcp_t_review_manage(action: "cleanup", projectRoot: <project_root>, branchName: <branch>)
+mcp__plugin_filid_t__review_manage(action: "cleanup", projectRoot: <project_root>, branchName: <branch>)
 ```
 
 This deletes the entire `.filid/review/<branch>/` directory (session artifacts,
@@ -251,7 +251,7 @@ review report, fix requests, justifications, `verification-ledger.md`,
 re-validate report).
 
 **Debt files are NOT affected** — they live in `.filid/debt/` and are managed
-separately by `mcp_t_debt_manage`.
+separately by `mcp__plugin_filid_t__debt_manage`.
 
 If the verdict is **FAIL**, skip cleanup so the developer can inspect the
 remaining unresolved items.
@@ -262,16 +262,16 @@ remaining unresolved items.
 
 | Tool                       | Action                      | Purpose                                                     |
 | -------------------------- | --------------------------- | ----------------------------------------------------------- |
-| `mcp_t_review_manage`      | `normalize-branch`          | Normalize branch name for review directory path             |
-| `mcp_t_review_manage`      | `cleanup`                   | Delete review session directory on PASS                     |
-| `mcp_t_ast_analyze`        | `tree-diff`                 | Semantic diff of changed files since resolve_commit_sha     |
-| `mcp_t_ast_analyze`        | `lcom4`                     | Verify LCOM4 < 2 after accepted fix                         |
-| `mcp_t_ast_analyze`        | `cyclomatic-complexity`     | Verify CC <= 15 after accepted fix                          |
-| `mcp_t_test_metrics`       | `check-312`                 | Verify 3+12 rule PASS after accepted fix                    |
-| `mcp_t_structure_validate` | —                           | Verify structure violation resolved after accepted fix      |
-| `mcp_t_debt_manage`        | `list`                      | Retrieve existing debt items to check for resolution        |
-| `mcp_t_debt_manage`        | `resolve`                   | Mark a debt item as resolved when its rule is now satisfied |
-| `mcp_t_review_manage`      | `format-revalidate-comment` | Format re-validation results into collapsible PR comment    |
+| `mcp__plugin_filid_t__review_manage`      | `normalize-branch`          | Normalize branch name for review directory path             |
+| `mcp__plugin_filid_t__review_manage`      | `cleanup`                   | Delete review session directory on PASS                     |
+| `mcp__plugin_filid_t__ast_analyze`        | `tree-diff`                 | Semantic diff of changed files since resolve_commit_sha     |
+| `mcp__plugin_filid_t__ast_analyze`        | `lcom4`                     | Verify LCOM4 < 2 after accepted fix                         |
+| `mcp__plugin_filid_t__ast_analyze`        | `cyclomatic-complexity`     | Verify CC <= 15 after accepted fix                          |
+| `mcp__plugin_filid_t__test_metrics`       | `check-312`                 | Verify 3+12 rule PASS after accepted fix                    |
+| `mcp__plugin_filid_t__structure_validate` | —                           | Verify structure violation resolved after accepted fix      |
+| `mcp__plugin_filid_t__debt_manage`        | `list`                      | Retrieve existing debt items to check for resolution        |
+| `mcp__plugin_filid_t__debt_manage`        | `resolve`                   | Mark a debt item as resolved when its rule is now satisfied |
+| `mcp__plugin_filid_t__review_manage`      | `format-revalidate-comment` | Format re-validation results into collapsible PR comment    |
 
 ## Options
 
@@ -294,7 +294,7 @@ Prereq:   /filid:resolve must have completed + fixes applied
 Verdict:  PASS | FAIL
 
 Steps:    1 (Load) → 2 (Delta) → [3 + 4 + 5 in parallel] → 6 (Verdict) → 7 (PR) → 8 (Cleanup on PASS)
-MCP tools: mcp_t_review_manage(normalize-branch, cleanup), mcp_t_ast_analyze(tree-diff, lcom4, cyclomatic-complexity),
-           mcp_t_test_metrics(check-312), mcp_t_structure_validate, mcp_t_debt_manage(list, resolve)
+MCP tools: mcp__plugin_filid_t__review_manage(normalize-branch, cleanup), mcp__plugin_filid_t__ast_analyze(tree-diff, lcom4, cyclomatic-complexity),
+           mcp__plugin_filid_t__test_metrics(check-312), mcp__plugin_filid_t__structure_validate, mcp__plugin_filid_t__debt_manage(list, resolve)
 Cleanup:  PASS → .filid/review/<branch>/ deleted | FAIL → kept for inspection
 ```

@@ -20,4 +20,4 @@ In the `{id}` segment, send the **numeric space ID for Cloud V2** or the **space
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| All operations | `mcp_tools_fetch` | GET | Read-only |
+| All operations | `mcp__plugin_atlassian_tools__fetch` | GET | Read-only |

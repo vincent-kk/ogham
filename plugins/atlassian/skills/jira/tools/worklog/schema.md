@@ -17,5 +17,5 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List | `mcp_tools_fetch` | GET | |
-| Add | `mcp_tools_fetch` | POST | |
+| List | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Add | `mcp__plugin_atlassian_tools__fetch` | POST | |

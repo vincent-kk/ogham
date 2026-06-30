@@ -9,22 +9,22 @@ fractal structure restructuring skill. For the quick-start overview, see [SKILL.
 
 ```
 // Parallel batch — fire all three simultaneously:
-mcp_t_fractal_scan({ path: "<target-path>" })
+mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 
-mcp_t_drift_detect({ path: "<target-path>" })
+mcp__plugin_filid_t__drift_detect({ path: "<target-path>" })
 // Returns: { drifts: DriftItem[], total: number }
 
-mcp_t_rule_query({ action: "list", path: "<target-path>" })
+mcp__plugin_filid_t__rule_query({ action: "list", path: "<target-path>" })
 // Returns: { rules: Rule[] }
 ```
 
-After `mcp_t_drift_detect` completes, call `mcp_t_lca_resolve` for each move candidate
-(requires mcp_t_drift_detect output to identify reclassification targets):
+After `mcp__plugin_filid_t__drift_detect` completes, call `mcp__plugin_filid_t__lca_resolve` for each move candidate
+(requires mcp__plugin_filid_t__drift_detect output to identify reclassification targets):
 
 ```
-// Sequential — after mcp_t_drift_detect:
-mcp_t_lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
+// Sequential — after mcp__plugin_filid_t__drift_detect:
+mcp__plugin_filid_t__lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
 // Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
 ```
 
@@ -108,10 +108,10 @@ export type { AuthUser, AuthState } from './types';
 
 ## Section 4 — Validation
 
-After `restructurer` completes, `fractal-architect` validates with `mcp_t_structure_validate`.
+After `restructurer` completes, `fractal-architect` validates with `mcp__plugin_filid_t__structure_validate`.
 
 ```
-mcp_t_structure_validate({ path: "<target-path>" })
+mcp__plugin_filid_t__structure_validate({ path: "<target-path>" })
 // Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
 // (passed / violations live at report.result)
 ```
@@ -143,7 +143,7 @@ Validation checks:
 | src/app.ts | ../components/AuthModal | ../features/auth/components/AuthModal |
 
 ### Validation Result
-mcp_t_structure_validate: PASS
+mcp__plugin_filid_t__structure_validate: PASS
 - All imports resolvable: ✓
 - No orphaned files: ✓
 - All fractal nodes have index.ts: ✓

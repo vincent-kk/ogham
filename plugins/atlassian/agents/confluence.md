@@ -7,10 +7,10 @@ tools:
   - Write
   - Grep
   - Glob
-  - mcp_tools_fetch
-  - mcp_tools_convert
-  - mcp_tools_auth_check
-  - mcp_tools_setup
+  - mcp__plugin_atlassian_tools__fetch
+  - mcp__plugin_atlassian_tools__convert
+  - mcp__plugin_atlassian_tools__auth_check
+  - mcp__plugin_atlassian_tools__setup
 maxTurns: 30
 ---
 
@@ -102,6 +102,6 @@ Send V2-style logical paths only (`/pages/{id}`, `/spaces/{id}`, `/footer-commen
 1. Load the `atlassian:confluence` skill for the tool catalog
 2. Select the appropriate domain (page, search, comment, etc.)
 3. Read `tools/<domain>/schema.md` under the `atlassian:confluence` skill directory for endpoint details — **only load when needed**
-4. Compose `mcp_tools_fetch` calls with correct HTTP method, endpoint, and parameters
+4. Compose `mcp__plugin_atlassian_tools__fetch` calls with correct HTTP method, endpoint, and parameters
 5. Load the `atlassian:download` skill for attachment operations
 6. On 401 error: load the `atlassian:setup` skill for reauth

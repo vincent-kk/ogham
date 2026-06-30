@@ -12,5 +12,5 @@ V2-style logical paths only — MCP rewrites to V1/DC form (including `type: 'co
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List | `mcp_tools_fetch` | GET | |
-| Add | `mcp_tools_fetch` | POST | `content_format: "markdown"`. Body: `{ body: "markdown", pageId: "{id}" }` — MCP auto-converts `pageId` → V1 `container: { id, type: 'page' }` on DC, and injects `type: 'comment'` |
+| List | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Add | `mcp__plugin_atlassian_tools__fetch` | POST | `content_format: "markdown"`. Body: `{ body: "markdown", pageId: "{id}" }` — MCP auto-converts `pageId` → V1 `container: { id, type: 'page' }` on DC, and injects `type: 'comment'` |

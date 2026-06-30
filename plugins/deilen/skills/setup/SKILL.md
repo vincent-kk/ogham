@@ -11,7 +11,7 @@ Open the deilen settings UI in a local browser.
 
 ## Steps
 
-1. Call `mcp_tools_open_settings` with no arguments.
+1. Call `mcp__plugin_deilen_tools__open_settings` with no arguments.
 2. Give the user the response's `url`. The page also opens automatically; in a
    headless environment or if the launcher fails, ask the user to open the URL
    themselves.

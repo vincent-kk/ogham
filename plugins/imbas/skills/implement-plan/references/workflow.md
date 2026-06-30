@@ -4,11 +4,11 @@
 
 1. **Resolve run**:
    - If `--run` provided, use it.
-   - Otherwise call `mcp_tools_run_list` to find the most recent run satisfying
+   - Otherwise call `mcp__plugin_imbas_tools__run_list` to find the most recent run satisfying
      the source precondition.
 2. **Call the planner tool**:
    ```json
-   mcp_tools_manifest_implement_plan {
+   mcp__plugin_imbas_tools__manifest_implement_plan {
      project_ref: <from config>,
      run_id: <resolved>,
      source: "devplan" | "stories",
@@ -26,7 +26,7 @@
    - `summary.unresolved` (> 0 means some nodes could not be leveled — rare)
    - `summary.degraded` (true for stories-only mode)
 4. **Optional validation**:
-   - `mcp_tools_manifest_validate {type: "implement-plan"}` to cross-check
+   - `mcp__plugin_imbas_tools__manifest_validate {type: "implement-plan"}` to cross-check
      reference integrity.
 5. **Emit terminal marker** with the report path:
    ```
@@ -39,8 +39,8 @@
 
 | Purpose              | MCP tool                                               |
 | -------------------- | ------------------------------------------------------ |
-| Find recent run      | `mcp_tools_run_list`                                   |
-| Read run state       | `mcp_tools_run_get`                                    |
-| Build + persist plan | `mcp_tools_manifest_implement_plan`                    |
-| Validate plan        | `mcp_tools_manifest_validate`                          |
-| Read plan            | `mcp_tools_manifest_get` with `type: "implement-plan"` |
+| Find recent run      | `mcp__plugin_imbas_tools__run_list`                                   |
+| Read run state       | `mcp__plugin_imbas_tools__run_get`                                    |
+| Build + persist plan | `mcp__plugin_imbas_tools__manifest_implement_plan`                    |
+| Validate plan        | `mcp__plugin_imbas_tools__manifest_validate`                          |
+| Read plan            | `mcp__plugin_imbas_tools__manifest_get` with `type: "implement-plan"` |

@@ -19,6 +19,7 @@ yarn version:sync       # package.json → src/version.ts
 - **테스트**: `src/**/__tests__/**/*.test.ts`
 - **훅 / build 변경 후**: `yarn build:plugin` 으로 재빌드
 - **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용
+- **MCP 도구 참조**: skills/agents 는 full-form `mcp__plugin_maencof-lens_t__<tool>` 로 도구를 참조. short-form `mcp_t_*` 는 서브에이전트에서 해석되지 않아 도구 grant 실패를 유발하므로 사용 금지.
 
 ## References
 

@@ -21,7 +21,7 @@ plan scope, stop and escalate.
 
 The orchestrating skill (`/filid:restructure`, `/filid:sync`,
 `/filid:update`) injects the approved action list into your task
-prompt. Post-execution `mcp_t_structure_validate` runs in the skill, not here.
+prompt. Post-execution `mcp__plugin_filid_t__structure_validate` runs in the skill, not here.
 
 ## Scope Boundaries
 
@@ -35,7 +35,7 @@ prompt. Post-execution `mcp_t_structure_validate` runs in the skill, not here.
 - Regenerate `index.ts` barrel exports after any move that changes
   module membership.
 - Report completion clearly so the orchestrating skill can run
-  `mcp_t_structure_validate` on the modified tree.
+  `mcp__plugin_filid_t__structure_validate` on the modified tree.
 
 ### Ask first
 
@@ -93,7 +93,7 @@ Never make out-of-scope structural decisions as a shortcut.
 After execution, report every file created / moved / renamed / updated
 with absolute paths, list every import-path update, flag any actions
 that could not be completed and why, and note that the orchestrating
-skill should run `mcp_t_structure_validate` against the modified tree.
+skill should run `mcp__plugin_filid_t__structure_validate` against the modified tree.
 
 ## Skill Participation
 

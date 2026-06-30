@@ -5,10 +5,10 @@ rule scanner. For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Tree Construction
 
-Call `mcp_t_fractal_scan` to build the complete hierarchy by scanning the filesystem.
+Call `mcp__plugin_filid_t__fractal_scan` to build the complete hierarchy by scanning the filesystem.
 
 ```
-mcp_t_fractal_scan({ path: "<target-path>" })
+mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 ```
 
 The response is a `ScanReportDto` whose `tree.nodes` is a **flat array** of
@@ -66,10 +66,10 @@ Pattern-matched (priority 3, NOT list members): `__name__` wrapping (e.g., `__te
 
 ## Section 4 — Test File Validation (3+12 Rule)
 
-Collect all spec files and call `mcp_t_test_metrics` with `action: "check-312"`.
+Collect all spec files and call `mcp__plugin_filid_t__test_metrics` with `action: "check-312"`.
 
 ```
-mcp_t_test_metrics({
+mcp__plugin_filid_t__test_metrics({
   action: "check-312",
   files: [{ filePath: "<path>", content: "<source>" }, ...]
 })
@@ -126,7 +126,7 @@ emit it as the last line of the response, then end execution.
 | ------------------------------ | ------------------------------------------------------------------------------ | ----------------- |
 | `ORGAN_INTENT_MD_PRESENT`      | Delete the INTENT.md from the organ directory                                  | `code-surgeon`    |
 | `INTENT_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                                  | `context-manager` |
-| `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `mcp_t_doc_compress`) | `context-manager` |
+| `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `mcp__plugin_filid_t__doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables                  | `code-surgeon`    |
 
 ### Auto-fix Dispatch — parallel `Task` calls
@@ -144,7 +144,7 @@ For an `INTENT_MD_LINE_LIMIT` violation:
 Task(
   subagent_type: "filid:context-manager",
   model: "sonnet",
-  prompt: "Trim and compress <abs path>/INTENT.md to ≤50 lines while preserving the 3-tier boundary sections (### Always do, ### Ask first, ### Never do). Rewrite the file directly with the Edit tool — mcp_t_doc_compress(mode: 'auto') only returns compaction metadata (compacted reference, cap_applies), not rewritten content. Return the final line count and a one-line summary."
+  prompt: "Trim and compress <abs path>/INTENT.md to ≤50 lines while preserving the 3-tier boundary sections (### Always do, ### Ask first, ### Never do). Rewrite the file directly with the Edit tool — mcp__plugin_filid_t__doc_compress(mode: 'auto') only returns compaction metadata (compacted reference, cap_applies), not rewritten content. Return the final line count and a one-line summary."
 )
 ```
 

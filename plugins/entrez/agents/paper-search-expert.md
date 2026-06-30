@@ -9,11 +9,11 @@ description: >
 model: sonnet
 tools:
   - Read
-  - mcp_tools_mesh_lookup
-  - mcp_tools_paper_search
-  - mcp_tools_paper_search_start
-  - mcp_tools_paper_search_status
-  - mcp_tools_paper_search_results
+  - mcp__plugin_entrez_tools__mesh_lookup
+  - mcp__plugin_entrez_tools__paper_search
+  - mcp__plugin_entrez_tools__paper_search_start
+  - mcp__plugin_entrez_tools__paper_search_status
+  - mcp__plugin_entrez_tools__paper_search_results
 maxTurns: 15
 ---
 
@@ -64,7 +64,7 @@ source of truth. This file is the operating contract.
 Goal: miss nothing. Procedure (full spec in `query-strategy.md`):
 
 1. **Decompose** the topic into concept facets (PICO-style where it fits).
-2. **`mcp_tools_mesh_lookup`** each facet → descriptor, tree numbers, entry terms,
+2. **`mcp__plugin_entrez_tools__mesh_lookup`** each facet → descriptor, tree numbers, entry terms,
    scope note. Use these to design explosion scope and synonym coverage.
 3. **Emit a `QueryRole` set** so each facet is expressed several ways:
    `ATM_BROAD`, `MESH_EXPLODED`, `MESH_NOEXP`, `TIAB_SYNONYM`, `ALL_FIELDS`, and
@@ -72,10 +72,10 @@ Goal: miss nothing. Procedure (full spec in `query-strategy.md`):
    roles together.
 4. **Keep mappings on** — never use quotes, wildcards, or over-narrow tags in
    broad roles; they disable PubMed ATM / MeSH explosion and cut recall.
-5. **`mcp_tools_paper_search`** with the query set; read `union` + `warnings`.
+5. **`mcp__plugin_entrez_tools__paper_search`** with the query set; read `union` + `warnings`.
    For very large result sets use the async job instead
-   (`mcp_tools_paper_search_start` → poll `mcp_tools_paper_search_status` →
-   `mcp_tools_paper_search_results`, cursor-paginated). If the recall gate is
+   (`mcp__plugin_entrez_tools__paper_search_start` → poll `mcp__plugin_entrez_tools__paper_search_status` →
+   `mcp__plugin_entrez_tools__paper_search_results`, cursor-paginated). If the recall gate is
    unmet and budget remains, broaden and regenerate.
 
 Output: `{ queries: [{ term, role, breadth, rationale }] }`.
@@ -113,7 +113,7 @@ Ignore which query produced a record (avoid self-bias toward your own queries).
 
 ### Always do
 
-- Call `mcp_tools_mesh_lookup` before designing explosion/synonyms (generation).
+- Call `mcp__plugin_entrez_tools__mesh_lookup` before designing explosion/synonyms (generation).
 - Preserve recall: rerank orders only; never drop a record or invent a pmid.
 - Report tool errors and `partial` results truthfully.
 

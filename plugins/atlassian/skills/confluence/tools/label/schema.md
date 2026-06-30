@@ -12,6 +12,6 @@ V2-style logical paths — MCP rewrites `/pages/{id}/labels` to `/content/{id}/l
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get | `mcp_tools_fetch` | GET | |
-| Add | `mcp_tools_fetch` | POST | Body: `[{ "name": "label" }]` |
-| Remove | `mcp_tools_fetch` | DELETE | |
+| Get | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Add | `mcp__plugin_atlassian_tools__fetch` | POST | Body: `[{ "name": "label" }]` |
+| Remove | `mcp__plugin_atlassian_tools__fetch` | DELETE | |

@@ -60,14 +60,14 @@ the integrated `adjudicator` fast path.
 | MEDIUM     | `[engineering-architect, knowledge-manager, business-driver, operations-sre]`                              |
 | HIGH       | `[engineering-architect, knowledge-manager, operations-sre, business-driver, product-manager, design-hci]` |
 
-This table mirrors `mcp_t_review_manage(elect-committee)` output and is
+This table mirrors `mcp__plugin_filid_t__review_manage(elect-committee)` output and is
 the sole reference for chairperson-side committee rewrites (e.g.,
 structure-bias escalation). Keep in sync with
 `src/mcp/tools/review-manage/handlers/elect-committee.ts`.
 
 ## Document Change Signal
 
-`hasDocumentChanges` (input to `mcp_t_review_manage(elect-committee)`) is
+`hasDocumentChanges` (input to `mcp__plugin_filid_t__review_manage(elect-committee)`) is
 computed by Phase B as:
 
 ```bash
@@ -359,7 +359,7 @@ A/B/C1/C2.
 ### Config Patch Contract (`.filid/config.json` fixes)
 
 Every Phase D fix whose Code Patch modifies `.filid/config.json` MUST
-pass through `mcp_t_config_patch_validate` before being written to
+pass through `mcp__plugin_filid_t__config_patch_validate` before being written to
 `fix-requests.md`. The contract is:
 
 | Field            | Direction            | Shape                                                    | Required           |

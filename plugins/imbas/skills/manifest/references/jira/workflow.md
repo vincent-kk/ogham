@@ -16,13 +16,13 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
    - DRIFT_DELETED → offer to reset to pending.
    - DRIFT_STATE → offer to skip or proceed.
 5. If any drift detected, display summary table and save reconciled manifest via
-   `mcp_tools_manifest_save` before Step 3.
+   `mcp__plugin_imbas_tools__manifest_save` before Step 3.
 6. Skip entirely for fresh runs (no `issue_ref` anywhere).
 
 ## Step 4 — Batch Execution (Jira)
 
 CRITICAL: after EACH item creation, immediately save the manifest with the
-updated `status` / `issue_ref` via `mcp_tools_manifest_save`. This is the crash-recovery
+updated `status` / `issue_ref` via `mcp__plugin_imbas_tools__manifest_save`. This is the crash-recovery
 invariant — re-runs skip already-created items.
 
 ### Stories type
@@ -111,8 +111,8 @@ See `../label-transitions.md` for the full transition table and idempotency rule
 
 ### Stories type (Phase 2.5)
 
-1. Load run state via `mcp_tools_run_get`.
-2. Load label config via `mcp_tools_config_get` with field `"labels"`.
+1. Load run state via `mcp__plugin_imbas_tools__run_get`.
+2. Load label config via `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
 3. For each created `issue_ref` in manifest (stories + epic):
    - If `split.pending_review === true`:
      `[OP: edit_issue] issue_ref=<ref>`, add `<config.labels.review_pending>` to labels.
@@ -121,7 +121,7 @@ See `../label-transitions.md` for the full transition table and idempotency rule
 
 ### Devplan type (Phase 3.5)
 
-1. Load label config via `mcp_tools_config_get` with field `"labels"`.
+1. Load label config via `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
 2. Collect all parent story `issue_ref`s from `stories-manifest.json`.
 3. For each parent story `issue_ref`:
    a. `[OP: edit_issue] issue_ref=<ref>`, remove `<config.labels.review_complete>`, add `<config.labels.dev_waiting>`.

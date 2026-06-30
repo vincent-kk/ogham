@@ -25,7 +25,7 @@ yarn deilen version:sync  # package.json → src/version.ts + plugin.json
 ## Plugin Runtime
 
 - Skill names have no plugin prefix (`setup`, `preview`) — directory name = skill name.
-- MCP server name is `tools` — skills reference it as `mcp_tools_<name>`.
+- MCP server name is `tools` — skills reference it as `mcp__plugin_deilen_tools__<name>`.
 - **No agents, no hooks** (hence no `libs/run.cjs`).
 - Heavy renderers live in `bridge/assets/` (built by `buildRenderers.mjs`) and are **never** bundled into `mcp-server.cjs` — enforced by a `buildMcpServer.mjs` guard.
 

@@ -29,7 +29,7 @@ Domain-based routing layer for all Jira REST API operations.
 ### Direct Execution Steps (Main Agent)
 
 1. Read `tools/<domain>/schema.md` for the needed domain
-2. Call `mcp_tools_fetch` with the correct HTTP method and endpoint
+2. Call `mcp__plugin_atlassian_tools__fetch` with the correct HTTP method and endpoint
 3. Use `content_format: "markdown"` when sending description/body content
 4. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `setup` skill and retry once; on decline abort with guidance message
 

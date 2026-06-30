@@ -47,7 +47,7 @@ confirmation — never retire a claim as a side effect of automation.
 Path: `.filid/harvest/<normalized-branch>/manifest.json` — local gate
 state, deliberately NOT committed (committing it would move HEAD past
 its own `head_sha`). Branch normalization is the same `/` → `--`
-mapping used by `.filid/review/` (`mcp_t_review_manage normalize-branch`).
+mapping used by `.filid/review/` (`mcp__plugin_filid_t__review_manage normalize-branch`).
 
 | Field                 | Meaning                                                                                                                                                                                                      |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

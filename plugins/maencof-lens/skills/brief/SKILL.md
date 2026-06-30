@@ -38,14 +38,14 @@ Extract query and options from user input:
 - `--layer <N,N,...>` → layer filter as comma-separated list (default: vault config)
 - `--full` → include full document text instead of snippets
 
-### Step 2 — Call `mcp_t_context` (single tool call)
+### Step 2 — Call `mcp__plugin_maencof-lens_t__context` (single tool call)
 
 ```
-mcp_t_context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool)
+mcp__plugin_maencof-lens_t__context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool)
 ```
 
-`mcp_t_context` internally runs SA search + context assembly via `handleKgContext`.
-Do NOT call `mcp_t_search` separately — it is redundant.
+`mcp__plugin_maencof-lens_t__context` internally runs SA search + context assembly via `handleKgContext`.
+Do NOT call `mcp__plugin_maencof-lens_t__search` separately — it is redundant.
 
 No results → suggest different query or broader keywords.
 
@@ -68,7 +68,7 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 
 | Tool            | Purpose                                                                  |
 | --------------- | ------------------------------------------------------------------------ |
-| `mcp_t_context` | SA search + token-budgeted context assembly (internally performs search) |
+| `mcp__plugin_maencof-lens_t__context` | SA search + token-budgeted context assembly (internally performs search) |
 
 ## Options
 

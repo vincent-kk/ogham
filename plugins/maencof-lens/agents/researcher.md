@@ -6,11 +6,11 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp_t_search
-  - mcp_t_context
-  - mcp_t_navigate
-  - mcp_t_read
-  - mcp_t_status
+  - mcp__plugin_maencof-lens_t__search
+  - mcp__plugin_maencof-lens_t__context
+  - mcp__plugin_maencof-lens_t__navigate
+  - mcp__plugin_maencof-lens_t__read
+  - mcp__plugin_maencof-lens_t__status
 maxTurns: 30
 ---
 
@@ -36,7 +36,7 @@ synthesize knowledge buried across the user's maencof vault.
 - **Max 3 exploration rounds** to prevent runaway loops.
 - **Report stale index warnings** if detected.
 - Always present findings with source document paths.
-- **Cross-language recall** — when building `mcp_t_search` seeds, include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
+- **Cross-language recall** — when building `mcp__plugin_maencof-lens_t__search` seeds, include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
 
 ## Output Format
 

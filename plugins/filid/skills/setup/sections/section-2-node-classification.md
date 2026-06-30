@@ -3,10 +3,10 @@
 > Detail reference for Phase 2 of /filid:setup.
 > See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
 
-For each directory, call `mcp_t_fractal_navigate` with `action: "classify"`:
+For each directory, call `mcp__plugin_filid_t__fractal_navigate` with `action: "classify"`:
 
 ```
-mcp_t_fractal_navigate({
+mcp__plugin_filid_t__fractal_navigate({
   action: "classify",
   path: "<directory-path>",
   entries: [/* child entries from tree */]

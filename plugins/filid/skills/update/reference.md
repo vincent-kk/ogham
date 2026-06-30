@@ -8,10 +8,10 @@ code-docs-tests synchronization skill. For the quick-start overview, see [SKILL.
 Stage 0 MCP calls:
 
 ```
-mcp_t_cache_manage({ action: "compute-hash", cwd: "<target-path>" })
+mcp__plugin_filid_t__cache_manage({ action: "compute-hash", cwd: "<target-path>" })
 // Returns: { hash: string, cwd: string }
 
-mcp_t_cache_manage({ action: "get-hash", cwd: "<target-path>", skillName: "update" })
+mcp__plugin_filid_t__cache_manage({ action: "get-hash", cwd: "<target-path>", skillName: "update" })
 // Returns: { hash: string | null, skillName: string, found: boolean }
 ```
 
@@ -35,10 +35,10 @@ git diff --name-only ${BASE}...HEAD   # list of changed files (auto-detect base 
 Restrict scan to changed files only:
 
 ```
-mcp_t_fractal_scan({ path: "<target-path>" })
+mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 
-mcp_t_test_metrics({ action: "check-312", files: [{ filePath, content }] })
+mcp__plugin_filid_t__test_metrics({ action: "check-312", files: [{ filePath, content }] })
 // Returns: { violations: TestViolation[], summary: { total, passing, failing } }
 ```
 
@@ -56,7 +56,7 @@ Scan result categories:
 **Approval gate**: after the drift analysis below produces a correction plan, the plan is presented to the user for approval before `filid:restructurer` executes it — skipped when `--auto-approve` is set.
 
 ```
-mcp_t_drift_detect({ path: "<target-path>", severity: "high" })
+mcp__plugin_filid_t__drift_detect({ path: "<target-path>", severity: "high" })
 // Returns: { drifts: DriftItem[], bySeverity: { critical, high, medium, low } }
 ```
 
@@ -81,10 +81,10 @@ sync DriftSeverity ordering: `critical > high > medium > low`
 Correction calls:
 
 ```
-mcp_t_lca_resolve({ path: "<target-path>", moduleA: "...", moduleB: "..." })
+mcp__plugin_filid_t__lca_resolve({ path: "<target-path>", moduleA: "...", moduleB: "..." })
 // Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
 
-mcp_t_structure_validate({ path: "<target-path>" })
+mcp__plugin_filid_t__structure_validate({ path: "<target-path>" })
 // Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
 // (passed / violations live at report.result)
 ```
@@ -128,7 +128,7 @@ For each fractal node containing changed files:
 3. **Update INTENT.md if present**: reflect implemented changes; compress if > 50 lines
 
 ```
-mcp_t_doc_compress({ mode: "auto", filePath: "<path>", content: "<content>", exports: [...] })
+mcp__plugin_filid_t__doc_compress({ mode: "auto", filePath: "<path>", content: "<content>", exports: [...] })
 // Suggests compression when content exceeds 50 lines
 ```
 
@@ -142,10 +142,10 @@ For each changed source file:
 2. **Create if missing**: scaffold 3 basic tests + 12 extended test slots
 
 ```
-mcp_t_ast_analyze({ source: "<source>", analysisType: "full" })
+mcp__plugin_filid_t__ast_analyze({ source: "<source>", analysisType: "full" })
 // Checks LCOM4, CC metrics → recommends module split or compression
 
-mcp_t_test_metrics({ action: "check-312", files: [...] })
+mcp__plugin_filid_t__test_metrics({ action: "check-312", files: [...] })
 // Validates 3+12 rule compliance
 ```
 
@@ -156,7 +156,7 @@ mcp_t_test_metrics({ action: "check-312", files: [...] })
 Save run hash:
 
 ```
-mcp_t_cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: "<currentHash>" })
+mcp__plugin_filid_t__cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: "<currentHash>" })
 // Returns: { saved: true, skillName: "update", hash: "..." }
 ```
 

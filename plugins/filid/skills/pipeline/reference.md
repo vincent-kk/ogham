@@ -16,7 +16,7 @@ checking signals in strict priority order. First match wins.
 
 ```
 1. Detect branch: git branch --show-current
-2. Normalize: mcp_t_review_manage(normalize-branch)
+2. Normalize: mcp__plugin_filid_t__review_manage(normalize-branch)
 3. Set review_dir = .filid/review/<normalized>/
 
 Check signals:
@@ -106,7 +106,7 @@ These files serve as the inter-stage communication interface.
 
 > Fail dispatch path: `rounds/failure.md` **and** a minimal `review-report.md`
 > (Failure Variant template in `cross-review/templates.md`) are both written
-> so `mcp_t_review_manage(format-pr-comment)` and the verdict decision step
+> so `mcp__plugin_filid_t__review_manage(format-pr-comment)` and the verdict decision step
 > have a consistent frontmatter to read. `fix-requests.md` is NOT written on
 > the fail path.
 
@@ -211,7 +211,7 @@ For each stage in pipeline:
       return_payload.committee
     )  # → "team" | "solo" | "fail" per DETAIL.md verdict_gate
     execute_phase_d(dispatch, return_payload)  # team / solo / fail branch
-    mcp_t_review_manage("content-hash", ...)    # Step 4.5 in main
+    mcp__plugin_filid_t__review_manage("content-hash", ...)    # Step 4.5 in main
     if --scope=pr:
       post_or_edit_pr_comment(...)              # Step 5 in main
     decide_next_stage(verdict)                   # APPROVED|REQUEST_CHANGES|INCONCLUSIVE
@@ -270,7 +270,7 @@ $ /filid:pipeline --from=pr-create --base=main --draft
   → TeamCreate(review-<branch>) + 4 persona Tasks, 2 rounds → SYNTHESIS
   → TeamDelete (try/finally)
   → Verdict: REQUEST_CHANGES (5 fix items)
-  → mcp_t_review_manage(content-hash) + gh pr comment
+  → mcp__plugin_filid_t__review_manage(content-hash) + gh pr comment
   ✓ review-report.md, fix-requests.md, content-hash.json written
 
 [3/4] resolve (main context)

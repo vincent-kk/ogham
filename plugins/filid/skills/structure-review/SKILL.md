@@ -71,17 +71,17 @@ See [reference.md Section 2](./reference.md#section-2--document-compliance-detai
 
 ### Stage 3 — Test Compliance
 
-Validate `*.spec.ts` files against the 3+12 rule (≤15 cases) via `mcp_t_test_metrics`.
+Validate `*.spec.ts` files against the 3+12 rule (≤15 cases) via `mcp__plugin_filid_t__test_metrics`.
 See [reference.md Section 3](./reference.md#section-3--test-compliance-details).
 
 ### Stage 4 — Metric Analysis
 
-Measure LCOM4 (split at ≥2) and CC (compress at >15) via `mcp_t_ast_analyze`. When using `analysisType: "lcom4"`, the `className` parameter must be provided; extract class names from the source file by scanning for `class X` declarations.
+Measure LCOM4 (split at ≥2) and CC (compress at >15) via `mcp__plugin_filid_t__ast_analyze`. When using `analysisType: "lcom4"`, the `className` parameter must be provided; extract class names from the source file by scanning for `class X` declarations.
 See [reference.md Section 4](./reference.md#section-4--metric-analysis-details).
 
 ### Stage 5 — Dependency Verification
 
-Build the dependency DAG and verify acyclicity via `mcp_t_ast_analyze`.
+Build the dependency DAG and verify acyclicity via `mcp__plugin_filid_t__ast_analyze`.
 See [reference.md Section 5](./reference.md#section-5--dependency-verification-details).
 
 ### Stage 6 — Summary Report (Sequential — after all spawned stages complete)
@@ -95,12 +95,12 @@ See [reference.md Section 6](./reference.md#section-6--summary-report-format).
 
 | Tool               | Stage | Purpose                                          |
 | ------------------ | ----- | ------------------------------------------------ |
-| `mcp_t_fractal_scan`     | 1     | Scan filesystem for full module tree             |
-| `mcp_t_fractal_navigate` | 1     | Classify individual directories                  |
-| `mcp_t_doc_compress`     | 2     | Document compression and size metadata reporting |
-| `mcp_t_coverage_verify`  | 3     | Test coverage verification                       |
-| `mcp_t_test_metrics`     | 3     | 3+12 rule validation and decision recommendation |
-| `mcp_t_ast_analyze`      | 4, 5  | LCOM4, CC metrics, dependency DAG                |
+| `mcp__plugin_filid_t__fractal_scan`     | 1     | Scan filesystem for full module tree             |
+| `mcp__plugin_filid_t__fractal_navigate` | 1     | Classify individual directories                  |
+| `mcp__plugin_filid_t__doc_compress`     | 2     | Document compression and size metadata reporting |
+| `mcp__plugin_filid_t__coverage_verify`  | 3     | Test coverage verification                       |
+| `mcp__plugin_filid_t__test_metrics`     | 3     | 3+12 rule validation and decision recommendation |
+| `mcp__plugin_filid_t__ast_analyze`      | 4, 5  | LCOM4, CC metrics, dependency DAG                |
 
 ## Options
 

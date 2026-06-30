@@ -11,5 +11,5 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List/Get | `mcp_tools_fetch` | GET | |
-| Submit form | `mcp_tools_fetch` | PUT | |
+| List/Get | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Submit form | `mcp__plugin_atlassian_tools__fetch` | PUT | |

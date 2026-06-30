@@ -169,10 +169,10 @@ Options:
 
 | Tool                  | Action             | When                               |
 | --------------------- | ------------------ | ---------------------------------- |
-| `mcp_t_review_manage` | `normalize-branch` | Step 1: branch detection           |
-| `mcp_t_debt_manage`   | `create`           | Step 5: for each rejected fix item |
+| `mcp__plugin_filid_t__review_manage` | `normalize-branch` | Step 1: branch detection           |
+| `mcp__plugin_filid_t__debt_manage`   | `create`           | Step 5: for each rejected fix item |
 
-## mcp_t_debt_manage(create) Input Schema
+## mcp__plugin_filid_t__debt_manage(create) Input Schema
 
 ```json
 {

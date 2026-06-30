@@ -16,7 +16,7 @@ error cases for the devplan skill's GitHub branch.
 
 All GitHub tool calls in devplan Step 2 are **optional**. Failures do NOT
 abort the devplan skill. The skill degrades gracefully to code-only exploration
-(mcp_tools_ast_search, mcp_tools_ast_analyze, Read, Grep, Glob) when GitHub access is unavailable.
+(mcp__plugin_imbas_tools__ast_search, mcp__plugin_imbas_tools__ast_analyze, Read, Grep, Glob) when GitHub access is unavailable.
 
 ## Manifest output errors
 

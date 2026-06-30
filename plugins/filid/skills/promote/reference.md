@@ -16,7 +16,7 @@ Locate all `test.ts` files and analyze their content:
 testFiles = glob("**/test.ts", root: targetPath ?? cwd)
 
 for each file in testFiles:
-    metrics = mcp_t_test_metrics(action: "count", files: [{ filePath: file, content: readFile(file) }])
+    metrics = mcp__plugin_filid_t__test_metrics(action: "count", files: [{ filePath: file, content: readFile(file) }])
     // Returns: { file, basic: number, complex: number, total: number,
     //            stableDays: number, lastFailure: string | null }
 ```
@@ -102,7 +102,7 @@ for each eligible file:
 
 ```
 for each generated spec:
-    result = mcp_t_test_metrics(action: "check-312", files: [{ filePath: generatedSpec, content: readFile(generatedSpec) }])
+    result = mcp__plugin_filid_t__test_metrics(action: "check-312", files: [{ filePath: generatedSpec, content: readFile(generatedSpec) }])
     // Must return: { pass: true, basic: <=3, complex: <=12, total: <=15 }
 
     if not result.pass:
@@ -129,10 +129,10 @@ Promotion complete (2/3 eligible files promoted):
 
 ## MCP Tool Examples
 
-**mcp_t_test_metrics count:**
+**mcp__plugin_filid_t__test_metrics count:**
 
 ```
-mcp_t_test_metrics(action: "count", files: [{ filePath: "src/core/test.ts", content: readFile("src/core/test.ts") }])
+mcp__plugin_filid_t__test_metrics(action: "count", files: [{ filePath: "src/core/test.ts", content: readFile("src/core/test.ts") }])
 // Returns:
 // {
 //   file: "src/core/test.ts",
@@ -144,10 +144,10 @@ mcp_t_test_metrics(action: "count", files: [{ filePath: "src/core/test.ts", cont
 // }
 ```
 
-**mcp_t_test_metrics check-312:**
+**mcp__plugin_filid_t__test_metrics check-312:**
 
 ```
-mcp_t_test_metrics(action: "check-312", files: [{ filePath: "src/core/spec.ts", content: readFile("src/core/spec.ts") }])
+mcp__plugin_filid_t__test_metrics(action: "check-312", files: [{ filePath: "src/core/spec.ts", content: readFile("src/core/spec.ts") }])
 // Returns:
 // { file: "src/core/spec.ts", basic: 3, complex: 12, total: 15, pass: true }
 ```

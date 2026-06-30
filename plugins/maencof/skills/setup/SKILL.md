@@ -92,8 +92,8 @@ Generate Layer 1 documents from the synthesized discovery.
 | `01_Core/boundaries.md` | Absolute boundaries |
 | `01_Core/preferences.md` | Communication preferences |
 
-Create the 4 markdown documents above with `mcp_t_create` (layer=1, tags required).
-Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `mcp_t_create`, which requires layer/tags and always emits Frontmatter markdown.
+Create the 4 markdown documents above with `mcp__plugin_maencof_t__create` (layer=1, tags required).
+Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `mcp__plugin_maencof_t__create`, which requires layer/tags and always emits Frontmatter markdown.
 
 Also create the Layer directories and sub-layer subdirectories:
 - `02_Derived/`
@@ -125,11 +125,11 @@ echo '{"current_level":0,"interaction_count":0,"success_count":0,"last_escalatio
 
 The `layer-guard` PreToolUse hook matches only `Write|Edit`, so `Bash` is not intercepted regardless of vault state. This applies to both initial setup and `--reset` mode.
 
-> Note: This `Bash` pattern applies only to `trust-level.json` (a JSON config file that cannot use `mcp_t_create`). Markdown L1 documents must always go through the `identity-guardian` agent.
+> Note: This `Bash` pattern applies only to `trust-level.json` (a JSON config file that cannot use `mcp__plugin_maencof_t__create`). Markdown L1 documents must always go through the `identity-guardian` agent.
 
 ### Stage 6 — Initial Index Build
 
-Check index status with `mcp_t_kg_status`.
+Check index status with `mcp__plugin_maencof_t__kg_status`.
 - If an existing markdown vault is present: suggest a full build and run `/maencof:build` after user confirmation.
 - If new: run a lightweight build with the generated L1 documents.
 
@@ -151,9 +151,9 @@ setup skill starts
 | Tool | Purpose |
 |------|---------|
 | `AskUserQuestion` | Conduct the dynamic discovery interview (Stages 1–3) |
-| `mcp_t_create` | Create L1 documents (Stage 4) |
-| `mcp_t_read` | Verify existing L1 documents (Stage 4) |
-| `mcp_t_kg_status` | Check index status (Stage 6) |
+| `mcp__plugin_maencof_t__create` | Create L1 documents (Stage 4) |
+| `mcp__plugin_maencof_t__read` | Verify existing L1 documents (Stage 4) |
+| `mcp__plugin_maencof_t__kg_status` | Check index status (Stage 6) |
 | `Bash` | Create/overwrite `trust-level.json` (Stage 5) |
 
 ## Options
@@ -167,7 +167,7 @@ setup skill starts
 ## Error Handling
 
 - **Vault path does not exist**: Ask the user to confirm creation before proceeding.
-- **`mcp_t_create` failure**: Report error and skip to next document; resume at failed stage on retry.
+- **`mcp__plugin_maencof_t__create` failure**: Report error and skip to next document; resume at failed stage on retry.
 - **`identity-guardian` unavailable**: Proceed without L1 Frontmatter verification and note in completion summary.
 - **Already initialized**: Warn that re-running will overwrite existing Core Identity documents; require explicit `--reset` confirmation.
 

@@ -2,7 +2,7 @@
 
 SSoT is the MCP server (`src/mcp/tools/*`) + design `mcp-tools.md`. This is a
 lazy reference for skills/agent. Tools are exposed under the `tools` server:
-call them as `mcp_tools_<name>`. All are `[Internal]` — invoked by the entrez
+call them as `mcp__plugin_entrez_tools__<name>`. All are `[Internal]` — invoked by the entrez
 agent/skills, not the user directly.
 
 ## paper_search (readOnly, non-idempotent)

@@ -38,3 +38,4 @@ Dispatcher (Claude Code main agent)
 - **Credentials**: `~/.claude/plugins/atlassian/credentials.json` 평문 JSON; stdout / log 출력 금지
 - **Converter**: `src/converter/` — Python `mcp-atlassian` 에서 포팅. ADF ↔ Markdown / Storage ↔ Markdown
 - **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용
+- **MCP 도구 참조**: 에이전트/스킬은 full-form `mcp__plugin_atlassian_tools__<tool>` 로 참조 (서버 키 `tools`). short-form `mcp_tools_*` 는 서브에이전트에서 해석되지 않아 도구 grant 실패를 유발하므로 사용 금지.

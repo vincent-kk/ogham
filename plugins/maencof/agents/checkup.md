@@ -6,11 +6,11 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp_t_read
-  - mcp_t_update
-  - mcp_t_kg_status
-  - mcp_t_kg_navigate
-  - mcp_t_kg_search
+  - mcp__plugin_maencof_t__read
+  - mcp__plugin_maencof_t__update
+  - mcp__plugin_maencof_t__kg_status
+  - mcp__plugin_maencof_t__kg_navigate
+  - mcp__plugin_maencof_t__kg_search
 maxTurns: 40
 ---
 
@@ -22,9 +22,9 @@ Diagnoses the health of the knowledge vault across 7 categories and generates Au
 for items that can be repaired automatically.
 
 **Write scope:**
-- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp_t_update`
+- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp__plugin_maencof_t__update`
   — covers D4 layer mismatch and D6 missing/invalid Frontmatter fields.
-- **Strictly forbidden**: deletion (`mcp_t_delete`), relocation (`mcp_t_move`), and bulk
+- **Strictly forbidden**: deletion (`mcp__plugin_maencof_t__delete`), relocation (`mcp__plugin_maencof_t__move`), and bulk
   modification. These are reported as AutoFixAction proposals only — execution belongs
   to the user or a different agent (e.g., memory-organizer for relocation).
 
@@ -34,7 +34,7 @@ for items that can be repaired automatically.
 
 ### D1. Orphan Node (orphan-node)
 ```
-Detection: nodes with both inbound and outbound link counts of 0 via mcp_t_kg_status
+Detection: nodes with both inbound and outbound link counts of 0 via mcp__plugin_maencof_t__kg_status
 Severity: warning
 Auto-fix: suggest calling /maencof:suggest skill (discover related documents and recommend new connections)
 ```
@@ -59,11 +59,11 @@ Auto-fix: not possible (requires manual review) — reports broken link list
 ```
 Detection: mismatch between file path directory (01_Core, 02_Derived, etc.)
            and the Frontmatter layer field. Frontmatter is loaded via
-           `mcp_t_read` which reads raw disk bytes, BYPASSING any
+           `mcp__plugin_maencof_t__read` which reads raw disk bytes, BYPASSING any
            graph-index cache. Results therefore reflect on-disk truth
            even when the graph index is stale or pending rebuild.
 Severity: error
-Auto-fixable: update Frontmatter layer field to match path (`mcp_t_update`)
+Auto-fixable: update Frontmatter layer field to match path (`mcp__plugin_maencof_t__update`)
 ```
 
 ### D5. Duplicate Document (duplicate)
@@ -76,7 +76,7 @@ Auto-fix: not possible — reports duplicate pairs and suggests /maencof:organiz
 ### D6. Frontmatter Validation (invalid-frontmatter)
 ```
 Detection: items that fail FrontmatterSchema (Zod) validation. Each file's
-           Frontmatter is re-parsed from raw disk via `mcp_t_read` rather
+           Frontmatter is re-parsed from raw disk via `mcp__plugin_maencof_t__read` rather
            than read from the graph index, so the validator catches on-disk
            drift that has not yet been indexed (e.g., external editor
            changes made outside a maencof session).
@@ -106,9 +106,9 @@ Auto-fixable:
 ## Workflow
 
 ```
-1. mcp_t_kg_status → check D2 (stale), D1 (orphan)
+1. mcp__plugin_maencof_t__kg_status → check D2 (stale), D1 (orphan)
 2. Glob "**/*.md" → collect full file list
-3. `mcp_t_read` each file → check D6 (Frontmatter), D4 (Layer violation)
+3. `mcp__plugin_maencof_t__read` each file → check D6 (Frontmatter), D4 (Layer violation)
 4. Read backlink-index.json → check D3 (broken links)
 5. Tag similarity analysis → detect D5 (duplicates)
 6. Read .maencof-meta/insight-config.json + auto-insight-stats.json → check D7 (auto-insight health)
@@ -140,7 +140,7 @@ Auto-fixable:
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| All Layers | allowed | restricted | `mcp_t_read`, `mcp_t_update` (Frontmatter only) | `mcp_t_delete`, `mcp_t_move`, bulk-modify |
+| All Layers | allowed | restricted | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update` (Frontmatter only) | `mcp__plugin_maencof_t__delete`, `mcp__plugin_maencof_t__move`, bulk-modify |
 
 Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requires confirmation)
 
@@ -152,7 +152,7 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 - **Bulk modification forbidden** — auto-fixes are applied file by file
 - **D3 (broken link) auto-fix forbidden** — requires manual review
 - **D5 (duplicate) auto-merge forbidden** — decision belongs to the user
-- **Layer 1 (01_Core/) auto-fix via `mcp_t_update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:setup --step 4` or edit manually
+- **Layer 1 (01_Core/) auto-fix via `mcp__plugin_maencof_t__update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:setup --step 4` or edit manually
 
 ---
 

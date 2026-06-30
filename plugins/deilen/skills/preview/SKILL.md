@@ -24,7 +24,7 @@ the conversation, whichever they chose.
    - Do **not** re-print the full document in chat before rendering it — that
      doubles token cost.
 
-2. **Render.** Call `mcp_tools_render_viewer` with `{ content | path, title? }`
+2. **Render.** Call `mcp__plugin_deilen_tools__render_viewer` with `{ content | path, title? }`
    (exactly one of `content`/`path`). It returns `{ session_id, url, status }`
    immediately. Give the user the `url` (the page also opens automatically) and
    tell them to select text or use a block's **+** to leave comments, paste or
@@ -32,7 +32,7 @@ the conversation, whichever they chose.
    and re-render the updated page), **Continue in chat** (talk the comments
    through — works even with none), or **Close** (just dismiss the viewer).
 
-3. **Collect (poll loop).** Call `mcp_tools_collect_feedback` with
+3. **Collect (poll loop).** Call `mcp__plugin_deilen_tools__collect_feedback` with
    `{ session_id, wait_seconds }`:
    - `status: "complete"` → stop the loop; you now have the feedback.
    - `status: "pending"` → call it again immediately (this is the normal
@@ -45,7 +45,7 @@ the conversation, whichever they chose.
    reflects the button the user pressed:
    - **Revise** → apply the comments to the document (each names a source-line
      range like `L12-14` and an excerpt — edit surgically at that spot), then
-     re-render the result: call `mcp_tools_render_viewer` again and resume the
+     re-render the result: call `mcp__plugin_deilen_tools__render_viewer` again and resume the
      collect loop. This is an iterative revise loop — repeat until the user
      continues in chat or closes the viewer.
    - **Discuss** → answer or discuss the comments in the conversation; don't
@@ -57,12 +57,12 @@ the conversation, whichever they chose.
    `[resolved]` markers as lower priority.
 
 5. **Clean up (optional).** A submitted review already closes its session; only
-   call `mcp_tools_close_viewer` with `{ session_id }` if you stopped polling
+   call `mcp__plugin_deilen_tools__close_viewer` with `{ session_id }` if you stopped polling
    before the user ever submitted.
 
 ## Notes
 
-- Plans are markdown too — render them with `mcp_tools_render_viewer` directly. In plan
+- Plans are markdown too — render them with `mcp__plugin_deilen_tools__render_viewer` directly. In plan
   mode, preview after the plan is confirmed (or render a saved plan file), since
   plan mode can restrict tool use.
 - Local images (analysis plots, screenshots) display when referenced by an
@@ -73,7 +73,7 @@ the conversation, whichever they chose.
 
 ## Do not
 
-- Block indefinitely on a single call — one `mcp_tools_collect_feedback` is bounded; the
+- Block indefinitely on a single call — one `mcp__plugin_deilen_tools__collect_feedback` is bounded; the
   loop provides the waiting.
 - Re-print the full document body in chat just to render it.
 - Mention or expose the `token` query parameter — it is opaque to the user.

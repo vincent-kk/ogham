@@ -6,7 +6,7 @@ Provider-specific tools are in `jira/tools.md` and `github/tools.md`.
 
 | Tool                   | Usage                                           |
 | ---------------------- | ----------------------------------------------- |
-| `mcp_tools_config_get` | Read `config.provider` to route Step 0 dispatch |
+| `mcp__plugin_imbas_tools__config_get` | Read `config.provider` to route Step 0 dispatch |
 
 ## Skill Invocations
 

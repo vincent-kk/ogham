@@ -87,9 +87,9 @@ participant set and re-evaluate against the counts above.
 Issue one call per enabled provider, all **in parallel** (single message, one
 tool use each) — include only the providers in the participant set:
 
-- `mcp_tools_start_conversation({ provider: 'codex', prompt, tier? })`
-- `mcp_tools_start_conversation({ provider: 'antigravity', prompt, tier? })`
-- `mcp_tools_start_conversation({ provider: 'claude', prompt, tier? })`
+- `mcp__plugin_cennad_tools__start_conversation({ provider: 'codex', prompt, tier? })`
+- `mcp__plugin_cennad_tools__start_conversation({ provider: 'antigravity', prompt, tier? })`
+- `mcp__plugin_cennad_tools__start_conversation({ provider: 'claude', prompt, tier? })`
 
 `tier` is optional — omit to use each provider's configured default; if given,
 `high` only with a specific reason to expect `mid` is insufficient (`high` is

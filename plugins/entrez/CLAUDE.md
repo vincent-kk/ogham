@@ -44,6 +44,7 @@ Dependency direction is one-way; lower layers never import upward.
 - **No hooks.** Subprocess only via `@ogham/cross-platform`; cancellation via `AbortSignal`.
 - **Secrets**: `api_key` → `credentials.json` (0o600); never in tool responses, logs, or `SearchManifest`.
 - **`src/version.ts`** is generated — never edit by hand (`version:sync`).
+- **MCP tool references**: agents/skills reference tools as full-form `mcp__plugin_entrez_tools__<tool>` (server key `tools`). The short `mcp_tools_*` form is not resolved for subagents → tool-grant failure; never use it.
 
 ## SSoT boundaries
 

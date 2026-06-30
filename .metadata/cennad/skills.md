@@ -7,7 +7,7 @@
 ## 공통 컨벤션
 
 - LLM 이 실행하는 스킬. 본문은 짧고 명령형.
-- 도구 호출 표기: `mcp_tools_start_conversation`, `mcp_tools_continue_conversation`, `mcp_tools_open_settings`. (MCP 서버 이름이 `tools` 이므로 prefix `mcp_tools_`.)
+- 도구 호출 표기: `mcp__plugin_cennad_tools__start_conversation`, `mcp__plugin_cennad_tools__continue_conversation`, `mcp__plugin_cennad_tools__open_settings`. (MCP 서버 이름이 `tools` 이므로 prefix `mcp__plugin_cennad_tools__`.)
 - 모든 응답은 `ConversationResponse` JSON. Claude 가 그대로 받아 다음 행동 결정.
 
 ## skill: `setup`
@@ -27,7 +27,7 @@ argument-hint: ""
 
 ### Body
 
-1. `mcp_tools_open_settings` 를 인자 없이 호출.
+1. `mcp__plugin_cennad_tools__open_settings` 를 인자 없이 호출.
 2. 응답의 `url` 을 사용자에게 출력.
 3. `reused: true` 면 "기존 설정 서버 재사용" 안내.
 4. headless / 브라우저 미오픈 가능성 명시 후 URL 직접 접속 요청.
@@ -54,8 +54,8 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 ### Body — 호출 매핑
 
-- `--continue <session_id>` 있으면 → `mcp_tools_continue_conversation({ session_id, prompt })`.
-- 그 외 → `mcp_tools_start_conversation({ provider: 'codex', prompt, tier? })`.
+- `--continue <session_id>` 있으면 → `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt })`.
+- 그 외 → `mcp__plugin_cennad_tools__start_conversation({ provider: 'codex', prompt, tier? })`.
 - 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)와 그 외 dispatcher 옵션은 `/setup` 설정 UI 로만 관리한다 (MCP input 미노출).
 - 응답 JSON 의 `session_id` 를 출력에 노출 (백틱으로 감싸 인라인 코드).
 - 실패 응답 (`status: 'failure'`):
@@ -94,8 +94,8 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 ### Body — 호출 매핑
 
-- `--continue <session_id>` 있으면 → `mcp_tools_continue_conversation({ session_id, prompt })`.
-- 그 외 → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, tier? })`.
+- `--continue <session_id>` 있으면 → `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt })`.
+- 그 외 → `mcp__plugin_cennad_tools__start_conversation({ provider: 'antigravity', prompt, tier? })`.
 - 권한 플래그(`sandbox` / `skip_permissions`)는 `/setup` 설정 UI 로만 관리 (MCP input 미노출). sandbox-backend 없음.
 - 응답 JSON 의 `session_id` 를 출력에 노출 (백틱으로 감싸 인라인 코드).
 - `--continue` 재개 시 `externalSessionRef` 는 격리된 cwd 경로. agy 는 `--print` 모드에서 conversation id 를 노출하지 않아(Issue #7) cwd 격리로 세션을 식별.
@@ -137,8 +137,8 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 ### Body — 호출 매핑
 
-- `--continue <session_id>` 있으면 → `mcp_tools_continue_conversation({ session_id, prompt })`.
-- 그 외 → `mcp_tools_start_conversation({ provider: 'claude', prompt, tier? })`.
+- `--continue <session_id>` 있으면 → `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt })`.
+- 그 외 → `mcp__plugin_cennad_tools__start_conversation({ provider: 'claude', prompt, tier? })`.
 - 권한 플래그(`permission_mode`)는 `/setup` 설정 UI 로만 관리 (MCP input 미노출). sandbox 플래그 없음; 격리는 permission-mode 로 처리.
 - 응답 JSON 의 `session_id` 를 출력에 노출 (백틱으로 감싸 인라인 코드).
 - `externalSessionRef` = 호출 시 주입한 `sessionId` (출력 파싱 불필요).
@@ -194,7 +194,7 @@ argument-hint: '[--tier high|mid|low] -- "prompt"'
 
 - 활성 게이트: SessionStart `Active providers:` 의 활성 집합(codex / antigravity / claude 중)에만 dispatch. 2개 이상 → N-way 합성, 1개 → 단독 응답 + 추가 활성화 안내, 0개 → MCP 호출 없이 안내.
 - `--continue` 미지원 (항상 fresh 세션). 사용자가 전달하면 `/cennad:<provider> --continue <id>` 로 안내.
-- 활성 provider 각각을 **병렬** dispatch (단일 메시지, 활성 개수만큼 tool use): `mcp_tools_start_conversation({ provider, prompt, tier? })`.
+- 활성 provider 각각을 **병렬** dispatch (단일 메시지, 활성 개수만큼 tool use): `mcp__plugin_cennad_tools__start_conversation({ provider, prompt, tier? })`.
 - 부분 실패: 살아남은 응답 + 실패측 `error.code`/`message` 동시 노출. 전부 실패: 모든 오류 노출 후 합성 skip. `disabled` 오류는 participant set 에서 제외 후 재평가.
 
 ### Body — 합성 포맷 (2개 이상 성공)

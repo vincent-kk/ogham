@@ -55,9 +55,9 @@ imbas를 사용하기 위한 최초 설정을 담당한다.
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `mcp_tools_config_get` | imbas MCP | 설정 읽기 |
-| `mcp_tools_config_set` | imbas MCP | 설정 생성/수정 |
-| `mcp_tools_cache_set` | imbas MCP | 캐시 저장 |
+| `mcp__plugin_imbas_tools__config_get` | imbas MCP | 설정 읽기 |
+| `mcp__plugin_imbas_tools__config_set` | imbas MCP | 설정 생성/수정 |
+| `mcp__plugin_imbas_tools__cache_set` | imbas MCP | 캐시 저장 |
 | `[OP: get_projects]` | Jira ([OP:]) | 프로젝트 목록 조회 |
 | `[OP: get_issue_types]` | Jira ([OP:]) | 이슈 타입 조회 |
 | `[OP: get_issue_type_fields]` | Jira ([OP:]) | 타입별 필수 필드 조회 |

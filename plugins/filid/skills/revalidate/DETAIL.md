@@ -5,7 +5,7 @@
 - Each Delta fix item MUST be (a) written to `verification-ledger.md` by the
   Step 3 subagent with a row containing literal `TBD` tokens in both
   `post_count` and `status`, and (b) re-derived by the Step 6 main
-  orchestrator via an independent `mcp_t_structure_validate` call before
+  orchestrator via an independent `mcp__plugin_filid_t__structure_validate` call before
   the PASS/FAIL verdict is rendered.
 - The Step 6 main orchestrator MUST:
   - detect tampering when `post_count != "TBD"` OR `status != "TBD"` on

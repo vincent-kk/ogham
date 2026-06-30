@@ -22,9 +22,9 @@ Authentication and connection management for Atlassian products.
 ## Setup Flow
 
 1. Parse arguments and dispatch:
-   - `--test` → call `mcp_tools_auth_check` with `connection_test: true` and report status. Skip the wizard.
-   - `--reset` → call `mcp_tools_setup` with `mode: "new"` (overwrites existing configuration).
-   - No flags → call `mcp_tools_auth_check` first; if `authenticated: false` invoke `mcp_tools_setup` with `mode: "new"`, if `authenticated: true` confirm with the user before invoking `mode: "edit"` (see [`auth_check.md`](../_shared/auth_check.md) Setup Skill Flow).
+   - `--test` → call `mcp__plugin_atlassian_tools__auth_check` with `connection_test: true` and report status. Skip the wizard.
+   - `--reset` → call `mcp__plugin_atlassian_tools__setup` with `mode: "new"` (overwrites existing configuration).
+   - No flags → call `mcp__plugin_atlassian_tools__auth_check` first; if `authenticated: false` invoke `mcp__plugin_atlassian_tools__setup` with `mode: "new"`, if `authenticated: true` confirm with the user before invoking `mode: "edit"` (see [`auth_check.md`](../_shared/auth_check.md) Setup Skill Flow).
 2. The setup tool launches a local web server and opens the browser automatically (skipped for `--test`)
 3. The web UI handles the entire flow: URL input, environment detection, auth method selection, credential collection, connection testing, and saving
 4. Report the result to the user based on the MCP tool response
@@ -51,7 +51,7 @@ Authoritative recovery protocol — router skills (`jira`, `confluence`) defer h
 
 - `../_shared/auth_check.md` — Pre-flight authentication check
 - `../_shared/environment-detection.md` — Cloud vs Server/DC detection
-- `../_shared/mcp-tools.md` — Available MCP tools (uses `mcp_tools_setup` tool)
+- `../_shared/mcp-tools.md` — Available MCP tools (uses `mcp__plugin_atlassian_tools__setup` tool)
 - `references/auth-types.md` — Detailed auth type comparison and selection guide
 - `references/setup-flow.md` — Step-by-step setup wizard
 - `references/errors.md` — Setup-specific error handling and troubleshooting

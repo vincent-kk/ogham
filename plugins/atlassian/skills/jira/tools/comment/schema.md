@@ -23,10 +23,10 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List/Get | `mcp_tools_fetch` | GET | |
-| Add | `mcp_tools_fetch` | POST | Use content_format: "markdown" |
-| Update | `mcp_tools_fetch` | PUT | |
-| Delete | `mcp_tools_fetch` | DELETE | |
+| List/Get | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Add | `mcp__plugin_atlassian_tools__fetch` | POST | Use content_format: "markdown" |
+| Update | `mcp__plugin_atlassian_tools__fetch` | PUT | |
+| Delete | `mcp__plugin_atlassian_tools__fetch` | DELETE | |
 
 ## URL Patterns
 

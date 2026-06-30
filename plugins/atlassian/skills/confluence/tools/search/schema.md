@@ -19,4 +19,4 @@ CQL search uses the V1 content-search endpoint on both Cloud and Server/DC (Atla
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Search | `mcp_tools_fetch` | GET | CQL in `query_params` |
+| Search | `mcp__plugin_atlassian_tools__fetch` | GET | CQL in `query_params` |

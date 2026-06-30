@@ -51,8 +51,8 @@ Produces `implement-plan.json` and a human-readable `implement-plan-report.md`.
 
 ## Workflow (Provider-agnostic)
 
-1. Resolve `run_id` via `mcp_tools_run_get` (omit for latest).
-2. Call `mcp_tools_manifest_implement_plan` with `{project_ref, run_id, source, max_parallel}`.
+1. Resolve `run_id` via `mcp__plugin_imbas_tools__run_get` (omit for latest).
+2. Call `mcp__plugin_imbas_tools__manifest_implement_plan` with `{project_ref, run_id, source, max_parallel}`.
    - **On precondition failure** (`E-IP-3` missing/wrong source manifest,
      `E-IP-4` schema validation, `E-IP-5` invalid `--max-parallel`): emit terminal
      marker `Implement plan BLOCKED: <error_code> — <reason>` (see references/errors.md)

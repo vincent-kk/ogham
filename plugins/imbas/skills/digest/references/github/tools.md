@@ -1,7 +1,7 @@
 # Tools Used — GitHub Provider (digest skill)
 
 Loaded when `config.provider === 'github'`. Provider-agnostic imbas MCP tools
-(`mcp_tools_run_get`, `mcp_tools_config_get`) are documented in `../tools.md` and are used by all
+(`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__config_get`) are documented in `../tools.md` and are used by all
 providers. Issue reading is delegated to the `read-issue` skill (see Step 1 of
 `../workflow.md`).
 

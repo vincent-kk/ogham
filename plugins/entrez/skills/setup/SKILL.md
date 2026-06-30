@@ -17,11 +17,11 @@ verify EInfo reachability. The api_key is handled entirely by a local web UI —
 ## Flow
 
 1. Parse arguments:
-   - `--test` → call `mcp_tools_auth_check` with `probeEInfo: true` and report
+   - `--test` → call `mcp__plugin_entrez_tools__auth_check` with `probeEInfo: true` and report
      status (configured, reachable, rate, db list). Skip the wizard.
-   - `--reset` → call `mcp_tools_setup` with `mode: "new"` (overwrite).
-   - no flags → call `mcp_tools_auth_check` first; if `configured: false` invoke
-     `mcp_tools_setup` `mode: "new"`; if already configured, confirm with the
+   - `--reset` → call `mcp__plugin_entrez_tools__setup` with `mode: "new"` (overwrite).
+   - no flags → call `mcp__plugin_entrez_tools__auth_check` first; if `configured: false` invoke
+     `mcp__plugin_entrez_tools__setup` `mode: "new"`; if already configured, confirm with the
      user then invoke `mode: "edit"`.
 2. The setup tool launches a local `127.0.0.1` web server and opens the browser
    automatically. The UI collects tool/email, optional api_key (masked on edit),

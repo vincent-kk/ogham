@@ -44,7 +44,7 @@ Identify the data source type and content from input:
 
 ### Step 3 — Auto-generate Frontmatter
 
-Determine the Frontmatter fields to pass to `mcp_t_create`. The `created` and `updated` timestamps are set automatically by `mcp_t_create` and do not need to be specified manually.
+Determine the Frontmatter fields to pass to `mcp__plugin_maencof_t__create`. The `created` and `updated` timestamps are set automatically by `mcp__plugin_maencof_t__create` and do not need to be specified manually.
 
 ```yaml
 tags: [auto-extracted tags]
@@ -54,10 +54,10 @@ source: { original URL }
 
 Tags are auto-extracted as core keywords from the content.
 
-### Step 4 — Call `mcp_t_create`
+### Step 4 — Call `mcp__plugin_maencof_t__create`
 
 ```
-mcp_t_create({
+mcp__plugin_maencof_t__create({
   layer: 3, 4, or 5,
   sub_layer: "topical" (L3 default; relational/structural if it fits) | "buffer" (L5 default; boundary if it bridges layers),  // omit for L4
   tags: [auto-extracted tags],
@@ -71,16 +71,16 @@ mcp_t_create({
 
 ### Step 5 — Connection Suggestions
 
-Search for existing documents related to the created document via `mcp_t_kg_search`
+Search for existing documents related to the created document via `mcp__plugin_maencof_t__kg_search`
 and suggest adding links.
 
 ## Available Tools
 
 | Tool              | Type   | Purpose                         |
 | ----------------- | ------ | ------------------------------- |
-| `mcp_t_create`    | MCP    | Create document                 |
-| `mcp_t_kg_search` | MCP    | Search for related documents    |
-| `mcp_t_update`    | MCP    | Add links                       |
+| `mcp__plugin_maencof_t__create`    | MCP    | Create document                 |
+| `mcp__plugin_maencof_t__kg_search` | MCP    | Search for related documents    |
+| `mcp__plugin_maencof_t__update`    | MCP    | Add links                       |
 | `WebFetch`        | Native | Fetch web page content from URL |
 
 ## Error Handling
@@ -88,8 +88,8 @@ and suggest adding links.
 - **maencof not initialized**: "Please run `/maencof:setup` first."
 - **URL fetch failure**: report error and offer to save the URL as an L3 stub document with the source field set
 - **GitHub URL but no GitHub MCP**: guide to run `/maencof:mcp-setup` to install the GitHub MCP server
-- **`mcp_t_create` failure**: report error; no partial document created
-- **Duplicate detected via kg_search**: ask whether to `mcp_t_create` new or `mcp_t_update` existing document
+- **`mcp__plugin_maencof_t__create` failure**: report error; no partial document created
+- **Duplicate detected via kg_search**: ask whether to `mcp__plugin_maencof_t__create` new or `mcp__plugin_maencof_t__update` existing document
 
 ## Options
 

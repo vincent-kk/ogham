@@ -11,4 +11,4 @@
 
 | Tool | Usage |
 |------|-------|
-| `mcp_tools_config_get` | Read `config.github.repo` for bare `#N` resolution |
+| `mcp__plugin_imbas_tools__config_get` | Read `config.github.repo` for bare `#N` resolution |

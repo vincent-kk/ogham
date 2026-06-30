@@ -77,7 +77,7 @@ using elected committee personas and a state machine.
 ### Step 1 — Branch Detection & Checkpoint Resume
 
 1. `git branch --show-current` (Bash) → `<branch>`
-2. `mcp_t_review_manage(action: "normalize-branch", projectRoot, branchName: <branch>)`
+2. `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot, branchName: <branch>)`
 
 > **Spike harvest guard** (runs before checkpoint/cache): when `<branch>`
 > matches `spike/*`, read
@@ -93,7 +93,7 @@ using elected committee personas and a state machine.
 > unharvested spike would manufacture a verdict with no oracle. A current
 > manifest (head_sha == HEAD) lets review proceed normally.
 
-3. `mcp_t_review_manage(action: "checkpoint", projectRoot, branchName: <branch>)`
+3. `mcp__plugin_filid_t__review_manage(action: "checkpoint", projectRoot, branchName: <branch>)`
 4. Resume from the phase indicated by the checkpoint response. See
    `mcp-map.md` → "Checkpoint Resume Table" for the full file-presence
    → next-phase mapping, the `no_structure_check` frontmatter rule, and
@@ -106,11 +106,11 @@ using elected committee personas and a state machine.
 > `.filid/review/<branch>/session.md` and re-run with `--force` to
 > start fresh." Then END execution. Do not enter any further phase.
 
-If `--force`: call `mcp_t_review_manage(action: "cleanup", projectRoot, branchName)`
+If `--force`: call `mcp__plugin_filid_t__review_manage(action: "cleanup", projectRoot, branchName)`
 first, then restart from Phase A (or Phase B if `--no-structure-check`).
 
 5. Cache check (skip when `--force`):
-   `mcp_t_review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
+   `mcp__plugin_filid_t__review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
    - `"skip-to-existing-results"` → read existing `review-report.md`
      and `fix-requests.md` from the paths in the response. In user-invoked
      mode: Done. In **Pipeline Subagent Mode** (`--pipeline-mode=abc-only`):
@@ -121,7 +121,7 @@ first, then restart from Phase A (or Phase B if `--no-structure-check`).
      Phase D dispatch.
    - `"proceed-full-review"` → continue to Step 2.
 
-> `mcp_t_review_manage(action: "check-cache", ...)` returns `{ action: "skip-to-existing-results" | "proceed-full-review", ... }`. On `skip-to-existing-results`, the pipeline short-circuits to the finalize-review stage.
+> `mcp__plugin_filid_t__review_manage(action: "check-cache", ...)` returns `{ action: "skip-to-existing-results" | "proceed-full-review", ... }`. On `skip-to-existing-results`, the pipeline short-circuits to the finalize-review stage.
 
 **→ After entry point is determined, immediately proceed to Step 2.**
 
@@ -316,7 +316,7 @@ defines:
    `plugins/filid/agents/<id>.md` (e.g.,
    `agents/engineering-architect.md`).
 5. `--solo` (when provided by the user) is passed to Phase B as
-   `adjudicatorMode: true` input to `mcp_t_review_manage(elect-committee)`,
+   `adjudicatorMode: true` input to `mcp__plugin_filid_t__review_manage(elect-committee)`,
    which returns `committee: ['adjudicator']` regardless of
    complexity. Phase D Step D.2-solo then spawns the `adjudicator`
    agent as a standalone `Task` (no Team infrastructure). The same
@@ -337,7 +337,7 @@ the team (if any) has been deleted.**
 After Phase D outputs are written, persist the content hash for future
 cache lookups:
 
-`mcp_t_review_manage(action: "content-hash", projectRoot, branchName, baseRef)`
+`mcp__plugin_filid_t__review_manage(action: "content-hash", projectRoot, branchName, baseRef)`
 
 This writes `content-hash.json` alongside the review outputs.
 
@@ -352,7 +352,7 @@ This writes `content-hash.json` alongside the review outputs.
 
 When `--scope=pr`:
 
-1. `mcp_t_review_manage(action: "format-pr-comment", projectRoot, branchName)`
+1. `mcp__plugin_filid_t__review_manage(action: "format-pr-comment", projectRoot, branchName)`
    → returns formatted markdown.
 2. `gh auth status` (Bash).
 3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use

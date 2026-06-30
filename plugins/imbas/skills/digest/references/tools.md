@@ -7,7 +7,7 @@ This file lists shared tools and delegated skills.
 
 | Tool                   | Usage                                                              |
 | ---------------------- | ------------------------------------------------------------------ |
-| `mcp_tools_config_get` | Read `config.provider` to route Step 6 to the correct publish path |
+| `mcp__plugin_imbas_tools__config_get` | Read `config.provider` to route Step 6 to the correct publish path |
 
 ## Delegated skills
 

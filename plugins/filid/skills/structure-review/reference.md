@@ -7,13 +7,13 @@ Detailed stage logic, MCP tool examples, and report format for the
 ## Section 1 — Structure Verification Details
 
 ```
-mcp_t_fractal_scan({ path: cwd })
+mcp__plugin_filid_t__fractal_scan({ path: cwd })
 // Retrieve full module tree by scanning the filesystem
 
 checks:
   - Every fractal dir has INTENT.md
   - No organ dir has INTENT.md
-  - mcp_t_fractal_navigate(action: "classify", path: dir, entries: [/* nodes from scan */])
+  - mcp__plugin_filid_t__fractal_navigate(action: "classify", path: dir, entries: [/* nodes from scan */])
     matches actual directory role
 ```
 
@@ -26,7 +26,7 @@ misclassified paths.
 for each INTENT.md in scope:
   - lineCount <= 50                     // hard limit
   - contains 3-tier boundary sections    // required headings
-  - mcp_t_doc_compress(mode: "auto")     // size warning at >= 90 lines
+  - mcp__plugin_filid_t__doc_compress(mode: "auto")     // size warning at >= 90 lines
 
 for each DETAIL.md in scope:
   - no append-only patterns detected     // no raw appended blocks
@@ -39,7 +39,7 @@ non-compliant file and violation.
 ## Section 3 — Test Compliance Details
 
 ```
-mcp_t_test_metrics(action: "check-312", files: allSpecTs)
+mcp__plugin_filid_t__test_metrics(action: "check-312", files: allSpecTs)
 // Returns per-file: { basic: number, complex: number, total: number, pass: boolean }
 
 checks:
@@ -55,13 +55,13 @@ per-file breakdown showing excess cases.
 ## Section 4 — Metric Analysis Details
 
 ```
-mcp_t_ast_analyze(source: <file content>, analysisType: "lcom4")
+mcp__plugin_filid_t__ast_analyze(source: <file content>, analysisType: "lcom4")
 // LCOM4 >= 2 → recommend module split
 
-mcp_t_ast_analyze(source: <file content>, analysisType: "cyclomatic-complexity")
+mcp__plugin_filid_t__ast_analyze(source: <file content>, analysisType: "cyclomatic-complexity")
 // CC > 15 → recommend function compression or decomposition
 
-mcp_t_test_metrics(action: "decide", decisionInput: { testCount, lcom4, cyclomaticComplexity })
+mcp__plugin_filid_t__test_metrics(action: "decide", decisionInput: { testCount, lcom4, cyclomaticComplexity })
 // decision: ok | split | compress | parameterize
 ```
 
@@ -76,7 +76,7 @@ values and recommended actions.
 ## Section 5 — Dependency Verification Details
 
 ```
-mcp_t_ast_analyze(source: <file content>, analysisType: "dependency-graph")
+mcp__plugin_filid_t__ast_analyze(source: <file content>, analysisType: "dependency-graph")
 // Returns: DAG of module import relationships
 
 detectCycles(dag)
@@ -87,7 +87,7 @@ verifyTopologicalSort(dag)
 ```
 
 ```
-mcp_t_fractal_scan({ path: cwd })
+mcp__plugin_filid_t__fractal_scan({ path: cwd })
 // Cross-reference with fractal structure to validate dependency directions
 ```
 
@@ -120,19 +120,19 @@ Recommendations:
 
 ## MCP Tool Examples
 
-**mcp_t_fractal_navigate classify:**
+**mcp__plugin_filid_t__fractal_navigate classify:**
 
 ```
-mcp_t_fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from mcp_t_fractal_scan */])
+mcp__plugin_filid_t__fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from mcp__plugin_filid_t__fractal_scan */])
 // Returns: { type: "fractal" | "organ", hasIntentMd: boolean }
 ```
 
-**mcp_t_ast_analyze lcom4:**
+**mcp__plugin_filid_t__ast_analyze lcom4:**
 
 ```
-// Read file first, then call mcp_t_ast_analyze with source content
+// Read file first, then call mcp__plugin_filid_t__ast_analyze with source content
 const source = readFile("src/core/index.ts")
-mcp_t_ast_analyze(source: source, analysisType: "lcom4", className: "MyClass")
+mcp__plugin_filid_t__ast_analyze(source: source, analysisType: "lcom4", className: "MyClass")
 // Returns: { lcom4: 1 }
 // Note: className parameter is required for lcom4 analysis
 ```
@@ -141,11 +141,11 @@ mcp_t_ast_analyze(source: source, analysisType: "lcom4", className: "MyClass")
 
 | Tool                     | Action / Parameters                             | Stage | Purpose                                      |
 | ------------------------ | ----------------------------------------------- | ----- | -------------------------------------------- |
-| `mcp_t_fractal_scan`     | `path: cwd`                                     | 1, 5  | Retrieve module tree; verify classifications |
-| `mcp_t_fractal_navigate` | `action: "classify", path, entries`             | 1     | Classify a specific directory                |
-| `mcp_t_doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |
-| `mcp_t_test_metrics`     | `action: "check-312", files`                    | 3     | Validate 3+12 rule per spec.ts               |
-| `mcp_t_test_metrics`     | `action: "decide", decisionInput`               | 4     | Generate split/compress recommendation       |
-| `mcp_t_ast_analyze`      | `analysisType: "lcom4", source, className`      | 4     | Compute LCOM4 cohesion metric                |
-| `mcp_t_ast_analyze`      | `analysisType: "cyclomatic-complexity", source` | 4     | Compute cyclomatic complexity                |
-| `mcp_t_ast_analyze`      | `analysisType: "dependency-graph", source`      | 5     | Build full import dependency DAG             |
+| `mcp__plugin_filid_t__fractal_scan`     | `path: cwd`                                     | 1, 5  | Retrieve module tree; verify classifications |
+| `mcp__plugin_filid_t__fractal_navigate` | `action: "classify", path, entries`             | 1     | Classify a specific directory                |
+| `mcp__plugin_filid_t__doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |
+| `mcp__plugin_filid_t__test_metrics`     | `action: "check-312", files`                    | 3     | Validate 3+12 rule per spec.ts               |
+| `mcp__plugin_filid_t__test_metrics`     | `action: "decide", decisionInput`               | 4     | Generate split/compress recommendation       |
+| `mcp__plugin_filid_t__ast_analyze`      | `analysisType: "lcom4", source, className`      | 4     | Compute LCOM4 cohesion metric                |
+| `mcp__plugin_filid_t__ast_analyze`      | `analysisType: "cyclomatic-complexity", source` | 4     | Compute cyclomatic complexity                |
+| `mcp__plugin_filid_t__ast_analyze`      | `analysisType: "dependency-graph", source`      | 5     | Build full import dependency DAG             |

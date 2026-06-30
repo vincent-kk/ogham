@@ -40,10 +40,10 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 ### document mode — Vault Document Deletion
 
-1. **Identify target** — resolve from path, keyword search (`mcp_t_kg_search`), or ask user
-2. **Preview** — read target with `mcp_t_read`, show Frontmatter summary
-3. **Safety checks** — L1 (01_Core/) deletion is forbidden; backlink check via `mcp_t_kg_navigate`
-4. **Execute** — `mcp_t_delete` after user confirmation (or `--force`)
+1. **Identify target** — resolve from path, keyword search (`mcp__plugin_maencof_t__kg_search`), or ask user
+2. **Preview** — read target with `mcp__plugin_maencof_t__read`, show Frontmatter summary
+3. **Safety checks** — L1 (01_Core/) deletion is forbidden; backlink check via `mcp__plugin_maencof_t__kg_navigate`
+4. **Execute** — `mcp__plugin_maencof_t__delete` after user confirmation (or `--force`)
 5. **Report** — show deleted path and recommend `/maencof:build --force --reset-cache`
 
 > See **reference.md § Document Mode** for detailed safety check flows and report format.
@@ -53,12 +53,12 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 1. **Scan** `05_Context/buffer/` for documents older than `--max-age` days (default: 30)
 2. **List** stale buffer items with creation date, tags, and connection count
 3. **Recommend action** per item: promote (to L2/L3 with sub-layer), archive, or delete
-4. **Execute** after user confirmation — uses `mcp_t_move` (promote) or `mcp_t_delete` (delete). With `--dry-run`, skip execution and report the planned actions only.
+4. **Execute** after user confirmation — uses `mcp__plugin_maencof_t__move` (promote) or `mcp__plugin_maencof_t__delete` (delete). With `--dry-run`, skip execution and report the planned actions only.
 
 ### claudemd mode — CLAUDE.md Section Management
 
-- **read**: `mcp_t_claudemd_read()` — display current maencof section
-- **remove**: `mcp_t_claudemd_remove(dry_run: true)` → confirm → `mcp_t_claudemd_remove(dry_run: false)`
+- **read**: `mcp__plugin_maencof_t__claudemd_read()` — display current maencof section
+- **remove**: `mcp__plugin_maencof_t__claudemd_remove(dry_run: true)` → confirm → `mcp__plugin_maencof_t__claudemd_remove(dry_run: false)`
 
 > See **reference.md § CLAUDE.md Mode** for detailed steps.
 
@@ -66,13 +66,13 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 | Tool                    | Purpose                                                    |
 | ----------------------- | ---------------------------------------------------------- |
-| `mcp_t_delete`          | Delete vault document (document mode)                      |
-| `mcp_t_read`            | Preview document before deletion (document mode)           |
-| `mcp_t_kg_search`       | Keyword search to identify deletion target (document mode) |
-| `mcp_t_kg_navigate`     | Check inbound links / backlink warnings (document mode)    |
-| `mcp_t_move`            | Promote buffer items to target layer (buffer-cleanup mode) |
-| `mcp_t_claudemd_read`   | Read CLAUDE.md maencof section (claudemd mode)             |
-| `mcp_t_claudemd_remove` | Remove CLAUDE.md maencof section (claudemd mode)           |
+| `mcp__plugin_maencof_t__delete`          | Delete vault document (document mode)                      |
+| `mcp__plugin_maencof_t__read`            | Preview document before deletion (document mode)           |
+| `mcp__plugin_maencof_t__kg_search`       | Keyword search to identify deletion target (document mode) |
+| `mcp__plugin_maencof_t__kg_navigate`     | Check inbound links / backlink warnings (document mode)    |
+| `mcp__plugin_maencof_t__move`            | Promote buffer items to target layer (buffer-cleanup mode) |
+| `mcp__plugin_maencof_t__claudemd_read`   | Read CLAUDE.md maencof section (claudemd mode)             |
+| `mcp__plugin_maencof_t__claudemd_remove` | Remove CLAUDE.md maencof section (claudemd mode)           |
 
 ## Options
 

@@ -19,7 +19,7 @@ plugin: imbas
 >
 > **HIGH-RISK YIELD POINTS**:
 >
-> - After `engineer` subagent returns `devplan-manifest.json` — chain `mcp_tools_manifest_save` and `mcp_tools_manifest_validate` in the same turn
+> - After `engineer` subagent returns `devplan-manifest.json` — chain `mcp__plugin_imbas_tools__manifest_save` and `mcp__plugin_imbas_tools__manifest_validate` in the same turn
 > - B→A feedback collection — do NOT pause to report feedback; continue to gate evaluation
 > - AST fallback mode detection — log once and continue; do not pause
 > - Devplan-blocked report generation — emit AND end execution in the same turn
@@ -66,7 +66,7 @@ batch Jira issue creation.
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load stories-manifest and run state via imbas_tools.
-2. Read `config.provider` via `mcp_tools_config_get`.
+2. Read `config.provider` via `mcp__plugin_imbas_tools__config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider` for Step 3 (feedback target_ref semantics) and Step 4 final message:
 
    | provider | workflow file                   |
@@ -76,9 +76,9 @@ batch Jira issue creation.
    | `local`  | `references/local/workflow.md`  |
 
 4. Execute Steps 1 and 2 (`engineer` agent spawn) from the shared skeleton. Steps 3 (feedback target_ref semantics) and 4 (completion message) come from the provider file.
-5. Persist devplan-manifest.json via mcp_tools_manifest_save.
+5. Persist devplan-manifest.json via mcp__plugin_imbas_tools__manifest_save.
 
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
-- Provider-specific operations (`[OP:]` notation for jira, `gh issue view/list` via Bash for github, Read/Grep/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow. The `engineer` agent's core exploration tools (mcp_tools_ast_search, mcp_tools_ast_analyze, Read, Grep, Glob) are shared and provider-agnostic.
+- Provider-specific operations (`[OP:]` notation for jira, `gh issue view/list` via Bash for github, Read/Grep/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow. The `engineer` agent's core exploration tools (mcp__plugin_imbas_tools__ast_search, mcp__plugin_imbas_tools__ast_analyze, Read, Grep, Glob) are shared and provider-agnostic.

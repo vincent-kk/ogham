@@ -24,7 +24,7 @@ without re-resolving the repo.
 modified. Divergences become GitHub issue comments only, mirroring the
 Jira-side "comments only" invariant.
 
-Call `mcp_tools_manifest_save` to persist feedback_comments in devplan-manifest.json.
+Call `mcp__plugin_imbas_tools__manifest_save` to persist feedback_comments in devplan-manifest.json.
 
 ## Step 4 — Final user guidance (GitHub)
 
@@ -48,5 +48,5 @@ gh issue view <N> --repo owner/repo --json title,body,labels,state
 ```
 
 These are optional, not required. The core exploration (Step 2a–2e) relies on
-`mcp_tools_ast_search`, `mcp_tools_ast_analyze`, `Read`, `Grep`, `Glob` which are provider-agnostic.
+`mcp__plugin_imbas_tools__ast_search`, `mcp__plugin_imbas_tools__ast_analyze`, `Read`, `Grep`, `Glob` which are provider-agnostic.
 GitHub queries are supplemental context only.

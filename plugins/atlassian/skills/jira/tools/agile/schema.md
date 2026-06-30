@@ -27,7 +27,7 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List/Get | `mcp_tools_fetch` | GET | |
-| Create | `mcp_tools_fetch` | POST | |
-| Update sprint | `mcp_tools_fetch` | PATCH | Partial update |
-| Move issues | `mcp_tools_fetch` | POST | Issues array in body |
+| List/Get | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Create | `mcp__plugin_atlassian_tools__fetch` | POST | |
+| Update sprint | `mcp__plugin_atlassian_tools__fetch` | PATCH | Partial update |
+| Move issues | `mcp__plugin_atlassian_tools__fetch` | POST | Issues array in body |

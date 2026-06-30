@@ -10,7 +10,7 @@ references) MUST refer to this table rather than duplicating aliases.
 - **Skill ID**: `filid:<name>` (colon-prefixed) — used only when calling a skill
   via `Skill("filid:<name>", "<args>")`.
 - **Stage alias / action / type token**: bare lowercase word — used in
-  `--from=<stage>`, `mcp_t_debt_manage(action: "<bareword>")`, fix-request
+  `--from=<stage>`, `mcp__plugin_filid_t__debt_manage(action: "<bareword>")`, fix-request
   `Type: <bareword>`, etc. Never prefixed with `filid:`.
 
 ## Stage Alias Table
@@ -54,5 +54,5 @@ Each stage's output is the next stage's input:
   `--from=review` entry interface stable regardless of the skill's slug.
 - Fix-request type values (`code-fix`, `promote`, `restructure`) follow the
   same bare-word token policy — see `skills/resolve/SKILL.md` Step 2.
-- `mcp_t_debt_manage` action values (`create`, `list`, `resolve`, `calculate-bias`)
+- `mcp__plugin_filid_t__debt_manage` action values (`create`, `list`, `resolve`, `calculate-bias`)
   are bare words — see `src/types/handoff.ts` (`DebtAction`).

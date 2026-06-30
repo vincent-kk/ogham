@@ -48,13 +48,13 @@ git diff <BASE_REF>..HEAD --name-only
 Then scan the full project hierarchy (required for node classification lookup in A.1):
 
 ```
-mcp_t_fractal_scan(path: <PROJECT_ROOT>)
+mcp__plugin_filid_t__fractal_scan(path: <PROJECT_ROOT>)
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, ... }, ... }
 ```
 
 Store `tree.nodes` (FractalNode array) as `SCAN_NODES`. Each node already carries
 its classified `type`, so A.1 reads the type directly from `SCAN_NODES` — no
-follow-up `mcp_t_fractal_navigate(classify)` call is needed.
+follow-up `mcp__plugin_filid_t__fractal_navigate(classify)` call is needed.
 
 Build two lists:
 
@@ -74,7 +74,7 @@ For each directory in `CHANGED_DIRS`:
 ```
 // Read classification directly from SCAN_NODES (no extra MCP call)
 nodeType = SCAN_NODES.find(n => n.path === <directory>)?.type
-mcp_t_structure_validate(path: <directory>)
+mcp__plugin_filid_t__structure_validate(path: <directory>)
 ```
 
 Checks:
@@ -82,7 +82,7 @@ Checks:
 - If a changed directory is a fractal node → must have a INTENT.md
 - If a changed directory is an organ node → must NOT have a INTENT.md
 - The `nodeType` read from `SCAN_NODES` must match the directory's actual role
-  (verified against INTENT.md presence and `mcp_t_structure_validate` output)
+  (verified against INTENT.md presence and `mcp__plugin_filid_t__structure_validate` output)
 
 Severity mapping:
 
@@ -96,7 +96,7 @@ For each file in `CHANGED_CLAUDE_MDS`:
 
 - Line count must be <= 50
 - Must contain all three tier sections: "Always do", "Ask first", "Never do"
-- If line count >= 40 AND <= 50: record as LOW severity warning (approaching the 50-line limit; `mcp_t_doc_compress` recommended)
+- If line count >= 40 AND <= 50: record as LOW severity warning (approaching the 50-line limit; `mcp__plugin_filid_t__doc_compress` recommended)
 
 For each file in `CHANGED_SPEC_MDS`:
 
@@ -122,7 +122,7 @@ Severity mapping:
 ### A.3 — Stage 3: Test Compliance (3+12 Rule)
 
 ```
-mcp_t_test_metrics(action: "check-312", files: CHANGED_SPEC_FILES)
+mcp__plugin_filid_t__test_metrics(action: "check-312", files: CHANGED_SPEC_FILES)
 ```
 
 Threshold: total test cases per spec.ts file <= 15 (TEST_THRESHOLD = 15).
@@ -140,9 +140,9 @@ Severity mapping:
 For each file in `CHANGED_FILES` (skip index.ts, _.d.ts, _.spec.ts):
 
 ```
-mcp_t_ast_analyze(source: <file content>, analysisType: "lcom4", className: <class>)
-mcp_t_ast_analyze(source: <file content>, analysisType: "cyclomatic-complexity")
-mcp_t_test_metrics(action: "decide", decisionInput: { testCount, lcom4, cyclomaticComplexity })
+mcp__plugin_filid_t__ast_analyze(source: <file content>, analysisType: "lcom4", className: <class>)
+mcp__plugin_filid_t__ast_analyze(source: <file content>, analysisType: "cyclomatic-complexity")
+mcp__plugin_filid_t__test_metrics(action: "decide", decisionInput: { testCount, lcom4, cyclomaticComplexity })
 ```
 
 Thresholds:
@@ -163,7 +163,7 @@ Severity mapping:
 For each file in `CHANGED_FILES`:
 
 ```
-mcp_t_ast_analyze(source: <file content>, analysisType: "dependency-graph")
+mcp__plugin_filid_t__ast_analyze(source: <file content>, analysisType: "dependency-graph")
 ```
 
 Checks:

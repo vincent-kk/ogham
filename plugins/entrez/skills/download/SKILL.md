@@ -16,7 +16,7 @@ imply redistribution rights).
 
 ## Procedure
 
-1. Call `mcp_tools_fetch_fulltext` with
+1. Call `mcp__plugin_entrez_tools__fetch_fulltext` with
    `{ ids[], formats?, outDir?, overwrite?, extractFromTgz? }` (formats default
    `[PDF]`).
 2. Report:

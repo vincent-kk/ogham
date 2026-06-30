@@ -26,7 +26,7 @@ V2-style flat field names. MCP rewrites envelope on DC: `spaceId → space.key`,
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get | `mcp_tools_fetch` | GET | Use V2 query param `body-format=storage` or V1 `expand=body.storage,version` |
-| Create | `mcp_tools_fetch` | POST | `content_format: "markdown"` |
-| Update | `mcp_tools_fetch` | PUT | Must include `version.number` |
-| Delete | `mcp_tools_fetch` | DELETE | Confirm if child pages exist |
+| Get | `mcp__plugin_atlassian_tools__fetch` | GET | Use V2 query param `body-format=storage` or V1 `expand=body.storage,version` |
+| Create | `mcp__plugin_atlassian_tools__fetch` | POST | `content_format: "markdown"` |
+| Update | `mcp__plugin_atlassian_tools__fetch` | PUT | Must include `version.number` |
+| Delete | `mcp__plugin_atlassian_tools__fetch` | DELETE | Confirm if child pages exist |

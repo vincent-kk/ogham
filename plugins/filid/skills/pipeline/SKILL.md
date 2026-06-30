@@ -95,7 +95,7 @@ If a prerequisite is missing: **ABORT** with "Cannot start from `<stage>`:
 order — first match wins. If no match, immediately check the next signal.
 
 1. Detect branch: `git branch --show-current` (Bash)
-2. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
+2. Normalize: `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 3. Check signals in priority order:
 
 | Priority | Signal                                                                                                                            | Entry stage                                                                       |
@@ -272,15 +272,15 @@ skill in its own context: review Step 4.5 and Step 5 run main-side
 because the subagent exits before Phase D.
 
 1. **Persist content hash** (review Step 4.5):
-   `mcp_t_review_manage(action: "content-hash", projectRoot: <project_root>, branchName: <branch>)`.
+   `mcp__plugin_filid_t__review_manage(action: "content-hash", projectRoot: <project_root>, branchName: <branch>)`.
 2. **PR comment** (review Step 5, `--scope=pr` only):
-   1. `mcp_t_review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)` — returns formatted markdown.
+   1. `mcp__plugin_filid_t__review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)` — returns formatted markdown.
    2. `gh auth status` (Bash). If not authenticated, skip the PR comment
       quietly — no error reporting.
    3. Query existing comments via `gh pr view --json comments --jq '.comments[].body'` (Bash).
       If a `Code Review Governance` comment already exists, check that
       its body contains ALL three structural markers emitted only by
-      `mcp_t_review_manage format-pr-comment`: 1. `<details><summary>Phase A — Structure Compliance</summary>` 2. `<details><summary>Review Report (Phase B~D)</summary>` 3. Footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``If any marker is missing OR the comment was hand-rolled, **edit it
+      `mcp__plugin_filid_t__review_manage format-pr-comment`: 1. `<details><summary>Phase A — Structure Compliance</summary>` 2. `<details><summary>Review Report (Phase B~D)</summary>` 3. Footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``If any marker is missing OR the comment was hand-rolled, **edit it
 in place** via`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`(obtain numeric`id`via`gh api repos/<owner>/<repo>/issues/<pr>/comments`).
    4. Otherwise post fresh via `gh pr comment --body-file <file>`.
 3. **Verdict decision** (read `verdict` from `review-report.md`
@@ -370,9 +370,9 @@ from the appropriate stage.
 
 | Tool                  | Action              | Purpose                                       |
 | --------------------- | ------------------- | --------------------------------------------- |
-| `mcp_t_review_manage` | `normalize-branch`  | Normalize branch name for auto-detection      |
-| `mcp_t_review_manage` | `content-hash`      | Persist review content hash (finalize review) |
-| `mcp_t_review_manage` | `format-pr-comment` | Format review findings as a PR comment        |
+| `mcp__plugin_filid_t__review_manage` | `normalize-branch`  | Normalize branch name for auto-detection      |
+| `mcp__plugin_filid_t__review_manage` | `content-hash`      | Persist review content hash (finalize review) |
+| `mcp__plugin_filid_t__review_manage` | `format-pr-comment` | Format review findings as a PR comment        |
 
 All other operations are delegated to existing skills via `Skill()` tool.
 

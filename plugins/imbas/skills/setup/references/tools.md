@@ -4,10 +4,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `mcp_tools_config_get` | Read current config.json (show subcommand) |
-| `mcp_tools_config_set` | Create or update config.json fields |
-| `mcp_tools_cache_get` | Read Jira metadata cache (show subcommand — displays cache status alongside config) |
-| `mcp_tools_cache_set` | Write Jira metadata to cache files |
+| `mcp__plugin_imbas_tools__config_get` | Read current config.json (show subcommand) |
+| `mcp__plugin_imbas_tools__config_set` | Create or update config.json fields |
+| `mcp__plugin_imbas_tools__cache_get` | Read Jira metadata cache (show subcommand — displays cache status alongside config) |
+| `mcp__plugin_imbas_tools__cache_set` | Write Jira metadata to cache files |
 
 ## Jira Operations ([OP:])
 

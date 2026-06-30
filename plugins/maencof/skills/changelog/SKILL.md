@@ -77,7 +77,7 @@ Check if a changelog file for today's date already exists.
 
 ### Step 4 — Write Changelog
 
-Write the changelog using the `mcp_t_create` tool (new file) or `mcp_t_update` tool (existing file).
+Write the changelog using the `mcp__plugin_maencof_t__create` tool (new file) or `mcp__plugin_maencof_t__update` tool (existing file).
 
 **File format:**
 
@@ -167,7 +167,7 @@ Changelog 기록 완료: 02_Derived/changelog/YYYY-MM-DD.md
 
 | Tool | Type | Purpose |
 |------|------|---------|
-| `mcp_t_create` | MCP | Create new vault document (alternative to direct file write) |
-| `mcp_t_read` | MCP | Read existing vault document |
-| `mcp_t_update` | MCP | Update existing vault document (when today's entry already exists) |
+| `mcp__plugin_maencof_t__create` | MCP | Create new vault document (alternative to direct file write) |
+| `mcp__plugin_maencof_t__read` | MCP | Read existing vault document |
+| `mcp__plugin_maencof_t__update` | MCP | Update existing vault document (when today's entry already exists) |
 | `Bash` | Native | Run git commands (status, add, commit) |

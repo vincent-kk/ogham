@@ -33,7 +33,7 @@ Helps fill gaps in the knowledge graph by discovering potential links.
 
 ### Step 1 — Check Index Status
 
-Call `mcp_t_kg_status()`. Abort if no index. Warn if stale.
+Call `mcp__plugin_maencof_t__kg_status()`. Abort if no index. Warn if stale.
 
 ### Step 2 — Determine Target
 
@@ -41,7 +41,7 @@ Determine the suggestion target from user input: file path, tags, free text, or 
 
 ### Step 3 — Run Link Suggestion
 
-Call `mcp_t_kg_suggest_links` with the determined target parameters.
+Call `mcp__plugin_maencof_t__kg_suggest_links` with the determined target parameters.
 
 ### Step 4 — Display Results
 
@@ -49,7 +49,7 @@ Show suggestions in a table with Document, Layer, Score, Reason columns.
 
 ### Step 5 — User Action
 
-User selects a suggestion to view details via `mcp_t_read`, or manually adds links.
+User selects a suggestion to view details via `mcp__plugin_maencof_t__read`, or manually adds links.
 
 > See **reference.md** for detailed step logic, display format, and target determination rules.
 
@@ -57,9 +57,9 @@ User selects a suggestion to view details via `mcp_t_read`, or manually adds lin
 
 | Tool | Purpose |
 |------|---------|
-| `mcp_t_kg_status` | Check index status (stale check) |
-| `mcp_t_kg_suggest_links` | SA + Jaccard based link suggestion (primary tool) |
-| `mcp_t_read` | Read suggested document content (optional detail view) |
+| `mcp__plugin_maencof_t__kg_status` | Check index status (stale check) |
+| `mcp__plugin_maencof_t__kg_suggest_links` | SA + Jaccard based link suggestion (primary tool) |
+| `mcp__plugin_maencof_t__read` | Read suggested document content (optional detail view) |
 
 ## Options
 

@@ -6,7 +6,7 @@ provider-specific workflow file (`jira/workflow.md`, `github/workflow.md`, or
 
 ## Step 0 — Provider routing
 
-Read `config.provider` via `mcp_tools_config_get`. Load ONLY the matching workflow:
+Read `config.provider` via `mcp__plugin_imbas_tools__config_get`. Load ONLY the matching workflow:
 - `jira`   → `jira/workflow.md`
 - `github` → `github/workflow.md`
 - `local`  → `local/workflow.md`

@@ -7,9 +7,9 @@ tools:
   - Write
   - Grep
   - Glob
-  - mcp_tools_fetch
-  - mcp_tools_auth_check
-  - mcp_tools_setup
+  - mcp__plugin_atlassian_tools__fetch
+  - mcp__plugin_atlassian_tools__auth_check
+  - mcp__plugin_atlassian_tools__setup
 maxTurns: 30
 ---
 
@@ -34,7 +34,7 @@ Simple operations (single issue read, single JQL search, single comment add) sho
 
 1. Load the `atlassian:jira` skill for the tool catalog
 2. Read `tools/<domain>/schema.md` under the `atlassian:jira` skill directory for endpoint details
-3. Compose `mcp_tools_fetch` calls with the correct HTTP method and endpoint
+3. Compose `mcp__plugin_atlassian_tools__fetch` calls with the correct HTTP method and endpoint
 4. Use `content_format: "markdown"` when sending description/body content
 
 ## Domain Knowledge
@@ -112,6 +112,6 @@ Send version-agnostic paths (`/issue/{key}`, `/myself` etc. — no `/rest/api/{2
 1. Load the `atlassian:jira` skill for the tool catalog
 2. Select the appropriate domain (issue, search, transition, etc.)
 3. Read `tools/<domain>/schema.md` under the `atlassian:jira` skill directory for endpoint details — **only load when needed**
-4. Compose `mcp_tools_fetch` calls with correct HTTP method, endpoint, and parameters
+4. Compose `mcp__plugin_atlassian_tools__fetch` calls with correct HTTP method, endpoint, and parameters
 5. Load the `atlassian:download` skill for attachment operations
 6. On 401 error: load the `atlassian:setup` skill for reauth

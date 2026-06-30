@@ -10,6 +10,6 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get | `mcp_tools_fetch` | GET | |
-| Add | `mcp_tools_fetch` | POST | Body: accountId string (Cloud) or username (Server) |
-| Remove | `mcp_tools_fetch` | DELETE | Via query parameter |
+| Get | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Add | `mcp__plugin_atlassian_tools__fetch` | POST | Body: accountId string (Cloud) or username (Server) |
+| Remove | `mcp__plugin_atlassian_tools__fetch` | DELETE | Via query parameter |

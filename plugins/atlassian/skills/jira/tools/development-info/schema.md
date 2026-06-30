@@ -17,4 +17,4 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| All operations | `mcp_tools_fetch` | GET | Read-only. Requires issue ID, not key. |
+| All operations | `mcp__plugin_atlassian_tools__fetch` | GET | Read-only. Requires issue ID, not key. |

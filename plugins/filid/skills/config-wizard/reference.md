@@ -15,7 +15,7 @@ Discover field names the safe way:
 
 1. `Read .filid/config.json` to see what the current project already stores.
 2. If you need the default shape (e.g., for `reset`), rely on
-   `mcp_t_project_init` — the handler writes `createDefaultConfig()` output
+   `mcp__plugin_filid_t__project_init` — the handler writes `createDefaultConfig()` output
    onto disk when no config file is present. Delete first, then call the MCP
    tool (see `SKILL.md` → Step 3 `reset`).
 

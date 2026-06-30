@@ -94,7 +94,7 @@ resumes), while any new commit produces a new id.
 
 Phase D produces the final review verdict through a **real multi-agent
 deliberation** using Claude Code's native team tools. Committee members
-elected by `mcp_t_review_manage(elect-committee)` are spawned as team workers,
+elected by `mcp__plugin_filid_t__review_manage(elect-committee)` are spawned as team workers,
 each in their own context, emitting structured opinion files per round.
 The chairperson (Lead) orchestrates rounds and applies the state machine
 defined in `../state-machine.md`.
@@ -623,7 +623,7 @@ gate-independent.
 Skip when the advisory partition is empty. Otherwise maintain
 `.filid/review/advisory-ledger.md` (project-level, shared across
 branches — NOT under the per-branch review directory, so
-`mcp_t_review_manage(cleanup)` never deletes it; format:
+`mcp__plugin_filid_t__review_manage(cleanup)` never deletes it; format:
 `../templates.md` → "Advisory Ledger Format"):
 
 1. Read the ledger (create with the header row when missing). Determine
@@ -639,7 +639,7 @@ branches — NOT under the per-branch review directory, so
    - no row → append with `count: 1`, `first_seen: <today>`,
      `status: open`, `last_run_id: <current run id>`.
 3. For every `open` row whose `count` reached **3**: promote to the
-   debt system — `mcp_t_debt_manage(action: "create", projectRoot,
+   debt system — `mcp__plugin_filid_t__debt_manage(action: "create", projectRoot,
 debtItem: { fractal_path, file_path, review_branch,
 original_fix_id: <ADV-id>, severity: "LOW", rule_violated,
 metric_value, title, original_request: <recommended_action>,
@@ -691,7 +691,7 @@ Action, Code Patch (if applicable).
 
 For each fix item whose Code Patch targets `.filid/config.json`:
 
-1. **Call the validator** — `mcp_t_config_patch_validate({ patch_json:
+1. **Call the validator** — `mcp__plugin_filid_t__config_patch_validate({ patch_json:
 "<stringified patch JSON>", source_context: "<persona-id or FIX-ID>" })`.
 2. **If `valid == true`** → emit the fix unchanged.
 3. **If `valid == false` and `suggestion` is present** → rewrite the
@@ -769,7 +769,7 @@ irreconcilable VETO writes `verdict: REQUEST_CHANGES`.
 3. **Write minimal `review-report.md`**: D.6 aggregation is skipped, but
    `<REVIEW_DIR>/review-report.md` MUST still exist so the pipeline
    finalize stage (`pipeline/SKILL.md` → "finalize review") and
-   `mcp_t_review_manage(format-pr-comment)` can read a consistent verdict
+   `mcp__plugin_filid_t__review_manage(format-pr-comment)` can read a consistent verdict
    field. Use the **Failure Variant** template in `../templates.md`
    (`## Review Report Format` → "Failure Variant (Step D.7 fail dispatch)").
    Required frontmatter fields: `verdict: INCONCLUSIVE`, `dispatch: fail`,
@@ -791,8 +791,8 @@ irreconcilable VETO writes `verdict: REQUEST_CHANGES`.
 - Phase D makes NO direct MCP measurement calls. All metrics come from
   `verification.md` / `verification-metrics.md` / `verification-structure.md` /
   `structure-check.md`. The only sanctioned Phase D MCP calls are
-  bookkeeping, not measurement: `mcp_t_config_patch_validate` (D.6.4
-  schema gate) and `mcp_t_debt_manage(create)` (D.6.2-adv advisory
+  bookkeeping, not measurement: `mcp__plugin_filid_t__config_patch_validate` (D.6.4
+  schema gate) and `mcp__plugin_filid_t__debt_manage(create)` (D.6.2-adv advisory
   promotion).
 - The chairperson writes `verification.md`, `review-report.md`,
   `fix-requests.md`, the advisory ledger

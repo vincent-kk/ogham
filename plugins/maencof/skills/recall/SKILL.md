@@ -50,12 +50,12 @@ Extract core keywords and intent from user input.
 
 ### Step 2 — Call kg_search
 
-Call the `mcp_t_kg_search` MCP tool to find seed nodes. The search reports index
+Call the `mcp__plugin_maencof_t__kg_search` MCP tool to find seed nodes. The search reports index
 freshness: if no index exists, stop and guide the user to `/maencof:build`; if the
 index is stale, surface a brief warning and continue.
 
 ```
-mcp_t_kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)
+mcp__plugin_maencof_t__kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)
 ```
 
 If no results: "No related documents found. Try different keywords."
@@ -65,7 +65,7 @@ If no results: "No related documents found. Try different keywords."
 Traverse inbound and outbound links from seed nodes.
 
 ```
-mcp_t_kg_navigate(path: selected_node_path, include_inbound=true, include_outbound=true, include_hierarchy=true)
+mcp__plugin_maencof_t__kg_navigate(path: selected_node_path, include_inbound=true, include_outbound=true, include_hierarchy=true)
 ```
 
 ### Step 4 — Context Assembly (kg_context)
@@ -73,7 +73,7 @@ mcp_t_kg_navigate(path: selected_node_path, include_inbound=true, include_outbou
 Assemble context for the top activated nodes.
 
 ```
-mcp_t_kg_context(query: search_query_string, token_budget=2000)
+mcp__plugin_maencof_t__kg_context(query: search_query_string, token_budget=2000)
 ```
 
 ### Step 5 — Result Formatting
@@ -115,9 +115,9 @@ For more detail: `/maencof:recall {query} --detail`
 
 | Tool                | Purpose                                                          |
 | ------------------- | ---------------------------------------------------------------- |
-| `mcp_t_kg_search`   | Keyword-based seed node search                                   |
-| `mcp_t_kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
-| `mcp_t_kg_context`  | Assemble node context                                            |
+| `mcp__plugin_maencof_t__kg_search`   | Keyword-based seed node search                                   |
+| `mcp__plugin_maencof_t__kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
+| `mcp__plugin_maencof_t__kg_context`  | Assemble node context                                            |
 
 ## Options
 

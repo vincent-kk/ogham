@@ -6,9 +6,9 @@
 
 | Tool | Usage |
 |------|-------|
-| `mcp_tools_config_get` | Load config.json for config.defaults.project_ref fallback in ensure/refresh actions |
-| `mcp_tools_cache_get` | Read cached metadata and check TTL status |
-| `mcp_tools_cache_set` | Write fetched metadata to cache files |
+| `mcp__plugin_imbas_tools__config_get` | Load config.json for config.defaults.project_ref fallback in ensure/refresh actions |
+| `mcp__plugin_imbas_tools__cache_get` | Read cached metadata and check TTL status |
+| `mcp__plugin_imbas_tools__cache_set` | Write fetched metadata to cache files |
 
 ### Jira Operations ([OP:])
 

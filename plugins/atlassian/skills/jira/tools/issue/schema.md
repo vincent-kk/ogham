@@ -78,11 +78,11 @@ Issue CRUD, bulk create, and changelog operations.
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get issue | `mcp_tools_fetch` | GET | |
-| Create issue | `mcp_tools_fetch` | POST | |
-| Update issue | `mcp_tools_fetch` | PUT | |
-| Delete issue | `mcp_tools_fetch` | DELETE | |
-| Bulk create | `mcp_tools_fetch` | POST | POST to `/issue/bulk` |
-| Get changelog | `mcp_tools_fetch` | GET | GET to `/issue/{key}/changelog` |
-| Get create metadata | `mcp_tools_fetch` | GET | GET to `/issue/createmeta` |
-| Assign issue | `mcp_tools_fetch` | PUT | PUT to `/issue/{key}/assignee` |
+| Get issue | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Create issue | `mcp__plugin_atlassian_tools__fetch` | POST | |
+| Update issue | `mcp__plugin_atlassian_tools__fetch` | PUT | |
+| Delete issue | `mcp__plugin_atlassian_tools__fetch` | DELETE | |
+| Bulk create | `mcp__plugin_atlassian_tools__fetch` | POST | POST to `/issue/bulk` |
+| Get changelog | `mcp__plugin_atlassian_tools__fetch` | GET | GET to `/issue/{key}/changelog` |
+| Get create metadata | `mcp__plugin_atlassian_tools__fetch` | GET | GET to `/issue/createmeta` |
+| Assign issue | `mcp__plugin_atlassian_tools__fetch` | PUT | PUT to `/issue/{key}/assignee` |

@@ -9,7 +9,7 @@ Detailed mode workflows, safety checks, and error handling.
 Determine the deletion target from user input:
 
 - Direct file path → use as target
-- Keyword/title → search with `mcp_t_kg_search` and confirm with user
+- Keyword/title → search with `mcp__plugin_maencof_t__kg_search` and confirm with user
 - Not specified → ask "Which document would you like to delete?"
 
 ### Step 2 — Preview Document
@@ -17,7 +17,7 @@ Determine the deletion target from user input:
 Read the target document to show content before deletion:
 
 ```
-mcp_t_read(path: target path)
+mcp__plugin_maencof_t__read(path: target path)
 ```
 
 Display Frontmatter summary (title, layer, tags) and content preview.
@@ -40,7 +40,7 @@ Abort the operation.
 Check for documents that reference the target:
 
 ```
-mcp_t_kg_navigate(path: target path, include_inbound: true)
+mcp__plugin_maencof_t__kg_navigate(path: target path, include_inbound: true)
 ```
 
 If inbound links exist:
@@ -59,7 +59,7 @@ Proceed anyway? (y/n) or use --force to skip this warning.
 After user confirmation:
 
 ```
-mcp_t_delete(path: target path, force: --force flag)
+mcp__plugin_maencof_t__delete(path: target path, force: --force flag)
 ```
 
 ### Step 6 — Completion Report
@@ -81,7 +81,7 @@ If backlinks were broken, list the affected documents.
 ### read submode
 
 ```
-mcp_t_claudemd_read()
+mcp__plugin_maencof_t__claudemd_read()
 ```
 
 Display the section content or "No maencof section found in CLAUDE.md."
@@ -91,7 +91,7 @@ Display the section content or "No maencof section found in CLAUDE.md."
 **Step 1** — Dry run first:
 
 ```
-mcp_t_claudemd_remove(dry_run: true)
+mcp__plugin_maencof_t__claudemd_remove(dry_run: true)
 ```
 
 Display what would be removed.
@@ -108,7 +108,7 @@ Proceed? (y/n)
 **Step 3** — Execute removal:
 
 ```
-mcp_t_claudemd_remove(dry_run: false)
+mcp__plugin_maencof_t__claudemd_remove(dry_run: false)
 ```
 
 Report success or failure.

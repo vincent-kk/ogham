@@ -14,10 +14,10 @@ Re-entry behaviour is documented at [Re-entry Behaviour](#re-entry-behaviour).
 
 ## Phase 0a — Config Initialization
 
-Call `mcp_t_project_init` to ensure `.filid/config.json` exists at the git root:
+Call `mcp__plugin_filid_t__project_init` to ensure `.filid/config.json` exists at the git root:
 
 ```
-mcp_t_project_init({ path: "<target-path>", language: "<session-language>" })
+mcp__plugin_filid_t__project_init({ path: "<target-path>", language: "<session-language>" })
 ```
 
 Resolve `<session-language>` from the Claude Code session's response language
@@ -54,17 +54,17 @@ provided):
 }
 ```
 
-`mcp_t_project_init` does NOT touch `.claude/rules/` — that is handled by
+`mcp__plugin_filid_t__project_init` does NOT touch `.claude/rules/` — that is handled by
 Phase 0b below. Rule doc state is tracked on the filesystem only
 (`.claude/rules/*.md`), never mirrored into `.filid/config.json`.
 
 ## Phase 0b — Rule Docs Status
 
-Call `mcp_t_rule_docs_sync` with `action: "status"` to inspect the current state
+Call `mcp__plugin_filid_t__rule_docs_sync` with `action: "status"` to inspect the current state
 of every rule doc declared in the plugin manifest:
 
 ```
-mcp_t_rule_docs_sync({ action: "status", path: "<target-path>" })
+mcp__plugin_filid_t__rule_docs_sync({ action: "status", path: "<target-path>" })
 ```
 
 The response partitions rules into two disjoint lists:
@@ -86,7 +86,7 @@ The response partitions rules into two disjoint lists:
   A deployed entry with `inSync === false` signals template drift — the
   plugin shipped a newer version than what the user has on disk.
 - `status.autoDeployed[]` — **required** rules. Always auto-synced by
-  `mcp_t_rule_docs_sync({ action: "sync" })` regardless of user input.
+  `mcp__plugin_filid_t__rule_docs_sync({ action: "sync" })` regardless of user input.
   Drifted required rules are overwritten unconditionally; the user cannot
   opt out and no confirmation is required. Use this list for the Phase 0d
   summary line — NEVER render these entries as checkboxes.
@@ -96,7 +96,7 @@ Build an internal map `currentSelection: Record<string, boolean>` from
 entries — they are implicit and must not appear in the UI.
 
 If `status.pluginRootResolved` is `false`, fail fast: the plugin is running
-without `CLAUDE_PLUGIN_ROOT` set, which means `mcp_t_rule_docs_sync` cannot
+without `CLAUDE_PLUGIN_ROOT` set, which means `mcp__plugin_filid_t__rule_docs_sync` cannot
 locate the manifest. Surface an error message and skip Phase 0c/0d.
 
 ## Phase 0c — Rule Docs Prompt <!-- [INTERACTIVE] -->
@@ -250,11 +250,11 @@ const resyncIds = status.entries
 
 ## Phase 0d — Rule Docs Sync
 
-Call `mcp_t_rule_docs_sync` with `action: "sync"`, the computed selection,
+Call `mcp__plugin_filid_t__rule_docs_sync` with `action: "sync"`, the computed selection,
 and the `resync` array from Phase 0c:
 
 ```
-mcp_t_rule_docs_sync({
+mcp__plugin_filid_t__rule_docs_sync({
   action: "sync",
   path: "<target-path>",
   selections: { "filid_fca-policy": true, "filid_reuse-first": false },

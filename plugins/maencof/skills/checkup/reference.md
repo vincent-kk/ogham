@@ -20,10 +20,10 @@ Detailed diagnostic items, report format, auto-fix rules, and the lightweight `-
 
 Delegated to the checkup agent:
 
-- `mcp_t_kg_status` → detect D1 (orphan), D2 (stale)
+- `mcp__plugin_maencof_t__kg_status` → detect D1 (orphan), D2 (stale)
 - `Glob "**/*.md"` → collect full file list
-- `mcp_t_read` per file → verify D6 (Frontmatter), D4 (Layer violation)
-- `mcp_t_kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link)
+- `mcp__plugin_maencof_t__read` per file → verify D6 (Frontmatter), D4 (Layer violation)
+- `mcp__plugin_maencof_t__kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link)
 - Tag similarity analysis → detect D5 (duplicate)
 - Read `.maencof-meta/insight-config.json` + `auto-insight-stats.json` → detect D7 (auto-insight health)
 
@@ -63,13 +63,13 @@ Execute AutoFixAction after user confirmation:
 
 | Action                                | Tool                                   | Condition |
 | ------------------------------------- | -------------------------------------- | --------- |
-| Fill missing Frontmatter fields       | `mcp_t_update`                         | D6 items  |
+| Fill missing Frontmatter fields       | `mcp__plugin_maencof_t__update`                         | D6 items  |
 | Rebuild stale index                   | `/maencof:build --force --reset-cache` | D2 items  |
-| Fix layer field based on path         | `mcp_t_update`                         | D4 items  |
+| Fix layer field based on path         | `mcp__plugin_maencof_t__update`                         | D4 items  |
 | Suggest links for orphan nodes        | `/maencof:suggest`                     | D1 items  |
 | Provision missing auto-insight config | config-provisioner defaults            | D7 items  |
 
-**Layer 1 (01_Core/) exception**: Auto-fix via `mcp_t_update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 4` or edit manually.
+**Layer 1 (01_Core/) exception**: Auto-fix via `mcp__plugin_maencof_t__update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 4` or edit manually.
 
 ## Error Handling
 
@@ -126,7 +126,7 @@ Recommended: Run /maencof:build --full or /maencof:checkup
 
 ### Sub-Layer Distribution
 
-Always include sub-layer distribution from the `mcp_t_kg_status` response
+Always include sub-layer distribution from the `mcp__plugin_maencof_t__kg_status` response
 (`subLayerDistribution` field) after the status banner:
 
 ```

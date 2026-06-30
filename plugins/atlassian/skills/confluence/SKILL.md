@@ -29,7 +29,7 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 ### Direct Execution Steps (Main Agent)
 
 1. Read `tools/<domain>/schema.md` for the needed domain
-2. Call `mcp_tools_fetch` with the V2-style logical endpoint (no `/wiki/...` or `/rest/api/...` prefix)
+2. Call `mcp__plugin_atlassian_tools__fetch` with the V2-style logical endpoint (no `/wiki/...` or `/rest/api/...` prefix)
 3. Use `content_format: "markdown"` when sending page body content (auto-converts to Storage Format)
 4. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `setup` skill and retry once; on decline abort with guidance message
 

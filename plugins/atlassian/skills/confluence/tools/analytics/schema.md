@@ -17,4 +17,4 @@ Analytics is Cloud-only. MCP raises an explicit error on Server/DC.
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get views | `mcp_tools_fetch` | GET | Cloud only — DC returns "Cloud V2 only" error |
+| Get views | `mcp__plugin_atlassian_tools__fetch` | GET | Cloud only — DC returns "Cloud V2 only" error |

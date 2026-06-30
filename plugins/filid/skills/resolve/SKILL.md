@@ -62,7 +62,7 @@ them into ADRs, create technical debt records, and auto-commit/push changes.
        - On "Abort": stop execution.
 
 2. Detect branch: `git branch --show-current` (Bash)
-3. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
+3. Normalize: `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 4. Verify: Read `.filid/review/<normalized>/fix-requests.md`
 5. If not found: abort with "No fix requests found. Run /filid:cross-review first."
 
@@ -203,9 +203,9 @@ For each rejected fix:
    - Decision: defer the fix with stated rationale
    - Consequences: technical debt created, future impact
 
-3. **Create debt file**: Call `mcp_t_debt_manage(create)` MCP tool:
+3. **Create debt file**: Call `mcp__plugin_filid_t__debt_manage(create)` MCP tool:
    ```
-   mcp_t_debt_manage(
+   mcp__plugin_filid_t__debt_manage(
      action: "create",
      projectRoot: <project_root>,
      debtItem: {
@@ -345,8 +345,8 @@ If there were NO accepted fixes (all rejected):
 
 | Tool                  | Action             | Purpose                                              |
 | --------------------- | ------------------ | ---------------------------------------------------- |
-| `mcp_t_review_manage` | `normalize-branch` | Normalize branch name for review directory path      |
-| `mcp_t_debt_manage`   | `create`           | Create a technical debt record for each rejected fix |
+| `mcp__plugin_filid_t__review_manage` | `normalize-branch` | Normalize branch name for review directory path      |
+| `mcp__plugin_filid_t__debt_manage`   | `create`           | Create a technical debt record for each rejected fix |
 
 ## Options
 
@@ -379,7 +379,7 @@ Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surg
 
 Agents:    filid:code-surgeon (Step 4a — parallel code-fix)
 Skills:    filid:promote (Step 4b), filid:restructure (Step 4b)
-MCP tools: mcp_t_review_manage(normalize-branch), mcp_t_debt_manage(create)
+MCP tools: mcp__plugin_filid_t__review_manage(normalize-branch), mcp__plugin_filid_t__debt_manage(create)
 
 --auto:   Skips Steps 3 (accept all), 5 (no rejections), 9 prompt (auto-revalidate)
           Aborts on: dirty working tree, typecheck failure

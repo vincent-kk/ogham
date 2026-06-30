@@ -12,6 +12,6 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get types/remote | `mcp_tools_fetch` | GET | |
-| Create | `mcp_tools_fetch` | POST | |
-| Delete | `mcp_tools_fetch` | DELETE | |
+| Get types/remote | `mcp__plugin_atlassian_tools__fetch` | GET | |
+| Create | `mcp__plugin_atlassian_tools__fetch` | POST | |
+| Delete | `mcp__plugin_atlassian_tools__fetch` | DELETE | |

@@ -113,10 +113,10 @@ See [reference.md Section 4](./reference.md#section-4--pr-publication).
 
 | Tool             | Action                   | Stage | Purpose                                                       |
 | ---------------- | ------------------------ | ----- | ------------------------------------------------------------- |
-| `mcp_t_review_manage`  | `generate-human-summary` | 3     | (Optional) Generate human-friendly PR summary from review session |
+| `mcp__plugin_filid_t__review_manage`  | `generate-human-summary` | 3     | (Optional) Generate human-friendly PR summary from review session |
 
 Stage 1 delegates to `/filid:update`, which internally uses its own MCP tools
-(`mcp_t_cache_manage`, `mcp_t_fractal_scan`, `mcp_t_test_metrics`, etc.). All other operations use
+(`mcp__plugin_filid_t__cache_manage`, `mcp__plugin_filid_t__fractal_scan`, `mcp__plugin_filid_t__test_metrics`, etc.). All other operations use
 Bash (git, gh) and the Skill tool.
 
 ## Options

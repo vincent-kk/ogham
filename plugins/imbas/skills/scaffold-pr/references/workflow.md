@@ -6,7 +6,7 @@ selected by `config.provider`. Steps 0, 1, 2, 4 are shared.
 
 ## Step 0 — Provider gate
 
-1. Read `config.provider` via `mcp_tools_config_get`.
+1. Read `config.provider` via `mcp__plugin_imbas_tools__config_get`.
 2. If `config.provider === "local"` → emit terminal marker `scaffold-pr BLOCKED: local provider not supported — PR creation requires a remote git host.` and end. Do NOT continue.
 
 ## Step 1 — Read issue

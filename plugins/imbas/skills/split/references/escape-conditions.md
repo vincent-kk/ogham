@@ -14,8 +14,8 @@ escape with a structured report ("escape is a report" principle):
 On escape:
 1. For E2-3 only: generate a single-Story stories-manifest.json wrapping the
    original document as one Story (the document is already appropriate size).
-   Call mcp_tools_manifest_save to persist it before escaping.
-2. Call mcp_tools_run_transition:
+   Call mcp__plugin_imbas_tools__manifest_save to persist it before escaping.
+2. Call mcp__plugin_imbas_tools__run_transition:
    - action: "escape_phase", phase: "split", escape_code: "<code>"
    → Sets split.status = "escaped", split.escape_code = "<code>"
 3. Emit terminal marker: "Escape code: <code>" (literal `<code>` is one of

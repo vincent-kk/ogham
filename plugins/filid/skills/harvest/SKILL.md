@@ -63,7 +63,7 @@ manifest — the ONLY artifact that lifts the pipeline/review spike gate.
 2. `git status --porcelain` non-empty → ABORT: "commit your probe work
    first — harvest snapshots committed state only." (Doc-hygiene denies
    are suspended on this branch; committing is cheap.)
-3. Normalize: `mcp_t_review_manage(action: "normalize-branch",
+3. Normalize: `mcp__plugin_filid_t__review_manage(action: "normalize-branch",
 projectRoot, branchName: <branch>)` → `<normalized>`.
 4. Resolve `<base_sha>`: `git merge-base HEAD <--base REF, default
 main>` (fallback `master` when `main` is absent).
@@ -170,7 +170,7 @@ AskUserQuestion(
    `.filid/review/<normalized>/fix-requests.md` exists and contains
    `Type: harvest-required` (the Harvest-Required Variant written by the
    review guard against the pre-harvest state), clear that review
-   session: `mcp_t_review_manage(action: "cleanup", projectRoot,
+   session: `mcp__plugin_filid_t__review_manage(action: "cleanup", projectRoot,
 branchName: <branch>)`. Otherwise the now-obsolete degraded artifacts
    would route the next pipeline run to resolve instead of a fresh
    review.
