@@ -9,7 +9,10 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/documentParser/index.js';
-import { buildGraph } from '../../../core/graphBuilder/index.js';
+import {
+  buildGraph,
+  hydrateRuntimeMaps,
+} from '../../../core/graphBuilder/index.js';
 import {
   type CurrentFileInfo,
   computeChangeSet,
@@ -21,14 +24,7 @@ import type { ScannedFile } from '../../../core/vaultScanner/index.js';
 import { scanVault } from '../../../core/vaultScanner/index.js';
 import { calculateWeights } from '../../../core/weightCalculator/index.js';
 import type { NodeId } from '../../../types/common.js';
-import type {
-  AdjacencyList,
-  EdgeTypeMap,
-  EdgeWeightMap,
-  KnowledgeEdge,
-  KnowledgeGraph,
-  KnowledgeNode,
-} from '../../../types/graph.js';
+import type { KnowledgeGraph, KnowledgeNode } from '../../../types/graph.js';
 import type { MaencofCrudResult } from '../../../types/mcp.js';
 
 /** kg_build 입력 */
@@ -82,57 +78,6 @@ interface BuildOutput {
   graph: KnowledgeGraph;
   files: ScannedFile[];
   parseFailures: KgBuildParseFailure[];
-}
-
-/**
- * 엣지 배열로부터 EdgeWeightMap을 구축한다.
- * calculateWeights() 이후에 호출하여 최종 가중치를 반영한다.
- */
-function buildEdgeWeightMap(edges: KnowledgeEdge[]): EdgeWeightMap {
-  const map: EdgeWeightMap = new Map();
-  for (const edge of edges) {
-    let inner = map.get(edge.from);
-    if (!inner) {
-      inner = new Map();
-      map.set(edge.from, inner);
-    }
-    inner.set(edge.to, edge.weight);
-  }
-  return map;
-}
-
-/**
- * 엣지 배열로부터 EdgeTypeMap을 구축한다.
- * SA에서 엣지 타입별 멀티플라이어를 적용하기 위한 O(1) 조회용.
- */
-function buildEdgeTypeMap(edges: KnowledgeEdge[]): EdgeTypeMap {
-  const map: EdgeTypeMap = new Map();
-  for (const edge of edges) {
-    let inner = map.get(edge.from);
-    if (!inner) {
-      inner = new Map();
-      map.set(edge.from, inner);
-    }
-    inner.set(edge.to, edge.type);
-  }
-  return map;
-}
-
-/**
- * 엣지 배열로부터 AdjacencyList를 구축한다.
- */
-function buildAdjacencyListFromEdges(
-  nodes: Map<NodeId, KnowledgeNode>,
-  edges: KnowledgeEdge[],
-): AdjacencyList {
-  const adj: AdjacencyList = new Map();
-  for (const id of nodes.keys()) {
-    adj.set(id, []);
-  }
-  for (const edge of edges) {
-    adj.get(edge.from)?.push(edge.to);
-  }
-  return adj;
 }
 
 /**
@@ -267,20 +212,15 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
   }
 
   const builtAt = new Date().toISOString();
-  const adjacencyList = buildAdjacencyListFromEdges(nodes, weightedEdges);
-  const edgeWeightMap = buildEdgeWeightMap(weightedEdges);
-  const edgeTypeMap = buildEdgeTypeMap(weightedEdges);
   const graph: KnowledgeGraph = {
     nodes,
     edges: weightedEdges,
     builtAt,
     nodeCount: nodes.size,
     edgeCount: weightedEdges.length,
-    adjacencyList,
-    edgeWeightMap,
-    edgeTypeMap,
-    invertedIndex: graphResult.invertedIndex,
   };
+  // 런타임 맵은 loadGraph 와 동일 로직으로 부착 (build==load 보장).
+  hydrateRuntimeMaps(graph);
 
   return { graph, files, parseFailures };
 }
@@ -394,21 +334,16 @@ async function incrementalBuild(
     }
   }
 
-  const incrAdjacencyList = buildAdjacencyListFromEdges(nodes, weightedEdges);
-  const incrEdgeWeightMap = buildEdgeWeightMap(weightedEdges);
-  const incrEdgeTypeMap = buildEdgeTypeMap(weightedEdges);
+  const graph: KnowledgeGraph = {
+    nodes,
+    edges: weightedEdges,
+    builtAt: new Date().toISOString(),
+    nodeCount: nodes.size,
+    edgeCount: weightedEdges.length,
+  };
+  hydrateRuntimeMaps(graph);
   return {
-    graph: {
-      nodes,
-      edges: weightedEdges,
-      builtAt: new Date().toISOString(),
-      nodeCount: nodes.size,
-      edgeCount: weightedEdges.length,
-      adjacencyList: incrAdjacencyList,
-      edgeWeightMap: incrEdgeWeightMap,
-      edgeTypeMap: incrEdgeTypeMap,
-      invertedIndex: graphResult.invertedIndex,
-    },
+    graph,
     files,
     parseFailures,
   };

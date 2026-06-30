@@ -112,9 +112,11 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     expect(graph.edges.find((e) => e.from === 'a.md')).toBeUndefined();
   });
 
-  it('weights / pageRank / edgeWeightMap 는 갱신되지 않는다 (background rebuild 의존)', async () => {
+  it('엣지 파생 맵은 graph.edges 로 재구성되되 node-level pageRank 는 유지된다', async () => {
     const a = makeNode('a.md');
     a.pagerank = 0.42;
+    // 의도적으로 graph.edges 와 어긋난 stale 맵(a.md→x)을 부착. merge 후 graph.edges(=[]) 기준으로
+    // 재구성되어 phantom 엣지 x 는 사라져야 한다. node-level pageRank 는 그대로여야 한다.
     const graph: KnowledgeGraph = {
       nodes: new Map([[a.id, a]]),
       edges: [],
@@ -135,10 +137,14 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     await store.appendStaleEntries([{ path: 'a.md', op: 'mutate' }]);
 
     await mergeStaleNodesIntoGraph(vaultDir, graph);
+    // phantom 엣지 a.md→x 가 재구성으로 제거됨 (graph.edges 는 비어 있음)
     expect(graph.edgeWeightMap?.get('a.md' as NodeId)?.get('x' as NodeId)).toBe(
-      0.7,
+      undefined,
     );
-    expect(graph.adjacencyList?.get('a.md' as NodeId)).toEqual(['x']);
+    expect(graph.adjacencyList?.get('a.md' as NodeId)).toEqual([]);
+    // node-level pageRank 는 background rebuild 가 소유 — merge 는 fresh 노드에 pagerank 를
+    // 부여하지 않는다(교체된 노드는 다음 전체 rebuild 까지 pagerank 미보유).
+    expect(graph.nodes.get('a.md' as NodeId)?.pagerank).toBeUndefined();
   });
 
   it('delete entry 는 graph nodes / 양방향 incident edges / invertedIndex 모두에서 제거한다', async () => {
