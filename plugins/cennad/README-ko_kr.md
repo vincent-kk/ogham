@@ -85,6 +85,10 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 
 추론·분석·작성·코드 리뷰에서 부모 세션의 대화와 사용자 정의로부터 분리된 새 Anthropic 모델 호출이 필요할 때 사용하세요. `--strict-mcp-config` 와 `--safe-mode` 가 항상 부착되어 자식 프로세스가 부모 세션의 MCP 서버, 훅, CLAUDE.md, 스킬을 상속하지 않습니다. 다만 설정된 `permission_mode`(기본값: `dontAsk`)에 따라 Claude Code 내장 도구로 실행 작업 디렉터리에 접근할 수 있습니다.
 
+### 자동 정교화
+
+단일 provider 위임(`/codex`, `/antigravity`, `/claude`) 후, 호스트는 응답을 요청과 대조해 구체적인 미흡점을 짚을 수 있으면 **같은 세션을 이어** 이를 보완합니다 — 최대 3회 호출(초기 1회 + 후속 2회). provider 가 사용자만 내릴 수 있는 결정(미명시 제약·스코프·의도)을 물으면, 호스트는 추측하지 않고 그 질문을 표면화합니다. 이 동작을 건너뛰고 첫 응답을 그대로 받으려면 `--no-refine` 를 사용하세요.
+
 ### Provider 교차 검증
 
 ```
@@ -92,7 +96,7 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 /crosscheck --tier high -- "이 RFC 를 코드·리서치·추론 관점에서 리뷰해줘"
 ```
 
-여러 모델 패밀리의 독립적 second opinion 이 가치 있을 때 사용하세요 (아키텍처 결정, 스펙/PR 리뷰). 동일 프롬프트가 활성화된 provider(codex, antigravity, claude) 전체에 병렬 전달되며, 비활성 provider 는 제외됩니다. 2개 이상 활성 시 응답은 Agreed / Conflicting / Final direction / Action checklist 4개 섹션으로 합성되고, 1개만 활성 시 해당 provider 응답을 그대로 제시합니다. 단일 호출 only — multi-turn follow-up 은 `/codex --continue`, `/antigravity --continue`, `/claude --continue` 로 진행하세요.
+여러 모델 패밀리의 독립적 second opinion 이 가치 있을 때 사용하세요 (아키텍처 결정, 스펙/PR 리뷰). 동일 프롬프트가 활성화된 provider(codex, antigravity, claude) 전체에 병렬 전달되며, 비활성 provider 는 제외됩니다. 2개 이상 활성 시 응답은 Agreed / Conflicting / Final direction / Action checklist 4개 섹션으로 합성되고, 1개만 활성 시 해당 provider 응답을 그대로 제시합니다. 응답이 권고를 바꿀 만큼 엇갈리면 crosscheck 는 수렴 라운드를 1회 수행합니다 — 각 측에 상대 입장을 보여준 뒤 재합성하며, 건너뛰려면 `--no-converge`. crosscheck 는 사용자 `--continue` 를 받지 않으니, 한쪽을 직접 더 진행하려면 `/codex --continue`, `/antigravity --continue`, `/claude --continue` 를 사용하세요.
 
 ---
 

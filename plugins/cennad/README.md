@@ -85,6 +85,10 @@ Use antigravity (`agy`) for live web-grounded research, very-large-context synth
 
 Use claude for reasoning-heavy analysis, writing, and review tasks where you want a fresh Anthropic model invocation isolated from the parent session's conversation and customizations. The child `claude` process runs with `--strict-mcp-config --safe-mode`, so it never inherits the parent session's MCP servers, hooks, CLAUDE.md, or skills. It can still use Claude Code's built-in tools in the spawned working directory according to `permission_mode` (default: `dontAsk`), configured in `/setup`.
 
+### Automatic Refinement
+
+After any single-provider delegation (`/codex`, `/antigravity`, `/claude`), the host evaluates the response against your request and, when it can name a concrete gap, continues the SAME session to close it — up to 3 provider calls total (the initial dispatch + 2 follow-ups). If the provider needs a decision only you can make (an unstated constraint, scope, or intent), the host surfaces its question instead of guessing. Pass `--no-refine` to skip this and take the first response as-is.
+
 ### Cross-checking Across Providers
 
 ```
@@ -92,7 +96,7 @@ Use claude for reasoning-heavy analysis, writing, and review tasks where you wan
 /crosscheck --tier high -- "Review this RFC from code, research, and reasoning angles"
 ```
 
-Use crosscheck when independent second opinions across model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded in parallel to every enabled provider (codex, antigravity, claude); disabled ones are skipped. With two or more enabled, the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections; with only one enabled, you get that provider's answer as-is. Single-shot only — use `/codex --continue`, `/antigravity --continue`, or `/claude --continue` for multi-turn follow-ups on any side.
+Use crosscheck when independent second opinions across model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded in parallel to every enabled provider (codex, antigravity, claude); disabled ones are skipped. With two or more enabled, the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections; with only one enabled, you get that provider's answer as-is. When the answers disagree in a way that changes the recommendation, crosscheck runs one convergence round — each side is shown the others and the result is re-synthesized; pass `--no-converge` to skip it. crosscheck takes no user `--continue`; to drive one side further yourself, use `/codex --continue`, `/antigravity --continue`, or `/claude --continue`.
 
 ---
 
