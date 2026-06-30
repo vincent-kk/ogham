@@ -7,9 +7,31 @@ import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import type { KgStatusInput, KgStatusResult } from '../../../types/mcp.js';
 
-/**
- * kg_status 핸들러
- */
+function collectLinkOrphanStats(graph: KnowledgeGraph): {
+  linkOrphanCount: number;
+  linkInboundOrphanCount: number;
+  linkOutboundOrphanCount: number;
+} {
+  const linkInbound = new Set<NodeId>();
+  const linkOutbound = new Set<NodeId>();
+  for (const edge of graph.edges) {
+    if (edge.type !== 'LINK') continue;
+    linkOutbound.add(edge.from);
+    linkInbound.add(edge.to);
+  }
+  let linkOrphanCount = 0;
+  let linkInboundOrphanCount = 0;
+  let linkOutboundOrphanCount = 0;
+  for (const id of graph.nodes.keys()) {
+    const hasIn = linkInbound.has(id);
+    const hasOut = linkOutbound.has(id);
+    if (!hasIn && !hasOut) linkOrphanCount++;
+    if (!hasIn) linkInboundOrphanCount++;
+    if (!hasOut) linkOutboundOrphanCount++;
+  }
+  return { linkOrphanCount, linkInboundOrphanCount, linkOutboundOrphanCount };
+}
+
 export async function handleKgStatus(
   vaultPath: string,
   graph: KnowledgeGraph | null,
@@ -59,25 +81,8 @@ export async function handleKgStatus(
     subLayerDistribution['cross_layer_edges'] = crossLayerEdgeCount;
   }
 
-  // LINK(위키링크) 서브그래프 고립 진단 — 폴더-형제(SIBLING) 등을 제외하고 LINK 엣지만으로 평가.
-  // total-degree orphan 검사를 대체하지 않고 보강한다(의미적 고립을 SIBLING 이 마스킹하므로).
-  const linkInbound = new Set<NodeId>();
-  const linkOutbound = new Set<NodeId>();
-  for (const edge of graph.edges) {
-    if (edge.type !== 'LINK') continue;
-    linkOutbound.add(edge.from);
-    linkInbound.add(edge.to);
-  }
-  let linkOrphanCount = 0;
-  let linkInboundOrphanCount = 0;
-  let linkOutboundOrphanCount = 0;
-  for (const id of graph.nodes.keys()) {
-    const hasIn = linkInbound.has(id);
-    const hasOut = linkOutbound.has(id);
-    if (!hasIn && !hasOut) linkOrphanCount++;
-    if (!hasIn) linkInboundOrphanCount++;
-    if (!hasOut) linkOutboundOrphanCount++;
-  }
+  const { linkOrphanCount, linkInboundOrphanCount, linkOutboundOrphanCount } =
+    collectLinkOrphanStats(graph);
 
   return {
     nodeCount: graph.nodeCount,

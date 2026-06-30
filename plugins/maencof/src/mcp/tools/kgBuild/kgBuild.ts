@@ -225,6 +225,46 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
   return { graph, files, parseFailures };
 }
 
+async function reparseFiles(
+  filesToReparse: string[],
+  fileMap: Map<string, ScannedFile>,
+  nodes: Map<NodeId, KnowledgeNode>,
+  allLinks: Array<{ from: string; to: string }>,
+  parseFailures: KgBuildParseFailure[],
+): Promise<void> {
+  await Promise.all(
+    filesToReparse.map(async (filePath) => {
+      const file = fileMap.get(filePath);
+      if (!file) return;
+      try {
+        const content = await readFile(file.absolutePath, 'utf-8');
+        const doc = parseDocument(file.relativePath, content, file.mtime);
+        const nodeResult = buildKnowledgeNode(doc);
+        if (nodeResult.success && nodeResult.node) {
+          nodes.set(nodeResult.node.id, nodeResult.node);
+          for (const link of doc.links) {
+            if (!link.isAbsolute) {
+              allLinks.push({ from: file.relativePath, to: link.href });
+            }
+          }
+        } else {
+          parseFailures.push({
+            path: file.relativePath,
+            errors: doc.frontmatter.errors ?? [
+              nodeResult.error ?? 'Unknown parse failure',
+            ],
+          });
+        }
+      } catch (error) {
+        parseFailures.push({
+          path: file.relativePath,
+          errors: [error instanceof Error ? error.message : String(error)],
+        });
+      }
+    }),
+  );
+}
+
 /**
  * 증분 빌드: 변경된 파일만 재파싱하고, 전체 노드 셋으로 그래프를 재구축한다.
  * "Incremental scan, full graph construction" 전략.
@@ -280,40 +320,12 @@ async function incrementalBuild(
   const allLinks: Array<{ from: string; to: string }> = [];
   const parseFailures: KgBuildParseFailure[] = [];
 
-  await Promise.all(
-    scope.filesToReparse.map(async (filePath) => {
-      const file = fileMap.get(filePath);
-      if (!file) return;
-      try {
-        const content = await readFile(file.absolutePath, 'utf-8');
-        const doc = parseDocument(file.relativePath, content, file.mtime);
-        const nodeResult = buildKnowledgeNode(doc);
-        if (nodeResult.success && nodeResult.node) {
-          nodes.set(nodeResult.node.id, nodeResult.node);
-
-          // 아웃바운드 링크 수집 (re-parsed 파일)
-          for (const link of doc.links) {
-            if (!link.isAbsolute) {
-              allLinks.push({ from: file.relativePath, to: link.href });
-            }
-          }
-        } else {
-          // frontmatter 검증 실패 — non-fatal surface
-          parseFailures.push({
-            path: file.relativePath,
-            errors: doc.frontmatter.errors ?? [
-              nodeResult.error ?? 'Unknown parse failure',
-            ],
-          });
-        }
-      } catch (error) {
-        // 파일 읽기/파서 예외 — non-fatal surface
-        parseFailures.push({
-          path: file.relativePath,
-          errors: [error instanceof Error ? error.message : String(error)],
-        });
-      }
-    }),
+  await reparseFiles(
+    scope.filesToReparse,
+    fileMap,
+    nodes,
+    allLinks,
+    parseFailures,
   );
 
   // re-parsed 노드에 아웃바운드 링크 부착

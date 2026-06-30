@@ -22,7 +22,8 @@ import type {
   KnowledgeGraph,
   KnowledgeNode,
 } from '../../types/graph.js';
-import { QueryCache } from '../queryCache/index.js';
+
+import { QueryCache } from './queryCache/index.js';
 
 /** 시드 매칭 유형 */
 export type MatchType =
@@ -51,7 +52,10 @@ export interface QueryOptions {
   maxHops?: number;
   /** Layer 필터 (미지정 시 전체 Layer) */
   layerFilter?: number[];
-  /** 적응형 SA 파라미터 활성화 (기본: true) */
+  /**
+   * 적응형 SA 파라미터 활성화 (기본: true).
+   * `maxHops`를 명시적으로 설정하면 무시된다. 적응형 동작을 원하면 `maxHops`를 생략하라.
+   */
   adaptiveSA?: boolean;
 }
 
@@ -484,6 +488,6 @@ export class QueryEngine {
     path: string,
     options?: QueryOptions,
   ): QueryResult {
-    return this.query(graph, [path], options);
+    return query(graph, [path], { ...this.defaultOptions, ...options });
   }
 }

@@ -313,6 +313,9 @@ export class SpreadingActivationEngine {
     seedId: NodeId,
     params?: SpreadingActivationParams,
   ): ActivationResult[] {
-    return this.activate(graph, [seedId], params);
+    return runSpreadingActivation(graph, [seedId], {
+      ...this.defaultParams,
+      ...params,
+    });
   }
 }

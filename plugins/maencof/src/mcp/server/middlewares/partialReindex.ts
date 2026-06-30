@@ -22,7 +22,7 @@ import {
   removeNodeFromInvertedIndex,
 } from '../../../core/graphBuilder/index.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
-import type { StaleEntry } from '../../../core/indexer/metadataStore/metadataStore.js';
+import type { StaleEntry } from '../../../core/indexer/metadataStore/index.js';
 import { invalidateQueryCache } from '../../../search/queryEngine/index.js';
 import type { NodeId } from '../../../types/common.js';
 import { toNodeId } from '../../../types/common.js';
@@ -63,19 +63,23 @@ export async function mergeStaleNodesIntoGraph(
 
   const replacedSourceIds = new Set<NodeId>();
   let anyDeleted = false;
+  const mutateDeltas: Array<{ freshNode: KnowledgeNode; oldNode: KnowledgeNode | undefined }> = [];
 
   for (const entry of toProcess) {
     if (entry.op === 'delete') {
       if (handleDelete(graph, pathToNodeId, entry.path)) anyDeleted = true;
       continue;
     }
-    await handleMutate(
-      vaultPath,
-      graph,
-      pathToNodeId,
-      replacedSourceIds,
-      entry.path,
-    );
+    const delta = await handleMutate(vaultPath, graph, pathToNodeId, entry.path);
+    if (delta) mutateDeltas.push(delta);
+  }
+
+  for (const { freshNode, oldNode } of mutateDeltas) {
+    if (oldNode) removeNodeFromInvertedIndex(graph.invertedIndex, oldNode);
+    graph.nodes.set(freshNode.id, freshNode);
+    pathToNodeId.set(freshNode.path, freshNode.id);
+    addNodeToInvertedIndex(graph.invertedIndex, freshNode);
+    replacedSourceIds.add(freshNode.id);
   }
 
   if (replacedSourceIds.size === 0 && !anyDeleted) return graph;
@@ -137,9 +141,8 @@ async function handleMutate(
   vaultPath: string,
   graph: KnowledgeGraph,
   pathToNodeId: Map<string, NodeId>,
-  replacedSourceIds: Set<NodeId>,
   stalePath: string,
-): Promise<void> {
+): Promise<{ freshNode: KnowledgeNode; oldNode: KnowledgeNode | undefined } | null> {
   let freshNode: KnowledgeNode | undefined;
   let oldNode: KnowledgeNode | undefined;
   try {
@@ -148,7 +151,7 @@ async function handleMutate(
     const stats = await stat(absolutePath);
     const doc = parseDocument(stalePath, content, stats.mtimeMs);
     const built = buildKnowledgeNode(doc);
-    if (!built.success || !built.node) return;
+    if (!built.success || !built.node) return null;
 
     freshNode = built.node;
     freshNode.outboundLinks = doc.links
@@ -169,15 +172,10 @@ async function handleMutate(
       error: `${stalePath}: ${String(err)}`,
       timestamp: new Date().toISOString(),
     });
-    return;
+    return null;
   }
 
-  if (!freshNode) return;
+  if (!freshNode) return null;
 
-  if (oldNode) removeNodeFromInvertedIndex(graph.invertedIndex, oldNode);
-
-  graph.nodes.set(freshNode.id, freshNode);
-  pathToNodeId.set(freshNode.path, freshNode.id);
-  addNodeToInvertedIndex(graph.invertedIndex, freshNode);
-  replacedSourceIds.add(freshNode.id);
+  return { freshNode, oldNode };
 }
