@@ -1,6 +1,6 @@
 ---
 name: knowledge-connector
-description: "Graph enrichment agent focused on discovering meaningful links between knowledge nodes."
+description: 'Graph enrichment agent focused on discovering meaningful links between knowledge nodes.'
 model: sonnet
 tools:
   - Read
@@ -35,6 +35,7 @@ to strengthen the knowledge graph. Operates across all Layers with Layer 1 read-
    a. Shared tags between documents in different Layers
    b. Co-referenced concepts (same terms appearing in multiple documents)
    c. Orphan nodes with no inbound/outbound links
+   d. Cross-language recall: pass each concept as separate seed items in BOTH the user's working language and English (they are unioned), since vault docs may be tagged/titled in either language; never combine languages in one item (a multi-word item is AND-matched)
 4. Rank candidates by connection strength (tag overlap + semantic similarity)
 5. Generate connection proposal list
 ```
@@ -54,13 +55,13 @@ to strengthen the knowledge graph. Operates across all Layers with Layer 1 read-
 
 ## Access Matrix
 
-| Layer | Read | Write | Allowed Operations | Forbidden Operations |
-|-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | allowed (read-only) | forbidden | `mcp_t_read`, graph traversal | `mcp_t_create`, `mcp_t_update`, `mcp_t_delete`, `mcp_t_move`, bulk-modify |
-| Layer 2 (02_Derived) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
-| Layer 3 (03_External) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
-| Layer 4 (04_Action) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
-| Layer 5 (05_Context) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
+| Layer                 | Read                | Write     | Allowed Operations                 | Forbidden Operations                                                      |
+| --------------------- | ------------------- | --------- | ---------------------------------- | ------------------------------------------------------------------------- |
+| Layer 1 (01_Core)     | allowed (read-only) | forbidden | `mcp_t_read`, graph traversal      | `mcp_t_create`, `mcp_t_update`, `mcp_t_delete`, `mcp_t_move`, bulk-modify |
+| Layer 2 (02_Derived)  | allowed             | allowed   | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify                                               |
+| Layer 3 (03_External) | allowed             | allowed   | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify                                               |
+| Layer 4 (04_Action)   | allowed             | allowed   | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify                                               |
+| Layer 5 (05_Context)  | allowed             | allowed   | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify                                               |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before linking)
 
@@ -78,24 +79,24 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## MCP Tool Usage
 
-| Tool | Purpose |
-|------|---------|
-| `mcp_t_read` | Read document Frontmatter and content for semantic analysis |
-| `mcp_t_update` | Update Frontmatter links field to establish connections |
-| `mcp_t_kg_navigate` | Traverse existing links to detect gaps and verify new links |
-| `mcp_t_kg_search` | Find semantically related documents across Layers |
+| Tool                     | Purpose                                                       |
+| ------------------------ | ------------------------------------------------------------- |
+| `mcp_t_read`             | Read document Frontmatter and content for semantic analysis   |
+| `mcp_t_update`           | Update Frontmatter links field to establish connections       |
+| `mcp_t_kg_navigate`      | Traverse existing links to detect gaps and verify new links   |
+| `mcp_t_kg_search`        | Find semantically related documents across Layers             |
 | `mcp_t_kg_suggest_links` | Get system-generated link suggestions based on graph analysis |
-| `mcp_t_kg_status` | Check vault graph density and orphan node count |
+| `mcp_t_kg_status`        | Check vault graph density and orphan node count               |
 
 ---
 
 ## Connection Strength Criteria
 
-| Strength | Condition | Action |
-|----------|-----------|--------|
-| HIGH | >= 3 shared tags + semantic co-reference | Immediately propose to user |
-| MEDIUM | 2 shared tags OR semantic co-reference | Propose with context explanation |
-| LOW | 1 shared tag only | Propose only when no higher candidates exist |
+| Strength | Condition                                | Action                                       |
+| -------- | ---------------------------------------- | -------------------------------------------- |
+| HIGH     | >= 3 shared tags + semantic co-reference | Immediately propose to user                  |
+| MEDIUM   | 2 shared tags OR semantic co-reference   | Propose with context explanation             |
+| LOW      | 1 shared tag only                        | Propose only when no higher candidates exist |
 
 ---
 

@@ -44,6 +44,7 @@ Rule of thumb: know what you want → `recall`. Want to wander → `explore`.
 Extract core keywords and intent from user input.
 
 - Natural-language query → list of search keywords
+- Cross-language recall: include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
 - Mode detection: `--summary` (summary mode, default) / `--detail` (detail mode)
 - Layer filter detection: `--layer=1` through `--layer=5`
 

@@ -32,6 +32,7 @@ For single-doc quick reference, use `/maencof-lens:lookup` instead.
 Extract query and options from user input:
 
 - Natural-language query → search keywords
+- Cross-language recall: phrase the query so each key concept appears in BOTH the user's working language and English (the query is split into keywords and unioned internally), since vault docs may be tagged or titled in either language. Do not anchor to one language.
 - `--budget <N>` → token budget (default: 2000)
 - `--vault <name>` → target vault (default: config default)
 - `--layer <N,N,...>` → layer filter as comma-separated list (default: vault config)

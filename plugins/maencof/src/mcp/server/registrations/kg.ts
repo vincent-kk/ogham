@@ -5,9 +5,9 @@
  * + 2 plain reads (kg_status, kg_build).
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { handleBoundaryCreate } from '../../tools/boundaryCreate/index.js';
 import { handleKgBuild } from '../../tools/kgBuild/index.js';
 import { handleKgContext } from '../../tools/kgContext/index.js';
@@ -30,7 +30,9 @@ export function registerKgTools(server: McpServer): void {
         seed: z
           .array(z.string())
           .min(1)
-          .describe('Seed nodes (paths or keywords)'),
+          .describe(
+            'Seed nodes (paths or keywords); array items are unioned. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item (multi-word within a single item is AND-matched).',
+          ),
         max_results: z
           .number()
           .int()
@@ -112,7 +114,11 @@ export function registerKgTools(server: McpServer): void {
       description:
         'Returns a context block assembled from documents relevant to the query within a token budget.',
       inputSchema: z.object({
-        query: z.string().describe('Search query'),
+        query: z
+          .string()
+          .describe(
+            'Search query (split into keywords internally). Include each concept in both the working language and English for cross-language recall.',
+          ),
         token_budget: z
           .number()
           .int()

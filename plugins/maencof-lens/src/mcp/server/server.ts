@@ -41,7 +41,12 @@ export function createLensServer(configRoot: string) {
         "Search vault knowledge via Spreading Activation from seed keywords.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
-        seed: z.array(z.string()).min(1),
+        seed: z
+          .array(z.string())
+          .min(1)
+          .describe(
+            "Seed keywords; array items are unioned. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item (multi-word within a single item is AND-matched).",
+          ),
         max_results: z.optional(z.number()),
         decay: z.optional(z.number()),
         threshold: z.optional(z.number()),
@@ -70,7 +75,11 @@ export function createLensServer(configRoot: string) {
         "Assemble a token-budgeted context block from vault documents matching a query.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
-        query: z.string(),
+        query: z
+          .string()
+          .describe(
+            "Search query (split into keywords internally). Include each concept in both the working language and English for cross-language recall.",
+          ),
         token_budget: z.optional(z.number()),
         include_full: z.optional(z.boolean()),
         layer_filter: z.optional(z.array(z.number())),

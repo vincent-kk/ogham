@@ -30,8 +30,10 @@ For multi-doc context assembly, use `/maencof-lens:brief` instead.
 
 Extract keywords from user input and search the vault knowledge graph.
 
+Cross-language recall: include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
+
 ```
-mcp_t_search(seed: [keyword1, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
+mcp_t_search(seed: [keyword1, keyword1_en, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
 ```
 
 Optional SA tuning parameters — pass only when user explicitly specifies:

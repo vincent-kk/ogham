@@ -1,9 +1,9 @@
 ---
 name: explore
 user_invocable: true
-description: "[maencof:explore] Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers. Supports --for-brainstorm to hand off candidate seeds to think --mode divergent."
-argument-hint: "[seed] [--hops 1-10] [--layer 1-5] [--sub-layer NAME] [--detail] [--for-brainstorm]"
-version: "1.1.0"
+description: '[maencof:explore] Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers. Supports --for-brainstorm to hand off candidate seeds to think --mode divergent.'
+argument-hint: '[seed] [--hops 1-10] [--layer 1-5] [--sub-layer NAME] [--detail] [--for-brainstorm]'
+version: '1.1.0'
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: explore skill
@@ -57,6 +57,7 @@ Determine the seed from user input:
 
 - Direct file path (contains `.md` or `/`) -> that node becomes the seed
 - Keyword -> pass to `mcp_t_kg_search` in Step 3; the top result becomes the seed node
+  - Cross-language recall: supply the keyword in BOTH the user's working language and English as **separate** seed items (unioned), since vault docs may be tagged/titled in either language. Never combine languages in one item (a multi-word item is AND-matched).
 - Not specified -> ask user to enter a topic to explore
 
 If a Layer filter (`--layer`) is specified, only documents in that Layer are allowed as seed candidates.
@@ -141,13 +142,13 @@ After 3 rounds: "Exploration depth limit reached."
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `mcp_t_kg_status` | Check index status (stale check) |
-| `mcp_t_kg_search` | SA-based related document search |
+| Tool                | Purpose                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| `mcp_t_kg_status`   | Check index status (stale check)                               |
+| `mcp_t_kg_search`   | SA-based related document search                               |
 | `mcp_t_kg_navigate` | Look up a node's neighbors (inbound/outbound links, hierarchy) |
-| `mcp_t_kg_context` | Assemble token-optimized context blocks |
-| `mcp_t_read` | Read the full content of a selected document |
+| `mcp_t_kg_context`  | Assemble token-optimized context blocks                        |
+| `mcp_t_read`        | Read the full content of a selected document                   |
 
 ## Options
 
@@ -157,14 +158,14 @@ After 3 rounds: "Exploration depth limit reached."
 /maencof:explore [seed] [--hops <1-10>] [--layer <1-5>] [--sub-layer <name>] [--detail] [--for-brainstorm]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `seed` | none (input requested) | Exploration starting point (path or keyword) |
-| `--hops` | 5 | Maximum hop count (1-10) |
-| `--layer` | all | Layer filter (1-5, multiple allowed) |
-| `--sub-layer` | none | Sub-layer filter: relational/structural/topical (L3), buffer/boundary (L5) |
-| `--detail` | false | Include document body excerpts in results |
-| `--for-brainstorm` | false | Emit 5-8 candidate seeds (title + path + 1-line summary) as ephemeral output for handoff to `think --mode divergent`. Skips Step 5 deep-expansion and Step 6 interactive expansion. No vault writes. |
+| Option             | Default                | Description                                                                                                                                                                                          |
+| ------------------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `seed`             | none (input requested) | Exploration starting point (path or keyword)                                                                                                                                                         |
+| `--hops`           | 5                      | Maximum hop count (1-10)                                                                                                                                                                             |
+| `--layer`          | all                    | Layer filter (1-5, multiple allowed)                                                                                                                                                                 |
+| `--sub-layer`      | none                   | Sub-layer filter: relational/structural/topical (L3), buffer/boundary (L5)                                                                                                                           |
+| `--detail`         | false                  | Include document body excerpts in results                                                                                                                                                            |
+| `--for-brainstorm` | false                  | Emit 5-8 candidate seeds (title + path + 1-line summary) as ephemeral output for handoff to `think --mode divergent`. Skips Step 5 deep-expansion and Step 6 interactive expansion. No vault writes. |
 
 ## Usage Examples
 
