@@ -136,7 +136,14 @@ describe('[acceptance] claude model x effort caps (D3 / section 3)', () => {
       CLAUDE_MODEL_ALIASES,
       'CLAUDE_MODEL_ALIASES not exported yet',
     ).toBeDefined();
-    for (const alias of ['opus', 'sonnet', 'haiku', 'fable', 'best']) {
+    for (const alias of [
+      'opus',
+      'sonnet',
+      'haiku',
+      'fable',
+      'mythos',
+      'best',
+    ]) {
       expect(CLAUDE_MODEL_ALIASES, alias).toContain(alias);
     }
   });
