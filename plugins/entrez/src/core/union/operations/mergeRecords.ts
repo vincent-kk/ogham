@@ -19,13 +19,12 @@ export function mergeRecords(records: PaperRecord[]): UnionResult {
     if (existing) {
       map.set(key, tagHitBy(existing, record));
       collisions += 1;
-    } else {
+    } else
       map.set(key, {
         ...record,
         hit_by: [...record.hit_by],
         query_role: [...record.query_role],
       });
-    }
   }
 
   return {

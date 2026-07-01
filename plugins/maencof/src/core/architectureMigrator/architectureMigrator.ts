@@ -91,17 +91,13 @@ export function planMigration(vaultPath: string): MigrationPlan {
   // 1. L3 서브디렉토리 생성
   for (const subdir of Object.values(L3_SUBDIR)) {
     const target = join(l3Dir, subdir);
-    if (!existsSync(target)) {
-      ops.push({ type: 'create_dir', path: target });
-    }
+    if (!existsSync(target)) ops.push({ type: 'create_dir', path: target });
   }
 
   // 2. L5 서브디렉토리 생성
   for (const subdir of Object.values(L5_SUBDIR)) {
     const target = join(l5Dir, subdir);
-    if (!existsSync(target)) {
-      ops.push({ type: 'create_dir', path: target });
-    }
+    if (!existsSync(target)) ops.push({ type: 'create_dir', path: target });
   }
 
   // 3. L3 문서 분류 및 이동 계획
@@ -175,7 +171,7 @@ export function executeMigration(
   let executedCount = 0;
   let failedCount = 0;
 
-  for (const entry of wal.operations) {
+  for (const entry of wal.operations)
     try {
       executeOp(entry.op, vaultPath);
       entry.status = 'done';
@@ -194,7 +190,6 @@ export function executeMigration(
         error: err instanceof Error ? err.message : String(err),
       };
     }
-  }
 
   wal.status = 'completed';
   wal.completedAt = new Date().toISOString();
@@ -217,9 +212,8 @@ export function rollbackMigration(vaultPath: string): {
   error?: string;
 } {
   const walPath = join(vaultPath, '.maencof-meta', 'migration-wal.json');
-  if (!existsSync(walPath)) {
+  if (!existsSync(walPath))
     return { success: false, rolledBack: 0, error: 'No WAL file found' };
-  }
 
   const wal: MigrationWAL = JSON.parse(
     readFileSync(walPath, 'utf-8'),
@@ -231,7 +225,7 @@ export function rollbackMigration(vaultPath: string): {
     .reverse();
 
   let rolledBack = 0;
-  for (const entry of doneEntries) {
+  for (const entry of doneEntries)
     try {
       rollbackOp(entry.op, vaultPath);
       entry.status = 'rolled_back';
@@ -245,7 +239,6 @@ export function rollbackMigration(vaultPath: string): {
         error: err instanceof Error ? err.message : String(err),
       };
     }
-  }
 
   wal.status = 'rolled_back';
   wal.completedAt = new Date().toISOString();
@@ -287,11 +280,8 @@ function collectMarkdownFiles(dir: string, maxDepth: number): string[] {
 
       const fullPath = join(currentDir, entry);
       const stat = statSync(fullPath);
-      if (stat.isFile() && entry.endsWith('.md')) {
-        results.push(fullPath);
-      } else if (stat.isDirectory()) {
-        walk(fullPath, depth + 1);
-      }
+      if (stat.isFile() && entry.endsWith('.md')) results.push(fullPath);
+      else if (stat.isDirectory()) walk(fullPath, depth + 1);
     }
   }
 
@@ -387,14 +377,13 @@ function rollbackOp(op: MigrationOp, _vaultPath: string): void {
       }
       break;
     case 'update_frontmatter':
-      if (existsSync(op.path)) {
+      if (existsSync(op.path))
         updateFrontmatterField(op.path, op.field, op.oldValue);
-      }
+
       break;
     case 'update_version':
-      if (existsSync(op.path)) {
-        updateVersionFile(op.path, op.oldVersion);
-      }
+      if (existsSync(op.path)) updateVersionFile(op.path, op.oldVersion);
+
       break;
   }
 }
@@ -415,15 +404,10 @@ function updateFrontmatterField(
 
   const valueStr = value === undefined || value === null ? '' : String(value);
 
-  if (fieldLine >= 0) {
-    if (valueStr === '') {
-      lines.splice(fieldLine, 1);
-    } else {
-      lines[fieldLine] = `${field}: ${valueStr}`;
-    }
-  } else if (valueStr !== '') {
-    lines.push(`${field}: ${valueStr}`);
-  }
+  if (fieldLine >= 0)
+    if (valueStr === '') lines.splice(fieldLine, 1);
+    else lines[fieldLine] = `${field}: ${valueStr}`;
+  else if (valueStr !== '') lines.push(`${field}: ${valueStr}`);
 
   const newContent = `${match[1]}${lines.join('\n')}${match[3]}${content.slice(match[0].length)}`;
   writeFileSync(filePath, newContent, 'utf-8');

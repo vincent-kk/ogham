@@ -54,7 +54,7 @@ export function computeChangeSet(
   currentFiles: CurrentFileInfo[],
   snapshot: FileSnapshot | null,
 ): ChangeSet {
-  if (!snapshot) {
+  if (!snapshot)
     // 스냅샷 없음 → 모든 파일이 새로 추가된 것으로 처리
     return {
       added: currentFiles.map((f) => f.path),
@@ -62,17 +62,12 @@ export function computeChangeSet(
       deleted: [],
       unchanged: 0,
     };
-  }
 
   const snapshotMap = new Map<string, SnapshotEntry>();
-  for (const entry of snapshot.entries) {
-    snapshotMap.set(entry.path, entry);
-  }
+  for (const entry of snapshot.entries) snapshotMap.set(entry.path, entry);
 
   const currentMap = new Map<string, CurrentFileInfo>();
-  for (const file of currentFiles) {
-    currentMap.set(file.path, file);
-  }
+  for (const file of currentFiles) currentMap.set(file.path, file);
 
   const added: string[] = [];
   const modified: string[] = [];
@@ -81,22 +76,16 @@ export function computeChangeSet(
   // 추가 및 수정 탐지
   for (const [path, current] of currentMap) {
     const prev = snapshotMap.get(path);
-    if (!prev) {
-      added.push(path);
-    } else if (current.mtime !== prev.mtime || current.size !== prev.size) {
+    if (!prev) added.push(path);
+    else if (current.mtime !== prev.mtime || current.size !== prev.size)
       modified.push(path);
-    } else {
-      unchanged++;
-    }
+    else unchanged++;
   }
 
   // 삭제 탐지
   const deleted: string[] = [];
-  for (const [path] of snapshotMap) {
-    if (!currentMap.has(path)) {
-      deleted.push(path);
-    }
-  }
+  for (const [path] of snapshotMap)
+    if (!currentMap.has(path)) deleted.push(path);
 
   return { added, modified, deleted, unchanged };
 }
@@ -117,19 +106,16 @@ export function computeOneHopNeighbors(
   // 변경된 노드 자신 추가
   for (const path of changedPaths) {
     const nodeId = path as NodeId;
-    if (graph.nodes.has(nodeId)) {
-      affected.add(nodeId);
-    }
+    if (graph.nodes.has(nodeId)) affected.add(nodeId);
   }
 
   // 1-hop 이웃 탐색
   for (const edge of graph.edges) {
-    if (affected.has(edge.from) && graph.nodes.has(edge.to)) {
+    if (affected.has(edge.from) && graph.nodes.has(edge.to))
       affected.add(edge.to);
-    }
-    if (affected.has(edge.to) && graph.nodes.has(edge.from)) {
+
+    if (affected.has(edge.to) && graph.nodes.has(edge.from))
       affected.add(edge.from);
-    }
   }
 
   return affected;
@@ -157,14 +143,13 @@ export function computeIncrementalScope(
   const changeRatio = totalNodes > 0 ? allChanged.length / totalNodes : 1;
 
   // 전체 재빌드 권장 조건
-  if (changeRatio > FULL_REBUILD_THRESHOLD) {
+  if (changeRatio > FULL_REBUILD_THRESHOLD)
     return {
       filesToReparse: allChanged,
       nodesToReweight: [],
       fullRebuildRecommended: true,
       fullRebuildReason: `Change ratio ${(changeRatio * 100).toFixed(1)}% > threshold ${FULL_REBUILD_THRESHOLD * 100}%`,
     };
-  }
 
   // 재파싱 파일 = added + modified (deleted는 그래프에서 제거)
   const filesToReparse = [...changeSet.added, ...changeSet.modified];

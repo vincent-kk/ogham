@@ -51,7 +51,7 @@ async function spawnHook(scriptPath: string, stdinData: string): Promise<void> {
 // 빌드된 스크립트가 존재하는 경우에만 벤치마크 실행
 const scriptsExist = Object.values(HOOK_SCRIPTS).every((p) => existsSync(p));
 
-if (scriptsExist) {
+if (scriptsExist)
   describe('hook-spawn: end-to-end process spawn', () => {
     bench(
       'pre-tool-use spawn',
@@ -77,10 +77,9 @@ if (scriptsExist) {
       { time: 2000 },
     );
   });
-} else {
+else
   describe('hook-spawn: end-to-end process spawn', () => {
     bench('(skipped: build dist/ first with `yarn build`)', () => {
       // 빌드된 스크립트가 없으면 스킵
     });
   });
-}

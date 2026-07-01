@@ -144,8 +144,8 @@ export async function efetch(
     },
     deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     throw new Error(res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: efetch`);
-  }
+
   return parseEfetch(res.text);
 }

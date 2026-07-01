@@ -24,11 +24,8 @@ async function writeConfigAt(path: string, content: string): Promise<void> {
 }
 
 function restoreEnv(name: string, value: string | undefined): void {
-  if (value === undefined) {
-    delete process.env[name];
-  } else {
-    process.env[name] = value;
-  }
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
 }
 
 async function loadConfigForHome(home: string): Promise<{

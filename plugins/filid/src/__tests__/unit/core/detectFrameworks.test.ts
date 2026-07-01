@@ -34,9 +34,8 @@ function writePkg(
 }
 
 afterEach(() => {
-  while (tmpRoots.length > 0) {
+  while (tmpRoots.length > 0)
     rmSync(tmpRoots.pop()!, { recursive: true, force: true });
-  }
 });
 
 describe('detectFrameworks', () => {

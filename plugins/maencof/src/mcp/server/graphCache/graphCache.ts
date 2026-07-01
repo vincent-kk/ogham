@@ -27,11 +27,9 @@ export function getVaultPath(): string {
   const raw = process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
   const resolved = resolve(raw);
 
-  for (const prefix of BLOCKED_PREFIXES) {
-    if (resolved.startsWith(prefix)) {
+  for (const prefix of BLOCKED_PREFIXES)
+    if (resolved.startsWith(prefix))
       throw new Error(`Access to global config path is blocked: ${resolved}`);
-    }
-  }
 
   return resolved;
 }

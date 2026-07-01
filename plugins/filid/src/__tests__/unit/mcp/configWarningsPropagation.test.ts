@@ -45,14 +45,14 @@ describe('configWarnings propagation', () => {
     // Pretend tmpDir is its own git root so loadConfig's resolveGitRoot cache
     // hits this path instead of walking upward.
     mockedSpawnCliSync.mockImplementation((bin, args) => {
-      if (bin === 'git' && [...args].includes('rev-parse')) {
+      if (bin === 'git' && [...args].includes('rev-parse'))
         return {
           code: 0,
           stdout: tmpDir + '\n',
           stderr: '',
           timedOut: false,
         };
-      }
+
       return {
         code: 1,
         stdout: '',
@@ -153,9 +153,8 @@ describe('configWarnings propagation', () => {
         );
       expect(result.configWarnings.length).toBeGreaterThan(0);
       // Each warning appears in log.warn output; order preserved.
-      for (let i = 0; i < result.configWarnings.length; i++) {
+      for (let i = 0; i < result.configWarnings.length; i++)
         expect(configLoaderLines[i]).toContain(result.configWarnings[i]);
-      }
     });
 
     it('empty warnings when config is strictly valid', async () => {

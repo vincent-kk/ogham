@@ -51,12 +51,12 @@ export async function subtitlesOperation(
     );
 
     const files = (await readdir(tmpDir)).filter((f) => f.endsWith('.json3'));
-    if (files.length === 0) {
+    if (files.length === 0)
       throw new YtDlpMcpError(
         ErrorCode.NO_CAPTIONS,
         `No subtitles available for language '${lang}'`,
       );
-    }
+
     const picked = pickSubtitleFile(files, lang);
     const content = await readFile(path.join(tmpDir, picked.file), 'utf8');
     return {

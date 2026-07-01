@@ -15,6 +15,8 @@ import {
   VAULT_COMMIT_CONFIG_FILE,
 } from '../../../constants/vaultCommitter.js';
 import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
+import { isMaencofVault } from '../../shared/isMaencofVault.js';
+import { metaPath } from '../../shared/metaPath.js';
 import {
   commitVaultChanges,
   generateCommitMessage,
@@ -23,8 +25,6 @@ import {
   isGitRepo,
   isIndexLocked,
 } from '../gitUtils/gitUtils.js';
-import { isMaencofVault } from '../../shared/isMaencofVault.js';
-import { metaPath } from '../../shared/metaPath.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -84,9 +84,7 @@ export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
         const validPatterns = rawPatterns.filter(
           (p): p is string => typeof p === 'string' && p.length > 0,
         );
-        if (validPatterns.length > 0) {
-          config.skip_patterns = validPatterns;
-        }
+        if (validPatterns.length > 0) config.skip_patterns = validPatterns;
       }
       return config;
     }
@@ -110,14 +108,14 @@ export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
  */
 function compileSkipPatterns(sources: readonly string[]): RegExp[] {
   const result: RegExp[] = [];
-  for (const source of sources) {
+  for (const source of sources)
     try {
       result.push(new RegExp(source, 'i'));
     } catch {
       // malformed regex — skip silently (error-log already captures it upstream
       // when the config reader fails to parse a non-string entry)
     }
-  }
+
   return result;
 }
 

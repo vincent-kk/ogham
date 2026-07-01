@@ -47,14 +47,10 @@ export function runActivityRecorder(
     const cwd = input.cwd ?? process.cwd();
     const toolName = input.tool_name ?? '';
 
-    if (!isMaencofVault(cwd)) {
-      return { continue: true };
-    }
+    if (!isMaencofVault(cwd)) return { continue: true };
 
     const category = TOOL_CATEGORY_MAP[toolName];
-    if (!category) {
-      return { continue: true };
-    }
+    if (!category) return { continue: true };
 
     const toolInput = input.tool_input ?? {};
     const description = buildToolDescription(toolName, toolInput);
@@ -66,9 +62,7 @@ export function runActivityRecorder(
 
     // P4: maencof 자체 관리 경로에 대한 write 는 skip — 그렇지 않으면 append 자체가
     // 재귀적으로 append 를 유발한다.
-    if (isExcludedPath(path)) {
-      return { continue: true };
-    }
+    if (isExcludedPath(path)) return { continue: true };
 
     appendActivityEvent(cwd, {
       time: formatTime(new Date()),
@@ -96,9 +90,9 @@ function extractPathFromResponse(
 ): string | null {
   if (!response) return null;
   try {
-    if (typeof response['path'] === 'string' && response['path']) {
+    if (typeof response['path'] === 'string' && response['path'])
       return response['path'];
-    }
+
     const content = response['content'];
     if (Array.isArray(content) && content.length > 0) {
       const first = content[0] as { type?: string; text?: string };

@@ -46,20 +46,19 @@ export async function pruneExpired(ttlHours: number): Promise<number> {
       if (Number.isNaN(lastUsed) || lastUsed >= cutoff) continue;
 
       await rm(file, { force: true });
-      if (parsed.data.provider === 'antigravity') {
+      if (parsed.data.provider === 'antigravity')
         await rm(antigravityCwdPath(parsed.data.session_id), {
           recursive: true,
           force: true,
         });
-      }
+
       removed += 1;
     }
 
     try {
       const after = await readdir(dir);
-      if (after.filter((e) => e !== '_meta.json').length === 0) {
+      if (after.filter((e) => e !== '_meta.json').length === 0)
         await rm(dir, { recursive: true, force: true });
-      }
     } catch (err) {
       logger.warn('failed to inspect project dir after prune', {
         dir,

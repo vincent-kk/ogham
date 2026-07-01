@@ -13,12 +13,10 @@ export function handleCalculateBias(
   const changedSet = new Set(changedFractalPaths);
 
   const updatedDebts = debts.map((debt) => {
-    if (!changedSet.has(debt.fractal_path)) {
-      return { ...debt };
-    }
-    if (debt.last_review_commit === currentCommitSha) {
-      return { ...debt };
-    }
+    if (!changedSet.has(debt.fractal_path)) return { ...debt };
+
+    if (debt.last_review_commit === currentCommitSha) return { ...debt };
+
     const newTouchCount = debt.touch_count + 1;
     const newWeight = Math.min(
       DEBT_BASE_WEIGHT * Math.pow(2, newTouchCount),

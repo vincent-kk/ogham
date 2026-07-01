@@ -14,11 +14,9 @@ process.env.USERPROFILE = e2eHome;
 const E2E_FAKE_ENV_PREFIXES = ['CENNAD_FAKE_'] as const;
 
 function clearFakeEnv(): void {
-  for (const key of Object.keys(process.env)) {
-    if (E2E_FAKE_ENV_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+  for (const key of Object.keys(process.env))
+    if (E2E_FAKE_ENV_PREFIXES.some((prefix) => key.startsWith(prefix)))
       delete process.env[key];
-    }
-  }
 }
 
 beforeEach(() => {

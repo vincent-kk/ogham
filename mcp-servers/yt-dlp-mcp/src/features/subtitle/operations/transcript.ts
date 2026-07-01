@@ -57,22 +57,20 @@ export async function transcriptOperation(
     const files = (await readdir(tmpDir))
       .filter((f) => f.endsWith('.json3'))
       .sort();
-    if (files.length === 0) {
+    if (files.length === 0)
       throw new YtDlpMcpError(
         ErrorCode.NO_CAPTIONS,
         `No subtitles available for language '${lang}'`,
       );
-    }
 
     const picked = pickSubtitleFile(files, lang);
     const content = await readFile(path.join(tmpDir, picked.file), 'utf8');
     const segments = parseJson3(content);
-    if (segments.length === 0) {
+    if (segments.length === 0)
       throw new YtDlpMcpError(
         ErrorCode.NO_CAPTIONS,
         'Subtitle file contained no readable text',
       );
-    }
 
     const warnings =
       picked.language === lang

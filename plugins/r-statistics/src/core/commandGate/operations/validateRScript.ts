@@ -16,16 +16,14 @@ function escapeRegex(value: string): string {
  */
 export function validateRScript(scriptCode: string): RScriptValidation {
   const blocked = new Set<string>();
-  for (const call of FORBIDDEN_R_CALLS) {
-    if (new RegExp(`\\b${escapeRegex(call)}\\s*\\(`).test(scriptCode)) {
+  for (const call of FORBIDDEN_R_CALLS)
+    if (new RegExp(`\\b${escapeRegex(call)}\\s*\\(`).test(scriptCode))
       blocked.add(call);
-    }
-  }
-  if (/do\.call\s*\(\s*["']/.test(scriptCode)) {
-    blocked.add("do.call(string)");
-  }
-  if (/get\s*\(\s*["'][^"']+["']\s*\)/.test(scriptCode)) {
+
+  if (/do\.call\s*\(\s*["']/.test(scriptCode)) blocked.add("do.call(string)");
+
+  if (/get\s*\(\s*["'][^"']+["']\s*\)/.test(scriptCode))
     blocked.add("get(string)");
-  }
+
   return { ok: blocked.size === 0, blockedCalls: [...blocked] };
 }

@@ -19,13 +19,11 @@ import {
  */
 export function parseScalarValue(raw: string): unknown {
   // double-quote: unescape 처리 (YAML 스펙상 \" \\ escape 지원)
-  if (raw.startsWith('"') && raw.endsWith('"')) {
+  if (raw.startsWith('"') && raw.endsWith('"'))
     return raw.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-  }
+
   // single-quote: YAML 스펙상 escape 없음 ('' 로 리터럴 ' 표현)
-  if (raw.startsWith("'") && raw.endsWith("'")) {
-    return raw.slice(1, -1);
-  }
+  if (raw.startsWith("'") && raw.endsWith("'")) return raw.slice(1, -1);
 
   // 불리언
   if (raw === 'true') return true;
@@ -121,9 +119,8 @@ export function parseYamlFrontmatter(yaml: string): Record<string, unknown> {
         items.push(item);
         i++;
       }
-      if (items.length > 0) {
-        result[key] = items;
-      }
+      if (items.length > 0) result[key] = items;
+
       continue;
     }
 

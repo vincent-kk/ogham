@@ -75,9 +75,7 @@ export function registerMutateTool<TShape extends ZodRawShape, TResult>(
             affected.primary,
             affected.also,
           );
-        } else {
-          await incrementUsageStat(vaultPath, name);
-        }
+        } else await incrementUsageStat(vaultPath, name);
 
         return toolResult(result);
       } catch (error) {

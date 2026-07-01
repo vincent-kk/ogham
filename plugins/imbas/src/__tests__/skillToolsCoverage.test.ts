@@ -67,13 +67,11 @@ describe('G2 skill-tools-coverage — workflow ↔ tools.md symmetric difference
 
       const used = extractTools(readFileSync(workflow, 'utf8'));
       const declared = extractToolsWithMarkers(readFileSync(tools, 'utf8'));
-      for (const tool of used) {
-        if (!declared.has(tool)) {
+      for (const tool of used)
+        if (!declared.has(tool))
           drift.push(
             `skills/${skill}: workflow.md invokes ${tool} but tools.md does not list it`,
           );
-        }
-      }
     }
     expect(drift, drift.join('\n')).toEqual([]);
   });
@@ -87,13 +85,11 @@ describe('G2 skill-tools-coverage — workflow ↔ tools.md symmetric difference
 
       const used = extractTools(readFileSync(workflow, 'utf8'));
       const declared = extractToolsWithMarkers(readFileSync(tools, 'utf8'));
-      for (const [tool, hasMarker] of declared) {
-        if (!used.has(tool) && !hasMarker) {
+      for (const [tool, hasMarker] of declared)
+        if (!used.has(tool) && !hasMarker)
           drift.push(
             `skills/${skill}: tools.md lists ${tool} but it is not invoked in workflow.md and lacks (declared-only)/(fallback) marker`,
           );
-        }
-      }
     }
     expect(drift, drift.join('\n')).toEqual([]);
   });

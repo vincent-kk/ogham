@@ -34,13 +34,12 @@ export function pruneOldSessions(cwd: string): void {
           const guideFp = join(dir, `guide-${hash}`);
           const boundaryFp = join(dir, `boundary-${hash}`);
           const fmapFp = join(dir, `fmap-${hash}.json`);
-          for (const paired of [contextFp, guideFp, boundaryFp, fmapFp]) {
+          for (const paired of [contextFp, guideFp, boundaryFp, fmapFp])
             try {
               if (existsSync(paired)) unlinkSync(paired);
             } catch {
               // ignore
             }
-          }
         }
       } catch {
         // ignore individual file deletion failures

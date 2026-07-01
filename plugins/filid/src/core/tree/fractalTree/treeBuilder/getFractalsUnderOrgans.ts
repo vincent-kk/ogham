@@ -47,23 +47,20 @@ export function getFractalsUnderOrgans(
       result.push(child);
 
       // collect its normal fractal descendants (via children[])
-      for (const desc of getDescendants(tree, childPath)) {
+      for (const desc of getDescendants(tree, childPath))
         if (!seen.has(desc.path)) {
           seen.add(desc.path);
           result.push(desc);
         }
-      }
 
       // also search organs inside this fractal child
-      for (const nestedOrgan of child.organs) {
+      for (const nestedOrgan of child.organs)
         if (!seen.has(nestedOrgan)) organQueue.push(nestedOrgan);
-      }
     }
 
     // nested organs inside this organ (organ chain: organ > organ > fractal)
-    for (const nestedOrgan of organ.organs) {
+    for (const nestedOrgan of organ.organs)
       if (!seen.has(nestedOrgan)) organQueue.push(nestedOrgan);
-    }
   }
 
   return result;

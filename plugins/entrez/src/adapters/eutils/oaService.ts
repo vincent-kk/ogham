@@ -46,9 +46,7 @@ export function parseOa(xml: string, pmcid: string): OaRecord {
   }
 
   const record = asArray<Node>(records?.record as Node | Node[] | undefined)[0];
-  if (!record) {
-    return { pmcid, oaStatus: OaStatus.UNKNOWN, formats: [] };
-  }
+  if (!record) return { pmcid, oaStatus: OaStatus.UNKNOWN, formats: [] };
 
   return {
     pmcid: String(record["@_id"] ?? pmcid),
@@ -74,8 +72,8 @@ export async function oaService(
     },
     deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     throw new Error(res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: oa.fcgi`);
-  }
+
   return parseOa(res.text, args.pmcid);
 }

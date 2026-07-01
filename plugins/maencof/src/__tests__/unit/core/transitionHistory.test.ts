@@ -75,9 +75,9 @@ describe('transition-history', () => {
 
   // Edge cases (12)
   it('evicts oldest entries when exceeding 500', () => {
-    for (let i = 0; i < 501; i++) {
+    for (let i = 0; i < 501; i++)
       appendTransition(cwd, makeEntry({ sessionId: `s${i}` }));
-    }
+
     const result = readTransitionHistory(cwd);
     expect(result).toHaveLength(500);
     expect(result[0].sessionId).toBe('s1');

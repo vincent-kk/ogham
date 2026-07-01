@@ -55,9 +55,8 @@ function getEdgeType(
   from: NodeId,
   to: NodeId,
 ): EdgeType {
-  if (graph.edgeTypeMap) {
-    return graph.edgeTypeMap.get(from)?.get(to) ?? 'LINK';
-  }
+  if (graph.edgeTypeMap) return graph.edgeTypeMap.get(from)?.get(to) ?? 'LINK';
+
   const edge = graph.edges.find((e) => e.from === from && e.to === to);
   return edge?.type ?? 'LINK';
 }
@@ -109,10 +108,10 @@ function capSiblingFanout(
 
   const siblings: NodeId[] = [];
   const others: NodeId[] = [];
-  for (const to of neighbors) {
+  for (const to of neighbors)
     if (getEdgeType(graph, from, to) === 'SIBLING') siblings.push(to);
     else others.push(to);
-  }
+
   if (siblings.length <= cap) return neighbors;
 
   siblings.sort((a, b) => {
@@ -172,14 +171,13 @@ function processNeighbor(
   });
 
   // 계속 확산 가능하면 큐에 추가
-  if (newHops < maxHops) {
+  if (newHops < maxHops)
     queue.push({
       nodeId: neighborId,
       activation: cappedActivation,
       hops: newHops,
       path: newPath,
     });
-  }
 }
 
 /**
@@ -221,14 +219,13 @@ export function runSpreadingActivation(
 
     const seedScore = resolvedParams.seedActivations?.get(seedId) ?? 1.0;
     const existing = activationMap.get(seedId);
-    if (!existing || existing.score < seedScore) {
+    if (!existing || existing.score < seedScore)
       activationMap.set(seedId, {
         nodeId: seedId,
         score: seedScore,
         hops: 0,
         path: [seedId],
       });
-    }
 
     queue.push({
       nodeId: seedId,
@@ -259,7 +256,7 @@ export function runSpreadingActivation(
         neighbors,
         siblingFanoutCap,
       );
-      for (const neighborId of ordered) {
+      for (const neighborId of ordered)
         processNeighbor(
           graph,
           current,
@@ -268,7 +265,6 @@ export function runSpreadingActivation(
           activationMap,
           queue,
         );
-      }
     }
   }
 

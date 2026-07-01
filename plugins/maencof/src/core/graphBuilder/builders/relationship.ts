@@ -21,7 +21,7 @@ export function buildRelationshipEdges(
     (n) => (n as PersonExt).person !== undefined,
   ) as PersonExt[];
 
-  for (let i = 0; i < personNodes.length; i++) {
+  for (let i = 0; i < personNodes.length; i++)
     for (let j = i + 1; j < personNodes.length; j++) {
       const a = personNodes[i];
       const b = personNodes[j];
@@ -31,11 +31,8 @@ export function buildRelationshipEdges(
       if (isSymmetricRelationship(relType)) {
         edges.push({ from: a.id, to: b.id, type: 'RELATIONSHIP', weight });
         edges.push({ from: b.id, to: a.id, type: 'RELATIONSHIP', weight });
-      } else {
-        edges.push({ from: a.id, to: b.id, type: 'RELATIONSHIP', weight });
-      }
+      } else edges.push({ from: a.id, to: b.id, type: 'RELATIONSHIP', weight });
     }
-  }
 
   return edges;
 }

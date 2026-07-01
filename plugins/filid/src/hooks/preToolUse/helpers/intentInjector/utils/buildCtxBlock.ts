@@ -34,9 +34,7 @@ export function buildCtxBlock(
       path.join(path.relative(boundary, d), 'INTENT.md').replace(/\\/g, '/'),
     );
 
-  if (chainIntents.length > 0) {
-    lines.push(`chain: ${chainIntents.join(' > ')}`);
-  }
+  if (chainIntents.length > 0) lines.push(`chain: ${chainIntents.join(' > ')}`);
 
   // Detail hint (check owning fractal for DETAIL.md too)
   if (details.get(ownerDir)) {

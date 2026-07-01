@@ -10,16 +10,16 @@ import type { RuleDocsManifest } from './manifestTypes.js';
  */
 export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
   const manifestPath = join(pluginRoot, 'templates', 'rules', 'manifest.json');
-  if (!existsSync(manifestPath)) {
+  if (!existsSync(manifestPath))
     throw new Error(`rule docs manifest not found at ${manifestPath}`);
-  }
+
   const raw = readFileSync(manifestPath, 'utf8');
   const parsed = JSON.parse(raw) as RuleDocsManifest;
-  if (!parsed || !Array.isArray(parsed.rules)) {
+  if (!parsed || !Array.isArray(parsed.rules))
     throw new Error(`rule docs manifest has invalid shape at ${manifestPath}`);
-  }
-  for (const entry of parsed.rules) {
-    if (!entry.templateHash || typeof entry.templateHash !== 'string') {
+
+  for (const entry of parsed.rules)
+    if (!entry.templateHash || typeof entry.templateHash !== 'string')
       // Pre-0.3.5 manifests lack `templateHash`. Upgraders MUST run
       // `yarn filid build` (which triggers scripts/sync-rule-hashes.mjs) to
       // repopulate the manifest before invoking /filid:setup. The
@@ -27,7 +27,6 @@ export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
       throw new Error(
         `rule docs manifest entry "${entry.id}" is missing templateHash — run \`node scripts/sync-rule-hashes.mjs\``,
       );
-    }
-  }
+
   return parsed;
 }

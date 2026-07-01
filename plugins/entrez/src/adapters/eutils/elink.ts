@@ -44,11 +44,9 @@ export function parseElink(jsonText: string, linkname: string): ElinkResult {
 
   for (const set of linksets) {
     for (const id of set.ids ?? []) seedPmids.add(String(id));
-    for (const db of set.linksetdbs ?? []) {
-      if (db.linkname === linkname) {
+    for (const db of set.linksetdbs ?? [])
+      if (db.linkname === linkname)
         for (const id of extractLinks(db)) linked.add(String(id));
-      }
-    }
   }
   for (const seed of seedPmids) linked.delete(seed);
 
@@ -76,8 +74,8 @@ export async function elink(
     },
     deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     throw new Error(res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: elink`);
-  }
+
   return parseElink(res.text, linkname);
 }

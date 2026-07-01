@@ -32,10 +32,10 @@ import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.
 import { isValidCompanionIdentity } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
-import { provisionMissingConfigs } from '../../../utils/configProvisioner/configProvisioner.js';
 import { claudeMdPath } from '../../../shared/claudeMdPath.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 import { metaPath } from '../../../shared/metaPath.js';
+import { provisionMissingConfigs } from '../../../utils/configProvisioner/configProvisioner.js';
 
 import META_SKILL_BODY from './metaSkillBody.md';
 
@@ -97,9 +97,8 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 
   // 2. Load companion identity
   const companion = loadCompanionIdentity(cwd, messages);
-  if (companion) {
+  if (companion)
     messages.push(`[maencof:${companion.name}] ${companion.greeting}`);
-  }
 
   // 2.5. CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기, version.json 기반)
   initClaudeMdSection(cwd, companion?.name, messages);
@@ -107,16 +106,15 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   // 2.8. Config file provisioning + migration — always run regardless of needsProvisioning
   try {
     const provision = provisionMissingConfigs(cwd);
-    if (provision.created.length > 0) {
+    if (provision.created.length > 0)
       messages.push(
         `[maencof] Config files provisioned: ${provision.created.join(', ')}`,
       );
-    }
-    if (provision.migrated.length > 0) {
+
+    if (provision.migrated.length > 0)
       messages.push(
         `[maencof] Config schemas updated: ${provision.migrated.join(', ')}`,
       );
-    }
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',
@@ -133,24 +131,22 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 
   // 3. Detect leftover WAL
   const walPath = metaPath(cwd, 'wal.json');
-  if (existsSync(walPath)) {
+  if (existsSync(walPath))
     messages.push(
       '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:checkup` to diagnose.',
     );
-  }
 
   // 4. Check schedule-log.json
   const scheduleLogPath = metaPath(cwd, 'schedule-log.json');
-  if (existsSync(scheduleLogPath)) {
+  if (existsSync(scheduleLogPath))
     try {
       const log = JSON.parse(readFileSync(scheduleLogPath, 'utf-8')) as {
         pending?: unknown[];
       };
-      if (log.pending && log.pending.length > 0) {
+      if (log.pending && log.pending.length > 0)
         messages.push(
           `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:organize\` to process.`,
         );
-      }
     } catch (e) {
       appendErrorLogSafe(cwd, {
         hook: 'session-start',
@@ -158,24 +154,21 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
         timestamp: new Date().toISOString(),
       });
     }
-  }
 
   // 5. Load recent session summary from the per-day session store (JSON).
   const recentSummary = getRecentSessionSummary(cwd);
-  if (recentSummary) {
+  if (recentSummary)
     messages.push(`[maencof] Previous session summary:\n${recentSummary}`);
-  }
 
   // 6. Check data-sources.json
   const dataSourcesPath = metaPath(cwd, 'data-sources.json');
   try {
     const dataSourcesRaw = readFileSync(dataSourcesPath, 'utf-8');
     const dataSources = JSON.parse(dataSourcesRaw) as { sources?: unknown[] };
-    if (!dataSources.sources || dataSources.sources.length === 0) {
+    if (!dataSources.sources || dataSources.sources.length === 0)
       messages.push(
         '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
       );
-    }
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',
@@ -190,9 +183,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   // 6.4. Precision-based sensitivity auto-adjustment
   try {
     const adjustment = autoAdjustSensitivity(cwd);
-    if (adjustment.message) {
-      messages.push(`[maencof] ${adjustment.message}`);
-    }
+    if (adjustment.message) messages.push(`[maencof] ${adjustment.message}`);
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',
@@ -205,9 +196,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   try {
     const insightConfig = readInsightConfig(cwd);
 
-    if (insightConfig.enabled) {
-      messages.push(buildMetaPrompt(insightConfig));
-    }
+    if (insightConfig.enabled) messages.push(buildMetaPrompt(insightConfig));
 
     const pending = readPendingNotification(cwd);
     if (pending && pending.captures.length > 0) {
@@ -254,12 +243,11 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     const metaBody = buildMetaSkillContext(cwd);
     const advisories = messages.length > 0 ? messages.join('\n\n') : null;
     const additionalContext = joinSessionContext(metaBody, advisories);
-    if (additionalContext !== null) {
+    if (additionalContext !== null)
       result.hookSpecificOutput = {
         hookEventName: 'SessionStart',
         additionalContext,
       };
-    }
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',
@@ -466,13 +454,12 @@ function checkArchitectureMismatch(cwd: string, messages: string[]): void {
       ) as VaultVersionInfo;
       archVersion = data.architecture_version ?? '1.0.0';
     }
-    if (archVersion !== EXPECTED_ARCHITECTURE_VERSION) {
+    if (archVersion !== EXPECTED_ARCHITECTURE_VERSION)
       messages.push(
         `[maencof] Architecture update available (${archVersion} → ${EXPECTED_ARCHITECTURE_VERSION}).` +
           '\nL3 sub-layers (relational/structural/topical) and L5 sub-layers (buffer/boundary) are now supported.' +
           '\nRun `/maencof:migrate` to upgrade your vault structure.',
       );
-    }
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',
@@ -489,12 +476,11 @@ function checkArchitectureMismatch(cwd: string, messages: string[]): void {
 function checkVersionMismatch(cwd: string, messages: string[]): void {
   try {
     const vaultVersion = readVaultVersion(cwd);
-    if (vaultVersion !== null && vaultVersion !== VERSION) {
+    if (vaultVersion !== null && vaultVersion !== VERSION)
       messages.push(
         `[maencof] Plugin updated (${vaultVersion} → ${VERSION}).` +
           '\nRun `/maencof:setup` to complete the migration.',
       );
-    }
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',

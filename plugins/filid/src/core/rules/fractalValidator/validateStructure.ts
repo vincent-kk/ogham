@@ -22,11 +22,8 @@ export function validateStructure(
   const start = Date.now();
   let ruleList: Rule[];
 
-  if (rules && rules.length > 0) {
-    ruleList = rules;
-  } else {
-    ruleList = loadBuiltinRules();
-  }
+  if (rules && rules.length > 0) ruleList = rules;
+  else ruleList = loadBuiltinRules();
 
   const violations: RuleViolation[] = [];
   let passed = 0;
@@ -41,9 +38,8 @@ export function validateStructure(
         continue;
       }
       const nodeViolations = validateNode(node, context, rule);
-      if (nodeViolations.length === 0) {
-        passed++;
-      } else {
+      if (nodeViolations.length === 0) passed++;
+      else {
         failed++;
         violations.push(...nodeViolations);
       }

@@ -53,19 +53,16 @@ export async function downloadOperation(
     'after_move:filepath',
   ];
 
-  if (params.kind === 'audio') {
+  if (params.kind === 'audio')
     args.push('-x', '--audio-format', params.audioFormat ?? 'm4a');
-  } else {
-    args.push('-f', videoFormat(params.resolution));
-  }
+  else args.push('-f', videoFormat(params.resolution));
 
-  if (params.startTime || params.endTime) {
+  if (params.startTime || params.endTime)
     args.push(
       '--download-sections',
       `*${params.startTime ?? '0'}-${params.endTime ?? 'inf'}`,
       '--force-keyframes-at-cuts',
     );
-  }
 
   args.push(params.url);
 

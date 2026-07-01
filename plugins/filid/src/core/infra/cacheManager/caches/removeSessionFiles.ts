@@ -19,11 +19,10 @@ export function removeSessionFiles(sessionId: string, cwd: string): void {
   const boundaryFile = join(cacheDir, `boundary-${hash}`);
   const fmapFile = join(cacheDir, `fmap-${hash}.json`);
   const guideFile = join(cacheDir, `guide-${hash}`);
-  for (const file of [marker, contextFile, boundaryFile, fmapFile, guideFile]) {
+  for (const file of [marker, contextFile, boundaryFile, fmapFile, guideFile])
     try {
       unlinkSync(file);
     } catch {
       // silently ignore — file may not exist
     }
-  }
 }

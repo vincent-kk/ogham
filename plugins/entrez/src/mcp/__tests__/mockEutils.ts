@@ -80,7 +80,7 @@ export function esearchJson(
 /** ESummary v2 JSON for the given pmids. */
 export function esummaryJson(pmids: string[]): string {
   const result: Record<string, unknown> = { uids: pmids };
-  for (const pmid of pmids) {
+  for (const pmid of pmids)
     result[pmid] = {
       uid: pmid,
       title: `Title ${pmid}`,
@@ -89,6 +89,6 @@ export function esummaryJson(pmids: string[]): string {
       authors: [{ name: "Doe J" }],
       articleids: [{ idtype: "doi", value: `10.1/${pmid}` }],
     };
-  }
+
   return JSON.stringify({ result });
 }

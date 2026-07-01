@@ -55,9 +55,8 @@ export function generateHumanSummary(
     warnings = result.warnings;
   }
 
-  if (input.fixRequestsContent) {
+  if (input.fixRequestsContent)
     allItems.push(...collectFixRequestItems(input.fixRequestsContent));
-  }
 
   const verdict = resolveVerdict(
     input.reviewReportContent,
@@ -69,27 +68,25 @@ export function generateHumanSummary(
   manualItems.sort((a, b) => b.errorProbability - a.errorProbability);
   const reviewItems = manualItems.slice(0, MAX_REVIEW_ITEMS);
 
-  if (allItems.length === 0 && (verdict === 'APPROVED' || verdict === 'PASS')) {
+  if (allItems.length === 0 && (verdict === 'APPROVED' || verdict === 'PASS'))
     reviewItems.push({
       severity: 'pass',
       message: '모든 검증 통과',
       autoFixable: false,
       errorProbability: 0,
     });
-  }
 
   if (
     warnings.length > 0 &&
     reviewItems.length === 0 &&
     autoFixItems.length === 0
-  ) {
+  )
     reviewItems.push({
       severity: 'info',
       message: `상세 항목 파싱 불가: ${warnings.join(', ')}`,
       autoFixable: false,
       errorProbability: 0,
     });
-  }
 
   const markdown = renderMarkdown(verdict, reviewItems, autoFixItems);
 

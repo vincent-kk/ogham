@@ -28,11 +28,9 @@ export function handleGetAsset(
   }
   const stream = createReadStream(full);
   stream.on("error", () => {
-    if (!res.headersSent) {
+    if (!res.headersSent)
       sendJson(res, 404, { ok: false, message: "Asset not found" });
-    } else {
-      res.destroy();
-    }
+    else res.destroy();
   });
   res.writeHead(200, {
     "Content-Type": type,

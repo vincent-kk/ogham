@@ -13,8 +13,7 @@ export function buildMapBlock(
   const unread = reads.filter(
     (r) => r !== currentDir && intents.indexOf(r) === -1,
   );
-  if (unread.length === 0) {
-    return `[filid:map] ${compressed}`;
-  }
+  if (unread.length === 0) return `[filid:map] ${compressed}`;
+
   return `[filid:map] ${compressed}\n  unread-intent: ${unread.join(', ')}`;
 }

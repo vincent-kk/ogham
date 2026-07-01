@@ -64,9 +64,8 @@ export function readActivityEvents(cwd: string, date: string): ActivityEntry[] {
         typeof parsed.time === 'string' &&
         typeof parsed.category === 'string' &&
         typeof parsed.description === 'string'
-      ) {
+      )
         entries.push(parsed);
-      }
     } catch {
       /* skip a single corrupt line */
     }

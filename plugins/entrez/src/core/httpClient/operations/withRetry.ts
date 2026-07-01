@@ -47,24 +47,24 @@ export async function withRetry(
     if (outcome.kind === "success" || outcome.kind === "fatal") return outcome;
 
     if (outcome.isRateLimit) {
-      if (rateRetries >= policy.rateRetryMax) {
+      if (rateRetries >= policy.rateRetryMax)
         return {
           kind: "fatal",
           status: outcome.status,
           code: ErrorCodes.RATE_LIMITED,
           message: Messages.RATE_RETRY_EXCEEDED,
         };
-      }
+
       rateRetries += 1;
     } else {
-      if (normalRetries >= policy.maxRetries) {
+      if (normalRetries >= policy.maxRetries)
         return {
           kind: "fatal",
           status: outcome.status,
           code: outcome.code,
           message: outcome.message,
         };
-      }
+
       normalRetries += 1;
     }
 

@@ -27,9 +27,8 @@ export function probeEnvironment(
   const pluginRootResolved = !!process.env.CLAUDE_PLUGIN_ROOT;
   if (!pluginRootResolved) errors.push("CLAUDE_PLUGIN_ROOT not set");
 
-  if (opts.writeLog && errors.length > 0 && opts.pkg) {
+  if (opts.writeLog && errors.length > 0 && opts.pkg)
     logHookFailure(opts.pkg, "self-probe", { errors });
-  }
 
   return { nodeOk, pathLen, pluginRootResolved, errors };
 }

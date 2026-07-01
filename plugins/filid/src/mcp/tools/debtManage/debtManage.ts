@@ -30,43 +30,40 @@ export async function handleDebtManage(
 > {
   const input = args as DebtManageInput;
 
-  if (!input.action) {
-    throw new Error('action is required');
-  }
-  if (!input.projectRoot) {
-    throw new Error('projectRoot is required');
-  }
+  if (!input.action) throw new Error('action is required');
+
+  if (!input.projectRoot) throw new Error('projectRoot is required');
 
   switch (input.action) {
     case 'create': {
-      if (!input.debtItem) {
+      if (!input.debtItem)
         throw new Error('debtItem is required for create action');
-      }
+
       return handleCreate(input.projectRoot, input.debtItem);
     }
     case 'list': {
       return handleList(input.projectRoot, input.fractalPath);
     }
     case 'resolve': {
-      if (!input.debtId) {
+      if (!input.debtId)
         throw new Error('debtId is required for resolve action');
-      }
+
       return handleResolve(input.projectRoot, input.debtId);
     }
     case 'calculate-bias': {
-      if (!input.debts) {
+      if (!input.debts)
         throw new Error('debts is required for calculate-bias action');
-      }
-      if (!input.changedFractalPaths) {
+
+      if (!input.changedFractalPaths)
         throw new Error(
           'changedFractalPaths is required for calculate-bias action',
         );
-      }
-      if (!input.currentCommitSha) {
+
+      if (!input.currentCommitSha)
         throw new Error(
           'currentCommitSha is required for calculate-bias action',
         );
-      }
+
       return handleCalculateBias(
         input.debts,
         input.changedFractalPaths,

@@ -141,9 +141,7 @@ describe('handleKgSuggestLinks', () => {
 
     const result = handleKgSuggestLinks(graph, { tags: ['typescript'] });
 
-    for (const s of result.suggestions) {
-      expect(s.reason).toBeTruthy();
-    }
+    for (const s of result.suggestions) expect(s.reason).toBeTruthy();
   });
 
   it('content_hint에서 키워드를 추출하여 추천한다', () => {
@@ -192,9 +190,7 @@ describe('handleKgSuggestLinks', () => {
     const targetSuggestion = result.suggestions.find(
       (s) => s.target_path === '02_Derived/target.md',
     );
-    if (targetSuggestion) {
-      expect(targetSuggestion.sa_score).toBeGreaterThan(0);
-    }
+    if (targetSuggestion) expect(targetSuggestion.sa_score).toBeGreaterThan(0);
   });
 
   it('SIBLING 엣지로만 연결된 노드는 추천 후보에 포함된다', () => {

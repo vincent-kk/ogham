@@ -160,9 +160,8 @@ describe('config-loader sanitize (Commit C)', () => {
       // Every warning message must appear in console.error output with the
       // config-loader tag, preserving order.
       expect(warnings.length).toBeGreaterThan(0);
-      for (let i = 0; i < warnings.length; i++) {
+      for (let i = 0; i < warnings.length; i++)
         expect(configWarnLines[i]).toContain(warnings[i]);
-      }
     });
 
     it('valid config passes zod strict cleanly with empty warnings', () => {

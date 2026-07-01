@@ -16,11 +16,10 @@ export async function handleKgSearch(
   graph: KnowledgeGraph | null,
   input: KgSearchInput,
 ): Promise<KgSearchResult | { error: string }> {
-  if (!graph) {
+  if (!graph)
     return {
       error: 'Index not built. Please run /maencof:build first.',
     };
-  }
 
   const startTime = Date.now();
 
@@ -34,12 +33,11 @@ export async function handleKgSearch(
 
   // Post-SA sub_layer 필터
   let filtered = result.results;
-  if (input.sub_layer) {
+  if (input.sub_layer)
     filtered = result.results.filter((r) => {
       const node = graph.nodes.get(r.nodeId);
       return node?.subLayer === input.sub_layer;
     });
-  }
 
   return {
     results: filtered,

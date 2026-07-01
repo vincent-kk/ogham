@@ -26,9 +26,9 @@ export function applyOverrides(
       newEnabled === rule.enabled &&
       newSeverity === rule.severity &&
       !hasExempt
-    ) {
+    )
       return rule;
-    }
+
     let check = rule.check;
     if (newSeverity !== rule.severity)
       check = remapSeverity(check, newSeverity);

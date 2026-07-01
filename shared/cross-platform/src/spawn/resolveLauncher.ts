@@ -33,12 +33,10 @@ export function resolveLauncher(
   const resolved = resolveBin(bin, options.env);
   if (!resolved) return null;
 
-  if (DIRECT_EXEC.test(resolved)) {
-    return { command: resolved, prependArgs: [] };
-  }
-  if (CMD_SHIM.test(resolved)) {
-    return resolveShimLauncher(resolved);
-  }
+  if (DIRECT_EXEC.test(resolved)) return { command: resolved, prependArgs: [] };
+
+  if (CMD_SHIM.test(resolved)) return resolveShimLauncher(resolved);
+
   return null;
 }
 

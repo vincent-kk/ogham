@@ -33,16 +33,15 @@ export async function createWorkspace(
   workspaceId?: string,
   options?: CreateWorkspaceOptions,
 ): Promise<WorkspaceHandle> {
-  if (workspaceId !== undefined && !/^[A-Za-z0-9_-]+$/.test(workspaceId)) {
+  if (workspaceId !== undefined && !/^[A-Za-z0-9_-]+$/.test(workspaceId))
     throw new Error(`${ERROR_MESSAGES.INVALID_WORKSPACE_ID}: ${workspaceId}`);
-  }
+
   const id = workspaceId ?? randomId("ws_");
   const dir = workspaceDir(id);
   const artifactsDir = workspaceArtifactsDir(id);
   const dataDir = workspaceDataDir(id);
-  if (options?.reset) {
-    await rm(dir, { recursive: true, force: true });
-  }
+  if (options?.reset) await rm(dir, { recursive: true, force: true });
+
   await mkdir(artifactsDir, { recursive: true, mode: DIR_MODE });
   await mkdir(dataDir, { recursive: true, mode: DIR_MODE });
   // Stamp createdAt on first creation only — `wx` fails (EEXIST) on a reused

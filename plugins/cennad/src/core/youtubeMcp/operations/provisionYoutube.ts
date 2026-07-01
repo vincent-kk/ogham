@@ -27,13 +27,11 @@ export async function provisionYoutube(
 
   const codexAction = resolveCodexAction(next, prev);
   let codex: ProvisionResult;
-  if (codexAction === 'add') {
+  if (codexAction === 'add')
     codex = await provisionCodexYoutube(true, next.language);
-  } else if (codexAction === 'remove') {
+  else if (codexAction === 'remove')
     codex = await provisionCodexYoutube(false, next.language);
-  } else {
-    codex = { ok: true, action: 'unchanged' };
-  }
+  else codex = { ok: true, action: 'unchanged' };
 
   return { antigravity, codex };
 }

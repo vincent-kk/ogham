@@ -31,14 +31,12 @@ export async function calculateCC(
       const body = stmt
         .children()
         .find((c: SgNode) => c.kind() === 'statement_block');
-      if (name && body) {
-        perFunction.set(name, computeCC(body));
-      }
+      if (name && body) perFunction.set(name, computeCC(body));
     }
 
     // const foo = () => {} or const foo = function() {}
-    if (kind === 'lexical_declaration' || kind === 'variable_declaration') {
-      for (const decl of stmt.children()) {
+    if (kind === 'lexical_declaration' || kind === 'variable_declaration')
+      for (const decl of stmt.children())
         if (decl.kind() === 'variable_declarator') {
           const nameNode = decl
             .children()
@@ -53,13 +51,9 @@ export async function calculateCC(
             const body = init
               .children()
               .find((c: SgNode) => c.kind() === 'statement_block');
-            if (body) {
-              perFunction.set(nameNode.text(), computeCC(body));
-            }
+            if (body) perFunction.set(nameNode.text(), computeCC(body));
           }
         }
-      }
-    }
 
     // export function foo() {} or export class Foo {}
     if (kind === 'export_statement') {
@@ -73,18 +67,14 @@ export async function calculateCC(
         const body = funcDecl
           .children()
           .find((c: SgNode) => c.kind() === 'statement_block');
-        if (name && body) {
-          perFunction.set(name, computeCC(body));
-        }
+        if (name && body) perFunction.set(name, computeCC(body));
       }
 
       // export class Foo { method() {} }
       const classDecl = exportedDecl.find(
         (c: SgNode) => c.kind() === 'class_declaration',
       );
-      if (classDecl) {
-        processClassMethods(classDecl, perFunction);
-      }
+      if (classDecl) processClassMethods(classDecl, perFunction);
 
       // export const foo = () => {}
       const lexDecl = exportedDecl.find(
@@ -92,8 +82,8 @@ export async function calculateCC(
           c.kind() === 'lexical_declaration' ||
           c.kind() === 'variable_declaration',
       );
-      if (lexDecl) {
-        for (const decl of lexDecl.children()) {
+      if (lexDecl)
+        for (const decl of lexDecl.children())
           if (decl.kind() === 'variable_declarator') {
             const nameNode = decl
               .children()
@@ -109,24 +99,16 @@ export async function calculateCC(
               const body = init
                 .children()
                 .find((c: SgNode) => c.kind() === 'statement_block');
-              if (body) {
-                perFunction.set(nameNode.text(), computeCC(body));
-              }
+              if (body) perFunction.set(nameNode.text(), computeCC(body));
             }
           }
-        }
-      }
     }
 
     // class Foo { method() {} }
-    if (kind === 'class_declaration') {
-      processClassMethods(stmt, perFunction);
-    }
+    if (kind === 'class_declaration') processClassMethods(stmt, perFunction);
   }
 
-  if (perFunction.size === 0) {
-    perFunction.set('(file)', 1);
-  }
+  if (perFunction.size === 0) perFunction.set('(file)', 1);
 
   let fileTotal = 0;
   for (const cc of perFunction.values()) fileTotal += cc;

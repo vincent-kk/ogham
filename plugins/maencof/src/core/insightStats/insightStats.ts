@@ -31,9 +31,7 @@ function metaPath(cwd: string, ...segments: string[]): string {
 
 function ensureDir(filePath: string): void {
   const dir = dirname(filePath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
 
 // ─── Config ─────────────────────────────────────────────────────────
@@ -118,13 +116,12 @@ export function appendPendingCapture(
 
 export function deletePendingNotification(cwd: string): void {
   const filePath = metaPath(cwd, PENDING_FILE);
-  if (existsSync(filePath)) {
+  if (existsSync(filePath))
     try {
       unlinkSync(filePath);
     } catch {
       // Silent — best-effort cleanup
     }
-  }
 }
 
 /**
@@ -164,22 +161,17 @@ export function autoAdjustSensitivity(cwd: string): {
 } {
   const stats = readInsightStats(cwd);
   const precision = calculatePrecision(stats);
-  if (precision === null) {
-    return { adjusted: false, message: null };
-  }
+  if (precision === null) return { adjusted: false, message: null };
 
   const config = readInsightConfig(cwd);
   let target: InsightConfig['sensitivity'] | null = null;
 
-  if (precision < 0.3 && config.sensitivity !== 'low') {
+  if (precision < 0.3 && config.sensitivity !== 'low')
     target = config.sensitivity === 'high' ? 'medium' : 'low';
-  } else if (precision > 0.8 && config.sensitivity !== 'high') {
+  else if (precision > 0.8 && config.sensitivity !== 'high')
     target = config.sensitivity === 'low' ? 'medium' : 'high';
-  }
 
-  if (target === null) {
-    return { adjusted: false, message: null };
-  }
+  if (target === null) return { adjusted: false, message: null };
 
   const message = `Insight precision is ${(precision * 100).toFixed(0)}%. Sensitivity adjustment recommended: ${config.sensitivity} → ${target}`;
   return { adjusted: false, message };

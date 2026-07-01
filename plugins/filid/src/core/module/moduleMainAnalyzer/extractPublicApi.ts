@@ -29,18 +29,14 @@ export async function extractPublicApi(entryPoint: string): Promise<PublicApi> {
   const RE_TYPE_ALIAS = /^export\s+type\s+(\w+)\s*[=<{]/gm;
   const RE_INTERFACE = /^export\s+interface\s+(\w+)/gm;
 
-  for (const match of content.matchAll(RE_FUNC_EXPORT)) {
+  for (const match of content.matchAll(RE_FUNC_EXPORT))
     functions.push(match[1]);
-  }
-  for (const match of content.matchAll(RE_CLASS_EXPORT)) {
-    classes.push(match[1]);
-  }
-  for (const match of content.matchAll(RE_TYPE_ALIAS)) {
-    types.push(match[1]);
-  }
-  for (const match of content.matchAll(RE_INTERFACE)) {
-    types.push(match[1]);
-  }
+
+  for (const match of content.matchAll(RE_CLASS_EXPORT)) classes.push(match[1]);
+
+  for (const match of content.matchAll(RE_TYPE_ALIAS)) types.push(match[1]);
+
+  for (const match of content.matchAll(RE_INTERFACE)) types.push(match[1]);
 
   return {
     exports,

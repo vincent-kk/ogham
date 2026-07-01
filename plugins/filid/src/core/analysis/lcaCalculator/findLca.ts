@@ -26,11 +26,8 @@ export function findLCA(
 
   const ancestorsA = new Set(getAncestorPaths(tree, pathA));
 
-  for (const ancestor of getAncestorPaths(tree, pathB)) {
-    if (ancestorsA.has(ancestor)) {
-      return tree.nodes.get(ancestor) ?? null;
-    }
-  }
+  for (const ancestor of getAncestorPaths(tree, pathB))
+    if (ancestorsA.has(ancestor)) return tree.nodes.get(ancestor) ?? null;
 
   // fallback: 루트 반환
   return tree.nodes.get(tree.root) ?? null;

@@ -12,9 +12,7 @@ describe('getFilesForLanguage', () => {
   let tmpDir: string;
 
   afterEach(() => {
-    if (tmpDir) {
-      rmSync(tmpDir, { recursive: true, force: true });
-    }
+    if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it('finds .ts files in a directory', () => {
@@ -87,9 +85,8 @@ describe('getFilesForLanguage', () => {
 
   it('respects maxFiles limit', () => {
     tmpDir = mkdtempSync(join(tmpdir(), 'filid-shared-test-'));
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++)
       writeFileSync(join(tmpDir, `file${i}.ts`), `const x${i} = ${i};`);
-    }
 
     const files = getFilesForLanguage(tmpDir, 'typescript', 3);
     expect(files.length).toBe(3);

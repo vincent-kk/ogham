@@ -14,12 +14,12 @@ export async function checkExecutable(
 ): Promise<ExecutableStatus> {
   const result = await spawnCli(bin, ['--version'], { timeoutMs });
   const spawnError = result.spawnError as NodeJS.ErrnoException | null;
-  if (spawnError?.code === 'ENOENT') {
+  if (spawnError?.code === 'ENOENT')
     return { status: 'unavailable', available: false };
-  }
-  if (result.spawnError || result.timedOut || result.code !== 0) {
+
+  if (result.spawnError || result.timedOut || result.code !== 0)
     return { status: 'unknown', available: false };
-  }
+
   const version = result.stdout.trim();
   return {
     status: 'available',

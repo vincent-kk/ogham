@@ -44,14 +44,14 @@ function killChild(handle: SpawnHandle, state: SpawnState): void {
   // A detached child leads its own process group, so a negative-pid signal
   // reaps grandchildren too. Require pid > 1: `kill(-0)` would target THIS
   // process's own group and does NOT throw, so try/catch cannot guard it.
-  if (handle.detached && typeof child.pid === "number" && child.pid > 1) {
+  if (handle.detached && typeof child.pid === "number" && child.pid > 1)
     try {
       process.kill(-child.pid, "SIGKILL");
       return;
     } catch {
       // group already gone (ESRCH) or double-kill — single-process kill below
     }
-  }
+
   child.kill("SIGKILL");
 }
 
@@ -154,13 +154,12 @@ export function spawnCli(
         }, timeoutMs)
       : null;
 
-    if (options.signal) {
+    if (options.signal)
       if (options.signal.aborted) onAbortListener();
       else
         options.signal.addEventListener("abort", onAbortListener, {
           once: true,
         });
-    }
 
     child.on("error", (err) => {
       state.spawnError = err;

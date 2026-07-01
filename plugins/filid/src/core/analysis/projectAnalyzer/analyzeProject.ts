@@ -64,9 +64,9 @@ export async function analyzeProject(
     moduleTargets.map((n) => analyzeModule(n.path)),
   );
   const modules: ModuleInfo[] = [];
-  for (const r of moduleResults) {
+  for (const r of moduleResults)
     if (r.status === 'fulfilled') modules.push(r.value);
-  }
+
   const scanReport: ScanReport = {
     tree,
     modules,
@@ -91,9 +91,7 @@ export async function analyzeProject(
       syncPlan,
       timestamp: new Date().toISOString(),
     };
-  } else {
-    driftReport = emptyDriftReport();
-  }
+  } else driftReport = emptyDriftReport();
 
   // 4. 종합
   const summary = {

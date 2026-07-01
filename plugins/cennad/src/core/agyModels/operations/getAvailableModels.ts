@@ -17,9 +17,8 @@ const TTL_MS = 60 * 60 * 1000; // 1 hour
 export async function getAvailableModels(): Promise<string[]> {
   const now = Date.now();
   const cached = await readCache();
-  if (cached && now - cached.fetched_at < TTL_MS) {
-    return cached.models;
-  }
+  if (cached && now - cached.fetched_at < TTL_MS) return cached.models;
+
   const fresh = await refreshModels(now);
   if (fresh.length > 0) return fresh;
   return cached?.models ?? [];

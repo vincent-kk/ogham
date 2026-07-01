@@ -80,18 +80,17 @@ export function extractBestSnippet(
   for (const para of paragraphs) {
     const lowerPara = para.toLowerCase();
     let score = 0;
-    for (const term of lowerTerms) {
-      if (lowerPara.includes(term)) score++;
-    }
+    for (const term of lowerTerms) if (lowerPara.includes(term)) score++;
+
     if (score > bestScore) {
       bestScore = score;
       bestParagraph = para.trim();
     }
   }
 
-  if (bestParagraph.length > maxLength) {
+  if (bestParagraph.length > maxLength)
     return bestParagraph.slice(0, maxLength);
-  }
+
   return bestParagraph;
 }
 
@@ -223,26 +222,23 @@ function buildMarkdown(
 ): string {
   const lines: string[] = ['## maencof Knowledge Context', ''];
 
-  if (selectedItems.length === 0) {
-    lines.push('_No related documents found._');
-  } else {
+  if (selectedItems.length === 0) lines.push('_No related documents found._');
+  else {
     lines.push(
       `_${selectedItems.length} document(s) (by score, descending)_`,
       '',
     );
-    for (const item of selectedItems) {
+    for (const item of selectedItems)
       lines.push(
         itemToMarkdown(item, includeFull && item.fullContent !== undefined),
       );
-    }
   }
 
-  if (truncatedCount > 0) {
+  if (truncatedCount > 0)
     lines.push(
       '',
       `_${truncatedCount} document(s) excluded due to token budget limit_`,
     );
-  }
 
   return lines.join('\n');
 }
@@ -273,9 +269,8 @@ export function assembleContext(
   // 전문 포함 (상위 N개) — 실제 파일 내용은 MCP 도구 계층에서 주입
   if (includeFull && selectedItems.length > 0) {
     const fullCount = Math.min(maxFullDocuments, selectedItems.length);
-    for (let i = 0; i < fullCount; i++) {
+    for (let i = 0; i < fullCount; i++)
       selectedItems[i].fullContent = undefined;
-    }
   }
 
   const markdown = buildMarkdown(selectedItems, truncatedCount, includeFull);

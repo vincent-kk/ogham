@@ -54,6 +54,8 @@ export function createESLintConfig(
         },
       },
       rules: {
+        // Single-statement if/else bodies omit braces (loops included via "multi").
+        curly: ["warn", "multi"],
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-require-imports": "off",
         "no-fallthrough": "off",

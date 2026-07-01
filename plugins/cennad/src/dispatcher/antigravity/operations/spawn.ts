@@ -34,14 +34,14 @@ export async function spawnAgy(
       spawnError: err,
     };
   }
-  if (result.spawnError) {
+  if (result.spawnError)
     return {
       exitCode: -1,
       stdout: result.stdout,
       stderr: result.stderr,
       spawnError: result.spawnError as NodeJS.ErrnoException,
     };
-  }
+
   return {
     exitCode: result.code ?? 0,
     stdout: result.stdout,

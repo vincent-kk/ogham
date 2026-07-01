@@ -16,9 +16,9 @@ import { fileURLToPath } from 'node:url';
 let cached: string | null = null;
 
 export function loadSettingsHtml(): string {
-  if (cached === null) {
+  if (cached === null)
     cached = readFileSync(resolvePublicAsset('settings.html'), 'utf-8');
-  }
+
   return cached;
 }
 

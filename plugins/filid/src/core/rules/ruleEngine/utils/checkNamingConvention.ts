@@ -7,13 +7,13 @@ import { isValidNaming } from './isValidNaming.js';
 /** Compile config-supplied regex strings, skipping any that do not compile. */
 function compileRoutePatterns(sources: string[]): RegExp[] {
   const compiled: RegExp[] = [];
-  for (const src of sources) {
+  for (const src of sources)
     try {
       compiled.push(new RegExp(src));
     } catch {
       // Uncompilable patterns are warn-dropped at config load; skip here too.
     }
-  }
+
   return compiled;
 }
 
@@ -43,9 +43,8 @@ export function checkNamingConvention(
       frameworkFiles &&
       frameworkFiles.length > 0 &&
       matchesFrameworkRouteName(node.name)
-    ) {
+    )
       return [];
-    }
 
     const frameworkHint =
       frameworkFiles && frameworkFiles.length > 0

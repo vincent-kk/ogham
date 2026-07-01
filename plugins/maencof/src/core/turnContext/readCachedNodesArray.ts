@@ -32,12 +32,10 @@ export function readCachedNodesArray<T = unknown>(cwd: string): T[] {
       const parsed = JSON.parse(readFileSync(legacyPath, 'utf-8')) as {
         nodes?: unknown;
       };
-      if (Array.isArray(parsed.nodes)) {
-        return parsed.nodes as T[];
-      }
-      if (parsed.nodes && typeof parsed.nodes === 'object') {
+      if (Array.isArray(parsed.nodes)) return parsed.nodes as T[];
+
+      if (parsed.nodes && typeof parsed.nodes === 'object')
         return Object.values(parsed.nodes) as T[];
-      }
     }
     return [];
   } catch {

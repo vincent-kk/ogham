@@ -50,26 +50,22 @@ describe('user-prompt-submit: project size tiers', () => {
 });
 
 describe('user-prompt-submit: cwd path depth', () => {
-  for (const { label, input } of cwdInputs) {
+  for (const { label, input } of cwdInputs)
     bench(label, () => {
       handleUserPromptSubmit(input);
     });
-  }
 });
 
 describe('user-prompt-submit: sustained injection', () => {
   // same session: 1 inject on first call + 99 session gate early returns
   bench('100 calls, same session (1 inject + 99 gate checks)', () => {
     const sessionInput = { ...inputS, session_id: 'bench-sustained' };
-    for (let i = 0; i < 100; i++) {
-      handleUserPromptSubmit(sessionInput);
-    }
+    for (let i = 0; i < 100; i++) handleUserPromptSubmit(sessionInput);
   });
 
   // unique sessions: new session on every call (100 injects)
   bench('100 calls, unique sessions (100 injects)', () => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i++)
       handleUserPromptSubmit({ ...inputS, session_id: `bench-unique-${i}` });
-    }
   });
 });

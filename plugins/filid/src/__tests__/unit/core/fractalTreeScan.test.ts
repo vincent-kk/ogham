@@ -49,16 +49,12 @@ describe('fractal-tree', () => {
       for (const [dir, files] of Object.entries(structure)) {
         const absDir = join(tmpDir, dir);
         mkdirSync(absDir, { recursive: true });
-        for (const file of files) {
-          writeFileSync(join(absDir, file), '');
-        }
+        for (const file of files) writeFileSync(join(absDir, file), '');
       }
     };
 
     const teardown = () => {
-      if (tmpDir) {
-        rmSync(tmpDir, { recursive: true, force: true });
-      }
+      if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
     };
 
     it('should build a tree from a real directory structure', async () => {

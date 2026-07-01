@@ -23,7 +23,7 @@ export async function callAgy(
   options: CallAgyOptions,
 ): Promise<AgyCallResult> {
   const result = await spawnAgy(argv, { cwd, timeoutMs: options.timeoutMs });
-  if (result.spawnError !== null || result.exitCode !== 0) {
+  if (result.spawnError !== null || result.exitCode !== 0)
     return {
       status: 'failure',
       response: null,
@@ -34,15 +34,15 @@ export async function callAgy(
       }),
       timedOut: result.spawnError?.code === 'ETIMEDOUT',
     };
-  }
+
   const parsed = parseJsonOutput(result.stdout);
-  if (parsed !== null) {
+  if (parsed !== null)
     return { status: 'success', response: parsed, error: null };
-  }
+
   const fallback = await resolveTranscript(cwd, options.since);
-  if (fallback !== null) {
+  if (fallback !== null)
     return { status: 'success', response: fallback, error: null };
-  }
+
   return {
     status: 'failure',
     response: null,

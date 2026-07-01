@@ -28,9 +28,8 @@ export async function handleManifestSave(input: ManifestSaveInput) {
   const cwd = process.cwd();
   const run_dir = getRunDir(cwd, input.project_ref, input.run_id);
 
-  if (input.manifest === undefined) {
-    throw new Error('manifest is required');
-  }
+  if (input.manifest === undefined) throw new Error('manifest is required');
+
   const filename = MANIFEST_FILE_MAP[input.type];
   const path = join(run_dir, filename);
 

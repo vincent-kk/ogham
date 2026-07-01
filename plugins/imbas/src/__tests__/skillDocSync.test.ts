@@ -87,11 +87,10 @@ describe('G1 skill-doc-sync — schema field references', () => {
       const matches = structured.matchAll(/config\.language\.([a-z_]+)/g);
       for (const m of matches) {
         const key = m[1];
-        if (!LANGUAGE_KEYS.includes(key)) {
+        if (!LANGUAGE_KEYS.includes(key))
           drift.push(
             `${file}: config.language.${key} not in LanguageConfigSchema (known: ${LANGUAGE_KEYS.join(', ')})`,
           );
-        }
       }
     }
     expect(drift, drift.join('\n')).toEqual([]);
@@ -108,11 +107,10 @@ describe('G1 skill-doc-sync — schema field references', () => {
         const phase = m[1];
         const field = m[2];
         const known = PHASE_FIELD_MAP[phase];
-        if (!known || !known.includes(field)) {
+        if (!known || !known.includes(field))
           drift.push(
             `${file}: phases.${phase}.${field} not in ${phase} phase schema (known: ${known?.join(', ') ?? 'N/A'})`,
           );
-        }
       }
     }
     expect(drift, drift.join('\n')).toEqual([]);

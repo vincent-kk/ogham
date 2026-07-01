@@ -85,11 +85,10 @@ export const transcriptTool: ToolDefinition = {
             );
 
             let segments = result.segments;
-            if (args.stripArtifacts) {
+            if (args.stripArtifacts)
               segments = dedupeAdjacent(segments)
                 .map((s) => ({ ...s, text: stripCaptionArtifacts(s.text) }))
                 .filter((s) => s.text.length > 0);
-            }
 
             const body = segmentsToText(segments, {
               timestamps: args.timestamps ?? false,

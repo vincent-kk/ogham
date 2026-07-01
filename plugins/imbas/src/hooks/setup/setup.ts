@@ -34,9 +34,7 @@ export function processSetup(input: SessionStartInput): HookOutput {
     // Phase 1: Init — ensure cache directory + enable file logging
     const cacheDir = getCacheDir(cwd);
     setLogDir(cacheDir);
-    if (!existsSync(cacheDir)) {
-      mkdirSync(cacheDir, { recursive: true });
-    }
+    if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
 
     log.debug(`cwd=${cwd} cache=${cacheDir}`);
 

@@ -12,13 +12,13 @@ export interface HookResult {
 }
 
 export function runHookLayerA(name: HookName): HookResult {
-  if (name === 'injectStatic') {
+  if (name === 'injectStatic')
     return {
       continue: true,
       hookEventName: 'SessionStart',
       additionalContext: buildStaticPayload(loadConfig()),
     };
-  }
+
   return {
     continue: true,
     hookEventName: 'UserPromptSubmit',

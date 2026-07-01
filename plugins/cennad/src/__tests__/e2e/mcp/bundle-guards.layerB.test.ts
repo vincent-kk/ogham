@@ -38,9 +38,8 @@ describe('Hook bundle guards (Layer B)', () => {
 
     it(`${name} contains no FORBIDDEN modules`, async () => {
       const content = await readFile(resolve(bridgeDir(), name), 'utf8');
-      for (const pattern of FORBIDDEN_PATTERNS) {
+      for (const pattern of FORBIDDEN_PATTERNS)
         expect(content).not.toMatch(pattern);
-      }
     });
   }
 });

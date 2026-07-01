@@ -17,13 +17,11 @@ export interface AstAnalyzeInput {
 export async function handleAstAnalyze(input: AstAnalyzeInput) {
   const filePath = input.file_path ?? DEFAULT_ANONYMOUS_PATH;
 
-  if (input.analysis_type === 'dependency-graph') {
+  if (input.analysis_type === 'dependency-graph')
     return extractDependencies(input.source, filePath);
-  }
 
-  if (input.analysis_type === 'cyclomatic-complexity') {
+  if (input.analysis_type === 'cyclomatic-complexity')
     return calculateComplexity(input.source, filePath);
-  }
 
   // full: run both
   const [deps, complexity] = await Promise.all([

@@ -24,13 +24,11 @@ export function buildCompanionIdentityTag(
     tag += `\n  <personality${toneAttr}${approachAttr}>${traitsText}</personality>`;
   }
 
-  if (identity.principles?.length) {
+  if (identity.principles?.length)
     tag += `\n  <principles>${identity.principles.join(' | ')}</principles>`;
-  }
 
-  if (identity.taboos?.length) {
+  if (identity.taboos?.length)
     tag += `\n  <taboos>${identity.taboos.join(' | ')}</taboos>`;
-  }
 
   tag += '\n</companion-identity>';
   return tag;

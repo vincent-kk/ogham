@@ -18,9 +18,9 @@ async function findConversationId(cwd: string): Promise<string | null> {
   const raw = await readFile(AGY_LAST_CONVERSATIONS_PATH, 'utf8');
   const map: unknown = JSON.parse(raw);
   if (!isRecord(map)) return null;
-  for (const [key, value] of Object.entries(map)) {
+  for (const [key, value] of Object.entries(map))
     if (typeof value === 'string' && samePath(key, cwd)) return value;
-  }
+
   return null;
 }
 
@@ -41,9 +41,8 @@ function extractPlannerResponse(jsonl: string): string | null {
       entry.status === 'DONE' &&
       typeof entry.content === 'string' &&
       entry.content.trim().length > 0
-    ) {
+    )
       answer = entry.content;
-    }
   }
   return answer;
 }

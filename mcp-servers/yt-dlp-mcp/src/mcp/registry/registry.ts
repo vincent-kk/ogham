@@ -58,12 +58,12 @@ export function registerEnabledTools(
   deps: ToolDeps,
 ): string[] {
   const registered: string[] = [];
-  for (const tool of TOOL_REGISTRY) {
+  for (const tool of TOOL_REGISTRY)
     if (isToolEnabled(tool, deps.config.enable)) {
       tool.register(server, deps);
       registered.push(tool.name);
     }
-  }
+
   deps.logger.info({ tools: registered }, 'registered MCP tools');
   return registered;
 }

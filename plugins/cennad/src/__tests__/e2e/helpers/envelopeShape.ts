@@ -60,25 +60,22 @@ export function assertHookEnvelope(
   expect(parsed.hookEventName).toBe(expectation.event);
   expect(typeof parsed.additionalContext).toBe('string');
   const ctx = parsed.additionalContext ?? '';
-  if (expectation.contextIncludes) {
-    for (const needle of expectation.contextIncludes) {
+  if (expectation.contextIncludes)
+    for (const needle of expectation.contextIncludes)
       expect(ctx).toContain(needle);
-    }
-  }
-  if (expectation.contextExcludes) {
-    for (const needle of expectation.contextExcludes) {
+
+  if (expectation.contextExcludes)
+    for (const needle of expectation.contextExcludes)
       expect(ctx).not.toContain(needle);
-    }
-  }
 }
 
 export function parseToolCallText(content: unknown): unknown {
-  if (!Array.isArray(content) || content.length === 0) {
+  if (!Array.isArray(content) || content.length === 0)
     throw new Error('callTool returned empty content');
-  }
+
   const first = content[0] as { type?: string; text?: string };
-  if (first.type !== 'text' || typeof first.text !== 'string') {
+  if (first.type !== 'text' || typeof first.text !== 'string')
     throw new Error('callTool first content is not text');
-  }
+
   return JSON.parse(first.text);
 }

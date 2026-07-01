@@ -54,12 +54,10 @@ export async function extractDependencies(
             const defaultImport = importClause
               .children()
               .find((c: SgNode) => c.kind() === 'identifier');
-            if (defaultImport && defaultImport.text() === node.text()) {
-              // Avoid duplicates
-              if (!specifiers.includes(node.text())) {
+            if (defaultImport && defaultImport.text() === node.text())
+              if (!specifiers.includes(node.text()))
+                // Avoid duplicates
                 specifiers.push(node.text());
-              }
-            }
           }
         }
         // Namespace import: import * as foo
@@ -67,9 +65,8 @@ export async function extractDependencies(
           const nameNode = node
             .children()
             .find((c: SgNode) => c.kind() === 'identifier');
-          if (nameNode && !specifiers.includes(nameNode.text())) {
+          if (nameNode && !specifiers.includes(nameNode.text()))
             specifiers.push(nameNode.text());
-          }
         }
       });
 
@@ -91,23 +88,20 @@ export async function extractDependencies(
       const exportClause = stmt
         .children()
         .find((c: SgNode) => c.kind() === 'export_clause');
-      if (exportClause) {
-        for (const spec of exportClause.children()) {
+      if (exportClause)
+        for (const spec of exportClause.children())
           if (spec.kind() === 'export_specifier') {
             const nameNode = spec
               .children()
               .find((c: SgNode) => c.kind() === 'identifier');
-            if (nameNode) {
+            if (nameNode)
               exports.push({
                 name: nameNode.text(),
                 isTypeOnly,
                 isDefault: false,
                 line,
               });
-            }
           }
-        }
-      }
 
       // export function/class/const/type/interface ...
       const children = stmt.children();
@@ -119,14 +113,13 @@ export async function extractDependencies(
         const nameNode = funcDecl
           .children()
           .find((c: SgNode) => c.kind() === 'identifier');
-        if (nameNode) {
+        if (nameNode)
           exports.push({
             name: nameNode.text(),
             isTypeOnly: false,
             isDefault: false,
             line,
           });
-        }
       }
 
       const classDecl = children.find(
@@ -136,14 +129,13 @@ export async function extractDependencies(
         const nameNode = classDecl
           .children()
           .find((c: SgNode) => c.kind() === 'type_identifier');
-        if (nameNode) {
+        if (nameNode)
           exports.push({
             name: nameNode.text(),
             isTypeOnly: false,
             isDefault: false,
             line,
           });
-        }
       }
 
       const lexDecl = children.find(
@@ -151,23 +143,20 @@ export async function extractDependencies(
           c.kind() === 'lexical_declaration' ||
           c.kind() === 'variable_declaration',
       );
-      if (lexDecl) {
-        for (const d of lexDecl.children()) {
+      if (lexDecl)
+        for (const d of lexDecl.children())
           if (d.kind() === 'variable_declarator') {
             const nameNode = d
               .children()
               .find((c: SgNode) => c.kind() === 'identifier');
-            if (nameNode) {
+            if (nameNode)
               exports.push({
                 name: nameNode.text(),
                 isTypeOnly: false,
                 isDefault: false,
                 line,
               });
-            }
           }
-        }
-      }
 
       const typeAlias = children.find(
         (c: SgNode) => c.kind() === 'type_alias_declaration',
@@ -176,14 +165,13 @@ export async function extractDependencies(
         const nameNode = typeAlias
           .children()
           .find((c: SgNode) => c.kind() === 'type_identifier');
-        if (nameNode) {
+        if (nameNode)
           exports.push({
             name: nameNode.text(),
             isTypeOnly: true,
             isDefault: false,
             line,
           });
-        }
       }
 
       const interfaceDecl = children.find(
@@ -193,14 +181,13 @@ export async function extractDependencies(
         const nameNode = interfaceDecl
           .children()
           .find((c: SgNode) => c.kind() === 'type_identifier');
-        if (nameNode) {
+        if (nameNode)
           exports.push({
             name: nameNode.text(),
             isTypeOnly: true,
             isDefault: false,
             line,
           });
-        }
       }
 
       // export default ...
@@ -233,12 +220,11 @@ export async function extractDependencies(
       const funcChild = node.children()[0];
       if (funcChild) {
         const callee = getCallee(funcChild);
-        if (callee) {
+        if (callee)
           calls.push({
             callee,
             line: node.range().start.line + 1,
           });
-        }
       }
     }
   });

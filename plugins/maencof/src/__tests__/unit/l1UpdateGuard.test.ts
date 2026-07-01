@@ -192,7 +192,7 @@ describe('handleMaencofUpdate — L1 Audit Log', () => {
   });
 
   it('여러 번 수정 시 audit log가 누적된다', async () => {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++)
       await handleMaencofUpdate(vault, {
         path: '01_Core/values.md',
         content: `Content version ${i}`,
@@ -200,7 +200,6 @@ describe('handleMaencofUpdate — L1 Audit Log', () => {
         justification: VALID_JUSTIFICATION,
         confirm_l1: true,
       });
-    }
 
     const auditPath = join(
       vault,

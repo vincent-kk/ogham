@@ -16,12 +16,11 @@ export async function parseSource(
   filePath = 'anonymous.ts',
 ): Promise<SgNode> {
   const sg = await getSgModule();
-  if (!sg) {
+  if (!sg)
     throw new Error(
       `@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi` +
         (getSgLoadError() ? ` (${getSgLoadError()})` : ''),
     );
-  }
 
   // Detect language from file extension, default to typescript
   const ext = filePath.includes('.') ? '.' + filePath.split('.').pop() : '.ts';

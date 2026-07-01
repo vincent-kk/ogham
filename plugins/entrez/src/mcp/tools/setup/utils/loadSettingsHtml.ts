@@ -36,8 +36,8 @@ function resolvePublicAsset(name: string): string {
 }
 
 export function loadSettingsHtml(): string {
-  if (cached === null) {
+  if (cached === null)
     cached = readFileSync(resolvePublicAsset("settings.html"), "utf-8");
-  }
+
   return cached;
 }

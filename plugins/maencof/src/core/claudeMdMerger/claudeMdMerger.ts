@@ -59,18 +59,16 @@ export function mergeMaencofSection(
 
   // 파일이 없는 경우
   if (!existsSync(filePath)) {
-    if (!createIfMissing) {
+    if (!createIfMissing)
       return {
         changed: false,
         hadExistingSection: false,
         content: maencofBlock,
       };
-    }
 
     const newContent = maencofBlock + '\n';
-    if (!dryRun) {
-      writeFileSync(filePath, newContent, 'utf-8');
-    }
+    if (!dryRun) writeFileSync(filePath, newContent, 'utf-8');
+
     return {
       changed: true,
       hadExistingSection: false,
@@ -101,13 +99,12 @@ export function mergeMaencofSection(
   }
 
   // 변경 없으면 파일 쓰기 건너뜀
-  if (newContent === original) {
+  if (newContent === original)
     return {
       changed: false,
       hadExistingSection,
       content: original,
     };
-  }
 
   let backupPath: string | undefined;
   if (!dryRun) {

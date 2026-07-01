@@ -119,12 +119,12 @@ async function acquireLock(
     } catch {
       continue;
     }
-    if (ctx.now() > deadline) {
+    if (ctx.now() > deadline)
       throw new YtDlpMcpError(
         ErrorCode.DOWNLOAD_FAILED,
         'Timed out waiting for binary download lock',
       );
-    }
+
     signal?.throwIfAborted?.();
     await delay(LOCK_POLL_MS);
   }
@@ -148,12 +148,11 @@ async function verifyChecksum(
       `No checksum entry for ${ctx.assetName}`,
     );
   const actual = await sha256File(filePath);
-  if (actual.toLowerCase() !== expected.toLowerCase()) {
+  if (actual.toLowerCase() !== expected.toLowerCase())
     throw new YtDlpMcpError(
       ErrorCode.CHECKSUM_MISMATCH,
       `Checksum mismatch for ${ctx.assetName}: expected ${expected}, got ${actual}`,
     );
-  }
 }
 
 async function acquireAndInstall(

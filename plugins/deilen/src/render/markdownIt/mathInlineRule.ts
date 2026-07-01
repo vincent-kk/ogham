@@ -12,18 +12,16 @@ import { emitPendingText } from "./emitPendingText.js";
 export function mathInline(state: StateInline, silent: boolean): boolean {
   const open = scanOpenDelimiter(state);
   if (open === "not-dollar") return false;
-  if (open === "invalid-open") {
+  if (open === "invalid-open")
     return emitPendingText(state, silent, "$", state.pos + 1);
-  }
 
   const start = state.pos + 1;
   const content = scanContent(state, start);
-  if (content.kind === "none") {
+  if (content.kind === "none")
     return emitPendingText(state, silent, "$", start);
-  }
-  if (content.kind === "empty") {
+
+  if (content.kind === "empty")
     return emitPendingText(state, silent, "$$", start + 1);
-  }
 
   if (!silent) {
     const token = state.push("math_inline", "math", 0);

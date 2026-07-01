@@ -9,11 +9,11 @@ export function computeErrorProbability(
   ruleId: string,
   severity: string,
 ): number {
-  if (ruleId && RULE_ERROR_PROBABILITY[ruleId] !== undefined) {
+  if (ruleId && RULE_ERROR_PROBABILITY[ruleId] !== undefined)
     return RULE_ERROR_PROBABILITY[ruleId];
-  }
-  if (severity && SEVERITY_FALLBACK[severity] !== undefined) {
+
+  if (severity && SEVERITY_FALLBACK[severity] !== undefined)
     return SEVERITY_FALLBACK[severity];
-  }
+
   return DEFAULT_ERROR_PROBABILITY;
 }

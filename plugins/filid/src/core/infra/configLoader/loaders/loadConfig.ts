@@ -87,10 +87,10 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
     };
   }
 
-  for (const issue of retry.error.issues) {
+  for (const issue of retry.error.issues)
     addWarning(
       `config validation failed at ${formatIssuePath(issue.path)}: ${issue.message}`,
     );
-  }
+
   return { config: null, warnings };
 }

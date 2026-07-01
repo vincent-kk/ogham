@@ -9,9 +9,9 @@ import { normalizeBranch } from '../utils/reviewUtils.js';
 export async function handleCheckpoint(
   input: ReviewManageInput,
 ): Promise<Record<string, unknown>> {
-  if (!input.branchName) {
+  if (!input.branchName)
     throw new Error('branchName is required for checkpoint action');
-  }
+
   const normalized = normalizeBranch(input.branchName);
   const reviewDir = path.join(
     input.projectRoot,
@@ -48,30 +48,22 @@ export async function handleCheckpoint(
       const content = await fs.readFile(sessionPath, 'utf-8');
       noStructureCheck = /^no_structure_check:\s*(true)/m.test(content);
       const attemptsMatch = content.match(/^resume_attempts:\s*(\d+)/m);
-      if (attemptsMatch) {
-        resumeAttempts = Number.parseInt(attemptsMatch[1], 10);
-      }
+      if (attemptsMatch) resumeAttempts = Number.parseInt(attemptsMatch[1], 10);
     } catch {
       // read error — treat flags as absent
     }
   }
 
   let phase: CheckpointStatus['phase'];
-  if (!hasStructureCheck && !hasSession) {
-    phase = 'A';
-  } else if (!hasSession) {
-    phase = 'B';
-  } else if (!hasStructureCheck && hasSession && !hasVerification) {
+  if (!hasStructureCheck && !hasSession) phase = 'A';
+  else if (!hasSession) phase = 'B';
+  else if (!hasStructureCheck && hasSession && !hasVerification)
     // session.md only: C if Phase A was intentionally skipped, else restart A.
     // Skill must increment resume_attempts and honor resumeExhausted.
     phase = noStructureCheck ? 'C' : 'A';
-  } else if (!hasVerification) {
-    phase = 'C';
-  } else if (!hasReport) {
-    phase = 'D';
-  } else {
-    phase = 'DONE';
-  }
+  else if (!hasVerification) phase = 'C';
+  else if (!hasReport) phase = 'D';
+  else phase = 'DONE';
 
   const result: CheckpointStatus = {
     phase,

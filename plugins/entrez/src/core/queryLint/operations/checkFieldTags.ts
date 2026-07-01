@@ -21,19 +21,19 @@ const QUOTED_PHRASE = /"[^"]*"/;
  */
 export function checkFieldTags(term: string): LintIssue[] {
   const issues: LintIssue[] = [];
-  if (QUOTED_PHRASE.test(term)) {
+  if (QUOTED_PHRASE.test(term))
     issues.push({
       code: LINT_CODE.PHRASE_DISABLES_ATM,
       message: LINT_MESSAGE.PHRASE_DISABLES_ATM,
       severity: "warning",
     });
-  }
-  if (term.includes("*")) {
+
+  if (term.includes("*"))
     issues.push({
       code: LINT_CODE.WILDCARD_DISABLES_EXPANSION,
       message: LINT_MESSAGE.WILDCARD_DISABLES_EXPANSION,
       severity: "warning",
     });
-  }
+
   return issues;
 }

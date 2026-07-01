@@ -31,7 +31,7 @@ export interface LossySummaryResult {
  * Original individual entries are discarded (non-recoverable).
  */
 export function summarizeLossy(entries: ToolCallEntry[]): LossySummaryResult {
-  if (entries.length === 0) {
+  if (entries.length === 0)
     return {
       summary: {
         totalEntries: 0,
@@ -48,13 +48,11 @@ export function summarizeLossy(entries: ToolCallEntry[]): LossySummaryResult {
         recoverable: false,
       },
     };
-  }
 
   // Count by tool name
   const toolCounts: Record<string, number> = {};
-  for (const entry of entries) {
+  for (const entry of entries)
     toolCounts[entry.tool] = (toolCounts[entry.tool] ?? 0) + 1;
-  }
 
   // Unique files
   const uniqueFiles = [...new Set(entries.map((e) => e.path))];

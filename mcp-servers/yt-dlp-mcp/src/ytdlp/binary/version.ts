@@ -86,12 +86,12 @@ export function createVersionResolver(
           `${RELEASE_BY_TAG_API}/${deps.config.pinnedVersion}`,
           signal,
         )) as GithubRelease;
-        if (!release || typeof release.tag_name !== 'string') {
+        if (!release || typeof release.tag_name !== 'string')
           throw new YtDlpMcpError(
             ErrorCode.BINARY_UNAVAILABLE,
             `Pinned version not found: ${deps.config.pinnedVersion}`,
           );
-        }
+
         return pickAsset(release);
       }
 
@@ -99,23 +99,23 @@ export function createVersionResolver(
         `${RELEASES_API}?per_page=30`,
         signal,
       )) as GithubRelease[];
-      if (!Array.isArray(releases)) {
+      if (!Array.isArray(releases))
         throw new YtDlpMcpError(
           ErrorCode.NETWORK,
           'Unexpected releases response from GitHub',
         );
-      }
+
       const release = selectSafeRelease(
         releases,
         deps.config.cooldownDays,
         now(),
       );
-      if (!release) {
+      if (!release)
         throw new YtDlpMcpError(
           ErrorCode.BINARY_UNAVAILABLE,
           `No yt-dlp release older than ${deps.config.cooldownDays} days found`,
         );
-      }
+
       return pickAsset(release);
     },
   };

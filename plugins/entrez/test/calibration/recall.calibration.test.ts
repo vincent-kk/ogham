@@ -25,11 +25,10 @@ describe("@calibration recall — zero loss across a query set", () => {
   function calibrationFetch() {
     return routeFetch((url) => {
       const term = url.searchParams.get("term") ?? "";
-      for (const key of Object.keys(RESULTS)) {
-        if (term.includes(key)) {
+      for (const key of Object.keys(RESULTS))
+        if (term.includes(key))
           return { body: esearchJson(RESULTS[key].length, RESULTS[key]) };
-        }
-      }
+
       return { body: esearchJson(0, []) };
     });
   }

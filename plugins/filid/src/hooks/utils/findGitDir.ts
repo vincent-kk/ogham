@@ -22,12 +22,11 @@ export function findGitDir(cwd: string): GitDirs | null {
   let cursor = cwd;
   while (true) {
     const candidate = join(cursor, '.git');
-    if (existsSync(candidate)) {
+    if (existsSync(candidate))
       try {
         let gitDir: string;
-        if (statSync(candidate).isDirectory()) {
-          gitDir = candidate;
-        } else {
+        if (statSync(candidate).isDirectory()) gitDir = candidate;
+        else {
           const match = /^gitdir:\s*(.+)$/m.exec(
             readFileSync(candidate, 'utf-8'),
           );
@@ -45,7 +44,7 @@ export function findGitDir(cwd: string): GitDirs | null {
       } catch {
         return null;
       }
-    }
+
     const parent = dirname(cursor);
     if (parent === cursor) return null;
     cursor = parent;

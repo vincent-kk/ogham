@@ -23,9 +23,8 @@ describe("feedbackResolver", () => {
     deliverComplete("a1", fb("a1"));
     const result = await pending;
     expect(result.kind).toBe("complete");
-    if (result.kind === "complete") {
+    if (result.kind === "complete")
       expect(result.feedback.session_id).toBe("a1");
-    }
   });
 
   it("buffers a submission that arrives before collect", async () => {

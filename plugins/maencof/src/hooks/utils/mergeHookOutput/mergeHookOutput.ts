@@ -42,11 +42,11 @@ export function mergeHookOutput(
   if (reasons.length) merged.reason = reasons.join('\n\n');
   if (systemMessages.length) merged.systemMessage = systemMessages.join('\n\n');
   if (messages.length) merged.message = messages.join('\n\n');
-  if (contexts.length) {
+  if (contexts.length)
     merged.hookSpecificOutput = {
       hookEventName: event,
       additionalContext: contexts.join('\n\n'),
     };
-  }
+
   return merged;
 }

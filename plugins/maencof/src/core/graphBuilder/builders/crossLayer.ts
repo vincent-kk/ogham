@@ -24,9 +24,8 @@ export function buildCrossLayerEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
   const layerMap = new Map<number, KnowledgeNode[]>();
   for (const node of nodes) {
     const layer = node.layer as number;
-    if (!layerMap.has(layer)) {
-      layerMap.set(layer, []);
-    }
+    if (!layerMap.has(layer)) layerMap.set(layer, []);
+
     layerMap.get(layer)!.push(node);
   }
 

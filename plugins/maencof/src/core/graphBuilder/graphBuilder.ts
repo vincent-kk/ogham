@@ -50,28 +50,23 @@ export function buildGraph(
   const { includeOrphans = true } = options;
 
   const nodeMap = new Map<NodeId, KnowledgeNode>();
-  for (const node of nodes) {
-    nodeMap.set(node.id, node);
-  }
+  for (const node of nodes) nodeMap.set(node.id, node);
 
   const edges: KnowledgeEdge[] = [];
 
   // LINK 엣지는 kg-build가 채운 outboundLinks 필드로부터 생성
-  for (const node of nodes) {
-    if (node.outboundLinks) {
+  for (const node of nodes)
+    if (node.outboundLinks)
       for (const target of node.outboundLinks) {
         const targetId = target as NodeId;
-        if (nodeMap.has(targetId)) {
+        if (nodeMap.has(targetId))
           edges.push({
             from: node.id,
             to: targetId,
             type: 'LINK',
             weight: 1.0,
           });
-        }
       }
-    }
-  }
 
   // 디렉토리 계층 엣지 (PARENT_OF / CHILD_OF / SIBLING)
   const dirMap = buildDirectoryMap(nodes);
@@ -103,9 +98,8 @@ export function buildGraph(
   const orphanNodes = detectOrphans(nodeMap, edges);
 
   if (!includeOrphans) {
-    for (const orphanId of orphanNodes) {
-      graph.nodes.delete(orphanId);
-    }
+    for (const orphanId of orphanNodes) graph.nodes.delete(orphanId);
+
     graph.nodeCount = graph.nodes.size;
   }
 
@@ -163,9 +157,9 @@ function buildEdgePairMaps(edges: KnowledgeEdge[]): {
     if (
       existingType !== undefined &&
       EDGE_TYPE_MULTIPLIER[existingType] >= EDGE_TYPE_MULTIPLIER[edge.type]
-    ) {
+    )
       continue;
-    }
+
     typeInner.set(edge.to, edge.type);
     weightInner.set(edge.to, edge.weight);
   }
@@ -194,9 +188,9 @@ export function hydrateRuntimeMaps(graph: KnowledgeGraph): KnowledgeGraph {
  * "맵 부재 → 폴백" 계약을 유지한다. partial-reindex 의 in-place edge 변경 후 맵 stale 을 막는다.
  */
 export function rebuildEdgeDerivedMaps(graph: KnowledgeGraph): void {
-  if (!graph.adjacencyList && !graph.edgeWeightMap && !graph.edgeTypeMap) {
+  if (!graph.adjacencyList && !graph.edgeWeightMap && !graph.edgeTypeMap)
     return;
-  }
+
   const { edgeWeightMap, edgeTypeMap } = buildEdgePairMaps(graph.edges);
   graph.adjacencyList = buildAdjacencyList(graph.nodes, graph.edges);
   graph.edgeWeightMap = edgeWeightMap;
@@ -219,12 +213,12 @@ export function tokenizeForInvertedIndex(node: KnowledgeNode): string[] {
     const lower = tag.toLowerCase();
     if (lower.length > 0) terms.push(lower);
   }
-  if (node.mentioned_persons) {
+  if (node.mentioned_persons)
     for (const person of node.mentioned_persons) {
       const lower = person.toLowerCase();
       if (lower.length > 0) terms.push(lower);
     }
-  }
+
   return terms;
 }
 
@@ -260,9 +254,7 @@ export function removeNodeFromInvertedIndex(
     const set = index.get(term);
     if (!set) continue;
     set.delete(node.id);
-    if (set.size === 0) {
-      index.delete(term);
-    }
+    if (set.size === 0) index.delete(term);
   }
 }
 
@@ -274,9 +266,8 @@ export function buildInvertedIndex(
   nodeMap: Map<NodeId, KnowledgeNode>,
 ): InvertedIndex {
   const index: InvertedIndex = new Map();
-  for (const node of nodeMap.values()) {
-    addNodeToInvertedIndex(index, node);
-  }
+  for (const node of nodeMap.values()) addNodeToInvertedIndex(index, node);
+
   return index;
 }
 
@@ -293,10 +284,7 @@ export function detectOrphans(
     connected.add(edge.to);
   }
   const orphans: NodeId[] = [];
-  for (const id of nodeMap.keys()) {
-    if (!connected.has(id)) {
-      orphans.push(id);
-    }
-  }
+  for (const id of nodeMap.keys()) if (!connected.has(id)) orphans.push(id);
+
   return orphans;
 }

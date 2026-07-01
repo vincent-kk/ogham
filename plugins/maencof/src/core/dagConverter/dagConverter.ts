@@ -60,22 +60,17 @@ function detectCycleEdges(graph: KnowledgeGraph): {
   const cycleEdgeKeys = new Set<string>();
   let cycleCount = 0;
 
-  for (const id of graph.nodes.keys()) {
-    state.set(id, 'unvisited');
-  }
+  for (const id of graph.nodes.keys()) state.set(id, 'unvisited');
 
   // 인접 리스트 구성 (LINK 엣지만 방향성 고려, SIBLING은 무시)
   const adj = new Map<NodeId, Array<{ to: NodeId; edgeKey: string }>>();
-  for (const id of graph.nodes.keys()) {
-    adj.set(id, []);
-  }
-  for (const edge of graph.edges) {
-    if (edge.type === 'LINK' || edge.type === 'PARENT_OF') {
+  for (const id of graph.nodes.keys()) adj.set(id, []);
+
+  for (const edge of graph.edges)
+    if (edge.type === 'LINK' || edge.type === 'PARENT_OF')
       adj
         .get(edge.from)
         ?.push({ to: edge.to, edgeKey: edgeKey(edge.from, edge.to) });
-    }
-  }
 
   function dfs(nodeId: NodeId): void {
     state.set(nodeId, 'in-stack');
@@ -86,18 +81,13 @@ function detectCycleEdges(graph: KnowledgeGraph): {
         // back-edge → 순환 엣지
         cycleEdgeKeys.add(key);
         cycleCount++;
-      } else if (s === 'unvisited') {
-        dfs(to);
-      }
+      } else if (s === 'unvisited') dfs(to);
     }
     state.set(nodeId, 'done');
   }
 
-  for (const id of graph.nodes.keys()) {
-    if (state.get(id) === 'unvisited') {
-      dfs(id);
-    }
-  }
+  for (const id of graph.nodes.keys())
+    if (state.get(id) === 'unvisited') dfs(id);
 
   return { cycleEdgeKeys, cycleCount };
 }
@@ -116,9 +106,9 @@ export function applyLayerDirectionality(
     const toNode = graph.nodes.get(edge.to);
     if (!fromNode || !toNode) return edge;
     // Layer 1 → 높은 Layer로의 아웃바운드 링크는 설계 위반 → 약화
-    if (fromNode.layer === Layer.L1_CORE && toNode.layer > Layer.L1_CORE) {
+    if (fromNode.layer === Layer.L1_CORE && toNode.layer > Layer.L1_CORE)
       return { ...edge, weight: CYCLE_WEIGHT };
-    }
+
     return edge;
   });
 

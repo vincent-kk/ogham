@@ -82,9 +82,9 @@ function setupGitMocks(
       if (bin !== 'git') return okResult();
       if (args.includes('--is-inside-work-tree')) return okResult('true\n');
       if (args.includes('--show-toplevel')) return okResult(`${cwd}\n`);
-      if (args[0] === 'status') {
+      if (args[0] === 'status')
         return okResult(hasChanges ? ' M .maencof/graph.json\n' : '');
-      }
+
       if (args[0] === 'commit' && commitThrows)
         return errResult('commit failed');
       return okResult();

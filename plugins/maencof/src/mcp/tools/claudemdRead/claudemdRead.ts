@@ -17,9 +17,7 @@ export function handleClaudeMdRead(cwd: string): ClaudeMdReadResult {
   const claudeMdPath = join(cwd, 'CLAUDE.md');
   const fileExists = existsSync(claudeMdPath);
 
-  if (!fileExists) {
-    return { exists: false, content: null, file_exists: false };
-  }
+  if (!fileExists) return { exists: false, content: null, file_exists: false };
 
   const content = readMaencofSection(claudeMdPath);
   return {

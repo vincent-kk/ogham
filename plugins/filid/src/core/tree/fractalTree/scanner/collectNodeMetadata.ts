@@ -18,14 +18,12 @@ export function collectNodeMetadata(
 
   // Pre-compute immediate children map: O(n) instead of O(n²) per-entry lookups
   const childrenMap = new Map<string, string[]>();
-  for (const absPath of allDirs) {
-    childrenMap.set(absPath, []);
-  }
+  for (const absPath of allDirs) childrenMap.set(absPath, []);
+
   for (const absPath of allDirs) {
     const parentDir = dirname(absPath);
-    if (parentDir && childrenMap.has(parentDir)) {
+    if (parentDir && childrenMap.has(parentDir))
       childrenMap.get(parentDir)!.push(absPath);
-    }
   }
 
   const nodeEntries: NodeEntry[] = [];

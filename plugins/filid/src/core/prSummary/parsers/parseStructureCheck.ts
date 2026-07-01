@@ -23,9 +23,7 @@ export function parseStructureCheckFrontmatter(
     const lines = stageBlock[1].split('\n');
     for (const line of lines) {
       const match = line.match(/^\s+(\w+):\s*(PASS|FAIL|SKIP)/);
-      if (match) {
-        stageResults[match[1]] = match[2];
-      }
+      if (match) stageResults[match[1]] = match[2];
     }
   }
 

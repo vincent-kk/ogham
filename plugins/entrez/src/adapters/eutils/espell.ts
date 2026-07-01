@@ -29,8 +29,8 @@ export async function espell(
     { url, params: { db: args.db, term: args.term } },
     deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     throw new Error(res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: espell`);
-  }
+
   return parseEspell(res.text);
 }

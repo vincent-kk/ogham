@@ -37,17 +37,13 @@ export function parseBenchOutput(jsonPath: string): BenchResult[] {
   const raw = readFileSync(jsonPath, 'utf-8');
   const data = JSON.parse(raw) as unknown;
 
-  if (!data || typeof data !== 'object') {
-    return [];
-  }
+  if (!data || typeof data !== 'object') return [];
 
   const results: BenchResult[] = [];
 
   // Vitest bench JSON 구조: { testResults: [...] }
   const testResults = (data as Record<string, unknown>).testResults;
-  if (!Array.isArray(testResults)) {
-    return [];
-  }
+  if (!Array.isArray(testResults)) return [];
 
   for (const suite of testResults) {
     if (!suite || typeof suite !== 'object') continue;
@@ -96,9 +92,7 @@ export function parseBenchOutput(jsonPath: string): BenchResult[] {
 
 /** 결과를 마크다운 테이블로 변환 */
 export function toMarkdownTable(results: BenchResult[]): string {
-  if (results.length === 0) {
-    return '_No benchmark results found._\n';
-  }
+  if (results.length === 0) return '_No benchmark results found._\n';
 
   const header =
     '| Benchmark | ops/sec | mean (ns) | min (ns) | max (ns) | p75 (ns) | p99 (ns) | samples |';
@@ -139,12 +133,10 @@ export function compareBenchResults(
     const faster = delta > 0;
 
     // 5% 이상 변화만 의미 있는 변화로 판단
-    if (Math.abs(deltaPercent) >= 5) {
+    if (Math.abs(deltaPercent) >= 5)
       if (faster) improved++;
       else regressed++;
-    } else {
-      unchanged++;
-    }
+    else unchanged++;
 
     entries.push({
       name: curr.name,

@@ -44,9 +44,7 @@ export async function findEntryPoint(
           e.isFile() && e.name.endsWith('.ts') && !e.name.endsWith('.d.ts'),
       )
       .map((e) => e.name);
-    if (tsFiles.length === 1) {
-      return portableJoin(modulePath, tsFiles[0]);
-    }
+    if (tsFiles.length === 1) return portableJoin(modulePath, tsFiles[0]);
   } catch {
     // 디렉토리 읽기 실패
   }

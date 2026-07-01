@@ -37,21 +37,20 @@ export async function checkTestCoverage(
       findMirrorTest(site.filePath, projectRoot) ??
       findIntegrationTest(site.filePath, projectRoot);
 
-    if (found) {
+    if (found)
       results.push({
         usageSite: site,
         hasTest: true,
         testFilePath: found.testFilePath,
         testCount: found.testCount,
       });
-    } else {
+    else
       results.push({
         usageSite: site,
         hasTest: false,
         testFilePath: null,
         testCount: 0,
       });
-    }
   }
 
   return results;

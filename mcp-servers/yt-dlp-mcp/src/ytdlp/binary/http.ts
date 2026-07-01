@@ -58,12 +58,12 @@ export async function downloadToFile(
   signal?: AbortSignal,
 ): Promise<void> {
   const res = await fetchOrThrow(url, signal);
-  if (!res.body) {
+  if (!res.body)
     throw new YtDlpMcpError(
       ErrorCode.NETWORK,
       `Empty response body from ${url}`,
     );
-  }
+
   await pipeline(
     Readable.fromWeb(res.body as import('stream/web').ReadableStream),
     createWriteStream(destPath),

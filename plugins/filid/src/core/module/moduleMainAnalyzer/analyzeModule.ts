@@ -22,7 +22,7 @@ export async function analyzeModule(modulePath: string): Promise<ModuleInfo> {
 
   const entryPoint = await findEntryPoint(absPath);
 
-  if (!entryPoint) {
+  if (!entryPoint)
     return {
       path: absPath,
       name,
@@ -31,7 +31,6 @@ export async function analyzeModule(modulePath: string): Promise<ModuleInfo> {
       imports: [],
       dependencies: [],
     };
-  }
 
   const [publicApi, rawImports] = await Promise.all([
     extractPublicApi(entryPoint),
@@ -45,17 +44,15 @@ export async function analyzeModule(modulePath: string): Promise<ModuleInfo> {
   const dependencies: string[] = [];
   const resolvedImports: string[] = [];
 
-  for (const importPath of rawImports) {
+  for (const importPath of rawImports)
     if (importPath.startsWith('.')) {
       // 상대 경로 → 절대 경로
       const resolved = portableResolve(entryDir, importPath);
       resolvedImports.push(resolved);
       dependencies.push(resolved);
-    } else {
+    } else
       // 외부 패키지는 imports에만 포함
       resolvedImports.push(importPath);
-    }
-  }
 
   return {
     path: absPath,

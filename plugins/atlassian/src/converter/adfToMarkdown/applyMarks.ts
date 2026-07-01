@@ -4,7 +4,7 @@ export function applyMarks(text: string, marks?: AdfNode["marks"]): string {
   if (!marks || marks.length === 0) return text;
 
   let result = text;
-  for (const mark of marks) {
+  for (const mark of marks)
     switch (mark.type) {
       case "strong":
         result = `**${result}**`;
@@ -22,7 +22,6 @@ export function applyMarks(text: string, marks?: AdfNode["marks"]): string {
         result = `[${result}](${(mark.attrs?.href as string) ?? ""})`;
         break;
     }
-  }
 
   return result;
 }

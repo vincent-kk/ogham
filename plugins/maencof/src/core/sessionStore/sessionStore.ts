@@ -51,7 +51,7 @@ export function recordSessionStart(
 
   if (existing) {
     if (!existing.usageBaseline) existing.usageBaseline = readUsageCounts(cwd);
-  } else {
+  } else
     log.sessions[sessionId] = {
       sessionId,
       startedAt: now.toISOString(),
@@ -59,7 +59,6 @@ export function recordSessionStart(
       filesModified: [],
       usageBaseline: readUsageCounts(cwd),
     };
-  }
 
   writeDayLog(cwd, log);
 }
@@ -150,7 +149,7 @@ function findOpenSessionDay(
   if (todayLog.sessions[sessionId]) return todayLog;
 
   const dir = getSessionsDir(cwd);
-  if (existsSync(dir)) {
+  if (existsSync(dir))
     try {
       const priorFiles = readdirSync(dir)
         .filter((f) => f.endsWith('.json') && f !== `${today}.json`)
@@ -164,7 +163,6 @@ function findOpenSessionDay(
     } catch {
       /* ignore directory read errors */
     }
-  }
 
   return todayLog;
 }
@@ -174,9 +172,8 @@ function readDayLog(cwd: string, date: string): SessionDayLog {
   if (!existsSync(path)) return { date, sessions: {} };
   try {
     const parsed = JSON.parse(readFileSync(path, 'utf-8')) as SessionDayLog;
-    if (parsed && typeof parsed === 'object' && parsed.sessions) {
+    if (parsed && typeof parsed === 'object' && parsed.sessions)
       return { date: parsed.date ?? date, sessions: parsed.sessions };
-    }
   } catch {
     /* corrupt file — fall through to empty log (no overwrite of recoverable data) */
   }
@@ -202,11 +199,10 @@ function readUsageCounts(cwd: string): Record<string, number> {
       unknown
     >;
     const counts: Record<string, number> = {};
-    for (const [key, value] of Object.entries(raw)) {
-      if (typeof value === 'number' && Number.isFinite(value)) {
+    for (const [key, value] of Object.entries(raw))
+      if (typeof value === 'number' && Number.isFinite(value))
         counts[key] = value;
-      }
-    }
+
     return counts;
   } catch {
     return {};
@@ -230,12 +226,12 @@ function formatSummary(record: SessionRecord): string {
     ? record.endedAt.slice(0, 16).replace('T', ' ')
     : 'unknown';
   const lines = [`- Last session ended ${ended} (${record.sessionId})`];
-  if (record.filesModified.length > 0) {
+  if (record.filesModified.length > 0)
     lines.push(`- Files modified: ${record.filesModified.length}`);
-  }
-  if (record.skillsUsed.length > 0) {
+
+  if (record.skillsUsed.length > 0)
     lines.push(`- Skills: ${record.skillsUsed.join(', ')}`);
-  }
+
   if (record.vaultOps && Object.keys(record.vaultOps).length > 0) {
     const ops = Object.entries(record.vaultOps)
       .map(([tool, count]) => `${tool}:${count}`)

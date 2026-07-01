@@ -22,13 +22,12 @@ export interface AstSearchInput {
 
 export async function handleAstSearch(input: AstSearchInput) {
   const sg = await getSgModule();
-  if (!sg) {
+  if (!sg)
     return {
       error:
         '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
       sgLoadError: getSgLoadError(),
     };
-  }
 
   try {
     const searchDir = input.path ?? process.cwd();

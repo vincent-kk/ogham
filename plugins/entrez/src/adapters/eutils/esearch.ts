@@ -89,8 +89,8 @@ export async function esearch(
     },
     deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     throw new Error(res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: esearch`);
-  }
+
   return parseEsearch(res.text);
 }

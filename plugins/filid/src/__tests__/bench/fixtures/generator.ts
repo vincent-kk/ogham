@@ -47,11 +47,10 @@ export function generateClaudeMdContent(
   const headerCount = lines.length;
   const remaining = lineCount - headerCount;
 
-  for (let i = 0; i < remaining; i++) {
+  for (let i = 0; i < remaining; i++)
     lines.push(
       `- Rule ${i + 1}: Follow architectural conventions and patterns`,
     );
-  }
 
   return lines.slice(0, lineCount).join('\n');
 }
@@ -71,13 +70,10 @@ export function generateFilePath(options: {
 
   const segments: string[] = ['/workspace'];
 
-  for (let i = 0; i < depth - 1; i++) {
-    if (isOrgan && i === depth - 2) {
+  for (let i = 0; i < depth - 1; i++)
+    if (isOrgan && i === depth - 2)
       segments.push(organDirs[i % organDirs.length]);
-    } else {
-      segments.push(normalDirs[i % normalDirs.length]);
-    }
-  }
+    else segments.push(normalDirs[i % normalDirs.length]);
 
   segments.push(fileName);
   return segments.join('/');
@@ -172,13 +168,12 @@ export function generateChangeQueue(changeCount: number): ChangeQueue {
   const queue = new ChangeQueue();
   const changeTypes = ['created', 'modified', 'deleted'] as const;
 
-  for (let i = 0; i < changeCount; i++) {
+  for (let i = 0; i < changeCount; i++)
     queue.enqueue({
       filePath: `/workspace/src/module-${i % 20}/file-${i}.ts`,
       changeType: changeTypes[i % changeTypes.length],
       timestamp: Date.now() - i * 1000,
     });
-  }
 
   return queue;
 }

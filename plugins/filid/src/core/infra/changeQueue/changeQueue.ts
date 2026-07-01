@@ -54,9 +54,7 @@ export class ChangeQueue {
     const dirs = new Set<string>();
     for (const record of this.queue) {
       const lastSlash = record.filePath.lastIndexOf('/');
-      if (lastSlash > 0) {
-        dirs.add(record.filePath.slice(0, lastSlash));
-      }
+      if (lastSlash > 0) dirs.add(record.filePath.slice(0, lastSlash));
     }
     return [...dirs];
   }

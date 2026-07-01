@@ -56,9 +56,8 @@ export type RuleQueryResult =
 export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
   const input = args as RuleQueryInput;
 
-  if (!input.action || !input.path) {
+  if (!input.action || !input.path)
     throw new Error('action and path are required');
-  }
 
   const { config, warnings: configWarnings } = loadConfig(input.path);
   const overrides = config?.rules ?? {};
@@ -75,11 +74,10 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
       let rules: Rule[] = activeRules;
       const filtered = Boolean(input.category);
 
-      if (input.category) {
+      if (input.category)
         rules = activeRules.filter(
           (r) => r.category === (input.category as RuleCategory),
         );
-      }
 
       const summaries: RuleSummary[] = rules.map((r) => ({
         id: r.id,
@@ -98,13 +96,11 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
     }
 
     case 'get': {
-      if (!input.ruleId) {
-        throw new Error("ruleId is required for action='get'");
-      }
+      if (!input.ruleId) throw new Error("ruleId is required for action='get'");
+
       const rule = allRules.find((r) => r.id === input.ruleId);
-      if (!rule) {
-        throw new Error(`Rule not found: ${input.ruleId}`);
-      }
+      if (!rule) throw new Error(`Rule not found: ${input.ruleId}`);
+
       return {
         id: rule.id,
         name: rule.name,
@@ -117,9 +113,8 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
     }
 
     case 'check': {
-      if (!input.targetPath) {
+      if (!input.targetPath)
         throw new Error("targetPath is required for action='check'");
-      }
 
       const maxDepth = resolveMaxDepth(config);
       const tree = await scanProject(input.path, { maxDepth });

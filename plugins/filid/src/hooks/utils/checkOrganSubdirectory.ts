@@ -18,11 +18,11 @@ export function checkOrganSubdirectory(
       break;
     }
   }
-  if (organIdx !== -1 && organIdx < segments.length - 1) {
+  if (organIdx !== -1 && organIdx < segments.length - 1)
     return [
       `Attempting to create a subdirectory inside organ directory "${organSegment}". ` +
         `Organ directories should remain flat leaf compartments without nested subdirectories.`,
     ];
-  }
+
   return [];
 }

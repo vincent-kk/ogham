@@ -39,9 +39,8 @@ export function evaluateRules(
         continue;
       }
       const nodeViolations = evaluateRule(rule, context);
-      if (nodeViolations.length === 0) {
-        passed++;
-      } else {
+      if (nodeViolations.length === 0) passed++;
+      else {
         failed++;
         violations.push(...nodeViolations);
       }

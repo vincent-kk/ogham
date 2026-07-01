@@ -99,12 +99,12 @@ export async function parseMultipart(
     }
     if (!part.name.startsWith("img_")) continue;
     const mimeType = part.mimeType ?? "";
-    if (!ALLOWED_MIME.includes(mimeType)) {
+    if (!ALLOWED_MIME.includes(mimeType))
       throw new Error(`unsupported image type: ${mimeType}`);
-    }
-    if (part.data.length > options.maxImageBytes) {
+
+    if (part.data.length > options.maxImageBytes)
       throw new Error("image exceeds max_image_mb");
-    }
+
     const image: AcceptedImage = {
       id: part.name.slice(4),
       mimeType,

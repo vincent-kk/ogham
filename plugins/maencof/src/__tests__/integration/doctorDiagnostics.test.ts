@@ -47,7 +47,7 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
     const fm = doc.frontmatter.success ? doc.frontmatter.data : undefined;
 
     // 1. missing-frontmatter
-    if (!fm?.layer) {
+    if (!fm?.layer)
       items.push({
         category: 'missing-frontmatter',
         severity: 'error',
@@ -58,10 +58,9 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
           fixable: true,
         },
       });
-    }
 
     // 2. expired-document
-    if (fm?.expires && fm.expires < today) {
+    if (fm?.expires && fm.expires < today)
       items.push({
         category: 'expired-document',
         severity: 'warning',
@@ -72,10 +71,9 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
           fixable: true,
         },
       });
-    }
 
     // 3. broken-link (상대 경로 링크 확인)
-    for (const link of doc.links) {
+    for (const link of doc.links)
       if (!link.isAbsolute) {
         const linkedAbs = join(vaultPath, link.href);
         try {
@@ -91,7 +89,6 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
           });
         }
       }
-    }
 
     // 4. layer-mismatch (디렉토리와 frontmatter layer 불일치)
     if (fm && nodeResult.success && nodeResult.node) {
@@ -106,7 +103,7 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
           5: '05_Context',
         };
         const expectedDir = layerDirMap[nodeResult.node.layer];
-        if (expectedDir && dirName !== expectedDir) {
+        if (expectedDir && dirName !== expectedDir)
           items.push({
             category: 'layer-mismatch',
             severity: 'warning',
@@ -117,7 +114,6 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
               fixable: true,
             },
           });
-        }
       }
     }
   }
@@ -130,17 +126,16 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
     const { readFile } = await import('node:fs/promises');
     const content = await readFile(file.absolutePath, 'utf-8');
     const doc = parseDocument(file.relativePath, content, 0);
-    for (const link of doc.links) {
+    for (const link of doc.links)
       if (!link.isAbsolute) linkedPaths.add(link.href);
-    }
   }
-  for (const path of allPaths) {
+  for (const path of allPaths)
     // Layer 1 문서는 고립 노드 검사 제외
     if (
       !path.startsWith('01_Core/') &&
       !linkedPaths.has(path) &&
       files.length > 1
-    ) {
+    )
       items.push({
         category: 'orphan-node',
         severity: 'info',
@@ -151,8 +146,6 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
           fixable: false,
         },
       });
-    }
-  }
 
   const errorCount = items.filter((i) => i.severity === 'error').length;
   const warningCount = items.filter((i) => i.severity === 'warning').length;
@@ -236,7 +229,7 @@ describe('Doctor 진단 통합 테스트', () => {
 
   it('진단 4: stale-index — 인덱스 신선도 부족 감지', async () => {
     // 문서 10개 생성 후 stale 추가
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++)
       await handleMaencofCreate(vault, {
         layer: 2,
         tags: [`tag-${i}`],
@@ -244,7 +237,6 @@ describe('Doctor 진단 통합 테스트', () => {
         title: `Doc ${i}`,
         filename: `doc-${i}`,
       });
-    }
 
     const buildResult = await handleKgBuild(vault, { force: true });
     expect(buildResult.success).toBe(true);

@@ -26,9 +26,7 @@ export async function discoverDirectories(
   for (const rel of dirPaths) {
     const clean = rel.replace(/\/$/, '');
     const absPath = join(rootPath, clean);
-    if (!shouldExclude(clean, opts)) {
-      allDirs.push(absPath);
-    }
+    if (!shouldExclude(clean, opts)) allDirs.push(absPath);
   }
   return allDirs;
 }

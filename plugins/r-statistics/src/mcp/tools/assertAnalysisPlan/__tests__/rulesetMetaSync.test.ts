@@ -27,9 +27,8 @@ function assumptionIds(yaml: string): string[] {
 
 describe("meta.yaml ↔ ruleset.ts consistency", () => {
   it("every ruleset technique has a readable meta.yaml", () => {
-    for (const technique of Object.keys(TECHNIQUE_RULES)) {
+    for (const technique of Object.keys(TECHNIQUE_RULES))
       expect(() => readMeta(technique)).not.toThrow();
-    }
   });
 
   it.each(Object.entries(TECHNIQUE_RULES))(

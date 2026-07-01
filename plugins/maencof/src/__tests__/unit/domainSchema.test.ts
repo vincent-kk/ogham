@@ -74,7 +74,7 @@ describe('DomainSchema', () => {
       'environment',
     ];
 
-    for (const domain of validLifeDomains) {
+    for (const domain of validLifeDomains)
       it(`life_domain '${domain}'은 유효하다`, () => {
         const result = DomainSchema.safeParse({
           domain_name: '테스트',
@@ -83,7 +83,6 @@ describe('DomainSchema', () => {
         });
         expect(result.success).toBe(true);
       });
-    }
 
     it('알 수 없는 life_domain은 실패한다', () => {
       const result = DomainSchema.safeParse({

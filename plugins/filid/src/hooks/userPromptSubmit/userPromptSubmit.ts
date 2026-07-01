@@ -23,9 +23,7 @@ export function handleUserPromptSubmit(
   input: UserPromptSubmitInput,
 ): HookOutput {
   const cwd = validateCwd(input.cwd);
-  if (cwd === null || !isFcaProject(cwd)) {
-    return { continue: true };
-  }
+  if (cwd === null || !isFcaProject(cwd)) return { continue: true };
 
   removeFractalMap(cwd, input.session_id);
   const base = injectContext(cwd, input.session_id);

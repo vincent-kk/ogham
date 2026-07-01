@@ -56,9 +56,8 @@ describe('error-log', () => {
 
   // Edge cases
   it('evicts oldest entries when exceeding 200', () => {
-    for (let i = 0; i < 201; i++) {
-      appendErrorLog(cwd, makeEntry(`hook-${i}`));
-    }
+    for (let i = 0; i < 201; i++) appendErrorLog(cwd, makeEntry(`hook-${i}`));
+
     const result = readErrorLog(cwd);
     expect(result).toHaveLength(200);
     expect(result[0].hook).toBe('hook-1');

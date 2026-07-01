@@ -62,17 +62,17 @@ describe('handleCoverageVerify', () => {
   it('returns valid CoverageVerifyResult for happy path', async () => {
     // Setup: target module exists with one export
     mockReadFileSync.mockImplementation((p) => {
-      if (p === '/project/src/shared/utils.ts') {
+      if (p === '/project/src/shared/utils.ts')
         return 'export function foo() {}';
-      }
-      if (p === '/project/src/core/service.ts') {
+
+      if (p === '/project/src/core/service.ts')
         return 'import { foo } from "../shared/utils.js";';
-      }
+
       return '';
     });
 
     mockExtractDeps.mockImplementation(async (_source, filePath) => {
-      if (filePath === '/project/src/shared/utils.ts') {
+      if (filePath === '/project/src/shared/utils.ts')
         return {
           filePath: filePath!,
           imports: [],
@@ -81,7 +81,7 @@ describe('handleCoverageVerify', () => {
           ],
           calls: [],
         };
-      }
+
       return {
         filePath: filePath!,
         imports: [

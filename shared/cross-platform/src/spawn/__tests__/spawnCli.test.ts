@@ -140,23 +140,22 @@ describe("spawnCli", () => {
         [fixture("spawn-grandchild.mjs"), pidFile],
         { detached: true, signal: controller.signal },
       );
-      while (!existsSync(pidFile)) {
-        await new Promise((r) => setTimeout(r, 20));
-      }
+      while (!existsSync(pidFile)) await new Promise((r) => setTimeout(r, 20));
+
       const gcPid = Number(readFileSync(pidFile, "utf8"));
       controller.abort();
       const result = await promise;
       expect(result.abortedByCaller).toBe(true);
 
       let alive = true;
-      for (let i = 0; i < 50 && alive; i += 1) {
+      for (let i = 0; i < 50 && alive; i += 1)
         try {
           process.kill(gcPid, 0);
           await new Promise((r) => setTimeout(r, 40));
         } catch {
           alive = false;
         }
-      }
+
       // cleanup so a regression never leaves an orphan behind in CI
       try {
         process.kill(gcPid, "SIGKILL");

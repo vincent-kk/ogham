@@ -51,7 +51,7 @@ function classify(
   finalizeSucceeded: boolean,
 ): { status: JobStatus; error?: RExecutionError } {
   if (spawn.aborted) return { status: JobStatus.Cancelled };
-  if (spawn.timedOut) {
+  if (spawn.timedOut)
     return {
       status: JobStatus.Timeout,
       error: {
@@ -60,8 +60,8 @@ function classify(
         retryable: true,
       },
     };
-  }
-  if (spawn.spawnError) {
+
+  if (spawn.spawnError)
     return {
       status: JobStatus.Failed,
       error: {
@@ -70,15 +70,15 @@ function classify(
         retryable: false,
       },
     };
-  }
+
   if (policyError) return { status: JobStatus.Failed, error: policyError };
   if (
     platform === Platform.Windows &&
     spawn.exitCode === WINDOWS_ACCESS_VIOLATION_EXIT_CODE &&
     finalizeSucceeded
-  ) {
+  )
     return { status: JobStatus.Succeeded };
-  }
+
   if (spawn.exitCode === 0) return { status: JobStatus.Succeeded };
   return {
     status: JobStatus.Failed,

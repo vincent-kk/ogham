@@ -76,9 +76,7 @@ describe('convertToDAG', () => {
       const isWeakened = weakenedEdges.some(
         (w) => w.from === edge.from && w.to === edge.to,
       );
-      if (isWeakened) {
-        expect(edge.weight).toBe(0.1);
-      }
+      if (isWeakened) expect(edge.weight).toBe(0.1);
     }
   });
 
@@ -115,9 +113,7 @@ describe('convertToDAG', () => {
       const isWeakened = weakenedEdges.some(
         (w) => w.from === edge.from && w.to === edge.to,
       );
-      if (isWeakened) {
-        expect(edge.weight).toBeLessThan(0.9);
-      }
+      if (isWeakened) expect(edge.weight).toBeLessThan(0.9);
     }
   });
 });

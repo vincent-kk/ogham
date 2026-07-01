@@ -82,7 +82,7 @@ export function syncRuleDocs(
     if (!entry.legacyFilename) continue;
     const legacyPath = join(rulesDir, entry.legacyFilename);
     const newPath = join(rulesDir, entry.filename);
-    if (existsSync(legacyPath) && !existsSync(newPath)) {
+    if (existsSync(legacyPath) && !existsSync(newPath))
       try {
         renameSync(legacyPath, newPath);
         log.debug(
@@ -91,7 +91,6 @@ export function syncRuleDocs(
       } catch (err) {
         log.error(`failed to migrate ${entry.legacyFilename}`, err);
       }
-    }
   }
 
   for (const entry of manifest.rules) {

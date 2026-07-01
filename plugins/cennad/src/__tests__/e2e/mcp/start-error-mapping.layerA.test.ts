@@ -104,7 +104,7 @@ describe('start_conversation error mapping (Layer A)', () => {
     await handle.close();
   });
 
-  for (const c of cases) {
+  for (const c of cases)
     it(c.label, async () => {
       c.applyEnv();
       const result = await handle.client.callTool({
@@ -120,5 +120,4 @@ describe('start_conversation error mapping (Layer A)', () => {
         provider: c.provider,
       });
     });
-  }
 });

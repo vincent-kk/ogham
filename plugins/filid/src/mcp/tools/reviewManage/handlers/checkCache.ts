@@ -12,12 +12,11 @@ import { normalizeBranch } from '../utils/reviewUtils.js';
 export async function handleCheckCache(
   input: ReviewManageInput,
 ): Promise<Record<string, unknown>> {
-  if (!input.branchName) {
+  if (!input.branchName)
     throw new Error('branchName is required for check-cache action');
-  }
-  if (!input.baseRef) {
+
+  if (!input.baseRef)
     throw new Error('baseRef is required for check-cache action');
-  }
 
   const normalized = normalizeBranch(input.branchName);
   const reviewDir = path.join(

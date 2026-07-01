@@ -13,9 +13,8 @@ export function checkIntentMdReclassification(
   // INTENT.md Write → organ directory reclassification notice.
   // FCA: "Fractal nodes CAN exist inside organ directories."
   // classifyNode priority 1 (hasIntentMd → fractal) guarantees reclassification.
-  if (toolName !== 'Write' || !isIntentMd(filePath)) {
-    return [];
-  }
+  if (toolName !== 'Write' || !isIntentMd(filePath)) return [];
+
   const info: string[] = [];
   let dirSoFar = cwd;
   for (const segment of segments) {

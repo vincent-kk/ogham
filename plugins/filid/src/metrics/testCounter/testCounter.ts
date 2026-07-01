@@ -33,24 +33,16 @@ export function countTestCases(file: RawTestFile): TestCaseCount {
     const trimmed = line.trim();
 
     // Track describe nesting depth
-    if (/^describe[\s.(]/.test(trimmed)) {
-      describeDepth++;
-    }
+    if (/^describe[\s.(]/.test(trimmed)) describeDepth++;
 
     // Count it() / test() / it.each() / test.each()
-    if (/^(it|test)[\s.(]/.test(trimmed)) {
-      if (describeDepth <= 1) {
-        basic++;
-      } else {
-        complex++;
-      }
-    }
+    if (/^(it|test)[\s.(]/.test(trimmed))
+      if (describeDepth <= 1) basic++;
+      else complex++;
 
     // Track closing braces to reduce depth
     // Count closing patterns: }); or }) that end a describe block
-    if (/^\}\);?\s*$/.test(trimmed) && describeDepth > 0) {
-      describeDepth--;
-    }
+    if (/^\}\);?\s*$/.test(trimmed) && describeDepth > 0) describeDepth--;
   }
 
   return {

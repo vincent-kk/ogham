@@ -32,9 +32,7 @@ export async function extractClassInfo(
       const nameNode = node
         .children()
         .find((c: SgNode) => c.kind() === 'type_identifier');
-      if (nameNode && nameNode.text() === className) {
-        classNode = node;
-      }
+      if (nameNode && nameNode.text() === className) classNode = node;
     }
   });
 
@@ -57,9 +55,7 @@ export async function extractClassInfo(
       const nameNode = member
         .children()
         .find((c: SgNode) => c.kind() === 'property_identifier');
-      if (nameNode) {
-        fields.push(nameNode.text());
-      }
+      if (nameNode) fields.push(nameNode.text());
     }
 
     // Methods: method_definition
@@ -70,12 +66,11 @@ export async function extractClassInfo(
       const bodyNode = member
         .children()
         .find((c: SgNode) => c.kind() === 'statement_block');
-      if (nameNode && bodyNode) {
+      if (nameNode && bodyNode)
         methods.push({
           name: nameNode.text(),
           accessedFields: findThisAccesses(bodyNode),
         });
-      }
     }
   }
 
@@ -88,19 +83,18 @@ export async function calculateLCOM4(
 ): Promise<LCOM4Result> {
   const info = await extractClassInfo(source, className);
 
-  if (!info || info.methods.length === 0) {
+  if (!info || info.methods.length === 0)
     return {
       value: 0,
       components: [],
       methodCount: info?.methods.length ?? 0,
       fieldCount: info?.fields.length ?? 0,
     };
-  }
 
   const adjacency = new Map<string, Set<string>>();
   for (const m of info.methods) adjacency.set(m.name, new Set());
 
-  for (let i = 0; i < info.methods.length; i++) {
+  for (let i = 0; i < info.methods.length; i++)
     for (let j = i + 1; j < info.methods.length; j++) {
       const a = info.methods[i];
       const b = info.methods[j];
@@ -109,7 +103,6 @@ export async function calculateLCOM4(
         adjacency.get(b.name)!.add(a.name);
       }
     }
-  }
 
   const visited = new Set<string>();
   const components: string[][] = [];
@@ -122,12 +115,11 @@ export async function calculateLCOM4(
     while (queue.length > 0) {
       const cur = queue.shift()!;
       component.push(cur);
-      for (const nb of adjacency.get(cur)!) {
+      for (const nb of adjacency.get(cur)!)
         if (!visited.has(nb)) {
           visited.add(nb);
           queue.push(nb);
         }
-      }
     }
     components.push(component);
   }

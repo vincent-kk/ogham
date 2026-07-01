@@ -44,12 +44,9 @@ export async function handleCoverageVerify(
 ): Promise<CoverageVerifyResult> {
   const input = args as CoverageVerifyInput;
 
-  if (!input.projectRoot) {
-    throw new Error('projectRoot is required');
-  }
-  if (!input.targetPath) {
-    throw new Error('targetPath is required');
-  }
+  if (!input.projectRoot) throw new Error('projectRoot is required');
+
+  if (!input.targetPath) throw new Error('targetPath is required');
 
   // 1. Resolve targetPath
   const absTarget = isPosixLikePath(input.targetPath)

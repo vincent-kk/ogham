@@ -44,15 +44,11 @@ describe('agent-enforcer: unknown/pass-through roles', () => {
 
 describe('agent-enforcer: rapid role switching', () => {
   bench('cycle through all 4 known roles', () => {
-    for (const input of knownInputs) {
-      enforceAgentRole(input);
-    }
+    for (const input of knownInputs) enforceAgentRole(input);
   });
 
   bench('mixed known + unknown roles (10 calls)', () => {
     const allInputs = [...knownInputs, ...unknownInputs.slice(0, 6)];
-    for (const input of allInputs) {
-      enforceAgentRole(input);
-    }
+    for (const input of allInputs) enforceAgentRole(input);
   });
 });

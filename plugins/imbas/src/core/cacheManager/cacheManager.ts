@@ -22,20 +22,19 @@ export async function loadCache(
 ): Promise<unknown> {
   if (cacheType === 'all') {
     const result: Record<string, unknown> = {};
-    for (const [key, filename] of Object.entries(CACHE_FILE_MAP)) {
+    for (const [key, filename] of Object.entries(CACHE_FILE_MAP))
       try {
         result[key] = await readJson(join(cacheDir, filename));
       } catch {
         // skip missing cache files
       }
-    }
+
     return result;
   }
 
   const filename = CACHE_FILE_MAP[cacheType];
-  if (!filename) {
-    throw new Error(`Unknown cache type: ${cacheType}`);
-  }
+  if (!filename) throw new Error(`Unknown cache type: ${cacheType}`);
+
   return readJson(join(cacheDir, filename));
 }
 
@@ -46,9 +45,7 @@ export async function saveCache(
   data: unknown,
 ): Promise<void> {
   const filename = CACHE_FILE_MAP[cacheType];
-  if (!filename) {
-    throw new Error(`Unknown cache type: ${cacheType}`);
-  }
+  if (!filename) throw new Error(`Unknown cache type: ${cacheType}`);
 
   await writeJson(join(cacheDir, filename), data);
 
@@ -95,11 +92,10 @@ export async function clearCache(cacheDir: string): Promise<void> {
     return;
   }
 
-  for (const entry of entries) {
+  for (const entry of entries)
     try {
       rmSync(join(cacheDir, entry), { force: true });
     } catch {
       // best effort
     }
-  }
 }

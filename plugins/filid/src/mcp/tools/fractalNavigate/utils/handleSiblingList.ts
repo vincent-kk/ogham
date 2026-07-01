@@ -17,9 +17,7 @@ export function handleSiblingList(
   const parentPath = lastSlash > 0 ? input.path.slice(0, lastSlash) : '';
   const parentNode = findNode(tree, parentPath);
 
-  if (!parentNode) {
-    return { siblings: [] };
-  }
+  if (!parentNode) return { siblings: [] };
 
   // children and organs are string[] (paths), resolve them to node info
   const allChildPaths = [...parentNode.children, ...parentNode.organs];

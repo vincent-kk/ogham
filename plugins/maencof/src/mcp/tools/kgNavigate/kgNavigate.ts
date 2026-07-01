@@ -44,9 +44,7 @@ function getEdgesForNode(
 
   // inbound는 역방향이므로 전체 엣지에서 필터 (향후 역 인접 리스트로 최적화 가능)
   const inbound: KnowledgeEdge[] = [];
-  for (const edge of graph.edges) {
-    if (edge.to === nodeId) inbound.push(edge);
-  }
+  for (const edge of graph.edges) if (edge.to === nodeId) inbound.push(edge);
 
   return { outbound, inbound };
 }
@@ -142,18 +140,15 @@ export async function handleKgNavigate(
   graph: KnowledgeGraph | null,
   input: KgNavigateInput,
 ): Promise<KgNavigateResult | { error: string }> {
-  if (!graph) {
+  if (!graph)
     return {
       error: 'Index not built. Please run /maencof:build first.',
     };
-  }
 
   const nodeId = toNodeId(input.path);
   const node = graph.nodes.get(nodeId);
 
-  if (!node) {
-    return { error: `Node not found: ${input.path}` };
-  }
+  if (!node) return { error: `Node not found: ${input.path}` };
 
   const includeInbound = input.include_inbound ?? true;
   const includeOutbound = input.include_outbound ?? true;

@@ -39,7 +39,7 @@ export async function spawnCodex(
       abortedByCaller: false,
     };
   }
-  if (result.abortedByCaller) {
+  if (result.abortedByCaller)
     return {
       exitCode: -1,
       stdout: result.stdout,
@@ -47,8 +47,8 @@ export async function spawnCodex(
       spawnError: null,
       abortedByCaller: true,
     };
-  }
-  if (result.spawnError) {
+
+  if (result.spawnError)
     return {
       exitCode: -1,
       stdout: result.stdout,
@@ -56,7 +56,7 @@ export async function spawnCodex(
       spawnError: result.spawnError as NodeJS.ErrnoException,
       abortedByCaller: false,
     };
-  }
+
   return {
     exitCode: result.code ?? 0,
     stdout: result.stdout,

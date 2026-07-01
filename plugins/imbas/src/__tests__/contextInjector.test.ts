@@ -54,9 +54,8 @@ function input(cwd: string): UserPromptSubmitInput {
 }
 
 afterEach(() => {
-  for (const dir of dirs.splice(0)) {
+  for (const dir of dirs.splice(0))
     if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
-  }
 });
 
 describe('processContextInjector — graceful-degradation paths', () => {

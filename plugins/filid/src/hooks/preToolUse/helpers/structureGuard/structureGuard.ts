@@ -6,14 +6,11 @@ import { getParentSegments } from '../../../utils/getParentSegments.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
 
 export function guardStructure(input: PreToolUseInput): HookOutput {
-  if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
+  if (input.tool_name !== 'Write' && input.tool_name !== 'Edit')
     return { continue: true };
-  }
 
   const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
-  if (!filePath) {
-    return { continue: true };
-  }
+  if (!filePath) return { continue: true };
 
   const cwd = validateCwd(input.cwd);
   if (cwd === null) return { continue: true };
@@ -31,23 +28,20 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
     ...checkCircularImports(filePath, content, cwd),
   ];
 
-  if (warnings.length === 0 && info.length === 0) {
-    return { continue: true };
-  }
+  if (warnings.length === 0 && info.length === 0) return { continue: true };
 
   const parts: string[] = [];
-  if (info.length > 0) {
+  if (info.length > 0)
     parts.push(
       `[filid:info] structure-guard:\n` +
         info.map((m, i) => `${i + 1}. ${m}`).join('\n'),
     );
-  }
-  if (warnings.length > 0) {
+
+  if (warnings.length > 0)
     parts.push(
       `[filid:warn] structure-guard:\n` +
         warnings.map((w, i) => `${i + 1}. ${w}`).join('\n'),
     );
-  }
 
   return {
     continue: true,

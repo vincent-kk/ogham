@@ -59,9 +59,8 @@ export async function collectArtifacts(
   }
 
   const kindByFile = new Map<string, ArtifactKind>();
-  for (const entry of manifest?.artifacts ?? []) {
+  for (const entry of manifest?.artifacts ?? [])
     kindByFile.set(entry.file, entry.kind);
-  }
 
   const collected: RArtifact[] = [];
   for (const name of entries) {
@@ -76,9 +75,9 @@ export async function collectArtifacts(
     } catch {
       continue;
     }
-    if (real !== join(realRoot, name) && !real.startsWith(realRoot + sep)) {
+    if (real !== join(realRoot, name) && !real.startsWith(realRoot + sep))
       throw new Error(ERROR_MESSAGES.ARTIFACT_OUTSIDE_DIR);
-    }
+
     if (!(await stat(real)).isFile()) continue;
 
     collected.push({

@@ -17,9 +17,8 @@ export function buildDynamicPayload(
 
   const lines = ['[cennad] Live state', ''];
 
-  if (total === 0) {
-    lines.push('No calls this session yet.');
-  } else {
+  if (total === 0) lines.push('No calls this session yet.');
+  else {
     const r = formatRatio(lanes);
     lines.push(
       `Calls this session: ${lanes
@@ -31,9 +30,7 @@ export function buildDynamicPayload(
     lines.push(`Drift:              ${r.drift}   (target - current)`);
   }
 
-  if (!anyEnabled) {
-    lines.push('Available providers: none — run /setup');
-  }
+  if (!anyEnabled) lines.push('Available providers: none — run /setup');
 
   return lines.join('\n');
 }

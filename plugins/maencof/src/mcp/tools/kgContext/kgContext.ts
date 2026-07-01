@@ -19,11 +19,10 @@ export async function handleKgContext(
   input: KgContextInput,
   vaultRoot?: string,
 ): Promise<KgContextResult | { error: string }> {
-  if (!graph) {
+  if (!graph)
     return {
       error: 'Index not built. Please run /maencof:build first.',
     };
-  }
 
   const tokenBudget = input.token_budget ?? 2000;
   const includeFull = input.include_full ?? false;
@@ -61,21 +60,19 @@ export async function handleKgContext(
 
     // Rebuild markdown with snippets appended
     const snippetLines: string[] = [];
-    for (const item of topItems) {
-      if (item.fullContent) {
+    for (const item of topItems)
+      if (item.fullContent)
         snippetLines.push(
           `\n### ${item.title}\n\`\`\`\n${item.fullContent}\n\`\`\``,
         );
-      }
-    }
-    if (snippetLines.length > 0) {
+
+    if (snippetLines.length > 0)
       return {
         context: assembled.markdown + '\n' + snippetLines.join('\n'),
         documentCount: assembled.items.length,
         estimatedTokens: assembled.estimatedTokens,
         truncatedCount: assembled.truncatedCount,
       };
-    }
   }
 
   return {

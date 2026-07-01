@@ -2,9 +2,8 @@ import { compactReversible } from '../../../../compress/reversibleCompactor/reve
 import type { DocCompressInput, DocCompressOutput } from '../docCompress.js';
 
 export function handleReversible(input: DocCompressInput): DocCompressOutput {
-  if (!input.content || !input.filePath) {
+  if (!input.content || !input.filePath)
     return { error: 'Reversible mode requires filePath and content' };
-  }
 
   const result = compactReversible({
     filePath: input.filePath,

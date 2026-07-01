@@ -23,7 +23,7 @@ export function wrapHandler<T>(
         result &&
         typeof result === 'object' &&
         'error' in result
-      ) {
+      )
         return {
           content: [
             {
@@ -32,7 +32,7 @@ export function wrapHandler<T>(
             },
           ],
         };
-      }
+
       return toolResult(result);
     } catch (error) {
       return toolError(error);

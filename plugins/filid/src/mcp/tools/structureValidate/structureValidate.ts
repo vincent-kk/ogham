@@ -38,9 +38,7 @@ export async function handleStructureValidate(
 ): Promise<StructureValidateResult> {
   const input = args as StructureValidateInput;
 
-  if (!input.path) {
-    throw new Error('path is required');
-  }
+  if (!input.path) throw new Error('path is required');
 
   const { config, warnings: configWarnings } = loadConfig(input.path);
   const overrides = config?.rules ?? {};

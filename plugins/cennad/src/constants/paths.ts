@@ -72,9 +72,8 @@ export function artifactDir(
   cwd: string,
   projectHash: string,
 ): string {
-  if (location === 'project') {
-    return join(cwd, '.cennad', 'artifacts');
-  }
+  if (location === 'project') return join(cwd, '.cennad', 'artifacts');
+
   return join(ARTIFACTS_DIR_USER, projectHash);
 }
 

@@ -21,7 +21,7 @@ const UNREGISTERED_TECHNIQUE = "unregistered_technique";
  */
 export function evaluateSoftRules(input: AssertInput): SoftEvaluation {
   const rule = TECHNIQUE_RULES[input.method.technique];
-  if (!rule) {
+  if (!rule)
     return {
       reasons: [
         soft(
@@ -33,7 +33,6 @@ export function evaluateSoftRules(input: AssertInput): SoftEvaluation {
       ],
       recommendedAlternatives: [],
     };
-  }
 
   const byId = new Map(
     (input.assumptionArtifacts ?? []).map((a) => [a.assumptionId, a]),

@@ -98,11 +98,11 @@ export function applyTransition(
 
     case 'escape_phase': {
       const phase = action.phase; // always 'split'
-      if (state.phases[phase].status !== 'in_progress') {
+      if (state.phases[phase].status !== 'in_progress')
         throw new Error(
           `Cannot escape phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
         );
-      }
+
       const updated = structuredClone(state);
       updated.phases.split.status = 'escaped';
       updated.phases.split.completed_at = now;

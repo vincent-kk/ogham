@@ -44,9 +44,7 @@ export interface SessionEndResult {
 export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   const cwd = input.cwd ?? process.cwd();
 
-  if (!isMaencofVault(cwd)) {
-    return { continue: true };
-  }
+  if (!isMaencofVault(cwd)) return { continue: true };
 
   // 1. Finalize the session in the per-day session store (JSON, keyed by session_id),
   //    then rebuild that day's work-history digest. recordSessionEnd returns the date
@@ -69,9 +67,8 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   // 2. Clean up context injection cache (session-specific files only)
   try {
     const sessionId = input.session_id ?? '';
-    if (sessionId) {
-      removeSessionFiles(sessionId, cwd);
-    }
+    if (sessionId) removeSessionFiles(sessionId, cwd);
+
     // turn-context는 session-scope이므로 sessionId와 무관하게 종료 시 폐기
     removeTurnContext(cwd);
   } catch (e) {

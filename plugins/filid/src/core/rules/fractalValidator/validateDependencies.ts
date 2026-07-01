@@ -8,9 +8,7 @@ function detectCycles(tree: FractalTree): string[][] {
   const state = new Map<string, 'unvisited' | 'visiting' | 'visited'>();
   const cycles: string[][] = [];
 
-  for (const [path] of tree.nodes) {
-    state.set(path, 'unvisited');
-  }
+  for (const [path] of tree.nodes) state.set(path, 'unvisited');
 
   function dfs(nodePath: string, stack: string[]): void {
     state.set(nodePath, 'visiting');
@@ -19,25 +17,17 @@ function detectCycles(tree: FractalTree): string[][] {
     const node = tree.nodes.get(nodePath);
     const deps = [...(node?.children ?? []), ...(node?.organs ?? [])];
 
-    for (const dep of deps) {
+    for (const dep of deps)
       if (state.get(dep) === 'visiting') {
         const cycleStart = stack.indexOf(dep);
-        if (cycleStart !== -1) {
-          cycles.push(stack.slice(cycleStart));
-        }
-      } else if (state.get(dep) !== 'visited') {
-        dfs(dep, [...stack]);
-      }
-    }
+        if (cycleStart !== -1) cycles.push(stack.slice(cycleStart));
+      } else if (state.get(dep) !== 'visited') dfs(dep, [...stack]);
 
     state.set(nodePath, 'visited');
   }
 
-  for (const [path] of tree.nodes) {
-    if (state.get(path) !== 'visited') {
-      dfs(path, []);
-    }
-  }
+  for (const [path] of tree.nodes)
+    if (state.get(path) !== 'visited') dfs(path, []);
 
   return cycles;
 }
@@ -53,7 +43,7 @@ export function validateDependencies(tree: FractalTree): RuleViolation[] {
   const violations: RuleViolation[] = [];
   const cycles = detectCycles(tree);
 
-  for (const cycle of cycles) {
+  for (const cycle of cycles)
     violations.push({
       ruleId: 'circular-dependency',
       severity: 'error',
@@ -61,7 +51,6 @@ export function validateDependencies(tree: FractalTree): RuleViolation[] {
       path: cycle[0] ?? '',
       suggestion: 'Extract shared logic to a common ancestor fractal.',
     });
-  }
 
   return violations;
 }

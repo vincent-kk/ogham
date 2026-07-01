@@ -62,9 +62,8 @@ export function buildDailyDigest(cwd: string, date: string): void {
       const ms = Date.parse(session.endedAt) - Date.parse(session.startedAt);
       if (ms > 0) totalDurationMin += Math.round(ms / 60000);
     }
-    for (const [tool, count] of Object.entries(session.vaultOps ?? {})) {
+    for (const [tool, count] of Object.entries(session.vaultOps ?? {}))
       vaultOps[tool] = (vaultOps[tool] ?? 0) + count;
-    }
   }
 
   const paths = [
@@ -143,13 +142,12 @@ export function aggregatePeriod(
     activeDays += 1;
     sessionCount += digest.sessionCount;
     totalDurationMin += digest.totalDurationMin;
-    for (const [tool, count] of Object.entries(digest.vaultOps)) {
+    for (const [tool, count] of Object.entries(digest.vaultOps))
       vaultOps[tool] = (vaultOps[tool] ?? 0) + count;
-    }
+
     for (const layer of digest.layers) layers.add(layer);
-    for (const topic of digest.topics) {
+    for (const topic of digest.topics)
       topicDays.set(topic, (topicDays.get(topic) ?? 0) + 1);
-    }
   }
 
   const topTopics = [...topicDays.entries()]
@@ -198,9 +196,8 @@ function readReverseIndex(path: string): ReverseIndex | null {
   if (!existsSync(path)) return null;
   try {
     const parsed = JSON.parse(readFileSync(path, 'utf-8')) as ReverseIndex;
-    if (parsed && parsed.index && typeof parsed.index === 'object') {
+    if (parsed && parsed.index && typeof parsed.index === 'object')
       return parsed;
-    }
   } catch {
     /* corrupt — 재파생 */
   }

@@ -13,14 +13,14 @@ function truncate(text: string, max = 80): string {
 
 /** Lead directive telling Claude what the user wants done with this submission. */
 function leadLine(intent: FeedbackIntent, hasItems: boolean): string {
-  if (intent === FeedbackIntent.Dismiss) {
+  if (intent === FeedbackIntent.Dismiss)
     return "The user closed the viewer without submitting feedback — no changes requested. Continue, or wait for their next message.";
-  }
-  if (intent === FeedbackIntent.Discuss) {
+
+  if (intent === FeedbackIntent.Discuss)
     return hasItems
       ? "The user reviewed the document and wants to CONTINUE THE CONVERSATION about the points below. Discuss or answer them in chat — do not rewrite the document unless they ask."
       : "The user reviewed the document, left no comments, and chose to continue in chat. Proceed with the conversation.";
-  }
+
   return hasItems
     ? "The user reviewed the document and requests REVISIONS. Apply the comments below, then re-display the updated document (call render_viewer again, then collect_feedback) so they can review the next iteration."
     : "The user submitted the review with no comments — no changes requested. Continue.";
@@ -73,7 +73,7 @@ export async function buildFeedbackContent(
   const content: CallToolResult["content"] = [
     { type: "text", text: lines.join("\n") },
   ];
-  for (const image of feedback.images) {
+  for (const image of feedback.images)
     try {
       const data = await readFile(sessionImagePath(sessionId, image.path));
       content.push({
@@ -84,6 +84,6 @@ export async function buildFeedbackContent(
     } catch {
       /* skip an unreadable attachment rather than failing the whole result */
     }
-  }
+
   return { content };
 }

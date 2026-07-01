@@ -30,14 +30,14 @@ export async function extractDeclarations(
     } else if (
       kind === 'lexical_declaration' ||
       kind === 'variable_declaration'
-    ) {
+    )
       for (const d of stmt.children()) {
         if (d.kind() === 'variable_declarator') {
           const name = getNameFromNode(d, 'identifier');
           if (name) decls.push({ name, kind: 'variable', normalized, line });
         }
       }
-    } else if (kind === 'interface_declaration') {
+    else if (kind === 'interface_declaration') {
       const name = getNameFromNode(stmt, 'type_identifier');
       if (name) decls.push({ name, kind: 'interface', normalized, line });
     } else if (kind === 'type_alias_declaration') {
@@ -66,7 +66,7 @@ export async function extractDeclarations(
         } else if (
           ck === 'lexical_declaration' ||
           ck === 'variable_declaration'
-        ) {
+        )
           for (const d of child.children()) {
             if (d.kind() === 'variable_declarator') {
               const name = getNameFromNode(d, 'identifier');
@@ -79,7 +79,7 @@ export async function extractDeclarations(
                 });
             }
           }
-        } else if (ck === 'interface_declaration') {
+        else if (ck === 'interface_declaration') {
           const name = getNameFromNode(child, 'type_identifier');
           if (name)
             decls.push({

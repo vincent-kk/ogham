@@ -19,17 +19,14 @@ export async function handleRunList(input: RunListInput) {
   if (!project_ref) {
     const config = await loadConfig(cwd);
     project_ref = config.defaults.project_ref ?? undefined;
-    if (!project_ref) {
+    if (!project_ref)
       throw new Error(
         'project_ref is required (or set defaults.project_ref in config)',
       );
-    }
   }
 
   const runsDir = getRunsDir(cwd, project_ref);
-  if (!existsSync(runsDir)) {
-    return { runs: [] };
-  }
+  if (!existsSync(runsDir)) return { runs: [] };
 
   const entries = readdirSync(runsDir).sort();
   const runs = [];

@@ -230,12 +230,11 @@ describe('buildImplementPlan edge cases', () => {
       makeStories([story('S1')]),
       makeDevplan([task('T1', [])]),
     );
-    for (const g of plan.groups) {
+    for (const g of plan.groups)
       for (const i of g.items) {
         expect(typeof i.rationale).toBe('string');
         expect(i.rationale.length).toBeGreaterThan(0);
       }
-    }
   });
 
   it('fills depends_on_groups with immediate previous level group ids', () => {
@@ -284,8 +283,6 @@ describe('buildImplementPlan edge cases', () => {
     expect(report).toContain('Implement Plan');
     expect(report).toContain('Level 0');
     expect(report).toContain('Level 1');
-    for (const g of plan.groups) {
-      expect(report).toContain(g.group_id);
-    }
+    for (const g of plan.groups) expect(report).toContain(g.group_id);
   });
 });

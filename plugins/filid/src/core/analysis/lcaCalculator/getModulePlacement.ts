@@ -15,9 +15,8 @@ export function getModulePlacement(
   tree: FractalTree,
   dependencies: string[],
 ): { suggestedParent: string; confidence: number } {
-  if (dependencies.length === 0) {
+  if (dependencies.length === 0)
     return { suggestedParent: tree.root, confidence: 0 };
-  }
 
   if (dependencies.length === 1) {
     const node = tree.nodes.get(dependencies[0]);
@@ -30,7 +29,7 @@ export function getModulePlacement(
   let pairCount = 0;
   let foundCount = 0;
 
-  for (let i = 0; i < dependencies.length; i++) {
+  for (let i = 0; i < dependencies.length; i++)
     for (let j = i + 1; j < dependencies.length; j++) {
       pairCount++;
       const lca = findLCA(tree, dependencies[i], dependencies[j]);
@@ -42,7 +41,6 @@ export function getModulePlacement(
         }
       }
     }
-  }
 
   const suggestedParent = deepestLCA?.path ?? tree.root;
   const confidence = pairCount > 0 ? foundCount / pairCount : 0;

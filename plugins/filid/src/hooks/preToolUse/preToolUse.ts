@@ -38,13 +38,13 @@ export async function handlePreToolUse(
   if (input.tool_name === 'Write' || input.tool_name === 'Edit') {
     const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
     let oldContent: string | undefined;
-    if (isDetailMd(filePath) || isCriteriaMd(filePath)) {
+    if (isDetailMd(filePath) || isCriteriaMd(filePath))
       try {
         oldContent = readFileSync(resolve(safeCwd, filePath), 'utf-8');
       } catch {
         /* new file */
       }
-    }
+
     const docTarget =
       isIntentMd(filePath) || isDetailMd(filePath) || isCriteriaMd(filePath);
     const spikeMode = docTarget && isSpikeBranch(readCurrentBranch(safeCwd));

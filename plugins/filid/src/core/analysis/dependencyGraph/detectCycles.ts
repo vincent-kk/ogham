@@ -10,9 +10,7 @@ export function detectCycles(dag: DependencyDAG): string[][] {
   const BLACK = 2; // Completed
 
   const color = new Map<string, number>();
-  for (const node of dag.nodes) {
-    color.set(node, WHITE);
-  }
+  for (const node of dag.nodes) color.set(node, WHITE);
 
   const cycles: string[][] = [];
   const path: string[] = [];
@@ -28,20 +26,14 @@ export function detectCycles(dag: DependencyDAG): string[][] {
         // Cycle found: slice from neighbor to current in path
         const cycleStart = path.indexOf(neighbor);
         cycles.push(path.slice(cycleStart));
-      } else if (c === WHITE) {
-        dfs(neighbor);
-      }
+      } else if (c === WHITE) dfs(neighbor);
     }
 
     path.pop();
     color.set(node, BLACK);
   }
 
-  for (const node of dag.nodes) {
-    if (color.get(node) === WHITE) {
-      dfs(node);
-    }
-  }
+  for (const node of dag.nodes) if (color.get(node) === WHITE) dfs(node);
 
   return cycles;
 }

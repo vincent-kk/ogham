@@ -32,9 +32,9 @@ export function composePrompt(input: ComposePromptInput): string {
   if (recencyBody === null && preamble === null) return input.prompt;
 
   const parts: string[] = [];
-  if (recencyBody !== null) {
+  if (recencyBody !== null)
     parts.push(`<recency_policy>\n${recencyBody}\n</recency_policy>`);
-  }
+
   if (preamble !== null) parts.push(preamble);
   parts.push(input.prompt);
   return parts.join('\n\n');

@@ -11,15 +11,14 @@ export function parseJsonOutput(stdout: string): string | null {
   if (text.length === 0) return null;
   try {
     const json: unknown = JSON.parse(text);
-    if (typeof json === 'string') {
+    if (typeof json === 'string')
       return json.trim().length > 0 ? json.trim() : null;
-    }
+
     if (isRecord(json)) {
       for (const key of ['response', 'output', 'text', 'message', 'result']) {
         const value = json[key];
-        if (typeof value === 'string' && value.trim().length > 0) {
+        if (typeof value === 'string' && value.trim().length > 0)
           return value.trim();
-        }
       }
       return null;
     }

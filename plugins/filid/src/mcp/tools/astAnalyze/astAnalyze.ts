@@ -37,12 +37,11 @@ export async function handleAstAnalyze(
   input: AstAnalyzeInput,
 ): Promise<Record<string, unknown>> {
   const sg = await getSgModule();
-  if (!sg) {
+  if (!sg)
     return {
       error: `@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi`,
       sgLoadError: getSgLoadError(),
     };
-  }
 
   const filePath = input.filePath ?? 'anonymous.ts';
 
@@ -57,9 +56,9 @@ export async function handleAstAnalyze(
     }
 
     case 'lcom4': {
-      if (!input.className) {
+      if (!input.className)
         throw new Error('className is required for lcom4 analysis');
-      }
+
       const result = await calculateLCOM4(input.source, input.className);
       return {
         value: result.value,

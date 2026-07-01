@@ -18,9 +18,7 @@ export function buildThreads(
     if (parent) {
       parent.replies = parent.replies ?? [];
       parent.replies.push(node);
-    } else {
-      roots.push(node);
-    }
+    } else roots.push(node);
   }
   return roots;
 }

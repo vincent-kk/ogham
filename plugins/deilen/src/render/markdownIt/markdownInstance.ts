@@ -35,9 +35,9 @@ function createMarkdownIt(): MarkdownIt {
     const lang = token.info.trim().split(/\s+/, 1)[0] ?? "";
     const attrs = lineAttrs(token);
     const escaped = escapeHtml(token.content);
-    if (lang === "mermaid") {
+    if (lang === "mermaid")
       return `<div class="deilen-mermaid"${attrs}><pre class="deilen-mermaid-src">${escaped}</pre></div>\n`;
-    }
+
     const langClass = lang ? ` class="language-${escapeHtml(lang)}"` : "";
     const langAttr = lang ? ` data-lang="${escapeHtml(lang)}"` : "";
     return `<pre${attrs}><code${langClass}${langAttr}>${escaped}</code></pre>\n`;

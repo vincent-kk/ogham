@@ -40,9 +40,8 @@ export function checkModuleEntryPoint(
         frameworkFiles &&
         frameworkFiles.length > 0 &&
         peerFiles.some((f) => ALL_FRAMEWORK_ENTRY_FILES.has(f))
-      ) {
+      )
         return [];
-      }
     }
 
     return [

@@ -9,15 +9,11 @@ export function parseFrontmatter(
     if (colonIdx === -1) continue;
     const key = line.slice(0, colonIdx).trim();
     let value = line.slice(colonIdx + 1).trim();
-    if (value === 'null') {
-      result[key] = null;
-    } else if (/^\d+(\.\d+)?$/.test(value)) {
-      result[key] = Number(value);
-    } else if (value.startsWith('"') && value.endsWith('"')) {
+    if (value === 'null') result[key] = null;
+    else if (/^\d+(\.\d+)?$/.test(value)) result[key] = Number(value);
+    else if (value.startsWith('"') && value.endsWith('"'))
       result[key] = value.slice(1, -1).replace(/\\"/g, '"');
-    } else {
-      result[key] = value;
-    }
+    else result[key] = value;
   }
   return result;
 }

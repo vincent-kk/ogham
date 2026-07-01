@@ -60,14 +60,13 @@ export function pruneStaleCacheDirs(): void {
       `pruneStaleCacheDirs: ${staleDirs.length}/${dirs.length} stale dirs to remove`,
     );
 
-    for (const dirPath of staleDirs) {
+    for (const dirPath of staleDirs)
       try {
         rmSync(dirPath, { recursive: true, force: true });
         log.debug(`pruneStaleCacheDirs: removed ${dirPath}`);
       } catch (e) {
         log.debug(`pruneStaleCacheDirs: failed to remove ${dirPath}:`, e);
       }
-    }
   } catch (e) {
     log.debug('pruneStaleCacheDirs: top-level error:', e);
   }

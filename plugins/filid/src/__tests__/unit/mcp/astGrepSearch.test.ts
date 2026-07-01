@@ -52,9 +52,7 @@ describe('handleAstGrepSearch', () => {
   let tmpDir: string;
 
   afterEach(() => {
-    if (tmpDir) {
-      rmSync(tmpDir, { recursive: true, force: true });
-    }
+    if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
   });
 
   describe('when @ast-grep/napi is not available', () => {
@@ -74,10 +72,9 @@ describe('handleAstGrepSearch', () => {
         expect(result.error).toBeTypeOf('string');
         expect(result.error.length).toBeGreaterThan(0);
         expect(result.sgLoadError).toBeTypeOf('string');
-      } else {
+      } else
         // If @ast-grep/napi is installed, we get a valid result — that is also acceptable
         expect(isSearchResult(result) || isNoMatchesMessage(result)).toBe(true);
-      }
     });
   });
 
@@ -94,9 +91,8 @@ describe('handleAstGrepSearch', () => {
       });
 
       // If sg is unavailable, we get an error object — still valid to check
-      if (isSearchError(result)) {
-        expect(result.error).toBeTypeOf('string');
-      } else {
+      if (isSearchError(result)) expect(result.error).toBeTypeOf('string');
+      else {
         expect(isNoFilesMessage(result)).toBe(true);
         if (isNoFilesMessage(result)) {
           expect(result.filesSearched).toBe(0);
@@ -115,9 +111,8 @@ describe('handleAstGrepSearch', () => {
         path: tmpDir,
       });
 
-      if (!isSearchError(result) && isNoFilesMessage(result)) {
+      if (!isSearchError(result) && isNoFilesMessage(result))
         expect(result.message).toContain('python');
-      }
     });
   });
 
@@ -135,19 +130,18 @@ describe('handleAstGrepSearch', () => {
         path: tmpDir,
       });
 
-      if (isSearchError(result)) {
+      if (isSearchError(result))
         // @ast-grep/napi unavailable — acceptable
         expect(result.error).toBeTypeOf('string');
-      } else if (isNoFilesMessage(result)) {
+      else if (isNoFilesMessage(result))
         // Should not happen — we wrote a .ts file
         expect(result.filesSearched).toBe(0);
-      } else if (isNoMatchesMessage(result)) {
+      else if (isNoMatchesMessage(result)) {
         expect(result.filesSearched).toBeGreaterThan(0);
         expect((result as { message: string }).message).toContain('No matches');
-      } else if (isSearchResult(result)) {
+      } else if (isSearchResult(result))
         // Pattern matched — valid if @ast-grep/napi is present
         expect(result.matches).toBeDefined();
-      }
     });
   });
 
@@ -182,9 +176,8 @@ describe('handleAstGrepSearch', () => {
         path: tmpDir,
       });
 
-      if (isSearchError(result)) {
+      if (isSearchError(result))
         expect(result.error).toContain('@ast-grep/napi');
-      }
     });
   });
 

@@ -156,8 +156,6 @@ describe('SA with sub-layer decay', () => {
     });
 
     expect(results.length).toBeLessThanOrEqual(100);
-    for (const r of results) {
-      expect(r.score).toBeLessThanOrEqual(1.0);
-    }
+    for (const r of results) expect(r.score).toBeLessThanOrEqual(1.0);
   });
 });

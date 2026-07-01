@@ -91,9 +91,8 @@ export async function scanVault(
  */
 export function buildSnapshot(files: ScannedFile[]): FileSnapshot {
   const snapshot: FileSnapshot = new Map();
-  for (const file of files) {
-    snapshot.set(file.relativePath, file.mtime);
-  }
+  for (const file of files) snapshot.set(file.relativePath, file.mtime);
+
   return snapshot;
 }
 
@@ -121,21 +120,14 @@ export function computeChangeSet(
     currentPaths.add(file.relativePath);
     const prevMtime = previous.get(file.relativePath);
 
-    if (prevMtime === undefined) {
-      changeSet.added.push(file);
-    } else if (prevMtime !== file.mtime) {
-      changeSet.modified.push(file);
-    } else {
-      changeSet.unchanged.push(file);
-    }
+    if (prevMtime === undefined) changeSet.added.push(file);
+    else if (prevMtime !== file.mtime) changeSet.modified.push(file);
+    else changeSet.unchanged.push(file);
   }
 
   // 삭제된 파일: 이전 스냅샷에 있지만 현재 없는 파일
-  for (const relPath of previous.keys()) {
-    if (!currentPaths.has(relPath)) {
-      changeSet.deleted.push(relPath);
-    }
-  }
+  for (const relPath of previous.keys())
+    if (!currentPaths.has(relPath)) changeSet.deleted.push(relPath);
 
   return changeSet;
 }

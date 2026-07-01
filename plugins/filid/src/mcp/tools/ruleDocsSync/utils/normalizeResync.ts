@@ -13,7 +13,7 @@ export function normalizeResync(resync: RuleDocsSyncInput['resync']): string[] {
 
   let source: unknown = resync;
 
-  if (typeof source === 'string') {
+  if (typeof source === 'string')
     try {
       source = JSON.parse(source);
     } catch {
@@ -21,7 +21,6 @@ export function normalizeResync(resync: RuleDocsSyncInput['resync']): string[] {
         `resync must be a string array; received a non-JSON string: "${String(resync).slice(0, 50)}"`,
       );
     }
-  }
 
   if (!Array.isArray(source))
     throw new Error('resync must be a string array of rule ids');

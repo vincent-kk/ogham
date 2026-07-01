@@ -125,13 +125,11 @@ function normalizePhrase(s: string): string {
  */
 function candidatesForToken(graph: KnowledgeGraph, token: string): Set<NodeId> {
   const ids = new Set<NodeId>();
-  if (graph.invertedIndex) {
+  if (graph.invertedIndex)
     for (const [term, nodeIds] of graph.invertedIndex) {
-      if (term.startsWith(token)) {
-        for (const id of nodeIds) ids.add(id);
-      }
+      if (term.startsWith(token)) for (const id of nodeIds) ids.add(id);
     }
-  } else {
+  else
     for (const [id, node] of graph.nodes) {
       const titleMatch = node.title.toLowerCase().includes(token);
       const tagMatch = node.tags.some((tag) =>
@@ -139,7 +137,7 @@ function candidatesForToken(graph: KnowledgeGraph, token: string): Set<NodeId> {
       );
       if (titleMatch || tagMatch) ids.add(id);
     }
-  }
+
   return ids;
 }
 
@@ -149,9 +147,8 @@ function intersectCandidateSets(sets: Set<NodeId>[]): Set<NodeId> {
   let smallest = sets[0]!;
   for (const s of sets) if (s.size < smallest.size) smallest = s;
   const result = new Set<NodeId>();
-  for (const id of smallest) {
-    if (sets.every((s) => s.has(id))) result.add(id);
-  }
+  for (const id of smallest) if (sets.every((s) => s.has(id))) result.add(id);
+
   return result;
 }
 
@@ -190,9 +187,8 @@ function classifyMultiToken(
 ): { score: number; type: MatchType } {
   const titleNorm = normalizePhrase(node.title);
   // 정규화된 제목이 phrase 와 완전 일치 → 단일 토큰 title-exact 와 동등하게 취급.
-  if (phrase.length > 0 && titleNorm === phrase) {
+  if (phrase.length > 0 && titleNorm === phrase)
     return { score: 1.0, type: 'title-exact' };
-  }
 
   let minScore = 1.0;
   let worstType: MatchType = 'title-word';
@@ -219,13 +215,13 @@ function resolvePathSeed(
   const nodeId = toNodeId(seed);
   if (graph.nodes.has(nodeId)) {
     const existing = bestScores.get(nodeId);
-    if (!existing || existing.matchScore < 1.0) {
+    if (!existing || existing.matchScore < 1.0)
       bestScores.set(nodeId, {
         nodeId,
         matchScore: 1.0,
         matchType: 'path-exact',
       });
-    }
+
     return;
   }
 
@@ -234,20 +230,19 @@ function resolvePathSeed(
   // path-exact 가 아닌 타입으로 분류 → 폴더 멤버가 결과에서 제외되지 않고 노출된다.
   const prefix = seed.endsWith('/') ? seed : `${seed}/`;
   const memberIds: NodeId[] = [];
-  for (const [id, node] of graph.nodes) {
+  for (const [id, node] of graph.nodes)
     if (node.path.startsWith(prefix)) memberIds.push(id);
-  }
+
   if (memberIds.length === 0) return;
 
   for (const id of capSeedsByPagerank(graph, memberIds, PATH_PREFIX_SEED_CAP)) {
     const existing = bestScores.get(id);
-    if (!existing || existing.matchScore < PATH_PREFIX_MATCH_SCORE) {
+    if (!existing || existing.matchScore < PATH_PREFIX_MATCH_SCORE)
       bestScores.set(id, {
         nodeId: id,
         matchScore: PATH_PREFIX_MATCH_SCORE,
         matchType: 'tag-exact',
       });
-    }
   }
 }
 
@@ -296,9 +291,8 @@ function resolveKeywordSeed(
 
   for (const { id, score, type } of scored.slice(0, KEYWORD_SEED_CAP)) {
     const existing = bestScores.get(id);
-    if (!existing || existing.matchScore < score) {
+    if (!existing || existing.matchScore < score)
       bestScores.set(id, { nodeId: id, matchScore: score, matchType: type });
-    }
   }
 }
 
@@ -319,13 +313,10 @@ export function resolveSeedNodes(
 ): ScoredSeed[] {
   const bestScores = new Map<NodeId, ScoredSeed>();
 
-  for (const seed of seeds) {
-    if (seed.endsWith('.md') || seed.includes('/')) {
+  for (const seed of seeds)
+    if (seed.endsWith('.md') || seed.includes('/'))
       resolvePathSeed(graph, seed, bestScores);
-    } else {
-      resolveKeywordSeed(graph, seed, bestScores);
-    }
-  }
+    else resolveKeywordSeed(graph, seed, bestScores);
 
   return Array.from(bestScores.values());
 }
@@ -377,9 +368,7 @@ export function query(
 
   // 캐시 조회
   const cached = queryCache.get(seeds, options, graph.builtAt);
-  if (cached) {
-    return { ...cached, durationMs: Date.now() - startTime };
-  }
+  if (cached) return { ...cached, durationMs: Date.now() - startTime };
 
   // 시드 노드 결정 (매칭 품질 포함)
   const scoredSeeds = resolveSeedNodes(graph, seeds);
@@ -390,9 +379,7 @@ export function query(
   if (scoredSeeds.length > 0) {
     // seedActivations 맵 구축
     const seedActivations = new Map<NodeId, number>();
-    for (const s of scoredSeeds) {
-      seedActivations.set(s.nodeId, s.matchScore);
-    }
+    for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);
 
     // 적응형 SA 파라미터 (B1)
     let adaptedMaxHops = maxHops;
@@ -414,9 +401,7 @@ export function query(
       if (isStrongSignal) {
         adaptedMaxHops = Math.min(adaptedMaxHops, 2);
         adaptedThreshold = Math.max(adaptedThreshold, 0.05);
-      } else if (avgScore >= 0.6) {
-        adaptedMaxHops = Math.min(adaptedMaxHops, 3);
-      }
+      } else if (avgScore >= 0.6) adaptedMaxHops = Math.min(adaptedMaxHops, 3);
     }
 
     // SA 파라미터
@@ -434,9 +419,8 @@ export function query(
   }
 
   // Layer 필터 적용
-  if (layerFilter.length > 0) {
+  if (layerFilter.length > 0)
     results = applyLayerFilter(results, graph, layerFilter);
-  }
 
   // path-exact 시드만 결과에서 제외 (키워드/태그 매칭 시드는 포함)
   const pathExactSeedSet = new Set(

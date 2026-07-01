@@ -67,14 +67,14 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
     }
     // Pretend tmpRoot is its own git repo root for loadConfig's resolveGitRoot.
     mockedSpawnCliSync.mockImplementation((bin, args) => {
-      if (bin === 'git' && [...args].includes('rev-parse')) {
+      if (bin === 'git' && [...args].includes('rev-parse'))
         return {
           code: 0,
           stdout: tmpRoot + '\n',
           stderr: '',
           timedOut: false,
         };
-      }
+
       return {
         code: 1,
         stdout: '',
@@ -104,17 +104,15 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
     writeScanConfig(3);
     const result = await handleFractalScan({ path: tmpRoot, depth: 1 });
     // With depth=1, nodes at depth 2 and 3 must not appear.
-    for (const node of result.tree.nodes) {
+    for (const node of result.tree.nodes)
       expect(node.depth).toBeLessThanOrEqual(1);
-    }
   });
 
   it('config.scan.maxDepth is used when input.depth is omitted', async () => {
     writeScanConfig(1);
     const result = await handleFractalScan({ path: tmpRoot });
-    for (const node of result.tree.nodes) {
+    for (const node of result.tree.nodes)
       expect(node.depth).toBeLessThanOrEqual(1);
-    }
   });
 
   it('falls back to default (10) when neither is set', async () => {

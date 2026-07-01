@@ -9,12 +9,11 @@ import { normalizeBranch } from '../utils/reviewUtils.js';
 export async function handleContentHash(
   input: ReviewManageInput,
 ): Promise<Record<string, unknown>> {
-  if (!input.branchName) {
+  if (!input.branchName)
     throw new Error('branchName is required for content-hash action');
-  }
-  if (!input.baseRef) {
+
+  if (!input.baseRef)
     throw new Error('baseRef is required for content-hash action');
-  }
 
   const baseCommit = await gitExec(input.projectRoot, [
     'merge-base',

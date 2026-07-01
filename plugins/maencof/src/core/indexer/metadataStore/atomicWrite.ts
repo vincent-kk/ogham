@@ -41,9 +41,7 @@ export async function atomicWriteJson(
     } catch (err) {
       lastErr = err;
       await unlink(tmpPath).catch(() => undefined);
-      if (attempt < retries - 1) {
-        await sleep(backoffMs);
-      }
+      if (attempt < retries - 1) await sleep(backoffMs);
     }
   }
   throw lastErr;

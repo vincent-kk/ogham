@@ -39,7 +39,7 @@ export async function handleKgStatus(
 ): Promise<KgStatusResult> {
   const store = new MetadataStore(vaultPath);
 
-  if (!graph) {
+  if (!graph)
     return {
       nodeCount: 0,
       edgeCount: 0,
@@ -49,7 +49,6 @@ export async function handleKgStatus(
       rebuildRecommended: true,
       vaultPath,
     };
-  }
 
   const staleNodes = await store.loadStaleEntries();
   const staleCount = staleNodes.entries.length;
@@ -64,22 +63,18 @@ export async function handleKgStatus(
 
   // Sub-layer 분포 집계
   const subLayerDistribution: Record<string, number> = {};
-  for (const [, node] of graph.nodes) {
-    if (node.subLayer) {
+  for (const [, node] of graph.nodes)
+    if (node.subLayer)
       subLayerDistribution[node.subLayer] =
         (subLayerDistribution[node.subLayer] ?? 0) + 1;
-    }
-  }
 
   // CROSS_LAYER 엣지 수 집계
   let crossLayerEdgeCount = 0;
-  for (const edge of graph.edges) {
+  for (const edge of graph.edges)
     if (edge.type === 'CROSS_LAYER') crossLayerEdgeCount++;
-  }
 
-  if (crossLayerEdgeCount > 0) {
+  if (crossLayerEdgeCount > 0)
     subLayerDistribution['cross_layer_edges'] = crossLayerEdgeCount;
-  }
 
   const { linkOrphanCount, linkInboundOrphanCount, linkOutboundOrphanCount } =
     collectLinkOrphanStats(graph);

@@ -31,7 +31,7 @@ export async function handleContinueConversation(
   const projectHash = getProjectHash(cwd);
 
   const session = await getSession(projectHash, input.session_id);
-  if (!session) {
+  if (!session)
     return {
       status: 'failure',
       session_id: input.session_id,
@@ -49,10 +49,9 @@ export async function handleContinueConversation(
         ignored_options: [],
       },
     };
-  }
 
   const config = await loadConfig();
-  if (!config.ratio[session.provider].enabled) {
+  if (!config.ratio[session.provider].enabled)
     return {
       status: 'failure',
       session_id: session.session_id,
@@ -69,7 +68,6 @@ export async function handleContinueConversation(
         ignored_options: [],
       },
     };
-  }
 
   await incrementCounter(session.provider);
 
@@ -136,7 +134,7 @@ export async function handleContinueConversation(
     config.artifacts.enabled &&
     result.status === 'success' &&
     result.response !== null
-  ) {
+  )
     artifactPath = await writeArtifact({
       artifacts: config.artifacts,
       cwd: session.cwd,
@@ -151,7 +149,6 @@ export async function handleContinueConversation(
       composedPrompt,
       response: result.response,
     });
-  }
 
   return buildResponse({
     sessionId: session.session_id,

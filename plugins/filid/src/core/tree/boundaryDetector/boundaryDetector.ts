@@ -21,9 +21,8 @@ export function findBoundary(filePath: string): string | null {
   let dir = resolve(dirname(filePath));
 
   while (true) {
-    if (existsSync(join(dir, 'package.json'))) {
-      return dir;
-    }
+    if (existsSync(join(dir, 'package.json'))) return dir;
+
     const parent = dirname(dir);
     if (parent === dir) break; // reached filesystem root
     dir = parent;

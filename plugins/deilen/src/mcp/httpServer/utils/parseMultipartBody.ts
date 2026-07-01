@@ -60,9 +60,9 @@ export function parseMultipartBody(
     if (segment.length >= 2 && segment[0] === DASH && segment[1] === DASH)
       break;
     let part = segment;
-    if (part.length >= 2 && part[0] === CR && part[1] === LF) {
+    if (part.length >= 2 && part[0] === CR && part[1] === LF)
       part = part.subarray(2);
-    }
+
     const headerEnd = part.indexOf(HEADER_SEPARATOR);
     if (headerEnd === -1) continue;
     let content = part.subarray(headerEnd + HEADER_SEPARATOR.length);
@@ -70,9 +70,9 @@ export function parseMultipartBody(
       content.length >= 2 &&
       content[content.length - 2] === CR &&
       content[content.length - 1] === LF
-    ) {
+    )
       content = content.subarray(0, content.length - 2);
-    }
+
     const headers = parsePartHeaders(part.subarray(0, headerEnd));
     if (headers.name === undefined) continue;
     const item: MultipartPart = { name: headers.name, data: content };

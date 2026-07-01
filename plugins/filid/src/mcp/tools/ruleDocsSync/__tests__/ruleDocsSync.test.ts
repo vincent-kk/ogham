@@ -21,9 +21,8 @@ describe('handleRuleDocsSync', () => {
 
   afterEach(() => {
     process.env.CLAUDE_PLUGIN_ROOT = originalPluginRoot;
-    for (const dir of tempDirs.splice(0)) {
+    for (const dir of tempDirs.splice(0))
       rmSync(dir, { recursive: true, force: true });
-    }
   });
 
   function createTempRepo(): string {
@@ -44,9 +43,8 @@ describe('handleRuleDocsSync', () => {
     });
 
     expect(output.action).toBe('sync');
-    if (output.action !== 'sync') {
-      throw new Error('expected sync output');
-    }
+    if (output.action !== 'sync') throw new Error('expected sync output');
+
     expect(output.selections).toEqual({ 'filid_reuse-first': true });
     expect(
       existsSync(join(repoRoot, '.claude', 'rules', 'filid_fca-policy.md')),
@@ -66,9 +64,8 @@ describe('handleRuleDocsSync', () => {
     });
 
     expect(output.action).toBe('sync');
-    if (output.action !== 'sync') {
-      throw new Error('expected sync output');
-    }
+    if (output.action !== 'sync') throw new Error('expected sync output');
+
     expect(output.selections).toEqual({
       'filid_fca-policy': true,
       'filid_reuse-first': true,

@@ -51,9 +51,7 @@ export async function pruneConfigFile(): Promise<PruneResult> {
   }
 
   const cleaned = parsed.data;
-  if (deepEqual(cleaned, rawParsed)) {
-    return { config: cleaned, pruned: false };
-  }
+  if (deepEqual(cleaned, rawParsed)) return { config: cleaned, pruned: false };
 
   try {
     await atomicWrite(CONFIG_PATH, `${JSON.stringify(cleaned, null, 2)}\n`);

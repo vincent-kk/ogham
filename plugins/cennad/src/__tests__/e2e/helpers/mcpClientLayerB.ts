@@ -15,9 +15,9 @@ export interface LayerBClient {
 
 function inheritProcessEnv(): Record<string, string> {
   const inherited: Record<string, string> = {};
-  for (const [key, value] of Object.entries(process.env)) {
+  for (const [key, value] of Object.entries(process.env))
     if (typeof value === 'string') inherited[key] = value;
-  }
+
   return inherited;
 }
 
@@ -25,11 +25,11 @@ export async function makeLayerBClient(
   opts: LayerBClientOptions = {},
 ): Promise<LayerBClient> {
   const bridgeDir = process.env.CENNAD_E2E_BRIDGE;
-  if (!bridgeDir) {
+  if (!bridgeDir)
     throw new Error(
       'CENNAD_E2E_BRIDGE not set — vitest.e2e.globalSetup.ts must export it.',
     );
-  }
+
   const serverPath = resolve(bridgeDir, 'mcp-server.cjs');
   const transport = new StdioClientTransport({
     command: process.execPath,

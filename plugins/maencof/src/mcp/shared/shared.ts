@@ -30,14 +30,10 @@ export async function removeBacklinks(
     index[target] = index[target].filter((src) => src !== sourcePath);
     if (index[target].length !== before) changed = true;
     // 빈 배열 제거
-    if (index[target].length === 0) {
-      delete index[target];
-    }
+    if (index[target].length === 0) delete index[target];
   }
 
-  if (changed) {
-    await writeFile(indexPath, JSON.stringify(index), 'utf-8');
-  }
+  if (changed) await writeFile(indexPath, JSON.stringify(index), 'utf-8');
 }
 
 /**

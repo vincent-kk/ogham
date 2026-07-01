@@ -8,11 +8,8 @@ const ORIGINAL_CLAUDE_PLUGIN_DADA = process.env.CLAUDE_PLUGIN_DADA;
 const ORIGINAL_CENNAD_CONFIG_PATH = process.env.CENNAD_CONFIG_PATH;
 
 function restoreEnv(name: string, value: string | undefined): void {
-  if (value === undefined) {
-    delete process.env[name];
-  } else {
-    process.env[name] = value;
-  }
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
 }
 
 async function loadPaths(): Promise<typeof import('../paths.js')> {

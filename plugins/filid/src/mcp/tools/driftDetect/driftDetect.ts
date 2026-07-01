@@ -44,9 +44,7 @@ export async function handleDriftDetect(
 ): Promise<McpDriftReport> {
   const input = args as DriftDetectInput;
 
-  if (!input.path) {
-    throw new Error('path is required');
-  }
+  if (!input.path) throw new Error('path is required');
 
   const { warnings: configWarnings } = loadConfig(input.path);
 
@@ -70,9 +68,7 @@ export async function handleDriftDetect(
     medium: 0,
     low: 0,
   };
-  for (const item of items) {
-    bySeverity[item.severity]++;
-  }
+  for (const item of items) bySeverity[item.severity]++;
 
   const report: McpDriftReport = {
     items,
@@ -82,9 +78,7 @@ export async function handleDriftDetect(
     configWarnings,
   };
 
-  if (input.generatePlan) {
-    report.syncPlan = generateSyncPlan(items);
-  }
+  if (input.generatePlan) report.syncPlan = generateSyncPlan(items);
 
   return report;
 }

@@ -40,19 +40,17 @@ export function handleKgSuggestLinks(
   const minScore = input.min_score ?? 0.2;
 
   // 그래프가 없거나 비어있으면 빈 결과
-  if (!graph || graph.nodes.size === 0) {
+  if (!graph || graph.nodes.size === 0)
     return { suggestions: [], candidates_explored: 0, duration_ms: 0 };
-  }
 
   // ── 입력 분석: 소스 태그 수집 ──
   const sourceTags = collectSourceTags(graph, input);
-  if (sourceTags.length === 0) {
+  if (sourceTags.length === 0)
     return {
       suggestions: [],
       candidates_explored: 0,
       duration_ms: Date.now() - startTime,
     };
-  }
 
   // 소스 노드 ID (이미 존재하는 문서인 경우)
   const sourceNodeId = input.path ? findNodeByPath(graph, input.path) : null;
@@ -79,10 +77,9 @@ export function handleKgSuggestLinks(
     if (node.tags.length === 0) continue;
 
     const tagScore = jaccardSimilarity(sourceTags, node.tags);
-    if (tagScore >= minScore * 0.5) {
+    if (tagScore >= minScore * 0.5)
       // 절반 임계값으로 넓게 수집 (SA 보강 기회 부여)
       candidates.push({ node, tagScore });
-    }
   }
 
   // ── 2단계: SA 보강 ──
@@ -93,11 +90,9 @@ export function handleKgSuggestLinks(
       threshold: 0.05,
       maxActiveNodes: 50,
     });
-    for (const result of saResults) {
-      if (!directlyLinked.has(result.nodeId)) {
+    for (const result of saResults)
+      if (!directlyLinked.has(result.nodeId))
         saScores.set(result.nodeId, result.score);
-      }
-    }
   } else if (sourceTags.length > 0) {
     // 태그 매칭으로 시드 노드 결정
     const seedIds = findSeedsByTags(graph, sourceTags, 3);
@@ -107,9 +102,7 @@ export function handleKgSuggestLinks(
         threshold: 0.05,
         maxActiveNodes: 50,
       });
-      for (const result of saResults) {
-        saScores.set(result.nodeId, result.score);
-      }
+      for (const result of saResults) saScores.set(result.nodeId, result.score);
     }
   }
 
@@ -165,9 +158,7 @@ function collectSourceTags(
   }
 
   // 직접 제공된 태그
-  if (input.tags) {
-    tags.push(...input.tags);
-  }
+  if (input.tags) tags.push(...input.tags);
 
   // content_hint에서 키워드 추출
   if (input.content_hint) {
@@ -180,9 +171,9 @@ function collectSourceTags(
 
 /** 경로로 노드 ID를 찾는다 */
 function findNodeByPath(graph: KnowledgeGraph, path: string): NodeId | null {
-  for (const [nodeId, node] of graph.nodes) {
+  for (const [nodeId, node] of graph.nodes)
     if (node.path === path) return nodeId;
-  }
+
   return null;
 }
 
@@ -198,9 +189,8 @@ function findSeedsByTags(
   for (const [nodeId, node] of graph.nodes) {
     const nodeTags = new Set(normalizeTags(node.tags));
     let overlap = 0;
-    for (const t of tagSet) {
-      if (nodeTags.has(t)) overlap++;
-    }
+    for (const t of tagSet) if (nodeTags.has(t)) overlap++;
+
     if (overlap > 0) scored.push({ nodeId, overlap });
   }
 
@@ -219,13 +209,10 @@ function buildReason(
 ): string {
   const parts: string[] = [];
 
-  if (shared.length > 0) {
-    parts.push(`Common tags: [${shared.join(', ')}]`);
-  }
+  if (shared.length > 0) parts.push(`Common tags: [${shared.join(', ')}]`);
 
-  if (saScore > 0) {
+  if (saScore > 0)
     parts.push(`SA indirect link (boost score: ${saScore.toFixed(2)})`);
-  }
 
   const layerNames: Record<number, string> = {
     1: 'Core Identity',
@@ -235,13 +222,11 @@ function buildReason(
     5: 'Context',
   };
   const layerNum = layer as number;
-  if (layerNames[layerNum]) {
+  if (layerNames[layerNum])
     parts.push(`Layer ${layerNum} (${layerNames[layerNum]})`);
-  }
 
-  if (subLayer && SUB_LAYER_NAMES[subLayer]) {
+  if (subLayer && SUB_LAYER_NAMES[subLayer])
     parts.push(`Sub-layer: ${SUB_LAYER_NAMES[subLayer]}`);
-  }
 
   return parts.length > 0
     ? parts.join(' | ')

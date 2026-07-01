@@ -90,35 +90,32 @@ export async function handleAstGrepReplace(
     // not a system directory to prevent accidental modifications outside projects.
     if (!dry_run) {
       const resolvedSearch = resolve(searchPath);
-      if (isSystemPath(resolvedSearch)) {
+      if (isSystemPath(resolvedSearch))
         return {
           error: `Refusing to modify files in system directory "${searchPath}". Only project directories are allowed.`,
         };
-      }
     }
 
     const sg = await getSgModule();
-    if (!sg) {
+    if (!sg)
       return {
         error: `@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi`,
         sgLoadError: getSgLoadError(),
       };
-    }
 
     const files = getFilesForLanguage(searchPath, language);
 
-    if (files.length === 0) {
+    if (files.length === 0)
       return {
         message: `No ${language} files found in ${searchPath}`,
         pattern,
         filesSearched: 0,
       };
-    }
 
     const changes: AstGrepReplaceChange[] = [];
     let totalReplacements = 0;
 
-    for (const filePath of files) {
+    for (const filePath of files)
       try {
         const content = readFileSync(filePath, 'utf-8');
         const root = sg.parse(toLangEnum(sg, language), content).root();
@@ -156,12 +153,11 @@ export async function handleAstGrepReplace(
             for (const metaVar of metaVars) {
               const varName = metaVar.replace(/^\$+/, '');
               const captured = match.getMatch(varName);
-              if (captured) {
+              if (captured)
                 finalReplacement = finalReplacement.replace(
                   metaVar,
                   captured.text(),
                 );
-              }
             }
           } catch {
             // If meta-variable extraction fails, use pattern as-is
@@ -196,21 +192,18 @@ export async function handleAstGrepReplace(
           totalReplacements++;
         }
 
-        if (!dry_run && edits.length > 0) {
+        if (!dry_run && edits.length > 0)
           writeFileSync(filePath, newContent, 'utf-8');
-        }
       } catch {
         // Skip files that fail to parse
       }
-    }
 
-    if (changes.length === 0) {
+    if (changes.length === 0)
       return {
         message: `No matches found for pattern: ${pattern}\n\nSearched ${files.length} ${language} file(s) in ${searchPath}`,
         pattern,
         filesSearched: files.length,
       };
-    }
 
     const mode = dry_run ? 'DRY RUN (no changes applied)' : 'CHANGES APPLIED';
 

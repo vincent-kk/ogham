@@ -19,11 +19,11 @@ const hasR = discoverRscript() !== null;
 
 async function runValue(scriptCode: string): Promise<number> {
   const out = await handleRunR({ scriptCode, executionMode: "sync" });
-  if (out.status !== JobStatus.Succeeded) {
+  if (out.status !== JobStatus.Succeeded)
     throw new Error(
       `R failed (${out.status}): ${out.result?.stderr.text ?? ""}`,
     );
-  }
+
   return Number.parseFloat(out.result!.stdout.text.trim());
 }
 

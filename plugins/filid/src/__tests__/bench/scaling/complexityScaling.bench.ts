@@ -69,12 +69,11 @@ describe('scaling: change-tracker queue sizes', () => {
     tool_response: { success: true },
   };
 
-  for (const size of queueSizes) {
+  for (const size of queueSizes)
     bench(`queue size: ${size}`, () => {
       const queue = generateChangeQueue(size);
       trackChange(writeInput, queue);
     });
-  }
 });
 
 // 복합 스케일링: 여러 훅 동시 실행

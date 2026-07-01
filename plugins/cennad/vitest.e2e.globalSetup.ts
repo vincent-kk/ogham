@@ -23,23 +23,21 @@ export async function setup(): Promise<void> {
       stdio: 'inherit',
       env: process.env,
     });
-    if (result.status !== 0) {
+    if (result.status !== 0)
       throw new Error(
         `cennad e2e: \`yarn build:plugin\` failed (exit ${result.status ?? 'null'}). ` +
           'Fix bundle errors before running e2e.',
       );
-    }
   }
 
   const missing = REQUIRED_ARTIFACTS.filter(
     (name) => !existsSync(resolve(bridgeDir, name)),
   );
-  if (missing.length > 0) {
+  if (missing.length > 0)
     throw new Error(
       `cennad e2e: required bridge artifacts missing: ${missing.join(', ')}. ` +
         `Expected under ${bridgeDir}. Did you run vitest from plugins/cennad?`,
     );
-  }
 
   process.env.CENNAD_E2E_BRIDGE = bridgeDir;
 }

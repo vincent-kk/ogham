@@ -33,9 +33,8 @@ export function resolveImportPath(
   currentFilePath: string,
 ): string | null {
   // Bare specifiers: package imports, node: prefix, etc.
-  if (!importSource.startsWith('.') && !importSource.startsWith('/')) {
+  if (!importSource.startsWith('.') && !importSource.startsWith('/'))
     return null;
-  }
 
   const baseDir = portableDirname(currentFilePath);
   const resolved = portableResolve(baseDir, importSource);

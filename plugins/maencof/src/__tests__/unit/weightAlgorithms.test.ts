@@ -85,9 +85,7 @@ describe('calculateWeights', () => {
     const graph = makeGraph([a, b], []);
     const { pageranks } = calculateWeights(graph);
     expect(pageranks.size).toBe(2);
-    for (const rank of pageranks.values()) {
-      expect(rank).toBeGreaterThan(0);
-    }
+    for (const rank of pageranks.values()) expect(rank).toBeGreaterThan(0);
   });
 });
 

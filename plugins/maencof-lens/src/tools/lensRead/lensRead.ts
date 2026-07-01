@@ -23,9 +23,8 @@ export async function handleLensRead(
   if (
     node?.layer !== undefined &&
     !effectiveLayers.includes(node.layer as number)
-  ) {
+  )
     return { error: `Document is in a restricted layer (L${node.layer})` };
-  }
 
   return raw;
 }

@@ -92,27 +92,19 @@ export function getImplementPlanSummary(
 function collectItems(manifest: StoriesManifest | DevplanManifest): string[] {
   const statuses: string[] = [];
 
-  if ('stories' in manifest) {
+  if ('stories' in manifest)
     // StoriesManifest
-    for (const story of manifest.stories) {
-      statuses.push(story.status);
-    }
-  } else {
+    for (const story of manifest.stories) statuses.push(story.status);
+  else {
     // DevplanManifest
     for (const task of manifest.tasks) {
       statuses.push(task.status);
-      for (const subtask of task.subtasks) {
-        statuses.push(subtask.status);
-      }
+      for (const subtask of task.subtasks) statuses.push(subtask.status);
     }
-    for (const ss of manifest.story_subtasks) {
-      for (const subtask of ss.subtasks) {
-        statuses.push(subtask.status);
-      }
-    }
-    for (const fc of manifest.feedback_comments) {
-      statuses.push(fc.status);
-    }
+    for (const ss of manifest.story_subtasks)
+      for (const subtask of ss.subtasks) statuses.push(subtask.status);
+
+    for (const fc of manifest.feedback_comments) statuses.push(fc.status);
   }
 
   return statuses;

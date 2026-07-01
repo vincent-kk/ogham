@@ -23,14 +23,14 @@ export async function computeTreeDiff(
 
   for (const [name, oldDecl] of oldMap) {
     const newDecl = newMap.get(name);
-    if (!newDecl) {
+    if (!newDecl)
       changes.push({
         type: 'removed',
         kind: oldDecl.kind,
         name,
         oldLine: oldDecl.line,
       });
-    } else if (oldDecl.normalized !== newDecl.normalized) {
+    else if (oldDecl.normalized !== newDecl.normalized)
       changes.push({
         type: 'modified',
         kind: oldDecl.kind,
@@ -38,19 +38,16 @@ export async function computeTreeDiff(
         oldLine: oldDecl.line,
         newLine: newDecl.line,
       });
-    }
   }
 
-  for (const [name, newDecl] of newMap) {
-    if (!oldMap.has(name)) {
+  for (const [name, newDecl] of newMap)
+    if (!oldMap.has(name))
       changes.push({
         type: 'added',
         kind: newDecl.kind,
         name,
         newLine: newDecl.line,
       });
-    }
-  }
 
   return {
     changes,

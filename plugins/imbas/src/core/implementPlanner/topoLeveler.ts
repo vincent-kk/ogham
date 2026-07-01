@@ -58,9 +58,7 @@ function runKahn(
 ): Map<string, number> {
   const inDegree = new Map<string, number>();
   for (const n of nodes) inDegree.set(n.id, 0);
-  for (const e of edges) {
-    inDegree.set(e.to, (inDegree.get(e.to) ?? 0) + 1);
-  }
+  for (const e of edges) inDegree.set(e.to, (inDegree.get(e.to) ?? 0) + 1);
 
   const levelByNode = new Map<string, number>();
   let current = nodes
@@ -72,14 +70,14 @@ function runKahn(
     for (const id of current) levelByNode.set(id, level);
 
     const next: string[] = [];
-    for (const id of current) {
+    for (const id of current)
       for (const e of edges) {
         if (e.from !== id) continue;
         const d = (inDegree.get(e.to) ?? 0) - 1;
         inDegree.set(e.to, d);
         if (d === 0 && !levelByNode.has(e.to)) next.push(e.to);
       }
-    }
+
     level++;
     current = next;
   }
@@ -107,11 +105,9 @@ function findCycle(
   const candSet = new Set(candidates);
   const outEdges = new Map<string, string[]>();
   for (const id of candidates) outEdges.set(id, []);
-  for (const e of edges) {
-    if (candSet.has(e.from) && candSet.has(e.to)) {
+  for (const e of edges)
+    if (candSet.has(e.from) && candSet.has(e.to))
       outEdges.get(e.from)!.push(e.to);
-    }
-  }
 
   const visited = new Set<string>();
   const stack: string[] = [];
@@ -234,12 +230,12 @@ function buildGroups(
 }
 
 function chunkItems<T>(items: T[], maxParallel?: number): T[][] {
-  if (!maxParallel || maxParallel <= 0 || items.length <= maxParallel) {
+  if (!maxParallel || maxParallel <= 0 || items.length <= maxParallel)
     return [items];
-  }
+
   const chunks: T[][] = [];
-  for (let i = 0; i < items.length; i += maxParallel) {
+  for (let i = 0; i < items.length; i += maxParallel)
     chunks.push(items.slice(i, i + maxParallel));
-  }
+
   return chunks;
 }

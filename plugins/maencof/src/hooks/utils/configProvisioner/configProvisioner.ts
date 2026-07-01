@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
-import { CONFIG_REGISTRY } from '../configRegistry/configRegistry.js';
 import { metaPath } from '../../shared/metaPath.js';
+import { CONFIG_REGISTRY } from '../configRegistry/configRegistry.js';
 
 export interface ProvisionResult {
   /** Filenames that were newly created */
@@ -18,11 +18,9 @@ function additiveMerge(
   defaults: Record<string, unknown>,
 ): Record<string, unknown> {
   const merged = { ...existing };
-  for (const [key, value] of Object.entries(defaults)) {
-    if (!(key in merged)) {
-      merged[key] = value; // top-level only, no nested deep merge
-    }
-  }
+  for (const [key, value] of Object.entries(defaults))
+    if (!(key in merged)) merged[key] = value; // top-level only, no nested deep merge
+
   merged._schemaVersion = defaults._schemaVersion;
   return merged;
 }
@@ -32,9 +30,7 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
 
   // Ensure .maencof-meta/ exists
   const metaDir = metaPath(cwd);
-  if (!existsSync(metaDir)) {
-    mkdirSync(metaDir, { recursive: true });
-  }
+  if (!existsSync(metaDir)) mkdirSync(metaDir, { recursive: true });
 
   for (const entry of CONFIG_REGISTRY) {
     const filePath = metaPath(cwd, entry.filename);
@@ -43,7 +39,7 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
       const value = entry.defaultValue();
       writeFileSync(filePath, JSON.stringify(value), 'utf-8');
       result.created.push(entry.filename);
-    } else if (entry.schemaVersion != null) {
+    } else if (entry.schemaVersion != null)
       // Migration: check if stale
       try {
         const existing = JSON.parse(readFileSync(filePath, 'utf-8')) as Record<
@@ -57,9 +53,7 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
           const merged = additiveMerge(existing, defaults);
           writeFileSync(filePath, JSON.stringify(merged), 'utf-8');
           result.migrated.push(entry.filename);
-        } else {
-          result.skipped.push(entry.filename);
-        }
+        } else result.skipped.push(entry.filename);
       } catch (e) {
         appendErrorLogSafe(cwd, {
           hook: 'config-provisioner',
@@ -68,9 +62,7 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
         });
         result.skipped.push(entry.filename); // corrupted -> skip
       }
-    } else {
-      result.skipped.push(entry.filename); // no schemaVersion -> skip
-    }
+    else result.skipped.push(entry.filename); // no schemaVersion -> skip
   }
 
   return result;

@@ -157,25 +157,22 @@ describe('architecture-migrator', () => {
         (o) => o.type === 'move_file' && o.from.endsWith('alice.md'),
       );
       expect(aliceMove).toBeDefined();
-      if (aliceMove && aliceMove.type === 'move_file') {
+      if (aliceMove && aliceMove.type === 'move_file')
         expect(aliceMove.to).toContain('relational');
-      }
 
       const companyMove = moveOps.find(
         (o) => o.type === 'move_file' && o.from.endsWith('company-x.md'),
       );
       expect(companyMove).toBeDefined();
-      if (companyMove && companyMove.type === 'move_file') {
+      if (companyMove && companyMove.type === 'move_file')
         expect(companyMove.to).toContain('structural');
-      }
 
       const reactMove = moveOps.find(
         (o) => o.type === 'move_file' && o.from.endsWith('react-hooks.md'),
       );
       expect(reactMove).toBeDefined();
-      if (reactMove && reactMove.type === 'move_file') {
+      if (reactMove && reactMove.type === 'move_file')
         expect(reactMove.to).toContain('topical');
-      }
     });
 
     it('frontmatter 업데이트 작업을 포함한다', () => {
@@ -184,11 +181,9 @@ describe('architecture-migrator', () => {
         (o) => o.type === 'update_frontmatter',
       );
       expect(fmOps.length).toBe(3);
-      for (const op of fmOps) {
-        if (op.type === 'update_frontmatter') {
+      for (const op of fmOps)
+        if (op.type === 'update_frontmatter')
           expect(op.field).toBe('sub_layer');
-        }
-      }
     });
 
     it('버전 업데이트 작업을 포함한다', () => {

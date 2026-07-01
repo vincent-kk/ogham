@@ -19,9 +19,7 @@ export async function handleList(
   }
 
   const mdFiles = files.filter((f) => f.endsWith('.md'));
-  if (mdFiles.length === 0) {
-    return { debts: [], totalWeight: 0 };
-  }
+  if (mdFiles.length === 0) return { debts: [], totalWeight: 0 };
 
   const debts: DebtItem[] = [];
 

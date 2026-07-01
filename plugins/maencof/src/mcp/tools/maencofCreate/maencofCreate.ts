@@ -254,13 +254,12 @@ export async function handleMaencofCreate(
     .map((m) => m[2])
     .filter((href) => !href.startsWith('http'));
 
-  if (linkedPaths.length > 0) {
+  if (linkedPaths.length > 0)
     try {
       await updateBacklinkIndex(metaDir, relativePath, linkedPaths);
     } catch {
       // backlink 갱신 실패는 경고만
     }
-  }
 
   return {
     success: true,

@@ -59,12 +59,12 @@ export async function provisionCodexYoutube(
   try {
     const result = await run(args);
     if (result.failed) {
-      if (!result.notInstalled) {
+      if (!result.notInstalled)
         logger.warn('codex youtube MCP provisioning failed', {
           code: result.code,
           stderr: result.stderr.slice(0, 200),
         });
-      }
+
       return { ok: false, action: 'unchanged' };
     }
     return { ok: true, action: enabled ? 'added' : 'removed' };

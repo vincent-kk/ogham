@@ -27,9 +27,7 @@ export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
   }
 
   const strict = FilidConfigSchema.safeParse(parsed);
-  if (strict.success) {
-    return { valid: true, errors: [] };
-  }
+  if (strict.success) return { valid: true, errors: [] };
 
   const errors: ConfigPatchIssue[] = strict.error.issues.map((issue) => ({
     path: formatIssuePath(issue.path),

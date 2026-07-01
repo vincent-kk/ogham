@@ -41,9 +41,9 @@ import { resolveDataRefs } from "./operations/resolveDataRefs.js";
 
 function clampTimeout(value: number | undefined): number {
   if (value === undefined) return DEFAULT_TIMEOUT_MS;
-  if (!Number.isFinite(value) || value <= 0) {
+  if (!Number.isFinite(value) || value <= 0)
     throw new Error(ERROR_MESSAGES.INVALID_TIMEOUT);
-  }
+
   return Math.min(value, MAX_TIMEOUT_MS);
 }
 
@@ -81,30 +81,30 @@ function failFast(error: RExecutionError, rscriptPath: string): RunROutput {
  * Execution safety only — statistical policy is the assert tool's concern.
  */
 export async function handleRunR(input: RunRInput): Promise<RunROutput> {
-  if (!input.scriptCode || !input.scriptCode.trim()) {
+  if (!input.scriptCode || !input.scriptCode.trim())
     throw new Error(ERROR_MESSAGES.EMPTY_SCRIPT);
-  }
-  if (input.scriptCode.length > MAX_SCRIPT_CHARS) {
+
+  if (input.scriptCode.length > MAX_SCRIPT_CHARS)
     throw new Error(ERROR_MESSAGES.SCRIPT_TOO_LARGE);
-  }
-  if (input.dataRefs && input.dataRefs.length > MAX_DATA_REFS) {
+
+  if (input.dataRefs && input.dataRefs.length > MAX_DATA_REFS)
     throw new Error(ERROR_MESSAGES.TOO_MANY_DATA_REFS);
-  }
+
   const sessionMode = input.sessionMode ?? SessionMode.Stateless;
-  if (sessionMode === SessionMode.WorkspaceFiles && !input.workspaceId) {
+  if (sessionMode === SessionMode.WorkspaceFiles && !input.workspaceId)
     throw new Error(ERROR_MESSAGES.WORKSPACE_FILES_REQUIRES_ID);
-  }
+
   if (
     sessionMode !== SessionMode.WorkspaceFiles &&
     input.workspaceId &&
     hasActiveWorkspaceJob(input.workspaceId)
-  ) {
+  )
     throw new Error(ERROR_MESSAGES.WORKSPACE_BUSY);
-  }
+
   const timeoutMs = clampTimeout(input.timeoutMs);
 
   const validation = validateRScript(input.scriptCode);
-  if (!validation.ok) {
+  if (!validation.ok)
     return failFast(
       {
         code: RErrorCode.CommandBlocked,
@@ -113,10 +113,9 @@ export async function handleRunR(input: RunRInput): Promise<RunROutput> {
       },
       "",
     );
-  }
 
   const rscriptPath = discoverRscript();
-  if (!rscriptPath) {
+  if (!rscriptPath)
     return failFast(
       {
         code: RErrorCode.RNotFound,
@@ -125,7 +124,6 @@ export async function handleRunR(input: RunRInput): Promise<RunROutput> {
       },
       "",
     );
-  }
 
   const workspace = await createWorkspace(input.workspaceId, {
     reset: sessionMode !== SessionMode.WorkspaceFiles,

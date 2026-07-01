@@ -22,23 +22,22 @@ export async function handleRunGet(input: RunGetInput) {
   if (!project_ref) {
     const config = await loadConfig(cwd);
     project_ref = config.defaults.project_ref ?? undefined;
-    if (!project_ref) {
+    if (!project_ref)
       throw new Error(
         'project_ref is required (or set defaults.project_ref in config)',
       );
-    }
   }
 
   let run_id = input.run_id;
   if (!run_id) {
     const runsDir = getRunsDir(cwd, project_ref);
-    if (!existsSync(runsDir)) {
+    if (!existsSync(runsDir))
       throw new Error(`No runs directory found for project: ${project_ref}`);
-    }
+
     const entries = readdirSync(runsDir).sort();
-    if (entries.length === 0) {
+    if (entries.length === 0)
       throw new Error(`No runs found for project: ${project_ref}`);
-    }
+
     run_id = entries[entries.length - 1]!;
   }
 
@@ -46,11 +45,8 @@ export async function handleRunGet(input: RunGetInput) {
   const state = await loadRunState(run_dir);
 
   const manifests_available: string[] = [];
-  for (const [key, filename] of Object.entries(MANIFEST_FILE_MAP)) {
-    if (existsSync(join(run_dir, filename))) {
-      manifests_available.push(key);
-    }
-  }
+  for (const [key, filename] of Object.entries(MANIFEST_FILE_MAP))
+    if (existsSync(join(run_dir, filename))) manifests_available.push(key);
 
   return { state, run_dir, manifests_available };
 }

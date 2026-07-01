@@ -25,8 +25,6 @@ export async function withVaultLock<T>(
   try {
     return await current;
   } finally {
-    if (lockChains.get(vaultPath) === tracker) {
-      lockChains.delete(vaultPath);
-    }
+    if (lockChains.get(vaultPath) === tracker) lockChains.delete(vaultPath);
   }
 }

@@ -7,9 +7,9 @@ import { normalizeBranch } from '../utils/reviewUtils.js';
 export async function handleEnsureDir(
   input: ReviewManageInput,
 ): Promise<Record<string, unknown>> {
-  if (!input.branchName) {
+  if (!input.branchName)
     throw new Error('branchName is required for ensure-dir action');
-  }
+
   const normalized = normalizeBranch(input.branchName);
   const dirPath = path.join(input.projectRoot, '.filid', 'review', normalized);
 

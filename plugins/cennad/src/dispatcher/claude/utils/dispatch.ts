@@ -31,7 +31,7 @@ export async function dispatch(
   });
   const failed = spawnResult.spawnError !== null || spawnResult.exitCode !== 0;
 
-  if (failed) {
+  if (failed)
     return {
       status: 'failure',
       response: null,
@@ -45,10 +45,9 @@ export async function dispatch(
       ignoredOptions,
       resolvedModel: input.resolvedModel,
     };
-  }
 
   const parsed = parseResult(spawnResult.stdout);
-  if (parsed.error !== null) {
+  if (parsed.error !== null)
     return {
       status: 'failure',
       response: parsed.response,
@@ -57,7 +56,6 @@ export async function dispatch(
       ignoredOptions,
       resolvedModel: input.resolvedModel,
     };
-  }
 
   return {
     status: 'success',

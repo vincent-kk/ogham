@@ -35,9 +35,9 @@ async function fetchBatch(
   fetchMode: FetchMode,
   ctx: ToolContext,
 ): Promise<PaperRecord[]> {
-  if (fetchMode === FetchMode.ABSTRACTS || fetchMode === FetchMode.FULL) {
+  if (fetchMode === FetchMode.ABSTRACTS || fetchMode === FetchMode.FULL)
     return efetch({ db, ids: pmids, baseUrl: ctx.baseUrl }, ctx.deps);
-  }
+
   const summaries = await esummary(
     { db, ids: pmids, baseUrl: ctx.baseUrl },
     ctx.deps,
@@ -76,9 +76,8 @@ export async function fetchMetadata(
   for (let i = 0; i < batches.length; i += 1) {
     const batch = batches[i];
     try {
-      for (const rec of await fetchBatch(batch, db, fetchMode, ctx)) {
+      for (const rec of await fetchBatch(batch, db, fetchMode, ctx))
         records.set(rec.pmid, rec);
-      }
     } catch (error) {
       failedBatches.push({
         retstart: i * batchSize,

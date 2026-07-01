@@ -15,16 +15,11 @@ export function validateNode(
   context: RuleContext,
   rule?: Rule,
 ): RuleViolation[] {
-  if (rule) {
-    return rule.check(context);
-  }
+  if (rule) return rule.check(context);
 
   const rules = loadBuiltinRules();
   const violations: RuleViolation[] = [];
-  for (const r of rules) {
-    if (r.enabled) {
-      violations.push(...r.check(context));
-    }
-  }
+  for (const r of rules) if (r.enabled) violations.push(...r.check(context));
+
   return violations;
 }

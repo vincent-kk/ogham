@@ -30,21 +30,19 @@ export async function planSegments(
 ): Promise<DateSegment[]> {
   const { dateField, from, to } = options;
 
-  if (totalCount <= UID_HARD_CAP) {
+  if (totalCount <= UID_HARD_CAP)
     return [{ field: dateField, from, to, count: totalCount, capped: false }];
-  }
-  if (depth >= MAX_SEGMENT_DEPTH) {
+
+  if (depth >= MAX_SEGMENT_DEPTH)
     return [{ field: dateField, from, to, count: totalCount, capped: true }];
-  }
 
   const parts = Math.min(
     Math.ceil(totalCount / UID_HARD_CAP) + 1,
     SEGMENT_MAX_BUCKETS,
   );
   const buckets = bucketByDate(from, to, parts);
-  if (buckets.length <= 1) {
+  if (buckets.length <= 1)
     return [{ field: dateField, from, to, count: totalCount, capped: true }];
-  }
 
   const segments: DateSegment[] = [];
   for (const bucket of buckets) {
@@ -54,7 +52,7 @@ export async function planSegments(
       to: bucket.to,
     });
     if (count === 0) continue;
-    if (count > UID_HARD_CAP) {
+    if (count > UID_HARD_CAP)
       segments.push(
         ...(await planSegments(
           term,
@@ -64,7 +62,7 @@ export async function planSegments(
           depth + 1,
         )),
       );
-    } else {
+    else
       segments.push({
         field: dateField,
         from: bucket.from,
@@ -72,7 +70,6 @@ export async function planSegments(
         count,
         capped: false,
       });
-    }
   }
   return segments;
 }

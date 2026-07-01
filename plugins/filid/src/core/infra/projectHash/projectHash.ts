@@ -24,7 +24,7 @@ export async function computeProjectHash(cwd: string): Promise<string> {
   files.sort();
 
   const parts: string[] = [];
-  for (const file of files) {
+  for (const file of files)
     try {
       const fullPath = join(cwd, file);
       const mtime = statSync(fullPath).mtimeMs;
@@ -32,7 +32,6 @@ export async function computeProjectHash(cwd: string): Promise<string> {
     } catch {
       // skip files that can't be stat'd
     }
-  }
 
   const input = parts.join('\n');
   return createHash('sha256').update(input).digest('hex').slice(0, 16);

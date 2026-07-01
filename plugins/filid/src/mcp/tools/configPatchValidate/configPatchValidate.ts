@@ -33,8 +33,8 @@ export async function handleConfigPatchValidate(
   args: unknown,
 ): Promise<ConfigPatchValidateResult> {
   const input = args as ConfigPatchValidateInput;
-  if (typeof input?.patch_json !== 'string') {
+  if (typeof input?.patch_json !== 'string')
     throw new Error('patch_json is required and must be a string');
-  }
+
   return validateConfigPatch(input.patch_json);
 }

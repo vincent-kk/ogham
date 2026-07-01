@@ -14,16 +14,15 @@ export async function handleAssertAnalysisPlan(
   input: AssertInput,
 ): Promise<AssertOutput> {
   const hardReasons = evaluateHardRules(input);
-  if (hardReasons.length > 0) {
+  if (hardReasons.length > 0)
     return {
       allowed: false,
       severity: AssertSeverity.HardBlock,
       reasons: hardReasons,
     };
-  }
 
   const { reasons, recommendedAlternatives } = evaluateSoftRules(input);
-  if (reasons.length > 0) {
+  if (reasons.length > 0)
     return {
       allowed: input.mode === ExecutionMode.Interactive,
       severity: AssertSeverity.SoftWarning,
@@ -33,7 +32,6 @@ export async function handleAssertAnalysisPlan(
           ? recommendedAlternatives
           : undefined,
     };
-  }
 
   return { allowed: true, severity: AssertSeverity.Ok, reasons: [] };
 }

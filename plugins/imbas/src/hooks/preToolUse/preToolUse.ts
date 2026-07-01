@@ -7,7 +7,7 @@ export function processPreToolUse(input: PreToolUseInput): HookOutput {
   const filePath =
     (tool_input?.file_path as string) || (tool_input?.path as string) || '';
 
-  if (filePath.includes('.imbas/') || filePath.includes('.imbas\\')) {
+  if (filePath.includes('.imbas/') || filePath.includes('.imbas\\'))
     return {
       continue: true,
       hookSpecificOutput: {
@@ -16,7 +16,6 @@ export function processPreToolUse(input: PreToolUseInput): HookOutput {
           '[imbas] Operating on imbas state directory. State files are managed by imbas MCP tools — prefer using imbas tools over direct file editing.',
       },
     };
-  }
 
   return { continue: true };
 }

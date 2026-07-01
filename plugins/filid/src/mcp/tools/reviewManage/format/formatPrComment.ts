@@ -17,12 +17,11 @@ export async function formatPrComment(
 ): Promise<Record<string, unknown>> {
   const input = args as ReviewManageInput;
 
-  if (!input.branchName) {
+  if (!input.branchName)
     throw new Error('branchName is required for format-pr-comment action');
-  }
-  if (!input.projectRoot) {
+
+  if (!input.projectRoot)
     throw new Error('projectRoot is required for format-pr-comment action');
-  }
 
   const normalized = normalizeBranch(input.branchName);
   const reviewDir = path.join(
@@ -35,11 +34,10 @@ export async function formatPrComment(
   const reportContent = await tryReadFile(
     path.join(reviewDir, 'review-report.md'),
   );
-  if (!reportContent) {
+  if (!reportContent)
     throw new Error(
       `Review not complete: review-report.md not found in ${reviewDir}`,
     );
-  }
 
   const structureContent = await tryReadFile(
     path.join(reviewDir, 'structure-check.md'),
@@ -52,20 +50,18 @@ export async function formatPrComment(
 
   const sections: string[] = [];
 
-  if (structureContent) {
+  if (structureContent)
     sections.push(
       collapsible(
         'Phase A — Structure Compliance',
         transformStructureContent(structureContent),
       ),
     );
-  }
 
   sections.push(collapsible('Review Report (Phase B~D)', reportContent));
 
-  if (fixRequestsContent) {
+  if (fixRequestsContent)
     sections.push(collapsible('Fix Requests', fixRequestsContent));
-  }
 
   const header = `## Code Review Governance — ${verdict}\n`;
   const body = sections.join('\n\n');
@@ -73,12 +69,11 @@ export async function formatPrComment(
 
   let markdown = header + '\n' + body + footer;
 
-  if (markdown.length > MAX_COMMENT_SIZE) {
+  if (markdown.length > MAX_COMMENT_SIZE)
     markdown =
       `## Code Review Governance — ${verdict}\n\n` +
       `Review content exceeds GitHub comment size limit.\n\n` +
       `> Full report: \`.filid/review/${normalized}/review-report.md\``;
-  }
 
   return { markdown, verdict, normalized };
 }

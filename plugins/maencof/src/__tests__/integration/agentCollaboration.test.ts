@@ -149,9 +149,8 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
         const deleteResult = await handleMaencofDelete(vault, {
           path: '04_Action/expired-task.md',
         });
-        if (deleteResult.success) {
+        if (deleteResult.success)
           actions.push(`만료 문서 삭제: 04_Action/expired-task.md`);
-        }
       }
     }
 
@@ -177,9 +176,8 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
         reason: '신뢰도 0.9 이상',
         confidence: 0.9,
       });
-      if (moveResult.success) {
+      if (moveResult.success)
         actions.push(`Layer 전이: 03_External → 02_Derived`);
-      }
     }
 
     const result = makeAgentResult('memory-organizer', actions, transitions);
@@ -230,9 +228,8 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
         filename: 'knowledge-synthesis',
       });
 
-      if (connectorDoc.success) {
+      if (connectorDoc.success)
         actions.push(`연결 문서 생성: ${connectorDoc.path}`);
-      }
     }
 
     const result = makeAgentResult('knowledge-connector', actions);

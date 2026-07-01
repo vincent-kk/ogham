@@ -61,9 +61,8 @@ describe('provisionMissingConfigs', () => {
       'data-sources.json',
       'usage-stats.json',
     ];
-    for (const filename of expectedFiles) {
+    for (const filename of expectedFiles)
       expect(existsSync(join(metaDir(cwd), filename))).toBe(true);
-    }
   });
 
   it('이미 존재하는 파일은 건너뛴다 (최신 schemaVersion)', () => {
@@ -145,9 +144,8 @@ describe('provisionMissingConfigs', () => {
       const defaultValue = entry.defaultValue();
 
       // 기본값의 모든 key가 생성된 파일에 존재하는지 확인
-      for (const key of Object.keys(defaultValue)) {
+      for (const key of Object.keys(defaultValue))
         expect(content).toHaveProperty(key);
-      }
     }
   });
 

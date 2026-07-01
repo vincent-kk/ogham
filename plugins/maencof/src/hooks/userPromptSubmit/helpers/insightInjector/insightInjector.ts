@@ -53,11 +53,10 @@ export function runInsightInjector(
     .map(([key]) => key)
     .join(',');
 
-  if (max > 0 && captured >= max) {
+  if (max > 0 && captured >= max)
     return buildInjectorResult(
       `<auto-insight status="limit-reached" captured="${captured}/${max}" />`,
     );
-  }
 
   return buildInjectorResult(
     `<auto-insight status="active" sensitivity="${sensitivity}" captured="${captured}/${max}" allowed-categories="${allowedCategories}" />`,

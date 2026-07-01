@@ -28,15 +28,13 @@ function safeStatMtime(path: string): number | null {
 export function findIndexMarker(vaultPath: string): MarkerInfo | null {
   const graphMetaPath = join(vaultPath, MAENCOF_DIR, CACHE_FILES.GRAPH_META);
   const graphMetaMtime = safeStatMtime(graphMetaPath);
-  if (graphMetaMtime !== null) {
+  if (graphMetaMtime !== null)
     return { kind: "graph-meta", path: graphMetaPath, mtimeMs: graphMetaMtime };
-  }
 
   const legacyPath = join(vaultPath, MAENCOF_DIR, CACHE_FILES.INDEX);
   const legacyMtime = safeStatMtime(legacyPath);
-  if (legacyMtime !== null) {
+  if (legacyMtime !== null)
     return { kind: "legacy", path: legacyPath, mtimeMs: legacyMtime };
-  }
 
   return null;
 }

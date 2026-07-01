@@ -28,10 +28,9 @@ export function calculateHealthScore(report: AnalysisReport): number {
   const { violations } = report.validation.result;
   let errorCount = 0;
   let warningCount = 0;
-  for (const v of violations) {
+  for (const v of violations)
     if (v.severity === 'error') errorCount++;
     else if (v.severity === 'warning') warningCount++;
-  }
 
   score -= Math.min(errorCount * ERROR_PENALTY, ERROR_PENALTY_CAP);
   score -= Math.min(warningCount * WARNING_PENALTY, WARNING_PENALTY_CAP);

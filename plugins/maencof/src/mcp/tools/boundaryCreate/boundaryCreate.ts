@@ -77,14 +77,13 @@ export async function handleBoundaryCreate(
     title: input.title,
   };
   const validation = validateFrontmatter(fmObject);
-  if (!validation.ok) {
+  if (!validation.ok)
     return {
       success: false,
       path: relativePath,
       node_id: '',
       message: `Frontmatter validation failed: ${validation.errors.join('; ')}`,
     };
-  }
 
   const frontmatter = [
     '---',

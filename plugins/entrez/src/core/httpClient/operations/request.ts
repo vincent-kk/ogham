@@ -21,9 +21,9 @@ const FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 /** Merge request params with injected NCBI identity (tool/email/api_key). */
 function buildParams(req: HttpRequest, deps: HttpDeps): Record<string, string> {
   const merged: Record<string, string> = {};
-  for (const [key, value] of Object.entries(req.params ?? {})) {
+  for (const [key, value] of Object.entries(req.params ?? {}))
     if (value !== undefined) merged[key] = String(value);
-  }
+
   if (req.injectAuth ?? true) {
     merged.tool = deps.tool;
     merged.email = deps.email;
@@ -34,9 +34,9 @@ function buildParams(req: HttpRequest, deps: HttpDeps): Record<string, string> {
 
 function buildGetUrl(base: string, params: Record<string, string>): string {
   const url = new URL(base);
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries(params))
     url.searchParams.set(key, value);
-  }
+
   return url.toString();
 }
 
@@ -59,18 +59,18 @@ async function classify(
   const contentType = res.headers.get("content-type") ?? undefined;
 
   if (status >= 200 && status < 300) {
-    if (acceptBinary) {
+    if (acceptBinary)
       return {
         kind: "success",
         status,
         binary: await res.arrayBuffer(),
         contentType,
       };
-    }
+
     return { kind: "success", status, text: await res.text(), contentType };
   }
 
-  if (status === TOO_MANY_REQUESTS) {
+  if (status === TOO_MANY_REQUESTS)
     return {
       kind: "retry",
       status,
@@ -79,9 +79,8 @@ async function classify(
       code: ErrorCode.RATE_LIMITED,
       message: `HTTP ${status}`,
     };
-  }
 
-  if ((RETRYABLE_STATUS_CODES as readonly number[]).includes(status)) {
+  if ((RETRYABLE_STATUS_CODES as readonly number[]).includes(status))
     return {
       kind: "retry",
       status,
@@ -89,7 +88,6 @@ async function classify(
       code: ErrorCode.EUTILS_ERROR,
       message: `HTTP ${status}`,
     };
-  }
 
   return {
     kind: "fatal",
@@ -161,7 +159,7 @@ export async function httpRequest(
     },
   );
 
-  if (outcome.kind === "success") {
+  if (outcome.kind === "success")
     return {
       ok: true,
       status: outcome.status,
@@ -171,7 +169,6 @@ export async function httpRequest(
       contentType: outcome.contentType,
       apiKeyUsed,
     };
-  }
 
   return {
     ok: false,

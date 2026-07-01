@@ -14,9 +14,7 @@ function historyPath(cwd: string): string {
 
 function ensureDir(filePath: string): void {
   const dir = dirname(filePath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
 
 export function readTransitionHistory(cwd: string): TransitionHistoryEntry[] {
@@ -37,9 +35,7 @@ export function appendTransition(
   entries.push(entry);
 
   // FIFO eviction
-  while (entries.length > MAX_ENTRIES) {
-    entries.shift();
-  }
+  while (entries.length > MAX_ENTRIES) entries.shift();
 
   const fp = historyPath(cwd);
   ensureDir(fp);

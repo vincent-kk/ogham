@@ -68,9 +68,9 @@ async function startHttpServer(): Promise<HttpServerInstance> {
       const s = server;
       server = null;
       await new Promise<void>((resolve) => {
-        if (typeof s.closeAllConnections === "function") {
+        if (typeof s.closeAllConnections === "function")
           s.closeAllConnections();
-        }
+
         s.close(() => resolve());
       });
     }

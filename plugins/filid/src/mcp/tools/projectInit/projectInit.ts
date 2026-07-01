@@ -25,9 +25,7 @@ export interface ProjectInitInput {
 export function handleProjectInit(args: unknown): InitResult {
   const input = args as ProjectInitInput;
 
-  if (!input.path) {
-    throw new Error('path is required');
-  }
+  if (!input.path) throw new Error('path is required');
 
   return initProject(input.path, input.language);
 }

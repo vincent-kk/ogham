@@ -19,9 +19,7 @@ function logPath(cwd: string): string {
 
 function ensureDir(filePath: string): void {
   const dir = dirname(filePath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
 
 export function readErrorLog(cwd: string): ErrorLogEntry[] {
@@ -38,9 +36,7 @@ export function appendErrorLog(cwd: string, entry: ErrorLogEntry): void {
   const entries = readErrorLog(cwd);
   entries.push(entry);
 
-  while (entries.length > MAX_ENTRIES) {
-    entries.shift();
-  }
+  while (entries.length > MAX_ENTRIES) entries.shift();
 
   const fp = logPath(cwd);
   ensureDir(fp);

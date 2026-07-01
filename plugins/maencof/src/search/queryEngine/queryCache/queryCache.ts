@@ -83,12 +83,12 @@ export class QueryCache {
     if (this.cache.size > this.maxEntries) {
       let oldestKey: string | null = null;
       let oldestTime = Infinity;
-      for (const [k, v] of this.cache) {
+      for (const [k, v] of this.cache)
         if (v.accessedAt < oldestTime) {
           oldestTime = v.accessedAt;
           oldestKey = k;
         }
-      }
+
       if (oldestKey) this.cache.delete(oldestKey);
     }
   }

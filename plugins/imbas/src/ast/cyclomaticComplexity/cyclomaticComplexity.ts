@@ -48,9 +48,7 @@ const DECISION_KINDS: ReadonlySet<string | number> = new Set([
 function walk(node: SgNode, fn: (n: SgNode) => void): void {
   fn(node);
   const children = node.children?.();
-  if (children) {
-    for (const child of children) walk(child, fn);
-  }
+  if (children) for (const child of children) walk(child, fn);
 }
 
 function computeCC(bodyNode: SgNode): number {
@@ -70,7 +68,7 @@ function computeCC(bodyNode: SgNode): number {
     }
 
     // Logical && and || each add +1
-    if (kind === 'binary_expression') {
+    if (kind === 'binary_expression')
       for (const child of node.children()) {
         const t = child.text();
         if (t === '&&' || t === '||') {
@@ -78,7 +76,6 @@ function computeCC(bodyNode: SgNode): number {
           break;
         }
       }
-    }
   });
   return cc;
 }
@@ -100,9 +97,7 @@ function processFunction(
   const body = node
     .children()
     .find((c: SgNode) => c.kind() === 'statement_block');
-  if (body) {
-    perFunction.set(name, computeCC(body));
-  }
+  if (body) perFunction.set(name, computeCC(body));
 }
 
 function processClassMethods(
@@ -113,7 +108,7 @@ function processClassMethods(
     .children()
     .find((c: SgNode) => c.kind() === 'class_body');
   if (!classBody) return;
-  for (const member of classBody.children()) {
+  for (const member of classBody.children())
     if (member.kind() === 'method_definition') {
       const nameNode = member
         .children()
@@ -121,18 +116,15 @@ function processClassMethods(
       const body = member
         .children()
         .find((c: SgNode) => c.kind() === 'statement_block');
-      if (nameNode && body) {
-        perFunction.set(nameNode.text(), computeCC(body));
-      }
+      if (nameNode && body) perFunction.set(nameNode.text(), computeCC(body));
     }
-  }
 }
 
 function processLexicalDecl(
   lexDecl: SgNode,
   perFunction: Map<string, number>,
 ): void {
-  for (const decl of lexDecl.children()) {
+  for (const decl of lexDecl.children())
     if (decl.kind() === 'variable_declarator') {
       const nameNode = decl
         .children()
@@ -143,11 +135,8 @@ function processLexicalDecl(
           (c: SgNode) =>
             c.kind() === 'arrow_function' || c.kind() === 'function_expression',
         );
-      if (nameNode && init) {
-        processFunction(init, nameNode.text(), perFunction);
-      }
+      if (nameNode && init) processFunction(init, nameNode.text(), perFunction);
     }
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -164,13 +153,12 @@ export async function calculateComplexity(
   filePath = 'anonymous.ts',
 ): Promise<CyclomaticResult | CyclomaticError> {
   const sg = await getSgModule();
-  if (!sg) {
+  if (!sg)
     return {
       error:
         '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
       sgLoadError: getSgLoadError(),
     };
-  }
 
   try {
     const ext = filePath.includes('.')
@@ -192,9 +180,8 @@ export async function calculateComplexity(
       }
 
       // const foo = () => {} or const foo = function() {}
-      if (kind === 'lexical_declaration' || kind === 'variable_declaration') {
+      if (kind === 'lexical_declaration' || kind === 'variable_declaration')
         processLexicalDecl(stmt, perFunction);
-      }
 
       // export function foo() {} / export class Foo {} / export const foo = () => {}
       if (kind === 'export_statement') {
@@ -222,14 +209,10 @@ export async function calculateComplexity(
       }
 
       // class Foo { method() {} }
-      if (kind === 'class_declaration') {
-        processClassMethods(stmt, perFunction);
-      }
+      if (kind === 'class_declaration') processClassMethods(stmt, perFunction);
     }
 
-    if (perFunction.size === 0) {
-      perFunction.set('(file)', 1);
-    }
+    if (perFunction.size === 0) perFunction.set('(file)', 1);
 
     let fileTotal = 0;
     let value = 0;
@@ -239,9 +222,7 @@ export async function calculateComplexity(
     }
 
     const perFunctionRecord: Record<string, number> = {};
-    for (const [name, cc] of perFunction) {
-      perFunctionRecord[name] = cc;
-    }
+    for (const [name, cc] of perFunction) perFunctionRecord[name] = cc;
 
     return { value, fileTotal, perFunction: perFunctionRecord };
   } catch (error) {

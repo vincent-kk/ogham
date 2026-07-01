@@ -48,14 +48,13 @@ function parseFrontmatter(raw: string): {
   let inDescription = false;
 
   for (const line of body) {
-    if (inDescription) {
-      if (/^[a-z_]+:/.test(line)) {
-        inDescription = false;
-      } else {
+    if (inDescription)
+      if (/^[a-z_]+:/.test(line)) inDescription = false;
+      else {
         descriptionLines.push(line);
         continue;
       }
-    }
+
     const m = line.match(
       /^(name|description|version|user_invocable|complexity|plugin):\s*(.*)$/,
     );
@@ -66,19 +65,17 @@ function parseFrontmatter(raw: string): {
       inDescription = true;
       continue;
     }
-    if (key === 'user_invocable') {
+    if (key === 'user_invocable')
       (fm as Record<string, unknown>)[key] = val === 'true';
-    } else {
-      (fm as Record<string, unknown>)[key] = val;
-    }
+    else (fm as Record<string, unknown>)[key] = val;
   }
   // If folded description was used, populate fm.description from the folded lines.
-  if (fm.description === undefined && descriptionLines.length > 0) {
+  if (fm.description === undefined && descriptionLines.length > 0)
     fm.description = descriptionLines
       .map((l) => l.trim())
       .filter(Boolean)
       .join(' ');
-  }
+
   return { fm, descriptionLines };
 }
 
@@ -101,11 +98,10 @@ describe('G3 skill-frontmatter — canonical SKILL.md frontmatter', () => {
       if (!fm.description) drift.push(`${path}: description missing`);
       if (fm.plugin !== 'imbas')
         drift.push(`${path}: plugin="${fm.plugin}" must be "imbas"`);
-      if (fm.complexity && !COMPLEXITY.has(fm.complexity)) {
+      if (fm.complexity && !COMPLEXITY.has(fm.complexity))
         drift.push(
           `${path}: complexity="${fm.complexity}" not in ${Array.from(COMPLEXITY).join('|')}`,
         );
-      }
     }
     expect(drift, drift.join('\n')).toEqual([]);
   });
@@ -118,11 +114,10 @@ describe('G3 skill-frontmatter — canonical SKILL.md frontmatter', () => {
       const { descriptionLines } = parseFrontmatter(readFileSync(path, 'utf8'));
       const triggerLine = descriptionLines.find((l) => /\bTrigger:/.test(l));
       if (!triggerLine) continue; // Optional — not every skill declares a Trigger line
-      if (!TRIGGER_RE.test(triggerLine)) {
+      if (!TRIGGER_RE.test(triggerLine))
         drift.push(
           `${path}: Trigger line does not match canonical regex: ${JSON.stringify(triggerLine)}`,
         );
-      }
     }
     expect(drift, drift.join('\n')).toEqual([]);
   });

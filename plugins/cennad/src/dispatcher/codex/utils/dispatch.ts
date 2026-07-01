@@ -31,7 +31,7 @@ export async function dispatch(
   const resolvedRef = input.existingRef ?? parsed.threadId ?? '';
   const failed = spawnResult.spawnError !== null || spawnResult.exitCode !== 0;
 
-  if (failed) {
+  if (failed)
     return {
       status: 'failure',
       response: null,
@@ -45,9 +45,8 @@ export async function dispatch(
       ignoredOptions,
       resolvedModel: parsed.resolvedModel,
     };
-  }
 
-  if (input.existingRef === null && !parsed.threadId) {
+  if (input.existingRef === null && !parsed.threadId)
     return {
       status: 'failure',
       response: parsed.response,
@@ -59,7 +58,6 @@ export async function dispatch(
       ignoredOptions,
       resolvedModel: parsed.resolvedModel,
     };
-  }
 
   return {
     status: 'success',

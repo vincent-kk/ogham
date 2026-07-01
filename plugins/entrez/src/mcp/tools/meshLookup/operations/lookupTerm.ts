@@ -72,8 +72,8 @@ export async function lookupTerm(
     },
     ctx.deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     return { input: term, matched: MeshMatch.NONE };
-  }
+
   return parseMeshSummary(term, uid, res.text, input);
 }

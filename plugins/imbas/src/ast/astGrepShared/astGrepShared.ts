@@ -78,9 +78,8 @@ export function toLangEnum(sg: SgModule, language: string): NapiLang {
   // Lang enum only contains built-in languages (Html, JavaScript, Tsx, Css, TypeScript).
   // All others (Python, Go, Rust, etc.) are CustomLang strings passed directly.
   const lang = getMappedLang(sg, language);
-  if (lang === undefined) {
-    throw new Error(`Unsupported language: ${language}`);
-  }
+  if (lang === undefined) throw new Error(`Unsupported language: ${language}`);
+
   return lang;
 }
 
@@ -117,9 +116,7 @@ export function collectFiles(
 
   try {
     const stat = statSync(resolvedDir);
-    if (stat.isFile()) {
-      return [resolvedDir];
-    }
+    if (stat.isFile()) return [resolvedDir];
   } catch {
     return [];
   }
@@ -135,14 +132,10 @@ export function collectFiles(
     for (const entry of entries) {
       if (files.length >= maxFiles) return;
       if (entry.isDirectory()) {
-        if (!AST_EXCLUDED_DIRS.has(entry.name)) {
-          walk(join(current, entry.name));
-        }
+        if (!AST_EXCLUDED_DIRS.has(entry.name)) walk(join(current, entry.name));
       } else if (entry.isFile()) {
         const ext = extname(entry.name).toLowerCase();
-        if (extensions.has(ext)) {
-          files.push(join(current, entry.name));
-        }
+        if (extensions.has(ext)) files.push(join(current, entry.name));
       }
     }
   }

@@ -5,9 +5,7 @@ import type { DecisionParams } from '../testMetrics.js';
 export function handleDecide(
   params?: DecisionParams,
 ): { decision: DecisionResult } | { error: string } {
-  if (!params) {
-    return { error: 'Decision action requires decisionInput' };
-  }
+  if (!params) return { error: 'Decision action requires decisionInput' };
 
   const result = decide({
     testCount: params.testCount,

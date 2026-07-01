@@ -35,14 +35,13 @@ function maxMarkdownMtime(root: string): number {
       if (entry.isDirectory()) {
         if (entry.name.startsWith(".") || SKIP_DIRS.has(entry.name)) continue;
         stack.push(fullPath);
-      } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      } else if (entry.isFile() && entry.name.endsWith(".md"))
         try {
           const m = statSync(fullPath).mtimeMs;
           if (m > max) max = m;
         } catch {
           // skip unreadable files
         }
-      }
     }
   }
   return max;
@@ -66,7 +65,7 @@ function formatSince(diffMs: number): string {
 export async function detectStale(vaultPath: string): Promise<StaleInfo> {
   const marker = findIndexMarker(vaultPath);
 
-  if (marker === null) {
+  if (marker === null)
     return {
       isStale: true,
       indexMtime: null,
@@ -74,9 +73,8 @@ export async function detectStale(vaultPath: string): Promise<StaleInfo> {
       staleSince: "index not found",
       markerKind: null,
     };
-  }
 
-  if (marker.kind === "legacy") {
+  if (marker.kind === "legacy")
     return {
       isStale: true,
       indexMtime: marker.mtimeMs,
@@ -84,7 +82,6 @@ export async function detectStale(vaultPath: string): Promise<StaleInfo> {
       staleSince: "legacy v1",
       markerKind: "legacy",
     };
-  }
 
   try {
     const newestFileMtime = maxMarkdownMtime(vaultPath);
@@ -96,9 +93,8 @@ export async function detectStale(vaultPath: string): Promise<StaleInfo> {
       markerKind: "graph-meta",
     };
 
-    if (isStale) {
+    if (isStale)
       result.staleSince = formatSince(newestFileMtime - marker.mtimeMs);
-    }
 
     return result;
   } catch {

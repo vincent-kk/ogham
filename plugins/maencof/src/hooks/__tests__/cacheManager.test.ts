@@ -153,9 +153,7 @@ describe('pruneOldSessions', () => {
   it('removes markers older than 24h', () => {
     const cwd = '/test/vault-prune';
     // Create 12 session markers to trigger pruning (threshold is 10)
-    for (let i = 0; i < 12; i++) {
-      markSessionInjected(`old-sess-${i}`, cwd);
-    }
+    for (let i = 0; i < 12; i++) markSessionInjected(`old-sess-${i}`, cwd);
 
     const cacheDir = getCacheDir(cwd);
     // Manually backdate first 5 markers to >24h ago

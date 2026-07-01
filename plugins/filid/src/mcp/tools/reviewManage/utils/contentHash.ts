@@ -7,19 +7,19 @@ export async function gitExec(cwd: string, args: string[]): Promise<string> {
     cwd,
     timeoutMs: 30_000,
   });
-  if (result.spawnError) {
+  if (result.spawnError)
     throw new Error(
       `git ${args[0]} failed in ${cwd}: ${result.spawnError.message}`,
       {
         cause: result.spawnError,
       },
     );
-  }
-  if (result.code !== 0) {
+
+  if (result.code !== 0)
     throw new Error(
       `git ${args[0]} failed in ${cwd} (exit ${result.code}): ${result.stderr.trim()}`,
     );
-  }
+
   return result.stdout.trimEnd();
 }
 
@@ -47,7 +47,7 @@ export async function computeContentHash(
 
     // Parse "<mode> <type> <hash>\t<path>" lines.
     const headBlobs = new Map<string, string>();
-    if (lsTreeOutput) {
+    if (lsTreeOutput)
       for (const line of lsTreeOutput.split('\n')) {
         if (!line) continue;
         const tabIdx = line.indexOf('\t');
@@ -56,11 +56,9 @@ export async function computeContentHash(
         const blobHash = line.slice(0, tabIdx).split(' ')[2];
         headBlobs.set(filePath, blobHash);
       }
-    }
 
-    for (const file of changedFiles) {
+    for (const file of changedFiles)
       fileHashes[file] = headBlobs.get(file) ?? 'DELETED';
-    }
   }
 
   const sortedEntries = Object.keys(fileHashes)

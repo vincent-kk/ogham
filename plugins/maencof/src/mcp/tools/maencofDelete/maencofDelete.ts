@@ -49,25 +49,23 @@ export async function handleMaencofDelete(
   const doc = parseDocument(input.path, content, mtime);
   const nodeResult = buildKnowledgeNode(doc);
 
-  if (nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE) {
+  if (nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE)
     return {
       success: false,
       path: input.path,
       message:
         'Layer 1 (Core Identity) documents cannot be deleted. Please contact the identity-guardian agent.',
     };
-  }
 
   // Backlink 경고 확인
   const backlinks = await getBacklinks(vaultPath, input.path);
-  if (backlinks.length > 0 && !input.force) {
+  if (backlinks.length > 0 && !input.force)
     return {
       success: false,
       path: input.path,
       message: `Cannot delete: ${backlinks.length} document(s) reference this document. Use force=true to force deletion.`,
       warnings: backlinks.map((src) => `Referenced by: ${src}`),
     };
-  }
 
   // 삭제 실행
   await unlink(absolutePath);

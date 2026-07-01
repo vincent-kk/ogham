@@ -26,9 +26,7 @@ function dialogueConfigPath(cwd: string): string {
 
 function ensureDir(filePath: string): void {
   const dir = dirname(filePath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
 
 /**

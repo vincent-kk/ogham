@@ -14,7 +14,6 @@ export function deleteAt(
     parent.splice(leaf, 1);
     return;
   }
-  if (typeof parent === 'object' && typeof leaf === 'string') {
+  if (typeof parent === 'object' && typeof leaf === 'string')
     delete (parent as Record<string, unknown>)[leaf];
-  }
 }

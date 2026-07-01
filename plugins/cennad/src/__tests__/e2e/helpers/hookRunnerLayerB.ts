@@ -47,9 +47,8 @@ export function runHookLayerB(
   opts: HookRunOptions = {},
 ): HookRunResult {
   const bridgeDir = process.env.CENNAD_E2E_BRIDGE;
-  if (!bridgeDir) {
-    throw new Error('CENNAD_E2E_BRIDGE not set');
-  }
+  if (!bridgeDir) throw new Error('CENNAD_E2E_BRIDGE not set');
+
   const script = resolve(bridgeDir, `${name}.mjs`);
   const result = spawnSync(process.execPath, [script], {
     cwd: opts.cwd,

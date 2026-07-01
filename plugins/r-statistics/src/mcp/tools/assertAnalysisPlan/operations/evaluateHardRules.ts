@@ -25,13 +25,13 @@ function checkOutcomeMismatch(
   technique: string,
   outcomeType: OutcomeType,
 ): AssertReason | null {
-  if (rule && !rule.outcomeTypes.includes(outcomeType)) {
+  if (rule && !rule.outcomeTypes.includes(outcomeType))
     return hard(
       HardRuleCode.OutcomeMethodMismatch,
       `Outcome type '${outcomeType}' is incompatible with ` +
         `'${technique}' (expects ${rule.outcomeTypes.join(", ")}).`,
     );
-  }
+
   return null;
 }
 
@@ -46,13 +46,13 @@ function checkGroupSize(
     groupCount !== undefined &&
     groupCount > 0 &&
     sampleSize / groupCount < MIN_PER_GROUP
-  ) {
+  )
     return hard(
       HardRuleCode.SampleTooSmall,
       `Per-group sample size is below ${MIN_PER_GROUP} ` +
         `(n=${sampleSize}, groups=${groupCount}).`,
     );
-  }
+
   return null;
 }
 
@@ -64,7 +64,7 @@ function checkEpv(
     (family === MethodFamily.Regression || family === MethodFamily.Survival) &&
     eventsPerVariable !== undefined &&
     eventsPerVariable < EPV_SEVERE_BLOCK_THRESHOLD
-  ) {
+  )
     return hard(
       HardRuleCode.SampleTooSmall,
       `Events-per-variable (${eventsPerVariable}) is below the severe ` +
@@ -72,7 +72,7 @@ function checkEpv(
         `trace to Peduzzi et al. 1996 and clinical prediction-model practice; ` +
         `they may be conservative outside that context.`,
     );
-  }
+
   return null;
 }
 
@@ -86,14 +86,13 @@ export function evaluateHardRules(input: AssertInput): AssertReason[] {
   const { method, datasetMeta } = input;
   const rule = TECHNIQUE_RULES[method.technique];
 
-  if (!datasetMeta.outcomeType) {
+  if (!datasetMeta.outcomeType)
     reasons.push(
       hard(
         HardRuleCode.MissingRequiredInput,
         "datasetMeta.outcomeType is required to evaluate method fit.",
       ),
     );
-  }
 
   if (datasetMeta.outcomeType) {
     const r = checkOutcomeMismatch(
@@ -116,14 +115,13 @@ export function evaluateHardRules(input: AssertInput): AssertReason[] {
   const epvReason = checkEpv(family, datasetMeta.eventsPerVariable);
   if (epvReason) reasons.push(epvReason);
 
-  if (method.technique === "chi_square" && datasetMeta.expectedCountsBelow5) {
+  if (method.technique === "chi_square" && datasetMeta.expectedCountsBelow5)
     reasons.push(
       hard(
         HardRuleCode.ExpectedCountLow,
         "Many expected counts < 5 for chi-square; use fisher_exact.",
       ),
     );
-  }
 
   return reasons;
 }

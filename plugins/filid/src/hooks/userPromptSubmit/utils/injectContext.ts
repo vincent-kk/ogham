@@ -32,9 +32,8 @@ import { buildMinimalContext } from './buildMinimalContext.js';
  * On first run, persists both session marker and prompt-context cache.
  */
 export function injectContext(cwd: string, sessionId: string): HookOutput {
-  if (!isFirstInSession(sessionId, cwd) && hasPromptContext(sessionId, cwd)) {
+  if (!isFirstInSession(sessionId, cwd) && hasPromptContext(sessionId, cwd))
     return { continue: true };
-  }
 
   const additionalContext = buildMinimalContext(cwd);
 

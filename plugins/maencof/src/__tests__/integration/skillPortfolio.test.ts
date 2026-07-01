@@ -39,11 +39,9 @@ describe('maencof skill portfolio invariants', () => {
     const matches: string[] = [];
     for (const file of files) {
       const content = readFileSync(file, 'utf-8');
-      for (const removed of REMOVED_SKILLS) {
-        if (content.includes(`/maencof:${removed}`)) {
+      for (const removed of REMOVED_SKILLS)
+        if (content.includes(`/maencof:${removed}`))
           matches.push(`${file}: contains /maencof:${removed}`);
-        }
-      }
     }
 
     expect(matches).toEqual([]);

@@ -57,9 +57,7 @@ describe('handleAstGrepReplace', () => {
   let tmpDir: string;
 
   afterEach(() => {
-    if (tmpDir) {
-      rmSync(tmpDir, { recursive: true, force: true });
-    }
+    if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
   });
 
   describe('graceful degradation — @ast-grep/napi unavailable', () => {
@@ -81,14 +79,13 @@ describe('handleAstGrepReplace', () => {
         expect(result.sgLoadError).toBeTypeOf('string');
         // Hint message should mention the package name
         expect(result.error).toContain('@ast-grep/napi');
-      } else {
+      } else
         // @ast-grep/napi is available — validate shape instead
         expect(
           isReplaceResult(result) ||
             isNoMatchesMessage(result) ||
             isNoFilesMessage(result),
         ).toBe(true);
-      }
     });
   });
 
@@ -105,9 +102,8 @@ describe('handleAstGrepReplace', () => {
         dry_run: true,
       });
 
-      if (isReplaceError(result)) {
-        expect(result.error).toBeTypeOf('string');
-      } else {
+      if (isReplaceError(result)) expect(result.error).toBeTypeOf('string');
+      else {
         expect(isNoFilesMessage(result)).toBe(true);
         if (isNoFilesMessage(result)) {
           expect(result.filesSearched).toBe(0);
@@ -128,9 +124,8 @@ describe('handleAstGrepReplace', () => {
         dry_run: true,
       });
 
-      if (!isReplaceError(result) && isNoFilesMessage(result)) {
+      if (!isReplaceError(result) && isNoFilesMessage(result))
         expect(result.message).toContain('python');
-      }
     });
   });
 
@@ -150,18 +145,16 @@ describe('handleAstGrepReplace', () => {
         dry_run: true,
       });
 
-      if (isReplaceError(result)) {
-        expect(result.error).toBeTypeOf('string');
-      } else if (isNoFilesMessage(result)) {
+      if (isReplaceError(result)) expect(result.error).toBeTypeOf('string');
+      else if (isNoFilesMessage(result))
         // Should not happen — a .ts file is present
         expect(result.filesSearched).toBe(0);
-      } else if (isNoMatchesMessage(result)) {
+      else if (isNoMatchesMessage(result)) {
         expect(result.filesSearched).toBeGreaterThan(0);
         expect(result.message).toContain('No matches');
-      } else if (isReplaceResult(result)) {
+      } else if (isReplaceResult(result))
         // Pattern matched — valid when @ast-grep/napi is present
         expect(result.changes).toBeDefined();
-      }
     });
   });
 
@@ -184,9 +177,7 @@ describe('handleAstGrepReplace', () => {
       const afterContent = readFileSync(filePath, 'utf-8');
       expect(afterContent).toBe(original);
 
-      if (isReplaceResult(result)) {
-        expect(result.mode).toContain('DRY RUN');
-      }
+      if (isReplaceResult(result)) expect(result.mode).toContain('DRY RUN');
     });
 
     it('result mode field says "DRY RUN" when dry_run=true and changes are found', async () => {
@@ -272,9 +263,8 @@ describe('handleAstGrepReplace', () => {
         dry_run: true,
       });
 
-      if (isReplaceResult(result)) {
+      if (isReplaceResult(result))
         expect(result.totalReplacements).toBe(result.changes.length);
-      }
     });
 
     it('filesSearched is reported correctly', async () => {
@@ -290,11 +280,8 @@ describe('handleAstGrepReplace', () => {
         dry_run: true,
       });
 
-      if (isReplaceResult(result)) {
-        expect(result.filesSearched).toBe(2);
-      } else if (isNoMatchesMessage(result)) {
-        expect(result.filesSearched).toBe(2);
-      }
+      if (isReplaceResult(result)) expect(result.filesSearched).toBe(2);
+      else if (isNoMatchesMessage(result)) expect(result.filesSearched).toBe(2);
     });
   });
 
@@ -316,9 +303,7 @@ describe('handleAstGrepReplace', () => {
       const afterContent = readFileSync(filePath, 'utf-8');
       expect(afterContent).toBe(original);
 
-      if (isReplaceResult(result)) {
-        expect(result.mode).toContain('DRY RUN');
-      }
+      if (isReplaceResult(result)) expect(result.mode).toContain('DRY RUN');
     });
   });
 });

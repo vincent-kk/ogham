@@ -16,23 +16,21 @@ export function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
   for (const node of nodes) {
     const ext = node as DomainExt;
     if (ext.domain) {
-      if (!domainMap.has(ext.domain)) {
-        domainMap.set(ext.domain, []);
-      }
+      if (!domainMap.has(ext.domain)) domainMap.set(ext.domain, []);
+
       domainMap.get(ext.domain)!.push(ext);
     }
   }
 
   for (const [, group] of domainMap) {
     if (group.length < 2) continue;
-    for (let i = 0; i < group.length; i++) {
+    for (let i = 0; i < group.length; i++)
       for (let j = i + 1; j < group.length; j++) {
         const a = group[i];
         const b = group[j];
         edges.push({ from: a.id, to: b.id, type: 'DOMAIN', weight: 0.3 });
         edges.push({ from: b.id, to: a.id, type: 'DOMAIN', weight: 0.3 });
       }
-    }
   }
 
   return edges;

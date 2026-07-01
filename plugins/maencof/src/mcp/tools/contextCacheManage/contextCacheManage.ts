@@ -55,23 +55,22 @@ export async function handleContextCacheManage(
 
   switch (input.action) {
     case 'pin': {
-      if (!input.node_id || !input.node_title || input.node_layer == null) {
+      if (!input.node_id || !input.node_title || input.node_layer == null)
         return {
           success: false,
           error: 'pin requires node_id, node_title, and node_layer',
         };
-      }
+
       const nodes = readPinnedNodes(vault);
 
       // Deduplicate by node_id
       const existing = nodes.find((n) => n.id === input.node_id);
-      if (existing) {
+      if (existing)
         return {
           success: true,
           message: `Node "${input.node_id}" is already pinned`,
           totalPinned: nodes.length,
         };
-      }
 
       const newNode: PinnedNode = {
         id: input.node_id,
@@ -84,14 +83,13 @@ export async function handleContextCacheManage(
 
       // Enforce max — evict oldest
       let toWrite = nodes;
-      if (toWrite.length > MAX_PINNED_NODES) {
+      if (toWrite.length > MAX_PINNED_NODES)
         toWrite = [...toWrite]
           .sort(
             (a, b) =>
               new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime(),
           )
           .slice(0, MAX_PINNED_NODES);
-      }
 
       writePinnedNodes(vault, toWrite);
 
@@ -108,19 +106,18 @@ export async function handleContextCacheManage(
     }
 
     case 'unpin': {
-      if (!input.node_id) {
+      if (!input.node_id)
         return { success: false, error: 'unpin requires node_id' };
-      }
+
       const nodes = readPinnedNodes(vault);
       const idx = nodes.findIndex((n) => n.id === input.node_id);
-      if (idx === -1) {
+      if (idx === -1)
         return {
           success: true,
           unpinned: false,
           reason: `Node "${input.node_id}" not found in pinned nodes`,
           totalPinned: nodes.length,
         };
-      }
 
       nodes.splice(idx, 1);
       writePinnedNodes(vault, nodes);

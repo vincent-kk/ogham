@@ -35,14 +35,13 @@ export function getRuleDocsStatus(
   pluginRoot?: string,
 ): RuleDocsStatus {
   const root = resolvePluginRoot(pluginRoot);
-  if (root === null) {
+  if (root === null)
     return {
       entries: [],
       autoDeployed: [],
       pluginRootResolved: false,
       manifestPath: null,
     };
-  }
 
   const manifestPath = join(root, 'templates', 'rules', 'manifest.json');
   let manifest: RuleDocsManifest;
@@ -95,11 +94,8 @@ export function getRuleDocsStatus(
       deployedHash,
       inSync,
     };
-    if (entry.required) {
-      autoDeployed.push(statusEntry);
-    } else {
-      entries.push(statusEntry);
-    }
+    if (entry.required) autoDeployed.push(statusEntry);
+    else entries.push(statusEntry);
   }
 
   return { entries, autoDeployed, pluginRootResolved: true, manifestPath };

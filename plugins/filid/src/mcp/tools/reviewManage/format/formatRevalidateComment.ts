@@ -16,16 +16,15 @@ export async function formatRevalidateComment(
 ): Promise<Record<string, unknown>> {
   const input = args as ReviewManageInput;
 
-  if (!input.branchName) {
+  if (!input.branchName)
     throw new Error(
       'branchName is required for format-revalidate-comment action',
     );
-  }
-  if (!input.projectRoot) {
+
+  if (!input.projectRoot)
     throw new Error(
       'projectRoot is required for format-revalidate-comment action',
     );
-  }
 
   const normalized = normalizeBranch(input.branchName);
   const reviewDir = path.join(
@@ -38,11 +37,10 @@ export async function formatRevalidateComment(
   const revalidateContent = await tryReadFile(
     path.join(reviewDir, 're-validate.md'),
   );
-  if (!revalidateContent) {
+  if (!revalidateContent)
     throw new Error(
       `Re-validation not complete: re-validate.md not found in ${reviewDir}`,
     );
-  }
 
   const verdict = extractRevalidateVerdict(revalidateContent);
   const section = collapsible('Re-validation Details', revalidateContent);
@@ -53,12 +51,11 @@ export async function formatRevalidateComment(
 
   let markdown = header + '\n' + section + footer;
 
-  if (markdown.length > MAX_COMMENT_SIZE) {
+  if (markdown.length > MAX_COMMENT_SIZE)
     markdown =
       `## Re-validation — ${verdictEmoji} ${verdict}\n\n` +
       `Re-validation content exceeds GitHub comment size limit.\n\n` +
       `> Full report: \`.filid/review/${normalized}/re-validate.md\``;
-  }
 
   return { markdown, verdict, normalized };
 }

@@ -23,11 +23,9 @@ function compressGroup(paths: string[]): string {
   const parts: string[] = [];
   for (const [head, tails] of groups) {
     const nonEmpty = tails.filter((t) => t !== '');
-    if (nonEmpty.length === 0) {
-      parts.push(head);
-    } else if (nonEmpty.length === 1) {
-      parts.push(`${head}/${nonEmpty[0]}`);
-    } else {
+    if (nonEmpty.length === 0) parts.push(head);
+    else if (nonEmpty.length === 1) parts.push(`${head}/${nonEmpty[0]}`);
+    else {
       const inner = compressGroup(nonEmpty);
       parts.push(`${head}/{${inner}}`);
     }

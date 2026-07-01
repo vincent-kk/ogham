@@ -24,9 +24,9 @@ export async function readJson<T>(
     if (
       fallback !== undefined &&
       (error as NodeJS.ErrnoException).code === "ENOENT"
-    ) {
+    )
       return fallback;
-    }
+
     throw error;
   }
   const data: unknown = JSON.parse(content);

@@ -82,14 +82,12 @@ export function restoreFromCompacted(compacted: string): RestoredReference {
   let filePath = '';
   let exports: string[] = [];
 
-  for (const line of lines) {
-    if (line.startsWith('[REF] ')) {
-      filePath = line.slice(6).trim();
-    } else if (line.startsWith('[EXPORTS] ')) {
+  for (const line of lines)
+    if (line.startsWith('[REF] ')) filePath = line.slice(6).trim();
+    else if (line.startsWith('[EXPORTS] ')) {
       const raw = line.slice(10).trim();
       exports = raw === '(none)' ? [] : raw.split(', ').map((s) => s.trim());
     }
-  }
 
   return { filePath, exports };
 }

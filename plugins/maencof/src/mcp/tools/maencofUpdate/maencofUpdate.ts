@@ -42,9 +42,8 @@ function patchFrontmatterField(
   value: string,
 ): string {
   const regex = new RegExp(`^(${key}:).*$`, 'm');
-  if (regex.test(yaml)) {
-    return yaml.replace(regex, `$1 ${value}`);
-  }
+  if (regex.test(yaml)) return yaml.replace(regex, `$1 ${value}`);
+
   // 필드 없으면 추가
   return yaml + `\n${key}: ${value}`;
 }
@@ -75,42 +74,38 @@ function updateFrontmatter(
   yaml = patchFrontmatterField(yaml, 'updated', today);
 
   // unset 먼저 처리 (머지 전 — 동일 키를 set+unset 시 set이 승리)
-  if (updates.unset) {
-    for (const key of updates.unset) {
-      yaml = removeFrontmatterField(yaml, key);
-    }
-  }
+  if (updates.unset)
+    for (const key of updates.unset) yaml = removeFrontmatterField(yaml, key);
 
-  if (updates.tags !== undefined) {
+  if (updates.tags !== undefined)
     yaml = patchFrontmatterField(
       yaml,
       'tags',
       `[${updates.tags.map((t) => quoteYamlValue(t)).join(', ')}]`,
     );
-  }
-  if (updates.title !== undefined) {
+
+  if (updates.title !== undefined)
     yaml = patchFrontmatterField(yaml, 'title', quoteYamlValue(updates.title));
-  }
-  if (updates.layer !== undefined) {
+
+  if (updates.layer !== undefined)
     yaml = patchFrontmatterField(yaml, 'layer', String(updates.layer));
-  }
-  if (updates.confidence !== undefined) {
+
+  if (updates.confidence !== undefined)
     yaml = patchFrontmatterField(
       yaml,
       'confidence',
       String(updates.confidence),
     );
-  }
-  if (updates.schedule !== undefined) {
+
+  if (updates.schedule !== undefined)
     yaml = patchFrontmatterField(
       yaml,
       'schedule',
       quoteYamlValue(updates.schedule),
     );
-  }
-  if (updates.sub_layer !== undefined) {
+
+  if (updates.sub_layer !== undefined)
     yaml = patchFrontmatterField(yaml, 'sub_layer', updates.sub_layer);
-  }
 
   return content.replace(match[0], `---\n${yaml}\n---\n`);
 }
@@ -147,7 +142,7 @@ export async function handleMaencofUpdate(
   const isL1 = nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE;
 
   if (isL1) {
-    if (!input.change_reason) {
+    if (!input.change_reason)
       return {
         success: false,
         path: input.path,
@@ -156,39 +151,38 @@ export async function handleMaencofUpdate(
           'Valid reasons: identity_evolution, error_correction, info_update, consolidation, reinterpretation. ' +
           'Recommended: Request identity-guardian agent for impact analysis first.',
       };
-    }
-    if (!input.justification || input.justification.length < 20) {
+
+    if (!input.justification || input.justification.length < 20)
       return {
         success: false,
         path: input.path,
         message:
           'Layer 1 modification requires a justification (min 20 characters) explaining the change.',
       };
-    }
-    if (!input.confirm_l1) {
+
+    if (!input.confirm_l1)
       return {
         success: false,
         path: input.path,
         message:
           'Layer 1 modification requires explicit confirmation. Set confirm_l1: true.',
       };
-    }
-    if (input.frontmatter?.layer !== undefined) {
+
+    if (input.frontmatter?.layer !== undefined)
       return {
         success: false,
         path: input.path,
         message:
           'The "layer" field of Layer 1 documents cannot be changed via update.',
       };
-    }
-    if (input.frontmatter?.unset && input.frontmatter.unset.length > 0) {
+
+    if (input.frontmatter?.unset && input.frontmatter.unset.length > 0)
       return {
         success: false,
         path: input.path,
         message:
           'Layer 1 documents do not allow frontmatter.unset (use a structured amendment instead).',
       };
-    }
   }
 
   // ─── unset 보호 필드 가드 (모든 레이어) ─────────────────────────
@@ -196,13 +190,12 @@ export async function handleMaencofUpdate(
     const blocked = input.frontmatter.unset.filter((k) =>
       PROTECTED_UNSET_FIELDS.has(k),
     );
-    if (blocked.length > 0) {
+    if (blocked.length > 0)
       return {
         success: false,
         path: input.path,
         message: `Cannot unset protected frontmatter fields: ${blocked.join(', ')}`,
       };
-    }
   }
 
   // Frontmatter 보존 + 본문 교체
@@ -237,40 +230,38 @@ export async function handleMaencofUpdate(
     const updatedFmYamlMatch = FRONTMATTER_REGEX.exec(updatedFmBlock);
     const updatedFmObject = parseYamlFrontmatter(updatedFmYamlMatch?.[1] ?? '');
     const validation = validateFrontmatter(updatedFmObject);
-    if (!validation.ok) {
+    if (!validation.ok)
       return {
         success: false,
         path: input.path,
         message: `Frontmatter validation failed: ${validation.errors.join('; ')}. Use frontmatter.unset to recover corrupted fields.`,
       };
-    }
 
     newContent = updatedFmBlock + bodyToWrite;
-  } else {
+  } else
     // Frontmatter 없는 문서 → 내용만 교체
     newContent = bodyToWrite;
-  }
 
   await writeFile(absolutePath, newContent, 'utf-8');
 
   // ─── L1 audit log + warnings ──────────────────────────────────
   if (isL1) {
     const warnings: string[] = [];
-    if (input.frontmatter?.tags) {
+    if (input.frontmatter?.tags)
       warnings.push(
         'Tags changed: DOMAIN edges and inverted index will be affected. Run kg_build for consistency.',
       );
-    }
-    if (input.frontmatter?.title) {
+
+    if (input.frontmatter?.title)
       warnings.push(
         'Title changed: Document references and display names may need updating.',
       );
-    }
-    if (input.content) {
+
+    if (input.content)
       warnings.push(
         'Content changed: Outbound links and SA activation weights may be affected.',
       );
-    }
+
     warnings.push(
       'L1 amendment recorded. Graph cache invalidated; next read-path query will trigger incremental rebuild.',
     );

@@ -52,9 +52,8 @@ export function extractModuleExports(content: string): ModuleExportInfo[] {
               ?.trim() ?? '',
         )
         .filter((v) => !!v);
-      for (const name of names) {
+      for (const name of names)
         exports.push({ name, kind: 're-export', source });
-      }
     }
   }
 
@@ -79,9 +78,8 @@ export function extractModuleExports(content: string): ModuleExportInfo[] {
               ?.trim() ?? '',
         )
         .filter((v) => !!v);
-      for (const name of names) {
+      for (const name of names)
         exports.push({ name, kind: 're-export', source });
-      }
     }
   }
 
@@ -98,21 +96,18 @@ export function extractModuleExports(content: string): ModuleExportInfo[] {
 
   // 4. type declaration: export type X = ...
   const typeDeclMatches = content.matchAll(RE_TYPE_DECL);
-  for (const match of typeDeclMatches) {
+  for (const match of typeDeclMatches)
     exports.push({ name: match[1], kind: 'type' });
-  }
 
   // 5. named declaration: export const/function/class/etc X
   const namedDeclMatches = content.matchAll(RE_NAMED_DECL);
-  for (const match of namedDeclMatches) {
+  for (const match of namedDeclMatches)
     exports.push({ name: match[1], kind: 'named' });
-  }
 
   // 6. default export
   const defaultMatches = content.matchAll(RE_DEFAULT_EXPORT);
-  for (const _match of defaultMatches) {
+  for (const _match of defaultMatches)
     exports.push({ name: 'default', kind: 'default' });
-  }
 
   return exports;
 }

@@ -15,14 +15,12 @@ export function shouldExclude(relPath: string, options: ScanOptions): boolean {
       relPath.startsWith(normalized + '/') ||
       relPath.includes('/' + normalized + '/') ||
       relPath.endsWith('/' + normalized)
-    ) {
+    )
       return true;
-    }
+
     // Handle exact glob like node_modules/**
     const base = normalized.replace(/\/\*\*$/, '');
-    if (relPath === base || relPath.startsWith(base + '/')) {
-      return true;
-    }
+    if (relPath === base || relPath.startsWith(base + '/')) return true;
   }
   return false;
 }

@@ -48,7 +48,7 @@ export async function handleMaencofRead(
   const doc = parseDocument(input.path, content, mtime);
   const nodeResult = buildKnowledgeNode(doc);
 
-  if (!nodeResult.success || !nodeResult.node) {
+  if (!nodeResult.success || !nodeResult.node)
     return {
       success: false,
       path: input.path,
@@ -57,14 +57,12 @@ export async function handleMaencofRead(
       node: {} as never,
       warnings: nodeResult.error ? [nodeResult.error] : undefined,
     };
-  }
 
   const warnings: string[] = [];
-  if (isLayer1Path(input.path)) {
+  if (isLayer1Path(input.path))
     warnings.push(
       'This is a Layer 1 (01_Core/) document. memory-organizer only allows indirect access via kg_navigate.',
     );
-  }
 
   return {
     success: true,

@@ -24,13 +24,13 @@ vi.mock('../../ast/dependencyExtractor/dependencyExtractor.js', async () => {
   return {
     extractDependencies: async () => {
       const sg = await getSgModule();
-      if (!sg) {
+      if (!sg)
         return {
           error:
             '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
           sgLoadError: getSgLoadError(),
         };
-      }
+
       return { imports: [], exports: [], calls: [] };
     },
   };
@@ -42,13 +42,13 @@ vi.mock('../../ast/cyclomaticComplexity/cyclomaticComplexity.js', async () => {
   return {
     calculateComplexity: async () => {
       const sg = await getSgModule();
-      if (!sg) {
+      if (!sg)
         return {
           error:
             '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
           sgLoadError: getSgLoadError(),
         };
-      }
+
       return { value: 1, fileTotal: 1, perFunction: { '(file)': 1 } };
     },
   };

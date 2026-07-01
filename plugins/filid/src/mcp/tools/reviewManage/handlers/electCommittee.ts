@@ -8,19 +8,18 @@ import type { ReviewManageInput } from '../reviewManage.js';
 export async function handleElectCommittee(
   input: ReviewManageInput,
 ): Promise<Record<string, unknown>> {
-  if (input.changedFilesCount === undefined) {
+  if (input.changedFilesCount === undefined)
     throw new Error('changedFilesCount is required for elect-committee action');
-  }
-  if (input.changedFractalsCount === undefined) {
+
+  if (input.changedFractalsCount === undefined)
     throw new Error(
       'changedFractalsCount is required for elect-committee action',
     );
-  }
-  if (input.hasInterfaceChanges === undefined) {
+
+  if (input.hasInterfaceChanges === undefined)
     throw new Error(
       'hasInterfaceChanges is required for elect-committee action',
     );
-  }
 
   const {
     changedFilesCount,
@@ -45,39 +44,35 @@ export async function handleElectCommittee(
     changedFilesCount <= 1 &&
     changedFractalsCount <= 1 &&
     !hasInterfaceChanges
-  ) {
+  )
     complexity = 'TRIVIAL';
-  } else if (
+  else if (
     changedFilesCount <= 3 &&
     changedFractalsCount <= 1 &&
     !hasInterfaceChanges
-  ) {
+  )
     complexity = 'LOW';
-  } else if (changedFilesCount > 10 || changedFractalsCount >= 4) {
+  else if (changedFilesCount > 10 || changedFractalsCount >= 4)
     complexity = 'HIGH';
-  } else {
-    complexity = 'MEDIUM';
-  }
+  else complexity = 'MEDIUM';
 
   let committee: PersonaId[];
-  if (complexity === 'TRIVIAL') {
+  if (complexity === 'TRIVIAL')
     // TRIVIAL auto-tier also uses the integrated adjudicator — the
     // diff is small enough that adversarial multi-persona debate has
     // no marginal value over a single fast-path pass.
     committee = ['adjudicator'];
-  } else if (complexity === 'LOW') {
+  else if (complexity === 'LOW') {
     committee = ['engineering-architect', 'operations-sre'];
-    if (input.hasDocumentChanges === true) {
-      committee.push('knowledge-manager');
-    }
-  } else if (complexity === 'MEDIUM') {
+    if (input.hasDocumentChanges === true) committee.push('knowledge-manager');
+  } else if (complexity === 'MEDIUM')
     committee = [
       'engineering-architect',
       'knowledge-manager',
       'business-driver',
       'operations-sre',
     ];
-  } else {
+  else
     committee = [
       'engineering-architect',
       'knowledge-manager',
@@ -86,7 +81,6 @@ export async function handleElectCommittee(
       'product-manager',
       'design-hci',
     ];
-  }
 
   const adversarialPairs: [PersonaId, PersonaId[]][] = [];
 
@@ -96,27 +90,24 @@ export async function handleElectCommittee(
       challengers.push('knowledge-manager');
     if (committee.includes('operations-sre'))
       challengers.push('operations-sre');
-    if (challengers.length > 0) {
+    if (challengers.length > 0)
       adversarialPairs.push(['business-driver', challengers]);
-    }
   }
 
   if (committee.includes('product-manager')) {
     const challengers: PersonaId[] = [];
     if (committee.includes('engineering-architect'))
       challengers.push('engineering-architect');
-    if (challengers.length > 0) {
+    if (challengers.length > 0)
       adversarialPairs.push(['product-manager', challengers]);
-    }
   }
 
   if (committee.includes('design-hci')) {
     const challengers: PersonaId[] = [];
     if (committee.includes('engineering-architect'))
       challengers.push('engineering-architect');
-    if (challengers.length > 0) {
+    if (challengers.length > 0)
       adversarialPairs.push(['design-hci', challengers]);
-    }
   }
 
   const result: CommitteeElection = {

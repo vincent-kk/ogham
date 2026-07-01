@@ -133,9 +133,8 @@ describe('runSpreadingActivation — 기본 동작', () => {
     const graph = makeSimpleGraph();
     const results = runSpreadingActivation(graph, [toNodeId('A')]);
 
-    for (let i = 1; i < results.length; i++) {
+    for (let i = 1; i < results.length; i++)
       expect(results[i - 1].score).toBeGreaterThanOrEqual(results[i].score);
-    }
   });
 
   it('path에 경로 정보가 포함되어야 한다', () => {

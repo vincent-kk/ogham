@@ -74,7 +74,7 @@ export function extractFrontmatter(content: string): {
 } {
   const match = FRONTMATTER_REGEX.exec(content);
 
-  if (!match) {
+  if (!match)
     return {
       frontmatter: {
         success: false,
@@ -83,7 +83,6 @@ export function extractFrontmatter(content: string): {
       },
       body: content,
     };
-  }
 
   const raw = match[1];
   const body = content.slice(match[0].length);
@@ -91,12 +90,11 @@ export function extractFrontmatter(content: string): {
   const parsed = parseYamlFrontmatter(raw);
   const validation = validateFrontmatter(parsed);
 
-  if (!validation.ok) {
+  if (!validation.ok)
     return {
       frontmatter: { success: false, errors: validation.errors, raw },
       body,
     };
-  }
 
   return {
     frontmatter: { success: true, data: validation.data, raw },
@@ -192,12 +190,11 @@ export function parseDocument(
  * @returns KnowledgeNode 구성 결과
  */
 export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
-  if (!doc.frontmatter.success || !doc.frontmatter.data) {
+  if (!doc.frontmatter.success || !doc.frontmatter.data)
     return {
       success: false,
       error: `Frontmatter validation failed: ${doc.frontmatter.errors?.join(', ')}`,
     };
-  }
 
   const fm: Frontmatter = doc.frontmatter.data;
 
@@ -240,11 +237,9 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
 export function inferSubLayerFromPath(
   relativePath: string,
 ): SubLayer | undefined {
-  for (const [prefix, subLayer] of Object.entries(SUBLAYER_DIR_PATTERNS)) {
-    if (relativePath.startsWith(`${prefix}/`)) {
-      return subLayer;
-    }
-  }
+  for (const [prefix, subLayer] of Object.entries(SUBLAYER_DIR_PATTERNS))
+    if (relativePath.startsWith(`${prefix}/`)) return subLayer;
+
   return undefined;
 }
 

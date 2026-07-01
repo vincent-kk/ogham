@@ -46,19 +46,16 @@ function updateLayerInFrontmatter(
   yaml = yaml.replace(/^updated:.*$/m, `updated: ${today}`);
 
   // sub_layer 갱신 또는 제거
-  if (options?.targetSubLayer) {
-    if (/^sub_layer:.*$/m.test(yaml)) {
+  if (options?.targetSubLayer)
+    if (/^sub_layer:.*$/m.test(yaml))
       yaml = yaml.replace(
         /^sub_layer:.*$/m,
         `sub_layer: ${options.targetSubLayer}`,
       );
-    } else {
-      yaml += `\nsub_layer: ${options.targetSubLayer}`;
-    }
-  } else {
+    else yaml += `\nsub_layer: ${options.targetSubLayer}`;
+  else
     // 대상 layer에 sub_layer가 적용되지 않으면 제거
     yaml = yaml.replace(/\n?^sub_layer:.*$/m, '');
-  }
 
   // L5-Buffer → 다른 레이어 이동 시 buffer 전용 필드 제거
   if (options?.stripBufferFields) {
@@ -100,25 +97,23 @@ export async function handleMaencofMove(
   // Layer 검증
   const targetLayerNum = input.target_layer as Layer;
   const targetLayerDir = LAYER_DIR[targetLayerNum];
-  if (!targetLayerDir) {
+  if (!targetLayerDir)
     return {
       success: false,
       path: input.path,
       message: `Invalid target Layer: ${input.target_layer}`,
     };
-  }
 
   // 현재 Layer 파악
   const doc = parseDocument(input.path, content, mtime);
   const nodeResult = buildKnowledgeNode(doc);
 
-  if (nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE) {
+  if (nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE)
     return {
       success: false,
       path: input.path,
       message: 'Layer 1 (Core Identity) documents cannot be moved.',
     };
-  }
 
   const sourceSubLayer = nodeResult.success
     ? nodeResult.node?.subLayer
@@ -129,24 +124,22 @@ export async function handleMaencofMove(
     nodeResult.success &&
     nodeResult.node?.layer === targetLayerNum &&
     !input.target_sub_layer
-  ) {
+  )
     return {
       success: false,
       path: input.path,
       message: `Already in Layer ${targetLayerNum}.`,
     };
-  }
 
   // 대상 경로 계산 (서브레이어 디렉토리 포함)
   const filename = basename(input.path);
   let subDir = '';
-  if (input.target_sub_layer) {
-    if (targetLayerNum === 3 && input.target_sub_layer in L3_SUBDIR) {
+  if (input.target_sub_layer)
+    if (targetLayerNum === 3 && input.target_sub_layer in L3_SUBDIR)
       subDir = L3_SUBDIR[input.target_sub_layer as L3SubLayer];
-    } else if (targetLayerNum === 5 && input.target_sub_layer in L5_SUBDIR) {
+    else if (targetLayerNum === 5 && input.target_sub_layer in L5_SUBDIR)
       subDir = L5_SUBDIR[input.target_sub_layer as L5SubLayer];
-    }
-  }
+
   const newRelativePath = subDir
     ? `${targetLayerDir}/${subDir}/${filename}`
     : `${targetLayerDir}/${filename}`;
@@ -177,13 +170,12 @@ export async function handleMaencofMove(
   const updatedFmYamlMatch = FRONTMATTER_REGEX.exec(updatedContent);
   const updatedFmObject = parseYamlFrontmatter(updatedFmYamlMatch?.[1] ?? '');
   const validation = validateFrontmatter(updatedFmObject);
-  if (!validation.ok) {
+  if (!validation.ok)
     return {
       success: false,
       path: input.path,
       message: `Frontmatter validation failed: ${validation.errors.join('; ')}`,
     };
-  }
 
   // WAL 기반 원자적 이동: 대상 쓰기 → 소스 삭제
   await mkdir(dirname(newAbsPath), { recursive: true });
@@ -191,12 +183,10 @@ export async function handleMaencofMove(
   await unlink(srcAbsPath);
 
   const warnings: string[] = [];
-  if (input.reason) {
-    warnings.push(`Transition reason: ${input.reason}`);
-  }
-  if (input.confidence !== undefined) {
+  if (input.reason) warnings.push(`Transition reason: ${input.reason}`);
+
+  if (input.confidence !== undefined)
     warnings.push(`Confidence: ${input.confidence}`);
-  }
 
   return {
     success: true,

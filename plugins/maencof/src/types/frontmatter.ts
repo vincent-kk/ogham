@@ -123,55 +123,51 @@ export const FrontmatterSchema = FrontmatterBaseSchema.superRefine(
     }
 
     // 서브레이어 전용 필드 배타성 검증
-    if (sub_layer === 'relational') {
-      if (data.org_type) {
+    if (sub_layer === 'relational')
+      if (data.org_type)
         ctx.addIssue({
           code: 'custom',
           message: 'org_type is exclusive to L3B (structural)',
           path: ['org_type'],
         });
-      }
-    }
-    if (sub_layer === 'structural') {
-      if (data.person_ref) {
+
+    if (sub_layer === 'structural')
+      if (data.person_ref)
         ctx.addIssue({
           code: 'custom',
           message: 'person_ref is exclusive to L3A (relational)',
           path: ['person_ref'],
         });
-      }
-    }
+
     if (sub_layer === 'buffer') {
-      if (data.boundary_type) {
+      if (data.boundary_type)
         ctx.addIssue({
           code: 'custom',
           message: 'boundary_type is exclusive to L5-Boundary',
           path: ['boundary_type'],
         });
-      }
-      if (data.connected_layers) {
+
+      if (data.connected_layers)
         ctx.addIssue({
           code: 'custom',
           message: 'connected_layers is exclusive to L5-Boundary',
           path: ['connected_layers'],
         });
-      }
     }
     if (sub_layer === 'boundary') {
-      if (data.buffer_type) {
+      if (data.buffer_type)
         ctx.addIssue({
           code: 'custom',
           message: 'buffer_type is exclusive to L5-Buffer',
           path: ['buffer_type'],
         });
-      }
-      if (data.promotion_target) {
+
+      if (data.promotion_target)
         ctx.addIssue({
           code: 'custom',
           message: 'promotion_target is exclusive to L5-Buffer',
           path: ['promotion_target'],
         });
-      }
     }
   },
 );

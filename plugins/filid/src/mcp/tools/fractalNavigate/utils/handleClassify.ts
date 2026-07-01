@@ -12,9 +12,8 @@ export function handleClassify(
 ): FractalNavigateOutput {
   // First check if the entry already has a known type in the provided entries
   const entry = input.entries.find((e) => e.path === input.path);
-  if (entry && entry.type !== ('directory' as string)) {
+  if (entry && entry.type !== ('directory' as string))
     return { classification: entry.type };
-  }
 
   const dirName =
     input.path

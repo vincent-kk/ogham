@@ -10,14 +10,11 @@ export function resolveVerdict(
   revalidateContent: string | null,
 ): string {
   let verdict = 'UNKNOWN';
-  if (reviewReportContent) {
-    verdict = extractVerdict(reviewReportContent);
-  }
+  if (reviewReportContent) verdict = extractVerdict(reviewReportContent);
+
   if (revalidateContent) {
     const revalidateVerdict = extractRevalidateVerdict(revalidateContent);
-    if (revalidateVerdict !== 'UNKNOWN') {
-      verdict = revalidateVerdict;
-    }
+    if (revalidateVerdict !== 'UNKNOWN') verdict = revalidateVerdict;
   }
   return verdict;
 }

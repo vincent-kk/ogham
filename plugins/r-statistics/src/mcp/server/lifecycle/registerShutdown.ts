@@ -10,10 +10,9 @@ export function registerShutdown(): void {
   if (registered) return;
   registered = true;
   process.once("exit", cancelAllJobs);
-  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  for (const signal of ["SIGINT", "SIGTERM"] as const)
     process.once(signal, () => {
       cancelAllJobs();
       process.exit(0);
     });
-  }
 }

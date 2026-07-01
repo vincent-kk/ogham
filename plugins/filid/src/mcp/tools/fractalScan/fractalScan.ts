@@ -27,9 +27,7 @@ export interface FractalScanInput {
 export async function handleFractalScan(args: unknown): Promise<ScanReportDto> {
   const input = args as FractalScanInput;
 
-  if (!input.path) {
-    throw new Error('path is required');
-  }
+  if (!input.path) throw new Error('path is required');
 
   const startTime = Date.now();
 

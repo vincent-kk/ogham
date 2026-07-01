@@ -118,16 +118,15 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
       // Required rules are enforced downstream by syncRuleDocs() from the
       // manifest, regardless of whether they appear in `normalized`.
       const selectedIds = new Set<string>();
-      for (const [id, flag] of Object.entries(normalizedSelections)) {
+      for (const [id, flag] of Object.entries(normalizedSelections))
         if (flag) selectedIds.add(id);
-      }
 
       // Validate resync ids against the manifest so unknown entries surface
       // as `skipped` rather than silently no-op.
       const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
       const knownIds = new Set<string>();
       const preSkipped: Array<{ id: string; reason: string }> = [];
-      if (pluginRoot) {
+      if (pluginRoot)
         try {
           const manifest = loadRuleDocsManifest(pluginRoot);
           for (const entry of manifest.rules) knownIds.add(entry.id);
@@ -135,18 +134,16 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
           // Manifest load failure is handled downstream by syncRuleDocs,
           // which records a `*` skip entry. Skip the pre-validation.
         }
-      }
+
       const resyncAccepted: string[] = [];
-      if (knownIds.size > 0) {
-        for (const id of resyncRaw) {
+      if (knownIds.size > 0)
+        for (const id of resyncRaw)
           if (knownIds.has(id)) resyncAccepted.push(id);
           else preSkipped.push({ id, reason: 'unknown rule id' });
-        }
-      } else {
+      else
         // Without a manifest we cannot classify; forward everything and let
         // syncRuleDocs decide. Any unknown id is a silent no-op at that layer.
         resyncAccepted.push(...resyncRaw);
-      }
 
       const result = syncRuleDocs(input.path, selectedIds, {
         resync: new Set(resyncAccepted),

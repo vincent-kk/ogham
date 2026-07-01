@@ -48,20 +48,16 @@ function buildPendingIdSet(manifest: DevplanManifest): Set<string> {
 
   for (const task of manifest.tasks) {
     if (task.status === 'pending') ids.add(task.id);
-    for (const subtask of task.subtasks) {
+    for (const subtask of task.subtasks)
       if (subtask.status === 'pending') ids.add(subtask.id);
-    }
   }
 
-  for (const ss of manifest.story_subtasks) {
-    for (const subtask of ss.subtasks) {
+  for (const ss of manifest.story_subtasks)
+    for (const subtask of ss.subtasks)
       if (subtask.status === 'pending') ids.add(subtask.id);
-    }
-  }
 
-  for (const fc of manifest.feedback_comments) {
+  for (const fc of manifest.feedback_comments)
     if (fc.status === 'pending') ids.add(fc.target_story);
-  }
 
   return ids;
 }

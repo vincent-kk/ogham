@@ -9,11 +9,11 @@ export function handleCompletePhase(
   now: string,
 ): RunState {
   const phase = action.phase;
-  if (state.phases[phase].status !== 'in_progress') {
+  if (state.phases[phase].status !== 'in_progress')
     throw new Error(
       `Cannot complete phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
     );
-  }
+
   const updated = structuredClone(state);
   updated.phases[phase].status = 'completed';
   updated.phases[phase].completed_at = now;

@@ -58,12 +58,9 @@ export async function handleReviewManage(
 ): Promise<Record<string, unknown>> {
   const input = args as ReviewManageInput;
 
-  if (!input.action) {
-    throw new Error('action is required');
-  }
-  if (!input.projectRoot) {
-    throw new Error('projectRoot is required');
-  }
+  if (!input.action) throw new Error('action is required');
+
+  if (!input.projectRoot) throw new Error('projectRoot is required');
 
   // Resolve to git root so monorepo sub-paths are normalized
   input.projectRoot = resolveGitRoot(input.projectRoot);
@@ -85,9 +82,7 @@ export async function handleReviewManage(
   };
 
   const handler = handlers[input.action];
-  if (!handler) {
-    throw new Error(`Unknown action: ${input.action}`);
-  }
+  if (!handler) throw new Error(`Unknown action: ${input.action}`);
 
   return handler(input);
 }

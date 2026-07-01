@@ -78,9 +78,8 @@ beforeEach(() => {
 afterEach(async () => {
   // background rebuild가 진행 중이면 settle 후 정리
   const inflight = _peekRebuildInProgress();
-  if (inflight) {
-    await inflight.catch(() => undefined);
-  }
+  if (inflight) await inflight.catch(() => undefined);
+
   rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3 });
   invalidateCache();
 });

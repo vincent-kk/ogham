@@ -11,14 +11,13 @@ export async function handleGenerateHumanSummary(
 
   const input = args as ReviewManageInput;
 
-  if (!input.branchName) {
+  if (!input.branchName)
     throw new Error('branchName is required for generate-human-summary action');
-  }
-  if (!input.projectRoot) {
+
+  if (!input.projectRoot)
     throw new Error(
       'projectRoot is required for generate-human-summary action',
     );
-  }
 
   const normalized = normalizeBranch(input.branchName);
   const reviewDir = path.join(

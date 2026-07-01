@@ -90,9 +90,8 @@ describe('buildGraph', () => {
       includeOrphans: false,
     });
     expect(orphanNodes.length).toBeGreaterThan(0);
-    for (const orphanId of orphanNodes) {
+    for (const orphanId of orphanNodes)
       expect(graph.nodes.has(orphanId)).toBe(false);
-    }
   });
 
   it('builtAt이 ISO 날짜 형식이다', () => {
@@ -107,9 +106,7 @@ describe('buildAdjacencyList', () => {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const adj = buildAdjacencyList(nodeMap, []);
     expect(adj.size).toBe(2);
-    for (const neighbors of adj.values()) {
-      expect(neighbors).toEqual([]);
-    }
+    for (const neighbors of adj.values()) expect(neighbors).toEqual([]);
   });
 
   it('엣지로부터 인접 리스트를 올바르게 구성한다', () => {

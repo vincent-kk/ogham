@@ -15,9 +15,8 @@ export function buildDirectoryMap(
   const dirMap = new Map<string, NodeId[]>();
   for (const node of nodes) {
     const dir = getDirectory(node.path);
-    if (!dirMap.has(dir)) {
-      dirMap.set(dir, []);
-    }
+    if (!dirMap.has(dir)) dirMap.set(dir, []);
+
     dirMap.get(dir)!.push(node.id);
   }
   return dirMap;
@@ -73,14 +72,13 @@ export function buildSiblingEdges(
   const edges: KnowledgeEdge[] = [];
   for (const [, siblings] of dirMap) {
     if (siblings.length < 2) continue;
-    for (let i = 0; i < siblings.length; i++) {
+    for (let i = 0; i < siblings.length; i++)
       for (let j = i + 1; j < siblings.length; j++) {
         const a = siblings[i];
         const b = siblings[j];
         edges.push({ from: a, to: b, type: 'SIBLING', weight: 1.0 });
         edges.push({ from: b, to: a, type: 'SIBLING', weight: 1.0 });
       }
-    }
   }
   return edges;
 }

@@ -29,14 +29,10 @@ export function getFilesForLanguage(
 
         // Skip common non-source directories
         if (entry.isDirectory()) {
-          if (!AST_SKIP_DIRS.includes(entry.name)) {
-            walk(fullPath);
-          }
+          if (!AST_SKIP_DIRS.includes(entry.name)) walk(fullPath);
         } else if (entry.isFile()) {
           const ext = extname(entry.name).toLowerCase();
-          if (extensions.includes(ext)) {
-            files.push(fullPath);
-          }
+          if (extensions.includes(ext)) files.push(fullPath);
         }
       }
     } catch {
@@ -47,9 +43,7 @@ export function getFilesForLanguage(
   const resolvedPath = resolve(dirPath);
   const stat = statSync(resolvedPath);
 
-  if (stat.isFile()) {
-    return [resolvedPath];
-  }
+  if (stat.isFile()) return [resolvedPath];
 
   walk(resolvedPath);
   return files;

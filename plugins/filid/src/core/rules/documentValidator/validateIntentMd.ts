@@ -19,13 +19,12 @@ export function validateIntentMd(content: string): IntentMdValidation {
 
   // Check 50-line limit
   const lines = countLines(content);
-  if (lines > INTENT_MD_LINE_LIMIT) {
+  if (lines > INTENT_MD_LINE_LIMIT)
     violations.push({
       rule: 'line-limit',
       message: `INTENT.md exceeds ${INTENT_MD_LINE_LIMIT}-line limit (${lines} lines). Compress, deduplicate, or move detailed content to DETAIL.md.`,
       severity: 'error',
     });
-  }
 
   // Check 3-tier boundary system presence
   const hasAlwaysDo = BOUNDARY_KEYWORDS.alwaysDo.test(content);

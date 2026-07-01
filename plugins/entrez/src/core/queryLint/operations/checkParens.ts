@@ -35,18 +35,16 @@ export function checkParens(term: string): LintIssue[] {
       stack.push(char);
       continue;
     }
-    if (char === ")" || char === "]") {
-      if (stack.pop() !== PAIR[char]) {
+    if (char === ")" || char === "]")
+      if (stack.pop() !== PAIR[char])
         return [
           issue(char === ")" ? "UNBALANCED_PARENS" : "UNBALANCED_BRACKETS"),
         ];
-      }
-    }
   }
-  if (stack.length > 0) {
+  if (stack.length > 0)
     return [
       issue(stack.includes("(") ? "UNBALANCED_PARENS" : "UNBALANCED_BRACKETS"),
     ];
-  }
+
   return [];
 }

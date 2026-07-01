@@ -13,9 +13,9 @@ export function computeBackoffMs(
   attempt: number,
   retryAfterMs?: number,
 ): number {
-  if (retryAfterMs !== undefined && retryAfterMs > 0) {
+  if (retryAfterMs !== undefined && retryAfterMs > 0)
     return Math.min(retryAfterMs, RETRY_MAX_DELAY_MS);
-  }
+
   const exponent = Math.max(0, attempt - 1);
   const delay =
     RETRY_BASE_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, exponent);

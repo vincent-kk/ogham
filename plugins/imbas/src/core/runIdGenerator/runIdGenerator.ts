@@ -23,15 +23,12 @@ export function generateRunId(runsDir: string): string {
   const prefix = `${datePart}-`;
   let maxSeq = 0;
 
-  for (const entry of entries) {
+  for (const entry of entries)
     if (entry.startsWith(prefix)) {
       const seqStr = entry.slice(prefix.length);
       const seq = parseInt(seqStr, 10);
-      if (!isNaN(seq) && seq > maxSeq) {
-        maxSeq = seq;
-      }
+      if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
     }
-  }
 
   const nextSeq = String(maxSeq + 1).padStart(3, '0');
   return `${datePart}-${nextSeq}`;

@@ -21,10 +21,10 @@ export async function loadConfig(cwd: string): Promise<ImbasConfig> {
     return await readJson(filePath, ImbasConfigSchema);
   } catch (err) {
     const msg = (err as Error).message;
-    if (msg.includes('Failed to read file')) {
+    if (msg.includes('Failed to read file'))
       // File missing — return defaults
       return ImbasConfigSchema.parse({}) as unknown as ImbasConfig;
-    }
+
     throw err;
   }
 }
@@ -72,8 +72,8 @@ export function applyConfigUpdates(
   updates: Record<string, unknown>,
 ): ImbasConfig {
   let result = config;
-  for (const [dotPath, value] of Object.entries(updates)) {
+  for (const [dotPath, value] of Object.entries(updates))
     result = setConfigValue(result, dotPath, value);
-  }
+
   return result;
 }

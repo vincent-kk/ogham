@@ -39,9 +39,7 @@ export function deduplicateContent(
 ): DeduplicateResult {
   const warnings: string[] = [];
 
-  if (!content) {
-    return { content: '', warnings };
-  }
+  if (!content) return { content: '', warnings };
 
   let result = content;
 
@@ -113,9 +111,7 @@ function removeLooseMetadataLines(
     if (generatedKeys.includes(kvMatch[1])) {
       removedKeys.push(kvMatch[1]);
       i++;
-    } else {
-      break;
-    }
+    } else break;
   }
 
   if (removedKeys.length === 0) return content;

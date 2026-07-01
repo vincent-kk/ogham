@@ -49,18 +49,14 @@ describe('handleKgNavigate', () => {
   it('graph가 null이면 error를 반환한다', async () => {
     const result = await handleKgNavigate(null, { path: 'test.md' });
     expect('error' in result).toBe(true);
-    if ('error' in result) {
-      expect(result.error).toContain('Index not built');
-    }
+    if ('error' in result) expect(result.error).toContain('Index not built');
   });
 
   it('존재하지 않는 노드이면 error를 반환한다', async () => {
     const graph = makeGraph([makeNode('a.md')]);
     const result = await handleKgNavigate(graph, { path: 'nonexistent.md' });
     expect('error' in result).toBe(true);
-    if ('error' in result) {
-      expect(result.error).toContain('Node not found');
-    }
+    if ('error' in result) expect(result.error).toContain('Node not found');
   });
 
   it('인바운드 LINK 엣지를 올바르게 반환한다', async () => {
@@ -153,9 +149,7 @@ describe('handleKgNavigate', () => {
     });
 
     expect('error' in result).toBe(false);
-    if (!('error' in result)) {
-      expect(result.inbound).toHaveLength(0);
-    }
+    if (!('error' in result)) expect(result.inbound).toHaveLength(0);
   });
 
   it('include_hierarchy=false이면 parent/children/siblings를 제외한다', async () => {
@@ -184,8 +178,6 @@ describe('handleKgNavigate', () => {
 
     const result = await handleKgNavigate(graph, { path: 'target.md' });
     expect('error' in result).toBe(false);
-    if (!('error' in result)) {
-      expect(result.node.path).toBe('target.md');
-    }
+    if (!('error' in result)) expect(result.node.path).toBe('target.md');
   });
 });

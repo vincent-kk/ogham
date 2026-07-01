@@ -43,11 +43,11 @@ export async function readJson<T>(
 
   if (schema) {
     const result = schema.safeParse(parsed);
-    if (!result.success) {
+    if (!result.success)
       throw new Error(
         `Schema validation failed for ${filePath}: ${result.error.message}`,
       );
-    }
+
     return result.data;
   }
 

@@ -54,8 +54,7 @@ export function buildRunEnv(
     R_STATISTICS_CONTRACT: contractScriptPath(),
     R_STATISTICS_LIB: MANAGED_R_LIB_DIR,
   };
-  if (platform === Platform.Windows) {
-    runEnv.R_LIBS_USER = MANAGED_R_LIB_DIR;
-  }
+  if (platform === Platform.Windows) runEnv.R_LIBS_USER = MANAGED_R_LIB_DIR;
+
   return runEnv;
 }

@@ -29,7 +29,7 @@ export async function incrementUsageStat(
     const statsPath = join(vaultPath, MAENCOF_META_DIR, USAGE_STATS_FILE);
     await withVaultLock(vaultPath, async () => {
       let stats: Record<string, number> = {};
-      if (existsSync(statsPath)) {
+      if (existsSync(statsPath))
         try {
           stats = JSON.parse(readFileSync(statsPath, 'utf-8')) as Record<
             string,
@@ -38,7 +38,7 @@ export async function incrementUsageStat(
         } catch {
           stats = {};
         }
-      }
+
       stats[toolName] = (stats[toolName] ?? 0) + 1;
       // 통계 SLA 느슨 — 단일 retry 충분 (성능 우선; atomic-write 기본 3 과 의도적 비대칭).
       await atomicWriteJson(statsPath, stats, { retries: 1 });

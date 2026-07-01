@@ -89,10 +89,10 @@ export async function esummary(
     },
     deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     throw new Error(
       res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: esummary`,
     );
-  }
+
   return parseEsummary(res.text);
 }

@@ -5,7 +5,7 @@ import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
 export function checkMaxDepth(context: RuleContext): RuleViolation[] {
   const { node, scanOptions } = context;
   const maxDepth = scanOptions?.maxDepth ?? DEFAULT_SCAN_OPTIONS.maxDepth;
-  if (node.depth > maxDepth) {
+  if (node.depth > maxDepth)
     return [
       {
         ruleId: BUILTIN_RULE_IDS.MAX_DEPTH,
@@ -15,6 +15,6 @@ export function checkMaxDepth(context: RuleContext): RuleViolation[] {
         suggestion: 'Flatten the directory structure or merge related modules.',
       },
     ];
-  }
+
   return [];
 }

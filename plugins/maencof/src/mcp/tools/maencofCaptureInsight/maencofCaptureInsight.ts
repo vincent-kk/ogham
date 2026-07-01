@@ -50,24 +50,22 @@ export async function handleCaptureInsight(
   const config = readInsightConfig(vaultPath);
   if (config.max_captures_per_session > 0) {
     const count = getSessionCaptureCount(vaultPath);
-    if (count >= config.max_captures_per_session) {
+    if (count >= config.max_captures_per_session)
       return {
         success: false,
         path: '',
         message: `Session capture limit (${config.max_captures_per_session}) reached. Use /maencof:insight --max N to increase.`,
       };
-    }
   }
 
   // 1.5. Check category_filter — reject if the requested category is not allowed
   const category: keyof InsightCategoryFilter = args.category ?? 'principle';
-  if (config.category_filter[category] === false) {
+  if (config.category_filter[category] === false)
     return {
       success: false,
       path: '',
       message: `Category "${category}" is rejected by config.category_filter. Use /maencof:insight --category ${categoryFlag(category)} --accept to allow.`,
     };
-  }
 
   // 2. Auto-inject auto-insight tag
   const tags = args.tags.includes('auto-insight')
@@ -76,9 +74,8 @@ export async function handleCaptureInsight(
 
   // 3. Build content with optional context section
   let fullContent = args.content;
-  if (args.context) {
+  if (args.context)
     fullContent = `## Context\n\n${args.context}\n\n${fullContent}`;
-  }
 
   // 4. Delegate to existing create handler
   const result = await handleMaencofCreate(vaultPath, {

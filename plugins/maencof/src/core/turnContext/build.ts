@@ -32,18 +32,15 @@ export function buildTurnContext(cwd: string): string {
 
   const parts: string[] = [];
 
-  if (identity) {
-    parts.push(buildCompanionIdentityTag(identity));
-  }
+  if (identity) parts.push(buildCompanionIdentityTag(identity));
 
   parts.push(
     `<kg-core${vaultAttr} nodes="${totalNodes}" layers="${formatLayerCounts(layerCounts)}">`,
   );
   parts.push(`  <pinned>${pinnedText}</pinned>`);
   const l1Summary = readL1NodesSummary(cwd);
-  if (l1Summary) {
-    parts.push(`  <l1-core>\n${l1Summary}\n  </l1-core>`);
-  }
+  if (l1Summary) parts.push(`  <l1-core>\n${l1Summary}\n  </l1-core>`);
+
   parts.push('</kg-core>');
 
   parts.push(

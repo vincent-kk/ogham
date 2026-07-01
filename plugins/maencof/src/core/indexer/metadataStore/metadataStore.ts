@@ -101,9 +101,7 @@ export function serializeGraph(graph: KnowledgeGraph): SerializedGraph {
  */
 export function deserializeGraph(data: SerializedGraph): KnowledgeGraph {
   const nodes = new Map<NodeId, KnowledgeNode>();
-  for (const node of data.nodes) {
-    nodes.set(node.id, node);
-  }
+  for (const node of data.nodes) nodes.set(node.id, node);
 
   return {
     nodes,
@@ -123,9 +121,8 @@ export function deserializeShards(
   meta: SerializedGraphMeta,
 ): KnowledgeGraph {
   const nodes = new Map<NodeId, KnowledgeNode>();
-  for (const node of nodesArr) {
-    nodes.set(node.id, node);
-  }
+  for (const node of nodesArr) nodes.set(node.id, node);
+
   return {
     nodes,
     edges: edgesArr as KnowledgeEdge[],
@@ -231,10 +228,10 @@ export class MetadataStore {
 
     try {
       const meta = JSON.parse(metaRaw) as SerializedGraphMeta;
-      if (meta.schemaVersion !== 2) {
+      if (meta.schemaVersion !== 2)
         // 미래 또는 손상된 schemaVersion — cache miss 로 처리하여 호출자 재빌드 유도
         return null;
-      }
+
       const [nodesRaw, edgesRaw] = await Promise.all([
         readFile(join(this.cacheDir, CACHE_FILES.NODES), 'utf-8'),
         readFile(join(this.cacheDir, CACHE_FILES.EDGES), 'utf-8'),
@@ -355,9 +352,9 @@ export class MetadataStore {
         | StaleEntries
         | LegacyStaleNodes
         | Record<string, unknown>;
-      if (parsed && Array.isArray((parsed as StaleEntries).entries)) {
+      if (parsed && Array.isArray((parsed as StaleEntries).entries))
         return parsed as StaleEntries;
-      }
+
       if (parsed && Array.isArray((parsed as LegacyStaleNodes).paths)) {
         const legacy = parsed as LegacyStaleNodes;
         return {
@@ -386,7 +383,7 @@ export class MetadataStore {
     await withVaultLock(this.vaultPath, async () => {
       const stalePath = join(this.cacheDir, CACHE_FILES.STALE_NODES);
       let lastErr: unknown;
-      for (let attempt = 0; attempt < STALE_RETRY_ATTEMPTS; attempt++) {
+      for (let attempt = 0; attempt < STALE_RETRY_ATTEMPTS; attempt++)
         try {
           const existing = await this.loadStaleEntries();
           const seen = new Set<string>();
@@ -405,11 +402,10 @@ export class MetadataStore {
           return;
         } catch (err) {
           lastErr = err;
-          if (attempt < STALE_RETRY_ATTEMPTS - 1) {
+          if (attempt < STALE_RETRY_ATTEMPTS - 1)
             await sleep(STALE_RETRY_BACKOFF_MS);
-          }
         }
-      }
+
       throw lastErr;
     });
   }

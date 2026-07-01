@@ -109,10 +109,10 @@ function computeSCSWeight(a: KnowledgeNode, b: KnowledgeNode): number {
   const partsB = b.path.split('/');
   let commonLen = 0;
   const minLen = Math.min(partsA.length, partsB.length);
-  for (let i = 0; i < minLen; i++) {
+  for (let i = 0; i < minLen; i++)
     if (partsA[i] === partsB[i]) commonLen++;
     else break;
-  }
+
   const maxLen = Math.max(partsA.length, partsB.length);
   if (maxLen === 0) return 1.0;
   return Math.min(1.0, commonLen / maxLen);
@@ -182,9 +182,7 @@ function iteratePageRank(
 
   // Dangling node rank 합산 → 모든 노드에 균등 분배
   let danglingSum = 0;
-  for (const id of danglingNodes) {
-    danglingSum += ranks.get(id) ?? 0;
-  }
+  for (const id of danglingNodes) danglingSum += ranks.get(id) ?? 0;
 
   for (const id of nodeIds) {
     let rank = (1 - dampingFactor) / n + (dampingFactor * danglingSum) / n;
@@ -233,9 +231,7 @@ export function computePageRank(
       dampingFactor,
     );
 
-    for (const [id, r] of newRanks) {
-      ranks.set(id, r);
-    }
+    for (const [id, r] of newRanks) ranks.set(id, r);
 
     if (checkConvergence(maxDelta, tolerance)) break;
   }
@@ -257,9 +253,9 @@ export function normalizeWeights(edges: KnowledgeEdge[]): KnowledgeEdge[] {
  * Layer별 감쇠 인자 반환. 서브레이어 지정 시 서브레이어 감쇠 사용.
  */
 export function getLayerDecay(layer: Layer, subLayer?: SubLayer): number {
-  if (subLayer && subLayer in SUBLAYER_DECAY_FACTORS) {
+  if (subLayer && subLayer in SUBLAYER_DECAY_FACTORS)
     return SUBLAYER_DECAY_FACTORS[subLayer];
-  }
+
   return LAYER_DECAY_FACTORS[layer] ?? 0.7;
 }
 
@@ -274,9 +270,9 @@ function getLCSDepth(pathA: string, pathB: string): number {
   const partsB = pathB.split('/');
   let lcs = 0;
   const minLen = Math.min(partsA.length, partsB.length);
-  for (let i = 0; i < minLen; i++) {
+  for (let i = 0; i < minLen; i++)
     if (partsA[i] === partsB[i]) lcs++;
     else break;
-  }
+
   return lcs;
 }

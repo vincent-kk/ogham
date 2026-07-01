@@ -51,9 +51,8 @@ function findParentPath(path: string, allPaths: string[]): string | null {
  * Automatically infers parent-child/organ relationships from paths.
  */
 export function buildFractalTree(entries: NodeEntry[]): FractalTree {
-  if (entries.length === 0) {
+  if (entries.length === 0)
     return { root: '', nodes: new Map(), depth: 0, totalNodes: 0 };
-  }
 
   // Sort by path length ascending (parents first)
   const sorted = [...entries].sort((a, b) => a.path.length - b.path.length);
@@ -62,7 +61,7 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
   const nodes = new Map<string, FractalNode>();
 
   // Step 1: Create all nodes
-  for (const e of sorted) {
+  for (const e of sorted)
     nodes.set(e.path, {
       path: e.path,
       name: e.name,
@@ -85,7 +84,6 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
           : {}),
       },
     });
-  }
 
   // Step 2: Establish parent-child relationships and compute depth
   for (const e of sorted) {
@@ -97,11 +95,8 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
     node.parent = parentPath;
     node.depth = parent.depth + 1;
 
-    if (e.type === 'organ') {
-      parent.organs.push(e.path);
-    } else {
-      parent.children.push(e.path);
-    }
+    if (e.type === 'organ') parent.organs.push(e.path);
+    else parent.children.push(e.path);
   }
 
   // Root: shortest path among nodes with null parent
@@ -110,11 +105,8 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
 
   // Compute max depth
   let maxDepth = 0;
-  for (const node of nodes.values()) {
-    if (node.depth > maxDepth) {
-      maxDepth = node.depth;
-    }
-  }
+  for (const node of nodes.values())
+    if (node.depth > maxDepth) maxDepth = node.depth;
 
   return { root, nodes, depth: maxDepth, totalNodes: nodes.size };
 }

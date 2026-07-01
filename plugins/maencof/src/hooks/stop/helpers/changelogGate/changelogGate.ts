@@ -107,9 +107,7 @@ function isMigrationInProgress(
     const ttlOk = Number.isFinite(startedAt) && Date.now() - startedAt < ttlMs;
     const sessionOk = !lock.sessionId || lock.sessionId === sessionId;
 
-    if (ttlOk && sessionOk) {
-      return true;
-    }
+    if (ttlOk && sessionOk) return true;
 
     // Orphan lock — TTL expired or session mismatch. Drop it so it cannot
     // block unrelated future sessions. Failure to unlink is non-fatal; the
@@ -146,26 +144,19 @@ export async function runChangelogGate(
     const cwd = input.cwd ?? process.cwd();
 
     // 1. 마커 파일 존재 → 이미 처리됨
-    if (hasGateMarker(cwd)) {
-      return { continue: true };
-    }
+    if (hasGateMarker(cwd)) return { continue: true };
 
     // 2. maencof vault 확인
-    if (!isMaencofVault(cwd)) {
-      return { continue: true };
-    }
+    if (!isMaencofVault(cwd)) return { continue: true };
 
     // 2.5. migration 진행 중이면 통과 (이 호출이 orphan lock cleanup 도 수행)
     const lockPath = metaPath(cwd, 'migration.lock');
-    if (isMigrationInProgress(lockPath, input.session_id, cwd)) {
+    if (isMigrationInProgress(lockPath, input.session_id, cwd))
       return { continue: true };
-    }
 
     // 3. 감시 경로에 git 변경 확인
     const changes = await detectWatchedChanges(cwd);
-    if (changes.length === 0) {
-      return { continue: true };
-    }
+    if (changes.length === 0) return { continue: true };
 
     // 4. 변경 감지 → 차단 + 메시지
     const changeList = changes.map((c) => `  ${c}`).join('\n');

@@ -33,12 +33,11 @@ const readInput: PostToolUseInput = {
 const queueSizes = [0, 10, 50, 100, 500, 1000, 5000];
 
 describe('change-tracker: queue sizes', () => {
-  for (const size of queueSizes) {
+  for (const size of queueSizes)
     bench(`Write to queue with ${size} existing items`, () => {
       const queue = generateChangeQueue(size);
       trackChange(writeInput, queue);
     });
-  }
 });
 
 describe('change-tracker: tool types', () => {
@@ -61,15 +60,13 @@ describe('change-tracker: tool types', () => {
 describe('change-tracker: sustained enqueue', () => {
   bench('100 sequential Write enqueues', () => {
     const queue = new ChangeQueue();
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i++)
       trackChange(makeInput('Write', `/workspace/src/file-${i}.ts`), queue);
-    }
   });
 
   bench('1000 sequential Edit enqueues', () => {
     const queue = new ChangeQueue();
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 1000; i++)
       trackChange(makeInput('Edit', `/workspace/src/file-${i}.ts`), queue);
-    }
   });
 });

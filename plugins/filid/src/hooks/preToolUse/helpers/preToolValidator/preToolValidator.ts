@@ -105,7 +105,7 @@ function handleIntentMdEdit(
   if (current !== undefined && oldString && current.includes(oldString)) {
     const projected = projectEdit(current, oldString, newString, input);
     const lineCount = projected.split('\n').length;
-    if (lineCount > INTENT_MD_LINE_LIMIT) {
+    if (lineCount > INTENT_MD_LINE_LIMIT)
       return {
         continue: true,
         hookSpecificOutput: {
@@ -117,12 +117,12 @@ function handleIntentMdEdit(
             `into it. ${DENY_RETRY_GUIDANCE}`,
         },
       };
-    }
+
     return { continue: true };
   }
 
   const lineCount = newString.split('\n').length;
-  if (lineCount > 20) {
+  if (lineCount > 20)
     return {
       continue: true,
       hookSpecificOutput: {
@@ -133,7 +133,7 @@ function handleIntentMdEdit(
           `${INTENT_MD_LINE_LIMIT} lines.`,
       },
     };
-  }
+
   return { continue: true };
 }
 
@@ -158,14 +158,13 @@ function handleIntentMdWrite(content: string): HookOutput {
   }
 
   const warnings = result.violations.filter((v) => v.severity === 'warning');
-  if (warnings.length > 0) {
+  if (warnings.length > 0)
     return {
       continue: true,
       hookSpecificOutput: {
         additionalContext: warnings.map((w) => w.message).join('; '),
       },
     };
-  }
 
   return { continue: true };
 }
@@ -228,9 +227,9 @@ export function validatePreToolUse(
 
   // criteria.md validation — runs before the spike gate (never exempt)
   if (isCriteriaMd(filePath)) {
-    if (input.tool_name === 'Edit') {
+    if (input.tool_name === 'Edit')
       return handleCriteriaMdEdit(input, safeCwd, filePath);
-    }
+
     // No truthiness gate: an empty-content Write is the trivial full-wipe
     // a gaming agent would use to escape FAIL claims — validate it too.
     if (input.tool_name === 'Write') {
@@ -246,23 +245,17 @@ export function validatePreToolUse(
   // Spike mode: doc-hygiene denies for INTENT.md/DETAIL.md are suspended.
   if (spikeExempt) return { continue: true };
 
-  if (input.tool_name === 'Edit' && isIntentMd(filePath)) {
+  if (input.tool_name === 'Edit' && isIntentMd(filePath))
     return handleIntentMdEdit(input, safeCwd, filePath);
-  }
 
   const content = input.tool_input.content;
 
-  if (input.tool_name !== 'Write' || !content) {
-    return { continue: true };
-  }
+  if (input.tool_name !== 'Write' || !content) return { continue: true };
 
-  if (isIntentMd(filePath)) {
-    return handleIntentMdWrite(content);
-  }
+  if (isIntentMd(filePath)) return handleIntentMdWrite(content);
 
-  if (isDetailMd(filePath) && oldContent !== undefined) {
+  if (isDetailMd(filePath) && oldContent !== undefined)
     return handleDetailMdWrite(content, oldContent);
-  }
 
   return { continue: true };
 }

@@ -45,9 +45,7 @@ function parseLinkLine(
 }
 
 function mergeRefs(existing: string[], incoming: string[]): void {
-  for (const ref of incoming) {
-    if (!existing.includes(ref)) existing.push(ref);
-  }
+  for (const ref of incoming) if (!existing.includes(ref)) existing.push(ref);
 }
 
 export function parseLinks(body: string): GithubLinks {

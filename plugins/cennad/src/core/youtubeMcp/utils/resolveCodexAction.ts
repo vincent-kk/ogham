@@ -15,9 +15,9 @@ export function resolveCodexAction(
   prev?: YoutubeAddonConfig,
 ): CodexAction {
   if (codexDesired(next)) {
-    if (prev && codexDesired(prev) && prev.language === next.language) {
+    if (prev && codexDesired(prev) && prev.language === next.language)
       return 'skip';
-    }
+
     return 'add';
   }
   if (!prev || codexDesired(prev)) return 'remove';

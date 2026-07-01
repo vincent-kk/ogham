@@ -7,10 +7,9 @@ let sgLoadFailed = false;
 let sgLoadError = '';
 
 export async function getSgModule(): Promise<SgModule | null> {
-  if (sgLoadFailed) {
-    return null;
-  }
-  if (!sgModule) {
+  if (sgLoadFailed) return null;
+
+  if (!sgModule)
     try {
       // Use createRequire for CJS-style resolution (respects NODE_PATH)
       // In CJS bundles, import.meta.url becomes undefined (esbuild replaces import.meta with {}).
@@ -32,7 +31,7 @@ export async function getSgModule(): Promise<SgModule | null> {
         return null;
       }
     }
-  }
+
   return sgModule;
 }
 

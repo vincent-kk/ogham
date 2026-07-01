@@ -73,13 +73,12 @@ export async function startSettingsServer(
         s.close(() => resolve());
       });
     }
-    if (options.onClose) {
+    if (options.onClose)
       try {
         await options.onClose();
       } catch {
         // best-effort cleanup hook
       }
-    }
   }
 
   function resetTimer(): void {
@@ -108,14 +107,12 @@ export async function startSettingsServer(
     (resolve, reject) => {
       server!.listen(0, '127.0.0.1', () => {
         const addr = server!.address();
-        if (addr && typeof addr === 'object') {
+        if (addr && typeof addr === 'object')
           resolve({
             url: `http://127.0.0.1:${addr.port}/?token=${token}`,
             port: addr.port,
           });
-        } else {
-          reject(new Error('Failed to get server address'));
-        }
+        else reject(new Error('Failed to get server address'));
       });
       server!.on('error', reject);
     },

@@ -35,9 +35,8 @@ async function persistLastIntent(
 ): Promise<void> {
   try {
     const config = await ctx.loadConfig();
-    if (config.last_intent !== intent) {
+    if (config.last_intent !== intent)
       await ctx.saveConfig({ ...config, last_intent: intent });
-    }
   } catch {
     /* swallow: last_intent is a convenience default, not part of the contract */
   }
@@ -82,9 +81,7 @@ export async function handlePostFeedback(
       });
       rawPayload = parsed.payload;
       images = parsed.images;
-    } else {
-      rawPayload = await parseJsonBody(req, config.max_payload_mb * MB);
-    }
+    } else rawPayload = await parseJsonBody(req, config.max_payload_mb * MB);
   } catch (err) {
     sendJson(res, 400, { ok: false, message: (err as Error).message });
     return;
@@ -122,9 +119,8 @@ export async function handlePostFeedback(
       if (
         payload.intent === FeedbackIntent.Revise ||
         payload.intent === FeedbackIntent.Discuss
-      ) {
+      )
         await persistLastIntent(ctx, payload.intent);
-      }
     }
     sendJson(res, 200, { ok: true, status: payload.status });
   } finally {

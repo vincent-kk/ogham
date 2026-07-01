@@ -38,9 +38,9 @@ vi.mock('node:fs', async (importOriginal) => {
       if (
         typeof p === 'string' &&
         toPosixPath(p).endsWith('.filid/config.json')
-      ) {
+      )
         return MOCK_CONFIG_JSON;
-      }
+
       throw new Error(`unexpected readFileSync: ${String(p)}`);
     }),
     writeFileSync: vi.fn(),

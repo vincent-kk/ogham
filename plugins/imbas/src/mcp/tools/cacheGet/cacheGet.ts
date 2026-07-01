@@ -27,11 +27,10 @@ export async function handleCacheGet(input: CacheGetInput) {
   if (!project_ref) {
     const config = await loadConfig(cwd);
     project_ref = config.defaults.project_ref ?? undefined;
-    if (!project_ref) {
+    if (!project_ref)
       throw new Error(
         'project_ref is required (or set defaults.project_ref in config)',
       );
-    }
   }
 
   const cache_type: CacheType = input.cache_type ?? 'all';

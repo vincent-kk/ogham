@@ -13,14 +13,14 @@ function toYaml(obj: Record<string, unknown>, indent = 0): string {
     .map(([k, v]) => {
       if (Array.isArray(v)) {
         if (v.length === 0) return `${pad}${k}: []`;
-        if (typeof v[0] === 'object') {
+        if (typeof v[0] === 'object')
           return `${pad}${k}:\n${v.map((i) => `${pad}  - ${JSON.stringify(i)}`).join('\n')}`;
-        }
+
         return `${pad}${k}:\n${v.map((i) => `${pad}  - ${i}`).join('\n')}`;
       }
-      if (v !== null && typeof v === 'object') {
+      if (v !== null && typeof v === 'object')
         return `${pad}${k}:\n${toYaml(v as Record<string, unknown>, indent + 1)}`;
-      }
+
       return `${pad}${k}: ${v}`;
     })
     .join('\n');

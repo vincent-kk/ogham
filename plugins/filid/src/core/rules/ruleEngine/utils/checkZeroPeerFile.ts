@@ -40,7 +40,7 @@ export function checkZeroPeerFile(
     // Category: additional-allowed from .filid/config.json
     //   string entry  → allowed everywhere (backward-compat).
     //   object entry  → allowed only when entry.paths glob matches node.path.
-    if (additionalAllowed) {
+    if (additionalAllowed)
       for (const entry of additionalAllowed) {
         if (typeof entry === 'string') {
           allowed.add(entry);
@@ -49,7 +49,6 @@ export function checkZeroPeerFile(
         if (entry.paths && !isExempt(node, entry.paths)) continue;
         allowed.add(entry.basename);
       }
-    }
 
     const disallowed = peerFiles.filter((f) => !allowed.has(f));
     if (disallowed.length === 0) return [];

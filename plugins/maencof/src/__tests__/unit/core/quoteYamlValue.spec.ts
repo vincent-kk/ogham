@@ -44,9 +44,8 @@ describe('quoteYamlValue', () => {
 
   it('parseScalarValue와 round-trip이 성립한다', () => {
     const inputs = ['Show GN: hello', '#comment', 'true', 'has "quotes"', ''];
-    for (const input of inputs) {
+    for (const input of inputs)
       expect(parseScalarValue(quoteYamlValue(input))).toBe(input);
-    }
   });
 
   it('double-quote로 감싼 ": " 포함 값을 올바르게 파싱한다', () => {

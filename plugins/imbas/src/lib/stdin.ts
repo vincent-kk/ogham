@@ -57,12 +57,11 @@ export function readStdin(timeoutMs = STDIN_TIMEOUT_MS): Promise<string> {
 
     // If stdin is already ended (e.g. empty pipe), 'end' fires immediately
     // But if stdin is a TTY or never piped, we need the timeout as safety net
-    if (process.stdin.readableEnded) {
+    if (process.stdin.readableEnded)
       if (!settled) {
         settled = true;
         settle();
         resolve(Buffer.concat(chunks).toString('utf-8'));
       }
-    }
   });
 }

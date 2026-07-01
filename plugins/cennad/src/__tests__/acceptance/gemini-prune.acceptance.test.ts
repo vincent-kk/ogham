@@ -68,11 +68,11 @@ describe('[acceptance] gemini config is pruned at setup/load', () => {
       'default_tier',
       'preamble',
       'recency_factor',
-    ]) {
+    ])
       expect(hasGeminiKey(cfg[section]), `gemini leaked into ${section}`).toBe(
         false,
       );
-    }
+
     expect(cfg.ratio).toHaveProperty('codex');
     expect(cfg.ratio.antigravity).toEqual({ value: 40, enabled: true });
   });

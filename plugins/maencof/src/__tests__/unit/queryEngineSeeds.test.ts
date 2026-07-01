@@ -124,9 +124,9 @@ describe('resolveSeedNodes — PP2 path prefix + PP3 budget', () => {
   it('budget keeps a low-pagerank title match over high-pagerank tag matches', () => {
     const nodes: KnowledgeNode[] = [];
     // 35 high-pagerank tag-only matches (tag-exact 0.5)
-    for (let i = 0; i < 35; i++) {
+    for (let i = 0; i < 35; i++)
       nodes.push(node(`tag${i}.md`, `T${i}`, ['security'], 100 + i));
-    }
+
     // one low-pagerank title-exact match (1.0) — must survive the budget
     nodes.push(node('the-doc.md', 'security', [], 0));
     const g = makeGraph(nodes);

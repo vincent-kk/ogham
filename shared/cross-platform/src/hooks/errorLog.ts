@@ -15,9 +15,9 @@ function defaultLogPath(pkg: string): string {
 }
 
 function serialize(error: unknown): string {
-  if (error instanceof Error) {
+  if (error instanceof Error)
     return `${error.message}${error.stack ? `\n${error.stack}` : ""}`;
-  }
+
   try {
     return JSON.stringify(error);
   } catch {
@@ -39,14 +39,13 @@ export function logHookFailure(
   mkdirSync(dirname(file), { recursive: true });
 
   let entries: ErrorEntry[] = [];
-  if (existsSync(file)) {
+  if (existsSync(file))
     try {
       const parsed: unknown = JSON.parse(readFileSync(file, "utf8"));
       if (Array.isArray(parsed)) entries = parsed as ErrorEntry[];
     } catch {
       entries = [];
     }
-  }
 
   entries.push({
     timestamp: new Date().toISOString(),

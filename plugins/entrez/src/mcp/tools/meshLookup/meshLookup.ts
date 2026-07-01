@@ -11,8 +11,8 @@ export async function runMeshLookup(
   ctx: ToolContext,
 ): Promise<MeshLookupOutput> {
   const mappings = [];
-  for (const term of input.terms) {
+  for (const term of input.terms)
     mappings.push(await lookupTerm(term, ctx, input));
-  }
+
   return { mappings };
 }

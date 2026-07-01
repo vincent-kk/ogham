@@ -54,11 +54,8 @@ describe('findBoundary', () => {
     const result = findBoundary(join(tmp, 'deep', 'nested', 'file.ts'));
     // tmp 조상 중 실제 package.json이 있을 수 있으므로,
     // 결과가 null이거나 tmp 밖의 경로여야 함
-    if (result !== null) {
-      expect(result.startsWith(tmp)).toBe(false);
-    } else {
-      expect(result).toBeNull();
-    }
+    if (result !== null) expect(result.startsWith(tmp)).toBe(false);
+    else expect(result).toBeNull();
   });
 });
 
@@ -131,11 +128,9 @@ describe('buildChain', () => {
 
     // tmp에 package.json이 없는 경우 null이거나 tmp 외부 경로
     const result = buildChain(join(tmp, 'deep', 'file.ts'));
-    if (result !== null) {
+    if (result !== null)
       // boundary가 tmp 밖에 있어야 함 (실제 시스템 package.json)
       expect(result.boundary.startsWith(tmp)).toBe(false);
-    } else {
-      expect(result).toBeNull();
-    }
+    else expect(result).toBeNull();
   });
 });

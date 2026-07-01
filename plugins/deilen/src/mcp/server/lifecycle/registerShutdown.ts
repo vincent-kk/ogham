@@ -16,10 +16,9 @@ export function registerShutdown(): void {
     void getHttpServer()?.close();
   };
   process.once("exit", shutdown);
-  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  for (const signal of ["SIGINT", "SIGTERM"] as const)
     process.once(signal, () => {
       shutdown();
       process.exit(0);
     });
-  }
 }

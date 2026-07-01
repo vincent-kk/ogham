@@ -81,8 +81,8 @@ export async function idconv(
     },
     deps,
   );
-  if (!res.ok || res.text === undefined) {
+  if (!res.ok || res.text === undefined)
     throw new Error(res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: idconv`);
-  }
+
   return parseIdConv(res.text);
 }

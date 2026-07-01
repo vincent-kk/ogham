@@ -20,13 +20,12 @@ describe('getSgModule', () => {
 
   it('returns null and records error when @ast-grep/napi is unavailable', async () => {
     const sg = await getSgModule();
-    if (sg === null) {
+    if (sg === null)
       // When the module is missing, getSgLoadError() should return a non-empty string
       expect(getSgLoadError()).toBeTypeOf('string');
-    } else {
+    else
       // Module is available — error string should be empty
       expect(getSgLoadError()).toBe('');
-    }
   });
 });
 

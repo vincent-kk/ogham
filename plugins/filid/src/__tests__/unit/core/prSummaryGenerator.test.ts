@@ -249,22 +249,20 @@ describe('generateHumanSummary', () => {
     });
 
     const autoFixRules = result.autoFixItems.map((i) => i.ruleId);
-    for (const rule of autoFixRules) {
+    for (const rule of autoFixRules)
       expect([
         'naming-convention',
         'index-barrel-pattern',
         'module-entry-point',
       ]).toContain(rule);
-    }
-    for (const item of result.reviewItems) {
-      if (item.ruleId) {
+
+    for (const item of result.reviewItems)
+      if (item.ruleId)
         expect([
           'naming-convention',
           'index-barrel-pattern',
           'module-entry-point',
         ]).not.toContain(item.ruleId);
-      }
-    }
   });
 
   it('handles malformed YAML frontmatter', () => {
@@ -346,11 +344,10 @@ describe('generateHumanSummary', () => {
       branch: 'sorted',
     });
 
-    for (let i = 1; i < result.reviewItems.length; i++) {
+    for (let i = 1; i < result.reviewItems.length; i++)
       expect(result.reviewItems[i - 1].errorProbability).toBeGreaterThanOrEqual(
         result.reviewItems[i].errorProbability,
       );
-    }
   });
 
   it('renders markdown with correct emoji indicators', () => {

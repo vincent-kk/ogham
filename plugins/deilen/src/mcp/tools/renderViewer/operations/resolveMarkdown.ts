@@ -24,18 +24,18 @@ export async function resolveMarkdown(
 ): Promise<ResolvedMarkdown> {
   const hasContent = typeof input.content === "string";
   const hasPath = typeof input.path === "string" && input.path.length > 0;
-  if (hasContent === hasPath) {
+  if (hasContent === hasPath)
     throw new Error("invalid_input: provide exactly one of content or path");
-  }
+
   const maxBytes = maxViewerMb * MB;
 
   if (hasContent) {
     const content = input.content as string;
-    if (Buffer.byteLength(content, "utf8") > maxBytes) {
+    if (Buffer.byteLength(content, "utf8") > maxBytes)
       throw new Error(
         `invalid_input: content exceeds max_viewer_mb (${maxViewerMb}MB)`,
       );
-    }
+
     return { markdown: content };
   }
 
@@ -49,14 +49,14 @@ export async function resolveMarkdown(
       { cause: err },
     );
   }
-  if (!info.isFile()) {
+  if (!info.isFile())
     throw new Error(`read_error: not a regular file: ${sourcePath}`);
-  }
-  if (info.size > maxBytes) {
+
+  if (info.size > maxBytes)
     throw new Error(
       `read_error: ${sourcePath} exceeds max_viewer_mb (${maxViewerMb}MB)`,
     );
-  }
+
   try {
     return { markdown: await readFile(sourcePath, "utf8"), sourcePath };
   } catch (err) {

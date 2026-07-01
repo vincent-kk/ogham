@@ -63,12 +63,12 @@ describe('[acceptance] claude config data model (D1/D2/D3/D6)', () => {
       'default_tier',
       'preamble',
       'recency_factor',
-    ]) {
+    ])
       expect(
         DEFAULT_CONFIG[section],
         `DEFAULT_CONFIG.${section}.claude missing`,
       ).toHaveProperty('claude');
-    }
+
     expect(DEFAULT_CONFIG.ratio.claude.enabled).toBe(true);
   });
 
@@ -95,23 +95,18 @@ describe('[acceptance] claude config data model (D1/D2/D3/D6)', () => {
       ClaudeFlagsSchema,
       'ClaudeFlagsSchema not exported yet',
     ).toBeDefined();
-    for (const mode of [
-      'acceptEdits',
-      'auto',
-      'dontAsk',
-      'bypassPermissions',
-    ]) {
+    for (const mode of ['acceptEdits', 'auto', 'dontAsk', 'bypassPermissions'])
       expect(
         ClaudeFlagsSchema.safeParse({ permission_mode: mode }).success,
         mode,
       ).toBe(true);
-    }
-    for (const mode of ['default', 'plan']) {
+
+    for (const mode of ['default', 'plan'])
       expect(
         ClaudeFlagsSchema.safeParse({ permission_mode: mode }).success,
         mode,
       ).toBe(false);
-    }
+
     expect(
       ClaudeFlagsSchema.safeParse({ permission_mode: 'sandboxed' }).success,
     ).toBe(false);
@@ -136,16 +131,8 @@ describe('[acceptance] claude model x effort caps (D3 / section 3)', () => {
       CLAUDE_MODEL_ALIASES,
       'CLAUDE_MODEL_ALIASES not exported yet',
     ).toBeDefined();
-    for (const alias of [
-      'opus',
-      'sonnet',
-      'haiku',
-      'fable',
-      'mythos',
-      'best',
-    ]) {
+    for (const alias of ['opus', 'sonnet', 'haiku', 'fable', 'mythos', 'best'])
       expect(CLAUDE_MODEL_ALIASES, alias).toContain(alias);
-    }
   });
 
   it('MODEL_EFFORT_SETS encodes per-model caps (sonnet skips xhigh, haiku none)', async () => {

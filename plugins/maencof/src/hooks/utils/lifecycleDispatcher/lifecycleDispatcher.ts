@@ -38,44 +38,32 @@ export function runLifecycleDispatcher(
   const cwd = input.cwd ?? process.cwd();
 
   // Only run in maencof vaults
-  if (!isMaencofVault(cwd)) {
-    return { continue: true };
-  }
+  if (!isMaencofVault(cwd)) return { continue: true };
 
   // Validate event name
-  if (!VALID_EVENTS.has(event as LifecycleEvent)) {
-    return { continue: true };
-  }
+  if (!VALID_EVENTS.has(event as LifecycleEvent)) return { continue: true };
 
   const lifecycleEvent = event as LifecycleEvent;
 
   // Read lifecycle.json
   const config = loadLifecycleConfig(cwd);
-  if (!config || config.actions.length === 0) {
-    return { continue: true };
-  }
+  if (!config || config.actions.length === 0) return { continue: true };
 
   // Filter matching actions
   const matching = config.actions.filter((action) =>
     isActionMatch(action, lifecycleEvent, input.tool_name),
   );
 
-  if (matching.length === 0) {
-    return { continue: true };
-  }
+  if (matching.length === 0) return { continue: true };
 
   // Execute actions and collect messages
   const messages: string[] = [];
   for (const action of matching) {
     const msg = executeAction(action);
-    if (msg) {
-      messages.push(msg);
-    }
+    if (msg) messages.push(msg);
   }
 
-  if (messages.length === 0) {
-    return { continue: true };
-  }
+  if (messages.length === 0) return { continue: true };
 
   return buildDispatchResult(lifecycleEvent, messages.join('\n'));
 }
@@ -95,9 +83,9 @@ function buildDispatchResult(
   event: LifecycleEvent,
   payload: string,
 ): LifecycleDispatchResult {
-  if (event === 'Stop' || event === 'SessionEnd') {
+  if (event === 'Stop' || event === 'SessionEnd')
     return { continue: true, systemMessage: payload };
-  }
+
   return {
     continue: true,
     hookSpecificOutput: {
@@ -112,18 +100,14 @@ function buildDispatchResult(
  */
 function loadLifecycleConfig(cwd: string): LifecycleConfig | null {
   const configPath = metaPath(cwd, 'lifecycle.json');
-  if (!existsSync(configPath)) {
-    return null;
-  }
+  if (!existsSync(configPath)) return null;
 
   try {
     const raw = readFileSync(configPath, 'utf-8');
     const parsed = JSON.parse(raw) as LifecycleConfig;
 
     // Basic validation
-    if (parsed.version !== 1 || !Array.isArray(parsed.actions)) {
-      return null;
-    }
+    if (parsed.version !== 1 || !Array.isArray(parsed.actions)) return null;
 
     return parsed;
   } catch (e) {
@@ -145,9 +129,7 @@ function isActionMatch(
   toolName?: string,
 ): boolean {
   // Must be enabled and match event
-  if (!action.enabled || action.event !== event) {
-    return false;
-  }
+  if (!action.enabled || action.event !== event) return false;
 
   // For PreToolUse/PostToolUse, check matcher pattern against tool_name
   if (

@@ -1,10 +1,10 @@
-import { runLifecycleDispatcher } from '../utils/lifecycleDispatcher/lifecycleDispatcher.js';
-import { isMaencofMcpToolName } from '../shared/maencofMcpTools.js';
 import type {
   DispatchInput,
   HookConcernResult,
   MergedHookOutput,
 } from '../../types/dispatch.js';
+import { isMaencofMcpToolName } from '../shared/maencofMcpTools.js';
+import { runLifecycleDispatcher } from '../utils/lifecycleDispatcher/lifecycleDispatcher.js';
 import { mergeHookOutput } from '../utils/mergeHookOutput/mergeHookOutput.js';
 import { safeConcern } from '../utils/safeConcern/safeConcern.js';
 
@@ -18,13 +18,13 @@ import { runActivityRecorder } from './helpers/activityRecorder/activityRecorder
 export function orchestratePostToolUse(input: DispatchInput): MergedHookOutput {
   const results: HookConcernResult[] = [];
 
-  if (input.tool_name && isMaencofMcpToolName(input.tool_name)) {
+  if (input.tool_name && isMaencofMcpToolName(input.tool_name))
     results.push(
       safeConcern(input.cwd, 'activity-recorder', () =>
         runActivityRecorder(input),
       ),
     );
-  }
+
   results.push(
     safeConcern(input.cwd, 'lifecycle-dispatcher', () =>
       runLifecycleDispatcher('PostToolUse', input),

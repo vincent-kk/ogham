@@ -68,7 +68,7 @@ describe('organ-classifier — classifyNode (extended)', () => {
         'fixtures',
         'e2e',
       ];
-      for (const dirName of testDirs) {
+      for (const dirName of testDirs)
         expect(
           classifyNode({
             dirName,
@@ -78,7 +78,6 @@ describe('organ-classifier — classifyNode (extended)', () => {
             isLeafDirectory: false,
           }),
         ).toBe('organ');
-      }
     });
 
     it.each([
@@ -121,7 +120,7 @@ describe('organ-classifier — classifyNode (extended)', () => {
 
     it('should classify dot-prefixed dirs as organ via pattern', () => {
       const dotDirs = ['.git', '.github', '.vscode', '.claude'];
-      for (const dirName of dotDirs) {
+      for (const dirName of dotDirs)
         expect(
           classifyNode({
             dirName,
@@ -131,7 +130,6 @@ describe('organ-classifier — classifyNode (extended)', () => {
             isLeafDirectory: false,
           }),
         ).toBe('organ');
-      }
     });
   });
 

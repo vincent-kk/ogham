@@ -12,11 +12,8 @@ const ORIGINAL_CLAUDE_PLUGIN_DATA = process.env.CLAUDE_PLUGIN_DATA;
 const ORIGINAL_CLAUDE_PLUGIN_DADA = process.env.CLAUDE_PLUGIN_DADA;
 
 function restoreEnv(name: string, value: string | undefined): void {
-  if (value === undefined) {
-    delete process.env[name];
-  } else {
-    process.env[name] = value;
-  }
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
 }
 
 async function writeConfigAt(path: string, content: string): Promise<void> {

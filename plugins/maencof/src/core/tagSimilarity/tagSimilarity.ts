@@ -33,9 +33,7 @@ export function jaccardSimilarity(a: string[], b: string[]): number {
   if (setA.size === 0 && setB.size === 0) return 0;
 
   let intersection = 0;
-  for (const tag of setA) {
-    if (setB.has(tag)) intersection++;
-  }
+  for (const tag of setA) if (setB.has(tag)) intersection++;
 
   const union = setA.size + setB.size - intersection;
   return union === 0 ? 0 : intersection / union;
@@ -150,8 +148,7 @@ export function commonTags(a: string[], b: string[]): string[] {
   const setA = new Set(normalizeTags(a));
   const setB = new Set(normalizeTags(b));
   const result: string[] = [];
-  for (const tag of setA) {
-    if (setB.has(tag)) result.push(tag);
-  }
+  for (const tag of setA) if (setB.has(tag)) result.push(tag);
+
   return result;
 }

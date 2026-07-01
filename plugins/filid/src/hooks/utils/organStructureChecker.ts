@@ -28,10 +28,10 @@ export function clearOrganCache(): void {
  */
 export function isOrganByStructure(dirPath: string): boolean {
   try {
-    if (!existsSync(dirPath)) {
+    if (!existsSync(dirPath))
       // 파일시스템에 없으면 레거시 이름 기반 폴백
       return KNOWN_ORGAN_DIR_NAMES.includes(path.basename(dirPath));
-    }
+
     const entries = readdirSync(dirPath, { withFileTypes: true });
     const hasIntentMd = entries.some(
       (e) => e.isFile() && e.name === 'INTENT.md',

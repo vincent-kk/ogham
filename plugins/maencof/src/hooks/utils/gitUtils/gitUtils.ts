@@ -7,7 +7,10 @@ import { join } from 'node:path';
 
 import { spawnCli } from '@ogham/cross-platform';
 
-import { MAENCOF_DIR, MAENCOF_META_DIR } from '../../../constants/directories.js';
+import {
+  MAENCOF_DIR,
+  MAENCOF_META_DIR,
+} from '../../../constants/directories.js';
 import { GIT_EXEC_TIMEOUT_MS } from '../../../constants/performance.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -48,29 +51,27 @@ export async function commitVaultChanges(
   commitMessage: string,
 ): Promise<void> {
   // Add each directory separately — if one doesn't exist, the other still gets staged
-  for (const dir of [MAENCOF_DIR, MAENCOF_META_DIR]) {
+  for (const dir of [MAENCOF_DIR, MAENCOF_META_DIR])
     if (existsSync(join(cwd, dir))) {
       const add = await spawnCli('git', ['add', `${dir}/`], {
         cwd,
         timeoutMs: GIT_EXEC_TIMEOUT_MS,
       });
-      if (add.code !== 0 || add.spawnError) {
+      if (add.code !== 0 || add.spawnError)
         throw new Error(
           `git add ${dir}/ failed: ${add.stderr.trim() || add.spawnError?.message || `exit ${add.code}`}`,
         );
-      }
     }
-  }
+
   const commit = await spawnCli(
     'git',
     ['commit', '--no-verify', '-m', commitMessage],
     { cwd, timeoutMs: GIT_EXEC_TIMEOUT_MS },
   );
-  if (commit.code !== 0 || commit.spawnError) {
+  if (commit.code !== 0 || commit.spawnError)
     throw new Error(
       `git commit failed: ${commit.stderr.trim() || commit.spawnError?.message || `exit ${commit.code}`}`,
     );
-  }
 }
 
 /**

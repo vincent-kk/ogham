@@ -100,9 +100,7 @@ ${result.publishedAt ? `- 발행일: ${result.publishedAt}` : ''}
       source: result.url,
     });
 
-    if (createResult.success) {
-      ingested.push(createResult.path);
-    }
+    if (createResult.success) ingested.push(createResult.path);
   }
 
   return ingested;

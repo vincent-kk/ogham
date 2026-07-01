@@ -35,19 +35,16 @@ export async function handleRunCreate(input: RunCreateInput) {
 
   // Copy source file — or create placeholder for devplan-pipeline mode
   const destSource = join(run_dir, SOURCE_FILENAME);
-  if (input.source_file === DEVPLAN_PIPELINE_SOURCE) {
+  if (input.source_file === DEVPLAN_PIPELINE_SOURCE)
     writeFileSync(destSource, '', 'utf-8');
-  } else {
-    copyFileSync(input.source_file, destSource);
-  }
+  else copyFileSync(input.source_file, destSource);
 
   // Copy supplements
   if (input.supplements && input.supplements.length > 0) {
     const suppDir = join(run_dir, SUPPLEMENTS_DIRNAME);
     mkdirSync(suppDir, { recursive: true });
-    for (const supp of input.supplements) {
+    for (const supp of input.supplements)
       copyFileSync(supp, join(suppDir, basename(supp)));
-    }
   }
 
   // Create initial state

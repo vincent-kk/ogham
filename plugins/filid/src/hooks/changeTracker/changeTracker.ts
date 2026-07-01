@@ -38,16 +38,13 @@ export function trackChange(
   if (safeCwd === null) return { continue: true };
 
   // Only track Write and Edit mutations
-  if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
+  if (input.tool_name !== 'Write' && input.tool_name !== 'Edit')
     return { continue: true };
-  }
 
   const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
 
   // Skip if no file path provided
-  if (!filePath) {
-    return { continue: true };
-  }
+  if (!filePath) return { continue: true };
 
   const cwd = safeCwd;
   const toolName = input.tool_name;

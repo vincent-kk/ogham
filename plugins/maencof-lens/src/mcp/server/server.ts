@@ -21,9 +21,7 @@ export function createLensServer(configRoot: string) {
   let router: VaultRouter | null = null;
   const graphCache = new GraphCache();
 
-  if (config) {
-    router = new VaultRouter(config);
-  }
+  if (config) router = new VaultRouter(config);
 
   const resolveVault = (vaultName?: string) => {
     if (!router)

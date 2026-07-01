@@ -28,16 +28,14 @@ export function makeFakeRunner(spec: FakeRunnerSpec = {}): FakeRunner {
     async run(args: string[], _opts?: RunOptions): Promise<RunResult> {
       calls.push(args);
       spec.onRun?.(args);
-      if (spec.error !== undefined) {
-        throw spec.error;
-      }
+      if (spec.error !== undefined) throw spec.error;
+
       if (spec.files) {
         const dir = outputDir(args);
         if (dir) {
           await mkdir(dir, { recursive: true });
-          for (const [name, content] of Object.entries(spec.files)) {
+          for (const [name, content] of Object.entries(spec.files))
             await writeFile(path.join(dir, name), content, 'utf8');
-          }
         }
       }
       return { stdout: spec.stdout ?? '', stderr: spec.stderr ?? '' };
@@ -47,12 +45,10 @@ export function makeFakeRunner(spec: FakeRunnerSpec = {}): FakeRunner {
 
 function outputDir(args: string[]): string | null {
   const o = args.indexOf('-o');
-  if (o >= 0 && args[o + 1]) {
-    return path.dirname(args[o + 1]);
-  }
+  if (o >= 0 && args[o + 1]) return path.dirname(args[o + 1]);
+
   const p = args.indexOf('--paths');
-  if (p >= 0 && args[p + 1]) {
-    return args[p + 1];
-  }
+  if (p >= 0 && args[p + 1]) return args[p + 1];
+
   return null;
 }

@@ -30,8 +30,8 @@ export function buildResponse(args: BuildResponseArgs): ConversationResponse {
       ignored_options: args.result.ignoredOptions,
     },
   };
-  if (args.artifactPath !== undefined) {
+  if (args.artifactPath !== undefined)
     response.artifact_path = args.artifactPath;
-  }
+
   return response;
 }

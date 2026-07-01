@@ -50,12 +50,12 @@ function fallbackLinks(
 }
 
 function normalizeDownloadUrl(href: string): string {
-  if (href.startsWith(S3_URI_PREFIX)) {
+  if (href.startsWith(S3_URI_PREFIX))
     return `${S3_HTTPS_PREFIX}${href.slice(S3_URI_PREFIX.length)}`;
-  }
-  if (href.startsWith(FTP_PMC_PREFIX)) {
+
+  if (href.startsWith(FTP_PMC_PREFIX))
     return `${S3_HTTPS_PREFIX}deprecated/${href.slice(FTP_PMC_PREFIX.length)}`;
-  }
+
   return href.replace(/^ftp:\/\//i, "https://");
 }
 
@@ -66,9 +66,9 @@ async function fetchBytes(href: string, ctx: ToolContext): Promise<Buffer> {
     { url, injectAuth: false, acceptBinary: true },
     { ...ctx.deps, allowedHosts: [...ctx.deps.allowedHosts, host] },
   );
-  if (!res.ok || !res.binary) {
+  if (!res.ok || !res.binary)
     throw new Error(res.error?.message ?? "download failed");
-  }
+
   return Buffer.from(res.binary);
 }
 
@@ -95,9 +95,9 @@ function extractFromTgz(bytes: Buffer, format: FulltextFormat): Buffer {
       FORMAT_EXTENSIONS[format].some((extension) =>
         name.toLowerCase().endsWith(extension),
       )
-    ) {
+    )
       return tar.subarray(dataStart, dataEnd);
-    }
+
     offset = dataStart + Math.ceil(size / TAR_BLOCK_SIZE) * TAR_BLOCK_SIZE;
   }
   throw new Error("format not found in tgz");
@@ -117,9 +117,8 @@ async function downloadOne(
   const path = safeOutputPath(outDir, `${pmcid}.${format}`);
 
   let bytes: Buffer;
-  if (!overwrite && existsSync(path)) {
-    bytes = await readFile(path);
-  } else {
+  if (!overwrite && existsSync(path)) bytes = await readFile(path);
+  else {
     bytes = await fetchBytes(href, ctx);
     await writeBinary(path, bytes);
   }
@@ -149,9 +148,8 @@ async function downloadFromTgz(
   const path = safeOutputPath(outDir, `${pmcid}.${format}`);
 
   let bytes: Buffer;
-  if (!overwrite && existsSync(path)) {
-    bytes = await readFile(path);
-  } else {
+  if (!overwrite && existsSync(path)) bytes = await readFile(path);
+  else {
     const tgzBytes = await fetchBytes(href, ctx);
     bytes = extractFromTgz(tgzBytes, format);
     await writeBinary(path, bytes);
@@ -227,7 +225,7 @@ export async function downloadFulltext(
     const link = oa.formats.find((f) => f.format === format);
     const tgzLink = oa.formats.find((f) => f.format === FulltextFormat.TAR);
     if (!link) {
-      if (tgzLink && format !== FulltextFormat.TAR) {
+      if (tgzLink && format !== FulltextFormat.TAR)
         try {
           downloaded.push(
             extractTgz
@@ -260,14 +258,14 @@ export async function downloadFulltext(
             links: fallbackLinks(doi, pmcid),
           });
         }
-      } else {
+      else
         unavailable.push({
           id,
           reason: UnavailableReason.FORMAT_NOT_OFFERED,
           format,
           links: fallbackLinks(doi, pmcid),
         });
-      }
+
       continue;
     }
     try {

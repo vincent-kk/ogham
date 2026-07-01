@@ -30,7 +30,7 @@ async function main() {
     context = context ? `${context}\n\n${warning}` : warning;
   }
 
-  if (context) {
+  if (context)
     process.stdout.write(
       JSON.stringify({
         hookSpecificOutput: {
@@ -40,7 +40,6 @@ async function main() {
         },
       }),
     );
-  }
 }
 
 main().catch((e) => {

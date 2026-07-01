@@ -94,9 +94,7 @@ export function buildStemIndex(
     .sort();
   for (const fullPath of sortedPaths) {
     const filename = posix.basename(fullPath);
-    if (!stemIndex.has(filename)) {
-      stemIndex.set(filename, fullPath);
-    }
+    if (!stemIndex.has(filename)) stemIndex.set(filename, fullPath);
   }
   return stemIndex;
 }
@@ -130,9 +128,7 @@ export function resolveAndAttachLinks(
       if (!stemIndex) stemIndex = buildStemIndex(nodes);
       const filename = posix.basename(resolved);
       const stemResolved = stemIndex.get(filename);
-      if (stemResolved) {
-        resolved = stemResolved;
-      }
+      if (stemResolved) resolved = stemResolved;
     }
 
     linksBySource.get(link.from)!.push(resolved);
@@ -140,9 +136,7 @@ export function resolveAndAttachLinks(
   for (const [sourcePath, targets] of linksBySource) {
     const nodeId = sourcePath as NodeId;
     const node = nodes.get(nodeId);
-    if (node) {
-      node.outboundLinks = targets;
-    }
+    if (node) node.outboundLinks = targets;
   }
 }
 
@@ -167,12 +161,10 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
           nodes.set(nodeResult.node.id, nodeResult.node);
 
           // 아웃바운드 링크 수집
-          for (const link of doc.links) {
-            if (!link.isAbsolute) {
+          for (const link of doc.links)
+            if (!link.isAbsolute)
               allLinks.push({ from: file.relativePath, to: link.href });
-            }
-          }
-        } else {
+        } else
           // frontmatter 검증 실패 — non-fatal surface
           parseFailures.push({
             path: file.relativePath,
@@ -180,7 +172,6 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
               nodeResult.error ?? 'Unknown parse failure',
             ],
           });
-        }
       } catch (error) {
         // 파일 읽기/파서 예외 — non-fatal surface
         parseFailures.push({
@@ -206,9 +197,7 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
   // PageRank를 노드에 반영
   for (const [nodeId, rank] of pageranks) {
     const node = nodes.get(nodeId);
-    if (node) {
-      node.pagerank = rank;
-    }
+    if (node) node.pagerank = rank;
   }
 
   const builtAt = new Date().toISOString();
@@ -242,19 +231,16 @@ async function reparseFiles(
         const nodeResult = buildKnowledgeNode(doc);
         if (nodeResult.success && nodeResult.node) {
           nodes.set(nodeResult.node.id, nodeResult.node);
-          for (const link of doc.links) {
-            if (!link.isAbsolute) {
+          for (const link of doc.links)
+            if (!link.isAbsolute)
               allLinks.push({ from: file.relativePath, to: link.href });
-            }
-          }
-        } else {
+        } else
           parseFailures.push({
             path: file.relativePath,
             errors: doc.frontmatter.errors ?? [
               nodeResult.error ?? 'Unknown parse failure',
             ],
           });
-        }
       } catch (error) {
         parseFailures.push({
           path: file.relativePath,
@@ -281,9 +267,7 @@ async function incrementalBuild(
     store.loadGraph(),
   ]);
 
-  if (!previousSnapshot || !previousGraph) {
-    return null; // 폴백: 전체 빌드
-  }
+  if (!previousSnapshot || !previousGraph) return null; // 폴백: 전체 빌드
 
   // 현재 vault 스캔
   const files = await scanVault(vaultPath);
@@ -297,23 +281,19 @@ async function incrementalBuild(
     changeSet.added.length === 0 &&
     changeSet.modified.length === 0 &&
     changeSet.deleted.length === 0
-  ) {
+  )
     return { graph: previousGraph, files, parseFailures: [] };
-  }
 
   // 증분 범위 계산 (전체 빌드 권장 여부 확인)
   const scope = computeIncrementalScope(previousGraph, changeSet);
-  if (scope.fullRebuildRecommended) {
-    return null; // 폴백: 전체 빌드
-  }
+  if (scope.fullRebuildRecommended) return null; // 폴백: 전체 빌드
 
   // 이전 노드에서 시작
   const nodes = new Map(previousGraph.nodes);
 
   // 삭제된 노드 제거
-  for (const deletedPath of changeSet.deleted) {
+  for (const deletedPath of changeSet.deleted)
     nodes.delete(deletedPath as NodeId);
-  }
 
   // 변경된 파일만 재파싱 (I/O 절약의 핵심)
   const fileMap = new Map(files.map((f) => [f.relativePath, f]));
@@ -341,9 +321,7 @@ async function incrementalBuild(
 
   for (const [nodeId, rank] of pageranks) {
     const node = nodes.get(nodeId);
-    if (node) {
-      node.pagerank = rank;
-    }
+    if (node) node.pagerank = rank;
   }
 
   const graph: KnowledgeGraph = {

@@ -79,9 +79,7 @@ function buildSessionContext(cwd: string): string {
           : firstSentence;
       lines.push(`- Origin: ${origin}`);
     }
-    if (identity.greeting) {
-      lines.push(`- Greeting: ${identity.greeting}`);
-    }
+    if (identity.greeting) lines.push(`- Greeting: ${identity.greeting}`);
   }
 
   return lines.join('\n');
@@ -99,11 +97,10 @@ function readTopDomains(cwd: string, limit: number): DomainCount[] {
   try {
     const nodes = readCachedNodesArray<{ domain?: string }>(cwd);
     const counts = new Map<string, number>();
-    for (const node of nodes) {
-      if (typeof node.domain === 'string' && node.domain) {
+    for (const node of nodes)
+      if (typeof node.domain === 'string' && node.domain)
         counts.set(node.domain, (counts.get(node.domain) ?? 0) + 1);
-      }
-    }
+
     return [...counts.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, limit)
@@ -128,9 +125,7 @@ export function injectContext(input: UserPromptSubmitInput): HookOutput {
   const sessionId = input.session_id ?? '';
 
   // Gate: skip if not a maencof vault
-  if (!isMaencofVault(cwd)) {
-    return { continue: true };
-  }
+  if (!isMaencofVault(cwd)) return { continue: true };
 
   // TURN CONTEXT (every prompt)
   let turnContext = readTurnContext(cwd);

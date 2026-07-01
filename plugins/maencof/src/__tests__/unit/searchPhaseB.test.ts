@@ -61,9 +61,8 @@ function buildGraphWithIndex(
     Map<ReturnType<typeof toNodeId>, number>
   >();
   for (const edge of edges) {
-    if (!edgeWeightMap.has(edge.from)) {
-      edgeWeightMap.set(edge.from, new Map());
-    }
+    if (!edgeWeightMap.has(edge.from)) edgeWeightMap.set(edge.from, new Map());
+
     edgeWeightMap.get(edge.from)!.set(edge.to, edge.weight);
   }
 
@@ -230,12 +229,11 @@ describe('B1: Adaptive SA Parameters', () => {
       'chain-d.md',
       'chain-e.md',
     ];
-    for (const id of ids) {
+    for (const id of ids)
       nodes.set(
         toNodeId(id),
         makeNode(id, Layer.L2_DERIVED, { title: `Node ${id}` }),
       );
-    }
 
     const edges = [
       makeEdge('chain-a.md', 'chain-b.md', 0.8),
@@ -266,7 +264,7 @@ describe('B1: Adaptive SA Parameters', () => {
   it('weak keyword → full depth 탐색 유지', () => {
     const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
     const ids = ['w-a.md', 'w-b.md', 'w-c.md', 'w-d.md'];
-    for (const id of ids) {
+    for (const id of ids)
       nodes.set(
         toNodeId(id),
         makeNode(id, Layer.L2_DERIVED, {
@@ -274,7 +272,6 @@ describe('B1: Adaptive SA Parameters', () => {
           tags: ['weakprefix-something'],
         }),
       );
-    }
 
     const edges = [
       makeEdge('w-a.md', 'w-b.md', 0.8),

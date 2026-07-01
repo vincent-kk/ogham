@@ -44,9 +44,7 @@ export function processSetup(input: SessionStartInput): HookOutput {
     // Phase 1: Init — ensure cache directory + enable file logging
     const cacheDir = getCacheDir(safeCwd);
     setLogDir(cacheDir);
-    if (!existsSync(cacheDir)) {
-      mkdirSync(cacheDir, { recursive: true });
-    }
+    if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
 
     let isFca = isFcaProject(safeCwd);
 
@@ -77,7 +75,7 @@ export function processSetup(input: SessionStartInput): HookOutput {
     // Only inject context for FCA projects to minimize token usage.
     // Rule doc deployment is intentionally skipped here — the setup
     // skill is the single source of writes to `.claude/rules/`.
-    if (isFca) {
+    if (isFca)
       return {
         continue: true,
         hookSpecificOutput: {
@@ -85,7 +83,6 @@ export function processSetup(input: SessionStartInput): HookOutput {
           additionalContext: `[filid] Session initialized. FCA project: yes. Cache: ${cacheDir}.`,
         },
       };
-    }
 
     return { continue: true };
   } catch (e) {

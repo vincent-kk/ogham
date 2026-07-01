@@ -37,12 +37,11 @@ export function buildSpikeBanner(cwd: string): string | null {
       `review-stage security rules unchanged.`,
   ];
 
-  if (elapsedDays !== null && elapsedDays >= SPIKE_TIMEBOX_DAYS) {
+  if (elapsedDays !== null && elapsedDays >= SPIKE_TIMEBOX_DAYS)
     lines.push(
       `[filid:spike] ⚠ TIMEBOX EXCEEDED — harvest accuracy degrades as the ` +
         `diff grows; run /filid:harvest now.`,
     );
-  }
 
   const manifest = readHarvestManifest(cwd, branch);
   if (manifest === null) {
@@ -66,25 +65,24 @@ export function buildSpikeBanner(cwd: string): string | null {
       manifest.head_sha === undefined ||
       headSha === null ||
       manifest.head_sha !== headSha
-    ) {
+    )
       lines.push(
         `[filid:spike] Harvest manifest STALE — head moved past ` +
           `${manifest.head_sha?.slice(0, 7) ?? '?'}. Re-run /filid:harvest ` +
           `before merge-track entry.`,
       );
-    } else if (expired) {
+    else if (expired)
       lines.push(
         `[filid:spike] Harvest manifest EXPIRED — sealed more than ` +
           `${SPIKE_TIMEBOX_DAYS}d ago; review/pipeline treat it as ` +
           `unharvested. Re-run /filid:harvest before merge-track entry.`,
       );
-    } else {
+    else
       lines.push(
         `[filid:spike] Harvest manifest current (head ` +
           `${headSha.slice(0, 7)}). Finalize spike disposal (discard by ` +
           `default, or promote); any new commit invalidates the manifest.`,
       );
-    }
   }
 
   return lines.join('\n');

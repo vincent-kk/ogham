@@ -64,7 +64,7 @@ export async function discover(
   const file = resolveCacheFile(opts);
   const cache = opts.refresh ? {} : readCache(file);
   const cached = cache[bin];
-  if (cached) {
+  if (cached)
     return {
       bin,
       available: cached.available,
@@ -72,7 +72,6 @@ export async function discover(
       version: cached.version,
       installHint: cached.available ? undefined : installHints(bin),
     };
-  }
 
   const found = await which(bin, { nothrow: true });
 

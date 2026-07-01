@@ -24,9 +24,8 @@ export function taskList(md: MarkdownIt): void {
       const checked = match[1] !== " ";
 
       const first = inline.children?.[0];
-      if (first?.type === "text") {
+      if (first?.type === "text")
         first.content = first.content.replace(TASK_RE, "");
-      }
 
       const checkbox = new state.Token("task_checkbox", "span", 0);
       checkbox.attrSet(

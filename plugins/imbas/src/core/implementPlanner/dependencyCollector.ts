@@ -38,7 +38,7 @@ export function collectGraph(
     }
   }
 
-  if (devplan) {
+  if (devplan)
     for (const task of devplan.tasks) {
       if (!idSet.has(task.id)) continue;
       for (const blockedId of task.blocks) {
@@ -51,7 +51,6 @@ export function collectGraph(
         });
       }
     }
-  }
 
   return { nodes, edges };
 }
@@ -61,13 +60,12 @@ function collectNodes(
   devplan: DevplanManifest | null,
 ): CollectedNode[] {
   const nodes: CollectedNode[] = [];
-  for (const story of stories.stories) {
+  for (const story of stories.stories)
     nodes.push({ id: story.id, kind: 'Story', issue_ref: story.issue_ref });
-  }
-  if (devplan) {
-    for (const task of devplan.tasks) {
+
+  if (devplan)
+    for (const task of devplan.tasks)
       nodes.push({ id: task.id, kind: 'Task', issue_ref: task.issue_ref });
-    }
-  }
+
   return nodes;
 }

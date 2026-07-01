@@ -123,7 +123,7 @@ export async function executeQuery(
   if (count > UID_HARD_CAP) {
     const strategy = input.capStrategy ?? DEFAULT_CAP_STRATEGY;
 
-    if (strategy === CapStrategy.ABORT) {
+    if (strategy === CapStrategy.ABORT)
       return {
         perQuery: {
           query: query.term,
@@ -144,7 +144,6 @@ export async function executeQuery(
           query: query.term,
         },
       };
-    }
 
     if (strategy === CapStrategy.WARN) {
       capped = true;

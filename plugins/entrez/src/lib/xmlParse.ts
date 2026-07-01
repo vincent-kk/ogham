@@ -59,11 +59,11 @@ export function collectText(node: unknown): string {
   if (typeof node === "string") return node;
   if (typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(collectText).join(" ");
-  if (typeof node === "object") {
+  if (typeof node === "object")
     return Object.entries(node as Record<string, unknown>)
       .filter(([key]) => !key.startsWith("@_"))
       .map(([, value]) => collectText(value))
       .join(" ");
-  }
+
   return "";
 }

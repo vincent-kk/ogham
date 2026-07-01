@@ -29,14 +29,10 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   const safeCwd = validateCwd(input.cwd);
   if (safeCwd === null) return { continue: true };
 
-  if (!isFcaProject(safeCwd)) {
-    return { continue: true };
-  }
+  if (!isFcaProject(safeCwd)) return { continue: true };
 
   const rawPath = input.tool_input.file_path ?? input.tool_input.path ?? '';
-  if (!rawPath) {
-    return { continue: true };
-  }
+  if (!rawPath) return { continue: true };
 
   // Resolve absolute file path
   const filePath = path.isAbsolute(rawPath)
@@ -57,9 +53,8 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
       path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
     if (fcaMap.intents.includes(relDir)) {
       // Already visited — only update reads + map block
-      if (!fcaMap.reads.includes(relDir)) {
-        fcaMap.reads.push(relDir);
-      }
+      if (!fcaMap.reads.includes(relDir)) fcaMap.reads.push(relDir);
+
       const mapBlock = buildMapBlock(fcaMap.reads, relDir, fcaMap.intents);
       writeFractalMap(safeCwd, sessionId, fcaMap);
       return mapBlock.trim()
@@ -72,25 +67,20 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   }
 
   const chainResult = buildChain(filePath);
-  if (!chainResult) {
-    return { continue: true };
-  }
+  if (!chainResult) return { continue: true };
 
   const { boundary, chain, intents, details } = chainResult;
 
   // Cache boundary if not already cached
-  if (cachedBoundary === null) {
+  if (cachedBoundary === null)
     writeBoundary(safeCwd, sessionId, fileDir, boundary);
-  }
 
   // Relative paths for display
   const relDir = path.relative(boundary, fileDir).replace(/\\/g, '/') || '.';
   const relFile = path.relative(boundary, filePath).replace(/\\/g, '/');
 
   // Add to reads (dedup)
-  if (!fcaMap.reads.includes(relDir)) {
-    fcaMap.reads.push(relDir);
-  }
+  if (!fcaMap.reads.includes(relDir)) fcaMap.reads.push(relDir);
 
   const isFirstVisit = !fcaMap.intents.includes(relDir);
   const guideNeeded = !hasGuideInjected(sessionId, safeCwd);
@@ -99,36 +89,30 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
 
   if (isFirstVisit) {
     fcaMap.intents.push(relDir);
-    if (details.get(fileDir)) {
-      if (!fcaMap.details.includes(relDir)) {
-        fcaMap.details.push(relDir);
-      }
-    }
+    if (details.get(fileDir))
+      if (!fcaMap.details.includes(relDir)) fcaMap.details.push(relDir);
 
     // Find INTENT.md: current dir first, then walk up chain to owning fractal
     let intentAbsPath: string | undefined;
     let ownerDir = fileDir;
 
-    if (existsSync(path.join(fileDir, 'INTENT.md'))) {
+    if (existsSync(path.join(fileDir, 'INTENT.md')))
       intentAbsPath = path.join(fileDir, 'INTENT.md');
-    } else {
-      for (let i = 1; i < chain.length; i++) {
+    else
+      for (let i = 1; i < chain.length; i++)
         if (intents.get(chain[i])) {
           intentAbsPath = path.join(chain[i], 'INTENT.md');
           ownerDir = chain[i];
           break;
         }
-      }
-    }
 
     let intentContent: string | undefined;
-    if (intentAbsPath) {
+    if (intentAbsPath)
       try {
         intentContent = readFileSync(intentAbsPath, 'utf-8');
       } catch {
         // ignore
       }
-    }
 
     // Mark owning fractal as visited too (if different from fileDir)
     // This prevents re-inlining when sibling organs or the owner itself are visited later
@@ -136,9 +120,8 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
       path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
     const ownerAlreadyVisited =
       ownerDir !== fileDir && fcaMap.intents.includes(ownerRelDir);
-    if (ownerDir !== fileDir && !ownerAlreadyVisited) {
+    if (ownerDir !== fileDir && !ownerAlreadyVisited)
       fcaMap.intents.push(ownerRelDir);
-    }
 
     // Only build ctx block if there's actual intent content or chain context
     // Skip if the owning fractal was already inlined by a sibling organ visit
@@ -172,9 +155,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   writeFractalMap(safeCwd, sessionId, fcaMap);
 
   const additionalContext = blocks.join('\n');
-  if (!additionalContext.trim()) {
-    return { continue: true };
-  }
+  if (!additionalContext.trim()) return { continue: true };
 
   return {
     continue: true,

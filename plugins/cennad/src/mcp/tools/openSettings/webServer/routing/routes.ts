@@ -47,18 +47,16 @@ export function createRouteHandler(
       sendJson(res, 500, { success: false, message });
     };
 
-    if (path === '/' && req.method === 'GET') {
+    if (path === '/' && req.method === 'GET')
       handleGetRoot(ctx, res).catch(onError);
-    } else if (path === '/config' && req.method === 'GET') {
+    else if (path === '/config' && req.method === 'GET')
       handleGetConfig(ctx, res).catch(onError);
-    } else if (path === '/provider-status' && req.method === 'GET') {
+    else if (path === '/provider-status' && req.method === 'GET')
       handleGetProviderStatus(res).catch(onError);
-    } else if (path === '/save' && req.method === 'POST') {
+    else if (path === '/save' && req.method === 'POST')
       handleSave(ctx, req, res).catch(onError);
-    } else if (path === '/close' && req.method === 'POST') {
+    else if (path === '/close' && req.method === 'POST')
       handleClose(ctx, res).catch(onError);
-    } else {
-      sendJson(res, 404, { success: false, message: 'Not found' });
-    }
+    else sendJson(res, 404, { success: false, message: 'Not found' });
   };
 }

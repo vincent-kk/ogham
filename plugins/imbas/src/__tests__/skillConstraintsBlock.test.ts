@@ -58,9 +58,9 @@ const FORBIDDEN_BODY_TOKENS = [
 
 function readSkillMd(skill: string): string {
   const path = join(SKILLS_DIR, skill, 'SKILL.md');
-  if (!existsSync(path)) {
+  if (!existsSync(path))
     throw new Error(`SKILL.md not found for skill: ${skill}`);
-  }
+
   return readFileSync(path, 'utf8');
 }
 
@@ -133,12 +133,11 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       const content = readSkillMd(skill);
       const body = stripFrontmatter(content);
       const bodyOutsideAnchor = stripConstraintsBlock(body);
-      for (const token of FORBIDDEN_BODY_TOKENS) {
+      for (const token of FORBIDDEN_BODY_TOKENS)
         expect(
           bodyOutsideAnchor,
           `${skill}: SKILL.md body contains forbidden tracker token "${token}" outside the anchor block; move it into references/<provider>/**`,
         ).not.toContain(token);
-      }
     },
   );
 });

@@ -70,12 +70,9 @@ function makeGraph(
     ReturnType<typeof toNodeId>,
     ReturnType<typeof toNodeId>[]
   >();
-  for (const id of nodeMap.keys()) {
-    adjacencyList.set(id, []);
-  }
-  for (const edge of edges) {
-    adjacencyList.get(edge.from)?.push(edge.to);
-  }
+  for (const id of nodeMap.keys()) adjacencyList.set(id, []);
+
+  for (const edge of edges) adjacencyList.get(edge.from)?.push(edge.to);
 
   return {
     nodes: nodeMap,

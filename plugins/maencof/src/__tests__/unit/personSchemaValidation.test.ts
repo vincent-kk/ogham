@@ -88,7 +88,7 @@ describe('PersonSchema', () => {
       'mentee',
       'acquaintance',
     ];
-    for (const type of validTypes) {
+    for (const type of validTypes)
       it(`relationship_type '${type}'는 유효하다`, () => {
         const result = PersonSchema.safeParse({
           name: 'Alice',
@@ -97,7 +97,6 @@ describe('PersonSchema', () => {
         });
         expect(result.success).toBe(true);
       });
-    }
 
     it('알 수 없는 relationship_type은 실패한다', () => {
       const result = PersonSchema.safeParse({

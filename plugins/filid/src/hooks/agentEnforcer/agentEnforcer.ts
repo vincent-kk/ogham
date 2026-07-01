@@ -25,9 +25,7 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
 
   // Security: validate payload cwd before any fs / execSync usage downstream.
   const safeCwd = validateCwd(input.cwd);
-  if (safeCwd === null) {
-    return { continue: true };
-  }
+  if (safeCwd === null) return { continue: true };
 
   // 1. filid agent role restrictions + language tag
   const restriction = ROLE_RESTRICTIONS[agentType];
@@ -43,13 +41,11 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   }
 
   // 2. Skip workflow guidance for non-FCA projects
-  if (!isFcaProject(safeCwd)) {
-    return { continue: true };
-  }
+  if (!isFcaProject(safeCwd)) return { continue: true };
 
   // 3. Planning agents: inject development workflow + language tag
   const langTag = buildLangTag(safeCwd);
-  if (PLANNING_AGENT_RE.test(agentType) || agentType === 'Plan') {
+  if (PLANNING_AGENT_RE.test(agentType) || agentType === 'Plan')
     return {
       continue: true,
       hookSpecificOutput: {
@@ -57,10 +53,9 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
         additionalContext: `${PLANNING_GUIDANCE}\n${langTag}`,
       },
     };
-  }
 
   // 4. Implementation agents: inject pre-implementation reminder + language tag
-  if (EXECUTOR_AGENT_RE.test(agentType) || agentType === 'general-purpose') {
+  if (EXECUTOR_AGENT_RE.test(agentType) || agentType === 'general-purpose')
     return {
       continue: true,
       hookSpecificOutput: {
@@ -68,7 +63,6 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
         additionalContext: `${IMPLEMENTATION_REMINDER}\n${langTag}`,
       },
     };
-  }
 
   return { continue: true };
 }

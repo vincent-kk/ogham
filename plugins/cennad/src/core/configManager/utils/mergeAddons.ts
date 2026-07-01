@@ -41,7 +41,7 @@ export function mergeAddons(
     };
   }
 
-  if (isPlainObject(legacyAntigravityYoutube)) {
+  if (isPlainObject(legacyAntigravityYoutube))
     return {
       youtube: {
         enabled: asBool(legacyAntigravityYoutube.enabled, false),
@@ -49,7 +49,6 @@ export function mergeAddons(
         targets: { codex: false, antigravity: true },
       },
     };
-  }
 
   return {
     youtube: {

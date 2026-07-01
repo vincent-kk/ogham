@@ -158,14 +158,10 @@ describe('fractal-init pipeline', () => {
 
     // Organ directories should not have INTENT.md
     const components = tree.nodes.get('/project/auth/components');
-    if (components) {
-      expect(components.hasIntentMd).toBe(false);
-    }
+    if (components) expect(components.hasIntentMd).toBe(false);
 
     const utils = tree.nodes.get('/project/auth/utils');
-    if (utils) {
-      expect(utils.hasIntentMd).toBe(false);
-    }
+    if (utils) expect(utils.hasIntentMd).toBe(false);
   });
 
   describe('post-correction loop — hasIndex nested fractal detection', () => {

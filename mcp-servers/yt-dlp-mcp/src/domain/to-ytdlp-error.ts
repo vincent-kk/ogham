@@ -28,20 +28,18 @@ export function toYtDlpError(value: unknown): YtDlpMcpError {
       return new YtDlpMcpError(ErrorCode.TIMEOUT, 'yt-dlp timed out', {
         cause: value,
       });
-    if (err.code === 'ENOENT') {
+    if (err.code === 'ENOENT')
       return new YtDlpMcpError(
         ErrorCode.BINARY_UNAVAILABLE,
         'yt-dlp binary not found',
         { cause: value },
       );
-    }
 
     const text = err.stderr || err.shortMessage || err.message;
-    if (typeof text === 'string' && text.length > 0) {
+    if (typeof text === 'string' && text.length > 0)
       return new YtDlpMcpError(classifyYtDlpError(text), firstLine(text), {
         cause: value,
       });
-    }
   }
 
   if (value instanceof Error)

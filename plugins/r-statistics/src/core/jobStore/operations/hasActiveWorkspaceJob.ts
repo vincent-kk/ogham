@@ -12,8 +12,8 @@ const ACTIVE: ReadonlySet<JobStatus> = new Set([
  */
 export function hasActiveWorkspaceJob(workspaceId: string): boolean {
   if (!workspaceId) return false;
-  for (const job of jobs.values()) {
+  for (const job of jobs.values())
     if (job.workspaceId === workspaceId && ACTIVE.has(job.status)) return true;
-  }
+
   return false;
 }

@@ -34,9 +34,8 @@ export async function handleLcaResolve(
 ): Promise<LcaResolveResult> {
   const input = args as LcaResolveInput;
 
-  if (!input.path || !input.moduleA || !input.moduleB) {
+  if (!input.path || !input.moduleA || !input.moduleB)
     throw new Error('path, moduleA, and moduleB are required');
-  }
 
   const tree = await scanProject(input.path);
 
@@ -48,19 +47,17 @@ export async function handleLcaResolve(
     ? input.moduleB
     : path.join(input.path, input.moduleB);
 
-  if (!tree.nodes.has(absA)) {
+  if (!tree.nodes.has(absA))
     throw new Error(`moduleA not found in fractal tree: ${absA}`);
-  }
-  if (!tree.nodes.has(absB)) {
+
+  if (!tree.nodes.has(absB))
     throw new Error(`moduleB not found in fractal tree: ${absB}`);
-  }
 
   const lcaNode = findLCA(tree, absA, absB);
-  if (!lcaNode) {
+  if (!lcaNode)
     throw new Error(
       `Could not determine LCA for ${input.moduleA} and ${input.moduleB}`,
     );
-  }
 
   const distanceA = distanceBetween(absA, lcaNode.path);
   const distanceB = distanceBetween(absB, lcaNode.path);

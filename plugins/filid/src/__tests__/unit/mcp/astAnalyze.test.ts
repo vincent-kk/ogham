@@ -131,10 +131,9 @@ describe('handleAstAnalyze', () => {
         expect(result.error).toBeTypeOf('string');
         expect(result.error).toContain('@ast-grep/napi');
         expect(result.sgLoadError).toBeTypeOf('string');
-      } else {
+      } else
         // @ast-grep/napi is installed — valid result is also acceptable
         expect(result.imports).toBeDefined();
-      }
     });
 
     it('error message includes installation hint when ast-grep unavailable', async () => {
@@ -147,10 +146,9 @@ describe('handleAstAnalyze', () => {
       if (isAstAnalyzeError(result)) {
         expect(result.error).toContain('npm install');
         expect(result.error).toContain('@ast-grep/napi');
-      } else {
+      } else
         // @ast-grep/napi available — check valid shape
         expect(result.fileTotal).toBeDefined();
-      }
     });
 
     it('result always has a deterministic shape (error OR valid result)', async () => {

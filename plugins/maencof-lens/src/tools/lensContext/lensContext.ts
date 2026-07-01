@@ -32,11 +32,10 @@ export async function handleLensContext(
     vaultPath,
   );
 
-  if ("error" in result) {
+  if ("error" in result)
     return {
       error: "Vault index not available. Run kg_build in a maencof session.",
     };
-  }
 
   // Post-filter: remove context items from excluded layers
   // Note: handleKgContext does not support layerFilter natively (v1 limitation)

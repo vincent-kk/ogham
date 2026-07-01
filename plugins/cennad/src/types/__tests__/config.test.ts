@@ -45,7 +45,7 @@ describe('ConfigSchema', () => {
   });
 
   it('rejects claude permission modes that can stall headless dispatch', () => {
-    for (const permissionMode of ['default', 'plan']) {
+    for (const permissionMode of ['default', 'plan'])
       expect(() =>
         ConfigSchema.parse({
           ...DEFAULT_CONFIG,
@@ -55,7 +55,6 @@ describe('ConfigSchema', () => {
           },
         }),
       ).toThrow();
-    }
   });
 
   it('rejects unknown codex sandbox mode', () => {
@@ -99,14 +98,13 @@ describe('ConfigSchema', () => {
   });
 
   it('accepts each recency level value', () => {
-    for (const level of ['off', 'auto', 'strict'] as const) {
+    for (const level of ['off', 'auto', 'strict'] as const)
       expect(() =>
         ConfigSchema.parse({
           ...DEFAULT_CONFIG,
           recency_factor: { codex: level, antigravity: level, claude: level },
         }),
       ).not.toThrow();
-    }
   });
 
   it('rejects missing default_tier', () => {

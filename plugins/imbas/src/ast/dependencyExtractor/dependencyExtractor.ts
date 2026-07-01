@@ -51,9 +51,7 @@ function stripQuotes(s: string): string {
 function walk(node: SgNode, fn: (n: SgNode) => void): void {
   fn(node);
   const children = node.children?.();
-  if (children) {
-    for (const child of children) walk(child, fn);
-  }
+  if (children) for (const child of children) walk(child, fn);
 }
 
 function getCallee(node: SgNode): string | null {
@@ -82,18 +80,16 @@ function extractImports(stmt: SgNode): ImportInfo | null {
       const nameNode = node
         .children()
         .find((c: SgNode) => c.kind() === 'identifier');
-      if (nameNode && !specifiers.includes(nameNode.text())) {
+      if (nameNode && !specifiers.includes(nameNode.text()))
         specifiers.push(nameNode.text());
-      }
     }
     // namespace import: * as foo
     if (k === 'namespace_import') {
       const nameNode = node
         .children()
         .find((c: SgNode) => c.kind() === 'identifier');
-      if (nameNode && !specifiers.includes(nameNode.text())) {
+      if (nameNode && !specifiers.includes(nameNode.text()))
         specifiers.push(nameNode.text());
-      }
     }
   });
 
@@ -105,9 +101,8 @@ function extractImports(stmt: SgNode): ImportInfo | null {
     const defaultId = importClause
       .children()
       .find((c: SgNode) => c.kind() === 'identifier');
-    if (defaultId && !specifiers.includes(defaultId.text())) {
+    if (defaultId && !specifiers.includes(defaultId.text()))
       specifiers.push(defaultId.text());
-    }
   }
 
   const sourceNode = stmt.children().find((c: SgNode) => c.kind() === 'string');
@@ -124,8 +119,8 @@ function extractExports(stmt: SgNode): ExportInfo[] {
   const exportClause = children.find(
     (c: SgNode) => c.kind() === 'export_clause',
   );
-  if (exportClause) {
-    for (const spec of exportClause.children()) {
+  if (exportClause)
+    for (const spec of exportClause.children())
       if (spec.kind() === 'export_specifier') {
         const nameNode = spec
           .children()
@@ -133,8 +128,6 @@ function extractExports(stmt: SgNode): ExportInfo[] {
         if (nameNode)
           results.push({ name: nameNode.text(), type: 'specifier' });
       }
-    }
-  }
 
   // export function foo() {}
   const funcDecl = children.find(
@@ -163,16 +156,14 @@ function extractExports(stmt: SgNode): ExportInfo[] {
     (c: SgNode) =>
       c.kind() === 'lexical_declaration' || c.kind() === 'variable_declaration',
   );
-  if (lexDecl) {
-    for (const d of lexDecl.children()) {
+  if (lexDecl)
+    for (const d of lexDecl.children())
       if (d.kind() === 'variable_declarator') {
         const nameNode = d
           .children()
           .find((c: SgNode) => c.kind() === 'identifier');
         if (nameNode) results.push({ name: nameNode.text(), type: 'const' });
       }
-    }
-  }
 
   // export type Foo = ...
   const typeAlias = children.find(
@@ -198,9 +189,8 @@ function extractExports(stmt: SgNode): ExportInfo[] {
 
   // export default ...
   const text = stmt.text();
-  if (text.includes('export default') && results.length === 0) {
+  if (text.includes('export default') && results.length === 0)
     results.push({ name: 'default', type: 'default' });
-  }
 
   return results;
 }
@@ -219,13 +209,12 @@ export async function extractDependencies(
   filePath = 'anonymous.ts',
 ): Promise<DependencyInfo | DependencyError> {
   const sg = await getSgModule();
-  if (!sg) {
+  if (!sg)
     return {
       error:
         '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
       sgLoadError: getSgLoadError(),
     };
-  }
 
   try {
     const ext = filePath.includes('.')
@@ -247,9 +236,7 @@ export async function extractDependencies(
         if (info) imports.push(info);
       }
 
-      if (kind === 'export_statement') {
-        exports.push(...extractExports(stmt));
-      }
+      if (kind === 'export_statement') exports.push(...extractExports(stmt));
     }
 
     // Count call expressions across the full AST
@@ -258,9 +245,7 @@ export async function extractDependencies(
         const funcChild = node.children()[0];
         if (funcChild) {
           const callee = getCallee(funcChild);
-          if (callee) {
-            callCounts.set(callee, (callCounts.get(callee) ?? 0) + 1);
-          }
+          if (callee) callCounts.set(callee, (callCounts.get(callee) ?? 0) + 1);
         }
       }
     });

@@ -15,9 +15,8 @@ export async function handleConfigGet(input: ConfigGetInput) {
   const cwd = process.cwd();
   const config = await loadConfig(cwd);
 
-  if (input.field) {
+  if (input.field)
     return { field: input.field, value: getConfigValue(config, input.field) };
-  }
 
   return config;
 }

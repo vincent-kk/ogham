@@ -16,7 +16,7 @@ export function checkIndexBarrelPattern(context: RuleContext): RuleViolation[] {
     barrelPattern &&
     !barrelPattern.isPureBarrel &&
     barrelPattern.declarationCount > 0
-  ) {
+  )
     return [
       {
         ruleId: BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN,
@@ -27,6 +27,6 @@ export function checkIndexBarrelPattern(context: RuleContext): RuleViolation[] {
           'Move direct declarations into separate files and re-export them from index.ts.',
       },
     ];
-  }
+
   return [];
 }

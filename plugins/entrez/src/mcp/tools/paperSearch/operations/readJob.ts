@@ -16,9 +16,9 @@ export async function readJob(
     cursor,
     path: resolveJobPath(jobId, options.dir),
   });
-  if (poll.result === undefined) {
+  if (poll.result === undefined)
     throw new Error(`${Messages.JOB_NOT_FOUND}: results not ready`);
-  }
+
   const output = poll.result as PaperSearchOutput;
   return { ...output, cursor: poll.cursor };
 }

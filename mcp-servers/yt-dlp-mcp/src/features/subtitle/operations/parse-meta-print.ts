@@ -5,9 +5,8 @@ import { normalizeUploadDate } from '@/utils/normalize-date.js';
 import { parseVideoId } from '@/utils/parse-video-id.js';
 
 function toInt(value: string | undefined): number | undefined {
-  if (!value || value === 'NA') {
-    return undefined;
-  }
+  if (!value || value === 'NA') return undefined;
+
   const n = Number.parseInt(value, 10);
   return Number.isFinite(n) ? n : undefined;
 }

@@ -74,9 +74,9 @@ export async function handleCollectFeedback(
   };
 
   if (result.kind === SettleKind.Complete) return deliver(result.feedback);
-  if (result.kind === SettleKind.Closing) {
+  if (result.kind === SettleKind.Closing)
     throw new Error("closed: server is shutting down");
-  }
+
   if (meta.status === SessionStatus.Closed) {
     // The in-memory buffer is gone (server restart or closeResolver), but a
     // complete submission is durable on disk — recover it instead of failing.

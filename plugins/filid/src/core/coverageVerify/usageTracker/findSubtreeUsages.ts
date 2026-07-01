@@ -47,12 +47,9 @@ export async function findSubtreeUsages(
   // Combine: root node + descendants + organ descendants (deduplicate)
   const allNodes = new Map<string, typeof rootNode>();
   allNodes.set(rootNode.path, rootNode);
-  for (const node of descendants) {
-    allNodes.set(node.path, node);
-  }
-  for (const node of organDescendants) {
-    allNodes.set(node.path, node);
-  }
+  for (const node of descendants) allNodes.set(node.path, node);
+
+  for (const node of organDescendants) allNodes.set(node.path, node);
 
   // For each node, iterate peerFiles
   for (const [nodePath, node] of allNodes) {

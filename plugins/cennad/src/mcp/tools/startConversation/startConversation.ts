@@ -32,7 +32,7 @@ export async function handleStartConversation(
   const config = await loadConfig();
   const sessionId = randomUUID();
 
-  if (!config.ratio[input.provider].enabled) {
+  if (!config.ratio[input.provider].enabled)
     return {
       status: 'failure',
       session_id: sessionId,
@@ -49,7 +49,6 @@ export async function handleStartConversation(
         ignored_options: [],
       },
     };
-  }
 
   const cwd = process.cwd();
   const tier: Tier = input.tier ?? config.default_tier[input.provider];
@@ -72,24 +71,24 @@ export async function handleStartConversation(
     spawnTimeoutMs: config.spawn_timeout_ms,
   };
   let result: DispatchResult;
-  if (input.provider === 'codex') {
+  if (input.provider === 'codex')
     result = await dispatchers.codex.start({
       ...base,
       flags: config.option_flags.codex,
     });
-  } else if (input.provider === 'antigravity') {
+  else if (input.provider === 'antigravity')
     result = await dispatchers.antigravity.start({
       ...base,
       flags: config.option_flags.antigravity,
       modelMap: config.model_map.antigravity,
     });
-  } else if (input.provider === 'claude') {
+  else if (input.provider === 'claude')
     result = await dispatchers.claude.start({
       ...base,
       flags: config.option_flags.claude,
       modelMap: config.model_map.claude,
     });
-  } else {
+  else
     return {
       status: 'failure',
       session_id: sessionId,
@@ -106,7 +105,6 @@ export async function handleStartConversation(
         ignored_options: [],
       },
     };
-  }
 
   await createSession({
     sessionId,
@@ -123,7 +121,7 @@ export async function handleStartConversation(
     config.artifacts.enabled &&
     result.status === 'success' &&
     result.response !== null
-  ) {
+  )
     artifactPath = await writeArtifact({
       artifacts: config.artifacts,
       cwd,
@@ -138,7 +136,6 @@ export async function handleStartConversation(
       composedPrompt,
       response: result.response,
     });
-  }
 
   return buildResponse({
     sessionId,

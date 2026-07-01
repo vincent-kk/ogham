@@ -31,13 +31,12 @@ export async function handleOpenSettings(
   // throws.
   await pruneConfigFile();
 
-  if (currentServer) {
+  if (currentServer)
     return {
       url: currentServer.url,
       message: 'Reusing the existing cennad settings server',
       reused: true,
     };
-  }
 
   const handle = await startSettingsServer({
     settingsHtml: loadSettingsHtml(),

@@ -26,9 +26,9 @@ function settle(sessionId: string, value: SettleValue): void {
   const slot = slots.get(sessionId);
   if (!slot) return;
   clearTimeout(slot.timer);
-  if (slot.signal && slot.onAbort) {
+  if (slot.signal && slot.onAbort)
     slot.signal.removeEventListener("abort", slot.onAbort);
-  }
+
   slots.delete(sessionId);
   slot.resolve(value);
 }
@@ -80,8 +80,8 @@ export function closeResolver(sessionId: string): void {
 
 /** Settle every waiter as closing (graceful shutdown). */
 export function settleAllResolvers(): void {
-  for (const sessionId of [...slots.keys()]) {
+  for (const sessionId of [...slots.keys()])
     settle(sessionId, { kind: SettleKind.Closing });
-  }
+
   completeBuffer.clear();
 }

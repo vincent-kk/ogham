@@ -83,8 +83,8 @@ export function discoverRscript(): string | null {
 
   if (platform === Platform.Windows) return discoverWindows();
 
-  for (const candidate of COMMON_RSCRIPT_PATHS[platform]) {
+  for (const candidate of COMMON_RSCRIPT_PATHS[platform])
     if (isExecutableFile(candidate)) return candidate;
-  }
+
   return null;
 }

@@ -16,9 +16,7 @@ export function processContextInjector(
   const { cwd } = input;
   const imbasRoot = join(cwd, IMBAS_ROOT_DIRNAME);
 
-  if (!existsSync(imbasRoot)) {
-    return { continue: true };
-  }
+  if (!existsSync(imbasRoot)) return { continue: true };
 
   // Try to find active run
   try {

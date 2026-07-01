@@ -297,12 +297,10 @@ describe('cache-manager boundary/fmap extensions', () => {
     const cwd = '/proj/workspace';
     const sessionId = 'session-stress';
 
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 15; i++)
       writeBoundary(cwd, sessionId, `/dir/${i}`, `/boundary/${i}`);
-    }
 
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 15; i++)
       expect(readBoundary(cwd, sessionId, `/dir/${i}`)).toBe(`/boundary/${i}`);
-    }
   });
 });

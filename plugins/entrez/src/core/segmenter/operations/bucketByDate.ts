@@ -41,9 +41,8 @@ export function bucketByDate(
   const startMs = start.getTime();
   const endMs = end.getTime();
 
-  if (parts <= 1 || endMs <= startMs) {
+  if (parts <= 1 || endMs <= startMs)
     return [{ from: formatDate(start), to: formatDate(end) }];
-  }
 
   const totalDays = Math.floor((endMs - startMs) / DAY_MS) + 1;
   const effectiveParts = Math.min(parts, totalDays);

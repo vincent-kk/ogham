@@ -53,22 +53,20 @@ export async function handleAstGrepSearch(
 
   try {
     const sg = await getSgModule();
-    if (!sg) {
+    if (!sg)
       return {
         error: `@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi`,
         sgLoadError: getSgLoadError(),
       };
-    }
 
     const files = getFilesForLanguage(path, language);
 
-    if (files.length === 0) {
+    if (files.length === 0)
       return {
         message: `No ${language} files found in ${path}`,
         pattern,
         filesSearched: 0,
       };
-    }
 
     const results: string[] = [];
     let totalMatches = 0;
@@ -105,13 +103,12 @@ export async function handleAstGrepSearch(
       }
     }
 
-    if (results.length === 0) {
+    if (results.length === 0)
       return {
         message: `No matches found for pattern: ${pattern}\n\nSearched ${files.length} ${language} file(s) in ${path}\n\nTip: Ensure the pattern is a valid AST node. For example:\n- Use "function $NAME" not just "$NAME"\n- Use "console.log($X)" not "console.log"`,
         pattern,
         filesSearched: files.length,
       };
-    }
 
     return {
       matches: results,

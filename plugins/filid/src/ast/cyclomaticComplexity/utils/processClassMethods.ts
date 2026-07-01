@@ -11,7 +11,7 @@ export function processClassMethods(
     .find((c: SgNode) => c.kind() === 'class_body');
   if (!classBody) return;
 
-  for (const member of classBody.children()) {
+  for (const member of classBody.children())
     if (member.kind() === 'method_definition') {
       const nameNode = member
         .children()
@@ -19,9 +19,6 @@ export function processClassMethods(
       const body = member
         .children()
         .find((c: SgNode) => c.kind() === 'statement_block');
-      if (nameNode && body) {
-        perFunction.set(nameNode.text(), computeCC(body));
-      }
+      if (nameNode && body) perFunction.set(nameNode.text(), computeCC(body));
     }
-  }
 }

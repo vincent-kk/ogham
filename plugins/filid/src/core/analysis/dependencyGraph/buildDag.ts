@@ -12,14 +12,11 @@ export function buildDAG(edges: DependencyEdge[]): DependencyDAG {
     nodes.add(edge.from);
     nodes.add(edge.to);
 
-    if (!adjacency.has(edge.from)) {
-      adjacency.set(edge.from, []);
-    }
+    if (!adjacency.has(edge.from)) adjacency.set(edge.from, []);
+
     adjacency.get(edge.from)!.push(edge.to);
 
-    if (!adjacency.has(edge.to)) {
-      adjacency.set(edge.to, []);
-    }
+    if (!adjacency.has(edge.to)) adjacency.set(edge.to, []);
   }
 
   return { nodes, edges, adjacency };

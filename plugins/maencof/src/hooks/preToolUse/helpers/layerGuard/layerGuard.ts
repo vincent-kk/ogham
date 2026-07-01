@@ -31,16 +31,12 @@ export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
   const cwd = input.cwd ?? process.cwd();
 
   // Always pass through if not in a maencof vault
-  if (!isMaencofVault(cwd)) {
-    return { continue: true };
-  }
+  if (!isMaencofVault(cwd)) return { continue: true };
 
   const filePath = input.tool_input?.file_path ?? input.tool_input?.path ?? '';
-  if (!filePath) {
-    return { continue: true };
-  }
+  if (!filePath) return { continue: true };
 
-  if (isLayer1Path(filePath)) {
+  if (isLayer1Path(filePath))
     return {
       continue: false,
       reason: [
@@ -53,7 +49,6 @@ export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
         `  Valid change_reason: identity_evolution, error_correction, info_update, consolidation, reinterpretation`,
       ].join('\n'),
     };
-  }
 
   return { continue: true };
 }

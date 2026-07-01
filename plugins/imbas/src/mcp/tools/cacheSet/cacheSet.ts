@@ -18,9 +18,8 @@ export async function handleCacheSet(input: CacheSetInput) {
   const cwd = process.cwd();
   const cacheDir = getCacheDir(cwd, input.project_ref);
 
-  if (input.data === undefined) {
-    throw new Error('data is required');
-  }
+  if (input.data === undefined) throw new Error('data is required');
+
   await saveCache(cacheDir, input.cache_type, input.data);
 
   const cached_at = new Date().toISOString();

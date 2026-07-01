@@ -21,9 +21,8 @@ export function detectAppendOnly(
   if (newLines.length <= oldLines.length) return false;
 
   // All existing lines must remain identical
-  for (let i = 0; i < oldLines.length; i++) {
+  for (let i = 0; i < oldLines.length; i++)
     if (oldLines[i] !== newLines[i]) return false;
-  }
 
   return true;
 }
@@ -39,14 +38,13 @@ export function validateDetailMd(
   const violations: DocumentViolation[] = [];
 
   // Detect append-only (when previous content is provided)
-  if (oldContent !== undefined && detectAppendOnly(oldContent, content)) {
+  if (oldContent !== undefined && detectAppendOnly(oldContent, content))
     violations.push({
       rule: 'append-only',
       message:
         'DETAIL.md must not be append-only. Restructure and compress content instead of simply appending.',
       severity: 'error',
     });
-  }
 
   return {
     valid: violations.every((v) => v.severity !== 'error'),

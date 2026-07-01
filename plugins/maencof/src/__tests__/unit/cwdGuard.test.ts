@@ -11,11 +11,10 @@ describe('getVaultPath CWD guard', () => {
   const originalEnv = process.env['MAENCOF_VAULT_PATH'];
 
   afterEach(() => {
-    if (originalEnv !== undefined) {
+    if (originalEnv !== undefined)
       process.env['MAENCOF_VAULT_PATH'] = originalEnv;
-    } else {
-      delete process.env['MAENCOF_VAULT_PATH'];
-    }
+    else delete process.env['MAENCOF_VAULT_PATH'];
+
     vi.unstubAllEnvs();
   });
 
@@ -34,13 +33,12 @@ describe('getVaultPath CWD guard', () => {
     function getVaultPath(): string {
       const raw = process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
       const resolved = resolve(raw);
-      for (const prefix of BLOCKED_PREFIXES) {
-        if (resolved.startsWith(prefix)) {
+      for (const prefix of BLOCKED_PREFIXES)
+        if (resolved.startsWith(prefix))
           throw new Error(
             `전역 설정 경로에 대한 접근이 차단되었습니다: ${resolved}`,
           );
-        }
-      }
+
       return resolved;
     }
 
@@ -55,13 +53,12 @@ describe('getVaultPath CWD guard', () => {
 
     function getVaultPath(vault: string): string {
       const resolved = resolve(vault);
-      for (const prefix of BLOCKED_PREFIXES) {
-        if (resolved.startsWith(prefix)) {
+      for (const prefix of BLOCKED_PREFIXES)
+        if (resolved.startsWith(prefix))
           throw new Error(
             `전역 설정 경로에 대한 접근이 차단되었습니다: ${resolved}`,
           );
-        }
-      }
+
       return resolved;
     }
 
@@ -78,11 +75,9 @@ describe('getVaultPath CWD guard', () => {
 
     function getVaultPath(vault: string): string {
       const resolved = resolve(vault);
-      for (const prefix of BLOCKED_PREFIXES) {
-        if (resolved.startsWith(prefix)) {
-          throw new Error('blocked');
-        }
-      }
+      for (const prefix of BLOCKED_PREFIXES)
+        if (resolved.startsWith(prefix)) throw new Error('blocked');
+
       return resolved;
     }
 

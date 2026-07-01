@@ -17,15 +17,14 @@ export function serializeFrontmatter(item: DebtItem): string {
   ];
   const lines = fields.map((key) => {
     const value = item[key];
-    if (value === null || value === undefined) {
-      return `${key}: null`;
-    }
+    if (value === null || value === undefined) return `${key}: null`;
+
     if (
       typeof value === 'string' &&
       (value.includes(':') || value.includes('\n') || value.includes("'"))
-    ) {
+    )
       return `${key}: "${value.replace(/"/g, '\\"')}"`;
-    }
+
     return `${key}: ${value}`;
   });
   return `---\n${lines.join('\n')}\n---`;

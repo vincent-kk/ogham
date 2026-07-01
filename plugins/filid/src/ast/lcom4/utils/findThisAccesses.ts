@@ -11,9 +11,7 @@ export function findThisAccesses(bodyNode: SgNode): string[] {
       const prop = children.find(
         (c: SgNode) => c.kind() === 'property_identifier',
       );
-      if (obj && prop) {
-        accessed.add(prop.text());
-      }
+      if (obj && prop) accessed.add(prop.text());
     }
   });
   return [...accessed];

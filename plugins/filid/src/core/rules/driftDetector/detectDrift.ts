@@ -45,9 +45,8 @@ export function detectDrift(
     (a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity],
   );
 
-  if (options?.criticalOnly) {
+  if (options?.criticalOnly)
     items = items.filter((item) => item.severity === 'critical');
-  }
 
   const bySeverity: Record<DriftSeverity, number> = {
     critical: 0,
@@ -55,9 +54,7 @@ export function detectDrift(
     medium: 0,
     low: 0,
   };
-  for (const item of items) {
-    bySeverity[item.severity]++;
-  }
+  for (const item of items) bySeverity[item.severity]++;
 
   return {
     items,

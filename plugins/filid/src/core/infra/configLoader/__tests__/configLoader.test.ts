@@ -15,9 +15,8 @@ describe('writeConfig', () => {
   const tempDirs: string[] = [];
 
   afterEach(() => {
-    for (const dir of tempDirs.splice(0)) {
+    for (const dir of tempDirs.splice(0))
       rmSync(dir, { recursive: true, force: true });
-    }
   });
 
   it('writes .filid/config.json at the git root for subdirectory inputs', () => {
@@ -68,9 +67,8 @@ describe('initProject — language seeding', () => {
   const tempDirs: string[] = [];
 
   afterEach(() => {
-    for (const dir of tempDirs.splice(0)) {
+    for (const dir of tempDirs.splice(0))
       rmSync(dir, { recursive: true, force: true });
-    }
   });
 
   it('writes the provided language into the created config', () => {

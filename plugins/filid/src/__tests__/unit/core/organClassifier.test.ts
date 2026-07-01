@@ -43,9 +43,8 @@ describe('organ-classifier', () => {
         'assets',
         'constants',
       ];
-      for (const name of expected) {
+      for (const name of expected)
         expect(KNOWN_ORGAN_DIR_NAMES).toContain(name);
-      }
     });
 
     it('should include test infrastructure directory names not covered by pattern', () => {
@@ -57,9 +56,8 @@ describe('organ-classifier', () => {
         'fixtures',
         'e2e',
       ];
-      for (const name of nonPatternTestDirs) {
+      for (const name of nonPatternTestDirs)
         expect(KNOWN_ORGAN_DIR_NAMES).toContain(name);
-      }
     });
 
     it('should not include __*__ names (covered by isInfraOrgDirectoryByPattern)', () => {

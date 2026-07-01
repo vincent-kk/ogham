@@ -93,11 +93,11 @@ describe("runPaperSearch", () => {
       const q = url.searchParams;
       const term = q.get("term") ?? "";
       const retmax = Number(q.get("retmax") ?? "0");
-      if (term.includes(" AND (")) {
+      if (term.includes(" AND ("))
         return retmax === 0
           ? { body: esearchJson(5000, []) }
           : { body: esearchJson(5000, ["s1", "s2"]) };
-      }
+
       if (term.includes("huge")) return { body: esearchJson(25000, []) };
       if (url.pathname.endsWith("esummary.fcgi")) {
         const ids = (q.get("id") ?? "").split(",").filter(Boolean);

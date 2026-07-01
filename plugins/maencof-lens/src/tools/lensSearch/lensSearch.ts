@@ -34,11 +34,10 @@ export async function handleLensSearch(
     sub_layer: input.sub_layer as SubLayer | undefined,
   });
 
-  if ("error" in result) {
+  if ("error" in result)
     return {
       error: "Vault index not available. Run kg_build in a maencof session.",
     };
-  }
 
   return result as unknown as Record<string, unknown>;
 }

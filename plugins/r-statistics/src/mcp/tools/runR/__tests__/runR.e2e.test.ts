@@ -28,9 +28,9 @@ add_artifact("data.demo", "data", "demo.csv", "demo dataset")
 async function poll(jobId: string): Promise<RunROutput> {
   for (let i = 0; i < 50; i += 1) {
     const out = await handleGetRJob({ jobId });
-    if (out.status !== JobStatus.Running && out.status !== JobStatus.Queued) {
+    if (out.status !== JobStatus.Running && out.status !== JobStatus.Queued)
       return out;
-    }
+
     await new Promise((r) => setTimeout(r, 100));
   }
   throw new Error("job did not finish in time");
