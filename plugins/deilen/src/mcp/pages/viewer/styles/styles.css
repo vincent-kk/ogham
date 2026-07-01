@@ -1120,6 +1120,10 @@ button {
   margin-top: 20px;
 }
 
+.overlay-actions[hidden] {
+  display: none;
+}
+
 .confirm-actions {
   display: flex;
   gap: 10px;

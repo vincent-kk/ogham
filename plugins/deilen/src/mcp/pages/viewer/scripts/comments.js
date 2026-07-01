@@ -832,5 +832,8 @@ export function initComments(viewState) {
     const overlay = document.getElementById("overlay");
     if (overlay) overlay.hidden = true;
   });
+  document
+    .getElementById("overlay-close")
+    ?.addEventListener("click", dismissViewer);
   renderSidebar();
 }
