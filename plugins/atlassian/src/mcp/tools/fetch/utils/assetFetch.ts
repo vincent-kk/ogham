@@ -16,7 +16,7 @@ export async function handleAssetFetch(
   const savePath = validateSavePath(params.save_to_path);
 
   // Cache check: return existing file without HTTP request
-  if (!params.force) {
+  if (!params.force)
     try {
       const s = await fsStat(savePath);
       return {
@@ -27,7 +27,6 @@ export async function handleAssetFetch(
     } catch {
       /* not cached, proceed with download */
     }
-  }
 
   const response = await executeRequest(config, {
     method: "GET",

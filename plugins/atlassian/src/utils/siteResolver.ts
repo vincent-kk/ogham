@@ -16,18 +16,16 @@ export function resolveSiteConfig(
   baseUrl?: string,
   endpoint?: string,
 ): ServiceConfig {
-  if (sites.length === 0) {
+  if (sites.length === 0)
     throw new Error(`No ${service} sites configured. Run setup first.`);
-  }
 
   // Warn if mixing Cloud and On-Prem under same service (shared credentials may fail)
   const hasCloud = sites.some((s) => s.is_cloud);
   const hasOnPrem = sites.some((s) => !s.is_cloud);
-  if (hasCloud && hasOnPrem) {
+  if (hasCloud && hasOnPrem)
     console.warn(
       `[atlassian] ${service}: mixing Cloud and On-Prem sites with shared credentials may cause authentication failures.`,
     );
-  }
 
   // 1. Explicit base_url parameter
   if (baseUrl) {
@@ -49,9 +47,7 @@ export function resolveSiteConfig(
   }
 
   // 3. Single site → auto-select
-  if (sites.length === 1) {
-    return sites[0];
-  }
+  if (sites.length === 1) return sites[0];
 
   // 4. Ambiguous — multiple sites, no disambiguator
   throw new Error(

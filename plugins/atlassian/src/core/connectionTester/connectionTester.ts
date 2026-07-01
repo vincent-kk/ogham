@@ -17,9 +17,8 @@ function getTestEndpoint(
     return `/rest/api/${version}/myself`;
   }
   // Confluence — DC v1 단일 표준이므로 override 미적용
-  if (isCloud) {
-    return "/wiki/rest/api/space?limit=1";
-  }
+  if (isCloud) return "/wiki/rest/api/space?limit=1";
+
   return "/rest/api/space?limit=1";
 }
 
@@ -40,13 +39,12 @@ export async function testConnection(
   const endpoint = getTestEndpoint(service, env.is_cloud, api_version_override);
 
   const authPayload = buildAuthHeader(credentials, username);
-  if (!authPayload) {
+  if (!authPayload)
     return {
       service,
       success: false,
       message: "Invalid or missing credentials",
     };
-  }
 
   const clientConfig: HttpClientConfig = {
     base_url: env.base_url,
@@ -71,9 +69,8 @@ export async function testConnection(
       message: `Connected to ${service} (${env.is_cloud ? "Cloud" : "Server"})`,
       latency_ms,
     };
-    if (include_body) {
-      result.response_body = response.data;
-    }
+    if (include_body) result.response_body = response.data;
+
     return result;
   }
 

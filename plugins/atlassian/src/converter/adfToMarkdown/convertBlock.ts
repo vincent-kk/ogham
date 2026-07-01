@@ -55,9 +55,8 @@ export function convertBlock(node: AdfNode, indent: string = ""): string {
           const mediaType = (attrs.type as string) ?? "file";
           if (!fileName && !id) return "[media]";
           const label = fileName ?? id;
-          if (mediaType === "image") {
-            return `![${label}](attachment:${id})`;
-          }
+          if (mediaType === "image") return `![${label}](attachment:${id})`;
+
           return `[${label}](attachment:${id})`;
         })
         .join("\n");
@@ -73,9 +72,9 @@ export function convertBlock(node: AdfNode, indent: string = ""): string {
       return `<details>\n<summary>${title}</summary>\n\n${body}\n</details>`;
     }
     default:
-      if (content.length > 0) {
+      if (content.length > 0)
         return content.map((child) => convertBlock(child)).join("\n");
-      }
+
       return convertInline(node);
   }
 }

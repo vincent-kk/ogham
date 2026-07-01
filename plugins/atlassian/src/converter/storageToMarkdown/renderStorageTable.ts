@@ -20,9 +20,8 @@ function collectRows(
       continue;
     }
 
-    if (child.tag === "thead" || child.tag === "tbody") {
+    if (child.tag === "thead" || child.tag === "tbody")
       collectRows(child.children, rows, renderNode);
-    }
   }
 }
 

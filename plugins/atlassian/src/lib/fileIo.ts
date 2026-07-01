@@ -29,9 +29,8 @@ export async function readJson<T>(
     throw error;
   }
   const data = JSON.parse(content);
-  if (schema) {
-    return schema.parse(data);
-  }
+  if (schema) return schema.parse(data);
+
   return data as T;
 }
 

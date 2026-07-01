@@ -5,20 +5,22 @@ ADF 자동 변환, 바이너리 에셋 다운로드, Markdown→ADF/Storage/Wiki
 
 ## Structure
 
-| 파일 | 역할 |
-|------|------|
-| `fetch.ts` | `handleFetch` — 메서드별 분기, 유틸 조율 |
-| `index.ts` | 배럴 — `handleFetch` 재내보내기 |
-| `utils/assetFetch.ts` | 바이너리 파일 다운로드 및 파일시스템 캐싱 |
-| `utils/autoConvertAdf.ts` | GET 응답에서 ADF 필드를 Markdown으로 자동 변환 |
-| `utils/pickBodyFormat.ts` | service+apiVersion → ADF/Storage/Wiki 결정 |
-| `utils/renderByFormat.ts` | 선택된 포맷으로 markdown 렌더 |
-| `utils/convertBody.ts` | POST/PUT/PATCH body의 Markdown → wire 포맷 변환 |
+| 파일                      | 역할                                                          |
+| ------------------------- | ------------------------------------------------------------- |
+| `fetch.ts`                | `handleFetch` — 메서드별 분기, 유틸 조율                      |
+| `index.ts`                | 배럴 — `handleFetch` 재내보내기                               |
+| `utils/assetFetch.ts`     | 바이너리 파일 다운로드 및 파일시스템 캐싱                     |
+| `utils/autoConvertAdf.ts` | GET 응답에서 ADF 필드를 Markdown으로 자동 변환                |
+| `utils/pickBodyFormat.ts` | service+apiVersion → ADF/Storage/Wiki 결정                    |
+| `utils/renderByFormat.ts` | 선택된 포맷으로 markdown 렌더                                 |
+| `utils/convertBody.ts`    | POST/PUT/PATCH body의 Markdown → wire 포맷 변환               |
+| `utils/normalizeBody.ts`  | 문자열로 도착한 JSON body를 객체로 파싱 (harness 직렬화 대응) |
 
 ## Boundaries
 
 ### Always do
 
+- 원시 `body`는 `normalizeBody`로 정규화한 뒤 변환·전송한다
 - HTTP 전송은 `core/httpClient`의 `executeRequest`에 위임한다
 - GET + `save_to_path` 조합은 `assetFetch` 유틸로 라우팅한다
 - GET 응답의 ADF 필드는 `autoConvertAdf`로 자동 Markdown 변환한다

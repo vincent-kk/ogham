@@ -12,11 +12,10 @@ export function buildUrl(
   queryParams?: Record<string, string>,
 ): string {
   const url = new URL(joinUrl(baseUrl, endpoint));
-  if (queryParams) {
-    for (const [key, value] of Object.entries(queryParams)) {
+  if (queryParams)
+    for (const [key, value] of Object.entries(queryParams))
       url.searchParams.set(key, value);
-    }
-  }
+
   return url.toString();
 }
 
@@ -27,8 +26,7 @@ export function extractHostname(url: string): string {
 
 /** Detect Atlassian service type from endpoint path */
 export function detectService(endpoint: string): "jira" | "confluence" {
-  if (endpoint.includes("/wiki/") || endpoint.startsWith("/api/v2/")) {
+  if (endpoint.includes("/wiki/") || endpoint.startsWith("/api/v2/"))
     return "confluence";
-  }
   return "jira";
 }

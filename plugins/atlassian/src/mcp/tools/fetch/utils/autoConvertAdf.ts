@@ -14,9 +14,7 @@ export function autoConvertAdf(data: unknown): unknown {
       (field as Record<string, unknown>).type === "doc"
     ) {
       const markdown = adfToMarkdown(field);
-      if (markdown) {
-        obj[`${key}_markdown`] = markdown;
-      }
+      if (markdown) obj[`${key}_markdown`] = markdown;
     }
   }
 
@@ -24,17 +22,15 @@ export function autoConvertAdf(data: unknown): unknown {
     const body = obj.body as Record<string, unknown>;
     if (body.atlas_doc_format && typeof body.atlas_doc_format === "object") {
       const adf = body.atlas_doc_format as Record<string, unknown>;
-      if (typeof adf.value === "string") {
+      if (typeof adf.value === "string")
         try {
           const parsed = JSON.parse(adf.value as string);
           const markdown = adfToMarkdown(parsed);
-          if (markdown) {
+          if (markdown)
             (obj as Record<string, unknown>)["body_markdown"] = markdown;
-          }
         } catch {
           /* not valid JSON ADF */
         }
-      }
     }
   }
 

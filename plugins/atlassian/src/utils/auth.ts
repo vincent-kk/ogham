@@ -20,8 +20,7 @@ export function buildAuthHeader(
     }
   }
   const bearer = serviceCredentials.bearer;
-  if (bearer?.token) {
-    return { type: "bearer", value: `Bearer ${bearer.token}` };
-  }
+  if (bearer?.token) return { type: "bearer", value: `Bearer ${bearer.token}` };
+
   return null;
 }

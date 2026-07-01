@@ -49,11 +49,9 @@ async function startTestServer(
   const baseUrl = await new Promise<string>((resolve, reject) => {
     server.listen(0, "127.0.0.1", () => {
       const addr = server.address();
-      if (addr && typeof addr === "object") {
+      if (addr && typeof addr === "object")
         resolve(`http://127.0.0.1:${addr.port}`);
-      } else {
-        reject(new Error("주소를 가져올 수 없음"));
-      }
+      else reject(new Error("주소를 가져올 수 없음"));
     });
     server.on("error", reject);
   });
@@ -74,9 +72,7 @@ async function postJson(url: string, body: unknown): Promise<Response> {
 
 function extractSetupState(html: string): Record<string, unknown> {
   const match = html.match(/window\.__SETTINGS_STATE__\s*=\s*(\{[\s\S]*\});/);
-  if (!match) {
-    throw new Error("SETUP_STATE payload not found");
-  }
+  if (!match) throw new Error("SETUP_STATE payload not found");
 
   return JSON.parse(match[1]);
 }

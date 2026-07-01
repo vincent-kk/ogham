@@ -5,9 +5,7 @@ function parseAttributes(attrSource: string): Record<string, string> {
   const attrRe = /([\w:.-]+)\s*=\s*"([^"]*)"/g;
   let match: RegExpExecArray | null;
 
-  while ((match = attrRe.exec(attrSource)) !== null) {
-    attrs[match[1]] = match[2];
-  }
+  while ((match = attrRe.exec(attrSource)) !== null) attrs[match[1]] = match[2];
 
   return attrs;
 }
@@ -54,9 +52,8 @@ export function parseHtml(html: string): HtmlNode[] {
       if (cdataEnd !== -1) {
         nodes.push(html.slice(tagStart + 9, cdataEnd));
         position = cdataEnd + 3;
-      } else {
-        position = html.length;
-      }
+      } else position = html.length;
+
       continue;
     }
 
@@ -107,9 +104,7 @@ export function parseHtml(html: string): HtmlNode[] {
       if (depth === 0) {
         element.children = parseHtml(html.slice(tagEnd + 1, nextClose));
         position = nextClose + closingTag.length;
-      } else {
-        searchPosition = nextClose + 1;
-      }
+      } else searchPosition = nextClose + 1;
     }
 
     if (depth > 0) {

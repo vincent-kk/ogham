@@ -12,8 +12,7 @@ export function pickBodyFormat(
   service: "jira" | "confluence",
   apiVersion: "2" | "3" | "v1" | "v2",
 ): BodyFormat {
-  if (service === "confluence") {
+  if (service === "confluence")
     return apiVersion === "v2" ? "storage-v2" : "storage-v1";
-  }
   return apiVersion === "3" ? "adf" : "wiki";
 }

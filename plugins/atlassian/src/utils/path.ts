@@ -3,9 +3,8 @@ import { TEMP_DIR_NAME } from "../constants/index.js";
 
 /** Validate a save path: reject traversal and always resolve under {cwd}/{TEMP_DIR_NAME}/ */
 export function validateSavePath(saveTo: string): string {
-  if (saveTo.includes("..")) {
+  if (saveTo.includes(".."))
     throw new Error("Invalid save path: path traversal detected");
-  }
 
   const cwd = process.cwd();
   const tmpBase = resolve(cwd, TEMP_DIR_NAME);
@@ -16,26 +15,21 @@ export function validateSavePath(saveTo: string): string {
     const normalized = resolve(saveTo);
     const fromTmp = relativePath(tmpBase, normalized);
     const fromCwd = relativePath(cwd, normalized);
-    if (isContained(fromTmp) && fromTmp !== "") {
-      relative = fromTmp;
-    } else if (isContained(fromCwd) && fromCwd !== "") {
+    if (isContained(fromTmp) && fromTmp !== "") relative = fromTmp;
+    else if (isContained(fromCwd) && fromCwd !== "")
       relative = fromCwd.replace(new RegExp(`^${TEMP_DIR_NAME}[/\\\\]`), "");
-    } else {
+    else
       throw new Error(
         'Invalid save path: absolute paths must be under working directory. Use a relative path (e.g., "KAN-27/file.png")',
       );
-    }
-  } else {
-    relative = saveTo.replace(new RegExp(`^${TEMP_DIR_NAME}[/\\\\]`), "");
-  }
+  } else relative = saveTo.replace(new RegExp(`^${TEMP_DIR_NAME}[/\\\\]`), "");
 
   const result = resolve(tmpBase, relative);
 
-  if (!result.startsWith(tmpBase)) {
+  if (!result.startsWith(tmpBase))
     throw new Error(
       `Invalid save path: must resolve under ${TEMP_DIR_NAME} directory`,
     );
-  }
 
   return result;
 }

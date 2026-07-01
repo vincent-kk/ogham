@@ -54,11 +54,9 @@ export async function startSetupServer(
   const url = await new Promise<string>((resolve, reject) => {
     server!.listen(0, "127.0.0.1", () => {
       const addr = server!.address();
-      if (addr && typeof addr === "object") {
+      if (addr && typeof addr === "object")
         resolve(`http://127.0.0.1:${addr.port}`);
-      } else {
-        reject(new Error("Failed to get server address"));
-      }
+      else reject(new Error("Failed to get server address"));
     });
     server!.on("error", reject);
   });

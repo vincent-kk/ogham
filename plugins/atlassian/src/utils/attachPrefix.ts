@@ -26,9 +26,9 @@ export function attachPrefix(
   service: "jira" | "confluence",
   apiVersion: "2" | "3" | "v1" | "v2",
 ): string {
-  if (endpoint.startsWith("/wiki/") || endpoint.startsWith("/rest/api/")) {
+  if (endpoint.startsWith("/wiki/") || endpoint.startsWith("/rest/api/"))
     return endpoint;
-  }
+
   const prefix = PREFIX_MAP[`${service}:${apiVersion}`];
   if (!prefix) return endpoint;
   const normalized = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;

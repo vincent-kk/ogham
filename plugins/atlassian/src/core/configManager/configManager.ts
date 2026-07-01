@@ -24,9 +24,9 @@ export async function loadConfig(
     const raw = await readJson<unknown>(path);
     return AtlassianConfigSchema.parse(raw);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT")
       return { ...DEFAULT_CONFIG };
-    }
+
     throw error;
   }
 }

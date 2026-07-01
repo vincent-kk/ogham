@@ -20,9 +20,8 @@ export function createLogger(prefix: string): Logger {
     error: (message, ...args) =>
       process.stderr.write(format("ERROR", message, args) + "\n"),
     debug: (message, ...args) => {
-      if (process.env.DEBUG) {
+      if (process.env.DEBUG)
         process.stderr.write(format("DEBUG", message, args) + "\n");
-      }
     },
   };
 }

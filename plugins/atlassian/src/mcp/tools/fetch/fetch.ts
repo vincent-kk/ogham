@@ -7,6 +7,7 @@ import type {
 import { attachPrefix, transformRequest } from "../../../utils/index.js";
 import { autoConvertAdf } from "./utils/autoConvertAdf.js";
 import { convertBody } from "./utils/convertBody.js";
+import { normalizeBody } from "./utils/normalizeBody.js";
 import { handleAssetFetch } from "./utils/assetFetch.js";
 
 /** Unified HTTP tool handler */
@@ -16,10 +17,12 @@ export async function handleFetch(
 ): Promise<McpResponse> {
   const { method } = params;
   const config = ctx.http;
+  // Normalize before transform: downstream mapping/conversion guard on object type.
+  const normalizedBody = normalizeBody(params.body);
   // V2 logical → V1 physical (Confluence DC), V2-only guard. Pass-through otherwise.
   const transformed = transformRequest(
     params.endpoint,
-    params.body,
+    normalizedBody,
     ctx.service,
     ctx.apiVersion,
   );
@@ -31,17 +34,15 @@ export async function handleFetch(
   );
 
   // Early validation: reject invalid method+param combos
-  if (method === "GET" && params.body !== undefined) {
+  if (method === "GET" && normalizedBody !== undefined)
     throw new Error("GET requests must not include a body");
-  }
-  if (method === "DELETE" && params.body !== undefined) {
+  if (method === "DELETE" && normalizedBody !== undefined)
     throw new Error("DELETE requests must not include a body");
-  }
 
   switch (method) {
     case "GET": {
       // Asset fetch: binary download with caching
-      if (params.save_to_path) {
+      if (params.save_to_path)
         return handleAssetFetch(
           {
             endpoint,
@@ -52,13 +53,11 @@ export async function handleFetch(
           },
           config,
         );
-      }
 
       // Document fetch: JSON API with ADF conversion
       const queryParams = { ...params.query_params };
-      if (params.expand && params.expand.length > 0) {
+      if (params.expand && params.expand.length > 0)
         queryParams["expand"] = params.expand.join(",");
-      }
 
       const response = await executeRequest(config, {
         method: "GET",
@@ -68,9 +67,8 @@ export async function handleFetch(
         headers: params.headers,
       });
 
-      if (response.success && response.data && params.accept_format !== "raw") {
+      if (response.success && response.data && params.accept_format !== "raw")
         response.data = autoConvertAdf(response.data);
-      }
 
       return response;
     }
@@ -78,21 +76,17 @@ export async function handleFetch(
     case "POST": {
       const headers = { ...params.headers };
 
-      if (params.content_type) {
-        headers["Content-Type"] = params.content_type;
-      }
+      if (params.content_type) headers["Content-Type"] = params.content_type;
 
       if (
         params.content_type === "multipart/form-data" ||
         ctx.requires_xsrf_bypass
-      ) {
+      )
         headers["X-Atlassian-Token"] = "no-check";
-      }
 
       let body = transformed.body;
-      if (params.content_format === "markdown") {
+      if (params.content_format === "markdown")
         body = convertBody(body, ctx.service, ctx.apiVersion);
-      }
 
       return executeRequest(config, {
         method: "POST",
@@ -105,14 +99,11 @@ export async function handleFetch(
     case "PUT":
     case "PATCH": {
       let body = transformed.body;
-      if (params.content_format === "markdown") {
+      if (params.content_format === "markdown")
         body = convertBody(body, ctx.service, ctx.apiVersion);
-      }
 
       const headers = { ...params.headers };
-      if (ctx.requires_xsrf_bypass) {
-        headers["X-Atlassian-Token"] = "no-check";
-      }
+      if (ctx.requires_xsrf_bypass) headers["X-Atlassian-Token"] = "no-check";
 
       return executeRequest(config, {
         method,
@@ -124,9 +115,8 @@ export async function handleFetch(
 
     case "DELETE": {
       const headers = { ...params.headers };
-      if (ctx.requires_xsrf_bypass) {
-        headers["X-Atlassian-Token"] = "no-check";
-      }
+      if (ctx.requires_xsrf_bypass) headers["X-Atlassian-Token"] = "no-check";
+
       return executeRequest(config, {
         method: "DELETE",
         endpoint,

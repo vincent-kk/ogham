@@ -51,9 +51,7 @@ export async function executeRequest(
   };
 
   // Auth injection — tokens never exposed to caller
-  if (config.auth_header) {
-    headers["Authorization"] = config.auth_header;
-  }
+  if (config.auth_header) headers["Authorization"] = config.auth_header;
 
   const fetchOptions: RequestInit = {
     method: options.method,
@@ -61,9 +59,11 @@ export async function executeRequest(
     signal: AbortSignal.timeout(timeout),
   };
 
-  if (options.body && options.method !== "GET" && options.method !== "DELETE") {
-    fetchOptions.body = JSON.stringify(options.body);
-  }
+  if (options.body && options.method !== "GET" && options.method !== "DELETE")
+    fetchOptions.body =
+      typeof options.body === "string"
+        ? options.body
+        : JSON.stringify(options.body);
 
   let lastError: McpResponse | null = null;
 
@@ -86,11 +86,9 @@ export async function executeRequest(
         if (options.acceptBinary && !contentType.includes("application/json")) {
           const buffer = await response.arrayBuffer();
           data = { _binary: true, buffer, contentType };
-        } else if (contentType.includes("application/json")) {
+        } else if (contentType.includes("application/json"))
           data = await response.json();
-        } else if (status !== 204) {
-          data = await response.text();
-        }
+        else if (status !== 204) data = await response.text();
 
         return {
           success: true,
@@ -120,9 +118,8 @@ export async function executeRequest(
         },
       };
 
-      if (!isRetryable(status) || attempt === RETRY_MAX_RETRIES) {
+      if (!isRetryable(status) || attempt === RETRY_MAX_RETRIES)
         return errorResponse;
-      }
 
       // Check Retry-After header for 429
       if (status === 429) {
@@ -150,9 +147,7 @@ export async function executeRequest(
         },
       };
 
-      if (attempt === RETRY_MAX_RETRIES) {
-        return lastError;
-      }
+      if (attempt === RETRY_MAX_RETRIES) return lastError;
     }
   }
 

@@ -42,11 +42,9 @@ async function startTestServer(
   const baseUrl = await new Promise<string>((resolve, reject) => {
     server.listen(0, "127.0.0.1", () => {
       const addr = server.address();
-      if (addr && typeof addr === "object") {
+      if (addr && typeof addr === "object")
         resolve(`http://127.0.0.1:${addr.port}`);
-      } else {
-        reject(new Error("could not resolve test server address"));
-      }
+      else reject(new Error("could not resolve test server address"));
     });
     server.on("error", reject);
   });

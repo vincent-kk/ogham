@@ -67,9 +67,7 @@ export async function handleAuthCheck(params: {
                 ? body.emailAddress
                 : undefined,
           };
-        } else {
-          entry.user = null;
-        }
+        } else entry.user = null;
       }
 
       entries.push(entry);

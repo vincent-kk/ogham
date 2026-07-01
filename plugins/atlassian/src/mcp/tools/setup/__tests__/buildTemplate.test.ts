@@ -13,13 +13,12 @@ const SETTINGS_HTML_PATH = join(PACKAGE_ROOT, "public", "settings.html");
 // `yarn clean` removes public/; build the asset on demand so `vitest run`
 // works standalone without a prior `yarn build`.
 beforeAll(() => {
-  if (!existsSync(SETTINGS_HTML_PATH)) {
+  if (!existsSync(SETTINGS_HTML_PATH))
     execFileSync(
       "node",
       [join(PACKAGE_ROOT, "scripts", "build-settings-html.mjs")],
       { cwd: PACKAGE_ROOT, stdio: "inherit" },
     );
-  }
 });
 
 describe("build-settings-html output (public/settings.html)", () => {

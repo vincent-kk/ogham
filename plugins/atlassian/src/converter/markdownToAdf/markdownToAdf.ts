@@ -4,13 +4,12 @@ import type { AdfNode } from "../types/adfNode.js";
 
 /** Convert Markdown text to an ADF document */
 export function markdownToAdf(markdown: string): AdfNode {
-  if (!markdown) {
+  if (!markdown)
     return {
       type: "doc",
       attrs: { version: 1 },
       content: [{ type: "paragraph", content: [] }],
     };
-  }
 
   const content = renderBlocksToAdf(parseMarkdownBlocks(markdown));
   return {

@@ -163,6 +163,21 @@ describe("http-client", () => {
     expect((callArgs[1] as RequestInit).body).toBe(JSON.stringify(body));
   });
 
+  it("does not double-encode a pre-serialized string body", async () => {
+    const mockResponse = new Response(null, { status: 204 });
+    vi.mocked(fetch).mockResolvedValue(mockResponse);
+
+    const preSerialized = JSON.stringify({ fields: { summary: "Test" } });
+    await executeRequest(mockConfig, {
+      method: "PUT",
+      endpoint: "/rest/api/3/issue/TEST-1",
+      body: preSerialized,
+    });
+
+    const callArgs = vi.mocked(fetch).mock.calls[0];
+    expect((callArgs[1] as RequestInit).body).toBe(preSerialized);
+  });
+
   it("handles 204 No Content response", async () => {
     const mockResponse = new Response(null, { status: 204 });
     vi.mocked(fetch).mockResolvedValue(mockResponse);

@@ -13,8 +13,7 @@ export function restoreMaskedValues(
   existing: ServiceCredentials | undefined,
 ): void {
   if (!existing) return;
-  if (svc.api_token === MASK) {
+  if (svc.api_token === MASK)
     svc.api_token = existing.basic?.api_token ?? existing.bearer?.token;
-  }
   if (svc.password === MASK) svc.password = existing.basic?.password;
 }

@@ -64,11 +64,9 @@ function matchesPattern(
   const params: Record<string, string> = {};
   for (let i = 0; i < ptSegs.length; i++) {
     const ps = ptSegs[i];
-    if (ps.startsWith("{") && ps.endsWith("}")) {
+    if (ps.startsWith("{") && ps.endsWith("}"))
       params[ps.slice(1, -1)] = pSegs[i];
-    } else if (ps !== pSegs[i]) {
-      return null;
-    }
+    else if (ps !== pSegs[i]) return null;
   }
   return { params };
 }
@@ -119,9 +117,7 @@ function mapBodyV2ToV1(body: unknown, route: LogicalRoute): unknown {
   }
 
   // V1 requires `type` on `/content` collection endpoints.
-  if (route.contentType && obj.type === undefined) {
-    obj.type = route.contentType;
-  }
+  if (route.contentType && obj.type === undefined) obj.type = route.contentType;
 
   // V2-only envelope field — DC ignores or rejects.
   delete obj.status;
@@ -147,11 +143,10 @@ export function transformRequest(
   // Confluence DC (apiVersion === 'v1')
   const { path, query } = splitEndpoint(endpoint);
 
-  if (isV2OnlyPath(path)) {
+  if (isV2OnlyPath(path))
     throw new Error(
       `Endpoint ${path} is Confluence Cloud V2 only and not available on Server/Data Center.`,
     );
-  }
 
   for (const route of ROUTES) {
     const m = matchesPattern(path, route.v2);

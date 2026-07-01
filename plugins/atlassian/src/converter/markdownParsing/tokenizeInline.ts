@@ -29,52 +29,42 @@ export function tokenizeInlineMarkdown(
 
   let match: RegExpExecArray | null;
   while ((match = regex.exec(text)) !== null) {
-    if (match.index > position) {
+    if (match.index > position)
       tokens.push({ type: "text", text: text.slice(position, match.index) });
-    }
 
     if (options.supportImages) {
       const [, code, strong, strike, alt, url, linkText, href, em] = match;
 
-      if (code !== undefined) {
-        tokens.push({ type: "code", text: code });
-      } else if (strong !== undefined) {
+      if (code !== undefined) tokens.push({ type: "code", text: code });
+      else if (strong !== undefined)
         tokens.push({ type: "strong", text: strong });
-      } else if (strike !== undefined) {
+      else if (strike !== undefined)
         tokens.push({ type: "strike", text: strike });
-      } else if (alt !== undefined) {
+      else if (alt !== undefined)
         tokens.push({ type: "image", alt, url: url ?? "" });
-      } else if (linkText !== undefined) {
+      else if (linkText !== undefined)
         tokens.push({ type: "link", text: linkText, href: href ?? "" });
-      } else if (em !== undefined) {
-        tokens.push({ type: "em", text: em });
-      }
+      else if (em !== undefined) tokens.push({ type: "em", text: em });
     } else {
       const [, code, strong, strike, linkText, href, em] = match;
 
-      if (code !== undefined) {
-        tokens.push({ type: "code", text: code });
-      } else if (strong !== undefined) {
+      if (code !== undefined) tokens.push({ type: "code", text: code });
+      else if (strong !== undefined)
         tokens.push({ type: "strong", text: strong });
-      } else if (strike !== undefined) {
+      else if (strike !== undefined)
         tokens.push({ type: "strike", text: strike });
-      } else if (linkText !== undefined) {
+      else if (linkText !== undefined)
         tokens.push({ type: "link", text: linkText, href: href ?? "" });
-      } else if (em !== undefined) {
-        tokens.push({ type: "em", text: em });
-      }
+      else if (em !== undefined) tokens.push({ type: "em", text: em });
     }
 
     position = match.index + match[0].length;
   }
 
-  if (position < text.length) {
+  if (position < text.length)
     tokens.push({ type: "text", text: text.slice(position) });
-  }
 
-  if (tokens.length === 0) {
-    tokens.push({ type: "text", text });
-  }
+  if (tokens.length === 0) tokens.push({ type: "text", text });
 
   return tokens;
 }

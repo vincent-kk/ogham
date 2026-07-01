@@ -11,17 +11,14 @@ export function convertBody(
   const obj = { ...(body as Record<string, unknown>) };
   const fmt = pickBodyFormat(service, apiVersion);
 
-  for (const key of ["description", "body"]) {
-    if (typeof obj[key] === "string") {
+  for (const key of ["description", "body"])
+    if (typeof obj[key] === "string")
       obj[key] = renderByFormat(obj[key] as string, fmt);
-    }
-  }
 
   if (obj.fields && typeof obj.fields === "object") {
     const fields = { ...(obj.fields as Record<string, unknown>) };
-    if (typeof fields.description === "string") {
+    if (typeof fields.description === "string")
       fields.description = renderByFormat(fields.description as string, fmt);
-    }
     obj.fields = fields;
   }
 

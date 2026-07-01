@@ -48,16 +48,14 @@ export function createRouteHandler(
       sendJson(res, 500, { success: false, message });
     };
 
-    if (path === "/" && req.method === "GET") {
+    if (path === "/" && req.method === "GET")
       handleGetRoot(ctx, res).catch(handleError);
-    } else if (path === "/status" && req.method === "GET") {
+    else if (path === "/status" && req.method === "GET")
       handleStatus(ctx, res).catch(handleError);
-    } else if (path === "/test" && req.method === "POST") {
+    else if (path === "/test" && req.method === "POST")
       handleTest(ctx, req, res).catch(handleError);
-    } else if (path === "/submit" && req.method === "POST") {
+    else if (path === "/submit" && req.method === "POST")
       handleSubmit(ctx, req, res).catch(handleError);
-    } else {
-      sendJson(res, 404, { success: false, message: "Not found" });
-    }
+    else sendJson(res, 404, { success: false, message: "Not found" });
   };
 }
