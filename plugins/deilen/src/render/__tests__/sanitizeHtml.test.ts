@@ -4,7 +4,12 @@ import { sanitizeHtml } from "../sanitize/sanitizeHtml.js";
 
 describe("sanitizeHtml", () => {
   it("drops disallowed tags but keeps inner text", () => {
-    expect(sanitizeHtml("<script>alert(1)</script>")).toBe("alert(1)");
+    expect(sanitizeHtml("<center>hi</center>")).toBe("hi");
+  });
+
+  it("removes script and style with their contents", () => {
+    expect(sanitizeHtml("<script>alert(1)</script>")).toBe("");
+    expect(sanitizeHtml("a<style>p{color:red}</style>b")).toBe("ab");
   });
 
   it("strips event-handler attributes", () => {
@@ -58,5 +63,34 @@ describe("sanitizeHtml", () => {
     const out = sanitizeHtml('<img src="https://x/p.png" onerror="x" alt="a">');
     expect(out).not.toContain("onerror");
     expect(out).toContain('src="https://x/p.png"');
+  });
+
+  it("rejects internal class and data attrs in the raw profile", () => {
+    const out = sanitizeHtml(
+      '<div class="deilen-mermaid" data-source-line="3" data-src="x">g</div>',
+      "raw",
+    );
+    expect(out).toBe("<div>g</div>");
+  });
+
+  it("decodes entity-obfuscated schemes before URL checks", () => {
+    expect(sanitizeHtml('<a href="java&#115;cript:alert(1)">x</a>')).toBe(
+      "<a>x</a>",
+    );
+    expect(sanitizeHtml('<a href="javascript&colon;alert(1)">x</a>')).toBe(
+      "<a>x</a>",
+    );
+  });
+
+  it("removes comments, declarations, and processing instructions", () => {
+    expect(sanitizeHtml("a<!-- c <img onerror=x> -->b")).toBe("ab");
+    expect(sanitizeHtml("a<!DOCTYPE html>b<?php x ?>c")).toBe("abc");
+    expect(sanitizeHtml("a<!-- never closed")).toBe("a");
+  });
+
+  it("escapes leftover angle brackets from unclosed tags", () => {
+    expect(sanitizeHtml('<div onclick="alert(1)"')).toBe(
+      '&lt;div onclick="alert(1)"',
+    );
   });
 });

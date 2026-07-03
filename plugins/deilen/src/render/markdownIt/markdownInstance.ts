@@ -1,5 +1,6 @@
 import MarkdownIt from "markdown-it";
 
+import { sanitizeHtml } from "../sanitize/sanitizeHtml.js";
 import { lineAttrs } from "../utils/lineAttrs.js";
 
 import { imageRule } from "./imageRule.js";
@@ -8,9 +9,11 @@ import { mathInline } from "./mathInlineRule.js";
 import { sourceLinePlugin } from "./sourceLinePlugin.js";
 import { taskList } from "./taskListRule.js";
 
+const LEADING_OPEN_TAG_RE = /^\s*<[a-zA-Z][a-zA-Z0-9]*/;
+
 function createMarkdownIt(): MarkdownIt {
   const markdown = new MarkdownIt({
-    html: false,
+    html: true,
     linkify: true,
     typographer: true,
   });
@@ -42,6 +45,21 @@ function createMarkdownIt(): MarkdownIt {
     const langAttr = lang ? ` data-lang="${escapeHtml(lang)}"` : "";
     return `<pre${attrs}><code${langClass}${langAttr}>${escaped}</code></pre>\n`;
   };
+
+  // Raw HTML is sanitized per-token with the "raw" profile (author markup must
+  // not carry deilen-internal class/data-* attrs). Blocks get the line anchor
+  // injected into their first opening tag — a wrapper div would break the
+  // GitHub pattern of markdown between <details> and </details> blocks.
+  markdown.renderer.rules.html_block = (tokens, idx) => {
+    const token = tokens[idx];
+    const sanitized = sanitizeHtml(token.content, "raw");
+    const attrs = lineAttrs(token);
+    if (!attrs) return sanitized;
+    return sanitized.replace(LEADING_OPEN_TAG_RE, (match) => match + attrs);
+  };
+
+  markdown.renderer.rules.html_inline = (tokens, idx) =>
+    sanitizeHtml(tokens[idx].content, "raw");
 
   markdown.renderer.rules.math_inline = (tokens, idx) =>
     `<span class="deilen-math" data-display="0">${escapeHtml(tokens[idx].content)}</span>`;

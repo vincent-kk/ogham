@@ -42,6 +42,7 @@ pages/viewer/
 ```
 
 - 본문은 서버 렌더 HTML(라인 앵커 포함)을 그대로 마운트. 무거운 렌더러만 클라이언트 lazy.
+- raw HTML 블록(`<details>` 등)의 앵커는 첫 여는 태그에 주입돼 직계 자식 수집(anchorTargets)에 그대로 잡힌다. 닫힌 `<details>` 의 거터 `+` 는 내용과 함께 숨겨지지만, 선택 기반 코멘트는 조상 앵커로 항상 동작. 닫는 태그 전용 블록·인라인 raw HTML 은 앵커 없음(해당 라인은 하이라이트 공백으로 열화).
 - 코멘트: 텍스트 선택 또는 라인 거터 클릭 → popover(텍스트 + 이미지 첨부) → 사이드바 누적. 디바운스 auto-save(`in_progress`).
 - 제출: 푸터의 두 의도 버튼 — **Revise & reopen**(코멘트 반영 후 재표시) / **Continue in chat**(대화로 이어감, 코멘트 0개도 가능) → multipart POST(`complete` + `intent`) → 오버레이. 상단바 **Close(✕)** 는 `intent:"dismiss"` 로 제출해 대기 중 collect 를 깔끔히 해제(미전송 코멘트 있으면 확인). 두 의도 버튼은 동일 스타일이며 disabled 상태만 색조로 구분한다(강조 색 반전 혼동 방지).
 - 코멘트가 달린 블록 하이라이트는 앰버(`--mark`), 작성 중(composer 열림) 블록은 더스티 로즈(`--pending`) — 팔레트 미사용 hue라 앰버·회색 선택·보라 accent 와 모두 구분. 둘은 박스 모델·중첩 진해짐 방지를 공유하고 같은 `<li>`/블록에 플래그를 얹어 불릿·체크박스 거터를 침범하지 않는다.
@@ -87,7 +88,7 @@ cennad settings 구조 차용. `Config` 폼 매핑:
 
 - token 미검증 → 401 `{ ok:false, message:'Invalid token' }`.
 - `__DEILEN_STATE__` 주입은 `escapeJsonForHtml`(`<`,`>`,`&`,U+2028,U+2029).
-- 렌더 HTML 은 서버 sanitize 후 주입([rendering.md](./rendering.md)).
+- 렌더 HTML 은 서버 sanitize 후 주입([rendering.md](./rendering.md)) — markdown-it `html:true` 이후 서버 sanitize 가 유일한 XSS 방어층(클라이언트 정제·CSP 없음). raw HTML 유래 마크업은 raw 프로파일로 내부 class/data-\* 위조가 차단된 채 도착한다.
 - Config 검증 실패 400 + `errors[]`, 저장 실패 500. multipart 한도는 [feedback-protocol.md](./feedback-protocol.md).
 - `/assets/<chunk>`: 빌드 매니페스트 allowlist 만 서빙 — 경로 구분자·`..`·인코딩 traversal·`bridge/assets` 외부 심링크 거부, 알려진 확장자만.
 - `/api/image/<sid>/<index>`: viewer.md 가 참조한 `file://` 이미지만(문서 멤버십 = allowlist, 임의 로컬 경로 차단) + 표시 확장자 화이트리스트(png/jpg/jpeg/gif/webp/svg)·`realpath` regular-file·`max_image_mb` 캡. `/assets` 와 달리 토큰 검증 대상.

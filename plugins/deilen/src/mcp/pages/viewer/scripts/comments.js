@@ -557,6 +557,10 @@ function decorateAnchors() {
     // cells and break the row, and the table's overflow clips a gutter "+"
     // anyway. Table rows are reached via text selection, not the "+" affordance.
     if (block.tagName === "TR") continue;
+    // A <details> is display-only too: prepending would put the "+" before
+    // <summary> (breaking the content model and hiding when collapsed). Reached
+    // via text selection; highlights still paint on the block.
+    if (block.tagName === "DETAILS") continue;
     const addButton = getElement("button", {
       class: "line-add",
       type: "button",
