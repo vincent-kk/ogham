@@ -48,44 +48,18 @@ Permission mode and the per-tier model + effort mapping are managed via `/setup`
 ## Response handling
 
 Treat the first response as the opening of a conversation, not necessarily its end:
-evaluate it, refine via the loop below when it falls short, then surface the FINAL
-answer and its `session_id`. Wrap `session_id` in backticks (`` ` ``) so it renders
-as a copyable inline code span — it is needed to continue later.
+evaluate it, refine when it falls short, then surface the FINAL answer and its
+`session_id`. Wrap `session_id` in backticks (`` ` ``) so it renders as a copyable
+inline code span — it is needed to continue later.
 
 ### Refinement loop
 
-Before dispatching, derive a completion checklist from the user's request — required
-deliverables, explicit constraints, and the expected format / evidence. Judge each
-response against THAT checklist, not against the response's own claim to be complete
-(a provider can sound finished while silently dropping a constraint).
-
-Continue the SAME session only when you can NAME a specific gap:
-
-- a checklist item the response left uncovered, partial, or ambiguous;
-- a blocking question WHOSE ANSWER you already hold (in the request or this session) — pass it explicitly;
-- a correctness defect you can actually explain or test, not merely suspect.
-
-Stop and surface to the USER instead (do NOT continue, do NOT invent an answer) when:
-
-- the provider asks about intent, scope, or a constraint the user never stated — relay its question verbatim and let the user resume via `--continue`;
-- the only doubt is a correctness issue you cannot independently verify — state it alongside the answer and let the user decide;
-- the provider merely offers optional extras ("want me to also…?") — that is not a gap.
-
-To continue, call `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt })`
-with the previous response's `session_id` — NOT a fresh `start_conversation`, which
-drops the prior turn's context. State the exact gap, supply any context the provider
-could not see, and ask for the corrected / completed answer (not just a critique).
-
-Stop the loop when any holds:
-
-- every checklist item is met;
-- no specific, closable gap remains to name;
-- you reach 3 provider calls in this session (initial + 2 continuations; a failed call still counts) — a ceiling, not a target. Use the 2nd continuation only if the 1st made material progress and one concrete gap remains;
-- a call returns `status: 'failure'` or empty / unusable output — do not retry; handle it below and return the best successful answer so far.
-
-Do not loop on trivial or already-complete answers; under a `high` tier each extra
-round multiplies cost. When you went beyond the initial call, note it to the user
-(e.g. "refined over N follow-up(s)").
+When the first response does not fully satisfy the request, judge and improve it
+over the same session per **[../\_shared/refinement-loop.md](../_shared/refinement-loop.md)**
+(derive a checklist, continue only for a nameable gap via `continue_conversation`,
+cap at 3 provider calls, otherwise stop or surface to the user). Skip the loop
+entirely for `--no-refine` or a trivially complete answer — return the single
+dispatch as-is.
 
 ### Failure dispatch
 
