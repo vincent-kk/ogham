@@ -33,6 +33,17 @@ describe("validateSavePath", () => {
     );
   });
 
+  it("rejects .. segment with backslash separators", () => {
+    expect(() => validateSavePath("output\\..\\evil.png")).toThrow(
+      "path traversal",
+    );
+  });
+
+  it("accepts filename containing consecutive dots", () => {
+    const result = validateSavePath("KAN-27/report..final.pdf");
+    expect(result).toBe(resolve(tmpBase, "KAN-27/report..final.pdf"));
+  });
+
   it("rejects absolute path outside working directory", () => {
     expect(() => validateSavePath("/etc/cron.d/evil")).toThrow(
       "absolute paths must be under working directory",

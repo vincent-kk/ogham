@@ -1,7 +1,7 @@
 ---
 name: download
 user_invocable: true
-description: "[atlassian:download] Download and upload file attachments from Jira issues and Confluence pages by direct URL or issue key/page ID metadata lookup. Trigger: \"download attachment\", \"첨부파일 다운로드\", \"파일 받기\", \"atlassian download\""
+description: '[atlassian:download] Download and upload file attachments from Jira issues and Confluence pages by direct URL or issue key/page ID metadata lookup. Trigger: "download attachment", "첨부파일 다운로드", "파일 받기", "atlassian download"'
 argument-hint: "<issue-key|page-id|url> [--filename <name>]"
 version: "0.1.0"
 complexity: simple
@@ -27,8 +27,9 @@ Unified attachment download for both Jira and Confluence.
 Tool: fetch (method: GET)
 Params:
   endpoint: <attachment URL or API path>
+  service: <jira | confluence>  # required for Confluence links without /wiki/
   accept_format: "raw"
-  save_to_path: "/path/to/save/filename.ext"
+  save_to_path: ".temp/{issueKey}/{filename}"
 ```
 
 ### Get Attachment Metadata (Jira)
@@ -52,11 +53,11 @@ Params:
 
 Organize downloads by source context. The directory structure serves as a cache — if the target file already exists, the fetch tool returns it immediately without re-downloading.
 
-| Source | save_to_path pattern |
-|--------|---------------------|
-| Jira issue `KAN-27` | `.temp/KAN-27/<filename>` |
+| Source                       | save_to_path pattern                    |
+| ---------------------------- | --------------------------------------- |
+| Jira issue `KAN-27`          | `.temp/KAN-27/<filename>`               |
 | Jira issue + comment `10110` | `.temp/KAN-27_comment-10110/<filename>` |
-| Confluence page ID `12345` | `.temp/confluence-12345/<filename>` |
+| Confluence page ID `12345`   | `.temp/confluence-12345/<filename>`     |
 
 To force re-download when a cached file exists, pass `force: true`.
 

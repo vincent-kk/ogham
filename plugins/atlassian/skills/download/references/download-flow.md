@@ -4,11 +4,11 @@
 
 Derive save path from the source context to enable filesystem-based caching:
 
-| Source | Namespace | Example save_to_path |
-|--------|-----------|---------------------|
-| Jira issue | `{issueKey}` | `.temp/KAN-27/screenshot.png` |
+| Source               | Namespace                        | Example save_to_path                  |
+| -------------------- | -------------------------------- | ------------------------------------- |
+| Jira issue           | `{issueKey}`                     | `.temp/KAN-27/screenshot.png`         |
 | Jira issue + comment | `{issueKey}_comment-{commentId}` | `.temp/KAN-27_comment-10110/demo.mp4` |
-| Confluence page | `confluence-{pageId}` | `.temp/confluence-12345/diagram.png` |
+| Confluence page      | `confluence-{pageId}`            | `.temp/confluence-12345/diagram.png`  |
 
 The fetch tool checks if the target file exists before downloading. If it exists, returns `{ saved_to, size_bytes, cached: true }` without making an HTTP request. Pass `force: true` to bypass cache.
 
@@ -27,16 +27,17 @@ The fetch tool checks if the target file exists before downloading. If it exists
 
 ## Confluence Attachment Download
 
-### By Page ID
+Pass `service: "confluence"` on every call in this section — Confluence paths without `/wiki/` are otherwise routed to Jira.
+
+### By Page ID (Cloud)
+
+1. List attachments: `GET /pages/{pageId}/attachments` (logical path — auto-prefixed to `/wiki/api/v2/...`)
+2. Download via the `downloadLink` value with `accept_format: "raw"` (relative `/download/attachments/...` links work as-is)
+
+### By Page ID (Server/DC)
 
 1. List attachments: `GET /rest/api/content/{pageId}/child/attachment`
-2. Find target attachment in results
-3. Download via download link with `accept_format: "raw"`
-
-### V2 API (Cloud)
-
-1. List: `GET /api/v2/pages/{pageId}/attachments`
-2. Download link in `downloadLink` field
+2. Download via the `_links.download` value with `accept_format: "raw"`
 
 ## Upload Flow
 
@@ -56,6 +57,7 @@ Params:
 Tool: fetch (method: POST)
 Params:
   endpoint: /rest/api/content/{pageId}/child/attachment
+  service: confluence
   content_type: "multipart/form-data"
   body: <file data>
 ```

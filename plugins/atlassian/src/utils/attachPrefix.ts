@@ -7,7 +7,7 @@
  *
  * Confluence Cloud V1 (`/wiki/rest/api/...`) is intentionally not auto-attached —
  * callers can still pass a fully-qualified `/wiki/rest/api/...` path and it is
- * preserved verbatim via the backward-compat check below.
+ * preserved verbatim via the pass-through check below.
  */
 const PREFIX_MAP: Record<string, string> = {
   "jira:2": "/rest/api/2",
@@ -17,16 +17,43 @@ const PREFIX_MAP: Record<string, string> = {
 };
 
 /**
+ * Site-root prefixes that are already physical paths and must never receive
+ * an API prefix:
+ *
+ * - `/wiki/`     — Confluence Cloud context path (REST + download servlet)
+ * - `/rest/`     — any REST root (`api`, `agile`, `servicedeskapi`, `dev-status`, …)
+ * - `/secure/`   — Jira servlet root (`/secure/attachment/{id}/{filename}`)
+ * - `/download/` — Confluence attachment servlet (Server/DC at site root;
+ *                  Cloud serves it under `/wiki/` — see rewrite below)
+ * - `/plugins/`  — servlet plugin root (`/plugins/servlet/...`)
+ */
+const PASS_THROUGH_PREFIXES = [
+  "/wiki/",
+  "/rest/",
+  "/secure/",
+  "/download/",
+  "/plugins/",
+];
+
+/**
  * Attach the service+version prefix to a logical endpoint.
- * If the endpoint already starts with a known absolute prefix
- * (`/wiki/` or `/rest/api/`), it is returned unchanged.
+ * Endpoints already rooted at a known physical prefix are returned unchanged.
  */
 export function attachPrefix(
   endpoint: string,
   service: "jira" | "confluence",
   apiVersion: "2" | "3" | "v1" | "v2",
 ): string {
-  if (endpoint.startsWith("/wiki/") || endpoint.startsWith("/rest/api/"))
+  // Confluence Cloud metadata returns context-relative download links
+  // (/download/attachments/...) whose servlet lives under /wiki.
+  if (
+    service === "confluence" &&
+    apiVersion === "v2" &&
+    endpoint.startsWith("/download/")
+  )
+    return `/wiki${endpoint}`;
+
+  if (PASS_THROUGH_PREFIXES.some((prefix) => endpoint.startsWith(prefix)))
     return endpoint;
 
   const prefix = PREFIX_MAP[`${service}:${apiVersion}`];

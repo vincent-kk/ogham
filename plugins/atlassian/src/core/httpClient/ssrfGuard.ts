@@ -7,8 +7,12 @@ export async function validateUrl(
   allowedHostname: string,
   allowPrivateIp = false,
 ): Promise<void> {
-  // Path traversal check on raw string (before URL normalization strips ..)
-  if (url.includes(".."))
+  // Path traversal check on the raw string — URL parsing collapses dot
+  // segments (raw and percent-encoded), so the sent path would silently
+  // differ from the validated one. Segment-precise: filenames merely
+  // containing consecutive dots (e.g. report..final.pdf) are not flagged.
+  const rawPath = url.split(/[?#]/, 1)[0];
+  if (rawPath.split(/[/\\]/).some(isTraversalSegment))
     throw new Error("SSRF: Path traversal detected in URL.");
 
   const parsed = new URL(url);
@@ -48,4 +52,16 @@ export async function validateUrl(
 
     // DNS resolution may fail in test environments — allow if hostname matches
   }
+}
+
+function isTraversalSegment(segment: string): boolean {
+  if (segment === "..") return true;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(segment);
+  } catch {
+    // Malformed percent sequence — not a valid encoding of ".."
+    return false;
+  }
+  return decoded === ".." || /(^|[/\\])\.\.([/\\]|$)/.test(decoded);
 }

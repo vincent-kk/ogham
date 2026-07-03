@@ -4,7 +4,11 @@ import type {
   McpResponse,
   FetchParams,
 } from "../../../types/index.js";
-import { attachPrefix, transformRequest } from "../../../utils/index.js";
+import {
+  attachPrefix,
+  stripBaseUrl,
+  transformRequest,
+} from "../../../utils/index.js";
 import { autoConvertAdf } from "./utils/autoConvertAdf.js";
 import { convertBody } from "./utils/convertBody.js";
 import { normalizeBody } from "./utils/normalizeBody.js";
@@ -19,9 +23,11 @@ export async function handleFetch(
   const config = ctx.http;
   // Normalize before transform: downstream mapping/conversion guard on object type.
   const normalizedBody = normalizeBody(params.body);
+  // Absolute URL endpoints (e.g. attachment content links) → base-relative path.
+  const relativeEndpoint = stripBaseUrl(params.endpoint, config.base_url);
   // V2 logical → V1 physical (Confluence DC), V2-only guard. Pass-through otherwise.
   const transformed = transformRequest(
-    params.endpoint,
+    relativeEndpoint,
     normalizedBody,
     ctx.service,
     ctx.apiVersion,

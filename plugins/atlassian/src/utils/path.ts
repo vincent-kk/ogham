@@ -3,7 +3,7 @@ import { TEMP_DIR_NAME } from "../constants/index.js";
 
 /** Validate a save path: reject traversal and always resolve under {cwd}/{TEMP_DIR_NAME}/ */
 export function validateSavePath(saveTo: string): string {
-  if (saveTo.includes(".."))
+  if (hasDotDotSegment(saveTo))
     throw new Error("Invalid save path: path traversal detected");
 
   const cwd = process.cwd();
@@ -32,6 +32,10 @@ export function validateSavePath(saveTo: string): string {
     );
 
   return result;
+}
+
+function hasDotDotSegment(path: string): boolean {
+  return path.split(/[/\\]/).some((segment) => segment === "..");
 }
 
 function relativePath(from: string, to: string): string {

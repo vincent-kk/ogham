@@ -56,6 +56,24 @@ describe("ssrf-guard", () => {
       ).rejects.toThrow("SSRF: Path traversal");
     });
 
+    it.each([
+      "https://example.atlassian.net/rest/%2e%2e/etc/passwd",
+      "https://example.atlassian.net/rest/..%2fetc/passwd",
+    ])("rejects percent-encoded traversal: %s", async (url) => {
+      await expect(validateUrl(url, "example.atlassian.net")).rejects.toThrow(
+        "SSRF: Path traversal",
+      );
+    });
+
+    it("allows filenames containing consecutive dots", async () => {
+      await expect(
+        validateUrl(
+          "https://mycompany.atlassian.net/secure/attachment/10000/report..final.pdf",
+          "mycompany.atlassian.net",
+        ),
+      ).resolves.toBeUndefined();
+    });
+
     it("rejects hostname mismatch", async () => {
       await expect(
         validateUrl(

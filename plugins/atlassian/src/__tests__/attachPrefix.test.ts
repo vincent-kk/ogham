@@ -33,6 +33,12 @@ describe("attachPrefix", () => {
       ["/wiki/rest/api/content/12345", "confluence", "v2"],
       ["/rest/api/3/issue/PROJ-1", "jira", "3"],
       ["/rest/api/content/12345", "confluence", "v1"],
+      ["/rest/agile/1.0/board/1/sprint", "jira", "3"],
+      ["/rest/servicedeskapi/request/SD-1", "jira", "2"],
+      ["/rest/dev-status/1.0/issue/detail?issueId=10000", "jira", "2"],
+      ["/secure/attachment/4322957/image.png", "jira", "2"],
+      ["/download/attachments/123456/file.pdf", "confluence", "v1"],
+      ["/plugins/servlet/oauth/authorize", "jira", "2"],
     ] as const)(
       "leaves %s path unchanged (%s %s)",
       (path, service, version) => {
@@ -95,6 +101,16 @@ describe("attachPrefix", () => {
     it("preserves /wiki/ prefix for any non-API path (e.g. /wiki/spaces)", () => {
       const path = "/wiki/spaces/DEV";
       expect(attachPrefix(path, "confluence", "v2")).toBe(path);
+    });
+
+    it("restores /wiki context for Cloud-relative download links (confluence v2)", () => {
+      expect(
+        attachPrefix(
+          "/download/attachments/123/file.png?api=v2",
+          "confluence",
+          "v2",
+        ),
+      ).toBe("/wiki/download/attachments/123/file.png?api=v2");
     });
   });
 });

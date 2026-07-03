@@ -1,4 +1,10 @@
-export { joinUrl, buildUrl, extractHostname, detectService } from "./url.js";
+export {
+  joinUrl,
+  buildUrl,
+  extractHostname,
+  detectService,
+  stripBaseUrl,
+} from "./url.js";
 export { buildAuthHeader } from "./auth.js";
 export { resolveSiteConfig } from "./siteResolver.js";
 export { isPrivateIp } from "./ip.js";
