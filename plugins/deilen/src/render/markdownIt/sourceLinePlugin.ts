@@ -5,8 +5,8 @@ import type MarkdownIt from "markdown-it";
  * a source map with `data-source-line` (1-based start) and `data-source-end`
  * (markdown-it map end). These anchors back the viewer's line-level feedback.
  */
-export function sourceLinePlugin(md: MarkdownIt): void {
-  md.core.ruler.push("deilen_source_line", (state) => {
+export function sourceLinePlugin(markdownIt: MarkdownIt): void {
+  markdownIt.core.ruler.push("deilen_source_line", (state) => {
     for (const token of state.tokens) {
       if (token.nesting === -1) continue;
       const map = token.map;

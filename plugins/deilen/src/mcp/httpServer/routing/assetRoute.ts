@@ -11,14 +11,14 @@ const ASSET_PATH = /^\/assets\/([^/]+)$/;
  * Returns true when the request was handled here, false to continue routing.
  */
 export function tryAssetRoute(
-  ctx: RouteContext,
+  context: RouteContext,
   path: string,
   method: string,
-  res: ServerResponse,
+  response: ServerResponse,
 ): boolean {
   const match = ASSET_PATH.exec(path);
   if (match && method === "GET") {
-    handleGetAsset(ctx, decodeURIComponent(match[1]), res);
+    handleGetAsset(context, decodeURIComponent(match[1]), response);
     return true;
   }
   return false;

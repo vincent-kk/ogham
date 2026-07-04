@@ -47,7 +47,7 @@
     태그 제거(텍스트 보존), 잔여 `<` 이스케이프, 속성 decode→검증→re-encode
   - `href`/`src` 위험 스킴(`javascript:` 등) 제거, `img` 만 `data:image/` 허용
   - `th`/`td` 의 `style` 은 `text-align:(left|right|center)` 만 허용
-- `sourceLinePlugin(md: MarkdownIt): void` — core ruler 등록 (블록 토큰 `data-source-line`/`-end`)
+- `sourceLinePlugin(markdownIt: MarkdownIt): void` — core ruler 등록 (블록 토큰 `data-source-line`/`-end`)
 
 ## Allowlist (GitHub 패리티)
 

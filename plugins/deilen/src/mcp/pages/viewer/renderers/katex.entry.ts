@@ -6,11 +6,11 @@ import katex from "katex";
  */
 export function typesetAll(): void {
   const nodes = document.querySelectorAll<HTMLElement>("#viewer .deilen-math");
-  nodes.forEach((el) => {
-    const display = el.getAttribute("data-display") === "1";
-    const tex = el.textContent ?? "";
+  nodes.forEach((element) => {
+    const display = element.getAttribute("data-display") === "1";
+    const tex = element.textContent ?? "";
     try {
-      katex.render(tex, el, {
+      katex.render(tex, element, {
         displayMode: display,
         throwOnError: false,
         trust: false,

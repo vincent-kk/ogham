@@ -17,11 +17,11 @@ const VIEWER_PATH = /^\/r\/([^/]+)$/;
 const IMAGE_PATH = /^\/api\/image\/([^/]+)\/(\d+)$/;
 
 interface RouteArgs {
-  ctx: RouteContext;
+  context: RouteContext;
   url: URL;
-  req: IncomingMessage;
-  res: ServerResponse;
-  onError: (err: unknown) => void;
+  request: IncomingMessage;
+  response: ServerResponse;
+  onError: (error: unknown) => void;
 }
 
 type RouteHandler = (args: RouteArgs) => void;
@@ -29,20 +29,22 @@ type RouteHandler = (args: RouteArgs) => void;
 const sessionOf = (url: URL): string => url.searchParams.get("session") ?? "";
 
 const STATIC_ROUTES: Record<string, RouteHandler> = {
-  "GET /api/viewer": ({ ctx, url, res, onError }) =>
-    void handleGetViewerData(ctx, url, res).catch(onError),
-  "GET /settings": ({ ctx, res, onError }) =>
-    void handleGetSettings(ctx, res).catch(onError),
-  "GET /api/config": ({ ctx, res, onError }) =>
-    void handleGetConfig(ctx, res).catch(onError),
-  "POST /api/config": ({ ctx, req, res, onError }) =>
-    void handleSaveConfig(ctx, req, res).catch(onError),
-  "POST /api/feedback": ({ ctx, url, req, res, onError }) =>
-    void handlePostFeedback(ctx, sessionOf(url), req, res).catch(onError),
-  "POST /api/close": ({ ctx, url, res, onError }) =>
-    void handleClose(ctx, sessionOf(url), res).catch(onError),
-  "POST /api/ping": ({ ctx, url, res, onError }) =>
-    void handlePing(ctx, sessionOf(url), res).catch(onError),
+  "GET /api/viewer": ({ context, url, response, onError }) =>
+    void handleGetViewerData(context, url, response).catch(onError),
+  "GET /settings": ({ context, response, onError }) =>
+    void handleGetSettings(context, response).catch(onError),
+  "GET /api/config": ({ context, response, onError }) =>
+    void handleGetConfig(context, response).catch(onError),
+  "POST /api/config": ({ context, request, response, onError }) =>
+    void handleSaveConfig(context, request, response).catch(onError),
+  "POST /api/feedback": ({ context, url, request, response, onError }) =>
+    void handlePostFeedback(context, sessionOf(url), request, response).catch(
+      onError,
+    ),
+  "POST /api/close": ({ context, url, response, onError }) =>
+    void handleClose(context, sessionOf(url), response).catch(onError),
+  "POST /api/ping": ({ context, url, response, onError }) =>
+    void handlePing(context, sessionOf(url), response).catch(onError),
 };
 
 /**
@@ -50,27 +52,27 @@ const STATIC_ROUTES: Record<string, RouteHandler> = {
  * then a 404 fallback. Mirrors the post-guard ordering of the original handler.
  */
 export function dispatchApiRoute(args: RouteArgs): void {
-  const { url, req, res } = args;
+  const { url, request, response } = args;
   const path = url.pathname;
-  const method = req.method ?? "GET";
+  const method = request.method ?? "GET";
 
   if (method === "GET") {
     const viewerMatch = VIEWER_PATH.exec(path);
     if (viewerMatch) {
       void handleGetViewer(
-        args.ctx,
+        args.context,
         decodeURIComponent(viewerMatch[1]),
-        res,
+        response,
       ).catch(args.onError);
       return;
     }
     const imageMatch = IMAGE_PATH.exec(path);
     if (imageMatch) {
       void handleGetImage(
-        args.ctx,
+        args.context,
         decodeURIComponent(imageMatch[1]),
         Number(imageMatch[2]),
-        res,
+        response,
       ).catch(args.onError);
       return;
     }
@@ -81,5 +83,5 @@ export function dispatchApiRoute(args: RouteArgs): void {
     route(args);
     return;
   }
-  sendJson(res, 404, { ok: false, message: "Not found" });
+  sendJson(response, 404, { ok: false, message: "Not found" });
 }

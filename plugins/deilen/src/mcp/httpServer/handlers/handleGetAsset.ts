@@ -12,30 +12,30 @@ const ASSET_MIME: Record<string, string> = {
 
 /** GET /assets/<name> — stream a built renderer chunk (token-exempt). */
 export function handleGetAsset(
-  ctx: RouteContext,
+  context: RouteContext,
   name: string,
-  res: ServerResponse,
+  response: ServerResponse,
 ): void {
-  const full = ctx.resolveAssetPath(name);
+  const full = context.resolveAssetPath(name);
   if (!full) {
-    sendJson(res, 404, { ok: false, message: "Asset not found" });
+    sendJson(response, 404, { ok: false, message: "Asset not found" });
     return;
   }
   const type = ASSET_MIME[extname(full).toLowerCase()];
   if (!type) {
-    sendJson(res, 404, { ok: false, message: "Asset not found" });
+    sendJson(response, 404, { ok: false, message: "Asset not found" });
     return;
   }
   const stream = createReadStream(full);
   stream.on("error", () => {
-    if (!res.headersSent)
-      sendJson(res, 404, { ok: false, message: "Asset not found" });
-    else res.destroy();
+    if (!response.headersSent)
+      sendJson(response, 404, { ok: false, message: "Asset not found" });
+    else response.destroy();
   });
-  res.writeHead(200, {
+  response.writeHead(200, {
     "Content-Type": type,
     "Cache-Control": "public, max-age=3600",
   });
-  res.on("close", () => stream.destroy());
-  stream.pipe(res);
+  response.on("close", () => stream.destroy());
+  stream.pipe(response);
 }

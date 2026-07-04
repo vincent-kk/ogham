@@ -1,4 +1,4 @@
-const NAMED: Record<string, string> = {
+const ESCAPED_NAMES = {
   amp: "&",
   lt: "<",
   gt: ">",
@@ -12,11 +12,11 @@ const NAMED: Record<string, string> = {
   tab: "\t",
   newline: "\n",
   nbsp: "\u00a0",
-};
+} as const;
 
 // Numeric refs decode with or without the trailing semicolon (as browsers do);
 // named refs require it. Unknown named refs stay literal.
-const ENTITY_RE =
+const ENTITY_PATTERN =
   /&(?:#[xX]([0-9a-fA-F]{1,6});?|#([0-9]{1,7});?|([a-zA-Z][a-zA-Z0-9]*);)/g;
 
 function fromCodePointSafe(codePoint: number): string {
@@ -35,9 +35,12 @@ function fromCodePointSafe(codePoint: number): string {
  * Covers all numeric refs plus the named refs relevant to scheme smuggling.
  */
 export function decodeEntities(value: string): string {
-  return value.replace(ENTITY_RE, (match, hex, dec, name) => {
-    if (hex !== undefined) return fromCodePointSafe(parseInt(hex, 16));
-    if (dec !== undefined) return fromCodePointSafe(parseInt(dec, 10));
-    return NAMED[(name as string).toLowerCase()] ?? match;
+  return value.replace(ENTITY_PATTERN, (match, hexadecimal, decimal, name) => {
+    if (hexadecimal !== undefined)
+      return fromCodePointSafe(parseInt(hexadecimal, 16));
+    if (decimal !== undefined) return fromCodePointSafe(parseInt(decimal, 10));
+    return (
+      ESCAPED_NAMES[name.toLowerCase() as keyof typeof ESCAPED_NAMES] ?? match
+    );
   });
 }

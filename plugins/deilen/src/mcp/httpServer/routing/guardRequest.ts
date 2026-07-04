@@ -15,34 +15,37 @@ const LOOPBACK_ORIGIN = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i;
  * continue routing.
  */
 export function guardRequest(
-  ctx: RouteContext,
+  context: RouteContext,
   url: URL,
   method: string,
-  req: IncomingMessage,
-  res: ServerResponse,
+  request: IncomingMessage,
+  response: ServerResponse,
 ): boolean {
-  if (!LOOPBACK_HOST.test(req.headers.host ?? "")) {
-    sendJson(res, 403, { ok: false, message: "Invalid host" });
+  if (!LOOPBACK_HOST.test(request.headers.host ?? "")) {
+    sendJson(response, 403, { ok: false, message: "Invalid host" });
     return true;
   }
 
-  if (!verifyToken(ctx.token, url.searchParams.get("token") ?? "")) {
-    sendJson(res, 401, { ok: false, message: "Invalid token" });
+  if (!verifyToken(context.token, url.searchParams.get("token") ?? "")) {
+    sendJson(response, 401, { ok: false, message: "Invalid token" });
     return true;
   }
 
   if (method === "POST") {
-    const origin = req.headers.origin;
+    const origin = request.headers.origin;
     if (origin !== undefined && !LOOPBACK_ORIGIN.test(origin)) {
-      sendJson(res, 403, { ok: false, message: "Invalid origin" });
+      sendJson(response, 403, { ok: false, message: "Invalid origin" });
       return true;
     }
-    const ct = (req.headers["content-type"] ?? "").toLowerCase();
+    const ct = (request.headers["content-type"] ?? "").toLowerCase();
     if (
       !ct.startsWith("application/json") &&
       !ct.startsWith("multipart/form-data")
     ) {
-      sendJson(res, 415, { ok: false, message: "Unsupported Content-Type" });
+      sendJson(response, 415, {
+        ok: false,
+        message: "Unsupported Content-Type",
+      });
       return true;
     }
   }

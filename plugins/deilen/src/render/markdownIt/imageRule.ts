@@ -20,26 +20,32 @@ interface ImageRewriteEnv {
  * document order, matching `walkLocalImages`. Falls back to markdown-it's
  * default image rendering so `alt` handling is preserved.
  */
-export function imageRule(md: MarkdownIt): void {
+export function imageRule(markdownIt: MarkdownIt): void {
   const fallback: RenderRule =
-    md.renderer.rules.image ??
-    ((tokens, idx, options, _env, self) =>
-      self.renderToken(tokens, idx, options));
+    markdownIt.renderer.rules.image ??
+    ((tokens, tokenIndex, options, _env, self) =>
+      self.renderToken(tokens, tokenIndex, options));
 
-  md.renderer.rules.image = (tokens, idx, options, env, self) => {
-    const e = env as ImageRewriteEnv;
-    if (e.imageRewrite) {
-      const token = tokens[idx];
-      const src = token.attrGet("src");
-      if (src !== null && isLocalImageSrc(src)) {
-        const index = e.localImageIndex ?? 0;
-        e.localImageIndex = index + 1;
+  markdownIt.renderer.rules.image = (
+    tokens,
+    tokenIndex,
+    options,
+    env,
+    self,
+  ) => {
+    const rewriteEnv = env as ImageRewriteEnv;
+    if (rewriteEnv.imageRewrite) {
+      const token = tokens[tokenIndex];
+      const source = token.attrGet("src");
+      if (source !== null && isLocalImageSrc(source)) {
+        const index = rewriteEnv.localImageIndex ?? 0;
+        rewriteEnv.localImageIndex = index + 1;
         token.attrSet(
           "src",
-          `/api/image/${e.imageRewrite.sessionId}/${index}?token=${encodeURIComponent(e.imageRewrite.token)}`,
+          `/api/image/${rewriteEnv.imageRewrite.sessionId}/${index}?token=${encodeURIComponent(rewriteEnv.imageRewrite.token)}`,
         );
       }
     }
-    return fallback(tokens, idx, options, env, self);
+    return fallback(tokens, tokenIndex, options, env, self);
   };
 }

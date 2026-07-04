@@ -45,12 +45,12 @@ function extractBoundary(contentType: string | undefined): string {
  * draining (bytes dropped) so the response can be sent and the keep-alive
  * connection stays usable, then reject at end.
  */
-function readBody(req: IncomingMessage, maxBytes: number): Promise<Buffer> {
+function readBody(request: IncomingMessage, maxBytes: number): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
     let over = false;
-    req.on("data", (chunk: Buffer) => {
+    request.on("data", (chunk: Buffer) => {
       size += chunk.length;
       if (over) return;
       if (size > maxBytes) {
@@ -60,11 +60,11 @@ function readBody(req: IncomingMessage, maxBytes: number): Promise<Buffer> {
       }
       chunks.push(chunk);
     });
-    req.on("end", () => {
+    request.on("end", () => {
       if (over) reject(new Error("payload exceeds max_payload_mb"));
       else resolve(Buffer.concat(chunks));
     });
-    req.on("error", reject);
+    request.on("error", reject);
   });
 }
 
@@ -83,11 +83,11 @@ function inferSource(filename: string | undefined): ImageRef["source"] {
  * mid-stream unpipe, so keep-alive needs no manual drain.
  */
 export async function parseMultipart(
-  req: IncomingMessage,
+  request: IncomingMessage,
   options: ParseMultipartOptions,
 ): Promise<ParsedMultipart> {
-  const boundary = extractBoundary(req.headers["content-type"]);
-  const body = await readBody(req, options.maxPayloadBytes);
+  const boundary = extractBoundary(request.headers["content-type"]);
+  const body = await readBody(request, options.maxPayloadBytes);
   const parts = parseMultipartBody(body, boundary);
 
   let payloadRaw: string | undefined;
@@ -141,9 +141,9 @@ export async function parseMultipart(
         path: storageName,
       });
     }
-  } catch (err) {
+  } catch (error) {
     await Promise.all(written.map((p) => rm(p, { force: true })));
-    throw err;
+    throw error;
   }
 
   return { payload, images };

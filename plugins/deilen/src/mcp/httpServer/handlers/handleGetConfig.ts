@@ -5,8 +5,8 @@ import { sendJson } from "../utils/sendJson.js";
 
 /** GET /api/config — return the current Config as JSON. */
 export async function handleGetConfig(
-  ctx: RouteContext,
-  res: ServerResponse,
+  context: RouteContext,
+  response: ServerResponse,
 ): Promise<void> {
-  sendJson(res, 200, { ok: true, config: await ctx.loadConfig() });
+  sendJson(response, 200, { ok: true, config: await context.loadConfig() });
 }

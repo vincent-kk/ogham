@@ -2,22 +2,22 @@ import type { IncomingMessage } from "node:http";
 
 /** Read and JSON-parse a request body (empty body -> {}). */
 export function parseJsonBody(
-  req: IncomingMessage,
+  request: IncomingMessage,
   maxBytes: number,
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
-    req.on("data", (chunk: Buffer) => {
+    request.on("data", (chunk: Buffer) => {
       size += chunk.length;
       if (size > maxBytes) {
         reject(new Error("request body too large"));
-        req.destroy();
+        request.destroy();
         return;
       }
       chunks.push(chunk);
     });
-    req.on("end", () => {
+    request.on("end", () => {
       const text = Buffer.concat(chunks).toString("utf-8");
       if (text.length === 0) {
         resolve({});
@@ -25,10 +25,10 @@ export function parseJsonBody(
       }
       try {
         resolve(JSON.parse(text));
-      } catch (err) {
-        reject(err);
+      } catch (error) {
+        reject(error);
       }
     });
-    req.on("error", reject);
+    request.on("error", reject);
   });
 }

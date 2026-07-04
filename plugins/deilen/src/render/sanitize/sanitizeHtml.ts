@@ -1,14 +1,15 @@
 import { ALLOWED_TAGS, type SanitizeProfile } from "./allowlist.js";
 import { sanitizeAttrs } from "./sanitizeAttrs.js";
 
-const TAG_RE = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
+const TAG_PATTERN =
+  /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
 // Comments, CDATA, declarations (<!DOCTYPE …>), processing instructions —
 // removed before the tag pass so splicing cannot assemble a tag that skips it.
 // Unterminated constructs swallow to end of input, mirroring browser parsing.
-const NON_TAG_RE =
+const NON_TAG_PATTERN =
   /<!--[\s\S]*?(?:-->|$)|<!\[CDATA\[[\s\S]*?(?:\]\]>|$)|<[!?][^>]*(?:>|$)/g;
 // script/style are dropped with their contents, not just their tags.
-const RAW_TEXT_RE =
+const RAW_TEXT_PATTERN =
   /<(script|style)\b(?:[^>"']|"[^"]*"|'[^']*')*>[\s\S]*?(?:<\/\1\s*>|$)/gi;
 const SENTINEL = "\u0000";
 
@@ -28,10 +29,10 @@ export function sanitizeHtml(
 ): string {
   const cleaned = html
     .replaceAll(SENTINEL, "")
-    .replace(NON_TAG_RE, "")
-    .replace(RAW_TEXT_RE, "")
+    .replace(NON_TAG_PATTERN, "")
+    .replace(RAW_TEXT_PATTERN, "")
     .replace(
-      TAG_RE,
+      TAG_PATTERN,
       (_match, slash: string, rawName: string, rawAttrs: string) => {
         const name = rawName.toLowerCase();
         if (!ALLOWED_TAGS.has(name)) return "";

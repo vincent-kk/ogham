@@ -14,9 +14,12 @@ export async function atomicWrite(
   data: string | Uint8Array,
   options: AtomicWriteOptions = {},
 ): Promise<void> {
-  const dir = dirname(filePath);
-  await mkdir(dir, { recursive: true, mode: options.dirMode ?? DIR_MODE });
-  const tmp = `${filePath}.${randomBytes(6).toString("hex")}.tmp`;
-  await writeFile(tmp, data, { mode: options.mode ?? FILE_MODE });
-  await rename(tmp, filePath);
+  const directory = dirname(filePath);
+  await mkdir(directory, {
+    recursive: true,
+    mode: options.dirMode ?? DIR_MODE,
+  });
+  const temporaryPath = `${filePath}.${randomBytes(6).toString("hex")}.tmp`;
+  await writeFile(temporaryPath, data, { mode: options.mode ?? FILE_MODE });
+  await rename(temporaryPath, filePath);
 }

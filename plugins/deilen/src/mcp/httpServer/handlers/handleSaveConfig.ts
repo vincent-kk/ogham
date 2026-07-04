@@ -9,20 +9,20 @@ const MAX_CONFIG_BYTES = 64 * 1024;
 
 /** POST /api/config — validate and persist the submitted Config. */
 export async function handleSaveConfig(
-  ctx: RouteContext,
-  req: IncomingMessage,
-  res: ServerResponse,
+  context: RouteContext,
+  request: IncomingMessage,
+  response: ServerResponse,
 ): Promise<void> {
   let body: unknown;
   try {
-    body = await parseJsonBody(req, MAX_CONFIG_BYTES);
-  } catch (err) {
-    sendJson(res, 400, { ok: false, message: (err as Error).message });
+    body = await parseJsonBody(request, MAX_CONFIG_BYTES);
+  } catch (error) {
+    sendJson(response, 400, { ok: false, message: (error as Error).message });
     return;
   }
   const parsed = ConfigSchema.safeParse(body);
   if (!parsed.success) {
-    sendJson(res, 400, {
+    sendJson(response, 400, {
       ok: false,
       message: "Invalid config",
       errors: parsed.error.issues.map((issue) =>
@@ -35,12 +35,15 @@ export async function handleSaveConfig(
   }
   // The settings form doesn't carry last_intent (auto-managed at submit time),
   // so preserve the stored value instead of letting the schema default reset it.
-  const current = await ctx.loadConfig();
+  const current = await context.loadConfig();
   try {
-    await ctx.saveConfig({ ...parsed.data, last_intent: current.last_intent });
-  } catch (err) {
-    sendJson(res, 500, { ok: false, message: (err as Error).message });
+    await context.saveConfig({
+      ...parsed.data,
+      last_intent: current.last_intent,
+    });
+  } catch (error) {
+    sendJson(response, 500, { ok: false, message: (error as Error).message });
     return;
   }
-  sendJson(res, 200, { ok: true });
+  sendJson(response, 200, { ok: true });
 }
