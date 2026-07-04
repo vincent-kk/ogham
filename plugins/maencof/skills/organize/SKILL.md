@@ -1,9 +1,9 @@
 ---
 name: organize
 user_invocable: true
-description: "[maencof:organize] Reorganizes the knowledge vault by promoting or retiring documents across layers. Presents ranked recommendations from the memory-organizer agent and executes moves only after explicit confirmation."
-argument-hint: "[--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]"
-version: "1.0.0"
+description: '[maencof:organize] Reorganizes the knowledge vault by promoting or retiring documents across layers. Presents ranked recommendations from the memory-organizer agent and executes moves only after explicit confirmation.'
+argument-hint: '[--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
+version: '1.0.0'
 complexity: complex
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: memory-organizer
@@ -61,6 +61,7 @@ If no index is found, abort with: "No index found. Please run `/maencof:build` f
 ### Step 2 — judge stage (memory-organizer delegation)
 
 Run the judge module of the `memory-organizer` agent:
+
 - Scan Layer 3/4/5 files (including sub-layer directories: `relational/`, `structural/`, `topical/`, `buffer/`, `boundary/`)
 - Evaluate access frequency, tag matching, and connection density
 - Generate a list of TransitionDirectives
@@ -79,6 +80,7 @@ The user can type "proceed" or select/exclude individual items.
 ### Step 4 — execute stage (memory-organizer delegation)
 
 Run the execute module for approved TransitionDirectives:
+
 - Call `mcp__plugin_maencof_t__move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
 - Update the Frontmatter `layer` and `sub_layer` fields
 - Update link paths
@@ -93,13 +95,13 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 > The organize skill is an orchestrator. MCP tools are invoked by the memory-organizer agent,
 > not directly by this skill. The skill coordinates the workflow and user confirmation flow.
 
-| Tool | Used by | Purpose |
-|------|---------|---------|
-| `mcp__plugin_maencof_t__kg_status` | skill (Step 1) | Check vault status and stale-nodes |
-| `mcp__plugin_maencof_t__read` | memory-organizer agent (judge module) | Read document Frontmatter |
-| `mcp__plugin_maencof_t__kg_navigate` | memory-organizer agent | Traverse link relationships |
-| `mcp__plugin_maencof_t__move` | memory-organizer agent (execute module) | Execute file move |
-| `mcp__plugin_maencof_t__update` | memory-organizer agent (execute module) | Update Frontmatter |
+| Tool                                 | Used by                                 | Purpose                            |
+| ------------------------------------ | --------------------------------------- | ---------------------------------- |
+| `mcp__plugin_maencof_t__kg_status`   | skill (Step 1)                          | Check vault status and stale-nodes |
+| `mcp__plugin_maencof_t__read`        | memory-organizer agent (judge module)   | Read document Frontmatter          |
+| `mcp__plugin_maencof_t__kg_navigate` | memory-organizer agent                  | Traverse link relationships        |
+| `mcp__plugin_maencof_t__move`        | memory-organizer agent (execute module) | Execute file move                  |
+| `mcp__plugin_maencof_t__update`      | memory-organizer agent (execute module) | Update Frontmatter                 |
 
 ## Error Handling
 
@@ -112,6 +114,7 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 ### Auto-Insight Documents
 
 When organizing, prioritize reviewing documents with the `auto-insight` tag:
+
 - L5 auto-insight documents with strong connections (high link count) → promote to L2
 - L5 auto-insight documents with no connections after 30+ days → archive candidate
 - Update `.maencof-meta/auto-insight-stats.json` when promoting (increment `l5_promoted`) or archiving (increment `l5_archived`)
@@ -119,10 +122,11 @@ When organizing, prioritize reviewing documents with the `auto-insight` tag:
 ### L5-Buffer Promotion Workflow
 
 Buffer documents are temporary holding areas. During organization:
+
 1. **Scan** `05_Context/buffer/` for documents older than 7 days
 2. **Evaluate** each document's connections, tags, and content type
 3. **Recommend target**: L2 (internalized), L3 with sub-layer (external reference), or archive
-4. **Execute** via `mcp__plugin_maencof_t__move` with `target_sub_layer` — buffer metadata is auto-stripped
+4. **Execute** via `mcp__plugin_maencof_t__move` with `target_sub_layer` — buffer metadata is auto-stripped. Pass `target_subdirectory` (e.g. `"projects"`, max 2 levels) to file the promoted document into a subdirectory of the target layer/sub-layer.
 
 ## Options
 
@@ -130,8 +134,8 @@ Buffer documents are temporary holding areas. During organization:
 /maencof:organize [--dry-run] [--layer <3|4|5>] [--min-confidence <0.0-1.0>]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--dry-run` | false | Run judge only, skip execute stage. Plain TransitionDirective preview; use `/maencof:reflect` for a deeper diagnostic report. |
-| `--layer` | 3,4,5 | Target Layer(s) to scan (3, 4, or 5) |
-| `--min-confidence` | 0.7 | Minimum confidence threshold |
+| Option             | Default | Description                                                                                                                   |
+| ------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `--dry-run`        | false   | Run judge only, skip execute stage. Plain TransitionDirective preview; use `/maencof:reflect` for a deeper diagnostic report. |
+| `--layer`          | 3,4,5   | Target Layer(s) to scan (3, 4, or 5)                                                                                          |
+| `--min-confidence` | 0.7     | Minimum confidence threshold                                                                                                  |

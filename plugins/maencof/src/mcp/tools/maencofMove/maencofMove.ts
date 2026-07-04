@@ -4,18 +4,20 @@
  */
 import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname } from 'node:path';
 
 import {
   L3_SUBDIR,
   L5_SUBDIR,
   LAYER_DIR,
 } from '../../../constants/architecture.js';
+import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { FRONTMATTER_REGEX } from '../../../constants/regexes.js';
 import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/documentParser/index.js';
+import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { parseYamlFrontmatter } from '../../../core/yamlParser/index.js';
 import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
@@ -65,6 +67,31 @@ function updateLayerInFrontmatter(
   }
 
   return content.replace(match[0], `---\n${yaml}\n---\n`);
+}
+
+/**
+ * target_subdirectory 입력을 정규화한다.
+ * `..` 세그먼트 거부, 세그먼트별 슬러그화, 깊이 제한 — maencofCreate의
+ * 명시적 filename 처리와 동일한 규칙을 따른다.
+ */
+function resolveTargetSubdirectory(
+  subdirectory: string,
+): { segments: string[] } | { error: string } {
+  if (subdirectory.split(/[/\\]/).some((segment) => segment === '..'))
+    return {
+      error:
+        'Path traversal detected: ".." segments are not allowed in target_subdirectory',
+    };
+
+  const segments = subdirectory
+    .split('/')
+    .map(sanitizeSegment)
+    .filter((segment) => segment.length > 0);
+  if (segments.length > MAX_FILENAME_SUBDIR_DEPTH)
+    return {
+      error: `Subdirectory depth exceeds limit (${MAX_FILENAME_SUBDIR_DEPTH}): ${subdirectory}`,
+    };
+  return { segments };
 }
 
 /**
@@ -123,11 +150,12 @@ export async function handleMaencofMove(
     ? nodeResult.node?.subLayer
     : undefined;
 
-  // 같은 레이어 + 같은 서브레이어이면 이동 불필요 (서브레이어 변경은 허용)
+  // 같은 레이어이면 서브레이어/서브디렉토리 재배치일 때만 이동 허용
   if (
     nodeResult.success &&
     nodeResult.node?.layer === targetLayerNum &&
-    !input.target_sub_layer
+    !input.target_sub_layer &&
+    !input.target_subdirectory
   )
     return {
       success: false,
@@ -135,7 +163,7 @@ export async function handleMaencofMove(
       message: `Already in Layer ${targetLayerNum}.`,
     };
 
-  // 대상 경로 계산 (서브레이어 디렉토리 포함)
+  // 대상 경로 계산 (서브레이어 + 서브디렉토리 포함)
   const filename = basename(input.path);
   let subDir = '';
   if (input.target_sub_layer)
@@ -144,10 +172,27 @@ export async function handleMaencofMove(
     else if (targetLayerNum === 5 && input.target_sub_layer in L5_SUBDIR)
       subDir = L5_SUBDIR[input.target_sub_layer as L5SubLayer];
 
-  const newRelativePath = subDir
-    ? `${targetLayerDir}/${subDir}/${filename}`
-    : `${targetLayerDir}/${filename}`;
-  const newAbsPath = join(vaultPath, newRelativePath);
+  let subdirectoryPath = '';
+  if (input.target_subdirectory) {
+    const subdirectoryResult = resolveTargetSubdirectory(
+      input.target_subdirectory,
+    );
+    if ('error' in subdirectoryResult)
+      return {
+        success: false,
+        path: input.path,
+        message: subdirectoryResult.error,
+      };
+    subdirectoryPath = subdirectoryResult.segments.join('/');
+  }
+
+  const newRelativePath = [targetLayerDir, subDir, subdirectoryPath, filename]
+    .filter((part) => part.length > 0)
+    .join('/');
+  const resolvedDst = resolveWithinVault(vaultPath, newRelativePath);
+  if ('error' in resolvedDst)
+    return { success: false, path: input.path, message: resolvedDst.error };
+  const newAbsPath = resolvedDst.absolutePath;
 
   // 대상 파일 중복 확인
   try {

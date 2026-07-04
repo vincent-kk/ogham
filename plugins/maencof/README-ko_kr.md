@@ -147,13 +147,13 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activation(SA) 감쇠율이 다릅니다:
 
-| Layer | 이름               | 디렉토리       | SA Decay | 용도                             |
-| ----- | ------------------ | -------------- | -------- | -------------------------------- |
-| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변  |
-| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술             |
-| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료          |
-| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트  |
-| L5    | Context            | `05_Context/`  | 0.95     | 맥락 메타데이터, 도메인 컨텍스트 |
+| Layer | 이름               | 디렉토리       | SA Decay | 용도                                              |
+| ----- | ------------------ | -------------- | -------- | ------------------------------------------------- |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변                   |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술                              |
+| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료                           |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트                   |
+| L5    | Context            | `05_Context/`  | 0.95     | 미분류 인박스(buffer), 교차 레이어 허브(boundary) |
 
 **감쇠율이 낮을수록 더 강하게 지속됩니다.** L1 문서는 검색 시 강하게 활성화되고 오래 유지됩니다. L4 문서는 강화되지 않으면 빠르게 사라집니다.
 

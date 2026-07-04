@@ -90,6 +90,8 @@ export interface MaencofMoveInput {
   confidence?: number;
   /** 목표 서브레이어 */
   target_sub_layer?: SubLayer;
+  /** 목표 레이어/서브레이어 아래 중첩 디렉토리 (최대 깊이 2) */
+  target_subdirectory?: string;
 }
 
 /** CRUD 공통 응답 */

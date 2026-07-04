@@ -46,19 +46,19 @@ export function registerCrudTools(server: McpServer): void {
           .string()
           .optional()
           .describe(
-            'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234"',
+            'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234" (max 2 subdirectory levels, nested under the layer/sub-layer directory)',
           ),
         source: z.string().optional().describe('External source (for Layer 3)'),
         expires: z
           .string()
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .optional()
-          .describe('Expiry date YYYY-MM-DD (for Layer 4)'),
+          .describe('Expiry date YYYY-MM-DD (for Layer 4 and L5 buffer)'),
         sub_layer: z
           .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
           .optional()
           .describe(
-            'Sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+            'Sub-layer (L3: relational/structural/topical — default topical; L5: buffer/boundary — default buffer, the unclassified inbox; for boundary MOC/hub documents prefer boundary_create)',
           ),
         mentioned_persons: z
           .array(z.string())
@@ -214,7 +214,7 @@ export function registerCrudTools(server: McpServer): void {
     McpToolName.MOVE,
     {
       description:
-        'Moves a document to a different Layer (transition). Layer 1 documents cannot be moved.',
+        'Moves a document to a different Layer (transition), sub-layer, or subdirectory. Layer 1 documents cannot be moved.',
       inputSchema: z.object({
         path: z.string().describe('Document path'),
         target_layer: z
@@ -235,6 +235,12 @@ export function registerCrudTools(server: McpServer): void {
           .optional()
           .describe(
             'Target sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+          ),
+        target_subdirectory: z
+          .string()
+          .optional()
+          .describe(
+            'Subdirectory under the target layer/sub-layer directory, e.g. "projects" (max 2 levels; ".." rejected). For reorganizing within the same sub-layer, pass target_sub_layer together.',
           ),
       }),
     },

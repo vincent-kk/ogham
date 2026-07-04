@@ -2,7 +2,7 @@
 name: remember
 user_invocable: true
 description: '[maencof:remember] Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter.'
-argument-hint: '[content] [--layer 2-5] [--sub-layer NAME] [--title TITLE] [--tags TAGS] [--source URL] [--expires DATE] [--no-check]'
+argument-hint: '[content] [--layer 2-5] [--sub-layer NAME] [--title TITLE] [--tags TAGS] [--source URL] [--expires DATE] [--filename NAME] [--no-check]'
 version: '1.0.0'
 complexity: medium
 context_layers: [2, 3, 4, 5]
@@ -41,16 +41,17 @@ Identify the content to record from user input or current conversation context:
 
 Recommend a Layer based on the nature of the content:
 
-| Layer       | Criteria                                                | Directory      |
-| ----------- | ------------------------------------------------------- | -------------- |
-| L2 Derived  | Internalized skills/knowledge/insights                  | `02_Derived/`  |
-| L3 External | External references, links, temporary knowledge         | `03_External/` |
-| L4 Action   | To-dos, current session context, temporary notes        | `04_Action/`   |
-| L5 Context  | Environmental context, domain metadata, people profiles | `05_Context/`  |
+| Layer       | Criteria                                                               | Directory      |
+| ----------- | ---------------------------------------------------------------------- | -------------- |
+| L2 Derived  | Internalized skills/knowledge/insights                                 | `02_Derived/`  |
+| L3 External | External references, links, temporary knowledge                        | `03_External/` |
+| L4 Action   | To-dos, current session context, temporary notes                       | `04_Action/`   |
+| L5 Context  | Unclassified fragments (buffer inbox), cross-layer MOC/hubs (boundary) | `05_Context/`  |
 
 **L2 recommendation criteria**: knowledge the user has directly acquired, validated concepts, expected to be referenced repeatedly
 **L3 recommendation criteria**: contains URL, references external materials, has explicit `source:`
 **L4 recommendation criteria**: "later", "today", "need to", time-limited, has an expiration date
+**L5 fallback rule**: when none of the L2/L3/L4 criteria clearly applies — the fragment is uncategorized, its context is unclear, or classification confidence is low — do NOT force a layer. Save it to L5 buffer (`05_Context/buffer/`), the inbox for later triage. Buffer items are promoted or expired via `/maencof:organize` and `/maencof:cleanup buffer`.
 
 #### L3 Sub-Layer Selection
 
@@ -75,7 +76,7 @@ When creating an L5 document, determine the role:
 | L5-Buffer   | Uncategorized temporary items, inbox | `05_Context/buffer/`   |
 | L5-Boundary | Cross-layer bridge, project MOC, hub | `05_Context/boundary/` |
 
-Default to **Buffer** for general L5 content. Use **Boundary** only when the document explicitly bridges multiple layers (e.g., project MOC linking L1 values to L3 references).
+Default to **Buffer** for general L5 content. For **Boundary** documents (project MOC, cross-layer hub linking e.g. L1 values to L3 references), do NOT use `create` — use the dedicated `mcp__plugin_maencof_t__boundary_create` tool, which writes the required `boundary_type` / `connected_layers` frontmatter that `create` cannot set.
 
 If the user specifies `--layer`, use that Layer.
 Confirm the recommended Layer with the user before proceeding:
@@ -155,18 +156,18 @@ expires: YYYY-MM-DD # expiration date (if applicable)
 schedule: 'once' # or "daily", "weekly"
 ```
 
-**L5 Frontmatter**:
+**L5 Frontmatter** (buffer — the only L5 kind written via `create`):
 
 ```yaml
 layer: 5
-sub_layer: buffer | boundary # default: buffer
+sub_layer: buffer # default for L5
 tags: [extracted tags]
-domain: 'domain or context category'
-subject: 'person name or entity (if applicable)'
-# L5-Boundary additional fields:
-boundary_type: 'project_moc | hub | domain_bridge'
-connected_layers: [1, 3] # layers this boundary bridges
+expires: YYYY-MM-DD # optional; buffer items default to a ~30-day triage window
 ```
+
+L5-Boundary documents are created with `mcp__plugin_maencof_t__boundary_create`
+(`title`, `boundary_type: project_moc|cross_domain|synthesis`, `connected_layers`, `tags`) —
+not with `create`.
 
 ### Step 6 — Confirmation Report
 
@@ -183,31 +184,33 @@ To explore related documents: /maencof:explore {tag}
 
 ## Available MCP Tools
 
-| Tool              | Purpose                                               |
-| ----------------- | ----------------------------------------------------- |
-| `mcp__plugin_maencof_t__create`    | Create document (primary tool)                        |
-| `mcp__plugin_maencof_t__kg_search` | Pre-creation duplicate check                          |
-| `mcp__plugin_maencof_t__update`    | Update existing document (when duplicate found)       |
-| `mcp__plugin_maencof_t__read`      | Read existing document content (when duplicate found) |
+| Tool                                     | Purpose                                               |
+| ---------------------------------------- | ----------------------------------------------------- |
+| `mcp__plugin_maencof_t__create`          | Create document (primary tool)                        |
+| `mcp__plugin_maencof_t__boundary_create` | Create L5 boundary (MOC/hub) documents                |
+| `mcp__plugin_maencof_t__kg_search`       | Pre-creation duplicate check                          |
+| `mcp__plugin_maencof_t__update`          | Update existing document (when duplicate found)       |
+| `mcp__plugin_maencof_t__read`            | Read existing document content (when duplicate found) |
 
 ## Options
 
 > Options are interpreted by the LLM in natural language.
 
 ```
-/maencof:remember [content] [--layer <2-5>] [--sub-layer <name>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>]
+/maencof:remember [content] [--layer <2-5>] [--sub-layer <name>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>] [--filename <[subdir/]name>]
 ```
 
-| Option        | Default              | Description                                                         |
-| ------------- | -------------------- | ------------------------------------------------------------------- |
-| `content`     | conversation context | Content to record                                                   |
-| `--layer`     | auto-recommended     | Specify Layer (2-5; L1 not allowed)                                 |
-| `--sub-layer` | auto-recommended     | Sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
-| `--title`     | auto-generated       | Document title                                                      |
-| `--tags`      | auto-extracted       | Tag list (comma-separated)                                          |
-| `--source`    | none                 | External source URL (for L3)                                        |
-| `--expires`   | none                 | Expiration date YYYY-MM-DD (for L4)                                 |
-| `--no-check`  | false                | Skip duplicate check                                                |
+| Option        | Default              | Description                                                                                                 |
+| ------------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `content`     | conversation context | Content to record                                                                                           |
+| `--layer`     | auto-recommended     | Specify Layer (2-5; L1 not allowed)                                                                         |
+| `--sub-layer` | auto-recommended     | Sub-layer: relational/structural/topical (L3), buffer/boundary (L5)                                         |
+| `--title`     | auto-generated       | Document title                                                                                              |
+| `--tags`      | auto-extracted       | Tag list (comma-separated)                                                                                  |
+| `--source`    | none                 | External source URL (for L3)                                                                                |
+| `--expires`   | none                 | Expiration date YYYY-MM-DD (for L4 / L5 buffer)                                                             |
+| `--filename`  | auto-generated       | Filename hint; a subdirectory prefix groups related documents, e.g. `projects/alpha-kickoff` (max 2 levels) |
+| `--no-check`  | false                | Skip duplicate check                                                                                        |
 
 ## Usage Examples
 
@@ -216,6 +219,8 @@ To explore related documents: /maencof:explore {tag}
 /maencof:remember https://example.com/paper paper on spreading activation --layer 3
 /maencof:remember PR review due tomorrow --layer 4 --expires 2026-12-31
 /maencof:remember --title "TypeScript Generic Patterns" --tags typescript,generic,pattern
+/maencof:remember overheard idea — spaced repetition for code review, unsure where it fits --layer 5
+/maencof:remember Project Alpha kickoff notes --layer 4 --filename projects/alpha-kickoff
 ```
 
 ## Error Handling

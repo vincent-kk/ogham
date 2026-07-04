@@ -5,12 +5,18 @@
 - `capture_insight` MCP 도구는 auto-insight 레코드를 벌트에 영속화하기 **이전에** `config.category_filter` 를 반드시 적용한다. 금지된 카테고리에 대한 호출은 파일 쓰기 없이 즉시 거절된다.
 - 사용자는 `/maencof:insight --category <key> --accept|--reject` 를 통해 `.maencof-meta/insight-config.json::category_filter.<key>` 를 토글할 수 있다.
 - `insightInjector` 훅은 이 필터에 대한 표면 배너를 노출할 뿐이며 실제 차단은 이 MCP 도구의 책임이다. 따라서 이 파일의 enforcement 로직이 바뀌면 `insightInjector` 의 배너 문구도 동기화해야 한다.
+- 레이어 라우팅: `layer: 2`(내재화된 인사이트/원리)는 `02_Derived/` 루트에, `layer: 5`(미분류 단편)는 반드시 `sub_layer: 'buffer'`로 위임되어 `05_Context/buffer/`에 생성된다. L5 캡처가 `05_Context/` 루트에 떨어지면 organize/cleanup의 buffer 스캔에서 누락되는 고아 문서가 되므로 금지.
 
 ## API Contracts
 
+### Layer routing contract
+
+- 입력 `layer`는 `2 | 5`만 허용한다 (Zod literal union).
+- `layer === 5`이면 `handleMaencofCreate` 위임 시 `sub_layer: 'buffer'`를 함께 전달한다. `layer === 2`는 `sub_layer` 없이 위임한다.
+
 ### Rejection contract (category_filter)
 
-`maencofCaptureInsight.ts:63-71` 에서 수행되는 거절 로직은 다음 응답을 반환한다:
+`maencofCaptureInsight.ts` 의 거절 로직은 다음 응답을 반환한다:
 
 ```ts
 {
@@ -32,9 +38,5 @@
 ### Enforcement sites (grep guard)
 
 `rg -n 'category_filter\[' plugins/maencof/src/` 결과는 정확히 1 개의 enforcement site
-(`maencofCaptureInsight.ts:65`) 만 반환해야 한다. 이 수가 증가하면 다중 enforcement 로 인한
+(`maencofCaptureInsight.ts`) 만 반환해야 한다. 이 수가 증가하면 다중 enforcement 로 인한
 문서/코드 drift 가능성이 있으므로 DETAIL.md 와 SKILL.md 둘 다 업데이트할 것.
-
-## Last Updated
-
-2026-04-16 (PR α — P3 re-diagnosed, docs-only fix 적용)

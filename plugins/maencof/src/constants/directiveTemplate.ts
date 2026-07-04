@@ -28,6 +28,7 @@ export function buildDefaultDirective(
 - When modifying vault documents MUST use \`update\`. Do not edit vault markdown files directly with the Edit tool.
 - When learning new information MUST use \`kg_suggest_links\` to check for connection possibilities with existing knowledge.
 - When creating documents MUST specify layer and tags.
+- When new information does NOT clearly fit L2/L3/L4, MUST NOT force a layer — create it with layer 5 + sub_layer 'buffer' (the unclassified inbox). Buffer items are promoted later via /maencof:organize or cleaned via /maencof:cleanup buffer.
 - When creating documents about interactions with people (meetings, conversations, collaborations), MUST include \`mentioned_persons\` parameter in \`create\` with the names of people mentioned. This is separate from \`person_ref\` (L3A-only, identifies who a profile document is about). \`mentioned_persons\` captures anyone mentioned in any document at any layer.
 
 ## Forbidden Rules (FORBIDDEN)
@@ -53,6 +54,7 @@ export function buildDefaultDirective(
 | Update vault documents | update | Edit |
 | Delete vault documents | delete | Bash rm |
 | Move vault documents | move | Bash mv |
+| Create cross-layer MOC/hub | boundary_create | create |
 | Check vault status | kg_status | ls, find |
 | Assemble context | kg_context | Manual file assembly |
 | Capture insight | capture_insight | create (use dedicated tool) |
@@ -83,6 +85,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - When discovering that existing vault information is outdated, MUST update the document using \`update\`.
 - For temporary task context (meeting notes, debugging sessions, research in progress), MUST create Layer 4 (Action) documents with appropriate \`expires\` dates.
 - When conversation reveals connections between existing documents, MUST use \`kg_suggest_links\` and update documents to add \`[[wikilinks]]\`.
+- To group related documents within a layer, use subdirectories: \`create\` accepts a \`filename\` with a subdirectory prefix (e.g. \`"projects/alpha-status"\`) and \`move\` accepts \`target_subdirectory\` (max 2 levels each).
 - When the system advises running \`kg_build\` (stale index advisory), follow the advice promptly.
 - Run \`kg_build\` explicitly only when advised by the system (high stale ratio) or for full PageRank recalculation.
 

@@ -18,13 +18,13 @@ Ensure consistency between file paths and the Frontmatter `layer` field.
 
 ### R1. Directory-to-Layer Mapping
 
-| Directory Prefix | Layer | Description |
-|-----------------|-------|-------------|
-| `01_Core/` | 1 | Core Identity Hub |
-| `02_Derived/` | 2 | Internalized knowledge |
-| `03_External/` | 3 | External references |
-| `04_Action/` | 4 | Action memory |
-| `05_Context/` | 5 | Contextual metadata (persons, domains) |
+| Directory Prefix | Layer | Description                                                      |
+| ---------------- | ----- | ---------------------------------------------------------------- |
+| `01_Core/`       | 1     | Core Identity Hub                                                |
+| `02_Derived/`    | 2     | Internalized knowledge                                           |
+| `03_External/`   | 3     | External references                                              |
+| `04_Action/`     | 4     | Action memory                                                    |
+| `05_Context/`    | 5     | Context (buffer: unclassified inbox, boundary: cross-layer hubs) |
 
 ### R2. Frontmatter layer Field Must Match
 
@@ -45,7 +45,8 @@ Hub nodes are only referenced by others; they do not reference outward.
 
 ```markdown
 <!-- Violation: inside 01_Core/values.md -->
-[Related Skill](../02_Derived/skills/programming.md)  <!-- ERROR -->
+
+[Related Skill](../02_Derived/skills/programming.md) <!-- ERROR -->
 ```
 
 ### R4. Upper Layer → Layer 4 Links Prohibited
@@ -67,7 +68,10 @@ function validateLayerStructure(node: KnowledgeNode): DiagnosticItem[] {
       severity: 'error',
       path: node.path,
       message: `Path-inferred Layer ${pathLayer}, Frontmatter layer: ${node.layer}`,
-      autoFix: { fixable: true, description: 'Update Frontmatter layer to match path' }
+      autoFix: {
+        fixable: true,
+        description: 'Update Frontmatter layer to match path',
+      },
     });
   }
 

@@ -34,13 +34,13 @@ Identify the data source type and content from input:
 
 ### Step 2 — Layer Determination
 
-| Source Type                                             | Default Layer | Reason             |
-| ------------------------------------------------------- | ------------- | ------------------ |
-| External reference (URL, document)                      | Layer 3       | External origin    |
-| Temporary work note                                     | Layer 4       | Volatile           |
-| GitHub issue (in progress)                              | Layer 4       | Temporal proximity |
-| Completed issue/PR                                      | Layer 3       | For reference      |
-| Domain metadata, people profiles, environmental context | Layer 5       | Contextual         |
+| Source Type                                         | Default Layer    | Reason                 |
+| --------------------------------------------------- | ---------------- | ---------------------- |
+| External reference (URL, document)                  | Layer 3          | External origin        |
+| Temporary work note                                 | Layer 4          | Volatile               |
+| GitHub issue (in progress)                          | Layer 4          | Temporal proximity     |
+| Completed issue/PR                                  | Layer 3          | For reference          |
+| Unclassified fragments, scraps with unclear context | Layer 5 (buffer) | Inbox for later triage |
 
 ### Step 3 — Auto-generate Frontmatter
 
@@ -63,7 +63,7 @@ mcp__plugin_maencof_t__create({
   tags: [auto-extracted tags],
   content: {converted markdown},
   title: {title},
-  filename: "date-title" (for Layer 4 temporary notes),
+  filename: "date-title" (for Layer 4 temporary notes; a subdirectory prefix like "geeknews/2026-07-04-title" groups related items, max 2 levels),
   source: {original URL} (for Layer 3 external references),
   expires: "YYYY-MM-DD" (for Layer 4 expiring items)
 })
@@ -76,12 +76,12 @@ and suggest adding links.
 
 ## Available Tools
 
-| Tool              | Type   | Purpose                         |
-| ----------------- | ------ | ------------------------------- |
+| Tool                               | Type   | Purpose                         |
+| ---------------------------------- | ------ | ------------------------------- |
 | `mcp__plugin_maencof_t__create`    | MCP    | Create document                 |
 | `mcp__plugin_maencof_t__kg_search` | MCP    | Search for related documents    |
 | `mcp__plugin_maencof_t__update`    | MCP    | Add links                       |
-| `WebFetch`        | Native | Fetch web page content from URL |
+| `WebFetch`                         | Native | Fetch web page content from URL |
 
 ## Error Handling
 

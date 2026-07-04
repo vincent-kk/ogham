@@ -27,7 +27,9 @@ export const captureInsightInputSchema = z.object({
   layer: z
     .literal(2)
     .or(z.literal(5))
-    .describe('Target layer (2=Derived, 5=Context)'),
+    .describe(
+      'Target layer (2=Derived for an internalized insight/principle, 5=Context buffer inbox for an unclassified fragment worth keeping)',
+    ),
   tags: z
     .array(z.string())
     .min(1)
@@ -77,9 +79,10 @@ export async function handleCaptureInsight(
   if (args.context)
     fullContent = `## Context\n\n${args.context}\n\n${fullContent}`;
 
-  // 4. Delegate to existing create handler
+  // 4. Delegate to existing create handler (L5 insights land in the buffer inbox)
   const result = await handleMaencofCreate(vaultPath, {
     layer: args.layer as 2 | 5,
+    ...(args.layer === 5 && { sub_layer: 'buffer' as const }),
     tags,
     content: fullContent,
     title: args.title,

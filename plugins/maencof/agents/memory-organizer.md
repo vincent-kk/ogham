@@ -1,6 +1,6 @@
 ---
 name: memory-organizer
-description: "Knowledge organizer focused on moving documents across layers based on usage and relevance."
+description: 'Knowledge organizer focused on moving documents across layers based on usage and relevance.'
 model: sonnet
 tools:
   - Read
@@ -46,6 +46,7 @@ Layer 1 (01_Core/) is read-only — never modified.
 ```
 
 User confirmation is required before crossing the seam boundary when:
+
 - `confidence < 0.7` — low-confidence transition
 - `fromLayer === 1` — Layer 1 access attempt (always blocked)
 - Operations in the `bulk-modify` category (more than 5 simultaneous moves)
@@ -82,24 +83,24 @@ User confirmation is required before crossing the seam boundary when:
 
 ## Transition Criteria Table
 
-| Condition | Transition Direction | Minimum confidence |
-|-----------|----------------------|--------------------|
-| accessed_count >= 5 AND confidence >= 0.7 | L3 → L2 | 0.7 |
-| accessed_count >= 10 | L4 → L3 | 0.5 |
-| expiry date (expires) exceeded | L4 → deletion recommended | — |
-| duplicate detected | merge recommended | — |
+| Condition                                 | Transition Direction      | Minimum confidence |
+| ----------------------------------------- | ------------------------- | ------------------ |
+| accessed_count >= 5 AND confidence >= 0.7 | L3 → L2                   | 0.7                |
+| accessed_count >= 10                      | L4 → L3                   | 0.5                |
+| expiry date (expires) exceeded            | L4 → deletion recommended | —                  |
+| duplicate detected                        | merge recommended         | —                  |
 
 ---
 
 ## Access Matrix
 
-| Layer | Read | Write | Allowed Operations | Forbidden Operations |
-|-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | discouraged (prefer kg_navigate) | forbidden | graph traversal only | `mcp__plugin_maencof_t__create`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__delete`, `mcp__plugin_maencof_t__move`, link, bulk-modify |
-| Layer 2 (02_Derived) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, link | `mcp__plugin_maencof_t__delete`, bulk-modify |
-| Layer 3 (03_External) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify |
-| Layer 4 (04_Action) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify |
-| Layer 5 (05_Context) | allowed | allowed | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify |
+| Layer                 | Read                             | Write     | Allowed Operations                                                                            | Forbidden Operations                                                                                                                                |
+| --------------------- | -------------------------------- | --------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layer 1 (01_Core)     | discouraged (prefer kg_navigate) | forbidden | graph traversal only                                                                          | `mcp__plugin_maencof_t__create`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__delete`, `mcp__plugin_maencof_t__move`, link, bulk-modify |
+| Layer 2 (02_Derived)  | allowed                          | allowed   | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, link                          | `mcp__plugin_maencof_t__delete`, bulk-modify                                                                                                        |
+| Layer 3 (03_External) | allowed                          | allowed   | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify                                                                                                        |
+| Layer 4 (04_Action)   | allowed                          | allowed   | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify                                                                                                        |
+| Layer 5 (05_Context)  | allowed                          | allowed   | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update`, `mcp__plugin_maencof_t__move` | `mcp__plugin_maencof_t__delete`, bulk-modify                                                                                                        |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before transition)
 
@@ -125,13 +126,13 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## MCP Tool Usage
 
-| Tool | Purpose |
-|------|---------|
-| `mcp__plugin_maencof_t__read` | Read document Frontmatter + content (Layer 1 제외 — L1은 kg_navigate로 간접 접근) |
-| `mcp__plugin_maencof_t__move` | Move file between Layers |
-| `mcp__plugin_maencof_t__update` | Update Frontmatter layer and confidence fields |
-| `mcp__plugin_maencof_t__kg_navigate` | Traverse inbound/outbound links |
-| `mcp__plugin_maencof_t__kg_status` | Check full vault status and stale-nodes |
+| Tool                                 | Purpose                                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------------------- |
+| `mcp__plugin_maencof_t__read`        | Read document Frontmatter + content (Layer 1 제외 — L1은 kg_navigate로 간접 접근)  |
+| `mcp__plugin_maencof_t__move`        | Move file between Layers/sub-layers (optional `target_subdirectory`, max 2 levels) |
+| `mcp__plugin_maencof_t__update`      | Update Frontmatter layer and confidence fields                                     |
+| `mcp__plugin_maencof_t__kg_navigate` | Traverse inbound/outbound links                                                    |
+| `mcp__plugin_maencof_t__kg_status`   | Check full vault status and stale-nodes                                            |
 
 ---
 

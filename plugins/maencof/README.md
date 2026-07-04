@@ -147,13 +147,13 @@ View skill/agent activation status, usage reports, and toggle features on/off.
 
 maencof organizes knowledge into five layers with distinct decay rates for Spreading Activation (SA):
 
-| Layer | Name               | Directory      | SA Decay | Purpose                                 |
-| ----- | ------------------ | -------------- | -------- | --------------------------------------- |
-| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | Who you are — protected, rarely changes |
-| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | Internalized insights and skills        |
-| L3    | External Reference | `03_External/` | 0.8      | Bookmarks, citations, external sources  |
-| L4    | Action Memory      | `04_Action/`   | 0.9      | Volatile task notes, session context    |
-| L5    | Context            | `05_Context/`  | 0.95     | Environmental metadata, domain context  |
+| Layer | Name               | Directory      | SA Decay | Purpose                                                      |
+| ----- | ------------------ | -------------- | -------- | ------------------------------------------------------------ |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | Who you are — protected, rarely changes                      |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | Internalized insights and skills                             |
+| L3    | External Reference | `03_External/` | 0.8      | Bookmarks, citations, external sources                       |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | Volatile task notes, session context                         |
+| L5    | Context            | `05_Context/`  | 0.95     | Buffer inbox (unclassified), boundary hubs (cross-layer MOC) |
 
 **Lower decay = stronger persistence.** L1 documents activate strongly and stay relevant across searches. L4 documents fade quickly unless reinforced.
 

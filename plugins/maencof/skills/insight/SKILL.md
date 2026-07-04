@@ -107,7 +107,7 @@ Procedure:
 1. Read config, set `category_filter.<key> = (--accept ? true : false)`, write config
 2. Confirm: "Category {key} set to {accept|reject}."
 
-**Live status.** Active filtering is enforced at capture time by the `capture_insight` MCP tool. When `config.category_filter.<key> = false`, matching `capture_insight` calls are rejected with an explanatory error (see `src/mcp/tools/maencofCaptureInsight/maencofCaptureInsight.ts` lines 63-71). The `insight-injector` hook surfaces the current `allowed-categories` list to Claude each turn for transparency, but does not drop injections itself.
+**Live status.** Active filtering is enforced at capture time by the `capture_insight` MCP tool. When `config.category_filter.<key> = false`, matching `capture_insight` calls are rejected with an explanatory error (see `src/mcp/tools/maencofCaptureInsight/maencofCaptureInsight.ts`). The `insight-injector` hook surfaces the current `allowed-categories` list to Claude each turn for transparency, but does not drop injections itself.
 
 ## Default (no options)
 
@@ -120,8 +120,8 @@ Show current status in this order:
 
 ## Available MCP Tools
 
-| Tool              | Purpose                                                         |
-| ----------------- | --------------------------------------------------------------- |
+| Tool                               | Purpose                                                         |
+| ---------------------------------- | --------------------------------------------------------------- |
 | `mcp__plugin_maencof_t__kg_search` | Search recent auto-insight documents by tag (`--recent` option) |
 
 > Note: Config file operations (`.maencof-meta/insight-config.json`, `.maencof-meta/auto-insight-stats.json`, `.maencof-meta/pending-insight-notification.json`) use filesystem Read/Write tools, not maencof MCP tools.
