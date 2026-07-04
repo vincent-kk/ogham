@@ -134,18 +134,12 @@ layer: 3
 sub_layer: relational | structural | topical # defaults to topical if unclear
 tags: [extracted tags]
 source: 'original source URL (if available)'
-confidence: 0.3 # document-level metadata, not a create parameter; initial value, increases after validation
-# L3A (relational) additional fields:
-person:
-  {
-    name: '...',
-    relationship_type: 'friend|colleague|...',
-    intimacy_level: 1-5,
-  }
-# L3B (structural) additional fields:
-org_name: 'organization name'
-org_role: "user's role in the org"
 ```
+
+`confidence` (internalization 0.0-1.0, initial ~0.3) is not a create parameter — set it
+after creation via `mcp__plugin_maencof_t__update` (frontmatter). Rich sub-layer metadata
+(L3A `person`, L3B `org_type`, etc.) is schema-validated on read but has no MCP write
+path — do not promise those fields during remember.
 
 **L4 Frontmatter**:
 

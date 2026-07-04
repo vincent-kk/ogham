@@ -52,11 +52,19 @@ function buildSessionContext(cwd: string): string {
   // L4 Action document count
   const l4Count = layerCounts[4] ?? 0;
 
+  // L5 buffer inbox count (session-once triage nudge)
+  const bufferCount = readBufferInboxCount(cwd);
+
   const lines: string[] = [
     '[maencof] Knowledge Graph Summary',
     `- ${totalNodes} nodes across 5 layers`,
     `- Top domains: ${domainText}`,
     `- Active L4 documents: ${l4Count}`,
+    ...(bufferCount > 0
+      ? [
+          `- L5 buffer inbox: ${bufferCount} unclassified — triage via /maencof:organize`,
+        ]
+      : []),
     '',
     '[maencof] Session Directives',
     '- Vault tool rules are in CLAUDE.md (written at session start). Follow them strictly.',
@@ -83,6 +91,16 @@ function buildSessionContext(cwd: string): string {
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Count L5 buffer-sublayer nodes from cached node metadata.
+ */
+function readBufferInboxCount(cwd: string): number {
+  const nodes = readCachedNodesArray<{ subLayer?: string }>(cwd);
+  let count = 0;
+  for (const node of nodes) if (node.subLayer === 'buffer') count += 1;
+  return count;
 }
 
 interface DomainCount {

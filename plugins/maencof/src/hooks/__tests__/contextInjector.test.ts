@@ -29,7 +29,9 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-function writeIndex(nodes: Array<{ layer?: number; domain?: string }>): void {
+function writeIndex(
+  nodes: Array<{ layer?: number; domain?: string; subLayer?: string }>,
+): void {
   // 신규 샤드 layout 으로 fixture 작성. hook readers 는 nodes.json 을 우선 본다.
   writeFileSync(
     join(vaultDir, '.maencof', 'nodes.json'),
@@ -106,6 +108,27 @@ describe('injectContext', () => {
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('3 nodes across 5 layers');
     expect(ctx).toContain('security');
+  });
+
+  it('session context surfaces L5 buffer inbox count only when non-zero', () => {
+    writeIndex([
+      { layer: 5, subLayer: 'buffer' },
+      { layer: 5, subLayer: 'buffer' },
+      { layer: 5, subLayer: 'boundary' },
+      { layer: 2 },
+    ]);
+    const result = injectContext({ cwd: vaultDir, session_id: 'buffer-test' });
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('L5 buffer inbox: 2 unclassified');
+    expect(ctx).toContain('/maencof:organize');
+  });
+
+  it('session context omits buffer inbox line when buffer is empty', () => {
+    writeIndex([{ layer: 2 }, { layer: 5, subLayer: 'boundary' }]);
+    const result = injectContext({ cwd: vaultDir, session_id: 'no-buf-test' });
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('[maencof] Knowledge Graph Summary');
+    expect(ctx).not.toContain('L5 buffer inbox');
   });
 
   it('builds and caches turn context on first access', () => {

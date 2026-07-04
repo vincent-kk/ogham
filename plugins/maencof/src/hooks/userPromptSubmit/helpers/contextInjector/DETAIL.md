@@ -4,6 +4,7 @@
 
 - 첫 prompt: session context (KG 요약, 동반자 identity, 지시문) + turn context를 `\n\n`으로 결합하여 emit.
 - 후속 prompt: turn context만 emit.
+- session context의 KG 요약에 L5 buffer 인박스 카운트를 포함한다 (`subLayer === 'buffer'` 노드 수). 0이면 라인을 생략한다 — 미분류 항목 triage(`/maencof:organize`)를 유도하는 세션 1회 넛지.
 - 인덱서 내부 상태(stale 카운트, freshness 비율, `<kg-stale-advisory>` 분기 등)는 컨텍스트에 절대 포함하지 않는다. 인덱스 신선도는 MCP server가 cache + partial reindex로 처리한다.
 - maencof vault가 아닌 디렉터리에서 호출되면 즉시 no-op (`isMaencofVault` 가드).
 - session context는 세션 1회만 빌드하고 캐시 (`writePromptContext` + `markSessionInjected`).
