@@ -9,15 +9,15 @@ import {
   getSession,
   readViewerMarkdown,
 } from "../../../core/sessionStore/index.js";
-import { walkLocalImages } from "../../../render/index.js";
+import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
+import { getSessionImageSources } from "../utils/sessionImageSources.js";
 
-const SESSION_ID = /^[A-Za-z0-9_-]+$/;
 const MB = 1024 * 1024;
 
-const notFound = (res: ServerResponse): void =>
-  sendJson(res, 404, { ok: false, message: "Image not found" });
+const notFound = (response: ServerResponse): void =>
+  sendJson(response, 404, { ok: false, message: "Image not found" });
 
 /**
  * GET /api/image/<sid>/<index> — stream the index-th `file://` image referenced
@@ -26,74 +26,76 @@ const notFound = (res: ServerResponse): void =>
  * extension, be a regular file, and stay under max_image_mb.
  */
 export async function handleGetImage(
-  ctx: RouteContext,
+  context: RouteContext,
   sessionId: string,
   index: number,
-  res: ServerResponse,
+  response: ServerResponse,
 ): Promise<void> {
-  if (!SESSION_ID.test(sessionId)) {
-    sendJson(res, 400, { ok: false, message: "Invalid session id" });
+  if (!SESSION_ID_PATTERN.test(sessionId)) {
+    sendJson(response, 400, { ok: false, message: "Invalid session id" });
     return;
   }
-  const meta = await getSession(sessionId, ctx.projectHash);
+  const meta = await getSession(sessionId, context.projectHash);
   if (!meta) {
-    sendJson(res, 404, { ok: false, message: "Unknown session" });
+    sendJson(response, 404, { ok: false, message: "Unknown session" });
     return;
   }
   const markdown = await readViewerMarkdown(sessionId);
   if (markdown === null) {
-    notFound(res);
+    notFound(response);
     return;
   }
 
-  const sources: string[] = [];
-  walkLocalImages(markdown, (src) => sources.push(src));
+  const sources = getSessionImageSources(sessionId, markdown);
   const fileUrl = sources[index];
   if (fileUrl === undefined) {
-    notFound(res);
+    notFound(response);
     return;
   }
   let target: string;
   try {
     target = fileURLToPath(fileUrl);
   } catch {
-    notFound(res);
+    notFound(response);
     return;
   }
 
-  const mime = DISPLAY_IMAGE_MIME_BY_EXT[extname(target).toLowerCase()];
-  if (!mime) {
-    notFound(res);
+  const mimeType: string | undefined =
+    DISPLAY_IMAGE_MIME_BY_EXT[
+      extname(target).toLowerCase() as keyof typeof DISPLAY_IMAGE_MIME_BY_EXT
+    ];
+  if (!mimeType) {
+    notFound(response);
     return;
   }
 
-  const config = await ctx.loadConfig();
-  let real: string;
+  const config = await context.loadConfig();
+  let realPath: string;
   try {
-    real = await realpath(target);
-    const info = await stat(real);
+    realPath = await realpath(target);
+    const info = await stat(realPath);
     if (!info.isFile()) {
-      notFound(res);
+      notFound(response);
       return;
     }
     if (info.size > config.max_image_mb * MB) {
-      sendJson(res, 413, { ok: false, message: "Image too large" });
+      sendJson(response, 413, { ok: false, message: "Image too large" });
       return;
     }
   } catch {
-    notFound(res);
+    notFound(response);
     return;
   }
 
-  const stream = createReadStream(real);
+  const stream = createReadStream(realPath);
   stream.on("error", () => {
-    if (!res.headersSent) notFound(res);
-    else res.destroy();
+    if (!response.headersSent) notFound(response);
+    else response.destroy();
   });
-  res.writeHead(200, {
-    "Content-Type": mime,
+  response.writeHead(200, {
+    "Content-Type": mimeType,
     "Cache-Control": "private, max-age=3600",
   });
-  res.on("close", () => stream.destroy());
-  stream.pipe(res);
+  response.on("close", () => stream.destroy());
+  stream.pipe(response);
 }

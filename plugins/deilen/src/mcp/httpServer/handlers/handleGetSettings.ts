@@ -1,22 +1,23 @@
 import type { ServerResponse } from "node:http";
 
+import { DEILEN_STATE_PLACEHOLDER_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { escapeJsonForHtml } from "../utils/escapeJsonForHtml.js";
 
 /** GET /settings — serve the settings UI with the current Config injected. */
 export async function handleGetSettings(
-  ctx: RouteContext,
-  res: ServerResponse,
+  context: RouteContext,
+  response: ServerResponse,
 ): Promise<void> {
-  const config = await ctx.loadConfig();
-  const html = ctx
+  const config = await context.loadConfig();
+  const html = context
     .loadSettingsHtml()
-    .replace(/["']__DEILEN_STATE__["']/, () =>
-      escapeJsonForHtml({ config, token: ctx.token }),
+    .replace(DEILEN_STATE_PLACEHOLDER_PATTERN, () =>
+      escapeJsonForHtml({ config, token: context.token }),
     );
-  res.writeHead(200, {
+  response.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Content-Length": Buffer.byteLength(html),
   });
-  res.end(html);
+  response.end(html);
 }

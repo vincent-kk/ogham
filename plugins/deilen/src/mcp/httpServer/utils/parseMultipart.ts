@@ -15,6 +15,8 @@ import { parseMultipartBody } from "./parseMultipartBody.js";
 
 const ALLOWED_MIME: readonly string[] = ALLOWED_IMAGE_MIME;
 
+type AllowedImageMime = (typeof ALLOWED_IMAGE_MIME)[number];
+
 export interface ParseMultipartOptions {
   sessionId: string;
   maxImageBytes: number;
@@ -28,7 +30,7 @@ export interface ParsedMultipart {
 
 interface AcceptedImage {
   id: string;
-  mimeType: string;
+  mimeType: AllowedImageMime;
   filename?: string;
   data: Buffer;
 }
@@ -107,7 +109,7 @@ export async function parseMultipart(
 
     const image: AcceptedImage = {
       id: part.name.slice(4),
-      mimeType,
+      mimeType: mimeType as AllowedImageMime,
       data: part.data,
     };
     if (part.filename !== undefined) image.filename = part.filename;

@@ -9,6 +9,7 @@ import { createRouteHandler } from "./routing/routes.js";
 import { loadViewerHtml } from "./utils/loadViewerHtml.js";
 import { loadSettingsHtml } from "./utils/loadSettingsHtml.js";
 import { resolveAssetPath } from "./utils/resolveAssetPath.js";
+import { clearSessionImageSources } from "./utils/sessionImageSources.js";
 
 export interface HttpServerInstance {
   baseUrl: string;
@@ -64,14 +65,15 @@ async function startHttpServer(): Promise<HttpServerInstance> {
       idleTimer = null;
     }
     instance = null;
+    clearSessionImageSources();
     if (server) {
-      const s = server;
+      const activeServer = server;
       server = null;
       await new Promise<void>((resolve) => {
-        if (typeof s.closeAllConnections === "function")
-          s.closeAllConnections();
+        if (typeof activeServer.closeAllConnections === "function")
+          activeServer.closeAllConnections();
 
-        s.close(() => resolve());
+        activeServer.close(() => resolve());
       });
     }
     logger.info("http server closed");
@@ -99,17 +101,17 @@ async function startHttpServer(): Promise<HttpServerInstance> {
 
   server = createServer(handler);
   const port = await new Promise<number>((resolve, reject) => {
-    const onListenError = (err: Error): void => reject(err);
+    const onListenError = (error: Error): void => reject(error);
     server!.once("error", onListenError);
     server!.listen(config.preferred_port, "127.0.0.1", () => {
       server!.removeListener("error", onListenError);
-      const addr = server!.address();
-      if (addr && typeof addr === "object") resolve(addr.port);
+      const address = server!.address();
+      if (address && typeof address === "object") resolve(address.port);
       else reject(new Error("failed to read server address"));
     });
   });
-  server.on("error", (err) => {
-    logger.error("http server error", { error: err.message });
+  server.on("error", (error) => {
+    logger.error("http server error", { error: error.message });
   });
 
   touch();

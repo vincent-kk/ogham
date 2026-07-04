@@ -9,6 +9,7 @@
 | `httpServer.ts` | `ensureHttpServer`/`getHttpServer` — 싱글톤 lifecycle(closure)                   |
 | `routing/`      | `routes`(디스패치 + token/CSRF 가드) + `routeContext`(organ)                     |
 | `handlers/`     | GET `/r/<sid>`·`/api/viewer`·`/api/image`·`/assets/<chunk>`, POST `/api/ping` 외 |
+| `constants/`    | 공용 정규식 패턴 (session id·`__DEILEN_STATE__` placeholder) (organ)             |
 | `utils/`        | sendJson·escapeJsonForHtml·bridgeRoot·resolveAssetPath·loadViewerHtml            |
 | `index.ts`      | barrel                                                                           |
 

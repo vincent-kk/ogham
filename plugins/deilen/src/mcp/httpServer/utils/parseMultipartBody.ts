@@ -12,10 +12,14 @@ interface PartHeaders {
   mimeType?: string;
 }
 
-const CR = 0x0d;
-const LF = 0x0a;
+const CARRIAGE_RETURN = 0x0d;
+const LINE_FEED = 0x0a;
 const DASH = 0x2d;
 const HEADER_SEPARATOR = Buffer.from("\r\n\r\n");
+
+const NAME_PATTERN = /name="([^"]*)"/i;
+const FILENAME_PATTERN = /filename="([^"]*)"/i;
+const PART_CONTENT_TYPE_PATTERN = /content-type:\s*([^\r\n]+)/i;
 
 function splitOnDelimiter(body: Buffer, delimiter: Buffer): Buffer[] {
   const segments: Buffer[] = [];
@@ -33,9 +37,9 @@ function splitOnDelimiter(body: Buffer, delimiter: Buffer): Buffer[] {
 function parsePartHeaders(block: Buffer): PartHeaders {
   const text = block.toString("utf8");
   return {
-    name: /name="([^"]*)"/i.exec(text)?.[1],
-    filename: /filename="([^"]*)"/i.exec(text)?.[1],
-    mimeType: /content-type:\s*([^\r\n]+)/i.exec(text)?.[1]?.trim(),
+    name: NAME_PATTERN.exec(text)?.[1],
+    filename: FILENAME_PATTERN.exec(text)?.[1],
+    mimeType: PART_CONTENT_TYPE_PATTERN.exec(text)?.[1]?.trim(),
   };
 }
 
@@ -55,12 +59,20 @@ export function parseMultipartBody(
   // segments[0] is the preamble; the trailing closing delimiter "--boundary--"
   // leaves a segment starting with "--". Each part sits between two delimiters
   // as CRLF + headers + CRLF CRLF + content + CRLF.
-  for (let i = 1; i < segments.length; i += 1) {
-    const segment = segments[i];
+  for (
+    let segmentIndex = 1;
+    segmentIndex < segments.length;
+    segmentIndex += 1
+  ) {
+    const segment = segments[segmentIndex];
     if (segment.length >= 2 && segment[0] === DASH && segment[1] === DASH)
       break;
     let part = segment;
-    if (part.length >= 2 && part[0] === CR && part[1] === LF)
+    if (
+      part.length >= 2 &&
+      part[0] === CARRIAGE_RETURN &&
+      part[1] === LINE_FEED
+    )
       part = part.subarray(2);
 
     const headerEnd = part.indexOf(HEADER_SEPARATOR);
@@ -68,8 +80,8 @@ export function parseMultipartBody(
     let content = part.subarray(headerEnd + HEADER_SEPARATOR.length);
     if (
       content.length >= 2 &&
-      content[content.length - 2] === CR &&
-      content[content.length - 1] === LF
+      content[content.length - 2] === CARRIAGE_RETURN &&
+      content[content.length - 1] === LINE_FEED
     )
       content = content.subarray(0, content.length - 2);
 

@@ -6,38 +6,40 @@ import {
 } from "../../../core/sessionStore/index.js";
 import { HEARTBEAT_INTERVAL_MS } from "../../../constants/defaults.js";
 import { renderMarkdown } from "../../../render/index.js";
+import {
+  DEILEN_STATE_PLACEHOLDER_PATTERN,
+  SESSION_ID_PATTERN,
+} from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { escapeJsonForHtml } from "../utils/escapeJsonForHtml.js";
 import { sendJson } from "../utils/sendJson.js";
 
-const SESSION_ID = /^[A-Za-z0-9_-]+$/;
-
 /** GET /r/<session> — serve the viewer HTML with injected `__DEILEN_STATE__`. */
 export async function handleGetViewer(
-  ctx: RouteContext,
+  context: RouteContext,
   sessionId: string,
-  res: ServerResponse,
+  response: ServerResponse,
 ): Promise<void> {
-  if (!SESSION_ID.test(sessionId)) {
-    sendJson(res, 400, { ok: false, message: "Invalid session id" });
+  if (!SESSION_ID_PATTERN.test(sessionId)) {
+    sendJson(response, 400, { ok: false, message: "Invalid session id" });
     return;
   }
-  const meta = await getSession(sessionId, ctx.projectHash);
+  const meta = await getSession(sessionId, context.projectHash);
   if (!meta) {
-    sendJson(res, 404, { ok: false, message: "Unknown session" });
+    sendJson(response, 404, { ok: false, message: "Unknown session" });
     return;
   }
   const markdown = await readViewerMarkdown(sessionId);
   if (markdown === null) {
-    sendJson(res, 404, { ok: false, message: "Viewer content missing" });
+    sendJson(response, 404, { ok: false, message: "Viewer content missing" });
     return;
   }
-  const config = await ctx.loadConfig();
+  const config = await context.loadConfig();
   const render = renderMarkdown(markdown);
   const overrides = meta.options;
   const state = {
     session_id: sessionId,
-    token: ctx.token,
+    token: context.token,
     title: meta.title,
     html: render.html,
     raw: markdown,
@@ -54,12 +56,12 @@ export async function handleGetViewer(
     },
     heartbeat_interval_ms: HEARTBEAT_INTERVAL_MS,
   };
-  const html = ctx
+  const html = context
     .loadViewerHtml()
-    .replace(/["']__DEILEN_STATE__["']/, () => escapeJsonForHtml(state));
-  res.writeHead(200, {
+    .replace(DEILEN_STATE_PLACEHOLDER_PATTERN, () => escapeJsonForHtml(state));
+  response.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Content-Length": Buffer.byteLength(html),
   });
-  res.end(html);
+  response.end(html);
 }

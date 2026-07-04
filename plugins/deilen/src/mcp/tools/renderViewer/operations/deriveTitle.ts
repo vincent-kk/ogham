@@ -1,6 +1,7 @@
 import { basename } from "node:path";
 
-const H1_RE = /^#[ \t]+(.+?)[ \t]*#*\s*$/m;
+const H1_PATTERN = /^#[ \t]+(.+?)[ \t]*#*\s*$/m;
+const FILE_EXTENSION_PATTERN = /\.[^.]+$/;
 
 export interface DeriveTitleInput {
   title?: string;
@@ -12,9 +13,9 @@ export interface DeriveTitleInput {
 export function deriveTitle(input: DeriveTitleInput): string {
   const explicit = input.title?.trim();
   if (explicit) return explicit;
-  const h1 = H1_RE.exec(input.markdown);
+  const h1 = H1_PATTERN.exec(input.markdown);
   if (h1) return h1[1].trim();
   if (input.sourcePath)
-    return basename(input.sourcePath).replace(/\.[^.]+$/, "");
+    return basename(input.sourcePath).replace(FILE_EXTENSION_PATTERN, "");
   return "Document";
 }

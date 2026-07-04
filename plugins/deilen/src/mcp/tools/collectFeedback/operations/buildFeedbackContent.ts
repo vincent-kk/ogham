@@ -6,9 +6,11 @@ import { sessionImagePath } from "../../../../constants/paths.js";
 import { FeedbackIntent } from "../../../../types/enums.js";
 import type { StoredFeedback } from "../../../../types/feedback.js";
 
-function truncate(text: string, max = 80): string {
-  const line = text.replace(/\s+/g, " ").trim();
-  return line.length > max ? `${line.slice(0, max)}…` : line;
+const WHITESPACE_RUN_PATTERN = /\s+/g;
+
+function truncate(text: string, maxLength = 80): string {
+  const line = text.replace(WHITESPACE_RUN_PATTERN, " ").trim();
+  return line.length > maxLength ? `${line.slice(0, maxLength)}…` : line;
 }
 
 /** Lead directive telling Claude what the user wants done with this submission. */
@@ -47,10 +49,10 @@ export async function buildFeedbackContent(
   if (overallNotes.length) {
     lines.push(`\nOverall notes (${overallNotes.length}):`);
     for (const note of overallNotes) {
-      const imgs = note.imageIds.length
+      const imageMarkers = note.imageIds.length
         ? ` ${note.imageIds.map((id) => `[img_${id}]`).join(" ")}`
         : "";
-      lines.push(`- ${note.text.trim()}${imgs}`);
+      lines.push(`- ${note.text.trim()}${imageMarkers}`);
     }
   }
   if (feedback.comments.length) {
@@ -62,11 +64,13 @@ export async function buildFeedbackContent(
       const excerpt = comment.anchor?.sourceText
         ? ` 「${truncate(comment.anchor.sourceText)}」`
         : "";
-      const imgs = comment.imageIds.length
+      const imageMarkers = comment.imageIds.length
         ? ` ${comment.imageIds.map((id) => `[img_${id}]`).join(" ")}`
         : "";
       const resolved = comment.resolved ? " [resolved]" : "";
-      lines.push(`- ${anchor}${excerpt}: ${comment.text}${imgs}${resolved}`);
+      lines.push(
+        `- ${anchor}${excerpt}: ${comment.text}${imageMarkers}${resolved}`,
+      );
     }
   }
 

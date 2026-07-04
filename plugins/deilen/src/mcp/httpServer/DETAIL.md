@@ -6,6 +6,7 @@
 - 세션 생존 = 뷰어 heartbeat + 도구 활동. 둘 다 `idle_shutdown_minutes`(기본 1분, heartbeat 30초보다 커야 함) 단절 시 폴백 종료(read-only 탭 닫기·Claude 크래시·`close_viewer` 누락 누수 방지).
 - 세션 토큰 으로 `/r`·API 보호; `/assets` 는 토큰 면제(동적 import·폰트 하위요청).
 - `__DEILEN_STATE__` 주입은 `escapeJsonForHtml`.
+- `/api/image` 의 이미지 소스 목록(viewer.md 파싱 결과)은 세션별 소형 캐시(삽입순 상한 16, 서버 close 시 flush) — viewer.md 는 세션 생성 후 불변이므로 안전.
 - 뷰어 state 에 `config.last_intent` 주입(저장된 제출 선호; 버튼 외형엔 미반영). 설정 저장(`POST /api/config`)은 폼 밖 `last_intent` 를 기존 값으로 merge-보존.
 
 ## API Contracts

@@ -3,6 +3,8 @@ import { getHttpServer } from "../../httpServer/index.js";
 
 let registered = false;
 
+const SHUTDOWN_SIGNALS = ["SIGINT", "SIGTERM"] as const;
+
 /**
  * On process termination, settle every pending long-poll and close the HTTP
  * server so neither the resolvers nor the listener outlive the MCP process. The
@@ -16,7 +18,7 @@ export function registerShutdown(): void {
     void getHttpServer()?.close();
   };
   process.once("exit", shutdown);
-  for (const signal of ["SIGINT", "SIGTERM"] as const)
+  for (const signal of SHUTDOWN_SIGNALS)
     process.once(signal, () => {
       shutdown();
       process.exit(0);

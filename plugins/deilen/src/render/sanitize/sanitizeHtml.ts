@@ -11,7 +11,10 @@ const NON_TAG_PATTERN =
 // script/style are dropped with their contents, not just their tags.
 const RAW_TEXT_PATTERN =
   /<(script|style)\b(?:[^>"']|"[^"]*"|'[^']*')*>[\s\S]*?(?:<\/\1\s*>|$)/gi;
-const SENTINEL = "\u0000";
+const SENTINEL = String.fromCharCode(0x00);
+// `<` and the sentinel are disjoint, so one pass is equivalent to escaping
+// every remaining `<` and then restoring sentinels back to `<`.
+const ESCAPE_OR_RESTORE_PATTERN = new RegExp(`[<${SENTINEL}]`, "g");
 
 /**
  * Allowlist HTML sanitizer — with markdown-it `html:true` this is the sole XSS
@@ -33,13 +36,17 @@ export function sanitizeHtml(
     .replace(RAW_TEXT_PATTERN, "")
     .replace(
       TAG_PATTERN,
-      (_match, slash: string, rawName: string, rawAttrs: string) => {
+      (_match, slash: string, rawName: string, rawAttributes: string) => {
         const name = rawName.toLowerCase();
         if (!ALLOWED_TAGS.has(name)) return "";
         if (slash === "/") return `${SENTINEL}/${name}>`;
-        const attrs = sanitizeAttrs(name, rawAttrs, profile);
-        return attrs ? `${SENTINEL}${name} ${attrs}>` : `${SENTINEL}${name}>`;
+        const attributes = sanitizeAttrs(name, rawAttributes, profile);
+        return attributes
+          ? `${SENTINEL}${name} ${attributes}>`
+          : `${SENTINEL}${name}>`;
       },
     );
-  return cleaned.replace(/</g, "&lt;").replaceAll(SENTINEL, "<");
+  return cleaned.replace(ESCAPE_OR_RESTORE_PATTERN, (character) =>
+    character === "<" ? "&lt;" : "<",
+  );
 }

@@ -1,6 +1,8 @@
 // Image attachments: paste / drop -> Blob + object-URL thumbnail. The bare id
 // becomes the comment's imageId and the multipart part name (img_<id>).
 
+const NON_ALPHANUMERIC_PATTERN = /[^a-z0-9]/gi;
+
 let counter = 0;
 
 function nextId() {
@@ -10,7 +12,10 @@ function nextId() {
 
 function extensionForMime(mimeType) {
   if (mimeType === "image/jpeg") return "jpg";
-  return (mimeType.split("/")[1] || "png").replace(/[^a-z0-9]/gi, "");
+  return (mimeType.split("/")[1] || "png").replace(
+    NON_ALPHANUMERIC_PATTERN,
+    "",
+  );
 }
 
 function toAttachment(blob, source) {

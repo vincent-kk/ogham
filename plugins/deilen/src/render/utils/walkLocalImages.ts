@@ -1,4 +1,4 @@
-import { md } from "../markdownIt/markdownInstance.js";
+import { markdownIt } from "../markdownIt/markdownInstance.js";
 
 import { isLocalImageSrc } from "./isLocalImageSrc.js";
 
@@ -10,16 +10,16 @@ import { isLocalImageSrc } from "./isLocalImageSrc.js";
  */
 export function walkLocalImages(
   markdown: string,
-  visit: (src: string, index: number) => void,
+  visit: (source: string, index: number) => void,
 ): void {
-  const tokens = md.parse(markdown, {});
+  const tokens = markdownIt.parse(markdown, {});
   let index = 0;
   for (const block of tokens) {
     if (block.type !== "inline" || !block.children) continue;
     for (const child of block.children) {
       if (child.type !== "image") continue;
-      const src = child.attrGet("src");
-      if (src !== null && isLocalImageSrc(src)) visit(src, index++);
+      const source = child.attrGet("src");
+      if (source !== null && isLocalImageSrc(source)) visit(source, index++);
     }
   }
 }

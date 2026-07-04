@@ -5,44 +5,43 @@ import {
   readViewerMarkdown,
 } from "../../../core/sessionStore/index.js";
 import { renderMarkdown } from "../../../render/index.js";
+import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
 
-const SESSION_ID = /^[A-Za-z0-9_-]+$/;
-
 /** GET /api/viewer — re-fetch render HTML+meta, or raw markdown (`format=md`). */
 export async function handleGetViewerData(
-  ctx: RouteContext,
+  context: RouteContext,
   url: URL,
-  res: ServerResponse,
+  response: ServerResponse,
 ): Promise<void> {
   const sessionId = url.searchParams.get("session") ?? "";
-  if (!SESSION_ID.test(sessionId)) {
-    sendJson(res, 400, { ok: false, message: "Invalid session id" });
+  if (!SESSION_ID_PATTERN.test(sessionId)) {
+    sendJson(response, 400, { ok: false, message: "Invalid session id" });
     return;
   }
-  const meta = await getSession(sessionId, ctx.projectHash);
+  const meta = await getSession(sessionId, context.projectHash);
   if (!meta) {
-    sendJson(res, 404, { ok: false, message: "Unknown session" });
+    sendJson(response, 404, { ok: false, message: "Unknown session" });
     return;
   }
   const markdown = await readViewerMarkdown(sessionId);
   if (markdown === null) {
-    sendJson(res, 404, { ok: false, message: "Viewer content missing" });
+    sendJson(response, 404, { ok: false, message: "Viewer content missing" });
     return;
   }
   if (url.searchParams.get("format") === "md") {
-    res.writeHead(200, {
+    response.writeHead(200, {
       "Content-Type": "text/plain; charset=utf-8",
       "Content-Length": Buffer.byteLength(markdown),
     });
-    res.end(markdown);
+    response.end(markdown);
     return;
   }
   const render = renderMarkdown(markdown, {
-    imageRewrite: { sessionId, token: ctx.token },
+    imageRewrite: { sessionId, token: context.token },
   });
-  sendJson(res, 200, {
+  sendJson(response, 200, {
     ok: true,
     title: meta.title,
     html: render.html,

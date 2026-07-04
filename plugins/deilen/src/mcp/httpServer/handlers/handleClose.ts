@@ -6,27 +6,26 @@ import {
   getSession,
 } from "../../../core/sessionStore/index.js";
 import { SessionStatus } from "../../../types/enums.js";
+import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
 
-const SESSION_ID = /^[A-Za-z0-9_-]+$/;
-
 /** POST /api/close — close a single session (viewer-initiated). */
 export async function handleClose(
-  ctx: RouteContext,
+  context: RouteContext,
   sessionId: string,
-  res: ServerResponse,
+  response: ServerResponse,
 ): Promise<void> {
-  if (!SESSION_ID.test(sessionId)) {
-    sendJson(res, 400, { ok: false, message: "Invalid session id" });
+  if (!SESSION_ID_PATTERN.test(sessionId)) {
+    sendJson(response, 400, { ok: false, message: "Invalid session id" });
     return;
   }
-  const meta = await getSession(sessionId, ctx.projectHash);
+  const meta = await getSession(sessionId, context.projectHash);
   if (!meta) {
-    sendJson(res, 404, { ok: false, message: "Unknown session" });
+    sendJson(response, 404, { ok: false, message: "Unknown session" });
     return;
   }
   closeResolver(sessionId);
   await closeSession(sessionId);
-  sendJson(res, 200, { ok: true, status: SessionStatus.Closed });
+  sendJson(response, 200, { ok: true, status: SessionStatus.Closed });
 }

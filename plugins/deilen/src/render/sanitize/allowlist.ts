@@ -87,4 +87,4 @@ export const TAG_ATTRS: Record<string, Set<string>> = {
   ol: new Set(["start"]),
 };
 
-export const SAFE_STYLE_RE = /^text-align:\s*(?:left|right|center)$/;
+export const SAFE_STYLE_PATTERN = /^text-align:\s*(?:left|right|center)$/;
