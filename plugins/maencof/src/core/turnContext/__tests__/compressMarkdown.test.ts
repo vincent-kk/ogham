@@ -46,6 +46,27 @@ describe('compressMarkdownBody', () => {
     expect(out).not.toMatch(/[\uD800-\uDFFF]/);
   });
 
+  it('strips headings indented up to three spaces but keeps four-space-indented lines', () => {
+    const doc = [
+      '   # Indented Heading',
+      'body line',
+      '    # four spaces is a code block, not a heading',
+    ].join('\n');
+    expect(compressMarkdownBody(doc)).toBe(
+      'body line # four spaces is a code block, not a heading',
+    );
+  });
+
+  it('falls back to a bare ellipsis when maxChars is smaller than the full marker', () => {
+    const out = compressMarkdownBody('a'.repeat(50), 5);
+    expect(out).toBe('aaaa…');
+    expect(out).toHaveLength(5);
+  });
+
+  it('returns an empty string for non-positive maxChars', () => {
+    expect(compressMarkdownBody('anything', 0)).toBe('');
+  });
+
   it('keeps an over-150-char L1 identity document intact at the L1 excerpt limit', () => {
     const doc = [
       '---',

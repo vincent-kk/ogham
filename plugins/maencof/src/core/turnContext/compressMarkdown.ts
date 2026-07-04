@@ -18,21 +18,30 @@ const TRAILING_HIGH_SURROGATE_RE = /[\uD800-\uDBFF]$/;
  * 잘림이 확정되는 즉시 스캔을 중단해 작업량이 문서 크기가 아니라 상한에 수렴한다.
  */
 export function compressMarkdownBody(content: string, maxChars = 150): string {
+  if (maxChars <= 0) return '';
   const text = content.replace(FRONTMATTER_RE, '');
 
   let out = '';
   let pendingSpace = false;
   let skipLine = false;
   let atLineStart = true;
+  let leadingSpaces = 0;
 
   for (const char of text) {
     if (char === '\n') {
       skipLine = false;
       atLineStart = true;
+      leadingSpaces = 0;
       pendingSpace = true;
       continue;
     }
     if (atLineStart) {
+      // 마크다운은 3칸까지의 들여쓰기를 heading 으로 인정한다 (4칸부터는 코드 블록).
+      if (char === ' ' && leadingSpaces < 3) {
+        leadingSpaces++;
+        pendingSpace = true;
+        continue;
+      }
       skipLine = char === '#';
       atLineStart = false;
     }
@@ -49,9 +58,11 @@ export function compressMarkdownBody(content: string, maxChars = 150): string {
 
   if (out.length <= maxChars) return out;
 
-  const budget = Math.max(0, maxChars - TRUNCATION_MARKER.length);
+  // maxChars 가 마커보다 짧으면 '…' 로 강등 — 상한 계약이 마커 원문보다 우선한다.
+  const marker = TRUNCATION_MARKER.length <= maxChars ? TRUNCATION_MARKER : '…';
+  const budget = maxChars - marker.length;
   let cut = out.slice(0, budget);
   // slice 는 UTF-16 코드 유닛 기준 — high surrogate 에서 끊기면 한 유닛 더 물린다.
   if (TRAILING_HIGH_SURROGATE_RE.test(cut)) cut = cut.slice(0, -1);
-  return `${cut.trimEnd()}${TRUNCATION_MARKER}`;
+  return `${cut.trimEnd()}${marker}`;
 }
