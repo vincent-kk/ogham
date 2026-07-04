@@ -5,6 +5,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { L1_EXCERPT_MAX_CHARS } from '../../constants/performance.js';
+
 import { compressMarkdownBody } from './compressMarkdown.js';
 import { readCachedNodesArray } from './readCachedNodesArray.js';
 
@@ -31,7 +33,7 @@ export function readL1NodesSummary(cwd: string): string {
       const filePath = join(cwd, node.path);
       if (!existsSync(filePath)) continue;
       const content = readFileSync(filePath, 'utf-8');
-      const excerpt = compressMarkdownBody(content);
+      const excerpt = compressMarkdownBody(content, L1_EXCERPT_MAX_CHARS);
       const tagPart =
         node.tags && node.tags.length > 0
           ? ` | tags: ${node.tags.slice(0, 3).join(',')}`

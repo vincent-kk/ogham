@@ -5,3 +5,5 @@ export const GIT_EXEC_TIMEOUT_MS = 1500;
 export const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 export const MAX_PINNED_NODES = 20;
+
+export const L1_EXCERPT_MAX_CHARS = 512;
