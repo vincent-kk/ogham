@@ -63,13 +63,15 @@ Execute AutoFixAction after user confirmation:
 
 | Action                                | Tool                                   | Condition |
 | ------------------------------------- | -------------------------------------- | --------- |
-| Fill missing Frontmatter fields       | `mcp__plugin_maencof_t__update`                         | D6 items  |
+| Fill missing Frontmatter fields       | `mcp__plugin_maencof_t__update`        | D6 items  |
 | Rebuild stale index                   | `/maencof:build --force --reset-cache` | D2 items  |
-| Fix layer field based on path         | `mcp__plugin_maencof_t__update`                         | D4 items  |
+| Fix layer field based on path         | `mcp__plugin_maencof_t__update`        | D4 items  |
 | Suggest links for orphan nodes        | `/maencof:suggest`                     | D1 items  |
 | Provision missing auto-insight config | config-provisioner defaults            | D7 items  |
 
 **Layer 1 (01_Core/) exception**: Auto-fix via `mcp__plugin_maencof_t__update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 4` or edit manually.
+
+**No-frontmatter exception**: `mcp__plugin_maencof_t__update` requires the target to already have a frontmatter block. A D6 file whose frontmatter block is entirely missing cannot be auto-fixed via `update` — recreate it with `mcp__plugin_maencof_t__create` or repair the file manually. (Files that have a frontmatter block but invalid/missing fields are still auto-fixable.)
 
 ## Error Handling
 

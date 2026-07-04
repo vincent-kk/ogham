@@ -3,7 +3,7 @@
  * @description `create` 도구 핸들러 — 새 기억 문서 생성
  */
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join, resolve, sep } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import {
   L3_SUBDIR,
@@ -13,6 +13,7 @@ import {
 import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { deduplicateContent } from '../../../core/contentDedup/index.js';
 import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
+import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { quoteYamlValue } from '../../../core/yamlParser/index.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
 import {
@@ -202,14 +203,10 @@ export async function handleMaencofCreate(
   const relativePath = subDir
     ? `${layerDir}/${subDir}/${filename}`
     : `${layerDir}/${filename}`;
-  const absolutePath = join(vaultPath, relativePath);
-
-  if (!resolve(absolutePath).startsWith(resolve(vaultPath) + sep))
-    return {
-      success: false,
-      path: '',
-      message: 'Resolved path escapes vault root',
-    };
+  const resolved = resolveWithinVault(vaultPath, relativePath);
+  if ('error' in resolved)
+    return { success: false, path: '', message: resolved.error };
+  const absolutePath = resolved.absolutePath;
 
   // ─── Frontmatter 객체 단계 검증 (read-path와 동일한 FrontmatterSchema 호출) ───
   const fmValidation = validateFrontmatter(inputToFrontmatterObject(input));

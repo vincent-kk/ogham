@@ -4,12 +4,12 @@
  */
 import { readFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
-import { join } from 'node:path';
 
 import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/documentParser/index.js';
+import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { isLayer1Path } from '../../../types/layer.js';
 import type {
   MaencofReadInput,
@@ -23,7 +23,16 @@ export async function handleMaencofRead(
   vaultPath: string,
   input: MaencofReadInput,
 ): Promise<MaencofReadResult> {
-  const absolutePath = join(vaultPath, input.path);
+  const resolved = resolveWithinVault(vaultPath, input.path);
+  if ('error' in resolved)
+    return {
+      success: false,
+      path: input.path,
+      message: resolved.error,
+      content: '',
+      node: {} as never,
+    };
+  const absolutePath = resolved.absolutePath;
 
   let content: string;
   let mtime: number;

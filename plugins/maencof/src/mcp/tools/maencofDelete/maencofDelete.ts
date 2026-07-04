@@ -4,12 +4,12 @@
  */
 import { unlink } from 'node:fs/promises';
 import { readFile, stat } from 'node:fs/promises';
-import { join } from 'node:path';
 
 import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/documentParser/index.js';
+import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { Layer } from '../../../types/common.js';
 import type {
   MaencofCrudResult,
@@ -25,7 +25,10 @@ export async function handleMaencofDelete(
   vaultPath: string,
   input: MaencofDeleteInput,
 ): Promise<MaencofCrudResult> {
-  const absolutePath = join(vaultPath, input.path);
+  const resolved = resolveWithinVault(vaultPath, input.path);
+  if ('error' in resolved)
+    return { success: false, path: input.path, message: resolved.error };
+  const absolutePath = resolved.absolutePath;
 
   // 파일 존재 확인 + 파싱
   let content: string;

@@ -16,6 +16,7 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/documentParser/index.js';
+import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { parseYamlFrontmatter } from '../../../core/yamlParser/index.js';
 import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
 import { Layer } from '../../../types/common.js';
@@ -74,7 +75,10 @@ export async function handleMaencofMove(
   vaultPath: string,
   input: MaencofMoveInput,
 ): Promise<MaencofCrudResult> {
-  const srcAbsPath = join(vaultPath, input.path);
+  const resolvedSrc = resolveWithinVault(vaultPath, input.path);
+  if ('error' in resolvedSrc)
+    return { success: false, path: input.path, message: resolvedSrc.error };
+  const srcAbsPath = resolvedSrc.absolutePath;
 
   // 소스 파일 확인
   let content: string;

@@ -1,6 +1,6 @@
 ---
 name: checkup
-description: "Vault diagnostic reviewer focused on knowledge health, integrity issues, and fix guidance."
+description: 'Vault diagnostic reviewer focused on knowledge health, integrity issues, and fix guidance.'
 model: sonnet
 tools:
   - Read
@@ -22,6 +22,7 @@ Diagnoses the health of the knowledge vault across 7 categories and generates Au
 for items that can be repaired automatically.
 
 **Write scope:**
+
 - **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp__plugin_maencof_t__update`
   — covers D4 layer mismatch and D6 missing/invalid Frontmatter fields.
 - **Strictly forbidden**: deletion (`mcp__plugin_maencof_t__delete`), relocation (`mcp__plugin_maencof_t__move`), and bulk
@@ -33,6 +34,7 @@ for items that can be repaired automatically.
 ## 7 Diagnostic Checks
 
 ### D1. Orphan Node (orphan-node)
+
 ```
 Detection: nodes with both inbound and outbound link counts of 0 via mcp__plugin_maencof_t__kg_status
 Severity: warning
@@ -40,6 +42,7 @@ Auto-fix: suggest calling /maencof:suggest skill (discover related documents and
 ```
 
 ### D2. Stale Index (stale-index)
+
 ```
 Detection: .maencof/stale-nodes.json is non-empty
            OR .maencof/index.json builtAt is older than 24 hours
@@ -48,6 +51,7 @@ Auto-fixable: call /maencof:build --force --reset-cache
 ```
 
 ### D3. Broken Link (broken-link)
+
 ```
 Detection: entries exist in .maencof-meta/broken-links.json
            OR file referenced in backlink-index.json does not exist on disk
@@ -56,6 +60,7 @@ Auto-fix: not possible (requires manual review) — reports broken link list
 ```
 
 ### D4. Layer Violation (layer-mismatch)
+
 ```
 Detection: mismatch between file path directory (01_Core, 02_Derived, etc.)
            and the Frontmatter layer field. Frontmatter is loaded via
@@ -67,6 +72,7 @@ Auto-fixable: update Frontmatter layer field to match path (`mcp__plugin_maencof
 ```
 
 ### D5. Duplicate Document (duplicate)
+
 ```
 Detection: document pairs sharing 3 or more identical tags with high title similarity
 Severity: warning
@@ -74,6 +80,7 @@ Auto-fix: not possible — reports duplicate pairs and suggests /maencof:organiz
 ```
 
 ### D6. Frontmatter Validation (invalid-frontmatter)
+
 ```
 Detection: items that fail FrontmatterSchema (Zod) validation. Each file's
            Frontmatter is re-parsed from raw disk via `mcp__plugin_maencof_t__read` rather
@@ -81,13 +88,16 @@ Detection: items that fail FrontmatterSchema (Zod) validation. Each file's
            drift that has not yet been indexed (e.g., external editor
            changes made outside a maencof session).
 Severity: error
-Auto-fixable:
+Auto-fixable (target must already have a frontmatter block; a file with no
+frontmatter block at all is NOT update-fixable — recreate via create or repair
+manually):
   - missing created/updated → auto-populate from file mtime
   - missing tags → extract 1 tag from filename/content and auto-populate
   - missing layer → infer from path
 ```
 
 ### D7. Auto-Insight Health (auto-insight-health)
+
 ```
 Detection:
   - .maencof-meta/insight-config.json missing or fails Zod schema validation
@@ -138,8 +148,8 @@ Auto-fixable:
 
 ## Access Matrix
 
-| Layer | Read | Write | Allowed Operations | Forbidden Operations |
-|-------|------|-------|--------------------|----------------------|
+| Layer      | Read    | Write      | Allowed Operations                                                                | Forbidden Operations                                                        |
+| ---------- | ------- | ---------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | All Layers | allowed | restricted | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update` (Frontmatter only) | `mcp__plugin_maencof_t__delete`, `mcp__plugin_maencof_t__move`, bulk-modify |
 
 Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requires confirmation)

@@ -14,6 +14,7 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/documentParser/index.js';
+import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import {
   parseYamlFrontmatter,
   quoteYamlValue,
@@ -117,7 +118,10 @@ export async function handleMaencofUpdate(
   vaultPath: string,
   input: MaencofUpdateInput,
 ): Promise<MaencofCrudResult> {
-  const absolutePath = join(vaultPath, input.path);
+  const resolved = resolveWithinVault(vaultPath, input.path);
+  if ('error' in resolved)
+    return { success: false, path: input.path, message: resolved.error };
+  const absolutePath = resolved.absolutePath;
 
   let existing: string;
   let mtime: number;
@@ -239,8 +243,13 @@ export async function handleMaencofUpdate(
 
     newContent = updatedFmBlock + bodyToWrite;
   } else
-    // Frontmatter 없는 문서 → 내용만 교체
-    newContent = bodyToWrite;
+    // frontmatter 없는 파일은 maencof 문서가 아님 → 무검증 덮어쓰기 거부 (경로 봉쇄 후 남는 write-what 잔여 차단)
+    return {
+      success: false,
+      path: input.path,
+      message:
+        'Target has no frontmatter block; not a maencof document. Use create for a new document, or repair the file first.',
+    };
 
   await writeFile(absolutePath, newContent, 'utf-8');
 

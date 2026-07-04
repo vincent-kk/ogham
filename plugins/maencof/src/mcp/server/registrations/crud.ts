@@ -4,9 +4,9 @@
  * 5 mutate (create, capture_insight, update, delete, move) + 1 plain read (read).
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import {
   captureInsightInputSchema,
   handleCaptureInsight,
@@ -121,7 +121,7 @@ export function registerCrudTools(server: McpServer): void {
     McpToolName.UPDATE,
     {
       description:
-        'Updates an existing document. The updated field in Frontmatter is automatically refreshed.',
+        'Updates an existing maencof document. The target must already contain a frontmatter block — use create for new documents. The updated field in Frontmatter is automatically refreshed.',
       inputSchema: z.object({
         path: z.string().describe('Document path'),
         content: z

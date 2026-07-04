@@ -13,6 +13,7 @@ export * from './documentParser/index.js';
 export * from './filenameSlug/index.js';
 export * from './graphBuilder/index.js';
 export * from './insightStats/index.js';
+export * from './pathGuard/index.js';
 export * from './sessionStore/index.js';
 export * from './spreadingActivation/index.js';
 export * from './transitionHistory/index.js';
