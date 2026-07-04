@@ -6,16 +6,20 @@
  * 타입 정의는 companion.ts의 Zod 스키마와 동기화 유지할 것.
  */
 
+/** AI 동반자 성격 객체 형식 (Zod CompanionPersonalitySchema의 관용 버전) */
+export interface CompanionPersonalityMinimal {
+  tone?: string;
+  approach?: string;
+  traits?: string[];
+}
+
 /** AI 동반자 자아 정체성 최소 인터페이스 (hook용) */
 export interface CompanionIdentityMinimal {
   name: string;
   greeting: string;
   role?: string;
-  personality?: {
-    tone?: string;
-    approach?: string;
-    traits?: string[];
-  };
+  /** 정본은 객체 형식. setup 위저드가 서술형 string으로 저장한 파일도 수용 */
+  personality?: CompanionPersonalityMinimal | string;
   principles?: string[];
   taboos?: string[];
   origin_story?: string;

@@ -2,8 +2,8 @@
 name: setup
 user_invocable: true
 description: "[maencof:setup] Runs the 7-stage maencof onboarding interview. Acts as a 'Professional Counselor' to dynamically understand and construct your Core Identity, values, boundaries, and AI persona through empathetic dialogue."
-argument-hint: "[--step STAGE] [--reset]"
-version: "3.0.0"
+argument-hint: '[--step STAGE] [--reset]'
+version: '3.0.0'
 complexity: complex
 context_layers: [1]
 orchestrator: setup skill
@@ -60,12 +60,13 @@ Collect the vault absolute path via `AskUserQuestion`.
 **Tool:** Use `AskUserQuestion` (type: `text` for open-ended, `choice` only when narrowing down is helpful).
 
 **Execution Loop:**
+
 1. **Open:** Start with a broad, empathetic question about their current knowledge management state (e.g., "Welcome. To help you build a space that truly fits your needs, could you tell me a bit about what brings you here and what challenges you're currently facing with your information?").
 2. **Understand & Synthesize:** Analyze the user's free-form response. Infer which schema fields (e.g., Core Values, Primary Interest) are implicitly answered.
 3. **Reflect & Probe:** Provide a brief, professional reflection ("I see, it sounds like you're looking for X because of Y..."). Then, ask a targeted follow-up question to uncover the remaining missing schema fields.
 4. **Complete:** Once you confidently have enough signal for all 5 schema fields (Name, Interest, Values, Boundary, Style), exit the loop and present the summary (T2-DONE).
 
-*Crucial:* Maintain the persona of a professional counselor. Do NOT use medical or clinical terms like "diagnosis" or "patient". Be calm and structured.
+_Crucial:_ Maintain the persona of a professional counselor. Do NOT use medical or clinical terms like "diagnosis" or "patient". Be calm and structured.
 
 ### Stage 3 — AI Companion Proposal (Persona Synthesis)
 
@@ -74,7 +75,7 @@ Synthesize an AI companion persona holistically based on the Stage 2 discovery.
 
 1. **Synthesize Persona**: Holistically design a companion that acts as a perfect partner for the user's stated needs and work style. Fill the `CompanionIdentitySchema`.
 2. **Propose & Refine**: Present the proposed persona (template T3-1) via `AskUserQuestion` with options:
-   - **Use** — Save to `.maencof-meta/companion-identity.json`
+   - **Use** — Save to `.maencof-meta/companion-identity.json` following the Persistence Schema in reference.md § Stage 3 (`personality` is an object, not a prose string)
    - **Regenerate** — Generate a new persona with a different approach
    - **Skip** — Do not create a companion identity; proceed to next stage
 3. **Skip behavior**: If the user skips, do NOT add `companion-identity` to `completedSteps`. Proceed normally to Stage 4.
@@ -85,17 +86,18 @@ Synthesize an AI companion persona holistically based on the Stage 2 discovery.
 Generate Layer 1 documents from the synthesized discovery.
 → Use templates T4-1, T4-2 from `reference.md`.
 
-| File | Content |
-|------|---------|
-| `01_Core/identity.md` | Name, role (inferred), primary interest |
-| `01_Core/values.md` | The 3 synthesized core values with brief explanations |
-| `01_Core/boundaries.md` | Absolute boundaries |
-| `01_Core/preferences.md` | Communication preferences |
+| File                     | Content                                               |
+| ------------------------ | ----------------------------------------------------- |
+| `01_Core/identity.md`    | Name, role (inferred), primary interest               |
+| `01_Core/values.md`      | The 3 synthesized core values with brief explanations |
+| `01_Core/boundaries.md`  | Absolute boundaries                                   |
+| `01_Core/preferences.md` | Communication preferences                             |
 
 Create the 4 markdown documents above with `mcp__plugin_maencof_t__create` (layer=1, tags required).
 Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `mcp__plugin_maencof_t__create`, which requires layer/tags and always emits Frontmatter markdown.
 
 Also create the Layer directories and sub-layer subdirectories:
+
 - `02_Derived/`
 - `03_External/`, `03_External/relational/`, `03_External/structural/`, `03_External/topical/`
 - `04_Action/`
@@ -130,6 +132,7 @@ The `layer-guard` PreToolUse hook matches only `Write|Edit`, so `Bash` is not in
 ### Stage 6 — Initial Index Build
 
 Check index status with `mcp__plugin_maencof_t__kg_status`.
+
 - If an existing markdown vault is present: suggest a full build and run `/maencof:build` after user confirmation.
 - If new: run a lightweight build with the generated L1 documents.
 
@@ -148,21 +151,21 @@ setup skill starts
 
 ## Available Tools
 
-| Tool | Purpose |
-|------|---------|
-| `AskUserQuestion` | Conduct the dynamic discovery interview (Stages 1–3) |
-| `mcp__plugin_maencof_t__create` | Create L1 documents (Stage 4) |
-| `mcp__plugin_maencof_t__read` | Verify existing L1 documents (Stage 4) |
-| `mcp__plugin_maencof_t__kg_status` | Check index status (Stage 6) |
-| `Bash` | Create/overwrite `trust-level.json` (Stage 5) |
+| Tool                               | Purpose                                              |
+| ---------------------------------- | ---------------------------------------------------- |
+| `AskUserQuestion`                  | Conduct the dynamic discovery interview (Stages 1–3) |
+| `mcp__plugin_maencof_t__create`    | Create L1 documents (Stage 4)                        |
+| `mcp__plugin_maencof_t__read`      | Verify existing L1 documents (Stage 4)               |
+| `mcp__plugin_maencof_t__kg_status` | Check index status (Stage 6)                         |
+| `Bash`                             | Create/overwrite `trust-level.json` (Stage 5)        |
 
 ## Options
 
-| Option | Description |
-|--------|-------------|
-| `--step <1-7>` | Re-run a specific stage only |
-| `--reset` | Full reset (recreates `trust-level.json`; existing L1 markdown documents are preserved) |
-| `--reset --companion` | Reset companion identity only (delete JSON → re-read L1 → re-synthesize) |
+| Option                | Description                                                                             |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| `--step <1-7>`        | Re-run a specific stage only                                                            |
+| `--reset`             | Full reset (recreates `trust-level.json`; existing L1 markdown documents are preserved) |
+| `--reset --companion` | Reset companion identity only (delete JSON → re-read L1 → re-synthesize)                |
 
 ## Error Handling
 

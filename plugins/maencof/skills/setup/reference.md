@@ -80,6 +80,31 @@ Holistically synthesize a companion persona that perfectly balances the user's s
 - `origin_story`: A logical proposal of why this partner fits the user (2 sentences).
 - `greeting`: One short opening line — the SessionStart hook prints `[maencof:{name}] {greeting}`.
 
+### Persistence Schema (companion-identity.json)
+
+On "Use", save the persona to `.maencof-meta/companion-identity.json` with EXACTLY this structure. `personality` MUST be an object — never a prose string. The turn-context injector serializes `tone`/`approach` as XML attributes and `traits` as the tag body, so a prose string cannot carry the persona faithfully.
+
+```json
+{
+  "name": "Aka",
+  "role": "Knowledge Structuring & Synthesis Partner",
+  "personality": {
+    "tone": "calm and concise",
+    "approach": "structure-first synthesis",
+    "traits": ["logical", "systematic", "brief"]
+  },
+  "principles": ["First principle.", "Second principle.", "Third principle."],
+  "taboos": ["First non-negotiable rule."],
+  "origin_story": "Two sentences explaining why this partner fits the user.",
+  "greeting": "One short opening line.",
+  "created_at": "2026-07-04T12:00:00Z",
+  "updated_at": "2026-07-04T12:00:00Z"
+}
+```
+
+- `created_at` / `updated_at`: ISO 8601 datetime (date-only strings are invalid). Set both to the current time on creation.
+- Write persona content in the user's configured language; keys and timestamps stay as shown.
+
 ### T3-1: Persona Proposal
 
 ```
