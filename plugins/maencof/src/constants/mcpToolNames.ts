@@ -15,6 +15,7 @@ export const McpToolName = {
   CLAUDEMD_MERGE: 'claudemd_merge',
   CLAUDEMD_READ: 'claudemd_read',
   CLAUDEMD_REMOVE: 'claudemd_remove',
+  COMPANION_EDIT: 'companion_edit',
   ACTIVITY_READ: 'activity_read',
   CONTEXT_CACHE_MANAGE: 'context_cache_manage',
   WORK_HISTORY: 'work_history',

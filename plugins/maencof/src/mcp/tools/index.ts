@@ -2,6 +2,7 @@ export * from './boundaryCreate/index.js';
 export * from './claudemdMerge/index.js';
 export * from './claudemdRead/index.js';
 export * from './claudemdRemove/index.js';
+export * from './companionEdit/index.js';
 export * from './activityRead/index.js';
 export * from './contextCacheManage/index.js';
 export * from './kgBuild/index.js';

@@ -73,14 +73,15 @@ function buildSessionContext(cwd: string): string {
     '- kg_context now returns content snippets from top results. Use it as the primary content retrieval tool for multi-document queries.',
   ];
 
-  // Companion identity — origin_story and greeting (session-once)
+  // Companion identity — origin section and greeting (session-once)
   const identity = readCompanionIdentity(cwd);
   if (identity) {
     lines.push('');
     lines.push('[maencof] Companion Identity');
-    if (identity.origin_story) {
+    const originSection = identity.sections.find((s) => s.key === 'origin');
+    if (originSection) {
       // First sentence up to 120 chars
-      const firstSentence = identity.origin_story.split(/\.\s/)[0] ?? '';
+      const firstSentence = originSection.detail.split(/\.\s/)[0] ?? '';
       const origin =
         firstSentence.length > 120
           ? firstSentence.slice(0, 120)

@@ -1,51 +1,37 @@
 /**
  * @file buildCompanionIdentityTag.ts
- * @description Compose `<companion-identity>` XML tag from identity data.
+ * @description 매 턴 `<companion-identity enforcement="binding">` 태그를 조립.
+ *
+ * 배경정보가 아니라 이번 응답에 대한 구속 규율(binding)로 프레이밍한다. 대상은
+ * `inject ∈ {turn, both}` 섹션, 본문은 `brief ?? detail`, 배치는 salience 내림차순.
+ * 런타임 컷은 없다 — 500자 예산은 저작(companion_edit·setup) 게이트가 강제한다.
  */
-import type { CompanionIdentityMinimal } from '../../types/companionGuard.js';
+import type { CompanionIdentityV2Minimal } from '../../types/companionGuard.js';
+
+import {
+  renderIdentitySection,
+  selectSections,
+} from './renderIdentitySection.js';
+
+const TURN_PREAMBLE_LEAD =
+  'The following are binding behavioral rules for THIS response — not background lore. Violating them breaks character.';
 
 /**
- * personality를 단독 태그로 직렬화한다. 객체 형식은 tone/approach 속성 +
- * traits 본문, 서술형 string은 본문 그대로. 실을 내용이 없으면 null —
- * 빈 <personality></personality>는 "성격 미정의" 오신호이므로 금지.
- */
-function buildPersonalityTag(
-  personality: CompanionIdentityMinimal['personality'],
-): string | null {
-  if (!personality) return null;
-  if (typeof personality === 'string') {
-    const text = personality.trim();
-    return text ? `<personality>${text}</personality>` : null;
-  }
-  const { tone, approach, traits } = personality;
-  const toneAttr = tone ? ` tone="${tone}"` : '';
-  const approachAttr = approach ? ` approach="${approach}"` : '';
-  const traitsText = traits?.length ? traits.join(',') : '';
-  if (!toneAttr && !approachAttr && !traitsText) return null;
-  return `<personality${toneAttr}${approachAttr}>${traitsText}</personality>`;
-}
-
-/**
- * Companion identity를 plain-text 선언 + 부속 속성/태그로 직렬화한다.
- * 길이 목표: ~200 chars 이하 (C1 5초 제약 준수).
+ * 매 턴 주입 태그를 만든다. 대상 섹션이 하나도 없으면 빈 문자열을 반환해
+ * 조립부(build.ts)가 규율 없는 빈 블록을 주입하지 않도록 한다.
  */
 export function buildCompanionIdentityTag(
-  identity: CompanionIdentityMinimal,
+  identity: CompanionIdentityV2Minimal,
 ): string {
-  const roleDecl = identity.role
-    ? `You are ${identity.name}, a ${identity.role}.`
-    : `You are ${identity.name}.`;
-  let tag = `<companion-identity>\n  ${roleDecl}`;
+  const sections = selectSections(identity.sections, 'turn');
+  if (sections.length === 0) return '';
 
-  const personalityTag = buildPersonalityTag(identity.personality);
-  if (personalityTag) tag += `\n  ${personalityTag}`;
-
-  if (identity.principles?.length)
-    tag += `\n  <principles>${identity.principles.join(' | ')}</principles>`;
-
-  if (identity.taboos?.length)
-    tag += `\n  <taboos>${identity.taboos.join(' | ')}</taboos>`;
-
-  tag += '\n</companion-identity>';
-  return tag;
+  const lines: string[] = [
+    '<companion-identity enforcement="binding">',
+    `  You are ${identity.name}. ${TURN_PREAMBLE_LEAD}`,
+  ];
+  for (const section of sections)
+    lines.push(`  ${renderIdentitySection(section, { useBrief: true })}`);
+  lines.push('</companion-identity>');
+  return lines.join('\n');
 }

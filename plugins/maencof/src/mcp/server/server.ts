@@ -9,6 +9,7 @@
  * Build x1: kg_build
  * Boundary x1: boundary_create
  * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
+ * Companion x1: companion_edit
  * Activity x1: activity_read
  * Work history x1: work_history
  * Cache x1: context_cache_manage
@@ -27,6 +28,7 @@ import {
   registerActivityReadTools,
   registerCacheTools,
   registerClaudeMdTools,
+  registerCompanionTools,
   registerCrudTools,
   registerKgTools,
   registerWorkHistoryTools,
@@ -40,6 +42,7 @@ export function createServer(): McpServer {
   registerCrudTools(server);
   registerKgTools(server);
   registerClaudeMdTools(server);
+  registerCompanionTools(server);
   registerActivityReadTools(server);
   registerCacheTools(server);
   registerWorkHistoryTools(server);

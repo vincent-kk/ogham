@@ -44,13 +44,29 @@ export {
 export type { Person, RelationshipType } from './person.js';
 
 export {
-  CompanionIdentitySchema,
+  CompanionIdentityV1Schema,
+  CompanionIdentityV2Schema,
+  CompanionSectionSchema,
+  CompanionInjectEnum,
   CompanionPersonalitySchema,
 } from './companion.js';
-export type { CompanionIdentity, CompanionPersonality } from './companion.js';
+export type {
+  CompanionIdentityV1,
+  CompanionIdentityV2,
+  CompanionSection,
+  CompanionInject,
+  CompanionPersonality,
+} from './companion.js';
 
-export { isValidCompanionIdentity } from './companionGuard.js';
-export type { CompanionIdentityMinimal } from './companionGuard.js';
+export {
+  isValidCompanionIdentity,
+  getCompanionSchemaVersion,
+} from './companionGuard.js';
+export type {
+  CompanionCoreMinimal,
+  CompanionSectionMinimal,
+  CompanionIdentityV2Minimal,
+} from './companionGuard.js';
 
 export { DomainSchema, LifeDomainEnum } from './domain.js';
 export type { Domain, LifeDomain } from './domain.js';

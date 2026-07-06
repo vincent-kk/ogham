@@ -32,7 +32,10 @@ export function buildTurnContext(cwd: string): string {
 
   const parts: string[] = [];
 
-  if (identity) parts.push(buildCompanionIdentityTag(identity));
+  if (identity) {
+    const identityTag = buildCompanionIdentityTag(identity);
+    if (identityTag) parts.push(identityTag);
+  }
 
   parts.push(
     `<kg-core${vaultAttr} nodes="${totalNodes}" layers="${formatLayerCounts(layerCounts)}">`,

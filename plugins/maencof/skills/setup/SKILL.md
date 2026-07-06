@@ -73,9 +73,9 @@ _Crucial:_ Maintain the persona of a professional counselor. Do NOT use medical 
 Synthesize an AI companion persona holistically based on the Stage 2 discovery.
 → See `reference.md` § Stage 3 for the Synthesis Guidelines. Load **examples.md** § Example 2 for sample output.
 
-1. **Synthesize Persona**: Holistically design a companion that acts as a perfect partner for the user's stated needs and work style. Fill the `CompanionIdentitySchema`.
+1. **Synthesize Persona**: Holistically design a companion that acts as a perfect partner for the user's stated needs and work style. Fill the v2 companion schema — core fields (`name`, `role`, `greeting`) plus uniform `sections` (one per character axis: tone, taboos, principles, traits, origin, and any custom axis).
 2. **Propose & Refine**: Present the proposed persona (template T3-1) via `AskUserQuestion` with options:
-   - **Use** — Save to `.maencof-meta/companion-identity.json` following the Persistence Schema in reference.md § Stage 3 (`personality` is an object, not a prose string)
+   - **Use** — Save to `.maencof-meta/companion-identity.json` following the v2 Persistence Schema in reference.md § Stage 3. Enforce the per-turn budget gate (≤500 chars across all `turn`/`both` sections) BEFORE writing; demote a section to `session` or add a shorter `brief` if it overflows.
    - **Regenerate** — Generate a new persona with a different approach
    - **Skip** — Do not create a companion identity; proceed to next stage
 3. **Skip behavior**: If the user skips, do NOT add `companion-identity` to `completedSteps`. Proceed normally to Stage 4.

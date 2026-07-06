@@ -1,0 +1,131 @@
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import type { CompanionIdentityV2 } from '../../../types/companion.js';
+import { runCompanionMigration } from '../companionMigration.js';
+
+describe('runCompanionMigration', () => {
+  let vaultDir: string;
+  let metaDir: string;
+  let identityPath: string;
+
+  beforeEach(() => {
+    vaultDir = mkdtempSync(join(tmpdir(), 'maencof-migrate-'));
+    metaDir = join(vaultDir, '.maencof-meta');
+    mkdirSync(metaDir, { recursive: true });
+    identityPath = join(metaDir, 'companion-identity.json');
+  });
+
+  afterEach(() => rmSync(vaultDir, { recursive: true, force: true }));
+
+  function writeV1(): void {
+    writeFileSync(
+      identityPath,
+      JSON.stringify({
+        name: 'Nao',
+        role: 'mirror advisor',
+        personality: {
+          tone: 'calm',
+          approach: 'structured',
+          traits: ['brief'],
+        },
+        principles: ['P1', 'P2'],
+        taboos: ['no unauthorized deletion'],
+        origin_story: 'Born to think alongside you.',
+        greeting: 'Welcome back.',
+        created_at: '2026-05-06T00:00:00Z',
+        updated_at: '2026-05-06T00:00:00Z',
+      }),
+      'utf-8',
+    );
+  }
+
+  function readIdentity(): CompanionIdentityV2 {
+    return JSON.parse(
+      readFileSync(identityPath, 'utf-8'),
+    ) as CompanionIdentityV2;
+  }
+
+  function backups(dir: string): string[] {
+    return readdirSync(dir).filter((f) => f.includes('.bak-'));
+  }
+
+  it('migrates a v1 file to v2, preserving created_at and backing up the original', () => {
+    writeV1();
+    const result = runCompanionMigration(vaultDir);
+    expect(result).toMatchObject({ migrated: true, reason: 'migrated' });
+    const v2 = readIdentity();
+    expect(v2.schema_version).toBe(2);
+    expect(v2.sections.find((s) => s.key === 'taboos')?.detail).toBe(
+      'no unauthorized deletion',
+    );
+    expect(v2.created_at.startsWith('2026-05-06')).toBe(true);
+    expect(backups(metaDir).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('is idempotent — a second run is a no-op (already-v2, no new backup)', () => {
+    writeV1();
+    runCompanionMigration(vaultDir);
+    const backupsAfterFirst = backups(metaDir).length;
+    const second = runCompanionMigration(vaultDir);
+    expect(second).toMatchObject({ migrated: false, reason: 'already-v2' });
+    expect(backups(metaDir).length).toBe(backupsAfterFirst);
+  });
+
+  it('returns no-file when the identity file is absent, and invalid for missing name/greeting', () => {
+    expect(runCompanionMigration(vaultDir)).toMatchObject({
+      migrated: false,
+      reason: 'no-file',
+    });
+    writeFileSync(
+      identityPath,
+      JSON.stringify({ personality: 'text only' }),
+      'utf-8',
+    );
+    expect(runCompanionMigration(vaultDir)).toMatchObject({
+      migrated: false,
+      reason: 'invalid',
+    });
+  });
+
+  it('absorbs a CLAUDE.md Tone(Nao) section into a section and removes it from CLAUDE.md', () => {
+    writeV1();
+    const claudeMdPath = join(vaultDir, 'CLAUDE.md');
+    writeFileSync(
+      claudeMdPath,
+      '# CLAUDE.md\n\n## Tone (Nao)\n\nNao speaks calmly in a measured register.\n\n## Other Section\n\nkeep me\n',
+      'utf-8',
+    );
+    const result = runCompanionMigration(vaultDir);
+    expect(result.claudeMdAbsorbed).toBe(true);
+    const v2 = readIdentity();
+    expect(v2.sections.find((s) => s.key === 'tone-detail')?.detail).toContain(
+      'measured register',
+    );
+    const claudeMd = readFileSync(claudeMdPath, 'utf-8');
+    expect(claudeMd).not.toContain('Tone (Nao)');
+    expect(claudeMd).toContain('Other Section');
+    expect(backups(vaultDir).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('leaves CLAUDE.md untouched when no name-matching tone/comm section is present (safe skip)', () => {
+    writeV1();
+    const claudeMdPath = join(vaultDir, 'CLAUDE.md');
+    const original =
+      '# CLAUDE.md\n\n## Tools\n\nGeneric guidance, no persona.\n';
+    writeFileSync(claudeMdPath, original, 'utf-8');
+    const result = runCompanionMigration(vaultDir);
+    expect(result).toMatchObject({ migrated: true, claudeMdAbsorbed: false });
+    expect(readFileSync(claudeMdPath, 'utf-8')).toBe(original);
+  });
+});

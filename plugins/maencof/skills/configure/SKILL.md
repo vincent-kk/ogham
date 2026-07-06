@@ -1,9 +1,9 @@
 ---
 name: configure
 user_invocable: true
-description: "[maencof:configure] Health-checks the full Claude Code environment — MCP servers, skills, agents, rules, hooks, and CLAUDE.md — then routes automatically to the appropriate configuration sub-skill."
-argument-hint: "[component to configure]"
-version: "1.1.0"
+description: '[maencof:configure] Health-checks the full Claude Code environment — MCP servers, skills, agents, rules, hooks, and CLAUDE.md — then routes automatically to the appropriate configuration sub-skill.'
+argument-hint: '[component to configure]'
+version: '1.1.0'
 complexity: medium
 context_layers: []
 orchestrator: configurator
@@ -39,41 +39,49 @@ needs tuning → `configure`.
 
 ## Scope
 
-| Area | Path | Access |
-|------|------|--------|
-| Execution | `{CWD}/.mcp.json` | Read → `/maencof:bridge` |
-| Execution | `{CWD}/.claude/settings.json` | Read → sub-skills |
-| Execution | `{CWD}/CLAUDE.md` | Read → `/maencof:instruct` |
-| Execution | `{CWD}/.claude/rules/` | Read → `/maencof:rule` |
-| Execution | `{CWD}/.claude/skills/` | Read → `/maencof:craft-skill` |
-| Execution | `{CWD}/.claude/agents/` | Read → `/maencof:craft-agent` |
-| Execution | `{CWD}/.maencof-meta/lifecycle.json` | Read → `/maencof:lifecycle` |
-| Execution | `{CWD}/.maencof-meta/` (other) | Read → `/maencof:checkup` |
-| Execution | `{CWD}/.claude/settings.local.json` | **Never** |
+| Area      | Path                                          | Access                                                              |
+| --------- | --------------------------------------------- | ------------------------------------------------------------------- |
+| Execution | `{CWD}/.mcp.json`                             | Read → `/maencof:bridge`                                            |
+| Execution | `{CWD}/.claude/settings.json`                 | Read → sub-skills                                                   |
+| Execution | `{CWD}/CLAUDE.md`                             | Read → `/maencof:instruct`                                          |
+| Execution | `{CWD}/.claude/rules/`                        | Read → `/maencof:rule`                                              |
+| Execution | `{CWD}/.claude/skills/`                       | Read → `/maencof:craft-skill`                                       |
+| Execution | `{CWD}/.claude/agents/`                       | Read → `/maencof:craft-agent`                                       |
+| Execution | `{CWD}/.maencof-meta/lifecycle.json`          | Read → `/maencof:lifecycle`                                         |
+| Execution | `{CWD}/.maencof-meta/companion-identity.json` | Read → `companion_edit` tool / `/maencof:setup --reset --companion` |
+| Execution | `{CWD}/.maencof-meta/` (other)                | Read → `/maencof:checkup`                                           |
+| Execution | `{CWD}/.claude/settings.local.json`           | **Never**                                                           |
+
+> **Companion persona (v2)**: For incremental tuning of the AI companion — add/update/remove a persona `section`, or adjust `inject`/`salience`/`brief`/`detail` — route to the `companion_edit` MCP tool (preview → commit, backup + schema + 500-char per-turn budget gate). For a full re-author, use `/maencof:setup --reset --companion`. Never edit `companion-identity.json` directly.
 
 ## Workflow
 
 ### Step 1 — Environment Scan
+
 Check all config files/directories for existence, format, and spec compliance.
 
 ### Step 2 — Health Report
+
 Display issues by severity (error/warning/info). Skip if clean.
 
 ### Step 3 — Identify Intent
+
 Present sub-skill menu or detect intent from natural language.
 
 ### Step 4 — Route to Sub-Skill
+
 Delegate to the appropriate skill (bridge, instruct, rule, lifecycle, craft-skill, craft-agent, checkup).
 
 ### Step 5 — Migration (when applicable)
+
 Handle legacy format conversion with diff preview and confirmation.
 
 > Load `reference.md` for routing table, health check details, migration guide, and error handling.
 
 ## Resources
 
-| File | Content |
-|------|---------|
+| File           | Content                                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------- |
 | `reference.md` | Scan targets, health report format, routing table, migration workflow, error handling, acceptance criteria |
 
 ## Options
@@ -82,8 +90,8 @@ Handle legacy format conversion with diff preview and confirmation.
 /maencof:configure [options]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `--scan` | Scan and report only (no modifications) |
-| `--fix` | Auto-fix detected issues (with confirmation) |
-| `--migrate` | Run legacy migration only |
+| Option      | Description                                  |
+| ----------- | -------------------------------------------- |
+| `--scan`    | Scan and report only (no modifications)      |
+| `--fix`     | Auto-fix detected issues (with confirmation) |
+| `--migrate` | Run legacy migration only                    |

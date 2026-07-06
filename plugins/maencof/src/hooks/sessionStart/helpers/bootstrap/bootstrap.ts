@@ -15,6 +15,7 @@ import {
   mergeMaencofSection,
   readMaencofSection,
 } from '../../../../core/claudeMdMerger/claudeMdMerger.js';
+import { normalizeToV2 } from '../../../../core/companionNormalize/normalizeToV2.js';
 import { isDialogueInjectionDisabled } from '../../../../core/dialogueConfig/dialogueConfig.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
 import {
@@ -28,8 +29,8 @@ import {
   getRecentSessionSummary,
   recordSessionStart,
 } from '../../../../core/sessionStore/sessionStore.js';
-import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
-import { isValidCompanionIdentity } from '../../../../types/companionGuard.js';
+import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSessionIdentityBlock.js';
+import type { CompanionIdentityV2Minimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
 import { claudeMdPath } from '../../../shared/claudeMdPath.js';
@@ -237,12 +238,17 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   const result: SessionStartResult = { continue: true };
 
   // 8. Compose `additionalContext` — the only channel Claude actually sees.
-  //    Combines the dialogue meta-skill body (if active) with aggregated
-  //    advisories so neither channel silently drops the other's payload.
+  //    Weaves the full session persona (binding), the dialogue meta-skill body,
+  //    and aggregated advisories so no channel silently drops another's payload.
   try {
+    const identityBlock = companion ? buildSessionIdentityBlock(companion) : '';
     const metaBody = buildMetaSkillContext(cwd);
     const advisories = messages.length > 0 ? messages.join('\n\n') : null;
-    const additionalContext = joinSessionContext(metaBody, advisories);
+    const additionalContext = joinSessionSegments([
+      identityBlock || null,
+      metaBody,
+      advisories,
+    ]);
     if (additionalContext !== null)
       result.hookSpecificOutput = {
         hookEventName: 'SessionStart',
@@ -260,16 +266,15 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 }
 
 /**
- * Combine the meta-skill body and advisories into a single
- * `additionalContext` string. Returns null when both inputs are empty so the
+ * Join non-empty session-context segments (persona, meta-skill body, advisories)
+ * with blank-line separators. Returns null when every segment is empty so the
  * caller can omit `hookSpecificOutput` entirely.
  */
-function joinSessionContext(
-  metaBody: string | null,
-  advisories: string | null,
-): string | null {
-  if (metaBody && advisories) return `${metaBody}\n\n${advisories}`;
-  return metaBody ?? advisories;
+function joinSessionSegments(segments: (string | null)[]): string | null {
+  const present = segments.filter(
+    (s): s is string => s !== null && s.length > 0,
+  );
+  return present.length > 0 ? present.join('\n\n') : null;
 }
 
 /**
@@ -289,22 +294,22 @@ function buildMetaSkillContext(cwd: string): string | null {
 }
 
 /**
- * Load companion identity from .maencof-meta/companion-identity.json.
- * Uses manual type guard (no Zod) to keep hook bundle small.
- * Surfaces a diagnostic when the file exists but fails validation so the
- * user can repair the JSON instead of silently losing greeting/turn context.
- * Graceful degradation: returns null on any failure.
+ * Load companion identity from .maencof-meta/companion-identity.json and
+ * normalize to the v2 minimal shape (v1 files are normalized in-memory, so the
+ * session persona renders even before the MCP-server migration runs).
+ * Zod-free (normalizeToV2) to keep the hook bundle small. Surfaces a diagnostic
+ * when the file exists but lacks name/greeting. Graceful: null on any failure.
  */
 function loadCompanionIdentity(
   cwd: string,
   messages: string[],
-): Pick<CompanionIdentityMinimal, 'name' | 'greeting'> | null {
+): CompanionIdentityV2Minimal | null {
   const identityPath = metaPath(cwd, 'companion-identity.json');
   if (!existsSync(identityPath)) return null;
   try {
     const raw: unknown = JSON.parse(readFileSync(identityPath, 'utf-8'));
-    if (isValidCompanionIdentity(raw))
-      return { name: raw.name, greeting: raw.greeting };
+    const identity = normalizeToV2(raw);
+    if (identity) return identity;
     messages.push(
       '[maencof] companion-identity.json present but invalid — missing `name` or `greeting`. Run `/maencof:setup --reset --companion` to repair.',
     );

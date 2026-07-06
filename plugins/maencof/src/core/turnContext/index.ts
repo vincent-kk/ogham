@@ -1,5 +1,11 @@
 export { buildTurnContext } from './build.js';
 export { buildCompanionIdentityTag } from './buildCompanionIdentityTag.js';
+export { buildSessionIdentityBlock } from './buildSessionIdentityBlock.js';
+export {
+  renderIdentitySection,
+  selectSections,
+} from './renderIdentitySection.js';
+export type { RenderSectionOptions } from './renderIdentitySection.js';
 export { compressMarkdownBody } from './compressMarkdown.js';
 export { readCachedNodesArray } from './readCachedNodesArray.js';
 export { readCompanionIdentity } from './readCompanionIdentity.js';

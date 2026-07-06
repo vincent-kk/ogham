@@ -1,6 +1,6 @@
 # mcp
 
-MCP 서버 + 19개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
+MCP 서버 + 20개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
 
 ## Boundaries
 
@@ -20,5 +20,5 @@ MCP 서버 + 19개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
 ### Never do
 
 - 도구 핸들러에서 파일 I/O 직접 수행 (core/ 모듈 위임)
-- serverEntry.ts 수정 (esbuild 번들 진입점)
+- serverEntry.ts에 서버 로직 추가 (esbuild 진입점 — startServer 전 runCompanionMigration 1회만 허용)
 - getVaultPath() 우회 또는 vault 경로 하드코딩

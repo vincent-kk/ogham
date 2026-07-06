@@ -42,14 +42,21 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //   session-start      — sessionStart (selfProbe + inlined meta-skill-body.md
 //                        + claudeMd merge + insight stats) + lifecycle.
 //   user-prompt-submit — contextInjector + insightInjector + lifecycle +
-//                        vaultCommitter (spawnCli/git).
+//                        vaultCommitter (spawnCli/git). Includes the companion
+//                        identity v2 turn renderer + graceful v1→v2 normalize
+//                        (normalizeToV2) reached via buildTurnContext — pure
+//                        Node-builtin functions, no external runtime.
 //   session-end        — sessionEnd (recap + digest) + lifecycle +
 //                        vaultCommitter (spawnCli/git).
 //   stop               — changelogGate (spawnCli/git) + lifecycle.
 //   post-tool-use      — activityRecorder + lifecycle.
 //   pre-tool-use       — layerGuard + vaultRedirector + lifecycle (all light).
-const SESSION_START_BYTES = 46 * 1024;
-const USER_PROMPT_SUBMIT_BYTES = 32 * 1024;
+const SESSION_START_BYTES = 48 * 1024;
+// 32 -> 34 KB: companion identity v2 added the per-turn binding renderer plus
+// graceful v1->v2 normalization to the turn path (buildTurnContext). All added
+// bytes are pure Node-builtin functions; the isolation guarantee (no zod /
+// fast-glob / MCP SDK) is still enforced by FORBIDDEN_PATTERNS below.
+const USER_PROMPT_SUBMIT_BYTES = 36 * 1024;
 const SESSION_END_BYTES = 32 * 1024;
 const STOP_BYTES = 24 * 1024;
 const POST_TOOL_USE_BYTES = 12 * 1024;
