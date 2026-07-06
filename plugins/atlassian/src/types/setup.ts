@@ -128,5 +128,6 @@ export type ConnectionTestResult = z.infer<typeof ConnectionTestResultSchema>;
 
 export interface SetupServerHandle {
   url: string;
+  token: string;
   close: () => Promise<void>;
 }

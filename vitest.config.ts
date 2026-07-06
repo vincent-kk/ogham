@@ -6,11 +6,13 @@ export default defineConfig({
       "./mcp-servers/yt-dlp-mcp",
       "./plugins/atlassian",
       "./plugins/cennad",
+      "./plugins/deilen",
       "./plugins/filid",
       "./plugins/imbas",
       "./plugins/maencof",
       "./plugins/maencof-lens",
       "./shared/cross-platform",
+      "./shared/http-guard",
     ],
   },
 });

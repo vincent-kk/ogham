@@ -18,6 +18,7 @@ Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음.
 
 - 순수 바닐라 JS, 빌드 스텝 없음
 - JS-HTML 바인딩은 id 대신 data-field 속성 사용
+- 서버 발급 토큰을 `location.search` 에서 읽어 `/submit` 요청에 `?token=` 부착
 - 각 파일 500라인 미만 유지
 
 ## Boundaries
@@ -40,6 +41,7 @@ Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음.
 - npm import 또는 빌드 스텝 도입
 - 프레임워크(React, Vue 등) 추가
 - mock-api.js를 프로덕션 경로에서 실행
+- 실 에셋(CSS/JS/폰트/이미지) 비인라인 참조 — 토큰 게이트 서버에 비토큰 정적 라우트가 없어 401
 
 ## Dependencies
 

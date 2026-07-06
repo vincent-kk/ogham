@@ -9,6 +9,8 @@ import type {
  *  routes.ts and handlers/* can both depend on the type without creating a
  *  routes.ts ↔ handlers/* import cycle. */
 export interface RouteContext {
+  /** Per-session token the server issues; requests must carry `?token=`. */
+  token: string;
   settingsHtml: string;
   loadConfig: () => Promise<AtlassianConfig>;
   saveConfig: (config: AtlassianConfig) => Promise<void>;

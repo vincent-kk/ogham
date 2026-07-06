@@ -31,10 +31,10 @@
 - `saveFeedback(sessionId, payload, images): Promise<StoredFeedback>` — feedback.json.
 - `readFeedback(sessionId): Promise<StoredFeedback | null>`.
 
-### authToken / projectHash
+### projectHash
 
-- `generateToken(): string` (16-byte hex), `verifyToken(expected, provided): boolean` (timing-safe).
 - `getProjectHash(cwd): string` (sha256 12-hex).
+- 세션 토큰(`generateToken`/`verifyToken`)은 공유 `@ogham/http-guard/token` 로 이관.
 
 ## Acceptance
 

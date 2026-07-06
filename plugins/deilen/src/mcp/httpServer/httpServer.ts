@@ -1,6 +1,7 @@
 import { type Server, createServer } from "node:http";
 
-import { generateToken } from "../../core/authToken/index.js";
+import { generateToken } from "@ogham/http-guard/token";
+
 import { loadConfig, saveConfig } from "../../core/configManager/index.js";
 import { getProjectHash } from "../../core/projectHash/index.js";
 import { logger } from "../../lib/logger.js";

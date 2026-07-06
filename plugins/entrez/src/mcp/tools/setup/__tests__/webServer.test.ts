@@ -25,6 +25,7 @@ let dir: string;
 let configPath: string;
 let credPath: string;
 let handle: SetupServerHandle;
+let base: string;
 let lastTested: SetupFormData | null;
 
 beforeEach(async () => {
@@ -51,6 +52,7 @@ beforeEach(async () => {
       },
     },
   });
+  base = new URL(handle.url).origin;
 });
 
 afterEach(async () => {
@@ -59,7 +61,7 @@ afterEach(async () => {
 });
 
 function postJson(path: string, body: unknown) {
-  return fetch(`${handle.url}${path}`, {
+  return fetch(`${base}${path}?token=${handle.token}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -77,7 +79,7 @@ describe("setup web server", () => {
     await saveConfig({ tool: "t", email: "e@x.com" }, configPath);
     await saveCredentials({ api_key: "STORED" }, credPath);
 
-    const res = await fetch(`${handle.url}/`);
+    const res = await fetch(`${base}/?token=${handle.token}`);
     const html = await res.text();
     expect(res.status).toBe(200);
     expect(html).toContain("window.__ENTREZ_STATE__ =");
@@ -87,14 +89,14 @@ describe("setup web server", () => {
 
   it("returns masked status on GET /status (no plaintext key)", async () => {
     await saveCredentials({ api_key: "STORED" }, credPath);
-    const res = await fetch(`${handle.url}/status`);
+    const res = await fetch(`${base}/status?token=${handle.token}`);
     const body = await res.json();
     expect(body.api_key).not.toBe("STORED");
     expect(JSON.stringify(body)).not.toContain("STORED");
   });
 
   it("rejects a non-JSON POST (CSRF guard, 415)", async () => {
-    const res = await fetch(`${handle.url}/test`, {
+    const res = await fetch(`${base}/test?token=${handle.token}`, {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(VALID),

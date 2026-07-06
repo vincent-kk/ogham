@@ -1,0 +1,46 @@
+{
+  "name": "@ogham/http-guard",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Internal to the ogham monorepo — local HTTP server guard (loopback host / DNS-rebinding, CSRF origin + content-type, timing-safe session token) shared by plugin setup/viewer servers",
+  "license": "MIT",
+  "author": {
+    "name": "Vincent Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./guard": {
+      "types": "./dist/guard/index.d.ts",
+      "import": "./dist/guard/index.js"
+    },
+    "./token": {
+      "types": "./dist/token/index.d.ts",
+      "import": "./dist/token/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "yarn clean && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo tsconfig.build.tsbuildinfo",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

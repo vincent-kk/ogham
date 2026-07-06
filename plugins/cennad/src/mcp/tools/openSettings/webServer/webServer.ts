@@ -1,7 +1,8 @@
 import { type Server, createServer } from 'node:http';
 
+import { generateToken } from '@ogham/http-guard/token';
+
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
-import { generateToken } from '../../../../core/authToken/index.js';
 import {
   loadConfig as loadConfigDefault,
   saveConfig as saveConfigDefault,

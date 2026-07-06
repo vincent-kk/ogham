@@ -22,6 +22,7 @@ export type SetupFormData = z.infer<typeof SetupFormDataSchema>;
 
 export interface SetupServerHandle {
   url: string;
+  token: string;
   close: () => Promise<void>;
 }
 

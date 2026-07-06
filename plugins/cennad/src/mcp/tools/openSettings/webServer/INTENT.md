@@ -1,21 +1,21 @@
 ## Purpose
 
-`open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 5 분 idle 자동 종료, one-time token 검증, CSRF 방어 (`application/json` 강제).
+`open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 5 분 idle 자동 종료. 공유 `@ogham/http-guard` 로 loopback Host(rebinding 차단) → one-time token → POST Origin(CSRF) → `application/json` 강제 순 검증.
 
 ## Structure
 
 | Path              | Role                                                                                                                                                       |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `webServer.ts`    | `startSettingsServer` — closure 기반 lifecycle (`{ url, token, close }`)                                                                                   |
-| `routes.ts`       | `createRouteHandler` — token + Content-Type 가드 + 경로 디스패치                                                                                           |
+| `routes.ts`       | `createRouteHandler` — shared guard(host/token/origin/CT) + 경로 디스패치                                                                                  |
 | `routeContext.ts` | 라우트와 핸들러를 잇는 context 인터페이스                                                                                                                  |
 | `handlers/`       | GET `/`, `/config`, `/provider-status` (antigravity 가용 + `agyModels`), POST `/save` (저장 후 youtube MCP addon 을 codex·antigravity 에 동기화), `/close` |
-| `utils/`          | sendJson, parseBody, escapeJsonForHtml, verifyToken (`core/authToken` 위임), buildState                                                                    |
+| `utils/`          | sendJson, parseBody, escapeJsonForHtml, buildState                                                                                                         |
 
 ## Conventions
 
-- 모든 요청에 `?token=<...>` 검증 (timing-safe 비교)
-- POST 는 `Content-Type: application/json` 강제 (CSRF 방어)
+- loopback Host + `?token=<...>` 검증 (rebinding 차단, timing-safe 비교)
+- POST 는 loopback Origin + `Content-Type: application/json` 강제 (CSRF 방어)
 - CORS 헤더 미설정 — 동일 origin only
 - 응답 본문 형태: `{ success: bool, message?, errors?, ...data }`
 - `__CENNAD_STATE__` 슬롯에 `escapeJsonForHtml` 로 직렬화된 Config 주입
@@ -44,6 +44,6 @@
 ## Dependencies
 
 - `node:http`, `node:url`
+- `@ogham/http-guard/{guard,token}` (inspectRequest — host/token/CSRF 가드, generateToken)
 - `../../../core/{configManager,youtubeMcp}` (loadConfig, saveConfig, provisionYoutube)
-- `../../../core/authToken` (generateToken, verifyToken)
 - `../../../types/index.ts` (`ConfigSchema`)

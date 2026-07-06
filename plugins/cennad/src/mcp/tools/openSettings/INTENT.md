@@ -34,7 +34,7 @@
 ### Never do
 
 - `127.0.0.1` 외 주소로 바인딩
-- token 발급/검증 로직을 별도 위치에서 재구현 (`core/authToken` 만 사용)
+- token 발급/검증 로직을 별도 위치에서 재구현 (`@ogham/http-guard/token` 만 사용)
 - state 파일을 직접 수정하거나 다른 프로세스의 핸들을 신뢰
 
 ## Dependencies

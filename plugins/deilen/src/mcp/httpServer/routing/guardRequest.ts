@@ -1,18 +1,23 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { verifyToken } from "../../../core/authToken/index.js";
+import { inspectRequest } from "@ogham/http-guard/guard";
+
 import { sendJson } from "../utils/sendJson.js";
 
 import type { RouteContext } from "./routeContext.js";
 
-const LOOPBACK_HOST = /^(127\.0\.0\.1|localhost)(:\d+)?$/i;
-const LOOPBACK_ORIGIN = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i;
+/** deilen serves image uploads, so multipart joins JSON as an accepted POST body. */
+const ALLOWED_CONTENT_TYPES = [
+  "application/json",
+  "multipart/form-data",
+] as const;
 
 /**
  * Host + token + CSRF guards applied after the asset branch. The loopback Host
  * check and the POST Origin check block DNS-rebinding even if the token leaks.
- * Returns true when the request was rejected (response already sent), false to
- * continue routing.
+ * Delegates the decision to the shared @ogham/http-guard canon and maps a
+ * rejecting verdict onto deilen's { ok, message } envelope. Returns true when
+ * the request was rejected (response already sent), false to continue routing.
  */
 export function guardRequest(
   context: RouteContext,
@@ -21,33 +26,18 @@ export function guardRequest(
   request: IncomingMessage,
   response: ServerResponse,
 ): boolean {
-  if (!LOOPBACK_HOST.test(request.headers.host ?? "")) {
-    sendJson(response, 403, { ok: false, message: "Invalid host" });
+  const verdict = inspectRequest({
+    host: request.headers.host,
+    method,
+    origin: request.headers.origin,
+    contentType: request.headers["content-type"],
+    expectedToken: context.token,
+    providedToken: url.searchParams.get("token") ?? "",
+    allowedContentTypes: ALLOWED_CONTENT_TYPES,
+  });
+  if (!verdict.ok) {
+    sendJson(response, verdict.status, { ok: false, message: verdict.message });
     return true;
-  }
-
-  if (!verifyToken(context.token, url.searchParams.get("token") ?? "")) {
-    sendJson(response, 401, { ok: false, message: "Invalid token" });
-    return true;
-  }
-
-  if (method === "POST") {
-    const origin = request.headers.origin;
-    if (origin !== undefined && !LOOPBACK_ORIGIN.test(origin)) {
-      sendJson(response, 403, { ok: false, message: "Invalid origin" });
-      return true;
-    }
-    const ct = (request.headers["content-type"] ?? "").toLowerCase();
-    if (
-      !ct.startsWith("application/json") &&
-      !ct.startsWith("multipart/form-data")
-    ) {
-      sendJson(response, 415, {
-        ok: false,
-        message: "Unsupported Content-Type",
-      });
-      return true;
-    }
   }
   return false;
 }

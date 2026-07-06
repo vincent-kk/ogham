@@ -11,7 +11,7 @@ setup 도구가 제공하는 브라우저 페이지의 **프론트엔드 소스*
 ## Conventions
 
 - 외부 의존성·외부 폰트 없음(오프라인 로컬 서버 동작). 시스템 폰트 스택 사용.
-- 서버 API와의 계약(`/`·`/status`·`/test`·`/submit`)만 통신, HTTP 인터페이스 한정.
+- 서버 API와의 계약(`/` 페이지 로드 · POST `/test`·`/submit`)만 통신, HTTP 인터페이스 한정.
 
 ## Boundaries
 

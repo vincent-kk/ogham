@@ -10,6 +10,8 @@ import type {
 
 /** Dependencies + lifecycle handed to setup route handlers (avoids cycles). */
 export interface RouteContext {
+  /** Per-session token the server issues; requests must carry `?token=`. */
+  token: string;
   settingsHtml: string;
   loadConfig: () => Promise<EntrezConfig | null>;
   loadCredentials: () => Promise<EntrezCredentials>;

@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { verifyToken } from '../../../../../core/authToken/index.js';
+import { inspectRequest } from '@ogham/http-guard/guard';
+
 import { handleClose } from '../handlers/handleClose.js';
 import { handleGetConfig } from '../handlers/handleGetConfig.js';
 import { handleGetProviderStatus } from '../handlers/handleGetProviderStatus.js';
@@ -21,22 +22,22 @@ export function createRouteHandler(
       `http://${req.headers.host ?? '127.0.0.1'}`,
     );
     const path = url.pathname;
-    const provided = url.searchParams.get('token') ?? '';
 
-    if (!verifyToken(ctx.token, provided)) {
-      sendJson(res, 401, { success: false, message: 'Invalid token' });
-      return;
-    }
-
-    if (
-      req.method === 'POST' &&
-      !(req.headers['content-type'] ?? '')
-        .toLowerCase()
-        .startsWith('application/json')
-    ) {
-      sendJson(res, 415, {
+    // Shared canon: loopback Host (rebinding) → token → POST Origin (CSRF) →
+    // Content-Type. The Host + Origin checks block DNS-rebinding even if the
+    // one-time token leaks via referer/history.
+    const verdict = inspectRequest({
+      host: req.headers.host,
+      method: req.method ?? 'GET',
+      origin: req.headers.origin,
+      contentType: req.headers['content-type'],
+      expectedToken: ctx.token,
+      providedToken: url.searchParams.get('token') ?? '',
+    });
+    if (!verdict.ok) {
+      sendJson(res, verdict.status, {
         success: false,
-        message: 'Content-Type must be application/json',
+        message: verdict.message,
       });
       return;
     }

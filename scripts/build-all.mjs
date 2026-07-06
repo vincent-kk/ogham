@@ -20,6 +20,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // while plugin packages ship via bridge/.
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
+  { name: "@ogham/http-guard", dir: "shared/http-guard" },
 ];
 
 const EXCLUDES = PROVIDERS.map(({ name }) => `--exclude=${name}`);

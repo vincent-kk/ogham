@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/cennad` 의 디스크 저장소 게이트웨이. config / counter / session / project-hash / auth-token 의 read·write 경로를 담당.
+`@ogham/cennad` 의 디스크 저장소 게이트웨이. config / counter / session / project-hash 의 read·write 경로를 담당. settings 서버 토큰은 공유 `@ogham/http-guard` 로 이관.
 
 ## Structure
 
@@ -10,7 +10,6 @@
 | `counterManager/` | `runtime/counter.json` 으로 provider 호출 카운트 추적 (parent-pid 리셋)          |
 | `projectHash/`    | `sha256(cwd).slice(0,12)` 계산                                                   |
 | `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                                     |
-| `authToken/`      | settings web UI 일회용 토큰 발급·검증                                            |
 | `artifactWriter/` | opt-in 마크다운 artifact 미러 (project/user 위치)                                |
 | `agyModels/`      | `agy models` CLI 출력 캐싱 → 사용 가능한 Antigravity 모델 목록 제공              |
 | `youtubeMcp/`     | yt-dlp-mcp MCP addon 을 antigravity·codex 에 멱등 등록·해제                      |
@@ -44,6 +43,6 @@
 
 ## Dependencies
 
-- `node:crypto` (sha256, randomBytes, randomUUID, timingSafeEqual)
+- `node:crypto` (sha256, randomUUID)
 - `node:fs/promises`, `node:path`
 - `zod` (types 재사용)

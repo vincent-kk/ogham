@@ -5,6 +5,8 @@
   var DEFAULT_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
   var WINDOW_PRESETS = ["7", "30", "90", "365"];
   var state = window.__ENTREZ_STATE__ || null;
+  // The server issues a per-session token; every request must echo it back.
+  var TOKEN = new URLSearchParams(window.location.search).get("token") || "";
 
   var $ = function (id) {
     return document.getElementById(id);
@@ -197,7 +199,7 @@
   }
 
   function post(path, body) {
-    return fetch(path, {
+    return fetch(path + "?token=" + encodeURIComponent(TOKEN), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -253,10 +255,7 @@
       .then(function (out) {
         var res = out.res || {};
         if (out.status === 200 && res.success) {
-          setStatus(
-            "ok",
-            "Saved. This tab will close automatically.",
-          );
+          setStatus("ok", "Saved. This tab will close automatically.");
           busy(saveBtn, false);
           saveBtn.disabled = true;
           testBtn.disabled = true;

@@ -36,12 +36,15 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // ../maencof/src/index.ts).
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
+  { name: "@ogham/http-guard", dir: "shared/http-guard" },
 ];
 
 // @ogham/prawf is a pure-markdown plugin (no TypeScript) and is
 // intentionally absent — it has no `typecheck` script to run.
 const CONSUMERS = [
   "@ogham/cennad",
+  "@ogham/deilen",
+  "@ogham/entrez",
   "@ogham/maencof",
   "@ogham/maencof-lens",
   "@ogham/filid",

@@ -44,5 +44,6 @@
 ## Dependencies
 
 - `node:http`, `node:fs`, `node:path`, `node:url`
-- `../../core/{authToken,configManager,projectHash,sessionStore}`
+- `@ogham/http-guard` (inspectRequest — host/token/CSRF 가드, generateToken)
+- `../../core/{configManager,projectHash,sessionStore}`
 - `../../render` (서버측 base 렌더)

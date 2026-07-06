@@ -1,6 +1,6 @@
 ## Purpose
 
-deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/저장, 렌더 세션(meta.json·viewer.md) 영속과 long-poll resolver 레지스트리, 세션 토큰, project 스코프 해시를 담당한다. 디스크 루트는 `~/.claude/plugins/deilen/` ([constants/paths](../constants/paths.ts)).
+deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/저장, 렌더 세션(meta.json·viewer.md) 영속과 long-poll resolver 레지스트리, project 스코프 해시를 담당한다. 세션 토큰은 공유 `@ogham/http-guard` 로 이관. 디스크 루트는 `~/.claude/plugins/deilen/` ([constants/paths](../constants/paths.ts)).
 
 ## Structure
 
@@ -8,7 +8,6 @@ deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/
 | ---------------- | ---------------------------------------------- |
 | `configManager/` | `loadConfig` / `saveConfig` (organ)            |
 | `sessionStore/`  | 세션 영속 + pendingResolver 레지스트리 (organ) |
-| `authToken/`     | 세션 토큰 생성·검증 (organ)                    |
 | `projectHash/`   | cwd → 12-hex 스코프 해시 (organ)               |
 | `feedbackStore/` | 피드백·이미지 영속 (organ)                     |
 | `index.ts`       | barrel                                         |

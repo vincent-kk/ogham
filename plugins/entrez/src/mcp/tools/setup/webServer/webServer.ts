@@ -1,13 +1,15 @@
 import { createServer } from "node:http";
 import type { Server } from "node:http";
 
+import { generateToken } from "@ogham/http-guard/token";
+
 import type { SetupServerHandle } from "../../../../types/setup.js";
 import { SETUP_AUTO_SHUTDOWN_MS } from "../../../../constants/defaults.js";
 import { createRouteHandler } from "./routes.js";
 import type { RouteContext } from "./routeContext.js";
 
 export interface SetupServerOptions {
-  context: Omit<RouteContext, "resetTimer" | "closeServer">;
+  context: Omit<RouteContext, "resetTimer" | "closeServer" | "token">;
 }
 
 /**
@@ -41,8 +43,10 @@ export async function startSetupServer(
     timer = setTimeout(() => void closeServer(), SETUP_AUTO_SHUTDOWN_MS);
   }
 
+  const token = generateToken();
   const routeContext: RouteContext = {
     ...options.context,
+    token,
     resetTimer,
     closeServer,
   };
@@ -52,12 +56,12 @@ export async function startSetupServer(
     server!.listen(0, "127.0.0.1", () => {
       const addr = server!.address();
       if (addr && typeof addr === "object")
-        resolve(`http://127.0.0.1:${addr.port}`);
+        resolve(`http://127.0.0.1:${addr.port}/?token=${token}`);
       else reject(new Error("Failed to get server address"));
     });
     server!.on("error", reject);
   });
 
   resetTimer();
-  return { url, close: closeServer };
+  return { url, token, close: closeServer };
 }

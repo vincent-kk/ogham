@@ -2,6 +2,9 @@
 "use strict";
 
 (function () {
+  // The server issues a per-session token; every request must echo it back.
+  var TOKEN = new URLSearchParams(window.location.search).get("token") || "";
+
   // Tab identifiers — shared with json-import.js via window.__settingsApp.TABS
   var TABS = { CLOUD: "cloud", ON_PREMISE: "on-premise" };
 
@@ -451,7 +454,7 @@
     hideStatusMessage();
     showStatusMessage(true, "Testing connection...");
 
-    fetch("/submit", {
+    fetch("/submit?token=" + encodeURIComponent(TOKEN), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

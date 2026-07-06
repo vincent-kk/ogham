@@ -13,7 +13,8 @@
 
 ## Conventions
 
-- POST는 `application/json` 강제(CSRF), 127.0.0.1 전용, 유휴 5분 자동 종료.
+- 공유 `@ogham/http-guard` 가드: loopback Host(rebinding 차단) → `?token=` → POST loopback Origin + `application/json`(CSRF). 127.0.0.1 전용, 유휴 5분 자동 종료.
+- 서버 기동마다 토큰 발급 → URL `?token=` 부착 → 브라우저 폼이 모든 요청에 echo.
 - `/submit`은 EInfo 통과 시에만 config/credentials 분리 저장 후 종료.
 - masked api_key(`••••`)는 미변경 의미 — 기존값 복원.
 
@@ -34,5 +35,6 @@
 
 ## Dependencies
 
+- `@ogham/http-guard/{guard,token}` (inspectRequest, generateToken)
 - `../../../core/config` · `@ogham/cross-platform/launcher`
 - `../../../core/{httpClient,sourceResolver}` · `../../../types/setup`

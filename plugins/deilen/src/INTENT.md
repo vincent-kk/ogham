@@ -4,15 +4,15 @@
 
 ## Structure
 
-| Directory    | Role                                                           |
-| ------------ | -------------------------------------------------------------- |
-| `types/`     | Zod 스키마·타입·`enums.ts` object enum 단일 소스 (organ)       |
-| `constants/` | 경로·기본값 (organ)                                            |
-| `core/`      | config / session(+pendingResolver) / feedback / authToken 저장 |
-| `render/`    | markdown → source-line 매핑 HTML (서버측 base 렌더)            |
-| `mcp/`       | MCP 서버 + 4 도구 + httpServer(뷰어·피드백·설정) + 뷰어 FE     |
-| `lib/`       | atomicWrite, logger (organ)                                    |
-| `utils/`     | isoNow, randomId (organ)                                       |
+| Directory    | Role                                                        |
+| ------------ | ----------------------------------------------------------- |
+| `types/`     | Zod 스키마·타입·`enums.ts` object enum 단일 소스 (organ)    |
+| `constants/` | 경로·기본값 (organ)                                         |
+| `core/`      | config / session(+pendingResolver) / feedback / projectHash |
+| `render/`    | markdown → source-line 매핑 HTML (서버측 base 렌더)         |
+| `mcp/`       | MCP 서버 + 4 도구 + httpServer(뷰어·피드백·설정) + 뷰어 FE  |
+| `lib/`       | atomicWrite, logger (organ)                                 |
+| `utils/`     | isoNow, randomId (organ)                                    |
 
 ## Conventions
 

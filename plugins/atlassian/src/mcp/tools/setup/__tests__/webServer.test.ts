@@ -32,14 +32,16 @@ describe("startSetupServer", () => {
   it("서버 시작 — { url, close } 반환, url은 http://127.0.0.1:포트 형식", async () => {
     handle = await startSetupServer({ context: mockContext });
 
-    expect(handle.url).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
+    expect(handle.url).toMatch(
+      /^http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]+$/,
+    );
     expect(typeof handle.close).toBe("function");
   });
 
   it("GET / — 200 응답과 HTML 반환", async () => {
     handle = await startSetupServer({ context: mockContext });
 
-    const res = await fetch(handle.url + "/");
+    const res = await fetch(handle.url);
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toContain("<html>");
@@ -52,7 +54,7 @@ describe("startSetupServer", () => {
     await handle.close();
     handle = null;
 
-    await expect(fetch(url + "/")).rejects.toThrow();
+    await expect(fetch(url)).rejects.toThrow();
   });
 
   // --- complex ---
@@ -81,14 +83,16 @@ describe("startSetupServer", () => {
   it("알 수 없는 라우트 — 404 반환", async () => {
     handle = await startSetupServer({ context: mockContext });
 
-    const res = await fetch(handle.url + "/unknown");
+    const res = await fetch(
+      `http://127.0.0.1:${new URL(handle.url).port}/unknown?token=${handle.token}`,
+    );
     expect(res.status).toBe(404);
   });
 
   it("OPTIONS 요청 — 404 반환 (서버는 127.0.0.1 전용 same-origin이므로 CORS preflight 핸들러 없음)", async () => {
     handle = await startSetupServer({ context: mockContext });
 
-    const res = await fetch(handle.url + "/", { method: "OPTIONS" });
+    const res = await fetch(handle.url, { method: "OPTIONS" });
     expect(res.status).toBe(404);
   });
 
