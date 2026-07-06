@@ -2,7 +2,7 @@
  * @file companion.ts
  * @description AI Companion Identity Zod 스키마 (MCP 서버 tools용).
  *
- * v2(`CompanionIdentityV2Schema`)가 정본. v1(`CompanionIdentityV1Schema`)은
+ * `CompanionIdentitySchema`가 정본(schema_version 2). 레거시 `CompanionIdentityV1Schema`는
  * 마이그레이션 입력 검증용으로 보존한다. 수동(Zod-free) 타입 가드는
  * companionGuard.ts에 분리되어 있으며, hook 번들은 반드시 그쪽을 import한다.
  */
@@ -33,7 +33,7 @@ export const CompanionIdentityV1Schema = z.object({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// v2 (정본 — 균일한 section 배열로 임의 캐릭터 축 확장)
+// 정본 (canonical — 균일한 section 배열로 임의 캐릭터 축 확장)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** 섹션 주입 채널 — 세션시작 / 매 턴 / 양쪽 */
@@ -53,11 +53,13 @@ export const CompanionSectionSchema = z.object({
   title: z.string().min(1).optional(),
 });
 
-/** v2 AI 동반자 자아 정체성 스키마 */
-export const CompanionIdentityV2Schema = z.object({
+/**
+ * 정본 AI 동반자 자아 정체성 스키마. 코어는 기능적 필드(name·greeting)만 —
+ * role을 포함한 모든 캐릭터 축은 균일 `sections`로 표현한다(코드 수정 없이 축 확장).
+ */
+export const CompanionIdentitySchema = z.object({
   schema_version: z.literal(2),
   name: z.string().min(1),
-  role: z.string().min(1),
   greeting: z.string().min(1),
   sections: z.array(CompanionSectionSchema).min(1),
   created_at: z.string().datetime(),
@@ -68,4 +70,4 @@ export type CompanionPersonality = z.infer<typeof CompanionPersonalitySchema>;
 export type CompanionIdentityV1 = z.infer<typeof CompanionIdentityV1Schema>;
 export type CompanionInject = z.infer<typeof CompanionInjectEnum>;
 export type CompanionSection = z.infer<typeof CompanionSectionSchema>;
-export type CompanionIdentityV2 = z.infer<typeof CompanionIdentityV2Schema>;
+export type CompanionIdentity = z.infer<typeof CompanionIdentitySchema>;

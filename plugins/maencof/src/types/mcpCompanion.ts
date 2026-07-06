@@ -1,8 +1,8 @@
 /**
  * @file mcpCompanion.ts
- * @description companion_edit 도구 입출력 스키마 — companion-identity.json v2 편집.
+ * @description companion_edit 도구 입출력 스키마 — companion-identity.json 정본 편집.
  */
-import type { CompanionIdentityV2, CompanionInject } from './companion.js';
+import type { CompanionIdentity, CompanionInject } from './companion.js';
 
 export type CompanionEditOperation =
   | 'add_section'
@@ -20,10 +20,9 @@ export interface CompanionSectionPatch {
   title?: string;
 }
 
-/** 코어 필드 부분 패치 */
+/** 코어 필드 부분 패치 (role은 section이므로 update_section으로 편집) */
 export interface CompanionCorePatch {
   name?: string;
-  role?: string;
   greeting?: string;
 }
 
@@ -61,8 +60,8 @@ export interface CompanionEditResult {
   /** 권고성 경고(세션 안전판 초과 등, 커밋 불차단) */
   warnings: string[];
   turn_budget: CompanionBudgetView;
-  /** 변경 적용된 v2 후보(검토용). 로드 실패 시 null */
-  identity_preview: CompanionIdentityV2 | null;
+  /** 변경 적용된 정본 후보(검토용). 로드 실패 시 null */
+  identity_preview: CompanionIdentity | null;
   /** commit 시 백업 경로 */
   backup_path?: string;
 }

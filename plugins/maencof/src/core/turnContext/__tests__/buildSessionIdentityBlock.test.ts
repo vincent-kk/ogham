@@ -1,25 +1,26 @@
 import { describe, expect, it } from 'vitest';
 
-import type { CompanionIdentityV2Minimal } from '../../../types/companionGuard.js';
+import type { CompanionIdentityMinimal } from '../../../types/companionGuard.js';
 import { buildSessionIdentityBlock } from '../buildSessionIdentityBlock.js';
 
 function identity(
-  sections: CompanionIdentityV2Minimal['sections'],
-  role?: string,
-): CompanionIdentityV2Minimal {
-  return { schema_version: 2, name: 'Nao', role, greeting: 'Hi', sections };
+  sections: CompanionIdentityMinimal['sections'],
+): CompanionIdentityMinimal {
+  return { schema_version: 2, name: 'Nao', greeting: 'Hi', sections };
 }
 
 describe('buildSessionIdentityBlock — full session render (§3, §4)', () => {
-  it('emits a binding companion-identity-full block with the role clause', () => {
+  it('emits a binding companion-identity-full block with a plain preamble and renders role as a section', () => {
     const block = buildSessionIdentityBlock(
-      identity(
-        [{ key: 'tone', inject: 'both', salience: 5, detail: 'calm' }],
-        'mirror advisor',
-      ),
+      identity([
+        { key: 'role', inject: 'both', salience: 5, detail: 'mirror advisor' },
+        { key: 'tone', inject: 'both', salience: 5, detail: 'calm' },
+      ]),
     );
     expect(block).toContain('<companion-identity-full enforcement="binding">');
-    expect(block).toContain('You are Nao, whose role is: mirror advisor.');
+    expect(block).toContain('You are Nao.');
+    expect(block).not.toContain('whose role is');
+    expect(block).toContain('<role salience="5">mirror advisor</role>');
     expect(block).toContain('</companion-identity-full>');
   });
 
@@ -68,14 +69,14 @@ describe('buildSessionIdentityBlock — full session render (§3, §4)', () => {
     expect(block).toContain('<taboos salience="5">NEVER: no deletes</taboos>');
   });
 
-  it('omits the role clause when role is absent and returns empty with no session sections', () => {
-    const noRole = buildSessionIdentityBlock(
+  it('uses a plain preamble and returns empty with no session sections', () => {
+    const plain = buildSessionIdentityBlock(
       identity([
         { key: 'origin', inject: 'session', salience: 1, detail: 'x' },
       ]),
     );
-    expect(noRole).toContain('You are Nao.');
-    expect(noRole).not.toContain('whose role is');
+    expect(plain).toContain('You are Nao.');
+    expect(plain).not.toContain('whose role is');
     const empty = buildSessionIdentityBlock(
       identity([
         { key: 'approach', inject: 'turn', salience: 4, detail: 'turn only' },

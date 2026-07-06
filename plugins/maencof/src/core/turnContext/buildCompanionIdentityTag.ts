@@ -6,7 +6,7 @@
  * `inject ∈ {turn, both}` 섹션, 본문은 `brief ?? detail`, 배치는 salience 내림차순.
  * 런타임 컷은 없다 — 500자 예산은 저작(companion_edit·setup) 게이트가 강제한다.
  */
-import type { CompanionIdentityV2Minimal } from '../../types/companionGuard.js';
+import type { CompanionIdentityMinimal } from '../../types/companionGuard.js';
 
 import {
   renderIdentitySection,
@@ -21,7 +21,7 @@ const TURN_PREAMBLE_LEAD =
  * 조립부(build.ts)가 규율 없는 빈 블록을 주입하지 않도록 한다.
  */
 export function buildCompanionIdentityTag(
-  identity: CompanionIdentityV2Minimal,
+  identity: CompanionIdentityMinimal,
 ): string {
   const sections = selectSections(identity.sections, 'turn');
   if (sections.length === 0) return '';

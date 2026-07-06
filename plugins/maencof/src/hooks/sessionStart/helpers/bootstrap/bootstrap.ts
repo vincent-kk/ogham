@@ -15,7 +15,7 @@ import {
   mergeMaencofSection,
   readMaencofSection,
 } from '../../../../core/claudeMdMerger/claudeMdMerger.js';
-import { normalizeToV2 } from '../../../../core/companionNormalize/normalizeToV2.js';
+import { normalizeCompanionIdentity } from '../../../../core/companionNormalize/normalizeCompanionIdentity.js';
 import { isDialogueInjectionDisabled } from '../../../../core/dialogueConfig/dialogueConfig.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
 import {
@@ -30,7 +30,7 @@ import {
   recordSessionStart,
 } from '../../../../core/sessionStore/sessionStore.js';
 import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSessionIdentityBlock.js';
-import type { CompanionIdentityV2Minimal } from '../../../../types/companionGuard.js';
+import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
 import { claudeMdPath } from '../../../shared/claudeMdPath.js';
@@ -295,20 +295,20 @@ function buildMetaSkillContext(cwd: string): string | null {
 
 /**
  * Load companion identity from .maencof-meta/companion-identity.json and
- * normalize to the v2 minimal shape (v1 files are normalized in-memory, so the
+ * normalize to the canonical minimal shape (legacy v1 files are normalized in-memory, so the
  * session persona renders even before the MCP-server migration runs).
- * Zod-free (normalizeToV2) to keep the hook bundle small. Surfaces a diagnostic
+ * Zod-free (normalizeCompanionIdentity) to keep the hook bundle small. Surfaces a diagnostic
  * when the file exists but lacks name/greeting. Graceful: null on any failure.
  */
 function loadCompanionIdentity(
   cwd: string,
   messages: string[],
-): CompanionIdentityV2Minimal | null {
+): CompanionIdentityMinimal | null {
   const identityPath = metaPath(cwd, 'companion-identity.json');
   if (!existsSync(identityPath)) return null;
   try {
     const raw: unknown = JSON.parse(readFileSync(identityPath, 'utf-8'));
-    const identity = normalizeToV2(raw);
+    const identity = normalizeCompanionIdentity(raw);
     if (identity) return identity;
     messages.push(
       '[maencof] companion-identity.json present but invalid — missing `name` or `greeting`. Run `/maencof:setup --reset --companion` to repair.',

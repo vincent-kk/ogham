@@ -1,10 +1,10 @@
 /**
  * @file absorbClaudeMdTone.ts
- * @description CLAUDE.md의 "떠도는" Communication Style / Tone 섹션을 v2 section으로
+ * @description CLAUDE.md의 "떠도는" Communication Style / Tone 섹션을 정본 section으로
  * 흡수하기 위한 scan(읽기)과 remove(쓰기)를 분리 제공한다.
  *
  * scan은 부작용 없이 section을 산출하고, remove는 백업 후 원본에서 섹션을 제거한다.
- * 오케스트레이터가 v2 identity를 먼저 쓴 뒤에만 remove를 호출하도록 분리해 부분 실패
+ * 오케스트레이터가 정본 identity를 먼저 쓴 뒤에만 remove를 호출하도록 분리해 부분 실패
  * (CLAUDE.md만 변경되고 identity는 미변경)를 원천 차단한다.
  *
  * 안전 게이트: 컴패니언 이름이 헤딩 또는 본문에 등장하는 섹션만 대상으로 삼아 생성된
@@ -85,7 +85,7 @@ function readClaudeMd(cwd: string): { path: string; lines: string[] } | null {
 }
 
 /**
- * CLAUDE.md의 tone/comm 섹션을 v2 section으로 산출한다(읽기 전용). 미매칭 시 [].
+ * CLAUDE.md의 tone/comm 섹션을 정본 section으로 산출한다(읽기 전용). 미매칭 시 [].
  */
 export function scanClaudeMdTone(
   cwd: string,

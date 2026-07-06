@@ -2,7 +2,7 @@
 
 ## Purpose
 
-esbuild 번들 진입점. companion v1→v2 마이그레이션 1회 후 MCP 서버를 stdio 모드로 시작.
+esbuild 번들 진입점. companion 레거시→정본 마이그레이션 1회 후 MCP 서버를 stdio 모드로 시작.
 
 ## Boundaries
 

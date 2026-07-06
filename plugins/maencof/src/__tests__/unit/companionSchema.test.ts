@@ -1,12 +1,12 @@
 /**
  * @file companionSchema.test.ts
- * @description Companion v1/v2 Zod 스키마 + 수동 타입 가드 테스트.
+ * @description Companion 레거시(v1)/정본 Zod 스키마 + 수동 타입 가드 테스트.
  */
 import { describe, expect, it } from 'vitest';
 
 import {
+  CompanionIdentitySchema,
   CompanionIdentityV1Schema,
-  CompanionIdentityV2Schema,
   CompanionSectionSchema,
 } from '../../types/companion.js';
 import {
@@ -33,7 +33,6 @@ function v2(overrides?: Record<string, unknown>) {
   return {
     schema_version: 2,
     name: 'Nao',
-    role: 'mirror advisor',
     greeting: 'Welcome back.',
     sections: [{ key: 'tone', inject: 'both', salience: 5, detail: 'calm' }],
     created_at: '2026-07-07T00:00:00Z',
@@ -109,32 +108,29 @@ describe('CompanionSectionSchema', () => {
   });
 });
 
-describe('CompanionIdentityV2Schema', () => {
-  it('accepts a valid v2 identity', () => {
-    expect(CompanionIdentityV2Schema.safeParse(v2()).success).toBe(true);
+describe('CompanionIdentitySchema', () => {
+  it('accepts a valid canonical identity', () => {
+    expect(CompanionIdentitySchema.safeParse(v2()).success).toBe(true);
   });
 
   it('rejects schema_version other than 2 and an empty sections array', () => {
     expect(
-      CompanionIdentityV2Schema.safeParse(v2({ schema_version: 1 })).success,
+      CompanionIdentitySchema.safeParse(v2({ schema_version: 1 })).success,
     ).toBe(false);
     expect(
-      CompanionIdentityV2Schema.safeParse(v2({ sections: [] })).success,
+      CompanionIdentitySchema.safeParse(v2({ sections: [] })).success,
     ).toBe(false);
   });
 
-  it('rejects an empty role or greeting', () => {
-    expect(CompanionIdentityV2Schema.safeParse(v2({ role: '' })).success).toBe(
-      false,
-    );
+  it('rejects an empty greeting', () => {
     expect(
-      CompanionIdentityV2Schema.safeParse(v2({ greeting: '' })).success,
+      CompanionIdentitySchema.safeParse(v2({ greeting: '' })).success,
     ).toBe(false);
   });
 });
 
 describe('isValidCompanionIdentity + getCompanionSchemaVersion', () => {
-  it('passes both v1 and v2 shapes (name + greeting)', () => {
+  it('passes both v1 and canonical shapes (name + greeting)', () => {
     expect(isValidCompanionIdentity(v1())).toBe(true);
     expect(isValidCompanionIdentity(v2())).toBe(true);
     expect(isValidCompanionIdentity({ name: 'X', greeting: 'Y' })).toBe(true);

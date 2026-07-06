@@ -1,6 +1,6 @@
 /**
  * @file renderIdentitySection.ts
- * @description Companion v2 section을 `<{key} salience="{n}">…</{key}>` 태그로 직렬화.
+ * @description Companion 정본 section을 `<{key} salience="{n}">…</{key}>` 태그로 직렬화.
  *
  * 매 턴 렌더러·세션 렌더러·예산 util이 공유하는 단일 primitive — 여기서만 마크업을
  * 정의해 측정과 렌더의 드리프트를 원천 차단한다.

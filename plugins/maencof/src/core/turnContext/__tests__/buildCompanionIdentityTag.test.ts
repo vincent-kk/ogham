@@ -1,15 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import type { CompanionIdentityV2Minimal } from '../../../types/companionGuard.js';
+import type { CompanionIdentityMinimal } from '../../../types/companionGuard.js';
 import { buildCompanionIdentityTag } from '../buildCompanionIdentityTag.js';
 
 function identity(
-  sections: CompanionIdentityV2Minimal['sections'],
-): CompanionIdentityV2Minimal {
+  sections: CompanionIdentityMinimal['sections'],
+): CompanionIdentityMinimal {
   return {
     schema_version: 2,
     name: 'Nao',
-    role: 'advisor',
     greeting: 'Hi',
     sections,
   };
@@ -91,9 +90,15 @@ describe('buildCompanionIdentityTag — binding per-turn render (§4)', () => {
     expect(tag).toBe('');
   });
 
-  it('keeps a realistic persona render within the 500-char per-turn budget', () => {
+  it('injects role as a per-turn section and keeps a realistic persona within the 500-char budget', () => {
     const tag = buildCompanionIdentityTag(
       identity([
+        {
+          key: 'role',
+          inject: 'both',
+          salience: 5,
+          detail: 'Knowledge Structuring & Synthesis Partner',
+        },
         {
           key: 'tone',
           inject: 'both',
@@ -119,6 +124,9 @@ describe('buildCompanionIdentityTag — binding per-turn render (§4)', () => {
           detail: 'logical, systematic, brief',
         },
       ]),
+    );
+    expect(tag).toContain(
+      '<role salience="5">Knowledge Structuring & Synthesis Partner</role>',
     );
     // Only the section markup + bodies count toward the 500 budget (preamble excluded).
     const sectionChars = tag

@@ -29,7 +29,6 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
       JSON.stringify({
         schema_version: 2,
         name: 'Nao',
-        role: 'advisor',
         greeting: 'Hi',
         sections: [
           { key: 'tone', inject: 'both', salience: 5, detail: 'calm' },
@@ -113,7 +112,7 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
     expect(removeLast.errors.join(' ')).toContain('last section');
   });
 
-  it('update_core changes name/role/greeting', () => {
+  it('update_core changes name/greeting', () => {
     const result = edit({
       operation: 'update_core',
       core: { greeting: 'Good to see you' },

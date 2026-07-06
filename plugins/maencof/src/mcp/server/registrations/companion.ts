@@ -20,7 +20,7 @@ export function registerCompanionTools(server: McpServer): void {
     McpToolName.COMPANION_EDIT,
     {
       description:
-        'Edits .maencof-meta/companion-identity.json (v2), the single source of truth for the AI companion persona. Two-step by design: without commit it previews the diff and validation only (file unchanged); with commit:true it backs up then writes. Rejects changes that break the schema, exceed the 500-char per-turn injection budget, or whose brief is not shorter than its detail. This is the ONLY permitted channel to edit companion-identity.json — never edit it directly.',
+        'Edits .maencof-meta/companion-identity.json (canonical schema), the single source of truth for the AI companion persona. Two-step by design: without commit it previews the diff and validation only (file unchanged); with commit:true it backs up then writes. Rejects changes that break the schema, exceed the 500-char per-turn injection budget, or whose brief is not shorter than its detail. This is the ONLY permitted channel to edit companion-identity.json — never edit it directly.',
       inputSchema: z.object({
         operation: z
           .enum([
@@ -30,7 +30,7 @@ export function registerCompanionTools(server: McpServer): void {
             'update_core',
           ])
           .describe(
-            'add_section: append a new persona axis; update_section: patch an existing section by key; remove_section: delete a section by key; update_core: change name/role/greeting',
+            'add_section: append a new persona axis; update_section: patch an existing section by key; remove_section: delete a section by key; update_core: change name/greeting (role is a section — edit it via update_section)',
           ),
         key: z
           .string()
@@ -86,7 +86,6 @@ export function registerCompanionTools(server: McpServer): void {
         core: z
           .object({
             name: z.string().min(1).optional(),
-            role: z.string().min(1).optional(),
             greeting: z.string().min(1).optional(),
           })
           .optional()

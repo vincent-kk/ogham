@@ -11,7 +11,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { CompanionIdentityV2 } from '../../../types/companion.js';
+import type { CompanionIdentity } from '../../../types/companion.js';
 import { runCompanionMigration } from '../companionMigration.js';
 
 describe('runCompanionMigration', () => {
@@ -50,22 +50,25 @@ describe('runCompanionMigration', () => {
     );
   }
 
-  function readIdentity(): CompanionIdentityV2 {
-    return JSON.parse(
-      readFileSync(identityPath, 'utf-8'),
-    ) as CompanionIdentityV2;
+  function readIdentity(): CompanionIdentity {
+    return JSON.parse(readFileSync(identityPath, 'utf-8')) as CompanionIdentity;
   }
 
   function backups(dir: string): string[] {
     return readdirSync(dir).filter((f) => f.includes('.bak-'));
   }
 
-  it('migrates a v1 file to v2, preserving created_at and backing up the original', () => {
+  it('migrates a v1 file to canonical, preserving created_at and backing up the original', () => {
     writeV1();
     const result = runCompanionMigration(vaultDir);
     expect(result).toMatchObject({ migrated: true, reason: 'migrated' });
     const v2 = readIdentity();
     expect(v2.schema_version).toBe(2);
+    expect(v2.sections.find((s) => s.key === 'role')).toMatchObject({
+      inject: 'both',
+      salience: 5,
+      detail: 'mirror advisor',
+    });
     expect(v2.sections.find((s) => s.key === 'taboos')?.detail).toBe(
       'no unauthorized deletion',
     );
@@ -73,12 +76,15 @@ describe('runCompanionMigration', () => {
     expect(backups(metaDir).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('is idempotent — a second run is a no-op (already-v2, no new backup)', () => {
+  it('is idempotent — a second run is a no-op (already-current, no new backup)', () => {
     writeV1();
     runCompanionMigration(vaultDir);
     const backupsAfterFirst = backups(metaDir).length;
     const second = runCompanionMigration(vaultDir);
-    expect(second).toMatchObject({ migrated: false, reason: 'already-v2' });
+    expect(second).toMatchObject({
+      migrated: false,
+      reason: 'already-current',
+    });
     expect(backups(metaDir).length).toBe(backupsAfterFirst);
   });
 

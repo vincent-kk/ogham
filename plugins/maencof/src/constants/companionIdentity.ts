@@ -1,6 +1,6 @@
 /**
  * @file companionIdentity.ts
- * @description Companion identity v2 주입 예산 상수.
+ * @description Companion identity 정본 주입 예산 상수.
  *
  * 예산은 저작(setup·companion_edit) 게이트로 강제된다 — 런타임 컷은 없다.
  * 렌더러·편집도구·마이그레이션이 companionBudget util을 통해 공유한다.

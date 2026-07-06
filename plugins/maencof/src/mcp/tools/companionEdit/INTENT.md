@@ -2,7 +2,7 @@
 
 ## Purpose
 
-companion_edit 도구 핸들러. companion-identity.json v2 편집(section add/update/remove, core 조정)의 유일한 허가 채널. preview/commit 2단계.
+companion_edit 도구 핸들러. companion-identity.json 정본 편집(section add/update/remove, core 조정)의 유일한 허가 채널. preview/commit 2단계.
 
 ## Boundaries
 

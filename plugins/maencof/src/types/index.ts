@@ -45,14 +45,14 @@ export type { Person, RelationshipType } from './person.js';
 
 export {
   CompanionIdentityV1Schema,
-  CompanionIdentityV2Schema,
+  CompanionIdentitySchema,
   CompanionSectionSchema,
   CompanionInjectEnum,
   CompanionPersonalitySchema,
 } from './companion.js';
 export type {
   CompanionIdentityV1,
-  CompanionIdentityV2,
+  CompanionIdentity,
   CompanionSection,
   CompanionInject,
   CompanionPersonality,
@@ -65,7 +65,7 @@ export {
 export type {
   CompanionCoreMinimal,
   CompanionSectionMinimal,
-  CompanionIdentityV2Minimal,
+  CompanionIdentityMinimal,
 } from './companionGuard.js';
 
 export { DomainSchema, LifeDomainEnum } from './domain.js';

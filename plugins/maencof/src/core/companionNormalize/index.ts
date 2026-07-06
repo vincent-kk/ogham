@@ -1,2 +1,2 @@
-export { normalizeToV2 } from './normalizeToV2.js';
+export { normalizeCompanionIdentity } from './normalizeCompanionIdentity.js';
 export { toIsoDatetime } from './toIsoDatetime.js';

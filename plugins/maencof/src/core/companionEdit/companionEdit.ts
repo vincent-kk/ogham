@@ -1,8 +1,8 @@
 /**
  * @file companionEdit.ts
- * @description companion-identity.json v2 편집의 유일한 허가 채널(preview/commit 2단계).
+ * @description companion-identity.json 정본 편집의 유일한 허가 채널(preview/commit 2단계).
  *
- * 로드(→ v1이면 v2 정규화) → 연산 적용(메모리) → 검증(Zod v2 + 500 예산 + brief 동기화)
+ * 로드(→ 레거시면 정본 정규화) → 연산 적용(메모리) → 검증(Zod 정본 + 500 예산 + brief 동기화)
  * → commit≠true면 diff만(파일 불변), commit이면 백업 후 저장. 예산·동기화 위반은 커밋 거부.
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -10,8 +10,8 @@ import { join } from 'node:path';
 
 import { TURN_IDENTITY_CHAR_BUDGET } from '../../constants/companionIdentity.js';
 import {
-  type CompanionIdentityV2,
-  CompanionIdentityV2Schema,
+  type CompanionIdentity,
+  CompanionIdentitySchema,
 } from '../../types/companion.js';
 import type { CompanionSectionMinimal } from '../../types/companionGuard.js';
 import type {
@@ -25,12 +25,11 @@ import {
   assertTurnBudget,
   checkBriefSubsumption,
 } from '../companionBudget/companionBudget.js';
-import { normalizeToV2 } from '../companionNormalize/normalizeToV2.js';
+import { normalizeCompanionIdentity } from '../companionNormalize/normalizeCompanionIdentity.js';
 import { toIsoDatetime } from '../companionNormalize/toIsoDatetime.js';
 
 interface CoreFields {
   name: string;
-  role?: string;
   greeting: string;
 }
 
@@ -145,7 +144,6 @@ function applyOperation(
     case 'update_core': {
       if (!input.core) return { error: 'update_core requires core' };
       if (input.core.name !== undefined) core.name = input.core.name;
-      if (input.core.role !== undefined) core.role = input.core.role;
       if (input.core.greeting !== undefined)
         core.greeting = input.core.greeting;
       return { sections, core, summary: 'update_core' };
@@ -178,7 +176,7 @@ export function applyCompanionEdit(
     );
   }
 
-  const current = normalizeToV2(raw);
+  const current = normalizeCompanionIdentity(raw);
   if (!current)
     return failResult(
       input,
@@ -188,21 +186,16 @@ export function applyCompanionEdit(
   const applied = applyOperation(
     {
       sections: current.sections,
-      core: {
-        name: current.name,
-        role: current.role,
-        greeting: current.greeting,
-      },
+      core: { name: current.name, greeting: current.greeting },
     },
     input,
   );
   if ('error' in applied) return failResult(input, applied.error);
 
   const now = new Date().toISOString();
-  const candidate: CompanionIdentityV2 = {
+  const candidate: CompanionIdentity = {
     schema_version: 2,
     name: applied.core.name,
-    role: applied.core.role ?? '',
     greeting: applied.core.greeting,
     sections: applied.sections,
     created_at: toIsoDatetime(current.created_at, now),
@@ -212,7 +205,7 @@ export function applyCompanionEdit(
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  const parsed = CompanionIdentityV2Schema.safeParse(candidate);
+  const parsed = CompanionIdentitySchema.safeParse(candidate);
   if (!parsed.success)
     errors.push(
       ...parsed.error.issues.map(
@@ -261,7 +254,9 @@ export function applyCompanionEdit(
       identity_preview: candidate,
     };
 
-  if (!valid)
+  // valid ⇒ Zod parse도 성공(스키마 오류는 errors에 편입). !parsed.success 항은
+  // 도달 불가하되 컴파일러 내로잉을 확보해 아래에서 parsed.data를 직접 쓴다.
+  if (!valid || !parsed.success)
     return {
       success: false,
       committed: false,
@@ -278,7 +273,7 @@ export function applyCompanionEdit(
   copyFileSync(identityPath, backupPath);
   writeFileSync(
     identityPath,
-    JSON.stringify(parsed.success ? parsed.data : candidate, null, 2) + '\n',
+    JSON.stringify(parsed.data, null, 2) + '\n',
     'utf-8',
   );
 
@@ -291,7 +286,7 @@ export function applyCompanionEdit(
     errors: [],
     warnings,
     turn_budget,
-    identity_preview: parsed.success ? parsed.data : candidate,
+    identity_preview: parsed.data,
     backup_path: backupPath,
   };
 }

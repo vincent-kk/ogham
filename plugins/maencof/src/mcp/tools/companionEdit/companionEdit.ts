@@ -1,6 +1,6 @@
 /**
  * @file companionEdit.ts
- * @description companion_edit 도구 핸들러 — companion-identity.json v2 편집.
+ * @description companion_edit 도구 핸들러 — companion-identity.json 정본 편집.
  * 로직은 core/companionEdit에 위임한다(도구는 얇게 유지).
  */
 import { applyCompanionEdit } from '../../../core/companionEdit/index.js';

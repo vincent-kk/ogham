@@ -1,22 +1,22 @@
 /**
  * @file companionMigration.ts
- * @description companion-identity.json v1→v2 파일 마이그레이션 (MCP 서버 기동 1회).
+ * @description companion-identity.json 레거시→정본 파일 마이그레이션 (MCP 서버 기동 1회).
  *
  * hook은 얇게 유지하고 무거운 1회성 변환은 여기서 수행한다. schema_version ≥ 2면
- * no-op(멱등). v2 identity를 먼저 쓴 뒤에만 CLAUDE.md tone 섹션을 제거해 부분 실패를
+ * no-op(멱등). 정본 identity를 먼저 쓴 뒤에만 CLAUDE.md tone 섹션을 제거해 부분 실패를
  * 차단한다. 실패는 격리(로그 후 원본 유지) — 마이그레이션 오류가 서버 기동을 막지 않는다.
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
-  type CompanionIdentityV2,
-  CompanionIdentityV2Schema,
+  type CompanionIdentity,
+  CompanionIdentitySchema,
 } from '../../types/companion.js';
 import { getCompanionSchemaVersion } from '../../types/companionGuard.js';
 import { backupPathFor } from '../backupPath/index.js';
 import { assertTurnBudget } from '../companionBudget/companionBudget.js';
-import { normalizeToV2 } from '../companionNormalize/normalizeToV2.js';
+import { normalizeCompanionIdentity } from '../companionNormalize/normalizeCompanionIdentity.js';
 import { toIsoDatetime } from '../companionNormalize/toIsoDatetime.js';
 import { appendErrorLogSafe } from '../errorLog/errorLog.js';
 
@@ -24,7 +24,7 @@ import { removeClaudeMdTone, scanClaudeMdTone } from './absorbClaudeMdTone.js';
 
 export type CompanionMigrationReason =
   | 'no-file'
-  | 'already-v2'
+  | 'already-current'
   | 'invalid'
   | 'migrated'
   | 'error';
@@ -42,7 +42,7 @@ export interface CompanionMigrationResult {
 const IDENTITY_RELATIVE = ['.maencof-meta', 'companion-identity.json'];
 
 /**
- * v1→v2 마이그레이션을 1회 수행한다. serverEntry가 매 기동 호출해도 안전(멱등).
+ * 레거시→정본 마이그레이션을 1회 수행한다. serverEntry가 매 기동 호출해도 안전(멱등).
  */
 export function runCompanionMigration(cwd: string): CompanionMigrationResult {
   const identityPath = join(cwd, ...IDENTITY_RELATIVE);
@@ -52,9 +52,9 @@ export function runCompanionMigration(cwd: string): CompanionMigrationResult {
 
     const raw: unknown = JSON.parse(readFileSync(identityPath, 'utf-8'));
     if (getCompanionSchemaVersion(raw) >= 2)
-      return { migrated: false, reason: 'already-v2' };
+      return { migrated: false, reason: 'already-current' };
 
-    const normalized = normalizeToV2(raw);
+    const normalized = normalizeCompanionIdentity(raw);
     if (!normalized) {
       appendErrorLogSafe(cwd, {
         hook: 'companion-migration',
@@ -69,21 +69,20 @@ export function runCompanionMigration(cwd: string): CompanionMigrationResult {
     const absorbedSections = scanClaudeMdTone(cwd, normalized.name);
 
     const now = new Date().toISOString();
-    const candidate: CompanionIdentityV2 = {
+    const candidate: CompanionIdentity = {
       schema_version: 2,
       name: normalized.name,
-      role: normalized.role ?? '',
       greeting: normalized.greeting,
       sections: [...normalized.sections, ...absorbedSections],
       created_at: toIsoDatetime(normalized.created_at, now),
       updated_at: now,
     };
 
-    const parsed = CompanionIdentityV2Schema.safeParse(candidate);
+    const parsed = CompanionIdentitySchema.safeParse(candidate);
     if (!parsed.success) {
       appendErrorLogSafe(cwd, {
         hook: 'companion-migration',
-        error: `v2 validation failed: ${parsed.error.issues
+        error: `canonical schema validation failed: ${parsed.error.issues
           .map((i) => `${i.path.join('.')}: ${i.message}`)
           .join('; ')}`,
         timestamp: now,

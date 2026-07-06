@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { readCompanionIdentity } from '../readCompanionIdentity.js';
 
-describe('readCompanionIdentity — load + normalize to v2', () => {
+describe('readCompanionIdentity — load + normalize to canonical', () => {
   let vaultDir: string;
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('readCompanionIdentity — load + normalize to v2', () => {
     );
   }
 
-  it('normalizes a v1 file into v2 sections (graceful, pre-migration)', () => {
+  it('normalizes a v1 file into canonical sections (graceful, pre-migration)', () => {
     write({
       name: 'Nao',
       role: 'advisor',
@@ -42,11 +42,10 @@ describe('readCompanionIdentity — load + normalize to v2', () => {
     expect(result?.sections.find((s) => s.key === 'taboos')?.detail).toBe('T1');
   });
 
-  it('returns an already-v2 file as sections', () => {
+  it('returns an already-canonical file as sections', () => {
     write({
       schema_version: 2,
       name: 'Nao',
-      role: 'advisor',
       greeting: 'Hi',
       sections: [{ key: 'tone', inject: 'both', salience: 5, detail: 'calm' }],
       created_at: '2026-07-07T00:00:00Z',
