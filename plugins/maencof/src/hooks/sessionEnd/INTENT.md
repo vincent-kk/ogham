@@ -2,18 +2,19 @@
 
 ## Purpose
 
-SessionEnd 이벤트 디스패처. `helpers/finalize`(세션 레코드 마감·일일 digest·캐시 정리·recap)와 공유 `lifecycleDispatcher`·`vaultCommitter`를 순차·격리 실행하고 단일 envelope로 병합한다.
+SessionEnd 이벤트 디스패처. `helpers/finalize`(세션 레코드 마감·일일 digest·캐시 정리·recap)·`helpers/archiveExpired`(L4 만료본 아카이빙)와 공유 `lifecycleDispatcher`·`vaultCommitter`를 순차·격리 실행하고 단일 envelope로 병합한다.
 
 ## Structure
 
 - `sessionEnd.entry.ts` — 브리지 진입점
 - `sessionEnd.ts` — `orchestrateSessionEnd` (조립 + 병합)
 - `helpers/finalize/` — 세션 종료 마감 + recap
+- `helpers/archiveExpired/` — L4 만료 문서 archive 이동 + 스텁
 
 ## Conventions
 
 - 헬퍼·공유 관심사·core 는 concrete 경로로 import (배럴 `index.js` 금지)
-- 실행 순서: finalize → lifecycle → vaultCommitter(마지막 — finalize 기록을 커밋에 포함)
+- 실행 순서: finalize → lifecycle → archiveExpired → vaultCommitter(마지막 — finalize·아카이빙 기록을 커밋에 포함)
 
 ## Boundaries
 

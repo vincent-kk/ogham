@@ -36,6 +36,10 @@ const FrontmatterBaseSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
+  /** 아카이브 스텁 여부 — L4 만료 후 archiveExpired hook이 설정. 정본은 archive로 이동하고 이 문서는 연결 보존용 경량 스텁이 된다. */
+  archived: z.boolean().optional(),
+  /** 정본 원본의 archive 상대 경로 (archived=true일 때 유효) */
+  archive_path: z.string().optional(),
   /** 내재화 신뢰도 0.0~1.0 (Layer 3→2 전이 기준, 선택) */
   confidence: z.number().min(0).max(1).optional(),
   /** 세션별 참조 횟수 누적 (선택) */
