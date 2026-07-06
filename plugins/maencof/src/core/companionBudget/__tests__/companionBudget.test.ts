@@ -97,4 +97,19 @@ describe('checkBriefSubsumption — length inversion guard (§5)', () => {
       true,
     );
   });
+
+  it('compares joined lengths when brief/detail are arrays', () => {
+    // joined brief 'a|b' (3) < joined detail 'aaa|bbb|ccc' (11) → ok
+    expect(
+      checkBriefSubsumption(
+        section({ detail: ['aaa', 'bbb', 'ccc'], brief: ['a', 'b'] }),
+      ).ok,
+    ).toBe(true);
+    // joined brief longer than joined detail → warns
+    expect(
+      checkBriefSubsumption(
+        section({ detail: ['x'], brief: ['longer', 'than', 'detail'] }),
+      ).ok,
+    ).toBe(false);
+  });
 });

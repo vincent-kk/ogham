@@ -13,6 +13,15 @@ export interface RenderSectionOptions {
 }
 
 /**
+ * detail/brief 필드를 렌더 문자열로 정규화한다. 배열이면 `|`로 join하고 문자열이면
+ * 그대로 반환한다. 렌더러·예산 측정·컨텍스트 주입이 공유하는 단일 join 지점이라
+ * 측정↔렌더 드리프트를 차단한다.
+ */
+export function resolveSectionText(value: string | string[]): string {
+  return Array.isArray(value) ? value.join('|') : value;
+}
+
+/**
  * 한 섹션을 명령형 태그로 렌더한다. `taboos` 섹션만 본문 앞에 `NEVER: ` 프리픽스를
  * 붙여 금지 규율을 명령형으로 강조한다(특수 처리는 taboos로 한정).
  */
@@ -20,9 +29,9 @@ export function renderIdentitySection(
   section: CompanionSectionMinimal,
   options: RenderSectionOptions,
 ): string {
-  const body = options.useBrief
-    ? (section.brief ?? section.detail)
-    : section.detail;
+  const body = resolveSectionText(
+    options.useBrief ? (section.brief ?? section.detail) : section.detail,
+  );
   const content = section.key === 'taboos' ? `NEVER: ${body}` : body;
   return `<${section.key} salience="${section.salience}">${content}</${section.key}>`;
 }

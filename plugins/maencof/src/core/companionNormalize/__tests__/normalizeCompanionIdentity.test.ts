@@ -51,12 +51,12 @@ describe('normalizeCompanionIdentity — v1 field mapping (§7-2)', () => {
     expect(byKey.principles).toMatchObject({
       inject: 'both',
       salience: 4,
-      detail: 'P1 | P2',
+      detail: ['P1', 'P2'],
     });
     expect(byKey.taboos).toMatchObject({
       inject: 'both',
       salience: 5,
-      detail: 'T1',
+      detail: ['T1'],
     });
     expect(byKey.origin).toMatchObject({ inject: 'session', salience: 1 });
   });
@@ -117,6 +117,38 @@ describe('normalizeCompanionIdentity — canonical passthrough + guards', () => 
       name: 'Nao',
       greeting: 'Hi',
       sections: [{ inject: 'both', salience: 3, detail: 'no key' }],
+    });
+    expect(v2?.sections).toEqual([]);
+  });
+
+  it('preserves array detail/brief on a canonical section, trimming empty items', () => {
+    const v2 = normalizeCompanionIdentity({
+      schema_version: 2,
+      name: 'Nao',
+      greeting: 'Hi',
+      sections: [
+        {
+          key: 'principles',
+          inject: 'both',
+          salience: 4,
+          detail: ['P1', '  ', 'P2'],
+          brief: ['b1'],
+        },
+      ],
+    });
+    const principles = v2?.sections.find((s) => s.key === 'principles');
+    expect(principles?.detail).toEqual(['P1', 'P2']);
+    expect(principles?.brief).toEqual(['b1']);
+  });
+
+  it('drops a canonical section whose array detail has no non-empty items', () => {
+    const v2 = normalizeCompanionIdentity({
+      schema_version: 2,
+      name: 'Nao',
+      greeting: 'Hi',
+      sections: [
+        { key: 'empty', inject: 'both', salience: 3, detail: ['', '  '] },
+      ],
     });
     expect(v2?.sections).toEqual([]);
   });

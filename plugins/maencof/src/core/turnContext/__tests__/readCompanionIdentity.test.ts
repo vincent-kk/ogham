@@ -39,7 +39,9 @@ describe('readCompanionIdentity — load + normalize to canonical', () => {
     const result = readCompanionIdentity(vaultDir);
     expect(result?.schema_version).toBe(2);
     expect(result?.sections.find((s) => s.key === 'tone')?.detail).toBe('calm');
-    expect(result?.sections.find((s) => s.key === 'taboos')?.detail).toBe('T1');
+    expect(result?.sections.find((s) => s.key === 'taboos')?.detail).toEqual([
+      'T1',
+    ]);
   });
 
   it('returns an already-canonical file as sections', () => {

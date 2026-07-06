@@ -91,8 +91,8 @@ Per section:
 - `key` (kebab/lower): unique id and render tag name.
 - `inject`: `"session"` (session start only), `"turn"` (every turn), or `"both"`.
 - `salience` (1-5): placement order within the injected tag (5 = first). NOT a runtime cut — it never drops content.
-- `detail`: canonical text. Always used at session start; used per turn when `brief` is absent.
-- `brief` (optional): a shorter per-turn compression of `detail`. Only add it for long sections that also inject per turn. It MUST be shorter than `detail` and MUST NOT add any rule `detail` does not already contain.
+- `detail`: canonical text. A string, or an array of strings joined with `|` at render (use an array to list several items, e.g. principles). Always used at session start; used per turn when `brief` is absent.
+- `brief` (optional): a shorter per-turn compression of `detail` (also a string or an array of strings joined with `|`). Only add it for long sections that also inject per turn. It MUST be shorter than `detail` (compared as the joined text) and MUST NOT add any rule `detail` does not already contain.
 
 ### Per-turn budget gate (MUST enforce before saving)
 
@@ -135,7 +135,11 @@ On "Use", save to `.maencof-meta/companion-identity.json` with EXACTLY this stru
       "key": "principles",
       "inject": "both",
       "salience": 4,
-      "detail": "Prioritize retrieval over collection. | Keep rigorous links between concepts. | Deliver with brevity.",
+      "detail": [
+        "Prioritize retrieval over collection.",
+        "Keep rigorous links between concepts.",
+        "Deliver with brevity."
+      ],
       "brief": "Retrieval over collection; rigorous links; brevity."
     },
     {
@@ -157,6 +161,7 @@ On "Use", save to `.maencof-meta/companion-identity.json` with EXACTLY this stru
 ```
 
 - `created_at` / `updated_at`: ISO 8601 datetime (date-only strings are invalid). Set both to the current time on creation.
+- `detail`/`brief` may be a string or an array of strings; arrays are joined with `|` at render (the `principles` section above uses an array). Budget and brief-length checks measure the joined text.
 - Write persona content (detail/brief/greeting) in the user's configured language; keys, `inject` values, and timestamps stay as shown.
 - The `role` and `principles` sections above carry a `brief`: it is the shorter form injected every turn, while the full `detail` is used only at session start. Add a `brief` to any long `turn`/`both` section to keep the per-turn budget under 500 chars. Sections without a `brief` (tone, taboos, traits) fall back to `detail` every turn.
 - After onboarding, incremental edits go through the `companion_edit` MCP tool (preview → commit), never by editing the JSON directly.

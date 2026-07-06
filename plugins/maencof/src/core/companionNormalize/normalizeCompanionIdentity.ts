@@ -26,13 +26,33 @@ function asStringArray(value: unknown): string[] {
     : [];
 }
 
+/**
+ * detail/brief 원시값을 정본 텍스트 필드로 소독한다. 문자열/문자열 배열 모두 수용하고
+ * 배열은 원형을 보존(trim + 빈 요소 제거)해 편집 round-trip에서 배열이 살아남게 한다.
+ * 유효 내용이 없으면 undefined.
+ */
+function asTextField(value: unknown): string | string[] | undefined {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+  if (Array.isArray(value)) {
+    const items = value
+      .filter((x): x is string => typeof x === 'string')
+      .map((x) => x.trim())
+      .filter((x) => x.length > 0);
+    return items.length > 0 ? items : undefined;
+  }
+  return undefined;
+}
+
 /** 이미 정본(sections 기반)인 파일의 개별 section을 graceful하게 소독한다(렌더 경로 관용성). */
 function sanitizeSection(raw: unknown): CompanionSectionMinimal | null {
   if (raw === null || typeof raw !== 'object') return null;
   const o = raw as Record<string, unknown>;
   const key = asTrimmed(o.key);
-  const detail = asTrimmed(o.detail);
-  if (!key || !detail) return null;
+  const detail = asTextField(o.detail);
+  if (!key || detail === undefined) return null;
 
   const inject: Inject =
     o.inject === 'session' || o.inject === 'turn' || o.inject === 'both'
@@ -46,7 +66,7 @@ function sanitizeSection(raw: unknown): CompanionSectionMinimal | null {
   if (salience < 1) salience = 1;
   if (salience > 5) salience = 5;
 
-  const brief = asTrimmed(o.brief) || undefined;
+  const brief = asTextField(o.brief);
   const title = asTrimmed(o.title) || undefined;
   return { key, inject, salience, detail, brief, title };
 }
@@ -136,7 +156,7 @@ export function normalizeCompanionIdentity(
       key: 'principles',
       inject: 'both',
       salience: 4,
-      detail: principles.join(' | '),
+      detail: principles,
     });
 
   const taboos = asStringArray(obj.taboos);
@@ -145,7 +165,7 @@ export function normalizeCompanionIdentity(
       key: 'taboos',
       inject: 'both',
       salience: 5,
-      detail: taboos.join(' | '),
+      detail: taboos,
     });
 
   const origin = asTrimmed(obj.origin_story);

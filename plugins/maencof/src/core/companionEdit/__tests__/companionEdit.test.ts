@@ -161,4 +161,95 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
     expect(result.success).toBe(false);
     expect(result.identity_preview).toBeNull();
   });
+
+  it('accepts array detail/brief and persists them as arrays (joined with | at render)', () => {
+    const result = edit({
+      operation: 'add_section',
+      section: {
+        key: 'principles',
+        inject: 'both',
+        salience: 4,
+        detail: ['retrieval over collection', 'rigorous links', 'brevity'],
+        brief: ['retrieval', 'links', 'brevity'],
+      },
+      commit: true,
+    });
+    expect(result.committed).toBe(true);
+    const saved = JSON.parse(raw()) as {
+      sections: { key: string; detail: unknown }[];
+    };
+    const principles = saved.sections.find((s) => s.key === 'principles');
+    expect(Array.isArray(principles?.detail)).toBe(true);
+    expect(principles?.detail).toHaveLength(3);
+  });
+
+  describe('monotone per-turn budget gate (§B1)', () => {
+    const writeOverBudget = () =>
+      writeFileSync(
+        identityPath,
+        JSON.stringify({
+          schema_version: 2,
+          name: 'Nao',
+          greeting: 'Hi',
+          sections: [
+            {
+              key: 'alpha',
+              inject: 'both',
+              salience: 5,
+              detail: 'a'.repeat(300),
+            },
+            {
+              key: 'beta',
+              inject: 'turn',
+              salience: 4,
+              detail: 'b'.repeat(300),
+            },
+          ],
+          created_at: '2026-07-07T00:00:00Z',
+          updated_at: '2026-07-07T00:00:00Z',
+        }),
+        'utf-8',
+      );
+
+    it('commits a reducing edit even while the set stays over 500 chars', () => {
+      writeOverBudget();
+      const result = edit({
+        operation: 'update_section',
+        key: 'alpha',
+        section: { brief: 'a'.repeat(250) },
+        commit: true,
+      });
+      expect(result.committed).toBe(true);
+      expect(result.turn_budget.ok).toBe(false);
+      expect(raw()).toContain('"brief"');
+    });
+
+    it('refuses an edit that worsens an already-over-budget set', () => {
+      writeOverBudget();
+      const result = edit({
+        operation: 'add_section',
+        section: {
+          key: 'gamma',
+          inject: 'turn',
+          salience: 3,
+          detail: 'c'.repeat(80),
+        },
+        commit: true,
+      });
+      expect(result.committed).toBe(false);
+      expect(result.errors.some((e) => e.includes('worsen'))).toBe(true);
+      expect(backups()).toHaveLength(0);
+    });
+
+    it('commits a budget-neutral edit on an over-budget file', () => {
+      writeOverBudget();
+      const result = edit({
+        operation: 'update_core',
+        core: { greeting: 'Good to see you' },
+        commit: true,
+      });
+      expect(result.committed).toBe(true);
+      expect(raw()).toContain('Good to see you');
+    });
+  });
 });

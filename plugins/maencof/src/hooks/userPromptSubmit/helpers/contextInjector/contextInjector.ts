@@ -19,6 +19,7 @@ import { buildTurnContext } from '../../../../core/turnContext/build.js';
 import { readCachedNodesArray } from '../../../../core/turnContext/readCachedNodesArray.js';
 import { readCompanionIdentity } from '../../../../core/turnContext/readCompanionIdentity.js';
 import { readIndexMetadata } from '../../../../core/turnContext/readIndexMetadata.js';
+import { resolveSectionText } from '../../../../core/turnContext/renderIdentitySection.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 
 export interface UserPromptSubmitInput {
@@ -81,7 +82,8 @@ function buildSessionContext(cwd: string): string {
     const originSection = identity.sections.find((s) => s.key === 'origin');
     if (originSection) {
       // First sentence up to 120 chars
-      const firstSentence = originSection.detail.split(/\.\s/)[0] ?? '';
+      const firstSentence =
+        resolveSectionText(originSection.detail).split(/\.\s/)[0] ?? '';
       const origin =
         firstSentence.length > 120
           ? firstSentence.slice(0, 120)

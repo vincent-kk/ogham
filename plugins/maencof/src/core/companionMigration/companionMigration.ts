@@ -3,24 +3,25 @@
  * @description companion-identity.json 레거시→정본 파일 마이그레이션 (MCP 서버 기동 1회).
  *
  * hook은 얇게 유지하고 무거운 1회성 변환은 여기서 수행한다. schema_version ≥ 2면
- * no-op(멱등). 정본 identity를 먼저 쓴 뒤에만 CLAUDE.md tone 섹션을 제거해 부분 실패를
- * 차단한다. 실패는 격리(로그 후 원본 유지) — 마이그레이션 오류가 서버 기동을 막지 않는다.
+ * no-op(멱등). v1→v2 필드 매핑만 수행하며 CLAUDE.md는 건드리지 않는다. 매 턴 예산을
+ * 초과하면 저살리언스 turn 섹션을 session으로 자동 강등해 500 이내로 맞춘다. 실패는
+ * 격리(로그 후 원본 유지) — 마이그레이션 오류가 서버 기동을 막지 않는다.
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { TURN_IDENTITY_CHAR_BUDGET } from '../../constants/companionIdentity.js';
 import {
   type CompanionIdentity,
   CompanionIdentitySchema,
 } from '../../types/companion.js';
+import type { CompanionSectionMinimal } from '../../types/companionGuard.js';
 import { getCompanionSchemaVersion } from '../../types/companionGuard.js';
 import { backupPathFor } from '../backupPath/index.js';
 import { assertTurnBudget } from '../companionBudget/companionBudget.js';
 import { normalizeCompanionIdentity } from '../companionNormalize/normalizeCompanionIdentity.js';
 import { toIsoDatetime } from '../companionNormalize/toIsoDatetime.js';
 import { appendErrorLogSafe } from '../errorLog/errorLog.js';
-
-import { removeClaudeMdTone, scanClaudeMdTone } from './absorbClaudeMdTone.js';
 
 export type CompanionMigrationReason =
   | 'no-file'
@@ -33,13 +34,34 @@ export interface CompanionMigrationResult {
   migrated: boolean;
   reason: CompanionMigrationReason;
   backupPath?: string;
-  /** CLAUDE.md tone 섹션 흡수(제거) 여부 */
-  claudeMdAbsorbed?: boolean;
-  /** 매 턴 예산 초과분(자동 강등 없음, 경고만) */
-  turnBudgetOverBy?: number;
+  /** 매 턴 예산을 맞추기 위해 inject:"session"으로 자동 강등된 섹션 key들 */
+  demotedToSession?: string[];
 }
 
 const IDENTITY_RELATIVE = ['.maencof-meta', 'companion-identity.json'];
+
+/**
+ * 매 턴 예산(500)을 초과하면 turn 대상(inject turn|both) 중 salience 낮은 것부터
+ * inject:"session"으로 강등해 예산 내로 맞춘다. v1→v2 매핑이 합성한 inject 기본값을
+ * 조정하는 것이며(사용자 저작값 아님) turn 대상이 소진되면 멈춘다. 반환은 강등된 key 목록.
+ */
+function demoteToFitTurnBudget(sections: CompanionSectionMinimal[]): {
+  sections: CompanionSectionMinimal[];
+  demoted: string[];
+} {
+  const out = sections.map((s) => ({ ...s }));
+  const demoted: string[] = [];
+  while (assertTurnBudget(out).total > TURN_IDENTITY_CHAR_BUDGET) {
+    const target = out
+      .map((s, index) => ({ s, index }))
+      .filter(({ s }) => s.inject === 'turn' || s.inject === 'both')
+      .sort((a, b) => a.s.salience - b.s.salience || a.index - b.index)[0];
+    if (!target) break;
+    out[target.index] = { ...target.s, inject: 'session' };
+    demoted.push(target.s.key);
+  }
+  return { sections: out, demoted };
+}
 
 /**
  * 레거시→정본 마이그레이션을 1회 수행한다. serverEntry가 매 기동 호출해도 안전(멱등).
@@ -65,15 +87,12 @@ export function runCompanionMigration(cwd: string): CompanionMigrationResult {
       return { migrated: false, reason: 'invalid' };
     }
 
-    // CLAUDE.md tone 섹션을 읽기 전용으로 스캔해 candidate에 합류(제거는 아직 안 함).
-    const absorbedSections = scanClaudeMdTone(cwd, normalized.name);
-
     const now = new Date().toISOString();
     const candidate: CompanionIdentity = {
       schema_version: 2,
       name: normalized.name,
       greeting: normalized.greeting,
-      sections: [...normalized.sections, ...absorbedSections],
+      sections: normalized.sections,
       created_at: toIsoDatetime(normalized.created_at, now),
       updated_at: now,
     };
@@ -90,38 +109,32 @@ export function runCompanionMigration(cwd: string): CompanionMigrationResult {
       return { migrated: false, reason: 'invalid' };
     }
 
-    // §7-4: 매 턴 예산 초과는 경고만 — 자동 강등하지 않는다(저작 도구로 조정 권장).
-    const budget = assertTurnBudget(parsed.data.sections);
-    if (!budget.ok)
+    // §B1: 매 턴 예산 초과 시 저살리언스 turn 섹션을 session으로 자동 강등해 500 이내로 맞춘다.
+    const fitted = demoteToFitTurnBudget(parsed.data.sections);
+    const finalData: CompanionIdentity =
+      fitted.demoted.length > 0
+        ? { ...parsed.data, sections: fitted.sections }
+        : parsed.data;
+    if (fitted.demoted.length > 0)
       appendErrorLogSafe(cwd, {
         hook: 'companion-migration',
-        error: `turn identity budget exceeded by ${budget.overBy} chars after migration; adjust via companion_edit (demote to session or add brief). offenders: ${budget.offenders
-          .map((o) => `${o.key}:${o.chars}`)
-          .join(', ')}`,
+        error: `turn identity budget exceeded after migration; auto-demoted to inject:"session" to fit ${TURN_IDENTITY_CHAR_BUDGET} chars: ${fitted.demoted.join(', ')}`,
         timestamp: now,
       });
 
-    // identity를 먼저 쓴다 (핵심 마이그레이션).
     const backupPath = backupPathFor(identityPath);
     copyFileSync(identityPath, backupPath);
     writeFileSync(
       identityPath,
-      JSON.stringify(parsed.data, null, 2) + '\n',
+      JSON.stringify(finalData, null, 2) + '\n',
       'utf-8',
     );
-
-    // identity 쓰기 성공 후에만 CLAUDE.md에서 흡수한 섹션을 제거한다.
-    const removal =
-      absorbedSections.length > 0
-        ? removeClaudeMdTone(cwd, normalized.name)
-        : { removed: false };
 
     return {
       migrated: true,
       reason: 'migrated',
       backupPath,
-      claudeMdAbsorbed: removal.removed,
-      turnBudgetOverBy: budget.ok ? undefined : budget.overBy,
+      demotedToSession: fitted.demoted.length > 0 ? fitted.demoted : undefined,
     };
   } catch (e) {
     appendErrorLogSafe(cwd, {

@@ -7,13 +7,16 @@
  * Zod 스키마(정본)와 동기화 유지할 것.
  */
 
-/** 렌더 경로가 소비하는 정본 section 최소 형태 (normalizeCompanionIdentity 산출물) */
+/**
+ * 렌더 경로가 소비하는 정본 section 최소 형태 (normalizeCompanionIdentity 산출물).
+ * `detail`·`brief`는 문자열 또는 문자열 배열이며, 렌더 시 `resolveSectionText`가 `|`로 join한다.
+ */
 export interface CompanionSectionMinimal {
   key: string;
   inject: 'session' | 'turn' | 'both';
   salience: number;
-  detail: string;
-  brief?: string;
+  detail: string | string[];
+  brief?: string | string[];
   title?: string;
 }
 

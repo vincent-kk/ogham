@@ -213,13 +213,22 @@ export function applyCompanionEdit(
       ),
     );
 
+  // §B1: 절대 500 기준이 아니라 단조-개선(monotone) 기준으로 커밋을 게이트한다.
+  // 편집 후 총합이 ≤500 이거나, 편집 전 총합을 악화시키지 않으면(초과를 늘리지 않으면)
+  // 허용 — 마이그레이션 직후 초과 상태(예: 675)에서도 brief를 하나씩 붙여 500 아래로
+  // 점진 수렴할 수 있다. 초과를 늘리는 편집만 거부한다.
+  const beforeTurn = assertTurnBudget(current.sections);
   const turn = assertTurnBudget(candidate.sections);
-  if (!turn.ok)
+  if (!turn.ok && turn.total > beforeTurn.total)
     errors.push(
-      `Turn identity budget exceeded: ${turn.total}/${turn.budget} chars (over by ${turn.overBy}). Demote a section to inject:"session" or add a shorter brief. Largest: ${turn.offenders
+      `Turn identity budget exceeded: ${turn.total}/${turn.budget} chars (was ${beforeTurn.total}; this edit would worsen an over-budget per-turn set). Demote a section to inject:"session" or add a shorter brief. Largest: ${turn.offenders
         .slice(0, 3)
         .map((o) => `${o.key}(${o.chars})`)
         .join(', ')}.`,
+    );
+  else if (!turn.ok)
+    warnings.push(
+      `Turn identity still over budget: ${turn.total}/${turn.budget} chars (improving from ${beforeTurn.total}). Keep adding briefs or demoting to inject:"session" until under ${turn.budget}.`,
     );
 
   const session = assertSessionBudget(candidate.sections);

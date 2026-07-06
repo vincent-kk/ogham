@@ -15,8 +15,10 @@ export interface CompanionSectionPatch {
   key?: string;
   inject?: CompanionInject;
   salience?: number;
-  detail?: string;
-  brief?: string;
+  /** 문자열 또는 문자열 배열(렌더 시 `|` join) */
+  detail?: string | string[];
+  /** 문자열 또는 문자열 배열(렌더 시 `|` join) */
+  brief?: string | string[];
   title?: string;
 }
 

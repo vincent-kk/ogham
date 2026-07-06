@@ -65,6 +65,22 @@ describe('buildCompanionIdentityTag — binding per-turn render (§4)', () => {
     expect(tag).not.toContain('the long canonical form');
   });
 
+  it('joins array detail with | in the rendered body', () => {
+    const tag = buildCompanionIdentityTag(
+      identity([
+        {
+          key: 'principles',
+          inject: 'both',
+          salience: 4,
+          detail: ['retrieval', 'links', 'brevity'],
+        },
+      ]),
+    );
+    expect(tag).toContain(
+      '<principles salience="4">retrieval|links|brevity</principles>',
+    );
+  });
+
   it('prefixes taboos with NEVER:', () => {
     const tag = buildCompanionIdentityTag(
       identity([

@@ -12,6 +12,7 @@ import {
 import type { CompanionSectionMinimal } from '../../types/companionGuard.js';
 import {
   renderIdentitySection,
+  resolveSectionText,
   selectSections,
 } from '../turnContext/renderIdentitySection.js';
 
@@ -97,7 +98,8 @@ export function checkBriefSubsumption(
   const warnings: string[] = [];
   if (
     section.brief !== undefined &&
-    codePointLength(section.brief) >= codePointLength(section.detail)
+    codePointLength(resolveSectionText(section.brief)) >=
+      codePointLength(resolveSectionText(section.detail))
   )
     warnings.push(
       `Section "${section.key}": brief is not shorter than detail — brief must compress detail, not expand it.`,

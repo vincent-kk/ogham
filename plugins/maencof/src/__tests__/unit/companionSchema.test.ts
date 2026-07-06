@@ -106,6 +106,37 @@ describe('CompanionSectionSchema', () => {
       }).success,
     ).toBe(false);
   });
+
+  it('accepts array detail and array brief', () => {
+    expect(
+      CompanionSectionSchema.safeParse({
+        key: 'principles',
+        inject: 'both',
+        salience: 4,
+        detail: ['a', 'b'],
+        brief: ['x'],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects an empty array or an array with an empty string for detail', () => {
+    expect(
+      CompanionSectionSchema.safeParse({
+        key: 'k',
+        inject: 'both',
+        salience: 3,
+        detail: [],
+      }).success,
+    ).toBe(false);
+    expect(
+      CompanionSectionSchema.safeParse({
+        key: 'k',
+        inject: 'both',
+        salience: 3,
+        detail: [''],
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe('CompanionIdentitySchema', () => {
