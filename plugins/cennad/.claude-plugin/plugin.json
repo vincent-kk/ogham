@@ -1,6 +1,6 @@
 {
   "name": "cennad",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "Cennad — delegate to Codex / Antigravity / Claude Code CLIs from Claude Code via MCP, skills, and hooks",
   "author": {
     "name": "Vincent K. Kelvin"
