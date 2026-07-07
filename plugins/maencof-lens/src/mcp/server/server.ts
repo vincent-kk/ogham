@@ -36,7 +36,7 @@ export function createLensServer(configRoot: string) {
     McpToolName.SEARCH,
     {
       description:
-        "Search vault knowledge via Spreading Activation from seed keywords.",
+        "Search vault knowledge via Spreading Activation from seed keywords. Returns ranked references (no content); for assembled multi-document content, prefer the context tool.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         seed: z
@@ -70,7 +70,7 @@ export function createLensServer(configRoot: string) {
     McpToolName.CONTEXT,
     {
       description:
-        "Assemble a token-budgeted context block from vault documents matching a query.",
+        "Assemble a token-budgeted context block from vault documents matching a query. Prefer this over search + read chains for multi-document content; layer/sub-layer/scope selection applies before the budget is spent.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         query: z
@@ -81,6 +81,20 @@ export function createLensServer(configRoot: string) {
         token_budget: z.optional(z.number()),
         include_full: z.optional(z.boolean()),
         layer_filter: z.optional(z.array(z.number())),
+        sub_layer: z.optional(
+          z
+            .enum(["relational", "structural", "topical", "buffer", "boundary"])
+            .describe(
+              "Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)",
+            ),
+        ),
+        scope: z.optional(
+          z
+            .enum(["focused", "balanced", "broad"])
+            .describe(
+              "Exploration breadth: 'focused' = close, high-confidence documents; 'balanced' = default; 'broad' = distant associative connections (ideation)",
+            ),
+        ),
       }),
     },
     async (args) => {
