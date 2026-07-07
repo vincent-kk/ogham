@@ -1,7 +1,7 @@
 # cross-review — Subagent Prompt Templates
 
 Literal prompt templates the chairperson fills in when spawning Phase
-A / B / C1 / C2 subagents via `Task(subagent_type: "general-purpose",
+A / B / C1 / C2 subagents via `Agent(subagent_type: "general-purpose",
 run_in_background: true)`. The meta-rules governing how to fill them
 in live in `contracts.md` → "Subagent Prompt Rules". Batch partitioning
 thresholds live in `mcp-map.md` → "Batch Partitioning Thresholds".
@@ -157,14 +157,14 @@ Skip remaining checks and write partial results (mark skipped as SKIP) if budget
 
 ## Team-Promoted Phase C (> 30 changed files)
 
-When `changedFilesCount > 30`, Phase C is promoted to a dedicated
-`review-c-<normalized-branch>` team (distinct from Phase D's
-`review-<normalized-branch>` team). Workers are spawned with
-`team_name: "review-c-<normalized-branch>"` and names `c1-batch-<N>` /
-`c2-batch-<N>` / `c2-global`. The base prompt template is identical to
-the non-team Phase C1 / C2 variants above — only the spawn call adds
-`team_name` and the worker follows the Team Worker Protocol defined in
-each phase file's "Batch / Team-Promoted Execution" section.
+When `changedFilesCount > 30`, Phase C is promoted to a set of named
+batch workers spawned as teammates on the session's implicit team:
+`Agent(name: "c1-batch-<N>" | "c2-batch-<N>" | "c2-global",
+subagent_type: "general-purpose", ...)`. The base prompt template is
+identical to the non-promoted Phase C1 / C2 variants above — only the
+spawn gains a `name` and the worker follows the Team Worker Protocol
+defined in each phase file's "Batch / Team-Promoted Execution" section.
 
-`TeamDelete` the `review-c-<normalized-branch>` team as soon as all
-C1/C2 workers complete — before entering Phase D.
+Confirm every C batch worker has terminated as soon as all C1/C2
+outputs are merged — `TaskStop` any straggler — before entering
+Phase D.

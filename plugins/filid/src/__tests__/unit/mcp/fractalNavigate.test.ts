@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { NodeEntry } from '../../../core/tree/fractalTree/fractalTree.js';
 import { handleFractalNavigate } from '../../../mcp/tools/fractalNavigate/fractalNavigate.js';
@@ -158,6 +162,43 @@ describe('fractal-navigate tool', () => {
         ],
       });
       expect(result.classification).toBe('fractal');
+    });
+  });
+
+  describe('classify filesystem fallback (entries lack target)', () => {
+    let tmpDir: string;
+
+    beforeEach(() => {
+      tmpDir = join(
+        tmpdir(),
+        `filid-navigate-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      );
+      mkdirSync(join(tmpDir, 'hooks'), { recursive: true });
+    });
+
+    afterEach(() => {
+      rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('should classify INTENT.md-bearing dir as fractal with empty entries', () => {
+      // Regression: entries: [] defaulted hasIntentMd to false, so an
+      // organ-named fractal (e.g. src/hooks with INTENT.md) came back organ.
+      writeFileSync(join(tmpDir, 'hooks', 'INTENT.md'), '# hooks\n');
+      const result = handleFractalNavigate({
+        action: 'classify',
+        path: join(tmpDir, 'hooks'),
+        entries: [],
+      });
+      expect(result.classification).toBe('fractal');
+    });
+
+    it('should fall back to name-based classification for nonexistent paths', () => {
+      const result = handleFractalNavigate({
+        action: 'classify',
+        path: join(tmpDir, 'missing', 'utils'),
+        entries: [],
+      });
+      expect(result.classification).toBe('organ');
     });
   });
 

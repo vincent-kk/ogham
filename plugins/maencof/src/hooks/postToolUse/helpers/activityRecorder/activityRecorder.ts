@@ -16,6 +16,7 @@ import { buildToolDescription } from '../../../../core/activityLog/buildToolDesc
 import { formatTime } from '../../../../core/dateFormat/dateFormat.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
+import { normalizeMaencofToolName } from '../../../shared/maencofMcpTools.js';
 
 function isExcludedPath(path: string | undefined): boolean {
   if (!path) return false;
@@ -45,7 +46,9 @@ export function runActivityRecorder(
 ): ActivityRecorderResult {
   try {
     const cwd = input.cwd ?? process.cwd();
-    const toolName = input.tool_name ?? '';
+    // Hook inputs carry full-form MCP names (mcp__plugin_maencof_t__create);
+    // category map and description builder are keyed on bare names.
+    const toolName = normalizeMaencofToolName(input.tool_name ?? '');
 
     if (!isMaencofVault(cwd)) return { continue: true };
 

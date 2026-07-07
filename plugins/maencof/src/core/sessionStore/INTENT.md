@@ -29,5 +29,5 @@ session_id 키 맵으로 보관하고 볼트 작업 차분을 산출한다.
 
 ### Never do
 
-- 구 `.maencof-meta/sessions/*.md` 읽기/쓰기 (자연 폐기)
+- `.maencof-meta/sessions/*.md` 읽기/쓰기
 - 누적(cumulative) 통계를 per-session 데이터로 기록

@@ -16,8 +16,8 @@
 > **HIGH-RISK YIELD POINTS in Phase D**:
 >
 > 1. After Step D.0 verification.md merge → chain D.1 immediately.
-> 2. After adjudicator Task returns (solo path) → chain D.6 write.
-> 3. After TeamCreate + parallel Task spawns return → chain D.2.5 wait
+> 2. After the adjudicator Agent returns (solo path) → chain D.6 write.
+> 3. After the parallel worker Agent spawns return → chain D.2.5 wait
 >    without yielding.
 > 4. After all Round N SendMessage deliveries arrive → chain D.3.1 (grep
 >    state frontmatter) + D.3.2 quorum decision in the same response.
@@ -25,18 +25,19 @@
 >    - SendMessage for every worker without yielding between them.
 > 6. After VETO compromise file is written → chain D.4.3 re-eval task
 >    creation immediately.
-> 7. After TeamDelete returns → chain ../SKILL.md Step 4.5 (content-hash)
->    in the same response.
+> 7. After worker teardown (D.6.5) completes → chain ../SKILL.md Step 4.5
+>    (content-hash) in the same response.
 >
 > Phase D completes when `review-report.md` and `fix-requests.md` are
-> written AND (team mode) the team is fully shut down via `TeamDelete`.
+> written AND (team mode) every worker has shut down (D.6.5 teardown).
 
 ## Main Pull-Up Contract
 
 Phase D runs **only in the main orchestrator**, never inside the A/B/C
-subagent. The subagent MUST NOT call `TeamCreate`, `SendMessage`, or otherwise
-attempt Phase D internally — nested team spawns from a subagent context are
-unsupported and leak orphan workers. The subagent's sole Phase-D obligation
+subagent. The subagent MUST NOT spawn teammates (`Agent`), call
+`SendMessage`, or otherwise attempt Phase D internally — nested teammate
+spawns from a subagent context are unsupported and leak orphan workers. The
+subagent's sole Phase-D obligation
 is to emit the Subagent Return Contract on exit (see
 `../review/DETAIL.md` → `## API Contracts`) with two
 dispatch fields:
@@ -47,11 +48,11 @@ round5-exhaust}`
 
 Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
 
-| Dispatch | Trigger                                                                                                                                                                                               | Main action                                                                                                                                                                         |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| team     | `deliberation_mode == team` AND `committee.length >= 2`                                                                                                                                               | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally                                                                                            |
-| solo     | `deliberation_mode == solo-adjudicator`                                                                                                                                                               | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                                                                                                     |
-| fail     | **Pre-dispatch**: `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`. **In-flight**: TeamCreate error (nested spawn refused) surfacing before any round completes. | Step D.7 — write `rounds/failure.md` AND a minimal `review-report.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure). |
+| Dispatch | Trigger                                                                                                                                                                                                | Main action                                                                                                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| team     | `deliberation_mode == team` AND `committee.length >= 2`                                                                                                                                                | Step D.2-team — spawn named worker Agents + round state machine, ALWAYS run D.6.5 teardown (shutdown_request → TaskStop) inside try/finally                                                               |
+| solo     | `deliberation_mode == solo-adjudicator`                                                                                                                                                                | Step D.2-solo — single standalone `Agent` of `filid:adjudicator`                                                                                                                                          |
+| fail     | **Pre-dispatch**: `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`. **In-flight**: worker Agent spawn error (spawn refused) surfacing before any round completes. | Step D.7 — write `rounds/failure.md` AND a minimal `review-report.md` with `verdict: INCONCLUSIVE`; if workers were already spawned, tear them down (shutdown_request → TaskStop, orphan-log on failure). |
 
 > **Round-5 exhaust, all-ABSTAIN quorum failures, and irreconcilable VETO are NOT Step D.7.**
 > Those surface during in-team round evaluation (Step D.3.2 or D.4) and route to
@@ -60,7 +61,7 @@ Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
 > irreconcilable VETO (D.4.4) maps to `verdict: REQUEST_CHANGES` per
 > `state-machine.md` → "VETO Branch (COMPROMISE) Rules". Step D.7 is reserved
 > for cases where deliberation never ran to a full round (pre-dispatch failure
-> or TeamCreate in-flight failure).
+> or in-flight worker-spawn failure).
 
 `chairperson-direct` Phase D synthesis — main writing a verdict without
 running either the team branch or the solo-adjudicator branch — is a
@@ -93,11 +94,14 @@ resumes), while any new commit produces a new id.
 ---
 
 Phase D produces the final review verdict through a **real multi-agent
-deliberation** using Claude Code's native team tools. Committee members
-elected by `mcp__plugin_filid_t__review_manage(elect-committee)` are spawned as team workers,
-each in their own context, emitting structured opinion files per round.
-The chairperson (Lead) orchestrates rounds and applies the state machine
-defined in `../state-machine.md`.
+deliberation** using Claude Code's native agent tools. The session has a
+single **implicit team** — there is no team-create/team-delete API.
+Committee members elected by
+`mcp__plugin_filid_t__review_manage(elect-committee)` are spawned as named
+teammate Agents, each in their own context, emitting structured opinion
+files per round. The chairperson (the main session, addressed by workers
+as `main`) orchestrates rounds and applies the state machine defined in
+`../state-machine.md`.
 
 ## Execution Context (read by chairperson before starting)
 
@@ -171,20 +175,20 @@ Used for `TRIVIAL` complexity (auto-selected small diff) or `--solo` flag
 exactly `['adjudicator']`. The state machine is skipped — a single
 consolidated opinion maps directly to the verdict.
 
-### Spawn the adjudicator as a standalone Task
+### Spawn the adjudicator as a standalone Agent
 
 ```
-Task(
+Agent(
   subagent_type: "filid:adjudicator",
   name: "adjudicator",
   prompt: <solo-worker-preamble>
 )
 ```
 
-Do **not** call `TeamCreate`. The adjudicator is a standalone integrated
-reviewer, not a team worker. It covers all six committee perspectives
-(structure, documentation, stability, velocity, user-value, cognitive
-load) in a single context.
+Do **not** spawn any other teammate. The adjudicator is a standalone
+integrated reviewer, not a team worker. It covers all six committee
+perspectives (structure, documentation, stability, velocity, user-value,
+cognitive load) in a single context.
 
 Solo worker preamble template:
 
@@ -227,9 +231,9 @@ cited evidence. PASS requires observable evidence matching the claim's
 cannot decide, use INSUFFICIENT-EVIDENCE.
 
 == REMINDER ==
-Write the output file before finishing. Do NOT call Task, TeamCreate,
-SendMessage, TaskList, or any orchestration tool. You are a standalone
-Task, not a team worker. Return a brief completion summary.
+Write the output file before finishing. Do NOT call Agent, SendMessage,
+TaskList, or any orchestration tool. You are a standalone agent, not a
+team worker. Return a brief completion summary.
 
 Language: <from [filid:lang] tag, default English>
 ```
@@ -265,16 +269,12 @@ After the Task returns:
 
 ## Step D.2-team — Team Deliberation (committee.length >= 2)
 
-### D.2.1 — TeamCreate
+### D.2.1 — Team context
 
-```
-TeamCreate({
-  team_name: "review-<normalized-branch>",
-  description: "Filid multi-persona code review — <N> members"
-})
-```
-
-The chairperson becomes `team-lead@review-<normalized-branch>`.
+There is no team-creation call: the session already provides a single
+**implicit team**. The chairperson is the main session — workers address
+it as `main` via `SendMessage({ to: "main", ... })` — and each committee
+member becomes addressable by the `name` given at its Agent spawn (D.2.4).
 
 ### D.2.2 — Ensure rounds directory exists
 
@@ -305,9 +305,8 @@ TaskUpdate({ taskId: <id>, owner: "<persona-id>" })
 Spawn every committee member in the same response (parallel tool calls):
 
 ```
-Task(
+Agent(
   subagent_type: "filid:<persona-id>",
-  team_name: "review-<normalized-branch>",
   name: "<persona-id>",
   prompt: <team-worker-preamble>
 )
@@ -316,9 +315,9 @@ Task(
 Team worker preamble template:
 
 ```
-You are the <persona-id> review persona working as a TEAM WORKER in team
-"review-<normalized-branch>". Your name is "<persona-id>". You report to
-"team-lead".
+You are the <persona-id> review persona working as a TEAM WORKER for the
+review of <normalized-branch>. Your name is "<persona-id>". You report to
+the main session ("main").
 
 == INPUTS (read these before anything else) ==
 - <REVIEW_DIR>/session.md
@@ -338,8 +337,8 @@ You are the <persona-id> review persona working as a TEAM WORKER in team
    block judging every listed claim (PASS / FAIL / INSUFFICIENT-EVIDENCE,
    each with cited evidence — never PASS on plausibility alone).
 5. TaskUpdate({ taskId, status: "completed" }).
-6. SendMessage({ type: "message", recipient: "team-lead",
-   content: "round 1 <persona-id> done: <state>",
+6. SendMessage({ to: "main",
+   message: "round 1 <persona-id> done: <state>",
    summary: "round 1 done" }).
 7. Wait for the next round task or a shutdown_request.
 
@@ -411,9 +410,8 @@ persona the adversarial context they need:
 3. SendMessage to each worker:
    ```
    {
-     type: "message",
-     recipient: "<persona-id>",
-     content: "Round <N+1> start. Read lead-brief-round-<N+1>.md and previous opinions in <REVIEW_DIR>/rounds/round-<N>-*.md. Claim your new task and write round-<N+1>-<persona-id>.md.",
+     to: "<persona-id>",
+     message: "Round <N+1> start. Read lead-brief-round-<N+1>.md and previous opinions in <REVIEW_DIR>/rounds/round-<N>-*.md. Claim your new task and write round-<N+1>-<persona-id>.md.",
      summary: "round <N+1> start"
    }
    ```
@@ -451,9 +449,8 @@ TaskCreate({
 })
 TaskUpdate({ taskId, owner: "business-driver" })
 SendMessage({
-  recipient: "business-driver",
-  type: "message",
-  content: "VETO compromise needed for round <N>. Inspect the new task and
+  to: "business-driver",
+  message: "VETO compromise needed for round <N>. Inspect the new task and
     write the compromise file.",
   summary: "VETO compromise"
 })
@@ -497,9 +494,8 @@ A worker is considered **stuck** when two consecutive `TaskList` polls
 
 ```
 SendMessage({
-  recipient: "<persona-id>",
-  type: "message",
-  content: "ping: are you still working on round <N>? reply with current progress",
+  to: "<persona-id>",
+  message: "ping: are you still working on round <N>? reply with current progress",
   summary: "probe"
 })
 ```
@@ -514,11 +510,12 @@ If no response, the worker is declared dead:
    ```
    TaskUpdate({ taskId, status: "pending", owner: "" })
    ```
-2. If `respawn_count[persona] < 2`, respawn with identical name:
+2. If `respawn_count[persona] < 2`, first `TaskStop("<persona-id>")` to
+   reap the dead worker (frees the name), then respawn with the identical
+   name:
    ```
-   Task(
+   Agent(
      subagent_type: "filid:<persona-id>",
-     team_name: "review-<normalized-branch>",
      name: "<persona-id>",
      prompt: <recovery-preamble>
    )
@@ -708,32 +705,32 @@ This gate guarantees hallucinated keys such as
 `rules[*].allowed-no-entry` never reach `resolve` — the class of
 failure that produces no-op config commits.
 
-### D.6.5 — Team shutdown (team deliberation only)
+### D.6.5 — Worker teardown (team deliberation only)
 
-Skip for solo deliberation — no team exists.
+Skip for solo deliberation — no lingering workers exist.
 
-For team deliberation, wrap the shutdown in a **try/finally** so
-`TeamDelete` ALWAYS runs — even when `shutdown_request` throws, times out, or
-an earlier step in this block raises:
+There is no team object to delete; teardown means **no worker lingers**.
+Wrap it in a **try/finally** so the `TaskStop` sweep ALWAYS runs — even when
+`shutdown_request` throws, times out, or an earlier step in this block
+raises:
 
 1. Verify all tasks completed via `TaskList`.
 2. Send `shutdown_request` to every committee member in parallel:
    ```
    SendMessage({
-     recipient: "<persona-id>",
-     type: "shutdown_request",
-     content: "All rounds complete, shutting down team"
+     to: "<persona-id>",
+     message: { type: "shutdown_request", reason: "All rounds complete, shutting down team" }
    })
    ```
 3. Wait up to 30 seconds per member for `shutdown_response`. Track
    confirmed and timed-out members.
-4. `TeamDelete({ team_name: "review-<normalized-branch>" })` — placed in the
-   `finally` arm. Any exception from steps 1–3 MUST still allow this call to
-   execute. On `TeamDelete` failure, append an `orphan_workers:` entry to
-   `<REVIEW_DIR>/session.md` listing the team name and surviving workers so
-   the next run can reap them.
+4. **`finally` arm**: for every member not confirmed shut down, call
+   `TaskStop("<persona-id>")`. Any exception from steps 1–3 MUST still
+   allow this sweep to execute. If a `TaskStop` itself fails, append an
+   `orphan_workers:` entry to `<REVIEW_DIR>/session.md` listing the
+   surviving worker names so the next run can reap them.
 
-**→ After TeamDelete returns (or solo path completes), immediately proceed to Step 4.5 in ../SKILL.md (persist content hash). Do NOT yield.**
+**→ After the teardown sweep completes (or solo path completes), immediately proceed to Step 4.5 in ../SKILL.md (persist content hash). Do NOT yield.**
 
 ---
 
@@ -743,19 +740,20 @@ Entered in two cases:
 
 - **Pre-dispatch fail**: Step D.1 selects fail because `deliberation_mode` is
   `chairperson-forbidden` or `null`, OR `failure_reason != "none"`.
-- **In-flight fail**: during D.2-team execution a TeamCreate error surfaces
-  (nested spawn refused) before any round completes.
+- **In-flight fail**: during D.2-team execution a worker Agent spawn error
+  surfaces (spawn refused) before any round completes.
 
 Round-5 exhaust, all-ABSTAIN quorum failures, and irreconcilable VETO are NOT
 this branch — they complete at least one round and route through D.3.2 / D.4
 → D.6. D.3.2 round-limit / all-ABSTAIN writes `verdict: INCONCLUSIVE`; D.4.4
 irreconcilable VETO writes `verdict: REQUEST_CHANGES`.
 
-1. **Team teardown (if applicable)**: if a team was already created before
-   the failure surfaced, run `TeamDelete({ team_name: "review-<normalized-branch>" })`
-   inside a try/finally block. On `TeamDelete` exception, append an
-   `orphan_workers:` entry to `<REVIEW_DIR>/session.md` (team name +
-   surviving worker list) so the next run can reap them.
+1. **Worker teardown (if applicable)**: if any workers were already spawned
+   before the failure surfaced, run the D.6.5 teardown sweep
+   (`shutdown_request` → `TaskStop` per worker) inside a try/finally block.
+   If a `TaskStop` fails, append an `orphan_workers:` entry to
+   `<REVIEW_DIR>/session.md` (surviving worker list) so the next run can
+   reap them.
 2. **Write failure record**: emit `<REVIEW_DIR>/rounds/failure.md` with
    frontmatter capturing the dispatch and reason:
    ```

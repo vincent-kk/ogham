@@ -6,8 +6,8 @@ the phase files point here rather than duplicating the mappings.
 
 ## Available MCP Tools (chairperson-level)
 
-| Tool                  | Action              | Purpose                                                                                                                                                                                                                     |
-| --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool                                 | Action              | Purpose                                                                                                                                                                                                                     |
+| ------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mcp__plugin_filid_t__review_manage` | `normalize-branch`  | Normalize branch name for review directory path                                                                                                                                                                             |
 | `mcp__plugin_filid_t__review_manage` | `ensure-dir`        | Create `.filid/review/<branch>/` directory                                                                                                                                                                                  |
 | `mcp__plugin_filid_t__review_manage` | `elect-committee`   | Deterministic committee election (Phase B). Accepts optional `adjudicatorMode: boolean` to force the integrated `adjudicator` fast-path agent. Emits TRIVIAL/LOW/MEDIUM/HIGH complexity with committees of 1/2/4/6 members. |
@@ -19,9 +19,9 @@ the phase files point here rather than duplicating the mappings.
 | `mcp__plugin_filid_t__debt_manage`   | `calculate-bias`    | Compute debt bias level for Phase C2 + D deliberation                                                                                                                                                                       |
 | `mcp__plugin_filid_t__debt_manage`   | `create`            | Promote a 3-strike advisory ledger entry to a debt record (Phase D Step D.6.2-adv — bookkeeping, not measurement)                                                                                                           |
 
-Phase D (deliberation) uses Claude Code's native team tools —
-`TeamCreate`, `TeamDelete`, `TaskCreate`, `TaskUpdate`, `TaskList`,
-`SendMessage`, `Task` — NOT MCP tools. See
+Phase D (deliberation) uses Claude Code's native agent tools —
+`Agent` (named teammates on the implicit team), `TaskCreate`,
+`TaskUpdate`, `TaskList`, `SendMessage`, `TaskStop` — NOT MCP tools. See
 `phases/phase-d-deliberation.md` for the full team orchestration
 protocol.
 
@@ -29,8 +29,8 @@ protocol.
 
 ### Phase A (Structure Agent, sonnet) — diff scope only
 
-| Tool                       | Action / Parameters                     | Stage | Purpose                                       |
-| -------------------------- | --------------------------------------- | ----- | --------------------------------------------- |
+| Tool                                      | Action / Parameters                     | Stage | Purpose                                       |
+| ----------------------------------------- | --------------------------------------- | ----- | --------------------------------------------- |
 | `mcp__plugin_filid_t__fractal_scan`       | `path: <PROJECT_ROOT>`                  | 0     | Build full fractal tree → `SCAN_NODES` lookup |
 | `mcp__plugin_filid_t__structure_validate` | `path: <changed dir>`                   | 1     | Fractal/organ boundary validation (diff only) |
 | `mcp__plugin_filid_t__doc_compress`       | `mode: "auto"`                          | 2     | INTENT.md line count (changed INTENT.md only) |
@@ -42,8 +42,8 @@ protocol.
 
 ### Phase B (Analysis Agent, haiku)
 
-| Tool                  | Action             | Purpose                                       |
-| --------------------- | ------------------ | --------------------------------------------- |
+| Tool                                 | Action             | Purpose                                       |
+| ------------------------------------ | ------------------ | --------------------------------------------- |
 | `mcp__plugin_filid_t__review_manage` | `normalize-branch` | Branch name → filesystem-safe string          |
 | `mcp__plugin_filid_t__review_manage` | `ensure-dir`       | Create `.filid/review/<branch>/`              |
 | `mcp__plugin_filid_t__review_manage` | `elect-committee`  | Deterministic committee election              |
@@ -51,8 +51,8 @@ protocol.
 
 ### Phase C1 (Metrics Agent, sonnet) — changed files only
 
-| Tool                    | Action                  | Purpose                                     |
-| ----------------------- | ----------------------- | ------------------------------------------- |
+| Tool                                   | Action                  | Purpose                                     |
+| -------------------------------------- | ----------------------- | ------------------------------------------- |
 | `mcp__plugin_filid_t__ast_analyze`     | `lcom4`                 | Cohesion verification (split needed?)       |
 | `mcp__plugin_filid_t__ast_analyze`     | `cyclomatic-complexity` | Complexity verification                     |
 | `mcp__plugin_filid_t__test_metrics`    | `check-312`             | 3+12 rule validation                        |
@@ -64,8 +64,8 @@ Phase C1 writes `verification-metrics.md`.
 
 ### Phase C2 (Structure Agent, sonnet) — diff-focused
 
-| Tool                       | Action             | Purpose                              |
-| -------------------------- | ------------------ | ------------------------------------ |
+| Tool                                      | Action             | Purpose                              |
+| ----------------------------------------- | ------------------ | ------------------------------------ |
 | `mcp__plugin_filid_t__structure_validate` | —                  | FCA-AI fractal boundary rules        |
 | `mcp__plugin_filid_t__ast_analyze`        | `dependency-graph` | Circular dependency check            |
 | `mcp__plugin_filid_t__ast_analyze`        | `tree-diff`        | Semantic change / interface analysis |
@@ -87,21 +87,21 @@ bookkeeping: `mcp__plugin_filid_t__config_patch_validate` (Step D.6.4 schema gat
 `mcp__plugin_filid_t__debt_manage(create)` (Step D.6.2-adv advisory promotion).
 
 **Solo path** (committee is `['adjudicator']`): spawn a standalone
-`Task(subagent_type: filid:adjudicator)` — no Team infrastructure is
+`Agent(subagent_type: filid:adjudicator)` — no other teammates are
 used. Read `round-1-adjudicator.md` and write `review-report.md` /
 `fix-requests.md`.
 
-**Team path** (committee size >= 2): uses Claude Code's native team
-tools:
+**Team path** (committee size >= 2): uses Claude Code's native agent
+tools on the session's single implicit team (there is no
+team-create/team-delete API):
 
-| Tool                        | Purpose                                   |
-| --------------------------- | ----------------------------------------- |
-| `TeamCreate`                | Create `review-<normalized-branch>` team  |
-| `TeamDelete`                | Dismantle team after CONCLUSION           |
-| `TaskCreate` + `TaskUpdate` | Round task creation and owner assignment  |
-| `TaskList`                  | Monitor round progress                    |
-| `Task` (with `team_name`)   | Spawn committee members as team workers   |
-| `SendMessage`               | Round triggers, probes, shutdown requests |
+| Tool                        | Purpose                                         |
+| --------------------------- | ----------------------------------------------- |
+| `Agent` (with `name`)       | Spawn committee members as named teammates      |
+| `TaskCreate` + `TaskUpdate` | Round task creation and owner assignment        |
+| `TaskList`                  | Monitor round progress                          |
+| `SendMessage`               | Round triggers, probes, shutdown requests       |
+| `TaskStop`                  | Teardown sweep / reap dead or lingering workers |
 
 **Phase C batch team** (optional): when Phase C is team-promoted
 (`changedFilesCount > 30`), a separate `review-c-<normalized-branch>`

@@ -8,6 +8,8 @@ import { MetadataStore } from '../../../core/indexer/index.js';
 import { handleKgBuild } from '../../tools/kgBuild/index.js';
 import { invalidateCache } from '../graphCache/index.js';
 
+import { refreshTurnContextSafe } from './refreshTurnContext.js';
+
 // 단일 vault 가정. multi-vault 도입 시 Map<vaultPath, Promise<void>>로 전환.
 let rebuildInProgress: Promise<void> | null = null;
 
@@ -24,7 +26,10 @@ export function triggerBackgroundRebuild(vaultPath: string): void {
   rebuildInProgress = (async () => {
     try {
       const result = await handleKgBuild(vaultPath, { force: false });
-      if (result.success) invalidateCache();
+      if (result.success) {
+        invalidateCache();
+        refreshTurnContextSafe(vaultPath);
+      }
     } catch (err) {
       appendErrorLogSafe(vaultPath, {
         hook: 'background-rebuild',

@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { KgContextScope } from "@ogham/maencof";
 import { z } from "zod";
 
 import { loadConfig } from "../../config/configLoader/configLoader.js";
@@ -36,7 +37,7 @@ export function createLensServer(configRoot: string) {
     McpToolName.SEARCH,
     {
       description:
-        "Search vault knowledge via Spreading Activation from seed keywords.",
+        "Search vault knowledge via Spreading Activation from seed keywords. Returns ranked references (no content); for assembled multi-document content, prefer the context tool.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         seed: z
@@ -49,7 +50,13 @@ export function createLensServer(configRoot: string) {
         decay: z.optional(z.number()),
         threshold: z.optional(z.number()),
         max_hops: z.optional(z.number()),
-        layer_filter: z.optional(z.array(z.number())),
+        layer_filter: z.optional(
+          z
+            .array(z.number())
+            .describe(
+              "Layer numbers to include; intersected with the vault's layer ceiling. An empty intersection silently falls back to the full ceiling range instead of erroring.",
+            ),
+        ),
         sub_layer: z.optional(z.string()),
       }),
     },
@@ -70,7 +77,7 @@ export function createLensServer(configRoot: string) {
     McpToolName.CONTEXT,
     {
       description:
-        "Assemble a token-budgeted context block from vault documents matching a query.",
+        "Assemble a token-budgeted context block from vault documents matching a query. Prefer this over search + read chains for multi-document content; layer/sub-layer/scope selection applies before the budget is spent.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         query: z
@@ -80,7 +87,27 @@ export function createLensServer(configRoot: string) {
           ),
         token_budget: z.optional(z.number()),
         include_full: z.optional(z.boolean()),
-        layer_filter: z.optional(z.array(z.number())),
+        layer_filter: z.optional(
+          z
+            .array(z.number())
+            .describe(
+              "Layer numbers to include; intersected with the vault's layer ceiling. An empty intersection silently falls back to the full ceiling range instead of erroring.",
+            ),
+        ),
+        sub_layer: z.optional(
+          z
+            .enum(["relational", "structural", "topical", "buffer", "boundary"])
+            .describe(
+              "Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)",
+            ),
+        ),
+        scope: z.optional(
+          z
+            .nativeEnum(KgContextScope)
+            .describe(
+              "Exploration breadth: 'focused' = close, high-confidence documents; 'balanced' = default; 'broad' = distant associative connections (ideation)",
+            ),
+        ),
       }),
     },
     async (args) => {

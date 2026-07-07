@@ -17,8 +17,8 @@ yarn version:sync       # package.json → src/version.ts
 ## Build System
 
 - `scripts/build-mcp-server.mjs`: MCP 서버 번들 → `bridge/mcp-server.cjs`
-- `scripts/build-hooks.mjs`: 이벤트별 디스패처 entry(`src/hooks/eventDispatch/entries/`) → `bridge/<event>.mjs` (이벤트당 단일 번들; 관심사 핸들러를 한 프로세스에서 순차 실행)
-- SessionStart 디스패처는 esbuild `.md → text` loader 로 `src/hooks/sessionStart/metaSkillBody.md` 를 인라인 (dialogue discipline meta-prompt)
+- `scripts/build-hooks.mjs`: 이벤트별 디스패처 entry(`src/hooks/<event>/<event>.entry.ts`) → `bridge/<event>.mjs` (이벤트당 단일 번들; 관심사 핸들러를 한 프로세스에서 순차 실행)
+- SessionStart 디스패처는 esbuild `.md → text` loader 로 `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 를 인라인 (dialogue discipline meta-prompt). 본문 예산은 `META_SKILL_MAX_CHARS` — 초과 시 build-hooks.mjs 가드가 빌드를 실패시킨다.
 
 ## Auto-invocation Mapping
 
@@ -39,14 +39,15 @@ yarn version:sync       # package.json → src/version.ts
 
 ## Session Lifecycle
 
-- **Session recap**: SessionEnd 훅이 `[maencof] Session Recap` 을 자동 출력 (명시 호출 불필요). `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
-- **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/sessionStart/metaSkillBody.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
+- **Session recap**: Stop 훅이 세션당 1회, pending insight 캡처가 있을 때 `[maencof] Session Recap` 을 `additionalContext` 로 주입 (`stop/helpers/sessionRecap`; SessionEnd 는 표시 보장 채널이 없어 발화 지점이 Stop). `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
+- **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
 
 ## Development Notes
 
 - **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용
 - **테스트**: `src/**/__tests__/**/*.test.ts`
 - **훅 / bridge 변경**: `yarn build:plugin` 으로 재빌드
+- **훅 직접 import 원칙**: 훅 도달 코드는 배럴(`index.js`) import 금지 — helper 는 `./helpers/<name>/<name>.js`, core 는 concrete 파일 경로로 직접 import (각 디스패처 INTENT.md Never do 와 동일, 루트 CLAUDE.md 참조)
 - **MCP 도구 참조**: skills/agents 는 full-form `mcp__plugin_maencof_t__<tool>` 로 도구를 참조 (`.mcp.json` 서버 키 `t`). short-form `mcp_t_*` 는 서브에이전트에서 해석되지 않아 도구 grant 실패 → 디스크 직접 접근 폴백을 유발하므로 사용 금지.
 
 ## References

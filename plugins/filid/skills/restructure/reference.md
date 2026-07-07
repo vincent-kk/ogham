@@ -11,6 +11,7 @@ fractal structure restructuring skill. For the quick-start overview, see [SKILL.
 // Parallel batch — fire all three simultaneously:
 mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
+// Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for details
 
 mcp__plugin_filid_t__drift_detect({ path: "<target-path>" })
 // Returns: { drifts: DriftItem[], total: number }
@@ -20,7 +21,7 @@ mcp__plugin_filid_t__rule_query({ action: "list", path: "<target-path>" })
 ```
 
 After `mcp__plugin_filid_t__drift_detect` completes, call `mcp__plugin_filid_t__lca_resolve` for each move candidate
-(requires mcp__plugin_filid_t__drift_detect output to identify reclassification targets):
+(requires mcp**plugin_filid_t**drift_detect output to identify reclassification targets):
 
 ```
 // Sequential — after mcp__plugin_filid_t__drift_detect:

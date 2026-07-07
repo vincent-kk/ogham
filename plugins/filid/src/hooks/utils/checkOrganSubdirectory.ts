@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import * as path from 'node:path';
 
 import { isOrganByStructure } from './organStructureChecker.js';
@@ -18,11 +19,22 @@ export function checkOrganSubdirectory(
       break;
     }
   }
-  if (organIdx !== -1 && organIdx < segments.length - 1)
-    return [
-      `Attempting to create a subdirectory inside organ directory "${organSegment}". ` +
-        `Organ directories should remain flat leaf compartments without nested subdirectories.`,
-    ];
+  if (organIdx === -1 || organIdx >= segments.length - 1) return [];
 
-  return [];
+  // FCA: "Fractal nodes MAY exist inside organ directories." A declared
+  // sub-fractal (INTENT.md/DETAIL.md) below the organ legalises the nesting.
+  let below = dirSoFar;
+  for (let i = organIdx + 1; i < segments.length; i++) {
+    below = path.join(below, segments[i]);
+    if (
+      existsSync(path.join(below, 'INTENT.md')) ||
+      existsSync(path.join(below, 'DETAIL.md'))
+    )
+      return [];
+  }
+
+  return [
+    `Attempting to create a subdirectory inside organ directory "${organSegment}". ` +
+      `Organ directories should remain flat leaf compartments without nested subdirectories.`,
+  ];
 }

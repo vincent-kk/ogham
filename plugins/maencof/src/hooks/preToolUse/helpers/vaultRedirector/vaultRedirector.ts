@@ -5,6 +5,8 @@
  */
 import { isAbsolute, relative, resolve } from 'node:path';
 
+import { normalize } from '@ogham/cross-platform/paths';
+
 import {
   MAENCOF_DIR,
   MAENCOF_META_DIR,
@@ -39,7 +41,7 @@ const INTERNAL_DIRS = [MAENCOF_DIR, MAENCOF_META_DIR] as const;
 export function isVaultInternalPath(cwd: string, filePath: string): boolean {
   const resolvedCwd = resolve(cwd);
   const absPath = resolve(resolvedCwd, filePath);
-  const relPath = relative(resolvedCwd, absPath).replace(/\\/g, '/');
+  const relPath = normalize(relative(resolvedCwd, absPath));
 
   if (
     relPath === '' ||
@@ -64,7 +66,7 @@ export function isVaultInternalPath(cwd: string, filePath: string): boolean {
 export function isVaultDocDirectory(cwd: string, dirPath: string): boolean {
   const resolvedCwd = resolve(cwd);
   const absPath = resolve(resolvedCwd, dirPath);
-  const relPath = relative(resolvedCwd, absPath).replace(/\\/g, '/');
+  const relPath = normalize(relative(resolvedCwd, absPath));
 
   // vault 루트이거나 하위 디렉토리여야 함
   if (relPath === '..' || relPath.startsWith('../') || isAbsolute(relPath))
@@ -102,10 +104,7 @@ export function runVaultRedirector(
   if (!isVaultInternalPath(cwd, filePath)) return { continue: true };
 
   const suggestion = TOOL_GUIDANCE[toolName] ?? 'maencof MCP tools';
-  const relPath = relative(resolve(cwd), resolve(cwd, filePath)).replace(
-    /\\/g,
-    '/',
-  );
+  const relPath = normalize(relative(resolve(cwd), resolve(cwd, filePath)));
 
   return {
     continue: true,

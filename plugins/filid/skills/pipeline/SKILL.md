@@ -141,7 +141,7 @@ uses a **hybrid execution model**:
   independent `general-purpose` Task subagent for context isolation. Phase
   A/B/C consume ~100k tokens and would degrade the main context if run
   inline. The subagent MUST NOT execute Phase D internally — nested
-  `TeamCreate` spawns from a subagent context are unsupported and leak
+  teammate spawns from a subagent context are unsupported and leak
   orphan workers. On exit the subagent returns
   `{ committee, deliberation_mode, failure_reason, paths_to_artifacts }` and
   the pipeline main dispatches Phase D itself (see Phase D Dispatch below).
@@ -183,7 +183,7 @@ uses a **hybrid execution model**:
     context key) tells the review skill to stop after Phase C and emit
     the Subagent Return Contract instead of executing Phase D / Step 4.5
     / Step 5 inline. Without this hint the subagent would run Phase D
-    inside its own context — a nested `TeamCreate` spawn that leaks
+    inside its own context — a nested teammate spawn that leaks
     orphan workers and breaks the Phase-D main pull-up contract.
 - **Pass through flags**: `--base`, `--force`, `--no-structure-check`
 - **Success signal**: the subagent's final assistant message contains a
@@ -249,12 +249,15 @@ Apply the `verdict_gate` rule (spec: `../cross-review/DETAIL.md` → `## API Con
 
 Dispatch actions (see `cross-review/phases/phase-d-deliberation.md` Step D.1):
 
-- **team** → `TeamCreate(review-<branch>)` + one `Task` per persona; run the
-  round state machine; ALWAYS `TeamDelete` inside try/finally.
-- **solo** → single standalone `Task(filid:adjudicator)` (no TeamCreate).
-- **fail** → write `rounds/failure.md` with `verdict: INCONCLUSIVE`; if a
-  team was already created before the failure, `TeamDelete` inside
-  try/finally (orphan-log on teardown failure).
+- **team** → one named worker `Agent` per persona (the session's implicit
+  team — no create call); run the round state machine; ALWAYS run the
+  worker-teardown sweep (shutdown_request → `TaskStop`) inside try/finally.
+- **solo** → single standalone `Agent(filid:adjudicator)` (no other
+  teammates).
+- **fail** → write `rounds/failure.md` with `verdict: INCONCLUSIVE`; if
+  workers were already spawned before the failure, tear them down
+  (shutdown_request → `TaskStop`) inside try/finally (orphan-log on
+  teardown failure).
 
 `chairperson-direct` synthesis — main writing a verdict without running
 team or solo dispatch — is a **protocol violation** blocked by `verdict_gate`.
@@ -368,8 +371,8 @@ from the appropriate stage.
 
 ## Available MCP Tools
 
-| Tool                  | Action              | Purpose                                       |
-| --------------------- | ------------------- | --------------------------------------------- |
+| Tool                                 | Action              | Purpose                                       |
+| ------------------------------------ | ------------------- | --------------------------------------------- |
 | `mcp__plugin_filid_t__review_manage` | `normalize-branch`  | Normalize branch name for auto-detection      |
 | `mcp__plugin_filid_t__review_manage` | `content-hash`      | Persist review content hash (finalize review) |
 | `mcp__plugin_filid_t__review_manage` | `format-pr-comment` | Format review findings as a PR comment        |

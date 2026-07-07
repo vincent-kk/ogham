@@ -75,6 +75,33 @@ describe('agent-enforcer (guidance)', () => {
     });
   });
 
+  describe('plugin-namespaced agent types', () => {
+    it('should apply role restriction for filid:qa-reviewer (namespaced spawn)', () => {
+      mockNonFcaProject();
+      const result = enforceAgentRole({
+        ...baseInput,
+        agent_type: 'filid:qa-reviewer',
+      });
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        'ROLE RESTRICTION',
+      );
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        '[filid:lang]',
+      );
+    });
+
+    it('should pass through filid:-prefixed unknown agent types', () => {
+      mockNonFcaProject();
+      const result = enforceAgentRole({
+        ...baseInput,
+        agent_type: 'filid:nonexistent-agent',
+      });
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput).toBeUndefined();
+    });
+  });
+
   describe('non-FCA project (no workflow guidance)', () => {
     it('should skip guidance for OMC planner in non-FCA project', () => {
       mockNonFcaProject();

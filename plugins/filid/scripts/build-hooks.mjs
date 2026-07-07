@@ -38,10 +38,12 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   spike banner (fs-only git meta readers, no spawn).
 //   HEAVY         — guard-heavy orchestration with logHookFailure
 //                   (intent-injector + pre-tool-validator + structure-guard
-//                   + spike mode gate + criteria-ledger lint + mode audit).
+//                   + spike mode gate + criteria-ledger lint + mode audit
+//                   + FCA opt-in gate + write-visit recording + fmap file
+//                   lock).
 //   SESSION_START — selfProbe (spawn-dependent → cross-spawn inlined) + logHookFailure.
 const SESSION_START_HOOK_BYTES = 40 * 1024;
-const HEAVY_HOOK_BYTES = 22 * 1024;
+const HEAVY_HOOK_BYTES = 24 * 1024;
 const LIGHT_HOOK_BYTES = 12 * 1024;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and

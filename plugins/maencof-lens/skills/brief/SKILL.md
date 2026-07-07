@@ -2,8 +2,8 @@
 name: brief
 user_invocable: true
 description: "[maencof-lens:brief] Token-budgeted multi-document context assembly from vault via Spreading Activation. Assembles relevant vault documents within a specified token budget for development context injection. Use for broad knowledge loading across multiple documents when working on tasks that require vault reference material — architecture decisions, topic research, or background context gathering."
-argument-hint: "<query> [--budget N] [--vault NAME] [--layer N,...] [--full]"
-version: 1.1.0
+argument-hint: "<query> [--budget N] [--vault NAME] [--layer N,...] [--full] [--scope focused|balanced|broad]"
+version: 1.2.0
 complexity: simple
 plugin: maencof-lens
 ---
@@ -37,11 +37,12 @@ Extract query and options from user input:
 - `--vault <name>` → target vault (default: config default)
 - `--layer <N,N,...>` → layer filter as comma-separated list (default: vault config)
 - `--full` → include full document text instead of snippets
+- `--scope <focused|balanced|broad>` → exploration breadth (default: balanced)
 
 ### Step 2 — Call `mcp__plugin_maencof-lens_t__context` (single tool call)
 
 ```
-mcp__plugin_maencof-lens_t__context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool)
+mcp__plugin_maencof-lens_t__context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool, scope?: breadth)
 ```
 
 `mcp__plugin_maencof-lens_t__context` internally runs SA search + context assembly via `handleKgContext`.
@@ -66,14 +67,14 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 
 ## MCP Tools
 
-| Tool            | Purpose                                                                  |
-| --------------- | ------------------------------------------------------------------------ |
+| Tool                                  | Purpose                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------ |
 | `mcp__plugin_maencof-lens_t__context` | SA search + token-budgeted context assembly (internally performs search) |
 
 ## Options
 
 ```
-/maencof-lens:brief <query> [--budget <N>] [--vault <name>] [--layer <N,N,...>] [--full]
+/maencof-lens:brief <query> [--budget <N>] [--vault <name>] [--layer <N,N,...>] [--full] [--scope <focused|balanced|broad>]
 ```
 
 | Option     | Default       | Description                                                                                                                         |
@@ -83,6 +84,7 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 | `--vault`  | default vault | Target vault name                                                                                                                   |
 | `--layer`  | vault config  | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
 | `--full`   | false         | Include full document text instead of snippets                                                                                      |
+| `--scope`  | balanced      | Exploration breadth: `focused` = close, high-confidence documents; `broad` = distant associative connections (ideation).            |
 
 ## Usage Examples
 
@@ -92,6 +94,7 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 /maencof-lens:brief project goals --vault work
 /maencof-lens:brief design decisions --layer 2 --budget 3000
 /maencof-lens:brief deployment strategy --full
+/maencof-lens:brief plugin naming ideas --scope broad
 ```
 
 ## Error Handling

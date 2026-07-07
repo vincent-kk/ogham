@@ -9,11 +9,12 @@ SessionStart 이벤트 디스패처. `helpers/bootstrap`(볼트 init·CLAUDE.md 
 - `sessionStart.entry.ts` — 브리지 진입점 (stdin → selfProbe → orchestrator → stdout)
 - `sessionStart.ts` — `orchestrateSessionStart` (조립 + 병합)
 - `helpers/bootstrap/` — 세션 시작 실제 작업
+- `helpers/probeAdvisory/` — selfProbe 오류 필터 + 경고 조립
 
 ## Conventions
 
 - 헬퍼·공유 관심사·core 는 concrete 경로로 import (배럴 `index.js` 금지)
-- entry 가 selfProbe 진단을 additionalContext 끝에 덧붙임
+- entry 가 probeAdvisory 로 필터된 selfProbe 진단만 additionalContext 끝에 덧붙임 (정상 동작 신호는 침묵)
 - 실행 순서: bootstrap → lifecycle
 
 ## Boundaries

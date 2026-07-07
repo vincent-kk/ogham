@@ -12,9 +12,8 @@ export interface InsightInjectorInput {
 
 /**
  * UserPromptSubmit hook envelope. Claude Code surfaces the status banner to
- * the model via `hookSpecificOutput.additionalContext`; the top-level
- * `hookMessage` / `message` keys are silently dropped (see
- * `.omc/research/maencof-v030-hook-schema.md`).
+ * the model via `hookSpecificOutput.additionalContext`; top-level
+ * `hookMessage` / `message` keys are silently dropped by Claude Code.
  */
 export interface InsightInjectorResult {
   continue: boolean;

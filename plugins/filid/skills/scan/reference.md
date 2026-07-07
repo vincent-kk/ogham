@@ -8,19 +8,27 @@ rule scanner. For the quick-start guide, see [SKILL.md](./SKILL.md).
 Call `mcp__plugin_filid_t__fractal_scan` to build the complete hierarchy by scanning the filesystem.
 
 ```
-mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
+mcp__plugin_filid_t__fractal_scan({ path: "<target-path>", outputMode: "paths" })
 ```
 
-The response is a `ScanReportDto` whose `tree.nodes` is a **flat array** of
-`FractalNode` objects. Iterate with `tree.nodes.map(...)` or
-`tree.nodes.filter(...)`. The array is the single source of truth — no
-companion list, no path-keyed dict.
+Use `outputMode: "paths"` for this skill — the scan phases only need
+`{ path, type, hasIntentMd, hasDetailMd }` per node, and the full
+`ScanReportDto` overflows the tool-result budget on non-trivial projects.
+The `paths` response is `{ outputMode, root, totalNodes, nodes }` where
+`nodes` is a **flat array**. Iterate with `nodes.map(...)` /
+`nodes.filter(...)` — the array is the single source of truth.
 
-Partition into three working sets by filtering `tree.nodes`:
+**Size-guard fallback**: if the response instead has
+`{ truncated: true, reportPath, summary }`, the full report was written to
+`reportPath` (line-structured JSON). Grep it for the node fields you need
+(e.g. `grep '"hasIntentMd"' <reportPath>` with surrounding lines) instead of
+reading the whole file into context.
+
+Partition into three working sets:
 
 - **fractal nodes** — nodes with `hasIntentMd: true` or `type: "fractal"`
 - **organ nodes** — nodes with `type: "organ"` or names matching `ORGAN_DIR_NAMES`
-- **spec files** — files matching `*.spec.ts` pattern
+- **spec files** — files matching `*.spec.ts` pattern (Glob; not part of the scan response)
 
 ## Section 2 — INTENT.md Validation
 
@@ -122,17 +130,17 @@ emit it as the last line of the response, then end execution.
 
 ### With `--fix` — apply remediations then re-validate
 
-| Violation                      | Auto-fix Action                                                                | Agent             |
-| ------------------------------ | ------------------------------------------------------------------------------ | ----------------- |
-| `ORGAN_INTENT_MD_PRESENT`      | Delete the INTENT.md from the organ directory                                  | `code-surgeon`    |
-| `INTENT_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                                  | `context-manager` |
+| Violation                      | Auto-fix Action                                                                               | Agent             |
+| ------------------------------ | --------------------------------------------------------------------------------------------- | ----------------- |
+| `ORGAN_INTENT_MD_PRESENT`      | Delete the INTENT.md from the organ directory                                                 | `code-surgeon`    |
+| `INTENT_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                                                 | `context-manager` |
 | `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `mcp__plugin_filid_t__doc_compress`) | `context-manager` |
-| `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables                  | `code-surgeon`    |
+| `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables                                 | `code-surgeon`    |
 
-### Auto-fix Dispatch — parallel `Task` calls
+### Auto-fix Dispatch — parallel `Agent` calls
 
 Launch all applicable fix agents in **a single response, parallel block** of
-`Task` tool calls. Do NOT use `run_in_background: true` — that yields the turn.
+`Agent` tool calls. Do NOT use `run_in_background: true` — that yields the turn.
 Mix different `subagent_type` values in the same block freely;
 `filid:context-manager` and `filid:code-surgeon` target non-overlapping file
 types (INTENT.md/DETAIL.md vs. file deletion / test refactoring) so parallel
@@ -141,7 +149,7 @@ execution is safe without file locking.
 For an `INTENT_MD_LINE_LIMIT` violation:
 
 ```
-Task(
+Agent(
   subagent_type: "filid:context-manager",
   model: "sonnet",
   prompt: "Trim and compress <abs path>/INTENT.md to ≤50 lines while preserving the 3-tier boundary sections (### Always do, ### Ask first, ### Never do). Rewrite the file directly with the Edit tool — mcp__plugin_filid_t__doc_compress(mode: 'auto') only returns compaction metadata (compacted reference, cap_applies), not rewritten content. Return the final line count and a one-line summary."
@@ -151,7 +159,7 @@ Task(
 For an `INTENT_MD_MISSING_BOUNDARIES` violation:
 
 ```
-Task(
+Agent(
   subagent_type: "filid:context-manager",
   model: "sonnet",
   prompt: "Append the three required boundary sections (### Always do, ### Ask first, ### Never do) to <abs path>/INTENT.md if any are missing. Each section gets one bullet placeholder ('- TBD'). Do NOT exceed the 50-line limit. Return the new line count."
@@ -161,7 +169,7 @@ Task(
 For an `ORGAN_INTENT_MD_PRESENT` violation:
 
 ```
-Task(
+Agent(
   subagent_type: "filid:code-surgeon",
   model: "sonnet",
   prompt: "Delete the file at <abs path>/INTENT.md. The directory is classified as an organ, which forbids INTENT.md. Return 'deleted' on success."
@@ -171,7 +179,7 @@ Task(
 For a `TEST_312_EXCEEDED` violation:
 
 ```
-Task(
+Agent(
   subagent_type: "filid:code-surgeon",
   model: "sonnet",
   prompt: "Refactor <abs path>.spec.ts so that the total `it()` count is ≤15. Parameterize repeated `it()` blocks into `it.each()` tables. Preserve test intent. Return the new test count."

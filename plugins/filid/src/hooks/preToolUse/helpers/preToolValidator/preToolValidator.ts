@@ -250,9 +250,13 @@ export function validatePreToolUse(
 
   const content = input.tool_input.content;
 
-  if (input.tool_name !== 'Write' || !content) return { continue: true };
+  if (input.tool_name !== 'Write') return { continue: true };
 
-  if (isIntentMd(filePath)) return handleIntentMdWrite(content);
+  // No truthiness gate for INTENT.md: an empty-content Write would otherwise
+  // skip the 3-tier/50-line validation entirely (same principle as criteria.md).
+  if (isIntentMd(filePath)) return handleIntentMdWrite(content ?? '');
+
+  if (!content) return { continue: true };
 
   if (isDetailMd(filePath) && oldContent !== undefined)
     return handleDetailMdWrite(content, oldContent);

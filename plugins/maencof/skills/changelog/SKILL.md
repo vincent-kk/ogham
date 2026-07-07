@@ -1,9 +1,9 @@
 ---
 name: changelog
 user_invocable: true
-description: "[maencof:changelog] Records daily self-change entries to the vault changelog. Detects git changes, writes the dated entry, commits it, and unblocks the changelog-gate Stop hook."
-argument-hint: ""
-version: "1.0.0"
+description: '[maencof:changelog] Records daily self-change entries to the vault changelog. Detects git changes, writes the dated entry, commits it, and unblocks the changelog-gate Stop hook.'
+argument-hint: ''
+version: '1.0.0'
 complexity: medium
 context_layers: [2]
 orchestrator: changelog skill
@@ -22,29 +22,29 @@ Detects changes in watched paths, categorizes them, and records them in the dail
 
 ## Watched Paths
 
-| Path | Description |
-|------|-------------|
-| `01_Core/` | Core identity documents |
-| `02_Derived/` | Derived knowledge (excludes changelog itself) |
-| `.claude/agents/` | AI agent configuration |
-| `.claude/rules/` | AI behavior rules |
-| `CLAUDE.md` | Project instructions |
+| Path              | Description                                   |
+| ----------------- | --------------------------------------------- |
+| `01_Core/`        | Core identity documents                       |
+| `02_Derived/`     | Derived knowledge (excludes changelog itself) |
+| `.claude/agents/` | AI agent configuration                        |
+| `.claude/rules/`  | AI behavior rules                             |
+| `CLAUDE.md`       | Project instructions                          |
 
 ## Changelog Categories
 
-| Category | Korean Label | Examples |
-|----------|-------------|----------|
-| `knowledge` | Knowledge change | Document creation, modification, content updates |
-| `structure` | Structure change | Directory add/move, memory structure changes |
-| `automation` | Automation | Hook add/modify, script changes |
-| `learning` | Learning | Newly discovered patterns, technical insights |
-| `preference` | User preference | Confirmed user preferences, workflow decisions |
+| Category     | Korean Label     | Examples                                         |
+| ------------ | ---------------- | ------------------------------------------------ |
+| `knowledge`  | Knowledge change | Document creation, modification, content updates |
+| `structure`  | Structure change | Directory add/move, memory structure changes     |
+| `automation` | Automation       | Hook add/modify, script changes                  |
+| `learning`   | Learning         | Newly discovered patterns, technical insights    |
+| `preference` | User preference  | Confirmed user preferences, workflow decisions   |
 
 ## Workflow
 
 ### Step 1 — Detect Changes
 
-Detect git changes in watched paths. Run from the **absolute vault root path** (`setup` Stage 1 collected this; fall back to `MAENCOF_VAULT_PATH` env). Do NOT rely on CWD — the changelog-gate Stop hook may fire from a non-vault project directory.
+Detect git changes in watched paths. Run from the **absolute vault root path** (`setup` Stage 1 collected this; fall back to `MAENCOF_VAULT_PATH` env). Do NOT rely on CWD — this skill can also be invoked manually from a directory other than the vault root.
 
 ```bash
 VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
@@ -59,6 +59,7 @@ git -C "$VAULT" status --porcelain -- 01_Core/ 02_Derived/ .claude/agents/ .clau
 Classify each changed file into one of 5 categories.
 
 Classification criteria:
+
 - `.md` file changes in `01_Core/`, `02_Derived/` → `knowledge`
 - Directory add/delete/move, structural file changes → `structure`
 - Files in `.claude/`, hook or script changes → `automation`
@@ -113,6 +114,7 @@ tags: [changelog, growth, daily]
 ```
 
 **Notes:**
+
 - Avoid duplicating already recorded entries
 - Omit category sections that have no corresponding changes
 - Record paths as relative paths from the vault root
@@ -135,15 +137,16 @@ git -C "$VAULT" commit -m "docs(changelog): YYYY-MM-DD 자기 변경 기록"
 
 ### Step 6 — Create Gate Marker
 
-Create the marker file to pass the changelog-gate.
+Create the marker file to pass the changelog-gate. Use the same absolute vault root as Steps 1/5 — the Stop hook checks the marker relative to the vault, not to wherever this skill happens to run.
 
 ```bash
-mkdir -p .omc
-touch .omc/.changelog-gate-passed
+VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
+mkdir -p "$VAULT/.omc"
+touch "$VAULT/.omc/.changelog-gate-passed"
 ```
 
 When this marker file exists, the Stop hook allows session termination.
-The marker file must be included in `.gitignore` and does not persist across sessions.
+The marker file must be included in `.gitignore`. It is session-scoped: the SessionStart hook deletes it, so each new session re-arms the gate.
 
 ### Step 7 — Report
 
@@ -165,9 +168,9 @@ Changelog 기록 완료: 02_Derived/changelog/YYYY-MM-DD.md
 
 ## Available Tools
 
-| Tool | Type | Purpose |
-|------|------|---------|
-| `mcp__plugin_maencof_t__create` | MCP | Create new vault document (alternative to direct file write) |
-| `mcp__plugin_maencof_t__read` | MCP | Read existing vault document |
-| `mcp__plugin_maencof_t__update` | MCP | Update existing vault document (when today's entry already exists) |
-| `Bash` | Native | Run git commands (status, add, commit) |
+| Tool                            | Type   | Purpose                                                            |
+| ------------------------------- | ------ | ------------------------------------------------------------------ |
+| `mcp__plugin_maencof_t__create` | MCP    | Create new vault document (alternative to direct file write)       |
+| `mcp__plugin_maencof_t__read`   | MCP    | Read existing vault document                                       |
+| `mcp__plugin_maencof_t__update` | MCP    | Update existing vault document (when today's entry already exists) |
+| `Bash`                          | Native | Run git commands (status, add, commit)                             |

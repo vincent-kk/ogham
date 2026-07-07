@@ -4,7 +4,7 @@ import { mergeHookOutput } from '../utils/mergeHookOutput/mergeHookOutput.js';
 import { safeConcern } from '../utils/safeConcern/safeConcern.js';
 
 import { runSessionStart } from './helpers/bootstrap/bootstrap.js';
-import { runRemindExpiredBuffer } from './helpers/remindExpiredBuffer/index.js';
+import { runRemindExpiredBuffer } from './helpers/remindExpiredBuffer/remindExpiredBuffer.js';
 
 /**
  * SessionStart: vault init + dialogue meta-prompt, then user lifecycle actions.

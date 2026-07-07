@@ -410,45 +410,12 @@ Please use a transpiler like Babel to transform the code for your target environ
 
 ---
 
-## Version Management
-
-This project uses [Changesets](https://github.com/changesets/changesets) for version management and publishing.
-
-### Creating a Changeset
-
-When you make changes to any package, create a changeset to document your changes:
-
-```bash
-yarn changeset
-```
-
-### Releasing
-
-```bash
-# Update package versions based on changesets
-yarn changeset:version
-
-# Publish packages to npm
-yarn changeset:publish
-```
-
-### Changeset Guidelines
-
-- **patch**: Bug fixes, documentation updates, internal refactoring
-- **minor**: New features, new exports, non-breaking changes
-- **major**: Breaking changes, removed exports, API changes
-
----
-
 ## Scripts
 
 - `yarn build:all` — Build all packages
 - `yarn test` — Run tests across all packages
 - `yarn lint` — Check code style
 - `yarn typecheck` — Verify TypeScript types
-- `yarn changeset` — Create a new changeset
-- `yarn changeset:version` — Update versions based on changesets
-- `yarn changeset:publish` — Publish packages to npm
 - `yarn tag:packages <commit>` — Create Git tags for all packages based on their versions
 
 ---

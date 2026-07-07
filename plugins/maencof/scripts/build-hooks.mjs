@@ -6,7 +6,8 @@
  * Output: bridge/<name>.mjs
  *
  * One bundle per Claude Code event: each bridge is a dispatcher that folds that
- * event's concern handlers into a single process (see src/hooks/eventDispatch).
+ * event's concern handlers into a single process (entries live at
+ * src/hooks/<event>/<event>.entry.ts).
  *
  * Hook isolation guards: hooks must remain thin scripts (Node builtins only).
  * Pulling external runtimes (zod, fast-glob, MCP SDK) into a hook bundle breaks
@@ -23,6 +24,38 @@ import { mkdir, readFile, stat } from 'fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
+
+// Meta-skill body budget guard: the SessionStart runtime SKIPS injection when
+// the body exceeds META_SKILL_MAX_CHARS, so an oversized body would ship as a
+// silently dead feature. Fail the build instead.
+{
+  const constantsSource = await readFile(
+    resolve(root, 'src/constants/sessionStart.ts'),
+    'utf8',
+  );
+  const limitMatch = /META_SKILL_MAX_CHARS\s*=\s*(\d+)/.exec(constantsSource);
+  if (!limitMatch)
+    throw new Error(
+      'build-hooks: cannot read META_SKILL_MAX_CHARS from src/constants/sessionStart.ts',
+    );
+  const metaSkillLimit = Number(limitMatch[1]);
+  const metaSkillBody = await readFile(
+    resolve(root, 'src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md'),
+    'utf8',
+  );
+  const metaSkillCodePoints = [...metaSkillBody].length;
+  if (metaSkillCodePoints > metaSkillLimit) {
+    console.error(
+      `\nMeta-skill body budget exceeded: ${metaSkillCodePoints} code points > META_SKILL_MAX_CHARS ${metaSkillLimit}.\n` +
+        'The SessionStart hook would silently skip the dialogue meta-skill at runtime.\n' +
+        'Trim src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md or raise the constant deliberately.',
+    );
+    process.exit(1);
+  }
+  console.log(
+    `  Meta-skill body budget ok (${metaSkillCodePoints} <= ${metaSkillLimit} code points)`,
+  );
+}
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
@@ -52,17 +85,20 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //   stop               — changelogGate (spawnCli/git) + lifecycle.
 //   post-tool-use      — activityRecorder + lifecycle.
 //   pre-tool-use       — layerGuard + vaultRedirector + lifecycle (all light).
-// 48 -> 52 KB: buildL1CoreBlock injects the full L1 core documents once at
-// session start (pure Node-builtin fs reads + frontmatter strip, no external
-// runtime). FORBIDDEN_PATTERNS below still enforces the real isolation guard.
+// session-start is the largest bundle: it inlines metaSkillBody.md and the
+// full-L1 reader (buildL1CoreBlock — pure Node-builtin fs reads + frontmatter
+// strip). FORBIDDEN_PATTERNS below still enforces the real isolation guard.
 const SESSION_START_BYTES = 52 * 1024;
-// 32 -> 34 KB: companion identity v2 added the per-turn binding renderer plus
-// graceful v1->v2 normalization to the turn path (buildTurnContext). All added
-// bytes are pure Node-builtin functions; the isolation guarantee (no zod /
-// fast-glob / MCP SDK) is still enforced by FORBIDDEN_PATTERNS below.
+// user-prompt-submit carries the per-turn companion binding renderer and the
+// graceful v1->v2 identity normalization on the turn path (buildTurnContext)
+// — pure Node-builtin functions; the isolation guarantee (no zod / fast-glob
+// / MCP SDK) is enforced by FORBIDDEN_PATTERNS below.
 const USER_PROMPT_SUBMIT_BYTES = 36 * 1024;
 const SESSION_END_BYTES = 32 * 1024;
-const STOP_BYTES = 24 * 1024;
+// stop carries changelogGate (spawnCli/git) + sessionRecap (insightStats read
+// + dialogueConfig off-switch + cacheManager markers) + lifecycle — all pure
+// Node-builtin code; FORBIDDEN_PATTERNS below enforces the isolation guard.
+const STOP_BYTES = 28 * 1024;
 const POST_TOOL_USE_BYTES = 12 * 1024;
 const PRE_TOOL_USE_BYTES = 12 * 1024;
 

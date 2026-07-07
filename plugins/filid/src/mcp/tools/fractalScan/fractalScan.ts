@@ -1,3 +1,4 @@
+import { SCAN_RESULT_MAX_CHARS } from '../../../constants/scanDefaults.js';
 import {
   loadConfig,
   resolveMaxDepth,
@@ -5,12 +6,15 @@ import {
 import { analyzeModule } from '../../../core/module/moduleMainAnalyzer/moduleMainAnalyzer.js';
 import { scanProject } from '../../../core/tree/fractalTree/fractalTree.js';
 import type { FractalTree, ModuleInfo } from '../../../types/fractal.js';
-import type { ScanReportDto } from '../../../types/report.js';
+import type { ScanReportDto, ScanResultDto } from '../../../types/report.js';
+
+import { buildScanResult } from './utils/buildScanResult.js';
 
 export interface FractalScanInput {
   path: string;
   depth?: number;
   includeModuleInfo?: boolean;
+  outputMode?: 'full' | 'summary' | 'paths';
 }
 
 /**
@@ -20,11 +24,13 @@ export interface FractalScanInput {
  * directory node as fractal / organ / pure-function / hybrid.
  * When includeModuleInfo is true, also analyses each node's entry points.
  *
- * Returns a {@link ScanReportDto} — the in-process `FractalTree` (whose
- * `nodes` is a `Map`) is converted to a flat `nodes: FractalNode[]` array
- * to avoid Map+Array double serialization in the MCP transport.
+ * Returns a {@link ScanResultDto} shaped by `outputMode` (default `full` =
+ * {@link ScanReportDto}); the in-process `FractalTree` (whose `nodes` is a
+ * `Map`) is converted to a flat `nodes: FractalNode[]` array to avoid
+ * Map+Array double serialization in the MCP transport. Oversized payloads
+ * degrade to a `{ truncated, reportPath, summary }` envelope.
  */
-export async function handleFractalScan(args: unknown): Promise<ScanReportDto> {
+export async function handleFractalScan(args: unknown): Promise<ScanResultDto> {
   const input = args as FractalScanInput;
 
   if (!input.path) throw new Error('path is required');
@@ -49,7 +55,7 @@ export async function handleFractalScan(args: unknown): Promise<ScanReportDto> {
       .map((r) => r.value);
   }
 
-  return {
+  const report: ScanReportDto = {
     tree: {
       root: tree.root,
       depth: tree.depth,
@@ -60,4 +66,11 @@ export async function handleFractalScan(args: unknown): Promise<ScanReportDto> {
     timestamp: new Date().toISOString(),
     duration: Date.now() - startTime,
   };
+
+  return buildScanResult(
+    report,
+    input.outputMode ?? 'full',
+    SCAN_RESULT_MAX_CHARS,
+    input.path,
+  );
 }

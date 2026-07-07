@@ -3,7 +3,13 @@ import { join } from 'node:path';
 
 import { getCacheDir, sessionIdHash } from './sessionCache.js';
 
-/** In-memory fractal map per session */
+/**
+ * In-memory fractal map per session.
+ *
+ * Entries are `{boundaryAbsPath}\t{relDir}` composite keys — relDir alone
+ * collides across monorepo packages (both `plugins/a/src` and `plugins/b/src`
+ * reduce to `src`). Display consumers strip everything through the tab.
+ */
 export interface FractalMap {
   reads: string[]; // accessed directories (order preserved, no duplicates)
   intents: string[]; // directories with INTENT.md (dedup dual-use)

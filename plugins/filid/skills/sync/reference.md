@@ -11,6 +11,7 @@ node classifications.
 ```
 mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
+// Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for details
 ```
 
 For each node, confirm:

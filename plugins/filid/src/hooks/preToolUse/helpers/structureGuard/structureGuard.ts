@@ -1,4 +1,8 @@
+import { existsSync } from 'node:fs';
+import * as path from 'node:path';
+
 import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
+import { isDetailMd, isIntentMd } from '../../../shared/shared.js';
 import { checkCircularImports } from '../../../utils/checkCircularImports.js';
 import { checkIntentMdReclassification } from '../../../utils/checkIntentMdReclassification.js';
 import { checkOrganSubdirectory } from '../../../utils/checkOrganSubdirectory.js';
@@ -14,7 +18,7 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
 
   const cwd = validateCwd(input.cwd);
   if (cwd === null) return { continue: true };
-  const segments = getParentSegments(filePath);
+  const segments = getParentSegments(filePath, cwd);
   const content = input.tool_input.content ?? input.tool_input.new_string ?? '';
 
   const info = checkIntentMdReclassification(
@@ -23,8 +27,16 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
     cwd,
     segments,
   );
+  // Organ-nesting is a CREATION concern: editing an existing file, or writing
+  // the INTENT.md/DETAIL.md that itself declares the sub-fractal, is not
+  // "creating a subdirectory inside an organ".
+  const absFile = path.isAbsolute(filePath)
+    ? filePath
+    : path.resolve(cwd, filePath);
+  const creationTarget =
+    !existsSync(absFile) && !isIntentMd(filePath) && !isDetailMd(filePath);
   const warnings = [
-    ...checkOrganSubdirectory(segments, cwd),
+    ...(creationTarget ? checkOrganSubdirectory(segments, cwd) : []),
     ...checkCircularImports(filePath, content, cwd),
   ];
 

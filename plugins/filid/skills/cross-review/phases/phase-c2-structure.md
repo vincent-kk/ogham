@@ -220,9 +220,9 @@ block. Behavior depends on `SCOPE_OVERRIDE`:
 - Claim your assigned task via `TaskList` / `TaskUpdate`, execute with
   streaming-write discipline, report completion via `SendMessage`, and
   handle `shutdown_request` as usual.
-- The `review-c-<normalized-branch>` team is **separate** from Phase D's
-  `review-<normalized-branch>` team and is dismantled by the
-  chairperson via `TeamDelete` as soon as all C1/C2 workers complete.
+- The C batch workers are **separate** from Phase D's committee workers;
+  the chairperson confirms they have terminated (TaskStop any straggler)
+  as soon as all C1/C2 outputs are merged.
 
 ### Merge protocol (executed by chairperson)
 

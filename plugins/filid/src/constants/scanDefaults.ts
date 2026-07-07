@@ -38,3 +38,10 @@ export const SKIP_PATTERNS = [
   /\.spec\.ts$/,
   /\.bench\.ts$/,
 ];
+
+/**
+ * Serialized fractal_scan payload budget. Larger results are written to
+ * `{cacheDir}/scan-report.json` and replaced by a path + summary envelope,
+ * keeping every response within the MCP tool-result cap.
+ */
+export const SCAN_RESULT_MAX_CHARS = 30_000;

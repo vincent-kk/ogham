@@ -11,6 +11,12 @@ Call `mcp__plugin_filid_t__fractal_scan` to retrieve the complete directory tree
 mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 ```
 
+> **Size guard**: an oversized result comes back as
+> `{ truncated: true, reportPath, summary }` — the full report is at
+> `reportPath` (line-structured JSON); grep it for the fields you need
+> instead of reading it whole. Pass `outputMode: "summary"` when only
+> counts are needed.
+
 The response is a `ScanReportDto` containing:
 
 - `tree.nodes`: **flat array** of FractalNode objects (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)

@@ -13,7 +13,7 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
 ## Conventions
 
 - 주입 우선순위 (짧은 회로):
-  1. `ROLE_RESTRICTIONS[agentType]` 정확 매치 → 역할 제약 + 언어 태그 (FCA 여부 무관)
+  1. `agent_type`의 `filid:` 플러그인 프리픽스를 제거한 뒤 `ROLE_RESTRICTIONS` 정확 매치 → 역할 제약 + 언어 태그 (FCA 여부 무관)
   2. `!isFcaProject(cwd)` → continue (비-FCA 프로젝트는 워크플로우 가이드 스킵)
   3. `PLANNING_AGENT_RE` 또는 `'Plan'` → `PLANNING_GUIDANCE` + 언어 태그
   4. `EXECUTOR_AGENT_RE` 또는 `'general-purpose'` → `IMPLEMENTATION_REMINDER` + 언어 태그

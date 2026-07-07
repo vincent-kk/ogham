@@ -21,7 +21,9 @@ import { buildLangTag } from './utils/buildLangTag.js';
  * 4. Implementation agent reminder (OMC executor/deep-executor, native general-purpose)
  */
 export function enforceAgentRole(input: SubagentStartInput): HookOutput {
-  const agentType = input.agent_type ?? '';
+  // Plugin-namespaced spawns ("filid:qa-reviewer") must hit the same
+  // restriction keys as bare names — ROLE_RESTRICTIONS is keyed bare.
+  const agentType = (input.agent_type ?? '').replace(/^filid:/, '');
 
   // Security: validate payload cwd before any fs / execSync usage downstream.
   const safeCwd = validateCwd(input.cwd);

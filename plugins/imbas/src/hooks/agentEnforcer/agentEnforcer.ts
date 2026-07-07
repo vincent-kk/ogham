@@ -1,4 +1,4 @@
-import { AGENT_CONSTRAINTS } from '../../constants/index.js';
+import { AGENT_CONSTRAINTS } from '../../constants/pipeline.js';
 import type { HookOutput, SubagentStartInput } from '../../types/hooks.js';
 
 export function processAgentEnforcer(input: SubagentStartInput): HookOutput {

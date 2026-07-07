@@ -67,4 +67,24 @@ describe('rebuildAndInvalidate', () => {
     const status = await handleKgStatus(vaultDir, reloaded, {});
     expect(status.nodeCount).toBe(2);
   });
+
+  it('build 성공 후 훅 주입용 turn-context 스냅샷도 새 인덱스를 반영한다', async () => {
+    const configDir = join(vaultDir, 'claude-config-isolated');
+    process.env.CLAUDE_CONFIG_DIR = configDir;
+    try {
+      writeDoc('a.md', 2);
+      await rebuildAndInvalidate(vaultDir, { force: true });
+
+      const { readTurnContext } =
+        await import('../../../core/cacheManager/index.js');
+      expect(readTurnContext(vaultDir)).toContain('nodes="1"');
+
+      writeDoc('b.md', 2);
+      await rebuildAndInvalidate(vaultDir, { force: true });
+
+      expect(readTurnContext(vaultDir)).toContain('nodes="2"');
+    } finally {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    }
+  });
 });

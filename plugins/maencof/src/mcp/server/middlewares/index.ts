@@ -5,6 +5,7 @@ export {
 } from './backgroundRebuild.js';
 export { mergeStaleNodesIntoGraph } from './partialReindex.js';
 export { rebuildAndInvalidate } from './rebuildAndInvalidate.js';
+export { refreshTurnContextSafe } from './refreshTurnContext.js';
 export { runMutateSideEffects } from './mutateSideEffects.js';
 export { incrementUsageStat } from './usageStats.js';
 export { walkVaultForExternalChanges } from './vaultWalk.js';
