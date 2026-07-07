@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { KgContextScope } from '../../constants/kgContext.js';
 import { buildAdjacencyList } from '../../core/graphBuilder/graphBuilder.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
 import { Layer, toNodeId } from '../../types/common.js';
@@ -145,7 +146,7 @@ describe('kg_context selectivity', () => {
     const implicit = await contextOf(graph, { query: 'topic' });
     const explicit = await contextOf(graph, {
       query: 'topic',
-      scope: 'balanced',
+      scope: KgContextScope.BALANCED,
     });
     expect(explicit).toEqual(implicit);
   });
@@ -166,12 +167,15 @@ describe('kg_context selectivity', () => {
 
     const focused = await contextOf(graph, {
       query: 'hop-a.md',
-      scope: 'focused',
+      scope: KgContextScope.FOCUSED,
     });
     expect(focused.context).toContain('hop-b.md');
     expect(focused.context).not.toContain('hop-e.md');
 
-    const broad = await contextOf(graph, { query: 'hop-a.md', scope: 'broad' });
+    const broad = await contextOf(graph, {
+      query: 'hop-a.md',
+      scope: KgContextScope.BROAD,
+    });
     expect(broad.context).toContain('hop-e.md');
   });
 });

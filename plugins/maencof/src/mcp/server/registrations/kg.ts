@@ -7,6 +7,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { KgContextScope } from '../../../constants/kgContext.js';
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { handleBoundaryCreate } from '../../tools/boundaryCreate/index.js';
 import { handleKgContext } from '../../tools/kgContext/index.js';
@@ -144,7 +145,7 @@ export function registerKgTools(server: McpServer): void {
             'Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)',
           ),
         scope: z
-          .enum(['focused', 'balanced', 'broad'])
+          .nativeEnum(KgContextScope)
           .optional()
           .describe(
             "Exploration breadth: 'focused' = close, high-confidence documents (answering a specific question); 'balanced' = default; 'broad' = distant, weakly-linked documents (ideation/brainstorming)",

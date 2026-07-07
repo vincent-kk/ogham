@@ -2,6 +2,8 @@
  * @file mcpKg.ts
  * @description Knowledge Graph 도구 입출력 스키마 — kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
  */
+import type { KgContextScope } from '../constants/kgContext.js';
+
 import type { Layer, SubLayer } from './common.js';
 import type { ActivationResult, KnowledgeNode } from './graph.js';
 
@@ -34,9 +36,6 @@ export interface KgNavigateInput {
   /** 부모/자식 포함 (기본 true) */
   include_hierarchy?: boolean;
 }
-
-/** kg_context 탐색 폭 — SA 내부값(threshold/maxHops)은 scope 프리셋으로 캡슐화 */
-export type KgContextScope = 'focused' | 'balanced' | 'broad';
 
 /** kg_context 입력 */
 export interface KgContextInput {

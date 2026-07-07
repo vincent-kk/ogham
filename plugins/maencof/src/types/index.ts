@@ -188,7 +188,6 @@ export type {
   KgSearchInput,
   KgNavigateInput,
   KgContextInput,
-  KgContextScope,
   KgStatusInput,
   MaencofCrudResult,
   MaencofReadResult,
@@ -197,6 +196,7 @@ export type {
   KgContextResult,
   KgStatusResult,
 } from './mcp.js';
+export { KgContextScope } from '../constants/kgContext.js';
 
 export {
   InsightConfigSchema,
