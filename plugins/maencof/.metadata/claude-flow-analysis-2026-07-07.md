@@ -112,6 +112,10 @@
 
 공통 패턴 두 가지가 근본 원인에 가깝다: ① **silent-skip/silent-log 설계가 과다** — 기능이 죽어도 신호가 없다(P1·P4·P5·P6·D6 공통). 훅의 “절대 세션을 막지 않는다” 원칙은 옳지만, 실패의 *표면화*까지 포기할 필요는 없다(systemMessage·SessionStart advisory·빌드 가드가 안전한 표면화 채널). ② **Claude Code 계약(훅 envelope·도구명)의 회귀 테스트 부재** — 자체 연구 문서가 정답을 알고 있는데 코드가 어긋나도 잡히지 않는다. `.omc/research/maencof-v030-hook-schema.md` §2 표를 스냅샷 테스트(각 entry의 차단/메시지 채널 shape 검증)로 옮기는 것을 권한다.
 
+## 후속 조치 (2026-07-07, 분석 직후 같은 날 적용)
+
+사용자 승인 하에 P1–P7을 수정 완료(P8은 저빈도로 보류). 요지: P1 한도 4096 상향 + build-hooks.mjs 코드포인트 가드(초과 시 빌드 실패) + 런타임 skip 시 error-log; P2 `normalizeMaencofToolName`으로 full-form 정규화; P3 `denyEnvelope` 헬퍼가 차단을 `permissionDecision:"deny"`로 번역; P4 recap을 Stop 관심사(`sessionRecap`, 세션당 1회 마커)로 이동하고 finalize의 무효 `message` 제거; P5 SessionStart가 게이트 마커 제거; P6 `probeAdvisory`가 `CLAUDE_PLUGIN_ROOT not set`을 경고 대상에서 제외(shared 미수정); P7 두 rebuild 경로가 `refreshTurnContextSafe`로 turn-context 재빌드. D1·D2·D3(주석만)·D5 및 관련 INTENT/DETAIL 동기화 완료. 전 수정은 신규 단위테스트와 본 부록 절차의 재실측(메타스킬 주입 복원, deny envelope, full-form 기록, 마커 세션 수명, recap 1회, kg_build 후 turn-context 갱신)으로 검증됨. 상세는 해당 커밋 메시지 참조.
+
 ## 부록 — 재현 절차
 
 스크래치 하네스(세션 스크래치패드 `scratchpad/`): `mk-vault.mjs`(픽스처 vault), `run-hook.mjs`(브리지 stdin 구동), `mcp-call.mjs`(stdio JSON-RPC), `measure-metaskill.mjs`(코드포인트 측정), `vault-field-stats.mjs`(현장 집계). 핵심 재현:

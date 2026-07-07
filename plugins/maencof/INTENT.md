@@ -22,7 +22,7 @@
 - 빌드 파이프라인: `clean → version:sync → tsc → mcp-server → hooks`
 - vault 경로는 `MAENCOF_VAULT_PATH` env 또는 CWD; 하드코딩 금지
 - 5-Layer 모델 v2 준수 (L1~L5, sublayer 규칙은 `src/INTENT.md`)
-- 문서 frontmatter 필수 필드: `id` / `layer` / `created`
+- 문서 frontmatter 필수 필드: `layer` / `tags` / `created` / `updated` (FrontmatterSchema; `templates/rules/frontmatter-required.md` 와 동기)
 
 ## Boundaries
 

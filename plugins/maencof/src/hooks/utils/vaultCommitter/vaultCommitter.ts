@@ -32,10 +32,13 @@ export interface VaultCommitConfig {
   enabled: boolean;
   /**
    * Regex source strings that, when matched against a UserPromptSubmit prompt,
-   * force the committer to skip. Defaults to `[DEFAULT_SKIP_PATTERN_SOURCE]`
-   * (matching `/clear`) when the field is absent or malformed. Y3 externalized
-   * the skip-match policy from hard-coded regex to `.maencof-meta/vault-commit.json`
-   * so users can add their own trigger prompts without code changes.
+   * TRIGGER the commit (the field name is historical — v0.2.x "skipped the
+   * rest of the prompt flow" on match; the observable behavior has always been
+   * "commit only when a pattern matches", default `/clear`, i.e. commit right
+   * before the context is wiped). Defaults to `[DEFAULT_SKIP_PATTERN_SOURCE]`
+   * when the field is absent or malformed. Y3 externalized the policy to
+   * `.maencof-meta/vault-commit.json` so users can add trigger prompts without
+   * code changes. Renaming the field would break existing user configs.
    */
   skip_patterns?: string[];
 }
@@ -121,8 +124,9 @@ function compileSkipPatterns(sources: readonly string[]): RegExp[] {
 
 /**
  * Decide whether a UserPromptSubmit prompt should trigger vault commit.
- * Uses `config.skip_patterns` when supplied (Y3); otherwise falls back to the
- * legacy `/clear` behavior via `DEFAULT_SKIP_PATTERN_SOURCE`.
+ * A match on `config.skip_patterns` (historical name — see VaultCommitConfig)
+ * means COMMIT NOW; no match means this prompt does not trigger the committer.
+ * Falls back to the `/clear` trigger via `DEFAULT_SKIP_PATTERN_SOURCE`.
  */
 export function shouldCommitOnPrompt(
   prompt: string,
