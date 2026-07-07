@@ -19,9 +19,6 @@
     "atlassian": "yarn workspace @ogham/atlassian",
     "build:all": "node scripts/build-all.mjs",
     "cennad": "yarn workspace @ogham/cennad",
-    "changeset": "changeset",
-    "changeset:publish": "yarn build:all && changeset publish",
-    "changeset:version": "changeset version",
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
     "crossPlatform": "yarn workspace @ogham/cross-platform",
     "deilen": "yarn workspace @ogham/deilen",
@@ -44,8 +41,6 @@
     "yt-dlp-mcp": "yarn workspace @ogham/yt-dlp-mcp"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.6.0",
-    "@changesets/cli": "^2.30.0",
     "@eslint/js": "^10.0.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.58.0",

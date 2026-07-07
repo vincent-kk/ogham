@@ -38,8 +38,4 @@ yarn clean              # 전체 dist / .tsbuildinfo 제거
 
 ## Release Workflow
 
-- 릴리즈는 [Changesets](https://github.com/changesets/changesets) 기반
-- `yarn changeset` → 변경 기록 생성
-- `yarn changeset:version` → 버전 bump
-- `yarn changeset:publish` → 빌드 + npm 게시
 - `yarn tag:packages <commit>` → 패키지별 git tag 생성
