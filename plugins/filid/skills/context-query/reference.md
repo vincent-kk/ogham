@@ -22,6 +22,10 @@ Use `mcp__plugin_filid_t__fractal_scan` to retrieve the full project tree, then 
 mcp__plugin_filid_t__fractal_scan({ path: "<project-root>" })
 ```
 
+> **Size guard**: an oversized result comes back as
+> `{ truncated: true, reportPath, summary }` — grep `reportPath` for the
+> target node instead of reading the file whole.
+
 Scan `tree.nodes` (flat FractalNode array) for the node whose name or path best matches the target — e.g. `tree.nodes.find(n => n.path === target)`.
 
 If the match is ambiguous, use `mcp__plugin_filid_t__fractal_navigate(classify)` with the node's
@@ -67,7 +71,7 @@ Apply compression only when necessary. Skip if the chain fits in context.
 
 | Prompt      | Purpose                                                     |
 | ----------- | ----------------------------------------------------------- |
-| 1           | Module location via `mcp__plugin_filid_t__fractal_navigate`                |
+| 1           | Module location via `mcp__plugin_filid_t__fractal_navigate` |
 | 2           | Detailed analysis or additional context loading if required |
 | 3 (maximum) | Final response generation                                   |
 

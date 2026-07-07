@@ -231,6 +231,57 @@ describe('handlePreToolUse', () => {
     }
   });
 
+  it('Write INTENT.md over 50 lines in non-FCA project → no deny (opt-in gate)', async () => {
+    // Regression: the validator ran without an FCA gate, so repositories
+    // that never opted into filid still had their INTENT.md writes denied.
+    const nonFcaDir = join(tmpdir(), `filid-nonfca-write-${Date.now()}`);
+    mkdirSync(join(nonFcaDir, '.git'), { recursive: true });
+    const content = Array.from({ length: 60 }, (_, i) => `Line ${i + 1}`).join(
+      '\n',
+    );
+
+    try {
+      const result = await handlePreToolUse({
+        cwd: nonFcaDir,
+        session_id: 'test-nonfca-write',
+        hook_event_name: 'PreToolUse',
+        tool_name: 'Write',
+        tool_input: { file_path: join(nonFcaDir, 'INTENT.md'), content },
+      });
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput).toBeUndefined();
+    } finally {
+      rmSync(nonFcaDir, { recursive: true, force: true });
+    }
+  });
+
+  it('Write into a never-read module → next Read map shows unread-intent', async () => {
+    // recordWriteVisit puts the written dir into reads without intents; the
+    // following Read's [filid:map] must surface it as unread-intent.
+    mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
+    writeFileSync(join(tmpDir, 'index.ts'), '');
+
+    await handlePreToolUse(
+      makeInput({
+        tool_name: 'Write',
+        tool_input: {
+          file_path: join(tmpDir, 'src', 'feature', 'x.ts'),
+          content: 'export const x = 1;\n',
+        },
+      }),
+    );
+
+    const readResult = await handlePreToolUse(
+      makeInput({
+        tool_name: 'Read',
+        tool_input: { file_path: join(tmpDir, 'index.ts') },
+      }),
+    );
+    const ctx = readResult.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('unread-intent:');
+    expect(ctx).toContain('src/feature');
+  });
+
   it('spike branch → over-50-line INTENT.md Write is exempted and audited', async () => {
     mkdirSync(join(tmpDir, '.git'), { recursive: true });
     writeFileSync(join(tmpDir, '.git', 'HEAD'), 'ref: refs/heads/spike/poc\n');

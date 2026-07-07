@@ -167,8 +167,8 @@ with delegation reliability.
 | Stage                       | Mode         | Reason                                                                                                                                                               |
 | --------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | pr-create                   | Main context | Lightweight, procedural — direct `Skill()` is reliable                                                                                                               |
-| review — A/B/C              | Subagent     | ~100k tokens — must isolate to prevent main context bloat. Subagent MUST NOT run Phase D (nested TeamCreate leaks orphan workers). Exits with `SubagentReturn` YAML. |
-| review — Phase D + finalize | Main context | Phase D requires main-context team orchestration (`TeamCreate`/solo `Task`). Finalize (content-hash + PR comment) reads from `review-report.md` frontmatter.         |
+| review — A/B/C              | Subagent     | ~100k tokens — must isolate to prevent main context bloat. Subagent MUST NOT run Phase D (nested teammate spawns leak orphan workers). Exits with `SubagentReturn` YAML. |
+| review — Phase D + finalize | Main context | Phase D requires main-context team orchestration (named worker `Agent`s / solo `Agent`). Finalize (content-hash + PR comment) reads from `review-report.md` frontmatter. |
 | resolve                     | Main context | Procedural with internal subagents (code-surgeon)                                                                                                                    |
 | revalidate                  | Main context | Lightweight with internal subagents (parallel verifiers)                                                                                                             |
 
@@ -177,9 +177,9 @@ with delegation reliability.
 The review stage is split: Phase A/B/C runs inside a `general-purpose`
 subagent via `Skill("filid:cross-review", "--pipeline-mode=abc-only ...")`,
 then Phase D + finalize (Step 4.5 content-hash, Step 5 PR comment) run in
-the pipeline main. The subagent MUST NOT call `TeamCreate` internally —
-nested Phase D from a subagent leaks orphan workers and violates the
-`verdict_gate` contract.
+the pipeline main. The subagent MUST NOT spawn Phase D teammates
+internally — nested Phase D from a subagent leaks orphan workers and
+violates the `verdict_gate` contract.
 
 ```
 For each stage in pipeline:
@@ -267,8 +267,8 @@ $ /filid:pipeline --from=pr-create --base=main --draft
 
 [2/4] review — Phase D + finalize (main)
   → verdict_gate(team, none) → dispatch: team
-  → TeamCreate(review-<branch>) + 4 persona Tasks, 2 rounds → SYNTHESIS
-  → TeamDelete (try/finally)
+  → 4 named persona Agents spawned, 2 rounds → SYNTHESIS
+  → worker teardown sweep: shutdown_request → TaskStop (try/finally)
   → Verdict: REQUEST_CHANGES (5 fix items)
   → mcp__plugin_filid_t__review_manage(content-hash) + gh pr comment
   ✓ review-report.md, fix-requests.md, content-hash.json written

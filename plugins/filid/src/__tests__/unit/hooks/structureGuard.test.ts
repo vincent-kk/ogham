@@ -205,9 +205,50 @@ describe('structure-guard', () => {
         },
       });
       expect(result.continue).toBe(true);
-      expect(
-        result.hookSpecificOutput?.additionalContext ?? '',
-      ).not.toContain('organ directory');
+      expect(result.hookSpecificOutput?.additionalContext ?? '').not.toContain(
+        'organ directory',
+      );
+    });
+
+    it('editing an EXISTING file under an organ → no nesting warning', () => {
+      // Organ nesting is a creation concern; established files are edited
+      // without re-warning on every touch.
+      mkdirSync(join(tmpCwd, 'src', 'utils', 'deep'), { recursive: true });
+      writeFileSync(join(tmpCwd, 'src', 'utils', 'deep', 'file.ts'), '');
+
+      const result = guardStructure({
+        ...baseInput,
+        tool_name: 'Edit',
+        cwd: tmpCwd,
+        tool_input: {
+          file_path: join(tmpCwd, 'src', 'utils', 'deep', 'file.ts'),
+          new_string: 'export {}',
+        },
+      });
+      expect(result.hookSpecificOutput?.additionalContext ?? '').not.toContain(
+        'organ directory',
+      );
+    });
+
+    it('declared sub-fractal below an organ legalises new files (no warning)', () => {
+      // FCA: fractal nodes MAY exist inside organ directories.
+      mkdirSync(join(tmpCwd, 'src', 'utils', 'sub'), { recursive: true });
+      writeFileSync(
+        join(tmpCwd, 'src', 'utils', 'sub', 'INTENT.md'),
+        '# sub\n',
+      );
+
+      const result = guardStructure({
+        ...baseInput,
+        cwd: tmpCwd,
+        tool_input: {
+          file_path: join(tmpCwd, 'src', 'utils', 'sub', 'newFile.ts'),
+          content: 'export {}',
+        },
+      });
+      expect(result.hookSpecificOutput?.additionalContext ?? '').not.toContain(
+        'organ directory',
+      );
     });
   });
 });

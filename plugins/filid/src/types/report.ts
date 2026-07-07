@@ -32,6 +32,49 @@ export interface ScanReportDto {
   duration: number;
 }
 
+/** Compact `fractal_scan` result — always context-safe. */
+export interface ScanSummaryDto {
+  outputMode: 'summary';
+  root: string;
+  depth: number;
+  totalNodes: number;
+  nodesByType: Record<string, number>;
+  /** fractal-classified nodes lacking INTENT.md */
+  missingIntentFractals: number;
+  timestamp: string;
+  duration: number;
+}
+
+/** Path-projection `fractal_scan` result (structure without payload bulk). */
+export interface ScanPathsDto {
+  outputMode: 'paths';
+  root: string;
+  totalNodes: number;
+  nodes: Array<{
+    path: string;
+    type: string;
+    hasIntentMd: boolean;
+    hasDetailMd: boolean;
+  }>;
+  timestamp: string;
+  duration: number;
+}
+
+/** Oversized-result degradation: payload saved to a file, summary inline. */
+export interface ScanTruncatedDto {
+  outputMode: 'full' | 'summary' | 'paths';
+  truncated: true;
+  /** Absolute path of the line-structured JSON report (Read/grep it). */
+  reportPath: string;
+  summary: Omit<ScanSummaryDto, 'outputMode'>;
+}
+
+export type ScanResultDto =
+  | ScanReportDto
+  | ScanSummaryDto
+  | ScanPathsDto
+  | ScanTruncatedDto;
+
 export interface ValidationReport {
   result: RuleEvaluationResult;
   scanOptions?: ScanOptions;

@@ -14,6 +14,7 @@ Write/Edit이 디렉토리 구조를 위반할 가능성을 PreToolUse 시점에
 - `tool_name`이 Write/Edit이 아니면 즉시 continue
 - `file_path`/`path` 둘 다 체크 (도구별 입력 키 호환)
 - content는 `tool_input.content` (Write) 또는 `new_string` (Edit) 우선순위로 선택
+- organ-중첩 경고는 생성에만 적용: 기존 파일 편집, INTENT.md/DETAIL.md 작성(sub-fractal 선언), organ 하위에 이미 선언된 sub-fractal이 있는 경로는 제외
 - 결과 파트:
   - `[filid:info] structure-guard:` — 재분류 안내 (`checkIntentMdReclassification` 결과)
   - `[filid:warn] structure-guard:` — 위반 경고 (`checkOrganSubdirectory` + `checkCircularImports`)

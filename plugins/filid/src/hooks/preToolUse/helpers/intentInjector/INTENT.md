@@ -6,8 +6,8 @@ PreToolUse(Read) 이벤트에서 대상 파일의 상위 fractal을 찾아 `[fil
 
 ## Structure
 
-- `intentInjector.ts` — `injectIntent`, `buildCtxBlock` (internal), `buildMapBlock` (internal)
-- `utils/` organ — `compressPaths` 등 보조 함수
+- `intentInjector.ts` — `injectIntent` + `recordWriteVisit` (Write/Edit 방문을 reads에만 기록 — unread-intent 신호 원천)
+- `utils/` organ — `compressPaths`, `visitKey`, `displayDir` 등 보조 함수
 
 ## Conventions
 

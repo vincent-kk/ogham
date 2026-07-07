@@ -9,6 +9,8 @@ Detailed stage logic, MCP tool examples, and report format for the
 ```
 mcp__plugin_filid_t__fractal_scan({ path: cwd })
 // Retrieve full module tree by scanning the filesystem
+// Size guard: { truncated: true, reportPath, summary } → grep reportPath
+// (line-structured JSON) for node fields instead of reading it whole
 
 checks:
   - Every fractal dir has INTENT.md
@@ -120,14 +122,14 @@ Recommendations:
 
 ## MCP Tool Examples
 
-**mcp__plugin_filid_t__fractal_navigate classify:**
+**mcp**plugin_filid_t**fractal_navigate classify:**
 
 ```
 mcp__plugin_filid_t__fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from mcp__plugin_filid_t__fractal_scan */])
 // Returns: { type: "fractal" | "organ", hasIntentMd: boolean }
 ```
 
-**mcp__plugin_filid_t__ast_analyze lcom4:**
+**mcp**plugin_filid_t**ast_analyze lcom4:**
 
 ```
 // Read file first, then call mcp__plugin_filid_t__ast_analyze with source content
@@ -139,8 +141,8 @@ mcp__plugin_filid_t__ast_analyze(source: source, analysisType: "lcom4", classNam
 
 ## MCP Tool Reference
 
-| Tool                     | Action / Parameters                             | Stage | Purpose                                      |
-| ------------------------ | ----------------------------------------------- | ----- | -------------------------------------------- |
+| Tool                                    | Action / Parameters                             | Stage | Purpose                                      |
+| --------------------------------------- | ----------------------------------------------- | ----- | -------------------------------------------- |
 | `mcp__plugin_filid_t__fractal_scan`     | `path: cwd`                                     | 1, 5  | Retrieve module tree; verify classifications |
 | `mcp__plugin_filid_t__fractal_navigate` | `action: "classify", path, entries`             | 1     | Classify a specific directory                |
 | `mcp__plugin_filid_t__doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |

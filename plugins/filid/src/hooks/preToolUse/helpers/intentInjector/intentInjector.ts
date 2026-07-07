@@ -11,7 +11,10 @@ import {
   writeFractalMap,
 } from '../../../../core/infra/cacheManager/cacheManager.js';
 import type { FractalMap } from '../../../../core/infra/cacheManager/cacheManager.js';
-import { buildChain } from '../../../../core/tree/boundaryDetector/boundaryDetector.js';
+import {
+  buildChain,
+  findBoundary,
+} from '../../../../core/tree/boundaryDetector/boundaryDetector.js';
 import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
 import { isFcaProject } from '../../../shared/shared.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
@@ -21,6 +24,38 @@ import { buildMapBlock } from './utils/buildMapBlock.js';
 import { visitKey } from './utils/visitKey.js';
 
 export type { FractalMap };
+
+/**
+ * Record a Write/Edit target directory in fcaMap.reads WITHOUT marking its
+ * INTENT.md as surfaced. A dir that was modified but never read then shows
+ * up as `unread-intent` on subsequent [filid:map] blocks — the signal that
+ * a module is being changed before its boundary rules were read.
+ */
+export function recordWriteVisit(input: PreToolUseInput): void {
+  const safeCwd = validateCwd(input.cwd);
+  if (safeCwd === null || !isFcaProject(safeCwd)) return;
+
+  const rawPath = input.tool_input.file_path ?? input.tool_input.path ?? '';
+  if (!rawPath) return;
+  const filePath = path.isAbsolute(rawPath)
+    ? rawPath
+    : path.resolve(safeCwd, rawPath);
+  const fileDir = path.dirname(filePath);
+
+  const sessionId = input.session_id;
+  const cachedBoundary = readBoundary(safeCwd, sessionId, fileDir);
+  const boundary = cachedBoundary ?? findBoundary(filePath);
+  if (boundary === null) return;
+  if (cachedBoundary === null)
+    writeBoundary(safeCwd, sessionId, fileDir, boundary);
+
+  const relDir = path.relative(boundary, fileDir).replace(/\\/g, '/') || '.';
+  const key = visitKey(boundary, relDir);
+  const fcaMap = readFractalMap(safeCwd, sessionId);
+  if (fcaMap.reads.includes(key)) return;
+  fcaMap.reads.push(key);
+  writeFractalMap(safeCwd, sessionId, fcaMap);
+}
 
 /**
  * Inject INTENT.md context for PreToolUse (Read).

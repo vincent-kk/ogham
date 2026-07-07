@@ -41,8 +41,8 @@ deliberation_mode:
   type: enum
   values: ['team', 'solo-adjudicator', 'chairperson-forbidden']
   semantics:
-    team: committee.length >= 2; main MUST perform TeamCreate(review-<branch>) and spawn one Task per persona.
-    solo-adjudicator: committee == ["adjudicator"]; main MUST dispatch a single standalone Task (no TeamCreate).
+    team: committee.length >= 2; main MUST spawn one named worker Agent per persona (implicit team; no create call).
+    solo-adjudicator: committee == ["adjudicator"]; main MUST dispatch a single standalone Agent (no other teammates).
     chairperson-forbidden: subagent detected or attempted a Phase D protocol violation; main MUST NOT synthesize a verdict and MUST block the merge.
 ```
 
@@ -60,7 +60,7 @@ failure_reason:
     ]
   semantics:
     none: healthy handoff; verdict derived from Phase D quorum result.
-    phase-d-team-spawn-unavailable: TeamCreate errored or the runtime refused the spawn call.
+    phase-d-team-spawn-unavailable: a worker Agent spawn errored or the runtime refused the spawn call.
     team-incomplete: workers spawned but quorum was unreachable (crashes, timeouts, or forced-ABSTAIN past the recovery budget).
     round5-exhaust: deliberation hit the 5-round cap without reaching SYNTHESIS.
 ```

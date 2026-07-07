@@ -1,9 +1,9 @@
 ---
 name: scan
 user_invocable: true
-description: "[filid:scan] Scan the entire project for FCA-AI rule violations across INTENT.md documents, organ boundaries, and test file structure, then produce a prioritized report with optional --fix auto-remediation."
-argument-hint: "[path] [--fix]"
-version: "1.0.0"
+description: '[filid:scan] Scan the entire project for FCA-AI rule violations across INTENT.md documents, organ boundaries, and test file structure, then produce a prioritized report with optional --fix auto-remediation.'
+argument-hint: '[path] [--fix]'
+version: '1.0.0'
 complexity: medium
 plugin: filid
 ---
@@ -14,10 +14,12 @@ plugin: filid
 > violation aggregation.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required
 > 2. Terminal stage marker emitted: `Scan complete: N violations` or `Scan complete: no violations found`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After Phase 1 `mcp__plugin_filid_t__fractal_scan` returns — chain Phases 2–4 in the same response (the "CRITICAL — No-Yield Execution" directive under the "## Core Workflow" section heading is authoritative)
 > - `--fix` auto-remediation loop — do NOT pause between fixes; continue until all applicable violations are addressed
 > - Final violation report — emit consolidated report AND end in the same turn
@@ -58,11 +60,14 @@ Build the project hierarchy using `mcp__plugin_filid_t__fractal_scan` and partit
 nodes, organ nodes, and spec files.
 See [reference.md Section 1](./reference.md#section-1--tree-construction).
 
-> **Phase 1 result handling**: `mcp__plugin_filid_t__fractal_scan` returns ≥50 KB of structured
-> data for any non-trivial project. Treat the full response as INTERNAL working
-> data — do NOT echo `tree.nodes` or `modules` arrays in your response. Extract
-> the three working sets (fractal nodes, organ nodes, spec files) silently and
-> proceed to Phase 2–4 tool calls in the same response.
+> **Phase 1 result handling**: call `mcp__plugin_filid_t__fractal_scan` with
+> `outputMode: "paths"` — the scan phases only need per-node
+> `path`/`type`/`hasIntentMd`/`hasDetailMd`. Treat the response as INTERNAL
+> working data — do NOT echo the `nodes` array in your response. If the
+> response is `{ truncated: true, reportPath, summary }`, the report was
+> written to `reportPath` — grep that file for node fields instead of loading
+> it whole. Extract the three working sets (fractal nodes, organ nodes, spec
+> files) silently and proceed to Phase 2–4 tool calls in the same response.
 
 **Immediately after** receiving `mcp__plugin_filid_t__fractal_scan` results, proceed to Phase 2–4
 in the same response — do NOT summarize or report Phase 1 results first.
@@ -124,10 +129,10 @@ See [reference.md Section 5](./reference.md#section-5--report-formats).
 
 ## Available MCP Tools
 
-| Tool           | Action      | Purpose                                              |
-| -------------- | ----------- | ---------------------------------------------------- |
-| `mcp__plugin_filid_t__fractal_scan` | —           | Build complete project hierarchy for scan            |
-| `mcp__plugin_filid_t__test_metrics` | `check-312` | Validate 3+12 rule across all spec files             |
+| Tool                                | Action      | Purpose                                                |
+| ----------------------------------- | ----------- | ------------------------------------------------------ |
+| `mcp__plugin_filid_t__fractal_scan` | —           | Build complete project hierarchy for scan              |
+| `mcp__plugin_filid_t__test_metrics` | `check-312` | Validate 3+12 rule across all spec files               |
 | `mcp__plugin_filid_t__doc_compress` | `auto`      | (`--fix`) Compress INTENT.md via context-manager agent |
 
 ## Options

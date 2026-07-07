@@ -61,6 +61,7 @@ Collection steps:
    ```
    mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
    // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: [...], ... }
+   // Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for node fields
    ```
 
    Skip `organ` nodes — INTENT.md is prohibited there and should be surfaced

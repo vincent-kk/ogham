@@ -181,11 +181,12 @@ export function createServer(): McpServer {
     McpToolName.FRACTAL_SCAN,
     {
       description:
-        'Scan project directory to build FractalTree and return ScanReportDto.',
+        'Scan project directory to build FractalTree. outputMode: full (ScanReportDto), summary (counts only), paths (path/type/INTENT flags per node). Oversized results are saved to a report file and returned as { truncated, reportPath, summary } — Read/grep the file for details.',
       inputSchema: z.object({
         path: z.string(),
         depth: z.number().min(1).max(20).optional(),
         includeModuleInfo: z.boolean().optional(),
+        outputMode: z.enum(['full', 'summary', 'paths']).optional(),
       }),
     },
     wrapHandler(handleFractalScan),

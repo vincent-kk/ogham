@@ -199,6 +199,6 @@ Adversarial pairs: <persona A> ↔ <persona B list>
 
 - Use MCP tools for deterministic operations (committee election, branch normalization)
 - Do NOT load persona agent definitions — Phase D spawns them as real
-  subagents via `Task(subagent_type: filid:<persona-id>)` when needed
+  subagents via `Agent(subagent_type: filid:<persona-id>)` when needed
 - Write ONLY `session.md` — no other files
 - If `SCAN_NODES.find(...)` returns no match for a path, classify it as "unknown" and continue

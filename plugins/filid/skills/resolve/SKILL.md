@@ -148,13 +148,13 @@ For each fix item:
 #### Phase 4a — Code Fixes (parallel)
 
 Delegate all accepted `code-fix` items **in a single response** as a block
-of parallel `Task` calls (`subagent_type: "filid:code-surgeon"`, `model:
+of parallel `Agent` calls (`subagent_type: "filid:code-surgeon"`, `model:
 "sonnet"`). Do NOT set `run_in_background: true` — foreground parallel
-Task calls give a deterministic sync point: the framework returns all
+Agent calls give a deterministic sync point: the framework returns all
 results together before the next response, which naturally "awaits all"
 before Phase 4b begins. No explicit wait primitive is needed.
 
-For each accepted code-fix, include one Task in the parallel block with:
+For each accepted code-fix, include one Agent call in the parallel block with:
 
 - The target file path
 - The recommended action and code patch from `fix-requests.md`

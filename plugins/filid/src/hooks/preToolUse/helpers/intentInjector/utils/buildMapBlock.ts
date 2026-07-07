@@ -17,9 +17,7 @@ export function buildMapBlock(
   // Unread = in reads but NOT in intents, excluding currentDir (always has active context)
   const unread = [
     ...new Set(
-      readDirs.filter(
-        (r) => r !== currentDir && intentDirs.indexOf(r) === -1,
-      ),
+      readDirs.filter((r) => r !== currentDir && intentDirs.indexOf(r) === -1),
     ),
   ];
   if (unread.length === 0) return `[filid:map] ${compressed}`;

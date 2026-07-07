@@ -1,5 +1,5 @@
 ---
-'@ogham/filid': patch
+"@ogham/filid": patch
 ---
 
 Hook-layer consistency fixes from the 2026-07-07 behavior analysis:

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-다중 페르소나 합의 기반 코드 리뷰 거버넌스 파이프라인. 구조 검사(Phase A), 분석 및 위원회 선출(Phase B), 기술 검증(Phase C1 메트릭 + C2 구조), 정치적 합의(Phase D) 단계로 구성. Phase D는 Claude Code 네이티브 팀 도구로 실제 에이전트를 스폰하여 위원회를 구성한다 (단, committee=1 이면 단일 Task).
+다중 페르소나 합의 기반 코드 리뷰 거버넌스 파이프라인. 구조 검사(Phase A), 분석 및 위원회 선출(Phase B), 기술 검증(Phase C1 메트릭 + C2 구조), 정치적 합의(Phase D) 단계로 구성. Phase D는 세션의 암묵 팀 위에 이름 있는 `Agent` 워커를 스폰해 위원회를 구성한다 (단, committee=1 이면 단일 standalone `Agent`).
 
 ## Structure
 

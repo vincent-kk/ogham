@@ -28,11 +28,12 @@ plugin: filid
 > 1. After Phase A/B background tasks complete → chain Step 3 immediately.
 > 2. After Phase C1/C2 background tasks complete → chain verification.md
 >    merge + Phase D immediately.
-> 3. After TeamCreate + worker spawns return → chain round monitoring
+> 3. After the parallel worker Agent spawns return → chain round monitoring
 >    immediately; do not pause between spawn and wait.
 > 4. Between deliberation rounds → parse opinion frontmatter and create
 >    Round N+1 tasks without yielding.
-> 5. After TeamDelete → chain Step 4.5 (content-hash) immediately.
+> 5. After the D.6.5 worker-teardown sweep → chain Step 4.5 (content-hash)
+>    immediately.
 > 6. After Step 4.5 content-hash persistence → chain Step 5 (PR comment)
 >    in the same response; emit the terminal verdict marker only after
 >    Step 5 completes or is skipped.
@@ -204,11 +205,12 @@ Phase A context.
 **Batch partitioning**: Same `changedFilesCount > 15` threshold as
 Phase A. Between 15 and 30 files → partition per-file work into 10-file
 batches (C2 also runs one extra `c2-global` subagent for project-wide
-scans). Above 30 files → promote to a dedicated
-`review-c-<normalized-branch>` team with one worker per batch. See
+scans). Above 30 files → promote to named batch workers
+(`c1-batch-<N>` / `c2-batch-<N>`), one Agent per batch. See
 `mcp-map.md` → "Batch Partitioning Thresholds" for full details and
-the merge protocol. `TeamDelete` the `review-c-<normalized-branch>`
-team as soon as all C1/C2 workers complete — before entering Phase D.
+the merge protocol. Confirm every C1/C2 batch worker has terminated
+(TaskStop any straggler) as soon as their outputs are merged — before
+entering Phase D.
 
 **Await both** C1 and C2 background agents before proceeding. Apply
 the same post-completion verification as Step 2 (see `contracts.md`).
@@ -255,10 +257,10 @@ message and terminate.
        verification_structure: <REVIEW_DIR>/verification-structure.md
    ```
 
-4. Terminate. Do NOT read Phase D's phase file, do NOT call `TeamCreate`,
-   do NOT write `review-report.md` or `fix-requests.md`. The pipeline
-   main will dispatch Phase D via the `verdict_gate` rule and write
-   those artifacts itself.
+4. Terminate. Do NOT read Phase D's phase file, do NOT spawn Phase D
+   teammates, do NOT write `review-report.md` or `fix-requests.md`. The
+   pipeline main will dispatch Phase D via the `verdict_gate` rule and
+   write those artifacts itself.
 
 **→ After SubagentReturn is emitted, execution is COMPLETE for the
 subagent. Return control to the pipeline main.**
@@ -294,14 +296,14 @@ defines:
 - Step D.0 — Merge `verification-metrics.md` + `verification-structure.md`
   into `verification.md`
 - Step D.1 — Committee size branch (solo vs team)
-- Step D.2-solo — Single Task spawn for `committee.length == 1`
-- Step D.2-team — `TeamCreate` + parallel worker spawns for
-  `committee.length >= 2`
+- Step D.2-solo — Single Agent spawn for `committee.length == 1`
+- Step D.2-team — parallel named worker Agent spawns for
+  `committee.length >= 2` (implicit team; no create call)
 - Step D.3 — Round evaluation (state machine from `state-machine.md`)
 - Step D.4 — VETO branch (compromise round)
 - Step D.5 — Recovery plan (dead worker detection + respawn)
 - Step D.6 — CONCLUSION — write `review-report.md` + `fix-requests.md`
-  and perform team shutdown + `TeamDelete`
+  and run the worker-teardown sweep (shutdown_request → TaskStop)
 
 **Chairperson invariants during Phase D**:
 
@@ -319,7 +321,7 @@ defines:
    `adjudicatorMode: true` input to `mcp__plugin_filid_t__review_manage(elect-committee)`,
    which returns `committee: ['adjudicator']` regardless of
    complexity. Phase D Step D.2-solo then spawns the `adjudicator`
-   agent as a standalone `Task` (no Team infrastructure). The same
+   agent as a standalone `Agent` (no other teammates). The same
    code path is used for auto-selected TRIVIAL complexity.
 
 **→ HIGH-RISK YIELD POINT: do NOT yield after Phase D outputs are

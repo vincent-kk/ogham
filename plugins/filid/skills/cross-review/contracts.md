@@ -27,17 +27,17 @@ All seven agents have scoped tool access (`Read, Write, Glob, Grep, Bash`).
 INTENT.md, DETAIL.md, or anything outside the review session's `rounds/`
 subtree is prohibited by each agent's in-body `Hard Rules` section. `Edit`
 is deliberately absent so no agent can rewrite existing files. They are
-spawned via `Task(subagent_type: filid:<id>)` exclusively by
+spawned via `Agent(subagent_type: filid:<id>)` exclusively by
 `phases/phase-d-deliberation.md`.
 
-- **`adjudicator`** is a standalone `Task` (NO `team_name`). It runs
+- **`adjudicator`** is a standalone `Agent` (no teammate role). It runs
   when the committee is `['adjudicator']` — either TRIVIAL auto-tier or
   `--solo` manual flag. It internalizes all six specialist perspectives
   in a single pass, skips the state machine, and emits one
   `round-1-adjudicator.md` opinion that maps directly to the verdict.
-- **Six specialist agents** run as team workers inside the
-  `review-<normalized-branch>` team when committee size >= 2. They
-  participate in the multi-round state machine deliberation.
+- **Six specialist agents** run as named teammates in the session's
+  implicit team when committee size >= 2. They participate in the
+  multi-round state machine deliberation.
 
 Adding a new specialist persona requires a coordinated edit in three
 places:
@@ -381,8 +381,8 @@ Dispatch rules are encoded in `phase-d-deliberation.md` Step D.6.4:
 ### Phase D protocol violation (chairperson-direct synthesis forbidden)
 
 A `chairperson-direct` Phase D synthesis — main writing a SYNTHESIS verdict
-without running either the `team` dispatch (`TeamCreate` + N `Task`s) or the
-`solo-adjudicator` dispatch (single `Task(filid:adjudicator)`) — is a
+without running either the `team` dispatch (N named worker `Agent`s) or the
+`solo-adjudicator` dispatch (single `Agent(filid:adjudicator)`) — is a
 **protocol violation** (프로토콜 위반). Phase D runs only in the main
 orchestrator, and only via one of those two sanctioned dispatches. Any
 deviation yields `deliberation_mode == "chairperson-forbidden"` and the
