@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { KgContextScope } from "@ogham/maencof";
 import { z } from "zod";
 
 import { loadConfig } from "../../config/configLoader/configLoader.js";
@@ -90,7 +91,7 @@ export function createLensServer(configRoot: string) {
         ),
         scope: z.optional(
           z
-            .enum(["focused", "balanced", "broad"])
+            .nativeEnum(KgContextScope)
             .describe(
               "Exploration breadth: 'focused' = close, high-confidence documents; 'balanced' = default; 'broad' = distant associative connections (ideation)",
             ),
