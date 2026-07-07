@@ -26,9 +26,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
 // Meta-skill body budget guard: the SessionStart runtime SKIPS injection when
-// the body exceeds META_SKILL_MAX_CHARS, so an oversized body ships as a
-// silently dead feature (regressed exactly this way in #74: 2974 -> 2975+
-// code points crossed the then-2500 limit unnoticed). Fail the build instead.
+// the body exceeds META_SKILL_MAX_CHARS, so an oversized body would ship as a
+// silently dead feature. Fail the build instead.
 {
   const constantsSource = await readFile(
     resolve(root, 'src/constants/sessionStart.ts'),
@@ -96,10 +95,9 @@ const SESSION_START_BYTES = 52 * 1024;
 // fast-glob / MCP SDK) is still enforced by FORBIDDEN_PATTERNS below.
 const USER_PROMPT_SUBMIT_BYTES = 36 * 1024;
 const SESSION_END_BYTES = 32 * 1024;
-// 24 -> 28 KB: the session recap moved from session-end (no guaranteed display
-// channel) to a stop concern — pulls insightStats read + dialogueConfig
-// off-switch + cacheManager markers into the stop bundle. Pure Node-builtin
-// code; FORBIDDEN_PATTERNS below still enforces the isolation guard.
+// stop carries changelogGate (spawnCli/git) + sessionRecap (insightStats read
+// + dialogueConfig off-switch + cacheManager markers) + lifecycle — all pure
+// Node-builtin code; FORBIDDEN_PATTERNS below enforces the isolation guard.
 const STOP_BYTES = 28 * 1024;
 const POST_TOOL_USE_BYTES = 12 * 1024;
 const PRE_TOOL_USE_BYTES = 12 * 1024;

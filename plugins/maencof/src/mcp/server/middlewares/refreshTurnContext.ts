@@ -4,8 +4,7 @@
  *
  * invalidateCache()가 MCP read 경로를 새 그래프로 이끄는 것과 같은 원리로,
  * 매 턴 주입되는 <kg-core> 요약(노드 수·레이어 분포·L1 gist)도 자신이 요약하는
- * 디스크 인덱스를 따라간다. 이것이 없으면 세션 중 mutate가 훅 컨텍스트에는
- * 세션 종료까지 반영되지 않는다 (2026-07-07 동작 분석 P7).
+ * 디스크 인덱스를 따라간다.
  */
 import { writeTurnContext } from '../../../core/cacheManager/cacheManager.js';
 import { appendErrorLogSafe } from '../../../core/errorLog/index.js';

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Stop 훅에서 세션당 1회, pending insight 캡처(합의 전제 L5 / 잠정 원칙 L2)를 recap으로 Claude에 주입. SessionEnd 는 표시 보장 채널이 없어 발화 지점이 Stop 으로 이동했다.
+Stop 훅에서 세션당 1회, pending insight 캡처(합의 전제 L5 / 잠정 원칙 L2)를 recap으로 Claude에 주입. 발화 지점은 Stop 이다 — SessionEnd 는 표시 보장 채널이 없다.
 
 ## Boundaries
 

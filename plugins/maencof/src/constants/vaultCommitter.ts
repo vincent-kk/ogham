@@ -3,9 +3,9 @@ export const VAULT_COMMIT_CONFIG_FILE = 'vault-commit.json';
 
 /**
  * Default commit-trigger pattern: a prompt matching `/clear` commits the vault
- * right before the context is wiped. (`SKIP` in the name is historical — the
- * config field `skip_patterns` predates the trigger semantics and is kept for
- * backward compatibility with existing user configs.) Users may override /
+ * right before the context is wiped. The `SKIP` name does not describe the
+ * trigger semantics but is kept — the `skip_patterns` config field name must
+ * stay backward compatible with existing user configs. Users may override /
  * extend via `vault-commit.json::skip_patterns`; this default applies only
  * when the field is missing or malformed.
  */

@@ -2,9 +2,9 @@
  * @file sessionRecap.ts
  * @description Stop Hook — 세션당 1회, pending insight 캡처를 recap으로 Claude에 주입.
  *
- * SessionEnd 는 표시가 보장되는 출력 채널이 없어(hooks 계약) recap 발화 지점을
- * Stop 으로 옮겼다. Stop 은 응답마다 발화하므로 cacheManager 의 recap 마커로
- * 세션당 1회로 제한하고, 보고할 캡처가 없으면 침묵한다(노이즈 방지).
+ * 발화 지점은 Stop 이다 — SessionEnd 는 표시가 보장되는 출력 채널이 없다(hooks
+ * 계약). Stop 은 응답마다 발화하므로 cacheManager 의 recap 마커로 세션당 1회로
+ * 제한하고, 보고할 캡처가 없으면 침묵한다(노이즈 방지).
  */
 import {
   hasRecapMarker,
@@ -37,15 +37,18 @@ export function runSessionRecap(input: SessionRecapInput): SessionRecapResult {
   try {
     const cwd = input.cwd ?? process.cwd();
     if (!isMaencofVault(cwd)) return { continue: true };
-    if (isSessionRecapDisabled(cwd)) return { continue: true };
 
     const sessionId = input.session_id ?? '';
     if (!sessionId) return { continue: true };
+    // Stop fires on every response — cheap stat guards first, the JSON reads
+    // (pending captures, off-switch config) only on the at-most-once path.
     if (hasRecapMarker(sessionId, cwd)) return { continue: true };
 
     const pending = readPendingNotification(cwd);
     const captures = pending?.captures ?? [];
     if (captures.length === 0) return { continue: true };
+
+    if (isSessionRecapDisabled(cwd)) return { continue: true };
 
     const recap = buildRecapText(captures);
     markRecapEmitted(sessionId, cwd);
@@ -72,7 +75,7 @@ interface RecapCapture {
 }
 
 /**
- * finalize 시절의 recap 구성을 유지한다: L5 캡처 → 합의 전제, L2 캡처 → 잠정 원칙.
+ * recap 구성: L5 캡처 → 합의 전제(Agreed premises), L2 캡처 → 잠정 원칙(Tentative principles).
  */
 function buildRecapText(captures: RecapCapture[]): string {
   const agreedPremises = captures
