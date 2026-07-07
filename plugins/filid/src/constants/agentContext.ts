@@ -55,5 +55,5 @@ export const GUIDE_BLOCK = [
   '  intent: INTENT.md path. --- ... --- is its inline content. Obey these rules.',
   '  chain: parent INTENT.md paths (nearest > root). Each is a readable file — read to learn parent rules.',
   '  detail: DETAIL.md path. Read BEFORE writing code in this module.',
-  '[filid:map] — visited directories this session. /* = current working directory. unread-intent: directories with INTENT.md not yet surfaced — read their INTENT.md before modifying.',
+  '[filid:map] — directories visited this turn (reset on each user prompt). /* marks the directory just accessed.',
 ].join('\n');

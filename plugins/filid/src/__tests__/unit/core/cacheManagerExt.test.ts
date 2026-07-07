@@ -225,10 +225,11 @@ describe('cache-manager boundary/fmap extensions', () => {
     expect(result.intents).toBeUndefined();
   });
 
-  // Test 12: writeFractalMap overwrite (not merge)
-  it('writeFractalMap: second write overwrites completely (no merge)', () => {
+  // Test 12: writeFractalMap union-merge (concurrent hook processes must not
+  // lose each other's visit records — see fractalMapMerge.test.ts)
+  it('writeFractalMap: second write union-merges with the on-disk map', () => {
     const cwd = '/proj/workspace';
-    const sessionId = 'session-overwrite';
+    const sessionId = 'session-merge';
 
     writeFractalMap(cwd, sessionId, {
       reads: ['old'],
@@ -242,7 +243,11 @@ describe('cache-manager boundary/fmap extensions', () => {
     });
 
     const result = readFractalMap(cwd, sessionId);
-    expect(result).toEqual({ reads: ['new'], intents: [], details: [] });
+    expect(result).toEqual({
+      reads: ['old', 'new'],
+      intents: ['old'],
+      details: ['old'],
+    });
   });
 
   // Test 13: writeBoundary with empty string dir key

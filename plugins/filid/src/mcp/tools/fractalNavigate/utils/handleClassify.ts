@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
 import {
   type ClassifyInput,
   classifyNode,
@@ -20,9 +23,17 @@ export function handleClassify(
       .split('/')
       .filter((s) => s.length > 0)
       .pop() ?? '';
-  const hasIntentMd = entry?.hasIntentMd ?? false;
-  const hasDetailMd = entry?.hasDetailMd ?? false;
+  let hasIntentMd = entry?.hasIntentMd ?? false;
+  let hasDetailMd = entry?.hasDetailMd ?? false;
   const hasIndex = entry?.hasIndex ?? false;
+
+  // Entries lack the target (e.g. classify called with entries: []) — consult
+  // the filesystem so classification priority 1-2 (INTENT.md/DETAIL.md →
+  // fractal) still holds instead of silently defaulting to false.
+  if (!entry && existsSync(input.path)) {
+    hasIntentMd = existsSync(join(input.path, 'INTENT.md'));
+    hasDetailMd = existsSync(join(input.path, 'DETAIL.md'));
+  }
 
   // entries에서 실제 계산 (hardcode 제거)
   const immediateChildren = input.entries.filter(

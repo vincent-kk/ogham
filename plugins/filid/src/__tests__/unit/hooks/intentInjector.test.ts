@@ -10,6 +10,7 @@ import {
   writeFractalMap,
 } from '../../../core/infra/cacheManager/cacheManager.js';
 import { injectIntent } from '../../../hooks/preToolUse/helpers/intentInjector/intentInjector.js';
+import { visitKey } from '../../../hooks/preToolUse/helpers/intentInjector/utils/visitKey.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------
@@ -331,8 +332,8 @@ describe('injectIntent', () => {
 
     // Pre-populate fmap: src/a in reads+intents, src/b in reads only (unread)
     writeFractalMap(tmpDir, sessionId, {
-      reads: ['src/a', 'src/b'],
-      intents: ['src/a'],
+      reads: [visitKey(tmpDir, 'src/a'), visitKey(tmpDir, 'src/b')],
+      intents: [visitKey(tmpDir, 'src/a')],
       details: [],
     });
     writeBoundary(tmpDir, sessionId, join(tmpDir, 'src', 'a'), tmpDir);
@@ -365,8 +366,12 @@ describe('injectIntent', () => {
 
     // Pre-populate fmap: src/a (currentDir) + src/b + src/c in reads, only src/b in intents
     writeFractalMap(tmpDir, sessionId, {
-      reads: ['src/a', 'src/b', 'src/c'],
-      intents: ['src/a'],
+      reads: [
+        visitKey(tmpDir, 'src/a'),
+        visitKey(tmpDir, 'src/b'),
+        visitKey(tmpDir, 'src/c'),
+      ],
+      intents: [visitKey(tmpDir, 'src/a')],
       details: [],
     });
     writeBoundary(tmpDir, sessionId, join(tmpDir, 'src', 'a'), tmpDir);
@@ -430,6 +435,49 @@ describe('injectIntent', () => {
     expect(turn2.hookSpecificOutput?.additionalContext).toContain(
       'Root module',
     );
+  });
+
+  it('monorepo: same relDir under two packages → both get [filid:ctx]', () => {
+    // Two workspace packages, each its own boundary (package.json), each with
+    // src/INTENT.md — the relDir "src" is identical across both.
+    for (const pkg of ['alpha', 'beta']) {
+      mkdirSync(join(tmpDir, 'packages', pkg, 'src'), { recursive: true });
+      writeFileSync(
+        join(tmpDir, 'packages', pkg, 'package.json'),
+        JSON.stringify({ name: pkg }),
+      );
+      writeFileSync(
+        join(tmpDir, 'packages', pkg, 'src', 'INTENT.md'),
+        `## Purpose\n${pkg} source\n`,
+      );
+      writeFileSync(join(tmpDir, 'packages', pkg, 'src', 'index.ts'), '');
+    }
+    // FCA marker at repo root so isFcaProject passes for cwd
+    writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRepo root\n');
+
+    const sessionId = `session-monorepo-${Date.now()}`;
+    const readPkg = (pkg: string) =>
+      injectIntent(
+        makeInput({
+          cwd: tmpDir,
+          session_id: sessionId,
+          tool_input: {
+            file_path: join(tmpDir, 'packages', pkg, 'src', 'index.ts'),
+          },
+        }),
+      );
+
+    const first = readPkg('alpha');
+    expect(first.hookSpecificOutput?.additionalContext).toContain(
+      'alpha source',
+    );
+
+    // Regression guard: beta/src collided with alpha/src as bare "src" and
+    // was silently treated as already visited (no ctx injection).
+    const second = readPkg('beta');
+    const ctx2 = second.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx2).toContain('[filid:ctx]');
+    expect(ctx2).toContain('beta source');
   });
 
   it('guide once per session: removeFractalMap between calls → guide NOT repeated', () => {

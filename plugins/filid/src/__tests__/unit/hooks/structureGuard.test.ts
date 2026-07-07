@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { guardStructure } from '../../../hooks/preToolUse/helpers/structureGuard/structureGuard.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
@@ -11,11 +15,17 @@ const baseInput: PreToolUseInput = {
   tool_input: {},
 };
 
+// Paths under cwd that do not exist on disk exercise the name-based organ
+// fallback (the intended branch for not-yet-created directories).
+
 describe('structure-guard', () => {
   it('should allow INTENT.md in organ-named directory with reclassification warning', () => {
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: '/app/src/utils/INTENT.md', content: '# Utils' },
+      tool_input: {
+        file_path: '/workspace/src/utils/INTENT.md',
+        content: '# Utils',
+      },
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
@@ -28,7 +38,7 @@ describe('structure-guard', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
-        file_path: '/app/src/components/ui/INTENT.md',
+        file_path: '/workspace/src/components/ui/INTENT.md',
         content: '# UI',
       },
     };
@@ -42,7 +52,10 @@ describe('structure-guard', () => {
   it('should allow INTENT.md in fractal directories', () => {
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: '/app/src/auth/INTENT.md', content: '# Auth' },
+      tool_input: {
+        file_path: '/workspace/src/auth/INTENT.md',
+        content: '# Auth',
+      },
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
@@ -52,7 +65,7 @@ describe('structure-guard', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
-        file_path: '/app/src/utils/helper.ts',
+        file_path: '/workspace/src/utils/helper.ts',
         content: 'export {}',
       },
     };
@@ -65,7 +78,7 @@ describe('structure-guard', () => {
       ...baseInput,
       tool_name: 'Edit',
       tool_input: {
-        file_path: '/app/src/utils/INTENT.md',
+        file_path: '/workspace/src/utils/INTENT.md',
         new_string: 'updated',
       },
     };
@@ -88,7 +101,10 @@ describe('structure-guard', () => {
     for (const dir of organDirs) {
       const input: PreToolUseInput = {
         ...baseInput,
-        tool_input: { file_path: `/app/src/${dir}/INTENT.md`, content: '# X' },
+        tool_input: {
+          file_path: `/workspace/src/${dir}/INTENT.md`,
+          content: '# X',
+        },
       };
       const result = guardStructure(input);
       expect(
@@ -102,7 +118,7 @@ describe('structure-guard', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
-        file_path: '/app/src/utils/sub-module/INTENT.md',
+        file_path: '/workspace/src/utils/sub-module/INTENT.md',
         content: '# Sub',
       },
     };
@@ -123,7 +139,7 @@ describe('structure-guard', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
-        file_path: '/app/src/utils/deep/nested/helper.ts',
+        file_path: '/workspace/src/utils/deep/nested/helper.ts',
         content: 'export {}',
       },
     };
@@ -138,9 +154,60 @@ describe('structure-guard', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_name: 'Read',
-      tool_input: { file_path: '/app/src/utils/INTENT.md' },
+      tool_input: { file_path: '/workspace/src/utils/INTENT.md' },
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
+  });
+
+  it('should skip checks entirely for paths outside cwd (absolute-path regression)', () => {
+    // Regression: absolute paths were split into raw segments and re-joined
+    // onto cwd, so organ names anywhere in the path (even above the project)
+    // produced warnings. Outside-cwd targets must not be checked at all.
+    const input: PreToolUseInput = {
+      ...baseInput,
+      tool_input: {
+        file_path: '/elsewhere/fixtures/utils/deep/INTENT.md',
+        content: '# X',
+      },
+    };
+    const result = guardStructure(input);
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput).toBeUndefined();
+  });
+
+  describe('structure-based correction (real filesystem)', () => {
+    let tmpCwd: string;
+
+    beforeEach(() => {
+      tmpCwd = join(
+        tmpdir(),
+        `filid-guard-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      );
+      mkdirSync(join(tmpCwd, 'src', 'hooks', 'probe'), { recursive: true });
+    });
+
+    afterEach(() => {
+      rmSync(tmpCwd, { recursive: true, force: true });
+    });
+
+    it('organ-named dir WITH INTENT.md is a fractal → no nesting warning', () => {
+      // src/hooks carries INTENT.md → classification priority 1 (fractal)
+      // must beat the KNOWN_ORGAN_DIR_NAMES name match.
+      writeFileSync(join(tmpCwd, 'src', 'hooks', 'INTENT.md'), '# hooks\n');
+
+      const result = guardStructure({
+        ...baseInput,
+        cwd: tmpCwd,
+        tool_input: {
+          file_path: join(tmpCwd, 'src', 'hooks', 'probe', 'probe.ts'),
+          content: 'export {}',
+        },
+      });
+      expect(result.continue).toBe(true);
+      expect(
+        result.hookSpecificOutput?.additionalContext ?? '',
+      ).not.toContain('organ directory');
+    });
   });
 });

@@ -18,11 +18,12 @@ import { validateCwd } from '../../../utils/validateCwd.js';
 
 import { buildCtxBlock } from './utils/buildCtxBlock.js';
 import { buildMapBlock } from './utils/buildMapBlock.js';
+import { visitKey } from './utils/visitKey.js';
 
 export type { FractalMap };
 
 /**
- * Inject INTENT.md context for PreToolUse (Read|Write|Edit).
+ * Inject INTENT.md context for PreToolUse (Read).
  * Returns additional context to inject into the agent.
  */
 export function injectIntent(input: PreToolUseInput): HookOutput {
@@ -51,9 +52,10 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   if (cachedBoundary !== null) {
     const relDir =
       path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
-    if (fcaMap.intents.includes(relDir)) {
+    const key = visitKey(cachedBoundary, relDir);
+    if (fcaMap.intents.includes(key)) {
       // Already visited — only update reads + map block
-      if (!fcaMap.reads.includes(relDir)) fcaMap.reads.push(relDir);
+      if (!fcaMap.reads.includes(key)) fcaMap.reads.push(key);
 
       const mapBlock = buildMapBlock(fcaMap.reads, relDir, fcaMap.intents);
       writeFractalMap(safeCwd, sessionId, fcaMap);
@@ -78,19 +80,20 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   // Relative paths for display
   const relDir = path.relative(boundary, fileDir).replace(/\\/g, '/') || '.';
   const relFile = path.relative(boundary, filePath).replace(/\\/g, '/');
+  const key = visitKey(boundary, relDir);
 
   // Add to reads (dedup)
-  if (!fcaMap.reads.includes(relDir)) fcaMap.reads.push(relDir);
+  if (!fcaMap.reads.includes(key)) fcaMap.reads.push(key);
 
-  const isFirstVisit = !fcaMap.intents.includes(relDir);
+  const isFirstVisit = !fcaMap.intents.includes(key);
   const guideNeeded = !hasGuideInjected(sessionId, safeCwd);
 
   const blocks: string[] = [];
 
   if (isFirstVisit) {
-    fcaMap.intents.push(relDir);
+    fcaMap.intents.push(key);
     if (details.get(fileDir))
-      if (!fcaMap.details.includes(relDir)) fcaMap.details.push(relDir);
+      if (!fcaMap.details.includes(key)) fcaMap.details.push(key);
 
     // Find INTENT.md: current dir first, then walk up chain to owning fractal
     let intentAbsPath: string | undefined;
@@ -118,10 +121,11 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
     // This prevents re-inlining when sibling organs or the owner itself are visited later
     const ownerRelDir =
       path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
+    const ownerKey = visitKey(boundary, ownerRelDir);
     const ownerAlreadyVisited =
-      ownerDir !== fileDir && fcaMap.intents.includes(ownerRelDir);
+      ownerDir !== fileDir && fcaMap.intents.includes(ownerKey);
     if (ownerDir !== fileDir && !ownerAlreadyVisited)
-      fcaMap.intents.push(ownerRelDir);
+      fcaMap.intents.push(ownerKey);
 
     // Only build ctx block if there's actual intent content or chain context
     // Skip if the owning fractal was already inlined by a sibling organ visit

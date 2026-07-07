@@ -14,7 +14,7 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
 
   const cwd = validateCwd(input.cwd);
   if (cwd === null) return { continue: true };
-  const segments = getParentSegments(filePath);
+  const segments = getParentSegments(filePath, cwd);
   const content = input.tool_input.content ?? input.tool_input.new_string ?? '';
 
   const info = checkIntentMdReclassification(
