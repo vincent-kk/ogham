@@ -15,7 +15,7 @@ PreToolUse(Read) 이벤트에서 대상 파일의 상위 fractal을 찾아 `[fil
 - `fcaMap` 원소는 `{boundary}\t{relDir}` 복합 키 (모노레포 패키지 간 동일 relDir 충돌 방지); `[filid:map]` 표시 시에는 `\t` 뒤 relDir만 사용
 - 소유자 fractal 탐색: 현재 디렉토리 → chain 상위로 첫 번째 `INTENT.md` 보유 dir 선택
 - 최초 방문 시에만 `[filid:ctx]` 인라인 본문 주입, 재방문은 `[filid:map]`만 갱신
-- 동일 세션에서 소유 fractal이 이미 주입되면 sibling organ 방문 시 재인라인 스킵
+- `fcaMap`(reads/intents/details)은 UserPromptSubmit에서 턴마다 리셋 — 동일 턴에서 소유 fractal이 이미 주입되면 sibling organ 방문 시 재인라인 스킵 (`[filid:guide]`는 별도 세션-스코프 캐시로 세션당 1회 유지)
 - `[filid:map]`은 `compressPaths` 결과 + `unread-intent` 목록 (reads에는 있지만 intents에 없는 경로) 포함
 - session 첫 ctx 블록 직전에 `GUIDE_BLOCK`을 정확히 1회 삽입 (`markGuideInjected`)
 
