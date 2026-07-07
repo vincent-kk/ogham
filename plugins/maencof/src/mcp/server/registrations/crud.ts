@@ -66,6 +66,12 @@ export function registerCrudTools(server: McpServer): void {
           .describe(
             'People mentioned in this document (e.g., ["홍길동", "Alice"])',
           ),
+        gist: z
+          .string()
+          .optional()
+          .describe(
+            'One-line summary injected into turn context every turn. Required for Layer 1 (create rejects a gist-less L1); optional for other layers. Single keyword/phrase line; capped to 128 code points in the per-turn view.',
+          ),
       }),
     },
     async (vaultPath, args) =>
@@ -154,6 +160,12 @@ export function registerCrudTools(server: McpServer): void {
               .optional()
               .describe(
                 'Sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+              ),
+            gist: z
+              .string()
+              .optional()
+              .describe(
+                'One-line Layer 1 gist injected into turn context. Required for Layer 1 (update rejects a modification that leaves the L1 gist-less); optional for other layers. Single keyword/phrase line; capped to 128 code points in the per-turn view.',
               ),
           })
           .optional()

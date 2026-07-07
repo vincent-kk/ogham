@@ -29,6 +29,7 @@ import {
   getRecentSessionSummary,
   recordSessionStart,
 } from '../../../../core/sessionStore/sessionStore.js';
+import { buildL1CoreBlock } from '../../../../core/turnContext/buildL1CoreBlock.js';
 import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSessionIdentityBlock.js';
 import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
@@ -242,10 +243,12 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   //    and aggregated advisories so no channel silently drops another's payload.
   try {
     const identityBlock = companion ? buildSessionIdentityBlock(companion) : '';
+    const l1Block = buildL1CoreBlock(cwd);
     const metaBody = buildMetaSkillContext(cwd);
     const advisories = messages.length > 0 ? messages.join('\n\n') : null;
     const additionalContext = joinSessionSegments([
       identityBlock || null,
+      l1Block || null,
       metaBody,
       advisories,
     ]);

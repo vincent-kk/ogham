@@ -59,6 +59,7 @@ interface KnowledgeNode {
   title: string;
   layer: Layer;
   tags: string[];
+  gist?: string; // one-line L1 turn-context summary
   created: string; // YYYY-MM-DD
   updated: string; // YYYY-MM-DD
   mtime: number; // unix ms

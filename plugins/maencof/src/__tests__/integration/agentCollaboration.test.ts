@@ -61,6 +61,7 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
       content: '핵심 정체성 — 보호 대상',
       title: 'Core Identity',
       filename: 'core-identity',
+      gist: 'core identity summary',
     });
     await handleMaencofCreate(vault, {
       layer: 2,

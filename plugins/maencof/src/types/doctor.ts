@@ -16,7 +16,8 @@ export type DiagnosticCategory =
   | 'orphan-node'
   | 'invalid-frontmatter'
   | 'duplicate'
-  | 'autonomy-lock';
+  | 'autonomy-lock'
+  | 'missing-l1-gist';
 
 /** 자동 수정 액션 */
 export interface AutoFixAction {

@@ -26,6 +26,8 @@ export interface MaencofCreateInput {
   sub_layer?: SubLayer;
   /** 문서 콘텐츠에서 언급된 인물 목록 (선택, 모든 레이어) */
   mentioned_persons?: string[];
+  /** 한 줄 요약 — L1 turn-context gist (선택) */
+  gist?: string;
 }
 
 /** `read` 입력 */
@@ -46,6 +48,8 @@ export interface MaencofUpdateFrontmatter {
   confidence?: number;
   schedule?: string;
   sub_layer?: SubLayer;
+  /** 한 줄 요약 — L1 turn-context gist (선택) */
+  gist?: string;
   /**
    * 제거할 frontmatter 필드 이름 목록.
    * 보호 필드(created, updated, layer, tags)는 unset 거부.

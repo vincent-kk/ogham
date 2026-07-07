@@ -100,6 +100,7 @@ describe('Setup Wizard 7단계 통합 테스트', () => {
       content: `이름: ${progress.interviewAnswers['name']}\n역할: ${progress.interviewAnswers['role']}`,
       title: 'Core Identity',
       filename: 'core-identity',
+      gist: 'core identity summary',
     });
     expect(identityResult.success).toBe(true);
     expect(identityResult.path).toMatch(/^01_Core\//);
@@ -139,6 +140,7 @@ describe('Setup Wizard 7단계 통합 테스트', () => {
       content: '핵심 정체성',
       title: 'Identity',
       filename: 'identity',
+      gist: 'core identity summary',
     });
     await handleMaencofCreate(vault, {
       layer: 2,
@@ -228,6 +230,7 @@ vault 경로: ${vault}
         content: '핵심 정체성 문서',
         title: 'Identity',
         filename: 'identity',
+        gist: 'core identity summary',
       }),
       handleMaencofCreate(vault, {
         layer: 2,

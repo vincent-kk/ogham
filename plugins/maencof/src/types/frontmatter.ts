@@ -29,6 +29,8 @@ const FrontmatterBaseSchema = z.object({
   layer: z.number().int().min(1).max(5),
   /** 문서 제목 (선택) */
   title: z.string().optional(),
+  /** 한 줄 요약 — L1 turn-context gist (선택). 존재 시 매 턴 주입되는 압축 요약. */
+  gist: z.string().optional(),
   /** 외부 출처 (Layer 3용, 선택) */
   source: z.string().optional(),
   /** 만료일 YYYY-MM-DD (Layer 4용, 선택) */

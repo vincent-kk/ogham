@@ -201,6 +201,7 @@ layer: 1
 created: { ISO_DATE }
 tags: [identity, core]
 title: Basic Profile
+gist: { one line — name, role, primary interest }
 ---
 ```
 
@@ -221,6 +222,7 @@ layer: 1
 created: { ISO_DATE }
 tags: [values, core]
 title: Core Values
+gist: { one line — the core values, comma-separated }
 ---
 ```
 
@@ -242,6 +244,7 @@ layer: 1
 created: { ISO_DATE }
 tags: [boundaries, core]
 title: Boundaries
+gist: { one line — the absolute boundaries }
 ---
 ```
 
@@ -260,6 +263,7 @@ layer: 1
 created: { ISO_DATE }
 tags: [preferences, core]
 title: Communication Style
+gist: { one line — communication style }
 ---
 ```
 

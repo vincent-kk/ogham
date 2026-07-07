@@ -146,6 +146,22 @@ export async function handleMaencofMove(
       message: 'Layer 1 (Core Identity) documents cannot be moved.',
     };
 
+  // Moving a document INTO Layer 1 must satisfy the L1 gist contract. move takes
+  // no content input, so the document must already carry a gist (add via update first).
+  if (
+    targetLayerNum === Layer.L1_CORE &&
+    !(
+      typeof nodeResult.node?.gist === 'string' &&
+      nodeResult.node.gist.trim().length > 0
+    )
+  )
+    return {
+      success: false,
+      path: input.path,
+      message:
+        'Moving a document to Layer 1 requires it to already carry a `gist`. Add one via update first, then move.',
+    };
+
   const sourceSubLayer = nodeResult.success
     ? nodeResult.node?.subLayer
     : undefined;

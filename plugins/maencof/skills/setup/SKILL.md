@@ -93,7 +93,7 @@ Generate Layer 1 documents from the synthesized discovery.
 | `01_Core/boundaries.md`  | Absolute boundaries                                   |
 | `01_Core/preferences.md` | Communication preferences                             |
 
-Create the 4 markdown documents above with `mcp__plugin_maencof_t__create` (layer=1, tags required).
+Create the 4 markdown documents above with `mcp__plugin_maencof_t__create` (layer=1; tags AND gist required — every L1 document must include a one-line `gist`, or create rejects it).
 Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `mcp__plugin_maencof_t__create`, which requires layer/tags and always emits Frontmatter markdown.
 
 Also create the Layer directories and sub-layer subdirectories:

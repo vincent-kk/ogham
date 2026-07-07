@@ -16,6 +16,8 @@ export interface KnowledgeNode {
   layer: Layer;
   /** Frontmatter 태그 목록 */
   tags: string[];
+  /** 한 줄 요약 — L1 turn-context gist (선택; 빌드 시 frontmatter 에서 수집) */
+  gist?: string;
   /** 최초 생성일 YYYY-MM-DD */
   created: string;
   /** 마지막 수정일 YYYY-MM-DD */

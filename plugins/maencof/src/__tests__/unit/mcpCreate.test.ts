@@ -52,6 +52,7 @@ describe('handleMaencofCreate', () => {
       tags: ['identity'],
       content: '핵심 정체성 문서.',
       title: 'Core Identity',
+      gist: 'core identity summary',
     });
 
     expect(result.success).toBe(true);

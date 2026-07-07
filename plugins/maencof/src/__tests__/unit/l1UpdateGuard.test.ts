@@ -39,16 +39,16 @@ async function createTestFile(
     ? relativePath.split('/').slice(0, -1).join('/')
     : '';
   if (dir) await mkdir(join(vault, dir), { recursive: true });
-  const content = [
+  const lines = [
     '---',
     `created: 2024-01-01`,
     `updated: 2024-01-01`,
     `tags: [${tags.join(', ')}]`,
     `layer: ${layer}`,
-    '---',
-    '',
-    'Test document content.',
-  ].join('\n');
+  ];
+  if (layer === 1) lines.push('gist: test fixture gist');
+  lines.push('---', '', 'Test document content.');
+  const content = lines.join('\n');
   await writeFile(absPath, content, 'utf-8');
 }
 

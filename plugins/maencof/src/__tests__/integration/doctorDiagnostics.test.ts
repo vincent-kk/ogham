@@ -181,6 +181,7 @@ describe('Doctor 진단 통합 테스트', () => {
       content: '정상 문서입니다.',
       title: 'Normal Doc',
       filename: 'normal',
+      gist: 'normal document summary',
     });
 
     const result = await runDiagnostics(vault);
@@ -277,6 +278,7 @@ describe('Doctor 진단 통합 테스트', () => {
       content: '고립된 Core 문서',
       title: 'Isolated Core',
       filename: 'isolated-core',
+      gist: 'isolated core document',
     });
     await handleMaencofCreate(vault, {
       layer: 2,

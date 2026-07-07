@@ -7,3 +7,10 @@ export const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 export const MAX_PINNED_NODES = 20;
 
 export const L1_EXCERPT_MAX_CHARS = 512;
+
+/**
+ * Per-document cap (code points) for the L1 `gist` injected every turn.
+ * Full L1 bodies are injected once at SessionStart; the turn context carries
+ * only this bounded gist, so per-turn cost stays flat regardless of body size.
+ */
+export const L1_GIST_MAX_CHARS = 128;

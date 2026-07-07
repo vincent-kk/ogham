@@ -5,9 +5,13 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { L1_EXCERPT_MAX_CHARS } from '../../constants/performance.js';
+import {
+  L1_EXCERPT_MAX_CHARS,
+  L1_GIST_MAX_CHARS,
+} from '../../constants/performance.js';
 
 import { compressMarkdownBody } from './compressMarkdown.js';
+import { capGist, extractGist } from './extractGist.js';
 import { readCachedNodesArray } from './readCachedNodesArray.js';
 
 interface IndexNode {
@@ -15,6 +19,29 @@ interface IndexNode {
   path?: string;
   title?: string;
   tags?: string[];
+  gist?: string;
+}
+
+/**
+ * 노드 하나의 turn-context 발췌를 만든다.
+ * 인덱싱된 `gist` 가 있으면 파일 재파싱 없이 그대로 사용하고,
+ * 없으면 파일을 읽어 frontmatter gist → 본문 절단(+ `⚠ no gist`) 순으로 폴백한다.
+ * 렌더 대상이 없으면 null.
+ */
+function resolveL1Excerpt(cwd: string, node: IndexNode): string | null {
+  if (typeof node.gist === 'string') {
+    const indexed = capGist(node.gist, L1_GIST_MAX_CHARS);
+    if (indexed) return indexed;
+  }
+  if (!node.path) return null;
+  const filePath = join(cwd, node.path);
+  if (!existsSync(filePath)) return null;
+
+  const content = readFileSync(filePath, 'utf-8');
+  return (
+    extractGist(content, L1_GIST_MAX_CHARS) ??
+    `${compressMarkdownBody(content, L1_EXCERPT_MAX_CHARS)} ⚠ no gist`
+  );
 }
 
 /**
@@ -28,20 +55,20 @@ export function readL1NodesSummary(cwd: string): string {
 
   const lines: string[] = [];
   for (const node of l1Nodes) {
-    if (!node.path || !node.title) continue;
+    if (!node.title) continue;
+    let excerpt: string | null;
     try {
-      const filePath = join(cwd, node.path);
-      if (!existsSync(filePath)) continue;
-      const content = readFileSync(filePath, 'utf-8');
-      const excerpt = compressMarkdownBody(content, L1_EXCERPT_MAX_CHARS);
-      const tagPart =
-        node.tags && node.tags.length > 0
-          ? ` | tags: ${node.tags.slice(0, 3).join(',')}`
-          : '';
-      lines.push(`[${node.title}]: ${excerpt}${tagPart}`);
+      excerpt = resolveL1Excerpt(cwd, node);
     } catch {
-      // skip this node
+      excerpt = null;
     }
+    if (excerpt === null) continue;
+
+    const tagPart =
+      node.tags && node.tags.length > 0
+        ? ` | tags: ${node.tags.slice(0, 3).join(',')}`
+        : '';
+    lines.push(`[${node.title}]: ${excerpt}${tagPart}`);
   }
   return lines.join('\n');
 }

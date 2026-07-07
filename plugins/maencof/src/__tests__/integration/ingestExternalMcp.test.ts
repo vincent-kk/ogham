@@ -158,6 +158,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
       content: '핵심 정체성',
       title: 'Identity',
       filename: 'identity',
+      gist: 'core identity summary',
     });
 
     const buildResult = await handleKgBuild(vault, { force: true });
@@ -257,6 +258,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
       content: '지식 그래프 연구자',
       title: 'Researcher Identity',
       filename: 'identity',
+      gist: 'knowledge graph researcher',
     });
     await handleMaencofCreate(vault, {
       layer: 2,

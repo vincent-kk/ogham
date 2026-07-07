@@ -40,7 +40,8 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 // concerns' code; the FORBIDDEN_PATTERNS guard below still holds — combining
 // clean concerns must not pull zod / fast-glob / MCP SDK.
 //   session-start      — sessionStart (selfProbe + inlined meta-skill-body.md
-//                        + claudeMd merge + insight stats) + lifecycle.
+//                        + claudeMd merge + insight stats + full L1 core reader
+//                        buildL1CoreBlock) + lifecycle.
 //   user-prompt-submit — contextInjector + insightInjector + lifecycle +
 //                        vaultCommitter (spawnCli/git). Includes the companion
 //                        identity v2 turn renderer + graceful v1→v2 normalize
@@ -51,7 +52,10 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //   stop               — changelogGate (spawnCli/git) + lifecycle.
 //   post-tool-use      — activityRecorder + lifecycle.
 //   pre-tool-use       — layerGuard + vaultRedirector + lifecycle (all light).
-const SESSION_START_BYTES = 48 * 1024;
+// 48 -> 52 KB: buildL1CoreBlock injects the full L1 core documents once at
+// session start (pure Node-builtin fs reads + frontmatter strip, no external
+// runtime). FORBIDDEN_PATTERNS below still enforces the real isolation guard.
+const SESSION_START_BYTES = 52 * 1024;
 // 32 -> 34 KB: companion identity v2 added the per-turn binding renderer plus
 // graceful v1->v2 normalization to the turn path (buildTurnContext). All added
 // bytes are pure Node-builtin functions; the isolation guarantee (no zod /

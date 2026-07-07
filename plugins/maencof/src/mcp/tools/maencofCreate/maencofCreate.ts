@@ -15,7 +15,8 @@ import { deduplicateContent } from '../../../core/contentDedup/index.js';
 import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { quoteYamlValue } from '../../../core/yamlParser/index.js';
-import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
+import { Layer } from '../../../types/common.js';
+import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
 import {
   AUTO_GENERATED_FM_KEYS,
   validateFrontmatter,
@@ -45,6 +46,7 @@ function inputToFrontmatterObject(
   if (input.expires !== undefined) fm.expires = input.expires;
   if (input.mentioned_persons && input.mentioned_persons.length > 0)
     fm.mentioned_persons = input.mentioned_persons;
+  if (input.gist !== undefined) fm.gist = input.gist;
   return fm;
 }
 
@@ -131,6 +133,7 @@ function buildFrontmatter(input: MaencofCreateInput): FrontmatterBuildResult {
     const personsYaml = `[${input.mentioned_persons.map((p) => quoteYamlValue(p)).join(', ')}]`;
     lines.push(`mentioned_persons: ${personsYaml}`);
   }
+  if (input.gist) lines.push(`gist: ${quoteYamlValue(input.gist)}`);
 
   lines.push('---');
 
@@ -215,6 +218,18 @@ export async function handleMaencofCreate(
       success: false,
       path: '',
       message: `Frontmatter validation failed: ${fmValidation.errors.join('; ')}`,
+    };
+
+  // Layer 1 documents require a gist (new/changed L1 must carry a one-line summary).
+  if (
+    input.layer === Layer.L1_CORE &&
+    !(typeof input.gist === 'string' && input.gist.trim().length > 0)
+  )
+    return {
+      success: false,
+      path: '',
+      message:
+        'Layer 1 documents require a `gist` (one-line summary). Provide a non-empty gist to create an L1 document.',
     };
 
   // 중복 파일 확인

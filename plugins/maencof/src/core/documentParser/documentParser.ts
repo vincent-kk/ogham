@@ -216,6 +216,7 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
   // Step 2.0a: person/domain 전파 (pre-existing bug fix)
   if (fm.person) node.person = fm.person;
   if (fm.domain) node.domain = fm.domain;
+  if (fm.gist) node.gist = fm.gist;
 
   // Step 2.0b: sub-layer 확장 필드 전파
   node.subLayer = fm.sub_layer ?? inferSubLayerFromPath(doc.relativePath);

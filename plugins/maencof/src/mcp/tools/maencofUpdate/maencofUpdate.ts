@@ -108,6 +108,9 @@ function updateFrontmatter(
   if (updates.sub_layer !== undefined)
     yaml = patchFrontmatterField(yaml, 'sub_layer', updates.sub_layer);
 
+  if (updates.gist !== undefined)
+    yaml = patchFrontmatterField(yaml, 'gist', quoteYamlValue(updates.gist));
+
   return content.replace(match[0], `---\n${yaml}\n---\n`);
 }
 
@@ -187,7 +190,41 @@ export async function handleMaencofUpdate(
         message:
           'Layer 1 documents do not allow frontmatter.unset (use a structured amendment instead).',
       };
+
+    // L1 must retain a gist: a legacy L1 without one must add it on any modification.
+    const nextGist = input.frontmatter?.gist;
+    const existingGist = nodeResult.node?.gist;
+    const gistPresent =
+      (typeof nextGist === 'string' && nextGist.trim().length > 0) ||
+      (typeof existingGist === 'string' && existingGist.trim().length > 0);
+    if (!gistPresent)
+      return {
+        success: false,
+        path: input.path,
+        message:
+          'Layer 1 documents require a `gist`. This one has none — include `frontmatter: { gist: "<one-line summary>" }` with the modification.',
+      };
   }
+
+  // Promoting a non-L1 document to Layer 1 via the layer field also requires a
+  // gist (the source-based L1 gate above does not fire when the source is not L1).
+  if (
+    input.frontmatter?.layer === Layer.L1_CORE &&
+    !(
+      typeof input.frontmatter?.gist === 'string' &&
+      input.frontmatter.gist.trim().length > 0
+    ) &&
+    !(
+      typeof nodeResult.node?.gist === 'string' &&
+      nodeResult.node.gist.trim().length > 0
+    )
+  )
+    return {
+      success: false,
+      path: input.path,
+      message:
+        'Promoting a document to Layer 1 requires a `gist`. Include `frontmatter: { gist: "<one-line summary>" }`.',
+    };
 
   // ─── unset 보호 필드 가드 (모든 레이어) ─────────────────────────
   if (input.frontmatter?.unset) {

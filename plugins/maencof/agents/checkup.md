@@ -18,7 +18,7 @@ maxTurns: 40
 
 ## Role
 
-Diagnoses the health of the knowledge vault across 7 categories and generates AutoFixActions
+Diagnoses the health of the knowledge vault across 8 categories and generates AutoFixActions
 for items that can be repaired automatically.
 
 **Write scope:**
@@ -31,7 +31,7 @@ for items that can be repaired automatically.
 
 ---
 
-## 7 Diagnostic Checks
+## 8 Diagnostic Checks
 
 ### D1. Orphan Node (orphan-node)
 
@@ -111,6 +111,24 @@ Auto-fixable:
   - orphaned auto-insights → reported only (decision belongs to user)
 ```
 
+### D8. Missing L1 Gist (missing-l1-gist)
+
+```
+Detection: Layer 1 (01_Core/) documents whose frontmatter lacks a non-empty
+           `gist` field. Frontmatter is read from raw disk via
+           `mcp__plugin_maencof_t__read`, so this reflects on-disk truth even
+           when the graph index is stale. Every L1 document must carry a
+           one-line `gist` — the compact summary injected every turn, while the
+           full body is injected once at session start. Because create/update
+           now require a gist on every L1 write, a gist-less L1 is a legacy
+           document that predates enforcement — it renders via fallback but
+           must gain a gist on its next modification.
+Severity: warning
+Auto-fix: not applied automatically. L1 gist authoring requires user review —
+          report each gist-less L1 and propose a draft gist (≤128 chars, one
+          line) for the user to add to the frontmatter.
+```
+
 ---
 
 ## Workflow
@@ -118,7 +136,7 @@ Auto-fixable:
 ```
 1. mcp__plugin_maencof_t__kg_status → check D2 (stale), D1 (orphan)
 2. Glob "**/*.md" → collect full file list
-3. `mcp__plugin_maencof_t__read` each file → check D6 (Frontmatter), D4 (Layer violation)
+3. `mcp__plugin_maencof_t__read` each file → check D6 (Frontmatter), D4 (Layer violation), D8 (missing L1 gist)
 4. Read backlink-index.json → check D3 (broken links)
 5. Tag similarity analysis → detect D5 (duplicates)
 6. Read .maencof-meta/insight-config.json + auto-insight-stats.json → check D7 (auto-insight health)
@@ -163,6 +181,7 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 - **D3 (broken link) auto-fix forbidden** — requires manual review
 - **D5 (duplicate) auto-merge forbidden** — decision belongs to the user
 - **Layer 1 (01_Core/) auto-fix via `mcp__plugin_maencof_t__update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:setup --step 4` or edit manually
+- **D8 (missing L1 gist) auto-fix forbidden** — propose a draft gist only; the user adds it to the frontmatter after review
 
 ---
 

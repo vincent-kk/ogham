@@ -1,5 +1,6 @@
 export { buildTurnContext } from './build.js';
 export { buildCompanionIdentityTag } from './buildCompanionIdentityTag.js';
+export { buildL1CoreBlock } from './buildL1CoreBlock.js';
 export { buildSessionIdentityBlock } from './buildSessionIdentityBlock.js';
 export {
   renderIdentitySection,
@@ -7,6 +8,7 @@ export {
 } from './renderIdentitySection.js';
 export type { RenderSectionOptions } from './renderIdentitySection.js';
 export { compressMarkdownBody } from './compressMarkdown.js';
+export { capGist, extractGist } from './extractGist.js';
 export { readCachedNodesArray } from './readCachedNodesArray.js';
 export { readCompanionIdentity } from './readCompanionIdentity.js';
 export { readIndexMetadata } from './readIndexMetadata.js';
