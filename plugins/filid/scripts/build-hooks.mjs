@@ -40,7 +40,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   (intent-injector + pre-tool-validator + structure-guard
 //                   + spike mode gate + criteria-ledger lint + mode audit
 //                   + FCA opt-in gate + write-visit recording + fmap file
-//                   lock — the 2026-07 behavior-analysis fixes).
+//                   lock).
 //   SESSION_START — selfProbe (spawn-dependent → cross-spawn inlined) + logHookFailure.
 const SESSION_START_HOOK_BYTES = 40 * 1024;
 const HEAVY_HOOK_BYTES = 24 * 1024;

@@ -29,7 +29,7 @@ export function handleClassify(
 
   // Entries lack the target (e.g. classify called with entries: []) — consult
   // the filesystem so classification priority 1-2 (INTENT.md/DETAIL.md →
-  // fractal) still holds instead of silently defaulting to false.
+  // fractal) holds even without a caller-supplied entry.
   if (!entry && existsSync(input.path)) {
     hasIntentMd = existsSync(join(input.path, 'INTENT.md'));
     hasDetailMd = existsSync(join(input.path, 'DETAIL.md'));
