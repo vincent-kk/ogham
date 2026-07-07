@@ -26,7 +26,7 @@ interface ChangelogGateResult {
 }
 ```
 
-### Migration lock invariant (P2 / OQ-6)
+### Migration lock invariant
 
 - `lock exists ∧ TTL 유효 ∧ (sessionId 없음 | sessionId = 현 세션)` → 통과, lock 보존.
 - 그 외(TTL 만료 / session 불일치 / JSON parse 실패) → `unlinkSync(lockPath)` 시도 후 일반 게이트 로직 진행.

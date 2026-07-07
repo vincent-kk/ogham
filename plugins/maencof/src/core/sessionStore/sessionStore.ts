@@ -6,7 +6,7 @@
  * 키 맵으로 보관해 전수조사 없이 직접 조회한다. SessionStart 에 baseline 스냅샷을
  * 찍고 SessionEnd 에 차분으로 볼트 작업량을 산출한다.
  *
- * 구 `.maencof-meta/sessions/*.md` 는 더 이상 읽거나 쓰지 않는다 — 자연 폐기.
+ * `.maencof-meta/sessions/*.md` 는 읽지도 쓰지도 않는다.
  */
 import {
   existsSync,

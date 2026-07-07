@@ -39,4 +39,4 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 ## Hook Notes
 
 - `sessionEnd`는 sessionStore(JSON)로 세션 레코드를 마감하고(`recordSessionEnd`), workIndex로 당일 작업 digest를 재생성한다(`buildDailyDigest`).
-- 세션 종료 기록은 sessionStore 전용이며, 구 `.maencof-meta/sessions/*.md` 나 dailynote .md 에는 더 이상 기록하지 않는다.
+- 세션 종료 기록은 sessionStore 전용이다 — `.maencof-meta/sessions/*.md` 나 dailynote .md 에는 기록하지 않는다.

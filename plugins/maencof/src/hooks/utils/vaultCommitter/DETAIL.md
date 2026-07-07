@@ -53,9 +53,4 @@ repo 소유자는 2026-04-16 자 Y1 정책 결정에서 **Option A — Keep `--n
 
 이 결정을 되돌리려면 (a) vault 파일을 쓰지 않는 pre-commit 환경을 보장하고,
 (b) loop-detector (사용자 hook 이 vault 를 수정했는지 detect → 재귀 중단)
-를 새로 구현한 뒤 본 훅에서 `--no-verify` 를 제거해야 한다. 해당 작업은
-v0.4.0 후속 follow-up 항목으로 추적된다.
-
-## Last Updated
-
-2026-04-16 (PR α follow-up — Y1 Option A rationale 승인 완료)
+를 새로 구현한 뒤 본 훅에서 `--no-verify` 를 제거해야 한다.

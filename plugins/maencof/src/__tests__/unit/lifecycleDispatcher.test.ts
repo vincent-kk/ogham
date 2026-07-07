@@ -1,8 +1,8 @@
 /**
  * @file lifecycleDispatcher.test.ts
- * @description runLifecycleDispatcher hook envelope 테스트 — P1 hook schema fix.
+ * @description runLifecycleDispatcher hook envelope 테스트.
  *
- * Contract (see `.omc/research/maencof-v030-hook-schema.md`):
+ * Contract:
  *   - SessionStart / UserPromptSubmit / PreToolUse / PostToolUse
  *     → `hookSpecificOutput.additionalContext` 로 payload 전달 (Claude 가시).
  *   - Stop / SessionEnd → `systemMessage` 로 payload 전달 (사용자 가시).

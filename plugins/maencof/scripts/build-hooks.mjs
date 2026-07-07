@@ -85,14 +85,14 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //   stop               — changelogGate (spawnCli/git) + lifecycle.
 //   post-tool-use      — activityRecorder + lifecycle.
 //   pre-tool-use       — layerGuard + vaultRedirector + lifecycle (all light).
-// 48 -> 52 KB: buildL1CoreBlock injects the full L1 core documents once at
-// session start (pure Node-builtin fs reads + frontmatter strip, no external
-// runtime). FORBIDDEN_PATTERNS below still enforces the real isolation guard.
+// session-start is the largest bundle: it inlines metaSkillBody.md and the
+// full-L1 reader (buildL1CoreBlock — pure Node-builtin fs reads + frontmatter
+// strip). FORBIDDEN_PATTERNS below still enforces the real isolation guard.
 const SESSION_START_BYTES = 52 * 1024;
-// 32 -> 34 KB: companion identity v2 added the per-turn binding renderer plus
-// graceful v1->v2 normalization to the turn path (buildTurnContext). All added
-// bytes are pure Node-builtin functions; the isolation guarantee (no zod /
-// fast-glob / MCP SDK) is still enforced by FORBIDDEN_PATTERNS below.
+// user-prompt-submit carries the per-turn companion binding renderer and the
+// graceful v1->v2 identity normalization on the turn path (buildTurnContext)
+// — pure Node-builtin functions; the isolation guarantee (no zod / fast-glob
+// / MCP SDK) is enforced by FORBIDDEN_PATTERNS below.
 const USER_PROMPT_SUBMIT_BYTES = 36 * 1024;
 const SESSION_END_BYTES = 32 * 1024;
 // stop carries changelogGate (spawnCli/git) + sessionRecap (insightStats read

@@ -279,7 +279,7 @@ describe('runSessionEnd', () => {
     ]);
   });
 
-  it('구 .maencof-meta/sessions/ 디렉터리에는 더 이상 쓰지 않는다 (하위호환)', () => {
+  it('.maencof-meta/sessions/ 디렉터리에는 쓰지 않는다', () => {
     runSessionEnd({
       session_id: 'legacy-check',
       cwd: vaultDir,

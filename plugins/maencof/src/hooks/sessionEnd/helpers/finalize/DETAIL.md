@@ -9,7 +9,7 @@
   - `buildDailyDigest(cwd, date)` — 마감된 일자의 작업 digest(`activity/digests/daily/{date}.json`)를 멱등 재생성 (workIndex 위임).
   - `removeSessionFiles(sessionId, cwd)` — 세션 컨텍스트 파일(recap-emitted 마커 포함) 삭제.
   - `removeTurnContext(cwd)` — turnContext 캐시 삭제. turnContext는 session-scope이므로 세션 종료와 동시에 폐기.
-- 구 `.maencof-meta/sessions/*.md` 는 쓰지 않는다(자연 폐기). 세션 라이프사이클은 dailynote .md 에 남기지 않는다.
+- `.maencof-meta/sessions/*.md` 에는 쓰지 않는다. 세션 라이프사이클은 dailynote .md 에 남기지 않는다.
 - vault-scope 데이터(graph, weights, snapshot, stale-nodes, usageStats 등)는 절대 손대지 않는다(usageStats 는 차분 계산용 read-only).
 
 ## API Contracts

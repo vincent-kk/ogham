@@ -88,10 +88,9 @@ export function hasGateMarker(cwd: string): boolean {
  * stale state. Returns `true` only when the lock is valid AND owned by the
  * current session.
  *
- * Contract (P2, OQ-6): cleanup venue is `changelog-gate` entry — NOT
- * SessionStart. Running on every entry keeps the session-boot path cheap and
- * guarantees orphan locks disappear by the first Stop event of the next
- * session.
+ * Contract: cleanup venue is `changelog-gate` entry — NOT SessionStart.
+ * Running on every entry keeps the session-boot path cheap and guarantees
+ * orphan locks disappear by the first Stop event of the next session.
  */
 function isMigrationInProgress(
   lockPath: string,
@@ -135,7 +134,7 @@ function isMigrationInProgress(
 /**
  * Changelog Gate Hook handler.
  * Stop 이벤트에서 감시 경로의 변경을 감지하고 changelog 기록을 유도한다.
- * migration.lock 의 orphan cleanup 도 수행한다 (P2 / OQ-6 cleanup venue).
+ * migration.lock 의 orphan cleanup 도 수행한다.
  */
 export async function runChangelogGate(
   input: ChangelogGateInput,

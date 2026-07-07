@@ -76,8 +76,6 @@ export function runLifecycleDispatcher(
  *   so Claude can act on the message.
  * - Terminal events (`Stop` / `SessionEnd`) do not support `additionalContext`.
  *   The payload is surfaced to the user via `systemMessage` only.
- *
- * Source: OQ-1 research — `.omc/research/maencof-v030-hook-schema.md`.
  */
 function buildDispatchResult(
   event: LifecycleEvent,

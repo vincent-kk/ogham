@@ -3,8 +3,8 @@
  * @description SessionEnd finalize concern — record the session into the per-day session
  * store (JSON) and clean session-scoped cache.
  *
- * 세션 요약은 더 이상 `.maencof-meta/sessions/*.md` 에 쓰지 않는다(자연 폐기).
- * 세션 라이프사이클은 활동 로그가 아니라 sessionStore JSON 에만 남는다.
+ * 세션 라이프사이클은 활동 로그가 아니라 sessionStore JSON 에만 남는다 —
+ * `.maencof-meta/sessions/*.md` 에는 쓰지 않는다.
  * Session recap 은 Stop 훅 관심사(stop/helpers/sessionRecap)가 담당한다 —
  * SessionEnd 는 표시가 보장되는 출력 채널이 없는 이벤트다(hooks 계약).
  */
