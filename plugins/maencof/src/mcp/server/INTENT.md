@@ -9,7 +9,7 @@ MCP 서버 설정 및 도구 등록. stdio 전송으로 Claude Code와 통신.
 - `server.ts` — createServer 오케스트레이터 + startServer; 부팅 직후 vaultWalk → stale>0 시 background 증분 빌드 1회 (fire-and-forget detach)
 - `graphCache/` sub-fractal — vault path 해석 + 그래프 캐시 상태 (load/invalidate)
 - `registrations/` organ — crud / kg / claudeMd / activity / cache / workHistory 도구 등록 wrapper
-- `middlewares/` organ — freshnessGuard, mutateSideEffects, usageStats, vaultWalk, partialReindex, backgroundRebuild, registerWithSideEffects
+- `middlewares/` organ — freshnessGuard, mutateSideEffects, usageStats, vaultWalk, partialReindex, backgroundRebuild, refreshTurnContext, registerWithSideEffects
 
 ## Boundaries
 

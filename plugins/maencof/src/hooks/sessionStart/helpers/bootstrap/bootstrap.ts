@@ -3,10 +3,12 @@
  * @description SessionStart bootstrap concern — Knowledge tree check, WAL recovery detection, schedule review, previous session summary load
  * C1 constraint: Must complete within 5 seconds. Heavy index builds are delegated to Skills.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { EXPECTED_ARCHITECTURE_VERSION } from '../../../../constants/architecture.js';
 import { buildDefaultDirective } from '../../../../constants/directiveTemplate.js';
+import { CHANGELOG_GATE_MARKER } from '../../../../constants/markers.js';
 import {
   META_SKILL_MAX_CHARS,
   META_SKILL_TAG,
@@ -104,6 +106,21 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 
   // 2.5. CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기, version.json 기반)
   initClaudeMdSection(cwd, companion?.name, messages);
+
+  // 2.7b. Changelog gate marker is session-scoped: a marker left by the
+  //       previous session's /maencof:changelog pass must not disarm this
+  //       session's Stop gate (SKILL.md contract: "does not persist across
+  //       sessions"). Removing it here re-arms the gate every session.
+  try {
+    const markerPath = join(cwd, '.omc', CHANGELOG_GATE_MARKER);
+    if (existsSync(markerPath)) unlinkSync(markerPath);
+  } catch (e) {
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   // 2.8. Config file provisioning + migration — always run regardless of needsProvisioning
   try {
@@ -285,14 +302,24 @@ function joinSessionSegments(segments: (string | null)[]): string | null {
  *
  * Returns `null` when:
  *   - the dialogue off-switch is active (env or config)
- *   - the body exceeds META_SKILL_MAX_CHARS (silent skip per plan §4.5)
+ *   - the body exceeds META_SKILL_MAX_CHARS — logged, never silent: the build
+ *     guard in scripts/build-hooks.mjs should have caught this first, so
+ *     reaching the branch at runtime means the guard drifted.
  *
  * Otherwise wraps the body (bundled inline via esbuild `.md -> text`) in `<maencof-meta-skill>` tags.
  */
 function buildMetaSkillContext(cwd: string): string | null {
   if (isDialogueInjectionDisabled(cwd)) return null;
   const body = META_SKILL_BODY;
-  if ([...body].length > META_SKILL_MAX_CHARS) return null;
+  const codePoints = [...body].length;
+  if (codePoints > META_SKILL_MAX_CHARS) {
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: `meta-skill body exceeds META_SKILL_MAX_CHARS (${codePoints} > ${META_SKILL_MAX_CHARS}) — injection skipped; build guard should have failed`,
+      timestamp: new Date().toISOString(),
+    });
+    return null;
+  }
   return `<${META_SKILL_TAG}>\n${body}\n</${META_SKILL_TAG}>`;
 }
 

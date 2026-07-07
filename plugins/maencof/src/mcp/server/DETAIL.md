@@ -8,6 +8,7 @@
 - 부팅 시 `startServer` 는 transport connect 직후 `walkVaultForExternalChanges(getVaultPath())` 를 detach. snapshot 부재 시 no-op.
 - background rebuild 성공 finalize 에서 `invalidateCache()` 를 호출해 다음 read 가 disk reload.
 - explicit `kg_build` 도구 호출도 성공 시 등록부에서 `invalidateCache()` 를 호출 (background rebuild 와 동일 계약). 핸들러는 disk 에만 `saveGraph` 하므로, 이 invalidate 없이는 동일 세션 후속 read(`loadGraphIfNeeded` 경유 `kg_status` 포함)가 build 직전 캐시 그래프를 계속 반환한다.
+- 두 rebuild 경로(explicit `kg_build` / background) 모두 성공 시 `refreshTurnContextSafe(vaultPath)` 로 훅 주입용 turn-context 스냅샷을 재빌드한다 — 매 턴 `<kg-core>` 요약이 자신이 요약하는 디스크 인덱스를 따라가게 하는 동일 계약의 확장 (best-effort, 실패는 error-log).
 
 ## API Contracts
 

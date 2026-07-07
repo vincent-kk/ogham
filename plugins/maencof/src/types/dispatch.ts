@@ -42,3 +42,22 @@ export interface MergedHookOutput {
     additionalContext: string;
   };
 }
+
+/**
+ * PreToolUse stdout contract (Claude Code hooks reference). A tool-call block
+ * MUST use `permissionDecision: "deny"` + `permissionDecisionReason` (shown to
+ * Claude); top-level `continue:false` aborts the whole turn and drops `reason`.
+ */
+export interface PreToolUseHookSpecificOutput {
+  hookEventName: 'PreToolUse';
+  permissionDecision?: 'allow' | 'deny' | 'ask';
+  permissionDecisionReason?: string;
+  additionalContext?: string;
+}
+
+/** Envelope the PreToolUse entry writes to stdout. */
+export interface PreToolUseStdoutEnvelope {
+  continue: boolean;
+  systemMessage?: string;
+  hookSpecificOutput?: PreToolUseHookSpecificOutput;
+}

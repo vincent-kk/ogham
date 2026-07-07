@@ -66,6 +66,28 @@ describe('runActivityRecorder', () => {
     expect(entries[0].description).toContain('Document created');
   });
 
+  it('Claude Code 훅이 전달하는 full-form MCP 도구명도 기록한다', () => {
+    runActivityRecorder({
+      tool_name: 'mcp__plugin_maencof_t__create',
+      tool_input: { layer: 2, tags: ['test'] },
+      cwd: vaultDir,
+    });
+
+    const entries = readActivityEvents(vaultDir, today());
+    expect(entries).toHaveLength(1);
+    expect(entries[0].description).toContain('Document created');
+  });
+
+  it('타 서버 full-form 도구명(mcp__other-server__create)은 기록하지 않는다', () => {
+    runActivityRecorder({
+      tool_name: 'mcp__other-server__create',
+      tool_input: { layer: 2 },
+      cwd: vaultDir,
+    });
+
+    expect(existsSync(getActivityEventPath(vaultDir, today()))).toBe(false);
+  });
+
   it('TOOL_CATEGORY_MAP에 없는 도구는 기록하지 않는다', () => {
     const result = runActivityRecorder({
       tool_name: 'unknown_tool',

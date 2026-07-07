@@ -2,19 +2,18 @@
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 import { selfProbe } from '@ogham/cross-platform/self-probe';
 
+import type { DispatchInput, MergedHookOutput } from '../../types/dispatch.js';
 import { readStdin } from '../shared/readStdin.js';
 import { writeResult } from '../shared/writeResult.js';
-import type {
-  DispatchInput,
-  MergedHookOutput,
-} from '../../types/dispatch.js';
 
+import { buildProbeAdvisory } from './helpers/probeAdvisory/probeAdvisory.js';
 import { orchestrateSessionStart } from './sessionStart.js';
 
-// SessionStart first hook entry — diagnose node/git/PATH/CLAUDE_PLUGIN_ROOT.
-// Errors are appended to ~/.claude/plugins/maencof/error-log.json so silent
-// hook failures (e.g. Windows PATH lacks node) become observable.
-const probe = await selfProbe({ writeLog: true, pkg: 'maencof' });
+// SessionStart first hook entry — diagnose node/git/PATH availability.
+// Logging happens below on the FILTERED error set: probeAdvisory drops signals
+// that also fire in healthy sessions (CLAUDE_PLUGIN_ROOT env absence), so the
+// error log and the Claude-facing warning only carry actionable failures.
+const probe = await selfProbe({ writeLog: false, pkg: 'maencof' });
 
 const raw = await readStdin();
 let result: MergedHookOutput;
@@ -26,17 +25,13 @@ try {
   result = { continue: true };
 }
 
-// Surface diagnostic failures to the user via additionalContext so they are
-// not silent. selfProbe already wrote a structured error-log entry above.
-if (probe.errors.length > 0) {
-  const warning =
-    '[maencof] hook bootstrap diagnostic — some hooks may not work:\n' +
-    probe.errors.map((e) => `  - ${e}`).join('\n') +
-    '\nSee ~/.claude/plugins/maencof/error-log.json for details.';
+const { actionable, advisory } = buildProbeAdvisory(probe.errors);
+if (advisory) {
+  logHookFailure('maencof', 'self-probe', { errors: actionable });
   const existing = result.hookSpecificOutput?.additionalContext;
   result.hookSpecificOutput = {
     hookEventName: 'SessionStart',
-    additionalContext: existing ? `${existing}\n\n${warning}` : warning,
+    additionalContext: existing ? `${existing}\n\n${advisory}` : advisory,
   };
 }
 

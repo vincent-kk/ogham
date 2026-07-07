@@ -22,8 +22,23 @@ export const MAENCOF_MCP_TOOLS = new Set<McpToolNameValue>([
   McpToolName.CLAUDEMD_REMOVE,
 ]);
 
-export function isMaencofMcpToolName(
-  toolName: string,
-): toolName is McpToolNameValue {
-  return MAENCOF_MCP_TOOLS.has(toolName as McpToolNameValue);
+/**
+ * Claude Code hook inputs carry MCP tool names in full form
+ * (`mcp__plugin_maencof_t__create`), while this package's constants use the
+ * bare registered names (`create`). The prefix gate keeps foreign servers'
+ * tools out — including maencof-lens, whose plugin segment continues with
+ * `-` and therefore does not match `maencof_`.
+ */
+const MAENCOF_MCP_FULL_FORM_PREFIX = /^mcp__(?:plugin_)?maencof_/;
+
+export function normalizeMaencofToolName(toolName: string): string {
+  if (!MAENCOF_MCP_FULL_FORM_PREFIX.test(toolName)) return toolName;
+  const separatorIndex = toolName.lastIndexOf('__');
+  return separatorIndex > 0 ? toolName.slice(separatorIndex + 2) : toolName;
+}
+
+export function isMaencofMcpToolName(toolName: string): boolean {
+  return MAENCOF_MCP_TOOLS.has(
+    normalizeMaencofToolName(toolName) as McpToolNameValue,
+  );
 }

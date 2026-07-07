@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 
+import type { DispatchInput, MergedHookOutput } from '../../types/dispatch.js';
 import { readStdin } from '../shared/readStdin.js';
 import { writeResult } from '../shared/writeResult.js';
-import type {
-  DispatchInput,
-  MergedHookOutput,
-} from '../../types/dispatch.js';
 
+import { toPreToolUseEnvelope } from './helpers/denyEnvelope/denyEnvelope.js';
 import { orchestratePreToolUse } from './preToolUse.js';
 
 const raw = await readStdin();
@@ -20,4 +18,5 @@ try {
   result = { continue: true };
 }
 
-writeResult(result);
+// Concern-level blocks become permissionDecision:"deny" — never continue:false.
+writeResult(toPreToolUseEnvelope(result));

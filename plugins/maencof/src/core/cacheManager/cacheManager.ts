@@ -22,8 +22,9 @@ import { CACHE_TTL_MS, MAX_PINNED_NODES } from '../../constants/performance.js';
 // Cache directory layout:
 //   {cwdHash}/session-context-{hash}   — session inject marker (24h TTL)
 //   {cwdHash}/prompt-context-{hash}    — per-session context text
-//   {cwdHash}/turn-context             — per-vault turn context (shared across sessions)
-//   {cwdHash}/pinned-nodes.json        — LLM-pinned node IDs
+//   {cwdHash}/recap-emitted-{hash}     — Stop recap once-per-session marker
+//   {cwdHash}/turn-context             — session-scoped turn context (removed at session end)
+//   {cwdHash}/pinned-nodes.json        — vault-scoped LLM-pinned node IDs
 
 export interface PinnedNode {
   id: string;
@@ -114,6 +115,29 @@ export function hasPromptContext(sessionId: string, cwd: string): boolean {
   }
 }
 
+export function hasRecapMarker(sessionId: string, cwd: string): boolean {
+  const marker = join(
+    getCacheDir(cwd),
+    `recap-emitted-${sessionIdHash(sessionId)}`,
+  );
+  try {
+    return existsSync(marker);
+  } catch {
+    return false;
+  }
+}
+
+export function markRecapEmitted(sessionId: string, cwd: string): void {
+  const cacheDir = getCacheDir(cwd);
+  const marker = join(cacheDir, `recap-emitted-${sessionIdHash(sessionId)}`);
+  try {
+    if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
+    writeFileSync(marker, '', 'utf-8');
+  } catch {
+    // silently ignore marker write failures
+  }
+}
+
 export function writeTurnContext(cwd: string, context: string): void {
   const cacheDir = getCacheDir(cwd);
   const turnFile = join(cacheDir, 'turn-context');
@@ -201,18 +225,18 @@ export function pruneOldSessions(cwd: string): void {
 export function removeSessionFiles(sessionId: string, cwd: string): void {
   const cacheDir = getCacheDir(cwd);
   const hash = sessionIdHash(sessionId);
-  const marker = join(cacheDir, `session-context-${hash}`);
-  const contextFile = join(cacheDir, `prompt-context-${hash}`);
-  try {
-    if (existsSync(marker)) unlinkSync(marker);
-  } catch {
-    // silently ignore
-  }
-  try {
-    if (existsSync(contextFile)) unlinkSync(contextFile);
-  } catch {
-    // silently ignore
-  }
+  const sessionScopedFiles = [
+    join(cacheDir, `session-context-${hash}`),
+    join(cacheDir, `prompt-context-${hash}`),
+    join(cacheDir, `recap-emitted-${hash}`),
+  ];
+  for (const file of sessionScopedFiles)
+    try {
+      if (existsSync(file)) unlinkSync(file);
+    } catch {
+      // silently ignore
+    }
+
   // NOTE: turn-context is session-scoped — removed via removeTurnContext on session end.
   // pinned-nodes.json is vault-scoped, NOT removed here.
 }

@@ -6,7 +6,8 @@
  * Output: bridge/<name>.mjs
  *
  * One bundle per Claude Code event: each bridge is a dispatcher that folds that
- * event's concern handlers into a single process (see src/hooks/eventDispatch).
+ * event's concern handlers into a single process (entries live at
+ * src/hooks/<event>/<event>.entry.ts).
  *
  * Hook isolation guards: hooks must remain thin scripts (Node builtins only).
  * Pulling external runtimes (zod, fast-glob, MCP SDK) into a hook bundle breaks
@@ -23,6 +24,39 @@ import { mkdir, readFile, stat } from 'fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
+
+// Meta-skill body budget guard: the SessionStart runtime SKIPS injection when
+// the body exceeds META_SKILL_MAX_CHARS, so an oversized body ships as a
+// silently dead feature (regressed exactly this way in #74: 2974 -> 2975+
+// code points crossed the then-2500 limit unnoticed). Fail the build instead.
+{
+  const constantsSource = await readFile(
+    resolve(root, 'src/constants/sessionStart.ts'),
+    'utf8',
+  );
+  const limitMatch = /META_SKILL_MAX_CHARS\s*=\s*(\d+)/.exec(constantsSource);
+  if (!limitMatch)
+    throw new Error(
+      'build-hooks: cannot read META_SKILL_MAX_CHARS from src/constants/sessionStart.ts',
+    );
+  const metaSkillLimit = Number(limitMatch[1]);
+  const metaSkillBody = await readFile(
+    resolve(root, 'src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md'),
+    'utf8',
+  );
+  const metaSkillCodePoints = [...metaSkillBody].length;
+  if (metaSkillCodePoints > metaSkillLimit) {
+    console.error(
+      `\nMeta-skill body budget exceeded: ${metaSkillCodePoints} code points > META_SKILL_MAX_CHARS ${metaSkillLimit}.\n` +
+        'The SessionStart hook would silently skip the dialogue meta-skill at runtime.\n' +
+        'Trim src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md or raise the constant deliberately.',
+    );
+    process.exit(1);
+  }
+  console.log(
+    `  Meta-skill body budget ok (${metaSkillCodePoints} <= ${metaSkillLimit} code points)`,
+  );
+}
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
@@ -62,7 +96,11 @@ const SESSION_START_BYTES = 52 * 1024;
 // fast-glob / MCP SDK) is still enforced by FORBIDDEN_PATTERNS below.
 const USER_PROMPT_SUBMIT_BYTES = 36 * 1024;
 const SESSION_END_BYTES = 32 * 1024;
-const STOP_BYTES = 24 * 1024;
+// 24 -> 28 KB: the session recap moved from session-end (no guaranteed display
+// channel) to a stop concern — pulls insightStats read + dialogueConfig
+// off-switch + cacheManager markers into the stop bundle. Pure Node-builtin
+// code; FORBIDDEN_PATTERNS below still enforces the isolation guard.
+const STOP_BYTES = 28 * 1024;
 const POST_TOOL_USE_BYTES = 12 * 1024;
 const PRE_TOOL_USE_BYTES = 12 * 1024;
 

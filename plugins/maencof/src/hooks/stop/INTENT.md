@@ -2,13 +2,14 @@
 
 ## Purpose
 
-Stop 이벤트 디스패처. `helpers/changelogGate`(감시 경로 미커밋 변경 시 세션 종료 차단 + migration.lock 정리)와 공유 `lifecycleDispatcher`를 순차·격리 실행하고 단일 envelope로 병합한다.
+Stop 이벤트 디스패처. `helpers/changelogGate`(감시 경로 미커밋 변경 시 세션 종료 차단 + migration.lock 정리) → `helpers/sessionRecap`(게이트 통과 시, 세션당 1회) → 공유 `lifecycleDispatcher`를 순차·격리 실행하고 단일 envelope로 병합한다.
 
 ## Structure
 
 - `stop.entry.ts` — 브리지 진입점 (차단 시 stderr + `exit(2)`)
 - `stop.ts` — `orchestrateStop` (조립 + 병합)
 - `helpers/changelogGate/` — changelog 게이트 + orphan lock cleanup
+- `helpers/sessionRecap/` — 세션당 1회 insight recap 주입 (Stop additionalContext)
 
 ## Conventions
 
@@ -21,6 +22,7 @@ Stop 이벤트 디스패처. `helpers/changelogGate`(감시 경로 미커밋 변
 
 - 각 관심사를 `safeConcern` 으로 감싸 격리
 - changelogGate 를 먼저 실행 (lock cleanup 은 항상 수행)
+- sessionRecap 은 게이트 통과 시에만 실행 (차단 시 stdout 유실로 1회 마커 낭비 방지)
 
 ### Ask first
 
