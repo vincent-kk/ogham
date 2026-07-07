@@ -51,7 +51,9 @@ export async function runArchiveExpired(
       if (frontmatter.archived) continue; // 이미 스텁 — 멱등
       if (!frontmatter.expires || frontmatter.expires >= today) continue; // 미만료
 
-      const relativePath = absolutePath.slice(actionLayerRoot.length + 1);
+      const relativePath = absolutePath
+        .slice(actionLayerRoot.length + 1)
+        .replace(/\\/g, '/');
       const archiveAbsolutePath = join(
         currentWorkingDirectory,
         '.maencof-meta',

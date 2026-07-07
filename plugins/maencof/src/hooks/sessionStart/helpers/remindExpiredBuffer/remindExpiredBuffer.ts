@@ -80,7 +80,9 @@ function collectExpiredBufferDocuments(
         const expires = extractExpires(readFileSync(entryPath, 'utf-8'));
         if (expires && expires < today)
           expiredRelativePaths.push(
-            entryPath.slice(currentWorkingDirectory.length + 1),
+            entryPath
+              .slice(currentWorkingDirectory.length + 1)
+              .replace(/\\/g, '/'),
           );
       }
     }
