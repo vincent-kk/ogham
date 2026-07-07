@@ -6,7 +6,7 @@ import {
   IMBAS_ROOT_DIRNAME,
   RUNS_DIRNAME,
   STATE_FILENAME,
-} from '../../constants/index.js';
+} from '../../constants/files.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 
 export function processContextInjector(
