@@ -2,6 +2,7 @@
  * @file kgContext.ts
  * @description kg_context 도구 핸들러 — 토큰 최적화 컨텍스트 블록 반환
  */
+import { KG_CONTEXT_SCOPE_PRESETS } from '../../../constants/kgContext.js';
 import { readVaultFile } from '../../../core/vaultScanner/index.js';
 import {
   assembleContext,
@@ -27,17 +28,25 @@ export async function handleKgContext(
   const tokenBudget = input.token_budget ?? 2000;
   const includeFull = input.include_full ?? false;
   const queryTerms = input.query.split(/\s+/).filter((t) => t.length > 0);
+  const scopePreset = KG_CONTEXT_SCOPE_PRESETS[input.scope ?? 'balanced'];
 
-  // 쿼리 실행
+  // 쿼리 실행 — 선별(layer/sub_layer/scope)은 예산 소비 전에 적용
   const queryResult = query(graph, queryTerms, {
     maxResults: 20,
     decay: 0.7,
-    threshold: 0.05,
-    maxHops: 5,
+    threshold: scopePreset.threshold,
+    maxHops: scopePreset.maxHops,
+    layerFilter: input.layer_filter as number[] | undefined,
   });
 
+  let candidates = queryResult.results;
+  if (input.sub_layer)
+    candidates = candidates.filter(
+      (r) => graph.nodes.get(r.nodeId)?.subLayer === input.sub_layer,
+    );
+
   // 컨텍스트 조립
-  const assembled = assembleContext(queryResult.results, graph, {
+  const assembled = assembleContext(candidates, graph, {
     tokenBudget,
     includeFull,
   });

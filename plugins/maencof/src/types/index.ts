@@ -188,6 +188,7 @@ export type {
   KgSearchInput,
   KgNavigateInput,
   KgContextInput,
+  KgContextScope,
   KgStatusInput,
   MaencofCrudResult,
   MaencofReadResult,

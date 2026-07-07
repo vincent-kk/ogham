@@ -28,7 +28,7 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_SEARCH,
     {
       description:
-        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords).',
+        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords). Returns ranked references (no content) with raw SA tuning parameters; when the goal is assembled multi-document content, prefer kg_context.',
       inputSchema: z.object({
         seed: z
           .array(z.string())
@@ -115,7 +115,7 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_CONTEXT,
     {
       description:
-        'Returns a context block assembled from documents relevant to the query within a token budget.',
+        'Returns a context block assembled from documents relevant to the query within a token budget. Prefer this over kg_search + read chains for multi-document context assembly; layer/sub-layer/scope selection applies before the budget is spent.',
       inputSchema: z.object({
         query: z
           .string()
@@ -133,9 +133,33 @@ export function registerKgTools(server: McpServer): void {
           .boolean()
           .optional()
           .describe('Include full text of top N results (default false)'),
+        layer_filter: z
+          .array(z.number().int().min(1).max(5))
+          .optional()
+          .describe('Layer filter (1-5)'),
+        sub_layer: z
+          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .optional()
+          .describe(
+            'Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)',
+          ),
+        scope: z
+          .enum(['focused', 'balanced', 'broad'])
+          .optional()
+          .describe(
+            "Exploration breadth: 'focused' = close, high-confidence documents (answering a specific question); 'balanced' = default; 'broad' = distant, weakly-linked documents (ideation/brainstorming)",
+          ),
       }),
     },
-    async (vaultPath, args, graph) => handleKgContext(graph, args, vaultPath),
+    async (vaultPath, args, graph) =>
+      handleKgContext(
+        graph,
+        {
+          ...args,
+          layer_filter: args.layer_filter as (1 | 2 | 3 | 4 | 5)[] | undefined,
+        },
+        vaultPath,
+      ),
     { needsFreshness: true },
   );
 

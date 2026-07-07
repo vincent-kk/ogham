@@ -35,6 +35,9 @@ export interface KgNavigateInput {
   include_hierarchy?: boolean;
 }
 
+/** kg_context 탐색 폭 — SA 내부값(threshold/maxHops)은 scope 프리셋으로 캡슐화 */
+export type KgContextScope = 'focused' | 'balanced' | 'broad';
+
 /** kg_context 입력 */
 export interface KgContextInput {
   /** 검색 쿼리 */
@@ -43,6 +46,12 @@ export interface KgContextInput {
   token_budget?: number;
   /** 상위 N개 전문 포함 (기본 false) */
   include_full?: boolean;
+  /** Layer 필터 (예산 소비 전 pre-filter) */
+  layer_filter?: Layer[];
+  /** 서브레이어 필터 (예산 소비 전 pre-filter) */
+  sub_layer?: SubLayer;
+  /** 탐색 폭 (기본 'balanced' — 미지정 시 기존 동작과 동일) */
+  scope?: KgContextScope;
 }
 
 /** kg_status 입력 (파라미터 없음) */
