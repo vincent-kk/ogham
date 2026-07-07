@@ -6,18 +6,18 @@ MCP 서버 read/mutate 도구가 공유하는 미들웨어 계층. freshness gat
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
-| `index.ts` | 배럴 — 하위 파일의 함수/타입 재노출 |
-| `freshnessGuard.ts` | read-path non-blocking freshness gate (`ensureFreshGraphNonBlocking`) |
-| `backgroundRebuild.ts` | fire-and-forget background rebuild + 모듈 mutex (`triggerBackgroundRebuild`, `triggerBootRebuildIfStale`) |
-| `rebuildAndInvalidate.ts` | 동기 kg_build 재빌드 + 캐시 invalidate (`rebuildAndInvalidate`) |
-| `refreshTurnContext.ts` | 재빌드 성공 직후 turn-context 스냅샷 재생성 (`refreshTurnContextSafe`) |
-| `mutateSideEffects.ts` | mutate 도구 성공 후 stale-entry append + usage stat + 임계치 rebuild 트리거 |
-| `partialReindex.ts` | stale node in-memory 병합 (node replace/delete + edge 파생 맵 재구성) |
-| `registerWithSideEffects.ts` | `registerMutateTool` / `registerReadTool` 등록 wrapper |
-| `usageStats.ts` | vault별 도구 사용 카운터 (atomic write) |
-| `vaultWalk.ts` | 외부 vault 변경 감지 → stale 마킹 |
+| 파일                         | 역할                                                                                                      |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `index.ts`                   | 배럴 — 하위 파일의 함수/타입 재노출                                                                       |
+| `freshnessGuard.ts`          | read-path non-blocking freshness gate (`ensureFreshGraphNonBlocking`)                                     |
+| `backgroundRebuild.ts`       | fire-and-forget background rebuild + 모듈 mutex (`triggerBackgroundRebuild`, `triggerBootRebuildIfStale`) |
+| `rebuildAndInvalidate.ts`    | 동기 kg_build 재빌드 + 캐시 invalidate (`rebuildAndInvalidate`)                                           |
+| `refreshTurnContext.ts`      | 재빌드 성공 직후 turn-context 스냅샷 재생성 (`refreshTurnContextSafe`)                                    |
+| `mutateSideEffects.ts`       | mutate 도구 성공 후 stale-entry append + usage stat + 임계치 rebuild 트리거                               |
+| `partialReindex.ts`          | stale node in-memory 병합 (node replace/delete + edge 파생 맵 재구성)                                     |
+| `registerWithSideEffects.ts` | `registerMutateTool` / `registerReadTool` 등록 wrapper                                                    |
+| `usageStats.ts`              | vault별 도구 사용 카운터 (atomic write)                                                                   |
+| `vaultWalk.ts`               | 외부 vault 변경 감지 → stale 마킹                                                                         |
 
 ## Conventions
 
