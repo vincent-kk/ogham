@@ -47,6 +47,7 @@ yarn version:sync       # package.json → src/version.ts
 - **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용
 - **테스트**: `src/**/__tests__/**/*.test.ts`
 - **훅 / bridge 변경**: `yarn build:plugin` 으로 재빌드
+- **훅 직접 import 원칙**: 훅 도달 코드는 배럴(`index.js`) import 금지 — helper 는 `./helpers/<name>/<name>.js`, core 는 concrete 파일 경로로 직접 import (각 디스패처 INTENT.md Never do 와 동일, 루트 CLAUDE.md 참조)
 - **MCP 도구 참조**: skills/agents 는 full-form `mcp__plugin_maencof_t__<tool>` 로 도구를 참조 (`.mcp.json` 서버 키 `t`). short-form `mcp_t_*` 는 서브에이전트에서 해석되지 않아 도구 grant 실패 → 디스크 직접 접근 폴백을 유발하므로 사용 금지.
 
 ## References
