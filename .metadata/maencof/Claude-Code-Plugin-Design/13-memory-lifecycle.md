@@ -17,28 +17,28 @@ layer: design-area-3
 
 ## 1. 기억 유형 정의
 
-| 유형 | Layer | 지속 범위 | 특성 |
-|------|-------|----------|------|
-| 단기 기억 | Layer 4 | 세션 내 | 작업 컨텍스트. 세션 종료 시 아카이브 또는 삭제 |
-| 중기 기억 | Layer 3A/B/C | 세션 간 | 외부 지식 임시 보관. `confidence`로 추적. 서브레이어별 관리 |
-| 장기 기억 | Layer 1-2 | 영구 | 내재화 완료. 의도적 삭제 외 유지 |
+| 유형      | Layer        | 지속 범위 | 특성                                                        |
+| --------- | ------------ | --------- | ----------------------------------------------------------- |
+| 단기 기억 | Layer 4      | 세션 내   | 작업 컨텍스트. 세션 종료 시 아카이브 또는 삭제              |
+| 중기 기억 | Layer 3A/B/C | 세션 간   | 외부 지식 임시 보관. `confidence`로 추적. 서브레이어별 관리 |
+| 장기 기억 | Layer 1-2    | 영구      | 내재화 완료. 의도적 삭제 외 유지                            |
 
 ---
 
 ## 2. 전이 조건 테이블
 
-| 전이 | 조건 | 트리거 | Level 0-1 | Level 2-3 |
-|------|------|--------|-----------|-----------|
-| L4→L3A/B/C | 세션 종료 + 보존 결정 + 대상 서브레이어 선택 | SessionEnd | 명시적 승인 | 제안 후 확인 |
-| L3A→L2 | confidence ≥ 0.7 AND accessed_count ≥ 5 | SessionStart 지연 전이 | 명시적 승인 | 자동 전이 |
-| L3B→L2 | confidence ≥ 0.7 AND accessed_count ≥ 5 | SessionStart 지연 전이 | 명시적 승인 | 자동 전이 |
-| L3C→L2 | confidence ≥ 0.7 AND accessed_count ≥ 5 | SessionStart 지연 전이 | 명시적 승인 | 자동 전이 |
-| L3A/B/C→삭제 | expires 경과 AND accessed_count = 0 | SessionStart 정리 | 명시적 승인 | 제안 후 확인 |
-| L4→삭제 | 30일 경과 AND 미참조 | SessionStart 정리 | 자동 | 자동 |
-| L5-Buffer→L3A/B/C | 사용자 분류 또는 시스템 분류 제안 | organize 스킬 | 명시적 승인 | 제안 후 확인 |
-| L5-Buffer→L2 | 직접 내재화 (이미 처리된 지식) | organize 스킬 | 명시적 승인 | 자동 전이 |
-| L5-Buffer→삭제 | 30일 경과 AND 미참조 | SessionStart | 명시적 승인 | 제안 후 확인 |
-| L3A/B/C→L5-Boundary | 노드가 교차 레이어 커넥터로 지정 | organize 스킬 | 명시적 승인 | 자동 |
+| 전이                | 조건                                         | 트리거                 | Level 0-1   | Level 2-3    |
+| ------------------- | -------------------------------------------- | ---------------------- | ----------- | ------------ |
+| L4→L3A/B/C          | 세션 종료 + 보존 결정 + 대상 서브레이어 선택 | SessionEnd             | 명시적 승인 | 제안 후 확인 |
+| L3A→L2              | confidence ≥ 0.7 AND accessed_count ≥ 5      | SessionStart 지연 전이 | 명시적 승인 | 자동 전이    |
+| L3B→L2              | confidence ≥ 0.7 AND accessed_count ≥ 5      | SessionStart 지연 전이 | 명시적 승인 | 자동 전이    |
+| L3C→L2              | confidence ≥ 0.7 AND accessed_count ≥ 5      | SessionStart 지연 전이 | 명시적 승인 | 자동 전이    |
+| L3A/B/C→삭제        | expires 경과 AND accessed_count = 0          | SessionStart 정리      | 명시적 승인 | 제안 후 확인 |
+| L4→삭제             | 30일 경과 AND 미참조                         | SessionStart 정리      | 자동        | 자동         |
+| L5-Buffer→L3A/B/C   | 사용자 분류 또는 시스템 분류 제안            | organize 스킬          | 명시적 승인 | 제안 후 확인 |
+| L5-Buffer→L2        | 직접 내재화 (이미 처리된 지식)               | organize 스킬          | 명시적 승인 | 자동 전이    |
+| L5-Buffer→삭제      | 30일 경과 AND 미참조                         | SessionStart           | 명시적 승인 | 제안 후 확인 |
+| L3A/B/C→L5-Boundary | 노드가 교차 레이어 커넥터로 지정             | organize 스킬          | 명시적 승인 | 자동         |
 
 ---
 
@@ -74,27 +74,28 @@ confidence ≥ 0.7 AND accessed_count ≥ 5
 
 ## 5. Session Recap — 비전이 경로
 
-SessionEnd 훅은 세션 내 다음 4요소를 집계해 `[maencof] Session Recap` 메시지로 노출한다:
+Stop 훅의 `sessionRecap` concern이 세션에서 자동 캡처된 pending insight를 집계해 세션당
+1회 `[maencof] Session Recap`을 `hookSpecificOutput.additionalContext`로 주입한다. 발화
+지점이 Stop인 이유: SessionEnd에는 표시가 보장되는 출력 채널이 없다. cacheManager의 recap
+마커가 세션당 1회를 보장하며, 캡처가 없거나 changelog gate가 차단 중이면 침묵한다.
 
-| 요소 | 원천 | 설명 |
-|------|------|------|
-| 수렴 요건 | refine Phase 4 통과 항목 | 확정된 스펙 수 |
-| 합의 전제 | refine Phase 2.5.a surfacing 후 유지된 전제 | 검증된 가정 |
-| 잠정 원리 | think 산출 중 `category=principle`로 캡처된 후보 | 장기 보존 후보 원칙 |
-| 미해결 긴장 | `category=refuted_premise` 중 재검토 표시된 전제 | Phase 2.5.b 기각 전제 |
+| 요소                             | 원천                          | 설명                 |
+| -------------------------------- | ----------------------------- | -------------------- |
+| 합의 전제 (Agreed premises)      | L5(Context)로 캡처된 인사이트 | 세션에서 합의된 전제 |
+| 잠정 원칙 (Tentative principles) | L2(Derived)로 캡처된 인사이트 | 장기 보존 후보 원칙  |
 
 이 recap 자체는 **전이(Layer 간 이동)가 아니며, 지식 트리에 자동 영속화되지 않는다**. 이유:
-- 4요소는 세션 중 `.maencof-meta/pending-insights/`에 임시 적재됨
-- 사용자가 명시적으로 영속화를 선언해야 Layer 이동이 발생함
+
+- 캡처는 세션 중 `.maencof-meta/pending-insights/`에 임시 적재됨
+- recap 말미의 안내(`/maencof:remember`)대로 사용자가 명시적으로 영속화를 선언해야 Layer 이동이 발생함
 
 ### 명시 영속화 경로
 
-| 요소 | 영속화 경로 | 결과 Layer |
-|------|-----------|-----------|
-| principle | `capture_insight(category=principle)` | L2-Derived |
-| 운영 메모 | `dailynote_writer` | L5-Buffer |
-| refuted_premise | (기본 폐기) | — |
-| ephemeral_candidate | (기본 폐기) | — |
+| 요소                | 영속화 경로                           | 결과 Layer |
+| ------------------- | ------------------------------------- | ---------- |
+| principle           | `capture_insight(category=principle)` | L2-Derived |
+| refuted_premise     | (기본 폐기)                           | —          |
+| ephemeral_candidate | (기본 폐기)                           | —          |
 
 `refuted_premise`와 `ephemeral_candidate`는 `InsightCategoryFilter` 기본 정책에서 거부된다.
 사용자가 `/maencof:insight --category refuted --accept`로 필터를 연 경우에만 L5-Buffer에 기록된다.
