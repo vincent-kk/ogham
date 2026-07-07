@@ -6,7 +6,7 @@ import {
   ROLE_RESTRICTIONS,
 } from '../../constants/agentContext.js';
 import type { HookOutput, SubagentStartInput } from '../../types/hooks.js';
-import { isFcaProject } from '../shared/shared.js';
+import { isFcaProject } from '../shared/index.js';
 import { validateCwd } from '../utils/validateCwd.js';
 
 import { buildLangTag } from './utils/buildLangTag.js';

@@ -9,8 +9,10 @@ import {
   writeBoundary,
   writeFractalMap,
 } from '../../../core/infra/cacheManager/cacheManager.js';
-import { injectIntent } from '../../../hooks/preToolUse/helpers/intentInjector/intentInjector.js';
-import { visitKey } from '../../../hooks/preToolUse/helpers/intentInjector/utils/visitKey.js';
+import {
+  injectIntent,
+  visitKey,
+} from '../../../hooks/preToolUse/helpers/intentInjector/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------

@@ -74,43 +74,59 @@ export interface SessionStartResult {
 }
 
 /**
- * SessionStart Hook handler.
- * 1. Check .maencof/ directory exists → prompt setup if missing
- * 2. Load companion identity → display greeting
- * 3. Detect leftover WAL → suggest recovery
- * 4. Check schedule-log.json → suggest organize skill
- * 5. Load recent session summary → display previous context
- * 6. Check data-sources.json → suggest connect if missing
+ * SessionStart Hook handler. Orchestrates vault validation, companion identity
+ * load, CLAUDE.md/config provisioning, WAL/schedule/data-source advisories,
+ * and `additionalContext` composition. The call sequence below documents the
+ * steps — see each named helper for details.
  */
 export function runSessionStart(input: SessionStartInput): SessionStartResult {
   const cwd = input.cwd ?? process.cwd();
   const messages: string[] = [];
 
-  // 1. Check maencof vault
-  if (!isMaencofVault(cwd)) {
-    const notice =
-      '[maencof] Vault is not initialized. Run `/maencof:setup` to get started.';
-    return {
-      continue: true,
-      hookSpecificOutput: {
-        hookEventName: 'SessionStart',
-        additionalContext: notice,
-      },
-    };
-  }
+  if (!isMaencofVault(cwd)) return buildVaultNotInitializedResult();
 
-  // 2. Load companion identity
   const companion = loadCompanionIdentity(cwd, messages);
   if (companion)
     messages.push(`[maencof:${companion.name}] ${companion.greeting}`);
 
-  // 2.5. CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기, version.json 기반)
   initClaudeMdSection(cwd, companion?.name, messages);
+  removeChangelogGateMarker(cwd);
+  provisionConfigs(cwd, messages);
+  checkArchitectureMismatch(cwd, messages);
+  checkVersionMismatch(cwd, messages);
+  checkLeftoverWal(cwd, messages);
+  checkScheduleLog(cwd, messages);
+  appendRecentSessionSummary(cwd, messages);
+  checkDataSources(cwd, messages);
+  applySensitivityAdjustment(cwd, messages);
+  injectAutoInsight(cwd, messages);
+  recordSessionStartSafe(cwd, input.session_id);
 
-  // 2.7b. Changelog gate marker is session-scoped: a marker left by the
-  //       previous session's /maencof:changelog pass must not disarm this
-  //       session's Stop gate (SKILL.md contract: "does not persist across
-  //       sessions"). Removing it here re-arms the gate every session.
+  return composeSessionStartResult(cwd, companion, messages);
+}
+
+/**
+ * Builds the early-return result when `.maencof/` has not been initialized.
+ */
+function buildVaultNotInitializedResult(): SessionStartResult {
+  const notice =
+    '[maencof] Vault is not initialized. Run `/maencof:setup` to get started.';
+  return {
+    continue: true,
+    hookSpecificOutput: {
+      hookEventName: 'SessionStart',
+      additionalContext: notice,
+    },
+  };
+}
+
+/**
+ * Changelog gate marker is session-scoped: a marker left by the previous
+ * session's /maencof:changelog pass must not disarm this session's Stop gate
+ * (SKILL.md contract: "does not persist across sessions"). Removing it here
+ * re-arms the gate every session.
+ */
+function removeChangelogGateMarker(cwd: string): void {
   try {
     const markerPath = join(cwd, '.omc', CHANGELOG_GATE_MARKER);
     if (existsSync(markerPath)) unlinkSync(markerPath);
@@ -121,8 +137,9 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       timestamp: new Date().toISOString(),
     });
   }
+}
 
-  // 2.8. Config file provisioning + migration — always run regardless of needsProvisioning
+function provisionConfigs(cwd: string, messages: string[]): void {
   try {
     const provision = provisionMissingConfigs(cwd);
     if (provision.created.length > 0)
@@ -141,21 +158,17 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       timestamp: new Date().toISOString(),
     });
   }
+}
 
-  // 2.6. 아키텍처 버전 체크 (L3 서브레이어 + L5 Buffer/Boundary)
-  checkArchitectureMismatch(cwd, messages);
-
-  // 2.7a. 플러그인 버전 불일치 감지
-  checkVersionMismatch(cwd, messages);
-
-  // 3. Detect leftover WAL
+function checkLeftoverWal(cwd: string, messages: string[]): void {
   const walPath = metaPath(cwd, 'wal.json');
   if (existsSync(walPath))
     messages.push(
       '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:checkup` to diagnose.',
     );
+}
 
-  // 4. Check schedule-log.json
+function checkScheduleLog(cwd: string, messages: string[]): void {
   const scheduleLogPath = metaPath(cwd, 'schedule-log.json');
   if (existsSync(scheduleLogPath))
     try {
@@ -173,13 +186,15 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
         timestamp: new Date().toISOString(),
       });
     }
+}
 
-  // 5. Load recent session summary from the per-day session store (JSON).
+function appendRecentSessionSummary(cwd: string, messages: string[]): void {
   const recentSummary = getRecentSessionSummary(cwd);
   if (recentSummary)
     messages.push(`[maencof] Previous session summary:\n${recentSummary}`);
+}
 
-  // 6. Check data-sources.json
+function checkDataSources(cwd: string, messages: string[]): void {
   const dataSourcesPath = metaPath(cwd, 'data-sources.json');
   try {
     const dataSourcesRaw = readFileSync(dataSourcesPath, 'utf-8');
@@ -198,8 +213,9 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
     );
   }
+}
 
-  // 6.4. Precision-based sensitivity auto-adjustment
+function applySensitivityAdjustment(cwd: string, messages: string[]): void {
   try {
     const adjustment = autoAdjustSensitivity(cwd);
     if (adjustment.message) messages.push(`[maencof] ${adjustment.message}`);
@@ -210,8 +226,9 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       timestamp: new Date().toISOString(),
     });
   }
+}
 
-  // 6.5. Auto-Insight: meta-prompt injection + pending notification
+function injectAutoInsight(cwd: string, messages: string[]): void {
   try {
     const insightConfig = readInsightConfig(cwd);
 
@@ -238,13 +255,19 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       timestamp: new Date().toISOString(),
     });
   }
+}
 
-  // 7. Record session start in the per-day session store (JSON, keyed by session_id).
-  //    Session lifecycle is no longer logged to the activity log — that log is
-  //    reserved for actual vault document/search/index activity.
+/**
+ * Records session start in the per-day session store (JSON, keyed by
+ * session_id). Session lifecycle is no longer logged to the activity log —
+ * that log is reserved for actual vault document/search/index activity.
+ */
+function recordSessionStartSafe(
+  cwd: string,
+  sessionId: string | undefined,
+): void {
   try {
-    const sessionId = input.session_id ?? 'unknown';
-    recordSessionStart(cwd, sessionId);
+    recordSessionStart(cwd, sessionId ?? 'unknown');
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',
@@ -252,12 +275,19 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       timestamp: new Date().toISOString(),
     });
   }
+}
 
+/**
+ * Composes `additionalContext` — the only channel Claude actually sees.
+ * Weaves the full session persona (binding), the dialogue meta-skill body,
+ * and aggregated advisories so no channel silently drops another's payload.
+ */
+function composeSessionStartResult(
+  cwd: string,
+  companion: CompanionIdentityMinimal | null,
+  messages: string[],
+): SessionStartResult {
   const result: SessionStartResult = { continue: true };
-
-  // 8. Compose `additionalContext` — the only channel Claude actually sees.
-  //    Weaves the full session persona (binding), the dialogue meta-skill body,
-  //    and aggregated advisories so no channel silently drops another's payload.
   try {
     const identityBlock = companion ? buildSessionIdentityBlock(companion) : '';
     const l1Block = buildL1CoreBlock(cwd);
@@ -281,7 +311,6 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       timestamp: new Date().toISOString(),
     });
   }
-
   return result;
 }
 

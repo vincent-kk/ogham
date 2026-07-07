@@ -50,7 +50,13 @@ export function createLensServer(configRoot: string) {
         decay: z.optional(z.number()),
         threshold: z.optional(z.number()),
         max_hops: z.optional(z.number()),
-        layer_filter: z.optional(z.array(z.number())),
+        layer_filter: z.optional(
+          z
+            .array(z.number())
+            .describe(
+              "Layer numbers to include; intersected with the vault's layer ceiling. An empty intersection silently falls back to the full ceiling range instead of erroring.",
+            ),
+        ),
         sub_layer: z.optional(z.string()),
       }),
     },
@@ -81,7 +87,13 @@ export function createLensServer(configRoot: string) {
           ),
         token_budget: z.optional(z.number()),
         include_full: z.optional(z.boolean()),
-        layer_filter: z.optional(z.array(z.number())),
+        layer_filter: z.optional(
+          z
+            .array(z.number())
+            .describe(
+              "Layer numbers to include; intersected with the vault's layer ceiling. An empty intersection silently falls back to the full ceiling range instead of erroring.",
+            ),
+        ),
         sub_layer: z.optional(
           z
             .enum(["relational", "structural", "topical", "buffer", "boundary"])

@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import {
   isMaencofMcpToolName,
   normalizeMaencofToolName,
-} from '../../hooks/shared/maencofMcpTools.js';
+} from '../../hooks/shared/index.js';
 
 describe('normalizeMaencofToolName', () => {
   it('플러그인 full-form을 bare 도구명으로 정규화한다', () => {

@@ -6,9 +6,9 @@
  * 매 턴 주입되는 <kg-core> 요약(노드 수·레이어 분포·L1 gist)도 자신이 요약하는
  * 디스크 인덱스를 따라간다.
  */
-import { writeTurnContext } from '../../../core/cacheManager/cacheManager.js';
+import { writeTurnContext } from '../../../core/cacheManager/index.js';
 import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
-import { buildTurnContext } from '../../../core/turnContext/build.js';
+import { buildTurnContext } from '../../../core/turnContext/index.js';
 
 /** Best-effort: 실패는 error-log로만 흘리고 빌드 흐름을 막지 않는다. */
 export function refreshTurnContextSafe(vaultPath: string): void {

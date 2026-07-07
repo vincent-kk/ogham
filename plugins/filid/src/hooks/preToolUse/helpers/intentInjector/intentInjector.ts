@@ -1,4 +1,3 @@
-import { existsSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
 import { GUIDE_BLOCK } from '../../../../constants/agentContext.js';
@@ -21,6 +20,7 @@ import { validateCwd } from '../../../utils/validateCwd.js';
 
 import { buildCtxBlock } from './utils/buildCtxBlock.js';
 import { buildMapBlock } from './utils/buildMapBlock.js';
+import { resolveOwnerIntent } from './utils/resolveOwnerIntent.js';
 import { visitKey } from './utils/visitKey.js';
 
 export type { FractalMap };
@@ -58,6 +58,99 @@ export function recordWriteVisit(input: PreToolUseInput): void {
 }
 
 /**
+ * Fast path: boundary is cached and its directory was already visited this
+ * session. Skips buildChain entirely — only refreshes reads + [filid:map].
+ * Returns null when the fast path does not apply (fall through to full path).
+ */
+function tryCachedVisitOutput(
+  cachedBoundary: string | null,
+  fileDir: string,
+  fcaMap: FractalMap,
+  sessionId: string,
+  safeCwd: string,
+): HookOutput | null {
+  if (cachedBoundary === null) return null;
+
+  const relDir =
+    path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
+  const key = visitKey(cachedBoundary, relDir);
+  if (!fcaMap.intents.includes(key)) return null;
+
+  if (!fcaMap.reads.includes(key)) fcaMap.reads.push(key);
+
+  const mapBlock = buildMapBlock(fcaMap.reads, relDir, fcaMap.intents);
+  writeFractalMap(safeCwd, sessionId, fcaMap);
+  return mapBlock.trim()
+    ? { continue: true, hookSpecificOutput: { additionalContext: mapBlock } }
+    : { continue: true };
+}
+
+/**
+ * Mark the owning fractal directory as visited (if different from fileDir)
+ * so sibling organs or the owner itself don't re-inline its INTENT.md later.
+ * Returns whether the owner was already marked before this call.
+ */
+function markOwnerVisited(
+  fcaMap: FractalMap,
+  boundary: string,
+  ownerDir: string,
+  fileDir: string,
+): boolean {
+  const ownerRelDir =
+    path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
+  const ownerKey = visitKey(boundary, ownerRelDir);
+  const ownerAlreadyVisited =
+    ownerDir !== fileDir && fcaMap.intents.includes(ownerKey);
+  if (ownerDir !== fileDir && !ownerAlreadyVisited)
+    fcaMap.intents.push(ownerKey);
+  return ownerAlreadyVisited;
+}
+
+/**
+ * Build the [filid:guide] + [filid:ctx] blocks for a first-time directory
+ * visit. Skips ctx entirely when the owning fractal was already inlined by
+ * a sibling organ visit, or when there's no intent content or chain context.
+ */
+function buildFirstVisitBlocks(
+  ownerAlreadyVisited: boolean,
+  intentContent: string | undefined,
+  chain: string[],
+  intents: Map<string, boolean>,
+  details: Map<string, boolean>,
+  boundary: string,
+  ownerDir: string,
+  relFile: string,
+  guideNeeded: boolean,
+  sessionId: string,
+  safeCwd: string,
+): string[] {
+  const blocks: string[] = [];
+
+  const hasContext =
+    !ownerAlreadyVisited &&
+    (intentContent !== undefined ||
+      chain.filter((d) => d !== ownerDir).some((d) => intents.get(d)));
+  if (!hasContext) return blocks;
+
+  if (guideNeeded) {
+    blocks.push(GUIDE_BLOCK);
+    markGuideInjected(sessionId, safeCwd);
+  }
+  blocks.push(
+    buildCtxBlock(
+      relFile,
+      intentContent,
+      chain,
+      intents,
+      details,
+      boundary,
+      ownerDir,
+    ),
+  );
+  return blocks;
+}
+
+/**
  * Inject INTENT.md context for PreToolUse (Read).
  * Returns additional context to inject into the agent.
  */
@@ -84,24 +177,14 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   const cachedBoundary = readBoundary(safeCwd, sessionId, fileDir);
 
   // Skip full buildChain when boundary is cached and dir was already visited
-  if (cachedBoundary !== null) {
-    const relDir =
-      path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
-    const key = visitKey(cachedBoundary, relDir);
-    if (fcaMap.intents.includes(key)) {
-      // Already visited — only update reads + map block
-      if (!fcaMap.reads.includes(key)) fcaMap.reads.push(key);
-
-      const mapBlock = buildMapBlock(fcaMap.reads, relDir, fcaMap.intents);
-      writeFractalMap(safeCwd, sessionId, fcaMap);
-      return mapBlock.trim()
-        ? {
-            continue: true,
-            hookSpecificOutput: { additionalContext: mapBlock },
-          }
-        : { continue: true };
-    }
-  }
+  const cachedOutput = tryCachedVisitOutput(
+    cachedBoundary,
+    fileDir,
+    fcaMap,
+    sessionId,
+    safeCwd,
+  );
+  if (cachedOutput) return cachedOutput;
 
   const chainResult = buildChain(filePath);
   if (!chainResult) return { continue: true };
@@ -131,61 +214,34 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
       if (!fcaMap.details.includes(key)) fcaMap.details.push(key);
 
     // Find INTENT.md: current dir first, then walk up chain to owning fractal
-    let intentAbsPath: string | undefined;
-    let ownerDir = fileDir;
+    const { intentContent, ownerDir } = resolveOwnerIntent(
+      fileDir,
+      chain,
+      intents,
+    );
 
-    if (existsSync(path.join(fileDir, 'INTENT.md')))
-      intentAbsPath = path.join(fileDir, 'INTENT.md');
-    else
-      for (let i = 1; i < chain.length; i++)
-        if (intents.get(chain[i])) {
-          intentAbsPath = path.join(chain[i], 'INTENT.md');
-          ownerDir = chain[i];
-          break;
-        }
+    const ownerAlreadyVisited = markOwnerVisited(
+      fcaMap,
+      boundary,
+      ownerDir,
+      fileDir,
+    );
 
-    let intentContent: string | undefined;
-    if (intentAbsPath)
-      try {
-        intentContent = readFileSync(intentAbsPath, 'utf-8');
-      } catch {
-        // ignore
-      }
-
-    // Mark owning fractal as visited too (if different from fileDir)
-    // This prevents re-inlining when sibling organs or the owner itself are visited later
-    const ownerRelDir =
-      path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
-    const ownerKey = visitKey(boundary, ownerRelDir);
-    const ownerAlreadyVisited =
-      ownerDir !== fileDir && fcaMap.intents.includes(ownerKey);
-    if (ownerDir !== fileDir && !ownerAlreadyVisited)
-      fcaMap.intents.push(ownerKey);
-
-    // Only build ctx block if there's actual intent content or chain context
-    // Skip if the owning fractal was already inlined by a sibling organ visit
-    if (
-      !ownerAlreadyVisited &&
-      (intentContent !== undefined ||
-        chain.filter((d) => d !== ownerDir).some((d) => intents.get(d)))
-    ) {
-      // Inject guide once per session, before the very first ctx block
-      if (guideNeeded) {
-        blocks.push(GUIDE_BLOCK);
-        markGuideInjected(sessionId, safeCwd);
-      }
-      blocks.push(
-        buildCtxBlock(
-          relFile,
-          intentContent,
-          chain,
-          intents,
-          details,
-          boundary,
-          ownerDir,
-        ),
-      );
-    }
+    blocks.push(
+      ...buildFirstVisitBlocks(
+        ownerAlreadyVisited,
+        intentContent,
+        chain,
+        intents,
+        details,
+        boundary,
+        ownerDir,
+        relFile,
+        guideNeeded,
+        sessionId,
+        safeCwd,
+      ),
+    );
   }
 
   // Always append map block

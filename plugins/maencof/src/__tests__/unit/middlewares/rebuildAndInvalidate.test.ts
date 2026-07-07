@@ -76,7 +76,7 @@ describe('rebuildAndInvalidate', () => {
       await rebuildAndInvalidate(vaultDir, { force: true });
 
       const { readTurnContext } =
-        await import('../../../core/cacheManager/cacheManager.js');
+        await import('../../../core/cacheManager/index.js');
       expect(readTurnContext(vaultDir)).toContain('nodes="1"');
 
       writeDoc('b.md', 2);

@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getCacheDir } from '../../../../core/infra/cacheManager/cacheManager.js';
+import { getCacheDir } from '../../../../core/infra/cacheManager/index.js';
 import type {
   ScanReportDto,
   ScanResultDto,

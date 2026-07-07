@@ -122,14 +122,14 @@ Recommendations:
 
 ## MCP Tool Examples
 
-**mcp**plugin_filid_t**fractal_navigate classify:**
+`mcp__plugin_filid_t__fractal_navigate` classify:
 
 ```
 mcp__plugin_filid_t__fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from mcp__plugin_filid_t__fractal_scan */])
 // Returns: { type: "fractal" | "organ", hasIntentMd: boolean }
 ```
 
-**mcp**plugin_filid_t**ast_analyze lcom4:**
+`mcp__plugin_filid_t__ast_analyze` lcom4:
 
 ```
 // Read file first, then call mcp__plugin_filid_t__ast_analyze with source content

@@ -5,8 +5,10 @@ import { join } from 'node:path';
 import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handleFractalScan } from '../../../mcp/tools/fractalScan/fractalScan.js';
-import { buildScanResult } from '../../../mcp/tools/fractalScan/utils/buildScanResult.js';
+import {
+  buildScanResult,
+  handleFractalScan,
+} from '../../../mcp/tools/fractalScan/index.js';
 import type { ScanReportDto, ScanResultDto } from '../../../types/report.js';
 
 /** Narrow the outputMode union to the full report (default mode in tests). */
