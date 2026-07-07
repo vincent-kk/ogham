@@ -371,8 +371,8 @@ from the appropriate stage.
 
 ## Available MCP Tools
 
-| Tool                  | Action              | Purpose                                       |
-| --------------------- | ------------------- | --------------------------------------------- |
+| Tool                                 | Action              | Purpose                                       |
+| ------------------------------------ | ------------------- | --------------------------------------------- |
 | `mcp__plugin_filid_t__review_manage` | `normalize-branch`  | Normalize branch name for auto-detection      |
 | `mcp__plugin_filid_t__review_manage` | `content-hash`      | Persist review content hash (finalize review) |
 | `mcp__plugin_filid_t__review_manage` | `format-pr-comment` | Format review findings as a PR comment        |

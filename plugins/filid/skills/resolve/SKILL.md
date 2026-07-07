@@ -343,8 +343,8 @@ If there were NO accepted fixes (all rejected):
 
 ## Available MCP Tools
 
-| Tool                  | Action             | Purpose                                              |
-| --------------------- | ------------------ | ---------------------------------------------------- |
+| Tool                                 | Action             | Purpose                                              |
+| ------------------------------------ | ------------------ | ---------------------------------------------------- |
 | `mcp__plugin_filid_t__review_manage` | `normalize-branch` | Normalize branch name for review directory path      |
 | `mcp__plugin_filid_t__debt_manage`   | `create`           | Create a technical debt record for each rejected fix |
 

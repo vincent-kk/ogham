@@ -164,13 +164,13 @@ with delegation reliability.
 
 ### Execution Modes
 
-| Stage                       | Mode         | Reason                                                                                                                                                               |
-| --------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| pr-create                   | Main context | Lightweight, procedural — direct `Skill()` is reliable                                                                                                               |
+| Stage                       | Mode         | Reason                                                                                                                                                                   |
+| --------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| pr-create                   | Main context | Lightweight, procedural — direct `Skill()` is reliable                                                                                                                   |
 | review — A/B/C              | Subagent     | ~100k tokens — must isolate to prevent main context bloat. Subagent MUST NOT run Phase D (nested teammate spawns leak orphan workers). Exits with `SubagentReturn` YAML. |
 | review — Phase D + finalize | Main context | Phase D requires main-context team orchestration (named worker `Agent`s / solo `Agent`). Finalize (content-hash + PR comment) reads from `review-report.md` frontmatter. |
-| resolve                     | Main context | Procedural with internal subagents (code-surgeon)                                                                                                                    |
-| revalidate                  | Main context | Lightweight with internal subagents (parallel verifiers)                                                                                                             |
+| resolve                     | Main context | Procedural with internal subagents (code-surgeon)                                                                                                                        |
+| revalidate                  | Main context | Lightweight with internal subagents (parallel verifiers)                                                                                                                 |
 
 ### Pseudocode
 

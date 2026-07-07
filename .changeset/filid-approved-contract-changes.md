@@ -1,5 +1,5 @@
 ---
-'@ogham/filid': minor
+"@ogham/filid": minor
 ---
 
 Approved contract changes from the 2026-07-07 behavior analysis (wave 2):
