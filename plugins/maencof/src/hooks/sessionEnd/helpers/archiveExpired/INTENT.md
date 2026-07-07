@@ -11,7 +11,7 @@ SessionEnd 관심사. L4 `04_Action/` 문서 중 `expires < today` 인 만료본
 
 ## Conventions
 
-- 훅 번들 격리: Node builtin(`node:fs/promises`·`node:path`)만 사용. zod(documentParser)·fast-glob(vaultScanner) 미의존 — 검증이 아니라 expires 비교 + 스텁 생성만 필요하므로 경량 자체 구현.
+- 훅 번들 격리: Node builtin(`node:fs/promises`·`node:path`)과 tree-shake 가능한 `@ogham/cross-platform/paths`(`normalize`)만 사용. zod(documentParser)·fast-glob(vaultScanner) 미의존 — 검증이 아니라 expires 비교 + 스텁 생성만 필요하므로 경량 자체 구현.
 - `utils/` concrete 파일 직접 import (배럴 없음)
 
 ## Boundaries

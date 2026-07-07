@@ -14,4 +14,4 @@
 
 - export: `runArchiveExpired(cwd: string): Promise<ArchiveExpiredResult>`.
 - 독립 bridge 없음 — `orchestrateSessionEnd` 가 vaultCommitter 앞에서 호출(만료 이동/스텁 결과를 그 커밋에 포함).
-- 의존: `isMaencofVault` (게이트), `utils/` (파싱·스텁 빌드). Node builtin 외 런타임 의존 없음.
+- 의존: `isMaencofVault` (게이트), `utils/` (파싱·스텁 빌드), `@ogham/cross-platform/paths` (`normalize` — vault 상대 경로 separator 정규화). 그 외 Node builtin 뿐.

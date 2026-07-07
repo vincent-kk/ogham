@@ -7,6 +7,8 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+import { normalize } from '@ogham/cross-platform/paths';
+
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 
 import { buildStubDocument } from './utils/buildStubDocument.js';
@@ -51,9 +53,9 @@ export async function runArchiveExpired(
       if (frontmatter.archived) continue; // 이미 스텁 — 멱등
       if (!frontmatter.expires || frontmatter.expires >= today) continue; // 미만료
 
-      const relativePath = absolutePath
-        .slice(actionLayerRoot.length + 1)
-        .replace(/\\/g, '/');
+      const relativePath = normalize(
+        absolutePath.slice(actionLayerRoot.length + 1),
+      );
       const archiveAbsolutePath = join(
         currentWorkingDirectory,
         '.maencof-meta',
