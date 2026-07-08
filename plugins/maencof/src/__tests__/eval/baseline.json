@@ -2,8 +2,8 @@
   "queries": 17,
   "engines": {
     "qga": {
-      "ndcg10": 0.9558,
-      "recall10": 0.8859,
+      "ndcg10": 0.9664,
+      "recall10": 0.93,
       "mrr": 1
     }
   }

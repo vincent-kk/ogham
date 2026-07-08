@@ -15,10 +15,10 @@ export const EDGE_TYPE_MULTIPLIER: Record<EdgeType, number> = {
 export const QGA_ITERATIONS = 3;
 
 /** QGA-SA 갱신 임계값 τ — 게이트 적용 후 Δ 미만이면 반영하지 않음 */
-export const QGA_UPDATE_THRESHOLD = 0.01;
+export const QGA_UPDATE_THRESHOLD = 0.005;
 
 /** QGA-SA lexical 게이트 하한 γ — 어휘 비중첩 노드의 구조 탐색 보존 */
-export const QGA_GATE_FLOOR = 0.3;
+export const QGA_GATE_FLOOR = 0.5;
 
 /**
  * QGA-SA LINK 유효 가중치 하한. SCS 경로 근사는 cross-folder wikilink 가중치를
