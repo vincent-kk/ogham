@@ -54,6 +54,7 @@ function createTempVault(): string {
   mkdirSync(dir, { recursive: true });
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
+  mkdirSync(join(dir, '01_Core'), { recursive: true });
   return dir;
 }
 
@@ -83,10 +84,13 @@ function setupGitMocks(
       if (args.includes('--is-inside-work-tree')) return okResult('true\n');
       if (args.includes('--show-toplevel')) return okResult(`${cwd}\n`);
       if (args[0] === 'status')
-        return okResult(hasChanges ? ' M .maencof/graph.json\n' : '');
+        return okResult(hasChanges ? ' M 01_Core/identity.md\n' : '');
+      if (args[0] === 'diff')
+        return okResult(hasChanges ? '01_Core/identity.md\n' : '');
 
       if (args[0] === 'commit' && commitThrows)
         return errResult('commit failed');
+      // rev-parse HEAD falls through to okResult('') → unborn HEAD → fold skipped
       return okResult();
     },
   );
@@ -180,6 +184,53 @@ describe('readVaultCommitConfig', () => {
     );
     const config = readVaultCommitConfig(vaultDir);
     expect(config?.skip_patterns).toBeUndefined();
+  });
+
+  it('picks up scope entries and drops unsafe ones item-by-item', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({
+        enabled: true,
+        scope: ['01_Core/', '/abs', '../up', 'a:b', '.git/hooks', 42, 'valid/'],
+      }),
+    );
+    const config = readVaultCommitConfig(vaultDir);
+    expect(config?.scope).toEqual(['01_Core/', 'valid/']);
+  });
+
+  it('picks up message_template with a sufficiently long static prefix', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({
+        enabled: true,
+        message_template: 'vault: wrap [{dirs}] ({date})',
+      }),
+    );
+    expect(readVaultCommitConfig(vaultDir)?.message_template).toBe(
+      'vault: wrap [{dirs}] ({date})',
+    );
+  });
+
+  it('drops message_template whose static prefix is too short to be a safe fold marker', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({ enabled: true, message_template: 'up: {dirs}' }),
+    );
+    expect(readVaultCommitConfig(vaultDir)?.message_template).toBeUndefined();
+  });
+
+  it('picks up fold_daily boolean and ignores non-boolean values', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({ enabled: true, fold_daily: false }),
+    );
+    expect(readVaultCommitConfig(vaultDir)?.fold_daily).toBe(false);
+
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({ enabled: true, fold_daily: 'yes' }),
+    );
+    expect(readVaultCommitConfig(vaultDir)?.fold_daily).toBeUndefined();
   });
 });
 
@@ -305,9 +356,15 @@ describe('runVaultCommitter', () => {
     const addCalls = findCalls(
       (bin, args) => bin === 'git' && args[0] === 'add',
     );
-    expect(addCalls).toHaveLength(2);
-    expect(addCalls[0][1]).toEqual(['add', '.maencof/']);
-    expect(addCalls[1][1]).toEqual(['add', '.maencof-meta/']);
+    expect(addCalls).toHaveLength(1);
+    const addArgs = addCalls[0][1] as string[];
+    expect(addArgs.slice(0, 2)).toEqual(['add', '--']);
+    // only scope entries that exist on disk are staged (01_Core + .maencof-meta)
+    expect(addArgs).toContain('01_Core/');
+    expect(addArgs).toContain('.maencof-meta/');
+    expect(addArgs).not.toContain('.maencof/');
+    expect(addArgs).not.toContain('02_Derived/');
+    expect(addArgs.some((arg) => arg.startsWith(':(exclude'))).toBe(true);
 
     const commitCalls = findCalls(
       (bin, args) => bin === 'git' && args[0] === 'commit',
@@ -318,7 +375,7 @@ describe('runVaultCommitter', () => {
     expect(commitArgs[1]).toBe('--no-verify');
     expect(commitArgs[2]).toBe('-m');
     expect(commitArgs[3]).toMatch(
-      /^chore\(maencof\): \d{4}_\d{2}_\d{2}:\d{2}_\d{2}_\d{2}_session_wrap$/,
+      /^chore\(maencof\): session wrap \[01_Core\] \(\d{4}-\d{2}-\d{2} \d{2}:\d{2}\)$/,
     );
   });
 

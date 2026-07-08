@@ -1,8 +1,8 @@
 /**
  * @file vaultCommitter.ts
- * @description SessionEnd / /clear Hook — Auto-commit vault changes (.maencof/, .maencof-meta/)
+ * @description SessionEnd / /clear Hook — Auto-commit vault changes (scope-driven, default: 5-Layer tree + .maencof-meta/)
  *
- * Triggers: SessionEnd (session exit) and UserPromptSubmit (when prompt is /clear)
+ * Triggers: SessionEnd (session exit) and UserPromptSubmit (when prompt matches skip_patterns, default /clear)
  * Opt-in only: requires .maencof-meta/vault-commit.json with { "enabled": true }
  * Always returns { continue: true } — never blocks session exit or prompt submission.
  */
@@ -11,25 +11,51 @@ import { existsSync, readFileSync } from 'node:fs';
 // ── Constants ────────────────────────────────────────────────────────
 
 import {
+  DEFAULT_COMMIT_SCOPE,
   DEFAULT_SKIP_PATTERN_SOURCE,
+  MESSAGE_TEMPLATE_MIN_PREFIX_CHARS,
   VAULT_COMMIT_CONFIG_FILE,
 } from '../../../constants/vaultCommitter.js';
 import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
 import { isMaencofVault } from '../../shared/isMaencofVault.js';
 import { metaPath } from '../../shared/metaPath.js';
 import {
-  commitVaultChanges,
+  commitStaged,
   generateCommitMessage,
   getGitRoot,
   hasVaultChanges,
   isGitRepo,
   isIndexLocked,
+  listStagedFiles,
+  stageVaultChanges,
+  stagedTopLevels,
+  templateStaticPrefix,
 } from '../gitUtils/gitUtils.js';
+
+import { tryFoldCommit } from './helpers/foldDaily/foldDaily.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 
 export interface VaultCommitConfig {
   enabled: boolean;
+  /**
+   * Commit scope: vault-root-relative directory/file list (`/` separator),
+   * or `["."]` to commit the whole vault root with exclusions delegated to
+   * .gitignore. Entries that are absolute, contain `..` or `:`, or point at
+   * `.git` are dropped. Absent or empty -> DEFAULT_COMMIT_SCOPE (5-Layer
+   * tree + .maencof-meta/).
+   */
+  scope?: string[];
+  /** Daily single-commit folding (helpers/foldDaily). Defaults to true. */
+  fold_daily?: boolean;
+  /**
+   * Commit-message template. Placeholders: {dirs}, {count}, {date}, {time}.
+   * The static prefix before the first placeholder must be at least
+   * MESSAGE_TEMPLATE_MIN_PREFIX_CHARS long (after trim) — it doubles as the
+   * fold's auto-commit marker. Invalid values are silently ignored in
+   * favour of DEFAULT_MESSAGE_TEMPLATE.
+   */
+  message_template?: string;
   /**
    * Regex source strings that, when matched against a UserPromptSubmit prompt,
    * TRIGGER the commit (default `/clear` — commit right before the context is
@@ -59,11 +85,23 @@ export { DEFAULT_SKIP_PATTERN_SOURCE };
 
 // ── Config Reader ────────────────────────────────────────────────────
 
+function isSafeScopeEntry(entry: unknown): entry is string {
+  return (
+    typeof entry === 'string' &&
+    entry.length > 0 &&
+    !entry.startsWith('/') &&
+    !entry.includes(':') &&
+    !entry.includes('..') &&
+    entry !== '.git' &&
+    !entry.startsWith('.git/')
+  );
+}
+
 /**
  * Read and validate vault-commit.json. Returns null if missing, malformed, or disabled.
- * `skip_patterns` (Y3) is accepted when present and is expected to be a
- * `string[]`; invalid entries are dropped but do not invalidate the whole
- * config.
+ * `scope`, `fold_daily`, and `skip_patterns` are optional; invalid entries are
+ * dropped item-by-item but do not invalidate the whole config. Unknown fields
+ * are ignored (legacy hand-written configs).
  */
 export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
   const configPath = metaPath(cwd, VAULT_COMMIT_CONFIG_FILE);
@@ -80,9 +118,21 @@ export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
       const config: VaultCommitConfig = {
         enabled: (parsed as VaultCommitConfig).enabled,
       };
-      const rawPatterns = (parsed as Record<string, unknown>).skip_patterns;
-      if (Array.isArray(rawPatterns)) {
-        const validPatterns = rawPatterns.filter(
+      const fields = parsed as Record<string, unknown>;
+      if (Array.isArray(fields.scope)) {
+        const validScope = fields.scope.filter(isSafeScopeEntry);
+        if (validScope.length > 0) config.scope = validScope;
+      }
+      if (typeof fields.fold_daily === 'boolean')
+        config.fold_daily = fields.fold_daily;
+      if (
+        typeof fields.message_template === 'string' &&
+        templateStaticPrefix(fields.message_template).trim().length >=
+          MESSAGE_TEMPLATE_MIN_PREFIX_CHARS
+      )
+        config.message_template = fields.message_template;
+      if (Array.isArray(fields.skip_patterns)) {
+        const validPatterns = fields.skip_patterns.filter(
           (p): p is string => typeof p === 'string' && p.length > 0,
         );
         if (validPatterns.length > 0) config.skip_patterns = validPatterns;
@@ -153,9 +203,10 @@ export function isClearCommand(prompt: string): boolean {
  * vault-committer hook handler.
  *
  * Flow: event gate → config check → vault check → git repo check → index.lock check
- *       → git status check → git add + commit → return
+ *       → scoped change check → stage (sensitive excludes ride along)
+ *       → daily fold OR plain commit → return
  *
- * For UserPromptSubmit: only proceeds when prompt matches /clear.
+ * For UserPromptSubmit: only proceeds when prompt matches skip_patterns.
  * Every step that fails silently returns { continue: true }.
  */
 export async function runVaultCommitter(
@@ -187,11 +238,29 @@ export async function runVaultCommitter(
     const gitRoot = await getGitRoot(cwd);
     if (!gitRoot || isIndexLocked(gitRoot)) return { continue: true };
 
-    // 5. Vault changes check
-    if (!(await hasVaultChanges(cwd))) return { continue: true };
+    // 5. Scoped vault changes check
+    const scope = config.scope ?? DEFAULT_COMMIT_SCOPE;
+    if (!(await hasVaultChanges(cwd, scope))) return { continue: true };
 
-    // 6. Stage and commit
-    await commitVaultChanges(cwd, generateCommitMessage());
+    // 6. Stage; nothing staged (e.g. sensitive-only changes) -> nothing to commit
+    await stageVaultChanges(cwd, scope);
+    const staged = await listStagedFiles(cwd);
+    if (staged.length === 0) return { continue: true };
+
+    // 7. Daily fold first; fall back to a plain commit
+    if (
+      config.fold_daily !== false &&
+      (await tryFoldCommit(cwd, scope, config.message_template))
+    )
+      return { continue: true };
+    await commitStaged(
+      cwd,
+      generateCommitMessage(
+        stagedTopLevels(staged, scope),
+        staged.length,
+        config.message_template,
+      ),
+    );
   } catch (e) {
     const cwd = input.cwd ?? process.cwd();
     appendErrorLogSafe(cwd, {

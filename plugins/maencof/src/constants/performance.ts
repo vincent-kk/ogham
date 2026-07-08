@@ -2,6 +2,9 @@ export const EXEC_TIMEOUT_MS = 2000;
 
 export const GIT_EXEC_TIMEOUT_MS = 1500;
 
+/** Backoff delays between retries when git fails on a held index.lock. */
+export const GIT_LOCK_RETRY_DELAYS_MS: readonly number[] = [250, 750];
+
 export const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 export const MAX_PINNED_NODES = 20;
