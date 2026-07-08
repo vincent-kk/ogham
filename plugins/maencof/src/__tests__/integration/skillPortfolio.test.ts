@@ -20,7 +20,8 @@ const PACKAGE_ROOT = join(__dirname, '..', '..', '..');
 const SKILLS_DIR = join(PACKAGE_ROOT, 'skills');
 
 const REMOVED_SKILLS = ['rebuild', 'diagnose', 'dailynote'];
-const EXPECTED_COUNT = 27;
+// 27 + personal-status (personal-context 열람·해소·토글)
+const EXPECTED_COUNT = 28;
 
 describe('maencof skill portfolio invariants', () => {
   it(`skills/ contains exactly ${EXPECTED_COUNT} skill directories`, () => {

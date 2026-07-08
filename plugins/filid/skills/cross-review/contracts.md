@@ -331,15 +331,25 @@ the failure through the `verdict_gate` rule in
 dispatch `fail` and verdict `INCONCLUSIVE`. See
 `plugins/filid/skills/cross-review/phases/phase-d-deliberation.md` Step D.7.
 
-After each A/B/C subagent completes, verify its output file exists before
-proceeding:
+After each A/B/C subagent completes, verify its output file is **complete**
+before proceeding — existence alone is NOT sufficient, because the
+streaming-write skeleton exists long before the analysis fills it:
 
-1. Check: Does `<REVIEW_DIR>/<expected_file>` exist? (Read or Glob)
-2. If **yes** → proceed to next step.
-3. If **no** → the subagent failed to write its A/B/C deliverable. Do NOT
-   re-launch a subagent. Instead, read the A/B/C phase instructions file
-   yourself and execute the steps directly as the chairperson. This is
-   faster and more reliable than re-delegating.
+1. Check completeness (per `DETAIL.md` → "Artifact completeness sentinel"):
+   the file exists AND its terminal frontmatter sentinel (`overall` /
+   `metrics_passed` / `structure_passed`; `session.md`: `committee` +
+   `deliberation_mode`) holds a real value — not `PENDING` — and no
+   `PENDING` cells remain. (Read or Grep.)
+2. If **complete** → proceed to the next step.
+3. If **missing, or still a `PENDING` skeleton** → do NOT assume failure
+   while the worker may still be streaming. First confirm the worker has
+   actually stopped, and **reap any survivor** — `TaskStop` the A/B/C
+   subagent AND its named `phase-*` teammates — so it cannot clobber your
+   writes. Then, do NOT re-launch a subagent: read the A/B/C phase
+   instructions file and execute the steps directly as the chairperson.
+   Direct execution meets the **same evidence bar** — run the same MCP
+   measurements the phase prescribes (e.g. `ast_analyze` on every in-scope
+   function); never estimate a metric a tool can compute.
 
 Apply this verification to every delegated A/B/C phase (and no further):
 

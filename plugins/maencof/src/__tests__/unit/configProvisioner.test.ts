@@ -45,12 +45,12 @@ describe('provisionMissingConfigs', () => {
     removeDir(cwd);
   });
 
-  it('빈 .maencof-meta/ 디렉토리에 6개의 config 파일을 모두 생성한다', () => {
+  it('빈 .maencof-meta/ 디렉토리에 7개의 config 파일을 모두 생성한다', () => {
     mkdirSync(metaDir(cwd), { recursive: true });
 
     const result = provisionMissingConfigs(cwd);
 
-    expect(result.created).toHaveLength(6);
+    expect(result.created).toHaveLength(7);
     expect(result.skipped).toHaveLength(0);
 
     const expectedFiles = [
@@ -60,6 +60,7 @@ describe('provisionMissingConfigs', () => {
       'lifecycle.json',
       'data-sources.json',
       'usage-stats.json',
+      'personal-context.json',
     ];
     for (const filename of expectedFiles)
       expect(existsSync(join(metaDir(cwd), filename))).toBe(true);
@@ -151,12 +152,12 @@ describe('provisionMissingConfigs', () => {
 
   it('두 번 호출해도 멱등성이 보장된다 (두 번째 호출: 모두 skipped)', () => {
     const first = provisionMissingConfigs(cwd);
-    expect(first.created).toHaveLength(6);
+    expect(first.created).toHaveLength(7);
     expect(first.skipped).toHaveLength(0);
 
     const second = provisionMissingConfigs(cwd);
     expect(second.created).toHaveLength(0);
-    expect(second.skipped).toHaveLength(6);
+    expect(second.skipped).toHaveLength(7);
   });
 
   it('부분 프로비저닝: 일부 파일만 존재할 때 나머지만 생성한다', () => {
@@ -185,13 +186,14 @@ describe('provisionMissingConfigs', () => {
     const result = provisionMissingConfigs(cwd);
 
     expect(result.skipped).toHaveLength(3);
-    expect(result.created).toHaveLength(3);
+    expect(result.created).toHaveLength(4);
     expect(result.migrated).toHaveLength(0);
     expect(result.skipped).toContain('insight-config.json');
     expect(result.skipped).toContain('vault-commit.json');
     expect(result.skipped).toContain('data-sources.json');
     expect(result.created).toContain('auto-insight-stats.json');
     expect(result.created).toContain('lifecycle.json');
+    expect(result.created).toContain('personal-context.json');
     expect(result.created).toContain('usage-stats.json');
   });
 });

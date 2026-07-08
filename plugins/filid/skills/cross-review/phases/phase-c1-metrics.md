@@ -16,6 +16,9 @@
 >    the next file.
 > 4. Never batch-accumulate metric results for multiple files in your
 >    context.
+> 5. Set the `metrics_passed` sentinel to its real true/false value as your
+>    LAST edit, only after every row is written — it stays `PENDING` in the
+>    skeleton and is the done-marker consumers key on.
 >
 > This is a hard requirement for large diffs. When the chairperson uses
 > batch partitioning (../SKILL.md Step 3), you operate on a 10-file batch
@@ -100,7 +103,7 @@ Write to `<REVIEW_DIR>/verification-metrics.md`:
 ---
 session_ref: session.md
 scope: metrics-half
-structure_check_ref: structure-check.md   # present if Phase A ran
+structure_check_ref: structure-check.md # present if Phase A ran
 tools_executed:
   - mcp__plugin_filid_t__ast_analyze(lcom4)
   - mcp__plugin_filid_t__ast_analyze(cyclomatic-complexity)
@@ -118,13 +121,13 @@ created_at: <ISO 8601>
 
 ## Code Metrics Results
 
-| Check               | Result         | Detail                                   |
-| ------------------- | -------------- | ---------------------------------------- |
-| LCOM4               | PASS/WARN/FAIL | <failing modules + measured values>      |
-| Cyclomatic (CC)     | PASS/WARN/FAIL | <failing files + measured values>        |
-| 3+12 rule           | PASS/WARN/FAIL | <failing spec files + test counts>       |
-| mcp__plugin_filid_t__test_metrics decide | INFO           | <split / compress / parameterize hints>  |
-| Shared dep coverage | PASS/WARN      | <N/M usage sites covered + warning list> |
+| Check                                    | Result         | Detail                                   |
+| ---------------------------------------- | -------------- | ---------------------------------------- |
+| LCOM4                                    | PASS/WARN/FAIL | <failing modules + measured values>      |
+| Cyclomatic (CC)                          | PASS/WARN/FAIL | <failing files + measured values>        |
+| 3+12 rule                                | PASS/WARN/FAIL | <failing spec files + test counts>       |
+| mcp**plugin_filid_t**test_metrics decide | INFO           | <split / compress / parameterize hints>  |
+| Shared dep coverage                      | PASS/WARN      | <N/M usage sites covered + warning list> |
 
 ## Findings
 
@@ -136,9 +139,9 @@ created_at: <ISO 8601>
 
 ### Cyclomatic Complexity (> 15)
 
-| Path | Function | CC | Recommendation |
-| ---- | -------- | -- | -------------- |
-| ...  | ...      | .. | ...            |
+| Path | Function | CC  | Recommendation |
+| ---- | -------- | --- | -------------- |
+| ...  | ...      | ..  | ...            |
 
 ### 3+12 Violations
 
@@ -167,8 +170,7 @@ created_at: <ISO 8601>
 
 ## Batch / Team-Promoted Execution
 
-When the chairperson dispatches Phase C1 as a batch worker (file count >
-15) or a team-promoted worker (file count > 30, see ../SKILL.md Step 3), the
+When the chairperson dispatches Phase C1 as a batch worker (file count > 15) or a team-promoted worker (file count > 30, see ../SKILL.md Step 3), the
 execution context is slightly different:
 
 ### Batch mode (> 15, <= 30 files)

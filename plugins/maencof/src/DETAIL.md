@@ -9,7 +9,7 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 | Directory | Role                                                                                                       |
 | --------- | ---------------------------------------------------------------------------------------------------------- |
 | `core/`   | 순수 함수 모듈 (VaultScanner I/O 예외)                                                                     |
-| `mcp/`    | MCP 서버 + 19개 도구 핸들러                                                                                |
+| `mcp/`    | MCP 서버 + 21개 도구 핸들러                                                                                |
 | `hooks/`  | Claude Code hook 핸들러 (configProvisioner, changelogDebt, activityRecorder, sessionStart, configRegistry) |
 | `types/`  | 공유 타입 (외부 의존성 없음, zod 제외)                                                                     |
 | `index/`  | MetadataStore, IncrementalTracker                                                                          |

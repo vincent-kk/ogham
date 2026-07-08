@@ -14,6 +14,7 @@ import {
 } from '../../../../core/cacheManager/cacheManager.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
 import { recordSessionEnd } from '../../../../core/sessionStore/sessionStore.js';
+import { prunePersonalContext } from '../../../../core/personalContext/prunePersonalContext.js';
 import { buildDailyDigest } from '../../../../core/workIndex/workIndex.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 
@@ -50,6 +51,18 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
       filesModified: input.files_modified ?? [],
     });
     buildDailyDigest(cwd, date);
+  } catch (e) {
+    appendErrorLogSafe(cwd, {
+      hook: 'session-end',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // 1.5. Personal-context lifecycle prune — expired states, overdue auto-resolve,
+  //      resolved-topic retention, storage cap. No-op when the file is absent.
+  try {
+    prunePersonalContext(cwd);
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-end',

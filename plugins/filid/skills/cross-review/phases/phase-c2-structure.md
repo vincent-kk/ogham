@@ -20,6 +20,9 @@
 >    before moving on.
 > 4. Never batch-accumulate dependency graphs or tree-diffs across
 >    multiple files.
+> 5. Set the `structure_passed` sentinel to its real true/false value as your
+>    LAST edit, only after every row is written — it stays `PENDING` in the
+>    skeleton and is the done-marker consumers key on.
 >
 > When the chairperson uses batch partitioning (../SKILL.md Step 3), you
 > operate on a 10-file batch for per-file checks only — project-wide
