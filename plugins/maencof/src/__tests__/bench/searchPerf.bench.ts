@@ -5,6 +5,7 @@
 import { bench, describe } from 'vitest';
 
 import { buildGraph } from '../../core/graphBuilder/graphBuilder.js';
+import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import { runSpreadingActivation } from '../../core/spreadingActivation/spreadingActivation.js';
 import { resolveSeedNodes } from '../../search/queryEngine/queryEngine.js';
 import { Layer } from '../../types/common.js';
@@ -92,6 +93,28 @@ describe('Keyword seed resolution', () => {
 
   bench('1000 nodes - keyword', () => {
     resolveSeedNodes(graph1000, ['topic-5']);
+  });
+});
+
+describe('QGA-SA execution (v2)', () => {
+  bench('100 nodes', () => {
+    runAccumulativeActivation(graph100, [toNodeId('doc-0.md')], {
+      queryTokens: ['topic-5'],
+    });
+  });
+
+  bench('1000 nodes', () => {
+    runAccumulativeActivation(graph1000, [toNodeId('doc-0.md')], {
+      queryTokens: ['topic-5'],
+    });
+  });
+
+  bench('1000 nodes - 3 seeds', () => {
+    runAccumulativeActivation(
+      graph1000,
+      [toNodeId('doc-0.md'), toNodeId('doc-125.md'), toNodeId('doc-250.md')],
+      { queryTokens: ['topic-5'] },
+    );
   });
 });
 

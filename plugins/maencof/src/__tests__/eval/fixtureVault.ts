@@ -6,7 +6,10 @@
  * 다경로 수렴 구조(두 시드 → graph-search-synthesis), 어휘 비중첩 연상 경로(ontology-modeling).
  * 랜덤 요소 없음 — 실행 간 완전 동일 그래프를 보장한다.
  */
-import { buildGraph, hydrateRuntimeMaps } from '../../core/graphBuilder/index.js';
+import {
+  buildGraph,
+  hydrateRuntimeMaps,
+} from '../../core/graphBuilder/index.js';
 import { calculateWeights } from '../../core/weightCalculator/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
@@ -41,9 +44,24 @@ function securityArticles(): FixtureDoc[] {
 }
 
 const FIXTURE_DOCS: FixtureDoc[] = [
-  { path: 'L1/identity.md', title: 'Identity Core', layer: Layer.L1_CORE, tags: ['identity', 'core'] },
-  { path: 'L1/values.md', title: 'Values and Principles', layer: Layer.L1_CORE, tags: ['identity', 'values'] },
-  { path: 'L2/index.md', title: 'Derived Knowledge Index', layer: Layer.L2_DERIVED, tags: ['index'] },
+  {
+    path: 'L1/identity.md',
+    title: 'Identity Core',
+    layer: Layer.L1_CORE,
+    tags: ['identity', 'core'],
+  },
+  {
+    path: 'L1/values.md',
+    title: 'Values and Principles',
+    layer: Layer.L1_CORE,
+    tags: ['identity', 'values'],
+  },
+  {
+    path: 'L2/index.md',
+    title: 'Derived Knowledge Index',
+    layer: Layer.L2_DERIVED,
+    tags: ['index'],
+  },
   {
     path: 'L2/insights/knowledge-graph-design.md',
     title: 'Knowledge Graph Design',
@@ -113,7 +131,12 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     layer: Layer.L2_DERIVED,
     tags: ['knowledge', 'organization'],
   },
-  { path: 'L3/index.md', title: 'External Knowledge Index', layer: Layer.L3_EXTERNAL, tags: ['index'] },
+  {
+    path: 'L3/index.md',
+    title: 'External Knowledge Index',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['index'],
+  },
   {
     path: 'L3/references/hipporag-paper.md',
     title: 'HippoRAG Paper Summary',
@@ -135,7 +158,12 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     tags: ['search', 'ranking', 'paper'],
   },
   ...securityArticles(),
-  { path: 'L4/index.md', title: 'Action Index', layer: Layer.L4_ACTION, tags: ['index'] },
+  {
+    path: 'L4/index.md',
+    title: 'Action Index',
+    layer: Layer.L4_ACTION,
+    tags: ['index'],
+  },
   {
     path: 'L4/tasks/implement-search-v2.md',
     title: 'Implement Search V2',

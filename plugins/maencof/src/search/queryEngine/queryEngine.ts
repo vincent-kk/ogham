@@ -12,8 +12,15 @@ import {
   PHRASE_CONTIGUITY_BONUS,
 } from '../../constants/queryEngine.js';
 import { WORD_BOUNDARY_SPLIT_REGEX } from '../../constants/regexes.js';
-import { SIBLING_FANOUT_CAP } from '../../constants/spreadingActivation.js';
-import { runSpreadingActivation } from '../../core/spreadingActivation/index.js';
+import {
+  SA_DEFAULT_ENGINE,
+  SIBLING_FANOUT_CAP,
+} from '../../constants/spreadingActivation.js';
+import type { SaEngine } from '../../constants/spreadingActivation.js';
+import {
+  runAccumulativeActivation,
+  runSpreadingActivation,
+} from '../../core/spreadingActivation/index.js';
 import type { SpreadingActivationParams } from '../../core/spreadingActivation/index.js';
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
@@ -57,6 +64,11 @@ export interface QueryOptions {
    * `maxHops`를 명시적으로 설정하면 무시된다. 적응형 동작을 원하면 `maxHops`를 생략하라.
    */
   adaptiveSA?: boolean;
+  /**
+   * 확산 엔진 선택 (기본: SA_DEFAULT_ENGINE).
+   * 'legacy' = v1 BFS max-전파(하드카피 기준선), 'qga' = v2 QGA-SA.
+   */
+  engine?: SaEngine;
 }
 
 /** 검색 결과 */
@@ -297,6 +309,29 @@ function resolveKeywordSeed(
 }
 
 /**
+ * 비-경로 시드에서 QGA 게이트용 쿼리 토큰을 수집한다 (dedup, lowercase).
+ * 경로 시드만 있으면 빈 배열 → 게이트 비활성.
+ */
+function collectQueryTokens(seeds: string[]): string[] {
+  const tokens = new Set<string>();
+  for (const seed of seeds) {
+    if (seed.endsWith('.md') || seed.includes('/')) continue;
+    for (const token of tokenizeSeed(seed)) tokens.add(token);
+  }
+  return Array.from(tokens);
+}
+
+/**
+ * maxHops(v1 반경 의미론)를 QGA 반복 횟수 T로 매핑한다.
+ * kg_context 프리셋 대응: FOCUSED(3)→2, BALANCED(5)→3, BROAD(7)→4.
+ */
+function iterationsFromMaxHops(maxHops: number): number {
+  if (maxHops <= 3) return 2;
+  if (maxHops >= 7) return 4;
+  return 3;
+}
+
+/**
  * 쿼리 문자열에서 시드 노드를 결정한다.
  *
  * 전략:
@@ -364,6 +399,7 @@ export function query(
     threshold = 0.1,
     maxHops = 5,
     layerFilter = [],
+    engine = SA_DEFAULT_ENGINE,
   } = options;
 
   // 캐시 조회
@@ -376,7 +412,18 @@ export function query(
 
   let results: ActivationResult[] = [];
 
-  if (scoredSeeds.length > 0) {
+  if (scoredSeeds.length > 0 && engine === 'qga') {
+    // v2 QGA-SA: 합산-누적·차수 정규화·lexical 게이트 (반경은 T 반복으로 제어)
+    const seedActivations = new Map<NodeId, number>();
+    for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);
+
+    results = runAccumulativeActivation(graph, seedIds, {
+      iterations: iterationsFromMaxHops(maxHops),
+      queryTokens: collectQueryTokens(seeds),
+      seedActivations,
+      maxActiveNodes: 100,
+    });
+  } else if (scoredSeeds.length > 0) {
     // seedActivations 맵 구축
     const seedActivations = new Map<NodeId, number>();
     for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);

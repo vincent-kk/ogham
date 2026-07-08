@@ -46,13 +46,22 @@ function loadBaseline(): Baseline {
   return JSON.parse(readFileSync(BASELINE_URL, 'utf8')) as Baseline;
 }
 
-function resultPaths(graph: KnowledgeGraph, seeds: string[], options: QueryOptions): string[] {
+function resultPaths(
+  graph: KnowledgeGraph,
+  seeds: string[],
+  options: QueryOptions,
+): string[] {
   const { results } = query(graph, seeds, options);
-  return results.map((r) => graph.nodes.get(r.nodeId)?.path ?? String(r.nodeId));
+  return results.map(
+    (r) => graph.nodes.get(r.nodeId)?.path ?? String(r.nodeId),
+  );
 }
 
 /** 골든셋 전체에 대한 macro-average 지표 */
-function measureEngine(graph: KnowledgeGraph, options: QueryOptions): EngineMetrics {
+function measureEngine(
+  graph: KnowledgeGraph,
+  options: QueryOptions,
+): EngineMetrics {
   let ndcgSum = 0;
   let recallSum = 0;
   let mrrSum = 0;
@@ -110,9 +119,19 @@ describe('search quality golden set', () => {
   });
 
   it('legacy engine meets ratchet baseline', () => {
-    const measured = measureEngine(graph, LIVE_DEFAULTS);
-    // eslint-disable-next-line no-console
+    const measured = measureEngine(graph, {
+      ...LIVE_DEFAULTS,
+      engine: 'legacy',
+    });
+     
     console.log('[eval] legacy:', JSON.stringify(measured));
     assertMeetsBaseline('legacy', measured, loadBaseline());
+  });
+
+  it('qga engine meets ratchet baseline', () => {
+    const measured = measureEngine(graph, { ...LIVE_DEFAULTS, engine: 'qga' });
+     
+    console.log('[eval] qga:', JSON.stringify(measured));
+    assertMeetsBaseline('qga', measured, loadBaseline());
   });
 });
