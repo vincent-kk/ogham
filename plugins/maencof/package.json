@@ -49,6 +49,7 @@
     "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
+    "eval": "vitest run src/__tests__/eval",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",

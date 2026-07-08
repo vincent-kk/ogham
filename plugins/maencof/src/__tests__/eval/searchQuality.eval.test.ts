@@ -11,31 +11,13 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import type { QueryOptions } from '../../search/queryEngine/index.js';
-import { query } from '../../search/queryEngine/index.js';
-import type { KnowledgeGraph } from '../../types/graph.js';
-
+import type { EngineMetrics } from './evalRunner.js';
+import { LIVE_DEFAULTS, liveSearchFn, measureSearchFn } from './evalRunner.js';
 import { buildEvalGraph } from './fixtureVault.js';
 import { GOLDEN_QUERIES } from './goldenSet.js';
-import { mrr, ndcgAt, recallAt } from './rankingMetrics.js';
 
 const BASELINE_URL = new URL('./baseline.json', import.meta.url);
 const RATCHET_EPSILON = 0.005;
-const K = 10;
-
-/** kg_search 기본 파라미터 고정 (라이브 경로 동일 조건) */
-const LIVE_DEFAULTS: QueryOptions = {
-  maxResults: K,
-  decay: 0.7,
-  threshold: 0.1,
-  maxHops: 5,
-};
-
-interface EngineMetrics {
-  ndcg10: number;
-  recall10: number;
-  mrr: number;
-}
 
 interface Baseline {
   queries: number;
@@ -44,43 +26,6 @@ interface Baseline {
 
 function loadBaseline(): Baseline {
   return JSON.parse(readFileSync(BASELINE_URL, 'utf8')) as Baseline;
-}
-
-function resultPaths(
-  graph: KnowledgeGraph,
-  seeds: string[],
-  options: QueryOptions,
-): string[] {
-  const { results } = query(graph, seeds, options);
-  return results.map(
-    (r) => graph.nodes.get(r.nodeId)?.path ?? String(r.nodeId),
-  );
-}
-
-/** 골든셋 전체에 대한 macro-average 지표 */
-function measureEngine(
-  graph: KnowledgeGraph,
-  options: QueryOptions,
-): EngineMetrics {
-  let ndcgSum = 0;
-  let recallSum = 0;
-  let mrrSum = 0;
-  for (const gq of GOLDEN_QUERIES) {
-    const ranked = resultPaths(graph, gq.seeds, options);
-    ndcgSum += ndcgAt(K, ranked, gq.relevance);
-    recallSum += recallAt(K, ranked, gq.relevance);
-    mrrSum += mrr(ranked, gq.relevance);
-  }
-  const n = GOLDEN_QUERIES.length;
-  return {
-    ndcg10: round4(ndcgSum / n),
-    recall10: round4(recallSum / n),
-    mrr: round4(mrrSum / n),
-  };
-}
-
-function round4(x: number): number {
-  return Math.round(x * 10000) / 10000;
 }
 
 function assertMeetsBaseline(
@@ -110,16 +55,15 @@ function assertMeetsBaseline(
 
 describe('search quality golden set', () => {
   const graph = buildEvalGraph();
+  const searchFn = liveSearchFn(graph, LIVE_DEFAULTS);
 
   it('every golden query returns at least one result', () => {
-    for (const gq of GOLDEN_QUERIES) {
-      const ranked = resultPaths(graph, gq.seeds, LIVE_DEFAULTS);
-      expect(ranked.length, `query ${gq.id}`).toBeGreaterThan(0);
-    }
+    for (const gq of GOLDEN_QUERIES)
+      expect(searchFn(gq.seeds).length, `query ${gq.id}`).toBeGreaterThan(0);
   });
 
   it('qga engine meets ratchet baseline', () => {
-    const measured = measureEngine(graph, LIVE_DEFAULTS);
+    const measured = measureSearchFn(searchFn);
 
     console.log('[eval] qga:', JSON.stringify(measured));
     assertMeetsBaseline('qga', measured, loadBaseline());
