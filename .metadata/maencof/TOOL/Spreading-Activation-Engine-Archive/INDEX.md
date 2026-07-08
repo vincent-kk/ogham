@@ -1,0 +1,21 @@
+# 확산 엔진 아카이브 (Spreading Activation Engine Archive)
+
+## 목적
+
+maencof 검색 엔진의 은퇴 버전을 **버전별 디렉토리**로 격리 보존한다. 각 버전은 코드베이스(`plugins/maencof/src`)와 완전히 분리된 자체 완결 격리본으로, **격리본만으로 벤치마크를 실행**해 현행 엔진과 성능지표를 비교할 수 있다.
+
+## 아카이브 정책
+
+1. **이탈 원칙**: 새 엔진이 골든셋 ratchet 게이트에서 우위를 확인하고 기본 엔진이 되면, 이전 엔진은 src에서 제거되고 이곳에 버전 디렉토리로 이동한다.
+2. **격리본 구성**: `source/`(이탈 시점 TS 원본 verbatim 스냅샷 — 참조 정본) + `runtime/`(의존성 0의 Node ESM 이식본 — 실행 정본). 이식 충실도는 동결 지표 재현(`run.mjs`의 FIDELITY 게이트)으로 증명한다.
+3. **동결 원칙**: 버전 디렉토리 내부는 수정하지 않는다. 픽스처·골든셋도 이탈 시점 스냅샷으로 고정 — src의 골든셋이 진화해도 아카이브 수치는 동결 분모 위에서만 유효하다. 세대 간 비교는 각 버전이 기록한 동결 지표와 신규 버전 이탈 시점의 동결 지표로 수행한다.
+4. **실행**: 각 버전 디렉토리의 `runtime/run.mjs`를 `node`로 직접 실행한다. 저장소 빌드·의존성 설치 불필요.
+
+## 버전 목록
+
+| 버전 | 엔진 | 재임 기간 | 동결 지표 (nDCG@10 / Recall@10 / MRR) |
+| --- | --- | --- | --- |
+| [v1-bfs-max-propagation](./v1-bfs-max-propagation/INDEX.md) | BFS max-전파 constrained SA | 초기 구현 ~ 2026-07-08 | 0.8991 / 0.8383 / 1.0 |
+| (현행) v2 QGA-SA | 합산-누적·차수 정규화·lexical 게이트 | 2026-07-08 ~ | 0.9529 / 0.8938 / 1.0 (이탈 시 이곳으로) |
+
+현행 엔진의 설계는 [Query-Gated-Accumulative-Spreading-Activation](../Query-Gated-Accumulative-Spreading-Activation/INDEX.md) 참조.
