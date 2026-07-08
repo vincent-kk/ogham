@@ -38,6 +38,22 @@ export interface ScoredSeed {
   matchType: MatchType;
 }
 
+/**
+ * QGA-SA 매직넘버 오버라이드 — 수렴 실험(eval 스윕) 전용.
+ * 미지정 필드는 constants/spreadingActivation.ts 기본값을 따른다.
+ * 라이브 MCP 도구는 이 필드를 노출하지 않는다 (튜닝 확정 시 상수로 승격).
+ */
+export interface QgaTuning {
+  /** 반복 횟수 T (지정 시 maxHops 매핑보다 우선) */
+  iterations?: number;
+  /** 갱신 임계값 τ */
+  updateThreshold?: number;
+  /** lexical 게이트 하한 γ */
+  gateFloor?: number;
+  /** 전역 감쇠 스케일 α_base */
+  alphaBase?: number;
+}
+
 /** QueryEngine 검색 옵션 */
 export interface QueryOptions {
   /** 최대 결과 수 (기본: 10) */
@@ -50,6 +66,8 @@ export interface QueryOptions {
   maxHops?: number;
   /** Layer 필터 (미지정 시 전체 Layer) */
   layerFilter?: number[];
+  /** 매직넘버 수렴 실험용 파라미터 오버라이드 (캐시 키에 포함) */
+  tuning?: QgaTuning;
 }
 
 /** 검색 결과 */
@@ -391,8 +409,12 @@ export function query(
     const seedActivations = new Map<NodeId, number>();
     for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);
 
+    const tuning = options.tuning;
     results = runAccumulativeActivation(graph, seedIds, {
-      iterations: iterationsFromMaxHops(maxHops),
+      iterations: tuning?.iterations ?? iterationsFromMaxHops(maxHops),
+      updateThreshold: tuning?.updateThreshold,
+      gateFloor: tuning?.gateFloor,
+      alphaBase: tuning?.alphaBase,
       queryTokens: collectQueryTokens(seeds),
       seedActivations,
       maxActiveNodes: 100,

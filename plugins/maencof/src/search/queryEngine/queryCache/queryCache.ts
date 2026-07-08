@@ -35,6 +35,7 @@ export class QueryCache {
       threshold: options.threshold,
       maxHops: options.maxHops,
       layerFilter: options.layerFilter,
+      tuning: options.tuning,
     });
     return `${sortedSeeds}::${opts}`;
   }
