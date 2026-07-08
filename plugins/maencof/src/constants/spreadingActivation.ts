@@ -5,7 +5,7 @@ export const EDGE_TYPE_MULTIPLIER: Record<EdgeType, number> = {
   LINK: 1.0,
   PARENT_OF: 0.8,
   CHILD_OF: 0.8,
-  SIBLING: 0.5,
+  SIBLING: 0.2,
   RELATIONSHIP: 0.7,
   CROSS_LAYER: 0.6,
   DOMAIN: 0.3,
