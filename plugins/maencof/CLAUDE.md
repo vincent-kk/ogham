@@ -22,10 +22,11 @@ yarn version:sync       # package.json → src/version.ts
 
 ## Auto-invocation Mapping
 
-6 인지 역할 → 스킬 매핑 (사용자가 명시하지 않아도 트리거됨):
+7 인지 역할 → 스킬 매핑 (사용자가 명시하지 않아도 트리거됨):
 
 - **Brainstorm / ideation**: `explore --for-brainstorm` → `think --mode divergent`
 - **Insight capture management**: `insight` (capture 자체는 `capture_insight` MCP 도구 + `insightInjector`, UserPromptSubmit 디스패처에 포함)
+- **User-state awareness**: `personal-status` (capture 자체는 `capture_personal_context` MCP 도구 — SessionStart가 주입하는 `<personal-context>` 블록의 지침이 유도, 무배너)
 - **Spec refinement / interview convergence**: `refine` (Phase 2.5 Socratic 포함)
 - **Plan review**: `think --mode review`
 
@@ -43,6 +44,7 @@ yarn version:sync       # package.json → src/version.ts
 - **Changelog debt**: SessionEnd `changelogDebt` 가 감시 경로 미기록 변경을 1회 스캔해 `.maencof-meta/changelog-state.json` 에 기록 → 다음 SessionStart 가 1줄 권고로 표면화 → `/maencof:changelog` 가 큐레이션 후 커서(lastCuratedAt) 갱신. 차단 없음.
 - **Insight 통지**: capture 시점은 `capture_insight` 도구 응답 message(누적 개수 포함), 세션 간 집계는 다음 SessionStart 의 pending 알림이 담당. `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
 - **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
+- **Personal-context 주입/정리**: SessionStart 가 companion 존재 시 `.maencof-meta/personal-context.json` 의 states/topics 를 `<personal-context>` 블록(캡처 지침 내장)으로 identity 직후 주입 → 대화 중 `capture_personal_context` 가 조용히 upsert → SessionEnd `prunePersonalContext` 이 만료/보존 규칙 집행. **OFF-switch**: `personal-context.json::config.enabled=false` (`/maencof:personal-status --disable`). 설계 정본: `.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`.
 
 ## Development Notes
 

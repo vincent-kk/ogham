@@ -36,7 +36,7 @@ claude --plugin-dir ./plugins/maencof
 
 빌드하면 두 가지 산출물이 생성됩니다:
 
-- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 19개)
+- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 21개)
 - `bridge/*.mjs` — 이벤트 디스패처 6개 (session-start, user-prompt-submit, pre-tool-use, post-tool-use, stop, session-end). 각 디스패처가 해당 이벤트의 관심사 핸들러를 한 프로세스에서 실행합니다.
 
 > **성능 안내**: maencof는 이벤트당 hook을 1개만 등록합니다. `UserPromptSubmit` 디스패처는 컨텍스트 주입 → lifecycle 액션 → vault 자동 커밋 → insight 배너를 한 프로세스에서 순차 실행합니다 — 관심사마다 node를 띄우는 대신 이벤트당 1회만 띄웁니다. 세션 첫 프롬프트는 추가로 컨텍스트 캐시를 빌드합니다. `hooks.json`의 이벤트별 timeout 값은 kill-switch이지 expected latency가 아니며, 각 관심사는 vault 밖에서 즉시 fast-fail 합니다. git을 실제로 실행하는 경로는 vault 자동 커밋 하나뿐이며, 세 조건이 동시에 충족돼야 동작합니다: vault opt-in (`vault-commit.json::enabled=true`) + 프롬프트가 `/clear` 또는 설정된 `skip_patterns` 중 하나와 매칭 + vault dirty. 즉 사용자가 명시적으로 "이번 세션을 마무리한다"는 신호를 보낸 시점에만 ~1–2s commit 비용이 발생하며, 이는 의도된 동작입니다.
@@ -165,16 +165,27 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 플러그인이 활성화되면 아래 Hook들이 **사용자 개입 없이** 자동 실행됩니다:
 
-| 언제                   | 무엇을                        | 왜                                                             |
-| ---------------------- | ----------------------------- | -------------------------------------------------------------- |
-| 세션 시작 시           | Vault 컨텍스트 + 인덱스 로드  | 첫 턴부터 에이전트가 지식을 인지                               |
-| 파일을 Write/Edit할 때 | Layer 보호 검사               | L1 문서의 무단 수정 방지                                       |
-| maencof 쓰기 도구 후   | 활동 로그 기록                | Vault 쓰기(create/update/move/delete) 변경 이력 추적           |
-| 세션 종료 시           | 세션 정리 + 영속화            | 휘발성 상태 저장, 만료 항목 정리                               |
-| 매 사용자 프롬프트 시  | 컨텍스트 주입 체인 (4개 hook) | 턴 컨텍스트 로드, 등록 액션 실행, 통찰 캡처, vault 커밋 게이팅 |
-| 에이전트 종료 시       | 라이프사이클 디스패처         | 종료 이벤트에 등록된 액션 실행                                 |
+| 언제                   | 무엇을                                    | 왜                                                                          |
+| ---------------------- | ----------------------------------------- | --------------------------------------------------------------------------- |
+| 세션 시작 시           | Vault 컨텍스트 + 인덱스 + personal-context 로드 | 첫 턴부터 에이전트가 지식을 — 컴페니언 세션에서는 최근 상태/동향까지 — 인지 |
+| 파일을 Write/Edit할 때 | Layer 보호 검사                           | L1 문서의 무단 수정 방지                                                    |
+| maencof 쓰기 도구 후   | 활동 로그 기록                            | Vault 쓰기(create/update/move/delete) 변경 이력 추적                        |
+| 세션 종료 시           | 세션 정리 + 영속화                        | 휘발성 상태 저장, 만료 항목 정리                                            |
+| 매 사용자 프롬프트 시  | 컨텍스트 주입 체인 (4개 hook)             | 턴 컨텍스트 로드, 등록 액션 실행, 통찰 캡처, vault 커밋 게이팅              |
+| 에이전트 종료 시       | 라이프사이클 디스패처                     | 종료 이벤트에 등록된 액션 실행                                              |
 
 차단이 발생하면 이유와 함께 메시지가 표시되므로 별도 대응은 필요 없습니다.
+
+---
+
+## Personal Context (은연중의 배려)
+
+vault 지식과 별개로, maencof는 작은 **personal context** — 일시적 상태(기분·건강·상황)와 최근 개인 주제(계획·고민·관계) — 를 `.maencof-meta/personal-context.json`에 유지합니다:
+
+- **조용한 캡처** — 대화 중 컴페니언이 `capture_personal_context` MCP 도구로 기록합니다. 배너도 알림도 없습니다.
+- **세션당 1회 주입** (컴페니언 세션 한정) — companion identity 직후 `<personal-context>` 블록으로 주입되어, 배려가 "당신을 추적하고 있다"는 말이 아니라 **톤**으로 나타납니다.
+- **자기 제한적** — 상태는 재강화 없으면 만료(기본 14일)되고, 주제는 20개까지 회전합니다. 계속 재강화되는 특성은 여기가 아니라 L1 정체성에 속합니다.
+- **사용자 소유** — `/maencof:personal-status`로 언제든 열람·해소·비활성화할 수 있습니다. 이 파일은 의도적으로 `recall`/`explore` 검색에 노출되지 않습니다.
 
 ---
 
@@ -196,6 +207,7 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:connect`         | 고급     | 외부 데이터 소스 등록                                                                                     |
 | `/maencof:mcp-setup`       | 고급     | 외부 MCP 서버 설치                                                                                        |
 | `/maencof:manage`          | 고급     | 스킬/에이전트 활성화 및 사용 리포트                                                                       |
+| `/maencof:personal-status` | 고급     | personal-context 열람/해소/토글 (상태 + 최근 동향)                                                              |
 | `/maencof:insight`         | 고급     | 자동 인사이트 캡처 관리                                                                                   |
 | `/maencof:changelog`       | 고급     | 자기 변경 기록 (일별 changelog)                                                                           |
 | `/maencof:migrate`         | 고급     | Vault 아키텍처 마이그레이션                                                                               |

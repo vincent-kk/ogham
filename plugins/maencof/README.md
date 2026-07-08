@@ -36,7 +36,7 @@ claude --plugin-dir ./plugins/maencof
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (19 knowledge tools)
+- `bridge/mcp-server.cjs` — MCP server (21 knowledge tools)
 - `bridge/*.mjs` — 6 event dispatchers (session-start, user-prompt-submit, pre-tool-use, post-tool-use, stop, session-end), each running that event's concern handlers in a single process
 
 > **Performance note**: maencof registers one hook per event. The `UserPromptSubmit` dispatcher runs context injection → lifecycle actions → vault auto-commit → the insight banner sequentially in a single process — one node start per event instead of one per concern. The first prompt of a session additionally builds the context cache. The per-event timeouts in `hooks.json` are kill-switches, not expected latency, and every concern fast-fails outside a vault. The only path that runs git is the vault auto-commit, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
@@ -165,16 +165,27 @@ maencof organizes knowledge into five layers with distinct decay rates for Sprea
 
 With the plugin active, these hooks fire **without user intervention**:
 
-| When                   | What                              | Why                                                                                  |
-| ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------ |
-| Session starts         | Loads Vault context + index       | Agent knows your knowledge from the first turn                                       |
-| Writing/editing a file | Layer guard check                 | Prevents unauthorized L1 modifications                                               |
-| After maencof write    | Activity log recording            | Tracks vault writes (create/update/move/delete) for change history                   |
-| Session ends           | Session cleanup + persistence     | Saves volatile state, prunes expired entries                                         |
-| On every user prompt   | Context-injection chain (4 hooks) | Loads turn context, fires registered actions, captures insights, gates vault commits |
-| On agent stop          | Lifecycle dispatcher              | Executes registered stop-event actions                                               |
+| When                   | What                                               | Why                                                                                                     |
+| ---------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Session starts         | Loads Vault context + index + personal-context awareness | Agent knows your knowledge — and, in companion sessions, your recent state/topics — from the first turn |
+| Writing/editing a file | Layer guard check                                  | Prevents unauthorized L1 modifications                                                                  |
+| After maencof write    | Activity log recording                             | Tracks vault writes (create/update/move/delete) for change history                                      |
+| Session ends           | Session cleanup + persistence                      | Saves volatile state, prunes expired entries                                                            |
+| On every user prompt   | Context-injection chain (4 hooks)                  | Loads turn context, fires registered actions, captures insights, gates vault commits                    |
+| On agent stop          | Lifecycle dispatcher                               | Executes registered stop-event actions                                                                  |
 
 When a block occurs, a message explaining the reason is displayed. No action needed.
+
+---
+
+## Personal Context (Subtle Care)
+
+Alongside vault knowledge, maencof keeps a small **personal context** — transient states (mood, health, situation) and recent personal topics (plans, concerns, relationships) — in `.maencof-meta/personal-context.json`:
+
+- **Captured silently** during conversation by the companion (`capture_personal_context` MCP tool). No banners, no notifications.
+- **Injected once per session** (companion sessions only) as a `<personal-context>` block right after the companion identity — care surfaces as tone, never as "I've been tracking you".
+- **Self-limiting**: states expire (default 14 days) unless reinforced; topics rotate (20 kept). A trait that keeps getting reinforced belongs in L1 identity, not here.
+- **User-owned**: inspect, resolve, or disable anytime with `/maencof:personal-status`. The file is intentionally invisible to `recall`/`explore` searches.
 
 ---
 
@@ -196,6 +207,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:connect`         | Advanced | Register external data sources                                                                       |
 | `/maencof:mcp-setup`       | Advanced | Install external MCP servers                                                                         |
 | `/maencof:manage`          | Advanced | Skill/agent activation and usage reports                                                             |
+| `/maencof:personal-status` | Advanced | View/resolve/toggle the personal context (states + recent topics)                                          |
 | `/maencof:insight`         | Advanced | Auto-insight capture management                                                                      |
 | `/maencof:changelog`       | Advanced | Self-change daily changelog recorder                                                                 |
 | `/maencof:migrate`         | Advanced | Vault architecture migration                                                                         |
