@@ -192,4 +192,48 @@ describe('applyPersonalContextMutation', () => {
     expect(result.success).toBe(false);
     expect(result.message).toContain('empty id');
   });
+
+  it('만료됐지만 파일에 남은 state를 재언급하면 재강화로 이력을 보존한다', () => {
+    captureState(vaultDir); // 기본 TTL 14일 → NOW+14 만료
+    const later = new Date(NOW.getTime() + 20 * DAY_MS); // 만료 후, SessionEnd prune 전
+    const result = captureState(vaultDir, {}, later);
+
+    expect(result.merged).toBe(true);
+    const state = readPersonalContext(vaultDir).states[0];
+    expect(state?.reinforceCount).toBe(2); // 신규 생성으로 빠져 1로 리셋되지 않는다
+    expect(state?.expiresAt).toBe(
+      new Date(later.getTime() + 14 * DAY_MS).toISOString(),
+    );
+  });
+
+  it('resolved topic 재캡처 시 경과한 due를 비워 즉시 재-resolve를 막는다', () => {
+    applyPersonalContextMutation(
+      vaultDir,
+      {
+        target: 'topic',
+        action: 'capture',
+        topic: { label: '이직 고민', kind: 'concern', due: '2026-05-01' },
+      },
+      NOW,
+    );
+    applyPersonalContextMutation(
+      vaultDir,
+      { target: 'topic', action: 'resolve', label: '이직 고민' },
+      NOW,
+    );
+    const later = new Date(NOW.getTime() + DAY_MS);
+    applyPersonalContextMutation(
+      vaultDir,
+      {
+        target: 'topic',
+        action: 'capture',
+        topic: { label: '이직 고민', kind: 'concern' },
+      },
+      later,
+    );
+
+    const topic = readPersonalContext(vaultDir).topics[0];
+    expect(topic?.status).toBe('active');
+    expect(topic?.due).toBeUndefined(); // stale due 제거 → prune이 즉시 재-resolve 못함
+  });
 });

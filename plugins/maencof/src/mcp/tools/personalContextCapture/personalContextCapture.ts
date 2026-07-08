@@ -17,6 +17,7 @@ import {
   type PersonalContextMutationResult,
   applyPersonalContextMutation,
 } from '../../../core/personalContext/index.js';
+import { PERSONAL_STATE_INTENSITIES } from '../../../types/personalContext.js';
 
 /**
  * 플랫 스키마 유지 — MCP SDK는 ZodRawShape를 요구하므로 discriminated union /
@@ -50,7 +51,7 @@ export const personalContextCaptureInputSchema = z.object({
       `Free lowercase-kebab category (required for capture). Suggested for states: ${SUGGESTED_STATE_KINDS.join(', ')}. Suggested for topics: ${SUGGESTED_TOPIC_KINDS.join(', ')}.`,
     ),
   intensity: z
-    .enum(['low', 'medium', 'high'])
+    .enum(PERSONAL_STATE_INTENSITIES)
     .optional()
     .describe('State strength (required for state capture).'),
   note: z
@@ -86,7 +87,9 @@ export const personalContextCaptureInputSchema = z.object({
     ),
 });
 
-export type PersonalContextCaptureArgs = z.infer<typeof personalContextCaptureInputSchema>;
+export type PersonalContextCaptureArgs = z.infer<
+  typeof personalContextCaptureInputSchema
+>;
 
 export async function handlePersonalContextCapture(
   vaultPath: string,

@@ -10,14 +10,13 @@ import {
   DEFAULT_PERSONAL_CONTEXT_CONFIG,
   PERSONAL_CONTEXT_SCHEMA_VERSION,
 } from '../../constants/personalContext.js';
-import type {
-  PersonalContextFile,
-  PersonalState,
-  PersonalStateIntensity,
-  PersonalTopic,
+import {
+  PERSONAL_STATE_INTENSITIES,
+  type PersonalContextFile,
+  type PersonalState,
+  type PersonalStateIntensity,
+  type PersonalTopic,
 } from '../../types/personalContext.js';
-
-const INTENSITIES: readonly PersonalStateIntensity[] = ['low', 'medium', 'high'];
 
 export function defaultPersonalContext(): PersonalContextFile {
   return {
@@ -51,15 +50,31 @@ export function normalizePersonalContext(raw: unknown): PersonalContextFile {
         ? raw._schemaVersion
         : PERSONAL_CONTEXT_SCHEMA_VERSION,
     config: {
-      enabled: isRecord(raw.config) ? raw.config.enabled !== false : true,
+      enabled: isRecord(raw.config) ? isEnabled(raw.config.enabled) : true,
     },
     states,
     topics,
   };
 }
 
+/**
+ * 손편집 관용 — 명시적 비활성 표기(불리언 false, 문자열 'false', 0)는 모두
+ * disabled로 본다. `!== false`만으로는 `"false"`·`0`이 활성으로 새는 허점이 있었다.
+ * 그 외 값은 기본 활성.
+ */
+function isEnabled(value: unknown): boolean {
+  return !(value === false || value === 'false' || value === 0);
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** 재강화/터치 카운트는 양의 정수만 — 손편집 음수·소수는 1로 되돌린다. */
+function normalizeCount(value: unknown): number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0
+    ? value
+    : 1;
 }
 
 function isNonEmptyString(value: unknown): value is string {
@@ -72,7 +87,9 @@ function normalizeState(raw: unknown): PersonalState | null {
     !isNonEmptyString(raw.id) ||
     !isNonEmptyString(raw.label) ||
     !isNonEmptyString(raw.kind) ||
-    !INTENSITIES.includes(raw.intensity as PersonalStateIntensity) ||
+    !PERSONAL_STATE_INTENSITIES.includes(
+      raw.intensity as PersonalStateIntensity,
+    ) ||
     typeof raw.evidence !== 'string' ||
     !isNonEmptyString(raw.capturedAt) ||
     !isNonEmptyString(raw.lastReinforcedAt) ||
@@ -89,11 +106,7 @@ function normalizeState(raw: unknown): PersonalState | null {
     capturedAt: raw.capturedAt,
     lastReinforcedAt: raw.lastReinforcedAt,
     expiresAt: raw.expiresAt,
-    reinforceCount:
-      typeof raw.reinforceCount === 'number' &&
-      Number.isFinite(raw.reinforceCount)
-        ? raw.reinforceCount
-        : 1,
+    reinforceCount: normalizeCount(raw.reinforceCount),
   };
   if (isNonEmptyString(raw.note)) state.note = raw.note;
   return state;
@@ -118,10 +131,7 @@ function normalizeTopic(raw: unknown): PersonalTopic | null {
     status: raw.status,
     firstSeenAt: raw.firstSeenAt,
     lastSeenAt: raw.lastSeenAt,
-    touchCount:
-      typeof raw.touchCount === 'number' && Number.isFinite(raw.touchCount)
-        ? raw.touchCount
-        : 1,
+    touchCount: normalizeCount(raw.touchCount),
   };
   if (isNonEmptyString(raw.note)) topic.note = raw.note;
   if (isNonEmptyString(raw.due)) topic.due = raw.due;

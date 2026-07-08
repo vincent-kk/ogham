@@ -17,7 +17,10 @@ import type {
 } from '../../../types/personalContext.js';
 import { defaultPersonalContext } from '../normalizePersonalContext.js';
 import { prunePersonalContext } from '../prunePersonalContext.js';
-import { readPersonalContext, personalContextPath } from '../readPersonalContext.js';
+import {
+  personalContextPath,
+  readPersonalContext,
+} from '../readPersonalContext.js';
 import { writePersonalContext } from '../writePersonalContext.js';
 
 const NOW = new Date('2026-07-09T00:00:00.000Z');
@@ -79,7 +82,9 @@ describe('prunePersonalContext', () => {
     });
     const result = prunePersonalContext(vaultDir, NOW);
     expect(result.removedStates).toBe(1);
-    expect(readPersonalContext(vaultDir).states.map((s) => s.id)).toEqual(['kept']);
+    expect(readPersonalContext(vaultDir).states.map((s) => s.id)).toEqual([
+      'kept',
+    ]);
   });
 
   it('변경이 없으면 파일을 다시 쓰지 않는다', () => {
@@ -87,6 +92,20 @@ describe('prunePersonalContext', () => {
     const before = readFileSync(personalContextPath(vaultDir), 'utf-8');
     const result = prunePersonalContext(vaultDir, NOW);
     expect(result.changed).toBe(false);
+    expect(readFileSync(personalContextPath(vaultDir), 'utf-8')).toBe(before);
+  });
+
+  it('config.enabled=false면 만료·경과 항목이 있어도 동결한다 (kept untouched)', () => {
+    seed({
+      config: { enabled: false },
+      states: [makeState({ expiresAt: '2026-07-08T00:00:00.000Z' })], // 만료
+      topics: [makeTopic({ due: '2026-07-01' })], // due 유예 경과
+    });
+    const before = readFileSync(personalContextPath(vaultDir), 'utf-8');
+    const result = prunePersonalContext(vaultDir, NOW);
+    expect(result.changed).toBe(false);
+    expect(result.removedStates).toBe(0);
+    expect(result.autoResolvedTopics).toBe(0);
     expect(readFileSync(personalContextPath(vaultDir), 'utf-8')).toBe(before);
   });
 
@@ -123,7 +142,9 @@ describe('prunePersonalContext', () => {
     });
     const result = prunePersonalContext(vaultDir, NOW);
     expect(result.removedTopics).toBe(1);
-    expect(readPersonalContext(vaultDir).topics.map((t) => t.id)).toEqual(['recent']);
+    expect(readPersonalContext(vaultDir).topics.map((t) => t.id)).toEqual([
+      'recent',
+    ]);
   });
 
   it('보존 캡(20) 초과 시 resolved를 우선 제거한다', () => {

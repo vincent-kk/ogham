@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { PersonalContextFile } from '../../../types/personalContext.js';
-import { defaultPersonalContext, normalizePersonalContext } from '../normalizePersonalContext.js';
+import {
+  defaultPersonalContext,
+  normalizePersonalContext,
+} from '../normalizePersonalContext.js';
 
 const validState = {
   id: '번아웃-기미',
@@ -49,7 +52,9 @@ describe('normalizePersonalContext', () => {
 
   it('객체가 아니면 default envelope을 반환한다', () => {
     expect(normalizePersonalContext(null)).toEqual(defaultPersonalContext());
-    expect(normalizePersonalContext('broken')).toEqual(defaultPersonalContext());
+    expect(normalizePersonalContext('broken')).toEqual(
+      defaultPersonalContext(),
+    );
   });
 
   it('빈 객체는 enabled=true 기본 구조로 정규화된다', () => {
@@ -75,7 +80,9 @@ describe('normalizePersonalContext', () => {
 
   it('reinforceCount 결측은 1로 채운다', () => {
     const { reinforceCount: _omitted, ...withoutCount } = validState;
-    const model = normalizePersonalContext(envelope({ states: [withoutCount] }));
+    const model = normalizePersonalContext(
+      envelope({ states: [withoutCount] }),
+    );
     expect(model.states[0]?.reinforceCount).toBe(1);
   });
 
@@ -99,15 +106,33 @@ describe('normalizePersonalContext', () => {
     expect(model.topics[0]).not.toHaveProperty('due');
   });
 
-  it('config.enabled=false는 보존하고 비불리언은 true로 본다', () => {
-    expect(
-      normalizePersonalContext(envelope({ config: { enabled: false } })).config
-        .enabled,
-    ).toBe(false);
-    expect(
-      normalizePersonalContext(envelope({ config: { enabled: 'off' } })).config
-        .enabled,
-    ).toBe(true);
+  it('명시적 비활성 표기(false/"false"/0)는 disabled, 그 외 비불리언은 true', () => {
+    const enabledOf = (enabled: unknown): boolean =>
+      normalizePersonalContext(envelope({ config: { enabled } })).config
+        .enabled;
+    expect(enabledOf(false)).toBe(false);
+    expect(enabledOf('false')).toBe(false);
+    expect(enabledOf(0)).toBe(false);
+    expect(enabledOf('off')).toBe(true);
+    expect(enabledOf(true)).toBe(true);
+  });
+
+  it('reinforceCount/touchCount의 음수·소수·0은 1로 정규화한다', () => {
+    const reinforce = (value: unknown): number | undefined =>
+      normalizePersonalContext(
+        envelope({ states: [{ ...validState, reinforceCount: value }] }),
+      ).states[0]?.reinforceCount;
+    expect(reinforce(-5)).toBe(1);
+    expect(reinforce(2.7)).toBe(1);
+    expect(reinforce(0)).toBe(1);
+    expect(reinforce(3)).toBe(3);
+
+    const touch = (value: unknown): number | undefined =>
+      normalizePersonalContext(
+        envelope({ topics: [{ ...validTopic, touchCount: value }] }),
+      ).topics[0]?.touchCount;
+    expect(touch(-1)).toBe(1);
+    expect(touch(4)).toBe(4);
   });
 
   it('_schemaVersion이 수치가 아니면 현재 버전으로 채운다', () => {

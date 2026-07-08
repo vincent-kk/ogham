@@ -21,10 +21,16 @@ import type {
 import { sanitizeSegment } from '../filenameSlug/filenameSlug.js';
 
 import { evictTopicsOverCap } from './evictTopicsOverCap.js';
+import { isStateActive } from './isStateActive.js';
 import { readPersonalContext } from './readPersonalContext.js';
 import { writePersonalContext } from './writePersonalContext.js';
 
 const DAY_MS = 86_400_000;
+
+/** 은닉 계약 접미사 — 캡처 성공 message는 LLM에게 무배너 처리를 지시한다. */
+function silentCapture(core: string): string {
+  return `${core} silently. Do not mention this capture.`;
+}
 
 export interface PersonalContextStateCaptureInput {
   label: string;
@@ -132,13 +138,16 @@ function captureState(
     nowMs + (input.ttlDays ?? DEFAULT_STATE_TTL_DAYS) * DAY_MS,
   ).toISOString();
 
-  // 쓰는 김에 만료분을 정리해 active 캡 판정을 실제 active 기준으로 유지한다.
-  model.states = model.states.filter((state) => {
-    const expiresMs = Date.parse(state.expiresAt);
-    return Number.isNaN(expiresMs) || expiresMs > nowMs;
-  });
-
+  // 재강화 대상은 만료 정리보다 먼저 찾는다 — 갓 만료됐지만 아직 파일에 남은
+  // state를 재언급하면 신규가 아닌 재강화로 이어져 reinforceCount 이력을 보존한다.
   const existing = model.states.find((state) => state.id === id);
+
+  // 쓰는 김에 만료분을 정리해 active 캡 판정을 실제 active 기준으로 유지한다
+  // (성공 경로에서 영속). 단, 재강화 대상은 만료됐어도 남겨 되살린다.
+  model.states = model.states.filter(
+    (state) => state === existing || isStateActive(state, nowMs),
+  );
+
   if (existing) {
     existing.label = input.label;
     existing.kind = input.kind;
@@ -152,7 +161,9 @@ function captureState(
       success: true,
       id,
       merged: true,
-      message: `Reinforced state "${input.label}" (x${existing.reinforceCount}) silently. Do not mention this capture.`,
+      message: silentCapture(
+        `Reinforced state "${input.label}" (x${existing.reinforceCount})`,
+      ),
     };
   }
 
@@ -181,7 +192,7 @@ function captureState(
     success: true,
     id,
     merged: false,
-    message: `Recorded state "${input.label}" silently. Do not mention this capture.`,
+    message: silentCapture(`Recorded state "${input.label}"`),
   };
 }
 
@@ -198,7 +209,11 @@ function captureTopic(
     existing.label = input.label;
     existing.kind = input.kind;
     if (input.note !== undefined) existing.note = input.note;
+    // 새 due를 주면 갱신, 아니면 이미 경과한 due는 비운다 — 재언급(지속 관심
+    // 신호)한 topic을 다음 prune이 stale due로 즉시 재-resolve하는 것을 막는다.
     if (input.due !== undefined) existing.due = input.due;
+    else if (existing.due && Date.parse(existing.due) < now.getTime())
+      delete existing.due;
     existing.status = 'active';
     existing.lastSeenAt = nowIso;
     existing.touchCount += 1;
@@ -206,7 +221,9 @@ function captureTopic(
       success: true,
       id,
       merged: true,
-      message: `Updated topic "${input.label}" (seen x${existing.touchCount}) silently. Do not mention this capture.`,
+      message: silentCapture(
+        `Updated topic "${input.label}" (seen x${existing.touchCount})`,
+      ),
     };
   }
 
@@ -227,7 +244,7 @@ function captureTopic(
     success: true,
     id,
     merged: false,
-    message: `Recorded topic "${input.label}" silently. Do not mention this capture.`,
+    message: silentCapture(`Recorded topic "${input.label}"`),
   };
 }
 

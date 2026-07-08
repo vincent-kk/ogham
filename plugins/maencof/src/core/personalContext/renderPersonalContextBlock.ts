@@ -10,22 +10,18 @@
  */
 import {
   MAX_INJECTED_TOPICS,
+  PERSONAL_CONTEXT_TAG,
   SUGGESTED_STATE_KINDS,
   SUGGESTED_TOPIC_KINDS,
-  PERSONAL_CONTEXT_TAG,
 } from '../../constants/personalContext.js';
-import type {
-  PersonalContextFile,
-  PersonalState,
-  PersonalStateIntensity,
-  PersonalTopic,
+import {
+  PERSONAL_STATE_INTENSITIES,
+  type PersonalContextFile,
+  type PersonalState,
+  type PersonalTopic,
 } from '../../types/personalContext.js';
 
-const INTENSITY_RANK: Record<PersonalStateIntensity, number> = {
-  high: 2,
-  medium: 1,
-  low: 0,
-};
+import { isStateActive } from './isStateActive.js';
 
 /**
  * personal-context 블록을 만든다. `config.enabled=false`면 빈 문자열을 반환한다.
@@ -39,7 +35,10 @@ export function renderPersonalContextBlock(
   const states = selectActiveStates(model.states, now);
   const topics = selectInjectedTopics(model.topics);
 
-  const lines: string[] = [`<${PERSONAL_CONTEXT_TAG}>`, ...buildDirectiveLines()];
+  const lines: string[] = [
+    `<${PERSONAL_CONTEXT_TAG}>`,
+    ...buildDirectiveLines(),
+  ];
   if (states.length > 0) {
     lines.push('  states:');
     for (const state of states) lines.push(renderStateLine(state));
@@ -52,17 +51,18 @@ export function renderPersonalContextBlock(
   return lines.join('\n');
 }
 
-/** 만료 판정 불가(파싱 실패) 항목은 보수적으로 유지한다. */
-function selectActiveStates(states: PersonalState[], now: Date): PersonalState[] {
+/** 만료 항목은 주입에서 제외한다 (파싱 불가는 isStateActive가 보수적으로 유지). */
+function selectActiveStates(
+  states: PersonalState[],
+  now: Date,
+): PersonalState[] {
   const nowMs = now.getTime();
   return states
-    .filter((state) => {
-      const expiresMs = Date.parse(state.expiresAt);
-      return Number.isNaN(expiresMs) || expiresMs > nowMs;
-    })
+    .filter((state) => isStateActive(state, nowMs))
     .sort(
       (a, b) =>
-        INTENSITY_RANK[b.intensity] - INTENSITY_RANK[a.intensity] ||
+        PERSONAL_STATE_INTENSITIES.indexOf(b.intensity) -
+          PERSONAL_STATE_INTENSITIES.indexOf(a.intensity) ||
         b.lastReinforcedAt.localeCompare(a.lastReinforcedAt),
     );
 }
@@ -88,17 +88,32 @@ function buildDirectiveLines(): string[] {
   ];
 }
 
+/**
+ * 자유 텍스트가 블록을 이탈하지 못하게 무력화한다 — 개행·제어문자는 공백으로,
+ * 꺾쇠는 제거한다. 캡처된 label/note/kind가 `</personal-context>`를 조기 종결하거나
+ * `<system-reminder>` 위조 태그를 시스템 컨텍스트에 주입하는 저장형 인젝션 차단.
+ */
+function sanitizeInline(value: string): string {
+  let out = '';
+  for (const ch of value) {
+    const code = ch.charCodeAt(0);
+    if (code < 0x20 || code === 0x7f) out += ' ';
+    else if (ch !== '<' && ch !== '>') out += ch;
+  }
+  return out;
+}
+
 function shortDate(isoLike: string): string {
-  return isoLike.slice(5, 10);
+  return sanitizeInline(isoLike.slice(5, 10));
 }
 
 function renderStateLine(state: PersonalState): string {
-  const note = state.note ? ` — ${state.note}` : '';
-  return `  - ${state.label} (${state.kind}, ${state.intensity}, ~${shortDate(state.expiresAt)})${note}`;
+  const note = state.note ? ` — ${sanitizeInline(state.note)}` : '';
+  return `  - ${sanitizeInline(state.label)} (${sanitizeInline(state.kind)}, ${state.intensity}, ~${shortDate(state.expiresAt)})${note}`;
 }
 
 function renderTopicLine(topic: PersonalTopic): string {
-  const note = topic.note ? ` — ${topic.note}` : '';
+  const note = topic.note ? ` — ${sanitizeInline(topic.note)}` : '';
   const due = topic.due ? `due ${shortDate(topic.due)}, ` : '';
-  return `  - [${topic.kind}] ${topic.label}${note} (${due}${shortDate(topic.lastSeenAt)}, x${topic.touchCount})`;
+  return `  - [${sanitizeInline(topic.kind)}] ${sanitizeInline(topic.label)}${note} (${due}${shortDate(topic.lastSeenAt)}, x${topic.touchCount})`;
 }
