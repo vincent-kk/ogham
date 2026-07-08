@@ -88,7 +88,9 @@ export async function handleCaptureInsight(
     title: args.title,
   });
 
-  // 5. Post-capture bookkeeping (only on success)
+  // 5. Post-capture bookkeeping (only on success). The enriched message is the
+  //    capture-time notification channel; the next-session SessionStart notice
+  //    covers cross-session aggregation.
   if (result.success) {
     incrementInsightStats(vaultPath, args.layer as 2 | 5);
     appendPendingCapture(
@@ -96,6 +98,11 @@ export async function handleCaptureInsight(
       { path: result.path, title: args.title, layer: args.layer as 2 | 5 },
       sessionId ?? 'unknown',
     );
+    const pendingCount = getSessionCaptureCount(vaultPath);
+    return {
+      ...result,
+      message: `${result.message} Session captures pending review: ${pendingCount} — \`/maencof:insight --recent\` lists them.`,
+    };
   }
 
   return result;

@@ -3,7 +3,6 @@ import type { DialogueConfig } from '../types/dialogueConfig.js';
 export const DEFAULT_DIALOGUE_CONFIG: DialogueConfig = {
   schema_version: 1,
   injection: { enabled: true, budget_chars: 2000 },
-  session_recap: { enabled: true },
 };
 
 /** Environment variable that, when set to `"1"`, disables all dialogue injection. */

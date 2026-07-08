@@ -74,15 +74,14 @@ export function runLifecycleDispatcher(
  * - Context-capable events (`SessionStart` / `UserPromptSubmit` / `PreToolUse` /
  *   `PostToolUse`) receive the payload via `hookSpecificOutput.additionalContext`
  *   so Claude can act on the message.
- * - Terminal events (`Stop` / `SessionEnd`) do not support `additionalContext`.
+ * - The terminal event (`SessionEnd`) does not support `additionalContext`.
  *   The payload is surfaced to the user via `systemMessage` only.
  */
 function buildDispatchResult(
   event: LifecycleEvent,
   payload: string,
 ): LifecycleDispatchResult {
-  if (event === 'Stop' || event === 'SessionEnd')
-    return { continue: true, systemMessage: payload };
+  if (event === 'SessionEnd') return { continue: true, systemMessage: payload };
 
   return {
     continue: true,

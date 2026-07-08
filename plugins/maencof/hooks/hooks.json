@@ -48,18 +48,6 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/stop.mjs\"",
-            "timeout": 8
-          }
-        ]
-      }
-    ],
     "SessionEnd": [
       {
         "matcher": "*",

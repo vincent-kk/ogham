@@ -11,10 +11,10 @@ import type {
  * - `additionalContext`: non-empty values concatenated with `\n\n`, wrapped
  *   with `hookEventName = event` (context-capable events only populate it).
  * - `systemMessage` / `message`: non-empty values concatenated with `\n\n`
- *   (terminal-event channels — Stop / SessionEnd).
+ *   (terminal-event channel — SessionEnd).
  *
  * Channels not used by an event simply stay absent (no concern populates them),
- * so one generic merge serves all six events. Block signalling (stdout JSON vs
+ * so one generic merge serves all five events. Block signalling (stdout JSON vs
  * stderr+exit(2)) is the entry's job, not the merge's.
  */
 export function mergeHookOutput(

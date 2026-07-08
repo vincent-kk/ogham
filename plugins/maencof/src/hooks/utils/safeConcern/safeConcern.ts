@@ -1,5 +1,4 @@
 import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
-
 import type { HookConcernResult } from '../../../types/dispatch.js';
 
 /**
@@ -25,7 +24,7 @@ export function safeConcern(
   }
 }
 
-/** Async variant for git-spawning concerns (vaultCommitter, changelogGate). */
+/** Async variant for git-spawning concerns (vaultCommitter, changelogDebt). */
 export async function safeConcernAsync(
   cwd: string | undefined,
   hook: string,

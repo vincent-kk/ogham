@@ -1,6 +1,6 @@
 import type { LifecycleEvent } from './lifecycle.js';
 
-/** The six Claude Code hook events maencof dispatches. */
+/** The five Claude Code hook events maencof dispatches. */
 export type DispatchEvent = LifecycleEvent;
 
 /**

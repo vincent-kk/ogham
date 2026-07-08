@@ -2,20 +2,20 @@
 
 ## Purpose
 
-대화 규율(meta-skill 주입 + 세션 회고) 설정 로더. `.maencof-meta/dialogue-config.json` 의 injection.enabled / session_recap.enabled 를 안전 파싱으로 읽고, env `MAENCOF_DISABLE_DIALOGUE` 우선 OR 결합으로 off-switch 판정.
+대화 규율(meta-skill 주입) 설정 로더. `.maencof-meta/dialogue-config.json` 의 injection.enabled 를 안전 파싱으로 읽고, env `MAENCOF_DISABLE_DIALOGUE` 우선 OR 결합으로 off-switch 판정.
 
 ## Structure
 
-- `dialogueConfig.ts` — readDialogueConfig, writeDialogueConfig, isDialogueInjectionDisabled, isSessionRecapDisabled
+- `dialogueConfig.ts` — readDialogueConfig, writeDialogueConfig, isDialogueInjectionDisabled
 - `index.ts` — barrel export
 
 ## Boundaries
 
 ### Always do
 
-- DialogueConfigSchema(Zod)로 설정 파싱 + safeParse 실패 시 DEFAULT_DIALOGUE_CONFIG fallback
+- 수동 가드(dialogueConfigGuard)로 설정 파싱 + 실패 시 DEFAULT_DIALOGUE_CONFIG fallback
 - env `MAENCOF_DISABLE_DIALOGUE === "1"` 을 config 보다 우선 평가
-- injection 과 session_recap 두 축을 독립적으로 노출 (env override 는 injection 만 적용)
+- 기존 설정 파일의 알 수 없는 키(retired `session_recap` 등)는 정규화에서 무시
 
 ### Ask first
 

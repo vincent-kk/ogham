@@ -41,7 +41,7 @@ Read `lifecycle.json` and show actions with status (active/inactive).
 
 ### Step 2 — Identify Intent and Map Event
 
-Detect target event from natural language (SessionStart, Stop, PreToolUse, etc.).
+Detect target event from natural language (SessionStart, SessionEnd, PreToolUse, etc. — `Stop` is not supported; map "after each response" to UserPromptSubmit or SessionEnd).
 
 ### Step 3 — Define Action
 

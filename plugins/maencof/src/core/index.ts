@@ -2,7 +2,7 @@ export * from './activityLog/index.js';
 export * from './architectureMigrator/index.js';
 export * from './autonomy/index.js';
 export * from './backupPath/index.js';
-export * from './changelogWriter/index.js';
+export * from './changelogState/index.js';
 export * from './claudeMdMerger/index.js';
 export * from './companionBudget/index.js';
 export * from './companionEdit/index.js';

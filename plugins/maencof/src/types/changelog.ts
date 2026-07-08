@@ -1,38 +1,32 @@
 /**
  * @file changelog.ts
- * @description Changelog 타입 정의 — 자기 변경(self-changes) 추적 및 일별 기록
+ * @description Changelog 타입 정의 — 감시 경로 미기록 변경의 세션 경계 스캔 상태
  *
- * 02_Derived/changelog/ 디렉토리에 일별 파일로 관리되며,
- * maencof Layer 2 (Derived) 문서로 분류된다.
+ * 일별 changelog 문서(02_Derived/changelog/)는 /maencof:changelog 스킬이
+ * 큐레이션한다. 코드는 스캔 상태(.maencof-meta/changelog-state.json)만 다룬다.
  */
 
-/** Changelog 카테고리 */
-export type ChangelogCategory =
-  | 'knowledge' // 지식 변경 — 문서 생성/수정
-  | 'structure' // 구조 변경 — 디렉토리/메모리 구조 변경
-  | 'automation' // 자동화 — hook/스크립트 변경
-  | 'learning' // 학습 — 새로 알게 된 패턴
-  | 'preference'; // 사용자 선호 확인 — 확인된 사용자 선호사항
+/** 세션 경계 스캔이 남긴 미기록 변경 묶음 */
+export interface ChangelogPendingScan {
+  /** 스캔 시각 (ISO 8601) */
+  detectedAt: string;
+  /** 스캔을 수행한 세션 */
+  sessionId?: string;
+  /** `<XY status> <path>` 형식의 변경 라인 (CHANGELOG_PENDING_MAX_CHANGES 상한) */
+  changes: string[];
+}
 
-export {
-  CHANGELOG_CATEGORY_LABELS,
-  CHANGELOG_CATEGORY_ORDER,
-} from '../constants/changelog.js';
-
-/** 단일 changelog 엔트리 */
-export interface ChangelogEntry {
-  /** 카테고리 */
-  category: ChangelogCategory;
-  /** 변경 설명 */
-  description: string;
-  /** 관련 파일 경로 목록 (선택) */
-  paths?: string[];
+/** `.maencof-meta/changelog-state.json` 스키마 */
+export interface ChangelogState {
+  /** 미기록 변경 (없으면 null) */
+  pending: ChangelogPendingScan | null;
+  /** 마지막 큐레이션 시각 (ISO 8601) — /maencof:changelog 가 갱신 */
+  lastCuratedAt: string | null;
 }
 
 export {
   WATCHED_PATHS,
   CHANGELOG_EXCLUDE,
-  CHANGELOG_DIR,
+  CHANGELOG_STATE_FILE,
+  CHANGELOG_PENDING_MAX_CHANGES,
 } from '../constants/changelog.js';
-
-export { CHANGELOG_GATE_MARKER } from '../constants/markers.js';

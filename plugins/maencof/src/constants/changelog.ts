@@ -1,21 +1,3 @@
-import type { ChangelogCategory } from '../types/changelog.js';
-
-export const CHANGELOG_CATEGORY_LABELS: Record<ChangelogCategory, string> = {
-  knowledge: '지식 변경',
-  structure: '구조 변경',
-  automation: '자동화',
-  learning: '학습',
-  preference: '사용자 선호 확인',
-};
-
-export const CHANGELOG_CATEGORY_ORDER: ChangelogCategory[] = [
-  'knowledge',
-  'structure',
-  'automation',
-  'learning',
-  'preference',
-];
-
 export const WATCHED_PATHS = [
   '01_Core/',
   '02_Derived/',
@@ -26,4 +8,8 @@ export const WATCHED_PATHS = [
 
 export const CHANGELOG_EXCLUDE = '02_Derived/changelog/';
 
-export const CHANGELOG_DIR = '02_Derived/changelog';
+/** `.maencof-meta/` 하위 changelog 스캔 상태 파일 이름. */
+export const CHANGELOG_STATE_FILE = 'changelog-state.json';
+
+/** pending 스캔에 보존하는 변경 라인 수 상한 (상태 파일 크기 bound). */
+export const CHANGELOG_PENDING_MAX_CHANGES = 50;

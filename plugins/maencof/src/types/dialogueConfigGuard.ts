@@ -14,7 +14,6 @@ import type { DialogueConfig } from './dialogueConfig.js';
 export interface DialogueConfigMinimal {
   schema_version?: unknown;
   injection?: unknown;
-  session_recap?: unknown;
 }
 
 /**
@@ -47,26 +46,16 @@ function normalizeInjection(v: unknown): DialogueConfig['injection'] {
   };
 }
 
-function normalizeSessionRecap(v: unknown): DialogueConfig['session_recap'] {
-  const def = DEFAULT_DIALOGUE_CONFIG.session_recap;
-  if (v === null || typeof v !== 'object' || Array.isArray(v))
-    return { ...def };
-  const obj = v as Record<string, unknown>;
-  return {
-    enabled: normalizeBoolean(obj.enabled, def.enabled),
-  };
-}
-
 /**
  * 부분 필드 누락 시 DEFAULT_DIALOGUE_CONFIG로 채워주는 정규화 헬퍼.
- * Zod 스키마의 .default(...) 흐름을 수동으로 재현한다.
+ * Zod 스키마의 .default(...) 흐름을 수동으로 재현한다. 알 수 없는 키
+ * (retired `session_recap` 등)는 조용히 무시된다.
  */
 export function normalizeDialogueConfig(raw: unknown): DialogueConfig {
   if (!isValidDialogueConfig(raw))
     return {
       ...DEFAULT_DIALOGUE_CONFIG,
       injection: { ...DEFAULT_DIALOGUE_CONFIG.injection },
-      session_recap: { ...DEFAULT_DIALOGUE_CONFIG.session_recap },
     };
   const obj = raw as Record<string, unknown>;
   return {
@@ -75,6 +64,5 @@ export function normalizeDialogueConfig(raw: unknown): DialogueConfig {
       DEFAULT_DIALOGUE_CONFIG.schema_version,
     ),
     injection: normalizeInjection(obj.injection),
-    session_recap: normalizeSessionRecap(obj.session_recap),
   };
 }

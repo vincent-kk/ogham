@@ -39,7 +39,9 @@ yarn version:sync       # package.json → src/version.ts
 
 ## Session Lifecycle
 
-- **Session recap**: Stop 훅이 세션당 1회, pending insight 캡처가 있을 때 `[maencof] Session Recap` 을 `additionalContext` 로 주입 (`stop/helpers/sessionRecap`; SessionEnd 는 표시 보장 채널이 없어 발화 지점이 Stop). `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
+- **Stop 훅 없음**: 매 턴 프로세스 spawn 비용 때문에 Stop 이벤트는 등록하지 않는다. 세션 단위 관심사는 SessionEnd(스캔·마감)와 SessionStart(표면화)로 배치한다.
+- **Changelog debt**: SessionEnd `changelogDebt` 가 감시 경로 미기록 변경을 1회 스캔해 `.maencof-meta/changelog-state.json` 에 기록 → 다음 SessionStart 가 1줄 권고로 표면화 → `/maencof:changelog` 가 큐레이션 후 커서(lastCuratedAt) 갱신. 차단 없음.
+- **Insight 통지**: capture 시점은 `capture_insight` 도구 응답 message(누적 개수 포함), 세션 간 집계는 다음 SessionStart 의 pending 알림이 담당. `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
 - **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
 
 ## Development Notes

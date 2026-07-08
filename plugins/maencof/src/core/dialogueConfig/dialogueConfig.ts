@@ -1,7 +1,9 @@
 /**
  * @file dialogueConfig.ts
  * @description Dialogue discipline configuration loader.
- *   Reads `.maencof-meta/dialogue-config.json` with manual guard fallback to DEFAULT_DIALOGUE_CONFIG.
+ *   Reads `.maencof-meta/dialogue-config.json` with manual guard fallback to
+ *   DEFAULT_DIALOGUE_CONFIG. Unknown keys in existing user config files (e.g.
+ *   the retired `session_recap` axis) are ignored by normalization.
  *   Exposes `isDialogueInjectionDisabled` which combines env `MAENCOF_DISABLE_DIALOGUE=1`
  *   (takes precedence) with `config.injection.enabled=false` OR-fallback.
  */
@@ -70,16 +72,4 @@ export function isDialogueInjectionDisabled(
   if (env[DIALOGUE_DISABLE_ENV] === '1') return true;
   const config = readDialogueConfig(cwd);
   return config.injection.enabled === false;
-}
-
-/**
- * Returns true if the SessionEnd recap message MUST be suppressed.
- *
- * Independent of `isDialogueInjectionDisabled`; driven only by
- * `config.session_recap.enabled`. No env override for session recap —
- * the recap is a transient SessionEnd message, not a context injection.
- */
-export function isSessionRecapDisabled(cwd: string): boolean {
-  const config = readDialogueConfig(cwd);
-  return config.session_recap.enabled === false;
 }

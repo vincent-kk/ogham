@@ -7,6 +7,5 @@ export const VALID_LIFECYCLE_EVENTS: ReadonlySet<LifecycleEvent> =
     'UserPromptSubmit',
     'PreToolUse',
     'PostToolUse',
-    'Stop',
     'SessionEnd',
   ]);

@@ -9,7 +9,6 @@ export type LifecycleEvent =
   | 'UserPromptSubmit'
   | 'PreToolUse'
   | 'PostToolUse'
-  | 'Stop'
   | 'SessionEnd';
 
 /** v1 action types (echo, remind only; command reserved for v2) */
@@ -66,7 +65,7 @@ export interface LifecycleConfig {
  * Per Claude Code's hook output spec:
  * - `SessionStart` / `UserPromptSubmit` / `PreToolUse` / `PostToolUse` support
  *   `hookSpecificOutput.additionalContext` (Claude-visible context).
- * - `Stop` / `SessionEnd` do NOT support `additionalContext`; only `systemMessage`
+ * - `SessionEnd` does NOT support `additionalContext`; only `systemMessage`
  *   (user-visible warning) is honored alongside `continue` / `suppressOutput`.
  * - Top-level `message` and `hookMessage` are NOT supported for any event and
  *   are silently dropped if emitted.
@@ -86,7 +85,7 @@ export interface LifecycleDispatchResult {
    */
   hookSpecificOutput?: LifecycleHookSpecificOutput;
   /**
-   * User-visible warning. Used for Stop / SessionEnd (which do not support
+   * User-visible warning. Used for SessionEnd (which does not support
    * `additionalContext`) and as a fallback channel for any event where a
    * human-visible banner is desirable. Claude itself does not see this field.
    */

@@ -10,11 +10,6 @@ export const DialogueConfigSchema = z.object({
       budget_chars: z.number().int().min(0).default(2000),
     })
     .default({ enabled: true, budget_chars: 2000 }),
-  session_recap: z
-    .object({
-      enabled: z.boolean().default(true),
-    })
-    .default({ enabled: true }),
 });
 
 export type DialogueConfig = z.infer<typeof DialogueConfigSchema>;

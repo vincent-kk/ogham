@@ -74,7 +74,7 @@ describe('mergeHookOutput', () => {
   });
 
   it('a block without a reason omits the reason key', () => {
-    const merged = mergeHookOutput('Stop', [{ continue: false }]);
+    const merged = mergeHookOutput('SessionEnd', [{ continue: false }]);
     expect(merged.continue).toBe(false);
     expect(merged.reason).toBeUndefined();
   });

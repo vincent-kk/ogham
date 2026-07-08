@@ -46,10 +46,9 @@ interface InsightInjectorResult {
 이 훅은 `pending-insight-notification.json` 을 읽지도 쓰지도 삭제하지도 않는다.
 해당 파일의 수명 주기는 다음과 같다:
 
-1. **Turn N, `capture_insight` MCP call** → `pending-insight-notification.json` 에 append.
-2. **Stop (같은 세션)** → `stop/helpers/sessionRecap` 이 read-only 로 참조해 세션당 1회 recap 을 주입한다 (파일 불변).
-3. **다음 세션 첫 SessionStart** → bootstrap 이 읽어 Claude 에게 surface 하고 파일을 삭제한다.
-4. **소비 전 크래시** → 파일은 디스크에 남으며, 다음 세션의 SessionStart 가 다시 pick up 한다. TTL 없음; one-shot + self-cleaning.
+1. **Turn N, `capture_insight` MCP call** → `pending-insight-notification.json` 에 append. 도구 응답 message 가 누적 개수를 함께 알린다 (capture-time 통지 채널).
+2. **다음 세션 첫 SessionStart** → bootstrap 이 읽어 Claude 에게 surface 하고 파일을 삭제한다.
+3. **소비 전 크래시** → 파일은 디스크에 남으며, 다음 세션의 SessionStart 가 다시 pick up 한다. TTL 없음; one-shot + self-cleaning.
 
 `insightInjector` 는 `config.category_filter` 에서 `allowed-categories` 만 읽어
 배너에 투영할 뿐, 위 파이프라인과는 독립적이다. 이 분리가 깨지면 (예: 인젝터가

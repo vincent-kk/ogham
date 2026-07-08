@@ -22,7 +22,6 @@ import { CACHE_TTL_MS, MAX_PINNED_NODES } from '../../constants/performance.js';
 // Cache directory layout:
 //   {cwdHash}/session-context-{hash}   — session inject marker (24h TTL)
 //   {cwdHash}/prompt-context-{hash}    — per-session context text
-//   {cwdHash}/recap-emitted-{hash}     — Stop recap once-per-session marker
 //   {cwdHash}/turn-context             — session-scoped turn context (removed at session end)
 //   {cwdHash}/pinned-nodes.json        — vault-scoped LLM-pinned node IDs
 
@@ -112,29 +111,6 @@ export function hasPromptContext(sessionId: string, cwd: string): boolean {
     return existsSync(contextFile);
   } catch {
     return false;
-  }
-}
-
-export function hasRecapMarker(sessionId: string, cwd: string): boolean {
-  const marker = join(
-    getCacheDir(cwd),
-    `recap-emitted-${sessionIdHash(sessionId)}`,
-  );
-  try {
-    return existsSync(marker);
-  } catch {
-    return false;
-  }
-}
-
-export function markRecapEmitted(sessionId: string, cwd: string): void {
-  const cacheDir = getCacheDir(cwd);
-  const marker = join(cacheDir, `recap-emitted-${sessionIdHash(sessionId)}`);
-  try {
-    if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
-    writeFileSync(marker, '', 'utf-8');
-  } catch {
-    // silently ignore marker write failures
   }
 }
 
@@ -228,7 +204,6 @@ export function removeSessionFiles(sessionId: string, cwd: string): void {
   const sessionScopedFiles = [
     join(cacheDir, `session-context-${hash}`),
     join(cacheDir, `prompt-context-${hash}`),
-    join(cacheDir, `recap-emitted-${hash}`),
   ];
   for (const file of sessionScopedFiles)
     try {

@@ -1,9 +1,9 @@
 ---
 name: changelog
 user_invocable: true
-description: '[maencof:changelog] Records daily self-change entries to the vault changelog. Detects git changes, writes the dated entry, commits it, and unblocks the changelog-gate Stop hook.'
+description: '[maencof:changelog] Curates self-change entries into the vault changelog. Reads the pending scan state, detects dirty and committed-but-unrecorded changes since the last curation, writes date-grouped entries, and advances the curation cursor. Non-blocking.'
 argument-hint: ''
-version: '1.0.0'
+version: '2.0.0'
 complexity: medium
 context_layers: [2]
 orchestrator: changelog skill
@@ -12,12 +12,14 @@ plugin: maencof
 
 # changelog — Self-Change Recorder
 
-Detects changes in watched paths, categorizes them, and records them in the daily changelog.
+Curates changes in watched paths into daily changelog documents (`02_Derived/changelog/YYYY-MM-DD.md`, Layer 2). Detection happens mechanically (SessionEnd scan + git); this skill adds the semantic layer: categorization, prose, and the "why".
+
+Recording is deferred and retroactive by design. Nothing blocks a session; unrecorded changes are preserved by git and surfaced as a one-line SessionStart advisory until curated.
 
 ## When to Use This Skill
 
-- When the changelog-gate Stop hook blocks session termination
-- To manually record self-changes during a session
+- When the SessionStart advisory reports unrecorded watched-path changes
+- To manually record self-changes at any time
 - To review or update the daily change history
 
 ## Watched Paths
@@ -42,43 +44,63 @@ Detects changes in watched paths, categorizes them, and records them in the dail
 
 ## Workflow
 
-### Step 1 — Detect Changes
+### Step 1 — Resolve Vault Root and Read State
 
-Detect git changes in watched paths. Run from the **absolute vault root path** (`setup` Stage 1 collected this; fall back to `MAENCOF_VAULT_PATH` env). Do NOT rely on CWD — this skill can also be invoked manually from a directory other than the vault root.
+Run from the **absolute vault root path** (`setup` Stage 1 collected this; fall back to `MAENCOF_VAULT_PATH` env). Do NOT rely on CWD — this skill can be invoked from a directory other than the vault root.
+
+Read `<vault-root>/.maencof-meta/changelog-state.json` with the Read tool. Schema:
+
+```json
+{
+  "pending": {
+    "detectedAt": "ISO",
+    "sessionId": "...",
+    "changes": ["M 01_Core/values.md"]
+  },
+  "lastCuratedAt": "ISO or null"
+}
+```
+
+- File absent or malformed → treat as `{ "pending": null, "lastCuratedAt": null }`.
+- `pending` is the last SessionEnd scan (informational — Step 2 re-detects live).
+
+### Step 2 — Detect Changes (live)
+
+Two complementary sources; exclude anything under `02_Derived/changelog/` from both.
+
+**a. Uncommitted changes** (working tree):
 
 ```bash
 VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
 git -C "$VAULT" status --porcelain -- 01_Core/ 02_Derived/ .claude/agents/ .claude/rules/ CLAUDE.md
 ```
 
-- Exclude changes under `02_Derived/changelog/`
-- If no changes found, display "No changes to record." and exit
+**b. Committed but not yet curated** (only when `lastCuratedAt` is not null):
 
-### Step 2 — Categorize Changes
+```bash
+git -C "$VAULT" log --since="<lastCuratedAt>" --date=short --pretty=format:"%ad %h %s" --name-status -- 01_Core/ 02_Derived/ .claude/agents/ .claude/rules/ CLAUDE.md
+```
 
-Classify each changed file into one of 5 categories.
+If both are empty, report "No changes to record.", still perform Step 6 (advance the cursor, clear stale pending), and exit.
 
-Classification criteria:
+### Step 3 — Enrich Context (optional, best effort)
 
-- `.md` file changes in `01_Core/`, `02_Derived/` → `knowledge`
-- Directory add/delete/move, structural file changes → `structure`
-- Files in `.claude/`, hook or script changes → `automation`
-- New patterns or insights detected in changes → `learning`
-- User preference or setting changes confirmed → `preference`
+For better prose and the `learning` / `preference` sections:
 
-A single change may match multiple categories. Choose the most appropriate one.
+- Activity log: NDJSON files under `<vault-root>/.maencof-meta/activity/` for the affected dates (tool-level descriptions of vault writes).
+- Auto-captured insights: vault documents tagged `auto-insight` created in the period (source material for learning/preference entries).
 
-### Step 3 — Read Existing Changelog
+Skip silently if unavailable.
 
-Check if a changelog file for today's date already exists.
+### Step 4 — Group by Change Date and Categorize
 
-- File path: `02_Derived/changelog/YYYY-MM-DD.md`
-- If existing file found, read its content to prevent duplicate entries
-- If no existing file, create a new one
+- Committed changes → the commit date (`%ad` from Step 2b).
+- Uncommitted changes → today.
+- Classify each change into one of the 5 categories (a change may match several; pick the most appropriate).
 
-### Step 4 — Write Changelog
+### Step 5 — Write Changelog Document(s)
 
-Write the changelog using the `mcp__plugin_maencof_t__create` tool (new file) or `mcp__plugin_maencof_t__update` tool (existing file).
+One file per change date: `02_Derived/changelog/YYYY-MM-DD.md`. Read any existing file for that date first to avoid duplicate entries, then write via `mcp__plugin_maencof_t__create` (new) or `mcp__plugin_maencof_t__update` (existing).
 
 **File format:**
 
@@ -96,81 +118,59 @@ tags: [changelog, growth, daily]
 
 - 문서 수정: 핵심 가치관 갱신 — `01_Core/values.md`
 
-### 구조 변경
-
-- 새 카테고리 디렉토리 생성 — `02_Derived/insights/`
-
 ### 자동화
 
-- changelog-gate Stop hook 추가 — `.claude/agents/changelog.md`
-
-### 학습
-
-- Knowledge Graph 탐색 시 spreading activation 파라미터 조정 패턴 발견
-
-### 사용자 선호 확인
-
-- 커밋 시 co-author 미사용 선호 확인
+- SessionEnd 스캔 도입 — `.claude/rules/...`
 ```
 
 **Notes:**
 
-- Avoid duplicating already recorded entries
 - Omit category sections that have no corresponding changes
 - Record paths as relative paths from the vault root
+- Entries describe the change and, where inferable, why it happened
 
-### Step 5 — Commit Changes (synchronous)
+### Step 6 — Advance the Cursor
 
-**Important:** Commit must be executed synchronously. Proceed to Step 6 only if the commit succeeds.
-On commit failure, output the error, skip Step 6 (Gate Marker), and proceed to Step 7 (Report). Do not create the marker file.
-Do not output progress in real time — only show the summary in Step 7 after completion.
+Overwrite `<vault-root>/.maencof-meta/changelog-state.json` with the Write tool:
 
-Commit the changelog file to git in the vault repo (substitute the literal absolute path or use `MAENCOF_VAULT_PATH` as a fallback — same pattern as Step 1).
+```json
+{ "pending": null, "lastCuratedAt": "<current ISO 8601 timestamp>" }
+```
+
+This clears the SessionStart advisory and sets the baseline for the next committed-change detection (Step 2b). On any Step 5 write failure, skip this step so the debt stays visible.
+
+### Step 7 — Commit (best effort)
+
+Commit the changelog file(s). Failure is non-fatal — report it and continue.
 
 ```bash
-VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
-git -C "$VAULT" add 02_Derived/changelog/YYYY-MM-DD.md
+git -C "$VAULT" add 02_Derived/changelog/
 git -C "$VAULT" commit -m "docs(changelog): YYYY-MM-DD 자기 변경 기록"
 ```
 
 **Important:** Do not add a co-author.
 
-### Step 6 — Create Gate Marker
-
-Create the marker file to pass the changelog-gate. Use the same absolute vault root as Steps 1/5 — the Stop hook checks the marker relative to the vault, not to wherever this skill happens to run.
-
-```bash
-VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
-mkdir -p "$VAULT/.omc"
-touch "$VAULT/.omc/.changelog-gate-passed"
-```
-
-When this marker file exists, the Stop hook allows session termination.
-The marker file must be included in `.gitignore`. It is session-scoped: the SessionStart hook deletes it, so each new session re-arms the gate.
-
-### Step 7 — Report
-
-Display the recorded changelog summary to the user.
+### Step 8 — Report
 
 ```
 Changelog 기록 완료: 02_Derived/changelog/YYYY-MM-DD.md
 - 지식 변경: N건
-- 구조 변경: N건
 - 자동화: N건
-세션 종료가 허용되었습니다.
+커서 갱신: lastCuratedAt = <ISO>
 ```
 
 ## Error Handling
 
 - Vault not initialized: "Vault is not initialized. Please run `/maencof:setup`."
-- git unavailable: record the changelog file only and skip commit
-- File write failure: display error message and do not create the marker file
+- git unavailable: curate from `pending.changes` and the activity log only; note the degraded source in the report
+- Document write failure: display the error and do NOT advance the cursor (Step 6)
 
 ## Available Tools
 
-| Tool                            | Type   | Purpose                                                            |
-| ------------------------------- | ------ | ------------------------------------------------------------------ |
-| `mcp__plugin_maencof_t__create` | MCP    | Create new vault document (alternative to direct file write)       |
-| `mcp__plugin_maencof_t__read`   | MCP    | Read existing vault document                                       |
-| `mcp__plugin_maencof_t__update` | MCP    | Update existing vault document (when today's entry already exists) |
-| `Bash`                          | Native | Run git commands (status, add, commit)                             |
+| Tool                            | Type   | Purpose                                                               |
+| ------------------------------- | ------ | --------------------------------------------------------------------- |
+| `mcp__plugin_maencof_t__create` | MCP    | Create new vault document                                             |
+| `mcp__plugin_maencof_t__read`   | MCP    | Read existing vault document                                          |
+| `mcp__plugin_maencof_t__update` | MCP    | Update existing vault document (when the date's entry already exists) |
+| `Read` / `Write`                | Native | Read and update `.maencof-meta/changelog-state.json`                  |
+| `Bash`                          | Native | Run git commands (status, log, add, commit)                           |

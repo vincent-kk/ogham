@@ -3,16 +3,15 @@
  * @description SessionStart bootstrap concern — Knowledge tree check, WAL recovery detection, schedule review, previous session summary load
  * C1 constraint: Must complete within 5 seconds. Heavy index builds are delegated to Skills.
  */
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 import { EXPECTED_ARCHITECTURE_VERSION } from '../../../../constants/architecture.js';
 import { buildDefaultDirective } from '../../../../constants/directiveTemplate.js';
-import { CHANGELOG_GATE_MARKER } from '../../../../constants/markers.js';
 import {
   META_SKILL_MAX_CHARS,
   META_SKILL_TAG,
 } from '../../../../constants/sessionStart.js';
+import { readChangelogState } from '../../../../core/changelogState/changelogState.js';
 import {
   mergeMaencofSection,
   readMaencofSection,
@@ -90,7 +89,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     messages.push(`[maencof:${companion.name}] ${companion.greeting}`);
 
   initClaudeMdSection(cwd, companion?.name, messages);
-  removeChangelogGateMarker(cwd);
+  checkChangelogDebt(cwd, messages);
   provisionConfigs(cwd, messages);
   checkArchitectureMismatch(cwd, messages);
   checkVersionMismatch(cwd, messages);
@@ -121,15 +120,17 @@ function buildVaultNotInitializedResult(): SessionStartResult {
 }
 
 /**
- * Changelog gate marker is session-scoped: a marker left by the previous
- * session's /maencof:changelog pass must not disarm this session's Stop gate
- * (SKILL.md contract: "does not persist across sessions"). Removing it here
- * re-arms the gate every session.
+ * Surface unrecorded watched-path changes detected by the previous session's
+ * SessionEnd scan (changelogDebt). Advisory only — never blocks; the live
+ * source of truth is re-checked by /maencof:changelog when it runs.
  */
-function removeChangelogGateMarker(cwd: string): void {
+function checkChangelogDebt(cwd: string, messages: string[]): void {
   try {
-    const markerPath = join(cwd, '.omc', CHANGELOG_GATE_MARKER);
-    if (existsSync(markerPath)) unlinkSync(markerPath);
+    const pending = readChangelogState(cwd).pending;
+    if (pending && pending.changes.length > 0)
+      messages.push(
+        `[maencof] ${pending.changes.length} watched-path change(s) are not yet recorded in the changelog. Run \`/maencof:changelog\` to record them.`,
+      );
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',

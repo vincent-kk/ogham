@@ -20,8 +20,9 @@ The dispatcher runtime (`src/hooks/lifecycleDispatcher/lifecycleDispatcher.ts`) 
 | `UserPromptSubmit` | Before prompt processing | Reminders, validation     |
 | `PreToolUse`       | Before tool execution    | Warnings, confirmation    |
 | `PostToolUse`      | After tool execution     | Logging, post-processing  |
-| `Stop`             | Claude response complete | Checklists, notifications |
 | `SessionEnd`       | Session closing          | Cleanup, summaries        |
+
+`Stop` is not supported — the plugin registers no Stop hook (per-turn process spawn cost). Map "after each response" requests to `UserPromptSubmit` (next turn) or `SessionEnd`.
 
 ## Action Types
 
@@ -51,7 +52,7 @@ Current lifecycle actions:
   [Active] greeting (SessionStart)
     "Hello! Have a great day"
 
-  [Active] commit-reminder (Stop)
+  [Active] commit-reminder (UserPromptSubmit)
     "Did you write commit messages in English?" (condition: after git ops)
 
   [Inactive] session-summary (SessionEnd)
@@ -62,13 +63,13 @@ Total: 3 actions (2 active, 1 inactive)
 
 ### Step 2 — Identify Intent and Map to Event
 
-| User Expression                       | Mapped Event       |
-| ------------------------------------- | ------------------ |
-| "When session starts", "on startup"   | `SessionStart`     |
-| "Every time I ask", "on prompt"       | `UserPromptSubmit` |
-| "Before editing files", "before tool" | `PreToolUse`       |
-| "After each response", "when done"    | `Stop`             |
-| "When session ends", "on close"       | `SessionEnd`       |
+| User Expression                       | Mapped Event                                   |
+| ------------------------------------- | ---------------------------------------------- |
+| "When session starts", "on startup"   | `SessionStart`                                 |
+| "Every time I ask", "on prompt"       | `UserPromptSubmit`                             |
+| "Before editing files", "before tool" | `PreToolUse`                                   |
+| "After each response", "when done"    | `UserPromptSubmit` (next turn) or `SessionEnd` |
+| "When session ends", "on close"       | `SessionEnd`                                   |
 
 ### Step 3 — Define Action
 

@@ -5,7 +5,7 @@
  * Contract:
  *   - SessionStart / UserPromptSubmit / PreToolUse / PostToolUse
  *     → `hookSpecificOutput.additionalContext` 로 payload 전달 (Claude 가시).
- *   - Stop / SessionEnd → `systemMessage` 로 payload 전달 (사용자 가시).
+ *   - SessionEnd → `systemMessage` 로 payload 전달 (사용자 가시).
  *   - 어떤 이벤트도 top-level `message` / `hookMessage` 방출 금지.
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -88,31 +88,28 @@ describe('runLifecycleDispatcher — hook output envelope', () => {
     });
   });
 
-  describe.each(['Stop', 'SessionEnd'] as const)(
-    'terminal event: %s',
-    (event) => {
-      beforeEach(() => {
-        vaultDir = createVaultWithEchoAction(event);
-      });
+  describe('terminal event: SessionEnd', () => {
+    beforeEach(() => {
+      vaultDir = createVaultWithEchoAction('SessionEnd');
+    });
 
-      it('systemMessage 에 payload 를 전달한다 (additionalContext 미지원)', () => {
-        const result = runLifecycleDispatcher(event, { cwd: vaultDir! });
+    it('systemMessage 에 payload 를 전달한다 (additionalContext 미지원)', () => {
+      const result = runLifecycleDispatcher('SessionEnd', { cwd: vaultDir! });
 
-        expect(result.continue).toBe(true);
-        expect(result.systemMessage).toBeDefined();
-        expect(result.systemMessage).toContain(MARKER);
-        expect(result.hookSpecificOutput).toBeUndefined();
-      });
+      expect(result.continue).toBe(true);
+      expect(result.systemMessage).toBeDefined();
+      expect(result.systemMessage).toContain(MARKER);
+      expect(result.hookSpecificOutput).toBeUndefined();
+    });
 
-      it('top-level message / hookMessage 를 방출하지 않는다', () => {
-        const result = runLifecycleDispatcher(event, {
-          cwd: vaultDir!,
-        }) as unknown as Record<string, unknown>;
-        expect('message' in result).toBe(false);
-        expect('hookMessage' in result).toBe(false);
-      });
-    },
-  );
+    it('top-level message / hookMessage 를 방출하지 않는다', () => {
+      const result = runLifecycleDispatcher('SessionEnd', {
+        cwd: vaultDir!,
+      }) as unknown as Record<string, unknown>;
+      expect('message' in result).toBe(false);
+      expect('hookMessage' in result).toBe(false);
+    });
+  });
 
   it('vault 가 아니면 { continue: true } 만 반환한다', () => {
     const nonVault = mkdtempSync(join(tmpdir(), 'non-vault-'));

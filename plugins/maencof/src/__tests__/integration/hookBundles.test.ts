@@ -12,10 +12,10 @@ const bridgeDir = resolve(packageRoot, 'bridge');
 
 interface HookCase {
   name: string;
-  args?: string[];
   buildInput: (cwd: string) => Record<string, unknown>;
 }
 
+// 이벤트당 하나의 디스패처 번들 — bridge/<event>.mjs 와 1:1.
 const HOOK_CASES: HookCase[] = [
   {
     name: 'session-start',
@@ -26,15 +26,7 @@ const HOOK_CASES: HookCase[] = [
     }),
   },
   {
-    name: 'session-end',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      hook_event_name: 'SessionEnd',
-    }),
-  },
-  {
-    name: 'insight-injector',
+    name: 'user-prompt-submit',
     buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
@@ -43,16 +35,17 @@ const HOOK_CASES: HookCase[] = [
     }),
   },
   {
-    name: 'context-injector',
+    name: 'pre-tool-use',
     buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
-      prompt: 'hello',
-      hook_event_name: 'UserPromptSubmit',
+      tool_name: 'Read',
+      tool_input: { file_path: join(cwd, 'noop.md') },
+      hook_event_name: 'PreToolUse',
     }),
   },
   {
-    name: 'activity-recorder',
+    name: 'post-tool-use',
     buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
@@ -63,50 +56,11 @@ const HOOK_CASES: HookCase[] = [
     }),
   },
   {
-    name: 'vault-committer',
-    args: ['UserPromptSubmit'],
+    name: 'session-end',
     buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
-      prompt: 'hello',
-      hook_event_name: 'UserPromptSubmit',
-    }),
-  },
-  {
-    name: 'changelog-gate',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      hook_event_name: 'Stop',
-    }),
-  },
-  {
-    name: 'lifecycle-dispatcher',
-    args: ['SessionStart'],
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      hook_event_name: 'SessionStart',
-    }),
-  },
-  {
-    name: 'vault-redirector',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      tool_name: 'Read',
-      tool_input: { file_path: join(cwd, 'noop.md') },
-      hook_event_name: 'PreToolUse',
-    }),
-  },
-  {
-    name: 'layer-guard',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      tool_name: 'Write',
-      tool_input: { file_path: join(cwd, 'noop.md'), content: 'noop' },
-      hook_event_name: 'PreToolUse',
+      hook_event_name: 'SessionEnd',
     }),
   },
 ];
@@ -122,13 +76,13 @@ describe('hook bundle smoke tests', () => {
     if (cwd) rmSync(cwd, { recursive: true, force: true });
   });
 
-  for (const { name, args = [], buildInput } of HOOK_CASES) {
+  for (const { name, buildInput } of HOOK_CASES) {
     const bundle = resolve(bridgeDir, `${name}.mjs`);
 
     it.skipIf(!existsSync(bundle))(
       `${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`,
       () => {
-        const result = spawnSync(process.execPath, [bundle, ...args], {
+        const result = spawnSync(process.execPath, [bundle], {
           input: JSON.stringify(buildInput(cwd)),
           encoding: 'utf8',
           timeout: 10_000,

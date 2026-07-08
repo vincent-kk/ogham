@@ -170,14 +170,12 @@ export type {
 } from './activity.js';
 
 export {
-  CHANGELOG_CATEGORY_LABELS,
-  CHANGELOG_CATEGORY_ORDER,
-  CHANGELOG_DIR,
   CHANGELOG_EXCLUDE,
-  CHANGELOG_GATE_MARKER,
+  CHANGELOG_PENDING_MAX_CHANGES,
+  CHANGELOG_STATE_FILE,
   WATCHED_PATHS,
 } from './changelog.js';
-export type { ChangelogCategory, ChangelogEntry } from './changelog.js';
+export type { ChangelogPendingScan, ChangelogState } from './changelog.js';
 
 export type {
   MaencofCreateInput,

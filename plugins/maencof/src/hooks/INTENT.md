@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Claude Code 훅 진입점. 이벤트마다 하나의 디렉토리(`sessionStart` / `userPromptSubmit` / `preToolUse` / `postToolUse` / `stop` / `sessionEnd`)가 그 이벤트의 브리지 entry + 얇은 orchestrator + `helpers/`(관심사)를 소유한다. 여러 이벤트가 공유하는 관심사·헬퍼는 `utils/` 하위에 둔다.
+Claude Code 훅 진입점. 이벤트마다 하나의 디렉토리(`sessionStart` / `userPromptSubmit` / `preToolUse` / `postToolUse` / `sessionEnd`)가 그 이벤트의 브리지 entry + 얇은 orchestrator + `helpers/`(관심사)를 소유한다. 여러 이벤트가 공유하는 관심사·헬퍼는 `utils/` 하위에 둔다. Stop 이벤트는 사용하지 않는다 — 매 턴 프로세스 spawn 비용 때문에 세션 단위 관심사는 SessionEnd(스캔)·SessionStart(표면화)로 배치한다.
 
 ## Structure
 

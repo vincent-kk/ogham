@@ -19,7 +19,7 @@
 
 ### Never do
 
-- recap 등 표시용 출력 emit (SessionEnd 는 표시 보장 채널 없음 — recap 은 `stop/helpers/sessionRecap` 소관)
+- 표시용 출력 emit (SessionEnd 는 표시 보장 채널 없음)
 - 볼트 데이터 삭제
 - vault-scope 캐시 삭제 (graph/weights/snapshot/stale-nodes 등은 MCP server 영역)
 - `.maencof-meta/sessions/*.md` 에 쓰기

@@ -8,6 +8,7 @@ import {
 import { runVaultCommitter } from '../utils/vaultCommitter/vaultCommitter.js';
 
 import { runArchiveExpired } from './helpers/archiveExpired/archiveExpired.js';
+import { runChangelogDebt } from './helpers/changelogDebt/changelogDebt.js';
 import { runSessionEnd } from './helpers/finalize/finalize.js';
 
 /**
@@ -23,7 +24,10 @@ export async function orchestrateSessionEnd(
     safeConcern(input.cwd, 'lifecycle-dispatcher', () =>
       runLifecycleDispatcher('SessionEnd', input),
     ),
-    // 아카이빙은 committer 앞 — 만료본 이동/스텁 결과가 그 커밋에 포함되도록
+    // 미기록 변경 스캔·아카이빙은 committer 앞 — 상태 파일/이동 결과가 그 커밋에 포함되도록
+    await safeConcernAsync(input.cwd, 'changelog-debt', () =>
+      runChangelogDebt(input),
+    ),
     await safeConcernAsync(input.cwd, 'archive-expired', () =>
       runArchiveExpired(input.cwd ?? process.cwd()),
     ),

@@ -160,6 +160,21 @@ describe('handleCaptureInsight', () => {
     expect(appendArgs[2]).toBe('session-abc');
   });
 
+  it('성공 메시지에 누적 캡처 수와 /maencof:insight 안내가 덧붙는다', async () => {
+    mockGetSessionCaptureCount.mockReturnValue(3);
+
+    const result = await handleCaptureInsight('/vault', {
+      title: 'Test',
+      content: 'Content',
+      layer: 2,
+      tags: ['test'],
+    });
+
+    expect(result.message).toContain('Created successfully');
+    expect(result.message).toContain('pending review: 3');
+    expect(result.message).toContain('/maencof:insight --recent');
+  });
+
   it('실패 시 bookkeeping이 호출되지 않는다', async () => {
     mockHandleMaencofCreate.mockResolvedValue(FAILURE_RESULT);
 
