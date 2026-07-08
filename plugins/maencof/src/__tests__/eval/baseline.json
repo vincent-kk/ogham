@@ -1,9 +1,9 @@
 {
-  "queries": 12,
+  "queries": 17,
   "engines": {
     "qga": {
-      "ndcg10": 0.9529,
-      "recall10": 0.8938,
+      "ndcg10": 0.9558,
+      "recall10": 0.8859,
       "mrr": 1
     }
   }

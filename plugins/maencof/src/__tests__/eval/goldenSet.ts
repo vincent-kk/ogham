@@ -154,4 +154,49 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L1/identity.md': 1,
     },
   },
+  {
+    id: 'indirect-hipporag',
+    seeds: ['hipporag'],
+    relevance: {
+      'L3/references/hipporag-paper.md': 2,
+      'L2/insights/graph-algorithms-survey.md': 2,
+      'L2/insights/spreading-activation-notes.md': 1,
+    },
+  },
+  {
+    id: 'deep-chain-actr',
+    seeds: ['ACT-R'],
+    relevance: {
+      'L3/references/actr-memory-paper.md': 2,
+      'L2/insights/personal-memory-systems.md': 2,
+      'L2/insights/knowledge-graph-design.md': 1,
+    },
+  },
+  {
+    id: 'convergence-single-seed',
+    seeds: ['knowledge graph design'],
+    relevance: {
+      'L2/insights/knowledge-graph-design.md': 2,
+      'L2/insights/graph-search-synthesis.md': 2,
+      'L2/insights/spreading-activation-notes.md': 2,
+      'L2/insights/ontology-modeling.md': 1,
+    },
+  },
+  {
+    id: 'hub-suppress-security-task',
+    seeds: ['security task'],
+    relevance: {
+      'L4/tasks/review-security-articles.md': 2,
+      'L3/clippings/security-article-00.md': 1,
+      'L3/clippings/security-article-01.md': 1,
+    },
+  },
+  {
+    id: 'precision-typescript-monorepo',
+    seeds: ['typescript monorepo'],
+    relevance: {
+      'L2/insights/typescript-monorepo-patterns.md': 2,
+      'L2/insights/typescript-type-safety.md': 2,
+    },
+  },
 ];
