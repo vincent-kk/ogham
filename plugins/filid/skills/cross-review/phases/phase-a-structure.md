@@ -15,6 +15,9 @@
 > 3. After writing each row, **discard the raw MCP response from your
 >    working memory** — do not quote, summarize, or re-reference it.
 > 4. Move to the next file with a clean context.
+> 5. Set the `overall` sentinel (and `stage_results`) to its real PASS/FAIL
+>    value as your LAST edit, only after every stage row is written — it
+>    stays `PENDING` in the skeleton and is the done-marker consumers key on.
 >
 > This prevents context overflow when `changedFilesCount` is large. The
 > chairperson may partition changed files into 10-file batches (see

@@ -191,8 +191,13 @@ uses a **hybrid execution model**:
   `deliberation_mode`, `failure_reason`, and `paths_to_artifacts` (spec:
   `../cross-review/DETAIL.md` → `## API Contracts`).
   Cross-check that `session.md`, `verification-metrics.md`, and
-  `verification-structure.md` exist at the returned paths before
-  dispatching Phase D.
+  `verification-structure.md` exist AND are complete at the returned paths
+  (terminal sentinel not `PENDING` — see `../cross-review/DETAIL.md` →
+  "Artifact completeness sentinel") before dispatching Phase D. A
+  still-`PENDING` skeleton counts as a missing return (treat as
+  `deliberation_mode: null`). Before writing any A/B/C artifact yourself,
+  reap survivors — `TaskStop` the A/B/C subagent and any `phase-*`
+  teammate — so they cannot clobber the review directory.
 - **Null / missing return handling**: if the subagent exits without a
   parseable `SubagentReturn` block, treat the payload as
   `deliberation_mode: null` and let the `verdict_gate` resolve to `fail`

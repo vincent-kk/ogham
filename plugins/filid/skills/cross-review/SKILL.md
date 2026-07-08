@@ -238,10 +238,12 @@ message and terminate.
    - `committee.length >= 2` → `team`
    - otherwise (empty or unrecognized committee) → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline `verdict_gate` blocks the merge as INCONCLUSIVE
      If `failure_reason` is missing, default to `none`.
-2. Verify required artifacts exist. Always required: `session.md`,
+2. Verify required artifacts exist **and are complete** (terminal
+   frontmatter sentinel not `PENDING` — see `DETAIL.md` → "Artifact
+   completeness sentinel"). Always required: `session.md`,
    `verification-metrics.md`, `verification-structure.md`. Required only
    when Phase A ran (`NO_STRUCTURE_CHECK=false`): `structure-check.md`.
-   Any missing required artifact → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline main blocks the merge via `verdict_gate`.
+   Any missing OR still-`PENDING` (skeleton) required artifact → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline main blocks the merge via `verdict_gate`.
 3. Emit the following fenced block verbatim as the terminal assistant
    message, substituting real values for every placeholder:
 
