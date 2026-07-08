@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { hydrateRuntimeMaps } from '../../core/graphBuilder/graphBuilder.js';
 import { MetadataStore } from '../../core/indexer/metadataStore/metadataStore.js';
-import { runSpreadingActivation } from '../../core/spreadingActivation/spreadingActivation.js';
+import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import type { NodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -107,13 +107,11 @@ describe('MetadataStore.loadGraph rehydration', () => {
     await store.saveGraph(built);
     const loaded = await store.loadGraph();
 
-    const fromBuilt = runSpreadingActivation(built, ['a.md' as NodeId], {
-      maxHops: 3,
-      threshold: 0.01,
+    const fromBuilt = runAccumulativeActivation(built, ['a.md' as NodeId], {
+      iterations: 3,
     });
-    const fromLoaded = runSpreadingActivation(loaded!, ['a.md' as NodeId], {
-      maxHops: 3,
-      threshold: 0.01,
+    const fromLoaded = runAccumulativeActivation(loaded!, ['a.md' as NodeId], {
+      iterations: 3,
     });
     expect(fromLoaded.map((r) => r.nodeId)).toEqual(
       fromBuilt.map((r) => r.nodeId),

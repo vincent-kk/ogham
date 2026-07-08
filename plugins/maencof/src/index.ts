@@ -60,11 +60,8 @@ export {
 } from './core/weightCalculator/weightCalculator.js';
 export type { WeightCalcResult } from './core/weightCalculator/weightCalculator.js';
 
-export {
-  runSpreadingActivation,
-  SpreadingActivationEngine,
-} from './core/spreadingActivation/spreadingActivation.js';
-export type { SpreadingActivationParams } from './core/spreadingActivation/spreadingActivation.js';
+export { runAccumulativeActivation } from './core/spreadingActivation/accumulativeActivation.js';
+export type { AccumulativeActivationParams } from './core/spreadingActivation/accumulativeActivation.js';
 
 export {
   CommunityDetector,

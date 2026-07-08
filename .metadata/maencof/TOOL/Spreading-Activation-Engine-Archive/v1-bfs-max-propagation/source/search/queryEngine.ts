@@ -12,7 +12,16 @@ import {
   PHRASE_CONTIGUITY_BONUS,
 } from '../../constants/queryEngine.js';
 import { WORD_BOUNDARY_SPLIT_REGEX } from '../../constants/regexes.js';
-import { runAccumulativeActivation } from '../../core/spreadingActivation/index.js';
+import {
+  SA_DEFAULT_ENGINE,
+  SIBLING_FANOUT_CAP,
+} from '../../constants/spreadingActivation.js';
+import type { SaEngine } from '../../constants/spreadingActivation.js';
+import {
+  runAccumulativeActivation,
+  runSpreadingActivation,
+} from '../../core/spreadingActivation/index.js';
+import type { SpreadingActivationParams } from '../../core/spreadingActivation/index.js';
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type {
@@ -38,36 +47,28 @@ export interface ScoredSeed {
   matchType: MatchType;
 }
 
-/**
- * QGA-SA 매직넘버 오버라이드 — 수렴 실험(eval 스윕) 전용.
- * 미지정 필드는 constants/spreadingActivation.ts 기본값을 따른다.
- * 라이브 MCP 도구는 이 필드를 노출하지 않는다 (튜닝 확정 시 상수로 승격).
- */
-export interface QgaTuning {
-  /** 반복 횟수 T (지정 시 maxHops 매핑보다 우선) */
-  iterations?: number;
-  /** 갱신 임계값 τ */
-  updateThreshold?: number;
-  /** lexical 게이트 하한 γ */
-  gateFloor?: number;
-  /** 전역 감쇠 스케일 α_base */
-  alphaBase?: number;
-}
-
 /** QueryEngine 검색 옵션 */
 export interface QueryOptions {
   /** 최대 결과 수 (기본: 10) */
   maxResults?: number;
-  /** v1 SA 감쇠 인자 — v1 은퇴로 무시됨 (MCP 스키마 호환용 유지; 아카이브 참조) */
+  /** SA 감쇠 인자 (기본: 0.7) */
   decay?: number;
-  /** v1 발화 임계값 — v1 은퇴로 무시됨 (MCP 스키마 호환용 유지; 아카이브 참조) */
+  /** 발화 임계값 (기본: 0.1) */
   threshold?: number;
-  /** 탐색 반경 — QGA 반복 횟수 T로 매핑 (≤3→2, 5→3, ≥7→4; 기본: 5→3) */
+  /** 최대 홉 수 (기본: 5) */
   maxHops?: number;
   /** Layer 필터 (미지정 시 전체 Layer) */
   layerFilter?: number[];
-  /** 매직넘버 수렴 실험용 파라미터 오버라이드 (캐시 키에 포함) */
-  tuning?: QgaTuning;
+  /**
+   * 적응형 SA 파라미터 활성화 (기본: true).
+   * `maxHops`를 명시적으로 설정하면 무시된다. 적응형 동작을 원하면 `maxHops`를 생략하라.
+   */
+  adaptiveSA?: boolean;
+  /**
+   * 확산 엔진 선택 (기본: SA_DEFAULT_ENGINE).
+   * 'legacy' = v1 BFS max-전파(하드카피 기준선), 'qga' = v2 QGA-SA.
+   */
+  engine?: SaEngine;
 }
 
 /** 검색 결과 */
@@ -392,7 +393,14 @@ export function query(
   options: QueryOptions = {},
 ): QueryResult {
   const startTime = Date.now();
-  const { maxResults = 10, maxHops = 5, layerFilter = [] } = options;
+  const {
+    maxResults = 10,
+    decay = 0.7,
+    threshold = 0.1,
+    maxHops = 5,
+    layerFilter = [],
+    engine = SA_DEFAULT_ENGINE,
+  } = options;
 
   // 캐시 조회
   const cached = queryCache.get(seeds, options, graph.builtAt);
@@ -404,21 +412,57 @@ export function query(
 
   let results: ActivationResult[] = [];
 
-  if (scoredSeeds.length > 0) {
-    // QGA-SA: 합산-누적·차수 정규화·lexical 게이트 (반경은 T 반복으로 제어)
+  if (scoredSeeds.length > 0 && engine === 'qga') {
+    // v2 QGA-SA: 합산-누적·차수 정규화·lexical 게이트 (반경은 T 반복으로 제어)
     const seedActivations = new Map<NodeId, number>();
     for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);
 
-    const tuning = options.tuning;
     results = runAccumulativeActivation(graph, seedIds, {
-      iterations: tuning?.iterations ?? iterationsFromMaxHops(maxHops),
-      updateThreshold: tuning?.updateThreshold,
-      gateFloor: tuning?.gateFloor,
-      alphaBase: tuning?.alphaBase,
+      iterations: iterationsFromMaxHops(maxHops),
       queryTokens: collectQueryTokens(seeds),
       seedActivations,
       maxActiveNodes: 100,
     });
+  } else if (scoredSeeds.length > 0) {
+    // seedActivations 맵 구축
+    const seedActivations = new Map<NodeId, number>();
+    for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);
+
+    // 적응형 SA 파라미터 (B1)
+    let adaptedMaxHops = maxHops;
+    let adaptedThreshold = threshold;
+    const useAdaptive =
+      options.adaptiveSA !== false && options.maxHops === undefined;
+
+    if (useAdaptive && scoredSeeds.length > 0) {
+      const maxScore = Math.max(...scoredSeeds.map((s) => s.matchScore));
+      const avgScore =
+        scoredSeeds.reduce((sum, s) => sum + s.matchScore, 0) /
+        scoredSeeds.length;
+      const isStrongSignal =
+        scoredSeeds.length === 1 &&
+        maxScore >= 0.9 &&
+        (scoredSeeds[0]!.matchType === 'path-exact' ||
+          scoredSeeds[0]!.matchType === 'title-exact');
+
+      if (isStrongSignal) {
+        adaptedMaxHops = Math.min(adaptedMaxHops, 2);
+        adaptedThreshold = Math.max(adaptedThreshold, 0.05);
+      } else if (avgScore >= 0.6) adaptedMaxHops = Math.min(adaptedMaxHops, 3);
+    }
+
+    // SA 파라미터
+    const saParams: SpreadingActivationParams = {
+      threshold: adaptedThreshold,
+      maxHops: adaptedMaxHops,
+      maxActiveNodes: 100,
+      decayOverride: decay,
+      seedActivations,
+      siblingFanoutCap: SIBLING_FANOUT_CAP,
+    };
+
+    // 확산 활성화 실행
+    results = runSpreadingActivation(graph, seedIds, saParams);
   }
 
   // Layer 필터 적용

@@ -10,7 +10,7 @@
 import { EDGE_TYPE } from '../../../constants/architecture.js';
 import { SUB_LAYER_NAMES } from '../../../constants/kgSuggestLinks.js';
 import { SA_BONUS_WEIGHT } from '../../../constants/weights.js';
-import { runSpreadingActivation } from '../../../core/spreadingActivation/index.js';
+import { runAccumulativeActivation } from '../../../core/spreadingActivation/index.js';
 import {
   commonTags,
   extractKeywords,
@@ -85,9 +85,8 @@ export function handleKgSuggestLinks(
   // ── 2단계: SA 보강 ──
   const saScores = new Map<NodeId, number>();
   if (sourceNodeId) {
-    const saResults = runSpreadingActivation(graph, [sourceNodeId], {
-      maxHops: 3,
-      threshold: 0.05,
+    const saResults = runAccumulativeActivation(graph, [sourceNodeId], {
+      iterations: 3,
       maxActiveNodes: 50,
     });
     for (const result of saResults)
@@ -97,9 +96,8 @@ export function handleKgSuggestLinks(
     // 태그 매칭으로 시드 노드 결정
     const seedIds = findSeedsByTags(graph, sourceTags, 3);
     if (seedIds.length > 0) {
-      const saResults = runSpreadingActivation(graph, seedIds, {
-        maxHops: 2,
-        threshold: 0.05,
+      const saResults = runAccumulativeActivation(graph, seedIds, {
+        iterations: 2,
         maxActiveNodes: 50,
       });
       for (const result of saResults) saScores.set(result.nodeId, result.score);
