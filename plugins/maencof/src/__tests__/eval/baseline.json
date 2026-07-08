@@ -1,0 +1,10 @@
+{
+  "queries": 12,
+  "engines": {
+    "legacy": {
+      "ndcg10": 0.8991,
+      "recall10": 0.8383,
+      "mrr": 1
+    }
+  }
+}
