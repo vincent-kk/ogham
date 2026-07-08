@@ -6,7 +6,6 @@ import { bench, describe } from 'vitest';
 
 import { buildGraph } from '../../core/graphBuilder/graphBuilder.js';
 import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
-import { runSpreadingActivation } from '../../core/spreadingActivation/spreadingActivation.js';
 import { resolveSeedNodes } from '../../search/queryEngine/queryEngine.js';
 import { Layer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
@@ -68,20 +67,6 @@ const graph100 = makeSyntheticGraph(100);
 const graph500 = makeSyntheticGraph(500);
 const graph1000 = makeSyntheticGraph(1000);
 
-describe('SA execution', () => {
-  bench('100 nodes', () => {
-    runSpreadingActivation(graph100, [toNodeId('doc-0.md')]);
-  });
-
-  bench('500 nodes', () => {
-    runSpreadingActivation(graph500, [toNodeId('doc-0.md')]);
-  });
-
-  bench('1000 nodes', () => {
-    runSpreadingActivation(graph1000, [toNodeId('doc-0.md')]);
-  });
-});
-
 describe('Keyword seed resolution', () => {
   bench('100 nodes - keyword', () => {
     resolveSeedNodes(graph100, ['topic-5']);
@@ -118,20 +103,12 @@ describe('QGA-SA execution (v2)', () => {
   });
 });
 
-describe('Edge weight lookup (SA with multiple seeds)', () => {
-  bench('100 nodes - 3 seeds', () => {
-    runSpreadingActivation(graph100, [
-      toNodeId('doc-0.md'),
-      toNodeId('doc-25.md'),
-      toNodeId('doc-50.md'),
-    ]);
-  });
-
+describe('QGA-SA multi-seed (500 nodes)', () => {
   bench('500 nodes - 3 seeds', () => {
-    runSpreadingActivation(graph500, [
-      toNodeId('doc-0.md'),
-      toNodeId('doc-125.md'),
-      toNodeId('doc-250.md'),
-    ]);
+    runAccumulativeActivation(
+      graph500,
+      [toNodeId('doc-0.md'), toNodeId('doc-125.md'), toNodeId('doc-250.md')],
+      { queryTokens: ['topic-5'] },
+    );
   });
 });

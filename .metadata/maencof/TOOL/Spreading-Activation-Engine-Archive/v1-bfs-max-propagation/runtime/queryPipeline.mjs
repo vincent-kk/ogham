@@ -10,27 +10,28 @@ import {
   PHRASE_CONTIGUITY_BONUS,
   SIBLING_FANOUT_CAP,
   WORD_BOUNDARY_SPLIT_REGEX,
-} from './constants.mjs';
-import { runSpreadingActivation } from './engineV1.mjs';
+} from "./constants.mjs";
+import { runSpreadingActivation } from "./engineV1.mjs";
 
 function classifyMatch(node, keyword) {
   const kw = keyword.toLowerCase();
   const titleLower = node.title.toLowerCase();
 
-  if (titleLower === kw) return { score: 1.0, type: 'title-exact' };
+  if (titleLower === kw) return { score: 1.0, type: "title-exact" };
 
   const titleWords = titleLower.split(/[\s\-_/\\.,;:!?()[\]{}'"]+/);
-  if (titleWords.some((w) => w === kw)) return { score: 0.8, type: 'title-word' };
+  if (titleWords.some((w) => w === kw))
+    return { score: 0.8, type: "title-word" };
 
   if (node.tags.some((t) => t.toLowerCase() === kw))
-    return { score: 0.5, type: 'tag-exact' };
+    return { score: 0.5, type: "tag-exact" };
 
   if (node.tags.some((t) => t.toLowerCase().startsWith(kw)))
-    return { score: 0.3, type: 'tag-prefix' };
+    return { score: 0.3, type: "tag-prefix" };
 
-  if (titleLower.includes(kw)) return { score: 0.8, type: 'title-word' };
+  if (titleLower.includes(kw)) return { score: 0.8, type: "title-word" };
 
-  return { score: 0.3, type: 'tag-prefix' };
+  return { score: 0.3, type: "tag-prefix" };
 }
 
 function tokenizeSeed(seed) {
@@ -43,7 +44,7 @@ function tokenizeSeed(seed) {
 }
 
 function normalizePhrase(s) {
-  return tokenizeSeed(s).join(' ');
+  return tokenizeSeed(s).join(" ");
 }
 
 function candidatesForToken(graph, token) {
@@ -55,7 +56,9 @@ function candidatesForToken(graph, token) {
   else
     for (const [id, node] of graph.nodes) {
       const titleMatch = node.title.toLowerCase().includes(token);
-      const tagMatch = node.tags.some((tag) => tag.toLowerCase().includes(token));
+      const tagMatch = node.tags.some((tag) =>
+        tag.toLowerCase().includes(token),
+      );
       if (titleMatch || tagMatch) ids.add(id);
     }
 
@@ -90,10 +93,10 @@ function capSeedsByPagerank(graph, ids, cap) {
 function classifyMultiToken(node, tokens, phrase) {
   const titleNorm = normalizePhrase(node.title);
   if (phrase.length > 0 && titleNorm === phrase)
-    return { score: 1.0, type: 'title-exact' };
+    return { score: 1.0, type: "title-exact" };
 
   let minScore = 1.0;
-  let worstType = 'title-word';
+  let worstType = "title-word";
   for (const token of tokens) {
     const { score, type } = classifyMatch(node, token);
     if (score < minScore) {
@@ -102,20 +105,27 @@ function classifyMultiToken(node, tokens, phrase) {
     }
   }
   const contiguous = phrase.length > 0 && titleNorm.includes(phrase);
-  const score = Math.min(1.0, minScore + (contiguous ? PHRASE_CONTIGUITY_BONUS : 0));
-  return { score, type: contiguous ? 'title-word' : worstType };
+  const score = Math.min(
+    1.0,
+    minScore + (contiguous ? PHRASE_CONTIGUITY_BONUS : 0),
+  );
+  return { score, type: contiguous ? "title-word" : worstType };
 }
 
 function resolvePathSeed(graph, seed, bestScores) {
   if (graph.nodes.has(seed)) {
     const existing = bestScores.get(seed);
     if (!existing || existing.matchScore < 1.0)
-      bestScores.set(seed, { nodeId: seed, matchScore: 1.0, matchType: 'path-exact' });
+      bestScores.set(seed, {
+        nodeId: seed,
+        matchScore: 1.0,
+        matchType: "path-exact",
+      });
 
     return;
   }
 
-  const prefix = seed.endsWith('/') ? seed : `${seed}/`;
+  const prefix = seed.endsWith("/") ? seed : `${seed}/`;
   const memberIds = [];
   for (const [id, node] of graph.nodes)
     if (node.path.startsWith(prefix)) memberIds.push(id);
@@ -128,7 +138,7 @@ function resolvePathSeed(graph, seed, bestScores) {
       bestScores.set(id, {
         nodeId: id,
         matchScore: PATH_PREFIX_MATCH_SCORE,
-        matchType: 'tag-exact',
+        matchType: "tag-exact",
       });
   }
 }
@@ -142,7 +152,7 @@ function resolveKeywordSeed(graph, seed, bestScores) {
     ? intersectCandidateSets(tokens.map((t) => candidatesForToken(graph, t)))
     : candidatesForToken(graph, tokens[0]);
 
-  const phrase = multiToken ? normalizePhrase(seed) : '';
+  const phrase = multiToken ? normalizePhrase(seed) : "";
 
   const scored = [];
   for (const id of candidateIds) {
@@ -172,7 +182,7 @@ export function resolveSeedNodes(graph, seeds) {
   const bestScores = new Map();
 
   for (const seed of seeds)
-    if (seed.endsWith('.md') || seed.includes('/'))
+    if (seed.endsWith(".md") || seed.includes("/"))
       resolvePathSeed(graph, seed, bestScores);
     else resolveKeywordSeed(graph, seed, bestScores);
 
@@ -207,17 +217,19 @@ export function query(graph, seeds, options = {}) {
 
     let adaptedMaxHops = maxHops;
     let adaptedThreshold = threshold;
-    const useAdaptive = options.adaptiveSA !== false && options.maxHops === undefined;
+    const useAdaptive =
+      options.adaptiveSA !== false && options.maxHops === undefined;
 
     if (useAdaptive && scoredSeeds.length > 0) {
       const maxScore = Math.max(...scoredSeeds.map((s) => s.matchScore));
       const avgScore =
-        scoredSeeds.reduce((sum, s) => sum + s.matchScore, 0) / scoredSeeds.length;
+        scoredSeeds.reduce((sum, s) => sum + s.matchScore, 0) /
+        scoredSeeds.length;
       const isStrongSignal =
         scoredSeeds.length === 1 &&
         maxScore >= 0.9 &&
-        (scoredSeeds[0].matchType === 'path-exact' ||
-          scoredSeeds[0].matchType === 'title-exact');
+        (scoredSeeds[0].matchType === "path-exact" ||
+          scoredSeeds[0].matchType === "title-exact");
 
       if (isStrongSignal) {
         adaptedMaxHops = Math.min(adaptedMaxHops, 2);
@@ -237,10 +249,13 @@ export function query(graph, seeds, options = {}) {
     results = runSpreadingActivation(graph, seedIds, saParams);
   }
 
-  if (layerFilter.length > 0) results = applyLayerFilter(results, graph, layerFilter);
+  if (layerFilter.length > 0)
+    results = applyLayerFilter(results, graph, layerFilter);
 
   const pathExactSeedSet = new Set(
-    scoredSeeds.filter((s) => s.matchType === 'path-exact').map((s) => s.nodeId),
+    scoredSeeds
+      .filter((s) => s.matchType === "path-exact")
+      .map((s) => s.nodeId),
   );
   const filtered = results
     .filter((r) => !pathExactSeedSet.has(r.nodeId))

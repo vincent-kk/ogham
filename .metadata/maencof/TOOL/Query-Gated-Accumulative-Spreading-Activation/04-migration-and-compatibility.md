@@ -1,8 +1,8 @@
 # 마이그레이션과 호환성
 
-## 엔진 플래그 전략
+## 엔진 플래그 전략 (이행 완료 — 2026-07-08)
 
-`QueryOptions.engine?: 'legacy' | 'qga'` 를 도입하고 기본값은 상수 `SA_DEFAULT_ENGINE`이 결정한다. 도입 시점의 기본값은 `legacy`이며, **T1 골든셋에서 QGA-SA가 baseline을 상회하는 것이 확인된 커밋에서 `qga`로 전환**한다. legacy 경로는 최소 한 릴리즈 동안 롤백 수단으로 유지한 뒤 처분을 별도 결정한다.
+이행 중에는 `QueryOptions.engine?: 'legacy' | 'qga'` 플래그로 두 엔진이 공존했고, T1 골든셋에서 QGA-SA 우위 확인(nDCG@10 0.9529 vs 0.8991) 후 기본 엔진을 `qga`로 전환했다. 이후 사용자 결정에 따라 **legacy는 코드베이스에서 최종 이탈** — 플래그와 `SA_DEFAULT_ENGINE` 상수도 함께 제거되었고, v1은 [`Spreading-Activation-Engine-Archive/v1-bfs-max-propagation`](../Spreading-Activation-Engine-Archive/v1-bfs-max-propagation/INDEX.md)에 단독 실행 가능한 격리본(verbatim TS 스냅샷 + 의존성 0 벤치마크 러너)으로 보존된다. 세대 간 지표 비교는 아카이브의 동결 기준선으로 수행한다. `QueryOptions.decay`/`threshold`는 MCP 도구 스키마 호환을 위해 필드만 유지되며 무시된다.
 
 두 엔진은 동일한 `ActivationResult[]` 계약을 반환하므로 queryEngine 이후 단계(Layer 필터, path-exact 제외, 캐시, 컨텍스트 조립)는 무변경이다.
 

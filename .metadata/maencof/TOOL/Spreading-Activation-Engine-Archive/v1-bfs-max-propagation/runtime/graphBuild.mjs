@@ -9,11 +9,11 @@
 import {
   EDGE_TYPE_MULTIPLIER,
   WORD_BOUNDARY_SPLIT_REGEX,
-} from './constants.mjs';
+} from "./constants.mjs";
 
 function getDirectory(filePath) {
-  const lastSlash = filePath.lastIndexOf('/');
-  return lastSlash >= 0 ? filePath.slice(0, lastSlash) : '';
+  const lastSlash = filePath.lastIndexOf("/");
+  return lastSlash >= 0 ? filePath.slice(0, lastSlash) : "";
 }
 
 function buildTreeEdges(nodes, nodeMap) {
@@ -24,8 +24,18 @@ function buildTreeEdges(nodes, nodeMap) {
     if (parentDir === dir) continue;
     const parentIndexId = `${parentDir}/index.md`;
     if (!nodeMap.has(parentIndexId)) continue;
-    edges.push({ from: parentIndexId, to: node.id, type: 'PARENT_OF', weight: 1.0 });
-    edges.push({ from: node.id, to: parentIndexId, type: 'CHILD_OF', weight: 1.0 });
+    edges.push({
+      from: parentIndexId,
+      to: node.id,
+      type: "PARENT_OF",
+      weight: 1.0,
+    });
+    edges.push({
+      from: node.id,
+      to: parentIndexId,
+      type: "CHILD_OF",
+      weight: 1.0,
+    });
   }
 
   const dirMap = new Map();
@@ -38,8 +48,18 @@ function buildTreeEdges(nodes, nodeMap) {
     if (siblings.length < 2) continue;
     for (let i = 0; i < siblings.length; i++)
       for (let j = i + 1; j < siblings.length; j++) {
-        edges.push({ from: siblings[i], to: siblings[j], type: 'SIBLING', weight: 1.0 });
-        edges.push({ from: siblings[j], to: siblings[i], type: 'SIBLING', weight: 1.0 });
+        edges.push({
+          from: siblings[i],
+          to: siblings[j],
+          type: "SIBLING",
+          weight: 1.0,
+        });
+        edges.push({
+          from: siblings[j],
+          to: siblings[i],
+          type: "SIBLING",
+          weight: 1.0,
+        });
       }
   }
   return edges;
@@ -58,8 +78,18 @@ function buildDomainEdges(nodes) {
     if (group.length < 2) continue;
     for (let i = 0; i < group.length; i++)
       for (let j = i + 1; j < group.length; j++) {
-        edges.push({ from: group[i].id, to: group[j].id, type: 'DOMAIN', weight: 0.3 });
-        edges.push({ from: group[j].id, to: group[i].id, type: 'DOMAIN', weight: 0.3 });
+        edges.push({
+          from: group[i].id,
+          to: group[j].id,
+          type: "DOMAIN",
+          weight: 0.3,
+        });
+        edges.push({
+          from: group[j].id,
+          to: group[i].id,
+          type: "DOMAIN",
+          weight: 0.3,
+        });
       }
   }
   return edges;
@@ -74,7 +104,7 @@ export function buildGraph(nodes) {
     if (node.outboundLinks)
       for (const target of node.outboundLinks)
         if (nodeMap.has(target))
-          edges.push({ from: node.id, to: target, type: 'LINK', weight: 1.0 });
+          edges.push({ from: node.id, to: target, type: "LINK", weight: 1.0 });
 
   for (const e of buildTreeEdges(nodes, nodeMap)) edges.push(e);
   for (const e of buildDomainEdges(nodes)) edges.push(e);
@@ -82,19 +112,19 @@ export function buildGraph(nodes) {
   return {
     nodes: nodeMap,
     edges,
-    builtAt: '1970-01-01T00:00:00.000Z',
+    builtAt: "1970-01-01T00:00:00.000Z",
     nodeCount: nodeMap.size,
     edgeCount: edges.length,
   };
 }
 
 function getPathDepth(filePath) {
-  return filePath.split('/').length;
+  return filePath.split("/").length;
 }
 
 function getLCSDepth(pathA, pathB) {
-  const partsA = pathA.split('/');
-  const partsB = pathB.split('/');
+  const partsA = pathA.split("/");
+  const partsB = pathB.split("/");
   let lcs = 0;
   const minLen = Math.min(partsA.length, partsB.length);
   for (let i = 0; i < minLen; i++)
@@ -114,8 +144,8 @@ function computeWuPalmerWeight(a, b) {
 }
 
 function computeSCSWeight(a, b) {
-  const partsA = a.path.split('/');
-  const partsB = b.path.split('/');
+  const partsA = a.path.split("/");
+  const partsB = b.path.split("/");
   let commonLen = 0;
   const minLen = Math.min(partsA.length, partsB.length);
   for (let i = 0; i < minLen; i++)
@@ -140,17 +170,17 @@ function computeEdgeWeight(edge, graph) {
   if (!fromNode || !toNode) return 1.0;
 
   switch (edge.type) {
-    case 'LINK':
+    case "LINK":
       return computeSCSWeight(fromNode, toNode);
-    case 'PARENT_OF':
-    case 'CHILD_OF':
-    case 'SIBLING':
+    case "PARENT_OF":
+    case "CHILD_OF":
+    case "SIBLING":
       return computeWuPalmerWeight(fromNode, toNode);
-    case 'RELATIONSHIP':
+    case "RELATIONSHIP":
       return computeRelationshipWeight(fromNode, toNode);
-    case 'CROSS_LAYER':
+    case "CROSS_LAYER":
       return 1.0;
-    case 'DOMAIN':
+    case "DOMAIN":
       return 0.3;
     default:
       return 1.0;
@@ -159,11 +189,18 @@ function computeEdgeWeight(edge, graph) {
 
 function isPageRankEdge(edgeType) {
   return (
-    edgeType === 'LINK' || edgeType === 'PARENT_OF' || edgeType === 'RELATIONSHIP'
+    edgeType === "LINK" ||
+    edgeType === "PARENT_OF" ||
+    edgeType === "RELATIONSHIP"
   );
 }
 
-export function computePageRank(graph, dampingFactor = 0.85, maxIterations = 100, tolerance = 1e-6) {
+export function computePageRank(
+  graph,
+  dampingFactor = 0.85,
+  maxIterations = 100,
+  tolerance = 1e-6,
+) {
   const nodeIds = Array.from(graph.nodes.keys());
   const n = nodeIds.length;
   if (n === 0) return new Map();

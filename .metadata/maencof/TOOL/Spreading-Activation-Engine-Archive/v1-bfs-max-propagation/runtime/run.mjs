@@ -8,11 +8,16 @@
  * threshold 0.1 / maxHops 5): ndcg10 0.8991 / recall10 0.8383 / mrr 1.0.
  * 이 수치 재현이 곧 이식 충실도의 증거다 — 불일치 시 exit 1.
  */
-import { buildEvalGraph, GOLDEN_QUERIES } from './fixtureAndGolden.mjs';
-import { query } from './queryPipeline.mjs';
+import { buildEvalGraph, GOLDEN_QUERIES } from "./fixtureAndGolden.mjs";
+import { query } from "./queryPipeline.mjs";
 
 const FROZEN_BASELINE = { ndcg10: 0.8991, recall10: 0.8383, mrr: 1.0 };
-const LIVE_DEFAULTS = { maxResults: 10, decay: 0.7, threshold: 0.1, maxHops: 5 };
+const LIVE_DEFAULTS = {
+  maxResults: 10,
+  decay: 0.7,
+  threshold: 0.1,
+  maxHops: 5,
+};
 const K = 10;
 const EPSILON = 0.0001;
 const LATENCY_RUNS = 200;
@@ -37,7 +42,9 @@ function ndcgAt(k, ranked, relevance) {
 }
 
 function recallAt(k, ranked, relevance) {
-  const relevantTotal = Object.values(relevance).filter((rel) => rel > 0).length;
+  const relevantTotal = Object.values(relevance).filter(
+    (rel) => rel > 0,
+  ).length;
   if (relevantTotal === 0) return 0;
   let hit = 0;
   for (const path of ranked.slice(0, k)) if ((relevance[path] ?? 0) > 0) hit++;
@@ -56,17 +63,21 @@ function round4(x) {
   return Math.round(x * 10000) / 10000;
 }
 
-const verbose = process.argv.includes('--verbose');
+const verbose = process.argv.includes("--verbose");
 const graph = buildEvalGraph();
 
-console.log(`[v1-archive] fixture graph: ${graph.nodeCount} nodes / ${graph.edgeCount} edges`);
+console.log(
+  `[v1-archive] fixture graph: ${graph.nodeCount} nodes / ${graph.edgeCount} edges`,
+);
 
 let ndcgSum = 0;
 let recallSum = 0;
 let mrrSum = 0;
 for (const gq of GOLDEN_QUERIES) {
   const { results } = query(graph, gq.seeds, LIVE_DEFAULTS);
-  const ranked = results.map((r) => graph.nodes.get(r.nodeId)?.path ?? r.nodeId);
+  const ranked = results.map(
+    (r) => graph.nodes.get(r.nodeId)?.path ?? r.nodeId,
+  );
   const n = ndcgAt(K, ranked, gq.relevance);
   const r = recallAt(K, ranked, gq.relevance);
   const m = mrr(ranked, gq.relevance);
@@ -103,8 +114,10 @@ const ok =
   Math.abs(measured.recall10 - FROZEN_BASELINE.recall10) <= EPSILON &&
   Math.abs(measured.mrr - FROZEN_BASELINE.mrr) <= EPSILON;
 
-if (ok) console.log('[v1-archive] FIDELITY OK — frozen baseline reproduced');
+if (ok) console.log("[v1-archive] FIDELITY OK — frozen baseline reproduced");
 else {
-  console.error('[v1-archive] FIDELITY MISMATCH — port deviates from frozen baseline');
+  console.error(
+    "[v1-archive] FIDELITY MISMATCH — port deviates from frozen baseline",
+  );
   process.exit(1);
 }

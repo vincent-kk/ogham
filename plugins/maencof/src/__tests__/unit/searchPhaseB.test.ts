@@ -1,11 +1,11 @@
 /**
  * @file searchPhaseB.test.ts
- * @description Phase B 테스트: B3 (Variable Seed Scoring), B1 (Adaptive SA), B4-lite (Content Snippets), B6 (Directives)
+ * @description Phase B 테스트: B3 (Variable Seed Scoring), B4-lite (Content Snippets), B6 (Directives)
  */
 import { describe, expect, it } from 'vitest';
 
 import { buildAdjacencyList } from '../../core/graphBuilder/graphBuilder.js';
-import { runSpreadingActivation } from '../../core/spreadingActivation/spreadingActivation.js';
+import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
 import { extractBestSnippet } from '../../search/contextAssembler/contextAssembler.js';
 import {
@@ -203,126 +203,15 @@ describe('B3: SA seedActivations — title-match vs tag-match ranking', () => {
       [toNodeId('B'), 0.3],
     ]);
 
-    const results = runSpreadingActivation(
+    const results = runAccumulativeActivation(
       graph,
       [toNodeId('A'), toNodeId('B')],
-      { seedActivations, decayOverride: 0.7 },
+      { seedActivations },
     );
 
     const cScore = results.find((r) => r.nodeId === toNodeId('C'))?.score ?? 0;
     const dScore = results.find((r) => r.nodeId === toNodeId('D'))?.score ?? 0;
     expect(cScore).toBeGreaterThan(dScore);
-  });
-});
-
-// ========================================
-// B1: Adaptive SA Parameters
-// ========================================
-describe('B1: Adaptive SA Parameters', () => {
-  /** 5-node chain: A-B-C-D-E */
-  function makeChainGraph(): KnowledgeGraph {
-    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
-    const ids = [
-      'chain-a.md',
-      'chain-b.md',
-      'chain-c.md',
-      'chain-d.md',
-      'chain-e.md',
-    ];
-    for (const id of ids)
-      nodes.set(
-        toNodeId(id),
-        makeNode(id, Layer.L2_DERIVED, { title: `Node ${id}` }),
-      );
-
-    const edges = [
-      makeEdge('chain-a.md', 'chain-b.md', 0.8),
-      makeEdge('chain-b.md', 'chain-c.md', 0.8),
-      makeEdge('chain-c.md', 'chain-d.md', 0.8),
-      makeEdge('chain-d.md', 'chain-e.md', 0.8),
-    ];
-
-    return buildGraphWithIndex(nodes, edges);
-  }
-
-  it('strong signal (exact path) → 2-hop 결과만 반환', () => {
-    const graph = makeChainGraph();
-    const result = query(graph, ['chain-a.md'], {
-      engine: 'legacy',
-      adaptiveSA: true,
-      decay: 0.7,
-      threshold: 0.01,
-    });
-
-    // seed 'chain-a.md'는 제외됨, B/C만 2-hop 이내
-    const resultIds = result.results.map((r) => r.nodeId);
-    expect(resultIds).toContain(toNodeId('chain-b.md'));
-    expect(resultIds).toContain(toNodeId('chain-c.md'));
-    expect(resultIds).not.toContain(toNodeId('chain-d.md'));
-    expect(resultIds).not.toContain(toNodeId('chain-e.md'));
-  });
-
-  it('weak keyword → full depth 탐색 유지', () => {
-    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
-    const ids = ['w-a.md', 'w-b.md', 'w-c.md', 'w-d.md'];
-    for (const id of ids)
-      nodes.set(
-        toNodeId(id),
-        makeNode(id, Layer.L2_DERIVED, {
-          title: `Doc ${id}`,
-          tags: ['weakprefix-something'],
-        }),
-      );
-
-    const edges = [
-      makeEdge('w-a.md', 'w-b.md', 0.8),
-      makeEdge('w-b.md', 'w-c.md', 0.8),
-      makeEdge('w-c.md', 'w-d.md', 0.8),
-    ];
-
-    const graph = buildGraphWithIndex(nodes, edges);
-    // 'weakprefix' → tag-prefix match (score 0.3) → weak signal → full depth
-    const result = query(graph, ['weakprefix'], {
-      engine: 'legacy',
-      adaptiveSA: true,
-      decay: 0.9,
-      threshold: 0.01,
-      maxHops: 5,
-    });
-
-    // weak signal이므로 user-provided maxHops=5가 그대로 사용됨
-    // 시드는 여러 개 (모두 tag-prefix match)이므로 결과가 존재해야 함
-    expect(result.seedIds.length).toBeGreaterThan(0);
-  });
-
-  it('user-explicit maxHops overrides adaptive', () => {
-    const graph = makeChainGraph();
-    const result = query(graph, ['chain-a.md'], {
-      engine: 'legacy',
-      adaptiveSA: true,
-      maxHops: 4,
-      decay: 0.7,
-      threshold: 0.01,
-    });
-
-    // maxHops가 명시적으로 4이므로 adaptive override 안 됨
-    const resultIds = result.results.map((r) => r.nodeId);
-    expect(resultIds).toContain(toNodeId('chain-d.md'));
-  });
-
-  it('adaptiveSA: false → adaptive 비활성화, maxHops 기본값 사용', () => {
-    const graph = makeChainGraph();
-    const result = query(graph, ['chain-a.md'], {
-      engine: 'legacy',
-      adaptiveSA: false,
-      decay: 0.9,
-      threshold: 0.001,
-    });
-
-    // adaptive 비활성화 → 기본 maxHops=5, strong signal이어도 축소 안 됨
-    // D는 3홉이므로 adaptive=true면 maxHops=2로 잘림, false면 도달
-    const resultIds = result.results.map((r) => r.nodeId);
-    expect(resultIds).toContain(toNodeId('chain-d.md'));
   });
 });
 

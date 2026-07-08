@@ -2,9 +2,9 @@
  * v1 확산 엔진(BFS max-전파) 이식 — ../source/core/spreadingActivation.ts 의
  * runSpreadingActivation 로직을 타입만 제거해 그대로 옮긴 것. 로직 변경 금지.
  */
-import { EDGE_TYPE_MULTIPLIER } from './constants.mjs';
-import { buildAdjacencyList } from './graphBuild.mjs';
-import { LAYER_DECAY_FACTORS, SUBLAYER_DECAY_FACTORS } from './constants.mjs';
+import { EDGE_TYPE_MULTIPLIER } from "./constants.mjs";
+import { buildAdjacencyList } from "./graphBuild.mjs";
+import { LAYER_DECAY_FACTORS, SUBLAYER_DECAY_FACTORS } from "./constants.mjs";
 
 function getLayerDecay(layer, subLayer) {
   if (subLayer && subLayer in SUBLAYER_DECAY_FACTORS)
@@ -14,10 +14,10 @@ function getLayerDecay(layer, subLayer) {
 }
 
 function getEdgeType(graph, from, to) {
-  if (graph.edgeTypeMap) return graph.edgeTypeMap.get(from)?.get(to) ?? 'LINK';
+  if (graph.edgeTypeMap) return graph.edgeTypeMap.get(from)?.get(to) ?? "LINK";
 
   const edge = graph.edges.find((e) => e.from === from && e.to === to);
-  return edge?.type ?? 'LINK';
+  return edge?.type ?? "LINK";
 }
 
 function getEdgeWeight(graph, from, to) {
@@ -42,7 +42,7 @@ function capSiblingFanout(graph, from, neighbors, cap) {
   const siblings = [];
   const others = [];
   for (const to of neighbors)
-    if (getEdgeType(graph, from, to) === 'SIBLING') siblings.push(to);
+    if (getEdgeType(graph, from, to) === "SIBLING") siblings.push(to);
     else others.push(to);
 
   if (siblings.length <= cap) return neighbors;
@@ -56,7 +56,14 @@ function capSiblingFanout(graph, from, neighbors, cap) {
   return [...others, ...siblings.slice(0, cap)];
 }
 
-function processNeighbor(graph, current, neighborId, params, activationMap, queue) {
+function processNeighbor(
+  graph,
+  current,
+  neighborId,
+  params,
+  activationMap,
+  queue,
+) {
   const { threshold, maxHops, decayOverride } = params;
 
   if (!graph.nodes.has(neighborId)) return;
@@ -131,7 +138,8 @@ export function runSpreadingActivation(graph, seedIds, params = {}) {
     });
   }
 
-  const adj = graph.adjacencyList ?? buildAdjacencyList(graph.nodes, graph.edges);
+  const adj =
+    graph.adjacencyList ?? buildAdjacencyList(graph.nodes, graph.edges);
 
   let queueHead = 0;
   while (queueHead < queue.length && activationMap.size <= maxActiveNodes) {
@@ -141,9 +149,21 @@ export function runSpreadingActivation(graph, seedIds, params = {}) {
 
     const neighbors = adj.get(current.nodeId);
     if (neighbors) {
-      const ordered = capSiblingFanout(graph, current.nodeId, neighbors, siblingFanoutCap);
+      const ordered = capSiblingFanout(
+        graph,
+        current.nodeId,
+        neighbors,
+        siblingFanoutCap,
+      );
       for (const neighborId of ordered)
-        processNeighbor(graph, current, neighborId, resolvedParams, activationMap, queue);
+        processNeighbor(
+          graph,
+          current,
+          neighborId,
+          resolvedParams,
+          activationMap,
+          queue,
+        );
     }
   }
 

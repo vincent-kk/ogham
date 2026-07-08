@@ -96,6 +96,7 @@ export function createESLintConfig(
         "**/bridge/**",
         "**/skills/**/templates/**",
         "**/*.config.*",
+        ".metadata/**",
       ],
     },
   ];

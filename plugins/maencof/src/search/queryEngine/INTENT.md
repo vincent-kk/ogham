@@ -2,14 +2,14 @@
 
 ## Purpose
 
-지식 그래프 쿼리 엔진. 시드 노드 해석, 확산 엔진 선택(`engine`: legacy v1 하드카피 / qga v2), 확산 실행.
+지식 그래프 쿼리 엔진. 시드 노드 해석 및 QGA-SA 확산 실행 (maxHops → 반복 횟수 T 매핑, 쿼리 토큰 게이트 공급).
 
 ## Boundaries
 
 ### Always do
 
-- spreadingActivation 엔진 재사용 (v1/v2 분기는 query() 한 곳에서만)
-- queryCache로 결과 캐싱 (캐시 키에 engine 포함)
+- spreadingActivation 엔진 재사용
+- queryCache로 결과 캐싱
 - invalidateQueryCache 외부 제공
 
 ### Ask first

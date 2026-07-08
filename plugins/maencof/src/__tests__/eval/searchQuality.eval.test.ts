@@ -118,18 +118,8 @@ describe('search quality golden set', () => {
     }
   });
 
-  it('legacy engine meets ratchet baseline', () => {
-    const measured = measureEngine(graph, {
-      ...LIVE_DEFAULTS,
-      engine: 'legacy',
-    });
-
-    console.log('[eval] legacy:', JSON.stringify(measured));
-    assertMeetsBaseline('legacy', measured, loadBaseline());
-  });
-
   it('qga engine meets ratchet baseline', () => {
-    const measured = measureEngine(graph, { ...LIVE_DEFAULTS, engine: 'qga' });
+    const measured = measureEngine(graph, LIVE_DEFAULTS);
 
     console.log('[eval] qga:', JSON.stringify(measured));
     assertMeetsBaseline('qga', measured, loadBaseline());

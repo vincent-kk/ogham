@@ -12,16 +12,7 @@ import {
   PHRASE_CONTIGUITY_BONUS,
 } from '../../constants/queryEngine.js';
 import { WORD_BOUNDARY_SPLIT_REGEX } from '../../constants/regexes.js';
-import {
-  SA_DEFAULT_ENGINE,
-  SIBLING_FANOUT_CAP,
-} from '../../constants/spreadingActivation.js';
-import type { SaEngine } from '../../constants/spreadingActivation.js';
-import {
-  runAccumulativeActivation,
-  runSpreadingActivation,
-} from '../../core/spreadingActivation/index.js';
-import type { SpreadingActivationParams } from '../../core/spreadingActivation/index.js';
+import { runAccumulativeActivation } from '../../core/spreadingActivation/index.js';
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type {
@@ -51,24 +42,14 @@ export interface ScoredSeed {
 export interface QueryOptions {
   /** 최대 결과 수 (기본: 10) */
   maxResults?: number;
-  /** SA 감쇠 인자 (기본: 0.7) */
+  /** v1 SA 감쇠 인자 — v1 은퇴로 무시됨 (MCP 스키마 호환용 유지; 아카이브 참조) */
   decay?: number;
-  /** 발화 임계값 (기본: 0.1) */
+  /** v1 발화 임계값 — v1 은퇴로 무시됨 (MCP 스키마 호환용 유지; 아카이브 참조) */
   threshold?: number;
-  /** 최대 홉 수 (기본: 5) */
+  /** 탐색 반경 — QGA 반복 횟수 T로 매핑 (≤3→2, 5→3, ≥7→4; 기본: 5→3) */
   maxHops?: number;
   /** Layer 필터 (미지정 시 전체 Layer) */
   layerFilter?: number[];
-  /**
-   * 적응형 SA 파라미터 활성화 (기본: true).
-   * `maxHops`를 명시적으로 설정하면 무시된다. 적응형 동작을 원하면 `maxHops`를 생략하라.
-   */
-  adaptiveSA?: boolean;
-  /**
-   * 확산 엔진 선택 (기본: SA_DEFAULT_ENGINE).
-   * 'legacy' = v1 BFS max-전파(하드카피 기준선), 'qga' = v2 QGA-SA.
-   */
-  engine?: SaEngine;
 }
 
 /** 검색 결과 */
@@ -393,14 +374,7 @@ export function query(
   options: QueryOptions = {},
 ): QueryResult {
   const startTime = Date.now();
-  const {
-    maxResults = 10,
-    decay = 0.7,
-    threshold = 0.1,
-    maxHops = 5,
-    layerFilter = [],
-    engine = SA_DEFAULT_ENGINE,
-  } = options;
+  const { maxResults = 10, maxHops = 5, layerFilter = [] } = options;
 
   // 캐시 조회
   const cached = queryCache.get(seeds, options, graph.builtAt);
@@ -412,8 +386,8 @@ export function query(
 
   let results: ActivationResult[] = [];
 
-  if (scoredSeeds.length > 0 && engine === 'qga') {
-    // v2 QGA-SA: 합산-누적·차수 정규화·lexical 게이트 (반경은 T 반복으로 제어)
+  if (scoredSeeds.length > 0) {
+    // QGA-SA: 합산-누적·차수 정규화·lexical 게이트 (반경은 T 반복으로 제어)
     const seedActivations = new Map<NodeId, number>();
     for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);
 
@@ -423,46 +397,6 @@ export function query(
       seedActivations,
       maxActiveNodes: 100,
     });
-  } else if (scoredSeeds.length > 0) {
-    // seedActivations 맵 구축
-    const seedActivations = new Map<NodeId, number>();
-    for (const s of scoredSeeds) seedActivations.set(s.nodeId, s.matchScore);
-
-    // 적응형 SA 파라미터 (B1)
-    let adaptedMaxHops = maxHops;
-    let adaptedThreshold = threshold;
-    const useAdaptive =
-      options.adaptiveSA !== false && options.maxHops === undefined;
-
-    if (useAdaptive && scoredSeeds.length > 0) {
-      const maxScore = Math.max(...scoredSeeds.map((s) => s.matchScore));
-      const avgScore =
-        scoredSeeds.reduce((sum, s) => sum + s.matchScore, 0) /
-        scoredSeeds.length;
-      const isStrongSignal =
-        scoredSeeds.length === 1 &&
-        maxScore >= 0.9 &&
-        (scoredSeeds[0]!.matchType === 'path-exact' ||
-          scoredSeeds[0]!.matchType === 'title-exact');
-
-      if (isStrongSignal) {
-        adaptedMaxHops = Math.min(adaptedMaxHops, 2);
-        adaptedThreshold = Math.max(adaptedThreshold, 0.05);
-      } else if (avgScore >= 0.6) adaptedMaxHops = Math.min(adaptedMaxHops, 3);
-    }
-
-    // SA 파라미터
-    const saParams: SpreadingActivationParams = {
-      threshold: adaptedThreshold,
-      maxHops: adaptedMaxHops,
-      maxActiveNodes: 100,
-      decayOverride: decay,
-      seedActivations,
-      siblingFanoutCap: SIBLING_FANOUT_CAP,
-    };
-
-    // 확산 활성화 실행
-    results = runSpreadingActivation(graph, seedIds, saParams);
   }
 
   // Layer 필터 적용

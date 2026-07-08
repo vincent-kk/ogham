@@ -11,26 +11,6 @@ export const EDGE_TYPE_MULTIPLIER: Record<EdgeType, number> = {
   DOMAIN: 0.3,
 };
 
-/**
- * 노드별 SIBLING(폴더-형제) 확산 fanout 상한.
- * 대형 폴더 클리크(예: 97-노드 폴더 → 노드당 96 형제)가 균일 점수로 결과를 도배하고
- * SA를 O(클리크²)로 폭증시키는 것을 막는다. 확산 시 형제 이웃은 pagerank 상위 K개만 전파한다.
- * LINK/계층 등 의미 엣지에는 적용하지 않는다. queryEngine 만 이 상한을 opt-in 하며,
- * kgSuggestLinks 등 다른 호출자는 기본값(무제한)을 유지한다.
- */
-export const SIBLING_FANOUT_CAP = 8;
-
-/** 확산 엔진 식별자 — v1(하드카피 기준선) / v2(QGA-SA) */
-export type SaEngine = 'legacy' | 'qga';
-
-/**
- * queryEngine 기본 확산 엔진. 골든셋 ratchet 게이트에서 v2 우위가 확인된 커밋에서만
- * 'qga'로 전환한다 (설계서 04장 마이그레이션 규칙).
- * 2026-07-08 전환: qga nDCG@10 0.9529 / Recall@10 0.8938 (legacy 0.8991 / 0.8383).
- * 롤백 수단: QueryOptions.engine = 'legacy'.
- */
-export const SA_DEFAULT_ENGINE: SaEngine = 'qga';
-
 /** QGA-SA 동기 반복 횟수 T (QA-SA 기본값) */
 export const QGA_ITERATIONS = 3;
 
