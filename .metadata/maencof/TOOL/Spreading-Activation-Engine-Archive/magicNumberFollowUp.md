@@ -7,12 +7,12 @@
 
 강신호 두 축만 승격, T·α는 불변(약축 과적합 회피):
 
-| 상수 | 이전 | 현행 | 근거 |
-| --- | --- | --- | --- |
+| 상수                     | 이전 | 현행      | 근거                               |
+| ------------------------ | ---- | --------- | ---------------------------------- |
 | QGA_UPDATE_THRESHOLD (τ) | 0.01 | **0.001** | 3데이터셋 공통 knee (그 아래 평탄) |
-| QGA_GATE_FLOOR (γ) | 0.3 | **0.5** | 합성 최적 평탄면 [0.4,0.7] 내부 |
-| QGA_ITERATIONS (T) | 3 | 3 | 세대 간 방향 불일치(신호 없음) |
-| alphaBase (α) | 1.0 | 1.0 | 이미 최적 |
+| QGA_GATE_FLOOR (γ)       | 0.3  | **0.5**   | 합성 최적 평탄면 [0.4,0.7] 내부    |
+| QGA_ITERATIONS (T)       | 3    | 3         | 세대 간 방향 불일치(신호 없음)     |
+| alphaBase (α)            | 1.0  | 1.0       | 이미 최적                          |
 
 ratchet baseline(17쿼리): nDCG 0.9529(gen0) → 0.9558(gen1 default) → **0.9737**, Recall 0.8938 → **0.9692**.
 (아카이브 INDEX.md 의 v2 행 수치 0.9529/0.8938 은 이 튜닝 이전 값 — 갱신 여부는 정책 판단.)
@@ -33,6 +33,7 @@ ratchet baseline(17쿼리): nDCG 0.9529(gen0) → 0.9558(gen1 default) → **0.9
 ## 재현 (로컬 러너는 미커밋)
 
 실볼트 러너는 scratch 전용이며 커밋하지 않는다(원본 볼트 무변경, 복사본에만 실행). 재현 시:
+
 - 그래프: `mcp/tools/kgBuild/kgBuild.ts::fullBuild` 를 read-only 복제(scanVault→parseDocument→buildKnowledgeNode→resolveAndAttachLinks→buildGraph→calculateWeights→hydrateRuntimeMaps; MetadataStore 미사용 → 디스크 무기록).
 - link-pred 셋: SA 는 outbound 인접만 순회하므로, 각 노드의 **제목을 시드**로, 그 **outbound 링크를 pseudo-relevant(등급 2)** 로 채점(seed 자기 경로는 랭킹에서 제외).
 - 그리드: `paramSweep.eval.test.ts` 와 동일 축, tuning 은 `QueryOptions.tuning` 오버라이드.
