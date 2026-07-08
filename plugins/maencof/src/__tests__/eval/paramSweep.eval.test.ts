@@ -87,7 +87,9 @@ describe('QGA-SA parameter sweep (magic-number convergence)', () => {
 
     entries.sort((a, b) => rankKey(b.metrics) - rankKey(a.metrics));
 
-    const defaultEntry = entries.find((e) => sameTuning(e.tuning, DEFAULT_TUNING));
+    const defaultEntry = entries.find((e) =>
+      sameTuning(e.tuning, DEFAULT_TUNING),
+    );
     expect(defaultEntry, 'grid must contain current defaults').toBeDefined();
     const defaultRank = entries.indexOf(defaultEntry!) + 1;
     const best = entries[0]!;

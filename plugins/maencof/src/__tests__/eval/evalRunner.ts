@@ -59,6 +59,8 @@ export function liveSearchFn(
 ): SearchFn {
   return (seeds) => {
     const { results } = query(graph, seeds, options);
-    return results.map((r) => graph.nodes.get(r.nodeId)?.path ?? String(r.nodeId));
+    return results.map(
+      (r) => graph.nodes.get(r.nodeId)?.path ?? String(r.nodeId),
+    );
   };
 }
