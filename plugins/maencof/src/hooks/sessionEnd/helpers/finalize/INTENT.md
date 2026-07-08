@@ -12,6 +12,7 @@
 - workIndex로 당일 작업 digest 재생성 (`buildDailyDigest`, 마감된 일자 대상)
 - cacheManager로 세션 파일 삭제 (`removeSessionFiles`)
 - cacheManager.removeTurnContext로 turnContext 캐시 삭제 (turnContext는 session-scope)
+- prunePersonalContext로 personal-context 수명주기 정리 (만료 state 제거·due 경과 자동 resolve·resolved 보존 기간·보존 캡; 파일 없으면 no-op)
 
 ### Ask first
 

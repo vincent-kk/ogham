@@ -8,16 +8,17 @@ Observe every session. CLAUDE.md / AGENTS.md user instructions override this met
 2. maencof dialogue discipline (this meta-skill)
 3. Default system prompt
 
-## 2. 6 Role → Skill Mapping
+## 2. 7 Role → Skill Mapping
 
-| Role                       | Skill                                                    |
-| -------------------------- | -------------------------------------------------------- |
-| Brainstorming / ideation   | `explore --for-brainstorm` → `think --mode divergent`    |
-| Insight capture management | `insight` + `capture_insight` MCP tool                   |
-| Spec refinement            | `refine` (Phase 2.5 Socratic included)                   |
-| Interview convergence      | `refine` Phase 2.5                                       |
-| Plan review                | `think --mode review`                                    |
-| Session retrospective      | SessionEnd hook automatic recap (no explicit invocation) |
+| Role                       | Skill                                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Brainstorming / ideation   | `explore --for-brainstorm` → `think --mode divergent`                                                           |
+| Insight capture management | `insight` + `capture_insight` MCP tool                                                                          |
+| User-state awareness       | automatic — `capture_personal_context` MCP, guided by the injected `<personal-context>` block; manage via `personal-status` |
+| Spec refinement            | `refine` (Phase 2.5 Socratic included)                                                                          |
+| Interview convergence      | `refine` Phase 2.5                                                                                              |
+| Plan review                | `think --mode review`                                                                                           |
+| Session retrospective      | SessionEnd hook automatic recap (no explicit invocation)                                                        |
 
 ## 3. Flow & Priority
 

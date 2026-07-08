@@ -8,6 +8,11 @@ import {
   DEFAULT_INSIGHT_CONFIG,
   DEFAULT_INSIGHT_STATS,
 } from '../../../constants/insight.js';
+import {
+  DEFAULT_PERSONAL_CONTEXT_CONFIG,
+  PERSONAL_CONTEXT_FILE,
+  PERSONAL_CONTEXT_SCHEMA_VERSION,
+} from '../../../constants/personalContext.js';
 
 export interface ConfigEntry {
   /** Filename within .maencof-meta/ */
@@ -59,5 +64,15 @@ export const CONFIG_REGISTRY: ConfigEntry[] = [
     filename: 'usage-stats.json',
     // No schemaVersion — Record<string, number> type incompatible with _schemaVersion metadata
     defaultValue: () => ({ ...DEFAULT_USAGE_STATS }),
+  },
+  {
+    filename: PERSONAL_CONTEXT_FILE,
+    schemaVersion: PERSONAL_CONTEXT_SCHEMA_VERSION,
+    defaultValue: () => ({
+      config: { ...DEFAULT_PERSONAL_CONTEXT_CONFIG },
+      states: [],
+      topics: [],
+      _schemaVersion: PERSONAL_CONTEXT_SCHEMA_VERSION,
+    }),
   },
 ];

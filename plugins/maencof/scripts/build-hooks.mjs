@@ -74,22 +74,27 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 // clean concerns must not pull zod / fast-glob / MCP SDK.
 //   session-start      — sessionStart (selfProbe + inlined meta-skill-body.md
 //                        + claudeMd merge + insight stats + full L1 core reader
-//                        buildL1CoreBlock) + lifecycle.
+//                        buildL1CoreBlock + personal-context reader/renderer
+//                        <personal-context> block) + lifecycle.
 //   user-prompt-submit — contextInjector + insightInjector + lifecycle +
 //                        vaultCommitter (spawnCli/git, scope staging +
 //                        foldDaily). Includes the companion identity v2 turn
 //                        renderer + graceful v1→v2 normalize (normalizeToV2)
 //                        reached via buildTurnContext — pure Node-builtin
 //                        functions, no external runtime.
-//   session-end        — sessionEnd (session record + digest) + lifecycle +
-//                        changelogDebt (spawnCli/git) + vaultCommitter
-//                        (spawnCli/git, scope staging + foldDaily).
+//   session-end        — sessionEnd (session record + digest + personal-context
+//                        lifecycle prune) + lifecycle + changelogDebt
+//                        (spawnCli/git) + vaultCommitter (spawnCli/git,
+//                        scope staging + foldDaily).
 //   post-tool-use      — activityRecorder + lifecycle.
 //   pre-tool-use       — layerGuard + vaultRedirector + lifecycle (all light).
 // session-start is the largest bundle: it inlines metaSkillBody.md and the
 // full-L1 reader (buildL1CoreBlock — pure Node-builtin fs reads + frontmatter
 // strip). FORBIDDEN_PATTERNS below still enforces the real isolation guard.
-const SESSION_START_BYTES = 52 * 1024;
+// 52 -> 56 KB with the personal-context awareness block (reader + zod-free
+// normalizer + renderer, ~4 KB minified). The isolation guarantee stays with
+// FORBIDDEN_PATTERNS below — the byte cap only catches accidental module pull.
+const SESSION_START_BYTES = 56 * 1024;
 // user-prompt-submit carries the per-turn companion binding renderer and the
 // graceful v1->v2 identity normalization on the turn path (buildTurnContext)
 // — pure Node-builtin functions; the isolation guarantee (no zod / fast-glob
@@ -98,7 +103,9 @@ const SESSION_START_BYTES = 52 * 1024;
 // expansion (configurable commit scope + sensitive-file exclude pathspecs +
 // daily fold via git reset --soft) — all pure Node-builtin + spawnCli code.
 const USER_PROMPT_SUBMIT_BYTES = 40 * 1024;
-const SESSION_END_BYTES = 36 * 1024;
+// 36 -> 40 KB with the personal-context lifecycle prune (reader + normalizer +
+// prune/eviction, ~3 KB minified).
+const SESSION_END_BYTES = 40 * 1024;
 const POST_TOOL_USE_BYTES = 12 * 1024;
 const PRE_TOOL_USE_BYTES = 12 * 1024;
 

@@ -32,6 +32,8 @@ import {
 } from '../../../../core/sessionStore/sessionStore.js';
 import { buildL1CoreBlock } from '../../../../core/turnContext/buildL1CoreBlock.js';
 import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSessionIdentityBlock.js';
+import { readPersonalContext } from '../../../../core/personalContext/readPersonalContext.js';
+import { renderPersonalContextBlock } from '../../../../core/personalContext/renderPersonalContextBlock.js';
 import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
@@ -280,8 +282,9 @@ function recordSessionStartSafe(
 
 /**
  * Composes `additionalContext` — the only channel Claude actually sees.
- * Weaves the full session persona (binding), the dialogue meta-skill body,
- * and aggregated advisories so no channel silently drops another's payload.
+ * Weaves the full session persona (binding), the personal-context awareness block,
+ * the dialogue meta-skill body, and aggregated advisories so no channel
+ * silently drops another's payload.
  */
 function composeSessionStartResult(
   cwd: string,
@@ -291,11 +294,13 @@ function composeSessionStartResult(
   const result: SessionStartResult = { continue: true };
   try {
     const identityBlock = companion ? buildSessionIdentityBlock(companion) : '';
+    const personalContextBlock = companion ? buildPersonalContextBlock(cwd) : '';
     const l1Block = buildL1CoreBlock(cwd);
     const metaBody = buildMetaSkillContext(cwd);
     const advisories = messages.length > 0 ? messages.join('\n\n') : null;
     const additionalContext = joinSessionSegments([
       identityBlock || null,
+      personalContextBlock || null,
       l1Block || null,
       metaBody,
       advisories,
@@ -313,6 +318,25 @@ function composeSessionStartResult(
     });
   }
   return result;
+}
+
+/**
+ * Build the `<personal-context>` awareness block (states + recent topics + capture
+ * directive). Called only when a companion exists — the personal context is context
+ * the companion consumes. Session-once by design: captures made mid-session
+ * surface from the next session. Graceful: empty string on any failure.
+ */
+function buildPersonalContextBlock(cwd: string): string {
+  try {
+    return renderPersonalContextBlock(readPersonalContext(cwd));
+  } catch (e) {
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
+    return '';
+  }
 }
 
 /**

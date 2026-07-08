@@ -31,6 +31,7 @@ import {
   registerCompanionTools,
   registerCrudTools,
   registerKgTools,
+  registerPersonalContextTools,
   registerWorkHistoryTools,
 } from './registrations/index.js';
 
@@ -43,6 +44,7 @@ export function createServer(): McpServer {
   registerKgTools(server);
   registerClaudeMdTools(server);
   registerCompanionTools(server);
+  registerPersonalContextTools(server);
   registerActivityReadTools(server);
   registerCacheTools(server);
   registerWorkHistoryTools(server);

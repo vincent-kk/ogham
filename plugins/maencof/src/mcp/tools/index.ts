@@ -17,4 +17,5 @@ export * from './maencofDelete/index.js';
 export * from './maencofMove/index.js';
 export * from './maencofRead/index.js';
 export * from './maencofUpdate/index.js';
+export * from './personalContextCapture/index.js';
 export * from './workHistory/index.js';

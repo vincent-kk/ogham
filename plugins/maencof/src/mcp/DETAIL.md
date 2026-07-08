@@ -2,22 +2,23 @@
 
 ## Purpose
 
-MCP 서버 구현. 20개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 CWD에서 읽음.
+MCP 서버 구현. 21개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 CWD에서 읽음.
 
-## Tools (20)
+## Tools (21)
 
-| Group         | Tools                                                   |
-| ------------- | ------------------------------------------------------- |
-| CRUD (5)      | `create`, `read`, `update`, `delete`, `move`            |
-| Insight (1)   | `capture_insight`                                       |
-| Graph (5)     | kg_search, kg_navigate, kg_context, kg_status, kg_build |
-| Boundary (1)  | boundary_create                                         |
-| Link (1)      | kg_suggest_links                                        |
-| INTENT.md (3) | claudemd_merge, claudemd_read, claudemd_remove          |
-| Companion (1) | companion_edit                                          |
-| Activity (1)  | activity_read                                           |
-| Work hist (1) | work_history                                            |
-| Cache (1)     | context_cache_manage                                    |
+| Group                | Tools                                                   |
+| -------------------- | ------------------------------------------------------- |
+| CRUD (5)             | `create`, `read`, `update`, `delete`, `move`            |
+| Insight (1)          | `capture_insight`                                       |
+| Graph (5)            | kg_search, kg_navigate, kg_context, kg_status, kg_build |
+| Boundary (1)         | boundary_create                                         |
+| Link (1)             | kg_suggest_links                                        |
+| INTENT.md (3)        | claudemd_merge, claudemd_read, claudemd_remove          |
+| Companion (1)        | companion_edit                                          |
+| Personal context (1) | capture_personal_context                                |
+| Activity (1)         | activity_read                                           |
+| Work hist (1)        | work_history                                            |
+| Cache (1)            | context_cache_manage                                    |
 
 ## Graph Cache
 
@@ -25,6 +26,7 @@ MCP 서버 구현. 20개 도구를 stdio 전송으로 제공. vault 경로는 `M
 - `loadGraphIfNeeded`: kg_status 전용 (진단 도구, 자동 리빌드 없음)
 - 캐시 무효화 트리거: `create`/`update`/`delete`/`move`, `capture_insight`, `boundary_create`, `kg_build`
 - `companion_edit`는 KG 그래프와 무관하므로 캐시를 무효화하지 않는다(read 래퍼로 등록, preview 순수 유지)
+- `capture_personal_context`도 같은 근거로 read 래퍼 등록 (`.maencof-meta/personal-context.json` 전용, KG 캐시 미접촉)
 - 리빌드 뮤텍스로 중복 동시 리빌드 방지
 
 ## Security
