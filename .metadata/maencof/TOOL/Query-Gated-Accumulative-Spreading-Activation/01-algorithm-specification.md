@@ -25,8 +25,11 @@ QGA-SA는 QA-SA(arXiv:2606.30133)의 반복형 게이트 확산과 SA-RAG(arXiv:
 **2. 차수 정규화 전이 (G3 해소)**
 
 ```
-Ŵ(i,j) = W(i,j) · mult(edgeType(i,j)) / deg_out(i)
+Ŵ(i,j) = W'(i,j) · mult(edgeType(i,j)) / deg_out(i)
+W'(i,j) = max(W(i,j), 0.5)   (LINK 엣지에 한함 — QGA_LINK_WEIGHT_FLOOR)
 ```
+
+LINK 하한은 구현 중 확인된 결함의 v2-국소 보정이다: SCS 경로 근사는 공통 접두사가 없는 cross-folder wikilink의 기본 가중치를 0으로 만드는데, 사용자가 직접 작성한 링크는 최강 신호이므로 폴더 거리와 무관하게 전파되어야 한다. v1 하드카피와 weightCalculator는 건드리지 않는다(격리 원칙).
 
 `deg_out(i)`는 인접 리스트의 라이브 아웃디그리다. 97-형제 클리크의 각 이웃은 자동으로 1/97의 질량만 받는다 — SIBLING top-8 하드 캡이 만들던 8/9번째 형제 간 경계효과가 사라지고, PageRank 사전 계산에 의존하지 않으므로 증분 재인덱싱 후 staleness 결합도 소멸한다. 완화 변형 `/√deg_out(i)`(준-정규화)는 벤치마크 ablation 대상으로 남긴다.
 
