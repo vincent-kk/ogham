@@ -26,7 +26,7 @@ import { buildEvalGraph } from './fixtureVault.js';
 /** 그리드 축 — 기본값을 반드시 포함해야 기본값 순위 비교가 성립한다 */
 const GRID: Record<keyof QgaTuning, number[]> = {
   iterations: [2, 3, 4],
-  updateThreshold: [0.005, 0.01, 0.02],
+  updateThreshold: [0.001, 0.005, 0.01, 0.02],
   gateFloor: [0.15, 0.3, 0.5],
   alphaBase: [0.85, 1.0],
 };
