@@ -26,8 +26,10 @@ export type SaEngine = 'legacy' | 'qga';
 /**
  * queryEngine 기본 확산 엔진. 골든셋 ratchet 게이트에서 v2 우위가 확인된 커밋에서만
  * 'qga'로 전환한다 (설계서 04장 마이그레이션 규칙).
+ * 2026-07-08 전환: qga nDCG@10 0.9529 / Recall@10 0.8938 (legacy 0.8991 / 0.8383).
+ * 롤백 수단: QueryOptions.engine = 'legacy'.
  */
-export const SA_DEFAULT_ENGINE: SaEngine = 'legacy';
+export const SA_DEFAULT_ENGINE: SaEngine = 'qga';
 
 /** QGA-SA 동기 반복 횟수 T (QA-SA 기본값) */
 export const QGA_ITERATIONS = 3;

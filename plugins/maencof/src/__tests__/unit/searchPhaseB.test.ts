@@ -248,6 +248,7 @@ describe('B1: Adaptive SA Parameters', () => {
   it('strong signal (exact path) → 2-hop 결과만 반환', () => {
     const graph = makeChainGraph();
     const result = query(graph, ['chain-a.md'], {
+      engine: 'legacy',
       adaptiveSA: true,
       decay: 0.7,
       threshold: 0.01,
@@ -282,6 +283,7 @@ describe('B1: Adaptive SA Parameters', () => {
     const graph = buildGraphWithIndex(nodes, edges);
     // 'weakprefix' → tag-prefix match (score 0.3) → weak signal → full depth
     const result = query(graph, ['weakprefix'], {
+      engine: 'legacy',
       adaptiveSA: true,
       decay: 0.9,
       threshold: 0.01,
@@ -296,6 +298,7 @@ describe('B1: Adaptive SA Parameters', () => {
   it('user-explicit maxHops overrides adaptive', () => {
     const graph = makeChainGraph();
     const result = query(graph, ['chain-a.md'], {
+      engine: 'legacy',
       adaptiveSA: true,
       maxHops: 4,
       decay: 0.7,
@@ -310,6 +313,7 @@ describe('B1: Adaptive SA Parameters', () => {
   it('adaptiveSA: false → adaptive 비활성화, maxHops 기본값 사용', () => {
     const graph = makeChainGraph();
     const result = query(graph, ['chain-a.md'], {
+      engine: 'legacy',
       adaptiveSA: false,
       decay: 0.9,
       threshold: 0.001,
