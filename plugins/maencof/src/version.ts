@@ -5,4 +5,4 @@
  * Current package version from package.json
  * Automatically synchronized during build process
  */
-export const VERSION = '0.7.5';
+export const VERSION = '0.9.0';
