@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MetadataStore } from '../../../core/indexer/metadataStore/metadataStore.js';
 import { mergeStaleNodesIntoGraph } from '../../../mcp/server/middlewares/partialReindex.js';
-import * as queryEngine from '../../../search/queryEngine/queryEngine.js';
+import * as queryEngine from '../../../search/queryEngine/index.js';
 import type { NodeId } from '../../../types/common.js';
 import type {
   InvertedIndex,

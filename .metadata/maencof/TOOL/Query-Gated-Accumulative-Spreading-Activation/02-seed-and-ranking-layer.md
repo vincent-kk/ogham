@@ -2,9 +2,24 @@
 
 확산 코어(01장)를 감싸는 전처리(시드)·후처리(랭킹) 계층의 변경을 정의한다. 코어와 독립적으로 단계 도입이 가능하다(04장 S2–S4).
 
-## 시드 가중: node specificity
+## 시드 가중 1단계 (현행): 쿼리 내 상대 토큰 IDF
 
-현행 시드 해석의 매칭 품질 점수(title-exact 1.0 / title-word 0.8 / tag-exact 0.5 / tag-prefix 0.3)는 유지하되, 허브 노드의 초기 질량을 IDF 유사 가중으로 억제한다(HippoRAG node specificity `s_i = 1/|P_i|`의 차수 기반 대응물).
+시드 해석은 매칭 품질 점수(title-exact 1.0 / title-word 0.8 / tag-exact 0.5 / tag-prefix 0.3)에 **쿼리 내 상대 IDF**를 곱한다. 흔한 내용어(다수 문서 매칭)가 희귀 토큰과 같은 점수 평탄대로 승격되어 동형이의어 노이즈("이미지" = container ↔ graphic)를 시드하는 것을 막는다.
+
+```
+idf(t)      = ln(1 + N / df(t)),  df = 토큰 prefix 후보 집합 크기 (invertedIndex 의미론과 동일)
+seed_idf(s) = max_{t ∈ tokens(s), df(t)>0} idf(t)   — 가장 희귀한 토큰이 시드의 변별력을 결정
+scale(s)    = seed_idf(s) / max_{s' ∈ query} seed_idf(s')
+seed_w(v,s) = matchScore(v,s) · scale(s)
+```
+
+성질: (1) **후보 union 불변** — 강등만 하고 탈락시키지 않는다(recall·분산 보존). (2) **단일 변별 토큰 쿼리 불변** — scale=1이므로 기존 골든 동작이 비트 단위로 보존된다. (3) 언어 중립 — df 통계만 사용, 형태소 지식 없음(언어 종속 정교화는 tool description으로 LLM에 위임). df는 시드 해석이 이미 계산하는 후보 집합 크기에서 공짜로 얻는다.
+
+kg_context 자연어 경로는 `deriveContextSeeds`(개별 단어 OR + 인접 2-gram phrase 시드 병행)로 분해된다 — 2-gram은 AND·연속성 보너스(`classifyMultiToken`)를 경유해 수렴 문서만 정밀 anchor로 승격시키며 union은 불변이다.
+
+## 시드 가중 2단계 (후속): node specificity
+
+허브 노드의 초기 질량을 차수 기반으로 추가 억제한다(HippoRAG node specificity `s_i = 1/|P_i|`의 차수 기반 대응물). 토큰 IDF(위)가 "토큰의 흔함"을 다룬다면, 이는 "노드의 흔함"을 다루는 직교 신호다.
 
 ```
 seed_w(v) = matchScore(v) · 1 / log₂(2 + deg(v))

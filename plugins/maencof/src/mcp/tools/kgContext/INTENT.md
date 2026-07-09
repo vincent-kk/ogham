@@ -4,6 +4,11 @@
 
 지식 그래프 컨텍스트 조회 도구. 쿼리 기반 스니펫 조합.
 
+## Structure
+
+- `kgContext.ts` — handleKgContext 핸들러 (조립 + 스니펫)
+- `helpers/` organ — selectContextCandidates (자연어 분해 + SA 후보 선정; 평가 하네스와 공유하는 단일 경로)
+
 ## Boundaries
 
 ### Always do

@@ -90,15 +90,16 @@ export type { DeduplicateResult } from './core/contentDedup/contentDedup.js';
 export {
   query,
   resolveSeedNodes,
+  deriveContextSeeds,
   QueryEngine,
   invalidateQueryCache,
-} from './search/queryEngine/queryEngine.js';
+} from './search/queryEngine/index.js';
 export type {
   QueryOptions,
   QueryResult,
   ScoredSeed,
   MatchType,
-} from './search/queryEngine/queryEngine.js';
+} from './search/queryEngine/index.js';
 
 export {
   assembleContext,

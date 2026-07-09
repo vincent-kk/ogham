@@ -3,7 +3,8 @@
  * @description 검색 품질 평가용 결정적 합성 vault — tirnanog 실측 위상 특성 축소 재현.
  *
  * 재현 특성: LINK 고아율 ≥ 50%, 대형 폴더 SIBLING 클리크(20노드), 허브 태그(security),
- * 다경로 수렴 구조(두 시드 → graph-search-synthesis), 어휘 비중첩 연상 경로(ontology-modeling).
+ * 다경로 수렴 구조(두 시드 → graph-search-synthesis), 어휘 비중첩 연상 경로(ontology-modeling),
+ * 동형이의어 위상(공유 토큰 "image"·"전환"이 무관 도메인 클러스터에 걸침 — IDF 판별 사례).
  * 랜덤 요소 없음 — 실행 간 완전 동일 그래프를 보장한다.
  */
 import {
@@ -131,6 +132,42 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     layer: Layer.L2_DERIVED,
     tags: ['knowledge', 'organization'],
   },
+  // 동형이의어 클러스터 A — "image": 컨테이너(도커) 도메인 vs 그래픽 도메인.
+  // 그래픽 클러스터는 링크로 상호 강화(실측 dense-cluster 노이즈 재현), df("image")=6 ≫ df("docker")=2.
+  {
+    path: 'L2/insights/docker-image-optimization.md',
+    title: 'Docker Image Optimization',
+    layer: Layer.L2_DERIVED,
+    tags: ['docker', 'devops'],
+  },
+  {
+    path: 'L2/insights/image-rendering-pipeline.md',
+    title: 'Image Rendering Pipeline',
+    layer: Layer.L2_DERIVED,
+    tags: ['graphics', 'media'],
+  },
+  {
+    path: 'L2/insights/image-editing-workflow.md',
+    title: 'Image Editing Workflow',
+    layer: Layer.L2_DERIVED,
+    tags: ['graphics', 'media'],
+    links: ['L2/insights/image-rendering-pipeline.md'],
+  },
+  // 동형이의어 클러스터 B — "전환": 마이그레이션(n3r) 도메인 vs UI/재무 도메인.
+  // df("전환")=4 ≫ df("n3r")=1 — 비ASCII 토큰의 IDF 경로 검증을 겸한다.
+  {
+    path: 'L2/insights/n3r-migration-plan.md',
+    title: 'N3R 전환 계획',
+    layer: Layer.L2_DERIVED,
+    tags: ['n3r', 'migration'],
+  },
+  {
+    path: 'L2/insights/ui-transition-patterns.md',
+    title: '화면 전환 패턴',
+    layer: Layer.L2_DERIVED,
+    tags: ['frontend', 'ui'],
+    links: ['L3/clippings/screen-transition-animation.md'],
+  },
   {
     path: 'L3/index.md',
     title: 'External Knowledge Index',
@@ -156,6 +193,39 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     title: 'BM25 Ranking Reference',
     layer: Layer.L3_EXTERNAL,
     tags: ['search', 'ranking', 'paper'],
+  },
+  {
+    path: 'L3/clippings/image-compression-survey.md',
+    title: 'Image Compression Survey',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['graphics', 'media'],
+    links: ['L2/insights/image-rendering-pipeline.md'],
+  },
+  {
+    path: 'L3/clippings/responsive-image-loading.md',
+    title: 'Responsive Image Loading',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['graphics', 'media'],
+    links: ['L3/clippings/image-compression-survey.md'],
+  },
+  {
+    path: 'L3/clippings/image-formats-reference.md',
+    title: 'Image Formats Reference',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['graphics', 'media'],
+    links: ['L3/clippings/image-compression-survey.md'],
+  },
+  {
+    path: 'L3/clippings/screen-transition-animation.md',
+    title: '화면 전환 애니메이션',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['frontend', 'animation'],
+  },
+  {
+    path: 'L3/clippings/currency-conversion-note.md',
+    title: '환율 전환 메모',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['finance'],
   },
   ...securityArticles(),
   {
@@ -193,6 +263,14 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     tags: ['investment', 'task'],
     links: ['L2/insights/investment-fomo-psychology.md'],
     updated: '2026-06-20',
+  },
+  {
+    path: 'L4/tasks/container-registry-setup.md',
+    title: 'Container Registry Setup',
+    layer: Layer.L4_ACTION,
+    tags: ['docker', 'devops', 'task'],
+    links: ['L2/insights/docker-image-optimization.md'],
+    updated: '2026-06-28',
   },
   {
     path: 'L4/tasks/write-vault-guide.md',

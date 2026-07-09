@@ -15,7 +15,7 @@ import { ensureFreshGraphNonBlocking } from '../../../mcp/server/middlewares/fre
 import {
   invalidateQueryCache,
   query,
-} from '../../../search/queryEngine/queryEngine.js';
+} from '../../../search/queryEngine/index.js';
 import type { NodeId } from '../../../types/common.js';
 
 let vaultDir: string;

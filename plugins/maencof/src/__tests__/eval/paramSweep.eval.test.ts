@@ -19,9 +19,11 @@ import {
 } from '../../constants/spreadingActivation.js';
 import type { QgaTuning } from '../../search/queryEngine/index.js';
 
-import type { EngineMetrics } from './evalRunner.js';
-import { LIVE_DEFAULTS, liveSearchFn, measureSearchFn } from './evalRunner.js';
+import type { EngineMetrics } from './engineMetrics.js';
+import { LIVE_DEFAULTS } from './evalConstants.js';
 import { buildEvalGraph } from './fixtureVault.js';
+import { liveSearchFn } from './liveSearchFn.js';
+import { measureSearchFn } from './measureSearchFn.js';
 
 /** 그리드 축 — 기본값을 반드시 포함해야 기본값 순위 비교가 성립한다 */
 const GRID: Record<keyof QgaTuning, number[]> = {
@@ -69,7 +71,7 @@ function sameTuning(a: Required<QgaTuning>, b: Required<QgaTuning>): boolean {
 
 function formatEntry(entry: SweepEntry): string {
   const { tuning: t, metrics: m } = entry;
-  return `T=${t.iterations} τ=${t.updateThreshold} γ=${t.gateFloor} α=${t.alphaBase} → ndcg10 ${m.ndcg10.toFixed(4)} recall10 ${m.recall10.toFixed(4)} mrr ${m.mrr.toFixed(4)}`;
+  return `T=${t.iterations} τ=${t.updateThreshold} γ=${t.gateFloor} α=${t.alphaBase} → ndcg10 ${m.ndcg10.toFixed(4)} recall10 ${m.recall10.toFixed(4)} mrr ${m.mrr.toFixed(4)} precR ${m.precisionR.toFixed(4)}`;
 }
 
 describe('QGA-SA parameter sweep (magic-number convergence)', () => {

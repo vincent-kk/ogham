@@ -35,7 +35,7 @@ export function registerKgTools(server: McpServer): void {
           .array(z.string())
           .min(1)
           .describe(
-            'Seed nodes (paths or keywords); array items are unioned. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item (multi-word within a single item is AND-matched).',
+            'Seed nodes (paths or keywords); array items are unioned. Use distilled concept keywords, not sentence fragments — drop grammar words (particles, articles, prepositions). Pair ambiguous/generic nouns with a qualifier in one item ("docker image", not bare "image"); multi-word within a single item is AND-matched. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item.',
           ),
         max_results: z
           .number()
@@ -121,7 +121,7 @@ export function registerKgTools(server: McpServer): void {
         query: z
           .string()
           .describe(
-            'Search query (split into keywords internally). Include each concept in both the working language and English for cross-language recall.',
+            'Search query — distilled concept keywords / short phrases, not a full sentence. Drop grammar words (particles, articles, prepositions); keep content terms only. Disambiguate polysemous words by placing a qualifier right next to them ("docker image", not bare "image") — adjacent word pairs are phrase-matched. Include each concept in both the working language and English for cross-language recall.',
           ),
         token_budget: z
           .number()

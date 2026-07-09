@@ -6,9 +6,10 @@ import { describe, expect, it } from 'vitest';
 
 import { hydrateRuntimeMaps } from '../../core/graphBuilder/graphBuilder.js';
 import {
+  deriveContextSeeds,
   query,
   resolveSeedNodes,
-} from '../../search/queryEngine/queryEngine.js';
+} from '../../search/queryEngine/index.js';
 import type { NodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 
@@ -136,5 +137,52 @@ describe('resolveSeedNodes — PP2 path prefix + PP3 budget', () => {
     const titleSeed = seeds.find((s) => s.nodeId === ('the-doc.md' as NodeId));
     expect(titleSeed).toBeDefined();
     expect(titleSeed!.matchType).toBe('title-exact');
+  });
+});
+
+describe('resolveSeedNodes — relative IDF + context seed derivation', () => {
+  it('common-token seeds are demoted relative to the rarest query token', () => {
+    const g = makeGraph([
+      node('rare.md', 'n3r plan'),
+      node('common1.md', 'transition ui'),
+      node('common2.md', 'transition currency'),
+      node('common3.md', 'transition habits'),
+    ]);
+    const seeds = resolveSeedNodes(g, ['n3r', 'transition']);
+    const score = (id: string) =>
+      seeds.find((s) => s.nodeId === (id as NodeId))!.matchScore;
+    expect(score('rare.md')).toBeCloseTo(0.8, 5);
+    expect(score('common1.md')).toBeLessThan(score('rare.md'));
+    // 후보 union 불변 — 흔한 토큰 매칭도 강등될 뿐 시드에서 탈락하지 않는다
+    expect(seeds.length).toBe(4);
+  });
+
+  it('single-token queries keep pre-IDF scores (scale 1 invariance)', () => {
+    const g = makeGraph([
+      node('a.md', 'transition ui'),
+      node('b.md', 'transition currency'),
+      node('c.md', 'other topic', ['transition']),
+    ]);
+    const seeds = resolveSeedNodes(g, ['transition']);
+    const score = (id: string) =>
+      seeds.find((s) => s.nodeId === (id as NodeId))!.matchScore;
+    expect(score('a.md')).toBeCloseTo(0.8, 5);
+    expect(score('c.md')).toBeCloseTo(0.5, 5);
+  });
+
+  it('deriveContextSeeds keeps words and adds deduplicated adjacent bigrams', () => {
+    expect(deriveContextSeeds('docker image optimization')).toEqual([
+      'docker',
+      'image',
+      'optimization',
+      'docker image',
+      'image optimization',
+    ]);
+    expect(deriveContextSeeds('graph')).toEqual(['graph']);
+    expect(deriveContextSeeds('  spaced   out  ')).toEqual([
+      'spaced',
+      'out',
+      'spaced out',
+    ]);
   });
 });

@@ -124,6 +124,11 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L2/insights/typescript-monorepo-patterns.md': 1,
       'L2/insights/typescript-type-safety.md': 1,
       'L2/insights/vault-organization.md': 1,
+      'L2/insights/docker-image-optimization.md': 1,
+      'L2/insights/image-rendering-pipeline.md': 1,
+      'L2/insights/image-editing-workflow.md': 1,
+      'L2/insights/n3r-migration-plan.md': 1,
+      'L2/insights/ui-transition-patterns.md': 1,
     },
   },
   {
@@ -197,6 +202,23 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
     relevance: {
       'L2/insights/typescript-monorepo-patterns.md': 2,
       'L2/insights/typescript-type-safety.md': 2,
+    },
+  },
+  // 동형이의어 OR 시드 — kg_context 자연어 분해가 만드는 것과 동일한 시드 형태.
+  // 흔한 토큰("image"/"전환")이 무관 도메인 클러스터를 시드하는 노이즈를 IDF가 강등하는지 판별.
+  {
+    id: 'homograph-or-image',
+    seeds: ['docker', 'image'],
+    relevance: {
+      'L2/insights/docker-image-optimization.md': 2,
+      'L4/tasks/container-registry-setup.md': 1,
+    },
+  },
+  {
+    id: 'homograph-or-korean',
+    seeds: ['n3r', '전환'],
+    relevance: {
+      'L2/insights/n3r-migration-plan.md': 2,
     },
   },
 ];

@@ -1,0 +1,11 @@
+{
+  "queries": 7,
+  "engines": {
+    "qga-context": {
+      "ndcg10": 0.9427,
+      "recall10": 0.9643,
+      "mrr": 1,
+      "precisionR": 0.7381
+    }
+  }
+}

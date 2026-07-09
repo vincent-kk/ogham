@@ -6,7 +6,7 @@ import { bench, describe } from 'vitest';
 
 import { buildGraph } from '../../core/graphBuilder/graphBuilder.js';
 import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
-import { resolveSeedNodes } from '../../search/queryEngine/queryEngine.js';
+import { resolveSeedNodes } from '../../search/queryEngine/index.js';
 import { Layer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';

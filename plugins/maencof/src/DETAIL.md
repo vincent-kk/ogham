@@ -19,7 +19,7 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 - Core: scanVault, parseDocument, buildGraph, convertToDAG, calculateWeights, runSpreadingActivation, detectCommunities, mergeMaencofSection, ArchitectureMigrator, readChangelogState/writeChangelogState, parseYamlFrontmatter, extractLinks
 - Core (internal): `quoteYamlValue`, `parseScalarValue` — YAML 직렬화 특수문자 안전 처리 (mcp/tools 내부 전용)
 - Types: EdgeType에 `DOMAIN` 추가, KnowledgeNode에 `mentioned_persons`/`outboundLinks` 필드, KnowledgeGraph에 `EdgeTypeMap`
-- Search: query, assembleContext, QueryEngine, ContextAssembler
+- Search: query, assembleContext, QueryEngine, ContextAssembler, deriveContextSeeds (kg_context 자연어 분해 — 단어 OR + 인접 2-gram phrase 시드)
 - Index: MetadataStore, IncrementalTracker, computeIncrementalChangeSet
 - MCP: createServer, startServer, tool handlers (maencof*\*, kg*\_, boundary\_\_, claudemd*\*, activity*\*, workHistory)
 - Types: 전체 타입 re-export (types/index.ts)

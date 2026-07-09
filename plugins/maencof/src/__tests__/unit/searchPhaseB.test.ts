@@ -11,7 +11,7 @@ import { extractBestSnippet } from '../../search/contextAssembler/contextAssembl
 import {
   query,
   resolveSeedNodes,
-} from '../../search/queryEngine/queryEngine.js';
+} from '../../search/queryEngine/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

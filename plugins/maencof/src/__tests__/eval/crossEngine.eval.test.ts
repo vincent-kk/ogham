@@ -10,9 +10,11 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import type { EngineMetrics, SearchFn } from './evalRunner.js';
-import { LIVE_DEFAULTS, liveSearchFn, measureSearchFn } from './evalRunner.js';
+import type { EngineMetrics, SearchFn } from './engineMetrics.js';
+import { LIVE_DEFAULTS } from './evalConstants.js';
 import { buildEvalGraph } from './fixtureVault.js';
+import { liveSearchFn } from './liveSearchFn.js';
+import { measureSearchFn } from './measureSearchFn.js';
 
 const ARCHIVE_PIPELINE_URL = new URL(
   '../../../../../.metadata/maencof/TOOL/Spreading-Activation-Engine-Archive/v1-bfs-max-propagation/runtime/queryPipeline.mjs',
@@ -32,7 +34,7 @@ async function loadArchivedPipeline(): Promise<ArchivedPipeline> {
 }
 
 function formatRow(name: string, m: EngineMetrics): string {
-  return `${name.padEnd(14)} ndcg10 ${m.ndcg10.toFixed(4)}  recall10 ${m.recall10.toFixed(4)}  mrr ${m.mrr.toFixed(4)}`;
+  return `${name.padEnd(14)} ndcg10 ${m.ndcg10.toFixed(4)}  recall10 ${m.recall10.toFixed(4)}  mrr ${m.mrr.toFixed(4)}  precR ${m.precisionR.toFixed(4)}`;
 }
 
 describe('cross-engine benchmark (archived v1 vs live qga)', () => {

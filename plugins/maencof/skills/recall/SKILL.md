@@ -43,7 +43,8 @@ Rule of thumb: know what you want → `recall`. Want to wander → `explore`.
 
 Extract core keywords and intent from user input.
 
-- Natural-language query → list of search keywords
+- Natural-language query → list of search keywords: keep distilled concept terms only, dropping grammar words (particles, articles, prepositions)
+- Disambiguate polysemous/generic nouns by binding a qualifier into the same seed item ("docker image", not bare "image") — a multi-word item is AND-matched
 - Cross-language recall: include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
 - Mode detection: `--summary` (summary mode, default) / `--detail` (detail mode)
 - Layer filter detection: `--layer=1` through `--layer=5`
@@ -113,8 +114,8 @@ For more detail: `/maencof:recall {query} --detail`
 
 ## MCP Tools
 
-| Tool                | Purpose                                                          |
-| ------------------- | ---------------------------------------------------------------- |
+| Tool                                 | Purpose                                                          |
+| ------------------------------------ | ---------------------------------------------------------------- |
 | `mcp__plugin_maencof_t__kg_search`   | Keyword-based seed node search                                   |
 | `mcp__plugin_maencof_t__kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
 | `mcp__plugin_maencof_t__kg_context`  | Assemble node context                                            |
