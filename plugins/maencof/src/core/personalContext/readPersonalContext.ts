@@ -7,20 +7,12 @@
  * 복구 가능한 데이터(항목·disable 설정)를 조용히 덮어쓰는 것을 막는다.
  */
 import { existsSync, readFileSync, renameSync } from 'node:fs';
-import { join } from 'node:path';
 
-import { MAENCOF_META_DIR } from '../../constants/directories.js';
-import { PERSONAL_CONTEXT_FILE } from '../../constants/personalContext.js';
 import type { PersonalContextFile } from '../../types/personalContext.js';
 
-import {
-  defaultPersonalContext,
-  normalizePersonalContext,
-} from './normalizePersonalContext.js';
-
-export function personalContextPath(cwd: string): string {
-  return join(cwd, MAENCOF_META_DIR, PERSONAL_CONTEXT_FILE);
-}
+import { defaultPersonalContext } from './defaultPersonalContext.js';
+import { normalizePersonalContext } from './normalizePersonalContext.js';
+import { personalContextPath } from './personalContextPath.js';
 
 export function readPersonalContext(cwd: string): PersonalContextFile {
   const filePath = personalContextPath(cwd);

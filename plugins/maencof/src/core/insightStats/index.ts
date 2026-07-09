@@ -1,1 +1,12 @@
-export * from './insightStats.js';
+export { appendPendingCapture } from './operations/appendPendingCapture.js';
+export { autoAdjustSensitivity } from './operations/autoAdjustSensitivity.js';
+export { buildMetaPrompt } from './operations/buildMetaPrompt.js';
+export { calculatePrecision } from './operations/calculatePrecision.js';
+export { deletePendingNotification } from './operations/deletePendingNotification.js';
+export { getSessionCaptureCount } from './operations/getSessionCaptureCount.js';
+export { incrementInsightStats } from './operations/incrementInsightStats.js';
+export { readInsightConfig } from './operations/readInsightConfig.js';
+export { readInsightStats } from './operations/readInsightStats.js';
+export { readPendingNotification } from './operations/readPendingNotification.js';
+export { updatePromotionStats } from './operations/updatePromotionStats.js';
+export { writeInsightConfig } from './operations/writeInsightConfig.js';

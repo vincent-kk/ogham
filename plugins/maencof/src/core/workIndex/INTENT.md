@@ -7,8 +7,8 @@
 
 ## Structure
 
-- `inferTopicsLayers.ts` — 경로 → 레이어/토픽 추론 (순수)
-- `workIndex.ts` — digest 생성, 기간 합산, 역색인 재파생/조회
+- `index.ts` — 순수 barrel (공개 API: inferTopicsLayers + getDigestsDir/getDailyDigestPath/buildDailyDigest/readDailyDigest/listDailyDigestDates/aggregatePeriod/queryWork)
+- `operations/` organ — 경로 → 레이어/토픽 추론(순수), digest 생성·기간 합산·역색인 재파생/조회, 함수 1개/파일 (getDailyDigestDir 는 비공개 헬퍼로 barrel 미노출)
 
 ## Conventions
 

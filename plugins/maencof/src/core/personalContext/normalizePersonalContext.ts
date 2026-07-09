@@ -6,10 +6,7 @@
  * 손상·손편집 파일에서 구조가 불완전한 항목은 조용히 drop한다 (렌더에
  * 이상 값이 주입되는 것 방지). 정상 경로(MCP가 쓴 파일)에서는 drop이 없다.
  */
-import {
-  DEFAULT_PERSONAL_CONTEXT_CONFIG,
-  PERSONAL_CONTEXT_SCHEMA_VERSION,
-} from '../../constants/personalContext.js';
+import { PERSONAL_CONTEXT_SCHEMA_VERSION } from '../../constants/personalContext.js';
 import {
   PERSONAL_STATE_INTENSITIES,
   type PersonalContextFile,
@@ -18,14 +15,7 @@ import {
   type PersonalTopic,
 } from '../../types/personalContext.js';
 
-export function defaultPersonalContext(): PersonalContextFile {
-  return {
-    _schemaVersion: PERSONAL_CONTEXT_SCHEMA_VERSION,
-    config: { ...DEFAULT_PERSONAL_CONTEXT_CONFIG },
-    states: [],
-    topics: [],
-  };
-}
+import { defaultPersonalContext } from './defaultPersonalContext.js';
 
 export function normalizePersonalContext(raw: unknown): PersonalContextFile {
   if (!isRecord(raw)) return defaultPersonalContext();

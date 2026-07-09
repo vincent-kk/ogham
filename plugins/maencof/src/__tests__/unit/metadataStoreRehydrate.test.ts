@@ -8,8 +8,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { hydrateRuntimeMaps } from '../../core/graphBuilder/graphBuilder.js';
-import { MetadataStore } from '../../core/indexer/metadataStore/metadataStore.js';
+import { hydrateRuntimeMaps } from '../../core/graphBuilder/index.js';
+import { MetadataStore } from '../../core/indexer/metadataStore/index.js';
 import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import type { NodeId } from '../../types/common.js';
 import type {

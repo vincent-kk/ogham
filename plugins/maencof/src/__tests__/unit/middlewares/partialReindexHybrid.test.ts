@@ -9,7 +9,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { MetadataStore } from '../../../core/indexer/metadataStore/metadataStore.js';
+import { MetadataStore } from '../../../core/indexer/metadataStore/index.js';
 import { mergeStaleNodesIntoGraph } from '../../../mcp/server/middlewares/partialReindex.js';
 import * as queryEngine from '../../../search/queryEngine/index.js';
 import type { NodeId } from '../../../types/common.js';

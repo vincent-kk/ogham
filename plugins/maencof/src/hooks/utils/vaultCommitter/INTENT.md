@@ -6,7 +6,9 @@
 
 ## Structure
 
-- `vaultCommitter.ts` — config 파싱 + stage → fold → commit orchestration
+- `index.ts` — 순수 barrel (공개 API: readVaultCommitConfig/shouldCommitOnPrompt/isClearCommand/runVaultCommitter + DEFAULT_SKIP_PATTERN_SOURCE + 타입)
+- `types/` organ — 공개 타입 (VaultCommitConfig/VaultCommitterInput/VaultCommitterEvent/VaultCommitterResult)
+- `operations/` organ — config 읽기·프롬프트 판별·커밋 오케스트레이션 (함수 1개/파일)
 - `helpers/foldDaily/` — 당일 자동 커밋 폴딩 (git reset --soft, 실패 시 ORIG_HEAD 복구)
 
 ## Boundaries

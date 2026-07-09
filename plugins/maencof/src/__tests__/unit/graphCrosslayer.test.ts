@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildGraph } from '../../core/graphBuilder/graphBuilder.js';
+import { buildGraph } from '../../core/graphBuilder/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeNode } from '../../types/graph.js';
 

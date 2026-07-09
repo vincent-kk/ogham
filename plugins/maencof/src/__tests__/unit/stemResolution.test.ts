@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildStemIndex,
   resolveAndAttachLinks,
-} from '../../mcp/tools/kgBuild/kgBuild.js';
+} from '../../mcp/tools/kgBuild/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { NodeId } from '../../types/common.js';
 import type { KnowledgeNode } from '../../types/graph.js';

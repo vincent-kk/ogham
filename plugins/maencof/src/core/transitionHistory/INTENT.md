@@ -6,8 +6,8 @@ Layer 간 문서 전이(TransitionDirective) 이력을 영속화하고 조회하
 
 ## Structure
 
-- `transitionHistory.ts` — appendTransition, readTransitionHistory, getRejectCount
-- `index.ts` — barrel export
+- `index.ts` — barrel (공개 API: readTransitionHistory/appendTransition/getRejectCount)
+- `operations/` organ — IO·조회 (historyPath 사설 헬퍼 + read/append/getRejectCount, 함수 1개/파일)
 
 ## Boundaries
 

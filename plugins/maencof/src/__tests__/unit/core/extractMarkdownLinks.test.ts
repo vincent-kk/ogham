@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { extractLinks } from '../../../core/documentParser/documentParser.js';
+import { extractLinks } from '../../../core/documentParser/index.js';
 
 // ─── extractLinks — 마크다운 링크 ─────────────────────────────────────────────
 

@@ -1,1 +1,16 @@
-export * from './cacheManager.js';
+export { cwdHash } from './operations/cwdHash.js';
+export { getCacheDir } from './operations/getCacheDir.js';
+export { hasPromptContext } from './operations/hasPromptContext.js';
+export { isFirstInSession } from './operations/isFirstInSession.js';
+export { markSessionInjected } from './operations/markSessionInjected.js';
+export { pruneOldSessions } from './operations/pruneOldSessions.js';
+export { readPinnedNodes } from './operations/readPinnedNodes.js';
+export { readPromptContext } from './operations/readPromptContext.js';
+export { readTurnContext } from './operations/readTurnContext.js';
+export { removeSessionFiles } from './operations/removeSessionFiles.js';
+export { removeTurnContext } from './operations/removeTurnContext.js';
+export { sessionIdHash } from './operations/sessionIdHash.js';
+export { writePinnedNodes } from './operations/writePinnedNodes.js';
+export { writePromptContext } from './operations/writePromptContext.js';
+export { writeTurnContext } from './operations/writeTurnContext.js';
+export type { PinnedNode } from './types/types.js';

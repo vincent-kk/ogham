@@ -15,7 +15,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleKgBuild } from '../../mcp/tools/kgBuild/kgBuild.js';
+import { handleKgBuild } from '../../mcp/tools/kgBuild/index.js';
 import { handleKgSearch } from '../../mcp/tools/kgSearch/kgSearch.js';
 import { handleMaencofCreate } from '../../mcp/tools/maencofCreate/maencofCreate.js';
 import { handleMaencofDelete } from '../../mcp/tools/maencofDelete/maencofDelete.js';
@@ -199,7 +199,7 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
 
     // 지식 그래프 로드
     const { MetadataStore } =
-      await import('../../core/indexer/metadataStore/metadataStore.js');
+      await import('../../core/indexer/metadataStore/index.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
     expect(graph).toBeTruthy();

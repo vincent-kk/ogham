@@ -8,7 +8,7 @@ import {
   appendTransition,
   getRejectCount,
   readTransitionHistory,
-} from '../../../core/transitionHistory/transitionHistory.js';
+} from '../../../core/transitionHistory/index.js';
 import type { TransitionHistoryEntry } from '../../../types/agent.js';
 
 function createTempDir(): string {

@@ -15,7 +15,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleKgBuild } from '../../mcp/tools/kgBuild/kgBuild.js';
+import { handleKgBuild } from '../../mcp/tools/kgBuild/index.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
 import { handleKgSearch } from '../../mcp/tools/kgSearch/kgSearch.js';
 import { handleKgStatus } from '../../mcp/tools/kgStatus/kgStatus.js';
@@ -187,7 +187,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
 
     // 그래프 로드
     const { MetadataStore } =
-      await import('../../core/indexer/metadataStore/metadataStore.js');
+      await import('../../core/indexer/metadataStore/index.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
     expect(graph).toBeTruthy();
@@ -218,7 +218,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
     expect(buildResult.success).toBe(true);
 
     const { MetadataStore } =
-      await import('../../core/indexer/metadataStore/metadataStore.js');
+      await import('../../core/indexer/metadataStore/index.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
 
@@ -275,7 +275,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
 
     // Step 5: 검색
     const { MetadataStore } =
-      await import('../../core/indexer/metadataStore/metadataStore.js');
+      await import('../../core/indexer/metadataStore/index.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
 

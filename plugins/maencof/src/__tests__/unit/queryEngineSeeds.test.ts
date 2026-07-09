@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { hydrateRuntimeMaps } from '../../core/graphBuilder/graphBuilder.js';
+import { hydrateRuntimeMaps } from '../../core/graphBuilder/index.js';
 import {
   deriveContextSeeds,
   query,

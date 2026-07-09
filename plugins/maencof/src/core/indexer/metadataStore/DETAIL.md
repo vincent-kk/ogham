@@ -22,7 +22,7 @@
 - `loadWeights()` / `saveWeights(data)` — `weights.json`.
 - `loadSnapshot()` / `saveSnapshot(snapshot)` — `snapshot.json`.
 - `loadStaleEntries()` / `appendStaleEntries(entries)` / `clearStaleEntries()` — `stale-nodes.json`.
-- 헬퍼: `atomicWrite.ts::atomicWriteJson(absPath, data)`, `fileMutex.ts::withVaultLock(vaultPath, fn)`.
+- 헬퍼: `operations/atomicWriteJson.ts::atomicWriteJson(absPath, data)`, `operations/withVaultLock.ts::withVaultLock(vaultPath, fn)`.
 
 ## Failure policy
 

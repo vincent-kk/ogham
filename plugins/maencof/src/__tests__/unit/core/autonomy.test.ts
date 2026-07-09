@@ -8,7 +8,7 @@ import {
   canAutoExecute,
   readAutonomyLevel,
   setAutonomyLevel,
-} from '../../../core/autonomy/autonomy.js';
+} from '../../../core/autonomy/index.js';
 
 function createTempDir(): string {
   return mkdtempSync(join(tmpdir(), 'maencof-autonomy-test-'));

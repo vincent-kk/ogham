@@ -19,7 +19,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../core/documentParser/documentParser.js';
+} from '../../core/documentParser/index.js';
 import { handleMaencofCreate } from '../../mcp/tools/maencofCreate/maencofCreate.js';
 import { handleMaencofMove } from '../../mcp/tools/maencofMove/maencofMove.js';
 import { handleMaencofRead } from '../../mcp/tools/maencofRead/maencofRead.js';

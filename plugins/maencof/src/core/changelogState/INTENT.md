@@ -6,8 +6,8 @@
 
 ## Structure
 
-- `changelogState.ts` — changelogStatePath, readChangelogState, writeChangelogState (+ 수동 정규화)
-- `index.ts` — barrel export
+- `index.ts` — barrel (공개 API: changelogStatePath/readChangelogState/writeChangelogState)
+- `operations/` organ — 상태 IO (changelogStatePath + read(수동 정규화 내장)/write, 함수 1개/파일)
 
 ## Boundaries
 

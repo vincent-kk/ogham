@@ -9,7 +9,7 @@ import {
   buildAdjacencyList,
   hydrateRuntimeMaps,
   rebuildEdgeDerivedMaps,
-} from '../../core/graphBuilder/graphBuilder.js';
+} from '../../core/graphBuilder/index.js';
 import type { NodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

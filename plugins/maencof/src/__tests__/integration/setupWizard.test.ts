@@ -22,8 +22,8 @@ import {
   MAENCOF_START_MARKER,
   mergeMaencofSection,
   readMaencofSection,
-} from '../../core/claudeMdMerger/claudeMdMerger.js';
-import { handleKgBuild } from '../../mcp/tools/kgBuild/kgBuild.js';
+} from '../../core/claudeMdMerger/index.js';
+import { handleKgBuild } from '../../mcp/tools/kgBuild/index.js';
 import { handleKgStatus } from '../../mcp/tools/kgStatus/kgStatus.js';
 import { handleMaencofCreate } from '../../mcp/tools/maencofCreate/maencofCreate.js';
 import type { SetupProgress, SetupStep } from '../../types/setup.js';

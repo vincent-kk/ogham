@@ -5,7 +5,7 @@ import type {
   PersonalState,
   PersonalTopic,
 } from '../../../types/personalContext.js';
-import { defaultPersonalContext } from '../normalizePersonalContext.js';
+import { defaultPersonalContext } from '../defaultPersonalContext.js';
 import { renderPersonalContextBlock } from '../renderPersonalContextBlock.js';
 
 const NOW = new Date('2026-07-09T00:00:00.000Z');

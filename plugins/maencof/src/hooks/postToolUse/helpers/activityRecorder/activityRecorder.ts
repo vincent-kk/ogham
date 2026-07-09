@@ -11,10 +11,10 @@
  */
 import { TOOL_CATEGORY_MAP } from '../../../../constants/activity.js';
 import { ACTIVITY_RECORDER_EXCLUSION_PREFIXES } from '../../../../constants/activityRecorder.js';
-import { appendActivityEvent } from '../../../../core/activityLog/activityLog.js';
-import { buildToolDescription } from '../../../../core/activityLog/buildToolDescription.js';
-import { formatTime } from '../../../../core/dateFormat/dateFormat.js';
-import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
+import { appendActivityEvent } from '../../../../core/activityLog/operations/appendActivityEvent.js';
+import { buildToolDescription } from '../../../../core/activityLog/operations/buildToolDescription.js';
+import { formatTime } from '../../../../core/dateFormat/operations/formatTime.js';
+import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 import { normalizeMaencofToolName } from '../../../shared/maencofMcpTools.js';
 

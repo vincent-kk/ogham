@@ -4,6 +4,11 @@
 
 YAML frontmatter 파싱 및 직렬화. 마크다운 문서 메타데이터 처리.
 
+## Structure
+
+- `index.ts` — 순수 barrel (공개 API: parseScalarValue/quoteYamlValue/parseYamlFrontmatter)
+- `operations/` organ — 파싱/직렬화 함수 (함수 1개/파일, 외부 의존 없음)
+
 ## Boundaries
 
 ### Always do

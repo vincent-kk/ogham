@@ -1,7 +1,5 @@
-import {
-  getSessionCaptureCount,
-  readInsightConfig,
-} from '../../../../core/insightStats/insightStats.js';
+import { getSessionCaptureCount } from '../../../../core/insightStats/operations/getSessionCaptureCount.js';
+import { readInsightConfig } from '../../../../core/insightStats/operations/readInsightConfig.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 
 export interface InsightInjectorInput {

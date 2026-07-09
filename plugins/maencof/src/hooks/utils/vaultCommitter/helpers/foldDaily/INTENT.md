@@ -4,6 +4,11 @@
 
 하루 1커밋 정책 — 당일의 연속된 자동 커밋(AUTO_COMMIT_SUBJECT_MARKERS 매칭)을 `git reset --soft`로 하나로 접고 재커밋한다. 수동 커밋은 폴딩 경계이며 절대 접지 않는다.
 
+## Structure
+
+- `index.ts` — 순수 barrel (공개 API: findFoldBase/isAutoCommitSubject/tryFoldCommit)
+- `operations/` organ — 폴딩 로직 (함수 1개/파일: isAutoCommitSubject/revParse/findFoldBase/tryFoldCommit; revParse 는 barrel 미노출 공용 헬퍼)
+
 ## Boundaries
 
 ### Always do

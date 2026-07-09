@@ -9,7 +9,7 @@ import {
   LAYER_DECAY_FACTORS,
   getLayerDecay,
   normalizeWeights,
-} from '../../core/weightCalculator/weightCalculator.js';
+} from '../../core/weightCalculator/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeEdge } from '../../types/graph.js';
 

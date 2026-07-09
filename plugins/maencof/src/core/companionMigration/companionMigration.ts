@@ -18,10 +18,10 @@ import {
 import type { CompanionSectionMinimal } from '../../types/companionGuard.js';
 import { getCompanionSchemaVersion } from '../../types/companionGuard.js';
 import { backupPathFor } from '../backupPath/index.js';
-import { assertTurnBudget } from '../companionBudget/companionBudget.js';
+import { assertTurnBudget } from '../companionBudget/index.js';
 import { normalizeCompanionIdentity } from '../companionNormalize/normalizeCompanionIdentity.js';
 import { toIsoDatetime } from '../companionNormalize/toIsoDatetime.js';
-import { appendErrorLogSafe } from '../errorLog/errorLog.js';
+import { appendErrorLogSafe } from '../errorLog/index.js';
 
 export type CompanionMigrationReason =
   | 'no-file'

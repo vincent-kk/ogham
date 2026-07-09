@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { withVaultLock } from '../../core/indexer/metadataStore/fileMutex.js';
+import { withVaultLock } from '../../core/indexer/metadataStore/index.js';
 
 describe('withVaultLock', () => {
   it('동일 vaultPath 호출은 직렬 실행된다', async () => {

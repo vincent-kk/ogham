@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
-import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { metaPath } from '../../shared/metaPath.js';
 import { CONFIG_REGISTRY } from '../configRegistry/configRegistry.js';
 

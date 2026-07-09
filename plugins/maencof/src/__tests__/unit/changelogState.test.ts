@@ -12,7 +12,7 @@ import {
   changelogStatePath,
   readChangelogState,
   writeChangelogState,
-} from '../../core/changelogState/changelogState.js';
+} from '../../core/changelogState/index.js';
 
 describe('changelogState', () => {
   let vaultDir: string;

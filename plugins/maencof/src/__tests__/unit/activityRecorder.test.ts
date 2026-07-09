@@ -11,8 +11,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   getActivityEventPath,
   readActivityEvents,
-} from '../../core/activityLog/activityLog.js';
-import { formatDate } from '../../core/dateFormat/dateFormat.js';
+} from '../../core/activityLog/index.js';
+import { formatDate } from '../../core/dateFormat/index.js';
 import { runActivityRecorder } from '../../hooks/postToolUse/helpers/activityRecorder/activityRecorder.js';
 
 function createTempVault(): string {

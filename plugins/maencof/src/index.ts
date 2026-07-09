@@ -13,13 +13,13 @@ export {
   computeChangeSet,
   scanIncrementalChanges,
   readVaultFile,
-} from './core/vaultScanner/vaultScanner.js';
+} from './core/vaultScanner/index.js';
 export type {
   ScannedFile,
   FileSnapshot,
   ChangeSet,
   VaultScanOptions,
-} from './core/vaultScanner/vaultScanner.js';
+} from './core/vaultScanner/index.js';
 
 export {
   parseYamlFrontmatter,
@@ -28,28 +28,28 @@ export {
   parseDocument,
   buildKnowledgeNode,
   parseDocumentFromFile,
-} from './core/documentParser/documentParser.js';
+} from './core/documentParser/index.js';
 export type {
   MarkdownLink,
   ParsedDocument,
   NodeBuildResult,
-} from './core/documentParser/documentParser.js';
+} from './core/documentParser/index.js';
 
 export {
   buildGraph,
   buildAdjacencyList,
   detectOrphans,
-} from './core/graphBuilder/graphBuilder.js';
+} from './core/graphBuilder/index.js';
 export type {
   GraphBuilderOptions,
   GraphBuildResult,
-} from './core/graphBuilder/graphBuilder.js';
+} from './core/graphBuilder/index.js';
 
 export {
   convertToDAG,
   applyLayerDirectionality,
-} from './core/dagConverter/dagConverter.js';
-export type { DAGConvertResult } from './core/dagConverter/dagConverter.js';
+} from './core/dagConverter/index.js';
+export type { DAGConvertResult } from './core/dagConverter/index.js';
 
 export {
   calculateWeights,
@@ -57,8 +57,8 @@ export {
   normalizeWeights,
   getLayerDecay,
   LAYER_DECAY_FACTORS,
-} from './core/weightCalculator/weightCalculator.js';
-export type { WeightCalcResult } from './core/weightCalculator/weightCalculator.js';
+} from './core/weightCalculator/index.js';
+export type { WeightCalcResult } from './core/weightCalculator/index.js';
 
 export { runAccumulativeActivation } from './core/spreadingActivation/accumulativeActivation.js';
 export type { AccumulativeActivationParams } from './core/spreadingActivation/accumulativeActivation.js';
@@ -66,12 +66,12 @@ export type { AccumulativeActivationParams } from './core/spreadingActivation/ac
 export {
   CommunityDetector,
   detectCommunities,
-} from './core/communityDetector/communityDetector.js';
+} from './core/communityDetector/index.js';
 export type {
   Community,
   CommunityDetectionResult,
   CommunityDetectorParams,
-} from './core/communityDetector/communityDetector.js';
+} from './core/communityDetector/index.js';
 
 export {
   mergeMaencofSection,
@@ -80,8 +80,8 @@ export {
   ClaudeMdMerger,
   MAENCOF_START_MARKER,
   MAENCOF_END_MARKER,
-} from './core/claudeMdMerger/claudeMdMerger.js';
-export type { MergeResult } from './core/claudeMdMerger/claudeMdMerger.js';
+} from './core/claudeMdMerger/index.js';
+export type { MergeResult } from './core/claudeMdMerger/index.js';
 
 export { deduplicateContent } from './core/contentDedup/contentDedup.js';
 export type { DeduplicateResult } from './core/contentDedup/contentDedup.js';
@@ -105,12 +105,12 @@ export {
   assembleContext,
   extractBestSnippet,
   ContextAssembler,
-} from './search/contextAssembler/contextAssembler.js';
+} from './search/contextAssembler/index.js';
 export type {
   ContextItem,
   AssembleOptions,
   AssembledContext,
-} from './search/contextAssembler/contextAssembler.js';
+} from './search/contextAssembler/index.js';
 
 // Index modules
 export {
@@ -118,14 +118,14 @@ export {
   deserializeGraph,
   MetadataStore,
   CACHE_FILES,
-} from './core/indexer/metadataStore/metadataStore.js';
+} from './core/indexer/metadataStore/index.js';
 export type {
   SnapshotEntry,
   FileSnapshot as CacheSnapshot,
   WeightsData,
   StaleEntry,
   StaleEntries,
-} from './core/indexer/metadataStore/metadataStore.js';
+} from './core/indexer/metadataStore/index.js';
 
 export {
   computeChangeSet as computeIncrementalChangeSet,
@@ -133,12 +133,12 @@ export {
   computeIncrementalScope,
   createSnapshot as createIncrementalSnapshot,
   IncrementalTracker,
-} from './core/indexer/incrementalTracker/incrementalTracker.js';
+} from './core/indexer/incrementalTracker/index.js';
 export type {
   ChangeSet as IncrementalChangeSet,
   IncrementalScope,
   CurrentFileInfo,
-} from './core/indexer/incrementalTracker/incrementalTracker.js';
+} from './core/indexer/incrementalTracker/index.js';
 
 // MCP modules
 export {

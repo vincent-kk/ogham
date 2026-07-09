@@ -1,4 +1,4 @@
-import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/operations/appendErrorLogSafe.js';
 import type { HookConcernResult } from '../../../types/dispatch.js';
 
 /**

@@ -14,7 +14,7 @@ import {
   MAENCOF_START_MARKER,
   readMaencofSection,
   removeMaencofSection,
-} from '../../core/claudeMdMerger/claudeMdMerger.js';
+} from '../../core/claudeMdMerger/index.js';
 
 /** 테스트용 임시 디렉토리 */
 let testDir: string;

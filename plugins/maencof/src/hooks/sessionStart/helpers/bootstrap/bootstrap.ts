@@ -11,29 +11,23 @@ import {
   META_SKILL_MAX_CHARS,
   META_SKILL_TAG,
 } from '../../../../constants/sessionStart.js';
-import { readChangelogState } from '../../../../core/changelogState/changelogState.js';
-import {
-  mergeMaencofSection,
-  readMaencofSection,
-} from '../../../../core/claudeMdMerger/claudeMdMerger.js';
+import { readChangelogState } from '../../../../core/changelogState/operations/readChangelogState.js';
+import { mergeMaencofSection } from '../../../../core/claudeMdMerger/operations/mergeMaencofSection.js';
+import { readMaencofSection } from '../../../../core/claudeMdMerger/operations/readMaencofSection.js';
 import { normalizeCompanionIdentity } from '../../../../core/companionNormalize/normalizeCompanionIdentity.js';
-import { isDialogueInjectionDisabled } from '../../../../core/dialogueConfig/dialogueConfig.js';
-import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
-import {
-  autoAdjustSensitivity,
-  buildMetaPrompt,
-  deletePendingNotification,
-  readInsightConfig,
-  readPendingNotification,
-} from '../../../../core/insightStats/insightStats.js';
-import {
-  getRecentSessionSummary,
-  recordSessionStart,
-} from '../../../../core/sessionStore/sessionStore.js';
-import { buildL1CoreBlock } from '../../../../core/turnContext/buildL1CoreBlock.js';
-import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSessionIdentityBlock.js';
+import { isDialogueInjectionDisabled } from '../../../../core/dialogueConfig/operations/isDialogueInjectionDisabled.js';
+import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
+import { autoAdjustSensitivity } from '../../../../core/insightStats/operations/autoAdjustSensitivity.js';
+import { buildMetaPrompt } from '../../../../core/insightStats/operations/buildMetaPrompt.js';
+import { deletePendingNotification } from '../../../../core/insightStats/operations/deletePendingNotification.js';
+import { readInsightConfig } from '../../../../core/insightStats/operations/readInsightConfig.js';
+import { readPendingNotification } from '../../../../core/insightStats/operations/readPendingNotification.js';
 import { readPersonalContext } from '../../../../core/personalContext/readPersonalContext.js';
 import { renderPersonalContextBlock } from '../../../../core/personalContext/renderPersonalContextBlock.js';
+import { getRecentSessionSummary } from '../../../../core/sessionStore/operations/getRecentSessionSummary.js';
+import { recordSessionStart } from '../../../../core/sessionStore/operations/recordSessionStart.js';
+import { buildL1CoreBlock } from '../../../../core/turnContext/buildL1CoreBlock.js';
+import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSessionIdentityBlock.js';
 import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
@@ -294,7 +288,9 @@ function composeSessionStartResult(
   const result: SessionStartResult = { continue: true };
   try {
     const identityBlock = companion ? buildSessionIdentityBlock(companion) : '';
-    const personalContextBlock = companion ? buildPersonalContextBlock(cwd) : '';
+    const personalContextBlock = companion
+      ? buildPersonalContextBlock(cwd)
+      : '';
     const l1Block = buildL1CoreBlock(cwd);
     const metaBody = buildMetaSkillContext(cwd);
     const advisories = messages.length > 0 ? messages.join('\n\n') : null;

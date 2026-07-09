@@ -5,12 +5,12 @@
 import { spawnCli } from '@ogham/cross-platform/spawn';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { formatDate } from '../../core/dateFormat/dateFormat.js';
+import { formatDate } from '../../core/dateFormat/index.js';
 import {
   findFoldBase,
   isAutoCommitSubject,
   tryFoldCommit,
-} from '../../hooks/utils/vaultCommitter/helpers/foldDaily/foldDaily.js';
+} from '../../hooks/utils/vaultCommitter/helpers/foldDaily/index.js';
 
 vi.mock('@ogham/cross-platform/spawn', () => ({
   spawnCli: vi.fn(),

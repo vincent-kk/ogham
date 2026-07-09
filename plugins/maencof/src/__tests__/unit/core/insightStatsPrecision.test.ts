@@ -9,7 +9,7 @@ import {
   calculatePrecision,
   readInsightStats,
   updatePromotionStats,
-} from '../../../core/insightStats/insightStats.js';
+} from '../../../core/insightStats/index.js';
 import type { InsightStats } from '../../../types/insight.js';
 
 function createTempDir(): string {

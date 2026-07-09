@@ -18,7 +18,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
-} from '../../core/claudeMdMerger/claudeMdMerger.js';
+} from '../../core/claudeMdMerger/index.js';
 import { runSessionStart } from '../../hooks/sessionStart/helpers/bootstrap/bootstrap.js';
 import { VERSION } from '../../version.js';
 

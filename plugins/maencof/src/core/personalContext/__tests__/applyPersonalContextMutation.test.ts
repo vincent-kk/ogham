@@ -9,7 +9,7 @@ import {
   type PersonalContextStateCaptureInput,
   applyPersonalContextMutation,
 } from '../applyPersonalContextMutation.js';
-import { defaultPersonalContext } from '../normalizePersonalContext.js';
+import { defaultPersonalContext } from '../defaultPersonalContext.js';
 import { readPersonalContext } from '../readPersonalContext.js';
 import { writePersonalContext } from '../writePersonalContext.js';
 

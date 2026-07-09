@@ -24,7 +24,7 @@ import {
   assertSessionBudget,
   assertTurnBudget,
   checkBriefSubsumption,
-} from '../companionBudget/companionBudget.js';
+} from '../companionBudget/index.js';
 import { normalizeCompanionIdentity } from '../companionNormalize/normalizeCompanionIdentity.js';
 import { toIsoDatetime } from '../companionNormalize/toIsoDatetime.js';
 

@@ -8,8 +8,8 @@ import { dirname, join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { getActivityEventPath } from '../../core/activityLog/activityLog.js';
-import { formatDate } from '../../core/dateFormat/dateFormat.js';
+import { getActivityEventPath } from '../../core/activityLog/index.js';
+import { formatDate } from '../../core/dateFormat/index.js';
 import { handleActivityRead } from '../../mcp/tools/activityRead/activityRead.js';
 import type { ActivityEntry } from '../../types/activity.js';
 

@@ -6,7 +6,9 @@ companion-identity 정본의 매 턴/세션 렌더 길이를 측정하고 500자
 
 ## Structure
 
-- `companionBudget.ts` — measure/assert(turn·session) + checkBriefSubsumption
+- `index.ts` — 순수 barrel (공개 API: measure/assert(turn·session) + checkBriefSubsumption + 타입)
+- `types/` organ — 공개 타입 (BudgetOffender/BudgetResult/BriefSubsumptionResult)
+- `operations/` organ — 측정/게이트 (measure·codePointLength 공유 헬퍼 + measureTurnChars/measureSessionChars/assertTurnBudget/assertSessionBudget/checkBriefSubsumption, 함수 1개/파일)
 
 ## Boundaries
 

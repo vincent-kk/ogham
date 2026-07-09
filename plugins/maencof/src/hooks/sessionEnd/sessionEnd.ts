@@ -5,10 +5,10 @@ import {
   safeConcern,
   safeConcernAsync,
 } from '../utils/safeConcern/safeConcern.js';
-import { runVaultCommitter } from '../utils/vaultCommitter/vaultCommitter.js';
+import { runVaultCommitter } from '../utils/vaultCommitter/operations/runVaultCommitter.js';
 
 import { runArchiveExpired } from './helpers/archiveExpired/archiveExpired.js';
-import { runChangelogDebt } from './helpers/changelogDebt/changelogDebt.js';
+import { runChangelogDebt } from './helpers/changelogDebt/operations/runChangelogDebt.js';
 import { runSessionEnd } from './helpers/finalize/finalize.js';
 
 /**

@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { parseYamlFrontmatter } from '../../../core/yamlParser/yamlParser.js';
+import { parseYamlFrontmatter } from '../../../core/yamlParser/index.js';
 
 describe('parseYamlFrontmatter', () => {
   it('인라인 배열을 올바르게 파싱한다', () => {

@@ -4,6 +4,12 @@
 
 mtime 기반 변경 감지 및 부분 재인덱싱 범위 계산.
 
+## Structure
+
+- `index.ts` — 순수 barrel (공개 API: computeChangeSet/computeOneHopNeighbors/computeIncrementalScope/createSnapshot/IncrementalTracker + 타입)
+- `types/` organ — 공개 타입 (ChangeSet/IncrementalScope/CurrentFileInfo)
+- `operations/` organ — 변경 계산 (computeChangeSet/computeOneHopNeighbors/computeIncrementalScope/createSnapshot + IncrementalTracker 래퍼 클래스, 함수 1개/파일)
+
 ## Boundaries
 
 ### Always do

@@ -10,7 +10,7 @@ import {
   buildGraph,
   buildInvertedIndex,
   detectOrphans,
-} from '../../core/graphBuilder/graphBuilder.js';
+} from '../../core/graphBuilder/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeNode } from '../../types/graph.js';
 

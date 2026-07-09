@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
-} from '../../core/claudeMdMerger/claudeMdMerger.js';
+} from '../../core/claudeMdMerger/index.js';
 import { handleClaudeMdRead } from '../../mcp/tools/claudemdRead/claudemdRead.js';
 import { handleClaudeMdRemove } from '../../mcp/tools/claudemdRemove/claudemdRemove.js';
 

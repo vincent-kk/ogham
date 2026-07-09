@@ -8,7 +8,7 @@ import {
   checkBriefSubsumption,
   measureSessionChars,
   measureTurnChars,
-} from '../companionBudget.js';
+} from '../index.js';
 
 function section(
   over?: Partial<CompanionSectionMinimal>,

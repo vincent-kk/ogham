@@ -14,7 +14,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { MetadataStore } from '../../core/indexer/metadataStore/metadataStore.js';
+import { MetadataStore } from '../../core/indexer/metadataStore/index.js';
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';

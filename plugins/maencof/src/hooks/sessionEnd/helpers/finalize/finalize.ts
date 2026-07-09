@@ -8,14 +8,12 @@
  * SessionEnd 는 표시가 보장되는 출력 채널이 없는 이벤트다(hooks 계약) —
  * 표시용 출력은 emit 하지 않는다.
  */
-import {
-  removeSessionFiles,
-  removeTurnContext,
-} from '../../../../core/cacheManager/cacheManager.js';
-import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
-import { recordSessionEnd } from '../../../../core/sessionStore/sessionStore.js';
+import { removeSessionFiles } from '../../../../core/cacheManager/operations/removeSessionFiles.js';
+import { removeTurnContext } from '../../../../core/cacheManager/operations/removeTurnContext.js';
+import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { prunePersonalContext } from '../../../../core/personalContext/prunePersonalContext.js';
-import { buildDailyDigest } from '../../../../core/workIndex/workIndex.js';
+import { recordSessionEnd } from '../../../../core/sessionStore/operations/recordSessionEnd.js';
+import { buildDailyDigest } from '../../../../core/workIndex/operations/buildDailyDigest.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 
 export interface SessionEndInput {

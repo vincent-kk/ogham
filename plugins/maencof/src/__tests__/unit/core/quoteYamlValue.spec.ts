@@ -8,7 +8,7 @@ import {
   parseScalarValue,
   parseYamlFrontmatter,
   quoteYamlValue,
-} from '../../../core/yamlParser/yamlParser.js';
+} from '../../../core/yamlParser/index.js';
 
 // ─── quoteYamlValue ───────────────────────────────────────────────────────────
 

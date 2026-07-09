@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { extractFrontmatter } from '../../../core/documentParser/documentParser.js';
+import { extractFrontmatter } from '../../../core/documentParser/index.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

@@ -16,7 +16,7 @@ import {
   runGit,
   stageVaultChanges,
   stagedTopLevels,
-} from '../../hooks/utils/gitUtils/gitUtils.js';
+} from '../../hooks/utils/gitUtils/index.js';
 
 vi.mock('@ogham/cross-platform/spawn', () => ({
   spawnCli: vi.fn(),

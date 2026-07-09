@@ -4,10 +4,10 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { buildAdjacencyList } from '../../core/graphBuilder/graphBuilder.js';
+import { buildAdjacencyList } from '../../core/graphBuilder/index.js';
 import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
-import { extractBestSnippet } from '../../search/contextAssembler/contextAssembler.js';
+import { extractBestSnippet } from '../../search/contextAssembler/index.js';
 import {
   query,
   resolveSeedNodes,

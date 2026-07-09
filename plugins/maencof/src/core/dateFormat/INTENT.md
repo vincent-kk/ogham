@@ -6,7 +6,8 @@
 
 ## Structure
 
-- `dateFormat.ts` — formatDate, formatTime
+- `index.ts` — barrel (공개 API: formatDate/formatTime)
+- `operations/` organ — 포맷 순수 함수 (formatDate/formatTime, 함수 1개/파일)
 
 ## Boundaries
 

@@ -6,7 +6,7 @@ import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { STALE_REBUILD_THRESHOLD } from '../../../constants/thresholds.js';
 import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
-import type { StaleEntry } from '../../../core/indexer/metadataStore/metadataStore.js';
+import type { StaleEntry } from '../../../core/indexer/metadataStore/index.js';
 
 import { triggerBackgroundRebuild } from './backgroundRebuild.js';
 import { incrementUsageStat } from './usageStats.js';

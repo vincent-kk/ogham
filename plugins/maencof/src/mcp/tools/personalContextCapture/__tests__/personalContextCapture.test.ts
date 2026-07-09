@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { defaultPersonalContext } from '../../../../core/personalContext/normalizePersonalContext.js';
+import { defaultPersonalContext } from '../../../../core/personalContext/defaultPersonalContext.js';
 import { readPersonalContext } from '../../../../core/personalContext/readPersonalContext.js';
 import { writePersonalContext } from '../../../../core/personalContext/writePersonalContext.js';
 import {

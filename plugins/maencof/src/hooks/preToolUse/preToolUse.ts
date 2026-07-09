@@ -8,7 +8,7 @@ import { mergeHookOutput } from '../utils/mergeHookOutput/mergeHookOutput.js';
 import { safeConcern } from '../utils/safeConcern/safeConcern.js';
 
 import { runLayerGuard } from './helpers/layerGuard/layerGuard.js';
-import { runVaultRedirector } from './helpers/vaultRedirector/vaultRedirector.js';
+import { runVaultRedirector } from './helpers/vaultRedirector/operations/runVaultRedirector.js';
 
 /**
  * PreToolUse: the consolidated matcher is `*`, so route by tool_name —

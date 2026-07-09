@@ -11,11 +11,9 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { defaultPersonalContext } from '../normalizePersonalContext.js';
-import {
-  personalContextPath,
-  readPersonalContext,
-} from '../readPersonalContext.js';
+import { defaultPersonalContext } from '../defaultPersonalContext.js';
+import { personalContextPath } from '../personalContextPath.js';
+import { readPersonalContext } from '../readPersonalContext.js';
 import { writePersonalContext } from '../writePersonalContext.js';
 
 describe('readPersonalContext', () => {

@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import type { PersonalContextFile } from '../../../types/personalContext.js';
-import {
-  defaultPersonalContext,
-  normalizePersonalContext,
-} from '../normalizePersonalContext.js';
+import { defaultPersonalContext } from '../defaultPersonalContext.js';
+import { normalizePersonalContext } from '../normalizePersonalContext.js';
 
 const validState = {
   id: '번아웃-기미',

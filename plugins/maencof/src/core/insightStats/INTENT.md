@@ -6,8 +6,8 @@
 
 ## Structure
 
-- `insightStats.ts` — readInsightConfig, writeInsightConfig, readInsightStats, incrementInsightStats, readPendingNotification, appendPendingCapture, deletePendingNotification, getSessionCaptureCount, updatePromotionStats, calculatePrecision, autoAdjustSensitivity, buildMetaPrompt
-- `index.ts` — barrel export
+- `index.ts` — 순수 barrel (공개 API: config/stats read·write, pending 알림, 승격 통계, 정밀도/민감도, 메타 프롬프트)
+- `operations/` organ — 인사이트 연산 (config·stats read/write, pending read/append/delete, getSessionCaptureCount, updatePromotionStats, calculatePrecision, autoAdjustSensitivity, buildMetaPrompt; 공유 private helper metaPath·ensureDir 는 barrel 미노출; 함수 1개/파일)
 
 ## Boundaries
 
@@ -26,4 +26,4 @@
 
 - autoAdjustSensitivity에서 설정 파일 직접 수정
 - mcp/ 또는 hooks/ 직접 의존
-- Zod 스키마(insightStats.ts)와 수동 가드(insightGuard.ts) 간 필드 불일치 허용 금지 — 스키마 수정 시 대응 가드도 같은 PR에서 동기화
+- Zod 스키마(types/insight.ts)와 수동 가드(types/insightGuard.ts) 간 필드 불일치 허용 금지 — 스키마 수정 시 대응 가드도 같은 PR에서 동기화

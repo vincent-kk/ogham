@@ -10,7 +10,7 @@ import { dirname } from 'node:path';
 
 import type { PersonalContextFile } from '../../types/personalContext.js';
 
-import { personalContextPath } from './readPersonalContext.js';
+import { personalContextPath } from './personalContextPath.js';
 
 export function writePersonalContext(
   cwd: string,

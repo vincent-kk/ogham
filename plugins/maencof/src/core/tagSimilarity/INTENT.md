@@ -4,6 +4,11 @@
 
 태그 기반 노드 유사도 계산. Jaccard 유사도 및 태그 빈도 분석.
 
+## Structure
+
+- `index.ts` — 순수 barrel (공개 API: normalizeTags/jaccardSimilarity/extractKeywords/commonTags)
+- `operations/` organ — 유사도 계산 (normalizeTags/jaccardSimilarity/extractKeywords/commonTags, 함수 1개/파일)
+
 ## Boundaries
 
 ### Always do

@@ -8,8 +8,10 @@ Personal Context 층(사용자 상태 `states` + 최근 동향 `topics`)의 IO·
 
 ## Structure
 
-- `normalizePersonalContext.ts` — zod-free graceful 정규화 + default envelope
-- `readPersonalContext.ts` — 파일 로드 (+ `personalContextPath`)
+- `normalizePersonalContext.ts` — zod-free graceful 정규화
+- `defaultPersonalContext.ts` — 빈 envelope 기본값 생성
+- `readPersonalContext.ts` — 파일 로드
+- `personalContextPath.ts` — envelope 파일 경로 해석
 - `writePersonalContext.ts` — 직렬화 저장
 - `renderPersonalContextBlock.ts` — SessionStart `<personal-context>` 블록 렌더 (캡처 지침 내장, 만료 lazy-filter)
 - `prunePersonalContext.ts` — SessionEnd 수명주기 정리 (만료 제거·due 자동 resolve·보존 캡)

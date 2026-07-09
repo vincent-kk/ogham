@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { KgContextScope } from '../../constants/kgContext.js';
-import { buildAdjacencyList } from '../../core/graphBuilder/graphBuilder.js';
+import { buildAdjacencyList } from '../../core/graphBuilder/index.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {

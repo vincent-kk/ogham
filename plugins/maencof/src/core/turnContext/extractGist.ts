@@ -3,7 +3,7 @@
  * @description Read and normalize the L1 `gist` field, trimmed and capped to a code-point budget.
  */
 import { FRONTMATTER_REGEX } from '../../constants/regexes.js';
-import { parseYamlFrontmatter } from '../yamlParser/yamlParser.js';
+import { parseYamlFrontmatter } from '../yamlParser/operations/parseYamlFrontmatter.js';
 
 /**
  * 원시 gist 문자열을 trim + maxChars(코드포인트) 로 캡한다. 공백-only 는 null.

@@ -132,7 +132,7 @@ describe('mutate → immediate read pipeline', () => {
 
   it('background rebuild 가 트리거되어도 read 응답을 await 하지 않는다', async () => {
     const { MetadataStore } =
-      await import('../../core/indexer/metadataStore/metadataStore.js');
+      await import('../../core/indexer/metadataStore/index.js');
     const store = new MetadataStore(vaultDir);
     await store.appendStaleEntries(
       Array.from({ length: 14 }, (_, i) => ({

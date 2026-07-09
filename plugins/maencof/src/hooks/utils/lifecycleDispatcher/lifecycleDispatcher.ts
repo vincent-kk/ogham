@@ -7,7 +7,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 
 import { VALID_LIFECYCLE_EVENTS as VALID_EVENTS } from '../../../constants/lifecycle.js';
-import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/operations/appendErrorLogSafe.js';
 import type {
   LifecycleAction,
   LifecycleConfig,

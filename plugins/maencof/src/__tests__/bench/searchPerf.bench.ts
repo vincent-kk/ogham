@@ -4,7 +4,7 @@
  */
 import { bench, describe } from 'vitest';
 
-import { buildGraph } from '../../core/graphBuilder/graphBuilder.js';
+import { buildGraph } from '../../core/graphBuilder/index.js';
 import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import { resolveSeedNodes } from '../../search/queryEngine/index.js';
 import { Layer } from '../../types/common.js';

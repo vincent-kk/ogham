@@ -15,12 +15,10 @@ import type {
   PersonalState,
   PersonalTopic,
 } from '../../../types/personalContext.js';
-import { defaultPersonalContext } from '../normalizePersonalContext.js';
+import { defaultPersonalContext } from '../defaultPersonalContext.js';
+import { personalContextPath } from '../personalContextPath.js';
 import { prunePersonalContext } from '../prunePersonalContext.js';
-import {
-  personalContextPath,
-  readPersonalContext,
-} from '../readPersonalContext.js';
+import { readPersonalContext } from '../readPersonalContext.js';
 import { writePersonalContext } from '../writePersonalContext.js';
 
 const NOW = new Date('2026-07-09T00:00:00.000Z');

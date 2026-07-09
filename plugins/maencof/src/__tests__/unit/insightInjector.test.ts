@@ -4,10 +4,8 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  getSessionCaptureCount,
-  readInsightConfig,
-} from '../../core/insightStats/insightStats.js';
+import { getSessionCaptureCount } from '../../core/insightStats/operations/getSessionCaptureCount.js';
+import { readInsightConfig } from '../../core/insightStats/operations/readInsightConfig.js';
 import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
 import { runInsightInjector } from '../../hooks/userPromptSubmit/helpers/insightInjector/insightInjector.js';
 import { DEFAULT_INSIGHT_CONFIG } from '../../types/insight.js';
@@ -18,8 +16,10 @@ vi.mock('../../hooks/shared/isMaencofVault.js', () => ({
   isMaencofVault: vi.fn(),
 }));
 
-vi.mock('../../core/insightStats/insightStats.js', () => ({
+vi.mock('../../core/insightStats/operations/readInsightConfig.js', () => ({
   readInsightConfig: vi.fn(),
+}));
+vi.mock('../../core/insightStats/operations/getSessionCaptureCount.js', () => ({
   getSessionCaptureCount: vi.fn(),
 }));
 

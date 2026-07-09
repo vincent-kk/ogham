@@ -19,9 +19,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../core/documentParser/documentParser.js';
-import { scanVault } from '../../core/vaultScanner/vaultScanner.js';
-import { handleKgBuild } from '../../mcp/tools/kgBuild/kgBuild.js';
+} from '../../core/documentParser/index.js';
+import { scanVault } from '../../core/vaultScanner/index.js';
+import { handleKgBuild } from '../../mcp/tools/kgBuild/index.js';
 import { handleKgStatus } from '../../mcp/tools/kgStatus/kgStatus.js';
 import { handleMaencofCreate } from '../../mcp/tools/maencofCreate/maencofCreate.js';
 import type { DiagnosticItem, DiagnosticResult } from '../../types/doctor.js';
@@ -260,7 +260,7 @@ describe('Doctor 진단 통합 테스트', () => {
 
     // graph 로드 후 status 확인
     const { MetadataStore } =
-      await import('../../core/indexer/metadataStore/metadataStore.js');
+      await import('../../core/indexer/metadataStore/index.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
 

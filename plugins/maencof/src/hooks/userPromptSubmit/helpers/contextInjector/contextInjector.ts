@@ -7,14 +7,12 @@
  *
  * All injected text MUST be in English.
  */
-import {
-  isFirstInSession,
-  markSessionInjected,
-  readTurnContext,
-  writePromptContext,
-  writeTurnContext,
-} from '../../../../core/cacheManager/cacheManager.js';
-import { appendErrorLogSafe } from '../../../../core/errorLog/errorLog.js';
+import { isFirstInSession } from '../../../../core/cacheManager/operations/isFirstInSession.js';
+import { markSessionInjected } from '../../../../core/cacheManager/operations/markSessionInjected.js';
+import { readTurnContext } from '../../../../core/cacheManager/operations/readTurnContext.js';
+import { writePromptContext } from '../../../../core/cacheManager/operations/writePromptContext.js';
+import { writeTurnContext } from '../../../../core/cacheManager/operations/writeTurnContext.js';
+import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { buildTurnContext } from '../../../../core/turnContext/build.js';
 import { readCachedNodesArray } from '../../../../core/turnContext/readCachedNodesArray.js';
 import { readCompanionIdentity } from '../../../../core/turnContext/readCompanionIdentity.js';

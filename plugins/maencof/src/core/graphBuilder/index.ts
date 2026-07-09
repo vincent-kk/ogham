@@ -1,1 +1,10 @@
-export * from './graphBuilder.js';
+export { buildGraph } from './operations/buildGraph.js';
+export { buildAdjacencyList } from './operations/buildAdjacencyList.js';
+export { detectOrphans } from './operations/detectOrphans.js';
+export { hydrateRuntimeMaps } from './operations/hydrateRuntimeMaps.js';
+export { rebuildEdgeDerivedMaps } from './operations/rebuildEdgeDerivedMaps.js';
+export { tokenizeForInvertedIndex } from './invertedIndex/tokenizeForInvertedIndex.js';
+export { addNodeToInvertedIndex } from './invertedIndex/addNodeToInvertedIndex.js';
+export { removeNodeFromInvertedIndex } from './invertedIndex/removeNodeFromInvertedIndex.js';
+export { buildInvertedIndex } from './invertedIndex/buildInvertedIndex.js';
+export type { GraphBuilderOptions, GraphBuildResult } from './types/types.js';

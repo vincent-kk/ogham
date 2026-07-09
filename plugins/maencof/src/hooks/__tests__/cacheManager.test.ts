@@ -17,8 +17,8 @@ import {
   writePinnedNodes,
   writePromptContext,
   writeTurnContext,
-} from '../../core/cacheManager/cacheManager.js';
-import type { PinnedNode } from '../../core/cacheManager/cacheManager.js';
+} from '../../core/cacheManager/index.js';
+import type { PinnedNode } from '../../core/cacheManager/index.js';
 
 let testDir: string;
 

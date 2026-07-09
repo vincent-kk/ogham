@@ -12,7 +12,7 @@ import {
   executeMigration,
   planMigration,
   rollbackMigration,
-} from '../../core/architectureMigrator/architectureMigrator.js';
+} from '../../core/architectureMigrator/index.js';
 
 const FIXTURES_DIR = join(__dirname, '..', 'fixtures', 'v1-vault');
 

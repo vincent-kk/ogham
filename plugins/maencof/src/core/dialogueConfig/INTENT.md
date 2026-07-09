@@ -6,8 +6,8 @@
 
 ## Structure
 
-- `dialogueConfig.ts` — readDialogueConfig, writeDialogueConfig, isDialogueInjectionDisabled
-- `index.ts` — barrel export
+- `index.ts` — barrel (공개 API: readDialogueConfig/writeDialogueConfig/isDialogueInjectionDisabled)
+- `operations/` organ — 설정 IO·판정 (dialogueConfigPath 사설 헬퍼 + read/write/isDialogueInjectionDisabled, 함수 1개/파일)
 
 ## Boundaries
 

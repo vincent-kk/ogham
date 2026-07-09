@@ -4,6 +4,12 @@
 
 지식 그래프 빌드 도구. 전체/증분 빌드 지원.
 
+## Structure
+
+- `index.ts` — 순수 barrel (handleKgBuild + @internal buildStemIndex/resolveAndAttachLinks + 타입)
+- `types/` organ — KgBuildInput / KgBuildResult / KgBuildParseFailure / BuildOutput
+- `operations/` organ — handleKgBuild(오케스트레이터) / fullBuild / incrementalBuild / resolveAndAttachLinks / buildStemIndex / toCurrentFileInfos
+
 ## Boundaries
 
 ### Always do

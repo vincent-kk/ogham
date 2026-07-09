@@ -8,8 +8,8 @@ import {
   appendErrorLog,
   appendErrorLogSafe,
   readErrorLog,
-} from '../../../core/errorLog/errorLog.js';
-import type { ErrorLogEntry } from '../../../core/errorLog/errorLog.js';
+} from '../../../core/errorLog/index.js';
+import type { ErrorLogEntry } from '../../../core/errorLog/index.js';
 
 function createTempDir(): string {
   return mkdtempSync(join(tmpdir(), 'maencof-error-log-test-'));

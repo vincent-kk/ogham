@@ -6,28 +6,29 @@ import { spawnCli } from '@ogham/cross-platform/spawn';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CHANGELOG_PENDING_MAX_CHANGES } from '../../constants/changelog.js';
-import {
-  readChangelogState,
-  writeChangelogState,
-} from '../../core/changelogState/changelogState.js';
-import { appendErrorLogSafe } from '../../core/errorLog/errorLog.js';
+import { readChangelogState } from '../../core/changelogState/operations/readChangelogState.js';
+import { writeChangelogState } from '../../core/changelogState/operations/writeChangelogState.js';
+import { appendErrorLogSafe } from '../../core/errorLog/operations/appendErrorLogSafe.js';
 import {
   detectWatchedChanges,
   parsePorcelainZ,
   runChangelogDebt,
-} from '../../hooks/sessionEnd/helpers/changelogDebt/changelogDebt.js';
+} from '../../hooks/sessionEnd/helpers/changelogDebt/index.js';
 import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
 
 vi.mock('@ogham/cross-platform/spawn', () => ({
   spawnCli: vi.fn(),
 }));
 
-vi.mock('../../core/changelogState/changelogState.js', () => ({
+vi.mock('../../core/changelogState/operations/readChangelogState.js', () => ({
   readChangelogState: vi.fn(),
+}));
+
+vi.mock('../../core/changelogState/operations/writeChangelogState.js', () => ({
   writeChangelogState: vi.fn(),
 }));
 
-vi.mock('../../core/errorLog/errorLog.js', () => ({
+vi.mock('../../core/errorLog/operations/appendErrorLogSafe.js', () => ({
   appendErrorLogSafe: vi.fn(),
 }));
 

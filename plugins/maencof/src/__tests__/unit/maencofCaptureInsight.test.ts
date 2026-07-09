@@ -9,7 +9,7 @@ import {
   getSessionCaptureCount,
   incrementInsightStats,
   readInsightConfig,
-} from '../../core/insightStats/insightStats.js';
+} from '../../core/insightStats/index.js';
 import { handleCaptureInsight } from '../../mcp/tools/maencofCaptureInsight/maencofCaptureInsight.js';
 import { handleMaencofCreate } from '../../mcp/tools/maencofCreate/maencofCreate.js';
 import { DEFAULT_INSIGHT_CONFIG } from '../../types/insight.js';
@@ -20,7 +20,7 @@ vi.mock('../../mcp/tools/maencofCreate/maencofCreate.js', () => ({
   handleMaencofCreate: vi.fn(),
 }));
 
-vi.mock('../../core/insightStats/insightStats.js', () => ({
+vi.mock('../../core/insightStats/index.js', () => ({
   readInsightConfig: vi.fn(),
   getSessionCaptureCount: vi.fn(),
   incrementInsightStats: vi.fn(),

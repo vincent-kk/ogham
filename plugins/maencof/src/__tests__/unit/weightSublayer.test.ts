@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   SUBLAYER_DECAY_FACTORS,
   getLayerDecay,
-} from '../../core/weightCalculator/weightCalculator.js';
+} from '../../core/weightCalculator/index.js';
 import { Layer } from '../../types/common.js';
 
 describe('getLayerDecay with sub-layer', () => {
