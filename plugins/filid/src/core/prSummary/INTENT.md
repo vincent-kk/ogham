@@ -2,8 +2,8 @@
 
 ## Purpose
 
-PR 검증 파일들(structure-check.md, fix-requests.md, review-report.md, re-validate.md)을
-파싱하여 인간 친화적 HumanSummary를 생성한다.
+PR 검증 파일들(fix-requests.md, review-report.md, re-validate.md — 레거시 세션의
+structure-check.md 포함)을 파싱하여 인간 친화적 HumanSummary를 생성한다.
 
 ## Structure
 

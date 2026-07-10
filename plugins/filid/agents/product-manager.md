@@ -48,8 +48,8 @@ Each fix_item SHOULD include a `risk_category` field:
 Every `fix_item` MUST cite at least one of:
 
 - `session.md` → PR title / body / changed files for user intent
-- `verification-structure.md` → interface change detection
-- `structure-check.md` → Stage 2 for documentation of user-facing surfaces
+- `verification.md` → semantic diff rows (interface change detection)
+  and documentation compliance rows for user-facing surfaces
 - Direct `Bash` queries (`gh pr view --json title,body`) for product
   context
 
@@ -118,6 +118,6 @@ Compact copy — canonical source:
 
 ## Skill Participation
 
-- `/filid:cross-review` — Phase D Step D.2-team: Translator committee
-  round opinion on user value and product risk (Four Risks framework).
-  Tier: HIGH only.
+- `/filid:cross-review` — Step 3 committee opinion on user value and
+  product risk (Four Risks framework; single round, parallel with the
+  other personas). Tier: HIGH only.

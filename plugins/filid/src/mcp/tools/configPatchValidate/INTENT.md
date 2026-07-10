@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`.filid/config.json` 패치 후보를 `FilidConfigSchema`로 엄격 검증한다. Phase D 챔피언/페르소나가 환각한 config 키를 fix-requests에 올리기 전에 차단한다.
+`.filid/config.json` 패치 후보를 `FilidConfigSchema`로 엄격 검증한다. 리뷰 페르소나가 환각한 config 키를 fix-requests에 올리기 전에 차단한다.
 
 ## Boundaries
 

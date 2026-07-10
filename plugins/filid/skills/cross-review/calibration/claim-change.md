@@ -1,6 +1,6 @@
 # run-d — Claim-Judgment Fixture (acceptance-criteria ledger)
 
-> Calibrates the Phase D acceptance-claim channel:
+> Calibrates the review's acceptance-claim channel:
 > in-scope `active` claims must be judged with evidence, a broken claim
 > must fold into the blocking set, and a satisfied claim must not be
 > demoted to FAIL / INSUFFICIENT-EVIDENCE. **MUST end

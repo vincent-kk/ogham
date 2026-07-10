@@ -2,40 +2,31 @@
 
 ## Requirements
 
-- Each Delta fix item MUST be (a) written to `verification-ledger.md` by the
-  Step 3 subagent with a row containing literal `TBD` tokens in both
-  `post_count` and `status`, and (b) re-derived by the Step 6 main
-  orchestrator via an independent `mcp__plugin_filid_t__structure_validate` call before
-  the PASS/FAIL verdict is rendered.
-- The Step 6 main orchestrator MUST:
-  - detect tampering when `post_count != "TBD"` OR `status != "TBD"` on
-    any subagent-authored row, log a warning, and discard the tampered
-    values before re-derivation;
-  - detect missing rows (`ledger rows < accepted fix count`) and mark the
-    absent fix entries as auto-`UNRESOLVED`;
-  - derive `post_count` from the returned violation set filtered by
-    `ruleId == <target rule>` and `path starts with <target_path>` —
-    EXCEPT acceptance-claim rows (`rule_id` matching `CLM-\d+`), whose
-    `post_count` comes from direct claim re-judgment against
-    `.filid/criteria.md` (`observable` evaluated, compared to
-    `expected`; PASS with cited evidence → 0, otherwise 1 — measurement
-    tools can never report a CLM rule, so counting would auto-resolve
-    claim fixes);
-  - derive `status` from the triple
-    `(pre_count, post_count, file_was_modified)` using the matrix below.
-- If any derived row has `status == "UNRESOLVED"`, the verdict MUST be
-  pinned to `FAIL` — subagent judgements cannot override this.
-- Step 8 cleanup MUST remove `verification-ledger.md` along with the rest
-  of the session directory only when the final verdict is `PASS`.
+- The verification ledger (`verification-ledger.md`) is authored by the
+  **main orchestrator** (Step 3) and completed by the main orchestrator
+  (Step 6) — subagents never write fix statuses. Steps 4–5 subagents are
+  scoped to justification checking and debt clearing only.
+- Every accepted fix MUST be re-measured by main via the
+  category-specific MCP tool before the verdict is rendered
+  (`post_count` from the returned violation set filtered by
+  `ruleId == <rule_id>` and `path` prefix `<target_path>`) — EXCEPT
+  acceptance-claim rows (`rule_id` matching `CLM-\d+`), whose
+  `post_count` comes from direct claim re-judgment against
+  `.filid/criteria.md` (`observable` evaluated, compared to `expected`;
+  PASS with cited evidence → 0, otherwise 1). Measurement tools can
+  never report a CLM rule, so counting would auto-resolve claim fixes.
+- `status` derives from the triple
+  `(pre_count, post_count, file_was_modified)` via the matrix below —
+  a file-diff matching the fix patch is necessary but never sufficient.
+- If any derived row is `UNRESOLVED`, any justification is
+  UNCONSTITUTIONAL, or the re-measurements surface a new critical
+  violation, the verdict MUST be `FAIL` — nothing overrides this.
+- An all-rejected resolve (`accepted_count == 0`) skips the ledger
+  entirely; the verdict derives solely from the constitutional check.
+- Step 8 cleanup removes `verification-ledger.md` with the rest of the
+  session directory only when the final verdict is `PASS`.
 
 ## API Contracts
-
-### Writer Responsibility
-
-| Role            | Writes                       | Must write                                                                                   | Must NOT write                                   |
-| --------------- | ---------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Step 3 subagent | `verification-ledger.md` row | `post_count: TBD`, `status: TBD`, `pre_count`, `target_path`, `rule_id`, `file_was_modified` | numeric `post_count`, `RESOLVED`, `UNRESOLVED`   |
-| Step 6 main     | Same row, overwrite          | derived `post_count` (number), derived `status`                                              | anything that overrides a prior main-derived row |
 
 ### status derivation
 
@@ -47,7 +38,10 @@
 | > 0       | 0          | false             | `UNRESOLVED` (file-diff insufficient) |
 | 0         | 0          | any               | `RESOLVED` (vacuous)                  |
 
-### parse-fail gate
+### Inputs
 
-If the ledger cannot be parsed (missing file, malformed row, unexpected
-column count) → verdict pinned to `FAIL` with `reason: verification-ledger.md parse failed`.
+`justifications.md` frontmatter MUST carry `resolve_commit_sha` (the
+pre-fix HEAD captured by `resolve` Step 4); the delta is
+`git diff <resolve_commit_sha>..HEAD`. `fix-requests.md` supplies
+`Path` / `Rule` / severity per fix; `review-report.md` supplies
+pre-fix finding counts.

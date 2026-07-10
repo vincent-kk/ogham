@@ -131,6 +131,6 @@ Compact copy — canonical source:
 
 ## Skill Participation
 
-- `/filid:cross-review` — Phase D Step D.2-team: Humanist committee
-  round opinion on cognitive load and usability (Miller's Law,
-  Nielsen's heuristics). Tier: HIGH only.
+- `/filid:cross-review` — Step 3 committee opinion on cognitive load
+  and usability (Miller's Law, Nielsen's heuristics; single round,
+  parallel with the other personas). Tier: HIGH only.

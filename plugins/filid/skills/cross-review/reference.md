@@ -1,37 +1,39 @@
 # cross-review — Reference Index
 
 Reference documentation for `cross-review` is split into focused files.
-This index routes readers to the right file based on what they need.
 
-| File                  | Contents                                                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `templates.md`        | Review report, fix requests, and PR comment output formats                                                                |
-| `contracts.md`        | Committee → agent mapping, opinion frontmatter schema, subagent prompt rules, post-completion verification                |
-| `mcp-map.md`          | Available MCP tools, per-phase usage map, batch partitioning thresholds, checkpoint resume table, debt bias levels        |
-| `prompt-templates.md` | Literal subagent prompt templates for Phase A / B / C1 / C2                                                               |
-| `state-machine.md`    | Phase D round judgment rules (quorum, VETO branch, 5-round limit, severity gate)                                          |
-| `phases/phase-*.md`   | Per-phase subagent instructions (A / B / C1 / C2 / D)                                                                     |
-| `calibration/`        | Verdict regression fixtures (clean / low-only / seeded / claim runs; FPR, FNR, severity-inflation, claim-verdict scoring) |
+| File                 | Contents                                                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `contracts.md`       | Committee → agent mapping, opinion frontmatter schema, severity gate, verifier verdict ladder, verdict derivation, acceptance claims, subagent prompt rules, config-patch gate |
+| `templates.md`       | Review report, fix requests, advisory ledger, and PR comment formats                                                                                                           |
+| `phases/evidence.md` | Evidence subagent instructions (MCP measurement stages, output schema, half/batch scopes, merge protocol)                                                                      |
+| `calibration/`       | Verdict regression fixtures (clean / low-only / seeded / claim runs; FPR, FNR, severity-inflation, claim scoring)                                                              |
 
 ## Cross-Reference Map
 
 - Writing `review-report.md` or `fix-requests.md`? → `templates.md`
-- Need the committee list for a complexity tier? → `contracts.md` →
-  "Committee → Agent File Mapping"
-- Validating a round opinion frontmatter? → `contracts.md` → "Opinion
+- Committee list for a complexity tier? → `contracts.md` →
+  "Complexity → Committee Mapping"
+- Validating an opinion frontmatter? → `contracts.md` → "Opinion
   Frontmatter Contract"
-- Constructing a subagent prompt? → `prompt-templates.md` (literal
-  templates) + `contracts.md` → "Subagent Prompt Rules" (meta-rules)
-- Checking which MCP tool to call in which phase? → `mcp-map.md` →
-  "MCP Tool Usage Map by Phase"
-- Deciding whether to partition a large diff into batches? → `mcp-map.md`
-  → "Batch Partitioning Thresholds"
-- Resuming a partially-completed review? → `mcp-map.md` → "Checkpoint
-  Resume Table"
-- Interpreting `debt_bias_level` in verification output? → `mcp-map.md`
-  → "Debt Bias Injection"
-- Phase D round quorum math? → `state-machine.md`
-- Severity gate, consequence requirement, null-result, or anti-inflation
-  rules? → `contracts.md` → "Severity Gate & Finding Discipline"
-- Advisory Notes / advisory ledger formats? → `templates.md`
+- Severity gate, consequence requirement, anti-inflation rules? →
+  `contracts.md` → "Severity Gate & Finding Discipline"
+- Verifier prompts and CONFIRMED/PLAUSIBLE/REFUTED semantics? →
+  `contracts.md` → "Verifier Verdict Ladder"
+- Deriving the final verdict? → `contracts.md` → "Verdict Derivation"
+- Which MCP tool measures what, and when? → `phases/evidence.md`
+- Acceptance-claim scoping, aggregation, folding? → `contracts.md` →
+  "Acceptance Claims (criteria ledger)"
+- Advisory Notes / advisory ledger? → `templates.md`
 - Regression-testing the reviewer itself? → `calibration/calibration.md`
+
+## MCP Tools Used
+
+| Tool                                                                                                                                        | Caller         | Purpose                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `review_manage` (session actions)                                                                                                           | chairperson    | normalize-branch, check-cache, checkpoint, cleanup, ensure-dir, elect-committee, content-hash, format-pr-comment |
+| `fractal_scan`, `structure_validate`, `ast_analyze`, `test_metrics`, `coverage_verify`, `drift_detect`, `debt_manage(list, calculate-bias)` | evidence agent | all technical measurement (`phases/evidence.md`)                                                                 |
+| `config_patch_validate`                                                                                                                     | chairperson    | config-patch gate before fix-requests emission (bookkeeping)                                                     |
+| `debt_manage(create)`                                                                                                                       | chairperson    | advisory-ledger promotion at count 3 (bookkeeping)                                                               |
+
+All tool names use the full form `mcp__plugin_filid_t__<tool>`.

@@ -1,170 +1,132 @@
 ---
 name: pull-request
 user_invocable: true
-description: "[filid:pull-request] Sync INTENT.md and DETAIL.md via update, then automatically generate a structured GitHub PR with Architecture, Code, and Test sections from the current branch changes."
-argument-hint: "[--base REF] [--skip-update] [--draft] [--title TITLE]"
-version: "1.1.0"
+description: '[filid:pull-request] Sync INTENT.md and DETAIL.md via update, then automatically generate a structured GitHub PR with Architecture, Code, and Test sections from the current branch changes.'
+argument-hint: '[--base REF] [--skip-update] [--draft] [--title TITLE]'
+version: '1.2.0'
 complexity: medium
 plugin: filid
 ---
 
-> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
-> After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after `Skill("filid:update")` delegation returns, git
-> command completion, or `gh` CLI operations.
+> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as
+> a SINGLE CONTINUOUS OPERATION EXCEPT at the step marked
+> `<!-- [INTERACTIVE] -->` (existing-PR overwrite confirmation). NEVER
+> yield after `Skill("filid:update")` returns, git command completion,
+> or `gh` CLI operations — chain the next stage in the same turn.
 >
 > **Valid reasons to yield**:
-> 1. User decision genuinely required
-> 2. Terminal stage marker emitted: GitHub PR URL (`https://github.com/<owner>/<repo>/pull/<N>`) or abort message
 >
-> **HIGH-RISK YIELD POINTS**:
-> - After Stage 1 `filid:update` delegation — chain Stage 2 branch analysis in the same turn
-> - After `git diff` / `git log` analysis — do NOT pause to summarize; continue to PR body composition
-> - After `gh pr create` returns PR URL — emit PR URL in the final report (this is the natural terminal; further yield is permitted)
-> - `--skip-update` path — proceed directly to Stage 2 without intermediate summary
+> 1. The `[INTERACTIVE]` existing-PR confirmation
+> 2. Terminal marker: the GitHub PR URL
+>    (`https://github.com/<owner>/<repo>/pull/<N>`) or an abort message
 
 # pull-request — FCA-Aware Pull Request Generator
 
-Synchronize FCA context documents (INTENT.md/DETAIL.md) with the latest code,
-then analyze branch changes to automatically generate a structured GitHub PR.
-The update sync is enforced as a prerequisite — PR creation is blocked on
-sync failure unless explicitly skipped.
+Synchronize FCA context documents (INTENT.md/DETAIL.md) with the latest
+code, then analyze branch changes and generate a structured GitHub PR.
+The update sync is a hard prerequisite — PR creation is blocked on sync
+failure unless explicitly skipped.
 
-> **Detail Reference**: See `reference.md` for git command signatures, base
-> branch detection algorithm, PR body templates, and error handling details.
+> **Reference**: `reference.md` — git/gh command signatures, base-branch
+> detection algorithm, PR body template, error handling map.
 
-## When to Use This Skill
+## When to Use
 
 - After completing branch work, before opening a PR
-- When FCA context documents and implementation code need synchronized PR delivery
-- When a structured PR body (Architecture / Code / Test sections) is required
-- To automate repetitive manual PR authoring
+- When FCA context documents and code need synchronized PR delivery
+- When a structured PR body (Architecture / Code / Test) is required
 
-### Relationship with Other Skills
-
-- `/filid:update`: Automatically invoked in Stage 1 to sync context documents
-- `/filid:cross-review`: Can be chained after PR creation for the code review pipeline
-- `/filid:structure-review`: Run separately before PR creation for structural verification
+Related: `/filid:update` (invoked in Stage 1), `/filid:cross-review`
+(chain after PR creation), `/filid:structure-review` (run separately
+before PR creation).
 
 ## Core Workflow
 
-### Stage 0 — Prerequisites & Validation
+### Stage 0 — Prerequisites
 
-Verify preconditions before PR creation.
+Sequential checks (details: `reference.md` §0):
 
-1. Confirm git repository
-2. Verify current branch (block direct PR from main/master)
-3. Check for uncommitted changes — abort only if non-FCA-document files (other than `INTENT.md`/`DETAIL.md`) are staged or unstaged; a clean worktree or FCA-document-only changes pass through. When `--skip-update` is active, the FCA-document pass-through is **disabled** — a clean worktree is required (Stage 1 is the sole committer of `INTENT.md`/`DETAIL.md`).
-4. Verify `gh` CLI authentication
-
-See [reference.md Section 0](./reference.md#section-0--prerequisites--validation).
+1. Inside a git repository
+2. Not on `main`/`master`, not detached HEAD
+3. Worktree state: clean → pass; only `INTENT.md`/`DETAIL.md` dirty →
+   pass (Stage 1 commits them); any other dirty file → abort. With
+   `--skip-update`, dirty FCA documents also abort (Stage 1 is their
+   sole committer).
+4. `gh auth status` — failure sets `GH_AUTH = false` (continue through
+   Stage 3, save the body locally in Stage 4)
 
 ### Stage 1 — FCA Context Sync
 
-Invoke `Skill("filid:update")` to synchronize INTENT.md/DETAIL.md with the
-current codebase.
+`Skill("filid:update")` — on failure, print the BLOCKED message
+(`reference.md` §1) and exit; `--skip-update` skips this stage.
 
-- **Success**: Proceed to Stage 2
-- **Failure**: Block PR creation, report failure reason, and exit
-- **`--skip-update`**: Skip Stage 1 entirely and proceed directly to Stage 2
-
-After `filid:update` completes, if `git status --porcelain` reports
-changes, **stage only `INTENT.md` / `DETAIL.md` paths** and create one
-commit: `docs(filid): sync INTENT.md / DETAIL.md via update`. Non-FCA
-modifications from update (structural corrections) surface as a Stage 0
-abort on next run — treat this as the expected contract.
-
-See [reference.md Section 1](./reference.md#section-1--fca-context-sync).
+After update completes, if `git status --porcelain` reports changes,
+stage **only** `INTENT.md`/`DETAIL.md` paths and commit:
+`docs(filid): sync INTENT.md / DETAIL.md via update`. Non-FCA
+modifications from update surface as a Stage 0 abort on the next run —
+this is the expected contract.
 
 ### Stage 2 — Base Branch Resolution
 
-Determine the PR base branch.
+`--base=<ref>` → verify with `git rev-parse --verify`. Otherwise
+auto-detect: `git remote show origin` HEAD branch, falling back to
+`origin/main` then `origin/master` (`reference.md` §2). No candidate →
+abort: "Specify --base explicitly."
 
-- **`--base=<ref>`**: Use the specified branch
-- **Unspecified**: Run merge-base distance auto-detection algorithm
+### Stage 3 — Change Analysis & PR Body
 
-See [reference.md Section 2](./reference.md#section-2--base-branch-resolution).
+Collect the base↔HEAD diff, stats, and commit messages
+(`reference.md` §3), then generate the 4-section body:
 
-### Stage 3 — Change Analysis & PR Body Generation
+- **Summary** — purpose, scope, affected modules (3-5 lines)
+- **Architecture Changes (FCA Context Diff)** — INTENT/DETAIL diff and
+  structural/interface changes
+- **Code Changes** — per-module changes with intent; ≤30 changed files →
+  file-level detail, >30 → directory-level summary
+- **Test Plan** — reviewer checklist + collapsible Given-When-Then
+  scenarios
 
-Analyze the base↔HEAD diff and generate a 4-section structured PR body.
-
-- **Summary**: Core purpose, change scope, affected modules
-- **Architecture Changes (FCA Context Diff)**: Context document change analysis
-- **Code Changes**: Per-module/file changes with development intent
-- **Test Plan**: Verification steps and test checklist
-
-Existing PR body is fully replaced (manual edits are not preserved).
-
-See [reference.md Section 3](./reference.md#section-3--change-analysis--pr-body-generation).
+Empty diff → abort: "No changes detected."
 
 ### Stage 4 — PR Publication
 
-Create or update a GitHub PR with the generated body.
-
-1. Re-verify `gh auth status`
-2. Check for existing PR → update or create new
-3. `git push -u origin <branch>` (if needed)
-4. Execute `gh pr create` or `gh pr edit`
-
-See [reference.md Section 4](./reference.md#section-4--pr-publication).
-
-## Available MCP Tools
-
-| Tool             | Action                   | Stage | Purpose                                                       |
-| ---------------- | ------------------------ | ----- | ------------------------------------------------------------- |
-| `mcp__plugin_filid_t__review_manage`  | `generate-human-summary` | 3     | (Optional) Generate human-friendly PR summary from review session |
-
-Stage 1 delegates to `/filid:update`, which internally uses its own MCP tools
-(`mcp__plugin_filid_t__cache_manage`, `mcp__plugin_filid_t__fractal_scan`, `mcp__plugin_filid_t__test_metrics`, etc.). All other operations use
-Bash (git, gh) and the Skill tool.
+1. `GH_AUTH == false` → save the body to `.filid/pr-draft/<branch>.md`
+   with manual instructions (`reference.md` §4.1) and END.
+2. Existing open PR check (`gh pr list --head <branch>`):
+   <!-- [INTERACTIVE] AskUserQuestion: replace existing PR body -->
+   an open PR exists → confirm "Replace the existing PR body entirely?"
+   — Overwrite → `gh pr edit`; Skip → print the body and exit.
+3. Push if the remote branch is missing: `git push -u origin <branch>`.
+4. `gh pr create --base <BASE_REF> --title "<title>" --body ...`
+   (+ `--draft` when set), then emit the final report with the PR URL
+   (`reference.md` §4.5).
 
 ## Options
 
-> Options are LLM-interpreted hints, not strict CLI flags. Natural language
-> works equally well (e.g., "create a PR against main" instead of `--base=main`).
+> Options are LLM-interpreted hints, not strict CLI flags.
 
-```
-/filid:pull-request [--base=<ref>] [--skip-update] [--draft] [--title=<title>]
-```
-
-| Option          | Type   | Default | Description                                                       |
-| --------------- | ------ | ------- | ----------------------------------------------------------------- |
-| `--base`        | string | auto    | PR base branch (auto-detected when unspecified)                   |
-| `--skip-update` | flag   | off     | Skip Stage 1 (update)                                         |
-| `--draft`       | flag   | off     | Create as draft PR                                                |
-| `--title`       | string | auto    | Explicit PR title (auto-generated when unspecified, max 70 chars) |
+| Option          | Type   | Default | Description                                      |
+| --------------- | ------ | ------- | ------------------------------------------------ |
+| `--base`        | string | auto    | PR base branch (auto-detected when unspecified)  |
+| `--skip-update` | flag   | off     | Skip Stage 1 (update)                            |
+| `--draft`       | flag   | off     | Create as draft PR                               |
+| `--title`       | string | auto    | Explicit PR title (auto-generated; max 70 chars) |
 
 ## Quick Reference
 
-```bash
-# Default execution (auto base, update included)
-/filid:pull-request
-
-# Target main branch
-/filid:pull-request --base=main
-
-# Skip update (already ran manually)
-/filid:pull-request --skip-update
-
-# Create as draft PR
-/filid:pull-request --draft
-
-# Explicit title
-/filid:pull-request --title="feat(filid): add pull-request skill"
 ```
+/filid:pull-request                       # auto base, update included
+/filid:pull-request --base=main --draft
+/filid:pull-request --skip-update --title="feat(filid): ..."
 
-```
-Stages:   Stage 0 (Prerequisites) → Stage 1 (FCA Sync) → Stage 2 (Base Resolution) → Stage 3 (Change Analysis) → Stage 4 (PR Publication)
-Agents:   (Stage 1 delegates to update internal agents)
-Output:   GitHub PR URL
-Language: PR title in English; PR body in the language specified by the `[filid:lang]` tag (default: English). Tech terms / code identifiers kept as-is.
+Stages:  0 Prerequisites → 1 FCA Sync → 2 Base Resolution →
+         3 Body Generation → 4 Publication
+Output:  GitHub PR URL (or .filid/pr-draft/<branch>.md when gh auth fails)
 ```
 
 Key rules:
 
 - update failure blocks PR creation (`--skip-update` to bypass)
-- Existing PR body is fully replaced after user confirmation
-- If `gh` auth fails, PR body is saved locally to `.filid/pr-draft/<branch>.md`
-- PR title written in English; PR body language follows the `[filid:lang]` tag configured in `.filid/config.json` (default: English); technical terms and code identifiers remain in original form
-- File-level detail for ≤30 changed files; directory-level summary for >30 files
+- The existing PR body is fully replaced after user confirmation
+- PR title in English; PR body in the `[filid:lang]` language (default
+  English) — technical terms, identifiers, and paths stay original

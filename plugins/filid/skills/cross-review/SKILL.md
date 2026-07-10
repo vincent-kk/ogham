@@ -1,379 +1,292 @@
 ---
 name: cross-review
 user_invocable: true
-description: '[filid:cross-review] Run multi-persona consensus code review governance: structure check (Phase A), analysis & committee election (Phase B), parallel technical verification (Phase C1 metrics + C2 structure), then Phase D political consensus executed as a real Claude Code team (committee.length >= 2) or a single Task (committee.length == 1).'
-argument-hint: '[--scope branch|pr|commit] [--base REF] [--force] [--verbose] [--no-structure-check] [--solo]'
-version: '2.1.0'
+description: '[filid:cross-review] Run multi-perspective consensus code review: scope & committee election, technical evidence collection, one parallel committee opinion round, then adversarial verification that arbitrates disagreements and kills false positives before the verdict.'
+argument-hint: '[--scope branch|pr|commit] [--base REF] [--force] [--solo]'
+version: '3.0.0'
 complexity: complex
 plugin: filid
 ---
 
 > **EXECUTION MODEL (Tier-2a Anti-Yield)**: Execute all steps as a SINGLE
-> CONTINUOUS OPERATION. After each step/phase completes, IMMEDIATELY chain
-> the next tool call in the same response. NEVER yield the turn after
-> subagent results return, MCP tools complete, or team messages arrive.
-> Checkpoint resume decisions are internal — do NOT ask the user which
-> phase to start from. Large subagent outputs and round opinion files are
-> internal working data — do NOT summarize them to the user mid-execution.
+> CONTINUOUS OPERATION. After each step completes, IMMEDIATELY chain the
+> next tool call in the same response. Subagent outputs and opinion files
+> are internal working data — do NOT summarize them to the user
+> mid-execution.
 >
 > **Valid reasons to yield**:
 >
-> 1. User decision genuinely required (unrecoverable error only)
+> 1. Unrecoverable error requiring human intervention
 > 2. Terminal stage marker emitted: `Review verdict: (APPROVED|REQUEST_CHANGES|INCONCLUSIVE)`
->    — after `review-report.md` + `fix-requests.md` are written, Step 4.5
->    content-hash is persisted, and any Phase D team has been deleted.
+>    — only after `review-report.md` (+ `fix-requests.md` when applicable)
+>    is written, the content hash is persisted, and the PR comment step
+>    ran or was skipped.
 >
-> **HIGH-RISK YIELD POINTS** (strengthen vigilance here):
+> **HIGH-RISK YIELD POINTS**:
 >
-> 1. After Phase A/B background tasks complete → chain Step 3 immediately.
-> 2. After Phase C1/C2 background tasks complete → chain verification.md
->    merge + Phase D immediately.
-> 3. After the parallel worker Agent spawns return → chain round monitoring
->    immediately; do not pause between spawn and wait.
-> 4. Between deliberation rounds → parse opinion frontmatter and create
->    Round N+1 tasks without yielding.
-> 5. After the D.6.5 worker-teardown sweep → chain Step 4.5 (content-hash)
->    immediately.
-> 6. After Step 4.5 content-hash persistence → chain Step 5 (PR comment)
->    in the same response; emit the terminal verdict marker only after
->    Step 5 completes or is skipped.
->
-> **PIPELINE SUBAGENT MODE**: When invoked from the
-> pipeline orchestrator as an A/B/C-only subagent (signalled via
-> `--pipeline-mode=abc-only` or the `PIPELINE_MODE=abc-only` context
-> key), this skill STOPS after Step 3 (Phase C). Step 4 (Phase D), Step
-> 4.5 (content-hash), and Step 5 (PR comment) MUST NOT execute inside
-> the subagent — they run in the pipeline main after the subagent
-> returns. The skill emits the Subagent Return Contract as its final
-> assistant message (see Step 3.9) and terminates. In user-invoked mode
-> (no pipeline flag) the skill runs all five steps as before.
+> 1. After evidence subagents return → chain Step 3 committee spawn immediately.
+> 2. After the parallel committee Agents return → chain Step 4 aggregation
+>    - verifier spawn in the same response.
+> 3. After verifier Agents return → chain verdict derivation + Step 5
+>    report writes in the same response.
 
-# cross-review — AI Code Review Governance
+# cross-review — Multi-Perspective Consensus Code Review
 
-Execute the multi-persona consensus-based code review governance
-pipeline. The chairperson delegates Phase A (structure check), Phase B
-(analysis & committee election), and Phase C (technical verification)
-to subagents, then directly conducts Phase D (political consensus)
-using elected committee personas and a state machine.
+The chairperson (main session) orchestrates: it elects a committee,
+delegates technical measurement to evidence subagents, collects one
+round of independent persona opinions in parallel, then runs an
+**adversarial verification pass** over every blocking finding — the
+arbitration step that resolves cross-persona disagreement and removes
+false positives — before deriving the verdict.
+
+Core properties: **multi-perspective** (2-6 personas, or the integrated
+adjudicator), **opinion balance** (severity gate + dedup + VETO
+override), **arbitration & false-positive removal** (verifier verdicts
+CONFIRMED / PLAUSIBLE / REFUTED; REFUTED findings are dismissed and
+recorded).
 
 > **References**:
 >
-> - `state-machine.md` — round judgment rules (quorum, VETO branch, 5-round limit)
-> - `templates.md` — `review-report.md` / `fix-requests.md` / PR comment formats
-> - `contracts.md` — opinion frontmatter schema, committee → agent mapping, subagent prompt rules, post-completion verification fallback
-> - `mcp-map.md` — MCP tool catalog, per-phase usage map, batch partitioning thresholds, checkpoint resume table, debt bias injection
-> - `prompt-templates.md` — literal subagent prompt templates for Phase A / B / C1 / C2
-> - `phases/phase-{a,b,c1,c2,d}-*.md` — per-phase instructions
-> - `../../agents/<persona-id>.md` — real committee agents
+> - `contracts.md` — committee mapping, opinion schema, severity gate,
+>   verifier verdict ladder, verdict derivation, acceptance claims,
+>   config-patch gate
+> - `templates.md` — `review-report.md` / `fix-requests.md` / advisory
+>   ledger / PR comment formats
+> - `phases/evidence.md` — evidence subagent instructions
+> - `calibration/` — reviewer regression fixtures (run after any change
+>   to finding discipline, severity anchoring, or verdict derivation)
+> - `../../agents/<persona-id>.md` — committee persona agents
 
 ## When to Use
 
-- Before merging PRs requiring multi-perspective governance review
+- Before merging PRs requiring multi-perspective review
 - When changes span multiple fractals or modify interfaces
-- To generate structured fix requests with severity ratings and code patches
-- When technical debt may influence review strictness
+- To generate structured fix requests with severity ratings and patches
 
 ## Core Workflow
 
-### Step 1 — Branch Detection & Checkpoint Resume
+### Step 1 — Scope & Session
 
-1. `git branch --show-current` (Bash) → `<branch>`
-2. `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot, branchName: <branch>)`
+1. `git branch --show-current` (Bash) → `<branch>`.
+2. `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot, branchName)`
+   → `<normalized>`; `REVIEW_DIR = .filid/review/<normalized>/`.
 
-> **Spike harvest guard** (runs before checkpoint/cache): when `<branch>`
-> matches `spike/*`, read
-> `.filid/harvest/<normalized-branch>/manifest.json` and compare its
-> `head_sha` to `git rev-parse HEAD`. If the manifest is missing, stale
-> (head moved), or expired (`created_at` older than 7 days — long-idle
-> spikes need a re-harvest), do NOT run Phases A–D: write the degraded
-> `review-report.md` (`verdict: REQUEST_CHANGES`) + `fix-requests.md`
-> with the single `Type: harvest-required` item per `templates.md` →
-> "Harvest-Required Variant", emit the terminal marker
-> `Review verdict: REQUEST_CHANGES`, and END. Spike work is judged only
-> AFTER `/filid:harvest` records its acceptance claims — reviewing an
-> unharvested spike would manufacture a verdict with no oracle. A current
-> manifest (head_sha == HEAD) lets review proceed normally.
+> **Spike harvest guard**: when `<branch>` matches `spike/*`, read
+> `.filid/harvest/<normalized>/manifest.json`. If it is missing, stale
+> (`head_sha` != `git rev-parse HEAD`), or expired (`created_at` older
+> than 7 days), do NOT review: write the Harvest-Required Variant pair
+> (`templates.md`) — `review-report.md` with `verdict: REQUEST_CHANGES`
+> plus the single `Type: harvest-required` fix item — emit
+> `Review verdict: REQUEST_CHANGES`, and END. Unharvested spike work has
+> no oracle to judge it against.
 
-3. `mcp__plugin_filid_t__review_manage(action: "checkpoint", projectRoot, branchName: <branch>)`
-4. Resume from the phase indicated by the checkpoint response. See
-   `mcp-map.md` → "Checkpoint Resume Table" for the full file-presence
-   → next-phase mapping, the `no_structure_check` frontmatter rule, and
-   the `resume_attempts` increment recipe.
+3. If `--force`: `mcp__plugin_filid_t__review_manage(action: "cleanup", projectRoot, branchName)`,
+   then continue fresh. Otherwise:
+   - `mcp__plugin_filid_t__review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
+     — on `"skip-to-existing-results"`, read the existing
+     `review-report.md`, report its verdict, emit the terminal marker,
+     and END.
+   - `mcp__plugin_filid_t__review_manage(action: "checkpoint", projectRoot, branchName)`
+     — resume from the artifacts listed in `files`:
+     `review-report.md` present → report existing results and END;
+     `verification.md` present → skip to Step 3;
+     `session.md` only → skip to Step 2; none → continue.
+4. Collect election inputs (Bash):
+   `git diff <BASE_REF>..HEAD --name-only` → changed files count;
+   changed fractal count (unique parent fractal dirs); interface changes
+   (`index.ts` / public exports touched); document changes per the SSoT
+   rule in `contracts.md` → "Document Change Signal".
+5. `mcp__plugin_filid_t__review_manage(action: "elect-committee", projectRoot, changedFilesCount, changedFractalsCount, hasInterfaceChanges, hasDocumentChanges, adjudicatorMode: <true when --solo, else false>)`
+   → `{ complexity, committee, adversarialPairs }`.
+6. `mcp__plugin_filid_t__review_manage(action: "ensure-dir", projectRoot, branchName)`,
+   then write `<REVIEW_DIR>/session.md`:
 
-> **Max-retry guard (LOGIC-011)**: When the checkpoint response reports
-> `resumeExhausted: true` (`resume_attempts >= 3`), TERMINATE with
-> verdict `INCONCLUSIVE`. Report: "Resume exhausted after 3 Phase A
-> retries — manual intervention required. Inspect
-> `.filid/review/<branch>/session.md` and re-run with `--force` to
-> start fresh." Then END execution. Do not enter any further phase.
+   ```markdown
+   ---
+   branch: <branch>
+   normalized_branch: <normalized>
+   base_ref: <BASE_REF>
+   run_id: <normalized>@<git rev-parse --short HEAD>
+   complexity: <TRIVIAL|LOW|MEDIUM|HIGH>
+   committee: [<persona-id>, ...]
+   adjudicator_mode: <true|false>
+   changed_files_count: <N>
+   changed_fractals: [<path>, ...]
+   interface_changes: <true|false>
+   created_at: <ISO 8601>
+   ---
 
-If `--force`: call `mcp__plugin_filid_t__review_manage(action: "cleanup", projectRoot, branchName)`
-first, then restart from Phase A (or Phase B if `--no-structure-check`).
+   ## Changed Files Summary
 
-5. Cache check (skip when `--force`):
-   `mcp__plugin_filid_t__review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
-   - `"skip-to-existing-results"` → read existing `review-report.md`
-     and `fix-requests.md` from the paths in the response. In user-invoked
-     mode: Done. In **Pipeline Subagent Mode** (`--pipeline-mode=abc-only`):
-     parse `verdict` from `review-report.md` frontmatter, read `committee`
-     / `deliberation_mode` from `session.md`, then emit the Step 3.9
-     `SubagentReturn` block with `failure_reason: none` and the existing
-     artifact paths — pipeline main will reuse the cached verdict and skip
-     Phase D dispatch.
-   - `"proceed-full-review"` → continue to Step 2.
-
-> `mcp__plugin_filid_t__review_manage(action: "check-cache", ...)` returns `{ action: "skip-to-existing-results" | "proceed-full-review", ... }`. On `skip-to-existing-results`, the pipeline short-circuits to the finalize-review stage.
-
-**→ After entry point is determined, immediately proceed to Step 2.**
-
-### Step 2 — Phase A + B: Parallel Delegation
-
-Phase A and Phase B are independent and run **in parallel** as separate
-`general-purpose` Task subagents (`run_in_background: true`). Phase A is
-skipped when `--no-structure-check` is set; in that case only Phase B
-runs.
-
-> `general-purpose` is chosen (not filid agents) because these phases
-> perform broad analysis that benefits from unrestricted tool access.
-
-| Phase | Model  | Phase file                    | Output file          |
-| ----- | ------ | ----------------------------- | -------------------- |
-| A     | sonnet | `phases/phase-a-structure.md` | `structure-check.md` |
-| B     | haiku  | `phases/phase-b-analysis.md`  | `session.md`         |
-
-Resolve each phase file path via
-`${CLAUDE_PLUGIN_ROOT}/skills/cross-review/phases/<phase>.md` (fallback:
-`Glob(**/skills/cross-review/phases/<phase>.md)`).
-
-**Prompt construction**: Use the literal templates in
-`prompt-templates.md` → Phase A / Phase B. Substitute concrete values
-for every `<placeholder>` before spawning — the chairperson must not
-pass variable names for the subagent to resolve. Follow the meta-rules
-in `contracts.md` → "Subagent Prompt Rules" (state deliverable first,
-resolve paths, pass language setting, reinforce reminder).
-
-**Batch partitioning**: When `changedFilesCount > 15`, partition changed
-files into 10-file batches and spawn one Phase A subagent per batch in
-parallel. Each batched subagent writes `structure-check.partial-<batchId>.md`;
-the chairperson merges partials into the canonical `structure-check.md`
-before Step 3. See `mcp-map.md` → "Batch Partitioning Thresholds" for
-the full threshold table and merge protocol.
-
-**Await both** background agents before proceeding. If `--no-structure-check`,
-only await Phase B.
-
-**Structure-bias escalation (main)**: After both phases complete, read
-`structure-check.md` frontmatter `critical_count` (treat as 0 when Phase
-A was skipped). If `critical_count >= 3` AND `adjudicator_mode == false`,
-escalate complexity by one level (TRIVIAL→LOW, LOW→MEDIUM, MEDIUM→HIGH)
-and overwrite `session.md` frontmatter `committee` / `complexity` using
-the canonical table in `contracts.md` → "Complexity → Committee Mapping".
-Additionally, overwrite `deliberation_mode` per the derivation rule in
-`phases/phase-b-analysis.md` → §B.3.5:
-
-- `committee == ['adjudicator']` → `deliberation_mode: solo-adjudicator`
-- `committee.length >= 2` → `deliberation_mode: team`
-
-Adjudicator mode is never escalated.
-
-**Post-completion verification**: After each subagent completes, verify
-its output file exists before proceeding. If missing, execute the phase
-instructions directly as chairperson rather than re-delegating. See
-`contracts.md` → "Post-Completion Verification" for the full fallback
-procedure.
-
-> **Terminology**: "fallback" in review refers to COVERAGE FALLBACK (when a Phase A/B/C1/C2 subagent output is missing, main-context chairperson executes the phase instructions directly). This is distinct from `ast-fallback`, which is DEGRADATION FALLBACK (LLM-based AST pattern matching when `@ast-grep/napi` native module is unavailable).
-
-**→ After both background agents complete and outputs are verified,
-immediately proceed to Step 3.**
-
-### Step 3 — Phase C1 + C2: Parallel Technical Verification
-
-Phase C is split into two parallel halves to reduce per-subagent context
-load. Both run as `general-purpose` subagents in parallel.
-
-| Phase | Model  | Phase file                     | Output file                 | Scope                                                        |
-| ----- | ------ | ------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| C1    | sonnet | `phases/phase-c1-metrics.md`   | `verification-metrics.md`   | file-level metrics (LCOM4, CC, 3+12, coverage)               |
-| C2    | sonnet | `phases/phase-c2-structure.md` | `verification-structure.md` | structure, dependency acyclicity, drift, documentation, debt |
-
-**Prompt construction**: Use the literal templates in
-`prompt-templates.md` → Phase C1 / Phase C2. Each subagent reads
-`session.md` for context and `structure-check.md` (if present) for
-Phase A context.
-
-**Batch partitioning**: Same `changedFilesCount > 15` threshold as
-Phase A. Between 15 and 30 files → partition per-file work into 10-file
-batches (C2 also runs one extra `c2-global` subagent for project-wide
-scans). Above 30 files → promote to named batch workers
-(`c1-batch-<N>` / `c2-batch-<N>`), one Agent per batch. See
-`mcp-map.md` → "Batch Partitioning Thresholds" for full details and
-the merge protocol. Confirm every C1/C2 batch worker has terminated
-(TaskStop any straggler) as soon as their outputs are merged — before
-entering Phase D.
-
-**Await both** C1 and C2 background agents before proceeding. Apply
-the same post-completion verification as Step 2 (see `contracts.md`).
-
-**→ After both Phase C halves complete and outputs are verified,
-IMMEDIATELY proceed to Step 3.9 (pipeline subagent mode) or Step 4
-(user-invoked mode) in the same response. Do NOT yield.**
-
-### Step 3.9 — Pipeline Subagent Mode Exit
-
-**Skip this step entirely when neither `--pipeline-mode=abc-only` nor
-the `PIPELINE_MODE=abc-only` context key is set** — in user-invoked
-mode proceed directly to Step 4.
-
-When invoked from the pipeline orchestrator as an A/B/C-only subagent,
-this skill MUST NOT execute Step 4 (Phase D), Step 4.5 (content-hash),
-or Step 5 (PR comment). Instead, emit the Subagent Return Contract
-defined in `DETAIL.md` → `## API Contracts` as the final assistant
-message and terminate.
-
-1. Read `<REVIEW_DIR>/session.md` frontmatter to extract `committee`,
-   `deliberation_mode`, and `failure_reason`. If `deliberation_mode` is
-   missing, derive it locally:
-   - `committee == ['adjudicator']` → `solo-adjudicator`
-   - `committee.length >= 2` → `team`
-   - otherwise (empty or unrecognized committee) → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline `verdict_gate` blocks the merge as INCONCLUSIVE
-     If `failure_reason` is missing, default to `none`.
-2. Verify required artifacts exist **and are complete** (terminal
-   frontmatter sentinel not `PENDING` — see `DETAIL.md` → "Artifact
-   completeness sentinel"). Always required: `session.md`,
-   `verification-metrics.md`, `verification-structure.md`. Required only
-   when Phase A ran (`NO_STRUCTURE_CHECK=false`): `structure-check.md`.
-   Any missing OR still-`PENDING` (skeleton) required artifact → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline main blocks the merge via `verdict_gate`.
-3. Emit the following fenced block verbatim as the terminal assistant
-   message, substituting real values for every placeholder:
-
-   ```yaml
-   SubagentReturn:
-     committee: [<persona-id>, ...]
-     deliberation_mode: <team | solo-adjudicator | chairperson-forbidden>
-     failure_reason: <none | phase-d-team-spawn-unavailable | team-incomplete | round5-exhaust>
-     paths_to_artifacts:
-       structure_check: <REVIEW_DIR>/structure-check.md | null
-       session: <REVIEW_DIR>/session.md
-       verification_metrics: <REVIEW_DIR>/verification-metrics.md
-       verification_structure: <REVIEW_DIR>/verification-structure.md
+   | File | Change Type | Fractal |
+   | ---- | ----------- | ------- |
    ```
 
-4. Terminate. Do NOT read Phase D's phase file, do NOT spawn Phase D
-   teammates, do NOT write `review-report.md` or `fix-requests.md`. The
-   pipeline main will dispatch Phase D via the `verdict_gate` rule and
-   write those artifacts itself.
+**→ Immediately proceed to Step 2.**
 
-**→ After SubagentReturn is emitted, execution is COMPLETE for the
-subagent. Return control to the pipeline main.**
+### Step 2 — Evidence (technical measurement)
 
-### Step 4 — Phase D: Political Consensus (Team Deliberation)
+All MCP measurement runs here, in subagents — the chairperson never
+measures. Resolve the phase file
+`${CLAUDE_PLUGIN_ROOT}/skills/cross-review/phases/evidence.md`
+(fallback: `Glob(**/skills/cross-review/phases/evidence.md)`).
 
-> **Pipeline Subagent Mode guard**: If `--pipeline-mode=abc-only` was set,
-> Step 3.9 already terminated this skill — execution MUST NOT reach Step 4
-> in that mode.
->
-> Step 4 (Phase D) executes in two mutually exclusive contexts, and this
-> SKILL.md file is only one of them:
->
-> 1. **User-invoked (standalone) path** — this skill runs all five steps
->    end-to-end; Step 4 executes here verbatim.
-> 2. **Pipeline main context** — the pipeline orchestrator does NOT
->    re-invoke `cross-review`. It reads `phases/phase-d-deliberation.md`
->    directly and drives Phase D Dispatch per `pipeline/SKILL.md` →
->    "Stage: Phase D Dispatch". In this case the present SKILL.md Step 4
->    is a documentation reference, not an entry point.
+- **≤ 15 changed files** — spawn ONE `general-purpose` subagent
+  (`run_in_background: true`, model `sonnet`) that follows
+  `phases/evidence.md` with `SCOPE: full` and writes
+  `<REVIEW_DIR>/verification.md` directly.
+- **> 15 changed files** — spawn TWO parallel subagents with
+  `SCOPE: metrics-half` / `SCOPE: structure-half`, each writing
+  `verification.<half>.partial.md`; the chairperson merges them into
+  `verification.md` (union of sections, frontmatter per
+  `phases/evidence.md` → "Merge"). Above 30 files, additionally pass
+  10-file `BATCH_FILES` lists per subagent as described there.
 
-Phase D executes the full multi-persona deliberation via Claude Code's
-native team tools (when `committee.length >= 2`) or a single Task
-subagent (when `committee.length == 1`). The chairperson (main session)
-is the team lead — it NEVER delegates Phase D to a general-purpose
-subagent.
+Prompt construction: state the output file first, substitute concrete
+values for every placeholder, pass the `[filid:lang]` language setting,
+and close with the write-before-finish reminder (rules:
+`contracts.md` → "Subagent Prompt Rules").
 
-**Read the detailed phase file**: Resolve
-`${CLAUDE_PLUGIN_ROOT}/skills/cross-review/phases/phase-d-deliberation.md`
-(fallback `Glob`) and follow its step-by-step procedure. The phase file
-defines:
+**Completeness check**: `verification.md` is consumable only when its
+frontmatter sentinel `verification_passed` holds a real value (not
+`PENDING`). If the subagent finished but the file is missing or still a
+`PENDING` skeleton, retry the phase ONCE with a fresh subagent; if it
+fails again, END with `Review verdict: INCONCLUSIVE` (reason: evidence
+unavailable).
 
-- Step D.0 — Merge `verification-metrics.md` + `verification-structure.md`
-  into `verification.md`
-- Step D.1 — Committee size branch (solo vs team)
-- Step D.2-solo — Single Agent spawn for `committee.length == 1`
-- Step D.2-team — parallel named worker Agent spawns for
-  `committee.length >= 2` (implicit team; no create call)
-- Step D.3 — Round evaluation (state machine from `state-machine.md`)
-- Step D.4 — VETO branch (compromise round)
-- Step D.5 — Recovery plan (dead worker detection + respawn)
-- Step D.6 — CONCLUSION — write `review-report.md` + `fix-requests.md`
-  and run the worker-teardown sweep (shutdown_request → TaskStop)
+**Committee escalation**: if `verification.md` frontmatter
+`critical_failures >= 3` and `adjudicator_mode: false`, escalate
+complexity one tier (LOW→MEDIUM, MEDIUM→HIGH) and overwrite
+`session.md` `complexity` / `committee` using the canonical table in
+`contracts.md` → "Complexity → Committee Mapping".
 
-**Chairperson invariants during Phase D**:
+**→ Immediately proceed to Step 3.**
 
-1. The chairperson NEVER calls MCP measurement tools directly — all
-   metrics come from `verification.md`, `verification-metrics.md`,
-   `verification-structure.md`, and `structure-check.md`.
-2. The chairperson reads `templates.md` for output formats
-   (`review-report.md` / `fix-requests.md`) before writing them.
-3. The chairperson loads `state-machine.md` for round judgment rules.
-4. Personas are **never** loaded from `personas/*.md` — that directory
-   does not exist. Each persona is a real Claude Code agent at
-   `plugins/filid/agents/<id>.md` (e.g.,
-   `agents/engineering-architect.md`).
-5. `--solo` (when provided by the user) is passed to Phase B as
-   `adjudicatorMode: true` input to `mcp__plugin_filid_t__review_manage(elect-committee)`,
-   which returns `committee: ['adjudicator']` regardless of
-   complexity. Phase D Step D.2-solo then spawns the `adjudicator`
-   agent as a standalone `Agent` (no other teammates). The same
-   code path is used for auto-selected TRIVIAL complexity.
+### Step 3 — Committee Opinions (one parallel round)
 
-**→ HIGH-RISK YIELD POINT: do NOT yield after Phase D outputs are
-written. Chain Step 4.5 (persist content hash) in the same response
-immediately after `review-report.md` and `fix-requests.md` exist and
-the team (if any) has been deleted.**
+Spawn every committee member **in the same response** as parallel
+foreground `Agent` calls (`subagent_type: "filid:<persona-id>"`, no
+`run_in_background`) — the framework returns all results together,
+giving a deterministic sync point with no polling, probing, or teardown.
 
-### Step 4.5 — Persist Content Hash
+Worker prompt (per persona; solo adjudicator uses the same shape). The
+chairperson pastes the frontmatter schema from `contracts.md` →
+"Opinion Frontmatter Contract" into the `== OUTPUT ==` block — agents do
+not resolve plugin paths themselves:
 
-> **Pipeline Subagent Mode guard**: Skipped in pipeline
-> subagent mode (the subagent exits at Step 3.9). Content-hash
-> persistence runs in the pipeline main as part of the "finalize
-> review" stage (`pipeline/SKILL.md`).
+```
+You are the <persona-id> review persona for branch <normalized>.
+This is a SINGLE-ROUND review — there is no round 2, no debate, no
+compromise negotiation. An independent verifier will adversarially
+check your blocking findings afterward, so pass every finding with a
+nameable consequence through rather than self-censoring.
 
-After Phase D outputs are written, persist the content hash for future
-cache lookups:
+== INPUTS ==
+- <REVIEW_DIR>/session.md
+- <REVIEW_DIR>/verification.md
+You MAY Read/Grep changed source files and run read-only git commands
+when the verification artifacts leave a gap.
 
-`mcp__plugin_filid_t__review_manage(action: "content-hash", projectRoot, branchName, baseRef)`
+== OUTPUT ==
+Write exactly one file: <REVIEW_DIR>/opinions/<persona-id>.md
+beginning with this frontmatter schema:
 
-This writes `content-hash.json` alongside the review outputs.
+<Opinion Frontmatter Contract block pasted from contracts.md>
 
-**→ After content hash is persisted, immediately proceed to Step 5.**
+Emit claim_verdicts when verification.md lists in-scope acceptance
+claims. Do NOT call Agent, SendMessage, or any orchestration tool.
 
-### Step 5 — PR Comment (Optional)
+Language: <from [filid:lang] tag, default English>
+REMINDER: Write the opinion file before finishing.
+```
 
-> **Pipeline Subagent Mode guard**: Skipped in pipeline
-> subagent mode (the subagent exits at Step 3.9). PR-comment emission
-> runs in the pipeline main as part of the "finalize review" stage
-> (`pipeline/SKILL.md`).
+- **Solo path** (`committee == ['adjudicator']`, from TRIVIAL tier or
+  `--solo`): spawn only the adjudicator; it sweeps all six lenses in one
+  opinion.
+- **Failed member**: an Agent call that errors or returns without
+  writing its opinion file is recorded as a forced ABSTAIN
+  (`state: ABSTAIN`, `confidence: 0`, chairperson-written). If **more
+  than half** of the committee failed (or the solo adjudicator failed),
+  END with `Review verdict: INCONCLUSIVE`.
 
-When `--scope=pr`:
+**→ After all Agents return, immediately proceed to Step 4 in the same response.**
 
-1. `mcp__plugin_filid_t__review_manage(action: "format-pr-comment", projectRoot, branchName)`
-   → returns formatted markdown.
-2. `gh auth status` (Bash).
-3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use
-   the `markdown` field from the tool result as-is.
-4. If not authenticated: skip with info message.
+### Step 4 — Arbitration & Verification
 
-> **Language**: All output files and PR comments MUST be written in the
-> language specified by the `[filid:lang]` tag in system context
-> (configured in `.filid/config.json`). If no tag is present, follow
-> the system's language setting; default to English. This applies to
-> `review-report.md`, `fix-requests.md`, `structure-check.md`
-> findings, PR comments, and any additional commentary. Technical
-> terms, code identifiers, rule IDs, and file paths remain in their
-> original form.
+The heart of opinion balance and false-positive removal. The
+chairperson makes NO measurement calls — only the two bookkeeping tools
+sanctioned in `contracts.md`.
 
-**After PR comment step completes (or is skipped), execution is
-COMPLETE.**
+1. **Aggregate & dedup**: collect `fix_items` from all
+   `opinions/*.md`. Deduplicate by `path + rule` — highest severity
+   wins, `confidence` as tiebreaker. Aggregate `claim_verdicts`
+   per claim across non-ABSTAIN opinions with worst-wins ordering
+   (`FAIL > INSUFFICIENT-EVIDENCE > PASS`), then fold non-PASS claims
+   into the fix set (`FAIL` → HIGH `code-fix`;
+   `INSUFFICIENT-EVIDENCE` → MEDIUM `harvest-required`) per
+   `contracts.md` → "Acceptance Claims".
+2. **Partition by the severity gate**: blocking (`>= MEDIUM`) vs
+   advisory (`LOW`). Advisory items skip verification — they can never
+   block.
+3. **Verify blocking candidates** (and every VETO's cited basis): group
+   candidates by file and spawn parallel foreground `general-purpose`
+   verifier Agents — one per file group — with the diff context, the
+   candidate list, and the verdict ladder from `contracts.md` →
+   "Verifier Verdict Ladder". Each returns per-candidate
+   `CONFIRMED | PLAUSIBLE | REFUTED` with quoted-line evidence.
+   Tool-measured metric rows in `verification.md` are ground truth —
+   verifiers judge misapplication (wrong rule scope, wrong file class,
+   e.g. INTENT.md's 50-line cap applied to DETAIL.md), misattribution,
+   and whether the stated consequence is real; they never re-measure.
+4. **Apply verdicts**: keep CONFIRMED and PLAUSIBLE; **REFUTED items
+   are dismissed** and recorded in the report's Arbitration Log with
+   the refuting evidence. A VETO whose cited basis is entirely REFUTED
+   is dismissed the same way; otherwise the VETO stands.
+5. **Derive the verdict** (`contracts.md` → "Verdict Derivation"):
+   - standing VETO, or critical-security override → `REQUEST_CHANGES`
+   - surviving blocking set non-empty → `REQUEST_CHANGES`
+   - surviving blocking set empty → `APPROVED` (presented as
+     **APPROVED (with notes)** when advisory items exist — presentation
+     only)
+   - majority committee failure / evidence unavailable → `INCONCLUSIVE`
+
+**→ Immediately proceed to Step 5 in the same response.**
+
+### Step 5 — Report & Finalize
+
+1. **Advisory ledger**: for each advisory item, update
+   `.filid/review/advisory-ledger.md` (dedup key `path + rule`, at most
+   one count per `run_id`; promote to a debt record at count 3 via
+   `mcp__plugin_filid_t__debt_manage(action: "create", ...)`) — format
+   and rules: `templates.md` → "Advisory Ledger Format".
+2. **Config-patch gate**: every fix whose patch modifies
+   `.filid/config.json` MUST pass
+   `mcp__plugin_filid_t__config_patch_validate` before being written
+   (dispatch rules: `contracts.md` → "Config Patch Contract").
+3. Write `<REVIEW_DIR>/review-report.md` and — when the blocking set is
+   non-empty — `<REVIEW_DIR>/fix-requests.md`, using `templates.md`
+   formats. The report's Arbitration Log records per-persona positions,
+   dedup collisions, every verifier verdict (including dismissed
+   REFUTED items), and VETO handling.
+4. `mcp__plugin_filid_t__review_manage(action: "content-hash", projectRoot, branchName, baseRef)`.
+5. **PR comment** (only when `--scope=pr`):
+   `mcp__plugin_filid_t__review_manage(action: "format-pr-comment", projectRoot, branchName)`,
+   then `gh auth status`; if authenticated, post the returned
+   `markdown` via `gh pr comment --body-file` (edit the existing
+   `Code Review Governance` comment in place when one exists — locate
+   it via `gh pr view --json comments`). Not authenticated → skip
+   quietly.
+6. Emit the terminal marker: `Review verdict: <VERDICT>`.
+
+> **Language**: all output files and PR comments follow the
+> `[filid:lang]` tag from system context (default: English). Technical
+> terms, code identifiers, rule IDs, and file paths stay in original
+> form.
+
+> **Protocol invariant**: the chairperson MUST NOT write a verdict
+> without committee opinions on disk — a verdict synthesized directly by
+> the main context is a protocol violation; when opinions cannot be
+> obtained the only legal verdict is `INCONCLUSIVE`.
 
 ## Options
 
@@ -381,57 +294,31 @@ COMPLETE.**
 > language works equally well (e.g., "review this PR" instead of
 > `--scope=pr`).
 
-```
-/filid:cross-review [--scope=branch|pr|commit] [--base=<ref>] [--force] [--verbose] [--no-structure-check] [--solo]
-```
-
-| Option                 | Default  | Description                                                                                                       |
-| ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `--scope`              | `branch` | Review scope (branch, pr, commit)                                                                                 |
-| `--base`               | auto     | Comparison base ref                                                                                               |
-| `--force`              | off      | Delete existing review, restart from Phase A                                                                      |
-| `--verbose`            | off      | Show detailed deliberation process                                                                                |
-| `--no-structure-check` | off      | Skip Phase A (faster; omits structure compliance)                                                                 |
-| `--solo`               | off      | Force `adjudicator` fast-path agent (integrated 6-perspective review, skips committee election and state machine) |
-
-`--solo` does NOT take an argument. It always selects the `adjudicator`
-agent (`plugins/filid/agents/adjudicator.md`), which covers all six
-committee perspectives (structure, documentation, stability, velocity,
-user-value, cognitive load) in a single context and produces a
-consolidated verdict in one round. Use this for small or time-sensitive
-changes where adversarial multi-persona debate provides no marginal
-value.
+| Option    | Default  | Description                                                                     |
+| --------- | -------- | ------------------------------------------------------------------------------- |
+| `--scope` | `branch` | Review scope (branch, pr, commit); `pr` also posts the PR comment               |
+| `--base`  | auto     | Comparison base ref                                                             |
+| `--force` | off      | Delete the existing review session and restart fresh                            |
+| `--solo`  | off      | Force the integrated `adjudicator` (single agent covering all six perspectives) |
 
 ## Quick Reference
 
 ```
-/filid:cross-review                            # Full review (A + B + C1/C2 + D team)
-/filid:cross-review --scope=pr                 # Review + post PR comment
-/filid:cross-review --force                    # Force restart from Phase A
-/filid:cross-review --no-structure-check       # Skip Phase A structure pre-check
-/filid:cross-review --solo                     # Fast-path adjudicator (6-perspective)
-/filid:cross-review --base=main --verbose      # Verbose review against main
+/filid:cross-review                 # Full committee review
+/filid:cross-review --scope=pr      # Review + PR comment
+/filid:cross-review --solo          # Fast-path adjudicator
+/filid:cross-review --force --base=main
 
-Phases:   A (Structure/sonnet) ┐
-          B (Analysis/haiku)   ┘→ C1 (Metrics/sonnet)    ┐
-                                  C2 (Structure/sonnet)  ┘→ D (Team consensus/direct)
-          [A + B parallel, C1 + C2 parallel]
-Outputs:  structure-check.md (A), session.md (B),
-          verification-metrics.md (C1), verification-structure.md (C2),
-          verification.md (merged by chairperson),
-          rounds/round-<N>-<persona-id>.md (committee members),
-          review-report.md, fix-requests.md (Phase D)
-Resume:   Automatic via checkpoint detection (see mcp-map.md)
-Committee:
-  TRIVIAL (1)   — single-file change, no interface → adjudicator
-  LOW (2)       — small non-interface change → 2 specialists
-  MEDIUM (4)    — interface or moderate size → 4 specialists
-  HIGH (6)      — >10 files or >=4 fractals → 6 specialists
-  --solo        — manual override → adjudicator (integrated 6-perspective)
-Rounds:   Max 5 deliberation rounds (team mode only)
-Verdict:  APPROVED | REQUEST_CHANGES | INCONCLUSIVE
-Gate:     fix_items >= MEDIUM block; LOW → Advisory Notes (never blocks;
-          APPROVED presented as "APPROVED (with notes)"). VETO classes
-          are gate-independent.
-Recovery: Dead worker → probe → respawn (max 2) → forced ABSTAIN
+Steps:    1 Scope/Session (main) → 2 Evidence (subagent) →
+          3 Committee (parallel personas, 1 round) →
+          4 Arbitrate/Verify (parallel verifiers) → 5 Report
+Committee: TRIVIAL=adjudicator · LOW=2 · MEDIUM=4 · HIGH=6 specialists
+Artifacts: session.md, verification.md, opinions/<persona>.md,
+           review-report.md, fix-requests.md, content-hash.json
+Verdict:   APPROVED | REQUEST_CHANGES | INCONCLUSIVE
+Gate:      >= MEDIUM blocks; LOW → Advisory Notes (never blocks);
+           VETO classes and the critical-security override are
+           gate-independent
+Arbiter:   verifier verdicts CONFIRMED / PLAUSIBLE / REFUTED —
+           REFUTED findings and refuted VETOs are dismissed on record
 ```

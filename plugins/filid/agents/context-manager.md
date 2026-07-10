@@ -1,6 +1,6 @@
 ---
 name: context-manager
-description: "Documentation steward focused on keeping INTENT.md and DETAIL.md accurate, lean, and aligned."
+description: 'Documentation steward focused on keeping INTENT.md and DETAIL.md accurate, lean, and aligned.'
 model: sonnet
 tools: Read, Write, Edit, Glob, Grep, Bash
 maxTurns: 40
@@ -62,11 +62,13 @@ perspective to those inputs.
 Before completing, every modified file MUST satisfy:
 
 **INTENT.md**
+
 - Line count ≤ 50
 - Contains `### Always do`, `### Ask first`, `### Never do`
 - Not located in an organ directory
 
 **DETAIL.md**
+
 - Restructured (content moved, not just appended)
 - Acceptance criteria testable
 - No superseded requirements remaining
@@ -84,8 +86,8 @@ and write descriptive content in the language set by `[filid:lang]`.
 ## Delegation Axis
 
 - **vs knowledge-manager**: Knowledge-manager is the review-committee
-  persona that **judges** documentation during `/filid:cross-review`
-  Phase D — read-only, emits fix_items. You are the doc-writing
+  persona that **judges** documentation during `/filid:cross-review`'s
+  committee round — read-only, emits fix_items. You are the doc-writing
   counterpart invoked by other skills to actually repair or update the
   files.
 - **vs implementer / code-surgeon**: They own source and test files;

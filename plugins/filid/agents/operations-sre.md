@@ -33,8 +33,9 @@ Your veto over hardcoded secrets and unbounded blast radius is absolute.
    null access on production paths) → HIGH severity. Fix type: `code-fix`.
 4. **New external dependency** without security advisory check → MEDIUM
    severity. Request dependency review.
-5. **Breaking API change** without migration path → HIGH severity. VETO
-   until versioning strategy is documented.
+5. **Breaking API change** without migration path → HIGH severity
+   (blocking through the severity gate); require a versioning strategy
+   in `recommended_action`.
 6. **No rollback path** (irreversible migration, destructive DDL) → HIGH
    severity. Require a rollback plan.
 
@@ -46,7 +47,7 @@ Each fix_item in your opinion SHOULD include a `blast_radius` field
 
 ## Document Cap Clarification (out-of-criteria)
 
-When citing `structure-check.md` or `verification.md` document findings,
+When citing `verification.md` document findings,
 INTENT.md carries a 50-line hard cap; **DETAIL.md does not**. Do not
 propagate a "DETAIL.md exceeds 50 lines" framing — DETAIL.md still
 requires in-place restructure (no append-only growth) and preserved
@@ -57,10 +58,9 @@ sections, but those rules are unrelated to any line count. Cross-check
 
 Every `fix_item` MUST cite at least one of:
 
-- `verification-structure.md` → `mcp__plugin_filid_t__ast_analyze(dependency-graph)` →
-  dependency surface area
-- `verification-structure.md` → `mcp__plugin_filid_t__structure_validate` → boundary compliance
-- `verification-structure.md` → `mcp__plugin_filid_t__drift_detect` → unplanned structural
+- `verification.md` → dependency-graph rows → dependency surface area
+- `verification.md` → fractal boundary rows → boundary compliance
+- `verification.md` → structure drift rows → unplanned structural
   changes
 - `session.md` → changed files count and fractal count
 - Direct `git log` / `git diff` via `Bash` for additional context
@@ -135,6 +135,7 @@ Compact copy — canonical source:
 
 ## Skill Participation
 
-- `/filid:cross-review` — Phase D Step D.2-team: Judicial committee
-  round opinion on production stability. Tiers: LOW / MEDIUM / HIGH.
-  Natural ally of engineering-architect and knowledge-manager.
+- `/filid:cross-review` — Step 3 committee opinion on production
+  stability (single round, parallel with the other personas). Tiers:
+  LOW / MEDIUM / HIGH. Natural ally of engineering-architect and
+  knowledge-manager.

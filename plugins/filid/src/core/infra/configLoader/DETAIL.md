@@ -10,20 +10,22 @@
 
 ### 공개 함수
 
-| 함수 | 시그니처 | 설명 |
-|---|---|---|
-| `syncRuleDocs` | `(projectRoot: string, selection: Iterable<string>, opts?: SyncRuleDocsOptions) => RuleDocSyncResult` | `.claude/rules/`를 선택 상태에 맞게 동기화. setup 전용. |
-| `getRuleDocsStatus` | `(projectRoot: string, pluginRoot?: string) => RuleDocsStatus` | 파일시스템을 읽어 rule doc 현황 스냅샷 반환. 뮤테이션 없음. |
-| `loadRuleDocsManifest` | `(pluginRoot: string) => RuleDocsManifest` | `templates/rules/manifest.json` 로드 및 유효성 검사. `templateHash` 누락 시 throw. |
-| `initProject` | `(projectRoot: string, language?: string) => InitResult` | `.filid/config.json`을 git root에 생성(부재 시). `language` 제공 시 config에 기록. 기존 config는 덮어쓰지 않음. |
-| `createDefaultConfig` | `(language?: string) => FilidConfig` | 8개 내장 규칙 기본 config 생성. `language` 제공 시 최상위 `language` 키 포함. |
+| 함수                   | 시그니처                                                                                              | 설명                                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `syncRuleDocs`         | `(projectRoot: string, selection: Iterable<string>, opts?: SyncRuleDocsOptions) => RuleDocSyncResult` | `.claude/rules/`를 선택 상태에 맞게 동기화. setup 전용.                                                         |
+| `getRuleDocsStatus`    | `(projectRoot: string, pluginRoot?: string) => RuleDocsStatus`                                        | 파일시스템을 읽어 rule doc 현황 스냅샷 반환. 뮤테이션 없음.                                                     |
+| `loadRuleDocsManifest` | `(pluginRoot: string) => RuleDocsManifest`                                                            | `templates/rules/manifest.json` 로드 및 유효성 검사. `templateHash` 누락 시 throw.                              |
+| `initProject`          | `(projectRoot: string, language?: string) => InitResult`                                              | `.filid/config.json`을 git root에 생성(부재 시). `language` 제공 시 config에 기록. 기존 config는 덮어쓰지 않음. |
+| `createDefaultConfig`  | `(language?: string) => FilidConfig`                                                                  | 8개 내장 규칙 기본 config 생성. `language` 제공 시 최상위 `language` 키 포함.                                   |
 
 ### 타입 계약
 
 **`RuleDocEntry`** — manifest.json 단일 항목.
+
 - `templateHash: string` — 빌드 시 주입된 템플릿 파일의 SHA-256 hex digest.
 
 **`RuleDocStatusEntry`** — 상태 스냅샷 단일 항목.
+
 - `deployed: boolean` — `.claude/rules/`에 파일이 존재하는지 여부.
 - `selected: boolean` — optional은 `deployed`와 동일; required는 항상 `true`.
 - `templateHash: string` — manifest의 템플릿 해시.
@@ -31,10 +33,12 @@
 - `inSync: boolean` — `deployed && deployedHash === templateHash`.
 
 **`RuleDocsStatus`** — `getRuleDocsStatus` 반환값.
+
 - `entries` — 체크박스 UI용 optional rule 목록.
 - `autoDeployed` — 사용자 선택 없이 자동 적용되는 required rule 목록.
 
 **`RuleDocSyncResult`** — `syncRuleDocs` 반환값.
+
 - `copied` — 새로 복사된 파일명 목록.
 - `removed` — 삭제된 파일명 목록.
 - `unchanged` — 변경 없는 파일명 목록.
@@ -43,6 +47,7 @@
 - `skipped` — `{ id, reason }` 형태의 처리 실패 항목.
 
 **`SyncRuleDocsOptions`**
+
 - `resync?: Iterable<string>` — drift된 optional rule을 덮어쓸 rule id 목록.
 - `pluginRoot?: string` — `CLAUDE_PLUGIN_ROOT` 환경 변수 대신 사용할 경로.
 
@@ -75,8 +80,8 @@ in `loaders/configSchemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>`
   "version": "1.0",
   "language": "en",
   "rules": {
-    "naming-convention":  { "enabled": true, "severity": "warning" },
-    "zero-peer-file":     { "enabled": true, "severity": "warning" },
+    "naming-convention": { "enabled": true, "severity": "warning" },
+    "zero-peer-file": { "enabled": true, "severity": "warning" },
     "module-entry-point": {
       "enabled": true,
       "severity": "warning",
@@ -116,11 +121,10 @@ string[] }`. Every MCP tool that loads config also surfaces the warnings
 array as `configWarnings` in its response (`structureValidate`,
 `ruleQuery`, `driftDetect`).
 
-### Phase D patch validation
+### Review patch validation
 
-Phase D fix-requests that propose `.filid/config.json` patches are
+cross-review fix-requests that propose `.filid/config.json` patches are
 validated via `mcp__plugin_filid_t__config_patch_validate` (calls `validateConfigPatch`
 which uses the shared schema — no local redefinition) before reaching
 `resolve`. Hallucinated keys such as `rules[*].allowed-no-entry`
 cannot slip through as no-op commits.
-

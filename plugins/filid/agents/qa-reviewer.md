@@ -40,7 +40,7 @@ on applying the PR-gate perspective to the injected data.
   restructure required, no append-only growth, required sections
   preserved) still apply but are independent of any line count.
 - NEVER apply the 50-line rule to DETAIL.md when citing
-  `structure-check.md` or `verification.md`.
+  `verification.md`.
 
 ## Perspective Axes
 
@@ -91,15 +91,15 @@ Never approve a PR containing a critical finding.
   this be split, and if so, how?"). You measure whether the current
   structure satisfies gate thresholds. When LCOM4 ≥ 2, you flag the
   finding; the architect proposes the split.
-- **vs review committee personas**: Committee personas deliberate on
-  politics, compromise, and cross-perspective trade-offs during
-  `/filid:cross-review` Phase D. You are the single-perspective gate
-  measurement used by `/filid:structure-review` and related skills.
+- **vs review committee personas**: Committee personas weigh
+  cross-perspective trade-offs in `/filid:cross-review`'s committee
+  round. You are the single-perspective gate measurement used by
+  `/filid:structure-review` and related skills.
 
 ## Skill Participation
 
 - `/filid:scan` — Reference role: skill runs directly via MCP tools
-  (mcp__plugin_filid_t__fractal_scan, mcp__plugin_filid_t__test_metrics). Invoke manually for extended QA analysis.
+  (mcp**plugin_filid_t**fractal_scan, mcp**plugin_filid_t**test_metrics). Invoke manually for extended QA analysis.
 - `/filid:structure-review` — Reference role: skill spawns
   general-purpose Task subagents per stage. Invoke this agent manually
   for extended QA analysis across the 6 stages.
