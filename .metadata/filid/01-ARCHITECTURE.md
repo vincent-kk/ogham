@@ -171,7 +171,7 @@ packages/filid/
 │   ├── context-query/SKILL.md
 │   ├── guide/SKILL.md
 │   ├── restructure/SKILL.md
-│   ├── cross-review/        # 거버넌스: phases/, personas/, state-machine.md
+│   ├── cross-review/        # 거버넌스: contracts.md, phases/evidence.md, calibration/
 │   ├── resolve/             # 거버넌스: 수정 해결
 │   ├── revalidate/          # 거버넌스: Delta 재검증
 │   ├── migrate/SKILL.md
@@ -321,13 +321,16 @@ mcp/server-entry.ts (시작점)
 
 ### 의장 위임 패턴 (Chairperson Delegation Pattern)
 
-`/filid:cross-review`는 3-Phase 위임 패턴으로 컨텍스트 효율을 극대화한다:
+`/filid:cross-review`는 5-Step 위임 패턴으로 컨텍스트 효율을 극대화한다.
+의장(메인 세션)은 측정하지 않고 조율만 한다:
 
-| Phase    | 실행자    | 모델   | 역할                                |
-| -------- | --------- | ------ | ----------------------------------- |
-| A (분석) | subagent  | haiku  | git diff 분석, 위원회 결정론적 선출 |
-| B (검증) | subagent  | sonnet | MCP tool 기반 기술 검증             |
-| C (합의) | 의장 직접 | -      | 페르소나 합의 상태 머신 실행        |
+| Step               | 실행자                           | 역할                                                      |
+| ------------------ | -------------------------------- | --------------------------------------------------------- |
+| 1 Scope/Session    | 의장 직접                        | 브랜치·캐시·위원회 결정론적 선출 (elect-committee)        |
+| 2 Evidence         | subagent ×1 (대형 diff 분할)     | 모든 MCP 기술 측정 → verification.md                      |
+| 3 Committee        | 페르소나 Agent 병렬 (foreground) | 단일 라운드 독립 의견 (opinions/<persona>.md)             |
+| 4 Arbitrate/Verify | 검증자 Agent 병렬                | 차단급 발견 적대적 검증 (CONFIRMED/PLAUSIBLE/REFUTED)     |
+| 5 Report           | 의장 직접                        | 심각도 게이트 → 판정 → review-report.md / fix-requests.md |
 
 ### 기술 부채 시스템
 
@@ -350,13 +353,12 @@ mcp/server-entry.ts (시작점)
 
 - 거버넌스 스킬은 기존 Hook/MCP/Agent 계층을 그대로 활용 — 새 계층 불필요
 - 신규 MCP tool 2개(`review_manage`, `debt_manage`)만 추가로 충분
-- 신규 agent 0개 — 페르소나는 SKILL.md 내 프레임워크 문서로 내장
+- 페르소나는 Layer 3의 실제 에이전트(`agents/<persona-id>.md` 7종)로 관리 — 스킬은 오케스트레이션만 담당
 - 기존 4계층 아키텍처의 일관성 유지
 
 **트레이드오프**:
 
 - Layer 4 스킬 수가 8→19로 증가 — 관리 범위 확대
-- 페르소나 파일이 skills/ 하위에 위치 — agents/와 분리된 관리
 
 ---
 

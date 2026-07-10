@@ -383,34 +383,39 @@ yarn test:run   # 1회 실행
 ### /filid:pipeline — 거버넌스 파이프라인 오케스트레이션
 
 ```
-/filid:pipeline [--scope=branch|pr|commit] [--base=ref] [--verbose]
+/filid:pipeline [--from=stage] [--base=ref] [--draft] [--skip-update] [--force] [--title=t]
 ```
 
-| 옵션        | 기본값   | 설명                         |
-| ----------- | -------- | ---------------------------- |
-| `--scope`   | `branch` | 리뷰 범위 (branch/pr/commit) |
-| `--base`    | `main`   | 비교 기준 ref                |
-| `--verbose` | (없음)   | 상세 분석 포함               |
+| 옵션            | 기본값 | 설명                                                |
+| --------------- | ------ | --------------------------------------------------- |
+| `--from`        | auto   | 진입 스테이지 (pr-create/review/resolve/revalidate) |
+| `--base`        | auto   | 베이스 브랜치 (pr-create·review에 전달)             |
+| `--draft`       | (없음) | 드래프트 PR 생성 (pr-create)                        |
+| `--skip-update` | (없음) | pr-create 내부의 update 동기화 생략                 |
+| `--force`       | (없음) | 리뷰 강제 재시작 (review)                           |
+| `--title`       | auto   | PR 제목 (pr-create)                                 |
 
 **예시**:
 
 ```
 /filid:pipeline
-/filid:pipeline --scope=pr --verbose
+/filid:pipeline --from=review --force
 ```
 
-**결과**: `/filid:cross-review` → `/filid:resolve` → `/filid:revalidate` 전체 파이프라인 자동 실행.
+**결과**: `pr-create` → `review` → `resolve --auto` → `revalidate` 자동 실행 (진입점 자동 감지, 실패 시 재실행으로 재개).
 
 ### /filid:pull-request — PR 생성 자동화
 
 ```
-/filid:pull-request [--base=ref] [--draft]
+/filid:pull-request [--base=ref] [--skip-update] [--draft] [--title=t]
 ```
 
-| 옵션      | 기본값 | 설명             |
-| --------- | ------ | ---------------- |
-| `--base`  | `main` | 베이스 브랜치    |
-| `--draft` | (없음) | 드래프트 PR 생성 |
+| 옵션            | 기본값 | 설명                          |
+| --------------- | ------ | ----------------------------- |
+| `--base`        | auto   | 베이스 브랜치 (자동 감지)     |
+| `--skip-update` | (없음) | Stage 1 (update 동기화) 생략  |
+| `--draft`       | (없음) | 드래프트 PR 생성              |
+| `--title`       | auto   | PR 제목 (미지정 시 자동 생성) |
 
 **예시**:
 
@@ -424,18 +429,19 @@ yarn test:run   # 1회 실행
 ### /filid:resolve — 수정 사항 해결
 
 ```
-/filid:resolve
+/filid:resolve [--auto]
 ```
 
-파라미터 없음. 현재 브랜치 자동 감지.
+현재 브랜치 자동 감지. `--auto`는 전체 수용·프롬프트 생략·자동 커밋/푸시/재검증.
 
 **예시**:
 
 ```
 /filid:resolve
+/filid:resolve --auto
 ```
 
-**결과**: 각 fix 항목에 대해 수용/거부 선택 → 거부 시 소명 수집 → justifications.md + 부채 파일 생성.
+**결과**: 각 fix 항목 수용/거부 → 수용분 code-surgeon 병렬 적용 + typecheck → 거부분 소명·ADR·부채 생성 → justifications.md + 커밋/푸시.
 
 ### /filid:revalidate — Delta 재검증
 
@@ -460,17 +466,19 @@ yarn test:run   # 1회 실행
 ```
 .filid/
 ├── review/<branch>/       # 브랜치별 리뷰 산출물
-│   ├── session.md            # Phase A: 위원회 선출 결과
-│   ├── verification.md       # Phase B: 기술 검증 결과
-│   ├── review-report.md      # Phase C: 최종 리뷰 보고서
-│   ├── fix-requests.md       # Phase C: 수정 요청 사항
+│   ├── session.md            # Step 1: 위원회 선출·run_id
+│   ├── verification.md       # Step 2: 기술 측정 결과
+│   ├── opinions/<persona>.md # Step 3: 페르소나 의견
+│   ├── review-report.md      # Step 5: 최종 리뷰 보고서
+│   ├── fix-requests.md       # Step 5: 차단급 수정 요청
 │   ├── justifications.md     # /filid:resolve: 수용/거부 결정
 │   └── re-validate.md        # /filid:revalidate: PASS/FAIL 판정
+├── review/advisory-ledger.md # advisory(LOW) 재발 추적 (브랜치 공유)
 └── debt/                  # 기술 부채 (전체 공유, 커밋 대상)
     └── <debt-id>.md          # 개별 부채 항목 (YAML frontmatter)
 ```
 
-- `.filid/review/` — 커밋 대상 (PR에 리뷰 이력 남김)
+- `.filid/review/` — 로컬 전용 (gitignore; 단계 간 통신 파일, revalidate PASS 시 정리)
 - `.filid/debt/` — 커밋 대상 (팀 간 부채 공유)
 
 ---

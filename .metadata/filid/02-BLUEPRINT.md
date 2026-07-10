@@ -541,72 +541,72 @@ stdin에서 JSON 읽기 → 핸들러 호출 → stdout에 JSON 쓰기.
 
 ### skills/cross-review/
 
-**목적**: 다중 페르소나 합의체 기반 코드 리뷰 거버넌스
+**목적**: 다관점 합의 코드 리뷰 — 단일 라운드 병렬 의견 수집 + 적대적 검증
 
 **구조**:
 
 ```
 skills/cross-review/
-├── SKILL.md                      # 의장 오케스트레이터 (~105줄)
-├── reference.md                  # 출력 포맷, MCP tool 맵, 부채 바이어스 테이블
-├── state-machine.md              # PROPOSAL→DEBATE→VETO/SYNTHESIS/ABSTAIN→CONCLUSION
+├── SKILL.md              # 의장 오케스트레이터 (5-Step 워크플로우)
+├── contracts.md          # 위원회 매핑, 의견 스키마, 심각도 게이트, verdict ladder, 판정 도출
+├── templates.md          # review-report / fix-requests / advisory ledger / PR comment 포맷
+├── reference.md          # 참조 인덱스 + MCP tool 맵
 ├── phases/
-│   ├── phase-a-analysis.md       # Phase A subagent: git diff, 위원회 선출
-│   └── phase-b-verification.md   # Phase B subagent: MCP 기술 검증
-└── personas/                     # 6개 페르소나 프레임워크 (각 ≤70줄)
-    ├── engineering-architect.md
-    ├── knowledge-manager.md
-    ├── operations-sre.md
-    ├── business-driver.md
-    ├── product-manager.md
-    └── design-hci.md
+│   └── evidence.md       # Evidence subagent: 모든 MCP 기술 측정 (full/half/batch 스코프)
+├── calibration/          # 검증기 회귀 픽스처 (FPR·FNR·인플레이션·claim 오판정)
+├── INTENT.md / DETAIL.md
 ```
 
-**MCP tool 의존**: `review_manage` (5 actions), `debt_manage` (1 action: calculate-bias), 기존 12개 MCP tool
+페르소나 7종은 `agents/<persona-id>.md`의 실제 에이전트 — 병렬 foreground `Agent`로 스폰되어 `opinions/<persona>.md`를 쓴다.
+
+**MCP tool 의존**: `review_manage` (세션 관리 액션 전반), `config_patch_validate` (config 패치 게이트), `debt_manage` (calculate-bias·advisory 승격), 측정 도구는 evidence subagent 전담
 
 ### skills/resolve/
 
-**목적**: 수정 사항 수용/거부 + 소명 + ADR 정제 + 부채 기록
+**목적**: 수정 사항 수용/거부 + code-surgeon 병렬 적용 + 소명 ADR + 부채 기록
 
 **구조**:
 
 ```
 skills/resolve/
-├── SKILL.md       # 6-step 워크플로우 (~119줄)
-└── reference.md   # justifications.md 포맷, ADR 가이드라인, AskUserQuestion 패턴
+├── SKILL.md       # 9-step 워크플로우 (--auto 전자동 모드 포함)
+└── reference.md   # justifications.md 포맷, ADR 가이드라인, fix type별 처리
 ```
 
 **MCP tool 의존**: `review_manage` (normalize-branch), `debt_manage` (create)
 
 ### skills/revalidate/
 
-**목적**: Delta 기반 경량 재검증, PASS/FAIL 최종 판정
+**목적**: Delta 기반 재측정 검증, PASS/FAIL 최종 판정 (main이 ledger 작성·재도출)
 
 **구조**:
 
 ```
 skills/revalidate/
-├── SKILL.md       # 7-step 워크플로우 (~126줄)
-└── reference.md   # re-validate.md 포맷, PR 코멘트 포맷, 비협상 규칙
+├── SKILL.md       # 8-step 워크플로우
+├── reference.md   # verification-ledger / re-validate.md 포맷, 비협상 규칙
+└── DETAIL.md      # status 도출 매트릭스, claim 재판정 계약
 ```
 
-**MCP tool 의존**: `review_manage` (normalize-branch), `debt_manage` (list, resolve), 기존 MCP tool (재검증용)
+**MCP tool 의존**: `review_manage` (normalize-branch, cleanup, format-revalidate-comment), `debt_manage` (list, resolve), 측정 도구 (재검증용)
 
 ---
 
 ## 8. 거버넌스 MCP tool 모듈
 
-### src/mcp/tools/review_manage.ts (217줄)
+### src/mcp/tools/reviewManage/
 
-**목적**: 리뷰 세션 결정론적 관리
+**목적**: 리뷰 세션 결정론적 관리 (dispatcher + handlers/format/utils organ)
 
-| Action             | 핵심 알고리즘                                                 |
-| ------------------ | ------------------------------------------------------------- |
-| `normalize-branch` | `/` → `--`, 특수문자 → `_`, 연속 `--` 보존                    |
-| `ensure-dir`       | `.filid/review/<normalized>/` 재귀 생성                       |
-| `checkpoint`       | session.md/verification.md/review-report.md 존재로 Phase 판정 |
-| `elect-committee`  | 복잡도(LOW/MED/HIGH) → 위원 수(2/4/6) + 적대적 짝짓기         |
-| `cleanup`          | 리뷰 디렉토리 재귀 삭제                                       |
+| Action                                                                       | 핵심 알고리즘                                                 |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `normalize-branch`                                                           | `/` → `--`, 특수문자 → `_`, 연속 `--` 보존                    |
+| `ensure-dir`                                                                 | `.filid/review/<normalized>/` 재귀 생성                       |
+| `checkpoint`                                                                 | 세션 아티팩트 존재 목록 반환 (스킬이 resume 지점 판정)        |
+| `elect-committee`                                                            | 복잡도(TRIVIAL/LOW/MED/HIGH) → 위원 1/2/4/6 + adjudicatorMode |
+| `check-cache` / `content-hash`                                               | diff 콘텐츠 해시로 동일 리뷰 스킵                             |
+| `cleanup`                                                                    | 리뷰 디렉토리 재귀 삭제 (revalidate PASS 시)                  |
+| `format-pr-comment` / `format-revalidate-comment` / `generate-human-summary` | 산출물 → 접이식 PR 코멘트/요약                                |
 
 **의존**: `types/review.ts`
 

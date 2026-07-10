@@ -452,56 +452,63 @@ T5  에이전트가 서브에이전트 생성
 `/filid:pipeline`으로 전체 흐름을 오케스트레이션하거나 각 단계를 개별 실행 가능.
 
 ```
-┌────────────────┐    ┌──────────────┐    ┌────────────────┐    ┌──────────────────┐
-│ /filid:pipeline   │    │ /filid:cross-review │───→│ /filid:resolve    │───→│ /filid:revalidate   │
-│                │───→│               │    │                │    │                  │
-│ 전체 오케스트레이 │    │ Phase A: 분석  │    │ 수용/거부 선택  │    │ Delta 추출        │
-│ 션 (선택)      │    │ Phase B: 검증  │    │ 소명 수집       │    │ 수정 확인         │
-│                │    │ Phase C: 합의  │    │ ADR 정제        │    │ PASS/FAIL        │
-│                │    │               │    │ 부채 생성        │    │ PR 코멘트         │
-└────────────────┘    └──────────────┘    └────────────────┘    └──────────────────┘
-  PR 시점               PR 시점              리뷰 완료 후            수정 적용 후
+┌────────────────┐    ┌──────────────────┐    ┌────────────────┐    ┌──────────────────┐
+│ /filid:pipeline   │    │ /filid:cross-review  │───→│ /filid:resolve    │───→│ /filid:revalidate   │
+│                │───→│                  │    │                │    │                  │
+│ 전체 오케스트레이 │    │ Scope → Evidence  │    │ 수용/거부 선택  │    │ Delta 추출        │
+│ 션 (선택)      │    │ → Committee       │    │ code-surgeon 적용│    │ main 재측정       │
+│                │    │ → Arbitrate/Verify│    │ 소명→ADR→부채   │    │ PASS/FAIL        │
+│                │    │ → Report          │    │ commit + push   │    │ PR 코멘트         │
+└────────────────┘    └──────────────────┘    └────────────────┘    └──────────────────┘
+  PR 시점               PR 시점                 리뷰 완료 후            수정 적용 후
 ```
 
-### /filid:cross-review — 3-Phase 위임 패턴
+### /filid:cross-review — 5-Step 위임 패턴
 
 ```
-Phase A (haiku subagent)
-├── git diff 분석
-├── review_manage(elect-committee) → 결정론적 위원회 선출
-├── review_manage(ensure-dir) → 리뷰 디렉토리 생성
+Step 1 Scope/Session (의장 직접)
+├── spike harvest 가드, 캐시/체크포인트 확인
+├── review_manage(elect-committee) → 결정론적 위원회 선출 (TRIVIAL=adjudicator/LOW=2/MED=4/HIGH=6)
 └── 출력: session.md
 
-Phase B (sonnet subagent)
-├── 기존 MCP tool 기반 기술 검증 (ast_analyze, test_metrics, ...)
-├── debt_manage(calculate-bias) → 부채 바이어스 계산
-└── 출력: verification.md
+Step 2 Evidence (subagent ×1; >15파일이면 metrics/structure 분할)
+├── 모든 MCP 기술 측정 (structure_validate, ast_analyze, test_metrics, drift, ...)
+├── debt_manage(calculate-bias) + acceptance claims 스코프 필터
+└── 출력: verification.md (완결성 sentinel: verification_passed)
 
-Phase C (의장 직접)
-├── 페르소나 프레임워크 지연 로딩
-├── 상태 머신: PROPOSAL→DEBATE→VETO/SYNTHESIS/ABSTAIN→CONCLUSION
-├── 최대 5라운드
-└── 출력: review-report.md, fix-requests.md
+Step 3 Committee (페르소나 Agent 병렬 foreground, 단일 라운드)
+├── 각 페르소나 독립 의견: state(SYNTHESIS|VETO|ABSTAIN) + fix_items + claim_verdicts
+└── 출력: opinions/<persona-id>.md (실패 페르소나 = forced ABSTAIN)
+
+Step 4 Arbitrate/Verify (검증자 Agent 병렬)
+├── dedup(path+rule, 고심각도 승리) + claim worst-wins 폴딩
+├── 차단급(>=MEDIUM) 발견 + VETO 근거 전수 검증: CONFIRMED/PLAUSIBLE/REFUTED
+└── REFUTED 기각 (Arbitration Log 기록), 심각도 게이트로 판정 도출
+
+Step 5 Report (의장 직접)
+├── advisory ledger 갱신(3회 누적 시 부채 승격), config-patch 게이트
+└── 출력: review-report.md, fix-requests.md, content-hash.json, (--scope=pr) PR 코멘트
 ```
 
 ### /filid:resolve — 수정 사항 해결
 
 ```
-1. 브랜치 감지 + fix-requests.md 로딩
-2. AskUserQuestion으로 각 fix 항목 수용/거부
-3. 수용 → 코드 패치 안내
+1. dirty worktree 가드 + fix-requests.md 로딩 (harvest-required 항목 존재 시 중단)
+2. AskUserQuestion으로 각 fix 항목 수용/거부 (--auto: 전체 수용·전 프롬프트 생략)
+3. 수용 → code-surgeon 병렬 적용 (promote/restructure는 스킬 위임)
 4. 거부 → 소명 수집 → ADR 정제 → debt_manage(create)
-5. justifications.md 출력 (resolve_commit_sha 포함)
+5. justifications.md 출력 (resolve_commit_sha = 적용 전 HEAD)
+6. typecheck 게이트 → 코드+부채 파일만 커밋 → push → revalidate 핸드오프
 ```
 
 ### /filid:revalidate — Delta 재검증
 
 ```
 1. resolve_commit_sha 기반 Delta 추출
-2. 수용된 fix 항목별 MCP tool 재검증
-3. 거부된 항목의 소명 헌법 검사
-4. 기존 부채 해소 확인 → debt_manage(resolve)
-5. PASS/FAIL 판정 → re-validate.md 출력
+2. main이 verification-ledger 작성 (fix별 pre_count·file_was_modified)
+3. 소명 헌법 검사 ∥ 기존 부채 해소 확인 (병렬 subagent)
+4. main이 fix별 MCP 재측정으로 post_count·status 도출 (CLM-*은 claim 직접 재판정)
+5. PASS/FAIL 판정 → re-validate.md 출력 (PASS 시 세션 디렉토리 cleanup)
 6. (선택) gh pr comment으로 PR 코멘트
 ```
 
@@ -522,13 +529,17 @@ Phase C (의장 직접)
 
 ```
 .filid/
-├── review/<branch>/       # 리뷰 중간 산출물 (브랜치별)
-│   ├── session.md            # Phase A 출력
-│   ├── verification.md       # Phase B 출력
-│   ├── review-report.md      # Phase C 출력 (최종 보고서)
-│   ├── fix-requests.md       # Phase C 출력 (수정 요청)
+├── review/<branch>/       # 리뷰 중간 산출물 (브랜치별, 로컬 전용)
+│   ├── session.md            # Step 1 출력 (위원회·run_id)
+│   ├── verification.md       # Step 2 출력 (기술 측정)
+│   ├── opinions/<persona>.md # Step 3 출력 (페르소나 의견)
+│   ├── review-report.md      # Step 5 출력 (판정 + Arbitration Log)
+│   ├── fix-requests.md       # Step 5 출력 (차단급 수정 요청)
+│   ├── content-hash.json     # 리뷰 캐시 키
 │   ├── justifications.md     # /filid:resolve 출력
+│   ├── verification-ledger.md# /filid:revalidate 작업 ledger
 │   └── re-validate.md        # /filid:revalidate 출력
+├── review/advisory-ledger.md # advisory(LOW) 재발 추적 (브랜치 공유)
 └── debt/                  # 기술 부채 파일 (전체 공유)
     └── <debt-id>.md          # 개별 부채 항목
 ```
