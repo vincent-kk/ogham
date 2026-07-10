@@ -1,7 +1,7 @@
 # GitHub Provider — Link Handling (Bidirectional)
 
 Documents the `## Links` section write protocol for the manifest skill.
-See `SPEC-provider-github.md §1.2` for the data contract.
+See `SPEC-provider-github.md §4` for the data contract.
 
 ## `## Links` section grammar
 

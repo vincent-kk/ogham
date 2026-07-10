@@ -1,6 +1,6 @@
 # SPEC-provider-github — GitHub Issues Provider
 
-> Status: Draft v1.2 (2026-04-06)
+> Status: Draft v1.3 (2026-07-10) — Implementation sync (`## Links` body sections, milestone 미채택)
 > Parent: [SPEC-provider.md](./SPEC-provider.md)
 
 ---
@@ -21,50 +21,39 @@ GitHub Issues provider implementation for imbas. Uses `gh` CLI for all operation
 
 ### 2.1 Issue Hierarchy
 
-| imbas Concept | GitHub Representation | Notes |
-|---------------|----------------------|-------|
-| **Epic** | Issue + `type:epic` label + **Milestone** | Milestone groups related stories. Epic issue contains task list for tracking. |
-| **Story** | Issue + `type:story` label | Assigned to Epic's milestone |
-| **Task** | Issue + `type:task` label | Cross-story technical work. Assigned to same milestone. |
-| **Subtask** | Issue + `type:subtask` label | Referenced in parent's task list |
-| **Bug** | Issue + `type:bug` label | Optional, for future use |
+| imbas Concept | GitHub Representation        | Notes                                                       |
+| ------------- | ---------------------------- | ----------------------------------------------------------- |
+| **Epic**      | Issue + `type:epic` label    | Tracking issue — task list(`## Sub-tasks`)로 하위 이슈 추적 |
+| **Story**     | Issue + `type:story` label   | Epic tracking issue의 task list에 등록                      |
+| **Task**      | Issue + `type:task` label    | Cross-story technical work                                  |
+| **Subtask**   | Issue + `type:subtask` label | Referenced in parent's task list                            |
+| **Bug**       | Issue + `type:bug` label     | Optional, for future use                                    |
 
-### 2.2 Epic = Milestone + Tracking Issue
+### 2.2 Epic = Tracking Issue
 
-An Epic maps to **both**:
-
-1. **Milestone** — provides native GitHub grouping, progress tracking, filtering
-2. **Tracking Issue** — provides task list for visual hierarchy, detailed description
+Epic은 `type:epic` 라벨의 **tracking issue** 하나로 표현한다 — 하위 이슈는
+본문의 `## Sub-tasks` task list로 추적한다.
 
 ```
-Milestone: "소셜 로그인"
-  ├── #10 [type:epic] "소셜 로그인" (tracking issue)
+#10 [type:epic] "소셜 로그인" (tracking issue)
   ├── #11 [type:story] "소셜 로그인으로 신규 가입"
   ├── #12 [type:story] "기존 계정 소셜 연동"
   └── #15 [type:task] "OAuth provider 추상화 레이어"
 ```
 
-**Milestone creation**: `gh api` to create milestone, then assign all child issues.
-
-```bash
-# Create milestone
-gh api repos/{owner}/{repo}/milestones -f title="소셜 로그인" -f description="Epic: 소셜 로그인 기능 구현"
-
-# Assign issue to milestone
-gh issue edit 11 --milestone "소셜 로그인"
-```
+> **Milestone 미채택**: 초기 설계는 Epic = Milestone + Tracking Issue 병행이었으나,
+> 구현은 tracking issue 단독으로 확정했다 (milestone 관리 오버헤드 대비 이득 없음).
 
 ### 2.3 Parent-Child Relationships
 
-GitHub has no native parent-child. imbas uses **task lists** in parent body:
+GitHub has no native parent-child. imbas uses a **`## Sub-tasks` task list** in the parent body:
 
 ```markdown
-## Stories
-- [ ] #11 소셜 로그인으로 신규 가입
-- [ ] #12 기존 계정 소셜 연동
+## Sub-tasks
 
-## Tasks
-- [ ] #15 OAuth provider 추상화 레이어
+- [ ] #11
+- [ ] #12
+- [ ] #15
 ```
 
 When a child issue is closed, GitHub automatically checks the task list item.
@@ -80,65 +69,50 @@ fully-qualified form:
 ### 2.5 Hierarchy Example
 
 ```
-Issue #10 [type:epic, status:todo, imbas]
+Issue #10 [type:epic, status:todo, imbas-managed]
   title: "소셜 로그인"
-  milestone: "소셜 로그인"
   body:
-    ## Overview
+    ## Description
     소셜 계정을 이용한 회원가입/로그인 기능 구현
 
-    ## Stories
-    - [ ] #11 소셜 로그인으로 신규 가입
-    - [ ] #12 기존 계정 소셜 연동
+    ## Sub-tasks
+    - [ ] #11
+    - [ ] #12
+    - [ ] #15
 
-    ## Tasks
-    - [ ] #15 OAuth provider 추상화 레이어
+    ## Links
 
-    <!-- imbas:meta
-    type: epic
-    milestone: 소셜 로그인
-    -->
-
-Issue #11 [type:story, status:todo, imbas]
+Issue #11 [type:story, status:todo, imbas-managed]
   title: "소셜 로그인으로 신규 가입"
-  milestone: "소셜 로그인"
   body:
-    ## User Story
+    ## Description
     As a new user,
     I want to sign up via social accounts,
     so that I can skip manual registration.
 
-    ## Acceptance Criteria
     Given a user on the login page
     When they click "Sign up with Google"
     Then an account is created with their Google profile
 
-    ## Subtasks
-    - [ ] #13 OAuth callback 처리
-    - [ ] #14 사용자 계정 생성
+    ## Sub-tasks
+    - [ ] #13
+    - [ ] #14
 
-    <!-- imbas:meta
-    type: story
-    parent: #10
-    is_blocked_by: #15
-    -->
+    ## Links
+    - blocked-by: #15
 
-Issue #15 [type:task, status:todo, imbas]
+Issue #15 [type:task, status:todo, imbas-managed]
   title: "OAuth provider 추상화 레이어 구현"
-  milestone: "소셜 로그인"
   body:
     ## Description
     OAuth 인증 흐름을 추상화하여 복수 provider를 지원하는 공통 레이어 구현
 
-    ## Subtasks
-    - [ ] #16 provider 인터페이스 정의
-    - [ ] #17 Google OAuth 구현
+    ## Sub-tasks
+    - [ ] #16
+    - [ ] #17
 
-    <!-- imbas:meta
-    type: task
-    parent: #10
-    blocks: #11, #12
-    -->
+    ## Links
+    - blocks: #11, #12
 ```
 
 ---
@@ -147,39 +121,29 @@ Issue #15 [type:task, status:todo, imbas]
 
 ### 3.1 Label Categories
 
-| Category | Labels | Purpose |
-|----------|--------|---------|
-| **Type** | `type:epic`, `type:story`, `type:task`, `type:subtask`, `type:bug` | Issue type classification |
-| **Status** | `status:todo`, `status:ready-for-dev`, `status:in-progress`, `status:in-review`, `status:done` | Workflow state |
-| **imbas** | `imbas` | Identifies imbas-managed issues |
+| Category      | Labels                                                                                         | Purpose                                        |
+| ------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Type**      | `type:epic`, `type:story`, `type:task`, `type:subtask`, `type:bug`                             | Issue type classification                      |
+| **Status**    | `status:todo`, `status:ready-for-dev`, `status:in-progress`, `status:in-review`, `status:done` | Workflow state                                 |
+| **Managed**   | `config.labels.managed` (기본 `imbas-managed`)                                                 | Identifies imbas-managed issues                |
+| **Lifecycle** | `config.labels.*` (review-pending, review-complete, dev_waiting 등)                            | Phase 경계 라이프사이클 마킹 (manifest Step 6) |
 
 ### 3.2 Label Colors
 
-| Label | Color | Hex |
-|-------|-------|-----|
-| `type:epic` | Green | `#0E8A16` |
-| `type:story` | Blue | `#1D76DB` |
-| `type:task` | Yellow | `#FBCA04` |
-| `type:subtask` | Light Blue | `#C5DEF5` |
-| `type:bug` | Red | `#D73A4A` |
-| `status:todo` | Light Gray | `#EDEDED` |
-| `status:ready-for-dev` | Light Blue | `#BFD4F2` |
-| `status:in-progress` | Blue | `#0075CA` |
-| `status:in-review` | Light Red | `#E99695` |
-| `status:done` | Green | `#0E8A16` |
-| `imbas` | Purple | `#5319E7` |
+단순화된 카테고리 색상을 사용한다 (라벨별 개별 색상은 미채택):
+
+| Category                      | Hex      |
+| ----------------------------- | -------- |
+| `type:*`                      | `0075ca` |
+| `status:*`                    | `e4e669` |
+| lifecycle (`config.labels.*`) | `c5def5` |
 
 ### 3.3 Label Auto-Creation
 
-`imbas:setup init` (GitHub provider) creates all labels if missing:
+두 지점에서 멱등 생성한다 (`gh label list` 로 존재 확인 후 누락분만 `gh label create`):
 
-```bash
-gh label create "type:epic" --color "0E8A16" --description "imbas Epic" --force
-gh label create "type:story" --color "1D76DB" --description "imbas Story" --force
-# ... (all labels)
-```
-
-`--force` flag updates existing labels without error.
+1. `imbas:setup init` Step 3.6 / `setup labels provision` — 라이프사이클 라벨 provisioning
+2. `imbas:manifest` Step 0 (Label Bootstrap) — `gh issue create` 전에 type/status/managed/lifecycle 전체 검증·생성. 403 시 fail-fast (`gh auth refresh -s repo` 안내).
 
 ### 3.4 GitHub Config
 
@@ -189,7 +153,7 @@ GitHub provider settings live under `config.github`:
 {
   "github": {
     "repo": "owner/repo",
-    "defaultLabels": ["imbas"],
+    "defaultLabels": [],
     "linkTypes": ["blocks", "blocked-by", "split-from", "split-into", "relates"]
   }
 }
@@ -204,54 +168,60 @@ defined by the provider spec and label bootstrap step.
 
 ---
 
-## 4. Body Meta Block
+## 4. Body Sections (`## Sub-tasks`, `## Links`)
 
-### 4.1 Format
+기계 판독 메타데이터는 HTML 주석 블록이 아니라 **고정 h2 바디 섹션**으로 저장한다.
+(초기 설계의 `<!-- imbas:meta -->` 블록은 미채택 — 파서 구현: `src/providers/github/parsers/parseLinks.ts`,
+프로토콜 정본: `skills/manifest/references/github/link-handling.md`.)
 
-Machine-readable metadata is embedded as an HTML comment block at the end of the issue body:
+### 4.1 `## Links` Grammar
 
 ```markdown
-<!-- imbas:meta
-type: story
-parent: #10
-blocks: #15, #16
-is_blocked_by: #20
-split_from: #8
-split_into: #21, #22
-relates_to: #30
--->
+## Links
+
+- blocks: #123
+- blocks: owner/repo#45
+- blocked-by: #7
+- split-from: #2
+- split-into: #8, #9
+- relates: #12, #14
 ```
 
-### 4.2 Fields
+파싱/쓰기 규칙:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `type` | string | Issue type (epic, story, task, subtask) |
-| `parent` | issue ref | Parent issue reference |
-| `blocks` | issue ref list | Issues this blocks |
-| `is_blocked_by` | issue ref list | Issues blocking this |
-| `split_from` | issue ref | Original issue before split |
-| `split_into` | issue ref list | Issues created by splitting this |
-| `relates_to` | issue ref list | Related issues (umbrella pattern) |
-| `milestone` | string | Milestone name (on epic tracking issues) |
+1. 헤더는 리터럴 `## Links` (h2). 섹션 부재 → `{}`.
+2. 각 행: `- <linkType>: <refList>`.
+3. `linkType` ∈ `{blocks, blocked-by, split-from, split-into, relates}` (`config.github.linkTypes` 기본값과 일치).
+4. `refList`: `#N` 또는 `owner/repo#N` 콤마 구분 목록.
+5. 중복 `linkType` 키는 병합(refs union), 미지의 linkType 은 경고(forward-compat).
 
-### 4.3 Parsing Rules
+### 4.2 Bidirectional Write
 
-1. Find `<!-- imbas:meta` ... `-->` block in body
-2. Parse as YAML-like key-value pairs
-3. Issue refs in body/meta blocks may use `#N` shorthand or `owner/repo#N`,
-   comma-separated for lists
-4. Missing fields = not applicable (no default values)
+A가 X 타입으로 B를 가리키면 B에는 역방향 타입을 기록한다:
+
+| Source (A → B) | Reverse (B → A) |
+| -------------- | --------------- |
+| `blocks`       | `blocked-by`    |
+| `blocked-by`   | `blocks`        |
+| `split-from`   | `split-into`    |
+| `split-into`   | `split-from`    |
+| `relates`      | `relates`       |
+
+한쪽 PATCH 실패 시 다른 쪽을 롤백하지 않고 실패를 보고한다.
+
+### 4.3 `## Sub-tasks` Task List
+
+부모 이슈 본문의 `## Sub-tasks` 섹션에 `- [ ] #N` 체크박스로 자식을 등록한다.
+자식 생성 후 부모 본문을 read-then-write 로 PATCH (`gh api repos/<o/r>/issues/<N> --method PATCH -f body=...`).
+동일 엔트리 존재 시 append 스킵 (멱등).
 
 ### 4.4 Body Update Protocol
 
-When adding/modifying meta block:
 1. Read current body: `gh issue view <num> --json body -q .body`
-2. If `<!-- imbas:meta` exists: replace entire block
-3. If not exists: append `\n\n---\n` + meta block
-4. Update: `gh issue edit <num> --body "<updated>"`
+2. 해당 섹션(`## Links` / `## Sub-tasks`) 부재 시 append, 존재 시 항목 추가
+3. Update via `gh api` PATCH
 
-**Important**: Preserve all user content above the meta block. Only modify the `<!-- imbas:meta -->` section.
+**Important**: 섹션 외 사용자 콘텐츠는 보존한다. read-then-write 로 동시 편집 클로버링을 방지한다.
 
 ---
 
@@ -265,31 +235,28 @@ gh issue create \
   --repo "owner/repo" \
   --title "소셜 로그인으로 신규 가입" \
   --body "$(cat <<'BODY'
-## User Story
+## Description
 
 As a new user,
 I want to sign up via social accounts,
 so that I can skip manual registration.
 
-## Acceptance Criteria
-
 Given a user on the login page
 When they click "Sign up with Google"
 Then an account is created with their Google profile
 
-<!-- imbas:meta
-type: story
-parent: #10
--->
+## Sub-tasks
+
+## Links
 BODY
 )" \
   --label "type:story" \
   --label "status:todo" \
-  --label "imbas" \
-  --milestone "소셜 로그인"
+  --label "imbas-managed"
 ```
 
 **Output parsing**: `gh issue create` returns the issue URL. Extract number:
+
 ```bash
 # Returns: https://github.com/owner/repo/issues/42
 # Store as: owner/repo#42
@@ -299,13 +266,12 @@ BODY
 
 ```bash
 # Get issue details as JSON
-gh issue view 42 --repo "owner/repo" --json number,title,body,labels,state,milestone,comments
+gh issue view 42 --repo "owner/repo" --json number,title,body,labels,state,comments
 
 # Search issues by label
 gh issue list --repo "owner/repo" \
   --label "type:story" \
-  --label "imbas" \
-  --milestone "소셜 로그인" \
+  --label "imbas-managed" \
   --json number,title,labels,state \
   --limit 100
 
@@ -343,12 +309,14 @@ gh issue close 8 --repo "owner/repo" --reason completed
 # Read current body
 BODY=$(gh issue view 42 --repo "owner/repo" --json body -q .body)
 
-# Append/update meta block (handled by skill logic)
+# Append `- <linkType>: <ref>` under ## Links (skill logic; §4.1 grammar)
 UPDATED_BODY="..."
 
 # Update
-gh issue edit 42 --repo "owner/repo" --body "$UPDATED_BODY"
+gh api repos/owner/repo/issues/42 --method PATCH -f body="$UPDATED_BODY"
 ```
+
+역방향 엔트리를 target 이슈에도 기록한다 (§4.2).
 
 ### 5.5 Task List Management (Parent Body Update)
 
@@ -377,34 +345,14 @@ COMMENT
 )"
 ```
 
-### 5.7 Milestone Management
+### 5.7 Label Operations
 
 ```bash
-# Create milestone
-gh api repos/{owner}/{repo}/milestones \
-  -f title="소셜 로그인" \
-  -f description="Epic: 소셜 로그인 기능 구현" \
-  -f state="open"
+# List labels (existence check)
+gh label list --repo "owner/repo" --json name
 
-# List milestones
-gh api repos/{owner}/{repo}/milestones --jq '.[].title'
-
-# Close milestone (when Epic is done)
-MILESTONE_NUM=$(gh api repos/{owner}/{repo}/milestones --jq '.[] | select(.title=="소셜 로그인") | .number')
-gh api repos/{owner}/{repo}/milestones/$MILESTONE_NUM -X PATCH -f state="closed"
-```
-
-### 5.8 Label Operations
-
-```bash
-# Create label (idempotent with --force)
-gh label create "type:story" --repo "owner/repo" --color "1D76DB" --description "imbas Story" --force
-
-# List labels
-gh label list --repo "owner/repo" --json name,color,description
-
-# Check if label exists
-gh label list --repo "owner/repo" --json name -q '.[].name' | grep -q "type:story"
+# Create only missing labels (idempotent bootstrap; §3.3)
+gh label create "type:story" --repo "owner/repo" --color "0075ca"
 ```
 
 ---
@@ -423,15 +371,15 @@ Step 2 — Repository selection
   - Bash: gh repo view owner/repo --json name,owner
   - Validate repo exists and has Issues enabled
 
-Step 3 — Label creation
-  - Create all type: and status: labels (§3.3)
-  - Create imbas tracking label
-  - --force ensures idempotent
+Step 3 — Label configuration & provisioning
+  - config.labels 기본값 확인/커스터마이즈 (managed, review-pending 등)
+  - 사용자 동의 시 라이프사이클 라벨 provisioning (§3.3; 존재 확인 후 누락분만 생성)
+  - type:/status: 라벨은 manifest Step 0 (Label Bootstrap)에서도 재검증
 
 Step 4 — config.json creation
   - provider: "github"
-  - github.repo: "owner/repo"
-  - github.labels: default mapping
+  - github: { repo: "owner/repo", defaultLabels: [], linkTypes: [...] }
+  - labels: { managed: "imbas-managed", ... } (top-level lifecycle labels)
   - defaults.project_ref: "owner/repo"
 
 Step 5 — Cache initialization
@@ -452,58 +400,56 @@ Step 7 — Result display
 ### 7.1 stories-manifest Execution (GitHub)
 
 ```
-Step 1 — Create Milestone (if Epic is new)
-  gh api repos/{owner}/{repo}/milestones -f title="..." -f description="..."
+Step 0 — Label Bootstrap
+  gh label list → 누락 라벨 생성 (type:/status:/managed/lifecycle; §3.3)
+  403 → fail-fast (blocked)
 
-Step 2 — Create Epic Tracking Issue
-  gh issue create --label type:epic --label status:todo --label imbas --milestone "..."
-  → issue_ref: owner/repo#10
+Phase 4a — Create Epic Tracking Issue (필요 시)
+  gh issue create --label type:epic --label status:todo --label <config.labels.managed>
+  → epic_ref: owner/repo#10 → save manifest
 
-Step 3 — Create Stories (sequential, with immediate state save)
+Phase 4b — Create Stories (sequential, with immediate state save)
   for each story where status == "pending":
-    gh issue create --label type:story --label status:todo --label imbas --milestone "..."
-    → story.issue_ref = "owner/repo#11"
-    → story.status = "created"
+    gh issue create --label type:story --label status:todo --label <config.labels.managed>
+    → story.issue_ref = "owner/repo#11", story.status = "created"
+    → Epic 존재 시 Epic 본문 ## Sub-tasks 에 `- [ ] #11` append (PATCH)
     → save manifest
 
-Step 4 — Update Epic task list
-  Read Epic body → append story refs to task list → gh issue edit
+Phase 4c — Process links
+  for each link where status == "pending", for each target in link.to:
+    source ## Links 에 `- <linkType>: <ref>` append + target 에 역방향 기록 (§4)
+    link.status = created/partial/failed → save manifest
 
-Step 5 — Process links
-  for each link where status == "pending":
-    Read target body → add/update meta block → gh issue edit
-    link.status = "created"
-    save manifest
-
-Step 6 — Horizontal split: close original
-  gh issue edit <ref> --remove-label status:todo --add-label status:done
-  gh issue close <ref> --reason completed
+Phase 4d — Source issue transitions
+  for each transition in manifest.transitions where status == "pending":
+    gh issue view <N> --json state (이미 closed → skipped)
+    gh issue close <N> --reason completed
+    → transition.status 갱신 → save manifest
 ```
 
 ### 7.2 devplan-manifest Execution (GitHub)
 
+execution_order 순서를 따른다:
+
 ```
-Step 1 — Create Tasks
-  gh issue create --label type:task --label status:todo --label imbas --milestone "..."
+Step 1 — create_tasks
+  gh issue create --label type:task --label status:todo --label <config.labels.managed>
 
-Step 2 — Create Task Subtasks
-  gh issue create --label type:subtask --label status:todo --label imbas
-  → Update Task body task list
+Step 2 — create_task_subtasks
+  gh issue create --label type:subtask ... → Task 본문 ## Sub-tasks append
 
-Step 3 — Create blocking links
-  For each Task → blocked Stories:
-    Update Story meta block: add is_blocked_by
-    Update Task meta block: add blocks
+Step 3 — create_links (task.blocks)
+  Task ## Links: `- blocks: <story_ref>` / Story ## Links: `- blocked-by: <task_ref>`
 
-Step 4 — Create Story Subtasks
-  gh issue create --label type:subtask --label status:todo --label imbas
-  → Update Story body task list
+Step 4 — create_story_subtasks
+  gh issue create --label type:subtask ... → Story 본문 ## Sub-tasks append
 
-Step 5 — Post B→A feedback comments
-  gh issue comment <story-ref> --body "..."
-
-Step 6 — Update Epic tracking issue task list (add Tasks)
+Step 5 — add_feedback_comments
+  gh issue comment <story-ref> --body-file -
 ```
+
+이후 라이프사이클 라벨 전환(manifest Step 6) + digest 제안(Step 4.5)은
+provider-agnostic 스켈레톤을 따른다.
 
 ### 7.3 Idempotency
 
@@ -523,18 +469,22 @@ gh issue view 42 --repo "owner/repo" --json number,title,body,labels,state,miles
 
 **digest marker detection**: Same HTML comment format as Jira. `<!-- imbas:digest v1 ... -->` in comment body.
 
+**digest 편집 모델**: GitHub 전용 last-wins — `/imbas:digest --update` 시
+`gh issue comment --edit-last` 로 최근 digest 코멘트를 덮어쓴다 (jira/local 은
+keep-old-post-new). `imbas:read-issue` 는 최신 마커 코멘트를 우선한다.
+
 ---
 
 ## 9. Limitations vs Jira
 
-| Feature | Jira | GitHub | Impact |
-|---------|------|--------|--------|
-| Native issue hierarchy | Epic → Story → Subtask | Flat (labels + task lists) | Task lists provide visual hierarchy but no enforced structure |
-| Workflow engine | Transition rules, guards | None (any label swap allowed) | More flexible but less guardrails |
-| Custom fields | Extensive | None (body + labels only) | Complex metadata goes in body meta block |
-| Link types | Native typed links | Convention-based (meta block) | Parsing required, less discoverable |
-| Subtask progress | Native % complete | Task list checkbox (native) | GitHub task list progress is actually good |
-| Search | JQL (powerful) | Basic label/keyword filter | May need `gh api` with GitHub Search API for complex queries |
+| Feature                | Jira                     | GitHub                                   | Impact                                                          |
+| ---------------------- | ------------------------ | ---------------------------------------- | --------------------------------------------------------------- |
+| Native issue hierarchy | Epic → Story → Subtask   | Flat (labels + task lists)               | Task lists provide visual hierarchy but no enforced structure   |
+| Workflow engine        | Transition rules, guards | None (any label swap allowed)            | More flexible but less guardrails                               |
+| Custom fields          | Extensive                | None (body + labels only)                | Complex metadata goes in body sections (## Links, ## Sub-tasks) |
+| Link types             | Native typed links       | Convention-based (## Links body section) | Parsing required, less discoverable                             |
+| Subtask progress       | Native % complete        | Task list checkbox (native)              | GitHub task list progress is actually good                      |
+| Search                 | JQL (powerful)           | Basic label/keyword filter               | May need `gh api` with GitHub Search API for complex queries    |
 
 ---
 

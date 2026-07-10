@@ -12,7 +12,7 @@ This skill does not directly modify run state (state.json). It operates on manif
 The manifest itself tracks per-item state via status field:
 
 ```
-"pending"  → item not yet created in Jira
+"pending"  → item not yet created on the provider
 "created"  → item created, issue_ref populated
 "failed"   → creation attempted but failed (retryable)
 "skipped"  → intentionally skipped (e.g., umbrella Story)

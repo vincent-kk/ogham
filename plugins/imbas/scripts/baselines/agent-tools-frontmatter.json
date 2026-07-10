@@ -1,15 +1,15 @@
 {
-  "_note": "Baseline snapshot of agent `tools:` frontmatter arrays. Used by scripts/check-agent-tools-frontmatter.mjs to detect silent tool-grant expansion. Update this file only when intentionally changing agent permissions. MCP tool IDs use the short single-underscore form (`mcp_<server>_<tool>`) matching the monorepo convention across atlassian/maencof agents.",
-  "_captured_at": "2026-04-06",
-  "_captured_in": "Semantic Operations Layer migration (plan.md)",
+  "_note": "Baseline snapshot of agent `tools:` frontmatter arrays. Used by scripts/check-agent-tools-frontmatter.mjs to detect silent tool-grant expansion. Update this file only when intentionally changing agent permissions. MCP tool IDs use the full-form `mcp__plugin_<plugin>_<server>__<tool>` (server key `tools`) — short forms are not resolved for subagents.",
+  "_captured_at": "2026-07-10",
+  "_captured_in": "Repo-wide full-form MCP tool reference migration",
   "agents": {
     "engineer": [
       "Read",
       "Grep",
       "Glob",
       "Bash",
-      "mcp_tools_ast_search",
-      "mcp_tools_ast_analyze"
+      "mcp__plugin_imbas_tools__ast_search",
+      "mcp__plugin_imbas_tools__ast_analyze"
     ],
     "planner": ["Read", "Grep", "Glob"],
     "analyst": ["Read", "Grep", "Glob", "Bash"]

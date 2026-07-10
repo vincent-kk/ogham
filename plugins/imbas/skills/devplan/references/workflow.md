@@ -28,7 +28,7 @@ Step 1.5 — Codebase Resolution
        Usage: /imbas:devplan --run <run-id> --codebase /path/to/repo"
 
 Step 2 — engineer Agent Spawn
-  - Spawn agent: `engineer`
+  - Spawn agent via Task tool (subagent_type: "imbas:engineer")
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input provided to agent:
     - stories-manifest.json (Story descriptions with issue_refs)
@@ -133,8 +133,8 @@ Step 4 — User Review Flow
        - pending_review: false
        → Sets devplan.status = "completed", devplan.pending_review = false
     3. Emit terminal marker: "Devplan manifest generated: <N> Tasks, <M> Subtasks."
-    4. Display the provider-specific next-step command (see jira/workflow.md
-       or local/workflow.md Step 4).
+    4. Display the provider-specific next-step command (see jira/workflow.md,
+       github/workflow.md, or local/workflow.md Step 4).
 
   Option B — Request modifications:
     1. User specifies changes (add/remove/modify Tasks or Subtasks).

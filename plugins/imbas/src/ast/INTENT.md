@@ -6,9 +6,9 @@
 
 ## Structure
 
-- `astGrepShared.ts` — napi lazy-load + graceful degradation
-- `dependencyExtractor.ts` — import/export/call 추출
-- `cyclomaticComplexity.ts` — 순환 복잡도 계산
+- `astGrepShared/` — napi lazy-load + graceful degradation (`astGrepShared/astGrepShared.ts`)
+- `dependencyExtractor/` — import/export/call 추출
+- `cyclomaticComplexity/` — 순환 복잡도 계산
 
 ## Boundaries
 

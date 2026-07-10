@@ -29,5 +29,5 @@ export async function handleAstAnalyze(input: AstAnalyzeInput) {
     calculateComplexity(input.source, filePath),
   ]);
 
-  return { dependencies: deps, complexity };
+  return { dependencies: deps, cyclomaticComplexity: complexity };
 }

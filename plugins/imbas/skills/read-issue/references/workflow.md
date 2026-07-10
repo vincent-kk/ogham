@@ -7,15 +7,17 @@ provider-specific workflow file (`jira/workflow.md`, `github/workflow.md`, or
 ## Step 0 — Provider routing
 
 Read `config.provider` via `mcp__plugin_imbas_tools__config_get`. Load ONLY the matching workflow:
-- `jira`   → `jira/workflow.md`
+
+- `jira` → `jira/workflow.md`
 - `github` → `github/workflow.md`
-- `local`  → `local/workflow.md`
+- `local` → `local/workflow.md`
 
 Do NOT read other provider files. See `SKILL.md` Constraints block.
 
 ## Steps 1-4 — Provider-specific
 
 The loaded provider workflow handles:
+
 1. Issue query / file lookup.
 2. Digest fast-path detection or digest section parsing.
 3. Conversation reconstruction (full in Jira, degraded in local).
@@ -29,13 +31,18 @@ the structured output identically.
 Build and return the complete JSON result per `output-schema.md`.
 
 Provider-specific notes:
+
 - Jira: all fields populated; `participants`, `decisions`, `open_questions`
   fully analyzed from the comment thread.
+- GitHub: all fields populated from `gh issue view --json` output; comment
+  thread analyzed the same way as Jira.
 - Local: `participants: []`; `decisions` / `open_questions` are scanned from
   description + digest bodies only; `comment_count` = digest entry count.
 
 The `key` field holds the provider's native identifier:
+
 - Jira: issue key (e.g., `PROJ-123`)
+- GitHub: fully qualified reference (e.g., `owner/repo#42`)
 - Local: prefix-by-type ID (e.g., `S-1`, `T-3`, `ST-42`)
 
 No caching. Issue content is re-read on every call.

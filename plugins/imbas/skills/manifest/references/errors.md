@@ -1,6 +1,6 @@
 # Error Handling — Provider-agnostic
 
-Provider-specific errors are in `jira/errors.md` and `local/errors.md`. This
+Provider-specific errors are in `jira/errors.md`, `github/errors.md`, and `local/errors.md`. This
 file lists errors that apply regardless of backend.
 
 | Error | Action |

@@ -42,6 +42,7 @@ export type SubtaskLimits = z.infer<typeof SubtaskLimitsSchema>;
 
 export const DefaultsConfigSchema = z.object({
   project_ref: z.string().nullable().default(null),
+  codebase: z.string().nullable().default(null),
   llm_model: LlmModelConfigSchema.default({}),
   subtask_limits: SubtaskLimitsSchema.default({}),
 });
@@ -76,6 +77,7 @@ export const JiraPhaseToWorkflowSchema = z.object({
 export type JiraPhaseToWorkflow = z.infer<typeof JiraPhaseToWorkflowSchema>;
 
 export const JiraConfigSchema = z.object({
+  base_url: z.string().nullable().default(null),
   issue_types: JiraIssueTypesSchema.default({}),
   workflow_states: JiraWorkflowStatesSchema.default({}),
   link_types: JiraLinkTypesSchema.default({}),

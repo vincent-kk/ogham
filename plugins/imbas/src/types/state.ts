@@ -124,11 +124,13 @@ export const EscapePhaseActionSchema = z.object({
   escape_code: EscapeCodeSchema,
 });
 
+export const SkippablePhaseSchema = z.enum(['validate', 'split']);
+
 export const SkipPhasesActionSchema = z.object({
   project_ref: z.string(),
   run_id: z.string(),
   action: z.literal('skip_phases'),
-  phases: z.array(PhaseNameSchema),
+  phases: z.array(SkippablePhaseSchema).min(1),
 });
 
 export const RunTransitionSchema = z.discriminatedUnion('action', [

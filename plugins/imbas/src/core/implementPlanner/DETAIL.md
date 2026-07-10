@@ -7,7 +7,7 @@
 - 노드: Story(from stories), Task(from devplan.tasks) — Subtask 제외
 - edges:
   - StoryLink.type='blocks': from → each in to
-  - StoryLink.type='is-blocked-by': each in to → from
+  - 역방향 어휘(정규화 후 'is blocked by' 또는 'blocked by' — jira/local "is blocked by", github "blocked-by" 모두 수용): each in to → from
   - TaskItem.blocks[]: task.id → each blocked ID (Story 또는 Task)
 - Level 계산: Kahn topological sort
 - Group chunking: 동일 level이 max_parallel 초과 시 결정적 순서로 chunk
@@ -38,4 +38,4 @@ interface ImplementPlanResult {
 
 ## Last Updated
 
-- 2026-04-18: 초기 도입
+2026-07-10

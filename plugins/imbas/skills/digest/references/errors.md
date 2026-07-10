@@ -1,6 +1,6 @@
 # digest — Error Handling
 
-Provider-specific errors are in `jira/errors.md` and `local/errors.md`.
+Provider-specific errors are in `jira/errors.md`, `github/errors.md`, and `local/errors.md`.
 
 | Error | Action |
 |-------|--------|

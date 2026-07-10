@@ -8,6 +8,22 @@ complexity: moderate
 plugin: imbas
 ---
 
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after MCP tool calls, `/imbas:read-issue` returns, `[OP:]`
+> operations, or `gh`/`git` command results.
+>
+> **Valid reasons to yield**:
+>
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `PR created: <url>` or `scaffold-pr BLOCKED: <reason>`
+>
+> **HIGH-RISK YIELD POINTS**:
+>
+> - After `/imbas:read-issue` returns — immediately continue to sub-task fetching
+> - After provider sub-task fetch — immediately chain branch creation
+> - After branch + empty commit — immediately chain PR creation in the same turn
+
 # scaffold-pr — Issue-based Draft PR Scaffolding
 
 Create a Draft PR from an issue with its sub-tasks rendered as a checklist
@@ -56,4 +72,4 @@ in the PR body. No code changes — empty commit only.
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
 - Provider-specific operations (`[OP:]` notation for Jira, `gh` CLI for GitHub) MUST only be invoked from within the matching `references/<provider>/` workflow.
 - This skill MUST NOT modify any source files. Only git branch, empty commit, and PR creation are allowed.
-- `local` provider is not supported — PR creation requires a remote git host.
+- `local` provider is not supported — PR creation requires a GitHub-hosted remote (`gh` CLI). Note: provider=jira also uses `gh` for the PR itself (Jira issue + GitHub code).

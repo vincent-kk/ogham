@@ -25,7 +25,7 @@ Before any `gh issue create` call, verify the required labels exist.
    - Emit: `"gh label create failed: insufficient scopes. Run 'gh auth refresh -s repo' and retry."`
    - Call `mcp__plugin_imbas_tools__run_transition` → `blocked` state.
    - STOP. Do NOT proceed to `gh issue create`.
-   See `label-bootstrap.md` for full protocol and `errors.md` for error taxonomy.
+     See `label-bootstrap.md` for full protocol and `errors.md` for error taxonomy.
 
 ## Step 2.5 — Drift Check (GitHub branch)
 
@@ -52,13 +52,14 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
 CRITICAL: after EACH item creation, immediately save the manifest with the
 updated `status` / `issue_ref` via `mcp__plugin_imbas_tools__manifest_save`. Crash-recovery invariant.
 
-`issue_ref` format is always `owner/repo#<number>` (§1.3).
+`issue_ref` format is always `owner/repo#<number>` (SPEC-provider-github.md §2.4).
 
 ### Stories type
 
 #### Phase 4a — Epic Creation (if needed)
 
 If manifest has `epic_ref == null` and an Epic entry exists:
+
 1. ```bash
    gh issue create --repo <owner/repo> \
      --title "[Epic] <title>" \
@@ -72,6 +73,7 @@ If manifest has `epic_ref == null` and an Epic entry exists:
 #### Phase 4b — Story Creation
 
 For each story in `manifest.stories` where `status == "pending"`:
+
 1. ```bash
    gh issue create --repo <owner/repo> \
      --title "[Story] <title>" \
@@ -87,6 +89,7 @@ For each story in `manifest.stories` where `status == "pending"`:
 #### Phase 4c — Link Creation
 
 For each link in `manifest.links` where `status == "pending"`:
+
 - Resolve `from` ID to `issue_ref`.
 - For EACH target in `link.to`:
   1. Resolve target ID to `issue_ref`.
@@ -99,20 +102,24 @@ For each link in `manifest.links` where `status == "pending"`:
 See `link-handling.md` for the full `## Links` grammar and bidirectional write protocol.
 
 #### Phase 4d — Source Issue Transitions
+
 For each transition in `manifest.transitions` where `status == "pending"`:
-  1. Resolve `issue_ref`:
-     - If it matches a manifest Story ID → lookup `issue_ref` from stories array.
-     - If it is already an external ref (e.g., source_issue_ref) → use directly.
-  2. Parse `owner/repo#N` from resolved ref.
-  3. ```bash
-     gh issue view <N> --repo <owner/repo> --json state
-     ```
-     - If `state == "closed"` → set transition `status = "skipped"`, save manifest immediately. Continue to next.
-  4. ```bash
-     gh issue close <N> --repo <owner/repo> --reason completed
-     ```
-     - On failure → set transition `status = "failed"`, log warning: "Cannot close <ref>: <error>. Manual action may be required." Save manifest immediately. Continue to next (do NOT block pipeline).
-  5. Set transition `status = "created"`. Save manifest immediately.
+
+1. Resolve `issue_ref`:
+   - If it matches a manifest Story ID → lookup `issue_ref` from stories array.
+   - If it is already an external ref (e.g., source_issue_ref) → use directly.
+2. Parse `owner/repo#N` from resolved ref.
+3. ```bash
+   gh issue view <N> --repo <owner/repo> --json state
+   ```
+
+   - If `state == "closed"` → set transition `status = "skipped"`, save manifest immediately. Continue to next.
+4. ```bash
+   gh issue close <N> --repo <owner/repo> --reason completed
+   ```
+
+   - On failure → set transition `status = "failed"`, log warning: "Cannot close <ref>: <error>. Manual action may be required." Save manifest immediately. Continue to next (do NOT block pipeline).
+5. Set transition `status = "created"`. Save manifest immediately.
 
 ### Devplan type
 
@@ -121,6 +128,7 @@ Follow `execution_order` from manifest (dependency-ordered).
 #### Step 1 — create_tasks
 
 For each task in `manifest.tasks` where `status == "pending"`:
+
 1. ```bash
    gh issue create --repo <owner/repo> \
      --title "[Task] <title>" \
@@ -134,6 +142,7 @@ For each task in `manifest.tasks` where `status == "pending"`:
 #### Step 2 — create_task_subtasks
 
 For each task, for each subtask where `status == "pending"`:
+
 1. ```bash
    gh issue create --repo <owner/repo> \
      --title "[Subtask] <title>" \
@@ -148,6 +157,7 @@ For each task, for each subtask where `status == "pending"`:
 #### Step 3 — create_links (task.blocks relations)
 
 For each task, for each `blocked_story_id` in `task.blocks`:
+
 1. Resolve story `issue_ref` from `stories-manifest.json`.
 2. PATCH task body `## Links`: append `- blocks: <story_ref>`.
 3. PATCH story body `## Links`: append `- blocked-by: <task_ref>`.
@@ -156,6 +166,7 @@ For each task, for each `blocked_story_id` in `task.blocks`:
 #### Step 4 — create_story_subtasks
 
 For each entry in `manifest.story_subtasks`, for each subtask where `status == "pending"`:
+
 1. `gh issue create` with `type:subtask` + `<config.labels.managed>` labels, parent ref in body.
 2. PATCH parent story body `## Sub-tasks`: append `- [ ] <subtask_ref>`.
 3. Update subtask: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
@@ -164,6 +175,7 @@ For each entry in `manifest.story_subtasks`, for each subtask where `status == "
 #### Step 5 — add_feedback_comments
 
 For each comment in `manifest.feedback_comments` where `status == "pending"`:
+
 1. Parse `owner/repo#N` from `target_ref`.
 2. ```bash
    echo "<comment body>" | gh issue comment <N> --repo <owner/repo> --body-file -
@@ -174,11 +186,7 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
 IDEMPOTENCY: check `status` and `issue_ref` before creating. If `issue_ref`
 already exists → run drift check and skip if confirmed present.
 
-## Drift check snippet (migrated from jira prototype)
-
-Historical provenance: the following 3-line drift check was preserved in
-`references/jira/workflow.md:101-105` during the v1.1 local-provider
-cycle and migrated here in v1.2:
+## Drift check snippet
 
 ```bash
 gh issue view <number> --repo <owner/repo> --json state,labels

@@ -1,43 +1,44 @@
 # implement-plan
 
-Generate a DAG-based implementation schedule that groups Stories and cross-story
-Tasks into parallel batches with explicit ordering, e.g. `[S1,S2,S5] -> [T1,S3] -> [S4,S6,S7]`.
+Story와 cross-story Task를 병렬 배치로 묶어 명시적 실행 순서를 산출하는
+DAG 기반 구현 일정 생성 스킬. 예: `[S1,S2,S5] -> [T1,S3] -> [S4,S6,S7]`
 
-## What it does
+## 개요
 
-1. Loads `stories-manifest.json` (and optionally `devplan-manifest.json`).
-2. Builds a dependency DAG from:
-   - `StoryLink` with type `blocks` / `is-blocked-by`
-   - `TaskItem.blocks` (cross-story Tasks pointing at Stories/Tasks)
-3. Assigns topological levels via Kahn's algorithm; breaks cycles deterministically.
-4. Chunks each level into groups (optionally capped by `--max-parallel`).
-5. Saves:
+1. `stories-manifest.json`을 로드한다 (선택적으로 `devplan-manifest.json` 병합).
+2. 의존성 DAG를 구성한다:
+   - `StoryLink` — `blocks` 및 역방향 어휘(`is blocked by` / `blocked-by`)
+   - `TaskItem.blocks` — cross-story Task가 가리키는 Story/Task
+3. Kahn 알고리즘으로 topological level을 부여하고, 순환은 결정적으로 해소한다.
+4. 각 level을 그룹으로 분할한다 (`--max-parallel`로 상한 지정 가능).
+5. 저장:
    - `.imbas/<KEY>/runs/<run-id>/implement-plan.json`
    - `.imbas/<KEY>/runs/<run-id>/implement-plan-report.md`
 
-## Typical usage
+## 사용 예
 
 ```bash
-# Standard usage after Phase 3.5
+# Phase 3.5 이후 표준 사용
 /imbas:implement-plan
 
-# Target a specific run with parallelism cap
-/imbas:implement-plan --run 2026-04-18T12-00-00 --max-parallel 3
+# 특정 런 대상 + 병렬 상한 지정
+/imbas:implement-plan --run 20260418-001 --max-parallel 3
 
-# Degraded stories-only mode (before devplan)
+# devplan 이전의 stories 전용 모드 (정밀도 저하)
 /imbas:implement-plan --source stories
 ```
 
-## Precision by source
+## 소스별 정밀도
 
-| Source | Available signals | Accuracy |
-|---|---|---|
-| `stories` | StoryLink blocks/is-blocked-by | Low — degraded |
-| `devplan` | StoryLink + Task.blocks + cross-story Task extraction | High |
+| Source    | 사용 신호                                       | 정밀도          |
+| --------- | ----------------------------------------------- | --------------- |
+| `stories` | StoryLink blocks / 역방향 어휘                  | 낮음 — degraded |
+| `devplan` | StoryLink + Task.blocks + cross-story Task 추출 | 높음            |
 
-The default is `devplan`.
+기본값은 `devplan`.
 
-## Limitations
+## 제한 사항
 
-- Subtasks are not scheduled (they belong to parent Stories).
-- Tickets without `issue_ref` are still scheduled; re-run after issue creation to get full references in the report.
+- Subtask는 스케줄링하지 않는다 (상위 Story에 귀속).
+- `issue_ref`가 없는 티켓도 스케줄에 포함된다; 이슈 생성 후 재실행하면
+  리포트에 전체 참조가 채워진다.

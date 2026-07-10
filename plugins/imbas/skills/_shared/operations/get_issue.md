@@ -2,6 +2,16 @@
 
 Fetch a single issue by key, including metadata, description, status, assignee, and comments.
 
+## Provider Resolution
+
+The sections below document the Jira semantics. When a skill invokes this
+operation without a provider-specific workflow file (e.g., `split`), resolve
+by `config.provider`:
+
+- `jira` — Jira MCP tool or REST endpoint below
+- `github` — `gh issue view <number> --repo <owner/repo> --json number,title,body,state,labels,assignees,comments`
+- `local` — read `.imbas/<KEY>/issues/<type-dir>/<ID>.md` (path derived from the ID prefix: S→stories, T→tasks, ST→subtasks); parse frontmatter + `## Description` / `## Digest`
+
 ## REST Endpoint
 
 ```
@@ -12,11 +22,11 @@ GET /rest/api/3/issue/{issueIdOrKey}
 
 ## Parameters
 
-| Name | Required | Description |
-|------|----------|-------------|
-| `issueIdOrKey` | yes | Issue key (e.g., `PROJ-123`) or numeric ID |
-| `fields` | no | Comma-separated field list to limit response size |
-| `expand` | no | `renderedFields`, `names`, `schema`, `transitions`, `changelog` |
+| Name           | Required | Description                                                     |
+| -------------- | -------- | --------------------------------------------------------------- |
+| `issueIdOrKey` | yes      | Issue key (e.g., `PROJ-123`) or numeric ID                      |
+| `fields`       | no       | Comma-separated field list to limit response size               |
+| `expand`       | no       | `renderedFields`, `names`, `schema`, `transitions`, `changelog` |
 
 ## Response Fields (key subset)
 

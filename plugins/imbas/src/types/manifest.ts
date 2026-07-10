@@ -79,6 +79,7 @@ export const SubtaskItemSchema = z.object({
   status: ManifestItemStatusSchema.default('pending'),
   issue_ref: z.string().nullable().default(null),
   labels: z.array(z.string()).default([]),
+  needs_review: z.boolean().optional(),
 });
 export type SubtaskItem = z.infer<typeof SubtaskItemSchema>;
 
@@ -92,6 +93,7 @@ export const TaskItemSchema = z.object({
   blocks: z.array(z.string()),
   subtasks: z.array(SubtaskItemSchema).default([]),
   labels: z.array(z.string()).default([]),
+  needs_review: z.boolean().optional(),
 });
 export type TaskItem = z.infer<typeof TaskItemSchema>;
 

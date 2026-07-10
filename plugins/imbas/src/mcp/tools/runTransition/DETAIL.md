@@ -5,9 +5,9 @@
 `run_transition` 도구는 run state의 phase 전이를 수행한다. 4가지 action을 지원한다.
 
 - `start_phase`: 필수 필드 `phase` ("validate" | "split" | "devplan").
-- `complete_phase`: 필수 필드 `phase`, `result` ("PASS" | "PASS_WITH_WARNINGS" | "BLOCKED"). 선택: `blocking_issues`, `warning_issues`, `pending_review`, `stories_created` (phase="split" 시).
+- `complete_phase`: 필수 필드 `phase`. `result` ("PASS" | "PASS_WITH_WARNINGS" | "BLOCKED")는 스키마상 optional — validate phase 완료 시에는 스킬 관례상 필수로 전달. 선택: `blocking_issues`, `warning_issues`, `pending_review`, `stories_created` (phase="split" 시). `result="BLOCKED"`면 `current_phase`를 전진시키지 않는다.
 - `escape_phase`: 필수 필드 `phase="split"`, `escape_code` ("E2-1" | "E2-2" | "E2-3" | "EC-1" | "EC-2").
-- `skip_phases`: 필수 필드 `phases` (phase 이름 배열).
+- `skip_phases`: 필수 필드 `phases` — "validate" | "split" 만 허용 (min 1; devplan은 skip 불가).
 
 ## API Contracts
 
@@ -15,4 +15,4 @@ MCP `inputSchema`는 flat leaf-primitive only `z.object`다 — 모든 비-core 
 
 ## Last Updated
 
-2026-04-05
+2026-07-10

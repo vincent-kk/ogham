@@ -2,7 +2,7 @@
 
 > **이름**: imbas (imbas forosnai — 예언적 통찰)
 > **소속**: ogham 하위 Claude Code 플러그인
-> **Status**: Blueprint v1.1 (2026-04-04) — Provider abstraction
+> **Status**: Blueprint v1.2 (2026-07-10) — Implementation sync (3 providers, 12 skills, 16 tools)
 > **설계 기반**: [design-v2.md](tirnanog:04_Action/npdp/imbas/design-v2.md), [imbas-spec-v1.md](tirnanog:04_Action/npdp/imbas/imbas-spec-v1.md)
 
 ---
@@ -28,25 +28,28 @@
 ```
 ogham (사전 가이드 시스템)
   └── imbas (이슈 분해 플러그인)
-       ├── Skills (10개: user 8 + internal 2)
+       ├── Skills (12개: user 10 + internal 2)
        │    ├── Core:  validate, split, devplan
+       │    ├── Orchestration: pipeline (end-to-end 자동 실행)
        │    ├── Infra: setup, status
        │    ├── Exec:  manifest, digest
+       │    ├── Post-planning: implement-plan (DAG 배치), scaffold-pr (Draft PR)
        │    └── Internal: `imbas:read-issue`, cache
        │
        ├── Agents (3개)
-       │    ├── imbas-analyst   — 문서 정합성 검증
-       │    ├── imbas-planner   — Story 분할 (기획 관점)
-       │    └── imbas-engineer  — Subtask/Task 생성 (개발 관점)
+       │    ├── analyst   — 문서 정합성 검증 (sonnet, maxTurns 50)
+       │    ├── planner   — Story 분할 (기획 관점; sonnet, maxTurns 60)
+       │    └── engineer  — Subtask/Task 생성 (개발 관점; opus, maxTurns 80)
        │
        ├── Provider Abstraction
-       │    ├── config.provider — "jira" | "github"
+       │    ├── config.provider — "jira" | "github" | "local"
        │    ├── Jira Provider   — Atlassian MCP 도구 경유
-       │    └── GitHub Provider — gh CLI (Bash) 경유
+       │    ├── GitHub Provider — gh CLI (Bash) 경유
+       │    └── Local Provider  — .imbas/<KEY>/issues/ 마크다운 파일
        │
        ├── State (.imbas/)
        │    ├── config.json     — 글로벌 설정 (provider 포함)
-       │    ├── <PROJECT>/imbas:cache — 이슈 트래커 메타데이터 캐시
+       │    ├── <PROJECT>/cache — 이슈 트래커 메타데이터 캐시
        │    ├── <PROJECT>/runs  — 실행 기록 + 매니페스트
        │    └── .temp/          — 미디어 임시 파일
        │
@@ -83,7 +86,7 @@ ogham (사전 가이드 시스템)
                        manifest│             │            │
                           ┌────▼─────┐       │            │
                           │ manifest │───────┘            │
-                          │ (exec)   │──── Jira API ──────┘
+                          │ (exec)   │─── provider API ───┘
                           └──────────┘
 ```
 
@@ -91,7 +94,7 @@ ogham (사전 가이드 시스템)
 
 ## 3. Design Decisions
 
-### 3.1 복수 에이전트 (4개)
+### 3.1 복수 에이전트 (3개)
 
 | 결정                        | 근거                                                                                                         |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -120,13 +123,14 @@ ogham (사전 가이드 시스템)
 
 ### 3.4 Issue Tracker Provider Abstraction
 
-| 결정                         | 근거                                                     |
-| ---------------------------- | -------------------------------------------------------- |
-| **Provider 추상화**          | Jira와 GitHub Issues 모두 지원. `config.provider`로 선택 |
-| **스킬 레벨 분기**           | 별도 MCP adapter 없이 스킬이 provider별 도구 직접 호출   |
-| **Jira**: Atlassian MCP 도구 | 필수 12개 + 선택 3개                                     |
-| **GitHub**: gh CLI via Bash  | `gh issue`, `gh api`, `gh label` 등                      |
-| **통일 매니페스트**          | `issue_ref` (Jira: `PROJ-123`, GitHub: `#42`)            |
+| 결정                         | 근거                                                                  |
+| ---------------------------- | --------------------------------------------------------------------- |
+| **Provider 추상화**          | Jira / GitHub Issues / local 마크다운 지원. `config.provider`로 선택  |
+| **스킬 레벨 분기**           | 별도 MCP adapter 없이 스킬이 provider별 도구 직접 호출                |
+| **Jira**: Atlassian MCP 도구 | 필수 12개 + 선택 3개                                                  |
+| **GitHub**: gh CLI via Bash  | `gh issue`, `gh api`, `gh label` 등                                   |
+| **Local**: 파일 시스템       | `.imbas/<KEY>/issues/{stories,tasks,subtasks}/` 마크다운              |
+| **통일 매니페스트**          | `issue_ref` (Jira: `PROJ-123`, GitHub: `owner/repo#42`, Local: `S-1`) |
 
 → 상세: [SPEC-provider.md](./specs/SPEC-provider.md), [SPEC-provider-jira.md](./specs/SPEC-provider-jira.md), [SPEC-provider-github.md](./specs/SPEC-provider-github.md)
 
@@ -158,40 +162,46 @@ ogham (사전 가이드 시스템)
 
 ## 4. Skill Map
 
-### User-invocable (사용자 노출, 8개)
+### User-invocable (사용자 노출, 10개)
 
-| #     | Skill                   | Type  | Slash Command               | Agent                        | 입력                | 출력                             |
-| ----- | ----------------------- | ----- | --------------------------- | ---------------------------- | ------------------- | -------------------------------- |
-| 1     | setup                   | Infra | `/imbas:setup`              | —                            | 사용자 입력         | config.json, cache/              |
-| 2     | validate                | Core  | `/imbas:validate`           | imbas-analyst                | 기획 문서           | validation-report.md             |
-| 3     | split                   | Core  | `/imbas:split`              | imbas-planner, imbas-analyst | 검증 통과 문서      | stories-manifest.json            |
-| 4     | devplan                 | Core  | `/imbas:devplan`            | imbas-engineer               | 승인된 Story + 코드 | devplan-manifest.json            |
-| 5     | manifest                | Exec  | `/imbas:manifest`           | —                            | \*-manifest.json    | Jira 이슈                        |
-| 6     | status                  | Infra | `/imbas:status`             | —                            | —                   | 상태 표시                        |
-| ~~7~~ | ~~`imbas:fetch-media`~~ | —     | `/atlassian:media-analysis` | —                            | —                   | _migrated to `@ogham/atlassian`_ |
-| 7     | digest                  | Exec  | `/imbas:digest`             | —                            | Jira 이슈 키        | Jira 코멘트 (압축 요약)          |
+| #      | Skill                   | Type          | Slash Command               | Agent                      | 입력                     | 출력                               |
+| ------ | ----------------------- | ------------- | --------------------------- | -------------------------- | ------------------------ | ---------------------------------- |
+| 1      | setup                   | Infra         | `/imbas:setup`              | —                          | 사용자 입력              | config.json, cache/, labels        |
+| 2      | pipeline                | Orchestration | `/imbas:pipeline`           | analyst, planner, engineer | 문서 또는 Story 키       | 전체 파이프라인 자동 실행          |
+| 3      | validate                | Core          | `/imbas:validate`           | analyst                    | 기획 문서                | validation-report.md               |
+| 4      | split                   | Core          | `/imbas:split`              | planner, analyst           | 검증 통과 문서           | stories-manifest.json              |
+| 5      | devplan                 | Core          | `/imbas:devplan`            | engineer                   | 승인된 Story + 코드      | devplan-manifest.json              |
+| 6      | manifest                | Exec          | `/imbas:manifest`           | —                          | \*-manifest.json         | provider 이슈 (Jira/GitHub/local)  |
+| 7      | implement-plan          | Post-planning | `/imbas:implement-plan`     | —                          | stories/devplan manifest | implement-plan.json + 리포트       |
+| 8      | scaffold-pr             | Post-planning | `/imbas:scaffold-pr`        | —                          | 이슈 참조                | Draft PR (체크리스트 포함)         |
+| 9      | status                  | Infra         | `/imbas:status`             | —                          | —                        | 상태 표시                          |
+| 10     | digest                  | Exec          | `/imbas:digest`             | —                          | 이슈 참조                | provider 코멘트/엔트리 (압축 요약) |
+| ~~11~~ | ~~`imbas:fetch-media`~~ | —             | `/atlassian:media-analysis` | —                          | —                        | _migrated to `@ogham/atlassian`_   |
 
 ### Internal (내부 전용, 2개)
 
-| #   | Skill              | 호출자                                   | 역할                              | 출력          |
-| --- | ------------------ | ---------------------------------------- | --------------------------------- | ------------- |
-| 9   | `imbas:read-issue` | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
-| 10  | cache              | setup, core skills                       | Jira 메타데이터 캐시 자동 갱신    | cache/\*.json |
+| #   | Skill              | 호출자                                        | 역할                               | 출력          |
+| --- | ------------------ | --------------------------------------------- | ---------------------------------- | ------------- |
+| 11  | `imbas:read-issue` | validate, split, devplan, digest, scaffold-pr | 이슈 본문+코멘트 대화 맥락 구조화  | 구조화된 JSON |
+| 12  | cache              | setup, core skills                            | provider 메타데이터 캐시 자동 갱신 | cache/\*.json |
 
 → 상세: [SPEC-skills.md](./specs/SPEC-skills.md)
 
-**총 10개 스킬** (user-invocable 8 + internal 2).
+**총 12개 스킬** (user-invocable 10 + internal 2).
 
 ---
 
 ## 5. Agent Map
 
-| #     | Agent           | Model  | 역할                                              | 호출자          |
-| ----- | --------------- | ------ | ------------------------------------------------- | --------------- |
-| 1     | imbas-analyst   | sonnet | 정합성 검증, 역추론                               | validate, split |
-| 2     | imbas-planner   | sonnet | Story 분할, INVEST 평가                           | split           |
-| 3     | imbas-engineer  | opus   | 코드 탐색, EARS Subtask, Task 추출                | devplan         |
-| ~~4~~ | ~~imbas-media~~ | —      | _migrated to `@ogham/atlassian` as `media` agent_ | —               |
+| #     | Agent           | Model  | maxTurns | 역할                                              | 호출자                    |
+| ----- | --------------- | ------ | -------- | ------------------------------------------------- | ------------------------- |
+| 1     | analyst         | sonnet | 50       | 정합성 검증, 역추론                               | validate, split, pipeline |
+| 2     | planner         | sonnet | 60       | Story 분할, INVEST 평가                           | split, pipeline           |
+| 3     | engineer        | opus   | 80       | 코드 탐색, EARS Subtask, Task 추출                | devplan, pipeline         |
+| ~~4~~ | ~~imbas-media~~ | —      | —        | _migrated to `@ogham/atlassian` as `media` agent_ | —                         |
+
+에이전트 이름은 접두사 없는 bare name — plugin 네임스페이스가 `imbas:` 접두사를 제공하며,
+스킬은 `subagent_type: "imbas:<agent>"` 형태로 spawn 한다.
 
 → 상세: [SPEC-agents.md](./specs/SPEC-agents.md)
 
@@ -203,13 +213,17 @@ ogham (사전 가이드 시스템)
 .imbas/
 ├── config.json
 ├── .gitignore
-├── <PROJECT-KEY>/
+├── <PROJECT-KEY>/            # GitHub ref "owner/repo" 는 "owner--repo" 디렉토리로 매핑
 │   ├── cache/
 │   │   ├── project-meta.json
 │   │   ├── issue-types.json
 │   │   ├── link-types.json
 │   │   ├── workflows.json
 │   │   └── cached_at.json
+│   ├── issues/               # local provider 전용
+│   │   ├── stories/          #   S-<N>.md
+│   │   ├── tasks/            #   T-<N>.md
+│   │   └── subtasks/         #   ST-<N>.md
 │   └── runs/
 │       └── <YYYYMMDD-NNN>/
 │           ├── state.json
@@ -217,7 +231,9 @@ ogham (사전 가이드 시스템)
 │           ├── supplements/
 │           ├── validation-report.md
 │           ├── stories-manifest.json
-│           └── devplan-manifest.json
+│           ├── devplan-manifest.json
+│           ├── implement-plan.json
+│           └── implement-plan-report.md
 └── .temp/
     └── <filename>/
         ├── frames/
@@ -244,13 +260,13 @@ Epic (Level 1)
       └── Subtask T1-2 (EARS)
 ```
 
-| 계층       | Jira                        | GitHub                                          |
-| ---------- | --------------------------- | ----------------------------------------------- |
-| Epic       | Epic 이슈 타입 (네이티브)   | Tracking Issue + `type:epic` label + Milestone  |
-| Story/Task | Story/Task 타입 (네이티브)  | Issue + `type:story`/`type:task` label          |
-| Subtask    | Sub-task 타입 (parent 필드) | Issue + `type:subtask` label + parent task list |
-| Link       | 네이티브 Issue Link         | Body meta block (`<!-- imbas:meta -->`)         |
-| 상태       | Workflow 전이               | Label swap (`status:*`) + open/closed           |
+| 계층       | Jira                        | GitHub                                          | Local                               |
+| ---------- | --------------------------- | ----------------------------------------------- | ----------------------------------- |
+| Epic       | Epic 이슈 타입 (네이티브)   | Tracking Issue + `type:epic` label              | (미지원 — Story 계층부터)           |
+| Story/Task | Story/Task 타입 (네이티브)  | Issue + `type:story`/`type:task` label          | `S-<N>.md` / `T-<N>.md` frontmatter |
+| Subtask    | Sub-task 타입 (parent 필드) | Issue + `type:subtask` label + parent task list | `ST-<N>.md` (frontmatter parent)    |
+| Link       | 네이티브 Issue Link         | `## Links` body section (양방향 기록)           | frontmatter links[] (양방향)        |
+| 상태       | Workflow 전이               | Label swap (`status:*`) + open/closed           | frontmatter status                  |
 
 ### 7.2 링크 타입
 
@@ -286,17 +302,14 @@ Epic (Level 1)
 
 ## Spec Documents
 
-| Doc                                                            | 내용                                                                    |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [SPEC-agents.md](./specs/SPEC-agents.md)                       | 에이전트 4개 정의, reference material, 도구, 호출 관계                  |
-| [SPEC-skills.md](./specs/SPEC-skills.md)                       | 스킬 10개 정의 (user 8 + internal 2), 인터페이스, 워크플로우, 호출 관계 |
-| [SPEC-tools.md](./specs/SPEC-tools.md)                         | imbas MCP tools 서버 15개 도구 정의, AST 분석, fallback 스킬            |
-| [SPEC-media.md](./specs/SPEC-media.md)                         | 미디어 다운로드, scene-sieve 통합, 서브에이전트 격리                    |
-| [SPEC-provider.md](./specs/SPEC-provider.md)                   | Provider 추상화 인터페이스, 통일 타입, 분기 패턴                        |
-| [SPEC-provider-jira.md](./specs/SPEC-provider-jira.md)         | Jira provider — Atlassian MCP 도구, 실행 패턴, 접근 제어                |
-| [SPEC-provider-github.md](./specs/SPEC-provider-github.md)     | GitHub provider — gh CLI 패턴, 라벨, 마일스톤, body meta block          |
-| ~~[SPEC-atlassian-tools.md](./specs/SPEC-atlassian-tools.md)~~ | ~~Deprecated — SPEC-provider-jira.md로 대체~~                           |
-
-## Implementation Plan
-
-→ [PLAN.md](./PLAN.md)
+| Doc                                                            | 내용                                                                     |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [SPEC-agents.md](./specs/SPEC-agents.md)                       | 에이전트 3개 정의, reference material, 도구, 호출 관계                   |
+| [SPEC-skills.md](./specs/SPEC-skills.md)                       | 스킬 12개 정의 (user 10 + internal 2), 인터페이스, 워크플로우, 호출 관계 |
+| [SPEC-tools.md](./specs/SPEC-tools.md)                         | imbas MCP tools 서버 16개 도구 정의, AST 분석, fallback 스킬             |
+| [SPEC-media.md](./specs/SPEC-media.md)                         | 미디어 다운로드, scene-sieve 통합, 서브에이전트 격리                     |
+| [SPEC-provider.md](./specs/SPEC-provider.md)                   | Provider 추상화 인터페이스, 통일 타입, 분기 패턴                         |
+| [SPEC-provider-jira.md](./specs/SPEC-provider-jira.md)         | Jira provider — Atlassian MCP 도구, 실행 패턴, 접근 제어                 |
+| [SPEC-provider-github.md](./specs/SPEC-provider-github.md)     | GitHub provider — gh CLI 패턴, 라벨, `## Links` body section             |
+| [SPEC-provider-local.md](./specs/SPEC-provider-local.md)       | Local provider — 마크다운 파일 저장, ID 규칙, 양방향 링크                |
+| ~~[SPEC-atlassian-tools.md](./specs/SPEC-atlassian-tools.md)~~ | ~~Deprecated — SPEC-provider-jira.md로 대체~~                            |

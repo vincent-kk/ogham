@@ -11,6 +11,11 @@
 └── cached_at.json        # Cache timestamp and TTL
 ```
 
+`<PROJECT-KEY>` is derived from `project_ref` by the MCP tools: Jira keys map
+as-is (`PROJ`), GitHub `owner/repo` refs map to `owner--repo` (slash → double
+dash). Skills never construct this path manually — always go through
+`mcp__plugin_imbas_tools__cache_get` / `cache_set`.
+
 ### project-meta.json
 
 ```json
@@ -53,8 +58,18 @@
 ```json
 {
   "types": [
-    { "id": "10000", "name": "Blocks", "inward": "is blocked by", "outward": "blocks" },
-    { "id": "10001", "name": "Cloners", "inward": "is cloned by", "outward": "clones" }
+    {
+      "id": "10000",
+      "name": "Blocks",
+      "inward": "is blocked by",
+      "outward": "blocks"
+    },
+    {
+      "id": "10001",
+      "name": "Cloners",
+      "inward": "is cloned by",
+      "outward": "clones"
+    }
   ]
 }
 ```

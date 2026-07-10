@@ -275,7 +275,7 @@ export function createServer(): McpServer {
   server.registerTool(
     McpToolName.CACHE_GET,
     {
-      description: 'Read Jira metadata cache',
+      description: 'Read issue tracker metadata cache',
       inputSchema: z.object({
         project_ref: z.string().optional(),
         cache_type: CacheTypeSchema.optional(),
@@ -292,7 +292,7 @@ export function createServer(): McpServer {
   server.registerTool(
     McpToolName.CACHE_SET,
     {
-      description: 'Write Jira metadata cache',
+      description: 'Write issue tracker metadata cache',
       inputSchema: z.object({
         project_ref: z.string(),
         cache_type: CacheTypeSchema,

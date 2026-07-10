@@ -14,11 +14,8 @@
 import { appendFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-  DEBUG_ENV_VAR,
-  DEBUG_LOG_FILENAME,
-  LOGGER_PREFIX,
-} from '../constants/index.js';
+import { DEBUG_LOG_FILENAME } from '../constants/files.js';
+import { DEBUG_ENV_VAR, LOGGER_PREFIX } from '../constants/pipeline.js';
 
 let _logDir: string | undefined;
 

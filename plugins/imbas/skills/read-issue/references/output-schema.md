@@ -46,23 +46,23 @@
 
 ## Field Reference
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `key` | string | Jira issue key |
-| `summary` | string | Issue title |
-| `type` | string | Issue type (Story, Task, Bug, etc.) |
-| `status` | string | Current workflow status |
-| `assignee` | string | Current assignee display name |
-| `reporter` | string | Issue reporter display name |
-| `created` | string | Issue creation date |
-| `updated` | string | Last update date |
-| `description_excerpt` | string | Truncated description (first meaningful paragraph) |
-| `comment_count` | number | Total number of comments |
-| `participants` | array | Unique commenters with role hints and counts |
-| `decisions` | array | Extracted decisions with attribution and evidence |
-| `open_questions` | array | Unresolved questions with status |
-| `latest_context` | string | Natural language summary of the most recent state |
-| `conversation_summary` | string | One-line conversation flow summary |
-| `digest_found` | boolean | Whether an imbas:digest marker was found in comments |
-| `digest_covered_comments` | string\|null | Range of comments covered by the digest (e.g., "1-15") |
-| `new_comments_after_digest` | number | Count of comments after the digest coverage range |
+| Field                       | Type         | Description                                                             |
+| --------------------------- | ------------ | ----------------------------------------------------------------------- |
+| `key`                       | string       | Provider-native issue reference (`PROJ-123`, `owner/repo#42`, or `S-1`) |
+| `summary`                   | string       | Issue title                                                             |
+| `type`                      | string       | Issue type (Story, Task, Bug, etc.)                                     |
+| `status`                    | string       | Current workflow status                                                 |
+| `assignee`                  | string       | Current assignee display name                                           |
+| `reporter`                  | string       | Issue reporter display name                                             |
+| `created`                   | string       | Issue creation date                                                     |
+| `updated`                   | string       | Last update date                                                        |
+| `description_excerpt`       | string       | Truncated description (first meaningful paragraph)                      |
+| `comment_count`             | number       | Total number of comments                                                |
+| `participants`              | array        | Unique commenters with role hints and counts                            |
+| `decisions`                 | array        | Extracted decisions with attribution and evidence                       |
+| `open_questions`            | array        | Unresolved questions with status                                        |
+| `latest_context`            | string       | Natural language summary of the most recent state                       |
+| `conversation_summary`      | string       | One-line conversation flow summary                                      |
+| `digest_found`              | boolean      | Whether an imbas:digest marker was found in comments                    |
+| `digest_covered_comments`   | string\|null | Range of comments covered by the digest (e.g., "1-15")                  |
+| `new_comments_after_digest` | number       | Count of comments after the digest coverage range                       |

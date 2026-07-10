@@ -27,14 +27,17 @@ export interface PreToolUseInput extends HookBaseInput {
 /** SubagentStart hook input */
 export interface SubagentStartInput extends HookBaseInput {
   hook_event_name: 'SubagentStart';
-  agent_name: string;
-  agent_prompt: string;
+  /** Agent type (plugin-namespaced spawns arrive as "imbas:<name>") */
+  agent_type: string;
+  /** Agent ID */
+  agent_id: string;
 }
 
 /** UserPromptSubmit hook input */
 export interface UserPromptSubmitInput extends HookBaseInput {
   hook_event_name: 'UserPromptSubmit';
-  user_prompt: string;
+  /** User prompt content */
+  prompt?: string;
 }
 
 /** SessionEnd hook input */
@@ -44,7 +47,11 @@ export interface SessionEndInput extends HookBaseInput {
 
 /** Hook output (stdout JSON) */
 export interface HookOutput {
-  /** Whether to continue (false = block, PreToolUse only) */
+  /**
+   * Whether to continue Claude's turn. `false` STOPS the entire turn and
+   * overrides any `permissionDecision` — it is not a per-tool block. Keep
+   * `true` for per-tool denies; express the block via `permissionDecision`.
+   */
   continue: boolean;
   /** Hook-specific output */
   hookSpecificOutput?: {
@@ -52,5 +59,9 @@ export interface HookOutput {
     hookEventName?: string;
     /** Additional context to inject into agent */
     additionalContext?: string;
+    /** PreToolUse per-tool gate: "deny" blocks only this call. */
+    permissionDecision?: 'allow' | 'deny' | 'ask';
+    /** Reason delivered to the model when permissionDecision is set. */
+    permissionDecisionReason?: string;
   };
 }

@@ -1,7 +1,7 @@
 # Tools Used — Provider-agnostic
 
-Provider-specific tools (Jira operations ([OP:]) for jira, Read/Write/Edit/Glob for local)
-are documented in `jira/tools.md` and `local/tools.md`. This file lists the
+Provider-specific tools (Jira operations ([OP:]) for jira, gh CLI via Bash for github, Read/Write/Edit/Glob for local)
+are documented in `jira/tools.md`, `github/tools.md`, and `local/tools.md`. This file lists the
 shared imbas MCP tools used by every provider.
 
 ## imbas MCP Tools (all providers)

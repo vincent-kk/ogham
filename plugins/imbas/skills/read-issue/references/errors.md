@@ -1,6 +1,6 @@
 # Error Handling — Provider-agnostic
 
-Provider-specific errors live in `jira/errors.md` and `local/errors.md`.
+Provider-specific errors live in `jira/errors.md`, `github/errors.md`, and `local/errors.md`.
 
 | Error | Action |
 |-------|--------|

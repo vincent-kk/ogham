@@ -109,8 +109,8 @@ When multiple Stories touch the same code:
 
 If AST tools return `@ast-grep/napi` unavailable errors, fall back to LLM-assisted analysis:
 
-| Native Tool                                     | Fallback                                                             |
-| ----------------------------------------------- | -------------------------------------------------------------------- |
+| Native Tool                                                    | Fallback                                                             |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- |
 | `mcp__plugin_imbas_tools__ast_search`                          | Convert meta-variables to regex → Grep → LLM filters false positives |
 | `mcp__plugin_imbas_tools__ast_analyze` (dependency-graph)      | Read source → LLM extracts import/export/call patterns               |
 | `mcp__plugin_imbas_tools__ast_analyze` (cyclomatic-complexity) | Read source → LLM counts branching statements                        |
@@ -234,7 +234,7 @@ status: BLOCKED
 }
 ```
 
-**Rules**: Tasks first → Task Subtasks → Links → Story Subtasks → Feedback. Every Task lists `blocks`. Every Subtask references its parent via `id` prefix. Links are implicit via `tasks[].blocks`.
+**Rules**: Tasks first → Task Subtasks → Links → Story Subtasks → Feedback. Every Task lists `blocks`. Every Subtask references its parent via `id` prefix. Links are implicit via `tasks[].blocks`. Set `needs_review: true` on any Task/Subtask left unsatisfiable after 2 revisions (the pipeline's GATE 3 stops on it); omit the field otherwise. `labels: string[]` is optional (defaults to `[]`).
 
 ---
 

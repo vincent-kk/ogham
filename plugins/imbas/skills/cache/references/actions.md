@@ -2,6 +2,10 @@
 
 ## Actions
 
+**Provider gate (ensure/refresh)**: read `config.provider` first. If it is not
+`"jira"`, return immediately as a no-op — github metadata is cached by `setup`,
+and local mode has nothing to cache. `clear` works for any provider.
+
 ### ensure
 
 Check if the cache exists and is within TTL. If valid, do nothing. If expired or missing,
@@ -57,11 +61,10 @@ Delete all cached files for the specified project.
 
 ```
 1. Determine project key
-2. Delete .imbas/<KEY>/cache/ directory contents:
-   - project-meta.json
-   - issue-types.json
-   - link-types.json
-   - workflows.json (if exists)
-   - cached_at.json
+2. Delete .imbas/<KEY>/cache/ directory contents via Bash
+   (no dedicated MCP tool — this is the one action that uses Bash):
+   rm -rf ".imbas/<KEY>/cache"
+   Removes: project-meta.json, issue-types.json, link-types.json,
+   workflows.json (if exists), cached_at.json
 3. Confirm deletion
 ```

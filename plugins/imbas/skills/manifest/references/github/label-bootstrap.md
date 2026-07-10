@@ -1,7 +1,7 @@
 # GitHub Provider — Label Bootstrap Protocol
 
 Documents the startup label verification and creation protocol for the manifest
-skill. Implements §1.9 (metadata cache / label bootstrap) from the design decisions.
+skill. Implements the label bootstrap protocol (SPEC-provider-github.md §3.3).
 
 ## Purpose
 

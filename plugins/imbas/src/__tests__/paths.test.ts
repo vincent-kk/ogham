@@ -48,4 +48,23 @@ describe('paths', () => {
     const runDir = getRunDir(cwd, 'PROJ', '20240101-001');
     expect(runDir.startsWith(projectDir)).toBe(true);
   });
+
+  it('maps GitHub owner/repo refs to owner--repo directories', () => {
+    expect(getProjectDir(cwd, 'owner/repo')).toBe(
+      join(cwd, '.imbas', 'owner--repo'),
+    );
+    expect(getRunDir(cwd, 'owner/repo', '20260404-001')).toBe(
+      join(cwd, '.imbas', 'owner--repo', 'runs', '20260404-001'),
+    );
+  });
+
+  it('rejects project refs that cannot form a safe directory segment', () => {
+    expect(() => getProjectDir(cwd, '..')).toThrow(/Invalid project_ref/);
+    expect(() => getProjectDir(cwd, '')).toThrow(/Invalid project_ref/);
+    expect(() => getProjectDir(cwd, 'a\\b')).toThrow(/Invalid project_ref/);
+  });
+
+  it('neutralizes traversal-shaped refs into single segments', () => {
+    expect(getProjectDir(cwd, '../evil')).toBe(join(cwd, '.imbas', '..--evil'));
+  });
 });

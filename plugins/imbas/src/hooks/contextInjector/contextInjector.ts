@@ -7,6 +7,7 @@ import {
   RUNS_DIRNAME,
   STATE_FILENAME,
 } from '../../constants/files.js';
+import { projectDirName } from '../../core/paths/utils/projectDirName.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 
 export function processContextInjector(
@@ -27,7 +28,7 @@ export function processContextInjector(
     const projectKey = config?.defaults?.project_ref;
     if (!projectKey) return { continue: true };
 
-    const runsDir = join(imbasRoot, projectKey, RUNS_DIRNAME);
+    const runsDir = join(imbasRoot, projectDirName(projectKey), RUNS_DIRNAME);
     if (!existsSync(runsDir)) return { continue: true };
 
     // Run IDs follow YYYYMMDD-NNN format (see core/run-id-generator), so

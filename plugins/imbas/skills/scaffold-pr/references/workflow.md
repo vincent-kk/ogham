@@ -54,8 +54,10 @@ The remaining shared steps (branch creation, empty commit, PR build + create) al
    | Other      | `feature/` |
 
 3. Branch name: `{prefix}{issue-key}` (e.g., `feature/PROJ-123`, `bug/PROJ-456`).
-   - For GitHub issues: use `{prefix}{repo}#{number}` or `{prefix}issue-{number}` based on context.
+   - For GitHub issues: use the naming defined in `github/workflow.md` —
+     `{prefix}{number}` (e.g., `feature/42`; avoids `#` and other special characters).
 4. Check if branch already exists:
+
    ```bash
    git rev-parse --verify <branch-name> 2>/dev/null
    ```
@@ -63,6 +65,7 @@ The remaining shared steps (branch creation, empty commit, PR build + create) al
    - If exists → ASK USER: "Branch `<name>` already exists. Use it? (y/n)"
    - If user confirms → checkout existing branch.
    - If user declines → STOP.
+
 5. Create and checkout:
    ```bash
    git checkout <base> && git pull --ff-only && git checkout -b <branch-name>

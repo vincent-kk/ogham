@@ -1,7 +1,7 @@
 # Local Provider — ID Allocation
 
-Transcribed from `.omc/plans/imbas-local-provider.md §3.2` as single source of
-truth. See also `SPEC-provider-local.md §3.2`.
+Identifier rules and allocation flow for the local provider
+(design reference: SPEC-provider-local §3 Identifier Rules, §4 Execution Model).
 
 ## Format
 

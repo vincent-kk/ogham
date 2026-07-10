@@ -113,7 +113,12 @@ export function applyTransition(
 
     case 'skip_phases': {
       const updated = structuredClone(state);
+      // Only pending/in_progress phases are skippable; re-skipping a
+      // completed/escaped phase is an idempotent no-op (preserves its data).
+      const applied: typeof action.phases = [];
       for (const phase of action.phases) {
+        const status = updated.phases[phase].status;
+        if (status !== 'pending' && status !== 'in_progress') continue;
         updated.phases[phase].status = 'completed';
         updated.phases[phase].completed_at = now;
         if (phase === 'validate') {
@@ -125,10 +130,13 @@ export function applyTransition(
           updated.phases.split.pending_review = false;
           updated.phases.split.stories_created = 0;
         }
+        applied.push(phase);
       }
-      const lastSkipped = action.phases[action.phases.length - 1]!;
-      updated.current_phase = advancePhase(lastSkipped);
-      updated.metadata = { ...updated.metadata, skipped_phases: action.phases };
+      if (applied.length > 0) {
+        const lastSkipped = applied[applied.length - 1]!;
+        updated.current_phase = advancePhase(lastSkipped);
+        updated.metadata = { ...updated.metadata, skipped_phases: applied };
+      }
       updated.updated_at = now;
       return updated;
     }

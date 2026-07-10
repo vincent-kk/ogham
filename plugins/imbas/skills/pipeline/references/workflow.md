@@ -131,7 +131,7 @@ Step 1.2 — Document Source Resolution
     - Save referenced content as supplements.
 
 Step 1.3 — analyst Agent Spawn
-  - Spawn agent: `analyst`
+  - Spawn agent via Task tool (subagent_type: "imbas:analyst")
   - Model: config.defaults.llm_model.validate (default: "sonnet")
   - Input: source.md + supplements/*.md + config.json language settings
   - Instructions: Perform 5-type validation (contradictions, divergences, omissions, infeasibilities, testability).
@@ -178,7 +178,7 @@ Step 2.2 — Parent Resolution (already resolved in Phase 0)
   - "none": Stories created without parent Epic.
 
 Step 2.3 — planner Agent Spawn
-  - Spawn agent: `planner`
+  - Spawn agent via Task tool (subagent_type: "imbas:planner")
   - Model: config.defaults.llm_model.split (default: "sonnet")
   - Input: source.md + supplements/*.md + Epic information + config.json language settings
   - Instructions: Split into INVEST-compliant Stories with User Story + AC (Given/When/Then or EARS).
@@ -199,7 +199,7 @@ Step 2.4 — 3→1→2 Verification (per Story)
     - Coherent → set verification.coherence = "PASS", continue
 
   [2] Reverse-Inference Verification
-    - Spawn agent: `analyst`
+    - Spawn agent via Task tool (subagent_type: "imbas:analyst")
     - Input: ALL split Stories reassembled + original source.md
     - Instructions: Compare reassembled Stories against original. Identify semantic loss, mutation, addition.
     - Match → set verification.reverse_inference = "PASS"
@@ -265,7 +265,7 @@ Step 2.7 — Manifest Generation
 
 >>> GATE 2: Split Quality (see auto-approval-gates.md)
   - All criteria pass → call mcp__plugin_imbas_tools__run_transition(complete_phase, split, pending_review: false)
-    → IMMEDIATELY AFTER: apply review approval label swap per label-transitions.md:
+    → IMMEDIATELY AFTER: apply review approval label swap per `../../manifest/references/label-transitions.md`:
       For each story issue_ref in stories-manifest (if already created):
         Remove config.labels.review_pending, add config.labels.review_complete.
   - Any criterion fails → STOP with blocker report detailing which Stories/fields failed
@@ -332,7 +332,7 @@ Step 2.5.3 — Execution Verification
     (devplan requires all Story issue_refs to be present)
 
 Step 2.5.4 — Post-Execution Label Transitions (stories type)
-  Apply lifecycle labels to all created issues per label-transitions.md.
+  Apply lifecycle labels to all created issues per `../../manifest/references/label-transitions.md`.
   1. Load config.labels via mcp__plugin_imbas_tools__config_get field "labels".
   2. Load run state via mcp__plugin_imbas_tools__run_get.
   3. For each created issue_ref in stories-manifest:
@@ -398,7 +398,7 @@ Step 3.1 — Start Phase
   2. Call mcp__plugin_imbas_tools__manifest_get(project_ref, run_id, type: "stories") to load stories-manifest
 
 Step 3.2 — engineer Agent Spawn
-  - Spawn agent: `engineer`
+  - Spawn agent via Task tool (subagent_type: "imbas:engineer")
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input:
     - stories-manifest.json (Story descriptions with issue_refs)
@@ -496,7 +496,7 @@ Step 3.5.3 — Execution Result
   - Suggest: "/imbas:manifest devplan --run <run-id>" to retry failed items
 
 Step 3.5.4 — Post-Execution Label Transitions (devplan type)
-  Apply lifecycle labels to parent stories per label-transitions.md.
+  Apply lifecycle labels to parent stories per `../../manifest/references/label-transitions.md`.
   1. Load config.labels via mcp__plugin_imbas_tools__config_get field "labels".
   2. Collect parent story issue_refs from stories-manifest.
   3. For each parent story issue_ref:

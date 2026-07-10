@@ -22,7 +22,7 @@ plugin: imbas
 >
 > - After `planner` subagent returns Story list — immediately proceed to 3→1→2 verification
 > - Reverse-inference `analyst` subagent return — chain gate evaluation in the same turn
-> - Horizontal split recursion (Phase 2.6) — recursive Story re-verification MUST NOT yield between iterations
+> - Horizontal split recursion (Step 5(a)) — recursive Story re-verification MUST NOT yield between iterations
 > - Escape condition detection (E2-1/E2-2/EC-1/EC-2) — emit blocker report AND end execution in the same turn
 
 # split — Phase 2 Story Splitting

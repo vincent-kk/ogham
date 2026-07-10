@@ -188,7 +188,7 @@ For full documentation, see the [cennad README](./plugins/cennad/README.md) ([Ko
 
 ### [`@ogham/imbas`](./plugins/imbas/) — Planning → Issue Pipeline
 
-A Claude Code plugin that converts planning documents into Jira or GitHub issues through a 4-phase orchestration pipeline.
+A Claude Code plugin that converts planning documents into Jira, GitHub, or local markdown issues through a 3-phase planning pipeline with batch manifest execution.
 
 Translating a strategy doc into well-formed, EARS-style developer tickets is repetitive and error-prone. imbas automates the entire flow — from validating the source plan to creating Stories, Tasks, and Subtasks — while keeping every step provider-agnostic.
 
@@ -199,14 +199,14 @@ Translating a strategy doc into well-formed, EARS-style developer tickets is rep
 | Skills    | 12    | `/imbas:pipeline`, `/imbas:validate`, `/imbas:split`, `/imbas:devplan`, `/imbas:manifest` |
 | MCP Tools | 16    | `run_create`, `manifest_save`, `manifest_implement_plan`, etc.                            |
 | Agents    | 3     | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                         |
-| Hooks     | 3     | pre-tool-use, context-injector, session-cleanup                                           |
+| Hooks     | 5     | setup, pre-tool-use, agent-enforcer, context-injector, session-cleanup                    |
 
 **Key features:**
 
-- **4-phase pipeline** — validate → split → manifest-stories → devplan → manifest-devplan with checkpoint files between phases
+- **Staged pipeline** — validate → split → manifest-stories → devplan → manifest-devplan with checkpoint files between stages
 - **Provider abstraction** — A single skill targets `jira`, `github`, or `local` providers; switching is a config change
 - **Agent separation** — Three role-specialized agents (analyst for validation, planner for splitting, engineer for EARS Subtask generation)
-- **Run-based state** — Each pipeline execution gets a `run_id` and `.imbas/runs/<id>/` directory for resumable, auditable runs
+- **Run-based state** — Each pipeline execution gets a `run_id` and `.imbas/<KEY>/runs/<id>/` directory for resumable, auditable runs
 
 ```
 # Initialize imbas configuration

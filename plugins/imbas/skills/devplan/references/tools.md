@@ -23,6 +23,8 @@ to produce a devplan manifest regardless of provider.
 
 ## Agent Spawn
 
+Spawn via the Task tool with the plugin-namespaced type: `subagent_type: "imbas:<agent>"` (e.g., `imbas:analyst`). Bare names are table labels only.
+
 | Agent | Model | Purpose |
 |-------|-------|---------|
 | `engineer` | config.defaults.llm_model.devplan (opus) | Codebase exploration, EARS Subtask generation, Task extraction |

@@ -6,6 +6,10 @@ from the shared skeleton (`../workflow.md`).
 ## Step 3 — Fetch sub-tasks
 
 1. Read `config.jira.base_url` via `mcp__plugin_imbas_tools__config_get` to build issue URLs.
+   If `base_url` is null or unset, derive the host from the `self` field of the
+   `[OP: get_issue]` response (scheme + host, e.g. `https://site.atlassian.net`)
+   and build `<host>/browse/<key>`. If neither is available, render issue keys
+   without links (do not guess a host).
 
 2. Call `[OP: get_issue] issue_ref=<issue-key>` with subtask fields.
    The Jira issue response includes a `subtasks` array for direct sub-task

@@ -6,14 +6,16 @@ import { join } from 'node:path';
 
 import { IMBAS_ROOT_DIRNAME, RUNS_DIRNAME } from '../../constants/index.js';
 
+import { projectDirName } from './utils/projectDirName.js';
+
 /** Returns root .imbas/ directory */
 export function getImbasRoot(cwd: string): string {
   return join(cwd, IMBAS_ROOT_DIRNAME);
 }
 
-/** Returns .imbas/<KEY>/ */
+/** Returns .imbas/<KEY>/ (GitHub "owner/repo" → "owner--repo") */
 export function getProjectDir(cwd: string, projectKey: string): string {
-  return join(getImbasRoot(cwd), projectKey);
+  return join(getImbasRoot(cwd), projectDirName(projectKey));
 }
 
 /** Returns .imbas/<KEY>/cache/ */
@@ -32,5 +34,15 @@ export function getRunDir(
   projectKey: string,
   runId: string,
 ): string {
+  if (
+    !runId ||
+    runId === '.' ||
+    runId === '..' ||
+    runId.includes('/') ||
+    runId.includes('\\') ||
+    runId.includes('\0')
+  )
+    throw new Error(`Invalid run_id: "${runId}"`);
+
   return join(getRunsDir(cwd, projectKey), runId);
 }

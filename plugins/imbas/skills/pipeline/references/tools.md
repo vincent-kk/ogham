@@ -50,6 +50,8 @@ The LLM resolves which tool to use at runtime. Read the linked operation files f
 
 ## Agent Spawn
 
+Spawn via the Task tool with the plugin-namespaced type: `subagent_type: "imbas:<agent>"` (e.g., `imbas:analyst`). Bare names are table labels only.
+
 | Agent | Phase | Model | Purpose | Spawned By |
 |-------|-------|-------|---------|------------|
 | `analyst` | 1 | sonnet | 5-type document validation (contradictions, divergences, omissions, infeasibilities, testability) | Phase 1 Step 1.3 |

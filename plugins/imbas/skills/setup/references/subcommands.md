@@ -12,7 +12,7 @@
 ## set-project <KEY>
 
 1. Call `mcp__plugin_imbas_tools__config_set` with `{ "defaults.project_ref": "<KEY>" }`.
-2. Execute cache population flow (Step 4 of Init Workflow) for the new project key.
+2. Execute cache population flow (Step 5 of Init Workflow) for the new project key.
 3. Display confirmation with new default project.
 
 ## set-language <field> <lang>
@@ -24,7 +24,7 @@
 ## refresh-cache [KEY]
 
 1. Determine project key: argument > config.defaults.project_ref.
-2. Execute cache population flow (Step 4 of Init Workflow) with force refresh.
+2. Execute cache population flow (Step 5 of Init Workflow) with force refresh.
 3. Display refreshed cache summary.
 
 ## set-provider <PROVIDER>
@@ -66,14 +66,14 @@
 ### labels provision (GitHub only)
 
 1. If `config.provider !== 'github'`:
-   Display: "Provisioning은 GitHub 전용입니다. Jira labels는 free-form으로 자동 생성됩니다."
+   Display: "Provisioning is GitHub-only. Jira labels are free-form and created automatically."
    Return.
 2. Load `config.labels` values via `mcp__plugin_imbas_tools__config_get`.
 3. Run: `gh label list --repo <config.github.repo> --json name` → parse existing label names.
 4. Compute missing labels: config label values NOT in existing set.
 5. For each missing label:
    `gh label create "<value>" --repo <config.github.repo> --color c5def5`
-6. Report: "N개 생성, M개 이미 존재."
+6. Report: "N created, M already existed."
 
 ### labels sync
 
@@ -85,9 +85,9 @@
      - Present in repo: list with "✓ Synced" marker.
    - Display summary table. If missing labels found, suggest `setup labels provision`.
 3. [jira]
-   Display: "Jira labels는 free-form — sync 해당 없음."
+   Display: "Jira labels are free-form — sync not applicable."
 4. [local]
-   Display: "Local provider — sync 해당 없음."
+   Display: "Local provider — sync not applicable."
 
 ## clear-temp
 

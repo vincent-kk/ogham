@@ -1,6 +1,6 @@
 # digest Workflow — Provider-agnostic skeleton
 
-This file owns Steps 1–5. Step 6 (preview / publish) is delegated to the
+This file owns Steps 0–5. Step 6 (preview / publish) is delegated to the
 provider-specific workflow file selected by `config.provider`:
 
 - `jira` → `jira/workflow.md` Step 6

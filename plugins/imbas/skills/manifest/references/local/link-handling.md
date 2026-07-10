@@ -1,7 +1,7 @@
 # Local Provider — Link Handling (Bidirectional)
 
-Transcribed from `.omc/plans/imbas-local-provider.md §3.5`. Single source of
-truth; see also `SPEC-provider-local.md §3.5`.
+Bidirectional link handling for the local provider
+(design reference: SPEC-provider-local §7 Link Handling).
 
 ## Invariant
 
@@ -12,13 +12,13 @@ and B's file contain entries in their `links[]` arrays.
 
 When source A records `{type: X, to: B}`, target B records the reverse type:
 
-| Source type (A → B)  | Reverse type (B → A)      |
-|----------------------|---------------------------|
-| `blocks`             | `is blocked by`           |
-| `is blocked by`      | `blocks`                  |
-| `is split into`      | `split from`              |
-| `split from`         | `is split into`           |
-| `relates to`         | `relates to`              |
+| Source type (A → B) | Reverse type (B → A) |
+| ------------------- | -------------------- |
+| `blocks`            | `is blocked by`      |
+| `is blocked by`     | `blocks`             |
+| `is split into`     | `split from`         |
+| `split from`        | `is split into`      |
+| `relates to`        | `relates to`         |
 
 `relates to` is symmetric — both sides use the same type string.
 

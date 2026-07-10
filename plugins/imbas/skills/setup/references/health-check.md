@@ -79,6 +79,7 @@ Server entry:
 ```
 
 Steps:
+
 1. Ask user to select scope:
    ```
    Where should the Atlassian MCP server be registered?
@@ -101,16 +102,20 @@ Steps:
 
 ### install-gh
 
-Install GitHub CLI globally:
+Install the official GitHub CLI (`cli/cli` — NOT the npm `gh` package, which is
+an unrelated unmaintained project):
 
 ```
-npm install -g gh
+macOS:   brew install gh
+Windows: winget install --id GitHub.cli
+Linux:   see https://github.com/cli/cli/blob/trunk/docs/install_linux.md
 ```
 
 Steps:
-1. Run: `npm install -g gh`
+
+1. Run the platform-appropriate install command above (or direct the user to https://cli.github.com).
 2. On success → display: "GitHub CLI installed."
-3. On failure → display: "Failed to install gh. Try manually: npm install -g gh"
+3. On failure → display: "Failed to install gh. Install manually from https://cli.github.com"
 4. After install, run: `gh auth status`
 5. If not authenticated → proceed to auth-gh action.
 
@@ -129,14 +134,14 @@ Guide user through GitHub CLI authentication:
 
 Health check results determine which providers can be offered in Step 1:
 
-| Tool status | Provider unlocked | Notes |
-|-------------|-------------------|-------|
-| Atlassian ✓ | `jira` | Full Jira Cloud/Server access |
-| Atlassian △/✗ | — | jira provider not available |
-| GitHub CLI ✓ | `github` | GitHub Issues via gh CLI |
-| GitHub CLI △ | — | Installed but not authenticated; offer auth-gh setup |
-| GitHub CLI ✗ | — | Not installed; offer install-gh setup |
-| (always) | `local` | No remote dependency; always available |
+| Tool status   | Provider unlocked | Notes                                                |
+| ------------- | ----------------- | ---------------------------------------------------- |
+| Atlassian ✓   | `jira`            | Full Jira Cloud/Server access                        |
+| Atlassian △/✗ | —                 | jira provider not available                          |
+| GitHub CLI ✓  | `github`          | GitHub Issues via gh CLI                             |
+| GitHub CLI △  | —                 | Installed but not authenticated; offer auth-gh setup |
+| GitHub CLI ✗  | —                 | Not installed; offer install-gh setup                |
+| (always)      | `local`           | No remote dependency; always available               |
 
 After auto-setup actions complete, re-evaluate availability before proceeding
 to provider selection. For example, if the user installs and authenticates gh
@@ -144,8 +149,8 @@ during Step 0, `github` becomes available for Step 1.
 
 ## Status Icons
 
-| Icon | Meaning |
-|------|---------|
-| ✓ | Available and working |
-| △ | Partially available (installed but not authenticated) |
-| ✗ | Not available |
+| Icon | Meaning                                               |
+| ---- | ----------------------------------------------------- |
+| ✓    | Available and working                                 |
+| △    | Partially available (installed but not authenticated) |
+| ✗    | Not available                                         |

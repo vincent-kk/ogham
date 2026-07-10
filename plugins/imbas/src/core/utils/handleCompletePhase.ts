@@ -14,6 +14,11 @@ export function handleCompletePhase(
       `Cannot complete phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
     );
 
+  if (phase === 'validate' && action.result === undefined)
+    throw new Error(
+      'complete_phase(validate) requires "result" (PASS | PASS_WITH_WARNINGS | BLOCKED)',
+    );
+
   const updated = structuredClone(state);
   updated.phases[phase].status = 'completed';
   updated.phases[phase].completed_at = now;

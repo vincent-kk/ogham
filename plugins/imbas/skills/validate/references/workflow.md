@@ -33,7 +33,7 @@ Step 2 — Document Source Resolution
     - Save referenced content as supplements.
 
 Step 3 — analyst Agent Spawn
-  - Spawn agent: `analyst`
+  - Spawn agent via Task tool (subagent_type: "imbas:analyst")
   - Model: config.defaults.llm_model.validate (default: "sonnet")
   - Input provided to agent:
     - source.md (full content)

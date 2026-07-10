@@ -1,6 +1,8 @@
 # @ogham/imbas
 
-A Claude Code plugin that converts product specification documents into structured Jira development tasks.
+A Claude Code plugin that converts product specification documents into a structured development backlog on Jira, GitHub Issues, or local markdown files.
+
+> [한국어 문서 (README-ko_kr.md)](./README-ko_kr.md)
 
 Writing specs is easy. Turning them into a well-organized backlog of Stories, Tasks, and Subtasks — with correct dependencies, size estimates, and implementation grounding — is tedious and error-prone. imbas automates this through a **3-phase pipeline** driven by specialized AI agents.
 
@@ -77,7 +79,17 @@ Document → [Validate] → [Split] → [Devplan] → Jira Issues
 - Dependency links and execution order
 - Feedback comments when Stories contain ambiguity that needs product clarification
 
-Each phase writes its output to a manifest file. Manifests are then executed against Jira to batch-create issues, links, and comments.
+Each phase writes its output to a manifest file. Manifests are then executed against the configured issue tracker to batch-create issues, links, and comments.
+
+### Providers
+
+The pipeline is provider-agnostic. `config.provider` selects the backend:
+
+| Provider | Backend                | Issue reference      |
+| -------- | ---------------------- | -------------------- |
+| `jira`   | Atlassian MCP tools    | `PROJ-123`           |
+| `github` | `gh` CLI (labels/meta) | `owner/repo#42`      |
+| `local`  | Markdown files         | `S-1`, `T-1`, `ST-1` |
 
 ### State Machine
 
@@ -103,7 +115,7 @@ All state is stored locally in `.imbas/`:
 │   │   ├── link-types.json
 │   │   └── workflows.json
 │   └── runs/
-│       └── 20250404-001/       # Run ID: YYYYMMDD-NNN
+│       └── 20260404-001/       # Run ID: YYYYMMDD-NNN
 │           ├── state.json      # Phase state machine
 │           ├── source.md       # Input document
 │           ├── supplements/    # Supporting files (optional)
@@ -123,10 +135,10 @@ imbas skills are **LLM prompts**, not CLI commands. You invoke them in Claude Co
 
 ```
 /imbas:setup
-/imbas:setup --project PROJ
+/imbas:setup set-project PROJ
 ```
 
-Creates `.imbas/`, sets up `config.json`, and caches your Jira project metadata (issue types, link types, workflows).
+Creates `.imbas/`, selects the provider, sets up `config.json`, and caches project metadata (issue types, link types, workflows).
 
 ### Run the Full Pipeline
 
@@ -227,11 +239,10 @@ With the plugin active, these hooks fire **without user intervention**:
 | `/imbas:implement-plan` | Yes            | Build a DAG-based implementation schedule grouping Stories/Tasks into parallel batches |
 | `/imbas:manifest`       | Yes            | Execute manifests to batch-create Jira issues                                          |
 | `/imbas:status`         | Yes            | View run status, list runs, resume interrupted runs                                    |
-| `/imbas:digest`         | Yes            | Compress a Jira issue into a structured summary                                        |
-| `/imbas:scaffold-pr`    | Yes            | Create a Draft PR from a Jira Story with sub-tasks                                     |
-
-| `/imbas:cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
-| `/imbas:read-issue` | No | Internal: Read and structure Jira issue context |
+| `/imbas:digest`         | Yes            | Compress an issue into a structured summary                                            |
+| `/imbas:scaffold-pr`    | Yes            | Create a Draft PR from a Story with sub-tasks                                          |
+| `/imbas:cache`          | No             | Internal: Manage provider metadata cache (24h TTL)                                     |
+| `/imbas:read-issue`     | No             | Internal: Read and structure issue context                                             |
 
 ---
 
@@ -279,6 +290,7 @@ During devplan:
 
 ```jsonc
 {
+  "provider": "jira", // "jira" | "github" | "local"
   "language": {
     "documents": "ko", // Source document language
     "skills": "en", // Agent prompt language
@@ -304,8 +316,9 @@ During devplan:
 Modify via:
 
 ```
-/imbas:setup set-language documents=en
+/imbas:setup set-language documents en
 /imbas:setup set-project NEWPROJ
+/imbas:setup set-provider github
 ```
 
 ---
@@ -322,7 +335,7 @@ yarn build          # tsc + MCP server + hooks bundling
 
 ### Tech Stack
 
-TypeScript 5.7, @modelcontextprotocol/sdk, @ast-grep/napi, esbuild, Vitest, Zod
+TypeScript, @modelcontextprotocol/sdk, @ast-grep/napi, esbuild, Vitest, Zod
 
 ---
 

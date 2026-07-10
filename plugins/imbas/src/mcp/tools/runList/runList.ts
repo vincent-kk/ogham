@@ -39,6 +39,7 @@ export async function handleRunList(input: RunListInput) {
         run_id,
         run_dir,
         current_phase: state.current_phase,
+        status: state.phases[state.current_phase].status,
         created_at: state.created_at,
         updated_at: state.updated_at,
       });

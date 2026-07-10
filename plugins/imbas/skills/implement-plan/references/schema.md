@@ -21,7 +21,7 @@ interface BatchGroup {
   level: number;                   // 0-based topological level
   can_parallel: boolean;           // true iff more than one item in group
   items: BatchItemRef[];
-  depends_on_groups: string[];     // group_ids of immediate predecessors
+  depends_on_groups: string[];     // group_ids of all groups at the immediately preceding level
 }
 
 interface BatchItemRef {

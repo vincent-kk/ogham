@@ -25,7 +25,7 @@ Step 2 — Epic Decision Flow
        c) "No Epic" → Stories created without parent Epic
 
 Step 3 — planner Agent Spawn (Story Splitting)
-  - Spawn agent: `planner`
+  - Spawn agent via Task tool (subagent_type: "imbas:planner")
   - Model: config.defaults.llm_model.split (default: "sonnet")
   - Input provided to agent:
     - source.md (full planning document)
@@ -58,7 +58,7 @@ Step 4 — 3→1→2 Verification (per Story)
     - Coherent → set verification.coherence = "PASS", continue to [2].
 
   [2] Reverse-Inference Verification — analyst spawn
-    - Spawn agent: `analyst`
+    - Spawn agent via Task tool (subagent_type: "imbas:analyst")
     - Input: ALL split Stories reassembled as a whole
     - Instructions: "Compare the reassembled Stories against the original source.md.
       Identify any requirements lost, distorted, or fabricated during splitting."

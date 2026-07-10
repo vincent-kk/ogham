@@ -37,7 +37,7 @@ Step 0 — Environment Health Check (non-blocking)
 
       Show numbered list of missing/failed items:
         [1] Atlassian MCP — register in .mcp.json (scope selection)
-        [2] GitHub CLI (gh) — install via npm
+        [2] GitHub CLI (gh) — install via brew/winget or https://cli.github.com
 
       Prompt: "Set up now? Enter numbers (e.g. 1,2) or [skip]:"
 
@@ -109,7 +109,7 @@ Step 3.5 — Label Configuration
      dev_in_progress  | 개발중            | (external trigger only)
      dev_done         | 개발완료          | (external trigger only)
 
-  3. Prompt: "이 기본 라벨로 진행하시겠습니까? [Yes / Customize]"
+  3. Prompt: "Proceed with these default labels? [Yes / Customize]"
      - Yes → use defaults, proceed to Step 3.6
      - Customize → for each label key, show current default and accept new value
        via AskUserQuestion (or equivalent interactive prompt).
@@ -117,18 +117,18 @@ Step 3.5 — Label Configuration
 
   Step 3.6 — GitHub Label Provisioning (GitHub provider only)
   [github]
-    1. Display: "GitHub 레포에 이 라벨들을 생성하시겠습니까?"
-    2. Prompt: "<owner/repo>에 라벨 provisioning? [Yes / Skip]"
+    1. Display: "Create these labels in the GitHub repo?"
+    2. Prompt: "Provision labels in <owner/repo>? [Yes / Skip]"
        - Yes → for each label value in config.labels:
          - Run: gh label list --repo <owner/repo> --json name
          - If label value NOT in existing list:
            gh label create "<value>" --repo <owner/repo> --color c5def5
          - If label already exists: skip (idempotent)
-         Report: "N개 생성, M개 이미 존재."
-       - Skip → display: "`setup labels provision`으로 나중에 생성할 수 있습니다."
+         Report: "N created, M already existed."
+       - Skip → display: "You can provision later with `setup labels provision`."
 
   [jira]
-    Display: "Jira labels는 free-form으로 별도 provisioning이 필요하지 않습니다."
+    Display: "Jira labels are free-form — no separate provisioning needed."
 
   [local]
     No label provisioning needed.

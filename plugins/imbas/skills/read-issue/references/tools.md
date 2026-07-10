@@ -1,6 +1,6 @@
 # Tools Used — Provider-agnostic
 
-Provider-specific tools are in `jira/tools.md` and `local/tools.md`.
+Provider-specific tools are in `jira/tools.md`, `github/tools.md`, and `local/tools.md`.
 
 ## imbas MCP Tools (all providers)
 

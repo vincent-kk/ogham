@@ -2,11 +2,13 @@ import { AGENT_CONSTRAINTS } from '../../constants/pipeline.js';
 import type { HookOutput, SubagentStartInput } from '../../types/hooks.js';
 
 export function processAgentEnforcer(input: SubagentStartInput): HookOutput {
-  const { agent_name } = input;
+  // Plugin-namespaced spawns ("imbas:engineer") must hit the same
+  // constraint keys as bare names — AGENT_CONSTRAINTS is keyed bare.
+  const agentType = (input.agent_type ?? '').replace(/^imbas:/, '');
 
-  if (!agent_name) return { continue: true };
+  if (!agentType) return { continue: true };
 
-  const constraint = AGENT_CONSTRAINTS[agent_name];
+  const constraint = AGENT_CONSTRAINTS[agentType];
   if (!constraint) return { continue: true };
 
   return {

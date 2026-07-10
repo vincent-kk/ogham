@@ -29,10 +29,13 @@ export function collectGraph(
   const edges: BatchEdge[] = [];
 
   for (const link of stories.links) {
-    if (link.type !== 'blocks' && link.type !== 'is-blocked-by') continue;
+    // Normalize provider vocab: jira/local "is blocked by", github "blocked-by".
+    const linkType = link.type.toLowerCase().replaceAll('-', ' ');
+    const isForward = linkType === 'blocks';
+    const isReverse = linkType === 'is blocked by' || linkType === 'blocked by';
+    if (!isForward && !isReverse) continue;
     for (const toId of link.to) {
-      const [from, to] =
-        link.type === 'blocks' ? [link.from, toId] : [toId, link.from];
+      const [from, to] = isForward ? [link.from, toId] : [toId, link.from];
       if (!idSet.has(from) || !idSet.has(to)) continue;
       edges.push({ from, to, source: 'story_link', weight: 1 });
     }

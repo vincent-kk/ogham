@@ -8,9 +8,9 @@ provider's `file-format.md`.
 
 Every imbas-managed GitHub issue has three components:
 
-1. **Title** — type-prefixed human-readable string (§1.4)
-2. **Labels** — type classification + status + defaults (§1.4, §1.7, §1.9)
-3. **Body** — structured markdown with fixed sections (§1.1, §1.2)
+1. **Title** — type-prefixed human-readable string
+2. **Labels** — type classification + status + defaults (SPEC-provider-github.md §3)
+3. **Body** — structured markdown with fixed sections (SPEC-provider-github.md §4)
 
 ## Title format
 
@@ -21,6 +21,7 @@ Every imbas-managed GitHub issue has three components:
 Where `<Type>` is one of: `Epic`, `Story`, `Task`, `Subtask`.
 
 Examples:
+
 ```
 [Story] User can reset their password
 [Task] Implement JWT refresh token endpoint
@@ -39,16 +40,16 @@ Every imbas issue carries exactly:
   `status:in-progress`, `status:in-review` (terminal states use close reason instead)
 - **Zero or more** labels from `config.github.defaultLabels`
 
-### Status → GitHub state mapping (§1.7)
+### Status → GitHub state mapping
 
-| imbas status | GitHub issue state | Label |
-|---|---|---|
-| `todo` | `open` | `status:todo` |
-| `ready-for-dev` | `open` | `status:ready-for-dev` |
-| `in-progress` | `open` | `status:in-progress` |
-| `in-review` | `open` | `status:in-review` |
-| `done` | `closed` (reason: completed) | (none) |
-| `wont-do` | `closed` (reason: not planned) | (none) |
+| imbas status    | GitHub issue state             | Label                  |
+| --------------- | ------------------------------ | ---------------------- |
+| `todo`          | `open`                         | `status:todo`          |
+| `ready-for-dev` | `open`                         | `status:ready-for-dev` |
+| `in-progress`   | `open`                         | `status:in-progress`   |
+| `in-review`     | `open`                         | `status:in-review`     |
+| `done`          | `closed` (reason: completed)   | (none)                 |
+| `wont-do`       | `closed` (reason: not planned) | (none)                 |
 
 ## Body sections
 
@@ -61,9 +62,9 @@ The body is structured markdown with fixed h2 sections in this order:
 
 ## Sub-tasks
 
-- [ ] owner/repo#42
-- [ ] owner/repo#43
-- [x] owner/repo#41
+- [ ] #42
+- [ ] #43
+- [x] #41
 
 ## Links
 
@@ -79,7 +80,7 @@ Not machine-parsed after creation (treated as opaque text).
 
 ### `## Sub-tasks`
 
-Task-list checkboxes listing child issue refs (§1.1, §1.6).
+Task-list checkboxes listing child issue refs (SPEC-provider-github.md §4.3).
 
 - Present on: `type:epic` (lists stories), `type:story` (lists tasks),
   `type:task` (lists subtasks).
@@ -91,7 +92,7 @@ Task-list checkboxes listing child issue refs (§1.1, §1.6).
 
 ### `## Links`
 
-Relation links between issues (§1.2). Full grammar in `link-handling.md`.
+Relation links between issues (SPEC-provider-github.md §4.1). Full grammar in `link-handling.md`.
 
 - Present on all issue types (may be empty — header present, no items).
 - Written and maintained by the manifest skill link creation step.
@@ -100,7 +101,7 @@ Relation links between issues (§1.2). Full grammar in `link-handling.md`.
 ## Digest comments
 
 Digest content is stored as GitHub issue **comments**, NOT in the body.
-The comment body starts with the HTML marker `<!-- imbas:digest -->` (§1.8).
+The comment body starts with the HTML marker `<!-- imbas:digest -->` (digest marker spec: `skills/digest/references/digest-marker.md`).
 See `digest/references/github/workflow.md` for the digest comment format.
 The body `## Links` and `## Sub-tasks` sections are never used for digest storage.
 

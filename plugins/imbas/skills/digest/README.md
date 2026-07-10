@@ -43,9 +43,8 @@ State Tracking + QA-Prompting 하이브리드 방식을 사용한다.
 | -------------------------- | --------------------- | ----------------------------------- |
 | `[OP: get_issue]`          | Jira ([OP:])          | 이슈 읽기 (`imbas:read-issue` 경유) |
 | `[OP: add_comment]`        | Jira ([OP:])          | digest 댓글 게시                    |
-| `[OP: fetch_attachment]`   | Jira ([OP:])          | 첨부 미디어 다운로드                |
 | `imbas:read-issue`         | 내부 스킬             | 구조화된 이슈 컨텍스트              |
-| `atlassian:media-analysis` | 외부 스킬 (atlassian) | 첨부 미디어 분석                    |
+| `atlassian:media-analysis` | 외부 스킬 (atlassian) | 첨부 미디어 다운로드 + 분석         |
 
 ## 참고 파일
 
