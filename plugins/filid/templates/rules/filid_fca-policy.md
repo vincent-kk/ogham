@@ -4,7 +4,7 @@
 
 - Modules document themselves (`INTENT.md`) and define contracts (`DETAIL.md`).
 - Imports go through entry points, never internal files.
-- Documentation precedes code. `INTENT.md` ≤ 50 lines. Test files ≤ 15 cases.
+- Documentation precedes code. `INTENT.md` ≤ 50 lines. Spec files ≤ 15 cases.
 
 Fractal Context Architecture (FCA-AI) is a recursive module organization system for AI-operated codebases.
 Every independent module is a "fractal node" with documentation, entry point, and boundary rules.

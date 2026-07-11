@@ -100,13 +100,13 @@ Notes`, so they never reach resolve.
 **promote**:
 
 ```markdown
-### FIX-002: spec.ts 3+12 rule violation
+### FIX-002: test.ts promotion candidate (stable, over-large)
 
 - **Severity**: MEDIUM
 - **Path**: `src/core/__tests__/unit/parser.test.ts`
-- **Rule**: 3+12 rule (18 test cases, limit 15)
+- **Rule**: promote candidate (18 cases; consolidate to <= 15 in a spec.ts)
 - **Type**: promote
-- **Action**: Promote test.ts to spec.ts with 3+12 split
+- **Action**: Promote the stable test.ts to a parameterized spec.ts (<= 15 cases). A test.ts is exempt from the 3+12 cap; this is an advisory consolidation, not a rule violation.
 ```
 
 **restructure**:

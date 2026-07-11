@@ -103,7 +103,7 @@ Fires on each user prompt submission. Injects FCA-AI rules into Claude's context
    - DETAIL.md has no line cap; updates must restructure in place
      (append-only growth forbidden, required sections preserved)
    - Organ directories must not have INTENT.md
-   - Test files max 15 cases per spec (3 basic + 12 complex)
+   - Spec files max 15 cases (3 basic + 12 complex); test.ts exempt
    - LCOM4 >= 2 triggers module split; CC > 15 triggers compress/abstract
 3. All 7 built-in fractal structure rules (from `rule-engine.ts`)
 4. FractalNode category classification guide

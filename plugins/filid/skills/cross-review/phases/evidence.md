@@ -35,7 +35,9 @@ git diff <BASE_REF>..HEAD --name-only
 ```
 
 Build: `CHANGED_FILES` (source), `CHANGED_DIRS`, `CHANGED_SPEC_FILES`
-(`*.spec.ts` / `*.test.ts`), `CHANGED_INTENT_MDS`, `CHANGED_DETAIL_MDS`.
+(`*.spec.ts` only; the 3+12 cap is spec-only), `CHANGED_TEST_FILES`
+(`*.test.ts`, tracked only for the advisory promote hint),
+`CHANGED_INTENT_MDS`, `CHANGED_DETAIL_MDS`.
 Then `mcp__plugin_filid_t__fractal_scan(path: <PROJECT_ROOT>)` → keep
 `tree.nodes` as the node-type lookup (no per-directory classify calls).
 A stage with an empty input list is recorded `SKIP`.
@@ -48,10 +50,15 @@ A stage with an empty input list is recorded `SKIP`.
    `mcp__plugin_filid_t__ast_analyze(analysisType: "cyclomatic-complexity", ...)`.
    Thresholds: LCOM4 >= 2 → FAIL (`restructure`); CC > 15 → FAIL
    (`code-fix`).
-2. **Test compliance (3+12)** — for each `CHANGED_SPEC_FILES` entry:
+2. **Test compliance (3+12)** — the cap is **spec-only**. For each
+   `CHANGED_SPEC_FILES` (`*.spec.ts`) entry:
    `mcp__plugin_filid_t__test_metrics(action: "check-312", ...)` (+
    `count` / `decide` for split hints). Total > 15 cases → FAIL
-   (`promote`).
+   (split / parameterize the spec). `.test.ts` files are EXEMPT —
+   `check-312` intentionally returns empty for them (that is correct, not a
+   broken tool; never manually re-report a `.test.ts` as a 3+12 violation).
+   A large, stable `.test.ts` (`CHANGED_TEST_FILES`) is at most a WARN
+   "candidate for `/filid:promote`", never a FAIL.
 3. **Shared dependency coverage** — for shared modules in the changed
    fractals (imported by 2+ sibling fractals):
    `mcp__plugin_filid_t__coverage_verify(projectRoot, targetPath)`.
