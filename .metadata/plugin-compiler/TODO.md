@@ -2,6 +2,19 @@
 
 > 현재 각 플러그인은 `skills/`·`agents/`·`hooks/` 를 **플러그인 루트**에 두고 Claude 전용으로 설치된다. 목표는 이를 **정본 `definitions/`** 로 재배치하고, 컴파일러가 `targets/{claude,codex,agy}/` 를 생성해 3-호스트로 배포하는 것. 도구·스펙은 완성(커밋됨) — 이 문서는 남은 **재배치 로직 + 런타임/인프라 작업**.
 
+## 시작점 (다음 세션 핸드오프)
+
+**완료 (커밋 `6378169a`)**: `tools/plugin-compiler` 도구 + 스펙(`.metadata/plugin-compiler/*`). CLI `extract`·`compile`·`verify`. 3-호스트 프로파일, agent/hook emitter, `mcp-lifecycle` fallback. **테스트·플러그인 추출물 미커밋**(도구+스펙만) — 검증 재현은 [reproduction.md](./reproduction.md).
+
+**미완료**: 어떤 플러그인도 아직 마이그레이션 안 됨(모두 `skills/agents/hooks` 를 루트에 유지). 빌드도 아직 컴파일러를 안 부름.
+
+**다음 액션 — 택1로 착수**:
+
+- **경로 A (마이그레이션 먼저)**: [prawf](../../plugins/prawf) 부터 §1 절차로 재배치(§5 난이도순). prawf 는 MCP·훅 없어 가장 안전한 첫 검증. 단 훅 있는 플러그인(maencof-lens~filid)은 경로 B(러너 어댑터) 없이는 agy 훅이 inert.
+- **경로 B (인프라 먼저)**: §4 Stage D 중 **러너 어댑터**부터(agy camelCase stdin·once-guard·tool_name 역매핑) — 훅 있는 플러그인 이식의 전제. 그 다음 MCP-부팅 sweep → 빌드 배선 → 루트 마켓플레이스 emit.
+
+**빌드 통합** (질문 답): 맞다 — 빌드가 이 도구를 부르게 한다. 각 플러그인 `package.json` 에 런타임 빌드 **뒤** `compile:plugin` 스텝(사용 가이드 [usage.md](./usage.md) §7). 이는 **플러그인별 마이그레이션의 마지막 단계**(§1 6번)로 배선한다 — 정본(`definitions/`)이 있어야 컴파일할 게 생기므로, 마이그레이션 전에 미리 배선하면 실패한다.
+
 ## 0. 현재 상태 vs 목표
 
 | 항목         | 현재 (루트)                                                                | 목표                                                        |
