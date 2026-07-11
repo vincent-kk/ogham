@@ -1,8 +1,8 @@
 # prawf 오케스트레이션 설계
 
 > [`personas.md`](./personas.md) 의 9인을 Claude Code 네이티브 팀으로 운영하는 **라운드 흐름 ·
-> 상태 머신 · 산출물 계약** 명세. filid `cross-review` 의 `state-machine.md` + `phase-d-deliberation.md` +
-> `contracts.md` 를 prawf 도메인으로 미러링한 한국어 설계 명세다.
+> 상태 머신 · 산출물 계약** 명세. filid `cross-review` 의 `SKILL.md`(워크플로우·상태 머신) +
+> `contracts.md`(심의·판정 도출) + `templates.md`(산출물 계약) 를 prawf 도메인으로 미러링한 한국어 설계 명세다.
 >
 > 실행 환경: **claude-code 세션 내부**. 모든 라운드는 native Team(`TeamCreate`/`Task`/`SendMessage`)으로
 > 돌고, 외부 LLM·검색은 페르소나가 capability로만 위임한다. 분야 전문성은 [분야 프로파일](./field-profiles.md)이

@@ -18,8 +18,8 @@ const GUIDE_SCOPE = [
   'agents/qa-reviewer.md',
   'agents/engineering-architect.md',
   'agents/operations-sre.md',
-  'skills/cross-review/phases/phase-a-structure.md',
-  'skills/cross-review/phases/phase-c2-structure.md',
+  'skills/cross-review/phases/evidence.md',
+  'skills/cross-review/contracts.md',
   'skills/cross-review/templates.md',
   'src/constants/agentContext.ts',
 ];
