@@ -25,7 +25,7 @@ node migrate.mjs <target-path> [--dry-run|--execute] [--auto-commit]
 | `<target-path>` | Directory to scan (defaults to `.`)           |
 | `--dry-run`     | Preview mode — no files modified (default)    |
 | `--execute`     | Perform renames and reference updates         |
-| `--auto-commit` | Commit all changes after successful execution |
+| `--auto-commit` | Commit the migration changes after successful execution |
 
 ---
 
@@ -103,6 +103,11 @@ The same logic applies for `SPEC.md` → `DETAIL.md`.
 - Logic code (e.g., `context-injector.ts`) with `CLAUDE.md` string constants
   from being altered when the file is not under a renamed directory
 
+Within a renamed directory the replacement is plain substring matching (a
+faithful port of the original `sed` pipeline): a depth-0 file mentioning
+`sub/CLAUDE.md` or `MYCLAUDE.md` is rewritten too. Review the dry-run listing
+when such references exist.
+
 Uses in-place string replacement in Node — no `sed`, so the same code path runs
 on every platform.
 
@@ -147,13 +152,17 @@ Conflicts skipped: 1
 When `--auto-commit` is passed with `--execute` in a git repo:
 
 ```bash
-git add -A
+# renames are already staged by `git mv`; only reference-updated files are added
+git add -- <reference-updated files>
 git commit -m "refactor: migrate CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md naming
 
 Renamed: 7 files
 References updated: 12 files
 Conflicts skipped: 1"
 ```
+
+Only migration-touched files are staged — unrelated working-tree changes stay
+out of the commit.
 
 Output:
 

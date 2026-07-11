@@ -171,6 +171,7 @@ function depthOf(baseDir, fileDir) {
 function scopedUpdate(dirs, oldName, newName, mode) {
   let updated = 0;
   const listing = [];
+  const files = [];
 
   for (const rdir of dirs) {
     if (!rdir || !existsSync(rdir) || !statSync(rdir).isDirectory()) continue;
@@ -196,24 +197,26 @@ function scopedUpdate(dirs, oldName, newName, mode) {
             .split(oldName)
             .join(newName);
           writeFileSync(file, next);
+          files.push(file);
         } else listing.push(`  ${disp(file)} (depth=0: bare + ./)`);
         updated++;
       } else {
         const prefix = '../'.repeat(depth);
         const pattern = `${prefix}${oldName}`;
         if (!content.includes(pattern)) continue;
-        if (mode === 'execute')
+        if (mode === 'execute') {
           writeFileSync(
             file,
             content.split(pattern).join(`${prefix}${newName}`),
           );
-        else listing.push(`  ${disp(file)} (depth=${depth}: ${pattern})`);
+          files.push(file);
+        } else listing.push(`  ${disp(file)} (depth=${depth}: ${pattern})`);
         updated++;
       }
     }
   }
 
-  return { updated, listing };
+  return { updated, listing, files };
 }
 
 function main() {
@@ -330,6 +333,7 @@ function main() {
   console.log('## Phase 3 — Reference Update (scoped)');
 
   let refFilesUpdated = 0;
+  const refUpdatedFiles = [];
 
   if (mode === 'execute') {
     const claudeRes = scopedUpdate(
@@ -345,6 +349,7 @@ function main() {
       'execute',
     );
     refFilesUpdated = claudeRes.updated + specRes.updated;
+    refUpdatedFiles.push(...claudeRes.files, ...specRes.files);
     console.log(`Updated references in: ${refFilesUpdated} files`);
   } else {
     console.log('Scoped reference scan (files that would be updated):');
@@ -393,7 +398,10 @@ function main() {
       `Renamed: ${renamedCount} files\n` +
       `References updated: ${refFilesUpdated} files\n` +
       `Conflicts skipped: ${conflictCount}`;
-    runGit(['-C', target, 'add', '-A']);
+    // git mv already staged the renames; add only reference-updated files so
+    // unrelated working-tree changes stay out of the migration commit.
+    for (let i = 0; i < refUpdatedFiles.length; i += 100)
+      runGit(['-C', target, 'add', '--', ...refUpdatedFiles.slice(i, i + 100)]);
     runGit(['-C', target, 'commit', '-m', message]);
     const sha = runGit(['-C', target, 'rev-parse', '--short', 'HEAD'], {
       capture: true,
