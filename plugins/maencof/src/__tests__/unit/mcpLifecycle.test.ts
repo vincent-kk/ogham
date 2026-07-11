@@ -1,8 +1,8 @@
 /**
  * @file mcpLifecycle.test.ts
  * @description MCP server lifecycle 유닛 테스트 — bootSweep 오케스트레이션 순서
- * (vaultCommitter 마지막 불변식), registerShutdown 의 동기 정밀 마감 + detached
- * `--finalize` finalizer 스폰.
+ * (vaultCommitter 마지막 불변식), registerShutdown 이 shared session-finalizer 에
+ * 위임하는 opts(guard=isMaencofVault, detached)와 onShutdown 의 동기 정밀 마감.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -67,14 +67,14 @@ vi.mock('../../hooks/shared/isMaencofVault.js', () => ({
   isMaencofVault: vi.fn(() => true),
 }));
 
-const { spawnDetachedMock } = vi.hoisted(() => ({
-  spawnDetachedMock: vi.fn(),
+// registerShutdown delegates to the shared runtime — mock it so the test can
+// capture the opts (guard/detached) and invoke the onShutdown callback directly.
+const { registerShutdownFinalizerMock } = vi.hoisted(() => ({
+  registerShutdownFinalizerMock: vi.fn(),
 }));
-vi.mock('@ogham/cross-platform/spawn', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@ogham/cross-platform/spawn')>();
-  return { ...actual, spawnDetached: spawnDetachedMock };
-});
+vi.mock('@ogham/session-finalizer', () => ({
+  registerShutdownFinalizer: registerShutdownFinalizerMock,
+}));
 
 const mockIsVault = vi.mocked(isMaencofVault);
 let savedSessionId: string | undefined;
@@ -137,34 +137,29 @@ describe('bootSweep', () => {
 });
 
 describe('registerShutdown', () => {
-  // Test 4 (complex): registration is once-only; handler does precise close
-  it('registers once and the handler closes exactly the env session', () => {
-    const before = {
-      exit: process.listeners('exit'),
-      sigint: process.listeners('SIGINT'),
-      sigterm: process.listeners('SIGTERM'),
-    };
-
-    registerShutdown('/vault');
+  // Test 4 (complex): delegates to the shared finalizer with the right opts
+  it('delegates to the shared finalizer (guard=isMaencofVault, detached)', () => {
     registerShutdown('/vault');
 
-    const added = {
-      exit: process.listeners('exit').filter((l) => !before.exit.includes(l)),
-      sigint: process
-        .listeners('SIGINT')
-        .filter((l) => !before.sigint.includes(l)),
-      sigterm: process
-        .listeners('SIGTERM')
-        .filter((l) => !before.sigterm.includes(l)),
-    };
-    expect(added.exit).toHaveLength(1);
-    expect(added.sigint).toHaveLength(1);
-    expect(added.sigterm).toHaveLength(1);
+    expect(registerShutdownFinalizerMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ctx: '/vault',
+        guard: isMaencofVault,
+        detached: true,
+        onShutdown: expect.any(Function),
+      }),
+    );
+  });
 
-    // invoke the exit handler directly (it never calls process.exit itself)
+  // Test 5 (complex): onShutdown closes exactly the env session, else turn-context only
+  it('onShutdown closes exactly the env session, turn-context only without it', () => {
+    registerShutdown('/vault');
+    const opts = registerShutdownFinalizerMock.mock.calls.at(-1)?.[0] as {
+      onShutdown: (v: string) => void;
+    };
+
     process.env.CLAUDE_CODE_SESSION_ID = 'own-session';
-    (added.exit[0] as () => void)();
-
+    opts.onShutdown('/vault');
     expect(calls).toEqual([
       'turnContext',
       'sweep',
@@ -187,25 +182,7 @@ describe('registerShutdown', () => {
     // without the env var only turn-context is cleaned (sweep deferred to boot)
     calls.length = 0;
     delete process.env.CLAUDE_CODE_SESSION_ID;
-    (added.exit[0] as () => void)();
+    opts.onShutdown('/vault');
     expect(calls).toEqual(['turnContext']);
-
-    // SIGINT/SIGTERM additionally spawns the detached --finalize process
-    // (heavy completion off the grace window), then exits.
-    const exitSpy = vi
-      .spyOn(process, 'exit')
-      .mockImplementation((() => undefined) as never);
-    (added.sigint[0] as () => void)();
-    expect(spawnDetachedMock).toHaveBeenCalledWith(process.execPath, [
-      process.argv[1],
-      '--finalize',
-      '/vault',
-    ]);
-    expect(exitSpy).toHaveBeenCalledWith(0);
-    exitSpy.mockRestore();
-
-    for (const l of added.exit) process.removeListener('exit', l);
-    for (const l of added.sigint) process.removeListener('SIGINT', l);
-    for (const l of added.sigterm) process.removeListener('SIGTERM', l);
   });
 });

@@ -9,7 +9,7 @@ status: implemented
 
 # 세션 완결 detached finalizer — "다음 부팅 의존" 갭 해소
 
-> 상태: **구현 완료**(2026-07-12) — §9 권장안 전항 채택, §8은 mcp-server 번들 재사용으로 개선(아래). 관련: [기억 라이프사이클](./13-memory-lifecycle.md) · [크래시 복구](./15-crash-recovery.md) · [한계와 제약](./26-constraints-and-limitations.md)
+> 상태: **구현 완료**(2026-07-12) — §9 권장안 전항 채택, §8은 mcp-server 번들 재사용 + shared `@ogham/session-finalizer` 위임으로 개선(아래). 관련: [기억 라이프사이클](./13-memory-lifecycle.md) · [크래시 복구](./15-crash-recovery.md) · [한계와 제약](./26-constraints-and-limitations.md)
 
 ## 1. Problem
 
@@ -75,16 +75,16 @@ detached finalizer 실행 중 사용자가 **빠르게 재개** → 다음 MCP b
 
 원칙: finalizer는 bootSweep의 **가속**일 뿐, 새 단일 실패점이 아니다. 모든 실패가 기존 보장 경로로 흡수된다.
 
-## 8. Build integration (구현: mcp-server 번들 재사용)
+## 8. Build integration (구현: mcp-server 번들 재사용 + shared 런타임)
 
-ADV-002(MCP 코드=배럴)로 finalizer(=MCP 코드, 무거운 bootSweep 체인)를 훅류 byte-cap 번들로 만드는 게 부적합해져, **별도 번들 대신 mcp-server 번들을 재사용**한다:
+ADV-002(MCP 코드=배럴)로 finalizer(=MCP 코드, 무거운 bootSweep 체인)를 훅류 byte-cap 번들로 만드는 게 부적합해져, **별도 번들 대신 mcp-server 번들을 재사용**한다. 스폰·디스패치 배선은 공유 런타임 **`@ogham/session-finalizer`**(Type P)에 위임한다:
 
-- `serverEntry.ts`에 `--finalize <vaultPath>` 분기 — argv 매치 시 `bootSweep(vaultPath)` 1회 후 exit(server 미기동).
-- `registerShutdown`이 `spawnDetached(process.execPath, [process.argv[1], '--finalize', vaultPath])` — 실행 중인 `bridge/mcp-server.cjs`를 재실행. 새 빌드 스텝·byte-cap·bootSweep 중복 없음. `process.argv[1]`로 번들 경로 자동 해석.
+- `serverEntry.ts`가 `runFinalizer(process.argv, bootSweep)` — argv `--finalize <vaultPath>` 매치 시 `bootSweep(vaultPath)` 1회 후 exit(server 미기동).
+- `registerShutdown`이 `registerShutdownFinalizer({ ctx: vaultPath, guard: isMaencofVault, onShutdown, detached: true })` — SIGINT/SIGTERM 시 `spawnDetached(process.execPath, [process.argv[1], '--finalize', vaultPath])`로 실행 중인 `bridge/mcp-server.cjs`를 재실행. 새 빌드 스텝·byte-cap·bootSweep 중복 없음. `process.argv[1]`로 번들 경로 자동 해석.
 
 ## 9. Decisions (구현: 전 항목 권장안 채택)
 
-1. **daemon 헬퍼**: `@ogham/cross-platform/spawn::spawnDetached` 신설(fire-and-forget, no-throw). ✅
+1. **daemon 헬퍼**: `@ogham/cross-platform/spawn::spawnDetached` 신설(fire-and-forget, no-throw); 스폰·디스패치 배선은 `@ogham/session-finalizer` 공유 런타임으로 추출. ✅
 2. **동시성 dedup**: index.lock+멱등 의존 — finalizing 마커 미도입(경합 관측 시 추가). ✅
 3. **finalizer 범위**: `bootSweep` 전체 재실행(멱등). ✅
 4. **스폰 지점**: SIGINT/SIGTERM 핸들러만('exit' 핸들러는 스폰 없음 — 동기 마감만). ✅
