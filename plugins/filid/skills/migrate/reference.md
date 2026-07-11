@@ -20,11 +20,11 @@ or `sed` required, so it behaves identically on macOS, Linux, and Windows.
 node migrate.mjs <target-path> [--dry-run|--execute] [--auto-commit]
 ```
 
-| Argument        | Description                                   |
-| --------------- | --------------------------------------------- |
-| `<target-path>` | Directory to scan (defaults to `.`)           |
-| `--dry-run`     | Preview mode — no files modified (default)    |
-| `--execute`     | Perform renames and reference updates         |
+| Argument        | Description                                             |
+| --------------- | ------------------------------------------------------- |
+| `<target-path>` | Directory to scan (defaults to `.`)                     |
+| `--dry-run`     | Preview mode — no files modified (default)              |
+| `--execute`     | Perform renames and reference updates                   |
 | `--auto-commit` | Commit the migration changes after successful execution |
 
 ---
