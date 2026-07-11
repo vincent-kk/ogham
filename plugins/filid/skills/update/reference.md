@@ -38,7 +38,7 @@ Restrict scan to changed files only:
 mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 
-mcp__plugin_filid_t__test_metrics({ action: "check-312", files: [{ filePath, content }] })
+mcp__plugin_filid_t__test_metrics({ action: "check-gate", files: [{ filePath, content }] })
 // Returns: { violations: TestViolation[], summary: { total, passing, failing } }
 ```
 
@@ -145,7 +145,7 @@ For each changed source file:
 mcp__plugin_filid_t__ast_analyze({ source: "<source>", analysisType: "full" })
 // Checks LCOM4, CC metrics → recommends module split or compression
 
-mcp__plugin_filid_t__test_metrics({ action: "check-312", files: [...] })
+mcp__plugin_filid_t__test_metrics({ action: "check-gate", files: [...] })
 // Validates 3+12 rule compliance
 ```
 

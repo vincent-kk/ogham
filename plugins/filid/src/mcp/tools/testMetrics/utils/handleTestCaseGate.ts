@@ -1,20 +1,20 @@
 import { countTestCases } from '../../../../metrics/testCounter/testCounter.js';
-import { check312Rule } from '../../../../metrics/threePlusTwelve/threePlusTwelve.js';
+import { checkTestCaseGate } from '../../../../metrics/testCaseGate/testCaseGate.js';
 import type {
   TestFileInput,
-  ThreePlusTwelveViolation,
+  TestCaseGateViolation,
 } from '../testMetrics.js';
 
-export function handleCheck312(files: TestFileInput[]): {
-  violations: ThreePlusTwelveViolation[];
+export function handleTestCaseGate(files: TestFileInput[]): {
+  violations: TestCaseGateViolation[];
 } {
   const testCaseCounts = files.map((f) =>
     countTestCases({ filePath: f.filePath, content: f.content }),
   );
 
-  const result = check312Rule(testCaseCounts);
+  const result = checkTestCaseGate(testCaseCounts);
 
-  const violations: ThreePlusTwelveViolation[] = result.violatingFiles.map(
+  const violations: TestCaseGateViolation[] = result.violatingFiles.map(
     (fp) => {
       const entry = testCaseCounts.find((c) => c.filePath === fp);
       return {

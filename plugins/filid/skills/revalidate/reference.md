@@ -93,7 +93,7 @@ returns ready-to-post markdown. Post via `gh pr comment --body`.
 | ------------------- | --------------------------------------------------------- | ---------------------- |
 | LCOM4 violation     | `mcp__plugin_filid_t__ast_analyze(lcom4)`                 | LCOM4 < 2              |
 | CC violation        | `mcp__plugin_filid_t__ast_analyze(cyclomatic-complexity)` | CC <= 15               |
-| 3+12 violation      | `mcp__plugin_filid_t__test_metrics(check-312)`            | All files PASS         |
+| 3+12 violation      | `mcp__plugin_filid_t__test_metrics(check-gate)`            | All files PASS         |
 | Structure violation | `mcp__plugin_filid_t__structure_validate`                 | No matching violations |
 | Circular dependency | `mcp__plugin_filid_t__ast_analyze(dependency-graph)`      | No cycles              |
 | Drift               | `mcp__plugin_filid_t__drift_detect`                       | No drift               |

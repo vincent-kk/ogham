@@ -52,10 +52,10 @@ A stage with an empty input list is recorded `SKIP`.
    (`code-fix`).
 2. **Test compliance (3+12)** — the cap is **spec-only**. For each
    `CHANGED_SPEC_FILES` (`*.spec.ts`) entry:
-   `mcp__plugin_filid_t__test_metrics(action: "check-312", ...)` (+
+   `mcp__plugin_filid_t__test_metrics(action: "check-gate", ...)` (+
    `count` / `decide` for split hints). Total > 15 cases → FAIL
    (split / parameterize the spec). `.test.ts` files are EXEMPT —
-   `check-312` intentionally returns empty for them (that is correct, not a
+   `check-gate` intentionally returns empty for them (that is correct, not a
    broken tool; never manually re-report a `.test.ts` as a 3+12 violation).
    A large, stable `.test.ts` (`CHANGED_TEST_FILES`) is at most a WARN
    "candidate for `/filid:promote`", never a FAIL.

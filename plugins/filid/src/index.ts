@@ -116,7 +116,7 @@ export type {
 
 // Metrics
 export { countTestCases } from './metrics/testCounter/testCounter.js';
-export { check312Rule } from './metrics/threePlusTwelve/threePlusTwelve.js';
+export { checkTestCaseGate } from './metrics/testCaseGate/testCaseGate.js';
 export { decide } from './metrics/decisionTree/decisionTree.js';
 export { checkPromotionEligibility } from './metrics/promotionTracker/promotionTracker.js';
 

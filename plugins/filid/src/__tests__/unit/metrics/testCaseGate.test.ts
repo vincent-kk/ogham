@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { check312Rule } from '../../../metrics/threePlusTwelve/threePlusTwelve.js';
+import { checkTestCaseGate } from '../../../metrics/testCaseGate/testCaseGate.js';
 import type { TestCaseCount } from '../../../types/metrics.js';
 
 const specFile = (
@@ -16,13 +16,13 @@ const specFile = (
   complex: Math.max(0, complex),
 });
 
-describe('three-plus-twelve', () => {
+describe('test-case-gate', () => {
   it('should pass when all spec files are within limit', () => {
     const files = [
       specFile('/app/auth.spec.ts', 10),
       specFile('/app/user.spec.ts', 15),
     ];
-    const result = check312Rule(files);
+    const result = checkTestCaseGate(files);
     expect(result.violated).toBe(false);
     expect(result.violatingFiles).toHaveLength(0);
   });
@@ -32,7 +32,7 @@ describe('three-plus-twelve', () => {
       specFile('/app/auth.spec.ts', 16),
       specFile('/app/user.spec.ts', 10),
     ];
-    const result = check312Rule(files);
+    const result = checkTestCaseGate(files);
     expect(result.violated).toBe(true);
     expect(result.violatingFiles).toContain('/app/auth.spec.ts');
     expect(result.violatingFiles).toHaveLength(1);
@@ -40,7 +40,7 @@ describe('three-plus-twelve', () => {
 
   it('should pass at exactly 15 test cases', () => {
     const files = [specFile('/app/auth.spec.ts', 15)];
-    const result = check312Rule(files);
+    const result = checkTestCaseGate(files);
     expect(result.violated).toBe(false);
   });
 
@@ -50,7 +50,7 @@ describe('three-plus-twelve', () => {
       specFile('/app/b.spec.ts', 18),
       specFile('/app/c.spec.ts', 5),
     ];
-    const result = check312Rule(files);
+    const result = checkTestCaseGate(files);
     expect(result.violated).toBe(true);
     expect(result.violatingFiles).toHaveLength(2);
   });
@@ -66,13 +66,13 @@ describe('three-plus-twelve', () => {
       },
       specFile('/app/b.spec.ts', 5),
     ];
-    const result = check312Rule(files);
+    const result = checkTestCaseGate(files);
     expect(result.violated).toBe(false);
     expect(result.files).toHaveLength(1); // only spec files
   });
 
   it('should return empty result for no files', () => {
-    const result = check312Rule([]);
+    const result = checkTestCaseGate([]);
     expect(result.violated).toBe(false);
     expect(result.files).toHaveLength(0);
     expect(result.violatingFiles).toHaveLength(0);

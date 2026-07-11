@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`test.ts`/`spec.ts` 파일 내용을 줄 단위로 스캔해 `it()`/`test()` 호출 수를 기본(basic) 케이스와 복잡(complex) 케이스로 분류한다. `threePlusTwelve` 규칙과 `decisionTree`가 이 결과를 소비한다.
+`test.ts`/`spec.ts` 파일 내용을 줄 단위로 스캔해 `it()`/`test()` 호출 수를 기본(basic) 케이스와 복잡(complex) 케이스로 분류한다. `testCaseGate` 규칙과 `decisionTree`가 이 결과를 소비한다.
 
 ## Structure
 
