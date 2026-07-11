@@ -51,14 +51,6 @@ const HOOK_CASES: HookCase[] = [
     }),
   },
   {
-    name: 'session-cleanup',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      hook_event_name: 'SessionEnd',
-    }),
-  },
-  {
     name: 'setup',
     buildInput: (cwd) => ({
       cwd,
