@@ -6,8 +6,9 @@ MCP server-process session lifecycle — the replacement for the removed Session
 
 ## Structure
 
-- `bootSweep.ts` — turn-context 폐기 → stale 세션 sweep(+digest) → personal-context prune → changelogDebt → archiveExpired → vaultCommitter(마지막)
-- `registerShutdown.ts` — exit/SIGINT/SIGTERM 1회 등록; 동기 경량만 (turn-context + env session_id 정밀 마감·캐시 삭제)
+- `index.ts` — barrel (operations/ 재노출)
+- `operations/bootSweep.ts` — turn-context 폐기 → stale 세션 sweep(+digest) → personal-context prune → changelogDebt → archiveExpired → vaultCommitter(마지막)
+- `operations/registerShutdown.ts` — exit/SIGINT/SIGTERM 1회 등록; 동기 경량만 (turn-context + env session_id 정밀 마감·캐시 삭제)
 
 ## Conventions
 

@@ -1,2 +1,2 @@
-export { bootSweep } from './bootSweep.js';
-export { registerShutdown } from './registerShutdown.js';
+export { bootSweep } from './operations/bootSweep.js';
+export { registerShutdown } from './operations/registerShutdown.js';
