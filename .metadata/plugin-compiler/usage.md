@@ -81,13 +81,13 @@ hooks: # 선택: event 별 fallback 오버라이드 (§5)
 
 `plugin.yaml: hooks:` 로 event 별 오버라이드(미지정 시 event 기본값). 값:
 
-| fallback              | 의미                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `pre-invocation-once` | agy `PreInvocation` + 러너 once-guard (SessionStart·UserPromptSubmit 기본)                                             |
-| `stale-sweep`         | 정리성 — Claude 는 native 훅 유지, agy/codex 드롭 + 다음-부팅 MCP sweep 보상 (SessionEnd 기본)                         |
-| `stop`                | agy `Stop`(매 턴 종료) — **경량 작업 한정 opt-in**                                                                     |
-| `mcp-lifecycle`       | **전 호스트(Claude 포함) 훅 미emit** — MCP 서버 shutdown 핸들러가 소유. SessionEnd 를 서버로 이전할 때. 손실 경고 없음 |
-| `drop`                | 전 호스트 생략 + 손실 경고                                                                                             |
+| fallback              | 의미                                                                                                                                                                                |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-invocation-once` | agy `PreInvocation` + 러너 once-guard (SessionStart·UserPromptSubmit 기본)                                                                                                          |
+| `stale-sweep`         | 정리성 — Claude 는 native 훅 유지, agy/codex 드롭 + 다음-부팅 MCP sweep 보상 (오버라이드 전용)                                                                                      |
+| `stop`                | agy `Stop`(매 턴 종료) — **경량 작업 한정 opt-in**                                                                                                                                  |
+| `mcp-lifecycle`       | **전 호스트(Claude 포함) 훅 미emit** — MCP 서버 수명주기가 소유(`@ogham/session-finalizer`: shutdown 등록 + detached finalizer + boot-sweep). **SessionEnd 기본값**. 손실 경고 없음 |
+| `drop`                | 전 호스트 생략 + 손실 경고                                                                                                                                                          |
 
 ⚠️ **agy `Stop` 은 매 실행 루프(턴) 종료마다 발화** — Claude `SessionEnd`(세션당 1회)와 다르다. 무거운 SessionEnd(정리/커밋/recap)를 `stop` 으로 매핑하지 말 것. 정리성은 `stale-sweep`, 서버 이전은 `mcp-lifecycle`.
 

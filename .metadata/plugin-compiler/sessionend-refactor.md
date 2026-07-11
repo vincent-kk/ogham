@@ -146,7 +146,7 @@ SessionEnd 훅     MCP shutdown                  다음 세션 boot-sweep
 - **event-source 저널**: Type R(recap)·Type P(commit) 는 세션 중 **델타를 append**(경량). finalize/boot 는 무겁게 재계산하지 않고 **누적분을 완결**. 모델-필요 recap 도 다음 boot(모델 접근 가능한 살아있는 서버)에서 조립 → **결과 보존, 시점만 다음 세션으로 지연**.
 - **트리거 계층**: Claude 는 SessionEnd 로 즉시·완전. Codex/agy 는 shutdown 로 best-effort, 못 끝내면 boot-sweep 로 반드시 완결.
 
-- **컴파일러 지원**: `mcp-lifecycle`(훅 미emit) + **런타임 라이브러리 신설**(`@ogham/session-finalizer`: finalize 등록·저널·멱등가드·boot-sweep). 컴파일러는 훅을 안 내고, 런타임이 소유 → 정본은 `hooks: { SessionEnd: mcp-lifecycle }` 만.
+- **컴파일러 지원**: `mcp-lifecycle`(훅 미emit) + **런타임 라이브러리 신설됨**(`@ogham/session-finalizer`: shutdown 등록·detached finalizer 디스패치·boot-sweep 위임). 컴파일러는 훅을 안 내고(SessionEnd 기본값), 런타임이 소유. **저널·멱등가드(event-source recap 지연완결)는 후속(미구현)** — 현재는 옵션 1(shutdown 직접) + detached finalizer 골격.
 - **파괴성**: 🟠 **중~높음** — 그러나 **의미 보존형**. SessionEnd 로직을 finalizer + 저널로 재작성 + 런타임 라이브러리 도입(공유). 인프라는 최대이나 플러그인은 **한 번만** 작성.
 - **커버리지**: Type C 🟢 / Type P 🟢 / **Type R 🟢(지연 완결)** — 원 의미(결국 recap·commit 이 완전히 일어남)를 유일하게 보존.
 - **장**: 의미 최대 보존, 플러그인 코드 단일화, "세션 종료 트리거 신뢰성"에 대한 의존 제거(boot-sweep 보장). Claude 는 여전히 즉시.
@@ -187,11 +187,11 @@ SessionEnd 훅     MCP shutdown                  다음 세션 boot-sweep
 ## 7. 우리 설계와의 연동
 
 - **컴파일러 (완료)**: `mcp-lifecycle` fallback — SessionEnd 를 전 호스트 훅에서 미emit, 손실 경고 없음(런타임 소유 선언). 옵션 1·3 의 컴파일러 측 지원은 끝. 옵션 2 는 `stop`+`mcp-lifecycle` 두 훅 선언으로 가능(하이브리드 표현 개선은 후속).
-- **런타임 (미구현, Stage D)**:
-  - 옵션 1: 각 플러그인 서버에 shutdown 핸들러(SIGTERM/stdin close).
-  - 옵션 2: Stop 수집기(agy 러너 어댑터 전제) + shutdown 처리기.
-  - 옵션 3: `@ogham/session-finalizer`(finalize 등록·저널·멱등·boot-sweep) — shared 워크스페이스 신설.
-  - 공통: **MCP-부팅 stale-sweep**(다음 세션 시작 시 지난 세션 잔여 완결) — [TODO.md](./TODO.md) §4.
+- **런타임 (부분 구현)**:
+  - 옵션 1: 각 플러그인 서버에 shutdown 핸들러(SIGTERM/stdin close) — maencof 는 `@ogham/session-finalizer` 경유로 완료.
+  - 옵션 2: Stop 수집기(agy 러너 어댑터 전제) + shutdown 처리기 — 미구현.
+  - 옵션 3: `@ogham/session-finalizer` — shared 워크스페이스 **신설됨**(registerShutdownFinalizer: shutdown 등록·onShutdown·detached 스폰; runFinalizer: 엔트리 디스패치). **저널·멱등가드(event-source)는 후속** — 현재는 옵션 1 + detached finalizer + boot-sweep 골격.
+  - 공통: **MCP-부팅 stale-sweep**(다음 세션 시작 시 지난 세션 잔여 완결) — maencof bootSweep 구현됨, filid·imbas 미이관. [TODO.md](./TODO.md) §4.
 - **마이그레이션 순서**: SessionEnd 이관은 **플러그인별·이 PR 무관**. 정리 전용(filid·imbas)부터 옵션 1, maencof 는 옵션 3. [TODO.md](./TODO.md) §3·§5.
 
 ---

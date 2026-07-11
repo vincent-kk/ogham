@@ -61,13 +61,13 @@
   - 동기/빠른 정리(filid 캐시·imbas) → 신뢰.
   - git commit(maencof vault) → best-effort(호스트 grace 후 SIGKILL 가능) + MCP-부팅 sweep 안전망.
   - LLM recap(maencof) → shutdown 시 불가 → **증분화**(세션 중 누적) 또는 Claude 한정 손실.
-- 컴파일러 지원(완료): `plugin.yaml: hooks: { SessionEnd: mcp-lifecycle }` 선언 시 SessionEnd 를 **전 호스트 훅에서 미emit**(Claude 포함), 손실 경고 없음. 각 플러그인이 서버 이전을 마치면 이 오버라이드를 정본에 추가(또는 hooks.json 에서 SessionEnd 자체 제거).
+- 컴파일러 지원(완료): SessionEnd **기본 fallback = `mcp-lifecycle`**(parseHooks) — plugin.yaml 오버라이드 없이도 전 호스트 훅에서 미emit(Claude 포함), 손실 경고 없음. 런타임은 `@ogham/session-finalizer`(shutdown 등록 + detached finalizer + boot-sweep)가 소유. **maencof 이관 완료**; filid·imbas 는 §5 순서로 미이관.
 - 이 작업은 **이 PR 무관** — 플러그인별 런타임 변경으로 별도 진행.
 
 ## 4. Stage D 인프라 (플러그인 공통)
 
 - [ ] 러너 어댑터(agy stdin 계약·once-guard·tool_name 역매핑).
-- [ ] MCP-부팅 sweep 런타임(SessionEnd 정리 보상).
+- [~] MCP-부팅 sweep 런타임(SessionEnd 정리 보상): `@ogham/session-finalizer` 신설 + maencof bootSweep/finalizer 이관 완료; filid·imbas 미이관.
 - [ ] 빌드 파이프라인 `compile:plugin` 스텝(사용 가이드 §7) + `bridge` 뒤 삽입.
 - [ ] 루트 마켓플레이스 emit: `.claude-plugin/marketplace.json`(→targets/claude) + `.agents/plugins/marketplace.json`(codex) + `.agents/plugins.json` declared(agy).
 - [ ] Codex 에이전트 설치 스텝: `.codex-agents/*.toml` → `~/.codex/agents/` 또는 repo `.codex/agents/`(setup 스킬).

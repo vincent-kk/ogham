@@ -1,7 +1,8 @@
 ---
 created: 2026-07-12
 updated: 2026-07-12
-tags: [handoff, session-finalizer, mcp-lifecycle, plugin-compiler, shared-runtime]
+tags:
+  [handoff, session-finalizer, mcp-lifecycle, plugin-compiler, shared-runtime]
 layer: handoff
 status: in-progress
 ---
@@ -67,19 +68,26 @@ export function runFinalizer(
 ```
 
 **maencof 이관 예시(목표 형태):**
+
 ```ts
 // serverEntry.ts
-if (runFinalizer(process.argv, (ctx) => bootSweep(ctx))) {/* handled, 서버 미기동 */}
-else { /* companion 마이그레이션 + startServer() */ }
+if (runFinalizer(process.argv, (ctx) => bootSweep(ctx))) {
+  /* handled, 서버 미기동 */
+} else {
+  /* companion 마이그레이션 + startServer() */
+}
 
 // registerShutdown 자리 (startServer가 호출)
 registerShutdownFinalizer({
   ctx: vaultPath,
   guard: isMaencofVault,
-  onShutdown: (v) => { removeTurnContext(v); /* env session_id 정밀 마감·digest·캐시삭제 */ },
+  onShutdown: (v) => {
+    removeTurnContext(v); /* env session_id 정밀 마감·digest·캐시삭제 */
+  },
   detached: true,
 });
 ```
+
 **filid/imbas**: `detached` 생략(또는 false) → 동기 cleanup만, 스폰 없음. (filid: onShutdown=cleanupOwnSessionCache; imbas: 세션종료 작업 없음 → 아래 §5 판단.)
 
 **의존**: `@ogham/cross-platform/spawn`의 `spawnDetached`. (spawn 로직 재구현 금지 — plugins/\*는 child_process 직접 금지, cross-platform 경유.)
@@ -92,6 +100,7 @@ registerShutdownFinalizer({
 **워크스페이스**: 루트 `package.json` `workspaces` = `["mcp-servers/*","plugins/*","shared/*","tools/*"]` → `shared/session-finalizer`는 자동 포함. `yarn workspace @ogham/session-finalizer <script>`.
 
 **템플릿**: `shared/cross-platform` 구조 복제.
+
 - `package.json`: name `@ogham/session-finalizer`, `private:true`, `type:"module"`, `sideEffects:false`, `exports: { ".": { types:"./dist/index.d.ts", import:"./dist/index.js" } }`, `main`/`types` → dist, scripts `build`(=`yarn clean && tsc -p tsconfig.build.json`)·`clean`·`typecheck`·`test`·`test:run`·`format`, devDeps: `@types/node ^20`, `typescript ^5.7`, `vitest ^4.1.10`. dependencies: `@ogham/cross-platform`(`workspace:^`). (spawn 타입 위해.)
 - `tsconfig.json`: `extends ../../tsconfig.base.json`, `outDir ./dist`, `rootDir ./src`, `types:["node"]`, `exclude:[...,"src/**/__tests__/**"]`.
 - `tsconfig.build.json`: extends tsconfig.json, `noEmit:false`, `declaration:true`, `declarationMap:true`.
@@ -130,10 +139,12 @@ registerShutdownFinalizer({
 ## 5. Phase 4 — filid + imbas 이관
 
 **현재 상태(실측):**
+
 - **filid**: 동기-only 수명주기. `plugins/filid/src/mcp/server/registerShutdown.ts`(exit/SIGINT/SIGTERM → `cleanupOwnSessionCache`), `cleanupOwnSessionCache.ts`(동기, ~400ms grace), `bootSweep.ts`(동기 throttle-gated prune), `startServer.ts:8-14` 배선. **spawnDetached·--finalize 없음**. lifecycle이 `operations/`로 분해 안 됨(flat: `mcp/server/{registerShutdown,bootSweep,cleanupOwnSessionCache}.ts`). serverEntry에 --finalize 분기 없음.
 - **imbas**: **수명주기 전무**. `plugins/imbas/src/mcp/server/server.ts:362-366` startServer는 transport connect만. registerShutdown/bootSweep/SessionEnd/sweep 없음. SessionEnd는 원래 **no-op**이었고 `549209b5`에서 제거됨 → **세션종료 작업 없음**.
 
 **이관 방침:**
+
 - **filid** (Type C, 동기): `registerShutdownFinalizer({ ctx: <projectRoot>, onShutdown: cleanupOwnSessionCache, /* detached 생략 */ })`로 수제 등록 교체. bootSweep(동기 prune)은 boot 폴백 유지. filid가 비동기 세션종료 작업이 **없으면 detached 불필요**(동기 경로만). filid `package.json`에 `@ogham/session-finalizer` 의존 추가. **filid는 훅 배럴 금지 규율 有** — 단 이 코드는 mcp/server(=배럴 경유 정상). filid도 `hooks: { SessionEnd: mcp-lifecycle }` 정본 선언 대상(컴파일러 마이그레이션 시).
 - **imbas**: 세션종료 작업이 실제로 없으면 **registerShutdownFinalizer 도입 불필요**(빈 onShutdown은 무의미). 단 향후 정리작업이 생기면 shared 런타임 사용. **먼저 imbas가 정말 세션종료 작업이 0인지 재확인**(hooks.json·server.ts 전수) 후, 0이면 "Phase 4 imbas = 변경 없음(런타임 불요)"로 문서화, 있으면 filid와 동일 이관.
 - **주의**: filid/imbas 이관은 ADR상 **플러그인별 decoupled** — maencof/Phase1-3와 독립 커밋. 각각 typecheck+test+build:plugin(bridge 복원).
