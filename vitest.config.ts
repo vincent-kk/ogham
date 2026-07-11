@@ -13,6 +13,7 @@ export default defineConfig({
       "./plugins/maencof-lens",
       "./shared/cross-platform",
       "./shared/http-guard",
+      "./shared/session-finalizer",
     ],
   },
 });
