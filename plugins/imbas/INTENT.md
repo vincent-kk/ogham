@@ -8,7 +8,7 @@
 | ---------------------------- | ---------------------------------------------- |
 | `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md) |
 | `agents/`                    | 역할별 에이전트 (analyst, planner, engineer)   |
-| `hooks/`                     | 5개 lifecycle 훅 매핑 (hooks/INTENT.md 참조)   |
+| `hooks/`                     | 4개 lifecycle 훅 매핑 (hooks/INTENT.md 참조)   |
 | `skills/`                    | 사용자 스킬 디렉토리                           |
 | `libs/`                      | cross-platform Node 러너                       |
 | `scripts/`                   | esbuild 빌드 스크립트                          |

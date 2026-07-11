@@ -43,9 +43,16 @@ const LIGHT_HOOK_BYTES = 10 * 1024;
 const hookEntries = [
   { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
   { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'context-injector', entry: 'contextInjector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'agent-enforcer', entry: 'agentEnforcer', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'session-cleanup', entry: 'sessionCleanup', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'context-injector',
+    entry: 'contextInjector',
+    maxBytes: HEAVY_HOOK_BYTES,
+  },
+  {
+    name: 'agent-enforcer',
+    entry: 'agentEnforcer',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
 ];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
