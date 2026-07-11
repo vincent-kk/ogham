@@ -125,12 +125,14 @@ fallback: stale-sweep # ★ 호스트에 event 부재/훅 자체 부재 시 (§4
 
 `event` 가 호스트 프로파일의 지원 집합에 없거나(agy 의 SessionStart·SessionEnd·UserPromptSubmit), 호스트가 플러그인 훅 자체를 지원하지 않을 때(Codex) emitter 동작:
 
-| `fallback`            | agy 에서                                                   | Codex 에서 (훅 채널 없음)                         |
-| --------------------- | ---------------------------------------------------------- | ------------------------------------------------- |
-| `pre-invocation-once` | `PreInvocation` 재배선 + 러너 once-guard (세션당 1회 근사) | skill lazy-init 지시 주입 + `AGENTS.md` 서술      |
-| `stale-sweep`         | `Stop` 재배선 (또는 PreInvocation sweep)                   | MCP 서버 기동 시 sweep (런타임이 sweep 모드 지원) |
-| `stop`                | `Stop` 재배선                                              | 드롭 + 경고                                       |
-| `drop`                | 생략 + 빌드 경고                                           | 생략 + 빌드 경고                                  |
+| `fallback`            | agy 에서                                                                            | Codex 에서 (훅 채널 없음)                         |
+| --------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `pre-invocation-once` | `PreInvocation` 재배선 + 러너 once-guard (세션당 1회 근사)                          | skill lazy-init 지시 주입 + `AGENTS.md` 서술      |
+| `stale-sweep`         | **드롭 + MCP 서버 기동 시 sweep** (agy `Stop` 은 매 턴 발화라 SessionEnd 매핑 금지) | MCP 서버 기동 시 sweep (런타임이 sweep 모드 지원) |
+| `stop`                | `Stop` 재배선 (경량 턴-종료 작업 한정 opt-in)                                       | 드롭 + 경고                                       |
+| `drop`                | 생략 + 빌드 경고                                                                    | 생략 + 빌드 경고                                  |
+
+- **핵심**: agy `Stop` 은 Claude `Stop` 처럼 **매 실행 루프(턴) 종료마다** 발화하며 세션당 1회가 아니다. 따라서 SessionEnd(무거운 정리/커밋/recap)를 `Stop` 으로 재배선하면 매 턴 실행된다 — `stale-sweep` 이 이를 agy 훅에서 제거하고 MCP-기동 sweep 으로 보상한다. `stop` 은 진짜 경량 작업에 한해 opt-in.
 
 - 지원 이벤트(agy): `PreToolUse`/`PostToolUse` 는 matcher 를 프로파일 번역표로 재작성(Claude `Write|Edit` → agy 도구명 regex — 어휘는 Stage 1 실측으로 확정). 번역 불가 matcher 는 빌드 경고.
 - stdin/응답 계약 차이는 정본이 아니라 **러너 어댑터** 소관 ([compiler-architecture.md](./compiler-architecture.md) §5) — 훅 구현은 Claude 계약만 알면 된다.

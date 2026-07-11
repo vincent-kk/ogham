@@ -63,13 +63,13 @@ emit 결과:
 
 현행 5 훅: SessionStart(setup) · PreToolUse(Read|Write|Edit 가드) · SubagentStart(agent-enforcer) · UserPromptSubmit · SessionEnd(session-cleanup).
 
-| 정본 (논리 이벤트)                          | Claude emit | Codex emit (훅 채널 없음 — 실측)                                                          | agy emit                                                 |
-| ------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| SessionStart, fallback: pre-invocation-once | 그대로      | skill lazy-init 지시 + `AGENTS.md`                                                        | `PreInvocation` + once-guard                             |
-| PreToolUse (Read\|Write\|Edit)              | 그대로      | **드롭** + AGENTS.md 규칙 서술                                                            | `PreToolUse` + matcher 번역 (agy 도구 어휘 ⚠️Stage 실측) |
-| SubagentStart                               | 그대로      | 드롭 + 경고                                                                               | 드롭 + 경고 (대응 이벤트 없음)                           |
-| UserPromptSubmit                            | 그대로      | 드롭                                                                                      | `PreInvocation` (경량 페이로드로 재작성)                 |
-| SessionEnd, fallback: stale-sweep           | 그대로      | **MCP 서버 기동 시 sweep** (`cacheManager.sweepStaleSessions(exceptId)` 런타임 소폭 보강) | `Stop` 재배선                                            |
+| 정본 (논리 이벤트)                          | Claude emit | Codex emit (훅 채널 없음 — 실측)                                                          | agy emit                                                                     |
+| ------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| SessionStart, fallback: pre-invocation-once | 그대로      | skill lazy-init 지시 + `AGENTS.md`                                                        | `PreInvocation` + once-guard                                                 |
+| PreToolUse (Read\|Write\|Edit)              | 그대로      | **드롭** + AGENTS.md 규칙 서술                                                            | `PreToolUse` + matcher 번역 (agy 도구 어휘 ⚠️Stage 실측)                     |
+| SubagentStart                               | 그대로      | 드롭 + 경고                                                                               | 드롭 + 경고 (대응 이벤트 없음)                                               |
+| UserPromptSubmit                            | 그대로      | 드롭                                                                                      | `PreInvocation` (경량 페이로드로 재작성)                                     |
+| SessionEnd, fallback: stale-sweep           | 그대로      | **MCP 서버 기동 시 sweep** (`cacheManager.sweepStaleSessions(exceptId)` 런타임 소폭 보강) | **드롭 + MCP-기동 sweep** (agy Stop 은 매 턴 발화 — SessionEnd 로 매핑 금지) |
 
 - 재배선의 함정(유지): `SessionEnd` 는 "현재 세션 삭제", sweep 은 "현재 제외 잔여 정리" — 런타임이 두 모드를 지원해야 함.
 - stdin 계약 차이는 러너 어댑터가 흡수 ([compiler-architecture.md](./compiler-architecture.md) §5) — `bridge/*.mjs` 무수정.
@@ -115,11 +115,36 @@ frontmatter 분포(조사 유지): 전원 `model: sonnet`(단 `fractal-architect
 5. **agy 인터랙티브 MCP 기동** — `--print` 미기동이 모드 한정인지 전면인지 (Stage 1). 아울러 공식 MCP 스키마에 `cwd` 필드가 없어(**Stdio: command/args/env 만**) 플러그인 MCP 의 상대 `args` 해석 기준(플러그인 디렉터리 vs 세션 cwd) 실측 필요 — 실패 시 setup 스킬의 절대 경로 주입으로 대체.
 6. agy 도구명·agents 스폰 의미론·PreToolUse matcher 어휘 (Stage 1–2).
 
+### D.1 Stage 1 실측 결과 (2026-07-11, 컴파일러 구현 후 실물 deilen 타깃)
+
+컴파일러가 생성한 **실제 deilen codex 타깃**을 codex 에 설치·기동해 게이트를 실물로 통과:
+
+- ✅ **Codex `cwd: "."` 전략 실물 확정**: `codex mcp list` 이 deilen 서버를 `Cwd=<install-root>/.` 로 등록, `bridge/mcp-server.cjs`(상대 args) 로 **실제 deilen MCP 서버 기동 성공**. PoC 가 아닌 실 서버·실 번들.
+- ✅ **Codex 도구명 실물 확정**: `codex exec` 도구 목록에 `mcp__deilen.render_viewer`·`collect_feedback`·`close_viewer`·`open_settings` 4종 노출. `mcp__<server>.<tool>` + 서버명=플러그인명 오버라이드가 실 플러그인에서 동작.
+- ✅ **agy 구조 수용**: `agy plugin validate targets/agy` → skills 2 + mcpServers 1 processed.
+- ⏳ **잔여 — agy 인터랙티브 MCP 기동**: 헤드리스(`agy --print`)로는 플러그인 MCP 미스폰이라 실 도구명(`mcp_tools_*` 추정) 확정은 인터랙티브 세션 수동 스모크로 남음.
+
+→ deilen(L1) 은 **3-호스트 중 Claude(바이트 등가)·Codex(실 스모크) 통과**, agy 는 구조 수용까지 확인. 실측 게이트 대부분 종결.
+
+### D.2 L2 실측 (2026-07-11, extraction→compile 실물)
+
+hook·agent 보유 플러그인을 `plugin-compiler extract`(현행 산출물 → 정본 역연산) 후 컴파일해 검증:
+
+- **maencof-lens**(최소 L2: 1 hook·1 agent) — Claude 등가 통과. Codex: 훅 미생성 + `researcher.toml`(`sandbox_mode` 를 tools 에서 유도). agy: `hooks.json` named-group(SessionStart→PreInvocation, cwd-상대 커맨드), agent tool 그랜트 `mcp_t_*` 재매핑.
+- **filid**(최대 L2: 19 skills·**14 agents**·**5 hooks**) — **Claude 바이트 등가 통과**(가장 강한 무결손 증명). Codex: 훅 **전량 드롭** + 14 `.codex-agents/*.toml`(write/read-only sandbox 정확 분류). agy: SessionStart/UserPromptSubmit→PreInvocation, PreToolUse matcher 번역(`Read|Write|Edit`→`view_file|write_to_file|replace_file_content`), **SessionEnd·SubagentStart 드롭**(SessionEnd 는 agy Stop 이 매 턴 발화라 무거운 정리를 매 턴 돌리지 않도록 제거 — MCP-기동 sweep 보상). 드롭은 hook-loss 경고로 표면화.
+
+**설계 정정(구현 중 발견)**:
+
+- 오라클 = npm `package.json:files` 가 아니라 **Claude 컴포넌트/런타임 세트**(files 는 agents 를 누락 — npm 용). `.omc`·`.DS_Store`·`INTENT.md`/`DETAIL.md`(FCA 거버넌스)는 설치 콘텐츠가 아니므로 오라클/추출에서 제외.
+- agent frontmatter `tools:` 의 MCP 그랜트는 토큰화 시 YAML 흐름맵으로 오파싱 → AgentIR 은 frontmatter 를 yaml-parse 하지 않고 rawText 보존 + 관용 필드 추출.
+- `{{pluginRoot}}` 은 **MCP args(cwd 전략)와 스킬/agent 프로즈 본문**의 두 컨텍스트 — 프로즈에서는 호스트별 값으로 치환(codex/agy 도 금지 아님). filid `${CLAUDE_PLUGIN_ROOT}/skills/migrate/migrate.sh` 프로즈 참조가 노출한 케이스.
+- 잔여 캐비엇: filid `cross-review/reference.md` 가 Claude 도구명 규약 자체(bare `mcp__plugin_filid_t__`)를 문서화 — 실제 호출 아니라 tool 이름이 없어 토큰화 대상 밖, codex/agy 에서 문서 텍스트로 잔존(기능 무해).
+
 ## E. Open Questions (갱신)
 
 1. ~~생성물 커밋 여부~~ → **커밋으로 결정** (bridge/ 일관, git 설치 지원). 손편집 금지.
 2. ~~`.mcp.json` 단일 vs 분리~~ → **호스트별 파일이 타깃 트리로 물리 분리**되어 무의미화.
 3. **FCA 정합**: `definitions/`(정본)와 `targets/`(산출물)의 노드 분류 — `targets/` 는 organ(생성물, INTENT 불요) 취급이 자연스러우나 zero-peer-file 규칙과의 정합 확인 필요.
-4. **maencof recap/commit**: agy 는 `Stop` 재배선으로 부분 보존 가능. Codex 는 MCP-기동 sweep 만 가능 — recap UX 자체는 드롭. 수용 여부 사용자 결정.
+4. **maencof recap/commit**: agy `Stop` 은 매 턴 발화라 재배선 불가(무거운 commit/recap 을 매 턴 실행하게 됨) — SessionEnd 는 agy·Codex 모두 드롭. 정리성 작업은 MCP-기동 sweep 으로 보상하나, recap/commit UX 자체는 **손실**(hook-loss 경고로 고지). 수용 여부 사용자 결정.
 5. ~~Claude `.mcp.json` 의 `cwd` 지원 여부~~ → **지원 확정** (공식 plugins-reference: cwd 필드 + 전 필드 `${CLAUDE_PLUGIN_ROOT}` 전개 + plugin.json 인라인). 단 Claude emit 은 무결손 원칙상 현행 변수-args 유지, cwd 동형화는 `process.cwd()` 감사 후 선택적 단순화 (matrix §4.1).
 6. Codex `interface` 스토어 메타의 정본 필드(`store:`) 채택 범위.

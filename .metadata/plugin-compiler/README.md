@@ -54,12 +54,23 @@ ogham 플러그인을 **하나의 호스트 중립 정본(IR)** 으로 기술하
 
 ## 문서 목차
 
+**설계 (why/what)**
+
 | 문서                                                     | 내용                                                                                            |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | [host-capability-matrix.md](./host-capability-matrix.md) | 3-호스트 메커니즘 매핑, L1/L2 모델, 실측 확정값(도구명·cwd 전략·훅 계약), 기능 손실 매트릭스    |
 | [ir-schema.md](./ir-schema.md)                           | 정본 IR 스키마 — `plugin.yaml`, skill 토큰 규약(3-호스트), agent `bundle`, hook `fallback` 어휘 |
 | [compiler-architecture.md](./compiler-architecture.md)   | 파이프라인, 프로파일 3종, emitter, `targets/` 배포 트리, 훅 러너 어댑터, 검증(동등성 게이트·CI) |
-| [case-studies.md](./case-studies.md)                     | deilen(L1 PoC) · filid(L2 PoC) · 로드맵 · 잔여 실측 게이트                                      |
+| [case-studies.md](./case-studies.md)                     | deilen(L1) · filid/maencof(L2) · 로드맵 · 실측 게이트 결산(§D)                                  |
+| [implementation-plan.md](./implementation-plan.md)       | 구현 착지본 — 패키지 위치·모듈 트리·IR 타입·단계 실행                                           |
+
+**사용 (how) — 구현체는 [`tools/plugin-compiler/`](../../tools/plugin-compiler/)**
+
+| 문서                                 | 내용                                                                    |
+| ------------------------------------ | ----------------------------------------------------------------------- |
+| [usage.md](./usage.md)               | 사용 가이드 — 정본 작성·CLI·토큰 규약·hook fallback·규칙 (다른 세션용)  |
+| [reproduction.md](./reproduction.md) | 검증 재현 절차 (테스트 미커밋 — extract→compile→verify 로 재확인)       |
+| [TODO.md](./TODO.md)                 | 기존 플러그인 재배치 플레이북 + Stage D 인프라 + SessionEnd→MCP수명주기 |
 
 ## 용어
 
