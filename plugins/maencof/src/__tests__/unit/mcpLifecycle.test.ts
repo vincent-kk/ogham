@@ -11,7 +11,10 @@ import { sweepStaleSessions } from '../../core/sessionStore/index.js';
 import { buildDailyDigest } from '../../core/workIndex/index.js';
 import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
 import { runVaultCommitter } from '../../hooks/utils/vaultCommitter/operations/runVaultCommitter.js';
-import { bootSweep, registerShutdown } from '../../mcp/server/lifecycle/index.js';
+import {
+  bootSweep,
+  registerShutdown,
+} from '../../mcp/server/lifecycle/index.js';
 
 const calls: string[] = [];
 
