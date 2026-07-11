@@ -1,8 +1,8 @@
-# decisionTree -- 3+12 초과 시 처방 결정
+# decisionTree -- 케이스 게이트 초과 시 처방 결정
 
 ## Purpose
 
-테스트 수·LCOM4·순환 복잡도 세 지표를 받아 `ok` / `split` / `compress` / `parameterize` 중 하나의 처방을 반환한다. 3+12 규칙이 위반되었을 때 "어떻게 고쳐야 하는지"를 안내하는 순수 의사결정 함수.
+테스트 수·LCOM4·순환 복잡도 세 지표를 받아 `ok` / `split` / `compress` / `parameterize` 중 하나의 처방을 반환한다. 테스트 케이스 게이트가 초과되었을 때 "어떻게 고쳐야 하는지"를 안내하는 순수 의사결정 함수.
 
 ## Structure
 
@@ -15,7 +15,7 @@
   2. `lcom4 >= 2` → `split` (SRP 위반, 하위 fractal로 추출)
   3. `cyclomaticComplexity > 15` → `compress` (응집 양호, 흐름 과다 → 전략 패턴·메서드 추출)
   4. 그 외 → `parameterize` (중복 엣지 케이스를 data-driven 테이블로 병합)
-- 임계값 세 개는 모두 `constants/qualityThresholds.ts`에서 import: `THREE_PLUS_TWELVE_THRESHOLD`, `LCOM4_SPLIT_THRESHOLD`, `CC_THRESHOLD`
+- 임계값 세 개는 모두 `constants/qualityThresholds.ts`에서 import: `MAX_TEST_CASES`, `LCOM4_SPLIT_THRESHOLD`, `CC_THRESHOLD`
 - `reason` 문자열에는 실제 입력 값을 포함 (디버깅 용이)
 - `metrics` 필드는 입력 그대로 에코 (로깅·UI 표시용)
 
@@ -39,4 +39,4 @@
 ## Dependencies
 
 - `../../types/metrics.js` (`DecisionResult`)
-- `../../constants/qualityThresholds.js` (`THREE_PLUS_TWELVE_THRESHOLD`, `LCOM4_SPLIT_THRESHOLD`, `CC_THRESHOLD`)
+- `../../constants/qualityThresholds.js` (`MAX_TEST_CASES`, `LCOM4_SPLIT_THRESHOLD`, `CC_THRESHOLD`)

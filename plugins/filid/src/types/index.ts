@@ -26,7 +26,7 @@ export type {
   LCOM4Result,
   CyclomaticComplexityResult,
   TestCaseCount,
-  ThreePlusTwelveResult,
+  TestCaseGateResult,
   DecisionAction,
   DecisionResult,
   PromotionCandidate,

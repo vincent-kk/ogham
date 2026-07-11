@@ -5,7 +5,7 @@
 - mutate 1회 → `registerMutateTool` wrapper가 (a) 핵심 핸들러 실행, (b) toolName 에 따른 op 분류로 영향 path 를 `appendStaleEntries` 로 기록 (delete/move-src=delete; 그 외/move-dst=mutate), (c) `incrementUsageStat`, (d) stale 누적이 `STALE_REBUILD_THRESHOLD` 에 도달하면 `triggerBackgroundRebuild` 를 fire-and-forget.
 - freshness 필요 read → `registerReadTool({ needsFreshness: true })` wrapper 가 `ensureFreshGraphNonBlocking` 결과 graph reference 를 핸들러에 전달. 절대 await rebuild.
 - freshness 불필요 read → `registerReadTool({ needsFreshness: false })` wrapper 가 `incrementUsageStat` 만 수행.
-- 부팅 시 `startServer` 는 transport connect 직후 `walkVaultForExternalChanges(getVaultPath())` 를 detach. snapshot 부재 시 no-op.
+- 부팅 시 `startServer` 는 `registerShutdown(vaultPath)` 로 종료 핸들러를 먼저 등록한 뒤, transport connect 직후 `bootSweep`(직전 세션 잔여 완결) → `walkVaultForExternalChanges`(외부 편집·sweep 이동의 stale 등록) → `triggerBootRebuildIfStale`(stale 존재 시 background 증분 빌드 1회) 체인을 detach. 절대 await 하지 않으며(부팅 비차단) 각 단계는 부재 시 no-op.
 - background rebuild 성공 finalize 에서 `invalidateCache()` 를 호출해 다음 read 가 disk reload.
 - explicit `kg_build` 도구 호출도 성공 시 등록부에서 `invalidateCache()` 를 호출 (background rebuild 와 동일 계약). 핸들러는 disk 에만 `saveGraph` 하므로, 이 invalidate 없이는 동일 세션 후속 read(`loadGraphIfNeeded` 경유 `kg_status` 포함)가 build 직전 캐시 그래프를 계속 반환한다.
 - 두 rebuild 경로(explicit `kg_build` / background) 모두 성공 시 `refreshTurnContextSafe(vaultPath)` 로 훅 주입용 turn-context 스냅샷을 재빌드한다 — 매 턴 `<kg-core>` 요약이 자신이 요약하는 디스크 인덱스를 따라가게 하는 동일 계약의 확장 (best-effort, 실패는 error-log).

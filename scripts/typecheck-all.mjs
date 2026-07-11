@@ -37,6 +37,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
   { name: "@ogham/http-guard", dir: "shared/http-guard" },
+  { name: "@ogham/session-finalizer", dir: "shared/session-finalizer" },
 ];
 
 // @ogham/prawf is a pure-markdown plugin (no TypeScript) and is

@@ -10,11 +10,12 @@ UserPromptSubmit 이벤트 디스패처. `helpers/contextInjector`·`helpers/ins
 - `userPromptSubmit.ts` — `orchestrateUserPromptSubmit` (조립 + 병합)
 - `helpers/contextInjector/` — KG/turn 컨텍스트 주입
 - `helpers/insightInjector/` — insight 캡처 상태 배너
+- `helpers/sessionTouch/` — 매 턴 lastActivityAt/usageSnapshot 갱신
 
 ## Conventions
 
 - 헬퍼·공유 관심사·core 는 concrete 경로로 import (배럴 `index.js` 금지)
-- 실행 순서: contextInjector → lifecycle → insightInjector → vaultCommitter(마지막, side-effect)
+- 실행 순서: contextInjector → lifecycle → insightInjector → session-touch → vaultCommitter(마지막, side-effect)
 
 ## Boundaries
 

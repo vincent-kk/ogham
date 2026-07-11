@@ -14,7 +14,7 @@ Personal Context 층(사용자 상태 `states` + 최근 동향 `topics`)의 IO·
 - `personalContextPath.ts` — envelope 파일 경로 해석
 - `writePersonalContext.ts` — 직렬화 저장
 - `renderPersonalContextBlock.ts` — SessionStart `<personal-context>` 블록 렌더 (캡처 지침 내장, 만료 lazy-filter)
-- `prunePersonalContext.ts` — SessionEnd 수명주기 정리 (만료 제거·due 자동 resolve·보존 캡)
+- `prunePersonalContext.ts` — 세션 경계(bootSweep) 수명주기 정리 (만료 제거·due 자동 resolve·보존 캡)
 - `evictTopicsOverCap.ts` — topics 보존 캡 집행 (resolved 우선)
 - `applyPersonalContextMutation.ts` — MCP 캡처/재강화/해소 upsert (훅 번들 미진입)
 

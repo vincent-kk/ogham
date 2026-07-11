@@ -39,7 +39,7 @@ export interface TestCaseCount {
 }
 
 /** 3+12 rule check result */
-export interface ThreePlusTwelveResult {
+export interface TestCaseGateResult {
   /** Whether violated */
   violated: boolean;
   /** Per-file results for spec.ts files */

@@ -1,11 +1,16 @@
 import { readFileSync } from "node:fs";
 import type { HookFallback, HookIR, LogicalEvent } from "../../types/ir.js";
 
-/** Default rewiring intent per event, used when a host lacks the event (agy). */
+/**
+ * Default rewiring intent per event. `mcp-lifecycle` (SessionEnd) suppresses the
+ * hook on every host — the MCP server owns session-end via `@ogham/session-finalizer`
+ * (shutdown handler + next-boot sweep). The rest rewire only where a host lacks the
+ * event (agy). Override per event via plugin.yaml `hooks:`.
+ */
 const FALLBACK: Partial<Record<LogicalEvent, HookFallback>> = {
   SessionStart: "pre-invocation-once",
   UserPromptSubmit: "pre-invocation-once",
-  SessionEnd: "stale-sweep",
+  SessionEnd: "mcp-lifecycle",
   SubagentStart: "drop",
 };
 

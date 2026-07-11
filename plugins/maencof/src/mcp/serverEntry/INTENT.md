@@ -2,13 +2,14 @@
 
 ## Purpose
 
-esbuild 번들 진입점. companion 레거시→정본 마이그레이션 1회 후 MCP 서버를 stdio 모드로 시작.
+esbuild 번들 진입점. `--finalize <vaultPath>` 로 스폰되면 shared `@ogham/session-finalizer` 의 `runFinalizer` 가 bootSweep 1회 실행 후 종료(서버 미기동); 정상 부팅 시 companion 레거시→정본 마이그레이션 1회 후 MCP 서버를 stdio 모드로 시작.
 
 ## Boundaries
 
 ### Always do
 
 - bridge/mcp-server.cjs로 번들됨
+- `--finalize` 분기는 `runFinalizer(process.argv, bootSweep)` 로 위임 — 매치 시 서버 미기동
 - startServer() 호출 전에 `runCompanionMigration(getVaultPath())` 1회(멱등, best-effort)
 - 마이그레이션 실패를 서버 기동으로 전파하지 않음(try/catch 격리)
 

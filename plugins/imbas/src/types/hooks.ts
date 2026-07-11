@@ -40,11 +40,6 @@ export interface UserPromptSubmitInput extends HookBaseInput {
   prompt?: string;
 }
 
-/** SessionEnd hook input */
-export interface SessionEndInput extends HookBaseInput {
-  hook_event_name: 'SessionEnd';
-}
-
 /** Hook output (stdout JSON) */
 export interface HookOutput {
   /**

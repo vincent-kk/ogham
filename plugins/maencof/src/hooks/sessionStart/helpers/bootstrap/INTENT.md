@@ -15,7 +15,7 @@
 - L1 core 문서 전체 본문을 `<l1-core-full>` 로 세션 1회 주입 (buildL1CoreBlock; 매 턴은 gist 요약만)
 - companion 존재 시 `<personal-context>` 블록을 identity 직후 주입 (readPersonalContext + renderPersonalContextBlock — 캡처 지침 내장, 만료 lazy-filter; 실패 격리)
 - sessionStore로 세션 시작 기록 + 직전 세션 요약 surface (`recordSessionStart` / `getRecentSessionSummary`)
-- changelog debt 표면화 — `changelog-state.json` 의 pending 이 있으면 1줄 권고 push (차단 없음; 스캔은 SessionEnd `changelogDebt` 소관)
+- changelog debt 표면화 — `changelog-state.json` 의 pending 이 있으면 1줄 권고 push (차단 없음; 스캔은 MCP bootSweep 의 `changelogDebt` 소관)
 
 ### Ask first
 

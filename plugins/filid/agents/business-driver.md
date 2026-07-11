@@ -55,7 +55,7 @@ Read `debt_bias_level` from `verification.md` frontmatter and adjust:
 | Situation                         | Recommended debt path                                            |
 | --------------------------------- | ---------------------------------------------------------------- |
 | LCOM4 split needed, sprint ending | Partial split now, remainder as debt with next-sprint commitment |
-| Test file over 3+12 limit         | Quick split into 2 files now, proper restructuring as debt       |
+| Spec file over 3+12 limit         | Quick split into 2 files now, proper restructuring as debt       |
 | Documentation gap                 | INTENT.md stub now, full documentation as debt                   |
 | Non-critical drift                | Acknowledge drift, schedule correction in next sprint            |
 

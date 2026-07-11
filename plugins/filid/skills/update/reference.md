@@ -38,7 +38,7 @@ Restrict scan to changed files only:
 mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 
-mcp__plugin_filid_t__test_metrics({ action: "check-312", files: [{ filePath, content }] })
+mcp__plugin_filid_t__test_metrics({ action: "check-gate", files: [{ filePath, content }] })
 // Returns: { violations: TestViolation[], summary: { total, passing, failing } }
 ```
 
@@ -46,7 +46,7 @@ Scan result categories:
 
 - INTENT.md exceeds 50-line limit
 - INTENT.md present inside an organ directory
-- test/spec files violating 3+12 rule (> 15 test cases)
+- spec files violating the 3+12 rule (> 15 cases); test.ts is exempt (promote candidate, not a violation)
 - Unclassified directories
 
 ## Section 2 — Sync
@@ -138,14 +138,14 @@ mcp__plugin_filid_t__doc_compress({ mode: "auto", filePath: "<path>", content: "
 
 For each changed source file:
 
-1. **Check test.ts/spec.ts**: existence and 3+12 rule compliance (max 15 cases)
+1. **Check test.ts/spec.ts**: existence; apply the 3+12 cap (max 15 cases) to spec.ts only — test.ts is exempt (large stable test.ts is a /filid:promote candidate)
 2. **Create if missing**: scaffold 3 basic tests + 12 extended test slots
 
 ```
 mcp__plugin_filid_t__ast_analyze({ source: "<source>", analysisType: "full" })
 // Checks LCOM4, CC metrics → recommends module split or compression
 
-mcp__plugin_filid_t__test_metrics({ action: "check-312", files: [...] })
+mcp__plugin_filid_t__test_metrics({ action: "check-gate", files: [...] })
 // Validates 3+12 rule compliance
 ```
 

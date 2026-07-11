@@ -21,6 +21,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
   { name: "@ogham/http-guard", dir: "shared/http-guard" },
+  { name: "@ogham/session-finalizer", dir: "shared/session-finalizer" },
 ];
 
 const EXCLUDES = PROVIDERS.map(({ name }) => `--exclude=${name}`);

@@ -10,22 +10,22 @@ Observe every session. CLAUDE.md / AGENTS.md user instructions override this met
 
 ## 2. 7 Role → Skill Mapping
 
-| Role                       | Skill                                                                                                           |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Brainstorming / ideation   | `explore --for-brainstorm` → `think --mode divergent`                                                           |
-| Insight capture management | `insight` + `capture_insight` MCP tool                                                                          |
+| Role                       | Skill                                                                                                                       |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Brainstorming / ideation   | `explore --for-brainstorm` → `think --mode divergent`                                                                       |
+| Insight capture management | `insight` + `capture_insight` MCP tool                                                                                      |
 | User-state awareness       | automatic — `capture_personal_context` MCP, guided by the injected `<personal-context>` block; manage via `personal-status` |
-| Spec refinement            | `refine` (Phase 2.5 Socratic included)                                                                          |
-| Interview convergence      | `refine` Phase 2.5                                                                                              |
-| Plan review                | `think --mode review`                                                                                           |
-| Session retrospective      | SessionEnd hook automatic recap (no explicit invocation)                                                        |
+| Spec refinement            | `refine` (Phase 2.5 Socratic included)                                                                                      |
+| Interview convergence      | `refine` Phase 2.5                                                                                                          |
+| Plan review                | `think --mode review`                                                                                                       |
+| Session retrospective      | Automatic recap as the session wraps up (no explicit invocation)                                                            |
 
 ## 3. Flow & Priority
 
 1. Vague / ambiguous input → `refine` first. If alternatives still remain, then `think --mode default`.
 2. Ideation signals ("idea", "stuck", "brainstorm") → `explore --for-brainstorm` (seed first) → `think --mode divergent`. Never invoke `think` without a sufficient seed — run `explore` beforehand.
 3. Plan / spec path ref + "review" / "check" → `think --mode review`.
-4. Session termination → SessionEnd recap surfaces automatically. Persist only when the user explicitly requests it. `reflect` is reserved for the vault judge, not session recap.
+4. Session termination → surface a brief recap automatically as the conversation wraps up. Persist only when the user explicitly requests it. `reflect` is reserved for the vault judge, not session recap.
 5. Auto-insight capture runs via `capture_insight` MCP + `insight-injector` hook; direct invocation not required.
 
 ## 4. Red Flags

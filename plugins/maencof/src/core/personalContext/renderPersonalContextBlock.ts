@@ -5,7 +5,7 @@
  * 캡처 지침을 블록에 내장한다 — enabled일 때만 지침이 존재해 읽기·쓰기
  * 지침이 응집되고, 항목이 없어도 지침은 주입되어 캡처를 부트스트랩한다.
  * 만료 항목은 여기서 lazy-filter로 주입에서만 제외한다 (파일 불변 —
- * 실제 제거는 SessionEnd prunePersonalContext 소관). 런타임 컷은 없다 —
+ * 실제 제거는 bootSweep 의 prunePersonalContext 소관). 런타임 컷은 없다 —
  * 예산은 저작 게이트(MCP 입력 길이 상한 + 항목 캡)가 통제한다.
  */
 import {

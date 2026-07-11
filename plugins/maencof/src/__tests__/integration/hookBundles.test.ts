@@ -55,14 +55,6 @@ const HOOK_CASES: HookCase[] = [
       hook_event_name: 'PostToolUse',
     }),
   },
-  {
-    name: 'session-end',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      hook_event_name: 'SessionEnd',
-    }),
-  },
 ];
 
 describe('hook bundle smoke tests', () => {

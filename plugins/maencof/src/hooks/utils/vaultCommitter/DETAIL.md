@@ -2,12 +2,12 @@
 
 ## Requirements
 
-- SessionEnd 또는 UserPromptSubmit 이벤트에서 opt-in 설정 (`.maencof-meta/vault-commit.json::enabled=true`) 이 있을 때만 vault 변경사항을 자동 커밋한다.
+- MCP BootSweep(직전 세션 마무리) 또는 UserPromptSubmit 트리거에서 opt-in 설정 (`.maencof-meta/vault-commit.json::enabled=true`) 이 있을 때만 vault 변경사항을 자동 커밋한다.
 - 커밋 범위는 `scope` 필드로 제어한다. 필드 부재 시 기본 scope 는 5-Layer 문서 트리 + `.maencof-meta/` (`DEFAULT_COMMIT_SCOPE`). `.maencof/` 그래프 캐시는 재생성 가능하므로 기본 scope 에 포함하지 않는다.
 - 민감 파일 2차 방어: 모든 staging 은 `SENSITIVE_EXCLUDE_PATH_SPECS` (credential/secret/token/apikey 류 `.json`, `.pem`, `.key`, `.env*`) 를 exclude pathspec 으로 동반한다. 1차 방어는 vault 의 `.gitignore`. 지식 문서(`.md`) 는 이름과 무관하게 exclude 대상이 아니다.
 - 하루 1커밋 정책: `fold_daily`(기본 true) 가 켜져 있으면 당일의 연속된 자동 커밋을 `git reset --soft` 로 하나로 접은 뒤 재커밋한다 (`helpers/foldDaily`). 수동 커밋은 폴딩 경계로 작동하며 절대 접지 않는다.
 - UserPromptSubmit 은 사용자의 프롬프트가 설정된 `skip_patterns` 중 하나와 매칭될 때만 트리거된다. 미설정 시 기본 패턴은 `/clear`.
-- 어떠한 경로에서도 세션 종료 / 프롬프트 처리를 블록하지 않는다. 항상 `{ continue: true }` 반환.
+- 어떠한 경로에서도 서버 부팅 / 프롬프트 처리를 블록하지 않는다. 항상 `{ continue: true }` 반환.
 
 ## API Contracts
 
@@ -42,7 +42,7 @@
 - staged 파일이 0개면 커밋하지 않는다.
 - 커밋 메시지: `message_template` 렌더 결과. 기본 `chore(maencof): session wrap [<top-level dirs>] (<YYYY-MM-DD HH:MM>)`. 디렉터리 목록은 커밋에 실제 포함되는 staged 파일에서 도출 (폴딩 시 접힌 변경 포함).
 - `git commit --no-verify` 로 커밋.
-- `.git/index.lock` 존재 시 시작 전 skip; 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도.
+- `.git/index.lock` 존재 시: mtime 이 `INDEX_LOCK_STALE_MS`(30분) 미만이면 live 로 존중해 skip, 초과면 stale(SIGKILL 절단 잔존)로 판정해 로그 기록 후 회수(unlink)하고 진행 — 절단 사고가 커밋 게이트를 영구 차단하지 못하게 한다. 회수 경합(동시 unlink)은 ENOENT 무시로 멱등, 이후 git 자체 lock 이 쓰기를 재직렬화. 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도. 잔여 리스크: 30분 초과 장기 수동 git 작업(중단된 rebase 등)은 오판 가능 — 로그로 추적.
 - 폴딩: HEAD 부터 당일+자동 커밋을 걷어 BASE 를 찾고, `git reset --soft BASE` → re-stage → commit. 자동 커밋 판정은 `AUTO_COMMIT_SUBJECT_MARKERS` includes 매칭(레거시 `*_session_wrap` 및 은퇴한 vault 로컬 스크립트의 subject 포함) + `message_template` 정적 접두부 startsWith 매칭. 재커밋 실패 시 `git reset --soft ORIG_HEAD` 로 복구. root 도달·탐색 상한(`FOLD_SCAN_MAX_COMMITS`) 초과 시 폴딩을 포기하고 일반 커밋한다.
 
 ## Policy — `--no-verify` rationale (Y1 Option A, 승인 완료 2026-04-16)
@@ -55,9 +55,9 @@ repo 소유자는 2026-04-16 자 Y1 정책 결정에서 **Option A — Keep `--n
    읽는 경우, vaultCommitter 가 pre-commit 을 실행시키면 그 hook 이 또다시
    vault 를 수정해 무한 루프로 발전할 수 있다. `--no-verify` 는 이 경로의
    재귀를 끊는다.
-2. **자동 커밋 의미 유지.** SessionEnd / `/clear` 트리거는 사용자가 손을 대지
-   않은 상태에서 발생한다. pre-commit 이 대화형 입력을 요구하면 세션 종료
-   자체가 블록될 수 있어 hook-as-background-job 보장이 깨진다.
+2. **자동 커밋 의미 유지.** BootSweep / `/clear` 트리거는 사용자가 손을 대지
+   않은 상태에서 발생한다. pre-commit 이 대화형 입력을 요구하면 서버 부팅
+   경로가 블록될 수 있어 background-job 보장이 깨진다.
 3. **opt-in 전용.** 기능 자체가 `.maencof-meta/vault-commit.json::enabled=true`
    에 의해서만 활성화되므로, 예외가 사용자 전체 리포지토리로 번지지 않는다.
 

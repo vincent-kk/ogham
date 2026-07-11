@@ -2,7 +2,7 @@
  * @file normalizePersonalContext.ts
  * @description personal-context.json 원시 JSON의 zod-free graceful 정규화.
  *
- * 훅 번들(sessionStart/sessionEnd)이 도달하는 경로 — 검증 런타임 금지.
+ * 훅 번들(sessionStart)이 도달하는 경로 — 검증 런타임 금지.
  * 손상·손편집 파일에서 구조가 불완전한 항목은 조용히 drop한다 (렌더에
  * 이상 값이 주입되는 것 방지). 정상 경로(MCP가 쓴 파일)에서는 drop이 없다.
  */

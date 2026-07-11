@@ -1,7 +1,7 @@
 import {
   CC_THRESHOLD,
   LCOM4_SPLIT_THRESHOLD,
-  THREE_PLUS_TWELVE_THRESHOLD,
+  MAX_TEST_CASES,
 } from '../../constants/qualityThresholds.js';
 import type { DecisionResult } from '../../types/metrics.js';
 
@@ -26,10 +26,10 @@ export function decide(input: DecisionInput): DecisionResult {
   const metrics = { testCount, lcom4, cyclomaticComplexity };
 
   // Phase 1: Check if threshold is exceeded
-  if (testCount <= THREE_PLUS_TWELVE_THRESHOLD)
+  if (testCount <= MAX_TEST_CASES)
     return {
       action: 'ok',
-      reason: `Test count (${testCount}) is within the 3+12 limit.`,
+      reason: `Test count (${testCount}) is within the test-case gate.`,
       metrics,
     };
 

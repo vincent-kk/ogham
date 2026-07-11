@@ -1,6 +1,6 @@
 import type { DecisionResult } from '../../../types/metrics.js';
 
-import { handleCheck312 } from './utils/handleCheck312.js';
+import { handleTestCaseGate } from './utils/handleTestCaseGate.js';
 import { handleCount } from './utils/handleCount.js';
 import { handleDecide } from './utils/handleDecide.js';
 
@@ -20,8 +20,8 @@ export interface DecisionParams {
 /** Input for test-metrics tool */
 export interface TestMetricsInput {
   /** Action to perform */
-  action: 'count' | 'check-312' | 'decide';
-  /** Test files (for count/check-312) */
+  action: 'count' | 'check-gate' | 'decide';
+  /** Test files (for count/check-gate) */
   files?: TestFileInput[];
   /** Decision parameters (for decide) */
   decisionInput?: DecisionParams;
@@ -36,7 +36,7 @@ export interface TestCountResult {
 }
 
 /** 3+12 violation */
-export interface ThreePlusTwelveViolation {
+export interface TestCaseGateViolation {
   filePath: string;
   testCount: number;
   threshold: number;
@@ -46,8 +46,8 @@ export interface ThreePlusTwelveViolation {
 export interface TestMetricsOutput {
   /** Test case counts (for 'count') */
   counts?: TestCountResult[];
-  /** 3+12 violations (for 'check-312') */
-  violations?: ThreePlusTwelveViolation[];
+  /** 3+12 violations (for 'check-gate') */
+  violations?: TestCaseGateViolation[];
   /** Decision result (for 'decide') */
   decision?: DecisionResult;
   /** Error message */
@@ -59,15 +59,15 @@ export interface TestMetricsOutput {
  *
  * Actions:
  * - count: Count test cases in provided file content
- * - check-312: Check 3+12 rule violations
+ * - check-gate: Check 3+12 rule violations
  * - decide: Run decision tree (split/compress/parameterize)
  */
 export function handleTestMetrics(input: TestMetricsInput): TestMetricsOutput {
   switch (input.action) {
     case 'count':
       return handleCount(input.files ?? []);
-    case 'check-312':
-      return handleCheck312(input.files ?? []);
+    case 'check-gate':
+      return handleTestCaseGate(input.files ?? []);
     case 'decide':
       return handleDecide(input.decisionInput);
     default:

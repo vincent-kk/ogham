@@ -53,8 +53,8 @@ describe('mergeHookOutput', () => {
     expect(merged.reason).toBe('r1\n\nr2');
   });
 
-  it('keeps systemMessage and message channels (terminal events)', () => {
-    const merged = mergeHookOutput('SessionEnd', [
+  it('keeps systemMessage and message channels (fallback banners)', () => {
+    const merged = mergeHookOutput('SessionStart', [
       { continue: true, message: 'recap' },
       { continue: true, systemMessage: 'sys' },
     ]);
@@ -74,7 +74,7 @@ describe('mergeHookOutput', () => {
   });
 
   it('a block without a reason omits the reason key', () => {
-    const merged = mergeHookOutput('SessionEnd', [{ continue: false }]);
+    const merged = mergeHookOutput('UserPromptSubmit', [{ continue: false }]);
     expect(merged.continue).toBe(false);
     expect(merged.reason).toBeUndefined();
   });

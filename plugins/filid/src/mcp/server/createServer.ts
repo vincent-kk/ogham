@@ -118,7 +118,7 @@ export function createServer(): McpServer {
       description:
         'Analyze test metrics: count cases, check 3+12 rule, or run decision tree.',
       inputSchema: z.object({
-        action: z.enum(['count', 'check-312', 'decide']),
+        action: z.enum(['count', 'check-gate', 'decide']),
         files: z
           .array(z.object({ filePath: z.string(), content: z.string() }))
           .optional(),
