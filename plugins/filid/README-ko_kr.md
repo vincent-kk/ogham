@@ -37,7 +37,7 @@ claude --plugin-dir ./plugins/filid
 빌드하면 두 가지 산출물이 생성됩니다:
 
 - `bridge/mcp-server.cjs` — MCP 서버 (분석 도구 18개)
-- `bridge/*.mjs` — Hook 스크립트 5개 (자동 규칙 시행)
+- `bridge/*.mjs` — Hook 스크립트 4개 (자동 규칙 시행)
 
 ---
 
@@ -181,7 +181,7 @@ git checkout -b spike/my-idea
 | `/filid:context-query`    | —                 | 구조 관련 질의응답                                   |
 | `/filid:guide`            | —                 | FCA-AI 가이드                                        |
 | `/filid:restructure`      | —                 | 모듈 리팩토링 가이드 + 마이그레이션 단계             |
-| `/filid:cross-review`           | **변경 파일만**   | 다중 페르소나 거버넌스 코드 리뷰 — PR마다 사용       |
+| `/filid:cross-review`     | **변경 파일만**   | 다중 페르소나 거버넌스 코드 리뷰 — PR마다 사용       |
 | `/filid:resolve`          | —                 | 수정 요청 해결                                       |
 | `/filid:revalidate`       | —                 | 수정 후 재검증 (PASS/FAIL)                           |
 | `/filid:harvest`          | —                 | spike 수확 인터뷰 — 수용 기준 claim 기록             |

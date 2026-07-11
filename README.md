@@ -46,7 +46,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 | Skills    | 19       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline` |
 | MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking         |
 | Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee         |
-| Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd   |
+| Hooks     | 4 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit               |
 
 **Key features:**
 
@@ -85,7 +85,7 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 | Skills    | 26          | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`, `/maencof:organize`   |
 | MCP Tools | 18          | Knowledge CRUD, graph search, spreading activation, insight capture             |
 | Agents    | 5           | Memory Organizer, Identity Guardian, Checkup, Configurator, Knowledge Connector |
-| Hooks     | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd       |
+| Hooks     | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse                         |
 
 **Key features:**
 
@@ -199,7 +199,7 @@ Translating a strategy doc into well-formed, EARS-style developer tickets is rep
 | Skills    | 12    | `/imbas:pipeline`, `/imbas:validate`, `/imbas:split`, `/imbas:devplan`, `/imbas:manifest` |
 | MCP Tools | 16    | `run_create`, `manifest_save`, `manifest_implement_plan`, etc.                            |
 | Agents    | 3     | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                         |
-| Hooks     | 5     | setup, pre-tool-use, agent-enforcer, context-injector, session-cleanup                    |
+| Hooks     | 4     | setup, pre-tool-use, agent-enforcer, context-injector                                     |
 
 **Key features:**
 

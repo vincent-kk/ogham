@@ -225,7 +225,7 @@ vault 지식과 별개로, maencof는 작은 **personal context** — 일시적 
 
 ## Vault 자동 커밋 정책
 
-`vault-committer` 훅은 세션 종료 시 또는 사용자가 `/clear` 를 입력했을 때 `.maencof/` 와 `.maencof-meta/` 디렉토리의 변경을 자동으로 커밋할 수 있습니다. 이 기능은 **opt-in 전용** 이며, `.maencof-meta/vault-commit.json` 에 `{"enabled": true}` 가 있을 때만 활성화됩니다.
+vault committer 는 사용자가 `/clear` 를 입력했을 때(hook 경로) 또는 MCP 서버 부팅 시 직전 세션을 마감하며(boot-sweep 경로) `.maencof/` 와 `.maencof-meta/` 디렉토리의 변경을 자동으로 커밋할 수 있습니다. 이 기능은 **opt-in 전용** 이며, `.maencof-meta/vault-commit.json` 에 `{"enabled": true}` 가 있을 때만 활성화됩니다.
 
 활성화되면 `git commit --no-verify` 를 사용하여 저장소의 pre-commit hook 을 건너뜁니다. 이는 글로벌 CLAUDE.md 의 "Never skip hooks" 원칙에 대한 **명시적 예외** 이며, 다음 근거에 기반합니다:
 
