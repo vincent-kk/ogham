@@ -2,7 +2,7 @@
 
 ## Purpose
 
-20개 MCP 도구 핸들러. 지식 문서 CRUD, 그래프 연산, CLAUDE.md 관리, companion identity 편집, 작업 이력 조회.
+22개 MCP 도구 핸들러. 지식 문서 CRUD, 그래프 연산, CLAUDE.md 관리, companion identity 편집, 작업 이력 조회, updated 기준 최근 문서 열거.
 
 ## Boundaries
 

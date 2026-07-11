@@ -18,6 +18,7 @@ export const TOOL_CATEGORY_MAP: Record<string, ActivityCategory> = {
   [McpToolName.KG_SEARCH]: 'search',
   [McpToolName.KG_NAVIGATE]: 'search',
   [McpToolName.KG_CONTEXT]: 'search',
+  [McpToolName.KG_TIMELINE]: 'search',
   [McpToolName.KG_BUILD]: 'index',
   [McpToolName.KG_STATUS]: 'index',
   [McpToolName.KG_SUGGEST_LINKS]: 'search',

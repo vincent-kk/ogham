@@ -1,7 +1,7 @@
 /**
  * @file kg.ts
- * @description Registers 7 KG tools via the wrapper organ:
- * 1 mutate (boundary_create) + 4 fresh reads (kg_search/navigate/context/suggest_links)
+ * @description Registers 8 KG tools via the wrapper organ:
+ * 1 mutate (boundary_create) + 5 fresh reads (kg_search/navigate/context/suggest_links/timeline)
  * + 2 plain reads (kg_status, kg_build).
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -15,12 +15,29 @@ import { handleKgNavigate } from '../../tools/kgNavigate/index.js';
 import { handleKgSearch } from '../../tools/kgSearch/index.js';
 import { handleKgStatus } from '../../tools/kgStatus/index.js';
 import { handleKgSuggestLinks } from '../../tools/kgSuggestLinks/index.js';
+import { handleKgTimeline } from '../../tools/kgTimeline/index.js';
 import { loadGraphIfNeeded } from '../graphCache/index.js';
 import {
   rebuildAndInvalidate,
   registerMutateTool,
   registerReadTool,
 } from '../middlewares/index.js';
+
+/** updated 시간창(since/until, inclusive) 공유 Zod 프래그먼트 — kg_search/context/recent 재사용 */
+const timeWindowFields = {
+  since: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .describe(
+      'Inclusive lower bound on the updated field (YYYY-MM-DD). Given alone (no until) means updated-after. since greater than until yields no matches.',
+    ),
+  until: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .describe('Inclusive upper bound on the updated field (YYYY-MM-DD).'),
+};
 
 export function registerKgTools(server: McpServer): void {
   // ─── kg_search (fresh read) ──────────────────────────────────────
@@ -63,6 +80,7 @@ export function registerKgTools(server: McpServer): void {
           .max(20)
           .optional()
           .describe('Maximum hop count (default 5)'),
+        ...timeWindowFields,
         layer_filter: z
           .array(z.number().int().min(1).max(5))
           .optional()
@@ -134,6 +152,7 @@ export function registerKgTools(server: McpServer): void {
           .boolean()
           .optional()
           .describe('Include full text of top N results (default false)'),
+        ...timeWindowFields,
         layer_filter: z
           .array(z.number().int().min(1).max(5))
           .optional()
@@ -257,6 +276,42 @@ export function registerKgTools(server: McpServer): void {
     },
     async (_vaultPath, args, graph) =>
       Promise.resolve(handleKgSuggestLinks(graph, args)),
+    { needsFreshness: true },
+  );
+
+  // ─── kg_timeline (fresh read) ────────────────────────────────────
+  registerReadTool(
+    server,
+    McpToolName.KG_TIMELINE,
+    {
+      description:
+        'Lists documents by updated recency (newest first) with no seed and no Spreading Activation. Omit the window for the most recently updated docs; pass since/until (inclusive, YYYY-MM-DD) for a modification window. For recent-plus-topic use kg_search or kg_context with since/until.',
+      inputSchema: z.object({
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .optional()
+          .describe('Maximum results to return (default 20)'),
+        ...timeWindowFields,
+        layer_filter: z
+          .array(z.number().int().min(1).max(5))
+          .optional()
+          .describe('Layer filter (1-5)'),
+        sub_layer: z
+          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .optional()
+          .describe('Sub-layer filter'),
+      }),
+    },
+    async (_vaultPath, args, graph) =>
+      Promise.resolve(
+        handleKgTimeline(graph, {
+          ...args,
+          layer_filter: args.layer_filter as (1 | 2 | 3 | 4 | 5)[] | undefined,
+        }),
+      ),
     { needsFreshness: true },
   );
 }

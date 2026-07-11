@@ -48,6 +48,10 @@ export interface QueryOptions {
   maxHops?: number;
   /** Layer 필터 (미지정 시 전체 Layer) */
   layerFilter?: number[];
+  /** updated 시간창 하한 (YYYY-MM-DD, inclusive; 단독 지정 시 updated_after 의미) */
+  since?: string;
+  /** updated 시간창 상한 (YYYY-MM-DD, inclusive) */
+  until?: string;
   /** 매직넘버 수렴 실험용 파라미터 오버라이드 (캐시 키에 포함) */
   tuning?: QgaTuning;
 }

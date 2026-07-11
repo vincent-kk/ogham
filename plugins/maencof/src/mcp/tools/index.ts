@@ -11,6 +11,7 @@ export * from './kgNavigate/index.js';
 export * from './kgSearch/index.js';
 export * from './kgStatus/index.js';
 export * from './kgSuggestLinks/index.js';
+export * from './kgTimeline/index.js';
 export * from './maencofCaptureInsight/index.js';
 export * from './maencofCreate/index.js';
 export * from './maencofDelete/index.js';

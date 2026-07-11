@@ -1,6 +1,6 @@
 /**
  * @file mcpKg.ts
- * @description Knowledge Graph 도구 입출력 스키마 — kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
+ * @description Knowledge Graph 도구 입출력 스키마 — kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links, kg_timeline
  */
 import type { KgContextScope } from '../constants/kgContext.js';
 
@@ -19,6 +19,10 @@ export interface KgSearchInput {
   threshold?: number;
   /** 최대 홉 수 (기본 5) */
   max_hops?: number;
+  /** updated 시간창 하한 (YYYY-MM-DD, inclusive; 단독 = updated_after) */
+  since?: string;
+  /** updated 시간창 상한 (YYYY-MM-DD, inclusive) */
+  until?: string;
   /** Layer 필터 */
   layer_filter?: Layer[];
   /** 서브레이어 필터 */
@@ -45,6 +49,10 @@ export interface KgContextInput {
   token_budget?: number;
   /** 상위 N개 전문 포함 (기본 false) */
   include_full?: boolean;
+  /** updated 시간창 하한 (YYYY-MM-DD, inclusive; 단독 = updated_after) */
+  since?: string;
+  /** updated 시간창 상한 (YYYY-MM-DD, inclusive) */
+  until?: string;
   /** Layer 필터 (예산 소비 전 pre-filter) */
   layer_filter?: Layer[];
   /** 서브레이어 필터 (예산 소비 전 pre-filter) */
@@ -169,4 +177,36 @@ export interface KgSuggestLinksResult {
   candidates_explored: number;
   /** 소요 시간 (ms) */
   duration_ms: number;
+}
+
+/** kg_timeline 입력 */
+export interface KgTimelineInput {
+  /** 최대 반환 수 (기본 20) */
+  limit?: number;
+  /** updated 시간창 하한 (YYYY-MM-DD, inclusive; 단독 = updated_after) */
+  since?: string;
+  /** updated 시간창 상한 (YYYY-MM-DD, inclusive) */
+  until?: string;
+  /** Layer 필터 */
+  layer_filter?: Layer[];
+  /** 서브레이어 필터 */
+  sub_layer?: SubLayer;
+}
+
+/** kg_timeline 결과 항목 */
+export interface KgTimelineItem {
+  path: string;
+  title: string;
+  updated: string;
+  created: string;
+  layer: Layer;
+  gist?: string;
+}
+
+/** kg_timeline 출력 */
+export interface KgTimelineResult {
+  /** updated 내림차순 정렬된 결과 (limit 적용) */
+  results: KgTimelineItem[];
+  /** 시간창/필터 적용 후 매칭된 총 문서 수 (limit 적용 전) */
+  totalMatched: number;
 }

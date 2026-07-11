@@ -12,6 +12,7 @@ import { resolveSeedNodes } from '../seeds/resolveSeedNodes.js';
 import type { QueryOptions, QueryResult } from '../types/types.js';
 
 import { applyLayerFilter } from './applyLayerFilter.js';
+import { applyTimeWindow } from './applyTimeWindow.js';
 import { collectQueryTokens } from './collectQueryTokens.js';
 import { iterationsFromMaxHops } from './iterationsFromMaxHops.js';
 import { sharedQueryCache } from './sharedQueryCache.js';
@@ -60,6 +61,9 @@ export function query(
   // Layer 필터 적용
   if (layerFilter.length > 0)
     results = applyLayerFilter(results, graph, layerFilter);
+
+  // updated 시간창 필터 (slice 이전 — truncation 전에 적용)
+  results = applyTimeWindow(results, graph, options.since, options.until);
 
   // path-exact 시드만 결과에서 제외 (키워드/태그 매칭 시드는 포함)
   const pathExactSeedSet = new Set(

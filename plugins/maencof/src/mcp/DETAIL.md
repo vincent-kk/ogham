@@ -2,23 +2,23 @@
 
 ## Purpose
 
-MCP 서버 구현. 21개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 CWD에서 읽음.
+MCP 서버 구현. 22개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 CWD에서 읽음.
 
-## Tools (21)
+## Tools (22)
 
-| Group                | Tools                                                   |
-| -------------------- | ------------------------------------------------------- |
-| CRUD (5)             | `create`, `read`, `update`, `delete`, `move`            |
-| Insight (1)          | `capture_insight`                                       |
-| Graph (5)            | kg_search, kg_navigate, kg_context, kg_status, kg_build |
-| Boundary (1)         | boundary_create                                         |
-| Link (1)             | kg_suggest_links                                        |
-| INTENT.md (3)        | claudemd_merge, claudemd_read, claudemd_remove          |
-| Companion (1)        | companion_edit                                          |
-| Personal context (1) | capture_personal_context                                |
-| Activity (1)         | activity_read                                           |
-| Work hist (1)        | work_history                                            |
-| Cache (1)            | context_cache_manage                                    |
+| Group                | Tools                                                                |
+| -------------------- | -------------------------------------------------------------------- |
+| CRUD (5)             | `create`, `read`, `update`, `delete`, `move`                         |
+| Insight (1)          | `capture_insight`                                                    |
+| Graph (6)            | kg_search, kg_navigate, kg_context, kg_status, kg_build, kg_timeline |
+| Boundary (1)         | boundary_create                                                      |
+| Link (1)             | kg_suggest_links                                                     |
+| INTENT.md (3)        | claudemd_merge, claudemd_read, claudemd_remove                       |
+| Companion (1)        | companion_edit                                                       |
+| Personal context (1) | capture_personal_context                                             |
+| Activity (1)         | activity_read                                                        |
+| Work hist (1)        | work_history                                                         |
+| Cache (1)            | context_cache_manage                                                 |
 
 ## Graph Cache
 

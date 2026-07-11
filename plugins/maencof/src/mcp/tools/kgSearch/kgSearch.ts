@@ -29,6 +29,8 @@ export async function handleKgSearch(
     threshold: input.threshold ?? 0.1,
     maxHops: input.max_hops ?? 5,
     layerFilter: input.layer_filter as number[] | undefined,
+    since: input.since,
+    until: input.until,
   });
 
   // Post-SA sub_layer 필터

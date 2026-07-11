@@ -20,7 +20,10 @@ import type { KgContextInput } from '../../../../types/mcp.js';
 
 export function selectContextCandidates(
   graph: KnowledgeGraph,
-  input: Pick<KgContextInput, 'query' | 'layer_filter' | 'sub_layer' | 'scope'>,
+  input: Pick<
+    KgContextInput,
+    'query' | 'layer_filter' | 'sub_layer' | 'scope' | 'since' | 'until'
+  >,
 ): ActivationResult[] {
   const seeds = deriveContextSeeds(input.query);
   const scopePreset =
@@ -33,6 +36,8 @@ export function selectContextCandidates(
     threshold: scopePreset.threshold,
     maxHops: scopePreset.maxHops,
     layerFilter: input.layer_filter as number[] | undefined,
+    since: input.since,
+    until: input.until,
   });
 
   let candidates = queryResult.results;
