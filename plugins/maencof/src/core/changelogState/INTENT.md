@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`.maencof-meta/changelog-state.json` 읽기/쓰기. 세션 경계 스캔이 남긴 감시 경로 미기록 변경(`pending`)과 마지막 큐레이션 시각(`lastCuratedAt`)을 보관한다. 쓰기 주체는 SessionEnd `changelogDebt` 관심사와 `/maencof:changelog` 스킬(기록 후 pending 비움 + lastCuratedAt 갱신).
+`.maencof-meta/changelog-state.json` 읽기/쓰기. 세션 경계 스캔이 남긴 감시 경로 미기록 변경(`pending`)과 마지막 큐레이션 시각(`lastCuratedAt`)을 보관한다. 쓰기 주체는 MCP bootSweep 의 `changelogDebt` 관심사와 `/maencof:changelog` 스킬(기록 후 pending 비움 + lastCuratedAt 갱신).
 
 ## Structure
 
@@ -14,7 +14,7 @@
 ### Always do
 
 - ChangelogState 타입 준수, 손상 파일은 빈 상태로 폴백
-- Zod-free 수동 정규화 유지 (SessionStart/SessionEnd 훅 번들에서 직접 import 됨)
+- Zod-free 수동 정규화 유지 (SessionStart 훅 번들에서 직접 import 됨)
 
 ### Ask first
 

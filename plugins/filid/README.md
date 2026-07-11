@@ -37,7 +37,7 @@ claude --plugin-dir ./plugins/filid
 Building produces two outputs:
 
 - `bridge/mcp-server.cjs` — MCP server (18 analysis tools)
-- `bridge/*.mjs` — 5 hook scripts (automatic rule enforcement)
+- `bridge/*.mjs` — 4 hook scripts (automatic rule enforcement)
 
 ---
 
@@ -182,7 +182,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/filid:context-query`    | —                 | Q&A about project structure                                |
 | `/filid:guide`            | —                 | FCA-AI guidance on any topic                               |
 | `/filid:restructure`      | —                 | Module refactoring guide with migration steps              |
-| `/filid:cross-review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
+| `/filid:cross-review`     | **Changed files** | Multi-persona governance code review — use on every PR     |
 | `/filid:resolve`          | —                 | Resolve fix requests from a review                         |
 | `/filid:revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
 | `/filid:harvest`          | —                 | Spike harvest interview — record acceptance claims         |

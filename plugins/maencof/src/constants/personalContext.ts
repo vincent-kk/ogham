@@ -8,7 +8,9 @@ export const PERSONAL_CONTEXT_TAG = 'personal-context';
 
 export const PERSONAL_CONTEXT_SCHEMA_VERSION = 1;
 
-export const DEFAULT_PERSONAL_CONTEXT_CONFIG: PersonalContextConfig = { enabled: true };
+export const DEFAULT_PERSONAL_CONTEXT_CONFIG: PersonalContextConfig = {
+  enabled: true,
+};
 
 /** active(미만료) state 상한 — 초과 캡처는 거부하고 현황을 반환해 병합/해소를 유도한다. */
 export const MAX_ACTIVE_STATES = 10;
@@ -24,10 +26,10 @@ export const DEFAULT_STATE_TTL_DAYS = 14;
 export const MIN_STATE_TTL_DAYS = 1;
 export const MAX_STATE_TTL_DAYS = 60;
 
-/** resolved topic 보존 기간 — lastSeenAt 기준 경과 시 SessionEnd prune이 제거. */
+/** resolved topic 보존 기간 — lastSeenAt 기준 경과 시 bootSweep prune이 제거. */
 export const RESOLVED_TOPIC_RETENTION_DAYS = 14;
 
-/** due 경과 유예 — 지나면 SessionEnd prune이 자동 resolved 처리 (kind 무관). */
+/** due 경과 유예 — 지나면 bootSweep prune이 자동 resolved 처리 (kind 무관). */
 export const OVERDUE_TOPIC_GRACE_DAYS = 7;
 
 export const MAX_LABEL_CHARS = 40;

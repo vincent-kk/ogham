@@ -1,11 +1,12 @@
 /**
  * @file runVaultCommitter.ts
- * @description SessionEnd / /clear Hook — Auto-commit vault changes (scope-driven,
- * default: 5-Layer tree + .maencof-meta/).
+ * @description Auto-commit vault changes (scope-driven, default: 5-Layer tree
+ * + .maencof-meta/).
  *
- * Triggers: SessionEnd (session exit) and UserPromptSubmit (when prompt matches skip_patterns, default /clear)
+ * Triggers: MCP BootSweep (previous-session wrap-up) and UserPromptSubmit
+ * (when prompt matches skip_patterns, default /clear)
  * Opt-in only: requires .maencof-meta/vault-commit.json with { "enabled": true }
- * Always returns { continue: true } — never blocks session exit or prompt submission.
+ * Always returns { continue: true } — never blocks boot or prompt submission.
  */
 import { DEFAULT_COMMIT_SCOPE } from '../../../../constants/vaultCommitter.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
@@ -15,6 +16,7 @@ import { stagedTopLevels } from '../../gitUtils/message/stagedTopLevels.js';
 import { getGitRoot } from '../../gitUtils/repo/getGitRoot.js';
 import { isGitRepo } from '../../gitUtils/repo/isGitRepo.js';
 import { isIndexLocked } from '../../gitUtils/repo/isIndexLocked.js';
+import { reclaimStaleIndexLock } from '../../gitUtils/repo/reclaimStaleIndexLock.js';
 import { commitStaged } from '../../gitUtils/staging/commitStaged.js';
 import { hasVaultChanges } from '../../gitUtils/staging/hasVaultChanges.js';
 import { listStagedFiles } from '../../gitUtils/staging/listStagedFiles.js';
@@ -64,9 +66,21 @@ export async function runVaultCommitter(
     // 3. Git repo check
     if (!(await isGitRepo(cwd))) return { continue: true };
 
-    // 4. Index lock check
+    // 4. Index lock check — a live lock defers to the running git operation;
+    //    a stale (SIGKILL-orphaned) lock is reclaimed so the commit gate is
+    //    never permanently blocked
     const gitRoot = await getGitRoot(cwd);
-    if (!gitRoot || isIndexLocked(gitRoot)) return { continue: true };
+    if (!gitRoot) return { continue: true };
+    if (isIndexLocked(gitRoot)) {
+      const reclaim = reclaimStaleIndexLock(gitRoot);
+      if (reclaim === 'live') return { continue: true };
+      if (reclaim === 'reclaimed')
+        appendErrorLogSafe(cwd, {
+          hook: 'vault-committer',
+          error: 'stale .git/index.lock reclaimed (mtime beyond threshold)',
+          timestamp: new Date().toISOString(),
+        });
+    }
 
     // 5. Scoped vault changes check
     const scope = config.scope ?? DEFAULT_COMMIT_SCOPE;

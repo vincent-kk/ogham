@@ -12,7 +12,7 @@ plugin: maencof
 
 # changelog — Self-Change Recorder
 
-Curates changes in watched paths into daily changelog documents (`02_Derived/changelog/YYYY-MM-DD.md`, Layer 2). Detection happens mechanically (SessionEnd scan + git); this skill adds the semantic layer: categorization, prose, and the "why".
+Curates changes in watched paths into daily changelog documents (`02_Derived/changelog/YYYY-MM-DD.md`, Layer 2). Detection happens mechanically (MCP boot sweep scan + git); this skill adds the semantic layer: categorization, prose, and the "why".
 
 Recording is deferred and retroactive by design. Nothing blocks a session; unrecorded changes are preserved by git and surfaced as a one-line SessionStart advisory until curated.
 
@@ -62,7 +62,7 @@ Read `<vault-root>/.maencof-meta/changelog-state.json` with the Read tool. Schem
 ```
 
 - File absent or malformed → treat as `{ "pending": null, "lastCuratedAt": null }`.
-- `pending` is the last SessionEnd scan (informational — Step 2 re-detects live).
+- `pending` is the last boot-sweep scan (informational — Step 2 re-detects live).
 
 ### Step 2 — Detect Changes (live)
 
@@ -120,7 +120,7 @@ tags: [changelog, growth, daily]
 
 ### 자동화
 
-- SessionEnd 스캔 도입 — `.claude/rules/...`
+- boot sweep 스캔 도입 — `.claude/rules/...`
 ```
 
 **Notes:**

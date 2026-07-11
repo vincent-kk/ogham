@@ -2,21 +2,21 @@
 
 ## Purpose
 
-FCA-AI 품질 규칙을 숫자 지표와 처방으로 연결하는 fractal. 테스트 케이스 카운팅 → 3+12 규칙 검증 → (위반 시) 모듈 분리 결정 트리 → test.ts 승격 적격성의 순수 계산 파이프라인을 제공한다.
+FCA-AI 품질 규칙을 숫자 지표와 처방으로 연결하는 fractal. 테스트 케이스 카운팅 → 테스트 케이스 게이트 검증 → (초과 시) 모듈 분리 결정 트리 → test.ts 승격 적격성의 순수 계산 파이프라인을 제공한다.
 
 ## Structure
 
-| 모듈 | 역할 |
-|------|------|
-| `testCounter` | `test.ts`/`spec.ts` 파일에서 `it`/`test` 호출을 basic/complex로 분류 |
-| `threePlusTwelve` | `spec.ts` 총 케이스 > 15면 위반. `test.ts`는 면제 |
-| `decisionTree` | 위반 시 `ok`/`split`/`compress`/`parameterize` 처방 결정 |
-| `promotionTracker` | 장기간 안정된 `test.ts`의 `spec.ts` 승격 적격성 판정 |
+| 모듈               | 역할                                                                 |
+| ------------------ | -------------------------------------------------------------------- |
+| `testCounter`      | `test.ts`/`spec.ts` 파일에서 `it`/`test` 호출을 basic/complex로 분류 |
+| `testCaseGate`     | `spec.ts` 총 케이스 > 15면 위반. `test.ts`는 면제                    |
+| `decisionTree`     | 위반 시 `ok`/`split`/`compress`/`parameterize` 처방 결정             |
+| `promotionTracker` | 장기간 안정된 `test.ts`의 `spec.ts` 승격 적격성 판정                 |
 
 ## Conventions
 
 - 모든 함수는 순수 — 파일 I/O·Date 호출 금지 (호출자가 주입)
-- 임계값은 `constants/qualityThresholds.ts`의 `THREE_PLUS_TWELVE_THRESHOLD`, `LCOM4_SPLIT_THRESHOLD`, `CC_THRESHOLD`, `DEFAULT_STABILITY_DAYS`에서만 import
+- 임계값은 `constants/qualityThresholds.ts`의 `MAX_TEST_CASES`, `LCOM4_SPLIT_THRESHOLD`, `CC_THRESHOLD`, `DEFAULT_STABILITY_DAYS`에서만 import
 - 모듈 간 직접 의존 금지 — 파이프라인은 상위 orchestrator(예: `mcp/tools/testMetrics`)가 조립
 - 반환 객체에는 입력 값을 에코(`metrics`/`stableDays` 등)해 UI·로그 재활용
 

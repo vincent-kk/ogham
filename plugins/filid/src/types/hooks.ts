@@ -87,21 +87,13 @@ export interface SessionStartInput extends HookBaseInput {
   hook_event_name: 'SessionStart';
 }
 
-/** SessionEnd hook input */
-export interface SessionEndInput extends HookBaseInput {
-  hook_event_name: 'SessionEnd';
-  /** Reason the session ended */
-  reason: string;
-}
-
 /** Union of all hook input types */
 export type HookInput =
   | PreToolUseInput
   | PostToolUseInput
   | SubagentStartInput
   | UserPromptSubmitInput
-  | SessionStartInput
-  | SessionEndInput;
+  | SessionStartInput;
 
 /**
  * structure-guard가 출력하는 검증 결과.

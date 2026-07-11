@@ -74,11 +74,11 @@ Pattern-matched (priority 3, NOT list members): `__name__` wrapping (e.g., `__te
 
 ## Section 4 — Test File Validation (3+12 Rule)
 
-Collect all spec files and call `mcp__plugin_filid_t__test_metrics` with `action: "check-312"`.
+Collect all spec files and call `mcp__plugin_filid_t__test_metrics` with `action: "check-gate"`.
 
 ```
 mcp__plugin_filid_t__test_metrics({
-  action: "check-312",
+  action: "check-gate",
   files: [{ filePath: "<path>", content: "<source>" }, ...]
 })
 ```

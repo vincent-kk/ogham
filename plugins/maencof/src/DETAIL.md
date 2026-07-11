@@ -36,7 +36,7 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 - version.ts는 빌드 시 inject-version.mjs가 자동 생성; 직접 수정 금지
 - bridge/ 출력 파일은 esbuild가 생성; 소스는 src/hooks/ 및 mcp/serverEntry.ts
 
-## Hook Notes
+## Session Lifecycle Notes
 
-- `sessionEnd`는 sessionStore(JSON)로 세션 레코드를 마감하고(`recordSessionEnd`), workIndex로 당일 작업 digest를 재생성한다(`buildDailyDigest`).
+- 세션 마감은 MCP 서버 수명주기가 소유한다: 매 턴 UserPromptSubmit `session-touch` 가 `lastActivityAt`/`usageSnapshot` 을 기록하고, 서버 shutdown(동기 정밀)·다음 부팅 bootSweep(보장)이 `sweepStaleSessions` 로 레코드를 마감하며 workIndex 당일 digest 를 재생성한다(`buildDailyDigest`).
 - 세션 종료 기록은 sessionStore 전용이다 — `.maencof-meta/sessions/*.md` 나 dailynote .md 에는 기록하지 않는다.

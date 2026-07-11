@@ -41,7 +41,7 @@ non-compliant file and violation.
 ## Section 3 — Test Compliance Details
 
 ```
-mcp__plugin_filid_t__test_metrics(action: "check-312", files: allSpecTs)
+mcp__plugin_filid_t__test_metrics(action: "check-gate", files: allSpecTs)
 // Returns per-file: { basic: number, complex: number, total: number, pass: boolean }
 
 checks:
@@ -146,7 +146,7 @@ mcp__plugin_filid_t__ast_analyze(source: source, analysisType: "lcom4", classNam
 | `mcp__plugin_filid_t__fractal_scan`     | `path: cwd`                                     | 1, 5  | Retrieve module tree; verify classifications |
 | `mcp__plugin_filid_t__fractal_navigate` | `action: "classify", path, entries`             | 1     | Classify a specific directory                |
 | `mcp__plugin_filid_t__doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |
-| `mcp__plugin_filid_t__test_metrics`     | `action: "check-312", files`                    | 3     | Validate 3+12 rule per spec.ts               |
+| `mcp__plugin_filid_t__test_metrics`     | `action: "check-gate", files`                    | 3     | Validate 3+12 rule per spec.ts               |
 | `mcp__plugin_filid_t__test_metrics`     | `action: "decide", decisionInput`               | 4     | Generate split/compress recommendation       |
 | `mcp__plugin_filid_t__ast_analyze`      | `analysisType: "lcom4", source, className`      | 4     | Compute LCOM4 cohesion metric                |
 | `mcp__plugin_filid_t__ast_analyze`      | `analysisType: "cyclomatic-complexity", source` | 4     | Compute cyclomatic complexity                |

@@ -1,7 +1,7 @@
 ---
 name: lifecycle
 user_invocable: true
-description: '[maencof:lifecycle] Attaches custom actions to Claude Code lifecycle events (session start/end, prompt submit, tool use, stop) via the dispatcher pattern without modifying hooks.json. Supports toggling and removing actions conversationally.'
+description: '[maencof:lifecycle] Attaches custom actions to Claude Code lifecycle events (session start, prompt submit, tool use) via the dispatcher pattern without modifying hooks.json. Supports toggling and removing actions conversationally.'
 argument-hint: '[mode] [id]'
 version: '1.1.0'
 complexity: medium
@@ -41,7 +41,7 @@ Read `lifecycle.json` and show actions with status (active/inactive).
 
 ### Step 2 — Identify Intent and Map Event
 
-Detect target event from natural language (SessionStart, SessionEnd, PreToolUse, etc. — `Stop` is not supported; map "after each response" to UserPromptSubmit or SessionEnd).
+Detect target event from natural language (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse — `Stop` and `SessionEnd` are not supported; map "after each response" or "when the session ends" to UserPromptSubmit (next turn) or SessionStart (next session)).
 
 ### Step 3 — Define Action
 

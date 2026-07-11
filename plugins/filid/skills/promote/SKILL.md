@@ -91,7 +91,7 @@ See [reference.md Section 4](./reference.md#section-4--spec-generation-312-rule)
 
 ### Phase 5 — Validation (skill → `qa-reviewer`)
 
-The **skill** calls `mcp__plugin_filid_t__test_metrics(action: "check-312", files: [...])`
+The **skill** calls `mcp__plugin_filid_t__test_metrics(action: "check-gate", files: [...])`
 for each generated spec. The PASS/FAIL results are passed to a
 `filid:qa-reviewer` Task that interprets the outcome per file:
 
@@ -113,7 +113,7 @@ See [reference.md Section 5 — Migration subsection](./reference.md#section-5--
 | Tool           | Action      | Purpose                                                  |
 | -------------- | ----------- | -------------------------------------------------------- |
 | `mcp__plugin_filid_t__test_metrics` | `count`     | Analyze test case counts, stability, and failure history |
-| `mcp__plugin_filid_t__test_metrics` | `check-312` | Validate generated spec.ts against 3+12 rule             |
+| `mcp__plugin_filid_t__test_metrics` | `check-gate` | Validate generated spec.ts against 3+12 rule             |
 
 ## Options
 
@@ -149,5 +149,5 @@ Constants:
   TEST_THRESHOLD         = 15  (max cases per spec.ts)
   basic  <= 3
   complex <= 12
-Rule:   Write spec.ts only after check-312 passes; delete test.ts after write succeeds
+Rule:   Write spec.ts only after check-gate passes; delete test.ts after write succeeds
 ```

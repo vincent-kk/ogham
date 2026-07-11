@@ -10,8 +10,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { appendActivityEvent } from '../../../core/activityLog/index.js';
 import {
-  recordSessionEnd,
   recordSessionStart,
+  sweepStaleSessions,
 } from '../../../core/sessionStore/index.js';
 import {
   aggregatePeriod,
@@ -68,7 +68,8 @@ describe('buildDailyDigest', () => {
     writeUsage({ create: 0 });
     recordSessionStart(vaultDir, 's1', start);
     writeUsage({ create: 3, update: 1 });
-    recordSessionEnd(vaultDir, {
+    sweepStaleSessions(vaultDir, {
+      staleThresholdMs: 0,
       sessionId: 's1',
       now: new Date(2026, 5, 21, 11, 0),
     });
@@ -113,7 +114,8 @@ describe('buildDailyDigest', () => {
 
   it('멱등 재계산 — 두 번 호출해도 동일 결과', () => {
     recordSessionStart(vaultDir, 's1', new Date(2026, 5, 21, 9, 0));
-    recordSessionEnd(vaultDir, {
+    sweepStaleSessions(vaultDir, {
+      staleThresholdMs: 0,
       sessionId: 's1',
       now: new Date(2026, 5, 21, 9, 30),
     });

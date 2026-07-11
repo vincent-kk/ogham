@@ -12,7 +12,6 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 | `PreToolUse` (EnterPlanMode)   | `plan-gate.entry.ts`          | FCA-AI compliance checklist when entering plan mode (example only — not registered in `hooks.json`)                      |
 | `SubagentStart`                | `agent-enforcer.entry.ts`     | FCA-AI agent role restriction injection                                                                                  |
 | `UserPromptSubmit`             | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start                                                                                  |
-| `SessionEnd`                   | `session-cleanup.entry.ts`    | Session cache and marker file cleanup                                                                                    |
 
 Built entry files live in `bridge/` after `yarn build:plugin`.
 
@@ -103,7 +102,7 @@ Fires on each user prompt submission. Injects FCA-AI rules into Claude's context
    - DETAIL.md has no line cap; updates must restructure in place
      (append-only growth forbidden, required sections preserved)
    - Organ directories must not have INTENT.md
-   - Test files max 15 cases per spec (3 basic + 12 complex)
+   - Spec files max 15 cases (3 basic + 12 complex); test.ts exempt
    - LCOM4 >= 2 triggers module split; CC > 15 triggers compress/abstract
 3. All 7 built-in fractal structure rules (from `rule-engine.ts`)
 4. FractalNode category classification guide
@@ -112,19 +111,25 @@ Never blocks user prompts (always `continue: true`).
 
 ---
 
-### 5. SessionEnd — Session Cleanup
+### 5. Session Cleanup — MCP Server Lifecycle
 
-**Entry**: `src/hooks/session-cleanup/session-cleanup.entry.ts`
-**Built output**: `bridge/session-cleanup.mjs`
+filid no longer registers a `SessionEnd` hook. `SessionEnd` is Claude-only, so
+session-scoped cleanup moved to the **MCP server process lifecycle** — the server
+is spawned and killed once per session, making its termination the only session-end
+signal common to all three hosts (Claude, Codex, Antigravity).
 
-Fires when a Claude Code session ends. Cleans up session-specific cache and marker files.
+**Entry**: `src/mcp/server/` (`registerShutdown` + `bootSweep`)
 
 **Behavior**:
 
-- Deletes the session context marker file (`session-context-<hash>`) from the plugin cache directory
-- Deletes the cached context file (`cached-context-<hash>`) if present
-- Always returns `continue: true` (SessionEnd hooks cannot block session termination)
-- Safe: only removes filid's own cache files, never touches project files
+- **Shutdown** (`exit`/`SIGINT`/`SIGTERM`) — synchronously deletes this session's own
+  cache/marker files (`session-context-<hash>` and its siblings), keyed by the
+  `CLAUDE_CODE_SESSION_ID` env var. No-op when the var is absent.
+- **Boot sweep** — on the next server start, prunes stale session files and cache
+  directories past their TTL (daily-throttled, idempotent). This is the fallback
+  that finalizes any session whose shutdown was cut off.
+- Best-effort + TTL-backed, not a guaranteed per-session hook. Only ever removes
+  filid's own cache files, never project files.
 
 ---
 
@@ -181,18 +186,6 @@ using `process.execPath`), which executes the built `.mjs` file in `bridge/`.
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"",
             "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"",
-            "timeout": 3
           }
         ]
       }

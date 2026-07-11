@@ -123,6 +123,46 @@ describe('agent-enforcer', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
+  // === cross-review committee personas: Write the opinion file, forbid Edit ===
+
+  const COMMITTEE_PERSONAS = [
+    'engineering-architect',
+    'operations-sre',
+    'knowledge-manager',
+    'business-driver',
+    'product-manager',
+    'design-hci',
+    'adjudicator',
+  ];
+
+  it.each(COMMITTEE_PERSONAS)(
+    'permits %s to Write its opinion file yet still forbids Edit',
+    (agentType) => {
+      const result = enforceAgentRole({ ...baseInput, agent_type: agentType });
+      const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+      expect(result.continue).toBe(true);
+      expect(ctx).toContain('ROLE RESTRICTION');
+      // regression guard: must NOT reintroduce the contradictory Write ban
+      expect(ctx).not.toMatch(/MUST NOT use Write/);
+      // Write is permitted, scoped to the opinion file
+      expect(ctx).toContain('Write');
+      expect(ctx).toContain('opinion');
+      // Edit is still forbidden
+      expect(ctx).toMatch(/MUST NOT use the Edit tool/);
+    },
+  );
+
+  it('applies the committee restriction to filid:-namespaced spawns', () => {
+    const result = enforceAgentRole({
+      ...baseInput,
+      agent_type: 'filid:engineering-architect',
+    });
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('ROLE RESTRICTION');
+    expect(ctx).not.toMatch(/MUST NOT use Write/);
+    expect(ctx).toContain('opinion');
+  });
+
   // === FCA workflow guidance for OMC/native agents ===
 
   describe('planning agent guidance (FCA project)', () => {

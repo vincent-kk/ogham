@@ -23,14 +23,14 @@ describe('test-metrics tool', () => {
     });
   });
 
-  describe('action: check-312', () => {
+  describe('action: check-gate', () => {
     it('should detect 3+12 rule violation', () => {
       const lines = Array.from(
         { length: 16 },
         (_, i) => `it('test ${i}', () => {});`,
       ).join('\n');
       const result = handleTestMetrics({
-        action: 'check-312',
+        action: 'check-gate',
         files: [{ filePath: '/app/x.spec.ts', content: lines }],
       });
       expect(result.violations).toBeDefined();
@@ -43,7 +43,7 @@ describe('test-metrics tool', () => {
         (_, i) => `it('test ${i}', () => {});`,
       ).join('\n');
       const result = handleTestMetrics({
-        action: 'check-312',
+        action: 'check-gate',
         files: [{ filePath: '/app/x.spec.ts', content: lines }],
       });
       expect(result.violations).toHaveLength(0);

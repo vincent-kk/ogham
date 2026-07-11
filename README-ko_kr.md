@@ -46,7 +46,7 @@ claude plugin install maencof
 | Skills   | 19       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline` |
 | MCP 도구 | 18       | 구조 분석, 드리프트 감지, AST 메트릭, 기술 부채 추적                    |
 | Agents   | 14       | Architect, Implementer, QA Reviewer, 7인 페르소나 리뷰 위원회           |
-| Hooks    | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd   |
+| Hooks    | 4 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit               |
 
 **주요 기능:**
 
@@ -85,7 +85,7 @@ AI 에이전트는 세션 간에 사용자를 잊습니다. 메모는 여러 도
 | Skills   | 26          | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`, `/maencof:organize`   |
 | MCP 도구 | 18          | 지식 CRUD, 그래프 검색, 스프레딩 액티베이션, 인사이트 캡처                      |
 | Agents   | 5           | Memory Organizer, Identity Guardian, Checkup, Configurator, Knowledge Connector |
-| Hooks    | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd       |
+| Hooks    | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse                         |
 
 **주요 기능:**
 
@@ -199,7 +199,7 @@ MCP 도구, 스킬, 라이프사이클 훅을 통해 Claude가 **OpenAI Codex CL
 | Skills   | 12   | `/imbas:pipeline`, `/imbas:validate`, `/imbas:split`, `/imbas:devplan`, `/imbas:manifest` |
 | MCP 도구 | 16   | `run_create`, `manifest_save`, `manifest_implement_plan` 등                               |
 | Agents   | 3    | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                         |
-| Hooks    | 3    | pre-tool-use, context-injector, session-cleanup                                           |
+| Hooks    | 4    | setup, pre-tool-use, agent-enforcer, context-injector                                     |
 
 **주요 기능:**
 

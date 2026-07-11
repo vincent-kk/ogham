@@ -15,7 +15,7 @@ export function readDailyDigest(cwd: string, date: string): DailyDigest | null {
     const parsed = JSON.parse(readFileSync(path, 'utf-8')) as DailyDigest;
     if (parsed && typeof parsed.date === 'string') return parsed;
   } catch {
-    /* corrupt digest — 다음 SessionEnd 에 재생성 */
+    /* corrupt digest — 다음 sweep 마감 시 재생성 */
   }
   return null;
 }

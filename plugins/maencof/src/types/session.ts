@@ -50,8 +50,12 @@ export interface UsageStats {
 /**
  * 단일 세션 레코드 — `activity/sessions/YYYY-MM-DD.json` 의 `sessions[sessionId]` 값.
  *
- * SessionStart 에 생성(`usageBaseline` 스냅샷 포함)되고 SessionEnd 에 마감된다.
- * 마감 시 baseline 대비 누적 통계 차분으로 `vaultOps` 를 산출하고 `usageBaseline` 은 제거한다.
+ * SessionStart 에 생성(`usageBaseline` 스냅샷 포함)되고, 매 턴 touch 가
+ * `lastActivityAt`/`usageSnapshot` 을 갱신하며, sweep(MCP 서버 boot/shutdown)이
+ * 무활동 레코드를 마감한다(`endedAt = lastActivityAt`,
+ * `vaultOps = usageSnapshot - usageBaseline`). sweep 마감은 잠정적이다 —
+ * baseline/snapshot 을 보존하므로 살아있는 세션의 오마감은 다음 touch 가
+ * `endedAt`/`vaultOps` 를 지워 재개방하고, 이후 sweep 이 다시 차분한다.
  * `endedAt` 이 없으면 아직 진행 중이거나 비정상 종료된 세션이다.
  */
 export interface SessionRecord {
@@ -61,14 +65,18 @@ export interface SessionRecord {
   startedAt: string;
   /** 세션 종료 시각 (ISO). 미마감 세션은 부재 */
   endedAt?: string;
+  /** 마지막 활동(프롬프트) 시각 (ISO) — 매 턴 touch 가 갱신 */
+  lastActivityAt?: string;
   /** 세션 중 실행된 스킬 */
   skillsUsed: string[];
   /** 세션 중 수정된 파일 */
   filesModified: string[];
   /** 이 세션 동안의 볼트 도구 호출 차분 (0 초과 항목만) */
   vaultOps?: Record<string, number>;
-  /** SessionStart 시점 누적 통계 스냅샷 — 마감 시 차분 계산 후 제거 */
+  /** SessionStart 시점 누적 통계 스냅샷 — sweep 차분의 기준점 */
   usageBaseline?: Record<string, number>;
+  /** 마지막 활동 시점 누적 통계 스냅샷 — sweep 차분의 종점 (sweep 시점 오염 차단) */
+  usageSnapshot?: Record<string, number>;
 }
 
 /**

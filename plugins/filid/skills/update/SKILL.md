@@ -40,7 +40,7 @@ An incremental gate (Stage 0) skips execution when no changes have occurred sinc
 - Immediately after writing or modifying code, to sync docs and tests
 - Before merging a branch, to verify FCA-AI compliance
 - When INTENT.md/DETAIL.md are out of sync with the implementation
-- When test.ts/spec.ts violate the FCA-AI 3+12 rule
+- When a spec.ts violates the FCA-AI 3+12 rule (the cap is spec-only; test.ts is exempt)
 
 ## Core Workflow
 
@@ -98,8 +98,8 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ## Available MCP Tools
 
-| Tool                       | Stage | Purpose                                            |
-| -------------------------- | ----- | -------------------------------------------------- |
+| Tool                                      | Stage | Purpose                                            |
+| ----------------------------------------- | ----- | -------------------------------------------------- |
 | `mcp__plugin_filid_t__cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
 | `mcp__plugin_filid_t__fractal_scan`       | 1     | Project structure scan                             |
 | `mcp__plugin_filid_t__fractal_navigate`   | 1     | Tree traversal and classification                  |
@@ -141,4 +141,4 @@ Key rules:
 - Without `--force`, exits immediately when no changes detected since last run
 - Stage 2 (Sync) runs only when critical/high violations are present
 - INTENT.md must stay within the 50-line limit
-- test.ts/spec.ts must follow the 3+12 rule (max 15 test cases per file)
+- spec.ts must follow the 3+12 rule (max 15 cases per spec.ts); test.ts is exempt (a large, stable test.ts is a /filid:promote candidate, not a violation)

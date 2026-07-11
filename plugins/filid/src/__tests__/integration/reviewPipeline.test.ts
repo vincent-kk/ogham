@@ -9,7 +9,7 @@ import { guardStructure } from '../../hooks/preToolUse/helpers/structureGuard/st
 import { decide } from '../../metrics/decisionTree/decisionTree.js';
 import { checkPromotionEligibility } from '../../metrics/promotionTracker/promotionTracker.js';
 import { countTestCases } from '../../metrics/testCounter/testCounter.js';
-import { check312Rule } from '../../metrics/threePlusTwelve/threePlusTwelve.js';
+import { checkTestCaseGate } from '../../metrics/testCaseGate/testCaseGate.js';
 import type { PreToolUseInput } from '../../types/hooks.js';
 
 describe('review pipeline', () => {
@@ -36,7 +36,7 @@ describe('review pipeline', () => {
       expect(counts.total).toBe(6);
       expect(counts.total).toBeLessThanOrEqual(15);
 
-      const rule = check312Rule([counts]);
+      const rule = checkTestCaseGate([counts]);
       expect(rule.violated).toBe(false);
     });
 
@@ -54,7 +54,7 @@ describe('review pipeline', () => {
       });
       expect(counts.total).toBe(16);
 
-      const rule = check312Rule([counts]);
+      const rule = checkTestCaseGate([counts]);
       expect(rule.violated).toBe(true);
       expect(rule.violatingFiles).toContain('overloaded.spec.ts');
     });

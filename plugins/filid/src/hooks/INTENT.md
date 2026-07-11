@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Claude Code 플러그인 훅 이벤트를 처리하는 fractal. SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·PreToolUse 검증/주입/가드·SubagentStart 역할 강제·PostToolUse 변경 추적·SessionEnd 정리를 각각 독립 sub-fractal로 구현한다. 엔트리 파일(`*.entry.ts`)은 esbuild가 `bridge/*.mjs`로 번들링.
+Claude Code 플러그인 훅 이벤트를 처리하는 fractal. SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·PreToolUse 검증/주입/가드·SubagentStart 역할 강제·PostToolUse 변경 추적을 각각 독립 sub-fractal로 구현한다. 세션 캐시 정리는 MCP 서버 수명주기(`src/mcp/server/bootSweep.ts`·`registerShutdown.ts`) 소관. 엔트리 파일(`*.entry.ts`)은 esbuild가 `bridge/*.mjs`로 번들링.
 
 ## Structure
 
@@ -16,7 +16,6 @@ Claude Code 플러그인 훅 이벤트를 처리하는 fractal. SessionStart 초
 | `preToolUse`       | PreToolUse        | 위 3개 서브모듈 오케스트레이션                                                |
 | `agentEnforcer`    | SubagentStart     | 에이전트 역할·언어 태그 주입                                                  |
 | `changeTracker`    | PostToolUse       | 변경 추적 (현재 비활성)                                                       |
-| `sessionCleanup`   | SessionEnd        | 세션 캐시 파일 정리                                                           |
 | `shared` organ     | -                 | `isFcaProject`/`isIntentMd`/`isDetailMd`/`isCriteriaMd`                       |
 | `utils` organ      | -                 | `validateCwd`, git 메타 판독(branch/HEAD/reflog/manifest), organ 구조 검사 등 |
 

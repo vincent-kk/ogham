@@ -2,7 +2,7 @@
 
 ## Purpose
 
-볼트 변경사항 Git 자동 커밋. SessionEnd와 UserPromptSubmit(skip_patterns 매칭, 기본 /clear) 이벤트에서 opt-in 방식으로 동작. 커밋 범위는 `vault-commit.json::scope`(기본: 5-Layer 문서 트리 + .maencof-meta/)로 제어하고, 당일 자동 커밋은 `helpers/foldDaily`가 하루 1커밋으로 접는다.
+볼트 변경사항 Git 자동 커밋. MCP bootSweep(직전 세션 마무리)과 UserPromptSubmit(skip_patterns 매칭, 기본 /clear)에서 opt-in 방식으로 동작. 커밋 범위는 `vault-commit.json::scope`(기본: 5-Layer 문서 트리 + .maencof-meta/)로 제어하고, 당일 자동 커밋은 `helpers/foldDaily`가 하루 1커밋으로 접는다. 커밋 게이트는 live index.lock 을 존중하되 stale lock(mtime 임계 초과)은 회수한다.
 
 ## Structure
 

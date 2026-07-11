@@ -60,11 +60,6 @@ const hookEntries = [
     entry: 'userPromptSubmit',
     maxBytes: LIGHT_HOOK_BYTES,
   },
-  {
-    name: 'session-cleanup',
-    entry: 'sessionCleanup',
-    maxBytes: LIGHT_HOOK_BYTES,
-  },
   { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
 ];
 

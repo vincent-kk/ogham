@@ -79,7 +79,7 @@ Do NOT use background agents or subagents — call the tools directly:
 
 - **Phase 2** — Read each INTENT.md (parallel Read calls) and check line count + boundary sections
 - **Phase 3** — Filter organ nodes from Phase 1 results and check for INTENT.md presence (no extra tool calls needed if Phase 1 data suffices; use Glob only if needed)
-- **Phase 4** — Call `mcp__plugin_filid_t__test_metrics` with `action: "check-312"` for all spec files
+- **Phase 4** — Call `mcp__plugin_filid_t__test_metrics` with `action: "check-gate"` for all spec files
 
 Launch all independent Read/Glob/MCP calls for Phases 2–4 as **parallel tool
 calls in one response**. Then proceed directly to Phase 5.
@@ -132,7 +132,7 @@ See [reference.md Section 5](./reference.md#section-5--report-formats).
 | Tool                                | Action      | Purpose                                                |
 | ----------------------------------- | ----------- | ------------------------------------------------------ |
 | `mcp__plugin_filid_t__fractal_scan` | —           | Build complete project hierarchy for scan              |
-| `mcp__plugin_filid_t__test_metrics` | `check-312` | Validate 3+12 rule across all spec files               |
+| `mcp__plugin_filid_t__test_metrics` | `check-gate` | Validate 3+12 rule across all spec files               |
 | `mcp__plugin_filid_t__doc_compress` | `auto`      | (`--fix`) Compress INTENT.md via context-manager agent |
 
 ## Options

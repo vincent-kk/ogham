@@ -2,19 +2,18 @@
 
 ## Purpose
 
-Claude Code 플러그인의 Layer 1 자동 실행 계층. 5개 lifecycle 이벤트를 `bridge/*.mjs` 스크립트에 매핑하는 정적 설정 노드.
+Claude Code 플러그인의 Layer 1 자동 실행 계층. 4개 lifecycle 이벤트를 `bridge/*.mjs` 스크립트에 매핑하는 정적 설정 노드.
 
 ## Structure
 
 - `hooks.json` — Claude Code가 읽는 이벤트-핸들러 매핑 설정
 
-| Event | Matcher | Bridge Script | Timeout |
-|---|---|---|---|
-| `SessionStart` | `*` | `setup.mjs` | 30s |
-| `PreToolUse` | `Read\|Write\|Edit` | `pre-tool-use.mjs` | 10s |
-| `SubagentStart` | `*` | `agent-enforcer.mjs` | 3s |
-| `UserPromptSubmit` | `*` | `user-prompt-submit.mjs` | 5s |
-| `SessionEnd` | `*` | `session-cleanup.mjs` | 3s |
+| Event              | Matcher             | Bridge Script            | Timeout |
+| ------------------ | ------------------- | ------------------------ | ------- |
+| `SessionStart`     | `*`                 | `setup.mjs`              | 30s     |
+| `PreToolUse`       | `Read\|Write\|Edit` | `pre-tool-use.mjs`       | 10s     |
+| `SubagentStart`    | `*`                 | `agent-enforcer.mjs`     | 3s      |
+| `UserPromptSubmit` | `*`                 | `user-prompt-submit.mjs` | 5s      |
 
 ## Conventions
 

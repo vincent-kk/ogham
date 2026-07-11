@@ -1,9 +1,9 @@
 ---
 name: migrate
 user_invocable: true
-description: "[filid:migrate] Migrate legacy CLAUDE.md and SPEC.md files to INTENT.md and DETAIL.md naming using a shell script for batch git-mv renames, reference updates, and optional auto-commit."
-argument-hint: "[path] [--execute] [--auto-commit]"
-version: "2.0.0"
+description: '[filid:migrate] Migrate legacy CLAUDE.md and SPEC.md files to INTENT.md and DETAIL.md naming using a cross-platform Node script for batch git-mv renames, reference updates, and optional auto-commit.'
+argument-hint: '[path] [--execute] [--auto-commit]'
+version: '2.0.0'
 complexity: simple
 plugin: filid
 ---
@@ -11,8 +11,9 @@ plugin: filid
 # migrate — CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md Migration
 
 Migrate an existing FCA-AI project from the legacy `CLAUDE.md`/`SPEC.md` naming
-convention to the new `INTENT.md`/`DETAIL.md` naming. Uses a shell script for
-batch processing — the LLM only reads the script output and reports to the user.
+convention to the new `INTENT.md`/`DETAIL.md` naming. Uses a cross-platform
+Node script for batch processing — the LLM only reads the script output and
+reports to the user.
 
 > **Detail Reference**: For script usage and implementation details,
 > read the `reference.md` file in this skill's directory.
@@ -31,7 +32,7 @@ batch processing — the LLM only reads the script output and reports to the use
 
 ## Core Workflow
 
-All phases are handled by `migrate.sh`. The LLM executes the script and
+All phases are handled by `migrate.mjs`. The LLM executes the script and
 reports the output to the user.
 
 ### Step 1 — Dry-Run (default)
@@ -39,14 +40,15 @@ reports the output to the user.
 Run the script without `--execute` to preview the migration plan:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/migrate/migrate.sh" <target-path>
+node "${CLAUDE_PLUGIN_ROOT}/skills/migrate/migrate.mjs" <target-path>
 ```
 
 > **Script resolution**: Use `${CLAUDE_PLUGIN_ROOT}` to resolve the absolute path.
-> If `CLAUDE_PLUGIN_ROOT` is not set, use `Glob(**/skills/migrate/migrate.sh)`
+> If `CLAUDE_PLUGIN_ROOT` is not set, use `Glob(**/skills/migrate/migrate.mjs)`
 > to locate the script. If the script is not found, abort with an error message.
 
 The script outputs:
+
 - Phase 1: Files found, conflicts detected
 - Phase 2: Renames planned (skipped in dry-run)
 - Phase 3: Cross-file references that would be updated
@@ -59,10 +61,11 @@ skill (the explicit `--execute` flag is the gate).
 ### Step 2 — Execute (with `--execute` flag)
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/migrate/migrate.sh" <target-path> --execute [--auto-commit]
+node "${CLAUDE_PLUGIN_ROOT}/skills/migrate/migrate.mjs" <target-path> --execute [--auto-commit]
 ```
 
 The script performs:
+
 1. `git mv` renames (falls back to `mv` if not a git repo)
 2. `sed` reference updates across `.md`, `.ts`, `.js` files
 3. Optional auto-commit with structured commit message
@@ -78,11 +81,11 @@ After execution, optionally run `mcp__plugin_filid_t__structure_validate` to con
 # Without --execute: dry-run mode (default), no files modified
 ```
 
-| Option           | Type   | Default                   | Description                                          |
-| ---------------- | ------ | ------------------------- | ---------------------------------------------------- |
-| `path`           | string | Current working directory | Scope migration to a specific subdirectory           |
-| `--execute`      | flag   | off                       | Actually perform the renames and content updates      |
-| `--auto-commit`  | flag   | off                       | Auto-commit migration changes after execution         |
+| Option          | Type   | Default                   | Description                                      |
+| --------------- | ------ | ------------------------- | ------------------------------------------------ |
+| `path`          | string | Current working directory | Scope migration to a specific subdirectory       |
+| `--execute`     | flag   | off                       | Actually perform the renames and content updates |
+| `--auto-commit` | flag   | off                       | Auto-commit migration changes after execution    |
 
 ## Reversibility
 
@@ -110,4 +113,4 @@ Key rules:
 - Default mode (no `--execute` flag) is a dry run that never modifies files
 - Directories with both `CLAUDE.md` and `INTENT.md` are **skipped** — resolve manually
 - Same conflict check for `SPEC.md` + `DETAIL.md` coexistence
-- `--auto-commit` creates a single commit with all migration changes
+- `--auto-commit` creates a single commit containing only the migration changes

@@ -82,10 +82,6 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                        renderer + graceful v1→v2 normalize (normalizeToV2)
 //                        reached via buildTurnContext — pure Node-builtin
 //                        functions, no external runtime.
-//   session-end        — sessionEnd (session record + digest + personal-context
-//                        lifecycle prune) + lifecycle + changelogDebt
-//                        (spawnCli/git) + vaultCommitter (spawnCli/git,
-//                        scope staging + foldDaily).
 //   post-tool-use      — activityRecorder + lifecycle.
 //   pre-tool-use       — layerGuard + vaultRedirector + lifecycle (all light).
 // session-start is the largest bundle: it inlines metaSkillBody.md and the
@@ -102,10 +98,10 @@ const SESSION_START_BYTES = 56 * 1024;
 // user-prompt-submit / session-end grew with the vaultCommitter scope
 // expansion (configurable commit scope + sensitive-file exclude pathspecs +
 // daily fold via git reset --soft) — all pure Node-builtin + spawnCli code.
-const USER_PROMPT_SUBMIT_BYTES = 40 * 1024;
-// 36 -> 40 KB with the personal-context lifecycle prune (reader + normalizer +
-// prune/eviction, ~3 KB minified).
-const SESSION_END_BYTES = 40 * 1024;
+// 40 -> 42 KB with the per-turn session-touch concern (sessionStore day-log
+// touch/reopen + usage snapshot, ~1.3 KB minified) that lets the MCP server
+// sweep own session finalization after the SessionEnd hook removal.
+const USER_PROMPT_SUBMIT_BYTES = 42 * 1024;
 const POST_TOOL_USE_BYTES = 12 * 1024;
 const PRE_TOOL_USE_BYTES = 12 * 1024;
 
@@ -131,11 +127,6 @@ const hookEntries = [
     name: 'post-tool-use',
     entryPath: 'postToolUse/postToolUse.entry.ts',
     maxBytes: POST_TOOL_USE_BYTES,
-  },
-  {
-    name: 'session-end',
-    entryPath: 'sessionEnd/sessionEnd.entry.ts',
-    maxBytes: SESSION_END_BYTES,
   },
 ];
 
@@ -234,5 +225,5 @@ if (violations.length > 0) {
 }
 
 console.log(
-  `  Hook bundle guards passed (per-event caps: session-start <= ${SESSION_START_BYTES}, user-prompt-submit <= ${USER_PROMPT_SUBMIT_BYTES}, session-end <= ${SESSION_END_BYTES}, post-tool-use <= ${POST_TOOL_USE_BYTES}, pre-tool-use <= ${PRE_TOOL_USE_BYTES} bytes, no forbidden modules)`,
+  `  Hook bundle guards passed (per-event caps: session-start <= ${SESSION_START_BYTES}, user-prompt-submit <= ${USER_PROMPT_SUBMIT_BYTES}, post-tool-use <= ${POST_TOOL_USE_BYTES}, pre-tool-use <= ${PRE_TOOL_USE_BYTES} bytes, no forbidden modules)`,
 );

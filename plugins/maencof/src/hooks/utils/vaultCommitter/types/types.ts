@@ -40,8 +40,8 @@ export interface VaultCommitterInput {
   prompt?: string;
 }
 
-/** Hook event name passed as CLI argument to distinguish trigger source. */
-export type VaultCommitterEvent = 'SessionEnd' | 'UserPromptSubmit';
+/** Trigger source tag — the /clear hook path or the MCP boot sweep. */
+export type VaultCommitterEvent = 'UserPromptSubmit' | 'BootSweep';
 
 export interface VaultCommitterResult {
   continue: boolean;

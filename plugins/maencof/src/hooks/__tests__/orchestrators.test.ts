@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { orchestratePostToolUse } from '../postToolUse/postToolUse.js';
 import { orchestratePreToolUse } from '../preToolUse/preToolUse.js';
-import { orchestrateSessionEnd } from '../sessionEnd/sessionEnd.js';
 import { safeConcern } from '../utils/safeConcern/safeConcern.js';
 
 let vaultDir: string;
@@ -105,26 +104,6 @@ describe('orchestratePostToolUse', () => {
       tool_input: {},
     });
     expect(result).toEqual({ continue: true });
-  });
-});
-
-describe('orchestrateSessionEnd', () => {
-  it('non-vault → bare continue:true', async () => {
-    const result = await orchestrateSessionEnd({
-      cwd: '/nonexistent/path',
-      session_id: 's',
-    });
-    expect(result).toEqual({ continue: true });
-  });
-
-  it('in a vault never blocks session exit', async () => {
-    const result = await orchestrateSessionEnd({
-      cwd: vaultDir,
-      session_id: 's',
-      skills_used: [],
-      files_modified: [],
-    });
-    expect(result.continue).toBe(true);
   });
 });
 

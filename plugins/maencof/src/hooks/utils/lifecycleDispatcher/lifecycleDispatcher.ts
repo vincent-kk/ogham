@@ -69,20 +69,14 @@ export function runLifecycleDispatcher(
 }
 
 /**
- * Build an event-appropriate Claude Code hook envelope.
- *
- * - Context-capable events (`SessionStart` / `UserPromptSubmit` / `PreToolUse` /
- *   `PostToolUse`) receive the payload via `hookSpecificOutput.additionalContext`
- *   so Claude can act on the message.
- * - The terminal event (`SessionEnd`) does not support `additionalContext`.
- *   The payload is surfaced to the user via `systemMessage` only.
+ * Build an event-appropriate Claude Code hook envelope. Every supported event
+ * is context-capable — the payload rides `hookSpecificOutput.additionalContext`
+ * so Claude can act on the message.
  */
 function buildDispatchResult(
   event: LifecycleEvent,
   payload: string,
 ): LifecycleDispatchResult {
-  if (event === 'SessionEnd') return { continue: true, systemMessage: payload };
-
   return {
     continue: true,
     hookSpecificOutput: {

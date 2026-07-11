@@ -40,11 +40,11 @@ yarn version:sync       # package.json → src/version.ts
 
 ## Session Lifecycle
 
-- **Stop 훅 없음**: 매 턴 프로세스 spawn 비용 때문에 Stop 이벤트는 등록하지 않는다. 세션 단위 관심사는 SessionEnd(스캔·마감)와 SessionStart(표면화)로 배치한다.
-- **Changelog debt**: SessionEnd `changelogDebt` 가 감시 경로 미기록 변경을 1회 스캔해 `.maencof-meta/changelog-state.json` 에 기록 → 다음 SessionStart 가 1줄 권고로 표면화 → `/maencof:changelog` 가 큐레이션 후 커서(lastCuratedAt) 갱신. 차단 없음.
+- **Stop·SessionEnd 훅 없음**: Stop 은 매 턴 프로세스 spawn 비용 때문에, SessionEnd 는 Claude 전용 훅이라(3-호스트 이식 불가) 등록하지 않는다. 세션 종료 관심사는 **MCP 서버 수명주기**(`src/mcp/server/lifecycle/`)가 소유한다 — shutdown(exit/SIGINT/SIGTERM)이 동기 정밀 마감(turn-context 폐기 + env `CLAUDE_CODE_SESSION_ID` 세션 마감·캐시 삭제), 다음 부팅의 bootSweep 이 잔여 완결(sweep 마감 → prune → changelog 스캔 → 아카이빙 → 자동 커밋)을 보장한다. 매 턴 UserPromptSubmit `session-touch` 가 `lastActivityAt`/`usageSnapshot` 을 기록해 sweep 의 재료를 만들고, 오마감은 touch 재개방으로 자가치유된다.
+- **Changelog debt**: MCP bootSweep 의 `changelogDebt` 가 감시 경로 미기록 변경을 부팅당 1회 스캔해 `.maencof-meta/changelog-state.json` 에 기록 → 같은 세션의 SessionStart 또는 다음 세션이 1줄 권고로 표면화 → `/maencof:changelog` 가 큐레이션 후 커서(lastCuratedAt) 갱신. 차단 없음.
 - **Insight 통지**: capture 시점은 `capture_insight` 도구 응답 message(누적 개수 포함), 세션 간 집계는 다음 SessionStart 의 pending 알림이 담당. `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
 - **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
-- **Personal-context 주입/정리**: SessionStart 가 companion 존재 시 `.maencof-meta/personal-context.json` 의 states/topics 를 `<personal-context>` 블록(캡처 지침 내장)으로 identity 직후 주입 → 대화 중 `capture_personal_context` 가 조용히 upsert → SessionEnd `prunePersonalContext` 이 만료/보존 규칙 집행. **OFF-switch**: `personal-context.json::config.enabled=false` (`/maencof:personal-status --disable`). 설계 정본: `.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`.
+- **Personal-context 주입/정리**: SessionStart 가 companion 존재 시 `.maencof-meta/personal-context.json` 의 states/topics 를 `<personal-context>` 블록(캡처 지침 내장)으로 identity 직후 주입 → 대화 중 `capture_personal_context` 가 조용히 upsert → MCP bootSweep 의 `prunePersonalContext` 가 만료/보존 규칙 집행. **OFF-switch**: `personal-context.json::config.enabled=false` (`/maencof:personal-status --disable`). 설계 정본: `.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`.
 
 ## Development Notes
 

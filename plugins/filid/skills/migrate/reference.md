@@ -1,6 +1,6 @@
 # migrate Reference
 
-Detailed reference for the `migrate.sh` script that handles CLAUDE.md/SPEC.md
+Detailed reference for the `migrate.mjs` script that handles CLAUDE.md/SPEC.md
 to INTENT.md/DETAIL.md batch migration.
 
 ---
@@ -8,27 +8,31 @@ to INTENT.md/DETAIL.md batch migration.
 ## Script Location
 
 ```
-skills/migrate/migrate.sh
+skills/migrate/migrate.mjs
 ```
+
+Runs on Node.js (the same runtime Claude Code itself uses) — no `bash`, `find`,
+or `sed` required, so it behaves identically on macOS, Linux, and Windows.
 
 ## Usage
 
 ```bash
-migrate.sh <target-path> [--dry-run|--execute] [--auto-commit]
+node migrate.mjs <target-path> [--dry-run|--execute] [--auto-commit]
 ```
 
-| Argument         | Description                                              |
-| ---------------- | -------------------------------------------------------- |
-| `<target-path>`  | Directory to scan (defaults to `.`)                      |
-| `--dry-run`      | Preview mode — no files modified (default)               |
-| `--execute`      | Perform renames and reference updates                    |
-| `--auto-commit`  | Commit all changes after successful execution            |
+| Argument        | Description                                             |
+| --------------- | ------------------------------------------------------- |
+| `<target-path>` | Directory to scan (defaults to `.`)                     |
+| `--dry-run`     | Preview mode — no files modified (default)              |
+| `--execute`     | Perform renames and reference updates                   |
+| `--auto-commit` | Commit the migration changes after successful execution |
 
 ---
 
 ## Phase 1 — Scan & Conflict Detection
 
-The script uses `find` to locate `CLAUDE.md` and `SPEC.md` files, excluding:
+The script recursively scans for `CLAUDE.md` and `SPEC.md` files, excluding:
+
 - `node_modules/`
 - `dist/`
 - `.git/`
@@ -37,6 +41,7 @@ The script uses `find` to locate `CLAUDE.md` and `SPEC.md` files, excluding:
 
 For each file found, it checks if the target name already exists in the same
 directory:
+
 - `CLAUDE.md` + `INTENT.md` coexist → **conflict**, skipped
 - `SPEC.md` + `DETAIL.md` coexist → **conflict**, skipped
 
@@ -83,21 +88,28 @@ Phase 2 collects which directories had renames (`_renamed_claude_dirs`,
 `_renamed_spec_dirs`). Phase 3 then only searches files **under those
 directories**, using depth-aware patterns:
 
-| File depth (relative to renamed dir) | Patterns replaced |
-| ------------------------------------ | ----------------------------------------- |
-| 0 (same directory) | `CLAUDE.md`, `./CLAUDE.md` |
-| 1 (one level deep) | `../CLAUDE.md` |
-| 2 (two levels deep) | `../../CLAUDE.md` |
-| N | `"../" × N + "CLAUDE.md"` |
+| File depth (relative to renamed dir) | Patterns replaced          |
+| ------------------------------------ | -------------------------- |
+| 0 (same directory)                   | `CLAUDE.md`, `./CLAUDE.md` |
+| 1 (one level deep)                   | `../CLAUDE.md`             |
+| 2 (two levels deep)                  | `../../CLAUDE.md`          |
+| N                                    | `"../" × N + "CLAUDE.md"`  |
 
 The same logic applies for `SPEC.md` → `DETAIL.md`.
 
 **Files outside renamed directories are never modified.** This prevents:
+
 - Skills prompts referencing `CLAUDE.md` as a concept from being changed
 - Logic code (e.g., `context-injector.ts`) with `CLAUDE.md` string constants
   from being altered when the file is not under a renamed directory
 
-Uses `sed` with platform detection (macOS `sed -i ''` vs GNU `sed -i`).
+Within a renamed directory the replacement is plain substring matching (a
+faithful port of the original `sed` pipeline): a depth-0 file mentioning
+`sub/CLAUDE.md` or `MYCLAUDE.md` is rewritten too. Review the dry-run listing
+when such references exist.
+
+Uses in-place string replacement in Node — no `sed`, so the same code path runs
+on every platform.
 
 In dry-run mode, lists matching files with their depth info without modifying.
 
@@ -140,7 +152,8 @@ Conflicts skipped: 1
 When `--auto-commit` is passed with `--execute` in a git repo:
 
 ```bash
-git add -A
+# renames are already staged by `git mv`; only reference-updated files are added
+git add -- <reference-updated files>
 git commit -m "refactor: migrate CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md naming
 
 Renamed: 7 files
@@ -148,7 +161,11 @@ References updated: 12 files
 Conflicts skipped: 1"
 ```
 
+Only migration-touched files are staged — unrelated working-tree changes stay
+out of the commit.
+
 Output:
+
 ```
 ## Auto-Commit
 Committed: abc1234
@@ -172,7 +189,7 @@ plugin's skill directory:
 
 ```bash
 # Find the script path from the plugin directory
-bash "<plugin-dir>/skills/migrate/migrate.sh" <target-path>
+node "<plugin-dir>/skills/migrate/migrate.mjs" <target-path>
 ```
 
 ---

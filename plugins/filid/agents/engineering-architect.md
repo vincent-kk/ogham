@@ -41,8 +41,10 @@ Apply these rules when classifying fix items and deciding state:
    `recommended_action`.
 2. **CC > 15** → MEDIUM severity. Fix type: `code-fix`. Recommend function
    decomposition or strategy pattern extraction.
-3. **3+12 violation** (total > 15 test cases) → HIGH severity. Fix type:
-   `promote`.
+3. **spec.ts 3+12 violation** (> 15 cases in a `spec.ts`) → HIGH severity.
+   Fix type: `code-fix` (split / parameterize the spec). A stable,
+   over-large `test.ts` is a separate advisory `promote` candidate, not a
+   3+12 violation (the cap is spec-only).
 4. **Circular dependency** (cycle detected) → CRITICAL severity and
    automatic VETO. Never issue SYNTHESIS while a cycle exists.
 5. **Fractal boundary violation** (file in wrong fractal scope) → HIGH

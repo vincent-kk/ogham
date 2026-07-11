@@ -195,7 +195,7 @@ describe('applyPersonalContextMutation', () => {
 
   it('만료됐지만 파일에 남은 state를 재언급하면 재강화로 이력을 보존한다', () => {
     captureState(vaultDir); // 기본 TTL 14일 → NOW+14 만료
-    const later = new Date(NOW.getTime() + 20 * DAY_MS); // 만료 후, SessionEnd prune 전
+    const later = new Date(NOW.getTime() + 20 * DAY_MS); // 만료 후, sweep prune 전
     const result = captureState(vaultDir, {}, later);
 
     expect(result.merged).toBe(true);

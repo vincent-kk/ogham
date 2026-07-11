@@ -1,8 +1,15 @@
 /**
  * @file vaultCommitter.test.ts
- * @description vault-committer hook unit tests — auto-commit vault changes on SessionEnd
+ * @description vault-committer unit tests — auto-commit vault changes on BootSweep / /clear
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -309,7 +316,7 @@ describe('runVaultCommitter', () => {
     expect(result).toEqual({ continue: true });
   });
 
-  it('returns { continue: true } when .git/index.lock exists', async () => {
+  it('returns { continue: true } when a live .git/index.lock exists', async () => {
     enableVaultCommit(vaultDir);
     const gitDir = join(vaultDir, '.git');
     mkdirSync(gitDir, { recursive: true });
@@ -331,6 +338,29 @@ describe('runVaultCommitter', () => {
       (bin, args) => bin === 'git' && args[0] === 'status',
     );
     expect(statusCalls).toHaveLength(0);
+    // A live (fresh) lock is respected, never deleted
+    expect(existsSync(join(gitDir, 'index.lock'))).toBe(true);
+  });
+
+  it('reclaims a stale .git/index.lock and proceeds past the gate', async () => {
+    enableVaultCommit(vaultDir);
+    const gitDir = join(vaultDir, '.git');
+    mkdirSync(gitDir, { recursive: true });
+    const lockPath = join(gitDir, 'index.lock');
+    writeFileSync(lockPath, '');
+    const past = new Date(Date.now() - 31 * 60_000);
+    utimesSync(lockPath, past, past);
+
+    setupGitMocks(vaultDir, { hasChanges: false });
+
+    const result = await runVaultCommitter({ cwd: vaultDir });
+    expect(result).toEqual({ continue: true });
+    expect(existsSync(lockPath)).toBe(false);
+    // Gate passed: the scoped change check (git status) ran after the reclaim
+    const statusCalls = findCalls(
+      (bin, args) => bin === 'git' && args[0] === 'status',
+    );
+    expect(statusCalls.length).toBeGreaterThan(0);
   });
 
   it('returns { continue: true } when no vault changes exist', async () => {
@@ -480,17 +510,17 @@ describe('runVaultCommitter with UserPromptSubmit event', () => {
     ).toHaveLength(1);
   });
 
-  it('commits on SessionEnd without needing prompt field', async () => {
+  it('commits on BootSweep without needing prompt field', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = await runVaultCommitter({ cwd: vaultDir }, 'SessionEnd');
+    const result = await runVaultCommitter({ cwd: vaultDir }, 'BootSweep');
     expect(result).toEqual({ continue: true });
     expect(
       findCalls((bin, args) => bin === 'git' && args[0] === 'commit'),
     ).toHaveLength(1);
   });
 
-  it('commits when event is undefined (backward compat, defaults to SessionEnd behavior)', async () => {
+  it('commits when event is undefined (backward compat, non-prompt behavior)', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
     const result = await runVaultCommitter({ cwd: vaultDir });

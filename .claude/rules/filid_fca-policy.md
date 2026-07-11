@@ -4,7 +4,7 @@
 
 - Modules document themselves (`INTENT.md`) and define contracts (`DETAIL.md`).
 - Imports go through entry points, never internal files.
-- Documentation precedes code. `INTENT.md` ≤ 50 lines. Test files ≤ 15 cases.
+- Documentation precedes code. `INTENT.md` ≤ 50 lines. Spec files ≤ 15 cases.
 
 Fractal Context Architecture (FCA-AI) is a recursive module organization system for AI-operated codebases.
 Every independent module is a "fractal node" with documentation, entry point, and boundary rules.
@@ -14,12 +14,12 @@ The dependency graph MUST be a DAG. Consumers MUST import only from entry points
 
 ## Node Types
 
-| Type | INTENT.md | Children | Entry point | Description |
-|---|---|---|---|---|
-| `fractal` | required | allowed | required | Independent module with public API |
-| `organ` | forbidden | none | not required | Leaf compartment (single concern) |
-| `pure-function` | optional | none | not required | Stateless functions, no side effects |
-| `hybrid` | optional | allowed | required | Transitional node (fractal + organ traits) |
+| Type            | INTENT.md | Children | Entry point  | Description                                |
+| --------------- | --------- | -------- | ------------ | ------------------------------------------ |
+| `fractal`       | required  | allowed  | required     | Independent module with public API         |
+| `organ`         | forbidden | none     | not required | Leaf compartment (single concern)          |
+| `pure-function` | optional  | none     | not required | Stateless functions, no side effects       |
+| `hybrid`        | optional  | allowed  | required     | Transitional node (fractal + organ traits) |
 
 ---
 
@@ -36,11 +36,13 @@ Classification is determined by directory inspection in this strict priority ord
 7. **Default** → `fractal` (generate INTENT.md)
 
 **Known organ names** (priority 2):
+
 - **Base** (shared/UI): `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`
 - **Test/infra**: `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
 - **Docs**: `references`
 
 **Pattern-matched organs** (priorities 3–4, not listed by name):
+
 - `__name__` (double-underscore wrapped): e.g. `__tests__`, `__mocks__`, `__fixtures__`.
 - `.name` (dot-prefixed): e.g. `.config`, `.hidden`.
 
@@ -80,12 +82,14 @@ Fractal nodes MAY exist inside organ directories; traversal MUST re-classify sub
 
 ```typescript
 // ALLOWED (pure barrel):
-export { myFunction } from './my-function.js';
-export type { MyType } from './types.js';
+export { myFunction } from "./my-function.js";
+export type { MyType } from "./types.js";
 
 // VIOLATION (direct declaration):
-export function myFunction() { return 42; }
-export const MY_CONSTANT = 'value';
+export function myFunction() {
+  return 42;
+}
+export const MY_CONSTANT = "value";
 ```
 
 - Does NOT apply to organ or pure-function nodes.
@@ -163,11 +167,11 @@ export const MY_CONSTANT = 'value';
 
 ## Quality Thresholds
 
-| Metric | Threshold | Action |
-|---|---|---|
-| LCOM4 (Lack of Cohesion) | >= 2 | Split into separate modules |
-| Cyclomatic Complexity | > 15 | Compress or abstract |
-| File size | > 500 lines (advisory; no code constant) | Consider splitting |
+| Metric                   | Threshold                                | Action                      |
+| ------------------------ | ---------------------------------------- | --------------------------- |
+| LCOM4 (Lack of Cohesion) | >= 2                                     | Split into separate modules |
+| Cyclomatic Complexity    | > 15                                     | Compress or abstract        |
+| File size                | > 500 lines (advisory; no code constant) | Consider splitting          |
 
 **Test file conventions (3+12 rule)**: max **3 basic** (happy path) + **12 complex** (edge cases) = **15 total** per spec file. Exceeding 15 signals the module should be split.
 

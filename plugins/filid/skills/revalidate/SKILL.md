@@ -124,7 +124,7 @@ category-specific MCP tool, filtering violations by
 | structure violation        | `mcp__plugin_filid_t__structure_validate`                                 | 0 matching violations |
 | LCOM4 violation            | `mcp__plugin_filid_t__ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
 | CC violation               | `mcp__plugin_filid_t__ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
-| 3+12 violation             | `mcp__plugin_filid_t__test_metrics(action: "check-312")`                  | PASS                  |
+| 3+12 violation             | `mcp__plugin_filid_t__test_metrics(action: "check-gate")`                  | PASS                  |
 | acceptance claim (`CLM-*`) | NONE — claim re-judgment (below)                                          | claim judged PASS     |
 
 > **Claim re-judgment (`rule_id` matching `CLM-\d+`)**: measurement
@@ -191,7 +191,7 @@ Emit the terminal marker: `Revalidate verdict: <PASS|FAIL>`.
 | `mcp__plugin_filid_t__review_manage`      | `cleanup`                        | Delete session directory on PASS         |
 | `mcp__plugin_filid_t__structure_validate` | —                                | Re-measure structure violations (Step 6) |
 | `mcp__plugin_filid_t__ast_analyze`        | `lcom4`, `cyclomatic-complexity` | Re-measure metrics (Step 6)              |
-| `mcp__plugin_filid_t__test_metrics`       | `check-312`                      | Re-measure test compliance (Step 6)      |
+| `mcp__plugin_filid_t__test_metrics`       | `check-gate`                      | Re-measure test compliance (Step 6)      |
 | `mcp__plugin_filid_t__debt_manage`        | `list`, `resolve`                | Debt verification & clearing (Steps 4–5) |
 | `mcp__plugin_filid_t__review_manage`      | `format-revalidate-comment`      | PR comment formatting (Step 7)           |
 
