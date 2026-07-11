@@ -9,15 +9,15 @@
  * 앞 산출물이 그 커밋에 포함). 전 단계 멱등 — 훅 병존기·동시 세션 이중 실행 무해.
  */
 import { STALE_SESSION_THRESHOLD_MS } from '../../../constants/sessionSweep.js';
-import { removeTurnContext } from '../../../core/cacheManager/operations/removeTurnContext.js';
-import { appendErrorLogSafe } from '../../../core/errorLog/operations/appendErrorLogSafe.js';
-import { prunePersonalContext } from '../../../core/personalContext/prunePersonalContext.js';
+import { removeTurnContext } from '../../../core/cacheManager/index.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
+import { prunePersonalContext } from '../../../core/personalContext/index.js';
 import { sweepStaleSessions } from '../../../core/sessionStore/index.js';
 import { buildDailyDigest } from '../../../core/workIndex/index.js';
-import { isMaencofVault } from '../../../hooks/shared/isMaencofVault.js';
-import { runArchiveExpired } from '../../../hooks/utils/archiveExpired/archiveExpired.js';
-import { runChangelogDebt } from '../../../hooks/utils/changelogDebt/operations/runChangelogDebt.js';
-import { runVaultCommitter } from '../../../hooks/utils/vaultCommitter/operations/runVaultCommitter.js';
+import { isMaencofVault } from '../../../hooks/shared/index.js';
+import { runArchiveExpired } from '../../../hooks/utils/archiveExpired/index.js';
+import { runChangelogDebt } from '../../../hooks/utils/changelogDebt/index.js';
+import { runVaultCommitter } from '../../../hooks/utils/vaultCommitter/index.js';
 
 export async function bootSweep(vaultPath: string): Promise<void> {
   if (!isMaencofVault(vaultPath)) return;

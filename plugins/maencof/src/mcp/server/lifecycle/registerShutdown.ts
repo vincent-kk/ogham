@@ -8,12 +8,11 @@
  * 마감은 다음 boot sweep 이 담당한다. async 작업(git 커밋 등)은 절단 시
  * index.lock 잔존 위험이 있어 여기서 실행하지 않는다.
  */
-import { removeSessionFiles } from '../../../core/cacheManager/operations/removeSessionFiles.js';
-import { removeTurnContext } from '../../../core/cacheManager/operations/removeTurnContext.js';
-import { appendErrorLogSafe } from '../../../core/errorLog/operations/appendErrorLogSafe.js';
+import { removeSessionFiles, removeTurnContext } from '../../../core/cacheManager/index.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
 import { sweepStaleSessions } from '../../../core/sessionStore/index.js';
 import { buildDailyDigest } from '../../../core/workIndex/index.js';
-import { isMaencofVault } from '../../../hooks/shared/isMaencofVault.js';
+import { isMaencofVault } from '../../../hooks/shared/index.js';
 
 let registered = false;
 

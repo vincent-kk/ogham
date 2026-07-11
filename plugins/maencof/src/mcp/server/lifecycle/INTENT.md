@@ -11,7 +11,7 @@ MCP server-process session lifecycle — the replacement for the removed Session
 
 ## Conventions
 
-- 완결 로직은 `hooks/utils/*`(changelogDebt·archiveExpired·vaultCommitter)를 **concrete 경로로 직접 import** — mcp→hooks 방향은 이 모듈에 한해 허용되는 의도된 결합 (공유 관심사의 소유권은 hooks/utils, 실행 트리거만 서버 수명주기)
+- import 는 대상 fractal 의 **배럴(index.js) 경유** — MCP 서버 코드 규약(루트 CLAUDE.md: MCP 서버 코드는 배럴 경유가 정상). 완결 로직(changelogDebt·archiveExpired·vaultCommitter) 소유권은 hooks/utils, 서버 수명주기는 실행 트리거만 (결합 방향 유지, import 는 배럴). organ(`constants/`)만 concrete
 - shutdown 은 async 금지 (SIGKILL grace ~400ms 실측; git 절단은 index.lock 잔존 위험)
 - `CLAUDE_CODE_SESSION_ID` 는 미문서화 env — 있으면 정밀 경로, 없으면 조용히 skip (boot sweep 이 폴백)
 
