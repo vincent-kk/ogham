@@ -1,5 +1,7 @@
 # Host Capability Matrix — Claude Code · Codex · Antigravity
 
+> **상태: 보류 — 개발예정.** 이 매트릭스가 뒷받침하는 3-호스트 이식은 미채용이다(2026-07-12 — [migration-playbook-deferred.md](./migration-playbook-deferred.md)). 실측값은 codex 0.144.1 · agy 1.1.1 기준 — 재개 시 재검증할 것.
+
 조사 결론(2026-07-11 갱신). 근거: **로컬 실측**(codex-cli 0.144.1 · agy 1.1.1, PoC 플러그인 설치/기동/도구호출) + 공식 문서 + agy 바이너리 내장 문서. 2026-06-28 문서 기반 조사에서 추정이던 항목을 실측으로 확정/정정했다.
 
 ## 1. 메커니즘 대응 (3 호스트)

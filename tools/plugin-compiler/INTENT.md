@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/plugin-compiler` 모노레포 내부 전용 빌드 도구. 하나의 호스트 중립 정본(`plugins/<pkg>/definitions/`)을 Claude Code · Codex · Antigravity 배포 트리(`plugins/<pkg>/targets/<host>/`)로 컴파일한다. 설계 SSoT 는 [`.metadata/plugin-compiler/`](../../.metadata/plugin-compiler/).
+`@ogham/plugin-compiler` 모노레포 내부 전용 빌드 도구. 하나의 호스트 중립 정본(`plugins/<pkg>/definitions/`)을 Claude Code · Codex · Antigravity 배포 트리(`plugins/<pkg>/targets/<host>/`)로 컴파일한다. 설계 SSoT 는 [`.metadata/plugin-compiler/`](../../.metadata/plugin-compiler/). **채택 상태: 보류(개발예정)** — 어떤 플러그인 빌드에도 배선되지 않았다. 경위·재개 트리거는 [migration-playbook-deferred.md](../../.metadata/plugin-compiler/migration-playbook-deferred.md).
 
 ## Structure
 

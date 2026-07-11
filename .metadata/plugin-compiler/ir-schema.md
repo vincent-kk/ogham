@@ -1,5 +1,7 @@
 # IR Schema — 정본(Intermediate Representation) 스키마
 
+> **상태: 보류 — 개발예정.** 이 스키마를 쓰는 마이그레이션은 착수하지 않는다(2026-07-12 — [migration-playbook-deferred.md](./migration-playbook-deferred.md)). 현재 어떤 플러그인에도 `definitions/` 는 없다.
+
 호스트 중립 플러그인 기술. 모든 정본은 플러그인의 `definitions/` 아래 위치하며, 컴파일러가 이를 읽어 호스트별 산출물(`targets/<host>/`)을 emit 한다. 정본은 **어떤 호스트도 직접 언급하지 않는다**(호스트 지식은 프로파일에만).
 
 ## 0. 디렉터리

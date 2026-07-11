@@ -1,5 +1,7 @@
 # Case Studies — deilen(스칼라) · filid(구조 분기) · 로드맵
 
+> **상태: 보류 — 개발예정.** 실측·PoC 결과는 유효하나 전체 이관(§C Stage 3)은 착수하지 않는다(2026-07-12 — [migration-playbook-deferred.md](./migration-playbook-deferred.md)). 본문의 훅 집계(§0 표 등)는 SessionEnd 제거 완료 **이전** 기준이다.
+
 두 PoC 로 2층 차이([host-capability-matrix.md](./host-capability-matrix.md) §2)를 모두 검증한다. deilen 은 L1 스칼라만, filid 는 L2 구조 분기(훅·agents) 전부를 친다. 2026-07-11 실측으로 기존 "실측 게이트 3종" 은 해소·정정되었고(§D), 잔여 게이트가 재정의되었다.
 
 ## 0. 플러그인 이식 지형 (2026-07-11 집계)

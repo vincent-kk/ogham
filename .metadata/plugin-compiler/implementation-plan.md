@@ -1,5 +1,7 @@
 # Implementation Plan — 구조설계 · 테스팅 하네스 · 단계 실행
 
+> **상태: 보류 — 개발예정.** 도구 구현(Stage A–C + L2)은 완료·커밋됐으나 채택(마이그레이션·빌드 배선·CI 상설화)은 보류다(2026-07-12 — [migration-playbook-deferred.md](./migration-playbook-deferred.md)).
+
 > 설계 문서군(README·host-capability-matrix·ir-schema·compiler-architecture·case-studies)의 **구현 착지본**. 개념은 그 문서들, 이 문서는 "어디에 어떤 파일로 무엇을 먼저 짓는가".
 
 ## Status

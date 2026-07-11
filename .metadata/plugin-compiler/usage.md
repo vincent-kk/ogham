@@ -1,5 +1,7 @@
 # Usage — plugin-compiler 사용 가이드
 
+> **상태: 보류 — 개발예정.** 마이그레이션 미착수로 이 가이드가 전제하는 `definitions/`/`targets/` 는 현재 어떤 플러그인에도 없다(2026-07-12 결정 — [migration-playbook-deferred.md](./migration-playbook-deferred.md)). 재개 시 유효한 사용 규칙이다.
+
 > 다른 세션·개발자를 위한 사용 규칙. 이 도구는 **하나의 호스트 중립 정본**을 Claude Code · Codex · Antigravity 배포 트리로 컴파일한다. 설계 근거는 이 디렉터리의 나머지 문서, 능력 매트릭스는 [host-capability-matrix.md](./host-capability-matrix.md).
 
 ## 1. 멘탈 모델
@@ -108,4 +110,4 @@ hooks: # 선택: event 별 fallback 오버라이드 (§5)
 ```
 
 - `bridge/` 가 만들어진 뒤 실행돼야 함(assets 를 targets 로 복사하므로).
-- 마켓플레이스 매니페스트가 `targets/<host>` 를 가리키도록 전환하는 것은 [TODO.md](./TODO.md) 의 컷오버 단계.
+- 마켓플레이스 매니페스트가 `targets/<host>` 를 가리키도록 전환하는 것은 [migration-playbook-deferred.md](./migration-playbook-deferred.md) 의 컷오버 단계.

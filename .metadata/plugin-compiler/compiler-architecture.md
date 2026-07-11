@@ -1,5 +1,7 @@
 # Compiler Architecture — 파이프라인 · 프로파일 · emitter · 배포 트리
 
+> **상태: 보류 — 개발예정.** 이 아키텍처의 구현체(`tools/plugin-compiler`)는 커밋되어 있으나 채택(마이그레이션·빌드 배선)은 보류다(2026-07-12 — [migration-playbook-deferred.md](./migration-playbook-deferred.md)).
+
 정본(IR) + 호스트 프로파일 → 호스트별 플러그인 산출물. `tsc` 가 한 소스를 ESM/CJS 로 emit 하듯, 한 정본을 Claude / Codex / Antigravity 로 emit 한다.
 
 ## 1. 파이프라인 (5단계)

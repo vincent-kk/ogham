@@ -1,6 +1,8 @@
 # SessionEnd 재설계 — 당위성 · 방향 · 옵션 (ADR)
 
-> 결정 기록(Architecture Decision Record). `SessionEnd` 훅을 기반 로직에서 **제외**하고 다른 메커니즘으로 이전해야 하는 **당위성**과, 그 **변경 방향 3옵션**(파괴성 동반 가능)을 우리 컴파일러 설계와 엮어 기술한다. 컴파일러 지원 현황은 [usage.md](./usage.md) §5·[TODO.md](./TODO.md) §3, 근거 매트릭스는 [host-capability-matrix.md](./host-capability-matrix.md).
+> 결정 기록(Architecture Decision Record). `SessionEnd` 훅을 기반 로직에서 **제외**하고 다른 메커니즘으로 이전해야 하는 **당위성**과, 그 **변경 방향 3옵션**(파괴성 동반 가능)을 우리 컴파일러 설계와 엮어 기술한다. 컴파일러 지원 현황은 [usage.md](./usage.md) §5·[migration-playbook-deferred.md](./migration-playbook-deferred.md) §3, 근거 매트릭스는 [host-capability-matrix.md](./host-capability-matrix.md).
+>
+> **상태: 채택·구현 완료.** 이 ADR 의 결정(SessionEnd→MCP 수명주기)은 전 플러그인에 적용됐다(SessionEnd 훅 0 + `@ogham/session-finalizer`). 연계된 3-호스트 이식(agy 러너 어댑터 등)은 보류 — 개발예정([migration-playbook-deferred.md](./migration-playbook-deferred.md)).
 
 ---
 
@@ -191,8 +193,8 @@ SessionEnd 훅     MCP shutdown                  다음 세션 boot-sweep
   - 옵션 1: 각 플러그인 서버에 shutdown 핸들러(SIGTERM/stdin close) — maencof 는 `@ogham/session-finalizer` 경유로 완료.
   - 옵션 2: Stop 수집기(agy 러너 어댑터 전제) + shutdown 처리기 — 미구현.
   - 옵션 3: `@ogham/session-finalizer` — shared 워크스페이스 **신설됨**(registerShutdownFinalizer: shutdown 등록·onShutdown·detached 스폰; runFinalizer: 엔트리 디스패치). **저널·멱등가드(event-source)는 후속** — 현재는 옵션 1 + detached finalizer + boot-sweep 골격.
-  - 공통: **MCP-부팅 stale-sweep**(다음 세션 시작 시 지난 세션 잔여 완결) — maencof bootSweep 구현됨, filid·imbas 미이관. [TODO.md](./TODO.md) §4.
-- **마이그레이션 순서**: SessionEnd 이관은 **플러그인별·이 PR 무관**. 정리 전용(filid·imbas)부터 옵션 1, maencof 는 옵션 3. [TODO.md](./TODO.md) §3·§5.
+  - 공통: **MCP-부팅 stale-sweep**(다음 세션 시작 시 지난 세션 잔여 완결) — `@ogham/session-finalizer` boot-sweep 으로 maencof·filid 이관 완료, imbas 는 세션종료 작업이 없어 불요. [migration-playbook-deferred.md](./migration-playbook-deferred.md) §4.
+- **마이그레이션 순서**: ✅ 완료 — filid(옵션 1)·maencof(옵션 3 골격) 이관, imbas 불요. 전 플러그인에서 SessionEnd 훅 제거됨. [migration-playbook-deferred.md](./migration-playbook-deferred.md) §3·§5.
 
 ---
 

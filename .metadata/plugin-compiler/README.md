@@ -1,7 +1,7 @@
 # Plugin Compiler — 단일 정본에서 다중 호스트 플러그인 생성
 
-> **Status**: 설계 단계 (design-only). 구현은 추후. 이 디렉터리는 설계 SSoT 이며 코드가 아니다.
-> 근거 이슈: [#78](https://github.com/vincent-kk/ogham/issues/78). 2026-07-11 로컬 실측(codex 0.144.1 · agy 1.1.1)으로 전면 갱신.
+> **Status: 보류 — 개발예정 (deferred).** 도구(`tools/plugin-compiler`)는 구현·커밋되었으나 마이그레이션(3-호스트 배포)은 착수하지 않기로 결정 — 빌드·CI 미배선. 경위·재개 트리거는 [migration-playbook-deferred.md](./migration-playbook-deferred.md). SessionEnd→MCP 수명주기 이관만 구현·채택 완료. 이 디렉터리는 설계 SSoT.
+> 근거 이슈: [#78](https://github.com/vincent-kk/ogham/issues/78). 2026-07-11 로컬 실측(codex 0.144.1 · agy 1.1.1)으로 전면 갱신, 2026-07-12 보류 결정.
 
 ## 한 줄 요약
 
@@ -67,11 +67,11 @@ ogham 플러그인을 **하나의 호스트 중립 정본(IR)** 으로 기술하
 
 **사용 (how) — 구현체는 [`tools/plugin-compiler/`](../../tools/plugin-compiler/)**
 
-| 문서                                 | 내용                                                                    |
-| ------------------------------------ | ----------------------------------------------------------------------- |
-| [usage.md](./usage.md)               | 사용 가이드 — 정본 작성·CLI·토큰 규약·hook fallback·규칙 (다른 세션용)  |
-| [reproduction.md](./reproduction.md) | 검증 재현 절차 (테스트 미커밋 — extract→compile→verify 로 재확인)       |
-| [TODO.md](./TODO.md)                 | 기존 플러그인 재배치 플레이북 + Stage D 인프라 + SessionEnd→MCP수명주기 |
+| 문서                                                               | 내용                                                                         |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| [usage.md](./usage.md)                                             | 사용 가이드 — 정본 작성·CLI·토큰 규약·hook fallback·규칙 (다른 세션용)       |
+| [reproduction.md](./reproduction.md)                               | 검증 재현 절차 (테스트 미커밋 — extract→compile→verify 로 재확인)            |
+| [migration-playbook-deferred.md](./migration-playbook-deferred.md) | 재배치 플레이북(**보류**) — 보류 결정·재개 트리거·선결 함정 + Stage D 인프라 |
 
 ## 용어
 
