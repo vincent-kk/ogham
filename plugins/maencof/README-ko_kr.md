@@ -37,7 +37,7 @@ claude --plugin-dir ./plugins/maencof
 빌드하면 두 가지 산출물이 생성됩니다:
 
 - `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 22개)
-- `bridge/*.mjs` — 이벤트 디스패처 6개 (session-start, user-prompt-submit, pre-tool-use, post-tool-use, stop, session-end). 각 디스패처가 해당 이벤트의 관심사 핸들러를 한 프로세스에서 실행합니다.
+- `bridge/*.mjs` — 이벤트 디스패처 4개 (session-start, user-prompt-submit, pre-tool-use, post-tool-use). 각 디스패처가 해당 이벤트의 관심사 핸들러를 한 프로세스에서 실행합니다. 세션 종료 마감(레코드 마감·아카이빙·자동 커밋)은 훅이 아니라 MCP 서버 수명주기(boot sweep + shutdown)가 담당합니다.
 
 > **성능 안내**: maencof는 이벤트당 hook을 1개만 등록합니다. `UserPromptSubmit` 디스패처는 컨텍스트 주입 → lifecycle 액션 → vault 자동 커밋 → insight 배너를 한 프로세스에서 순차 실행합니다 — 관심사마다 node를 띄우는 대신 이벤트당 1회만 띄웁니다. 세션 첫 프롬프트는 추가로 컨텍스트 캐시를 빌드합니다. `hooks.json`의 이벤트별 timeout 값은 kill-switch이지 expected latency가 아니며, 각 관심사는 vault 밖에서 즉시 fast-fail 합니다. git을 실제로 실행하는 경로는 vault 자동 커밋 하나뿐이며, 세 조건이 동시에 충족돼야 동작합니다: vault opt-in (`vault-commit.json::enabled=true`) + 프롬프트가 `/clear` 또는 설정된 `skip_patterns` 중 하나와 매칭 + vault dirty. 즉 사용자가 명시적으로 "이번 세션을 마무리한다"는 신호를 보낸 시점에만 ~1–2s commit 비용이 발생하며, 이는 의도된 동작입니다.
 
@@ -163,16 +163,15 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 ## 자동으로 동작하는 것들
 
-플러그인이 활성화되면 아래 Hook들이 **사용자 개입 없이** 자동 실행됩니다:
+플러그인이 활성화되면 아래 동작이 **사용자 개입 없이** 자동 실행됩니다:
 
 | 언제                   | 무엇을                                          | 왜                                                                          |
 | ---------------------- | ----------------------------------------------- | --------------------------------------------------------------------------- |
 | 세션 시작 시           | Vault 컨텍스트 + 인덱스 + personal-context 로드 | 첫 턴부터 에이전트가 지식을 — 컴페니언 세션에서는 최근 상태/동향까지 — 인지 |
 | 파일을 Write/Edit할 때 | Layer 보호 검사                                 | L1 문서의 무단 수정 방지                                                    |
 | maencof 쓰기 도구 후   | 활동 로그 기록                                  | Vault 쓰기(create/update/move/delete) 변경 이력 추적                        |
-| 세션 종료 시           | 세션 정리 + 영속화                              | 휘발성 상태 저장, 만료 항목 정리                                            |
-| 매 사용자 프롬프트 시  | 컨텍스트 주입 체인 (4개 hook)                   | 턴 컨텍스트 로드, 등록 액션 실행, 통찰 캡처, vault 커밋 게이팅              |
-| 에이전트 종료 시       | 라이프사이클 디스패처                           | 종료 이벤트에 등록된 액션 실행                                              |
+| 매 사용자 프롬프트 시  | 컨텍스트 주입 체인 + 세션 활동 touch            | 턴 컨텍스트 로드, 등록 액션 실행, 통찰 캡처, vault 커밋 게이팅, 활동 기록   |
+| MCP 서버 부팅/종료 시  | 세션 마감 (sweep + 정리 + 자동 커밋)            | 세션 레코드 마감, 만료 항목 정리, L4 만료 아카이빙, vault 커밋(opt-in)      |
 
 차단이 발생하면 이유와 함께 메시지가 표시되므로 별도 대응은 필요 없습니다.
 

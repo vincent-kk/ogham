@@ -37,7 +37,7 @@ claude --plugin-dir ./plugins/maencof
 Building produces two outputs:
 
 - `bridge/mcp-server.cjs` — MCP server (22 knowledge tools)
-- `bridge/*.mjs` — 6 event dispatchers (session-start, user-prompt-submit, pre-tool-use, post-tool-use, stop, session-end), each running that event's concern handlers in a single process
+- `bridge/*.mjs` — 4 event dispatchers (session-start, user-prompt-submit, pre-tool-use, post-tool-use), each running that event's concern handlers in a single process. Session finalization (record close, archiving, auto-commit) lives in the MCP server lifecycle (boot sweep + shutdown), not in a hook.
 
 > **Performance note**: maencof registers one hook per event. The `UserPromptSubmit` dispatcher runs context injection → lifecycle actions → vault auto-commit → the insight banner sequentially in a single process — one node start per event instead of one per concern. The first prompt of a session additionally builds the context cache. The per-event timeouts in `hooks.json` are kill-switches, not expected latency, and every concern fast-fails outside a vault. The only path that runs git is the vault auto-commit, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
 
@@ -163,16 +163,15 @@ maencof organizes knowledge into five layers with distinct decay rates for Sprea
 
 ## What Runs Automatically
 
-With the plugin active, these hooks fire **without user intervention**:
+With the plugin active, these run **without user intervention**:
 
-| When                   | What                                                     | Why                                                                                                     |
-| ---------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Session starts         | Loads Vault context + index + personal-context awareness | Agent knows your knowledge — and, in companion sessions, your recent state/topics — from the first turn |
-| Writing/editing a file | Layer guard check                                        | Prevents unauthorized L1 modifications                                                                  |
-| After maencof write    | Activity log recording                                   | Tracks vault writes (create/update/move/delete) for change history                                      |
-| Session ends           | Session cleanup + persistence                            | Saves volatile state, prunes expired entries                                                            |
-| On every user prompt   | Context-injection chain (4 hooks)                        | Loads turn context, fires registered actions, captures insights, gates vault commits                    |
-| On agent stop          | Lifecycle dispatcher                                     | Executes registered stop-event actions                                                                  |
+| When                     | What                                                     | Why                                                                                                     |
+| ------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Session starts           | Loads Vault context + index + personal-context awareness | Agent knows your knowledge — and, in companion sessions, your recent state/topics — from the first turn |
+| Writing/editing a file   | Layer guard check                                        | Prevents unauthorized L1 modifications                                                                  |
+| After maencof write      | Activity log recording                                   | Tracks vault writes (create/update/move/delete) for change history                                      |
+| On every user prompt     | Context-injection chain + session activity touch         | Loads turn context, fires registered actions, captures insights, gates vault commits, records activity  |
+| MCP server boot/shutdown | Session finalization (sweep + cleanup + auto-commit)     | Closes session records, prunes expired entries, archives expired L4 docs, commits the vault (opt-in)    |
 
 When a block occurs, a message explaining the reason is displayed. No action needed.
 
@@ -226,7 +225,7 @@ Alongside vault knowledge, maencof keeps a small **personal context** — transi
 
 ## Vault Auto-Commit Policy
 
-The `vault-committer` hook can automatically commit changes under `.maencof/` and `.maencof-meta/` when a session ends or when the user types `/clear`. The feature is **opt-in only** — it activates only when `.maencof-meta/vault-commit.json` contains `{"enabled": true}`.
+The vault committer can automatically commit vault changes when the user types `/clear` (hook path) and at MCP server boot, wrapping up the previous session (boot-sweep path). The feature is **opt-in only** — it activates only when `.maencof-meta/vault-commit.json` contains `{"enabled": true}`.
 
 When enabled, the committer invokes `git commit --no-verify`, bypassing your repository's pre-commit hooks for these automatic commits. This is an explicit, documented exception to the general "never skip hooks" principle:
 
