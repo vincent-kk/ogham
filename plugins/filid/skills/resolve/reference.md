@@ -167,12 +167,12 @@ Options:
 
 ## MCP Tool Usage
 
-| Tool                  | Action             | When                               |
-| --------------------- | ------------------ | ---------------------------------- |
+| Tool                                 | Action             | When                               |
+| ------------------------------------ | ------------------ | ---------------------------------- |
 | `mcp__plugin_filid_t__review_manage` | `normalize-branch` | Step 1: branch detection           |
 | `mcp__plugin_filid_t__debt_manage`   | `create`           | Step 5: for each rejected fix item |
 
-## mcp__plugin_filid_t__debt_manage(create) Input Schema
+## mcp**plugin_filid_t**debt_manage(create) Input Schema
 
 ```json
 {

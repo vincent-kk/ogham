@@ -127,7 +127,7 @@ in `review-report.md` → `## Advisory Notes`.
 Type tokens are bare words (never `filid:`-prefixed):
 
 - `code-fix` — inline code patch (default when omitted)
-- `promote` — 3+12 violations → test file promotion/splitting
+- `promote` — stable `test.ts` → `spec.ts` consolidation (advisory; a `.test.ts` is exempt from the 3+12 cap, so this is not a rule violation). A `spec.ts` over the 15-case cap is remedied by `code-fix`/`restructure` (split / parameterize), not promote.
 - `restructure` — LCOM4 >= 2 or structural drift → module reorganization
 - `harvest-required` — oracle gap, not a code defect (never dispatched
   to code-surgeon): resolved via `/filid:harvest` (spike) or by

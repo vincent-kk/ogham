@@ -98,8 +98,8 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ## Available MCP Tools
 
-| Tool                       | Stage | Purpose                                            |
-| -------------------------- | ----- | -------------------------------------------------- |
+| Tool                                      | Stage | Purpose                                            |
+| ----------------------------------------- | ----- | -------------------------------------------------- |
 | `mcp__plugin_filid_t__cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
 | `mcp__plugin_filid_t__fractal_scan`       | 1     | Project structure scan                             |
 | `mcp__plugin_filid_t__fractal_navigate`   | 1     | Tree traversal and classification                  |
