@@ -63,6 +63,7 @@ ogham 플러그인을 **하나의 호스트 중립 정본(IR)** 으로 기술하
 | [compiler-architecture.md](./compiler-architecture.md)   | 파이프라인, 프로파일 3종, emitter, `targets/` 배포 트리, 훅 러너 어댑터, 검증(동등성 게이트·CI) |
 | [case-studies.md](./case-studies.md)                     | deilen(L1) · filid/maencof(L2) · 로드맵 · 실측 게이트 결산(§D)                                  |
 | [implementation-plan.md](./implementation-plan.md)       | 구현 착지본 — 패키지 위치·모듈 트리·IR 타입·단계 실행                                           |
+| [sessionend-refactor.md](./sessionend-refactor.md)       | ADR — SessionEnd 제외 당위성 + 이전 방향 3옵션(shutdown·Stop수집·Finalizer) + 계층 채택 권장    |
 
 **사용 (how) — 구현체는 [`tools/plugin-compiler/`](../../tools/plugin-compiler/)**
 
