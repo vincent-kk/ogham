@@ -2,7 +2,7 @@
 
 ## Purpose
 
-SessionEnd 관심사. 감시 경로(WATCHED_PATHS)의 미기록 git 변경을 세션당 1회 스캔해 `changelogState` 의 `pending` 에 기록한다. 다음 SessionStart 가 pending 을 1줄 권고로 표면화하고, `/maencof:changelog` 가 큐레이션 후 비운다. 감지를 세션 경계에 두는 이유: 매 턴 git spawn 과 세션 종료 차단을 피한다.
+MCP bootSweep 관심사. 감시 경로(WATCHED_PATHS)의 미기록 git 변경을 부팅당 1회 스캔해 `changelogState` 의 `pending` 에 기록한다. SessionStart 가 pending 을 1줄 권고로 표면화하고, `/maencof:changelog` 가 큐레이션 후 비운다. 감지를 세션 경계(부팅)에 두는 이유: 매 턴 git spawn 을 피한다.
 
 ## Structure
 

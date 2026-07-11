@@ -5,7 +5,7 @@
  * Contract:
  *   - SessionStart / UserPromptSubmit / PreToolUse / PostToolUse
  *     → `hookSpecificOutput.additionalContext` 로 payload 전달 (Claude 가시).
- *   - SessionEnd → `systemMessage` 로 payload 전달 (사용자 가시).
+ *   - 은퇴한 SessionEnd → 등록 액션이 있어도 무시 (`{ continue: true }`).
  *   - 어떤 이벤트도 top-level `message` / `hookMessage` 방출 금지.
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -88,26 +88,15 @@ describe('runLifecycleDispatcher — hook output envelope', () => {
     });
   });
 
-  describe('terminal event: SessionEnd', () => {
+  describe('retired event: SessionEnd', () => {
     beforeEach(() => {
       vaultDir = createVaultWithEchoAction('SessionEnd');
     });
 
-    it('systemMessage 에 payload 를 전달한다 (additionalContext 미지원)', () => {
+    it('SessionEnd 는 어휘에서 은퇴 — 등록된 액션이 있어도 무시된다', () => {
       const result = runLifecycleDispatcher('SessionEnd', { cwd: vaultDir! });
 
-      expect(result.continue).toBe(true);
-      expect(result.systemMessage).toBeDefined();
-      expect(result.systemMessage).toContain(MARKER);
-      expect(result.hookSpecificOutput).toBeUndefined();
-    });
-
-    it('top-level message / hookMessage 를 방출하지 않는다', () => {
-      const result = runLifecycleDispatcher('SessionEnd', {
-        cwd: vaultDir!,
-      }) as unknown as Record<string, unknown>;
-      expect('message' in result).toBe(false);
-      expect('hookMessage' in result).toBe(false);
+      expect(result).toEqual({ continue: true });
     });
   });
 

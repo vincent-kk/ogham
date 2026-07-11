@@ -20,7 +20,7 @@ work_history 읽기 도구. "그동안 무슨 작업을 했나"를 daily digest 
 ### Never do
 
 - 파일 I/O 직접 수행 (core/ 위임)
-- daily digest 생성/쓰기 (읽기 전용 — 생성은 SessionEnd 의 workIndex)
+- daily digest 생성/쓰기 (읽기 전용 — 생성은 sweep 마감의 workIndex)
 
 ## Output Contract
 

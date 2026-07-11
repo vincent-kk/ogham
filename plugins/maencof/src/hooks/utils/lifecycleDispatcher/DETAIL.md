@@ -21,11 +21,10 @@ interface LifecycleDispatcherInput {
 
 ### CLI argument
 
-- 첫 번째 arg 는 `LifecycleEvent` (`SessionStart` | `UserPromptSubmit` | `PreToolUse` | `PostToolUse` | `Stop` | `SessionEnd`). 그 외 값은 silently `{ continue: true }` 반환.
+- 첫 번째 arg 는 `LifecycleEvent` (`SessionStart` | `UserPromptSubmit` | `PreToolUse` | `PostToolUse`). 그 외 값(은퇴한 `Stop`·`SessionEnd` 포함)은 silently `{ continue: true }` 반환 — 기존 lifecycle.json 에 남은 SessionEnd 액션은 무시된다.
 
 ### Output envelope (`LifecycleDispatchResult`)
 
-- Context-capable events (`SessionStart` / `UserPromptSubmit` / `PreToolUse` / `PostToolUse`):
+- 지원 이벤트 전부 context-capable:
   `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }` — Claude 가 메시지를 직접 읽을 수 있음.
-- Terminal events (`Stop` / `SessionEnd`): `{ continue: true, systemMessage }` — 사용자에게만 경고로 노출됨 (Claude 미가시).
 - Top-level `message`, `hookMessage` 필드는 어떤 이벤트에서도 방출되지 않는다 (Claude Code 가 조용히 버리는 필드).

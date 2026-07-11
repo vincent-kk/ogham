@@ -2,7 +2,7 @@
  * @file dialogueConfigGuard.ts
  * @description Dialogue Config 수동 타입 가드 (Zod-free)
  *
- * session-start / session-end hook에서 사용.
+ * session-start hook에서 사용.
  * Zod를 import하지 않아 hook 번들 크기를 보전한다.
  * 타입 정의는 dialogueConfig.ts의 Zod 스키마와 동기화 유지할 것.
  */

@@ -1,6 +1,6 @@
 /**
  * @file prunePersonalContext.ts
- * @description SessionEnd 수명주기 정리 — 만료 state 제거, due 경과 자동 resolve,
+ * @description 세션 경계(MCP bootSweep) 수명주기 정리 — 만료 state 제거, due 경과 자동 resolve,
  * resolved topic 보존 기간 경과 제거, 보존 캡 방어.
  *
  * 파일이 없으면 아무것도 만들지 않는다. 변경이 있을 때만 쓴다

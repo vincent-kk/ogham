@@ -20,6 +20,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { VERSION } from '../../version.js';
 
 import { getVaultPath } from './graphCache/index.js';
+import { bootSweep } from './lifecycle/bootSweep.js';
+import { registerShutdown } from './lifecycle/registerShutdown.js';
 import {
   triggerBootRebuildIfStale,
   walkVaultForExternalChanges,
@@ -54,11 +56,12 @@ export function createServer(): McpServer {
 /**
  * Starts the MCP server with stdio transport.
  *
- * Boot 직후 walkVaultForExternalChanges를 detach하여 외부 편집(다른 프로세스가
- * vault 마크다운을 수정한 경우)의 stale 등록을 백그라운드에서 처리하고,
- * 그 직후 stale 이 있으면 background 증분 빌드를 1회 트리거한다 — 직전 세션의 미반영
- * 변경(예: 핸드오프 문서)이 첫 read 전에 인덱싱되도록 한다. 둘 다 절대 await하지 않으며
- * (부팅 비차단) snapshot/stale 부재 시 no-op이다.
+ * 종료 핸들러를 먼저 등록하고(자기 세션 즉시 마감 — best-effort), boot 직후
+ * bootSweep(직전 세션 잔여 완결: turn-context 폐기 → 세션 sweep → prune →
+ * changelog 스캔 → 아카이빙 → 자동 커밋) → walkVaultForExternalChanges(외부
+ * 편집·sweep 이동 결과의 stale 등록) → stale 이 있으면 background 증분 빌드
+ * 1회를 체인으로 detach 한다. 절대 await하지 않으며(부팅 비차단) 각 단계는
+ * 부재 시 no-op이다.
  */
 export async function startServer(): Promise<void> {
   const server = createServer();
@@ -67,7 +70,9 @@ export async function startServer(): Promise<void> {
 
   try {
     const vaultPath = getVaultPath();
-    void walkVaultForExternalChanges(vaultPath)
+    registerShutdown(vaultPath);
+    void bootSweep(vaultPath)
+      .then(() => walkVaultForExternalChanges(vaultPath))
       .then(() => triggerBootRebuildIfStale(vaultPath))
       .catch(() => {
         /* fire-and-forget; failures are logged inside the concerns */

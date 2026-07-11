@@ -3,13 +3,16 @@
  * @description Lifecycle dispatcher types — dynamic hook actions managed via conversation
  */
 
-/** Supported lifecycle hook events */
+/**
+ * Supported lifecycle hook events. `SessionEnd` is retired — the hook no
+ * longer exists (session finalization lives in the MCP server lifecycle),
+ * and MCP boot/shutdown has no user-visible output channel for actions.
+ */
 export type LifecycleEvent =
   | 'SessionStart'
   | 'UserPromptSubmit'
   | 'PreToolUse'
-  | 'PostToolUse'
-  | 'SessionEnd';
+  | 'PostToolUse';
 
 /** v1 action types (echo, remind only; command reserved for v2) */
 export type LifecycleActionType = 'echo' | 'remind';
@@ -65,8 +68,6 @@ export interface LifecycleConfig {
  * Per Claude Code's hook output spec:
  * - `SessionStart` / `UserPromptSubmit` / `PreToolUse` / `PostToolUse` support
  *   `hookSpecificOutput.additionalContext` (Claude-visible context).
- * - `SessionEnd` does NOT support `additionalContext`; only `systemMessage`
- *   (user-visible warning) is honored alongside `continue` / `suppressOutput`.
  * - Top-level `message` and `hookMessage` are NOT supported for any event and
  *   are silently dropped if emitted.
  */
@@ -79,14 +80,10 @@ export interface LifecycleHookSpecificOutput {
 export interface LifecycleDispatchResult {
   /** Whether Claude Code should continue processing */
   continue: boolean;
-  /**
-   * Event-scoped payload. Populated only for events that support
-   * `additionalContext` (SessionStart / UserPromptSubmit / PreToolUse / PostToolUse).
-   */
+  /** Event-scoped payload (`hookSpecificOutput.additionalContext`). */
   hookSpecificOutput?: LifecycleHookSpecificOutput;
   /**
-   * User-visible warning. Used for SessionEnd (which does not support
-   * `additionalContext`) and as a fallback channel for any event where a
+   * User-visible warning — fallback channel for any event where a
    * human-visible banner is desirable. Claude itself does not see this field.
    */
   systemMessage?: string;

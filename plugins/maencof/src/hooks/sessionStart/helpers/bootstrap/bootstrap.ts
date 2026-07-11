@@ -116,9 +116,9 @@ function buildVaultNotInitializedResult(): SessionStartResult {
 }
 
 /**
- * Surface unrecorded watched-path changes detected by the previous session's
- * SessionEnd scan (changelogDebt). Advisory only — never blocks; the live
- * source of truth is re-checked by /maencof:changelog when it runs.
+ * Surface unrecorded watched-path changes detected by the MCP boot sweep's
+ * changelogDebt scan. Advisory only — never blocks; the live source of truth
+ * is re-checked by /maencof:changelog when it runs.
  */
 function checkChangelogDebt(cwd: string, messages: string[]): void {
   try {

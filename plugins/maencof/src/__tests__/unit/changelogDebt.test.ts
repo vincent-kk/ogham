@@ -1,6 +1,6 @@
 /**
  * @file changelogDebt.test.ts
- * @description runChangelogDebt / detectWatchedChanges / parsePorcelainZ 유닛 테스트 — SessionEnd hook
+ * @description runChangelogDebt / detectWatchedChanges / parsePorcelainZ 유닛 테스트 — MCP bootSweep concern
  */
 import { spawnCli } from '@ogham/cross-platform/spawn';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -9,12 +9,12 @@ import { CHANGELOG_PENDING_MAX_CHANGES } from '../../constants/changelog.js';
 import { readChangelogState } from '../../core/changelogState/operations/readChangelogState.js';
 import { writeChangelogState } from '../../core/changelogState/operations/writeChangelogState.js';
 import { appendErrorLogSafe } from '../../core/errorLog/operations/appendErrorLogSafe.js';
+import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
 import {
   detectWatchedChanges,
   parsePorcelainZ,
   runChangelogDebt,
-} from '../../hooks/sessionEnd/helpers/changelogDebt/index.js';
-import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
+} from '../../hooks/utils/changelogDebt/index.js';
 
 vi.mock('@ogham/cross-platform/spawn', () => ({
   spawnCli: vi.fn(),

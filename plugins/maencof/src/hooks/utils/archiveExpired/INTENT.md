@@ -2,7 +2,7 @@
 
 ## Purpose
 
-SessionEnd 관심사. L4 `04_Action/` 의 아카이브 불변식을 매 세션 집행한다 — `expires < today` 만료본은 `.maencof-meta/archive/` 로 옮기고(정방향), archive 에만 있고 원위치에 없는 문서는 경량 스텁(frontmatter + 요약 + [[링크]])을 소급 복구한다(역방향). 어느 쪽이든 원위치에 스텁을 남겨 그래프 연결을 유지한다(고아 방지). 의미적 증류(L2 수확)는 `/archive-harvest` 스킬이 별도 수행.
+MCP bootSweep 관심사. L4 `04_Action/` 의 아카이브 불변식을 매 부팅(직전 세션 마무리) 집행한다 — `expires < today` 만료본은 `.maencof-meta/archive/` 로 옮기고(정방향), archive 에만 있고 원위치에 없는 문서는 경량 스텁(frontmatter + 요약 + [[링크]])을 소급 복구한다(역방향). 어느 쪽이든 원위치에 스텁을 남겨 그래프 연결을 유지한다(고아 방지). 의미적 증류(L2 수확)는 `/archive-harvest` 스킬이 별도 수행.
 
 ## Structure
 

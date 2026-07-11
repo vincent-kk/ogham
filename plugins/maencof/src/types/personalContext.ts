@@ -3,7 +3,7 @@
  * @description Personal Context 층(`.maencof-meta/personal-context.json`) 도메인 타입.
  *
  * 순수 타입과 도메인 상수(intensity 집합)만 정의한다(zod 없음) — 훅
- * 번들(sessionStart/sessionEnd)이 직접 도달하는 경로이므로 검증 런타임을
+ * 번들(sessionStart)이 직접 도달하는 경로이므로 검증 런타임을
  * 끌어오지 않는다. 입력 검증은 MCP 도구(`capture_personal_context`)의 Zod
  * 스키마가, 파일 정규화는 `core/personalContext/normalizePersonalContext`(zod-free)이 담당한다.
  */

@@ -1,10 +1,10 @@
 /**
  * @file archiveExpired.ts
- * @description SessionEnd archiveExpired concern — L4 04_Action 아카이브 불변식을 집행한다.
+ * @description archiveExpired concern (MCP bootSweep) — L4 04_Action 아카이브 불변식을 집행한다.
  * 정방향(만료본 이동+스텁)과 역방향(누락 스텁 백필)을 순차 실행하며, 스캔·I/O 세부는
  * `operations/` organ에, 파싱·스텁 생성은 `utils/` organ에 위임한다.
  */
-import { isMaencofVault } from '../../../shared/isMaencofVault.js';
+import { isMaencofVault } from '../../shared/isMaencofVault.js';
 
 import { archiveExpiredForward } from './operations/archiveExpiredForward.js';
 import { backfillMissingStubs } from './operations/backfillMissingStubs.js';

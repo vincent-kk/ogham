@@ -54,6 +54,14 @@ export const AUTO_COMMIT_SUBJECT_MARKERS: readonly string[] = [
 export const FOLD_SCAN_MAX_COMMITS = 100;
 
 /**
+ * Age (mtime) beyond which a leftover `.git/index.lock` is treated as stale
+ * and reclaimed by the commit gate. Conservative: live git operations finish
+ * in seconds, so 30 minutes only ever matches locks orphaned by a killed
+ * process — never a running one. Reclaims are logged before deletion.
+ */
+export const INDEX_LOCK_STALE_MS = 30 * 60 * 1000;
+
+/**
  * Message-template placeholder tokens — single source of truth. Each token
  * MUST have a replacer registered in MESSAGE_TEMPLATE_REPLACERS (gitUtils);
  * the renderer's `satisfies Record<PlaceholderToken, ...>` enforces the
