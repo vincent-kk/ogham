@@ -20,8 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { VERSION } from '../../version.js';
 
 import { getVaultPath } from './graphCache/index.js';
-import { bootSweep } from './lifecycle/bootSweep.js';
-import { registerShutdown } from './lifecycle/registerShutdown.js';
+import { bootSweep, registerShutdown } from './lifecycle/index.js';
 import {
   triggerBootRebuildIfStale,
   walkVaultForExternalChanges,

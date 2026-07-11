@@ -10,7 +10,9 @@
  */
 import { removeSessionFiles } from '../../../core/cacheManager/operations/removeSessionFiles.js';
 import { removeTurnContext } from '../../../core/cacheManager/operations/removeTurnContext.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { sweepStaleSessions } from '../../../core/sessionStore/index.js';
+import { buildDailyDigest } from '../../../core/workIndex/index.js';
 import { isMaencofVault } from '../../../hooks/shared/isMaencofVault.js';
 
 let registered = false;
@@ -26,11 +28,20 @@ export function registerShutdown(vaultPath: string): void {
       removeTurnContext(vaultPath);
       const sessionId = process.env.CLAUDE_CODE_SESSION_ID;
       if (sessionId) {
-        sweepStaleSessions(vaultPath, { staleThresholdMs: 0, sessionId });
+        const { dates } = sweepStaleSessions(vaultPath, {
+          staleThresholdMs: 0,
+          sessionId,
+        });
+        for (const date of dates) buildDailyDigest(vaultPath, date);
         removeSessionFiles(sessionId, vaultPath);
       }
-    } catch {
-      // cleanup failure must never affect the exit path
+    } catch (e) {
+      // cleanup failure must never affect the exit path — record for diagnosis
+      appendErrorLogSafe(vaultPath, {
+        hook: 'mcp-shutdown',
+        error: String(e),
+        timestamp: new Date().toISOString(),
+      });
     }
   };
   process.once('exit', shutdown);

@@ -11,14 +11,13 @@
  * 마감은 잠정적 — baseline/snapshot/lastActivityAt 을 보존하므로 살아있는 세션의
  * 오마감은 다음 touch 가 재개방하고, 이후 sweep 이 멱등 재차분한다.
  * `vaultOps = usageSnapshot - usageBaseline` (sweep 시점 카운트를 쓰지 않아
- * 동시·후속 세션의 작업이 섞이지 않는다). 마감이 발생한 일자는 daily digest 를
- * 멱등 재생성한다.
+ * 동시·후속 세션의 작업이 섞이지 않는다). 마감이 발생한 일자(`dates`)는
+ * 호출부(bootSweep/registerShutdown)가 digest 를 멱등 재생성하도록 반환한다.
  */
 import { existsSync, readdirSync } from 'node:fs';
 
 import { SESSION_SWEEP_DAY_WINDOW } from '../../../constants/sessionSweep.js';
 import type { SessionRecord } from '../../../types/session.js';
-import { buildDailyDigest } from '../../workIndex/operations/buildDailyDigest.js';
 
 import { diffUsageCounts } from './diffUsageCounts.js';
 import { getSessionsDir } from './getSessionsDir.js';
@@ -65,7 +64,6 @@ export function sweepStaleSessions(
     }
   }
 
-  for (const date of closedDates) buildDailyDigest(cwd, date);
   return { closed, dates: closedDates };
 }
 

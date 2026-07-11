@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { removeSessionFiles } from '../../core/cacheManager/operations/removeSessionFiles.js';
 import { removeTurnContext } from '../../core/cacheManager/operations/removeTurnContext.js';
 import { sweepStaleSessions } from '../../core/sessionStore/index.js';
+import { buildDailyDigest } from '../../core/workIndex/index.js';
 import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
 import { runVaultCommitter } from '../../hooks/utils/vaultCommitter/operations/runVaultCommitter.js';
 import { bootSweep } from '../../mcp/server/lifecycle/bootSweep.js';
@@ -24,8 +25,13 @@ vi.mock('../../core/cacheManager/operations/removeSessionFiles.js', () => ({
 vi.mock('../../core/sessionStore/index.js', () => ({
   sweepStaleSessions: vi.fn(() => {
     calls.push('sweep');
-    return { closed: 0, dates: [] };
+    return { closed: 1, dates: ['2026-07-11'] };
   }),
+}));
+vi.mock('../../core/workIndex/index.js', () => ({
+  buildDailyDigest: vi.fn((_cwd: string, date: string) =>
+    calls.push(`digest:${date}`),
+  ),
 }));
 vi.mock('../../core/personalContext/prunePersonalContext.js', () => ({
   prunePersonalContext: vi.fn(() => calls.push('personalContext')),
@@ -82,6 +88,7 @@ describe('bootSweep', () => {
     expect(calls).toEqual([
       'turnContext',
       'sweep',
+      'digest:2026-07-11',
       'personalContext',
       'changelogDebt',
       'archiveExpired',
@@ -94,6 +101,10 @@ describe('bootSweep', () => {
     expect(vi.mocked(sweepStaleSessions)).toHaveBeenCalledWith(
       '/vault',
       expect.objectContaining({ staleThresholdMs: expect.any(Number) }),
+    );
+    expect(vi.mocked(buildDailyDigest)).toHaveBeenCalledWith(
+      '/vault',
+      '2026-07-11',
     );
   });
 
@@ -142,11 +153,20 @@ describe('registerShutdown', () => {
     process.env.CLAUDE_CODE_SESSION_ID = 'own-session';
     (added.exit[0] as () => void)();
 
-    expect(calls).toEqual(['turnContext', 'sweep', 'sessionFiles']);
+    expect(calls).toEqual([
+      'turnContext',
+      'sweep',
+      'digest:2026-07-11',
+      'sessionFiles',
+    ]);
     expect(vi.mocked(sweepStaleSessions)).toHaveBeenCalledWith('/vault', {
       staleThresholdMs: 0,
       sessionId: 'own-session',
     });
+    expect(vi.mocked(buildDailyDigest)).toHaveBeenCalledWith(
+      '/vault',
+      '2026-07-11',
+    );
     expect(vi.mocked(removeSessionFiles)).toHaveBeenCalledWith(
       'own-session',
       '/vault',

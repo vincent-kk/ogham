@@ -7,7 +7,7 @@ session_id 키 맵으로 보관하고 볼트 작업 차분을 산출한다.
 
 ## Structure
 
-- `index.ts` — 순수 barrel (공개 API: getSessionsDir/getSessionDayPath/recordSessionStart/recordSessionEnd/readSessionDayLog/getRecentSessionSummary/sweepStaleSessions)
+- `index.ts` — 순수 barrel (공개 API: getSessionsDir/getSessionDayPath/recordSessionStart/readSessionDayLog/getRecentSessionSummary/sweepStaleSessions; recordSessionEnd 는 barrel 노출 중이나 현재 미사용 — 제거 후보, 세션 종료 기록은 sweepStaleSessions 로 이관됨)
 - `operations/` organ — 경로 헬퍼·시작/종료 기록·턴 touch·sweep 마감·직전 세션 요약, 함수 1개/파일 (readDayLog/writeDayLog/readUsageCounts/diffUsageCounts/touchSessionActivity 는 비공개 다중 사용 헬퍼로 barrel 미노출; touch 는 훅이 concrete 경로로 소비)
 
 ## Conventions

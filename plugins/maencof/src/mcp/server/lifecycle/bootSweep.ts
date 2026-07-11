@@ -13,6 +13,7 @@ import { removeTurnContext } from '../../../core/cacheManager/operations/removeT
 import { appendErrorLogSafe } from '../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { prunePersonalContext } from '../../../core/personalContext/prunePersonalContext.js';
 import { sweepStaleSessions } from '../../../core/sessionStore/index.js';
+import { buildDailyDigest } from '../../../core/workIndex/index.js';
 import { isMaencofVault } from '../../../hooks/shared/isMaencofVault.js';
 import { runArchiveExpired } from '../../../hooks/utils/archiveExpired/archiveExpired.js';
 import { runChangelogDebt } from '../../../hooks/utils/changelogDebt/operations/runChangelogDebt.js';
@@ -22,9 +23,10 @@ export async function bootSweep(vaultPath: string): Promise<void> {
   if (!isMaencofVault(vaultPath)) return;
   try {
     removeTurnContext(vaultPath);
-    sweepStaleSessions(vaultPath, {
+    const { dates } = sweepStaleSessions(vaultPath, {
       staleThresholdMs: STALE_SESSION_THRESHOLD_MS,
     });
+    for (const date of dates) buildDailyDigest(vaultPath, date);
     prunePersonalContext(vaultPath);
     await runChangelogDebt({ cwd: vaultPath });
     await runArchiveExpired(vaultPath);

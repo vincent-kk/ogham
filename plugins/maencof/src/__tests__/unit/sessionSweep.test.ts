@@ -236,8 +236,8 @@ describe('sweepStaleSessions', () => {
     expect(record.vaultOps).toBeUndefined();
   });
 
-  // Test 11 (complex): closing writes the day digest for affected dates
-  it('rebuilds the daily digest for dates it closed', () => {
+  // Test 11 (complex): returns the closed dates for the caller to rebuild digests
+  it('returns the dates it closed, for the caller to rebuild digests', () => {
     const t0 = new Date('2026-07-11T10:00:00Z');
     recordSessionStart(vaultDir, 's1', t0);
     touchSessionActivity(vaultDir, 's1', new Date('2026-07-11T10:10:00Z'));
@@ -248,18 +248,6 @@ describe('sweepStaleSessions', () => {
     });
 
     expect(result.dates).toEqual([dateOf(t0)]);
-    const digestPath = join(
-      vaultDir,
-      '.maencof-meta',
-      'activity',
-      'digests',
-      'daily',
-      `${dateOf(t0)}.json`,
-    );
-    const digest = JSON.parse(readFileSync(digestPath, 'utf-8')) as {
-      sessionCount: number;
-    };
-    expect(digest.sessionCount).toBe(1);
   });
 
   // Test 12 (complex): corrupt lastActivityAt is skipped, not crashed on
