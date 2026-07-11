@@ -1,7 +1,4 @@
-import {
-  type RawTestFile,
-  countTestCases,
-} from '../../../../metrics/testCounter/testCounter.js';
+import { countTestCases } from '../../../../metrics/testCounter/testCounter.js';
 import { check312Rule } from '../../../../metrics/threePlusTwelve/threePlusTwelve.js';
 import type {
   TestFileInput,
@@ -11,19 +8,9 @@ import type {
 export function handleCheck312(files: TestFileInput[]): {
   violations: ThreePlusTwelveViolation[];
 } {
-  const testCaseCounts = files.map((f) => {
-    const raw: RawTestFile = { filePath: f.filePath, content: f.content };
-    const count = countTestCases(raw);
-    return {
-      filePath: f.filePath,
-      fileType: f.filePath.includes('.spec.')
-        ? ('spec' as const)
-        : ('test' as const),
-      total: count.total,
-      basic: count.total,
-      complex: 0,
-    };
-  });
+  const testCaseCounts = files.map((f) =>
+    countTestCases({ filePath: f.filePath, content: f.content }),
+  );
 
   const result = check312Rule(testCaseCounts);
 
