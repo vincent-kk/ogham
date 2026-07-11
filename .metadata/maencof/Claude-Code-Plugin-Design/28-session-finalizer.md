@@ -1,14 +1,15 @@
 ---
 created: 2026-07-11
-updated: 2026-07-11
-tags: [session-lifecycle, finalization, shutdown, detached-process, cross-platform]
+updated: 2026-07-12
+tags:
+  [session-lifecycle, finalization, shutdown, detached-process, cross-platform]
 layer: design-area-3
-status: proposal
+status: implemented
 ---
 
 # 세션 완결 detached finalizer — "다음 부팅 의존" 갭 해소
 
-> 상태: **설계 제안(미구현)**. 승인 후 구현. 관련: [기억 라이프사이클](./13-memory-lifecycle.md) · [크래시 복구](./15-crash-recovery.md) · [한계와 제약](./26-constraints-and-limitations.md)
+> 상태: **구현 완료**(2026-07-12) — §9 권장안 전항 채택, §8은 mcp-server 번들 재사용으로 개선(아래). 관련: [기억 라이프사이클](./13-memory-lifecycle.md) · [크래시 복구](./15-crash-recovery.md) · [한계와 제약](./26-constraints-and-limitations.md)
 
 ## 1. Problem
 
@@ -53,7 +54,7 @@ SessionEnd 훅 은퇴(issue-78) 이후 세션 종료 완결은 두 경로가 소
 - **주의**: `@ogham/cross-platform` `spawnCli`의 `detached`는 **관리형**(kill/abort 추적) + **POSIX 전용**(`useDetached = detached && platform !== 'win32'`)이라 **fire-and-forget daemon에는 부적합**. → 신규 헬퍼 **`spawnDetached`/`spawnDaemon`**(반환 즉시 unref, 미추적)을 `@ogham/cross-platform/spawn`에 추가 권장.
 - **POSIX**: detached는 자식이 자기 프로세스 그룹 리더 → 부모 종료·그룹 시그널과 분리.
 - **Windows**: `detached:true, windowsHide:true, stdio:'ignore'` + unref. win32는 프로세스 그룹 모델이 달라 별도 경로 필요(spawnCli가 win32 detached를 끄는 이유). daemon 헬퍼가 win32 분기 소유.
-- maencof은 **plugin**(plugins/maencof)이라 `@ogham/cross-platform` 런타임 의존 허용([project_mcp_servers_no_cross_platform_runtime]는 mcp-servers/* 한정). finalizer 번들은 esbuild가 cross-platform을 인라인.
+- maencof은 **plugin**(plugins/maencof)이라 `@ogham/cross-platform` 런타임 의존 허용([project_mcp_servers_no_cross_platform_runtime]는 mcp-servers/\* 한정). finalizer 번들은 esbuild가 cross-platform을 인라인.
 
 ## 6. Concurrency & index.lock
 
@@ -64,28 +65,29 @@ detached finalizer 실행 중 사용자가 **빠르게 재개** → 다음 MCP b
 
 ## 7. Edge cases & fallback
 
-| 상황 | 처리 |
-|---|---|
-| 하드 SIGKILL(핸들러 미실행) | bootSweep 폴백(다음 부팅). 미커버(Non-Goal). |
-| 스폰 실패 | bootSweep 폴백. 스폰은 try/catch, 실패 무시. |
-| 자식 크래시(git 실패 등) | bootSweep 폴백(멱등 재실행). 자식은 `appendErrorLogSafe`로 자기 로그. |
-| 스크립트 경로 미해석 | 스폰 실패 처리와 동일 → 폴백. |
-| `'exit'`만 발생(SIGINT 없이) | best-effort 스폰; 실패 시 폴백. |
+| 상황                         | 처리                                                                  |
+| ---------------------------- | --------------------------------------------------------------------- |
+| 하드 SIGKILL(핸들러 미실행)  | bootSweep 폴백(다음 부팅). 미커버(Non-Goal).                          |
+| 스폰 실패                    | bootSweep 폴백. 스폰은 try/catch, 실패 무시.                          |
+| 자식 크래시(git 실패 등)     | bootSweep 폴백(멱등 재실행). 자식은 `appendErrorLogSafe`로 자기 로그. |
+| 스크립트 경로 미해석         | 스폰 실패 처리와 동일 → 폴백.                                         |
+| `'exit'`만 발생(SIGINT 없이) | best-effort 스폰; 실패 시 폴백.                                       |
 
 원칙: finalizer는 bootSweep의 **가속**일 뿐, 새 단일 실패점이 아니다. 모든 실패가 기존 보장 경로로 흡수된다.
 
-## 8. Build integration
+## 8. Build integration (구현: mcp-server 번들 재사용)
 
-- `scripts/build-hooks.mjs` 엔트리 리스트에 `session-finalize` 추가 → `bridge/session-finalize.mjs`.
-- 소스: `src/mcp/server/lifecycle/finalizer/session-finalize.entry.ts`(argv 파싱 → `bootSweep`). 훅류 번들 규율 준수: **concrete import**(배럴 금지), byte-cap + FORBIDDEN_PATTERNS 가드 편입.
-- registerShutdown이 번들 경로를 알아야 함(`bridge/session-finalize.mjs`) — 서버 번들 기준 상대 해석.
+ADV-002(MCP 코드=배럴)로 finalizer(=MCP 코드, 무거운 bootSweep 체인)를 훅류 byte-cap 번들로 만드는 게 부적합해져, **별도 번들 대신 mcp-server 번들을 재사용**한다:
 
-## 9. Open decisions (승인 시 확정)
+- `serverEntry.ts`에 `--finalize <vaultPath>` 분기 — argv 매치 시 `bootSweep(vaultPath)` 1회 후 exit(server 미기동).
+- `registerShutdown`이 `spawnDetached(process.execPath, [process.argv[1], '--finalize', vaultPath])` — 실행 중인 `bridge/mcp-server.cjs`를 재실행. 새 빌드 스텝·byte-cap·bootSweep 중복 없음. `process.argv[1]`로 번들 경로 자동 해석.
 
-1. **daemon 헬퍼**: 신규 `@ogham/cross-platform/spawn::spawnDetached` vs finalizer 인라인 spawn. (권장: 재사용 위해 헬퍼)
-2. **동시성 dedup**: index.lock+멱등 의존(a) vs finalizing 마커(b). (권장: a로 시작)
-3. **finalizer 범위**: `bootSweep` 전체 재실행 vs shutdown 미실행분만. (권장: 전체 — 멱등이라 단순)
-4. **'exit' 스폰**: 포함 vs SIGINT/SIGTERM만. (권장: SIGINT/SIGTERM 우선, exit는 best-effort 옵션)
+## 9. Decisions (구현: 전 항목 권장안 채택)
+
+1. **daemon 헬퍼**: `@ogham/cross-platform/spawn::spawnDetached` 신설(fire-and-forget, no-throw). ✅
+2. **동시성 dedup**: index.lock+멱등 의존 — finalizing 마커 미도입(경합 관측 시 추가). ✅
+3. **finalizer 범위**: `bootSweep` 전체 재실행(멱등). ✅
+4. **스폰 지점**: SIGINT/SIGTERM 핸들러만('exit' 핸들러는 스폰 없음 — 동기 마감만). ✅
 
 ## 10. Alternatives considered
 

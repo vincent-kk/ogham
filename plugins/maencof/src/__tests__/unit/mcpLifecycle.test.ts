@@ -1,7 +1,8 @@
 /**
  * @file mcpLifecycle.test.ts
  * @description MCP server lifecycle 유닛 테스트 — bootSweep 오케스트레이션 순서
- * (vaultCommitter 마지막 불변식)와 registerShutdown 의 동기 정밀 마감 경로.
+ * (vaultCommitter 마지막 불변식), registerShutdown 의 동기 정밀 마감 + detached
+ * `--finalize` finalizer 스폰.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -65,6 +66,15 @@ vi.mock(
 vi.mock('../../hooks/shared/isMaencofVault.js', () => ({
   isMaencofVault: vi.fn(() => true),
 }));
+
+const { spawnDetachedMock } = vi.hoisted(() => ({
+  spawnDetachedMock: vi.fn(),
+}));
+vi.mock('@ogham/cross-platform/spawn', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@ogham/cross-platform/spawn')>();
+  return { ...actual, spawnDetached: spawnDetachedMock };
+});
 
 const mockIsVault = vi.mocked(isMaencofVault);
 let savedSessionId: string | undefined;
@@ -179,6 +189,20 @@ describe('registerShutdown', () => {
     delete process.env.CLAUDE_CODE_SESSION_ID;
     (added.exit[0] as () => void)();
     expect(calls).toEqual(['turnContext']);
+
+    // SIGINT/SIGTERM additionally spawns the detached --finalize process
+    // (heavy completion off the grace window), then exits.
+    const exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((() => undefined) as never);
+    (added.sigint[0] as () => void)();
+    expect(spawnDetachedMock).toHaveBeenCalledWith(process.execPath, [
+      process.argv[1],
+      '--finalize',
+      '/vault',
+    ]);
+    expect(exitSpy).toHaveBeenCalledWith(0);
+    exitSpy.mockRestore();
 
     for (const l of added.exit) process.removeListener('exit', l);
     for (const l of added.sigint) process.removeListener('SIGINT', l);

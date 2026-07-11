@@ -11,14 +11,25 @@
 import { runCompanionMigration } from '../../core/companionMigration/index.js';
 import { getVaultPath } from '../server/graphCache/index.js';
 import { startServer } from '../server/index.js';
+import { bootSweep } from '../server/lifecycle/index.js';
 
-try {
-  runCompanionMigration(getVaultPath());
-} catch {
-  /* migration is best-effort; a failure must never block server start */
+// Detached finalizer mode — `node bridge/mcp-server.cjs --finalize <vaultPath>`,
+// spawned by registerShutdown to complete the previous session's bootSweep
+// chain off the shutdown grace window. Run it once and exit; skip server start.
+const finalizeIdx = process.argv.indexOf('--finalize');
+if (finalizeIdx !== -1) {
+  const vaultPath = process.argv[finalizeIdx + 1];
+  if (vaultPath) void bootSweep(vaultPath).finally(() => process.exit(0));
+  else process.exit(0);
+} else {
+  try {
+    runCompanionMigration(getVaultPath());
+  } catch {
+    /* migration is best-effort; a failure must never block server start */
+  }
+
+  startServer().catch((err: unknown) => {
+    process.stderr.write(`maencof MCP server error: ${String(err)}\n`);
+    process.exit(1);
+  });
 }
-
-startServer().catch((err: unknown) => {
-  process.stderr.write(`maencof MCP server error: ${String(err)}\n`);
-  process.exit(1);
-});
