@@ -1,8 +1,5 @@
 import { MAX_TEST_CASES } from '../../constants/qualityThresholds.js';
-import type {
-  TestCaseCount,
-  TestCaseGateResult,
-} from '../../types/metrics.js';
+import type { TestCaseCount, TestCaseGateResult } from '../../types/metrics.js';
 
 /**
  * Test-case growth gate: flag every spec.ts whose total case count exceeds
