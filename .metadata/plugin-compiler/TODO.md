@@ -87,7 +87,7 @@
 | 7   | cennad       | 훅 2. **자기참조 순환**(codex/agy/claude 위임 — 자기 provider 제외 조정)                |
 | 8   | imbas        | 훅 5(SubagentStart 포함)                                                                |
 | 9   | maencof      | 훅 5(PostToolUse 포함)+skills 28+git write. SessionEnd=vault commit/recap(§3 핵심 대상) |
-| 10  | filid        | 훅 5+agents 14+skills 19. `migrate.sh`(POSIX 전용 — Node 재작성 or 고지)                |
+| 10  | filid        | 훅 5+agents 14+skills 19. `migrate.mjs`(POSIX 의존 없음 — Node 이식 완료)               |
 
 ## 6. 기능 손실 고지 (사용자 확인 필요 항목)
 

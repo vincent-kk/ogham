@@ -43,7 +43,7 @@ export const agyProfile: HostProfile = {
     return name;
   },
   // agy has no dedicated prose plugin-root variable; ${CLAUDE_PLUGIN_ROOT} is the
-  // de-facto placeholder. Plugin-file references in prose (e.g. filid migrate.sh)
+  // de-facto placeholder. Plugin-file references in prose (e.g. filid migrate.mjs)
   // are a known host-portability caveat. MCP paths use relative args (buildMcp).
   pluginRoot: "${CLAUDE_PLUGIN_ROOT}",
 
