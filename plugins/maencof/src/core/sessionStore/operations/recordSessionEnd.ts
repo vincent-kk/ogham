@@ -8,6 +8,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import type { SessionDayLog } from '../../../types/session.js';
 import { formatDate } from '../../dateFormat/index.js';
 
+import { diffUsageCounts } from './diffUsageCounts.js';
 import { getSessionsDir } from './getSessionsDir.js';
 import { readDayLog } from './readDayLog.js';
 import { readUsageCounts } from './readUsageCounts.js';
@@ -77,16 +78,4 @@ function findOpenSessionDay(
     }
 
   return todayLog;
-}
-
-function diffUsageCounts(
-  baseline: Record<string, number>,
-  current: Record<string, number>,
-): Record<string, number> {
-  const delta: Record<string, number> = {};
-  for (const [tool, count] of Object.entries(current)) {
-    const diff = count - (baseline[tool] ?? 0);
-    if (diff > 0) delta[tool] = diff;
-  }
-  return delta;
 }

@@ -9,10 +9,12 @@ import { runVaultCommitter } from '../utils/vaultCommitter/operations/runVaultCo
 
 import { injectContext } from './helpers/contextInjector/contextInjector.js';
 import { runInsightInjector } from './helpers/insightInjector/insightInjector.js';
+import { runSessionTouch } from './helpers/sessionTouch/sessionTouch.js';
 
 /**
- * UserPromptSubmit: KG/turn context + lifecycle actions + insight banner, then
- * the opt-in vault auto-commit last (side-effect only, runs after context).
+ * UserPromptSubmit: KG/turn context + lifecycle actions + insight banner +
+ * session activity touch, then the opt-in vault auto-commit last (side-effect
+ * only, runs after context).
  */
 export async function orchestrateUserPromptSubmit(
   input: DispatchInput,
@@ -23,6 +25,7 @@ export async function orchestrateUserPromptSubmit(
       runLifecycleDispatcher('UserPromptSubmit', input),
     ),
     safeConcern(input.cwd, 'insight-injector', () => runInsightInjector(input)),
+    safeConcern(input.cwd, 'session-touch', () => runSessionTouch(input)),
     await safeConcernAsync(input.cwd, 'vault-committer', () =>
       runVaultCommitter(input, 'UserPromptSubmit'),
     ),

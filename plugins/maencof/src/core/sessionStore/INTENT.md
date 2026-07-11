@@ -7,13 +7,14 @@ session_id 키 맵으로 보관하고 볼트 작업 차분을 산출한다.
 
 ## Structure
 
-- `index.ts` — 순수 barrel (공개 API: getSessionsDir/getSessionDayPath/recordSessionStart/recordSessionEnd/readSessionDayLog/getRecentSessionSummary)
-- `operations/` organ — 경로 헬퍼·시작/종료 기록·직전 세션 요약, 함수 1개/파일 (readDayLog/writeDayLog/readUsageCounts 는 비공개 다중 사용 헬퍼로 barrel 미노출)
+- `index.ts` — 순수 barrel (공개 API: getSessionsDir/getSessionDayPath/recordSessionStart/recordSessionEnd/readSessionDayLog/getRecentSessionSummary/sweepStaleSessions)
+- `operations/` organ — 경로 헬퍼·시작/종료 기록·턴 touch·sweep 마감·직전 세션 요약, 함수 1개/파일 (readDayLog/writeDayLog/readUsageCounts/diffUsageCounts/touchSessionActivity 는 비공개 다중 사용 헬퍼로 barrel 미노출; touch 는 훅이 concrete 경로로 소비)
 
 ## Conventions
 
-- 하루 1파일, `sessions[sessionId]` 직접 조회 (전수조사 금지)
-- SessionStart 에서 baseline 스냅샷, SessionEnd 에서 차분 후 baseline 제거
+- 하루 1파일, `sessions[sessionId]` 직접 조회 (전수조사 금지; sweep 도 최근 일자 창 고정)
+- SessionStart 에서 baseline 스냅샷 → 매 턴 touch 가 lastActivityAt/usageSnapshot 갱신 → sweep(boot/shutdown)이 `snapshot - baseline` 차분으로 마감
+- sweep 마감은 잠정적 (baseline/snapshot 보존) — touch 가 오마감을 재개방하고 sweep 이 멱등 재차분
 - usage-stats 는 숫자 카운트만 사용 (legacy 비숫자 키 무시)
 
 ## Boundaries
