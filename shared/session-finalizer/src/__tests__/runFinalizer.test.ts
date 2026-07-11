@@ -67,4 +67,23 @@ describe("runFinalizer", () => {
     expect(task).toHaveBeenCalledWith("/project");
     await vi.waitFor(() => expect(exitSpy).toHaveBeenCalledWith(0));
   });
+
+  // Test 5 (complex): a synchronously throwing task (contract breach) still exits 0
+  it("exits 0 even when the task throws synchronously", () => {
+    const exitSpy = vi
+      .spyOn(process, "exit")
+      .mockImplementation((() => undefined) as never);
+    const task = vi.fn(() => {
+      throw new Error("boom");
+    });
+
+    const handled = runFinalizer(
+      ["node", "entry.js", "--finalize", "/vault"],
+      task,
+    );
+
+    expect(handled).toBe(true);
+    expect(task).toHaveBeenCalledWith("/vault");
+    expect(exitSpy).toHaveBeenCalledWith(0);
+  });
 });

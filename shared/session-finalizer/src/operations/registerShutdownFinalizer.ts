@@ -30,7 +30,9 @@ const SHUTDOWN_SIGNALS = ["SIGINT", "SIGTERM"] as const;
  * - SIGINT/SIGTERM → `onShutdown` → (when `detached`) spawn the finalizer →
  *   `process.exit(0)`.
  *
- * Repeat calls are ignored (once-guard). The host SIGKILLs ~400ms after the
+ * Repeat calls are ignored (once-guard), and `onShutdown` runs at most once per
+ * process — the signal path's `process.exit(0)` re-fires the `exit` listener,
+ * which the internal run-once guard absorbs. The host SIGKILLs ~400ms after the
  * signal, so `onShutdown` must stay synchronous; defer heavy work to the
  * detached finalizer.
  */
@@ -47,7 +49,10 @@ export function registerShutdownFinalizer(
     flag = DEFAULT_FINALIZE_FLAG,
   } = opts;
 
+  let ran = false;
   const shutdown = (): void => {
+    if (ran) return;
+    ran = true;
     if (guard && !guard(ctx)) return;
     onShutdown?.(ctx);
   };

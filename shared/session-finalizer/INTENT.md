@@ -5,8 +5,8 @@
 ## Structure
 
 - `src/index.ts` — barrel (operations 재노출)
-- `src/operations/registerShutdownFinalizer.ts` — exit/SIGINT/SIGTERM 1회 등록; exit→onShutdown(동기), signal→onShutdown+(detached면)spawnDetached+exit(0)
-- `src/operations/runFinalizer.ts` — 서버 엔트리 디스패치; argv `<flag> <ctx>` 매치 시 task(ctx) 1회 후 exit(0), true 반환
+- `src/operations/registerShutdownFinalizer.ts` — exit/SIGINT/SIGTERM 1회 등록; exit→onShutdown(동기), signal→onShutdown+(detached면)spawnDetached+exit(0); onShutdown 은 프로세스당 최대 1회(시그널 경로 exit(0) 의 'exit' 재발화 흡수)
+- `src/operations/runFinalizer.ts` — 서버 엔트리 디스패치; argv `<flag> <ctx>` 매치 시 task(ctx) 1회 후 exit(0), true 반환 (task 동기 throw 에도 exit(0) 보장)
 - `src/constants/finalizeFlag.ts` — DEFAULT_FINALIZE_FLAG('--finalize'); 스폰측·디스패치측 공유 계약
 
 ## Conventions

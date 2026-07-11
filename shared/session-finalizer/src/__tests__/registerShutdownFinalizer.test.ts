@@ -158,4 +158,20 @@ describe("registerShutdownFinalizer", () => {
     ]);
     expect(exitSpy).toHaveBeenCalledWith(0);
   });
+
+  // Test 7 (complex): the 'exit' re-fire that follows the signal path's
+  // process.exit(0) must not rerun onShutdown
+  it("runs onShutdown at most once across the signal and exit paths", async () => {
+    const before = listenerSnapshot();
+    const register = await loadFresh();
+    const onShutdown = vi.fn();
+    register({ ctx: "/vault", onShutdown });
+    const added = addedSince(before);
+    vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
+
+    (added.SIGINT[0] as () => void)();
+    (added.exit[0] as () => void)();
+
+    expect(onShutdown).toHaveBeenCalledTimes(1);
+  });
 });
