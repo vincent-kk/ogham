@@ -70,15 +70,14 @@ describe('buildGraph', () => {
     expect(linkEdges).toHaveLength(0);
   });
 
-  it('SIBLING 엣지를 동일 디렉토리 노드 간에 생성한다', () => {
+  it('SIBLING 엣지를 물질화하지 않는다 (hydrate 시 파생)', () => {
     const a = makeNode('02_Derived/a.md');
     const b = makeNode('02_Derived/b.md');
     const c = makeNode('02_Derived/c.md');
 
     const { graph } = buildGraph([a, b, c]);
     const siblingEdges = graph.edges.filter((e) => e.type === 'SIBLING');
-    // 3개 노드 쌍: (a,b), (a,c), (b,c) 각 양방향 = 6
-    expect(siblingEdges).toHaveLength(6);
+    expect(siblingEdges).toHaveLength(0);
   });
 
   it('includeOrphans=false 시 고립 노드를 그래프에서 제외한다', () => {

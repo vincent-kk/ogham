@@ -16,7 +16,7 @@ import type {
  * EDGE_TYPE_MULTIPLIER 가 더 높은 타입을 결정적으로 채택한다(동률은 엣지 배열 순서상 먼저 등장한
  * 것 우선). weight 와 type 이 항상 같은 승자 엣지에서 나오도록 두 맵을 함께 만든다.
  */
-export function buildEdgePairMaps(edges: KnowledgeEdge[]): {
+export function buildEdgePairMaps(edges: Iterable<KnowledgeEdge>): {
   edgeWeightMap: EdgeWeightMap;
   edgeTypeMap: EdgeTypeMap;
 } {

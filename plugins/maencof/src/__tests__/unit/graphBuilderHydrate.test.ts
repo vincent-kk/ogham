@@ -148,8 +148,14 @@ describe('rebuildEdgeDerivedMaps', () => {
     const invRef = g.invertedIndex;
     g.edges = [];
     rebuildEdgeDerivedMaps(g);
-    expect(g.edgeWeightMap?.get('a.md' as NodeId)).toBeUndefined();
-    expect(g.adjacencyList?.get('a.md' as NodeId)).toEqual([]);
+    // LINK 항목은 사라지고, 동일 루트 디렉토리 멤버십에서 파생된 SIBLING 만 남는다
+    expect(g.edgeTypeMap?.get('a.md' as NodeId)?.get('b.md' as NodeId)).toBe(
+      'SIBLING',
+    );
+    expect(g.edgeWeightMap?.get('a.md' as NodeId)?.get('b.md' as NodeId)).toBe(
+      0,
+    );
+    expect(g.adjacencyList?.get('a.md' as NodeId)).toEqual(['b.md']);
     expect(g.invertedIndex).toBe(invRef);
   });
 });

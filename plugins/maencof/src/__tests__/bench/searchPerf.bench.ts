@@ -4,7 +4,10 @@
  */
 import { bench, describe } from 'vitest';
 
-import { buildGraph } from '../../core/graphBuilder/index.js';
+import {
+  buildGraph,
+  hydrateRuntimeMaps,
+} from '../../core/graphBuilder/index.js';
 import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import { resolveSeedNodes } from '../../search/queryEngine/index.js';
 import { Layer } from '../../types/common.js';
@@ -44,7 +47,7 @@ function makeSyntheticGraph(nodeCount: number): KnowledgeGraph {
     nodes.push(makeSyntheticNode(i, layer));
   }
 
-  // buildGraph가 SIBLING/PARENT_OF/CHILD_OF 엣지를 자동 생성
+  // buildGraph가 PARENT_OF/CHILD_OF·LINK 엣지를 생성하고, SIBLING은 hydrate가 파생
   // 추가로 outboundLinks를 통해 LINK 엣지도 생성
   for (let i = 0; i < nodeCount; i++) {
     const ext = nodes[i] as KnowledgeNode & { outboundLinks?: string[] };
@@ -59,7 +62,7 @@ function makeSyntheticGraph(nodeCount: number): KnowledgeGraph {
   }
 
   const { graph } = buildGraph(nodes);
-  return graph;
+  return hydrateRuntimeMaps(graph);
 }
 
 // Pre-built graphs for benchmarks

@@ -39,6 +39,8 @@ export interface KgNavigateInput {
   include_outbound?: boolean;
   /** 부모/자식 포함 (기본 true) */
   include_hierarchy?: boolean;
+  /** 형제 목록 상한(MAX_NAVIGATE_SIBLINGS) 해제 — 대형 폴더 전체 열람용 (기본 false) */
+  include_all_siblings?: boolean;
 }
 
 /** kg_context 입력 */
@@ -89,8 +91,10 @@ export interface KgNavigateResult {
   parent?: KnowledgeNode;
   /** 자식 노드 목록 */
   children: KnowledgeNode[];
-  /** 형제 노드 목록 */
+  /** 형제 노드 목록 — 동일 디렉토리 멤버십에서 파생 (경로 정렬, 기본 MAX_NAVIGATE_SIBLINGS 상한 — include_all_siblings 로 해제) */
   siblings: KnowledgeNode[];
+  /** 상한 적용 전 형제 총수 — siblings.length 보다 크면 목록이 절단된 것 */
+  siblingTotalCount?: number;
   /** CROSS_LAYER 연결 노드 (L5-Boundary 경유) */
   crossLayer?: KnowledgeNode[];
   /** DOMAIN 연결 노드 (동일 domain 태그) */

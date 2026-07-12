@@ -5,6 +5,9 @@ export const MAX_CROSS_LAYER_EDGES_PER_NODE = 50;
 /** kg_status include_orphan_paths 응답의 경로 목록 상한 (정렬 후 절단; 01_Core 가 사전순 선두라 고신호 우선 보존) */
 export const MAX_LINK_ORPHAN_PATHS = 200;
 
+/** kg_navigate siblings 응답 기본 상한 — 대형 자동수집 폴더의 이웃 폭주로부터 도구 응답을 보호 (include_all_siblings 로 해제) */
+export const MAX_NAVIGATE_SIBLINGS = 50;
+
 export const STALE_THRESHOLD_PERCENT = 10;
 
 /**

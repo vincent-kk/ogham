@@ -122,8 +122,8 @@ describe('buildCrossLayerEdges', () => {
     const { graph } = buildGraph(nodes);
 
     const edgeTypes = new Set(graph.edges.map((e) => e.type));
-    // SIBLING between l1 and l1b, CROSS_LAYER from boundary to l1
-    expect(edgeTypes.has('SIBLING')).toBe(true);
+    // CROSS_LAYER from boundary to l1; SIBLING 은 물질화되지 않는다 (hydrate 파생)
+    expect(edgeTypes.has('SIBLING')).toBe(false);
     expect(edgeTypes.has('CROSS_LAYER')).toBe(true);
   });
 

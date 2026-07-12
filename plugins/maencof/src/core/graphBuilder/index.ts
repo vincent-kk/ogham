@@ -1,5 +1,6 @@
 export { buildGraph } from './operations/buildGraph.js';
 export { buildAdjacencyList } from './operations/buildAdjacencyList.js';
+export { deriveSiblingEdges } from './operations/deriveSiblingEdges.js';
 export { detectOrphans } from './operations/detectOrphans.js';
 export { hydrateRuntimeMaps } from './operations/hydrateRuntimeMaps.js';
 export { rebuildEdgeDerivedMaps } from './operations/rebuildEdgeDerivedMaps.js';

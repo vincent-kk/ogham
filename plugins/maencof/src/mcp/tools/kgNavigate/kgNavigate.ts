@@ -2,6 +2,7 @@
  * @file kgNavigate.ts
  * @description kg_navigate 도구 핸들러 — 특정 노드의 이웃 조회
  */
+import { MAX_NAVIGATE_SIBLINGS } from '../../../constants/thresholds.js';
 import { toNodeId } from '../../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -11,42 +12,49 @@ import type {
 import type { KgNavigateInput, KgNavigateResult } from '../../../types/mcp.js';
 
 /**
- * 노드에 연결된 엣지만 필터링 (type-aware 이웃 조회).
- * adjacencyList가 있으면 outbound 이웃만 빠르게 조회하고 엣지 타입은 edgeWeightMap 구조 대신
- * 엣지 배열에서 해당 이웃에 대해서만 조회한다.
+ * 노드에 연결된 엣지 필터링 — 단일 O(E) 패스.
+ * graph.edges 는 명시 엣지만 담으므로(SIBLING 은 파생) 전체 순회가 가장 싸다.
  */
 function getEdgesForNode(
   graph: KnowledgeGraph,
   nodeId: string,
 ): { outbound: KnowledgeEdge[]; inbound: KnowledgeEdge[] } {
-  // 사전 계산된 인접 리스트가 없으면 전체 스캔 폴백
-  if (!graph.adjacencyList) {
-    const outbound: KnowledgeEdge[] = [];
-    const inbound: KnowledgeEdge[] = [];
-    for (const edge of graph.edges) {
-      if (edge.from === nodeId) outbound.push(edge);
-      if (edge.to === nodeId) inbound.push(edge);
-    }
-    return { outbound, inbound };
-  }
-
-  // 인접 리스트 기반 최적화: outbound 이웃 확인 후 엣지 타입/가중치 조회
   const outbound: KnowledgeEdge[] = [];
-  const neighbors =
-    graph.adjacencyList.get(nodeId as ReturnType<typeof toNodeId>) ?? [];
-  for (const neighborId of neighbors) {
-    // edgeWeightMap에서 가중치, 엣지 배열에서 타입 조회
-    const edge = graph.edges.find(
-      (e) => e.from === nodeId && e.to === neighborId,
-    );
-    if (edge) outbound.push(edge);
-  }
-
-  // inbound는 역방향이므로 전체 엣지에서 필터 (향후 역 인접 리스트로 최적화 가능)
   const inbound: KnowledgeEdge[] = [];
-  for (const edge of graph.edges) if (edge.to === nodeId) inbound.push(edge);
-
+  for (const edge of graph.edges) {
+    if (edge.from === nodeId) outbound.push(edge);
+    if (edge.to === nodeId) inbound.push(edge);
+  }
   return { outbound, inbound };
+}
+
+/**
+ * 동일 디렉토리 멤버십에서 형제 노드를 파생한다 (경로 정렬, 기본 MAX_NAVIGATE_SIBLINGS 상한).
+ * 대형 자동수집 폴더에서 응답이 이웃 전체로 폭주하지 않도록 총수는 별도 반환하며,
+ * includeAll 은 폴더 전체 열람이 필요한 호출자를 위한 opt-in 해제다.
+ */
+function collectSiblings(
+  graph: KnowledgeGraph,
+  node: KnowledgeNode,
+  includeAll: boolean,
+): { siblings: KnowledgeNode[]; total: number } {
+  const dir = getDirectory(node.path);
+  const members: KnowledgeNode[] = [];
+  for (const candidate of graph.nodes.values())
+    if (candidate.id !== node.id && getDirectory(candidate.path) === dir)
+      members.push(candidate);
+
+  members.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  return {
+    siblings: includeAll ? members : members.slice(0, MAX_NAVIGATE_SIBLINGS),
+    total: members.length,
+  };
+}
+
+/** 파일 경로에서 디렉토리 경로 추출 */
+function getDirectory(filePath: string): string {
+  const lastSlash = filePath.lastIndexOf('/');
+  return lastSlash >= 0 ? filePath.slice(0, lastSlash) : '';
 }
 
 function collectOutboundNeighbors(
@@ -57,13 +65,11 @@ function collectOutboundNeighbors(
 ): {
   outbound: KnowledgeNode[];
   children: KnowledgeNode[];
-  siblings: KnowledgeNode[];
   crossLayer: KnowledgeNode[];
   domain: KnowledgeNode[];
 } {
   const outbound: KnowledgeNode[] = [];
   const children: KnowledgeNode[] = [];
-  const siblings: KnowledgeNode[] = [];
   const crossLayer: KnowledgeNode[] = [];
   const domain: KnowledgeNode[] = [];
 
@@ -72,15 +78,9 @@ function collectOutboundNeighbors(
       const dst = graph.nodes.get(edge.to);
       if (dst) outbound.push(dst);
     }
-    if (includeHierarchy) {
-      if (edge.type === 'PARENT_OF') {
-        const child = graph.nodes.get(edge.to);
-        if (child) children.push(child);
-      }
-      if (edge.type === 'SIBLING') {
-        const sib = graph.nodes.get(edge.to);
-        if (sib) siblings.push(sib);
-      }
+    if (includeHierarchy && edge.type === 'PARENT_OF') {
+      const child = graph.nodes.get(edge.to);
+      if (child) children.push(child);
     }
     if (edge.type === 'CROSS_LAYER') {
       const target = graph.nodes.get(edge.to);
@@ -92,7 +92,7 @@ function collectOutboundNeighbors(
     }
   }
 
-  return { outbound, children, siblings, crossLayer, domain };
+  return { outbound, children, crossLayer, domain };
 }
 
 function collectInboundNeighbors(
@@ -162,7 +162,6 @@ export async function handleKgNavigate(
   const {
     outbound,
     children,
-    siblings,
     crossLayer: outCrossLayer,
     domain: outDomain,
   } = collectOutboundNeighbors(
@@ -179,6 +178,10 @@ export async function handleKgNavigate(
     domain: inDomain,
   } = collectInboundNeighbors(inEdges, graph, includeInbound, includeHierarchy);
 
+  const { siblings, total: siblingTotalCount } = includeHierarchy
+    ? collectSiblings(graph, node, input.include_all_siblings ?? false)
+    : { siblings: [], total: 0 };
+
   const crossLayer = [...outCrossLayer, ...inCrossLayer];
   const domain = [...outDomain, ...inDomain];
 
@@ -189,6 +192,7 @@ export async function handleKgNavigate(
     parent,
     children,
     siblings,
+    siblingTotalCount,
     crossLayer: crossLayer.length > 0 ? crossLayer : undefined,
     domain: domain.length > 0 ? domain : undefined,
   };

@@ -10,10 +10,9 @@ import type {
 } from '../../../types/graph.js';
 import {
   buildCrossLayerEdges,
-  buildDirectoryMap,
   buildDomainEdges,
+  buildHierarchyEdges,
   buildRelationshipEdges,
-  buildTreeEdges,
 } from '../builders/index.js';
 import { buildInvertedIndex } from '../invertedIndex/buildInvertedIndex.js';
 import type { GraphBuildResult, GraphBuilderOptions } from '../types/types.js';
@@ -25,7 +24,7 @@ import { detectOrphans } from './detectOrphans.js';
  * 파싱된 KnowledgeNode 목록으로부터 KnowledgeGraph를 구성한다.
  * - LINK 엣지: 각 노드의 outboundLinks에서 생성
  * - PARENT_OF / CHILD_OF: 디렉토리 계층에서 생성
- * - SIBLING: 동일 디렉토리 내 문서 간 관계
+ * - SIBLING 은 물질화하지 않음 — 런타임 맵 구성 시 파생 (deriveSiblingEdges)
  */
 export function buildGraph(
   nodes: KnowledgeNode[],
@@ -52,10 +51,9 @@ export function buildGraph(
           });
       }
 
-  // 디렉토리 계층 엣지 (PARENT_OF / CHILD_OF / SIBLING)
-  const dirMap = buildDirectoryMap(nodes);
-  const treeEdges = buildTreeEdges(nodes, dirMap, nodeMap);
-  for (const e of treeEdges) edges.push(e);
+  // 디렉토리 계층 엣지 (PARENT_OF / CHILD_OF)
+  const hierarchyEdges = buildHierarchyEdges(nodes, nodeMap);
+  for (const e of hierarchyEdges) edges.push(e);
 
   // RELATIONSHIP 엣지: person frontmatter가 있는 노드 쌍 간 관계 엣지 생성
   const relationshipEdges = buildRelationshipEdges(nodes);

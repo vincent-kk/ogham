@@ -16,7 +16,7 @@ import type {
  */
 export function buildAdjacencyList(
   nodeMap: Map<NodeId, KnowledgeNode>,
-  edges: KnowledgeEdge[],
+  edges: Iterable<KnowledgeEdge>,
 ): AdjacencyList {
   const adj: AdjacencyList = new Map();
   const seen = new Map<NodeId, Set<NodeId>>();

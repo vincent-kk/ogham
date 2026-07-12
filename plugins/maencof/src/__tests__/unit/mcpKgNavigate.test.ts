@@ -119,19 +119,52 @@ describe('handleKgNavigate', () => {
     }
   });
 
-  it('SIBLING 엣지로 siblings를 반환한다', async () => {
-    const nodeA = makeNode('a.md');
-    const nodeB = makeNode('b.md');
-    const edges: KnowledgeEdge[] = [
-      { from: nodeA.id, to: nodeB.id, type: 'SIBLING', weight: 0.5 },
-    ];
-    const graph = makeGraph([nodeA, nodeB], edges);
+  it('동일 디렉토리 멤버십에서 siblings를 파생한다 (엣지 불필요)', async () => {
+    const nodeA = makeNode('02_Derived/a.md');
+    const nodeB = makeNode('02_Derived/b.md');
+    const nodeC = makeNode('01_Core/c.md');
+    const graph = makeGraph([nodeA, nodeB, nodeC]);
 
-    const result = await handleKgNavigate(graph, { path: 'a.md' });
+    const result = await handleKgNavigate(graph, { path: '02_Derived/a.md' });
     expect('error' in result).toBe(false);
     if (!('error' in result)) {
       expect(result.siblings).toHaveLength(1);
-      expect(result.siblings[0].path).toBe('b.md');
+      expect(result.siblings[0].path).toBe('02_Derived/b.md');
+      expect(result.siblingTotalCount).toBe(1);
+    }
+  });
+
+  it('siblings를 기본 상한으로 절단하고 총수를 별도 보고한다', async () => {
+    const dir = '04_Action/bulk';
+    const nodes = Array.from({ length: 55 }, (_, i) =>
+      makeNode(`${dir}/doc-${String(i).padStart(2, '0')}.md`),
+    );
+    const graph = makeGraph(nodes);
+
+    const result = await handleKgNavigate(graph, { path: `${dir}/doc-00.md` });
+    expect('error' in result).toBe(false);
+    if (!('error' in result)) {
+      expect(result.siblings).toHaveLength(50);
+      expect(result.siblingTotalCount).toBe(54);
+      expect(result.siblings[0].path).toBe(`${dir}/doc-01.md`); // 경로 정렬
+    }
+  });
+
+  it('include_all_siblings=true 이면 상한 없이 전체 형제를 반환한다', async () => {
+    const dir = '04_Action/bulk';
+    const nodes = Array.from({ length: 55 }, (_, i) =>
+      makeNode(`${dir}/doc-${String(i).padStart(2, '0')}.md`),
+    );
+    const graph = makeGraph(nodes);
+
+    const result = await handleKgNavigate(graph, {
+      path: `${dir}/doc-00.md`,
+      include_all_siblings: true,
+    });
+    expect('error' in result).toBe(false);
+    if (!('error' in result)) {
+      expect(result.siblings).toHaveLength(54);
+      expect(result.siblingTotalCount).toBe(54);
     }
   });
 
@@ -169,6 +202,8 @@ describe('handleKgNavigate', () => {
     if (!('error' in result)) {
       expect(result.parent).toBeUndefined();
       expect(result.children).toHaveLength(0);
+      expect(result.siblings).toHaveLength(0); // 동일 루트 디렉토리지만 hierarchy 제외
+      expect(result.siblingTotalCount).toBe(0);
     }
   });
 

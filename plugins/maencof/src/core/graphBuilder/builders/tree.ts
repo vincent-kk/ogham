@@ -1,6 +1,8 @@
 /**
  * @file tree.ts
- * @description 디렉토리 계층 기반 PARENT_OF / CHILD_OF / SIBLING 엣지 생성.
+ * @description 디렉토리 계층 기반 PARENT_OF / CHILD_OF 엣지 생성 + 디렉토리 맵.
+ * SIBLING 은 물질화하지 않는다 — node.path 가 이미 보유한 폴더 멤버십의 O(k²) 전개이므로
+ * 런타임 맵 구성 시점에 파생한다 (operations/deriveSiblingEdges.ts).
  */
 import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeEdge, KnowledgeNode } from '../../../types/graph.js';
@@ -20,17 +22,6 @@ export function buildDirectoryMap(
     dirMap.get(dir)!.push(node.id);
   }
   return dirMap;
-}
-
-/**
- * 디렉토리 맵으로부터 PARENT_OF / CHILD_OF / SIBLING 엣지를 생성한다.
- */
-export function buildTreeEdges(
-  nodes: KnowledgeNode[],
-  dirMap: Map<string, NodeId[]>,
-  nodeMap: Map<NodeId, KnowledgeNode>,
-): KnowledgeEdge[] {
-  return [...buildHierarchyEdges(nodes, nodeMap), ...buildSiblingEdges(dirMap)];
 }
 
 /**
@@ -59,26 +50,6 @@ export function buildHierarchyEdges(
       type: 'CHILD_OF',
       weight: 1.0,
     });
-  }
-  return edges;
-}
-
-/**
- * SIBLING 엣지 생성: 동일 디렉토리 내 노드 쌍 (양방향)
- */
-export function buildSiblingEdges(
-  dirMap: Map<string, NodeId[]>,
-): KnowledgeEdge[] {
-  const edges: KnowledgeEdge[] = [];
-  for (const [, siblings] of dirMap) {
-    if (siblings.length < 2) continue;
-    for (let i = 0; i < siblings.length; i++)
-      for (let j = i + 1; j < siblings.length; j++) {
-        const a = siblings[i];
-        const b = siblings[j];
-        edges.push({ from: a, to: b, type: 'SIBLING', weight: 1.0 });
-        edges.push({ from: b, to: a, type: 'SIBLING', weight: 1.0 });
-      }
   }
   return edges;
 }

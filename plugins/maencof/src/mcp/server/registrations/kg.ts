@@ -107,7 +107,7 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_NAVIGATE,
     {
       description:
-        'Retrieves neighbors (inbound/outbound links, parent/child, siblings) of a specific node.',
+        'Retrieves neighbors of a node: inbound/outbound links, parent/children, and same-folder siblings (capped at 50 by default; full count in siblingTotalCount).',
       inputSchema: z.object({
         path: z.string().describe('Target node path'),
         include_inbound: z
@@ -122,6 +122,12 @@ export function registerKgTools(server: McpServer): void {
           .boolean()
           .optional()
           .describe('Include parent/child/siblings (default true)'),
+        include_all_siblings: z
+          .boolean()
+          .optional()
+          .describe(
+            'Lift the 50-item sibling cap and return every same-folder member (default false)',
+          ),
       }),
     },
     async (_vaultPath, args, graph) => handleKgNavigate(graph, args),
