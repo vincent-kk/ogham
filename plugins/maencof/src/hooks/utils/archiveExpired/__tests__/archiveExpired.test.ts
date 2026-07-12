@@ -97,6 +97,32 @@ describe('runArchiveExpired', () => {
     expect(stubContent).toContain('## Summary');
   });
 
+  it('does not resurrect code-quoted example wikilinks in the stub', async () => {
+    // 회귀: 코드 스팬/블록 안 예시 위키링크가 스텁 Links (preserved)에 raw로 부활하던 버그
+    const originalPath = writeActionDocument(
+      'maencof-bug/wikilink-edge-bug.md',
+      [
+        'created: 2026-06-01',
+        'updated: 2026-06-01',
+        'tags: [maencof, bug]',
+        'layer: 4',
+        'expires: 2026-06-30',
+      ],
+      '# Wikilink Edge Bug\n\nBug report quoting wikilink syntax as examples.\n\n`kg_build`가 본문의 `[[wikilink]]`를 파싱하지 않음.\n\n```\n- `[[path]]` 형식\n```\n\nReal reference: [[cve/real-target]].',
+    );
+
+    const result = await runArchiveExpired(vaultDirectory);
+
+    expect(result.archived).toContain(
+      '04_Action/maencof-bug/wikilink-edge-bug.md',
+    );
+    const stubContent = readFileSync(originalPath, 'utf-8');
+    // 실제 링크만 보존 — 코드 인용 예시는 제외
+    expect(stubContent).toContain('- [[cve/real-target]]');
+    expect(stubContent).not.toContain('[[wikilink]]');
+    expect(stubContent).not.toContain('[[path]]');
+  });
+
   it('leaves a not-yet-expired document untouched', async () => {
     const documentPath = writeActionDocument(
       'future-note.md',

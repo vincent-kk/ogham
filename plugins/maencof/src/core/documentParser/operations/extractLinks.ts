@@ -31,6 +31,7 @@ export function extractLinks(body: string): MarkdownLink[] {
     if (!href) continue;
 
     links.push({
+      kind: 'markdown',
       text,
       href,
       isAbsolute: ABSOLUTE_HREF_REGEX.test(href),
@@ -53,6 +54,7 @@ export function extractLinks(body: string): MarkdownLink[] {
     const href = pathOnly.endsWith('.md') ? pathOnly : `${pathOnly}.md`;
 
     links.push({
+      kind: 'wiki',
       text: raw,
       href,
       isAbsolute: false, // 위키링크는 항상 vault-relative 내부 참조

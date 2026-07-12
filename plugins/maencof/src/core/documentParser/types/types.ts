@@ -7,6 +7,8 @@ import type { KnowledgeNode } from '../../../types/graph.js';
 
 /** 마크다운 링크 정보 */
 export interface MarkdownLink {
+  /** 링크 종류 — 표준 마크다운 `[text](href)` 또는 위키링크 `[[...]]` */
+  kind: 'markdown' | 'wiki';
   /** 링크 텍스트 */
   text: string;
   /** 링크 대상 (상대 경로) */

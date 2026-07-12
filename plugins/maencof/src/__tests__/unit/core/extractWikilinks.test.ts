@@ -82,6 +82,8 @@ describe('extractLinks — wikilinks', () => {
 
     expect(links).toHaveLength(2);
     expect(links[0].href).toBe('./path.md');
+    expect(links[0].kind).toBe('markdown');
     expect(links[1].href).toBe('wiki-link.md');
+    expect(links[1].kind).toBe('wiki');
   });
 });
