@@ -27,6 +27,12 @@ export const ERROR_MESSAGES = {
     "The workspace is in use by an active job and cannot be reset; wait for it to finish or use a different workspaceId.",
   SCRIPT_TOO_LARGE: "scriptCode exceeds the maximum allowed size.",
   TOO_MANY_DATA_REFS: "dataRefs exceeds the maximum allowed number of entries.",
+  DATA_REF_OUTSIDE_ROOT:
+    "Refusing to read an input dataset outside the allowed data root " +
+    "(absolute path required; set R_STATISTICS_DATA_ROOT to widen it). " +
+    "System paths like /etc or ~/.ssh are rejected.",
+  DATA_ROOT_INVALID:
+    "R_STATISTICS_DATA_ROOT does not resolve to an existing directory.",
 } as const;
 
 export const TIMEOUT_MESSAGE =

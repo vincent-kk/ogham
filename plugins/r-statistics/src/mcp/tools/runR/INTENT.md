@@ -19,6 +19,7 @@
 - Rscript 미탐색 → `R_NOT_FOUND` (setup 안내)
 - 기본 `executionMode=async` (jobId 반환 후 get_r_job 폴링), `sync` 는 즉시 결과
 - 모든 잡은 jobStore 에 등록 (사전 실패도 synthetic 잡으로 일관 반환)
+- 데이터 ref 경로는 allow-root(`R_STATISTICS_DATA_ROOT`, 기본 CWD) 하위 realpath 만 수용
 
 ## Boundaries
 
@@ -36,6 +37,7 @@
 
 - 통계 가정·기법 적합성 판단 (assert 소관)
 - ARTIFACTS_DIR 밖 산출물 수용
+- allow-root 밖 데이터 ref 경로 수용 (심링크 탈출 포함)
 
 ## Dependencies
 

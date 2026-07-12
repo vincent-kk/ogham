@@ -1,0 +1,29 @@
+# DETAIL — run_r 실행 계약
+
+## Requirements
+
+- LLM 이 생성한 R 코드를 `--vanilla` 헤드리스 Rscript + temp 워크스페이스로만 실행한다.
+- 실행 전 `validateRScript` 정적 게이트가 `FORBIDDEN_R_CALLS`(process·network·filesystem-escape) 를 차단한다.
+- 입력 데이터(`dataRefs`)는 MCP 가 워크스페이스 `data/` 로 복사하고 `refs.json` 으로만 노출한다. user R 코드는 경로를 직접 만들지 않는다.
+- `timeoutMs` 는 `MAX_TIMEOUT_MS` 로 clamp, `dataRefs` 는 `MAX_DATA_REFS` 로 제한한다.
+
+## API Contracts
+
+### run_r 입력
+
+- `scriptCode` (필수): `MAX_SCRIPT_CHARS` 이하 R 소스.
+- `dataRefs[]` (선택): `{ id, format, path, encoding?, sha256? }`.
+  - `id`: `^[A-Za-z0-9_-]+$` — 복사본 파일명이 되므로 경로 구분자 금지(워크스페이스 탈출 차단).
+  - `path`: **절대경로 + allow-root 하위(realpath 기준)만 허용** — 아래 위협 모델 참조.
+- `sessionMode`/`executionMode`/`timeoutMs`/`seed`/`workspaceId`: 실행 격리·모드 제어.
+
+### 데이터 경로 위협 모델 (`dataRefs[].path`)
+
+- **위협**: 복사 주체는 게이트된 R 이 아니라 MCP(신뢰 코드)다. 무제한 `path` 는 R 정적 게이트를 우회해 임의 호스트 파일(`~/.ssh/id_rsa`, `/etc/*`)을 `data/` 로 끌어와 무해한 read 로 유출하는 exfil 증폭 채널이 된다.
+- **완화**: `resolveDataRefs` 가 `realpath(path)` 를 allow-root 하위로 강제한다(심링크 탈출 포함 거부). 위반 → `DATA_REF_OUTSIDE_ROOT`.
+- **allow-root**: 기본 `process.cwd()`(Claude Code 가 MCP 를 기동한 프로젝트 디렉토리). `R_STATISTICS_DATA_ROOT` 로 재정의. 미해석 시 `DATA_ROOT_INVALID`.
+- 실행 안전 계층만 담당 — 통계 정책은 assert 소관.
+
+## Last Updated
+
+2026-07-12 — `dataRefs[].path` allow-root containment 도입 (operations-sre-3 부채 해소).

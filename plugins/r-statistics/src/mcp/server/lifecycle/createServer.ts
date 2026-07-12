@@ -35,7 +35,10 @@ const dataRefSchema = z.object({
   format: z.nativeEnum(DataFormat).describe("On-disk format of the dataset."),
   path: z
     .string()
-    .describe("Absolute path the MCP resolves and copies into the workspace."),
+    .describe(
+      "Absolute path under the data root (project CWD, or R_STATISTICS_DATA_ROOT) " +
+        "the MCP resolves and copies into the workspace.",
+    ),
   encoding: z
     .nativeEnum(Encoding)
     .optional()

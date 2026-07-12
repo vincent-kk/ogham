@@ -43,3 +43,13 @@ export function contractScriptPath(): string {
   const root = process.env.CLAUDE_PLUGIN_ROOT ?? R_STATISTICS_HOME;
   return join(root, "shared", "contract.R");
 }
+
+/**
+ * Allow-root every run_r input dataset path must resolve under (symlinks
+ * included; enforced in resolveDataRefs). Defaults to the process CWD — the
+ * project directory Claude Code launched the MCP from, where a user's data
+ * lives. Override with R_STATISTICS_DATA_ROOT to point at a dedicated dir.
+ */
+export function inputDataRoot(): string {
+  return process.env.R_STATISTICS_DATA_ROOT ?? process.cwd();
+}
