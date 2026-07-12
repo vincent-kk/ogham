@@ -1,4 +1,4 @@
-# r-setup — Windows
+# setup — Windows
 
 Approved install commands (run only after explicit consent):
 
@@ -21,7 +21,7 @@ choco install r.project
 
 ## R packages
 
-After R is installed, r-setup checks the required package set. CRAN ships Windows
+After R is installed, setup checks the required package set. CRAN ships Windows
 binaries (Rtools usually unneeded). Mind PowerShell quoting — outer double, inner
 single. Install packages fresh into the r-statistics managed library; do not copy
 or move an existing `win-library` tree into it, because compiled packages from a

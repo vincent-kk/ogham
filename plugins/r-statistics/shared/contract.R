@@ -37,7 +37,7 @@
         "r-statistics contract: data inputs were provided (data/refs.json is ",
         "present) but the 'jsonlite' package is not installed, so data ",
         "references cannot be resolved. Install the R package set via the ",
-        "r-setup skill, then re-run.",
+        "setup skill, then re-run.",
         call. = FALSE
       )
     }

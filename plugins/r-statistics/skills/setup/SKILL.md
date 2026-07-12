@@ -1,7 +1,7 @@
 ---
-name: r-setup
+name: setup
 user_invocable: true
-description: '[r-statistics:r-setup] Check whether R/Rscript is installed and, with explicit consent, guide a per-OS install via the system package manager. Trigger: "install R", "set up R", "R is not found", "R 설치", "Rscript 없음"'
+description: '[r-statistics:setup] Check whether R/Rscript is installed and, with explicit consent, guide a per-OS install via the system package manager. Trigger: "install R", "set up R", "R is not found", "R 설치", "Rscript 없음"'
 argument-hint: "[--os windows|macos|linux] [--packages]"
 version: "1.1.0"
 complexity: simple
@@ -10,7 +10,7 @@ plugin: r-statistics
 
 <!-- [INTERACTIVE] — installation changes the system; never run an installer without explicit consent. -->
 
-# r-setup — Detect & Install R
+# setup — Detect & Install R
 
 Confirm R is available for the execution tools, and when it is missing, guide an
 install through the OS package manager. Installation is a **separate channel

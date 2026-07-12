@@ -20,7 +20,7 @@ when ambiguous between a full run and a single step, prefer asking
 | normality / homogeneity / independence test    | `assumption-check` |
 | plot / chart / figure                          | `visualization`    |
 | Table 1 / effect size / report / Quarto / DOCX | `reporting`        |
-| install / find R / environment                 | `r-setup`          |
+| install / find R / environment                 | `setup`            |
 
 ## Notes
 

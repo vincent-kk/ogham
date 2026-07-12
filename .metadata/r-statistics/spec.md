@@ -12,7 +12,7 @@
 | **assumption-check 스킬**          | `skills/assumption-check/`          | 정규성·등분산·독립성 검정 → assert 입력 아티팩트 생성                            |
 | **visualization 스킬**             | `skills/visualization/`             | ggplot2 디바이스 보일러플레이트 (분포/박스/산점/생존/forest)                     |
 | **reporting 스킬**                 | `skills/reporting/`                 | Table 1·효과크기·다중비교 보정 → Quarto(DOCX/HTML/PDF)                           |
-| **r-setup 스킬**                   | `skills/r-setup/`                   | R 설치 확인 + 환경별 가이드 + 동의 기반 설치 실행                                |
+| **setup 스킬**                     | `skills/setup/`                     | R 설치 확인 + 환경별 가이드 + 동의 기반 설치 실행                                |
 | **run_r**                          | `src/mcp/tools/runR/`               | 크로스플랫폼 Rscript 실행, 아티팩트 수집, 실행 안전 게이트                       |
 | **assert_analysis_plan**           | `src/mcp/tools/assertAnalysisPlan/` | 통계적 hard gate (기법↔가정 결정론적 검증)                                       |
 | **workspace (core)**               | `src/core/workspace/`               | temp 격리·아티팩트·세션 상태 영속                                                |

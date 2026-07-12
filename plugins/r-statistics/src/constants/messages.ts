@@ -3,7 +3,7 @@
 
 export const ERROR_MESSAGES = {
   R_NOT_FOUND:
-    "Rscript was not found. Run the r-setup skill to install R or set " +
+    "Rscript was not found. Run the setup skill to install R or set " +
     "R_STATISTICS_RSCRIPT to the Rscript path.",
   INVALID_TIMEOUT:
     "timeoutMs must be a positive number within the allowed ceiling.",

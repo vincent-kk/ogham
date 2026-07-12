@@ -28,7 +28,7 @@
 ```
 [Dispatcher]  analyze 스킬 — 상태머신 오케스트레이션 (intent 분류 + 전이 + 모드)
 [Agent]       statistician(WHAT) · r-expert(HOW) · methodology-validator(VALID)
-[Skill]       analyze · data-preparation · assumption-check · visualization · reporting · r-setup
+[Skill]       analyze · data-preparation · assumption-check · visualization · reporting · setup
                  └ lazy: methods/{technique}/ · shared/contract.R
 [MCP]         run_r · get_r_job · cancel_r_job · assert_analysis_plan  (도메인 무지·stateless)
 [R-CLI]       Rscript (temp 격리 + 명령어 게이트 + --vanilla + renv)

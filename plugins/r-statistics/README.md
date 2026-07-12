@@ -45,13 +45,13 @@ pre-built package whitelist.
 /r-statistics:visualization      /r-statistics:reporting
 
 # Check / install R
-/r-statistics:r-setup
+/r-statistics:setup
 ```
 
 ## Requirements
 
 - Node.js ≥ 20.
-- A local R installation (`Rscript`). Run `/r-statistics:r-setup` to detect or
+- A local R installation (`Rscript`). Run `/r-statistics:setup` to detect or
   install it; set `R_STATISTICS_RSCRIPT` if R is on a non-standard path.
 
 ## Documentation

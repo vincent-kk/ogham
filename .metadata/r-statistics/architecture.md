@@ -13,7 +13,7 @@
      ↓ (Task)
 [Agent]      statistician / r-expert / methodology-validator  (추천만; 전이는 Dispatcher)
      ↓ (참조)
-[Skill]      analyze · data-preparation · assumption-check · visualization · reporting · r-setup
+[Skill]      analyze · data-preparation · assumption-check · visualization · reporting · setup
                 └ lazy: methods/{technique}/, shared/contract.R
      ↓ (mcp_*)
 [MCP]        run_r · get_r_job · cancel_r_job · assert_analysis_plan  (도메인 무지·stateless)
@@ -55,7 +55,7 @@ plugins/r-statistics/
 │   ├── assumption-check/SKILL.md
 │   ├── visualization/SKILL.md
 │   ├── reporting/SKILL.md
-│   └── r-setup/
+│   └── setup/
 │       ├── SKILL.md
 │       └── references/{windows.md, macos.md, linux.md}
 ├── agents/

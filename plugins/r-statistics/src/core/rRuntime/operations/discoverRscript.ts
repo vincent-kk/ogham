@@ -68,7 +68,7 @@ function discoverWindows(): string | null {
 /**
  * Resolve an Rscript binary: env override → PATH → platform common paths →
  * (Windows) registry `HKLM\SOFTWARE\R-core\R`. Returns null when none is found,
- * letting the caller surface R_NOT_FOUND + the r-setup guidance.
+ * letting the caller surface R_NOT_FOUND + the setup guidance.
  */
 export function discoverRscript(): string | null {
   const platform = detectPlatform();

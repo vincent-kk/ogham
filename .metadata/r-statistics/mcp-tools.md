@@ -89,7 +89,7 @@ MCP가 user code를 래퍼로 감쌈 (`shared/contract.R` 골격 주입):
 
 ### 크로스플랫폼 (core/rRuntime)
 
-- **Rscript 탐색**: config → env → PATH → 공통 경로 → **Windows 레지스트리 `HKLM\SOFTWARE\R-core\R`**. 실패 시 `R_NOT_FOUND` → `r-setup` 스킬 안내.
+- **Rscript 탐색**: config → env → PATH → 공통 경로 → **Windows 레지스트리 `HKLM\SOFTWARE\R-core\R`**. 실패 시 `R_NOT_FOUND` → `setup` 스킬 안내.
 - **spawn**: `child_process.spawn(rscriptPath, ["--vanilla", scriptPath], { shell: false })` — 셸 미경유(이스케이프/인젝션 회피).
 - **인코딩**: 스크립트 UTF-8 기록 + CRLF→LF. 출력 디코딩 **UTF-8 우선 → CP949 fallback**(한글 Windows).
 

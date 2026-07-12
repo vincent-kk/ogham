@@ -42,13 +42,13 @@ Claude 를 도메인 중립 **통계 전문가** 로 만드는 플러그인 — 
 /r-statistics:visualization      /r-statistics:reporting
 
 # R 확인 / 설치
-/r-statistics:r-setup
+/r-statistics:setup
 ```
 
 ## 요구사항
 
 - Node.js ≥ 20.
-- 로컬 R 설치(`Rscript`). `/r-statistics:r-setup` 으로 탐지·설치하며, 비표준 경로면
+- 로컬 R 설치(`Rscript`). `/r-statistics:setup` 으로 탐지·설치하며, 비표준 경로면
   `R_STATISTICS_RSCRIPT` 를 설정하세요.
 
 ## 문서

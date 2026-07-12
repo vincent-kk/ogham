@@ -1,4 +1,4 @@
-# r-setup — macOS
+# setup — macOS
 
 Approved install command (run only after explicit consent):
 
@@ -19,7 +19,7 @@ brew install --cask r
 
 ## R packages
 
-After R is installed, r-setup checks the required package set. macOS uses CRAN
+After R is installed, setup checks the required package set. macOS uses CRAN
 binaries (no build tools needed); install missing packages with:
 
 ```bash

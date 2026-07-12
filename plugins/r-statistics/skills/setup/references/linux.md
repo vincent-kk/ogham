@@ -1,4 +1,4 @@
-# r-setup — Linux
+# setup — Linux
 
 Approved install commands by distribution family (run only after explicit
 consent). Prefer the distribution package; for the latest R, the official CRAN
@@ -33,7 +33,7 @@ sudo zypper install R-base
 
 ## R packages
 
-After R is installed, r-setup checks the required package set. CRAN on Linux
+After R is installed, setup checks the required package set. CRAN on Linux
 often builds from source, so system headers may be needed first (Debian/Ubuntu:
 `r-base-dev` plus `libcurl4-openssl-dev libssl-dev libxml2-dev`; `arrow` is
 heavy). For speed prefer distro `r-cran-*` binaries or a binary repo (Posit

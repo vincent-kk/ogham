@@ -16,7 +16,7 @@
 ## Conventions
 
 - 실행 전 `validateRScript` 정적 게이트 통과 필수 (실패 → `COMMAND_BLOCKED`)
-- Rscript 미탐색 → `R_NOT_FOUND` (r-setup 안내)
+- Rscript 미탐색 → `R_NOT_FOUND` (setup 안내)
 - 기본 `executionMode=async` (jobId 반환 후 get_r_job 폴링), `sync` 는 즉시 결과
 - 모든 잡은 jobStore 에 등록 (사전 실패도 synthetic 잡으로 일관 반환)
 

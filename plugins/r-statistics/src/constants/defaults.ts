@@ -42,7 +42,7 @@ export const EPV_SOFT_GUIDANCE_THRESHOLD = 10;
 export const EPV_SEVERE_BLOCK_THRESHOLD = 5;
 
 /**
- * Always installed by r-setup — the execution contract and the bulk of the
+ * Always installed by setup — the execution contract and the bulk of the
  * shipped methods depend on these (`jsonlite` backs run_r's own I/O).
  */
 export const REQUIRED_PACKAGES = [
@@ -69,7 +69,7 @@ const BASELINE_OPTIONAL = [
  * Pre-built package whitelist (renv lockfile baseline): REQUIRED ∪
  * method-referenced optional ∪ base `stats`. What executed R code may assume
  * present after a standard setup. Use-case bundles (PACKAGE_USE_CASES) may pull
- * companions beyond this baseline; those install on demand through r-setup's
+ * companions beyond this baseline; those install on demand through setup's
  * consent-gated terminal channel — run_r itself never installs.
  */
 export const PACKAGE_WHITELIST = [
@@ -79,7 +79,7 @@ export const PACKAGE_WHITELIST = [
 ] as const;
 
 /**
- * r-setup use-case catalog. Instead of asking package-by-package, r-setup asks
+ * setup use-case catalog. Instead of asking package-by-package, setup asks
  * which analyses/outputs the user needs and installs each selected bundle's
  * packages in one pass. Labels/summaries are English; the skill localizes them
  * at prompt time. Bundles may include companions beyond PACKAGE_WHITELIST.
@@ -218,7 +218,7 @@ export const COMMON_RSCRIPT_PATHS: Record<Platform, string[]> = {
 export const RSCRIPT_ENV_VAR = "R_STATISTICS_RSCRIPT";
 
 /**
- * Approved OS package-manager installers (r-setup consent gate). Only these
+ * Approved OS package-manager installers (setup consent gate). Only these
  * binaries and these subcommands may be proposed for installing R.
  */
 export const INSTALLER_COMMANDS: Record<
