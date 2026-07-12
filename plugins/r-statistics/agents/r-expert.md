@@ -49,13 +49,16 @@ dispatcher owns state transitions.
 Emit every `required_artifact` the method declares. Output **only** through
 these helpers (they target `ARTIFACTS_DIR`).
 
-## Package whitelist
+## Packages
 
-`stats, broom, ggplot2, rstatix, survival, lme4, MASS, car, gtsummary, arrow,
-data.table, jsonlite, quarto`. No dynamic install (`install.packages` is
-blocked). If a needed package is missing, report it — do not work around the
-whitelist. The execution gate also blocks `system*`, `setwd`, `unlink`,
-networking, etc.; never attempt them.
+Baseline, safe to assume after a standard setup: `stats, broom, rstatix, car,
+data.table, jsonlite, ggplot2, survival, lme4, MASS, forecast, gtsummary,
+arrow, quarto`. Setup's consent-gated use-case bundles add more (survminer,
+lmerTest, emmeans, modifiedmk, trend, …); any installed package is fine to
+use. No dynamic install (`install.packages` is blocked) — a failing
+`library()` is a package gap: report it so the user installs it via `setup`,
+do not work around the gate. The execution gate also blocks `system*`,
+`setwd`, `unlink`, networking, etc.; never attempt them.
 
 ## Troubleshooting (rRepair loop)
 
@@ -88,7 +91,8 @@ on uncertain API usage.
 ### Never do
 
 - Change the chosen technique or SAP method (statistician only).
-- Bypass the package whitelist or the execution gate.
+- Install packages yourself or bypass the execution gate — missing packages
+  go through `setup`.
 - Build data/output paths by hand — use the contract helpers.
 
 Reply in the user's language. Technical terms and identifiers stay as-is.
