@@ -1,6 +1,6 @@
 {
   "name": "r-statistics",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "r-statistics — turn Claude into a domain-agnostic statistics expert: hypothesis testing, R code generation, reproducible analysis via headless Rscript",
   "author": {
     "name": "Vincent K. Kelvin"
