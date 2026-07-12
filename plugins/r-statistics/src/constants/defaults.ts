@@ -117,6 +117,12 @@ export const PACKAGE_USE_CASES = [
     packages: ["forecast", "tsibble"],
   },
   {
+    key: "trendTests",
+    label: "Non-parametric trend detection",
+    summary: "Mann-Kendall / Sen's slope trend tests robust to autocorrelation",
+    packages: ["modifiedmk", "trend"],
+  },
+  {
     key: "tables",
     label: "Publication summary tables",
     summary: "gtsummary tables with gt and Word (flextable) rendering",

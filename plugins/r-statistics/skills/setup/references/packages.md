@@ -15,8 +15,8 @@ package, reporting what is missing in each group:
 required <- c("broom","rstatix","car","data.table","jsonlite")
 usecase  <- c("ggplot2","ggpubr","patchwork","survival","survminer",
               "lme4","lmerTest","emmeans","MASS","sandwich","lmtest",
-              "forecast","tsibble","gtsummary","gt","flextable","arrow",
-              "quarto","knitr","rmarkdown")
+              "forecast","tsibble","modifiedmk","trend","gtsummary","gt",
+              "flextable","arrow","quarto","knitr","rmarkdown")
 miss <- function(p) p[!vapply(p, requireNamespace, logical(1), quietly = TRUE)]
 rm <- miss(required); um <- miss(usecase)
 cat("REQUIRED_MISSING:", if (length(rm)) paste(rm, collapse = " ") else "-", "\n")
@@ -33,8 +33,8 @@ optional packages, do **not** ask package-by-package: ask by _use case_ and
 install each chosen bundle at once. Use `AskUserQuestion` with
 `multiSelect: true`, presenting the catalog below localized to the user's
 language. The tool caps options at 4 per question, so split the bundles across up
-to two `multiSelect` questions (e.g. model types, then outputs/data); offer only
-bundles that still have a missing package. Each question's auto "Other" lets the
+to three `multiSelect` questions (e.g. model types, then time/trend, then
+outputs/data); offer only bundles that still have a missing package. Each question's auto "Other" lets the
 user describe an uncovered need.
 
 | Use case                              | Installs                 |
@@ -44,6 +44,7 @@ user describe an uncovered need.
 | Mixed-effects / multilevel models     | lme4 lmerTest emmeans    |
 | Count models (neg. binomial, Poisson) | MASS sandwich lmtest     |
 | Time-series forecasting               | forecast tsibble         |
+| Non-parametric trend detection        | modifiedmk trend         |
 | Publication summary tables            | gtsummary gt flextable   |
 | Large / columnar data input           | arrow                    |
 | Report rendering                      | quarto knitr rmarkdown   |
