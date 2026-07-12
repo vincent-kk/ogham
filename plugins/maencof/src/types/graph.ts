@@ -40,6 +40,8 @@ export interface KnowledgeNode {
   person?: Person;
   /** Domain 이름 (cross-layer 그룹핑용) */
   domain?: string;
+  /** 아카이브 스텁 여부 (frontmatter archived; 정본은 archive_path 에 있음) */
+  archived?: boolean;
   /** 문서에서 언급된 인물 목록 (모든 레이어, person_ref와 별개) */
   mentioned_persons?: string[];
   /** 아웃바운드 링크 목록 (vault-root-relative 경로, 빌드 시 document-parser에서 수집) */

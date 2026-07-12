@@ -1,7 +1,8 @@
 /**
  * @file calculateWeights.ts
- * @description 그래프의 모든 엣지 가중치를 계산한다 — P0: 균일 가중치 1.0.
+ * @description 그래프의 모든 엣지 가중치를 계산한다 — 타입별 알고리즘 + PageRank.
  */
+import { LINK_WEIGHT_FLOOR } from '../../../constants/weights.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,
@@ -13,10 +14,9 @@ import { computePageRank } from './computePageRank.js';
 
 /**
  * 그래프의 모든 엣지 가중치를 계산한다.
- * P0: 균일 가중치 1.0 (Wu-Palmer / SCS는 Phase 1+ 구현)
- * - LINK 엣지: SCS 기반 (P0에서는 1.0)
- * - PARENT_OF / CHILD_OF: Wu-Palmer 기반 (P0에서는 1.0)
- * - SIBLING: Wu-Palmer 기반 (P0에서는 1.0)
+ * - LINK: SCS 기반, LINK_WEIGHT_FLOOR 하한 (cross-folder 사용자 링크 보존)
+ * - PARENT_OF / CHILD_OF / SIBLING: Wu-Palmer 기반
+ * - RELATIONSHIP: intimacy_level 매핑, CROSS_LAYER: 1.0, DOMAIN: 0.3
  */
 export function calculateWeights(graph: KnowledgeGraph): WeightCalcResult {
   const edges = graph.edges.map((edge) => ({
@@ -24,15 +24,13 @@ export function calculateWeights(graph: KnowledgeGraph): WeightCalcResult {
     weight: computeEdgeWeight(edge, graph),
   }));
 
+  // PageRank 는 재계산 전 초기 가중치(LINK=1.0) 기준 — 사용자 링크는 폴더 거리와 무관하게 전파된다.
   const pageranks = computePageRank(graph);
 
   return { edges, pageranks };
 }
 
-/**
- * 개별 엣지 가중치 계산.
- * P0: 균일 1.0, 향후 Wu-Palmer / SCS로 교체 예정.
- */
+/** 개별 엣지 가중치 계산 (타입별 분기). */
 function computeEdgeWeight(edge: KnowledgeEdge, graph: KnowledgeGraph): number {
   const fromNode = graph.nodes.get(edge.from);
   const toNode = graph.nodes.get(edge.to);
@@ -41,7 +39,7 @@ function computeEdgeWeight(edge: KnowledgeEdge, graph: KnowledgeGraph): number {
 
   switch (edge.type) {
     case 'LINK':
-      return computeSCSWeight(fromNode, toNode);
+      return Math.max(computeSCSWeight(fromNode, toNode), LINK_WEIGHT_FLOOR);
     case 'PARENT_OF':
     case 'CHILD_OF':
     case 'SIBLING':

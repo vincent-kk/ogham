@@ -11,6 +11,7 @@ tools:
   - mcp__plugin_maencof_t__kg_status
   - mcp__plugin_maencof_t__kg_navigate
   - mcp__plugin_maencof_t__kg_search
+  - mcp__plugin_maencof_t__kg_suggest_links
 maxTurns: 40
 ---
 
@@ -36,9 +37,24 @@ for items that can be repaired automatically.
 ### D1. Orphan Node (orphan-node)
 
 ```
-Detection: nodes with both inbound and outbound link counts of 0 via mcp__plugin_maencof_t__kg_status
-Severity: warning
-Auto-fix: suggest calling /maencof:suggest skill (discover related documents and recommend new connections)
+Detection: mcp__plugin_maencof_t__kg_status with include_orphan_paths: true →
+           linkOrphanCount / linkOrphanByLayer / linkOrphanArchivedCount / linkOrphanPaths.
+           "Orphan" means wikilink (LINK) isolation. Folder SIBLING adjacency and
+           tag overlap are NOT connectivity — do not treat them as such.
+Triage (report each bucket separately; never lump into one number):
+  1. L1 orphans (linkOrphanByLayer["1"]) — highest signal: core identity documents
+     disconnected from the knowledge web. List each file individually.
+  2. Archived stubs (linkOrphanArchivedCount; frontmatter archived: true) —
+     expected state. Report the count only; no per-file action.
+  3. Bulk-imported raw clippings (path patterns such as 04_Action/<collector>/,
+     L3 raw inbox) — link absence is normal. Do not propose per-file links.
+     For a large cluster, recommend maintaining a folder MOC (index.md) that
+     anchors the cluster into the vault instead.
+  4. Remaining authored documents — actionable. Sample up to 5 via
+     mcp__plugin_maencof_t__kg_suggest_links: candidates found → propose
+     /maencof:suggest for that file; no candidates → propose tagging first.
+Severity: warning (buckets 1 and 4); info (buckets 2 and 3)
+Auto-fix: suggest calling /maencof:suggest skill for bucket 4 files
 ```
 
 ### D2. Stale Index (stale-index)
@@ -134,7 +150,7 @@ Auto-fix: not applied automatically. L1 gist authoring requires user review —
 ## Workflow
 
 ```
-1. mcp__plugin_maencof_t__kg_status → check D2 (stale), D1 (orphan)
+1. mcp__plugin_maencof_t__kg_status (include_orphan_paths: true) → check D2 (stale), D1 (orphan buckets)
 2. Glob "**/*.md" → collect full file list
 3. `mcp__plugin_maencof_t__read` each file → check D6 (Frontmatter), D4 (Layer violation), D8 (missing L1 gist)
 4. Read backlink-index.json → check D3 (broken links)

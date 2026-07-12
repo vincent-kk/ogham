@@ -2,6 +2,7 @@
  * @file kgStatus.ts
  * @description kg_status 도구 핸들러 — 인덱스 상태 조회
  */
+import { MAX_LINK_ORPHAN_PATHS } from '../../../constants/thresholds.js';
 import { MetadataStore } from '../../../core/indexer/metadataStore/index.js';
 import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
@@ -11,6 +12,9 @@ function collectLinkOrphanStats(graph: KnowledgeGraph): {
   linkOrphanCount: number;
   linkInboundOrphanCount: number;
   linkOutboundOrphanCount: number;
+  linkOrphanByLayer: Record<string, number>;
+  linkOrphanArchivedCount: number;
+  linkOrphanPaths: string[];
 } {
   const linkInbound = new Set<NodeId>();
   const linkOutbound = new Set<NodeId>();
@@ -19,23 +23,37 @@ function collectLinkOrphanStats(graph: KnowledgeGraph): {
     linkOutbound.add(edge.from);
     linkInbound.add(edge.to);
   }
-  let linkOrphanCount = 0;
   let linkInboundOrphanCount = 0;
   let linkOutboundOrphanCount = 0;
-  for (const id of graph.nodes.keys()) {
+  const linkOrphanByLayer: Record<string, number> = {};
+  let linkOrphanArchivedCount = 0;
+  const linkOrphanPaths: string[] = [];
+  for (const [id, node] of graph.nodes) {
     const hasIn = linkInbound.has(id);
     const hasOut = linkOutbound.has(id);
-    if (!hasIn && !hasOut) linkOrphanCount++;
     if (!hasIn) linkInboundOrphanCount++;
     if (!hasOut) linkOutboundOrphanCount++;
+    if (hasIn || hasOut) continue;
+    const layerKey = String(node.layer);
+    linkOrphanByLayer[layerKey] = (linkOrphanByLayer[layerKey] ?? 0) + 1;
+    if (node.archived) linkOrphanArchivedCount++;
+    linkOrphanPaths.push(node.path);
   }
-  return { linkOrphanCount, linkInboundOrphanCount, linkOutboundOrphanCount };
+  linkOrphanPaths.sort();
+  return {
+    linkOrphanCount: linkOrphanPaths.length,
+    linkInboundOrphanCount,
+    linkOutboundOrphanCount,
+    linkOrphanByLayer,
+    linkOrphanArchivedCount,
+    linkOrphanPaths,
+  };
 }
 
 export async function handleKgStatus(
   vaultPath: string,
   graph: KnowledgeGraph | null,
-  _input: KgStatusInput,
+  input: KgStatusInput,
 ): Promise<KgStatusResult> {
   const store = new MetadataStore(vaultPath);
 
@@ -76,8 +94,7 @@ export async function handleKgStatus(
   if (crossLayerEdgeCount > 0)
     subLayerDistribution['cross_layer_edges'] = crossLayerEdgeCount;
 
-  const { linkOrphanCount, linkInboundOrphanCount, linkOutboundOrphanCount } =
-    collectLinkOrphanStats(graph);
+  const orphanStats = collectLinkOrphanStats(graph);
 
   return {
     nodeCount: graph.nodeCount,
@@ -91,8 +108,18 @@ export async function handleKgStatus(
       Object.keys(subLayerDistribution).length > 0
         ? subLayerDistribution
         : undefined,
-    linkOrphanCount,
-    linkInboundOrphanCount,
-    linkOutboundOrphanCount,
+    linkOrphanCount: orphanStats.linkOrphanCount,
+    linkInboundOrphanCount: orphanStats.linkInboundOrphanCount,
+    linkOutboundOrphanCount: orphanStats.linkOutboundOrphanCount,
+    linkOrphanByLayer: orphanStats.linkOrphanByLayer,
+    linkOrphanArchivedCount: orphanStats.linkOrphanArchivedCount,
+    ...(input.include_orphan_paths
+      ? {
+          linkOrphanPaths: orphanStats.linkOrphanPaths.slice(
+            0,
+            MAX_LINK_ORPHAN_PATHS,
+          ),
+        }
+      : {}),
   };
 }

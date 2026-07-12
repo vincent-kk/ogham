@@ -189,8 +189,15 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_STATUS,
     {
       description:
-        'Retrieves index status (node count, edge count, stale ratio, freshness). Diagnostic only — not recommended for autonomous LLM use.',
-      inputSchema: z.object({}),
+        'Retrieves index status (node count, edge count, stale ratio, freshness, wikilink-orphan breakdown by layer/archived). Diagnostic only — not recommended for autonomous LLM use.',
+      inputSchema: z.object({
+        include_orphan_paths: z
+          .boolean()
+          .optional()
+          .describe(
+            'Include sorted wikilink-orphan node paths (capped at 200; default false)',
+          ),
+      }),
     },
     async (vaultPath, args) => {
       const graph = await loadGraphIfNeeded(vaultPath);

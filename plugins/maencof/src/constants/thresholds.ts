@@ -2,6 +2,9 @@ export const FULL_REBUILD_THRESHOLD = 0.1;
 
 export const MAX_CROSS_LAYER_EDGES_PER_NODE = 50;
 
+/** kg_status include_orphan_paths 응답의 경로 목록 상한 (정렬 후 절단; 01_Core 가 사전순 선두라 고신호 우선 보존) */
+export const MAX_LINK_ORPHAN_PATHS = 200;
+
 export const STALE_THRESHOLD_PERCENT = 10;
 
 /**

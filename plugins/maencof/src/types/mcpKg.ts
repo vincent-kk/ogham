@@ -61,8 +61,11 @@ export interface KgContextInput {
   scope?: KgContextScope;
 }
 
-/** kg_status 입력 (파라미터 없음) */
-export type KgStatusInput = Record<string, never>;
+/** kg_status 입력 */
+export interface KgStatusInput {
+  /** LINK 고립 노드 경로 목록 포함 여부 (기본 false; MAX_LINK_ORPHAN_PATHS 상한) */
+  include_orphan_paths?: boolean;
+}
 
 /** kg_search 응답 */
 export interface KgSearchResult {
@@ -133,6 +136,16 @@ export interface KgStatusResult {
   linkInboundOrphanCount?: number;
   /** outbound LINK 가 없는 노드 수 (어떤 문서도 가리키지 않음). */
   linkOutboundOrphanCount?: number;
+  /**
+   * LINK 고립 노드의 Layer별 분포 (키: '1'~'5').
+   * L1 고립(정체성 핵심의 그래프 단절)과 L3/L4 raw 클리핑 고립(정상 상태)을
+   * 구분하는 provenance 신호 — 합은 linkOrphanCount.
+   */
+  linkOrphanByLayer?: Record<string, number>;
+  /** LINK 고립 노드 중 아카이브 스텁(frontmatter archived: true) 수 — 링크 부재가 기대 상태인 부분집합. */
+  linkOrphanArchivedCount?: number;
+  /** LINK 고립 노드 경로 목록 (정렬, MAX_LINK_ORPHAN_PATHS 상한) — include_orphan_paths=true 일 때만. */
+  linkOrphanPaths?: string[];
 }
 
 /** kg_suggest_links 입력 */

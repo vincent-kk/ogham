@@ -20,3 +20,10 @@ export const SUBLAYER_DECAY_FACTORS: Record<SubLayer, number> = {
 export const CYCLE_WEIGHT = 0.1;
 
 export const SA_BONUS_WEIGHT = 0.3;
+
+/**
+ * LINK(위키링크) 저장 가중치 하한. SCS 경로 근사는 최상위 폴더를 가로지르는
+ * 위키링크를 0으로 만들지만, 사용자 작성 링크는 최강 신호이므로 폴더 거리와
+ * 무관하게 PageRank·SA 양쪽에서 전파되어야 한다.
+ */
+export const LINK_WEIGHT_FLOOR = 0.5;
