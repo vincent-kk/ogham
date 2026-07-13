@@ -12,6 +12,7 @@
 | `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                                     |
 | `artifactWriter/` | opt-in 마크다운 artifact 미러 (project/user 위치)                                |
 | `agyModels/`      | `agy models` CLI 출력 캐싱 → 사용 가능한 Antigravity 모델 목록 제공              |
+| `codexModels/`    | `codex debug models` 카탈로그 캐싱 → 모델별 지원 effort 집합 제공                |
 | `youtubeMcp/`     | yt-dlp-mcp MCP addon 을 antigravity·codex 에 멱등 등록·해제                      |
 
 ## Conventions

@@ -45,6 +45,17 @@ describe('DEFAULT_CONFIG', () => {
       low: { model: 'sonnet', effort: 'high' },
     });
   });
+
+  // Tiers ride codex's 5.6 split — sol (frontier) for high, terra (balanced) for
+  // mid/low at different efforts.
+  // app.js DEFAULT_CODEX_MODEL_MAP mirrors this value — keep in sync.
+  it('defaults model_map.codex to per-tier {model, effort}', () => {
+    expect(DEFAULT_CONFIG.model_map.codex).toEqual({
+      high: { model: 'gpt-5.6-sol', effort: 'max' },
+      mid: { model: 'gpt-5.6-terra', effort: 'high' },
+      low: { model: 'gpt-5.6-terra', effort: 'medium' },
+    });
+  });
 });
 
 describe('file modes', () => {

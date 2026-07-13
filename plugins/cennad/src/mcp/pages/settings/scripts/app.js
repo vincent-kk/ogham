@@ -27,6 +27,11 @@
     mid: { model: 'opus', effort: 'high' },
     low: { model: 'sonnet', effort: 'high' },
   };
+  var DEFAULT_CODEX_MODEL_MAP = {
+    high: { model: 'gpt-5.6-sol', effort: 'max' },
+    mid: { model: 'gpt-5.6-terra', effort: 'high' },
+    low: { model: 'gpt-5.6-terra', effort: 'medium' },
+  };
   var DEFAULT_YOUTUBE_ADDON = {
     enabled: false,
     language: 'en',
@@ -72,6 +77,17 @@
     sonnet: ['low', 'medium', 'high', 'max'],
     'sonnet[1m]': ['low', 'medium', 'high', 'max'],
     haiku: [],
+  };
+  // Mirror src/constants/codexModels.ts — keep in sync. The live catalog from
+  // /provider-status wins; these sets only cover a codex that cannot be probed.
+  var CODEX_EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'];
+  var CODEX_FALLBACK_MODEL_EFFORT_SETS = {
+    'gpt-5.6-sol': ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'],
+    'gpt-5.6-terra': ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'],
+    'gpt-5.6-luna': ['low', 'medium', 'high', 'xhigh', 'max'],
+    'gpt-5.5': ['low', 'medium', 'high', 'xhigh'],
+    'gpt-5.4': ['low', 'medium', 'high', 'xhigh'],
+    'gpt-5.4-mini': ['low', 'medium', 'high', 'xhigh'],
   };
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
   var RECENCY_LEVELS = ['off', 'auto', 'strict'];
@@ -125,6 +141,16 @@
   var codexSandboxWrap = $('#codex-sandbox-wrap');
   var codexSandboxHint = $('#codex-sandbox-hint');
   var codexFullAccessWarning = $('#codex-full-access-warning');
+  var modelCodex = {
+    high: $('#model-codex-high'),
+    mid: $('#model-codex-mid'),
+    low: $('#model-codex-low'),
+  };
+  var effortCodex = {
+    high: $('#effort-codex-high'),
+    mid: $('#effort-codex-mid'),
+    low: $('#effort-codex-low'),
+  };
 
   // antigravity-specific controls.
   var antigravitySandbox = $('#antigravity-sandbox');
@@ -178,8 +204,14 @@
     claude: 'available',
   };
   var agyModels = [];
+  var codexModels = [];
   var antigravityModelMap = { high: '', mid: '', low: '' };
   var claudeModelMap = {
+    high: { model: '', effort: '' },
+    mid: { model: '', effort: '' },
+    low: { model: '', effort: '' },
+  };
+  var codexModelMap = {
     high: { model: '', effort: '' },
     mid: { model: '', effort: '' },
     low: { model: '', effort: '' },
@@ -725,14 +757,16 @@
     });
   }
 
-  function clampEffort(current, set) {
+  // Keep the closest level at or below the current one when a model switch shrinks
+  // the available set. `scale` orders the provider's levels (codex adds ultra).
+  function clampEffort(current, set, scale) {
     if (set.length === 0) return '';
     if (set.indexOf(current) >= 0) return current;
-    var rank = CLAUDE_EFFORT_LEVELS.indexOf(current);
+    var rank = scale.indexOf(current);
     if (rank < 0) return set[set.length - 1];
     var best = set[0];
     for (var i = 0; i < set.length; i += 1) {
-      if (CLAUDE_EFFORT_LEVELS.indexOf(set[i]) <= rank) best = set[i];
+      if (scale.indexOf(set[i]) <= rank) best = set[i];
     }
     return best;
   }
@@ -751,7 +785,11 @@
       return;
     }
     sel.disabled = false;
-    var pick = clampEffort(claudeModelMap[tier].effort, set);
+    var pick = clampEffort(
+      claudeModelMap[tier].effort,
+      set,
+      CLAUDE_EFFORT_LEVELS,
+    );
     for (var i = 0; i < set.length; i += 1) {
       var o = document.createElement('option');
       o.value = set[i];
@@ -785,6 +823,96 @@
     renderProviderSummary('claude');
   }
 
+  function codexCatalogEntry(slug) {
+    for (var i = 0; i < codexModels.length; i += 1) {
+      if (codexModels[i] && codexModels[i].slug === slug) return codexModels[i];
+    }
+    return null;
+  }
+
+  // An unknown model (custom slug, or a catalog newer than this build) gets the
+  // full scale rather than an empty selector — codex itself is the final arbiter.
+  function codexEffortSet(slug) {
+    var entry = codexCatalogEntry(slug);
+    if (entry && Array.isArray(entry.efforts)) return entry.efforts;
+    return CODEX_FALLBACK_MODEL_EFFORT_SETS[slug] || CODEX_EFFORT_LEVELS;
+  }
+
+  function codexModelSlugs() {
+    if (codexModels.length > 0) {
+      return codexModels
+        .map(function (m) {
+          return m && typeof m.slug === 'string' ? m.slug : '';
+        })
+        .filter(function (slug) {
+          return slug.length > 0;
+        });
+    }
+    return Object.keys(CODEX_FALLBACK_MODEL_EFFORT_SETS);
+  }
+
+  function applyCodexModelTitles(sel) {
+    for (var i = 0; i < sel.options.length; i += 1) {
+      var entry = codexCatalogEntry(sel.options[i].value);
+      if (entry && entry.description) sel.options[i].title = entry.description;
+    }
+    var current = codexCatalogEntry(sel.value);
+    sel.title = current && current.description ? current.description : '';
+  }
+
+  function bindCodexEffortOptions(tier, model) {
+    var sel = effortCodex[tier];
+    if (!sel) return;
+    var set = codexEffortSet(model);
+    while (sel.firstChild) sel.removeChild(sel.firstChild);
+    if (set.length === 0) {
+      var empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = '(no effort)';
+      sel.appendChild(empty);
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = false;
+    var pick = clampEffort(
+      codexModelMap[tier].effort,
+      set,
+      CODEX_EFFORT_LEVELS,
+    );
+    for (var i = 0; i < set.length; i += 1) {
+      var opt = document.createElement('option');
+      opt.value = set[i];
+      opt.textContent = set[i];
+      if (set[i] === pick) opt.selected = true;
+      sel.appendChild(opt);
+    }
+  }
+
+  function bindCodexModelOptions() {
+    var slugs = codexModelSlugs();
+    TIERS.forEach(function (tier) {
+      var sel = modelCodex[tier];
+      if (!sel) return;
+      bindSelectOptions(
+        sel,
+        slugs,
+        codexModelMap[tier].model,
+        '(codex default)',
+      );
+      applyCodexModelTitles(sel);
+      bindCodexEffortOptions(tier, sel.value);
+    });
+  }
+
+  function onCodexModelChange(tier) {
+    var sel = effortCodex[tier];
+    codexModelMap[tier].effort =
+      sel && !sel.disabled ? sel.value : codexModelMap[tier].effort;
+    applyCodexModelTitles(modelCodex[tier]);
+    bindCodexEffortOptions(tier, modelCodex[tier].value);
+    renderProviderSummary('codex');
+  }
+
   function applyModels(raw) {
     var src = raw && typeof raw === 'object' ? raw : {};
     var ag =
@@ -810,8 +938,23 @@
         effort: typeof t.effort === 'string' ? t.effort : '',
       };
     });
+    var cx = src.codex && typeof src.codex === 'object' ? src.codex : {};
+    TIERS.forEach(function (tier) {
+      var t =
+        cx[tier] && typeof cx[tier] === 'object'
+          ? cx[tier]
+          : DEFAULT_CODEX_MODEL_MAP[tier];
+      codexModelMap[tier] = {
+        model:
+          typeof t.model === 'string'
+            ? t.model
+            : DEFAULT_CODEX_MODEL_MAP[tier].model,
+        effort: typeof t.effort === 'string' ? t.effort : '',
+      };
+    });
     bindAgyModelOptions(agyModels);
     bindClaudeModelOptions();
+    bindCodexModelOptions();
   }
 
   function syncYoutubeAddonInert() {
@@ -891,26 +1034,37 @@
     };
   }
 
+  function buildTierConfig(modelSel, effortSel, effortSetFor) {
+    var model = modelSel ? String(modelSel.value || '') : '';
+    var tierCfg = { model: model };
+    var set = effortSetFor(model);
+    if (effortSel && !effortSel.disabled && set.length > 0 && effortSel.value) {
+      tierCfg.effort = effortSel.value;
+    }
+    return tierCfg;
+  }
+
+  function claudeEffortSet(model) {
+    return MODEL_EFFORT_SETS[model] || [];
+  }
+
   function buildModelMap() {
+    var codex = {};
     var claude = {};
     TIERS.forEach(function (tier) {
-      var model = modelClaude[tier]
-        ? String(modelClaude[tier].value || '')
-        : '';
-      var tierCfg = { model: model };
-      var effortSel = effortClaude[tier];
-      var set = MODEL_EFFORT_SETS[model] || [];
-      if (
-        effortSel &&
-        !effortSel.disabled &&
-        set.length > 0 &&
-        effortSel.value
-      ) {
-        tierCfg.effort = effortSel.value;
-      }
-      claude[tier] = tierCfg;
+      codex[tier] = buildTierConfig(
+        modelCodex[tier],
+        effortCodex[tier],
+        codexEffortSet,
+      );
+      claude[tier] = buildTierConfig(
+        modelClaude[tier],
+        effortClaude[tier],
+        claudeEffortSet,
+      );
     });
     return {
+      codex: codex,
       antigravity: {
         high: modelAntigravity.high
           ? String(modelAntigravity.high.value || '')
@@ -1055,7 +1209,9 @@
             : 'unknown';
       });
       agyModels = Array.isArray(body.agyModels) ? body.agyModels : [];
+      codexModels = Array.isArray(body.codexModels) ? body.codexModels : [];
       bindAgyModelOptions(agyModels);
+      bindCodexModelOptions();
     } catch (e) {
       return;
     }
@@ -1143,6 +1299,11 @@
     if (modelClaude[tier]) {
       modelClaude[tier].addEventListener('change', function () {
         onClaudeModelChange(tier);
+      });
+    }
+    if (modelCodex[tier]) {
+      modelCodex[tier].addEventListener('change', function () {
+        onCodexModelChange(tier);
       });
     }
   });

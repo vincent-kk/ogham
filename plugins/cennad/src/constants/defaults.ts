@@ -8,8 +8,8 @@ export const DEFAULT_CONFIG: Config = {
   },
   intervention_strength: 0,
   keywords: {
-    codex: 'code, refactor, sandbox',
-    antigravity: 'research, search, youtube, large-context',
+    codex: 'code, refactor, youtube, create-image',
+    antigravity: 'research, search, large-context',
     claude: 'reasoning, writing, analysis, review',
   },
   option_flags: {
@@ -18,6 +18,13 @@ export const DEFAULT_CONFIG: Config = {
     claude: { permission_mode: 'dontAsk' },
   },
   model_map: {
+    // codex's 5.6 line splits by role: sol = frontier, terra = balanced everyday.
+    // high jumps to sol; mid and low ride terra at different efforts.
+    codex: {
+      high: { model: 'gpt-5.6-sol', effort: 'max' },
+      mid: { model: 'gpt-5.6-terra', effort: 'high' },
+      low: { model: 'gpt-5.6-terra', effort: 'medium' },
+    },
     antigravity: {
       high: 'Gemini 3.1 Pro',
       mid: 'Gemini 3.5 Flash',

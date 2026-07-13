@@ -6,6 +6,7 @@ import {
   type Provider,
   type SessionMeta,
   SessionMetaSchema,
+  type Tier,
 } from '../../../types/index.js';
 import { isoNow } from '../../../utils/isoNow.js';
 import { getProjectHash } from '../../projectHash/index.js';
@@ -17,6 +18,7 @@ export interface CreateSessionInput {
   cwd: string;
   externalSessionRef: string;
   model: string;
+  tier?: Tier;
   options?: Record<string, unknown>;
 }
 
@@ -36,6 +38,7 @@ export async function createSession(
     cwd: input.cwd,
     project_hash: projectHash,
     model: input.model,
+    tier: input.tier,
     options: input.options ?? {},
   });
   await ensureProjectMeta(projectHash, input.cwd, now);

@@ -24,7 +24,7 @@
 ### Always do
 
 - `incrementCounter` 를 dispatch 호출 직전에 +1
-- `createSession` 으로 디스크 메타 영속화
+- `createSession` 으로 디스크 메타 영속화 (해석된 tier 포함 — resume 이 같은 모델로 이어가도록)
 - dispatcher 응답의 `resolvedModel` 우선 저장 (없으면 tier)
 
 ### Ask first

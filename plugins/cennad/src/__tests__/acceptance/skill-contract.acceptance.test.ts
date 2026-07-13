@@ -17,8 +17,11 @@ describe('[acceptance] provider skill contracts', () => {
       expect(skill).toContain(
         'mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt, tier? })',
       );
-      expect(skill).toContain('Pass `tier` when supplied');
+      expect(skill).toContain('Pass `tier` only when the user supplied one');
       expect(skill).not.toContain('Drop `tier`');
+      // Omitting tier on resume must keep the session's model — tiers select a
+      // model now, so falling back to default_tier would switch it mid-thread.
+      expect(skill).toContain('resumes on the model it started with');
     },
   );
 

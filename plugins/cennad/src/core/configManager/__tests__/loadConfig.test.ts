@@ -73,6 +73,11 @@ describe('loadConfig', () => {
         claude: { permission_mode: 'auto' as const },
       },
       model_map: {
+        codex: {
+          high: { model: 'gpt-5.6-sol', effort: 'ultra' as const },
+          mid: { model: 'gpt-5.5', effort: 'xhigh' as const },
+          low: { model: 'gpt-5.4-mini' },
+        },
         antigravity: {
           high: 'Gemini 3.1 Pro',
           mid: 'Claude Sonnet 4.5',

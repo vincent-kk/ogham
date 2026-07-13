@@ -24,7 +24,7 @@ if (mode === 'success') {
   const isResume = args[1] === 'resume';
   const tid = isResume ? args[2] : 'tid-default';
   emit({type:'thread.started', thread_id: tid});
-  emit({type:'item.completed', item:{type:'agent_message', text:'resumed response'}});
+  emit({type:'item.completed', item:{type:'agent_message', text:'resumed response ' + args.join(' ')}});
   process.exit(0);
 } else if (mode === 'auth-stderr') {
   process.stderr.write('HTTP 401\\n');
@@ -152,7 +152,29 @@ describe('handleContinueConversation', () => {
     expect(updated?.turn_count).toBe(1);
   });
 
-  it('accepts an explicit tier for the follow-up turn', async () => {
+  // Tiers now select a model, so falling back to default_tier on resume would switch
+  // models mid-thread. The session's own tier wins unless the caller names one.
+  it("restores the session's tier when the caller omits one", async () => {
+    process.env.CENNAD_FAKE_CODEX_MODE = 'success';
+    const session = await createSession({
+      provider: 'codex',
+      cwd: process.cwd(),
+      externalSessionRef: 'tid-resume',
+      model: 'gpt-5.6-sol',
+      tier: 'high',
+    });
+
+    const result = await handleContinueConversation({
+      session_id: session.session_id,
+      prompt: 'follow up',
+    });
+
+    expect(result.status).toBe('success');
+    expect(result.response).toContain('-m gpt-5.6-sol');
+    expect(result.response).toContain('model_reasoning_effort=max');
+  });
+
+  it('falls back to default_tier for a legacy session with no recorded tier', async () => {
     process.env.CENNAD_FAKE_CODEX_MODE = 'success';
     const session = await createSession({
       provider: 'codex',
@@ -164,9 +186,29 @@ describe('handleContinueConversation', () => {
     const result = await handleContinueConversation({
       session_id: session.session_id,
       prompt: 'follow up',
+    });
+
+    expect(result.status).toBe('success');
+    expect(result.response).toContain('-m gpt-5.6-terra');
+  });
+
+  it('lets an explicit tier override the recorded session tier', async () => {
+    process.env.CENNAD_FAKE_CODEX_MODE = 'success';
+    const session = await createSession({
+      provider: 'codex',
+      cwd: process.cwd(),
+      externalSessionRef: 'tid-resume',
+      model: 'gpt-5.6-luna',
+      tier: 'low',
+    });
+
+    const result = await handleContinueConversation({
+      session_id: session.session_id,
+      prompt: 'follow up',
       tier: 'high',
     });
 
     expect(result.status).toBe('success');
+    expect(result.response).toContain('-m gpt-5.6-sol');
   });
 });

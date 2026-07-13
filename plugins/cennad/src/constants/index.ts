@@ -1,6 +1,7 @@
 export * from './paths.js';
 export * from './defaults.js';
 export * from './claudeModels.js';
+export * from './codexModels.js';
 export * from './errorCodes.js';
 export * from './recencyPromptTokens.js';
 export * from './recencyPromptAuto.js';

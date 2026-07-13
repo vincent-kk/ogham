@@ -16,8 +16,20 @@ describe('SessionMetaSchema', () => {
     options: {},
   };
 
-  it('parses a valid session meta', () => {
+  // `base` carries no tier — that is the legacy shape written before tier was
+  // persisted, and it must still parse so old sessions stay resumable.
+  it('parses a valid session meta, tier absent', () => {
     expect(SessionMetaSchema.parse(base)).toEqual(base);
+  });
+
+  it('carries the tier the session was started with', () => {
+    expect(SessionMetaSchema.parse({ ...base, tier: 'high' }).tier).toBe(
+      'high',
+    );
+  });
+
+  it('rejects an unknown tier', () => {
+    expect(() => SessionMetaSchema.parse({ ...base, tier: 'ultra' })).toThrow();
   });
 
   it('rejects non-uuid session_id', () => {

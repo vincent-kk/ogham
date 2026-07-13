@@ -49,6 +49,7 @@ export const COUNTER_PATH = join(RUNTIME_DIR, 'counter.json');
 export const SETTINGS_SERVER_PATH = join(RUNTIME_DIR, 'settings_server.json');
 export const ANTIGRAVITY_CWD_DIR = join(RUNTIME_DIR, 'antigravity-cwd');
 export const AGY_MODELS_CACHE_PATH = join(RUNTIME_DIR, 'agy-models.json');
+export const CODEX_MODELS_CACHE_PATH = join(RUNTIME_DIR, 'codex-models.json');
 export const ARTIFACTS_DIR_USER = join(CENNAD_HOME, 'artifacts');
 
 export function sessionDir(projectHash: string): string {

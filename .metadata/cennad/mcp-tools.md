@@ -71,17 +71,17 @@ antigravity 의 `sandbox` 는 하위호환용으로 항상 false 취급 — `--s
 z.object({
   session_id: z.string().uuid(),
   prompt: z.string().min(1),
-  tier: z.enum(["high", "mid", "low"]).optional(), // 생략 시 config.default_tier[provider]
+  tier: z.enum(["high", "mid", "low"]).optional(), // 생략 시 SessionMeta.tier → default_tier
 });
 ```
 
-| 인자         | 필수 | 기본값                          |
-| ------------ | ---- | ------------------------------- |
-| `session_id` | O    | —                               |
-| `prompt`     | O    | —                               |
-| `tier`       | X    | `config.default_tier[provider]` |
+| 인자         | 필수 | 기본값                                               |
+| ------------ | ---- | ---------------------------------------------------- |
+| `session_id` | O    | —                                                    |
+| `prompt`     | O    | —                                                    |
+| `tier`       | X    | `SessionMeta.tier` → `config.default_tier[provider]` |
 
-`tier` 는 생략 시 해당 provider 의 `config.default_tier` 가 적용되며, 매 turn 재적용된다 (원 세션 tier 는 복원하지 않는다 — `SessionMeta` 는 구체 모델명을 저장하지 않으므로). start·continue 모두 `tier` 는 optional 이며, 생략 시 동일하게 provider 별 default 로 수렴한다.
+`tier` 는 생략 시 세션을 시작한 tier(`SessionMeta.tier`)를 복원한다. tier 가 모델을 고르므로(`model_map.<provider>`), 복원하지 않고 `default_tier` 로 떨어지면 세션 중간에 모델이 갈린다 — codex 는 `recorded with model X but is resuming with Y` 경고를 낸다. tier 를 기록하지 않은 legacy 세션만 `default_tier` 를 쓴다. 명시하면 그 turn 에서 override 하며, 이 경우 모델이 바뀔 수 있다.
 
 ### 동작
 
@@ -122,7 +122,7 @@ z.object({});
 4. Headless 가 아니면 OS 브라우저 자동 오픈 시도. 실패해도 URL 반환.
 5. 5분 idle / 사용자 "저장 후 닫기" / MCP 종료 시 서버 종료.
 
-설정 UI 는 3 개 레인(codex / antigravity / Anthropic)으로 구성된다. 각 레인은 활성화 토글·weight 슬라이더(정규화 %)를 공통으로 제공하며, codex 는 yolo/sandbox, antigravity 는 skip-permissions·per-tier 모델 드롭다운, claude 는 permission-mode 라디오·per-tier 모델 및 effort 드롭다운(모델별 effort 옵션 연동)을 추가로 제공한다. 각 provider 의 ratio·keywords·option_flags·preamble·recency_factor·counter 를 조정할 수 있다.
+설정 UI 는 3 개 레인(codex / antigravity / Anthropic)으로 구성된다. 각 레인은 활성화 토글·weight 슬라이더(정규화 %)를 공통으로 제공하며, codex 는 yolo/sandbox·per-tier 모델 및 effort 드롭다운(모델별 effort 옵션 연동 — `codex debug models` 카탈로그 기반), antigravity 는 skip-permissions·per-tier 모델 드롭다운, claude 는 permission-mode 라디오·per-tier 모델 및 effort 드롭다운(모델별 effort 옵션 연동)을 추가로 제공한다. 각 provider 의 ratio·keywords·option_flags·preamble·recency_factor·counter 를 조정할 수 있다.
 
 ### 출력
 
@@ -188,7 +188,7 @@ interface ConversationResponse {
 스킬 비경유 LLM 직접 호출을 지원하도록, 도구 description 은 슬림하게 라우팅 핵심만 담고 입력 스키마는 `.describe()` + enum 으로 자기설명적이게 한다.
 
 - `start_conversation`: provider 선택 기준(codex=code/shell, antigravity=Google large-context, claude=Anthropic reasoning/writing/analysis) + self-contained prompt + session_id 반환. tier 는 optional (생략 시 provider 별 default).
-- `continue_conversation`: session_id 로 재개, 동일 cwd(project-scoped) 세션만. optional tier 로 해당 turn 모델 지정 (생략 시 provider 별 default).
+- `continue_conversation`: session_id 로 재개, 동일 cwd(project-scoped) 세션만. optional tier 로 해당 turn 모델 지정 (생략 시 세션 시작 tier 복원 — 모델 유지).
 - `open_settings`: 설정 UI 기동, 인자 없음.
 
 입력 필드는 `.describe()` 로 값의 의미(provider 선택, prompt 자족성, session_id 출처)를 노출한다. 권한 플래그는 description 이 아니라 `config.option_flags` + `/setup` 에서 관리한다.

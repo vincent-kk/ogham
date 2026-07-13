@@ -53,6 +53,28 @@ describe('settings page ratio controls', () => {
     expect(css).toContain('grid-template-columns: minmax(52px, auto) 1fr 1fr');
   });
 
+  it('offers codex per-tier model and effort controls', () => {
+    const html = readSettingsFile('index.html');
+
+    for (const tier of ['high', 'mid', 'low']) {
+      expect(html).toContain(`id="model-codex-${tier}"`);
+      expect(html).toContain(`id="effort-codex-${tier}"`);
+    }
+  });
+
+  // codex hard-fails an effort its model does not advertise, so the effort list
+  // must follow the selected model rather than offering the whole scale.
+  it('scopes codex effort options to the selected model', () => {
+    const app = readSettingsFile('scripts/app.js');
+
+    expect(app).toContain('function codexEffortSet(');
+    expect(app).toContain('CODEX_FALLBACK_MODEL_EFFORT_SETS');
+    expect(app).toContain("'ultra'");
+    expect(app).toContain(
+      'bindCodexEffortOptions(tier, modelCodex[tier].value)',
+    );
+  });
+
   it('describes user artifacts under the cennad data home', () => {
     const html = readSettingsFile('index.html');
 

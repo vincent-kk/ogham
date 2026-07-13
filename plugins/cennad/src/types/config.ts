@@ -6,6 +6,7 @@ import {
   ClaudeFlagsSchema,
   ClaudeModelMapSchema,
   CodexFlagsSchema,
+  CodexModelMapSchema,
   TierModelMapSchema,
 } from './dispatch.js';
 
@@ -50,21 +51,21 @@ export const OptionFlagsSchema = z.object({
 
 export type OptionFlags = z.infer<typeof OptionFlagsSchema>;
 
-// Per-tier model mapping. antigravity serves multiple model families (string
-// map) and claude maps each tier to a {model, effort} pair; codex keeps its
-// env-based modelAlias resolution and needs no map. The tier-map schemas live in
-// dispatch.ts to avoid an import cycle.
+// Per-tier model mapping. antigravity serves multiple model families (plain string
+// map); codex and claude each map a tier to a {model, effort} pair. The tier-map
+// schemas live in dispatch.ts to avoid an import cycle.
 export const ModelMapSchema = z.object({
+  codex: CodexModelMapSchema,
   antigravity: TierModelMapSchema,
   claude: ClaudeModelMapSchema,
 });
 
 export type ModelMap = z.infer<typeof ModelMapSchema>;
 
-// Per-provider default tier, applied when a dispatch omits an explicit tier
-// (start_conversation's optional tier; continue_conversation, which never
-// restores the original session tier). Per-provider because cost / rate-limit
-// characteristics differ across providers.
+// Per-provider default tier, applied when a dispatch omits an explicit tier and no
+// session tier is on record (start_conversation's optional tier; a legacy session
+// written before tier was persisted). continue_conversation prefers the session's
+// own tier. Per-provider because cost / rate-limit characteristics differ.
 export const DefaultTierSchema = z.object({
   codex: TierSchema,
   antigravity: TierSchema,

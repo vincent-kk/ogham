@@ -20,6 +20,35 @@ export const CodexFlagsSchema = z.object({
 });
 export type CodexFlags = z.infer<typeof CodexFlagsSchema>;
 
+// codex reasoning-effort scale, ordered. Which levels a model accepts differs per
+// model (only gpt-5.6-sol/terra reach ultra), and codex rejects an unadvertised
+// effort with a hard API error rather than downgrading it — so effort must always
+// be resolved together with a model.
+export const CodexEffortSchema = z.enum([
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'max',
+  'ultra',
+]);
+export type CodexEffort = z.infer<typeof CodexEffortSchema>;
+
+// Per-tier {model, effort}. An empty model or an omitted effort sends no flag for
+// that dimension, leaving it to the user's ~/.codex/config.toml.
+export const CodexTierConfigSchema = z.object({
+  model: z.string(),
+  effort: CodexEffortSchema.optional(),
+});
+export type CodexTierConfig = z.infer<typeof CodexTierConfigSchema>;
+
+export const CodexModelMapSchema = z.object({
+  high: CodexTierConfigSchema,
+  mid: CodexTierConfigSchema,
+  low: CodexTierConfigSchema,
+});
+export type CodexModelMap = z.infer<typeof CodexModelMapSchema>;
+
 export const AntigravityFlagsSchema = z.object({
   // Forced off while agy #76 (non-TTY output drop) is unfixed — the --sandbox
   // wiring is commented out in buildStartArgs/buildResumeArgs to restore later.

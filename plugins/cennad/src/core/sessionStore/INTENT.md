@@ -16,6 +16,7 @@
 ## Conventions
 
 - 디스크 JSON 키는 snake_case (`session_id`, `project_hash`, `turn_count`, `last_used_at`)
+- `tier` 는 세션을 시작한 tier 를 기록한다(기록 전 legacy 세션은 없음) — `continue_conversation` 이 모델 유지를 위해 복원
 - `getSession` 은 `projectHash` 불일치 시 항상 `null` — fallback 검색 금지
 - TTL 기준은 `constants/defaults.ts` 의 `SESSION_TTL_MS` 단독 신뢰
 - 모든 write 는 `atomicWrite` 경유; `sessionId` 는 `node:crypto` `randomUUID`

@@ -25,7 +25,7 @@ Delegate to the Antigravity CLI (`agy`) through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--tier high|mid|low` — optional; omit to use the provider's configured default tier (set via `/setup`). If given: `mid` for normal work, `low` for clearly simple tasks, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
+- `--tier high|mid|low` — optional. For a new session, omitting it uses the provider's configured default tier (set via `/setup`); with `--continue`, omitting it keeps the tier — and therefore the model — the session started with. If given: `mid` for normal work, `low` for clearly simple tasks, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 - `--no-refine` — optional; disable the refinement loop below and return the first response as-is (a single dispatch).
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
@@ -33,7 +33,7 @@ Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping 
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt, tier? })`. Pass `tier` when supplied; otherwise omit it to use the provider's currently configured default.
+- With `--continue <session_id>` → `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt, tier? })`. Pass `tier` only when the user supplied one; otherwise omit it so the session resumes on the model it started with.
 - Otherwise → `mcp__plugin_cennad_tools__start_conversation({ provider: 'antigravity', prompt, tier? })`. `tier` is optional — omit to use the configured default; if given, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 
 ## Response handling

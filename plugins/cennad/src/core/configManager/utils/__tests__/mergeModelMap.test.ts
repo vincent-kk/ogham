@@ -14,11 +14,12 @@ describe('mergeModelMap', () => {
     expect(mergeModelMap(null)).toEqual(defaults);
   });
 
-  it('preserves a fully-specified antigravity map and fills claude defaults', () => {
+  it('preserves a fully-specified antigravity map and fills codex/claude defaults', () => {
     const raw = {
       antigravity: { high: 'ModelA', mid: 'ModelB', low: 'ModelC' },
     };
     expect(mergeModelMap(raw)).toEqual({
+      codex: defaults.codex,
       antigravity: { high: 'ModelA', mid: 'ModelB', low: 'ModelC' },
       claude: defaults.claude,
     });
@@ -77,6 +78,43 @@ describe('mergeModelMap', () => {
     const raw = { claude: { high: { effort: 'max' } } };
     const result = mergeModelMap(raw) as typeof defaults;
     expect(result.claude.high).toEqual(defaults.claude.high);
+  });
+
+  it('merges a fully-specified codex tier {model, effort}', () => {
+    const raw = {
+      codex: {
+        high: { model: 'gpt-5.6-terra', effort: 'ultra' },
+        mid: { model: 'gpt-5.5', effort: 'xhigh' },
+        low: { model: 'gpt-5.4-mini' },
+      },
+    };
+    const result = mergeModelMap(raw) as typeof defaults;
+    expect(result.codex.high).toEqual({
+      model: 'gpt-5.6-terra',
+      effort: 'ultra',
+    });
+    expect(result.codex.mid).toEqual({ model: 'gpt-5.5', effort: 'xhigh' });
+  });
+
+  it('does not inherit default effort for a codex tier that omits effort', () => {
+    const raw = { codex: { low: { model: 'gpt-5.4-mini' } } };
+    const result = mergeModelMap(raw) as typeof defaults;
+    expect(result.codex.low).toEqual({ model: 'gpt-5.4-mini' });
+    expect(result.codex.low).not.toHaveProperty('effort');
+  });
+
+  it('fills missing codex tiers from defaults when only one tier is provided', () => {
+    const raw = { codex: { high: { model: 'gpt-5.5', effort: 'xhigh' } } };
+    const result = mergeModelMap(raw) as typeof defaults;
+    expect(result.codex.high).toEqual({ model: 'gpt-5.5', effort: 'xhigh' });
+    expect(result.codex.mid).toEqual(defaults.codex.mid);
+    expect(result.codex.low).toEqual(defaults.codex.low);
+  });
+
+  it('falls back to the default codex tier when a tier lacks a string model', () => {
+    const raw = { codex: { high: { effort: 'ultra' } } };
+    const result = mergeModelMap(raw) as typeof defaults;
+    expect(result.codex.high).toEqual(defaults.codex.high);
   });
 
   it('does not mutate DEFAULT_CONFIG.model_map', () => {

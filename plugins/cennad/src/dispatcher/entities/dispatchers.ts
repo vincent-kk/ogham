@@ -3,11 +3,12 @@ import type {
   ClaudeFlags,
   ClaudeModelMap,
   CodexFlags,
+  CodexModelMap,
   Dispatcher,
 } from '../../types/index.js';
 
 export interface Dispatchers {
-  codex: Dispatcher<CodexFlags>;
+  codex: Dispatcher<CodexFlags, CodexModelMap>;
   antigravity: Dispatcher<AntigravityFlags>;
   claude: Dispatcher<ClaudeFlags, ClaudeModelMap>;
 }

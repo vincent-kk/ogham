@@ -76,9 +76,14 @@ export async function handleContinueConversation(
     preamble: config.preamble[session.provider],
     recencyLevel: config.recency_factor[session.provider],
   });
+  // Prefer the session's own tier over default_tier: tiers now select a model, so
+  // falling back to the default would switch models mid-thread (codex warns and can
+  // lose continuity). An explicit tier still overrides.
+  const tier: Tier =
+    input.tier ?? session.tier ?? config.default_tier[session.provider];
   const base = {
     prompt: composedPrompt,
-    tier: input.tier ?? config.default_tier[session.provider],
+    tier,
     options: {},
     sessionId: session.session_id,
     cwd: session.cwd,
@@ -96,6 +101,7 @@ export async function handleContinueConversation(
     result = await dispatchers.codex.resume({
       ...base,
       flags: config.option_flags.codex,
+      modelMap: config.model_map.codex,
     });
   else if (session.provider === 'claude')
     result = await dispatchers.claude.resume({

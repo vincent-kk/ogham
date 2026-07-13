@@ -75,6 +75,7 @@ export async function handleStartConversation(
     result = await dispatchers.codex.start({
       ...base,
       flags: config.option_flags.codex,
+      modelMap: config.model_map.codex,
     });
   else if (input.provider === 'antigravity')
     result = await dispatchers.antigravity.start({
@@ -112,6 +113,7 @@ export async function handleStartConversation(
     cwd,
     externalSessionRef: result.externalSessionRef,
     model: result.resolvedModel ?? tier,
+    tier,
     options,
   });
 

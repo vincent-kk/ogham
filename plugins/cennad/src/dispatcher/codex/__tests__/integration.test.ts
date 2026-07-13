@@ -8,7 +8,11 @@ import {
   it,
 } from 'vitest';
 
-import type { CodexFlags, DispatchOptions } from '../../../types/index.js';
+import type {
+  CodexFlags,
+  CodexModelMap,
+  DispatchOptions,
+} from '../../../types/index.js';
 import {
   installFakeBinary,
   prependToPath,
@@ -68,7 +72,7 @@ beforeEach(() => {
   delete process.env.CENNAD_FAKE_CODEX_THREAD;
 });
 
-function baseOptions(): DispatchOptions<CodexFlags> {
+function baseOptions(): DispatchOptions<CodexFlags, CodexModelMap> {
   return {
     prompt: 'hello',
     tier: 'mid',

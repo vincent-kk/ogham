@@ -29,6 +29,7 @@ active home 의 `config.json` 에 수행된다.
 └── runtime/                           # 휘발성. 재시작 시 정리 가능.
     ├── counter.json
     ├── agy-models.json                # antigravity 모델 목록 캐시 (1시간 TTL)
+    ├── codex-models.json              # codex 모델 카탈로그 캐시 (1시간 TTL)
     ├── settings_server.json           # web UI 동작 중일 때만
     └── antigravity-cwd/               # antigravity dispatcher 작업 디렉토리
         └── <session_id>/
@@ -102,11 +103,14 @@ interface SessionMeta {
   cwd: string; // 원본 절대 경로 (project_hash 검증용)
   project_hash: string; // sha256(cwd).slice(0, 12) — 빠른 매칭
   model: string; // 해결된 모델 ID
+  tier?: "high" | "mid" | "low"; // 세션을 시작한 tier (기록 전 legacy 세션은 없음)
   options: Record<string, unknown>; // start 시 전달된 options 원본 (감사용)
 }
 ```
 
 `turn_count` 는 `continue_conversation` 호출마다 +1, `start_conversation` 시 1로 초기화.
+
+`tier` 는 `start_conversation` 이 해석한 tier 를 기록한다. tier 가 모델을 고르므로(`model_map.<provider>`), `continue_conversation` 은 tier 를 생략한 호출에서 이 값을 복원해 같은 모델로 재개한다 — 복원하지 않으면 `default_tier` 로 떨어져 세션 중간에 모델이 갈린다(codex 는 `recorded with model X but is resuming with Y` 경고). tier 가 없는 legacy 세션만 `default_tier` 를 쓴다.
 
 antigravity 의 `external_session_ref` 는 `runtime/antigravity-cwd/<session_id>/` 절대 경로다. agy 는 headless 대화 ID 를 발행하지 않으므로(Issue #7), 격리된 cwd 가 세션의 durable 핸들로 사용된다.
 
@@ -146,6 +150,22 @@ interface AgyModelsCache {
 ```
 
 `core/agyModels` 가 관리. TTL 은 1시간이며, TTL 이내이면 캐시를 반환하고 만료 시 `agy models` 를 재실행한다. 재실행 실패 시 stale 캐시로 폴백하며, 캐시도 없으면 빈 배열을 반환한다. settings UI 의 `/provider-status` 웹 라우트가 `getAvailableModels` 를 직접 호출해 이 캐시를 통해 모델 목록을 노출한다.
+
+## `runtime/codex-models.json`
+
+```typescript
+interface CodexModelsCache {
+  models: {
+    slug: string; // 예: gpt-5.6-sol
+    efforts: CodexEffort[]; // 그 모델이 광고한 effort 집합
+    default_effort?: CodexEffort;
+    description?: string; // settings UI 툴팁
+  }[];
+  fetched_at: number; // Unix ms timestamp
+}
+```
+
+`core/codexModels` 가 관리. TTL 1시간, 만료 시 `codex debug models` 를 재실행한다. 실패 시 stale 캐시 → `constants/codexModels.ts` 의 정적 fallback 순으로 폴백한다 (빈 배열이 아니라 정적 목록 — settings UI 가 항상 선택지를 갖도록). `visibility !== 'list'` 이거나 `supported_in_api === false` 인 항목은 제외한다. `/provider-status` 가 `getCodexModels` 를 직접 호출해 `codexModels` 배열로 노출하며, UI 는 이를 per-tier model / effort 드롭다운에 바인딩한다.
 
 ## `runtime/settings_server.json`
 
@@ -192,7 +212,7 @@ agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 3. 비어버린 `sessions/<project_hash>/` 디렉토리는 `_meta.json` 만 남으면 함께 제거.
 4. **외부 CLI 자체 세션 파일은 손대지 않는다** — `$CODEX_HOME/sessions/` 등. cennad 는 자신의 매핑만 제거하며, 외부 CLI 의 자체 관리(TTL, 명시 삭제 명령 등)에 위임한다.
 
-`runtime/counter.json`, `runtime/agy-models.json`, `runtime/settings_server.json` 은 별도 정리 안 함 (재기동 시 자동 갱신).
+`runtime/counter.json`, `runtime/agy-models.json`, `runtime/codex-models.json`, `runtime/settings_server.json` 은 별도 정리 안 함 (재기동 시 자동 갱신).
 
 ## 권한
 

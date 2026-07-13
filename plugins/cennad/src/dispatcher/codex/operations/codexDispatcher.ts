@@ -1,5 +1,6 @@
 import type {
   CodexFlags,
+  CodexModelMap,
   ConversationOptions,
   DispatchOptions,
   DispatchResult,
@@ -10,13 +11,17 @@ import { buildResumeArgs } from '../utils/buildResumeArgs.js';
 import { buildStartArgs } from '../utils/buildStartArgs.js';
 import { dispatch } from '../utils/dispatch.js';
 
+import { resolveCodexTier } from './resolveTier.js';
+
 const supportedOptions: ReadonlySet<keyof ConversationOptions> = new Set();
 
-export const codexDispatcher: Dispatcher<CodexFlags> = {
+export const codexDispatcher: Dispatcher<CodexFlags, CodexModelMap> = {
   supportedOptions,
-  async start(args: DispatchOptions<CodexFlags>): Promise<DispatchResult> {
+  async start(
+    args: DispatchOptions<CodexFlags, CodexModelMap>,
+  ): Promise<DispatchResult> {
     return dispatch({
-      argv: buildStartArgs(args),
+      argv: buildStartArgs(args, resolveCodexTier(args.tier, args.modelMap)),
       cwd: args.cwd,
       options: args.options,
       existingRef: null,
@@ -25,10 +30,10 @@ export const codexDispatcher: Dispatcher<CodexFlags> = {
     });
   },
   async resume(
-    args: DispatchResumeOptions<CodexFlags>,
+    args: DispatchResumeOptions<CodexFlags, CodexModelMap>,
   ): Promise<DispatchResult> {
     return dispatch({
-      argv: buildResumeArgs(args),
+      argv: buildResumeArgs(args, resolveCodexTier(args.tier, args.modelMap)),
       cwd: args.cwd,
       options: args.options,
       existingRef: args.externalSessionRef,

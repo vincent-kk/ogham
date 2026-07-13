@@ -239,6 +239,30 @@
                     environment.</span
                   >
                 </div>
+                <div class="tier-model-map">
+                  <p class="flag-field-label">per-tier model &amp; effort</p>
+                  <p class="flag-hint">
+                    Map each tier to a model and reasoning effort. Models come
+                    from <code>codex debug models</code>, and effort options
+                    adapt to the model — codex rejects an effort the model does
+                    not advertise instead of downgrading it.
+                  </p>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-codex-high">high</label>
+                    <select id="model-codex-high" class="tier-select"></select>
+                    <select id="effort-codex-high" class="tier-select"></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-codex-mid">mid</label>
+                    <select id="model-codex-mid" class="tier-select"></select>
+                    <select id="effort-codex-mid" class="tier-select"></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-codex-low">low</label>
+                    <select id="model-codex-low" class="tier-select"></select>
+                    <select id="effort-codex-low" class="tier-select"></select>
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -2,17 +2,29 @@ import { describe, expect, it } from 'vitest';
 
 import type {
   CodexFlags,
+  CodexModelMap,
   DispatchOptions,
   DispatchResumeOptions,
   Tier,
 } from '../../../types/index.js';
+import { resolveCodexTier } from '../operations/resolveTier.js';
 import { buildResumeArgs } from '../utils/buildResumeArgs.js';
 import { buildStartArgs } from '../utils/buildStartArgs.js';
 
 const READ_ONLY: CodexFlags = { yolo: false, sandbox: 'read-only' };
 
-function startArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
-  const opts: DispatchOptions<CodexFlags> = {
+const MODEL_MAP: CodexModelMap = {
+  high: { model: 'gpt-5.6-sol', effort: 'max' },
+  mid: { model: 'gpt-5.6-terra', effort: 'medium' },
+  low: { model: 'gpt-5.6-luna', effort: 'medium' },
+};
+
+function startWith(
+  flags: CodexFlags,
+  tier: Tier,
+  modelMap: CodexModelMap | undefined,
+): string[] {
+  const opts: DispatchOptions<CodexFlags, CodexModelMap> = {
     prompt: 'hi',
     tier,
     options: {},
@@ -20,12 +32,17 @@ function startArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
     cwd: '/tmp',
     flags,
     spawnTimeoutMs: 10000,
+    modelMap,
   };
-  return buildStartArgs(opts);
+  return buildStartArgs(opts, resolveCodexTier(tier, modelMap));
 }
 
-function resumeArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
-  const opts: DispatchResumeOptions<CodexFlags> = {
+function resumeWith(
+  flags: CodexFlags,
+  tier: Tier,
+  modelMap: CodexModelMap | undefined,
+): string[] {
+  const opts: DispatchResumeOptions<CodexFlags, CodexModelMap> = {
     prompt: 'hi',
     tier,
     options: {},
@@ -34,8 +51,17 @@ function resumeArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
     flags,
     externalSessionRef: 'thread-id',
     spawnTimeoutMs: 10000,
+    modelMap,
   };
-  return buildResumeArgs(opts);
+  return buildResumeArgs(opts, resolveCodexTier(tier, modelMap));
+}
+
+function startArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
+  return startWith(flags, tier, MODEL_MAP);
+}
+
+function resumeArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
+  return resumeWith(flags, tier, MODEL_MAP);
 }
 
 describe('codex buildStartArgs', () => {
@@ -76,22 +102,51 @@ describe('codex buildStartArgs', () => {
     expect(args[args.length - 1]).toBe('hi');
   });
 
-  it('maps concrete tiers to -c model_reasoning_effort=<level>', () => {
-    const high = startArgs(READ_ONLY, 'high');
-    const i = high.indexOf('-c');
-    expect(i).toBeGreaterThanOrEqual(0);
-    expect(high[i + 1]).toBe('model_reasoning_effort=high');
-    expect(startArgs(READ_ONLY, 'mid')).toContain(
-      'model_reasoning_effort=medium',
+  it('sends the tier model with -m and its effort with -c', () => {
+    const args = startArgs(READ_ONLY, 'high');
+    const model = args.indexOf('-m');
+    const config = args.indexOf('-c');
+    expect(args[model + 1]).toBe('gpt-5.6-sol');
+    expect(args[config + 1]).toBe('model_reasoning_effort=max');
+  });
+
+  it('gives each tier its own model and effort', () => {
+    expect(startArgs(READ_ONLY, 'mid')).toEqual(
+      expect.arrayContaining([
+        'gpt-5.6-terra',
+        'model_reasoning_effort=medium',
+      ]),
     );
-    expect(startArgs(READ_ONLY, 'low')).toContain('model_reasoning_effort=low');
+    expect(startArgs(READ_ONLY, 'low')).toEqual(
+      expect.arrayContaining(['gpt-5.6-luna', 'model_reasoning_effort=medium']),
+    );
+  });
+
+  it('omits -m and -c with no model map, deferring to ~/.codex/config.toml', () => {
+    const args = startWith(READ_ONLY, 'high', undefined);
+    expect(args).not.toContain('-m');
+    expect(args).not.toContain('-c');
+  });
+
+  it('omits -c when a tier configures a model but no effort', () => {
+    const args = startWith(READ_ONLY, 'high', {
+      ...MODEL_MAP,
+      high: { model: 'gpt-5.5' },
+    });
+    expect(args).toContain('gpt-5.5');
+    expect(args).not.toContain('-c');
   });
 });
 
 describe('codex buildResumeArgs', () => {
-  it('always includes exec resume + --json', () => {
+  it('always includes exec resume + --skip-git-repo-check + --json', () => {
     const args = resumeArgs(READ_ONLY);
-    expect(args.slice(0, 3)).toEqual(['exec', 'resume', '--json']);
+    expect(args.slice(0, 4)).toEqual([
+      'exec',
+      'resume',
+      '--skip-git-repo-check',
+      '--json',
+    ]);
   });
 
   it('does not emit yolo / sandbox flags regardless of flags', () => {
@@ -105,9 +160,15 @@ describe('codex buildResumeArgs', () => {
     expect(args.slice(-2)).toEqual(['thread-id', 'hi']);
   });
 
-  it('injects the effort override for concrete tiers', () => {
+  it('carries the tier model and effort into the resumed turn', () => {
     const args = resumeArgs(READ_ONLY, 'high');
-    expect(args).toContain('-c');
-    expect(args).toContain('model_reasoning_effort=high');
+    expect(args).toEqual(
+      expect.arrayContaining([
+        '-m',
+        'gpt-5.6-sol',
+        '-c',
+        'model_reasoning_effort=max',
+      ]),
+    );
   });
 });

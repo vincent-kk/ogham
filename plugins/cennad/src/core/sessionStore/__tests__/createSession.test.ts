@@ -95,4 +95,27 @@ describe('createSession', () => {
     });
     expect(meta.options).toEqual({});
   });
+
+  // Recorded so continue_conversation can resume on the same model instead of
+  // falling back to default_tier and switching models mid-thread.
+  it('records the tier the session was started with', async () => {
+    const meta = await createSession({
+      provider: 'codex',
+      cwd: '/proj/f',
+      externalSessionRef: 'thread-uuid',
+      model: 'gpt-5.6-sol',
+      tier: 'high',
+    });
+    expect(meta.tier).toBe('high');
+  });
+
+  it('omits tier when the caller supplies none', async () => {
+    const meta = await createSession({
+      provider: 'codex',
+      cwd: '/proj/g',
+      externalSessionRef: 'thread-uuid',
+      model: 'gpt-5',
+    });
+    expect(meta.tier).toBeUndefined();
+  });
 });

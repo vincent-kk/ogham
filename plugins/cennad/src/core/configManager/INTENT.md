@@ -8,7 +8,7 @@
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | `operations/loadConfig.ts`·`saveConfig.ts` | load: active read + optional read-only fallback + mergeWithDefaults + Zod · save: ConfigSchema.parse 재검증 후 atomicWrite |
 | `utils/mergeWithDefaults.ts`               | raw 객체와 DEFAULT_CONFIG deep merge (전 pipeline 조율)                                                                    |
-| `utils/mergeModelMap.ts`                   | raw model_map + defaults 병합 (antigravity tier 해석용)                                                                    |
+| `utils/mergeModelMap.ts`                   | raw model_map + defaults 병합 (codex·claude tier `{model,effort}`, antigravity tier 모델명)                                |
 | `utils/mergeDefaultTier.ts`                | raw default_tier + DEFAULT_CONFIG.default_tier provider별 병합                                                             |
 | `utils/mergePreamble.ts`                   | raw → PreambleConfig (provider별 문자열, 기본값 fallback)                                                                  |
 | `utils/mergeRecencyFactor.ts`              | raw → RecencyFactorConfig (off/auto/strict 검증)                                                                           |

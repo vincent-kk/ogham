@@ -64,26 +64,41 @@ v1 에서 세 provider 모두 `supportedOptions` 가 비어 있다. 사용자가
 
 ### Resume
 
-- `codex exec resume --json [-c model_reasoning_effort=<v>] <externalSessionRef> <prompt>`.
-- Resume 은 `--sandbox`, `--search`, `--cd` 를 받지 않는다 (codex 0.132). dispatcher 가 자동으로 플래그를 제거.
+- `codex exec resume --skip-git-repo-check --json [-m <model>] [-c model_reasoning_effort=<v>] <externalSessionRef> <prompt>`.
+- Resume 은 `--sandbox`, `--search`, `--cd` 를 받지 않는다. dispatcher 가 자동으로 플래그를 제거.
+- `--skip-git-repo-check` 는 resume 에도 필요하다 — 없으면 codex 가 trusted 로 기록하지 않은 디렉터리에서 실행을 거부하므로, start 는 성공한 세션이 continue 에서 실패한다.
+- tier 를 바꿔 resume 하면 모델이 바뀌고 codex 가 `This session was recorded with model X but is resuming with Y` 경고를 낸다(실행 자체는 진행). 그래서 `continue_conversation` 은 tier 생략 시 `SessionMeta.tier` 를 복원해 같은 모델로 이어간다 — `default_tier` 로 떨어지는 것은 tier 를 기록하지 않은 legacy 세션뿐이다.
 
-### Tier 매핑 — `dispatcher/codex/operations/reasoningEffort.ts`
+### Tier 매핑 — `dispatcher/codex/operations/resolveTier.ts`
 
-codex 는 단일 코딩 모델(`codex debug models` 기준 기본 `medium`)을 쓰고, tier 는 모델명이 아니라 reasoning effort 로 매핑한다.
+tier 는 `config.model_map.codex` 의 `{model, effort}` 쌍으로 해석된다. env override `CENNAD_CODEX_<TIER>_MODEL` / `CENNAD_CODEX_<TIER>_EFFORT` 가 config 보다 우선한다.
 
 ```typescript
-function resolveCodexEffort(tier: Tier): string | null {
-  switch (tier) {
-    case Tier.High:
-      return "high";
-    case Tier.Mid:
-      return "medium";
-    case Tier.Low:
-      return "low";
-  }
-}
-// effort → `-c model_reasoning_effort=<effort>` 로 주입한다.
+function resolveCodexTier(
+  tier: Tier,
+  map: CodexModelMap | undefined,
+): { model?: string; effort?: string };
+// model → `-m <model>`, effort → `-c model_reasoning_effort=<effort>` 로 주입.
+// 미해결 차원은 플래그를 생략해 사용자 `~/.codex/config.toml` 이 결정하게 둔다.
 ```
+
+effort 스케일은 `low < medium < high < xhigh < max < ultra` 이며 **지원 집합은 모델마다 다르다** — `ultra` 는 `gpt-5.6-sol`/`gpt-5.6-terra` 전용이고 `gpt-5.5`/`gpt-5.4` 계열은 `xhigh` 가 상한이다. claude-code 와 달리 codex 는 미지원 effort 를 조용히 낮추지 않고 `invalid_request_error` 로 실패시키므로, 모델과 effort 는 반드시 짝으로 해석하고 settings UI 가 모델별 선택지를 제한한다.
+
+기본 매핑은 frontier 모델을 `high` 에만 할당하고, `mid` 와 `low` 는 같은 balanced 모델(`gpt-5.6-terra`)을 effort 로 가른다.
+
+| tier   | 기본 모델       | 기본 effort | 역할                   |
+| ------ | --------------- | ----------- | ---------------------- |
+| `high` | `gpt-5.6-sol`   | `max`       | frontier               |
+| `mid`  | `gpt-5.6-terra` | `high`      | balanced everyday work |
+| `low`  | `gpt-5.6-terra` | `medium`    | 동일 모델, 낮은 effort |
+
+### core/codexModels — 모델 카탈로그 캐시
+
+`codex debug models` 결과를 1시간 TTL 캐시(`<CENNAD_HOME>/runtime/codex-models.json`)로 관리.
+
+- `getCodexModels()`: 캐시 유효 시 반환, 만료 시 `refreshCodexModels()` 호출. 실패 시 stale 캐시 → `constants/codexModels.ts` 의 정적 fallback 순으로 degradation (빈 배열이 아니라 정적 목록 — UI 가 항상 선택지를 갖도록).
+- `parseCodexModels`: `visibility !== 'list'` 또는 `supported_in_api === false` 항목을 제외하고 `supported_reasoning_levels[].effort` 를 추출. 카탈로그 순서(codex `priority`, frontier 우선)를 보존한다.
+- settings UI 의 `/provider-status` 가 `codexModels` 배열로 서빙 → per-tier model / effort 드롭다운을 동적 바인딩한다.
 
 ## Antigravity dispatcher
 
