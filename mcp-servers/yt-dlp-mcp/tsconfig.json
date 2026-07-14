@@ -8,7 +8,6 @@
     "types": ["node"],
     "composite": false,
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

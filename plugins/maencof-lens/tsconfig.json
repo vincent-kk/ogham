@@ -3,7 +3,6 @@
   "compilerOptions": {
     "types": ["node"],
     "composite": false,
-    "baseUrl": ".",
     "paths": {
       "@ogham/maencof": ["../maencof/src/index.ts"]
     }
