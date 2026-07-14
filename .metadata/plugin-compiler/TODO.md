@@ -4,15 +4,15 @@
 
 ## 지금 상태 — 한 눈에
 
-| 단계                            | 상태                                                                  |
-| ------------------------------- | --------------------------------------------------------------------- |
-| **Stage 1** 실측 게이트 G1–G8   | ✅ **전부 종료** (아래 표)                                            |
-| **Phase A** 어댑터 정정         | ✅ 완료 (`42d5d898`)                                                  |
-| **Phase B** CI·README 배선      | ✅ 완료 (`42d5d898`)                                                  |
-| **Phase C** 정본 런타임 — 경로  | ✅ 완료 (main `77825966` — Vincent 님이 별도 진행)                    |
-| **Phase C4** 정본 런타임 — 규칙 | ⬜ **다음 작업** → [stage4-rules-channel.md](./stage4-rules-channel.md) |
-| **Phase D/E** agy·Codex 심화    | ⬜ 선택 → [backlog-d-e.md](./backlog-d-e.md)                          |
-| main 머지 · GitHub 경유 설치 확인 | ⬜ (아래 "머지 전 주의" 필독)                                        |
+| 단계                              | 상태                                                                    |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| **Stage 1** 실측 게이트 G1–G8     | ✅ **전부 종료** (아래 표)                                              |
+| **Phase A** 어댑터 정정           | ✅ 완료 (`42d5d898`)                                                    |
+| **Phase B** CI·README 배선        | ✅ 완료 (`42d5d898`)                                                    |
+| **Phase C** 정본 런타임 — 경로    | ✅ 완료 (main `77825966` — Vincent 님이 별도 진행)                      |
+| **Phase C4** 정본 런타임 — 규칙   | ⬜ **다음 작업** → [stage4-rules-channel.md](./stage4-rules-channel.md) |
+| **Phase D/E** agy·Codex 심화      | ⬜ 선택 → [backlog-d-e.md](./backlog-d-e.md)                            |
+| main 머지 · GitHub 경유 설치 확인 | ⬜ (아래 "머지 전 주의" 필독)                                           |
 
 **전체 계획 정본: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 
@@ -35,16 +35,16 @@ plugins/<n>/mcp_config.json           × 9   ← agy MCP (상대 args + OGHAM_HO
 
 ## 게이트 결과 (Stage 1 — 전부 종료)
 
-| #      | 결과                                                                                                                                       |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| #      | 결과                                                                                                                                               |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **G1** | 도구명 `mcp__<server>__<tool>` · **플러그인 스코프 없음** ⇒ 서버명 오버라이드 필수. **`cwd` 누락 블로커 발견·수정**(안 고쳤으면 MCP 9종 무음 사망) |
-| **G2** | 신뢰된 훅은 헤드리스 `codex exec` 에서 발화하고 주입 문구가 모델에 도달. **미신뢰 훅은 경고 없이 조용히 스킵** ⇒ cennad 위임 경로 주의     |
-| **G3** | `plugin add` 는 enabled 만 · 첫 TUI 진입에서 trust 게이트 · `trusted_hash` 고정 · **"changed"** 가 재신뢰 트리거                           |
-| **G4** | agy 상대 args 는 정상 해석. **위치**가 문제 — `agy plugin install` 이 넣는 곳에선 MCP 가 안 뜨고 `.agents/plugins/` 에서만 뜬다            |
-| **G5** | agy 가 Claude 훅 포맷을 훅 이름 `"hooks"` 로 오독 → 파싱 실패 → **훅 0개 로드**                                                            |
-| **G6** | 스킬은 `<plugin>:<skill>` 로 정상 주입. 단 본문 full-form 도구명과 실제 Codex 도구명 **불일치 확정**                                       |
-| **G7** | Codex MCP 는 프로젝트 좌표를 잃는다(MCP `roots` 도 불가) → hostPaths 헬퍼로 해소됨                                                          |
-| **G8** | `~/.codex/rules` 는 **커맨드 승인 allowlist** 였다. 지침 채널은 **`AGENTS.md`**(루트·전역 둘 다 주입·중첩)                                 |
+| **G2** | 신뢰된 훅은 헤드리스 `codex exec` 에서 발화하고 주입 문구가 모델에 도달. **미신뢰 훅은 경고 없이 조용히 스킵** ⇒ cennad 위임 경로 주의             |
+| **G3** | `plugin add` 는 enabled 만 · 첫 TUI 진입에서 trust 게이트 · `trusted_hash` 고정 · **"changed"** 가 재신뢰 트리거                                   |
+| **G4** | agy 상대 args 는 정상 해석. **위치**가 문제 — `agy plugin install` 이 넣는 곳에선 MCP 가 안 뜨고 `.agents/plugins/` 에서만 뜬다                    |
+| **G5** | agy 가 Claude 훅 포맷을 훅 이름 `"hooks"` 로 오독 → 파싱 실패 → **훅 0개 로드**                                                                    |
+| **G6** | 스킬은 `<plugin>:<skill>` 로 정상 주입. 단 본문 full-form 도구명과 실제 Codex 도구명 **불일치 확정**                                               |
+| **G7** | Codex MCP 는 프로젝트 좌표를 잃는다(MCP `roots` 도 불가) → hostPaths 헬퍼로 해소됨                                                                 |
+| **G8** | `~/.codex/rules` 는 **커맨드 승인 allowlist** 였다. 지침 채널은 **`AGENTS.md`**(루트·전역 둘 다 주입·중첩)                                         |
 
 ---
 

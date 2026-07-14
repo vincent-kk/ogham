@@ -31,7 +31,10 @@ describe("planPluginAdapters", () => {
   // --- basic ---
 
   it("emits the manifest to both the plugin root and .codex-plugin", () => {
-    writeJson(".claude-plugin/plugin.json", { name: "deilen", version: "1.0.0" });
+    writeJson(".claude-plugin/plugin.json", {
+      name: "deilen",
+      version: "1.0.0",
+    });
     expect(emittedPaths()).toEqual([
       ".codex-plugin/plugin.json",
       "plugin.json",
@@ -49,7 +52,10 @@ describe("planPluginAdapters", () => {
   // --- complex ---
 
   it("keeps the two manifest copies byte-identical — the hosts must not diverge", () => {
-    writeJson(".claude-plugin/plugin.json", { name: "deilen", version: "2.0.0" });
+    writeJson(".claude-plugin/plugin.json", {
+      name: "deilen",
+      version: "2.0.0",
+    });
     writeJson(".mcp.json", {
       mcpServers: { tools: { command: "node", args: ["bridge/x.cjs"] } },
     });

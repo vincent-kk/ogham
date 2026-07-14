@@ -11,10 +11,10 @@
 
 경로 좌표(`pluginRoot()`·`projectRoot()`)는 `@ogham/cross-platform` 의 `hostPaths` 로 이미 정리됐다. **남은 것은 "쓰기 대상 파일의 이름·위치가 호스트마다 다르다" 는 축이다.**
 
-| 대상                                     | 지금                       | Codex 에서 필요한 것            |
-| ---------------------------------------- | -------------------------- | ------------------------------- |
-| filid 규칙 문서 배포 (`syncRuleDocs`)    | `.claude/rules/*.md` 고정  | **`AGENTS.md` 병합**            |
-| maencof 지침 병합 (`claudeMdMerger`)     | `CLAUDE.md` 고정           | **`AGENTS.md`**                 |
+| 대상                                  | 지금                      | Codex 에서 필요한 것 |
+| ------------------------------------- | ------------------------- | -------------------- |
+| filid 규칙 문서 배포 (`syncRuleDocs`) | `.claude/rules/*.md` 고정 | **`AGENTS.md` 병합** |
+| maencof 지침 병합 (`claudeMdMerger`)  | `CLAUDE.md` 고정          | **`AGENTS.md`**      |
 
 둘 다 **Codex 에서는 지금 무의미하게 동작한다** — Codex 는 `.claude/rules/*.md` 도 `CLAUDE.md` 도 읽지 않는다. 파일은 만들어지지만 모델은 못 본다. 에러가 아니라 **조용한 무효**라 더 위험하다.
 
@@ -34,12 +34,12 @@ prefix_rule(pattern=["gh", "pr", "checks"], decision="allow")
 
 Codex 의 지침 채널은 **`AGENTS.md` 하나**다. 마커를 심어 `codex debug prompt-input`(모델이 보는 프롬프트를 그대로 렌더)으로 실측했다:
 
-| 파일                              | 모델 프롬프트 주입 |
-| --------------------------------- | ------------------ |
-| 저장소 루트 `AGENTS.md`           | ✅ 주입됨 (user role) |
-| 전역 `~/.codex/AGENTS.md`         | ✅ 주입됨          |
-| **둘 다 있을 때**                 | ✅ **둘 다 주입되고 함께 쌓인다** |
-| `.claude/rules/*.md`              | ❌ 무시            |
+| 파일                      | 모델 프롬프트 주입                |
+| ------------------------- | --------------------------------- |
+| 저장소 루트 `AGENTS.md`   | ✅ 주입됨 (user role)             |
+| 전역 `~/.codex/AGENTS.md` | ✅ 주입됨                         |
+| **둘 다 있을 때**         | ✅ **둘 다 주입되고 함께 쌓인다** |
+| `.claude/rules/*.md`      | ❌ 무시                           |
 
 ⇒ 저장소 루트와 전역 중 **어디에 쓸지는 설계 결정**이다(둘 다 유효). filid 는 프로젝트 단위 규칙이므로 **저장소 루트 `AGENTS.md`** 가 자연스럽다.
 
@@ -107,7 +107,9 @@ export function instructionsFile(): string;
 //  agy    → 미정 (실측 전까지 claude 와 동일하게 두거나 throw)
 
 /** 규칙 문서를 어디에 어떻게 쓰는가. */
-export function ruleDocsTarget(): { kind: "directory"; path: string } | { kind: "merge"; file: string };
+export function ruleDocsTarget():
+  | { kind: "directory"; path: string }
+  | { kind: "merge"; file: string };
 //  claude → { kind: "directory", path: ".claude/rules" }
 //  codex  → { kind: "merge", file: "AGENTS.md" }      ← 파일 하나에 섹션 병합
 ```

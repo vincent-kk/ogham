@@ -19,13 +19,13 @@ I hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
 
 **해야 할 일**: 플러그인 루트에 **agy 포맷 `hooks.json`** 을 생성하는 emitter 추가.
 
-| 항목        | Claude (정본)                             | agy                                                                                                 |
-| ----------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| 최상위 형식 | `{"hooks": {"<Event>": [...]}}`           | `{"<hookName>": {"enabled": bool, "<Event>": [...]}}` (named group)                                 |
-| 이벤트      | SessionStart·UserPromptSubmit·PreToolUse·PostToolUse·SubagentStart | **PreToolUse · PostToolUse · PreInvocation · PostInvocation · Stop** 5종만          |
-| matcher     | Claude 도구명                             | agy 도구명 regex (`run_command`, `view_file`, `browser_.*`)                                         |
-| stdin       | snake_case (`session_id`·`tool_input`)    | **camelCase** (`conversationId`·`workspacePaths[]`·`stepIdx`)                                        |
-| 응답 계약   | `hookSpecificOutput.additionalContext` 등 | PreToolUse: `{decision, reason, permissionOverrides[]}` / Pre·PostInvocation: `{injectSteps: [...]}` |
+| 항목        | Claude (정본)                                                      | agy                                                                                                  |
+| ----------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| 최상위 형식 | `{"hooks": {"<Event>": [...]}}`                                    | `{"<hookName>": {"enabled": bool, "<Event>": [...]}}` (named group)                                  |
+| 이벤트      | SessionStart·UserPromptSubmit·PreToolUse·PostToolUse·SubagentStart | **PreToolUse · PostToolUse · PreInvocation · PostInvocation · Stop** 5종만                           |
+| matcher     | Claude 도구명                                                      | agy 도구명 regex (`run_command`, `view_file`, `browser_.*`)                                          |
+| stdin       | snake_case (`session_id`·`tool_input`)                             | **camelCase** (`conversationId`·`workspacePaths[]`·`stepIdx`)                                        |
+| 응답 계약   | `hookSpecificOutput.additionalContext` 등                          | PreToolUse: `{decision, reason, permissionOverrides[]}` / Pre·PostInvocation: `{injectSteps: [...]}` |
 
 **이벤트 매핑**: `SessionStart` → `PreInvocation` + **세션당 1회 가드**(conversationId 기록), `UserPromptSubmit` → `PreInvocation`, `PreToolUse`/`PostToolUse` → 동명 + matcher 번역, `SubagentStart` → 드롭.
 
@@ -37,11 +37,11 @@ I hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
 
 **현 상태**: `agy plugin install` 은 플러그인을 `~/.gemini/config/plugins/<n>/` 에 넣는데, **agy 는 거기서 플러그인 MCP 를 절대 띄우지 않는다**(설치 로그는 `✔ mcpServers : 1 processed` 라고 거짓 안심을 준다). MCP 가 뜨는 위치는 **커스터마이제이션 루트**뿐이다:
 
-| 위치                              | 플러그인 MCP |
-| --------------------------------- | ------------ |
-| `~/.gemini/config/plugins/<n>/`   | ❌           |
-| `~/.agents/plugins/<n>/`          | ✅           |
-| `<workspace>/.agents/plugins/<n>/`| ✅           |
+| 위치                               | 플러그인 MCP |
+| ---------------------------------- | ------------ |
+| `~/.gemini/config/plugins/<n>/`    | ❌           |
+| `~/.agents/plugins/<n>/`           | ✅           |
+| `<workspace>/.agents/plugins/<n>/` | ✅           |
 
 **우리 어댑터는 이미 맞다** — 상대 args(`bridge/mcp-server.cjs`)는 플러그인 디렉터리 기준으로 정상 해석되고, 루트 `plugin.json` 덕에 agy 가 `source: antigravity` 로 분류해 `mcp_config.json`(+ `OGHAM_HOST`)을 보존한다. **위치만 옮기면 된다.**
 
