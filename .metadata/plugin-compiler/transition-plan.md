@@ -59,12 +59,13 @@
 > 애초에 별도 체크아웃에서 진행할 계획이었으나, **경로 좌표 코드가 호스트에서 한 번도 돌지 않았다**는 사실 때문에 이 브랜치로 가져온다. 검증 하네스(호스트 PoC 절차·프로브)가 여기 있고, C4 도 같은 헬퍼를 건드린다.
 
 - [x] **C1–C3. 경로 좌표 — 코드** (main `77825966`) — `@ogham/cross-platform` 에 `hostPaths`(`detectHost`·`pluginRoot`·`projectRoot`) 신설, A(7 지점)·B(31 지점) 반영. imbas 인자 폭증은 **`projectRootMemo`**(첫 호출이 준 루트를 세션에 기억)로 해소. 잔여 4개 `process.cwd()` 는 프로젝트 좌표가 아니므로 **의도적 잔류**.
-- [ ] **M1. main 머지 + `yarn plugin:adapters` 재생성** — hostPaths 코드가 이 브랜치에 없다. 또한 main 이 filid MCP 서버명을 `t`→`tools` 로 바꿔 어댑터가 stale 하다.
-- [ ] **V1–V4. 경로 좌표 — 호스트 재검증** ⬜ **핵심. 상세는 [TODO.md](./TODO.md)** - **V1 (Codex)**: 모델이 `project_root` 를 **절대경로로** 실제 넘기는가. Codex TUI 는 워크스페이스를 `~/Workspace/…`(틸데)로 표시하는데 `toAbsoluteRoot()` 는 `path.isAbsolute()` 라 **틸데를 거부**한다. 미전달→throw→재시도→틸데→throw→재시도 왕복을 모델이 완주하는가. - **V2 (agy)**: 같은 질문. - **V3 (agy 잠재 버그)**: `pluginRoot()` 가 `detectHost() === "codex" ? process.cwd() : null` 이라 **agy 에서 `null`** → r-statistics `contract.R` 파손 가능. 선행 측정: **agy MCP 프로세스의 cwd·env**. - **V4 (Codex)**: r-statistics `run_r` 이 `contract.R` 을 실제로 찾는가 — stage4-host-paths 의 완료 기준인데 미측정.
-- [ ] **C4. 규칙 채널** → **[stage4-rules-channel.md](./stage4-rules-channel.md)** (의뢰서 정본)
-      filid `syncRuleDocs`(`.claude/rules/*.md`)·maencof `claudeMdMerger`(`CLAUDE.md`)의 **Codex 타깃 = `AGENTS.md` 병합**. `~/.codex/rules` 는 커맨드 allowlist 라 **쓰면 안 된다**(G8). ⚠ 쓰기 채널만 바꾸고 **읽기 채널**(filid 훅의 규칙 존재 판정)을 놔두면 새 버그가 생긴다.
+- [x] **M1. main 머지 + `yarn plugin:adapters` 재생성** — 완료. 게이트가 설계대로 21 stale 을 잡았다.
+- [x] **V1–V4. 경로 좌표 — 코드** ✅ **코드 완료 · 호스트 실측은 유예**. 상세는 [TODO.md](./TODO.md) - **V1**: `toAbsoluteRoot()` 가 `~` 를 전개한다 (`~user` 는 거부). 세 호스트 공통. 스키마 설명 문구는 `PROJECT_ROOT_ARG_DESCRIPTION` 정본 1곳으로 통합. - **V3**: `pluginRoot()` 의 agy 분기를 **cwd 추측이 아니라 자기탐색**(`locatePluginRoot()` — 매니페스트까지 상향 8단계)으로 닫았다. 미실측 가정에 기대지 않는다. r-statistics `contract.R` 이 이걸로 살아난다. - **V2·V4**: 모델 순응과 `run_r` 실행은 **실측 대상** — 코드 쪽 대비(안내 문구·계약 경로 스펙)는 끝났다.
+- [x] **C4. 규칙 채널** ✅ **코드 완료** → **[stage4-rules-channel.md](./stage4-rules-channel.md)**
+      `ruleDocsTarget()` 로 filid 가 Codex 에서 `AGENTS.md` 에 마커 구간으로 병합하고, maencof 도 `instructionsFile()` 로 대상을 잡는다. ⚠ **읽기 채널도 같이 고쳤다** — 훅엔 `OGHAM_HOST` 가 **없어** 호스트 분기가 불가능하므로 **모든 채널 합집합 판독**으로 풀었다.
+- [ ] **M2. 호스트 실측** ⬜ **다음 작업** — Vincent 님 요청으로 한 번에 몰아서 한다. 항목·절차는 [TODO.md](./TODO.md) §"유예된 실측(M2)".
 
-**완료 기준**: `OGHAM_HOST` 부재(=Claude)에서 전 플러그인 테스트가 현행과 **동일 통과**. Codex 에서 `run_r` 이 `contract.R` 을 찾고, 프로젝트 대상 도구가 사용자 워크스페이스를 보며, 규칙이 `AGENTS.md` 로 실려 모델 프롬프트에 실제 주입된다.
+**완료 기준**: `OGHAM_HOST` 부재(=Claude)에서 전 플러그인 테스트가 현행과 **동일 통과** — ✅ 4267 초록. Codex 에서 `run_r` 이 `contract.R` 을 찾고, 프로젝트 대상 도구가 사용자 워크스페이스를 보며, 규칙이 `AGENTS.md` 로 실려 모델 프롬프트에 실제 주입된다 — **M2 에서 확인**.
 
 ---
 
@@ -107,25 +108,26 @@
 Phase A ✅ (어댑터 정정)  ──→  Phase B ✅ (CI·README)
                                     │
                                     ▼
-              M1 (main 머지 + 어댑터 재생성)        ← 선행 조건
+              M1 ✅ (main 머지 + 어댑터 재생성)
                                     │
                                     ▼
-              V1–V4 (경로 좌표 호스트 재검증)       ← 핵심. 여기서 hostPaths 보정 결정
+              V1–V4 ✅ + C4 ✅ (코드)               ← 한 번에 감. 아래 각주 참조
                                     │
                                     ▼
-              C4 (규칙 채널 → AGENTS.md)           ← 같은 헬퍼를 건드리므로 V 뒤에
+              M2 (호스트 실측)  ⬜ ← 다음. 코드보다 먼저.
                                     │
                                     ▼
               main 머지 → GitHub 경유 설치 재확인   ──→  Phase D/E (선택 심화)
 ```
 
-- **M1 → V**: hostPaths 코드가 이 브랜치에 없으므로 머지가 선행이다. 머지 시 어댑터 재생성 필수(filid 서버명 `t`→`tools`).
-- **V → C4**: 둘 다 `hostPaths` 를 건드린다. 헬퍼가 실제로 도는 걸 본 뒤에 채널 분기를 얹어야 agy 분기를 두 번 손대지 않는다.
-- **C4 없이 Codex 를 "정식 지원" 이라 선언하면 안 된다** — 규칙·지침 문서가 아무도 안 읽는 경로에 쌓인다.
+- **원래 V → C4 순서였던 이유**("헬퍼가 실제로 도는 걸 본 뒤에 채널 분기를 얹어야 agy 분기를 두 번 손대지 않는다")는 **해소됐다**: agy 분기를 실측 의존 가정(cwd)이 아니라 **자기탐색**으로 닫았으므로, 실측 결과가 그 분기를 되돌릴 일이 없다. 그래서 둘을 함께 진행했다.
+- **M2 는 코드보다 먼저** — 남은 미결(모델 순응·agy 지침 파일)은 실측만이 답할 수 있고, 그 답이 설계를 바꿀 수 있다.
+- **C4 없이 Codex 를 "정식 지원" 이라 선언하면 안 된다** — 규칙·지침 문서가 아무도 안 읽는 경로에 쌓인다. (코드는 들어갔고, 실제 주입은 M2-5 에서 확인한다.)
 
 ---
 
 ## 9. 지금 상태
 
-- **완료**: 어댑터 체제 구축 · Codex `cwd` 블로커 수정 · 게이트 G1–G8 전부 종료 · Stage 4 작업 지시서 배포(양쪽 체크아웃).
+- **완료**: 어댑터 체제 구축 · Codex `cwd` 블로커 수정 · 게이트 G1–G8 전부 종료 · **V1–V4 · C4 코드 반영**(틸데 전개 · 자기탐색 플러그인 루트 · `AGENTS.md` 규칙/지침 채널 · 훅 합집합 읽기) — 전체 4267 초록, 어댑터 30 unchanged.
+- **다음**: **호스트 실측(M2)** — 유예해 둔 것을 한 번에. 코드를 더 쓰기 전에 한다.
 - **PoC 잔여**: codex 에 마켓플레이스 `ogham` + `deilen`·`r-statistics`·`maencof-lens` 설치, `ogham_mk2` 신뢰 디렉터리, maencof-lens 훅 trust 등록. 정리: `codex plugin remove <n>@ogham` + `codex plugin marketplace remove ogham`. agy 는 이미 정리됨.
