@@ -5,7 +5,7 @@ model: sonnet
 tools:
   - mcp__plugin_cennad_tools__start_conversation
   - mcp__plugin_cennad_tools__continue_conversation
-maxTurns: 32
+maxTurns: 20
 ---
 
 # courier — cennad delegation runner
