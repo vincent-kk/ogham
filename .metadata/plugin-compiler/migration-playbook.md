@@ -52,13 +52,15 @@ yarn plugin:adapters:check    # 재생성-비교만 — 불일치·호환성 err
 | G1  | Codex 플러그인 MCP 도구명 형식·플러그인 스코프 (서버명 `tools`/`t` 충돌 여부)                                                          | ogham 플러그인 2개+ 동시 설치, TUI 도구 목록·호출 확인  | 서버명=플러그인명 오버라이드가 이미 방어 — 형식만 기록                               |
 | G2  | `codex exec` 헤드리스에서 훅 거동 (신뢰됨/미신뢰 각각)                                                                                 | trust 승인 전후 `codex exec` 실행, 훅 발화·행 여부 확인 | cennad codex 위임 경로에 훅 미발화 고지 또는 trust 선행 안내                         |
 | G3  | 플러그인 버전 업 → 훅 파일 해시 변경 시 재신뢰 UX                                                                                      | ponytail 또는 ogham PoC 로 버전 업 후 훅 상태 확인      | 릴리즈 노트에 `/hooks` 재승인 안내 문구 표준화                                       |
-| G4  | agy `mcp_config.json` 상대 args 해석 기준 (플러그인 루트 vs 세션 cwd)                                                                  | agy 인터랙티브 설치 + MCP 기동 stderr 마커              | agy emitter 를 설치-시-절대경로 주입으로 교체                                        |
+| G4  | agy `mcp_config.json` 상대 args 해석 기준 (플러그인 루트 vs 세션 cwd)                                                                  | agy 인터랙티브 설치 + MCP 기동 stderr 마커 (**agy 1.1.2 로 재실측** — matrix 사실은 1.1.1 기준)              | agy emitter 를 설치-시-절대경로 주입으로 교체                                        |
 | G5  | agy 가 `hooks/hooks.json`(Claude 포맷)을 자동 로드해 오독하는지 (ponytail 의 회피 관행이 시사)                                         | agy 에 훅 보유 플러그인 설치, validate/로그 확인        | 훅 파일을 `hooks/claude-hooks.json` 등으로 개명 + 매니페스트 명시 (Claude 동작 불변) |
 | G6  | skill 본문의 Claude full-form 도구명(`mcp__plugin_…`)이 Codex/agy 모델을 오도하는 정도                                                 | Codex 에서 대표 스킬 실사용 관찰                        | 서술형 참조로 완화(정본 수정이므로 별도 결정) 또는 AGENTS.md 보완                    |
 | G7  | `process.cwd()` 의존 런타임 (Codex 플러그인 MCP 는 cwd=플러그인 루트 고정)                                                             | deilen `preview`(상대 경로 인자) 를 Codex 에서 실행     | 해당 서버만 세션 cwd 를 env/인자로 수신하도록 보강                                   |
 | G8  | Codex 의 규칙 파일 의미론 — `~/.codex/rules` 디렉토리의 실제 로드 규약, `AGENTS.md`(전역 `~/.codex/AGENTS.md`·저장소 루트) 주입 등가성 | Codex 에 규칙 파일 배치 후 컨텍스트 반영 확인           | filid rules 배포의 Codex 타깃을 AGENTS.md 병합 방식으로 조정                         |
 
 권장 PoC 순서: **r-statistics 또는 deilen**(MCP only, 훅 없음)으로 G1·G6·G7 → **maencof-lens**(SessionStart 1종)로 G2·G3·G5 → **cennad**(훅 2종 + 자기참조)로 위임 경로 점검.
+
+> ⚠ **등록 경로 필수 조건**: 마켓플레이스로 등록할 체크아웃에 어댑터가 **생성되어 있어야** 한다. 어댑터 없는 클론(예: 아직 머지 전인 `main` 작업본)을 등록하면 Codex 가 §5.1 탐색 순서대로 `.claude-plugin` fallback 으로 떨어져 변수 args 가 든 `.mcp.json` 을 읽는다 — 어댑터를 타지 않는 **가짜 PoC** 다. 등록 직전 `find plugins -maxdepth 3 -path '*/.codex-plugin/plugin.json' | wc -l` 이 10 인지 확인한다.
 
 ## 4. 잔여 Stage (게이트 통과 후)
 
@@ -80,4 +82,4 @@ yarn plugin:adapters:check    # 재생성-비교만 — 불일치·호환성 err
 1. ~~inject-version.mjs 컷오버 파손~~ → in-place 라 컷오버 없음. 대신 `.codex-plugin/plugin.json` version 동기화가 inject-version.mjs 에 추가됨 — 플러그인에 `.codex-plugin` 이 없으면 조용히 skip 하는지 확인.
 2. ~~r-statistics `shared/contract.R` 누락~~ → in-place 라 산출물 재배치 없음. `${CLAUDE_PLUGIN_ROOT}/shared/contract.R` 런타임 참조는 Codex 훅 env 주입으로도 유효하나, **MCP 서버 프로세스에는 그 env 가 없다** — r-statistics 서버가 이 경로를 어떻게 해석하는지 G1 PoC 에서 함께 확인.
 3. ~~verify 게이트 소멸~~ → `plugin:adapters:check` 가 상설 clean-regen 게이트로 대체.
-4. CI paths 필터: `.codex-plugin/**`·`mcp_config.json`·`.agents/**` 변경이 CI 를 타도록 Stage 2 에서 경로 추가.
+4. CI paths 필터 — **job 편입만으로는 무효**: 현행 `ci.yml` 은 `**.json` 을 명시 배제하고(주석: "config/manifest-only (`**.json`) 변경은 매트릭스를 건너뛴다") `**.ts`~`**.cjs` 만 트리거한다. 어댑터 21개는 전부 `.json` 이므로, paths 에 `.codex-plugin/**`·`**/mcp_config.json`·`.agents/**` 를 추가하기 전에는 어댑터만 손편집·desync 된 커밋에서 **CI 자체가 돌지 않는다**. Stage 2 에서 paths 추가와 `plugin:adapters:check` 편입은 한 쌍으로 처리한다.
