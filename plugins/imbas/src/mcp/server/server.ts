@@ -4,6 +4,7 @@
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { PROJECT_ROOT_ARG_DESCRIPTION } from '@ogham/cross-platform/host-paths';
 import { z } from 'zod';
 
 import { McpToolName } from '../../constants/mcpToolNames.js';
@@ -32,9 +33,7 @@ import {
 const projectRootInput = z
   .string()
   .optional()
-  .describe(
-    'Absolute path of the workspace directory. Omit on Claude Code, where this server already runs from the workspace; required on hosts that launch it from the plugin install directory.',
-  );
+  .describe(PROJECT_ROOT_ARG_DESCRIPTION);
 
 /**
  * Create and configure the MCP server with all tool registrations.
