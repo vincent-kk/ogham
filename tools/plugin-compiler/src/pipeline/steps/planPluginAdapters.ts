@@ -6,6 +6,7 @@ import {
 import {
   AGY_MCP_CONFIG_PATH,
   CODEX_MANIFEST_PATH,
+  ROOT_MANIFEST_PATH,
 } from "../../constants/adapterPaths.js";
 import { readPluginFacts } from "../../facts/index.js";
 import { lintHookEvents, lintHookMatchers } from "../../lint/index.js";
@@ -17,10 +18,18 @@ export function planPluginAdapters(directory: string): AdapterPlan {
   const diagnostics = [...lintHookEvents(facts), ...lintHookMatchers(facts)];
 
   try {
+    // One manifest, two locations — the plugin root copy is agy's marker and is
+    // also what Codex actually reads (it shadows .codex-plugin). Same bytes, so
+    // the hosts cannot diverge. See constants/adapterPaths.ts.
+    const manifest = stableJson(buildCodexPluginManifest(facts));
     const files: GeneratedFile[] = [
       {
         absolutePath: join(directory, CODEX_MANIFEST_PATH),
-        content: stableJson(buildCodexPluginManifest(facts)),
+        content: manifest,
+      },
+      {
+        absolutePath: join(directory, ROOT_MANIFEST_PATH),
+        content: manifest,
       },
     ];
     const agyMcpConfig = buildAgyMcpConfig(facts);

@@ -4,16 +4,16 @@
 
 ## 1. 메커니즘 대응 (3 호스트)
 
-| Claude 메커니즘                                      | Codex 대응                                                                | Antigravity(agy) 대응                                                |
-| ---------------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| **MCP 서버** (`.mcp.json` → `bridge/mcp-server.cjs`) | 🟢 동일 `mcpServers` 래퍼 — args 변수 미전개 → 상대 args + **`cwd:"."` 필수** (§4.1) | 🟡 `mcp_config.json` — 상대 args 정상. 단 **`.agents/plugins/` 에 있어야 로드**된다 (§4.4) |
-| **Skills** (`skills/<n>/SKILL.md`)                   | 🟢 동일 구조 `SKILL.md` 무변환 수용                                       | 🟢 **무변환 수용** (Claude 형식 그대로 processed, 실측)              |
-| **Agents** (`agents/<n>.md`)                         | 🔴 플러그인 컴포넌트 아님 (매니페스트 스키마에 없음 — 소스 확인)          | 🟢 **동일 `.md` 형식 수용** (frontmatter 포함, 실측)                 |
-| **Hooks** (`hooks/hooks.json`)                       | 🟢 **Claude hooks.json 포맷 그대로 파싱** (§4.2 — 이벤트 10종·계약 동일)  | 🔴 **파싱 실패 → 0개 로드** (named-group 형식 불일치, §4.3)          |
-| **Manifest** (`.claude-plugin/plugin.json`)          | 🟢 `.codex-plugin/plugin.json` 우선, **`.claude-plugin` fallback** (§5.1) | 🔴 루트 `plugin.json` **필수** — 없으면 Claude 임포트로 폴백해 **어댑터를 덮어쓴다** (§4.4) |
-| **Commands** (Claude: skills 로 통합됨)              | — (Skills 로 대체)                                                        | 🟢 `commands/<n>.toml` (gemini 형식) → skills 자동 변환              |
-| **Rules** (CLAUDE.md / .claude/rules)                | **`AGENTS.md` 뿐** — 루트·전역(`~/.codex/AGENTS.md`) 둘 다 주입·중첩 (G8 실측). `~/.codex/rules` 는 **커맨드 allowlist** 라 무관 | `GEMINI.md` · `AGENTS.md` · `.agents/rules/*.md` · 플러그인 `rules/` (미실측) |
-| **Marketplace** (`.claude-plugin/marketplace.json`)  | `.agents/plugins/marketplace.json` 우선, **`.claude-plugin` fallback**    | 🔴 `.agents/plugins.json` declared **무용지물** (실측) — 디렉터리 스캔만 유효 (§4.4) |
+| Claude 메커니즘                                      | Codex 대응                                                                                                                       | Antigravity(agy) 대응                                                                       |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **MCP 서버** (`.mcp.json` → `bridge/mcp-server.cjs`) | 🟢 동일 `mcpServers` 래퍼 — args 변수 미전개 → 상대 args + **`cwd:"."` 필수** (§4.1)                                             | 🟡 `mcp_config.json` — 상대 args 정상. 단 **`.agents/plugins/` 에 있어야 로드**된다 (§4.4)  |
+| **Skills** (`skills/<n>/SKILL.md`)                   | 🟢 동일 구조 `SKILL.md` 무변환 수용                                                                                              | 🟢 **무변환 수용** (Claude 형식 그대로 processed, 실측)                                     |
+| **Agents** (`agents/<n>.md`)                         | 🔴 플러그인 컴포넌트 아님 (매니페스트 스키마에 없음 — 소스 확인)                                                                 | 🟢 **동일 `.md` 형식 수용** (frontmatter 포함, 실측)                                        |
+| **Hooks** (`hooks/hooks.json`)                       | 🟢 **Claude hooks.json 포맷 그대로 파싱** (§4.2 — 이벤트 10종·계약 동일)                                                         | 🔴 **파싱 실패 → 0개 로드** (named-group 형식 불일치, §4.3)                                 |
+| **Manifest** (`.claude-plugin/plugin.json`)          | 🟢 `.codex-plugin/plugin.json` 우선, **`.claude-plugin` fallback** (§5.1)                                                        | 🔴 루트 `plugin.json` **필수** — 없으면 Claude 임포트로 폴백해 **어댑터를 덮어쓴다** (§4.4) |
+| **Commands** (Claude: skills 로 통합됨)              | — (Skills 로 대체)                                                                                                               | 🟢 `commands/<n>.toml` (gemini 형식) → skills 자동 변환                                     |
+| **Rules** (CLAUDE.md / .claude/rules)                | **`AGENTS.md` 뿐** — 루트·전역(`~/.codex/AGENTS.md`) 둘 다 주입·중첩 (G8 실측). `~/.codex/rules` 는 **커맨드 allowlist** 라 무관 | `GEMINI.md` · `AGENTS.md` · `.agents/rules/*.md` · 플러그인 `rules/` (미실측)               |
+| **Marketplace** (`.claude-plugin/marketplace.json`)  | `.agents/plugins/marketplace.json` 우선, **`.claude-plugin` fallback**                                                           | 🔴 `.agents/plugins.json` declared **무용지물** (실측) — 디렉터리 스캔만 유효 (§4.4)        |
 
 호환 레이어: Codex 는 hook 커맨드 프로세스에 `CLAUDE_PLUGIN_ROOT`·`PLUGIN_ROOT`·`CLAUDE_PLUGIN_DATA`·`PLUGIN_DATA` 를 env 로 주입한다(소스 주석에 "OOTB compat" 명기 — `hooks/engine/discovery.rs`). 커맨드는 `$SHELL -lc`(Windows `cmd /C`) 경유라 `${CLAUDE_PLUGIN_ROOT}` 가 쉘에서 전개된다. **MCP args/env 에는 여전히 어떤 전개도 없다.** agy 는 `agy plugin import claude` 명령으로 Claude 플러그인 임포트 경로를 자체 제공한다.
 
@@ -126,13 +126,14 @@ I hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
 - **상대 `args` 는 플러그인 디렉터리 기준으로 정확히 풀린다** (실측). ⇒ 우리가 생성하는 `mcp_config.json`(`args:["bridge/mcp-server.cjs"]` + `env.OGHAM_HOST="agy"`)은 **그대로 유효**하다. 절대경로 주입 불요 — 구 G4 대응책은 불필요했다.
 - **⚠ 결정적 격차 — agy 는 커스터마이제이션 루트에서만 플러그인 MCP 를 띄운다:**
 
-| 플러그인 위치                                        | 플러그인 MCP 로드 |
-| ---------------------------------------------------- | ----------------- |
+| 플러그인 위치                                                         | 플러그인 MCP 로드 |
+| --------------------------------------------------------------------- | ----------------- |
 | `~/.gemini/config/plugins/<n>/` — **`agy plugin install` 이 넣는 곳** | ❌ **안 뜬다**    |
-| `~/.agents/plugins/<n>/` — 전역 커스터마이제이션 루트 | ✅ 뜬다           |
-| `<workspace>/.agents/plugins/<n>/` — 워크스페이스 루트 | ✅ 뜬다           |
+| `~/.agents/plugins/<n>/` — 전역 커스터마이제이션 루트                 | ✅ 뜬다           |
+| `<workspace>/.agents/plugins/<n>/` — 워크스페이스 루트                | ✅ 뜬다           |
 
-  설치 로그가 `✔ mcpServers : 1 processed` 라고 보고해도 런타임에는 로드되지 않는다 — **agy 1.1.2 CLI 의 갭**. (대조군: 동일 서버를 전역 `~/.gemini/config/mcp_config.json` 에 넣으면 정상 기동 ⇒ agy 의 stdio MCP 자체는 멀쩡하다.)
+설치 로그가 `✔ mcpServers : 1 processed` 라고 보고해도 런타임에는 로드되지 않는다 — **agy 1.1.2 CLI 의 갭**. (대조군: 동일 서버를 전역 `~/.gemini/config/mcp_config.json` 에 넣으면 정상 기동 ⇒ agy 의 stdio MCP 자체는 멀쩡하다.)
+
 - **루트 `plugin.json` 이 분류를 가른다**: 없으면 agy 가 `source: claude-code` 로 임포트하며 **우리 `mcp_config.json` 을 `.mcp.json` 에서 재생성해 덮어쓴다**(`${CLAUDE_PLUGIN_ROOT}` 리터럴 · `env: null` → **`OGHAM_HOST` 마커 소실**). `plugins/<n>/plugin.json` = `{"name":"<n>"}` 를 두면 `source: antigravity` 로 분류되고 우리 어댑터가 **온전히 보존**된다. ⇒ **5번째 어댑터 파일이 필요하다.**
 - **`.agents/plugins.json` declared 레이어는 무용지물**: 항목별 경로(`./plugins/<n>`)로도, 컨테이너 경로(`./plugins`)로도, 루트 `plugin.json` 마커를 붙여도 플러그인이 로드되지 않았다(실측 3종). ⇒ 이 어댑터 파일은 **폐기 대상**.
 
@@ -140,11 +141,11 @@ I hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
 
 agy 가 요구하는 루트 `plugin.json` 은 **Codex 의 매니페스트 탐색 경로에도 포함**되며 `.codex-plugin/plugin.json` 을 **가린다**. 실측 인과:
 
-| `plugins/<n>/plugin.json` 내용        | Codex MCP 도구        | agy 분류                              |
-| ------------------------------------- | --------------------- | ------------------------------------- |
-| (파일 없음)                           | ✅ 4개 노출           | ❌ `claude-code` → **어댑터 덮어쓰기** |
+| `plugins/<n>/plugin.json` 내용        | Codex MCP 도구         | agy 분류                               |
+| ------------------------------------- | ---------------------- | -------------------------------------- |
+| (파일 없음)                           | ✅ 4개 노출            | ❌ `claude-code` → **어댑터 덮어쓰기** |
 | `{"name":"deilen"}` (agy 최소 마커)   | 🔴 **`[]` — MCP 소실** | ✅ `antigravity`                       |
-| **Codex 매니페스트 전체** (동일 내용) | ✅ 4개 노출           | ✅ `antigravity` → **어댑터 보존**     |
+| **Codex 매니페스트 전체** (동일 내용) | ✅ 4개 노출            | ✅ `antigravity` → **어댑터 보존**     |
 
 ⇒ **해법: 루트 `plugin.json` 을 둘 거면 `.codex-plugin/plugin.json` 과 동일한 전체 매니페스트를 담아야 한다.** 그러면 한 파일이 Codex·agy 를 동시에 만족시킨다(둘을 병치해도 무해 — 내용이 같으므로). 최소 마커만 두면 **Codex 가 죽는다.**
 
@@ -191,18 +192,18 @@ agy 가 요구하는 루트 `plugin.json` 은 **Codex 의 매니페스트 탐색
 
 ## 7. 기능 손실 매트릭스 (호스트별 잔여 격차)
 
-| 기능 (사용 플러그인)                                                 | Codex                                                                                                                                                                                          | Antigravity                                             |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| **훅 전반** (SessionStart·PreToolUse·PostToolUse·UserPromptSubmit)   | 🟢 **전부 동작** — trust 승인 후 발화, `additionalContext` 주입까지 실측(G2). 단 `Read` matcher 미발화, 미신뢰 시 무음 스킵                                                                     | 🔴 **0개 로드** — Claude 포맷 파싱 실패(G5). Stage 3 전까지 전면 무동작 |
-| SessionEnd 정리                                                      | 🟢 mcp-lifecycle 이관 완료 — 호스트 이벤트 불요 (전 호스트 공통)                                                                                                                               | 🟢 동일                                                                 |
-| **플러그인 MCP 기동**                                                | 🟢 `cwd:"."` 로 해결 — 도구 노출 확인(G1)                                                                                                                                                      | 🟡 **위치 의존** — `.agents/plugins/` 에서만 뜬다. `agy plugin install` 경로는 ❌(§4.4) |
-| Skills                                                               | 🟢 `<plugin>:<skill>` 주입 (Claude 규약 동일)                                                                                                                                                  | 🟢 install 시 processed (실측)                                          |
-| Subagent 격리 위원회 (filid·prawf·atlassian)                         | 🔴 agents 컴포넌트 없음 — 별도 설치·재설계 전까지 미이식                                                                                                                                       | 🟡 `agents: 1 processed` (수용 실측) — 스폰 의미론 미검증               |
-| 호스트 결합 쓰기 — maencof `CLAUDE.md`·filid `.claude/rules/`        | 🟡 **타깃 확정: `AGENTS.md`**(루트·전역 모두 주입, G8). `~/.codex/rules` 는 커맨드 allowlist 라 무관 — Stage 4                                                                                 | 🟡 `.agents/rules/`·`GEMINI.md` 후보 (미실측)                           |
+| 기능 (사용 플러그인)                                                 | Codex                                                                                                                                                                                          | Antigravity                                                                                  |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **훅 전반** (SessionStart·PreToolUse·PostToolUse·UserPromptSubmit)   | 🟢 **전부 동작** — trust 승인 후 발화, `additionalContext` 주입까지 실측(G2). 단 `Read` matcher 미발화, 미신뢰 시 무음 스킵                                                                    | 🔴 **0개 로드** — Claude 포맷 파싱 실패(G5). Stage 3 전까지 전면 무동작                      |
+| SessionEnd 정리                                                      | 🟢 mcp-lifecycle 이관 완료 — 호스트 이벤트 불요 (전 호스트 공통)                                                                                                                               | 🟢 동일                                                                                      |
+| **플러그인 MCP 기동**                                                | 🟢 `cwd:"."` 로 해결 — 도구 노출 확인(G1)                                                                                                                                                      | 🟡 **위치 의존** — `.agents/plugins/` 에서만 뜬다. `agy plugin install` 경로는 ❌(§4.4)      |
+| Skills                                                               | 🟢 `<plugin>:<skill>` 주입 (Claude 규약 동일)                                                                                                                                                  | 🟢 install 시 processed (실측)                                                               |
+| Subagent 격리 위원회 (filid·prawf·atlassian)                         | 🔴 agents 컴포넌트 없음 — 별도 설치·재설계 전까지 미이식                                                                                                                                       | 🟡 `agents: 1 processed` (수용 실측) — 스폰 의미론 미검증                                    |
+| 호스트 결합 쓰기 — maencof `CLAUDE.md`·filid `.claude/rules/`        | 🟡 **타깃 확정: `AGENTS.md`**(루트·전역 모두 주입, G8). `~/.codex/rules` 는 커맨드 allowlist 라 무관 — Stage 4                                                                                 | 🟡 `.agents/rules/`·`GEMINI.md` 후보 (미실측)                                                |
 | 플러그인 자기 파일 해석 — `CLAUDE_PLUGIN_ROOT` (6 플러그인 / 7 지점) | 🟡 env 부재 → 폴백. r-statistics `contract.R` 은 폴백 경로가 없어 **`run_r` 파손**, filid `syncRuleDocs` 는 **조용히 skip**. `process.cwd()` 분기로 해결 (§9-A)                                | 🔴 **동일 문제 + 마커 소실 위험** — 루트 `plugin.json` 없으면 `OGHAM_HOST` 까지 파괴됨(§4.4) |
-| 사용자 프로젝트 경로 — `process.cwd()` (**8 플러그인 / 31 지점**)    | 🔴 **전부 플러그인 루트를 본다.** imbas(15) 사실상 전 기능·cennad 위임 spawn·r-statistics allow-root·deilen 프로젝트 격리. 서버 안에서 복구 불가 — **모델이 인자로 넘기는 수밖에 없다** (§9-B) | 🔴 동일 구조 (cwd = 플러그인 디렉터리) — Stage 4 헬퍼의 agy 분기 필요   |
-| `user_invocable`·`argument-hint` 등 Claude frontmatter               | 드롭 여부 미실측 (수용은 확인 — G6)                                                                                                                                                            | 드롭 여부 미실측 (수용은 확인)                                          |
-| Claude 전용 UX (deilen 뷰어 자동오픈 등 MCP 무관 기능)               | 🟢 MCP 경유라 손실 없음 (단 cwd 의미 변화 — §9)                                                                                                                                                | 🟢 동일                                                                 |
+| 사용자 프로젝트 경로 — `process.cwd()` (**8 플러그인 / 31 지점**)    | 🔴 **전부 플러그인 루트를 본다.** imbas(15) 사실상 전 기능·cennad 위임 spawn·r-statistics allow-root·deilen 프로젝트 격리. 서버 안에서 복구 불가 — **모델이 인자로 넘기는 수밖에 없다** (§9-B) | 🔴 동일 구조 (cwd = 플러그인 디렉터리) — Stage 4 헬퍼의 agy 분기 필요                        |
+| `user_invocable`·`argument-hint` 등 Claude frontmatter               | 드롭 여부 미실측 (수용은 확인 — G6)                                                                                                                                                            | 드롭 여부 미실측 (수용은 확인)                                                               |
+| Claude 전용 UX (deilen 뷰어 자동오픈 등 MCP 무관 기능)               | 🟢 MCP 경유라 손실 없음 (단 cwd 의미 변화 — §9)                                                                                                                                                | 🟢 동일                                                                                      |
 
 ## 8. 출처 · 신뢰도
 

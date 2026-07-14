@@ -1,6 +1,6 @@
 ## Purpose
 
-facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. Codex 매니페스트·agy MCP 설정·루트 마켓플레이스 2종이 산출물이며, 디스크 접촉이 없다.
+facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. 산출물은 매니페스트(플러그인 루트 + `.codex-plugin/` 두 곳에 같은 내용)·agy MCP 설정·Codex 마켓플레이스이며, 디스크 접촉이 없다.
 
 ## Structure
 
@@ -10,7 +10,6 @@ facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. C
 | `builders/buildCodexMcpServers.ts`     | PluginFacts → Codex 인라인 mcpServers (서버명=플러그인명)  |
 | `builders/buildAgyMcpConfig.ts`        | PluginFacts → `mcp_config.json` 객체 (서버명 원본 유지)    |
 | `builders/buildCodexMarketplace.ts`    | MarketplaceFacts → `.agents/plugins/marketplace.json` 객체 |
-| `builders/buildAgyDeclaredPlugins.ts`  | MarketplaceFacts → `.agents/plugins.json` 객체             |
 | `utils/buildPortableMcpServer.ts`      | 공용 서버 변환 — args 상대화 · `OGHAM_HOST` env 주입       |
 | `utils/relativizePluginRootPath.ts`    | `${CLAUDE_PLUGIN_ROOT}/X` → `X` (접두 외 사용은 throw)     |
 

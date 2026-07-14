@@ -133,21 +133,26 @@ function syncPluginJson(version) {
   }
 }
 
-function syncCodexPluginJson(version) {
-  const codexPluginJsonPath = join(ROOT, ".codex-plugin", "plugin.json");
+/**
+ * The generated manifest lives at two paths with identical content — the plugin
+ * root copy is agy's marker and is also the one Codex reads (it shadows
+ * .codex-plugin). Both must carry the same version or the hosts disagree.
+ */
+const ADAPTER_MANIFEST_PATHS = ["plugin.json", ".codex-plugin/plugin.json"];
 
-  // Codex adapter manifest is generated per plugin by tools/plugin-compiler;
+function syncAdapterManifest(relativePath, version) {
+  const manifestPath = join(ROOT, relativePath);
+
+  // Adapter manifests are generated per plugin by tools/plugin-compiler;
   // plugins without one (or not yet synced) are skipped silently.
-  if (!existsSync(codexPluginJsonPath)) return false;
+  if (!existsSync(manifestPath)) return false;
 
   try {
-    const content = readFileSync(codexPluginJsonPath, "utf-8");
+    const content = readFileSync(manifestPath, "utf-8");
     const plugin = JSON.parse(content);
 
     if (plugin.version === version) {
-      console.log(
-        `  ✓ .codex-plugin/plugin.json already up to date: ${version}`,
-      );
+      console.log(`  ✓ ${relativePath} already up to date: ${version}`);
       return false;
     }
 
@@ -155,22 +160,17 @@ function syncCodexPluginJson(version) {
     plugin.version = version;
 
     writeFileSync(
-      codexPluginJsonPath,
+      manifestPath,
       JSON.stringify(plugin, null, 2) + "\n",
       "utf-8",
     );
-    console.log(
-      `  ✓ .codex-plugin/plugin.json updated: ${prevVersion} → ${version}`,
-    );
+    console.log(`  ✓ ${relativePath} updated: ${prevVersion} → ${version}`);
     return true;
   } catch (error) {
     if (error instanceof SyntaxError) {
-      console.error("❌ Error: Invalid JSON in .codex-plugin/plugin.json");
+      console.error(`❌ Error: Invalid JSON in ${relativePath}`);
     } else {
-      console.error(
-        "❌ Error syncing .codex-plugin/plugin.json:",
-        error.message,
-      );
+      console.error(`❌ Error syncing ${relativePath}:`, error.message);
     }
     process.exit(1);
   }
@@ -182,9 +182,11 @@ try {
 
   const versionUpdated = generateVersionFile(version);
   const pluginUpdated = syncPluginJson(version);
-  const codexPluginUpdated = syncCodexPluginJson(version);
+  const adapterUpdated = ADAPTER_MANIFEST_PATHS.map((path) =>
+    syncAdapterManifest(path, version),
+  ).some(Boolean);
 
-  if (!versionUpdated && !pluginUpdated && !codexPluginUpdated) {
+  if (!versionUpdated && !pluginUpdated && !adapterUpdated) {
     console.log(`\n✅ All versions already synchronized: ${version}`);
   } else {
     console.log(`\n✅ Version synchronization complete: ${version}`);

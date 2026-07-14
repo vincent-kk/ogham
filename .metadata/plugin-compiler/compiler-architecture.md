@@ -16,19 +16,22 @@ Claude 산출물(현행 `plugins/<pkg>/` 루트 파일)이 **정본이자 그대
 
 ```
 ogham/                                  ← 저장소 루트 = 마켓플레이스 루트
-├── .claude-plugin/marketplace.json     ← 정본 (Claude·agy 소비, Codex fallback)
-├── .agents/
-│   ├── plugins/marketplace.json        ← [생성] Codex 마켓플레이스 (중첩 source/policy)
-│   └── plugins.json                    ← [생성] agy declared entries (클론 즉시 활성화)
+├── .claude-plugin/marketplace.json     ← 정본 (Claude 소비, Codex fallback)
+├── .agents/plugins/marketplace.json    ← [생성] Codex 마켓플레이스 (중첩 source/policy)
 └── plugins/<pkg>/
-    ├── .claude-plugin/plugin.json      ← 정본 (Claude 소비, Codex fallback)
+    ├── .claude-plugin/plugin.json      ← 정본 (Claude 소비)
     ├── .mcp.json                       ← 정본 (Claude 전용 — 변수 args)
     ├── skills/ · agents/ · hooks/hooks.json · bridge/ · libs/ · public/ …  ← 정본 (호스트 공유)
-    ├── .codex-plugin/plugin.json       ← [생성] Codex 매니페스트 (인라인 mcpServers·hooks 명시)
+    ├── plugin.json                     ← [생성] 루트 매니페스트 — agy 마커 + Codex 가 실제로 읽는 경로
+    ├── .codex-plugin/plugin.json       ← [생성] 위와 바이트 동일 (Codex 규약 경로)
     └── mcp_config.json                 ← [생성] agy MCP 설정 (MCP 보유 플러그인만)
 ```
 
-`[생성]` 파일 4종이 어댑터의 전부다. 손편집 금지 — `tools/plugin-compiler` 가 정본에서 재생성한다.
+`[생성]` 경로 4종이 어댑터의 전부다. 손편집 금지 — `tools/plugin-compiler` 가 정본에서 재생성한다.
+
+**매니페스트가 왜 두 곳인가** (2026-07-15 실측): agy 는 루트 `plugin.json` 을 **플러그인 마커**로 요구한다 — 없으면 플러그인을 Claude 임포트로 처리하며 우리 `mcp_config.json` 을 덮어써 `OGHAM_HOST` 마커를 파괴한다. 그런데 **Codex 도 그 경로를 탐색해 `.codex-plugin/plugin.json` 을 가린다** — 루트에 최소 마커(`{"name":…}`)만 두면 **Codex MCP 가 통째로 죽는다**. 두 경로에 **같은 전체 매니페스트**를 두면 양쪽이 만족하고, 같은 빌더 출력이라 갈라질 수 없다. Claude 는 `.claude-plugin/plugin.json` 만 읽으므로 무영향(실측: `--plugin-dir` 로딩 로그·경고 수 동일).
+
+**`.agents/plugins.json`(agy declared)은 폐기**됐다 — 항목별 경로·컨테이너 경로·마커 조합 3종 모두 로드 실패(matrix §4.4). agy 는 `.agents/plugins/<n>/` 디렉터리 스캔으로만 플러그인을 찾는다.
 
 ## 3. 어댑터 생성 규칙
 

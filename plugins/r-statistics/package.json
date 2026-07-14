@@ -26,6 +26,7 @@
     "agents",
     "shared",
     ".claude-plugin",
+    "plugin.json",
     ".codex-plugin",
     ".mcp.json",
     "mcp_config.json",

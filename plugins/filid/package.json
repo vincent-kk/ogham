@@ -37,6 +37,7 @@
     "skills",
     "templates",
     ".claude-plugin",
+    "plugin.json",
     ".codex-plugin",
     ".mcp.json",
     "mcp_config.json",

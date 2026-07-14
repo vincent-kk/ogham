@@ -8,7 +8,7 @@ sync 실행의 오케스트레이션 — 대상 열거, facts→어댑터 계획
 | -------------------------------- | ---------------------------------------------------------- |
 | `steps/listPluginDirectories.ts` | 저장소 루트 → `.claude-plugin` 보유 플러그인 디렉터리 목록 |
 | `steps/planPluginAdapters.ts`    | 플러그인 1개 → 생성 파일 + 진단 (MCP 변수 오류 포집)       |
-| `steps/planRootAdapters.ts`      | 저장소 루트 → 마켓플레이스 어댑터 2종                      |
+| `steps/planRootAdapters.ts`      | 저장소 루트 → Codex 마켓플레이스 어댑터                    |
 | `steps/applyFiles.ts`            | 계획 → 쓰기(sync) 또는 비교(check)                         |
 
 ## Conventions
@@ -35,6 +35,6 @@ sync 실행의 오케스트레이션 — 대상 열거, facts→어댑터 계획
 
 ## Dependencies
 
-- `adapters/` (buildCodexPluginManifest · buildAgyMcpConfig · buildCodexMarketplace · buildAgyDeclaredPlugins), `facts/` (readPluginFacts · readMarketplaceFacts), `lint/` (lintHookEvents · lintHookMatchers).
+- `adapters/` (buildCodexPluginManifest · buildAgyMcpConfig · buildCodexMarketplace), `facts/` (readPluginFacts · readMarketplaceFacts), `lint/` (lintHookEvents · lintHookMatchers).
 - `constants/adapterPaths.ts` · `constants/claudeArtifacts.ts`, `utils/stableJson.ts`, `types/` (AdapterPlan · GeneratedFile · FileOutcome).
 - Node `fs` (existsSync · mkdirSync · readFileSync · writeFileSync · readdirSync) · `path` (join · dirname) — 디스크에 직접 접근하는 유일한 모듈.

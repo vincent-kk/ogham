@@ -24,6 +24,7 @@
     "agents",
     "skills",
     ".claude-plugin",
+    "plugin.json",
     ".codex-plugin",
     "README.md"
   ],
