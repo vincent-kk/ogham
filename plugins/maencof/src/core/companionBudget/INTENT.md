@@ -2,7 +2,7 @@
 
 ## Purpose
 
-companion-identity 정본의 매 턴/세션 렌더 길이를 측정하고 500자(turn) 예산을 게이트하며 brief↔detail 동기화를 검증하는 util. 렌더러와 동일 primitive(`renderIdentitySection`)로 측정해 측정↔렌더 드리프트를 차단한다. 렌더러·companionEdit·companionMigration·setup 스킬이 공유한다.
+companion-identity 정본의 매 턴/세션 렌더 길이를 측정하고 매 턴 예산(`constants/companionIdentity.ts::TURN_IDENTITY_CHAR_BUDGET`)을 게이트하며 brief↔detail 동기화를 검증하는 util. 렌더러와 동일 primitive(`renderIdentitySection`)로 측정해 측정↔렌더 드리프트를 차단한다. 렌더러·companionEdit·companionMigration·setup 스킬이 공유한다.
 
 ## Structure
 
@@ -20,7 +20,7 @@ companion-identity 정본의 매 턴/세션 렌더 길이를 측정하고 500자
 
 ### Ask first
 
-- 예산 상수(500/4000) 변경
+- 예산 상수(`TURN_IDENTITY_CHAR_BUDGET`/`SESSION_IDENTITY_CHAR_BUDGET`) 변경 — 숫자 소비처는 `skills/setup/reference.md` 뿐, 나머지는 상수를 참조한다
 - offenders 정렬/반환 계약 변경
 
 ### Never do

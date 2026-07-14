@@ -4,7 +4,7 @@
  *
  * hook은 얇게 유지하고 무거운 1회성 변환은 여기서 수행한다. schema_version ≥ 2면
  * no-op(멱등). v1→v2 필드 매핑만 수행하며 CLAUDE.md는 건드리지 않는다. 매 턴 예산을
- * 초과하면 저살리언스 turn 섹션을 session으로 자동 강등해 500 이내로 맞춘다. 실패는
+ * 초과하면 저살리언스 turn 섹션을 session으로 자동 강등해 예산 이내로 맞춘다. 실패는
  * 격리(로그 후 원본 유지) — 마이그레이션 오류가 서버 기동을 막지 않는다.
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -41,7 +41,7 @@ export interface CompanionMigrationResult {
 const IDENTITY_RELATIVE = ['.maencof-meta', 'companion-identity.json'];
 
 /**
- * 매 턴 예산(500)을 초과하면 turn 대상(inject turn|both) 중 salience 낮은 것부터
+ * 매 턴 예산(`TURN_IDENTITY_CHAR_BUDGET`)을 초과하면 turn 대상(inject turn|both) 중 salience 낮은 것부터
  * inject:"session"으로 강등해 예산 내로 맞춘다. v1→v2 매핑이 합성한 inject 기본값을
  * 조정하는 것이며(사용자 저작값 아님) turn 대상이 소진되면 멈춘다. 반환은 강등된 key 목록.
  */
@@ -109,7 +109,7 @@ export function runCompanionMigration(cwd: string): CompanionMigrationResult {
       return { migrated: false, reason: 'invalid' };
     }
 
-    // §B1: 매 턴 예산 초과 시 저살리언스 turn 섹션을 session으로 자동 강등해 500 이내로 맞춘다.
+    // §B1: 매 턴 예산 초과 시 저살리언스 turn 섹션을 session으로 자동 강등해 예산 이내로 맞춘다.
     const fitted = demoteToFitTurnBudget(parsed.data.sections);
     const finalData: CompanionIdentity =
       fitted.demoted.length > 0

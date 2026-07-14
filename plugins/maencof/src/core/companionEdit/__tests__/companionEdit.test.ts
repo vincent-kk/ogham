@@ -11,6 +11,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { TURN_IDENTITY_CHAR_BUDGET } from '../../../constants/companionIdentity.js';
 import type { CompanionEditInput } from '../../../types/mcpCompanion.js';
 import { applyCompanionEdit } from '../companionEdit.js';
 
@@ -129,7 +130,7 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
         key: 'bloat',
         inject: 'both',
         salience: 4,
-        detail: 'x'.repeat(600),
+        detail: 'x'.repeat(TURN_IDENTITY_CHAR_BUDGET + 1),
       },
       commit: true,
     });
@@ -196,13 +197,13 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
               key: 'alpha',
               inject: 'both',
               salience: 5,
-              detail: 'a'.repeat(300),
+              detail: 'a'.repeat(TURN_IDENTITY_CHAR_BUDGET + 200),
             },
             {
               key: 'beta',
               inject: 'turn',
               salience: 4,
-              detail: 'b'.repeat(300),
+              detail: 'b'.repeat(TURN_IDENTITY_CHAR_BUDGET + 100),
             },
           ],
           created_at: '2026-07-07T00:00:00Z',
@@ -211,12 +212,12 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
         'utf-8',
       );
 
-    it('commits a reducing edit even while the set stays over 500 chars', () => {
+    it('commits a reducing edit even while the set stays over the configured budget', () => {
       writeOverBudget();
       const result = edit({
         operation: 'update_section',
         key: 'alpha',
-        section: { brief: 'a'.repeat(250) },
+        section: { brief: 'a'.repeat(TURN_IDENTITY_CHAR_BUDGET + 100) },
         commit: true,
       });
       expect(result.committed).toBe(true);
@@ -232,7 +233,7 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
           key: 'gamma',
           inject: 'turn',
           salience: 3,
-          detail: 'c'.repeat(80),
+          detail: 'c'.repeat(TURN_IDENTITY_CHAR_BUDGET + 1),
         },
         commit: true,
       });

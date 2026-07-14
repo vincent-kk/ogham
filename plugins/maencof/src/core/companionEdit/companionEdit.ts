@@ -2,7 +2,7 @@
  * @file companionEdit.ts
  * @description companion-identity.json 정본 편집의 유일한 허가 채널(preview/commit 2단계).
  *
- * 로드(→ 레거시면 정본 정규화) → 연산 적용(메모리) → 검증(Zod 정본 + 500 예산 + brief 동기화)
+ * 로드(→ 레거시면 정본 정규화) → 연산 적용(메모리) → 검증(Zod 정본 + 매 턴 예산 + brief 동기화)
  * → commit≠true면 diff만(파일 불변), commit이면 백업 후 저장. 예산·동기화 위반은 커밋 거부.
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -213,10 +213,10 @@ export function applyCompanionEdit(
       ),
     );
 
-  // §B1: 절대 500 기준이 아니라 단조-개선(monotone) 기준으로 커밋을 게이트한다.
-  // 편집 후 총합이 ≤500 이거나, 편집 전 총합을 악화시키지 않으면(초과를 늘리지 않으면)
-  // 허용 — 마이그레이션 직후 초과 상태(예: 675)에서도 brief를 하나씩 붙여 500 아래로
-  // 점진 수렴할 수 있다. 초과를 늘리는 편집만 거부한다.
+  // §B1: 절대 `TURN_IDENTITY_CHAR_BUDGET` 기준이 아니라 단조-개선(monotone) 기준으로
+  // 커밋을 게이트한다. 편집 후 총합이 예산 이내이거나, 편집 전 총합을 악화시키지 않으면
+  // 허용 — 마이그레이션 직후 초과 상태에서도 brief를 하나씩 붙여 예산 아래로 점진
+  // 수렴할 수 있다. 초과를 늘리는 편집만 거부한다.
   const beforeTurn = assertTurnBudget(current.sections);
   const turn = assertTurnBudget(candidate.sections);
   if (!turn.ok && turn.total > beforeTurn.total)

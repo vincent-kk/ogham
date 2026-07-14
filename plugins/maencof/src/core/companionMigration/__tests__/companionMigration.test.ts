@@ -11,6 +11,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { TURN_IDENTITY_CHAR_BUDGET } from '../../../constants/companionIdentity.js';
 import type { CompanionIdentity } from '../../../types/companion.js';
 import { assertTurnBudget } from '../../companionBudget/index.js';
 import { runCompanionMigration } from '../companionMigration.js';
@@ -116,18 +117,18 @@ describe('runCompanionMigration', () => {
     expect(readFileSync(claudeMdPath, 'utf-8')).toBe(original);
   });
 
-  it('auto-demotes low-salience turn sections to session when migration exceeds the 500-char turn budget (§B1)', () => {
+  it('auto-demotes low-salience turn sections to session when migration exceeds the configured turn budget (§B1)', () => {
     writeFileSync(
       identityPath,
       JSON.stringify({
         name: 'Nao',
-        role: 'r'.repeat(260),
+        role: 'r'.repeat(Math.ceil(TURN_IDENTITY_CHAR_BUDGET / 2)),
         personality: {
           tone: 'calm',
           approach: 'structured',
           traits: ['brief'],
         },
-        principles: ['p'.repeat(260)],
+        principles: ['p'.repeat(Math.ceil(TURN_IDENTITY_CHAR_BUDGET / 2))],
         taboos: ['no unauthorized deletion'],
         origin_story: 'Born to think alongside you.',
         greeting: 'Welcome back.',
@@ -144,7 +145,7 @@ describe('runCompanionMigration', () => {
     expect(v2.sections.find((s) => s.key === 'principles')?.inject).toBe(
       'session',
     );
-    // the post-migration per-turn set now fits the 500-char budget
+    // the post-migration per-turn set now fits the configured budget
     expect(assertTurnBudget(v2.sections).ok).toBe(true);
   });
 });

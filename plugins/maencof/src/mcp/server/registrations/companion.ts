@@ -10,6 +10,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { TURN_IDENTITY_CHAR_BUDGET } from '../../../constants/companionIdentity.js';
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { handleCompanionEdit } from '../../tools/companionEdit/index.js';
 import { registerReadTool } from '../middlewares/index.js';
@@ -19,8 +20,7 @@ export function registerCompanionTools(server: McpServer): void {
     server,
     McpToolName.COMPANION_EDIT,
     {
-      description:
-        'Edits .maencof-meta/companion-identity.json (canonical schema), the single source of truth for the AI companion persona. Two-step by design: without commit it previews the diff and validation only (file unchanged); with commit:true it backs up then writes. Rejects changes that break the schema, exceed the 500-char per-turn injection budget, or whose brief is not shorter than its detail. This is the ONLY permitted channel to edit companion-identity.json — never edit it directly.',
+      description: `Edits .maencof-meta/companion-identity.json (canonical schema), the single source of truth for the AI companion persona. Two-step by design: without commit it previews the diff and validation only (file unchanged); with commit:true it backs up then writes. Rejects changes that break the schema, exceed the ${TURN_IDENTITY_CHAR_BUDGET}-char per-turn injection budget, or whose brief is not shorter than its detail. This is the ONLY permitted channel to edit companion-identity.json — never edit it directly.`,
       inputSchema: z.object({
         operation: z
           .enum([

@@ -1,6 +1,6 @@
 /**
  * @file assertTurnBudget.ts
- * @description 매 턴 500자 예산 게이트. 초과 시 `ok:false` + 큰 순 offenders.
+ * @description 매 턴 `TURN_IDENTITY_CHAR_BUDGET` 예산 게이트. 초과 시 `ok:false` + 큰 순 offenders.
  */
 import { TURN_IDENTITY_CHAR_BUDGET } from '../../../constants/companionIdentity.js';
 import type { CompanionSectionMinimal } from '../../../types/companionGuard.js';

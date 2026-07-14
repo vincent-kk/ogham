@@ -4,7 +4,7 @@
  *
  * 배경정보가 아니라 이번 응답에 대한 구속 규율(binding)로 프레이밍한다. 대상은
  * `inject ∈ {turn, both}` 섹션, 본문은 `brief ?? detail`, 배치는 salience 내림차순.
- * 런타임 컷은 없다 — 500자 예산은 저작(companion_edit·setup) 게이트가 강제한다.
+ * 런타임 컷은 없다 — `TURN_IDENTITY_CHAR_BUDGET` 예산은 저작(companion_edit·setup) 게이트가 강제한다.
  */
 import type { CompanionIdentityMinimal } from '../../types/companionGuard.js';
 

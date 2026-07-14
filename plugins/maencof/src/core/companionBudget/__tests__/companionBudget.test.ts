@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { TURN_IDENTITY_CHAR_BUDGET } from '../../../constants/companionIdentity.js';
 import type { CompanionSectionMinimal } from '../../../types/companionGuard.js';
 import { renderIdentitySection } from '../../turnContext/renderIdentitySection.js';
 import {
@@ -43,11 +44,17 @@ describe('measureTurnChars', () => {
   });
 });
 
-describe('assertTurnBudget — 500 gate (§3.1)', () => {
+describe('assertTurnBudget — configured gate (§3.1)', () => {
   it('flags an over-budget per-turn set and reports offenders largest-first', () => {
     const sections = [
-      section({ key: 'a', detail: 'a'.repeat(300) }),
-      section({ key: 'b', detail: 'b'.repeat(250) }),
+      section({
+        key: 'a',
+        detail: 'a'.repeat(TURN_IDENTITY_CHAR_BUDGET + 100),
+      }),
+      section({
+        key: 'b',
+        detail: 'b'.repeat(TURN_IDENTITY_CHAR_BUDGET + 1),
+      }),
     ];
     const result = assertTurnBudget(sections);
     expect(result.ok).toBe(false);

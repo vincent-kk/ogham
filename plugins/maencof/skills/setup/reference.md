@@ -96,11 +96,11 @@ Per section:
 
 ### Per-turn budget gate (MUST enforce before saving)
 
-The per-turn injection is capped at 500 characters. Before saving:
+The per-turn injection is capped at **1024 characters** — this document is the only prose copy of the value; it mirrors `TURN_IDENTITY_CHAR_BUDGET` in the plugin source, which is what the `companion_edit` tool actually enforces. Before saving:
 
 1. Take every section with `inject` of `"turn"` or `"both"`.
 2. For each, render `<{key} salience="{n}">{brief ?? detail}</{key}>` (taboos get a `NEVER: ` body prefix) and sum the character counts.
-3. If the total exceeds 500, demote a section to `inject: "session"` or add a shorter `brief`, then recompute. Never save an over-budget per-turn set — there is no runtime trimming.
+3. If the total exceeds the cap, demote a section to `inject: "session"` or add a shorter `brief`, then recompute. Never save an over-budget per-turn set — there is no runtime trimming.
 
 ### Persistence Schema (companion-identity.json, v2)
 
@@ -163,7 +163,7 @@ On "Use", save to `.maencof-meta/companion-identity.json` with EXACTLY this stru
 - `created_at` / `updated_at`: ISO 8601 datetime (date-only strings are invalid). Set both to the current time on creation.
 - `detail`/`brief` may be a string or an array of strings; arrays are joined with `|` at render (the `principles` section above uses an array). Budget and brief-length checks measure the joined text.
 - Write persona content (detail/brief/greeting) in the user's configured language; keys, `inject` values, and timestamps stay as shown.
-- The `role` and `principles` sections above carry a `brief`: it is the shorter form injected every turn, while the full `detail` is used only at session start. Add a `brief` to any long `turn`/`both` section to keep the per-turn budget under 500 chars. Sections without a `brief` (tone, taboos, traits) fall back to `detail` every turn.
+- The `role` and `principles` sections above carry a `brief`: it is the shorter form injected every turn, while the full `detail` is used only at session start. Add a `brief` to any long `turn`/`both` section to keep the per-turn budget under the cap (§ Per-turn budget gate). Sections without a `brief` (tone, taboos, traits) fall back to `detail` every turn.
 - After onboarding, incremental edits go through the `companion_edit` MCP tool (preview → commit), never by editing the JSON directly.
 
 ### T3-1: Persona Proposal

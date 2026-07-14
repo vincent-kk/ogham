@@ -52,7 +52,7 @@ needs tuning → `configure`.
 | Execution | `{CWD}/.maencof-meta/` (other)                | Read → `/maencof:checkup`                                           |
 | Execution | `{CWD}/.claude/settings.local.json`           | **Never**                                                           |
 
-> **Companion persona (v2)**: For incremental tuning of the AI companion — add/update/remove a persona `section`, or adjust `inject`/`salience`/`brief`/`detail` (each a string or an array of strings joined with `|`) — route to the `companion_edit` MCP tool (preview → commit, backup + schema + monotone 500-char per-turn budget gate that lets an over-budget persona converge without worsening). For a full re-author, use `/maencof:setup --reset --companion`. Never edit `companion-identity.json` directly.
+> **Companion persona (v2)**: For incremental tuning of the AI companion — add/update/remove a persona `section`, or adjust `inject`/`salience`/`brief`/`detail` (each a string or an array of strings joined with `|`) — route to the `companion_edit` MCP tool (preview → commit, backup + schema + monotone per-turn budget gate — the tool states the char cap and lets an over-budget persona converge without worsening). For a full re-author, use `/maencof:setup --reset --companion`. Never edit `companion-identity.json` directly.
 
 ## Workflow
 

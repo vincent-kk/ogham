@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { TURN_IDENTITY_CHAR_BUDGET } from '../../../constants/companionIdentity.js';
 import type { CompanionIdentityMinimal } from '../../../types/companionGuard.js';
 import { buildCompanionIdentityTag } from '../buildCompanionIdentityTag.js';
 
@@ -106,7 +107,7 @@ describe('buildCompanionIdentityTag — binding per-turn render (§4)', () => {
     expect(tag).toBe('');
   });
 
-  it('injects role as a per-turn section and keeps a realistic persona within the 500-char budget', () => {
+  it('injects role as a per-turn section and keeps a realistic persona within the configured budget', () => {
     const tag = buildCompanionIdentityTag(
       identity([
         {
@@ -144,11 +145,11 @@ describe('buildCompanionIdentityTag — binding per-turn render (§4)', () => {
     expect(tag).toContain(
       '<role salience="5">Knowledge Structuring & Synthesis Partner</role>',
     );
-    // Only the section markup + bodies count toward the 500 budget (preamble excluded).
+    // Only the section markup + bodies count toward the configured budget (preamble excluded).
     const sectionChars = tag
       .split('\n')
       .filter((l) => l.trim().startsWith('<') && l.includes('salience='))
       .reduce((sum, l) => sum + [...l.trim()].length, 0);
-    expect(sectionChars).toBeLessThanOrEqual(500);
+    expect(sectionChars).toBeLessThanOrEqual(TURN_IDENTITY_CHAR_BUDGET);
   });
 });

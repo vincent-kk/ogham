@@ -57,7 +57,7 @@ export interface CompanionEditResult {
   /** 변경 요약 (예: `add_section "humor"`) */
   changed: string;
   message: string;
-  /** 커밋을 막는 검증 실패(스키마·500 예산·brief 길이 역전) */
+  /** 커밋을 막는 검증 실패(스키마·매 턴 예산·brief 길이 역전) */
   errors: string[];
   /** 권고성 경고(세션 안전판 초과 등, 커밋 불차단) */
   warnings: string[];
