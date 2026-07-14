@@ -5,14 +5,13 @@ import {
   CLAUDE_MANIFEST_PATH,
   CLAUDE_MCP_PATH,
   SKILLS_DIRECTORY,
-} from "../../constants/hosts.js";
+} from "../../constants/claudeArtifacts.js";
 import type {
   HooksFileSource,
   McpServerSource,
   PluginFacts,
-} from "../../types/adapter.js";
+} from "../../types/index.js";
 
-/** Reads one plugin's Claude artifacts (read-only) into adapter-input facts. */
 export function readPluginFacts(directory: string): PluginFacts {
   const manifestPath = join(directory, CLAUDE_MANIFEST_PATH);
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as Record<

@@ -51,6 +51,7 @@ const CONSUMERS = [
   "@ogham/filid",
   "@ogham/imbas",
   "@ogham/atlassian",
+  "@ogham/plugin-compiler",
 ];
 
 async function clearTscCache(pkgDir) {

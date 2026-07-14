@@ -1,31 +1,25 @@
 ## Purpose
 
-`@ogham/plugin-compiler` 모노레포 내부 전용 어댑터 생성기. 각 플러그인의 **Claude 산출물을 무수정 정본**으로 읽어 Codex(`.codex-plugin/plugin.json`)·Antigravity(`mcp_config.json`)·루트 마켓플레이스(`.agents/*`) 어댑터 파일을 결정적으로 생성한다. 설계 SSoT 는 [`.metadata/plugin-compiler/`](../../.metadata/plugin-compiler/), 적용 절차는 [migration-playbook.md](../../.metadata/plugin-compiler/migration-playbook.md).
+`@ogham/plugin-compiler` 패키지 루트. 모노레포 내부 전용 어댑터 생성기로, 각 플러그인의 **Claude 산출물을 무수정 정본**으로 읽어 Codex(`.codex-plugin/plugin.json`)·Antigravity(`mcp_config.json`)·루트 마켓플레이스(`.agents/*`) 어댑터를 결정적으로 생성한다. 설계 SSoT 는 [`.metadata/plugin-compiler/`](../../.metadata/plugin-compiler/), 적용 절차는 [migration-playbook.md](../../.metadata/plugin-compiler/migration-playbook.md).
 
 ## Structure
 
-| Path             | Role                                                         |
-| ---------------- | ------------------------------------------------------------ |
-| `src/main.ts`    | CLI 진입 (`sync [--check] [pluginDir ...]`, tsx 실행)        |
-| `src/constants/` | organ: 호스트 상수 (Codex 이벤트셋 · 어댑터 경로 · env 마커) |
-| `src/types/`     | organ: PluginFacts · GeneratedFile · Diagnostic 계약         |
-| `src/json/`      | organ: `stableJson` 직렬화                                   |
-| `src/facts/`     | fractal: Claude 정본 → facts (읽기 전용)                     |
-| `src/adapters/`  | fractal: facts → 어댑터 파일 내용 (순수)                     |
-| `src/lint/`      | organ: 호환성 진단 (훅 이벤트 · matcher · MCP 이식성)        |
-| `src/pipeline/`  | fractal: 대상 열거 · 쓰기/검사 오케스트레이션                |
+| Path               | Role                                            |
+| ------------------ | ----------------------------------------------- |
+| `src/`             | TypeScript 소스 (fractal 루트 — 진입 `main.ts`) |
+| `vitest.config.ts` | 스펙 러너 (`src/**/__tests__/**`)               |
+| `package.json`     | private 워크스페이스 (npm 게시 금지)            |
 
 ## Conventions
 
-- `tsx` 로 실행 — dist 빌드 산출물 없음 (`private: true`, npm 게시 금지).
-- 어댑터 내용 생성(`adapters/`)은 순수 함수 — 디스크 쓰기는 `pipeline/applyFiles` 단일 경로.
+- `tsx` 로 실행 — dist 빌드 산출물 없음 (`private: true`).
 - 진입은 루트 스크립트 `yarn plugin:adapters`(sync) / `yarn plugin:adapters:check`.
+- 루트 `yarn typecheck` · `yarn test:run` 이 이 패키지를 포함한다.
 
 ## Boundaries
 
 ### Always do
 
-- JSON emit 은 `stableJson`(2-space + 개행) 단일 경로 — 재실행 무변경(결정성).
 - Claude 소비 파일(`.claude-plugin/**`·`.mcp.json`·`skills/`·`agents/`·`hooks/`)은 **읽기 전용**.
 - 생성 MCP 선언에 `OGHAM_HOST` 호스트 마커 env 주입 (codex/agy; Claude 는 마커 없음).
 
@@ -42,5 +36,5 @@
 
 ## Dependencies
 
-- **개발**: `typescript ^5.7`, `tsx`(루트) — Node.js ≥ 20, Yarn 4.12 workspaces. 런타임 의존성 없음(Node 내장만).
+- **개발**: `typescript ^5.7`, `vitest`, `tsx`(루트) — Node.js ≥ 20, Yarn 4.12 workspaces. 런타임 의존성 없음(Node 내장만).
 - 버전 동기화는 [`scripts/inject-version.mjs`](../../scripts/inject-version.mjs) 가 담당(`.claude-plugin` + `.codex-plugin`).

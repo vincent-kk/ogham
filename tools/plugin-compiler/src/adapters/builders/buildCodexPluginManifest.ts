@@ -1,5 +1,8 @@
-import { CLAUDE_HOOKS_PATH } from "../../constants/hosts.js";
-import type { PluginFacts } from "../../types/adapter.js";
+import {
+  CLAUDE_HOOKS_PATH,
+  SKILLS_DIRECTORY,
+} from "../../constants/claudeArtifacts.js";
+import type { PluginFacts } from "../../types/index.js";
 import { buildCodexMcpServers } from "./buildCodexMcpServers.js";
 
 const COPIED_MANIFEST_FIELDS = [
@@ -13,11 +16,6 @@ const COPIED_MANIFEST_FIELDS = [
   "keywords",
 ] as const;
 
-/**
- * `.codex-plugin/plugin.json` content. Declaring `mcpServers` inline shields
- * Codex from the Claude-only `.mcp.json` (variable args); `hooks` points at
- * the same file Claude consumes so both hosts share one hook config.
- */
 export function buildCodexPluginManifest(
   facts: PluginFacts,
 ): Record<string, unknown> {
@@ -26,7 +24,7 @@ export function buildCodexPluginManifest(
     if (facts.manifest[field] !== undefined)
       manifest[field] = facts.manifest[field];
 
-  if (facts.hasSkills) manifest.skills = "./skills/";
+  if (facts.hasSkills) manifest.skills = `./${SKILLS_DIRECTORY}/`;
   if (facts.hasHooks) manifest.hooks = `./${CLAUDE_HOOKS_PATH}`;
 
   const mcpServers = buildCodexMcpServers(facts);

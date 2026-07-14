@@ -6,12 +6,11 @@ import {
 import {
   AGY_DECLARED_PLUGINS_PATH,
   CODEX_MARKETPLACE_PATH,
-} from "../../constants/hosts.js";
+} from "../../constants/adapterPaths.js";
 import { readMarketplaceFacts } from "../../facts/index.js";
-import { stableJson } from "../../json/stableJson.js";
-import type { AdapterPlan } from "../../types/adapter.js";
+import type { AdapterPlan } from "../../types/index.js";
+import { stableJson } from "../../utils/stableJson.js";
 
-/** Plans the repository-root marketplace adapters (Codex + agy declared). */
 export function planRootAdapters(rootDirectory: string): AdapterPlan {
   const facts = readMarketplaceFacts(rootDirectory);
   return {

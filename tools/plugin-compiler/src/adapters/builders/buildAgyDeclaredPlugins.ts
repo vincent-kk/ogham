@@ -1,10 +1,5 @@
-import type { MarketplaceFacts } from "../../types/adapter.js";
+import type { MarketplaceFacts } from "../../types/index.js";
 
-/**
- * `.agents/plugins.json` content — Antigravity declared-plugins layer.
- * Checking this file in lets a cloned workspace activate the plugins without
- * an install command.
- */
 export function buildAgyDeclaredPlugins(
   facts: MarketplaceFacts,
 ): Record<string, unknown> {

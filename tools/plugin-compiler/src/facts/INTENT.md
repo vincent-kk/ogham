@@ -17,7 +17,7 @@ Claude 정본(플러그인 산출물·루트 마켓플레이스)을 **읽기 전
 
 ### Ask first
 
-- facts 계약(`types/adapter.ts`) 확장 — adapters/lint 소비처 전체에 영향.
+- facts 계약(`types/facts.ts`) 확장 — adapters/lint 소비처 전체에 영향.
 
 ### Never do
 

@@ -1,7 +1,6 @@
-import { CODEX_HOOK_EVENT_SET } from "../constants/hosts.js";
-import type { Diagnostic, PluginFacts } from "../types/adapter.js";
+import { CODEX_HOOK_EVENT_SET } from "../../constants/hosts.js";
+import type { Diagnostic, PluginFacts } from "../../types/index.js";
 
-/** Flags hook events Codex would silently ignore (outside its 10-event set). */
 export function lintHookEvents(facts: PluginFacts): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   for (const event of Object.keys(facts.hooksFile?.hooks ?? {}))

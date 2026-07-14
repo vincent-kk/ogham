@@ -30,6 +30,8 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 | `.agents/plugins.json`                  | `.claude-plugin/marketplace.json`                     | `{"entries":[{"path":"./plugins/<n>"}…]}` (agy declared)                                                                                            |
 
 - args 상대화: `${CLAUDE_PLUGIN_ROOT}/X` 접두를 `X` 로. 변수가 접두 이외 위치·env·command 에 있으면 **error** (생성물이 깨지므로).
+- **Codex 서버명 오버라이드**: ogham 플러그인은 `tools`·`t` 같은 범용 서버명을 공유하는데 Codex 의 도구 네임스페이스는 플러그인 단위로 스코프되지 않아 충돌한다. 서버가 하나면 플러그인명, 둘 이상이면 `<plugin>-<server>` 로 바꾼다. agy 는 플러그인 단위로 네임스페이스하므로 원본 이름을 유지한다.
+- **인라인 `mcpServers`**: Codex 매니페스트가 서버를 직접 선언해 Claude 전용 `.mcp.json`(변수 args)을 Codex 가 읽지 않게 차단한다. 반면 `hooks` 는 Claude 와 **같은 파일**을 가리켜 훅 설정을 한 벌로 공유한다.
 - **호스트 마커 env**: 생성되는 MCP 선언에 `OGHAM_HOST` (`codex`/`agy`)를 주입한다. Claude `.mcp.json` 은 무수정이므로 마커 부재 = claude. 호스트 결합 런타임 쓰기(maencof `CLAUDE.md`, filid `.claude/rules/`)가 이 값으로 분기한다(런타임 분기 구현은 플레이북 Stage 4). 훅 프로세스의 호스트 감지는 Codex 주입 env `PLUGIN_DATA` 유무.
 - 버전 동기화: `scripts/inject-version.mjs` 가 `.claude-plugin` 과 함께 `.codex-plugin/plugin.json`(존재 시)을 갱신 — sync 재실행 없이 릴리즈 가능.
 
@@ -47,3 +49,4 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - `yarn plugin:adapters:check` 가 어댑터 손편집·정본 변경 후 미재생성을 exit 1 로 검출.
 - 훅 5종 플러그인(cennad·filid·imbas·maencof·maencof-lens)에서 `codex-read-matcher` 외 진단 0 (filid·imbas 는 `Read|Write|Edit` matcher 로 warning 1 씩 예상).
 - Claude 소비 파일의 git diff 0 (도구 실행 전후).
+- 스펙 통과 — 순수 변환(adapters·lint·cli·utils)과 I/O 계약(pipeline·facts)을 `yarn plugin-compiler test:run` 이 검증. `applyFiles` 의 check 모드는 어떤 쓰기도 하지 않음이 스펙으로 고정된다.

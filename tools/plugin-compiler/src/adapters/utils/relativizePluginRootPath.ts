@@ -1,12 +1,7 @@
-import { CLAUDE_PLUGIN_ROOT_VARIABLE } from "../../constants/hosts.js";
+import { CLAUDE_PLUGIN_ROOT_VARIABLE } from "../../constants/claudeArtifacts.js";
 
 const VARIABLE_PREFIX = `${CLAUDE_PLUGIN_ROOT_VARIABLE}/`;
 
-/**
- * Strips a leading `${CLAUDE_PLUGIN_ROOT}/` so the path resolves against the
- * plugin root (Codex/agy default cwd). Any other placement of the variable has
- * no portable meaning and throws.
- */
 export function relativizePluginRootPath(argument: string): string {
   const relative = argument.startsWith(VARIABLE_PREFIX)
     ? argument.slice(VARIABLE_PREFIX.length)

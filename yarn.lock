@@ -1102,6 +1102,7 @@ __metadata:
   dependencies:
     "@types/node": "npm:^20.11.0"
     typescript: "npm:^5.7.2"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 

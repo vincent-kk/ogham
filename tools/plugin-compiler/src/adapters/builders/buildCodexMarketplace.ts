@@ -1,12 +1,7 @@
-import type { MarketplaceFacts } from "../../types/adapter.js";
+import type { MarketplaceFacts } from "../../types/index.js";
 
 const DEFAULT_CATEGORY = "Productivity";
 
-/**
- * `.agents/plugins/marketplace.json` content — Codex marketplace schema
- * (nested source/policy). Source paths from the Claude manifest are already
- * marketplace-root-relative (`./plugins/<n>`) and carry over verbatim.
- */
 export function buildCodexMarketplace(
   facts: MarketplaceFacts,
 ): Record<string, unknown> {

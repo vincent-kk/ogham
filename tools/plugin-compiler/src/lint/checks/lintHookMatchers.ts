@@ -1,11 +1,7 @@
-import type { Diagnostic, PluginFacts } from "../types/adapter.js";
+import type { Diagnostic, PluginFacts } from "../../types/index.js";
 
 const TOOL_MATCHER_EVENTS = ["PreToolUse", "PostToolUse"] as const;
 
-/**
- * Flags `Read` in tool matchers: Codex has no Read hook alias (file reads go
- * through Bash), so only the Write/Edit legs fire there.
- */
 export function lintHookMatchers(facts: PluginFacts): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   for (const event of TOOL_MATCHER_EVENTS)

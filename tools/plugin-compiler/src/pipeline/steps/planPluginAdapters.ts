@@ -6,14 +6,12 @@ import {
 import {
   AGY_MCP_CONFIG_PATH,
   CODEX_MANIFEST_PATH,
-} from "../../constants/hosts.js";
+} from "../../constants/adapterPaths.js";
 import { readPluginFacts } from "../../facts/index.js";
-import { stableJson } from "../../json/stableJson.js";
-import { lintHookEvents } from "../../lint/lintHookEvents.js";
-import { lintHookMatchers } from "../../lint/lintHookMatchers.js";
-import type { AdapterPlan, GeneratedFile } from "../../types/adapter.js";
+import { lintHookEvents, lintHookMatchers } from "../../lint/index.js";
+import type { AdapterPlan, GeneratedFile } from "../../types/index.js";
+import { stableJson } from "../../utils/stableJson.js";
 
-/** Plans one plugin's adapter files; MCP portability violations become error diagnostics. */
 export function planPluginAdapters(directory: string): AdapterPlan {
   const facts = readPluginFacts(directory);
   const diagnostics = [...lintHookEvents(facts), ...lintHookMatchers(facts)];

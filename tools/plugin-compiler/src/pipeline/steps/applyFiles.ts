@@ -1,11 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import type { FileOutcome, GeneratedFile } from "../../types/adapter.js";
+import type { FileOutcome, GeneratedFile } from "../../types/index.js";
 
-/**
- * Writes planned files that differ from disk; in check mode compares only and
- * reports drift as stale/missing instead of writing.
- */
 export function applyFiles(
   files: GeneratedFile[],
   check: boolean,

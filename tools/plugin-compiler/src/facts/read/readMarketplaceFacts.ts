@@ -1,17 +1,16 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CLAUDE_MARKETPLACE_PATH } from "../../constants/hosts.js";
+import { CLAUDE_MARKETPLACE_PATH } from "../../constants/claudeArtifacts.js";
 import type {
   MarketplaceFacts,
   MarketplacePluginFacts,
-} from "../../types/adapter.js";
+} from "../../types/index.js";
 
 interface RawMarketplace {
   name?: string;
   plugins?: { name?: string; source?: unknown; category?: string }[];
 }
 
-/** Reads the root Claude marketplace manifest (read-only) into facts. */
 export function readMarketplaceFacts(rootDirectory: string): MarketplaceFacts {
   const path = join(rootDirectory, CLAUDE_MARKETPLACE_PATH);
   const raw = JSON.parse(readFileSync(path, "utf8")) as RawMarketplace;

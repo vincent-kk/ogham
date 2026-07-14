@@ -1,18 +1,14 @@
+import { CLAUDE_PLUGIN_ROOT_VARIABLE } from "../../constants/claudeArtifacts.js";
 import {
-  CLAUDE_PLUGIN_ROOT_VARIABLE,
   HOST_MARKER_ENV_NAME,
+  type HostMarker,
 } from "../../constants/hosts.js";
-import type { McpServerSource } from "../../types/adapter.js";
+import type { McpServerSource } from "../../types/index.js";
 import { relativizePluginRootPath } from "./relativizePluginRootPath.js";
 
-/**
- * Rewrites one Claude `.mcp.json` server for hosts that neither expand
- * `${CLAUDE_PLUGIN_ROOT}` nor run servers in the session cwd: args become
- * plugin-root-relative and the host marker env identifies the host at runtime.
- */
 export function buildPortableMcpServer(
   source: McpServerSource,
-  hostMarker: string,
+  hostMarker: HostMarker,
 ): McpServerSource {
   if (source.command.includes(CLAUDE_PLUGIN_ROOT_VARIABLE))
     throw new Error(
