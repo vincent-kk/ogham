@@ -1,52 +1,49 @@
 ## Requirements
 
-`@ogham/plugin-compiler` 는 4대 요구를 기계적으로 충족한다.
+`@ogham/plugin-compiler` 는 in-place 멀티호스트 체제의 어댑터 생성기다. 4대 요구:
 
-1. **Claude 무결손** — `verify/claudeEquivalence` 가 `targets/claude/**` 를 현행 커밋 산출물과 바이트 비교, 불일치 시 실패. 컴파일러가 Claude 에 무해함을 매 실행 증명.
-2. **정본 단일 수정점** — `definitions/` 만 사람이 편집. `compilePlugin` 이 전 호스트 산출물 재생성.
-3. **설치 격리** — 호스트별 `targets/<host>/` 자기완결 트리 emit. 마켓플레이스가 해당 트리만 지목.
-4. **Windows/POSIX** — 훅/서버 진입은 `node <script>` 직접 호출로 emit. 경로는 변수/상대.
+1. **Claude 무결손** — Claude 가 소비하는 파일(`.claude-plugin/**`·`.mcp.json`·`skills/`·`agents/`·`hooks/`)을 **읽기만** 하고 절대 쓰지 않는다. 쓰기 대상은 어댑터 4종뿐.
+2. **결정성** — 동일 정본 → 바이트 동일 어댑터(`stableJson`). `sync` 직후 `sync --check` 는 항상 통과.
+3. **호환성 표면화** — Codex 가 조용히 무시/오동작할 항목(미지원 훅 이벤트, `Read` matcher, MCP env/command 변수)을 진단으로 노출.
+4. **무배선 실행** — `tsx` 로 즉시 실행, dist 없음. 루트 스크립트 `plugin:adapters`·`plugin:adapters:check` 가 유일한 진입.
 
 ## API Contracts
 
-### 프로그램 API (`src/index.ts` 배럴 — 없음; 진입은 pipeline)
-
-- `compilePlugin(pkgDir: string): CompileResult`
-  - 입력: 플러그인 디렉터리(절대경로). `definitions/` 필수.
-  - 출력: `{ targets: Record<HostId, FileMap>, diagnostics: Diagnostic[] }` (순수 — 디스크 미접촉).
-  - 실패: 스키마 위반 · 미해결 토큰 · `fallback` 누락 · Codex 훅 잔존 시 `diagnostics` 에 error, throw 안 함(호출자 판단).
-- `writeTargets(pkgDir, targets): void` — FileMap → `targets/<host>/` 원자적 쓰기.
-- `claudeEquivalence(pkgDir): Diff[]` — 빈 배열이면 통과.
-
-### CLI (`src/main.ts`, `tsx src/main.ts`)
+### CLI (`src/main.ts`)
 
 ```
-plugin-compiler compile <pkgDir> [--host claude|codex|agy|all] [--check]
-  compile        : definitions → targets/ 쓰기
-  --check        : 쓰기 없이 등가/재생성 검증만 (CI clean-regen 게이트)
-plugin-compiler verify <pkgDir>   : claudeEquivalence + 구조 린트
+node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ...]
 ```
 
-### FileMap 계약
+- 인자 없음: 저장소 루트의 `plugins/*`(`.claude-plugin/plugin.json` 보유 디렉터리) 전부 + 루트 어댑터 2종.
+- `pluginDir ...`: 해당 플러그인만 (루트 어댑터 제외).
+- `--check`: 디스크에 쓰지 않고 재생성-비교. 불일치(stale/missing) 또는 error 진단 시 exit 1.
+- 출력: 진단(⚠/✗) → stderr, 파일별 액션(created/updated/unchanged/stale) 요약 → stdout.
 
-- `FileMap = Map<string, Buffer>` — 키는 타깃 루트 기준 상대경로(POSIX 구분자), 값은 바이트.
-- 결정성: 동일 입력 → 동일 FileMap(순서 무관, 바이트 동일). 스냅샷/등가 게이트의 전제.
+### 생성물 (어댑터 4종)
 
-### 토큰 규약 (본문 → 호스트)
+| 파일                                    | 소스                                                  | 규칙                                                                                                                                                |
+| --------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugins/<p>/.codex-plugin/plugin.json` | `.claude-plugin/plugin.json` + `.mcp.json` + 디렉터리 | 메타 필드 복사, `skills`/`hooks` 존재 시 명시 선언, `mcpServers` 인라인(서버명=플러그인명, args 상대화, `type` 생략, `env.OGHAM_HOST="codex"` 주입) |
+| `plugins/<p>/mcp_config.json`           | `.mcp.json`                                           | 동일 래퍼 + args 상대화, 서버명 원본 유지, `env.OGHAM_HOST="agy"` 주입. MCP 없으면 미생성                                                           |
+| `.agents/plugins/marketplace.json`      | `.claude-plugin/marketplace.json`                     | 항목별 `{name, source:{source:"local",path}, policy:{AVAILABLE,ON_INSTALL}, category(Title-case)}`                                                  |
+| `.agents/plugins.json`                  | `.claude-plugin/marketplace.json`                     | `{"entries":[{"path":"./plugins/<n>"}…]}` (agy declared)                                                                                            |
 
-| 토큰                           | claude                               | codex                              | agy                             |
-| ------------------------------ | ------------------------------------ | ---------------------------------- | ------------------------------- |
-| `{{tool:<t>}}`                 | `mcp__plugin_<plugin>_<server>__<t>` | `mcp__<plugin>.<t>`                | `mcp_<server>_<t>`              |
-| `{{skill:<s>}}`                | `/<plugin>:<s>`                      | `$<s>`                             | `<s>`                           |
-| `{{pluginRoot}}` (프로즈 본문) | `${CLAUDE_PLUGIN_ROOT}`              | `${CLAUDE_PLUGIN_ROOT}`(주입 별칭) | `${CLAUDE_PLUGIN_ROOT}`(캐비엇) |
+- args 상대화: `${CLAUDE_PLUGIN_ROOT}/X` 접두를 `X` 로. 변수가 접두 이외 위치·env·command 에 있으면 **error** (생성물이 깨지므로).
+- **호스트 마커 env**: 생성되는 MCP 선언에 `OGHAM_HOST` (`codex`/`agy`)를 주입한다. Claude `.mcp.json` 은 무수정이므로 마커 부재 = claude. 호스트 결합 런타임 쓰기(maencof `CLAUDE.md`, filid `.claude/rules/`)가 이 값으로 분기한다(런타임 분기 구현은 플레이북 Stage 4). 훅 프로세스의 호스트 감지는 Codex 주입 env `PLUGIN_DATA` 유무.
+- 버전 동기화: `scripts/inject-version.mjs` 가 `.claude-plugin` 과 함께 `.codex-plugin/plugin.json`(존재 시)을 갱신 — sync 재실행 없이 릴리즈 가능.
 
-- codex 서버명은 플러그인명으로 오버라이드(전역 도구명 충돌 회피, 실측 근거). MCP args 경로는 `cwd: "."`+상대(프로즈 pluginRoot 와 별개).
-- codex 도구명(`mcp__deilen.render_viewer`)은 실 스모크로 확정. agy 도구명은 인터랙티브 스모크로 재확정 대기(현재 추정값).
+### 진단
+
+| level   | code                  | 조건                                                               |
+| ------- | --------------------- | ------------------------------------------------------------------ |
+| error   | `mcp-variable-args`   | `${CLAUDE_PLUGIN_ROOT}` 가 args 접두 이외 위치·command·env 에 존재 |
+| warning | `codex-unknown-event` | hooks.json 에 Codex 미지원 이벤트(10종 밖) — Codex 가 조용히 무시  |
+| warning | `codex-read-matcher`  | PreToolUse/PostToolUse matcher 에 `Read` — Codex 는 미발화         |
 
 ## Acceptance Criteria
 
-검증은 커밋된 테스트가 아니라 **재현 절차**([`.metadata/plugin-compiler/reproduction.md`](../../.metadata/plugin-compiler/reproduction.md))로 확인한다 — `extract → compile → verify` 를 실 플러그인에 실행:
-
-- 정본 → `targets/claude` 가 현행 커밋 산출물(`CLAUDE_INSTALL_ENTRIES`)과 **JSON 의미 동일 + 그 외 바이트 동일** (`verify` 가 빈 diff). deilen(L1)·maencof-lens/filid/maencof(L2) 재현 확인됨.
-- `compile` 진단: 미해결 예약토큰 0(error), Codex hooks 파일 0, agy SessionEnd 드롭(warning), 서버명 오버라이드·frontmatter 드롭.
-- `mcp-lifecycle` 오버라이드 시 SessionEnd 가 Claude 포함 전 호스트에서 미emit + 손실경고 없음.
+- `yarn plugin:adapters` 2회 연속 실행 시 2회째 전 파일 `unchanged`.
+- `yarn plugin:adapters:check` 가 어댑터 손편집·정본 변경 후 미재생성을 exit 1 로 검출.
+- 훅 5종 플러그인(cennad·filid·imbas·maencof·maencof-lens)에서 `codex-read-matcher` 외 진단 0 (filid·imbas 는 `Read|Write|Edit` matcher 로 warning 1 씩 예상).
+- Claude 소비 파일의 git diff 0 (도구 실행 전후).
