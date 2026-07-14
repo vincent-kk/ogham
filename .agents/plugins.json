@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "path": "./plugins/atlassian"
+    },
+    {
+      "path": "./plugins/cennad"
+    },
+    {
+      "path": "./plugins/deilen"
+    },
+    {
+      "path": "./plugins/entrez"
+    },
+    {
+      "path": "./plugins/filid"
+    },
+    {
+      "path": "./plugins/imbas"
+    },
+    {
+      "path": "./plugins/maencof"
+    },
+    {
+      "path": "./plugins/maencof-lens"
+    },
+    {
+      "path": "./plugins/prawf"
+    },
+    {
+      "path": "./plugins/r-statistics"
+    }
+  ]
+}

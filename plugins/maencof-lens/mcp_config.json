@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "t": {
+      "command": "node",
+      "args": [
+        "bridge/mcp-server.cjs"
+      ],
+      "env": {
+        "OGHAM_HOST": "agy"
+      }
+    }
+  }
+}
