@@ -36,4 +36,4 @@ Reference documentation for `cross-review` is split into focused files.
 | `config_patch_validate`                                                                                                                     | chairperson    | config-patch gate before fix-requests emission (bookkeeping)                                                     |
 | `debt_manage(create)`                                                                                                                       | chairperson    | advisory-ledger promotion at count 3 (bookkeeping)                                                               |
 
-All tool names use the full form `mcp__plugin_filid_t__<tool>`.
+All tool names use the full form `mcp__plugin_filid_tools__<tool>`.

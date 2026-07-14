@@ -124,7 +124,7 @@ array as `configWarnings` in its response (`structureValidate`,
 ### Review patch validation
 
 cross-review fix-requests that propose `.filid/config.json` patches are
-validated via `mcp__plugin_filid_t__config_patch_validate` (calls `validateConfigPatch`
+validated via `mcp__plugin_filid_tools__config_patch_validate` (calls `validateConfigPatch`
 which uses the shared schema — no local redefinition) before reaching
 `resolve`. Hallucinated keys such as `rules[*].allowed-no-entry`
 cannot slip through as no-op commits.

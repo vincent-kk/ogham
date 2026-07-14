@@ -604,7 +604,7 @@ Set up the build pipeline and plugin manifest files for Claude Code plugin distr
 ```json
 {
   "mcpServers": {
-    "t": {
+    "tools": {
       "command": "${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh",
       "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"]
     }
@@ -811,11 +811,11 @@ Token usage: ~{used}/{budget}
 **Available Tools**:
 
 - `Read`, `Glob`, `Grep` (파일시스템 접근)
-- `mcp__plugin_maencof-lens_t__search`
-- `mcp__plugin_maencof-lens_t__context`
-- `mcp__plugin_maencof-lens_t__navigate`
-- `mcp__plugin_maencof-lens_t__read`
-- `mcp__plugin_maencof-lens_t__status`
+- `mcp__plugin_maencof-lens_tools__search`
+- `mcp__plugin_maencof-lens_tools__context`
+- `mcp__plugin_maencof-lens_tools__navigate`
+- `mcp__plugin_maencof-lens_tools__read`
+- `mcp__plugin_maencof-lens_tools__status`
 
 **Exploration Strategy**:
 

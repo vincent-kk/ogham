@@ -16,7 +16,7 @@ file type.
 
 The orchestrating skill (`/filid:update`, `/filid:scan
 --fix`) provides the workflow sequence and injects MCP tool results
-(`mcp__plugin_filid_t__fractal_scan`, `mcp__plugin_filid_t__fractal_navigate`, `mcp__plugin_filid_t__ast_analyze`, `mcp__plugin_filid_t__doc_compress`) into
+(`mcp__plugin_filid_tools__fractal_scan`, `mcp__plugin_filid_tools__fractal_navigate`, `mcp__plugin_filid_tools__ast_analyze`, `mcp__plugin_filid_tools__doc_compress`) into
 your task prompt. You focus on applying the documentation-steward
 perspective to those inputs.
 
@@ -25,7 +25,7 @@ perspective to those inputs.
 ### Always do
 
 - Restrict all writes to `INTENT.md` and `DETAIL.md` files.
-- Keep every `INTENT.md` under 50 lines. Apply `mcp__plugin_filid_t__doc_compress` (results
+- Keep every `INTENT.md` under 50 lines. Apply `mcp__plugin_filid_tools__doc_compress` (results
   injected by the skill) before the limit is reached.
 - Ensure every `INTENT.md` contains the three tiers: `### Always do`,
   `### Ask first`, `### Never do`.

@@ -26,7 +26,7 @@ Generates a pure analysis report with no filesystem changes.
 
 - **`reflect`** — read-only judge. No filesystem changes, ever. Use for
   diagnostic reports and dry-run-style previews of organize candidates.
-- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_t__move`
+- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move`
   after user confirmation. Use when you are ready to apply the transitions
   `reflect` surfaced.
 
@@ -47,7 +47,7 @@ Rule of thumb: inspect without side effects → `reflect`; apply transitions →
 
 ### Step 1 — Query Vault Status
 
-Query the current index status, node count, and stale node list via `mcp__plugin_maencof_t__kg_status`.
+Query the current index status, node count, and stale node list via `mcp__plugin_maencof_tools__kg_status`.
 
 ### Step 2 — Run judge Module
 
@@ -95,9 +95,9 @@ Execute memory-organizer judge logic:
 
 | Tool | Purpose |
 |------|---------|
-| `mcp__plugin_maencof_t__kg_status` | Query vault status |
-| `mcp__plugin_maencof_t__kg_navigate` | Traverse link relationships |
-| `mcp__plugin_maencof_t__read` | Read document Frontmatter |
+| `mcp__plugin_maencof_tools__kg_status` | Query vault status |
+| `mcp__plugin_maencof_tools__kg_navigate` | Traverse link relationships |
+| `mcp__plugin_maencof_tools__read` | Read document Frontmatter |
 
 ## Error Handling
 

@@ -25,7 +25,7 @@ Windows와 Unix (macOS, Linux) 런타임 간의 호환성 무결성을 보장하
 - [ ] 파서에서 CRLF 라인 엔딩 정상 취급, 에러 또는 오동작 방지.
 
 ### `filid`
-- [ ] `mcp__plugin_filid_t__*` 도구가 Windows 기반 서버 환경에서도 정상 노출/호출.
+- [ ] `mcp__plugin_filid_tools__*` 도구가 Windows 기반 서버 환경에서도 정상 노출/호출.
 - [ ] Git 미설치 환경에서도 충돌하지 않고 graceful fallback 구동(`error-log` 기록 및 적절한 메시지 반환).
 - [ ] `ast-grep` 경로 화이트리스트가 `C:\Windows\System32` 등 시스템 디렉토리를 정상 제어.
 

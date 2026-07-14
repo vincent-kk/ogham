@@ -47,7 +47,7 @@ the sole author of fix statuses — no subagent judgment can flip them.
 ### Step 1 — Branch Detection & File Loading
 
 1. Detect branch: `git branch --show-current` (Bash)
-2. `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot, branchName)`
+2. `mcp__plugin_filid_tools__review_manage(action: "normalize-branch", projectRoot, branchName)`
 3. Load from `.filid/review/<normalized>/`: `review-report.md`,
    `fix-requests.md`, `justifications.md` (contains
    `resolve_commit_sha`).
@@ -99,14 +99,14 @@ rejected fix with a justification:
    (`reference.md` → "Non-Negotiable Rules"): hardcoded secrets,
    circular dependencies, security vulnerabilities — always FAIL
    regardless of justification quality.
-2. Verify the debt record exists via `mcp__plugin_filid_t__debt_manage(action: "list", ...)`.
+2. Verify the debt record exists via `mcp__plugin_filid_tools__debt_manage(action: "list", ...)`.
 3. Mark DEFERRED (valid) or UNCONSTITUTIONAL (invalid).
 
 **Step 5 — Resolve cleared debt.** For each existing debt item
-(`mcp__plugin_filid_t__debt_manage(action: "list", ...)`) whose
+(`mcp__plugin_filid_tools__debt_manage(action: "list", ...)`) whose
 `file_path` is in the delta: re-run the relevant MCP measurement; if the
 rule is now satisfied,
-`mcp__plugin_filid_t__debt_manage(action: "resolve", projectRoot, debtId)`.
+`mcp__plugin_filid_tools__debt_manage(action: "resolve", projectRoot, debtId)`.
 
 **→ After both subagents complete, immediately proceed to Step 6. Do NOT summarize their outputs.**
 
@@ -121,10 +121,10 @@ category-specific MCP tool, filtering violations by
 
 | rule_id kind               | MCP tool                                                                  | success =             |
 | -------------------------- | ------------------------------------------------------------------------- | --------------------- |
-| structure violation        | `mcp__plugin_filid_t__structure_validate`                                 | 0 matching violations |
-| LCOM4 violation            | `mcp__plugin_filid_t__ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
-| CC violation               | `mcp__plugin_filid_t__ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
-| 3+12 violation             | `mcp__plugin_filid_t__test_metrics(action: "check-gate")`                  | PASS                  |
+| structure violation        | `mcp__plugin_filid_tools__structure_validate`                                 | 0 matching violations |
+| LCOM4 violation            | `mcp__plugin_filid_tools__ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
+| CC violation               | `mcp__plugin_filid_tools__ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
+| 3+12 violation             | `mcp__plugin_filid_tools__test_metrics(action: "check-gate")`                  | PASS                  |
 | acceptance claim (`CLM-*`) | NONE — claim re-judgment (below)                                          | claim judged PASS     |
 
 > **Claim re-judgment (`rule_id` matching `CLM-\d+`)**: measurement
@@ -160,7 +160,7 @@ fully-derived ledger (template: `reference.md`).
 
 ### Step 7 — PR Comment (Optional)
 
-1. `mcp__plugin_filid_t__review_manage(action: "format-revalidate-comment", projectRoot, branchName)`
+1. `mcp__plugin_filid_tools__review_manage(action: "format-revalidate-comment", projectRoot, branchName)`
    → formatted markdown.
 2. `gh auth status` (Bash); authenticated →
    `gh pr comment --body "<markdown>"`; otherwise skip with an info
@@ -174,7 +174,7 @@ fully-derived ledger (template: `reference.md`).
 
 ### Step 8 — Cleanup on PASS
 
-- **PASS** → `mcp__plugin_filid_t__review_manage(action: "cleanup", projectRoot, branchName)`
+- **PASS** → `mcp__plugin_filid_tools__review_manage(action: "cleanup", projectRoot, branchName)`
   — deletes the whole `.filid/review/<branch>/` session directory. Debt
   files in `.filid/debt/` are NOT affected.
 - **FAIL** → skip cleanup so the developer can inspect unresolved items.
@@ -187,13 +187,13 @@ Emit the terminal marker: `Revalidate verdict: <PASS|FAIL>`.
 
 | Tool                                      | Action                           | Purpose                                  |
 | ----------------------------------------- | -------------------------------- | ---------------------------------------- |
-| `mcp__plugin_filid_t__review_manage`      | `normalize-branch`               | Review directory resolution              |
-| `mcp__plugin_filid_t__review_manage`      | `cleanup`                        | Delete session directory on PASS         |
-| `mcp__plugin_filid_t__structure_validate` | —                                | Re-measure structure violations (Step 6) |
-| `mcp__plugin_filid_t__ast_analyze`        | `lcom4`, `cyclomatic-complexity` | Re-measure metrics (Step 6)              |
-| `mcp__plugin_filid_t__test_metrics`       | `check-gate`                      | Re-measure test compliance (Step 6)      |
-| `mcp__plugin_filid_t__debt_manage`        | `list`, `resolve`                | Debt verification & clearing (Steps 4–5) |
-| `mcp__plugin_filid_t__review_manage`      | `format-revalidate-comment`      | PR comment formatting (Step 7)           |
+| `mcp__plugin_filid_tools__review_manage`      | `normalize-branch`               | Review directory resolution              |
+| `mcp__plugin_filid_tools__review_manage`      | `cleanup`                        | Delete session directory on PASS         |
+| `mcp__plugin_filid_tools__structure_validate` | —                                | Re-measure structure violations (Step 6) |
+| `mcp__plugin_filid_tools__ast_analyze`        | `lcom4`, `cyclomatic-complexity` | Re-measure metrics (Step 6)              |
+| `mcp__plugin_filid_tools__test_metrics`       | `check-gate`                      | Re-measure test compliance (Step 6)      |
+| `mcp__plugin_filid_tools__debt_manage`        | `list`, `resolve`                | Debt verification & clearing (Steps 4–5) |
+| `mcp__plugin_filid_tools__review_manage`      | `format-revalidate-comment`      | PR comment formatting (Step 7)           |
 
 ## Options
 

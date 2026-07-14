@@ -21,11 +21,11 @@ Detailed diagnostic items, report format, auto-fix rules, and the lightweight `-
 
 Delegated to the checkup agent:
 
-- `mcp__plugin_maencof_t__kg_status` (`include_orphan_paths: true`) → detect D2 (stale) + D1 orphan buckets (`linkOrphanByLayer` / `linkOrphanArchivedCount` / `linkOrphanPaths`)
+- `mcp__plugin_maencof_tools__kg_status` (`include_orphan_paths: true`) → detect D2 (stale) + D1 orphan buckets (`linkOrphanByLayer` / `linkOrphanArchivedCount` / `linkOrphanPaths`)
 - `Glob "**/*.md"` → collect full file list
-- `mcp__plugin_maencof_t__read` per file → verify D6 (Frontmatter), D4 (Layer violation), D8 (missing L1 gist)
-- `mcp__plugin_maencof_t__kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link)
-- `mcp__plugin_maencof_t__kg_suggest_links` on sampled authored orphans → D1 actionability (candidates → `/maencof:suggest`; none → tag first)
+- `mcp__plugin_maencof_tools__read` per file → verify D6 (Frontmatter), D4 (Layer violation), D8 (missing L1 gist)
+- `mcp__plugin_maencof_tools__kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link)
+- `mcp__plugin_maencof_tools__kg_suggest_links` on sampled authored orphans → D1 actionability (candidates → `/maencof:suggest`; none → tag first)
 - Tag similarity analysis → detect D5 (duplicate)
 - Read `.maencof-meta/insight-config.json` + `auto-insight-stats.json` → detect D7 (auto-insight health)
 
@@ -69,16 +69,16 @@ Execute AutoFixAction after user confirmation:
 
 | Action                                | Tool                                   | Condition                |
 | ------------------------------------- | -------------------------------------- | ------------------------ |
-| Fill missing Frontmatter fields       | `mcp__plugin_maencof_t__update`        | D6 items                 |
+| Fill missing Frontmatter fields       | `mcp__plugin_maencof_tools__update`    | D6 items                 |
 | Rebuild stale index                   | `/maencof:build --force --reset-cache` | D2 items                 |
-| Fix layer field based on path         | `mcp__plugin_maencof_t__update`        | D4 items                 |
+| Fix layer field based on path         | `mcp__plugin_maencof_tools__update`    | D4 items                 |
 | Suggest links for orphan nodes        | `/maencof:suggest`                     | D1 authored-bucket items |
 | Provision missing auto-insight config | config-provisioner defaults            | D7 items                 |
 | Propose draft L1 gist (report-only)   | user edits frontmatter after review    | D8 items                 |
 
-**Layer 1 (01_Core/) exception**: Auto-fix via `mcp__plugin_maencof_t__update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 4` or edit manually.
+**Layer 1 (01_Core/) exception**: Auto-fix via `mcp__plugin_maencof_tools__update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 4` or edit manually.
 
-**No-frontmatter exception**: `mcp__plugin_maencof_t__update` requires the target to already have a frontmatter block. A D6 file whose frontmatter block is entirely missing cannot be auto-fixed via `update` — recreate it with `mcp__plugin_maencof_t__create` or repair the file manually. (Files that have a frontmatter block but invalid/missing fields are still auto-fixable.)
+**No-frontmatter exception**: `mcp__plugin_maencof_tools__update` requires the target to already have a frontmatter block. A D6 file whose frontmatter block is entirely missing cannot be auto-fixed via `update` — recreate it with `mcp__plugin_maencof_tools__create` or repair the file manually. (Files that have a frontmatter block but invalid/missing fields are still auto-fixable.)
 
 ## Error Handling
 
@@ -135,7 +135,7 @@ Recommended: Run /maencof:build --full or /maencof:checkup
 
 ### Sub-Layer Distribution
 
-Always include sub-layer distribution from the `mcp__plugin_maencof_t__kg_status` response
+Always include sub-layer distribution from the `mcp__plugin_maencof_tools__kg_status` response
 (`subLayerDistribution` field) after the status banner:
 
 ```

@@ -8,7 +8,7 @@ import type { ConfigPatchIssue, ConfigPatchValidation } from './configTypes.js';
 /**
  * Validate a prospective `.filid/config.json` patch JSON string against the
  * shared `FilidConfigSchema`. No local schema is defined — this is the
- * SSoT contract for the `mcp_t_config_patch_validate` MCP tool.
+ * SSoT contract for the `mcp__plugin_filid_tools__config_patch_validate` MCP tool.
  */
 export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
   let parsed: unknown;

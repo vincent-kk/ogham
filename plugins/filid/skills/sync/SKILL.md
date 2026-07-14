@@ -55,13 +55,13 @@ operates independently.
 
 ### Stage 1 — Scan
 
-`drift-analyzer` scans the full project using `mcp__plugin_filid_t__fractal_scan` to establish the
+`drift-analyzer` scans the full project using `mcp__plugin_filid_tools__fractal_scan` to establish the
 current structural state.
 See [reference.md Section 1](./reference.md#section-1--scan).
 
 ### Stage 2 — Detect & Classify
 
-`mcp__plugin_filid_t__drift_detect` identifies all drift items and classifies them by severity:
+`mcp__plugin_filid_tools__drift_detect` identifies all drift items and classifies them by severity:
 `critical`, `high`, `medium`, `low`. The `--severity` option restricts which
 items are included in the correction plan.
 See [reference.md Section 2](./reference.md#section-2--detect--classify).
@@ -69,7 +69,7 @@ See [reference.md Section 2](./reference.md#section-2--detect--classify).
 ### Stage 3 — Plan & Approval
 
 `drift-analyzer` generates the correction plan. `fractal-architect` reviews
-reclassification candidates using `mcp__plugin_filid_t__lca_resolve`. The plan is presented to the
+reclassification candidates using `mcp__plugin_filid_tools__lca_resolve`. The plan is presented to the
 user for approval unless `--auto-approve` is set.
 See [reference.md Section 3](./reference.md#section-3--plan--approval).
 
@@ -77,7 +77,7 @@ See [reference.md Section 3](./reference.md#section-3--plan--approval).
 
 Skipped when `--dry-run` is set — the plan from Stage 3 is printed and the skill exits without modifying any files.
 
-Otherwise, `restructurer` executes the approved corrections and `mcp__plugin_filid_t__structure_validate` confirms
+Otherwise, `restructurer` executes the approved corrections and `mcp__plugin_filid_tools__structure_validate` confirms
 the result.
 See [reference.md Section 4](./reference.md#section-4--correction-execution).
 
@@ -85,10 +85,10 @@ See [reference.md Section 4](./reference.md#section-4--correction-execution).
 
 | Tool                 | Stage | Purpose                                                     |
 | -------------------- | ----- | ----------------------------------------------------------- |
-| `mcp__plugin_filid_t__fractal_scan`       | 1     | Full project structure scan                                 |
-| `mcp__plugin_filid_t__drift_detect`       | 2     | Identify drift items                                        |
-| `mcp__plugin_filid_t__lca_resolve`        | 3     | Determine correct placement for reclassification candidates |
-| `mcp__plugin_filid_t__structure_validate` | 4     | Validate post-correction structure                          |
+| `mcp__plugin_filid_tools__fractal_scan`       | 1     | Full project structure scan                                 |
+| `mcp__plugin_filid_tools__drift_detect`       | 2     | Identify drift items                                        |
+| `mcp__plugin_filid_tools__lca_resolve`        | 3     | Determine correct placement for reclassification candidates |
+| `mcp__plugin_filid_tools__structure_validate` | 4     | Validate post-correction structure                          |
 
 ## Options
 

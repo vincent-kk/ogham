@@ -39,14 +39,14 @@ Extract query and options from user input:
 - `--full` → include full document text instead of snippets
 - `--scope <focused|balanced|broad>` → exploration breadth (default: balanced)
 
-### Step 2 — Call `mcp__plugin_maencof-lens_t__context` (single tool call)
+### Step 2 — Call `mcp__plugin_maencof-lens_tools__context` (single tool call)
 
 ```
-mcp__plugin_maencof-lens_t__context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool, scope?: breadth)
+mcp__plugin_maencof-lens_tools__context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool, scope?: breadth)
 ```
 
-`mcp__plugin_maencof-lens_t__context` internally runs SA search + context assembly via `handleKgContext`.
-Do NOT call `mcp__plugin_maencof-lens_t__search` separately — it is redundant.
+`mcp__plugin_maencof-lens_tools__context` internally runs SA search + context assembly via `handleKgContext`.
+Do NOT call `mcp__plugin_maencof-lens_tools__search` separately — it is redundant.
 
 No results → suggest different query or broader keywords.
 
@@ -67,9 +67,9 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 
 ## MCP Tools
 
-| Tool                                  | Purpose                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------ |
-| `mcp__plugin_maencof-lens_t__context` | SA search + token-budgeted context assembly (internally performs search) |
+| Tool                                      | Purpose                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| `mcp__plugin_maencof-lens_tools__context` | SA search + token-budgeted context assembly (internally performs search) |
 
 ## Options
 

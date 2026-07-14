@@ -70,7 +70,7 @@ Detail column (observable evaluated → expected matched / not matched).
 
 ## PR Comment Format
 
-`mcp__plugin_filid_t__review_manage(action: "format-revalidate-comment")`
+`mcp__plugin_filid_tools__review_manage(action: "format-revalidate-comment")`
 reads `re-validate.md`, wraps it in a collapsible `<details>` section,
 handles the 50,000-char limit, extracts the PASS/FAIL verdict, and
 returns ready-to-post markdown. Post via `gh pr comment --body`.
@@ -91,13 +91,13 @@ returns ready-to-post markdown. Post via `gh pr comment --body`.
 
 | Fix rule kind       | Verification tool                                         | Pass condition         |
 | ------------------- | --------------------------------------------------------- | ---------------------- |
-| LCOM4 violation     | `mcp__plugin_filid_t__ast_analyze(lcom4)`                 | LCOM4 < 2              |
-| CC violation        | `mcp__plugin_filid_t__ast_analyze(cyclomatic-complexity)` | CC <= 15               |
-| 3+12 violation      | `mcp__plugin_filid_t__test_metrics(check-gate)`            | All files PASS         |
-| Structure violation | `mcp__plugin_filid_t__structure_validate`                 | No matching violations |
-| Circular dependency | `mcp__plugin_filid_t__ast_analyze(dependency-graph)`      | No cycles              |
-| Drift               | `mcp__plugin_filid_t__drift_detect`                       | No drift               |
-| Document compliance | `mcp__plugin_filid_t__doc_compress(auto)` + Read          | INTENT.md <= 50 lines  |
+| LCOM4 violation     | `mcp__plugin_filid_tools__ast_analyze(lcom4)`                 | LCOM4 < 2              |
+| CC violation        | `mcp__plugin_filid_tools__ast_analyze(cyclomatic-complexity)` | CC <= 15               |
+| 3+12 violation      | `mcp__plugin_filid_tools__test_metrics(check-gate)`            | All files PASS         |
+| Structure violation | `mcp__plugin_filid_tools__structure_validate`                 | No matching violations |
+| Circular dependency | `mcp__plugin_filid_tools__ast_analyze(dependency-graph)`      | No cycles              |
+| Drift               | `mcp__plugin_filid_tools__drift_detect`                       | No drift               |
+| Document compliance | `mcp__plugin_filid_tools__doc_compress(auto)` + Read          | INTENT.md <= 50 lines  |
 | Acceptance claim    | none — direct re-judgment vs `.filid/criteria.md`         | claim judged PASS      |
 
 ## Non-Negotiable Rules (Constitutional)

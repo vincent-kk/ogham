@@ -179,7 +179,7 @@ export function slugify(input: string): string {
 
 - One changed file, one fractal, no interface change (TRIVIAL-tier shape).
 - The base tree passes **all 8 built-in structural rules with zero
-  violations** (`mcp__plugin_filid_t__structure_validate` on the materialized tree:
+  violations** (`mcp__plugin_filid_tools__structure_validate` on the materialized tree:
   `violations: [], failed: 0, rulesApplied: 8`): naming-convention,
   organ-no-intentmd, index-barrel-pattern, module-entry-point (root
   `index.ts`), max-depth, circular-dependency, pure-function-isolation,

@@ -15,7 +15,7 @@ plugin: maencof
 Inspect and control the personal context: `states` (transient conditions such as mood,
 sleep, health, situation) and `topics` (recent personal topics — plans, concerns,
 relationships, appointments). The companion captures these silently during
-conversation via the `mcp__plugin_maencof_t__capture_personal_context` MCP tool and
+conversation via the `mcp__plugin_maencof_tools__capture_personal_context` MCP tool and
 consumes them at session start as the `<personal-context>` block.
 
 Silence is a conversational-tone contract, not data hiding — the data is
@@ -46,7 +46,7 @@ user-owned plain JSON, and this skill is the explicit inspection channel.
 
 1. Read the file and locate `<label>` among states first, then topics
    (match against `label`, falling back to `id`).
-2. Call `mcp__plugin_maencof_t__capture_personal_context` with
+2. Call `mcp__plugin_maencof_tools__capture_personal_context` with
    `{ target: <'state'|'topic'>, action: 'resolve', label }`.
 3. Report the outcome in one line. A resolved state is removed immediately;
    a resolved topic is kept out of injection and pruned after its retention

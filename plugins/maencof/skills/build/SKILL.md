@@ -37,7 +37,7 @@ If `--reset-cache` is specified:
 2. Remove the existing `.maencof/` cache contents (`index.json`, `backlink-index.json`, `stale-nodes.json`, etc.) so the next build starts from scratch.
 3. Skip the stale-ratio check and proceed as a full rebuild.
 
-Otherwise, check the current index status with the `mcp__plugin_maencof_t__kg_status` MCP tool.
+Otherwise, check the current index status with the `mcp__plugin_maencof_tools__kg_status` MCP tool.
 
 - No index -> run a full build
 - Stale < 10% -> run an incremental build
@@ -58,7 +58,7 @@ Build pipeline:
 ```
 
 For incremental build: recompute only changed files + 1-hop neighbors.
-For full/force mode: call `mcp__plugin_maencof_t__kg_build(force=true)` to reprocess every node.
+For full/force mode: call `mcp__plugin_maencof_tools__kg_build(force=true)` to reprocess every node.
 
 ### Step 3 — Completion Report
 
@@ -70,7 +70,7 @@ Build type: incremental (12 files updated)
 ```
 
 For full rebuilds triggered by `--force` or `--reset-cache`, include before/after deltas
-when the prior index existed (from `mcp__plugin_maencof_t__kg_status` snapshot taken in Step 1 before cache reset):
+when the prior index existed (from `mcp__plugin_maencof_tools__kg_status` snapshot taken in Step 1 before cache reset):
 
 ```
 ## Rebuild Complete
@@ -83,15 +83,15 @@ when the prior index existed (from `mcp__plugin_maencof_t__kg_status` snapshot t
 
 If the change is large (nodes ±20% or more), warn and recommend investigating the cause.
 
-> Note: Layer-by-layer node distribution is not available from `mcp__plugin_maencof_t__kg_status` / `mcp__plugin_maencof_t__kg_build` responses.
+> Note: Layer-by-layer node distribution is not available from `mcp__plugin_maencof_tools__kg_status` / `mcp__plugin_maencof_tools__kg_build` responses.
 > To inspect layer distribution, use `/maencof:checkup --quick --verbose`.
 
 ## Available MCP Tools
 
 | Tool              | Purpose                                                          |
 | ----------------- | ---------------------------------------------------------------- |
-| `mcp__plugin_maencof_t__kg_status` | Check current index status (pre- and post-rebuild snapshots)     |
-| `mcp__plugin_maencof_t__kg_build`  | Run index build (incremental: `force=false`, full: `force=true`) |
+| `mcp__plugin_maencof_tools__kg_status` | Check current index status (pre- and post-rebuild snapshots)     |
+| `mcp__plugin_maencof_tools__kg_build`  | Run index build (incremental: `force=false`, full: `force=true`) |
 
 ## Error Handling
 

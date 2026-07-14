@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "t": {
+    "tools": {
       "type": "stdio",
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"]

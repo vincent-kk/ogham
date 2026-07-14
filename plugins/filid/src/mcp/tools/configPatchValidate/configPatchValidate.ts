@@ -21,7 +21,7 @@ export interface ConfigPatchValidateInput {
 export type ConfigPatchValidateResult = ConfigPatchValidation;
 
 /**
- * Handle `mcp_t_config_patch_validate` MCP calls.
+ * Handle `mcp__plugin_filid_tools__config_patch_validate` MCP calls.
  *
  * Parses `patch_json` and validates it strictly; returns `{ valid, errors[],
  * suggestion? }`. `suggestion` is a sanitised JSON string that would pass

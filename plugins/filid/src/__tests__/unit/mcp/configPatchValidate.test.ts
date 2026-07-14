@@ -1,6 +1,6 @@
 /**
  * @file configPatchValidate.test.ts
- * @description Unit tests for `mcp_t_config_patch_validate` handler (AC5a).
+ * @description Unit tests for `mcp__plugin_filid_tools__config_patch_validate` handler (AC5a).
  * Ensures the SSoT schema wired through `handleConfigPatchValidate` rejects
  * hallucinated config keys and the bare `**` exempt pattern before they
  * reach `fix-requests.md`.

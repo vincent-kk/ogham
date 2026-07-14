@@ -68,7 +68,7 @@ describe('runActivityRecorder', () => {
 
   it('Claude Code 훅이 전달하는 full-form MCP 도구명도 기록한다', () => {
     runActivityRecorder({
-      tool_name: 'mcp__plugin_maencof_t__create',
+      tool_name: 'mcp__plugin_maencof_tools__create',
       tool_input: { layer: 2, tags: ['test'] },
       cwd: vaultDir,
     });

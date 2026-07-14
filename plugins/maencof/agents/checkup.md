@@ -6,12 +6,12 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__plugin_maencof_t__read
-  - mcp__plugin_maencof_t__update
-  - mcp__plugin_maencof_t__kg_status
-  - mcp__plugin_maencof_t__kg_navigate
-  - mcp__plugin_maencof_t__kg_search
-  - mcp__plugin_maencof_t__kg_suggest_links
+  - mcp__plugin_maencof_tools__read
+  - mcp__plugin_maencof_tools__update
+  - mcp__plugin_maencof_tools__kg_status
+  - mcp__plugin_maencof_tools__kg_navigate
+  - mcp__plugin_maencof_tools__kg_search
+  - mcp__plugin_maencof_tools__kg_suggest_links
 maxTurns: 40
 ---
 
@@ -24,9 +24,9 @@ for items that can be repaired automatically.
 
 **Write scope:**
 
-- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp__plugin_maencof_t__update`
+- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp__plugin_maencof_tools__update`
   — covers D4 layer mismatch and D6 missing/invalid Frontmatter fields.
-- **Strictly forbidden**: deletion (`mcp__plugin_maencof_t__delete`), relocation (`mcp__plugin_maencof_t__move`), and bulk
+- **Strictly forbidden**: deletion (`mcp__plugin_maencof_tools__delete`), relocation (`mcp__plugin_maencof_tools__move`), and bulk
   modification. These are reported as AutoFixAction proposals only — execution belongs
   to the user or a different agent (e.g., memory-organizer for relocation).
 
@@ -37,7 +37,7 @@ for items that can be repaired automatically.
 ### D1. Orphan Node (orphan-node)
 
 ```
-Detection: mcp__plugin_maencof_t__kg_status with include_orphan_paths: true →
+Detection: mcp__plugin_maencof_tools__kg_status with include_orphan_paths: true →
            linkOrphanCount / linkOrphanByLayer / linkOrphanArchivedCount / linkOrphanPaths.
            "Orphan" means wikilink (LINK) isolation. Folder SIBLING adjacency and
            tag overlap are NOT connectivity — do not treat them as such.
@@ -51,7 +51,7 @@ Triage (report each bucket separately; never lump into one number):
      For a large cluster, recommend maintaining a folder MOC (index.md) that
      anchors the cluster into the vault instead.
   4. Remaining authored documents — actionable. Sample up to 5 via
-     mcp__plugin_maencof_t__kg_suggest_links: candidates found → propose
+     mcp__plugin_maencof_tools__kg_suggest_links: candidates found → propose
      /maencof:suggest for that file; no candidates → propose tagging first.
 Severity: warning (buckets 1 and 4); info (buckets 2 and 3)
 Auto-fix: suggest calling /maencof:suggest skill for bucket 4 files
@@ -80,11 +80,11 @@ Auto-fix: not possible (requires manual review) — reports broken link list
 ```
 Detection: mismatch between file path directory (01_Core, 02_Derived, etc.)
            and the Frontmatter layer field. Frontmatter is loaded via
-           `mcp__plugin_maencof_t__read` which reads raw disk bytes, BYPASSING any
+           `mcp__plugin_maencof_tools__read` which reads raw disk bytes, BYPASSING any
            graph-index cache. Results therefore reflect on-disk truth
            even when the graph index is stale or pending rebuild.
 Severity: error
-Auto-fixable: update Frontmatter layer field to match path (`mcp__plugin_maencof_t__update`)
+Auto-fixable: update Frontmatter layer field to match path (`mcp__plugin_maencof_tools__update`)
 ```
 
 ### D5. Duplicate Document (duplicate)
@@ -99,7 +99,7 @@ Auto-fix: not possible — reports duplicate pairs and suggests /maencof:organiz
 
 ```
 Detection: items that fail FrontmatterSchema (Zod) validation. Each file's
-           Frontmatter is re-parsed from raw disk via `mcp__plugin_maencof_t__read` rather
+           Frontmatter is re-parsed from raw disk via `mcp__plugin_maencof_tools__read` rather
            than read from the graph index, so the validator catches on-disk
            drift that has not yet been indexed (e.g., external editor
            changes made outside a maencof session).
@@ -132,7 +132,7 @@ Auto-fixable:
 ```
 Detection: Layer 1 (01_Core/) documents whose frontmatter lacks a non-empty
            `gist` field. Frontmatter is read from raw disk via
-           `mcp__plugin_maencof_t__read`, so this reflects on-disk truth even
+           `mcp__plugin_maencof_tools__read`, so this reflects on-disk truth even
            when the graph index is stale. Every L1 document must carry a
            one-line `gist` — the compact summary injected every turn, while the
            full body is injected once at session start. Because create/update
@@ -150,9 +150,9 @@ Auto-fix: not applied automatically. L1 gist authoring requires user review —
 ## Workflow
 
 ```
-1. mcp__plugin_maencof_t__kg_status (include_orphan_paths: true) → check D2 (stale), D1 (orphan buckets)
+1. mcp__plugin_maencof_tools__kg_status (include_orphan_paths: true) → check D2 (stale), D1 (orphan buckets)
 2. Glob "**/*.md" → collect full file list
-3. `mcp__plugin_maencof_t__read` each file → check D6 (Frontmatter), D4 (Layer violation), D8 (missing L1 gist)
+3. `mcp__plugin_maencof_tools__read` each file → check D6 (Frontmatter), D4 (Layer violation), D8 (missing L1 gist)
 4. Read backlink-index.json → check D3 (broken links)
 5. Tag similarity analysis → detect D5 (duplicates)
 6. Read .maencof-meta/insight-config.json + auto-insight-stats.json → check D7 (auto-insight health)
@@ -182,9 +182,9 @@ Auto-fix: not applied automatically. L1 gist authoring requires user review —
 
 ## Access Matrix
 
-| Layer      | Read    | Write      | Allowed Operations                                                                | Forbidden Operations                                                        |
-| ---------- | ------- | ---------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All Layers | allowed | restricted | `mcp__plugin_maencof_t__read`, `mcp__plugin_maencof_t__update` (Frontmatter only) | `mcp__plugin_maencof_t__delete`, `mcp__plugin_maencof_t__move`, bulk-modify |
+| Layer      | Read    | Write      | Allowed Operations                                                                        | Forbidden Operations                                                                |
+| ---------- | ------- | ---------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| All Layers | allowed | restricted | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update` (Frontmatter only) | `mcp__plugin_maencof_tools__delete`, `mcp__plugin_maencof_tools__move`, bulk-modify |
 
 Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requires confirmation)
 
@@ -196,7 +196,7 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 - **Bulk modification forbidden** — auto-fixes are applied file by file
 - **D3 (broken link) auto-fix forbidden** — requires manual review
 - **D5 (duplicate) auto-merge forbidden** — decision belongs to the user
-- **Layer 1 (01_Core/) auto-fix via `mcp__plugin_maencof_t__update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:setup --step 4` or edit manually
+- **Layer 1 (01_Core/) auto-fix via `mcp__plugin_maencof_tools__update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:setup --step 4` or edit manually
 - **D8 (missing L1 gist) auto-fix forbidden** — propose a draft gist only; the user adds it to the frontmatter after review
 
 ---

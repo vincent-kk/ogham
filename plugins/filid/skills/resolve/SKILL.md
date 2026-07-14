@@ -54,7 +54,7 @@ auto-commit/push.
      "Uncommitted changes will be included in the auto-commit. Continue
      anyway?" — "Continue anyway" / "Abort".
 2. `git branch --show-current` →
-   `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot, branchName)`.
+   `mcp__plugin_filid_tools__review_manage(action: "normalize-branch", projectRoot, branchName)`.
 3. Read `.filid/review/<normalized>/fix-requests.md`; missing → abort
    with "No fix requests found. Run /filid:cross-review first."
 
@@ -140,7 +140,7 @@ For each rejected fix:
 2. Refine it into a structured ADR (Context / Decision / Consequences —
    rules in `reference.md`).
 3. Create the debt record:
-   `mcp__plugin_filid_t__debt_manage(action: "create", projectRoot, debtItem: { fractal_path, file_path, created_at, review_branch, original_fix_id, severity, rule_violated, metric_value, title, original_request, developer_justification, refined_adr })`.
+   `mcp__plugin_filid_tools__debt_manage(action: "create", projectRoot, debtItem: { fractal_path, file_path, created_at, review_branch, original_fix_id, severity, rule_violated, metric_value, title, original_request, developer_justification, refined_adr })`.
 
 **→ Immediately proceed to Step 6.**
 
@@ -210,10 +210,10 @@ to evaluate justifications?") — "Yes — run now" / "Not now".
 
 ## Available MCP Tools
 
-| Tool                                 | Action             | Purpose                      |
-| ------------------------------------ | ------------------ | ---------------------------- |
-| `mcp__plugin_filid_t__review_manage` | `normalize-branch` | Review directory resolution  |
-| `mcp__plugin_filid_t__debt_manage`   | `create`           | Debt record per rejected fix |
+| Tool                                     | Action             | Purpose                      |
+| ---------------------------------------- | ------------------ | ---------------------------- |
+| `mcp__plugin_filid_tools__review_manage` | `normalize-branch` | Review directory resolution  |
+| `mcp__plugin_filid_tools__debt_manage`   | `create`           | Debt record per rejected fix |
 
 ## Options
 

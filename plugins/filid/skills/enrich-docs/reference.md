@@ -56,10 +56,10 @@ Collection steps:
    };
    ```
 
-3. Resolve classification for each `moduleRoot` via a single `mcp__plugin_filid_t__fractal_scan`:
+3. Resolve classification for each `moduleRoot` via a single `mcp__plugin_filid_tools__fractal_scan`:
 
    ```
-   mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
+   mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
    // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: [...], ... }
    // Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for node fields
    ```
@@ -275,11 +275,11 @@ restructure it in place on each update instead.
 For every file the agent reports as `written`:
 
 ```
-mcp__plugin_filid_t__doc_compress({ mode: "auto", filePath: "<docPath>", content: "<new content>" })
+mcp__plugin_filid_tools__doc_compress({ mode: "auto", filePath: "<docPath>", content: "<new content>" })
 // Returns: { compacted?: string, summary?: ToolCallSummary, meta?: CompressionMeta,
 //            cap_applies?: { intent: boolean, detail: boolean }, error?: string }
 
-mcp__plugin_filid_t__structure_validate({ path: "<moduleRoot>" })
+mcp__plugin_filid_tools__structure_validate({ path: "<moduleRoot>" })
 // Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
 // (passed / violations live at report.result)
 ```
@@ -295,9 +295,9 @@ Decision logic:
 - Written content lacks any of the three tier headings (`### Always do`,
   `### Ask first`, `### Never do`) → mark file as `NEEDS_REWORK`, revert the
   on-disk content, and report in Stage 8. Check the headings directly on the
-  content — `mcp__plugin_filid_t__structure_validate` evaluates structural rules only and
+  content — `mcp__plugin_filid_tools__structure_validate` evaluates structural rules only and
   does not inspect tier sections.
-- `report.result.violations` from `mcp__plugin_filid_t__structure_validate` reports a
+- `report.result.violations` from `mcp__plugin_filid_tools__structure_validate` reports a
   structural violation for the module → mark file as `NEEDS_REWORK`, revert,
   and report in Stage 8.
 - All checks pass → mark as `ACCEPTED`.

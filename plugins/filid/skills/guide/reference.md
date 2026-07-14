@@ -5,10 +5,10 @@ fractal structure `filid:guide` skill. For the quick-start overview, see [SKILL.
 
 ## Section 1 — Project Scan
 
-Call `mcp__plugin_filid_t__fractal_scan` to retrieve the complete directory tree and node classifications.
+Call `mcp__plugin_filid_tools__fractal_scan` to retrieve the complete directory tree and node classifications.
 
 ```
-mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
+mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
 ```
 
 > **Size guard**: an oversized result comes back as
@@ -32,10 +32,10 @@ Build three working sets from `tree.nodes` (e.g. `tree.nodes.filter(...)`):
 
 ## Section 2 — Rule Query
 
-Call `mcp__plugin_filid_t__rule_query` to retrieve the full list of active rules.
+Call `mcp__plugin_filid_tools__rule_query` to retrieve the full list of active rules.
 
 ```
-mcp__plugin_filid_t__rule_query({ action: "list", path: "<target-path>" })
+mcp__plugin_filid_tools__rule_query({ action: "list", path: "<target-path>" })
 ```
 
 Response fields:

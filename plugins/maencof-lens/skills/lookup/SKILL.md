@@ -26,14 +26,14 @@ For multi-doc context assembly, use `/maencof-lens:brief` instead.
 
 ## Workflow
 
-### Step 1 — Search (`mcp__plugin_maencof-lens_t__search`)
+### Step 1 — Search (`mcp__plugin_maencof-lens_tools__search`)
 
 Extract keywords from user input and search the vault knowledge graph.
 
 Cross-language recall: include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
 
 ```
-mcp__plugin_maencof-lens_t__search(seed: [keyword1, keyword1_en, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
+mcp__plugin_maencof-lens_tools__search(seed: [keyword1, keyword1_en, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
 ```
 
 Optional SA tuning parameters — pass only when user explicitly specifies:
@@ -41,10 +41,10 @@ Optional SA tuning parameters — pass only when user explicitly specifies:
 
 No results → suggest different keywords.
 
-### Step 2 — Read Top Result (`mcp__plugin_maencof-lens_t__read`)
+### Step 2 — Read Top Result (`mcp__plugin_maencof-lens_tools__read`)
 
 ```
-mcp__plugin_maencof-lens_t__read(path: top_result.path, vault: same_vault)
+mcp__plugin_maencof-lens_tools__read(path: top_result.path, vault: same_vault)
 ```
 
 - Default: read top 1 result
@@ -79,8 +79,8 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 
 | Tool           | Purpose                                    |
 | -------------- | ------------------------------------------ |
-| `mcp__plugin_maencof-lens_t__search` | SA-based keyword search across vault graph |
-| `mcp__plugin_maencof-lens_t__read`   | Read document content by path              |
+| `mcp__plugin_maencof-lens_tools__search` | SA-based keyword search across vault graph |
+| `mcp__plugin_maencof-lens_tools__read`   | Read document content by path              |
 
 ## Options
 
@@ -109,4 +109,4 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 - **No lens config** → guide to `/maencof-lens:setup`
 - **No index** → guide to run `kg_build` in maencof session
 - **No results** → suggest different keywords
-- **Read failure** → show error and suggest alternative results from `mcp__plugin_maencof-lens_t__search`
+- **Read failure** → show error and suggest alternative results from `mcp__plugin_maencof-lens_tools__search`

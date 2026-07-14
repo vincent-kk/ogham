@@ -55,7 +55,7 @@ Recommend a Layer based on the nature of the content:
 
 #### L3 Sub-Layer Selection
 
-`sub_layer` applies only to L3 and L5. For L1/L2/L4, omit `sub_layer` entirely — passing it on those layers will be rejected by `mcp__plugin_maencof_t__create` because **sub_layer is only valid for L3 or L5**.
+`sub_layer` applies only to L3 and L5. For L1/L2/L4, omit `sub_layer` entirely — passing it on those layers will be rejected by `mcp__plugin_maencof_tools__create` because **sub_layer is only valid for L3 or L5**.
 
 When creating an L3 document, determine the appropriate sub-layer:
 
@@ -65,7 +65,7 @@ When creating an L3 document, determine the appropriate sub-layer:
 | L3B Structural | Organizations, teams, systems, processes   | `03_External/structural/` |
 | L3C Topical    | Concepts, technologies, external knowledge | `03_External/topical/`    |
 
-Pass `sub_layer` to `mcp__plugin_maencof_t__create`. If the content doesn't clearly fit a sub-layer, default to **topical** (`03_External/topical/`). This aligns with the L3 Classification Rules used by `/maencof:migrate`.
+Pass `sub_layer` to `mcp__plugin_maencof_tools__create`. If the content doesn't clearly fit a sub-layer, default to **topical** (`03_External/topical/`). This aligns with the L3 Classification Rules used by `/maencof:migrate`.
 
 #### L5 Sub-Layer Selection
 
@@ -76,7 +76,7 @@ When creating an L5 document, determine the role:
 | L5-Buffer   | Uncategorized temporary items, inbox | `05_Context/buffer/`   |
 | L5-Boundary | Cross-layer bridge, project MOC, hub | `05_Context/boundary/` |
 
-Default to **Buffer** for general L5 content. For **Boundary** documents (project MOC, cross-layer hub linking e.g. L1 values to L3 references), do NOT use `create` — use the dedicated `mcp__plugin_maencof_t__boundary_create` tool, which writes the required `boundary_type` / `connected_layers` frontmatter that `create` cannot set.
+Default to **Buffer** for general L5 content. For **Boundary** documents (project MOC, cross-layer hub linking e.g. L1 values to L3 references), do NOT use `create` — use the dedicated `mcp__plugin_maencof_tools__boundary_create` tool, which writes the required `boundary_type` / `connected_layers` frontmatter that `create` cannot set.
 
 If the user specifies `--layer`, use that Layer.
 Confirm the recommended Layer with the user before proceeding:
@@ -96,10 +96,10 @@ Extract 3–5 relevant tags from the content. Rules:
 
 ### Step 4 — Pre-creation Duplicate Check
 
-Search for similar documents with `mcp__plugin_maencof_t__kg_search` to prevent duplicates:
+Search for similar documents with `mcp__plugin_maencof_tools__kg_search` to prevent duplicates:
 
 ```
-mcp__plugin_maencof_t__kg_search(
+mcp__plugin_maencof_tools__kg_search(
   seed: [1-2 core tags],
   max_results: 3,
   threshold: 0.3
@@ -117,7 +117,7 @@ Would you like to create a new document or update the existing one? (Create new 
 
 ### Step 5 — Document Creation
 
-Create the document with the `mcp__plugin_maencof_t__create` MCP tool:
+Create the document with the `mcp__plugin_maencof_tools__create` MCP tool:
 
 **L2 Frontmatter**:
 
@@ -127,7 +127,7 @@ tags: [extracted tags]
 title: auto-generated or user-provided
 ```
 
-**L3 Frontmatter** (fields written into the document by `mcp__plugin_maencof_t__create`):
+**L3 Frontmatter** (fields written into the document by `mcp__plugin_maencof_tools__create`):
 
 ```yaml
 layer: 3
@@ -137,7 +137,7 @@ source: 'original source URL (if available)'
 ```
 
 `confidence` (internalization 0.0-1.0, initial ~0.3) is not a create parameter — set it
-after creation via `mcp__plugin_maencof_t__update` (frontmatter). Rich sub-layer metadata
+after creation via `mcp__plugin_maencof_tools__update` (frontmatter). Rich sub-layer metadata
 (L3A `person`, L3B `org_type`, etc.) is schema-validated on read but has no MCP write
 path — do not promise those fields during remember.
 
@@ -159,7 +159,7 @@ tags: [extracted tags]
 expires: YYYY-MM-DD # optional; buffer items default to a ~30-day triage window
 ```
 
-L5-Boundary documents are created with `mcp__plugin_maencof_t__boundary_create`
+L5-Boundary documents are created with `mcp__plugin_maencof_tools__boundary_create`
 (`title`, `boundary_type: project_moc|cross_domain|synthesis`, `connected_layers`, `tags`) —
 not with `create`.
 
@@ -178,13 +178,13 @@ To explore related documents: /maencof:explore {tag}
 
 ## Available MCP Tools
 
-| Tool                                     | Purpose                                               |
-| ---------------------------------------- | ----------------------------------------------------- |
-| `mcp__plugin_maencof_t__create`          | Create document (primary tool)                        |
-| `mcp__plugin_maencof_t__boundary_create` | Create L5 boundary (MOC/hub) documents                |
-| `mcp__plugin_maencof_t__kg_search`       | Pre-creation duplicate check                          |
-| `mcp__plugin_maencof_t__update`          | Update existing document (when duplicate found)       |
-| `mcp__plugin_maencof_t__read`            | Read existing document content (when duplicate found) |
+| Tool                                         | Purpose                                               |
+| -------------------------------------------- | ----------------------------------------------------- |
+| `mcp__plugin_maencof_tools__create`          | Create document (primary tool)                        |
+| `mcp__plugin_maencof_tools__boundary_create` | Create L5 boundary (MOC/hub) documents                |
+| `mcp__plugin_maencof_tools__kg_search`       | Pre-creation duplicate check                          |
+| `mcp__plugin_maencof_tools__update`          | Update existing document (when duplicate found)       |
+| `mcp__plugin_maencof_tools__read`            | Read existing document content (when duplicate found) |
 
 ## Options
 

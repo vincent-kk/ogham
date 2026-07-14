@@ -35,7 +35,7 @@ See [reference.md Section 1](./reference.md#section-1--question-parsing).
 
 ### Phase 2 — Navigation (Prompt 1)
 
-Locate the target module using `mcp__plugin_filid_t__fractal_scan` to retrieve the full tree, then
+Locate the target module using `mcp__plugin_filid_tools__fractal_scan` to retrieve the full tree, then
 find the node matching the query. If no matching node is found, report
 "No matching module found for the query" and suggest checking the module name
 or running `/filid:guide` to see the full project structure.
@@ -48,7 +48,7 @@ See [reference.md Section 3](./reference.md#section-3--context-chain-loading).
 
 ### Phase 4 — Compression (if needed)
 
-Apply `mcp__plugin_filid_t__doc_compress(mode: "auto")` when chain exceeds context limits.
+Apply `mcp__plugin_filid_tools__doc_compress(mode: "auto")` when chain exceeds context limits.
 See [reference.md Section 4](./reference.md#section-4--compression-strategy).
 
 ### Phase 5 — Response (Prompt 2–3 max)
@@ -60,9 +60,9 @@ See [reference.md Section 5](./reference.md#section-5--3-prompt-limit-protocol).
 
 | Tool               | Action     | Purpose                                                 |
 | ------------------ | ---------- | ------------------------------------------------------- |
-| `mcp__plugin_filid_t__fractal_scan`     | —          | Scan project hierarchy to locate the target module      |
-| `mcp__plugin_filid_t__fractal_navigate` | `classify` | Resolve ambiguous module classification                 |
-| `mcp__plugin_filid_t__doc_compress`     | `auto`     | Compress INTENT.md chain when it exceeds context limits |
+| `mcp__plugin_filid_tools__fractal_scan`     | —          | Scan project hierarchy to locate the target module      |
+| `mcp__plugin_filid_tools__fractal_navigate` | `classify` | Resolve ambiguous module classification                 |
+| `mcp__plugin_filid_tools__doc_compress`     | `auto`     | Compress INTENT.md chain when it exceeds context limits |
 
 ## Options
 
@@ -89,7 +89,7 @@ See [reference.md Section 5](./reference.md#section-5--3-prompt-limit-protocol).
 /filid:context-query "What does the auth INTENT.md say we must never do?"
 
 # 3-Prompt Limit
-Prompt 1  →  mcp__plugin_filid_t__fractal_scan (full tree) + mcp__plugin_filid_t__fractal_navigate (classify target)
+Prompt 1  →  mcp__plugin_filid_tools__fractal_scan (full tree) + mcp__plugin_filid_tools__fractal_navigate (classify target)
 Prompt 2  →  load/analyse INTENT.md chain
 Prompt 3  →  final answer (hard limit)
 

@@ -38,7 +38,7 @@ Build: `CHANGED_FILES` (source), `CHANGED_DIRS`, `CHANGED_SPEC_FILES`
 (`*.spec.ts` only; the 3+12 cap is spec-only), `CHANGED_TEST_FILES`
 (`*.test.ts`, tracked only for the advisory promote hint),
 `CHANGED_INTENT_MDS`, `CHANGED_DETAIL_MDS`.
-Then `mcp__plugin_filid_t__fractal_scan(path: <PROJECT_ROOT>)` → keep
+Then `mcp__plugin_filid_tools__fractal_scan(path: <PROJECT_ROOT>)` → keep
 `tree.nodes` as the node-type lookup (no per-directory classify calls).
 A stage with an empty input list is recorded `SKIP`.
 
@@ -46,13 +46,13 @@ A stage with an empty input list is recorded `SKIP`.
 
 1. **Code metrics** — for each `CHANGED_FILES` entry (skip `index.ts`,
    `*.d.ts`, spec/test files):
-   `mcp__plugin_filid_t__ast_analyze(analysisType: "lcom4", ...)` and
-   `mcp__plugin_filid_t__ast_analyze(analysisType: "cyclomatic-complexity", ...)`.
+   `mcp__plugin_filid_tools__ast_analyze(analysisType: "lcom4", ...)` and
+   `mcp__plugin_filid_tools__ast_analyze(analysisType: "cyclomatic-complexity", ...)`.
    Thresholds: LCOM4 >= 2 → FAIL (`restructure`); CC > 15 → FAIL
    (`code-fix`).
 2. **Test compliance (3+12)** — the cap is **spec-only**. For each
    `CHANGED_SPEC_FILES` (`*.spec.ts`) entry:
-   `mcp__plugin_filid_t__test_metrics(action: "check-gate", ...)` (+
+   `mcp__plugin_filid_tools__test_metrics(action: "check-gate", ...)` (+
    `count` / `decide` for split hints). Total > 15 cases → FAIL
    (split / parameterize the spec). `.test.ts` files are EXEMPT —
    `check-gate` intentionally returns empty for them (that is correct, not a
@@ -61,13 +61,13 @@ A stage with an empty input list is recorded `SKIP`.
    "candidate for `/filid:promote`", never a FAIL.
 3. **Shared dependency coverage** — for shared modules in the changed
    fractals (imported by 2+ sibling fractals):
-   `mcp__plugin_filid_t__coverage_verify(projectRoot, targetPath)`.
+   `mcp__plugin_filid_tools__coverage_verify(projectRoot, targetPath)`.
    `uncoveredCount > 0` → **WARN** (never FAIL).
 
 ## Structure stages (`full` and `structure-half`)
 
 4. **Fractal boundaries** —
-   `mcp__plugin_filid_t__structure_validate(path: <PROJECT_ROOT>)`;
+   `mcp__plugin_filid_tools__structure_validate(path: <PROJECT_ROOT>)`;
    report only nodes intersecting the changed fractals. Organ dir with
    INTENT.md → HIGH; fractal dir missing INTENT.md → MEDIUM; type
    mismatch → HIGH.
@@ -79,18 +79,18 @@ A stage with an empty input list is recorded `SKIP`.
    "DETAIL.md exceeds N lines" finding; record the cap scope in the
    output so downstream personas cannot misapply it.
 6. **Dependency acyclicity** — for each `CHANGED_FILES` entry:
-   `mcp__plugin_filid_t__ast_analyze(analysisType: "dependency-graph", ...)`.
+   `mcp__plugin_filid_tools__ast_analyze(analysisType: "dependency-graph", ...)`.
    New cycle → CRITICAL; cross-fractal sibling import without a shared
    organ → HIGH.
 7. **Semantic diff** — for changed files with old+new versions:
-   `mcp__plugin_filid_t__ast_analyze(analysisType: "tree-diff", ...)` →
+   `mcp__plugin_filid_tools__ast_analyze(analysisType: "tree-diff", ...)` →
    record interface additions/removals (INFO).
 8. **Structure drift** —
-   `mcp__plugin_filid_t__drift_detect(path: <PROJECT_ROOT>)`; skip when
+   `mcp__plugin_filid_tools__drift_detect(path: <PROJECT_ROOT>)`; skip when
    stage 4 passed clean for every changed fractal.
-9. **Debt bias** — `mcp__plugin_filid_t__debt_manage(action: "list", projectRoot)`;
+9. **Debt bias** — `mcp__plugin_filid_tools__debt_manage(action: "list", projectRoot)`;
    when debts touch changed fractals,
-   `mcp__plugin_filid_t__debt_manage(action: "calculate-bias", ...)`.
+   `mcp__plugin_filid_tools__debt_manage(action: "calculate-bias", ...)`.
    ALWAYS emit `debt_bias_level` (`LOW_PRESSURE` when no debts).
 10. **Acceptance claims** — load `.filid/criteria.md` from BOTH base
     (`git show <BASE_REF>:.filid/criteria.md`, tolerate absence) and

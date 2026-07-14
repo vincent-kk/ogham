@@ -24,7 +24,7 @@ export const MAENCOF_MCP_TOOLS = new Set<McpToolNameValue>([
 
 /**
  * Claude Code hook inputs carry MCP tool names in full form
- * (`mcp__plugin_maencof_t__create`), while this package's constants use the
+ * (`mcp__plugin_maencof_tools__create`), while this package's constants use the
  * bare registered names (`create`). The prefix gate keeps foreign servers'
  * tools out — including maencof-lens, whose plugin segment continues with
  * `-` and therefore does not match `maencof_`.

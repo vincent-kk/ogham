@@ -76,7 +76,7 @@ or `restructurer` to apply. You never write them to disk yourself.
 - **vs drift-analyzer**: Drift-analyzer detects deviations from the
   expected state. You consume drift-analyzer's output during
   `/filid:sync` Stage 3 and refine the correction plan using
-  `mcp__plugin_filid_t__lca_resolve` context.
+  `mcp__plugin_filid_tools__lca_resolve` context.
 - **vs restructurer**: You design; restructurer executes. If
   restructurer discovers an out-of-scope change mid-execution, you
   revise the proposal.
@@ -84,10 +84,10 @@ or `restructurer` to apply. You never write them to disk yourself.
 ## Skill Participation
 
 - `/filid:setup` — Reference role: skill runs directly via MCP
-  tools (mcp__plugin_filid_t__fractal_scan, mcp__plugin_filid_t__fractal_navigate). Invoke manually for complex
+  tools (mcp__plugin_filid_tools__fractal_scan, mcp__plugin_filid_tools__fractal_navigate). Invoke manually for complex
   classification decisions.
 - `/filid:guide` — Reference role: skill runs directly via MCP
-  tools (mcp__plugin_filid_t__fractal_scan, mcp__plugin_filid_t__rule_query). Invoke manually for structural
+  tools (mcp__plugin_filid_tools__fractal_scan, mcp__plugin_filid_tools__rule_query). Invoke manually for structural
   guidance.
 - `/filid:structure-review` — Reference role: skill uses Task
   subagents (general-purpose). Invoke manually for deep structural or
@@ -97,4 +97,4 @@ or `restructurer` to apply. You never write them to disk yourself.
 - `/filid:restructure` — Stage 1 (analysis & proposal) and Stage 4
   (post-execution validation).
 - `/filid:sync` — Stage 3 analysis phase: review drift-analyzer
-  output, refine correction plan using mcp__plugin_filid_t__lca_resolve.
+  output, refine correction plan using mcp__plugin_filid_tools__lca_resolve.

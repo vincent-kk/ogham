@@ -18,7 +18,7 @@ preferences, rule overrides, and project-level FCA-AI configuration.
 > That source is NOT distributed to user projects, so this skill MUST NOT
 > hardcode config keys AND MUST NOT attempt to read that source file at
 > runtime. Observe the actual `.filid/config.json` on disk with Read; when
-> the default shape is needed (e.g., `reset`), rely on `mcp__plugin_filid_t__project_init`
+> the default shape is needed (e.g., `reset`), rely on `mcp__plugin_filid_tools__project_init`
 > to emit it (see Step 3 `reset`).
 >
 > **Detail Reference**: For dot-notation path resolution, validation rules,
@@ -78,7 +78,7 @@ Reset the config to defaults. Preserves the `language` field if currently set
    create a default config first, then apply the change.
 5. If `.filid/config.json` does not exist and the subcommand is `reset`,
    skip the read/delete in Step 3 and proceed directly to the
-   `mcp__plugin_filid_t__project_init` regeneration call.
+   `mcp__plugin_filid_tools__project_init` regeneration call.
 
 ### Step 2 — Parse Arguments
 
@@ -112,7 +112,7 @@ Parse the user's input to determine the subcommand and arguments.
 1. Read the current `.filid/config.json`. If `--full` is absent, capture the
    existing `language` field (may be undefined).
 2. Delete the current config via Bash: `rm <git_root>/.filid/config.json`.
-3. Call `mcp__plugin_filid_t__project_init({ path: <git_root> })`. Because the file no longer
+3. Call `mcp__plugin_filid_tools__project_init({ path: <git_root> })`. Because the file no longer
    exists, the handler writes the output of `createDefaultConfig()` (defined
    in the plugin's internal `src/core/infra/config-loader/loaders/create-default-config.ts`
    — referenced here only as documentation; do NOT attempt to Read it).

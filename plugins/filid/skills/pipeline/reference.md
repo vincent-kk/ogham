@@ -11,7 +11,7 @@ match wins.
 
 ```
 1. Detect branch: git branch --show-current
-2. Normalize: mcp__plugin_filid_t__review_manage(normalize-branch)
+2. Normalize: mcp__plugin_filid_tools__review_manage(normalize-branch)
 3. Set review_dir = .filid/review/<normalized>/
 
 Signal 0 (spike harvest guard): branch matches spike/*?

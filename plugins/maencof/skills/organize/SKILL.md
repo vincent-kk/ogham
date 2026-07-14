@@ -24,7 +24,7 @@ The judge module evaluates candidates, then the execute module performs the actu
 
 ## When to Use vs Adjacent Skills
 
-- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_t__move`
+- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move`
   after explicit user confirmation. Use when you are ready to apply transitions.
 - **`reflect`** — read-only judge. Produces an analysis report with
   zero filesystem changes. Use to preview candidates before committing.
@@ -45,7 +45,7 @@ new links → `suggest`.
 ```
 
 > **Note.** Stale-node bookkeeping is handled inside the MCP server middleware
-> layer (around `mcp__plugin_maencof_t__move` / `mcp__plugin_maencof_t__update` calls and at boot-time via vault
+> layer (around `mcp__plugin_maencof_tools__move` / `mcp__plugin_maencof_tools__update` calls and at boot-time via vault
 > scanning). It never interacts with the organize workflow directly.
 
 **Orchestrator**: the organize skill coordinates the entire flow.
@@ -55,7 +55,7 @@ Calls the memory-organizer agent sequentially through judge -> (confirmation) ->
 
 ### Step 1 — Pre-check Index Status
 
-Check vault status and stale nodes with the `mcp__plugin_maencof_t__kg_status` MCP tool before delegating to the agent.
+Check vault status and stale nodes with the `mcp__plugin_maencof_tools__kg_status` MCP tool before delegating to the agent.
 If no index is found, abort with: "No index found. Please run `/maencof:build` first."
 
 ### Step 2 — judge stage (memory-organizer delegation)
@@ -81,10 +81,10 @@ The user can type "proceed" or select/exclude individual items.
 
 Run the execute module for approved TransitionDirectives:
 
-- Call `mcp__plugin_maencof_t__move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
+- Call `mcp__plugin_maencof_tools__move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
 - Update the Frontmatter `layer` and `sub_layer` fields
 - Update link paths
-- **Buffer auto-strip**: When moving from L5-Buffer to another layer, `mcp__plugin_maencof_t__move` automatically strips buffer-specific metadata
+- **Buffer auto-strip**: When moving from L5-Buffer to another layer, `mcp__plugin_maencof_tools__move` automatically strips buffer-specific metadata
 
 ### Step 5 — Result Summary
 
@@ -95,13 +95,13 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 > The organize skill is an orchestrator. MCP tools are invoked by the memory-organizer agent,
 > not directly by this skill. The skill coordinates the workflow and user confirmation flow.
 
-| Tool                                 | Used by                                 | Purpose                            |
-| ------------------------------------ | --------------------------------------- | ---------------------------------- |
-| `mcp__plugin_maencof_t__kg_status`   | skill (Step 1)                          | Check vault status and stale-nodes |
-| `mcp__plugin_maencof_t__read`        | memory-organizer agent (judge module)   | Read document Frontmatter          |
-| `mcp__plugin_maencof_t__kg_navigate` | memory-organizer agent                  | Traverse link relationships        |
-| `mcp__plugin_maencof_t__move`        | memory-organizer agent (execute module) | Execute file move                  |
-| `mcp__plugin_maencof_t__update`      | memory-organizer agent (execute module) | Update Frontmatter                 |
+| Tool                                     | Used by                                 | Purpose                            |
+| ---------------------------------------- | --------------------------------------- | ---------------------------------- |
+| `mcp__plugin_maencof_tools__kg_status`   | skill (Step 1)                          | Check vault status and stale-nodes |
+| `mcp__plugin_maencof_tools__read`        | memory-organizer agent (judge module)   | Read document Frontmatter          |
+| `mcp__plugin_maencof_tools__kg_navigate` | memory-organizer agent                  | Traverse link relationships        |
+| `mcp__plugin_maencof_tools__move`        | memory-organizer agent (execute module) | Execute file move                  |
+| `mcp__plugin_maencof_tools__update`      | memory-organizer agent (execute module) | Update Frontmatter                 |
 
 ## Error Handling
 
@@ -126,7 +126,7 @@ Buffer documents are temporary holding areas. During organization:
 1. **Scan** `05_Context/buffer/` for documents older than 7 days
 2. **Evaluate** each document's connections, tags, and content type
 3. **Recommend target**: L2 (internalized), L3 with sub-layer (external reference), or archive
-4. **Execute** via `mcp__plugin_maencof_t__move` with `target_sub_layer` — buffer metadata is auto-stripped. Pass `target_subdirectory` (e.g. `"projects"`, max 2 levels) to file the promoted document into a subdirectory of the target layer/sub-layer.
+4. **Execute** via `mcp__plugin_maencof_tools__move` with `target_sub_layer` — buffer metadata is auto-stripped. Pass `target_subdirectory` (e.g. `"projects"`, max 2 levels) to file the promoted document into a subdirectory of the target layer/sub-layer.
 
 ## Options
 

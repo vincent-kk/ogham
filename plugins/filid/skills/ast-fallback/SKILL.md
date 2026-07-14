@@ -18,15 +18,15 @@ with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
 > `reference.md` file in this skill's directory (same location as this SKILL.md).
 
 > **Internal skill** (`user_invocable: false`) — orchestrator skills (or the
-> plugin host) invoke this fallback when `mcp__plugin_filid_t__ast_grep_search` /
-> `mcp__plugin_filid_t__ast_grep_replace` reports `@ast-grep/napi is not available`. Not
+> plugin host) invoke this fallback when `mcp__plugin_filid_tools__ast_grep_search` /
+> `mcp__plugin_filid_tools__ast_grep_replace` reports `@ast-grep/napi is not available`. Not
 > intended for direct user invocation via `/filid:ast-fallback`. The
 > syntax examples below document the invocation shape for callers, not
 > end users.
 
 ## When to Use This Skill
 
-- `mcp__plugin_filid_t__ast_grep_search` or `mcp__plugin_filid_t__ast_grep_replace` MCP tools return `@ast-grep/napi is not available`
+- `mcp__plugin_filid_tools__ast_grep_search` or `mcp__plugin_filid_tools__ast_grep_replace` MCP tools return `@ast-grep/napi is not available`
 - The environment cannot install native dependencies (sandboxed, CI, etc.)
 - Quick one-off pattern searches where exact AST precision is not critical
 - Searching across multiple languages in a single pass
@@ -38,7 +38,7 @@ with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
 
 ### Phase 1 — Attempt Native Tool
 
-Call `mcp__plugin_filid_t__ast_grep_search` (or `mcp__plugin_filid_t__ast_grep_replace`) MCP tool with the user's
+Call `mcp__plugin_filid_tools__ast_grep_search` (or `mcp__plugin_filid_tools__ast_grep_replace`) MCP tool with the user's
 pattern. If it succeeds, return the result directly. No fallback needed.
 See [reference.md Section 1](./reference.md#section-1--native-tool-attempt).
 
@@ -69,8 +69,8 @@ See [reference.md Section 4](./reference.md#section-4--llm-replace-fallback).
 
 | Tool               | Purpose                                      | Fallback          |
 | ------------------ | -------------------------------------------- | ----------------- |
-| `mcp__plugin_filid_t__ast_grep_search`  | Native AST pattern search (Phase 1 attempt)  | Grep + Read + LLM |
-| `mcp__plugin_filid_t__ast_grep_replace` | Native AST pattern replace (Phase 1 attempt) | Edit + LLM        |
+| `mcp__plugin_filid_tools__ast_grep_search`  | Native AST pattern search (Phase 1 attempt)  | Grep + Read + LLM |
+| `mcp__plugin_filid_tools__ast_grep_replace` | Native AST pattern replace (Phase 1 attempt) | Edit + LLM        |
 
 ## Options
 

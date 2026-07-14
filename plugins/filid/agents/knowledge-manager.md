@@ -32,7 +32,7 @@ finding with a nameable consequence through rather than self-censoring.
 ## Decision Criteria
 
 1. **INTENT.md > 50 lines** → HIGH severity. Fix type: `code-fix`.
-   Recommended action: "compress via `mcp__plugin_filid_t__doc_compress` auto mode or decompose
+   Recommended action: "compress via `mcp__plugin_filid_tools__doc_compress` auto mode or decompose
    module into sub-fractals".
 2. **Missing 3-tier boundary section** ("Always do" / "Ask first" /
    "Never do") → MEDIUM severity. Fix type: `code-fix`.

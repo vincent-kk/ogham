@@ -13,7 +13,7 @@ models. Use this table to pick the right one.
 
 | Skill         | Trigger               | Detection                 | Incremental gate                | Invocation                           |
 | ------------- | --------------------- | ------------------------- | ------------------------------- | ------------------------------------ |
-| `update`      | Branch git diff       | Rule violations           | Hash-based (mcp__plugin_filid_t__cache_manage) | Internal (`user_invocable: false`)   |
+| `update`      | Branch git diff       | Rule violations           | Hash-based (mcp__plugin_filid_tools__cache_manage) | Internal (`user_invocable: false`)   |
 | `enrich-docs` | Target directory path | Quality smell (heuristic) | None (quality re-eval)          | User-facing (`user_invocable: true`) |
 
 Practical guidance:
@@ -30,9 +30,9 @@ its own reads via the Read/Glob tools — they are not documented here.
 
 | Tool                       | Stage | Purpose                                          | Signature summary                                                               |
 | -------------------------- | ----- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `mcp__plugin_filid_t__fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReportDto`                                                    |
-| `mcp__plugin_filid_t__doc_compress`       | 7     | 50-line limit enforcement                        | `{ mode, filePath, content }` → `{ compacted?, summary?, meta?, cap_applies? }` |
-| `mcp__plugin_filid_t__structure_validate` | 7     | Structural rule check on the enriched module     | `{ path }` → `{ report, rulesApplied, rulesSkipped, configWarnings }`           |
+| `mcp__plugin_filid_tools__fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReportDto`                                                    |
+| `mcp__plugin_filid_tools__doc_compress`       | 7     | 50-line limit enforcement                        | `{ mode, filePath, content }` → `{ compacted?, summary?, meta?, cap_applies? }` |
+| `mcp__plugin_filid_tools__structure_validate` | 7     | Structural rule check on the enriched module     | `{ path }` → `{ report, rulesApplied, rulesSkipped, configWarnings }`           |
 
 Full tool signatures and return-type schemas live in
 [reference.md Sections 2 and 7](./reference.md#section-2--discovery).

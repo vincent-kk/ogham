@@ -63,7 +63,7 @@ pr-create → review → resolve → revalidate
 ### Step 1 — Determine Entry Point
 
 Detect the branch (`git branch --show-current`), normalize it
-(`mcp__plugin_filid_t__review_manage(action: "normalize-branch", ...)`),
+(`mcp__plugin_filid_tools__review_manage(action: "normalize-branch", ...)`),
 set `review_dir = .filid/review/<normalized>/`.
 
 > **Spike harvest guard (precedes `--from` and auto-detection)**: if the

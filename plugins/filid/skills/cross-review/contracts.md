@@ -48,7 +48,7 @@ integrated `adjudicator` fast path.
 | MEDIUM     | `[engineering-architect, knowledge-manager, business-driver, operations-sre]`                              |
 | HIGH       | `[engineering-architect, knowledge-manager, operations-sre, business-driver, product-manager, design-hci]` |
 
-This table mirrors `mcp__plugin_filid_t__review_manage(elect-committee)`
+This table mirrors `mcp__plugin_filid_tools__review_manage(elect-committee)`
 output and is the sole reference for chairperson-side committee rewrites
 (the Step 2 escalation). Keep in sync with
 `src/mcp/tools/reviewManage/handlers/electCommittee.ts`.
@@ -274,7 +274,7 @@ When constructing evidence / persona / verifier prompts:
 ## Config Patch Contract (`.filid/config.json` fixes)
 
 Every fix whose Code Patch modifies `.filid/config.json` MUST pass
-through `mcp__plugin_filid_t__config_patch_validate` before being
+through `mcp__plugin_filid_tools__config_patch_validate` before being
 written to `fix-requests.md`:
 
 | Result                                 | Action                                                                                 |

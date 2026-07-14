@@ -23,7 +23,7 @@ when the native tool is genuinely unavailable.
 ### Search Request
 
 ```
-Tool: mcp__plugin_filid_t__ast_grep_search
+Tool: mcp__plugin_filid_tools__ast_grep_search
 Input:
   pattern: <user pattern>
   language: <language>
@@ -35,7 +35,7 @@ Input:
 ### Replace Request
 
 ```
-Tool: mcp__plugin_filid_t__ast_grep_replace
+Tool: mcp__plugin_filid_tools__ast_grep_replace
 Input:
   pattern: <user pattern>
   replacement: <user replacement>
@@ -54,7 +54,7 @@ user confirmation.
 
 ### Error String
 
-The exact error returned by both `mcp__plugin_filid_t__ast_grep_search` and `mcp__plugin_filid_t__ast_grep_replace`:
+The exact error returned by both `mcp__plugin_filid_tools__ast_grep_search` and `mcp__plugin_filid_tools__ast_grep_replace`:
 
 ```
 @ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi

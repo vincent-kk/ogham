@@ -31,16 +31,16 @@ node --import tsx src/main.ts compile ../../plugins/filid   # 최대 L2: 19 skil
 
 기대 진단·산출물:
 
-- Claude `targets/claude/`: `hooks/hooks.json`(5 이벤트)·`agents/*.md`(14)·`.claude-plugin/plugin.json`·`.mcp.json`(server `t`, `${CLAUDE_PLUGIN_ROOT}` args).
+- Claude `targets/claude/`: `hooks/hooks.json`(5 이벤트)·`agents/*.md`(14)·`.claude-plugin/plugin.json`·`.mcp.json`(server `tools`, `${CLAUDE_PLUGIN_ROOT}` args).
 - Codex `targets/codex/`: **`hooks/` 없음**(⚠ `hook-loss: all hooks dropped`)·`.codex-agents/*.toml`(14, read-only/workspace-write sandbox 분류)·`.mcp.json`(server=`filid` 오버라이드·`cwd:"."`)·도구명 `mcp__filid.*`.
-- agy `targets/agy/`: `hooks.json` named-group — SessionStart/UserPromptSubmit→PreInvocation, PreToolUse(matcher `Read|Write|Edit`→`view_file|write_to_file|replace_file_content`). **SessionEnd·SubagentStart 드롭**(⚠ hook-loss 경고). agent .md 도구그랜트 `mcp_t_*`.
+- agy `targets/agy/`: `hooks.json` named-group — SessionStart/UserPromptSubmit→PreInvocation, PreToolUse(matcher `Read|Write|Edit`→`view_file|write_to_file|replace_file_content`). **SessionEnd·SubagentStart 드롭**(⚠ hook-loss 경고). agent .md 도구그랜트 `mcp_tools_*`.
 
 ## 3. 도구명 치환 (3-호스트)
 
 ```bash
-grep -o 'mcp__plugin_filid_t__[a-z_]*' ../../plugins/filid/targets/claude/skills/*/SKILL.md | head   # claude full-form
+grep -o 'mcp__plugin_filid_tools__[a-z_]*' ../../plugins/filid/targets/claude/skills/*/SKILL.md | head   # claude full-form
 grep -o 'mcp__filid\.[a-z_]*'          ../../plugins/filid/targets/codex/skills/*/SKILL.md  | head   # codex
-grep -o 'mcp_t_[a-z_]*'                ../../plugins/filid/targets/agy/skills/*/SKILL.md    | head   # agy
+grep -o 'mcp_tools_[a-z_]*'                ../../plugins/filid/targets/agy/skills/*/SKILL.md    | head   # agy
 ```
 
 ## 4. SessionEnd → MCP-lifecycle 지원 (mcp-lifecycle fallback)

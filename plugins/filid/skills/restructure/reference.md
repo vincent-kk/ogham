@@ -9,23 +9,23 @@ fractal structure restructuring skill. For the quick-start overview, see [SKILL.
 
 ```
 // Parallel batch — fire all three simultaneously:
-mcp__plugin_filid_t__fractal_scan({ path: "<target-path>" })
+mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
 // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 // Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for details
 
-mcp__plugin_filid_t__drift_detect({ path: "<target-path>" })
+mcp__plugin_filid_tools__drift_detect({ path: "<target-path>" })
 // Returns: { drifts: DriftItem[], total: number }
 
-mcp__plugin_filid_t__rule_query({ action: "list", path: "<target-path>" })
+mcp__plugin_filid_tools__rule_query({ action: "list", path: "<target-path>" })
 // Returns: { rules: Rule[] }
 ```
 
-After `mcp__plugin_filid_t__drift_detect` completes, call `mcp__plugin_filid_t__lca_resolve` for each move candidate
-(requires mcp**plugin_filid_t**drift_detect output to identify reclassification targets):
+After `mcp__plugin_filid_tools__drift_detect` completes, call `mcp__plugin_filid_tools__lca_resolve` for each move candidate
+(requires `mcp__plugin_filid_tools__drift_detect` output to identify reclassification targets):
 
 ```
-// Sequential — after mcp__plugin_filid_t__drift_detect:
-mcp__plugin_filid_t__lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
+// Sequential — after mcp__plugin_filid_tools__drift_detect:
+mcp__plugin_filid_tools__lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
 // Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
 ```
 
@@ -109,10 +109,10 @@ export type { AuthUser, AuthState } from './types';
 
 ## Section 4 — Validation
 
-After `restructurer` completes, `fractal-architect` validates with `mcp__plugin_filid_t__structure_validate`.
+After `restructurer` completes, `fractal-architect` validates with `mcp__plugin_filid_tools__structure_validate`.
 
 ```
-mcp__plugin_filid_t__structure_validate({ path: "<target-path>" })
+mcp__plugin_filid_tools__structure_validate({ path: "<target-path>" })
 // Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
 // (passed / violations live at report.result)
 ```
@@ -144,7 +144,7 @@ Validation checks:
 | src/app.ts | ../components/AuthModal | ../features/auth/components/AuthModal |
 
 ### Validation Result
-mcp__plugin_filid_t__structure_validate: PASS
+mcp__plugin_filid_tools__structure_validate: PASS
 - All imports resolvable: ✓
 - No orphaned files: ✓
 - All fractal nodes have index.ts: ✓

@@ -2,7 +2,7 @@
 
 Canonical output formats for review artifacts and the PR comment. The
 chairperson reads this file before writing `review-report.md` and
-`fix-requests.md`; `mcp__plugin_filid_t__review_manage(format-pr-comment)`
+`fix-requests.md`; `mcp__plugin_filid_tools__review_manage(format-pr-comment)`
 consumes these conventions when assembling PR comments.
 
 ## Review Report Format (`review-report.md`)
@@ -178,13 +178,13 @@ scope. One row per advisory key, updated in place in SKILL.md Step 5:
 - `count` increments at most once per run: a row whose `last_run_id`
   equals the current `session.md` `run_id` is skipped.
 - At `count` 3 with `status: open`: promote via
-  `mcp__plugin_filid_t__debt_manage(action: "create", projectRoot, debtItem: { severity: "LOW", original_fix_id: <ADV-id>, ... })`,
+  `mcp__plugin_filid_tools__debt_manage(action: "create", projectRoot, debtItem: { severity: "LOW", original_fix_id: <ADV-id>, ... })`,
   set `status: promoted`, record `debt_id`. Promoted rows are never
   re-counted — the ledger never becomes an unbounded backlog.
 
 ## PR Comment Format
 
-Use `mcp__plugin_filid_t__review_manage(action: "format-pr-comment")` —
+Use `mcp__plugin_filid_tools__review_manage(action: "format-pr-comment")` —
 it reads `review-report.md` (+ `fix-requests.md` when present), wraps
 each in collapsible `<details>` sections, handles the 50,000-char limit,
 and returns ready-to-post markdown. Post via

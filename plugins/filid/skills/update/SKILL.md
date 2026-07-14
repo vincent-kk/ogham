@@ -10,7 +10,7 @@ plugin: filid
 
 > **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
 > After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after `mcp__plugin_filid_t__cache_manage` gate, `filid:qa-reviewer` subagent return,
+> NEVER yield after `mcp__plugin_filid_tools__cache_manage` gate, `filid:qa-reviewer` subagent return,
 > `filid:context-manager` delegation, or `filid:implementer` completion.
 >
 > **Valid reasons to yield**:
@@ -48,8 +48,8 @@ An incremental gate (Stage 0) skips execution when no changes have occurred sinc
 
 Without `--force`, exits immediately if no changes have occurred since the last run.
 
-1. `mcp__plugin_filid_t__cache_manage({ action: "compute-hash", cwd: "<path>" })` → `currentHash`
-2. `mcp__plugin_filid_t__cache_manage({ action: "get-hash", cwd: "<path>", skillName: "update" })` → `lastHash`
+1. `mcp__plugin_filid_tools__cache_manage({ action: "compute-hash", cwd: "<path>" })` → `currentHash`
+2. `mcp__plugin_filid_tools__cache_manage({ action: "get-hash", cwd: "<path>", skillName: "update" })` → `lastHash`
 3. `currentHash === lastHash` and no `--force` → output "No changes since last run. Use --force to override." and exit
 4. Changes detected → proceed to Stage 1
 
@@ -68,7 +68,7 @@ Runs only when Stage 1 detects `critical` or `high` severity violations.
 See `reference.md` Section 2 Severity Normalization Table for the mapping from scan violation types to drift severity levels.
 
 Agents: `filid:drift-analyzer` (sonnet) → `filid:restructurer` (sonnet)
-MCP: `mcp__plugin_filid_t__drift_detect`, `mcp__plugin_filid_t__lca_resolve`, `mcp__plugin_filid_t__structure_validate`
+MCP: `mcp__plugin_filid_tools__drift_detect`, `mcp__plugin_filid_tools__lca_resolve`, `mcp__plugin_filid_tools__structure_validate`
 The correction plan from `filid:drift-analyzer` is presented for user approval
 before `filid:restructurer` executes it — skipped when `--auto-approve` is set.
 See [reference.md Section 2](./reference.md#section-2--sync).
@@ -92,23 +92,23 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 1. Verify all prior stages completed without errors. If any stage reported an
    error, skip hash save and report the error — this ensures the next incremental
    run re-processes the failed work.
-2. `mcp__plugin_filid_t__cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: currentHash })`
+2. `mcp__plugin_filid_tools__cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: currentHash })`
 3. Output consolidated report
    See [reference.md Section 4](./reference.md#section-4--finalize).
 
 ## Available MCP Tools
 
-| Tool                                      | Stage | Purpose                                            |
-| ----------------------------------------- | ----- | -------------------------------------------------- |
-| `mcp__plugin_filid_t__cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
-| `mcp__plugin_filid_t__fractal_scan`       | 1     | Project structure scan                             |
-| `mcp__plugin_filid_t__fractal_navigate`   | 1     | Tree traversal and classification                  |
-| `mcp__plugin_filid_t__test_metrics`       | 1, 3  | 3+12 rule validation                               |
-| `mcp__plugin_filid_t__drift_detect`       | 2     | Drift detection                                    |
-| `mcp__plugin_filid_t__lca_resolve`        | 2     | Determine correct placement for reclassification   |
-| `mcp__plugin_filid_t__structure_validate` | 2     | Structure validity check                           |
-| `mcp__plugin_filid_t__doc_compress`       | 3     | Document size check                                |
-| `mcp__plugin_filid_t__ast_analyze`        | 3     | LCOM4, CC metrics                                  |
+| Tool                                          | Stage | Purpose                                            |
+| --------------------------------------------- | ----- | -------------------------------------------------- |
+| `mcp__plugin_filid_tools__cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
+| `mcp__plugin_filid_tools__fractal_scan`       | 1     | Project structure scan                             |
+| `mcp__plugin_filid_tools__fractal_navigate`   | 1     | Tree traversal and classification                  |
+| `mcp__plugin_filid_tools__test_metrics`       | 1, 3  | 3+12 rule validation                               |
+| `mcp__plugin_filid_tools__drift_detect`       | 2     | Drift detection                                    |
+| `mcp__plugin_filid_tools__lca_resolve`        | 2     | Determine correct placement for reclassification   |
+| `mcp__plugin_filid_tools__structure_validate` | 2     | Structure validity check                           |
+| `mcp__plugin_filid_tools__doc_compress`       | 3     | Document size check                                |
+| `mcp__plugin_filid_tools__ast_analyze`        | 3     | LCOM4, CC metrics                                  |
 
 ## Options
 

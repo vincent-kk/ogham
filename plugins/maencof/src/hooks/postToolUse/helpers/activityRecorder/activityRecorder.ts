@@ -46,7 +46,7 @@ export function runActivityRecorder(
 ): ActivityRecorderResult {
   try {
     const cwd = input.cwd ?? process.cwd();
-    // Hook inputs carry full-form MCP names (mcp__plugin_maencof_t__create);
+    // Hook inputs carry full-form MCP names (mcp__plugin_maencof_tools__create);
     // category map and description builder are keyed on bare names.
     const toolName = normalizeMaencofToolName(input.tool_name ?? '');
 

@@ -103,7 +103,7 @@ yarn test:run   # 1회 실행
 ```json
 {
   "mcpServers": {
-    "t": {
+    "tools": {
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"]
     }

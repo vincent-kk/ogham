@@ -100,7 +100,7 @@ Skip silently if unavailable.
 
 ### Step 5 — Write Changelog Document(s)
 
-One file per change date: `02_Derived/changelog/YYYY-MM-DD.md`. Read any existing file for that date first to avoid duplicate entries, then write via `mcp__plugin_maencof_t__create` (new) or `mcp__plugin_maencof_t__update` (existing).
+One file per change date: `02_Derived/changelog/YYYY-MM-DD.md`. Read any existing file for that date first to avoid duplicate entries, then write via `mcp__plugin_maencof_tools__create` (new) or `mcp__plugin_maencof_tools__update` (existing).
 
 **File format:**
 
@@ -167,10 +167,10 @@ Changelog 기록 완료: 02_Derived/changelog/YYYY-MM-DD.md
 
 ## Available Tools
 
-| Tool                            | Type   | Purpose                                                               |
-| ------------------------------- | ------ | --------------------------------------------------------------------- |
-| `mcp__plugin_maencof_t__create` | MCP    | Create new vault document                                             |
-| `mcp__plugin_maencof_t__read`   | MCP    | Read existing vault document                                          |
-| `mcp__plugin_maencof_t__update` | MCP    | Update existing vault document (when the date's entry already exists) |
-| `Read` / `Write`                | Native | Read and update `.maencof-meta/changelog-state.json`                  |
-| `Bash`                          | Native | Run git commands (status, log, add, commit)                           |
+| Tool                                | Type   | Purpose                                                               |
+| ----------------------------------- | ------ | --------------------------------------------------------------------- |
+| `mcp__plugin_maencof_tools__create` | MCP    | Create new vault document                                             |
+| `mcp__plugin_maencof_tools__read`   | MCP    | Read existing vault document                                          |
+| `mcp__plugin_maencof_tools__update` | MCP    | Update existing vault document (when the date's entry already exists) |
+| `Read` / `Write`                    | Native | Read and update `.maencof-meta/changelog-state.json`                  |
+| `Bash`                              | Native | Run git commands (status, log, add, commit)                           |

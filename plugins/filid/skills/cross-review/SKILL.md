@@ -68,7 +68,7 @@ recorded).
 ### Step 1 — Scope & Session
 
 1. `git branch --show-current` (Bash) → `<branch>`.
-2. `mcp__plugin_filid_t__review_manage(action: "normalize-branch", projectRoot, branchName)`
+2. `mcp__plugin_filid_tools__review_manage(action: "normalize-branch", projectRoot, branchName)`
    → `<normalized>`; `REVIEW_DIR = .filid/review/<normalized>/`.
 
 > **Spike harvest guard**: when `<branch>` matches `spike/*`, read
@@ -80,13 +80,13 @@ recorded).
 > `Review verdict: REQUEST_CHANGES`, and END. Unharvested spike work has
 > no oracle to judge it against.
 
-3. If `--force`: `mcp__plugin_filid_t__review_manage(action: "cleanup", projectRoot, branchName)`,
+3. If `--force`: `mcp__plugin_filid_tools__review_manage(action: "cleanup", projectRoot, branchName)`,
    then continue fresh. Otherwise:
-   - `mcp__plugin_filid_t__review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
+   - `mcp__plugin_filid_tools__review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
      — on `"skip-to-existing-results"`, read the existing
      `review-report.md`, report its verdict, emit the terminal marker,
      and END.
-   - `mcp__plugin_filid_t__review_manage(action: "checkpoint", projectRoot, branchName)`
+   - `mcp__plugin_filid_tools__review_manage(action: "checkpoint", projectRoot, branchName)`
      — resume from the artifacts listed in `files`:
      `review-report.md` present → report existing results and END;
      `verification.md` present → skip to Step 3;
@@ -96,9 +96,9 @@ recorded).
    changed fractal count (unique parent fractal dirs); interface changes
    (`index.ts` / public exports touched); document changes per the SSoT
    rule in `contracts.md` → "Document Change Signal".
-5. `mcp__plugin_filid_t__review_manage(action: "elect-committee", projectRoot, changedFilesCount, changedFractalsCount, hasInterfaceChanges, hasDocumentChanges, adjudicatorMode: <true when --solo, else false>)`
+5. `mcp__plugin_filid_tools__review_manage(action: "elect-committee", projectRoot, changedFilesCount, changedFractalsCount, hasInterfaceChanges, hasDocumentChanges, adjudicatorMode: <true when --solo, else false>)`
    → `{ complexity, committee, adversarialPairs }`.
-6. `mcp__plugin_filid_t__review_manage(action: "ensure-dir", projectRoot, branchName)`,
+6. `mcp__plugin_filid_tools__review_manage(action: "ensure-dir", projectRoot, branchName)`,
    then write `<REVIEW_DIR>/session.md`:
 
    ```markdown
@@ -257,20 +257,20 @@ sanctioned in `contracts.md`.
 1. **Advisory ledger**: for each advisory item, update
    `.filid/review/advisory-ledger.md` (dedup key `path + rule`, at most
    one count per `run_id`; promote to a debt record at count 3 via
-   `mcp__plugin_filid_t__debt_manage(action: "create", ...)`) — format
+   `mcp__plugin_filid_tools__debt_manage(action: "create", ...)`) — format
    and rules: `templates.md` → "Advisory Ledger Format".
 2. **Config-patch gate**: every fix whose patch modifies
    `.filid/config.json` MUST pass
-   `mcp__plugin_filid_t__config_patch_validate` before being written
+   `mcp__plugin_filid_tools__config_patch_validate` before being written
    (dispatch rules: `contracts.md` → "Config Patch Contract").
 3. Write `<REVIEW_DIR>/review-report.md` and — when the blocking set is
    non-empty — `<REVIEW_DIR>/fix-requests.md`, using `templates.md`
    formats. The report's Arbitration Log records per-persona positions,
    dedup collisions, every verifier verdict (including dismissed
    REFUTED items), and VETO handling.
-4. `mcp__plugin_filid_t__review_manage(action: "content-hash", projectRoot, branchName, baseRef)`.
+4. `mcp__plugin_filid_tools__review_manage(action: "content-hash", projectRoot, branchName, baseRef)`.
 5. **PR comment** (only when `--scope=pr`):
-   `mcp__plugin_filid_t__review_manage(action: "format-pr-comment", projectRoot, branchName)`,
+   `mcp__plugin_filid_tools__review_manage(action: "format-pr-comment", projectRoot, branchName)`,
    then `gh auth status`; if authenticated, post the returned
    `markdown` via `gh pr comment --body-file` (edit the existing
    `Code Review Governance` comment in place when one exists — locate
