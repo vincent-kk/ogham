@@ -21,14 +21,15 @@
 
 2026-07-11 체제의 L1(스칼라 치환)/L2(구조 분기) + `targets/<host>/` 배포 트리 모델은 **폐기**한다. 0.144.4 재실측으로 Codex 가 Claude 산출물(매니페스트 fallback·hooks 포맷·skills·마켓플레이스 fallback)을 거의 그대로 소비하므로, 호스트 차이는 **소수의 추가 파일(어댑터)** 로 흡수된다:
 
-| 차이                       | 흡수 지점                                                                               |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| Codex MCP args 변수 미전개 | `.codex-plugin/plugin.json` 인라인 `mcpServers` (상대 args + **`cwd:"."` 명시** — §4.1) |
-| Codex 서버명 전역충돌 위험 | 위 인라인 선언에서 서버명=플러그인명 오버라이드                                         |
-| agy MCP 파일명             | 플러그인 루트 `mcp_config.json` 추가 파일                                               |
-| Codex 마켓플레이스 스키마  | 루트 `.agents/plugins/marketplace.json` 추가 파일                                       |
-| agy 클론-즉시-활성화       | 루트 `.agents/plugins.json` declared entries 추가 파일                                  |
-| agy 훅 어휘 상이           | (잔여 Stage — 러너 어댑터, §4.3)                                                        |
+| 차이                       | 흡수 지점                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| Codex MCP args 변수 미전개 | `.codex-plugin/plugin.json` 인라인 `mcpServers` (상대 args + **`cwd:"."` 명시** — §4.1)    |
+| Codex 서버명 전역충돌 위험 | 위 인라인 선언에서 서버명=플러그인명 오버라이드                                            |
+| agy MCP 파일명             | 플러그인 루트 `mcp_config.json` 추가 파일                                                  |
+| Codex 마켓플레이스 스키마  | 루트 `.agents/plugins/marketplace.json` 추가 파일                                          |
+| agy 플러그인 마커·분류     | 플러그인 루트 `plugin.json` (**Codex 도 이 경로를 읽으므로 전체 매니페스트여야** — §4.4.1) |
+| ~~agy 클론-즉시-활성화~~   | ~~루트 `.agents/plugins.json` declared~~ → **폐기**: 어떤 형식으로도 로드 실패 (§4.4)      |
+| agy 훅 어휘 상이           | (잔여 Stage — 러너 어댑터, §4.3)                                                           |
 
 Claude 산출물은 **정본이자 그대로 Claude 배포물** — 수정 자체가 없으므로 무결손이 구조적으로 보장된다. 상세 절차는 [migration-playbook.md](./migration-playbook.md), 생성 도구는 [`tools/plugin-compiler`](../../tools/plugin-compiler/).
 

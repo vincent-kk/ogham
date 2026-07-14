@@ -6,33 +6,29 @@
 
 ## 지금 상태 — 한 눈에
 
-| 단계                             | 상태                                                      |
-| -------------------------------- | --------------------------------------------------------- |
-| **Stage 1** 실측 게이트 G1–G8    | ✅ 전부 종료 (아래 표)                                    |
-| **Phase A** 어댑터 정정          | ✅ 완료 (`42d5d898`)                                      |
-| **Phase B** CI·README 배선       | ✅ 완료 (`42d5d898`)                                      |
-| **Phase C1–C3** 경로 좌표 (코드) | ✅ main `77825966` 에 반영됨 — **단 호스트 실측은 0**     |
-| **M1** main 머지 + 어댑터 재생성 | ⬜ **다음 작업 (선행 조건)**                              |
-| **V1–V4** 경로 수정 재검증       | ⬜ **핵심** — 아래 §"재검증" 참조                         |
-| **C4** 규칙 채널                 | ⬜ → [stage4-rules-channel.md](./stage4-rules-channel.md) |
-| **Phase D/E** agy·Codex 심화     | ⬜ 선택 → [backlog-d-e.md](./backlog-d-e.md)              |
-| main 머지·GitHub 경유 설치 확인  | ⬜ 마지막                                                 |
+| 단계                                 | 상태                                                                       |
+| ------------------------------------ | -------------------------------------------------------------------------- |
+| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                     |
+| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                       |
+| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                       |
+| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966` — 리베이스로 이 브랜치에 들어옴. **단 호스트 실측은 0** |
+| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록(4238), 어댑터 30 결정적                         |
+| **V1–V4** 경로 수정 재검증           | ⬜ **다음 작업 · 핵심** — 아래 §"재검증" 참조                              |
+| **C4** 규칙 채널                     | ⬜ → [stage4-rules-channel.md](./stage4-rules-channel.md)                  |
+| **Phase D/E** agy·Codex 심화         | ⬜ 선택 → [backlog-d-e.md](./backlog-d-e.md)                               |
+| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                  |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 
 ---
 
-## M1. main 머지 + 어댑터 재생성 (선행 조건)
+## M1. main 리베이스 + 어댑터 재생성 ✅ 완료
 
-경로 좌표 코드(`hostPaths`)는 **main 에만 있고 이 브랜치엔 없다.** 재검증을 하려면 먼저 가져와야 한다.
+브랜치를 main 위로 리베이스했고, main 의 핵심 커밋(`77825966` hostPaths · `b89e9be4` filid 서버명 · `54e2712e` maencof 예산 · `60ab6c87` 버전)이 전부 조상으로 들어왔다. 어댑터 30개 재생성 완료.
 
-```bash
-git merge main
-yarn plugin:adapters        # 필수 — 아래 이유
-yarn plugin:adapters:check  # 30 unchanged 확인
-```
+**게이트가 설계대로 작동했다**: 리베이스 직후 `plugin:adapters:check` 가 **21 stale → exit 1** 로 잡았고(filid 서버명 `t`→`tools` 반영 필요), `yarn plugin:adapters` 후 exit 0. CI 를 그렇게 배선한 이유가 이것이다.
 
-⚠ **재생성을 빼먹으면 안 된다**: main `b89e9be4` 에서 **filid MCP 서버명이 `t` → `tools`** 로 바뀌었다. 이 브랜치의 어댑터는 아직 `t` 기준이다. 잊어도 CI 의 `plugin:adapters:check` 가 exit 1 로 잡는다(그게 그 게이트를 만든 이유다).
+전체 테스트 **4238개 전부 통과** — 리베이스 전 양쪽에 있던 실패(브랜치 cennad 4건 · main maencof 5건)가 모두 해소됐다.
 
 ---
 
@@ -57,12 +53,23 @@ projectRoot(explicit?)
 
 즉 **"실패시키고 안내 메시지로 모델을 재시도시키는" 자기교정 루프**다. 스킬 본문에는 안내가 없다 — 스키마 설명과 에러 메시지가 전부다.
 
-### V1. Codex — 모델이 절대경로를 실제로 넘기는가 ⚠ **가장 중요**
+### V1. 모델이 절대경로를 실제로 넘기는가 ⚠ **가장 중요 — 세 호스트 공통 결정**
 
 - **틸데 위험**: Codex TUI 는 워크스페이스를 **`~/Workspace/ogham_mk2`** 로 표시한다. `toAbsoluteRoot()` 는 `path.isAbsolute()` 를 쓰므로 **틸데는 거부**된다. 모델이 자기 컨텍스트에서 본 문자열을 그대로 넘기면 실패한다.
 - **회복 가능한가**: 미전달 → 안내 throw → 재시도 → 틸데 → 두 번째 throw → 재시도. **이 왕복을 모델이 실제로 완주하는가? 몇 번 만에?** 못 하면 도구가 사실상 죽는다.
 - **측정**: Codex 에서 imbas 도구(`manifest_get` 등)를 실제 호출시키고 `codex exec --json` 으로 왕복을 관찰.
-- **결과에 따른 대응**: (a) `toAbsoluteRoot` 가 `~` 를 전개하도록 완화, (b) 스키마 설명에 "expand `~` yourself" 명시, (c) 스킬 본문에 안내 추가 — **어느 쪽이든 정본 수정이라 이 브랜치에서 결정한다.**
+
+> ⚠ **이건 Codex 만의 문제가 아니다 — Claude 에도 새 실패 경로가 생겼다.**
+> `project_root` 인자는 스키마가 호스트별로 갈리지 않으므로 **Claude 모델에게도 보인다**. 설명이 "Omit on Claude Code" 라고 해도 모델이 이를 무시하고 틸데 경로를 넘기면 `requireAbsoluteRoot()` 가 throw 한다 — **hostPaths 이전에는 인자 자체가 없어 불가능하던 실패다.**
+> hostPaths 자체는 Claude 에서 초록이다(`@ogham/cross-platform` 스펙 133개 통과, 경로를 갈아끼운 플러그인 전부 통과 — `OGHAM_HOST` 부재 → claude → `pluginRoot()`=`CLAUDE_PLUGIN_ROOT`, `projectRoot()`=`process.cwd()` 로 기존과 동일 경로). 리스크는 **모델이 하지 말라는 짓을 했을 때만** 드러난다.
+>
+> ⇒ **틸데를 어떻게 다룰지 정하는 결정이 세 호스트에 동시에 적용된다.** 대응 후보:
+>
+> - **(a) `toAbsoluteRoot()` 가 `~` 를 전개** — 셋 다 한 번에 깔끔해진다. **현재로선 이쪽이 유력.** 단 `~user` 형태·Windows 를 함께 봐야 한다.
+> - **(b) 스키마 설명에 "expand `~` yourself" 명시** — 모델 순응에 기댄다. 약하다.
+> - **(c) 스킬 본문에 안내 추가** — 스킬을 안 타는 직접 호출에는 안 먹는다.
+>
+> V1 실측(모델이 실제로 몇 번 만에 회복하는가)을 보고 정한다. **어느 쪽이든 정본 수정이므로 이 브랜치에서 결정·적용한다.**
 
 ### V2. agy — 같은 질문
 

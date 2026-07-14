@@ -12,14 +12,16 @@
 
 ```
 ogham/
-├── .claude-plugin/marketplace.json     정본 (Claude 설치 · agy 재사용 · Codex fallback)
+├── .claude-plugin/marketplace.json     정본 (Claude 설치 · Codex fallback)
 ├── .agents/plugins/marketplace.json    [생성] Codex: codex plugin marketplace add <repo>
-├── .agents/plugins.json                [생성] agy: 클론 즉시 declared 활성화
 └── plugins/<pkg>/
     ├── (현행 Claude 산출물 전부 — 무수정)
-    ├── .codex-plugin/plugin.json       [생성] Codex 매니페스트 (skills·hooks 명시 + 인라인 mcpServers)
+    ├── plugin.json                     [생성] 루트 매니페스트 — agy 마커 + Codex 가 실제로 읽는 경로
+    ├── .codex-plugin/plugin.json       [생성] 위와 바이트 동일 (Codex 규약 경로)
     └── mcp_config.json                 [생성] agy MCP (MCP 보유 플러그인만)
 ```
+
+생성물 **30 파일** / 경로 4종. `.agents/plugins.json`(agy declared)은 **폐기** — 어떤 형식으로도 플러그인을 로드하지 못했다(matrix §4.4).
 
 설치 채널 (사용자 안내 문구의 정본):
 
@@ -119,4 +121,4 @@ PoC: 로컬 마켓플레이스 `ogham` 등록 + `deilen`·`r-statistics`(MCP onl
 1. ~~inject-version.mjs 컷오버 파손~~ → in-place 라 컷오버 없음. 대신 `.codex-plugin/plugin.json` version 동기화가 inject-version.mjs 에 추가됨 — 플러그인에 `.codex-plugin` 이 없으면 조용히 skip 하는지 확인.
 2. ~~r-statistics `shared/contract.R` 누락~~ → in-place 라 산출물 재배치 없음. `${CLAUDE_PLUGIN_ROOT}/shared/contract.R` 런타임 참조는 Codex 훅 env 주입으로도 유효하나, **MCP 서버 프로세스에는 그 env 가 없다** — r-statistics 서버가 이 경로를 어떻게 해석하는지 G1 PoC 에서 함께 확인.
 3. ~~verify 게이트 소멸~~ → `plugin:adapters:check` 가 상설 clean-regen 게이트로 대체.
-4. CI paths 필터 — **job 편입만으로는 무효**: 현행 `ci.yml` 은 `**.json` 을 명시 배제하고(주석: "config/manifest-only (`**.json`) 변경은 매트릭스를 건너뛴다") `**.ts`~`**.cjs` 만 트리거한다. 어댑터 21개는 전부 `.json` 이므로, paths 에 `.codex-plugin/**`·`**/mcp_config.json`·`.agents/**` 를 추가하기 전에는 어댑터만 손편집·desync 된 커밋에서 **CI 자체가 돌지 않는다**. Stage 2 에서 paths 추가와 `plugin:adapters:check` 편입은 한 쌍으로 처리한다.
+4. ~~CI paths 필터~~ → **해소됨 (Phase B, `42d5d898`)**. 구 `ci.yml` 은 `**.json` 을 명시 배제해 어댑터(전부 `.json`)만 desync 된 커밋에서 **CI 자체가 돌지 않았다** — job 편입만으로는 무효였다. 이제 paths 가 **정본 입력**(`**/.mcp.json`·`**/hooks.json`·매니페스트·마켓플레이스)과 **생성물**(`**/plugin.json`·`**/mcp_config.json`·`.agents/**`)을 양쪽 다 트리거하고, `plugin:adapters:check` 가 단계로 들어갔다(stale → exit 1 실증).

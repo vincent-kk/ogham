@@ -35,7 +35,7 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 | [TODO.md](./TODO.md)                                     | **세션 복원 지점** — 현재 상태·다음 작업·머지 전 주의. 새 세션은 여기부터 읽는다           |
 | [transition-plan.md](./transition-plan.md)               | 최종 전환 계획 — Phase A~E 실행 순서·의존성·완료 기준·사용자 고지 문안                     |
 | [stage4-host-paths.md](./stage4-host-paths.md)           | 경로 좌표 의뢰서 — 코드는 main 반영됨. **호스트 실측은 TODO V1–V4 에서**                   |
-| [stage4-rules-channel.md](./stage4-rules-channel.md)     | **규칙 채널 의뢰서** — 이 브랜치 작업. Codex 타깃은 `AGENTS.md`(G8)                       |
+| [stage4-rules-channel.md](./stage4-rules-channel.md)     | **규칙 채널 의뢰서** — 이 브랜치 작업. Codex 타깃은 `AGENTS.md`(G8)                        |
 | [backlog-d-e.md](./backlog-d-e.md)                       | 백로그 — Phase D(agy 훅·설치) · Phase E(Codex 도구명·Read matcher·agents 부재)             |
 | [sessionend-refactor.md](./sessionend-refactor.md)       | ADR — SessionEnd → MCP 수명주기 이관(완료·유지, 호스트 이벤트 채널 의존 제거)              |
 
@@ -44,6 +44,6 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 ## 용어
 
 - **정본**: 각 플러그인의 현행 Claude 산출물(`.claude-plugin/`·`.mcp.json`·`skills/`·`agents/`·`hooks/`·`bridge/`·`libs/`). 사람이 수정하는 유일한 층.
-- **어댑터**: 정본에서 생성되는 호스트 호환 파일 4종 — 플러그인별 `.codex-plugin/plugin.json`·`mcp_config.json`, 루트 `.agents/plugins/marketplace.json`·`.agents/plugins.json`. 손편집 금지.
-- **게이트 (G1–G6)**: 실사용 전 실측으로 닫아야 하는 미확정 항목. 플레이북이 정의·추적.
-- **러너 어댑터**: agy 훅 stdin/응답 계약을 Claude 계약으로 정규화하는 잔여 Stage 의 런타임 층(`libs/run.cjs` 확장).
+- **어댑터**: 정본에서 생성되는 호스트 호환 파일 — 경로 4종 / 총 30 파일. 플러그인별 `plugin.json`(루트 매니페스트 — agy 마커이자 Codex 가 실제로 읽는 경로) · `.codex-plugin/plugin.json`(위와 바이트 동일) · `mcp_config.json`, 루트 `.agents/plugins/marketplace.json`. 손편집 금지. (`.agents/plugins.json` agy declared 는 **폐기** — 로드되지 않았다.)
+- **게이트 (G1–G8)**: 실사용 전 실측으로 닫아야 했던 미확정 항목. **전부 종료** — 플레이북 §3 이 결과 정본.
+- **러너 어댑터**: agy 훅 stdin/응답 계약을 Claude 계약으로 정규화하는 잔여 Stage 의 런타임 층(`libs/run.cjs` 확장) — [backlog-d-e.md](./backlog-d-e.md) D1.

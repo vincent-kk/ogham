@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "t": {
+    "tools": {
       "command": "node",
       "args": [
         "bridge/mcp-server.cjs"
