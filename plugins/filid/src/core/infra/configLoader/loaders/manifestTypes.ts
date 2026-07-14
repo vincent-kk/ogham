@@ -22,6 +22,19 @@ export interface RuleDocsManifest {
   rules: RuleDocEntry[];
 }
 
+/** Everything a rule-doc channel needs, resolved once by `syncRuleDocs`. */
+export interface RuleDocSyncPlan {
+  /** Plugin install directory — where `templates/rules/` ships. */
+  pluginRoot: string;
+  /** Target project, git root already resolved. */
+  projectRoot: string;
+  manifest: RuleDocsManifest;
+  /** Rule ids the caller opted into. Required rules deploy regardless. */
+  selection: Set<string>;
+  /** Rule ids whose drifted deployment may be overwritten. */
+  resync: Set<string>;
+}
+
 /** Report returned by syncRuleDocs. */
 export interface RuleDocSyncResult {
   copied: string[];
