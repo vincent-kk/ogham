@@ -19,6 +19,7 @@
       "args": [
         "bridge/mcp-server.cjs"
       ],
+      "cwd": ".",
       "env": {
         "OGHAM_HOST": "codex"
       }

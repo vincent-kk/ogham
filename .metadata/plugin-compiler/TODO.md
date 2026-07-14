@@ -26,15 +26,17 @@ codex plugin add r-statistics@ogham && codex plugin add deilen@ogham
 codex   # TUI 에서 도구 목록·호출 확인
 ```
 
-- [ ] **G1** MCP 도구명 형식·플러그인 스코프 (2개+ 동시 설치, `tools`/`t` 충돌 여부) — 서버명=플러그인명 오버라이드가 방어 중이므로 형식만 기록
-- [ ] **G7** deilen `preview` 상대 경로 인자 (Codex 플러그인 MCP 는 cwd=플러그인 루트 고정) + r-statistics `${CLAUDE_PLUGIN_ROOT}/shared/contract.R` 해석 (MCP 프로세스엔 그 env 없음 — playbook §6-2)
-- [ ] **G6** 대표 스킬 실사용 — 본문의 Claude full-form 도구명(`mcp__plugin_…`)이 모델을 오도하는 정도
+- [x] **G1** ✅ 닫힘 — 도구명 `mcp__<server>__<tool>`(더블 언더스코어), **플러그인 스코프 없음** ⇒ 서버명 오버라이드는 필수. **블로커 발견·수정**: `cwd` 누락 시 MCP 9종 전체 무음 사망 → emitter 가 `"cwd": "."` 방출 (playbook §3.1)
+- [x] **G7** ✅ 닫힘 — **제약 확정**. MCP 프로세스 env 는 `OGHAM_HOST` 뿐이고 Codex 는 세션 cwd 를 안 준다. cwd=플러그인 루트 고정이라 **deilen `preview` 상대 경로는 Codex 에서 오해석**. 대응 미결정 → Stage 4
+- [x] **G6** ✅ 닫힘 — 스킬은 `<plugin>:<skill>` 로 정상 주입(Claude 규약과 동일). 단 본문 full-form(`mcp__plugin_deilen_tools__…`)과 실제 도구명(`mcp__deilen__…`) **불일치 확정** → 완화는 Stage 5
 - [ ] **G2·G3·G5** maencof-lens(SessionStart 1종)로: TUI `/hooks` trust → 주입 확인 → `codex exec` 헤드리스 거동(신뢰/미신뢰) → 버전 범프 후 재신뢰 UX. G5 는 agy 축: `agy plugin install` 시 `hooks/hooks.json`(Claude 포맷) 오독 여부 — 오독 시 훅 파일 개명(플레이북 대응책)
 - [ ] **G4** agy 인터랙티브에서 `mcp_config.json` 상대 args 기동 (실패 시 emitter 를 절대경로 주입으로 교체) — **agy 축(G4·G5)은 1.1.2 로 재실측**: matrix 의 agy 사실은 1.1.1(2026-07-11) 기준이라 승계 금지
 - [ ] **G8** Codex 규칙 채널(`~/.codex/rules` 로드 규약·AGENTS.md 등가성) — Stage 4 의 전제
-- [ ] 결과를 playbook §3 표에 기록 + matrix §6 동기화 + 세션 메모리 갱신
+- [x] 1차 결과 기록 완료 — playbook §3.1 · matrix §3·§4.1·§6·§7·§8 · compiler-architecture §3.1 · DETAIL.md 동기화 (2026-07-15)
 
-마지막으로 cennad 설치로 codex 위임 경로(자기참조) 점검. 게이트 중 하나라도 아키텍처를 흔들면(특히 G1 스코프·G4) 결과 먼저 기록하고 대응책 실행.
+**남은 것**: G2·G3(훅 — maencof-lens 설치 필요), G5(agy 훅 오독), G4(agy MCP — **1.1.2 로 재실측**), G8(Codex 규칙 채널). 마지막으로 cennad 설치로 codex 위임 경로(자기참조) 점검.
+
+**현재 PoC 상태**: codex 에 마켓플레이스 `ogham` + `deilen`·`r-statistics` 설치됨. `~/Workspace/ogham_mk2` 는 codex 신뢰 디렉터리로 등록됨. 정리 절차는 아래.
 
 ### 2. Stage 2 — 배선 (게이트 통과 후)
 

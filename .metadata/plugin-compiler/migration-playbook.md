@@ -62,6 +62,20 @@ yarn plugin:adapters:check    # 재생성-비교만 — 불일치·호환성 err
 
 > ⚠ **등록 경로 필수 조건**: 마켓플레이스로 등록할 체크아웃에 어댑터가 **생성되어 있어야** 한다. 어댑터 없는 클론(예: 아직 머지 전인 `main` 작업본)을 등록하면 Codex 가 §5.1 탐색 순서대로 `.claude-plugin` fallback 으로 떨어져 변수 args 가 든 `.mcp.json` 을 읽는다 — 어댑터를 타지 않는 **가짜 PoC** 다. 등록 직전 `find plugins -maxdepth 3 -path '*/.codex-plugin/plugin.json' | wc -l` 이 10 인지 확인한다.
 
+### 3.1 실측 결과 — Codex 축 1차 (2026-07-15, codex-cli 0.144.4)
+
+PoC: 로컬 마켓플레이스 `ogham` 등록 + `deilen`·`r-statistics`(MCP only, 훅 없음) 동시 설치.
+
+| #      | 결과                                                                                                                                                                                                                                                        |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **G1** | ✅ **닫힘 (단, 블로커 1건 발견·수정)**. 도구명은 `mcp__<server>__<tool>` — **더블 언더스코어**이며 0.144.1 의 `mcp__<server>.<tool>` 은 폐기. `sanitize_name` 으로 `r-statistics`→`r_statistics`. **플러그인 스코프는 없다** (Codex 시스템 프롬프트: "use tool provenance to tell which plugin they come from") → 서버명=플러그인명 오버라이드는 방어책이 아니라 **필수**다(ogham 은 `tools`×6·`t`×3 이 전역 충돌한다). 실측 도구명: `mcp__deilen__render_viewer`·`mcp__r_statistics__run_r` 등 8개. |
+| **G6** | ✅ **닫힘 (양호)**. Codex 가 스킬을 `<plugin>:<skill>` 접두로 주입 — Claude 의 `/<plugin>:<skill>` 규약과 동일. 설명·한국어 트리거 원문 유지. **단** 스킬 본문의 Claude full-form(`mcp__plugin_deilen_tools__render_viewer`)은 실제 Codex 도구명(`mcp__deilen__render_viewer`)과 **불일치가 확정**됐다(미실측 아님) — 완화책은 Stage 5.     |
+| **G7** | ✅ **닫힘 (제약 확정)**. 플러그인 MCP 서버 프로세스의 env 는 **`OGHAM_HOST` 단 하나** — Codex 는 세션 cwd·워크스페이스 경로를 **전혀 주지 않는다**. `cwd:"."` 로 고정한 뒤 프로세스 cwd = 플러그인 설치 루트(lsof 확인). ⇒ **사용자 상대 경로를 `process.cwd()` 로 해석하는 런타임(deilen `preview`)은 Codex 에서 오해석한다.** 대응 미정 — §4 Stage 4 결정 대상.                                |
+
+**발견된 블로커 (수정 완료)**: `.codex-plugin/plugin.json` 의 `mcpServers` 에 `cwd` 를 **생략하면** Codex 는 세션 cwd 로 서버를 띄운다. 상대 args(`bridge/mcp-server.cjs`)가 사용자 프로젝트 기준으로 풀려 **module-not-found → initialize 중 즉사**하고, `codex exec` 는 이 실패를 **조용히 삼킨다**(TUI 만 `⚠ MCP client for X failed to start` 경고). 즉 **MCP 보유 9개 플러그인 전체가 Codex 에서 무음 사망**하던 상태였다. matrix §4.1 의 "cwd 생략 시 플러그인 루트가 기본(소스 확정)" 은 0.144.4 실측으로 **반증**됐다.
+
+→ 대응: emitter 가 `"cwd": "."` 를 명시 방출(`buildCodexMcpServers`). 설치 경로(`~/.codex/plugins/cache/<mp>/<plugin>/<version>`)는 생성 시점에 알 수 없어 절대 args 는 불가능하므로 **유일 해법**이다. 재설치 후 TUI 경고 0건 · 헤드리스 exec 에서 도구 8개 노출 확인.
+
 ## 4. 잔여 Stage (게이트 통과 후)
 
 - **Stage 2 — 배선**: CI 에 `yarn plugin:adapters:check` 편입(clean-regen 게이트, `ci.yml` paths 에 `.codex-plugin`·`mcp_config.json`·`.agents/**` 포함), README(사용자용)에 Codex/agy 설치 절 추가.

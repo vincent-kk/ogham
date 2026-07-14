@@ -62,4 +62,11 @@ describe("buildAgyMcpConfig", () => {
     ) as { mcpServers: Record<string, McpServerSource> };
     expect(built.mcpServers.t.args).toEqual(["bridge/x.cjs"]);
   });
+
+  it("omits cwd — the agy MCP schema has no such field (codex-only)", () => {
+    const built = buildAgyMcpConfig(
+      facts({ t: { command: "node", args: ["b.cjs"] } }),
+    ) as { mcpServers: Record<string, McpServerSource & { cwd?: string }> };
+    expect(built.mcpServers.t.cwd).toBeUndefined();
+  });
 });

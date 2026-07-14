@@ -59,7 +59,12 @@ describe("buildCodexPluginManifest", () => {
       facts({ mcpServers: { t: { command: "node", args: ["b.cjs"] } } }),
     );
     expect(built.mcpServers).toEqual({
-      filid: { command: "node", args: ["b.cjs"], env: { OGHAM_HOST: "codex" } },
+      filid: {
+        command: "node",
+        args: ["b.cjs"],
+        cwd: ".",
+        env: { OGHAM_HOST: "codex" },
+      },
     });
   });
 

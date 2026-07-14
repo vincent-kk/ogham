@@ -53,8 +53,16 @@ describe("buildCodexMcpServers", () => {
     expect(built?.cennad).toEqual({
       command: "node",
       args: ["b.cjs"],
+      cwd: ".",
       env: { OGHAM_HOST: "codex" },
     });
+  });
+
+  it("pins cwd to the plugin root so relative args resolve on codex", () => {
+    const built = buildCodexMcpServers(
+      facts({ tools: server, lens: server }, "maencof"),
+    );
+    expect(Object.values(built ?? {}).map((s) => s.cwd)).toEqual([".", "."]);
   });
 
   it("returns an empty map when mcpServers is an empty object", () => {
