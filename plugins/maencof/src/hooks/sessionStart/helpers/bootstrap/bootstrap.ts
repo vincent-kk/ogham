@@ -31,7 +31,7 @@ import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSes
 import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
-import { claudeMdPath } from '../../../shared/claudeMdPath.js';
+import { instructionsPath } from '../../../shared/instructionsPath.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 import { metaPath } from '../../../shared/metaPath.js';
 import { provisionMissingConfigs } from '../../../utils/configProvisioner/configProvisioner.js';
@@ -428,7 +428,7 @@ function initClaudeMdSection(
 ): boolean {
   let needsProvisioning = false;
   try {
-    const filePath = claudeMdPath(cwd);
+    const filePath = instructionsPath(cwd);
     const existing = readMaencofSection(filePath);
     const vaultVersion = readVaultVersion(cwd);
 

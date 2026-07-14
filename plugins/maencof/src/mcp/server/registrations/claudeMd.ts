@@ -1,12 +1,15 @@
 /**
  * @file claudeMd.ts
- * @description Registers 3 CLAUDE.md tools: claudemd_merge / claudemd_read / claudemd_remove.
+ * @description Registers 3 instruction-file tools: claudemd_merge / claudemd_read / claudemd_remove.
+ *
+ * The file itself is host-dependent — Claude reads `CLAUDE.md`, Codex reads `AGENTS.md` —
+ * so the side-effect bookkeeping resolves it per call rather than pinning a constant.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
+import { instructionsFile } from '@ogham/cross-platform/host-paths';
 import { z } from 'zod';
 
-import { CLAUDE_MD_RELATIVE_PATH } from '../../../constants/claudeMd.js';
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { handleClaudeMdMerge } from '../../tools/claudemdMerge/index.js';
 import { handleClaudeMdRead } from '../../tools/claudemdRead/index.js';
 import { handleClaudeMdRemove } from '../../tools/claudemdRemove/index.js';
@@ -19,11 +22,13 @@ export function registerClaudeMdTools(server: McpServer): void {
     McpToolName.CLAUDEMD_MERGE,
     {
       description:
-        'Inserts or updates the maencof directive section in CLAUDE.md at CWD. Section managed via markers (MAENCOF:START/END).',
+        "Inserts or updates the maencof directive section in this host's instruction file at CWD (CLAUDE.md on Claude Code, AGENTS.md on Codex). Section managed via markers (MAENCOF:START/END).",
       inputSchema: z.object({
         content: z
           .string()
-          .describe('maencof directive to insert into CLAUDE.md (markdown)'),
+          .describe(
+            "maencof directive to insert into the host's instruction file (markdown)",
+          ),
         dry_run: z
           .boolean()
           .optional()
@@ -31,7 +36,7 @@ export function registerClaudeMdTools(server: McpServer): void {
       }),
     },
     async (vaultPath, args) => handleClaudeMdMerge(vaultPath, args),
-    () => CLAUDE_MD_RELATIVE_PATH,
+    () => instructionsFile(),
   );
 
   // ─── claudemd_read (plain read) ────────────────────────────────────
@@ -39,7 +44,8 @@ export function registerClaudeMdTools(server: McpServer): void {
     server,
     McpToolName.CLAUDEMD_READ,
     {
-      description: 'Reads the maencof directive section from CLAUDE.md at CWD.',
+      description:
+        "Reads the maencof directive section from this host's instruction file at CWD (CLAUDE.md on Claude Code, AGENTS.md on Codex).",
       inputSchema: z.object({}),
     },
     async (vaultPath) => handleClaudeMdRead(vaultPath),
@@ -52,7 +58,7 @@ export function registerClaudeMdTools(server: McpServer): void {
     McpToolName.CLAUDEMD_REMOVE,
     {
       description:
-        'Removes the maencof directive section from CLAUDE.md at CWD.',
+        "Removes the maencof directive section from this host's instruction file at CWD (CLAUDE.md on Claude Code, AGENTS.md on Codex).",
       inputSchema: z.object({
         dry_run: z
           .boolean()
@@ -61,6 +67,6 @@ export function registerClaudeMdTools(server: McpServer): void {
       }),
     },
     async (vaultPath, args) => handleClaudeMdRemove(vaultPath, args),
-    () => CLAUDE_MD_RELATIVE_PATH,
+    () => instructionsFile(),
   );
 }
