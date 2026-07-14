@@ -1,6 +1,6 @@
 {
   "name": "@ogham/entrez",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "entrez — NCBI E-utilities (PubMed/PMC/MeSH) academic paper search plugin for Claude Code",
   "keywords": [
     "claude-code",
