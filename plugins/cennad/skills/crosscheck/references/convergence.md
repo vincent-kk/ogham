@@ -9,13 +9,16 @@ passed. Differences in wording, emphasis, or rationale alone do NOT qualify.
 
 The first synthesis is a snapshot, not the verdict. Run ONE convergence round:
 
-1. Continue ONLY the sessions on opposing sides of that deciding conflict — call
+1. Continue ONLY the sessions on opposing sides of that deciding conflict —
+   spawn one `cennad:courier` per involved session, all in a single message
+   (parallel, background), each with `operation: continue`, `refine: false`,
+   that provider's own `session_id`, and the `tier` the crosscheck ran with
+   (if any) — never `operation: start` (that would discard its first answer).
+   Carry every other participant's first answer forward unchanged; do not
+   spend a courier on providers outside the conflict. (When agent spawning is
+   unavailable, call
    `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt, tier? })`
-   with each provider's own `session_id`, NOT a fresh `start_conversation` (that
-   would discard its first answer). Carry every other participant's first answer
-   forward unchanged; do not spend a turn on providers outside the conflict. Reuse
-   the `tier` the crosscheck ran with, if any. Dispatch the involved sessions in
-   parallel (single message, one tool use each).
+   in parallel directly instead.)
 2. In each follow-up, summarize the opposing position(s) faithfully — key claim and
    reasoning — and ask the provider to defend or revise WITH reasoning. Tell it to
    revise ONLY if the opposing argument is genuinely stronger, and to hold and

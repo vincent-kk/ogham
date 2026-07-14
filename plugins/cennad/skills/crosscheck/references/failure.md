@@ -1,46 +1,41 @@
-# Failure handling
+# Partial-failure handling
 
-Load this when any `start_conversation` returns `status: 'failure'`, or when only
-some providers succeed. The happy path (every dispatched provider succeeds) never
-needs this file.
+Load this when any courier report is failed or unusable. Count **usable
+viewpoints** = reports with `status: 'success'` AND a non-empty body.
+Everything else is a **failed entry**: `status: 'failure'` reports,
+empty-body successes (`note: empty provider response`), and couriers that
+terminated without reporting (treat as `error: cli_error`).
 
-## Failure dispatch
+Each entry's `remedy` comes from its courier report — do not re-derive it.
+Two cases have no courier remedy; use these instead: a report-less crash →
+"the courier terminated before reporting; retry", an empty-body success →
+"the provider returned an empty response; retry or continue the session".
 
-For each provider independently, dispatch by `error.code`:
+## Synthesis policy
 
-- `auth` → tell the user to authenticate that provider: `codex login` for
-  codex, sign in to `agy` (Google OAuth) for antigravity, or run `claude`
-  once interactively and complete the login for claude.
-- `rate_limit` / `budget_exhausted` → suggest retrying after a pause or
-  invoking a surviving provider via `/cennad:<provider>`.
-- `disabled` → the provider was switched off in config. Drop it from the
-  participant set (re-evaluate the activation gate), or tell the user to
-  re-enable it via `/cennad:setup`.
-- `network` / `cli_error` / `unknown` → relay `error.message` verbatim.
+- **2+ usable viewpoints** → synthesize normally AND note each failed entry's
+  `error` + `remedy`.
+- **Exactly 1 usable viewpoint** → mobilize the host LLM as the second
+  viewpoint: draft your own independent answer to the SAME prompt (commit to
+  it before consulting the surviving response again — it has already been
+  seen once, so this only limits anchoring), then synthesize host vs the
+  survivor with the standard format, noting each failed entry. Do NOT abort.
+- **0 usable viewpoints** → skip synthesis; surface every entry's `error` +
+  `remedy`. If the participant gate had already mobilized a host draft
+  (exactly-one-enabled path), present it clearly labeled as the host's own
+  unverified answer — it is not a cross-check.
 
-## Partial-failure synthesis
+## Template
 
-- If **two or more** providers succeed → synthesize the successful answers
-  normally AND note each failed provider's `error.code` / `error.message`.
-- If **exactly one** provider succeeds → mobilize the host LLM as the second
-  viewpoint: draft your own independent answer to the SAME prompt, then
-  synthesize host vs the surviving provider with the standard Synthesis
-  format (attributing points to `host` vs the provider) AND note each failed
-  provider's error. Do NOT abort.
-- If **all** providers fail → surface every error and skip synthesis. Relay
-  the per-code remedy (from Failure dispatch above) for each before retrying.
-
-## Partial-failure template
-
-One `## <Provider> response` block per surviving provider, then one
-`## <Provider> error` block per failed provider:
+One `## <Provider> response` block per usable viewpoint, then one
+`## <Provider> error` block per failed entry:
 
 ```
 ## <Provider> response
 <answer body>
 
 ## <Provider> error
-`error.code`: error.message
+`<error code>`
 
-> <one-line remedy from the failure dispatch above>
+> <remedy — from the courier report, or the stated exception>
 ```

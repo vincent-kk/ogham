@@ -36,6 +36,7 @@
     "hooks",
     "libs",
     "skills",
+    "agents",
     ".claude-plugin",
     ".mcp.json",
     "README.md"

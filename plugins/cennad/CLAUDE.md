@@ -20,7 +20,10 @@ yarn version:sync       # package.json → src/version.ts
 ## Architecture (Layered Flow)
 
 ```
-Skills (/setup, /codex, /antigravity, /claude, /crosscheck)  Layer 3 (user) — thin tool-call mappers
+Skills (/setup, /codex, /antigravity, /claude, /crosscheck)  Layer 3 (user) — thin dispatch mappers
+        │  background spawn (디스패치 스킬 4종; setup 은 open_settings 직접 호출)
+        ▼
+Agent "courier" (agents/courier.md)               provider 대화 실행 · 판단 (refine ≤3콜) — 메인 세션 비블로킹
         │
         ▼
 MCP "tools" server                                Layer 2 (logic) — 3 MCP 도구
@@ -40,7 +43,8 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 ## Plugin Runtime
 
 - 스킬 이름에 플러그인 prefix 없음 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`) — 디렉토리 이름 = 스킬 이름
-- MCP 서버 이름은 `tools` — 스킬에서 `mcp__plugin_cennad_tools__<name>` 으로 참조
+- **Agent**: `courier` 1개 (`agents/courier.md`, 서브에이전트 타입 `cennad:courier`, model sonnet) — 디스패치 스킬 4종이 background spawn. 관점(정교화 루프 `refine: true` 시 동일 세션 ≤3콜 · 실패 remedy · tier 의미론)은 courier 가 보유, 스킬은 행동(파싱→spawn→릴레이)만. `plugin.json` 에 `agents` 필드는 추가하지 않는다 (`agents/` 디렉토리 자동 발견)
+- MCP 서버 이름은 `tools` — 스킬·에이전트에서 `mcp__plugin_cennad_tools__<name>` full-form 으로 참조
 - **훅 번들 cap**: 10 KB LIGHT (enforced by `scripts/buildHooks.mjs`). injectStatic / injectDynamic 모두 ~3.3 KB minified
 - **훅 번들 금지 import**: `zod`, `@modelcontextprotocol/sdk`, `fast-glob`, `lodash`, `moment`, `date-fns` — `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs` 가 강제
 

@@ -6,9 +6,10 @@
 | ---------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------ |
 | Hooks                                    | MCP 상태 → Claude 컨텍스트 주입 (read-only 어댑터)                     | `hooks/`                             |
 | Claude                                   | provider 선택 및 위임 여부 판단 (판단 주체)                            | —                                    |
-| Skill `codex` / `antigravity` / `claude` | Claude 결정 → MCP 도구 호출 매핑                                       | `skills/{codex,antigravity,claude}/` |
-| Skill `crosscheck`                       | 활성 provider 병렬 호출 + 응답 합성 (비활성 제외)                      | `skills/crosscheck/`                 |
+| Skill `codex` / `antigravity` / `claude` | Claude 결정 → `courier` background spawn 매핑 (비블로킹)               | `skills/{codex,antigravity,claude}/` |
+| Skill `crosscheck`                       | 활성 provider 별 courier 병렬 spawn + 응답 합성 (비활성 제외)          | `skills/crosscheck/`                 |
 | Skill `setup`                            | `open_settings` 호출 → 브라우저 안내                                   | `skills/setup/`                      |
+| Agent `courier`                          | 스킬이 spawn 하는 위임 실행자 — 정교화(≤3콜) · remedy 판단 보유        | `agents/courier.md`                  |
 | MCP Server `tools`                       | provider 디스패치, config/counter/session 보유                         | `src/mcp/`                           |
 | Provider Dispatcher                      | `codex-cli`, `agy`, `claude` 자식 프로세스 실행 + JSON envelope 정규화 | `src/dispatcher/`                    |
 | External CLI                             | 실제 LLM 호출                                                          | 시스템 PATH                          |
@@ -20,11 +21,12 @@
 2. UserPromptSubmit 훅: 동적 상태 매 턴 주입.
 3. Claude 가 정책 + 작업 성격을 종합해 provider 결정.
 4. `/codex`, `/antigravity`, 또는 `/claude` 스킬 호출.
-5. 스킬이 MCP `start_conversation` 또는 `continue_conversation` 호출.
-6. MCP 가 provider별 dispatcher 로 위임.
-7. Dispatcher 가 외부 CLI 자식 프로세스 실행, stdout/JSONL 파싱.
-8. 정규화된 `ConversationResponse` 반환. 카운터 +1 (성공/실패 무관).
-9. Claude 는 응답의 `session_id` 만으로 이어가기 판단 (직전 응답에 명시).
+5. 스킬이 `cennad:courier` 서브에이전트를 background spawn (메인 세션 비블로킹 — 폴링 없이 완료 알림으로 재개).
+6. courier 가 MCP `start_conversation` 또는 `continue_conversation` 호출 (`refine: true` 면 체크리스트 판정으로 동일 세션 최대 3콜).
+7. MCP 가 provider별 dispatcher 로 위임.
+8. Dispatcher 가 외부 CLI 자식 프로세스 실행, stdout/JSONL 파싱.
+9. 정규화된 `ConversationResponse` 반환. 카운터 +1 (콜마다, 성공/실패 무관). courier 가 최종 envelope 를 헤더+본문 보고로 메인 세션에 반환.
+10. Claude 는 응답의 `session_id` 만으로 이어가기 판단 (직전 응답에 명시).
 
 ## 정책 모델
 

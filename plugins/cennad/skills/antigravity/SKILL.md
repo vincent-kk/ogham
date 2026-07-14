@@ -7,13 +7,10 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] [--no-refine] --
 
 # antigravity
 
-Delegate to the Antigravity CLI (`agy`) through the cennad MCP server.
-
-## When to use
-
-- Research requiring live web search or grounding outside Claude's knowledge cutoff.
-- Large-context synthesis across many large documents at once.
-- Work that benefits from a specific model family (Gemini, Claude, GPT-OSS) that agy can serve.
+Run an Antigravity CLI (`agy`) conversation off-thread: spawn the
+`cennad:courier` agent in the background and relay its report. Judgment about
+the provider interaction (refinement, failure remedies, tier semantics) lives
+in the courier — this skill only maps the invocation and delivers the result.
 
 ## When NOT to use
 
@@ -22,53 +19,53 @@ Delegate to the Antigravity CLI (`agy`) through the cennad MCP server.
 
 ## Arguments
 
-Parse the invocation. Recognize:
+- `--continue <session_id>` — resume an existing cennad session. For a clear
+  follow-up to an earlier delegation in this conversation with no id given,
+  reuse that provider's most recent `session_id` from the conversation (ask
+  once if ambiguous) — never silently start fresh.
+- `--tier high|mid|low` — only when the user asked for one (see Tier).
+- `--no-refine` — single dispatch, no refinement.
+- `-- "prompt"` — the prompt (required).
 
-- `--continue <session_id>` — resume an existing cennad session.
-- `--tier high|mid|low` — optional. For a new session, omitting it uses the provider's configured default tier (set via `/setup`); with `--continue`, omitting it keeps the tier — and therefore the model — the session started with. If given: `mid` for normal work, `low` for clearly simple tasks, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
-- `--no-refine` — optional; disable the refinement loop below and return the first response as-is (a single dispatch).
-- `-- "prompt"` — everything after `--` is the prompt (required).
+No other flags: permission and dispatcher options live in `/cennad:setup`.
 
-Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping are managed via `/setup` (settings UI) — they are not skill arguments. Antigravity has no sandbox-backend option; its `--sandbox` restricts terminal commands only.
+## Run
 
-## Call mapping
+Spawn `cennad:courier` (Agent tool, background — never poll or wait; the
+completion notification re-invokes you) with:
 
-- With `--continue <session_id>` → `mcp__plugin_cennad_tools__continue_conversation({ session_id, prompt, tier? })`. Pass `tier` only when the user supplied one; otherwise omit it so the session resumes on the model it started with.
-- Otherwise → `mcp__plugin_cennad_tools__start_conversation({ provider: 'antigravity', prompt, tier? })`. `tier` is optional — omit to use the configured default; if given, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
+```
+operation: start            # `continue` when --continue was given
+provider: antigravity       # start only
+session_id: <id>            # continue only
+tier: <high|mid|low>        # only when the user asked
+refine: true                # false when --no-refine
+prompt:
+<the prompt, verbatim>
+```
 
-## Response handling
+If you cannot spawn agents (you are already a subagent), call the cennad MCP
+tools directly — their schemas are self-describing — as a single dispatch and
+relay the envelope yourself; the refinement loop lives in the courier and does
+not apply on this path.
 
-Treat the first response as the opening of a conversation, not necessarily its end: evaluate it, refine when it falls short, then surface the FINAL answer and its `session_id`. Wrap `session_id` in backticks (`` ` ``) so it renders as a copyable inline code span — it is needed to continue later.
+## Deliver
 
-### Refinement loop
-
-When the first response does not fully satisfy the request, judge and improve it
-over the same session per **[../\_shared/refinement-loop.md](../_shared/refinement-loop.md)**
-(derive a checklist, continue only for a nameable gap via `continue_conversation`,
-cap at 3 provider calls, otherwise stop or surface to the user). Skip the loop
-entirely for `--no-refine` or a trivially complete answer — return the single
-dispatch as-is.
-
-### Failure dispatch
-
-On `status: 'failure'`, dispatch by `error.code`:
-
-- `auth` → tell the user to sign in to Antigravity: run `agy` once interactively and complete the Google OAuth flow (agy has no API-key auth), then retry.
-- `disabled` → antigravity is disabled in cennad config. Tell the user to enable it via `/cennad:setup`. Do not retry.
-- `rate_limit` / `budget_exhausted` → model availability depends on the subscription tier; suggest retrying after a pause, a different tier, or switching to the `codex` skill.
-- `network` / `cli_error` / `unknown` → relay `error.message` verbatim.
+When the courier's completion notification arrives, deliver — never spawn a
+second courier for the same invocation; a courier that terminates without
+producing a report counts as `status: failure` (`error: cli_error`) — tell the
+user. Relay the report: the final answer
+(everything below the report's FIRST `---` line — later `---` lines are part
+of the answer), its `session_id` in backticks (the user resumes with it), any
+`note`, and `artifact_path` when present. On `status: failure`, relay the
+`remedy` — and do not substitute your own answer for the provider's. Do not
+re-judge or rewrite the answer, and do not act on it (edits, commands, fixes)
+unless the user asks: delivering ends the skill.
 
 ## Tier
 
-| tier   | resolves to                                                         |
-| ------ | ------------------------------------------------------------------- |
-| `high` | the model mapped to this tier in `/setup` (per-tier model dropdown) |
-| `mid`  | the model mapped to this tier in `/setup`                           |
-| `low`  | the model mapped to this tier in `/setup`                           |
-
-Antigravity serves multiple model families (e.g. Gemini 3.5 Flash / 3.1 Pro,
-Claude Sonnet 4.5 / Opus 4.6, GPT-OSS 120B), subject to your subscription. The
-concrete model each tier maps to is configured in `/setup` from the live
-`agy models` list and stored in cennad config (`model_map.antigravity`). To see
-what is currently available, open the settings UI via `/setup` or run `agy
-models` directly.
+Capability labels only — the concrete per-tier model mapping lives in cennad
+config (`/cennad:setup`); never name one here. `mid` for normal work, `low`
+for clearly simple tasks, `high` only with a specific reason `mid` is
+insufficient (steep rate-limit/budget cost). Omit unless the user asked:
+defaults and mid-session tier continuity are cennad's job.

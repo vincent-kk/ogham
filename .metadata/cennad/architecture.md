@@ -24,6 +24,8 @@ packages/cennad/
 │   ├── antigravity/SKILL.md
 │   ├── claude/SKILL.md
 │   └── crosscheck/SKILL.md
+├── agents/
+│   └── courier.md               # 디스패치 스킬이 background spawn 하는 위임 실행 에이전트 (plugin.json 필드 없이 자동 발견)
 ├── scripts/
 │   ├── buildMcpServer.mjs       # esbuild → bridge/mcp-server.cjs (CJS)
 │   ├── buildHooks.mjs           # esbuild → bridge/<name>.mjs (ESM, thin-script 가드)
@@ -40,7 +42,7 @@ packages/cennad/
 `package.json` 의 `files`:
 
 ```
-["dist", "bridge", "hooks", "libs", "skills", ".claude-plugin", ".mcp.json", "README.md"]
+["dist", "bridge", "public", "hooks", "libs", "skills", "agents", ".claude-plugin", ".mcp.json", "README.md"]
 ```
 
 `scripts/` 파일은 camelCase + `.mjs` 확장자. filid 의 kebab-case 스크립트 이름과 다르지만 cennad 컨벤션 우선.

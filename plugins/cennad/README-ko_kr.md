@@ -2,7 +2,7 @@
 
 > **`cogair` 에서 이름이 변경되었습니다.** 이 플러그인은 이전에 `cogair` 로 제공되었습니다. 이름 변경으로 기존 `/cogair:*` 스킬, `cogair` MCP 서버, 그리고 `~/.claude/plugins/cogair/` 의 디스크 설정은 더 이상 적용되지 않습니다 — 자동 마이그레이션은 없습니다. `cennad` 로 다시 설치한 뒤 `/cennad:setup` 을 실행해 프로바이더 비율·키워드·옵션을 다시 설정하세요.
 
-Claude 가 필요에 따라 **OpenAI Codex CLI**, **Google Antigravity CLI**, 또는 **Anthropic Claude CLI** 로 작업을 위임할 수 있게 해주는 Claude Code 플러그인입니다. MCP 도구 3개, 사용자 호출 가능 스킬 5개, 라이프사이클 훅 2개로 구성됩니다.
+Claude 가 필요에 따라 **OpenAI Codex CLI**, **Google Antigravity CLI**, 또는 **Anthropic Claude CLI** 로 작업을 위임할 수 있게 해주는 Claude Code 플러그인입니다. MCP 도구 3개, 사용자 호출 가능 스킬 5개, 백그라운드 디스패치 에이전트 1개, 라이프사이클 훅 2개로 구성됩니다.
 
 `atlassian` 이나 `filid` 가 도메인 지식을 캡슐화한다면, cennad 는 **위임 표면(delegation surface)** 입니다. 다른 모델 패밀리가 더 적합한 작업(무거운 코드 → codex, 실시간 웹 검색 → antigravity, 추론·리뷰 → claude)에서 Claude 가 위임을 결정하면, 플러그인이 세션 관리·비율 추적·세션별 호출 카운터를 처리합니다.
 
@@ -39,7 +39,7 @@ claude --plugin-dir ./plugins/cennad
 
 - `codex` (OpenAI Codex CLI) — `codex login` 실행
 - `agy` (Google Antigravity CLI) — `curl -fsSL https://antigravity.google/cli/install.sh | bash` 로 설치 후, `agy` 를 한 번 실행해 로그인합니다(Google OAuth, API key 없음).
-- `claude` (Anthropic Claude CLI) — Claude Code 설치 시 자동으로 포함됩니다. 별도 인증 없이 현재 세션 자격증명이 사용됩니다.
+- `claude` (Anthropic Claude Code CLI) — https://claude.ai/code 에서 설치 후, `claude` 를 한 번 실행해 인증합니다.
 
 cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이 누락된 경우 실패 응답에 `error.code: 'auth'` 가 담기고, 해당 스킬이 적절한 로그인 명령을 안내합니다.
 
@@ -87,7 +87,7 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 
 ### 자동 정교화
 
-단일 provider 위임(`/codex`, `/antigravity`, `/claude`) 후, 호스트는 응답을 요청과 대조해 구체적인 미흡점을 짚을 수 있으면 **같은 세션을 이어** 이를 보완합니다 — 최대 3회 호출(초기 1회 + 후속 2회). provider 가 사용자만 내릴 수 있는 결정(미명시 제약·스코프·의도)을 물으면, 호스트는 추측하지 않고 그 질문을 표면화합니다. 이 동작을 건너뛰고 첫 응답을 그대로 받으려면 `--no-refine` 를 사용하세요.
+단일 provider 위임(`/codex`, `/antigravity`, `/claude`) 후, 백그라운드 `courier` 에이전트는 응답을 요청과 대조해 구체적인 미흡점을 짚을 수 있으면 **같은 세션을 이어** 이를 보완합니다 — 최대 3회 호출(초기 1회 + 후속 2회). provider 가 사용자만 내릴 수 있는 결정(미명시 제약·스코프·의도)을 물으면, courier 는 추측하지 않고 그 질문을 보고에 표면화합니다. 이 동작을 건너뛰고 첫 응답을 그대로 받으려면 `--no-refine` 를 사용하세요.
 
 ### Provider 교차 검증
 
@@ -106,6 +106,9 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 Claude Code session
    │
    ├── Skills (/setup, /codex, /antigravity, /claude, /crosscheck)   Layer 3 (user)
+   │       │  background spawn
+   │       ▼
+   ├── Agent "courier"                          provider 대화를 오프스레드로 실행
    │       │
    │       ▼
    ├── MCP "tools" 서버                          Layer 2 (logic) — 3 MCP 도구
@@ -119,7 +122,7 @@ Claude Code session
    └── Hooks (SessionStart, UserPromptSubmit)   Layer 1 (auto) — read-only 컨텍스트 주입
 ```
 
-단일 dispatch 레이어 — 스킬과 MCP 서버 사이에 agent 가 없습니다. Hook 은 격리된 얇은 스크립트로, `src/core/` 나 `src/types/` 를 import 하지 않습니다 (zod·MCP SDK 가 번들에 들어가면 cap 위반).
+디스패치 스킬은 메인 세션에서 MCP 도구를 직접 호출하지 않습니다: 각 스킬이 백그라운드 `courier` 에이전트를 spawn 하고 courier 가 provider 대화를 실행해 최종 envelope 를 보고하므로, 긴 provider 호출이 대화를 막지 않습니다 (`/setup` 은 `open_settings` 직접 호출). Hook 은 격리된 얇은 스크립트로, `src/core/` 나 `src/types/` 를 import 하지 않습니다 (zod·MCP SDK 가 번들에 들어가면 cap 위반).
 
 ### MCP 도구
 
@@ -136,12 +139,16 @@ Claude Code session
 | `/setup`       | "cennad 설정", "open cennad settings", "개입 강도"        |
 | `/codex`       | "ask codex", "codex 호출", "코덱스에게"                   |
 | `/antigravity` | "ask antigravity", "antigravity 호출", "안티그래비티에게" |
-| `/claude`      | "ask claude", "claude 호출", "anthropic", "클로드에게"    |
+| `/claude`      | "ask claude", "claude 호출", "클로드에게"                 |
 | `/crosscheck`  | "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"  |
 
 #### 충돌 정책
 
 `/setup`, `/codex`, `/antigravity`, `/claude`, `/crosscheck` 는 플러그인 접두사 없이 전역 등록됩니다. 다른 플러그인이 동일한 이름을 사용할 경우, Claude Code 의 스킬 해석 순서(플러그인 등록 순)에 따라 먼저 등록된 스킬이 우선합니다. 충돌이 의심될 때는 `claude config` 로 활성 스킬 목록을 확인하거나, 네임스페이스 형식(`cennad:setup` 등)을 사용하십시오.
+
+### 백그라운드 에이전트
+
+`cennad:courier` (`agents/courier.md`) — 디스패치 스킬이 세션 내 MCP 호출 대신 spawn 하는 위임 실행 서브에이전트입니다. provider 상호작용에 대한 판단 — 선택적 정교화 루프(동일 세션 최대 3회 호출), 실패 remedy 매핑, tier 의미론 — 을 보유하고 최종 envelope 를 보고하며, 스킬은 얇은 행동 매퍼(파싱 → spawn → 릴레이)로 남습니다. `agents/` 디렉터리에서 자동 등록됩니다.
 
 ### Hook
 
@@ -222,7 +229,7 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod.
 | [spec](../../.metadata/cennad/spec.md)                           | 책임 분리·데이터 흐름·비채택 사항          |
 | [architecture](../../.metadata/cennad/architecture.md)           | 모듈 트리·의존 방향·빌드 파이프라인        |
 | [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP 도구 (입력 스키마·동작·envelope)     |
-| [skills](../../.metadata/cennad/skills.md)                       | 스킬 본문 + 도구 호출 매핑                 |
+| [skills](../../.metadata/cennad/skills.md)                       | 스킬 본문 + courier 위임 매핑              |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit 주입       |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli 호출 매트릭스 |
 | [storage](../../.metadata/cennad/storage.md)                     | 영구 데이터 레이아웃 및 config fallback    |

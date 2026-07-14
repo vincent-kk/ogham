@@ -2,7 +2,7 @@
 
 > **Renamed from `cogair`.** This plugin was previously published as `cogair`. With the rename, the old `/cogair:*` skills, the `cogair` MCP server, and the on-disk settings at `~/.claude/plugins/cogair/` no longer apply — there is no automatic migration. Reinstall as `cennad` and run `/cennad:setup` to reconfigure your provider ratio, keywords, and options.
 
-A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI**, **Google Antigravity CLI**, or **Anthropic Claude CLI** through three MCP tools, five user-invocable skills, and two lifecycle hooks.
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI**, **Google Antigravity CLI**, or **Anthropic Claude CLI** through three MCP tools, five user-invocable skills, a background dispatch agent, and two lifecycle hooks.
 
 Where `atlassian` or `filid` encapsulate domain knowledge, cennad is a **delegation surface**: Claude decides when another model family fits better (heavy code → codex; live web search → antigravity) and the plugin handles session bookkeeping, ratio tracking, and per-session call counters.
 
@@ -87,7 +87,7 @@ Use claude for reasoning-heavy analysis, writing, and review tasks where you wan
 
 ### Automatic Refinement
 
-After any single-provider delegation (`/codex`, `/antigravity`, `/claude`), the host evaluates the response against your request and, when it can name a concrete gap, continues the SAME session to close it — up to 3 provider calls total (the initial dispatch + 2 follow-ups). If the provider needs a decision only you can make (an unstated constraint, scope, or intent), the host surfaces its question instead of guessing. Pass `--no-refine` to skip this and take the first response as-is.
+After any single-provider delegation (`/codex`, `/antigravity`, `/claude`), the background `courier` agent evaluates the response against the request and, when it can name a concrete gap, continues the SAME session to close it — up to 3 provider calls total (the initial dispatch + 2 follow-ups). If the provider needs a decision only you can make (an unstated constraint, scope, or intent), the courier surfaces that question in its report instead of guessing. Pass `--no-refine` to skip this and take the first response as-is.
 
 ### Cross-checking Across Providers
 
@@ -106,6 +106,9 @@ Use crosscheck when independent second opinions across model families matter (ar
 Claude Code session
    │
    ├── Skills (/setup, /codex, /antigravity, /claude, /crosscheck)   Layer 3 (user)
+   │       │  background spawn
+   │       ▼
+   ├── Agent "courier"                          runs the provider conversation off-thread
    │       │
    │       ▼
    ├── MCP "tools" server                       Layer 2 (logic) — 3 MCP tools
@@ -119,7 +122,7 @@ Claude Code session
    └── Hooks (SessionStart, UserPromptSubmit)   Layer 1 (auto) — read-only context injection
 ```
 
-Single-layer dispatch — no agents between skills and the MCP server. Hooks are isolated thin scripts that never import `src/core/` or `src/types/` (zod and the MCP SDK would blow the bundle budget).
+The dispatch skills never call the MCP tools in the main session: each spawns a background `courier` agent that runs the provider conversation and reports the final envelope, so a long provider call never blocks the conversation (`/setup` calls `open_settings` directly). Hooks are isolated thin scripts that never import `src/core/` or `src/types/` (zod and the MCP SDK would blow the bundle budget).
 
 ### MCP Tools
 
@@ -142,6 +145,10 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 #### Name collision policy
 
 `/setup`, `/codex`, `/antigravity`, `/claude`, and `/crosscheck` are registered globally without a plugin prefix. When another plugin claims the same name, Claude Code's skill-resolution order (plugin registration order) decides which one wins — the earlier registration takes priority. If you suspect a collision, list the active skills with `claude config`, or invoke the namespaced form (e.g. `cennad:setup`).
+
+### Background agent
+
+`cennad:courier` (`agents/courier.md`) — the delegation runner spawned by the dispatch skills instead of calling the MCP tools in-session. It holds the judgment for the provider interaction — an optional refinement loop (up to 3 provider calls on the same session), failure-remedy mapping, tier semantics — and reports the final envelope; the skills stay thin action mappers (parse → spawn → relay). Registered automatically from the `agents/` directory.
 
 ### Hooks
 
@@ -220,7 +227,7 @@ For technical details and design rationale, see [`.metadata/cennad/`](../../.met
 | [spec](../../.metadata/cennad/spec.md)                           | Responsibilities, data flow, non-goals          |
 | [architecture](../../.metadata/cennad/architecture.md)           | Module tree + dependency direction + build flow |
 | [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP tools (input schema, behavior, envelope)  |
-| [skills](../../.metadata/cennad/skills.md)                       | Skill body + tool-call mapping                  |
+| [skills](../../.metadata/cennad/skills.md)                       | Skill body + courier dispatch mapping           |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli invocation matrix  |
 | [storage](../../.metadata/cennad/storage.md)                     | Persistent data layout and config fallback      |

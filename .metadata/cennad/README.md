@@ -12,7 +12,7 @@ Claude Code 플러그인. Codex CLI / Antigravity CLI(`agy`) / Claude CLI 를 Cl
 
 - 패키지명: `@ogham/cennad` · 플러그인 이름: `cennad`
 - MCP 서버 이름: `tools` (atlassian 동일 컨벤션)
-- Agent 없음. 스킬 5개: `setup`, `codex`, `antigravity`, `claude`, `crosscheck` (플러그인 prefix 미사용)
+- Agent 1개: `courier` — 스킬이 background spawn 하는 위임 실행자 (정교화 ≤3콜 · remedy 판단 보유). 스킬 5개: `setup`, `codex`, `antigravity`, `claude`, `crosscheck` (플러그인 prefix 미사용)
 - Hook 은 빌드 산출물(`bridge/*.mjs`) + `libs/run.cjs` 러너 — filid 동일
 - 라우팅 판단은 Claude. MCP 는 디스패치만.
 
@@ -25,7 +25,7 @@ Claude Code 플러그인. Codex CLI / Antigravity CLI(`agy`) / Claude CLI 를 Cl
 | [mcp-tools.md](./mcp-tools.md)                   | `start_conversation`, `continue_conversation`, `open_settings` (3개)                                                                   |
 | [storage.md](./storage.md)                       | `~/.claude/plugins/cennad/` 디스크 레이아웃 + config fallback 정책                                                                     |
 | [hooks.md](./hooks.md)                           | SessionStart / UserPromptSubmit 훅 (filid 패턴)                                                                                        |
-| [skills.md](./skills.md)                         | `setup`, `codex`, `antigravity`, `claude`, `crosscheck` 스킬                                                                           |
+| [skills.md](./skills.md)                         | `setup`, `codex`, `antigravity`, `claude`, `crosscheck` 스킬 + `courier` 에이전트                                                      |
 | [web-ui.md](./web-ui.md)                         | 로컬 설정 웹 UI (codex / antigravity / Anthropic 3-lane, per-provider 토글·슬라이더, claude permission-mode·모델·effort 드롭다운 포함) |
 | [provider-dispatch.md](./provider-dispatch.md)   | codex-cli / claude-cli / agy (Antigravity CLI) 호출 매핑                                                                               |
 | [agy-upstream-watch.md](./agy-upstream-watch.md) | agy 업스트림 결함(#76, #7) 추적 — 워크어라운드 해제 조건 + 검증 로그 + 재검증 절차                                                     |

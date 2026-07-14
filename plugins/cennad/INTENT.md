@@ -10,6 +10,7 @@
 | `scripts/`                   | esbuild 빌드 스크립트                                        |
 | `hooks/`                     | Claude Code 훅 매핑                                          |
 | `skills/`                    | `setup`, `codex`, `antigravity`, `claude`, `crosscheck` 스킬 |
+| `agents/`                    | `courier` — 스킬이 background spawn 하는 위임 실행 에이전트  |
 | `libs/run.cjs`               | cross-platform Node 러너 (filid 동일)                        |
 | `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`)                 |
 | `public/settings.html`       | 빌드된 settings UI — 런타임 디스크 서빙 (커밋)               |
@@ -20,7 +21,7 @@
 
 - 빌드 파이프라인은 filid 패턴 — `version:sync → settingsHtml → tsc → mcpServer → hooks`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`)
-- Agent 없음
+- Agent 는 `courier` 1개 (`cennad:courier`) — 관점(정교화 ≤3콜 · 실패 remedy · tier 의미론)은 courier, 스킬은 행동(파싱→background spawn→릴레이)만 (비블로킹)
 - E2E 는 이중 레이어 (Layer A in-process + Layer B 번들 stdio); `CENNAD_E2E_REAL_CLI=1` 일 때만 real CLI
 
 ## Boundaries
