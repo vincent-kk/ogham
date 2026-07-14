@@ -2,18 +2,20 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { pluginRoot } from "@ogham/cross-platform/host-paths";
+
 let cached: string | null = null;
 
 /**
- * Resolve the committed `bridge/` directory (built FE assets). Honors
- * CLAUDE_PLUGIN_ROOT, then walks up from this module — works both as the esbuild
- * CJS bundle (import.meta.url shimmed by buildMcpServer.mjs) and from TS sources.
+ * Resolve the committed `bridge/` directory (built FE assets). Honors the host's
+ * plugin root, then walks up from this module — works both as the esbuild CJS
+ * bundle (import.meta.url shimmed by buildMcpServer.mjs) and from TS sources.
  */
 export function bridgeRoot(): string {
   if (cached) return cached;
-  const fromEnv = process.env.CLAUDE_PLUGIN_ROOT;
-  if (fromEnv) {
-    const candidate = join(fromEnv, "bridge");
+  const fromHost = pluginRoot();
+  if (fromHost) {
+    const candidate = join(fromHost, "bridge");
     if (existsSync(candidate)) {
       cached = candidate;
       return candidate;
@@ -30,6 +32,6 @@ export function bridgeRoot(): string {
     if (parent === dir) break;
     dir = parent;
   }
-  cached = join(fromEnv ?? process.cwd(), "bridge");
+  cached = join(fromHost ?? process.cwd(), "bridge");
   return cached;
 }

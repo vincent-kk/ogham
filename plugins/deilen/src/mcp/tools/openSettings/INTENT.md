@@ -7,18 +7,19 @@
 | File              | Role                                                   |
 | ----------------- | ------------------------------------------------------ |
 | `openSettings.ts` | 핸들러 — `ensureHttpServer` → 설정 URL → 브라우저 오픈 |
-| `index.ts`        | barrel — `handleOpenSettings`, 출력 타입               |
+| `index.ts`        | barrel — `handleOpenSettings`, 입출력 타입             |
 
 ## Conventions
 
-- 인자 없음 — `ensureHttpServer().settingsUrl()` 로 토큰 포함 URL 산출
+- 유일한 입력은 선택 인자 `project_root` — 설정 UI 자체는 프로젝트 무관하나, 이 도구가 기동하는 공용 서버가 세션 스코프 해시를 필요로 한다
+- `ensureHttpServer(workspace).settingsUrl()` 로 토큰 포함 URL 산출
 - 브라우저 오픈은 best-effort (`openBrowser`); 반환값은 항상 URL
 
 ## Boundaries
 
 ### Always do
 
-- 설정 URL 산출 전 `ensureHttpServer`
+- `ensureHttpServer` 보다 먼저 `projectRoot(input.project_root)` 해석
 
 ### Ask first
 
@@ -30,4 +31,4 @@
 
 ## Dependencies
 
-- `../../httpServer`, `../../../utils` (`openBrowser`)
+- `../../httpServer`, `../../../utils` (`openBrowser`), `@ogham/cross-platform/host-paths` (projectRoot)

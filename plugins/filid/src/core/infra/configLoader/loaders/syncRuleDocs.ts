@@ -53,7 +53,7 @@ export function syncRuleDocs(
   if (root === null) {
     result.skipped.push({
       id: '*',
-      reason: 'CLAUDE_PLUGIN_ROOT not set and no pluginRoot provided',
+      reason: 'plugin root could not be resolved and no pluginRoot provided',
     });
     return result;
   }

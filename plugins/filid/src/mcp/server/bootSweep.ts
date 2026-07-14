@@ -1,3 +1,5 @@
+import { tryProjectRoot } from '@ogham/cross-platform/host-paths';
+
 import {
   isPruneDue,
   isSessionPruneDue,
@@ -13,12 +15,17 @@ import {
  * MCP server boot is the only per-session cleanup point; on Claude it shares
  * the daily-throttle marker gates with the SessionStart hook, so a double
  * run in the same session stays a no-op.
+ *
+ * The session-scoped prune is project-scoped, so it is skipped when no project
+ * root resolves — sweeping the plugin's install directory would be worse than
+ * sweeping nothing. The stale-cache prune is global and always runs.
  */
-export function bootSweep(cwd: string = process.cwd()): void {
+export function bootSweep(cwd?: string): void {
   try {
-    if (isSessionPruneDue(cwd)) {
-      pruneOldSessions(cwd);
-      markSessionPruneRun(cwd);
+    const root = tryProjectRoot(cwd);
+    if (root !== null && isSessionPruneDue(root)) {
+      pruneOldSessions(root);
+      markSessionPruneRun(root);
     }
     if (isPruneDue()) {
       pruneStaleCacheDirs();

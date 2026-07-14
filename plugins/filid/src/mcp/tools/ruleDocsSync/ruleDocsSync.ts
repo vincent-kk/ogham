@@ -102,7 +102,7 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
         return {
           action: 'manifest',
           manifest: { version: '', rules: [] },
-          skipped: [{ id: '*', reason: 'CLAUDE_PLUGIN_ROOT not set' }],
+          skipped: [{ id: '*', reason: 'plugin root could not be resolved' }],
         };
       const manifest = loadRuleDocsManifest(pluginRoot);
       return { action: 'manifest', manifest };
@@ -123,7 +123,7 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
 
       // Validate resync ids against the manifest so unknown entries surface
       // as `skipped` rather than silently no-op.
-      const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
+      const pluginRoot = resolvePluginRoot();
       const knownIds = new Set<string>();
       const preSkipped: Array<{ id: string; reason: string }> = [];
       if (pluginRoot)

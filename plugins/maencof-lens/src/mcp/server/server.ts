@@ -15,8 +15,8 @@ import { VERSION } from "../../version.js";
 
 import { toolError, toolResult } from "../shared/shared.js";
 
-export function createLensServer(configRoot: string) {
-  const config = loadConfig(configRoot);
+export function createLensServer(configRoot: string | null) {
+  const config = configRoot === null ? null : loadConfig(configRoot);
   const server = new McpServer({ name: "maencof-lens", version: VERSION });
 
   let router: VaultRouter | null = null;
@@ -27,7 +27,9 @@ export function createLensServer(configRoot: string) {
   const resolveVault = (vaultName?: string) => {
     if (!router)
       throw new Error(
-        "No .maencof-lens/config.json found. Run /maencof-lens:setup to configure.",
+        configRoot === null
+          ? "Could not resolve the project root, so .maencof-lens/config.json was never looked up — this host does not expose the workspace directory to the MCP server. Set MAENCOF_LENS_CONFIG_ROOT to the absolute path of the directory that holds .maencof-lens/."
+          : `No .maencof-lens/config.json found under ${configRoot}. Run /maencof-lens:setup to configure, or set MAENCOF_LENS_CONFIG_ROOT to the absolute path of the directory that holds .maencof-lens/.`,
       );
     return router.resolve(vaultName);
   };

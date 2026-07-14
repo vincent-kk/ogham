@@ -1,6 +1,15 @@
 export { env } from "./env/index.js";
 export { normalizeEol } from "./eol/index.js";
 export { paths } from "./paths/index.js";
+export {
+  detectHost,
+  pluginRoot,
+  projectRoot,
+  rememberProjectRoot,
+  resetProjectRoot,
+  tryProjectRoot,
+} from "./hostPaths/index.js";
+export type { Host } from "./hostPaths/index.js";
 export { spawnCli, spawnCliSync, execCli, osTimeout } from "./spawn/index.js";
 export type { SpawnOptions, SpawnResult } from "./spawn/index.js";
 export { discover, binaries, installHints } from "./binaries/index.js";

@@ -1,3 +1,5 @@
+import { projectRoot } from "@ogham/cross-platform/host-paths";
+
 import { loadConfig } from "../../../core/configManager/index.js";
 import { getProjectHash } from "../../../core/projectHash/index.js";
 import {
@@ -20,6 +22,7 @@ export interface RenderViewerInput {
   path?: string;
   title?: string;
   options?: RenderOptions;
+  project_root?: string;
 }
 
 export interface RenderViewerOutput {
@@ -35,6 +38,7 @@ export interface RenderViewerOutput {
 export async function handleRenderViewer(
   input: RenderViewerInput,
 ): Promise<RenderViewerOutput> {
+  const workspace = projectRoot(input.project_root);
   const config = await loadConfig();
   // Bound disk usage during a long-lived process: startup prune is only a
   // backstop, so reclaim expired sessions on render too (best-effort).
@@ -43,15 +47,16 @@ export async function handleRenderViewer(
   );
   const { markdown, sourcePath } = await resolveMarkdown(
     input,
+    workspace,
     config.max_viewer_mb,
   );
   const title = deriveTitle({ title: input.title, sourcePath, markdown });
   const sessionId = randomId("rs_");
-  const server = await ensureHttpServer();
+  const server = await ensureHttpServer(workspace);
   const url = server.viewerUrl(sessionId);
   await createSession({
     sessionId,
-    projectHash: getProjectHash(process.cwd()),
+    projectHash: getProjectHash(workspace),
     title,
     url,
     markdown,

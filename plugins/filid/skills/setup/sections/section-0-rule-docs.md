@@ -95,9 +95,9 @@ Build an internal map `currentSelection: Record<string, boolean>` from
 `status.entries` only (`selected` field). Do NOT include any required
 entries — they are implicit and must not appear in the UI.
 
-If `status.pluginRootResolved` is `false`, fail fast: the plugin is running
-without `CLAUDE_PLUGIN_ROOT` set, which means `mcp__plugin_filid_tools__rule_docs_sync` cannot
-locate the manifest. Surface an error message and skip Phase 0c/0d.
+If `status.pluginRootResolved` is `false`, the plugin's install directory could
+not be resolved, which means `mcp__plugin_filid_tools__rule_docs_sync` cannot
+locate the manifest. Fail fast: surface an error message and skip Phase 0c/0d.
 
 ## Phase 0c — Rule Docs Prompt <!-- [INTERACTIVE] -->
 
@@ -146,14 +146,16 @@ const secondLabel = entry.deployed
 AskUserQuestion({
   questions: [
     {
-      question: "<translate `Apply rule doc \"${entry.title}\"?` to [filid:lang]>",
+      question:
+        '<translate `Apply rule doc "${entry.title}"?` to [filid:lang]>',
       multiSelect: false,
-      header: "Rule docs",
+      header: 'Rule docs',
       options: [
         { label: firstLabel, description: firstDescription },
         {
           label: secondLabel,
-          description: "<translate `Do not apply this rule doc.` to [filid:lang]>",
+          description:
+            '<translate `Do not apply this rule doc.` to [filid:lang]>',
         },
       ],
     },
@@ -196,9 +198,9 @@ function descriptionFor(entry) {
 AskUserQuestion({
   questions: [
     {
-      question: "<translate the header below to [filid:lang]>",
+      question: '<translate the header below to [filid:lang]>',
       multiSelect: true,
-      header: "Rule docs",
+      header: 'Rule docs',
       options: status.entries.map((entry) => ({
         label: labelFor(entry),
         description: descriptionFor(entry),
@@ -317,6 +319,7 @@ invocation in the same project:
   `AskUserQuestion` cannot pre-check boxes, so in Case C the user MUST
   re-select every optional rule doc they want to keep — omitting an
   `[ON]` item causes it to be removed in Phase 0d.
+
 - Phase 0d applies the diff (add newly-checked, remove newly-unchecked,
   resync drifted-and-still-checked). Required rules that show drift are
   always overwritten.

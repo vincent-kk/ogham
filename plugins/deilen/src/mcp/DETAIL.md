@@ -8,15 +8,16 @@
 
 ## Tools
 
-| Tool               | Input                                  | Output                                                       |
-| ------------------ | -------------------------------------- | ------------------------------------------------------------ |
-| `render_viewer`    | `content`/`path`, `title?`, `options?` | `{ session_id, url, status: "serving" }` (논블로킹)          |
-| `collect_feedback` | `session_id`, `wait_seconds?`          | content(text+image) 또는 `{ status:"pending", draft_count }` |
-| `close_viewer`     | `session_id`                           | `{ status: "closed" }`                                       |
-| `open_settings`    | 없음                                   | `{ url }`                                                    |
+| Tool               | Input                                                   | Output                                                       |
+| ------------------ | ------------------------------------------------------- | ------------------------------------------------------------ |
+| `render_viewer`    | `content`/`path`, `title?`, `options?`, `project_root?` | `{ session_id, url, status: "serving" }` (논블로킹)          |
+| `collect_feedback` | `session_id`, `wait_seconds?`, `project_root?`          | content(text+image) 또는 `{ status:"pending", draft_count }` |
+| `close_viewer`     | `session_id`, `project_root?`                           | `{ status: "closed" }`                                       |
+| `open_settings`    | `project_root?`                                         | `{ url }`                                                    |
 
-- `render_viewer`: content/path 정확히 하나(아니면 `invalid_input`), `max_viewer_mb` 캡(`read_error`).
+- `render_viewer`: content/path 정확히 하나(아니면 `invalid_input`), `max_viewer_mb` 캡(`read_error`). 상대 `path` 는 워크스페이스 기준 해석, 절대 `path` 는 그대로.
 - `collect_feedback`: bounded long-poll, `wait_seconds ≤ 55`. `unknown`/`closed` 세션은 throw. `extra.signal` abort 시 정리.
+- `project_root`(절대경로)는 모든 도구에서 선택 — Claude 는 생략(`process.cwd()`), 플러그인 설치 디렉터리에서 기동되는 호스트는 필수(부재 시 actionable throw). 핸들러는 `ensureHttpServer` 보다 먼저 해석해 세션 해시와 서버 스코프를 일치시킨다.
 - 도구 등록명은 snake_case, 심볼·파일은 camelCase.
 
 ## HTTP routes

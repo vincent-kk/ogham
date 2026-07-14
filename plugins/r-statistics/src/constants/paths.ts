@@ -1,6 +1,8 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 
+import { pluginRoot, projectRoot } from "@ogham/cross-platform/host-paths";
+
 function claudeRoot(): string {
   return process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude");
 }
@@ -36,20 +38,22 @@ export function workspaceMetaPath(workspaceId: string): string {
 }
 
 /**
- * Resolve the shipped R execution contract (shared/contract.R). CLAUDE_PLUGIN_ROOT
- * is set by the Claude Code plugin runtime to the plugin install directory.
+ * Resolve the shipped R execution contract (shared/contract.R) inside the plugin's
+ * install directory, falling back to the conventional home when the host exposes
+ * neither an env var nor a usable cwd.
  */
 export function contractScriptPath(): string {
-  const root = process.env.CLAUDE_PLUGIN_ROOT ?? R_STATISTICS_HOME;
+  const root = pluginRoot() ?? R_STATISTICS_HOME;
   return join(root, "shared", "contract.R");
 }
 
 /**
  * Allow-root every run_r input dataset path must resolve under (symlinks
- * included; enforced in resolveDataRefs). Defaults to the process CWD — the
- * project directory Claude Code launched the MCP from, where a user's data
- * lives. Override with R_STATISTICS_DATA_ROOT to point at a dedicated dir.
+ * included; enforced in resolveDataRefs). Defaults to the user's workspace, where
+ * their data lives; off Claude that has to be supplied as run_r's `project_root`
+ * (projectRoot throws otherwise rather than pointing the allow-root at the plugin
+ * folder). Override with R_STATISTICS_DATA_ROOT to point at a dedicated dir.
  */
 export function inputDataRoot(): string {
-  return process.env.R_STATISTICS_DATA_ROOT ?? process.cwd();
+  return process.env.R_STATISTICS_DATA_ROOT ?? projectRoot();
 }

@@ -2,6 +2,8 @@
  * @file configGet.ts
  * @description Read config.json
  */
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import {
   getConfigValue,
   loadConfig,
@@ -9,10 +11,11 @@ import {
 
 export interface ConfigGetInput {
   field?: string;
+  project_root?: string;
 }
 
 export async function handleConfigGet(input: ConfigGetInput) {
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
   const config = await loadConfig(cwd);
 
   if (input.field)

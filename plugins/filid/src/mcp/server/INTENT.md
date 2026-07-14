@@ -10,6 +10,8 @@ MCP 서버 초기화, 18개 도구 등록, 세션 캐시 수명주기 소유 (bo
 - `bootSweep.ts` — 부팅 시 스로틀 게이트 prune (보장 경로)
 - `registerShutdown.ts` → `cleanupOwnSessionCache.ts` — exit/SIGINT/SIGTERM 시 자기 세션 캐시 동기 삭제 (best-effort)
 
+프로젝트 루트는 `@ogham/cross-platform/host-paths`의 `tryProjectRoot()`로 해석한다. boot/shutdown 경로는 도구 입력이 없어 미해석이 가능하며, 이때는 프로젝트 스코프 작업(세션 prune·세션 캐시 삭제)을 **건너뛴다**. 전역 stale-cache prune 은 루트가 필요 없어 항상 실행.
+
 ## Boundaries
 
 ### Always do
@@ -28,3 +30,4 @@ MCP 서버 초기화, 18개 도구 등록, 세션 캐시 수명주기 소유 (bo
 - 모듈 경계 외부 로직 인라인
 - 응답 직렬화에 indent 강제 (디버그는 `FILID_PRETTY_JSON=1` env 사용)
 - shutdown 경로에 async 작업·모델 호출 추가
+- 프로젝트 루트 미해석 시 `process.cwd()` 폴백 (플러그인 설치 디렉터리를 프로젝트로 오인해 청소)

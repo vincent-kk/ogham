@@ -11,7 +11,7 @@
 
 ## Conventions
 
-- 세션은 `getSession` 으로 cwd 스코프 검증; 부재는 `unknown` throw
+- 세션은 `getSession` 으로 프로젝트 스코프 검증(`projectRoot(input.project_root)` → `getProjectHash`); 부재는 `unknown` throw
 - `closeResolver` 로 대기 waiter 를 `closing` 으로 settle + buffer 비움 후 meta status `closed` 갱신
 - 반환은 `{ status: 'closed' }` 고정
 
@@ -29,8 +29,8 @@
 ### Never do
 
 - 대기 resolver 를 settle 하지 않고 세션만 닫기
-- 다른 cwd 세션 닫기 허용
+- 다른 프로젝트의 세션 닫기 허용
 
 ## Dependencies
 
-- `../../../core` (projectHash·sessionStore)
+- `../../../core` (projectHash·sessionStore), `@ogham/cross-platform/host-paths` (projectRoot)

@@ -3,6 +3,7 @@
 ## Requirements
 
 - 첫 `render_viewer`/`open_settings` 에서 1회 기동, 이후 재사용(싱글톤).
+- 기동 시 프로젝트 스코프 해시를 1회 확정 — Claude 는 `process.cwd()`, 그 외 호스트는 도구 인자 `project_root`(부재 시 actionable throw, `process.cwd()` 폴백 금지).
 - 세션 생존 = 뷰어 heartbeat + 도구 활동. 둘 다 `idle_shutdown_minutes`(기본 1분, heartbeat 30초보다 커야 함) 단절 시 폴백 종료(read-only 탭 닫기·Claude 크래시·`close_viewer` 누락 누수 방지).
 - 세션 토큰 으로 `/r`·API 보호; `/assets` 는 토큰 면제(동적 import·폰트 하위요청).
 - `__DEILEN_STATE__` 주입은 `escapeJsonForHtml`.
@@ -11,7 +12,7 @@
 
 ## API Contracts
 
-- `ensureHttpServer(): Promise<HttpServerInstance>` — 기동 또는 재사용+touch.
+- `ensureHttpServer(workspace?: string): Promise<HttpServerInstance>` — 기동 또는 재사용+touch. `workspace` 는 호출자가 이미 해석한 프로젝트 루트(생략 시 `projectRoot()` 로 해석); 이미 떠 있으면 무시된다(프로세스당 1 workspace).
 - `getHttpServer(): HttpServerInstance | null`.
 - `HttpServerInstance`: `{ baseUrl, port, token, viewerUrl(sid), settingsUrl(), touch(), close() }`.
 

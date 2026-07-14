@@ -1,12 +1,13 @@
 import { relative, resolve, isAbsolute } from "node:path";
+import { projectRoot } from "@ogham/cross-platform/host-paths";
 import { TEMP_DIR_NAME } from "../constants/index.js";
 
-/** Validate a save path: reject traversal and always resolve under {cwd}/{TEMP_DIR_NAME}/ */
+/** Validate a save path: reject traversal and always resolve under {projectRoot}/{TEMP_DIR_NAME}/ */
 export function validateSavePath(saveTo: string): string {
   if (hasDotDotSegment(saveTo))
     throw new Error("Invalid save path: path traversal detected");
 
-  const cwd = process.cwd();
+  const cwd = projectRoot();
   const tmpBase = resolve(cwd, TEMP_DIR_NAME);
 
   let relative = saveTo;

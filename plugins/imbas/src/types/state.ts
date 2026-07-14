@@ -102,6 +102,7 @@ export const StartPhaseActionSchema = z.object({
   run_id: z.string(),
   action: z.literal('start_phase'),
   phase: PhaseNameSchema,
+  project_root: z.string().optional(),
 });
 
 export const CompletePhaseActionSchema = z.object({
@@ -114,6 +115,7 @@ export const CompletePhaseActionSchema = z.object({
   warning_issues: z.number().int().nonnegative().optional(),
   pending_review: z.boolean().optional(),
   stories_created: z.number().int().nonnegative().optional(),
+  project_root: z.string().optional(),
 });
 
 export const EscapePhaseActionSchema = z.object({
@@ -122,6 +124,7 @@ export const EscapePhaseActionSchema = z.object({
   action: z.literal('escape_phase'),
   phase: z.literal('split'),
   escape_code: EscapeCodeSchema,
+  project_root: z.string().optional(),
 });
 
 export const SkippablePhaseSchema = z.enum(['validate', 'split']);
@@ -131,6 +134,7 @@ export const SkipPhasesActionSchema = z.object({
   run_id: z.string(),
   action: z.literal('skip_phases'),
   phases: z.array(SkippablePhaseSchema).min(1),
+  project_root: z.string().optional(),
 });
 
 export const RunTransitionSchema = z.discriminatedUnion('action', [

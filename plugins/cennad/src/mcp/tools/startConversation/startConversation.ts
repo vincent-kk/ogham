@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import { writeArtifact } from '../../../core/artifactWriter/index.js';
 import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
@@ -23,6 +25,7 @@ export interface StartConversationInput {
   provider: Provider;
   prompt: string;
   tier?: Tier;
+  project_root?: string;
 }
 
 export async function handleStartConversation(
@@ -50,7 +53,7 @@ export async function handleStartConversation(
       },
     };
 
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
   const tier: Tier = input.tier ?? config.default_tier[input.provider];
   const options = {};
 

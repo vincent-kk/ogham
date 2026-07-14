@@ -1,4 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { projectRoot } from "@ogham/cross-platform/host-paths";
 
 import { MAX_COLLECT_WAIT_SECONDS } from "../../../constants/defaults.js";
 import { loadConfig } from "../../../core/configManager/index.js";
@@ -24,6 +25,7 @@ import { buildFeedbackContent } from "./operations/buildFeedbackContent.js";
 export interface CollectFeedbackInput {
   session_id: string;
   wait_seconds?: number;
+  project_root?: string;
 }
 
 export interface CollectFeedbackPending {
@@ -40,7 +42,8 @@ export async function handleCollectFeedback(
   input: CollectFeedbackInput,
   extra: ToolExtra,
 ): Promise<CallToolResult | CollectFeedbackPending> {
-  const projectHash = getProjectHash(process.cwd());
+  const workspace = projectRoot(input.project_root);
+  const projectHash = getProjectHash(workspace);
   const meta = await getSession(input.session_id, projectHash);
   if (!meta) throw new Error(`unknown: no session ${input.session_id}`);
 
@@ -49,7 +52,7 @@ export async function handleCollectFeedback(
     Math.max(input.wait_seconds ?? config.collect_timeout_seconds, 1),
     MAX_COLLECT_WAIT_SECONDS,
   );
-  await ensureHttpServer();
+  await ensureHttpServer(workspace);
 
   // A complete submission closes the session server-side. A closed session
   // still hands back a buffered complete that no collect has claimed yet (no

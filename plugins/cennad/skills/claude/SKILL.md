@@ -19,8 +19,8 @@ result.
 - Work the current session can already do with its own context — a context-free
   child adds nothing.
 - Tasks needing this session's conversation context or MCP tools — the child
-  inherits neither (it still has Claude Code's built-in tools in its working
-  directory).
+  inherits neither (it still has Claude Code's built-in tools in the spawned
+  working directory, bounded by the configured permission mode).
 
 ## Arguments
 

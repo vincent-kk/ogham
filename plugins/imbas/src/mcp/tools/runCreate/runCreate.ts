@@ -5,6 +5,8 @@
 import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import {
   DEVPLAN_PIPELINE_SOURCE,
   SOURCE_FILENAME,
@@ -22,10 +24,11 @@ export interface RunCreateInput {
   source_file: string;
   supplements?: string[];
   source_issue_ref?: string;
+  project_root?: string;
 }
 
 export async function handleRunCreate(input: RunCreateInput) {
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
   const runsDir = getRunsDir(cwd, input.project_ref);
 
   const run_id = generateRunId(runsDir);

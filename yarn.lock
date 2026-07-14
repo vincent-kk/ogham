@@ -985,6 +985,7 @@ __metadata:
   resolution: "@ogham/deilen@workspace:plugins/deilen"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/cross-platform": "workspace:^"
     "@ogham/http-guard": "workspace:^"
     "@playwright/test": "npm:^1.61.0"
     "@types/markdown-it": "npm:^14.1.2"

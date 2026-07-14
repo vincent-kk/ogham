@@ -12,7 +12,7 @@
 
 ## Conventions
 
-- 세션은 `getSession` 으로 cwd 스코프 검증; 부재는 `unknown`. 닫힌 세션은 buffer 또는 디스크(`feedback.json` status=complete)에서 complete 회수, 둘 다 없으면 `closed` throw
+- 세션은 `getSession` 으로 프로젝트 스코프 검증(`projectRoot(input.project_root)` → `getProjectHash`, `ensureHttpServer` 보다 먼저); 부재는 `unknown`. 닫힌 세션은 buffer 또는 디스크(`feedback.json` status=complete)에서 complete 회수, 둘 다 없으면 `closed` throw
 - 대기 시간은 `wait_seconds ?? config.collect_timeout_seconds`, `[1, MAX_COLLECT_WAIT_SECONDS]` 클램프
 - `complete` → 피드백 content (반환 직후 `clearCollectedFeedback` 으로 feedback.json/images 정리, meta.json/viewer.md 는 새로고침용 보존; best-effort, 실패는 TTL prune 백스톱), `closing` → `closed` throw, 그 외 → `{ status: 'pending', draft_count }`
 - 읽을 수 없는 첨부 이미지는 전체 실패 대신 스킵
@@ -37,4 +37,4 @@
 ## Dependencies
 
 - `../../../core` (config·feedbackStore·projectHash·sessionStore), `../../httpServer`, `../../shared`, `../../../constants`
-- `node:fs/promises`, `@modelcontextprotocol/sdk` (타입)
+- `node:fs/promises`, `@modelcontextprotocol/sdk` (타입), `@ogham/cross-platform/host-paths` (projectRoot)

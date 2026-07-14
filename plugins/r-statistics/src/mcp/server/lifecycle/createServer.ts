@@ -36,7 +36,7 @@ const dataRefSchema = z.object({
   path: z
     .string()
     .describe(
-      "Absolute path under the data root (project CWD, or R_STATISTICS_DATA_ROOT) " +
+      "Absolute path under the data root (the project root, or R_STATISTICS_DATA_ROOT) " +
         "the MCP resolves and copies into the workspace.",
     ),
   encoding: z
@@ -130,6 +130,14 @@ export function createServer(): McpServer {
           .int()
           .optional()
           .describe("RNG seed for set.seed (reproducibility)."),
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            "Absolute path of the workspace directory. Omit on Claude Code, where " +
+              "this server already runs from the workspace; required on hosts that " +
+              "launch it from the plugin install directory.",
+          ),
       },
       annotations: {
         readOnlyHint: false,

@@ -1,3 +1,5 @@
+import { rememberProjectRoot } from "@ogham/cross-platform/host-paths";
+
 import {
   DEFAULT_TIMEOUT_MS,
   MAX_DATA_REFS,
@@ -81,6 +83,8 @@ function failFast(error: RExecutionError, rscriptPath: string): RunROutput {
  * Execution safety only — statistical policy is the assert tool's concern.
  */
 export async function handleRunR(input: RunRInput): Promise<RunROutput> {
+  rememberProjectRoot(input.project_root);
+
   if (!input.scriptCode || !input.scriptCode.trim())
     throw new Error(ERROR_MESSAGES.EMPTY_SCRIPT);
 

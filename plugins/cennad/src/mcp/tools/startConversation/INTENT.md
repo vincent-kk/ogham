@@ -11,7 +11,7 @@
 
 ## Conventions
 
-- 입력 키는 `snake_case` 그대로 (외부 LLM 인터페이스)
+- 입력 키는 `snake_case` 그대로 (외부 LLM 인터페이스). `project_root` optional (절대경로) — 외부 CLI 의 spawn cwd 이자 `projectHash` 입력; Claude 는 생략 시 `process.cwd()`, 그 외 호스트는 생략하면 해석 실패로 거부
 - 외부 CLI 실패 시에도 `session_id` 디스크 기록 유지 (스펙)
 - `provider` 카운터는 시도 기준 +1 (성공/실패 무관); 비활성 provider(`ratio[provider].enabled=false`)는 dispatch·기록·카운터 없이 `error.code='disabled'` 거부
 - tier optional — 생략 시 `config.default_tier[provider]` 적용; 제공 시 호출 측(Claude)이 작업 복잡도로 선택
@@ -41,7 +41,7 @@
 
 - `../../../core/sessionStore` — `createSession` (세션 메타 영속화)
 - `../../../core/counterManager` — `incrementCounter` (제공자별 호출 횟수 증가)
-- `../../../core/projectHash` — cwd 기반 프로젝트 식별자
+- `../../../core/projectHash` — cwd 기반 프로젝트 식별자 (cwd 는 `@ogham/cross-platform/host-paths` 의 `projectRoot(input.project_root)` 로 해석)
 - `../../../core/configManager` — `loadConfig` (ratio/preamble/recency_factor/option_flags/default_tier/artifacts 등 조회; tier 생략 시 `default_tier[provider]` fallback, `options` 는 항상 `{}`)
 - `../../../dispatcher` — `dispatchers` (공급자별 CLI 호출), `buildResponse` (envelope 생성)
 - `../../../types` — `ConversationResponse`, `Provider`, `Tier`, `ConversationOptions`

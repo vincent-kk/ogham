@@ -57,7 +57,10 @@ Continue the same session ONLY to close a gap you can name: an uncovered or
 partial checklist item, a blocking provider question whose answer the prompt
 already holds, or a defect you can explain. In the follow-up, state the exact
 gap, supply the missing context, and ask for the corrected or completed answer
-— not just a critique.
+— not just a critique. A provider offering optional extras ("want me to also
+…?") is not a gap — never accept on the user's behalf. Spend the 2nd follow-up
+only when the 1st made material progress and one concrete gap remains; an
+unspent call is not a reason to make one.
 
 Stop — and report what you have — when any of these holds:
 
@@ -105,6 +108,13 @@ note: <one line>               # optional — e.g. "refined over 2 follow-ups", 
 ---
 <final response text, complete and unabridged; omit on failure>
 ```
+
+A failed call never discards work already done: when an earlier call in the
+session returned a usable response and a later refinement call fails, report
+`status: success` with the best successful answer so far as the body, plus
+`note: refinement call failed (<error.code>) — returning the best answer so
+far`. `status: failure` (empty body) is only for a run with no usable response
+at all.
 
 The FIRST standalone `---` line ends the header; everything after it is the
 response body, even when the body itself contains `---` lines or header-like

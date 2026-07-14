@@ -28,6 +28,7 @@ export interface FetchParams {
   content_format?: "json" | "markdown";
   save_to_path?: string;
   force?: boolean;
+  project_root?: string;
 }
 
 export interface AssetFetchParams {

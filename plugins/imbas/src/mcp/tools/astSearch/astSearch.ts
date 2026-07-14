@@ -4,6 +4,8 @@
  */
 import { readFileSync } from 'node:fs';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import {
   collectFiles,
   getSgLoadError,
@@ -21,6 +23,7 @@ export interface AstSearchInput {
   path?: string;
   context?: number;
   max_results?: number;
+  project_root?: string;
 }
 
 export async function handleAstSearch(input: AstSearchInput) {
@@ -33,7 +36,7 @@ export async function handleAstSearch(input: AstSearchInput) {
     };
 
   try {
-    const searchDir = input.path ?? process.cwd();
+    const searchDir = input.path ?? projectRoot(input.project_root);
     const maxResults = input.max_results ?? AST_SEARCH_MAX_RESULTS;
     const contextLines = input.context ?? AST_SEARCH_CONTEXT_LINES;
     const files = collectFiles(searchDir, input.language);

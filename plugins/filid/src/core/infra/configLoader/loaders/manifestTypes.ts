@@ -85,6 +85,6 @@ export interface SyncRuleDocsOptions {
   /** Rule ids whose drifted deployed files should be overwritten with the
    *  current template. Required rules auto-resync regardless of this set. */
   resync?: Iterable<string>;
-  /** Override for the plugin root (defaults to CLAUDE_PLUGIN_ROOT). */
+  /** Override for the plugin root (defaults to the host's plugin root). */
   pluginRoot?: string;
 }

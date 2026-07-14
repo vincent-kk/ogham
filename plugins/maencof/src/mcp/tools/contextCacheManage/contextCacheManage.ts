@@ -5,6 +5,7 @@
  */
 import { resolve } from 'node:path';
 
+import { tryProjectRoot } from '@ogham/cross-platform/host-paths';
 import { z } from 'zod';
 
 import { MAX_PINNED_NODES } from '../../../constants/performance.js';
@@ -24,7 +25,9 @@ export const contextCacheManageInputSchema = {
   cwd: z
     .string()
     .optional()
-    .describe('Vault root path (defaults to MAENCOF_VAULT_PATH or CWD)'),
+    .describe(
+      "Vault root path (defaults to MAENCOF_VAULT_PATH, or the server's workspace directory)",
+    ),
   node_id: z.string().optional().describe('Node ID (required for pin/unpin)'),
   node_title: z.string().optional().describe('Node title (required for pin)'),
   node_layer: z
@@ -34,7 +37,12 @@ export const contextCacheManageInputSchema = {
 };
 
 function resolveVaultPath(cwd?: string): string {
-  const raw = cwd ?? process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
+  const raw = cwd ?? process.env['MAENCOF_VAULT_PATH'] ?? tryProjectRoot();
+  if (raw === null)
+    throw new Error(
+      'Cannot determine the vault path: this MCP server does not run from the vault directory on this host. Pass "cwd" with the absolute path of the vault, or set MAENCOF_VAULT_PATH.',
+    );
+
   return resolve(raw);
 }
 

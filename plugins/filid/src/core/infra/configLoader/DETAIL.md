@@ -4,7 +4,8 @@
 - 런타임에서 `.claude/rules/<filename>`의 배포 파일 해시와 `templateHash`를 비교해 drift를 감지한다.
 - required rule: drift 발생 시 `syncRuleDocs`가 자동으로 템플릿으로 덮어써 재동기화한다.
 - optional rule: `resync` 파라미터에 해당 rule id를 포함해야만 재동기화된다. 포함하지 않으면 drift만 보고된다.
-- `CLAUDE_PLUGIN_ROOT` 미설정 시 `syncRuleDocs`는 throw 없이 `skipped` 배열로 graceful degradation한다.
+- 플러그인 루트는 `resolvePluginRoot`가 단일 해석 지점이다: 호출자 인자 우선, 부재 시 `@ogham/cross-platform/host-paths`의 `pluginRoot()`(호스트별 채널 — Claude/Codex는 `CLAUDE_PLUGIN_ROOT`, Codex는 서버 cwd 폴백), 그래도 없으면 `null`.
+- 플러그인 루트 해석 실패 시 `syncRuleDocs`는 throw 없이 `skipped` 배열로, `getRuleDocsStatus`는 `pluginRootResolved: false`로 graceful degradation한다.
 
 ## API Contracts
 
@@ -15,6 +16,7 @@
 | `syncRuleDocs`         | `(projectRoot: string, selection: Iterable<string>, opts?: SyncRuleDocsOptions) => RuleDocSyncResult` | `.claude/rules/`를 선택 상태에 맞게 동기화. setup 전용.                                                         |
 | `getRuleDocsStatus`    | `(projectRoot: string, pluginRoot?: string) => RuleDocsStatus`                                        | 파일시스템을 읽어 rule doc 현황 스냅샷 반환. 뮤테이션 없음.                                                     |
 | `loadRuleDocsManifest` | `(pluginRoot: string) => RuleDocsManifest`                                                            | `templates/rules/manifest.json` 로드 및 유효성 검사. `templateHash` 누락 시 throw.                              |
+| `resolvePluginRoot`    | `(pluginRoot?: string) => string \| null`                                                             | 플러그인 설치 디렉터리 해석. 인자 → 호스트 채널(`pluginRoot()`) 순. 미해석 시 `null` (throw 없음).              |
 | `initProject`          | `(projectRoot: string, language?: string) => InitResult`                                              | `.filid/config.json`을 git root에 생성(부재 시). `language` 제공 시 config에 기록. 기존 config는 덮어쓰지 않음. |
 | `createDefaultConfig`  | `(language?: string) => FilidConfig`                                                                  | 8개 내장 규칙 기본 config 생성. `language` 제공 시 최상위 `language` 키 포함.                                   |
 
@@ -49,7 +51,7 @@
 **`SyncRuleDocsOptions`**
 
 - `resync?: Iterable<string>` — drift된 optional rule을 덮어쓸 rule id 목록.
-- `pluginRoot?: string` — `CLAUDE_PLUGIN_ROOT` 환경 변수 대신 사용할 경로.
+- `pluginRoot?: string` — 호스트가 제공하는 플러그인 루트 대신 사용할 경로.
 
 ## `.filid/config.json` Schema Reference
 

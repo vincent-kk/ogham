@@ -30,6 +30,10 @@ exports[`MCP inputSchema is structurally ref-free > snapshot — run_transition 
     "project_ref": {
       "type": "string",
     },
+    "project_root": {
+      "description": "Absolute path of the workspace directory. Omit on Claude Code, where this server already runs from the workspace; required on hosts that launch it from the plugin install directory.",
+      "type": "string",
+    },
     "result": {
       "type": "string",
     },

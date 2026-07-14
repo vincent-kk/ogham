@@ -2,20 +2,23 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { pluginRoot } from "@ogham/cross-platform/host-paths";
+
 /**
  * Read the built settings UI (`public/settings.html`). Shipped beside the
  * plugin (package.json:files) and read at runtime rather than inlined into the
- * MCP bundle. Resolution prefers CLAUDE_PLUGIN_ROOT, then walks up from this
- * module (works in the esbuild bundle and when running TS sources directly).
+ * MCP bundle. Resolution prefers the host-provided plugin root, then walks up
+ * from this module (works in the esbuild bundle and when running TS sources
+ * directly).
  */
 let cached: string | null = null;
 
 function resolvePublicAsset(name: string): string {
   const candidates: string[] = [];
 
-  const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
-  if (pluginRoot) {
-    const candidate = join(pluginRoot, "public", name);
+  const root = pluginRoot();
+  if (root) {
+    const candidate = join(root, "public", name);
     candidates.push(candidate);
     if (existsSync(candidate)) return candidate;
   }

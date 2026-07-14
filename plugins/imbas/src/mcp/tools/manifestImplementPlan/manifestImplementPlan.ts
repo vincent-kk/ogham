@@ -5,6 +5,8 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import {
   MANIFEST_FILE_MAP,
   REPORT_FILE_MAP,
@@ -23,12 +25,13 @@ export interface ManifestImplementPlanInput {
   batch?: string;
   source?: 'stories' | 'devplan';
   max_parallel?: number;
+  project_root?: string;
 }
 
 export async function handleManifestImplementPlan(
   input: ManifestImplementPlanInput,
 ) {
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
   const run_dir = getRunDir(cwd, input.project_ref, input.run_id);
   const source = input.source ?? 'devplan';
 

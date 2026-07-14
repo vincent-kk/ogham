@@ -19,7 +19,8 @@
 - Rscript 미탐색 → `R_NOT_FOUND` (setup 안내)
 - 기본 `executionMode=async` (jobId 반환 후 get_r_job 폴링), `sync` 는 즉시 결과
 - 모든 잡은 jobStore 에 등록 (사전 실패도 synthetic 잡으로 일관 반환)
-- 데이터 ref 경로는 allow-root(`R_STATISTICS_DATA_ROOT`, 기본 CWD) 하위 realpath 만 수용
+- 데이터 ref 경로는 allow-root(`R_STATISTICS_DATA_ROOT`, 기본 프로젝트 루트) 하위 realpath 만 수용
+- 선택 인자 `project_root`(절대경로)는 핸들러 진입 즉시 `rememberProjectRoot` 로 기억 — allow-root 를 해석하는 깊은 leaf(`inputDataRoot`)가 이를 소비한다 (Claude 에서는 무시되어 기존 CWD 동작 유지)
 
 ## Boundaries
 
@@ -42,3 +43,4 @@
 ## Dependencies
 
 - `../../../core` (rRuntime·workspace·commandGate·jobStore), `../../../constants`, `../../../lib/atomicWrite`, `../../../types`, `../../../utils`
+- `@ogham/cross-platform/host-paths` (`rememberProjectRoot`)

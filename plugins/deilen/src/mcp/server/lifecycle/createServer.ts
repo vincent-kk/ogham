@@ -35,8 +35,9 @@ export function createServer(): McpServer {
           .string()
           .optional()
           .describe(
-            "Absolute or cwd-relative path to a local markdown file. Read when " +
-              "content is omitted. Mutually exclusive with content.",
+            "Path to a local markdown file — absolute, or relative to the " +
+              "workspace root. Read when content is omitted. Mutually exclusive " +
+              "with content.",
           ),
         title: z
           .string()
@@ -48,6 +49,14 @@ export function createServer(): McpServer {
           "Per-call overrides for theme, content width, and renderer toggles " +
             "(falls back to saved config).",
         ),
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            "Absolute path of the workspace directory. Omit on Claude Code, " +
+              "where this server already runs from the workspace; required on " +
+              "hosts that launch it from the plugin install directory.",
+          ),
       },
       annotations: {
         readOnlyHint: false,
@@ -80,6 +89,14 @@ export function createServer(): McpServer {
             "Max seconds to wait this call (default from config, capped at 55, " +
               "below the client MCP timeout). On timeout, re-call.",
           ),
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            "Absolute path of the workspace directory. Omit on Claude Code, " +
+              "where this server already runs from the workspace; required on " +
+              "hosts that launch it from the plugin install directory.",
+          ),
       },
       annotations: {
         readOnlyHint: false,
@@ -101,6 +118,14 @@ export function createServer(): McpServer {
         session_id: z
           .string()
           .describe("The session_id returned by render_viewer."),
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            "Absolute path of the workspace directory. Omit on Claude Code, " +
+              "where this server already runs from the workspace; required on " +
+              "hosts that launch it from the plugin install directory.",
+          ),
       },
       annotations: {
         readOnlyHint: false,
@@ -116,9 +141,18 @@ export function createServer(): McpServer {
     {
       description:
         "Open the deilen settings UI in a local browser to configure theme, " +
-        "auto-open, timeouts, renderer toggles, and size limits. No arguments; " +
-        "returns a localhost URL.",
-      inputSchema: {},
+        "auto-open, timeouts, renderer toggles, and size limits. Returns a " +
+        "localhost URL.",
+      inputSchema: {
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            "Absolute path of the workspace directory. Omit on Claude Code, " +
+              "where this server already runs from the workspace; required on " +
+              "hosts that launch it from the plugin install directory.",
+          ),
+      },
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,

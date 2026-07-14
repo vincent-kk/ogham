@@ -43,5 +43,6 @@
 - `../../../constants/paths` — `SETTINGS_SERVER_PATH`
 - `./utils/loadSettingsHtml` — `loadSettingsHtml` (`public/settings.html` 런타임 로드)
 - `@ogham/cross-platform/launcher` — `openBrowser` (OS별 브라우저 기동)
+- `@ogham/cross-platform/host-paths` — `pluginRoot` (`public/` 자산 탐색 기준점)
 - `./utils/persistState` — `persistState` (state 파일 원자적 기록)
 - `./webServer` — `startSettingsServer`, `SettingsServerInstance`

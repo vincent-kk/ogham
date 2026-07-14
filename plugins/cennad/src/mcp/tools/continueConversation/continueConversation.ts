@@ -1,5 +1,7 @@
 import { performance } from 'node:perf_hooks';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import { writeArtifact } from '../../../core/artifactWriter/index.js';
 import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
@@ -21,13 +23,14 @@ export interface ContinueConversationInput {
   session_id: string;
   prompt: string;
   tier?: Tier;
+  project_root?: string;
 }
 
 export async function handleContinueConversation(
   input: ContinueConversationInput,
 ): Promise<ConversationResponse> {
   const startedAt = performance.now();
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
   const projectHash = getProjectHash(cwd);
 
   const session = await getSession(projectHash, input.session_id);

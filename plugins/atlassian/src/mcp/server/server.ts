@@ -46,6 +46,12 @@ export function createServer(): McpServer {
         content_format: z.enum(["json", "markdown"]).optional(),
         save_to_path: z.string().optional(),
         force: z.boolean().optional(),
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            "Absolute path of the workspace directory. Omit on Claude Code, where this server already runs from the workspace; required on hosts that launch it from the plugin install directory.",
+          ),
       }),
       annotations: {
         readOnlyHint: false,
@@ -68,6 +74,7 @@ export function createServer(): McpServer {
         content_format?: "json" | "markdown";
         save_to_path?: string;
         force?: boolean;
+        project_root?: string;
       }) => {
         const service = args.service ?? detectService(args.endpoint);
         const ctx = await buildFetchContext(

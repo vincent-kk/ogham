@@ -10,6 +10,7 @@ export {
 } from "./collectFeedback/index.js";
 export {
   handleOpenSettings,
+  type OpenSettingsInput,
   type OpenSettingsOutput,
 } from "./openSettings/index.js";
 export {

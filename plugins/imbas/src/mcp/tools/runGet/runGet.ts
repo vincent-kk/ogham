@@ -5,6 +5,8 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
 import { loadConfig } from '../../../core/configManager/configManager.js';
 import { getRunDir, getRunsDir } from '../../../core/paths/paths.js';
@@ -13,10 +15,11 @@ import { loadRunState } from '../../../core/stateManager/stateManager.js';
 export interface RunGetInput {
   project_ref?: string;
   run_id?: string;
+  project_root?: string;
 }
 
 export async function handleRunGet(input: RunGetInput) {
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
 
   let project_ref = input.project_ref;
   if (!project_ref) {

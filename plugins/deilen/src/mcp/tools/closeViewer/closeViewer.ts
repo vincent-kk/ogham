@@ -1,3 +1,5 @@
+import { projectRoot } from "@ogham/cross-platform/host-paths";
+
 import { getProjectHash } from "../../../core/projectHash/index.js";
 import {
   closeResolver,
@@ -8,6 +10,7 @@ import { SessionStatus } from "../../../types/enums.js";
 
 export interface CloseViewerInput {
   session_id: string;
+  project_root?: string;
 }
 
 export interface CloseViewerOutput {
@@ -18,7 +21,7 @@ export interface CloseViewerOutput {
 export async function handleCloseViewer(
   input: CloseViewerInput,
 ): Promise<CloseViewerOutput> {
-  const projectHash = getProjectHash(process.cwd());
+  const projectHash = getProjectHash(projectRoot(input.project_root));
   const meta = await getSession(input.session_id, projectHash);
   if (!meta) throw new Error(`unknown: no session ${input.session_id}`);
   closeResolver(input.session_id);

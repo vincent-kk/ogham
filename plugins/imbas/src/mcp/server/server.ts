@@ -29,6 +29,13 @@ import {
   handleRunTransition,
 } from '../tools/index.js';
 
+const projectRootInput = z
+  .string()
+  .optional()
+  .describe(
+    'Absolute path of the workspace directory. Omit on Claude Code, where this server already runs from the workspace; required on hosts that launch it from the plugin install directory.',
+  );
+
 /**
  * Create and configure the MCP server with all tool registrations.
  */
@@ -65,6 +72,7 @@ export function createServer(): McpServer {
         source_file: z.string(),
         supplements: z.array(z.string()).optional(),
         source_issue_ref: z.string().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: false,
@@ -82,6 +90,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string().optional(),
         run_id: z.string().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,
@@ -110,6 +119,7 @@ export function createServer(): McpServer {
         warning_issues: z.number().int().nonnegative().optional(),
         pending_review: z.boolean().optional(),
         stories_created: z.number().int().nonnegative().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: false,
@@ -126,6 +136,7 @@ export function createServer(): McpServer {
       description: 'List runs for a project',
       inputSchema: z.object({
         project_ref: z.string().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,
@@ -146,6 +157,7 @@ export function createServer(): McpServer {
         project_ref: z.string(),
         run_id: z.string(),
         type: z.enum(['stories', 'devplan', 'implement-plan']),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,
@@ -168,6 +180,7 @@ export function createServer(): McpServer {
         // validation in a single MCP inputSchema. Handler validates internally via
         // StoriesManifestSchema.parse() / DevplanManifestSchema.parse().
         manifest: z.unknown().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: false,
@@ -186,6 +199,7 @@ export function createServer(): McpServer {
         project_ref: z.string(),
         run_id: z.string(),
         type: z.enum(['stories', 'devplan', 'implement-plan']),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,
@@ -203,6 +217,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string(),
         run_id: z.string(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,
@@ -224,6 +239,7 @@ export function createServer(): McpServer {
         batch: z.string().optional(),
         source: z.enum(['stories', 'devplan']).optional(),
         max_parallel: z.number().int().positive().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: false,
@@ -242,6 +258,7 @@ export function createServer(): McpServer {
       description: 'Read config.json',
       inputSchema: z.object({
         field: z.string().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,
@@ -260,6 +277,7 @@ export function createServer(): McpServer {
         // Config values are heterogeneous (string, number, object) — z.unknown()
         // allows any JSON value. Handler validates via dot-path resolution.
         updates: z.record(z.string(), z.unknown()),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: false,
@@ -279,6 +297,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string().optional(),
         cache_type: CacheTypeSchema.optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,
@@ -299,6 +318,7 @@ export function createServer(): McpServer {
         // Cache data varies by type (jira metadata, issue types, etc.) — z.unknown()
         // is intentional. Handler validates via CacheTypeSchema for the type field.
         data: z.unknown().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: false,
@@ -321,6 +341,7 @@ export function createServer(): McpServer {
         path: z.string().optional(),
         context: z.number().int().nonnegative().optional(),
         max_results: z.number().int().positive().optional(),
+        project_root: projectRootInput,
       }),
       annotations: {
         readOnlyHint: true,

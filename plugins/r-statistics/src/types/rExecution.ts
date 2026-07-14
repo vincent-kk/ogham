@@ -27,6 +27,7 @@ export interface RunRInput {
   executionMode?: RunMode;
   timeoutMs?: number;
   seed?: number;
+  project_root?: string;
 }
 
 /** A single collected artifact (hash-verified, inside ARTIFACTS_DIR). */

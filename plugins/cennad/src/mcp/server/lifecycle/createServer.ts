@@ -40,6 +40,14 @@ export function createServer(): McpServer {
             'all work; low for clearly simple tasks; high only with a specific reason ' +
             'to expect mid will be insufficient — not merely because the task looks complex.',
         ),
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            'Absolute path of the workspace directory. Omit on Claude Code, where this server ' +
+              'already runs from the workspace; required on hosts that launch it from the plugin ' +
+              'install directory.',
+          ),
       },
       annotations: {
         readOnlyHint: false,
@@ -76,6 +84,14 @@ export function createServer(): McpServer {
             'rate_limit or budget_exhausted. Use mid for normal work, low for clearly ' +
             'simple tasks; high only with a specific reason to expect mid will be insufficient.',
         ),
+        project_root: z
+          .string()
+          .optional()
+          .describe(
+            'Absolute path of the workspace directory. Omit on Claude Code, where this server ' +
+              'already runs from the workspace; required on hosts that launch it from the plugin ' +
+              'install directory. Must match the start_conversation call — sessions are scoped to it.',
+          ),
       },
       annotations: {
         readOnlyHint: false,

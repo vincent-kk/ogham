@@ -2,7 +2,7 @@
 
 ## Purpose
 
-MCP 서버 구현. 22개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 CWD에서 읽음.
+MCP 서버 구현. 22개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 호스트 워크스페이스 루트에서 읽으며, 둘 다 해석되지 않으면 throw.
 
 ## Tools (22)
 

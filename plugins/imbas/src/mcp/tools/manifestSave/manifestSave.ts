@@ -4,6 +4,8 @@
  */
 import { join } from 'node:path';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
 import {
   getImplementPlanSummary,
@@ -22,10 +24,11 @@ export interface ManifestSaveInput {
   run_id: string;
   type: 'stories' | 'devplan' | 'implement-plan';
   manifest?: unknown;
+  project_root?: string;
 }
 
 export async function handleManifestSave(input: ManifestSaveInput) {
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
   const run_dir = getRunDir(cwd, input.project_ref, input.run_id);
 
   if (input.manifest === undefined) throw new Error('manifest is required');

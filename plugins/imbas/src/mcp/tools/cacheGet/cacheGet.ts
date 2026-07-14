@@ -4,6 +4,8 @@
  */
 import { join } from 'node:path';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import { CACHED_AT_FILENAME } from '../../../constants/index.js';
 import {
   isCacheExpired,
@@ -18,10 +20,11 @@ import type { CacheType } from '../../../types/cache.js';
 export interface CacheGetInput {
   project_ref?: string;
   cache_type?: CacheType;
+  project_root?: string;
 }
 
 export async function handleCacheGet(input: CacheGetInput) {
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
 
   let project_ref = input.project_ref;
   if (!project_ref) {

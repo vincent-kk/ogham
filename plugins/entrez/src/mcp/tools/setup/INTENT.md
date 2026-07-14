@@ -36,5 +36,5 @@
 ## Dependencies
 
 - `@ogham/http-guard/{guard,token}` (inspectRequest, generateToken)
-- `../../../core/config` · `@ogham/cross-platform/launcher`
+- `../../../core/config` · `@ogham/cross-platform/{launcher,host-paths}`
 - `../../../core/{httpClient,sourceResolver}` · `../../../types/setup`

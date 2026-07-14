@@ -10,19 +10,23 @@
   across the MCP transport).
 - Own the per-session cache lifecycle (replaces the removed SessionEnd hook —
   the MCP server process is the only session-end signal common to all hosts):
-  - **Boot sweep** (`bootSweep`): after transport connect, run the same
+  - **Boot sweep** (`bootSweep(cwd?)`): after transport connect, run the same
     daily-throttled maintenance as the SessionStart hook
     (`isSessionPruneDue` → `pruneOldSessions`, `isPruneDue` →
     `pruneStaleCacheDirs`). Marker gates are mtime-based and shared across
-    processes, so a double run (hook + server) stays a no-op. Best-effort:
-    absorb every exception; never block or fail server boot.
+    processes, so a double run (hook + server) stays a no-op. The
+    session-scoped prune is project-scoped: it runs only when
+    `tryProjectRoot(cwd)` resolves, and is skipped otherwise. The
+    stale-cache prune needs no root and always runs. Best-effort: absorb
+    every exception; never block or fail server boot.
   - **Shutdown cleanup** (`registerShutdown` → `cleanupOwnSessionCache`): on
     `exit`/`SIGINT`/`SIGTERM`, synchronously remove this session's cache
-    files via `removeSessionFiles(CLAUDE_CODE_SESSION_ID, cwd)`. The host
-    kills the process ~400ms after SIGINT (measured), so the handler must be
-    strictly synchronous. `CLAUDE_CODE_SESSION_ID` is an undocumented env
-    var: when absent, skip — the boot sweep covers the files by TTL. Register
-    handlers once; never let a cleanup failure affect the exit path.
+    files via `removeSessionFiles(CLAUDE_CODE_SESSION_ID, tryProjectRoot())`.
+    The host kills the process ~400ms after SIGINT (measured), so the handler
+    must be strictly synchronous. `CLAUDE_CODE_SESSION_ID` is an undocumented
+    env var: when absent, skip — the boot sweep covers the files by TTL.
+    Skip likewise when no project root resolves. Register handlers once;
+    never let a cleanup failure affect the exit path.
 
 ## API Contracts
 

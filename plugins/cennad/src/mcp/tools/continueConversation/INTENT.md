@@ -11,8 +11,8 @@
 
 ## Conventions
 
-- 입력 키 `snake_case`
-- 현재 `process.cwd()` 의 `project_hash` 와 일치하지 않으면 `error.code='unknown'` 반환 (fallback 검색 금지)
+- 입력 키 `snake_case`. `project_root` optional (절대경로) — Claude 는 생략 시 `process.cwd()`, 그 외 호스트는 생략하면 해석 실패로 거부
+- 현재 프로젝트 루트의 `project_hash` 와 일치하지 않으면 `error.code='unknown'` 반환 (fallback 검색 금지). resume 의 spawn cwd 는 `SessionMeta.cwd` — `project_root` 는 세션 조회에만 쓰인다
 - `provider` 카운터는 시도 기준 +1
 - tier 우선순위: 명시 입력 → `SessionMeta.tier`(세션 시작 tier 복원) → `config.default_tier[provider]`(tier 미기록 legacy 세션만). tier 가 모델을 고르므로 복원하지 않으면 resume 중 모델이 갈린다(codex 가 경고). `options` 는 항상 `{}` 전달
 - 권한 플래그는 매 호출 시 현재 `config.option_flags[provider]` 를 다시 읽어 `DispatchOptions.flags` 로 주입
@@ -42,6 +42,7 @@
 - `../../../core/sessionStore` — `getSession`, `updateSession`
 - `../../../core/counterManager` — `incrementCounter`
 - `../../../core/projectHash` — `getProjectHash`
+- `@ogham/cross-platform/host-paths` — `projectRoot` (세션 조회용 프로젝트 루트 해석)
 - `../../../dispatcher` — `dispatchers`, `buildResponse` (`envelope.js`)
 - `../../../types` — `ConversationResponse`
 - `../../../utils/isoNow.ts` — `isoNow`

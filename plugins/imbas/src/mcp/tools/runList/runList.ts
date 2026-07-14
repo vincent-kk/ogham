@@ -4,16 +4,19 @@
  */
 import { existsSync, readdirSync } from 'node:fs';
 
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import { loadConfig } from '../../../core/configManager/configManager.js';
 import { getRunDir, getRunsDir } from '../../../core/paths/paths.js';
 import { loadRunState } from '../../../core/stateManager/stateManager.js';
 
 export interface RunListInput {
   project_ref?: string;
+  project_root?: string;
 }
 
 export async function handleRunList(input: RunListInput) {
-  const cwd = process.cwd();
+  const cwd = projectRoot(input.project_root);
 
   let project_ref = input.project_ref;
   if (!project_ref) {

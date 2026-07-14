@@ -2,6 +2,8 @@
  * @file runTransition.ts
  * @description Typed phase transition (start/complete/escape)
  */
+import { projectRoot } from '@ogham/cross-platform/host-paths';
+
 import { getRunDir } from '../../../core/paths/paths.js';
 import {
   applyTransition,
@@ -20,7 +22,7 @@ export async function handleRunTransition(input: unknown) {
   // contract. Throws on invalid input → wrapHandler surfaces MCP isError.
   const parsed: RunTransition = RunTransitionSchema.parse(input);
 
-  const cwd = process.cwd();
+  const cwd = projectRoot(parsed.project_root);
   const run_dir = getRunDir(cwd, parsed.project_ref, parsed.run_id);
 
   const state = await loadRunState(run_dir);

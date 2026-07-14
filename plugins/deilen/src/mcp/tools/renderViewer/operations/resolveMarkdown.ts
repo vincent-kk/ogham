@@ -17,9 +17,13 @@ const MB = 1024 * 1024;
  * Resolve viewer markdown from exactly one of `content`/`path`, enforcing the
  * max_viewer_mb cap. The caller (Claude) is a trusted fs principal, so any
  * readable regular file is allowed after canonicalization + utf8 read.
+ *
+ * A relative `path` resolves against `workspace`, never `process.cwd()` — off
+ * Claude the process runs from the plugin's install directory.
  */
 export async function resolveMarkdown(
   input: ResolveMarkdownInput,
+  workspace: string,
   maxViewerMb: number,
 ): Promise<ResolvedMarkdown> {
   const hasContent = typeof input.content === "string";
@@ -39,7 +43,7 @@ export async function resolveMarkdown(
     return { markdown: content };
   }
 
-  const sourcePath = resolve(input.path as string);
+  const sourcePath = resolve(workspace, input.path as string);
   let info;
   try {
     info = await stat(sourcePath);

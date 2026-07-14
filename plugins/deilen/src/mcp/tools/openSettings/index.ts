@@ -1,1 +1,5 @@
-export { handleOpenSettings, type OpenSettingsOutput } from "./openSettings.js";
+export {
+  handleOpenSettings,
+  type OpenSettingsInput,
+  type OpenSettingsOutput,
+} from "./openSettings.js";

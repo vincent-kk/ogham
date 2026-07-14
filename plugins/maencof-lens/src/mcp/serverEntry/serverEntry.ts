@@ -4,11 +4,16 @@
  * Bundled to bridge/mcp-server.cjs.
  */
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { tryProjectRoot } from "@ogham/cross-platform/host-paths";
 
 import { createLensServer } from "../server/server.js";
 
+function resolveConfigRoot(): string | null {
+  return process.env["MAENCOF_LENS_CONFIG_ROOT"] ?? tryProjectRoot();
+}
+
 async function main() {
-  const configRoot = process.cwd();
+  const configRoot = resolveConfigRoot();
   const server = createLensServer(configRoot);
   const transport = new StdioServerTransport();
   await server.connect(transport);

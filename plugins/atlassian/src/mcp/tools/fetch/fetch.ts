@@ -1,3 +1,4 @@
+import { rememberProjectRoot } from "@ogham/cross-platform/host-paths";
 import { executeRequest } from "../../../core/httpClient/index.js";
 import type {
   FetchContext,
@@ -19,6 +20,8 @@ export async function handleFetch(
   params: FetchParams,
   ctx: FetchContext,
 ): Promise<McpResponse> {
+  rememberProjectRoot(params.project_root);
+
   const { method } = params;
   const config = ctx.http;
   // Normalize before transform: downstream mapping/conversion guard on object type.

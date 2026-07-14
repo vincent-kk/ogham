@@ -6,6 +6,7 @@
  */
 import { resolve } from 'node:path';
 
+import { tryProjectRoot } from '@ogham/cross-platform/host-paths';
 import { home } from '@ogham/cross-platform/paths';
 
 import { MetadataStore } from '../../../core/indexer/index.js';
@@ -20,11 +21,16 @@ const BLOCKED_PREFIXES = [
 ];
 
 /**
- * vault path (from environment variable or CWD).
+ * vault path (from environment variable or the host's workspace root).
  * Blocks access to global config paths.
  */
 export function getVaultPath(): string {
-  const raw = process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
+  const raw = process.env['MAENCOF_VAULT_PATH'] ?? tryProjectRoot();
+  if (raw === null)
+    throw new Error(
+      'Cannot determine the vault path: this MCP server does not run from the vault directory on this host. Set MAENCOF_VAULT_PATH to the absolute path of the vault.',
+    );
+
   const resolved = resolve(raw);
 
   for (const prefix of BLOCKED_PREFIXES)

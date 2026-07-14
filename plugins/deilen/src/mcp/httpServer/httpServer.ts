@@ -1,5 +1,6 @@
 import { type Server, createServer } from "node:http";
 
+import { projectRoot } from "@ogham/cross-platform/host-paths";
 import { generateToken } from "@ogham/http-guard/token";
 
 import { loadConfig, saveConfig } from "../../core/configManager/index.js";
@@ -27,14 +28,20 @@ const MINUTE_MS = 60 * 1000;
 let instance: HttpServerInstance | null = null;
 let starting: Promise<HttpServerInstance> | null = null;
 
-/** Start the singleton server, or reuse + touch the running one. */
-export async function ensureHttpServer(): Promise<HttpServerInstance> {
+/**
+ * Start the singleton server, or reuse + touch the running one. `workspace` is
+ * the caller's already-resolved project root: the server scopes its sessions to
+ * it at startup, so it must not be resolved later than the first call.
+ */
+export async function ensureHttpServer(
+  workspace?: string,
+): Promise<HttpServerInstance> {
   if (instance) {
     instance.touch();
     return instance;
   }
   if (starting) return starting;
-  starting = startHttpServer();
+  starting = startHttpServer(workspace);
   try {
     instance = await starting;
     return instance;
@@ -48,10 +55,12 @@ export function getHttpServer(): HttpServerInstance | null {
   return instance;
 }
 
-async function startHttpServer(): Promise<HttpServerInstance> {
+async function startHttpServer(
+  workspace?: string,
+): Promise<HttpServerInstance> {
   const config = await loadConfig();
   const token = generateToken();
-  const projectHash = getProjectHash(process.cwd());
+  const projectHash = getProjectHash(projectRoot(workspace));
   const idleMs = config.idle_shutdown_minutes * MINUTE_MS;
 
   let server: Server | null = null;

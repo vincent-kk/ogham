@@ -18,7 +18,7 @@
 - `artifacts: ArtifactsConfig` — `{ enabled, location }`. 호출자가 반드시
   `enabled === true` 를 사전 확인하고 호출한다 (작성기는 호출되면 항상
   쓰기를 시도).
-- `cwd: string` — `process.cwd()` (start) 또는 `session.cwd` (continue).
+- `cwd: string` — 해석된 프로젝트 루트 (start) 또는 `session.cwd` (continue).
 - `projectHash: string` — `core/projectHash` 의 `sha256(cwd).slice(0,12)`.
 - `sessionId: string` — `randomUUID()` 가 발급한 UUIDv4.
 - `turn: number` — `start` 는 1, `continue` 는 `nextTurn`.

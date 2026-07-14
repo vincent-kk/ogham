@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { pluginRoot } from "@ogham/cross-platform/host-paths";
 
 /**
  * Read the built settings UI (`public/settings.html`). The file ships beside the
@@ -24,9 +25,9 @@ export function loadSettingsHtml(): string {
 function resolvePublicAsset(name: string): string {
   const candidates: string[] = [];
 
-  const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
-  if (pluginRoot) {
-    const candidate = join(pluginRoot, "public", name);
+  const root = pluginRoot();
+  if (root) {
+    const candidate = join(root, "public", name);
     candidates.push(candidate);
     if (existsSync(candidate)) return candidate;
   }
