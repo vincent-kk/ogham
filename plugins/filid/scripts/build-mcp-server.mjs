@@ -5,12 +5,12 @@
  *
  * Output: bridge/mcp-server.cjs
  */
-
-import * as esbuild from 'esbuild';
-import { mkdir } from 'fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import * as esbuild from 'esbuild';
+import { mkdir } from 'fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -21,7 +21,9 @@ const outfile = resolve(root, 'bridge/mcp-server.cjs');
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
 // Resolve zod from MCP SDK's dependency tree — single copy in the bundle
-const require = createRequire(resolve(root, 'node_modules/@modelcontextprotocol/sdk/package.json'));
+const require = createRequire(
+  resolve(root, 'node_modules/@modelcontextprotocol/sdk/package.json'),
+);
 const zodPath = dirname(require.resolve('zod/package.json'));
 
 // NODE_PATH auto-injection banner for MCP server bundle
@@ -49,6 +51,9 @@ try {
     _Module._initPaths();
   }
 } catch (_e) { /* npm not available - native modules will gracefully degrade */ }
+
+// Self-location for bundled assets: esbuild empties import.meta in CJS output.
+const __import_meta_url = require('url').pathToFileURL(__filename).href;
 `;
 
 await esbuild.build({
@@ -59,6 +64,7 @@ await esbuild.build({
   format: 'cjs',
   outfile,
   banner: { js: banner },
+  define: { 'import.meta.url': '__import_meta_url' },
   minify: true,
   sourcemap: false,
   treeShaking: true,
@@ -67,7 +73,7 @@ await esbuild.build({
   // Externalize native modules that can't be bundled
   external: ['@ast-grep/napi'],
   alias: {
-    'zod': zodPath,
+    zod: zodPath,
   },
 });
 

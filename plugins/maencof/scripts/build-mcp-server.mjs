@@ -26,7 +26,8 @@ const require = createRequire(
 );
 const zodPath = dirname(require.resolve('zod/package.json'));
 
-const banner = '';
+// Self-location for bundled assets: esbuild empties import.meta in CJS output.
+const banner = `const __import_meta_url = require('url').pathToFileURL(__filename).href;`;
 
 await esbuild.build({
   entryPoints: [resolve(root, 'src/mcp/serverEntry/serverEntry.ts')],
@@ -36,6 +37,7 @@ await esbuild.build({
   format: 'cjs',
   outfile,
   banner: { js: banner },
+  define: { 'import.meta.url': '__import_meta_url' },
   minify: true,
   sourcemap: false,
   treeShaking: true,

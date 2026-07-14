@@ -31,6 +31,11 @@ await esbuild.build({
   outfile,
   minify: true,
   sourcemap: false,
+  // Self-location for bundled assets: esbuild empties import.meta in CJS output.
+  banner: {
+    js: "const __import_meta_url = require('url').pathToFileURL(__filename).href;",
+  },
+  define: { "import.meta.url": "__import_meta_url" },
   treeShaking: true,
   mainFields: ["module", "main"],
   external: [],
