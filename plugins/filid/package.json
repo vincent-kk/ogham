@@ -37,7 +37,9 @@
     "skills",
     "templates",
     ".claude-plugin",
+    ".codex-plugin",
     ".mcp.json",
+    "mcp_config.json",
     "README.md"
   ],
   "scripts": {

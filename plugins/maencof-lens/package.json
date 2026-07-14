@@ -36,7 +36,9 @@
     "hooks",
     "skills",
     ".claude-plugin",
-    ".mcp.json"
+    ".codex-plugin",
+    ".mcp.json",
+    "mcp_config.json"
   ],
   "scripts": {
     "build": "yarn clean && yarn version:sync && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",

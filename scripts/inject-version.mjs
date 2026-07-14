@@ -133,14 +133,58 @@ function syncPluginJson(version) {
   }
 }
 
+function syncCodexPluginJson(version) {
+  const codexPluginJsonPath = join(ROOT, ".codex-plugin", "plugin.json");
+
+  // Codex adapter manifest is generated per plugin by tools/plugin-compiler;
+  // plugins without one (or not yet synced) are skipped silently.
+  if (!existsSync(codexPluginJsonPath)) return false;
+
+  try {
+    const content = readFileSync(codexPluginJsonPath, "utf-8");
+    const plugin = JSON.parse(content);
+
+    if (plugin.version === version) {
+      console.log(
+        `  ✓ .codex-plugin/plugin.json already up to date: ${version}`,
+      );
+      return false;
+    }
+
+    const prevVersion = plugin.version;
+    plugin.version = version;
+
+    writeFileSync(
+      codexPluginJsonPath,
+      JSON.stringify(plugin, null, 2) + "\n",
+      "utf-8",
+    );
+    console.log(
+      `  ✓ .codex-plugin/plugin.json updated: ${prevVersion} → ${version}`,
+    );
+    return true;
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.error("❌ Error: Invalid JSON in .codex-plugin/plugin.json");
+    } else {
+      console.error(
+        "❌ Error syncing .codex-plugin/plugin.json:",
+        error.message,
+      );
+    }
+    process.exit(1);
+  }
+}
+
 try {
   const version = readPackageVersion();
   console.log(`\n🔄 Syncing version: ${version}\n`);
 
   const versionUpdated = generateVersionFile(version);
   const pluginUpdated = syncPluginJson(version);
+  const codexPluginUpdated = syncCodexPluginJson(version);
 
-  if (!versionUpdated && !pluginUpdated) {
+  if (!versionUpdated && !pluginUpdated && !codexPluginUpdated) {
     console.log(`\n✅ All versions already synchronized: ${version}`);
   } else {
     console.log(`\n✅ Version synchronization complete: ${version}`);
