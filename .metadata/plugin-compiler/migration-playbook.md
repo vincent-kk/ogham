@@ -27,7 +27,7 @@ ogham/
 | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | Claude | `/plugin marketplace add vincent-kk/ogham` → `/plugin install <pkg>@ogham` (현행 그대로)                                        |
 | Codex  | `codex plugin marketplace add vincent-kk/ogham` → `codex plugin add <pkg>@ogham` → TUI **`/hooks` 에서 trust 승인** → 새 스레드 |
-| agy    | `agy plugin install <pkg>@ogham` 또는 저장소 클론 + declared(`.agents/plugins.json`) 자동 등록                                  |
+| agy    | ⚠ **`agy plugin install` 은 쓰면 안 된다** — MCP 가 로드되지 않는 위치에 설치한다. 플러그인 디렉터리를 `~/.agents/plugins/<pkg>/` 로 복사/심링크해야 한다 (실측 §3.2). declared(`.agents/plugins.json`)도 무용지물. |
 
 ## 2. 어댑터 생성·유지 절차 (상시 운영 규칙)
 
@@ -78,6 +78,22 @@ PoC: 로컬 마켓플레이스 `ogham` 등록 + `deilen`·`r-statistics`(MCP onl
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **G2** | ✅ **닫힘 — ogham 훅 끝까지 검증**. **신뢰된 훅은 `codex exec` 헤드리스에서 발화한다**: maencof-lens 훅을 trust 한 뒤 SessionStart 가 2회(ponytail + ogham) 발화하고 프로세스도 관측됐으며, **모델이 주입 문구 `[maencof-lens] Read-only vault access enabled.` 를 그대로 인용**했다. ⇒ `${CLAUDE_PLUGIN_ROOT}` 쉘 전개 · `libs/run.cjs` 런처 · **Claude 포맷 `hooks/hooks.json` 공유** · `hookSpecificOutput.additionalContext` → 모델 주입이 **전부 동작**한다. **미신뢰 훅은 조용히 건너뛴다** — exit 0 완주, **경고 한 줄 없고** 프로세스도 안 뜬다. ⇒ **cennad 의 codex 위임 경로는 trust 승인 전까지 ogham 훅이 무동작이고 사용자는 알 수 없다.** 우회로: `codex exec --dangerously-bypass-hook-trust`. **훅 프로세스는 세션 cwd 를 받는다**(훅이 `<세션cwd>/.maencof-lens/config.json` 을 찾아냄 — MCP 와 달리 훅은 경로 문제 없음, matrix §9). |
 | **G3** | ✅ **닫힘**. `codex plugin add` 는 플러그인을 `enabled` 로만 만들고 **훅 신뢰는 등록하지 않는다**. 이후 첫 TUI 진입에서 게이트가 뜬다 — `Hooks need review / 1 hook is new or changed / Hooks can run outside the sandbox after you trust them` → `1. Review hooks · 2. Trust all and continue · 3. Continue without trusting (hooks won't run)`. 신뢰는 `config.toml` `[hooks.state."<plugin>@<mp>:<훅파일>:<event>:<i>:<j>"]` 의 `trusted_hash` 로 고정된다. **"new or changed"** 가 곧 재신뢰 트리거 — 버전 업으로 훅 파일이 바뀌면 재승인을 요구한다.                                                                                                                                                                                                                                                                                              |
+
+### 3.2 실측 결과 — agy 축 (2026-07-15, agy 1.1.2)
+
+| #      | 결과                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **G4** | ✅ **닫힘 — 질문 자체가 틀렸다**. 상대 args 는 **플러그인 디렉터리 기준으로 정상 해석**된다(우리 `mcp_config.json` 무수정 유효, `OGHAM_HOST` 도 보존). **진짜 문제는 위치**다 — `agy plugin install` 이 넣는 `~/.gemini/config/plugins/` 에서는 **MCP 가 아예 안 뜬다**(설치 로그는 `✔ mcpServers : 1 processed` 라고 거짓 안심을 준다). `~/.agents/plugins/<n>/` 또는 워크스페이스 `.agents/plugins/<n>/` 에 두면 **정상 기동**한다(대조군: 전역 `mcp_config.json` 도 정상 → agy 의 stdio MCP 자체는 멀쩡). |
+| **G5** | ✅ **닫힘 — 오독 확정**. agy 가 `hooks/hooks.json` 을 루트 `hooks.json` 으로 복사한 뒤 Claude 포맷을 **훅 이름 `"hooks"`** 로 오독해 파싱 실패한다: `invalid hook "hooks": command hook must specify 'command'` → `loaded 0 named hooks`. 세션은 안 깨지지만 **agy 훅 전면 무동작**. → Stage 3(agy 포맷 emitter + 러너 어댑터).                                                              |
+
+**부수 발견 (어댑터 설계 변경 필요)**
+
+- **루트 `plugin.json` 이 필수다**: 없으면 agy 가 `source: claude-code` 로 임포트하며 **우리 `mcp_config.json` 을 `.mcp.json` 에서 재생성해 덮어쓴다** — `${CLAUDE_PLUGIN_ROOT}` 리터럴 + `env: null` 로 **`OGHAM_HOST` 마커가 파괴**된다. `{"name":"<n>"}` 한 줄을 두면 `source: antigravity` 로 분류되고 어댑터가 온전히 보존된다.
+- **`.agents/plugins.json` (declared) 은 무용지물**: 항목별 경로·컨테이너 경로·마커 조합 3종 모두 실패. **폐기 대상.**
+
+### 3.3 실측 결과 — G8 Codex 규칙 채널 (2026-07-15)
+
+✅ **닫힘 — 기존 가정이 틀렸다.** `~/.codex/rules/` 는 지침 문서 채널이 **아니다** — `prefix_rule(pattern=["yarn","test:run"], decision="allow")` 형태의 **쉘 커맨드 승인 allowlist**(Claude `settings.json` permissions 대응)다. Codex 의 지침 채널은 **`AGENTS.md` 뿐**이고, **저장소 루트 `AGENTS.md` 와 전역 `~/.codex/AGENTS.md` 가 둘 다 주입되며 함께 쌓인다**(마커로 실측). `.claude/rules/*.md` 는 무시된다. ⇒ **filid `syncRuleDocs`·maencof `claudeMdMerger` 의 Codex 타깃 = `AGENTS.md` 병합** (Stage 4).
 
 **발견된 블로커 (수정 완료)**: `.codex-plugin/plugin.json` 의 `mcpServers` 에 `cwd` 를 **생략하면** Codex 는 세션 cwd 로 서버를 띄운다. 상대 args(`bridge/mcp-server.cjs`)가 사용자 프로젝트 기준으로 풀려 **module-not-found → initialize 중 즉사**하고, `codex exec` 는 이 실패를 **조용히 삼킨다**(TUI 만 `⚠ MCP client for X failed to start` 경고). 즉 **MCP 보유 9개 플러그인 전체가 Codex 에서 무음 사망**하던 상태였다. matrix §4.1 의 "cwd 생략 시 플러그인 루트가 기본(소스 확정)" 은 0.144.4 실측으로 **반증**됐다.
 
