@@ -29,7 +29,10 @@ codex   # TUI 에서 도구 목록·호출 확인
 - [x] **G1** ✅ 닫힘 — 도구명 `mcp__<server>__<tool>`(더블 언더스코어), **플러그인 스코프 없음** ⇒ 서버명 오버라이드는 필수. **블로커 발견·수정**: `cwd` 누락 시 MCP 9종 전체 무음 사망 → emitter 가 `"cwd": "."` 방출 (playbook §3.1)
 - [x] **G7** ✅ 닫힘 — **제약 확정**. MCP 프로세스 env 는 `OGHAM_HOST` 뿐이고 Codex 는 세션 cwd 를 안 준다. cwd=플러그인 루트 고정이라 **deilen `preview` 상대 경로는 Codex 에서 오해석**. 대응 미결정 → Stage 4
 - [x] **G6** ✅ 닫힘 — 스킬은 `<plugin>:<skill>` 로 정상 주입(Claude 규약과 동일). 단 본문 full-form(`mcp__plugin_deilen_tools__…`)과 실제 도구명(`mcp__deilen__…`) **불일치 확정** → 완화는 Stage 5
-- [ ] **G2·G3·G5** maencof-lens(SessionStart 1종)로: TUI `/hooks` trust → 주입 확인 → `codex exec` 헤드리스 거동(신뢰/미신뢰) → 버전 범프 후 재신뢰 UX. G5 는 agy 축: `agy plugin install` 시 `hooks/hooks.json`(Claude 포맷) 오독 여부 — 오독 시 훅 파일 개명(플레이북 대응책)
+- [x] **G2** ✅ 닫힘 — 신뢰된 훅은 헤드리스 `codex exec` 에서 **발화**(ponytail 실측), 미신뢰 훅은 **조용히 스킵**(exit 0·경고 없음). ⇒ cennad codex 위임 경로는 trust 전까지 훅 무동작이고 **고지가 없다**. 우회: `--dangerously-bypass-hook-trust`
+- [x] **G3** ✅ 닫힘 — `plugin add` 는 enabled 만; 첫 TUI 진입에서 `Hooks need review / 1 hook is new or changed` 게이트. `trusted_hash` 로 고정되며 **"changed"** 가 재신뢰 트리거
+- [ ] **G2 잔여** — ogham **자기 훅**이 신뢰 후 실제로 도는지(= `${CLAUDE_PLUGIN_ROOT}` 쉘 전개 + `libs/run.cjs` + 우리 hooks.json 포맷이 Codex 에서 유효한지) 확인 — **TUI 훅 trust 승인 필요(사용자 결정)**
+- [ ] **G5** agy 축: `agy plugin install` 시 `hooks/hooks.json`(Claude 포맷) 오독 여부 — 오독 시 훅 파일 개명(플레이북 대응책)
 - [ ] **G4** agy 인터랙티브에서 `mcp_config.json` 상대 args 기동 (실패 시 emitter 를 절대경로 주입으로 교체) — **agy 축(G4·G5)은 1.1.2 로 재실측**: matrix 의 agy 사실은 1.1.1(2026-07-11) 기준이라 승계 금지
 - [ ] **G8** Codex 규칙 채널(`~/.codex/rules` 로드 규약·AGENTS.md 등가성) — Stage 4 의 전제
 - [x] 1차 결과 기록 완료 — playbook §3.1 · matrix §3·§4.1·§6·§7·§8 · compiler-architecture §3.1 · DETAIL.md 동기화 (2026-07-15)
