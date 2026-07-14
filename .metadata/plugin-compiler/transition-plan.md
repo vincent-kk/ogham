@@ -54,13 +54,21 @@
 
 ---
 
-## 4. Phase C — 정본 런타임 (`~/Workspace/ogham`)
+## 4. Phase C — 정본 런타임 (**이 브랜치에서 이어간다**)
 
-- [x] **C1–C3. 경로 좌표** ✅ 완료 (main `77825966`) — `@ogham/cross-platform` 에 `hostPaths`(`detectHost`·`pluginRoot`·`projectRoot`) 신설, A(7 지점)·B(31 지점) 반영. imbas 인자 폭증은 **`projectRootMemo`**(첫 호출이 준 루트를 세션에 기억)로 해소. 잔여 4개 `process.cwd()` 는 프로젝트 좌표가 아니므로 **의도적 잔류**.
-- [ ] **C4. 규칙 채널** ⬜ **다음 작업** → **[stage4-rules-channel.md](./stage4-rules-channel.md)** (의뢰서 정본)
+> 애초에 별도 체크아웃에서 진행할 계획이었으나, **경로 좌표 코드가 호스트에서 한 번도 돌지 않았다**는 사실 때문에 이 브랜치로 가져온다. 검증 하네스(호스트 PoC 절차·프로브)가 여기 있고, C4 도 같은 헬퍼를 건드린다.
+
+- [x] **C1–C3. 경로 좌표 — 코드** (main `77825966`) — `@ogham/cross-platform` 에 `hostPaths`(`detectHost`·`pluginRoot`·`projectRoot`) 신설, A(7 지점)·B(31 지점) 반영. imbas 인자 폭증은 **`projectRootMemo`**(첫 호출이 준 루트를 세션에 기억)로 해소. 잔여 4개 `process.cwd()` 는 프로젝트 좌표가 아니므로 **의도적 잔류**.
+- [ ] **M1. main 머지 + `yarn plugin:adapters` 재생성** — hostPaths 코드가 이 브랜치에 없다. 또한 main 이 filid MCP 서버명을 `t`→`tools` 로 바꿔 어댑터가 stale 하다.
+- [ ] **V1–V4. 경로 좌표 — 호스트 재검증** ⬜ **핵심. 상세는 [TODO.md](./TODO.md)**
+      - **V1 (Codex)**: 모델이 `project_root` 를 **절대경로로** 실제 넘기는가. Codex TUI 는 워크스페이스를 `~/Workspace/…`(틸데)로 표시하는데 `toAbsoluteRoot()` 는 `path.isAbsolute()` 라 **틸데를 거부**한다. 미전달→throw→재시도→틸데→throw→재시도 왕복을 모델이 완주하는가.
+      - **V2 (agy)**: 같은 질문.
+      - **V3 (agy 잠재 버그)**: `pluginRoot()` 가 `detectHost() === "codex" ? process.cwd() : null` 이라 **agy 에서 `null`** → r-statistics `contract.R` 파손 가능. 선행 측정: **agy MCP 프로세스의 cwd·env**.
+      - **V4 (Codex)**: r-statistics `run_r` 이 `contract.R` 을 실제로 찾는가 — stage4-host-paths 의 완료 기준인데 미측정.
+- [ ] **C4. 규칙 채널** → **[stage4-rules-channel.md](./stage4-rules-channel.md)** (의뢰서 정본)
       filid `syncRuleDocs`(`.claude/rules/*.md`)·maencof `claudeMdMerger`(`CLAUDE.md`)의 **Codex 타깃 = `AGENTS.md` 병합**. `~/.codex/rules` 는 커맨드 allowlist 라 **쓰면 안 된다**(G8). ⚠ 쓰기 채널만 바꾸고 **읽기 채널**(filid 훅의 규칙 존재 판정)을 놔두면 새 버그가 생긴다.
 
-**완료 기준**: `OGHAM_HOST` 부재(=Claude)에서 전 플러그인 테스트가 현행과 **동일 통과**. Codex 에서 규칙이 `AGENTS.md` 로 실려 모델 프롬프트에 실제로 주입된다.
+**완료 기준**: `OGHAM_HOST` 부재(=Claude)에서 전 플러그인 테스트가 현행과 **동일 통과**. Codex 에서 `run_r` 이 `contract.R` 을 찾고, 프로젝트 대상 도구가 사용자 워크스페이스를 보며, 규칙이 `AGENTS.md` 로 실려 모델 프롬프트에 실제 주입된다.
 
 ---
 
@@ -100,16 +108,24 @@
 ## 8. 순서 의존성
 
 ```
-Phase A (어댑터 정정)  ──→ Phase B (CI·README)  ──→ main 머지 → GitHub 경유 설치 재확인
-       │
-       └──→ (독립) Phase C (정본 런타임, ~/Workspace/ogham)  ← 다른 개발과 병행 가능
-                     │
-                     └──→ Phase D/E (선택 심화)
+Phase A ✅ (어댑터 정정)  ──→  Phase B ✅ (CI·README)
+                                    │
+                                    ▼
+              M1 (main 머지 + 어댑터 재생성)        ← 선행 조건
+                                    │
+                                    ▼
+              V1–V4 (경로 좌표 호스트 재검증)       ← 핵심. 여기서 hostPaths 보정 결정
+                                    │
+                                    ▼
+              C4 (규칙 채널 → AGENTS.md)           ← 같은 헬퍼를 건드리므로 V 뒤에
+                                    │
+                                    ▼
+              main 머지 → GitHub 경유 설치 재확인   ──→  Phase D/E (선택 심화)
 ```
 
-- **A → B**: README 의 설치 문구가 A2(루트 `plugin.json`) 결과에 따라 달라진다.
-- **A5 가 실패하면**: A2 를 철회하고 agy 는 D2(설치 스크립트가 목적지에 `plugin.json` 을 쓰는 방식)로만 지원한다. 이 경우 저장소는 어댑터 3종만 유지한다.
-- **C 는 A/B 와 독립** — 정본 체크아웃에서 병행한다. 단 C 없이 Codex 를 "정식 지원" 이라 선언하면 안 된다(MCP 도구가 엉뚱한 디렉터리를 본다).
+- **M1 → V**: hostPaths 코드가 이 브랜치에 없으므로 머지가 선행이다. 머지 시 어댑터 재생성 필수(filid 서버명 `t`→`tools`).
+- **V → C4**: 둘 다 `hostPaths` 를 건드린다. 헬퍼가 실제로 도는 걸 본 뒤에 채널 분기를 얹어야 agy 분기를 두 번 손대지 않는다.
+- **C4 없이 Codex 를 "정식 지원" 이라 선언하면 안 된다** — 규칙·지침 문서가 아무도 안 읽는 경로에 쌓인다.
 
 ---
 

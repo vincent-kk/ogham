@@ -34,8 +34,8 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 | [migration-playbook.md](./migration-playbook.md)         | 적용 절차 — 플러그인별 스텝·실측 게이트 G1–G8·롤아웃 순서·운영 규칙                        |
 | [TODO.md](./TODO.md)                                     | **세션 복원 지점** — 현재 상태·다음 작업·머지 전 주의. 새 세션은 여기부터 읽는다           |
 | [transition-plan.md](./transition-plan.md)               | 최종 전환 계획 — Phase A~E 실행 순서·의존성·완료 기준·사용자 고지 문안                     |
-| [stage4-host-paths.md](./stage4-host-paths.md)           | 정본 의뢰서 (경로 좌표) — **실행 완료**(main `77825966`). 근거 기록으로 보존               |
-| [stage4-rules-channel.md](./stage4-rules-channel.md)     | **정본 의뢰서 (규칙 채널)** — 다음 작업. filid·maencof 의 Codex 타깃을 `AGENTS.md` 로      |
+| [stage4-host-paths.md](./stage4-host-paths.md)           | 경로 좌표 의뢰서 — 코드는 main 반영됨. **호스트 실측은 TODO V1–V4 에서**                   |
+| [stage4-rules-channel.md](./stage4-rules-channel.md)     | **규칙 채널 의뢰서** — 이 브랜치 작업. Codex 타깃은 `AGENTS.md`(G8)                       |
 | [backlog-d-e.md](./backlog-d-e.md)                       | 백로그 — Phase D(agy 훅·설치) · Phase E(Codex 도구명·Read matcher·agents 부재)             |
 | [sessionend-refactor.md](./sessionend-refactor.md)       | ADR — SessionEnd → MCP 수명주기 이관(완료·유지, 호스트 이벤트 채널 의존 제거)              |
 
