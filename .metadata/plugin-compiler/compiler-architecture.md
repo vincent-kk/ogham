@@ -1,177 +1,86 @@
-# Compiler Architecture — 파이프라인 · 프로파일 · emitter · 배포 트리
+# Adapter Architecture — Claude 정본 + in-place 호스트 어댑터
 
-> **상태: 보류 — 개발예정.** 이 아키텍처의 구현체(`tools/plugin-compiler`)는 커밋되어 있으나 채택(마이그레이션·빌드 배선)은 보류다(2026-07-12 — [migration-playbook-deferred.md](./migration-playbook-deferred.md)).
+Claude 산출물(현행 `plugins/<pkg>/` 루트 파일)이 **정본이자 그대로 Claude 배포물**이고, Codex·Antigravity 호환은 그 옆에 **생성되는 소수의 추가 파일(어댑터)** 이 담당한다. 선행 사례는 ponytail(단일 트리 + `.codex-plugin` 병치 + Claude/Codex 훅 파일 공유). 실측 근거는 [host-capability-matrix.md](./host-capability-matrix.md).
 
-정본(IR) + 호스트 프로파일 → 호스트별 플러그인 산출물. `tsc` 가 한 소스를 ESM/CJS 로 emit 하듯, 한 정본을 Claude / Codex / Antigravity 로 emit 한다.
+## 1. 왜 재배치(`definitions/`→`targets/`)가 아니라 in-place 인가
 
-## 1. 파이프라인 (5단계)
+구 설계(2026-07-11)는 Codex 가 플러그인 훅을 못 쓰고 산출물 구조가 갈라진다는 전제에서 호스트별 배포 트리를 분리했다. 0.144.4 재실측으로 전제가 무너졌다:
 
-```
-definitions/  ──①parse──►  IR 객체  ──②validate──►  검증된 IR
-                                                        │
-                     host profile (claude|codex|agy) ──③bind──► 바인딩된 모델
-                                                        │
-                                  ──④emit──►  targets/<host>/  ──⑤verify──►  스냅샷/스모크
-```
+- Codex 가 `.claude-plugin/plugin.json`·`.claude-plugin/marketplace.json` 을 **fallback 으로 직접 읽고**, `hooks/hooks.json` 을 **Claude 포맷 그대로 파싱**한다 (matrix §4.2·§5.1).
+- 남는 실차이는 Codex MCP args 변수 미전개·서버명 스코프, agy 파일명·훅 어휘뿐 — 전부 **추가 파일로 흡수 가능**하고, 호스트는 자기 파일만 읽으므로 서로 간섭하지 않는다.
+- 재배치의 비용(3중 트리 커밋 노이즈·마켓플레이스 소스 전환·바이트 등가 게이트 운영)이 근거를 잃었다. in-place 는 Claude 파일을 **수정하지 않으므로** 무결손이 게이트가 아니라 구조로 보장된다.
 
-| 단계       | 입력             | 출력                            | 실패 조건                                                                     |
-| ---------- | ---------------- | ------------------------------- | ----------------------------------------------------------------------------- |
-| ① parse    | `definitions/**` | IR 객체 (yaml + md frontmatter) | yaml/frontmatter 파싱 오류                                                    |
-| ② validate | IR               | 검증된 IR                       | 스키마 위반, 미해결 토큰, `fallback` 누락 ([ir-schema.md](./ir-schema.md) §5) |
-| ③ bind     | IR + 프로파일    | 호스트 바인딩 모델              | 프로파일에 없는 `model` 등급, 번역 불가                                       |
-| ④ emit     | 바인딩 모델      | `targets/<host>/` 산출물 트리   | I/O                                                                           |
-| ⑤ verify   | 산출물           | 합/불                           | 스냅샷 불일치, Claude 동등성 게이트(§6), 스모크 실패                          |
+트레이드오프(수용): 설치 시 타 호스트 어댑터 파일 몇 개가 함께 복사된다(구 요구 3 "정본만 전달" 완화). 각 파일은 수 KB JSON 이고 호스트가 읽지 않는 파일은 무해하다 — ponytail 도 동일 방식으로 15+ 호스트를 지원한다.
 
-## 2. 호스트 프로파일 (3종)
+## 2. 파일 지형
 
 ```
-profiles/
-├── claude.ts
-├── codex.ts
-└── agy.ts        # Antigravity
+ogham/                                  ← 저장소 루트 = 마켓플레이스 루트
+├── .claude-plugin/marketplace.json     ← 정본 (Claude·agy 소비, Codex fallback)
+├── .agents/
+│   ├── plugins/marketplace.json        ← [생성] Codex 마켓플레이스 (중첩 source/policy)
+│   └── plugins.json                    ← [생성] agy declared entries (클론 즉시 활성화)
+└── plugins/<pkg>/
+    ├── .claude-plugin/plugin.json      ← 정본 (Claude 소비, Codex fallback)
+    ├── .mcp.json                       ← 정본 (Claude 전용 — 변수 args)
+    ├── skills/ · agents/ · hooks/hooks.json · bridge/ · libs/ · public/ …  ← 정본 (호스트 공유)
+    ├── .codex-plugin/plugin.json       ← [생성] Codex 매니페스트 (인라인 mcpServers·hooks 명시)
+    └── mcp_config.json                 ← [생성] agy MCP 설정 (MCP 보유 플러그인만)
 ```
 
-프로파일 인터페이스(개념):
+`[생성]` 파일 4종이 어댑터의 전부다. 손편집 금지 — `tools/plugin-compiler` 가 정본에서 재생성한다.
 
-```ts
-interface HostProfile {
-  id: "claude" | "codex" | "agy";
-  manifest: { path: string; render(ir): object }; // 파일 위치+스키마
-  mcp: {
-    filename: string;
-    wrap(server, cfg): object;
-    toolRef(server, logical): string;
-    pathStrategy: "plugin-root-var" | "cwd-dot";
-  };
-  skill: { ref(name): string; dropFrontmatterKeys: string[] };
-  hooks: {
-    emit: "claude-json" | "agy-named-groups" | "none"; // codex = none (§4.2 매트릭스)
-    supports: Set<LogicalEvent>;
-    rewrite(event, fallback): HostEvent | null;
-    matcherMap(claudeMatcher): string; // 도구명 어휘 번역
-    stdinAdapter: "claude" | "agy"; // 러너가 정규화할 계약 (§5)
-  };
-  agents: {
-    strategy: "bundle-md" | "external-toml" | "bundle-md-asis";
-    modelSlug(level): string;
-    capability(cap): object;
-  };
-  marketplace?: { path: string; render(plugins): object }; // 루트 레벨 emitter
-}
-```
+## 3. 어댑터 생성 규칙
 
-### 2.1 핵심 차이 (프로파일이 캡슐화 — 실측 기반)
+### 3.1 `.codex-plugin/plugin.json` (플러그인별)
 
-| 관심사        | claude.ts                               | codex.ts                                        | agy.ts                                                                                |
-| ------------- | --------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------- |
-| manifest      | `.claude-plugin/plugin.json`            | `.codex-plugin/plugin.json` (+`interface` 메타) | `plugin.json` (루트, name 만 필수)                                                    |
-| MCP 파일/래퍼 | `.mcp.json` / `mcpServers`              | `.mcp.json` / `mcpServers` (동일)               | `mcp_config.json` / `mcpServers` (동일)                                               |
-| MCP 경로 전략 | `${CLAUDE_PLUGIN_ROOT}` args            | **`cwd: "."` + 상대 args** (변수 미전개 실측)   | 상대 args (공식 스키마에 cwd 없음 — 해석 기준 실측 대기, 실패 시 setup 절대경로 주입) |
-| 도구명 포맷   | `mcp__plugin_<plugin>_<server>__<tool>` | `mcp__<server>.<tool>` (실측)                   | `mcp_<server>_<tool>` (추정)                                                          |
-| MCP 서버명    | `plugin.yaml: mcp.server` 그대로        | **플러그인명으로 오버라이드** (전역충돌 회피)   | `mcp.server` 그대로 (플러그인 네임스페이스)                                           |
-| skill 참조    | `/<plugin>:<name>`                      | `$<name>` (재확인)                              | 스킬명 서술 참조                                                                      |
-| hooks         | `hooks/hooks.json` 그대로               | **emit 안 함** (선언=세션 행, 실측)             | 루트 `hooks.json`, named-group 재구성                                                 |
-| agent 전략    | `agents/<n>.md` 번들                    | `.codex/agents/<n>.toml` + setup 설치 스텝      | `agents/<n>.md` **무변환 번들**                                                       |
-| rules         | (플러그인 규약 없음 — 스킬로 안내)      | `AGENTS.md`                                     | `rules/*.md` 플러그인 컴포넌트                                                        |
+`.claude-plugin/plugin.json` + `.mcp.json` + 디렉터리 사실에서 유도:
 
-## 3. emitter (산출물별)
+- 메타 필드(name·version·description·author·license·keywords·homepage·repository) 그대로 복사. version 은 `scripts/inject-version.mjs` 가 `.claude-plugin` 과 함께 동기화.
+- `"skills": "./skills/"` — skills/ 존재 시.
+- `"hooks": "./hooks/hooks.json"` — hooks 존재 시 **명시 선언**(기본 발견에 의존하지 않음). Claude 와 같은 파일을 공유한다.
+- `"mcpServers"`: 인라인 객체 — `.mcp.json` 의 각 서버를 (a) 서버명 → **플러그인명**으로 오버라이드(전역충돌 회피), (b) args 의 `${CLAUDE_PLUGIN_ROOT}/X` → 상대 `X` 로 변환, (c) cwd 미지정(기본=플러그인 루트), (d) **`env.OGHAM_HOST="codex"` 주입** — 호스트 결합 런타임 쓰기(maencof `CLAUDE.md`, filid `.claude/rules/`)의 분기 신호(플레이북 Stage 4). 원본 env 는 보존하되 값에 변수가 있으면 오류.
+- Codex 가 이 파일을 읽는 순간 `.claude-plugin` fallback 과 `.mcp.json` 자동 발견이 **모두 차폐**된다 — Claude 전용 형식이 Codex 에 노출되지 않는 단일 차단점.
 
-| emitter         | 소비 정본          | Claude                            | Codex                                                   | Antigravity                               |
-| --------------- | ------------------ | --------------------------------- | ------------------------------------------------------- | ----------------------------------------- |
-| **manifest**    | `plugin.yaml`      | `.claude-plugin/plugin.json`      | `.codex-plugin/plugin.json`                             | `plugin.json`                             |
-| **mcp**         | `plugin.yaml: mcp` | `.mcp.json` (변수 args)           | `.mcp.json` (`cwd: "."`)                                | `mcp_config.json`                         |
-| **skill**       | `skills/*.md`      | `skills/<n>/SKILL.md`             | `skills/<n>/SKILL.md` (키 드롭, embed agent 인라인)     | `skills/<n>/SKILL.md` (키 정책 실측 후)   |
-| **agent**       | `agents/*.yaml`    | `agents/<n>.md`                   | `.codex-agents/<n>.toml` (타깃 내 스테이징, setup 설치) | `agents/<n>.md`                           |
-| **hook**        | `hooks/*.yaml`     | `hooks/hooks.json`                | — (생성 금지) + 대체 채널 주입(skill lazy-init 등)      | `hooks.json` (named-group, matcher 번역)  |
-| **runtime**     | `bridge/` `libs/`  | 복사                              | 복사                                                    | 복사                                      |
-| **marketplace** | 루트 정본          | `.claude-plugin/marketplace.json` | `.agents/plugins/marketplace.json`                      | `.agents/plugins.json` (declared entries) |
+### 3.2 `mcp_config.json` (플러그인별, agy)
 
-## 4. 디렉터리 레이아웃 — 배포 격리 (핵심 결정)
+`.mcp.json` 과 동일 래퍼에 상대 args(서버명은 원본 유지 — agy 는 플러그인 단위 네임스페이스) + `env.OGHAM_HOST="agy"` 주입. 상대 args 해석 기준은 게이트 G4 — 실패 확인 시 이 emitter 를 설치-시-절대경로 전략으로 교체한다.
 
-**요구**: 설치 시 그 호스트의 산출물만 전달 (타 호스트 파일 미포함). 실측상 세 호스트 모두 설치 = "지정 디렉터리 통째 복사" 이므로, **설치 단위 디렉터리를 호스트별로 분리**해야 달성된다.
+호스트 감지 규약(런타임 공통): MCP 서버 프로세스는 `process.env.OGHAM_HOST`(부재=claude), 훅 프로세스는 Codex 주입 env `PLUGIN_DATA` 유무로 분기한다. Claude 소비 파일에는 어떤 마커도 넣지 않는다.
+
+### 3.3 루트 `.agents/plugins/marketplace.json` (Codex)
+
+`.claude-plugin/marketplace.json` 에서 유도: 항목별 `{name, source: {source: "local", path: "./plugins/<n>"}, policy: {installation: "AVAILABLE", authentication: "ON_INSTALL"}, category}` (category 는 Claude 값 Title-case). `interface.displayName` = 마켓플레이스 name.
+
+### 3.4 루트 `.agents/plugins.json` (agy declared)
+
+`{"entries": [{"path": "./plugins/<n>"}, …]}` — 저장소를 agy 워크스페이스로 열면 클론만으로 플러그인이 등록된다.
+
+## 4. 도구 (`tools/plugin-compiler`)
 
 ```
-plugins/<pkg>/
-├── definitions/                 ← 정본 SSoT (사람이 수정, 커밋)
-├── src/                         ← 런타임 소스 (커밋)
-├── bridge/ · libs/              ← 런타임 번들 정본 (esbuild 산출, 커밋 — 현행 유지)
-├── package.json · tsconfig.*    ← 개발 인프라 (배포 제외)
-└── targets/                     ← 호스트별 배포 트리 (compile-plugin 생성물, 커밋)
-    ├── claude/
-    │   ├── .claude-plugin/plugin.json
-    │   ├── .mcp.json
-    │   ├── skills/ · agents/ · hooks/hooks.json
-    │   └── bridge/ · libs/      ← 복사본 (설치 디렉터리는 자기완결이어야 함)
-    ├── codex/
-    │   ├── .codex-plugin/plugin.json
-    │   ├── .mcp.json            ← cwd 전략
-    │   ├── skills/
-    │   ├── .codex-agents/       ← standalone TOML 스테이징 (setup 이 ~/.codex/agents 로 설치)
-    │   ├── AGENTS.md            ← 훅 대체 규칙 서술
-    │   └── bridge/ · libs/
-    └── agy/
-        ├── plugin.json
-        ├── mcp_config.json
-        ├── hooks.json
-        ├── skills/ · agents/ · rules/
-        └── bridge/ · libs/
+src/
+├── main.ts            CLI: sync [--check] [pluginDir...]
+├── constants/ types/ json/   organ: 호스트 상수 · 계약 타입 · stableJson
+├── facts/             fractal: Claude 정본 → PluginFacts/MarketplaceFacts (읽기 전용)
+├── adapters/          fractal: facts → 생성 파일 내용 (순수)
+├── lint/              organ: 호환성 진단 (훅 이벤트 subset · matcher Read · MCP 이식성)
+└── pipeline/          fractal: 대상 열거 + 쓰기/검사 오케스트레이션
 ```
 
-루트 마켓플레이스 매니페스트가 타깃 트리를 가리킨다:
+- **sync**: 대상 플러그인(무인자 = 전체 + 루트)의 어댑터를 재생성해 디스크와 다를 때만 쓴다(결정적 `stableJson` — 재실행 무변경).
+- **sync --check**: 쓰지 않고 재생성-비교. 불일치·error 진단 시 exit 1 — CI clean-regen 게이트용.
+- 진단: error(codex 미지원 훅 이벤트 잔존 — 조용한 무시 방지, MCP env/command 변수), warning(matcher 의 `Read` — Codex 미발화), 요약 출력.
+- 실행: `yarn plugin:adapters` / `yarn plugin:adapters:check` (루트 스크립트, tsx 경유 — dist 없음).
 
-- `.claude-plugin/marketplace.json` → `"source": "./plugins/<pkg>/targets/claude"`
-- `.agents/plugins/marketplace.json` → `"path": "./plugins/<pkg>/targets/codex"`
-- agy → 3경로: (a) `agy plugin install <repo>/plugins/<pkg>/targets/agy`, (b) **repo 체크인 `.agents/plugins.json` declared entries** 가 `plugins/*/targets/agy` 를 지목(클론만으로 활성화 — 팀/모노레포 내 사용 최적), (c) agy 가 Claude marketplace.json 규약을 재사용하므로 `plugin@marketplace` 문법으로도 설치 가능(실측 대기).
+## 5. 검증 전략
 
-### 4.1 결정 근거와 마이그레이션 주의
+- **Claude 무결손**: 도구가 Claude 소비 파일을 쓰지 않는다(생성 대상은 §2 의 4종뿐) — 코드 리뷰로 강제되는 구조적 보장. 별도 등가 게이트 불요.
+- **결정성**: `sync` 직후 `sync --check` 가 통과(무 diff). CI 에는 `plugin:adapters:check` 를 편입해 정본-어댑터 desync 차단(배선은 플레이북 Stage 2).
+- **스모크(호스트별)**: [migration-playbook.md](./migration-playbook.md) 게이트 G1–G6 — Codex 실설치(훅 trust·MCP 도구 목록·exec 거동), agy validate + 인터랙티브 기동.
 
-- **커밋한다** (기존 open question 종결): `bridge/` 정책과 일관. 설치자가 git URL 만으로 빌드 없이 설치. 손편집 금지 — 정본만 수정.
-- 커밋 노이즈 완화(교차검증 지적 반영): `targets/**` 를 `.gitattributes` 에 `linguist-generated` 로 표시(PR diff 접힘) + CI 가 "재생성 시 무변경(clean regen)" 을 검증해 소스-산출물 desync 를 차단. 대안으로 **배포 전용 브랜치/릴리스 아티팩트** 방식(main 은 소스만, CI 가 release 브랜치에 targets 푸시)이 있으나 마켓플레이스 add 가 브랜치 지정을 지원하는지 호스트별 확인이 선행 — 기본안은 커밋, 이 대안은 릴리스 전략 결정 시 재평가.
-- bridge/libs 복사 중복(호스트당 1벌)은 배포 격리의 대가. 수십 KB 수준(캡 가드 유지)이라 수용.
-- **Claude 소스 경로 변경**(`./plugins/<pkg>` → `./plugins/<pkg>/targets/claude`)은 기존 설치자의 marketplace update 경로를 바꾼다 — Stage 3 에서 (a) 산출물 바이트 동일성 게이트 통과 후 (b) 플러그인 name 불변 확인 후 전환. 전환 전까지 Claude 는 현행 루트 산출물을 유지(이중 기간 허용, §6 게이트가 동기화 보증).
-- `plugins/<pkg>/` 루트의 현행 산출물(skills/, agents/, .claude-plugin/, .mcp.json, hooks/)은 Stage 3 전환 완료 시 targets/claude 로 대체되고 루트에서 제거된다.
+## 6. 새 호스트 추가 절차
 
-## 5. 훅 러너 어댑터 (런타임 0-수정의 열쇠)
-
-기존 훅 구현(`bridge/*.mjs`)은 Claude stdin 계약(snake_case, `session_id`, `hook_event_name`)을 가정한다. agy 는 camelCase + 다른 필드/응답 계약. 훅 로직 소스를 건드리지 않기 위해 **어댑터를 러너 층에 둔다**:
-
-```
-agy hooks.json:  node libs/run.cjs --host=agy --event=SessionStart bridge/setup.mjs
-                          │
-                          ├─ stdin(agy camelCase) → Claude 계약으로 정규화 (conversationId→session_id, …)
-                          ├─ tool_name 역매핑 (agy 도구명 → Claude full-form; maencof PostToolUse 가 full-form 매칭 — 실측 2개 파일)
-                          ├─ 기존 훅 번들 실행 (무수정)
-                          └─ stdout(Claude 계약) → agy 응답 계약으로 역변환 (additionalContext→injectSteps.ephemeralMessage, …)
-```
-
-- `libs/run.cjs` 는 이미 크로스 플랫폼 스폰 러너(process.execPath) — 어댑터 기능을 이 층에 추가(또는 자매 파일 `libs/run-agy.cjs`). 15KB 훅 캡 정책 준수.
-- 세션당 1회 근사(`SessionStart` → `PreInvocation`)의 once-guard 는 **락 파일이 아니라 "마지막 실행 conversationId 기록 + 불일치 시 실행"** 방식 — Stop 미발화·비정상 종료에도 좀비 상태가 없다 (교차검증 지적 반영).
-- stdin/stdout 은 **UTF-8 명시** (Windows `cmd /c` 경유 시 코드페이지 오염 방지 — 교차검증 지적 반영).
-- Codex 는 훅이 없으므로 어댑터 불필요 — 대체 채널(matrix §4.5)은 emit 시 주입.
-
-## 6. 검증 전략 (⑤)
-
-- **스냅샷**: `definitions/` + 프로파일 → `targets/**` 골든 파일 (vitest).
-- **Claude 동등성 게이트 (요구 1 의 기계적 보장)**: Stage 3 전환 시 `targets/claude/**` 가 현행 수동 산출물과 **바이트 동일**해야 통과. 차이가 나면 정본이 아니라 emitter 를 고친다. 통과 후 루트 산출물 제거.
-- **시맨틱 린트**: 미해결 토큰 0, 리터럴 `mcp_`/`mcp__` 본문 금지, 비-공통 이벤트 `fallback` 보유, Codex 타깃에 hooks 파일 부재 확인(생성 자체가 결함).
-- **스모크** (호스트별): claude — 기존 CI. codex — `codex plugin marketplace add`+`add`+`exec` 도구 목록 확인 (도구명 `mcp__<server>.<tool>` 존재). agy — `agy plugin validate`(5 컴포넌트 processed) + 인터랙티브 MCP 기동 1회 수동 확인.
-- **Windows 매트릭스** (요구 4): CI `windows-latest` 에서 (a) 빌드 재현, (b) run.cjs 훅 스폰, (c) MCP 서버 stdio 왕복. POSIX 는 기존 macOS/linux 러너.
-
-## 7. 기존 빌드 통합
-
-```
-clean → version:sync → tsc → esbuild(mcp-server/hooks) → compile-plugin → verify
-                                                            └ definitions/ + profiles → targets/{claude,codex,agy}
-```
-
-- `compile-plugin` 은 esbuild **뒤** (bridge/ 를 타깃으로 복사해야 하므로).
-- `version:sync`(`inject-version.mjs`) 확장: `package.json: version` → `definitions/plugin.yaml` 주입 → 각 타깃 매니페스트 3종은 emit 이 담당. (장기적으로 inject-version 은 compile-plugin 에 흡수.)
-- 도구 후보: yaml 파서 + `gray-matter` + TOML 직렬화(Codex agent) + vitest 스냅샷. 경량 토큰 치환 + emitter 함수로 시작.
-- 훅 도달 코드 규칙(배럴 import 금지, 바이트 캡)은 타깃 복사본에도 그대로 적용 — 복사만 하므로 자동 준수.
-
-## 8. 새 호스트 추가 절차 (확장성)
-
-1. `profiles/<host>.ts` 작성.
-2. 호스트 고유 산출물이 있으면 emitter 보강.
-3. `targets/<host>/` 스냅샷 골든 추가 + 루트 마켓플레이스/설치 안내 갱신.
-   정본(`definitions/`)·런타임(src/bridge/libs) 무수정. Cursor(`.cursor-plugin/`)·OpenCode(`.opencode/`) 등이 후보 (superpowers 가 대상 호스트 폭의 실증 사례).
+1. `adapters/` 에 해당 호스트 빌더 추가(필요 파일이 있을 때만).
+2. `lint/` 에 그 호스트의 제약 진단 추가.
+3. 플레이북에 설치·스모크 절차 추가. 정본(Claude 산출물)·런타임(src/bridge/libs)은 무수정.
