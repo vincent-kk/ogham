@@ -43,7 +43,7 @@ Codex 는 **둘 다 안 준다.** 그리고 이건 선택이 아니라 **강제*
 
 ⇒ **서버 안에서는 B 를 알 수 없다.** §3-B 설계(모델이 인자로 넘긴다)는 우아해서가 아니라 **유일해서** 선택된다.
 
-**훅은 대상이 아니다.** Codex 는 훅 프로세스에는 `CLAUDE_PLUGIN_ROOT`·`PLUGIN_ROOT`·`PLUGIN_DATA` 를 주입하고 cwd 도 세션 기준이다. `src/hooks/**` 는 손대지 않는다. **MCP 서버 런타임만** 대상이다.
+**훅은 대상이 아니다 (실측 확인).** Codex 는 훅 프로세스에는 `CLAUDE_PLUGIN_ROOT`·`PLUGIN_ROOT`·`PLUGIN_DATA` 를 주입하고 **cwd 도 세션 기준으로 준다** — maencof-lens SessionStart 훅이 `<세션cwd>/.maencof-lens/config.json` 을 정확히 찾아 읽고 그 결과를 모델에 주입하는 것을 확인했다. 즉 **훅에는 두 좌표가 다 있다.** `src/hooks/**` 는 손대지 않는다. **MCP 서버 런타임만** 대상이다.
 
 ## 2. 수정 지점 (전수 · 이 체크아웃 기준 검증됨)
 
