@@ -1,4 +1,5 @@
 import { detectHost } from "./detectHost.js";
+import { locatePluginRoot } from "./locatePluginRoot.js";
 
 /**
  * The plugin's own install directory — where bundled assets ship (settings HTML,
@@ -14,11 +15,15 @@ import { detectHost } from "./detectHost.js";
  * before serving a single tool — so a *running* Codex MCP server is itself the
  * proof that its cwd is the plugin root.
  *
- * `agy` has no `cwd` field in `mcp_config.json`, so that coupling is unavailable
- * and its plugin root is still unmeasured — null until it is.
+ * agy affords neither channel — no env var, and no `cwd` field in its
+ * `mcp_config.json` to pin — so the last resort asks the filesystem instead of
+ * assuming a cwd nobody has measured: `locatePluginRoot` walks up from this
+ * module's own location to the manifest that marks a plugin root. It answers on
+ * every host, and it answers with a directory that provably exists.
  */
 export function pluginRoot(): string | null {
   const fromEnv = process.env.CLAUDE_PLUGIN_ROOT;
   if (fromEnv) return fromEnv;
-  return detectHost() === "codex" ? process.cwd() : null;
+  if (detectHost() === "codex") return process.cwd();
+  return locatePluginRoot();
 }

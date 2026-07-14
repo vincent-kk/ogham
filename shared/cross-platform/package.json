@@ -31,6 +31,10 @@
       "types": "./dist/hostPaths/index.d.ts",
       "import": "./dist/hostPaths/index.js"
     },
+    "./instructions": {
+      "types": "./dist/instructions/index.d.ts",
+      "import": "./dist/instructions/index.js"
+    },
     "./spawn": {
       "types": "./dist/spawn/index.d.ts",
       "import": "./dist/spawn/index.js"

@@ -1,4 +1,5 @@
-import { isAbsolute, resolve } from "node:path";
+import { homedir } from "node:os";
+import { isAbsolute, join, resolve } from "node:path";
 
 /**
  * A supplied workspace path must be absolute. A relative one would resolve against
@@ -6,20 +7,41 @@ import { isAbsolute, resolve } from "node:path";
  * exact confusion this module exists to remove, so it is rejected rather than
  * quietly resolved.
  *
+ * A leading `~` is expanded first. The model fills this argument from what its host
+ * showed it, and the Codex TUI names the workspace `~/Workspace/app`; rejecting that
+ * spelling would leave the model retrying a path it has no expanded form of. `~user`
+ * is not expandable from Node — only a shell can read it out of the passwd database —
+ * so it stays rejected.
+ *
  * The absolute form is canonicalised because consumers hash it (`sha256(root)` is
  * the project identity in deilen and cennad); two spellings of the same directory
  * must not produce two projects.
  */
 export function toAbsoluteRoot(value: string): string | null {
-  return isAbsolute(value) ? resolve(value) : null;
+  const expanded = expandHome(value);
+  if (expanded === null) return null;
+  return isAbsolute(expanded) ? resolve(expanded) : null;
 }
 
 export function requireAbsoluteRoot(value: string): string {
   const root = toAbsoluteRoot(value);
   if (root === null)
     throw new Error(
-      `"project_root" must be an absolute path; received "${value}". A relative path ` +
-        `resolves against the plugin's install directory, not your workspace.`,
+      `"project_root" must be an absolute path; received "${value}". A leading "~" is ` +
+        `expanded for you, but "~user" is not. A relative path resolves against the ` +
+        `plugin's install directory, not your workspace.`,
     );
   return root;
+}
+
+/** `null` for the `~user` form, which only a shell can resolve. */
+function expandHome(value: string): string | null {
+  if (!value.startsWith("~")) return value;
+  if (value === "~") return homedir();
+  if (value.startsWith("~/")) return join(homedir(), value.slice(2));
+  // Windows spells the same thing with a backslash. On POSIX a backslash is an
+  // ordinary filename character, so `~\x` there is a literal name, not a home ref.
+  if (process.platform === "win32" && value.startsWith("~\\"))
+    return join(homedir(), value.slice(2));
+  return null;
 }
