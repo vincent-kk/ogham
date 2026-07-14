@@ -1,8 +1,17 @@
 # 정본 수정 지시서 — Codex 이식 시 MCP 경로 좌표 상실
 
-> **상태: 미착수 — 수정 방향 기록 (2026-07-15).** 실측(codex-cli 0.144.4) 결과를 근거와 함께 담은 **자립 문서**다. 사실 정본은 [host-capability-matrix.md §9](./host-capability-matrix.md), 게이트 맥락은 [migration-playbook.md](./migration-playbook.md) G7.
+> ## ✅ 실행 완료 (main `77825966` — "Route MCP server path resolution through a shared host-paths helper")
 >
-> **대상: 플러그인 런타임(정본) 수정** — 어댑터·도구 작업(이 브랜치)과 분리되며 **정본 작업 체크아웃 `~/Workspace/ogham` 에서 진행한다.** 동일 사본이 그쪽에도 배치돼 있다(그쪽 헤더에는 구 설계 문서 경고가 붙는다).
+> `@ogham/cross-platform` 에 `hostPaths`(`detectHost`·`pluginRoot`·`projectRoot`)가 신설되고 A(7 지점)·B(31 지점)가 전부 반영됐다. imbas 의 인자 폭증은 **`projectRootMemo`**(첫 호출이 준 프로젝트 루트를 세션에 기억)로 해소됐다.
+> 남은 4개 `process.cwd()` 지점은 **의도적 잔류** — 프로젝트 좌표가 아니라 ast-grep 모듈 해석·자기탐색 폴백이다(§5 참조).
+>
+> **후속 델타는 [stage4-rules-channel.md](./stage4-rules-channel.md)** — 규칙 문서의 호스트 채널(`AGENTS.md`). G8 을 이 작업 뒤에 닫아서 아래 본문에는 없다.
+>
+> 아래는 **당시 근거 기록**이며 재실행 대상이 아니다.
+
+---
+
+> **원 상태: 미착수 — 수정 방향 기록 (2026-07-15).** 실측(codex-cli 0.144.4) 결과를 근거와 함께 담은 **자립 문서**다. 사실 정본은 [host-capability-matrix.md §9](./host-capability-matrix.md), 게이트 맥락은 [migration-playbook.md](./migration-playbook.md) G7.
 
 ## 0. 한 줄 요약
 

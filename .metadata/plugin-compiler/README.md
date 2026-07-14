@@ -32,9 +32,11 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 | [host-capability-matrix.md](./host-capability-matrix.md) | 3-호스트 능력 매핑 — Codex 훅 계약(소스 확정)·MCP 전략·마켓플레이스 fallback·손실 매트릭스 |
 | [compiler-architecture.md](./compiler-architecture.md)   | in-place 어댑터 아키텍처 — 파일 지형·생성 규칙·도구 구조·검증                              |
 | [migration-playbook.md](./migration-playbook.md)         | 적용 절차 — 플러그인별 스텝·실측 게이트 G1–G8·롤아웃 순서·운영 규칙                        |
-| [transition-plan.md](./transition-plan.md)               | **최종 전환 계획** — 게이트 종료 후 Phase A~E 실행 순서·의존성·완료 기준·사용자 고지 문안  |
-| [TODO.md](./TODO.md)                                     | 인수인계 — 완료 상태 + 게이트 G1–G8 결과 요약                                              |
-| [stage4-host-paths.md](./stage4-host-paths.md)           | **정본 수정 방향** — Codex MCP 의 경로 좌표 상실(G7): 왜 깨지는지·무엇을 고치는지·근거     |
+| [TODO.md](./TODO.md)                                     | **세션 복원 지점** — 현재 상태·다음 작업·머지 전 주의. 새 세션은 여기부터 읽는다           |
+| [transition-plan.md](./transition-plan.md)               | 최종 전환 계획 — Phase A~E 실행 순서·의존성·완료 기준·사용자 고지 문안                     |
+| [stage4-host-paths.md](./stage4-host-paths.md)           | 정본 의뢰서 (경로 좌표) — **실행 완료**(main `77825966`). 근거 기록으로 보존               |
+| [stage4-rules-channel.md](./stage4-rules-channel.md)     | **정본 의뢰서 (규칙 채널)** — 다음 작업. filid·maencof 의 Codex 타깃을 `AGENTS.md` 로      |
+| [backlog-d-e.md](./backlog-d-e.md)                       | 백로그 — Phase D(agy 훅·설치) · Phase E(Codex 도구명·Read matcher·agents 부재)             |
 | [sessionend-refactor.md](./sessionend-refactor.md)       | ADR — SessionEnd → MCP 수명주기 이관(완료·유지, 호스트 이벤트 채널 의존 제거)              |
 
 사용법(CLI)은 [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md) 가 소유한다. 구 체제 문서(ir-schema·case-studies·implementation-plan·reproduction·usage)는 재배치 설계와 함께 은퇴 — git 이력(`6378169a`) 참조.

@@ -35,46 +35,40 @@
 
 ---
 
-## 2. Phase A — 어댑터 정정 (이 브랜치 `feature/issue-78-1`)
+## 2. Phase A — 어댑터 정정 ✅ 완료 (`42d5d898`)
 
-**왜**: 실측으로 어댑터 4종 중 **1종이 무용지물**이고, **1종이 빠져 있다**.
-
-- [ ] **A1. `.agents/plugins.json` emitter 제거** (`buildAgyDeclaredPlugins`)
-      → declared 레이어는 3가지 형식 모두 플러그인을 로드하지 못했다(matrix §4.4). 생성물·스펙·DETAIL 표에서 함께 제거.
-- [ ] **A2. 루트 `plugins/<n>/plugin.json` emitter 추가** — 내용은 **`.codex-plugin/plugin.json` 과 동일**(같은 빌더 재사용).
-      → agy 가 `source: antigravity` 로 분류해 **우리 `mcp_config.json` 을 덮어쓰지 않게** 한다. **최소 마커(`{"name":…}`)만 두면 Codex MCP 가 죽는다** — 전체 매니페스트여야 한다(matrix §4.4.1).
-- [ ] **A3. `package.json:files` 에 `plugin.json` 추가**, `scripts/inject-version.mjs` 가 이 파일의 version 도 동기화하도록 확장.
-- [ ] **A4. 검증**: `yarn plugin:adapters` → `--check` 무변경 · `yarn typecheck` · `yarn plugin-compiler test:run` · **Claude 소비 파일 git diff 0**.
-- [ ] **A5. ⚠ Claude 무결손 실증** — 루트 `plugin.json` 추가가 Claude 플러그인 로딩에 영향이 없음을 **재설치로 확인**한다. 이 체제의 근간이므로 추론으로 넘기지 않는다. 영향이 있으면 A2 를 철회하고 Phase D-2(설치 스크립트)로 대체한다.
-
-**완료 기준**: 어댑터 4종(= `plugin.json` · `.codex-plugin/plugin.json` · `mcp_config.json` · `.agents/plugins/marketplace.json`), `--check` 통과, Claude 무영향 실증.
+- [x] **A1. `.agents/plugins.json` emitter 제거** — declared 레이어는 3가지 형식 모두 로드 실패(matrix §4.4).
+- [x] **A2. 루트 `plugins/<n>/plugin.json` emitter 추가** — `.codex-plugin/plugin.json` 과 **바이트 동일**(같은 빌더, 스펙으로 고정). agy 마커이자 Codex 가 실제로 읽는 경로.
+- [x] **A3.** `package.json:files` 에 `plugin.json` 추가 · `inject-version.mjs` 가 매니페스트 2곳을 함께 동기화.
+- [x] **A4. 검증** — 30 파일 결정적(`--check` unchanged) · typecheck clean · 스펙 101 통과 · **Claude 소비 파일 diff 0**.
+- [x] **A5. Claude 무결손 실증** — `claude --plugin-dir` 디버그 로그가 루트 매니페스트 추가 전후 **동일**(플러그인 수·경고/에러 수 27→27). Claude 는 `.claude-plugin/plugin.json` 만 읽는다(공식 문서 + 실측).
+- [x] **호스트 검증** — Codex: 도구 4개 노출·MCP 경고 0건. agy: `source: antigravity` 분류로 `mcp_config.json`(상대 args + `OGHAM_HOST`) 보존.
 
 ---
 
-## 3. Phase B — 배선 (이 브랜치, Phase A 직후)
+## 3. Phase B — 배선 ✅ 완료 (`42d5d898`)
 
-- [ ] **B1. CI paths 선행 수정** — 현행 `ci.yml` 은 `**.json` 을 **명시 배제**하고 `**.ts`~`**.cjs` 만 트리거한다. 어댑터는 전부 `.json` 이므로 **paths 를 먼저 고치지 않으면 check job 을 넣어도 무효**다. `.codex-plugin/**` · `**/plugin.json` · `**/mcp_config.json` · `.agents/**` 추가.
-- [ ] **B2. `yarn plugin:adapters:check` 를 CI job 으로 편입** (clean-regen 게이트).
-- [ ] **B3. 사용자 README(EN/ko) 에 설치 절 추가** — 문구는 아래 §6.
-
-**완료 기준**: 어댑터만 손편집한 커밋이 CI 에서 exit 1.
+- [x] **B1. CI paths 선행 수정** — `**.json` 배제를 풀고 **정본 입력**(`**/.mcp.json`·`**/hooks.json`·매니페스트·마켓플레이스)과 **생성물**(`**/plugin.json`·`**/mcp_config.json`·`.agents/**`)을 양쪽 다 트리거에 넣었다. paths 를 먼저 안 고치면 check 를 넣어도 무효였다.
+- [x] **B2. `plugin:adapters:check` 를 CI 단계로 편입** — 어댑터 손편집 → exit 1, 재생성 → exit 0 로 실증.
+- [x] **B3. README(EN/ko) 설치 절** — Codex·agy 절차와 **알려진 한계**(Codex 훅 trust 미승인 시 무음 스킵 · agy MCP 수동 배치) 명시.
 
 ---
 
-## 4. Phase C — 정본 런타임 (`~/Workspace/ogham` · 다른 개발과 병행)
+## 4. Phase C — 정본 런타임 (`~/Workspace/ogham`)
 
-**설계 정본: [stage4-host-paths.md](./stage4-host-paths.md)** (그 체크아웃에도 자립 사본 배치됨).
+- [x] **C1–C3. 경로 좌표** ✅ 완료 (main `77825966`) — `@ogham/cross-platform` 에 `hostPaths`(`detectHost`·`pluginRoot`·`projectRoot`) 신설, A(7 지점)·B(31 지점) 반영. imbas 인자 폭증은 **`projectRootMemo`**(첫 호출이 준 루트를 세션에 기억)로 해소. 잔여 4개 `process.cwd()` 는 프로젝트 좌표가 아니므로 **의도적 잔류**.
+- [ ] **C4. 규칙 채널** ⬜ **다음 작업** → **[stage4-rules-channel.md](./stage4-rules-channel.md)** (의뢰서 정본)
+      filid `syncRuleDocs`(`.claude/rules/*.md`)·maencof `claudeMdMerger`(`CLAUDE.md`)의 **Codex 타깃 = `AGENTS.md` 병합**. `~/.codex/rules` 는 커맨드 allowlist 라 **쓰면 안 된다**(G8). ⚠ 쓰기 채널만 바꾸고 **읽기 채널**(filid 훅의 규칙 존재 판정)을 놔두면 새 버그가 생긴다.
 
-- [ ] **C1. `@ogham/cross-platform` 에 `./host-paths` 추가** — `detectHost()` · `pluginRoot()` · `projectRoot()`. (10개 중 8개 플러그인이 이미 이 패키지 의존 → 새 패키지 불요.)
-- [ ] **C2. A 구간 적용 (7 지점, 기계적·저위험)** — `CLAUDE_PLUGIN_ROOT` → `pluginRoot()`. **r-statistics `contract.R` 이 이걸로 살아난다.**
-- [ ] **C3. B 구간 적용 (31 지점)** — 도구 스키마에 **선택 인자** `projectRoot?`. imbas(15 지점)는 인자 폭증을 피할 전략 결정 필요.
-- [ ] **C4. 규칙 채널 분기 (G8 결과 반영)** — filid `syncRuleDocs`(`.claude/rules/*.md`) 와 maencof `claudeMdMerger`(`CLAUDE.md`) 의 **Codex 타깃 = `AGENTS.md` 병합**. `~/.codex/rules` 는 커맨드 allowlist 라 **쓰면 안 된다**. 저장소 루트·전역(`~/.codex/AGENTS.md`) 둘 다 주입되므로 타깃 선택은 설계 결정.
-
-**완료 기준**: `OGHAM_HOST` 부재(=Claude)에서 전 플러그인 테스트가 현행과 **동일 통과**. Codex 에서 `run_r` 이 `contract.R` 을 찾고 사용자 데이터가 allow-root 를 통과한다.
+**완료 기준**: `OGHAM_HOST` 부재(=Claude)에서 전 플러그인 테스트가 현행과 **동일 통과**. Codex 에서 규칙이 `AGENTS.md` 로 실려 모델 프롬프트에 실제로 주입된다.
 
 ---
 
-## 5. Phase D — agy 심화 (선택 · 채택 시)
+## 5. Phase D · E — 심화 (선택)
+
+> **상세 정본: [backlog-d-e.md](./backlog-d-e.md)** — 실측 사실·함정·이벤트 매핑표까지 담았다. 아래는 요약.
+
+### Phase D — agy 심화 (선택 · 채택 시)
 
 - [ ] **D1. agy 포맷 `hooks.json` emitter** (Stage 3) — named-group 형식 + agy 이벤트 매핑(`SessionStart`→`PreInvocation`+once-guard, `UserPromptSubmit`→`PreInvocation`, `PreToolUse`/`PostToolUse`→동명+matcher 번역, `SubagentStart`→드롭) + `libs/run.cjs` 의 camelCase stdin 정규화.
       ⚠ **선행 확인**: 루트 `hooks.json` 을 Codex 가 자동 발견해 오독하지 않는지(Codex 는 `hooks` 필드로 `hooks/hooks.json` 을 명시 선언하지만, 스펙상 "명시 선언은 기본 발견을 *보완*한다"). 오독하면 파일명을 바꾼다.
@@ -82,7 +76,7 @@
 
 ---
 
-## 6. Phase E — Codex 심화 (선택)
+### Phase E — Codex 심화 (선택)
 
 - [ ] **E1. 스킬 본문 도구명** (G6) — 본문의 Claude full-form(`mcp__plugin_deilen_tools__render_viewer`)은 Codex 실제 도구명(`mcp__deilen__render_viewer`)과 **불일치가 확정**됐다. 서술형 참조로 완화하거나 호스트별 안내를 `AGENTS.md` 로 보완.
 - [ ] **E2. maencof 레코더 도구명 정규화** — Codex 도구명(`Bash`·`apply_patch`·`mcp__<server>__<tool>`)과 훅 내부 매칭 불일치.
