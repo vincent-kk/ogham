@@ -44,9 +44,18 @@ codex   # TUI 에서 도구 목록·호출 확인
 - [ ] 사용자용 README(EN/ko)에 Codex·agy 설치 절 추가 — 문구 정본은 playbook §1 표 (`/hooks` trust 승인 단계 포함)
 - [ ] main 머지/푸시 후 GitHub 경유 설치(`codex plugin marketplace add vincent-kk/ogham`) 재확인
 
-### 3. Stage 4 — 호스트 결합 런타임 분기 (`OGHAM_HOST`, 별도 지시로 착수)
+### 3. Stage 4 — 호스트 경로 해석 + 결합 런타임 분기
+
+> **설계 정본: [stage4-host-paths.md](./stage4-host-paths.md)** — 왜 깨지는지·무엇을 고치는지·플러그인별 지점·근거.
+> **정본(플러그인 런타임) 수정이므로 `~/Workspace/ogham` 체크아웃에서 진행한다.** 이 브랜치(어댑터·도구)와 분리.
+
+**2026-07-15 실측으로 범위 확대**: `cwd:"."` 로 Codex MCP 서버는 뜨지만, **`process.cwd()` 를 프로젝트로 가정하는 8 플러그인 / 31 지점이 전부 플러그인 루트를 본다** — imbas(15) 사실상 전 기능, cennad 위임 spawn, r-statistics allow-root, deilen 프로젝트 격리. 추가로 `CLAUDE_PLUGIN_ROOT` 의존 6 플러그인 / 7 지점(r-statistics `run_r` 파손, filid 규칙 배포 무음 skip). **이 Stage 없이는 Codex 에서 MCP 도구가 의미상 어긋난 채 동작한다.**
 
 어댑터가 주입하는 env 는 준비됨(MCP: `OGHAM_HOST`=codex/agy, 부재=claude; 훅: `PLUGIN_DATA` 유무=codex). 런타임 쪽 미구현:
+
+- [ ] `@ogham/cross-platform` 에 `./host-paths` 추가 — `detectHost()`·`pluginRoot()`·`projectRoot()` (8/10 플러그인이 이미 이 패키지 의존)
+- [ ] **A**(플러그인 루트, 7 지점) 기계적 교체 — 모델 개입·스킬 변경 없음, Claude 불변. r-statistics `contract.R` 이 살아난다
+- [ ] **B**(프로젝트 루트, 31 지점) — 도구 스키마에 선택 인자 `projectRoot?` 추가 + 스킬 안내. imbas 는 인자 폭증을 피할 전략 결정 필요
 
 - [ ] 공용 호스트 감지 헬퍼 신설 위치 결정(shared/\* 또는 플러그인별) 후 분기 적용:
   - [ ] maencof `claudeMdMerger`(`constants/claudeMd.ts` 의 `CLAUDE.md`) → Codex 에서 `AGENTS.md`

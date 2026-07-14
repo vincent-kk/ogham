@@ -80,7 +80,7 @@ PoC: 로컬 마켓플레이스 `ogham` 등록 + `deilen`·`r-statistics`(MCP onl
 
 - **Stage 2 — 배선**: CI 에 `yarn plugin:adapters:check` 편입(clean-regen 게이트, `ci.yml` paths 에 `.codex-plugin`·`mcp_config.json`·`.agents/**` 포함), README(사용자용)에 Codex/agy 설치 절 추가.
 - **Stage 3 — agy 러너 어댑터** (agy 실사용 채택 시): `libs/run.cjs` 확장 또는 자매 러너 — camelCase stdin→Claude 계약 정규화, `SessionStart→PreInvocation` once-guard(conversationId 기록 방식), matcher 번역, agy 훅 `hooks.json`(named-group) emitter 를 도구에 추가. 이전 설계 그대로 유효(matrix §4.3).
-- **Stage 4 — 호스트 결합 런타임 분기**: 플러그인 런타임이 호스트 고정 경로를 쓰는 지점을 `OGHAM_HOST` env(어댑터가 MCP 선언에 주입 — codex/agy; 부재=claude) 분기로 일반화한다. 훅 프로세스는 `PLUGIN_DATA` 유무로 Codex 를 감지(ponytail 패턴). 현재 확인된 대상:
+- **Stage 4 — 호스트 결합 런타임 분기** · **설계 정본: [stage4-host-paths.md](./stage4-host-paths.md)** (근거 포함 · 정본 체크아웃 `~/Workspace/ogham` 에서 진행). 2026-07-15 실측으로 범위가 크게 넓어졌다 — Codex MCP 는 `cwd:"."` 로 서버는 뜨지만 **`process.cwd()` 를 프로젝트로 가정하는 8 플러그인 / 31 지점이 전부 플러그인 루트를 본다**(imbas 15 지점 = 사실상 전 기능). 플러그인 런타임이 호스트 고정 경로를 쓰는 지점을 `OGHAM_HOST` env(어댑터가 MCP 선언에 주입 — codex/agy; 부재=claude) 분기로 일반화한다. 훅 프로세스는 `PLUGIN_DATA` 유무로 Codex 를 감지(ponytail 패턴). 확인된 대상:
   - **maencof `claudeMdMerger`** (`CLAUDE.md` 읽기/쓰기 — `constants/claudeMd.ts`) → Codex 에서는 `AGENTS.md` 대상화.
   - **filid `rule_docs_sync`/`syncRuleDocs`** (`.claude/rules/*.md` 배포) → Codex 규칙 채널(G8 실측 후 `~/.codex/rules` 또는 AGENTS.md 병합)로 대상화. 훅 주입 문구의 `.claude/rules/…` 경로 언급도 함께 분기.
   - 신규 플러그인에서 호스트 고정 경로(`CLAUDE.md`·`.claude/**`)를 쓰게 될 때는 처음부터 이 분기 헬퍼를 경유한다 — 반복 패턴의 정본 규칙.

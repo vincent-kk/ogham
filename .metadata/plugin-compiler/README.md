@@ -33,6 +33,7 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 | [compiler-architecture.md](./compiler-architecture.md)   | in-place 어댑터 아키텍처 — 파일 지형·생성 규칙·도구 구조·검증                              |
 | [migration-playbook.md](./migration-playbook.md)         | 적용 절차 — 플러그인별 스텝·실측 게이트 G1–G8·롤아웃 순서·운영 규칙                        |
 | [TODO.md](./TODO.md)                                     | 재개 인수인계 — 완료 상태 스냅샷 + Stage 1 실측부터의 작업 체크리스트                      |
+| [stage4-host-paths.md](./stage4-host-paths.md)           | **정본 수정 방향** — Codex MCP 의 경로 좌표 상실(G7): 왜 깨지는지·무엇을 고치는지·근거     |
 | [sessionend-refactor.md](./sessionend-refactor.md)       | ADR — SessionEnd → MCP 수명주기 이관(완료·유지, 호스트 이벤트 채널 의존 제거)              |
 
 사용법(CLI)은 [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md) 가 소유한다. 구 체제 문서(ir-schema·case-studies·implementation-plan·reproduction·usage)는 재배치 설계와 함께 은퇴 — git 이력(`6378169a`) 참조.
