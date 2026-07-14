@@ -14,6 +14,12 @@ facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. C
 | `utils/buildPortableMcpServer.ts`      | 공용 서버 변환 — args 상대화 · `OGHAM_HOST` env 주입       |
 | `utils/relativizePluginRootPath.ts`    | `${CLAUDE_PLUGIN_ROOT}/X` → `X` (접두 외 사용은 throw)     |
 
+## Conventions
+
+- 빌더 함수는 전부 동기·순수 — `(facts) => Record<string, unknown>`, 조건부 산출물(`mcpServers` 미설정 등)만 `| null` 을 반환한다.
+- 서버명 규칙은 호스트마다 다르다 — `buildCodexMcpServers` 는 서버가 여럿일 때만 `{plugin}-{server}` 로 재명명하고, `buildAgyMcpConfig` 는 원본 서버명을 그대로 쓴다.
+- `${CLAUDE_PLUGIN_ROOT}` 는 `command`·`env` 값에 남아있으면 throw, `args` 접두사일 때만 상대화한다(`buildPortableMcpServer` → `relativizePluginRootPath`).
+
 ## Boundaries
 
 ### Always do
@@ -29,3 +35,7 @@ facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. C
 
 - 디스크 I/O — 쓰기는 `pipeline/applyFiles` 단일 경로.
 - Claude 산출물 형식 변형 재출력 (Claude 파일은 이 모듈의 출력 대상이 아니다).
+
+## Dependencies
+
+- `types/` (PluginFacts · MarketplaceFacts · McpServerSource), `constants/hosts.ts` (HOST_MARKERS · HOST_MARKER_ENV_NAME), `constants/claudeArtifacts.ts` (CLAUDE_PLUGIN_ROOT_VARIABLE · CLAUDE_HOOKS_PATH · SKILLS_DIRECTORY) 만 — 외부 패키지·Node 내장 모듈 없음.
