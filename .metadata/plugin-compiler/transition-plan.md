@@ -60,11 +60,7 @@
 
 - [x] **C1–C3. 경로 좌표 — 코드** (main `77825966`) — `@ogham/cross-platform` 에 `hostPaths`(`detectHost`·`pluginRoot`·`projectRoot`) 신설, A(7 지점)·B(31 지점) 반영. imbas 인자 폭증은 **`projectRootMemo`**(첫 호출이 준 루트를 세션에 기억)로 해소. 잔여 4개 `process.cwd()` 는 프로젝트 좌표가 아니므로 **의도적 잔류**.
 - [ ] **M1. main 머지 + `yarn plugin:adapters` 재생성** — hostPaths 코드가 이 브랜치에 없다. 또한 main 이 filid MCP 서버명을 `t`→`tools` 로 바꿔 어댑터가 stale 하다.
-- [ ] **V1–V4. 경로 좌표 — 호스트 재검증** ⬜ **핵심. 상세는 [TODO.md](./TODO.md)**
-      - **V1 (Codex)**: 모델이 `project_root` 를 **절대경로로** 실제 넘기는가. Codex TUI 는 워크스페이스를 `~/Workspace/…`(틸데)로 표시하는데 `toAbsoluteRoot()` 는 `path.isAbsolute()` 라 **틸데를 거부**한다. 미전달→throw→재시도→틸데→throw→재시도 왕복을 모델이 완주하는가.
-      - **V2 (agy)**: 같은 질문.
-      - **V3 (agy 잠재 버그)**: `pluginRoot()` 가 `detectHost() === "codex" ? process.cwd() : null` 이라 **agy 에서 `null`** → r-statistics `contract.R` 파손 가능. 선행 측정: **agy MCP 프로세스의 cwd·env**.
-      - **V4 (Codex)**: r-statistics `run_r` 이 `contract.R` 을 실제로 찾는가 — stage4-host-paths 의 완료 기준인데 미측정.
+- [ ] **V1–V4. 경로 좌표 — 호스트 재검증** ⬜ **핵심. 상세는 [TODO.md](./TODO.md)** - **V1 (Codex)**: 모델이 `project_root` 를 **절대경로로** 실제 넘기는가. Codex TUI 는 워크스페이스를 `~/Workspace/…`(틸데)로 표시하는데 `toAbsoluteRoot()` 는 `path.isAbsolute()` 라 **틸데를 거부**한다. 미전달→throw→재시도→틸데→throw→재시도 왕복을 모델이 완주하는가. - **V2 (agy)**: 같은 질문. - **V3 (agy 잠재 버그)**: `pluginRoot()` 가 `detectHost() === "codex" ? process.cwd() : null` 이라 **agy 에서 `null`** → r-statistics `contract.R` 파손 가능. 선행 측정: **agy MCP 프로세스의 cwd·env**. - **V4 (Codex)**: r-statistics `run_r` 이 `contract.R` 을 실제로 찾는가 — stage4-host-paths 의 완료 기준인데 미측정.
 - [ ] **C4. 규칙 채널** → **[stage4-rules-channel.md](./stage4-rules-channel.md)** (의뢰서 정본)
       filid `syncRuleDocs`(`.claude/rules/*.md`)·maencof `claudeMdMerger`(`CLAUDE.md`)의 **Codex 타깃 = `AGENTS.md` 병합**. `~/.codex/rules` 는 커맨드 allowlist 라 **쓰면 안 된다**(G8). ⚠ 쓰기 채널만 바꾸고 **읽기 채널**(filid 훅의 규칙 존재 판정)을 놔두면 새 버그가 생긴다.
 
