@@ -153,3 +153,4 @@ plugins/<n>/mcp_config.json           × 9   ← agy MCP (상대 args + OGHAM_HO
 2. **정본 체크아웃에 문서를 두지 말 것** — 미추적 파일이라 두 번 유실됐다. 모든 문서는 이 브랜치의 `.metadata/plugin-compiler/` 에 커밋한다.
 3. **기존 실패 4건은 해소됨** — cennad `skill-contract.acceptance.test.ts` 포함 전체 초록(4267). Phase E1 주제(스킬 본문 full-form 도구명)는 별건으로 남아 있다.
 4. **호스트 PoC 는 정리된 상태** — `~/.codex/config.toml` 이 세션 시작 시점과 바이트 동일. 재실측하려면 마켓플레이스 등록부터 다시 한다(playbook §3).
+5. **main 동기화됨 (`9f39355a` 병합 커밋)** — origin/main(#87 portableResolve·버전범프·crosscheck)을 이 브랜치로 흡수(HEAD..main=0). 충돌 해소: `absoluteRoot.ts`(틸데 전개 + portableResolve 결합)·`hostPaths/INTENT.md`, 번들은 전량 재빌드, filid HEAVY 캡 24→25 KB(#87 이 pre-tool-use 경로에 portableResolve 유입). 전체 4328 통과. 다음 main 진행분은 다시 이 지점부터 벌어지므로 **주기적 재병합 권장**.
