@@ -26,9 +26,9 @@ export const DEFAULT_CONFIG: Config = {
       low: { model: 'gpt-5.6-terra', effort: 'medium' },
     },
     antigravity: {
-      high: 'Gemini 3.1 Pro',
-      mid: 'Gemini 3.5 Flash',
-      low: 'Gemini 3.5 Flash',
+      high: 'Gemini 3.1 Pro (High)',
+      mid: 'Gemini 3.5 Flash (Medium)',
+      low: 'Gemini 3.5 Flash (Low)',
     },
     claude: {
       high: { model: 'opus', effort: 'max' },
