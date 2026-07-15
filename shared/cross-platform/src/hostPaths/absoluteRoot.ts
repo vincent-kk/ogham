@@ -1,4 +1,6 @@
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute } from "node:path";
+
+import { portableResolve } from "../paths/index.js";
 
 /**
  * A supplied workspace path must be absolute. A relative one would resolve against
@@ -6,12 +8,15 @@ import { isAbsolute, resolve } from "node:path";
  * exact confusion this module exists to remove, so it is rejected rather than
  * quietly resolved.
  *
- * The absolute form is canonicalised because consumers hash it (`sha256(root)` is
- * the project identity in deilen and cennad); two spellings of the same directory
- * must not produce two projects.
+ * Canonicalisation goes through `portableResolve`, never native `path.resolve`: a
+ * POSIX-style path keeps POSIX semantics and a Windows path keeps Windows semantics
+ * whatever OS the server runs on. Consumers hash the result (`sha256(root)` is the
+ * project identity in deilen, cennad and filid), and host-dependent `resolve()`
+ * rewrote separators and prepended a drive on Windows only — so the same workspace
+ * split into two projects across runners.
  */
 export function toAbsoluteRoot(value: string): string | null {
-  return isAbsolute(value) ? resolve(value) : null;
+  return isAbsolute(value) ? portableResolve(value) : null;
 }
 
 export function requireAbsoluteRoot(value: string): string {
