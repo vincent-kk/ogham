@@ -2,11 +2,16 @@
 
 > **여기부터 읽으면 된다.** 2026-07-15 기준. 브랜치 `feature/issue-78-1`.
 >
-> ## ⏭ 다음 세션은 **실측부터** 시작한다
+> ## ✅ M2 호스트 실측 완료 — V1–V4·C4 검증됨, 결함 1건(F2) 수정
 >
-> V1–V4 · C4 의 **코드는 전부 들어갔다**(아래 §"코드 완료"). 남은 것은 **호스트 실측 하나**다 — Vincent 님 요청으로 실측은 **의도적으로 유예**했고, 한 번에 몰아서 한다. 실측 절차는 §"유예된 실측(M2)".
+> **원시 로그 정본: [m2-measurement-log.md](./m2-measurement-log.md).** 요약:
 >
-> 즉 **코드를 더 쓰기 전에 실측을 먼저 한다.** 실측 결과가 설계를 바꿀 수 있는 지점(agy 지침 채널·모델 순응)이 아직 열려 있다.
+> - **Codex (M2-1·M2-4·M2-5)**: V1(project_root 전달)·V4(contract.R 소싱·allow-root)·C4(AGENTS.md 병합·모델 프롬프트 도달·훅 합집합 판정)가 **전부 실측 확인**. filid·maencof 양쪽 C4 정상.
+> - **결함 F2 발견·수정**: r-statistics `resolveDataRefs` 가 projectRoot 가드의 "retry with project_root" 안내를 `DATA_ROOT_INVALID` 로 삼키던 것을 수정(안내가 모델에 도달하도록). 회귀 테스트 추가.
+> - **agy (M2-2·M2-3·M2-6)**: 자기탐색(V3)이 wrong-cwd에서도 플러그인 루트를 정확 해석(결정론적 확인). 단 agy(--print)는 **지침 파일을 자동 주입하지 않고**(모델이 grep 으로 읽음) 워크스페이스 경로도 미주입 → **conservative 코드 유지가 실측으로 정당화됨**(agy 분기 업그레이드 안 함). 환경 제약: agy CLI 미로그인 + print 모드.
+> - **가설 정정**: F1(모델은 `~`가 아니라 절대경로 전달 — 틸데 이득 서술만 정정), F3(agy 자동주입 없음 — 위 참조). 둘 다 코드 변경 불요.
+>
+> Codex 헤드리스 exec 는 **read-only 아닌 MCP 도구를 승인 게이트로 취소**하므로(`--dangerously-bypass-*` 필요), 부수효과 도구(run_r·rule_docs_sync)의 **코드**는 실제 설치 스냅샷 브리지를 Codex env 계약대로 스폰해 MCP 프로토콜로 직접 검증했다(model-facing 호출은 M2-1 read-only 도구로 확인).
 
 ## 지금 상태 — 한 눈에
 
@@ -18,9 +23,9 @@
 | **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                  |
 | **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적        |
 | **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                 |
-| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 코드 완료 — 모델 순응 여부는 실측 대상           |
-| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기                |
-| **M2** 호스트 실측                   | ⬜ **다음 작업 · 유예됨** — 아래 §"유예된 실측(M2)" |
+| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정       |
+| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)    |
+| **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정 |
 | **Phase D/E** agy·Codex 심화         | ⬜ 선택 → [backlog-d-e.md](./backlog-d-e.md)        |
 | main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                           |
 
@@ -64,20 +69,24 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 
 ---
 
-## 유예된 실측 (M2) — **다음 작업**
+## 유예된 실측 (M2) — ✅ **완료 (2026-07-15)**
 
-> **코드는 준비됐고, 실측만 안 했다.** Vincent 님 요청으로 실측을 한 번에 몰아 하기 위해 유예. 아래는 전부 **호스트에서 실제로 돌려야만** 답이 나오는 것들이다.
+> **실측 완료.** 원시 관측·발견 정본은 [m2-measurement-log.md](./m2-measurement-log.md). 아래 표는 각 항목의 결과.
+>
+> **결과 한 줄 요약**: Codex 축(M2-1·M2-4·M2-5) 전부 통과 — V1/V4/C4 코드가 Codex 에서 실측 확인됨. 실측 중 **결함 F2**(r-statistics `resolveDataRefs` 가 projectRoot 안내를 `DATA_ROOT_INVALID` 로 삼킴) 발견·수정·회귀테스트. agy 축(M2-2·M2-3·M2-6)은 자기탐색(V3) 결정론적 확인 + **agy 는 지침 파일을 자동 주입하지 않음**을 확인 → conservative 코드 유지(업그레이드 안 함). agy CLI 미로그인·print 모드 제약은 로그에 명시.
 
-**선행**: [migration-playbook.md](./migration-playbook.md) §3 (마켓플레이스 등록 → 설치 → TUI trust → `codex exec --json` 관찰). 등록 경로는 **어댑터가 생성된 체크아웃**이어야 한다 — 아니면 가짜 PoC. 확인: `find plugins -maxdepth 3 -path '*/.codex-plugin/plugin.json' | wc -l` = 10.
+**실측 방법 주의**: Codex 헤드리스 `codex exec` 는 read-only 아닌 MCP 도구를 승인 게이트로 취소한다(`--dangerously-bypass-*` 필요, auto 모드 분류기가 차단). 부수효과 도구(run_r·rule_docs_sync)의 **코드**는 실제 설치 스냅샷 브리지를 Codex env 계약(cwd=스냅샷·`OGHAM_HOST`·`CLAUDE_PLUGIN_ROOT` 부재)대로 스폰해 MCP 프로토콜로 직접 검증(`scratchpad/mcp-call.mjs`). model-facing 전달은 M2-1(read-only `config_get`)로 확인. **선행**: [migration-playbook.md](./migration-playbook.md) §3. `find plugins -maxdepth 3 -path '*/.codex-plugin/plugin.json' | wc -l` = 10.
 
-| #                     | 측정할 것                                                                                                                                                             | 코드가 이미 한 대비                                                                      |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **M2-1** (원 V1)      | **모델이 `project_root` 를 실제로 넘기는가, 몇 번 만에.** Codex 에서 imbas 도구를 호출시키고 `codex exec --json` 으로 왕복 관찰. 미전달 → 안내 throw → 재시도 회복률. | 틸데가 이제 통과하므로 왕복이 **1회 줄었다**. 남은 실패 경로는 "인자를 아예 안 넘김" 뿐. |
-| **M2-2** (원 V2)      | **agy 모델이 절대 워크스페이스 경로를 아는가.** agy 훅 stdin 엔 `workspacePaths[]` 가 있지만 **MCP 모델 컨텍스트에 있는지는 미확인**.                                 | 모르면 agy 의 프로젝트 대상 도구는 못 쓴다. 플러그인 루트는 이미 해결됨(V3).             |
-| **M2-3** (원 V3 선행) | **agy MCP 프로세스의 cwd·env** (`lsof -a -p <pid> -d cwd` + `ps eww`).                                                                                                | 이제 **필수 아님** — 자기탐색이 cwd 가정을 제거했다. 다만 사실 확인용으로 여전히 유용.   |
-| **M2-4** (원 V4)      | **Codex `run_r` end-to-end** — `contract.R` 이 실제로 source 되는가.                                                                                                  | 경로 해석은 스펙으로 고정됨. 남은 건 진짜 실행.                                          |
-| **M2-5** (C4)         | **Codex `codex debug prompt-input` 에 규칙 본문이 실린다** — `AGENTS.md` 병합분이 모델 프롬프트에 도달하는지. + 훅의 규칙 존재 판정이 오판 없는지.                    | 병합·마커·idempotence 는 스펙으로 고정됨.                                                |
-| **M2-6** (C4/agy)     | **agy 의 지침 파일이 무엇인가** (`GEMINI.md`? `AGENTS.md`? `.agents/rules/`?). 마커 심어 프롬프트 렌더로 확인.                                                        | 현재 코드는 agy 를 Claude 채널에 둔다 — 실측 후 `instructionsChannel.ts` **한 줄** 수정. |
+**결과표** (측정할 것 → 결과):
+
+| # | 결과 |
+| --- | --- |
+| **M2-1** (V1) | ✅ Codex 모델이 `project_root`(절대경로) **첫 호출 자발 전달**, 복구 왕복 0회. (F1: 모델은 `~` 아닌 절대경로 사용 — 틸데 이득 서술만 정정, 코드 불변) |
+| **M2-2** (V2) | ✅ agy 는 워크스페이스 절대경로를 모델 컨텍스트에 **미주입** — 모델이 `pwd` 로 발견(transcript 확인). project_root 전달은 pwd 발견 후 가능. 코드(선택 인자) 호환. |
+| **M2-3** (V3) | ✅ agy 계약(wrong cwd·env 부재)에서 `run_r` 성공 = **자기탐색이 플러그인 루트 정확 해석**. (실 MCP 프로세스 cwd/env 측정은 미로그인으로 유예 — 자기탐색이 이를 불요로 함) |
+| **M2-4** (V4) | ✅ contract.R 소싱(manifest present)·allow-root(project_root) 정상, 가드 throw 확인. **결함 F2 발견·수정.** |
+| **M2-5** (C4) | ✅ filid·maencof 가 Codex 에서 `AGENTS.md` 병합, `codex debug prompt-input` 에 규칙 본문 도달, idempotent, 훅 합집합 판정 오판 없음. |
+| **M2-6** (C4/agy) | ✅ **agy(--print)는 GEMINI/AGENTS/CLAUDE 자동주입 안 함**(모델 grep 으로 읽음, transcript 확인) → `instructionsChannel.ts` agy 분기 **업그레이드 안 함**(conservative 유지가 정당). |
 
 ---
 
