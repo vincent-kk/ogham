@@ -14,7 +14,10 @@ import {
 import { findConfigRoot } from '../../utils/findConfigRoot.js';
 import { readHookConfig } from '../../utils/readHookConfig.js';
 
-const RULES_DIR = join('.claude', 'rules');
+// Forward-slash literal: this is a display pointer shown to the model, so it must
+// read the same on every OS. `join(root, …)` below still finds the file on Windows —
+// Node accepts forward slashes in FS paths there.
+const RULES_DIR = '.claude/rules';
 
 export function buildMinimalContext(cwd: string): string {
   const lines: string[] = [];
@@ -32,7 +35,7 @@ export function buildMinimalContext(cwd: string): string {
     const deployedAt = locateFcaPolicy(root);
     lines.push(
       deployedAt === null
-        ? `[filid] ⚠ Rules not deployed. Run /filid:setup to deploy ${join(RULES_DIR, FCA_POLICY_RULE_DOC)}.`
+        ? `[filid] ⚠ Rules not deployed. Run /filid:setup to deploy ${RULES_DIR}/${FCA_POLICY_RULE_DOC}.`
         : `[filid] FCA-AI active. Rules: ${deployedAt}`,
     );
   }
@@ -65,7 +68,7 @@ export function buildMinimalContext(cwd: string): string {
  */
 function locateFcaPolicy(root: string): string | null {
   for (const filename of [FCA_POLICY_RULE_DOC, LEGACY_FCA_POLICY_RULE_DOC]) {
-    const path = join(RULES_DIR, filename);
+    const path = `${RULES_DIR}/${filename}`;
     if (existsSync(join(root, path))) return path;
   }
 

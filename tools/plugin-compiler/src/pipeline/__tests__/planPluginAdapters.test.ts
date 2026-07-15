@@ -21,9 +21,14 @@ function writeJson(relativePath: string, value: unknown): void {
   writeFileSync(path, JSON.stringify(value), "utf8");
 }
 
+/** Forward-slash a path so assertions hold on Windows (join yields backslashes). */
+function norm(p: string): string {
+  return p.replaceAll("\\", "/");
+}
+
 function emittedPaths(): string[] {
   return planPluginAdapters(pluginDirectory).files.map((file) =>
-    file.absolutePath.slice(pluginDirectory.length + 1),
+    norm(file.absolutePath.slice(pluginDirectory.length + 1)),
   );
 }
 
@@ -60,9 +65,9 @@ describe("planPluginAdapters", () => {
       mcpServers: { tools: { command: "node", args: ["bridge/x.cjs"] } },
     });
     const { files } = planPluginAdapters(pluginDirectory);
-    const root = files.find((f) => f.absolutePath.endsWith("/plugin.json"));
+    const root = files.find((f) => norm(f.absolutePath).endsWith("/plugin.json"));
     const codex = files.find((f) =>
-      f.absolutePath.endsWith(".codex-plugin/plugin.json"),
+      norm(f.absolutePath).endsWith(".codex-plugin/plugin.json"),
     );
     expect(root?.content).toBe(codex?.content);
     expect(root?.content).toContain('"mcpServers"');
@@ -109,7 +114,7 @@ describe("planPluginAdapters", () => {
       },
     });
     const { files } = planPluginAdapters(pluginDirectory);
-    const agy = files.find((f) => f.absolutePath.endsWith("/hooks.json"));
+    const agy = files.find((f) => norm(f.absolutePath).endsWith("/hooks.json"));
     expect(agy?.content).toContain(
       "node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs",
     );
