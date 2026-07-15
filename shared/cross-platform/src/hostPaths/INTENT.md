@@ -12,14 +12,14 @@
 | `pluginRoot.ts`      | 자기 설치 디렉터리 (번들 자산·계약 스크립트·설정 HTML)             |
 | `projectRoot.ts`     | 사용자 작업물 루트 — `projectRoot`(throw) / `tryProjectRoot`(null) |
 | `projectRootMemo.ts` | 프로세스당 workspace 좌표 기억 (claude 에서는 무시)                |
-| `absoluteRoot.ts`    | 공급된 경로의 절대성 강제 + 정규화                                 |
+| `absoluteRoot.ts`    | 공급된 경로의 절대성 강제 + `portableResolve` 정규화 (호스트 독립) |
 
 ## Conventions
 
 - `pluginRoot()` 는 **env 우선** — Codex 는 훅 프로세스에 `CLAUDE_PLUGIN_ROOT` 를 주입하고 그 cwd 는 세션 디렉터리다. env 부재 + codex 일 때만 cwd 로 폴백한다.
 - `projectRoot()` 의 claude 분기는 `process.cwd()` — 기존 동작과 완전히 동일해야 한다 (가산적 변경).
 - claude 외 호스트에서 해석 실패는 **throw** — `process.cwd()` 폴백은 플러그인 폴더를 프로젝트로 오인하는 바로 그 결함이다.
-- 공급된 경로는 **절대경로만** 수용하고 `resolve()` 로 정규화한다 — 상대경로는 (호스트 무관) 플러그인 폴더 기준으로 풀리고, 소비처가 `sha256(root)` 로 프로젝트를 식별하므로 표기 차이가 프로젝트를 갈라놓는다.
+- 공급된 경로는 **절대경로만** 수용하고 `portableResolve` 로 정규화한다 (네이티브 `resolve` 금지) — 소비처가 `sha256(root)` 로 프로젝트를 식별하는데, 네이티브 `resolve` 는 Windows 에서만 구분자·드라이브를 바꿔 같은 작업물을 러너마다 다른 프로젝트로 가른다. `portableResolve` 는 경로 플레이버로 win32/posix 를 정해 호스트와 무관하게 결정적이다.
 
 ## Boundaries
 
@@ -40,4 +40,5 @@
 
 ## Dependencies
 
-- 외부: Node 내장 (`node:path`) 만.
+- 외부: Node 내장 (`node:path`).
+- 내부: `../paths` (`portableResolve` — 정규화 단일 경유).
