@@ -11,14 +11,14 @@ agy 훅 계약 ↔ Claude 훅 계약 **순수 번역**. agy 는 Claude 포맷 `h
 | `eventMap.ts`      | Claude 이벤트 → agy 이벤트 (SessionStart·UserPromptSubmit→PreInvocation) |
 | `toolMap.ts`       | agy 도구명·인자 → Claude `tool_name`/`file_path` (PreToolUse 게이팅)     |
 | `toClaudeInput.ts` | agy 페이로드 → Claude snake_case 입력                                    |
-| `toAgyResponse.ts` | Claude 출력 → agy 응답(injectSteps / decision)                          |
+| `toAgyResponse.ts` | Claude 출력 → agy 응답(injectSteps / decision)                           |
 
 ## Conventions
 
 - **순수 함수만** — `node:*` I/O 금지. stdin/stdout·프로세스 스폰·once-guard 는 러너가 소유.
 - 번역: **SessionStart·UserPromptSubmit→PreInvocation**(주입), **PreToolUse→게이팅**(deny→`decision`). **PostToolUse** 는 아직 미지원 — 조용히 통과시키지 않고 **throw**.
 - PreToolUse 는 agy `toolCall.{name,args}`(실측: `write_to_file{TargetFile,CodeContent}`·`view_file{AbsolutePath}`) 를 매핑. agy 는 `deny` 를 강제하나 **PreToolUse 엔 주입 채널이 없어 권고성 `additionalContext` 는 손실**(차단만 이식).
-- `cwd` 는 `workspacePaths[0]`, `session_id` 는 `conversationId`.
+- `cwd` = `workspacePaths[0]` (PreToolUse 에서 비면 편집 파일 디렉터리로 폴백 → 가드 상향탐색). `session_id` = `conversationId`.
 
 ## Boundaries
 

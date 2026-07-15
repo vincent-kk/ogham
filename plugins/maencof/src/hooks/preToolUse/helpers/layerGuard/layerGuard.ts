@@ -4,7 +4,7 @@
  * Guides modification through the identity-guardian agent
  */
 import { isLayer1Path } from '../../../../types/layer.js';
-import { isMaencofVault } from '../../../shared/isMaencofVault.js';
+import { isInsideMaencofVault } from '../../../shared/isMaencofVault.js';
 
 export interface PreToolUseInput {
   tool_name?: string;
@@ -30,8 +30,10 @@ export interface PreToolUseResult {
 export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
   const cwd = input.cwd ?? process.cwd();
 
-  // Always pass through if not in a maencof vault
-  if (!isMaencofVault(cwd)) return { continue: true };
+  // Always pass through if not in a maencof vault. Walk up from cwd — on agy the
+  // hook receives only the edited file's own folder (a vault subdirectory like
+  // 01_Core/), not the vault root, so an exact-match check would miss it.
+  if (!isInsideMaencofVault(cwd)) return { continue: true };
 
   const filePath = input.tool_input?.file_path ?? input.tool_input?.path ?? '';
   if (!filePath) return { continue: true };

@@ -78,6 +78,38 @@ describe("agyToClaudeInput — PreToolUse", () => {
     expect(out.tool_name).toBe("");
     expect(out.tool_input).toEqual({});
   });
+
+  it("falls back to the edited file's folder for cwd when no workspace", () => {
+    // agy sends no workspacePaths on a PreToolUse hook — derive cwd from the file
+    // so the guards can walk up to .filid/.maencof.
+    const out = agyToClaudeInput(
+      {
+        conversationId: "c1",
+        workspacePaths: [],
+        toolCall: {
+          name: "write_to_file",
+          args: { TargetFile: "/vault/01_Core/values.md", CodeContent: "x" },
+        },
+      },
+      "PreToolUse",
+    );
+    expect(out.cwd).toBe("/vault/01_Core");
+  });
+
+  it("prefers the real workspace over the file-folder fallback", () => {
+    const out = agyToClaudeInput(
+      {
+        conversationId: "c1",
+        workspacePaths: ["/vault"],
+        toolCall: {
+          name: "write_to_file",
+          args: { TargetFile: "/vault/01_Core/values.md" },
+        },
+      },
+      "PreToolUse",
+    );
+    expect(out.cwd).toBe("/vault");
+  });
 });
 
 describe("claudeToAgyResponse — PreToolUse", () => {
@@ -96,9 +128,9 @@ describe("claudeToAgyResponse — PreToolUse", () => {
   });
 
   it("treats a top-level continue:false as a deny", () => {
-    expect(claudeToAgyResponse({ continue: false }, "PreToolUse").decision).toBe(
-      "deny",
-    );
+    expect(
+      claudeToAgyResponse({ continue: false }, "PreToolUse").decision,
+    ).toBe("deny");
   });
 
   it("allows the tool when the handler does not deny", () => {

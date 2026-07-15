@@ -6,6 +6,12 @@ import type {
   ClaudeHookInput,
 } from "./types.js";
 
+/** The directory part of an absolute path — pure, POSIX and Windows separators. */
+function parentDir(p: string): string {
+  const i = Math.max(p.lastIndexOf("/"), p.lastIndexOf("\\"));
+  return i > 0 ? p.slice(0, i) : "";
+}
+
 /**
  * Build the Claude snake_case payload a bundled ogham handler expects, from agy's
  * camelCase invocation payload.
@@ -19,8 +25,11 @@ import type {
  * neither of which reads the prompt body, so nothing is lost.
  *
  * PreToolUse maps agy's `toolCall` onto Claude `tool_name`/`tool_input` (via toolMap) so
- * the bundled Write/Edit guards run. PostToolUse still needs its own contract and is
- * rejected loudly rather than passed through half-formed.
+ * the bundled Write/Edit guards run. agy sends no project directory on a PreToolUse hook
+ * (`workspacePaths` is empty in `--print`, there is no GEMINI_PROJECT_DIR, and the hook
+ * cwd is the plugin dir — measured 2026-07-15), so when the workspace is absent the
+ * gated file's own directory stands in for cwd; the guards walk up from there to find
+ * `.filid`/`.maencof`. PostToolUse still needs its own contract and is rejected loudly.
  */
 export function agyToClaudeInput(
   agy: AgyCommonInput & Record<string, unknown>,
@@ -50,7 +59,10 @@ export function agyToClaudeInput(
         toolCall?.name ?? "",
         toolCall?.args,
       );
-      return { ...base, tool_name, tool_input };
+      const filePath = tool_input["file_path"];
+      const fallbackCwd =
+        typeof filePath === "string" ? parentDir(filePath) : "";
+      return { ...base, cwd: cwd || fallbackCwd, tool_name, tool_input };
     }
     default:
       throw new Error(
