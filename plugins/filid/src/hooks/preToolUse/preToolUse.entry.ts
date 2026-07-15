@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { normalizeCodexToolUse } from '@ogham/cross-platform/codex-hooks';
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 
 import { createLogger } from '../../lib/logger.js';
@@ -11,7 +12,9 @@ const log = createLogger('pre-tool-use');
 const raw = await readStdin(2000);
 let result;
 try {
-  const input = JSON.parse(raw) as PreToolUseInput;
+  // Codex sends file edits as apply_patch; normalise to Write/Edit so the
+  // Claude-vocab guards below fire (no-op on Claude/agy). See codex-hooks.
+  const input = normalizeCodexToolUse(JSON.parse(raw) as PreToolUseInput);
   result = await handlePreToolUse(input);
 } catch (e) {
   log.error('hook entry failed', e);

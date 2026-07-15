@@ -4,20 +4,20 @@
 
 ## Structure
 
-| Path                | Role                                                                      |
-| ------------------- | ------------------------------------------------------------------------- |
-| `src/`              | TypeScript 소스 (fractal 루트; `index.ts` barrel)                         |
-| `src/spawn/`        | cross-spawn 래퍼 + 타임아웃 + EOL 정규화 (PR-B 도착)                      |
-| `src/paths/`        | OS 별 home/tmp/config/cache 경로 추상화                                   |
-| `src/hostPaths/`    | 호스트별 플러그인 루트 / 프로젝트 루트 / 문서 채널 해석 (MCP 런타임 전용) |
-| `src/instructions/` | 지침 문서 파일명 + 마커 구간 순수 연산 (훅 안전 — env 판독 없음)          |
-| `src/agyHooks/` ·`src/agyRunner/` | agy↔Claude 훅 계약 순수 번역 + 런타임 러너(I/O·once-guard) |
-| `src/env/`          | 환경변수 / OS 분기 / PATH delimiter / EOL                                 |
-| `src/eol/`          | CRLF → LF, BOM strip                                                      |
-| `src/binaries/`     | which/where 디스커버리 + 24h 캐시 + 설치 가이드                           |
-| `src/hooks/`        | hook bootstrap + selfProbe + errorLog                                     |
-| `src/shim/`         | Windows `.cmd` shim 자동 생성 (빌드 step)                                 |
-| `src/launcher/`     | OS 기본 핸들러로 URL/파일 열기 (`openBrowser`)                            |
+| Path                              | Role                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------- |
+| `src/`                            | TypeScript 소스 (fractal 루트; `index.ts` barrel)                         |
+| `src/spawn/`                      | cross-spawn 래퍼 + 타임아웃 + EOL 정규화 (PR-B 도착)                      |
+| `src/paths/`                      | OS 별 home/tmp/config/cache 경로 추상화                                   |
+| `src/hostPaths/`                  | 호스트별 플러그인 루트 / 프로젝트 루트 / 문서 채널 해석 (MCP 런타임 전용) |
+| `src/instructions/`               | 지침 문서 파일명 + 마커 구간 순수 연산 (훅 안전 — env 판독 없음)          |
+| `agyHooks/`·`agyRunner/`·`codexHooks/` | agy↔Claude 훅 번역·러너 + Codex `apply_patch`→`Write`/`Edit` 정규화     |
+| `src/env/`                        | 환경변수 / OS 분기 / PATH delimiter / EOL                                 |
+| `src/eol/`                        | CRLF → LF, BOM strip                                                      |
+| `src/binaries/`                   | which/where 디스커버리 + 24h 캐시 + 설치 가이드                           |
+| `src/hooks/`                      | hook bootstrap + selfProbe + errorLog                                     |
+| `src/shim/`                       | Windows `.cmd` shim 자동 생성 (빌드 step)                                 |
+| `src/launcher/`                   | OS 기본 핸들러로 URL/파일 열기 (`openBrowser`)                            |
 
 ## Conventions
 
