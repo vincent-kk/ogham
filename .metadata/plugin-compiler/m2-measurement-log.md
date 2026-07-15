@@ -127,3 +127,29 @@ r-statistics 스냅샷 브리지를 **agy 계약**(OGHAM_HOST=agy · CLAUDE_PLUG
 | M2-6 (agy)    | agy(--print) 지침 파일 자동주입 안 함 → conservative 유지                              | 없음 (F3: 업그레이드 안 함)         |
 
 **수정 대상: F2 (r-statistics resolveDataRefs) 1건.** F1·F3 는 문서/서술 정정.
+
+---
+
+## agy 훅 어댑터 (D1) — 2026-07-15 후속
+
+번역 어댑터를 만들고(`@ogham/cross-platform/agy-hooks`·`agy-runner`, 21 테스트, 커밋 `01d1ca98`) agy 1.1.2 에 라이브 검증했다. 방법: maencof-lens 를 `agy plugin install` 로 등록 → `agy --print`/대화형 실행 → agy 로그·once-guard 마커·핸들러 수신 payload·run-agy stdout(tee)·모델 transcript 를 관측.
+
+### 검증된 것
+
+- **로드**: `jsonhook.go:189 Loaded hooks.json … 1 named hooks, 1 total handlers`. `agy plugin validate` → `✔ hooks : 1 processed`. ⇒ **emitter 가 낼 agy-format(named-group)은 유효**하다(구 Claude 포맷은 `invalid hook "hooks"` 파싱 실패).
+- **발화·번역**: PreInvocation 발화 → once-guard 마커 생성 → 핸들러가 `{cwd,session_id,hook_event_name:"SessionStart",source:"startup"}` 수신(conversationId→session_id 번역 확인) → run-agy stdout = `{"injectSteps":[{"ephemeralMessage":"OGHAM-AGY-PROOF-7777"}]}` (스텁+tee 로 확인). **어댑터 전 구간 정확**.
+
+### F4. agy 1.1.2 는 PreInvocation injectSteps 를 적용하지 않는다 (플랫폼 한계)
+
+run-agy 가 정확한 injectSteps 를 방출했고 훅도 발화했으나, 주입 토큰(`OGHAM-AGY-PROOF-7777`)이 모델 transcript 에 **0회** — --print 에서 확정. 대화형은 tmux 캡처 불안정으로 미확정(6회 발화 관측되나 토큰 미검출). ⇒ **우리 코드 결함 아님**; agy 의 injectSteps 렌더 미구현(hooks 문서 "Current Limitations" 부합). **컨텍스트 주입 훅(SessionStart·UserPromptSubmit)은 agy 가 이걸 고칠 때까지 무가치.**
+
+### 부수 실측 사실
+
+- agy 훅은 **등록(`agy plugin install <dir>`) 후에만** 스캔된다(`.agents/plugins/` 배치만으론 0개). 등록 후엔 --print 도 로드·발화.
+- `agy plugin install` 은 **`bridge/` 미복사**(hooks.json·plugin.json 만) → 번들이 설치 위치에 없어 무동작. 전체 디렉터리를 `.agents/plugins/<n>/` 에 두고 install 필요(D2 결합).
+- agy 대화형은 **로그인 상태**(lunox298@gmail.com·Gemini 3.1 Pro) — M2-6 의 --print "not logged in" 은 print 모드 아티팩트. **단 M2-6 결론(--print 지침 자동주입 없음, transcript 판독)은 유효** — 대화형 자동주입은 여전히 미실측.
+
+### 다음 작업 (우회 후보)
+
+- **게이팅 훅(D1b)**: PreToolUse `decision` 은 injectSteps 와 **다른 채널** → agy 에서 동작할 수 있다. 도구-이벤트 번역(agy `toolCall.{name,args}` → Claude `tool_name`/`tool_input`, agy 도구명 매핑: `run_command`→Bash·`view_file`→Read·`grep_search`→Grep, write/edit 도구명 실측 선행) 구현 후 라이브 검증. 되면 filid 구조가드·maencof 레이어가드가 agy 에서 강제된다.
+- emitter/빌드 배선은 위 결정 후.

@@ -9,7 +9,33 @@
 
 ### D1. agy 포맷 `hooks.json` emitter (= 기존 "Stage 3 러너 어댑터")
 
-**현 상태**: agy 에서 ogham 훅은 **0개 로드**된다. agy 가 우리 `hooks/hooks.json`(Claude 포맷)을 플러그인 루트로 복사한 뒤 최상위 키 `"hooks"` 를 **훅 이름**으로 오독해 파싱에 실패한다:
+> **⚠ 2026-07-15 실측: 번역 어댑터는 완성·검증됐으나, agy 1.1.2 가 PreInvocation injectSteps 를 렌더하지 않아 컨텍스트 주입 훅은 아직 무가치.** 상세는 [m2-measurement-log.md](./m2-measurement-log.md) "agy 훅 어댑터(D1)".
+>
+> **완료·커밋된 것** (`01d1ca98`):
+>
+> - `@ogham/cross-platform/agy-hooks` — 순수 번역(agy PreInvocation payload → Claude SessionStart/UserPromptSubmit, additionalContext → injectSteps). 12 테스트.
+> - `@ogham/cross-platform/agy-runner` — 런타임 래퍼(agy stdin 판독 → 번역 → 기존 `bridge/<hook>.mjs` 스폰 → 응답 역변환 → SessionStart once-guard). 9 테스트. Claude/Codex 경로 무영향.
+>
+> **라이브 검증 (agy 1.1.2, `agy plugin install` 로 등록)**:
+> - ✅ agy 가 **agy-format hooks.json 을 로드**한다 — `jsonhook.go:189 … 1 named hooks, 1 total handlers`. (구 Claude 포맷은 `invalid hook "hooks"` 파싱 실패였다 — 아래.) `agy plugin validate` 도 `✔ hooks : 1 processed`.
+> - ✅ agy 가 **PreInvocation 을 발화**하고 러너가 **정확히 번역**한다 — 핸들러가 올바른 Claude payload 를 받고, 러너가 정확히 `{"injectSteps":[{"ephemeralMessage":"…"}]}` 를 방출(stdout tee 로 확인).
+> - ❌ **agy 1.1.2 는 그 PreInvocation injectSteps 를 적용하지 않는다** — 주입 텍스트가 모델 transcript 에 도달 안 함(--print 확정, 대화형은 tmux 불안정으로 미확정). 어댑터는 정확하며 **agy 자체의 injectSteps 처리 한계**(hooks 문서 "Current Limitations" 의 미구현 항목들과 부합).
+>
+> **배운 사실 3가지**:
+> 1. agy 훅은 플러그인이 **등록(`agy plugin install <dir>`)돼야** 스캔된다 — `.agents/plugins/` 배치만으론 `agy plugin list` 에 안 잡히고 훅도 0개. (등록 후엔 `--print` 에서도 로드·발화.)
+> 2. `agy plugin install` 은 **`bridge/` 를 복사하지 않는다**(hooks.json·plugin.json 만) — 훅 커맨드가 참조하는 번들이 설치 위치에 없어 무동작. 전체 플러그인 디렉터리를 `.agents/plugins/<n>/` 에 두고 그걸 install 해야 한다(= D2 배치와 결합).
+> 3. agy 대화형은 **로그인돼 있다**(lunox298@gmail.com, Gemini 3.1 Pro) — `--print` 의 "not logged in" 은 print 모드 아티팩트.
+>
+> **결론 / 다음 작업**:
+> - **컨텍스트 주입 훅(SessionStart·UserPromptSubmit)** 은 agy 가 injectSteps 를 렌더할 때까지 **보류**(어댑터는 준비됨). agy 업스트림 이슈로 추적.
+> - **우회 후보 — 게이팅 훅(D1b)**: PreToolUse `decision`(도구 차단/승인)은 injectSteps 가 **아닌** 별도 채널이라 동작할 수 있다. D1b(도구-이벤트 번역: agy `toolCall` → Claude `tool_name`/`tool_input`, agy 도구명 매핑)를 구현하면 agy 가 filid 구조가드·maencof 레이어가드를 **강제**할 수 있다 — 미검증, 다음 작업.
+> - emitter/빌드 배선은 위 결정(주입 보류 / 게이팅 채택 여부) 후 착수. 지금은 어댑터 기반만 커밋됨.
+
+---
+
+**아래는 원 배경 기록** (emitter 설계 — 게이팅 채택 시 유효):
+
+**구 현상**: agy 가 우리 `hooks/hooks.json`(Claude 포맷)을 플러그인 루트로 복사한 뒤 최상위 키 `"hooks"` 를 **훅 이름**으로 오독해 파싱에 실패했다:
 
 ```
 W hooks.go:44] Failed to parse hooks file …/maencof-lens/hooks.json:
@@ -17,7 +43,7 @@ W hooks.go:44] Failed to parse hooks file …/maencof-lens/hooks.json:
 I hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
 ```
 
-**해야 할 일**: 플러그인 루트에 **agy 포맷 `hooks.json`** 을 생성하는 emitter 추가.
+**emitter 가 할 일**: 플러그인 루트에 **agy 포맷 `hooks.json`** 을 생성.
 
 | 항목        | Claude (정본)                                                      | agy                                                                                                  |
 | ----------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
