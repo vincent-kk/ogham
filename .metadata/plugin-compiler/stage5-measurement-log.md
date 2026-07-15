@@ -113,7 +113,7 @@ D1 로그의 "agy plugin install 은 bridge/ 미복사" 는 **틀렸다**(agy 1.
 
 ### 조사 (공식/커뮤니티 — 내 접근 검증)
 
-- **OpenAI 공식 훅 문서**(learn.chatgpt.com/docs/hooks): Codex PreToolUse `tool_name:"apply_patch"`·`tool_input.command`·`Bash`, deny 차단 — **내 E2/E3 실측과 일치**. **PreToolUse `additionalContext` 는 "parsed but not applied"**(issue #19385) ⇒ **filid 구조경고·maencof vault redirect 권고는 Codex 에서도 손실**(agy 와 동일 — 전 비-Claude 호스트에서 차단만 이식, 주입/권고 불가).
+- **OpenAI 공식 훅 문서**(learn.chatgpt.com/docs/hooks): Codex PreToolUse `tool_name:"apply_patch"`·`tool_input.command`·`Bash`, deny 차단 — **내 E2/E3 실측과 일치**. ~~**PreToolUse `additionalContext` 는 "parsed but not applied"**(issue #19385) ⇒ filid 구조경고·maencof vault redirect 권고는 Codex 에서도 손실~~ — **정정(2026-07-16)**: openai/codex **PR #20692(2026-05-05 병합)**으로 PreToolUse `additionalContext` 가 이제 모델에 주입된다(현재 공식 문서: "To add model-visible context without blocking, return hookSpecificOutput.additionalContext"). issue #19385 인용 당시엔 맞았으나 이후 해소. ⇒ **filid 구조경고·maencof vault redirect 권고는 Codex 에 도달한다**(Codex 가 인터셉트하는 "단순 셸" 읽기 한정). 단 **agy PreToolUse 는 여전히 주입 채널 없음**(decision/reason/permissionOverrides 뿐) — agy 손실 서술만 유효.
 - **`falcosecurity/prempti`**: `tool_input.command` 에서 apply_patch 파싱, **다중 파일은 경로당 1 이벤트** — 내 파서 접근 검증 + 다중파일 상한의 업그레이드 경로(참조 구현).
 - agy Medium 가이드·Reddit: PreToolUse `{decision:deny}` 차단 실증 — 내 D1b 확증.
 

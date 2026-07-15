@@ -32,7 +32,7 @@
 | **Emitter/빌드 배선**                | ✅ **완료**(`b0d0cd0f`) — `buildAgyHooks` 5번째 어댑터(루트 `hooks.json`, PreToolUse→named-group), 3플러그인 `run-agy.mjs` 번들, baseline 30→33, 스모크(deny/allow/F6) 통과 |
 | **PR #89** (branch→main)             | 🟢 **CI 전부 초록**(macOS·Ubuntu·Windows×Node20/22)·MERGEABLE·CLEAN. Windows 경로 이식 버그 4건 수정(`165333fe`). **머지는 Vincent 이 직접**                                |
 | main 머지·GitHub 경유 설치 확인      | ⬜ 머지 후 — 마켓플레이스 실설치로 Claude 무영향 라이브 재확인                                                                                                              |
-| **Codex 완성도 심화**                | ⬜ **다음 — 아래 §Codex 로드맵** (read 추적 부분복구·agents 폴백·process.cwd 잔여감사). agy 는 업스트림 대기                                                                 |
+| **Codex 완성도 심화**                | 🟡 **진행 중** — §1 maencof read추적 ✅(`5fad890c`)·§3 process.cwd 감사 ✅(전부 무해). §1 filid·imbas 설계결정 대기·§2 agents 폴백 대기. agy 는 업스트림 대기                                                                 |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 
@@ -119,12 +119,12 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 
 마켓플레이스 실설치로 **Claude 무영향 라이브 재확인**(지금까지 `--plugin-dir` 로그 + 구조적 확인뿐). 루트 `plugin.json`·`hooks.json` 이 실제 Claude 설치에 무영향인지. Codex 설치·도구노출·훅 trust 도 함께.
 
-### 1. Read 추적 부분 복구 (Codex) — **maencof 쉬움 / filid·imbas 어려움** (실측 정정)
+### 1. Read 추적 부분 복구 (Codex) — 🟡 **maencof ✅ 완료 / filid·imbas 설계결정 대기**
 
-- **실측**: Codex 는 파일 읽기를 `Bash` 로 직렬화(`Read` 별칭 없음 — 소스 확정). **matcher 확인**: maencof=`*`(Bash 훅 **이미 발화**) / filid·imbas=`Read|Write|Edit`(Bash **미발화**). codex-hooks 는 현재 `apply_patch` 만 정규화, Bash 통과(INTENT 에 "Bash 읽기 경로 추출" 이 *Ask first* 로 명시).
-- **maencof**: codex-hooks 에 Bash-read 파서(`cat/head/less <경로>`→`Read`) + vaultRedirector 가 Read 처리 → **부분 복구 가능**(matcher 변경 불요).
-- **filid·imbas**: matcher 에 `Bash` 추가해야 훅 발화 → 그런데 hooks.json 은 Claude·Codex **공유**라 Claude 에서도 매 bash 발화(비용·거동 변화). ⇒ **Codex 전용 훅 채널**(emitter 가 Codex matcher 만 확장) 또는 핸들러 Claude-bash 빠른 no-op 필요. **설계 결정 선행**.
-- **한계 고지**: 셸 표현 무한(파이프·grep·awk) → **완전 fidelity 불가**, 흔한 단순 읽기만 복구.
+- **실측**: Codex 는 파일 읽기를 `Bash` 로 직렬화(`Read` 별칭 없음 — 소스 확정). **matcher 확인**: maencof=`*`(Bash 훅 **이미 발화**) / filid·imbas=`Read|Write|Edit`(Bash **미발화**).
+- **maencof ✅ 완료 (`5fad890c`)**: codex-hooks 에 `parseBashRead`(순수 파서, `cat/head/tail/less/more/bat <경로>`→`Read`) + `normalizeCodexToolUse` Bash 분기. vaultRedirector 가 Read 처리(matcher 변경 불요). 종단 스모크: vault `.md` read→권고, `.txt`·파이프→무발화. **가치 재확인**: Codex 가 PreToolUse `additionalContext` 를 주입(PR #20692, 2026-05-05 병합 — stage5 line 116 정정)하므로 권고가 실제 모델 도달.
+- **filid·imbas ⏸ 설계결정**: `parseBashRead` 는 이미 공유 코드라 **matcher 만 배선하면 작동**. 단 emitter 가 Codex 를 Claude 와 **동일 `hooks.json`**(`CLAUDE_HOOKS_PATH`)로 가리키고 `buildCodexHooks` 부재 → (a) **Codex 전용 훅 채널**(신규 emitter 빌더 + `.codex-plugin/hooks.json` + 매니페스트 재배선 — 상당 비용, Claude 무영향) / (b) **공유 matcher 에 `Bash` 추가**(간단하나 Claude 매 bash 훅 스폰 비용) / (c) **미착수·한계 고지**. Vincent 결정 대기.
+- **한계 고지**: 셸 표현 무한(파이프·grep·awk) → **완전 fidelity 불가**, Codex 도 "단순 셸만" 인터셉트 → 흔한 단순 읽기만 복구.
 
 ### 2. Codex agents 폴백 — **구조적 부재, 단일-폴백** (L3)
 
@@ -132,10 +132,14 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 - **작업**: 위원회 의존 스킬(filid Phase D 리뷰·prawf·atlassian 미디어)에 "Codex 면 **단일 에이전트 인라인**" 분기 or MCP 오케스트레이션 재설계. 병렬·격리는 잃음.
 - (미확인: Codex 자체 비-플러그인 에이전트 경로 유무 — 필요 시 조사.)
 
-### 3. process.cwd() 잔여 감사 — **사실상 해결, 소수만** (실측)
+### 3. process.cwd() 잔여 감사 — ✅ **완료: 전부 무해로 종결** (2026-07-16 감사)
 
-- **실측 분류**: 잔여 `process.cwd()` 중 **maencof 14·maencof-lens 1 = 전부 훅**(Codex 는 훅에 세션 cwd 제공 → **문제 없음**). 9-B 프로젝트 경로는 `project_root` 인자로 광범위 해결(imbas 15→1). M2-1 로 모델이 넘김 실측.
-- **잔여 MCP 도달 감사**(프로젝트 경로 여부 확인): `deilen renderViewer/resolveMarkdown.ts:21`·`deilen httpServer/bridgeRoot.ts:35`(자기위치일 가능성)·`imbas astGrepShared.ts:43`·`filid getSgModule.ts:21`(네이티브 모듈 로드일 가능성). 각각 프로젝트 경로면 `project_root` 배선, 아니면 무해로 종결.
+- **감사 결과**: MCP+훅 도달 `process.cwd()` 총 **19개**(테스트 제외) = 훅 15개 + 비-훅 4개. **코드 변경 불요** — roadmap 가설("사실상 해결") 확인.
+- **훅 15개**: maencof 14·maencof-lens 1 = **전부 `/hooks/` 하위**(경로 확인). Codex 는 훅에 세션 cwd(실제 프로젝트) 제공 → **무해**.
+- **비-훅 MCP 도달 4개 — 전부 무해**(읽고 판정):
+  - `deilen resolveMarkdown.ts:21` — **주석**일 뿐(실코드는 `resolve(workspace, path)`, workspace=`projectRoot(project_root)`). 이미 정확.
+  - `deilen bridgeRoot.ts:35` — 플러그인 **자기 `bridge/` 자산** 위치 최후 폴백(pluginRoot→import.meta 8단계 walk-up 실패 후에만 도달). 프로젝트 경로 아님.
+  - `filid getSgModule.ts:21`·`imbas astGrepShared.ts:43` — `@ast-grep/napi` **네이티브 모듈 로드** `createRequire` `_base` 3순위 폴백(import.meta.url·`__filename` 우선). 프로젝트 경로 아님.
 
 ### 4. agy — 업스트림 대기 (착수 보류)
 
