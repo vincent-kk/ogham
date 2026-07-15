@@ -2,13 +2,13 @@
 
 - `antigravityDispatcher` 는 `agy -p` (start) / `agy --continue -p` (resume) 를
   세션별 격리 cwd 에서 실행하고 `DispatchResult` 로 정규화한다.
-- agy `--sandbox` 는 부착하지 않는다. 복원 게이트는 업스트림 #76(non-TTY 출력
-  드롭) 종결 — 추적·재검증 절차는 레포 루트 `.metadata/cennad/agy-upstream-watch.md`
-  참조. `AntigravityFlags.sandbox` 는 config 하위호환을 위해 스키마에 남되 항상
-  false 로 취급한다.
-- agy #76: `--print` 모드가 non-TTY stdout 으로 긴 응답을 flush 하기 전에 종료해
-  빈 stdout 을 반환하는 비결정적 결함. 로깅 초기화 전에 블로킹되는 행 변종도
-  있다 — 이 경우 transcript 도 없어 spawn timeout 후 `cli_error` 로 끝난다.
+- agy `--sandbox` 는 `flags.sandbox` 가 true 일 때 부착한다(config 기본 false).
+  업스트림 이력·재검증 절차는 레포 루트 `.metadata/cennad/agy-upstream-watch.md`
+  참조.
+- agy #76(구버전 `--print` 이 non-TTY stdout 으로 긴 응답을 flush 하기 전에
+  종료해 빈 stdout 을 반환하던 비결정적 결함) 호환: cennad 는 agy 버전을 강제하지
+  않으므로 빈 stdout 시 복구 경로를 안전망으로 유지한다. 로깅 초기화 전에
+  블로킹되는 행 변종은 transcript 도 없어 spawn timeout 후 `cli_error` 로 끝난다.
   응답이 생성된 경우 agy 는 디스크(brain transcript)에 보존하므로, 빈 stdout 일
   때 transcript 에서 복구한다.
 - 복구는 읽기 전용이다. agy 의 store·로그·세션 파일을 절대 수정하지 않는다.
@@ -46,11 +46,11 @@ agy 데이터 경로·transcript 스키마 지식을 한 모듈에 가둔다. ag
 - start 빈 stdout + transcript 존재 → 복구 텍스트로 `success`.
 - start 빈 stdout + transcript 부재 → `cli_error`.
 - resume 은 `--continue` 가 대화에 턴을 추가하므로 재시도 대상이 아니다.
-- `sandbox: true` 입력이어도 start/resume argv 에 `--sandbox` 가 없다.
+- `sandbox: true` 입력이면 start/resume argv 에 `--sandbox` 가 붙는다.
 
 ### Caveats
 
-- transcript 경로·스키마는 agy 비문서화 내부 구조(agy 1.0.7 기준)다. agy 1.0.4+
+- transcript 경로·스키마는 agy 비문서화 내부 구조(agy 1.1.2 기준)다. agy 1.0.4+
   는 `.db`(SQLite)를 공식 포맷으로 병행 기록하므로, 향후 JSONL 폐기 시 복구가
   깨질 수 있다 — 그 경우 `null` → `cli_error` 로 안전하게 실패한다.
 - 멀티바이트 경계 손상이 드물게 남을 수 있다 (빈 응답보다는 우월).

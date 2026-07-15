@@ -79,9 +79,9 @@ describe('loadConfig', () => {
           low: { model: 'gpt-5.4-mini' },
         },
         antigravity: {
-          high: 'Gemini 3.1 Pro',
-          mid: 'Claude Sonnet 4.5',
-          low: 'Gemini 3.5 Flash',
+          high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+          mid: { model: 'Claude Sonnet 4.6', effort: 'Thinking' },
+          low: { model: 'Gemini 3.5 Flash' },
         },
         claude: {
           high: { model: 'opus', effort: 'max' as const },

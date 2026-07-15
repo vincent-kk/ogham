@@ -50,9 +50,8 @@ export const CodexModelMapSchema = z.object({
 export type CodexModelMap = z.infer<typeof CodexModelMapSchema>;
 
 export const AntigravityFlagsSchema = z.object({
-  // Forced off while agy #76 (non-TTY output drop) is unfixed — the --sandbox
-  // wiring is commented out in buildStartArgs/buildResumeArgs to restore later.
-  // Kept in the schema for config back-compat.
+  // sandbox → --sandbox (terminal restrictions); skip_permissions →
+  // --dangerously-skip-permissions.
   sandbox: z.boolean(),
   skip_permissions: z.boolean(),
 });
@@ -101,16 +100,26 @@ export const ClaudeModelMapSchema = z.object({
 });
 export type ClaudeModelMap = z.infer<typeof ClaudeModelMapSchema>;
 
-// Per-tier model-name map. Lives here (not config.ts) so DispatchOptions can
-// carry it without a config→dispatch→config import cycle.
-export const TierModelMapSchema = z.object({
-  high: z.string(),
-  mid: z.string(),
-  low: z.string(),
+// Per-tier antigravity config. agy embeds the variant in the model display name —
+// "Gemini 3.5 Flash (Medium)" — so model and effort are stored separately (as
+// codex/claude do) and recomposed into that name at dispatch. effort is a free string:
+// agy's variants differ per model family (Gemini: Low/Medium/High, Claude: Thinking)
+// and are not a shared ordered scale, so they are not the codex/claude effort enum.
+// Lives here (not config.ts) so DispatchOptions can carry it without an import cycle.
+export const AntigravityTierConfigSchema = z.object({
+  model: z.string(),
+  effort: z.string().optional(),
 });
-export type TierModelMap = z.infer<typeof TierModelMapSchema>;
+export type AntigravityTierConfig = z.infer<typeof AntigravityTierConfigSchema>;
 
-export interface DispatchOptions<F = unknown, M = TierModelMap> {
+export const AntigravityModelMapSchema = z.object({
+  high: AntigravityTierConfigSchema,
+  mid: AntigravityTierConfigSchema,
+  low: AntigravityTierConfigSchema,
+});
+export type AntigravityModelMap = z.infer<typeof AntigravityModelMapSchema>;
+
+export interface DispatchOptions<F = unknown, M = AntigravityModelMap> {
   prompt: string;
   tier: Tier;
   options: ConversationOptions;
@@ -119,14 +128,14 @@ export interface DispatchOptions<F = unknown, M = TierModelMap> {
   flags: F;
   spawnTimeoutMs: number;
   // Tier→model map, injected by the MCP tool for providers that resolve concrete
-  // models from config (antigravity's TierModelMap, claude's ClaudeModelMap).
+  // models from config (antigravity's AntigravityModelMap, claude's ClaudeModelMap).
   // codex ignores it.
   modelMap?: M;
 }
 
 export interface DispatchResumeOptions<
   F = unknown,
-  M = TierModelMap,
+  M = AntigravityModelMap,
 > extends DispatchOptions<F, M> {
   externalSessionRef: string;
 }
@@ -140,7 +149,7 @@ export interface DispatchResult {
   resolvedModel: string | null;
 }
 
-export interface Dispatcher<F = unknown, M = TierModelMap> {
+export interface Dispatcher<F = unknown, M = AntigravityModelMap> {
   readonly supportedOptions: ReadonlySet<keyof ConversationOptions>;
   start(args: DispatchOptions<F, M>): Promise<DispatchResult>;
   resume(args: DispatchResumeOptions<F, M>): Promise<DispatchResult>;

@@ -1,14 +1,18 @@
-import type { Tier, TierModelMap } from '../../../types/index.js';
+import type { AntigravityModelMap, Tier } from '../../../types/index.js';
 
-// Resolves a tier alias to a concrete agy model full-name from config's
-// model_map.antigravity. A missing map omits -m so agy picks its default.
-// Unlike codex, model names are never hardcoded here — they live entirely in
-// config.
+// Resolves a tier to the concrete agy model name from config's model_map.antigravity.
+// agy carries the variant inside the display name ("Gemini 3.5 Flash (Medium)"), so
+// model + effort are recomposed into that form here. A missing map or an empty model
+// omits --model, letting agy pick its default. Model names are never hardcoded — they
+// live entirely in config.
 export function resolveAntigravityModel(
   tier: Tier,
-  map: TierModelMap | undefined,
+  map: AntigravityModelMap | undefined,
 ): string | null {
   if (!map) return null;
-  const name = map[tier];
-  return name && name.trim().length > 0 ? name : null;
+  const { model, effort } = map[tier];
+  const trimmedModel = model.trim();
+  if (trimmedModel.length === 0) return null;
+  const trimmedEffort = effort?.trim();
+  return trimmedEffort ? `${trimmedModel} (${trimmedEffort})` : trimmedModel;
 }

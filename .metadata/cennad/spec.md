@@ -130,15 +130,15 @@ agy 가 non-TTY 환경에서 stdout 을 무음 drop 하는 버그:
 
 ## model_map.antigravity
 
-config 의 `model_map.antigravity` 는 tier → concrete model name 매핑이다.
+config 의 `model_map.antigravity` 는 tier → `{ model, effort }` 매핑이다. agy 는 모델 표시명에 variant 를 내장한다 (예: `Gemini 3.5 Flash (Medium)`) — model 과 effort 를 분리 저장했다가 디스패치 시 재조합한다. effort 는 codex/claude 처럼 정렬된 스케일이 아니라 provider 자유 문자열(agy 모델별 variant 명, 예: `High`/`Medium`/`Low`)이며 optional 이다.
 
 ```json
 {
   "model_map": {
     "antigravity": {
-      "high": "<agy-model-full-name>",
-      "mid": "<agy-model-full-name>",
-      "low": "<agy-model-full-name>"
+      "high": { "model": "Gemini 3.1 Pro", "effort": "High" },
+      "mid": { "model": "Gemini 3.5 Flash", "effort": "Medium" },
+      "low": { "model": "Gemini 3.5 Flash", "effort": "Low" }
     }
   }
 }

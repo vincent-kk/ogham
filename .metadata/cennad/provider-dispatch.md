@@ -17,7 +17,7 @@ interface DispatchOptions<F> {
   sessionId: string; // cennad UUID (메타 키)
   cwd: string;
   flags: F;
-  modelMap?: TierModelMap;
+  modelMap?: AntigravityModelMap;
   spawnTimeoutMs?: number;
 }
 
@@ -107,7 +107,7 @@ effort 스케일은 `low < medium < high < xhigh < max < ultra` 이며 **지원 
 - 실행: `agy -p "<prompt>" [--dangerously-skip-permissions] [--model=<model>]`.
 - cwd 는 `<CENNAD_HOME>/runtime/antigravity-cwd/<sessionId>/`. 세션마다 격리. `<CENNAD_HOME>` 은 기본 `~/.claude/plugins/cennad` 이며 `CENNAD_CONFIG_PATH` 로 override 가능하다.
 - agy 는 `--output-format` 플래그가 없어(1.x 가 미정의 플래그로 거부) plain text 를 출력 — `parseJsonOutput` 가 text/json 모두 파싱. 모델은 `--model=<name>` (등호; `-m` 별칭 없음).
-- Sandbox: 미부착. `flags.sandbox` 는 스키마에 남되 항상 false — 복원 게이트는 #76 종결 ([agy-upstream-watch.md](./agy-upstream-watch.md)). `flags.skip_permissions` → `--dangerously-skip-permissions`.
+- Sandbox: `flags.sandbox`(config 기본 false)가 true 면 `--sandbox` 부착. 과거 #76 non-TTY 출력 드롭 악화로 미부착했으나 #76 종결·재검증 통과로 복원됐다 ([agy-upstream-watch.md](./agy-upstream-watch.md)). `flags.skip_permissions` → `--dangerously-skip-permissions`.
 
 ### Session 매핑
 
@@ -132,13 +132,17 @@ agy 는 `--print` 모드에서 conversation id 를 노출하지 않는다 (Issue
 ```typescript
 function resolveAntigravityModel(
   tier: Tier,
-  map: TierModelMap | undefined,
+  map: AntigravityModelMap | undefined,
 ): string | null {
   if (!map) return null;
-  const name = map[tier];
-  return name && name.trim().length > 0 ? name : null;
+  const { model, effort } = map[tier];
+  const trimmedModel = model.trim();
+  if (trimmedModel.length === 0) return null;
+  const trimmedEffort = effort?.trim();
+  return trimmedEffort ? `${trimmedModel} (${trimmedEffort})` : trimmedModel;
 }
-// null → --model 플래그 생략 (agy 기본값). map 미설정 시 항상 null.
+// null → --model 플래그 생략 (agy 기본값). agy 는 변종을 모델명에 담으므로
+// {model, effort} 를 "model (effort)" 로 재조합 — effort 없으면 model 만.
 ```
 
 `config.model_map.antigravity` 는 `{ high, mid, low }` per-tier 매핑. 사용 가능한 모델 전체 이름은 settings UI 드롭다운에서 확인한다.
@@ -177,7 +181,7 @@ Tier → `{ model, effort }` 를 `config.model_map.claude` 에서 해결. 환경
 //   haiku                            → effort 없음 (플래그 생략)
 function resolveClaudeModel(
   tier: Tier,
-  map: ClaudeTierModelMap | undefined,
+  map: ClaudeModelMap | undefined,
 ): { model: string; effort: string | null } | null {
   if (!map) return null;
   const entry = map[tier];

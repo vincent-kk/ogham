@@ -16,25 +16,65 @@ describe('mergeModelMap', () => {
 
   it('preserves a fully-specified antigravity map and fills codex/claude defaults', () => {
     const raw = {
-      antigravity: { high: 'ModelA', mid: 'ModelB', low: 'ModelC' },
+      antigravity: {
+        high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+        mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
+        low: { model: 'GPT-OSS 120B' },
+      },
     };
     expect(mergeModelMap(raw)).toEqual({
       codex: defaults.codex,
-      antigravity: { high: 'ModelA', mid: 'ModelB', low: 'ModelC' },
+      antigravity: {
+        high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+        mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
+        low: { model: 'GPT-OSS 120B' },
+      },
       claude: defaults.claude,
     });
   });
 
-  it('fills missing antigravity tiers from defaults when only high is provided', () => {
-    const raw = { antigravity: { high: 'CustomHigh' } };
+  it('does not inherit default effort for an antigravity tier that omits effort', () => {
+    const raw = { antigravity: { low: { model: 'GPT-OSS 120B' } } };
     const result = mergeModelMap(raw) as typeof defaults;
-    expect(result.antigravity.high).toBe('CustomHigh');
-    expect(result.antigravity.mid).toBe(defaults.antigravity.mid);
-    expect(result.antigravity.low).toBe(defaults.antigravity.low);
+    expect(result.antigravity.low).toEqual({ model: 'GPT-OSS 120B' });
+    expect(result.antigravity.low).not.toHaveProperty('effort');
+  });
+
+  it('fills missing antigravity tiers from defaults when only high is provided', () => {
+    const raw = {
+      antigravity: { high: { model: 'CustomHigh', effort: 'High' } },
+    };
+    const result = mergeModelMap(raw) as typeof defaults;
+    expect(result.antigravity.high).toEqual({
+      model: 'CustomHigh',
+      effort: 'High',
+    });
+    expect(result.antigravity.mid).toEqual(defaults.antigravity.mid);
+    expect(result.antigravity.low).toEqual(defaults.antigravity.low);
   });
 
   it('returns defaults when raw is a string', () => {
     expect(mergeModelMap('not-an-object')).toEqual(defaults);
+  });
+
+  it('migrates a legacy flat-string antigravity model_map, splitting model/effort', () => {
+    const raw = {
+      antigravity: {
+        high: 'Gemini 3.1 Pro (High)',
+        mid: 'Gemini 3.5 Flash (Medium)',
+        low: 'GPT-OSS 120B',
+      },
+    };
+    const result = mergeModelMap(raw) as typeof defaults;
+    expect(result.antigravity.high).toEqual({
+      model: 'Gemini 3.1 Pro',
+      effort: 'High',
+    });
+    expect(result.antigravity.mid).toEqual({
+      model: 'Gemini 3.5 Flash',
+      effort: 'Medium',
+    });
+    expect(result.antigravity.low).toEqual({ model: 'GPT-OSS 120B' });
   });
 
   it('returns defaults when raw is an array', () => {
@@ -119,7 +159,7 @@ describe('mergeModelMap', () => {
 
   it('does not mutate DEFAULT_CONFIG.model_map', () => {
     const before = JSON.parse(JSON.stringify(defaults));
-    mergeModelMap({ antigravity: { high: 'Mutator' } });
+    mergeModelMap({ antigravity: { high: { model: 'Mutator' } } });
     expect(DEFAULT_CONFIG.model_map).toEqual(before);
   });
 });

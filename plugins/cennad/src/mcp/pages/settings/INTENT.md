@@ -16,7 +16,7 @@
 - token 은 URL 쿼리 `?token=<...>` 에서 읽어 동일 origin XHR 에 재전달
 - POST body 는 항상 `Content-Type: application/json`
 - CSS 변수로 다크 모드 토큰화
-- antigravity 활성 시 per-tier 모델 드롭다운(high / mid / low) 표시 — 선택 항목은 `/provider-status` 의 `agyModels` 배열로 동적 바인딩
+- antigravity 활성 시 per-tier model + effort 드롭다운 표시 — agy 카탈로그(전체 이름)를 base/variant 로 분해해 model=base 목록·effort=선택 model 의 variant 집합으로 바인딩; 저장은 `{model, effort}`, dispatch 가 `model (effort)` 로 재조합 (카탈로그는 `/provider-status` 의 `agyModels`)
 - Provider ratio 는 단일 segmented bar 로 조정 — 활성 provider 수가 `n`이면 경계 handle `n-1`개를 렌더링하고, 저장 포맷은 기존 `ratio.<provider>.value/enabled` 유지
 - codex 레인: yolo/sandbox 컨트롤 + per-tier model 및 effort 드롭다운 — model 선택 항목은 `/provider-status` 의 `codexModels` 카탈로그(실패 시 정적 fallback), effort 선택 항목은 선택된 model 이 광고한 집합으로 제한. codex 는 미지원 effort 를 다운그레이드하지 않고 API 에러로 실패시키므로 UI 가 원천 차단한다
 - Anthropic(claude) 레인: headless 위임에 맞춘 `permission_mode` 라디오(acceptEdits/auto/dontAsk/bypassPermissions, 기본 dontAsk) + per-tier model 및 effort 드롭다운 (effort 선택 항목은 선택된 model 에 따라 적응)
