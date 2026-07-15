@@ -663,8 +663,7 @@
         : DEFAULT_OPTION_FLAGS.codex.sandbox,
       CODEX_SANDBOX_MODES,
     );
-    // antigravity --sandbox is forced off (agy #76); keep the control disabled.
-    antigravitySandbox.checked = false;
+    antigravitySandbox.checked = Boolean(a.sandbox);
     antigravitySkipPerms.checked = Boolean(a.skip_permissions);
     setRadio(
       'claude-permission-mode',
@@ -1020,8 +1019,7 @@
         ),
       },
       antigravity: {
-        // Forced off while agy #76 is unfixed.
-        sandbox: false,
+        sandbox: Boolean(antigravitySandbox.checked),
         skip_permissions: Boolean(antigravitySkipPerms.checked),
       },
       claude: {

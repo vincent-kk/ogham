@@ -50,9 +50,8 @@ export const CodexModelMapSchema = z.object({
 export type CodexModelMap = z.infer<typeof CodexModelMapSchema>;
 
 export const AntigravityFlagsSchema = z.object({
-  // Forced off while agy #76 (non-TTY output drop) is unfixed — the --sandbox
-  // wiring is commented out in buildStartArgs/buildResumeArgs to restore later.
-  // Kept in the schema for config back-compat.
+  // sandbox → --sandbox (terminal restrictions); skip_permissions →
+  // --dangerously-skip-permissions.
   sandbox: z.boolean(),
   skip_permissions: z.boolean(),
 });
