@@ -25,15 +25,16 @@
 > **배운 사실 3가지**:
 >
 > 1. agy 훅은 플러그인이 **등록(`agy plugin install <dir>`)돼야** 스캔된다 — `.agents/plugins/` 배치만으론 `agy plugin list` 에 안 잡히고 훅도 0개. (등록 후엔 `--print` 에서도 로드·발화.)
-> 2. `agy plugin install` 은 **`bridge/` 를 복사하지 않는다**(hooks.json·plugin.json 만) — 훅 커맨드가 참조하는 번들이 설치 위치에 없어 무동작. 전체 플러그인 디렉터리를 `.agents/plugins/<n>/` 에 두고 그걸 install 해야 한다(= D2 배치와 결합).
+> 2. ~~`agy plugin install` 은 `bridge/` 를 복사하지 않는다~~ → **F7 정정 (2026-07-15 2차 실측)**: agy 1.1.2 는 `bridge/` 를 **복사한다**(설치 위치 `~/.gemini/config/plugins/<n>/bridge/` 에 번들 확인). ⇒ 훅 커맨드의 상대경로(`node bridge/run-agy.mjs …`)가 `agy plugin install` 로 정상 해석. (구 D1 관측은 오류였음.)
 > 3. agy 대화형은 **로그인돼 있다**(lunox298@gmail.com, Gemini 3.1 Pro) — `--print` 의 "not logged in" 은 print 모드 아티팩트.
 >
 > **결론 / 진행 (2026-07-15 2차 세션 — stage5)**:
 >
 > - **컨텍스트 주입 훅(SessionStart·UserPromptSubmit)** 은 agy 가 injectSteps 를 렌더할 때까지 **보류**(어댑터 준비됨).
 > - **✅ 게이팅 훅(D1b) 채택·번역 완료 (`85fea062`)**: 실측 확정 — agy 는 PreToolUse `{decision:deny}` 를 **강제**한다(probe 로 view_file deny 시 모델이 ask_permission 후 grep 우회). `agy-hooks` 에 `toolMap`(agy `write_to_file{TargetFile,CodeContent}`→Write, `replace_file_content`→Edit, `view_file`→Read …)·PreToolUse 번역·deny 역변환 추가. runner+실 maencof 브리지로 `write_to_file`→`01_Core` 차단 실측. **차단 가드만 이식**(agy PreToolUse 엔 주입 채널 없음 → 권고 가드 손실).
-> - ⚠ **workspacePaths 런타임 블로커 (F6)**: --print 에서 `workspacePaths:[]` 비어 있어 러너 cwd 가 비면 가드 no-op. 대화형 주입은 agy 문서상 추정이나 미검증. **emitter 배선 전 대화형 workspacePaths 확인 필수.**
-> - **emitter/빌드 배선** 은 다음 작업. 선행조건 ✅: Codex 는 매니페스트가 `hooks/hooks.json` 선언 시 루트 `hooks.json` 을 **무시**(실측) → agy-format `hooks.json` 루트 배치 안전.
+> - ✅ **F6 해소 (`6c75b159`) + 라이브 검증**: agy 훅엔 프로젝트 경로 신호가 없다(`workspacePaths:[]`·`GEMINI_PROJECT_DIR` 없음·cwd=플러그인 dir, stage5 2차). ⇒ 러너가 편집 파일(`toolCall.args.TargetFile`) 디렉터리를 cwd 로 역산 + maencof `isInsideMaencofVault` walk-up. **라이브 agy 로 확정**: 빈 workspacePaths 에서 `write_to_file`→Layer-1 이 `{decision:deny}` 강제됨.
+> - ⚠ **셸 우회 (고지)**: 모델이 Bash(`run_command`)로 파일 편집 시 write 가드 우회 — Claude·Codex·agy 전 호스트 공통 guardrail 한계(OpenAI 공식 문서 확인). 차단 가드는 주 경로(write_to_file/replace_file_content)만 막음.
+> - ✅ **emitter unblocked**: 선행조건(Codex 루트 hooks.json 무시) + **F7 정정**(`agy plugin install` 이 bridge/ 복사 — D1 로그의 "미복사" 반증) ⇒ emitter 상대경로 배포 작동. 배선만 남음(3플러그인 build-hooks + baseline, 별도 세션).
 
 ---
 

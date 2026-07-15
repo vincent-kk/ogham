@@ -88,11 +88,46 @@ TODO 원안 "공유 Codex↔Claude 파일도구 **매핑 헬퍼**로 정규화 (
 
 ⇒ **emitter 는 agy-format `hooks.json` 을 플러그인 루트에 안전하게 둘 수 있다**(agy=루트 발견 / Codex=subdir 선언만). ponytail 식 파일명 변경(claude-codex-hooks.json) 불요.
 
+---
+
+## 2차: 라이브 agy 검증 + 공식/커뮤니티 조사 (같은 세션)
+
+### F6 해소 — agy 훅엔 프로젝트 경로가 없다 → 편집 파일 경로로 역산
+
+측정: agy PreToolUse 훅 env·payload 전수 — `workspacePaths:[]`(git repo 여부 무관), **`GEMINI_PROJECT_DIR` 없음**(Medium 가이드 주장 반증), cwd=플러그인 dir, env엔 `ANTIGRAVITY_CONVERSATION_ID` 뿐. **유일한 프로젝트 신호는 `toolCall.args.TargetFile`(절대경로)**. ⇒ 러너가 workspace 부재 시 편집 파일의 디렉터리를 cwd 로 삼고 가드가 상향탐색. filid `isFcaProject` 는 이미 walk-up; maencof 는 `isInsideMaencofVault`(walk-up 변형) 추가해 layerGuard 만 사용(다른 호출부는 cwd=vault 루트 가정 유지). **커밋 `6c75b159`**.
+
+### 라이브 agy E2E (agy 1.1.2, 실제 실행)
+
+maencof 브리지 + `bridge/run-agy.mjs`(esbuild 번들)를 agy 플러그인으로 등록, agy --print 로 Layer-1 파일 편집 유도:
+
+- ✅ **agy 가 mnguard 훅 발화** — run-agy 체인 실행(trace 확인).
+- ✅ **agy 가 `write_to_file` `{decision:deny}` 강제** — 모델이 write_to_file 차단당함(trace: write_to_file→deny).
+- ✅ **F6 fallback 라이브 작동** — 빈 workspacePaths 에서 TargetFile 로 cwd 역산 → walk-up 이 실제 vault `.maencof` 발견 → deny.
+- ⚠️ **모델이 셸(`run_command echo`)로 우회**해 파일 수정 — 내 가드는 write_to_file/replace_file_content 만 deny, Bash 미차단. **이는 전 호스트 공통 guardrail 한계**(OpenAI 공식 문서: "Codex can often perform equivalent work through another supported tool path"; Claude 도 Bash `echo>file` 로 우회 가능). ⇒ **agy = Claude 파리티**(차단 가드는 주 경로만 막고 셸 우회는 어디서나 가능).
+
+> ⚠ **안전 사고·복구**: 혼란한 agy 모델이 테스트 vault 대신 **사용자 실제 vault(falias·tirnanog)의 01_Core/identity.md** 를 찾아 셸로 수정함. 즉시 `git checkout` 으로 **복원 완료**(git clean 확인). 교훈: **라이브 agy 파일-쓰기 테스트는 모델이 실제 파일에 도달하므로 위험** — 이후 read-only 로 한정.
+
+### F7 정정 — `agy plugin install` 은 `bridge/` 를 복사한다
+
+D1 로그의 "agy plugin install 은 bridge/ 미복사" 는 **틀렸다**(agy 1.1.2 실측: install 위치 `~/.gemini/config/plugins/<n>/bridge/` 에 번들 복사 확인). ⇒ **emitter 의 상대경로(`node bridge/run-agy.mjs …`)가 `agy plugin install` 로 작동** — 배포 블로커 해소.
+
+### 조사 (공식/커뮤니티 — 내 접근 검증)
+
+- **OpenAI 공식 훅 문서**(learn.chatgpt.com/docs/hooks): Codex PreToolUse `tool_name:"apply_patch"`·`tool_input.command`·`Bash`, deny 차단 — **내 E2/E3 실측과 일치**. **PreToolUse `additionalContext` 는 "parsed but not applied"**(issue #19385) ⇒ **filid 구조경고·maencof vault redirect 권고는 Codex 에서도 손실**(agy 와 동일 — 전 비-Claude 호스트에서 차단만 이식, 주입/권고 불가).
+- **`falcosecurity/prempti`**: `tool_input.command` 에서 apply_patch 파싱, **다중 파일은 경로당 1 이벤트** — 내 파서 접근 검증 + 다중파일 상한의 업그레이드 경로(참조 구현).
+- agy Medium 가이드·Reddit: PreToolUse `{decision:deny}` 차단 실증 — 내 D1b 확증.
+
+### Emitter — validated·unblocked, 유예 (다음 단계)
+
+라이브로 설계 전체가 검증됐고(체인·deny·F6·bridge 복사) 블로커도 없다. 배선만 남음: compiler `buildAgyHooks`(Claude PreToolUse → agy named-group, `*` matcher, `node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs`) + **PreToolUse 보유 3개 플러그인(filid·imbas·maencof)** 의 build-hooks 에 `bridge/run-agy.mjs`(cross-platform agyRunner main) 번들 + `package.json:files` + baseline 30→33 + DETAIL + Claude 무영향(루트 hooks.json) 재확인. build-hooks 는 이벤트별 캡·금지패턴 가드가 정교해 신중히 다뤄야 함 — 별도 집중 세션 권장.
+
 ## 결론 요약
 
-| 항목                  | 결과                                                                             | 코드       |
-| --------------------- | -------------------------------------------------------------------------------- | ---------- |
-| E2/E3 Codex 파일도구  | ✅ apply_patch→Write/Edit 정규화, 가드 발화 실측                                 | `16a161cc` |
-| D1b agy 게이팅        | ✅ 번역 완료, agy deny 강제 실측, 가드 발화 실측                                 | `85fea062` |
-| Codex root hooks.json | ✅ 안전(무시) — emitter 설계 확정                                                | (문서)     |
-| Emitter 배선          | ⬜ 유예 — 대규모(compiler+5플러그인+baseline) + **workspacePaths 런타임 미검증** | 다음       |
+| 항목                     | 결과                                                                                 | 코드       |
+| ------------------------ | ------------------------------------------------------------------------------------ | ---------- |
+| E2/E3 Codex 파일도구     | ✅ apply_patch→Write/Edit 정규화, 가드 발화 실측 (공식 문서·prempti 검증)            | `16a161cc` |
+| D1b agy 게이팅           | ✅ 번역 + **라이브 agy deny 강제 실측** + 가드 발화                                  | `85fea062` |
+| F6 workspacePaths        | ✅ 편집 파일 경로로 cwd 역산 + walk-up — **라이브 실측**(빈 workspace 에서 deny)     | `6c75b159` |
+| 셸 우회 (전 호스트 공통) | ⚠️ 모델이 Bash 로 우회 — guardrail 한계, Claude·Codex·agy 동일(고지)                 | (문서)     |
+| Codex root hooks.json    | ✅ 안전(무시) · F7: agy install 이 bridge 복사 — emitter 설계·배포 확정              | (문서)     |
+| Emitter 배선             | ⬜ 유예 — **validated·unblocked**, 3플러그인 build-hooks + baseline (별도 집중 세션) | 다음       |

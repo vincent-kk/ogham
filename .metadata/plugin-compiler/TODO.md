@@ -28,8 +28,8 @@
 | **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정                                              |
 | **D1** agy 훅 번역 어댑터            | 🟡 주입훅 보류(F4) — 게이팅(D1b)은 ✅ 완료(`85fea062`, 아래)                                                          |
 | **E3/E2** Codex 파일도구 매칭        | ✅ **완료**(`16a161cc`) — `apply_patch`→`Write`/`Edit` 정규화, 가드 발화 실측 ([stage5](./stage5-measurement-log.md)) |
-| **D1b** agy 게이팅 훅 (번역)         | ✅ **완료**(`85fea062`) — agy `deny` 강제 실측, maencof 보안가드 발화 실측. 배선(emitter)·workspacePaths 미검증       |
-| **Emitter/빌드 배선**                | ⬜ 다음 — 선행조건(Codex root hooks 안전) 확정. **대규모 + workspacePaths 런타임 미검증** (아래)                      |
+| **D1b** agy 게이팅 훅 (번역)         | ✅ **완료 + 라이브 검증**(`85fea062`·`6c75b159`) — 실제 agy 가 `write_to_file` deny 강제·F6 fallback 작동             |
+| **Emitter/빌드 배선**                | ⬜ 다음 — **validated·unblocked**(라이브 검증·F7 bridge 복사). 3플러그인 build-hooks + baseline (별도 집중 세션)      |
 | main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                                                             |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
@@ -98,8 +98,10 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 > Vincent 님 지시: **순차적으로 전부**, 플랫폼 한계 3종은 **우회+고지**. 실측 정본: [stage5-measurement-log.md](./stage5-measurement-log.md).
 
 1. ~~**E3/E2 — Codex 파일도구 매칭**~~ → ✅ **완료 (`16a161cc`)**. 실측이 원안 가설을 정정: Codex 는 `apply_patch`(V4A 패치)·`Bash` 만 보내고 Read/Grep/Glob 도구는 **원천 미발화**(모델이 셸로 읽음). 이름 매핑이 아니라 **패치 파싱**이 필요 — `@ogham/cross-platform/codex-hooks` 가 `apply_patch`→`Write`/`Edit`(file_path·content 추출) 정규화. maencof Layer1·filid 문서계약 deny 가 Codex `apply_patch` 에서 발화, Claude 와 바이트 동일(E2E 실측). **읽기 계열 추적은 이식 불가**(고지).
-2. ~~**D1b — agy 게이팅 훅**~~ → ✅ **번역 완료 (`85fea062`)**. 실측 확정: agy PreToolUse 는 `toolCall:{name,args}` 를 싣고 **`{decision:deny}` 를 강제**(injectSteps F4 와 대조). `agy-hooks` 확장(도구맵·PreToolUse 번역·deny 역변환). runner+실 maencof 브리지로 `write_to_file`→`01_Core` 차단 실측. **차단 가드만 이식**(agy PreToolUse 엔 주입 채널 없음 → 권고 가드 손실, 고지).
-3. **Emitter/빌드 배선** — ⬜ **다음 작업**. 선행조건 ✅: Codex 는 매니페스트가 `hooks/hooks.json` 선언 시 **루트 `hooks.json` 을 무시**(실측). ⇒ agy-format `hooks.json` 을 플러그인 루트에 안전 배치. 필요: compiler `buildAgyHooks`(Claude→agy named-group, PreToolUse matcher 번역) + build-hooks 가 5 플러그인에 `bridge/run-agy.mjs` 번들 + `package.json:files` + baseline 30→35 + DETAIL. **대규모.** ⚠ **workspacePaths 런타임 미검증** — --print 에선 `[]` 비어 있어 가드 no-op; 대화형 주입은 추정(agy 문서)·미확인. **배선 전 대화형 workspacePaths 주입 확인 필수** — 아니면 emit 한 훅이 no-op.
+2. ~~**D1b — agy 게이팅 훅**~~ → ✅ **번역 완료 + 라이브 검증 (`85fea062`·`6c75b159`)**. **실제 agy 실행으로 확정**: agy 가 훅 발화·`write_to_file` `{decision:deny}` 강제(라이브 trace)·F6 fallback 작동. `agy-hooks` 확장(도구맵·PreToolUse 번역·deny 역변환) + 편집파일 경로 cwd 역산(F6). **차단 가드만 이식**(주입 채널 없음). 모델 셸 우회는 전 호스트 공통 한계.
+3. **Emitter/빌드 배선** — ⬜ **다음 작업 (validated·unblocked)**. **라이브 agy 로 설계 전체 검증됨**(stage5 2차): agy 가 훅 발화·`write_to_file` deny 강제·F6 fallback 작동·`agy plugin install` 이 bridge 복사(F7). 배선만 남음: compiler `buildAgyHooks`(Claude PreToolUse → agy named-group, `*` matcher, `node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs`) + **PreToolUse 보유 3플러그인(filid·imbas·maencof)** build-hooks 에 `bridge/run-agy.mjs`(cross-platform agyRunner main) 번들 + `package.json:files` + baseline 30→33 + DETAIL + Claude 무영향(루트 hooks.json) 재확인. ⚠ build-hooks 는 이벤트별 캡·금지패턴 가드가 정교 — 별도 집중 세션 권장.
+   - **F6 해소** (`6c75b159`): agy 훅엔 프로젝트 경로 신호 없음(workspacePaths `[]`·GEMINI_PROJECT_DIR 없음) → 러너가 편집 파일 경로로 cwd 역산 + maencof `isInsideMaencofVault` walk-up. 라이브 실측(빈 workspace 에서 Layer-1 deny).
+   - **셸 우회 (고지)**: 모델이 Bash(`run_command`)로 파일 편집 시 write 가드 우회 — Claude·Codex·agy 전 호스트 공통 guardrail 한계(OpenAI 공식 문서 확인). 차단 가드는 주 경로(Write/Edit↔apply_patch↔write_to_file)만 막음.
 4. **L2·L3 우회·고지** — agy MCP 배치 스크립트/README(L2), Codex agents 단일-폴백·설치안내(L3). 정본: matrix §10.
 
 **커밋 완료**: F2+M2(`23003510`), agy 어댑터 기반(`01d1ca98`), E2/E3(`16a161cc`), D1b 번역(`85fea062`). 상세: [stage5-measurement-log.md](./stage5-measurement-log.md) · [backlog-d-e.md](./backlog-d-e.md) · [matrix §10](./host-capability-matrix.md).

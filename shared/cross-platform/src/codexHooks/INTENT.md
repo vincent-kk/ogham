@@ -4,12 +4,12 @@ Codex `apply_patch` 도구 호출을 Claude 훅 도구 어휘(`Write`/`Edit`)로
 
 ## Structure
 
-| File                  | Role                                                          |
-| --------------------- | ------------------------------------------------------------ |
-| `index.ts`            | barrel                                                       |
-| `types.ts`            | `ApplyPatchOp` · `CodexToolUse` 최소 타입 (organ)           |
-| `parseApplyPatch.ts`  | V4A 패치 → 파일 연산 목록 (순수 파서)                       |
-| `normalizeToolUse.ts` | `apply_patch` 입력 → Claude `Write`/`Edit` 입력 재작성      |
+| File                  | Role                                                   |
+| --------------------- | ------------------------------------------------------ |
+| `index.ts`            | barrel                                                 |
+| `types.ts`            | `ApplyPatchOp` · `CodexToolUse` 최소 타입 (organ)      |
+| `parseApplyPatch.ts`  | V4A 패치 → 파일 연산 목록 (순수 파서)                  |
+| `normalizeToolUse.ts` | `apply_patch` 입력 → Claude `Write`/`Edit` 입력 재작성 |
 
 ## Conventions
 
