@@ -3,11 +3,11 @@ import { z } from 'zod';
 import { TierSchema } from './conversation.js';
 import {
   AntigravityFlagsSchema,
+  AntigravityModelMapSchema,
   ClaudeFlagsSchema,
   ClaudeModelMapSchema,
   CodexFlagsSchema,
   CodexModelMapSchema,
-  TierModelMapSchema,
 } from './dispatch.js';
 
 export const InterventionStrengthSchema = z.union([
@@ -51,12 +51,12 @@ export const OptionFlagsSchema = z.object({
 
 export type OptionFlags = z.infer<typeof OptionFlagsSchema>;
 
-// Per-tier model mapping. antigravity serves multiple model families (plain string
-// map); codex and claude each map a tier to a {model, effort} pair. The tier-map
-// schemas live in dispatch.ts to avoid an import cycle.
+// Per-tier model mapping. Each provider maps a tier to a {model, effort} pair;
+// antigravity recomposes them into agy's "model (effort)" display name at dispatch.
+// The tier-map schemas live in dispatch.ts to avoid an import cycle.
 export const ModelMapSchema = z.object({
   codex: CodexModelMapSchema,
-  antigravity: TierModelMapSchema,
+  antigravity: AntigravityModelMapSchema,
   claude: ClaudeModelMapSchema,
 });
 

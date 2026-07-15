@@ -62,6 +62,27 @@ describe('settings page ratio controls', () => {
     }
   });
 
+  it('offers antigravity per-tier model and effort controls', () => {
+    const html = readSettingsFile('index.html');
+
+    for (const tier of ['high', 'mid', 'low']) {
+      expect(html).toContain(`id="model-antigravity-${tier}"`);
+      expect(html).toContain(`id="effort-antigravity-${tier}"`);
+    }
+  });
+
+  // agy embeds the variant in the model name; the UI splits it into a model + a
+  // per-model effort dropdown so config stores {model, effort} like codex/claude.
+  it('splits agy models into model + effort and scopes effort to the model', () => {
+    const app = readSettingsFile('scripts/app.js');
+
+    expect(app).toContain('function parseAgyModel(');
+    expect(app).toContain('function agyEffortSet(');
+    expect(app).toContain(
+      'bindAgyEffortOptions(tier, modelAntigravity[tier].value)',
+    );
+  });
+
   // codex hard-fails an effort its model does not advertise, so the effort list
   // must follow the selected model rather than offering the whole scale.
   it('scopes codex effort options to the selected model', () => {

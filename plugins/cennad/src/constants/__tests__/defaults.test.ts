@@ -56,6 +56,16 @@ describe('DEFAULT_CONFIG', () => {
       low: { model: 'gpt-5.6-terra', effort: 'medium' },
     });
   });
+
+  // agy embeds the variant in the model name; dispatch recomposes {model, effort}
+  // into "model (effort)".
+  it('defaults model_map.antigravity to per-tier {model, effort}', () => {
+    expect(DEFAULT_CONFIG.model_map.antigravity).toEqual({
+      high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+      mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
+      low: { model: 'Gemini 3.5 Flash', effort: 'Low' },
+    });
+  });
 });
 
 describe('file modes', () => {
