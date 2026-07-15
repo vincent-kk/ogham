@@ -22,7 +22,10 @@ export function assertEnvelopeSuccess(
   expectation: SuccessExpect,
 ): ConversationResponse {
   const parsed = ConversationResponseSchema.parse(envelope);
-  expect(parsed.status).toBe('success');
+  expect(
+    parsed.status,
+    `expected success but dispatch returned ${parsed.status}: ${JSON.stringify(parsed.error)}`,
+  ).toBe('success');
   expect(parsed.provider).toBe(expectation.provider);
   expect(parsed.meta.turn).toBe(expectation.turn);
   expect(parsed.error).toBeNull();
