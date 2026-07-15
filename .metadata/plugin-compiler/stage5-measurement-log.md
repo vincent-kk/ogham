@@ -117,9 +117,15 @@ D1 로그의 "agy plugin install 은 bridge/ 미복사" 는 **틀렸다**(agy 1.
 - **`falcosecurity/prempti`**: `tool_input.command` 에서 apply_patch 파싱, **다중 파일은 경로당 1 이벤트** — 내 파서 접근 검증 + 다중파일 상한의 업그레이드 경로(참조 구현).
 - agy Medium 가이드·Reddit: PreToolUse `{decision:deny}` 차단 실증 — 내 D1b 확증.
 
-### Emitter — validated·unblocked, 유예 (다음 단계)
+### Emitter — ✅ 완료 (`b0d0cd0f`)
 
-라이브로 설계 전체가 검증됐고(체인·deny·F6·bridge 복사) 블로커도 없다. 배선만 남음: compiler `buildAgyHooks`(Claude PreToolUse → agy named-group, `*` matcher, `node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs`) + **PreToolUse 보유 3개 플러그인(filid·imbas·maencof)** 의 build-hooks 에 `bridge/run-agy.mjs`(cross-platform agyRunner main) 번들 + `package.json:files` + baseline 30→33 + DETAIL + Claude 무영향(루트 hooks.json) 재확인. build-hooks 는 이벤트별 캡·금지패턴 가드가 정교해 신중히 다뤄야 함 — 별도 집중 세션 권장.
+배선 완료. compiler `buildAgyHooks` 가 Claude PreToolUse → agy named-group(`{"<plugin>":{"PreToolUse":[{matcher:"*",hooks:[…]}]}}`)로 재작성, 핸들러 커맨드는 `node bridge/run-agy.mjs PreToolUse bridge/<handler>.mjs`(핸들러 경로는 Claude 커맨드에서 regex 추출 — 브리지 리네임 추종). **PreToolUse 만 방출** — 주입훅(SessionStart·UserPromptSubmit→PreInvocation)은 F4 로 死코드이자 매 턴 스폰이라 제외, PostToolUse 는 러너 미지원. **PreToolUse 보유 3플러그인(filid·imbas·maencof)** build-hooks 가 `@ogham/cross-platform/agy-runner/main`(신규 subpath export)을 `import.meta.resolve` 로 잡아 `bridge/run-agy.mjs` 로 번들(별도 esbuild 패스 + 12 KB 캡 + FORBIDDEN_PATTERNS, 실측 3.3 KB Node 내장만) + `package.json:files` 에 루트 `hooks.json` 추가(`bridge/` 는 기존 포함). baseline 30→33, idempotent.
+
+**스모크 (빌드된 브리지 3종)**: agy `write_to_file`→maencof Layer1, `workspacePaths:[]`(F6 역산) → **`{decision:deny}`**(사유 그대로); 비-Layer1(04_Notes)·비-FCA → allow; 브리지 2회 재빌드 md5 동일(결정론). typecheck 클린, 전체 4326 통과, adapters:check 33 unchanged, Claude 소비 파일 diff 0.
+
+**⚠ 스모크 실행 함정**: 러너는 `resolve(argv[3])` 로 핸들러를 **cwd 기준** 해석한다. agy 는 cwd=hooks.json 위치(플러그인 루트)로 실행하므로 스모크도 **플러그인 루트에서** 돌려야 한다 — repo 루트에서 돌리면 `repo/bridge/pre-tool-use.mjs` 부재 → runHandler null → 러너 no-op(allow). 초기 측정에서 이 cwd 오류로 deny 가 allow 로 보였다(코드 아닌 하네스 오류로 확정).
+
+**실측 발견 — F6 stale 브리지 (`2e4f08b0`)**: 재빌드 중 maencof 브리지 3개(post-tool-use·session-start·user-prompt-submit)가 커밋본과 달랐다. 통제 실험(isMaencofVault 를 HEAD 로 되돌려도 동일 diff)으로 원인을 격리: F6(`6c75b159`)이 `isMaencofVault` 를 `hasVaultMarker`+`isInsideMaencofVault` 로 분리하고 **pre-tool-use 만 재빌드**, 공유 lifecycle dispatcher 를 인라인하는 나머지 3개를 pre-F6 소스로 남겼다. 기능 동일(리팩터는 순수 분리)이나 `bridge/` 가 소스와 드리프트 — 재빌드로 재현성 복구.
 
 ## 결론 요약
 
@@ -130,4 +136,4 @@ D1 로그의 "agy plugin install 은 bridge/ 미복사" 는 **틀렸다**(agy 1.
 | F6 workspacePaths        | ✅ 편집 파일 경로로 cwd 역산 + walk-up — **라이브 실측**(빈 workspace 에서 deny)     | `6c75b159` |
 | 셸 우회 (전 호스트 공통) | ⚠️ 모델이 Bash 로 우회 — guardrail 한계, Claude·Codex·agy 동일(고지)                 | (문서)     |
 | Codex root hooks.json    | ✅ 안전(무시) · F7: agy install 이 bridge 복사 — emitter 설계·배포 확정              | (문서)     |
-| Emitter 배선             | ⬜ 유예 — **validated·unblocked**, 3플러그인 build-hooks + baseline (별도 집중 세션) | 다음       |
+| Emitter 배선             | ✅ **완료** — `buildAgyHooks` 5번째 어댑터·3플러그인 `run-agy.mjs` 번들·30→33·스모크 통과 | `b0d0cd0f` |
