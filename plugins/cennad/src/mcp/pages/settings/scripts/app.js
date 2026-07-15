@@ -81,6 +81,9 @@
   // Mirror src/constants/codexModels.ts — keep in sync. The live catalog from
   // /provider-status wins; these sets only cover a codex that cannot be probed.
   var CODEX_EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'];
+  // agy variants are model-specific labels, not a shared scale; this ordering only
+  // guides clampEffort's fallback when a model switch drops the current variant.
+  var AGY_EFFORT_SCALE = ['Low', 'Medium', 'High', 'Thinking'];
   var CODEX_FALLBACK_MODEL_EFFORT_SETS = {
     'gpt-5.6-sol': ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'],
     'gpt-5.6-terra': ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'],
@@ -160,6 +163,11 @@
     mid: $('#model-antigravity-mid'),
     low: $('#model-antigravity-low'),
   };
+  var effortAntigravity = {
+    high: $('#effort-antigravity-high'),
+    mid: $('#effort-antigravity-mid'),
+    low: $('#effort-antigravity-low'),
+  };
 
   // claude-specific controls.
   var claudeBypassWarning = $('#claude-bypass-warning');
@@ -205,7 +213,11 @@
   };
   var agyModels = [];
   var codexModels = [];
-  var antigravityModelMap = { high: '', mid: '', low: '' };
+  var antigravityModelMap = {
+    high: { model: '', effort: '' },
+    mid: { model: '', effort: '' },
+    low: { model: '', effort: '' },
+  };
   var claudeModelMap = {
     high: { model: '', effort: '' },
     mid: { model: '', effort: '' },
@@ -743,17 +755,88 @@
     }
   }
 
-  function bindAgyModelOptions(list) {
+  // agy models arrive as full display names — "Gemini 3.5 Flash (Medium)". Split the
+  // trailing "(variant)" into model + effort so the UI can offer a model dropdown and a
+  // per-model effort dropdown, mirroring codex/claude. dispatch recomposes them back
+  // into this form since agy carries the variant inside the model name.
+  function parseAgyModel(fullName) {
+    var match = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(String(fullName || ''));
+    if (match) return { model: match[1].trim(), effort: match[2].trim() };
+    return { model: String(fullName || '').trim(), effort: '' };
+  }
+
+  function agyModelBases() {
+    var bases = [];
+    for (var i = 0; i < agyModels.length; i += 1) {
+      var base = parseAgyModel(agyModels[i]).model;
+      if (base && bases.indexOf(base) < 0) bases.push(base);
+    }
+    return bases;
+  }
+
+  function agyEffortSet(base) {
+    var set = [];
+    for (var i = 0; i < agyModels.length; i += 1) {
+      var parsed = parseAgyModel(agyModels[i]);
+      if (
+        parsed.model === base &&
+        parsed.effort &&
+        set.indexOf(parsed.effort) < 0
+      )
+        set.push(parsed.effort);
+    }
+    return set;
+  }
+
+  function bindAgyEffortOptions(tier, base) {
+    var sel = effortAntigravity[tier];
+    if (!sel) return;
+    var set = agyEffortSet(base);
+    while (sel.firstChild) sel.removeChild(sel.firstChild);
+    if (set.length === 0) {
+      var empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = '(no effort)';
+      sel.appendChild(empty);
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = false;
+    var pick = clampEffort(
+      antigravityModelMap[tier].effort,
+      set,
+      AGY_EFFORT_SCALE,
+    );
+    for (var i = 0; i < set.length; i += 1) {
+      var opt = document.createElement('option');
+      opt.value = set[i];
+      opt.textContent = set[i];
+      if (set[i] === pick) opt.selected = true;
+      sel.appendChild(opt);
+    }
+  }
+
+  function bindAgyModelOptions() {
+    var bases = agyModelBases();
     TIERS.forEach(function (tier) {
       var sel = modelAntigravity[tier];
-      if (sel)
-        bindSelectOptions(
-          sel,
-          list,
-          antigravityModelMap[tier],
-          '(run agy to load models)',
-        );
+      if (!sel) return;
+      bindSelectOptions(
+        sel,
+        bases,
+        antigravityModelMap[tier].model,
+        '(run agy to load models)',
+      );
+      bindAgyEffortOptions(tier, sel.value);
     });
+  }
+
+  function onAgyModelChange(tier) {
+    var sel = effortAntigravity[tier];
+    antigravityModelMap[tier].effort =
+      sel && !sel.disabled ? sel.value : antigravityModelMap[tier].effort;
+    bindAgyEffortOptions(tier, modelAntigravity[tier].value);
+    renderProviderSummary('antigravity');
   }
 
   // Keep the closest level at or below the current one when a model switch shrinks
@@ -918,11 +1001,13 @@
       src.antigravity && typeof src.antigravity === 'object'
         ? src.antigravity
         : {};
-    antigravityModelMap = {
-      high: typeof ag.high === 'string' ? ag.high : '',
-      mid: typeof ag.mid === 'string' ? ag.mid : '',
-      low: typeof ag.low === 'string' ? ag.low : '',
-    };
+    TIERS.forEach(function (tier) {
+      var t = ag[tier] && typeof ag[tier] === 'object' ? ag[tier] : {};
+      antigravityModelMap[tier] = {
+        model: typeof t.model === 'string' ? t.model : '',
+        effort: typeof t.effort === 'string' ? t.effort : '',
+      };
+    });
     var cl = src.claude && typeof src.claude === 'object' ? src.claude : {};
     TIERS.forEach(function (tier) {
       var t =
@@ -951,7 +1036,7 @@
         effort: typeof t.effort === 'string' ? t.effort : '',
       };
     });
-    bindAgyModelOptions(agyModels);
+    bindAgyModelOptions();
     bindClaudeModelOptions();
     bindCodexModelOptions();
   }
@@ -1048,12 +1133,18 @@
 
   function buildModelMap() {
     var codex = {};
+    var antigravity = {};
     var claude = {};
     TIERS.forEach(function (tier) {
       codex[tier] = buildTierConfig(
         modelCodex[tier],
         effortCodex[tier],
         codexEffortSet,
+      );
+      antigravity[tier] = buildTierConfig(
+        modelAntigravity[tier],
+        effortAntigravity[tier],
+        agyEffortSet,
       );
       claude[tier] = buildTierConfig(
         modelClaude[tier],
@@ -1063,17 +1154,7 @@
     });
     return {
       codex: codex,
-      antigravity: {
-        high: modelAntigravity.high
-          ? String(modelAntigravity.high.value || '')
-          : '',
-        mid: modelAntigravity.mid
-          ? String(modelAntigravity.mid.value || '')
-          : '',
-        low: modelAntigravity.low
-          ? String(modelAntigravity.low.value || '')
-          : '',
-      },
+      antigravity: antigravity,
       claude: claude,
     };
   }
@@ -1208,7 +1289,7 @@
       });
       agyModels = Array.isArray(body.agyModels) ? body.agyModels : [];
       codexModels = Array.isArray(body.codexModels) ? body.codexModels : [];
-      bindAgyModelOptions(agyModels);
+      bindAgyModelOptions();
       bindCodexModelOptions();
     } catch (e) {
       return;
@@ -1302,6 +1383,11 @@
     if (modelCodex[tier]) {
       modelCodex[tier].addEventListener('change', function () {
         onCodexModelChange(tier);
+      });
+    }
+    if (modelAntigravity[tier]) {
+      modelAntigravity[tier].addEventListener('change', function () {
+        onAgyModelChange(tier);
       });
     }
   });

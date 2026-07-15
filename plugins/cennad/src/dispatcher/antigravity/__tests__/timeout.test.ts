@@ -147,7 +147,11 @@ describe('antigravityDispatcher timeout — start()', () => {
     const result = await antigravityDispatcher.start({
       ...baseOptions(),
       tier: 'high',
-      modelMap: { high: 'Gemini 3.1 Pro', mid: 'x', low: 'y' },
+      modelMap: {
+        high: { model: 'Gemini 3.1 Pro' },
+        mid: { model: 'x' },
+        low: { model: 'y' },
+      },
     });
     expect(result.resolvedModel).toBe('Gemini 3.1 Pro');
   });
@@ -195,7 +199,11 @@ describe('antigravityDispatcher timeout — resume()', () => {
     const result = await antigravityDispatcher.resume({
       ...resumeOptions('/stored/cwd'),
       tier: 'mid',
-      modelMap: { high: 'Gemini 3.1 Pro', mid: 'Gemini 2.5 Flash', low: 'y' },
+      modelMap: {
+        high: { model: 'Gemini 3.1 Pro' },
+        mid: { model: 'Gemini 2.5 Flash' },
+        low: { model: 'y' },
+      },
     });
     expect(result.resolvedModel).toBe('Gemini 2.5 Flash');
   });

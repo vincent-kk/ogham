@@ -7,9 +7,9 @@ interface TierConfigFallback {
   effort?: string;
 }
 
-// Merge one codex/claude tier. Take the raw tier wholesale when it carries a
-// string model (so a model without effort support, e.g. haiku, does not inherit
-// the default's effort); otherwise fall back to the default tier config.
+// Merge one provider tier. Take the raw tier wholesale when it carries a string
+// model (so a model without effort support, e.g. haiku or a bare agy model, does not
+// inherit the default's effort); otherwise fall back to the default tier config.
 function mergeTierConfig(raw: unknown, fallback: TierConfigFallback): unknown {
   if (!isPlainObject(raw) || typeof raw.model !== 'string') return fallback;
   const tier: { model: string; effort?: unknown } = { model: raw.model };
@@ -21,6 +21,7 @@ export function mergeModelMap(raw: unknown): unknown {
   const defaults = DEFAULT_CONFIG.model_map;
   if (!isPlainObject(raw)) return defaults;
   const rawCodex = isPlainObject(raw.codex) ? raw.codex : {};
+  const rawAntigravity = isPlainObject(raw.antigravity) ? raw.antigravity : {};
   const rawClaude = isPlainObject(raw.claude) ? raw.claude : {};
   return {
     codex: {
@@ -29,8 +30,9 @@ export function mergeModelMap(raw: unknown): unknown {
       low: mergeTierConfig(rawCodex.low, defaults.codex.low),
     },
     antigravity: {
-      ...defaults.antigravity,
-      ...(isPlainObject(raw.antigravity) ? raw.antigravity : {}),
+      high: mergeTierConfig(rawAntigravity.high, defaults.antigravity.high),
+      mid: mergeTierConfig(rawAntigravity.mid, defaults.antigravity.mid),
+      low: mergeTierConfig(rawAntigravity.low, defaults.antigravity.low),
     },
     claude: {
       high: mergeTierConfig(rawClaude.high, defaults.claude.high),

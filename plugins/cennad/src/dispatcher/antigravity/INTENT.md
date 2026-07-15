@@ -18,7 +18,7 @@ Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cw
 - `resume`: `agy --continue -p "<prompt>" ...` (cwd 격리 = 세션)
 - 권한: `flags.skip_permissions`→`--dangerously-skip-permissions`, `flags.sandbox`→`--sandbox` (config 기본 false)
 - 응답: `parseJsonOutput` 가 stdout 파싱. 빈 stdout(agy #76: non-TTY 긴 응답에서 비결정적 드롭) 시 `resolveTranscript`→`agyTranscriptStore` 가 agy brain transcript 에서 읽기 전용 복구
-- 모델 풀네임은 config `model_map.antigravity` 단독; `externalSessionRef`=cwd
+- 모델은 config `model_map.antigravity` 의 tier→`{model, effort}`; agy 는 변종을 모델명에 담으므로 `modelAlias` 가 `model (effort)` 로 재조합(effort 없으면 model 만). `externalSessionRef`=cwd
 
 ## Boundaries
 

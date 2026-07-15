@@ -465,27 +465,40 @@
                   <p class="flag-field-label">per-tier model mapping</p>
                   <p class="flag-hint">
                     Antigravity serves multiple model families. Map each tier to
-                    a model. Options come from <code>agy models</code> (run agy
-                    and sign in to populate them).
+                    a model and effort. Options come from
+                    <code>agy models</code> (run agy and sign in to populate
+                    them).
                   </p>
-                  <div class="tier-field">
+                  <div class="tier-field" data-layout="model-effort">
                     <label for="model-antigravity-high">high</label>
                     <select
                       id="model-antigravity-high"
                       class="tier-select"
                     ></select>
+                    <select
+                      id="effort-antigravity-high"
+                      class="tier-select"
+                    ></select>
                   </div>
-                  <div class="tier-field">
+                  <div class="tier-field" data-layout="model-effort">
                     <label for="model-antigravity-mid">mid</label>
                     <select
                       id="model-antigravity-mid"
                       class="tier-select"
                     ></select>
+                    <select
+                      id="effort-antigravity-mid"
+                      class="tier-select"
+                    ></select>
                   </div>
-                  <div class="tier-field">
+                  <div class="tier-field" data-layout="model-effort">
                     <label for="model-antigravity-low">low</label>
                     <select
                       id="model-antigravity-low"
+                      class="tier-select"
+                    ></select>
+                    <select
+                      id="effort-antigravity-low"
                       class="tier-select"
                     ></select>
                   </div>

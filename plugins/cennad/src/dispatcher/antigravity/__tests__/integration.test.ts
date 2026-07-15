@@ -158,7 +158,11 @@ describe('antigravityDispatcher.start', () => {
     const result = await antigravityDispatcher.start({
       ...baseOptions(),
       tier: 'high',
-      modelMap: { high: 'Gemini 3.1 Pro', mid: 'x', low: 'y' },
+      modelMap: {
+        high: { model: 'Gemini 3.1 Pro' },
+        mid: { model: 'x' },
+        low: { model: 'y' },
+      },
     });
     expect(result.status).toBe('success');
     expect(result.resolvedModel).toBe('Gemini 3.1 Pro');
