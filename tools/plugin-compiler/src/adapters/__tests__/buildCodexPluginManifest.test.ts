@@ -41,6 +41,16 @@ describe("buildCodexPluginManifest", () => {
 
   // --- complex ---
 
+  it("points hooks at the Codex-only copy when a read matcher needs Bash", () => {
+    const built = buildCodexPluginManifest(
+      facts({
+        hasHooks: true,
+        hooksFile: { hooks: { PreToolUse: [{ matcher: "Read|Write|Edit" }] } },
+      }),
+    );
+    expect(built.hooks).toBe("./.codex-plugin/hooks.json");
+  });
+
   it("drops manifest fields outside the allow list", () => {
     const built = buildCodexPluginManifest(
       facts({ manifest: { name: "filid", mcpServers: { evil: {} } } }),

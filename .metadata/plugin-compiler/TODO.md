@@ -32,7 +32,7 @@
 | **Emitter/빌드 배선**                | ✅ **완료**(`b0d0cd0f`) — `buildAgyHooks` 5번째 어댑터(루트 `hooks.json`, PreToolUse→named-group), 3플러그인 `run-agy.mjs` 번들, baseline 30→33, 스모크(deny/allow/F6) 통과 |
 | **PR #89** (branch→main)             | 🟢 **CI 전부 초록**(macOS·Ubuntu·Windows×Node20/22)·MERGEABLE·CLEAN. Windows 경로 이식 버그 4건 수정(`165333fe`). **머지는 Vincent 이 직접**                                |
 | main 머지·GitHub 경유 설치 확인      | ⬜ 머지 후 — 마켓플레이스 실설치로 Claude 무영향 라이브 재확인                                                                                                              |
-| **Codex 완성도 심화**                | 🟡 **진행 중** — §1 maencof read추적 ✅(`5fad890c`)·§3 process.cwd 감사 ✅(전부 무해). §1 filid·imbas 설계결정 대기·§2 agents 폴백 대기. agy 는 업스트림 대기                                                                 |
+| **Codex 완성도 심화**                | 🟡 **진행 중** — §1 read추적 ✅ **전부**(maencof `5fad890c` + filid·imbas Codex 전용 훅 채널)·§3 process.cwd 감사 ✅(전부 무해). §2 agents 폴백만 대기(Vincent 지시로 다음 세션). agy 는 업스트림 대기                        |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 
@@ -119,12 +119,12 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 
 마켓플레이스 실설치로 **Claude 무영향 라이브 재확인**(지금까지 `--plugin-dir` 로그 + 구조적 확인뿐). 루트 `plugin.json`·`hooks.json` 이 실제 Claude 설치에 무영향인지. Codex 설치·도구노출·훅 trust 도 함께.
 
-### 1. Read 추적 부분 복구 (Codex) — 🟡 **maencof ✅ 완료 / filid·imbas 설계결정 대기**
+### 1. Read 추적 부분 복구 (Codex) — ✅ **완료 (maencof + filid·imbas, option a)**
 
 - **실측**: Codex 는 파일 읽기를 `Bash` 로 직렬화(`Read` 별칭 없음 — 소스 확정). **matcher 확인**: maencof=`*`(Bash 훅 **이미 발화**) / filid·imbas=`Read|Write|Edit`(Bash **미발화**).
-- **maencof ✅ 완료 (`5fad890c`)**: codex-hooks 에 `parseBashRead`(순수 파서, `cat/head/tail/less/more/bat <경로>`→`Read`) + `normalizeCodexToolUse` Bash 분기. vaultRedirector 가 Read 처리(matcher 변경 불요). 종단 스모크: vault `.md` read→권고, `.txt`·파이프→무발화. **가치 재확인**: Codex 가 PreToolUse `additionalContext` 를 주입(PR #20692, 2026-05-05 병합 — stage5 line 116 정정)하므로 권고가 실제 모델 도달.
-- **filid·imbas ⏸ 설계결정**: `parseBashRead` 는 이미 공유 코드라 **matcher 만 배선하면 작동**. 단 emitter 가 Codex 를 Claude 와 **동일 `hooks.json`**(`CLAUDE_HOOKS_PATH`)로 가리키고 `buildCodexHooks` 부재 → (a) **Codex 전용 훅 채널**(신규 emitter 빌더 + `.codex-plugin/hooks.json` + 매니페스트 재배선 — 상당 비용, Claude 무영향) / (b) **공유 matcher 에 `Bash` 추가**(간단하나 Claude 매 bash 훅 스폰 비용) / (c) **미착수·한계 고지**. Vincent 결정 대기.
-- **한계 고지**: 셸 표현 무한(파이프·grep·awk) → **완전 fidelity 불가**, Codex 도 "단순 셸만" 인터셉트 → 흔한 단순 읽기만 복구.
+- **maencof ✅ (`5fad890c`)**: codex-hooks 에 `parseBashRead`(순수 파서, `cat/head/tail/less/more/bat <경로>`→`Read`) + `normalizeCodexToolUse` Bash 분기. vaultRedirector 가 Read 처리(matcher 변경 불요). 종단 스모크: vault `.md` read→권고, `.txt`·파이프→무발화. **가치 재확인**: Codex 가 PreToolUse `additionalContext` 를 주입(PR #20692, 2026-05-05 병합 — stage5 line 116 정정)하므로 권고가 실제 모델 도달.
+- **filid·imbas ✅ (option a — Codex 전용 훅 채널)**: 신규 emitter 빌더 `buildCodexHooks` 가 Claude 훅 전체를 복사하되 read 잡는 PreToolUse matcher(`Read|Write|Edit`)에 `|Bash` 추가한 `.codex-plugin/hooks.json` 방출, Codex 매니페스트 `hooks` 가 이를 가리킴. **Claude 무영향**(`hooks/hooks.json` 그대로 — git diff 0 실측). baseline 33→35(filid·imbas 각 +1), adapters:check 멱등, 전체 4355 통과. `parseBashRead` 공유 코드가 셸 read 를 Read 로 승격 → filid·imbas Read 컨텍스트 주입 복구.
+- **한계 고지**: 셸 표현 무한(파이프·grep·awk) → **완전 fidelity 불가**, Codex 도 "단순 셸만" 인터셉트 → 흔한 단순 읽기만 복구. `codex-read-matcher` 경고가 이 잔여 한계를 계속 표면화.
 
 ### 2. Codex agents 폴백 — **구조적 부재, 단일-폴백** (L3)
 
@@ -172,12 +172,14 @@ r-statistics  R_STATISTICS_HOME      (= join(claudeRoot(), 'plugins', 'r-statist
 
 ## 어댑터 현황
 
-생성물 **30 파일**, 경로 4종. 손편집 금지 — 정본 수정 후 `yarn plugin:adapters`.
+생성물 **35 파일**, 경로 6종. 손편집 금지 — 정본 수정 후 `yarn plugin:adapters`.
 
 ```
 plugins/<n>/plugin.json               ×10   ← 루트 매니페스트: agy 마커 + Codex 가 실제로 읽는 경로
 plugins/<n>/.codex-plugin/plugin.json ×10   ← 위와 바이트 동일 (Codex 규약 경로)
 plugins/<n>/mcp_config.json           × 9   ← agy MCP (상대 args + OGHAM_HOST)
+plugins/<n>/hooks.json                × 3   ← agy 훅 (filid·imbas·maencof, PreToolUse→named-group)
+plugins/<n>/.codex-plugin/hooks.json  × 2   ← Codex 전용 훅 (filid·imbas, read matcher+Bash)
 .agents/plugins/marketplace.json      × 1   ← Codex 마켓플레이스
 ```
 

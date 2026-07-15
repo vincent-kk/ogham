@@ -14,6 +14,18 @@ export const AGY_MCP_CONFIG_PATH = "mcp_config.json";
 export const CODEX_MARKETPLACE_PATH = ".agents/plugins/marketplace.json";
 
 /**
+ * Codex-only hooks file, emitted only when a plugin's PreToolUse matcher names
+ * file tools (`Read|Write|Edit`) that would miss a Codex read — Codex has no Read
+ * tool and reads by shelling out, so this copy adds `Bash` to the matcher and the
+ * Codex manifest's `hooks` field points here instead of `hooks/hooks.json`. Claude
+ * keeps using the unchanged shared file, and agy its root `hooks.json`. Lives in
+ * Codex's own convention dir so it collides with neither. The manifest path
+ * resolves plugin-root-relative (measured, stage5), so `./.codex-plugin/hooks.json`
+ * lands here regardless of which manifest copy Codex reads.
+ */
+export const CODEX_HOOKS_PATH = ".codex-plugin/hooks.json";
+
+/**
  * agy discovers a hooks file by convention at the plugin root, in its own
  * named-group format. Claude auto-discovers `hooks/hooks.json` (subdirectory)
  * and Codex reads it via the manifest's `hooks` field, so neither consults this

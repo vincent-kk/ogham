@@ -114,10 +114,41 @@ describe("planPluginAdapters", () => {
       },
     });
     const { files } = planPluginAdapters(pluginDirectory);
-    const agy = files.find((f) => norm(f.absolutePath).endsWith("/hooks.json"));
+    // Both the agy root file and the Codex copy end in `/hooks.json`; match the
+    // root one exactly so the Codex copy cannot be mistaken for it.
+    const agy = files.find(
+      (f) =>
+        norm(f.absolutePath).slice(pluginDirectory.length + 1) === "hooks.json",
+    );
     expect(agy?.content).toContain(
       "node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs",
     );
+  });
+
+  it("emits a Bash-extended .codex-plugin/hooks.json for a read matcher", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "filid" });
+    writeJson("hooks/hooks.json", {
+      hooks: {
+        PreToolUse: [
+          { matcher: "Read|Write|Edit", hooks: [{ command: "node b.mjs" }] },
+        ],
+      },
+    });
+    const { files } = planPluginAdapters(pluginDirectory);
+    const codex = files.find((f) =>
+      norm(f.absolutePath).endsWith(".codex-plugin/hooks.json"),
+    );
+    expect(codex?.content).toContain("Read|Write|Edit|Bash");
+  });
+
+  it("omits .codex-plugin/hooks.json when the matcher already catches Bash (`*`)", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "maencof" });
+    writeJson("hooks/hooks.json", {
+      hooks: {
+        PreToolUse: [{ matcher: "*", hooks: [{ command: "node b.mjs" }] }],
+      },
+    });
+    expect(emittedPaths()).not.toContain(".codex-plugin/hooks.json");
   });
 
   it("omits agy hooks.json for a plugin without a PreToolUse hook", () => {

@@ -17,7 +17,7 @@
     "structure"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
+  "hooks": "./.codex-plugin/hooks.json",
   "mcpServers": {
     "filid": {
       "command": "node",
