@@ -15,20 +15,22 @@
 
 ## 지금 상태 — 한 눈에
 
-| 단계                                 | 상태                                                                     |
-| ------------------------------------ | ------------------------------------------------------------------------ |
-| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                   |
-| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                     |
-| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                     |
-| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                                       |
-| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적                             |
-| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                                      |
-| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정                            |
-| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)                         |
-| **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정 |
-| **D1** agy 훅 번역 어댑터             | 🟡 어댑터 완성·검증 커밋(`01d1ca98`) — **agy 1.1.2 injectSteps 미렌더(F4)로 주입훅 보류**, 게이팅(D1b)이 우회 후보 |
-| **Phase D/E 잔여**                   | ⬜ 아래 §"다음 작업" — E3/E2 Codex(achievable), D1b agy 게이팅, L1–L3 우회·고지 |
-| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                |
+| 단계                                 | 상태                                                                                                                  |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                                                                |
+| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                                                                  |
+| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                                                                  |
+| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                                                                                    |
+| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적                                                                          |
+| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                                                                                   |
+| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정                                                                         |
+| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)                                                                      |
+| **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정                                              |
+| **D1** agy 훅 번역 어댑터            | 🟡 주입훅 보류(F4) — 게이팅(D1b)은 ✅ 완료(`85fea062`, 아래)                                                          |
+| **E3/E2** Codex 파일도구 매칭        | ✅ **완료**(`16a161cc`) — `apply_patch`→`Write`/`Edit` 정규화, 가드 발화 실측 ([stage5](./stage5-measurement-log.md)) |
+| **D1b** agy 게이팅 훅 (번역)         | ✅ **완료**(`85fea062`) — agy `deny` 강제 실측, maencof 보안가드 발화 실측. 배선(emitter)·workspacePaths 미검증       |
+| **Emitter/빌드 배선**                | ⬜ 다음 — 선행조건(Codex root hooks 안전) 확정. **대규모 + workspacePaths 런타임 미검증** (아래)                      |
+| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                                                             |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 
@@ -93,14 +95,14 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 
 ## 다음 작업 — 완전 동등 (achievable 순차 + 플랫폼 한계 우회·고지)
 
-> Vincent 님 지시: **순차적으로 전부**, 플랫폼 한계 3종은 **우회+고지**. agy 컨텍스트 주입 훅은 agy 1.1.2 한계(F4)로 보류 — 아래는 **우리 코드로 달성 가능한** 순서.
+> Vincent 님 지시: **순차적으로 전부**, 플랫폼 한계 3종은 **우회+고지**. 실측 정본: [stage5-measurement-log.md](./stage5-measurement-log.md).
 
-1. **E3/E2 — Codex 파일도구 매칭** (fully achievable·verifiable). filid/imbas·maencof 의 PreToolUse 내부 매칭이 Claude 도구명(`Write`/`Edit`/`Read`/`Grep`)을 쓴다 → Codex(`apply_patch`·`Bash`)에서 미발화. 공유 Codex↔Claude 파일도구 매핑 헬퍼(cross-platform)로 정규화. **레코더는 이미 동작**(`normalizeMaencofToolName` 이 `mcp__maencof__create` 처리 확인) — E2 는 매칭만 보완. Codex 헤드리스로 검증.
-2. **D1b — agy 게이팅 훅** (L1 우회). PreToolUse `decision`(차단/승인)은 injectSteps 와 다른 채널 → agy 동작 가능. `agy-hooks`/`agy-runner` 에 PreToolUse/PostToolUse 번역 추가(agy `toolCall.{name,args}`→Claude `tool_name`/`tool_input`; agy 도구명 매핑 — write/edit 도구명 실측 선행). 되면 filid 구조가드·maencof 레이어가드가 agy 에서 강제. 안 되면 고지.
-3. **emitter/빌드 배선** — 위 결정(주입 보류/게이팅 채택) 후: compiler `buildAgyHooks`(agy-format hooks.json) + build-hooks 가 `bridge/run-agy.mjs` 번들. ⚠ 루트 `hooks.json` 을 Codex 가 오독하지 않는지 선행 확인(backlog-d-e §D1).
+1. ~~**E3/E2 — Codex 파일도구 매칭**~~ → ✅ **완료 (`16a161cc`)**. 실측이 원안 가설을 정정: Codex 는 `apply_patch`(V4A 패치)·`Bash` 만 보내고 Read/Grep/Glob 도구는 **원천 미발화**(모델이 셸로 읽음). 이름 매핑이 아니라 **패치 파싱**이 필요 — `@ogham/cross-platform/codex-hooks` 가 `apply_patch`→`Write`/`Edit`(file_path·content 추출) 정규화. maencof Layer1·filid 문서계약 deny 가 Codex `apply_patch` 에서 발화, Claude 와 바이트 동일(E2E 실측). **읽기 계열 추적은 이식 불가**(고지).
+2. ~~**D1b — agy 게이팅 훅**~~ → ✅ **번역 완료 (`85fea062`)**. 실측 확정: agy PreToolUse 는 `toolCall:{name,args}` 를 싣고 **`{decision:deny}` 를 강제**(injectSteps F4 와 대조). `agy-hooks` 확장(도구맵·PreToolUse 번역·deny 역변환). runner+실 maencof 브리지로 `write_to_file`→`01_Core` 차단 실측. **차단 가드만 이식**(agy PreToolUse 엔 주입 채널 없음 → 권고 가드 손실, 고지).
+3. **Emitter/빌드 배선** — ⬜ **다음 작업**. 선행조건 ✅: Codex 는 매니페스트가 `hooks/hooks.json` 선언 시 **루트 `hooks.json` 을 무시**(실측). ⇒ agy-format `hooks.json` 을 플러그인 루트에 안전 배치. 필요: compiler `buildAgyHooks`(Claude→agy named-group, PreToolUse matcher 번역) + build-hooks 가 5 플러그인에 `bridge/run-agy.mjs` 번들 + `package.json:files` + baseline 30→35 + DETAIL. **대규모.** ⚠ **workspacePaths 런타임 미검증** — --print 에선 `[]` 비어 있어 가드 no-op; 대화형 주입은 추정(agy 문서)·미확인. **배선 전 대화형 workspacePaths 주입 확인 필수** — 아니면 emit 한 훅이 no-op.
 4. **L2·L3 우회·고지** — agy MCP 배치 스크립트/README(L2), Codex agents 단일-폴백·설치안내(L3). 정본: matrix §10.
 
-**커밋 완료**: F2 수정+M2 실측(`23003510`), agy 훅 어댑터 기반(`01d1ca98`). 상세 로드맵은 [backlog-d-e.md](./backlog-d-e.md), 한계 정본은 [host-capability-matrix.md §10](./host-capability-matrix.md).
+**커밋 완료**: F2+M2(`23003510`), agy 어댑터 기반(`01d1ca98`), E2/E3(`16a161cc`), D1b 번역(`85fea062`). 상세: [stage5-measurement-log.md](./stage5-measurement-log.md) · [backlog-d-e.md](./backlog-d-e.md) · [matrix §10](./host-capability-matrix.md).
 
 ## C4-3. 상태 디렉터리 (미착수 · 우선순위 낮음)
 

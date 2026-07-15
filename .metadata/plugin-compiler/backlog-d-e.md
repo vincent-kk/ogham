@@ -17,19 +17,23 @@
 > - `@ogham/cross-platform/agy-runner` — 런타임 래퍼(agy stdin 판독 → 번역 → 기존 `bridge/<hook>.mjs` 스폰 → 응답 역변환 → SessionStart once-guard). 9 테스트. Claude/Codex 경로 무영향.
 >
 > **라이브 검증 (agy 1.1.2, `agy plugin install` 로 등록)**:
+>
 > - ✅ agy 가 **agy-format hooks.json 을 로드**한다 — `jsonhook.go:189 … 1 named hooks, 1 total handlers`. (구 Claude 포맷은 `invalid hook "hooks"` 파싱 실패였다 — 아래.) `agy plugin validate` 도 `✔ hooks : 1 processed`.
 > - ✅ agy 가 **PreInvocation 을 발화**하고 러너가 **정확히 번역**한다 — 핸들러가 올바른 Claude payload 를 받고, 러너가 정확히 `{"injectSteps":[{"ephemeralMessage":"…"}]}` 를 방출(stdout tee 로 확인).
 > - ❌ **agy 1.1.2 는 그 PreInvocation injectSteps 를 적용하지 않는다** — 주입 텍스트가 모델 transcript 에 도달 안 함(--print 확정, 대화형은 tmux 불안정으로 미확정). 어댑터는 정확하며 **agy 자체의 injectSteps 처리 한계**(hooks 문서 "Current Limitations" 의 미구현 항목들과 부합).
 >
 > **배운 사실 3가지**:
+>
 > 1. agy 훅은 플러그인이 **등록(`agy plugin install <dir>`)돼야** 스캔된다 — `.agents/plugins/` 배치만으론 `agy plugin list` 에 안 잡히고 훅도 0개. (등록 후엔 `--print` 에서도 로드·발화.)
 > 2. `agy plugin install` 은 **`bridge/` 를 복사하지 않는다**(hooks.json·plugin.json 만) — 훅 커맨드가 참조하는 번들이 설치 위치에 없어 무동작. 전체 플러그인 디렉터리를 `.agents/plugins/<n>/` 에 두고 그걸 install 해야 한다(= D2 배치와 결합).
 > 3. agy 대화형은 **로그인돼 있다**(lunox298@gmail.com, Gemini 3.1 Pro) — `--print` 의 "not logged in" 은 print 모드 아티팩트.
 >
-> **결론 / 다음 작업**:
-> - **컨텍스트 주입 훅(SessionStart·UserPromptSubmit)** 은 agy 가 injectSteps 를 렌더할 때까지 **보류**(어댑터는 준비됨). agy 업스트림 이슈로 추적.
-> - **우회 후보 — 게이팅 훅(D1b)**: PreToolUse `decision`(도구 차단/승인)은 injectSteps 가 **아닌** 별도 채널이라 동작할 수 있다. D1b(도구-이벤트 번역: agy `toolCall` → Claude `tool_name`/`tool_input`, agy 도구명 매핑)를 구현하면 agy 가 filid 구조가드·maencof 레이어가드를 **강제**할 수 있다 — 미검증, 다음 작업.
-> - emitter/빌드 배선은 위 결정(주입 보류 / 게이팅 채택 여부) 후 착수. 지금은 어댑터 기반만 커밋됨.
+> **결론 / 진행 (2026-07-15 2차 세션 — stage5)**:
+>
+> - **컨텍스트 주입 훅(SessionStart·UserPromptSubmit)** 은 agy 가 injectSteps 를 렌더할 때까지 **보류**(어댑터 준비됨).
+> - **✅ 게이팅 훅(D1b) 채택·번역 완료 (`85fea062`)**: 실측 확정 — agy 는 PreToolUse `{decision:deny}` 를 **강제**한다(probe 로 view_file deny 시 모델이 ask_permission 후 grep 우회). `agy-hooks` 에 `toolMap`(agy `write_to_file{TargetFile,CodeContent}`→Write, `replace_file_content`→Edit, `view_file`→Read …)·PreToolUse 번역·deny 역변환 추가. runner+실 maencof 브리지로 `write_to_file`→`01_Core` 차단 실측. **차단 가드만 이식**(agy PreToolUse 엔 주입 채널 없음 → 권고 가드 손실).
+> - ⚠ **workspacePaths 런타임 블로커 (F6)**: --print 에서 `workspacePaths:[]` 비어 있어 러너 cwd 가 비면 가드 no-op. 대화형 주입은 agy 문서상 추정이나 미검증. **emitter 배선 전 대화형 workspacePaths 확인 필수.**
+> - **emitter/빌드 배선** 은 다음 작업. 선행조건 ✅: Codex 는 매니페스트가 `hooks/hooks.json` 선언 시 루트 `hooks.json` 을 **무시**(실측) → agy-format `hooks.json` 루트 배치 안전.
 
 ---
 
@@ -87,15 +91,13 @@ I hooks_manager.go:53] loaded 0 named hooks from 0 hooks.json file(s)
 - 완화안: 본문을 서술형 참조로 바꾸거나(정본 수정), 호스트별 안내를 `AGENTS.md` 로 보완.
 - ⚠ **관련 기존 실패**: cennad `src/__tests__/acceptance/skill-contract.acceptance.test.ts` 4건이 **이미 깨져 있다** — 스킬 본문에서 full-form 도구명이 빠졌는데 acceptance 테스트는 아직 그걸 기대한다. E1 과 같은 주제이므로 함께 정리하는 것이 자연스럽다.
 
-### E2. maencof 레코더의 도구명 정규화
+### E2/E3. Codex 파일도구 매칭 — ✅ **완료 (`16a161cc`, stage5)**
 
-훅 내부에서 Claude full-form 도구명으로 매칭하는데 Codex 도구명은 `Bash`·`apply_patch`·`mcp__<server>__<tool>` 이다 → 자동 기록이 부분 무동작.
+실측이 원안을 정정했다: Codex 파일 편집/생성은 **`apply_patch`**(V4A 패치, `file_path` 없음), 셸은 **`Bash`**, **Read/Grep/Glob 도구는 미발화**(모델이 셸로 읽음). 즉 "이름 매핑" 이 아니라 **패치 파싱**이 필요.
 
-### E3. filid·imbas 의 `Read` matcher
-
-Codex 에 `Read` 별칭이 **없어서** PreToolUse matcher `Read|Write|Edit` 중 Write/Edit(→`apply_patch`)만 발화한다. 읽기 추적 손실. 생성기가 이미 warning 으로 노출 중(`codex-read-matcher`).
-
-- 대안: Codex 의 read 계열 도구명을 실측해 matcher 를 확장하거나, 손실을 고지하고 대체 신호(PostToolUse `Bash` 관찰 등)를 설계.
+- **채택**: `@ogham/cross-platform/codex-hooks` 가 `apply_patch` 를 파싱해 `Write`(Add)/`Edit`(Update) + `file_path`/content 로 정규화. filid/imbas/maencof PreToolUse 엔트리에 배선. maencof Layer1·filid 문서계약 deny 가 Codex `apply_patch` 에서 발화(E2E, Claude 와 바이트 동일).
+- **E2 레코더**: maencof recorder 는 maencof **MCP** 도구(`mcp__maencof__*`) 매칭이라 `normalizeMaencofToolName` 으로 이미 동작 — 파일도구와 무관, 정정 불요.
+- **E3 읽기 추적**: **이식 불가(플랫폼 한계·고지)** — Codex 모델은 셸로 읽어 Read/Grep/Glob 도구가 원천 미발화. filid Read 주입·imbas read-context·maencof vaultRedirector 는 Codex 무동작.
 
 ### E4. 기타
 
