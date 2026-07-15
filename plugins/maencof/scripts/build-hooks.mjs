@@ -158,6 +158,31 @@ await Promise.all(
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
 
+// agy hook runner (shared — bundled from @ogham/cross-platform, not this
+// plugin's src). The emitted agy hooks.json (plugin root, named-group format)
+// routes each event through this runner, which translates agy's camelCase
+// payload to the Claude contract, runs the same bridge/<event>.mjs handler, and
+// translates the reply back. Bundling it here ships it in bridge/ so
+// `agy plugin install` distributes it. Contract: tools/plugin-compiler
+// buildAgyHooks emits `node bridge/run-agy.mjs <ClaudeEvent> bridge/<handler>.mjs`.
+// It pulls only Node builtins (spawnSync + the pure agy-hooks translation), so
+// it stays under the light cap and trips no FORBIDDEN_PATTERNS.
+const RUN_AGY_HOOK_BYTES = 12 * 1024;
+await esbuild.build({
+  entryPoints: [
+    fileURLToPath(import.meta.resolve('@ogham/cross-platform/agy-runner/main')),
+  ],
+  bundle: true,
+  platform: 'node',
+  target: 'node20',
+  format: 'esm',
+  outfile: resolve(root, 'bridge/run-agy.mjs'),
+  minify: true,
+  sourcemap: false,
+  treeShaking: true,
+});
+console.log('  agy hook runner -> bridge/run-agy.mjs');
+
 const FORBIDDEN_PATTERNS = [
   // Glob family
   /\bfast-glob\b/,
@@ -196,7 +221,12 @@ const FORBIDDEN_PATTERNS = [
 
 const violations = [];
 
-for (const { name, maxBytes } of hookEntries) {
+const guardedBundles = [
+  ...hookEntries,
+  { name: 'run-agy', maxBytes: RUN_AGY_HOOK_BYTES },
+];
+
+for (const { name, maxBytes } of guardedBundles) {
   const file = resolve(root, `bridge/${name}.mjs`);
   const { size } = await stat(file);
   if (size > maxBytes) {

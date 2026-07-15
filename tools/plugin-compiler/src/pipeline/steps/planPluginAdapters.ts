@@ -1,9 +1,11 @@
 import { join } from "node:path";
 import {
+  buildAgyHooks,
   buildAgyMcpConfig,
   buildCodexPluginManifest,
 } from "../../adapters/index.js";
 import {
+  AGY_HOOKS_PATH,
   AGY_MCP_CONFIG_PATH,
   CODEX_MANIFEST_PATH,
   ROOT_MANIFEST_PATH,
@@ -37,6 +39,12 @@ export function planPluginAdapters(directory: string): AdapterPlan {
       files.push({
         absolutePath: join(directory, AGY_MCP_CONFIG_PATH),
         content: stableJson(agyMcpConfig),
+      });
+    const agyHooks = buildAgyHooks(facts);
+    if (agyHooks)
+      files.push({
+        absolutePath: join(directory, AGY_HOOKS_PATH),
+        content: stableJson(agyHooks),
       });
     return { files, diagnostics };
   } catch (error) {

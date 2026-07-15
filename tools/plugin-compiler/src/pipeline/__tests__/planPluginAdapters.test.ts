@@ -90,4 +90,45 @@ describe("planPluginAdapters", () => {
     expect(files).toEqual([]);
     expect(diagnostics.at(-1)?.code).toBe("mcp-variable-args");
   });
+
+  it("emits agy hooks.json for a plugin with a PreToolUse hook", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "filid" });
+    writeJson("hooks/hooks.json", {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "Read|Write|Edit",
+            hooks: [
+              {
+                command:
+                  'node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" "${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs"',
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const { files } = planPluginAdapters(pluginDirectory);
+    const agy = files.find((f) => f.absolutePath.endsWith("/hooks.json"));
+    expect(agy?.content).toContain(
+      "node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs",
+    );
+  });
+
+  it("omits agy hooks.json for a plugin without a PreToolUse hook", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "maencof-lens" });
+    writeJson("hooks/hooks.json", {
+      hooks: {
+        SessionStart: [
+          {
+            matcher: "*",
+            hooks: [
+              { command: 'node "${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs"' },
+            ],
+          },
+        ],
+      },
+    });
+    expect(emittedPaths()).not.toContain("hooks.json");
+  });
 });

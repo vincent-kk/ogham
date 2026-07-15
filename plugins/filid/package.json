@@ -41,6 +41,7 @@
     ".codex-plugin",
     ".mcp.json",
     "mcp_config.json",
+    "hooks.json",
     "README.md"
   ],
   "scripts": {

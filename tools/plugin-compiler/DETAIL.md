@@ -20,24 +20,26 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - `--check`: 디스크에 쓰지 않고 재생성-비교. 불일치(stale/missing) 또는 error 진단 시 exit 1.
 - 출력: 진단(⚠/✗) → stderr, 파일별 액션(created/updated/unchanged/stale) 요약 → stdout.
 
-### 생성물 (어댑터 4종)
+### 생성물 (어댑터 5종)
 
 | 파일                                    | 소스                                                  | 규칙                                                                                                                                                                    |
 | --------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `plugins/<p>/plugin.json`               | (= 아래 Codex 매니페스트와 **바이트 동일**)           | 플러그인 루트 매니페스트 — **agy 의 플러그인 마커이자 Codex 가 실제로 읽는 경로**. 아래 항목과 같은 빌더에서 나온다                                                     |
 | `plugins/<p>/.codex-plugin/plugin.json` | `.claude-plugin/plugin.json` + `.mcp.json` + 디렉터리 | 메타 필드 복사, `skills`/`hooks` 존재 시 명시 선언, `mcpServers` 인라인(서버명=플러그인명, args 상대화, **`cwd:"."` 명시**, `type` 생략, `env.OGHAM_HOST="codex"` 주입) |
 | `plugins/<p>/mcp_config.json`           | `.mcp.json`                                           | 동일 래퍼 + args 상대화, 서버명 원본 유지, `env.OGHAM_HOST="agy"` 주입. MCP 없으면 미생성                                                                               |
+| `plugins/<p>/hooks.json`                | `hooks/hooks.json` 의 **PreToolUse**                  | **agy named-group** — 플러그인명 키, `*` matcher, `node bridge/run-agy.mjs PreToolUse bridge/<handler>.mjs`. PreToolUse 없으면 미생성(현재 filid·imbas·maencof 3곳)     |
 | `.agents/plugins/marketplace.json`      | `.claude-plugin/marketplace.json`                     | 항목별 `{name, source:{source:"local",path}, policy:{AVAILABLE,ON_INSTALL}, category(Title-case)}`                                                                      |
 
 - args 상대화: `${CLAUDE_PLUGIN_ROOT}/X` 접두를 `X` 로. 변수가 접두 이외 위치·env·command 에 있으면 **error** (생성물이 깨지므로).
 - **Codex 서버명 오버라이드**: ogham 플러그인은 `tools`·`t` 같은 범용 서버명을 공유하는데 Codex 의 도구 네임스페이스는 플러그인 단위로 스코프되지 않아 충돌한다(실측: 도구명은 `mcp__<server>__<tool>` 이고 Codex 시스템 프롬프트가 "use tool provenance to tell which plugin they come from" 이라 명시). 서버가 하나면 플러그인명, 둘 이상이면 `<plugin>-<server>` 로 바꾼다. agy 는 플러그인 단위로 네임스페이스하므로 원본 이름을 유지한다.
 - **Codex `cwd:"."` (필수)**: 생략하면 Codex 는 플러그인 MCP 서버를 **세션 cwd** 로 띄운다 — 상대 args 가 사용자 프로젝트 기준으로 풀려 서버가 initialize 중 죽고, `codex exec` 는 그 실패를 **조용히 삼킨다**(TUI 만 경고). 설치 경로는 생성 시점에 알 수 없어 절대 args 는 불가능하므로 이것이 유일 해법이다. agy 스키마엔 `cwd` 필드가 없으므로 **codex 빌더에서만** 부여한다(`buildCodexMcpServers`).
 - **매니페스트 2곳, 내용 1개 (실측 기반)**: agy 는 플러그인 루트 `plugin.json` 을 **플러그인 마커**로 요구한다 — 없으면 플러그인을 Claude 임포트로 처리하며 `mcp_config.json` 을 `.mcp.json` 에서 재생성해 **덮어쓰고 `OGHAM_HOST` 를 파괴**한다. 그런데 Codex 도 그 경로를 탐색하며 **`.codex-plugin/plugin.json` 을 가린다** — 따라서 루트 매니페스트가 `{"name":…}` 같은 최소 마커면 **Codex 의 MCP 가 통째로 죽는다**. 해법은 두 경로에 **같은 전체 매니페스트**를 방출하는 것이고, 같은 빌더에서 나오므로 갈라질 수 없다(스펙으로 고정: `planPluginAdapters`). Claude 는 `.claude-plugin/plugin.json` 만 읽으므로 무영향(실측 확인 — `--plugin-dir` 로딩 로그·경고 수 동일).
-- **인라인 `mcpServers`**: Codex 매니페스트가 서버를 직접 선언해 Claude 전용 `.mcp.json`(변수 args)을 Codex 가 읽지 않게 차단한다. 반면 `hooks` 는 Claude 와 **같은 파일**을 가리켜 훅 설정을 한 벌로 공유한다.
+- **인라인 `mcpServers`**: Codex 매니페스트가 서버를 직접 선언해 Claude 전용 `.mcp.json`(변수 args)을 Codex 가 읽지 않게 차단한다. 반면 `hooks` 는 Claude 와 **같은 파일**(`hooks/hooks.json`)을 가리켜 훅 설정을 한 벌로 공유한다.
+- **agy 훅 채널 (루트 `hooks.json`)**: 세 호스트의 훅 발견 경로가 **완전히 분리**된다 — Claude=`hooks/hooks.json` 자동발견, Codex=매니페스트 `hooks` 선언, **agy=루트 `hooks.json`**(agy named-group). agy 는 Claude 포맷을 오독해 0개 로드하므로(matrix §4.3 G5) `buildAgyHooks` 가 **PreToolUse 만** agy 포맷으로 재작성한다. PreToolUse 만인 이유: agy 는 `{decision:"deny"}` 를 강제하나(게이팅 실측), 컨텍스트 주입(SessionStart·UserPromptSubmit→PreInvocation)은 agy 1.1.2 가 injectSteps 를 렌더하지 않아 매 턴 스폰만 하는 死코드가 된다(F4). 각 핸들러는 `bridge/run-agy.mjs`(agyRunner main, 플러그인 build-hooks 가 번들·`bridge/` 로 커밋)를 경유해 agy camelCase 페이로드를 Claude 계약으로 번역한다. matcher 는 `*` — agy 도구 어휘가 Claude 와 달라 도구 regex 번역 대신 러너가 비대상 도구를 allow no-op 처리한다. **커맨드 문자열이 `bridge/run-agy.mjs` 를 참조하는 계약이 build-hooks 의 번들 출력명과 맞물린다**(`constants/adapterPaths.ts` AGY_RUNNER_BRIDGE).
 - **`.agents/plugins.json`(agy declared)은 폐기됐다** — 항목별 경로·컨테이너 경로·마커 조합 3종 모두 플러그인을 로드하지 못했다(실측). agy 는 `.agents/plugins/<n>/` 디렉터리 스캔으로만 플러그인을 찾는다.
 - **호스트 마커 env**: 생성되는 MCP 선언에 `OGHAM_HOST` (`codex`/`agy`)를 주입한다. Claude `.mcp.json` 은 무수정이므로 마커 부재 = claude. 호스트 결합 런타임 쓰기(maencof `CLAUDE.md`, filid `.claude/rules/`)가 이 값으로 분기한다(런타임 분기 구현은 플레이북 Stage 4). 훅 프로세스의 호스트 감지는 Codex 주입 env `PLUGIN_DATA` 유무.
 - 버전 동기화: `scripts/inject-version.mjs` 가 `.claude-plugin/plugin.json` 과 함께 **어댑터 매니페스트 2곳**(`plugin.json`·`.codex-plugin/plugin.json`, 존재 시)을 갱신 — sync 재실행 없이 릴리즈 가능.
-- npm 파리티: 각 플러그인 `package.json:files` 에 `plugin.json`·`.codex-plugin`·`mcp_config.json` 포함.
+- npm 파리티: 각 플러그인 `package.json:files` 에 `plugin.json`·`.codex-plugin`·`mcp_config.json` 포함. PreToolUse 플러그인은 루트 `hooks.json` 도 추가(`bridge/` 는 이미 포함되어 `run-agy.mjs` 는 자동 배포).
 
 ### 진단
 
@@ -49,7 +51,8 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 
 ## Acceptance Criteria
 
-- `yarn plugin:adapters` 2회 연속 실행 시 2회째 전 파일 `unchanged` (현재 30 파일).
+- `yarn plugin:adapters` 2회 연속 실행 시 2회째 전 파일 `unchanged` (현재 33 파일 — 매니페스트 20 + agy MCP 9 + 마켓플레이스 1 + **agy hooks.json 3**).
+- agy `hooks.json` 은 PreToolUse 보유 플러그인에만 방출된다(현재 filid·imbas·maencof 3곳; cennad·maencof-lens 는 PreToolUse 없어 미생성).
 - `yarn plugin:adapters:check` 가 어댑터 손편집·정본 변경 후 미재생성을 exit 1 로 검출.
 - 루트 `plugin.json` 과 `.codex-plugin/plugin.json` 은 **바이트 동일** — `planPluginAdapters` 스펙이 고정한다.
 - 훅 5종 플러그인(cennad·filid·imbas·maencof·maencof-lens)에서 `codex-read-matcher` 외 진단 0 (filid·imbas 는 `Read|Write|Edit` matcher 로 warning 1 씩 예상).

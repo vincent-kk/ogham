@@ -4,8 +4,13 @@ export interface McpServerSource {
   env?: Record<string, string>;
 }
 
+export interface HookCommandSource {
+  command?: string;
+}
+
 export interface HookMatcherGroup {
   matcher?: string;
+  hooks?: HookCommandSource[];
 }
 
 export interface HooksFileSource {

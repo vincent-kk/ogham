@@ -43,6 +43,10 @@
       "types": "./dist/agyRunner/index.d.ts",
       "import": "./dist/agyRunner/index.js"
     },
+    "./agy-runner/main": {
+      "types": "./dist/agyRunner/main.d.ts",
+      "import": "./dist/agyRunner/main.js"
+    },
     "./codex-hooks": {
       "types": "./dist/codexHooks/index.d.ts",
       "import": "./dist/codexHooks/index.js"
