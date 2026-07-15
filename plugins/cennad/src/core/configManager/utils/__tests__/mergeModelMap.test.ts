@@ -57,6 +57,20 @@ describe('mergeModelMap', () => {
     expect(mergeModelMap('not-an-object')).toEqual(defaults);
   });
 
+  it('migrates a legacy flat-string antigravity model_map to {model}', () => {
+    const raw = {
+      antigravity: {
+        high: 'Gemini 3.1 Pro',
+        mid: 'Gemini 3.5 Flash',
+        low: 'GPT-OSS 120B',
+      },
+    };
+    const result = mergeModelMap(raw) as typeof defaults;
+    expect(result.antigravity.high).toEqual({ model: 'Gemini 3.1 Pro' });
+    expect(result.antigravity.mid).toEqual({ model: 'Gemini 3.5 Flash' });
+    expect(result.antigravity.low).toEqual({ model: 'GPT-OSS 120B' });
+  });
+
   it('returns defaults when raw is an array', () => {
     expect(mergeModelMap([{ antigravity: { high: 'X' } }])).toEqual(defaults);
   });

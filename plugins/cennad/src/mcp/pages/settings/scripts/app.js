@@ -32,6 +32,11 @@
     mid: { model: 'gpt-5.6-terra', effort: 'high' },
     low: { model: 'gpt-5.6-terra', effort: 'medium' },
   };
+  var DEFAULT_ANTIGRAVITY_MODEL_MAP = {
+    high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+    mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
+    low: { model: 'Gemini 3.5 Flash', effort: 'Low' },
+  };
   var DEFAULT_YOUTUBE_ADDON = {
     enabled: false,
     language: 'en',
@@ -1002,9 +1007,15 @@
         ? src.antigravity
         : {};
     TIERS.forEach(function (tier) {
-      var t = ag[tier] && typeof ag[tier] === 'object' ? ag[tier] : {};
+      var t =
+        ag[tier] && typeof ag[tier] === 'object'
+          ? ag[tier]
+          : DEFAULT_ANTIGRAVITY_MODEL_MAP[tier];
       antigravityModelMap[tier] = {
-        model: typeof t.model === 'string' ? t.model : '',
+        model:
+          typeof t.model === 'string'
+            ? t.model
+            : DEFAULT_ANTIGRAVITY_MODEL_MAP[tier].model,
         effort: typeof t.effort === 'string' ? t.effort : '',
       };
     });
@@ -1117,12 +1128,21 @@
     };
   }
 
-  function buildTierConfig(modelSel, effortSel, effortSetFor) {
+  // `fallbackEffort` covers antigravity's case: the live agy catalog is only
+  // populated after the async /provider-status probe resolves, so the effort
+  // select can be transiently (or permanently, if agy isn't installed/signed
+  // in) disabled on first paint. Without a fallback, saving in that window
+  // would silently drop the previously-loaded effort. codex/claude never pass
+  // this arg, so their omit-on-disabled behavior (e.g. claude's haiku, which
+  // genuinely has no effort levels) is unchanged.
+  function buildTierConfig(modelSel, effortSel, effortSetFor, fallbackEffort) {
     var model = modelSel ? String(modelSel.value || '') : '';
     var tierCfg = { model: model };
     var set = effortSetFor(model);
     if (effortSel && !effortSel.disabled && set.length > 0 && effortSel.value) {
       tierCfg.effort = effortSel.value;
+    } else if (effortSel && effortSel.disabled && fallbackEffort) {
+      tierCfg.effort = fallbackEffort;
     }
     return tierCfg;
   }
@@ -1145,6 +1165,7 @@
         modelAntigravity[tier],
         effortAntigravity[tier],
         agyEffortSet,
+        antigravityModelMap[tier].effort,
       );
       claude[tier] = buildTierConfig(
         modelClaude[tier],

@@ -10,7 +10,10 @@ interface TierConfigFallback {
 // Merge one provider tier. Take the raw tier wholesale when it carries a string
 // model (so a model without effort support, e.g. haiku or a bare agy model, does not
 // inherit the default's effort); otherwise fall back to the default tier config.
+// A bare string raw is the pre-{model,effort} antigravity schema — migrate it to
+// {model: raw} instead of discarding the user's chosen model.
 function mergeTierConfig(raw: unknown, fallback: TierConfigFallback): unknown {
+  if (typeof raw === 'string') return { model: raw };
   if (!isPlainObject(raw) || typeof raw.model !== 'string') return fallback;
   const tier: { model: string; effort?: unknown } = { model: raw.model };
   if (typeof raw.effort === 'string') tier.effort = raw.effort;
