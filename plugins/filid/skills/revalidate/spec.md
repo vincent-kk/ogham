@@ -1,4 +1,4 @@
-# revalidate — DETAIL
+# revalidate — Spec
 
 ## Requirements
 

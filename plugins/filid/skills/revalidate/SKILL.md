@@ -34,7 +34,7 @@ rejected justification, and render PASS/FAIL. The main orchestrator is
 the sole author of fix statuses — no subagent judgment can flip them.
 
 > **References**: `reference.md` (output templates, verification tool
-> map, constitutional rules). `DETAIL.md` (status derivation matrix).
+> map, constitutional rules). `spec.md` (status derivation matrix).
 
 ## When to Use
 
@@ -119,13 +119,13 @@ verdict rests on main's own measurements.
 category-specific MCP tool, filtering violations by
 `ruleId == <rule_id>` and `path` prefix `<target_path>`:
 
-| rule_id kind               | MCP tool                                                                  | success =             |
-| -------------------------- | ------------------------------------------------------------------------- | --------------------- |
+| rule_id kind               | MCP tool                                                                      | success =             |
+| -------------------------- | ----------------------------------------------------------------------------- | --------------------- |
 | structure violation        | `mcp__plugin_filid_tools__structure_validate`                                 | 0 matching violations |
 | LCOM4 violation            | `mcp__plugin_filid_tools__ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
 | CC violation               | `mcp__plugin_filid_tools__ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
-| 3+12 violation             | `mcp__plugin_filid_tools__test_metrics(action: "check-gate")`                  | PASS                  |
-| acceptance claim (`CLM-*`) | NONE — claim re-judgment (below)                                          | claim judged PASS     |
+| 3+12 violation             | `mcp__plugin_filid_tools__test_metrics(action: "check-gate")`                 | PASS                  |
+| acceptance claim (`CLM-*`) | NONE — claim re-judgment (below)                                              | claim judged PASS     |
 
 > **Claim re-judgment (`rule_id` matching `CLM-\d+`)**: measurement
 > tools can never report a CLM rule, so counting would auto-resolve the
@@ -137,7 +137,7 @@ category-specific MCP tool, filtering violations by
 > evidence line in `re-validate.md`); otherwise `post_count := 1`. A
 > claim is NEVER resolved by file modification alone.
 
-**6.2 — Derive `status`** per row via the DETAIL.md matrix
+**6.2 — Derive `status`** per row via the `spec.md` matrix
 `(pre_count, post_count, file_was_modified) → status`. The only path to
 `RESOLVED` is `pre > 0 ∧ post == 0 ∧ file_was_modified` (or the vacuous
 `pre == 0 ∧ post == 0`). A file-diff matching the fix patch is necessary
@@ -185,13 +185,13 @@ Emit the terminal marker: `Revalidate verdict: <PASS|FAIL>`.
 
 ## Available MCP Tools
 
-| Tool                                      | Action                           | Purpose                                  |
-| ----------------------------------------- | -------------------------------- | ---------------------------------------- |
+| Tool                                          | Action                           | Purpose                                  |
+| --------------------------------------------- | -------------------------------- | ---------------------------------------- |
 | `mcp__plugin_filid_tools__review_manage`      | `normalize-branch`               | Review directory resolution              |
 | `mcp__plugin_filid_tools__review_manage`      | `cleanup`                        | Delete session directory on PASS         |
 | `mcp__plugin_filid_tools__structure_validate` | —                                | Re-measure structure violations (Step 6) |
 | `mcp__plugin_filid_tools__ast_analyze`        | `lcom4`, `cyclomatic-complexity` | Re-measure metrics (Step 6)              |
-| `mcp__plugin_filid_tools__test_metrics`       | `check-gate`                      | Re-measure test compliance (Step 6)      |
+| `mcp__plugin_filid_tools__test_metrics`       | `check-gate`                     | Re-measure test compliance (Step 6)      |
 | `mcp__plugin_filid_tools__debt_manage`        | `list`, `resolve`                | Debt verification & clearing (Steps 4–5) |
 | `mcp__plugin_filid_tools__review_manage`      | `format-revalidate-comment`      | PR comment formatting (Step 7)           |
 
