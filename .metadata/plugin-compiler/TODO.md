@@ -30,9 +30,13 @@
 | **E3/E2** Codex 파일도구 매칭        | ✅ **완료**(`16a161cc`) — `apply_patch`→`Write`/`Edit` 정규화, 가드 발화 실측 ([stage5](./stage5-measurement-log.md))                                                       |
 | **D1b** agy 게이팅 훅 (번역)         | ✅ **완료 + 라이브 검증**(`85fea062`·`6c75b159`) — 실제 agy 가 `write_to_file` deny 강제·F6 fallback 작동                                                                   |
 | **Emitter/빌드 배선**                | ✅ **완료**(`b0d0cd0f`) — `buildAgyHooks` 5번째 어댑터(루트 `hooks.json`, PreToolUse→named-group), 3플러그인 `run-agy.mjs` 번들, baseline 30→33, 스모크(deny/allow/F6) 통과 |
-| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                                                                                                                   |
+| **PR #89** (branch→main)             | 🟢 **CI 전부 초록**(macOS·Ubuntu·Windows×Node20/22)·MERGEABLE·CLEAN. Windows 경로 이식 버그 4건 수정(`165333fe`). **머지는 Vincent 이 직접**                                |
+| main 머지·GitHub 경유 설치 확인      | ⬜ 머지 후 — 마켓플레이스 실설치로 Claude 무영향 라이브 재확인                                                                                                              |
+| **Codex 완성도 심화**                | ⬜ **다음 — 아래 §Codex 로드맵** (read 추적 부분복구·agents 폴백·process.cwd 잔여감사). agy 는 업스트림 대기                                                                 |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
+
+> **완결성 현황 (2026-07-15, 실측 재확인)**: Claude 무결손·머지 준비는 완료됐으나 **Codex/agy 완전 파리티는 아직 아니다**. Codex=1급(구멍: read추적·agents·일부 cwd), agy=2급(injectSteps·MCP위치 — 업스트림 버그로 우리 코드로 불가). 상세 로드맵은 문서 하단 **§다음 세션 작업 — Codex 완성도 심화** 참조.
 
 ---
 
@@ -105,7 +109,38 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
    - **실측 발견 (배선 중, `2e4f08b0`)**: F6(`6c75b159`)이 `isMaencofVault` 를 리팩터하며 maencof 브리지 4개 중 pre-tool-use 만 재빌드하고 나머지 3개(공유 lifecycle dispatcher 가 인라인)를 **stale** 로 남겼다 — 이번 재빌드가 교정(기능 동일, 재현성 복구). agy 러너 스모크는 **cwd=플러그인 루트**(agy 실행 모델: cwd=hooks.json 위치)에서만 유효 — repo 루트 실행 시 상대 핸들러 경로 미해석으로 러너가 no-op→allow(가짜 통과 주의).
 4. **L2·L3 우회·고지** — agy MCP 배치 스크립트/README(L2), Codex agents 단일-폴백·설치안내(L3). 정본: matrix §10.
 
-**커밋 완료**: F2+M2(`23003510`), agy 어댑터 기반(`01d1ca98`), E2/E3(`16a161cc`), D1b 번역(`85fea062`), maencof stale 브리지 교정(`2e4f08b0`), **Emitter/빌드 배선(`b0d0cd0f`)**. 상세: [stage5-measurement-log.md](./stage5-measurement-log.md) · [backlog-d-e.md](./backlog-d-e.md) · [matrix §10](./host-capability-matrix.md).
+**커밋 완료**: F2+M2(`23003510`), agy 어댑터 기반(`01d1ca98`), E2/E3(`16a161cc`), D1b 번역(`85fea062`), maencof stale 브리지 교정(`2e4f08b0`), **Emitter/빌드 배선(`b0d0cd0f`)**, main 동기화 2회(`9f39355a`·`73d99ccc`), Windows 경로 수정(`165333fe`). 상세: [stage5-measurement-log.md](./stage5-measurement-log.md) · [backlog-d-e.md](./backlog-d-e.md) · [matrix §10](./host-capability-matrix.md).
+
+## 다음 세션 작업 — Codex 완성도 심화 (2026-07-15 실측 검증)
+
+> agy 는 업스트림 버그(injectSteps·MCP 위치) 대기 → **Codex 집중**. 아래는 **코드·소스 실측으로 실현성을 확인한** 순위. "완전 파리티" 가 아니라 "achievable 만큼 + 정직 고지" 원칙 유지.
+
+### 0. (선행) PR #89 머지 후 — GitHub 설치 라이브 게이트
+
+마켓플레이스 실설치로 **Claude 무영향 라이브 재확인**(지금까지 `--plugin-dir` 로그 + 구조적 확인뿐). 루트 `plugin.json`·`hooks.json` 이 실제 Claude 설치에 무영향인지. Codex 설치·도구노출·훅 trust 도 함께.
+
+### 1. Read 추적 부분 복구 (Codex) — **maencof 쉬움 / filid·imbas 어려움** (실측 정정)
+
+- **실측**: Codex 는 파일 읽기를 `Bash` 로 직렬화(`Read` 별칭 없음 — 소스 확정). **matcher 확인**: maencof=`*`(Bash 훅 **이미 발화**) / filid·imbas=`Read|Write|Edit`(Bash **미발화**). codex-hooks 는 현재 `apply_patch` 만 정규화, Bash 통과(INTENT 에 "Bash 읽기 경로 추출" 이 *Ask first* 로 명시).
+- **maencof**: codex-hooks 에 Bash-read 파서(`cat/head/less <경로>`→`Read`) + vaultRedirector 가 Read 처리 → **부분 복구 가능**(matcher 변경 불요).
+- **filid·imbas**: matcher 에 `Bash` 추가해야 훅 발화 → 그런데 hooks.json 은 Claude·Codex **공유**라 Claude 에서도 매 bash 발화(비용·거동 변화). ⇒ **Codex 전용 훅 채널**(emitter 가 Codex matcher 만 확장) 또는 핸들러 Claude-bash 빠른 no-op 필요. **설계 결정 선행**.
+- **한계 고지**: 셸 표현 무한(파이프·grep·awk) → **완전 fidelity 불가**, 흔한 단순 읽기만 복구.
+
+### 2. Codex agents 폴백 — **구조적 부재, 단일-폴백** (L3)
+
+- **실측**: Codex 매니페스트에 `agents` 컴포넌트 **없음**(소스 `plugin/manifest.rs`). 모든 Codex 플러그인 공통 — 서브에이전트를 플러그인으로 등록 불가.
+- **작업**: 위원회 의존 스킬(filid Phase D 리뷰·prawf·atlassian 미디어)에 "Codex 면 **단일 에이전트 인라인**" 분기 or MCP 오케스트레이션 재설계. 병렬·격리는 잃음.
+- (미확인: Codex 자체 비-플러그인 에이전트 경로 유무 — 필요 시 조사.)
+
+### 3. process.cwd() 잔여 감사 — **사실상 해결, 소수만** (실측)
+
+- **실측 분류**: 잔여 `process.cwd()` 중 **maencof 14·maencof-lens 1 = 전부 훅**(Codex 는 훅에 세션 cwd 제공 → **문제 없음**). 9-B 프로젝트 경로는 `project_root` 인자로 광범위 해결(imbas 15→1). M2-1 로 모델이 넘김 실측.
+- **잔여 MCP 도달 감사**(프로젝트 경로 여부 확인): `deilen renderViewer/resolveMarkdown.ts:21`·`deilen httpServer/bridgeRoot.ts:35`(자기위치일 가능성)·`imbas astGrepShared.ts:43`·`filid getSgModule.ts:21`(네이티브 모듈 로드일 가능성). 각각 프로젝트 경로면 `project_root` 배선, 아니면 무해로 종결.
+
+### 4. agy — 업스트림 대기 (착수 보류)
+
+- **F4** injectSteps 미렌더 → 컨텍스트 주입훅 무가치. 어댑터·러너 **준비됨**, agy 가 렌더하면 emitter 에 PreInvocation 방출만 추가.
+- **L2** MCP `agy plugin install` 위치 버그 → `.agents/plugins/` 배치 스크립트/README(우회). agy CLI 수정 전까지 수동.
 
 ## C4-3. 상태 디렉터리 (미착수 · 우선순위 낮음)
 
