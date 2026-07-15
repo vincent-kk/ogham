@@ -90,9 +90,7 @@ describe("buildCodexHooks", () => {
 
   it("does not extend a Read matcher on a non-PreToolUse event", () => {
     expect(
-      buildCodexHooks(
-        facts({ hooks: { PostToolUse: [{ matcher: "Read" }] } }),
-      ),
+      buildCodexHooks(facts({ hooks: { PostToolUse: [{ matcher: "Read" }] } })),
     ).toBeNull();
   });
 });

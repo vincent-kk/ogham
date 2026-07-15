@@ -28,7 +28,7 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 | `plugins/<p>/.codex-plugin/plugin.json` | `.claude-plugin/plugin.json` + `.mcp.json` + 디렉터리 | 메타 필드 복사, `skills`/`hooks` 존재 시 명시 선언, `mcpServers` 인라인(서버명=플러그인명, args 상대화, **`cwd:"."` 명시**, `type` 생략, `env.OGHAM_HOST="codex"` 주입) |
 | `plugins/<p>/mcp_config.json`           | `.mcp.json`                                           | 동일 래퍼 + args 상대화, 서버명 원본 유지, `env.OGHAM_HOST="agy"` 주입. MCP 없으면 미생성                                                                               |
 | `plugins/<p>/hooks.json`                | `hooks/hooks.json` 의 **PreToolUse**                  | **agy named-group** — 플러그인명 키, `*` matcher, `node bridge/run-agy.mjs PreToolUse bridge/<handler>.mjs`. PreToolUse 없으면 미생성(현재 filid·imbas·maencof 3곳)     |
-| `plugins/<p>/.codex-plugin/hooks.json`  | `hooks/hooks.json` 전체                               | **Codex 전용** — Claude 훅 전부 복사하되 read 잡는 PreToolUse matcher(`Read\|…`)에 `\|Bash` 추가. `*`·비-read matcher 는 미생성(현재 filid·imbas 2곳)                    |
+| `plugins/<p>/.codex-plugin/hooks.json`  | `hooks/hooks.json` 전체                               | **Codex 전용** — Claude 훅 전부 복사하되 read 잡는 PreToolUse matcher(`Read\|…`)에 `\|Bash` 추가. `*`·비-read matcher 는 미생성(현재 filid·imbas 2곳)                   |
 | `.agents/plugins/marketplace.json`      | `.claude-plugin/marketplace.json`                     | 항목별 `{name, source:{source:"local",path}, policy:{AVAILABLE,ON_INSTALL}, category(Title-case)}`                                                                      |
 
 - args 상대화: `${CLAUDE_PLUGIN_ROOT}/X` 접두를 `X` 로. 변수가 접두 이외 위치·env·command 에 있으면 **error** (생성물이 깨지므로).
@@ -45,10 +45,10 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 
 ### 진단
 
-| level   | code                  | 조건                                                               |
-| ------- | --------------------- | ------------------------------------------------------------------ |
-| error   | `mcp-variable-args`   | `${CLAUDE_PLUGIN_ROOT}` 가 args 접두 이외 위치·command·env 에 존재 |
-| warning | `codex-unknown-event` | hooks.json 에 Codex 미지원 이벤트(10종 밖) — Codex 가 조용히 무시  |
+| level   | code                  | 조건                                                                                      |
+| ------- | --------------------- | ----------------------------------------------------------------------------------------- |
+| error   | `mcp-variable-args`   | `${CLAUDE_PLUGIN_ROOT}` 가 args 접두 이외 위치·command·env 에 존재                        |
+| warning | `codex-unknown-event` | hooks.json 에 Codex 미지원 이벤트(10종 밖) — Codex 가 조용히 무시                         |
 | warning | `codex-read-matcher`  | matcher 에 `Read` — Codex 는 Read 미발화(단순 셸 읽기만 Bash 채널 복구, 복합 읽기 미추적) |
 
 ## Acceptance Criteria

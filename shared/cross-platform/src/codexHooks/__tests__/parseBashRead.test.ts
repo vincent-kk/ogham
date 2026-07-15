@@ -5,7 +5,9 @@ import { parseBashRead } from "../parseBashRead.js";
 
 describe("parseBashRead", () => {
   it("extracts the path from a bare cat", () => {
-    expect(parseBashRead("cat 01_Core/identity.md")).toBe("01_Core/identity.md");
+    expect(parseBashRead("cat 01_Core/identity.md")).toBe(
+      "01_Core/identity.md",
+    );
   });
 
   it("skips leading flags and flag values (head -n 50 file)", () => {

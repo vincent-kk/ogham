@@ -65,7 +65,9 @@ describe("planPluginAdapters", () => {
       mcpServers: { tools: { command: "node", args: ["bridge/x.cjs"] } },
     });
     const { files } = planPluginAdapters(pluginDirectory);
-    const root = files.find((f) => norm(f.absolutePath).endsWith("/plugin.json"));
+    const root = files.find((f) =>
+      norm(f.absolutePath).endsWith("/plugin.json"),
+    );
     const codex = files.find((f) =>
       norm(f.absolutePath).endsWith(".codex-plugin/plugin.json"),
     );
