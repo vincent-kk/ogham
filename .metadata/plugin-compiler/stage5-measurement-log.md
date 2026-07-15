@@ -127,10 +127,31 @@ D1 로그의 "agy plugin install 은 bridge/ 미복사" 는 **틀렸다**(agy 1.
 
 **실측 발견 — F6 stale 브리지 (`2e4f08b0`)**: 재빌드 중 maencof 브리지 3개(post-tool-use·session-start·user-prompt-submit)가 커밋본과 달랐다. 통제 실험(isMaencofVault 를 HEAD 로 되돌려도 동일 diff)으로 원인을 격리: F6(`6c75b159`)이 `isMaencofVault` 를 `hasVaultMarker`+`isInsideMaencofVault` 로 분리하고 **pre-tool-use 만 재빌드**, 공유 lifecycle dispatcher 를 인라인하는 나머지 3개를 pre-F6 소스로 남겼다. 기능 동일(리팩터는 순수 분리)이나 `bridge/` 가 소스와 드리프트 — 재빌드로 재현성 복구.
 
+## 3차 세션 — Codex read 추적 복구 (2026-07-16)
+
+> §1(read 추적)·§3(process.cwd 감사) 실행. §2(agents 폴백)는 Vincent 지시로 다음 세션.
+
+### F-A 정정 — PreToolUse `additionalContext` 는 이제 주입된다
+
+2차 세션이 인용한 "parsed but not applied"(issue #19385)는 **openai/codex PR #20692(2026-05-05 병합)로 해소**. 현재 공식 문서: "To add model-visible context without blocking, return hookSpecificOutput.additionalContext". ⇒ filid 구조경고·maencof vault 권고가 Codex 모델에 **도달**(단순 셸 읽기 한정). agy PreToolUse 는 여전히 주입 채널 없음(그 서술만 유효). line 116 정정 완료.
+
+### §1 read 추적 — codex read 채널 (parseBashRead + Codex 전용 hooks)
+
+- **maencof (`5fad890c`)**: `@ogham/cross-platform/codexHooks` 에 `parseBashRead` 추가(`cat/head/tail/less/more/bat <path>`→Read, 셸 메타문자면 null — write 오분류·복합명령 방지). `normalizeCodexToolUse` 에 Bash 분기. maencof matcher=`*` 라 배선 불요. **종단 스모크(빌드된 브리지)**: vault `.md` read→vault redirect 권고, `.txt`·파이프→무발화.
+- **filid·imbas (`9b6aae63`, option a)**: 신규 emitter 빌더 `buildCodexHooks` — Claude 훅 전체 복사 + read 잡는 PreToolUse matcher 에 `|Bash`, `.codex-plugin/hooks.json` 방출, Codex 매니페스트 `hooks` 가 이를 가리킴(경로 해석 플러그인-루트 기준). **Claude 무영향 실측**(`hooks/hooks.json` git diff 0). baseline 33→35. **filid 종단 스모크(session_id 포함)**: 직접 `Read` 와 Codex `Bash cat <FCA .ts>` 가 **바이트 동일한 `[filid:ctx]` 주입**, 파이프는 무주입. `codex-read-matcher` 린트는 부분 복구·잔여 한계(복합 셸 읽기) 서술로 리워드.
+- **셸 우회·복합 읽기 한계**: 파이프·grep·awk 는 미추적(파서가 null). Codex 도 "단순 셸만" 인터셉트 → 프레이밍 일치.
+
+### §3 process.cwd() 잔여 감사 — 전부 무해 종결
+
+MCP+훅 도달 19곳(테스트 제외) = 훅 15(maencof 14·maencof-lens 1, Codex 는 훅에 세션 cwd 제공 → 무해) + 비-훅 4(`deilen resolveMarkdown` 주석·`deilen bridgeRoot` 자기자산·`filid getSgModule`·`imbas astGrepShared` 네이티브 로드 `_base`). 코드 변경 불요 — roadmap 가설 확인.
+
 ## 결론 요약
 
 | 항목                     | 결과                                                                                      | 코드       |
 | ------------------------ | ----------------------------------------------------------------------------------------- | ---------- |
+| §1 codex read (maencof)  | ✅ `parseBashRead`→Read 승격, vault 권고 종단 스모크                                       | `5fad890c` |
+| §1 codex read (filid·imbas) | ✅ `buildCodexHooks` Codex 전용 채널, filid `[filid:ctx]` 종단 스모크, Claude 무영향    | `9b6aae63` |
+| §3 process.cwd 감사      | ✅ 19곳 전부 무해(훅 15·네이티브/자기위치 4) — 코드 불요                                   | `7b323035` |
 | E2/E3 Codex 파일도구     | ✅ apply_patch→Write/Edit 정규화, 가드 발화 실측 (공식 문서·prempti 검증)                 | `16a161cc` |
 | D1b agy 게이팅           | ✅ 번역 + **라이브 agy deny 강제 실측** + 가드 발화                                       | `85fea062` |
 | F6 workspacePaths        | ✅ 편집 파일 경로로 cwd 역산 + walk-up — **라이브 실측**(빈 workspace 에서 deny)          | `6c75b159` |
