@@ -15,19 +15,19 @@
 
 ## 지금 상태 — 한 눈에
 
-| 단계                                 | 상태                                                |
-| ------------------------------------ | --------------------------------------------------- |
-| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                              |
-| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                |
-| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                |
-| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                  |
-| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적        |
-| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                 |
-| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정       |
-| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)    |
+| 단계                                 | 상태                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------ |
+| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                   |
+| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                     |
+| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                     |
+| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                                       |
+| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적                             |
+| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                                      |
+| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정                            |
+| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)                         |
 | **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정 |
-| **Phase D/E** agy·Codex 심화         | ⬜ 선택 → [backlog-d-e.md](./backlog-d-e.md)        |
-| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                           |
+| **Phase D/E** agy·Codex 심화         | ⬜ 선택 → [backlog-d-e.md](./backlog-d-e.md)                             |
+| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 
@@ -79,13 +79,13 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 
 **결과표** (측정할 것 → 결과):
 
-| # | 결과 |
-| --- | --- |
-| **M2-1** (V1) | ✅ Codex 모델이 `project_root`(절대경로) **첫 호출 자발 전달**, 복구 왕복 0회. (F1: 모델은 `~` 아닌 절대경로 사용 — 틸데 이득 서술만 정정, 코드 불변) |
-| **M2-2** (V2) | ✅ agy 는 워크스페이스 절대경로를 모델 컨텍스트에 **미주입** — 모델이 `pwd` 로 발견(transcript 확인). project_root 전달은 pwd 발견 후 가능. 코드(선택 인자) 호환. |
-| **M2-3** (V3) | ✅ agy 계약(wrong cwd·env 부재)에서 `run_r` 성공 = **자기탐색이 플러그인 루트 정확 해석**. (실 MCP 프로세스 cwd/env 측정은 미로그인으로 유예 — 자기탐색이 이를 불요로 함) |
-| **M2-4** (V4) | ✅ contract.R 소싱(manifest present)·allow-root(project_root) 정상, 가드 throw 확인. **결함 F2 발견·수정.** |
-| **M2-5** (C4) | ✅ filid·maencof 가 Codex 에서 `AGENTS.md` 병합, `codex debug prompt-input` 에 규칙 본문 도달, idempotent, 훅 합집합 판정 오판 없음. |
+| #                 | 결과                                                                                                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M2-1** (V1)     | ✅ Codex 모델이 `project_root`(절대경로) **첫 호출 자발 전달**, 복구 왕복 0회. (F1: 모델은 `~` 아닌 절대경로 사용 — 틸데 이득 서술만 정정, 코드 불변)                               |
+| **M2-2** (V2)     | ✅ agy 는 워크스페이스 절대경로를 모델 컨텍스트에 **미주입** — 모델이 `pwd` 로 발견(transcript 확인). project_root 전달은 pwd 발견 후 가능. 코드(선택 인자) 호환.                   |
+| **M2-3** (V3)     | ✅ agy 계약(wrong cwd·env 부재)에서 `run_r` 성공 = **자기탐색이 플러그인 루트 정확 해석**. (실 MCP 프로세스 cwd/env 측정은 미로그인으로 유예 — 자기탐색이 이를 불요로 함)           |
+| **M2-4** (V4)     | ✅ contract.R 소싱(manifest present)·allow-root(project_root) 정상, 가드 throw 확인. **결함 F2 발견·수정.**                                                                         |
+| **M2-5** (C4)     | ✅ filid·maencof 가 Codex 에서 `AGENTS.md` 병합, `codex debug prompt-input` 에 규칙 본문 도달, idempotent, 훅 합집합 판정 오판 없음.                                                |
 | **M2-6** (C4/agy) | ✅ **agy(--print)는 GEMINI/AGENTS/CLAUDE 자동주입 안 함**(모델 grep 으로 읽음, transcript 확인) → `instructionsChannel.ts` agy 분기 **업그레이드 안 함**(conservative 유지가 정당). |
 
 ---
