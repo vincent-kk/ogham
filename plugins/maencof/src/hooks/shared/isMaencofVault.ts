@@ -5,7 +5,8 @@ import { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
 
 function hasVaultMarker(dir: string): boolean {
   return (
-    existsSync(join(dir, MAENCOF_DIR)) || existsSync(join(dir, MAENCOF_META_DIR))
+    existsSync(join(dir, MAENCOF_DIR)) ||
+    existsSync(join(dir, MAENCOF_META_DIR))
   );
 }
 
