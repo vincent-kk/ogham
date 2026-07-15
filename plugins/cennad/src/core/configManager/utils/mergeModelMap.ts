@@ -7,13 +7,32 @@ interface TierConfigFallback {
   effort?: string;
 }
 
-// Merge one provider tier. Take the raw tier wholesale when it carries a string
-// model (so a model without effort support, e.g. haiku or a bare agy model, does not
-// inherit the default's effort); otherwise fall back to the default tier config.
-// A bare string raw is the pre-{model,effort} antigravity schema — migrate it to
-// {model: raw} instead of discarding the user's chosen model.
+// Matches an agy display name's base + trailing "(variant)" —
+// "Gemini 3.5 Flash (Medium)" → ["Gemini 3.5 Flash", "Medium"]. Module-scoped so the
+// migration path reuses one compiled RegExp; mirrors parseAgyModel in the settings UI
+// (keep in sync).
+const AGY_MODEL_VARIANT_RE = /^(.*?)\s*\(([^()]+)\)\s*$/;
+
+// The pre-{model,effort} antigravity schema stored the full agy display name. Split the
+// trailing "(variant)" into {model, effort} so the migrated value matches the current
+// schema: the settings UI lists bases in its model dropdown and dispatch recomposes
+// "model (effort)". A name without a trailing variant migrates to {model} (no effort).
+function parseLegacyAntigravityModel(raw: string): {
+  model: string;
+  effort?: string;
+} {
+  const match = AGY_MODEL_VARIANT_RE.exec(raw);
+  if (match) return { model: match[1].trim(), effort: match[2].trim() };
+  return { model: raw.trim() };
+}
+
+// Merge one provider tier. Take the raw tier wholesale when it carries a string model
+// (so a model without effort support, e.g. haiku, does not inherit the default's
+// effort); otherwise fall back to the default tier config. A bare string raw is the
+// legacy antigravity schema — migrate it via parseLegacyAntigravityModel instead of
+// discarding the user's chosen model.
 function mergeTierConfig(raw: unknown, fallback: TierConfigFallback): unknown {
-  if (typeof raw === 'string') return { model: raw };
+  if (typeof raw === 'string') return parseLegacyAntigravityModel(raw);
   if (!isPlainObject(raw) || typeof raw.model !== 'string') return fallback;
   const tier: { model: string; effort?: unknown } = { model: raw.model };
   if (typeof raw.effort === 'string') tier.effort = raw.effort;
