@@ -28,6 +28,12 @@ export interface AgyCommonInput {
   modelName?: string;
 }
 
+/** The tool an agy PreToolUse payload is gating (name + PascalCase args). */
+export interface AgyToolCall {
+  name?: string;
+  args?: Record<string, unknown>;
+}
+
 /** The Claude snake_case input a bundled handler reads from stdin. */
 export interface ClaudeHookInput {
   cwd: string;

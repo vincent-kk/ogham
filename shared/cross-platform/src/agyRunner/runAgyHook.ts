@@ -32,17 +32,22 @@ export interface RunAgyHookDeps {
  *
  * Pure orchestration: every side effect (stdin, the marker file, spawning the handler)
  * is injected, so the mapping and the once-guard are unit-testable without a live agy.
- * The empty-`injectSteps` no-op is the safe default on every early return — a hook must
- * never wedge the agent loop.
+ * Every early return is a no-op so a hook never wedges the agent loop — for PreToolUse
+ * that means `{decision:"allow"}` (letting the tool run), everywhere else an empty
+ * `injectSteps`.
  */
 export function runAgyHook(deps: RunAgyHookDeps): AgyHookResponse {
-  if (deps.claudeEvent === "SessionStart" && !deps.claimSessionStartOnce()) {
-    return { injectSteps: [] };
-  }
+  const noop: AgyHookResponse =
+    deps.claudeEvent === "PreToolUse"
+      ? { decision: "allow" }
+      : { injectSteps: [] };
+
+  if (deps.claudeEvent === "SessionStart" && !deps.claimSessionStartOnce())
+    return noop;
 
   const claudeInput = agyToClaudeInput(deps.agyPayload, deps.claudeEvent);
   const claudeOutput = deps.runHandler(claudeInput);
-  if (claudeOutput === null) return { injectSteps: [] };
+  if (claudeOutput === null) return noop;
 
   return claudeToAgyResponse(claudeOutput, deps.claudeEvent);
 }

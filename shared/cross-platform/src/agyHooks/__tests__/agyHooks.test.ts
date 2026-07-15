@@ -59,8 +59,8 @@ describe("agyToClaudeInput", () => {
     ).toBe("");
   });
 
-  it("throws on a tool event, which needs argument translation not yet built", () => {
-    expect(() => agyToClaudeInput(AGY, "PreToolUse")).toThrow(/unsupported/);
+  it("throws on PostToolUse, whose contract translation is a later stage", () => {
+    expect(() => agyToClaudeInput(AGY, "PostToolUse")).toThrow(/unsupported/);
   });
 });
 
@@ -82,9 +82,11 @@ describe("claudeToAgyResponse", () => {
   });
 
   it("returns an empty step list when the handler injects nothing", () => {
-    expect(claudeToAgyResponse({ continue: true }, "UserPromptSubmit")).toEqual({
-      injectSteps: [],
-    });
+    expect(claudeToAgyResponse({ continue: true }, "UserPromptSubmit")).toEqual(
+      {
+        injectSteps: [],
+      },
+    );
   });
 
   it("treats an empty-string context as nothing to inject", () => {

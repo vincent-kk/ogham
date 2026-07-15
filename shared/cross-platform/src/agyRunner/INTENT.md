@@ -4,16 +4,16 @@ agy 훅 **런타임 어댑터**. 순수 번역(`agyHooks`)을 감싸 실제 I/O 
 
 ## Structure
 
-| File             | Role                                                                      |
-| ---------------- | ------------------------------------------------------------------------- |
-| `index.ts`       | barrel (테스트·API 표면)                                                  |
-| `runAgyHook.ts`  | 순수 오케스트레이션 — I/O 주입받아 매핑·once-guard 결정 (테스트 가능)      |
-| `sessionOnce.ts` | conversationId+target 별 SessionStart 1회 가드 (O_EXCL 마커)              |
-| `main.ts`        | CLI 진입 — stdin 판독 + 핸들러 spawn 배선 (`bridge/run-agy.mjs` 로 번들)   |
+| File             | Role                                                                     |
+| ---------------- | ------------------------------------------------------------------------ |
+| `index.ts`       | barrel (테스트·API 표면)                                                 |
+| `runAgyHook.ts`  | 순수 오케스트레이션 — I/O 주입받아 매핑·once-guard 결정 (테스트 가능)    |
+| `sessionOnce.ts` | conversationId+target 별 SessionStart 1회 가드 (O_EXCL 마커)             |
+| `main.ts`        | CLI 진입 — stdin 판독 + 핸들러 spawn 배선 (`bridge/run-agy.mjs` 로 번들) |
 
 ## Conventions
 
-- 모든 조기 반환은 **빈 `injectSteps` no-op** — 훅이 agy 루프를 막지 않는다.
+- 조기 반환 no-op 은 이벤트별로 안전: PreToolUse 는 `{decision:"allow"}`(도구 통과), 그 외는 빈 `injectSteps`.
 - 부수효과(stdin·마커·spawn)는 `runAgyHook` 에 주입 → 라이브 agy 없이 단위 테스트.
 - 스폰되는 핸들러엔 `CLAUDE_PLUGIN_ROOT = cwd`(agy 에선 플러그인 루트) 를 넘긴다.
 - argv: `<ClaudeEvent> <handler.mjs 경로>`.
@@ -28,7 +28,7 @@ agy 훅 **런타임 어댑터**. 순수 번역(`agyHooks`)을 감싸 실제 I/O 
 ### Ask first
 
 - 마커 저장 위치 변경(현재 OS temp).
-- PreToolUse/PostToolUse 배선 추가 (agyHooks 확장 선행).
+- PostToolUse 배선 추가 (agyHooks 확장 선행 — PreToolUse 게이팅은 배선됨).
 
 ### Never do
 

@@ -1,5 +1,7 @@
+import { agyToolToClaude } from "./toolMap.js";
 import type {
   AgyCommonInput,
+  AgyToolCall,
   ClaudeHookEvent,
   ClaudeHookInput,
 } from "./types.js";
@@ -16,9 +18,9 @@ import type {
  * empty prompt. The ogham prompt hooks inject context and gate on first-in-session,
  * neither of which reads the prompt body, so nothing is lost.
  *
- * Only the PreInvocation-mapped events are handled here; PreToolUse/PostToolUse need a
- * tool-name and argument translation that is a later stage, and are rejected loudly
- * rather than passed through half-formed.
+ * PreToolUse maps agy's `toolCall` onto Claude `tool_name`/`tool_input` (via toolMap) so
+ * the bundled Write/Edit guards run. PostToolUse still needs its own contract and is
+ * rejected loudly rather than passed through half-formed.
  */
 export function agyToClaudeInput(
   agy: AgyCommonInput & Record<string, unknown>,
@@ -42,9 +44,17 @@ export function agyToClaudeInput(
       return { ...base, source: "startup" };
     case "UserPromptSubmit":
       return { ...base, prompt: "" };
+    case "PreToolUse": {
+      const toolCall = agy["toolCall"] as AgyToolCall | undefined;
+      const { tool_name, tool_input } = agyToolToClaude(
+        toolCall?.name ?? "",
+        toolCall?.args,
+      );
+      return { ...base, tool_name, tool_input };
+    }
     default:
       throw new Error(
-        `agyToClaudeInput: unsupported event "${claudeEvent}" — PreToolUse/PostToolUse translation is a later stage`,
+        `agyToClaudeInput: unsupported event "${claudeEvent}" — PostToolUse translation is a later stage`,
       );
   }
 }
