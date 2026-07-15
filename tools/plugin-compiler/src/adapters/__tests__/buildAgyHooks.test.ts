@@ -62,7 +62,8 @@ describe("buildAgyHooks", () => {
             hooks: [
               {
                 type: "command",
-                command: "node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs",
+                command:
+                  "node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs",
               },
             ],
           },

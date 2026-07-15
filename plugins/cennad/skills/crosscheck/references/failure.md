@@ -3,13 +3,16 @@
 Load this when any courier report is failed or unusable. Count **usable
 viewpoints** = reports with `status: 'success'` AND a non-empty body.
 Everything else is a **failed entry**: `status: 'failure'` reports,
-empty-body successes (`note: empty provider response`), and couriers that
+empty-body successes (`note: empty provider response`), headerless
+self-answers (no `status:`/`provider:` envelope), and couriers that
 terminated without reporting (treat as `error: cli_error`).
 
 Each entry's `remedy` comes from its courier report — do not re-derive it.
-Two cases have no courier remedy; use these instead: a report-less crash →
+Three cases have no courier remedy; use these instead: a report-less crash →
 "the courier terminated before reporting; retry", an empty-body success →
-"the provider returned an empty response; retry or continue the session".
+"the provider returned an empty response; retry or continue the session", a
+headerless self-answer → "re-spawn the courier WITHOUT a teammate `name` so
+it instantiates as `cennad:courier`".
 
 ## Synthesis policy
 

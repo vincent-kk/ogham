@@ -15,22 +15,22 @@
 
 ## 지금 상태 — 한 눈에
 
-| 단계                                 | 상태                                                                                                                  |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                                                                |
-| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                                                                  |
-| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                                                                  |
-| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                                                                                    |
-| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적                                                                          |
-| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                                                                                   |
-| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정                                                                         |
-| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)                                                                      |
-| **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정                                              |
-| **D1** agy 훅 번역 어댑터            | 🟡 주입훅 보류(F4) — 게이팅(D1b)은 ✅ 완료(`85fea062`, 아래)                                                          |
-| **E3/E2** Codex 파일도구 매칭        | ✅ **완료**(`16a161cc`) — `apply_patch`→`Write`/`Edit` 정규화, 가드 발화 실측 ([stage5](./stage5-measurement-log.md)) |
-| **D1b** agy 게이팅 훅 (번역)         | ✅ **완료 + 라이브 검증**(`85fea062`·`6c75b159`) — 실제 agy 가 `write_to_file` deny 강제·F6 fallback 작동             |
+| 단계                                 | 상태                                                                                                                                                                        |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                                                                                                                      |
+| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                                                                                                                        |
+| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                                                                                                                        |
+| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                                                                                                                                          |
+| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적                                                                                                                                |
+| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                                                                                                                                         |
+| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정                                                                                                                               |
+| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)                                                                                                                            |
+| **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정                                                                                                    |
+| **D1** agy 훅 번역 어댑터            | 🟡 주입훅 보류(F4) — 게이팅(D1b)은 ✅ 완료(`85fea062`, 아래)                                                                                                                |
+| **E3/E2** Codex 파일도구 매칭        | ✅ **완료**(`16a161cc`) — `apply_patch`→`Write`/`Edit` 정규화, 가드 발화 실측 ([stage5](./stage5-measurement-log.md))                                                       |
+| **D1b** agy 게이팅 훅 (번역)         | ✅ **완료 + 라이브 검증**(`85fea062`·`6c75b159`) — 실제 agy 가 `write_to_file` deny 강제·F6 fallback 작동                                                                   |
 | **Emitter/빌드 배선**                | ✅ **완료**(`b0d0cd0f`) — `buildAgyHooks` 5번째 어댑터(루트 `hooks.json`, PreToolUse→named-group), 3플러그인 `run-agy.mjs` 번들, baseline 30→33, 스모크(deny/allow/F6) 통과 |
-| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                                                             |
+| main 머지·GitHub 경유 설치 확인      | ⬜ 마지막                                                                                                                                                                   |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 

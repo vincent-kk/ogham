@@ -1,6 +1,6 @@
 {
   "name": "entrez",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "entrez — NCBI E-utilities (PubMed/PMC/MeSH) academic paper search plugin for Claude Code. Recall-first multi-query union search with deterministic dedup.",
   "author": {
     "name": "Vincent K. Kelvin"

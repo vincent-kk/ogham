@@ -272,3 +272,23 @@ describe('isVaultDocDirectory', () => {
     expect(isVaultDocDirectory(cwd, '../outside')).toBe(false);
   });
 });
+
+// isVaultInternalPath/isVaultDocDirectory 는 순수 함수라 실행 OS 와 무관하게
+// Windows-flavored(드라이브 레터) 입력으로 검증할 수 있다. 네이티브 path 를
+// 쓰면 러너 OS 에 따라 결과가 갈라졌고, 대소문자 구분 비교는 Windows(대소문자
+// 무시 FS)에서 내부 관리 디렉토리를 놓쳐 잘못된 리다이렉트 힌트를 냈다.
+describe('Windows-flavored 경로 (대소문자 무시 FS)', () => {
+  const winCwd = 'C:\\vault';
+
+  it('내부 디렉토리는 대소문자가 달라도 제외한다', () => {
+    expect(isVaultInternalPath(winCwd, '.Maencof-Meta/notes.md')).toBe(false);
+    expect(isVaultInternalPath(winCwd, '.MAENCOF/notes.md')).toBe(false);
+    expect(isVaultDocDirectory(winCwd, '.Maencof-Meta')).toBe(false);
+    expect(isVaultDocDirectory(winCwd, '.MAENCOF/subdir')).toBe(false);
+  });
+
+  it('내부 디렉토리가 아닌 vault 문서는 그대로 인식한다', () => {
+    expect(isVaultInternalPath(winCwd, '01_Core/values.md')).toBe(true);
+    expect(isVaultDocDirectory(winCwd, '01_Core')).toBe(true);
+  });
+});

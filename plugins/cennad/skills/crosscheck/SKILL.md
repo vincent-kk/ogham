@@ -53,7 +53,9 @@ spawn replacement couriers.
 ## Run
 
 In ONE message, spawn one `cennad:courier` per participant (Agent tool,
-background — never poll; name each after its provider):
+background — never poll; identify each by a provider-specific `description`,
+NEVER by teammate `name` — naming discards the `cennad:courier` type and the
+agent answers itself instead of delegating):
 
 ```
 operation: start
@@ -93,9 +95,10 @@ uncertainty — an inference stays an inference:
 ```
 
 Add an `## Artifacts` section listing any `artifact_path` present in the
-reports. A success report with an empty body (`note: empty provider response`)
-is unusable — count and report it as a failed entry, never as a viewpoint. If
-any report is failed or unusable, load
+reports. A report with an empty body (`note: empty provider response`) or
+without the `status:`/`provider:` envelope header (a self-answer, not a
+delegation) is unusable — count it as a failed entry, never as a viewpoint.
+If any report is failed or unusable, load
 **[references/failure.md](references/failure.md)** for partial-failure
 synthesis; its branches count USABLE viewpoints (non-empty successes) and
 decide when the host must supply the second viewpoint.

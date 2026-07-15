@@ -13,7 +13,7 @@
 | `locatePluginRoot.ts`    | 매니페스트까지 상향 탐색 — env·cwd 채널이 없는 호스트의 최후 수단  |
 | `projectRoot.ts`         | 사용자 작업물 루트 — `projectRoot`(throw) / `tryProjectRoot`(null) |
 | `projectRootMemo.ts`     | 프로세스당 workspace 좌표 기억 (claude 에서는 무시)                |
-| `absoluteRoot.ts`        | 공급된 경로의 절대성 강제 + `~` 전개 + 정규화                      |
+| `absoluteRoot.ts`        | 공급된 경로의 절대성 강제 + `~` 전개 + `portableResolve` 정규화    |
 | `instructionsChannel.ts` | `instructionsFile()` · `ruleDocsTarget()` — 호스트별 문서 채널     |
 
 ## Conventions
@@ -21,7 +21,7 @@
 - `pluginRoot()` 는 **env → codex cwd → 상향 탐색** 순. 마지막 단계는 **존재 검증된 답**이라 미실측 호스트(agy)에도 안전하다 — cwd 를 추측하지 않는다.
 - `projectRoot()` 의 claude 분기는 `process.cwd()` — 기존 동작과 완전히 동일해야 한다 (가산적 변경).
 - claude 외 호스트에서 프로젝트 좌표 해석 실패는 **throw** — `process.cwd()` 폴백은 플러그인 폴더를 프로젝트로 오인하는 바로 그 결함이다.
-- 공급된 경로는 `~` 전개 후 **절대경로만** 수용하고 `resolve()` 로 정규화한다 — 소비처가 `sha256(root)` 로 프로젝트를 식별하므로 표기 차이가 프로젝트를 갈라놓는다.
+- 공급된 경로는 `~` 전개 후 **절대경로만** 수용하고 `portableResolve` 로 정규화한다 (네이티브 `resolve` 금지) — 소비처가 `sha256(root)` 로 프로젝트를 식별하는데, 네이티브 `resolve` 는 Windows 에서만 구분자·드라이브를 바꿔 같은 작업물을 갈라놓는다.
 - 도구 스키마의 `project_root` 설명은 `PROJECT_ROOT_ARG_DESCRIPTION` 하나를 공유한다 (문구 표류 금지).
 
 ## Boundaries
@@ -43,5 +43,5 @@
 
 ## Dependencies
 
-- 내부: `instructions` (파일명·마커 정본).
+- 내부: `instructions` (파일명·마커 정본), `../paths` (`portableResolve` — 정규화 단일 경유).
 - 외부: Node 내장 (`node:path` · `node:fs` · `node:os` · `node:url`) 만.

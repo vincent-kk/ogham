@@ -42,8 +42,11 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   + FCA opt-in gate + write-visit recording + fmap file
 //                   lock).
 //   SESSION_START — selfProbe (spawn-dependent → cross-spawn inlined) + logHookFailure.
+// HEAVY is 25 KB (was 24): #87 routed cwd hashing through portableResolve, which
+// the cacheManager pulls into the pre-tool-use path (~24.6 KB now). Still Node
+// builtins only — FORBIDDEN_PATTERNS below is the real isolation guard, not this cap.
 const SESSION_START_HOOK_BYTES = 40 * 1024;
-const HEAVY_HOOK_BYTES = 24 * 1024;
+const HEAVY_HOOK_BYTES = 25 * 1024;
 const LIGHT_HOOK_BYTES = 12 * 1024;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and

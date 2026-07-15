@@ -129,11 +129,11 @@ D1 로그의 "agy plugin install 은 bridge/ 미복사" 는 **틀렸다**(agy 1.
 
 ## 결론 요약
 
-| 항목                     | 결과                                                                                 | 코드       |
-| ------------------------ | ------------------------------------------------------------------------------------ | ---------- |
-| E2/E3 Codex 파일도구     | ✅ apply_patch→Write/Edit 정규화, 가드 발화 실측 (공식 문서·prempti 검증)            | `16a161cc` |
-| D1b agy 게이팅           | ✅ 번역 + **라이브 agy deny 강제 실측** + 가드 발화                                  | `85fea062` |
-| F6 workspacePaths        | ✅ 편집 파일 경로로 cwd 역산 + walk-up — **라이브 실측**(빈 workspace 에서 deny)     | `6c75b159` |
-| 셸 우회 (전 호스트 공통) | ⚠️ 모델이 Bash 로 우회 — guardrail 한계, Claude·Codex·agy 동일(고지)                 | (문서)     |
-| Codex root hooks.json    | ✅ 안전(무시) · F7: agy install 이 bridge 복사 — emitter 설계·배포 확정              | (문서)     |
+| 항목                     | 결과                                                                                      | 코드       |
+| ------------------------ | ----------------------------------------------------------------------------------------- | ---------- |
+| E2/E3 Codex 파일도구     | ✅ apply_patch→Write/Edit 정규화, 가드 발화 실측 (공식 문서·prempti 검증)                 | `16a161cc` |
+| D1b agy 게이팅           | ✅ 번역 + **라이브 agy deny 강제 실측** + 가드 발화                                       | `85fea062` |
+| F6 workspacePaths        | ✅ 편집 파일 경로로 cwd 역산 + walk-up — **라이브 실측**(빈 workspace 에서 deny)          | `6c75b159` |
+| 셸 우회 (전 호스트 공통) | ⚠️ 모델이 Bash 로 우회 — guardrail 한계, Claude·Codex·agy 동일(고지)                      | (문서)     |
+| Codex root hooks.json    | ✅ 안전(무시) · F7: agy install 이 bridge 복사 — emitter 설계·배포 확정                   | (문서)     |
 | Emitter 배선             | ✅ **완료** — `buildAgyHooks` 5번째 어댑터·3플러그인 `run-agy.mjs` 번들·30→33·스모크 통과 | `b0d0cd0f` |
