@@ -72,9 +72,9 @@ export function createServer(): McpServer {
     {
       description:
         "Collect line-anchored feedback for a render session via a bounded " +
-        "long-poll. Returns the submitted comments (and any attached images) " +
-        'once the user clicks Submit, or { status: "pending" } on timeout — ' +
-        "re-call until complete.",
+        "long-poll. Blocks until the user clicks Submit, then returns their " +
+        "comments (and any attached images). One call covers the whole review — " +
+        'only if the wait elapses first does it return { status: "pending" }.',
       inputSchema: {
         session_id: z
           .string()
@@ -83,11 +83,12 @@ export function createServer(): McpServer {
           .number()
           .int()
           .min(1)
-          .max(55)
+          .max(600)
           .optional()
           .describe(
-            "Max seconds to wait this call (default from config, capped at 55, " +
-              "below the client MCP timeout). On timeout, re-call.",
+            "Max seconds to wait this call (default from config, capped at " +
+              "600). Leave unset unless the user wants a shorter wait — the " +
+              "default is sized to cover a full review in one call.",
           ),
         project_root: z
           .string()

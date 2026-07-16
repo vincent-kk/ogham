@@ -16,7 +16,7 @@
 | `open_settings`    | `project_root?`                                         | `{ url }`                                                    |
 
 - `render_viewer`: content/path 정확히 하나(아니면 `invalid_input`), `max_viewer_mb` 캡(`read_error`). 상대 `path` 는 워크스페이스 기준 해석, 절대 `path` 는 그대로.
-- `collect_feedback`: bounded long-poll, `wait_seconds ≤ 55`. `unknown`/`closed` 세션은 throw. `extra.signal` abort 시 정리.
+- `collect_feedback`: bounded long-poll, `wait_seconds ≤ 600`(기본 600 — 리뷰 1회를 한 호출로 덮는다; 상한 근거는 stdio idle window 30분). `unknown`/`closed` 세션은 throw. `extra.signal` abort 시 정리.
 - `project_root`(절대경로)는 모든 도구에서 선택 — Claude 는 생략(`process.cwd()`), 플러그인 설치 디렉터리에서 기동되는 호스트는 필수(부재 시 actionable throw). 핸들러는 `ensureHttpServer` 보다 먼저 해석해 세션 해시와 서버 스코프를 일치시킨다.
 - 도구 등록명은 snake_case, 심볼·파일은 camelCase.
 

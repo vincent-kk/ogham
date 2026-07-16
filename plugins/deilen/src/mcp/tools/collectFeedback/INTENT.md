@@ -1,6 +1,6 @@
 ## Purpose
 
-`collect_feedback` 도구 핸들러. bounded long-poll 로 라인 단위 피드백을 수집해 MCP content 로 반환하고, 타임아웃 시 pending 마커를 돌려 재호출을 유도한다.
+`collect_feedback` 도구 핸들러. bounded long-poll 로 라인 단위 피드백을 수집해 MCP content 로 반환한다. 기본 대기(600초)는 리뷰 1회를 한 호출로 덮으며, 그 안에 제출이 없을 때만 pending 마커를 돌려 재호출을 유도한다.
 
 ## Structure
 
@@ -22,7 +22,7 @@
 ### Always do
 
 - `extra.signal` 을 `awaitFeedback` 에 전달 (abort 전파)
-- 대기 시간을 상한으로 클램프 (클라이언트 MCP 타임아웃 이내)
+- 대기 시간을 `MAX_COLLECT_WAIT_SECONDS` 로 클램프 (stdio idle window 이내)
 
 ### Ask first
 

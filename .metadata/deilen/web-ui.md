@@ -70,7 +70,7 @@ cennad settings 구조 차용. `Config` 폼 매핑:
 | ------------------------------------ | ------------------------------------- |
 | `theme`                              | radio `light`/`dark`/`auto`           |
 | `auto_open`                          | toggle                                |
-| `collect_timeout_seconds`            | number 1–300                          |
+| `collect_timeout_seconds`            | number 1–600                          |
 | `session_ttl_hours`                  | number 1–720                          |
 | `idle_shutdown_minutes`              | number                                |
 | `preferred_port`                     | number(0=동적)                        |

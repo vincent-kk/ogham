@@ -24,22 +24,22 @@
 
 ## Config 스키마 (`types/config.ts`)
 
-| 필드                      | 타입                      | 기본   | 범위/비고                         |
-| ------------------------- | ------------------------- | ------ | --------------------------------- |
-| `theme`                   | `'light'\|'dark'\|'auto'` | `auto` |                                   |
-| `auto_open`               | `boolean`                 | `true` | 렌더 시 브라우저 자동 오픈        |
-| `collect_timeout_seconds` | `number`                  | `45`   | 1–55, 클라이언트 MCP_TIMEOUT 미만 |
-| `session_ttl_hours`       | `number`                  | `72`   | 1–720                             |
-| `idle_shutdown_minutes`   | `number`                  | `1`    | 1–120, 무활동 idle 폴백 종료      |
-| `preferred_port`          | `number`                  | `0`    | 0=동적, 그 외 1024–65535          |
-| `content_width_px`        | `number`                  | `820`  | 480–1600                          |
-| `font_family`             | `string`                  | 시스템 |                                   |
-| `renderers.mermaid`       | `boolean`                 | `true` | false=강제 비활성                 |
-| `renderers.highlight`     | `boolean`                 | `true` |                                   |
-| `renderers.math`          | `boolean`                 | `true` |                                   |
-| `max_image_mb`            | `number`                  | `10`   | 1–100, part 당 상한               |
-| `max_payload_mb`          | `number`                  | `50`   | 1–200, `≥ max_image_mb`           |
-| `max_viewer_mb`           | `number`                  | `5`    | 1–50, render content/path         |
+| 필드                      | 타입                      | 기본   | 범위/비고                           |
+| ------------------------- | ------------------------- | ------ | ----------------------------------- |
+| `theme`                   | `'light'\|'dark'\|'auto'` | `auto` |                                     |
+| `auto_open`               | `boolean`                 | `true` | 렌더 시 브라우저 자동 오픈          |
+| `collect_timeout_seconds` | `number`                  | `600`  | 1–600, stdio idle window(30분) 이내 |
+| `session_ttl_hours`       | `number`                  | `72`   | 1–720                               |
+| `idle_shutdown_minutes`   | `number`                  | `1`    | 1–120, 무활동 idle 폴백 종료        |
+| `preferred_port`          | `number`                  | `0`    | 0=동적, 그 외 1024–65535            |
+| `content_width_px`        | `number`                  | `820`  | 480–1600                            |
+| `font_family`             | `string`                  | 시스템 |                                     |
+| `renderers.mermaid`       | `boolean`                 | `true` | false=강제 비활성                   |
+| `renderers.highlight`     | `boolean`                 | `true` |                                     |
+| `renderers.math`          | `boolean`                 | `true` |                                     |
+| `max_image_mb`            | `number`                  | `10`   | 1–100, part 당 상한                 |
+| `max_payload_mb`          | `number`                  | `50`   | 1–200, `≥ max_image_mb`             |
+| `max_viewer_mb`           | `number`                  | `5`    | 1–50, render content/path           |
 
 - 모든 디스크 쓰기는 `lib/atomicWrite.ts`(temp→rename).
 - config 부재 시 `constants/defaults.ts` 로 부팅, 첫 저장 시 파일 생성.

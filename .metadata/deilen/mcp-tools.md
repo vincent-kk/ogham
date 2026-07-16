@@ -29,10 +29,10 @@ MCP 서버 이름 `tools`. 도구 4개. 모든 스키마는 `src/types/` 의 Zod
 
 입력:
 
-| 필드           | 타입      | 설명                                                                                                                               |
-| -------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `session_id`   | `string`  | `render_viewer` 가 반환한 ID.                                                                                                      |
-| `wait_seconds` | `number?` | 최대 대기 (기본 `config.collect_timeout_seconds`=45, 상한 55 — 클라이언트 `MCP_TIMEOUT` 미만, [mcp-runtime.md](./mcp-runtime.md)). |
+| 필드           | 타입      | 설명                                                                                                                                                                   |
+| -------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `session_id`   | `string`  | `render_viewer` 가 반환한 ID.                                                                                                                                          |
+| `wait_seconds` | `number?` | 최대 대기 (기본 `config.collect_timeout_seconds`=600, 상한 600 — stdio idle window 이내, [mcp-runtime.md](./mcp-runtime.md)). 리뷰 1회를 한 호출로 덮으므로 보통 생략. |
 
 동작:
 
@@ -42,7 +42,7 @@ MCP 서버 이름 `tools`. 도구 4개. 모든 스키마는 `src/types/` 의 Zod
 반환 (MCP content 배열):
 
 - `status:"complete"`: 텍스트 블록(overall 노트들 + 라인 앵커별 코멘트 정리) + **이미지 content 블록**(첨부 이미지마다 `{ type:"image", data:<base64>, mimeType }`).
-- `status:"pending"`: 텍스트 블록 `{ status:"pending", draft_count }` — `preview` 가 재호출.
+- `status:"pending"`: 텍스트 블록 `{ status:"pending", draft_count }` — 대기 소진까지 미제출. `preview` 는 재호출 없이 사용자 신호를 기다린다.
 
 알 수 없는 `session_id` → `unknown` 에러. `closed` 세션 → `closed` 에러.
 

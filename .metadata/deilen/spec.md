@@ -32,9 +32,9 @@ MCP 에서 데이터는 **도구 호출 반환**으로만 Claude 에 흐른다. 
 - MCP 서버는 세션별 `pendingResolver: (feedback) => void` 를 보유.
 - `collect_feedback` 핸들러: 이미 complete 버퍼가 있으면 즉시 resolve; 없으면 resolver 등록 + `wait_seconds` 타이머 설치(타임아웃 시 `{status:"pending", draft_count}` resolve).
 - `POST /api/feedback`(`status:"complete"`) 핸들러: 영속화 후 그 세션의 resolver 를 호출해 대기 중 요청을 깨움.
-- `preview` SKILL.md: `status:"complete"` 일 때까지 `collect_feedback` 재호출. M 라운드 초과 시 "준비되면 알려달라"로 수동 폴백.
+- `preview` SKILL.md: `collect_feedback` 1회 호출이 리뷰 전체를 대기. `status:"pending"`(대기 소진까지 미제출) 이면 재호출 없이 "준비되면 알려달라"로 수동 폴백 — 제출은 버퍼에 남아 다음 호출이 즉시 회수한다.
 
-기본 `wait_seconds` 는 config 의 `collect_timeout_seconds`(기본 60). 사용자 체감: **Submit = 즉시 반영**.
+기본 `wait_seconds` 는 config 의 `collect_timeout_seconds`(기본 600 — 리뷰 1회를 한 호출로 덮는다). 사용자 체감: **Submit = 즉시 반영**.
 
 ## 비채택 (명시)
 

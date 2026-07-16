@@ -4,7 +4,7 @@ import { FeedbackIntent, Theme } from "../types/enums.js";
 export const DEFAULT_CONFIG: Config = {
   theme: Theme.Auto,
   auto_open: true,
-  collect_timeout_seconds: 45,
+  collect_timeout_seconds: 600,
   session_ttl_hours: 72,
   idle_shutdown_minutes: 1,
   preferred_port: 0,
@@ -20,8 +20,12 @@ export const DEFAULT_CONFIG: Config = {
 export const DIR_MODE = 0o700;
 export const FILE_MODE = 0o600;
 
-/** Hard cap on collect_feedback long-poll wait, below the client MCP_TIMEOUT. */
-export const MAX_COLLECT_WAIT_SECONDS = 55;
+/**
+ * Hard cap on collect_feedback long-poll wait. Bounded by the MCP stdio idle
+ * window (30 min default), which aborts a tool call that sends nothing for that
+ * long; stdio has no per-request timer, and MCP_TOOL_TIMEOUT defaults to ~28h.
+ */
+export const MAX_COLLECT_WAIT_SECONDS = 600;
 
 /** Viewer heartbeat cadence (POST /api/ping). Server idle uses idle_shutdown_minutes. */
 export const HEARTBEAT_INTERVAL_MS = 30_000;
