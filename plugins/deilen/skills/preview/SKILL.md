@@ -29,13 +29,12 @@ feedback and act: revise the document or continue the conversation.
    drop image screenshots, then choose **Revise & reopen**, **Continue in chat**
    (works even with no comments), or **Close**.
 
-3. **Collect (poll loop).** Call `mcp__plugin_deilen_tools__collect_feedback` with
-   `{ session_id, wait_seconds }`:
-   - `status: "complete"` → stop the loop; you have the feedback.
-   - `status: "pending"` → call it again immediately (the normal waiting path).
-     Use a generous `wait_seconds` (e.g. 45) so it resolves in one or two rounds.
-   - After about 5 pending rounds, stop polling and tell the user to let you know
-     when they have submitted, then wait for their message.
+3. **Collect.** Call `mcp__plugin_deilen_tools__collect_feedback` with
+   `{ session_id }` — omit `wait_seconds` so the configured default applies. The
+   single call covers the whole review: it blocks until the user submits, then
+   returns their feedback. `status: "pending"` means the wait elapsed with no
+   submission — don't call again; tell the user to say the word once they have
+   submitted, then wait for their message (their submission is held for you).
 
 4. **Act on the intent.** The feedback opens with a directive naming the button
    the user pressed:
@@ -69,7 +68,8 @@ feedback and act: revise the document or continue the conversation.
 
 ## Do not
 
-- Block indefinitely on a single call — one `mcp__plugin_deilen_tools__collect_feedback`
-  is bounded; the loop provides the waiting.
+- Poll in a loop, or pass a short `wait_seconds` to force one — a single
+  `mcp__plugin_deilen_tools__collect_feedback` is bounded and already waits out
+  the whole review.
 - Re-print the full document body in chat just to render it.
 - Mention or expose the `token` query parameter — it is opaque to the user.
