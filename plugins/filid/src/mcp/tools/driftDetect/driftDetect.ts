@@ -1,10 +1,17 @@
-import { loadConfig } from '../../../core/infra/configLoader/configLoader.js';
+import {
+  loadConfig,
+  resolveMaxDepth,
+} from '../../../core/infra/configLoader/configLoader.js';
 import {
   detectDrift,
   generateSyncPlan,
 } from '../../../core/rules/driftDetector/driftDetector.js';
 import { SEVERITY_ORDER } from '../../../core/rules/driftDetector/driftDetector.js';
 import { validateStructure } from '../../../core/rules/fractalValidator/fractalValidator.js';
+import {
+  getActiveRules,
+  loadBuiltinRules,
+} from '../../../core/rules/ruleEngine/ruleEngine.js';
 import { scanProject } from '../../../core/tree/fractalTree/fractalTree.js';
 import type {
   DriftItem,
@@ -46,10 +53,24 @@ export async function handleDriftDetect(
 
   if (!input.path) throw new Error('path is required');
 
-  const { warnings: configWarnings } = loadConfig(input.path);
+  const { config, warnings: configWarnings } = loadConfig(input.path);
 
-  const tree = await scanProject(input.path);
-  const validation = validateStructure(tree);
+  // Drift is derived from rule violations, so it must run the SAME configured
+  // rule set as structure_validate. Dropping the config here made drift report
+  // violations the project had explicitly exempted (rule overrides,
+  // additional-allowed, additional-entry-points, additional-route-patterns).
+  const rules = getActiveRules(
+    loadBuiltinRules(
+      config?.rules ?? {},
+      config?.['additional-allowed'],
+      config?.['additional-entry-points'],
+      config?.['additional-route-patterns'],
+    ),
+  );
+
+  const maxDepth = resolveMaxDepth(config);
+  const tree = await scanProject(input.path, { maxDepth });
+  const validation = validateStructure(tree, rules, { maxDepth });
   const driftResult = detectDrift(tree, validation.result.violations, {
     generatePlan: false,
   });

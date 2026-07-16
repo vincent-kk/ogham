@@ -1,11 +1,13 @@
 /**
  * @file configWarningsPropagation.test.ts
- * @description AC11 + AC-Obs coverage.
+ * @description AC11 + AC-Obs coverage, plus config→rule-set propagation.
  *   - AC11: unknown-key config → structure-validate / rule-query /
  *     drift-detect responses all include `configWarnings[]` with matching
  *     messages.
  *   - AC-Obs: log.warn (via console.error) emits the same message set in the
  *     same order as the returned `configWarnings` array.
+ *   - Rule set: drift-detect must evaluate the SAME configured rules as
+ *     structure-validate, not the unconfigured defaults.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -119,6 +121,65 @@ describe('configWarnings propagation', () => {
       const result = await handleDriftDetect({ path: tmpDir });
       expect(Array.isArray(result.configWarnings)).toBe(true);
       expect(result.configWarnings.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('rule set propagation', () => {
+    it('drift-detect honours rule overrides from config', async () => {
+      // snake_case fractal dir — a naming-convention violation.
+      mkdirSync(join(tmpDir, 'bad_name'), { recursive: true });
+      writeFileSync(
+        join(tmpDir, 'bad_name', 'INTENT.md'),
+        '# bad_name\n',
+        'utf8',
+      );
+
+      writeRaw(tmpDir, {
+        version: '1.0',
+        rules: { 'naming-convention': { enabled: true, severity: 'warning' } },
+      });
+      const enabled = await handleDriftDetect({ path: tmpDir });
+      expect(enabled.items.some((i) => i.rule === 'naming-convention')).toBe(
+        true,
+      );
+
+      // Disabling it must silence the drift item too. drift-detect used to call
+      // validateStructure() with no rules, which falls back to the unconfigured
+      // builtin set — so it reported violations the project had exempted.
+      writeRaw(tmpDir, {
+        version: '1.0',
+        rules: { 'naming-convention': { enabled: false } },
+      });
+      const disabled = await handleDriftDetect({ path: tmpDir });
+      expect(disabled.items.some((i) => i.rule === 'naming-convention')).toBe(
+        false,
+      );
+    });
+
+    it('drift-detect and structure-validate agree on the configured rule set', async () => {
+      mkdirSync(join(tmpDir, 'bad_name'), { recursive: true });
+      writeFileSync(
+        join(tmpDir, 'bad_name', 'INTENT.md'),
+        '# bad_name\n',
+        'utf8',
+      );
+
+      writeRaw(tmpDir, {
+        version: '1.0',
+        rules: { 'naming-convention': { enabled: false } },
+      });
+
+      const validated = await handleStructureValidate({ path: tmpDir });
+      const drifted = await handleDriftDetect({ path: tmpDir });
+
+      expect(
+        validated.report.result.violations.some(
+          (v) => v.ruleId === 'naming-convention',
+        ),
+      ).toBe(false);
+      expect(drifted.items.some((i) => i.rule === 'naming-convention')).toBe(
+        false,
+      );
     });
   });
 
