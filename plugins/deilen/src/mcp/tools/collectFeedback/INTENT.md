@@ -1,6 +1,6 @@
 ## Purpose
 
-`collect_feedback` 도구 핸들러. bounded long-poll 로 라인 단위 피드백을 수집해 MCP content 로 반환한다. 기본 대기(600초)는 리뷰 1회를 한 호출로 덮으며, 그 안에 제출이 없을 때만 pending 마커를 돌려 재호출을 유도한다.
+`collect_feedback` 도구 핸들러. bounded long-poll 로 라인 단위 피드백을 수집해 MCP content 로 반환한다. 기본 대기(600초)는 리뷰 1회를 한 호출로 덮으며, 그 안에 제출이 없을 때만 pending 마커를 반환한다.
 
 ## Structure
 

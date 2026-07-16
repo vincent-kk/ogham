@@ -1,7 +1,8 @@
-import type { Config } from "../types/config.js";
+import { CONFIG_VERSION, type Config } from "../types/config.js";
 import { FeedbackIntent, Theme } from "../types/enums.js";
 
 export const DEFAULT_CONFIG: Config = {
+  config_version: CONFIG_VERSION,
   theme: Theme.Auto,
   auto_open: true,
   collect_timeout_seconds: 600,

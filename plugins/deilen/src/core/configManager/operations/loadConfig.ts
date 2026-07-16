@@ -6,7 +6,10 @@ import { logger } from "../../../lib/logger.js";
 import { type Config, ConfigSchema } from "../../../types/config.js";
 import { isFileNotFound } from "../../../utils/isFileNotFound.js";
 
-/** Read + validate config.json, filling Zod defaults; fall back to defaults. */
+import { migrateConfig } from "./migrateConfig.js";
+import { saveConfig } from "./saveConfig.js";
+
+/** Read + validate config.json, migrating legacy versions once; fall back to defaults. */
 export async function loadConfig(): Promise<Config> {
   let raw: unknown;
   try {
@@ -25,5 +28,12 @@ export async function loadConfig(): Promise<Config> {
     });
     return DEFAULT_CONFIG;
   }
-  return parsed.data;
+  const config = parsed.data;
+  if (migrateConfig(config))
+    await saveConfig(config).catch((err: unknown) =>
+      logger.warn("config migration not persisted", {
+        error: (err as Error).message,
+      }),
+    );
+  return config;
 }

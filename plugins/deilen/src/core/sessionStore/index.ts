@@ -12,6 +12,7 @@ export {
   awaitFeedback,
   closeResolver,
   deliverComplete,
+  hasPendingWaiters,
   settleAllResolvers,
   type SettleValue,
 } from "./resolver/feedbackResolver.js";

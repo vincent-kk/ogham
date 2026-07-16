@@ -46,7 +46,7 @@ MCP 서버 이름 `tools`. 도구 4개. 모든 스키마는 `src/types/` 의 Zod
 
 알 수 없는 `session_id` → `unknown` 에러. `closed` 세션 → `closed` 에러.
 
-settle 결과 매핑(상세 [mcp-runtime.md](./mcp-runtime.md)): `superseded`(동일 세션 collect 재등록 — `preview` 직렬이라 정상 미발생, 발생 시 `pending` 처럼 재호출) / `server_closing`(서버 종료 중 → `closed` 로 반환). 호출 취소(`extra.signal` abort) 시 resolver 정리 후 반환 중단.
+settle 결과 매핑(상세 [mcp-runtime.md](./mcp-runtime.md)): `superseded`(동일 세션 collect 재등록 — `preview` 직렬이라 정상 미발생, 발생 시 `pending` 과 동일하게 처리 — 재호출 없이 사용자 신호 대기) / `server_closing`(서버 종료 중 → `closed` 로 반환). 호출 취소(`extra.signal` abort) 시 resolver 정리 후 반환 중단.
 
 ## `open_settings`
 

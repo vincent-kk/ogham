@@ -2,15 +2,15 @@
 
 ## 컴포넌트 책임
 
-| 컴포넌트           | 역할                                                                | 위치                    |
-| ------------------ | ------------------------------------------------------------------- | ----------------------- |
-| Claude             | 문서 생성 주체. `preview` 스킬로 렌더 위임, 수거된 피드백 반영      | —                       |
-| Skill `preview`    | `render_viewer` 호출 → `collect_feedback` poll 루프 → 피드백 정리   | `skills/preview/`       |
-| Skill `setup`      | `open_settings` 호출 → 브라우저 안내                                | `skills/setup/`         |
-| MCP Server `tools` | 렌더 세션 보유, HTTP 서버 호스팅, 피드백 수거 resolver 관리         | `src/mcp/`              |
-| Render 파이프라인  | markdown → source-line 매핑 HTML (서버측 base 렌더)                 | `src/render/`           |
-| HTTP Server        | 문서 뷰어 + 피드백 API + 설정 UI 서빙 (127.0.0.1)                   | `src/mcp/httpServer/`   |
-| Browser (뷰어)     | base HTML 표시, 확장 렌더러 lazy-load, 라인 코멘트·이미지 수집·제출 | `src/mcp/pages/viewer/` |
+| 컴포넌트           | 역할                                                                        | 위치                    |
+| ------------------ | --------------------------------------------------------------------------- | ----------------------- |
+| Claude             | 문서 생성 주체. `preview` 스킬로 렌더 위임, 수거된 피드백 반영              | —                       |
+| Skill `preview`    | `render_viewer` 호출 → `collect_feedback` 1회 호출(long-poll) → 피드백 정리 | `skills/preview/`       |
+| Skill `setup`      | `open_settings` 호출 → 브라우저 안내                                        | `skills/setup/`         |
+| MCP Server `tools` | 렌더 세션 보유, HTTP 서버 호스팅, 피드백 수거 resolver 관리                 | `src/mcp/`              |
+| Render 파이프라인  | markdown → source-line 매핑 HTML (서버측 base 렌더)                         | `src/render/`           |
+| HTTP Server        | 문서 뷰어 + 피드백 API + 설정 UI 서빙 (127.0.0.1)                           | `src/mcp/httpServer/`   |
+| Browser (뷰어)     | base HTML 표시, 확장 렌더러 lazy-load, 라인 코멘트·이미지 수집·제출         | `src/mcp/pages/viewer/` |
 
 ## 데이터 흐름
 
@@ -22,7 +22,7 @@
 6. 사용자가 페이지에서 라인을 선택해 코멘트 + 이미지(파일/클립보드)를 추가 → 디바운스 auto-save(`status:"in_progress"`, 텍스트만 — 이미지 Blob 은 최종 제출 시 일괄).
 7. 사용자가 **Submit** → 브라우저가 `multipart/form-data`(`status:"complete"`) POST.
 8. 서버가 페이로드 파싱·이미지 저장 후 해당 세션의 **pending resolver 를 깨움** → `collect_feedback` 가 피드백+이미지를 반환.
-9. 미제출 상태로 `wait_seconds` 경과 시 `{ status: "pending" }` 반환 → `preview` 가 자동 재호출(루프).
+9. 미제출 상태로 `wait_seconds` 경과 시 `{ status: "pending" }` 반환 → `preview` 는 재호출 없이 사용자 신호를 기다린다.
 10. Claude 가 라인 앵커별 코멘트 + 첨부 이미지를 받아 문서를 수정.
 
 ## 수거 메커니즘 — bounded long-poll (자동 수거)

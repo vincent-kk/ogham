@@ -22,8 +22,13 @@ const PortSchema = z
 
 const FONT_FAMILY_PATTERN = /^[^;{}<>\\@/]*$/;
 
+/** Current config.json schema version — bump together with a new migration step in configManager. */
+export const CONFIG_VERSION = 1;
+
 export const ConfigSchema = z
   .object({
+    // Absent on pre-versioning installs -> 0 routes them through every migration.
+    config_version: z.number().int().min(0).default(0),
     theme: ThemeSchema.default(Theme.Auto),
     auto_open: z.boolean().default(true),
     collect_timeout_seconds: z.number().int().min(1).max(600).default(600),

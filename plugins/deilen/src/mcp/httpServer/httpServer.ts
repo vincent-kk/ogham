@@ -5,6 +5,7 @@ import { generateToken } from "@ogham/http-guard/token";
 
 import { loadConfig, saveConfig } from "../../core/configManager/index.js";
 import { getProjectHash } from "../../core/projectHash/index.js";
+import { hasPendingWaiters } from "../../core/sessionStore/index.js";
 import { logger } from "../../lib/logger.js";
 
 import { createRouteHandler } from "./routing/routes.js";
@@ -89,13 +90,24 @@ async function startHttpServer(
     logger.info("http server closed");
   };
 
-  const touch = (): void => {
-    if (closed) return;
-    if (idleTimer) clearTimeout(idleTimer);
+  const armIdleTimer = (): void => {
     idleTimer = setTimeout(() => {
+      // An in-flight collect_feedback wait is activity too, even though it
+      // never calls touch() again after the wait starts — re-arm instead of
+      // closing out from under it.
+      if (hasPendingWaiters()) {
+        armIdleTimer();
+        return;
+      }
       void close();
     }, idleMs);
     idleTimer.unref();
+  };
+
+  const touch = (): void => {
+    if (closed) return;
+    if (idleTimer) clearTimeout(idleTimer);
+    armIdleTimer();
   };
 
   const handler = createRouteHandler({

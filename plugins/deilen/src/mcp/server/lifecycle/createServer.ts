@@ -74,7 +74,9 @@ export function createServer(): McpServer {
         "Collect line-anchored feedback for a render session via a bounded " +
         "long-poll. Blocks until the user clicks Submit, then returns their " +
         "comments (and any attached images). One call covers the whole review — " +
-        'only if the wait elapses first does it return { status: "pending" }.',
+        'only if the wait elapses first does it return { status: "pending" }; ' +
+        "on pending do NOT call again — ask the user to say the word once they " +
+        "have submitted, then wait for their message (their submission is held).",
       inputSchema: {
         session_id: z
           .string()

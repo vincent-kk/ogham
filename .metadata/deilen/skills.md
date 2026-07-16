@@ -12,13 +12,13 @@ Claude 문서를 페이지로 띄우고 라인 피드백을 자동 수거하는 
 
 1. **콘텐츠 확정** — 직전 문서 본문(대화 내) 또는 사용자가 가리키는 파일 경로. 본문이면 `content`, 파일이면 `path`.
 2. **렌더** — `render_viewer({ content | path, title? })` 호출 → `{ session_id, url }` 수신. 사용자에게 URL 안내(자동 오픈됨) + "라인 선택해 코멘트·이미지 남기고 Submit" 안내.
-3. **자동 수거 루프** — `collect_feedback({ session_id, wait_seconds })` 반복:
-   - `status:"complete"` → 루프 종료, 피드백 확보.
-   - `status:"pending"` → 즉시 재호출(자동). `preview` 가 M 라운드(기본 5) 초과하면 "검토 끝나면 알려주세요"로 **수동 폴백** 후 대기.
+3. **수거(1회 호출)** — `collect_feedback({ session_id })` 호출(`wait_seconds` 생략 시 config 기본값 600s 적용). 리뷰 전체를 한 번의 대기로 덮는다:
+   - `status:"complete"` → 피드백 확보.
+   - `status:"pending"` → 대기 소진까지 미제출. 재호출하지 말고 "제출하면 말씀해달라"고 안내한 뒤 사용자 메시지를 기다린다(제출분은 버퍼에 남아 다음 호출이 즉시 회수).
 4. **반영** — text 코멘트(라인 앵커별) + image 블록(스크린샷)을 근거로 문서 수정. 라인 앵커로 위치를 특정해 surgical 수정.
 5. **정리(선택)** — `close_viewer({ session_id })`.
 
-원칙: 무한 블로킹 금지. 한 번의 `collect_feedback` 는 bounded(`wait_seconds`)이며, 자동성은 재호출 루프로 달성.
+원칙: 무한 블로킹 금지. `collect_feedback` 1회 호출이 `wait_seconds`(기본 600s)로 bounded 되어 리뷰 전체를 덮으므로 재호출이 필요 없다.
 
 ## `setup`
 
