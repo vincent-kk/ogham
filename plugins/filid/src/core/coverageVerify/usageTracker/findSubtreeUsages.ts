@@ -5,12 +5,55 @@ import { portableJoin, samePath } from '@ogham/cross-platform/paths';
 import { extractDependencies } from '../../../ast/dependencyExtractor/dependencyExtractor.js';
 import { SKIP_PATTERNS } from '../../../constants/scanDefaults.js';
 import type { UsageSite } from '../../../types/coverage.js';
-import type { FractalNode, FractalTree } from '../../../types/fractal.js';
+import type { FractalTree } from '../../../types/fractal.js';
 import { scanProject } from '../../tree/fractalTree/fractalTree.js';
 import { resolveImportPath } from '../importResolver/importResolver.js';
 
+import { collectSubtreeNodes } from './collectSubtreeNodes.js';
+
 function shouldSkipFile(fileName: string): boolean {
   return SKIP_PATTERNS.some((pattern) => pattern.test(fileName));
+}
+
+/** Read + parse one candidate file and return its UsageSite when it runtime-imports the target. */
+async function findUsageInFile(
+  filePath: string,
+  nodePath: string,
+  targetPath: string,
+): Promise<UsageSite | null> {
+  let content: string;
+  try {
+    content = readFileSync(filePath, 'utf-8');
+  } catch {
+    // File unreadable — skip
+    return null;
+  }
+
+  let deps;
+  try {
+    deps = await extractDependencies(content, filePath);
+  } catch {
+    // AST parse failure — skip
+    return null;
+  }
+
+  for (const imp of deps.imports) {
+    // Skip type-only imports — they don't need runtime tests
+    if (imp.isTypeOnly) continue;
+
+    const resolved = resolveImportPath(imp.source, filePath);
+    if (resolved && samePath(resolved, targetPath))
+      // One UsageSite per file is enough
+      return {
+        filePath,
+        fractalPath: nodePath,
+        importedNames: imp.specifiers,
+        isTypeOnly: false,
+        importLine: imp.line,
+      };
+  }
+
+  return null;
 }
 
 /**
@@ -31,27 +74,10 @@ export async function findSubtreeUsages(
   const fractalTree = tree ?? (await scanProject(projectRoot));
   const usages: UsageSite[] = [];
 
-  // Determine the search root
   const searchRoot = subtreeRoot ?? fractalTree.root;
-  const rootNode = fractalTree.nodes.get(searchRoot);
-  if (!rootNode) return usages;
+  if (!fractalTree.nodes.get(searchRoot)) return usages;
 
-  // Walk both edge types from the search root. `buildFractalTree` files organ
-  // dirs under `organs[]` and everything else under `children[]`, so a
-  // children-only walk never reaches an organ node — and organ peer files
-  // (utils/, helpers/, scanner/, constants/) hold most implementation code.
-  const allNodes = new Map<string, FractalNode>();
-  const queue = [searchRoot];
-  while (queue.length > 0) {
-    const nodePath = queue.shift()!;
-    if (allNodes.has(nodePath)) continue;
-
-    const node = fractalTree.nodes.get(nodePath);
-    if (!node) continue;
-
-    allNodes.set(nodePath, node);
-    queue.push(...node.children, ...node.organs);
-  }
+  const allNodes = collectSubtreeNodes(fractalTree, searchRoot);
 
   // For each node, iterate peerFiles
   for (const [nodePath, node] of allNodes) {
@@ -68,39 +94,8 @@ export async function findSubtreeUsages(
       // Skip if this is the target file itself
       if (samePath(filePath, targetPath)) continue;
 
-      let content: string;
-      try {
-        content = readFileSync(filePath, 'utf-8');
-      } catch {
-        // File unreadable — skip
-        continue;
-      }
-
-      let deps;
-      try {
-        deps = await extractDependencies(content, filePath);
-      } catch {
-        // AST parse failure — skip
-        continue;
-      }
-
-      for (const imp of deps.imports) {
-        // Skip type-only imports — they don't need runtime tests
-        if (imp.isTypeOnly) continue;
-
-        const resolved = resolveImportPath(imp.source, filePath);
-        if (resolved && samePath(resolved, targetPath)) {
-          usages.push({
-            filePath,
-            fractalPath: nodePath,
-            importedNames: imp.specifiers,
-            isTypeOnly: false,
-            importLine: imp.line,
-          });
-          // One UsageSite per file is enough — break inner loop
-          break;
-        }
-      }
+      const site = await findUsageInFile(filePath, nodePath, targetPath);
+      if (site) usages.push(site);
     }
   }
 
