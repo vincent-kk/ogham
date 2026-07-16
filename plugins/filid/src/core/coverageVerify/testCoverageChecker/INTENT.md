@@ -17,16 +17,19 @@
 ## Boundaries
 
 ### Always do
+
 - 전략은 위 우선순위대로 시도하고 첫 성공에서 종료
 - 파일 읽기 실패는 "미발견"으로 처리 (예외 전파 금지)
 - 경고 메시지 포맷: `UNCOVERED: <file> imports [<names>] but has no representative test`
 
 ### Ask first
+
 - 새로운 탐색 전략 추가 또는 우선순위 변경
 - mirror 경로 규칙(`src/__tests__/unit/` 프리픽스) 변경
 - `countTestCases` 외의 테스트 유효성 판정 도입
 
 ### Never do
+
 - 테스트 파일 실행 또는 커버리지 수치(lines/branches) 측정
 - `UsageSite` 수집 로직 인라인 (usageTracker 책임)
 - 전략 외 경로 글로브로 테스트 추정
