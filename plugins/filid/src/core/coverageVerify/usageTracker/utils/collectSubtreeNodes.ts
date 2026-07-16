@@ -1,4 +1,4 @@
-import type { FractalNode, FractalTree } from '../../../types/fractal.js';
+import type { FractalNode, FractalTree } from '../../../../types/fractal.js';
 
 /**
  * Collect every node reachable from `searchRoot`, walking BOTH edge types.

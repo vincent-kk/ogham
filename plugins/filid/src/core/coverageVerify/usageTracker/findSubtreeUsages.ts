@@ -9,7 +9,7 @@ import type { FractalTree } from '../../../types/fractal.js';
 import { scanProject } from '../../tree/fractalTree/fractalTree.js';
 import { resolveImportPath } from '../importResolver/importResolver.js';
 
-import { collectSubtreeNodes } from './collectSubtreeNodes.js';
+import { collectSubtreeNodes } from './utils/collectSubtreeNodes.js';
 
 function shouldSkipFile(fileName: string): boolean {
   return SKIP_PATTERNS.some((pattern) => pattern.test(fileName));
