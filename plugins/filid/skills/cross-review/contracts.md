@@ -121,6 +121,43 @@ Field semantics:
 > `DebtSeverity`) — distinct from rule severity `error|warning|info` and
 > lowercase drift severity.
 
+## Write-First Output Discipline
+
+Canonical definition — every committee persona agent file carries a
+compact copy; this section is the source of truth when they drift.
+
+The opinion file IS the deliverable; analysis that never reaches disk is
+a failed run. Observed failure mode (2026-07 review sessions): personas
+spent 30-50 tool calls analyzing, then died before the terminal Write —
+three of six first-spawn members produced nothing. Every retry that
+followed these four rules succeeded in 8-19 tool calls.
+
+1. **Skeleton first** — the FIRST tool action writes the opinion file
+   with `state: ABSTAIN`, `confidence: 0`,
+   `reasoning_gaps: ["skeleton — analysis in progress"]` and body line
+   `Checked: (in progress)`. A worker that dies mid-analysis then reads
+   as a failed member (forced-ABSTAIN semantics), never as a clean
+   approval — NEVER start the skeleton at SYNTHESIS.
+2. **Incremental rewrites** — after each verified conclusion, rewrite
+   the full file (personas have `Write` only; `Edit` is deliberately
+   absent). The file on disk holds the best-so-far opinion at every
+   moment; the frontmatter flips away from ABSTAIN only when written
+   content backs it.
+3. **Trust the evidence phase** — `verification.md` measurements are
+   ground truth. Never re-run project-wide scans (structure_validate,
+   drift_detect, whole-tree greps); read only the few files the lens
+   genuinely needs. Aim for under ~15 tool calls total.
+4. **Final pass last** — the LAST write sets the final
+   state / confidence / fix_items.
+
+Solo variant: adjudicator opinions prohibit `ABSTAIN`, so the solo
+skeleton starts at `state: SYNTHESIS`, `confidence: 0` — the
+confidence-0 marker alone flags it as unfinished.
+
+Chairperson side: a skeleton still at `confidence: 0` when the worker
+returns is treated exactly like a missing file — forced ABSTAIN, one
+retry permitted.
+
 ## Severity Gate & Finding Discipline
 
 Canonical definition — every persona agent file carries a compact copy;
@@ -270,6 +307,11 @@ When constructing evidence / persona / verifier prompts:
 5. **Close with the write-before-finish reminder**, including the
    partial-results fallback ("if budget runs low, write the file with
    what you have; mark skipped stages SKIP").
+6. **Persona prompts restate the Write-First Output Discipline**
+   (skeleton first → incremental rewrites → ≤ ~15 tool calls → final
+   pass last). The agent files already carry the compact copy, but
+   restating it in the spawn prompt is what recovered every failed
+   member in practice — treat it as mandatory, not optional.
 
 ## Config Patch Contract (`.filid/config.json` fixes)
 
