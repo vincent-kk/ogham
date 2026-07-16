@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import * as path from 'node:path';
 
+import { DETAIL_MD, INTENT_MD } from '../../constants/documentFiles.js';
 import {
   KNOWN_ORGAN_DIR_NAMES,
   classifyNode,
@@ -33,12 +34,8 @@ export function isOrganByStructure(dirPath: string): boolean {
       return KNOWN_ORGAN_DIR_NAMES.includes(path.basename(dirPath));
 
     const entries = readdirSync(dirPath, { withFileTypes: true });
-    const hasIntentMd = entries.some(
-      (e) => e.isFile() && e.name === 'INTENT.md',
-    );
-    const hasDetailMd = entries.some(
-      (e) => e.isFile() && e.name === 'DETAIL.md',
-    );
+    const hasIntentMd = entries.some((e) => e.isFile() && e.name === INTENT_MD);
+    const hasDetailMd = entries.some((e) => e.isFile() && e.name === DETAIL_MD);
     const subDirs = entries.filter((e) => e.isDirectory());
     const hasFractalChildren = subDirs.some((d) => {
       const childPath = path.join(dirPath, d.name);
@@ -46,7 +43,7 @@ export function isOrganByStructure(dirPath: string): boolean {
         const childEntries = readdirSync(childPath, { withFileTypes: true });
         return childEntries.some(
           (ce) =>
-            ce.isFile() && (ce.name === 'INTENT.md' || ce.name === 'DETAIL.md'),
+            ce.isFile() && (ce.name === INTENT_MD || ce.name === DETAIL_MD),
         );
       } catch {
         return false;

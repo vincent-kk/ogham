@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import {
   type ClassifyInput,
   classifyNode,
@@ -31,8 +32,8 @@ export function handleClassify(
   // the filesystem so classification priority 1-2 (INTENT.md/DETAIL.md →
   // fractal) holds even without a caller-supplied entry.
   if (!entry && existsSync(input.path)) {
-    hasIntentMd = existsSync(join(input.path, 'INTENT.md'));
-    hasDetailMd = existsSync(join(input.path, 'DETAIL.md'));
+    hasIntentMd = existsSync(join(input.path, INTENT_MD));
+    hasDetailMd = existsSync(join(input.path, DETAIL_MD));
   }
 
   // entries에서 실제 계산 (hardcode 제거)

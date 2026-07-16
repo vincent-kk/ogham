@@ -146,8 +146,11 @@ export {
 } from '../constants/allowedPeerFiles.js';
 export {
   RULE_ERROR_PROBABILITY,
+  extractRevalidateVerdict,
+  extractVerdict,
   generateHumanSummary,
   parseFixRequests,
   parseStructureCheckFrontmatter,
+  resolveVerdict,
 } from './prSummary/index.js';
 export type { GenerateSummaryInput } from './prSummary/index.js';

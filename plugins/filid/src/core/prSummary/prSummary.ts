@@ -38,6 +38,11 @@ export { RULE_ERROR_PROBABILITY };
 // parsers
 export { parseStructureCheckFrontmatter } from './parsers/parseStructureCheck.js';
 export { parseFixRequests } from './parsers/parseFixRequests.js';
+export {
+  extractRevalidateVerdict,
+  extractVerdict,
+  resolveVerdict,
+} from './aggregators/resolveVerdict.js';
 
 /**
  * 파일 내용을 입력받아 인간 친화적 PR 요약을 생성한다.

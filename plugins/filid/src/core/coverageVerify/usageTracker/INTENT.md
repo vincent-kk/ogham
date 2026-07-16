@@ -8,7 +8,7 @@
 
 ## Scope
 
-- 루트 노드 + descendants + organ 아래 프랙탈을 모두 포함해 중복 제거
+- 서브트리 루트에서 `children[]`·`organs[]` 양쪽 간선을 BFS — organ 노드 자체를 포함해야 함 (`utils/`·`helpers/`·`scanner/` peer 파일에 구현 대부분이 산다). children 만 걷으면 organ 이 통째로 누락됨
 - peer 파일은 `.ts/.tsx/.js/.jsx/.mts/.mjs/.cts/.cjs`만 대상
 - `SKIP_PATTERNS` 매칭 파일은 제외
 - 타겟 파일 자신은 제외

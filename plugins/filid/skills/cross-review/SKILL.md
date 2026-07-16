@@ -197,17 +197,25 @@ Emit claim_verdicts when verification.md lists in-scope acceptance
 claims. Do NOT call Agent, SendMessage, or any orchestration tool.
 
 Language: <from [filid:lang] tag, default English>
-REMINDER: Write the opinion file before finishing.
+WRITE-FIRST (contracts.md → "Write-First Output Discipline"): your FIRST
+tool action writes the opinion file as an ABSTAIN/confidence-0 skeleton;
+rewrite the full file after each verified conclusion; trust
+verification.md instead of re-running project-wide scans (aim under ~15
+tool calls); your LAST write sets the final state/confidence/fix_items.
+An unwritten opinion is a failed run.
 ```
 
 - **Solo path** (`committee == ['adjudicator']`, from TRIVIAL tier or
   `--solo`): spawn only the adjudicator; it sweeps all six lenses in one
   opinion.
-- **Failed member**: an Agent call that errors or returns without
-  writing its opinion file is recorded as a forced ABSTAIN
-  (`state: ABSTAIN`, `confidence: 0`, chairperson-written). If **more
-  than half** of the committee failed (or the solo adjudicator failed),
-  END with `Review verdict: INCONCLUSIVE`.
+- **Failed member**: an Agent call that errors, returns without writing
+  its opinion file, or leaves the file at the untouched
+  ABSTAIN/confidence-0 skeleton is recorded as a forced ABSTAIN
+  (`state: ABSTAIN`, `confidence: 0`, chairperson-written). Retry a
+  failed member ONCE with the Write-First discipline restated
+  (contracts.md → "Subagent Prompt Rules" #6) before recording the
+  ABSTAIN. If **more than half** of the committee failed (or the solo
+  adjudicator failed), END with `Review verdict: INCONCLUSIVE`.
 
 **→ After all Agents return, immediately proceed to Step 4 in the same response.**
 

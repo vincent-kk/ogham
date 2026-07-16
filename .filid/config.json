@@ -54,7 +54,23 @@
     "vitest.e2e.config.ts",
     "vitest.e2e.setup.ts",
     "vitest.e2e.globalSetup.ts",
-    "index.html"
+    "index.html",
+    {
+      "basename": "setup.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/setup"]
+    },
+    {
+      "basename": "preToolUse.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/preToolUse"]
+    },
+    {
+      "basename": "agentEnforcer.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/agentEnforcer"]
+    },
+    {
+      "basename": "userPromptSubmit.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/userPromptSubmit"]
+    }
   ],
   "additional-route-patterns": ["^_shared$", "^__tests__$"]
 }

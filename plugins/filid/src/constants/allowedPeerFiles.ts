@@ -1,3 +1,5 @@
+import { DETAIL_MD, INTENT_MD } from './documentFiles.js';
+
 export const ALLOWED_FRACTAL_ROOT_FILES = new Set([
   'index.ts',
   'index.js',
@@ -6,8 +8,8 @@ export const ALLOWED_FRACTAL_ROOT_FILES = new Set([
   'index.cjs',
   'main.ts',
   'main.js',
-  'INTENT.md',
-  'DETAIL.md',
+  INTENT_MD,
+  DETAIL_MD,
 ]);
 
 export const FRAMEWORK_RESERVED_FILES: Record<string, string[]> = {

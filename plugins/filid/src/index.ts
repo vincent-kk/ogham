@@ -101,9 +101,12 @@ export {
   FRAMEWORK_PACKAGES,
   FRAMEWORK_RESERVED_FILES,
   RULE_ERROR_PROBABILITY,
+  extractRevalidateVerdict,
+  extractVerdict,
   generateHumanSummary,
   parseFixRequests,
   parseStructureCheckFrontmatter,
+  resolveVerdict,
 } from './core/index.js';
 export type {
   ChainResult,

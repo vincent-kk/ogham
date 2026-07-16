@@ -6,18 +6,20 @@
 
 ## Structure
 
-- `isFcaProject.ts` — `isFcaProject` (`.filid/` / `INTENT.md` walk-up 검색)
-- `isIntentMd.ts` — `isIntentMd` (파일명 정확 일치)
-- `isDetailMd.ts` — `isDetailMd` (파일명 정확 일치)
-- `isCriteriaMd.ts` — `isCriteriaMd` (경로 segment 정규화 후 꼬리 일치)
-- `fileBasename.ts` — `fileBasename` (internal, `/`·`\` 양쪽 지원)
-- `shared.ts` / `index.ts` — barrel re-export
+- `utils/` organ — 판별 함수 구현
+  - `isFcaProject.ts` — `isFcaProject` (`.filid/` / `INTENT.md` walk-up 검색)
+  - `isIntentMd.ts` — `isIntentMd` (파일명 정확 일치)
+  - `isDetailMd.ts` — `isDetailMd` (파일명 정확 일치)
+  - `isCriteriaMd.ts` — `isCriteriaMd` (경로 segment 정규화 후 꼬리 일치)
+  - `fileBasename.ts` — `fileBasename` (internal, `/`·`\` 양쪽 지원)
+- `shared.ts` — facade (`utils/` concrete 파일 재수출; 훅은 이 파일을 import)
+- `index.ts` — barrel (`shared.ts` 재수출)
 
 ## Conventions
 
 - `isFcaProject(cwd)`: `.filid/` 또는 `INTENT.md` 를 git 루트(`.git`)까지 walk-up 검색 — 하위 디렉토리 cwd에서도 프로젝트 감지, 첫 마커에서 반환
 - `fileBasename(path)`: POSIX `/`와 Windows `\` 양쪽 separator 지원 — `lastIndexOf`의 최댓값 사용
-- 파일 판정은 `fileBasename(path) === 'INTENT.md'` / `'DETAIL.md'` 정확 일치 (대소문자 구분); `isCriteriaMd`는 경로를 segment 단위로 정규화(`..`·`.`·빈 segment 처리)한 뒤 `[.filid, criteria.md]` 꼬리 일치 — denormalized 경로 우회 방지
+- 파일 판정은 `fileBasename(path) === INTENT_MD` / `DETAIL_MD` 정확 일치 (대소문자 구분; 파일명 리터럴은 `constants/documentFiles.js` 단일 원천); `isCriteriaMd`는 경로를 segment 단위로 정규화(`..`·`.`·빈 segment 처리)한 뒤 `[.filid, criteria.md]` 꼬리 일치 — denormalized 경로 우회 방지
 - `isFcaProject` 는 git 루트까지 bounded walk-up(level당 `existsSync`); 그 외 함수는 `existsSync` 한 번 또는 순수 문자열 연산
 - 함수 네이밍: `is*` 접두사로 boolean predicate 명시
 
@@ -42,3 +44,4 @@
 
 - `node:fs` (`existsSync`)
 - `node:path` (`join`, `dirname`)
+- `../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)
