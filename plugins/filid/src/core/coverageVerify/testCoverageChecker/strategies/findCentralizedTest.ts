@@ -8,6 +8,11 @@
  * (가장 가까운 INTENT.md 디렉터리) 이름 prefix 로 매칭한다 — fractal 단위
  * 대표 테스트를 인정하는 의도적 완화이며, `tryTestFile` 의 테스트 케이스
  * 존재 검증(`total > 0`)을 통과해야만 채택된다.
+ *
+ * 알려진 ceiling: 동일 src 루트에 동명 fractal 이 존재하면(현존 예:
+ * core/coverageVerify vs mcp/tools/coverageVerify) exact/prefix 매칭이
+ * 타 fractal 의 테스트를 오귀속시킬 수 있다 — 경로 무시 basename 매칭의
+ * 한계. 실제 오귀속 관측 시 path-scoped 매칭으로 업그레이드할 것.
  */
 import { existsSync, readdirSync } from 'node:fs';
 
