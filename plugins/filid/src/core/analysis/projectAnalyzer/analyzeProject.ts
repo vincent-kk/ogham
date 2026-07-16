@@ -7,12 +7,20 @@ import type {
   ScanReport,
   ValidationReport,
 } from '../../../types/report.js';
+import {
+  loadConfig,
+  resolveMaxDepth,
+} from '../../infra/configLoader/configLoader.js';
 import { analyzeModule } from '../../module/moduleMainAnalyzer/moduleMainAnalyzer.js';
 import {
   detectDrift,
   generateSyncPlan,
 } from '../../rules/driftDetector/driftDetector.js';
 import { validateStructure } from '../../rules/fractalValidator/fractalValidator.js';
+import {
+  getActiveRules,
+  loadBuiltinRules,
+} from '../../rules/ruleEngine/ruleEngine.js';
 import { scanProject } from '../../tree/fractalTree/fractalTree.js';
 
 import { calculateHealthScore } from './calculateHealthScore.js';
@@ -54,9 +62,24 @@ export async function analyzeProject(
     ...options,
   };
 
+  // 0. 설정 — validateStructure 를 룰 없이 부르면 미설정 기본 룰셋으로
+  // 폴백해, 프로젝트가 명시적으로 예외 처리한 위반이 violations 와
+  // healthScore 에 그대로 새어 들어간다 (drift_detect 에서 실측된 버그와
+  // 동일 계열). 반드시 structure_validate 와 같은 룰셋으로 평가한다.
+  const { config } = loadConfig(root);
+  const rules = getActiveRules(
+    loadBuiltinRules(
+      config?.rules ?? {},
+      config?.['additional-allowed'],
+      config?.['additional-entry-points'],
+      config?.['additional-route-patterns'],
+    ),
+  );
+  const maxDepth = resolveMaxDepth(config);
+
   // 1. 스캔
   const scanStart = Date.now();
-  const tree = await scanProject(root);
+  const tree = await scanProject(root, { maxDepth });
   const moduleTargets = [...tree.nodes.values()].filter(
     (n) => n.type === 'fractal' || n.type === 'hybrid',
   );
@@ -75,7 +98,9 @@ export async function analyzeProject(
   };
 
   // 2. 검증
-  const validationReport: ValidationReport = validateStructure(tree);
+  const validationReport: ValidationReport = validateStructure(tree, rules, {
+    maxDepth,
+  });
 
   // 3. 이격 감지
   let driftReport: DriftReport;

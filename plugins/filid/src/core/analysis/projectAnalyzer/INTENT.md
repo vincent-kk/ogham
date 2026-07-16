@@ -36,7 +36,8 @@
 ## Dependencies
 
 - `../../tree/fractalTree/` (scanProject)
-- `../../rules/fractalValidator/`, `../../rules/driftDetector/`
+- `../../rules/fractalValidator/`, `../../rules/driftDetector/`, `../../rules/ruleEngine/` (loadBuiltinRules, getActiveRules)
+- `../../infra/configLoader/` (loadConfig, resolveMaxDepth — 설정 룰셋으로 검증)
 - `../../module/moduleMainAnalyzer/` (analyzeModule)
 - `../../../types/report.js`, `../../../types/drift.js`, `../../../types/fractal.js`
 - `../../../constants/healthScore.js`
