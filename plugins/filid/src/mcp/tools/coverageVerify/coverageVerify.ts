@@ -110,6 +110,14 @@ export async function handleCoverageVerify(
   const total = coverageResults.length;
   const coverageRatio = total > 0 ? coveredCount / total : 1.0;
 
+  // A ratio of 1.0 over zero usages is vacuous: it reads as "fully covered"
+  // when it only means "nothing to check". Say so, or callers bank a PASS the
+  // tool never established.
+  if (total === 0)
+    warnings.push(
+      `NO USAGES: nothing under ${subtreeRoot ?? input.projectRoot} imports ${absTarget} — coverageRatio 1.0 means "nothing to check", not "verified covered"`,
+    );
+
   return {
     targetPath: absTarget,
     targetExports,

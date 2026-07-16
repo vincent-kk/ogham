@@ -5,12 +5,8 @@ import { portableJoin, samePath } from '@ogham/cross-platform/paths';
 import { extractDependencies } from '../../../ast/dependencyExtractor/dependencyExtractor.js';
 import { SKIP_PATTERNS } from '../../../constants/scanDefaults.js';
 import type { UsageSite } from '../../../types/coverage.js';
-import type { FractalTree } from '../../../types/fractal.js';
+import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 import { scanProject } from '../../tree/fractalTree/fractalTree.js';
-import {
-  getDescendants,
-  getFractalsUnderOrgans,
-} from '../../tree/fractalTree/fractalTree.js';
 import { resolveImportPath } from '../importResolver/importResolver.js';
 
 function shouldSkipFile(fileName: string): boolean {
@@ -40,16 +36,22 @@ export async function findSubtreeUsages(
   const rootNode = fractalTree.nodes.get(searchRoot);
   if (!rootNode) return usages;
 
-  // Collect all descendant nodes (including those under organs)
-  const descendants = getDescendants(fractalTree, searchRoot);
-  const organDescendants = getFractalsUnderOrgans(fractalTree, searchRoot);
+  // Walk both edge types from the search root. `buildFractalTree` files organ
+  // dirs under `organs[]` and everything else under `children[]`, so a
+  // children-only walk never reaches an organ node — and organ peer files
+  // (utils/, helpers/, scanner/, constants/) hold most implementation code.
+  const allNodes = new Map<string, FractalNode>();
+  const queue = [searchRoot];
+  while (queue.length > 0) {
+    const nodePath = queue.shift()!;
+    if (allNodes.has(nodePath)) continue;
 
-  // Combine: root node + descendants + organ descendants (deduplicate)
-  const allNodes = new Map<string, typeof rootNode>();
-  allNodes.set(rootNode.path, rootNode);
-  for (const node of descendants) allNodes.set(node.path, node);
+    const node = fractalTree.nodes.get(nodePath);
+    if (!node) continue;
 
-  for (const node of organDescendants) allNodes.set(node.path, node);
+    allNodes.set(nodePath, node);
+    queue.push(...node.children, ...node.organs);
+  }
 
   // For each node, iterate peerFiles
   for (const [nodePath, node] of allNodes) {
