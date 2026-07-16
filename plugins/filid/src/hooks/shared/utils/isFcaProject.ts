@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { INTENT_MD } from '../../constants/documentFiles.js';
+import { INTENT_MD } from '../../../constants/documentFiles.js';
 
 /**
  * Check whether `cwd` is inside an FCA-AI project.

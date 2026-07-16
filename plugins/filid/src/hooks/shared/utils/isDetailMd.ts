@@ -1,4 +1,4 @@
-import { DETAIL_MD } from '../../constants/documentFiles.js';
+import { DETAIL_MD } from '../../../constants/documentFiles.js';
 
 import { fileBasename } from './fileBasename.js';
 

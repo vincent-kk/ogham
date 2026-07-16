@@ -1,4 +1,4 @@
-import { INTENT_MD } from '../../constants/documentFiles.js';
+import { INTENT_MD } from '../../../constants/documentFiles.js';
 
 import { fileBasename } from './fileBasename.js';
 

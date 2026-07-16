@@ -6,12 +6,14 @@
 
 ## Structure
 
-- `isFcaProject.ts` — `isFcaProject` (`.filid/` / `INTENT.md` walk-up 검색)
-- `isIntentMd.ts` — `isIntentMd` (파일명 정확 일치)
-- `isDetailMd.ts` — `isDetailMd` (파일명 정확 일치)
-- `isCriteriaMd.ts` — `isCriteriaMd` (경로 segment 정규화 후 꼬리 일치)
-- `fileBasename.ts` — `fileBasename` (internal, `/`·`\` 양쪽 지원)
-- `shared.ts` / `index.ts` — barrel re-export
+- `utils/` organ — 판별 함수 구현
+  - `isFcaProject.ts` — `isFcaProject` (`.filid/` / `INTENT.md` walk-up 검색)
+  - `isIntentMd.ts` — `isIntentMd` (파일명 정확 일치)
+  - `isDetailMd.ts` — `isDetailMd` (파일명 정확 일치)
+  - `isCriteriaMd.ts` — `isCriteriaMd` (경로 segment 정규화 후 꼬리 일치)
+  - `fileBasename.ts` — `fileBasename` (internal, `/`·`\` 양쪽 지원)
+- `shared.ts` — facade (`utils/` concrete 파일 재수출; 훅은 이 파일을 import)
+- `index.ts` — barrel (`shared.ts` 재수출)
 
 ## Conventions
 
