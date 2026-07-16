@@ -10,7 +10,7 @@ Write/Edit가 `INTENT.md`(50줄 제한)·`DETAIL.md`(append-only 방지)·`.fili
 
 ## Conventions
 
-- `INTENT_MD_LINE_LIMIT = 50` 모듈 상수
+- `INTENT_MD_LINE_LIMIT`은 `constants/documentValidation.js`에서 import (모듈 재선언 금지 — 단일 원천)
 - Edit INTENT.md: 기존 content에 `old_string`→`new_string` 교체 시뮬레이션, projected > 50줄이면 블록; 시뮬레이션 불가 시 `new_string` 20줄 초과면 경고만
 - Write INTENT.md: `validateIntentMd` — `error`는 블록, `warning`은 continue + 메시지
 - Write DETAIL.md: `oldContent` 제공 시 `validateDetailMd` append-only 검사
@@ -22,7 +22,7 @@ Write/Edit가 `INTENT.md`(50줄 제한)·`DETAIL.md`(append-only 방지)·`.fili
 
 ### Always do
 
-- 50줄 제한은 `INTENT_MD_LINE_LIMIT` 상수 경유 (숫자 리터럴 금지)
+- 50줄 제한은 `INTENT_MD_LINE_LIMIT` import 경유 (숫자 리터럴·지역 재선언 금지)
 - `warning`은 continue하되 `additionalContext`로 사용자에게 알림
 - criteria 검사는 spike 면제 게이트보다 먼저 실행
 
@@ -44,5 +44,5 @@ Write/Edit가 `INTENT.md`(50줄 제한)·`DETAIL.md`(append-only 방지)·`.fili
 - `../shared/` (`isIntentMd`, `isDetailMd`, `isCriteriaMd`)
 - `../utils/validateCwd.js`
 - `../../types/hooks.js`, `../../types/documents.js`
-- `../../constants/hookDefaults.js` (`DENY_RETRY_GUIDANCE`)
+- `../../constants/hookDefaults.js` (`DENY_RETRY_GUIDANCE`), `../../constants/documentValidation.js` (`INTENT_MD_LINE_LIMIT`)
 - `node:fs`, `node:path`
