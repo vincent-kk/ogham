@@ -11,9 +11,8 @@ Write/Edit가 `INTENT.md`(50줄 제한)·`DETAIL.md`(append-only 방지)·`.fili
 ## Conventions
 
 - `INTENT_MD_LINE_LIMIT`은 `constants/documentValidation.js`에서 import (모듈 재선언 금지 — 단일 원천)
-- Edit INTENT.md: 기존 content에 `old_string`→`new_string` 교체 시뮬레이션, projected > 50줄이면 블록; 시뮬레이션 불가 시 `new_string` 20줄 초과면 경고만
-- Write INTENT.md: `validateIntentMd` — `error`는 블록, `warning`은 continue + 메시지
-- Write DETAIL.md: `oldContent` 제공 시 `validateDetailMd` append-only 검사
+- INTENT.md — Write: `validateIntentMd` (`error` 블록, `warning` continue + 메시지). Edit: `old_string`→`new_string` 교체 시뮬레이션 후 projected > 50줄이면 블록; 시뮬레이션 불가 시 `new_string` 20줄 초과만 경고
+- DETAIL.md — Write: `oldContent` 제공 시 `validateDetailMd` append-only 검사
 - criteria.md: Write/Edit 모두 `validateCriteriaMd` (Edit은 시뮬레이션) — claim 삭제·필수 필드 누락·status enum·중복 id·동어반복 차단
 - `spikeExempt=true`(spike/\* 브랜치 + INTENT/DETAIL 대상, 오케스트레이터가 판정)면 문서 위생 deny 면제; criteria.md는 어떤 모드에서도 면제 불가
 - 차단 시 `permissionDecision: 'deny'` + `permissionDecisionReason`에 사유 설정
@@ -41,8 +40,6 @@ Write/Edit가 `INTENT.md`(50줄 제한)·`DETAIL.md`(append-only 방지)·`.fili
 ## Dependencies
 
 - `../../core/rules/documentValidator/` (`validateIntentMd`, `validateDetailMd`, `validateCriteriaMd`)
-- `../shared/` (`isIntentMd`, `isDetailMd`, `isCriteriaMd`)
-- `../utils/validateCwd.js`
-- `../../types/hooks.js`, `../../types/documents.js`
+- `../shared/` (`isIntentMd`, `isDetailMd`, `isCriteriaMd`), `../utils/validateCwd.js`
 - `../../constants/hookDefaults.js` (`DENY_RETRY_GUIDANCE`), `../../constants/documentValidation.js` (`INTENT_MD_LINE_LIMIT`)
-- `node:fs`, `node:path`
+- `../../types/hooks.js`, `../../types/documents.js`, `node:fs`, `node:path`
