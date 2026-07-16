@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { INTENT_MD } from '../../constants/documentFiles.js';
+
 /**
  * Check whether `cwd` is inside an FCA-AI project.
  *
@@ -16,7 +18,7 @@ export function isFcaProject(cwd: string): boolean {
   while (true) {
     if (
       existsSync(join(cursor, '.filid')) ||
-      existsSync(join(cursor, 'INTENT.md'))
+      existsSync(join(cursor, INTENT_MD))
     )
       return true;
     if (existsSync(join(cursor, '.git'))) return false;

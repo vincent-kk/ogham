@@ -40,5 +40,5 @@ PreToolUse(Read) 이벤트에서 대상 파일의 상위 fractal을 찾아 `[fil
 
 - `../../core/infra/cacheManager/` (`readBoundary`, `writeBoundary`, `readFractalMap`, `writeFractalMap`, `hasGuideInjected`, `markGuideInjected`)
 - `../../core/tree/boundaryDetector/` (`buildChain`)
-- `../../constants/agentContext.js` (`GUIDE_BLOCK`)
+- `../../constants/agentContext.js` (`GUIDE_BLOCK`), `../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)
 - `../shared/`, `../utils/validateCwd.js`, `./utils/compressPaths.js`

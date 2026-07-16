@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs';
 import * as path from 'node:path';
 
+import { DETAIL_MD, INTENT_MD } from '../../constants/documentFiles.js';
+
 import { isOrganByStructure } from './organStructureChecker.js';
 
 export function checkOrganSubdirectory(
@@ -27,8 +29,8 @@ export function checkOrganSubdirectory(
   for (let i = organIdx + 1; i < segments.length; i++) {
     below = path.join(below, segments[i]);
     if (
-      existsSync(path.join(below, 'INTENT.md')) ||
-      existsSync(path.join(below, 'DETAIL.md'))
+      existsSync(path.join(below, INTENT_MD)) ||
+      existsSync(path.join(below, DETAIL_MD))
     )
       return [];
   }

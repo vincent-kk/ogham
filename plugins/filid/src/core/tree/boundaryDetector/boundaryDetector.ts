@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
+import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
+
 /** Result of building a context chain from a file to its boundary */
 export interface ChainResult {
   /** Directory containing package.json (boundary) */
@@ -48,11 +50,11 @@ export function buildChain(filePath: string): ChainResult | null {
     chain.push(dir);
 
     // Check INTENT.md
-    const hasIntent = existsSync(join(dir, 'INTENT.md'));
+    const hasIntent = existsSync(join(dir, INTENT_MD));
     intents.set(dir, hasIntent);
 
     // Check DETAIL.md
-    const hasDetail = existsSync(join(dir, 'DETAIL.md'));
+    const hasDetail = existsSync(join(dir, DETAIL_MD));
     details.set(dir, hasDetail);
 
     if (dir === boundary) break;

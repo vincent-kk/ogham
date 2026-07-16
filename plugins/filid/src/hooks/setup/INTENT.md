@@ -41,5 +41,5 @@
 
 - `../../core/infra/cacheManager/` (`getCacheDir`, `isPruneDue`, `isSessionPruneDue`, `markPruneRun`, `markSessionPruneRun`, `pruneOldSessions`, `pruneStaleCacheDirs`)
 - `../../lib/logger.js` (`createLogger`, `setLogDir`)
-- `../../constants/scanDefaults.js` (`SCAN_SKIP_DIRS`)
+- `../../constants/scanDefaults.js` (`SCAN_SKIP_DIRS`), `../../constants/documentFiles.js` (`INTENT_MD`)
 - `../shared/`, `../../types/hooks.js`

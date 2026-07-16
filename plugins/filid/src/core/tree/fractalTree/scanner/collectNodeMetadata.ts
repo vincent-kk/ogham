@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
+import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import type { ScanOptions } from '../../../../types/scan.js';
 import { classifyNode } from '../../organClassifier/organClassifier.js';
 import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
@@ -35,8 +36,8 @@ export function collectNodeMetadata(
     if (depth > maxDepth) continue;
 
     const name = absPath === rootPath ? basename(rootPath) : basename(absPath);
-    const hasIntentMd = existsSync(join(absPath, 'INTENT.md'));
-    const hasDetailMd = existsSync(join(absPath, 'DETAIL.md'));
+    const hasIntentMd = existsSync(join(absPath, INTENT_MD));
+    const hasDetailMd = existsSync(join(absPath, DETAIL_MD));
     const hasIndex =
       existsSync(join(absPath, 'index.ts')) ||
       existsSync(join(absPath, 'index.tsx')) ||
