@@ -7,25 +7,25 @@ import { readdirSync } from 'node:fs';
 import { portableJoin } from '@ogham/cross-platform/paths';
 
 import { moduleName } from './moduleName.js';
+import { nearestSrcRoot } from './nearestSrcRoot.js';
 import { tryTestFile } from './tryTestFile.js';
 
 /**
- * Strategy 3: Integration test by naming convention.
+ * Strategy 4: Integration test by naming convention.
  *
- * Globs `src/__tests__/integration/` and matches files whose base name
- * equals the source module name or starts with `<name>-`.
+ * Globs `<nearest src>/__tests__/integration/` and matches files whose base
+ * name equals the source module name or starts with `<name>-`. Anchored on
+ * the source file's own `src` root (see nearestSrcRoot); `projectRoot` is
+ * only the fallback anchor.
  */
 export function findIntegrationTest(
   sourceFilePath: string,
   projectRoot: string,
 ): { testFilePath: string; testCount: number } | null {
   const name = moduleName(sourceFilePath);
-  const integrationDir = portableJoin(
-    projectRoot,
-    'src',
-    '__tests__',
-    'integration',
-  );
+  const srcRoot =
+    nearestSrcRoot(sourceFilePath) ?? portableJoin(projectRoot, 'src');
+  const integrationDir = portableJoin(srcRoot, '__tests__', 'integration');
 
   let entries: string[];
   try {

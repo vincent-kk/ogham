@@ -5,13 +5,14 @@
 `UsageSite[]`의 각 항목에 대해 대표 테스트 파일을 3-Strategy로 탐지하고,
 `UsageCoverage[]`와 사람이 읽을 수 있는 경고 문자열을 생성한다.
 
-## Strategies (우선순위 순)
+## Strategies (우선순위 순, 앵커 = 소스 파일의 nearest `src` 루트)
 
 1. **Co-located**: `<dir>/<name>.{test,spec}.{ts,tsx}`
-2. **Mirror**: `src/<layer>/<name>.ts` → `src/__tests__/unit/<layer>/<name>.test.ts`
-3. **Integration**: `src/__tests__/integration/<name>*.{test,spec}.ts` — 파일명이 모듈명과 일치하거나 `<name>-`로 시작
+2. **Mirror**: `<src>/<layer>/<name>.ts` → `<src>/__tests__/unit/<layer>/<name>.test.ts`
+3. **Centralized**: `<src>/__tests__/**` 에서 basename 정확 일치 → 소유 fractal(최근접 INTENT.md 디렉터리) 이름 prefix 일치 — 평탄화·중앙집중 레이아웃 대응
+4. **Integration**: `<src>/__tests__/integration/<name>*.{test,spec}.ts` — 모듈명 일치 또는 `<name>-` 시작
 
-테스트 파일은 `countTestCases`로 검증하며 `total === 0`이면 발견 실패로 처리한다.
+앵커를 `projectRoot/src` 로 두면 모노레포에서 2·4 가 발화 불가(false negative) — 반드시 파일 자신의 `src` 기준. 테스트 파일은 `countTestCases`로 검증하며 `total === 0`이면 발견 실패로 처리한다.
 
 ## Boundaries
 
