@@ -6,18 +6,18 @@
 
 ## Export 요약
 
-| 카테고리       | 함수/클래스 | 타입   | 합계    |
-| -------------- | ----------- | ------ | ------- |
-| Core           | 30          | 9      | 39      |
-| Metrics        | 4           | 7      | 11      |
-| Compression    | 3           | 1      | 4       |
-| AST            | 12          | 8      | 20      |
-| Hooks          | 8           | 7      | 15      |
-| Cache Manager  | 13          | 1      | 14      |
-| MCP            | 16          | 0      | 16      |
-| **합계**       | **86**      | **33** | **119** |
+| 카테고리      | 함수/클래스 | 타입   | 합계    |
+| ------------- | ----------- | ------ | ------- |
+| Core          | 30          | 9      | 39      |
+| Metrics       | 4           | 7      | 11      |
+| Compression   | 3           | 1      | 4       |
+| AST           | 12          | 8      | 20      |
+| Hooks         | 8           | 7      | 15      |
+| Cache Manager | 21          | 5      | 26      |
+| MCP           | 16          | 0      | 16      |
+| **합계**      | **94**      | **37** | **131** |
 
-> `src/index.ts` 기준 실제 export 수. 함수/클래스와 타입 합산 94+ 심볼.
+> `src/index.ts` 기준 실제 export 수. 함수/클래스와 타입 합산 131 심볼.
 
 ---
 
@@ -32,7 +32,10 @@ function validateIntentMd(content: string): IntentMdValidation;
 INTENT.md 내용을 검증한다. 50줄 제한 + 3-tier 경계 섹션 검사.
 
 ```typescript
-function validateDetailMd(content: string, oldContent?: string): DetailMdValidation;
+function validateDetailMd(
+  content: string,
+  oldContent?: string,
+): DetailMdValidation;
 ```
 
 DETAIL.md 내용을 검증한다. `oldContent` 제공 시 append-only 감지.
@@ -90,7 +93,10 @@ function getFractalsUnderOrgans(tree: FractalTree): FractalNode[];
 Organ 디렉토리 하위에 있는 프랙탈 노드를 반환한다 (구조 위반 감지용).
 
 ```typescript
-async function scanProject(projectRoot: string, options?: ScanOptions): Promise<NodeEntry[]>;
+async function scanProject(
+  projectRoot: string,
+  options?: ScanOptions,
+): Promise<NodeEntry[]>;
 ```
 
 프로젝트 루트를 재귀 탐색하여 `NodeEntry` 배열을 반환한다.
@@ -150,7 +156,10 @@ function detectDrift(projectRoot: string): Promise<DriftReport>;
 프로젝트 내 코드-문서 드리프트(구조 불일치)를 감지한다.
 
 ```typescript
-function compareCurrent(node: FractalNode, projectRoot: string): Promise<DriftItem[]>;
+function compareCurrent(
+  node: FractalNode,
+  projectRoot: string,
+): Promise<DriftItem[]>;
 ```
 
 단일 노드의 현재 상태와 INTENT.md/DETAIL.md 선언을 비교한다.
@@ -256,13 +265,20 @@ index 파일에서 모듈 export 목록을 추출한다.
 ### lca-calculator
 
 ```typescript
-function findLCA(tree: FractalTree, pathA: string, pathB: string): string | null;
+function findLCA(
+  tree: FractalTree,
+  pathA: string,
+  pathB: string,
+): string | null;
 ```
 
 두 모듈 경로의 최저 공통 조상(LCA) 프랙탈을 찾는다.
 
 ```typescript
-function getModulePlacement(tree: FractalTree, modulePath: string): PlacementInfo;
+function getModulePlacement(
+  tree: FractalTree,
+  modulePath: string,
+): PlacementInfo;
 ```
 
 모듈의 프랙탈 트리 내 위치 정보를 반환한다.
@@ -569,16 +585,22 @@ function isFirstInSession(cwd: string, sessionId: string): boolean;
 현재 세션에서 첫 번째 주입 여부를 확인한다.
 
 ```typescript
-function pruneOldSessions(cwd: string, maxAgeDays?: number): void;
+function pruneOldSessions(cwd: string): void;
 ```
 
-오래된 세션 캐시 파일을 정리한다.
+오래된 세션 캐시 파일을 정리한다. 세션 파일 수가 임계값을 넘을 때만 동작하며, TTL 경과 파일과 그 짝(prompt-context / guide / boundary / delivered / turn / fmap-\*)을 함께 삭제한다.
 
 ```typescript
-function removeSessionFiles(cwd: string, sessionId: string): void;
+function pruneStaleCacheDirs(): void;
 ```
 
-특정 세션의 캐시 파일을 삭제한다.
+플러그인 캐시 루트의 stale `cwdHash` 디렉터리를 정리한다 — 모든 파일이 TTL을 넘긴 디렉터리가 대상이며, 디렉터리 수가 임계값을 넘을 때만 동작한다. SessionStart 훅에서 호출.
+
+```typescript
+function removeSessionFiles(sessionId: string, cwd: string): void;
+```
+
+특정 세션의 캐시 파일을 삭제한다. 인자 순서가 `(sessionId, cwd)` 로 이 섹션의 다른 함수들과 반대임에 주의.
 
 ```typescript
 function markSessionInjected(cwd: string, sessionId: string): void;
@@ -599,28 +621,91 @@ function getLastRunHash(cwd: string): string | null;
 마지막 실행 해시를 캐시에서 읽는다.
 
 ```typescript
-function readBoundary(cwd: string): BoundaryInfo | null;
+function readBoundary(
+  cwd: string,
+  sessionId: string,
+  dir: string,
+): string | null;
 ```
 
-캐시에서 경계 정보를 읽는다.
+디렉터리의 캐시된 프랙탈 경계 경로를 읽는다. 미캐시면 `null`.
 
 ```typescript
-function writeBoundary(cwd: string, boundary: BoundaryInfo): void;
+function writeBoundary(
+  cwd: string,
+  sessionId: string,
+  dir: string,
+  boundaryPath: string,
+): void;
 ```
 
-경계 정보를 캐시에 저장한다.
+디렉터리 → 경계 경로 매핑을 캐시에 저장한다.
 
 ```typescript
-function readFractalMap(cwd: string): FractalMap | null;
+interface VisitScope {
+  sessionId: string;
+  sub?: string;
+}
 ```
 
-캐시에서 프랙탈 맵을 읽는다.
+훅 이벤트의 캐시 스코프. `sub` 는 서브에이전트 transcript basename — 서브에이전트 방문이 메인 세션의 전달 상태를 오염시키지 않게 한다. `sub` 부재 = 메인 세션(호스트가 transcript 를 구분하지 못할 때의 fallback 이기도 함).
 
 ```typescript
-function commitVisit(cwd: string, scope: VisitScope, args: VisitArgs): VisitDecision;
+interface FractalMap {
+  reads: string[];
+  lastMap?: string;
+  delivered?: Record<string, true>;
+  guideShown?: boolean;
+}
+```
+
+한 스코프의 턴 단위 방문 맵. `reads` 항목은 `{boundaryAbsPath}\t{relDir}` 복합 키(relDir 단독은 모노레포 패키지 간 충돌), `lastMap` 은 마지막 방출 `[filid:map]` 의 정규형(방출 dedup). `delivered`/`guideShown` 은 서브에이전트 스코프에만 존재.
+
+```typescript
+function readFractalMap(cwd: string, scope: VisitScope): FractalMap;
+```
+
+스코프의 프랙탈 맵을 읽는다 (`commitVisit` 밖에서는 advisory). 파일 부재·파싱 실패 시 `{ reads: [] }`.
+
+```typescript
+function removeFractalMap(cwd: string, sessionId: string): void;
+```
+
+세션의 모든 프랙탈 맵 파일을 삭제한다 — 메인 스코프 맵과 서브에이전트 스코프 형제(`fmap-{hash}-sub-*.json`) 전부. UserPromptSubmit 의 턴 리셋과 세션 정리 경로에서 호출.
+
+```typescript
+function commitVisit(
+  cwd: string,
+  scope: VisitScope,
+  args: VisitArgs,
+): VisitDecision;
 ```
 
 방문 판정·기록의 원자 트랜잭션 — 전달 상태 판정, 읽기 병합, lastMap CAS, guide 1회를 lock 안에서 수행한다.
+
+```typescript
+type DeliveredState = "none" | "stale" | "fresh";
+```
+
+`commitVisit` 이 판정하는 전달 3-상태. main 스코프는 `(currentTurn - stamp) < ttlTurns` 일 때만 `fresh`, sub 스코프는 이진 판정.
+
+```typescript
+function readDelivered(cwd: string, sessionId: string): Record<string, number>;
+```
+
+세션 에포크 전달 기록(ownerKey → 마지막 INTENT 전달 turn 스탬프)을 읽는다. `commitVisit` 밖에서는 advisory — 쓰기 권한은 lock 안의 트랜잭션에 있다.
+
+```typescript
+function readTurn(cwd: string, sessionId: string): number;
+```
+
+현재 세션의 turn 을 읽는다 (첫 UserPromptSubmit 전에는 0).
+
+```typescript
+function incrementTurn(cwd: string, sessionId: string): number;
+```
+
+turn 카운터를 1 증가시키고 증가된 값을 반환한다. UserPromptSubmit 에서만 호출되며 자기 자신과 동시 실행되지 않는다.
 
 ```typescript
 function computeProjectHash(projectRoot: string): Promise<string>;
@@ -666,8 +751,12 @@ function handleReviewManage(
   input: ReviewManageInput,
 ): Promise<ReviewManageOutput>;
 function handleDebtManage(input: DebtManageInput): Promise<DebtManageOutput>;
-function handleAstGrepSearch(input: AstGrepSearchInput): Promise<AstGrepSearchOutput>;
-function handleAstGrepReplace(input: AstGrepReplaceInput): Promise<AstGrepReplaceOutput>;
+function handleAstGrepSearch(
+  input: AstGrepSearchInput,
+): Promise<AstGrepSearchOutput>;
+function handleAstGrepReplace(
+  input: AstGrepReplaceInput,
+): Promise<AstGrepReplaceOutput>;
 function handleCacheManage(input: CacheManageInput): Promise<CacheManageOutput>;
 ```
 
@@ -955,7 +1044,7 @@ const EXT_TO_LANG: Record<string, string>;
 ### Fractal 타입 (`types/fractal.ts`)
 
 ```typescript
-type NodeType = 'fractal' | 'organ' | 'pure-function';
+type NodeType = "fractal" | "organ" | "pure-function";
 
 interface FractalNode {
   path: string;
@@ -972,7 +1061,6 @@ interface FractalTree {
   root: string;
   nodes: Map<string, FractalNode>;
 }
-type FractalMap = Map<string, FractalNode>;
 
 interface ChainResult {
   chain: string[];
@@ -983,7 +1071,7 @@ interface ChainResult {
 interface DependencyEdge {
   from: string;
   to: string;
-  type: 'import' | 'export' | 'call' | 'inheritance';
+  type: "import" | "export" | "call" | "inheritance";
 }
 interface DependencyDAG {
   nodes: Set<string>;
@@ -1017,7 +1105,7 @@ interface DetailMdSchema {
   compressionMeta?: CompressionMeta;
 }
 interface CompressionMeta {
-  method: 'reversible' | 'lossy';
+  method: "reversible" | "lossy";
   originalLines: number;
   compressedLines: number;
   timestamp: string;
@@ -1033,13 +1121,13 @@ interface DetailMdValidation {
 }
 interface DocumentViolation {
   rule:
-    | 'line-limit'
-    | 'deduplication'
-    | 'append-only'
-    | 'missing-boundaries'
-    | 'missing-section';
+    | "line-limit"
+    | "deduplication"
+    | "append-only"
+    | "missing-boundaries"
+    | "missing-section";
   message: string;
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
 }
 ```
 
@@ -1059,7 +1147,7 @@ interface CyclomaticComplexityResult {
 }
 interface TestCaseCount {
   filePath: string;
-  fileType: 'spec' | 'test';
+  fileType: "spec" | "test";
   total: number;
   basic: number;
   complex: number;
@@ -1069,7 +1157,7 @@ interface ThreePlusTwelveResult {
   files: TestCaseCount[];
   violatingFiles: string[];
 }
-type DecisionAction = 'split' | 'compress' | 'parameterize' | 'ok';
+type DecisionAction = "split" | "compress" | "parameterize" | "ok";
 interface DecisionResult {
   action: DecisionAction;
   reason: string;
@@ -1162,7 +1250,7 @@ interface ClassInfo {
   fields: string[];
 }
 interface TreeDiffChange {
-  type: 'added' | 'removed' | 'modified';
+  type: "added" | "removed" | "modified";
   kind: string;
   name: string;
   oldLine?: number;

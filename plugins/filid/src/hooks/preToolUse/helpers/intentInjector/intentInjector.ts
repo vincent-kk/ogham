@@ -116,20 +116,19 @@ export function processVisit(
     silentDelivery: selfAuthoring,
   });
 
-  if (gateEligible && decision.deliveredState === 'none')
-    return buildGateDeny(
-      ownerRelDir,
-      buildCtxBlock(
-        relFile,
-        intentContent,
-        chain,
-        intents,
-        details,
-        boundary,
-        ownerDir,
-      ),
-      decision.guideNeeded,
+  const ctxBlock = (): string =>
+    buildCtxBlock(
+      relFile,
+      intentContent,
+      chain,
+      intents,
+      details,
+      boundary,
+      ownerDir,
     );
+
+  if (gateEligible && decision.deliveredState === 'none')
+    return buildGateDeny(ownerRelDir, ctxBlock(), decision.guideNeeded);
 
   const blocks: string[] = [];
   if (
@@ -138,17 +137,7 @@ export function processVisit(
     !selfAuthoring
   ) {
     if (decision.guideNeeded) blocks.push(GUIDE_BLOCK);
-    blocks.push(
-      buildCtxBlock(
-        relFile,
-        intentContent,
-        chain,
-        intents,
-        details,
-        boundary,
-        ownerDir,
-      ),
-    );
+    blocks.push(ctxBlock());
   }
   if (decision.mapChanged) blocks.push(buildMapBlock(decision.reads, relDir));
 

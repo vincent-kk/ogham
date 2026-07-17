@@ -60,4 +60,4 @@ export const GUIDE_BLOCK = [
 ].join('\n');
 
 export const GATE_RETRY_GUIDANCE =
-  'Review the rules above, then retry the same call — the retry will pass.';
+  'Review the rules below, then retry the same call — the retry will pass.';
