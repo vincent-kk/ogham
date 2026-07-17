@@ -1,13 +1,13 @@
 import { mkdirSync, renameSync, writeFileSync } from 'node:fs';
 
-import { deliveredPath, readDelivered } from './deliveredCache.js';
+import { deliveredPath } from './deliveredCache.js';
 import { acquireLock, releaseLock } from './fmapLock.js';
 import type { VisitScope } from './fmapPath.js';
 import { fmapPath } from './fmapPath.js';
 import { getCacheDir } from './getCacheDir.js';
-import { hasGuideInjected, markGuideInjected } from './guideCache.js';
 import { readFractalMap } from './readFractalMap.js';
-import { readTurn } from './turnCounter.js';
+import { resolveDeliveredState } from './resolveDeliveredState.js';
+import { resolveGuideNeeded } from './resolveGuideNeeded.js';
 
 export type DeliveredState = 'none' | 'stale' | 'fresh';
 
@@ -79,43 +79,20 @@ export function commitVisit(
   try {
     const map = readFractalMap(cwd, scope);
 
-    let deliveredState: DeliveredState = 'fresh';
-    let mainDelivered: Record<string, number> | null = null;
-    if (args.ownerKey !== null)
-      if (scope.sub) {
-        const record = map.delivered ?? {};
-        deliveredState = record[args.ownerKey] ? 'fresh' : 'none';
-        if (deliveredState !== 'fresh') {
-          record[args.ownerKey] = true;
-          map.delivered = record;
-        }
-      } else {
-        const delivered = readDelivered(cwd, scope.sessionId);
-        const stamp = delivered[args.ownerKey];
-        const turn = readTurn(cwd, scope.sessionId);
-        deliveredState =
-          typeof stamp !== 'number'
-            ? 'none'
-            : turn - stamp < args.ttlTurns
-              ? 'fresh'
-              : 'stale';
-        if (deliveredState !== 'fresh') {
-          delivered[args.ownerKey] = turn;
-          mainDelivered = delivered;
-        }
-      }
+    const { deliveredState, mainDelivered } = resolveDeliveredState(
+      cwd,
+      scope,
+      args,
+      map,
+    );
 
-    let guideNeeded = false;
-    if (deliveredState !== 'fresh' && args.silentDelivery !== true)
-      if (scope.sub) {
-        if (!map.guideShown) {
-          guideNeeded = true;
-          map.guideShown = true;
-        }
-      } else if (!hasGuideInjected(scope.sessionId, cwd)) {
-        guideNeeded = true;
-        markGuideInjected(scope.sessionId, cwd);
-      }
+    const guideNeeded = resolveGuideNeeded(
+      cwd,
+      scope,
+      deliveredState,
+      args.silentDelivery,
+      map,
+    );
 
     const denyPath = args.gateEligible && deliveredState === 'none';
     let mapChanged = false;

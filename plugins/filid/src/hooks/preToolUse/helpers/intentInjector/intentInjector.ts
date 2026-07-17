@@ -1,30 +1,22 @@
 import * as path from 'node:path';
 
-import { GUIDE_BLOCK } from '../../../../constants/agentContext.js';
 import { CTX_TTL_TURNS_DEFAULT } from '../../../../constants/hookDefaults.js';
 import {
   commitVisit,
-  readBoundary,
-  readFractalMap,
   writeBoundary,
 } from '../../../../core/infra/cacheManager/cacheManager.js';
 import type { FractalMap } from '../../../../core/infra/cacheManager/cacheManager.js';
 import { buildChain } from '../../../../core/tree/boundaryDetector/boundaryDetector.js';
 import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
-import {
-  isCriteriaMd,
-  isDetailMd,
-  isFcaProject,
-  isIntentMd,
-} from '../../../shared/shared.js';
+import { isFcaProject } from '../../../shared/shared.js';
 import { readHookConfig } from '../../../utils/readHookConfig.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
 import { visitScope } from '../../../utils/visitScope.js';
 
 import { buildCtxBlock } from './utils/buildCtxBlock.js';
-import { buildGateDeny } from './utils/buildGateDeny.js';
-import { buildMapBlock } from './utils/buildMapBlock.js';
-import { resolveOwnerIntent } from './utils/resolveOwnerIntent.js';
+import { buildDeliveryOutput } from './utils/buildDeliveryOutput.js';
+import { isFastPathSettled } from './utils/isFastPathSettled.js';
+import { resolveGateContext } from './utils/resolveGateContext.js';
 import { visitKey } from './utils/visitKey.js';
 
 export type { FractalMap };
@@ -61,19 +53,13 @@ export function processVisit(
   const mutation = input.tool_name === 'Write' || input.tool_name === 'Edit';
   const scope = visitScope(input);
 
-  // Fast path: a directory already in this turn's reads was settled by an
-  // earlier commitVisit — delivery is fresh within the same turn, the map is
-  // current. Fully silent, mutations included.
-  const cachedBoundary = readBoundary(safeCwd, input.session_id, fileDir);
-  if (cachedBoundary !== null) {
-    const relDir = toPosix(path.relative(cachedBoundary, fileDir)) || '.';
-    if (
-      readFractalMap(safeCwd, scope).reads.includes(
-        visitKey(cachedBoundary, relDir),
-      )
-    )
-      return { continue: true };
-  }
+  const { cachedBoundary, settled } = isFastPathSettled(
+    safeCwd,
+    input.session_id,
+    fileDir,
+    scope,
+  );
+  if (settled) return { continue: true };
 
   const chainResult = buildChain(filePath);
   if (!chainResult) return { continue: true };
@@ -85,25 +71,23 @@ export function processVisit(
   const relFile = toPosix(path.relative(boundary, filePath));
   const readKey = visitKey(boundary, relDir);
 
-  const selfAuthoring = mutation && isIntentMd(filePath);
-  const { intentContent, ownerDir } = resolveOwnerIntent(
+  const {
+    intentContent,
+    ownerDir,
+    ownerKey,
+    ownerRelDir,
+    gateEligible,
+    selfAuthoring,
+  } = resolveGateContext(
+    filePath,
     fileDir,
     chain,
     intents,
+    boundary,
+    readKey,
+    mutation,
+    spikeMode,
   );
-  const hasOwner = intentContent !== undefined;
-  const ownerRelDir = toPosix(path.relative(boundary, ownerDir)) || '.';
-  // Self-authoring delivers the module being documented, whether or not its
-  // INTENT.md existed on disk before this write.
-  const ownerKey = selfAuthoring
-    ? readKey
-    : hasOwner
-      ? visitKey(boundary, ownerRelDir)
-      : null;
-
-  const docTarget =
-    isIntentMd(filePath) || isDetailMd(filePath) || isCriteriaMd(filePath);
-  const gateEligible = mutation && hasOwner && !docTarget && !spikeMode;
 
   const ttlTurns =
     readHookConfig(safeCwd)?.injection?.ctxTtlTurns ?? CTX_TTL_TURNS_DEFAULT;
@@ -127,25 +111,13 @@ export function processVisit(
       ownerDir,
     );
 
-  if (gateEligible && decision.deliveredState === 'none')
-    return buildGateDeny(ownerRelDir, ctxBlock(), decision.guideNeeded);
-
-  const blocks: string[] = [];
-  if (
-    ownerKey !== null &&
-    decision.deliveredState !== 'fresh' &&
-    !selfAuthoring
-  ) {
-    if (decision.guideNeeded) blocks.push(GUIDE_BLOCK);
-    blocks.push(ctxBlock());
-  }
-  if (decision.mapChanged) blocks.push(buildMapBlock(decision.reads, relDir));
-
-  const additionalContext = blocks.join('\n');
-  if (!additionalContext.trim()) return { continue: true };
-
-  return {
-    continue: true,
-    hookSpecificOutput: { additionalContext },
-  };
+  return buildDeliveryOutput(
+    decision,
+    gateEligible,
+    ownerKey,
+    ownerRelDir,
+    selfAuthoring,
+    relDir,
+    ctxBlock,
+  );
 }
