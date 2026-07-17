@@ -5,8 +5,9 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  commitVisit,
   readFractalMap,
-  writeFractalMap,
+  readTurn,
 } from '../../../core/infra/cacheManager/cacheManager.js';
 import { handleUserPromptSubmit } from '../../../hooks/userPromptSubmit/userPromptSubmit.js';
 import type { UserPromptSubmitInput } from '../../../types/hooks.js';
@@ -32,24 +33,23 @@ afterEach(() => {
 });
 
 describe('handleUserPromptSubmit', () => {
-  it('FCA project: clears fmap then injects context', () => {
+  it('FCA project: clears fmap (sub scopes included), bumps turn, injects context', () => {
     // isFcaProject checks for .filid/ directory or INTENT.md
     mkdirSync(join(tempDir, '.filid'), { recursive: true });
 
     const sessionId = `session-ups-${Date.now()}`;
 
-    // Pre-populate fmap
-    writeFractalMap(tempDir, sessionId, {
-      reads: ['src/a', 'src/b'],
-      intents: ['src/a'],
-      details: [],
-    });
+    // Pre-populate main and subagent fmaps
+    const args = { ownerKey: null, ttlTurns: 5, gateEligible: false };
+    commitVisit(tempDir, { sessionId }, { ...args, readKey: 'src/a' });
+    commitVisit(
+      tempDir,
+      { sessionId, sub: 'agent-aprobe-1' },
+      { ...args, readKey: 'src/b' },
+    );
 
-    // Verify fmap exists
-    expect(readFractalMap(tempDir, sessionId).reads).toEqual([
-      'src/a',
-      'src/b',
-    ]);
+    expect(readFractalMap(tempDir, { sessionId }).reads).toEqual(['src/a']);
+    expect(readTurn(tempDir, sessionId)).toBe(0);
 
     const input: UserPromptSubmitInput = {
       cwd: tempDir,
@@ -59,12 +59,12 @@ describe('handleUserPromptSubmit', () => {
 
     const result = handleUserPromptSubmit(input);
 
-    // fmap should be cleared
-    expect(readFractalMap(tempDir, sessionId)).toEqual({
-      reads: [],
-      intents: [],
-      details: [],
-    });
+    // fmap should be cleared for both scopes; the turn counter advanced
+    expect(readFractalMap(tempDir, { sessionId })).toEqual({ reads: [] });
+    expect(
+      readFractalMap(tempDir, { sessionId, sub: 'agent-aprobe-1' }),
+    ).toEqual({ reads: [] });
+    expect(readTurn(tempDir, sessionId)).toBe(1);
 
     // Should still return a valid hook output (from injectContext)
     expect(result.continue).toBe(true);

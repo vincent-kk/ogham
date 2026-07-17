@@ -1,44 +1,49 @@
-# intentInjector -- PreToolUse INTENT.md 체인 주입
+# intentInjector -- 전달 모델 기반 INTENT.md 주입 + mutation 게이트
 
 ## Purpose
 
-PreToolUse(Read) 이벤트에서 대상 파일의 상위 fractal을 찾아 `[filid:ctx]` 블록(intent 경로 + 인라인 본문 + chain + detail 힌트)과 `[filid:map]` 방문 맵을 주입한다. 세션당 최초 `[filid:guide]` 블록도 한 번 주입. (오케스트레이터가 Read에만 배선 — Write/Edit은 validator/guard 경로.)
+Read | Write | Edit 공용 방문 파이프라인. 전달 모델("규칙이 live 컨텍스트에
+존재하면 전달된 상태")의 3-상태(미전달/stale/fresh)에 따라 소유 fractal의
+`[filid:ctx]`(INTENT 본문 인라인 + chain + detail 힌트)를 주입하고, 미전달
+모듈의 mutation은 deny reason에 규칙 본문을 실어 1왕복으로 차단-전달한다
+(`[filid:gate]`). `[filid:map]`은 방문 집합이 변한 경우에만 방출.
 
 ## Structure
 
-- `intentInjector.ts` — `injectIntent` + `recordWriteVisit` (Write/Edit 방문을 reads에만 기록 — unread-intent 신호 원천)
-- `utils/` organ — `compressPaths`, `visitKey`, `displayDir` 등 보조 함수
+- `intentInjector.ts` — `processVisit(input, spikeMode?)` 단일 진입
+- `utils/` organ — ctx/gate/map 블록 빌더와 키·경로 보조 함수
 
 ## Conventions
 
-- 캐시 경로: `fcaMap`(reads/intents/details) + 디렉토리별 boundary 캐시
-- `fcaMap` 원소는 `{boundary}\t{relDir}` 복합 키 (모노레포 패키지 간 동일 relDir 충돌 방지); `[filid:map]` 표시 시에는 `\t` 뒤 relDir만 사용
-- 소유자 fractal 탐색: 현재 디렉토리 → chain 상위로 첫 번째 `INTENT.md` 보유 dir 선택
-- 최초 방문 시에만 `[filid:ctx]` 인라인 본문 주입, 재방문은 `[filid:map]`만 갱신
-- `fcaMap`(reads/intents/details)은 UserPromptSubmit에서 턴마다 리셋 — 동일 턴에서 소유 fractal이 이미 주입되면 sibling organ 방문 시 재인라인 스킵 (`[filid:guide]`는 별도 세션-스코프 캐시로 세션당 1회 유지)
-- `[filid:map]`은 `compressPaths` 결과 + `unread-intent` 목록 (reads에는 있지만 intents에 없는 경로) 포함
-- session 첫 ctx 블록 직전에 `GUIDE_BLOCK`을 정확히 1회 삽입 (`markGuideInjected`)
+- 상태 판정·기록의 최종 권위는 `commitVisit`(cacheManager) lock 트랜잭션;
+  메모리 판정은 advisory 사전 필터. 같은 턴 재방문 디렉토리는 완전 무출력
+- fresh(경과 < `injection.ctxTtlTurns`, 기본 5턴) → 무출력; stale → soft ctx
+  재전달; 미전달 → Read는 ctx, mutation은 deny(+본문) 후 재시도 통과
+- 게이트 면제: INTENT/DETAIL/criteria.md 대상(문서 위생은 validator 전담),
+  owner INTENT 부재, spike 모드. INTENT.md 자기-작성은 전달로 마킹
+- 전달 단위는 소유 fractal(chain 상향 첫 INTENT.md 보유 dir); 키는 `{boundary}\t{relDir}`;
+  서브 스코프 분리는 판별 transcript_path 제공 시 자동 활성 (현행 미제공 → 세션 공유, DETAIL 참조)
+- `GUIDE_BLOCK`은 스코프당 1회, 첫 ctx(또는 첫 deny reason)에 선행
 
 ## Boundaries
 
 ### Always do
 
-- `buildChain` 결과의 boundary를 즉시 캐시해 이후 PreToolUse 호출에서 chain 재계산 회피
-- 경로는 POSIX 슬래시(`/`)로 정규화 (Windows `\` 변환)
+- boundary는 즉시 캐시해 chain 재계산 회피; 경로는 POSIX 슬래시로 정규화
+- deny reason에는 항상 재시도 안내와 INTENT 본문을 포함 (bare deny 금지)
 
 ### Ask first
 
-- `[filid:map]` 포맷 변경 (구문 파서가 읽는 계약)
-- `GUIDE_BLOCK` 주입 빈도를 세션당 1회 외로 변경
+- `[filid:ctx]`/`[filid:map]`/`[filid:gate]` 포맷 변경 (에이전트가 읽는 계약)
+- TTL 기본값(5턴) 변경, 게이트 면제 목록 확장
 
 ### Never do
 
-- 파일 write 수행 (`continue: true`만 반환하는 읽기 전용 훅)
-- boundary 캐시를 세션 간 공유 (session_id 격리 필수)
+- stale/fresh 상태에서 deny 발화 (deny는 미전달 mutation 전용)
+- 프로젝트 파일 write (캐시 파일 외 부수효과 금지)
+- 전달 기록을 세션 epoch 간 공유 (compact/clear 리셋 필수)
 
 ## Dependencies
 
-- `../../core/infra/cacheManager/` (`readBoundary`, `writeBoundary`, `readFractalMap`, `writeFractalMap`, `hasGuideInjected`, `markGuideInjected`)
-- `../../core/tree/boundaryDetector/` (`buildChain`)
-- `../../constants/agentContext.js` (`GUIDE_BLOCK`), `../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)
-- `../shared/`, `../utils/validateCwd.js`, `./utils/compressPaths.js`
+- `../../core/infra/cacheManager/` (`commitVisit`, `readFractalMap`, `readDelivered`, `readTurn`), `../../core/tree/boundaryDetector/` (`buildChain`)
+- `../shared/`, `../utils/` (`validateCwd`, `readHookConfig`, `visitScope`), `../../constants/agentContext.js`
