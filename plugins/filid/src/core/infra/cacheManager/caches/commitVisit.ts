@@ -1,5 +1,6 @@
 import { mkdirSync } from 'node:fs';
 
+import { LOCK_SUFFIX } from './constants/cacheFiles.js';
 import { acquireLock, releaseLock } from './fmapLock.js';
 import { readFractalMap } from './readFractalMap.js';
 import { resolveDeliveredState } from './resolveDeliveredState.js';
@@ -61,7 +62,7 @@ export function commitVisit(
   const cacheDir = getCacheDir(cwd);
   mkdirSync(cacheDir, { recursive: true });
   const filePath = fcaMapPath(cwd, scope);
-  const lockPath = `${filePath}.lock`;
+  const lockPath = `${filePath}${LOCK_SUFFIX}`;
   const lockToken = acquireLock(lockPath);
   try {
     const map = readFractalMap(cwd, scope);

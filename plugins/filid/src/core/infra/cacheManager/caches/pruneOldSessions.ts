@@ -6,6 +6,7 @@ import {
   SESSION_TTL_MS,
 } from '../../../../constants/infraDefaults.js';
 
+import { CACHE_PREFIX } from './constants/cacheFiles.js';
 import { getCacheDir } from './utils/getCacheDir.js';
 
 /**
@@ -20,7 +21,9 @@ export function pruneOldSessions(cwd: string): void {
   try {
     const dir = getCacheDir(cwd);
     const files = readdirSync(dir);
-    const sessionFiles = files.filter((f) => f.startsWith('session-context-'));
+    const sessionFiles = files.filter((f) =>
+      f.startsWith(CACHE_PREFIX.SESSION_CONTEXT),
+    );
     if (sessionFiles.length <= MAX_SESSION_FILES_BEFORE_PRUNE) return;
     const now = Date.now();
     for (const file of sessionFiles) {
@@ -30,15 +33,15 @@ export function pruneOldSessions(cwd: string): void {
           unlinkSync(fp);
           // also remove paired cache files (aligned with removeSessionFiles);
           // fmap uses a prefix match to catch subagent-scoped map files too
-          const hash = file.replace('session-context-', '');
+          const hash = file.replace(CACHE_PREFIX.SESSION_CONTEXT, '');
           const paired = [
-            join(dir, `prompt-context-${hash}`),
-            join(dir, `guide-${hash}`),
-            join(dir, `boundary-${hash}`),
-            join(dir, `delivered-${hash}.json`),
-            join(dir, `turn-${hash}`),
+            join(dir, `${CACHE_PREFIX.PROMPT_CONTEXT}${hash}`),
+            join(dir, `${CACHE_PREFIX.GUIDE}${hash}`),
+            join(dir, `${CACHE_PREFIX.BOUNDARY}${hash}`),
+            join(dir, `${CACHE_PREFIX.DELIVERED}${hash}.json`),
+            join(dir, `${CACHE_PREFIX.TURN}${hash}`),
             ...files
-              .filter((f) => f.startsWith(`fmap-${hash}`))
+              .filter((f) => f.startsWith(`${CACHE_PREFIX.FMAP}${hash}`))
               .map((f) => join(dir, f)),
           ];
           for (const pairedFile of paired)

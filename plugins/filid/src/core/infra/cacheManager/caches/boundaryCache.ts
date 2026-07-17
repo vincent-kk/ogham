@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
 
+import { CACHE_PREFIX } from './constants/cacheFiles.js';
 import { getCacheDir, sessionIdHash } from './sessionCache.js';
 
 const log = createLogger('cache');
@@ -18,7 +19,7 @@ export function readBoundary(
 ): string | null {
   const cacheDir = getCacheDir(cwd);
   const hash = sessionIdHash(sessionId);
-  const filePath = join(cacheDir, `boundary-${hash}`);
+  const filePath = join(cacheDir, `${CACHE_PREFIX.BOUNDARY}${hash}`);
   try {
     const data = JSON.parse(readFileSync(filePath, 'utf-8'));
     return data[dir] ?? null;
@@ -44,7 +45,7 @@ export function writeBoundary(
   const cacheDir = getCacheDir(cwd);
   mkdirSync(cacheDir, { recursive: true });
   const hash = sessionIdHash(sessionId);
-  const filePath = join(cacheDir, `boundary-${hash}`);
+  const filePath = join(cacheDir, `${CACHE_PREFIX.BOUNDARY}${hash}`);
   let data: Record<string, string> = {};
   try {
     data = JSON.parse(readFileSync(filePath, 'utf-8'));

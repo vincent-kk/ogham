@@ -1,5 +1,7 @@
 import { join } from 'node:path';
 
+import { CACHE_PREFIX, SUBSCOPE_INFIX } from '../constants/cacheFiles.js';
+
 import { getCacheDir } from './getCacheDir.js';
 import { sessionIdHash } from './sessionIdHash.js';
 
@@ -23,7 +25,7 @@ export interface VisitScope {
 export function fcaMapPath(cwd: string, scope: VisitScope): string {
   const hash = sessionIdHash(scope.sessionId);
   const name = scope.sub
-    ? `fmap-${hash}-sub-${sessionIdHash(scope.sub)}.json`
-    : `fmap-${hash}.json`;
+    ? `${CACHE_PREFIX.FMAP}${hash}${SUBSCOPE_INFIX}${sessionIdHash(scope.sub)}.json`
+    : `${CACHE_PREFIX.FMAP}${hash}.json`;
   return join(getCacheDir(cwd), name);
 }

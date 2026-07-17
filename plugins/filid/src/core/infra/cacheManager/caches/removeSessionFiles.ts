@@ -1,6 +1,7 @@
 import { unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { CACHE_PREFIX } from './constants/cacheFiles.js';
 import { removeFractalMap } from './removeFractalMap.js';
 import { getCacheDir } from './utils/getCacheDir.js';
 import { sessionIdHash } from './utils/sessionIdHash.js';
@@ -18,12 +19,12 @@ export function removeSessionFiles(sessionId: string, cwd: string): void {
   const cacheDir = getCacheDir(cwd);
   const hash = sessionIdHash(sessionId);
   const names = [
-    `session-context-${hash}`,
-    `prompt-context-${hash}`,
-    `boundary-${hash}`,
-    `guide-${hash}`,
-    `delivered-${hash}.json`,
-    `turn-${hash}`,
+    `${CACHE_PREFIX.SESSION_CONTEXT}${hash}`,
+    `${CACHE_PREFIX.PROMPT_CONTEXT}${hash}`,
+    `${CACHE_PREFIX.BOUNDARY}${hash}`,
+    `${CACHE_PREFIX.GUIDE}${hash}`,
+    `${CACHE_PREFIX.DELIVERED}${hash}.json`,
+    `${CACHE_PREFIX.TURN}${hash}`,
   ];
   for (const name of names)
     try {

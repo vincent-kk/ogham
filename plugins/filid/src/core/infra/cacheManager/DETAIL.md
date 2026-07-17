@@ -87,10 +87,10 @@ ctx/map 중복 방출을 직렬화로 제거한다.
 
 ## Intentional Cross-Concern Coupling
 
-`pruneOldSessions`와 `removeSessionFiles`는 다른 캐시 파일의 파일명 규약을
-의도적으로 알고 있다 (`prompt-context-{h}`, `guide-{h}`, `boundary-{h}`,
-`fmap-{h}*.json`, `delivered-{h}.json`, `turn-{h}`). 세션 정리 시 모든 연관
-파일을 함께 제거하기 위한 설계이며, 이 패턴 변경은 Ask-first 경계를 적용한다.
+`pruneOldSessions`와 `removeSessionFiles`는 세션의 모든 연관 캐시 파일을 함께
+제거하기 위해 파일명 규약을 공유한다. prefix 리터럴은
+`caches/constants/cacheFiles.ts`의 `CACHE_PREFIX`가 단일 출처이며 양쪽이 동일
+상수를 참조한다 — 세션 스코프 파일 집합 자체의 변경은 Ask-first 경계를 적용한다.
 `removeSessionFiles`는 setup 훅의 compact/clear epoch 리셋 경로에서도 재사용된다
 (boundary까지 제거되지만 파일시스템 사실이라 재계산 비용만 지불, 정합성 무해).
 

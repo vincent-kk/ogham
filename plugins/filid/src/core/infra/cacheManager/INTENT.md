@@ -11,6 +11,7 @@
 | 파일                           | 담당                                                                                                                                        |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `caches/utils/`                | 도메인 중립 유틸 organ: cwdHash·sessionIdHash·getCacheDir·getPluginRoot·fcaMapPath·turnPath·ownerPath·deliveredPath·writeAtomic·canonicalOf |
+| `caches/constants/`            | 캐시 파일명 규약 상수 organ: CACHE_PREFIX·RUN_HASH_PREFIX·MODE_AUDIT_FILE (prune/remove 단일 출처)                                          |
 | `caches/sessionCache.ts`       | 세션 마커·prune throttle 게이트 파사드 (util 재수출)                                                                                        |
 | `caches/promptContextCache.ts` | 프롬프트 컨텍스트 읽기/쓰기/존재확인                                                                                                        |
 | `caches/boundaryCache.ts`      | 경계 캐시 읽기/쓰기                                                                                                                         |

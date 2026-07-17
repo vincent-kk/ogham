@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
 
+import { CACHE_PREFIX } from './constants/cacheFiles.js';
 import { getCacheDir, sessionIdHash } from './sessionCache.js';
 
 const log = createLogger('cache');
@@ -14,7 +15,7 @@ export function readPromptContext(
   const cacheDir = getCacheDir(cwd);
   const contextFile = join(
     cacheDir,
-    `prompt-context-${sessionIdHash(sessionId)}`,
+    `${CACHE_PREFIX.PROMPT_CONTEXT}${sessionIdHash(sessionId)}`,
   );
   try {
     if (!existsSync(contextFile)) return null;
