@@ -82,26 +82,35 @@ export {
 
 // infra
 export {
+  commitVisit,
   cwdHash,
   getCacheDir,
   getLastRunHash,
   hasPromptContext,
+  incrementTurn,
   isFirstInSession,
   markSessionInjected,
   pruneOldSessions,
   pruneStaleCacheDirs,
   readBoundary,
+  readDelivered,
   readFractalMap,
   readPromptContext,
+  readTurn,
   removeSessionFiles,
   removeFractalMap,
   saveRunHash,
   sessionIdHash,
   writeBoundary,
-  writeFractalMap,
   writePromptContext,
 } from './infra/cacheManager/cacheManager.js';
-export type { FractalMap } from './infra/cacheManager/cacheManager.js';
+export type {
+  DeliveredState,
+  FractalMap,
+  VisitArgs,
+  VisitDecision,
+  VisitScope,
+} from './infra/cacheManager/cacheManager.js';
 export { computeProjectHash } from './infra/projectHash/projectHash.js';
 export { ChangeQueue } from './infra/changeQueue/changeQueue.js';
 export type { ChangeRecord } from './infra/changeQueue/changeQueue.js';

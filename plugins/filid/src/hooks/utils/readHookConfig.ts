@@ -6,6 +6,7 @@ import { findConfigRoot } from './findConfigRoot.js';
 export interface HookConfig {
   language?: string;
   rules?: Record<string, { enabled?: boolean } | undefined>;
+  injection?: { ctxTtlTurns?: number };
 }
 
 /**
@@ -41,6 +42,15 @@ export function readHookConfig(cwd: string): HookConfig | null {
       !Array.isArray(raw.rules)
     )
       config.rules = raw.rules as HookConfig['rules'];
+    if (
+      typeof raw.injection === 'object' &&
+      raw.injection !== null &&
+      !Array.isArray(raw.injection)
+    ) {
+      const ttl = (raw.injection as Record<string, unknown>).ctxTtlTurns;
+      if (typeof ttl === 'number' && Number.isFinite(ttl) && ttl >= 1)
+        config.injection = { ctxTtlTurns: Math.floor(ttl) };
+    }
     return config;
   } catch {
     return null;

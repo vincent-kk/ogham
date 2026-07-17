@@ -1,31 +1,34 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
-import { getCacheDir, sessionIdHash } from './sessionCache.js';
+import type { VisitScope } from './utils/fcaMapPath.js';
+import { fcaMapPath } from './utils/fcaMapPath.js';
 
 /**
- * In-memory fractal map per session.
+ * Per-turn visit map for one scope.
  *
- * Entries are `{boundaryAbsPath}\t{relDir}` composite keys — relDir alone
- * collides across monorepo packages (both `plugins/a/src` and `plugins/b/src`
- * reduce to `src`). Display consumers strip everything through the tab.
+ * `reads` entries are `{boundaryAbsPath}\t{relDir}` composite keys — relDir
+ * alone collides across monorepo packages. `lastMap` is the canonical form of
+ * the last emitted [filid:map] (emission dedup, last-writer-wins).
+ * `delivered`/`guideShown` exist only in subagent scopes, whose delivery
+ * record lives and dies with the turn-scoped map file itself.
  */
 export interface FractalMap {
-  reads: string[]; // accessed directories (order preserved, no duplicates)
-  intents: string[]; // directories with INTENT.md (dedup dual-use)
-  details: string[]; // directories with DETAIL.md
+  reads: string[];
+  lastMap?: string;
+  delivered?: Record<string, true>;
+  guideShown?: boolean;
 }
 
-/**
- * Read fractal map from cache.
- */
-export function readFractalMap(cwd: string, sessionId: string): FractalMap {
-  const cacheDir = getCacheDir(cwd);
-  const hash = sessionIdHash(sessionId);
-  const filePath = join(cacheDir, `fmap-${hash}.json`);
+/** Read the scope's fractal map (advisory outside `commitVisit`). */
+export function readFractalMap(cwd: string, scope: VisitScope): FractalMap {
   try {
-    return JSON.parse(readFileSync(filePath, 'utf-8'));
+    const parsed: unknown = JSON.parse(
+      readFileSync(fcaMapPath(cwd, scope), 'utf-8'),
+    );
+    if (typeof parsed !== 'object' || parsed === null) return { reads: [] };
+    const raw = parsed as Partial<FractalMap>;
+    return { ...raw, reads: Array.isArray(raw.reads) ? raw.reads : [] };
   } catch {
-    return { reads: [], intents: [], details: [] };
+    return { reads: [] };
   }
 }

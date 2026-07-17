@@ -1,4 +1,7 @@
-import { removeFractalMap } from '../../core/infra/cacheManager/cacheManager.js';
+import {
+  incrementTurn,
+  removeFractalMap,
+} from '../../core/infra/cacheManager/cacheManager.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 import { isFcaProject } from '../shared/shared.js';
 import { validateCwd } from '../utils/validateCwd.js';
@@ -9,7 +12,8 @@ import { injectContext } from './utils/injectContext.js';
 /**
  * UserPromptSubmit hook orchestrator.
  *
- * 1. Per-turn fmap reset (so INTENT.md is re-injected on next PreToolUse).
+ * 1. Per-turn fmap reset (incl. subagent-scoped maps) + turn-counter
+ *    increment (the delivery-TTL clock consumed by the visit pipeline).
  * 2. Session-first FCA-AI rules pointer injection.
  * 3. Spike banner — cache-EXEMPT, evaluated fresh on every prompt (mode can
  *    flip mid-session via checkout; a stale banner is a brain-split).
@@ -26,6 +30,7 @@ export function handleUserPromptSubmit(
   if (cwd === null || !isFcaProject(cwd)) return { continue: true };
 
   removeFractalMap(cwd, input.session_id);
+  incrementTurn(cwd, input.session_id);
   const base = injectContext(cwd, input.session_id);
 
   const banner = buildSpikeBanner(cwd);

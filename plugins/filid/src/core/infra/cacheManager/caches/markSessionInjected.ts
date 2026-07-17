@@ -3,9 +3,9 @@ import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
 
-import { getCacheDir } from './getCacheDir.js';
 import { pruneOldSessions } from './pruneOldSessions.js';
-import { sessionIdHash } from './sessionIdHash.js';
+import { getCacheDir } from './utils/getCacheDir.js';
+import { sessionIdHash } from './utils/sessionIdHash.js';
 
 const log = createLogger('cache');
 

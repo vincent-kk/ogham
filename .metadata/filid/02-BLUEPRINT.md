@@ -216,7 +216,9 @@ interface ChainResult {
 ```
 getCacheDir(cwd) → string
 readBoundary/writeBoundary(cwd, sessionId, dir, ...) → string|null/void
-readFractalMap/writeFractalMap/removeFractalMap(cwd, sessionId, ...) → FractalMap/void
+readFractalMap(cwd, scope) / removeFractalMap(cwd, sessionId) → FractalMap/void
+commitVisit(cwd, scope, args) → VisitDecision (locked visit transaction)
+readDelivered/readTurn/incrementTurn(cwd, sessionId) → delivery/turn records
 hasGuideInjected/markGuideInjected(sessionId, cwd) → boolean/void
 pruneOldSessions(cwd) → void
 ```

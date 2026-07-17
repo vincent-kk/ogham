@@ -2,7 +2,7 @@
 
 ## Purpose
 
-PreToolUse 이벤트를 받아 `intentInjector` + `preToolValidator` + `structureGuard`를 조합 실행하고 결과를 단일 `HookOutput`으로 머지한다. 비-FCA 프로젝트는 최상단 게이트에서 전부 스킵(opt-in 원칙). Read는 intent 주입만, Write/Edit은 방문 기록(`recordWriteVisit`) 후 검증·구조 가드·spike 모드 게이트·mode audit까지 실행한다.
+PreToolUse 이벤트를 받아 `intentInjector` + `preToolValidator` + `structureGuard`를 조합 실행하고 결과를 단일 `HookOutput`으로 머지한다. 비-FCA 프로젝트는 최상단 게이트에서 전부 스킵(opt-in 원칙). Read | Write | Edit 모두 방문 파이프라인(`processVisit`)을 최우선 통과하며, Write/Edit은 이어서 검증·구조 가드·spike 모드 게이트·mode audit까지 실행한다. 방문 게이트가 deny(미전달 mutation)를 반환하면 즉시 단락 반환 — 재시도가 나머지 경로를 정상 실행한다.
 
 ## Structure
 
@@ -14,11 +14,11 @@ PreToolUse 이벤트를 받아 `intentInjector` + `preToolValidator` + `structur
 ## Conventions
 
 - 실행 순서 (`validateCwd`→`isFcaProject` 게이트 통과 후):
-  1. `injectIntent` (Read)
-  2. Write/Edit이면 `recordWriteVisit` → `isDetailMd`/`isCriteriaMd` 판정 후 기존 content 읽기 → spike 판정(`readCurrentBranch`+`isSpikeBranch`, 브랜치명 단일 권위, 매 이벤트 fresh) → `validatePreToolUse`
+  1. spike 판정(`readCurrentBranch`+`isSpikeBranch`, 브랜치명 단일 권위, 매 이벤트 fresh) → `processVisit(input, spikeMode)` — Read/Write/Edit 공통, 게이트 deny면 즉시 반환
+  2. Write/Edit이면 `isDetailMd`/`isCriteriaMd` 판정 후 기존 content 읽기 → `validatePreToolUse`
   3. Write/Edit이면 `guardStructure`
   4. 문서 계약 대상이면 머지 결과를 `auditDocDecision`으로 기록
-- spike 면제는 INTENT/DETAIL 위생 deny 한정; criteria.md는 항상 검증
+- spike 면제는 INTENT/DETAIL 위생 deny + 방문 게이트 한정; criteria.md는 항상 검증
 - `mergeResults` 규칙:
   - `permissionDecision`: 하나라도 deny면 deny (AND); reason은 `\n\n` concat
   - `additionalContext`: 비어 있지 않은 문자열을 `\n\n` concat (deny와 공존 가능)

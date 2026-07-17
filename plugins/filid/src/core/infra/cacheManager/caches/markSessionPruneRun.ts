@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { PRUNE_MARKER_FILENAME } from '../../../../constants/infraDefaults.js';
 import { createLogger } from '../../../../lib/logger.js';
 
-import { getCacheDir } from './getCacheDir.js';
+import { getCacheDir } from './utils/getCacheDir.js';
 
 const log = createLogger('cache');
 

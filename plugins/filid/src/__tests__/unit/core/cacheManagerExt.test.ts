@@ -5,19 +5,34 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  commitVisit,
   getCacheDir,
   hasGuideInjected,
+  incrementTurn,
   markGuideInjected,
   readBoundary,
+  readDelivered,
   readFractalMap,
+  readTurn,
   removeFractalMap,
   removeSessionFiles,
   sessionIdHash,
   writeBoundary,
-  writeFractalMap,
 } from '../../../core/infra/cacheManager/cacheManager.js';
 
 let tempDir: string;
+
+const record = (cwd: string, sessionId: string, readKey: string) =>
+  commitVisit(
+    cwd,
+    { sessionId },
+    {
+      readKey,
+      ownerKey: null,
+      ttlTurns: 5,
+      gateEligible: false,
+    },
+  );
 
 beforeEach(() => {
   tempDir = join(
@@ -52,68 +67,67 @@ describe('cache-manager boundary/fmap extensions', () => {
     expect(result).toBe(boundaryPath);
   });
 
-  // Test 2: writeFractalMap → readFractalMap roundtrip
-  it('writeFractalMap → readFractalMap: returns written map', () => {
+  // Test 2: visit records accumulate and read back
+  it('commitVisit → readFractalMap: reads accumulate in order', () => {
     const cwd = '/proj/workspace';
     const sessionId = 'session-002';
-    const map = {
-      reads: ['src/payments', 'src/auth'],
-      intents: ['src/payments'],
-      details: [],
-    };
 
-    writeFractalMap(cwd, sessionId, map);
-    const result = readFractalMap(cwd, sessionId);
+    record(cwd, sessionId, 'src/payments');
+    record(cwd, sessionId, 'src/auth');
 
-    expect(result).toEqual(map);
+    const result = readFractalMap(cwd, { sessionId });
+    expect(result.reads).toEqual(['src/payments', 'src/auth']);
+    expect(result.lastMap).toBe(['src/auth', 'src/payments'].join('\n'));
   });
 
-  // Test 3: fmap intents dedup — roundtrip preserves data
-  it('writeFractalMap → readFractalMap: preserves intents and details arrays', () => {
+  // Test 3: delivery + turn survive across visits (session-epoch records)
+  it('delivery stamps persist per session and reset with removeSessionFiles', () => {
     const cwd = '/proj/workspace';
     const sessionId = 'session-003';
-    const map = {
-      reads: ['src/checkout', 'src/refund', 'src/auth'],
-      intents: ['src/checkout', 'src/auth'],
-      details: ['src/checkout'],
-    };
+    incrementTurn(cwd, sessionId);
+    commitVisit(
+      cwd,
+      { sessionId },
+      {
+        readKey: 'src/checkout',
+        ownerKey: 'src/checkout',
+        ttlTurns: 5,
+        gateEligible: false,
+      },
+    );
 
-    writeFractalMap(cwd, sessionId, map);
-    const result = readFractalMap(cwd, sessionId);
-
-    expect(result.reads).toHaveLength(3);
-    expect(result.intents).toHaveLength(2);
-    expect(result.details).toHaveLength(1);
-    expect(result.intents).toContain('src/checkout');
-    expect(result.intents).toContain('src/auth');
+    expect(readDelivered(cwd, sessionId)).toEqual({ 'src/checkout': 1 });
+    expect(readTurn(cwd, sessionId)).toBe(1);
   });
 
-  // Test 4: removeSessionFiles cleanup
-  it('removeSessionFiles: removes boundary and fmap files', () => {
+  // Test 4: removeSessionFiles cleanup (boundary, fmap, delivered, turn)
+  it('removeSessionFiles: removes boundary, fmap, delivered, and turn files', () => {
     const cwd = '/proj/workspace';
     const sessionId = 'session-004';
     const dir = '/proj/workspace/src';
 
     writeBoundary(cwd, sessionId, dir, cwd);
-    writeFractalMap(cwd, sessionId, {
-      reads: ['src'],
-      intents: [],
-      details: [],
-    });
+    incrementTurn(cwd, sessionId);
+    commitVisit(
+      cwd,
+      { sessionId },
+      {
+        readKey: 'src',
+        ownerKey: 'src',
+        ttlTurns: 5,
+        gateEligible: false,
+      },
+    );
 
-    // Verify files were written
     expect(readBoundary(cwd, sessionId, dir)).toBe(cwd);
-    expect(readFractalMap(cwd, sessionId).reads).toEqual(['src']);
+    expect(readFractalMap(cwd, { sessionId }).reads).toEqual(['src']);
 
     removeSessionFiles(sessionId, cwd);
 
-    // After cleanup, reads should return defaults
     expect(readBoundary(cwd, sessionId, dir)).toBeNull();
-    expect(readFractalMap(cwd, sessionId)).toEqual({
-      reads: [],
-      intents: [],
-      details: [],
-    });
+    expect(readFractalMap(cwd, { sessionId })).toEqual({ reads: [] });
+    expect(readDelivered(cwd, sessionId)).toEqual({});
+    expect(readTurn(cwd, sessionId)).toBe(0);
   });
 
   // Test 5: Session isolation — different sessionIds do not share cache
@@ -124,17 +138,11 @@ describe('cache-manager boundary/fmap extensions', () => {
     const dir = '/proj/workspace/src';
 
     writeBoundary(cwd, sessionA, dir, '/proj/workspace');
-    writeFractalMap(cwd, sessionA, {
-      reads: ['src'],
-      intents: ['src'],
-      details: [],
-    });
+    record(cwd, sessionA, 'src');
 
     expect(readBoundary(cwd, sessionB, dir)).toBeNull();
-    expect(readFractalMap(cwd, sessionB)).toEqual({
+    expect(readFractalMap(cwd, { sessionId: sessionB })).toEqual({
       reads: [],
-      intents: [],
-      details: [],
     });
   });
 
@@ -195,19 +203,17 @@ describe('cache-manager boundary/fmap extensions', () => {
     const cwd = '/proj/workspace';
     const sessionId = 'session-corrupt-fmap';
 
-    // Write a valid map first to create the file
-    writeFractalMap(cwd, sessionId, { reads: ['x'], intents: [], details: [] });
+    record(cwd, sessionId, 'x');
     // Overwrite with garbage
     const cacheDir = getCacheDir(cwd);
     const hash = sessionIdHash(sessionId);
     writeFileSync(`${cacheDir}/fmap-${hash}.json`, '{BROKEN');
 
-    const result = readFractalMap(cwd, sessionId);
-    expect(result).toEqual({ reads: [], intents: [], details: [] });
+    expect(readFractalMap(cwd, { sessionId })).toEqual({ reads: [] });
   });
 
-  // Test 11: readFractalMap with partial JSON (missing keys)
-  it('readFractalMap: partial JSON (missing intents/details) → returns as-is', () => {
+  // Test 11: readFractalMap with partial JSON (missing reads)
+  it('readFractalMap: partial JSON → reads defaulted, extras preserved', () => {
     const cwd = '/proj/workspace';
     const sessionId = 'session-partial-fmap';
 
@@ -216,38 +222,21 @@ describe('cache-manager boundary/fmap extensions', () => {
     const hash = sessionIdHash(sessionId);
     writeFileSync(
       `${cacheDir}/fmap-${hash}.json`,
-      JSON.stringify({ reads: ['a'] }),
+      JSON.stringify({ lastMap: 'a' }),
     );
 
-    const result = readFractalMap(cwd, sessionId);
-    expect(result.reads).toEqual(['a']);
-    // Missing keys remain undefined (not defaulted)
-    expect(result.intents).toBeUndefined();
+    const result = readFractalMap(cwd, { sessionId });
+    expect(result.reads).toEqual([]);
+    expect(result.lastMap).toBe('a');
   });
 
-  // Test 12: writeFractalMap union-merge (concurrent hook processes must not
-  // lose each other's visit records — see fractalMapMerge.test.ts)
-  it('writeFractalMap: second write union-merges with the on-disk map', () => {
+  // Test 12: turn counter lifecycle
+  it('turn counter: starts at 0, increments, isolated per session', () => {
     const cwd = '/proj/workspace';
-    const sessionId = 'session-merge';
-
-    writeFractalMap(cwd, sessionId, {
-      reads: ['old'],
-      intents: ['old'],
-      details: ['old'],
-    });
-    writeFractalMap(cwd, sessionId, {
-      reads: ['new'],
-      intents: [],
-      details: [],
-    });
-
-    const result = readFractalMap(cwd, sessionId);
-    expect(result).toEqual({
-      reads: ['old', 'new'],
-      intents: ['old'],
-      details: ['old'],
-    });
+    expect(readTurn(cwd, 'session-t1')).toBe(0);
+    expect(incrementTurn(cwd, 'session-t1')).toBe(1);
+    expect(incrementTurn(cwd, 'session-t1')).toBe(2);
+    expect(readTurn(cwd, 'session-t2')).toBe(0);
   });
 
   // Test 13: writeBoundary with empty string dir key
@@ -268,23 +257,15 @@ describe('cache-manager boundary/fmap extensions', () => {
 
     // Part 1: removeFractalMap deletes fmap, readFractalMap returns empty after
     const sid1 = 'session-rm-1';
-    writeFractalMap(cwd, sid1, {
-      reads: ['src/a'],
-      intents: ['src/a'],
-      details: [],
-    });
+    record(cwd, sid1, 'src/a');
     removeFractalMap(cwd, sid1);
-    expect(readFractalMap(cwd, sid1)).toEqual({
-      reads: [],
-      intents: [],
-      details: [],
-    });
+    expect(readFractalMap(cwd, { sessionId: sid1 })).toEqual({ reads: [] });
 
     // Part 2: removeFractalMap does NOT affect boundary cache
     const sid2 = 'session-rm-2';
     const dir = '/proj/workspace/src';
     writeBoundary(cwd, sid2, dir, cwd);
-    writeFractalMap(cwd, sid2, { reads: ['src'], intents: [], details: [] });
+    record(cwd, sid2, 'src');
     removeFractalMap(cwd, sid2);
     expect(readBoundary(cwd, sid2, dir)).toBe(cwd); // boundary survives
 
