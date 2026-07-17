@@ -10,6 +10,13 @@ export interface HookBaseInput {
   session_id: string;
   /** Hook event name */
   hook_event_name: string;
+  /**
+   * Transcript file of the agent issuing the event. Subagent tool calls point
+   * into `<session>/subagents/agent-*.jsonl`, which is how visit scopes are
+   * separated; absent on hosts that do not provide it (scope falls back to
+   * session_id, i.e. the shared behavior).
+   */
+  transcript_path?: string;
 }
 
 /** PreToolUse hook input */
@@ -85,6 +92,8 @@ export interface HookOutput {
 /** SessionStart hook input */
 export interface SessionStartInput extends HookBaseInput {
   hook_event_name: 'SessionStart';
+  /** Start reason: 'startup' | 'resume' | 'clear' | 'compact' (parsed JSON — unknown values no-op). */
+  source?: string;
 }
 
 /** Union of all hook input types */

@@ -28,15 +28,22 @@ export function pruneOldSessions(cwd: string): void {
       try {
         if (now - statSync(fp).mtimeMs > SESSION_TTL_MS) {
           unlinkSync(fp);
-          // also remove paired cache files (aligned with removeSessionFiles)
+          // also remove paired cache files (aligned with removeSessionFiles);
+          // fmap uses a prefix match to catch subagent-scoped map files too
           const hash = file.replace('session-context-', '');
-          const contextFp = join(dir, `prompt-context-${hash}`);
-          const guideFp = join(dir, `guide-${hash}`);
-          const boundaryFp = join(dir, `boundary-${hash}`);
-          const fmapFp = join(dir, `fmap-${hash}.json`);
-          for (const paired of [contextFp, guideFp, boundaryFp, fmapFp])
+          const paired = [
+            join(dir, `prompt-context-${hash}`),
+            join(dir, `guide-${hash}`),
+            join(dir, `boundary-${hash}`),
+            join(dir, `delivered-${hash}.json`),
+            join(dir, `turn-${hash}`),
+            ...files
+              .filter((f) => f.startsWith(`fmap-${hash}`))
+              .map((f) => join(dir, f)),
+          ];
+          for (const pairedFile of paired)
             try {
-              if (existsSync(paired)) unlinkSync(paired);
+              if (existsSync(pairedFile)) unlinkSync(pairedFile);
             } catch {
               // ignore
             }
