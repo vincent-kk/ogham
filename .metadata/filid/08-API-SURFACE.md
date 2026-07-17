@@ -451,10 +451,10 @@ function mergeResults(results: HookOutput[]): HookOutput;
 ### intent-injector
 
 ```typescript
-function injectIntent(input: PreToolUseInput): HookOutput;
+function processVisit(input: PreToolUseInput, spikeMode?: boolean): HookOutput;
 ```
 
-INTENT.md/DETAIL.md 파일 수정 전 관련 컨텍스트를 주입한다.
+Read | Write | Edit 공용 방문 파이프라인. 전달 상태(미전달/stale/fresh)에 따라 [filid:ctx]를 주입하고, 미전달 모듈의 mutation은 deny reason에 규칙을 실어 차단-전달한다.
 
 ```typescript
 function compressPaths(paths: string[]): string;
@@ -617,10 +617,10 @@ function readFractalMap(cwd: string): FractalMap | null;
 캐시에서 프랙탈 맵을 읽는다.
 
 ```typescript
-function writeFractalMap(cwd: string, map: FractalMap): void;
+function commitVisit(cwd: string, scope: VisitScope, args: VisitArgs): VisitDecision;
 ```
 
-프랙탈 맵을 캐시에 저장한다.
+방문 판정·기록의 원자 트랜잭션 — 전달 상태 판정, 읽기 병합, lastMap CAS, guide 1회를 lock 안에서 수행한다.
 
 ```typescript
 function computeProjectHash(projectRoot: string): Promise<string>;
