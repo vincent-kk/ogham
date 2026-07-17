@@ -75,7 +75,7 @@ export function commitVisit(
   mkdirSync(cacheDir, { recursive: true });
   const filePath = fmapPath(cwd, scope);
   const lockPath = `${filePath}.lock`;
-  const locked = acquireLock(lockPath);
+  const lockToken = acquireLock(lockPath);
   try {
     const map = readFractalMap(cwd, scope);
 
@@ -114,6 +114,6 @@ export function commitVisit(
 
     return { deliveredState, mapChanged, reads: map.reads, guideNeeded };
   } finally {
-    releaseLock(lockPath, locked);
+    releaseLock(lockPath, lockToken);
   }
 }
