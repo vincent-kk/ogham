@@ -9,7 +9,7 @@
       "required": true,
       "title": "FCA-AI Architecture Rules",
       "description": "Fractal Context Architecture rules: node types, structural rules, documentation constraints, and quality thresholds. Mandatory for every FCA-AI project.",
-      "templateHash": "eb16345f5bafdaabb7d7d9f1e32ea169cd1805e49b8d42a5ee529ddfb7505a83"
+      "templateHash": "fd8cdcf50c5ce44b14adfd4fc64076e4750f9a3fb7a499c227a26cb6f3c84db3"
     },
     {
       "id": "filid_reuse-first",
@@ -27,6 +27,22 @@
       "title": "Cognitive Discipline Rules",
       "description": "Epistemic standards that block LLM rationalization: evidence over confidence, anti-rationalization principles, and intellectual honesty requirements.",
       "templateHash": "0f3bb2a7ebbf62f5269a01ef1ee0cd766f7c518b08cf593b8b03fb14cc79f97e"
+    },
+    {
+      "id": "filid_test-validity",
+      "filename": "filid_test-validity.md",
+      "required": false,
+      "title": "Test Validity Rules",
+      "description": "Falsification contract for tests: fail-first verification, artifact-under-test checks, snapshot discipline, loud skips, and load-bearing fixes.",
+      "templateHash": "f81b889c125bbff21014389cd34b7e8c260a5af525e9d0455f0b71993d9ac643"
+    },
+    {
+      "id": "filid_context-efficiency",
+      "filename": "filid_context-efficiency.md",
+      "required": false,
+      "title": "Context Efficiency Rules",
+      "description": "Context budget discipline: generated artifacts are search-only, capture command output once, and never re-read unchanged file sections.",
+      "templateHash": "6c13006837b89ad0849322a9ea946d17533aadacd20172702ae180b669456f94"
     }
   ]
 }

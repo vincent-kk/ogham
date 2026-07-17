@@ -79,6 +79,9 @@ Fractal nodes MAY exist inside organ directories; traversal MUST re-classify sub
 
 - `index.ts` in fractal/hybrid nodes MUST be a pure barrel — re-export statements only.
 - MUST NOT contain direct function, class, constant, or type declarations.
+- Re-exports MUST be named. `export *` is a violation — it erases the symbol list
+  from the barrel (the public contract becomes invisible), invites circular imports,
+  and forces agents and indexers to open every re-exported file to trace one symbol.
 
 ```typescript
 // ALLOWED (pure barrel):
@@ -90,6 +93,9 @@ export function myFunction() {
   return 42;
 }
 export const MY_CONSTANT = 'value';
+
+// VIOLATION (wildcard re-export — contract hidden):
+export * from './my-function.js';
 ```
 
 - Does NOT apply to organ or pure-function nodes.
@@ -150,6 +156,11 @@ export const MY_CONSTANT = 'value';
   - `### Never do` — actions strictly prohibited in this module
 - Approaching 50 lines signals the module MUST be decomposed into smaller fractal nodes.
 - MUST NOT increase the limit; restructure the module instead.
+- `## Structure` SHOULD call out name traps when present (e.g., "entry point is
+  `cli.ts`, NOT `index.ts`") — one line that pre-empts the most expensive misread.
+- `## Conventions` SHOULD rank the module's tradeoff priorities when they exist
+  (e.g., "when making tradeoffs, in order: 1. correctness 2. throughput") —
+  a decision rule guides an agent further than any list of actions.
 - Section headings (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`,
   `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`) MUST remain in English — machine-readable anchors for the validator.
 - Descriptive content MUST follow the language specified by `[filid:lang]`; default to English if absent.
