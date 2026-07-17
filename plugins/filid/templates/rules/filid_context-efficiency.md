@@ -11,9 +11,12 @@ genuinely disoriented, one broad read beats three wrong guesses.
 
 **Build output is not source. Fix generators, not their output.**
 
-- Directories like `dist/`, `build/`, `out/`, `coverage/`, `.next/`,
-  `node_modules/`, lockfiles, and generated clients: search them to trace
-  a symbol, but do not read them wholesale, and never edit them.
+- Build output (`dist/`, `build/`, `out/`, `coverage/`, `.next/`, generated
+  clients): search to trace a symbol, do not read wholesale, never edit.
+- Installed dependencies and lockfiles are a different class. `node_modules/`
+  sources and type definitions are canonical references — read them when a
+  dependency contract is the question. Never hand-edit a lockfile; change
+  the manifest and regenerate through the package manager.
 - Stale build output read as source is a classic wrong-file edit: the
   "bug" you found may already be fixed upstream, and an edit made there
   disappears on the next build.
@@ -32,23 +35,32 @@ Ask yourself: "Would this file survive a clean build?"
 - Long or repeated diagnostics (build logs, dev-server output) belong in
   a file you can `grep` and `tail` — not in scrollback that is gone by
   the next step.
+- A capture goes stale the moment relevant code changes — re-run after
+  edits; judging a post-fix state from a pre-fix capture is self-deception.
+  Flaky-test investigation is a legitimate reason for repeated runs.
+- Write captures to a scratch/temp location, never the repository tree —
+  repo-root log files pollute `git status` and violate structure rules.
 
 Ask yourself: "Did I already have this output and throw it away?"
 
 ## 3. Do Not Re-Read the Unchanged
 
-**A file you read and did not change is still in your context.**
+**Re-reads are driven by change or doubt, not habit.**
 
-- Never re-read the same file section without intervening code changes.
+- Do not re-read a file section without a reason: an intervening code
+  change, an external modification, or genuine doubt about your recall.
+  After context compaction or a long session, re-reading before an edit
+  is correct, not waste.
 - Read the part of the file the task needs; a targeted range read plus a
   follow-up beats loading whole files by default.
 - Before a broad exploration, state what you are looking for; stop when
-  you find it.
+  you find it — after confirming it is the only candidate. A first grep
+  hit is not proof of uniqueness.
 
 Ask yourself: "What new fact will this read give me that the last one didn't?"
 
 ---
 
 **These rules are working if:** generated directories never appear in your
-edits, long outputs are captured to files and quoted from them, and no
-file section is read twice without a change in between.
+edits, long outputs are captured to files and quoted from them, and every
+re-read can name its reason.

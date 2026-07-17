@@ -5,21 +5,26 @@ when a test counts as verification. Distilled from merge-blocking review
 contracts in large agent-operated repositories and from execution-based
 benchmark methodology (fail-to-pass / pass-to-pass task construction).
 
-**Tradeoff:** These rules add one verification step per test. For throwaway
-spikes, use judgment — but a test you never saw fail proves nothing either way.
+**Tradeoff:** These rules add one verification step per test. They bind every
+test that lands in a commit; for throwaway spikes, remember only that a test
+you never saw fail proves nothing either way.
 
 ## 1. Fail First, Then Fix
 
 **A fix's test is valid only if it fails without the fix.**
 
-- Before finishing a bug fix, run its test against the pre-fix code (stash
-  the fix, or revert the change locally) and confirm it fails.
+- Before finishing a bug fix, run its test against the pre-fix code and
+  confirm it fails. Use a scoped mechanism — revert the change locally,
+  `git stash push -- <changed files>`, or a scratch worktree. Never bare
+  `git stash` on a tree holding unrelated work.
 - A test that passes both with and without the change verifies nothing.
   It is worse than no test: it certifies the bug as handled.
-- The failure must be for the right reason — the bug's symptom, not a
-  missing import, a wrong path, or a setup error.
-- Refactors invert the contract: the suite MUST pass unchanged before and
-  after. Pin current behavior with characterization tests BEFORE moving code.
+- The failure must be for the right reason — the bug's symptom, not an
+  unrelated setup error, wrong path, or missing import. When the fix adds
+  a new symbol, the expected pre-fix failure IS that symbol's absence.
+- Refactors invert the contract: existing tests MUST pass unmodified before
+  and after. Pin current behavior with added characterization tests BEFORE
+  moving code — adding tests is fine; editing existing assertions is not.
 
 Ask yourself: "Have I watched this test fail for the reason the bug exists?"
 
@@ -29,13 +34,16 @@ Ask yourself: "Have I watched this test fail for the reason the bug exists?"
 
 - Confirm the harness exercises your modified code — not a system-installed
   binary, a stale build output, or a cached dependency.
-- Use the repository's canonical wrapper commands (package scripts, `just`,
-  `make`). If a wrapper exists, invoking the underlying tool directly is a
-  violation: wrappers exist because the raw tool tests the wrong thing.
-- If unsure, break your change deliberately once — the suite must go red.
-  If it stays green, you are not testing what you changed.
+- Report results only from the repository's canonical wrapper commands
+  (package scripts, `just`, `make`) — wrappers often carry env vars, build
+  steps, and flags the raw tool lacks. Running the raw tool narrowly while
+  debugging is fine; a raw-tool pass is never the final evidence.
+- If unsure, break your change deliberately once in a unit-scoped check and
+  revert the probe immediately — the suite must go red. If it stays green,
+  you are not testing what you changed. Skip this probe where the suite has
+  real side effects (networks, shared databases, deployments).
 
-Ask yourself: "If my change were deleted, would this command notice?"
+Ask yourself: "Is this command exercising the code I just edited, or some other copy of it?"
 
 ## 3. Snapshots Are Claims, Not Truth
 
@@ -66,8 +74,10 @@ Ask yourself: "If this test silently stopped testing, would anyone know?"
 - Delete each load-bearing clause of your fix (mentally, or actually): at
   least one test must break for each. A clause no test requires is either
   untested or unnecessary.
-- Apply the same check to defensive code you add: a guard no input can
-  reach is scope creep wearing a safety vest.
+- Apply the same check to defensive code inside module internals: a guard no
+  internal path can reach is scope creep wearing a safety vest. Trust-boundary
+  validation (public APIs, user input, external data) is exempt — exported
+  symbols cannot enumerate their callers.
 
 Ask yourself: "Which test breaks if I remove this line?"
 
