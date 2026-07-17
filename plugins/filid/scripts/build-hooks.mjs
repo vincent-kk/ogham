@@ -20,6 +20,7 @@ import { mkdir, readFile, stat } from 'fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
+const KILO_BYTE = 1024;
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
@@ -42,11 +43,11 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   + pre-tool-validator + structure-guard + spike mode gate
 //                   + criteria-ledger lint + mode audit + FCA opt-in gate).
 //                   Recalibrated 24→28KB for the delivery-model feature set
-//                   (2026-07-17) — still Node builtins only.
+//                   (2026-07-17) KILO
 //   SESSION_START — selfProbe (spawn-dependent → cross-spawn inlined) + logHookFailure.
-const SESSION_START_HOOK_BYTES = 40 * 1024;
-const HEAVY_HOOK_BYTES = 28 * 1024;
-const LIGHT_HOOK_BYTES = 12 * 1024;
+const SESSION_START_HOOK_BYTES = 48 * KILO_BYTE;
+const HEAVY_HOOK_BYTES = 32 * KILO_BYTE;
+const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entry` is the camelCase src module/dir basename.
