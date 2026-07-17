@@ -9,7 +9,6 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 | ------------------------------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SessionStart`                 | `setup.entry.ts`              | Session initialization: FCA project detection, session cache setup, and epoch reset on `compact`/`clear` (re-arms rule delivery after context loss) |
 | `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts`       | Unified hook: intent injection + INTENT.md(50-line cap) / DETAIL.md(append-only) validation + organ structure protection                            |
-| `PreToolUse` (EnterPlanMode)   | `plan-gate.entry.ts`          | FCA-AI compliance checklist when entering plan mode (example only — not registered in `hooks.json`)                                                 |
 | `SubagentStart`                | `agent-enforcer.entry.ts`     | FCA-AI agent role restriction injection                                                                                                             |
 | `UserPromptSubmit`             | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start                                                                                                             |
 
@@ -72,21 +71,7 @@ Unrecognized agent types pass through with no restriction.
 
 ---
 
-### 3. PreToolUse (EnterPlanMode) — Plan Gate
-
-**Entry**: `src/hooks/plan-gate/plan-gate.entry.ts` (example only — not currently registered in `hooks/hooks.json`)
-**Built output**: `bridge/plan-gate.mjs` (when enabled)
-
-Fires when `EnterPlanMode` tool is called. Injects an FCA-AI compliance checklist reminder into the agent's context when entering plan mode.
-
-**Behavior**:
-
-- Passes with `additionalContext` containing FCA-AI plan compliance reminders (INTENT.md limits, organ boundaries, 3+12 test rule)
-- Never blocks plan mode exit (always `continue: true`)
-
----
-
-### 4. UserPromptSubmit — FCA-AI Context Injector
+### 3. UserPromptSubmit — FCA-AI Context Injector
 
 **Entry**: `src/hooks/user-prompt-submit/user-prompt-submit.entry.ts`
 **Built output**: `bridge/user-prompt-submit.mjs`
@@ -116,7 +101,7 @@ Never blocks user prompts (always `continue: true`).
 
 ---
 
-### 5. Session Cleanup — MCP Server Lifecycle
+### 4. Session Cleanup — MCP Server Lifecycle
 
 filid no longer registers a `SessionEnd` hook. `SessionEnd` is Claude-only, so
 session-scoped cleanup moved to the **MCP server process lifecycle** — the server

@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { assertUnder } from '../../utils/fsGuard.js';
 import type { ReviewManageInput } from '../reviewManage.js';
 import { normalizeBranch } from '../utils/reviewUtils.js';
 
@@ -11,20 +12,15 @@ export async function handleCleanup(
     throw new Error('branchName is required for cleanup action');
 
   const normalized = normalizeBranch(input.branchName);
-  const reviewDir = path.join(
-    input.projectRoot,
-    '.filid',
-    'review',
-    normalized,
-  );
+  if (!normalized)
+    throw new Error(
+      'branchName normalizes to an empty string; refusing to clean the review root',
+    );
+  const reviewRoot = path.join(input.projectRoot, '.filid', 'review');
+  const reviewDir = path.join(reviewRoot, normalized);
 
   // Guard against path traversal: reviewDir MUST stay under projectRoot/.filid/review/.
-  const resolvedReview = path.resolve(reviewDir);
-  const expectedPrefix = path.resolve(
-    path.join(input.projectRoot, '.filid', 'review'),
-  );
-  if (!resolvedReview.startsWith(expectedPrefix))
-    throw new Error('Invalid cleanup target: path traversal detected');
+  assertUnder(reviewRoot, reviewDir);
 
   await fs.rm(reviewDir, { recursive: true, force: true });
 
