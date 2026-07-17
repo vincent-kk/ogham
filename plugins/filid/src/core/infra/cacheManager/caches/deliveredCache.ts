@@ -1,13 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
-import { getCacheDir } from './getCacheDir.js';
-import { sessionIdHash } from './sessionIdHash.js';
-
-/** Path of the session-epoch delivery record (main scope only). */
-export function deliveredPath(cwd: string, sessionId: string): string {
-  return join(getCacheDir(cwd), `delivered-${sessionIdHash(sessionId)}.json`);
-}
+import { deliveredPath } from './utils/deliveredPath.js';
 
 /**
  * Read the session-epoch delivery record: ownerKey → turn-stamp of the last

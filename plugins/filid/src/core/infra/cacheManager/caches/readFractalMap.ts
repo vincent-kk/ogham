@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
-import type { VisitScope } from './fmapPath.js';
-import { fmapPath } from './fmapPath.js';
+import type { VisitScope } from './utils/fcaMapPath.js';
+import { fcaMapPath } from './utils/fcaMapPath.js';
 
 /**
  * Per-turn visit map for one scope.
@@ -23,7 +23,7 @@ export interface FractalMap {
 export function readFractalMap(cwd: string, scope: VisitScope): FractalMap {
   try {
     const parsed: unknown = JSON.parse(
-      readFileSync(fmapPath(cwd, scope), 'utf-8'),
+      readFileSync(fcaMapPath(cwd, scope), 'utf-8'),
     );
     if (typeof parsed !== 'object' || parsed === null) return { reads: [] };
     const raw = parsed as Partial<FractalMap>;

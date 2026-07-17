@@ -1,12 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 
-import { getCacheDir } from './getCacheDir.js';
-import { sessionIdHash } from './sessionIdHash.js';
-
-function turnPath(cwd: string, sessionId: string): string {
-  return join(getCacheDir(cwd), `turn-${sessionIdHash(sessionId)}`);
-}
+import { getCacheDir } from './utils/getCacheDir.js';
+import { turnPath } from './utils/turnPath.js';
 
 /** Current session turn (0 before the first UserPromptSubmit). */
 export function readTurn(cwd: string, sessionId: string): number {

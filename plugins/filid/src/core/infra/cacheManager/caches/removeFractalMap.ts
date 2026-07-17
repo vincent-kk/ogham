@@ -1,8 +1,8 @@
 import { readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getCacheDir } from './getCacheDir.js';
-import { sessionIdHash } from './sessionIdHash.js';
+import { getCacheDir } from './utils/getCacheDir.js';
+import { sessionIdHash } from './utils/sessionIdHash.js';
 
 /**
  * Remove every fractal-map file of a session — the main-scope map and all

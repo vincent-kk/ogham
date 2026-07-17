@@ -5,14 +5,10 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { join } from 'node:path';
+
+import { ownerPath } from './utils/ownerPath.js';
 
 let seq = 0;
-
-/** Ownership-token file inside the lock dir; distinguishes lock generations. */
-function ownerPath(lockPath: string): string {
-  return join(lockPath, 'owner');
-}
 
 /**
  * Bounded cross-process mutex via atomic `mkdir` (100ms budget, 1s stale

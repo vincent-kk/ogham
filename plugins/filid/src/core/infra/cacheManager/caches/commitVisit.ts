@@ -1,13 +1,15 @@
-import { mkdirSync, renameSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 
-import { deliveredPath } from './deliveredCache.js';
 import { acquireLock, releaseLock } from './fmapLock.js';
-import type { VisitScope } from './fmapPath.js';
-import { fmapPath } from './fmapPath.js';
-import { getCacheDir } from './getCacheDir.js';
 import { readFractalMap } from './readFractalMap.js';
 import { resolveDeliveredState } from './resolveDeliveredState.js';
 import { resolveGuideNeeded } from './resolveGuideNeeded.js';
+import { canonicalOf } from './utils/canonicalOf.js';
+import { deliveredPath } from './utils/deliveredPath.js';
+import type { VisitScope } from './utils/fcaMapPath.js';
+import { fcaMapPath } from './utils/fcaMapPath.js';
+import { getCacheDir } from './utils/getCacheDir.js';
+import { writeAtomic } from './utils/writeAtomic.js';
 
 export type DeliveredState = 'none' | 'stale' | 'fresh';
 
@@ -42,21 +44,6 @@ export interface VisitDecision {
   guideNeeded: boolean;
 }
 
-function writeAtomic(filePath: string, data: string): void {
-  const tmpPath = `${filePath}.${process.pid}.tmp`;
-  writeFileSync(tmpPath, data);
-  renameSync(tmpPath, filePath);
-}
-
-/** Canonical visit set: sorted unique boundary-stripped dirs (marker-free). */
-function canonicalOf(reads: string[]): string {
-  const dirs = reads.map((key) => {
-    const tab = key.indexOf('\t');
-    return tab === -1 ? key : key.slice(tab + 1);
-  });
-  return [...new Set(dirs)].sort().join('\n');
-}
-
 /**
  * The visit transaction — single write authority for visit state. Inside the
  * fmap lock it re-reads on-disk state, resolves the delivery 3-state, stamps
@@ -73,7 +60,7 @@ export function commitVisit(
 ): VisitDecision {
   const cacheDir = getCacheDir(cwd);
   mkdirSync(cacheDir, { recursive: true });
-  const filePath = fmapPath(cwd, scope);
+  const filePath = fcaMapPath(cwd, scope);
   const lockPath = `${filePath}.lock`;
   const lockToken = acquireLock(lockPath);
   try {

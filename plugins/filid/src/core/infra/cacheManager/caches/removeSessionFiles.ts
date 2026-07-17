@@ -1,9 +1,9 @@
 import { unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getCacheDir } from './getCacheDir.js';
 import { removeFractalMap } from './removeFractalMap.js';
-import { sessionIdHash } from './sessionIdHash.js';
+import { getCacheDir } from './utils/getCacheDir.js';
+import { sessionIdHash } from './utils/sessionIdHash.js';
 
 /**
  * Remove all session-related cache files. Also the SessionStart epoch reset

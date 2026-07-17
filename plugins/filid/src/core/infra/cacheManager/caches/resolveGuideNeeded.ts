@@ -1,7 +1,7 @@
 import type { DeliveredState } from './commitVisit.js';
-import type { VisitScope } from './fmapPath.js';
 import { hasGuideInjected, markGuideInjected } from './guideCache.js';
 import type { FractalMap } from './readFractalMap.js';
+import type { VisitScope } from './utils/fcaMapPath.js';
 
 /**
  * Resolve whether GUIDE_BLOCK must be prepended — true exactly once per

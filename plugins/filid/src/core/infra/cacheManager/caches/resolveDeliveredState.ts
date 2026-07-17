@@ -1,8 +1,8 @@
 import type { DeliveredState, VisitArgs } from './commitVisit.js';
 import { readDelivered } from './deliveredCache.js';
-import type { VisitScope } from './fmapPath.js';
 import type { FractalMap } from './readFractalMap.js';
 import { readTurn } from './turnCounter.js';
+import type { VisitScope } from './utils/fcaMapPath.js';
 
 /**
  * Resolve the delivery 3-state for the owner INTENT. Sub-scope stamping

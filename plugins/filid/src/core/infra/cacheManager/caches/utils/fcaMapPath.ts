@@ -20,7 +20,7 @@ export interface VisitScope {
  * prefix so session-wide sweeps (per-turn reset, prune, epoch reset) can
  * remove them with a single `fmap-{hash}` prefix match.
  */
-export function fmapPath(cwd: string, scope: VisitScope): string {
+export function fcaMapPath(cwd: string, scope: VisitScope): string {
   const hash = sessionIdHash(scope.sessionId);
   const name = scope.sub
     ? `fmap-${hash}-sub-${sessionIdHash(scope.sub)}.json`

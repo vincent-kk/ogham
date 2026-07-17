@@ -6,7 +6,7 @@ import {
   SESSION_TTL_MS,
 } from '../../../../constants/infraDefaults.js';
 
-import { getCacheDir } from './getCacheDir.js';
+import { getCacheDir } from './utils/getCacheDir.js';
 
 /**
  * Prune old session files.
