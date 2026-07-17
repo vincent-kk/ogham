@@ -6,7 +6,7 @@ Reference documentation for `cross-review` is split into focused files.
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `contracts.md`       | Committee → agent mapping, opinion frontmatter schema, severity gate, verifier verdict ladder, verdict derivation, acceptance claims, subagent prompt rules, config-patch gate |
 | `templates.md`       | Review report, fix requests, advisory ledger, and PR comment formats                                                                                                           |
-| `phases/evidence.md` | Evidence subagent instructions (MCP measurement stages, output schema, half/batch scopes, merge protocol)                                                                      |
+| `phases/evidence.md` | Evidence subagent instructions (MCP measurement stages, output schema, half scopes, merge protocol)                                                                            |
 | `calibration/`       | Verdict regression fixtures (clean / low-only / seeded / claim runs; FPR, FNR, severity-inflation, claim scoring)                                                              |
 
 ## Cross-Reference Map

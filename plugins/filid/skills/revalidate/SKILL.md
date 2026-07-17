@@ -3,7 +3,7 @@ name: revalidate
 user_invocable: true
 description: '[filid:revalidate] Extract delta since resolve_commit_sha, re-measure each accepted fix to verify it resolved its issue, check rejected justifications for constitutional compliance, then render a final PASS or FAIL verdict with optional PR comment.'
 argument-hint: ''
-version: '2.0.0'
+version: '2.0.1'
 complexity: complex
 plugin: filid
 ---
@@ -89,8 +89,11 @@ verdict derives solely from Step 4.
 
 ### Steps 4–5 (Parallel subagents)
 
-Steps 4 and 5 are independent — spawn both as `general-purpose` Task
-subagents (`run_in_background: true`) and await both before Step 6.
+Steps 4 and 5 are independent — spawn both **in the same response** as
+parallel foreground `general-purpose` subagents
+(`run_in_background: false` — a background spawn returns a task id
+instead of the result and stalls the pipeline); both results return
+together before Step 6.
 
 **Step 4 — Verify justifications (constitutional check).** For each
 rejected fix with a justification:

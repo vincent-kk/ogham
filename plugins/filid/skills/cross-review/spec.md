@@ -14,16 +14,21 @@
   as an empty result. One fresh-subagent retry is allowed; a second
   failure pins the verdict to `INCONCLUSIVE`.
 - Committee opinions are collected in ONE round of parallel foreground
-  `Agent` calls. There is no multi-round debate: cross-persona
-  disagreement is arbitrated by the verification pass. A failed persona
-  becomes a chairperson-written forced ABSTAIN; more than half failed
-  (or a failed solo adjudicator) pins the verdict to `INCONCLUSIVE`.
+  `Agent` calls (explicit `run_in_background: false` — the returning
+  tool result is the synchronization point). There is no multi-round
+  debate: cross-persona disagreement is arbitrated by the verification
+  pass. A failed persona becomes a chairperson-written forced ABSTAIN;
+  more than half failed (or a failed solo adjudicator) pins the verdict
+  to `INCONCLUSIVE`.
 - Every blocking candidate (severity >= MEDIUM) and every VETO basis
   MUST pass the adversarial verification pass before verdict
   derivation (`contracts.md` → "Verifier Verdict Ladder"). REFUTED
   candidates are dismissed and recorded in the Arbitration Log — they
   never reach `fix-requests.md`. Advisory (LOW) items skip
-  verification and never block.
+  verification and never block. A verifier failure (one retry allowed)
+  never silently dismisses or approves: its candidates survive as
+  PLAUSIBLE, marked `unverified — verifier failed` in the Arbitration
+  Log.
 - Verdict derivation MUST follow `contracts.md` → "Verdict Derivation":
   only the surviving blocking set produces `REQUEST_CHANGES`; VETO
   classes and the critical-security override are gate-independent; a
@@ -48,7 +53,11 @@
   `session.md`, `verification.md`, `opinions/<persona-id>.md`,
   `review-report.md`, `fix-requests.md`, `content-hash.json`. The
   advisory ledger lives at `.filid/review/advisory-ledger.md` (outside
-  per-branch cleanup scope).
+  per-branch cleanup scope). A run whose surviving blocking set is
+  empty removes any leftover `fix-requests.md` from a prior run —
+  pipeline auto-detection keys on that file's existence. Every
+  terminal verdict, including `INCONCLUSIVE`, writes `review-report.md`
+  (the pipeline greps its frontmatter `verdict`).
 
 ## API Contracts
 

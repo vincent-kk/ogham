@@ -24,6 +24,8 @@ Signal 0 (spike harvest guard): branch matches spike/*?
 
 Signal 1: re-validate.md exists?
   → YES: pipeline already complete — report existing results. DONE.
+    (To redo the cycle after new commits:
+     /filid:pipeline --from=review --force.)
 
 Signal 2: justifications.md exists?
   → YES: check unpushed commits (git log @{upstream}..HEAD --oneline)

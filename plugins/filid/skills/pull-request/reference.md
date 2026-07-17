@@ -251,6 +251,7 @@ with no applicable changes.
 </details>
 
 ---
+
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
@@ -300,16 +301,15 @@ with no applicable changes.
 
 ## Section 4 — PR Publication
 
+Stage 4 first writes the generated body to `.filid/pr-draft/<branch>.md`
+(the `Write` tool creates parent directories). Every publication path
+consumes that file via `--body-file`, deletes it after a successful
+`gh pr create` / `gh pr edit`, and keeps it on failure paths for manual
+use.
+
 ### 4.1 GitHub CLI Auth Re-check
 
-When `GH_AUTH = false` was set in Stage 0, save the PR body locally:
-
-```bash
-# Ensure pr-draft directory exists
-mkdir -p .filid/pr-draft
-```
-
-Then write the generated body to `.filid/pr-draft/<branch>.md` and display:
+When `GH_AUTH = false` was set in Stage 0, keep the body file and display:
 
 ```
 ## `filid:pull-request` — Manual PR Required
@@ -342,9 +342,12 @@ Replace the existing PR body entirely?
 - Skip: Exit without updating
 ```
 
-- Overwrite selected → `gh pr edit <N> --body "<new-body>"`
-- Skip selected → print PR body and exit
-- No existing PR → create new
+- Overwrite selected →
+  `gh pr edit <N> --body-file .filid/pr-draft/<branch>.md`, then emit
+  the §4.5 report (status: updated), delete the body file, and END —
+  §4.3/§4.4 are create-path only
+- Skip selected → keep the body file, print its path, and exit
+- No existing PR → continue to §4.3
 
 ### 4.3 Remote Push
 
@@ -362,24 +365,12 @@ git push -u origin <CURRENT_BRANCH>
 gh pr create \
   --base <BASE_REF> \
   --title "<title>" \
-  --body "$(cat <<'EOF'
-<generated-body>
-EOF
-)"
+  --body-file .filid/pr-draft/<branch>.md
 ```
 
-With `--draft` option:
-
-```bash
-gh pr create \
-  --base <BASE_REF> \
-  --title "<title>" \
-  --body "$(cat <<'EOF'
-<generated-body>
-EOF
-)" \
-  --draft
-```
+Append `--draft` when the option is set. On success, delete
+`.filid/pr-draft/<branch>.md`; on failure, keep it and print the §5
+error format.
 
 ### 4.5 Final Report
 
@@ -405,22 +396,22 @@ EOF
 
 ### Error-Action Map by Stage
 
-| Stage             | Error                          | Action                                                   |
-| ----------------- | ------------------------------ | -------------------------------------------------------- |
-| 0 (Prerequisites) | Not a git repo                 | "Not a git repository" → abort                           |
-| 0                 | On main/master branch          | "Cannot create PR from main/master" → abort              |
-| 0                 | Detached HEAD                  | "Check out a branch first" → abort                       |
-| 0                 | Non-FCA uncommitted changes    | "Commit or stash non-FCA changes before running" → abort |
-| 0                 | gh CLI not authenticated       | Set `GH_AUTH = false`, continue through Stage 3          |
-| 1                 | update failure             | Print BLOCKED message → abort                            |
-| 2                 | `--base` ref not found         | "Specified ref not found" → abort                        |
-| 2                 | No auto-detect candidates      | "Specify `--base` explicitly" → abort                    |
-| 2                 | Remote (origin) not configured | "No remote repository configured" → abort                |
-| 3                 | Empty diff (no changes)        | "No changes detected" → abort                            |
-| 4                 | `gh auth` not authenticated    | Save PR body to `.filid/pr-draft/` + manual instructions |
-| 4                 | Existing PR update rejected    | Print PR body and exit                                   |
-| 4                 | `git push` failure             | Print push error → abort                                 |
-| 4                 | `gh pr create` failure         | Print error + save PR body to `.filid/pr-draft/`         |
+| Stage             | Error                          | Action                                                    |
+| ----------------- | ------------------------------ | --------------------------------------------------------- |
+| 0 (Prerequisites) | Not a git repo                 | "Not a git repository" → abort                            |
+| 0                 | On main/master branch          | "Cannot create PR from main/master" → abort               |
+| 0                 | Detached HEAD                  | "Check out a branch first" → abort                        |
+| 0                 | Non-FCA uncommitted changes    | "Commit or stash non-FCA changes before running" → abort  |
+| 0                 | gh CLI not authenticated       | Set `GH_AUTH = false`, continue through Stage 3           |
+| 1                 | update failure                 | Print BLOCKED message → abort                             |
+| 2                 | `--base` ref not found         | "Specified ref not found" → abort                         |
+| 2                 | No auto-detect candidates      | "Specify `--base` explicitly" → abort                     |
+| 2                 | Remote (origin) not configured | "No remote repository configured" → abort                 |
+| 3                 | Empty diff (no changes)        | "No changes detected" → abort                             |
+| 4                 | `gh auth` not authenticated    | Keep body file + manual instructions (§4.1)               |
+| 4                 | Existing PR update rejected    | Keep body file, print its path, exit                      |
+| 4                 | `git push` failure             | Print push error → abort (body file kept)                 |
+| 4                 | `gh pr create` failure         | Print error — body stays at `.filid/pr-draft/<branch>.md` |
 
 ### Common Error Output Format
 

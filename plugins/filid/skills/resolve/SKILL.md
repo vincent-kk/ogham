@@ -3,7 +3,7 @@ name: resolve
 user_invocable: true
 description: '[filid:resolve] Resolve review fix requests by accepting or rejecting each item, applying accepted fixes via parallel code-surgeon subagents, recording ADR justifications for rejections, then auto-committing and pushing.'
 argument-hint: '[--auto]'
-version: '2.1.0'
+version: '2.1.1'
 complexity: medium
 plugin: filid
 ---
@@ -108,9 +108,10 @@ in Step 6 (revalidate diffs `resolve_commit_sha..HEAD`).
 
 **Phase 4a — code fixes (parallel).** Dispatch all accepted `code-fix`
 items **in a single response** as parallel foreground `Agent` calls
-(`subagent_type: "filid:code-surgeon"`, model `sonnet`, NO
-`run_in_background`) — foreground parallel calls return together,
-giving a deterministic sync point before Phase 4b. Each call carries the
+(`subagent_type: "filid:code-surgeon"`, model `sonnet`,
+`run_in_background: false` — omitting the flag spawns BACKGROUND agents
+whose results never return to the turn) — foreground parallel calls
+return together, giving a deterministic sync point before Phase 4b. Each call carries the
 target path, the recommended action, and the code patch, with the
 instruction to apply the fix directly.
 

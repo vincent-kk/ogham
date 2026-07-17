@@ -23,9 +23,11 @@ agent file under `../../agents/`:
 All seven agents have scoped tool access (`Read, Write, Glob, Grep,
 Bash`). `Write` is used exclusively to author their
 `opinions/<persona-id>.md` file; `Edit` is deliberately absent. They are
-spawned as parallel foreground `Agent(subagent_type: filid:<id>)` calls
-by SKILL.md Step 3 — never as background teammates, never with
-orchestration tools.
+spawned by SKILL.md Step 3 as parallel
+`Agent(subagent_type: filid:<id>)` calls with explicit
+`run_in_background: false` — never in the background (a background call
+returns a task id instead of the result, so the opinions are read
+before they exist), never with orchestration tools.
 
 Adding a new specialist persona requires a coordinated edit in three
 places:
@@ -127,10 +129,12 @@ Canonical definition — every committee persona agent file carries a
 compact copy; this section is the source of truth when they drift.
 
 The opinion file IS the deliverable; analysis that never reaches disk is
-a failed run. Observed failure mode (2026-07 review sessions): personas
-spent 30-50 tool calls analyzing, then died before the terminal Write —
-three of six first-spawn members produced nothing. Every retry that
-followed these four rules succeeded in 8-19 tool calls.
+a failed run. Personas run under a hard turn budget (`maxTurns` in the
+agent file): a worker that analyzes at length and writes once tends to
+exhaust the budget before its terminal Write and returns nothing.
+Skeleton-first plus incremental rewrites keep the best-so-far opinion
+on disk at every moment, so even a budget-killed worker leaves a
+parseable artifact.
 
 1. **Skeleton first** — the FIRST tool action writes the opinion file
    with `state: ABSTAIN`, `confidence: 0`,
@@ -212,10 +216,11 @@ it.
 ## Verifier Verdict Ladder
 
 The Step 4 verification pass is the arbitration mechanism: it resolves
-cross-persona disagreement and removes false positives. One
-`general-purpose` verifier Agent per file group receives the diff, the
-relevant file(s), and the candidate list, and returns exactly one
-verdict per candidate:
+cross-persona disagreement and removes false positives. Candidates are
+grouped by file into **at most 4** parallel foreground
+`general-purpose` verifier Agents (`run_in_background: false`); each
+receives the diff, the relevant file(s), its candidate list, and this
+ladder, and returns exactly one verdict per candidate:
 
 - **CONFIRMED** — can name the inputs/state that trigger the failure and
   the wrong outcome. Quote the line.
@@ -234,9 +239,19 @@ Ground-truth rule: tool-measured metric rows in `verification.md`
 misapplication, misattribution, and consequence realism; they never
 re-measure or dispute measured values.
 
+Verifier constraints: read-only (`Read` / `Grep` / `Glob` plus read-only
+git via `Bash`) — no writes, no `Agent` or orchestration calls. The
+final message is the deliverable, one line per candidate:
+`<path> + <rule> — <VERDICT> — <one-line evidence>`.
+
 Disposition: CONFIRMED and PLAUSIBLE survive; REFUTED is dismissed and
 recorded in the Arbitration Log with the refuting evidence. A VETO whose
 entire cited basis is REFUTED is dismissed; otherwise the VETO stands.
+A verifier that errors or returns no parseable verdicts is retried ONCE
+with a fresh Agent; if the retry also fails, its candidates survive as
+PLAUSIBLE and the Arbitration Log marks them
+`unverified — verifier failed` — verification failure never silently
+dismisses or approves a candidate.
 
 ## Verdict Derivation
 
@@ -298,7 +313,7 @@ When constructing evidence / persona / verifier prompts:
 1. **State the output file (or return shape) first.**
 2. **Substitute concrete values** for every placeholder (`REVIEW_DIR`,
    `PROJECT_ROOT`, `BASE_REF`, ...) — never pass variable names for the
-   subagent to resolve.
+   subagent to resolve. Prefer absolute paths.
 3. **Include the resolved instruction-file path** when one applies
    (`phases/evidence.md`).
 4. **Pass the language setting** from the `[filid:lang]` tag (default
@@ -309,9 +324,9 @@ When constructing evidence / persona / verifier prompts:
    what you have; mark skipped stages SKIP").
 6. **Persona prompts restate the Write-First Output Discipline**
    (skeleton first → incremental rewrites → ≤ ~15 tool calls → final
-   pass last). The agent files already carry the compact copy, but
-   restating it in the spawn prompt is what recovered every failed
-   member in practice — treat it as mandatory, not optional.
+   pass last). The agent files already carry the compact copy, but the
+   spawn-prompt restatement is mandatory — workers weight the immediate
+   prompt far more heavily than their agent file.
 
 ## Config Patch Contract (`.filid/config.json` fixes)
 
