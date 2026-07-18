@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --bg: #0a0a0b;
   --panel: #131316;
   --muted: #1c1c20;
@@ -19,6 +20,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  background: var(--accent-ring);
 }
 
 html,
@@ -56,7 +61,7 @@ code {
 .masthead {
   border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
-  margin-bottom: 8px;
+  margin-bottom: 32px;
 }
 
 .brand {
@@ -84,8 +89,12 @@ code {
   line-height: 1.6;
 }
 
+.lede code {
+  overflow-wrap: anywhere;
+}
+
 .note {
-  margin: 16px 0 0;
+  margin: 0;
   padding: 12px 16px;
   font-size: 12px;
   color: var(--fg-muted);
@@ -150,6 +159,9 @@ code {
 .section--collapsible[open] .section-chevron {
   transform: rotate(180deg);
 }
+.section--collapsible > .section-summary:hover .section-chevron {
+  color: var(--fg);
+}
 .section--collapsible > .section-summary:focus-visible {
   outline: none;
   border-radius: var(--radius);
@@ -164,69 +176,136 @@ code {
   display: none;
 }
 
-/* ───────────────────── Provider radio chips ───────────────────── */
+/* ───────────────────── Provider rows ───────────────────── */
 
-.radio-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+/* Hero panel — the card treatment cennad gives its primary control cluster. */
+.panel {
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 }
 
-.radio {
+.provider-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.provider-row {
   position: relative;
+  display: block;
   cursor: pointer;
 }
 
-.radio input {
+.provider-row input {
   position: absolute;
   opacity: 0;
   inset: 0;
+  margin: 0;
   cursor: pointer;
 }
 
-.radio span {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 10px 14px;
+.provider-row-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 12px 16px;
+  background: var(--muted);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--muted);
-  color: var(--fg-muted);
-  min-height: 44px;
   transition:
-    border-color var(--transition),
     background var(--transition),
-    color var(--transition);
+    border-color var(--transition);
 }
 
-.radio:hover span {
+.provider-row:hover .provider-row-body {
   border-color: var(--border-hi);
-  color: var(--fg);
+  background: var(--muted-hi);
 }
 
-.radio input:checked + span {
+.provider-row input:checked + .provider-row-body {
   border-color: var(--fg);
   background: var(--muted-hi);
-  color: var(--fg);
 }
 
-.radio input:focus-visible + span {
+.provider-row input:focus-visible + .provider-row-body {
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
-.radio-hint {
+.provider-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  color: var(--fg);
+}
+
+.provider-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.provider-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.provider-name {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+
+.provider-desc {
+  font-size: 11px;
+  color: var(--fg-faint);
+  line-height: 1.5;
+}
+
+.provider-state {
+  margin-left: auto;
   font-style: normal;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--fg-faint);
+  white-space: nowrap;
 }
-.radio-hint[data-tone='ok'] {
+.provider-state[data-tone='ok'] {
   color: var(--fg-muted);
 }
-.radio-hint[data-tone='warn'] {
+.provider-state[data-tone='warn'] {
   color: var(--danger);
+}
+
+.provider-dot {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border: 1px solid var(--border-hi);
+  border-radius: 50%;
+  transition: border-color var(--transition);
+}
+
+.provider-row input:checked + .provider-row-body .provider-dot {
+  border-color: var(--fg);
+}
+
+.provider-row input:checked + .provider-row-body .provider-dot::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--fg);
 }
 
 /* ───────────────────── Fields ───────────────────── */
@@ -279,6 +358,13 @@ code {
 
 .field select {
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9aa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
 }
 
 .field textarea {
@@ -427,6 +513,10 @@ input[type='checkbox']:focus-visible {
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
 .btn-primary {
   background: var(--fg);
   color: var(--bg);
@@ -495,5 +585,12 @@ input[type='checkbox']:focus-visible {
   .kvgrid {
     grid-template-columns: 1fr;
     gap: 4px 0;
+  }
+  .panel {
+    padding: 12px;
+  }
+  .provider-row-body {
+    padding: 10px 12px;
+    gap: 10px;
   }
 }

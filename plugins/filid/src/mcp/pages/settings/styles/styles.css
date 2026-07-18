@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --bg: #0a0a0b;
   --panel: #131316;
   --muted: #1c1c20;
@@ -19,6 +20,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  background: var(--accent-ring);
 }
 
 html,
@@ -56,7 +61,7 @@ code {
 .masthead {
   border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
-  margin-bottom: 8px;
+  margin-bottom: 32px;
 }
 
 .brand {
@@ -84,8 +89,12 @@ code {
   line-height: 1.6;
 }
 
+.lede code {
+  overflow-wrap: anywhere;
+}
+
 .note {
-  margin: 16px 0 0;
+  margin: 0;
   padding: 12px 16px;
   font-size: 12px;
   color: var(--fg-muted);
@@ -158,6 +167,9 @@ code {
 .section--collapsible[open] .section-chevron {
   transform: rotate(180deg);
 }
+.section--collapsible > .section-summary:hover .section-chevron {
+  color: var(--fg);
+}
 .section--collapsible > .section-summary:focus-visible {
   outline: none;
   border-radius: var(--radius);
@@ -191,6 +203,23 @@ code {
 }
 
 /* ───────────────────── Rule documents ───────────────────── */
+
+/* Hero panel — the card treatment cennad gives its primary control cluster. */
+.panel {
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.doc-panel {
+  padding: 4px 16px;
+}
+
+/* Nothing to list (plugin root unresolved) — drop the empty card. */
+.doc-panel:not(:has(li)) {
+  display: none;
+}
 
 .doclist {
   list-style: none;
@@ -316,7 +345,8 @@ input[type='checkbox']:focus-visible {
 }
 
 .ruleitem--disabled .rulerow__name,
-.ruleitem--disabled .rulerow select {
+.ruleitem--disabled .rulerow select,
+.ruleitem--disabled .ruleexempt {
   opacity: 0.4;
 }
 
@@ -350,6 +380,27 @@ input[type='checkbox']:focus-visible {
 }
 .ruleexempt textarea {
   margin-top: 6px;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.7;
+  background: var(--muted);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+.ruleexempt textarea::placeholder {
+  color: var(--fg-faint);
+}
+.ruleexempt textarea:focus {
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 /* ───────────────────── Fields ───────────────────── */
@@ -399,8 +450,14 @@ input[type='checkbox']:focus-visible {
 }
 
 .rulerow select {
-  padding: 8px 10px;
+  padding: 8px 28px 8px 10px;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9aa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 13px;
 }
 
 .field textarea {
@@ -476,6 +533,10 @@ input[type='checkbox']:focus-visible {
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
 .btn-primary {
   background: var(--fg);
   color: var(--bg);
@@ -544,5 +605,8 @@ input[type='checkbox']:focus-visible {
   .rulehead,
   .rulerow {
     grid-template-columns: 1fr 56px 108px;
+  }
+  .doc-panel {
+    padding: 2px 12px;
   }
 }

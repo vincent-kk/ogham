@@ -70,7 +70,9 @@ export async function handleOpenSettings(
       },
     });
     currentServer = { ...handle, projectRoot: root };
-    openBrowser(handle.url);
+    // IMBAS_NO_BROWSER=1 suppresses the tab for e2e runs and headless hosts;
+    // the URL still returns so callers can surface it.
+    if (process.env.IMBAS_NO_BROWSER !== '1') openBrowser(handle.url);
   }
 
   const server = currentServer;

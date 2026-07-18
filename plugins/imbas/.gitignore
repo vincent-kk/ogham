@@ -5,3 +5,6 @@ dist/
 # bridge/ is a build output (from esbuild) but intentionally NOT gitignored.
 # Plugin consumers need pre-built bridge files (MCP server entry point)
 # to function without running a build step.
+
+test-results/
+playwright-report/

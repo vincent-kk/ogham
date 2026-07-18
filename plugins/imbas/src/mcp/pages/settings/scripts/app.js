@@ -134,6 +134,8 @@
     var host = $('jira-maps');
     JIRA_MAPS.forEach(function (map) {
       var values = (config.jira && config.jira[map.key]) || {};
+      // An empty map would render as an orphan group title — skip it.
+      if (Object.keys(values).length === 0) return;
       var group = document.createElement('div');
       group.className = 'kvgroup';
       var title = document.createElement('p');

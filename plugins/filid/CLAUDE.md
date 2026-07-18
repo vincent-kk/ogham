@@ -9,6 +9,7 @@ yarn build              # clean → version:sync → sync-rule-hashes → settin
 yarn build:plugin       # mcp-server + hooks 번들만 (tsc 생략)
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)
+yarn test:e2e           # settings 페이지 Playwright e2e (빌드 후 실브라우저)
 yarn test:coverage      # 커버리지
 yarn bench:run          # 벤치마크
 yarn format && yarn lint

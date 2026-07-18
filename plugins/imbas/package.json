@@ -39,6 +39,7 @@
     "smoke:github": "CI=1 node scripts/github-mode-smoke.mjs",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "node scripts/build-settings-html.mjs && playwright test",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "version:major": "yarn version major",
@@ -54,6 +55,7 @@
   "devDependencies": {
     "@ogham/cross-platform": "workspace:^",
     "@ogham/http-guard": "workspace:^",
+    "@playwright/test": "^1.61.0",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.24.0",

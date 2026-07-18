@@ -9,6 +9,7 @@ yarn build              # clean → version:sync → settings-html → tsc → e
 yarn build:plugin       # mcp-server + hooks 번들만
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)
+yarn test:e2e           # settings 페이지 Playwright e2e (빌드 후 실브라우저)
 yarn test               # watch
 yarn format && yarn lint
 yarn version:sync       # package.json → src/version.ts
