@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>imbas · settings</title>
+    <script>
+      window.__IMBAS_STATE__ = '__IMBAS_STATE__';
+    </script>
+    <link rel="stylesheet" href="./styles/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-name">imbas</span>
+          <span class="brand-tag">/ settings</span>
+        </div>
+        <p class="lede">
+          Issue-pipeline settings for
+          <code id="project-chip" title="Project root"></code> — provider,
+          project reference, lifecycle labels, and defaults.
+        </p>
+      </header>
+
+      <div id="init-note" class="note" hidden>
+        No <code>.imbas/config.json</code> found yet — saving will create it at
+        the project root.
+      </div>
+
+      <form id="settings-form" class="form" novalidate>
+        <section class="section" aria-labelledby="provider-title">
+          <h2 class="section-title" id="provider-title">Provider</h2>
+          <p class="section-help">
+            Where Story / Task / Subtask issues are created. Availability is
+            detected by the health check in Claude Code; local markdown files
+            need no remote tool.
+          </p>
+          <div class="radio-row" role="radiogroup" aria-label="Issue provider">
+            <label class="radio">
+              <input type="radio" name="provider" value="jira" />
+              <span
+                >jira <em class="radio-hint" data-provider-hint="jira"></em
+              ></span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="provider" value="github" />
+              <span
+                >github <em class="radio-hint" data-provider-hint="github"></em
+              ></span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="provider" value="local" />
+              <span
+                >local <em class="radio-hint" data-provider-hint="local"></em
+              ></span>
+            </label>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="project-title">
+          <h2 class="section-title" id="project-title">Project reference</h2>
+          <div class="provider-only" data-for-provider="jira">
+            <label
+              class="field"
+              for="jira-project-select"
+              id="jira-select-wrap"
+              hidden
+            >
+              <span>Jira project</span>
+              <select id="jira-project-select"></select>
+              <small class="help">
+                Projects fetched from your Jira site. Pick one or type a key
+                below.
+              </small>
+            </label>
+            <label class="field" for="jira-project-key">
+              <span>Project key</span>
+              <input
+                id="jira-project-key"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="KAN"
+              />
+              <small
+                class="error"
+                data-error-for="jira-project-key"
+                hidden
+              ></small>
+            </label>
+          </div>
+          <div class="provider-only" data-for-provider="github">
+            <label class="field" for="github-repo">
+              <span>Repository (owner/name)</span>
+              <input
+                id="github-repo"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="owner/repo"
+              />
+              <small class="help">
+                All imbas-managed issues are created in this repository via the
+                gh CLI.
+              </small>
+              <small class="error" data-error-for="github-repo" hidden></small>
+            </label>
+          </div>
+          <div class="provider-only" data-for-provider="local">
+            <label class="field" for="local-key">
+              <span>Local project key</span>
+              <input
+                id="local-key"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="LOCAL"
+              />
+              <small class="help">
+                Issues are stored as markdown under
+                <code>.imbas/&lt;KEY&gt;/issues/</code>.
+              </small>
+              <small class="error" data-error-for="local-key" hidden></small>
+            </label>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="labels-title">
+          <h2 class="section-title" id="labels-title">Lifecycle labels</h2>
+          <p class="section-help">
+            Applied to imbas-managed issues as they move through the pipeline.
+          </p>
+          <div class="field-grid">
+            <label class="field" for="label-managed">
+              <span>managed</span>
+              <input id="label-managed" data-label-key="managed" type="text" />
+              <small class="help">Issue creation (all types)</small>
+            </label>
+            <label class="field" for="label-review_pending">
+              <span>review pending</span>
+              <input
+                id="label-review_pending"
+                data-label-key="review_pending"
+                type="text"
+              />
+              <small class="help">Phase 2 complete</small>
+            </label>
+            <label class="field" for="label-review_complete">
+              <span>review complete</span>
+              <input
+                id="label-review_complete"
+                data-label-key="review_complete"
+                type="text"
+              />
+              <small class="help">Review approved</small>
+            </label>
+            <label class="field" for="label-dev_waiting">
+              <span>dev waiting</span>
+              <input
+                id="label-dev_waiting"
+                data-label-key="dev_waiting"
+                type="text"
+              />
+              <small class="help">Phase 3.5 complete</small>
+            </label>
+            <label class="field" for="label-dev_in_progress">
+              <span>dev in progress</span>
+              <input
+                id="label-dev_in_progress"
+                data-label-key="dev_in_progress"
+                type="text"
+              />
+              <small class="help">External trigger only</small>
+            </label>
+            <label class="field" for="label-dev_done">
+              <span>dev done</span>
+              <input
+                id="label-dev_done"
+                data-label-key="dev_done"
+                type="text"
+              />
+              <small class="help">External trigger only</small>
+            </label>
+          </div>
+          <div class="provider-only" data-for-provider="github">
+            <label class="checkline" for="provision-labels">
+              <input id="provision-labels" type="checkbox" />
+              <span>
+                Provision these labels in the GitHub repository after save
+                (creates missing labels via <code>gh label create</code>)
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="language-title">
+          <h2 class="section-title" id="language-title">Languages</h2>
+          <p class="section-help">
+            Language codes per output surface (e.g. <code>ko</code>,
+            <code>en</code>, <code>ja</code>).
+          </p>
+          <div class="field-grid">
+            <label class="field" for="lang-documents">
+              <span>documents</span>
+              <input
+                id="lang-documents"
+                data-lang-key="documents"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <label class="field" for="lang-skills">
+              <span>skills</span>
+              <input
+                id="lang-skills"
+                data-lang-key="skills"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <label class="field" for="lang-issue_content">
+              <span>issue content</span>
+              <input
+                id="lang-issue_content"
+                data-lang-key="issue_content"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <label class="field" for="lang-reports">
+              <span>reports</span>
+              <input
+                id="lang-reports"
+                data-lang-key="reports"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <datalist id="lang-options">
+              <option value="ko"></option>
+              <option value="en"></option>
+              <option value="ja"></option>
+              <option value="zh"></option>
+            </datalist>
+          </div>
+        </section>
+
+        <details class="section section--collapsible">
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Defaults</span>
+              <span class="section-summary__hint"
+                >agent models · subtask limits</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <div class="field-grid">
+            <label class="field" for="model-validate">
+              <span>validate model</span>
+              <input
+                id="model-validate"
+                data-model-key="validate"
+                type="text"
+                list="model-options"
+              />
+            </label>
+            <label class="field" for="model-split">
+              <span>split model</span>
+              <input
+                id="model-split"
+                data-model-key="split"
+                type="text"
+                list="model-options"
+              />
+            </label>
+            <label class="field" for="model-devplan">
+              <span>devplan model</span>
+              <input
+                id="model-devplan"
+                data-model-key="devplan"
+                type="text"
+                list="model-options"
+              />
+            </label>
+            <datalist id="model-options">
+              <option value="sonnet"></option>
+              <option value="opus"></option>
+              <option value="haiku"></option>
+            </datalist>
+            <label class="field" for="limit-max_lines">
+              <span>subtask max lines</span>
+              <input
+                id="limit-max_lines"
+                data-limit-key="max_lines"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+              />
+              <small
+                class="error"
+                data-error-for="limit-max_lines"
+                hidden
+              ></small>
+            </label>
+            <label class="field" for="limit-max_files">
+              <span>subtask max files</span>
+              <input
+                id="limit-max_files"
+                data-limit-key="max_files"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+              />
+              <small
+                class="error"
+                data-error-for="limit-max_files"
+                hidden
+              ></small>
+            </label>
+            <label class="field" for="limit-review_hours">
+              <span>review hours</span>
+              <input
+                id="limit-review_hours"
+                data-limit-key="review_hours"
+                type="number"
+                min="0.1"
+                step="0.1"
+                inputmode="decimal"
+              />
+              <small
+                class="error"
+                data-error-for="limit-review_hours"
+                hidden
+              ></small>
+            </label>
+          </div>
+        </details>
+
+        <details
+          class="section section--collapsible provider-only"
+          data-for-provider="jira"
+        >
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Jira advanced</span>
+              <span class="section-summary__hint"
+                >issue types · workflow states · link types</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <label class="field" for="jira-base-url">
+            <span>Base URL</span>
+            <input
+              id="jira-base-url"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="https://your-site.atlassian.net"
+            />
+            <small class="help">Blank = resolved by the Atlassian MCP.</small>
+          </label>
+          <div id="jira-maps"></div>
+        </details>
+
+        <details
+          class="section section--collapsible provider-only"
+          data-for-provider="github"
+        >
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">GitHub advanced</span>
+              <span class="section-summary__hint"
+                >default labels · link types</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <label class="field" for="github-default-labels">
+            <span>Default labels</span>
+            <textarea
+              id="github-default-labels"
+              rows="2"
+              spellcheck="false"
+              placeholder="one label per line"
+            ></textarea>
+            <small class="help">
+              Extra labels applied to every created issue, on top of the
+              auto-managed <code>type:*</code> and <code>status:*</code>
+              labels.
+            </small>
+          </label>
+          <div class="field">
+            <span class="field-label">Link types</span>
+            <div id="github-link-types" class="checkgrid"></div>
+            <small class="help">
+              Allowed keys for the issue body <code>## Links</code> section.
+            </small>
+          </div>
+        </details>
+
+        <div class="actions">
+          <button id="save-btn" type="submit" class="btn btn-primary">
+            <span class="btn__label">Save settings</span>
+          </button>
+          <button id="close-btn" type="button" class="btn">
+            <span class="btn__label">Close without saving</span>
+          </button>
+        </div>
+      </form>
+
+      <div
+        id="status"
+        class="status"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+    </main>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>

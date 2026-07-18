@@ -8,59 +8,22 @@ Step 0 — Environment Health Check (non-blocking)
   0-1. Atlassian MCP check
     - [OP: auth_check] — use any Atlassian identity/auth_check tool,
       or GET /rest/api/3/myself via a generic HTTP tool.
-    - On success → "✓ Atlassian connected (user: <displayName>)"
-    - On tool-not-found → "✗ Atlassian MCP — not connected"
-    - On auth/network error → "✗ Atlassian MCP — connection failed (<reason>)"
-
   0-2. GitHub CLI check
-    - Run: which gh
-    - If not found → "✗ GitHub CLI — not installed"
-    - If found, run: gh auth status
-      - On success → "✓ GitHub CLI authenticated (user: <login>)"
-      - On failure → "△ GitHub CLI installed but not authenticated"
-
+    - which gh → gh auth status
   0-3. Result display & provider availability
-    Show status summary:
+    Show the status summary exactly as before (see health-check.md),
+    offer auto-setup for missing items ("Set up now? 1,2 or [skip]"),
+    re-evaluate availability after any auto-setup.
 
-      Remote Tool Status:
-        <icon> Atlassian MCP — <status>
-        <icon> GitHub CLI — <status>
+    Derive: jira_available / github_available (local is always available).
 
-    Derive available providers from results:
-      - Atlassian ✓ → jira available
-      - GitHub ✓   → github available
-      - local       → always available
-
-    If any tool missing, show:
-      "⚠ Remote ticket management requires at least one remote tool.
-       Local-only workflows are fully supported without them."
-
-      Show numbered list of missing/failed items:
-        [1] Atlassian MCP — register in .mcp.json (scope selection)
-        [2] GitHub CLI (gh) — install via brew/winget or https://cli.github.com
-
-      Prompt: "Set up now? Enter numbers (e.g. 1,2) or [skip]:"
-
-      - On skip → proceed to Step 1 with current availability.
-      - On selection → execute auto-setup for each selected item
-        (see references/health-check.md § Auto-Setup Actions),
-        then re-evaluate available providers before Step 1.
-
-Step 1 — Provider selection
-  Present available providers as numbered options based on Step 0 results:
-
-    Available providers:
-      [1] jira   — Jira Cloud/Server via Atlassian MCP    (requires: Atlassian MCP ✓)
-      [2] github — GitHub Issues via gh CLI                (requires: GitHub CLI ✓)
-      [3] local  — Local markdown files (no remote needed) (always available)
-
-  Rules:
-  - Only show providers whose dependencies were confirmed in Step 0.
-  - `local` is always shown.
-  - If only `local` is available, still show selection but note:
-    "Only local provider is available. Select [3] or set up a remote tool first."
-  - If exactly one remote provider is available, recommend it but do not auto-select.
-  - Store selected provider for Step 3.
+Step 1 — Session data prefetch (feeds the settings page)
+  [if jira_available]
+    [OP: get_projects] → jira_projects = [{ key, name }] (cap at ~50).
+    On failure: proceed without a list (the page falls back to a key input).
+  [if github_available]
+    gh repo view --json nameWithOwner → github_repo = "owner/repo".
+    Outside a git repo or on failure: omit.
 
 Step 2 — .imbas/ directory creation
   1. Check if .imbas/ exists at project root.
@@ -71,118 +34,48 @@ Step 2 — .imbas/ directory creation
      # imbas auto-generated — do not edit
      *
 
-Step 3 — Project reference selection (provider-specific)
+Step 3 — Settings Page (browser; the ONLY interactive configuration step)
+  Call the MCP tool with the ABSOLUTE workspace path:
 
-  [jira]
-    1. [OP: get_projects]
-       → Returns list of projects with key, name, projectType.
-    2. Present project list to user as numbered options.
-    3. User selects a project (or enters a key manually).
-    4. Store selected project key as project_ref.
+    mcp__plugin_imbas_tools__open_settings({
+      project_root: "<absolute-cwd>",
+      wait_seconds: 300,
+      bootstrap: {
+        providers: { jira: <jira_available>, github: <github_available> },
+        jira_projects: <from Step 1, when fetched>,
+        github_repo: "<from Step 1, when detected>"
+      }
+    })
 
-  [github]
-    1. Detect current repo: gh repo view --json nameWithOwner
-    2. If in a git repo with remote → suggest detected "owner/repo".
-    3. User confirms or enters a different owner/repo.
-    4. Store as project_ref (e.g. "ogham-org/ogham-app").
+  The tool opens the local settings page and BLOCKS inside the call until
+  the user saves, closes the page, or the wait elapses. The page edits the
+  full config in one form: provider, project reference, lifecycle labels
+  (with a github-only "provision labels after save" checkbox), languages,
+  llm models, subtask limits, and provider-specific advanced sections.
+  The server persists .imbas/config.json on Save — the skill does NOT
+  write config in this flow.
 
-  [local]
-    1. Suggest project key from directory name (uppercase, e.g. "OGHAM").
-    2. User confirms or enters a custom key.
-    3. If key is empty, default to "LOCAL".
-    4. Store as project_ref.
-    5. Create issue directories:
-       - .imbas/<KEY>/issues/stories/
-       - .imbas/<KEY>/issues/tasks/
-       - .imbas/<KEY>/issues/subtasks/
+  Dispatch on result.status:
+  - saved   → result.summary = { configWritten, provider, projectRef,
+              provisionLabels }. Continue to Step 4.
+  - pending → call open_settings ONCE more (same arguments; the running
+              server is reused, no new browser tab). If still pending,
+              surface result.url and STOP — re-running /imbas:setup
+              resumes against the saved (or unchanged) config.
+  - closed  → the user closed without saving. Report that the existing
+              config is unchanged and STOP.
 
-Step 3.5 — Label Configuration
-  1. Load default labels from LabelsConfigSchema defaults.
-  2. Display default label table:
+Step 4 — GitHub label provisioning (only when summary.provider == "github"
+          AND summary.provisionLabels == true)
+  1. Load config.labels via mcp__plugin_imbas_tools__config_get.
+  2. gh label list --repo <repo> --json name → existing set.
+  3. For each config label value NOT in existing:
+     gh label create "<value>" --repo <repo> --color c5def5
+  4. Report: "N created, M already existed."
+  (Unchecked box → skip silently; `setup labels provision` remains available.)
 
-     Key              | Value            | Applied When
-     -----------------+------------------+-------------------------------
-     managed          | imbas-managed    | Issue creation (all types)
-     review_pending   | review-pending   | Phase 2 complete
-     review_complete  | review-complete  | Review approved
-     dev_waiting      | 개발대기          | Phase 3.5 complete
-     dev_in_progress  | 개발중            | (external trigger only)
-     dev_done         | 개발완료          | (external trigger only)
-
-  3. Prompt: "Proceed with these default labels? [Yes / Customize]"
-     - Yes → use defaults, proceed to Step 3.6
-     - Customize → for each label key, show current default and accept new value
-       via AskUserQuestion (or equivalent interactive prompt).
-       Store customized values for config.labels section.
-
-  Step 3.6 — GitHub Label Provisioning (GitHub provider only)
-  [github]
-    1. Display: "Create these labels in the GitHub repo?"
-    2. Prompt: "Provision labels in <owner/repo>? [Yes / Skip]"
-       - Yes → for each label value in config.labels:
-         - Run: gh label list --repo <owner/repo> --json name
-         - If label value NOT in existing list:
-           gh label create "<value>" --repo <owner/repo> --color c5def5
-         - If label already exists: skip (idempotent)
-         Report: "N created, M already existed."
-       - Skip → display: "You can provision later with `setup labels provision`."
-
-  [jira]
-    Display: "Jira labels are free-form — no separate provisioning needed."
-
-  [local]
-    No label provisioning needed.
-
-Step 4 — config.json creation
-  1. Build config object (provider-aware):
-     {
-       "version": "1.0",
-       "provider": "<selected provider>",      ← NEW
-       "language": {
-         "documents": "ko",
-         "skills": "en",
-         "issue_content": "ko",
-         "reports": "ko"
-       },
-       "defaults": {
-         "project_ref": "<selected key or owner/repo>",
-         "llm_model": {
-           "validate": "sonnet",
-           "split": "sonnet",
-           "devplan": "opus"
-         },
-         "subtask_limits": {
-           "max_lines": 200,
-           "max_files": 10,
-           "review_hours": 1
-         }
-       },
-       // provider-specific section (only one present):
-       "jira": { ... },       // when provider = jira
-       "github": { ... },     // when provider = github
-       // no extra section     // when provider = local
-     }
-
-  [jira] section:
-     "jira": {
-       "issue_types": { "epic": "Epic", "story": "Story", "task": "Task", "subtask": "Sub-task", "bug": "Bug" },
-       "workflow_states": { "todo": "To Do", "ready_for_dev": "Ready for Dev", "in_progress": "In Progress", "in_review": "In Review", "done": "Done" },
-       "link_types": { "blocks": "Blocks", "split_into": "is split into", "split_from": "split from", "relates_to": "relates to" }
-     }
-
-  [github] section (see SPEC-provider-github.md § Config keys):
-     "github": {
-       "repo": "<owner/repo>",
-       "defaultLabels": [],
-       "linkTypes": ["blocks", "blocked-by", "split-from", "split-into", "relates"]
-     }
-
-  [local] — no provider-specific section.
-
-  2. Call mcp__plugin_imbas_tools__config_set with full config.
-  3. Confirm config.json created.
-
-Step 5 — Cache population (provider-specific)
+Step 5 — Cache population (provider-specific, from the saved config)
+  Read the saved config via mcp__plugin_imbas_tools__config_get first.
 
   [jira]
     1. Create `.imbas/<KEY>/cache/` directory.
@@ -202,7 +95,11 @@ Step 5 — Cache population (provider-specific)
     3. Cache label inventory via mcp__plugin_imbas_tools__cache_set.
 
   [local]
-    No cache needed. Display: "Local provider — no remote cache required."
+    1. Create issue directories:
+       - .imbas/<KEY>/issues/stories/
+       - .imbas/<KEY>/issues/tasks/
+       - .imbas/<KEY>/issues/subtasks/
+    2. No remote cache needed. Display: "Local provider — no remote cache required."
 
 Step 6 — .gitignore guard
   1. Check if .git directory exists at project root.
@@ -215,11 +112,19 @@ Step 7 — Result display
   1. Show summary:
      - Provider: <provider>
      - Project: <project_ref>
-     - Config: .imbas/config.json created
+     - Config: .imbas/config.json saved via settings page
+     - Labels: provisioned (N created) | skipped
      - Cache:
        [jira]   issue-types, link-types, project-meta populated
        [github]  label inventory cached
-       [local]   N/A (local provider)
+       [local]   issue directories created
      - .gitignore: updated (if applicable)
   2. Suggest next step: "Run /imbas:validate <source> to start Phase 1."
 ```
+
+## Headless / CI fallback
+
+`open_settings` needs a local browser. Automation that cannot open one
+configures directly instead: `mcp__plugin_imbas_tools__config_set` with dot-path
+updates (e.g. `{ "provider": "local", "defaults.project_ref": "KEY" }`),
+then continue from Step 5.

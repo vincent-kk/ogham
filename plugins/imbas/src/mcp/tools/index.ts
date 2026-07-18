@@ -10,6 +10,7 @@ export { handleManifestPlan } from './manifestPlan/index.js';
 export { handleManifestImplementPlan } from './manifestImplementPlan/index.js';
 export { handleConfigGet } from './configGet/index.js';
 export { handleConfigSet } from './configSet/index.js';
+export { handleOpenSettings } from './openSettings/index.js';
 export { handleCacheGet } from './cacheGet/index.js';
 export { handleCacheSet } from './cacheSet/index.js';
 export { handleAstSearch } from './astSearch/index.js';

@@ -5,7 +5,7 @@
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → tsc → esbuild
+yarn build              # clean → version:sync → settings-html → tsc → esbuild
 yarn build:plugin       # mcp-server + hooks 번들만
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)

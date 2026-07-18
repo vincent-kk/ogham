@@ -24,13 +24,14 @@
     "libs",
     "hooks",
     "skills",
+    "public",
     ".claude-plugin",
     ".mcp.json",
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/build-settings-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build:plugin": "node scripts/build-settings-html.mjs && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "@ogham/cross-platform": "workspace:^",
+    "@ogham/http-guard": "workspace:^",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.24.0",

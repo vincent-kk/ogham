@@ -12,13 +12,13 @@
 | `skills/`                    | 사용자 스킬 디렉토리                           |
 | `libs/`                      | cross-platform Node 러너                       |
 | `scripts/`                   | esbuild 빌드 스크립트                          |
-| `bridge/`                    | esbuild 산출물 (커밋)                          |
+| `bridge/` · `public/`        | 빌드 산출물: MCP/훅 번들 · settings UI (커밋)  |
 | `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                |
 | `.mcp.json`                  | MCP 서버 등록                                  |
 
 ## Conventions
 
-- 빌드 파이프라인: `clean → version:sync → tsc → mcp-server → hooks`
+- 빌드 파이프라인: `clean → version:sync → settings-html → tsc → mcp-server → hooks`
 - 파이프라인: validate → split → manifest-stories → devplan → manifest-devplan (state phase 는 validate/split/devplan 3개)
 - provider 추상화 (`jira` / `github` / `local`); 실행 state 는 `.imbas/<KEY>/runs/<id>/` (GitHub ref 는 `owner--repo` 디렉토리로 매핑)
 

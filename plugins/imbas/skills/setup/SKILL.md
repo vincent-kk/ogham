@@ -1,7 +1,7 @@
 ---
 name: setup
 user_invocable: true
-description: '[imbas:setup] Initialize .imbas/ directory, select provider (jira/github/local), create config.json, and cache project metadata. Supports subcommands: init, show, set-project, set-provider, set-language, refresh-cache, clear-temp, labels. Trigger: "setup imbas", "imbas 설정", "imbas init", "imbas labels"'
+description: '[imbas:setup] Initialize .imbas/ via the browser settings page (provider, project ref, labels, languages, defaults in one form) and cache project metadata. Supports subcommands: init, show, set-project, set-provider, set-language, refresh-cache, clear-temp, labels. Trigger: "setup imbas", "imbas 설정", "imbas init", "imbas labels"'
 argument-hint: '[init | show | set-project KEY | set-provider PROVIDER | set-language FIELD LANG | refresh-cache [KEY] | clear-temp | labels [show|edit|provision|sync]]'
 version: '1.0.0'
 complexity: simple
@@ -10,8 +10,12 @@ plugin: imbas
 
 # setup — Initialization & Configuration
 
-Initialize the `.imbas/` working directory, select a provider (`jira`, `github`, or `local`),
-configure project settings, and populate metadata caches. Entry point for all imbas workflows.
+Initialize the `.imbas/` working directory, configure everything (provider,
+project reference, labels, languages, defaults) in the **browser settings
+page** opened by `mcp__plugin_imbas_tools__open_settings`, and populate metadata
+caches. Entry point for all imbas workflows. The open_settings call blocks
+until the user saves — after it returns, continue the init workflow in the
+same response (never yield between steps).
 
 ## When to Use This Skill
 
@@ -30,7 +34,7 @@ configure project settings, and populate metadata caches. Entry point for all im
 /imbas:setup [subcommand] [args...]
 
 Subcommands:
-  init              (default) Interactive initialization — project key, language → config.json + cache
+  init              (default) Initialization — health check → browser settings page → cache
   show              Display config.json + cache status
   set-project <KEY> Change default project + refresh cache
   set-provider <PROVIDER>      Change provider (jira, github, local) + re-run health check
