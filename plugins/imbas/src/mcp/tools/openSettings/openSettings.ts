@@ -76,6 +76,12 @@ export async function handleOpenSettings(
   }
 
   const server = currentServer;
+  // server.url carries a one-time auth token in its query string. Only the
+  // browser (opened above) and a manual reopen of a still-pending page need
+  // it, so terminal states return the token-less base URL and never echo the
+  // token once the flow ends. Loopback binding + Host/Origin/token checks
+  // bound the residual risk of the token that pending responses still surface.
+  const baseUrl = new URL(server.url).origin + '/';
   const wait = Math.min(
     Math.max(input.wait_seconds ?? DEFAULT_WAIT_SECONDS, 1),
     MAX_WAIT_SECONDS,
@@ -85,20 +91,20 @@ export async function handleOpenSettings(
   if (event.kind === 'saved')
     return {
       status: 'saved',
-      url: server.url,
+      url: baseUrl,
       summary: event.summary,
       message: 'Settings saved. Continue with the persisted config.',
     };
   if (event.kind === 'closed')
     return {
       status: 'closed',
-      url: server.url,
+      url: baseUrl,
       message:
         'Settings page closed without saving. Existing config is unchanged.',
     };
   return {
     status: 'pending',
     url: server.url,
-    message: `No submission within ${wait}s. The page is still open at ${server.url} — call open_settings again to keep waiting, or proceed with the existing config.`,
+    message: `No submission within ${wait}s. The page is still open — call open_settings again to keep waiting, or proceed with the existing config.`,
   };
 }

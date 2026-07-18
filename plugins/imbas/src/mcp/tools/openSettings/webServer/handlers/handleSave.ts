@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import { SettingsSaveBodySchema } from '../../../../../types/settings.js';
 import type { RouteContext } from '../routing/routeContext.js';
-import { parseBody } from '../utils/parseBody.js';
+import { RequestTooLargeError, parseBody } from '../utils/parseBody.js';
 import { sendJson } from '../utils/sendJson.js';
 
 export async function handleSave(
@@ -14,6 +14,13 @@ export async function handleSave(
   try {
     raw = await parseBody(req);
   } catch (err) {
+    if (err instanceof RequestTooLargeError) {
+      sendJson(res, 413, {
+        success: false,
+        message: 'Request body too large',
+      });
+      return;
+    }
     sendJson(res, 400, {
       success: false,
       message: `Invalid JSON body: ${(err as Error).message}`,

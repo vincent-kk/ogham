@@ -77,7 +77,11 @@ describe('open_settings tool', () => {
 
     const out = await second;
     expect(out.status).toBe('saved');
-    expect(out.url).toBe(first.url);
+    // Terminal states return the token-less base URL; the one-time token is
+    // only surfaced by a still-pending page (for manual reopen), never once
+    // the flow has ended.
+    expect(out.url).toBe(new URL(first.url).origin + '/');
+    expect(out.url).not.toContain('token');
     expect(out.summary?.configWritten).toBe(true);
     // Reuse must not respawn a browser tab.
     expect(openBrowser).toHaveBeenCalledTimes(1);
