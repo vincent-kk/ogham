@@ -6,19 +6,19 @@
 
 ## Structure
 
-| 경로 | 역할 |
-|------|------|
-| `index.ts` | 공개 API 엔트리포인트 (함수/상수 + 타입 re-export) |
-| `version.ts` | 자동 생성 버전 상수 (직접 수정 금지) |
-| `core/` | 7개 sub-fractal: tree/rules/analysis/module/infra/coverageVerify/prSummary |
-| `ast/` | `@ast-grep/napi` 기반 AST 분석 (LCOM4, CC, 의존성) |
-| `mcp/` | MCP 서버 + 18개 도구 핸들러 |
-| `hooks/` | Claude Code 훅 구현체 |
-| `metrics/` | 테스트 밀도 · 모듈 분리 결정 메트릭 |
-| `compress/` | 컨텍스트 압축 (가역/손실) |
-| `constants/` | 공유 상수 organ (임계값·이름 패턴·기본값) |
-| `types/` | 공유 TypeScript 타입 organ |
-| `lib/` | 런타임 유틸 organ (`logger`, `stdin`) |
+| 경로         | 역할                                                                       |
+| ------------ | -------------------------------------------------------------------------- |
+| `index.ts`   | 공개 API 엔트리포인트 (함수/상수 + 타입 re-export)                         |
+| `version.ts` | 자동 생성 버전 상수 (직접 수정 금지)                                       |
+| `core/`      | 7개 sub-fractal: tree/rules/analysis/module/infra/coverageVerify/prSummary |
+| `ast/`       | `@ast-grep/napi` 기반 AST 분석 (LCOM4, CC, 의존성)                         |
+| `mcp/`       | MCP 서버 + 19개 도구 핸들러 + 설정 페이지 정적 자산                        |
+| `hooks/`     | Claude Code 훅 구현체                                                      |
+| `metrics/`   | 테스트 밀도 · 모듈 분리 결정 메트릭                                        |
+| `compress/`  | 컨텍스트 압축 (가역/손실)                                                  |
+| `constants/` | 공유 상수 organ (임계값·이름 패턴·기본값)                                  |
+| `types/`     | 공유 TypeScript 타입 organ                                                 |
+| `lib/`       | 런타임 유틸 organ (`logger`, `stdin`)                                      |
 
 ## Conventions
 

@@ -54,6 +54,7 @@
     "vitest.e2e.config.ts",
     "vitest.e2e.setup.ts",
     "vitest.e2e.globalSetup.ts",
+    "playwright.config.ts",
     "index.html",
     {
       "basename": "setup.entry.ts",

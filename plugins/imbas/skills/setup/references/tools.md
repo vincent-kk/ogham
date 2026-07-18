@@ -2,39 +2,40 @@
 
 ## imbas MCP Tools
 
-| Tool | Usage |
-|------|-------|
-| `mcp__plugin_imbas_tools__config_get` | Read current config.json (show subcommand) |
-| `mcp__plugin_imbas_tools__config_set` | Create or update config.json fields |
-| `mcp__plugin_imbas_tools__cache_get` | Read Jira metadata cache (show subcommand — displays cache status alongside config) |
-| `mcp__plugin_imbas_tools__cache_set` | Write Jira metadata to cache files |
+| Tool                                     | Usage                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| `mcp__plugin_imbas_tools__open_settings` | Open the browser settings page and wait for Save (init Step 3; edits the full config) |
+| `mcp__plugin_imbas_tools__config_get`    | Read current config.json (show subcommand, post-save reads)                           |
+| `mcp__plugin_imbas_tools__config_set`    | Update config.json fields (arg-driven subcommands, headless fallback)                 |
+| `mcp__plugin_imbas_tools__cache_get`     | Read Jira metadata cache (show subcommand — displays cache status alongside config)   |
+| `mcp__plugin_imbas_tools__cache_set`     | Write Jira metadata to cache files                                                    |
 
 ## Jira Operations ([OP:])
 
-| Operation | Usage |
-|-----------|-------|
-| [`[OP: get_projects]`](../../_shared/operations/get_projects.md) | List available Jira projects for selection |
-| [`[OP: get_issue_types]`](../../_shared/operations/get_issue_types.md) | Fetch issue types for selected project |
-| [`[OP: get_issue_type_fields]`](../../_shared/operations/get_issue_type_fields.md) | Fetch required fields per issue type |
-| [`[OP: get_link_types]`](../../_shared/operations/get_link_types.md) | Fetch available issue link types |
+| Operation                                                                          | Usage                                      |
+| ---------------------------------------------------------------------------------- | ------------------------------------------ |
+| [`[OP: get_projects]`](../../_shared/operations/get_projects.md)                   | List available Jira projects for selection |
+| [`[OP: get_issue_types]`](../../_shared/operations/get_issue_types.md)             | Fetch issue types for selected project     |
+| [`[OP: get_issue_type_fields]`](../../_shared/operations/get_issue_type_fields.md) | Fetch required fields per issue type       |
+| [`[OP: get_link_types]`](../../_shared/operations/get_link_types.md)               | Fetch available issue link types           |
 
 The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
 
 ## GitHub Operations (provider = github)
 
-| Tool | Usage |
-|------|-------|
-| `gh repo view --json nameWithOwner` | Detect current repository for project_ref |
-| `gh label list --repo <r> --json name` | Fetch label inventory for cache |
-| `gh label create <name> --repo <r>` | Bootstrap missing type/status labels |
+| Tool                                   | Usage                                     |
+| -------------------------------------- | ----------------------------------------- |
+| `gh repo view --json nameWithOwner`    | Detect current repository for project_ref |
+| `gh label list --repo <r> --json name` | Fetch label inventory for cache           |
+| `gh label create <name> --repo <r>`    | Bootstrap missing type/status labels      |
 
 ## Health Check Tools (Step 0)
 
-| Tool | Source | Usage |
-|------|--------|-------|
+| Tool                                                         | Source    | Usage                                                    |
+| ------------------------------------------------------------ | --------- | -------------------------------------------------------- |
 | [`[OP: auth_check]`](../../_shared/operations/auth_check.md) | Atlassian | Verify Atlassian connectivity and retrieve user identity |
-| `which gh` | Bash | Check if GitHub CLI is installed |
-| `gh auth status` | Bash | Check GitHub CLI authentication status |
+| `which gh`                                                   | Bash      | Check if GitHub CLI is installed                         |
+| `gh auth status`                                             | Bash      | Check GitHub CLI authentication status                   |
 
 The LLM resolves `[OP: auth_check]` at runtime. Read the linked operation file for REST fallback details.
 

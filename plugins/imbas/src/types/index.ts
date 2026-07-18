@@ -48,6 +48,16 @@ export type {
   RunTransition,
 } from './state.js';
 
+// Settings page types (open_settings)
+export { SettingsBootstrapSchema, SettingsSaveBodySchema } from './settings.js';
+export type {
+  SettingsBootstrap,
+  SettingsPageState,
+  SettingsSaveBody,
+  SettingsSaveSummary,
+  SettingsSettleEvent,
+} from './settings.js';
+
 // Config types
 export {
   ProviderSchema,

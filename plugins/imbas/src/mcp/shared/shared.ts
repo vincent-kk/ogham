@@ -31,14 +31,21 @@ export function toolError(error: unknown) {
   };
 }
 
-/** Wrap a tool handler with standard try/catch + optional error-field detection */
+/** Subset of the MCP request extra forwarded to handlers (abort propagation). */
+export interface HandlerExtra {
+  signal?: AbortSignal;
+}
+
+/** Wrap a tool handler with standard try/catch + optional error-field detection.
+ *  The MCP request extra is forwarded so long-polling handlers can observe the
+ *  call's AbortSignal; single-param handlers simply ignore it. */
 export function wrapHandler<T>(
-  fn: (args: T) => unknown | Promise<unknown>,
+  fn: (args: T, extra?: HandlerExtra) => unknown | Promise<unknown>,
   options?: { checkErrorField?: boolean },
 ) {
-  return async (args: T) => {
+  return async (args: T, extra?: HandlerExtra) => {
     try {
-      const result = await fn(args);
+      const result = await fn(args, extra);
       if (
         options?.checkErrorField &&
         result &&

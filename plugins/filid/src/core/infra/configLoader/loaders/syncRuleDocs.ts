@@ -28,8 +28,11 @@ const log = createLogger('config-loader');
  * - not selected + file present → removed
  * - not selected + file absent → unchanged
  *
- * This function MUST be invoked exclusively from the setup skill. It is
- * safe to call repeatedly (idempotent relative to the selection + resync inputs).
+ * This function MUST be invoked exclusively from setup surfaces: the
+ * settings page server (`open_settings`, interactive path) or the
+ * `rule_docs_sync` tool driven by the setup skill (headless/CI fallback).
+ * It is safe to call repeatedly (idempotent relative to the selection +
+ * resync inputs).
  *
  * @param projectRoot - Target project (git root resolved internally)
  * @param selection - Rule ids the user has explicitly opted into; required rules are enforced from the manifest

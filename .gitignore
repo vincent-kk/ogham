@@ -20,6 +20,8 @@ npm-debug.log*
 .temp/
 docs/superpowers/
 
+.playwright-cli/
+
 # Yarn
 .yarn/*
 !.yarn/patches

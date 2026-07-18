@@ -1,37 +1,36 @@
 ---
 name: setup
 user_invocable: true
-description: '[filid:setup] Initialize FCA-AI fractal architecture: create config, apply selected rule docs via a count-aware prompt (0/1/N optional rules), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only.'
+description: '[filid:setup] Initialize FCA-AI fractal architecture: create config, open the browser settings page (config + rule docs in one form, persisted server-side), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to open the settings page only.'
 argument-hint: '[path] [--rules]'
-version: '1.4.0'
+version: '1.5.0'
 complexity: medium
 plugin: filid
 ---
 
 > **EXECUTION MODEL (Tier-2b, interactive escape hatch)**:
-> Execute phases as a SINGLE CONTINUOUS OPERATION, except at explicitly
-> marked `<!-- [INTERACTIVE] -->` points where a user decision is required.
-> After each phase completes, IMMEDIATELY proceed to the next.
-> NEVER yield the turn after an MCP tool call returns or between non-interactive phases.
-> Large tool responses (e.g., mcp__plugin_filid_tools__fractal_scan) are internal working data —
-> do NOT summarize them to the user. Skip phases with no work silently.
-> At `<!-- [INTERACTIVE] -->` markers, present the appropriate prompt
-> shape for `status.entries.length` (see Phase 0c), wait for the user's
-> answer, then resume the chain in the same response.
+> Execute phases as a SINGLE CONTINUOUS OPERATION. The ONLY interactive
+> checkpoint is Phase 0b, and its interaction happens in the BROWSER inside
+> the blocking `mcp__plugin_filid_tools__open_settings` call — after that call returns,
+> dispatch on `status` and IMMEDIATELY continue the chain in the same
+> response. NEVER yield the turn after an MCP tool call returns or between
+> phases. Large tool responses (e.g., mcp**plugin_filid_tools**fractal_scan) are internal
+> working data — do NOT summarize them to the user. Skip phases with no
+> work silently.
 
 # setup — FCA-AI Initialization
 
 Initialize the FCA-AI fractal context architecture in a project. Creates
-the config, asks the user which rule docs to apply via a checkbox UI,
-scans the directory tree, classifies every directory by node type,
-generates missing INTENT.md files for fractal nodes, and produces a
-validation report.
+the config, opens the local browser settings page where the user edits
+`.filid/config.json` and rule doc deployment in one form, scans the
+directory tree, classifies every directory by node type, generates missing
+INTENT.md files for fractal nodes, and produces a validation report.
 
 > **Detail References**: Each phase's detail lives in a separate file under
 > `./sections/`. Load ONLY the section for the phase you're currently
 > executing — do not pre-load the whole set.
 >
-> - Phase 0 (rule docs): [sections/section-0-rule-docs.md](./sections/section-0-rule-docs.md)
+> - Phase 0 (config + settings page): [sections/section-0-rule-docs.md](./sections/section-0-rule-docs.md)
 > - Phase 1 (scan): [sections/section-1-directory-scan.md](./sections/section-1-directory-scan.md)
 > - Phase 2 (classify): [sections/section-2-node-classification.md](./sections/section-2-node-classification.md)
 > - Phase 3 (INTENT.md): [sections/section-3-intent-md-template.md](./sections/section-3-intent-md-template.md)
@@ -42,8 +41,9 @@ validation report.
 
 - Starting a new project that will follow FCA-AI conventions
 - Onboarding an existing codebase into the fractal context system
-- **Managing rule doc application** — this skill is the single entry point
-  for adding or removing `.claude/rules/*.md` files
+- **Managing rule doc application and config** — the settings page opened by
+  this skill is the single entry point for `.claude/rules/*.md` toggling and
+  `.filid/config.json` editing
 - Regenerating INTENT.md files after a large-scale refactor removed them
 - Creating DETAIL.md scaffolds for modules that lack formal specifications
 - Auditing which directories are correctly classified before running `/filid:scan`
@@ -53,12 +53,12 @@ validation report.
 Before Phase 0a, inspect the invocation arguments:
 
 - If the arguments contain `--rules`, enter **rules-only mode**: execute
-  Phase 0a → Phase 0d, then STOP (skip Phase 1–5 entirely). This is the
-  lightweight path for toggling which `.claude/rules/*.md` files are
-  applied without re-scanning or regenerating INTENT.md/DETAIL.md.
+  Phase 0a → Phase 0b, then STOP (skip Phase 1–5 entirely). This is the
+  lightweight path for toggling rule docs or tweaking config without
+  re-scanning or regenerating INTENT.md/DETAIL.md.
 - Otherwise run the full workflow (Phase 0a → Phase 5).
 - Any non-flag token is treated as the target `path` (default: current
-  working directory).
+  working directory). Phase 0b requires the ABSOLUTE form of this path.
 
 ## Prerequisites — Environment Check
 
@@ -84,61 +84,32 @@ exists at the git root with the default 8-rule configuration. Pass the
 session's configured response language as `language` so generated docs and
 `[filid:lang]` match the user's locale (omit for English). Existing config is
 never overwritten. `mcp__plugin_filid_tools__project_init` does NOT touch `.claude/rules/` — that
-is Phase 0b's job.
+is the settings page's job in Phase 0b.
 See [sections/section-0-rule-docs.md — Phase 0a](./sections/section-0-rule-docs.md#phase-0a--config-initialization).
 
 **→ Immediately proceed to Phase 0b.**
 
-### Phase 0b — Rule Docs Status
+### Phase 0b — Settings Page <!-- [INTERACTIVE] -->
 
-Call `mcp__plugin_filid_tools__rule_docs_sync({ action: "status", path })` to inspect deployed
-rule docs and template drift. The response partitions rules into
-`status.entries[]` (optional — feeds Phase 0c UI) and `status.autoDeployed[]`
-(required — auto-synced silently). Each optional entry carries
-`templateHash` / `deployedHash` / `inSync` so drift can be surfaced in the UI.
-If `status.pluginRootResolved === false`, fail fast and skip Phase 0c/0d
-(do not run the rule-docs prompt or deployment).
-See [sections/section-0-rule-docs.md — Phase 0b](./sections/section-0-rule-docs.md#phase-0b--rule-docs-status).
+Call `mcp__plugin_filid_tools__open_settings({ path: "<absolute-target-path>", waitSeconds: 300 })`.
+The tool opens the local settings page (config + rule docs in one form) and
+blocks until the user saves, closes, or the wait elapses. The server
+persists everything on Save — do NOT call `mcp__plugin_filid_tools__rule_docs_sync` here.
 
-**→ Otherwise, immediately proceed to Phase 0c.**
+Dispatch on `result.status`:
 
-### Phase 0c — Rule Docs Prompt <!-- [INTERACTIVE] -->
+- `saved` — print a one-line rule doc summary from `result.summary.ruleDocs`
+  (+ two drift hint lines when `drift` is non-empty)
+- `pending` — call `mcp__plugin_filid_tools__open_settings` once more; if still pending,
+  surface `result.url` and STOP
+- `closed` — keep the existing config and continue
 
-Dispatch on `N = status.entries.length` (number of **optional** rules only):
-
-- `N === 0`: skip `AskUserQuestion`, `nextSelection = {}`
-- `N === 1`: single-select Yes/No with three label states
-  (`Apply:` / `[ON] Keep:` / `[UPDATE] Apply latest:`)
-- `N >= 2`: multi-select checkbox, exactly ONE option per optional entry,
-  prefixed with `[ON]` (applied + in-sync) or `[UPDATE]` (applied + drift).
-  Required rules from `status.autoDeployed[]` MUST NOT appear in the UI.
-
-Then derive `resyncIds` from drifted optional rules that the user kept on:
-
-```ts
-const resyncIds = status.entries
-  .filter((e) => e.deployed && !e.inSync && nextSelection[e.id] === true)
-  .map((e) => e.id);
-```
-
-See [sections/section-0-rule-docs.md — Phase 0c](./sections/section-0-rule-docs.md#phase-0c--rule-docs-prompt)
-for Case A/B/C `AskUserQuestion` call shapes, header copy, hard rules, and
-response-mapping logic.
-
-**→ Proceed to Phase 0d with `nextSelection` and `resyncIds` in the same response.**
-
-### Phase 0d — Rule Docs Sync
-
-Call `mcp__plugin_filid_tools__rule_docs_sync({ action: "sync", path, selections, resync })`.
-`selections` MUST be a raw `Record<string, boolean>` map (never a JSON string);
-`resync` MUST be a raw string array (or omitted). Surface a one-line summary
-from `result.copied / removed / updated / drift / unchanged / skipped`. When
-`result.drift` is non-empty, append TWO hint lines (status + action).
-See [sections/section-0-rule-docs.md — Phase 0d](./sections/section-0-rule-docs.md#phase-0d--rule-docs-sync).
+See [sections/section-0-rule-docs.md — Phase 0b](./sections/section-0-rule-docs.md#phase-0b--settings-page)
+for the full dispatch contract and the headless/CI fallback.
 
 **→ If the invocation passed `--rules`, STOP here and emit a short completion
-line (e.g., `"Rule docs updated — Phase 1–5 skipped"`). Otherwise immediately
-proceed to Phase 1.**
+line (e.g., `"Settings saved — Phase 1–5 skipped"`). Otherwise immediately
+proceed to Phase 1 in the same response.**
 
 ### Phase 1 — Directory Scan
 
@@ -176,22 +147,21 @@ See [sections/section-4-detail-md-scaffolding.md](./sections/section-4-detail-md
 ### Phase 5 — Validation and Report
 
 Validate all generated files against FCA-AI rules and emit a summary report
-that includes the rule doc sync summary from Phase 0d.
+that includes the settings summary from Phase 0b.
 See [sections/section-5-validation-report.md](./sections/section-5-validation-report.md).
 
 **After printing the summary report, execution is COMPLETE. Do not ask the user any follow-up questions.**
 
 ## Available MCP Tools
 
-| Tool                     | Action     | Purpose                                                           |
-| ------------------------ | ---------- | ----------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)              |
-| `mcp__plugin_filid_tools__rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                         |
-| `mcp__plugin_filid_tools__rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)   |
-| `mcp__plugin_filid_tools__rule_docs_sync`   | `manifest` | (Optional) Fetch raw manifest for custom UI rendering             |
-| `mcp__plugin_filid_tools__fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy |
-| `mcp__plugin_filid_tools__fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function    |
-| `mcp__plugin_filid_tools__ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)         |
+| Tool                                        | Action            | Purpose                                                                 |
+| ------------------------------------------- | ----------------- | ----------------------------------------------------------------------- |
+| `mcp__plugin_filid_tools__project_init`     | —                 | Create `.filid/config.json` with defaults (Phase 0a)                    |
+| `mcp__plugin_filid_tools__open_settings`    | —                 | Open the browser settings page and wait for Save (Phase 0b)             |
+| `mcp__plugin_filid_tools__rule_docs_sync`   | `status` / `sync` | Headless/CI fallback only — the settings page replaces it interactively |
+| `mcp__plugin_filid_tools__fractal_scan`     | —                 | Scan filesystem and retrieve complete project directory hierarchy       |
+| `mcp__plugin_filid_tools__fractal_navigate` | `classify`        | Classify a single directory as fractal / organ / pure-function          |
+| `mcp__plugin_filid_tools__ast_grep_search`  | —                 | AST pattern matching (optional — requires @ast-grep/napi)               |
 
 ## Options
 
@@ -201,32 +171,27 @@ See [sections/section-5-validation-report.md](./sections/section-5-validation-re
 /filid:setup [path] [--rules]
 ```
 
-| Parameter | Type   | Default                   | Description                                                  |
-| --------- | ------ | ------------------------- | ------------------------------------------------------------ |
-| `path`    | string | Current working directory | Root directory to initialize                                 |
-| `--rules` | flag   | off                       | Rules-only mode: run Phase 0a–0d, then stop (skip Phase 1–5) |
+| Parameter | Type   | Default                   | Description                                                     |
+| --------- | ------ | ------------------------- | --------------------------------------------------------------- |
+| `path`    | string | Current working directory | Root directory to initialize                                    |
+| `--rules` | flag   | off                       | Settings-only mode: run Phase 0a–0b, then stop (skip Phase 1–5) |
 
 ## Quick Reference
 
 ```bash
-# Initialize current project (checkbox UI appears in Phase 0c)
+# Initialize current project (browser settings page opens in Phase 0b)
 /filid:setup
 
 # Initialize a specific sub-directory
 /filid:setup src/payments
 
-# Update rule docs only — no scan, no INTENT.md/DETAIL.md generation
+# Open the settings page only — no scan, no INTENT.md/DETAIL.md generation
 /filid:setup --rules
 
-# Re-run to toggle optional rule docs or accept template updates. Phase 0c
-# dispatches on the number of optional rules: N=0 skips the prompt, N=1
-# shows a single-select Yes/No, N>=2 shows a multi-select checkbox where
-# "[ON]" marks already-applied items whose content matches the plugin
-# template, and "[UPDATE]" marks already-applied items whose plugin
-# template has changed (re-checking an [UPDATE] item overwrites local
-# edits with the new template). AskUserQuestion cannot pre-check options
-# — in the N>=2 case you MUST re-select every item you want to keep
-# applied; unchecked optional items are removed.
+# Re-run any time to toggle rule docs or tweak config. The page pre-checks
+# deployed optional docs from filesystem state (no re-select trap), marks
+# drifted docs with an "UPDATE AVAILABLE" badge, and only overwrites local
+# edits when the per-row overwrite box is explicitly checked.
 
 # Constants
 KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helpers
@@ -241,9 +206,15 @@ DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tr
 
 Key rules:
 
-- `.claude/rules/*.md` files are ONLY written or removed inside this skill
-- Required rule docs (manifest `required: true`) are always auto-applied and auto-updated — they NEVER appear in the prompt UI, the user cannot opt out, and drift is overwritten without confirmation
-- Optional rule docs showing drift are labeled with `[UPDATE]` in the Phase 0c checkbox UI; re-checking accepts the template update, unchecking removes the file, leaving the box in its previous state preserves the local copy until the next `--rules` run
+- `.claude/rules/*.md` files are ONLY written or removed by this skill's
+  surfaces: the settings page server (interactive) or `rule_docs_sync`
+  (headless/CI fallback)
+- Required rule docs (manifest `required: true`) are always auto-applied and
+  auto-updated — the page lists them read-only and drift is overwritten on
+  save without confirmation
+- Optional rule docs render pre-checked from deployment state; drifted docs
+  are overwritten only when the user checks the per-row overwrite box —
+  otherwise local edits are preserved and reported as drift
 - Session hooks never touch `.claude/rules/` or `.filid/config.json`
 - Organ directories must never receive an INTENT.md
 - INTENT.md must not exceed 50 lines

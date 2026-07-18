@@ -24,13 +24,14 @@
     "libs",
     "hooks",
     "skills",
+    "public",
     ".claude-plugin",
     ".mcp.json",
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/build-settings-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build:plugin": "node scripts/build-settings-html.mjs && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
@@ -38,6 +39,7 @@
     "smoke:github": "CI=1 node scripts/github-mode-smoke.mjs",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "node scripts/build-settings-html.mjs && playwright test",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "version:major": "yarn version major",
@@ -52,6 +54,8 @@
   },
   "devDependencies": {
     "@ogham/cross-platform": "workspace:^",
+    "@ogham/http-guard": "workspace:^",
+    "@playwright/test": "^1.61.0",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.24.0",

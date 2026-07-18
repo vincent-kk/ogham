@@ -1,0 +1,632 @@
+:root {
+  color-scheme: dark;
+  --bg: #0a0a0b;
+  --panel: #131316;
+  --muted: #1c1c20;
+  --muted-hi: #24242a;
+  --border: #26262c;
+  --border-hi: #3a3a42;
+  --fg: #f5f5f7;
+  --fg-muted: #9a9aa3;
+  --fg-faint: #5a5a63;
+  --accent-ring: rgba(245, 245, 247, 0.24);
+  --danger: #d97070;
+  --mono:
+    'JetBrains Mono', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 160ms ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--accent-ring);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font: 14px/1.55 var(--mono);
+  min-height: 100dvh;
+  padding: 48px 24px 80px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: inherit;
+  background: var(--muted);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--fg);
+}
+
+.shell {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ───────────────────── Masthead ───────────────────── */
+
+.masthead {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.brand-name {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.brand-tag {
+  color: var(--fg-muted);
+  font-size: 14px;
+}
+
+.lede {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.lede code {
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* ───────────────────── Sections ───────────────────── */
+
+.section {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+
+.section-help {
+  margin: 0 0 16px;
+  color: var(--fg-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.warning-inline {
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+/* Collapsible section — native <details> in the same section rhythm. */
+.section--collapsible > .section-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.section--collapsible > .section-summary::-webkit-details-marker {
+  display: none;
+}
+.section-summary__label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.section-summary__hint {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-faint);
+}
+.section-chevron {
+  flex: none;
+  color: var(--fg-muted);
+  transition: transform var(--transition);
+}
+.section--collapsible[open] .section-chevron {
+  transform: rotate(180deg);
+}
+.section--collapsible > .section-summary:hover .section-chevron {
+  color: var(--fg);
+}
+.section--collapsible > .section-summary:focus-visible {
+  outline: none;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.section--collapsible[open] > .section-summary {
+  margin-bottom: 14px;
+}
+
+/* ───────────────────── Badges ───────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.badge--update {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+/* ───────────────────── Rule documents ───────────────────── */
+
+/* Hero panel — the card treatment cennad gives its primary control cluster. */
+.panel {
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.doc-panel {
+  padding: 4px 16px;
+}
+
+/* Nothing to list (plugin root unresolved) — drop the empty card. */
+.doc-panel:not(:has(li)) {
+  display: none;
+}
+
+.doclist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.doclist:empty {
+  display: none;
+}
+
+.docrow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  padding: 12px 2px;
+}
+.docrow + .docrow,
+.doclist + .doclist > .docrow:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.docrow__check {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 3px;
+  min-width: 17px;
+}
+
+/* Custom checkbox — same vocabulary as the primary button and toggles:
+   muted well + hairline border, filled white with a dark check when on. */
+input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex: none;
+  background: var(--muted);
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+input[type='checkbox']:hover {
+  border-color: var(--fg-faint);
+}
+input[type='checkbox']:checked {
+  background-color: var(--fg);
+  border-color: var(--fg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0b' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 11px;
+}
+input[type='checkbox']:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.docrow__main {
+  min-width: 0;
+}
+
+.docrow__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.docrow__title label {
+  cursor: pointer;
+}
+
+.docrow__desc {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+}
+
+.resync {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--danger);
+  cursor: pointer;
+  width: fit-content;
+}
+
+/* ───────────────────── Structural rules ───────────────────── */
+
+.rulehead,
+.rulerow {
+  display: grid;
+  grid-template-columns: 1fr 72px 128px;
+  gap: 12px;
+  align-items: center;
+}
+
+.rulehead {
+  padding: 0 2px 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg-faint);
+  border-bottom: 1px solid var(--border);
+}
+.rulehead span:not(:first-child) {
+  text-align: center;
+}
+
+.rulelist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ruleitem + .ruleitem {
+  border-top: 1px solid var(--border);
+}
+
+.rulerow {
+  padding: 10px 2px;
+}
+
+.rulerow__name {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.rulerow__name label {
+  cursor: pointer;
+}
+
+.rulerow__enabled {
+  display: flex;
+  justify-content: center;
+}
+
+.ruleitem--disabled .rulerow__name,
+.ruleitem--disabled .rulerow select,
+.ruleitem--disabled .ruleexempt {
+  opacity: 0.4;
+}
+
+.ruleexempt {
+  margin: 0 2px 10px;
+}
+.ruleexempt summary {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-faint);
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+  width: fit-content;
+  list-style: none;
+}
+.ruleexempt summary::-webkit-details-marker {
+  display: none;
+}
+.ruleexempt summary::before {
+  content: '▸ ';
+}
+.ruleexempt[open] summary::before {
+  content: '▾ ';
+}
+.ruleexempt summary:focus-visible {
+  outline: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.ruleexempt textarea {
+  margin-top: 6px;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.7;
+  background: var(--muted);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+.ruleexempt textarea::placeholder {
+  color: var(--fg-faint);
+}
+.ruleexempt textarea:focus {
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* ───────────────────── Fields ───────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field + .field {
+  margin-top: 12px;
+}
+
+.field > span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.field-grid .field + .field {
+  margin-top: 0;
+}
+
+.field input,
+.field textarea,
+.rulerow select {
+  font: inherit;
+  font-size: 13px;
+  background: var(--muted);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.rulerow select {
+  padding: 8px 28px 8px 10px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9aa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 13px;
+}
+
+.field textarea {
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--fg-faint);
+}
+
+.field input:focus,
+.field textarea:focus,
+.rulerow select:focus {
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.field input[aria-invalid='true'],
+.field textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.help {
+  font-size: 11px;
+  color: var(--fg-faint);
+  line-height: 1.6;
+}
+
+.error {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* ───────────────────── Actions & status ───────────────────── */
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font: inherit;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    opacity var(--transition);
+  min-height: 44px;
+}
+
+.btn:hover {
+  border-color: var(--border-hi);
+  background: var(--muted-hi);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status {
+  margin-top: 24px;
+  min-height: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  white-space: pre-line;
+  line-height: 1.7;
+}
+
+.status[data-kind='ok'] {
+  color: var(--fg);
+}
+
+.status[data-kind='error'] {
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body {
+    padding: 24px 16px 64px;
+  }
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+  .rulehead,
+  .rulerow {
+    grid-template-columns: 1fr 56px 108px;
+  }
+  .doc-panel {
+    padding: 2px 12px;
+  }
+}

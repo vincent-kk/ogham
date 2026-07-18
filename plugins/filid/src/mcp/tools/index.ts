@@ -12,6 +12,7 @@ export * from './driftDetect/driftDetect.js';
 export * from './fractalNavigate/fractalNavigate.js';
 export * from './fractalScan/fractalScan.js';
 export * from './lcaResolve/lcaResolve.js';
+export * from './openSettings/openSettings.js';
 export * from './projectInit/projectInit.js';
 export * from './reviewManage/reviewManage.js';
 export * from './ruleDocsSync/ruleDocsSync.js';
