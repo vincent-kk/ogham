@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>filid · settings</title>
+    <script>
+      window.__FILID_STATE__ = '__FILID_STATE__';
+    </script>
+    <link rel="stylesheet" href="./styles/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-name">filid</span>
+          <span class="brand-tag">/ settings</span>
+        </div>
+        <p class="lede">
+          FCA-AI architecture settings for
+          <code id="project-chip" title="Project root"></code> — structural
+          rules, rule documents, and scan behavior.
+        </p>
+      </header>
+
+      <div id="init-note" class="note" hidden>
+        No <code>.filid/config.json</code> found yet — saving will create it at
+        the project root.
+      </div>
+
+      <form id="settings-form" class="form" novalidate>
+        <section class="section" aria-labelledby="rule-docs-title">
+          <h2 class="section-title" id="rule-docs-title">Rule documents</h2>
+          <p class="section-help">
+            Guideline files deployed to <code>.claude/rules/</code>. Checked
+            items stay applied; unchecked items are removed on save. Required
+            documents are always deployed and kept up to date.
+          </p>
+          <div id="rule-docs-unavailable" class="warning-inline" hidden>
+            Plugin root could not be resolved — rule document management is
+            unavailable in this session. Config changes below still save.
+          </div>
+          <ul
+            id="rule-docs-required"
+            class="doclist"
+            aria-label="Required rule documents"
+          ></ul>
+          <ul
+            id="rule-docs-optional"
+            class="doclist"
+            aria-label="Optional rule documents"
+          ></ul>
+        </section>
+
+        <section class="section" aria-labelledby="rules-title">
+          <h2 class="section-title" id="rules-title">Structural rules</h2>
+          <p class="section-help">
+            Per-rule enforcement for <code>/filid:scan</code> and session hooks.
+            Exempt patterns are glob paths, one per line.
+          </p>
+          <div class="rulehead" aria-hidden="true">
+            <span>rule</span><span>enabled</span><span>severity</span>
+          </div>
+          <ul id="rules-list" class="rulelist"></ul>
+        </section>
+
+        <section class="section" aria-labelledby="general-title">
+          <h2 class="section-title" id="general-title">General</h2>
+          <div class="field-grid">
+            <label class="field" for="language">
+              <span>Documentation language</span>
+              <input
+                id="language"
+                name="language"
+                type="text"
+                list="language-options"
+                autocomplete="off"
+                placeholder="English"
+              />
+              <datalist id="language-options">
+                <option value="English"></option>
+                <option value="Korean"></option>
+                <option value="Japanese"></option>
+                <option value="Chinese"></option>
+                <option value="Spanish"></option>
+                <option value="German"></option>
+                <option value="French"></option>
+              </datalist>
+              <small class="help">
+                Language for generated INTENT.md / DETAIL.md content
+                (<code>[filid:lang]</code>). Blank = English.
+              </small>
+            </label>
+            <label class="field" for="max-depth">
+              <span>Scan max depth</span>
+              <input
+                id="max-depth"
+                name="max-depth"
+                type="number"
+                min="0"
+                step="1"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="10"
+              />
+              <small class="help">
+                Maximum fractal tree depth for the <code>max-depth</code> rule.
+                Blank = default (10).
+              </small>
+              <small class="error" data-error-for="max-depth" hidden></small>
+            </label>
+          </div>
+        </section>
+
+        <details class="section section--collapsible">
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Structure exceptions</span>
+              <span class="section-summary__hint"
+                >allowed peer files · entry points · route patterns</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <p class="section-help">
+            Optional allowlists consumed by <code>zero-peer-file</code>,
+            <code>module-entry-point</code>, and <code>naming-convention</code>.
+            One entry per line; leave blank to keep defaults.
+          </p>
+          <label class="field" for="additional-allowed">
+            <span>Additional allowed peer files</span>
+            <textarea
+              id="additional-allowed"
+              rows="3"
+              spellcheck="false"
+              placeholder='notes.md&#10;{"basename": "setup.ts", "paths": ["src/cli/**"]}'
+            ></textarea>
+            <small class="help">
+              A bare file name applies globally; a JSON object restricts it to
+              path globs.
+            </small>
+            <small
+              class="error"
+              data-error-for="additional-allowed"
+              hidden
+            ></small>
+          </label>
+          <label class="field" for="additional-entry-points">
+            <span>Additional entry points</span>
+            <textarea
+              id="additional-entry-points"
+              rows="2"
+              spellcheck="false"
+              placeholder="page.tsx&#10;route.ts"
+            ></textarea>
+          </label>
+          <label class="field" for="additional-route-patterns">
+            <span>Additional route patterns</span>
+            <textarea
+              id="additional-route-patterns"
+              rows="2"
+              spellcheck="false"
+              placeholder="^\(.+\)$"
+            ></textarea>
+            <small class="help">
+              Regex patterns exempting framework directory names, e.g. route
+              groups.
+            </small>
+          </label>
+        </details>
+
+        <div class="actions">
+          <button id="save-btn" type="submit" class="btn btn-primary">
+            <span class="btn__label">Save settings</span>
+          </button>
+          <button id="close-btn" type="button" class="btn">
+            <span class="btn__label">Close without saving</span>
+          </button>
+        </div>
+      </form>
+
+      <div
+        id="status"
+        class="status"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+    </main>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>

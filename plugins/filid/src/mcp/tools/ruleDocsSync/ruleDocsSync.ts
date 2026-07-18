@@ -12,7 +12,9 @@
  *   - `manifest` — return the raw manifest (id/filename/required/title/desc)
  *     for skill UI rendering.
  *
- * The skill is the ONLY caller. Session hooks MUST NOT invoke this tool.
+ * The setup skill's headless/CI fallback is the ONLY caller — the
+ * interactive path now runs through the `open_settings` settings page.
+ * Session hooks MUST NOT invoke this tool.
  */
 import {
   type RuleDocSyncResult,

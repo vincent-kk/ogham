@@ -5,7 +5,7 @@
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → sync-rule-hashes → tsc → mcp-server → hooks
+yarn build              # clean → version:sync → sync-rule-hashes → settings-html → tsc → mcp-server → hooks
 yarn build:plugin       # mcp-server + hooks 번들만 (tsc 생략)
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)
@@ -19,6 +19,7 @@ yarn version:sync       # package.json → src/version.ts
 
 - `scripts/build-mcp-server.mjs`: `src/mcp/serverEntry/serverEntry.ts` → `bridge/mcp-server.cjs` (CJS)
 - `scripts/build-hooks.mjs`: `src/hooks/<name>/<name>.entry.ts` → `bridge/<name>.mjs` (ESM, 각 훅 개별 번들)
+- `scripts/build-settings-html.mjs`: `src/mcp/pages/settings/**` → `public/settings.html` (인라인 단일 파일; `open_settings` 가 런타임 디스크 서빙)
 - `scripts/sync-rule-hashes.mjs`: built-in rule 의 hash 를 rule registry 와 동기화
 - `dist/` 는 라이브러리 export 용, `bridge/` 는 플러그인 런타임용, `libs/` 는 cross-platform Node 러너 (`run.cjs`)
 

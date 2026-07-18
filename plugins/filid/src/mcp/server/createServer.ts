@@ -16,6 +16,7 @@ import { handleDriftDetect } from '../tools/driftDetect/driftDetect.js';
 import { handleFractalNavigate } from '../tools/fractalNavigate/fractalNavigate.js';
 import { handleFractalScan } from '../tools/fractalScan/fractalScan.js';
 import { handleLcaResolve } from '../tools/lcaResolve/lcaResolve.js';
+import { handleOpenSettings } from '../tools/openSettings/openSettings.js';
 import { handleProjectInit } from '../tools/projectInit/projectInit.js';
 import { handleReviewManage } from '../tools/reviewManage/reviewManage.js';
 import { handleRuleDocsSync } from '../tools/ruleDocsSync/ruleDocsSync.js';
@@ -175,6 +176,25 @@ export function createServer(): McpServer {
       }),
     },
     wrapHandler(handleRuleDocsSync),
+  );
+
+  server.registerTool(
+    McpToolName.OPEN_SETTINGS,
+    {
+      description:
+        'Open the local filid settings page (.filid/config.json + rule docs) in a browser and long-poll until the user saves. Returns status: saved (summary included) | closed (kept existing config) | pending (wait elapsed; page still open — call again to keep waiting).',
+      inputSchema: z.object({
+        path: z
+          .string()
+          .optional()
+          .describe('Absolute path of the target workspace root.'),
+        waitSeconds: z
+          .number()
+          .optional()
+          .describe('Bounded wait for the save event (default 300, max 600).'),
+      }),
+    },
+    wrapHandler(handleOpenSettings),
   );
 
   server.registerTool(
