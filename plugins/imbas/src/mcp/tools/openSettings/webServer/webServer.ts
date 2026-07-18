@@ -39,6 +39,7 @@ export async function startSettingsServer(
   let server: Server | null = null;
   let shutdownTimer: ReturnType<typeof setTimeout> | null = null;
   let closed = false;
+  let serverStarted = false;
   let settleResolvers: Array<(event: SettingsSettleEvent) => void> = [];
 
   const idleMs = options.idleMs ?? SETTINGS_SERVER_IDLE_MS;
@@ -138,10 +139,19 @@ export async function startSettingsServer(
           });
         else reject(new Error('Failed to get server address'));
       });
-      server!.on('error', reject);
+      server!.on('error', (err) => {
+        if (!serverStarted) {
+          reject(err);
+          return;
+        }
+        // Post-startup error: reject() no-ops here, so log + tear down instead.
+        console.error('[imbas] settings web server error:', err);
+        void closeServer();
+      });
     },
   );
 
+  serverStarted = true;
   resetTimer();
 
   return {

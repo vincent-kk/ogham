@@ -210,17 +210,21 @@
       nodes[i].textContent = '';
     }
     var inputs = form.querySelectorAll('[aria-invalid]');
-    for (var j = 0; j < inputs.length; j++)
+    for (var j = 0; j < inputs.length; j++) {
       inputs[j].removeAttribute('aria-invalid');
+      inputs[j].removeAttribute('aria-describedby');
+    }
   }
 
   function showFieldError(field, message) {
+    var input = $(field);
     var el = form.querySelector('[data-error-for="' + field + '"]');
     if (el) {
+      el.id = field + '-error';
       el.textContent = message;
       el.hidden = false;
+      if (input) input.setAttribute('aria-describedby', el.id);
     }
-    var input = $(field);
     if (input) {
       input.setAttribute('aria-invalid', 'true');
       var details = input.closest ? input.closest('details') : null;
@@ -275,33 +279,48 @@
   }
 
   // --- collect -------------------------------------------------------------
-  function collect() {
-    var provider = selectedProvider();
-
-    var projectRef = null;
-    if (provider === 'jira') {
-      projectRef = $('jira-project-key').value.trim() || null;
-      if (!projectRef) {
-        showFieldError('jira-project-key', 'Enter a Jira project key.');
-        return null;
-      }
-    } else if (provider === 'github') {
-      var repo = $('github-repo').value.trim();
-      if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) {
-        showFieldError('github-repo', 'Enter the repository as owner/name.');
-        return null;
-      }
-      projectRef = repo;
-    } else {
-      projectRef = $('local-key').value.trim().toUpperCase() || 'LOCAL';
+  function collectJiraProjectRef() {
+    var projectRef = $('jira-project-key').value.trim() || null;
+    if (!projectRef) {
+      showFieldError('jira-project-key', 'Enter a Jira project key.');
+      return null;
     }
+    return projectRef;
+  }
 
+  function collectGithubProjectRef() {
+    var repo = $('github-repo').value.trim();
+    if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) {
+      showFieldError('github-repo', 'Enter the repository as owner/name.');
+      return null;
+    }
+    return repo;
+  }
+
+  function collectLocalProjectRef() {
+    return $('local-key').value.trim().toUpperCase() || 'LOCAL';
+  }
+
+  function collectProjectRef(provider) {
+    if (provider === 'jira') return collectJiraProjectRef();
+    if (provider === 'github') return collectGithubProjectRef();
+    return collectLocalProjectRef();
+  }
+
+  function collectSubtaskLimits() {
     var maxLines = positiveNumber('limit-max_lines', true);
     var maxFiles = positiveNumber('limit-max_files', true);
     var reviewHours = positiveNumber('limit-review_hours', false);
     if (maxLines === null || maxFiles === null || reviewHours === null)
       return null;
+    return {
+      max_lines: maxLines,
+      max_files: maxFiles,
+      review_hours: reviewHours,
+    };
+  }
 
+  function collectJiraSection() {
     var jira = {
       base_url: $('jira-base-url').value.trim() || null,
       issue_types: {},
@@ -316,6 +335,41 @@
       var key = mapInputs[i].getAttribute('data-jira-key');
       jira[map][key] = mapInputs[i].value.trim();
     }
+    return jira;
+  }
+
+  function collectGithubLinkTypes() {
+    var linkTypes = [];
+    var boxes = form.querySelectorAll('[data-link-type]');
+    for (var b = 0; b < boxes.length; b++)
+      if (boxes[b].checked)
+        linkTypes.push(boxes[b].getAttribute('data-link-type'));
+    return linkTypes;
+  }
+
+  function collectGithubSection(projectRef) {
+    return {
+      repo: projectRef,
+      defaultLabels: $('github-default-labels')
+        .value.split('\n')
+        .map(function (line) {
+          return line.trim();
+        })
+        .filter(function (line) {
+          return line.length > 0;
+        }),
+      linkTypes: collectGithubLinkTypes(),
+    };
+  }
+
+  function collect() {
+    var provider = selectedProvider();
+
+    var projectRef = collectProjectRef(provider);
+    if (projectRef === null) return null;
+
+    var subtaskLimits = collectSubtaskLimits();
+    if (subtaskLimits === null) return null;
 
     var next = {
       version: config.version || '1.0',
@@ -325,34 +379,14 @@
         project_ref: projectRef,
         codebase: config.defaults.codebase || null,
         llm_model: collectGroup('data-model-key'),
-        subtask_limits: {
-          max_lines: maxLines,
-          max_files: maxFiles,
-          review_hours: reviewHours,
-        },
+        subtask_limits: subtaskLimits,
       },
       labels: collectGroup('data-label-key'),
-      jira: jira,
+      jira: collectJiraSection(),
     };
 
     if (provider === 'github') {
-      var linkTypes = [];
-      var boxes = form.querySelectorAll('[data-link-type]');
-      for (var b = 0; b < boxes.length; b++)
-        if (boxes[b].checked)
-          linkTypes.push(boxes[b].getAttribute('data-link-type'));
-      next.github = {
-        repo: projectRef,
-        defaultLabels: $('github-default-labels')
-          .value.split('\n')
-          .map(function (line) {
-            return line.trim();
-          })
-          .filter(function (line) {
-            return line.length > 0;
-          }),
-        linkTypes: linkTypes,
-      };
+      next.github = collectGithubSection(projectRef);
     } else if (config.github) {
       // Preserve a previously configured GitHub section when another
       // provider is active, so switching back does not lose it.
@@ -369,6 +403,8 @@
     var next = collect();
     if (next === null) {
       setStatus('error', 'Fix the highlighted fields, then save.');
+      var firstInvalid = form.querySelector('[aria-invalid="true"]');
+      if (firstInvalid) firstInvalid.focus();
       return;
     }
     var provision = next.provider === 'github' && $('provision-labels').checked;

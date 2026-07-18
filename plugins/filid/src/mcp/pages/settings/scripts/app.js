@@ -247,8 +247,10 @@
       nodes[i].textContent = '';
     }
     var inputs = form.querySelectorAll('[aria-invalid]');
-    for (var j = 0; j < inputs.length; j++)
+    for (var j = 0; j < inputs.length; j++) {
       inputs[j].removeAttribute('aria-invalid');
+      inputs[j].removeAttribute('aria-describedby');
+    }
   }
 
   function showFieldError(field, message) {
@@ -260,6 +262,10 @@
     var input = $(field);
     if (input) {
       input.setAttribute('aria-invalid', 'true');
+      if (el) {
+        if (!el.id) el.id = input.id + '-error';
+        input.setAttribute('aria-describedby', el.id);
+      }
       var details = input.closest ? input.closest('details') : null;
       if (details && !details.open) details.open = true;
     }
@@ -387,6 +393,8 @@
     clearErrors();
     var config = collectConfig();
     if (config === null) {
+      var firstInvalid = form.querySelector('[aria-invalid="true"]');
+      if (firstInvalid) firstInvalid.focus();
       setStatus('error', 'Fix the highlighted fields, then save.');
       return;
     }

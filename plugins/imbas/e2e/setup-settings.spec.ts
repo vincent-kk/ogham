@@ -4,7 +4,7 @@ import { basename, join } from 'node:path';
 
 import { expect, test } from '@playwright/test';
 
-import { handleOpenSettings } from '../src/mcp/tools/openSettings/openSettings.js';
+import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
 import type { ImbasConfig } from '../src/types/config.js';
 import type { SettingsBootstrap } from '../src/types/settings.js';
 
