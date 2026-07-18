@@ -248,17 +248,37 @@ code {
   min-width: 17px;
 }
 
+/* Custom checkbox — same vocabulary as the primary button and toggles:
+   muted well + hairline border, filled white with a dark check when on. */
 input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: var(--fg);
+  flex: none;
+  background: var(--muted);
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
   cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+input[type='checkbox']:hover {
+  border-color: var(--fg-faint);
+}
+input[type='checkbox']:checked {
+  background-color: var(--fg);
+  border-color: var(--fg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0b' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 11px;
 }
 input[type='checkbox']:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--accent-ring);
-  border-radius: 3px;
 }
 
 .docrow__main {
