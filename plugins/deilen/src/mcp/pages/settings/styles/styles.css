@@ -1,62 +1,126 @@
-/* deilen settings — shares the viewer token system; cennad-style chrome.
-   Chrome (buttons, switches, radios, focus) is monochrome: --accent maps to the
-   text color per theme, so high-contrast controls fall out of the token values. */
+/* deilen settings — parchment · ink · seal, same token sheet as the viewer.
+   Chrome is monochrome ink: --accent equals the text color per theme, so
+   high-contrast controls fall out of the token values. --seal appears only on
+   the brand glyph. */
 
+/* ── Shared token sheet — single source: ../../DESIGN.md.
+   Keep this block identical between viewer and settings styles.css. ── */
 :root {
-  --font-body:
+  --font-doc: Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-ui:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --bg: #ffffff;
-  --bg-subtle: #f7f7f8;
-  --bg-inset: #ededee;
-  --text: #1a1a1d;
-  --text-muted: #5c5c63;
-  --text-faint: #8a8a90;
-  --border: #e5e5e7;
-  --border-strong: #d4d4d7;
-  --accent: #5b5bd6;
-  --accent-hover: #4a4ac4;
-  --accent-contrast: #ffffff;
-  --accent-soft: rgba(91, 91, 214, 0.1);
-  --danger: #d61f1f;
-  --radius-sm: 6px;
-  --radius: 10px;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", "JetBrains Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --bg: #f8f5ee;
+  --bg-subtle: #f1ede1;
+  --bg-inset: #e7e2d2;
+  --text: #1f1d16;
+  --text-muted: #6b665a;
+  --text-faint: #98917f;
+  --border: #e3ddcc;
+  --border-strong: #cec6b1;
+
+  --accent: #1f1d16;
+  --accent-hover: #000000;
+  --accent-contrast: #f8f5ee;
+  --accent-soft: rgba(31, 29, 22, 0.07);
+  --seal: #6d2130;
+
+  --danger: #b3372f;
+  --danger-soft: rgba(179, 55, 47, 0.1);
+  --success: #2f6e44;
+  --mark: rgba(202, 141, 22, 0.2);
+  --mark-line: rgba(164, 110, 10, 0.55);
+  --pending: rgba(158, 82, 110, 0.11);
+  --pending-line: rgba(158, 82, 110, 0.45);
+  --syn-keyword: #9c4a2f;
+  --syn-string: #41684b;
+  --syn-number: #91630c;
+  --syn-function: #33697a;
+  --syn-attr: #5d6b34;
+
+  --shadow-sm:
+    0 1px 2px rgba(43, 36, 18, 0.06), 0 1px 3px rgba(43, 36, 18, 0.08);
+  --shadow-md:
+    0 4px 12px rgba(43, 36, 18, 0.1), 0 2px 4px rgba(43, 36, 18, 0.06);
+  --shadow-lg: 0 12px 32px rgba(43, 36, 18, 0.16);
+
+  --radius-sm: 4px;
+  --radius: 7px;
+  --radius-lg: 10px;
   --transition: 160ms ease;
 }
 
 :root[data-theme="dark"] {
-  --bg: #16161a;
-  --bg-subtle: #1c1c20;
-  --bg-inset: #242429;
-  --text: #f4f4f6;
-  --text-muted: #9a9aa3;
-  --text-faint: #5e5e67;
-  --border: #2a2a31;
-  --border-strong: #3a3a43;
-  --accent: #8b8cea;
-  --accent-hover: #a3a4f0;
-  --accent-contrast: #16161a;
-  --accent-soft: rgba(139, 140, 234, 0.16);
-  --danger: #f08a8a;
+  --bg: #1c1a15;
+  --bg-subtle: #221f19;
+  --bg-inset: #2b2720;
+  --text: #ebe6d8;
+  --text-muted: #a49c88;
+  --text-faint: #6f695a;
+  --border: #35302a;
+  --border-strong: #4a4433;
+
+  --accent: #ebe6d8;
+  --accent-hover: #ffffff;
+  --accent-contrast: #1c1a15;
+  --accent-soft: rgba(235, 230, 216, 0.09);
+  --seal: #ad4750;
+
+  --danger: #e0968c;
+  --danger-soft: rgba(224, 150, 140, 0.13);
+  --success: #83c290;
+  --mark: rgba(226, 178, 88, 0.18);
+  --mark-line: rgba(226, 178, 88, 0.45);
+  --pending: rgba(214, 146, 172, 0.13);
+  --pending-line: rgba(214, 146, 172, 0.45);
+  --syn-keyword: #d9a084;
+  --syn-string: #a9c9a6;
+  --syn-number: #d9b26e;
+  --syn-function: #92bcc6;
+  --syn-attr: #b5c48f;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] {
-    --bg: #16161a;
-    --bg-subtle: #1c1c20;
-    --bg-inset: #242429;
-    --text: #f4f4f6;
-    --text-muted: #9a9aa3;
-    --text-faint: #5e5e67;
-    --border: #2a2a31;
-    --border-strong: #3a3a43;
-    --accent: #8b8cea;
-    --accent-hover: #a3a4f0;
-    --accent-contrast: #16161a;
-    --accent-soft: rgba(139, 140, 234, 0.16);
-    --danger: #f08a8a;
+    --bg: #1c1a15;
+    --bg-subtle: #221f19;
+    --bg-inset: #2b2720;
+    --text: #ebe6d8;
+    --text-muted: #a49c88;
+    --text-faint: #6f695a;
+    --border: #35302a;
+    --border-strong: #4a4433;
+    --accent: #ebe6d8;
+    --accent-hover: #ffffff;
+    --accent-contrast: #1c1a15;
+    --accent-soft: rgba(235, 230, 216, 0.09);
+    --seal: #ad4750;
+    --danger: #e0968c;
+    --danger-soft: rgba(224, 150, 140, 0.13);
+    --success: #83c290;
+    --mark: rgba(226, 178, 88, 0.18);
+    --mark-line: rgba(226, 178, 88, 0.45);
+    --pending: rgba(214, 146, 172, 0.13);
+    --pending-line: rgba(214, 146, 172, 0.45);
+    --syn-keyword: #d9a084;
+    --syn-string: #a9c9a6;
+    --syn-number: #d9b26e;
+    --syn-function: #92bcc6;
+    --syn-attr: #b5c48f;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
   }
 }
+/* ── End shared token sheet ── */
 
 * {
   box-sizing: border-box;
@@ -71,7 +135,7 @@ body {
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
   font-size: 14px;
   line-height: 1.55;
   min-height: 100dvh;
@@ -85,8 +149,7 @@ body {
 }
 
 code {
-  font-family:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   background: var(--bg-inset);
   padding: 1px 6px;
   border-radius: 4px;
@@ -113,9 +176,10 @@ code {
   margin-bottom: 8px;
 }
 
+/* Wax-seal brand glyph — the only chrome element allowed to carry --seal. */
 .brand {
   display: inline-flex;
-  color: var(--accent);
+  color: var(--seal);
 }
 
 .brand-name {
@@ -200,7 +264,7 @@ code {
 
 .input {
   width: 100%;
-  height: 38px;
+  height: 36px;
   padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -260,7 +324,8 @@ code {
 .radio input:checked + span {
   border-color: var(--accent);
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--text);
+  font-weight: 500;
 }
 
 .radio input:focus-visible + span {
@@ -339,14 +404,18 @@ code {
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
   font: inherit;
   font-size: 13px;
-  padding: 10px 18px;
-  min-height: 44px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-subtle);
-  color: var(--text);
+  font-weight: 500;
   cursor: pointer;
   transition:
     background var(--transition),
@@ -355,20 +424,13 @@ code {
 }
 
 .btn:hover {
-  border-color: var(--border-strong);
-  background: var(--bg-inset);
-}
-
-.btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  background: var(--bg-subtle);
 }
 
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-contrast);
-  font-weight: 500;
 }
 
 .btn-primary:hover {
@@ -379,7 +441,7 @@ code {
 .btn-ghost {
   background: transparent;
   border-color: transparent;
-  color: var(--text-muted, var(--text));
+  color: var(--text-muted);
 }
 
 .btn-ghost:hover {

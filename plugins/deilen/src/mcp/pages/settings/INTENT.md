@@ -16,6 +16,7 @@
 - 사용자 입력은 빌드 후 inlined `__DEILEN_STATE__` 만 신뢰 (escape 는 백엔드 책임)
 - 모든 fetch 는 `?token=` 부착, POST body 는 `application/json`
 - 외부 CDN·동봉 폰트 금지
+- 토큰 시트는 viewer `styles.css` 와 동일 블록 유지 — 정본 [`DESIGN.md`](../DESIGN.md)
 
 ## Boundaries
 

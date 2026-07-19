@@ -8,6 +8,7 @@
 | ----------- | ------------------------------------------------- |
 | `viewer/`   | 문서 뷰어 FE (HTML/CSS/JS + lazy 렌더러 entry)    |
 | `settings/` | 설정 FE (HTML/CSS/JS)                             |
+| `DESIGN.md` | 디자인 정본 — 페이지 수정·추가의 기준             |
 | `index.ts`  | 빌드 입력 표식 (`export {}`) — 런타임 export 없음 |
 
 ## Conventions
@@ -20,6 +21,7 @@
 
 ### Always do
 
+- 페이지 수정·추가는 [DESIGN.md](./DESIGN.md) 를 따른다
 - FE 자산은 빌드 스크립트(`scripts/build*.mjs`)로만 `public/` 에 산출
 
 ### Ask first
