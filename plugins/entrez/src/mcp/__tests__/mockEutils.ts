@@ -10,7 +10,7 @@ import {
 } from "../../constants/defaults.js";
 
 export interface MockResponse {
-  body: BodyInit;
+  body: ConstructorParameters<typeof Response>[0];
   status?: number;
   contentType?: string;
 }

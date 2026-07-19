@@ -24,8 +24,23 @@ const VALID_JIRA_FORM = {
   },
 };
 
+const TEST_TOKEN = "test-token";
+
+type RouteJson = {
+  success?: boolean;
+  configured?: boolean;
+  results?: unknown[];
+  errors?: unknown[];
+  jira?: Array<{ base_url?: string }>;
+};
+
+async function readJson(res: Response): Promise<RouteJson> {
+  return res.json() as Promise<RouteJson>;
+}
+
 function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
   return {
+    token: TEST_TOKEN,
     settingsHtml:
       "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
     loadConfig: vi.fn().mockResolvedValue({}),
@@ -38,7 +53,13 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
     resetTimer: vi.fn(),
     closeServer: vi.fn().mockResolvedValue(undefined),
     ...overrides,
-  };
+  } as RouteContext;
+}
+
+function withToken(baseUrl: string, path: string, token = TEST_TOKEN): string {
+  const url = new URL(path, baseUrl);
+  url.searchParams.set("token", token);
+  return url.toString();
 }
 
 async function startTestServer(
@@ -94,7 +115,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/");
+    const res = await fetch(withToken(baseUrl, "/"));
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toContain("window.__SETTINGS_STATE__ = {");
@@ -122,7 +143,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/");
+    const res = await fetch(withToken(baseUrl, "/"));
     expect(res.status).toBe(200);
     const text = await res.text();
     const state = extractSetupState(text);
@@ -176,7 +197,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/");
+    const res = await fetch(withToken(baseUrl, "/"));
     expect(res.status).toBe(200);
     const text = await res.text();
     const state = extractSetupState(text);
@@ -208,7 +229,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/");
+    const res = await fetch(withToken(baseUrl, "/"));
     expect(res.status).toBe(200);
     const text = await res.text();
     const state = extractSetupState(text);
@@ -235,7 +256,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/");
+    const res = await fetch(withToken(baseUrl, "/"));
     expect(res.status).toBe(200);
     const text = await res.text();
     const state = extractSetupState(text);
@@ -249,9 +270,9 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/status");
+    const res = await fetch(withToken(baseUrl, "/status"));
     expect(res.status).toBe(200);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.configured).toBe(false);
   });
 
@@ -260,9 +281,9 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/test", VALID_JIRA_FORM);
+    const res = await postJson(withToken(baseUrl, "/test"), VALID_JIRA_FORM);
     expect(res.status).toBe(200);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.success).toBe(true);
     expect(Array.isArray(data.results)).toBe(true);
   });
@@ -274,9 +295,9 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", VALID_JIRA_FORM);
+    const res = await postJson(withToken(baseUrl, "/submit"), VALID_JIRA_FORM);
     expect(res.status).toBe(200);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.success).toBe(true);
     expect(ctx.saveConfig).toHaveBeenCalledOnce();
     expect(ctx.saveCredentials).toHaveBeenCalledOnce();
@@ -293,9 +314,9 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", VALID_JIRA_FORM);
+    const res = await postJson(withToken(baseUrl, "/submit"), VALID_JIRA_FORM);
     expect(res.status).toBe(400);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.success).toBe(false);
     expect(ctx.saveConfig).not.toHaveBeenCalled();
     expect(ctx.saveCredentials).not.toHaveBeenCalled();
@@ -306,12 +327,12 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", {
+    const res = await postJson(withToken(baseUrl, "/submit"), {
       deployment_type: "cloud",
       jira: { base_url: "not-a-url" },
     });
     expect(res.status).toBe(400);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.success).toBe(false);
     expect(Array.isArray(data.errors)).toBe(true);
   });
@@ -321,12 +342,12 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/test", {
+    const res = await postJson(withToken(baseUrl, "/test"), {
       deployment_type: "cloud",
       jira: { base_url: "bad-url" },
     });
     expect(res.status).toBe(400);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.success).toBe(false);
   });
 
@@ -341,7 +362,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", {
+    const res = await postJson(withToken(baseUrl, "/submit"), {
       deployment_type: "cloud",
       jira: {
         base_url: "https://test.atlassian.net",
@@ -371,8 +392,8 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/status");
-    const data = await res.json();
+    const res = await fetch(withToken(baseUrl, "/status"));
+    const data = await readJson(res);
     expect(data.configured).toBe(true);
     expect(data.jira?.[0]?.base_url).toBe("https://test.atlassian.net");
   });
@@ -382,7 +403,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    await postJson(baseUrl + "/submit", VALID_JIRA_FORM);
+    await postJson(withToken(baseUrl, "/submit"), VALID_JIRA_FORM);
 
     // closeServer는 void로 호출되므로 잠시 대기
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -394,7 +415,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", {
+    const res = await postJson(withToken(baseUrl, "/submit"), {
       ...VALID_JIRA_FORM,
       closeAfter: false,
     });
@@ -411,9 +432,9 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await fetch(baseUrl + "/nonexistent-path");
+    const res = await fetch(withToken(baseUrl, "/nonexistent-path"));
     expect(res.status).toBe(404);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.success).toBe(false);
   });
 
@@ -422,7 +443,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    await postJson(baseUrl + "/submit", VALID_JIRA_FORM);
+    await postJson(withToken(baseUrl, "/submit"), VALID_JIRA_FORM);
 
     const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[0];
     expect(Array.isArray(savedConfig?.jira)).toBe(true);
@@ -442,7 +463,7 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", {
+    const res = await postJson(withToken(baseUrl, "/submit"), {
       deployment_type: "onprem",
       jira: {
         base_url: "https://jira.internal.com",

@@ -12,6 +12,7 @@ import { handleRunCreate } from '../../mcp/tools/runCreate/runCreate.js';
 import { handleRunTransition } from '../../mcp/tools/runTransition/runTransition.js';
 import {
   DevplanManifestSchema,
+  type ManifestSummary,
   StoriesManifestSchema,
 } from '../../types/manifest.js';
 
@@ -139,7 +140,7 @@ describe('Pipeline Integration', () => {
         manifest,
       });
       expect(saveResult.path).toContain('stories-manifest.json');
-      expect(saveResult.summary.total).toBe(3);
+      expect((saveResult.summary as ManifestSummary).total).toBe(3);
 
       await handleRunTransition({
         project_ref: 'ALPHA',
@@ -200,7 +201,7 @@ describe('Pipeline Integration', () => {
         run_id,
         type: 'stories',
       });
-      expect(getResult.summary.total).toBe(3);
+      expect((getResult.summary as ManifestSummary).total).toBe(3);
 
       const validateResult = await handleManifestValidate({
         project_ref: 'ALPHA',

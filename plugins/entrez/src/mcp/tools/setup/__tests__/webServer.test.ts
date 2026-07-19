@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { startSetupServer } from "../webServer/index.js";
+import type { SetupStatus } from "../webServer/utils/buildStatus.js";
 import type { SetupServerHandle } from "../../../../types/setup.js";
 import type {
   SetupFormData,
@@ -90,7 +91,7 @@ describe("setup web server", () => {
   it("returns masked status on GET /status (no plaintext key)", async () => {
     await saveCredentials({ api_key: "STORED" }, credPath);
     const res = await fetch(`${base}/status?token=${handle.token}`);
-    const body = await res.json();
+    const body = (await res.json()) as SetupStatus;
     expect(body.api_key).not.toBe("STORED");
     expect(JSON.stringify(body)).not.toContain("STORED");
   });
@@ -106,7 +107,7 @@ describe("setup web server", () => {
 
   it("runs the EInfo probe on POST /test", async () => {
     const res = await postJson("/test", VALID);
-    const body = await res.json();
+    const body = (await res.json()) as ConnectionTestResult;
     expect(body.success).toBe(true);
     expect(body.dbCount).toBe(3);
     expect(lastTested?.api_key).toBe("SECRETKEY");
@@ -114,7 +115,7 @@ describe("setup web server", () => {
 
   it("saves config + credentials (0o600) on POST /submit; key not in response", async () => {
     const res = await postJson("/submit", VALID);
-    const body = await res.json();
+    const body = (await res.json()) as { success: boolean };
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
     expect(JSON.stringify(body)).not.toContain("SECRETKEY");

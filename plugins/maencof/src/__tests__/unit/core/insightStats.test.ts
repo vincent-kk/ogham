@@ -137,9 +137,7 @@ describe('writeInsightConfig', () => {
 
     writeInsightConfig(nestedCwd, DEFAULT_INSIGHT_CONFIG);
     const read = readInsightConfig(nestedCwd);
-    // readInsightConfig strips _schemaVersion (Zod schema doesn't include it)
-    const { _schemaVersion: _, ...expected } = DEFAULT_INSIGHT_CONFIG;
-    expect(read).toEqual(expected);
+    expect(read).toEqual(DEFAULT_INSIGHT_CONFIG);
   });
 });
 
@@ -365,10 +363,9 @@ describe('buildMetaPrompt', () => {
 
   it('config 값이 출력에 포함된다 (max, sensitivity)', () => {
     const config = {
-      enabled: true,
+      ...DEFAULT_INSIGHT_CONFIG,
       sensitivity: 'high' as const,
       max_captures_per_session: 7,
-      notify: true,
     };
     const prompt = buildMetaPrompt(config);
 

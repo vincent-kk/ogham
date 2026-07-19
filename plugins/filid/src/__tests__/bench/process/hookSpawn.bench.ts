@@ -1,11 +1,8 @@
-import { execFile } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { promisify } from 'node:util';
 
 import { bench, describe } from 'vitest';
-
-const execFileAsync = promisify(execFile);
 
 const DIST_DIR = join(import.meta.dirname, '../../../../..', 'dist');
 
@@ -42,9 +39,15 @@ const USER_PROMPT_INPUT = JSON.stringify({
 });
 
 async function spawnHook(scriptPath: string, stdinData: string): Promise<void> {
-  await execFileAsync('node', [scriptPath], {
-    input: stdinData,
-    timeout: 5000,
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn('node', [scriptPath], { timeout: 5000 });
+    child.stdin?.write(stdinData);
+    child.stdin?.end();
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`hook exited with code ${code}`));
+    });
   });
 }
 

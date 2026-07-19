@@ -3,7 +3,6 @@
  * @description sessionStore core 모듈 유닛 테스트 — 일자별 JSON 세션 기록 + 차분.
  */
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,

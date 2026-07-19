@@ -52,6 +52,7 @@ const baseStoriesManifest: StoriesManifest = {
       type: 'Story',
       status: 'pending',
       issue_ref: null,
+      labels: [],
       verification: {
         anchor_link: true,
         coherence: 'PASS',
@@ -68,6 +69,7 @@ const baseStoriesManifest: StoriesManifest = {
       type: 'Story',
       status: 'pending',
       issue_ref: null,
+      labels: [],
       verification: {
         anchor_link: true,
         coherence: 'PASS',
@@ -79,6 +81,7 @@ const baseStoriesManifest: StoriesManifest = {
     },
   ],
   links: [],
+  transitions: [],
 };
 
 const baseDevplanManifest: DevplanManifest = {
@@ -95,6 +98,7 @@ const baseDevplanManifest: DevplanManifest = {
       type: 'Task',
       status: 'pending',
       issue_ref: null,
+      labels: [],
       blocks: [],
       subtasks: [
         {
@@ -103,6 +107,7 @@ const baseDevplanManifest: DevplanManifest = {
           description: 'Sub desc',
           status: 'pending',
           issue_ref: null,
+          labels: [],
         },
       ],
     },
