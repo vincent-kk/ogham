@@ -2,13 +2,14 @@
 
 ## Purpose
 
-MCP server-process session lifecycle — the replacement for the removed SessionEnd hook. `bootSweep` is the guaranteed path (finalize the previous session's leftovers at boot); `registerShutdown` is the best-effort fast path (close this session precisely at exit). Every step is idempotent, so double execution (shutdown + next boot, or two concurrent sessions) is harmless. `registerShutdown` delegates to the shared `@ogham/session-finalizer` runtime — a synchronous precise-close plus, on SIGINT/SIGTERM, a detached `--finalize` spawn so the heavy chain completes off the ~400ms grace window without waiting for the next boot; `bootSweep` stays the idempotent fallback.
+MCP server-process session lifecycle — the replacement for the removed SessionEnd hook. `bootSweep` is the guaranteed path (finalize the previous session's leftovers at boot); `registerShutdown` is the best-effort fast path (close this session precisely at exit). Every step is idempotent, so double execution (shutdown + next boot, or two concurrent sessions) is harmless. `registerShutdown` delegates to the shared `@ogham/session-finalizer` runtime — a synchronous precise-close plus, on SIGINT/SIGTERM, a detached `--finalize` spawn that runs `finalizeSession` (bootSweep + one index rebuild) off the ~400ms grace window without waiting for the next boot; `bootSweep` stays the idempotent fallback.
 
 ## Structure
 
 - `index.ts` — barrel (operations/ 재노출)
 - `operations/bootSweep.ts` — turn-context 폐기 → stale 세션 sweep(+digest) → personal-context prune → changelogDebt → archiveExpired → vaultCommitter(마지막)
 - `operations/registerShutdown.ts` — shared `@ogham/session-finalizer` 의 registerShutdownFinalizer 에 위임 (guard=isMaencofVault, 동기 onShutdown=turn-context+env session_id 정밀 마감·캐시 삭제, detached=true 로 SIGINT/SIGTERM 시 `--finalize` 스폰)
+- `operations/finalizeSession.ts` — detached `--finalize` 자식 태스크: bootSweep 완결 후 handleKgBuild(증분) 1회로 최종 문서 상태를 인덱스에 반영 (정상 부팅의 vaultWalk→triggerBootRebuildIfStale 대체 — 자식엔 실행 중 서버 캐시 없음)
 
 ## Conventions
 

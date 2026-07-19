@@ -2,7 +2,8 @@
  * @file mcpLifecycle.test.ts
  * @description MCP server lifecycle 유닛 테스트 — bootSweep 오케스트레이션 순서
  * (vaultCommitter 마지막 불변식), registerShutdown 이 shared session-finalizer 에
- * 위임하는 opts(guard=isMaencofVault, detached)와 onShutdown 의 동기 정밀 마감.
+ * 위임하는 opts(guard=isMaencofVault, detached)와 onShutdown 의 동기 정밀 마감,
+ * finalizeSession 이 bootSweep 뒤 인덱스 재빌드(kg_build)를 1회 잇는지.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -14,8 +15,10 @@ import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
 import { runVaultCommitter } from '../../hooks/utils/vaultCommitter/operations/runVaultCommitter.js';
 import {
   bootSweep,
+  finalizeSession,
   registerShutdown,
 } from '../../mcp/server/lifecycle/index.js';
+import { handleKgBuild } from '../../mcp/tools/kgBuild/index.js';
 
 const calls: string[] = [];
 
@@ -65,6 +68,12 @@ vi.mock(
 );
 vi.mock('../../hooks/shared/isMaencofVault.js', () => ({
   isMaencofVault: vi.fn(() => true),
+}));
+vi.mock('../../mcp/tools/kgBuild/index.js', () => ({
+  handleKgBuild: vi.fn(async () => {
+    calls.push('kgBuild');
+    return { success: true };
+  }),
 }));
 
 // registerShutdown delegates to the shared runtime — mock it so the test can
@@ -184,5 +193,26 @@ describe('registerShutdown', () => {
     delete process.env.CLAUDE_CODE_SESSION_ID;
     opts.onShutdown('/vault');
     expect(calls).toEqual(['turnContext']);
+  });
+});
+
+describe('finalizeSession', () => {
+  // Test 6 (complex): the detached --finalize child reindexes AFTER the full
+  // bootSweep chain, so the index reflects archiveExpired's moves without waiting
+  // for the next boot. Incremental (no force) — kg_build runs last.
+  it('runs bootSweep then rebuilds the index (kg_build last, incremental)', async () => {
+    await finalizeSession('/vault');
+
+    expect(calls).toEqual([
+      'turnContext',
+      'sweep',
+      'digest:2026-07-11',
+      'personalContext',
+      'changelogDebt',
+      'archiveExpired',
+      'vaultCommitter',
+      'kgBuild',
+    ]);
+    expect(vi.mocked(handleKgBuild)).toHaveBeenCalledWith('/vault', {});
   });
 });
