@@ -1,4 +1,4 @@
-/* deilen viewer — parchment · ink · seal reading surface. */
+/* deilen viewer — parchment · ink · nib · seal reading surface. */
 
 /* ── Shared token sheet — single source: ../../DESIGN.md.
    Keep this block identical between viewer and settings styles.css. ── */
@@ -19,6 +19,8 @@
   --text-faint: #98917f;
   --border: #e3ddcc;
   --border-strong: #cec6b1;
+  --divider: #e9e4d4;
+  --divider-edge: rgba(255, 255, 255, 0.75);
 
   --accent: #1f1d16;
   --accent-hover: #000000;
@@ -60,6 +62,8 @@
   --text-faint: #6f695a;
   --border: #35302a;
   --border-strong: #4a4433;
+  --divider: #4a4433;
+  --divider-edge: rgba(255, 255, 255, 0.09);
 
   --accent: #ebe6d8;
   --accent-hover: #ffffff;
@@ -95,6 +99,8 @@
     --text-faint: #6f695a;
     --border: #35302a;
     --border-strong: #4a4433;
+    --divider: #4a4433;
+    --divider-edge: rgba(255, 255, 255, 0.09);
     --accent: #ebe6d8;
     --accent-hover: #ffffff;
     --accent-contrast: #1c1a15;
@@ -488,18 +494,30 @@ button {
   margin-bottom: 0;
 }
 
-/* Hedera (❦) — the printer's "leaf" ornament, deilen's namesake. */
+/* Divider — two hairline rules around a center lozenge (─── ◆ ───),
+   debossed into the page (near-bg fill + 1px light edge below). */
 .viewer hr {
+  --divider-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20120%2012'%3E%3Cg%20fill='none'%20stroke='%23000'%20stroke-width='1.2'%20stroke-linecap='round'%3E%3Cpath%20d='M4%206H53'/%3E%3Cpath%20d='M67%206H116'/%3E%3C/g%3E%3Cpath%20d='M60%203.9L62.1%206%2060%208.1%2057.9%206Z'/%3E%3C/svg%3E");
   border: none;
-  margin: 2em 0;
-  text-align: center;
+  position: relative;
+  width: 132px;
+  height: 13px;
+  margin: 2em auto;
 }
 
+.viewer hr::before,
 .viewer hr::after {
-  content: "❦";
-  color: var(--text-faint);
-  font-size: 0.95em;
-  font-style: normal;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--divider);
+  -webkit-mask: var(--divider-mask) center / 100% 100% no-repeat;
+  mask: var(--divider-mask) center / 100% 100% no-repeat;
+}
+
+.viewer hr::before {
+  background: var(--divider-edge);
+  transform: translateY(1px);
 }
 
 .viewer img {
@@ -916,6 +934,8 @@ button {
   color: var(--danger);
 }
 
+/* Muted on purpose: an ink-bright outline next to the text being typed pulls
+   the eye away from it — DESIGN.md focus exception. */
 .composer {
   display: flex;
   flex-direction: column;
@@ -923,7 +943,7 @@ button {
   border-radius: var(--radius);
   background: var(--bg);
   padding: 12px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-md);
 }
 
@@ -958,7 +978,7 @@ button {
 
 .composer textarea:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--text-faint);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
@@ -1152,10 +1172,49 @@ button {
   color: var(--accent);
 }
 
-/* Sending seals the letter — the wax glyph is its own circle, no backing disc. */
+/* Sending seals the letter — the wax glyph is its own circle, no backing disc.
+   The halo swells like warm wax: a thick soft band that barely travels, melts
+   away, then rests before the next slow beat. */
 .overlay-icon-seal {
   background: none;
   color: var(--seal);
+  position: relative;
+}
+
+.overlay-icon-seal::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 5px solid color-mix(in srgb, var(--seal) 32%, transparent);
+  filter: blur(1.8px);
+  animation: seal-halo 5s cubic-bezier(0.2, 0.5, 0.25, 1) infinite;
+}
+
+@keyframes seal-halo {
+  0% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.75;
+  }
+  55% {
+    transform: scale(1.1);
+    opacity: 0.4;
+  }
+  75%,
+  100% {
+    transform: scale(1.14);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay-icon-seal::after {
+    animation: none;
+    opacity: 0.5;
+  }
 }
 
 .overlay-title {

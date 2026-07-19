@@ -1,4 +1,4 @@
-/* deilen settings — parchment · ink · seal, same token sheet as the viewer.
+/* deilen settings — parchment · ink · nib · seal, same token sheet as the viewer.
    Chrome is monochrome ink: --accent equals the text color per theme, so
    high-contrast controls fall out of the token values. --seal appears only on
    the brand glyph. */
@@ -22,6 +22,8 @@
   --text-faint: #98917f;
   --border: #e3ddcc;
   --border-strong: #cec6b1;
+  --divider: #e9e4d4;
+  --divider-edge: rgba(255, 255, 255, 0.75);
 
   --accent: #1f1d16;
   --accent-hover: #000000;
@@ -63,6 +65,8 @@
   --text-faint: #6f695a;
   --border: #35302a;
   --border-strong: #4a4433;
+  --divider: #4a4433;
+  --divider-edge: rgba(255, 255, 255, 0.09);
 
   --accent: #ebe6d8;
   --accent-hover: #ffffff;
@@ -98,6 +102,8 @@
     --text-faint: #6f695a;
     --border: #35302a;
     --border-strong: #4a4433;
+    --divider: #4a4433;
+    --divider-edge: rgba(255, 255, 255, 0.09);
     --accent: #ebe6d8;
     --accent-hover: #ffffff;
     --accent-contrast: #1c1a15;
