@@ -3,7 +3,9 @@
 /* ── Shared token sheet — single source: ../../DESIGN.md.
    Keep this block identical between viewer and settings styles.css. ── */
 :root {
-  --font-doc: Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-doc:
+    Charter, "Iowan Old Style", "Palatino Linotype", Georgia,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", serif;
   --font-ui:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
     "Helvetica Neue", Arial, sans-serif;
