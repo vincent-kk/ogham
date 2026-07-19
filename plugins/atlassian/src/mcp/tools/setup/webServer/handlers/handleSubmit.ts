@@ -141,5 +141,6 @@ export async function handleSubmit(
     message: "Configuration saved successfully",
   });
 
-  void ctx.closeServer();
+  // "Save & Close" (closeAfter) tears down the server; plain "Save" keeps it up.
+  if (rawBody.closeAfter !== false) void ctx.closeServer();
 }

@@ -14,9 +14,9 @@ let token = "";
 
 beforeAll(() => {
   const pluginRoot = mkdtempSync(join(tmpdir(), "deilen-settings-"));
-  mkdirSync(join(pluginRoot, "bridge", "assets"), { recursive: true });
-  writeFileSync(join(pluginRoot, "bridge", "settings.html"), SETTINGS_HTML);
-  writeFileSync(join(pluginRoot, "bridge", "viewer.html"), "x");
+  mkdirSync(join(pluginRoot, "public", "assets"), { recursive: true });
+  writeFileSync(join(pluginRoot, "public", "settings.html"), SETTINGS_HTML);
+  writeFileSync(join(pluginRoot, "public", "viewer.html"), "x");
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
 });
 

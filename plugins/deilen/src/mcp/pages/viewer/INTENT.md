@@ -1,6 +1,6 @@
 ## Purpose
 
-문서 뷰어 프런트엔드. 렌더된 HTML 을 마운트하고 테마·복사·라인 단위 코멘트를 제공하며, 무거운 렌더러는 lazy-load 한다. 빌드 시 단일 `bridge/viewer.html` 로 inline+minify 된다.
+문서 뷰어 프런트엔드. 렌더된 HTML 을 마운트하고 테마·복사·라인 단위 코멘트를 제공하며, 무거운 렌더러는 lazy-load 한다. 빌드 시 단일 `public/viewer.html` 로 inline+minify 된다.
 
 ## Structure
 
@@ -11,7 +11,7 @@
 | `scripts/app.js`                           | 진입점 — state hydrate·마운트·테마·heartbeat      |
 | `scripts/enhance.js`                       | `/assets/*` lazy import (highlight/mermaid/katex) |
 | `scripts/{comments,images,submit,copy}.js` | 코멘트·이미지·피드백 전송·복사                    |
-| `renderers/*.entry.ts`                     | 무거운 렌더러 esbuild 진입점 → `bridge/assets/`   |
+| `renderers/*.entry.ts`                     | 무거운 렌더러 esbuild 진입점 → `public/assets/`   |
 | `index.ts`                                 | 빌드 입력 표식 (`export {}`)                      |
 
 ## Conventions
@@ -37,7 +37,7 @@
 ### Never do
 
 - `eval`·inline 핸들러·외부 origin fetch
-- 빌드 산출물(`bridge/viewer.html`, `bridge/assets/*`) 직접 수정
+- 빌드 산출물(`public/viewer.html`, `public/assets/*`) 직접 수정
 
 ## Dependencies
 

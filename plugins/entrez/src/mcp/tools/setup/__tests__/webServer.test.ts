@@ -125,6 +125,18 @@ describe("setup web server", () => {
     expect((await stat(credPath)).mode & 0o777).toBe(0o600);
   });
 
+  it("keeps the server open after a plain Save (closeAfter: false)", async () => {
+    const res = await postJson("/submit", { ...VALID, closeAfter: false });
+    expect(res.status).toBe(200);
+    expect((await loadConfig(configPath))?.tool).toBe(ENTREZ_TOOL_NAME);
+
+    // A plain Save persists but must not tear down the server — only
+    // "Save & Close" closes it, so a follow-up request still succeeds.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const status = await fetch(`${base}/status?token=${handle.token}`);
+    expect(status.status).toBe(200);
+  });
+
   it("rejects an invalid submit without saving (400)", async () => {
     const res = await postJson("/submit", { email: "not-email" });
     expect(res.status).toBe(400);

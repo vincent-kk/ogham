@@ -389,6 +389,23 @@ describe("createRouteHandler", () => {
     expect(ctx.closeServer).toHaveBeenCalled();
   });
 
+  it("POST /submit — closeAfter:false 면 저장하되 closeServer 미호출", async () => {
+    const ctx = makeContext();
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await postJson(baseUrl + "/submit", {
+      ...VALID_JIRA_FORM,
+      closeAfter: false,
+    });
+    expect(res.status).toBe(200);
+    expect(ctx.saveConfig).toHaveBeenCalled();
+
+    // "Save"(유지)는 서버를 닫지 않는다 — "Save & Close"만 닫는다.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(ctx.closeServer).not.toHaveBeenCalled();
+  });
+
   it("알 수 없는 라우트 — 404 반환", async () => {
     const ctx = makeContext();
     const { server: s, baseUrl } = await startTestServer(ctx);

@@ -51,6 +51,8 @@ export async function handleSave(
     return;
   }
 
+  // Both "Save" and "Save & Close" settle the long-poll so Claude resumes; they
+  // differ only in whether the browser then closes the window (client-side).
   ctx.settleSaved(summary);
   sendJson(res, 200, { success: true, message: 'Saved', summary });
 }

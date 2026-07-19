@@ -16,6 +16,8 @@
   var statusBox = $("status");
   var testBtn = $("test-btn");
   var saveBtn = $("save-btn");
+  var cancelBtn = $("cancel-btn");
+  var saveCloseBtn = $("saveclose-btn");
   var apiKeyInput = $("api_key");
   var windowPreset = $("window_preset");
   var windowDays = $("window_days");
@@ -238,15 +240,17 @@
   });
 
   // --- save --------------------------------------------------------------
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
+  function doSubmit(closeAfter) {
     if (!localValidate()) {
       setStatus("error", "Fix the highlighted fields, then save.");
       return;
     }
-    busy(saveBtn, true, "Saving…");
+    var btn = closeAfter ? saveCloseBtn : saveBtn;
+    busy(btn, true, "Saving…");
     setStatus("info", "Validating and saving…");
-    post("/submit", collect())
+    var body = collect();
+    body.closeAfter = closeAfter;
+    post("/submit", body)
       .then(function (r) {
         return r.json().then(function (res) {
           return { status: r.status, res: res };
@@ -255,13 +259,18 @@
       .then(function (out) {
         var res = out.res || {};
         if (out.status === 200 && res.success) {
-          setStatus("ok", "Saved. This tab will close automatically.");
-          busy(saveBtn, false);
-          saveBtn.disabled = true;
-          testBtn.disabled = true;
-          setTimeout(function () {
-            window.close();
-          }, 1000);
+          busy(btn, false);
+          if (closeAfter) {
+            setStatus("ok", "Saved. This tab will close automatically.");
+            saveBtn.disabled = true;
+            saveCloseBtn.disabled = true;
+            testBtn.disabled = true;
+            setTimeout(function () {
+              window.close();
+            }, 1000);
+          } else {
+            setStatus("ok", "Saved.");
+          }
         } else {
           if (Array.isArray(res.errors)) {
             res.errors.forEach(function (er) {
@@ -269,12 +278,23 @@
             });
           }
           setStatus("error", res.message || "Save failed.");
-          busy(saveBtn, false);
+          busy(btn, false);
         }
       })
       .catch(function () {
         setStatus("error", "Could not reach the local server.");
-        busy(saveBtn, false);
+        busy(btn, false);
       });
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    doSubmit(false);
+  });
+  saveCloseBtn.addEventListener("click", function () {
+    doSubmit(true);
+  });
+  cancelBtn.addEventListener("click", function () {
+    window.close();
   });
 })();

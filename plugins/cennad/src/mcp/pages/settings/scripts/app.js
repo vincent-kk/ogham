@@ -121,6 +121,7 @@
   var status = $('#status');
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
+  var cancelBtn = $('#cancel');
   var ratioWarn = $('#ratio-warn');
   var ratioBar = $('#ratio-bar');
   var strength = $('#strength');
@@ -1385,6 +1386,20 @@
     }
   }
 
+  async function cancel() {
+    cancelBtn.disabled = saveBtn.disabled = saveCloseBtn.disabled = true;
+    try {
+      await fetch(withToken('/close'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+    } catch (e) {
+      /* server closed before responding — expected */
+    }
+    window.close();
+  }
+
   PROVIDERS.forEach(function (p) {
     refs[p].toggle.addEventListener('click', function () {
       toggleProvider(p);
@@ -1437,6 +1452,9 @@
   });
   saveCloseBtn.addEventListener('click', function () {
     save(true);
+  });
+  cancelBtn.addEventListener('click', function () {
+    cancel();
   });
 
   renderAllSummaries();

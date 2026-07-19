@@ -4,7 +4,7 @@
 
 ## Status
 
-Implemented: render core, the local HTTP server + viewer, line-anchored feedback (long-poll), the settings UI, and the `preview` / `setup` skills. Four MCP tools: `render_viewer`, `collect_feedback`, `close_viewer`, `open_settings`. Build artifacts (`bridge/`) are built and committed by the user.
+Implemented: render core, the local HTTP server + viewer, line-anchored feedback (long-poll), the settings UI, and the `preview` / `setup` skills. Four MCP tools: `render_viewer`, `collect_feedback`, `close_viewer`, `open_settings`. Build artifacts (`bridge/`, `public/`) are built and committed by the user.
 
 ## What deilen does
 
@@ -27,12 +27,12 @@ yarn deilen version:sync  # package.json → src/version.ts + plugin.json
 - Skill names have no plugin prefix (`setup`, `preview`) — directory name = skill name.
 - MCP server name is `tools` — skills reference it as `mcp__plugin_deilen_tools__<name>`.
 - **No agents, no hooks** (hence no `libs/run.cjs`).
-- Heavy renderers live in `bridge/assets/` (built by `buildRenderers.mjs`) and are **never** bundled into `mcp-server.cjs` — enforced by a `buildMcpServer.mjs` guard.
+- Heavy renderers live in `public/assets/` (built by `buildRenderers.mjs`) and are **never** bundled into `mcp-server.cjs` — enforced by a `buildMcpServer.mjs` guard.
 
 ## Development Notes
 
 - **Version**: `yarn version:sync` only. Never hand-edit `src/version.ts` or `.claude-plugin/plugin.json`.
-- **Build artifacts**: `bridge/` is built and committed by the user, not the AI. The AI authors `src/`, `scripts/`, `skills/`, and docs only.
+- **Build artifacts**: `bridge/` and `public/` are built and committed by the user, not the AI. The AI authors `src/`, `scripts/`, `skills/`, and docs only.
 - **Disk paths**: under `~/.claude/plugins/deilen/`.
 - **FCA**: before coding a module, read `.metadata/deilen/`, update its `DETAIL.md`/`INTENT.md`, then run `/filid:scan` after. Domain roots (`core`/`render`/`mcp`/`mcp/httpServer`) carry `INTENT.md`; single-concern subdirs and `types`/`constants`/`lib`/`utils` are organs.
 

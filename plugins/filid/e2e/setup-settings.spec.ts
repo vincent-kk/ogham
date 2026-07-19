@@ -119,7 +119,7 @@ test('full save round-trip persists every edited config field to disk', async ({
     .fill('notes.md\n{"basename": "cli.ts", "paths": ["src/**"]}');
   await page.locator('#additional-entry-points').fill('page.tsx');
 
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
@@ -137,6 +137,24 @@ test('full save round-trip persists every edited config field to disk', async ({
     { basename: 'cli.ts', paths: ['src/**'] },
   ]);
   expect(config['additional-entry-points']).toEqual(['page.tsx']);
+});
+
+test('plain Save settles the long-poll (window stays open)', async ({
+  page,
+}) => {
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+
+  await page.goto(url);
+  await page.locator('#max-depth').fill('7');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.locator('#status')).toContainText('Saved');
+
+  // Plain "Save" applies the change and settles the long-poll (Claude resumes),
+  // differing from "Save & Close" only by not closing the window.
+  const out = await waiting;
+  expect(out.status).toBe('saved');
+  expect(readConfig(projectDir).scan?.maxDepth).toBe(7);
 });
 
 test('rule docs render deployment state and the save syncs .claude/rules', async ({
@@ -175,7 +193,7 @@ test('rule docs render deployment state and the save syncs .claude/rules', async
   await page.locator('[data-resync-id="filid_test-validity"]').check();
   await page.locator('#doc-filid_cognitive-discipline').check();
 
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
@@ -215,7 +233,7 @@ test('keeping the overwrite box unchecked preserves local edits and reports drif
 
   await page.goto(url);
   await expect(page.locator('#doc-filid_test-validity')).toBeChecked();
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
@@ -236,7 +254,7 @@ test('client validation blocks the save and recovers after the fix', async ({
   await page.goto(url);
   await page.getByText('Structure exceptions').click();
   await page.locator('#additional-allowed').fill('{not valid json');
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
 
   await expect(
     page.locator('[data-error-for="additional-allowed"]'),
@@ -246,7 +264,7 @@ test('client validation blocks the save and recovers after the fix', async ({
   expect(existsSync(join(projectDir, '.filid', 'config.json'))).toBe(false);
 
   await page.locator('#additional-allowed').fill('notes.md');
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
@@ -261,7 +279,7 @@ test('close without saving resolves closed and leaves no config behind', async (
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
-  await page.getByRole('button', { name: 'Close without saving' }).click();
+  await page.getByRole('button', { name: 'Cancel' }).click();
 
   const out = await waiting;
   expect(out.status).toBe('closed');

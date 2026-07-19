@@ -518,6 +518,7 @@ input[type='checkbox']:focus-visible {
 
 .actions {
   display: flex;
+  justify-content: flex-end;
   gap: 12px;
   margin-top: 32px;
   flex-wrap: wrap;
@@ -567,6 +568,18 @@ input[type='checkbox']:focus-visible {
 .btn-primary:hover {
   background: #ffffff;
   border-color: #ffffff;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg-muted, var(--fg));
+}
+
+.btn-ghost:hover {
+  background: var(--muted);
+  border-color: var(--border);
+  color: var(--fg);
 }
 
 .btn:disabled {

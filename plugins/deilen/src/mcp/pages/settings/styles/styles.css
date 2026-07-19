@@ -332,6 +332,7 @@ code {
 /* ── Actions + status ───────────────────────────────────── */
 .actions {
   display: flex;
+  justify-content: flex-end;
   gap: 12px;
   margin-top: 32px;
   flex-wrap: wrap;
@@ -373,6 +374,18 @@ code {
 .btn-primary:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-muted, var(--text));
+}
+
+.btn-ghost:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border);
+  color: var(--text);
 }
 
 .btn:disabled {

@@ -25,6 +25,7 @@
   var statusBox = $('status');
   var saveBtn = $('save-btn');
   var closeBtn = $('close-btn');
+  var saveCloseBtn = $('saveclose-btn');
   var dirty = false;
   var saved = false;
 
@@ -397,8 +398,7 @@
   }
 
   // --- save ----------------------------------------------------------------
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+  function doSave(closeAfter) {
     clearErrors();
     var next = collect();
     if (next === null) {
@@ -408,7 +408,8 @@
       return;
     }
     var provision = next.provider === 'github' && $('provision-labels').checked;
-    busy(saveBtn, true, 'Saving…');
+    var btn = closeAfter ? saveCloseBtn : saveBtn;
+    busy(btn, true, 'Saving…');
     setStatus('info', 'Validating and saving…');
     post('/save', { config: next, options: { provision_labels: provision } })
       .then(function (r) {
@@ -421,25 +422,32 @@
         if (out.status === 200 && res.success) {
           saved = true;
           dirty = false;
-          setStatus(
-            'ok',
+          var summary =
             'Saved — provider ' +
-              next.provider +
-              ', project ' +
-              (next.defaults.project_ref || '(none)') +
-              '.\nReturn to Claude Code — setup continues automatically. This tab will close.',
-          );
-          busy(saveBtn, false);
-          saveBtn.disabled = true;
-          setTimeout(function () {
-            window.close();
-          }, 1400);
+            next.provider +
+            ', project ' +
+            (next.defaults.project_ref || '(none)') +
+            '.';
+          busy(btn, false);
+          if (closeAfter) {
+            setStatus(
+              'ok',
+              summary +
+                '\nReturn to Claude Code — setup continues automatically. This tab will close.',
+            );
+            saveBtn.disabled = saveCloseBtn.disabled = true;
+            setTimeout(function () {
+              window.close();
+            }, 1400);
+          } else {
+            setStatus('ok', summary);
+          }
         } else {
           var detail = Array.isArray(res.errors)
             ? '\n' + res.errors.join('\n')
             : '';
           setStatus('error', (res.message || 'Save failed.') + detail);
-          busy(saveBtn, false);
+          busy(btn, false);
         }
       })
       .catch(function () {
@@ -447,11 +455,19 @@
           'error',
           'Could not reach the local server. It may have timed out — rerun /imbas:setup.',
         );
-        busy(saveBtn, false);
+        busy(btn, false);
       });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    doSave(false);
+  });
+  saveCloseBtn.addEventListener('click', function () {
+    doSave(true);
   });
 
-  // --- close without saving ------------------------------------------------
+  // --- cancel (close without saving) ---------------------------------------
   closeBtn.addEventListener('click', function () {
     dirty = false;
     post('/close', {}).finally(function () {

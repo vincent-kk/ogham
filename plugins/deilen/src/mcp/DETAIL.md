@@ -4,7 +4,7 @@
 
 - MCP 서버 이름 `tools`, stdio transport. 도구 4개 등록.
 - 모든 핸들러는 `wrapHandler` 로 감싸 throw 흡수 + `extra`(signal) 전달.
-- 장수 HTTP 서버를 호스팅하되, 무거운 렌더러는 `bridge/assets/` 자산으로만 서빙(번들 미포함).
+- 장수 HTTP 서버를 호스팅하되, 무거운 렌더러는 `public/assets/` 자산으로만 서빙(번들 미포함).
 
 ## Tools
 
@@ -27,8 +27,8 @@
 ## Build outputs
 
 - `bridge/mcp-server.cjs` — esbuild(node, cjs). mermaid/katex/highlight 미포함(가드 강제).
-- `bridge/viewer.html`, `bridge/settings.html` — esbuild inline(런타임 로드).
-- `bridge/assets/{highlight,mermaid,katex}.js` + `katex.css` + woff2 — lazy 렌더러 자산.
+- `public/viewer.html`, `public/settings.html` — esbuild inline(런타임 로드).
+- `public/assets/{highlight,mermaid,katex}.js` + `katex.css` + woff2 — lazy 렌더러 자산.
 
 ## Acceptance
 

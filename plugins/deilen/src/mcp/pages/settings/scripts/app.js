@@ -115,6 +115,7 @@ function init() {
   for (const radio of document.querySelectorAll('input[name="theme"]')) {
     radio.addEventListener("change", () => setTheme(collect().theme));
   }
+  $("cancel").addEventListener("click", () => window.close());
   $("save").addEventListener("click", () => save(false));
   $("save-close").addEventListener("click", () => save(true));
 }

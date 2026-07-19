@@ -118,7 +118,7 @@ test('jira flow: picking a project from the select persists the config', async (
   await page.locator('#jira-project-select').selectOption('KAN');
   await expect(page.locator('#jira-project-key')).toHaveValue('KAN');
 
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
@@ -133,6 +133,24 @@ test('jira flow: picking a project from the select persists the config', async (
   expect(config.provider).toBe('jira');
   expect(config.defaults.project_ref).toBe('KAN');
   expect(config.jira.issue_types.story).toBe('Story');
+});
+
+test('plain Save settles the long-poll (window stays open)', async ({
+  page,
+}) => {
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+
+  await page.goto(url);
+  await page.locator('#jira-project-select').selectOption('KAN');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.locator('#status')).toContainText('Saved');
+
+  // Plain "Save" applies the change and settles the long-poll (Claude resumes),
+  // differing from "Save & Close" only by not closing the window.
+  const out = await waiting;
+  expect(out.status).toBe('saved');
+  expect(readConfig(projectDir).defaults.project_ref).toBe('KAN');
 });
 
 test('github flow: repo prefill, label/limit edits, and provision intent', async ({
@@ -154,7 +172,7 @@ test('github flow: repo prefill, label/limit edits, and provision intent', async
   await page.locator('#limit-max_lines').fill('150');
   await page.locator('#model-devplan').fill('sonnet');
 
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
@@ -190,14 +208,14 @@ test('client validation blocks a malformed repo and recovers after the fix', asy
   await page.goto(url);
   await page.locator('.provider-row', { hasText: 'github' }).click();
   await page.locator('#github-repo').fill('not-a-repo');
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
 
   await expect(page.locator('[data-error-for="github-repo"]')).toBeVisible();
   await expect(page.locator('#status')).toContainText('Fix the highlighted');
   expect(existsSync(join(projectDir, '.imbas', 'config.json'))).toBe(false);
 
   await page.locator('#github-repo').fill('acme/app');
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
@@ -214,7 +232,7 @@ test('switching provider preserves the previously saved github section', async (
   const first = longPoll(projectDir);
   await page.goto(url);
   await page.locator('.provider-row', { hasText: 'github' }).click();
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
   expect((await first).status).toBe('saved');
 
@@ -227,7 +245,7 @@ test('switching provider preserves the previously saved github section', async (
     page.locator('input[name="provider"][value="github"]'),
   ).toBeChecked();
   await page.locator('.provider-row', { hasText: 'local' }).click();
-  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await second;
@@ -246,7 +264,7 @@ test('close without saving resolves closed and leaves no config behind', async (
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
-  await page.getByRole('button', { name: 'Close without saving' }).click();
+  await page.getByRole('button', { name: 'Cancel' }).click();
 
   const out = await waiting;
   expect(out.status).toBe('closed');

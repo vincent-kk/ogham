@@ -1,7 +1,7 @@
 // Dev preview: rebuild the inlined viewer from current src/, render a sample
 // document rich in block types (table, list, task, quote, code), and start the
 // local server so you can eyeball line-anchored commenting without installing
-// the plugin. Rebuilding first is the point — it stops a stale bridge/viewer.html
+// the plugin. Rebuilding first is the point — it stops a stale public/viewer.html
 // from masking your src/ edits. Ctrl+C to stop.
 import { execSync } from "node:child_process";
 import { dirname, join } from "node:path";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// 1. Re-inline styles/scripts into bridge/viewer.html so src/ edits are served.
+// 1. Re-inline styles/scripts into public/viewer.html so src/ edits are served.
 execSync("node scripts/buildViewerHtml.mjs", { cwd: root, stdio: "inherit" });
 
 // 2. Render a sample document and start the viewer server.

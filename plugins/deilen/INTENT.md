@@ -4,21 +4,22 @@
 
 ## Structure
 
-| Path                         | Role                                         |
-| ---------------------------- | -------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트)               |
-| `scripts/`                   | esbuild 빌드 스크립트                        |
-| `skills/`                    | `setup`, `preview` 스킬                      |
-| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`) |
-| `.claude-plugin/plugin.json` | 플러그인 매니페스트                          |
-| `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                |
+| Path                         | Role                                                  |
+| ---------------------------- | ----------------------------------------------------- |
+| `src/`                       | TypeScript 소스 (fractal 루트)                        |
+| `scripts/`                   | esbuild 빌드 스크립트                                 |
+| `skills/`                    | `setup`, `preview` 스킬                               |
+| `bridge/`                    | esbuild MCP 서버 번들 (`mcp-server.cjs`, 커밋)        |
+| `public/`                    | esbuild FE 산출물 (viewer/settings HTML·assets, 커밋) |
+| `.claude-plugin/plugin.json` | 플러그인 매니페스트                                   |
+| `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                         |
 
 ## Conventions
 
 - 빌드: `clean → version:sync → buildViewerHtml → buildSettingsHtml → buildRenderers → tsc → buildMcpServer`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `preview`)
 - Agent 없음, Hook 없음 (그래서 `libs/run.cjs` 도 없음)
-- 무거운 렌더러는 브라우저 자산(`bridge/assets/`) — MCP 서버 번들에 미포함, 동봉 폰트 없음(KaTeX 는 MathML)
+- 무거운 렌더러는 브라우저 자산(`public/assets/`) — MCP 서버 번들에 미포함, 동봉 폰트 없음(KaTeX 는 MathML)
 
 ## Boundaries
 
@@ -34,7 +35,7 @@
 
 ### Never do
 
-- `dist/` 커밋 (`bridge/` 는 의도적 커밋 — `package.json:files`)
+- `dist/` 커밋 (`bridge/`·`public/` 는 의도적 커밋 — `package.json:files`)
 - `version.ts` / `plugin.json` 의 version 수동 수정 (inject-version.mjs 만)
 
 ## Dependencies

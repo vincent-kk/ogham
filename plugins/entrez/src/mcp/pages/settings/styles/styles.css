@@ -350,11 +350,18 @@ code {
 
 .actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-top: 20px;
 }
+.actions-aux,
+.actions-commit {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 .btn {
-  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -387,6 +394,16 @@ code {
 .btn--ghost:hover {
   background: var(--surface-2);
 }
+.btn--text {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg-muted, var(--fg));
+}
+.btn--text:hover {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--fg);
+}
 .btn[disabled] {
   opacity: 0.55;
   cursor: progress;
@@ -416,8 +433,5 @@ code {
 @media (max-width: 480px) {
   .field-row {
     grid-template-columns: 1fr;
-  }
-  .actions {
-    flex-direction: column-reverse;
   }
 }

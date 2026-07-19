@@ -1,14 +1,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { bridgeRoot } from "./bridgeRoot.js";
+import { publicRoot } from "./publicRoot.js";
 
 let cached: string | null = null;
 
-/** Read the built settings template (`bridge/settings.html`), cached. */
+/** Read the built settings template (`public/settings.html`), cached. */
 export function loadSettingsHtml(): string {
   if (cached === null)
-    cached = readFileSync(join(bridgeRoot(), "settings.html"), "utf-8");
+    cached = readFileSync(join(publicRoot(), "settings.html"), "utf-8");
 
   return cached;
 }
