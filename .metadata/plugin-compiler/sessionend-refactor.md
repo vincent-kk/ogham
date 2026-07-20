@@ -4,7 +4,7 @@
 >
 > ⚠ 본문이 인용하는 `usage.md`·`migration-playbook-deferred.md` 는 **구 체제(재배치 설계) 문서로 은퇴**했다 — git 이력 `6378169a` 참조. 아래 링크는 현행 문서로 대체돼 있다.
 >
-> **상태: 채택·구현 완료.** 이 ADR 의 결정(SessionEnd→MCP 수명주기)은 전 플러그인에 적용됐다(SessionEnd 훅 0 + `@ogham/session-finalizer`). 연계된 3-호스트 이식(agy 러너 어댑터 등)은 여전히 잔여 — [backlog-d-e.md](./backlog-d-e.md) D1.
+> **상태: 채택·구현 완료.** 이 ADR 의 결정(SessionEnd→MCP 수명주기)은 전 플러그인에 적용됐다(SessionEnd 훅 0 + `@ogham/session-finalizer`). 연계된 3-호스트 이식(agy 러너 어댑터)은 게이팅 훅 라이브 검증 완료, 컨텍스트 주입은 agy `injectSteps` 렌더 대기 — README [§현재 상태·남은 작업](./README.md#현재-상태--남은-작업).
 
 ---
 

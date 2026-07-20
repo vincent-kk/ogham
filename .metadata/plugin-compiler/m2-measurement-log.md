@@ -1,6 +1,6 @@
 # M2 호스트 실측 로그 (2026-07-15)
 
-> 세션 작업 로그. 확정된 결론은 host-capability-matrix.md / migration-playbook.md / TODO.md 로 이관한다.
+> 세션 작업 로그(동결). 확정된 결론은 host-capability-matrix.md / migration-playbook.md / README.md 로 이관됨.
 > 브랜치 `feature/issue-78-1`. codex-cli 0.144.4 · agy 1.1.2.
 
 ## 환경 사실 (확인됨)

@@ -18,10 +18,13 @@ ogham/
     ├── (현행 Claude 산출물 전부 — 무수정)
     ├── plugin.json                     [생성] 루트 매니페스트 — agy 마커 + Codex 가 실제로 읽는 경로
     ├── .codex-plugin/plugin.json       [생성] 위와 바이트 동일 (Codex 규약 경로)
-    └── mcp_config.json                 [생성] agy MCP (MCP 보유 플러그인만)
+    ├── mcp_config.json                 [생성] agy MCP (MCP 보유 9개)
+    ├── hooks.json                      [생성] agy 훅 (PreToolUse→named-group; filid·imbas·maencof)
+    ├── .codex-plugin/hooks.json        [생성] Codex read-matcher 훅 (filid·imbas)
+    └── .codex-plugin/skills/**         [생성] Codex 스킬 변이 — self-load 스폰 (entrez·filid·imbas·r-statistics)
 ```
 
-생성물 **30 파일** / 경로 4종. `.agents/plugins.json`(agy declared)은 **폐기** — 어떤 형식으로도 플러그인을 로드하지 못했다(matrix §4.4).
+생성물 **322 파일** / 경로 7종. `.agents/plugins.json`(agy declared)은 **폐기** — 어떤 형식으로도 플러그인을 로드하지 못했다(matrix §4.4).
 
 설치 채널 (사용자 안내 문구의 정본):
 
@@ -101,20 +104,20 @@ PoC: 로컬 마켓플레이스 `ogham` 등록 + `deilen`·`r-statistics`(MCP onl
 
 → 대응: emitter 가 `"cwd": "."` 를 명시 방출(`buildCodexMcpServers`). 설치 경로(`~/.codex/plugins/cache/<mp>/<plugin>/<version>`)는 생성 시점에 알 수 없어 절대 args 는 불가능하므로 **유일 해법**이다. 재설치 후 TUI 경고 0건 · 헤드리스 exec 에서 도구 8개 노출 확인.
 
-## 4. 잔여 Stage (게이트 통과 후)
+## 4. Stage 이력 (게이트 통과 후 — 전부 반영됨)
 
-- **Stage 2 — 배선**: CI 에 `yarn plugin:adapters:check` 편입(clean-regen 게이트, `ci.yml` paths 에 `.codex-plugin`·`mcp_config.json`·`.agents/**` 포함), README(사용자용)에 Codex/agy 설치 절 추가.
-- **Stage 3 — agy 러너 어댑터** (agy 실사용 채택 시): `libs/run.cjs` 확장 또는 자매 러너 — camelCase stdin→Claude 계약 정규화, `SessionStart→PreInvocation` once-guard(conversationId 기록 방식), matcher 번역, agy 훅 `hooks.json`(named-group) emitter 를 도구에 추가. 이전 설계 그대로 유효(matrix §4.3).
-- **Stage 4 — 호스트 결합 런타임 분기** · **설계 정본: [stage4-host-paths.md](./stage4-host-paths.md)** (근거 포함 · 정본 체크아웃 `~/Workspace/ogham` 에서 진행). 2026-07-15 실측으로 범위가 크게 넓어졌다 — Codex MCP 는 `cwd:"."` 로 서버는 뜨지만 **`process.cwd()` 를 프로젝트로 가정하는 8 플러그인 / 31 지점이 전부 플러그인 루트를 본다**(imbas 15 지점 = 사실상 전 기능). 플러그인 런타임이 호스트 고정 경로를 쓰는 지점을 `OGHAM_HOST` env(어댑터가 MCP 선언에 주입 — codex/agy; 부재=claude) 분기로 일반화한다. 훅 프로세스는 `PLUGIN_DATA` 유무로 Codex 를 감지(ponytail 패턴). 확인된 대상:
-  - **maencof `claudeMdMerger`** (`CLAUDE.md` 읽기/쓰기 — `constants/claudeMd.ts`) → Codex 에서는 `AGENTS.md` 대상화.
-  - **filid `rule_docs_sync`/`syncRuleDocs`** (`.claude/rules/*.md` 배포) → Codex 규칙 채널(G8 실측 후 `~/.codex/rules` 또는 AGENTS.md 병합)로 대상화. 훅 주입 문구의 `.claude/rules/…` 경로 언급도 함께 분기.
-  - 신규 플러그인에서 호스트 고정 경로(`CLAUDE.md`·`.claude/**`)를 쓰게 될 때는 처음부터 이 분기 헬퍼를 경유한다 — 반복 패턴의 정본 규칙.
-- **Stage 5 — Codex 심화** (필요 시): maencof 레코더의 도구명 정규화(Codex `Bash`/`apply_patch`/`mcp__t__*` → 내부 매칭), filid Read 추적의 Codex 보완(read 계열 도구명 실측 후 matcher 확장), agents 컴포넌트 대안(위원회 의존 스킬의 Codex 거동 정의), `commandWindows` 병기(Windows).
+> 잔여·외부 차단 항목은 README [§현재 상태·남은 작업](./README.md#현재-상태--남은-작업) 이 정본. 아래는 각 Stage 의 완료 메커니즘.
+
+- **Stage 2 — 배선** ✅ (`42d5d898`): CI 에 `yarn plugin:adapters:check` 편입(clean-regen 게이트, `ci.yml` paths 에 정본 입력 + 생성물 `.codex-plugin`·`mcp_config.json`·`.agents/**`·`hooks.json` 포함), 사용자 README 에 Codex/agy 설치 절.
+- **Stage 3 — agy 러너 어댑터** ✅: `@ogham/cross-platform/agy-runner`(camelCase stdin ↔ Claude 계약 번역, `SessionStart→PreInvocation` once-guard, matcher 번역) + `buildAgyHooks` named-group emitter. **게이팅(PreToolUse deny) 훅은 라이브 검증 완료**, 컨텍스트 주입(PreInvocation)은 agy `injectSteps` 미렌더로 보류(README §남은 작업).
+- **Stage 4 — 호스트 결합 런타임 분기** ✅ (main): `@ogham/cross-platform` 의 `hostPaths`(`detectHost`·`pluginRoot`·`projectRoot` — A 7지점·B 31지점, imbas 는 `projectRootMemo` 로 인자 폭증 해소) + 규칙 채널 `instructionsFile()`·`ruleDocsTarget()`(C4 = `AGENTS.md` 병합) + 상태 디렉터리 호스트 인지 `pluginCache()`(C4-3). MCP 선언의 `OGHAM_HOST` env(부재=claude), 훅은 Codex 주입 env 로 감지. maencof `CLAUDE.md`→`AGENTS.md`, filid `.claude/rules`→Codex 규칙 채널로 분기 반영. 남은 `process.cwd()` 4지점은 프로젝트 좌표가 아니라 ast-grep 모듈 해석·자기탐색 폴백(의도적 잔류, 감사 종결).
+- **Stage 5 — Codex 심화** ✅: `apply_patch` 파싱(→ Write/Edit)·maencof 도구명 정규화(`@ogham/cross-platform/codex-hooks`), Codex read-matcher 훅(`buildCodexHooks` — 셸 단순읽기 `Read` 승격), agents 컴포넌트 대안 = 스킬 변이 self-load 스폰(`buildCodexSkills` — filid·entrez·r-statistics·imbas). 잔여: `commandWindows`(Windows) · 복합 셸 read 추적(플랫폼 한계, `codex-read-matcher` 린트가 표면화) · 스킬 본문 도구명 불일치(E1) — README §남은 작업.
 
 ## 5. 알려진 격차 (사용자 고지 문안의 근거 — matrix §7 요약)
 
-- Codex: subagent 위원회(filid Phase D·prawf·atlassian 미디어) 미이식 — agents 컴포넌트 부재. filid/imbas 의 Read 기반 추적 부분 손실. maencof 자동 기록은 도구명 정규화 전까지 부분 무동작. **호스트 결합 쓰기(maencof CLAUDE.md·filid .claude/rules)는 Stage 4 분기 전까지 Claude 경로에 그대로 쓴다**(Codex 컨텍스트에 미반영). cennad 는 codex 안에서 codex 로 재위임(순환 아님 — 새 exec 스폰이지만, provider 기본값 조정 여지).
-- agy: 훅 전 기능이 Stage 3 러너 어댑터 전까지 미동작(skills·agents·MCP 는 즉시).
+- **Codex**: subagent 위원회는 스킬 변이 self-load 스폰으로 **이식됨**(filid·entrez·r-statistics·imbas; prawf 네이티브) — 단 선언적 `agents` 컴포넌트는 여전히 없다. filid/imbas 의 **복합 셸 read 추적은 부분 손실**(단순 `cat`/`head` 만 `Read` 승격, 파이프/grep 불가 — 플랫폼 한계). maencof 자동 기록은 도구명 정규화(`codex-hooks`)로 **동작**. 스킬 본문 full-form 도구명 불일치(E1) 잔존. 호스트 결합 쓰기(maencof `AGENTS.md`·filid 규칙 채널)는 Stage 4 로 **분기 반영됨**. cennad 는 codex 안에서 codex 로 재위임(순환 아님).
+- **agy**: 게이팅 훅(PreToolUse deny)·skills·agents·MCP 는 동작. **컨텍스트 주입 훅은 agy 가 `injectSteps` 를 렌더할 때까지 무동작**(어댑터 준비됨). MCP 는 `~/.agents/plugins/<n>/` 위치에서만 로드(설치 수동).
+- 모델의 Bash 파일편집 우회는 write 가드를 뚫는 **3-호스트 공통 guardrail 한계**(OpenAI 공식 확인).
 
 ## 6. 재개 함정 체크리스트 (구 결정에서 승계·재검증)
 

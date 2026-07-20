@@ -1,7 +1,7 @@
 # Stage 5 / Phase D-E 실측 로그 (2026-07-15, 2차 세션)
 
 > E2/E3(Codex 파일도구 매칭)·D1b(agy 게이팅)·emitter 선행조건을 실측한 세션 기록.
-> 확정 결론은 host-capability-matrix.md / backlog-d-e.md / TODO.md 로 이관한다.
+> 확정 결론은 host-capability-matrix.md / README.md 로 이관됨(동결 로그).
 > 환경: codex-cli 0.144.4 · agy 1.1.2. 측정 하네스: stdin 덤프 훅 probe(Codex·agy 각각).
 
 ## 측정 방법 주의

@@ -233,7 +233,7 @@ agy 가 요구하는 루트 `plugin.json` 은 **Codex 의 매니페스트 탐색
 
 ⇒ 런타임 코드(`process.cwd()` = 프로젝트, `CLAUDE_PLUGIN_ROOT` = 플러그인)는 **Claude 계약 하에서 정상**이다. 이건 보편 버그가 아니라 **Codex 전환 고유 문제**다.
 
-**적용 범위 (MCP 도달 코드 전수, 2026-07-15)**: A 는 6 플러그인 / 7 지점, B 는 **8 플러그인 / 31 지점**(imbas 15 · deilen 5 · filid 4 · cennad 2 · maencof 2 · atlassian 1 · maencof-lens 1 · r-statistics 1). 즉 `cwd:"."` 는 서버를 **살렸을 뿐** 의미를 고치지 못했다. 수정 방향·근거·플러그인별 지점은 **[stage4-host-paths.md](./stage4-host-paths.md)** 가 정본.
+**적용 범위 (MCP 도달 코드 전수, 2026-07-15)**: A 는 6 플러그인 / 7 지점, B 는 **8 플러그인 / 31 지점**(imbas 15 · deilen 5 · filid 4 · cennad 2 · maencof 2 · atlassian 1 · maencof-lens 1 · r-statistics 1). 즉 `cwd:"."` 는 서버를 **살렸을 뿐** 의미를 고치지 못했다. 수정 방향은 `@ogham/cross-platform` 의 `hostPaths`(A 7지점·B 31지점 전부 반영)로 **main 완료** — 절차는 [migration-playbook.md](./migration-playbook.md) Stage 4.
 
 ### 9-A. 플러그인 자기 파일 — 해결 가능 (모델 개입 불필요)
 
