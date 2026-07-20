@@ -1,6 +1,6 @@
 {
   "name": "prawf",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Prawf — multi-agent academic peer-review orchestration plugin for Claude Code",
   "author": {
     "name": "Vincent K. Kelvin"
