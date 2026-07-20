@@ -147,14 +147,20 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 - **F4** injectSteps 미렌더 → 컨텍스트 주입훅 무가치. 어댑터·러너 **준비됨**, agy 가 렌더하면 emitter 에 PreInvocation 방출만 추가.
 - **L2** MCP `agy plugin install` 위치 버그 → `.agents/plugins/` 배치 스크립트/README(우회). agy CLI 수정 전까지 수동.
 
-## C4-3. 상태 디렉터리 (미착수 · 우선순위 낮음)
+## C4-3. 상태 디렉터리 호스트 인지 — 📋 **설계 완료 (전수 census)** · 정본 [c4-3-state-directory.md](./c4-3-state-directory.md)
 
-`~/.claude/` 밑에 런타임 상태를 쓰는 지점들 — Codex 로 돌려도 Claude 폴더에 쌓인다. **기능은 동작**하므로 보류. 같은 분기에 얹을 수 있다.
+`~/.claude/plugins/<pkg>/` 에 런타임 상태를 쓰는 지점들 — Codex/agy 로 돌려도 `~/.claude` 에 쌓인다. **기능은 동작**(자기일관적)하나 위생·격리 부채. `ruleDocsTarget()`(C4)와 같은 호스트 인지 축의 마지막 지점.
 
-```
-deilen/src/constants/paths.ts        (CLAUDE_CONFIG_DIR ?? ~/.claude)
-r-statistics  R_STATISTICS_HOME      (= join(claudeRoot(), 'plugins', 'r-statistics'))
-```
+**핵심**: 중앙화 지점 `pluginCache(pkg)`(`shared/cross-platform/src/paths/paths.ts`)가 이미 있다 → **`claudeRoot()` 한 곳을 호스트 인지로 + 우회 복제 통합**. 분기는 `shared/cross-platform` 에 집약(플러그인 산발 금지).
+
+- **이미 중앙 경유(수정만으로 자동)**: atlassian·cennad·entrez·filid = `pluginCache()`.
+- **우회 → 통합 필요**: deilen·r-statistics 로컬 `claudeRoot()`, `shared/hooks/errorLog.ts`, imbas 훅 setup.
+- **비대상**: maencof `BLOCKED_PREFIXES`(보안), cennad `AGY_HOME`(의도적 agy 읽기), entrez 자동완성.
+- **Claude 불변 최우선**: `claude` 분기 = `CLAUDE_CONFIG_DIR ?? ~/.claude` 바이트 동일. codex → `CODEX_HOME ?? ~/.codex`, agy → 미실측 claude 채널.
+- **한계**: 훅엔 `OGHAM_HOST` 없음 → 훅 상태(imbas·errorLog)는 Codex 에서도 `~/.claude`. MCP 컨텍스트 상태만 호스트 인지.
+- **주의**: `detectHost` 를 `paths` 가 쓰면 `paths↔hostPaths` 순환 → leaf 화 or 인라인.
+
+구현은 Task ③ (아래 §다음 작업). 상세 census·설계: [c4-3-state-directory.md](./c4-3-state-directory.md).
 
 ---
 
