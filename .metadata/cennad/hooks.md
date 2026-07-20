@@ -198,7 +198,7 @@ No calls this session yet.
 
 ## 빌드 가드 — `scripts/buildHooks.mjs`
 
-filid 의 `build-hooks.mjs` 복제 + `hookEntries` 만 교체:
+filid 의 `buildHooks.mjs` 복제 + `hookEntries` 만 교체:
 
 ```javascript
 const hookEntries = [

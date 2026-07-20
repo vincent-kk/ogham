@@ -6,7 +6,7 @@ import type { RuleDocsManifest } from './manifestTypes.js';
 /**
  * Load and validate the rule docs manifest shipped with the filid plugin.
  * Throws if the manifest is missing, malformed, or any entry is missing a
- * `templateHash` (which indicates `scripts/sync-rule-hashes.mjs` was skipped).
+ * `templateHash` (which indicates `scripts/syncRuleHashes.mjs` was skipped).
  */
 export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
   const manifestPath = join(pluginRoot, 'templates', 'rules', 'manifest.json');
@@ -21,11 +21,11 @@ export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
   for (const entry of parsed.rules)
     if (!entry.templateHash || typeof entry.templateHash !== 'string')
       // Pre-0.3.5 manifests lack `templateHash`. Upgraders MUST run
-      // `yarn filid build` (which triggers scripts/sync-rule-hashes.mjs) to
+      // `yarn filid build` (which triggers scripts/syncRuleHashes.mjs) to
       // repopulate the manifest before invoking /filid:setup. The
       // `syncRuleDocs()` caller wraps this throw into `skipped: [{id: '*', ...}]`.
       throw new Error(
-        `rule docs manifest entry "${entry.id}" is missing templateHash — run \`node scripts/sync-rule-hashes.mjs\``,
+        `rule docs manifest entry "${entry.id}" is missing templateHash — run \`node scripts/syncRuleHashes.mjs\``,
       );
 
   return parsed;

@@ -19,7 +19,7 @@
 
 ## Conventions
 
-- 빌드 파이프라인: `clean → version:sync → sync-rule-hashes → settings-html → tsc → mcp-server → hooks`
+- 빌드(도메인 스크립트 조합): `clean → version:sync → rules → pages → compile → mcp → hooks → compile-plugin`
 - 자체 FCA 규약 준수 — 50줄 INTENT.md cap, 3-tier boundary, 3+12 test rule
 - 모든 훅은 `src/hooks/<name>/<name>.entry.ts` 에서 esbuild 로 번들
 - 새 fractal 모듈에는 INTENT.md + DETAIL.md 동반 작성
@@ -29,7 +29,7 @@
 ### Always do
 
 - 빌드 후 `bridge/` 커밋 (`package.json:files` 에 포함됨)
-- 새 built-in rule 의 hash 를 `scripts/sync-rule-hashes.mjs` 로 동기화
+- 새 built-in rule 의 hash 를 `scripts/syncRuleHashes.mjs` 로 동기화
 
 ### Ask first
 

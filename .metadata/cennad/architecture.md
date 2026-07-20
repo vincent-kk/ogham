@@ -226,7 +226,7 @@ hooks/inject*    →  hooks/shared (only)        ← core/ import 금지
 
 ### `scripts/buildHooks.mjs` — filid 가드 복제
 
-filid 의 `build-hooks.mjs` 와 동일한 규칙:
+filid 의 `buildHooks.mjs` 와 동일한 규칙:
 
 - 각 hook 을 `esbuild.build` 로 `format: 'esm'`, `target: 'node20'`, `bundle: true`, `minify: true` 출력.
 - 두 hook 모두 LIGHT cap (`10 * 1024` bytes).

@@ -32,8 +32,8 @@ packages/maencof-lens/
 ├── libs/
 │   └── find-node.sh             # Node.js resolver (copy from maencof)
 ├── scripts/
-│   ├── build-mcp-server.mjs     # esbuild: server-entry.ts → bridge/mcp-server.cjs
-│   ├── build-hooks.mjs          # esbuild: hooks entries → bridge/*.mjs
+│   ├── buildMcpServer.mjs     # esbuild: server-entry.ts → bridge/mcp-server.cjs
+│   ├── buildHooks.mjs          # esbuild: hooks entries → bridge/*.mjs
 │   └── inject-version.mjs       # Version sync: package.json → src/version.ts
 ├── src/
 │   ├── index.ts                 # Barrel export (public API)

@@ -195,7 +195,7 @@ kind별 TTL 차등은 두지 않는다 — 운영 데이터가 쌓인 후 재검
 | `types/personalContext.ts`                             | 전역                             | 순수 타입 (zod 없음)       |
 | `constants/personalContext.ts`                         | 전역                             | 캡·TTL·길이 상한·제안 어휘 |
 
-- 훅 도달 코드는 concrete 경로 import(배럴 금지) + zod 금지 — `build-hooks.mjs`의
+- 훅 도달 코드는 concrete 경로 import(배럴 금지) + zod 금지 — `buildHooks.mjs`의
   FORBIDDEN_PATTERNS와 번들 바이트 캡이 빌드 시 강제한다.
 - id 슬러그는 `core/filenameSlug`의 `sanitizeSegment`를 재사용한다(한글 보존, 결정적,
   바이트 예산 + 해시 절단).

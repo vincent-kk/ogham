@@ -28,15 +28,27 @@ yarn clean              # 전체 dist / .tsbuildinfo 제거
 
 ## Common Build Pipeline
 
-각 패키지는 동일 패턴을 따름:
+각 패키지의 `build` 는 **도메인별 원자 스크립트**를 조합한다 (플러그인은 보유 도메인만 선언):
 
-1. `yarn version:sync` — `package.json` → `src/version.ts` + `.claude-plugin/plugin.json` 동기화 (`scripts/inject-version.mjs`)
-2. `tsc -p tsconfig.build.json` — `src/` → `dist/` (ESM + `.d.ts`)
-3. `esbuild` (개별 스크립트) — `bridge/mcp-server.cjs` + `bridge/<hook>.mjs`
+```
+build = clean && version:sync && [build:rules] && [build:pages] && [build:compile] && [build:mcp] && [build:hooks] && build:compile-plugin
+```
 
-`bridge/` 는 플러그인 런타임 산출물로 **커밋 대상** (`package.json:files`). `dist/` 는 라이브러리 export 용.
+| 스크립트               | 역할                                                                                    | 산출물                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `version:sync`         | `package.json` → `src/version.ts` + `.claude-plugin/plugin.json` (`inject-version.mjs`) | —                                                                  |
+| `build:rules`          | built-in rule hash 동기화 (filid 전용)                                                  | rule registry                                                      |
+| `build:pages`          | settings / viewer / renderers HTML (esbuild)                                            | `public/`                                                          |
+| `build:compile`        | `tsc -p tsconfig.build.json`                                                            | `dist/` (라이브러리 export)                                        |
+| `build:mcp`            | MCP 서버 번들 (esbuild)                                                                 | `bridge/mcp-server.cjs`                                            |
+| `build:hooks`          | 훅 번들 (esbuild, 훅별 개별)                                                            | `bridge/<hook>.mjs`                                                |
+| `build:compile-plugin` | plugin-compiler 로 Codex/agy 어댑터 재생성 (`sync .`)                                   | `.codex-plugin/`·`mcp_config.json`·루트 `plugin.json`·`hooks.json` |
 
-**훅 직접 import 원칙**: `src/hooks/**` 훅 도달 코드는 배럴(`index.js`) import 금지 — esbuild 가 배럴이 재노출하는 모듈 전체를 훅 번들로 끌어온다. 항상 구체 파일 경로로 직접 import 한다 (예: `../shared/shared.js`, `./helpers/foo/foo.js`, `constants/files.js`). typecheck 는 이를 잡지 못하며 각 패키지 `build-hooks.mjs` 의 바이트 캡 + 금지 모듈 가드가 최종 방어선 — 훅 소스 변경 후 반드시 `build:plugin` 으로 확인. (테스트·MCP 서버 코드는 대상 아님 — 배럴 경유가 정상.)
+- `build:compile-plugin` 이 배포 어댑터를 build 에 자동 편입한다 — 빌드-배포 시 항상 최신. 결정적·멱등(무변경이면 재작성 없음).
+- `build:plugin` = 런타임 번들만 빠르게 재빌드 (`build:pages && build:mcp && build:hooks`, clean/compile/compile-plugin 제외) — 훅·MCP 반복 개발용.
+- `bridge/`·`public/` 는 플러그인 런타임 산출물로 **커밋 대상** (`package.json:files`). `dist/` 는 라이브러리 export 용(미커밋).
+
+**훅 직접 import 원칙**: `src/hooks/**` 훅 도달 코드는 배럴(`index.js`) import 금지 — esbuild 가 배럴이 재노출하는 모듈 전체를 훅 번들로 끌어온다. 항상 구체 파일 경로로 직접 import 한다 (예: `../shared/shared.js`, `./helpers/foo/foo.js`, `constants/files.js`). typecheck 는 이를 잡지 못하며 각 패키지 `buildHooks.mjs` 의 바이트 캡 + 금지 모듈 가드가 최종 방어선 — 훅 소스 변경 후 반드시 `build:plugin` 으로 확인. (테스트·MCP 서버 코드는 대상 아님 — 배럴 경유가 정상.)
 
 ## Release Workflow
 

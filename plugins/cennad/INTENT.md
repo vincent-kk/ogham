@@ -19,7 +19,7 @@
 
 ## Conventions
 
-- 빌드 파이프라인은 filid 패턴 — `version:sync → settingsHtml → tsc → mcpServer → hooks`
+- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → hooks → compile-plugin`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`)
 - Agent 는 `courier` 1개 (`cennad:courier`) — 관점(정교화 ≤3콜 · 실패 remedy · tier 의미론)은 courier, 스킬은 행동(파싱→background spawn→릴레이)만 (비블로킹)
 - E2E 는 이중 레이어 (Layer A in-process + Layer B 번들 stdio); `CENNAD_E2E_REAL_CLI=1` 일 때만 real CLI

@@ -50,6 +50,6 @@ export const CODEX_SKILLS_DIR = ".codex-plugin/skills";
  * The agy hook runner each plugin bundles to `bridge/run-agy.mjs`
  * (@ogham/cross-platform agyRunner main). The emitted agy `hooks.json` routes
  * every event through it because agy cannot parse Claude-format hooks. Kept in
- * sync with the plugins' `scripts/build-hooks.mjs` output name by this contract.
+ * sync with the plugins' `scripts/buildHooks.mjs` output name by this contract.
  */
 export const AGY_RUNNER_BRIDGE = "bridge/run-agy.mjs";

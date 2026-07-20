@@ -10,7 +10,7 @@ export interface RuleDocEntry {
   /**
    * SHA-256 hex digest of the template file shipped in
    * `templates/rules/<filename>`. Injected by
-   * `plugins/filid/scripts/sync-rule-hashes.mjs` at build time; the runtime
+   * `plugins/filid/scripts/syncRuleHashes.mjs` at build time; the runtime
    * uses it to detect drift against `.claude/rules/<filename>`.
    */
   templateHash: string;

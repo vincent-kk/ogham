@@ -5,8 +5,8 @@
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → esbuild (mcp-server + hooks)
-yarn build:plugin       # esbuild 번들만 (mcp-server + hooks)
+yarn build              # clean → version:sync → mcp → hooks → compile-plugin
+yarn build:plugin       # mcp + hooks 번들만
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)
 yarn version:sync       # package.json → src/version.ts

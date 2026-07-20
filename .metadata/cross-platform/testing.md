@@ -35,7 +35,7 @@ Windows와 Unix (macOS, Linux) 런타임 간의 호환성 무결성을 보장하
 
 ### `imbas`
 - [ ] 임시 디렉토리 캐싱 로직이 `process.env.HOME` 대신 `USERPROFILE` 기반으로도 올바르게 경로 생성.
-- [ ] `build-mcp-server.mjs` 가 글로벌 `npm` 없이도 `process.execPath`로 안전하게 우회 빌드 성공.
+- [ ] `buildMcpServer.mjs` 가 글로벌 `npm` 없이도 `process.execPath`로 안전하게 우회 빌드 성공.
 
 ### `maencof-lens`
 - [ ] `/` 와 `\` 가 섞인 Windows 혼합 파일 시스템 경로 입력에서도 정규화 및 슬라이스 무결성 확보.

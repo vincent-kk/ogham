@@ -1,6 +1,6 @@
 ## Requirements
 
-- 빌드 시 `scripts/sync-rule-hashes.mjs`가 각 rule doc 템플릿의 SHA-256 해시를 `templates/rules/manifest.json`의 `templateHash` 필드에 주입한다.
+- 빌드 시 `scripts/syncRuleHashes.mjs`가 각 rule doc 템플릿의 SHA-256 해시를 `templates/rules/manifest.json`의 `templateHash` 필드에 주입한다.
 - **배포 채널은 호스트가 정한다** (`ruleDocsTarget()`): Claude 는 `.claude/rules/<filename>` **파일 1개씩**, Codex 는 `AGENTS.md` **한 파일에 마커 구간**으로 병합한다 (Codex 는 rules 디렉터리를 읽지 않으므로 거기 쓰면 에러가 아니라 **조용한 무효**). agy 는 **미실측** — Claude 와 동일 채널.
 - drift 감지: 디렉터리 채널은 배포 파일 해시 vs `templateHash`, 병합 채널은 **구간 본문 vs 템플릿 본문(trim)** 을 비교한다 (병합은 trim 후 삽입하므로 원본 바이트 해시와는 절대 일치할 수 없다).
 - 병합 채널은 **재실행 안전** — 같은 규칙을 두 번 배포해도 `AGENTS.md` 에 중복 누적되지 않는다. 마커 밖 사용자 내용은 보존된다.

@@ -1,7 +1,7 @@
 /**
  * Hard upper bound (Unicode code points) for the meta-skill body.
  *
- * Enforced at BUILD time by scripts/build-hooks.mjs (build fails on overflow —
+ * Enforced at BUILD time by scripts/buildHooks.mjs (build fails on overflow —
  * the regex there reads this literal, keep the `= <number>` form). The runtime
  * check in bootstrap is a last-resort backstop that logs before skipping.
  */

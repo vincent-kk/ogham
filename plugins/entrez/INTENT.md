@@ -15,7 +15,7 @@
 
 ## Conventions
 
-- 빌드: `clean → version:sync → (settings-html) → tsc → mcp-server`.
+- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → compile-plugin`.
 - 의존성 단방향: Dispatcher → Agent → Skill → MCP → httpClient → NCBI.
 - FCA·1함수1파일·문자열 리터럴 상수화·hook 미사용.
 

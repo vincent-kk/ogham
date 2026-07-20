@@ -12,7 +12,7 @@ export async function getSgModule(): Promise<SgModule | null> {
   if (!sgModule)
     try {
       // Use createRequire for CJS-style resolution (respects NODE_PATH).
-      // build-mcp-server.mjs defines import.meta.url in the CJS bundle, but the
+      // buildMcpServer.mjs defines import.meta.url in the CJS bundle, but the
       // __filename fallback stays: without that define, esbuild replaces import.meta
       // with {} and this resolves against the wrong root (or nothing at all).
       const _base =

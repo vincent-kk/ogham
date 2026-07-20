@@ -5,8 +5,8 @@
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → tsc → esbuild (mcp-server + hooks)
-yarn build:plugin       # esbuild 번들만 (mcp-server + hooks)
+yarn build              # clean → version:sync → compile → mcp → hooks → compile-plugin
+yarn build:plugin       # mcp + hooks 번들만
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)
 yarn test               # watch
@@ -16,9 +16,9 @@ yarn version:sync       # package.json → src/version.ts
 
 ## Build System
 
-- `scripts/build-mcp-server.mjs`: MCP 서버 번들 → `bridge/mcp-server.cjs`
-- `scripts/build-hooks.mjs`: 이벤트별 디스패처 entry(`src/hooks/<event>/<event>.entry.ts`) → `bridge/<event>.mjs` (이벤트당 단일 번들; 관심사 핸들러를 한 프로세스에서 순차 실행)
-- SessionStart 디스패처는 esbuild `.md → text` loader 로 `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 를 인라인 (dialogue discipline meta-prompt). 본문 예산은 `META_SKILL_MAX_CHARS` — 초과 시 build-hooks.mjs 가드가 빌드를 실패시킨다.
+- `scripts/buildMcpServer.mjs`: MCP 서버 번들 → `bridge/mcp-server.cjs`
+- `scripts/buildHooks.mjs`: 이벤트별 디스패처 entry(`src/hooks/<event>/<event>.entry.ts`) → `bridge/<event>.mjs` (이벤트당 단일 번들; 관심사 핸들러를 한 프로세스에서 순차 실행)
+- SessionStart 디스패처는 esbuild `.md → text` loader 로 `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 를 인라인 (dialogue discipline meta-prompt). 본문 예산은 `META_SKILL_MAX_CHARS` — 초과 시 buildHooks.mjs 가드가 빌드를 실패시킨다.
 
 ## Auto-invocation Mapping
 

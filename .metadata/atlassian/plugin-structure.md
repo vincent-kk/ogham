@@ -288,8 +288,8 @@ Following the ogham monorepo conventions:
 {
   "scripts": {
     "build": "yarn clean && yarn version:sync && tsc && yarn build:hooks && yarn build:mcp",
-    "build:mcp": "node scripts/build-mcp-server.mjs",
-    "build:hooks": "node scripts/build-hooks.mjs",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
+    "build:hooks": "node scripts/buildHooks.mjs",
     "clean": "rm -rf dist bridge/*.cjs bridge/*.mjs",
     "version:sync": "node ../../scripts/inject-version.mjs",
     "typecheck": "tsc --noEmit",

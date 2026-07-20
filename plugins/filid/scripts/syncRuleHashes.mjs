@@ -72,7 +72,7 @@ if (checkMode) {
     for (const m of mismatches) {
       console.error(`  - ${m.id}: stored=${m.expected} actual=${m.actual}`);
     }
-    console.error('Run `node scripts/sync-rule-hashes.mjs` (or `yarn filid build`) to refresh.');
+    console.error('Run `node scripts/syncRuleHashes.mjs` (or `yarn filid build`) to refresh.');
     process.exit(1);
   }
   console.log('[sync-rule-hashes] manifest up to date');

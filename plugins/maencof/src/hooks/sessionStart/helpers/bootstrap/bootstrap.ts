@@ -353,7 +353,7 @@ function joinSessionSegments(segments: (string | null)[]): string | null {
  * Returns `null` when:
  *   - the dialogue off-switch is active (env or config)
  *   - the body exceeds META_SKILL_MAX_CHARS — logged, never silent: the build
- *     guard in scripts/build-hooks.mjs should have caught this first, so
+ *     guard in scripts/buildHooks.mjs should have caught this first, so
  *     reaching the branch at runtime means the guard drifted.
  *
  * Otherwise wraps the body (bundled inline via esbuild `.md -> text`) in `<maencof-meta-skill>` tags.
