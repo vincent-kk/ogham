@@ -130,8 +130,9 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 
 - **두 층위 분리**: 선언적 플러그인 `agents` 컴포넌트는 **없음**(소스 `plugin/manifest.rs` + plugin-creator `plugin-json-spec.md` — 컴포넌트 = `skills`·`hooks`·`mcpServers`·`apps`·`interface`). 스킬 안 `agents/openai.yaml` 은 하니스 UI 설정(페르소나 아님). **그러나** 런타임 `multi_agent`(`codex features list` = stable)는 subagent 스폰을 지원한다.
 - **실측 ([stage6-codex-multiagent.md](./stage6-codex-multiagent.md))**: 페르소나 원장을 **스킬 본문**에 실으면 codex 가 스킬을 읽어(`sed`) 원장을 취득하고 **격리 subagent** 로 스폰 — rollout 11개 = 오케스트레이터 1 + subagent 10(`/root/<persona>`, `thread_source: subagent`). 10인 스케일·충실도(soundness-theory Ω(n log n) 격파·adjudicator REJECT) 확인. codex 0.144.6·`exec --json` read-only.
-- **재정의된 작업**: "단일 에이전트 인라인" → **스킬 임베드 페르소나 원장 + 네이티브 multi_agent 오케스트레이션**. 컴파일러 Codex 어댑터가 `agents/*.md`(Codex 무시) → 스킬 참조로 **재배치**. 대상: filid Phase D·prawf·atlassian 미디어.
-- **잔여 경계**: 완전 플러그인 E2E(마켓플레이스 설치)·병렬 폭·모델 의존 미측정(저위험). "선언적 등록 부재"만 잔존 한계.
+- **재정의된 작업 (Stage 6b, [stage6](./stage6-codex-multiagent.md))**: "재배치" 아님 — `agents/*.md` 는 Codex 에 **이미 배송**(local source 전체복사 + `files`), 단 비활성. 메커니즘 = **self-load 스폰**("subagent 띄워 `agents/<id>.md` 읽어 채택", 호스트 중립). **prawf 무변환**(이미 self-load), entrez·filid 는 `subagent_type` 레지스트리 주입만 의존 → self-load 결여 → **컴파일러 생성 Codex 스킬 변이**(`.codex-plugin/skills/`, Claude `skills/` 바이트 불변, 분기 컴파일러 집약 — Vincent 결정)로 주입.
+- **실측: tool-using subagent MCP 접근 ✅**: subagent 가 플러그인 MCP 도구를 컨텍스트 상속·호출 시도(rollout `/root/alpha`·`/root/beta` `saw_probe_tool=True`), 헤드리스 승인 게이트만 취소. M2-1 실설치 read-only 성공과 합쳐 ⇒ entrez(하드 MCP)·MCP 쓰는 filid **이식 가능**. 잔여: 인터랙티브 승인 UX·완전 E2E 미측정.
+- **다음 구현 순서**: (1) MCP-subagent 접근 ✅ 검증. (2) 컴파일러 `buildCodexSkills` 변이 builder — `subagent_type` 스폰 → self-load 스폰 재작성, `.codex-plugin/skills/` 방출 + Codex 매니페스트 `skills` 재지정. (3) filid 크로스리뷰 파일럿(순수추론 위원회) → prawf(무변환 확인) → entrez(MCP). (4) `package.json:files`·adapters:check·플레이북 동기화.
 
 ### 3. process.cwd() 잔여 감사 — ✅ **완료: 전부 무해로 종결** (2026-07-16 감사)
 
