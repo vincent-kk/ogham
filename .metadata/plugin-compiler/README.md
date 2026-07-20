@@ -44,6 +44,7 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 - **머지 후 라이브 게이트**: main 머지 후 마켓플레이스 실설치로 Claude 무영향 재확인 + Codex 설치·도구노출·훅 trust 라이브 확인 (지금까지 `--plugin-dir` 로그 + 구조적 확인뿐).
 - **agy 업스트림 대기**: (F4) agy 1.1.2 가 PreInvocation `injectSteps` 를 렌더하지 않아 컨텍스트 주입 훅 무가치 — 어댑터·러너는 준비됨, agy 가 렌더하면 emit 만 추가. (L2) `agy plugin install` 이 MCP 안 뜨는 위치(`~/.gemini/config/plugins/`)에 설치 → `~/.agents/plugins/<pkg>/` 수동 복사(README 안내). 둘 다 agy CLI 수정 전까지 우리 쪽 해결 불가.
 - **Codex 플랫폼 한계(고지)**: 셸 read 추적 불완전(복합 파이프/grep — `codex-read-matcher` 린트가 표면화), 스킬 본문 full-form 도구명 불일치(E1 — `AGENTS.md`/서술형 완화 여지). 모델의 Bash 파일편집 우회는 3-호스트 공통 guardrail 한계.
+- **훅/MCP 상태 경로 호스트 정합성 심화 검토** — 훅 상태 `~/.claude` 누수 1차 봉합은 완료(위)했으나, ① Claude 의 `PLUGIN_DATA` 미설정 **직접 실측**, ② MCP↔훅 경로 정합/Codex 정식 data dir 채택 여부, ③ 힌트 문자열·전 플러그인 상태경로 전수 감사가 남음. 정본: [TODO.md](./TODO.md).
 
 **운영 함정 (재개·머지 시):**
 
@@ -63,7 +64,7 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 | [stage5-measurement-log.md](./stage5-measurement-log.md)   | 실측 로그 — Stage 5(Codex 파일도구·agy 게이팅·emitter 배선)                                     |
 | [stage6-codex-multiagent.md](./stage6-codex-multiagent.md) | 실측 로그 — Codex 네이티브 multi_agent 위원회 이식 검증(스킬 변이 근거)                         |
 
-사용법(CLI)은 [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md) 가 소유한다. 세션 복원용 TODO·전환 계획(transition-plan)·경로/규칙 의뢰서(stage4-\*)·백로그(backlog-d-e)·C4-3 설계서는 작업 완료로 이 README §현재 상태·남은 작업 에 흡수·은퇴했다(상세 이력은 git). 구 체제 문서(ir-schema·case-studies·implementation-plan·reproduction·usage)는 재배치 설계와 함께 은퇴 — git 이력(`6378169a`) 참조.
+사용법(CLI)은 [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md) 가 소유한다. 구 세션-복원 TODO·전환 계획(transition-plan)·경로/규칙 의뢰서(stage4-\*)·백로그(backlog-d-e)·C4-3 설계서는 작업 완료로 이 README §현재 상태·남은 작업 에 흡수·은퇴했다(상세 이력은 git). 현행 [TODO.md](./TODO.md) 는 그 덤프가 아니라 **훅/MCP 상태 경로 심화 검토 전용** 이슈 추적기로 신규 작성됐다(다음 세션). 구 체제 문서(ir-schema·case-studies·implementation-plan·reproduction·usage)는 재배치 설계와 함께 은퇴 — git 이력(`6378169a`) 참조.
 
 ## 용어
 
