@@ -15,7 +15,7 @@
     "ncbi",
     "research"
   ],
-  "skills": "./skills/",
+  "skills": "./.codex-plugin/skills/",
   "mcpServers": {
     "entrez": {
       "command": "node",

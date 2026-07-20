@@ -1,0 +1,94 @@
+# Mann-Whitney U test (Wilcoxon rank-sum, two independent samples).
+# Slot body only: contract is sourced and seed/manifest are injected by the runner.
+
+library(rstatix)
+
+# ---- data ------------------------------------------------------------------
+df <- read_data("{{DATA_REF_ID}}")
+
+# Outcome (numeric/ordinal ranks) split by a two-level grouping factor.
+outcome <- "{{OUTCOME}}"
+group <- "{{GROUP}}"
+df[[group]] <- factor(df[[group]])
+
+# Drop rows missing either column so test and effect size see the same data.
+df <- df[stats::complete.cases(df[, c(outcome, group)]), , drop = FALSE]
+
+group_levels <- levels(droplevels(df[[group]]))
+if (length(group_levels) != 2L) {
+  stop(sprintf(
+    "Mann-Whitney requires exactly two groups; '%s' has %d.",
+    group, length(group_levels)
+  ))
+}
+
+fml <- stats::as.formula(sprintf("%s ~ %s", outcome, group))
+
+# ---- assumption: independence (design-level, not data-checkable) -----------
+note_assumption("independence")
+
+# ---- hypothesis test -------------------------------------------------------
+# Exact p-value only without ties and small n; otherwise normal approximation.
+wt <- stats::wilcox.test(fml, data = df, conf.int = TRUE)
+
+# rstatix effect size r = |Z| / sqrt(N), with magnitude label.
+eff <- rstatix::wilcox_effsize(df, formula = fml)
+
+# Group medians for an interpretable summary alongside the rank-based test.
+medians <- tapply(df[[outcome]], df[[group]], stats::median, na.rm = TRUE)
+
+# broom::tidy gives a flat one-row data.frame of the htest result.
+tidy_test <- broom::tidy(wt)
+
+# ---- human-readable summary ------------------------------------------------
+cat("Mann-Whitney U test (Wilcoxon rank-sum)\n")
+cat(sprintf("  %s by %s: %s (n=%d) vs %s (n=%d)\n",
+  outcome, group,
+  group_levels[1], sum(df[[group]] == group_levels[1]),
+  group_levels[2], sum(df[[group]] == group_levels[2])
+))
+cat(sprintf("  Median %s = %.4g | %s = %.4g\n",
+  group_levels[1], medians[[group_levels[1]]],
+  group_levels[2], medians[[group_levels[2]]]
+))
+cat(sprintf("  W = %.4g, p = %.4g (%s)\n",
+  unname(wt$statistic), wt$p.value, wt$alternative
+))
+cat(sprintf("  Effect size r = %.4g (%s)\n",
+  eff$effsize[1], as.character(eff$magnitude[1])
+))
+
+# ---- artifacts -------------------------------------------------------------
+# result.hypothesis_test: the test statistic, p-value, CI, and effect size.
+hypothesis_test <- list(
+  method = unname(wt$method),
+  outcome = outcome,
+  group = group,
+  group_levels = group_levels,
+  statistic_W = unname(wt$statistic),
+  p_value = wt$p.value,
+  alternative = wt$alternative,
+  location_shift_estimate = if (!is.null(wt$estimate)) unname(wt$estimate) else NA_real_,
+  conf_low = if (!is.null(wt$conf.int)) wt$conf.int[1] else NA_real_,
+  conf_high = if (!is.null(wt$conf.int)) wt$conf.int[2] else NA_real_,
+  effect_size_r = eff$effsize[1],
+  effect_magnitude = as.character(eff$magnitude[1]),
+  medians = as.list(medians)
+)
+write_json_artifact(
+  "result.hypothesis_test", "model", hypothesis_test,
+  "mann_whitney_result.json",
+  "Mann-Whitney U test statistic, p-value, CI, and rank-biserial effect size r"
+)
+
+# table.test_summary: tidy one-row test result joined with the effect size.
+test_summary <- cbind(
+  tidy_test,
+  effsize = eff$effsize[1],
+  effsize_magnitude = as.character(eff$magnitude[1])
+)
+write_json_artifact(
+  "table.test_summary", "table", test_summary,
+  "mann_whitney_summary.json",
+  "Tidy Mann-Whitney test summary with effect size"
+)

@@ -40,13 +40,15 @@ function find(
 describe("emitsCodexSkillVariant", () => {
   // --- basic ---
 
-  it("is false for a plugin not on the opt-in allowlist", () => {
+  it("is false for a qualifying plugin held off the opt-in allowlist (prawf)", () => {
+    // prawf has personas and subagent_type spawns but is deliberately excluded
+    // (its worker prompt loads personas by an actionable ../../agents/ climb).
     expect(
       emitsCodexSkillVariant(
         facts({
-          name: "entrez",
+          name: "prawf",
           agentFiles: { "x.md": "P" },
-          skillFiles: { "search/SKILL.md": 'subagent_type: "entrez:x"' },
+          skillFiles: { "peer-review/SKILL.md": 'subagent_type: "prawf:x"' },
         }),
       ),
     ).toBe(false);

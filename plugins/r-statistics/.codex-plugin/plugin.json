@@ -15,7 +15,7 @@
     "r",
     "hypothesis-testing"
   ],
-  "skills": "./skills/",
+  "skills": "./.codex-plugin/skills/",
   "mcpServers": {
     "r-statistics": {
       "command": "node",

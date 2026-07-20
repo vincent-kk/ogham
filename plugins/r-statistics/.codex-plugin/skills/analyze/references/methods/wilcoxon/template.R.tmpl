@@ -1,0 +1,82 @@
+# Wilcoxon test (nonparametric, continuous outcome)
+# Two-sample = Mann-Whitney/rank-sum; with {{GROUP}} having 2 levels.
+# Use {{ALTERNATIVE}} = "two.sided" | "less" | "greater"; {{PAIRED}} = TRUE/FALSE.
+
+df <- read_data("{{DATA_REF_ID}}")
+
+# Outcome must be numeric/continuous; grouping factor must have exactly 2 levels.
+df[["{{OUTCOME}}"]] <- as.numeric(df[["{{OUTCOME}}"]])
+df[["{{GROUP}}"]] <- factor(df[["{{GROUP}}"]])
+df <- df[stats::complete.cases(df[["{{OUTCOME}}"]], df[["{{GROUP}}"]]), , drop = FALSE]
+
+grp_levels <- levels(df[["{{GROUP}}"]])
+if (length(grp_levels) != 2L) {
+  stop(sprintf(
+    "Wilcoxon rank-sum requires exactly 2 groups in '%s'; found %d.",
+    "{{GROUP}}", length(grp_levels)
+  ))
+}
+
+# Independence is a design property — recorded, not statistically testable here.
+note_assumption("independence")
+
+# Run the Wilcoxon test via the formula interface (outcome ~ group).
+fit <- stats::wilcox.test(
+  stats::as.formula("{{OUTCOME}} ~ {{GROUP}}"),
+  data = df,
+  alternative = "{{ALTERNATIVE}}",
+  paired = {{PAIRED}},
+  conf.int = TRUE
+)
+
+# Human-readable summary of the htest object.
+cat("Wilcoxon test:", fit$method, "\n")
+cat(sprintf("Groups (%s): %s vs %s\n", "{{GROUP}}", grp_levels[1], grp_levels[2]))
+print(fit)
+
+# tidy one-row summary (statistic, p.value, method, alternative, conf.int).
+tidy_fit <- broom::tidy(fit)
+print(tidy_fit)
+
+# Group-level n and rank-based effect size (r) for reporting context.
+group_n <- as.list(table(df[["{{GROUP}}"]]))
+eff <- rstatix::wilcox_effsize(
+  df,
+  stats::as.formula("{{OUTCOME}} ~ {{GROUP}}"),
+  paired = {{PAIRED}}
+)
+cat("\nEffect size (rank-biserial r):\n")
+print(eff)
+
+# Required artifact: result.hypothesis_test — the core test result.
+result_obj <- list(
+  method = fit$method,
+  outcome = "{{OUTCOME}}",
+  group = "{{GROUP}}",
+  group_levels = grp_levels,
+  group_n = group_n,
+  paired = isTRUE({{PAIRED}}),
+  alternative = fit$alternative,
+  statistic = unname(fit$statistic),
+  p_value = fit$p.value,
+  estimate = if (!is.null(fit$estimate)) unname(fit$estimate) else NA,
+  conf_low = if (!is.null(fit$conf.int)) fit$conf.int[1] else NA,
+  conf_high = if (!is.null(fit$conf.int)) fit$conf.int[2] else NA,
+  effect_size = eff$effsize,
+  effect_magnitude = as.character(eff$magnitude)
+)
+write_json_artifact(
+  "result.hypothesis_test", "model", result_obj,
+  "wilcoxon_result.json",
+  "Wilcoxon test result: statistic, p-value, CI, and rank-biserial effect size"
+)
+
+# Required artifact: table.test_summary — flat tidy summary table.
+summary_tbl <- as.data.frame(tidy_fit)
+summary_tbl$effect_size <- eff$effsize
+summary_tbl$effect_magnitude <- as.character(eff$magnitude)
+write_json_artifact(
+  "table.test_summary", "table", summary_tbl,
+  "wilcoxon_summary.json",
+  "Tidy one-row Wilcoxon test summary with effect size"
+)

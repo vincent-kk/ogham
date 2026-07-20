@@ -1,0 +1,133 @@
+# Logistic regression slot: fit stats::glm(family = binomial),
+# report tidy coefficients on the log-odds and odds-ratio scales, and check
+# logit-linearity (Box-Tidwell), multicollinearity (VIF), and events-per-variable.
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{FORMULA}} {{PREDICTORS}}
+
+# ---- data -----------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# {{PREDICTORS}} is a comma-separated list of modelled predictor columns.
+predictors <- trimws(strsplit("{{PREDICTORS}}", ",")[[1]])
+model_cols <- c("{{OUTCOME}}", predictors)
+
+# Binary outcome -> 0/1 factor; glm models the probability of the second level.
+df[["{{OUTCOME}}"]] <- factor(df[["{{OUTCOME}}"]])
+
+# Drop rows missing any modelled column so every helper sees complete cases.
+df <- df[stats::complete.cases(df[, model_cols, drop = FALSE]), , drop = FALSE]
+
+# ---- model fit ------------------------------------------------------------
+# {{FORMULA}} expands to e.g. outcome ~ x1 + x2 + x3.
+model_formula <- stats::as.formula("{{FORMULA}}")
+fit <- stats::glm(model_formula, data = df, family = stats::binomial())
+
+cat("=== Logistic regression (glm, binomial) ===\n")
+print(summary(fit))
+
+# Coefficients on the log-odds scale with Wald confidence intervals.
+coef_tidy <- broom::tidy(fit, conf.int = TRUE)
+cat("\n=== Coefficients (log-odds) ===\n")
+print(coef_tidy)
+
+# Same coefficients exponentiated -> odds ratios.
+or_tidy <- broom::tidy(fit, exponentiate = TRUE, conf.int = TRUE)
+cat("\n=== Odds ratios ===\n")
+print(or_tidy)
+
+# ---- assumption: logit linearity (Box-Tidwell) ----------------------------
+# Box-Tidwell adds x * log(x) interaction terms for each positive numeric
+# predictor; a significant term flags a non-linear predictor-logit relation.
+numeric_predictors <- predictors[vapply(
+  predictors,
+  function(p) is.numeric(df[[p]]) && all(df[[p]] > 0, na.rm = TRUE),
+  logical(1)
+)]
+box_tidwell <- if (length(numeric_predictors) > 0) {
+  bt_terms <- vapply(
+    numeric_predictors,
+    function(p) sprintf("I(%s * log(%s))", p, p),
+    character(1)
+  )
+  bt_formula <- stats::as.formula(
+    paste("{{FORMULA}}", "+", paste(bt_terms, collapse = " + "))
+  )
+  bt_fit <- stats::glm(bt_formula, data = df, family = stats::binomial())
+  bt_tidy <- broom::tidy(bt_fit)
+  bt_tidy[grepl("log\\(", bt_tidy$term, fixed = FALSE), , drop = FALSE]
+} else {
+  data.frame(term = character(0), estimate = numeric(0),
+             std.error = numeric(0), statistic = numeric(0),
+             p.value = numeric(0))
+}
+cat("\n=== Logit linearity (Box-Tidwell interaction terms) ===\n")
+print(box_tidwell)
+note_assumption("logit_linearity")
+
+# ---- assumption: no multicollinearity (VIF) -------------------------------
+# car::vif needs >= 2 predictor terms; values > 5 (or 10) signal collinearity.
+vif_vals <- if (length(stats::coef(fit)) > 2) {
+  v <- car::vif(fit)
+  # Multi-column matrix is returned for factors with > 1 df (GVIF); reduce it.
+  if (is.matrix(v)) v[, ncol(v)] else v
+} else {
+  stats::setNames(numeric(0), character(0))
+}
+vif_tbl <- data.frame(
+  term = names(vif_vals),
+  vif = as.numeric(vif_vals),
+  row.names = NULL
+)
+cat("\n=== Multicollinearity (VIF) ===\n")
+print(vif_tbl)
+note_assumption("no_multicollinearity")
+
+# ---- assumption: events per variable (EPV) --------------------------------
+# EPV = count of the minority outcome class divided by number of model
+# coefficients (excluding intercept); EPV >= 10 is the common stability rule.
+outcome_counts <- table(df[["{{OUTCOME}}"]])
+n_events <- if (length(outcome_counts) > 0) min(outcome_counts) else 0L
+n_params <- length(stats::coef(fit)) - 1L
+epv <- if (n_params > 0) n_events / n_params else NA_real_
+cat(sprintf(
+  "\n=== Events per variable (EPV) ===\nevents=%d, parameters=%d, EPV=%.2f\n",
+  n_events, n_params, epv
+))
+note_assumption("epv_ge_10")
+
+# ---- artifact: model.fit --------------------------------------------------
+# Persist the fitted glm object for downstream prediction / inspection.
+model_file <- artifact_path("logistic_model.rds")
+saveRDS(fit, model_file)
+add_artifact(
+  "model.fit", "model", "logistic_model.rds",
+  "Fitted logistic regression glm object (binomial family)"
+)
+
+# ---- artifact: table.coefficients -----------------------------------------
+# Log-odds coefficient table with estimates, SE, Wald z, p, and CIs.
+write_json_artifact(
+  "table.coefficients", "table",
+  coef_tidy, "coefficients.json",
+  "Logistic regression coefficients on the log-odds scale with 95% CIs"
+)
+
+# ---- artifact: table.odds_ratios ------------------------------------------
+# Exponentiated coefficients (odds ratios) with 95% CIs, plus EPV/fit context.
+odds_ratios <- list(
+  technique = "logistic_regression",
+  outcome = "{{OUTCOME}}",
+  predictors = predictors,
+  n = nrow(df),
+  n_events = n_events,
+  events_per_variable = epv,
+  epv_ok = is.na(epv) || epv >= 10,
+  null_deviance = fit$null.deviance,
+  residual_deviance = fit$deviance,
+  aic = stats::AIC(fit),
+  odds_ratios = or_tidy
+)
+write_json_artifact(
+  "table.odds_ratios", "table",
+  odds_ratios, "odds_ratios.json",
+  "Odds ratios (exponentiated coefficients) with 95% CIs and model fit summary"
+)
