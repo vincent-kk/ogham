@@ -89,10 +89,9 @@ leaf) **한 곳**에만 존재 — 원칙 준수.
 3. **agy base 미확정**: 보수적으로 claude 채널 유지(미실측). 근거 확보 시 `~/.gemini`
    등으로 승격.
 
-## 구현 순서 (Task ③ 에서)
+## 구현 (Task ③ — 완료 2026-07-20)
 
-1. `detectHost` leaf 화(순환 회피) 또는 `paths` 인라인 판독.
-2. `paths.ts` `claudeRoot()` 호스트 인지 + 회귀 테스트(claude 분기 불변 assert).
-3. deilen·r-statistics 로컬 `claudeRoot()` → `pluginCache()`.
-4. `errorLog.ts`·imbas 훅 통합.
-5. `build:all`·`test:run`·`typecheck` + **Claude 경로 불변** 검증(가장 중요).
+1. ✅ `paths.ts` `claudeRoot()` → `stateRoot()` 호스트 인지. `OGHAM_HOST` **인라인 판독**(`detectHost` import 는 `paths↔hostPaths` 순환이라 회피 — 3줄 중복은 주석 명시). **claude 분기 바이트 동일**. codex fail-first 테스트 2건(변경 전 실패 확인 → 복원 후 통과).
+2. ✅ deilen·r-statistics 로컬 `claudeRoot()` → `pluginCache()` (MCP 컨텍스트, 안전).
+3. ⏸ **`errorLog.ts`·imbas 훅 = 의도적 미통합**: 훅 컨텍스트엔 `OGHAM_HOST` 부재 → 항상 claude → 호스트 인지 **구조적 불가**(위 잔여 경계 #1). 게다가 `pluginCache` 는 `paths.ts`(env-paths 임포트) 경유라 **훅 번들 팽창 위험**. 현 `~/.claude` 하드코드는 **훅에선 기능상 정확**하므로 유지.
+4. ✅ 검증: cross-platform 51(fail-first 포함)·r-statistics 123·deilen 125·typecheck 클린. (build:all·전체 test:run·adapters:check 는 커밋 전 최종.)

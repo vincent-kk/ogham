@@ -1,11 +1,10 @@
-import { homedir } from "node:os";
 import { join } from "node:path";
 
-function claudeRoot(): string {
-  return process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude");
-}
+import { pluginCache } from "@ogham/cross-platform/paths";
 
-export const DEILEN_HOME = join(claudeRoot(), "plugins", "deilen");
+// Host-aware state root via the shared pluginCache (claude → ~/.claude, codex →
+// ~/.codex). Never hardcode ~/.claude here — see paths/INTENT.md.
+export const DEILEN_HOME = pluginCache("deilen");
 export const CONFIG_PATH = join(DEILEN_HOME, "config.json");
 export const RUNTIME_DIR = join(DEILEN_HOME, "runtime");
 export const SERVER_STATE_PATH = join(RUNTIME_DIR, "server.json");

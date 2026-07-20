@@ -64,6 +64,44 @@ describe("paths", () => {
     }
   });
 
+  it("pluginCache targets ~/.codex on the codex host", () => {
+    const origHost = process.env.OGHAM_HOST;
+    const origCodex = process.env.CODEX_HOME;
+    const origClaude = process.env.CLAUDE_CONFIG_DIR;
+    process.env.OGHAM_HOST = "codex";
+    delete process.env.CODEX_HOME;
+    delete process.env.CLAUDE_CONFIG_DIR;
+    try {
+      expect(paths.pluginCache("filid")).toBe(
+        join(homedir(), ".codex", "plugins", "filid"),
+      );
+    } finally {
+      if (origHost === undefined) delete process.env.OGHAM_HOST;
+      else process.env.OGHAM_HOST = origHost;
+      if (origCodex === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = origCodex;
+      if (origClaude === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+      else process.env.CLAUDE_CONFIG_DIR = origClaude;
+    }
+  });
+
+  it("pluginCache honors CODEX_HOME on the codex host", () => {
+    const origHost = process.env.OGHAM_HOST;
+    const origCodex = process.env.CODEX_HOME;
+    process.env.OGHAM_HOST = "codex";
+    process.env.CODEX_HOME = join("/custom", "codex");
+    try {
+      expect(paths.pluginCache("filid")).toBe(
+        join("/custom", "codex", "plugins", "filid"),
+      );
+    } finally {
+      if (origHost === undefined) delete process.env.OGHAM_HOST;
+      else process.env.OGHAM_HOST = origHost;
+      if (origCodex === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = origCodex;
+    }
+  });
+
   it("normalize converts backslashes to forward slashes", () => {
     expect(paths.normalize("a\\b\\c")).toBe("a/b/c");
     expect(paths.normalize("C:\\Users\\test")).toBe("C:/Users/test");
