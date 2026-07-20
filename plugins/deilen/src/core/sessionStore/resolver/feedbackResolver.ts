@@ -62,6 +62,11 @@ export function awaitFeedback(
   });
 }
 
+/** True while any session has an in-flight long-poll waiter registered. */
+export function hasPendingWaiters(): boolean {
+  return slots.size > 0;
+}
+
 /** Deliver a complete submission: wake a waiter, or buffer for the next collect. */
 export function deliverComplete(
   sessionId: string,

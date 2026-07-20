@@ -16,7 +16,8 @@ export async function handleSubmit(
   req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
-  const parsed = SetupFormDataSchema.safeParse(await parseBody(req));
+  const raw = await parseBody(req);
+  const parsed = SetupFormDataSchema.safeParse(raw);
   if (!parsed.success) {
     sendJson(res, 400, {
       success: false,
@@ -57,5 +58,8 @@ export async function handleSubmit(
     success: true,
     message: "Configuration saved successfully",
   });
-  void ctx.closeServer();
+  // "Save & Close" (closeAfter) tears down the server; plain "Save" keeps it up.
+  // Read from raw — it is a UI control flag, not part of the form-data schema.
+  const closeAfter = (raw as Record<string, unknown>).closeAfter !== false;
+  if (closeAfter) void ctx.closeServer();
 }

@@ -63,7 +63,9 @@ describe('handleConfigGet', () => {
   it('returns full config when no field specified', async () => {
     writeConfig(tmpDir, BASE_CONFIG);
     const result = await handleConfigGet({});
-    expect((result as typeof BASE_CONFIG).defaults.project_ref).toBe('DEFAULT');
+    expect((result as unknown as typeof BASE_CONFIG).defaults.project_ref).toBe(
+      'DEFAULT',
+    );
   });
 
   it('returns specific field value via dot-path', async () => {

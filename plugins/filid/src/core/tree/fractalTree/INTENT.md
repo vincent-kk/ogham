@@ -41,6 +41,6 @@
 ## Dependencies
 
 - `../../../types/fractal.js` (`FractalTree`, `FractalNode`, `NodeEntry`, `ScanOptions`)
-- `../../../constants/scanDefaults.js`, `../../../constants/organNames.js`
+- `../../../constants/scanDefaults.js`, `../../../constants/organNames.js`, `../../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)
 - `../organClassifier/` (classifyNode)
 - `node:fs`, `node:path`, `fast-glob`

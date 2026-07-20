@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
 
+import { MODE_AUDIT_FILE } from './constants/cacheFiles.js';
 import { getCacheDir } from './sessionCache.js';
 
 const log = createLogger('cache');
@@ -28,7 +29,7 @@ export function appendModeAudit(cwd: string, entry: ModeAuditEntry): void {
   try {
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
     appendFileSync(
-      join(cacheDir, 'mode-audit.jsonl'),
+      join(cacheDir, MODE_AUDIT_FILE),
       `${JSON.stringify(entry)}\n`,
       'utf-8',
     );

@@ -5,3 +5,6 @@ export const GENERIC_DENY_REASON =
 /** deny 사유 끝에 공통으로 붙는 retry·escalation 지시. */
 export const DENY_RETRY_GUIDANCE =
   'Then retry. If it fails again, STOP and ask the user — do NOT resubmit unchanged.';
+
+/** [filid:ctx] 재전달 TTL 기본값 (턴). `.filid/config.json` injection.ctxTtlTurns로 조정. */
+export const CTX_TTL_TURNS_DEFAULT = 5;

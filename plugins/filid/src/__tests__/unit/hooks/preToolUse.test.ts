@@ -67,7 +67,7 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('handlePreToolUse', () => {
-  it('Read event → injectIntent runs (additionalContext present), no block', async () => {
+  it('Read event → visit pipeline runs (additionalContext present), no block', async () => {
     // Place a file inside the temp FCA project
     const filePath = join(tmpDir, 'src', 'index.ts');
     mkdirSync(join(tmpDir, 'src'), { recursive: true });
@@ -82,12 +82,12 @@ describe('handlePreToolUse', () => {
 
     // Must not block
     expect(result.continue).toBe(true);
-    // injectIntent should produce additionalContext (filid:ctx or filid:map)
+    // processVisit should produce additionalContext (filid:ctx or filid:map)
     expect(result.hookSpecificOutput?.additionalContext).toBeDefined();
     expect(result.hookSpecificOutput?.additionalContext).toMatch(/\[filid:/);
   });
 
-  it('Write normal .ts file → all pass, continue=true', async () => {
+  it('Write normal .ts into undelivered module → gate denies once with rules, retry passes', async () => {
     const filePath = join(tmpDir, 'src', 'feature.ts');
     mkdirSync(join(tmpDir, 'src'), { recursive: true });
 
@@ -96,8 +96,16 @@ describe('handlePreToolUse', () => {
       tool_input: { file_path: filePath, content: 'export const x = 1;\n' },
     });
 
-    const result = await handlePreToolUse(input);
-    expect(result.continue).toBe(true);
+    const denied = await handlePreToolUse(input);
+    expect(denied.continue).toBe(true);
+    expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
+    const reason = denied.hookSpecificOutput?.permissionDecisionReason ?? '';
+    expect(reason).toContain('[filid:gate]');
+    expect(reason).toContain('Test project'); // INTENT body inline
+
+    const retry = await handlePreToolUse(input);
+    expect(retry.continue).toBe(true);
+    expect(retry.hookSpecificOutput?.permissionDecision).toBeUndefined();
   });
 
   it('Write INTENT.md to organ-named target directory → allowed (chicken-and-egg fix)', async () => {
@@ -161,7 +169,7 @@ describe('handlePreToolUse', () => {
   });
 
   it('deny + intent context coexist → continue=true, both permissionDecision and additionalContext present', async () => {
-    // Write INTENT.md with >50 lines: validator denies; injectIntent also runs
+    // Write INTENT.md with >50 lines: validator denies; the visit pipeline also runs
     // and may add additionalContext. Both must be present in the merged output.
     const content = Array.from({ length: 51 }, (_, i) => `Line ${i + 1}`).join(
       '\n',
@@ -255,21 +263,20 @@ describe('handlePreToolUse', () => {
     }
   });
 
-  it('Write into a never-read module → next Read map shows unread-intent', async () => {
-    // recordWriteVisit puts the written dir into reads without intents; the
-    // following Read's [filid:map] must surface it as unread-intent.
+  it('gate delivery is terminal: after deny+retry, later Reads emit no unread warning and no re-ctx', async () => {
     mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
     writeFileSync(join(tmpDir, 'index.ts'), '');
 
-    await handlePreToolUse(
-      makeInput({
-        tool_name: 'Write',
-        tool_input: {
-          file_path: join(tmpDir, 'src', 'feature', 'x.ts'),
-          content: 'export const x = 1;\n',
-        },
-      }),
-    );
+    const write = makeInput({
+      tool_name: 'Write',
+      tool_input: {
+        file_path: join(tmpDir, 'src', 'feature', 'x.ts'),
+        content: 'export const x = 1;\n',
+      },
+    });
+    const denied = await handlePreToolUse(write);
+    expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
+    await handlePreToolUse(write); // retry passes, records the visit
 
     const readResult = await handlePreToolUse(
       makeInput({
@@ -278,8 +285,9 @@ describe('handlePreToolUse', () => {
       }),
     );
     const ctx = readResult.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('unread-intent:');
-    expect(ctx).toContain('src/feature');
+    expect(ctx).not.toContain('unread-intent');
+    // root module was delivered by the gate → same-session Read stays ctx-free
+    expect(ctx).not.toContain('[filid:ctx]');
   });
 
   it('spike branch → over-50-line INTENT.md Write is exempted and audited', async () => {
@@ -327,27 +335,32 @@ describe('handlePreToolUse', () => {
     expect(entry.reason).toBeDefined();
   });
 
-  it('Write .ts with ancestor import in FCA project → all 3 hooks produce context', async () => {
-    // Set up: file with ancestor import triggers structure-guard warning,
-    // FCA project with INTENT.md triggers intent injection,
-    // Write tool triggers validator
+  it('Write .ts with ancestor import (module delivered) → guard + map context present', async () => {
+    // Deliver the root module first so the gate does not fire; the Write then
+    // runs guard (ancestor-import warning) alongside the visit pipeline.
     mkdirSync(join(tmpDir, 'src', 'deep'), { recursive: true });
-    const filePath = join(tmpDir, 'src', 'deep', 'child.ts');
+    writeFileSync(join(tmpDir, 'index.ts'), '');
+    await handlePreToolUse(
+      makeInput({
+        tool_name: 'Read',
+        tool_input: { file_path: join(tmpDir, 'index.ts') },
+      }),
+    );
 
-    const input = makeInput({
-      tool_name: 'Write',
-      tool_input: {
-        file_path: filePath,
-        content: 'import { foo } from "../../";\nexport const bar = foo;\n',
-      },
-    });
-
-    const result = await handlePreToolUse(input);
+    const result = await handlePreToolUse(
+      makeInput({
+        tool_name: 'Write',
+        tool_input: {
+          file_path: join(tmpDir, 'src', 'deep', 'child.ts'),
+          content: 'import { foo } from "../../";\nexport const bar = foo;\n',
+        },
+      }),
+    );
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    // Intent injection should produce [filid: block
-    expect(ctx).toContain('[filid:');
-    // Structure guard should warn about ancestor import
+    // Visit pipeline emits the grown map; structure guard warns on the import
+    expect(ctx).toContain('[filid:map]');
     expect(ctx).toContain('import');
   });
 });

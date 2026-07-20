@@ -37,3 +37,4 @@
 ## Dependencies
 
 - `node:fs` (`existsSync`), `node:path` (`dirname`, `join`, `resolve`)
+- `../../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)

@@ -1,6 +1,6 @@
 {
   "name": "@ogham/deilen",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "description": "Deilen — render Claude markdown documents as a readable browser page with line-anchored feedback back to Claude",
   "keywords": [
     "claude-code",
@@ -22,6 +22,7 @@
   "type": "module",
   "files": [
     "bridge",
+    "public",
     "skills",
     ".claude-plugin",
     "plugin.json",
@@ -33,7 +34,7 @@
   "scripts": {
     "build": "yarn clean && yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
     "build:plugin": "yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && node scripts/buildMcpServer.mjs",
-    "clean": "rm -rf bridge dist",
+    "clean": "rm -rf bridge dist public",
     "dev": "tsc --watch",
     "dev:viewer": "node --import tsx scripts/devViewer.ts",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",

@@ -1,4 +1,4 @@
-export { isFcaProject } from './isFcaProject.js';
-export { isIntentMd } from './isIntentMd.js';
-export { isDetailMd } from './isDetailMd.js';
-export { isCriteriaMd } from './isCriteriaMd.js';
+export { isFcaProject } from './utils/isFcaProject.js';
+export { isIntentMd } from './utils/isIntentMd.js';
+export { isDetailMd } from './utils/isDetailMd.js';
+export { isCriteriaMd } from './utils/isCriteriaMd.js';

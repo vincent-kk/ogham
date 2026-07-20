@@ -8,7 +8,7 @@ import { PROJECT_ROOT_ARG_DESCRIPTION } from '@ogham/cross-platform/host-paths';
 import { z } from 'zod';
 
 import { McpToolName } from '../../constants/mcpToolNames.js';
-import { CacheTypeSchema } from '../../types/index.js';
+import { CacheTypeSchema, SettingsBootstrapSchema } from '../../types/index.js';
 import { VERSION } from '../../version.js';
 import { wrapHandler } from '../shared/index.js';
 import {
@@ -24,6 +24,7 @@ import {
   handleManifestPlan,
   handleManifestSave,
   handleManifestValidate,
+  handleOpenSettings,
   handleRunCreate,
   handleRunGet,
   handleRunList,
@@ -285,6 +286,28 @@ export function createServer(): McpServer {
       },
     },
     wrapHandler(handleConfigSet),
+  );
+
+  server.registerTool(
+    McpToolName.OPEN_SETTINGS,
+    {
+      description:
+        'Open the local imbas settings page (.imbas/config.json) in a browser and long-poll until the user saves. Returns status: saved (summary included) | closed (kept existing config) | pending (wait elapsed; page still open — call again to keep waiting). Pass session-known facts via bootstrap so the page can render provider availability and project pickers.',
+      inputSchema: z.object({
+        project_root: projectRootInput,
+        wait_seconds: z
+          .number()
+          .optional()
+          .describe('Bounded wait for the save event (default 300, max 600).'),
+        bootstrap: SettingsBootstrapSchema.optional(),
+      }),
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+      },
+    },
+    wrapHandler(handleOpenSettings),
   );
 
   // --- Cache tools ---

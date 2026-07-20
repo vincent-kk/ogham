@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { startSetupServer } from "../webServer/index.js";
+import type { SetupStatus } from "../webServer/utils/buildStatus.js";
 import type { SetupServerHandle } from "../../../../types/setup.js";
 import type {
   SetupFormData,
@@ -90,7 +91,7 @@ describe("setup web server", () => {
   it("returns masked status on GET /status (no plaintext key)", async () => {
     await saveCredentials({ api_key: "STORED" }, credPath);
     const res = await fetch(`${base}/status?token=${handle.token}`);
-    const body = await res.json();
+    const body = (await res.json()) as SetupStatus;
     expect(body.api_key).not.toBe("STORED");
     expect(JSON.stringify(body)).not.toContain("STORED");
   });
@@ -106,7 +107,7 @@ describe("setup web server", () => {
 
   it("runs the EInfo probe on POST /test", async () => {
     const res = await postJson("/test", VALID);
-    const body = await res.json();
+    const body = (await res.json()) as ConnectionTestResult;
     expect(body.success).toBe(true);
     expect(body.dbCount).toBe(3);
     expect(lastTested?.api_key).toBe("SECRETKEY");
@@ -114,7 +115,7 @@ describe("setup web server", () => {
 
   it("saves config + credentials (0o600) on POST /submit; key not in response", async () => {
     const res = await postJson("/submit", VALID);
-    const body = await res.json();
+    const body = (await res.json()) as { success: boolean };
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
     expect(JSON.stringify(body)).not.toContain("SECRETKEY");
@@ -123,6 +124,18 @@ describe("setup web server", () => {
     expect(cfg?.tool).toBe(ENTREZ_TOOL_NAME);
     expect((await loadCredentials(credPath)).api_key).toBe("SECRETKEY");
     expect((await stat(credPath)).mode & 0o777).toBe(0o600);
+  });
+
+  it("keeps the server open after a plain Save (closeAfter: false)", async () => {
+    const res = await postJson("/submit", { ...VALID, closeAfter: false });
+    expect(res.status).toBe(200);
+    expect((await loadConfig(configPath))?.tool).toBe(ENTREZ_TOOL_NAME);
+
+    // A plain Save persists but must not tear down the server — only
+    // "Save & Close" closes it, so a follow-up request still succeeds.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const status = await fetch(`${base}/status?token=${handle.token}`);
+    expect(status.status).toBe(200);
   });
 
   it("rejects an invalid submit without saving (400)", async () => {

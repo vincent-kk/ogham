@@ -20,7 +20,7 @@ function applyDocumentChrome() {
     root.style.setProperty("--content-width", `${state.content_width_px}px`);
   }
   if (state.font_family) {
-    root.style.setProperty("--font-body", state.font_family);
+    root.style.setProperty("--font-doc", state.font_family);
   }
   applyTheme(state.theme || "auto");
   const title = state.title || "Document";

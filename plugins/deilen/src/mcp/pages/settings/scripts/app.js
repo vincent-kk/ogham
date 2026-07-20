@@ -26,7 +26,7 @@ function populate() {
   $("content_width_px").value = config.content_width_px ?? 820;
   $("font_family").value = config.font_family ?? "";
   $("auto_open").checked = config.auto_open !== false;
-  $("collect_timeout_seconds").value = config.collect_timeout_seconds ?? 45;
+  $("collect_timeout_seconds").value = config.collect_timeout_seconds ?? 600;
   $("idle_shutdown_minutes").value = config.idle_shutdown_minutes ?? 1;
   $("session_ttl_hours").value = config.session_ttl_hours ?? 72;
   $("preferred_port").value = config.preferred_port ?? 0;
@@ -115,6 +115,7 @@ function init() {
   for (const radio of document.querySelectorAll('input[name="theme"]')) {
     radio.addEventListener("change", () => setTheme(collect().theme));
   }
+  $("cancel").addEventListener("click", () => window.close());
   $("save").addEventListener("click", () => save(false));
   $("save-close").addEventListener("click", () => save(true));
 }

@@ -75,7 +75,8 @@ Reset the config to defaults. Preserves the `language` field if currently set
 3. If `.filid/config.json` does not exist and the subcommand is `show`,
    report "No config found" and suggest `/filid:setup`.
 4. If `.filid/config.json` does not exist and the subcommand is `set`,
-   create a default config first, then apply the change.
+   create a default config first via `mcp__plugin_filid_tools__project_init({ path: <git_root> })`
+   (never hand-fabricate it), then apply the change.
 5. If `.filid/config.json` does not exist and the subcommand is `reset`,
    skip the read/delete in Step 3 and proceed directly to the
    `mcp__plugin_filid_tools__project_init` regeneration call.
@@ -129,8 +130,12 @@ After any mutation (`set` or `reset`):
 
 1. Read the written file back.
 2. Verify it is valid JSON.
-3. Verify the `version` field exists.
-4. Verify the `rules` object exists and is non-empty.
+3. Validate the full shape against the schema:
+   `mcp__plugin_filid_tools__config_patch_validate({ patch_json: <file contents> })`.
+   If `valid` is false, report `errors[]` (and the returned `suggestion` when
+   present) — this authoritatively catches invalid `severity` values and wrong
+   value types the checks below cannot.
+4. Verify the `version` field exists and the `rules` object is non-empty.
 5. Report any validation issues.
 
 ## Usage

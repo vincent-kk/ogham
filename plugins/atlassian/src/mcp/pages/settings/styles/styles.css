@@ -415,10 +415,17 @@ details[open] .advanced-toggle::after {
   flex-wrap: wrap;
 }
 
-.action-right {
+.action-commit {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.action-commit .test-result {
+  margin-right: auto;
 }
 
 /* Buttons */
@@ -463,6 +470,17 @@ details[open] .advanced-toggle::after {
 .btn-secondary:hover:not(:disabled) {
   background: var(--gray-50);
   border-color: var(--gray-400);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--gray-600);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--gray-50);
+  color: var(--gray-800);
 }
 
 .btn-link {
@@ -715,12 +733,10 @@ details[open] .advanced-toggle::after {
   .card {
     padding: 20px 16px;
   }
-  .action-row {
+  .action-row,
+  .action-commit {
     flex-direction: column;
     align-items: stretch;
-  }
-  .action-right {
-    justify-content: flex-end;
   }
   .tab-btn {
     font-size: 12px;

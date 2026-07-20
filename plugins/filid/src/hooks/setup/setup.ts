@@ -1,10 +1,12 @@
 /**
  * SessionStart hook handler for filid.
  *
- * Performs three tasks on every session start:
+ * Performs four tasks on every session start:
  *   1. Init  — ensure the cache directory exists, detect FCA project
- *   2. Auto-detect — if no .filid marker, scan for INTENT.md and create .filid/
- *   3. Maintenance — prune expired session cache files
+ *   2. Epoch reset — on compact/clear, remove the session's context-dependent
+ *      records so rule delivery re-arms after context loss
+ *   3. Auto-detect — if no .filid marker, scan for INTENT.md and create .filid/
+ *   4. Maintenance — prune expired session cache files
  *
  * The hook intentionally does NOT touch `.claude/rules/` or
  * `.filid/config.json`. Rule doc deployment and config creation are handled
@@ -26,6 +28,7 @@ import {
   markSessionPruneRun,
   pruneOldSessions,
   pruneStaleCacheDirs,
+  removeSessionFiles,
 } from '../../core/infra/cacheManager/cacheManager.js';
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
@@ -46,9 +49,15 @@ export function processSetup(input: SessionStartInput): HookOutput {
     setLogDir(cacheDir);
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
 
+    // Phase 2: Epoch reset — compact/clear lose the live context, so every
+    // context-dependent record (delivery, turn, guide, pointer markers) is
+    // re-armed. resume/startup preserve or freshly create context: no reset.
+    if (input.source === 'compact' || input.source === 'clear')
+      removeSessionFiles(input.session_id, safeCwd);
+
     let isFca = isFcaProject(safeCwd);
 
-    // Phase 2: Auto-detect — scan for INTENT.md and create .filid/ marker
+    // Phase 3: Auto-detect — scan for INTENT.md and create .filid/ marker
     try {
       if (!isFca && hasIntentMdInTree(safeCwd)) {
         mkdirSync(join(safeCwd, '.filid'), { recursive: true });
@@ -62,7 +71,7 @@ export function processSetup(input: SessionStartInput): HookOutput {
 
     log.debug(`cwd=${safeCwd} fca=${isFca} cache=${cacheDir}`);
 
-    // Phase 3: Maintenance — daily-throttled prune (independent gates per concern)
+    // Phase 4: Maintenance — daily-throttled prune (independent gates per concern)
     if (isSessionPruneDue(safeCwd)) {
       pruneOldSessions(safeCwd);
       markSessionPruneRun(safeCwd);

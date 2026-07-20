@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
+import { INTENT_MD_LINE_LIMIT } from '../../../../constants/documentValidation.js';
 import { DENY_RETRY_GUIDANCE } from '../../../../constants/hookDefaults.js';
 import {
   validateCriteriaMd,
@@ -15,8 +16,6 @@ import {
   isIntentMd,
 } from '../../../shared/shared.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
-
-const INTENT_MD_LINE_LIMIT = 50;
 
 /**
  * Project an Edit the way Claude Code's Edit tool applies it: literal

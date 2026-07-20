@@ -170,10 +170,10 @@ describe('fractal-scan tool — output modes & size guard', () => {
     expect(result).toMatchObject({ outputMode: 'summary' });
     expect(result).not.toHaveProperty('nodes');
     expect(result).not.toHaveProperty('tree');
-    if (result.outputMode === 'summary') {
-      expect(result.totalNodes).toBeGreaterThan(0);
-      expect(Object.keys(result.nodesByType).length).toBeGreaterThan(0);
-    }
+    if (!('totalNodes' in result) || !('nodesByType' in result))
+      throw new Error('expected summary mode');
+    expect(result.totalNodes).toBeGreaterThan(0);
+    expect(Object.keys(result.nodesByType).length).toBeGreaterThan(0);
   });
 
   it('paths mode projects nodes down to path/type/INTENT flags', async () => {
@@ -181,7 +181,11 @@ describe('fractal-scan tool — output modes & size guard', () => {
       path: import.meta.dirname,
       outputMode: 'paths',
     });
-    if (result.outputMode !== 'paths' || !('nodes' in result))
+    if (
+      !('outputMode' in result) ||
+      result.outputMode !== 'paths' ||
+      !('nodes' in result)
+    )
       throw new Error('expected paths projection');
     expect(result.nodes.length).toBe(result.totalNodes);
     expect(Object.keys(result.nodes[0]).sort()).toEqual([
@@ -211,6 +215,7 @@ describe('fractal-scan tool — output modes & size guard', () => {
             hasIndex: true,
             hasMain: false,
             depth: 0,
+            metadata: {},
           },
           {
             path: '/proj/src',
@@ -224,6 +229,7 @@ describe('fractal-scan tool — output modes & size guard', () => {
             hasIndex: true,
             hasMain: false,
             depth: 1,
+            metadata: {},
           },
         ],
       },

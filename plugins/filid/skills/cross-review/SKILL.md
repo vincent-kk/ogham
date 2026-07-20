@@ -3,7 +3,7 @@ name: cross-review
 user_invocable: true
 description: '[filid:cross-review] Run multi-perspective consensus code review: scope & committee election, technical evidence collection, one parallel committee opinion round, then adversarial verification that arbitrates disagreements and kills false positives before the verdict.'
 argument-hint: '[--scope branch|pr|commit] [--base REF] [--force] [--solo]'
-version: '3.0.0'
+version: '3.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -25,8 +25,8 @@ plugin: filid
 > **HIGH-RISK YIELD POINTS**:
 >
 > 1. After evidence subagents return → chain Step 3 committee spawn immediately.
-> 2. After the parallel committee Agents return → chain Step 4 aggregation
->    - verifier spawn in the same response.
+> 2. After the parallel committee Agents return → chain Step 4
+>    aggregation + verifier spawn in the same response.
 > 3. After verifier Agents return → chain verdict derivation + Step 5
 >    report writes in the same response.
 
@@ -45,7 +45,12 @@ override), **arbitration & false-positive removal** (verifier verdicts
 CONFIRMED / PLAUSIBLE / REFUTED; REFUTED findings are dismissed and
 recorded).
 
-> **References**:
+> **References** — resolve every skill file at
+> `${CLAUDE_PLUGIN_ROOT}/skills/cross-review/<file>` (fallback:
+> `Glob(**/skills/cross-review/<file>)`). Read `contracts.md` during
+> Step 1 — Steps 1-5 apply its rules and paste its schema blocks into
+> subagent prompts verbatim. Read `templates.md` before Step 5 (or on
+> any early END that writes a report).
 >
 > - `contracts.md` — committee mapping, opinion schema, severity gate,
 >   verifier verdict ladder, verdict derivation, acceptance claims,
@@ -65,6 +70,15 @@ recorded).
 
 ## Core Workflow
 
+> **Spawn-mode invariant**: every subagent in this skill — evidence,
+> committee personas, verifiers — is spawned as a parallel FOREGROUND
+> `Agent` call with explicit `run_in_background: false`; the returning
+> tool result is the synchronization point. Omitting the flag spawns a
+> BACKGROUND agent: the call returns a task id instead of the result,
+> output files get read before they exist, and healthy workers get
+> misrecorded as failures. Never spawn background agents here, and
+> never poll for files as a substitute for the foreground return.
+
 ### Step 1 — Scope & Session
 
 1. `git branch --show-current` (Bash) → `<branch>`.
@@ -80,7 +94,12 @@ recorded).
 > `Review verdict: REQUEST_CHANGES`, and END. Unharvested spike work has
 > no oracle to judge it against.
 
-3. If `--force`: `mcp__plugin_filid_tools__review_manage(action: "cleanup", projectRoot, branchName)`,
+3. Resolve `<BASE_REF>`: `--base` when given (verify with
+   `git rev-parse --verify`); otherwise the `origin` HEAD branch
+   (`git remote show origin`), falling back to `origin/main` then
+   `origin/master`. No candidate → END with "Cannot auto-detect base.
+   Specify --base explicitly."
+4. If `--force`: `mcp__plugin_filid_tools__review_manage(action: "cleanup", projectRoot, branchName)`,
    then continue fresh. Otherwise:
    - `mcp__plugin_filid_tools__review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
      — on `"skip-to-existing-results"`, read the existing
@@ -91,14 +110,14 @@ recorded).
      `review-report.md` present → report existing results and END;
      `verification.md` present → skip to Step 3;
      `session.md` only → skip to Step 2; none → continue.
-4. Collect election inputs (Bash):
+5. Collect election inputs (Bash):
    `git diff <BASE_REF>..HEAD --name-only` → changed files count;
    changed fractal count (unique parent fractal dirs); interface changes
    (`index.ts` / public exports touched); document changes per the SSoT
    rule in `contracts.md` → "Document Change Signal".
-5. `mcp__plugin_filid_tools__review_manage(action: "elect-committee", projectRoot, changedFilesCount, changedFractalsCount, hasInterfaceChanges, hasDocumentChanges, adjudicatorMode: <true when --solo, else false>)`
-   → `{ complexity, committee, adversarialPairs }`.
-6. `mcp__plugin_filid_tools__review_manage(action: "ensure-dir", projectRoot, branchName)`,
+6. `mcp__plugin_filid_tools__review_manage(action: "elect-committee", projectRoot, changedFilesCount, changedFractalsCount, hasInterfaceChanges, hasDocumentChanges, adjudicatorMode: <true when --solo, else false>)`
+   → `{ complexity, committee }` (ignore any extra response fields).
+7. `mcp__plugin_filid_tools__review_manage(action: "ensure-dir", projectRoot, branchName)`,
    then write `<REVIEW_DIR>/session.md`:
 
    ```markdown
@@ -132,15 +151,16 @@ measures. Resolve the phase file
 (fallback: `Glob(**/skills/cross-review/phases/evidence.md)`).
 
 - **≤ 15 changed files** — spawn ONE `general-purpose` subagent
-  (`run_in_background: true`, model `sonnet`) that follows
+  (`run_in_background: false`, model `sonnet`) that follows
   `phases/evidence.md` with `SCOPE: full` and writes
   `<REVIEW_DIR>/verification.md` directly.
-- **> 15 changed files** — spawn TWO parallel subagents with
-  `SCOPE: metrics-half` / `SCOPE: structure-half`, each writing
-  `verification.<half>.partial.md`; the chairperson merges them into
-  `verification.md` (union of sections, frontmatter per
-  `phases/evidence.md` → "Merge"). Above 30 files, additionally pass
-  10-file `BATCH_FILES` lists per subagent as described there.
+- **> 15 changed files** — spawn TWO such subagents in the same
+  response with `SCOPE: metrics-half` / `SCOPE: structure-half`, each
+  writing `verification.<half>.partial.md`; the chairperson merges them
+  into `verification.md` (union of sections, frontmatter per
+  `phases/evidence.md` → "Merge"). No further split exists — the
+  streaming-write discipline in `phases/evidence.md` keeps each agent's
+  memory flat regardless of file count.
 
 Prompt construction: state the output file first, substitute concrete
 values for every placeholder, pass the `[filid:lang]` language setting,
@@ -151,8 +171,9 @@ and close with the write-before-finish reminder (rules:
 frontmatter sentinel `verification_passed` holds a real value (not
 `PENDING`). If the subagent finished but the file is missing or still a
 `PENDING` skeleton, retry the phase ONCE with a fresh subagent; if it
-fails again, END with `Review verdict: INCONCLUSIVE` (reason: evidence
-unavailable).
+fails again, write the INCONCLUSIVE variant of `review-report.md`
+(`templates.md`) and END with `Review verdict: INCONCLUSIVE` (reason:
+evidence unavailable).
 
 **Committee escalation**: if `verification.md` frontmatter
 `critical_failures >= 3` and `adjudicator_mode: false`, escalate
@@ -165,9 +186,9 @@ complexity one tier (LOW→MEDIUM, MEDIUM→HIGH) and overwrite
 ### Step 3 — Committee Opinions (one parallel round)
 
 Spawn every committee member **in the same response** as parallel
-foreground `Agent` calls (`subagent_type: "filid:<persona-id>"`, no
-`run_in_background`) — the framework returns all results together,
-giving a deterministic sync point with no polling, probing, or teardown.
+foreground `Agent` calls (`subagent_type: "filid:<persona-id>"`,
+`run_in_background: false`) — all results return together, a
+deterministic sync point with no polling, probing, or teardown.
 
 Worker prompt (per persona; solo adjudicator uses the same shape). The
 chairperson pastes the frontmatter schema from `contracts.md` →
@@ -197,17 +218,26 @@ Emit claim_verdicts when verification.md lists in-scope acceptance
 claims. Do NOT call Agent, SendMessage, or any orchestration tool.
 
 Language: <from [filid:lang] tag, default English>
-REMINDER: Write the opinion file before finishing.
+WRITE-FIRST (contracts.md → "Write-First Output Discipline"): your FIRST
+tool action writes the opinion file as an ABSTAIN/confidence-0 skeleton;
+rewrite the full file after each verified conclusion; trust
+verification.md instead of re-running project-wide scans (aim under ~15
+tool calls); your LAST write sets the final state/confidence/fix_items.
+An unwritten opinion is a failed run.
 ```
 
 - **Solo path** (`committee == ['adjudicator']`, from TRIVIAL tier or
   `--solo`): spawn only the adjudicator; it sweeps all six lenses in one
   opinion.
-- **Failed member**: an Agent call that errors or returns without
-  writing its opinion file is recorded as a forced ABSTAIN
-  (`state: ABSTAIN`, `confidence: 0`, chairperson-written). If **more
-  than half** of the committee failed (or the solo adjudicator failed),
-  END with `Review verdict: INCONCLUSIVE`.
+- **Failed member**: an Agent call that errors, returns without writing
+  its opinion file, or leaves the file at the untouched
+  ABSTAIN/confidence-0 skeleton is recorded as a forced ABSTAIN
+  (`state: ABSTAIN`, `confidence: 0`, chairperson-written). Retry a
+  failed member ONCE with a fresh Agent call before recording the
+  ABSTAIN. If **more than half** of the committee failed (or the solo
+  adjudicator failed), write the INCONCLUSIVE variant of
+  `review-report.md` (`templates.md`) and END with
+  `Review verdict: INCONCLUSIVE`.
 
 **→ After all Agents return, immediately proceed to Step 4 in the same response.**
 
@@ -227,13 +257,19 @@ sanctioned in `contracts.md`.
    `contracts.md` → "Acceptance Claims".
 2. **Partition by the severity gate**: blocking (`>= MEDIUM`) vs
    advisory (`LOW`). Advisory items skip verification — they can never
-   block.
+   block. Empty blocking set AND no VETO → skip items 3-4 entirely
+   (spawn no verifiers) and derive the verdict directly.
 3. **Verify blocking candidates** (and every VETO's cited basis): group
-   candidates by file and spawn parallel foreground `general-purpose`
-   verifier Agents — one per file group — with the diff context, the
-   candidate list, and the verdict ladder from `contracts.md` →
-   "Verifier Verdict Ladder". Each returns per-candidate
-   `CONFIRMED | PLAUSIBLE | REFUTED` with quoted-line evidence.
+   candidates by file into at most 4 parallel foreground
+   `general-purpose` verifier Agents (`run_in_background: false`), each
+   given the diff context, its candidate list, and the verdict ladder
+   pasted from `contracts.md` → "Verifier Verdict Ladder" (including
+   the verifier constraints and return format). Each returns
+   per-candidate `CONFIRMED | PLAUSIBLE | REFUTED` with quoted-line
+   evidence. A verifier that errors or returns no parseable verdicts is
+   retried ONCE; if the retry fails too, its candidates survive as
+   PLAUSIBLE, marked `unverified — verifier failed` in the Arbitration
+   Log.
    Tool-measured metric rows in `verification.md` are ground truth —
    verifiers judge misapplication (wrong rule scope, wrong file class,
    e.g. INTENT.md's 50-line cap applied to DETAIL.md), misattribution,
@@ -265,9 +301,11 @@ sanctioned in `contracts.md`.
    (dispatch rules: `contracts.md` → "Config Patch Contract").
 3. Write `<REVIEW_DIR>/review-report.md` and — when the blocking set is
    non-empty — `<REVIEW_DIR>/fix-requests.md`, using `templates.md`
-   formats. The report's Arbitration Log records per-persona positions,
-   dedup collisions, every verifier verdict (including dismissed
-   REFUTED items), and VETO handling.
+   formats. When the blocking set is EMPTY, delete any leftover
+   `fix-requests.md` from a prior run (a stale file misroutes pipeline
+   auto-detection into resolve). The report's Arbitration Log records
+   per-persona positions, dedup collisions, every verifier verdict
+   (including dismissed REFUTED items), and VETO handling.
 4. `mcp__plugin_filid_tools__review_manage(action: "content-hash", projectRoot, branchName, baseRef)`.
 5. **PR comment** (only when `--scope=pr`):
    `mcp__plugin_filid_tools__review_manage(action: "format-pr-comment", projectRoot, branchName)`,
@@ -312,6 +350,7 @@ sanctioned in `contracts.md`.
 Steps:    1 Scope/Session (main) → 2 Evidence (subagent) →
           3 Committee (parallel personas, 1 round) →
           4 Arbitrate/Verify (parallel verifiers) → 5 Report
+Spawn:    every subagent foreground — run_in_background: false
 Committee: TRIVIAL=adjudicator · LOW=2 · MEDIUM=4 · HIGH=6 specialists
 Artifacts: session.md, verification.md, opinions/<persona>.md,
            review-report.md, fix-requests.md, content-hash.json

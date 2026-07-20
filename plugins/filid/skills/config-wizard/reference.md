@@ -140,7 +140,11 @@ Current config:
 
 ## Validation Rules
 
-After any write operation, verify:
+After any write operation, validate the written config against the schema with
+`mcp__plugin_filid_tools__config_patch_validate({ patch_json: <file contents> })` —
+its `errors[]` is the authoritative check for shape, enum, and type errors. The
+items below are additional sanity checks, some stricter than the schema (which
+accepts an empty `version` or empty `rules`), so keep applying them:
 
 1. **Valid JSON**: File parses without error
 2. **Version exists**: `config.version` is a non-empty string

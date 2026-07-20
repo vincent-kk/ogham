@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs';
 import * as path from 'node:path';
 
+import { DETAIL_MD, INTENT_MD } from '../../constants/documentFiles.js';
+
 import { isOrganByStructure } from './organStructureChecker.js';
 
 export function checkOrganSubdirectory(
@@ -13,6 +15,15 @@ export function checkOrganSubdirectory(
   let dirSoFar = cwd;
   for (let i = 0; i < segments.length; i++) {
     dirSoFar = path.join(dirSoFar, segments[i]);
+    // Pattern-matched organs are exempt from the flatness warning; only
+    // named code organs (utils/, helpers/, ...) keep it. Dot-prefixed dirs
+    // (.filid, .github) are hidden infra/state whose nesting is their design
+    // (the plugin's own .filid/review/<branch>/ would trip this on every
+    // review write), and dunder dirs (__tests__) conventionally nest
+    // (unit/<layer>/ — the mirror test strategy itself mandates it).
+    // Classification stays organ; only this warning skips.
+    if (segments[i].startsWith('.')) continue;
+    if (/^__.*__$/.test(segments[i])) continue;
     if (isOrganByStructure(dirSoFar)) {
       organIdx = i;
       organSegment = segments[i];
@@ -27,8 +38,8 @@ export function checkOrganSubdirectory(
   for (let i = organIdx + 1; i < segments.length; i++) {
     below = path.join(below, segments[i]);
     if (
-      existsSync(path.join(below, 'INTENT.md')) ||
-      existsSync(path.join(below, 'DETAIL.md'))
+      existsSync(path.join(below, INTENT_MD)) ||
+      existsSync(path.join(below, DETAIL_MD))
     )
       return [];
   }

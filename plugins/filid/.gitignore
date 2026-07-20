@@ -2,3 +2,5 @@ node_modules/
 dist/
 *.log
 bench-results/
+test-results/
+playwright-report/

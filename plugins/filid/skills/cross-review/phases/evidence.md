@@ -24,9 +24,6 @@ explicitly project-wide calls below.
 
 - `REVIEW_DIR`, `PROJECT_ROOT`, `BASE_REF`, `BRANCH`
 - `SCOPE`: `full` | `metrics-half` | `structure-half`
-- `BATCH_FILES`: optional newline-separated file list — when set,
-  restrict per-file stages to these files and write to
-  `verification.<half>.partial-<batch>.md`
 
 ## Stage 0 — Collect scope (all SCOPEs)
 
@@ -161,18 +158,15 @@ fields they own); leave the other half's counters out entirely.
 
 ## Merge (chairperson-side, split path only)
 
-`verification.metrics-half.partial*.md` +
-`verification.structure-half.partial*.md` → `verification.md`: union
+`verification.metrics-half.partial.md` +
+`verification.structure-half.partial.md` → `verification.md`: union
 the body sections, dedup Findings rows by `path + rule`, take frontmatter
 counters from the half that owns them, recompute `critical_failures` and
 `verification_passed` over the merged Findings, keep `scope: full`.
 
-## Batch mode (> 30 changed files)
-
-The chairperson partitions per-file stages into 10-file `BATCH_FILES`
-lists and spawns one subagent per batch per half; project-wide calls
-(`structure_validate`, `drift_detect`, `debt_manage`, claims) run only
-in the first structure batch. Partials merge exactly as above.
+No further split exists above the two halves — the streaming-write
+discipline keeps memory flat regardless of file count, so a large diff
+just means more appended rows, never more subagents.
 
 ## Important Notes
 

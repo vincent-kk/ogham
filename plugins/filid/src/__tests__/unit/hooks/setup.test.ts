@@ -27,6 +27,7 @@ vi.mock(
       getCacheDir: vi.fn(actual.getCacheDir),
       pruneOldSessions: vi.fn(),
       pruneStaleCacheDirs: vi.fn(),
+      removeSessionFiles: vi.fn(),
     };
   },
 );
@@ -34,7 +35,7 @@ vi.mock(
 const { processSetup } = await import('../../../hooks/setup/setup.js');
 const { existsSync: mockExistsSync, mkdirSync: mockMkdirSync } =
   await import('node:fs');
-const { getCacheDir, pruneOldSessions } =
+const { getCacheDir, pruneOldSessions, removeSessionFiles } =
   await import('../../../core/infra/cacheManager/cacheManager.js');
 
 const testWorkspace = resolve('/tmp/test-workspace');
@@ -162,6 +163,35 @@ describe('processSetup', () => {
     const result = processSetup(baseInput);
 
     expect(result.continue).toBe(true);
+  });
+
+  it('epoch reset: source=compact and source=clear remove session files', () => {
+    (getCacheDir as ReturnType<typeof vi.fn>).mockReturnValue(
+      '/tmp/filid-cache',
+    );
+    (mockExistsSync as ReturnType<typeof vi.fn>).mockReturnValue(true);
+
+    processSetup({ ...baseInput, source: 'compact' });
+    expect(removeSessionFiles).toHaveBeenCalledWith(
+      'test-session-123',
+      testWorkspace,
+    );
+
+    (removeSessionFiles as ReturnType<typeof vi.fn>).mockClear();
+    processSetup({ ...baseInput, source: 'clear' });
+    expect(removeSessionFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('epoch reset: startup/resume/absent source do NOT reset', () => {
+    (getCacheDir as ReturnType<typeof vi.fn>).mockReturnValue(
+      '/tmp/filid-cache',
+    );
+    (mockExistsSync as ReturnType<typeof vi.fn>).mockReturnValue(true);
+
+    processSetup({ ...baseInput, source: 'startup' });
+    processSetup({ ...baseInput, source: 'resume' });
+    processSetup(baseInput);
+    expect(removeSessionFiles).not.toHaveBeenCalled();
   });
 
   // Rule doc deployment is no longer performed by setup.ts. The SessionStart

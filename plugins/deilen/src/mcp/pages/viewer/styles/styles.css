@@ -1,81 +1,90 @@
-/* deilen viewer — editorial-developer reading surface. */
+/* deilen viewer — parchment · ink · nib · seal reading surface. */
 
+/* ── Shared token sheet — single source: ../../DESIGN.md.
+   Keep this block identical between viewer and settings styles.css. ── */
 :root {
-  --content-width: 820px;
-  --font-body:
+  --font-doc:
+    Charter, "Iowan Old Style", "Palatino Linotype", Georgia,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", serif;
+  --font-ui:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     ui-monospace, SFMono-Regular, "SF Mono", "JetBrains Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
 
-  --bg: #ffffff;
-  --bg-subtle: #f7f7f8;
-  --bg-inset: #ededee;
-  --text: #1a1a1d;
-  --text-muted: #5c5c63;
-  --text-faint: #8a8a90;
-  --border: #e5e5e7;
-  --border-strong: #d4d4d7;
+  --bg: #f8f5ee;
+  --bg-subtle: #f1ede1;
+  --bg-inset: #e7e2d2;
+  --text: #1f1d16;
+  --text-muted: #6b665a;
+  --text-faint: #98917f;
+  --border: #e3ddcc;
+  --border-strong: #cec6b1;
+  --divider: #e9e4d4;
+  --divider-edge: rgba(255, 255, 255, 0.75);
 
-  --accent: #5b5bd6;
-  --accent-hover: #4a4ac4;
-  --accent-contrast: #ffffff;
-  --accent-soft: rgba(91, 91, 214, 0.1);
+  --accent: #1f1d16;
+  --accent-hover: #000000;
+  --accent-contrast: #f8f5ee;
+  --accent-soft: rgba(31, 29, 22, 0.07);
+  --seal: #6d2130;
 
-  --danger: #d61f1f;
-  --danger-soft: rgba(214, 31, 31, 0.1);
-  --success: #15803d;
-  --mark: rgba(240, 169, 14, 0.22);
-  --mark-line: rgba(214, 138, 0, 0.55);
-  --pending: rgba(192, 86, 130, 0.13);
-  --pending-line: rgba(192, 86, 130, 0.55);
-  --syn-keyword: #8250df;
-  --syn-string: #0a7d33;
-  --syn-number: #b5530f;
-  --syn-function: #1f6feb;
-  --syn-attr: #116329;
+  --danger: #b3372f;
+  --danger-soft: rgba(179, 55, 47, 0.1);
+  --success: #2f6e44;
+  --mark: rgba(202, 141, 22, 0.2);
+  --mark-line: rgba(164, 110, 10, 0.55);
+  --pending: rgba(158, 82, 110, 0.11);
+  --pending-line: rgba(158, 82, 110, 0.45);
+  --syn-keyword: #9c4a2f;
+  --syn-string: #41684b;
+  --syn-number: #91630c;
+  --syn-function: #33697a;
+  --syn-attr: #5d6b34;
 
   --shadow-sm:
-    0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+    0 1px 2px rgba(43, 36, 18, 0.06), 0 1px 3px rgba(43, 36, 18, 0.08);
   --shadow-md:
-    0 4px 12px rgba(15, 23, 42, 0.1), 0 2px 4px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.16);
+    0 4px 12px rgba(43, 36, 18, 0.1), 0 2px 4px rgba(43, 36, 18, 0.06);
+  --shadow-lg: 0 12px 32px rgba(43, 36, 18, 0.16);
 
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --topbar-h: 52px;
-  --submitbar-h: 60px;
+  --radius-sm: 4px;
+  --radius: 7px;
+  --radius-lg: 10px;
+  --transition: 160ms ease;
 }
 
 :root[data-theme="dark"] {
-  --bg: #16161a;
-  --bg-subtle: #1c1c20;
-  --bg-inset: #242429;
-  --text: #f4f4f6;
-  --text-muted: #9a9aa3;
-  --text-faint: #5e5e67;
-  --border: #2a2a31;
-  --border-strong: #3a3a43;
+  --bg: #1c1a15;
+  --bg-subtle: #221f19;
+  --bg-inset: #2b2720;
+  --text: #ebe6d8;
+  --text-muted: #a49c88;
+  --text-faint: #6f695a;
+  --border: #35302a;
+  --border-strong: #4a4433;
+  --divider: #4a4433;
+  --divider-edge: rgba(255, 255, 255, 0.09);
 
-  --accent: #8b8cea;
-  --accent-hover: #a3a4f0;
-  --accent-contrast: #16161a;
-  --accent-soft: rgba(139, 140, 234, 0.16);
+  --accent: #ebe6d8;
+  --accent-hover: #ffffff;
+  --accent-contrast: #1c1a15;
+  --accent-soft: rgba(235, 230, 216, 0.09);
+  --seal: #ad4750;
 
-  --danger: #f08a8a;
-  --danger-soft: rgba(240, 138, 138, 0.14);
-  --success: #5bd07f;
-  --mark: rgba(245, 184, 74, 0.2);
-  --mark-line: rgba(245, 184, 74, 0.5);
-  --pending: rgba(232, 140, 175, 0.16);
-  --pending-line: rgba(232, 140, 175, 0.55);
-  --syn-keyword: #d2a8ff;
-  --syn-string: #7ee787;
-  --syn-number: #ffa657;
-  --syn-function: #79c0ff;
-  --syn-attr: #7ee787;
+  --danger: #e0968c;
+  --danger-soft: rgba(224, 150, 140, 0.13);
+  --success: #83c290;
+  --mark: rgba(226, 178, 88, 0.18);
+  --mark-line: rgba(226, 178, 88, 0.45);
+  --pending: rgba(214, 146, 172, 0.13);
+  --pending-line: rgba(214, 146, 172, 0.45);
+  --syn-keyword: #d9a084;
+  --syn-string: #a9c9a6;
+  --syn-number: #d9b26e;
+  --syn-function: #92bcc6;
+  --syn-attr: #b5c48f;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
@@ -84,34 +93,44 @@
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] {
-    --bg: #16161a;
-    --bg-subtle: #1c1c20;
-    --bg-inset: #242429;
-    --text: #f4f4f6;
-    --text-muted: #9a9aa3;
-    --text-faint: #5e5e67;
-    --border: #2a2a31;
-    --border-strong: #3a3a43;
-    --accent: #8b8cea;
-    --accent-hover: #a3a4f0;
-    --accent-contrast: #16161a;
-    --accent-soft: rgba(139, 140, 234, 0.16);
-    --danger: #f08a8a;
-    --danger-soft: rgba(240, 138, 138, 0.14);
-    --success: #5bd07f;
-    --mark: rgba(245, 184, 74, 0.2);
-    --mark-line: rgba(245, 184, 74, 0.5);
-    --pending: rgba(232, 140, 175, 0.16);
-    --pending-line: rgba(232, 140, 175, 0.55);
-    --syn-keyword: #d2a8ff;
-    --syn-string: #7ee787;
-    --syn-number: #ffa657;
-    --syn-function: #79c0ff;
-    --syn-attr: #7ee787;
+    --bg: #1c1a15;
+    --bg-subtle: #221f19;
+    --bg-inset: #2b2720;
+    --text: #ebe6d8;
+    --text-muted: #a49c88;
+    --text-faint: #6f695a;
+    --border: #35302a;
+    --border-strong: #4a4433;
+    --divider: #4a4433;
+    --divider-edge: rgba(255, 255, 255, 0.09);
+    --accent: #ebe6d8;
+    --accent-hover: #ffffff;
+    --accent-contrast: #1c1a15;
+    --accent-soft: rgba(235, 230, 216, 0.09);
+    --seal: #ad4750;
+    --danger: #e0968c;
+    --danger-soft: rgba(224, 150, 140, 0.13);
+    --success: #83c290;
+    --mark: rgba(226, 178, 88, 0.18);
+    --mark-line: rgba(226, 178, 88, 0.45);
+    --pending: rgba(214, 146, 172, 0.13);
+    --pending-line: rgba(214, 146, 172, 0.45);
+    --syn-keyword: #d9a084;
+    --syn-string: #a9c9a6;
+    --syn-number: #d9b26e;
+    --syn-function: #92bcc6;
+    --syn-attr: #b5c48f;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
   }
+}
+/* ── End shared token sheet ── */
+
+:root {
+  --content-width: 820px;
+  --topbar-h: 52px;
+  --submitbar-h: 60px;
 }
 
 * {
@@ -127,7 +146,7 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
   font-size: 16px;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
@@ -168,9 +187,10 @@ button {
   min-width: 0;
 }
 
+/* Wax-seal brand glyph — the only chrome element allowed to carry --seal. */
 .brand {
   display: inline-flex;
-  color: var(--accent);
+  color: var(--seal);
   flex: none;
 }
 
@@ -205,9 +225,9 @@ button {
   font-size: 13px;
   font-weight: 500;
   transition:
-    background 0.16s ease,
-    color 0.16s ease,
-    border-color 0.16s ease;
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition);
 }
 
 .icon-btn:hover {
@@ -343,7 +363,13 @@ button {
   background: var(--accent-soft);
 }
 
-/* ── Reading typography ─────────────────────────────────── */
+/* ── Reading typography — serif document on parchment ───── */
+.viewer {
+  font-family: var(--font-doc);
+  font-size: 16.5px;
+  line-height: 1.75;
+}
+
 .viewer > * {
   position: relative;
 }
@@ -355,9 +381,10 @@ button {
 .viewer h5,
 .viewer h6 {
   line-height: 1.3;
-  letter-spacing: -0.014em;
+  letter-spacing: -0.012em;
   margin: 1.8em 0 0.6em;
-  font-weight: 650;
+  /* Charter/Georgia ship 400/700 only — intermediate weights render faux. */
+  font-weight: 700;
 }
 
 .viewer > :first-child {
@@ -366,7 +393,6 @@ button {
 
 .viewer h1 {
   font-size: 1.9rem;
-  font-weight: 700;
 }
 .viewer h2 {
   font-size: 1.45rem;
@@ -391,12 +417,15 @@ button {
 
 .viewer a {
   color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 3px;
 }
 
 .viewer a:hover {
-  border-bottom-color: var(--accent);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
 }
 
 .viewer ul,
@@ -454,12 +483,12 @@ button {
   color: var(--text-faint);
 }
 
+/* Print-style quote: ink rule + italics, no background wash. */
 .viewer blockquote {
   margin: 1.2em 0;
-  padding: 0.4em 1.1em;
-  border-left: 3px solid var(--accent);
-  background: var(--accent-soft);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 0.15em 1.1em;
+  border-left: 2px solid var(--text);
+  font-style: italic;
   color: var(--text-muted);
 }
 
@@ -467,10 +496,30 @@ button {
   margin-bottom: 0;
 }
 
+/* Divider — two hairline rules around a center lozenge (─── ◆ ───),
+   debossed into the page (near-bg fill + 1px light edge below). */
 .viewer hr {
+  --divider-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20120%2012'%3E%3Cg%20fill='none'%20stroke='%23000'%20stroke-width='1.2'%20stroke-linecap='round'%3E%3Cpath%20d='M4%206H53'/%3E%3Cpath%20d='M67%206H116'/%3E%3C/g%3E%3Cpath%20d='M60%203.9L62.1%206%2060%208.1%2057.9%206Z'/%3E%3C/svg%3E");
   border: none;
-  border-top: 1px solid var(--border);
-  margin: 2em 0;
+  position: relative;
+  width: 132px;
+  height: 13px;
+  margin: 2em auto;
+}
+
+.viewer hr::before,
+.viewer hr::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--divider);
+  -webkit-mask: var(--divider-mask) center / 100% 100% no-repeat;
+  mask: var(--divider-mask) center / 100% 100% no-repeat;
+}
+
+.viewer hr::before {
+  background: var(--divider-edge);
+  transform: translateY(1px);
 }
 
 .viewer img {
@@ -481,7 +530,7 @@ button {
 
 .viewer code {
   font-family: var(--font-mono);
-  font-size: 0.86em;
+  font-size: 0.84em;
 }
 
 .viewer :not(pre) > code {
@@ -579,8 +628,8 @@ button {
   font-size: 12px;
   opacity: 0;
   transition:
-    opacity 0.16s ease,
-    color 0.16s ease;
+    opacity var(--transition),
+    color var(--transition);
 }
 
 .viewer pre:hover .code-copy,
@@ -696,13 +745,14 @@ button {
   border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--accent);
+  font-family: var(--font-ui);
   font-size: 15px;
   line-height: 1;
   opacity: 0;
   transform: translateX(4px);
   transition:
-    opacity 0.14s ease,
-    transform 0.14s ease;
+    opacity var(--transition),
+    transform var(--transition);
 }
 
 .viewer > :hover > .line-add,
@@ -719,9 +769,8 @@ button {
 /* Committed (amber) and pending (dusty rose) comment highlights share one box
    model — a translucent wash + bottom inset underline on the anchored block.
    The flag sits on the same <li>/block as the bullet/checkbox gutter offset, so
-   neither ever paints over a marker. Rose is an otherwise-unused hue, so the
-   pending block never collides with the amber comment, the grey selection, or
-   the indigo accent. */
+   neither ever paints over a marker. The chrome is monochrome ink, so the two
+   washes only need to stay distinct from each other and the grey selection. */
 .viewer [data-has-comment="true"],
 .viewer [data-pending-comment="true"] {
   background: var(--mark);
@@ -787,6 +836,7 @@ button {
   border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--text);
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 500;
   box-shadow: var(--shadow-md);
@@ -804,7 +854,7 @@ button {
   background: var(--bg);
   box-shadow: var(--shadow-sm);
   padding: 12px;
-  transition: box-shadow 0.16s ease;
+  transition: box-shadow var(--transition);
 }
 
 .comment-card:hover {
@@ -815,15 +865,16 @@ button {
   opacity: 0.6;
 }
 
+/* Graphite anchor chip — quiet position marker; never carries --seal. */
 .anchor-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   max-width: 100%;
   padding: 2px 8px;
-  border-radius: 6px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  border-radius: 5px;
+  background: var(--bg-inset);
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
@@ -833,7 +884,7 @@ button {
 .anchor-chip.overall {
   background: var(--bg-inset);
   color: var(--text-muted);
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
   border: 1px solid var(--border-strong);
 }
 
@@ -885,6 +936,8 @@ button {
   color: var(--danger);
 }
 
+/* Muted on purpose: an ink-bright outline next to the text being typed pulls
+   the eye away from it — DESIGN.md focus exception. */
 .composer {
   display: flex;
   flex-direction: column;
@@ -892,7 +945,7 @@ button {
   border-radius: var(--radius);
   background: var(--bg);
   padding: 12px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-md);
 }
 
@@ -912,13 +965,13 @@ button {
   border-radius: var(--radius-sm);
   background: var(--bg-inset);
   color: var(--text);
-  font-family: inherit;
+  font-family: var(--font-ui);
   font-size: 14px;
   line-height: 1.6;
   padding: 9px 11px;
   transition:
-    border-color 0.16s ease,
-    box-shadow 0.16s ease;
+    border-color var(--transition),
+    box-shadow var(--transition);
 }
 
 .composer textarea::placeholder {
@@ -927,13 +980,13 @@ button {
 
 .composer textarea:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--text-faint);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 /* Dark elevation: raise cards above the sidebar and sink the field into a
    genuine inset well (lighter = raised), since dark surfaces can't lean on
-   drop shadow for separation. Light mode already lifts the white card above
+   drop shadow for separation. Light mode already lifts the parchment card above
    the subtle sidebar, so it keeps the default mapping. */
 :root[data-theme="dark"] .comment-card,
 :root[data-theme="dark"] .composer {
@@ -1020,9 +1073,9 @@ button {
   font-size: 14px;
   font-weight: 500;
   transition:
-    background 0.16s ease,
-    border-color 0.16s ease,
-    opacity 0.16s ease;
+    background var(--transition),
+    border-color var(--transition),
+    opacity var(--transition);
 }
 
 .btn:hover {
@@ -1119,6 +1172,51 @@ button {
   border-radius: 50%;
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+/* Sending seals the letter — the wax glyph is its own circle, no backing disc.
+   The halo swells like warm wax: a thick soft band that barely travels, melts
+   away, then rests before the next slow beat. */
+.overlay-icon-seal {
+  background: none;
+  color: var(--seal);
+  position: relative;
+}
+
+.overlay-icon-seal::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 5px solid color-mix(in srgb, var(--seal) 32%, transparent);
+  filter: blur(1.8px);
+  animation: seal-halo 5s cubic-bezier(0.2, 0.5, 0.25, 1) infinite;
+}
+
+@keyframes seal-halo {
+  0% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.75;
+  }
+  55% {
+    transform: scale(1.1);
+    opacity: 0.4;
+  }
+  75%,
+  100% {
+    transform: scale(1.14);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay-icon-seal::after {
+    animation: none;
+    opacity: 0.5;
+  }
 }
 
 .overlay-title {

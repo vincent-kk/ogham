@@ -35,9 +35,9 @@ function makeNode(id: string, layer: number = 2): KnowledgeNode {
     tags: ['test'],
     created: '2024-01-01',
     updated: '2024-01-01',
-    links: [],
+    mtime: Date.now(),
+    accessed_count: 0,
     pagerank: 0.15,
-    accessedCount: 0,
   };
 }
 
@@ -50,7 +50,7 @@ function makeGraph(
     nodes: nodeMap,
     edges,
     builtAt: new Date().toISOString(),
-    nodeCount: nodes.size ?? nodes.length,
+    nodeCount: nodes.length,
     edgeCount: edges.length,
   };
 }

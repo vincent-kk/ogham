@@ -3,7 +3,7 @@ name: pipeline
 user_invocable: true
 description: '[filid:pipeline] Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support.'
 argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-update] [--force] [--title TITLE]'
-version: '2.0.0'
+version: '2.0.1'
 complexity: medium
 plugin: filid
 ---
@@ -83,13 +83,13 @@ Alias Table; if missing, **ABORT** with "Cannot start from `<stage>`:
 **If `--from` is omitted**, check signals in priority order — first
 match wins:
 
-| Priority | Signal                                        | Entry                                                           |
-| -------- | --------------------------------------------- | --------------------------------------------------------------- |
-| 1        | `re-validate.md` exists                       | Pipeline **complete** — report existing results, END            |
-| 2        | `justifications.md` exists + unpushed commits | `git push`, then `revalidate` (details in `reference.md`)       |
-| 3        | `justifications.md` exists (all pushed)       | `revalidate`                                                    |
-| 4        | `fix-requests.md` exists                      | `resolve` — unless it contains `Type: harvest-required` (below) |
-| 5        | None of the above → `gh pr view` (Bash)       | `review` if a PR exists, `pr-create` if not                     |
+| Priority | Signal                                        | Entry                                                                                |
+| -------- | --------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 1        | `re-validate.md` exists                       | Pipeline **complete** — report existing results (redo: `--from=review --force`), END |
+| 2        | `justifications.md` exists + unpushed commits | `git push`, then `revalidate` (details in `reference.md`)                            |
+| 3        | `justifications.md` exists (all pushed)       | `revalidate`                                                                         |
+| 4        | `fix-requests.md` exists                      | `resolve` — unless it contains `Type: harvest-required` (below)                      |
+| 5        | None of the above → `gh pr view` (Bash)       | `review` if a PR exists, `pr-create` if not                                          |
 
 **Priority 4 guard**: Grep `fix-requests.md` for
 `Type: harvest-required`. If present, do NOT invoke resolve (its
@@ -112,8 +112,11 @@ stage in the same response.
 - **Pre-check**: if `gh pr list --head <branch> --state open` returns a
   PR, skip to the review stage.
 - **Execute**: `Skill("filid:pull-request", "<forward: --base --draft --skip-update --title>")`
-- **Success signal**: skill completes without error (PR URL emitted)
-- **Failure**: END with "PR creation failed: `<error>`"
+- **Success signal**: a PR URL is emitted (an existing PR found by the
+  pre-check counts).
+- **Failure**: any ending without a PR URL — an abort, or the
+  Manual-PR/local-draft ending when `gh` is unauthenticated. Relay the
+  skill's own instructions and END with "PR creation failed: `<reason>`".
 - **→ Immediately proceed to the review stage.**
 
 #### Stage: review
@@ -125,9 +128,10 @@ stage in the same response.
 - **Success signal**: `review-report.md` exists in `review_dir`.
 - **Verdict branch** (grep `verdict:` from `review-report.md`
   frontmatter; missing → treat as INCONCLUSIVE):
-  - **APPROVED** → skip resolve + revalidate. If a stale
-    `fix-requests.md` exists with 0 items, remove it. Report "Review
-    approved — no fixes needed." Pipeline **PASS**, END.
+  - **APPROVED** → skip resolve + revalidate. cross-review removes any
+    leftover `fix-requests.md` itself; if one somehow remains, delete
+    it (it would misroute the next auto-detection into resolve). Report
+    "Review approved — no fixes needed." Pipeline **PASS**, END.
   - **INCONCLUSIVE** → skip resolve + revalidate. Pipeline **FAIL** —
     report "Review inconclusive. Inspect
     `.filid/review/<branch>/review-report.md` and re-run

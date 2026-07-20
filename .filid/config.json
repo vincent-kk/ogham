@@ -1,6 +1,5 @@
 {
   "version": "1.0",
-  "language": "ko",
   "rules": {
     "naming-convention": {
       "enabled": true,
@@ -35,10 +34,12 @@
       "severity": "warning"
     }
   },
+  "language": "ko",
   "additional-allowed": [
     "version.ts",
     "hooks.json",
     "SKILL.md",
+    "DESIGN.md",
     "DETAIL.md",
     "INTENT.md",
     "README.md",
@@ -54,7 +55,24 @@
     "vitest.e2e.config.ts",
     "vitest.e2e.setup.ts",
     "vitest.e2e.globalSetup.ts",
-    "index.html"
+    "playwright.config.ts",
+    "index.html",
+    {
+      "basename": "setup.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/setup"]
+    },
+    {
+      "basename": "preToolUse.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/preToolUse"]
+    },
+    {
+      "basename": "agentEnforcer.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/agentEnforcer"]
+    },
+    {
+      "basename": "userPromptSubmit.entry.ts",
+      "paths": ["**/plugins/filid/src/hooks/userPromptSubmit"]
+    }
   ],
   "additional-route-patterns": ["^_shared$", "^__tests__$"]
 }

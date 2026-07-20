@@ -10,7 +10,7 @@ const baseInput: PostToolUseInput = {
   hook_event_name: 'PostToolUse',
   tool_name: 'Write',
   tool_input: {},
-  tool_response: '',
+  tool_response: {},
 };
 
 describe('change-tracker', () => {

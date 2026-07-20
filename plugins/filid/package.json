@@ -1,6 +1,6 @@
 {
   "name": "@ogham/filid",
-  "version": "0.7.1",
+  "version": "0.7.6",
   "description": "FCA-AI rule enforcement plugin for Claude Code agent workflows",
   "keywords": [
     "claude-code",
@@ -36,6 +36,7 @@
     "hooks",
     "skills",
     "templates",
+    "public",
     ".claude-plugin",
     "plugin.json",
     ".codex-plugin",
@@ -47,13 +48,14 @@
   "scripts": {
     "bench": "vitest bench",
     "bench:run": "vitest bench --run",
-    "build": "yarn clean && yarn version:sync && node scripts/sync-rule-hashes.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/sync-rule-hashes.mjs && node scripts/build-settings-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build:plugin": "node scripts/build-settings-html.mjs && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "node scripts/build-settings-html.mjs && playwright test",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "version:major": "yarn version major",
@@ -69,7 +71,9 @@
   },
   "devDependencies": {
     "@ogham/cross-platform": "workspace:^",
+    "@ogham/http-guard": "workspace:^",
     "@ogham/session-finalizer": "workspace:^",
+    "@playwright/test": "^1.61.0",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.24.0",

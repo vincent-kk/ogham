@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { INTENT_MD } from '../../../constants/documentFiles.js';
 import { SCAN_SKIP_DIRS } from '../../../constants/scanDefaults.js';
 
 /**
@@ -19,7 +20,7 @@ export function hasIntentMdInTree(
     const { dir, depth } = queue.shift()!;
     if (depth > maxDepth) continue;
 
-    if (existsSync(join(dir, 'INTENT.md'))) return true;
+    if (existsSync(join(dir, INTENT_MD))) return true;
 
     if (depth === maxDepth) continue;
 

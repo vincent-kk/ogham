@@ -1,8 +1,8 @@
-# server -- MCP 서버 초기화 및 18개 도구 등록
+# server -- MCP 서버 초기화 및 19개 도구 등록
 
 ## Purpose
 
-MCP 서버 초기화, 18개 도구 등록, 세션 캐시 수명주기 소유 (boot sweep + shutdown 정리 — SessionEnd 훅 대체).
+MCP 서버 초기화, 19개 도구 등록, 세션 캐시 수명주기 소유 (boot sweep + shutdown 정리 — SessionEnd 훅 대체).
 
 ## Structure
 

@@ -7,7 +7,7 @@ import {
 } from '../../../../constants/infraDefaults.js';
 import { createLogger } from '../../../../lib/logger.js';
 
-import { getPluginRoot } from './getPluginRoot.js';
+import { getPluginRoot } from './utils/getPluginRoot.js';
 
 const log = createLogger('cache');
 

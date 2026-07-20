@@ -1,9 +1,9 @@
 ---
 name: structure-review
 user_invocable: true
-description: "[filid:structure-review] Run the 6-stage PR verification pipeline that validates structure, document compliance, test rules, code metrics, and dependency acyclicity in parallel before emitting a consolidated pass or fail verdict."
-argument-hint: "[--stage=1-6] [--verbose]"
-version: "1.0.0"
+description: '[filid:structure-review] Run the 6-stage PR verification pipeline that validates structure, document compliance, test rules, code metrics, and dependency acyclicity in parallel before emitting a consolidated pass or fail verdict.'
+argument-hint: '[--stage=1-6] [--verbose]'
+version: '1.0.1'
 complexity: complex
 plugin: filid
 ---
@@ -14,10 +14,12 @@ plugin: filid
 > cross-stage aggregation.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required
 > 2. Terminal stage marker emitted: `Structure Review verdict: (PASS|FAIL)` with consolidated Stage 6 output
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After Stages 1–5 parallel subagents return — immediately invoke Stage 6 aggregator in the same turn (do NOT summarize intermediate results first)
 > - `--stage=N` mode completion — emit the single-stage verdict AND end in the same turn
 > - Stage-level failure — propagate to Stage 6 consolidation; do NOT early-exit with partial report
@@ -52,12 +54,13 @@ pipeline independently and can be used to validate results after `/filid:update`
 > as a Task subagent — do NOT spawn the other stages. Stage 6 then reports only
 > the result of the selected stage (no cross-stage aggregation).
 
-Stages 1–5 are **independent** and run **in parallel** as separate Task subagents (`general-purpose`, model: `sonnet`, `run_in_background: true`). Stage 6 aggregates their results and runs after all parallel stages complete.
+Stages 1–5 are **independent** and run **in parallel** as separate Task subagents (`general-purpose`, model: `sonnet`, `run_in_background: false` — omitting the flag or passing `true` spawns BACKGROUND agents whose results never return to the turn). Stage 6 aggregates their results and runs after all parallel calls return.
 
 ### Stages 1–5 (Parallel — full run only)
 
-When running without `--stage=N`: spawn all five stages simultaneously.
-Await all before proceeding to Stage 6.
+When running without `--stage=N`: spawn all five stages **in the same
+response** as parallel foreground calls — they return together, and
+Stage 6 proceeds in that same response.
 
 ### Stage 1 — Structure Verification
 
@@ -93,8 +96,8 @@ See [reference.md Section 6](./reference.md#section-6--summary-report-format).
 
 ## Available MCP Tools
 
-| Tool               | Stage | Purpose                                          |
-| ------------------ | ----- | ------------------------------------------------ |
+| Tool                                        | Stage | Purpose                                          |
+| ------------------------------------------- | ----- | ------------------------------------------------ |
 | `mcp__plugin_filid_tools__fractal_scan`     | 1     | Scan filesystem for full module tree             |
 | `mcp__plugin_filid_tools__fractal_navigate` | 1     | Classify individual directories                  |
 | `mcp__plugin_filid_tools__doc_compress`     | 2     | Document compression and size metadata reporting |

@@ -14,9 +14,9 @@ let token = "";
 
 beforeAll(() => {
   const pluginRoot = mkdtempSync(join(tmpdir(), "deilen-settings-"));
-  mkdirSync(join(pluginRoot, "bridge", "assets"), { recursive: true });
-  writeFileSync(join(pluginRoot, "bridge", "settings.html"), SETTINGS_HTML);
-  writeFileSync(join(pluginRoot, "bridge", "viewer.html"), "x");
+  mkdirSync(join(pluginRoot, "public", "assets"), { recursive: true });
+  writeFileSync(join(pluginRoot, "public", "settings.html"), SETTINGS_HTML);
+  writeFileSync(join(pluginRoot, "public", "viewer.html"), "x");
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
 });
 
@@ -61,6 +61,26 @@ describe("settings flow", () => {
     };
     expect(body.config.theme).toBe("dark");
     expect(body.config.content_width_px).toBe(900);
+  });
+
+  it("keeps a deliberately saved collect_timeout_seconds of 45", async () => {
+    const initial = await fetch(`${baseUrl}/api/config?token=${token}`);
+    const before = (await initial.json()) as {
+      config: Record<string, unknown>;
+    };
+
+    const save = await fetch(`${baseUrl}/api/config?token=${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...before.config, collect_timeout_seconds: 45 }),
+    });
+    expect(save.status).toBe(200);
+
+    const after = await fetch(`${baseUrl}/api/config?token=${token}`);
+    const body = (await after.json()) as {
+      config: { collect_timeout_seconds: number };
+    };
+    expect(body.config.collect_timeout_seconds).toBe(45);
   });
 
   it("rejects an invalid config with 400", async () => {

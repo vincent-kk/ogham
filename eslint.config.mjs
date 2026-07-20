@@ -96,6 +96,7 @@ export function createESLintConfig(
         "**/libs/**",
         "**/scripts/**",
         "**/bridge/**",
+        "**/public/**",
         "**/skills/**/templates/**",
         "**/*.config.*",
         ".metadata/**",

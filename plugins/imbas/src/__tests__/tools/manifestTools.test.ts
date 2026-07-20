@@ -8,6 +8,7 @@ import { handleManifestGet } from '../../mcp/tools/manifestGet/manifestGet.js';
 import { handleManifestPlan } from '../../mcp/tools/manifestPlan/manifestPlan.js';
 import { handleManifestSave } from '../../mcp/tools/manifestSave/manifestSave.js';
 import { handleManifestValidate } from '../../mcp/tools/manifestValidate/manifestValidate.js';
+import type { ManifestSummary } from '../../types/manifest.js';
 
 // --- helpers ---
 
@@ -106,8 +107,8 @@ describe('handleManifestGet', () => {
       type: 'stories',
     });
     expect(result.manifest).toBeDefined();
-    expect(result.summary.total).toBe(1);
-    expect(result.summary.pending).toBe(1);
+    expect((result.summary as ManifestSummary).total).toBe(1);
+    expect((result.summary as ManifestSummary).pending).toBe(1);
   });
 
   it('loads devplan manifest and returns summary', async () => {
@@ -123,7 +124,7 @@ describe('handleManifestGet', () => {
       type: 'devplan',
     });
     expect(result.manifest).toBeDefined();
-    expect(result.summary.total).toBe(1);
+    expect((result.summary as ManifestSummary).total).toBe(1);
   });
 
   it('throws when manifest file is missing', async () => {
@@ -160,7 +161,7 @@ describe('handleManifestSave', () => {
       manifest: VALID_STORIES_MANIFEST,
     });
     expect(result.path).toContain('stories-manifest.json');
-    expect(result.summary.total).toBe(1);
+    expect((result.summary as ManifestSummary).total).toBe(1);
   });
 
   it('throws when manifest is undefined', async () => {

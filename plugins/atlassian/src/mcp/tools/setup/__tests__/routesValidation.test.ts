@@ -17,8 +17,19 @@ vi.mock("../../../../core/index.js", () => ({
   executeRequest: vi.fn().mockResolvedValue({ success: true, data: {} }),
 }));
 
+const TEST_TOKEN = "test-token";
+
+type RouteJson = {
+  success?: boolean;
+};
+
+async function readJson(res: Response): Promise<RouteJson> {
+  return res.json() as Promise<RouteJson>;
+}
+
 function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
   return {
+    token: TEST_TOKEN,
     settingsHtml:
       "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
     loadConfig: vi.fn().mockResolvedValue({}),
@@ -31,7 +42,13 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
     resetTimer: vi.fn(),
     closeServer: vi.fn().mockResolvedValue(undefined),
     ...overrides,
-  };
+  } as RouteContext;
+}
+
+function withToken(baseUrl: string, path: string, token = TEST_TOKEN): string {
+  const url = new URL(path, baseUrl);
+  url.searchParams.set("token", token);
+  return url.toString();
 }
 
 async function startTestServer(
@@ -78,7 +95,7 @@ describe("routes-validation (discriminated schema + on-prem PAT routing)", () =>
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", {
+    const res = await postJson(withToken(baseUrl, "/submit"), {
       deployment_type: "cloud",
       jira: {
         base_url: "https://test.atlassian.net",
@@ -87,7 +104,7 @@ describe("routes-validation (discriminated schema + on-prem PAT routing)", () =>
     });
 
     expect(res.status).toBe(400);
-    const data = await res.json();
+    const data = await readJson(res);
     expect(data.success).toBe(false);
     expect(ctx.saveConfig).not.toHaveBeenCalled();
     expect(ctx.saveCredentials).not.toHaveBeenCalled();
@@ -98,7 +115,7 @@ describe("routes-validation (discriminated schema + on-prem PAT routing)", () =>
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(baseUrl + "/submit", {
+    const res = await postJson(withToken(baseUrl, "/submit"), {
       deployment_type: "onprem",
       jira: {
         base_url: "https://jira.internal.com",

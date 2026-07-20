@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>filid · settings</title>
+    <script>
+      window.__FILID_STATE__ = '__FILID_STATE__';
+    </script>
+    <style>:root{color-scheme:dark;--bg: #0a0a0b;--panel: #131316;--muted: #1c1c20;--muted-hi: #24242a;--border: #26262c;--border-hi: #3a3a42;--fg: #f5f5f7;--fg-muted: #9a9aa3;--fg-faint: #5a5a63;--accent-ring: rgba(245, 245, 247, .24);--danger: #d97070;--mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;--radius: 8px;--radius-lg: 12px;--transition: .16s ease}*{box-sizing:border-box}::selection{background:var(--accent-ring)}html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}body{font:14px/1.55 var(--mono);min-height:100dvh;padding:48px 24px 80px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}code{font-family:inherit;background:var(--muted);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--fg)}.shell{max-width:720px;margin:0 auto}.masthead{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}.brand{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.brand-name{font-size:22px;font-weight:500;letter-spacing:-.02em}.brand-tag{color:var(--fg-muted);font-size:14px}.lede{margin:0;color:var(--fg-muted);font-size:13px;line-height:1.6}.lede code{overflow-wrap:anywhere}.note{margin:0;padding:12px 16px;font-size:12px;color:var(--fg-muted);background:var(--panel);border:1px solid var(--border);border-radius:var(--radius)}.section{padding:24px 0;border-bottom:1px solid var(--border)}.section:last-of-type{border-bottom:none}.section-title{font-size:14px;font-weight:500;margin:0 0 6px}.section-help{margin:0 0 16px;color:var(--fg-muted);font-size:12px;line-height:1.6}.warning-inline{font-size:11px;color:var(--danger);font-weight:600;line-height:1.5;margin-bottom:12px}.section--collapsible>.section-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;user-select:none}.section--collapsible>.section-summary::-webkit-details-marker{display:none}.section-summary__label{display:flex;flex-direction:column;gap:4px}.section-summary__hint{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-faint)}.section-chevron{flex:none;color:var(--fg-muted);transition:transform var(--transition)}.section--collapsible[open] .section-chevron{transform:rotate(180deg)}.section--collapsible>.section-summary:hover .section-chevron{color:var(--fg)}.section--collapsible>.section-summary:focus-visible{outline:none;border-radius:var(--radius);box-shadow:0 0 0 3px var(--accent-ring)}.section--collapsible[open]>.section-summary{margin-bottom:14px}.badge{display:inline-flex;align-items:center;padding:2px 6px;font-size:9px;font-weight:500;letter-spacing:.04em;color:var(--fg-muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;white-space:nowrap;text-transform:uppercase}.badge--update{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:color-mix(in srgb,var(--danger) 8%,transparent)}.panel{padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg)}.doc-panel{padding:4px 16px}.doc-panel:not(:has(li)){display:none}.doclist{list-style:none;margin:0;padding:0}.doclist:empty{display:none}.docrow{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:12px 2px}.docrow+.docrow,.doclist+.doclist>.docrow:first-child{border-top:1px solid var(--border)}.docrow__check{display:flex;align-items:flex-start;padding-top:3px;min-width:17px}input[type=checkbox]{appearance:none;-webkit-appearance:none;width:16px;height:16px;margin:0;flex:none;background:var(--muted);border:1px solid var(--border-hi);border-radius:4px;cursor:pointer;transition:background var(--transition),border-color var(--transition)}input[type=checkbox]:hover{border-color:var(--fg-faint)}input[type=checkbox]:checked{background-color:var(--fg);border-color:var(--fg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0b' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:11px}input[type=checkbox]:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.docrow__main{min-width:0}.docrow__title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:500}.docrow__title label{cursor:pointer}.docrow__desc{margin:3px 0 0;font-size:12px;color:var(--fg-muted);line-height:1.6}.resync{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--danger);cursor:pointer;width:fit-content}.rulehead,.rulerow{display:grid;grid-template-columns:1fr 72px 128px;gap:12px;align-items:center}.rulehead{padding:0 2px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-faint);border-bottom:1px solid var(--border)}.rulehead span:not(:first-child){text-align:center}.rulelist{list-style:none;margin:0;padding:0}.ruleitem+.ruleitem{border-top:1px solid var(--border)}.rulerow{padding:10px 2px}.rulerow__name{font-size:13px;overflow-wrap:anywhere}.rulerow__name label{cursor:pointer}.rulerow__enabled{display:flex;justify-content:center}.ruleitem--disabled .rulerow__name,.ruleitem--disabled .rulerow select,.ruleitem--disabled .ruleexempt{opacity:.4}.ruleexempt{margin:0 2px 10px}.ruleexempt summary{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-faint);cursor:pointer;user-select:none;padding:2px 0;width:fit-content;list-style:none}.ruleexempt summary::-webkit-details-marker{display:none}.ruleexempt summary:before{content:"\25b8  "}.ruleexempt[open] summary:before{content:"\25be  "}.ruleexempt summary:focus-visible{outline:none;border-radius:4px;box-shadow:0 0 0 3px var(--accent-ring)}.ruleexempt textarea{margin-top:6px;font:inherit;font-size:12.5px;line-height:1.7;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;outline:none;width:100%;resize:vertical;transition:border-color var(--transition),box-shadow var(--transition)}.ruleexempt textarea::placeholder{color:var(--fg-faint)}.ruleexempt textarea:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.field{display:flex;flex-direction:column;gap:6px}.field+.field{margin-top:12px}.field>span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field-grid .field+.field{margin-top:0}.field input,.field textarea,.rulerow select{font:inherit;font-size:13px;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;width:100%;resize:vertical;transition:border-color var(--transition),box-shadow var(--transition)}.rulerow select{padding:8px 28px 8px 10px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9aa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:13px}.field textarea{font-size:12.5px;line-height:1.7}.field input::placeholder,.field textarea::placeholder{color:var(--fg-faint)}.field input:focus,.field textarea:focus,.rulerow select:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.field input[aria-invalid=true],.field textarea[aria-invalid=true]{border-color:var(--danger)}.help{font-size:11px;color:var(--fg-faint);line-height:1.6}.error{font-size:12px;color:var(--danger);font-weight:500}.actions{display:flex;justify-content:flex-end;gap:12px;margin-top:32px;flex-wrap:wrap}.btn{font:inherit;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg);cursor:pointer;transition:background var(--transition),border-color var(--transition),opacity var(--transition);min-height:44px}.btn:hover{border-color:var(--border-hi);background:var(--muted-hi)}.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.btn:active:not(:disabled){transform:translateY(1px)}.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:500}.btn-primary:hover{background:#fff;border-color:#fff}.btn-ghost{background:transparent;border-color:transparent;color:var(--fg-muted, var(--fg))}.btn-ghost:hover{background:var(--muted);border-color:var(--border);color:var(--fg)}.btn:disabled{opacity:.4;cursor:not-allowed}.spinner{width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.status{margin-top:24px;min-height:20px;font-size:12px;font-weight:500;color:var(--fg-muted);white-space:pre-line;line-height:1.7}.status[data-kind=ok]{color:var(--fg)}.status[data-kind=error]{color:var(--danger)}@media (prefers-reduced-motion: reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}@media (max-width: 560px){body{padding:24px 16px 64px}.field-grid{grid-template-columns:1fr}.rulehead,.rulerow{grid-template-columns:1fr 56px 108px}.doc-panel{padding:2px 12px}}</style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-name">filid</span>
+          <span class="brand-tag">/ settings</span>
+        </div>
+        <p class="lede">
+          FCA-AI architecture settings for
+          <code id="project-chip" title="Project root"></code> — structural
+          rules, rule documents, and scan behavior.
+        </p>
+      </header>
+
+      <div id="init-note" class="note" hidden>
+        No <code>.filid/config.json</code> found yet — saving will create it at
+        the project root.
+      </div>
+
+      <form id="settings-form" class="form" novalidate>
+        <section class="section" aria-labelledby="rule-docs-title">
+          <h2 class="section-title" id="rule-docs-title">Rule documents</h2>
+          <p class="section-help">
+            Guideline files deployed to <code>.claude/rules/</code>. Checked
+            items stay applied; unchecked items are removed on save. Required
+            documents are always deployed and kept up to date.
+          </p>
+          <div id="rule-docs-unavailable" class="warning-inline" hidden>
+            Plugin root could not be resolved — rule document management is
+            unavailable in this session. Config changes below still save.
+          </div>
+          <div class="panel doc-panel">
+            <ul
+              id="rule-docs-required"
+              class="doclist"
+              aria-label="Required rule documents"
+            ></ul>
+            <ul
+              id="rule-docs-optional"
+              class="doclist"
+              aria-label="Optional rule documents"
+            ></ul>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="rules-title">
+          <h2 class="section-title" id="rules-title">Structural rules</h2>
+          <p class="section-help">
+            Per-rule enforcement for <code>/filid:scan</code> and session hooks.
+            Exempt patterns are glob paths, one per line.
+          </p>
+          <div class="rulehead" aria-hidden="true">
+            <span>rule</span><span>enabled</span><span>severity</span>
+          </div>
+          <ul id="rules-list" class="rulelist"></ul>
+        </section>
+
+        <section class="section" aria-labelledby="general-title">
+          <h2 class="section-title" id="general-title">General</h2>
+          <div class="field-grid">
+            <label class="field" for="language">
+              <span>Documentation language</span>
+              <input
+                id="language"
+                name="language"
+                type="text"
+                list="language-options"
+                autocomplete="off"
+                placeholder="English"
+              />
+              <datalist id="language-options">
+                <option value="English"></option>
+                <option value="Korean"></option>
+                <option value="Japanese"></option>
+                <option value="Chinese"></option>
+                <option value="Spanish"></option>
+                <option value="German"></option>
+                <option value="French"></option>
+              </datalist>
+              <small class="help">
+                Language for generated INTENT.md / DETAIL.md content
+                (<code>[filid:lang]</code>). Blank = English.
+              </small>
+            </label>
+            <label class="field" for="max-depth">
+              <span>Scan max depth</span>
+              <input
+                id="max-depth"
+                name="max-depth"
+                type="number"
+                min="0"
+                step="1"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="10"
+              />
+              <small class="help">
+                Maximum fractal tree depth for the <code>max-depth</code> rule.
+                Blank = default (10).
+              </small>
+              <small class="error" data-error-for="max-depth" hidden></small>
+            </label>
+          </div>
+        </section>
+
+        <details class="section section--collapsible">
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Structure exceptions</span>
+              <span class="section-summary__hint"
+                >allowed peer files · entry points · route patterns</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <p class="section-help">
+            Optional allowlists consumed by <code>zero-peer-file</code>,
+            <code>module-entry-point</code>, and <code>naming-convention</code>.
+            One entry per line; leave blank to keep defaults.
+          </p>
+          <label class="field" for="additional-allowed">
+            <span>Additional allowed peer files</span>
+            <textarea
+              id="additional-allowed"
+              rows="3"
+              spellcheck="false"
+              placeholder='notes.md&#10;{"basename": "setup.ts", "paths": ["src/cli/**"]}'
+            ></textarea>
+            <small class="help">
+              A bare file name applies globally; a JSON object restricts it to
+              path globs.
+            </small>
+            <small
+              class="error"
+              data-error-for="additional-allowed"
+              hidden
+            ></small>
+          </label>
+          <label class="field" for="additional-entry-points">
+            <span>Additional entry points</span>
+            <textarea
+              id="additional-entry-points"
+              rows="2"
+              spellcheck="false"
+              placeholder="page.tsx&#10;route.ts"
+            ></textarea>
+          </label>
+          <label class="field" for="additional-route-patterns">
+            <span>Additional route patterns</span>
+            <textarea
+              id="additional-route-patterns"
+              rows="2"
+              spellcheck="false"
+              placeholder="^\(.+\)$"
+            ></textarea>
+            <small class="help">
+              Regex patterns exempting framework directory names, e.g. route
+              groups.
+            </small>
+          </label>
+        </details>
+
+        <div class="actions">
+          <button id="close-btn" type="button" class="btn btn-ghost">
+            <span class="btn__label">Cancel</span>
+          </button>
+          <button id="save-btn" type="submit" class="btn btn-primary">
+            <span class="btn__label">Save</span>
+          </button>
+          <button id="saveclose-btn" type="button" class="btn">
+            <span class="btn__label">Save &amp; Close</span>
+          </button>
+        </div>
+      </form>
+
+      <div
+        id="status"
+        class="status"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+    </main>
+    <script>(function(){"use strict";var u=typeof window.__FILID_STATE__=="object"?window.__FILID_STATE__:null,L=new URLSearchParams(window.location.search).get("token")||"",T=["error","warning","info"],d=function(e){return document.getElementById(e)},p=d("settings-form"),y=d("status"),w=d("save-btn"),q=d("close-btn"),A=d("saveclose-btn"),C=!1,_=!1;if(!u){m("error","Settings state failed to load. Reopen this page from Claude Code (/filid:setup)."),w.disabled=!0;return}d("project-chip").textContent=u.projectRoot,d("project-chip").title=u.projectRoot,u.configExists||(d("init-note").hidden=!1);function x(e,a){var t=document.createElement("span");return t.className="badge"+(a?" badge--"+a:""),t.textContent=e,t}function N(e,a){var t=document.createElement("li");t.className="docrow";var n=document.createElement("span");n.className="docrow__check";var r=document.createElement("div");r.className="docrow__main";var l=document.createElement("div");l.className="docrow__title";var o=document.createElement("p");if(o.className="docrow__desc",o.textContent=e.description,a)l.appendChild(document.createTextNode(e.title)),l.appendChild(x("REQUIRED")),e.deployed&&!e.inSync&&l.appendChild(x("AUTO-UPDATES ON SAVE","update"));else{var i=document.createElement("input");i.type="checkbox",i.id="doc-"+e.id,i.checked=e.deployed,i.setAttribute("data-doc-id",e.id),n.appendChild(i);var c=document.createElement("label");if(c.setAttribute("for",i.id),c.textContent=e.title,l.appendChild(c),e.deployed&&!e.inSync){l.appendChild(x("UPDATE AVAILABLE","update"));var s=document.createElement("label");s.className="resync";var v=document.createElement("input");return v.type="checkbox",v.setAttribute("data-resync-id",e.id),s.appendChild(v),s.appendChild(document.createTextNode("Overwrite local edits with the newer plugin template")),r.appendChild(l),r.appendChild(o),r.appendChild(s),t.appendChild(n),t.appendChild(r),t}}return r.appendChild(l),r.appendChild(o),t.appendChild(n),t.appendChild(r),t}(function(){var a=u.ruleDocs;if(!a.pluginRootResolved){d("rule-docs-unavailable").hidden=!1;return}var t=d("rule-docs-required"),n=d("rule-docs-optional");a.autoDeployed.forEach(function(r){t.appendChild(N(r,!0))}),a.entries.forEach(function(r){n.appendChild(N(r,!1))})})();function j(e,a){var t=document.createElement("li");t.className="ruleitem";var n=document.createElement("div");n.className="rulerow";var r=document.createElement("span");r.className="rulerow__name";var l=document.createElement("label");l.setAttribute("for","rule-"+e+"-enabled"),l.textContent=e,r.appendChild(l);var o=document.createElement("span");o.className="rulerow__enabled";var i=document.createElement("input");i.type="checkbox",i.id="rule-"+e+"-enabled",i.checked=a.enabled!==!1,i.setAttribute("data-rule-enabled",e),i.setAttribute("aria-label",e+" enabled"),o.appendChild(i);var c=document.createElement("select");c.setAttribute("data-rule-severity",e),c.setAttribute("aria-label",e+" severity"),T.forEach(function(b){var h=document.createElement("option");h.value=b,h.textContent=b,c.appendChild(h)}),a.severity&&(c.value=a.severity),n.appendChild(r),n.appendChild(o),n.appendChild(c),t.appendChild(n);var s=document.createElement("details");s.className="ruleexempt";var v=document.createElement("summary");v.textContent="Exempt patterns";var f=document.createElement("textarea");f.rows=2,f.spellcheck=!1,f.placeholder="src/legacy/**",f.setAttribute("data-rule-exempt",e),f.setAttribute("aria-label",e+" exempt patterns"),a.exempt&&a.exempt.length&&(f.value=a.exempt.join(`
+`),s.open=!0),s.appendChild(v),s.appendChild(f),t.appendChild(s);function g(){t.className=i.checked?"ruleitem":"ruleitem ruleitem--disabled"}return i.addEventListener("change",g),g(),t}(function(){var a=d("rules-list");Object.keys(u.config.rules).forEach(function(t){a.appendChild(j(t,u.config.rules[t]||{}))})})(),function(){u.config.language&&(d("language").value=u.config.language),u.config.scan&&typeof u.config.scan.maxDepth=="number"&&(d("max-depth").value=String(u.config.scan.maxDepth));var a=u.config["additional-allowed"]||[];d("additional-allowed").value=a.map(function(t){return typeof t=="string"?t:JSON.stringify(t)}).join(`
+`),d("additional-entry-points").value=(u.config["additional-entry-points"]||[]).join(`
+`),d("additional-route-patterns").value=(u.config["additional-route-patterns"]||[]).join(`
+`)}(),p.addEventListener("input",function(){C=!0}),window.addEventListener("beforeunload",function(e){if(!(!C||_))return e.preventDefault(),e.returnValue="",""});function S(e){return d(e).value.split(`
+`).map(function(a){return a.trim()}).filter(function(a){return a.length>0})}function m(e,a){y.hidden=!1,y.setAttribute("data-kind",e),y.textContent=a}function I(){for(var e=p.querySelectorAll(".error"),a=0;a<e.length;a++)e[a].hidden=!0,e[a].textContent="";for(var t=p.querySelectorAll("[aria-invalid]"),n=0;n<t.length;n++)t[n].removeAttribute("aria-invalid"),t[n].removeAttribute("aria-describedby")}function k(e,a){var t=p.querySelector('[data-error-for="'+e+'"]');t&&(t.textContent=a,t.hidden=!1);var n=d(e);if(n){n.setAttribute("aria-invalid","true"),t&&(t.id||(t.id=n.id+"-error"),n.setAttribute("aria-describedby",t.id));var r=n.closest?n.closest("details"):null;r&&!r.open&&(r.open=!0)}}function E(e,a,t){e.disabled=a;var n=e.querySelector(".btn__label");if(a){e.dataset.label=n.textContent,n.textContent=t;var r=document.createElement("span");r.className="spinner",r.setAttribute("aria-hidden","true"),e.insertBefore(r,n)}else{e.dataset.label&&(n.textContent=e.dataset.label);var l=e.querySelector(".spinner");l&&l.remove()}}function R(e,a){return fetch(e+"?token="+encodeURIComponent(L),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)})}function O(){for(var e=[],a=S("additional-allowed"),t=0;t<a.length;t++){var n=a[t];if(n.charAt(0)==="{")try{e.push(JSON.parse(n))}catch{return k("additional-allowed","Line "+(t+1)+" is not valid JSON: "+n),null}else e.push(n)}return e}function B(){for(var e={version:u.config.version||"1.0",rules:{}},a=p.querySelectorAll("[data-rule-enabled]"),t=0;t<a.length;t++){var n=a[t].getAttribute("data-rule-enabled"),r=p.querySelector('[data-rule-severity="'+n+'"]').value,l={enabled:a[t].checked,severity:r},o=p.querySelector('[data-rule-exempt="'+n+'"]'),i=o.value.split(`
+`).map(function(h){return h.trim()}).filter(function(h){return h.length>0});i.length&&(l.exempt=i),e.rules[n]=l}var c=d("language").value.trim();c&&(e.language=c);var s=d("max-depth").value.trim();if(s!==""){var v=Number(s);if(!isFinite(v)||v<0)return k("max-depth","Enter a non-negative number."),null;e.scan={maxDepth:v}}var f=O();if(f===null)return null;f.length&&(e["additional-allowed"]=f);var g=S("additional-entry-points");g.length&&(e["additional-entry-points"]=g);var b=S("additional-route-patterns");return b.length&&(e["additional-route-patterns"]=b),e}function P(){for(var e={},a=p.querySelectorAll("[data-doc-id]"),t=0;t<a.length;t++)e[a[t].getAttribute("data-doc-id")]=a[t].checked;for(var n=[],r=p.querySelectorAll("[data-resync-id]"),l=0;l<r.length;l++){var o=r[l].getAttribute("data-resync-id");r[l].checked&&e[o]&&n.push(o)}return{selections:e,resync:n}}function D(e){I();var a=B();if(a===null){var t=p.querySelector('[aria-invalid="true"]');t&&t.focus(),m("error","Fix the highlighted fields, then save.");return}var n=e?A:w;E(n,!0,"Saving\u2026"),m("info","Validating and saving\u2026"),R("/save",{config:a,ruleDocs:P()}).then(function(r){return r.json().then(function(l){return{status:r.status,res:l}})}).then(function(r){var l=r.res||{};if(r.status===200&&l.success){_=!0,C=!1;var o=l.ruleDocs||{},i=[];o.copied&&o.copied.length&&i.push("applied "+o.copied.join(", ")),o.updated&&o.updated.length&&i.push("updated "+o.updated.join(", ")),o.removed&&o.removed.length&&i.push("removed "+o.removed.join(", "));var c="Saved"+(i.length?" \u2014 "+i.join("; "):"")+".";E(n,!1),e?(m("ok",c+`
+Return to Claude Code \u2014 setup continues automatically. This tab will close.`),w.disabled=A.disabled=!0,setTimeout(function(){window.close()},1400)):m("ok",c)}else{var s=Array.isArray(l.errors)?`
+`+l.errors.join(`
+`):"";m("error",(l.message||"Save failed.")+s),E(n,!1)}}).catch(function(){m("error","Could not reach the local server. It may have timed out \u2014 rerun /filid:setup."),E(n,!1)})}p.addEventListener("submit",function(e){e.preventDefault(),D(!1)}),A.addEventListener("click",function(){D(!0)}),q.addEventListener("click",function(){C=!1,R("/close",{}).finally(function(){window.close()})})})();</script>
+  </body>
+</html>

@@ -12,14 +12,14 @@
 | `skills/`                    | 사용자 스킬 디렉토리                               |
 | `libs/`                      | cross-platform Node 러너 (`run.cjs`)               |
 | `scripts/`                   | esbuild 빌드 + rule-hash sync 스크립트             |
-| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files` 포함)  |
+| `bridge/` · `public/`        | 빌드 산출물: MCP/훅 번들 · settings UI (커밋)      |
 | `templates/`                 | 신규 모듈용 INTENT.md / DETAIL.md 템플릿           |
 | `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                    |
 | `.mcp.json`                  | MCP 서버 등록 (`bridge/mcp-server.cjs`)            |
 
 ## Conventions
 
-- 빌드 파이프라인: `clean → version:sync → sync-rule-hashes → tsc → mcp-server → hooks`
+- 빌드 파이프라인: `clean → version:sync → sync-rule-hashes → settings-html → tsc → mcp-server → hooks`
 - 자체 FCA 규약 준수 — 50줄 INTENT.md cap, 3-tier boundary, 3+12 test rule
 - 모든 훅은 `src/hooks/<name>/<name>.entry.ts` 에서 esbuild 로 번들
 - 새 fractal 모듈에는 INTENT.md + DETAIL.md 동반 작성

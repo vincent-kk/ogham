@@ -1,0 +1,37 @@
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { pluginRoot } from "@ogham/cross-platform/host-paths";
+
+let cached: string | null = null;
+
+/**
+ * Resolve the committed `public/` directory (built FE assets). Honors the host's
+ * plugin root, then walks up from this module — works both as the esbuild CJS
+ * bundle (import.meta.url shimmed by buildMcpServer.mjs) and from TS sources.
+ */
+export function publicRoot(): string {
+  if (cached) return cached;
+  const fromHost = pluginRoot();
+  if (fromHost) {
+    const candidate = join(fromHost, "public");
+    if (existsSync(candidate)) {
+      cached = candidate;
+      return candidate;
+    }
+  }
+  let dir = dirname(fileURLToPath(import.meta.url));
+  for (let depth = 0; depth < 8; depth += 1) {
+    const candidate = join(dir, "public");
+    if (existsSync(candidate)) {
+      cached = candidate;
+      return candidate;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  cached = join(fromHost ?? process.cwd(), "public");
+  return cached;
+}

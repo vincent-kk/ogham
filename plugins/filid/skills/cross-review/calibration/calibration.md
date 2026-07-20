@@ -7,7 +7,7 @@
 > that must stay LOW (advisory) being promoted to MEDIUM or above. Run a
 > calibration pass after any change to `skills/cross-review/**` or `agents/*.md`
 > that touches finding discipline, severity anchoring, or verdict derivation
-> (see `../DETAIL.md` → Requirements).
+> (see `../spec.md` → Requirements).
 
 ## 1. Fixtures
 

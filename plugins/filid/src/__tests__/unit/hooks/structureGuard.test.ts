@@ -250,5 +250,53 @@ describe('structure-guard', () => {
         'organ directory',
       );
     });
+
+    it('dot-prefixed infra dirs (.filid) nest without the flatness warning', () => {
+      // Regression: the plugin's own .filid/review/<branch>/ layout tripped
+      // this warning on every review-session write.
+      mkdirSync(join(tmpCwd, '.filid', 'review', 'branch-x'), {
+        recursive: true,
+      });
+
+      const result = guardStructure({
+        ...baseInput,
+        cwd: tmpCwd,
+        tool_input: {
+          file_path: join(tmpCwd, '.filid', 'review', 'branch-x', 'session.md'),
+          content: '# session',
+        },
+      });
+      expect(result.hookSpecificOutput?.additionalContext ?? '').not.toContain(
+        'organ directory',
+      );
+    });
+
+    it('dunder dirs (__tests__) nest without the flatness warning', () => {
+      // Regression: the centralized test layout (__tests__/unit/<layer>/) is
+      // mandated by the mirror strategy itself, yet writing any test file
+      // there warned about organ nesting.
+      mkdirSync(join(tmpCwd, 'src', '__tests__', 'unit', 'core'), {
+        recursive: true,
+      });
+
+      const result = guardStructure({
+        ...baseInput,
+        cwd: tmpCwd,
+        tool_input: {
+          file_path: join(
+            tmpCwd,
+            'src',
+            '__tests__',
+            'unit',
+            'core',
+            'x.test.ts',
+          ),
+          content: 'it("x", () => {});',
+        },
+      });
+      expect(result.hookSpecificOutput?.additionalContext ?? '').not.toContain(
+        'organ directory',
+      );
+    });
   });
 });

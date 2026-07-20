@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import { EDGE_TYPE } from '../../constants/architecture.js';
 import { handleKgSuggestLinks } from '../../mcp/tools/kgSuggestLinks/kgSuggestLinks.js';
+import { type NodeId, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,
@@ -19,7 +20,7 @@ function makeNode(
   layer: number = 2,
 ): KnowledgeNode {
   return {
-    id,
+    id: toNodeId(id),
     path: `0${layer}_Derived/${id}.md`,
     title: id,
     layer: layer as 1 | 2 | 3 | 4 | 5,
@@ -36,7 +37,7 @@ function makeGraph(
   nodes: KnowledgeNode[],
   edges: KnowledgeEdge[] = [],
 ): KnowledgeGraph {
-  const nodeMap = new Map<string, KnowledgeNode>();
+  const nodeMap = new Map<NodeId, KnowledgeNode>();
   for (const n of nodes) nodeMap.set(n.id, n);
   return {
     nodes: nodeMap,
@@ -117,8 +118,8 @@ describe('handleKgSuggestLinks', () => {
       ],
       [
         {
-          from: 'source',
-          to: 'linked',
+          from: toNodeId('source'),
+          to: toNodeId('linked'),
           type: EDGE_TYPE.LINK,
           weight: 0.8,
         },
@@ -167,14 +168,14 @@ describe('handleKgSuggestLinks', () => {
       ],
       [
         {
-          from: 'source',
-          to: 'middle',
+          from: toNodeId('source'),
+          to: toNodeId('middle'),
           type: EDGE_TYPE.LINK,
           weight: 0.9,
         },
         {
-          from: 'middle',
-          to: 'target',
+          from: toNodeId('middle'),
+          to: toNodeId('target'),
           type: EDGE_TYPE.LINK,
           weight: 0.8,
         },
@@ -201,8 +202,8 @@ describe('handleKgSuggestLinks', () => {
       ],
       [
         {
-          from: 'source',
-          to: 'sibling',
+          from: toNodeId('source'),
+          to: toNodeId('sibling'),
           type: EDGE_TYPE.SIBLING,
           weight: 1.0,
         },
@@ -226,8 +227,8 @@ describe('handleKgSuggestLinks', () => {
       ],
       [
         {
-          from: 'source',
-          to: 'linked',
+          from: toNodeId('source'),
+          to: toNodeId('linked'),
           type: EDGE_TYPE.LINK,
           weight: 1.0,
         },

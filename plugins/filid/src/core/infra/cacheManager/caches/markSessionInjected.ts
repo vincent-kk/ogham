@@ -3,15 +3,19 @@ import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
 
-import { getCacheDir } from './getCacheDir.js';
+import { CACHE_PREFIX } from './constants/cacheFiles.js';
 import { pruneOldSessions } from './pruneOldSessions.js';
-import { sessionIdHash } from './sessionIdHash.js';
+import { getCacheDir } from './utils/getCacheDir.js';
+import { sessionIdHash } from './utils/sessionIdHash.js';
 
 const log = createLogger('cache');
 
 export function markSessionInjected(sessionId: string, cwd: string): void {
   const cacheDir = getCacheDir(cwd);
-  const marker = join(cacheDir, `session-context-${sessionIdHash(sessionId)}`);
+  const marker = join(
+    cacheDir,
+    `${CACHE_PREFIX.SESSION_CONTEXT}${sessionIdHash(sessionId)}`,
+  );
   try {
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
     writeFileSync(marker, '', 'utf-8');

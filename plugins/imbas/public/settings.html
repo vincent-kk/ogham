@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>imbas · settings</title>
+    <script>
+      window.__IMBAS_STATE__ = '__IMBAS_STATE__';
+    </script>
+    <style>:root{color-scheme:dark;--bg: #0a0a0b;--panel: #131316;--muted: #1c1c20;--muted-hi: #24242a;--border: #26262c;--border-hi: #3a3a42;--fg: #f5f5f7;--fg-muted: #9a9aa3;--fg-faint: #5a5a63;--accent-ring: rgba(245, 245, 247, .24);--danger: #d97070;--mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;--radius: 8px;--radius-lg: 12px;--transition: .16s ease}*{box-sizing:border-box}::selection{background:var(--accent-ring)}html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}body{font:14px/1.55 var(--mono);min-height:100dvh;padding:48px 24px 80px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}code{font-family:inherit;background:var(--muted);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--fg)}.shell{max-width:720px;margin:0 auto}.masthead{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}.brand{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.brand-name{font-size:22px;font-weight:500;letter-spacing:-.02em}.brand-tag{color:var(--fg-muted);font-size:14px}.lede{margin:0;color:var(--fg-muted);font-size:13px;line-height:1.6}.lede code{overflow-wrap:anywhere}.note{margin:0;padding:12px 16px;font-size:12px;color:var(--fg-muted);background:var(--panel);border:1px solid var(--border);border-radius:var(--radius)}.section{padding:24px 0;border-bottom:1px solid var(--border)}.section:last-of-type{border-bottom:none}.section-title{font-size:14px;font-weight:500;margin:0 0 6px}.section-help{margin:0 0 16px;color:var(--fg-muted);font-size:12px;line-height:1.6}.section--collapsible>.section-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;user-select:none}.section--collapsible>.section-summary::-webkit-details-marker{display:none}.section-summary__label{display:flex;flex-direction:column;gap:4px}.section-summary__hint{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-faint)}.section-chevron{flex:none;color:var(--fg-muted);transition:transform var(--transition)}.section--collapsible[open] .section-chevron{transform:rotate(180deg)}.section--collapsible>.section-summary:hover .section-chevron{color:var(--fg)}.section--collapsible>.section-summary:focus-visible{outline:none;border-radius:var(--radius);box-shadow:0 0 0 3px var(--accent-ring)}.section--collapsible[open]>.section-summary{margin-bottom:14px}.provider-only[hidden]{display:none}.panel{padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg)}.provider-rows{display:flex;flex-direction:column;gap:12px}.provider-row{position:relative;display:block;cursor:pointer}.provider-row input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}.provider-row-body{display:flex;align-items:center;gap:14px;min-height:56px;padding:12px 16px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius);transition:background var(--transition),border-color var(--transition)}.provider-row:hover .provider-row-body{border-color:var(--border-hi);background:var(--muted-hi)}.provider-row input:checked+.provider-row-body{border-color:var(--fg);background:var(--muted-hi)}.provider-row input:focus-visible+.provider-row-body{box-shadow:0 0 0 3px var(--accent-ring)}.provider-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;color:var(--fg)}.provider-icon svg{width:22px;height:22px;display:block}.provider-meta{display:flex;flex-direction:column;gap:2px;min-width:0}.provider-name{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--fg)}.provider-desc{font-size:11px;color:var(--fg-faint);line-height:1.5}.provider-state{margin-left:auto;font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-faint);white-space:nowrap}.provider-state[data-tone=ok]{color:var(--fg-muted)}.provider-state[data-tone=warn]{color:var(--danger)}.provider-dot{position:relative;width:16px;height:16px;flex:none;border:1px solid var(--border-hi);border-radius:50%;transition:border-color var(--transition)}.provider-row input:checked+.provider-row-body .provider-dot{border-color:var(--fg)}.provider-row input:checked+.provider-row-body .provider-dot:after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--fg)}.field{display:flex;flex-direction:column;gap:6px}.field+.field{margin-top:12px}.field>span,.field-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field-grid .field+.field{margin-top:0}.field input,.field textarea,.field select,.kvgrid input{font:inherit;font-size:13px;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;width:100%;resize:vertical;transition:border-color var(--transition),box-shadow var(--transition)}.field select{cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9aa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:14px}.field textarea{font-size:12.5px;line-height:1.7}.field input::placeholder,.field textarea::placeholder{color:var(--fg-faint)}.field input:focus,.field textarea:focus,.field select:focus,.kvgrid input:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.field input[aria-invalid=true],.field textarea[aria-invalid=true]{border-color:var(--danger)}.help{font-size:11px;color:var(--fg-faint);line-height:1.6}.error{font-size:12px;color:var(--danger);font-weight:500}.kvgroup{margin-top:16px}.kvgroup-title{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.kvgrid{display:grid;grid-template-columns:140px 1fr;gap:8px 12px;align-items:center}.kvgrid label{font-size:12px;color:var(--fg-faint);overflow-wrap:anywhere}input[type=checkbox]{appearance:none;-webkit-appearance:none;width:16px;height:16px;margin:0;flex:none;background:var(--muted);border:1px solid var(--border-hi);border-radius:4px;cursor:pointer;transition:background var(--transition),border-color var(--transition)}input[type=checkbox]:hover{border-color:var(--fg-faint)}input[type=checkbox]:checked{background-color:var(--fg);border-color:var(--fg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0b' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:11px}input[type=checkbox]:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.checkline{display:flex;align-items:flex-start;gap:10px;margin-top:16px;font-size:12.5px;color:var(--fg-muted);cursor:pointer;line-height:1.6}.checkline input{margin-top:3px}.checkgrid{display:flex;gap:14px;flex-wrap:wrap}.checkgrid label{display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;min-height:44px}.actions{display:flex;justify-content:flex-end;gap:12px;margin-top:32px;flex-wrap:wrap}.btn{font:inherit;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg);cursor:pointer;transition:background var(--transition),border-color var(--transition),opacity var(--transition);min-height:44px}.btn:hover{border-color:var(--border-hi);background:var(--muted-hi)}.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.btn:active:not(:disabled){transform:translateY(1px)}.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:500}.btn-primary:hover{background:#fff;border-color:#fff}.btn-ghost{background:transparent;border-color:transparent;color:var(--fg-muted, var(--fg))}.btn-ghost:hover{background:var(--muted);border-color:var(--border);color:var(--fg)}.btn:disabled{opacity:.4;cursor:not-allowed}.spinner{width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.status{margin-top:24px;min-height:20px;font-size:12px;font-weight:500;color:var(--fg-muted);white-space:pre-line;line-height:1.7}.status[data-kind=ok]{color:var(--fg)}.status[data-kind=error]{color:var(--danger)}@media (prefers-reduced-motion: reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}@media (max-width: 560px){body{padding:24px 16px 64px}.field-grid{grid-template-columns:1fr}.kvgrid{grid-template-columns:1fr;gap:4px 0}.panel{padding:12px}.provider-row-body{padding:10px 12px;gap:10px}}</style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-name">imbas</span>
+          <span class="brand-tag">/ settings</span>
+        </div>
+        <p class="lede">
+          Issue-pipeline settings for
+          <code id="project-chip" title="Project root"></code> — provider,
+          project reference, lifecycle labels, and defaults.
+        </p>
+      </header>
+
+      <div id="init-note" class="note" hidden>
+        No <code>.imbas/config.json</code> found yet — saving will create it at
+        the project root.
+      </div>
+
+      <form id="settings-form" class="form" novalidate>
+        <section class="section" aria-labelledby="provider-title">
+          <h2 class="section-title" id="provider-title">Provider</h2>
+          <p class="section-help">
+            Where Story / Task / Subtask issues are created. Availability is
+            detected by the health check in Claude Code; local markdown files
+            need no remote tool.
+          </p>
+          <div
+            class="panel provider-rows"
+            role="radiogroup"
+            aria-label="Issue provider"
+          >
+            <label class="provider-row">
+              <input type="radio" name="provider" value="jira" />
+              <span class="provider-row-body">
+                <span class="provider-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.005-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0z"
+                    />
+                  </svg>
+                </span>
+                <span class="provider-meta">
+                  <span class="provider-name">jira</span>
+                  <span class="provider-desc"
+                    >issues in your Atlassian site</span
+                  >
+                </span>
+                <em class="provider-state" data-provider-hint="jira"></em>
+                <span class="provider-dot" aria-hidden="true"></span>
+              </span>
+            </label>
+            <label class="provider-row">
+              <input type="radio" name="provider" value="github" />
+              <span class="provider-row-body">
+                <span class="provider-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+                    />
+                  </svg>
+                </span>
+                <span class="provider-meta">
+                  <span class="provider-name">github</span>
+                  <span class="provider-desc"
+                    >repository issues via the gh CLI</span
+                  >
+                </span>
+                <em class="provider-state" data-provider-hint="github"></em>
+                <span class="provider-dot" aria-hidden="true"></span>
+              </span>
+            </label>
+            <label class="provider-row">
+              <input type="radio" name="provider" value="local" />
+              <span class="provider-row-body">
+                <span class="provider-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
+                    />
+                  </svg>
+                </span>
+                <span class="provider-meta">
+                  <span class="provider-name">local</span>
+                  <span class="provider-desc"
+                    >markdown files under .imbas/</span
+                  >
+                </span>
+                <em class="provider-state" data-provider-hint="local"></em>
+                <span class="provider-dot" aria-hidden="true"></span>
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="project-title">
+          <h2 class="section-title" id="project-title">Project reference</h2>
+          <div class="provider-only" data-for-provider="jira">
+            <label
+              class="field"
+              for="jira-project-select"
+              id="jira-select-wrap"
+              hidden
+            >
+              <span>Jira project</span>
+              <select id="jira-project-select"></select>
+              <small class="help">
+                Projects fetched from your Jira site. Pick one or type a key
+                below.
+              </small>
+            </label>
+            <label class="field" for="jira-project-key">
+              <span>Project key</span>
+              <input
+                id="jira-project-key"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="KAN"
+              />
+              <small
+                class="error"
+                data-error-for="jira-project-key"
+                hidden
+              ></small>
+            </label>
+          </div>
+          <div class="provider-only" data-for-provider="github">
+            <label class="field" for="github-repo">
+              <span>Repository (owner/name)</span>
+              <input
+                id="github-repo"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="owner/repo"
+              />
+              <small class="help">
+                All imbas-managed issues are created in this repository via the
+                gh CLI.
+              </small>
+              <small class="error" data-error-for="github-repo" hidden></small>
+            </label>
+          </div>
+          <div class="provider-only" data-for-provider="local">
+            <label class="field" for="local-key">
+              <span>Local project key</span>
+              <input
+                id="local-key"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="LOCAL"
+              />
+              <small class="help">
+                Issues are stored as markdown under
+                <code>.imbas/&lt;KEY&gt;/issues/</code>.
+              </small>
+              <small class="error" data-error-for="local-key" hidden></small>
+            </label>
+          </div>
+        </section>
+
+        <details class="section section--collapsible">
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Lifecycle labels</span>
+              <span class="section-summary__hint"
+                >prefilled with defaults · open to customize</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <p class="section-help">
+            Applied to imbas-managed issues as they move through the pipeline.
+          </p>
+          <div class="field-grid">
+            <label class="field" for="label-managed">
+              <span>managed</span>
+              <input id="label-managed" data-label-key="managed" type="text" />
+              <small class="help">Issue creation (all types)</small>
+            </label>
+            <label class="field" for="label-review_pending">
+              <span>review pending</span>
+              <input
+                id="label-review_pending"
+                data-label-key="review_pending"
+                type="text"
+              />
+              <small class="help">Phase 2 complete</small>
+            </label>
+            <label class="field" for="label-review_complete">
+              <span>review complete</span>
+              <input
+                id="label-review_complete"
+                data-label-key="review_complete"
+                type="text"
+              />
+              <small class="help">Review approved</small>
+            </label>
+            <label class="field" for="label-dev_waiting">
+              <span>dev waiting</span>
+              <input
+                id="label-dev_waiting"
+                data-label-key="dev_waiting"
+                type="text"
+              />
+              <small class="help">Phase 3.5 complete</small>
+            </label>
+            <label class="field" for="label-dev_in_progress">
+              <span>dev in progress</span>
+              <input
+                id="label-dev_in_progress"
+                data-label-key="dev_in_progress"
+                type="text"
+              />
+              <small class="help">External trigger only</small>
+            </label>
+            <label class="field" for="label-dev_done">
+              <span>dev done</span>
+              <input
+                id="label-dev_done"
+                data-label-key="dev_done"
+                type="text"
+              />
+              <small class="help">External trigger only</small>
+            </label>
+          </div>
+          <div class="provider-only" data-for-provider="github">
+            <label class="checkline" for="provision-labels">
+              <input id="provision-labels" type="checkbox" />
+              <span>
+                Provision these labels in the GitHub repository after save
+                (creates missing labels via <code>gh label create</code>)
+              </span>
+            </label>
+          </div>
+        </details>
+
+        <section class="section" aria-labelledby="language-title">
+          <h2 class="section-title" id="language-title">Languages</h2>
+          <p class="section-help">
+            Language codes per output surface (e.g. <code>ko</code>,
+            <code>en</code>, <code>ja</code>).
+          </p>
+          <div class="field-grid">
+            <label class="field" for="lang-documents">
+              <span>documents</span>
+              <input
+                id="lang-documents"
+                data-lang-key="documents"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <label class="field" for="lang-skills">
+              <span>skills</span>
+              <input
+                id="lang-skills"
+                data-lang-key="skills"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <label class="field" for="lang-issue_content">
+              <span>issue content</span>
+              <input
+                id="lang-issue_content"
+                data-lang-key="issue_content"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <label class="field" for="lang-reports">
+              <span>reports</span>
+              <input
+                id="lang-reports"
+                data-lang-key="reports"
+                type="text"
+                list="lang-options"
+              />
+            </label>
+            <datalist id="lang-options">
+              <option value="ko"></option>
+              <option value="en"></option>
+              <option value="ja"></option>
+              <option value="zh"></option>
+            </datalist>
+          </div>
+        </section>
+
+        <details class="section section--collapsible">
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Defaults</span>
+              <span class="section-summary__hint"
+                >agent models · subtask limits</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <div class="field-grid">
+            <label class="field" for="model-validate">
+              <span>validate model</span>
+              <input
+                id="model-validate"
+                data-model-key="validate"
+                type="text"
+                list="model-options"
+              />
+            </label>
+            <label class="field" for="model-split">
+              <span>split model</span>
+              <input
+                id="model-split"
+                data-model-key="split"
+                type="text"
+                list="model-options"
+              />
+            </label>
+            <label class="field" for="model-devplan">
+              <span>devplan model</span>
+              <input
+                id="model-devplan"
+                data-model-key="devplan"
+                type="text"
+                list="model-options"
+              />
+            </label>
+            <datalist id="model-options">
+              <option value="sonnet"></option>
+              <option value="opus"></option>
+              <option value="haiku"></option>
+            </datalist>
+            <label class="field" for="limit-max_lines">
+              <span>subtask max lines</span>
+              <input
+                id="limit-max_lines"
+                data-limit-key="max_lines"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+              />
+              <small
+                class="error"
+                data-error-for="limit-max_lines"
+                hidden
+              ></small>
+            </label>
+            <label class="field" for="limit-max_files">
+              <span>subtask max files</span>
+              <input
+                id="limit-max_files"
+                data-limit-key="max_files"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+              />
+              <small
+                class="error"
+                data-error-for="limit-max_files"
+                hidden
+              ></small>
+            </label>
+            <label class="field" for="limit-review_hours">
+              <span>review hours</span>
+              <input
+                id="limit-review_hours"
+                data-limit-key="review_hours"
+                type="number"
+                min="0.1"
+                step="0.1"
+                inputmode="decimal"
+              />
+              <small
+                class="error"
+                data-error-for="limit-review_hours"
+                hidden
+              ></small>
+            </label>
+          </div>
+        </details>
+
+        <details
+          class="section section--collapsible provider-only"
+          data-for-provider="jira"
+        >
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Jira advanced</span>
+              <span class="section-summary__hint"
+                >issue types · workflow states · link types</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <label class="field" for="jira-base-url">
+            <span>Base URL</span>
+            <input
+              id="jira-base-url"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="https://your-site.atlassian.net"
+            />
+            <small class="help">Blank = resolved by the Atlassian MCP.</small>
+          </label>
+          <div id="jira-maps"></div>
+        </details>
+
+        <details
+          class="section section--collapsible provider-only"
+          data-for-provider="github"
+        >
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">GitHub advanced</span>
+              <span class="section-summary__hint"
+                >default labels · link types</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <label class="field" for="github-default-labels">
+            <span>Default labels</span>
+            <textarea
+              id="github-default-labels"
+              rows="2"
+              spellcheck="false"
+              placeholder="one label per line"
+            ></textarea>
+            <small class="help">
+              Extra labels applied to every created issue, on top of the
+              auto-managed <code>type:*</code> and <code>status:*</code>
+              labels.
+            </small>
+          </label>
+          <div class="field">
+            <span class="field-label" id="github-link-types-label"
+              >Link types</span
+            >
+            <div
+              id="github-link-types"
+              class="checkgrid"
+              role="group"
+              aria-labelledby="github-link-types-label"
+            ></div>
+            <small class="help">
+              Allowed keys for the issue body <code>## Links</code> section.
+            </small>
+          </div>
+        </details>
+
+        <div class="actions">
+          <button id="close-btn" type="button" class="btn btn-ghost">
+            <span class="btn__label">Cancel</span>
+          </button>
+          <button id="save-btn" type="submit" class="btn btn-primary">
+            <span class="btn__label">Save</span>
+          </button>
+          <button id="saveclose-btn" type="button" class="btn">
+            <span class="btn__label">Save &amp; Close</span>
+          </button>
+        </div>
+      </form>
+
+      <div
+        id="status"
+        class="status"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+    </main>
+    <script>(function(){"use strict";var d=typeof window.__IMBAS_STATE__=="object"?window.__IMBAS_STATE__:null,B=new URLSearchParams(window.location.search).get("token")||"",C=["blocks","blocked-by","split-from","split-into","relates"],N=[{key:"issue_types",title:"Issue types"},{key:"workflow_states",title:"Workflow states"},{key:"link_types",title:"Link types"}],i=function(e){return document.getElementById(e)},s=i("settings-form"),k=i("status"),j=i("save-btn"),I=i("close-btn"),_=i("saveclose-btn"),h=!1,L=!1;if(!d){v("error","Settings state failed to load. Reopen this page from Claude Code (/imbas:setup)."),j.disabled=!0;return}var l=d.config,x=d.bootstrap||{};i("project-chip").textContent=d.projectRoot,i("project-chip").title=d.projectRoot,d.configExists||(i("init-note").hidden=!1);function G(e){if(e==="local")return{text:"always available",tone:"ok"};var t=x.providers||{};return t[e]===!0?{text:"detected",tone:"ok"}:t[e]===!1?{text:"not detected",tone:"warn"}:{text:"unchecked",tone:""}}["jira","github","local"].forEach(function(e){var t=G(e),r=s.querySelector('[data-provider-hint="'+e+'"]');r.textContent=t.text,t.tone&&r.setAttribute("data-tone",t.tone)});function T(){var e=s.querySelector('input[name="provider"]:checked');return e?e.value:"jira"}function q(){for(var e=T(),t=document.querySelectorAll(".provider-only"),r=0;r<t.length;r++)t[r].hidden=t[r].getAttribute("data-for-provider")!==e}for(var b=s.querySelectorAll('input[name="provider"]'),p=0;p<b.length;p++)b[p].checked=b[p].value===l.provider,b[p].addEventListener("change",q);(function(){var t=l.defaults.project_ref||"",r=x.jira_projects||[];if(r.length>0){i("jira-select-wrap").hidden=!1;var a=i("jira-project-select"),n=document.createElement("option");n.value="",n.textContent="\u2014 pick a project \u2014",a.appendChild(n),r.forEach(function(o){var c=document.createElement("option");c.value=o.key,c.textContent=o.name?o.key+" \u2014 "+o.name:o.key,a.appendChild(c)}),a.addEventListener("change",function(){a.value&&(i("jira-project-key").value=a.value)})}l.provider==="jira"&&t&&(i("jira-project-key").value=t),l.provider==="local"&&t&&(i("local-key").value=t),i("local-key").value||(i("local-key").value=d.suggestedLocalKey);var u=l.github&&l.github.repo||(l.provider==="github"?t:"")||x.github_repo||"";u&&(i("github-repo").value=u)})();function m(e,t){for(var r=s.querySelectorAll("["+e+"]"),a=0;a<r.length;a++){var n=r[a].getAttribute(e);t&&t[n]!==void 0&&t[n]!==null&&(r[a].value=String(t[n]))}}m("data-label-key",l.labels),m("data-lang-key",l.language),m("data-model-key",l.defaults.llm_model),m("data-limit-key",l.defaults.subtask_limits),function(){l.jira&&l.jira.base_url&&(i("jira-base-url").value=l.jira.base_url);var t=i("jira-maps");N.forEach(function(r){var a=l.jira&&l.jira[r.key]||{};if(Object.keys(a).length!==0){var n=document.createElement("div");n.className="kvgroup";var u=document.createElement("p");u.className="kvgroup-title",u.textContent=r.title,n.appendChild(u);var o=document.createElement("div");o.className="kvgrid",Object.keys(a).forEach(function(c){var g="jira-"+r.key+"-"+c,S=document.createElement("label");S.setAttribute("for",g),S.textContent=c;var f=document.createElement("input");f.type="text",f.id=g,f.value=a[c],f.setAttribute("data-jira-map",r.key),f.setAttribute("data-jira-key",c),o.appendChild(S),o.appendChild(f)}),n.appendChild(o),t.appendChild(n)}})}(),function(){var t=l.github||{};t.defaultLabels&&t.defaultLabels.length&&(i("github-default-labels").value=t.defaultLabels.join(`
+`));var r=t.linkTypes||C,a=i("github-link-types");C.forEach(function(n){var u=document.createElement("label"),o=document.createElement("input");o.type="checkbox",o.checked=r.indexOf(n)!==-1,o.setAttribute("data-link-type",n),u.appendChild(o),u.appendChild(document.createTextNode(n)),a.appendChild(u)})}(),q(),s.addEventListener("input",function(){h=!0}),window.addEventListener("beforeunload",function(e){if(!(!h||L))return e.preventDefault(),e.returnValue="",""});function v(e,t){k.hidden=!1,k.setAttribute("data-kind",e),k.textContent=t}function O(){for(var e=s.querySelectorAll(".error"),t=0;t<e.length;t++)e[t].hidden=!0,e[t].textContent="";for(var r=s.querySelectorAll("[aria-invalid]"),a=0;a<r.length;a++)r[a].removeAttribute("aria-invalid"),r[a].removeAttribute("aria-describedby")}function A(e,t){var r=i(e),a=s.querySelector('[data-error-for="'+e+'"]');if(a&&(a.id=e+"-error",a.textContent=t,a.hidden=!1,r&&r.setAttribute("aria-describedby",a.id)),r){r.setAttribute("aria-invalid","true");var n=r.closest?r.closest("details"):null;n&&!n.open&&(n.open=!0)}}function y(e,t,r){e.disabled=t;var a=e.querySelector(".btn__label");if(t){e.dataset.label=a.textContent,a.textContent=r;var n=document.createElement("span");n.className="spinner",n.setAttribute("aria-hidden","true"),e.insertBefore(n,a)}else{e.dataset.label&&(a.textContent=e.dataset.label);var u=e.querySelector(".spinner");u&&u.remove()}}function R(e,t){return fetch(e+"?token="+encodeURIComponent(B),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)})}function E(e){for(var t={},r=s.querySelectorAll("["+e+"]"),a=0;a<r.length;a++)t[r[a].getAttribute(e)]=r[a].value.trim();return t}function w(e,t){var r=i(e).value.trim(),a=Number(r);return r===""||!isFinite(a)||a<=0||t&&a%1!==0?(A(e,t?"Enter a positive integer.":"Enter a positive number."),null):a}function J(){var e=i("jira-project-key").value.trim()||null;return e||(A("jira-project-key","Enter a Jira project key."),null)}function F(){var e=i("github-repo").value.trim();return/^[^/\s]+\/[^/\s]+$/.test(e)?e:(A("github-repo","Enter the repository as owner/name."),null)}function M(){return i("local-key").value.trim().toUpperCase()||"LOCAL"}function U(e){return e==="jira"?J():e==="github"?F():M()}function H(){var e=w("limit-max_lines",!0),t=w("limit-max_files",!0),r=w("limit-review_hours",!1);return e===null||t===null||r===null?null:{max_lines:e,max_files:t,review_hours:r}}function K(){for(var e={base_url:i("jira-base-url").value.trim()||null,issue_types:{},workflow_states:{},link_types:{},phase_to_workflow:l.jira&&l.jira.phase_to_workflow||void 0},t=s.querySelectorAll("[data-jira-map]"),r=0;r<t.length;r++){var a=t[r].getAttribute("data-jira-map"),n=t[r].getAttribute("data-jira-key");e[a][n]=t[r].value.trim()}return e}function D(){for(var e=[],t=s.querySelectorAll("[data-link-type]"),r=0;r<t.length;r++)t[r].checked&&e.push(t[r].getAttribute("data-link-type"));return e}function V(e){return{repo:e,defaultLabels:i("github-default-labels").value.split(`
+`).map(function(t){return t.trim()}).filter(function(t){return t.length>0}),linkTypes:D()}}function $(){var e=T(),t=U(e);if(t===null)return null;var r=H();if(r===null)return null;var a={version:l.version||"1.0",provider:e,language:E("data-lang-key"),defaults:{project_ref:t,codebase:l.defaults.codebase||null,llm_model:E("data-model-key"),subtask_limits:r},labels:E("data-label-key"),jira:K()};return e==="github"?a.github=V(t):l.github&&(a.github=l.github),a}function P(e){O();var t=$();if(t===null){v("error","Fix the highlighted fields, then save.");var r=s.querySelector('[aria-invalid="true"]');r&&r.focus();return}var a=t.provider==="github"&&i("provision-labels").checked,n=e?_:j;y(n,!0,"Saving\u2026"),v("info","Validating and saving\u2026"),R("/save",{config:t,options:{provision_labels:a}}).then(function(u){return u.json().then(function(o){return{status:u.status,res:o}})}).then(function(u){var o=u.res||{};if(u.status===200&&o.success){L=!0,h=!1;var c="Saved \u2014 provider "+t.provider+", project "+(t.defaults.project_ref||"(none)")+".";y(n,!1),e?(v("ok",c+`
+Return to Claude Code \u2014 setup continues automatically. This tab will close.`),j.disabled=_.disabled=!0,setTimeout(function(){window.close()},1400)):v("ok",c)}else{var g=Array.isArray(o.errors)?`
+`+o.errors.join(`
+`):"";v("error",(o.message||"Save failed.")+g),y(n,!1)}}).catch(function(){v("error","Could not reach the local server. It may have timed out \u2014 rerun /imbas:setup."),y(n,!1)})}s.addEventListener("submit",function(e){e.preventDefault(),P(!1)}),_.addEventListener("click",function(){P(!0)}),I.addEventListener("click",function(){h=!1,R("/close",{}).finally(function(){window.close()})})})();</script>
+  </body>
+</html>

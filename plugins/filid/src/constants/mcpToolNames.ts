@@ -17,6 +17,7 @@ export const McpToolName = {
   AST_GREP_REPLACE: 'ast_grep_replace',
   CONFIG_PATCH_VALIDATE: 'config_patch_validate',
   COVERAGE_VERIFY: 'coverage_verify',
+  OPEN_SETTINGS: 'open_settings',
 } as const;
 
 export type McpToolName = (typeof McpToolName)[keyof typeof McpToolName];

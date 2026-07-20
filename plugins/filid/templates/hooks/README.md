@@ -5,13 +5,12 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 
 ## Hook Overview
 
-| Hook Event                     | Entry File                    | Purpose                                                                                                                  |
-| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `SessionStart`                 | `setup.entry.ts`              | Session initialization: FCA project detection and session context cache setup                                            |
-| `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts`       | Unified hook: intent injection + INTENT.md(50-line cap) / DETAIL.md(append-only) validation + organ structure protection |
-| `PreToolUse` (EnterPlanMode)   | `plan-gate.entry.ts`          | FCA-AI compliance checklist when entering plan mode (example only — not registered in `hooks.json`)                      |
-| `SubagentStart`                | `agent-enforcer.entry.ts`     | FCA-AI agent role restriction injection                                                                                  |
-| `UserPromptSubmit`             | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start                                                                                  |
+| Hook Event                     | Entry File                    | Purpose                                                                                                                                             |
+| ------------------------------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SessionStart`                 | `setup.entry.ts`              | Session initialization: FCA project detection, session cache setup, and epoch reset on `compact`/`clear` (re-arms rule delivery after context loss) |
+| `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts`       | Unified hook: intent injection + INTENT.md(50-line cap) / DETAIL.md(append-only) validation + organ structure protection                            |
+| `SubagentStart`                | `agent-enforcer.entry.ts`     | FCA-AI agent role restriction injection                                                                                                             |
+| `UserPromptSubmit`             | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start                                                                                                             |
 
 Built entry files live in `bridge/` after `yarn build:plugin`.
 
@@ -26,7 +25,12 @@ Built entry files live in `bridge/` after `yarn build:plugin`.
 
 A single consolidated hook that orchestrates three sub-hooks for every `Read`, `Write`, or `Edit` tool call:
 
-1. **Intent Injector** (`injectIntent`) — Runs on all events (Read/Write/Edit). Injects fractal context (`[filid:ctx]` block) on first visit to a directory, and fractal map (`[filid:map]`) on subsequent visits.
+1. **Intent Injector** (`processVisit`) — Runs on all events (Read/Write/Edit) as a delivery-state machine. A module's owner INTENT.md is "delivered" once its body has entered the live context; the state is session-scoped with a turn TTL (`injection.ctxTtlTurns`, default 5).
+   - **Undelivered + Read** → injects `[filid:ctx]` (inline INTENT body + parent chain + DETAIL hint)
+   - **Undelivered + Write/Edit** → denies once with the rules inline in the reason (`[filid:gate]`); the identical retry passes — rules always arrive before the first mutation
+   - **Stale (TTL elapsed) + any tool** → soft `[filid:ctx]` re-delivery, never a deny
+   - **Fresh** → silent. `[filid:map]` is emitted only when the turn's visit set actually changes
+   - Exemptions: INTENT.md/DETAIL.md/criteria.md targets, modules with no owner INTENT.md, spike branches. Authoring a module's INTENT.md marks it delivered.
 
 2. **Pre-Tool Validator** (`validatePreToolUse`) — Runs on Write/Edit only.
    - Blocks `Write` to `INTENT.md` if content exceeds 50 lines
@@ -67,26 +71,12 @@ Unrecognized agent types pass through with no restriction.
 
 ---
 
-### 3. PreToolUse (EnterPlanMode) — Plan Gate
-
-**Entry**: `src/hooks/plan-gate/plan-gate.entry.ts` (example only — not currently registered in `hooks/hooks.json`)
-**Built output**: `bridge/plan-gate.mjs` (when enabled)
-
-Fires when `EnterPlanMode` tool is called. Injects an FCA-AI compliance checklist reminder into the agent's context when entering plan mode.
-
-**Behavior**:
-
-- Passes with `additionalContext` containing FCA-AI plan compliance reminders (INTENT.md limits, organ boundaries, 3+12 test rule)
-- Never blocks plan mode exit (always `continue: true`)
-
----
-
-### 4. UserPromptSubmit — FCA-AI Context Injector
+### 3. UserPromptSubmit — FCA-AI Context Injector
 
 **Entry**: `src/hooks/user-prompt-submit/user-prompt-submit.entry.ts`
 **Built output**: `bridge/user-prompt-submit.mjs`
 
-Fires on each user prompt submission. Injects FCA-AI rules into Claude's context on the first prompt of each session.
+Fires on each user prompt submission. Resets the per-turn visit map (including subagent-scoped maps), increments the session turn counter (the delivery-TTL clock), and injects FCA-AI rules into Claude's context on the first prompt of each session.
 
 **Session gate**: Uses a session marker file in the cache directory (`~/.filid/cache/`) to ensure injection happens only once per session. Subsequent prompts in the same session return immediately.
 
@@ -111,7 +101,7 @@ Never blocks user prompts (always `continue: true`).
 
 ---
 
-### 5. Session Cleanup — MCP Server Lifecycle
+### 4. Session Cleanup — MCP Server Lifecycle
 
 filid no longer registers a `SessionEnd` hook. `SessionEnd` is Claude-only, so
 session-scoped cleanup moved to the **MCP server process lifecycle** — the server

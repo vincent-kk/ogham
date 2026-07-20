@@ -11,6 +11,7 @@ export const McpToolName = {
   MANIFEST_IMPLEMENT_PLAN: 'manifest_implement_plan',
   CONFIG_GET: 'config_get',
   CONFIG_SET: 'config_set',
+  OPEN_SETTINGS: 'open_settings',
   CACHE_GET: 'cache_get',
   CACHE_SET: 'cache_set',
   AST_SEARCH: 'ast_search',

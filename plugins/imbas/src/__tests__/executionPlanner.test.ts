@@ -38,6 +38,7 @@ describe('planExecution', () => {
           type: 'Task',
           status: 'pending',
           issue_ref: null,
+          labels: [],
           blocks: [],
           subtasks: [],
         },
@@ -48,6 +49,7 @@ describe('planExecution', () => {
           type: 'Task',
           status: 'created',
           issue_ref: null,
+          labels: [],
           blocks: [],
           subtasks: [],
         },
@@ -73,6 +75,7 @@ describe('planExecution', () => {
           type: 'Task',
           status: 'pending',
           issue_ref: null,
+          labels: [],
           blocks: [],
           subtasks: [
             {
@@ -81,6 +84,7 @@ describe('planExecution', () => {
               description: 'D',
               status: 'pending',
               issue_ref: null,
+              labels: [],
             },
             {
               id: 'ST-002',
@@ -88,6 +92,7 @@ describe('planExecution', () => {
               description: 'D',
               status: 'created',
               issue_ref: null,
+              labels: [],
             },
           ],
         },
@@ -120,6 +125,7 @@ describe('planExecution filtering', () => {
           type: 'Task',
           status: 'created',
           issue_ref: null,
+          labels: [],
           blocks: [],
           subtasks: [],
         },
@@ -142,6 +148,7 @@ describe('planExecution filtering', () => {
           type: 'Task',
           status: 'pending',
           issue_ref: null,
+          labels: [],
           blocks: [],
           subtasks: [],
         },
@@ -167,6 +174,7 @@ describe('planExecution filtering', () => {
               description: 'D',
               status: 'pending',
               issue_ref: null,
+              labels: [],
             },
             {
               id: 'SS-002',
@@ -174,6 +182,7 @@ describe('planExecution filtering', () => {
               description: 'D',
               status: 'failed',
               issue_ref: null,
+              labels: [],
             },
           ],
         },
@@ -243,6 +252,7 @@ describe('planExecution filtering', () => {
           type: 'Task',
           status: 'pending',
           issue_ref: null,
+          labels: [],
           blocks: [],
           subtasks: [
             {
@@ -251,6 +261,7 @@ describe('planExecution filtering', () => {
               description: 'D',
               status: 'created',
               issue_ref: null,
+              labels: [],
             },
             {
               id: 'ST-002',
@@ -258,6 +269,7 @@ describe('planExecution filtering', () => {
               description: 'D',
               status: 'pending',
               issue_ref: null,
+              labels: [],
             },
           ],
         },

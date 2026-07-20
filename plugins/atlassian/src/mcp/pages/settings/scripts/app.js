@@ -242,12 +242,25 @@
 
   // --- Buttons ---
   function bindButtons() {
-    document.getElementById("btn-save").addEventListener("click", onSave);
+    document.getElementById("btn-save").addEventListener("click", function () {
+      onSubmit(false);
+    });
+    document
+      .getElementById("btn-saveclose")
+      .addEventListener("click", function () {
+        onSubmit(true);
+      });
+    document.getElementById("btn-test").addEventListener("click", onTest);
+    document
+      .getElementById("btn-cancel")
+      .addEventListener("click", function () {
+        window.close();
+      });
     document
       .getElementById("settings-form")
       .addEventListener("submit", function (e) {
         e.preventDefault();
-        onSave();
+        onSubmit(false);
       });
   }
 
@@ -439,7 +452,7 @@
   }
 
   // --- Save (validate -> test connection -> save) ---
-  function onSave() {
+  function onSubmit(closeAfter) {
     if (!validateForm()) return;
 
     if (state.editMode) {
@@ -450,6 +463,7 @@
     }
 
     var data = collectFormData();
+    data.closeAfter = closeAfter;
     setLoading(true);
     hideStatusMessage();
     showStatusMessage(true, "Testing connection...");
@@ -464,10 +478,42 @@
       })
       .then(function (result) {
         if (result.success) {
-          showSuccessScreen();
+          if (closeAfter) {
+            showSuccessScreen();
+          } else {
+            showStatusMessage(true, "Saved. Settings updated.");
+          }
         } else {
           showStatusMessage(false, result.message || "Save failed");
         }
+      })
+      .catch(function (err) {
+        showStatusMessage(false, "Request failed: " + err.message);
+      })
+      .finally(function () {
+        setLoading(false);
+      });
+  }
+
+  // --- Test connection (no save) ---
+  function onTest() {
+    if (!validateForm()) return;
+
+    var data = collectFormData();
+    setLoading(true);
+    hideStatusMessage();
+    showStatusMessage(true, "Testing connection...");
+
+    fetch("/test?token=" + encodeURIComponent(TOKEN), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (result) {
+        showStatusMessage(!!result.success, result.message || "Test complete");
       })
       .catch(function (err) {
         showStatusMessage(false, "Request failed: " + err.message);
@@ -490,6 +536,9 @@
     state.loading = on;
     var btns = [
       document.getElementById("btn-save"),
+      document.getElementById("btn-saveclose"),
+      document.getElementById("btn-test"),
+      document.getElementById("btn-cancel"),
       document.getElementById("btn-import"),
     ];
     btns.forEach(function (btn) {

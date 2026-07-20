@@ -51,6 +51,11 @@ describe("renderMarkdown", () => {
     expect(html).toMatch(/<p[^>]*data-source-line="3"/);
   });
 
+  it("renders hr as an anchorable block", () => {
+    const { html } = renderMarkdown("para\n\n---\n\nafter");
+    expect(html).toMatch(/<hr[^>]*data-source-line="3"/);
+  });
+
   it("reports source line index and line count", () => {
     const { sourceLineIndex, lineCount } = renderMarkdown(
       "# A\n\npara\n\n- item",

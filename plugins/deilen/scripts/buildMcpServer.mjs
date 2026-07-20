@@ -41,7 +41,7 @@ await esbuild.build({
   define: { "import.meta.url": "__import_meta_url" },
 });
 
-// Heavy browser renderers belong in bridge/assets/*, never in the MCP runtime.
+// Heavy browser renderers belong in public/assets/*, never in the MCP runtime.
 // Use library-specific signatures that never appear in deilen's own server code
 // (which legitimately contains the strings "mermaid" and "highlight"), plus a
 // size ceiling as a backstop against any heavy dependency leaking in.

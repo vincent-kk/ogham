@@ -6,7 +6,8 @@ import {
   SESSION_TTL_MS,
 } from '../../../../constants/infraDefaults.js';
 
-import { getCacheDir } from './getCacheDir.js';
+import { CACHE_PREFIX } from './constants/cacheFiles.js';
+import { getCacheDir } from './utils/getCacheDir.js';
 
 /**
  * Prune old session files.
@@ -20,7 +21,9 @@ export function pruneOldSessions(cwd: string): void {
   try {
     const dir = getCacheDir(cwd);
     const files = readdirSync(dir);
-    const sessionFiles = files.filter((f) => f.startsWith('session-context-'));
+    const sessionFiles = files.filter((f) =>
+      f.startsWith(CACHE_PREFIX.SESSION_CONTEXT),
+    );
     if (sessionFiles.length <= MAX_SESSION_FILES_BEFORE_PRUNE) return;
     const now = Date.now();
     for (const file of sessionFiles) {
@@ -28,15 +31,22 @@ export function pruneOldSessions(cwd: string): void {
       try {
         if (now - statSync(fp).mtimeMs > SESSION_TTL_MS) {
           unlinkSync(fp);
-          // also remove paired cache files (aligned with removeSessionFiles)
-          const hash = file.replace('session-context-', '');
-          const contextFp = join(dir, `prompt-context-${hash}`);
-          const guideFp = join(dir, `guide-${hash}`);
-          const boundaryFp = join(dir, `boundary-${hash}`);
-          const fmapFp = join(dir, `fmap-${hash}.json`);
-          for (const paired of [contextFp, guideFp, boundaryFp, fmapFp])
+          // also remove paired cache files (aligned with removeSessionFiles);
+          // fmap uses a prefix match to catch subagent-scoped map files too
+          const hash = file.replace(CACHE_PREFIX.SESSION_CONTEXT, '');
+          const paired = [
+            join(dir, `${CACHE_PREFIX.PROMPT_CONTEXT}${hash}`),
+            join(dir, `${CACHE_PREFIX.GUIDE}${hash}`),
+            join(dir, `${CACHE_PREFIX.BOUNDARY}${hash}`),
+            join(dir, `${CACHE_PREFIX.DELIVERED}${hash}.json`),
+            join(dir, `${CACHE_PREFIX.TURN}${hash}`),
+            ...files
+              .filter((f) => f.startsWith(`${CACHE_PREFIX.FMAP}${hash}`))
+              .map((f) => join(dir, f)),
+          ];
+          for (const pairedFile of paired)
             try {
-              if (existsSync(paired)) unlinkSync(paired);
+              if (existsSync(pairedFile)) unlinkSync(pairedFile);
             } catch {
               // ignore
             }

@@ -10,7 +10,7 @@ Apply the comments, then re-render, and keep iterating:
    an excerpt — edit at exactly that spot. Do not reword or restructure beyond
    what the comment asks.
 2. **Re-render.** Call `mcp__plugin_deilen_tools__render_viewer` again on the
-   updated document, then resume the collect poll loop (Step 3 of the skill).
+   updated document, then collect again (Step 3 of the skill).
 3. **Iterate.** This is an iterative revise loop — repeat 1–2 until the user
    continues in chat or closes the viewer.
 

@@ -69,8 +69,9 @@ describe('dependency-graph', () => {
       ];
       const dag = buildDAG(edges);
       const sorted = topologicalSort(dag);
-      expect(sorted.indexOf('A')).toBeLessThan(sorted.indexOf('B'));
-      expect(sorted.indexOf('B')).toBeLessThan(sorted.indexOf('C'));
+      expect(sorted).not.toBeNull();
+      expect(sorted!.indexOf('A')).toBeLessThan(sorted!.indexOf('B'));
+      expect(sorted!.indexOf('B')).toBeLessThan(sorted!.indexOf('C'));
     });
 
     it('should handle diamond dependency', () => {
@@ -82,10 +83,11 @@ describe('dependency-graph', () => {
       ];
       const dag = buildDAG(edges);
       const sorted = topologicalSort(dag);
-      expect(sorted.indexOf('A')).toBeLessThan(sorted.indexOf('B'));
-      expect(sorted.indexOf('A')).toBeLessThan(sorted.indexOf('C'));
-      expect(sorted.indexOf('B')).toBeLessThan(sorted.indexOf('D'));
-      expect(sorted.indexOf('C')).toBeLessThan(sorted.indexOf('D'));
+      expect(sorted).not.toBeNull();
+      expect(sorted!.indexOf('A')).toBeLessThan(sorted!.indexOf('B'));
+      expect(sorted!.indexOf('A')).toBeLessThan(sorted!.indexOf('C'));
+      expect(sorted!.indexOf('B')).toBeLessThan(sorted!.indexOf('D'));
+      expect(sorted!.indexOf('C')).toBeLessThan(sorted!.indexOf('D'));
     });
 
     it('should return empty array for empty DAG', () => {

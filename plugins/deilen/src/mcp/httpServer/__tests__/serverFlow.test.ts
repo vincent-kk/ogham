@@ -21,11 +21,11 @@ function sessionIdFrom(url: string): string {
 }
 
 beforeAll(async () => {
-  const pluginRoot = mkdtempSync(join(tmpdir(), "deilen-bridge-"));
-  mkdirSync(join(pluginRoot, "bridge", "assets"), { recursive: true });
-  writeFileSync(join(pluginRoot, "bridge", "viewer.html"), VIEWER_HTML);
+  const pluginRoot = mkdtempSync(join(tmpdir(), "deilen-public-"));
+  mkdirSync(join(pluginRoot, "public", "assets"), { recursive: true });
+  writeFileSync(join(pluginRoot, "public", "viewer.html"), VIEWER_HTML);
   writeFileSync(
-    join(pluginRoot, "bridge", "assets", "highlight.js"),
+    join(pluginRoot, "public", "assets", "highlight.js"),
     "export function highlightAll(){}",
   );
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;

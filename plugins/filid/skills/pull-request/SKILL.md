@@ -3,7 +3,7 @@ name: pull-request
 user_invocable: true
 description: '[filid:pull-request] Sync INTENT.md and DETAIL.md via update, then automatically generate a structured GitHub PR with Architecture, Code, and Test sections from the current branch changes.'
 argument-hint: '[--base REF] [--skip-update] [--draft] [--title TITLE]'
-version: '1.2.0'
+version: '1.2.1'
 complexity: medium
 plugin: filid
 ---
@@ -90,14 +90,20 @@ Empty diff → abort: "No changes detected."
 
 ### Stage 4 — PR Publication
 
-1. `GH_AUTH == false` → save the body to `.filid/pr-draft/<branch>.md`
-   with manual instructions (`reference.md` §4.1) and END.
-2. Existing open PR check (`gh pr list --head <branch>`):
+1. Write the generated body to `.filid/pr-draft/<branch>.md` — every
+   path below passes it via `--body-file` (inline `--body` breaks on
+   backticks/quotes in generated markdown). Delete the file after a
+   successful publication; keep it on every failure path.
+2. `GH_AUTH == false` → keep the body file, print manual instructions
+   (`reference.md` §4.1), END.
+3. Existing open PR check (`gh pr list --head <branch>`):
    <!-- [INTERACTIVE] AskUserQuestion: replace existing PR body -->
    an open PR exists → confirm "Replace the existing PR body entirely?"
-   — Overwrite → `gh pr edit`; Skip → print the body and exit.
-3. Push if the remote branch is missing: `git push -u origin <branch>`.
-4. `gh pr create --base <BASE_REF> --title "<title>" --body ...`
+   — Overwrite → `gh pr edit <N> --body-file <file>`, emit the final
+   report (status: updated), END — steps 4-5 are create-path only;
+   Skip → keep the body file, print its path, END.
+4. Push if the remote branch is missing: `git push -u origin <branch>`.
+5. `gh pr create --base <BASE_REF> --title "<title>" --body-file <file>`
    (+ `--draft` when set), then emit the final report with the PR URL
    (`reference.md` §4.5).
 

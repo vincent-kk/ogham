@@ -11,6 +11,7 @@ function fb(sessionId: string): StoredFeedback {
   return {
     session_id: sessionId,
     status: "complete",
+    overall: [],
     comments: [],
     images: [],
     updated_at: "now",

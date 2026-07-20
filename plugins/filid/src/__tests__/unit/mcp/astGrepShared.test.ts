@@ -61,7 +61,7 @@ describe('toLangEnum', () => {
       Json: 'Json',
       Yaml: 'Yaml',
     },
-  } as Parameters<typeof toLangEnum>[0];
+  } as unknown as Parameters<typeof toLangEnum>[0];
 
   it.each([
     ['javascript', 'JavaScript'],

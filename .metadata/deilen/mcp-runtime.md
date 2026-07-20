@@ -57,4 +57,4 @@ cennad/atlassian `webServer` 의 idle 패턴(`setTimeout` shutdown + `server.lis
 - [ ] graceful shutdown 에서 pending resolver 전부 settle
 - [ ] 이미지·자산 스트림 fd 정리
 - [ ] 세션 TTL prune 동작 확인
-- [ ] `wait_seconds` < MCP 클라이언트 tool 타임아웃(`MCP_TIMEOUT`) — 토큰 효율은 [skills.md](./skills.md)
+- [ ] `wait_seconds` ≤ stdio idle window(기본 30분, 무응답 호출 abort) — `MCP_TIMEOUT` 은 서버 기동 전용이라 무관, `MCP_TOOL_TIMEOUT` 기본 ~28h, 60초 per-request 타이머는 HTTP/SSE 전용. 토큰 효율은 [skills.md](./skills.md)
