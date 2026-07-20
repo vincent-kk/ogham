@@ -115,3 +115,16 @@ Codex 마켓플레이스로 설치·프로브.
 - **환경**: 테스트 후 플러그인·마켓플레이스 제거로 ~/.codex 원복. (측정 방법 주의: `codex exec`
   는 프롬프트를 위치 인자로 주고 stdin 을 안 닫으면 stdin 대기로 **무한 블록** — 항상 `< /dev/null`
   또는 `- < file` 로 stdin 을 닫을 것.)
+
+### 실측 — self-load(파일-읽기) 스폰 작동 (아키텍처 최종 검증)
+
+컴파일러 변이는 페르소나를 스킬에 embed 하지 않고 **별도 파일**(`agents/<id>.md`)로 두고 스폰
+시 "read 후 채택"시킨다(Stage 6 는 embed 였음). 이 파일-읽기 self-load 가 작동하는지 검증:
+페르소나를 별도 파일에 두고 각 파일 끝에 **고유 마커**(`[OPT-3391]`·`[SKEP-7742]`)를 심어,
+프롬프트엔 CLAIM 만 전달(마커는 스킬·프롬프트 어디에도 없음).
+
+- **결과 (effort low, stdin 닫음)**: rollout 3개(오케스트레이터 + subagent 2), 최종 출력에 **두
+  마커 모두 존재** → subagent 가 별도 페르소나 파일을 **실제로 읽고 채택**했음이 증명. 충실도
+  정확(skeptic `parseInt("0x10")===16`·`"12px"→12` 포착, optimist 방어).
+- **판정**: "spawn subagent → Read `agents/<id>.md` → 채택" 이 Codex 에서 신뢰성 있게 작동. ⇒
+  **컴파일러 변이 아키텍처 전면 검증**(검증 #1 replace + 검증 #2 self-load 파일읽기 = 둘 다 ✅).
