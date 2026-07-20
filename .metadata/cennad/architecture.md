@@ -53,7 +53,7 @@ packages/cennad/
 src/
 ├── INTENT.md
 ├── index.ts                     # public API barrel
-├── version.ts                   # scripts/inject-version.mjs 가 갱신, 수정 금지
+├── version.ts                   # scripts/injectVersion.mjs 가 갱신, 수정 금지
 ├── types/                       # fractal — Zod 스키마 + 타입
 │   ├── INTENT.md
 │   ├── index.ts
@@ -210,7 +210,7 @@ hooks/inject*    →  hooks/shared (only)        ← core/ import 금지
   "build": "yarn clean && yarn version:sync && node scripts/buildSettingsHtml.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
   "build:plugin": "node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
   "clean": "rm -rf bridge",
-  "version:sync": "node ../../scripts/inject-version.mjs"
+  "version:sync": "node ../../scripts/injectVersion.mjs"
 }
 ```
 

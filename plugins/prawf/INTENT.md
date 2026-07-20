@@ -44,5 +44,5 @@
 ## Dependencies
 
 - **런타임**: 없음 (순수 마크다운).
-- **도구**: `version:sync` 용 루트 `scripts/inject-version.mjs`.
+- **도구**: `version:sync` 용 루트 `scripts/injectVersion.mjs`.
 - **설계 SSoT**: `.metadata/prawf/` (한국어, 읽기 전용 참조).

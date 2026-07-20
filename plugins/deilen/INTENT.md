@@ -36,7 +36,7 @@
 ### Never do
 
 - `dist/` 커밋 (`bridge/`·`public/` 는 의도적 커밋 — `package.json:files`)
-- `version.ts` / `plugin.json` 의 version 수동 수정 (inject-version.mjs 만)
+- `version.ts` / `plugin.json` 의 version 수동 수정 (injectVersion.mjs 만)
 
 ## Dependencies
 

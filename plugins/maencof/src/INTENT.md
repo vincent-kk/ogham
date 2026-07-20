@@ -31,5 +31,5 @@ maencof 플러그인 소스 루트. 5-Layer Knowledge Model v2 기반 개인 지
 
 - hooks/ 진입점 파일을 직접 import하지 않음 (esbuild 진입점)
 - core/ 모듈에서 mcp/ 또는 hooks/ 직접 의존
-- version.ts 직접 수정 (inject-version.mjs 사용)
+- version.ts 직접 수정 (injectVersion.mjs 사용)
 - bridge/ 출력 파일 직접 수정 (esbuild 생성 결과물)

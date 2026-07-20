@@ -11,7 +11,7 @@ Claude Code 플러그인 모노레포. 패키지별 작업 가이드는 각 `plu
 ## Tech Stack
 
 - TypeScript ^5.7, Node.js ≥ 20, ESM
-- 빌드: tsc (ESM) + esbuild (CJS / ESM 번들) + `scripts/inject-version.mjs`
+- 빌드: tsc (ESM) + esbuild (CJS / ESM 번들) + `scripts/injectVersion.mjs`
 - 테스트: Vitest 3.2
 - MCP: `@modelcontextprotocol/sdk ~1.22`
 - Validation: Zod (`zod ^3.23`)
@@ -36,7 +36,7 @@ build = clean && version:sync && [build:rules] && [build:pages] && [build:compil
 
 | 스크립트               | 역할                                                                                    | 산출물                                                             |
 | ---------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `version:sync`         | `package.json` → `src/version.ts` + `.claude-plugin/plugin.json` (`inject-version.mjs`) | —                                                                  |
+| `version:sync`         | `package.json` → `src/version.ts` + `.claude-plugin/plugin.json` (`injectVersion.mjs`) | —                                                                  |
 | `build:rules`          | built-in rule hash 동기화 (filid 전용)                                                  | rule registry                                                      |
 | `build:pages`          | settings / viewer / renderers HTML (esbuild)                                            | `public/`                                                          |
 | `build:compile`        | `tsc -p tsconfig.build.json`                                                            | `dist/` (라이브러리 export)                                        |

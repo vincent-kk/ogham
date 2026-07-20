@@ -36,7 +36,7 @@ plugins/deilen/
 src/
 ├── INTENT.md
 ├── index.ts                       # public API barrel
-├── version.ts                     # inject-version.mjs 가 갱신, 수정 금지
+├── version.ts                     # injectVersion.mjs 가 갱신, 수정 금지
 ├── types/                         # organ — Zod 스키마 (known organ; INTENT.md 없음)
 │   ├── index.ts
 │   ├── config.ts                  # Config
@@ -128,7 +128,7 @@ core/*          →  lib, utils, constants
   "build": "yarn clean && yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
   "build:plugin": "node scripts/buildMcpServer.mjs",
   "clean": "rm -rf bridge",
-  "version:sync": "node ../../scripts/inject-version.mjs"
+  "version:sync": "node ../../scripts/injectVersion.mjs"
 }
 ```
 

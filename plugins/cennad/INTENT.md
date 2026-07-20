@@ -38,11 +38,11 @@
 ### Never do
 
 - `dist/` 를 커밋 (`bridge/` · `public/` 는 의도적 커밋 — `package.json:files` 포함)
-- `version.ts` 또는 `.claude-plugin/plugin.json` 의 version 을 손으로 수정 (inject-version.mjs 만)
+- `version.ts` 또는 `.claude-plugin/plugin.json` 의 version 을 손으로 수정 (injectVersion.mjs 만)
 
 ## Dependencies
 
 - **런타임**: `@modelcontextprotocol/sdk ~1.22.0`, `zod ^3.23.8`
 - **개발**: `esbuild ^0.24.0`, `typescript ^5.7.2`, `vitest ^4.1.2`, `@types/node ^20.11.0`
 - **환경**: Node.js >= 20, Yarn 4.12 workspaces
-- **빌드 스크립트**: `scripts/buildSettingsHtml.mjs`, `scripts/buildMcpServer.mjs`, `scripts/buildHooks.mjs`, `../../scripts/inject-version.mjs`
+- **빌드 스크립트**: `scripts/buildSettingsHtml.mjs`, `scripts/buildMcpServer.mjs`, `scripts/buildHooks.mjs`, `../../scripts/injectVersion.mjs`

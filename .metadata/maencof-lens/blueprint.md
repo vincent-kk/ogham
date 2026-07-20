@@ -34,7 +34,7 @@ packages/maencof-lens/
 ├── scripts/
 │   ├── buildMcpServer.mjs     # esbuild: server-entry.ts → bridge/mcp-server.cjs
 │   ├── buildHooks.mjs          # esbuild: hooks entries → bridge/*.mjs
-│   └── inject-version.mjs       # Version sync: package.json → src/version.ts
+│   └── injectVersion.mjs       # Version sync: package.json → src/version.ts
 ├── src/
 │   ├── index.ts                 # Barrel export (public API)
 │   ├── version.ts               # Auto-generated version constant

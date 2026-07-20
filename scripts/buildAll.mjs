@@ -2,7 +2,7 @@
 /**
  * Workspace-wide build orchestrator.
  *
- * Same provider/consumer staging as scripts/typecheck-all.mjs:
+ * Same provider/consumer staging as scripts/typecheckAll.mjs:
  * providers emit dist first so consumer `tsc -p tsconfig.build.json`
  * can resolve their .d.ts files. Consumers run sequentially via
  * `yarn workspaces foreach --topological-dev` so package dependencies
@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-// See scripts/typecheck-all.mjs for why only cross-platform emits dist
+// See scripts/typecheckAll.mjs for why only cross-platform emits dist
 // while plugin packages ship via bridge/.
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },

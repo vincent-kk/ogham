@@ -49,7 +49,7 @@ Create the `packages/maencof-lens` package structure and the config loader that 
   },
   "scripts": {
     "clean": "rm -rf bridge",
-    "version:sync": "node scripts/inject-version.mjs",
+    "version:sync": "node scripts/injectVersion.mjs",
     "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
     "build:plugin": "node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
     "test": "vitest",
@@ -575,7 +575,7 @@ Set up the build pipeline and plugin manifest files for Claude Code plugin distr
 - Format: ESM, bundled, node20 target
 - Pattern: copy from maencof's build script
 
-**`scripts/inject-version.mjs`**:
+**`scripts/injectVersion.mjs`**:
 
 - Reads version from `package.json`
 - Writes to `src/version.ts`: `export const VERSION = '0.0.1';`

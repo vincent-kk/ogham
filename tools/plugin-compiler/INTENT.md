@@ -37,4 +37,4 @@
 ## Dependencies
 
 - **개발**: `typescript ^5.7`, `vitest`, `tsx`(루트) — Node.js ≥ 20, Yarn 4.12 workspaces. 런타임 의존성 없음(Node 내장만).
-- 버전 동기화는 [`scripts/inject-version.mjs`](../../scripts/inject-version.mjs) 가 담당(`.claude-plugin` + `.codex-plugin`).
+- 버전 동기화는 [`scripts/injectVersion.mjs`](../../scripts/injectVersion.mjs) 가 담당(`.claude-plugin` + `.codex-plugin`).
