@@ -9,8 +9,8 @@
 ## 핵심 발견 — 중앙화 지점은 이미 있다
 
 `shared/cross-platform/src/paths/paths.ts` 의 **`pluginCache(pkg)`** 가 바로 그 단일
-진입점이다. 모듈 INTENT.md 가 못박아 둠: *"호출자는 `~/.claude/plugins/<pkg>` 하드코딩
-대신 본 모듈만 사용"*, Never do: *"`~/.claude/plugins/` 경로 문자열 하드코딩"*.
+진입점이다. 모듈 INTENT.md 가 못박아 둠: _"호출자는 `~/.claude/plugins/<pkg>` 하드코딩
+대신 본 모듈만 사용"_, Never do: _"`~/.claude/plugins/` 경로 문자열 하드코딩"_.
 
 ```
 pluginCache(pkg, version?) → join(claudeRoot(), "plugins", pkg[, version])
@@ -24,31 +24,31 @@ claudeRoot()               → process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), 
 
 ### A. 이미 중앙 경유 — `claudeRoot()` 수정만으로 자동 호스트 인지
 
-| 플러그인  | 지점                                            | 상태               |
-| --------- | ----------------------------------------------- | ------------------ |
-| atlassian | `constants/paths.ts` `pluginCache("atlassian")` | ✅ 중앙 경유       |
+| 플러그인  | 지점                                                                 | 상태         |
+| --------- | -------------------------------------------------------------------- | ------------ |
+| atlassian | `constants/paths.ts` `pluginCache("atlassian")`                      | ✅ 중앙 경유 |
 | cennad    | `constants/paths.ts`·`hooks/shared/paths.ts` `pluginCache('cennad')` | ✅ 중앙 경유 |
-| entrez    | `constants/paths.ts` `pluginCache("entrez")`    | ✅ 중앙 경유       |
-| filid     | `core/infra/cacheManager/.../getCacheDir.ts` `pluginCache('filid')` | ✅ 중앙 경유 |
+| entrez    | `constants/paths.ts` `pluginCache("entrez")`                         | ✅ 중앙 경유 |
+| filid     | `core/infra/cacheManager/.../getCacheDir.ts` `pluginCache('filid')`  | ✅ 중앙 경유 |
 
 ### B. 중앙 우회 — 로컬 복제 → `pluginCache()` 통합 필요
 
-| 지점                                                 | 현재                                       | 조치                             |
-| ---------------------------------------------------- | ------------------------------------------ | -------------------------------- |
-| `plugins/deilen/src/constants/paths.ts`              | 로컬 `claudeRoot()` → `DEILEN_HOME`        | `pluginCache('deilen')` 로 교체  |
-| `plugins/r-statistics/src/constants/paths.ts`        | 로컬 `claudeRoot()` → `R_STATISTICS_HOME`  | `pluginCache('r-statistics')`    |
-| `shared/cross-platform/src/hooks/errorLog.ts`        | `join(homedir(),".claude","plugins",pkg…)` | `pluginCache(pkg)` 로 교체       |
-| `plugins/imbas/src/hooks/setup/setup.ts`             | `CLAUDE_CONFIG_DIR\|\|~/.claude` + `/plugins/imbas/<cwd>` | 베이스를 `pluginCache('imbas')` 로 (훅 한계 아래) |
+| 지점                                          | 현재                                                      | 조치                                              |
+| --------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------- |
+| `plugins/deilen/src/constants/paths.ts`       | 로컬 `claudeRoot()` → `DEILEN_HOME`                       | `pluginCache('deilen')` 로 교체                   |
+| `plugins/r-statistics/src/constants/paths.ts` | 로컬 `claudeRoot()` → `R_STATISTICS_HOME`                 | `pluginCache('r-statistics')`                     |
+| `shared/cross-platform/src/hooks/errorLog.ts` | `join(homedir(),".claude","plugins",pkg…)`                | `pluginCache(pkg)` 로 교체                        |
+| `plugins/imbas/src/hooks/setup/setup.ts`      | `CLAUDE_CONFIG_DIR\|\|~/.claude` + `/plugins/imbas/<cwd>` | 베이스를 `pluginCache('imbas')` 로 (훅 한계 아래) |
 
 ### C. C4-3 아님 (분류 확정 — 건드리지 말 것)
 
-| 지점                                     | 이유                                                                   |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
+| 지점                                       | 이유                                                                                                                                     |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | maencof `graphCache.ts` `BLOCKED_PREFIXES` | 상태 저장 아님 — vault 가 `~/.claude`·`~/.config` 가 되는 걸 막는 **보안 블록리스트**. (선택: Codex 대칭 위해 `~/.codex` 추가 검토 가능) |
-| cennad `constants/paths.ts` `AGY_HOME`   | cennad 가 **agy 의 실제 홈**(`~/.gemini/antigravity-cli`)을 읽는 의도적 타호스트 접근 — 위임 플러그인 본연. 고정 위치 유지 |
-| entrez `buildPathSuggestions.ts`         | 상태 아님 — settings 폼의 다운로드 경로 **자동완성 제안**(user 폴더)  |
-| maencof 상태 (`.maencof-meta/`)          | 프로젝트 스코프 — 홈 디렉터리 아님                                     |
-| `configDir()`·`cacheDir()` (env-paths)   | 호스트 중립(XDG/AppData) — `~/.claude` 오염 무관                       |
+| cennad `constants/paths.ts` `AGY_HOME`     | cennad 가 **agy 의 실제 홈**(`~/.gemini/antigravity-cli`)을 읽는 의도적 타호스트 접근 — 위임 플러그인 본연. 고정 위치 유지               |
+| entrez `buildPathSuggestions.ts`           | 상태 아님 — settings 폼의 다운로드 경로 **자동완성 제안**(user 폴더)                                                                     |
+| maencof 상태 (`.maencof-meta/`)            | 프로젝트 스코프 — 홈 디렉터리 아님                                                                                                       |
+| `configDir()`·`cacheDir()` (env-paths)     | 호스트 중립(XDG/AppData) — `~/.claude` 오염 무관                                                                                         |
 
 ## Fix 설계
 

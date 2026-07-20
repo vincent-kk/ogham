@@ -91,8 +91,27 @@ subagent 가 플러그인 MCP 를 호출할 수 있나"를 검증: 최소 stdio 
 
 ### 페르소나 도구 유형별 이식 난이도
 
-| 대상 | 도구 | 상태 |
-| --- | --- | --- |
-| prawf 10인 | `Read/Write/Glob/Grep` 빌트인 | Stage 6 검증 완료 · self-load 이미 함 → 무변환 |
-| filid 크로스리뷰 7인 | 대부분 빌트인(파일 읽어 리뷰) | self-load 라인 추가(컴파일러 변이) |
-| entrez 1인 | 하드 MCP 5종 | subagent MCP 접근(위 실측)으로 이식 가능 |
+| 대상                 | 도구                          | 상태                                           |
+| -------------------- | ----------------------------- | ---------------------------------------------- |
+| prawf 10인           | `Read/Write/Glob/Grep` 빌트인 | Stage 6 검증 완료 · self-load 이미 함 → 무변환 |
+| filid 크로스리뷰 7인 | 대부분 빌트인(파일 읽어 리뷰) | self-load 라인 추가(컴파일러 변이)             |
+| entrez 1인           | 하드 MCP 5종                  | subagent MCP 접근(위 실측)으로 이식 가능       |
+
+### 실측 — Codex 스킬 발견 = replace (아키텍처 성립 확인)
+
+채택 아키텍처(컴파일러 Codex 스킬 변이)의 성립성 검증: Codex 매니페스트 `skills` 가 기본
+`./skills/` 발견을 **supplement 하는지 replace 하는지**. 최소 테스트 플러그인(기본
+`./skills/alpha-default`=비밀 ALPHA, 매니페스트 선언 `./altskills/beta-manifest`=비밀 BETA)을
+Codex 마켓플레이스로 설치·프로브.
+
+- **결과 (2회 일치)**: (1) 비밀 프로브 → **BETA 만** 노출. (2) 스킬명 프로브 →
+  `alpha-default: NO`, `beta-manifest: YES`. ⇒ **매니페스트 `skills` = REPLACE**(선언 경로만
+  로드, 기본 `./skills/` 미로드). plugin-json-spec 의 "supplement" 문구와 반대 — 2회 실측이 정본.
+- **아키텍처 성립**: Codex 매니페스트 `skills` 를 `.codex-plugin/skills/` 로 재지정하면 Claude
+  `./skills/` 가 **충돌 없이 shadow**된다(Claude 는 `.claude-plugin` 경유로 `./skills/` 그대로
+  로드, 불변). ⇒ 컴파일러 스킬 변이 안전.
+- **대가**: `.codex-plugin/skills/` 가 **전 스킬 보유**(변이 + 미변경 복사)해야 한다(기본 발견이
+  꺼지므로). 매니페스트 바이트복사처럼 `adapters:check` 로 drift-gated.
+- **환경**: 테스트 후 플러그인·마켓플레이스 제거로 ~/.codex 원복. (측정 방법 주의: `codex exec`
+  는 프롬프트를 위치 인자로 주고 stdin 을 안 닫으면 stdin 대기로 **무한 블록** — 항상 `< /dev/null`
+  또는 `- < file` 로 stdin 을 닫을 것.)
