@@ -15,24 +15,24 @@
 
 ## 지금 상태 — 한 눈에
 
-| 단계                                 | 상태                                                                                                                                                                                                           |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                                                                                                                                                         |
-| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                                                                                                                                                           |
-| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                                                                                                                                                           |
-| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                                                                                                                                                                             |
-| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적                                                                                                                                                                   |
-| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                                                                                                                                                                            |
-| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정                                                                                                                                                                  |
-| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)                                                                                                                                                               |
-| **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정                                                                                                                                       |
-| **D1** agy 훅 번역 어댑터            | 🟡 주입훅 보류(F4) — 게이팅(D1b)은 ✅ 완료(`85fea062`, 아래)                                                                                                                                                   |
-| **E3/E2** Codex 파일도구 매칭        | ✅ **완료**(`16a161cc`) — `apply_patch`→`Write`/`Edit` 정규화, 가드 발화 실측 ([stage5](./stage5-measurement-log.md))                                                                                          |
-| **D1b** agy 게이팅 훅 (번역)         | ✅ **완료 + 라이브 검증**(`85fea062`·`6c75b159`) — 실제 agy 가 `write_to_file` deny 강제·F6 fallback 작동                                                                                                      |
-| **Emitter/빌드 배선**                | ✅ **완료**(`b0d0cd0f`) — `buildAgyHooks` 5번째 어댑터(루트 `hooks.json`, PreToolUse→named-group), 3플러그인 `run-agy.mjs` 번들, baseline 30→33, 스모크(deny/allow/F6) 통과                                    |
-| **PR #89** (branch→main)             | 🟢 **CI 전부 초록**(macOS·Ubuntu·Windows×Node20/22)·MERGEABLE·CLEAN. Windows 경로 이식 버그 4건 수정(`165333fe`). **머지 보류 — Vincent 이 이 코드가 프로덕션 적용 가능하다고 판단하는 시점에 직접 머지**      |
-| main 머지·GitHub 경유 설치 확인      | ⬜ 머지 후 — 마켓플레이스 실설치로 Claude 무영향 라이브 재확인                                                                                                                                                 |
-| **Codex 완성도 심화**                | 🟡 **진행 중** — §1 read추적 ✅ **전부**(maencof `5fad890c` + filid·imbas Codex 전용 훅 채널 `9b6aae63`)·§3 process.cwd 감사 ✅(전부 무해). **§2 agents 폴백 = 다음 세션 확정**(Vincent). agy 는 업스트림 대기 |
+| 단계                                 | 상태                                                                                                                                                                                                                                              |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Stage 1** 실측 게이트 G1–G8        | ✅ 전부 종료 (아래 표)                                                                                                                                                                                                                            |
+| **Phase A** 어댑터 정정              | ✅ 완료 (`42d5d898`)                                                                                                                                                                                                                              |
+| **Phase B** CI·README 배선           | ✅ 완료 (`42d5d898`)                                                                                                                                                                                                                              |
+| **Phase C1–C3** 경로 좌표 (코드)     | ✅ main `77825966`                                                                                                                                                                                                                                |
+| **M1** main 리베이스 + 어댑터 재생성 | ✅ 완료 — 전체 테스트 초록, 어댑터 30 결정적                                                                                                                                                                                                      |
+| **V1 · V3** 경로 수정 (코드)         | ✅ 완료 — 틸데 전개 · 자기탐색 폴백                                                                                                                                                                                                               |
+| **V2 · V4** 스키마 안내 · 계약 경로  | ✅ 완료 — 실측 확인(M2-1·M2-4) + 결함 F2 수정                                                                                                                                                                                                     |
+| **C4** 규칙 채널 (`AGENTS.md`)       | ✅ 완료 — 쓰기 + 읽기 채널 동시 분기 (M2-5 확인)                                                                                                                                                                                                  |
+| **M2** 호스트 실측                   | ✅ **완료** — [m2-measurement-log.md](./m2-measurement-log.md) · F2 수정                                                                                                                                                                          |
+| **D1** agy 훅 번역 어댑터            | 🟡 주입훅 보류(F4) — 게이팅(D1b)은 ✅ 완료(`85fea062`, 아래)                                                                                                                                                                                      |
+| **E3/E2** Codex 파일도구 매칭        | ✅ **완료**(`16a161cc`) — `apply_patch`→`Write`/`Edit` 정규화, 가드 발화 실측 ([stage5](./stage5-measurement-log.md))                                                                                                                             |
+| **D1b** agy 게이팅 훅 (번역)         | ✅ **완료 + 라이브 검증**(`85fea062`·`6c75b159`) — 실제 agy 가 `write_to_file` deny 강제·F6 fallback 작동                                                                                                                                         |
+| **Emitter/빌드 배선**                | ✅ **완료**(`b0d0cd0f`) — `buildAgyHooks` 5번째 어댑터(루트 `hooks.json`, PreToolUse→named-group), 3플러그인 `run-agy.mjs` 번들, baseline 30→33, 스모크(deny/allow/F6) 통과                                                                       |
+| **PR #89** (branch→main)             | 🟢 **CI 전부 초록**(macOS·Ubuntu·Windows×Node20/22)·MERGEABLE·CLEAN. Windows 경로 이식 버그 4건 수정(`165333fe`). **머지 보류 — Vincent 이 이 코드가 프로덕션 적용 가능하다고 판단하는 시점에 직접 머지**                                         |
+| main 머지·GitHub 경유 설치 확인      | ⬜ 머지 후 — 마켓플레이스 실설치로 Claude 무영향 라이브 재확인                                                                                                                                                                                    |
+| **Codex 완성도 심화**                | 🟡 **진행 중** — §1 read추적 ✅ **전부**(maencof `5fad890c` + filid·imbas Codex 전용 훅 채널 `9b6aae63`)·§3 process.cwd 감사 ✅(전부 무해). **§2 agents 폴백 ✅ Stage6 이식가능 실측·재정의**(스킬 임베드 원장→multi_agent). agy 는 업스트림 대기 |
 
 **전체 계획: [transition-plan.md](./transition-plan.md)** · 사실 정본: [host-capability-matrix.md](./host-capability-matrix.md) · 절차: [migration-playbook.md](./migration-playbook.md) · 도구 계약: [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md)
 
@@ -126,11 +126,12 @@ locatePluginRoot()  →  자기 모듈 위치에서 상향 8단계, `.claude-plu
 - **filid·imbas ✅ (option a — Codex 전용 훅 채널)**: 신규 emitter 빌더 `buildCodexHooks` 가 Claude 훅 전체를 복사하되 read 잡는 PreToolUse matcher(`Read|Write|Edit`)에 `|Bash` 추가한 `.codex-plugin/hooks.json` 방출, Codex 매니페스트 `hooks` 가 이를 가리킴. **Claude 무영향**(`hooks/hooks.json` 그대로 — git diff 0 실측). baseline 33→35(filid·imbas 각 +1), adapters:check 멱등, 전체 4355 통과. `parseBashRead` 공유 코드가 셸 read 를 Read 로 승격 → filid·imbas Read 컨텍스트 주입 복구.
 - **한계 고지**: 셸 표현 무한(파이프·grep·awk) → **완전 fidelity 불가**, Codex 도 "단순 셸만" 인터셉트 → 흔한 단순 읽기만 복구. `codex-read-matcher` 경고가 이 잔여 한계를 계속 표면화.
 
-### 2. Codex agents 폴백 — ⬅️ **다음 세션 착수 확정 (Vincent)** · 구조적 부재, 단일-폴백 (L3)
+### 2. Codex agents 폴백 — ✅ **실측: 이식 가능 (2026-07-20, Stage 6)** · 재정의됨 (L3)
 
-- **실측**: Codex 매니페스트에 `agents` 컴포넌트 **없음**(소스 `plugin/manifest.rs`). 모든 Codex 플러그인 공통 — 서브에이전트를 플러그인으로 등록 불가.
-- **작업**: 위원회 의존 스킬(filid Phase D 리뷰·prawf·atlassian 미디어)에 "Codex 면 **단일 에이전트 인라인**" 분기 or MCP 오케스트레이션 재설계. 병렬·격리는 잃음.
-- (미확인: Codex 자체 비-플러그인 에이전트 경로 유무 — 필요 시 조사.)
+- **두 층위 분리**: 선언적 플러그인 `agents` 컴포넌트는 **없음**(소스 `plugin/manifest.rs` + plugin-creator `plugin-json-spec.md` — 컴포넌트 = `skills`·`hooks`·`mcpServers`·`apps`·`interface`). 스킬 안 `agents/openai.yaml` 은 하니스 UI 설정(페르소나 아님). **그러나** 런타임 `multi_agent`(`codex features list` = stable)는 subagent 스폰을 지원한다.
+- **실측 ([stage6-codex-multiagent.md](./stage6-codex-multiagent.md))**: 페르소나 원장을 **스킬 본문**에 실으면 codex 가 스킬을 읽어(`sed`) 원장을 취득하고 **격리 subagent** 로 스폰 — rollout 11개 = 오케스트레이터 1 + subagent 10(`/root/<persona>`, `thread_source: subagent`). 10인 스케일·충실도(soundness-theory Ω(n log n) 격파·adjudicator REJECT) 확인. codex 0.144.6·`exec --json` read-only.
+- **재정의된 작업**: "단일 에이전트 인라인" → **스킬 임베드 페르소나 원장 + 네이티브 multi_agent 오케스트레이션**. 컴파일러 Codex 어댑터가 `agents/*.md`(Codex 무시) → 스킬 참조로 **재배치**. 대상: filid Phase D·prawf·atlassian 미디어.
+- **잔여 경계**: 완전 플러그인 E2E(마켓플레이스 설치)·병렬 폭·모델 의존 미측정(저위험). "선언적 등록 부재"만 잔존 한계.
 
 ### 3. process.cwd() 잔여 감사 — ✅ **완료: 전부 무해로 종결** (2026-07-16 감사)
 
