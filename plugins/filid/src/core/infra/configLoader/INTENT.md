@@ -11,24 +11,20 @@ configLoader/
   configLoader.ts      facade (loaders/ + utils/ 공개 재수출)
   index.ts              barrel (configLoader.ts 재수출)
   loaders/              organ — 함수별 단일-파일 로더
-    configSchemas.ts        Zod schema SSoT (RuleOverride/AllowedEntry/FilidConfig)
-    configTypes.ts          Init/LoadConfig/ConfigPatch 결과 타입
-    manifestTypes.ts        RuleDoc* 타입 묶음
-    loadConfig.ts           loadConfig
-    writeConfig.ts          writeConfig
-    createDefaultConfig.ts createDefaultConfig
-    loadRuleOverrides.ts   loadRuleOverrides
-    validateConfigPatch.ts validateConfigPatch
-    resolveLanguage.ts      resolveLanguage
-    resolveMaxDepth.ts     resolveMaxDepth
-    initProject.ts          initProject
-    loadRuleDocsManifest.ts  loadRuleDocsManifest
-    getRuleDocsStatus.ts  getRuleDocsStatus
-    syncRuleDocs.ts        syncRuleDocs
+    configSchemas.ts (Zod SSoT), configTypes.ts, manifestTypes.ts (RuleDoc* 타입)
+    loadConfig / writeConfig / createDefaultConfig / loadRuleOverrides
+    validateConfigPatch / resolveLanguage / resolveMaxDepth / initProject
+    loadRuleDocsManifest.ts
+    syncRuleDocs.ts        호스트 rule doc 채널 분기 (ruleDocsTarget)
+      └ syncRuleDocsToDirectory.ts  .claude/rules/ 파일 1개씩 (Claude)
+      └ syncRuleDocsToFile.ts       AGENTS.md 마커 구간 병합 (Codex)
+    getRuleDocsStatus.ts   두 채널 공통 현황 판독
   utils/                organ — 공유 private 헬퍼
     resolveGitRoot.ts, resolvePluginRoot.ts
     formatIssuePath.ts, getAt.ts, deleteAt.ts, parseWithAllowlistWarn.ts
-    exemptSanitize.ts, routePatternSanitize.ts, writeFileAtomically.ts, computeFileSha256.ts
+    exemptSanitize.ts, routePatternSanitize.ts
+    writeFileAtomically.ts (파일 복사) / writeTextAtomically.ts (내용 쓰기)
+    computeFileSha256.ts / computeTextSha256.ts
 ```
 
 ## Boundaries

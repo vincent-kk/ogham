@@ -31,7 +31,7 @@ import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSes
 import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
-import { claudeMdPath } from '../../../shared/claudeMdPath.js';
+import { instructionsPath } from '../../../shared/instructionsPath.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 import { metaPath } from '../../../shared/metaPath.js';
 import { provisionMissingConfigs } from '../../../utils/configProvisioner/configProvisioner.js';
@@ -353,7 +353,7 @@ function joinSessionSegments(segments: (string | null)[]): string | null {
  * Returns `null` when:
  *   - the dialogue off-switch is active (env or config)
  *   - the body exceeds META_SKILL_MAX_CHARS — logged, never silent: the build
- *     guard in scripts/build-hooks.mjs should have caught this first, so
+ *     guard in scripts/buildHooks.mjs should have caught this first, so
  *     reaching the branch at runtime means the guard drifted.
  *
  * Otherwise wraps the body (bundled inline via esbuild `.md -> text`) in `<maencof-meta-skill>` tags.
@@ -428,7 +428,7 @@ function initClaudeMdSection(
 ): boolean {
   let needsProvisioning = false;
   try {
-    const filePath = claudeMdPath(cwd);
+    const filePath = instructionsPath(cwd);
     const existing = readMaencofSection(filePath);
     const vaultVersion = readVaultVersion(cwd);
 

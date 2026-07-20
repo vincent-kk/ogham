@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "atlassian": "yarn workspace @ogham/atlassian",
-    "build:all": "node scripts/build-all.mjs",
+    "build:all": "node scripts/buildAll.mjs",
     "cennad": "yarn workspace @ogham/cennad",
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
     "crossPlatform": "yarn workspace @ogham/cross-platform",
@@ -31,15 +31,17 @@
     "maencof": "yarn workspace @ogham/maencof",
     "maencof-lens": "yarn workspace @ogham/maencof-lens",
     "plugin-compiler": "yarn workspace @ogham/plugin-compiler",
+    "plugin:adapters": "node --import tsx tools/plugin-compiler/src/main.ts sync",
+    "plugin:adapters:check": "node --import tsx tools/plugin-compiler/src/main.ts sync --check",
     "prawf": "yarn workspace @ogham/prawf",
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
     "rStatistics": "yarn workspace @ogham/r-statistics",
     "run:all": "yarn workspaces foreach -A --topological-dev run",
     "sort:packages": "npx sort-package-json '**/package.json'",
-    "tag:packages": "./scripts/tag-packages.sh",
+    "tag:packages": "./scripts/tagPackages.sh",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "node scripts/typecheck-all.mjs",
+    "typecheck": "node scripts/typecheckAll.mjs",
     "yt-dlp-mcp": "yarn workspace @ogham/yt-dlp-mcp"
   },
   "devDependencies": {

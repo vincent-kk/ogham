@@ -110,7 +110,7 @@ yarn dev            # TypeScript watch 모드
 yarn test           # Vitest watch
 yarn test:run       # 1회 실행
 yarn typecheck      # 타입 체크
-yarn build          # tsc + node scripts/build-mcp-server.mjs
+yarn build          # tsc + node scripts/buildMcpServer.mjs
 ```
 
 ### 기술 스택

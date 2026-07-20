@@ -36,11 +36,17 @@
     "hooks",
     "skills",
     ".claude-plugin",
-    ".mcp.json"
+    "plugin.json",
+    ".codex-plugin",
+    ".mcp.json",
+    "mcp_config.json"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build": "yarn clean && yarn version:sync && yarn build:mcp && yarn build:hooks && yarn build:compile-plugin",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
+    "build:hooks": "node scripts/buildHooks.mjs",
+    "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
+    "build:plugin": "yarn build:mcp && yarn build:hooks",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
@@ -51,7 +57,7 @@
     "version:major": "yarn version major",
     "version:minor": "yarn version minor",
     "version:patch": "yarn version patch",
-    "version:sync": "node ../../scripts/inject-version.mjs"
+    "version:sync": "node ../../scripts/injectVersion.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "~1.22.0",

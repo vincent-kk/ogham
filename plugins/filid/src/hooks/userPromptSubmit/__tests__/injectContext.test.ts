@@ -72,6 +72,29 @@ describe('buildMinimalContext', () => {
     expect(context).not.toContain('Project rule docs');
   });
 
+  it('finds the rule merged into AGENTS.md — a hook has no host marker to branch on', () => {
+    const projectRoot = makeProject({ deployFca: false });
+    writeFileSync(
+      join(projectRoot, 'AGENTS.md'),
+      `<!-- FILID:START:${RULE_FILE} -->\n# fca\n<!-- FILID:END:${RULE_FILE} -->\n`,
+      'utf8',
+    );
+
+    const context = buildMinimalContext(projectRoot);
+
+    expect(context).toContain('[filid] FCA-AI active. Rules: AGENTS.md');
+    expect(context).not.toContain('Rules not deployed');
+  });
+
+  it('does not mistake an AGENTS.md without a filid section for deployed rules', () => {
+    const projectRoot = makeProject({ deployFca: false });
+    writeFileSync(join(projectRoot, 'AGENTS.md'), '# House rules\n', 'utf8');
+
+    const context = buildMinimalContext(projectRoot);
+
+    expect(context).toContain('Rules not deployed');
+  });
+
   it('always emits exactly one [filid:lang] tag', () => {
     const deployed = buildMinimalContext(makeProject({ deployFca: true }));
     const missing = buildMinimalContext(makeProject({ deployFca: false }));

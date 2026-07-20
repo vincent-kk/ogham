@@ -1,13 +1,11 @@
-import { homedir } from "node:os";
 import { join } from "node:path";
 
 import { pluginRoot, projectRoot } from "@ogham/cross-platform/host-paths";
+import { pluginCache } from "@ogham/cross-platform/paths";
 
-function claudeRoot(): string {
-  return process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude");
-}
-
-export const R_STATISTICS_HOME = join(claudeRoot(), "plugins", "r-statistics");
+// Host-aware state root via the shared pluginCache (claude → ~/.claude, codex →
+// ~/.codex). Never hardcode ~/.claude here — see cross-platform paths/INTENT.md.
+export const R_STATISTICS_HOME = pluginCache("r-statistics");
 export const CONFIG_PATH = join(R_STATISTICS_HOME, "config.json");
 export const RUNTIME_DIR = join(R_STATISTICS_HOME, "runtime");
 export const WORKSPACES_DIR = join(RUNTIME_DIR, "workspaces");

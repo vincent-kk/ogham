@@ -52,4 +52,30 @@ describe("logHookFailure", () => {
     expect(data).toHaveLength(1);
     expect(data[0].hook).toBe("second");
   });
+
+  it("default path follows the host-aware plugin cache — a Codex hook (PLUGIN_DATA) writes under ~/.codex, not ~/.claude", () => {
+    // No logFile override: exercises defaultLogPath, which must route through pluginCache
+    // rather than a hardcoded ~/.claude, so Codex hook state does not leak to the Claude root.
+    const root = mkdtempSync(join(tmpdir(), "xp-codexhome-"));
+    const origData = process.env.PLUGIN_DATA;
+    const origCodex = process.env.CODEX_HOME;
+    const origHost = process.env.OGHAM_HOST;
+    process.env.PLUGIN_DATA = "1";
+    process.env.CODEX_HOME = root;
+    delete process.env.OGHAM_HOST;
+    try {
+      logHookFailure("errlog-pkg", "session-start", new Error("boom"));
+      expect(
+        existsSync(join(root, "plugins", "errlog-pkg", "error-log.json")),
+      ).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+      if (origData === undefined) delete process.env.PLUGIN_DATA;
+      else process.env.PLUGIN_DATA = origData;
+      if (origCodex === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = origCodex;
+      if (origHost === undefined) delete process.env.OGHAM_HOST;
+      else process.env.OGHAM_HOST = origHost;
+    }
+  });
 });

@@ -33,7 +33,7 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 
 - core/ 모듈은 mcp/, hooks/에 의존하지 않음
 - types/는 외부 의존성 없음 (zod 제외)
-- version.ts는 빌드 시 inject-version.mjs가 자동 생성; 직접 수정 금지
+- version.ts는 빌드 시 injectVersion.mjs가 자동 생성; 직접 수정 금지
 - bridge/ 출력 파일은 esbuild가 생성; 소스는 src/hooks/ 및 mcp/serverEntry.ts
 
 ## Session Lifecycle Notes

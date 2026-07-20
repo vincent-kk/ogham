@@ -31,6 +31,26 @@
       "types": "./dist/hostPaths/index.d.ts",
       "import": "./dist/hostPaths/index.js"
     },
+    "./instructions": {
+      "types": "./dist/instructions/index.d.ts",
+      "import": "./dist/instructions/index.js"
+    },
+    "./agy-hooks": {
+      "types": "./dist/agyHooks/index.d.ts",
+      "import": "./dist/agyHooks/index.js"
+    },
+    "./agy-runner": {
+      "types": "./dist/agyRunner/index.d.ts",
+      "import": "./dist/agyRunner/index.js"
+    },
+    "./agy-runner/main": {
+      "types": "./dist/agyRunner/main.d.ts",
+      "import": "./dist/agyRunner/main.js"
+    },
+    "./codex-hooks": {
+      "types": "./dist/codexHooks/index.d.ts",
+      "import": "./dist/codexHooks/index.js"
+    },
     "./spawn": {
       "types": "./dist/spawn/index.d.ts",
       "import": "./dist/spawn/index.js"

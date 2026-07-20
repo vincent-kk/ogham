@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [
     {
-      // Mirrors the esbuild `.md -> text` loader used by scripts/build-hooks.mjs,
+      // Mirrors the esbuild `.md -> text` loader used by scripts/buildHooks.mjs,
       // so source modules can `import body from './file.md'` in both test and production.
       name: 'md-as-text',
       enforce: 'pre',

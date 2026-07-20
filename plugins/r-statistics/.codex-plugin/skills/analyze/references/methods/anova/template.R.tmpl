@@ -1,0 +1,107 @@
+# ANOVA slot: fit stats::aov, report Type-II tests via car::Anova,
+# check residual normality (Shapiro) and homogeneity of variance (Levene).
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{GROUP}} {{FORMULA}}
+
+# ---- data -----------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Outcome must be numeric; grouping factor drives the between-group test.
+df[["{{OUTCOME}}"]] <- as.numeric(df[["{{OUTCOME}}"]])
+df[["{{GROUP}}"]] <- factor(df[["{{GROUP}}"]])
+
+# Drop rows missing either modelled column so every helper sees complete cases.
+df <- df[stats::complete.cases(df[, c("{{OUTCOME}}", "{{GROUP}}")]), , drop = FALSE]
+
+# ---- model fit ------------------------------------------------------------
+# {{FORMULA}} expands to e.g. outcome ~ group (+ additional factors).
+model_formula <- stats::as.formula("{{FORMULA}}")
+fit <- stats::aov(model_formula, data = df)
+
+# car::Anova gives Type-II sums of squares (robust for unbalanced designs).
+anova_tbl <- car::Anova(fit, type = 2)
+anova_tidy <- broom::tidy(anova_tbl)
+
+cat("=== ANOVA (Type-II) ===\n")
+print(anova_tidy)
+
+# ---- assumption: residual normality (Shapiro-Wilk) ------------------------
+resid_vec <- stats::residuals(fit)
+# Shapiro-Wilk is only valid for 3..5000 observations; guard the bounds.
+n_resid <- length(resid_vec)
+shapiro <- if (n_resid >= 3 && n_resid <= 5000) {
+  broom::tidy(stats::shapiro.test(resid_vec))
+} else {
+  data.frame(statistic = NA_real_, p.value = NA_real_,
+             method = "shapiro-wilk (skipped: n out of range)")
+}
+cat("\n=== Residual normality (Shapiro-Wilk) ===\n")
+print(shapiro)
+note_assumption("residual_normality")
+
+# ---- assumption: homogeneity of variance (Levene) -------------------------
+# rstatix::levene_test uses the median-centred (Brown-Forsythe) variant.
+levene <- rstatix::levene_test(df, model_formula)
+cat("\n=== Homogeneity of variance (Levene) ===\n")
+print(levene)
+note_assumption("homogeneity")
+
+# ---- artifact: result.anova_table -----------------------------------------
+# Term-level test table as the primary numeric result.
+write_json_artifact(
+  "result.anova_table", "table",
+  anova_tidy, "anova_table.json",
+  "Type-II ANOVA table (term, df, sumsq, statistic, p.value)"
+)
+
+# ---- artifact: table.test_summary -----------------------------------------
+# Compact run summary pairing the omnibus test with assumption checks.
+group_levels <- levels(df[["{{GROUP}}"]])
+omnibus_row <- anova_tidy[!is.na(anova_tidy$p.value), , drop = FALSE]
+test_summary <- list(
+  technique = "anova",
+  outcome = "{{OUTCOME}}",
+  group = "{{GROUP}}",
+  n = nrow(df),
+  n_groups = length(group_levels),
+  groups = group_levels,
+  terms = anova_tidy,
+  omnibus_p_value = if (nrow(omnibus_row) > 0) min(omnibus_row$p.value) else NA_real_,
+  shapiro_p_value = shapiro$p.value,
+  levene_p_value = levene$p,
+  normality_ok = is.na(shapiro$p.value) || shapiro$p.value >= 0.05,
+  homogeneity_ok = is.na(levene$p) || levene$p >= 0.05
+)
+write_json_artifact(
+  "table.test_summary", "table",
+  test_summary, "test_summary.json",
+  "ANOVA omnibus result with normality and homogeneity assumption checks"
+)
+
+# ---- artifact: plot.residual_diagnostics ----------------------------------
+# Residuals-vs-fitted (variance structure) + QQ (normality) side by side.
+diag_df <- data.frame(
+  .fitted = stats::fitted(fit),
+  .resid = resid_vec
+)
+resid_fitted_plot <- ggplot2::ggplot(diag_df, ggplot2::aes(x = .fitted, y = .resid)) +
+  ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
+  ggplot2::geom_point(alpha = 0.6) +
+  ggplot2::labs(title = "Residuals vs Fitted", x = "Fitted", y = "Residual") +
+  ggplot2::theme_minimal()
+
+qq_plot <- ggplot2::ggplot(diag_df, ggplot2::aes(sample = .resid)) +
+  ggplot2::stat_qq(alpha = 0.6) +
+  ggplot2::stat_qq_line(colour = "grey50") +
+  ggplot2::labs(title = "Normal Q-Q", x = "Theoretical", y = "Sample") +
+  ggplot2::theme_minimal()
+
+save_plot_artifact(
+  "plot.residual_diagnostics", resid_fitted_plot,
+  "residual_vs_fitted.png",
+  "Residuals vs fitted values (homoscedasticity check)"
+)
+save_plot_artifact(
+  "plot.residual_diagnostics", qq_plot,
+  "residual_qq.png",
+  "Normal Q-Q plot of model residuals (normality check)"
+)

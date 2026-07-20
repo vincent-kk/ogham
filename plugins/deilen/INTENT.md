@@ -16,7 +16,7 @@
 
 ## Conventions
 
-- 빌드: `clean → version:sync → buildViewerHtml → buildSettingsHtml → buildRenderers → tsc → buildMcpServer`
+- 빌드(도메인 스크립트 조합): `clean → version:sync → pages(viewer+settings+renderers) → compile → mcp → compile-plugin`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `preview`)
 - Agent 없음, Hook 없음 (그래서 `libs/run.cjs` 도 없음)
 - 무거운 렌더러는 브라우저 자산(`public/assets/`) — MCP 서버 번들에 미포함, 동봉 폰트 없음(KaTeX 는 MathML)
@@ -36,7 +36,7 @@
 ### Never do
 
 - `dist/` 커밋 (`bridge/`·`public/` 는 의도적 커밋 — `package.json:files`)
-- `version.ts` / `plugin.json` 의 version 수동 수정 (inject-version.mjs 만)
+- `version.ts` / `plugin.json` 의 version 수동 수정 (injectVersion.mjs 만)
 
 ## Dependencies
 

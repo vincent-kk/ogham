@@ -1,5 +1,5 @@
-export { claudeMdPath } from './claudeMdPath.js';
-export { isMaencofVault } from './isMaencofVault.js';
+export { instructionsPath } from './instructionsPath.js';
+export { isInsideMaencofVault, isMaencofVault } from './isMaencofVault.js';
 export {
   isMaencofMcpToolName,
   MAENCOF_MCP_TOOLS,

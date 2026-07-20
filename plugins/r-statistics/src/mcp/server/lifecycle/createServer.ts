@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { PROJECT_ROOT_ARG_DESCRIPTION } from "@ogham/cross-platform/host-paths";
 import { z } from "zod";
 
 import {
@@ -133,11 +134,7 @@ export function createServer(): McpServer {
         project_root: z
           .string()
           .optional()
-          .describe(
-            "Absolute path of the workspace directory. Omit on Claude Code, where " +
-              "this server already runs from the workspace; required on hosts that " +
-              "launch it from the plugin install directory.",
-          ),
+          .describe(PROJECT_ROOT_ARG_DESCRIPTION),
       },
       annotations: {
         readOnlyHint: false,

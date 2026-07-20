@@ -1,0 +1,14 @@
+technique: fisher_exact
+family: categorical
+outcome_types:
+  - categorical
+  - binary
+required_assumptions: []
+hard_rules:
+  - OUTCOME_METHOD_MISMATCH
+required_artifacts:
+  - result.hypothesis_test
+  - table.contingency
+packages:
+  - stats
+  - rstatix

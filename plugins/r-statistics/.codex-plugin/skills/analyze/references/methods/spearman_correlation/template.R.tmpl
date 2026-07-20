@@ -1,0 +1,79 @@
+# Spearman rank correlation between two variables (monotonic association).
+# Slot body only: contract is sourced and seed/manifest are injected by the runner.
+# Placeholders: {{DATA_REF_ID}} {{X}} {{Y}}
+
+library(ggplot2)
+
+# ---- data ------------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Spearman ranks both variables, so each must be numeric or ordinal (orderable).
+x_var <- "{{X}}"
+y_var <- "{{Y}}"
+df[[x_var]] <- as.numeric(df[[x_var]])
+df[[y_var]] <- as.numeric(df[[y_var]])
+
+# Drop rows missing either variable so the test and the plot see one dataset.
+df <- df[stats::complete.cases(df[, c(x_var, y_var)]), , drop = FALSE]
+n_obs <- nrow(df)
+if (n_obs < 3L) {
+  stop(sprintf(
+    "Spearman correlation requires at least 3 complete pairs; found %d.", n_obs
+  ))
+}
+
+# ---- correlation test ------------------------------------------------------
+# Spearman's rho: rank-based, so no normality/linearity requirement (only a
+# monotonic relationship is assumed). exact=FALSE uses the t/AS 89 approximation,
+# which avoids the "cannot compute exact p-value with ties" warning.
+ct <- stats::cor.test(
+  df[[x_var]], df[[y_var]],
+  method = "spearman", exact = FALSE
+)
+
+# broom::tidy flattens the htest into a one-row data.frame (estimate = rho, S, p).
+tidy_test <- broom::tidy(ct)
+
+# ---- human-readable summary ------------------------------------------------
+cat("Spearman rank correlation\n")
+cat(sprintf("  %s vs %s: n = %d complete pairs\n", x_var, y_var, n_obs))
+cat(sprintf("  rho = %.4g, S = %.4g, p = %.4g\n",
+  unname(ct$estimate), unname(ct$statistic), ct$p.value
+))
+cat(sprintf("  Alternative hypothesis: %s\n", ct$alternative))
+print(tidy_test)
+
+# ---- artifact: result.correlation ------------------------------------------
+# Canonical correlation record: coefficient, test statistic, p-value, and n.
+correlation_result <- list(
+  method = unname(ct$method),
+  x = x_var,
+  y = y_var,
+  n = n_obs,
+  rho = unname(ct$estimate),
+  statistic_S = unname(ct$statistic),
+  p_value = ct$p.value,
+  alternative = ct$alternative
+)
+write_json_artifact(
+  "result.correlation", "model", correlation_result,
+  "spearman_correlation_result.json",
+  "Spearman rho, S statistic, p-value, and complete-pair count"
+)
+
+# ---- artifact: plot.scatter ------------------------------------------------
+# Scatter of the raw values with a monotonic loess trend to visualise the
+# direction/strength of association captured by the rank correlation.
+scatter_plot <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]])) +
+  ggplot2::geom_point(alpha = 0.6) +
+  ggplot2::geom_smooth(method = "loess", se = FALSE, colour = "steelblue") +
+  ggplot2::labs(
+    title = sprintf("Spearman rho = %.3f (p = %.3g)", unname(ct$estimate), ct$p.value),
+    x = x_var, y = y_var
+  ) +
+  ggplot2::theme_minimal()
+save_plot_artifact(
+  "plot.scatter", scatter_plot,
+  "spearman_scatter.png",
+  "Scatter plot of the two variables with a loess trend line"
+)

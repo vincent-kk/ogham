@@ -29,6 +29,37 @@ That's it. All components (Skills, MCP tools, Agents, Hooks) register automatica
 
 > After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:setup` to initialize FCA-AI in your project. See the [All Packages](#all-packages) table below for every available plugin.
 
+### Other hosts — OpenAI Codex and Google Antigravity
+
+Claude Code is the primary target and gets every feature. The same plugin directories also install into **Codex** and, partially, into **Antigravity (`agy`)** — the repo carries generated adapter manifests alongside the Claude ones.
+
+**Codex** (`codex-cli` 0.144.4+) — skills, hooks, and MCP tools all work:
+
+```bash
+codex plugin marketplace add https://github.com/vincent-kk/ogham
+codex plugin add filid@ogham
+
+# Then open the Codex TUI once. For plugins that ship hooks it will show
+# "Hooks need review" — approve them, or the hooks stay silently inert.
+codex
+```
+
+> **Hook trust is required and its absence is silent.** Until you approve a plugin's hooks in the TUI, Codex skips them with no warning and the session still exits cleanly. This also applies when something else drives Codex headlessly (for example `cennad` delegating to it).
+
+Known gaps on Codex: subagent committees are unavailable (Codex has no `agents` plugin component), and `Read`-tool tracking does not fire (Codex has no `Read` alias).
+
+**Antigravity** (`agy` 1.1.2) — skills and agents work; MCP needs one manual step:
+
+```bash
+agy plugin install filid@ogham        # skills + agents
+
+# MCP tools additionally require the plugin to live under a customization root.
+# `agy plugin install` places it where agy never launches plugin MCP servers.
+cp -R plugins/filid ~/.agents/plugins/filid
+```
+
+Known gaps on agy: **hooks do not run at all** (agy's hook format differs from Claude's and ours fails to parse), and MCP requires the copy step above until the `agy` CLI loads plugin MCP servers from its own install location.
+
 ---
 
 ## Plugins

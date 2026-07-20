@@ -11,9 +11,10 @@ export async function getSgModule(): Promise<SgModule | null> {
 
   if (!sgModule)
     try {
-      // Use createRequire for CJS-style resolution (respects NODE_PATH)
-      // In CJS bundles, import.meta.url becomes undefined (esbuild replaces import.meta with {}).
-      // __filename provides the bundle file path as fallback for CJS-relative resolution.
+      // Use createRequire for CJS-style resolution (respects NODE_PATH).
+      // buildMcpServer.mjs defines import.meta.url in the CJS bundle, but the
+      // __filename fallback stays: without that define, esbuild replaces import.meta
+      // with {} and this resolves against the wrong root (or nothing at all).
       const _base =
         import.meta.url ||
         (typeof __filename !== 'undefined' ? __filename : undefined) ||

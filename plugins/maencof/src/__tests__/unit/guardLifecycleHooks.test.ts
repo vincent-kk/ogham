@@ -52,6 +52,17 @@ describe('runLayerGuard', () => {
     expect(result.reason).toContain('Layer 1');
   });
 
+  it('cwd가 vault 하위 디렉토리여도 walk-up으로 차단한다 (agy 시나리오)', () => {
+    // agy hands the hook only the edited file's own folder, not the vault root.
+    const result = runLayerGuard({
+      tool_name: 'Write',
+      tool_input: { file_path: join(vaultDir, '01_Core/values.md') },
+      cwd: join(vaultDir, '01_Core'),
+    });
+    expect(result.continue).toBe(false);
+    expect(result.reason).toContain('Layer 1');
+  });
+
   it('Layer 2 파일 수정은 허용한다', () => {
     const result = runLayerGuard({
       tool_name: 'Write',

@@ -1,0 +1,15 @@
+{
+  "maencof": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}

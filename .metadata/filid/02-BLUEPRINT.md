@@ -499,7 +499,7 @@ process.stdout.write(JSON.stringify(result));
 
 stdin에서 JSON 읽기 → 핸들러 호출 → stdout에 JSON 쓰기.
 
-빌드 결과물은 ESM `.mjs` 파일로 생성 (`scripts/build-hooks.mjs` 사용). 후크 실행기는 `find-node.sh` 대신 `libs/run.cjs`를 통해 Node.js를 직접 호출한다.
+빌드 결과물은 ESM `.mjs` 파일로 생성 (`scripts/buildHooks.mjs` 사용). 후크 실행기는 `find-node.sh` 대신 `libs/run.cjs`를 통해 Node.js를 직접 호출한다.
 
 ---
 

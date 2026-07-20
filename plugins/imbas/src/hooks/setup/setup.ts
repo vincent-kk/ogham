@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
-import { env } from '@ogham/cross-platform/env';
+import { pluginCache } from '@ogham/cross-platform/paths';
 
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
@@ -16,15 +16,14 @@ import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 const log = createLogger('setup');
 
 /**
- * Derive imbas cache directory path.
- * Uses CLAUDE_CONFIG_DIR or ~/.claude as base.
+ * Derive imbas cache directory path under the host-aware plugin state root
+ * (`~/.claude` on Claude, `~/.codex` on Codex — `pluginCache` reads the host
+ * signal, so hook-written state no longer leaks to `~/.claude` under Codex).
  */
 function getCacheDir(cwd: string): string {
-  const configDir =
-    process.env['CLAUDE_CONFIG_DIR'] || join(env.home(), '.claude');
-  // Hash-free simple path: use plugin name + cwd basename
+  // Hash-free simple path: plugin state root + cwd basename
   const base = basename(cwd) || 'default';
-  return join(configDir, 'plugins', 'imbas', base);
+  return join(pluginCache('imbas'), base);
 }
 
 export function processSetup(input: SessionStartInput): HookOutput {

@@ -1,0 +1,31 @@
+{
+  "name": "r-statistics",
+  "version": "0.2.1",
+  "description": "r-statistics — turn Claude into a domain-agnostic statistics expert: hypothesis testing, R code generation, reproducible analysis via headless Rscript",
+  "author": {
+    "name": "Vincent K. Kelvin"
+  },
+  "repository": "https://github.com/vincent-kk/ogham",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/r-statistics",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "statistics",
+    "r",
+    "hypothesis-testing"
+  ],
+  "skills": "./.codex-plugin/skills/",
+  "mcpServers": {
+    "r-statistics": {
+      "command": "node",
+      "args": [
+        "bridge/mcp-server.cjs"
+      ],
+      "cwd": ".",
+      "env": {
+        "OGHAM_HOST": "codex"
+      }
+    }
+  }
+}

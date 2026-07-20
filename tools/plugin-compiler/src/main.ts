@@ -1,78 +1,57 @@
 #!/usr/bin/env node
-/**
- * plugin-compiler CLI (run via tsx).
- *
- *   plugin-compiler compile <pkgDir> [--check]   definitions → targets/ (or verify only)
- *   plugin-compiler verify  <pkgDir>             claude equivalence gate
- */
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { argv, exit, stderr, stdout } from "node:process";
-import { extractDefinitions, writeDefinitions } from "./ir/index.js";
-import { compilePlugin, writeTargets } from "./pipeline/index.js";
-import type { Diagnostic, Diff } from "./types/output.js";
-import { claudeEquivalence } from "./verify/index.js";
+import { fileURLToPath } from "node:url";
+import {
+  formatDiagnostics,
+  formatOutcomes,
+  parseCommand,
+} from "./cli/index.js";
+import {
+  applyFiles,
+  listPluginDirectories,
+  planPluginAdapters,
+  planRootAdapters,
+} from "./pipeline/index.js";
+import type { AdapterPlan } from "./types/index.js";
+
+const REPOSITORY_ROOT = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../..",
+);
+
+const USAGE = "usage: plugin-compiler sync [--check] [pluginDir ...]\n";
 
 function main(): void {
-  const [command, pkgArg, ...rest] = argv.slice(2);
-  if (!command || !pkgArg) return fail(usage());
-  const pkgDir = resolve(pkgArg);
-
-  if (command === "extract") {
-    const files = extractDefinitions(pkgDir);
-    writeDefinitions(pkgDir, files);
-    stdout.write(
-      `✓ extracted ${files.size} definition files → ${pkgDir}/definitions/\n`,
-    );
-    return;
+  const command = parseCommand(argv.slice(2));
+  if (!command) {
+    stderr.write(USAGE);
+    exit(1);
   }
-  if (command === "compile") {
-    const result = compilePlugin(pkgDir);
-    report(result.diagnostics);
-    if (result.diagnostics.some((d) => d.level === "error"))
-      return fail("compile failed");
-    if (rest.includes("--check")) return gate(pkgDir);
-    writeTargets(pkgDir, result.targets);
-    stdout.write(
-      `✓ compiled [${Object.keys(result.targets).join(", ")}] → ${pkgDir}/targets/\n`,
-    );
-    return;
-  }
-  if (command === "verify") return gate(pkgDir);
-  return fail(usage());
-}
 
-function gate(pkgDir: string): void {
-  const diffs = claudeEquivalence(pkgDir);
-  if (diffs.length) return fail(renderDiffs(diffs));
-  stdout.write("✓ claude equivalence OK\n");
-}
+  const plans: AdapterPlan[] = command.pluginDirectories.length
+    ? command.pluginDirectories.map(planPluginAdapters)
+    : [
+        ...listPluginDirectories(REPOSITORY_ROOT).map(planPluginAdapters),
+        planRootAdapters(REPOSITORY_ROOT),
+      ];
 
-function report(diagnostics: Diagnostic[]): void {
-  for (const d of diagnostics)
-    stderr.write(
-      `${d.level === "error" ? "✗" : "⚠"} [${d.host ?? "-"}] ${d.code}: ${d.message}\n`,
-    );
-}
+  const diagnostics = plans.flatMap((plan) => plan.diagnostics);
+  stderr.write(formatDiagnostics(diagnostics));
 
-function renderDiffs(diffs: Diff[]): string {
-  return (
-    "✗ claude equivalence FAILED:\n" +
-    diffs
-      .map(
-        (d) =>
-          `  ${d.kind.padEnd(10)} ${d.relPath}${d.detail ? ` (${d.detail})` : ""}`,
-      )
-      .join("\n")
+  const outcomes = applyFiles(
+    plans.flatMap((plan) => plan.files),
+    command.check,
   );
-}
+  stdout.write(formatOutcomes(outcomes, REPOSITORY_ROOT));
 
-function usage(): string {
-  return "usage: plugin-compiler <extract|compile|verify> <pkgDir> [--check]";
-}
-
-function fail(message: string): void {
-  stderr.write(message + "\n");
-  exit(1);
+  const hasErrors = diagnostics.some(
+    (diagnostic) => diagnostic.level === "error",
+  );
+  const hasDrift = outcomes.some(
+    (outcome) => outcome.action === "stale" || outcome.action === "missing",
+  );
+  if (hasErrors || (command.check && hasDrift)) exit(1);
 }
 
 main();

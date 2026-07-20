@@ -1,0 +1,16 @@
+technique: logistic_regression
+family: regression
+outcome_types: [binary]
+required_assumptions:
+  - id: logit_linearity
+    severity: soft
+    check: box_tidwell
+  - id: no_multicollinearity
+    severity: soft
+    check: vif
+  - id: epv_ge_10
+    severity: soft
+    check: epv
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [model.fit, table.coefficients, table.odds_ratios]
+packages: [stats, broom, car]

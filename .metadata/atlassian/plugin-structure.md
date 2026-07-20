@@ -288,10 +288,10 @@ Following the ogham monorepo conventions:
 {
   "scripts": {
     "build": "yarn clean && yarn version:sync && tsc && yarn build:hooks && yarn build:mcp",
-    "build:mcp": "node scripts/build-mcp-server.mjs",
-    "build:hooks": "node scripts/build-hooks.mjs",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
+    "build:hooks": "node scripts/buildHooks.mjs",
     "clean": "rm -rf dist bridge/*.cjs bridge/*.mjs",
-    "version:sync": "node ../../scripts/inject-version.mjs",
+    "version:sync": "node ../../scripts/injectVersion.mjs",
     "typecheck": "tsc --noEmit",
     "test:run": "vitest run",
     "lint": "eslint src/",
@@ -302,4 +302,4 @@ Following the ogham monorepo conventions:
 
 - **tsc**: ESM type-checked output
 - **esbuild**: CJS bundle for MCP server (`bridge/mcp-server.cjs`) and ESM bundles for hooks
-- **Version**: `src/version.ts` is auto-injected via `scripts/inject-version.mjs` — never edit directly
+- **Version**: `src/version.ts` is auto-injected via `scripts/injectVersion.mjs` — never edit directly

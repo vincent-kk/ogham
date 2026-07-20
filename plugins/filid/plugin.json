@@ -1,0 +1,33 @@
+{
+  "name": "filid",
+  "version": "0.7.6",
+  "description": "FCA-AI rule enforcement + fractal structure management plugin for Claude Code agent workflows",
+  "author": {
+    "name": "Vincent K. Kelvin"
+  },
+  "repository": "https://github.com/vincent-kk/ogham",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/filid",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "fca-ai",
+    "fractal",
+    "context-architecture",
+    "structure"
+  ],
+  "skills": "./.codex-plugin/skills/",
+  "hooks": "./.codex-plugin/hooks.json",
+  "mcpServers": {
+    "filid": {
+      "command": "node",
+      "args": [
+        "bridge/mcp-server.cjs"
+      ],
+      "cwd": ".",
+      "env": {
+        "OGHAM_HOST": "codex"
+      }
+    }
+  }
+}

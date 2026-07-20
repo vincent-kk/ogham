@@ -2,24 +2,23 @@
   "name": "@ogham/plugin-compiler",
   "version": "0.0.0",
   "private": true,
-  "description": "Internal to the ogham monorepo — compiles one host-neutral plugin definition into Claude Code / Codex / Antigravity distribution trees",
+  "description": "Internal to the ogham monorepo — generates Codex / Antigravity adapter files (in place) from each plugin's Claude artifacts",
   "license": "MIT",
   "author": {
     "name": "Vincent K. Kelvin"
   },
   "type": "module",
-  "bin": {
-    "ogham-plugin-compiler": "./src/main.ts"
-  },
   "scripts": {
-    "compile": "tsx src/main.ts",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "sync": "tsx src/main.ts sync",
+    "test": "vitest",
+    "test:run": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "typescript": "^5.7.2",
-    "yaml": "^2.6.1"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=20.0.0"

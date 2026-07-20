@@ -5,8 +5,8 @@
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → settingsHtml → tsc → mcpServer → hooks
-yarn build:plugin       # MCP + hook 번들만 (tsc / version:sync 생략)
+yarn build              # clean → version:sync → pages → compile → mcp → hooks → compile-plugin
+yarn build:plugin       # pages + mcp + hooks 번들만 (clean/compile/compile-plugin 생략)
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test               # vitest watch
 yarn test:run           # 단일 실행 (CI)

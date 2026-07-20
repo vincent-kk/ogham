@@ -1,0 +1,95 @@
+# Pearson product-moment correlation: stats::cor.test(method = "pearson").
+# Measures the strength/direction of a *linear* association between two
+# continuous variables. Reports r, its CI, t statistic and p value.
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{PREDICTOR}}
+
+# ---- data -----------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# The two continuous variables being correlated.
+x_var <- "{{PREDICTOR}}"
+y_var <- "{{OUTCOME}}"
+
+# Both columns must be numeric for a Pearson correlation.
+df[[x_var]] <- as.numeric(df[[x_var]])
+df[[y_var]] <- as.numeric(df[[y_var]])
+
+# Pairwise-complete cases only: a row missing either value cannot contribute.
+df <- df[stats::complete.cases(df[, c(x_var, y_var), drop = FALSE]), , drop = FALSE]
+x <- df[[x_var]]
+y <- df[[y_var]]
+n <- nrow(df)
+
+# ---- correlation test -----------------------------------------------------
+# Pearson r with a two-sided t-test of H0: rho = 0, plus a 95% CI on r.
+fit <- stats::cor.test(x, y, method = "pearson")
+tidy_fit <- broom::tidy(fit)
+
+cat("=== Pearson correlation ===\n")
+cat(sprintf("%s vs %s (n = %d)\n", x_var, y_var, n))
+print(fit)
+
+# ---- assumption: bivariate normality (Shapiro-Wilk per variable) ----------
+# Soft assumption; on violation the statistician recommends spearman_correlation.
+# Shapiro-Wilk is only valid for 3..5000 observations; guard the bounds.
+shapiro_one <- function(v, name) {
+  if (n >= 3 && n <= 5000) {
+    st <- stats::shapiro.test(v)
+    list(variable = name, n = n, W = unname(st$statistic), p_value = st$p.value)
+  } else {
+    list(variable = name, n = n, W = NA_real_, p_value = NA_real_)
+  }
+}
+shapiro_x <- shapiro_one(x, x_var)
+shapiro_y <- shapiro_one(y, y_var)
+note_assumption("normality")
+
+cat("\n=== Normality (Shapiro-Wilk) ===\n")
+for (s in list(shapiro_x, shapiro_y)) {
+  cat(sprintf("  %s (n=%d): W=%.4f, p=%.4g\n", s$variable, s$n, s$W, s$p_value))
+}
+
+# ---- assumption: linearity (scatter) --------------------------------------
+# A scatter plot of y vs x reveals whether the association is linear; a curved
+# trend signals Pearson is mis-specified and Spearman should be preferred.
+note_assumption("linearity")
+
+# ---- artifact: result.correlation -----------------------------------------
+correlation <- list(
+  method = unname(fit$method),
+  x = x_var,
+  y = y_var,
+  n = n,
+  estimate = unname(fit$estimate),          # Pearson's r
+  statistic = unname(fit$statistic),        # t statistic
+  parameter_df = unname(fit$parameter),     # degrees of freedom
+  p_value = unname(fit$p.value),
+  conf_low = unname(fit$conf.int[1]),
+  conf_high = unname(fit$conf.int[2]),
+  conf_level = attr(fit$conf.int, "conf.level"),
+  alternative = fit$alternative,
+  normality = list(x = shapiro_x, y = shapiro_y)
+)
+write_json_artifact(
+  "result.correlation", "table", correlation,
+  "pearson_correlation_result.json",
+  description = "Pearson correlation result (r, CI, t, p) with per-variable Shapiro-Wilk checks"
+)
+
+# ---- artifact: plot.scatter -----------------------------------------------
+# Scatter with an OLS trend line: visual evidence for linearity and the sign
+# and tightness of the association.
+scatter_plot <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]])) +
+  ggplot2::geom_point(alpha = 0.6) +
+  ggplot2::geom_smooth(method = "lm", formula = y ~ x, se = TRUE, colour = "steelblue") +
+  ggplot2::labs(
+    title = sprintf("%s vs %s (Pearson r = %.3f)", x_var, y_var, unname(fit$estimate)),
+    x = x_var, y = y_var
+  ) +
+  ggplot2::theme_minimal()
+
+save_plot_artifact(
+  "plot.scatter", scatter_plot,
+  "scatter.png",
+  "Scatter plot with linear trend line (linearity and association check)"
+)

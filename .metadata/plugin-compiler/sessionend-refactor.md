@@ -1,14 +1,16 @@
 # SessionEnd 재설계 — 당위성 · 방향 · 옵션 (ADR)
 
-> 결정 기록(Architecture Decision Record). `SessionEnd` 훅을 기반 로직에서 **제외**하고 다른 메커니즘으로 이전해야 하는 **당위성**과, 그 **변경 방향 3옵션**(파괴성 동반 가능)을 우리 컴파일러 설계와 엮어 기술한다. 컴파일러 지원 현황은 [usage.md](./usage.md) §5·[migration-playbook-deferred.md](./migration-playbook-deferred.md) §3, 근거 매트릭스는 [host-capability-matrix.md](./host-capability-matrix.md).
+> 결정 기록(Architecture Decision Record). `SessionEnd` 훅을 기반 로직에서 **제외**하고 다른 메커니즘으로 이전해야 하는 **당위성**과, 그 **변경 방향 3옵션**(파괴성 동반 가능)을 우리 컴파일러 설계와 엮어 기술한다. 컴파일러 계약은 [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md), 적용 절차는 [migration-playbook.md](./migration-playbook.md), 근거 매트릭스는 [host-capability-matrix.md](./host-capability-matrix.md).
 >
-> **상태: 채택·구현 완료.** 이 ADR 의 결정(SessionEnd→MCP 수명주기)은 전 플러그인에 적용됐다(SessionEnd 훅 0 + `@ogham/session-finalizer`). 연계된 3-호스트 이식(agy 러너 어댑터 등)은 보류 — 개발예정([migration-playbook-deferred.md](./migration-playbook-deferred.md)).
+> ⚠ 본문이 인용하는 `usage.md`·`migration-playbook-deferred.md` 는 **구 체제(재배치 설계) 문서로 은퇴**했다 — git 이력 `6378169a` 참조. 아래 링크는 현행 문서로 대체돼 있다.
+>
+> **상태: 채택·구현 완료.** 이 ADR 의 결정(SessionEnd→MCP 수명주기)은 전 플러그인에 적용됐다(SessionEnd 훅 0 + `@ogham/session-finalizer`). 연계된 3-호스트 이식(agy 러너 어댑터)은 게이팅 훅 라이브 검증 완료, 컨텍스트 주입은 agy `injectSteps` 렌더 대기 — README [§현재 상태·남은 작업](./README.md#현재-상태--남은-작업).
 
 ---
 
 ## 0. 요약 (TL;DR)
 
-- **당위성**: `SessionEnd`(세션당 1회 훅)는 **3-호스트 중 Claude 에만** 존재한다. Codex 는 플러그인 훅 자체가 없고, agy 의 `Stop` 은 **매 턴 종료마다** 발화한다. 그래서 SessionEnd 를 훅으로 두는 한 이식은 불가능하거나(코덱스) 위험하다(agy 에 매핑하면 무거운 종료작업을 매 턴 실행). SessionEnd 가 다루는 일(정리·커밋·recap)은 본질적으로 **대화 이벤트가 아니라 프로세스 수명주기** 관심사다.
+- **당위성**: `SessionEnd`(세션당 1회 훅)는 **3-호스트 중 Claude 에만** 존재한다. Codex 는 훅을 지원하지만 **이벤트 10종에 `SessionEnd` 가 없고**(2026-07-15 실측 — 구 서술 "플러그인 훅 자체가 없다"는 반증됨), agy 의 `Stop` 은 **매 턴 종료마다** 발화한다. 그래서 SessionEnd 를 훅으로 두는 한 이식은 불가능하거나(Codex) 위험하다(agy 에 매핑하면 무거운 종료작업을 매 턴 실행). SessionEnd 가 다루는 일(정리·커밋·recap)은 본질적으로 **대화 이벤트가 아니라 프로세스 수명주기** 관심사다. **⇒ 훅 지원 여부가 바뀌어도 이 ADR 의 결론은 그대로 선다.**
 - **공통 신호**: 세 호스트 모두 **MCP 서버를 세션당 spawn/kill** 한다 → MCP 서버 프로세스의 종료가 유일한 3-호스트 공통 "세션 종료" 신호다.
 - **옵션**: ① shutdown 직접 이전(단순·파괴적, Type R 손실) · ② Stop 경량수집 → shutdown 처리(2단계, Type R 부분구제) · ③ Session Finalizer 추상화(의미보존·최대인프라, 결과는 항상 일어나되 시점만 지연).
 - **권장**: **작업 종류별 계층 채택** — 정리성(Type C)은 지금 ①로(컴파일러 `mcp-lifecycle` 이미 지원), 커밋/​recap(Type P·R)은 ③의 event-source 저널 + boot-sweep 로 점진 이관. ②는 ①/③ 사이의 중간 도구로 필요 시.
@@ -28,10 +30,10 @@
 3-호스트 훅 능력:
 
 ```
-                SessionEnd 훅?    "세션 종료" 신호?
-Claude Code      ✅ 네이티브       SessionEnd (1회/세션)
-Codex            ❌ 플러그인 훅 없음   —
-Antigravity(agy) ❌ (5 이벤트뿐)    Stop = 매 턴(실행 루프) 종료
+                SessionEnd 훅?            "세션 종료" 신호?
+Claude Code      ✅ 네이티브               SessionEnd (1회/세션)
+Codex            ❌ 이벤트 10종에 없음      —          ← 훅 자체는 지원 (2026-07-15 실측)
+Antigravity(agy) ❌ (이벤트 5종뿐)          Stop = 매 턴(실행 루프) 종료
 ```
 
 → **SessionEnd 는 Claude 전용 훅이다.** 이대로면 Codex 는 실행 불가, agy 는 `Stop` 오매핑 시 무거운 종료작업이 매 턴 돈다.
@@ -67,7 +69,7 @@ Node 서버가 잡을 수 있는 종료 신호: `process.on('SIGTERM'|'SIGINT')`
 
 - **동기 작업만 완주 보장**. `beforeExit`/`exit` 는 동기만, SIGTERM 핸들러의 async 는 호스트가 grace(수백 ms~수 초) 후 SIGKILL 하면 **중도 절단**될 수 있다.
 - **모델 호출 불가**. 죽어가는 서버 프로세스에 LLM 추론 시간·접근이 없다. recap 같은 "모델이 필요한" 작업은 shutdown 시점에 **원천 불가**.
-- **agy 서버 기동 자체가 미검증**. 헤드리스 `--print` 에서 플러그인 MCP 미스폰 실측 — 인터랙티브 기동은 잔여 게이트. agy 수명주기 보상은 이 게이트에 의존.
+- **agy 서버 기동은 위치에 의존한다** (2026-07-15 실측 — 구 서술 "`--print` 라서 미스폰"은 반증됨). agy 는 `.agents/plugins/<n>/`(전역 `~/.agents/` 또는 워크스페이스)에 있는 플러그인의 MCP 만 띄우고, `agy plugin install` 이 넣는 `~/.gemini/config/plugins/` 에서는 **인터랙티브에서도 안 뜬다**(matrix §4.4). agy 수명주기 보상은 이 배치 전제에 의존.
 
 작업을 이 물리에 비추어 3종으로 나눈다:
 
@@ -193,8 +195,8 @@ SessionEnd 훅     MCP shutdown                  다음 세션 boot-sweep
   - 옵션 1: 각 플러그인 서버에 shutdown 핸들러(SIGTERM/stdin close) — maencof 는 `@ogham/session-finalizer` 경유로 완료.
   - 옵션 2: Stop 수집기(agy 러너 어댑터 전제) + shutdown 처리기 — 미구현.
   - 옵션 3: `@ogham/session-finalizer` — shared 워크스페이스 **신설됨**(registerShutdownFinalizer: shutdown 등록·onShutdown·detached 스폰; runFinalizer: 엔트리 디스패치). **저널·멱등가드(event-source)는 후속** — 현재는 옵션 1 + detached finalizer + boot-sweep 골격.
-  - 공통: **MCP-부팅 stale-sweep**(다음 세션 시작 시 지난 세션 잔여 완결) — `@ogham/session-finalizer` boot-sweep 으로 maencof·filid 이관 완료, imbas 는 세션종료 작업이 없어 불요. [migration-playbook-deferred.md](./migration-playbook-deferred.md) §4.
-- **마이그레이션 순서**: ✅ 완료 — filid(옵션 1)·maencof(옵션 3 골격) 이관, imbas 불요. 전 플러그인에서 SessionEnd 훅 제거됨. [migration-playbook-deferred.md](./migration-playbook-deferred.md) §3·§5.
+  - 공통: **MCP-부팅 stale-sweep**(다음 세션 시작 시 지난 세션 잔여 완결) — `@ogham/session-finalizer` boot-sweep 으로 maencof·filid 이관 완료, imbas 는 세션종료 작업이 없어 불요. (구 문서 은퇴 — git 이력 `6378169a`).
+- **마이그레이션 순서**: ✅ 완료 — filid(옵션 1)·maencof(옵션 3 골격) 이관, imbas 불요. 전 플러그인에서 SessionEnd 훅 제거됨. (구 문서 은퇴 — git 이력 `6378169a`).
 
 ---
 

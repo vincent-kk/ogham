@@ -20,7 +20,7 @@ Claude Code 훅 진입점. 이벤트마다 하나의 디렉토리(`sessionStart`
 
 ### Ask first
 
-- 새 이벤트/관심사 추가 시 build-hooks.mjs (`entryPath`) 갱신
+- 새 이벤트/관심사 추가 시 buildHooks.mjs (`entryPath`) 갱신
 - orchestrator 실행 순서·병합 계약 변경
 
 ### Never do
