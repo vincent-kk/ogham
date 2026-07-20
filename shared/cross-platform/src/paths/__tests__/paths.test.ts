@@ -102,6 +102,56 @@ describe("paths", () => {
     }
   });
 
+  it("pluginCache targets ~/.codex when a hook carries Codex's PLUGIN_DATA (no OGHAM_HOST)", () => {
+    // Codex injects PLUGIN_DATA into hook processes but never OGHAM_HOST (that marker
+    // rides only on MCP declarations). Without honoring PLUGIN_DATA, hook-written state
+    // silently leaks to ~/.claude under Codex.
+    const origHost = process.env.OGHAM_HOST;
+    const origData = process.env.PLUGIN_DATA;
+    const origCodex = process.env.CODEX_HOME;
+    const origClaude = process.env.CLAUDE_CONFIG_DIR;
+    delete process.env.OGHAM_HOST;
+    process.env.PLUGIN_DATA = join(homedir(), ".codex", "plugins", "data", "x");
+    delete process.env.CODEX_HOME;
+    delete process.env.CLAUDE_CONFIG_DIR;
+    try {
+      expect(paths.pluginCache("imbas")).toBe(
+        join(homedir(), ".codex", "plugins", "imbas"),
+      );
+    } finally {
+      if (origHost === undefined) delete process.env.OGHAM_HOST;
+      else process.env.OGHAM_HOST = origHost;
+      if (origData === undefined) delete process.env.PLUGIN_DATA;
+      else process.env.PLUGIN_DATA = origData;
+      if (origCodex === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = origCodex;
+      if (origClaude === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+      else process.env.CLAUDE_CONFIG_DIR = origClaude;
+    }
+  });
+
+  it("pluginCache stays on ~/.claude when neither OGHAM_HOST nor PLUGIN_DATA is present", () => {
+    // Claude sets neither marker — its state paths must not move.
+    const origHost = process.env.OGHAM_HOST;
+    const origData = process.env.PLUGIN_DATA;
+    const origClaude = process.env.CLAUDE_CONFIG_DIR;
+    delete process.env.OGHAM_HOST;
+    delete process.env.PLUGIN_DATA;
+    delete process.env.CLAUDE_CONFIG_DIR;
+    try {
+      expect(paths.pluginCache("cennad")).toBe(
+        join(homedir(), ".claude", "plugins", "cennad"),
+      );
+    } finally {
+      if (origHost === undefined) delete process.env.OGHAM_HOST;
+      else process.env.OGHAM_HOST = origHost;
+      if (origData === undefined) delete process.env.PLUGIN_DATA;
+      else process.env.PLUGIN_DATA = origData;
+      if (origClaude === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+      else process.env.CLAUDE_CONFIG_DIR = origClaude;
+    }
+  });
+
   it("normalize converts backslashes to forward slashes", () => {
     expect(paths.normalize("a\\b\\c")).toBe("a/b/c");
     expect(paths.normalize("C:\\Users\\test")).toBe("C:/Users/test");

@@ -13,7 +13,7 @@ OS 별 경로 추상화. home / tmp / config / cache / plugin cache 와 Windows/
 ## Conventions
 
 - 외부 OS 별 위치 결정은 `env-paths` 위임 — Windows AppData, macOS Library/Application Support, Linux XDG.
-- `pluginCache(pkg, version?)` 는 호스트별 상태 루트(claude=`CLAUDE_CONFIG_DIR ?? ~/.claude`, codex=`CODEX_HOME ?? ~/.codex`; 훅 컨텍스트엔 `OGHAM_HOST` 부재 → claude) 밑 `plugins/<pkg>[/version]` 컨벤션 강제.
+- `pluginCache(pkg, version?)` 는 호스트별 상태 루트(claude=`CLAUDE_CONFIG_DIR ?? ~/.claude`, codex=`CODEX_HOME ?? ~/.codex`) 밑 `plugins/<pkg>[/version]` 컨벤션 강제. 호스트 판별은 프로세스 종류별로 다르다 — MCP 는 어댑터가 넣은 `OGHAM_HOST`, 훅은 Codex 가 주입하는 `PLUGIN_DATA`(claude·agy 는 미설정) 로 감지해 훅도 Codex 면 `~/.codex` 로 간다.
 - `normalize(p)` 는 backslash → forward 단방향.
 - `compat/` public 함수는 함수별 파일로 유지해 inline 번들 tree-shaking 을 돕는다.
 

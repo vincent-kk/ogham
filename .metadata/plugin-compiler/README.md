@@ -34,6 +34,7 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 - 실측 게이트 **G1–G8 전부 종료** (결과 정본: 플레이북 §3).
 - 어댑터 생성기 완성 — 경로 7종 / **322 파일**, `plugin:adapters:check` **결정적(멱등)**.
 - 경로 좌표(V1–V4)·규칙 채널(C4 = `AGENTS.md` 병합)·상태 디렉터리 호스트 인지(C4-3) 코드 반영(main).
+- **훅 컨텍스트 상태 leak 봉합** (2026-07-21): C4-3 이 "구조적 한계"로 남겼던 **훅이 쓰는 상태의 `~/.claude` 누수**를 닫았다 — Codex 는 훅 프로세스에 `PLUGIN_DATA` 를 주입(소스 확정 · ponytail 실증)하므로 `stateRoot()` 가 이를 읽어 `~/.codex` 로 라우팅하고, 우회하던 `errorLog`·imbas setup 을 `pluginCache` 경유로 정정. fail-first 테스트 추가, 전체 4465 통과. (MCP 는 종전대로 `OGHAM_HOST` 로 감지.)
 - Codex 파일도구 매칭(`apply_patch` 파싱 → Write/Edit)·agy 게이팅 훅(D1b, 라이브 검증)·Codex 전용 read-matcher 훅.
 - **Codex 스킬 변이**(`buildCodexSkills`) — filid·entrez·r-statistics·imbas 의 `subagent_type` 스폰을 self-load(`_shared/personas/<id>.md` 채택)로 재작성해 `.codex-plugin/skills/` 방출. prawf 는 이미 self-load(무변환). **Claude `skills/` 바이트 불변.**
 - 로컬 게이트 통과 확인: `yarn typecheck` 클린 · `plugin:adapters:check` **322 결정적**. PR **#89** 는 직전 실측 시점 CI 전부 초록(macOS·Ubuntu·Windows ×Node20/22)·MERGEABLE — **머지는 Vincent 이 프로덕션 판단 시점에 직접** (최신 로컬 커밋 `f4437a64` 미푸시).

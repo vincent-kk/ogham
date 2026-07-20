@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+
+import { pluginCache } from "../paths/paths.js";
 
 const SIZE_CAP_BYTES = 256 * 1024;
 
@@ -11,7 +12,7 @@ interface ErrorEntry {
 }
 
 function defaultLogPath(pkg: string): string {
-  return join(homedir(), ".claude", "plugins", pkg, "error-log.json");
+  return join(pluginCache(pkg), "error-log.json");
 }
 
 function serialize(error: unknown): string {
