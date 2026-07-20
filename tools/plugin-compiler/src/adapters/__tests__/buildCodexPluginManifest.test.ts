@@ -9,6 +9,8 @@ function facts(overrides: Partial<PluginFacts> = {}): PluginFacts {
     name: "filid",
     manifest: { name: "filid", version: "1.2.3", description: "d" },
     hasSkills: false,
+    agentFiles: {},
+    skillFiles: {},
     hasHooks: false,
     hooksFile: null,
     mcpServers: null,
@@ -31,6 +33,19 @@ describe("buildCodexPluginManifest", () => {
     expect(buildCodexPluginManifest(facts({ hasSkills: true })).skills).toBe(
       "./skills/",
     );
+  });
+
+  it("points skills at the Codex variant tree when persona spawns are rewritten", () => {
+    const built = buildCodexPluginManifest(
+      facts({
+        hasSkills: true,
+        agentFiles: { "code-surgeon.md": "P" },
+        skillFiles: {
+          "resolve/SKILL.md": 'subagent_type: "filid:code-surgeon"',
+        },
+      }),
+    );
+    expect(built.skills).toBe("./.codex-plugin/skills/");
   });
 
   it("points hooks at the file Claude already consumes", () => {

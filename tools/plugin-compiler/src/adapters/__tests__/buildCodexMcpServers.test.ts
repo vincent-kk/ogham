@@ -12,6 +12,8 @@ function facts(
     name,
     manifest: { name },
     hasSkills: false,
+    agentFiles: {},
+    skillFiles: {},
     hasHooks: false,
     hooksFile: null,
     mcpServers,

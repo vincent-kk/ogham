@@ -9,6 +9,8 @@ function facts(hooksFile: HooksFileSource | null): PluginFacts {
     name: "filid",
     manifest: { name: "filid" },
     hasSkills: false,
+    agentFiles: {},
+    skillFiles: {},
     hasHooks: hooksFile !== null,
     hooksFile,
     mcpServers: null,

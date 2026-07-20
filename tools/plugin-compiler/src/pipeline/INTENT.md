@@ -31,10 +31,10 @@ sync 실행의 오케스트레이션 — 대상 열거, facts→어댑터 계획
 
 ### Never do
 
-- Claude 소비 파일 경로로의 쓰기 — 대상 경로는 어댑터 4종 상수로 한정.
+- Claude 소비 파일 경로로의 쓰기 — 대상 경로는 어댑터 경로 상수로 한정.
 
 ## Dependencies
 
-- `adapters/` (buildCodexPluginManifest · buildAgyMcpConfig · buildAgyHooks · buildCodexMarketplace), `facts/` (readPluginFacts · readMarketplaceFacts), `lint/` (lintHookEvents · lintHookMatchers).
+- `adapters/` (buildCodexPluginManifest · buildAgyMcpConfig · buildAgyHooks · buildCodexHooks · buildCodexSkills · buildCodexMarketplace), `facts/` (readPluginFacts · readMarketplaceFacts), `lint/` (lintHookEvents · lintHookMatchers).
 - `constants/adapterPaths.ts` · `constants/claudeArtifacts.ts`, `utils/stableJson.ts`, `types/` (AdapterPlan · GeneratedFile · FileOutcome).
 - Node `fs` (existsSync · mkdirSync · readFileSync · writeFileSync · readdirSync) · `path` (join · dirname) — 디스크에 직접 접근하는 유일한 모듈.

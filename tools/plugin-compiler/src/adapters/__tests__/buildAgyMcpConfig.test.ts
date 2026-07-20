@@ -11,6 +11,8 @@ function facts(
     name: "deilen",
     manifest: { name: "deilen" },
     hasSkills: false,
+    agentFiles: {},
+    skillFiles: {},
     hasHooks: false,
     hooksFile: null,
     mcpServers,

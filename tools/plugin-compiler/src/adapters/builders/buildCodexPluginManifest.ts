@@ -1,4 +1,7 @@
-import { CODEX_HOOKS_PATH } from "../../constants/adapterPaths.js";
+import {
+  CODEX_HOOKS_PATH,
+  CODEX_SKILLS_DIR,
+} from "../../constants/adapterPaths.js";
 import {
   CLAUDE_HOOKS_PATH,
   SKILLS_DIRECTORY,
@@ -6,6 +9,7 @@ import {
 import type { PluginFacts } from "../../types/index.js";
 import { buildCodexHooks } from "./buildCodexHooks.js";
 import { buildCodexMcpServers } from "./buildCodexMcpServers.js";
+import { emitsCodexSkillVariant } from "./buildCodexSkills.js";
 
 const COPIED_MANIFEST_FIELDS = [
   "name",
@@ -26,7 +30,12 @@ export function buildCodexPluginManifest(
     if (facts.manifest[field] !== undefined)
       manifest[field] = facts.manifest[field];
 
-  if (facts.hasSkills) manifest.skills = `./${SKILLS_DIRECTORY}/`;
+  // Point Codex at the skill-variant tree when one is emitted (persona spawns
+  // rewritten to self-load), else the shared Claude `skills/`. emitsCodexSkillVariant
+  // is the single source of that decision — the pipeline emits the tree on the
+  // same test, so manifest and tree never disagree.
+  if (facts.hasSkills)
+    manifest.skills = `./${emitsCodexSkillVariant(facts) ? CODEX_SKILLS_DIR : SKILLS_DIRECTORY}/`;
   // Point Codex at its own Bash-extended hooks copy when one is emitted (a
   // read-catching matcher), else the shared Claude file. buildCodexHooks is the
   // single source of that decision — the pipeline emits the file on the same test.

@@ -11,6 +11,8 @@ import type {
   McpServerSource,
   PluginFacts,
 } from "../../types/index.js";
+import { readAgentFiles } from "./readAgentFiles.js";
+import { readSkillFiles } from "./readSkillFiles.js";
 
 export function readPluginFacts(directory: string): PluginFacts {
   const manifestPath = join(directory, CLAUDE_MANIFEST_PATH);
@@ -45,5 +47,7 @@ export function readPluginFacts(directory: string): PluginFacts {
     hasHooks,
     hooksFile,
     mcpServers,
+    agentFiles: readAgentFiles(directory),
+    skillFiles: readSkillFiles(directory),
   };
 }

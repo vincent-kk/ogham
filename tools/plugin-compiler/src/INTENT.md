@@ -35,7 +35,7 @@
 
 ### Never do
 
-- Claude 소비 파일 쓰기 — 쓰기 대상은 어댑터 4종 상수로 한정.
+- Claude 소비 파일 쓰기 — 쓰기 대상은 어댑터 경로 상수로 한정.
 - `adapters/`·`lint/`·`cli/` 에서의 디스크 I/O.
 
 ## Dependencies

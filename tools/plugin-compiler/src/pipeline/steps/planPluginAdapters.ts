@@ -4,6 +4,7 @@ import {
   buildAgyMcpConfig,
   buildCodexHooks,
   buildCodexPluginManifest,
+  buildCodexSkills,
 } from "../../adapters/index.js";
 import {
   AGY_HOOKS_PATH,
@@ -54,6 +55,15 @@ export function planPluginAdapters(directory: string): AdapterPlan {
         absolutePath: join(directory, CODEX_HOOKS_PATH),
         content: stableJson(codexHooks),
       });
+    // Codex skill variant: a whole `.codex-plugin/skills/` tree of raw markdown
+    // (not stableJson — these are copied/rewritten skill files, not JSON).
+    const codexSkills = buildCodexSkills(facts);
+    if (codexSkills)
+      for (const { relativePath, content } of codexSkills)
+        files.push({
+          absolutePath: join(directory, relativePath),
+          content,
+        });
     return { files, diagnostics };
   } catch (error) {
     diagnostics.push({

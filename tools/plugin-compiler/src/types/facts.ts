@@ -8,6 +8,14 @@ export interface PluginFacts {
   hasHooks: boolean;
   hooksFile: HooksFileSource | null;
   mcpServers: Record<string, McpServerSource> | null;
+  /** `agents/*.md` basename → file content. Empty when the plugin has no `agents/` dir. */
+  agentFiles: Record<string, string>;
+  /**
+   * Every file under `skills/`, keyed by its POSIX path relative to `skills/`.
+   * Empty when the plugin has no `skills/` dir. Feeds the Codex skill-variant
+   * copy-all + persona-spawn rewrite (`buildCodexSkills`).
+   */
+  skillFiles: Record<string, string>;
 }
 
 export interface MarketplacePluginFacts {

@@ -9,6 +9,8 @@ function facts(hooksFile: HooksFileSource | null): PluginFacts {
     name: "maencof",
     manifest: { name: "maencof" },
     hasSkills: false,
+    agentFiles: {},
+    skillFiles: {},
     hasHooks: hooksFile !== null,
     hooksFile,
     mcpServers: null,

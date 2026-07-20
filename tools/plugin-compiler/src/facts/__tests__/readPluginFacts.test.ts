@@ -16,9 +16,13 @@ afterEach(() => {
 });
 
 function writeJson(relativePath: string, value: unknown): void {
+  writeFile(relativePath, JSON.stringify(value));
+}
+
+function writeFile(relativePath: string, content: string): void {
   const path = join(pluginDirectory, relativePath);
   mkdirSync(join(path, ".."), { recursive: true });
-  writeFileSync(path, JSON.stringify(value), "utf8");
+  writeFileSync(path, content, "utf8");
 }
 
 function writeManifest(
@@ -43,6 +47,8 @@ describe("readPluginFacts", () => {
     expect(facts.hasSkills).toBe(false);
     expect(facts.hasHooks).toBe(false);
     expect(facts.mcpServers).toBeNull();
+    expect(facts.agentFiles).toEqual({});
+    expect(facts.skillFiles).toEqual({});
   });
 
   it("throws when the manifest has no name", () => {
@@ -58,6 +64,27 @@ describe("readPluginFacts", () => {
     writeManifest();
     mkdirSync(join(pluginDirectory, "skills"), { recursive: true });
     expect(readPluginFacts(pluginDirectory).hasSkills).toBe(true);
+  });
+
+  it("reads agents/*.md into agentFiles, ignoring non-markdown", () => {
+    writeManifest();
+    writeFile("agents/code-surgeon.md", "PERSONA A");
+    writeFile("agents/adjudicator.md", "PERSONA B");
+    writeFile("agents/README.txt", "ignored");
+    expect(readPluginFacts(pluginDirectory).agentFiles).toEqual({
+      "code-surgeon.md": "PERSONA A",
+      "adjudicator.md": "PERSONA B",
+    });
+  });
+
+  it("reads skills/ recursively into skillFiles with POSIX keys", () => {
+    writeManifest();
+    writeFile("skills/cross-review/SKILL.md", "top");
+    writeFile("skills/cross-review/phases/evidence.md", "nested");
+    expect(readPluginFacts(pluginDirectory).skillFiles).toEqual({
+      "cross-review/SKILL.md": "top",
+      "cross-review/phases/evidence.md": "nested",
+    });
   });
 
   it("loads the hooks file when present", () => {

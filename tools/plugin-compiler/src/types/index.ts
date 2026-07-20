@@ -10,6 +10,7 @@ export type {
 } from "./facts.js";
 export type {
   AdapterPlan,
+  CodexSkillFile,
   Diagnostic,
   DiagnosticLevel,
   FileAction,

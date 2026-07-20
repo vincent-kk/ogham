@@ -4,10 +4,12 @@ Claude 정본(플러그인 산출물·루트 마켓플레이스)을 **읽기 전
 
 ## Structure
 
-| Path                           | Role                                                        |
-| ------------------------------ | ----------------------------------------------------------- |
-| `read/readPluginFacts.ts`      | 플러그인 디렉터리 → PluginFacts (manifest·mcp·hooks·skills) |
-| `read/readMarketplaceFacts.ts` | 저장소 루트 → MarketplaceFacts (이름·플러그인 항목)         |
+| Path                           | Role                                                               |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `read/readPluginFacts.ts`      | 플러그인 디렉터리 → PluginFacts (manifest·mcp·hooks·skills·agents) |
+| `read/readMarketplaceFacts.ts` | 저장소 루트 → MarketplaceFacts (이름·플러그인 항목)                |
+| `read/readAgentFiles.ts`       | `agents/*.md` → basename→내용 (페르소나 원본)                      |
+| `read/readSkillFiles.ts`       | `skills/**` → POSIX 상대경로→내용 (재귀 walk, 파일만)              |
 
 ## Conventions
 

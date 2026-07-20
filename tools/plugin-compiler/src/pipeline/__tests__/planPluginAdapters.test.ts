@@ -16,9 +16,13 @@ afterEach(() => {
 });
 
 function writeJson(relativePath: string, value: unknown): void {
+  writeFile(relativePath, JSON.stringify(value));
+}
+
+function writeFile(relativePath: string, content: string): void {
   const path = join(pluginDirectory, relativePath);
   mkdirSync(join(path, ".."), { recursive: true });
-  writeFileSync(path, JSON.stringify(value), "utf8");
+  writeFileSync(path, content, "utf8");
 }
 
 /** Forward-slash a path so assertions hold on Windows (join yields backslashes). */
@@ -168,5 +172,41 @@ describe("planPluginAdapters", () => {
       },
     });
     expect(emittedPaths()).not.toContain("hooks.json");
+  });
+
+  it("emits a Codex skill variant + repoints skills for an opted-in plugin", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "filid" });
+    writeFile(
+      "skills/resolve/SKILL.md",
+      'spawn `subagent_type: "filid:code-surgeon"`',
+    );
+    writeFile("skills/resolve/contracts.md", "plain copy");
+    writeFile("agents/code-surgeon.md", "PERSONA");
+    const { files } = planPluginAdapters(pluginDirectory);
+    const paths = files.map((f) =>
+      norm(f.absolutePath.slice(pluginDirectory.length + 1)),
+    );
+    expect(paths).toContain(".codex-plugin/skills/resolve/SKILL.md");
+    expect(paths).toContain(".codex-plugin/skills/resolve/contracts.md");
+    expect(paths).toContain(
+      ".codex-plugin/skills/_shared/personas/code-surgeon.md",
+    );
+
+    const manifest = files.find((f) =>
+      norm(f.absolutePath).endsWith(".codex-plugin/plugin.json"),
+    );
+    expect(manifest?.content).toContain('"skills": "./.codex-plugin/skills/"');
+
+    const skill = files.find((f) =>
+      norm(f.absolutePath).endsWith(".codex-plugin/skills/resolve/SKILL.md"),
+    );
+    expect(skill?.content).toContain("codex-persona-spawn");
+    // a non-spawn sibling is copied byte-for-byte
+    const contracts = files.find((f) =>
+      norm(f.absolutePath).endsWith(
+        ".codex-plugin/skills/resolve/contracts.md",
+      ),
+    );
+    expect(contracts?.content).toBe("plain copy");
   });
 });
