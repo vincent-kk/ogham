@@ -12,7 +12,7 @@
     "claude-code",
     "plugin"
   ],
-  "skills": "./skills/",
+  "skills": "./.codex-plugin/skills/",
   "hooks": "./.codex-plugin/hooks.json",
   "mcpServers": {
     "imbas": {

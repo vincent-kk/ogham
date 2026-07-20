@@ -19,12 +19,19 @@ import {
  * — a `${CLAUDE_PLUGIN_ROOT}`/Glob fallback or a `../_shared/` ref (copied along),
  * NOT an actionable `../../agents/` persona path.
  *
- * - filid: registry spawns; sibling refs via `${CLAUDE_PLUGIN_ROOT}`+Glob. Live
- *   E2E confirmed (codex-cli 0.144.6).
+ * - filid, imbas: registry spawns; live E2E confirmed (codex-cli 0.144.6) —
+ *   filid at depth-1, imbas at depth-2. imbas's `agents/*.md` refs are schema
+ *   doc pointers, self-satisfied by the self-loaded persona (not an actionable
+ *   load path).
  * - entrez, r-statistics: registry spawns, no actionable `../../agents/` path;
  *   sibling refs via `../_shared/` (copied along) or none. Static-verified.
  */
-const VARIANT_ENABLED_PLUGINS = new Set(["filid", "entrez", "r-statistics"]);
+const VARIANT_ENABLED_PLUGINS = new Set([
+  "filid",
+  "entrez",
+  "r-statistics",
+  "imbas",
+]);
 
 /**
  * Whether this plugin emits a Codex skill variant: opted in, has personas, and
