@@ -6,6 +6,87 @@
 
 ---
 
+# 세션 재개 — 여기부터 읽으세요
+
+**2026-07-23 기준. 브랜치 `feature/97-98`.**
+
+플러그인의 **런타임은 전부 동작합니다** — 빌드·MCP·설정 UI·훅·스킬. 아직 없는 것은 **규칙 본문 자체**뿐이고, 그것이 다음 작업(Phase 0)입니다.
+
+## 지금 상태
+
+|            |                                                                     |
+| ---------- | ------------------------------------------------------------------- |
+| 동작       | `yarn seiri build` green · 설정 페이지 배포/해제 왕복 · 훅 2개 번들 |
+| 테스트     | `yarn seiri test:run` **45 passed** (5 파일)                        |
+| 타입       | `yarn typecheck` — 9 워크스페이스 clean (seiri 등록 완료)           |
+| 린트       | `yarn lint` clean                                                   |
+| filid 회귀 | `yarn filid test:run` **1183 passed / 5 skipped**                   |
+| 배포 규칙  | **0개** — `templates/rules/manifest.json` 의 `rules` 가 빈 배열     |
+
+## 이 브랜치의 커밋 (오래된 것부터)
+
+```
+78e86f77 feat(seiri): introduce foundational documents ...   ← 설계 원장
+0f8493b4 feat(seiri): initialize seiri plugin ...            ← 스캐폴드
+e520f304 feat(filid): add refactoring safety contract to code-editing agents
+fd834444 chore(seiri): wire the plugin into the monorepo
+e16cacdb feat(seiri): add rule-hash sync and the rule manifest
+aacea609 feat(seiri): add config and rule-doc core
+2b391aeb style(seiri): normalize design ledger markdown
+dbcd4740 feat(seiri): add SessionStart and InstructionsLoaded hooks
+5cfb35f4 feat(seiri): add the MCP layer and the settings page
+19086afd feat(seiri): add the four skills and package documentation
+```
+
+SHA 는 rebase·amend 로 바뀝니다. 어긋나면 `git log --format='%h %s' main..HEAD` 로
+다시 확인하세요 — 제목 줄이 안정된 식별자입니다.
+
+**미커밋**: `plugins/seiri/bridge/` · `plugins/seiri/public/` (빌드 산출물 — **사용자가 직접 커밋**하는 저장소 규약. AI 는 `src/`·`skills/`·문서만 커밋).
+
+## 이미 있는 테스트 45건 — 무엇을 지키는가
+
+| 파일                                                      | 건수 | 지키는 것                                                                              |
+| --------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------- |
+| `src/core/ruleDocs/__tests__/decideRuleDocAction.test.ts` | 11   | 배포·제거·드리프트 판정 전체. **resync 없이는 로컬 편집을 덮지 않는다**가 핵심         |
+| `src/hooks/setup/__tests__/renderStatusLines.test.ts`     | 11   | 배포 0건이면 무주입 · 다이얼별 렌더 분량 · 규칙 본문 비복제                            |
+| `src/mcp/tools/openSettings/__tests__/webServer.test.ts`  | 11   | 실제 HTTP 왕복 — 토큰 가드 · 상태 주입 · **plan 과 save 의 결과 일치** · 드리프트 보존 |
+| `src/__tests__/wiring.test.ts`                            | 10   | 언어 경계를 넘는 계약 (상수 ↔ `hooks.json` ↔ 빌드 스크립트 ↔ HTML/JS)                  |
+| `src/__tests__/size.test.ts`                              | 3    | 스킬 2KB · 규칙 200줄 · 배포 스킬 목록                                                 |
+
+이 테스트들은 전부 **일부러 깨뜨려 red 를 확인**한 것들입니다 (판정 가드 제거·상태 주입 제거·훅 이름 불일치·스킬 200B 추가). 새 테스트를 추가할 때도 같은 절차를 밟으세요 — 실패를 본 적 없는 테스트는 아무것도 증명하지 않습니다.
+
+**아직 없는 테스트**: `rule-lint` (규칙 문서 자체 검사 — Precedence 블록 · `rests on a propert(y|ies)` · 이중 반증 · 임계 금칙 · 러너명 금칙). 검사 대상 규칙이 0개라 A-1c 와 함께 만드는 것이 맞습니다. `hash-fresh` 는 `sync-rule-hashes --check` 를 CI 에서 부르면 되므로 별도 테스트가 필요한지 재검토하세요.
+
+## 다음 작업 = Phase 0 (아래 상세 절 참조)
+
+규칙 9종 초안은 [03-RULES.md](./03-RULES.md) 코드펜스 안에 완성되어 있습니다. Phase 0 은 그중 **어느 것이 실제로 행동을 바꾸는지** 무지침 대조군으로 가리는 작업이며 **코드를 쓰지 않습니다**. 통과한 것만 `templates/rules/` 로 추출합니다.
+
+## 재개 시 알아야 할 함정 5가지
+
+1. **포매팅은 매 턴 끝에 훅이 돌립니다** (`.claude/settings.json` 의 Stop 훅 → `prettier --write --ignore-unknown`). 커밋 전에 같은 명령을 직접 돌려야 커밋과 포매팅 결과가 어긋나지 않습니다.
+2. **훅이 저장소 루트에서 실행되므로 무시 규칙도 루트 `.prettierignore` 만 참조됩니다.** 패키지 레벨 `.prettierignore` 는 효력이 없습니다. 규칙 템플릿 보호(`plugins/*/templates/rules/`)가 루트에 들어가 있는 이유입니다 — 포매팅되면 `templateHash` 가 무효화되어 모든 사용자에게 거짓 드리프트가 뜹니다.
+3. **훅 도달 코드는 배럴 import 금지**입니다. concrete 파일 직접 import 만. typecheck 는 못 잡고 `scripts/build-hooks.mjs` 의 캡·금칙 가드만 잡습니다. 훅 소스를 고쳤으면 반드시 `yarn seiri build:plugin`.
+4. **번들 금칙 정규식은 미니파이 후에도 살아남는 문자열이어야 합니다.** 패키지 이름은 번들링이 지웁니다 (`env-paths` 대신 `XDG_CONFIG_HOME` 을 매칭하는 이유).
+5. **경로는 `@ogham/cross-platform/compat` 경유**, 네이티브 `node:path` 금지. `hostPaths` 는 MCP 전용이고 **훅에서 소비 금지**입니다 (호스트가 훅에 `CLAUDE_PLUGIN_ROOT` 와 cwd 를 직접 줍니다).
+
+---
+
+# 이번 세션의 원장 교정 · 결정
+
+구현 중 실측으로 드러나 정본을 고친 항목입니다.
+
+| #   | 항목                                                              | 결론                                                                                                                                                                                                                                                         |
+| --- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | `.seiri/config.json` 의 "언어"·"활성 규칙" 필드                   | **제거.** 배포 상태의 진실은 `.claude/rules/` 파일시스템이고, 규칙 본문은 영문 고정이라 언어 설정이 쓸 곳이 없습니다. config 가 담는 것은 **다이얼 하나뿐**.                                                                                                 |
+| 2   | `InstructionsLoaded` 의 matcher                                   | **무의미.** 공식 문서 실측 — 이벤트는 실재하나 decision-control 표가 "no matcher support · exit code ignored". 로드 사유는 페이로드로 오므로 훅 안에서 분기합니다. 페이로드의 이벤트별 키는 **문서에 없어 미확정** — 그래서 훅이 페이로드 전체를 기록합니다. |
+| 3   | `SessionStart` matcher                                            | `fork` 추가됨 (`startup`·`resume`·`clear`·`compact`·`fork`). seiri 는 `*` 라 영향 없음.                                                                                                                                                                      |
+| 4   | `core/rules/{manifestLoader,ruleSync,hashCompare}` 3-fractal 구조 | **`core/ruleDocs/` 하나로 통합.** 셋 다 같은 매니페스트·경로를 공유하는 1함수 모듈이라 seiri 자신의 규칙("자식 하나짜리 디렉터리는 방이 아니라 복도")에 걸립니다.                                                                                            |
+| 5   | `src/` ≤1,500줄 목표                                              | **폐지** (사용자 결정). 근거는 [02-ARCHITECTURE.md](./02-ARCHITECTURE.md) 규모 목표 절. 실측 2,199줄(설정 UI 자산 919줄 별도).                                                                                                                               |
+
+**filid 에 없던 보강 1건**: `plan`(dry-run) 경로. 설정 페이지가 저장 전 diff 를 보여줍니다. `plan` 과 `save` 가 같은 본문 스키마와 같은 판정 함수(`decideRuleDocAction`)를 경유하므로 미리보기가 저장이 하지 않을 일을 약속할 수 없습니다.
+
+---
+
 # 브랜치 전략 — 단일 브랜치 통합
 
 seiri 신설(#97)과 filid 슬리밍(#98)을 **하나의 브랜치에서 함께** 진행합니다.
@@ -30,7 +111,7 @@ seiri 신설(#97)과 filid 슬리밍(#98)을 **하나의 브랜치에서 함께*
 한 브랜치 안에서도 **논리적 순서는 유지**합니다 — 히스토리를 읽는 사람이 "왜 filid에서 뺐나"를 알려면 seiri가 먼저 존재해야 합니다.
 
 ```
-0. (완료) 플러그인 스캐폴드                    ← 25f8bd0e
+0. (완료) 플러그인 스캐폴드                    ← 0f8493b4
 1. filid 에이전트 안전 조항 (독립·선행 가능)
 2. seiri 규칙 자산 + manifest + 빌드 스크립트   ← Phase 1
 3. seiri MCP + 설정 UI                        ← Phase 2
@@ -46,19 +127,25 @@ seiri 신설(#97)과 filid 슬리밍(#98)을 **하나의 브랜치에서 함께*
 
 두 트랙이 한 브랜치에서 병행합니다. **트랙 B는 트랙 A의 Phase 1 산출물에 의존**합니다 — seiri 규칙 파일이 확정돼야 filid에서 뺄 것이 확정되기 때문입니다.
 
-| 트랙    | 단계 | 내용                                                                   | 상태          | 선행                      |
-| ------- | ---- | ---------------------------------------------------------------------- | ------------- | ------------------------- |
-| —       | —    | 플러그인 스캐폴드 (`package.json`·tsconfig·`libs/run.cjs`·`.mcp.json`) | ✅ `25f8bd0e` | —                         |
-| **A**   | 0    | 규칙 검증 (micro-test)                                                 | ⏭ **다음**   | —                         |
-| **A**   | 1    | 규칙 자산 + 매니페스트 + 해시 동기화                                   | ⏸             | A-0                       |
-| **A**   | 2    | MCP 서버 — `open_settings` · `rule_docs_sync` + 설정 UI                | ⏸             | A-1                       |
-| **A**   | 3    | 훅 2개 — SessionStart 주입 · InstructionsLoaded 측정                   | ⏸             | A-2                       |
-| **A**   | 4    | 스킬 4개 — setup · brainstorm · interview · debug                      | ⏸             | A-2                       |
-| **B**   | —    | **filid 에이전트 수정**                                                | ⏸             | 없음 — **독립 착수 가능** |
-| **B**   | —    | **filid 룰 정리**                                                      | ⏸             | **A-1**                   |
-| **A+B** | —    | **통합 검증 (머지 게이트)**                                            | ⏸             | 전부                      |
+**Phase 0 을 인프라와 병행**하기로 했습니다 (사용자 결정). 빌드·MCP·훅·UI 는 규칙 내용과 무관하므로 먼저 만들었고, `templates/rules/` 에 실제 규칙을 넣는 시점만 Phase 0 통과에 종속됩니다. 그래서 아래 표에서 **A-1 만 부분 완료**입니다.
 
-**B의 에이전트 수정(B-1~B-3)은 지금 착수해도 됩니다** — seiri와 무관하게 그 자체로 옳은 수정이고(무방비 상태 해소·문서 불일치 정정), 먼저 해두면 룰 이관 시 리스크가 줄어듭니다.
+| 트랙    | 단계  | 내용                                                                   | 상태                                | 선행     |
+| ------- | ----- | ---------------------------------------------------------------------- | ----------------------------------- | -------- |
+| —       | —     | 플러그인 스캐폴드 (`package.json`·tsconfig·`libs/run.cjs`·`.mcp.json`) | ✅ `0f8493b4`                       | —        |
+| **B**   | —     | filid 에이전트 수정 (B-1~B-3)                                          | ✅ `e520f304`                       | 없음     |
+| **A**   | 1a    | 모노레포 배선 + 스캐폴드 보정                                          | ✅ `fd834444`                       | —        |
+| **A**   | 1b    | 빌드 스크립트 4종 + 빈 매니페스트                                      | ✅ `e16cacdb` `dbcd4740` `5cfb35f4` | —        |
+| **A**   | 2     | core — configLoader · ruleDocs                                         | ✅ `aacea609`                       | —        |
+| **A**   | 3     | 훅 2개 — SessionStart 주입 · InstructionsLoaded 측정                   | ✅ `dbcd4740`                       | A-2      |
+| **A**   | 4     | MCP 2개 + 설정 UI (+ `plan` diff)                                      | ✅ `5cfb35f4`                       | A-2      |
+| **A**   | 5     | 스킬 4개 + 패키지 문서                                                 | ✅ `19086afd`                       | A-4      |
+| **A**   | **0** | **규칙 검증 (micro-test)**                                             | ⏭ **다음 — 코드 0줄**              | —        |
+| **A**   | 1c    | 규칙 자산 추출 → `templates/rules/`                                    | ⏸                                   | **A-0**  |
+| **A**   | 6     | `rule-lint` 테스트                                                     | ⏸                                   | A-1c     |
+| **B**   | —     | filid 룰 정리 (B-4)                                                    | ⏸                                   | **A-1c** |
+| **A+B** | —     | 통합 검증 (머지 게이트)                                                | ⏸                                   | 전부     |
+
+**부수 항목** (독립 착수 가능, 순서 무관): `e2e/` Playwright · `templates/gates/` placeholder 골격 · `/filid:scan` 으로 구조 점검.
 
 **설계는 완료됐습니다.** 사상·헌법·구조·규칙 전문 9종·명명까지 확정. 3사 적대 리뷰와 메커니즘 실측을 거쳤습니다.
 
@@ -111,9 +198,34 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 
 **실행 도구**: `/cennad:crosscheck` 또는 개별 provider 호출. 외부 모델에 돌리면 설계 세션과 독립된 판정이 됩니다.
 
+## 재개 절차 — 이 순서로
+
+1. **[03-RULES.md](./03-RULES.md) S1 절을 읽습니다.** 코드펜스 안 영문이 시험 대상이고, 그 위 한국어 "판정 노트"가 **무엇을 겨냥한 규칙인지**를 말해줍니다. S1 은 에이전트 코드 오독 6메커니즘 중 ②암묵 관례·⑤반복 구조 오편집·③이름 함정·①간접 참조를 겨냥합니다.
+2. **유혹 시나리오를 씁니다.** 규칙을 어기고 싶어지는 과제여야 합니다. S1 이라면: 프레임워크가 경로 규약으로 호출하는 파일을 추가하되, 호출 지점이 보이지 않는 상황. 표지판을 빠뜨리는 것이 자연스러운 과제.
+3. **대조군을 먼저 돌립니다** — 규칙 없이 5회. **실패가 안 나오면 거기서 멈추고 그 규칙은 만들지 않습니다.** 이것이 Phase 0 의 전부입니다.
+4. 대조군이 실패를 보이면 규칙을 넣고 5회. **5회 산출물을 사람이 직접 읽습니다** — 규칙 문구를 그대로 반향한 것과 실제로 행동이 바뀐 것은 다릅니다.
+5. **분산을 봅니다.** 5회가 제각각이면 문구가 아니라 형태가 문제입니다 (레시피형/금지형/템플릿형 중 실패 유형에 맞는 형태인지). 말을 더하기 전에 형태를 바꿉니다.
+6. 결과를 [03-RULES.md](./03-RULES.md) 상태표(문서 상단)에 기록합니다.
+
+## 통과 후 — A-1c 규칙 자산 추출
+
+인프라는 이미 완성되어 있으므로 **파일을 놓고 매니페스트에 등재하면 끝**입니다.
+
+- `templates/rules/seiri_<slug>.md` — 03-RULES 코드펜스에서 **무수정 추출** (통과분만)
+- `templates/rules/manifest.json` 의 `rules` 배열에 항목 추가:
+  `id`(=`seiri_<slug>`) · `filename`(=`<id>.md`) · `title` · `description` · `recommended`(권장 3종만 `true`) · `templateHash`(**손대지 말 것 — 빌드가 채웁니다**)
+- `yarn seiri build` → `sync-rule-hashes` 가 해시를 주입
+- `yarn seiri test:run` → `wiring` 이 id/filename 규약을, `size` 가 200줄 상한을 검사
+
+**`required` 필드는 없습니다** (전부 opt-in). **`legacyFilename` 도 없습니다** (신규 플러그인이라 마이그레이션 대상 부재).
+
 ---
 
 # Phase 1 — 규칙 자산 + 매니페스트
+
+> ✅ **인프라 완료** (`fd834444` `e16cacdb`) — 스캐폴드 보정·모노레포 배선·빌드 스크립트 4종·빈 매니페스트.
+> ⏸ **규칙 자산만 남음** — Phase 0 통과분 추출. 절차는 위 "Phase 0 › 통과 후" 절 참조.
+> 아래 체크리스트는 원안이며, 남은 항목은 `templates/rules/seiri_*.md` · `templates/gates/` · `templates/INTENT.md` 뿐입니다.
 
 **목적**: 배포할 것을 확정하고, 해시 자동화를 세웁니다. **트랙 B의 룰 정리가 여기에 의존합니다.**
 
@@ -167,6 +279,11 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 
 # Phase 2 — MCP 서버 + 설정 UI
 
+> ✅ **완료** (`aacea609` core · `5cfb35f4` MCP+UI). 구조는 원안과 둘 다릅니다:
+> `core/rules/{manifestLoader,ruleSync,hashCompare}` 3-fractal → **`core/ruleDocs/` 단일 fractal**,
+> 그리고 filid 에 없는 **`plan`(dry-run) 경로 + `/plan` 엔드포인트**가 추가되었습니다.
+> ⏸ 남은 것: `e2e/` Playwright (서버 왕복은 `src/mcp/tools/openSettings/__tests__/webServer.test.ts` 11건이 이미 검증 — 남은 것은 브라우저 페이지 자체).
+
 **목적**: 규칙이 대상 저장소에 안전하게 도달하는 경로.
 
 | 항목          | 내용                                                                          |
@@ -208,13 +325,18 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 
 # Phase 3 — 훅 2개
 
+> ✅ **완료** (`dbcd4740`). 번들 실측: `setup.mjs` 4,445 B · `instructions-loaded.mjs` 2,257 B, 캡 16 KB 단일 light 티어.
+> filid 와 달리 `selfProbe` 를 쓰지 않아 cross-spawn 이 인라인되지 않습니다 (탐지할 외부 바이너리가 없음).
+> **선행 실측 2건 중 1건 해소** — matcher 무의미 확인. 페이로드 스키마는 여전히 미확정이라 훅이 페이로드 전체를 기록합니다.
+> ⏸ 남은 것: 실사용 세션에서 `~/.claude/plugins/seiri/instructions-loaded.jsonl` 을 읽어 **실제 페이로드 형태 확인** · 규칙의 컴팩션 생존 여부.
+
 **목적**: 상태 요약 주입과 효능 측정.
 
-| 항목          | 내용                                                               |
-| ------------- | ------------------------------------------------------------------ |
-| 착수 조건     | Phase 2 완료                                                       |
-| 완료 조건     | 다이얼 3단이 렌더를 바꾸고 배포 문서는 불변. 로드 로그가 남음      |
-| **중단 조건** | `src/`가 1,500줄을 넘으면 → 기능을 덜어냅니다(역할 밖 목록 재적용) |
+| 항목          | 내용                                                                                                                          |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 착수 조건     | Phase 2 완료                                                                                                                  |
+| 완료 조건     | 다이얼 3단이 렌더를 바꾸고 배포 문서는 불변. 로드 로그가 남음                                                                 |
+| **중단 조건** | ~~`src/` 1,500줄~~ → **폐지** (위 "원장 교정 · 결정" 5번). 대형화 신호는 도구·훅·에이전트 개수와 역할 밖 목록 위반으로 봅니다 |
 
 ## 선행 실측 2건
 
@@ -243,6 +365,11 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 ---
 
 # Phase 4 — 스킬 4개
+
+> ✅ **완료** (`19086afd`). 네 스킬 모두 2 KB 이내 (2038·2044·2046·2046 B) — 초안은 전부 초과했고 여러 번 깎아 맞췄습니다.
+> 상한은 `src/__tests__/size.test.ts` 가 기계 검사하고, 예산 값은 `src/constants/budgets.ts` 에 있습니다.
+> 프론트매터는 `user_invocable` + `disable-model-invocation`(호출형 3종) / `disallowed-tools: AskUserQuestion`(debug).
+> ⏸ 남은 검증: **`/context` 에서 호출형 스킬 description 이 실제로 안 보이는지** — "상시 비용 0" 은 원장의 주장이지 아직 측정되지 않았습니다. 자동 스킬(debug)이 질문하지 않는지도 유도 시나리오로 실측 필요.
 
 **목적**: 대화형 도구와 자동 절차. 상시 예산을 늘리지 않습니다.
 
@@ -334,6 +461,10 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 - [ ] 제거 항목의 `templateHash` 정리
 
 ## B. filid 에이전트 수정 — 이관 리스크 대응
+
+> ✅ **B-1 ~ B-3 완료** (`e520f304`). `restructurer.md` 와 `code-surgeon.md` 에 "Refactoring Safety Contract" 절 신설, `implementer.md` 의 3+12 표현 2곳 정정.
+> 회귀 확인: `yarn filid test:run` 1183 passed / 5 skipped.
+> **주의**: `docsLanguage.test.ts` 의 SCOPE 는 qa-reviewer·engineering-architect·operations-sre 셋뿐이라 이 세 파일을 검사하지 않습니다 — 그 테스트 통과는 이 변경의 증거가 아닙니다.
 
 ### B-1. ❗ `agents/restructurer.md` — 리팩토링 안전 조항 **신설**
 
