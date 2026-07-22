@@ -7,7 +7,6 @@
  * 도는 세션마다 거짓 "some hooks may not work" 가 주입되므로 advisory 대상에서
  * 제외한다 (node/git/PATH 실패만 실제 행동 가능 신호).
  */
-
 import { errorLogPath } from '@ogham/cross-platform/error-log';
 
 const IGNORED_PROBE_ERRORS = new Set(['CLAUDE_PLUGIN_ROOT not set']);

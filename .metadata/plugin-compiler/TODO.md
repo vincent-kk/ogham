@@ -11,7 +11,7 @@
 
 | 커밋       | 내용                                                                                          |
 | ---------- | --------------------------------------------------------------------------------------------- |
-| `541f8877` | 1차 봉합 — `stateRoot()` 가 훅에서도 Codex 감지, `errorLog`·imbas setup 을 `pluginCache` 경유   |
+| `541f8877` | 1차 봉합 — `stateRoot()` 가 훅에서도 Codex 감지, `errorLog`·imbas setup 을 `pluginCache` 경유 |
 | `40b9a805` | `hostRegistry` 신설 — 호스트 지식 단일 진실원, `paths` 에서 호스트 리터럴 제거, agy 명시적 행 |
 | `3ae5d9cb` | 런타임 산출물(`bridge/`) 동기화 + filid HEAVY 훅 캡 28→32KB (근거 주석 병기)                  |
 | `4161a5d9` | 호스트 정식 data 영역을 쓰지 않는 근거를 `paths/INTENT.md`·`types.ts` 에 기록                 |
