@@ -6,17 +6,17 @@
 
 ## 상태표
 
-| # | 파일 | 형식 층 | 형태 | 상태 |
-|---|---|---|---|---|
-| S1 | `seiri_agent-legible.md` | L0·L1 | 레시피 | 초안 v1 |
-| S2 | `seiri_public-contract.md` | L2 | 레시피 | 초안 v1 |
-| S3 | `seiri_test-validity.md` | L4 | 혼합 | 초안 v1 |
-| S4 | `seiri_reuse-first.md` | L3 | 레시피 | 초안 v1 |
-| S5 | `seiri_naming.md` | L0 | 레시피(발견 위임) | 초안 v1 |
-| S6 | `seiri_structure.md` | L0·L1 | 방향형 | 초안 v1 |
-| S7 | `seiri_context-efficiency.md` | 6층 예외 | 레시피 | 초안 v1 |
-| S8 | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | 초안 v1 |
-| S9 | `seiri_decision-trail.md` | L5 | 템플릿 슬롯 | 초안 v1 (편입 미정) |
+| #   | 파일                            | 형식 층  | 형태              | 상태                |
+| --- | ------------------------------- | -------- | ----------------- | ------------------- |
+| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | 초안 v1             |
+| S2  | `seiri_public-contract.md`      | L2       | 레시피            | 초안 v1             |
+| S3  | `seiri_test-validity.md`        | L4       | 혼합              | 초안 v1             |
+| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | 초안 v1             |
+| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | 초안 v1             |
+| S6  | `seiri_structure.md`            | L0·L1    | 방향형            | 초안 v1             |
+| S7  | `seiri_context-efficiency.md`   | 6층 예외 | 레시피            | 초안 v1             |
+| S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | 초안 v1             |
+| S9  | `seiri_decision-trail.md`       | L5       | 템플릿 슬롯       | 초안 v1 (편입 미정) |
 
 **공통 검증**: 전 규칙에 우선순위 사슬·형식 근거·이중 반증 적용. 임계 숫자 0건, 언어 특정 예시 0건, 각 200줄 미만.
 
@@ -36,7 +36,7 @@
 > higher source wins and this rule yields.
 ```
 
-**근거**: 공식 — *"두 규칙이 모순되면 Claude는 임의로 하나를 고를 수 있다."* 텍스트로 못 박는 것 외에 수단이 없습니다.
+**근거**: 공식 — _"두 규칙이 모순되면 Claude는 임의로 하나를 고를 수 있다."_ 텍스트로 못 박는 것 외에 수단이 없습니다.
 **배치**: 제목 바로 아래, 목적 문단보다 **앞**.
 
 ## B2. 하방 개방 — 임계가 필요한 규칙
@@ -91,7 +91,7 @@ Applies when: <관측 가능한 술어>.
 - ✅ `Applies when: the change is intended to land in version control.`
 - ❌ `This rule does not apply to throwaway code.` — **예외 조항 금지**
 
-**근거**: 실측 — *"예외 조항은 스코프하지 않는다"*, *"뉘앙스 조항 하나가 일관된 결과를 노이즈로 무너뜨렸다."*
+**근거**: 실측 — _"예외 조항은 스코프하지 않는다"_, _"뉘앙스 조항 하나가 일관된 결과를 노이즈로 무너뜨렸다."_
 
 ## B8. 거부권 조항 — 호출 스킬 전용
 
@@ -108,7 +108,7 @@ This skill was invoked automatically. Do not ask the user questions. When a
 choice is needed, take the conservative default and state the choice in one line.
 ```
 
-+ frontmatter `disallowed-tools: AskUserQuestion`
+- frontmatter `disallowed-tools: AskUserQuestion`
 
 ---
 
@@ -126,16 +126,19 @@ choice is needed, take the conservative default and state the choice in one line
 [B7 스코프 조건문]
 
 ## 1. <볼드 한 줄 명령>
+
 <불릿>
 Ask yourself: "<행동 앵커>"
 
 ## 2. …
 
 ---
+
 [B6 이중 반증]
 ```
 
 **규율**
+
 - **200줄 미만**
 - 원칙 문장은 6층 어휘로만, 예시는 의사코드·구조 서술
 - **작성 전 실패 유형을 분류**합니다: 규율 위반형이면 금지+합리화표, **형태 오류형이면 긍정형 레시피**(금지문은 역효과), 요소 누락형이면 템플릿 슬롯, 조건 의존형이면 조건문
@@ -148,7 +151,7 @@ Ask yourself: "<행동 앵커>"
 
 ## S1. `seiri_agent-legible.md` — seiri의 존재 이유
 
-**판정 노트**: 에이전트 코드 오독 6메커니즘 중 ②(암묵 관례)·⑤(반복 구조 오편집)·③(이름·위치 함정)·①(간접 참조)을 겨냥. 두 선례 어디에도 독립 규칙으로 없던 자리. 형태: 작성자가 표지판을 *빠뜨리는* 실패이므로 긍정형 레시피.
+**판정 노트**: 에이전트 코드 오독 6메커니즘 중 ②(암묵 관례)·⑤(반복 구조 오편집)·③(이름·위치 함정)·①(간접 참조)을 겨냥. 두 선례 어디에도 독립 규칙으로 없던 자리. 형태: 작성자가 표지판을 _빠뜨리는_ 실패이므로 긍정형 레시피.
 
 ```markdown
 # Agent-Legible Code
@@ -243,6 +246,7 @@ Ask yourself: "Can I state what this file does without opening a second
 file?"
 
 ---
+
 **This rule is working if:** edits land on the intended instance on the
 first attempt; a new file's run-conditions can be stated from the file
 alone; plain text search finds a feature's wiring.
@@ -252,7 +256,7 @@ the framework — label framework conventions and leave them standing.
 
 ## S2. `seiri_public-contract.md`
 
-**판정 노트**: filid의 배럴 규칙·진입점 규칙·재사용 규칙 §5를 병합 승격. 경계의 *형태*(`index.ts` 여부, 적용 대상, 외부/내부 import 구분)는 filid 잔류 — seiri는 "무엇을 공개하는가"만 다룹니다.
+**판정 노트**: filid의 배럴 규칙·진입점 규칙·재사용 규칙 §5를 병합 승격. 경계의 _형태_(`index.ts` 여부, 적용 대상, 외부/내부 import 구분)는 filid 잔류 — seiri는 "무엇을 공개하는가"만 다룹니다.
 
 ```markdown
 # Public Contract
@@ -325,6 +329,7 @@ Ask yourself: "What breaks at runtime if I change this export's shape —
 and would any import have warned me?"
 
 ---
+
 **This rule is working if:** the public surface can be enumerated by
 reading entry points; removing an internal symbol breaks no consumer;
 review diffs show contract changes as changed lines in an export list.
@@ -435,6 +440,7 @@ Ask yourself: "Which test breaks if I remove this line?"
 Ask yourself: "Is this file accumulating cases, or organizing them?"
 
 ---
+
 **This rule is working if:** your tests fail before your fixes and pass
 after; snapshot diffs are explained; skipped tests say why; deleting any
 part of a fix turns something red.
@@ -529,6 +535,7 @@ Ask yourself: "How will I know — mechanically — that I am done?"
 Ask yourself: "If this file grows one more export, should it split?"
 
 ---
+
 **This rule is working if:** diffs read as direct answers to their
 requests; new code is hard to tell apart from the code around it; the
 utility you almost wrote turns out to already exist, found.
@@ -611,6 +618,7 @@ Ask yourself: "Could a stranger guess what does NOT belong in this file?"
 Ask yourself: "From this file's name, can I find the file it serves?"
 
 ---
+
 **This rule is working if:** you can locate a feature by guessing its
 name; new files look native to their directory; a rename never leaves
 orphaned companions behind.
@@ -694,6 +702,7 @@ Ask yourself: "What part of this file keeps attracting changes — and is
 it the same part I opened it for?"
 
 ---
+
 **This rule is working if:** following a call chain rarely reverses
 direction; finding code takes few hops; splits land at seams reviewers
 recognize without explanation.
@@ -771,6 +780,7 @@ Ask yourself: "What new fact will this read give me that the last one
 didn't?"
 
 ---
+
 **This rule is working if:** generated directories never appear in your
 edits; long outputs are quoted from capture files; every re-read can
 name its reason.
@@ -865,16 +875,16 @@ expected?"
 
 ## Rationalizations
 
-| Excuse | Reality |
-|---|---|
-| "Should work now" | Run the verification. |
-| "I'm confident" | Confidence is not evidence. |
-| "Too simple to test" | Simple changes break builds too. |
-| "The linter passed" | The linter is not the build, the build is not the suite. |
-| "I already did this manually" | Unrecorded checks cannot be re-run or cited. |
-| "Just this once" | This once is every time under pressure. |
-| "I followed the spirit" | The letter IS the spirit. |
-| "Deleting X hours feels wasteful" | Keeping unverified work is the waste. |
+| Excuse                            | Reality                                                  |
+| --------------------------------- | -------------------------------------------------------- |
+| "Should work now"                 | Run the verification.                                    |
+| "I'm confident"                   | Confidence is not evidence.                              |
+| "Too simple to test"              | Simple changes break builds too.                         |
+| "The linter passed"               | The linter is not the build, the build is not the suite. |
+| "I already did this manually"     | Unrecorded checks cannot be re-run or cited.             |
+| "Just this once"                  | This once is every time under pressure.                  |
+| "I followed the spirit"           | The letter IS the spirit.                                |
+| "Deleting X hours feels wasteful" | Keeping unverified work is the waste.                    |
 
 ## Red flags — stop and verify
 
@@ -883,6 +893,7 @@ success without fresh output · a fix touching the same symptom a second
 time · wanting the task to be over.
 
 ---
+
 **This rule is working if:** claims cite tool output; pushback comes with
 reasoning; fixes do not reappear in new places; skipped checks are
 skipped out loud.
@@ -967,6 +978,7 @@ Ask yourself: "Would I be comfortable with this line in a public fork?"
 Ask yourself: "After the squash, does the remaining message still say why?"
 
 ---
+
 **This rule is working if:** history answers "why is it this way?" for
 surprising code; future changes cite recorded constraints instead of
 re-deriving them; no trailer has ever needed redaction.
