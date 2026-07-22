@@ -2,3 +2,9 @@ bridge/
 scripts/
 dist/
 node_modules/
+
+# Rule templates are hashed byte-for-byte into templates/rules/manifest.json
+# by scripts/sync-rule-hashes.mjs. A formatter pass here would change those
+# bytes, invalidate every templateHash, and make each user's already-deployed
+# copy report as local drift.
+templates/rules/

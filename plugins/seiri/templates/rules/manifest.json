@@ -1,0 +1,5 @@
+{
+  "_comment": "Injectable rule docs manifest. Drives optional rule file deployment from the setup surfaces (settings page / rule_docs_sync). Never read by session hooks. Every entry is opt-in — seiri has no required rules.",
+  "version": "1.0",
+  "rules": []
+}
