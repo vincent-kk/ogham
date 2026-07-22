@@ -9,6 +9,7 @@ function status(overrides: Partial<RuleDocStatus> = {}): RuleDocStatus {
     filename: 'seiri_agent-legible.md',
     title: 'Agent-Legible Code',
     description: 'signposting rules',
+    recommended: true,
     deployed: true,
     templateHash: 'a'.repeat(64),
     deployedHash: 'a'.repeat(64),
@@ -89,14 +90,14 @@ describe('renderStatusLines', () => {
       'advisory',
       'config.json is not valid JSON',
     );
-    expect(lines.some((line) => line.includes('Ignored .seiri/config.json'))).toBe(
-      true,
-    );
+    expect(
+      lines.some((line) => line.includes('Ignored .seiri/config.json')),
+    ).toBe(true);
   });
 
   it('keeps the default render short enough to stay cheap', () => {
-    expect(renderStatusLines([status()], 'advisory').length).toBeLessThanOrEqual(
-      2,
-    );
+    expect(
+      renderStatusLines([status()], 'advisory').length,
+    ).toBeLessThanOrEqual(2);
   });
 });

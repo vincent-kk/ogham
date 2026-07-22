@@ -5,6 +5,13 @@ export interface RuleDocEntry {
   title: string;
   description: string;
   /**
+   * Offered pre-checked to a project that has deployed nothing yet.
+   * A suggestion, not a requirement — seiri has no required rules, because
+   * a rule applied without being chosen is the kind of blanket enforcement
+   * the plugin exists to avoid.
+   */
+  recommended?: boolean;
+  /**
    * SHA-256 hex digest of the template shipped in
    * `templates/rules/<filename>`, injected by
    * `scripts/sync-rule-hashes.mjs` at build time. The runtime compares it
@@ -25,6 +32,8 @@ export interface RuleDocStatus {
   filename: string;
   title: string;
   description: string;
+  /** Mirrors the manifest; drives the pre-checked default on a fresh project. */
+  recommended: boolean;
   /** File currently exists under `.claude/rules/`. */
   deployed: boolean;
   /** SHA-256 hex of the plugin-shipped template. Mirrors the manifest. */

@@ -1,5 +1,10 @@
+import { INJECTION_PREFIX, RULE_ID_PREFIX } from '../../../constants/plugin.js';
 import type { InterventionLevel } from '../../../types/config.js';
 import type { RuleDocStatus } from '../../../types/manifest.js';
+
+const RULES_DIR_LABEL = '.claude/rules/';
+const CONFIG_LABEL = '.seiri/config.json';
+const SETUP_COMMAND = '/seiri:setup';
 
 /**
  * Build the SessionStart injection.
@@ -24,32 +29,34 @@ export function renderStatusLines(
 
   const names = deployed.map((status) => shortName(status.id)).join(', ');
   const lines = [
-    `[seiri] Active rules: ${names} (${deployed.length}/${statuses.length}) — .claude/rules/`,
+    `${INJECTION_PREFIX} Active rules: ${names} (${deployed.length}/${statuses.length}) — ${RULES_DIR_LABEL}`,
   ];
 
   if (intervention !== 'advisory')
-    lines.push(`[seiri] Intervention: ${intervention}`);
+    lines.push(`${INJECTION_PREFIX} Intervention: ${intervention}`);
 
   if (intervention === 'strict')
     lines.push(
-      '[seiri] Precedence: repository instructions > repository conventions > these rules.',
+      `${INJECTION_PREFIX} Precedence: repository instructions > repository conventions > these rules.`,
     );
 
   const drifted = deployed.filter((status) => !status.inSync);
   if (drifted.length > 0)
     lines.push(
-      `[seiri] ${drifted.length} rule(s) differ from the shipped template: ${drifted
+      `${INJECTION_PREFIX} ${drifted.length} rule(s) differ from the shipped template: ${drifted
         .map((status) => shortName(status.id))
-        .join(', ')}. Run /seiri:setup to review.`,
+        .join(', ')}. Run ${SETUP_COMMAND} to review.`,
     );
 
   if (configWarning)
-    lines.push(`[seiri] Ignored .seiri/config.json — ${configWarning}.`);
+    lines.push(
+      `${INJECTION_PREFIX} Ignored ${CONFIG_LABEL} — ${configWarning}.`,
+    );
 
   return lines;
 }
 
 /** `seiri_agent-legible` reads as `agent-legible` once the source is known. */
 function shortName(id: string): string {
-  return id.startsWith('seiri_') ? id.slice('seiri_'.length) : id;
+  return id.startsWith(RULE_ID_PREFIX) ? id.slice(RULE_ID_PREFIX.length) : id;
 }

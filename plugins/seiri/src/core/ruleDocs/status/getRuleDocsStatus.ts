@@ -30,6 +30,7 @@ export function getRuleDocsStatus(
       filename: entry.filename,
       title: entry.title,
       description: entry.description,
+      recommended: entry.recommended === true,
       deployed,
       templateHash: entry.templateHash,
       deployedHash,

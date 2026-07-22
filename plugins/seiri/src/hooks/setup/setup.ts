@@ -1,6 +1,8 @@
+import { ENV_PLUGIN_ROOT } from '../../constants/env.js';
+import { HookEvent } from '../../constants/hooks.js';
+import { DEFAULT_INTERVENTION } from '../../constants/intervention.js';
 import { loadConfig } from '../../core/infra/configLoader/loaders/loadConfig.js';
 import { getRuleDocsStatus } from '../../core/ruleDocs/status/getRuleDocsStatus.js';
-import { DEFAULT_INTERVENTION } from '../../constants/intervention.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 
 import { renderStatusLines } from './utils/renderStatusLines.js';
@@ -17,7 +19,7 @@ import { renderStatusLines } from './utils/renderStatusLines.js';
  * plugin costs nothing until someone opts in.
  */
 export function processSessionStart(input: SessionStartInput): HookOutput {
-  const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
+  const pluginRoot = process.env[ENV_PLUGIN_ROOT];
   if (!pluginRoot || !input.cwd) return { continue: true };
 
   let lines: string[];
@@ -40,7 +42,7 @@ export function processSessionStart(input: SessionStartInput): HookOutput {
   return {
     continue: true,
     hookSpecificOutput: {
-      hookEventName: 'SessionStart',
+      hookEventName: HookEvent.SESSION_START,
       additionalContext: lines.join('\n'),
     },
   };

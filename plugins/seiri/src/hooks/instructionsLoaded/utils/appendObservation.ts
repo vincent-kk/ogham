@@ -3,12 +3,15 @@ import { appendFileSync, mkdirSync, statSync, truncateSync } from 'node:fs';
 import { portableJoin } from '@ogham/cross-platform/compat';
 import { pluginCache } from '@ogham/cross-platform/paths';
 
+import { OBSERVATION_LOG } from '../../../constants/files.js';
+import { PLUGIN_NAME } from '../../../constants/plugin.js';
+
 /** Newest records win once the log reaches this size; older ones are dropped. */
 const SIZE_CAP_BYTES = 512 * 1024;
 
 /** Absolute path of the instruction-load log. */
 export function observationLogPath(): string {
-  return portableJoin(pluginCache('seiri'), 'instructions-loaded.jsonl');
+  return portableJoin(pluginCache(PLUGIN_NAME), OBSERVATION_LOG);
 }
 
 /**
@@ -27,7 +30,7 @@ export function observationLogPath(): string {
 export function appendObservation(record: Record<string, unknown>): void {
   try {
     const path = observationLogPath();
-    mkdirSync(pluginCache('seiri'), { recursive: true });
+    mkdirSync(pluginCache(PLUGIN_NAME), { recursive: true });
 
     // Truncating rather than rotating: this log answers "is delivery
     // happening now", so a recent window is all it ever needs to hold.

@@ -27,7 +27,9 @@ export function readStdin(timeoutMs = 5000): Promise<string> {
     }, timeoutMs);
 
     process.stdin.on('data', (chunk: Buffer) => chunks.push(chunk));
-    process.stdin.on('end', () => finish(Buffer.concat(chunks).toString('utf8')));
+    process.stdin.on('end', () =>
+      finish(Buffer.concat(chunks).toString('utf8')),
+    );
     process.stdin.on('error', () => finish(''));
 
     if (process.stdin.readableEnded)

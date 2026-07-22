@@ -18,3 +18,12 @@ export const MANIFEST_FILE = 'manifest.json';
 
 /** Marker that ends a walk-up search for the repository root. */
 export const GIT_DIR = '.git';
+
+/** Built browser assets, shipped beside the plugin and read at runtime. */
+export const PUBLIC_DIR = 'public';
+
+/** Settings page inside {@link PUBLIC_DIR}. */
+export const SETTINGS_HTML = 'settings.html';
+
+/** Instruction-load observations, inside the plugin cache directory. */
+export const OBSERVATION_LOG = 'instructions-loaded.jsonl';

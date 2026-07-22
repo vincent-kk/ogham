@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 
+import { HookName } from '../../constants/hooks.js';
+import { PLUGIN_NAME } from '../../constants/plugin.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import { readStdin } from '../shared/readStdin.js';
 
@@ -13,7 +15,7 @@ try {
 } catch (error) {
   // Never block a session on our own failure — record it and fall through
   // to no injection, which is the same state as "seiri not set up here".
-  logHookFailure('seiri', 'setup', error);
+  logHookFailure(PLUGIN_NAME, HookName.SETUP, error);
 }
 
 process.stdout.write(JSON.stringify(result));

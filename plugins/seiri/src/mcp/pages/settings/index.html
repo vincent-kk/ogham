@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>seiri — settings</title>
+    <link rel="stylesheet" href="./styles/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-name">seiri</span>
+          <span class="brand-tag">code authoring rules</span>
+        </div>
+        <p class="lede">
+          Rules you select are written to
+          <code>.claude/rules/</code> in this repository, where the harness
+          loads them at the start of every session. Nothing is written until you
+          save, and you can see the exact change first.
+        </p>
+        <p class="root" id="project-root"></p>
+      </header>
+
+      <section class="panel" aria-labelledby="rules-heading">
+        <div class="panel-head">
+          <h2 id="rules-heading">Rules</h2>
+          <p class="panel-note">
+            Every rule is opt-in. Each one yields to this repository's own
+            instructions and conventions where they disagree.
+          </p>
+        </div>
+        <div id="rules-list" class="rules"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="dial-heading">
+        <div class="panel-head">
+          <h2 id="dial-heading">Intervention</h2>
+          <p class="panel-note">
+            Changes how much seiri says at the start of a session. It never
+            changes the rule documents themselves.
+          </p>
+        </div>
+        <div
+          id="dial"
+          class="dial"
+          role="radiogroup"
+          aria-labelledby="dial-heading"
+        ></div>
+      </section>
+
+      <details class="advanced">
+        <summary>Advanced</summary>
+        <div class="advanced-body">
+          <dl class="facts" id="facts"></dl>
+        </div>
+      </details>
+
+      <section class="panel preview" aria-labelledby="preview-heading">
+        <div class="panel-head">
+          <h2 id="preview-heading">Pending changes</h2>
+          <p class="panel-note">
+            What saving would do to <code>.claude/rules/</code> right now.
+          </p>
+        </div>
+        <div id="preview" class="preview-body"></div>
+      </section>
+
+      <footer class="actions">
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+        <div class="buttons">
+          <button type="button" id="close" class="btn btn-ghost">Close</button>
+          <button type="button" id="save" class="btn">Save</button>
+          <button type="button" id="save-close" class="btn btn-primary">
+            Save &amp; close
+          </button>
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      window.__SEIRI_STATE__ = '__SEIRI_STATE__';
+    </script>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>
