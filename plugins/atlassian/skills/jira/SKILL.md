@@ -14,6 +14,7 @@ Domain-based routing layer for all Jira REST API operations.
 ## Execution Model
 
 **Main agent executes directly** for simple operations:
+
 - Single issue read (`GET /rest/api/3/issue/{key}`)
 - Single JQL search
 - Single comment read/add
@@ -21,6 +22,7 @@ Domain-based routing layer for all Jira REST API operations.
 - Single worklog add
 
 **Spawn `jira` agent** only for complex multi-step workflows:
+
 - Bulk issue creation/updates (>3 issues)
 - Multi-domain chained operations (create + comment + transition + link)
 - Operations requiring field metadata lookup before execution
@@ -31,7 +33,8 @@ Domain-based routing layer for all Jira REST API operations.
 1. Read `tools/<domain>/schema.md` for the needed domain
 2. Call `mcp__plugin_atlassian_tools__fetch` with the correct HTTP method and endpoint
 3. Use `content_format: "markdown"` when sending description/body content
-4. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `setup` skill and retry once; on decline abort with guidance message
+4. After create/update whose body carries special characters or heavy formatting, verify rendering: `GET /issue/{key}?expand=renderedFields` — a `class="error"` span in the rendered HTML means broken markup; fix the body and update
+5. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `setup` skill and retry once; on decline abort with guidance message
 
 ## When to Use
 
@@ -47,23 +50,23 @@ Domain-based routing layer for all Jira REST API operations.
 
 ## Tool Catalog
 
-| Domain | Description |
-|---|---|
-| `issue` | Issue CRUD, bulk create, changelog |
-| `search` | JQL-based issue search (Cloud POST vs Server GET) |
-| `transition` | Workflow state transitions |
-| `comment` | Issue comments CRUD + JSM internal comments |
-| `agile` | Board, Sprint, Epic operations via Agile REST API |
-| `project` | Project metadata, components, versions |
-| `field` | Field metadata and custom field option management |
-| `link` | Internal issue links and remote issue links |
-| `worklog` | Work time logging and retrieval |
-| `attachment` | Attachment upload and metadata retrieval |
-| `user` | User search and profile lookup |
-| `watcher` | Issue watcher management |
-| `jsm` | JSM SLA, queues, and ProForma form handling |
-| `development-info` | Dev info: branches, commits, PRs linked to issues |
-| `metrics` | Issue time metrics via changelog-based calculation |
+| Domain             | Description                                        |
+| ------------------ | -------------------------------------------------- |
+| `issue`            | Issue CRUD, bulk create, changelog                 |
+| `search`           | JQL-based issue search (Cloud POST vs Server GET)  |
+| `transition`       | Workflow state transitions                         |
+| `comment`          | Issue comments CRUD + JSM internal comments        |
+| `agile`            | Board, Sprint, Epic operations via Agile REST API  |
+| `project`          | Project metadata, components, versions             |
+| `field`            | Field metadata and custom field option management  |
+| `link`             | Internal issue links and remote issue links        |
+| `worklog`          | Work time logging and retrieval                    |
+| `attachment`       | Attachment upload and metadata retrieval           |
+| `user`             | User search and profile lookup                     |
+| `watcher`          | Issue watcher management                           |
+| `jsm`              | JSM SLA, queues, and ProForma form handling        |
+| `development-info` | Dev info: branches, commits, PRs linked to issues  |
+| `metrics`          | Issue time metrics via changelog-based calculation |
 
 ## Lazy Reference Loading
 
