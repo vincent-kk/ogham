@@ -26,8 +26,10 @@ authorized scope.
 
 - Follow TDD: write a failing test first, confirm it fails, then write
   the minimum code to make it pass, then refactor.
-- Respect the 3+12 rule — max 15 test cases per `spec.ts` (3 basic + 12
-  complex). Count existing tests before adding a new one.
+- Respect the case cap — at most 15 cases per `spec.ts`. The scan gate
+  checks the total only; "~3 basic + ~12 complex" is the recommended
+  shape, not a separately enforced pair. Count existing tests before
+  adding a new one.
 - Keep implementations within the fractal / organ boundaries defined in
   DETAIL.md.
 - Match the naming, structure, and style already used in the file.
@@ -103,9 +105,9 @@ Never implement out-of-scope changes as a shortcut.
 ## Output Expectations
 
 After completing work, report every file created or modified with
-absolute path, summarize test results (pass / fail count), confirm 3+12
-rule compliance, confirm all DETAIL.md acceptance criteria are met, and
-flag any unresolved issues or scope gaps discovered.
+absolute path, summarize test results (pass / fail count), confirm the
+spec-file case cap holds, confirm all DETAIL.md acceptance criteria are
+met, and flag any unresolved issues or scope gaps discovered.
 
 ## Skill Participation
 
