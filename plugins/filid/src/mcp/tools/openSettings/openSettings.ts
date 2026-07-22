@@ -62,9 +62,9 @@ export async function handleOpenSettings(
       },
     });
     currentServer = { ...handle, projectRoot: root };
-    // FILID_NO_BROWSER=1 suppresses the tab for e2e runs and headless hosts;
+    // openBrowser no-ops under OGHAM_NO_BROWSER (e2e runs, headless hosts);
     // the URL still returns so callers can surface it.
-    if (process.env.FILID_NO_BROWSER !== '1') openBrowser(handle.url);
+    openBrowser(handle.url);
   }
 
   const server = currentServer;

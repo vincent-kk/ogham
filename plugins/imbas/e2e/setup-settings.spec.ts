@@ -9,7 +9,7 @@ import type { ImbasConfig } from '../src/types/config.js';
 import type { SettingsBootstrap } from '../src/types/settings.js';
 
 // The tool must not spawn real browser tabs during e2e runs.
-process.env.IMBAS_NO_BROWSER = '1';
+process.env.OGHAM_NO_BROWSER = '1';
 
 const BOOTSTRAP: SettingsBootstrap = {
   providers: { jira: true, github: false },

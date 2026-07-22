@@ -18,7 +18,7 @@ async function loadRuntime(): Promise<void> {
   process.env.CLAUDE_CONFIG_DIR = testHome;
   process.env.HOME = testHome;
   process.env.USERPROFILE = testHome;
-  process.env.DEILEN_NO_BROWSER = "1";
+  process.env.OGHAM_NO_BROWSER = "1";
 
   [
     { handleRenderViewer },

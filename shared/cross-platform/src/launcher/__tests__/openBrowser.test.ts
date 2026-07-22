@@ -6,7 +6,7 @@ vi.mock("cross-spawn", () => ({
   default: spawnMock,
 }));
 
-import { openBrowser } from "../openBrowser.js";
+import { NO_BROWSER_ENV, openBrowser } from "../openBrowser.js";
 
 describe("openBrowser", () => {
   const originalPlatform = process.platform;
@@ -29,6 +29,22 @@ describe("openBrowser", () => {
       value: originalPlatform,
       configurable: true,
     });
+  });
+
+  it(`launches nothing when ${NO_BROWSER_ENV} is set`, () => {
+    // The switch exists because an unmocked call in a test run opens a real tab
+    // on the developer's machine. Any non-empty value counts — the old
+    // per-plugin variables demanded exactly "1", a rule to get wrong for no gain.
+    const original = process.env[NO_BROWSER_ENV];
+    stubPlatform("darwin");
+    process.env[NO_BROWSER_ENV] = "1";
+    try {
+      openBrowser("http://127.0.0.1:1234");
+      expect(spawnMock).not.toHaveBeenCalled();
+    } finally {
+      if (original === undefined) delete process.env[NO_BROWSER_ENV];
+      else process.env[NO_BROWSER_ENV] = original;
+    }
   });
 
   it("uses `open` on darwin", () => {

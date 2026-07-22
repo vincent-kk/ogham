@@ -47,4 +47,4 @@ export type {
 } from "./hooks/index.js";
 export { generateWindowsCmd } from "./shim/index.js";
 export type { ShimOptions } from "./shim/index.js";
-export { openBrowser } from "./launcher/index.js";
+export { NO_BROWSER_ENV, openBrowser } from "./launcher/index.js";
