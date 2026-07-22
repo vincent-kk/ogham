@@ -34,7 +34,12 @@ export { spawnCli, spawnCliSync, execCli, osTimeout } from "./spawn/index.js";
 export type { SpawnOptions, SpawnResult } from "./spawn/index.js";
 export { discover, binaries, installHints } from "./binaries/index.js";
 export type { BinaryStatus, DiscoverOptions } from "./binaries/index.js";
-export { runHookEntry, selfProbe, logHookFailure } from "./hooks/index.js";
+export {
+  errorLogPath,
+  logHookFailure,
+  runHookEntry,
+  selfProbe,
+} from "./hooks/index.js";
 export type {
   ProbeResult,
   SelfProbeOptions,

@@ -11,7 +11,18 @@ interface ErrorEntry {
   error: string;
 }
 
-function defaultLogPath(pkg: string): string {
+/**
+ * Where `logHookFailure` writes for this package — exported so bootstrap
+ * diagnostics can *name* it.
+ *
+ * Those messages used to spell out `~/.claude/plugins/<pkg>/error-log.json`, which
+ * is only true on Claude: under Codex the same hook writes beneath `~/.codex`, so
+ * the advisory sent a user to a file that does not exist. Deriving the text from
+ * the writer's own path makes the two impossible to disagree.
+ *
+ * For display only. Reading or writing the file stays inside this module.
+ */
+export function errorLogPath(pkg: string): string {
   return join(pluginCache(pkg), "error-log.json");
 }
 
@@ -36,7 +47,7 @@ export function logHookFailure(
   error: unknown,
   opts: LogHookFailureOptions = {},
 ): void {
-  const file = opts.logFile ?? defaultLogPath(pkg);
+  const file = opts.logFile ?? errorLogPath(pkg);
   mkdirSync(dirname(file), { recursive: true });
 
   let entries: ErrorEntry[] = [];

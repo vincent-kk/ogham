@@ -8,6 +8,8 @@
  * 제외한다 (node/git/PATH 실패만 실제 행동 가능 신호).
  */
 
+import { errorLogPath } from '@ogham/cross-platform/error-log';
+
 const IGNORED_PROBE_ERRORS = new Set(['CLAUDE_PLUGIN_ROOT not set']);
 
 export interface ProbeAdvisory {
@@ -25,6 +27,6 @@ export function buildProbeAdvisory(errors: string[]): ProbeAdvisory {
     advisory:
       '[maencof] hook bootstrap diagnostic — some hooks may not work:\n' +
       actionable.map((e) => `  - ${e}`).join('\n') +
-      '\nSee ~/.claude/plugins/maencof/error-log.json for details.',
+      `\nSee ${errorLogPath('maencof')} for details.`,
   };
 }

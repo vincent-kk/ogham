@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { logHookFailure } from '@ogham/cross-platform/error-log';
+import { errorLogPath, logHookFailure } from '@ogham/cross-platform/error-log';
 import { selfProbe } from '@ogham/cross-platform/self-probe';
 
 import { createLogger } from '../../lib/logger.js';
@@ -11,8 +11,8 @@ import { processSetup } from './setup.js';
 const log = createLogger('setup');
 
 // SessionStart first hook entry — diagnose node/git/PATH/CLAUDE_PLUGIN_ROOT.
-// Errors append to ~/.claude/plugins/filid/error-log.json so silent hook
-// failures (e.g. Windows PATH lacks node) become observable.
+// Errors append to the host-aware plugin error log (`errorLogPath`) so silent
+// hook failures (e.g. Windows PATH lacks node) become observable.
 const probe = await selfProbe({ writeLog: true, pkg: 'filid' });
 
 const raw = await readStdin(5000);
@@ -32,7 +32,7 @@ if (probe.errors.length > 0) {
   const warning =
     '[filid] hook bootstrap diagnostic — some hooks may not work:\n' +
     probe.errors.map((e) => `  - ${e}`).join('\n') +
-    '\nSee ~/.claude/plugins/filid/error-log.json for details.';
+    `\nSee ${errorLogPath('filid')} for details.`;
   const existing = result.hookSpecificOutput?.additionalContext;
   result.hookSpecificOutput = {
     hookEventName: 'SessionStart',

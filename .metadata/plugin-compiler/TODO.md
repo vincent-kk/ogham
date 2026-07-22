@@ -48,23 +48,23 @@
 
 ## 열린 질문
 
-### Q3. 남은 하드코딩 힌트 문자열
-
-훅 부트스트랩 실패 메시지 4곳이 `~/.claude/plugins/<pkg>/error-log.json` 하드코딩 → Codex 에선 오안내:
-
-- `plugins/imbas/src/hooks/setup/setup.entry.ts:35` (+ `:14` 주석) · `plugins/filid/src/hooks/setup/setup.entry.ts:35`
-- `plugins/maencof-lens/src/hooks/sessionStart/sessionStart.entry.ts:29` · `plugins/maencof/src/hooks/sessionStart/helpers/probeAdvisory/probeAdvisory.ts:28`
-
-→ `errorLog` 에 `errorLogPath(pkg)` export 후 실제 경로 보간. 레지스트리 도입으로 **경로 산출은 이미 호스트 정합** — 남은 건 문자열 보간뿐이다.
-
-### Q4. 전 플러그인 상태-경로 전수 감사
-
-- C4-3 이 통합했다는 **deilen·r-statistics** 로컬 `claudeRoot()` 가 실제 `pluginCache` 경유하는지 재확인.
-- 훅 도달 코드의 `homedir()+.claude` / `CLAUDE_CONFIG_DIR` 잔존 하드코딩 재스윕. (`maencof graphCache.ts:19` 의 `~/.claude` 는 **BLOCKED_PREFIXES 보안**이라 정상·제외.)
-
 ### Q5. agy 훅 상태 채널 — **부분 해소**
 
 레지스트리에서 agy 는 이제 claude 채널을 **명시 차용하는 행**이다(부재 아님). 남은 건 agy 고유 상태 신호 실측 — agy 러너 훅이 받는 env 미측정.
+
+### ~~Q3. 하드코딩 힌트 문자열~~ — **종료 (2026-07-23)**
+
+`errorLog` 이 `errorLogPath(pkg)` 를 export 하고, 훅 부트스트랩 경고 4곳이 그 값을 보간한다 — 안내 문구와 실제 기록 경로가 **어긋날 수 없는 구조**가 됐다(`filid`·`imbas` setup.entry · `maencof-lens` sessionStart.entry · `maencof` probeAdvisory).
+
+- fail-first: pre-fix RED 확인 — maencof 케이스가 정확히 증상으로 실패했다(`기대 /custom/codex/... ↔ 실제 See ~/.claude/...`). cross-platform 케이스는 신규 심볼 부재로 실패.
+- 부수 효과: 하드코딩 리터럴이 계산식보다 길어 **훅 번들 4종이 각각 24–25 B 작아졌다.**
+- `errorLogPath` 는 **표시 전용** — 파일 read/write 는 여전히 `errorLog` 모듈 내부에만 있다(`hooks/INTENT.md` Never do 유지).
+
+### ~~Q4. 전 플러그인 상태-경로 전수 감사~~ — **종료 (2026-07-23): 우회 0건**
+
+- `pluginCache()` 호출점 12곳이 8개 플러그인 상태 루트 전부를 덮는다. **`claudeRoot` 심볼 0건** — C4-3 의 deilen·r-statistics 통합이 실제로 완료돼 있다.
+- 훅 도달 코드의 `CLAUDE_CONFIG_DIR` 잔존 **0건**(hostRegistry 제외). 남은 `join(homedir(), …)` 4곳은 전부 상태 루트가 아니다 — cennad `AGY_HOME`(agy CLI 설치 위치) · entrez 출력 경로 *제안* UI · `paths.ts` 의 레지스트리 구동 stateRoot 자신 · `absoluteRoot` 의 `~` 전개.
+- `maencof graphCache.ts:19` 의 `~/.claude` 는 `BLOCKED_PREFIXES` **보안 denylist**(볼트 스캔 차단)라 대상 아님. filid `scanDefaults.ts` 는 스캔 무시 glob.
 
 ### ~~Q2. 호스트 정식 per-plugin data 디렉터리를 쓸 것인가~~ — **종료: 안 쓴다 (2026-07-23, Vincent 결정)**
 

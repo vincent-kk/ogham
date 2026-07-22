@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { logHookFailure } from "../errorLog.js";
+import { errorLogPath, logHookFailure } from "../errorLog.js";
 
 describe("logHookFailure", () => {
   let tmp: string;
@@ -51,6 +51,26 @@ describe("logHookFailure", () => {
     const data = JSON.parse(raw);
     expect(data).toHaveLength(1);
     expect(data[0].hook).toBe("second");
+  });
+
+  it("errorLogPath names the file the writer actually uses, per host", () => {
+    // Bootstrap advisories quote this path to the user. Hardcoding
+    // ~/.claude/... in that text pointed Codex users at a file that is not
+    // there, so the advisory has to derive it from the same source as the write.
+    const origData = process.env.PLUGIN_DATA;
+    const origCodex = process.env.CODEX_HOME;
+    process.env.PLUGIN_DATA = "1";
+    process.env.CODEX_HOME = join("/custom", "codex");
+    try {
+      expect(errorLogPath("errlog-pkg")).toBe(
+        join("/custom", "codex", "plugins", "errlog-pkg", "error-log.json"),
+      );
+    } finally {
+      if (origData === undefined) delete process.env.PLUGIN_DATA;
+      else process.env.PLUGIN_DATA = origData;
+      if (origCodex === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = origCodex;
+    }
   });
 
   it("default path follows the host-aware plugin cache — a Codex hook (PLUGIN_DATA) writes under ~/.codex, not ~/.claude", () => {

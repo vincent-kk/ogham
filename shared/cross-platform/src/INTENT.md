@@ -8,7 +8,7 @@
 
 | Path            | Role                                                          |
 | --------------- | ------------------------------------------------------------- |
-| `index.ts`      | 배럴 — 9개 하위 fractal 재노출, 유일한 공개 API               |
+| `index.ts`      | 배럴 — 하위 fractal 재노출, 유일한 공개 API                   |
 | `binaries/`     | which/where 디스커버리 + 24h 캐시 + 설치 가이드               |
 | `env/`          | 환경변수 / OS 분기 / PATH delimiter 추상화                    |
 | `eol/`          | 줄바꿈(CRLF→LF) / BOM 정규화                                  |
