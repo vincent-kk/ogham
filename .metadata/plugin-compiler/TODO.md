@@ -1,58 +1,77 @@
 # TODO — 훅/MCP 플러그인 상태 경로(plugin-data path) 면밀 검토
 
-> **2026-07-21 착수 · 다음 세션 이어서.** 배경 원장: [README.md](./README.md) §현재 상태·남은 작업 · 호스트 env 사실은 [host-capability-matrix.md](./host-capability-matrix.md).
+> **2026-07-21 착수 · 2026-07-22 Q1 실측 종료 + 호스트 레지스트리 리팩터 완료.** 배경 원장: [README.md](./README.md) §현재 상태·남은 작업 · 호스트 env 사실은 [host-capability-matrix.md](./host-capability-matrix.md).
 > 이 문서는 세션-복원 덤프가 아니라 **이 단일 이슈**(훅/MCP 상태 디렉터리 호스트 정합성)의 열린 질문 추적기다.
 
-## 이미 한 것 — 훅 상태 `~/.claude` 누수 1차 봉합 (재작업 금지)
+## 이미 한 것 (재작업 금지)
 
-이 브랜치 워킹트리(미커밋)에서 완료·검증됨:
+### 1차 — 훅 상태 `~/.claude` 누수 봉합 (커밋 `541f8877`)
 
-- `shared/cross-platform/src/paths/paths.ts` `stateRoot()` — `OGHAM_HOST==="codex" || process.env.PLUGIN_DATA` → `CODEX_HOME ?? ~/.codex`. **훅은 `OGHAM_HOST` 를 못 받지만 Codex 가 훅 프로세스에 주입하는 `PLUGIN_DATA` 로 감지**(소스 `hooks/engine/discovery.rs` "OOTB compat", ponytail 실증).
-- `shared/cross-platform/src/hooks/errorLog.ts` — `~/.claude` 하드코딩 → `pluginCache(pkg)` 경유 (INTENT.md 가 이미 명시하던 `../paths` 의존 복원).
-- `plugins/imbas/src/hooks/setup/setup.ts` — `CLAUDE_CONFIG_DIR||~/.claude` 하드코딩 → `pluginCache('imbas')` 경유.
-- fail-first 테스트: paths 2건 + errorLog 1건 (pre-fix RED → post-fix GREEN 확인). typecheck 클린, 전체 **4465 통과**, 훅 번들 바이트캡·금지모듈 가드 통과(env-paths tree-shake 확인).
+- `paths.ts` `stateRoot()` 가 훅에서도 Codex 를 감지 · `errorLog.ts` 와 imbas setup 을 `pluginCache` 경유로 정정 · fail-first 테스트 3건.
 
-## 열린 질문 (면밀 검토 대상)
+### 2차 — Q1 실측 + 호스트 레지스트리 분리 (2026-07-22)
 
-### Q1. Claude 는 정말 `PLUGIN_DATA` 를 안 주는가? — **직접 실측 필요 (최우선)**
+- **Q1 종료** (아래 §실측 확정). 판별자 `Boolean(PLUGIN_DATA) === Codex` 는 **안전 확정**.
+- **`shared/cross-platform/src/hostRegistry/` 신설** — 호스트 이름·마커·상태 루트 env·기본 디렉터리·훅 신호를 담는 **데이터 테이블 단일 진실원**. 내부 의존 0 인 leaf 라 `paths`·`hostPaths` 가 사이클 없이 공유한다(`hostPaths → paths` 엣지가 이미 있어 leaf 가 아니면 순환).
+  - `paths.ts` `stateRoot()` 에서 **호스트 리터럴 전면 제거** — `$HOME` 상대 조립만 담당.
+  - `detectHost.ts` 의 사설 `KNOWN_HOSTS` 제거 → 레지스트리 위임. `Host` 타입 정본도 레지스트리로 이동.
+  - **agy 가 명시적 행이 됐다** — 종전엔 분기 자체가 없어 조용히 claude 경로를 탔다(부재 → 결정).
+- 검증: 특성화 테스트 66건 **무수정 통과**(리팩터 계약) · 신규 11건 · 전체 **4476 통과** · typecheck·lint 클린 · 훅 번들 가드 5 플러그인 전부 통과.
+- **filid HEAVY 훅 캡 28→32KB 상향** (`buildHooks.mjs`, 날짜·사유 주석 병기 — 2026-07-17 의 24→28KB 선례 방식). 레지스트리가 훅 번들에 +275B(순수 데이터+순수함수, 모듈 유입 0). 28KB 티어는 잔여 여유가 258B 뿐이라 **포화를 알린 것이지 우발적 의존 유입을 잡은 게 아니었다.**
 
-판별자 `Boolean(process.env.PLUGIN_DATA) === Codex` 의 안전성은 **Claude 가 un-prefixed `PLUGIN_DATA` 를 미설정**한다는 전제에 선다.
+## 실측 확정 — Claude 훅 env (2026-07-22, `--plugin-dir` 프로브)
 
-- **정황 근거**: ponytail-runtime.js `isCodex = !isCopilot && Boolean(PLUGIN_DATA)` (프로덕션 다중호스트 — Claude 를 Codex 로 오판 안 함) · matrix (Claude native = `CLAUDE_`-prefixed, un-prefixed 는 Codex compat).
-- **미검증**: 이 세션에서 Claude Code 훅의 실제 env 를 **직접 안 쟀다**. 훅에 env 덤프 프로브를 걸어 Claude 가 `PLUGIN_DATA` 를 설정하는지 확정할 것.
-- **리스크**: 만약 Claude 도 `PLUGIN_DATA` 를 준다면 → **Claude 상태가 `~/.codex` 로 오라우팅**(Claude 무결손 위반). 그 경우 대체 discriminator 필요(예: Codex 전용 다른 마커, 혹은 `PLUGIN_DATA` 값의 경로 패턴 검사).
+프로브 플러그인 + `--settings` 훅을 붙여 헤드리스 `claude -p` 로 SessionStart 훅 env 를 덤프하고, 부모 Bash 프로세스 env 를 대조군으로 차분했다.
 
-### Q2. MCP vs 훅 경로 정합성 + Codex 정식 데이터 디렉터리 사용 여부
+| 항목                                    | 플러그인 훅                                                                      | settings 훅 |
+| --------------------------------------- | -------------------------------------------------------------------------------- | ----------- |
+| Claude 가 **추가**한 변수 (대조군 대비) | `CLAUDE_PLUGIN_ROOT`·`CLAUDE_PLUGIN_DATA`·`CLAUDE_PROJECT_DIR`·`CLAUDE_ENV_FILE` | 뒤의 2개만  |
+| un-prefixed `PLUGIN_DATA`/`PLUGIN_ROOT` | **없음**                                                                         | 없음        |
 
-- 현재: Codex 에서 MCP(`OGHAM_HOST`)·훅(`PLUGIN_DATA`) 둘 다 `CODEX_HOME/plugins/<pkg>` 로 수렴 → **정합**(의도).
-- 그러나 Codex 가 훅에 주는 `PLUGIN_DATA` **값**은 Codex 관리 per-plugin dir(예: `~/.codex/plugins/data/<mp>-<pkg>`)이고 우리 `~/.codex/plugins/<pkg>` 와 **다르다**. MCP 엔 `PLUGIN_DATA` 가 안 와서 값을 직접 못 쓴다.
-- **결정 필요**: (a) 현행 — 우리 컨벤션 유지(MCP/훅 정합, 단 Codex uninstall 시 미정리). (b) 훅은 `PLUGIN_DATA` 값 직접 사용(Codex-native·자동정리, 단 MCP 와 경로 분기 → 같은 플러그인이 MCP·훅에서 상태 공유 시 깨짐). → **플러그인별 "MCP·훅이 같은 상태 파일 공유하나" 감사 후 결정.**
+⇒ Claude 는 **`CLAUDE_` 접두만** 준다. Codex 는 4종을 모두 주입(matrix §1, "OOTB compat"). **un-prefixed 존재 = Codex** 가 정확한 판별자다. TODO Q1 의 "Claude 상태가 `~/.codex` 로 오라우팅" 리스크는 **소멸**.
 
-### Q3. 남은 하드코딩 힌트 문자열 (cosmetic, 내 수정이 초래한 불일치)
+## 열린 질문
 
-훅 부트스트랩 실패 메시지 4곳이 아직 `~/.claude/plugins/<pkg>/error-log.json` 하드코딩 → Codex 에선 오안내:
+### Q2. 호스트 **정식** per-plugin data 디렉터리를 쓸 것인가 — **재구성됨 (최우선)**
 
-- `plugins/imbas/src/hooks/setup/setup.entry.ts:35` (+ `:14` 주석)
-- `plugins/filid/src/hooks/setup/setup.entry.ts:35`
-- `plugins/maencof-lens/src/hooks/sessionStart/sessionStart.entry.ts:29`
-- `plugins/maencof/src/hooks/sessionStart/helpers/probeAdvisory/probeAdvisory.ts:28`
+Q1 프로브가 부수적으로 밝힌 사실이 이 질문의 전제를 바꿨다. **Codex 만의 문제가 아니라 대칭 문제다.**
 
-→ `errorLog` 에 `errorLogPath(pkg)` export 후 실제 경로 보간(또는 호스트 중립 문구). 이번 세션에 export 착수→범위 보류로 되돌림.
+- `CLAUDE_PLUGIN_DATA` = `~/.claude/plugins/data/<plugin>-<marketplace>` (실측: `filid-ogham`·`deilen-inline`·`cennad-ogham` …). Codex 도 동형 — `~/.codex/plugins/data/ponytail-ponytail`.
+- 즉 **두 호스트 모두 정식 data dir 을 제공하고 env 로 알려주는데, 우리는 어느 쪽에서도 안 쓴다.** 우리 컨벤션 `~/.claude/plugins/<pkg>` 는 정식 `data/` 의 **형제로 무단 점유**한 디렉터리이고, 정식 디렉터리들은 **전부 비어 있다**.
+- 채널별 가용성: Claude 는 **MCP·훅 양쪽** `CLAUDE_PLUGIN_DATA` 보유(matrix §9). Codex 는 **훅만** `PLUGIN_DATA`, MCP 엔 없음.
+- **결정 필요**: (a) 현행 컨벤션 유지 — MCP↔훅 정합, 단 무단 점유 + uninstall 시 미정리. (b) 정식 dir 채택 — Claude 는 양 채널 가능하나 **Codex 는 MCP 가 값을 못 얻어 채널이 갈린다**. (c) 호스트별 분기 — 일관성 요구는 *호스트 내부*이지 호스트 간이 아니므로 성립하나, Claude 사용자 기존 상태(atlassian·entrez 자격증명 등)가 **고아화**된다.
+- 마이그레이션 위험이 실질적이라 (a) 가 현실적 — 다만 이제 **근거 있는 결정**이지 사고가 아니다. 채택 시 `hostRegistry` 에 `dataDirEnv` 필드 1개 추가로 끝난다.
+
+### Q3. 남은 하드코딩 힌트 문자열
+
+훅 부트스트랩 실패 메시지 4곳이 `~/.claude/plugins/<pkg>/error-log.json` 하드코딩 → Codex 에선 오안내:
+
+- `plugins/imbas/src/hooks/setup/setup.entry.ts:35` (+ `:14` 주석) · `plugins/filid/src/hooks/setup/setup.entry.ts:35`
+- `plugins/maencof-lens/src/hooks/sessionStart/sessionStart.entry.ts:29` · `plugins/maencof/src/hooks/sessionStart/helpers/probeAdvisory/probeAdvisory.ts:28`
+
+→ `errorLog` 에 `errorLogPath(pkg)` export 후 실제 경로 보간. 레지스트리 도입으로 **경로 산출은 이미 호스트 정합** — 남은 건 문자열 보간뿐이다.
 
 ### Q4. 전 플러그인 상태-경로 전수 감사
 
 - C4-3 이 통합했다는 **deilen·r-statistics** 로컬 `claudeRoot()` 가 실제 `pluginCache` 경유하는지 재확인.
-- 훅 도달 코드에 `homedir()+.claude` / `CLAUDE_CONFIG_DIR` 잔존 하드코딩 재스윕. (이번엔 errorLog·imbas setup 만 발견. `maencof graphCache.ts:19` 의 `~/.claude` 는 **BLOCKED_PREFIXES 보안**이라 정상·제외.)
+- 훅 도달 코드의 `homedir()+.claude` / `CLAUDE_CONFIG_DIR` 잔존 하드코딩 재스윕. (`maencof graphCache.ts:19` 의 `~/.claude` 는 **BLOCKED_PREFIXES 보안**이라 정상·제외.)
 
-### Q5. agy 훅 상태 채널
+### Q5. agy 훅 상태 채널 — **부분 해소**
 
-- agy 러너 훅은 `PLUGIN_DATA`(Codex 전용)를 못 받는다 → 현재 claude 채널(conservative). agy 가 훅에 주는 고유 상태 신호가 있는지, 별도 처리 필요한지 미검토.
+레지스트리에서 agy 는 이제 claude 채널을 **명시 차용하는 행**이다(부재 아님). 남은 건 agy 고유 상태 신호 실측 — agy 러너 훅이 받는 env 미측정.
 
-### Q6. 판별자 robustness
+### ~~Q1. Claude 는 정말 `PLUGIN_DATA` 를 안 주는가~~ — **종료** (위 §실측 확정)
 
-- Copilot=`COPILOT_PLUGIN_DATA`(별개)→무영향. 그 외 `PLUGIN_DATA` 를 세팅하는 무관 환경의 false-positive 여지 점검.
+### ~~Q6. 판별자 robustness~~ — **해소**
+
+판별식이 `hostRegistry` 의 `hookSignalEnv` 필드가 됐다. 조이려면 한 필드만 고치면 된다. Copilot=`COPILOT_PLUGIN_DATA`(별개)→무영향.
+
+## 부수 발견 (미처리)
+
+- `~/.claude/plugins/errlog-pkg/error-log.json` — 1차 봉합의 fail-first **RED 단계 잔재**(2026-07-20T17:52Z). 현재 코드는 tmpdir 로 가므로 버그 아님. 단 `errorLog.test.ts` 의 claude 분기는 격리되지 않아 **회귀 시 실제 홈 디렉터리에 쓴다** — 테스트 위생 개선 여지.
+- `shared/cross-platform/src/INTENT.md` 의 Structure 표가 하위 fractal 을 **일부만 나열**한다(`agyHooks`·`agyRunner`·`codexHooks`·`instructions` 누락). 50줄 cap 때문에 전부 담을 수 없다 — FCA 규칙상 **모듈 분해 신호**.
 
 ## 참조
 
-- 판별 근거·소스는 `stateRoot()` 주석(`paths.ts`)에 인라인.
-- 호스트 훅 env 실측: matrix (Codex `discovery.rs` OOTB compat) · ponytail `hooks/ponytail-runtime.js` (`~/.codex/plugins/cache/ponytail/ponytail/<ver>/`).
+- 판별 근거는 `hostRegistry/registry.ts` 주석 + `INTENT.md` 에 인라인.
+- 호스트 훅 env 실측: 위 §실측 확정 (Claude) · matrix (Codex `discovery.rs` OOTB compat) · ponytail `hooks/ponytail-runtime.js`.

@@ -8,7 +8,7 @@
 | ------------------------ | ------------------------------------------------------------------ |
 | `index.ts`               | barrel                                                             |
 | `types.ts`               | `Host` · `RuleDocsTarget`                                          |
-| `detectHost.ts`          | `OGHAM_HOST` 마커 판독 — 부재 = claude                             |
+| `detectHost.ts`          | 마커 판독(`hostRegistry` 위임) — 부재 = claude, 미인식 = unknown   |
 | `pluginRoot.ts`          | 자기 설치 디렉터리 (번들 자산·계약 스크립트·설정 HTML)             |
 | `locatePluginRoot.ts`    | 매니페스트까지 상향 탐색 — env·cwd 채널이 없는 호스트의 최후 수단  |
 | `projectRoot.ts`         | 사용자 작업물 루트 — `projectRoot`(throw) / `tryProjectRoot`(null) |
@@ -43,5 +43,5 @@
 
 ## Dependencies
 
-- 내부: `instructions` (파일명·마커 정본), `../paths` (`portableResolve` — 정규화 단일 경유).
+- 내부: `instructions` (파일명·마커 정본), `../paths` (`portableResolve` — 정규화 단일 경유), `hostRegistry` (호스트 테이블·`Host` 타입 정본).
 - 외부: Node 내장 (`node:path` · `node:fs` · `node:os` · `node:url`) 만.

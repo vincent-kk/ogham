@@ -1,8 +1,9 @@
 /**
- * Agent host running the plugin. `unknown` covers an `OGHAM_HOST` marker this
- * build does not recognise — treated conservatively (no coordinate is guessed).
+ * Agent host running the plugin. Defined by `hostRegistry`, which owns the host
+ * table; re-exported here so this module's own contract stays readable in one
+ * place.
  */
-export type Host = "claude" | "codex" | "agy" | "unknown";
+export type { Host } from "../hostRegistry/index.js";
 
 /**
  * Where a host expects rule documents to live, relative to the project root.

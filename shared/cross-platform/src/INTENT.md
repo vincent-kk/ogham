@@ -2,22 +2,23 @@
 
 ## Purpose
 
-`src/` 는 `@ogham/cross-platform` 소스 루트(fractal). 배럴(`index.ts`) 이 9개 하위 fractal 을 하나의 공개 API 로 통합해 재노출한다. 패키지 레벨 계약(퍼블리시 금지, esbuild inline 전제 등)은 `../INTENT.md` 참조 — 본 문서는 내부 구조만 다룬다.
+`src/` 는 `@ogham/cross-platform` 소스 루트(fractal). 배럴(`index.ts`) 이 하위 fractal 들을 하나의 공개 API 로 통합해 재노출한다. 패키지 레벨 계약(퍼블리시 금지, esbuild inline 전제 등)은 `../INTENT.md` 참조 — 본 문서는 내부 구조만 다룬다.
 
 ## Structure
 
-| Path         | Role                                                    |
-| ------------ | ------------------------------------------------------- |
-| `index.ts`   | 배럴 — 9개 하위 fractal 재노출, 유일한 공개 API         |
-| `binaries/`  | which/where 디스커버리 + 24h 캐시 + 설치 가이드         |
-| `env/`       | 환경변수 / OS 분기 / PATH delimiter 추상화              |
-| `eol/`       | 줄바꿈(CRLF→LF) / BOM 정규화                            |
-| `hooks/`     | hook bootstrap + selfProbe + errorLog                   |
-| `hostPaths/` | 호스트별 플러그인 루트 / 프로젝트 루트 해석             |
-| `launcher/`  | OS 기본 핸들러로 URL/파일 열기 (`openBrowser`)          |
-| `paths/`     | home/tmp/config/cache 경로 + win/posix 경로 문자열 호환 |
-| `shim/`      | Windows `.cmd` shim 생성 (빌드 스텝)                    |
-| `spawn/`     | 외부 CLI spawn 단일 진입점(`spawnCli` 등) + 타임아웃    |
+| Path            | Role                                                          |
+| --------------- | ------------------------------------------------------------- |
+| `index.ts`      | 배럴 — 9개 하위 fractal 재노출, 유일한 공개 API               |
+| `binaries/`     | which/where 디스커버리 + 24h 캐시 + 설치 가이드               |
+| `env/`          | 환경변수 / OS 분기 / PATH delimiter 추상화                    |
+| `eol/`          | 줄바꿈(CRLF→LF) / BOM 정규화                                  |
+| `hooks/`        | hook bootstrap + selfProbe + errorLog                         |
+| `hostPaths/`    | 호스트별 플러그인 루트 / 프로젝트 루트 해석                   |
+| `hostRegistry/` | 호스트 테이블(이름·마커·상태 루트·훅 신호) 단일 진실원 — leaf |
+| `launcher/`     | OS 기본 핸들러로 URL/파일 열기 (`openBrowser`)                |
+| `paths/`        | home/tmp/config/cache 경로 + win/posix 경로 문자열 호환       |
+| `shim/`         | Windows `.cmd` shim 생성 (빌드 스텝)                          |
+| `spawn/`        | 외부 CLI spawn 단일 진입점(`spawnCli` 등) + 타임아웃          |
 
 ## Conventions
 
@@ -44,5 +45,5 @@
 
 ## Dependencies
 
-- 내부: 하위 9개 fractal 전부 (`binaries`, `env`, `eol`, `hooks`, `hostPaths`, `launcher`, `paths`, `shim`, `spawn`).
+- 내부: 하위 fractal 전부. `hostRegistry` 만 leaf(내부 의존 0) — `paths`·`hostPaths` 가 공유하는 호스트 지식을 사이클 없이 담기 위한 불변식.
 - 외부: 없음 (각 하위 fractal 이 자체 외부 의존을 소유).

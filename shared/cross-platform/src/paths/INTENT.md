@@ -13,7 +13,8 @@ OS 별 경로 추상화. home / tmp / config / cache / plugin cache 와 Windows/
 ## Conventions
 
 - 외부 OS 별 위치 결정은 `env-paths` 위임 — Windows AppData, macOS Library/Application Support, Linux XDG.
-- `pluginCache(pkg, version?)` 는 호스트별 상태 루트(claude=`CLAUDE_CONFIG_DIR ?? ~/.claude`, codex=`CODEX_HOME ?? ~/.codex`) 밑 `plugins/<pkg>[/version]` 컨벤션 강제. 호스트 판별은 프로세스 종류별로 다르다 — MCP 는 어댑터가 넣은 `OGHAM_HOST`, 훅은 Codex 가 주입하는 `PLUGIN_DATA`(claude·agy 는 미설정) 로 감지해 훅도 Codex 면 `~/.codex` 로 간다.
+- `pluginCache(pkg, version?)` 는 호스트별 상태 루트 밑 `plugins/<pkg>[/version]` 컨벤션 강제. **어느 호스트인지·그 호스트의 루트가 어디인지는 `hostRegistry` 가 답한다** — 본 모듈은 `$HOME` 상대 조립만 담당하며 호스트 이름·호스트 env 이름을 리터럴로 갖지 않는다.
+- `hostRegistry` 는 배럴이 아니라 구체 파일로 import 한다 — 본 모듈은 훅 도달 코드(`hooks/errorLog.ts`)라 배럴 재노출 전체가 훅 번들로 딸려온다.
 - `normalize(p)` 는 backslash → forward 단방향.
 - `compat/` public 함수는 함수별 파일로 유지해 inline 번들 tree-shaking 을 돕는다.
 
@@ -37,4 +38,4 @@ OS 별 경로 추상화. home / tmp / config / cache / plugin cache 와 Windows/
 ## Dependencies
 
 - 외부: `env-paths ^3` (inline).
-- 내부: 없음.
+- 내부: `hostRegistry` (상태 루트 좌표 — 구체 파일 직접 import).

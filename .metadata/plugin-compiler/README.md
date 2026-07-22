@@ -44,7 +44,7 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 - **머지 후 라이브 게이트**: main 머지 후 마켓플레이스 실설치로 Claude 무영향 재확인 + Codex 설치·도구노출·훅 trust 라이브 확인 (지금까지 `--plugin-dir` 로그 + 구조적 확인뿐).
 - **agy 업스트림 대기**: (F4) agy 1.1.2 가 PreInvocation `injectSteps` 를 렌더하지 않아 컨텍스트 주입 훅 무가치 — 어댑터·러너는 준비됨, agy 가 렌더하면 emit 만 추가. (L2) `agy plugin install` 이 MCP 안 뜨는 위치(`~/.gemini/config/plugins/`)에 설치 → `~/.agents/plugins/<pkg>/` 수동 복사(README 안내). 둘 다 agy CLI 수정 전까지 우리 쪽 해결 불가.
 - **Codex 플랫폼 한계(고지)**: 셸 read 추적 불완전(복합 파이프/grep — `codex-read-matcher` 린트가 표면화), 스킬 본문 full-form 도구명 불일치(E1 — `AGENTS.md`/서술형 완화 여지). 모델의 Bash 파일편집 우회는 3-호스트 공통 guardrail 한계.
-- **훅/MCP 상태 경로 호스트 정합성 심화 검토** — 훅 상태 `~/.claude` 누수 1차 봉합은 완료(위)했으나, ① Claude 의 `PLUGIN_DATA` 미설정 **직접 실측**, ② MCP↔훅 경로 정합/Codex 정식 data dir 채택 여부, ③ 힌트 문자열·전 플러그인 상태경로 전수 감사가 남음. 정본: [TODO.md](./TODO.md).
+- **훅/MCP 상태 경로 호스트 정합성 심화 검토** — 1차 봉합(위)에 더해 2026-07-22 에 ① Claude 훅 env **직접 실측 종료**(`CLAUDE_` 접두만 주입 ⇒ un-prefixed `PLUGIN_DATA` = Codex 판별자 안전 확정)와 ② **호스트 레지스트리 분리**(`hostRegistry` — 호스트 지식 단일 진실원, `paths` 에서 호스트 리터럴 제거, agy 가 명시적 행으로)를 완료. 남은 것은 **정식 per-plugin data dir 채택 여부**(양 호스트 모두 제공하는데 우리가 안 씀 — 대칭 문제로 재구성됨)와 힌트 문자열·전수 감사. 정본: [TODO.md](./TODO.md).
 
 **운영 함정 (재개·머지 시):**
 

@@ -12,7 +12,14 @@ export {
   ruleDocsTarget,
   tryProjectRoot,
 } from "./hostPaths/index.js";
-export type { Host, RuleDocsTarget } from "./hostPaths/index.js";
+export type { RuleDocsTarget } from "./hostPaths/index.js";
+export {
+  HOST_MARKER_ENV,
+  HOSTS,
+  hostFromMarker,
+  resolveHostDescriptor,
+} from "./hostRegistry/index.js";
+export type { Host, HostDescriptor } from "./hostRegistry/index.js";
 export {
   CLAUDE_INSTRUCTIONS_FILE,
   CODEX_INSTRUCTIONS_FILE,
