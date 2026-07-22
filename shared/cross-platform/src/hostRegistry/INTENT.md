@@ -20,6 +20,7 @@
 - `hookSignalEnv` 는 **실측 기반**이다. Codex 는 훅에 un-prefixed `PLUGIN_DATA` 주입, Claude 는 `CLAUDE_` 접두만(`--plugin-dir` 프로브 확인). 추정으로 채우지 않는다.
 - 미실측 호스트는 claude 채널을 **명시적으로 차용**한다 (`CLAUDE_STATE_CHANNEL` 공유) — 분기 부재가 아니라 테이블 위의 결정으로 남긴다.
 - 마커가 있으면 **훅 신호 패스를 억제**한다 — 마커는 진술, 훅 신호는 추론이라 둘이 결합해 아무도 지명하지 않은 호스트가 나오면 안 된다.
+- `hookSignalEnv` 는 **신호이지 위치가 아니다** — 존재 여부만 읽고 값(호스트 관리 data dir)은 의도적으로 버린다. 근거는 `../paths/INTENT.md`.
 - `unknown` 은 행이 아니라 **매칭 실패**다. 부재 신호는 `null` 명시가 아니라 **필드 생략**. 이 테이블은 훅 번들에 실리므로 행은 lean 하게 유지한다 (필드 1개 = 모든 훅 콜드스타트 비용).
 
 ## Boundaries

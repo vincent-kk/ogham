@@ -37,6 +37,12 @@ export interface HostDescriptor {
    * Env var the host injects into hook processes but NOT into MCP processes —
    * usable as a hook-side discriminator, because hooks never receive the marker.
    * Omitted when the host offers no such signal.
+   *
+   * Only its presence is read; its value — the host's own managed per-plugin data
+   * directory — is deliberately discarded. That directory is keyed
+   * `<plugin>-<marketplace>`, so it changes when the install source does and would
+   * strand credentials on reinstall, and Codex supplies it to hooks but not to MCP,
+   * which would split one host's two channels. See `../paths/INTENT.md`.
    */
   readonly hookSignalEnv?: string;
 }
