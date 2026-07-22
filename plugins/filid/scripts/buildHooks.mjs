@@ -44,13 +44,19 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   + criteria-ledger lint + mode audit + FCA opt-in gate).
 //                   Recalibrated 24→28KB for the delivery-model feature set
 //                   (2026-07-17) KILO
+//                   Recalibrated 28→32KB for the hostRegistry state-root table
+//                   (2026-07-22): +275 B of pure data + pure functions, zero
+//                   module pull (FORBIDDEN_PATTERNS clean). The 28KB tier had
+//                   258 B of headroom left, so it was flagging saturation, not
+//                   an accidental dependency — the failure mode these caps exist
+//                   to catch.
 //   SESSION_START — selfProbe (spawn-dependent → cross-spawn inlined) + logHookFailure.
 // Caps sized for the merged bundle set (Codex read-tracking hooks + settings/
 // open_settings). #87 routed cwd hashing through portableResolve, pulled into the
 // pre-tool-use path via cacheManager. Still Node builtins only — FORBIDDEN_PATTERNS
 // below is the real isolation guard, not these caps.
 const SESSION_START_HOOK_BYTES = 48 * KILO_BYTE;
-const HEAVY_HOOK_BYTES = 28 * KILO_BYTE;
+const HEAVY_HOOK_BYTES = 32 * KILO_BYTE;
 const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and

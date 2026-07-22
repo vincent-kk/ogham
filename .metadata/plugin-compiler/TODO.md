@@ -30,6 +30,22 @@
 
 ⇒ Claude 는 **`CLAUDE_` 접두만** 준다. Codex 는 4종을 모두 주입(matrix §1, "OOTB compat"). **un-prefixed 존재 = Codex** 가 정확한 판별자다. TODO Q1 의 "Claude 상태가 `~/.codex` 로 오라우팅" 리스크는 **소멸**.
 
+## 실측 확정 — Codex 라이브 E2E (2026-07-22, codex-cli **0.145.0**)
+
+이 체크아웃을 로컬 마켓플레이스로 등록하고 imbas·filid 를 실제 설치해 `codex exec` 세션을 돌렸다. 설치 스냅샷의 `bridge/*.mjs`·`mcp-server.cjs` 는 이 브랜치 빌드본과 **SHA256 동일** 확인.
+
+| 채널    | 관측된 산출물                                                                                            | 판별 신호     |
+| ------- | -------------------------------------------------------------------------------------------------------- | ------------- |
+| **훅**  | `~/.codex/plugins/imbas/ogham_mk2/` · `~/.codex/plugins/filid/<cwdHash>/{session,prompt,turn}-context-*` | `PLUGIN_DATA` |
+| **MCP** | `~/.codex/plugins/filid/<cwdHash>/run-codexprobe.hash` (`cache_manage save-hash`)                        | `OGHAM_HOST`  |
+
+- **두 채널이 같은 디렉터리(`<cwdHash>` = `0664f1532b7d1fab`)로 수렴** — MCP↔훅 상태 공유가 Codex 에서 실제로 성립한다.
+- **`~/.claude` 누수 0** — 동시에 돌던 Claude 세션이 같은 프로젝트에 쓰고 있었음에도 `~/.claude/plugins/{filid,imbas}` 에 신규 항목 0건. 같은 프로젝트가 호스트별로 **같은 해시·다른 루트**로 갈린다.
+- 훅은 `--dangerously-bypass-hook-trust` 로 발화(미신뢰 시 무음 스킵은 기지 사실). 부수효과 MCP 도구는 headless 승인 게이트에 막혀 `--dangerously-bypass-approvals-and-sandbox` 필요.
+- 실측 후 `~/.codex` 원복 완료(플러그인·마켓플레이스·config.toml·스냅샷 캐시). **부수 발견**: `codex plugin remove` 는 `~/.codex/plugins/cache/<mp>/` 스냅샷을 정리하지 않는다 — 수동 삭제 필요.
+
+⇒ **"Codex 설치 플러그인은 `~/.codex` 에 상태를 쓰고 훅도 거기서 읽는다"가 코드 추론이 아니라 관측 사실이 됐다.**
+
 ## 열린 질문
 
 ### Q2. 호스트 **정식** per-plugin data 디렉터리를 쓸 것인가 — **재구성됨 (최우선)**
