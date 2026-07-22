@@ -1,12 +1,18 @@
 {
   "name": "@ogham/seiri",
   "version": "0.0.1",
-  "description": "",
-  "keywords": [],
+  "description": "Code authoring quality, review discipline, and development methodology rules for agent-legible codebases",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "code-quality",
+    "agent-legible",
+    "rules"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/vincent-kk/ogham.git",
-    "directory": "plugins/filid"
+    "directory": "plugins/seiri"
   },
   "license": "MIT",
   "author": {
@@ -22,7 +28,18 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [],
+  "files": [
+    "dist",
+    "bridge",
+    "libs",
+    "hooks",
+    "skills",
+    "templates",
+    "public",
+    ".claude-plugin",
+    ".mcp.json",
+    "README.md"
+  ],
   "scripts": {
     "bench": "vitest bench",
     "bench:run": "vitest bench --run",

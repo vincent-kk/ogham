@@ -1133,6 +1133,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@ogham/seiri@workspace:plugins/seiri":
+  version: 0.0.0-use.local
+  resolution: "@ogham/seiri@workspace:plugins/seiri"
+  dependencies:
+    "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/cross-platform": "workspace:^"
+    "@ogham/http-guard": "workspace:^"
+    "@ogham/session-finalizer": "workspace:^"
+    "@playwright/test": "npm:^1.61.0"
+    "@types/node": "npm:^20.11.0"
+    "@vitest/coverage-v8": "npm:^4.1.10"
+    esbuild: "npm:^0.24.0"
+    typescript: "npm:^5.7.2"
+    vitest: "npm:^4.1.10"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
 "@ogham/session-finalizer@workspace:^, @ogham/session-finalizer@workspace:shared/session-finalizer":
   version: 0.0.0-use.local
   resolution: "@ogham/session-finalizer@workspace:shared/session-finalizer"
