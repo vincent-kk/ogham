@@ -72,11 +72,21 @@ describe("HOSTS table", () => {
   });
 
   it("makes agy's borrowed channel an explicit row, not a missing branch", () => {
-    // agy has no measured state directory. Borrowing claude's is the conservative
-    // choice; the row exists so the choice is visible and revisable in one place.
+    // agy hands hooks no data directory at all (measured), so it borrows claude's
+    // channel; the row exists so the borrow is visible and revisable in one place.
     expect(HOSTS.agy.stateRootEnv).toBe(HOSTS.claude.stateRootEnv);
     expect(HOSTS.agy.stateRootDir).toBe(HOSTS.claude.stateRootDir);
-    expect(HOSTS.agy.hookSignalEnv).toBeUndefined();
+  });
+
+  it("identifies an agy hook by the one variable agy adds", () => {
+    // agy 1.1.5 injects ANTIGRAVITY_CONVERSATION_ID and nothing else — no plugin
+    // root, no data directory (measured by diffing a probe hook's env against its
+    // parent's). Without the signal an agy hook is indistinguishable from Claude's.
+    const d = resolveHostDescriptor({
+      ANTIGRAVITY_CONVERSATION_ID: "4fabd115-5817-42ad-a9bc-94148e808fe3",
+    });
+    expect(d).toBe(HOSTS.agy);
+    expect(d.stateRootDir).toBe(HOSTS.claude.stateRootDir);
   });
 
   it("describes only identified hosts — 'unknown' is not a row", () => {

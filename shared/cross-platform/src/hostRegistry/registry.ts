@@ -31,9 +31,12 @@ const CODEX_STATE_CHANNEL = {
  * un-prefixed pair. That asymmetry is the whole basis for reading `PLUGIN_DATA` as
  * "this is Codex", so it lives here as data rather than inline in a path helper.
  *
- * agy borrows Claude's channel deliberately: no agy state directory has been
- * measured, and inventing one would move state to a path nothing reads. The row
- * exists so the borrow is a decision on the table rather than a branch nobody wrote.
+ * agy adds exactly one variable to a hook process, `ANTIGRAVITY_CONVERSATION_ID`
+ * (measured on agy 1.1.5 by diffing a probe hook's env against its parent's), and
+ * no data directory of any kind. So the row keeps borrowing Claude's channel —
+ * inventing an agy directory would move state somewhere nothing reads — while the
+ * signal keeps an agy hook from passing for Claude, and leaves a measured agy
+ * state directory a one-field change away.
  *
  * This table is bundled into hook processes, so rows stay lean — a field here is
  * paid for on every hook cold start.
@@ -45,5 +48,9 @@ export const HOSTS: Readonly<Record<KnownHost, HostDescriptor>> = {
     ...CODEX_STATE_CHANNEL,
     hookSignalEnv: "PLUGIN_DATA",
   },
-  agy: { marker: "agy", ...CLAUDE_STATE_CHANNEL },
+  agy: {
+    marker: "agy",
+    ...CLAUDE_STATE_CHANNEL,
+    hookSignalEnv: "ANTIGRAVITY_CONVERSATION_ID",
+  },
 };
