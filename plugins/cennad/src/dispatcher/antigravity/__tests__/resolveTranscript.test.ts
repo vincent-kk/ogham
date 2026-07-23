@@ -22,6 +22,19 @@ function doneEntry(content: string): string {
   });
 }
 
+// A tool-call planner step (agy's shape when the model invokes a tool): DONE but
+// carries thinking + tool_calls and no `content`. extractPlannerResponse must skip
+// these and recover the later text answer.
+function toolStep(): string {
+  return JSON.stringify({
+    source: 'MODEL',
+    type: 'PLANNER_RESPONSE',
+    status: 'DONE',
+    thinking: 'inspecting the repo',
+    tool_calls: [{ name: 'run_command', args: {} }],
+  });
+}
+
 async function seedMap(map: Record<string, string>): Promise<void> {
   await mkdir(dirname(AGY_LAST_CONVERSATIONS_PATH), { recursive: true });
   await writeFile(AGY_LAST_CONVERSATIONS_PATH, JSON.stringify(map));
@@ -104,6 +117,21 @@ describe('resolveTranscript', () => {
   it('returns null when the DONE entry content is empty', async () => {
     await seedMap({ [CWD]: CONV });
     await seedTranscript(CONV, doneEntry(''));
+    expect(await resolveTranscript(CWD, 0)).toBeNull();
+  });
+
+  it('recovers the final text answer past tool-call planner steps', async () => {
+    await seedMap({ [CWD]: CONV });
+    await seedTranscript(
+      CONV,
+      [toolStep(), toolStep(), doneEntry('final answer')].join('\n'),
+    );
+    expect(await resolveTranscript(CWD, 0)).toBe('final answer');
+  });
+
+  it('returns null when every planner step is a content-less tool call (soft-deny)', async () => {
+    await seedMap({ [CWD]: CONV });
+    await seedTranscript(CONV, [toolStep(), toolStep()].join('\n'));
     expect(await resolveTranscript(CWD, 0)).toBeNull();
   });
 });

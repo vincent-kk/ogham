@@ -11,7 +11,9 @@
   var DEFAULT_SPAWN_TIMEOUT_MS = 10 * 60 * 1000;
   var DEFAULT_OPTION_FLAGS = {
     codex: { yolo: false, sandbox: 'workspace-write' },
-    antigravity: { sandbox: false, skip_permissions: false },
+    // headless agy auto-denies permission-gated tools; skip to let them run,
+    // sandboxed so auto-approval stays inside terminal restrictions (paired)
+    antigravity: { sandbox: true, skip_permissions: true },
     claude: { permission_mode: 'dontAsk' },
   };
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };

@@ -52,6 +52,9 @@ if (mode === 'success') {
   process.exit(0);
 } else if (mode === 'empty-stdout') {
   process.exit(0);
+} else if (mode === 'empty-stdout-stderr') {
+  process.stderr.write('a tool required the "command" permission that headless mode cannot prompt for, so it was auto-denied. re-run with --dangerously-skip-permissions.\\n');
+  process.exit(0);
 } else if (mode === 'auth-stderr') {
   process.stderr.write('Please sign in to continue\\n');
   process.exit(1);
@@ -111,6 +114,14 @@ describe('antigravityDispatcher.start', () => {
     const result = await antigravityDispatcher.start(baseOptions());
     expect(result.status).toBe('failure');
     expect(result.error?.code).toBe('cli_error');
+  });
+
+  it('surfaces agy stderr in the cli_error when stdout is empty (auto-deny notice)', async () => {
+    process.env.CENNAD_FAKE_AGY_MODE = 'empty-stdout-stderr';
+    const result = await antigravityDispatcher.start(baseOptions());
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('cli_error');
+    expect(result.error?.message).toContain('--dangerously-skip-permissions');
   });
 
   it('recovers from the agy transcript when stdout is empty (#76 fallback)', async () => {

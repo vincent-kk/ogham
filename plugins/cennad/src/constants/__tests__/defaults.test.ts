@@ -17,10 +17,14 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
 
-  it('defaults option_flags to safe per-provider values', () => {
+  // antigravity sandbox + skip_permissions both default true (paired): agy headless
+  // -p auto-denies permission-gated tools, so skip_permissions is needed; sandbox
+  // keeps auto-approval inside terminal restrictions instead of an unbounded bypass.
+  // app.js DEFAULT_OPTION_FLAGS mirrors this value — keep in sync.
+  it('defaults option_flags to per-provider values', () => {
     expect(DEFAULT_CONFIG.option_flags).toEqual({
       codex: { yolo: false, sandbox: 'workspace-write' },
-      antigravity: { sandbox: false, skip_permissions: false },
+      antigravity: { sandbox: true, skip_permissions: true },
       claude: { permission_mode: 'dontAsk' },
     });
   });

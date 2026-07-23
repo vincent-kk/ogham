@@ -2,6 +2,7 @@ import type { ConversationError } from '../../../types/index.js';
 import { mapError } from '../../errorMap/index.js';
 import { spawnAgy } from '../operations/spawn.js';
 
+import { emptyOutputMessage } from './emptyOutputMessage.js';
 import { parseJsonOutput } from './parseJsonOutput.js';
 import { resolveTranscript } from './resolveTranscript.js';
 
@@ -48,8 +49,7 @@ export async function callAgy(
     response: null,
     error: {
       code: 'cli_error',
-      message:
-        'agy returned no output and the response could not be recovered. Try again, or update the agy CLI.',
+      message: emptyOutputMessage(result.stderr),
     },
   };
 }
