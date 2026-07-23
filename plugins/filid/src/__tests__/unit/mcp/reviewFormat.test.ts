@@ -50,6 +50,17 @@ All members reached consensus.
 **REQUEST_CHANGES** — 2 fix request items generated.
 `;
 
+const SAMPLE_REPORT_WITH_FRONTMATTER = `---
+verdict: REQUEST_CHANGES
+branch: feature/test
+base_ref: main
+run_id: feature--test@d8dc44e0
+committee: [engineering-architect, knowledge-manager]
+generated_at: 2026-03-08T00:00:00Z
+---
+
+${SAMPLE_REPORT}`;
+
 const SAMPLE_STRUCTURE = `---
 scope: diff
 stage_results:
@@ -182,6 +193,75 @@ describe('formatPrComment', () => {
     expect(md).not.toContain('Fix Requests');
     const detailsCount = (md.match(/<details>/g) || []).length;
     expect(detailsCount).toBe(1);
+  });
+
+  it('renders report frontmatter as a table above the collapsible sections', async () => {
+    const reviewDir = await setupReviewDir(tmpDir, 'feature/test');
+    await fs.writeFile(
+      path.join(reviewDir, 'review-report.md'),
+      SAMPLE_REPORT_WITH_FRONTMATTER,
+    );
+
+    const result = await formatPrComment({
+      action: 'format-pr-comment',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+    });
+
+    const md = result.markdown as string;
+    expect(md).toContain('| Field | Value |');
+    expect(md).toContain('| Verdict | **REQUEST_CHANGES** |');
+    expect(md).toContain('| Branch | `feature/test` |');
+    expect(md).toContain('| Base | `main` |');
+    expect(md).toContain('| Run ID | `feature--test@d8dc44e0` |');
+    expect(md).toContain(
+      '| Committee | `engineering-architect` · `knowledge-manager` |',
+    );
+    expect(md).toContain('| Generated | `2026-03-08T00:00:00Z` |');
+
+    // The table sits between the governance header and the first <details>
+    const headerEnd = md.indexOf('## Code Review Governance — REQUEST_CHANGES');
+    const tableAt = md.indexOf('| Field | Value |');
+    const firstDetailsAt = md.indexOf('<details>');
+    expect(headerEnd).toBeLessThan(tableAt);
+    expect(tableAt).toBeLessThan(firstDetailsAt);
+  });
+
+  it('strips raw frontmatter from the collapsed report body', async () => {
+    const reviewDir = await setupReviewDir(tmpDir, 'feature/test');
+    await fs.writeFile(
+      path.join(reviewDir, 'review-report.md'),
+      SAMPLE_REPORT_WITH_FRONTMATTER,
+    );
+
+    const result = await formatPrComment({
+      action: 'format-pr-comment',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+    });
+
+    const md = result.markdown as string;
+    expect(md).not.toContain('base_ref:');
+    expect(md).not.toContain('run_id:');
+    expect(md).not.toContain('generated_at:');
+    expect(md).not.toContain('committee: [');
+    // Report body survives the strip
+    expect(md).toContain('# Code Review Report — feature/test');
+  });
+
+  it('omits the meta table when the report has no frontmatter', async () => {
+    const reviewDir = await setupReviewDir(tmpDir, 'feature/test');
+    await fs.writeFile(path.join(reviewDir, 'review-report.md'), SAMPLE_REPORT);
+
+    const result = await formatPrComment({
+      action: 'format-pr-comment',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+    });
+
+    const md = result.markdown as string;
+    expect(md).not.toContain('| Field | Value |');
+    expect(md).toContain('# Code Review Report — feature/test');
   });
 
   it('throws when review-report.md is missing', async () => {

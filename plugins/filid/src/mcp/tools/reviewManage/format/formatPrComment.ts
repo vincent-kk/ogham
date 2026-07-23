@@ -8,6 +8,7 @@ import {
 } from '../utils/reviewUtils.js';
 
 import { collapsible } from './collapsible.js';
+import { splitReportMeta } from './utils/splitReportMeta.js';
 import { transformStructureContent } from './utils/transformStructureContent.js';
 
 const MAX_COMMENT_SIZE = 50_000;
@@ -47,6 +48,7 @@ export async function formatPrComment(
   );
 
   const verdict = extractVerdict(reportContent);
+  const { metaTable, body: reportBody } = splitReportMeta(reportContent);
 
   const sections: string[] = [];
 
@@ -58,16 +60,17 @@ export async function formatPrComment(
       ),
     );
 
-  sections.push(collapsible('Review Report (Phase B~D)', reportContent));
+  sections.push(collapsible('Review Report (Phase B~D)', reportBody));
 
   if (fixRequestsContent)
     sections.push(collapsible('Fix Requests', fixRequestsContent));
 
   const header = `## Code Review Governance — ${verdict}\n`;
+  const meta = metaTable ? `\n${metaTable}\n` : '';
   const body = sections.join('\n\n');
   const footer = `\n\n> Full report: \`.filid/review/${normalized}/review-report.md\``;
 
-  let markdown = header + '\n' + body + footer;
+  let markdown = header + meta + '\n' + body + footer;
 
   if (markdown.length > MAX_COMMENT_SIZE)
     markdown =
