@@ -8,7 +8,7 @@
       "title": "Agent-Legible Code",
       "description": "Make invisible wiring, repeated blocks, name traps, and indirection legible at the point where they bite.",
       "recommended": true,
-      "templateHash": "f619ed1b434042169c23f366cb972584f17d9e370ee17e382009191d6ab34488"
+      "templateHash": "ca5f3c61def7a49f1181ea9e9ac003036719b304bfc7f6447f47b4cda95cbc3f"
     },
     {
       "id": "seiri_public-contract",
@@ -16,7 +16,7 @@
       "title": "Public Contract",
       "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement.",
       "recommended": false,
-      "templateHash": "3a8cf0d13132d899e58a32b076996b2349ce66f6c7fcc87911dc62273e24c7a3"
+      "templateHash": "16546c445b9ffe0c2a6f98917eb47df1e8725ade61d5ff8f9b51a7cafe70e225"
     },
     {
       "id": "seiri_test-validity",
@@ -32,7 +32,7 @@
       "title": "Reuse First",
       "description": "Search first, compose second, write last — the smallest change that answers the request.",
       "recommended": true,
-      "templateHash": "b7428d1d215abe60ac7b3897bd5906af54a5f7ce1ac6a97f79e499a6036fcab2"
+      "templateHash": "2a0312162dd52034b62d09dfa041d11065235ffbfdb6dd5977afeb4e73dafab3"
     },
     {
       "id": "seiri_naming",
@@ -40,7 +40,7 @@
       "title": "Naming",
       "description": "Mirror sibling conventions, name one concrete responsibility, and keep grab-bag files out of the tree.",
       "recommended": false,
-      "templateHash": "a6e9bbca69d67e2bab75bf9ee1f2c4da15d82262f9b2515d5e924d3e689ffb77"
+      "templateHash": "e0e194a9b2450e014366737a88f70c51551b545d7196828988ef204fea28cd61"
     },
     {
       "id": "seiri_structure",

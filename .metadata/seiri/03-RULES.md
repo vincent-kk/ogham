@@ -8,11 +8,11 @@
 
 | #   | 파일                            | 형식 층  | 형태              | 상태                        |
 | --- | ------------------------------- | -------- | ----------------- | --------------------------- |
-| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ 통과 (07-23)             |
-| S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ 통과 (07-23)             |
+| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ lite · D9 통과 (07-24)   |
+| S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ lite · D9 통과 (07-24)   |
 | S3  | `seiri_test-validity.md`        | L4       | 혼합              | ✅ 이관본 (§1 프로세스)     |
-| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ 이관본 (0/3 준수)        |
-| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ 이관본 (0/3 준수)        |
+| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ lite · D9 통과 (07-24)   |
+| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite · D9 통과 (07-24)   |
 | S6  | `seiri_structure.md`            | L0·L1    | 방향형            | ✅ 이관본 (방향형)          |
 | S7  | `seiri_context-efficiency.md`   | 6층 예외 | 레시피            | ✅ 통과 (D8 무삭감)         |
 | S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | ✅ 통과 (D8 무삭감)         |
@@ -28,6 +28,8 @@
 - **S9 — D2 확정 (편입 opt-in), 등재는 유보**: Phase 0 대원칙(대조군 없이 만들지 않는다)에 따라 자체 대조군(3표본)이 실패를 보인 뒤 manifest에 opt-in(recommended: false)으로 등재한다.
 
 **A-1c 실행 완료 (2026-07-23)**: S1~S8을 `templates/rules/seiri_*.md`로 무수정 추출(결정적 스크립트, 전 파일 무결성 검사 통과, 최장 107줄, 러너명 금칙 0건) · manifest 8항 등재(권장 3종 S1·S3·S4) · `yarn seiri build`가 templateHash 8건 주입 · `yarn seiri test:run` **45 passed**. S9는 대조군 통과 후 추가 등재.
+
+**D9 슬리밍 완료 (2026-07-24)** — 근거·수치 원문 [phase0/d9-results.md](./phase0/d9-results.md): 구조 4종(S1·S2·S4·S5)을 lite로 재단(볼드 명령+Ask yourself+레시피만 남기고 정당화 삭제 — 레시피 무손상, 불변식 전부 통과). **2-1 성능가드 A/B**(sonnet, full vs lite, 30런): full 15/15 = lite 15/15 hidden-pass, **롤백 0**, 4종 전부 채택. 상시비용 **-13%**(8규칙 4760→4130 단어; 재단 4종만 -27%). sonnet은 양 arm 100% 무차별이라 가드는 무회귀만 확증 — 판별력은 약모델·reuse 차원(lite가 reuse-first §1 무손상 보존). **2-2 프로세스 A/B**(as-is vs to-be S3·S7·S8, 6런): cause-fix 3/3 양측·증상패치 0·거짓done 0 → **lift 없음**(sonnet 기본역량이 원인수정·fail-first·전수인지 수행). 단 긴 세션·컴팩션 국면은 프록시 미도달(메인세션 잔여). S3·S6·S7·S8은 full 무변경.
 
 ---
 
