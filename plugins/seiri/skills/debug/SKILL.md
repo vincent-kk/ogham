@@ -18,29 +18,29 @@ line.
 ## Workflow
 
 **1. Reproduce first.** Run this repository's designated verification
-command, capture the failure to a scratch file outside the repository
-tree, and quote that file — re-running a suite to grep it differently
+command, capture the failure to a scratch file outside the repository,
+and quote that file — re-running a suite to grep it differently
 pays twice. Without a reproduction there is nothing to verify a fix
 against; say so rather than guessing.
 
 **2. Separate where it appeared from where it lives.** The failing line
 is evidence, not the answer. Trace backward through the values that
-reached it, to the first place the state was already wrong.
+reached it to where state first went wrong.
 
 **3. Confirm the cause before fixing.** Make the smallest change that
 would break if your explanation were wrong, and check it. An explanation
 that predicts nothing is a story.
 
-**4. Fix, then prove it.** Run the same command, then confirm the test
+**4. Fix, then prove it.** Run the same command, and confirm the test
 could have failed: it must fail against pre-fix code, for the bug's own
 reason. A test that passes with and without the change certifies the bug
 as handled.
 
 ## Red flags — stop
 
-The same symptom fixed twice · each fix revealing a new problem elsewhere
-· "should work now" without fresh output · a passing run you have not
-confirmed exercises the code you edited.
+One symptom fixed twice · each fix revealing a new problem · "should
+work now" without fresh output · a passing run not confirmed to
+exercise the edited code.
 
 Repeated failure of one approach indicts the approach. Reconsider the
 assumption rather than patching again.
@@ -50,5 +50,6 @@ assumption rather than patching again.
 - Cite tool output for every claim. Your reasoning about output is not
   output.
 - Change only what the diagnosis requires; mention other findings.
+- Hand off: completion claims go through verify.
 - Report an unresolved cause plainly — a disclosed dead end beats a
   plausible fix nobody verified.

@@ -18,30 +18,31 @@ shape worth implementing, not agreement.
 
 **1. Find what already exists.** Search this repository for prior art
 first: a utility that does part of this, the closest proven pattern, an
-installed library. Report near-misses too — "nothing exists" is a claim
-that needs a search behind it.
+installed library. Report near-misses — "nothing exists" needs a
+search behind it.
 
 **2. State the constraints you found.** Not preferences — facts that
-narrow the solution: an interface callers depend on, a convention the
+narrow the solution: an interface callers depend on, a convention
 neighbouring files follow, a limit the runtime imposes. Name where you
 saw each one.
 
 **3. Offer distinct shapes, not variations.** Two or three options that
-differ in what they trade away, each with its cost stated. If one is
-clearly right given the constraints, say so and why rather than padding
-the list.
+differ in what they trade away, costs stated. If one is clearly right
+given the constraints, say so and why.
 
 **4. Make it checkable.** Turn the chosen shape into something that can
 fail: "these inputs are rejected, shown by a check that fails first and
-passes after" beats "add validation". If you cannot say how the work
-would be verified, the shape is not finished.
+passes after" beats "add validation". If you cannot say how it would
+be verified, the shape is not finished.
 
 ## Rules
 
 - Disagree with reasoning when the request conflicts with what the
-  repository already does. Reflexive agreement is not analysis.
-- Say "I don't know" rather than guessing, and name what would settle it.
+  repository does. Reflexive agreement is not analysis.
+- Say "I don't know" rather than guessing; name what would settle it.
 - Do not write or modify files here. This skill produces a shape.
+- Hand off: an approved shape goes to plan when multi-step, to
+  implement when it is one surgical change.
 - If the user says to proceed without further questions, stop asking.
-  Write what you have as an artifact and hand it over. Do not modify
-  files or delegate execution on the strength of an unfinished interview.
+  Write what you have as an artifact, hand it over. Do not modify
+  files or delegate execution on an unfinished interview.

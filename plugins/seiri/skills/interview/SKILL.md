@@ -21,29 +21,29 @@ mark the gaps. An interview that never ends produces nothing.
 
 **Round 1 — the observable outcome.** What is true after this works that
 is not true now? Push until the answer names something checkable.
-"Faster" becomes "this path returns within N seconds under this load".
+"Faster" becomes "returns within N seconds under this load".
 
 **Round 2 — the boundaries.** What is out of scope? What must not change?
-Which existing behaviour is load-bearing for someone else? Unstated
+Which existing behaviour is load-bearing for others? Unstated
 invariants turn a correct change into a regression.
 
 **Round 3 — the edges.** What inputs are hostile, empty, or duplicated?
-What happens when a dependency is unavailable? Ask only where the answer
+What if a dependency is unavailable? Ask only where the answer
 changes the implementation.
 
 ## Output
 
 A spec with three sections: **Done when** (criteria that can fail),
 **Out of scope** (what this does not touch), **Open** (what remains
-unanswered, and what would settle it). Every criterion must be something
-a check could confirm; anything you cannot phrase that way goes under
-Open.
+unanswered, and what would settle it). Every criterion must be
+checkable; anything you cannot phrase that way goes under Open.
 
 ## Rules
 
 - One round is a batch of questions, not one question. Do not spend a
   round on what the repository could answer — read it instead.
 - Never invent a criterion. An unanswered question belongs under Open.
+- Hand off: the finished spec goes to plan when work is multi-step.
 - If the user says to proceed without further questions, stop asking.
-  Write what you have as an artifact and hand it over. Do not modify
-  files or delegate execution on the strength of an unfinished interview.
+  Write what you have as an artifact, hand it over. Do not modify
+  files or delegate execution on an unfinished interview.
