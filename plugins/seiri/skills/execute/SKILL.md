@@ -1,6 +1,6 @@
 ---
 name: execute
-user_invocable: true
+user-invocable: true
 disallowed-tools: AskUserQuestion
 description: '[seiri:execute] Carry a written plan to done without losing your place. Use when an implementation plan exists and the work is to perform it.'
 argument-hint: '[path to the plan]'

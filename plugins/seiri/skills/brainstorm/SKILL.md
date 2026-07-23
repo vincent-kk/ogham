@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-user_invocable: true
+user-invocable: true
 disable-model-invocation: true
 description: '[seiri:brainstorm] Shape a change before any code is written — what this repository already does, what constrains the solution, what counts as done. Trigger: "brainstorm this", "설계 같이 고민해줘"'
 argument-hint: '<what you are trying to build or change>'

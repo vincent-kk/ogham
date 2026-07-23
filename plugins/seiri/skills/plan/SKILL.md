@@ -1,6 +1,6 @@
 ---
 name: plan
-user_invocable: true
+user-invocable: true
 disallowed-tools: AskUserQuestion
 description: '[seiri:plan] Write an implementation plan a stranger could execute without this conversation. Use when work spans multiple steps or sittings, before touching code.'
 argument-hint: '[the spec or goal to plan]'

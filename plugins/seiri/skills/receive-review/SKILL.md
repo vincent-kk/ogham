@@ -1,6 +1,6 @@
 ---
 name: receive-review
-user_invocable: true
+user-invocable: true
 disallowed-tools: AskUserQuestion
 description: '[seiri:receive-review] Verify feedback against the code before implementing it. Use when review feedback arrives, before acting on any of it.'
 argument-hint: '[the feedback]'

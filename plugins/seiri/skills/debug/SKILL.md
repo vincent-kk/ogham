@@ -1,6 +1,6 @@
 ---
 name: debug
-user_invocable: true
+user-invocable: true
 disallowed-tools: AskUserQuestion
 description: '[seiri:debug] Trace a failure to where it started rather than where it surfaced. Use when a test fails, an error is thrown, or a fix did not hold.'
 argument-hint: '[the failing test or symptom]'

@@ -1,6 +1,6 @@
 ---
 name: implement
-user_invocable: true
+user-invocable: true
 disallowed-tools: AskUserQuestion
 description: '[seiri:implement] Prove a change with a failure you watched. Use when implementing any feature or bugfix, before writing the implementation.'
 argument-hint: '[the change to make]'

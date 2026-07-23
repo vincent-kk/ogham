@@ -15,8 +15,8 @@ import { GIT_DIR } from '../../constants/files.js';
  * A filesystem walk rather than `git rev-parse`: this runs inside hook
  * processes, where one spawn per session start is the dominant cost.
  * Segmentation and the loop's stop test go through the compat adapters, so
- * a Windows-flavoured path resolves the same way on any runner — the same
- * property the project-identity hash depends on.
+ * a Windows-flavoured path resolves the same way on any runner — the repo
+ * root that anchors config and observation records stays stable per runner.
  */
 export function findRepoRoot(startDir: string): string {
   let current = startDir;

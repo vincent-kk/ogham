@@ -1,6 +1,6 @@
 ---
 name: request-review
-user_invocable: true
+user-invocable: true
 disallowed-tools: AskUserQuestion
 description: '[seiri:request-review] Hand a reviewer the work, not your session. Use when substantial work is complete, before merging or handing off.'
 argument-hint: '[range or scope to review]'

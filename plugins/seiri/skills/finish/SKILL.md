@@ -1,6 +1,6 @@
 ---
 name: finish
-user_invocable: true
+user-invocable: true
 disable-model-invocation: true
 description: '[seiri:finish] Close out a development branch deliberately — verify, then choose integration. Trigger: "finish this branch", "wrap this up", "작업 마무리"'
 argument-hint: '[branch]'

@@ -274,8 +274,8 @@ the framework — label framework conventions and leave them standing.
 
 What a module exports is a promise to every present and future consumer.
 This rule keeps that promise small, named, and enumerable.
-This rule rests on a property every codebase has: a distinction exists
-between what is public and what is internal.
+This rule rests on a property every codebase with a module system has: a
+distinction exists between what is public and what is internal.
 
 **Tradeoff:** occasionally you will export one symbol twice on purpose
 (once for use, once for stated intent) instead of exporting everything once.
@@ -289,9 +289,11 @@ visibility mechanism.
 - Exporting is publication, not filing. Every public symbol widens the
   surface that must stay compatible.
 - A symbol nothing consumes is either intended API (state it: a doc line,
-  a public-surface list — whatever this repository uses) or leftover
-  (remove it). Usage is checkable by tools; intent must be written by you —
-  exported symbols cannot enumerate their future callers.
+  a public-surface list — whatever this repository uses) or leftover.
+  Remove leftover your change added or orphaned; leave a pre-existing one
+  for a deliberate cleanup (seiri_reuse-first §3). Usage is checkable by
+  tools; intent must be written by you — exported symbols cannot enumerate
+  their future callers.
 
 Ask yourself: "Who consumes this — and if no one yet, where did I say so?"
 

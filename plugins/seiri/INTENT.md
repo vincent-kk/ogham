@@ -9,17 +9,17 @@
 
 ## Structure
 
-| Path                         | Role                                        |
-| ---------------------------- | ------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트)              |
-| `templates/rules/`           | 배포되는 규칙 문서 + `manifest.json`        |
-| `templates/gates/`           | 저장소 게이트 placeholder 골격 (값 없음)    |
-| `skills/`                    | 스킬 4종 (setup·brainstorm·interview·debug) |
-| `hooks/hooks.json`           | SessionStart · InstructionsLoaded 매핑      |
-| `libs/run.cjs`               | cross-platform 훅 러너                      |
-| `scripts/`                   | esbuild 번들 + 규칙 해시 동기화             |
-| `bridge/` · `public/`        | 빌드 산출물 (커밋 대상)                     |
-| `.claude-plugin/plugin.json` | 플러그인 매니페스트 — **`agents` 없음**     |
+| Path                         | Role                                                               |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `src/`                       | TypeScript 소스 (fractal 루트)                                     |
+| `templates/rules/`           | 배포되는 규칙 문서 + `manifest.json`                               |
+| `templates/gates/`           | 저장소 게이트 placeholder 골격 (값 없음)                           |
+| `skills/`                    | 스킬 (호출·자동, 작업 주기 전 구간) — 목록 정본은 `SHIPPED_SKILLS` |
+| `hooks/hooks.json`           | SessionStart · InstructionsLoaded 매핑                             |
+| `libs/run.cjs`               | cross-platform 훅 러너                                             |
+| `scripts/`                   | esbuild 번들 + 규칙 해시 동기화                                    |
+| `bridge/` · `public/`        | 빌드 산출물 (커밋 대상)                                            |
+| `.claude-plugin/plugin.json` | 플러그인 매니페스트 — **`agents` 없음**                            |
 
 ## Conventions
 

@@ -58,12 +58,26 @@ heard of any particular architecture.
 
 ## Skills
 
+Invoked by you:
+
 | Skill               | Use                                              |
 | ------------------- | ------------------------------------------------ |
 | `/seiri:setup`      | Choose which rules this repository uses          |
 | `/seiri:brainstorm` | Shape a change before writing it                 |
 | `/seiri:interview`  | Turn a vague request into criteria that can fail |
-| `/seiri:debug`      | Trace a failure to where it started              |
+| `/seiri:finish`     | Decide whether finished work integrates          |
+
+Dispatched automatically when the moment fits:
+
+| Skill                   | Use                                         |
+| ----------------------- | ------------------------------------------- |
+| `/seiri:plan`           | Break multi-step work into reviewable tasks |
+| `/seiri:execute`        | Carry a written plan to done                |
+| `/seiri:implement`      | Make a change test-first                    |
+| `/seiri:debug`          | Trace a failure to where it started         |
+| `/seiri:verify`         | Check a completion claim before it is made  |
+| `/seiri:request-review` | Hand work to review with a fixed scope      |
+| `/seiri:receive-review` | Fold review feedback back into the code     |
 
 ## License
 

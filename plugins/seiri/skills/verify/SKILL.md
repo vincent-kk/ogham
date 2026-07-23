@@ -1,6 +1,6 @@
 ---
 name: verify
-user_invocable: true
+user-invocable: true
 disallowed-tools: AskUserQuestion
 description: '[seiri:verify] Evidence before claims. Use when about to say done, fixed, or passing — before committing, merging, or moving to the next task.'
 argument-hint: '[the claim to prove]'

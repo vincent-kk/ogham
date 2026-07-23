@@ -9,12 +9,14 @@ import { computeFileSha256 } from '../core/utils/computeFileSha256.js';
 
 /**
  * A mechanical drift guard, NOT a quality test. It checks only the things
- * about seiri rules that are string-level facts: the filid/seiri boundary
- * (numeric thresholds and test-runner names belong to filid, never seiri) and
- * the D8 shared-idiom contract (identical wording in a rule and its skill, so
- * a reword shows up as a red diff). Whether a rule is sound or actually shifts
- * behavior is a semantic question — that lives in the micro-test / 10-issue A/B
- * track, which an LLM evaluates. This file makes no claim about it.
+ * about seiri rules that are string-level facts: the B1/B5/B6 skeleton
+ * (precedence chain, format grounding, double falsification — presence only),
+ * the filid/seiri boundary (numeric thresholds and test-runner names belong to
+ * filid, never seiri), and the D8 shared-idiom contract (identical wording in a
+ * rule and its skill, so a reword shows up as a red diff). Whether a rule is
+ * sound or actually shifts behavior is a semantic question — that lives in the
+ * micro-test / 10-issue A/B track, which an LLM evaluates. This file makes no
+ * claim about it.
  */
 const packageRoot = portableJoin(
   portableDirname(fileURLToPath(import.meta.url)),
@@ -98,5 +100,49 @@ describe('rule invariants (filid/seiri boundary + D8 idiom contract)', () => {
       )
       .map((r) => r.filename);
     expect(stale).toEqual([]);
+  });
+
+  it('every rule opens with the B1 precedence chain', () => {
+    const PRECEDENCE = /^> \*\*Precedence\*\*:/m;
+    const offenders = rules
+      .filter((r) => !PRECEDENCE.test(r.text))
+      .map((r) => r.name);
+    expect(offenders).toEqual([]);
+    // The guard bites: a rule with no precedence block is caught.
+    expect(PRECEDENCE.test('# Rule\n\nbody with no chain')).toBe(false);
+  });
+
+  it('every rule states its B5 format grounding (P5 gate)', () => {
+    // Singular, plural, and the session-scoped variant all satisfy P5 — the
+    // form count matches the number of properties the rule leans on.
+    const GROUNDING = /\brests on (a property|properties)\b/i;
+    const offenders = rules
+      .filter((r) => !GROUNDING.test(r.text))
+      .map((r) => r.name);
+    expect(offenders).toEqual([]);
+    // The guard bites both ways: plural and session variants pass, prose
+    // with no grounding sentence fails.
+    expect(
+      GROUNDING.test('This rule rests on properties every codebase has'),
+    ).toBe(true);
+    expect(
+      GROUNDING.test('rests on a property of every session, not a codebase'),
+    ).toBe(true);
+    expect(GROUNDING.test('a rule with no grounding sentence')).toBe(false);
+  });
+
+  it('every rule carries the B6 double falsification', () => {
+    const offenders = rules
+      .filter(
+        (r) =>
+          !/This rule is working if:/.test(r.text) ||
+          !/is wrong for you if:/.test(r.text),
+      )
+      .map((r) => r.name);
+    expect(offenders).toEqual([]);
+    // The guard bites: one half alone does not satisfy B6.
+    expect(/is wrong for you if:/.test('This rule is working if: x')).toBe(
+      false,
+    );
   });
 });
