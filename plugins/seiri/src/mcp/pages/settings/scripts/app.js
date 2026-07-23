@@ -70,9 +70,10 @@
     close: document.getElementById('close'),
   };
 
-  function setStatus(message, isError) {
+  function setStatus(kind, message) {
+    elements.status.hidden = false;
+    elements.status.setAttribute('data-kind', kind);
     elements.status.textContent = message || '';
-    elements.status.classList.toggle('is-error', Boolean(isError));
   }
 
   function body() {
@@ -294,23 +295,23 @@
 
   function save(thenClose) {
     setBusy(true);
-    setStatus('Saving…');
+    setStatus('info', 'Saving…');
     post(ROUTE.SAVE, body())
       .then(function (data) {
         renderPreview(data.ruleDocs);
-        setStatus('Saved. You can return to the session.');
+        setStatus('ok', 'Saved. You can return to the session.');
         if (thenClose) return post(ROUTE.CLOSE, {}).then(closeWindow);
         setBusy(false);
         return undefined;
       })
       .catch(function (err) {
-        setStatus(err.message, true);
+        setStatus('error', err.message);
         setBusy(false);
       });
   }
 
   function closeWindow() {
-    setStatus('Saved. This tab can be closed.');
+    setStatus('ok', 'Saved. This tab can be closed.');
     window.close();
   }
 
@@ -322,13 +323,13 @@
   });
   elements.close.addEventListener('click', function () {
     setBusy(true);
-    setStatus('Closing…');
+    setStatus('info', 'Closing…');
     post(ROUTE.CLOSE, {})
       .then(function () {
         window.close();
       })
       .catch(function (err) {
-        setStatus(err.message, true);
+        setStatus('error', err.message);
         setBusy(false);
       });
   });
