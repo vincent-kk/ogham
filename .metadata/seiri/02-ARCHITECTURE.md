@@ -131,7 +131,7 @@ plugins/seiri/
 │   ├── INTENT.md
 │   ├── rules/
 │   │   ├── manifest.json        # SSoT
-│   │   └── seiri_*.md           # 규칙 9종
+│   │   └── seiri_*.md           # 배포 규칙 (정본)
 │   └── gates/                   # placeholder 골격 (값 없음)
 │
 ├── skills/                      # 호출 4 · 자동 7 — 지도는 §3
