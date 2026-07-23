@@ -185,9 +185,12 @@ scope. One row per advisory key, updated in place in SKILL.md Step 5:
 ## PR Comment Format
 
 Use `mcp__plugin_filid_tools__review_manage(action: "format-pr-comment")` —
-it reads `review-report.md` (+ `fix-requests.md` when present), wraps
-each in collapsible `<details>` sections, handles the 50,000-char limit,
-and returns ready-to-post markdown. Post via
+it reads `review-report.md` (+ `fix-requests.md` when present), lifts the
+report frontmatter into a `| Field | Value |` table rendered _outside_ the
+collapsible sections (between the `## Code Review Governance — <verdict>`
+header and the first `<details>`), wraps each artifact in a `<details>`
+sections with the raw frontmatter stripped from the report body, handles
+the 50,000-char limit, and returns ready-to-post markdown. Post via
 `gh pr comment --body-file`; when a `Code Review Governance` comment
 already exists, edit it in place
 (`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id>`).

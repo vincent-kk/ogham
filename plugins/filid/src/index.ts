@@ -108,6 +108,7 @@ export {
   extractVerdict,
   generateHumanSummary,
   parseFixRequests,
+  parseReviewReportFrontmatter,
   parseStructureCheckFrontmatter,
   resolveVerdict,
 } from './core/index.js';
