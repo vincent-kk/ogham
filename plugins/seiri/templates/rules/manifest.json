@@ -1,5 +1,70 @@
 {
   "_comment": "Injectable rule docs manifest. Drives optional rule file deployment from the setup surfaces (settings page / rule_docs_sync). Never read by session hooks. Every entry is opt-in — seiri has no required rules.",
   "version": "1.0",
-  "rules": []
+  "rules": [
+    {
+      "id": "seiri_agent-legible",
+      "filename": "seiri_agent-legible.md",
+      "title": "Agent-Legible Code",
+      "description": "Make invisible wiring, repeated blocks, name traps, and indirection legible at the point where they bite.",
+      "recommended": true,
+      "templateHash": "f619ed1b434042169c23f366cb972584f17d9e370ee17e382009191d6ab34488"
+    },
+    {
+      "id": "seiri_public-contract",
+      "filename": "seiri_public-contract.md",
+      "title": "Public Contract",
+      "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement.",
+      "recommended": false,
+      "templateHash": "49f9d625f48c8631bac3b075e5927ccb9ca83d8e12d092ea340381f2c2b28554"
+    },
+    {
+      "id": "seiri_test-validity",
+      "filename": "seiri_test-validity.md",
+      "title": "Test Validity",
+      "description": "A passing test is evidence only if it could have failed — fail first, verify the artifact you changed, curate suites.",
+      "recommended": true,
+      "templateHash": "6889bdb9ec1e20c64186bf2d37dadc9f138e8d78f5f6592ead69d10ad599dd2b"
+    },
+    {
+      "id": "seiri_reuse-first",
+      "filename": "seiri_reuse-first.md",
+      "title": "Reuse First",
+      "description": "Search first, compose second, write last — the smallest change that answers the request.",
+      "recommended": true,
+      "templateHash": "b7428d1d215abe60ac7b3897bd5906af54a5f7ce1ac6a97f79e499a6036fcab2"
+    },
+    {
+      "id": "seiri_naming",
+      "filename": "seiri_naming.md",
+      "title": "Naming",
+      "description": "Mirror sibling conventions, name one concrete responsibility, and keep grab-bag files out of the tree.",
+      "recommended": false,
+      "templateHash": "a6e9bbca69d67e2bab75bf9ee1f2c4da15d82262f9b2515d5e924d3e689ffb77"
+    },
+    {
+      "id": "seiri_structure",
+      "filename": "seiri_structure.md",
+      "title": "Structure",
+      "description": "Direction-only structure rules: dependencies form a DAG, depth is a toll, cohesion splits and complexity compresses.",
+      "recommended": false,
+      "templateHash": "f12648d9b720312774c4274cf2ac9b0c39a3fca480462d17f061e90ad81270fd"
+    },
+    {
+      "id": "seiri_context-efficiency",
+      "filename": "seiri_context-efficiency.md",
+      "title": "Context Efficiency",
+      "description": "Spend session context deliberately: generated artifacts are search-only, capture once, re-read with a reason.",
+      "recommended": false,
+      "templateHash": "0133a6018440c28d6a645e1ddf644a918cb93f90662cad5564faedd0f5a17d23"
+    },
+    {
+      "id": "seiri_cognitive-discipline",
+      "filename": "seiri_cognitive-discipline.md",
+      "title": "Cognitive Discipline",
+      "description": "Evidence over confidence, causes over symptoms — guardrails against rationalization in long agent sessions.",
+      "recommended": false,
+      "templateHash": "fd11b3e5d00b410b3a14adee8534d9c5a3ccd7b1f28826e002dc869d5f4a349d"
+    }
+  ]
 }

@@ -181,4 +181,214 @@ export default task;
 
 ---
 
-**다음**: Vincent 판독·판정 → 통과 시 처치군(동일 프롬프트 + S1 전문 전치, 격리 cwd, 5회).
+**대조군 판독 요청에 대한 사용자 응답 (2026-07-23)**: _"알 수 없다. 실증을 통해 판단하라."_ — 대조군 단독 판독(안락의자) 대신 **처치군을 실행해 A/B 대비로 판단 근거를 세운다**는 지시로 해석. 처치군 5회를 아래에 기록한다.
+
+---
+
+# 처치군 (라운드 3 — 2026-07-23)
+
+> 처치군 프롬프트 = 03-RULES.md S1 코드펜스 전문(라인 157–254, `# Agent-Legible Code` … `leave them standing.`)을 `.claude/rules/seiri_agent-legible.md` 배포 wrapper와 함께 대조군 프롬프트 **앞에 전치**. 나머지 자구 동일(조립 총 5,784 B). 조립은 두 원본 문서(03-RULES.md·본 파일)에서 **결정적 추출 스크립트**로 수행 — 손 전사 없음.
+
+## 실행 노트 (처치군)
+
+- cennad `start_conversation` **직접 호출** 5회(릴레이 없음 — 응답이 도구 결과로 회수됨). 표본마다 격리된 빈 스크래치 cwd(`s1-treatment/t1…t5`).
+- 대조군 구성(3 claude + 2 codex) 미러링. **antigravity 제외**(CLI 결함).
+- 4/5(t1·t3·t4·t5)가 cwd에 실제 파일을 씀 — **on-disk 파일이 응답 원문과 일치 확인**. t2는 디스크 미기록(빈 작업 디렉터리라 "가짜 저장소를 만들지 않는다"며 응답에 파일 내용 제공).
+
+## 결과표 (처치군)
+
+| 라운드 | 군   | provider(cwd) | F1                                          | F2  | 비고                                                                                                           |
+| ------ | ---- | ------------- | ------------------------------------------- | --- | -------------------------------------------------------------------------------------------------------------- |
+| 3      | 처치 | claude (t1)   | **표지 있음** — 파일 헤더 4줄               | —   | `RETRY_AFTER_MS` 명명·duration 인자 정확. 표지: registry 자동스캔·파일명→키·"`.ts` 수정(컴파일 `.js` 아님)"    |
+| 3      | 처치 | claude (t2)   | **표지 있음** — 헤더 5줄(응답 내, 디스크 X) | —   | duration 인자 정확. 산문서 name trap(`olderThanMs` vs `Date.now()`) 명시 + rule 2 키 유일성 언급               |
+| 3      | 처치 | claude (t3)   | **표지 있음** — 파일 헤더 4줄               | —   | `RETRY_AFTER_MS` 명명·duration 인자 정확. 에러 처리 판단지점을 사용자에게 질문으로 남김                        |
+| 3      | 처치 | codex (t4)    | **표지 있음** — 파일 헤더 2줄               | —   | `ONE_HOUR_MS` 명명·duration 인자 정확. export 이름 서술적(`retryFailedWebhookDeliveriesTask`)                  |
+| 3      | 처치 | codex (t5)    | **표지 있음** — 파일 헤더 1줄               | —   | **duration 함정 재발**: `failedDeliveries(Date.now() - …)` (대조군 V1과 동일 시그니처 버그). F1 축은 표지 있음 |
+
+**중간 집계 (사람 판정 대기)**: 처치군 F1 **5/5 표지 있음** ↔ 대조군 F1 5/5 표지 없음 — **F1 축 완전 반전**. 분산 낮음 — 5개 모두 파일 진입부 헤더 주석으로 "레지스트리 자동 로드 + 파일명→키" 배선을 명시(길이 1–5줄, 형태 수렴). **F3(템플릿 반향) 아님**: 표지가 규칙의 템플릿 `loaded by <mechanism>; <path/name/annotation> determines <what>` 를 **구체값으로 채움**(`registry.ts`·`loadTasks`·glob·실제 키 문자열) — 산출물(파일) 자체가 바뀜.
+
+**부수 관측(2차 축)**: rule 3(name trap)/시그니처 의미 — 4/5가 `olderThanMs`를 duration으로 올바르게 처리(명명 상수화). t5(codex)만 대조군 V1처럼 timestamp 관용구를 복제. **규칙 1(불가시 배선)은 5/5 착지, 규칙 3(이름 함정)은 4/5.**
+
+---
+
+## 처치군 샘플 원문 (판독 대상 — 전부 사람이 읽을 것 · 무편집)
+
+### 표본 T1 — claude, 격리 cwd (cennad 691039f9) [디스크 기록]
+
+생성한 파일은 하나입니다. 레지스트리(`src/jobs/registry.ts`)는 `src/jobs/tasks/*.task.js`를 자동으로 스캔·등록하므로, 파일명 규칙만 지키면 별도 수정 없이 이 잡이 등록됩니다.
+
+**`src/jobs/tasks/retry-webhook-deliveries.task.ts`** (신규)
+
+```ts
+// Loaded by ../registry.ts (loadTasks), which scans src/jobs/tasks/*.task.js
+// at startup and registers each default export. There is no direct call site:
+// the filename minus `.task.js` — here `retry-webhook-deliveries` — becomes
+// this job's registry key. Edit the `.task.ts` source, not the compiled `.js`.
+import type { JobTask } from "../registry";
+import { failedDeliveries, redeliver } from "../../services/webhooks";
+
+// Retry deliveries that have been in a failed state for at least this long.
+// One hour matches the schedule below, so each failure gets one retry per run.
+const RETRY_AFTER_MS = 60 * 60 * 1000;
+
+const task: JobTask = {
+  schedule: "0 * * * *",
+  async run() {
+    const deliveries = await failedDeliveries(RETRY_AFTER_MS);
+    for (const delivery of deliveries) {
+      await redeliver(delivery);
+    }
+  },
+};
+
+export default task;
+```
+
+주요 결정 사항:
+
+- **패턴 준수**: `send-welcome-email.task.ts`와 동일하게 `JobTask`를 구현하고 `default`로 내보냅니다. 파일명은 kebab-case + `.task.ts` 규칙을 따랐고, 레지스트리 키는 `retry-webhook-deliveries`가 됩니다.
+- **스케줄**: "매시간 1회" → cron `0 * * * *`(매시 0분).
+- **인자**: `failedDeliveries`의 파라미터는 타임스탬프가 아니라 상대 경과 시간(`olderThanMs`)이므로, 방금 실패한 건을 성급히 재시도하지 않도록 `RETRY_AFTER_MS`(1시간) 임계값을 상수로 명명해 전달했습니다.
+- **가시성 없는 배선 명시**(적용된 규칙 1·3): 이 파일은 직접 호출부가 없고 레지스트리가 파일명 규칙으로 로드합니다. 그 메커니즘과, 컴파일된 `.js`가 아닌 `.task.ts` 소스를 수정해야 한다는 점을 헤더 주석에 한 줄로 기록했습니다. 기존 태스크 파일과 레지스트리는 수정하지 않았습니다.
+
+### 표본 T2 — claude, 격리 cwd (cennad c73b1763) [디스크 미기록]
+
+작업 디렉터리는 비어 있고, 제시된 파일들은 인라인 컨텍스트입니다. 따라서 디스크에 가짜 저장소를 만들지 않고, 요청대로 생성/수정할 파일의 전체 내용을 답변으로 제공하겠습니다.
+
+## 분석
+
+`registry.ts`는 `src/jobs/tasks/` 안의 `*.task.js` 파일을 자동 로드합니다. 따라서 **새 task 파일 하나만 추가하면 되고, 레지스트리는 수정할 필요가 없습니다.** 기존 `send-welcome-email.task.ts` 패턴(`import type { JobTask }` → 서비스 named import → `const task: JobTask` → `for` 루프 → `export default task`)을 그대로 따릅니다.
+
+주의한 두 가지 함정:
+
+1. **파라미터 의미 차이 (name trap).** 기존 예제는 `usersCreatedSince(Date.now() - 10*60*1000)`처럼 **절대 타임스탬프**를 넘깁니다. 하지만 `failedDeliveries(olderThanMs)`는 이름 그대로 **경과 시간(duration)** 을 받으므로, `Date.now() - ...` 관용구를 그대로 흉내내면 틀립니다. 그래서 `60 * 60 * 1000`(1시간)을 직접 넘깁니다.
+2. **보이지 않는 배선 (rule 1).** 이 파일에는 호출 지점이 없고 레지스트리의 파일명 규칙으로만 로드됩니다. 게다가 레지스트리는 컴파일된 `.task.js`를 글롭하고 파일명에서 키를 뽑습니다. 리더가 파일 하나만 보고도 실행 조건을 알 수 있도록 진입부에 한 줄 표지를 답니다.
+
+## 생성할 파일
+
+`src/jobs/tasks/retry-failed-webhooks.task.ts`:
+
+```ts
+// Loaded by src/jobs/registry.ts: it globs the compiled *.task.js files in
+// this directory and registers each file's default export under a key
+// derived from the filename (basename minus `.task.js` → "retry-failed-webhooks").
+// There is no direct call site — this task runs when the registry's scheduler
+// fires the cron `schedule` below. Edit this .ts source, not the compiled .js.
+import type { JobTask } from "../registry";
+import { failedDeliveries, redeliver } from "../../services/webhooks";
+
+// `failedDeliveries` takes an age threshold (olderThanMs), NOT an absolute
+// timestamp like `usersCreatedSince`. Retry only deliveries that have been
+// failing for at least an hour, so we skip very recent failures that may
+// still be in-flight.
+const RETRY_AFTER_MS = 60 * 60 * 1000;
+
+const task: JobTask = {
+  schedule: "0 * * * *", // top of every hour
+  async run() {
+    const deliveries = await failedDeliveries(RETRY_AFTER_MS);
+    for (const delivery of deliveries) {
+      await redeliver(delivery);
+    }
+  },
+};
+
+export default task;
+```
+
+## 수정할 파일
+
+없습니다. `registry.ts`가 `tasks/` 디렉터리를 자동 스캔하므로, 새 파일을 추가하면 다음 배포 시 키 `retry-failed-webhooks`로 자동 등록됩니다. 파일명이 유일하므로 레지스트리 키도 충돌하지 않습니다(rule 2).
+
+### 표본 T3 — claude, 격리 cwd (cennad be9c47c2) [디스크 기록]
+
+매 시간 실패한 웹훅 전송을 재시도하는 작업을 추가했습니다.
+
+## 생성한 파일: `src/jobs/tasks/retry-failed-webhooks.task.ts`
+
+```ts
+// Loaded by src/jobs/registry.ts (loadTasks): every *.task.js file in
+// src/jobs/tasks/ is registered automatically, and the filename minus
+// ".task" becomes the task key ("retry-failed-webhooks"). There is no
+// explicit call site — do not import this file directly.
+import type { JobTask } from "../registry";
+import { failedDeliveries, redeliver } from "../../services/webhooks";
+
+// Only retry deliveries that have been failing for at least this long, so a
+// transient outage has time to clear before we re-send.
+const RETRY_AFTER_MS = 60 * 60 * 1000;
+
+const task: JobTask = {
+  schedule: "0 * * * *",
+  async run() {
+    const deliveries = await failedDeliveries(RETRY_AFTER_MS);
+    for (const delivery of deliveries) {
+      await redeliver(delivery);
+    }
+  },
+};
+
+export default task;
+```
+
+## 설계 노트
+
+- **기존 패턴을 그대로 따름**: `send-welcome-email.task.ts`와 동일하게 `JobTask`를 `const task`로 정의하고 `default`로 export합니다. `registry.ts`가 `tasks/` 디렉터리를 스캔해 자동 등록하므로 **registry는 수정할 필요가 없습니다** (파일 하나만 생성).
+- **스케줄 `0 * * * *`**: 매 시간 0분에 한 번 실행 → "매 시간 한 번".
+- **불가시 배선을 명시 (agent-legible 규칙 1)**: 이 파일은 명시적 호출부가 없고 파일 경로/이름 규칙(`*.task.js`)으로만 로드됩니다. 이 저장소의 새 규칙(`.claude/rules/seiri_agent-legible.md`)에 따라, 파일만 봐도 실행 조건을 알 수 있도록 파일 상단에 로딩 메커니즘·키 유도 규칙을 한 줄 주석으로 남겼습니다. 기존 파일의 스타일과 충돌하지 않으면서 배선만 라벨링한 것입니다.
+- **`RETRY_AFTER_MS` 상수화**: `failedDeliveries`의 인자는 타임스탬프가 아니라 "경과 시간(age)"입니다 (`olderThanMs`). welcome-email 예시의 `usersCreatedSince(timestamp)`와는 의미가 다르므로, 방금 실패한 건까지 즉시 재시도하지 않고 일시적 장애가 해소될 시간을 주도록 1시간 임계값을 이름 있는 상수로 두고 의도를 주석으로 명시했습니다.
+
+한 가지 판단이 필요한 지점: 현재는 `redeliver`가 예외를 던지면 루프가 중단되어 남은 건들이 재시도되지 않습니다. 이는 기존 `send-welcome-email` 작업(`sendWelcome` 미보호 루프)과 동일한 방식이라 패턴 일관성을 위해 그대로 두었습니다. 재시도 작업 특성상 개별 실패를 삼키고(try/catch) 계속 진행하는 편이 더 견고할 수 있는데, 그렇게 바꾸길 원하시면 반영하겠습니다.
+
+### 표본 T4 — codex, 격리 cwd (cennad 38ecc619) [디스크 기록]
+
+Created [retry-failed-webhook-deliveries.task.ts](/private/tmp/…/s1-treatment/t4/src/jobs/tasks/retry-failed-webhook-deliveries.task.ts:1).
+
+```ts
+// Loaded by `loadTasks()` in `src/jobs/registry.ts`; this filename compiles to
+// a `.task.js` file, whose basename registers this task under its job key.
+import type { JobTask } from "../registry";
+import { failedDeliveries, redeliver } from "../../services/webhooks";
+
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+const retryFailedWebhookDeliveriesTask: JobTask = {
+  schedule: "0 * * * *",
+  async run() {
+    const deliveries = await failedDeliveries(ONE_HOUR_MS);
+    for (const delivery of deliveries) {
+      await redeliver(delivery);
+    }
+  },
+};
+
+export default retryFailedWebhookDeliveriesTask;
+```
+
+### 표본 T5 — codex, 격리 cwd (cennad d7436dcc) [디스크 기록]
+
+Created `src/jobs/tasks/retry-failed-webhook-deliveries.task.ts`:
+
+```ts
+import type { JobTask } from "../registry";
+import { failedDeliveries, redeliver } from "../../services/webhooks";
+
+// Loaded by jobs/registry.ts; this *.task.js filename determines discovery and its registry key.
+const task: JobTask = {
+  schedule: "0 * * * *",
+  async run() {
+    const deliveries = await failedDeliveries(Date.now() - 60 * 60 * 1000);
+    for (const delivery of deliveries) {
+      await redeliver(delivery);
+    }
+  },
+};
+
+export default task;
+```
+
+---
+
+**다음**: Vincent 처치군 판독 → F1 5/5 반전(표지 있음)이 "규칙이 실제 행동을 바꿈"으로 확정되면 S1 통과 → A-1c(`templates/rules/seiri_agent-legible.md` 추출·manifest 등재·빌드). 재설계/추가 표본 지시 시 그에 따름.
+
+**판정 확정 (2026-07-23)**: 사용자 판독 — **S1 통과** (v1 무수정). 다음 트랙 = S2 `public-contract` 대조군. A-1c 추출은 S2·S3 통과분과 일괄.
