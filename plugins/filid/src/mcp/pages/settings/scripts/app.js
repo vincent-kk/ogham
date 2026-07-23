@@ -106,6 +106,12 @@
       $('rule-docs-unavailable').hidden = false;
       return;
     }
+    // No optional docs to select → the required doc auto-deploys server-side,
+    // so there is nothing to manage here. Hide the whole section.
+    if (!docs.entries || docs.entries.length === 0) {
+      $('rule-docs-section').hidden = true;
+      return;
+    }
     var requiredList = $('rule-docs-required');
     var optionalList = $('rule-docs-optional');
     docs.autoDeployed.forEach(function (entry) {

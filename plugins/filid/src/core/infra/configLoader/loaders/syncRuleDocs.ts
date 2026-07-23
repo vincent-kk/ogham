@@ -1,4 +1,10 @@
-import { existsSync, mkdirSync, renameSync, unlinkSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  renameSync,
+  unlinkSync,
+} from 'node:fs';
 import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
@@ -27,6 +33,10 @@ const log = createLogger('config-loader');
  * - optional selected + file present + hash differs + id ∉ resync → drift reported, file untouched
  * - not selected + file present → removed
  * - not selected + file absent → unchanged
+ *
+ * After the manifest pass, any `<namespace>_*.md` file absent from the manifest
+ * is retired (a rule this plugin dropped in an earlier version). The namespace
+ * is derived from the manifest's own filenames — no hardcoded retired list.
  *
  * This function MUST be invoked exclusively from setup surfaces: the
  * settings page server (`open_settings`, interactive path) or the
@@ -169,6 +179,34 @@ export function syncRuleDocs(
         id: entry.id,
         reason: `remove failed: ${(err as Error).message}`,
       });
+    }
+  }
+
+  // --- Retire orphaned rule docs ---
+  // A `<namespace>_*.md` file this plugin no longer ships (its own namespace,
+  // yet absent from the manifest) is a rule dropped in an earlier version.
+  // The namespace is derived from the manifest, so adding or removing a rule
+  // needs no code change. Runs only here (a setup surface), never a session
+  // hook, so the extra directory read stays off the hot path.
+  const namespace = manifest.rules[0]?.filename.split('_')[0];
+  if (namespace && existsSync(rulesDir)) {
+    const shipped = new Set(manifest.rules.map((r) => r.filename));
+    for (const file of readdirSync(rulesDir)) {
+      if (
+        !file.startsWith(`${namespace}_`) ||
+        !file.endsWith('.md') ||
+        shipped.has(file)
+      )
+        continue;
+      try {
+        unlinkSync(join(rulesDir, file));
+        result.removed.push(file);
+      } catch (err) {
+        result.skipped.push({
+          id: file,
+          reason: `retire failed: ${(err as Error).message}`,
+        });
+      }
     }
   }
 

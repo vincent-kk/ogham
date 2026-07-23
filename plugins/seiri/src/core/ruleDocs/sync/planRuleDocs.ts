@@ -1,8 +1,10 @@
 import type {
+  RuleDocOutcome,
   RuleDocSyncResult,
   SyncRuleDocsOptions,
 } from '../../../types/manifest.js';
 import { collectRuleDocDecisions } from '../utils/collectRuleDocDecisions.js';
+import { detectOrphanedDocs } from '../utils/detectOrphanedDocs.js';
 
 /**
  * Dry-run a sync: report what `applyRuleDocs` would do to `.claude/rules/`
@@ -25,13 +27,20 @@ export function planRuleDocs(
     opts.resync ?? [],
   );
 
-  return {
-    applied: false,
-    outcomes: records.map(({ entry, decision }) => ({
-      id: entry.id,
-      filename: entry.filename,
-      action: decision.action,
-      reason: decision.reason,
-    })),
-  };
+  const outcomes: RuleDocOutcome[] = records.map(({ entry, decision }) => ({
+    id: entry.id,
+    filename: entry.filename,
+    action: decision.action,
+    reason: decision.reason,
+  }));
+  // Preview the same retirements applyRuleDocs would perform — no deletion.
+  for (const filename of detectOrphanedDocs(projectRoot, pluginRoot))
+    outcomes.push({
+      id: filename,
+      filename,
+      action: 'remove',
+      reason: 'retired: no longer shipped',
+    });
+
+  return { applied: false, outcomes };
 }
