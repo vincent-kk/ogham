@@ -71,12 +71,12 @@ describe('rule invariants (filid/seiri boundary + D8 idiom contract)', () => {
       {
         idiom: 'pays twice',
         rule: 'templates/rules/seiri_context-efficiency.md',
-        skill: 'skills/debug/SKILL.md',
+        skill: 'skills/trace-cause/SKILL.md',
       },
       {
         idiom: 'fix where it started',
         rule: 'templates/rules/seiri_cognitive-discipline.md',
-        skill: 'skills/debug/SKILL.md',
+        skill: 'skills/trace-cause/SKILL.md',
       },
     ];
     const broken = contracts

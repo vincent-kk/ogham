@@ -71,11 +71,11 @@ Dispatched automatically when the moment fits:
 
 | Skill                   | Use                                         |
 | ----------------------- | ------------------------------------------- |
-| `/seiri:plan`           | Break multi-step work into reviewable tasks |
+| `/seiri:write-plan`     | Break multi-step work into reviewable tasks |
 | `/seiri:execute`        | Carry a written plan to done                |
 | `/seiri:implement`      | Make a change test-first                    |
-| `/seiri:debug`          | Trace a failure to where it started         |
-| `/seiri:verify`         | Check a completion claim before it is made  |
+| `/seiri:trace-cause`    | Trace a failure to where it started         |
+| `/seiri:verify-done`    | Check a completion claim before it is made  |
 | `/seiri:request-review` | Hand work to review with a fixed scope      |
 | `/seiri:receive-review` | Fold review feedback back into the code     |
 

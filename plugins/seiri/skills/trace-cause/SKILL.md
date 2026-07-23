@@ -1,15 +1,15 @@
 ---
-name: debug
+name: trace-cause
 user-invocable: true
 disallowed-tools: AskUserQuestion
-description: '[seiri:debug] Trace a failure to where it started rather than where it surfaced. Use when a test fails, an error is thrown, or a fix did not hold.'
+description: '[seiri:trace-cause] Trace a failure to where it started rather than where it surfaced. Use when a test fails, an error is thrown, or a fix did not hold.'
 argument-hint: '[the failing test or symptom]'
 version: '0.1.0'
 complexity: moderate
 plugin: seiri
 ---
 
-# debug — fix where it started
+# trace-cause — fix where it started
 
 This skill may be invoked automatically. Do not ask the user questions.
 When a choice is needed, take the conservative default and say so in one
@@ -50,6 +50,6 @@ assumption rather than patching again.
 - Cite tool output for every claim. Your reasoning about output is not
   output.
 - Change only what the diagnosis requires; mention other findings.
-- Hand off: completion claims go through verify.
+- Hand off: completion claims go through verify-done.
 - Report an unresolved cause plainly — a disclosed dead end beats a
   plausible fix nobody verified.

@@ -1,15 +1,15 @@
 ---
-name: verify
+name: verify-done
 user-invocable: true
 disallowed-tools: AskUserQuestion
-description: '[seiri:verify] Evidence before claims. Use when about to say done, fixed, or passing — before committing, merging, or moving to the next task.'
+description: '[seiri:verify-done] Evidence before claims. Use when about to say done, fixed, or passing — before committing, merging, or moving to the next task.'
 argument-hint: '[the claim to prove]'
 version: '0.1.0'
 complexity: simple
 plugin: seiri
 ---
 
-# verify — run it, read it, then say it
+# verify-done — run it, read it, then say it
 
 This skill may be invoked automatically. Do not ask the user questions.
 When a choice is needed, take the conservative default and say so in one

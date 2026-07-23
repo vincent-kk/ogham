@@ -42,7 +42,7 @@ that way goes under Open.
 ## Rules
 
 - Never invent a criterion. An unanswered question belongs under Open.
-- Hand off: the finished spec goes to plan when the work is multi-step.
+- Hand off: the finished spec goes to write-plan when the work is multi-step.
 - If the user says to proceed without further questions, stop asking. Write
   what you have as an artifact, hand it over. Do not modify files or delegate
   execution on an unfinished interview.

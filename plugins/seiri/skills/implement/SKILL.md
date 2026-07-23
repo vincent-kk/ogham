@@ -48,4 +48,4 @@ adding behaviour, keeping every check green.
 - This repository's explicit instructions outrank this sequence.
 - Exploring is fine — throw the exploration away and start from the
   check.
-- Hand off: completion claims go through verify.
+- Hand off: completion claims go through verify-done.

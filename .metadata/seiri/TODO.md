@@ -417,7 +417,7 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 - [ ] `skills/brainstorm/` — 호출 전용 + 거부권 조항(B8)
   - 승인 게이트·3중 승인·"한 메시지에 질문 하나"는 **가져오지 않습니다**
 - [ ] `skills/interview/` — 호출 전용 + 거부권 조항, 라운드 상한
-- [ ] `skills/debug/` — 자동. `disallowed-tools: AskUserQuestion` + 자동 계약(B9)
+- [ ] `skills/trace-cause/` — 자동. `disallowed-tools: AskUserQuestion` + 자동 계약(B9)
   - 이관 시 3항 제거: 사람 논의 강제 · 출처 없는 수치 · 사용자 발화를 리셋 트리거로 재해석
 - [ ] 스킬 작성 규율: **상시 지시로 작성**(재독되지 않음), `description`+`when_to_use` 1,536자 캡
 

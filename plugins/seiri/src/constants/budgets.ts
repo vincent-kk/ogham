@@ -19,14 +19,14 @@ export const RULE_MAX_LINES = 200;
 /** Skills that ship. A twelfth is a budget decision, not a detail. */
 export const SHIPPED_SKILLS = [
   'brainstorm',
-  'debug',
   'execute',
   'finish',
   'implement',
   'interview',
-  'plan',
   'receive-review',
   'request-review',
   'setup',
-  'verify',
+  'trace-cause',
+  'verify-done',
+  'write-plan',
 ] as const;

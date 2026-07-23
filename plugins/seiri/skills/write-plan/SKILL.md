@@ -1,15 +1,15 @@
 ---
-name: plan
+name: write-plan
 user-invocable: true
 disallowed-tools: AskUserQuestion
-description: '[seiri:plan] Write an implementation plan a stranger could execute without this conversation. Use when work spans multiple steps or sittings, before touching code.'
+description: '[seiri:write-plan] Write an implementation plan a stranger could execute without this conversation. Use when work spans multiple steps or sittings, before touching code.'
 argument-hint: '[the spec or goal to plan]'
 version: '0.1.0'
 complexity: moderate
 plugin: seiri
 ---
 
-# plan — write it so the session is not needed
+# write-plan — write it so the session is not needed
 
 This skill may be invoked automatically. Do not ask the user questions.
 When a choice is needed, take the conservative default and say so in one

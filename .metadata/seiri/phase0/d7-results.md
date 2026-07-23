@@ -1,5 +1,7 @@
 # D7 Dispatch Battery — Results (subagent-proxy harness)
 
+> **명명 변경 (2026-07-24, 측정 이후)**: `plan`→`write-plan` · `debug`→`trace-cause` · `verify`→`verify-done` (내장 `/plan`·`/debug`·`/verify` 충돌 회피). 아래 결과·표는 **변경 전 이름으로 측정된 기록**이라 소급 수정하지 않는다.
+
 _2026-07-23. Run from session 0fc0faf5 against locally-installed seiri (cache/ogham/seiri/0.0.1, verified identical to source)._
 
 ## Executive summary — seiri real-harness validation (defined 2026-07-24)

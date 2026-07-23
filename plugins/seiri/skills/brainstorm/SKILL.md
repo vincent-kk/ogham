@@ -37,7 +37,7 @@ Before handing off, run the spec self-review in `references/self-review.md`.
   does. Reflexive agreement is not analysis.
 - Say "I don't know" rather than guessing; name what would settle it.
 - Do not write or modify files here. This skill produces a shape.
-- Hand off: an approved shape goes to plan when multi-step, to implement when it
+- Hand off: an approved shape goes to write-plan when multi-step, to implement when it
   is one surgical change.
 - If the user says to proceed without further questions, stop asking. Write
   what you have as an artifact, hand it over. Do not modify files or delegate

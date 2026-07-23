@@ -29,8 +29,8 @@ version history over recollection, and never redo a task the ledger
 marks complete.
 
 **3. Per task, follow the steps exactly.** The implement discipline
-carries each change; verify closes the task; a failure mid-task is
-debug's job, not a cue to improvise around the plan.
+carries each change; verify-done closes the task; a failure mid-task is
+trace-cause's job, not a cue to improvise around the plan.
 
 **4. Do not pause between tasks to ask whether to continue.** The plan
 was the approval. Stop only for: a blocker you cannot resolve, ambiguity

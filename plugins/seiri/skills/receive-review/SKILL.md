@@ -42,4 +42,4 @@ clear ones.
   Restate the requirement or act; the diff is the acknowledgment.
 - Feedback that conflicts with the owner's earlier decisions goes back
   to the owner, not silently into the code.
-- Hand off: changed code re-enters verify before any completion claim.
+- Hand off: changed code re-enters verify-done before any completion claim.
