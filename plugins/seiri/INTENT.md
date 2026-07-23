@@ -2,10 +2,9 @@
 
 ## Purpose
 
-코드 작성 품질·리뷰 규율·개발 방법론 규칙을 대상 저장소의
-`.claude/rules/` 로 배포하는 Claude Code 플러그인. 특정 아키텍처에
-종속되지 않고 단독으로 동작한다. **규칙 본문은 주입하지 않는다** —
-배포된 파일은 하니스가 세션마다 자동 로드한다.
+코드 작성 품질·리뷰 규율·개발 방법론 규칙을 대상 저장소의 `.claude/rules/` 로
+배포하는 Claude Code 플러그인. 특정 아키텍처에 종속되지 않고 단독 동작한다.
+**규칙 본문은 주입하지 않는다** — 배포 파일은 하니스가 세션마다 로드한다.
 
 ## Structure
 
@@ -15,7 +14,7 @@
 | `templates/rules/`           | 배포되는 규칙 문서 + `manifest.json`                               |
 | `templates/gates/`           | 저장소 게이트 placeholder 골격 (값 없음)                           |
 | `skills/`                    | 스킬 (호출·자동, 작업 주기 전 구간) — 목록 정본은 `SHIPPED_SKILLS` |
-| `hooks/hooks.json`           | SessionStart · InstructionsLoaded 매핑                             |
+| `hooks/hooks.json`           | SessionStart 매핑 (InstructionsLoaded dormant)                     |
 | `libs/run.cjs`               | cross-platform 훅 러너                                             |
 | `scripts/`                   | esbuild 번들 + 규칙 해시 동기화                                    |
 | `bridge/` · `public/`        | 빌드 산출물 (커밋 대상)                                            |

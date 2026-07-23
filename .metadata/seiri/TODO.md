@@ -14,6 +14,8 @@
 
 **2026-07-24 — brainstorm·interview 절차 심화**: 두 호출형 스킬의 SKILL.md는 2KB 뼈대로 유지하고, omc/sp의 절차적 지혜(차원 조준·수렴 판정·형태 도출·자가점검)를 **수치 없이** `references/`로 이식했습니다. `test:run` 54 green. 상세는 [02-ARCHITECTURE.md](./02-ARCHITECTURE.md) §3 "호출 스킬의 깊이". **`references/`는 설계의 일부이지 드리프트가 아닙니다** — 다음 세션에서 구현 결함으로 읽지 마세요.
 
+**2026-07-24 — InstructionsLoaded dormant + trace-cause size 수정**: 관측 로그(`instructions-loaded.jsonl`)가 소비처 없는 상시 부작용이라 `hooks.json` 등록을 제거했습니다(코드·번들 존치, 재측정 시 블록 복원 — 정본 `src/hooks/instructionsLoaded/INTENT.md`). `DORMANT_HOOKS`(constants)+wiring 테스트가 미등록을 박제합니다. 겸사 선재 size red(`trace-cause` 2066>2048)를 본문 감축으로 해소.
+
 **Phase 0 완료 + A-1c 완료 (2026-07-23)**: S1~S8 판정 확정 · `templates/rules/` 8종 등재 · templateHash 주입 · `yarn seiri test:run` **45 passed** ([phase0/SYNTHESIS.md](./phase0/SYNTHESIS.md)). **개발 작업(work-phase) 완료 (2026-07-23)**: 트랙 B(filid 슬리밍·orphan 은퇴) · A-6(좁은 기계 드리프트 가드) · B(정적 리뷰 프로토콜 [RULE-REVIEW.md](./RULE-REVIEW.md) + 첫 실행·적대검증 후 발견 1·2 적용) · web UI 슬리밍 · seiri 브라우저 e2e · gates/INTENT. **남은 것은 전부 하니스/외부 의존**: 10이슈 A/B · D7 디스패치 발화율 · `/context` 실로드 · 공백 재현 · S9 대조군(cennad).
 
 ## 지금 상태
@@ -360,7 +362,7 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 > ✅ **완료** (`dbcd4740`). 번들 실측: `setup.mjs` 4,445 B · `instructions-loaded.mjs` 2,257 B, 캡 16 KB 단일 light 티어.
 > filid 와 달리 `selfProbe` 를 쓰지 않아 cross-spawn 이 인라인되지 않습니다 (탐지할 외부 바이너리가 없음).
 > **선행 실측 2건 중 1건 해소** — matcher 무의미 확인. 페이로드 스키마는 여전히 미확정이라 훅이 페이로드 전체를 기록합니다.
-> ⏸ 남은 것: 실사용 세션에서 `~/.claude/plugins/seiri/instructions-loaded.jsonl` 을 읽어 **실제 페이로드 형태 확인** · 규칙의 컴팩션 생존 여부.
+> ⏸ 남은 것: 규칙의 컴팩션 생존 여부(긴 메인 세션 필요). **2026-07-24 InstructionsLoaded dormant화** — 페이로드 스키마는 실사용 로그로 드러났고(`file_path`·`memory_type`·`load_reason`·`trigger_file_path`), 로드 검증은 `/context` 가 대체하며 소비처가 0이라 hooks.json 등록을 제거했다(코드·번들 존치). 재측정은 `InstructionsLoaded` 블록 복원. 정본 `src/hooks/instructionsLoaded/INTENT.md`.
 
 **목적**: 상태 요약 주입과 효능 측정.
 
@@ -600,14 +602,14 @@ seiri는 **filid와 같은 4계층 플러그인**입니다(Hook · MCP · Skill,
 
 # 전 단계 관통 검증
 
-| 축            | 수단                       | 시점                      |
-| ------------- | -------------------------- | ------------------------- |
-| **행동 변화** | micro-test (무지침 대조군) | Phase 0, 규칙 개정 시마다 |
-| **자기 준수** | `rule-lint`                | 매 커밋                   |
-| **실제 도달** | `/context` Memory files    | Phase 1 이후 상시         |
-| **로드 관측** | `InstructionsLoaded` 로그  | Phase 3 이후              |
-| **최종 효능** | **10이슈 A/B**             | Phase 3 완료 후           |
-| **적대 검토** | `/cennad:crosscheck`       | Phase 2 완료 시 1회       |
+| 축            | 수단                           | 시점                        |
+| ------------- | ------------------------------ | --------------------------- |
+| **행동 변화** | micro-test (무지침 대조군)     | Phase 0, 규칙 개정 시마다   |
+| **자기 준수** | `rule-lint`                    | 매 커밋                     |
+| **실제 도달** | `/context` Memory files        | Phase 1 이후 상시           |
+| **로드 관측** | `InstructionsLoaded` (dormant) | 재측정 시 hooks.json 재등록 |
+| **최종 효능** | **10이슈 A/B**                 | Phase 3 완료 후             |
+| **적대 검토** | `/cennad:crosscheck`           | Phase 2 완료 시 1회         |
 
 ## 10이슈 A/B 프로토콜
 

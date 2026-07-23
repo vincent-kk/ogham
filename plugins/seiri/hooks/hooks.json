@@ -11,17 +11,6 @@
           }
         ]
       }
-    ],
-    "InstructionsLoaded": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/instructions-loaded.mjs\"",
-            "timeout": 5
-          }
-        ]
-      }
     ]
   }
 }

@@ -11,11 +11,11 @@ plugin: seiri
 
 # trace-cause — fix where it started
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Do not ask questions. When a choice is needed, take the conservative default and say so in one line.
 
 ## Workflow
 
-**1. Reproduce first.** Run this repository's designated verification command, capture the failure to a scratch file outside the repository, and quote that file — re-running a suite to grep it differently pays twice. Without a reproduction there is nothing to verify a fix against; say so rather than guessing.
+**1. Reproduce first.** Run this repo's designated verification command, capture the failure to a scratch file outside the repo, and quote it — re-running a suite to grep it differently pays twice. Without a reproduction there is nothing to verify a fix against; say so rather than guess.
 
 **2. Separate where it appeared from where it lives.** The failing line is evidence, not the answer. Trace backward through the values that reached it to where state first went wrong.
 
@@ -25,7 +25,7 @@ This skill may be invoked automatically. Do not ask the user questions. When a c
 
 ## Red flags — stop
 
-One symptom fixed twice · each fix revealing a new problem · "should work now" without fresh output · a passing run not confirmed to exercise the edited code.
+One symptom fixed twice · each fix revealing a new problem · "should work now" without fresh output · a passing run not confirmed to exercise edited code.
 
 Repeated failure of one approach indicts the approach. Reconsider the assumption rather than patching again.
 

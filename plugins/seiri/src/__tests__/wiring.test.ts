@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
 import { describe, expect, it } from 'vitest';
 
-import { HookName } from '../constants/hooks.js';
+import { DORMANT_HOOKS, HookName } from '../constants/hooks.js';
 import { Route, STATE_PLACEHOLDER } from '../constants/http.js';
 import { INTERVENTION_LEVELS } from '../constants/intervention.js';
 import { RULE_ID_PREFIX } from '../constants/plugin.js';
@@ -30,10 +30,19 @@ function read(...segments: string[]): string {
 }
 
 describe('wiring', () => {
-  it('registers every hook bundle in hooks.json', () => {
+  it('registers every active hook bundle in hooks.json', () => {
     const hooksJson = read('hooks', 'hooks.json');
-    for (const name of Object.values(HookName))
+    const active = Object.values(HookName).filter(
+      (name) => !DORMANT_HOOKS.includes(name),
+    );
+    for (const name of active)
       expect(hooksJson).toContain(`bridge/${name}.mjs`);
+  });
+
+  it('keeps dormant hooks out of hooks.json until re-measurement', () => {
+    const hooksJson = read('hooks', 'hooks.json');
+    for (const name of DORMANT_HOOKS)
+      expect(hooksJson).not.toContain(`bridge/${name}.mjs`);
   });
 
   it('builds every hook that hooks.json registers', () => {

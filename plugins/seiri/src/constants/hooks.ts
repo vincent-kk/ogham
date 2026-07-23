@@ -5,14 +5,28 @@ export const HookEvent = {
 } as const;
 
 /**
- * `bridge/<name>.mjs` basenames.
+ * `bridge/<name>.mjs` basenames — every hook seiri builds.
  *
- * Three places carry these: `hooks/hooks.json`, the `hookEntries` list in
- * `scripts/build-hooks.mjs`, and the error-log scope below. The first two
- * are JSON and a build script, so neither can import this file — the
- * wiring test is what keeps all three in step.
+ * Two places carry these and neither can import this file: the
+ * `hookEntries` list in `scripts/build-hooks.mjs` that builds them, and
+ * each hook's error-log scope. The wiring test keeps them in step.
+ * Whether a built hook is also *registered* in `hooks/hooks.json` is a
+ * separate fact — see {@link DORMANT_HOOKS}.
  */
 export const HookName = {
   SETUP: 'setup',
   INSTRUCTIONS_LOADED: 'instructions-loaded',
 } as const;
+
+/**
+ * Hooks that are built but deliberately absent from `hooks/hooks.json`.
+ *
+ * `instructions-loaded` records which rule files reach the model — a
+ * measurement device, not a delivery path. Its original goals (payload
+ * schema, load verification) are met, `/context` already proved delivery,
+ * and nothing consumes the log, so firing it every session is pure side
+ * effect. The bundle stays built so re-measurement only needs its block
+ * restored in `hooks.json`; the wiring test asserts it stays absent until
+ * then.
+ */
+export const DORMANT_HOOKS: readonly string[] = [HookName.INSTRUCTIONS_LOADED];
