@@ -1,3 +1,22 @@
+---
+paths:
+  - '*.test.*'
+  - '*.spec.*'
+  - '*_test.*'
+  - '*_spec.*'
+  - 'test_*.*'
+  - '*Test.*'
+  - '*Tests.*'
+  - '*Spec.*'
+  - 'conftest.py'
+  - '__tests__'
+  - 'test'
+  - 'tests'
+  - 'spec'
+  - 'specs'
+  - 'e2e'
+---
+
 # Test Validity
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >

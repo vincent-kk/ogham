@@ -29,4 +29,5 @@ This skill may be invoked automatically. Do not ask the user questions. When a c
 
 - Push back on wrong findings with reasoning and a check that proves it; deference is not a review outcome.
 - Any capable reviewer serves: a fresh session, a review pipeline, a colleague. The discipline is in what you hand them.
+- A delegated reviewer inherits none of this session's instructions. Name the rule files the work must satisfy and the verification command, in the request itself.
 - Hand off: fixes re-enter through implement; the re-review closes when its findings do.

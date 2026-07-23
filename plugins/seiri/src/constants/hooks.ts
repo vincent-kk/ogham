@@ -1,7 +1,17 @@
-/** Claude Code hook events seiri subscribes to. */
+/**
+ * Claude Code hook events seiri subscribes to.
+ *
+ * A Bash command that exits non-zero fires `PostToolUseFailure`, not
+ * `PostToolUse` — measured against the shipped client, whose public
+ * reference documents the two as separate events. The failure-chain hook
+ * therefore registers under both: one event to count on, one to reset on.
+ */
 export const HookEvent = {
   SESSION_START: 'SessionStart',
   INSTRUCTIONS_LOADED: 'InstructionsLoaded',
+  POST_TOOL_USE: 'PostToolUse',
+  POST_TOOL_USE_FAILURE: 'PostToolUseFailure',
+  SUBAGENT_START: 'SubagentStart',
 } as const;
 
 /**
@@ -16,6 +26,8 @@ export const HookEvent = {
 export const HookName = {
   SETUP: 'setup',
   INSTRUCTIONS_LOADED: 'instructions-loaded',
+  POST_TOOL_USE: 'post-tool-use',
+  SUBAGENT_START: 'subagent-start',
 } as const;
 
 /**

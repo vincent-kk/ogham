@@ -13,7 +13,13 @@ import type {
   RuleDocsManifest,
 } from '../../../types/manifest.js';
 
-export type RuleDocsAction = 'status' | 'manifest' | 'plan' | 'sync';
+import type {
+  ConfigActionResult,
+  ConfigOp,
+} from './utils/applyConfigAction.js';
+import { applyConfigAction } from './utils/applyConfigAction.js';
+
+export type RuleDocsAction = 'status' | 'manifest' | 'plan' | 'sync' | 'config';
 
 export interface RuleDocsSyncInput {
   action: RuleDocsAction;
@@ -25,12 +31,17 @@ export interface RuleDocsSyncInput {
   selections?: Record<string, boolean> | null;
   /** Rule ids whose local edits may be discarded. Drift is kept otherwise. */
   resync?: string[] | null;
+  /** What the `config` action should do. Defaults to reading the dial. */
+  config_op?: ConfigOp | null;
+  /** Dial position for `config_op: "set"`. */
+  intervention?: string | null;
 }
 
 export type RuleDocsSyncOutput =
   | { action: 'status'; entries: RuleDocStatus[] }
   | { action: 'manifest'; manifest: RuleDocsManifest }
-  | { action: 'plan' | 'sync'; result: RuleDocSyncResult; selected: string[] };
+  | { action: 'plan' | 'sync'; result: RuleDocSyncResult; selected: string[] }
+  | ConfigActionResult;
 
 /**
  * Inspect or reconcile `.claude/rules/`.
@@ -42,17 +53,31 @@ export type RuleDocsSyncOutput =
  *
  * `plan` answers the same question as `sync` without writing, so a caller
  * that cannot render the settings page can still show the diff first.
+ *
+ * `config` is the dial rather than the rule files, absorbed here instead
+ * of becoming a third tool: every registered schema is context spent on
+ * every turn, and one more action costs a fraction of one more tool.
  */
 export function handleRuleDocsSync(
   input: RuleDocsSyncInput,
 ): RuleDocsSyncOutput {
+  const root = projectRoot(input.project_root);
+
+  // Before the plugin-root check: the dial lives in the project, so
+  // reading or lowering it must work even where the shipped templates do
+  // not resolve — that is exactly when someone wants to turn seiri down.
+  if (input.action === 'config')
+    return applyConfigAction(
+      root,
+      input.config_op ?? 'get',
+      input.intervention,
+    );
+
   const plugin = pluginRoot();
   if (plugin === null)
     throw new Error(
       'Cannot locate the seiri plugin directory, so the rule templates it ships are unreachable.',
     );
-
-  const root = projectRoot(input.project_root);
 
   if (input.action === 'manifest')
     return { action: 'manifest', manifest: loadManifest(plugin) };

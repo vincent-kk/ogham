@@ -14,7 +14,7 @@
 | `templates/rules/`           | 배포되는 규칙 문서 + `manifest.json`                               |
 | `templates/gates/`           | 저장소 게이트 placeholder 골격 (값 없음)                           |
 | `skills/`                    | 스킬 (호출·자동, 작업 주기 전 구간) — 목록 정본은 `SHIPPED_SKILLS` |
-| `hooks/hooks.json`           | SessionStart 매핑 (InstructionsLoaded dormant)                     |
+| `hooks/hooks.json`           | 등록 3 (InstructionsLoaded 만 dormant)                             |
 | `libs/run.cjs`               | cross-platform 훅 러너                                             |
 | `scripts/`                   | esbuild 번들 + 규칙 해시 동기화                                    |
 | `bridge/` · `public/`        | 빌드 산출물 (커밋 대상)                                            |
@@ -23,7 +23,7 @@
 ## Conventions
 
 - 빌드: `clean → version:sync → sync-rule-hashes → settings-html → tsc → mcp-server → hooks`
-- 규모 목표: MCP 도구 ≤3 · 훅 2 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤2KB
+- 규모 목표: MCP 도구 ≤3 · 훅 4 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤2KB
   (`references/`는 별도) · 규칙 각 <200줄.
   `src/__tests__/size.test.ts` 가 기계 검사한다.
 - `templates/rules/*.md` 는 raw 바이트로 해시된다 — 루트 `.gitattributes`(LF

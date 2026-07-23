@@ -35,21 +35,35 @@
 
 ### Configuration
 
-- `<repoRoot>/.seiri/config.json` holds the intervention dial and nothing
-  else. Reading it never throws; a damaged file yields defaults plus a
-  warning the session render surfaces.
+- The intervention dial is stored in two layers under `<repoRoot>/.seiri/`
+  and nothing else is stored there: `config.json` is the committed
+  baseline, written only by a setup surface; `runtime.json` is an
+  untracked session valve, written only by the `config` action.
+- The dial in effect is `runtime ?? baseline ?? advisory`. Hooks resolve
+  it per run, so a change applies without restarting a session.
+- A runtime value that differs from the baseline is always named as such
+  wherever the dial is rendered. Silent override is prohibited.
+- Reading never throws. A damaged layer is skipped, the next layer
+  applies, and the ignored file is named in a warning.
+- The first `runtime.json` write also creates `.seiri/.gitignore` listing
+  the directory's untracked members. An existing one is left as found;
+  the repository's root ignore file is never edited.
 
 ## API Contracts
 
-| Export                                     | Contract                                                               |
-| ------------------------------------------ | ---------------------------------------------------------------------- |
-| `loadConfig(projectRoot)`                  | `{ config \| null, path, warning? }`. Never throws.                    |
-| `writeConfig(projectRoot, config)`         | Writes atomically; returns the path written.                           |
-| `loadManifest(pluginRoot)`                 | Throws on a malformed manifest or a missing `templateHash`.            |
-| `getRuleDocsStatus(projectRoot, plugin)`   | Per-rule filesystem snapshot including `inSync`.                       |
-| `planRuleDocs(...)` / `applyRuleDocs(...)` | Same decisions; `applied` distinguishes preview from write.            |
-| `open_settings`                            | `{ status: saved \| closed \| pending, url, summary? }`. Bounded wait. |
-| `rule_docs_sync`                           | Actions `status` · `manifest` · `plan` · `sync`.                       |
+| Export                                     | Contract                                                                                             |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `loadConfig(projectRoot)`                  | Baseline layer only: `{ config \| null, path, warning? }`. Never throws.                             |
+| `loadIntervention(projectRoot)`            | Both layers: `{ effective, source, baseline, runtime, warnings }`. Never throws.                     |
+| `writeConfig(projectRoot, config)`         | Writes the baseline atomically; returns the path written.                                            |
+| `writeRuntime(projectRoot, level)`         | Writes the valve atomically plus `.seiri/.gitignore`; returns the path.                              |
+| `clearRuntime(projectRoot)`                | Drops the valve; returns whether one existed.                                                        |
+| `loadManifest(pluginRoot)`                 | Throws on a malformed manifest or a missing `templateHash`.                                          |
+| `getRuleDocsStatus(projectRoot, plugin)`   | Per-rule filesystem snapshot including `inSync`.                                                     |
+| `planRuleDocs(...)` / `applyRuleDocs(...)` | Same decisions; `applied` distinguishes preview from write.                                          |
+| `open_settings`                            | `{ status: saved \| closed \| pending, url, summary? }`. Bounded wait.                               |
+| `rule_docs_sync`                           | Actions `status` · `manifest` · `plan` · `sync` · `config`.                                          |
+| `rule_docs_sync` action `config`           | `{ op, changed, dial, posture }`. `set` needs a valid `intervention`; the baseline is never written. |
 
 ## Scope
 

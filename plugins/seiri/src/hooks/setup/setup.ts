@@ -1,11 +1,9 @@
 import { ENV_PLUGIN_ROOT } from '../../constants/env.js';
 import { HookEvent } from '../../constants/hooks.js';
-import { DEFAULT_INTERVENTION } from '../../constants/intervention.js';
-import { loadConfig } from '../../core/infra/configLoader/loaders/loadConfig.js';
+import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import { getRuleDocsStatus } from '../../core/ruleDocs/status/getRuleDocsStatus.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
-
-import { renderStatusLines } from './utils/renderStatusLines.js';
+import { renderStatusLines } from '../shared/renderStatusLines.js';
 
 /**
  * SessionStart: report which seiri rules are active, where the dial sits,
@@ -24,11 +22,9 @@ export function processSessionStart(input: SessionStartInput): HookOutput {
 
   let lines: string[];
   try {
-    const { config, warning } = loadConfig(input.cwd);
     lines = renderStatusLines(
       getRuleDocsStatus(input.cwd, pluginRoot),
-      config?.intervention ?? DEFAULT_INTERVENTION,
-      warning,
+      loadIntervention(input.cwd),
     );
   } catch {
     // A malformed or unhashed manifest is a build defect on our side.

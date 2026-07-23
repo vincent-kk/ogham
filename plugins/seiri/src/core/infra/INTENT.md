@@ -6,7 +6,7 @@
 
 ## Structure
 
-- `configLoader/` — `.seiri/config.json` (다이얼)
+- `configLoader/` — 다이얼 2계층 (`config.json` 기준선 + `runtime.json` 밸브)
 - `index.ts` — barrel
 
 ## Conventions

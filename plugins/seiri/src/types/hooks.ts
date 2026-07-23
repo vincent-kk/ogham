@@ -36,6 +36,41 @@ export interface InstructionsLoadedInput extends HookBaseInput {
   [key: string]: unknown;
 }
 
+/**
+ * PostToolUse input, delivered after a tool call that *succeeded*.
+ *
+ * `tool_response` for Bash carries `stdout` / `stderr` and no exit code,
+ * because reaching this event already means the command exited zero. A
+ * non-zero exit arrives as {@link PostToolUseFailureInput} instead.
+ */
+export interface PostToolUseInput extends HookBaseInput {
+  hook_event_name: 'PostToolUse';
+  tool_name: string;
+  tool_input?: { command?: unknown; [key: string]: unknown };
+  tool_response?: Record<string, unknown>;
+}
+
+/**
+ * PostToolUseFailure input — a separate event from PostToolUse, with a
+ * different payload: no `tool_response`, an `error` string carrying the
+ * exit code and stderr, and `is_interrupt` when the user stopped the run
+ * rather than the command failing on its own.
+ */
+export interface PostToolUseFailureInput extends HookBaseInput {
+  hook_event_name: 'PostToolUseFailure';
+  tool_name: string;
+  tool_input?: { command?: unknown; [key: string]: unknown };
+  error?: string;
+  is_interrupt?: boolean;
+}
+
+/** SubagentStart input. `agent_type` is the matcher's field. */
+export interface SubagentStartInput extends HookBaseInput {
+  hook_event_name: 'SubagentStart';
+  agent_type?: string;
+  [key: string]: unknown;
+}
+
 /** Hook output (stdout JSON). */
 export interface HookOutput {
   continue: boolean;

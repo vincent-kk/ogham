@@ -1,5 +1,8 @@
 export type {
   InterventionLevel,
+  InterventionSource,
+  InterventionState,
+  InterventionWarning,
   LoadConfigResult,
   SeiriConfig,
 } from './config.js';
@@ -16,5 +19,9 @@ export type {
   HookBaseInput,
   HookOutput,
   InstructionsLoadedInput,
+  PostToolUseFailureInput,
+  PostToolUseInput,
   SessionStartInput,
+  SubagentStartInput,
 } from './hooks.js';
+export type { SessionSignals } from './signals.js';

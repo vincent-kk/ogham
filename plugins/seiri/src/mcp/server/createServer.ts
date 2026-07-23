@@ -43,15 +43,29 @@ export function createServer(): McpServer {
     ToolName.RULE_DOCS_SYNC,
     {
       description:
-        'Headless fallback for the seiri setup skill: inspect or reconcile `.claude/rules/seiri_*.md`. Actions: status (what is deployed now) | manifest (what ships) | plan (dry-run a selection, writes nothing) | sync (apply it). Prefer open_settings when a browser is available. Never call from a session hook.',
+        'Headless fallback for the seiri setup skill, plus the intervention dial. Rule actions: status (what is deployed now) | manifest (what ships) | plan (dry-run a selection, writes nothing) | sync (apply it) — prefer open_settings when a browser is available. Dial action: config (read the dial, or turn the session valve up/down for this checkout). Never call from a session hook.',
       inputSchema: {
         action: z
-          .enum(['status', 'manifest', 'plan', 'sync'])
-          .describe('plan previews the same change sync would apply.'),
+          .enum(['status', 'manifest', 'plan', 'sync', 'config'])
+          .describe(
+            'plan previews the same change sync would apply. config reads or moves the intervention dial and touches no rule file.',
+          ),
         project_root: z
           .string()
           .optional()
           .describe('Absolute path of the target workspace root.'),
+        config_op: z
+          .enum(['get', 'set', 'clear'])
+          .nullish()
+          .describe(
+            'For action "config", default get. set stores an untracked session valve that overrides the committed baseline; clear drops it so the baseline applies again. Neither writes the committed baseline — that stays a setup-surface act.',
+          ),
+        intervention: z
+          .enum(['advisory', 'standard', 'strict'])
+          .nullish()
+          .describe(
+            'Dial position for config_op "set". advisory silences every conditional signal seiri injects; standard announces the workflow chain; strict also widens borderline moments and puts a verification run behind completion claims.',
+          ),
         selections: z
           .record(z.string(), z.boolean())
           .nullish()

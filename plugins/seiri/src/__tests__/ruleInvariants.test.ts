@@ -112,6 +112,23 @@ describe('rule invariants (filid/seiri boundary + D8 idiom contract)', () => {
     expect(PRECEDENCE.test('# Rule\n\nbody with no chain')).toBe(false);
   });
 
+  it('conditional rules carry their own paths, and the key the harness reads', () => {
+    const conditional = rules.filter((r) => r.text.startsWith('---\n'));
+    // test-validity only binds while a test file is open, so it is the one
+    // rule that should not be standing context.
+    expect(conditional.map((r) => r.name)).toContain('seiri_test-validity.md');
+
+    for (const rule of conditional) {
+      // Claude Code reads `paths:`. A `globs:` key parses as unknown
+      // frontmatter and is dropped, which silently makes the rule
+      // unconditional — the exact failure this asserts against.
+      expect(rule.text).toMatch(/^paths:$/m);
+      expect(rule.text).not.toMatch(/^globs:/m);
+      // Precedence still opens the body, not the frontmatter.
+      expect(rule.text).toMatch(/^---\n[\s\S]*?\n---\n/);
+    }
+  });
+
   it('every rule states its B5 format grounding (P5 gate)', () => {
     // Singular, plural, and the session-scoped variant all satisfy P5 — the
     // form count matches the number of properties the rule leans on.

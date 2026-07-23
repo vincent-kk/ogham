@@ -1,8 +1,15 @@
 export {
+  clearRuntime,
   createDefaultConfig,
+  describeDial,
+  isInterventionLevel,
   loadConfig,
+  loadIntervention,
+  renderPostureLines,
   resolveConfigPath,
+  resolveRuntimePath,
   writeConfig,
+  writeRuntime,
 } from './infra/configLoader/index.js';
 export {
   applyRuleDocs,

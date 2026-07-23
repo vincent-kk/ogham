@@ -1,9 +1,11 @@
-import { INJECTION_PREFIX, RULE_ID_PREFIX } from '../../../constants/plugin.js';
-import type { InterventionLevel } from '../../../types/config.js';
-import type { RuleDocStatus } from '../../../types/manifest.js';
+import { DEFAULT_INTERVENTION } from '../../constants/intervention.js';
+import { INJECTION_PREFIX, RULE_ID_PREFIX } from '../../constants/plugin.js';
+import { describeDial } from '../../core/infra/configLoader/utils/describeDial.js';
+import { renderPostureLines } from '../../core/infra/configLoader/utils/renderPostureLines.js';
+import type { InterventionState } from '../../types/config.js';
+import type { RuleDocStatus } from '../../types/manifest.js';
 
 const RULES_DIR_LABEL = '.claude/rules/';
-const CONFIG_LABEL = '.seiri/config.json';
 const SETUP_COMMAND = '/seiri:setup';
 
 /**
@@ -21,8 +23,8 @@ const SETUP_COMMAND = '/seiri:setup';
  */
 export function renderStatusLines(
   statuses: RuleDocStatus[],
-  intervention: InterventionLevel,
-  configWarning?: string,
+  dial: InterventionState,
+  options: { compact?: boolean } = {},
 ): string[] {
   const deployed = statuses.filter((status) => status.deployed);
   if (deployed.length === 0) return [];
@@ -32,13 +34,33 @@ export function renderStatusLines(
     `${INJECTION_PREFIX} Active rules: ${names} (${deployed.length}/${statuses.length}) — ${RULES_DIR_LABEL}`,
   ];
 
-  if (intervention !== 'advisory')
-    lines.push(`${INJECTION_PREFIX} Intervention: ${intervention}`);
+  // Compact is for a subagent, which starts without the parent's context
+  // and needs the two facts it cannot recover: which rules this
+  // repository turned on, and the order the work runs in. Drift and
+  // stored-file warnings are the parent's business, and precedence is
+  // already in the rule files the subagent can read.
+  //
+  // The posture axis being empty at advisory is what makes this silent
+  // there, which keeps a subagent spawn exactly as it was measured.
+  if (options.compact) {
+    const [chain] = renderPostureLines(dial.effective);
+    return chain === undefined
+      ? []
+      : [...lines, `${INJECTION_PREFIX} ${chain}`];
+  }
 
-  if (intervention === 'strict')
+  // A valve that lowered the dial to advisory still prints: silence there
+  // would be indistinguishable from a project that simply never set one.
+  if (dial.effective !== DEFAULT_INTERVENTION || dial.source === 'runtime')
+    lines.push(`${INJECTION_PREFIX} ${describeDial(dial)}`);
+
+  if (dial.effective === 'strict')
     lines.push(
       `${INJECTION_PREFIX} Precedence: repository instructions > repository conventions > these rules.`,
     );
+
+  for (const line of renderPostureLines(dial.effective))
+    lines.push(`${INJECTION_PREFIX} ${line}`);
 
   const drifted = deployed.filter((status) => !status.inSync);
   if (drifted.length > 0)
@@ -48,9 +70,9 @@ export function renderStatusLines(
         .join(', ')}. Run ${SETUP_COMMAND} to review.`,
     );
 
-  if (configWarning)
+  for (const warning of dial.warnings)
     lines.push(
-      `${INJECTION_PREFIX} Ignored ${CONFIG_LABEL} — ${configWarning}.`,
+      `${INJECTION_PREFIX} Ignored ${warning.file} — ${warning.reason}.`,
     );
 
   return lines;

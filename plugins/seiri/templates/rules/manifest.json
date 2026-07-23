@@ -24,7 +24,7 @@
       "title": "Test Validity",
       "description": "A passing test is evidence only if it could have failed — fail first, verify the artifact you changed, curate suites.",
       "recommended": true,
-      "templateHash": "6889bdb9ec1e20c64186bf2d37dadc9f138e8d78f5f6592ead69d10ad599dd2b"
+      "templateHash": "bed5fd6d7f06cc7ca48ee8c6ff6e7a14a0d86a23d05d9f54473ae654478ddc3d"
     },
     {
       "id": "seiri_reuse-first",

@@ -34,8 +34,8 @@ generateWindowsCmd({
 });
 console.log('  Windows hook shim -> bridge/run-hook.cmd');
 
-// Both hooks are light: neither probes for external binaries, so neither
-// pulls a spawn implementation into its bundle.
+// Every hook is light: none probes for external binaries, so none pulls a
+// spawn implementation into its bundle.
 const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // `name` is the bridge output basename, referenced by hooks.json and kept
@@ -45,6 +45,12 @@ const hookEntries = [
   {
     name: 'instructions-loaded',
     entry: 'instructionsLoaded',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
+  { name: 'post-tool-use', entry: 'postToolUse', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'subagent-start',
+    entry: 'subagentStart',
     maxBytes: LIGHT_HOOK_BYTES,
   },
 ];
