@@ -12,6 +12,8 @@
 
 플러그인의 **런타임은 전부 동작합니다** — 빌드·MCP·설정 UI·훅·스킬. **2026-07-23 스킬 계층이 4종→11종으로 확장**되었습니다(sp 완전 대체 결정 — 아래 Phase 4b). 아직 없는 것은 **규칙 본문 자체**뿐입니다.
 
+**2026-07-24 — brainstorm·interview 절차 심화**: 두 호출형 스킬의 SKILL.md는 2KB 뼈대로 유지하고, omc/sp의 절차적 지혜(차원 조준·수렴 판정·형태 도출·자가점검)를 **수치 없이** `references/`로 이식했습니다. `test:run` 54 green. 상세는 [02-ARCHITECTURE.md](./02-ARCHITECTURE.md) §3 "호출 스킬의 깊이". **`references/`는 설계의 일부이지 드리프트가 아닙니다** — 다음 세션에서 구현 결함으로 읽지 마세요.
+
 **Phase 0 완료 + A-1c 완료 (2026-07-23)**: S1~S8 판정 확정 · `templates/rules/` 8종 등재 · templateHash 주입 · `yarn seiri test:run` **45 passed** ([phase0/SYNTHESIS.md](./phase0/SYNTHESIS.md)). **개발 작업(work-phase) 완료 (2026-07-23)**: 트랙 B(filid 슬리밍·orphan 은퇴) · A-6(좁은 기계 드리프트 가드) · B(정적 리뷰 프로토콜 [RULE-REVIEW.md](./RULE-REVIEW.md) + 첫 실행·적대검증 후 발견 1·2 적용) · web UI 슬리밍 · seiri 브라우저 e2e · gates/INTENT. **남은 것은 전부 하니스/외부 의존**: 10이슈 A/B · D7 디스패치 발화율 · `/context` 실로드 · 공백 재현 · S9 대조군(cennad).
 
 ## 지금 상태
