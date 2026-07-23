@@ -12,7 +12,7 @@
 
 플러그인의 **런타임은 전부 동작합니다** — 빌드·MCP·설정 UI·훅·스킬. **2026-07-23 스킬 계층이 4종→11종으로 확장**되었습니다(sp 완전 대체 결정 — 아래 Phase 4b). 아직 없는 것은 **규칙 본문 자체**뿐입니다.
 
-**Phase 0 완료 + A-1c 완료 (2026-07-23)**: S1~S8 판정 확정 · `templates/rules/` 8종 등재 · templateHash 주입 · `yarn seiri test:run` **45 passed** ([phase0/SYNTHESIS.md](./phase0/SYNTHESIS.md)). 남은 트랙: S9 대조군(통과 시 opt-in 등재) · D7 디스패치 micro-test(실하니스) · A-6 rule-lint · 트랙 B(filid 슬리밍) · 통합 검증.
+**Phase 0 완료 + A-1c 완료 (2026-07-23)**: S1~S8 판정 확정 · `templates/rules/` 8종 등재 · templateHash 주입 · `yarn seiri test:run` **45 passed** ([phase0/SYNTHESIS.md](./phase0/SYNTHESIS.md)). **개발 작업(work-phase) 완료 (2026-07-23)**: 트랙 B(filid 슬리밍·orphan 은퇴) · A-6(좁은 기계 드리프트 가드) · B(정적 리뷰 프로토콜 [RULE-REVIEW.md](./RULE-REVIEW.md) + 첫 실행·적대검증 후 발견 1·2 적용) · web UI 슬리밍 · seiri 브라우저 e2e · gates/INTENT. **남은 것은 전부 하니스/외부 의존**: 10이슈 A/B · D7 디스패치 발화율 · `/context` 실로드 · 공백 재현 · S9 대조군(cennad).
 
 ## 지금 상태
 
@@ -159,11 +159,11 @@ seiri 신설(#97)과 filid 슬리밍(#98)을 **하나의 브랜치에서 함께*
 | **A**   | 5b    | **스킬 확장 v2** — sp 절차 7종 이식 + 체이닝 (Phase 4b)                | ✅ 07-23                            | A-5      |
 | **A**   | **0** | **규칙 검증 + 스킬 디스패치 검증 (micro-test)**                        | ✅ 07-23 규칙 축 — 디스패치는 D7    | —        |
 | **A**   | 1c    | 규칙 자산 추출 → `templates/rules/`                                    | ✅ 07-23 — 8종 + manifest           | **A-0**  |
-| **A**   | 6     | `rule-lint` 테스트                                                     | ⏸                                   | A-1c     |
+| **A**   | 6     | `rule-lint` → 좁은 드리프트 가드 + B 정적 리뷰                         | ✅ 07-23                            | A-1c     |
 | **B**   | —     | filid 룰 정리 (B-4)                                                    | ✅ 07-23 (A-1~A-5·C)                | **A-1c** |
 | **A+B** | —     | 통합 검증 (머지 게이트)                                                | ⏸                                   | 전부     |
 
-**부수 항목** (독립 착수 가능, 순서 무관): `e2e/` Playwright · `templates/gates/` placeholder 골격 · `/filid:scan` 으로 구조 점검.
+**부수 항목**: ✅ seiri `e2e/` Playwright (5 pass) · ✅ `templates/gates/` + `templates/INTENT.md` · ⏸ `/filid:scan` 구조 점검.
 
 **설계는 완료됐습니다.** 사상·헌법·구조·규칙 전문 9종·명명까지 확정. 3사 적대 리뷰와 메커니즘 실측을 거쳤습니다.
 

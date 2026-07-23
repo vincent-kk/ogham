@@ -16,7 +16,7 @@
       "title": "Public Contract",
       "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement.",
       "recommended": false,
-      "templateHash": "49f9d625f48c8631bac3b075e5927ccb9ca83d8e12d092ea340381f2c2b28554"
+      "templateHash": "3a8cf0d13132d899e58a32b076996b2349ce66f6c7fcc87911dc62273e24c7a3"
     },
     {
       "id": "seiri_test-validity",
