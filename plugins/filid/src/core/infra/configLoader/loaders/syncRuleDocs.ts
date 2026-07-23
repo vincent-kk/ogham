@@ -1,13 +1,6 @@
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  renameSync,
-  unlinkSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { createLogger } from '../../../../lib/logger.js';
 import { computeFileSha256 } from '../utils/computeFileSha256.js';
 import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 import { resolvePluginRoot } from '../utils/resolvePluginRoot.js';
@@ -19,8 +12,8 @@ import type {
   RuleDocsManifest,
   SyncRuleDocsOptions,
 } from './manifestTypes.js';
-
-const log = createLogger('config-loader');
+import { migrateLegacyFilenames } from './migrateLegacyFilenames.js';
+import { retireOrphanedRuleDocs } from './retireOrphanedRuleDocs.js';
 
 /**
  * Synchronise `.claude/rules/` with the desired selection.
@@ -87,24 +80,7 @@ export function syncRuleDocs(
   const selectionSet = new Set(selection);
   const resyncSet = new Set(opts.resync ?? []);
 
-  // --- Legacy filename migration ---
-  // Rename old-named files (e.g. fca.md → filid_fca-policy.md)
-  // so the main loop sees them under the current name. User edits are preserved
-  // because renameSync is a metadata-only operation (no content rewrite).
-  for (const entry of manifest.rules) {
-    if (!entry.legacyFilename) continue;
-    const legacyPath = join(rulesDir, entry.legacyFilename);
-    const newPath = join(rulesDir, entry.filename);
-    if (existsSync(legacyPath) && !existsSync(newPath))
-      try {
-        renameSync(legacyPath, newPath);
-        log.debug(
-          `migrated rule doc: ${entry.legacyFilename} → ${entry.filename}`,
-        );
-      } catch (err) {
-        log.error(`failed to migrate ${entry.legacyFilename}`, err);
-      }
-  }
+  migrateLegacyFilenames(manifest, rulesDir);
 
   for (const entry of manifest.rules) {
     const desired = entry.required || selectionSet.has(entry.id);
@@ -182,33 +158,7 @@ export function syncRuleDocs(
     }
   }
 
-  // --- Retire orphaned rule docs ---
-  // A `<namespace>_*.md` file this plugin no longer ships (its own namespace,
-  // yet absent from the manifest) is a rule dropped in an earlier version.
-  // The namespace is derived from the manifest, so adding or removing a rule
-  // needs no code change. Runs only here (a setup surface), never a session
-  // hook, so the extra directory read stays off the hot path.
-  const namespace = manifest.rules[0]?.filename.split('_')[0];
-  if (namespace && existsSync(rulesDir)) {
-    const shipped = new Set(manifest.rules.map((r) => r.filename));
-    for (const file of readdirSync(rulesDir)) {
-      if (
-        !file.startsWith(`${namespace}_`) ||
-        !file.endsWith('.md') ||
-        shipped.has(file)
-      )
-        continue;
-      try {
-        unlinkSync(join(rulesDir, file));
-        result.removed.push(file);
-      } catch (err) {
-        result.skipped.push({
-          id: file,
-          reason: `retire failed: ${(err as Error).message}`,
-        });
-      }
-    }
-  }
+  retireOrphanedRuleDocs(manifest, rulesDir, result);
 
   return result;
 }

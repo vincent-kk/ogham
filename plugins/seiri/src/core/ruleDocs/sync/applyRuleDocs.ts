@@ -68,23 +68,32 @@ export function applyRuleDocs(
   // longer lists. Detection is shared with planRuleDocs so the preview and
   // this write agree; here the files are actually deleted.
   const rulesDir = resolveRulesDir(projectRoot);
-  for (const filename of detectOrphanedDocs(projectRoot, pluginRoot))
-    try {
-      unlinkSync(portableJoin(rulesDir, filename));
-      outcomes.push({
-        id: filename,
-        filename,
-        action: 'remove',
-        reason: 'retired: no longer shipped',
-      });
-    } catch (err) {
-      outcomes.push({
-        id: filename,
-        filename,
-        action: 'skip',
-        reason: `retire failed: ${(err as Error).message}`,
-      });
-    }
+  try {
+    for (const filename of detectOrphanedDocs(projectRoot, pluginRoot))
+      try {
+        unlinkSync(portableJoin(rulesDir, filename));
+        outcomes.push({
+          id: filename,
+          filename,
+          action: 'remove',
+          reason: 'retired: no longer shipped',
+        });
+      } catch (err) {
+        outcomes.push({
+          id: filename,
+          filename,
+          action: 'skip',
+          reason: `retire failed: ${(err as Error).message}`,
+        });
+      }
+  } catch (err) {
+    outcomes.push({
+      id: rulesDir,
+      filename: rulesDir,
+      action: 'skip',
+      reason: `orphan detection failed: ${(err as Error).message}`,
+    });
+  }
 
   return { applied: true, outcomes };
 }
