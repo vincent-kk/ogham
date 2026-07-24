@@ -1,5 +1,7 @@
 import type { ServerResponse } from "node:http";
 
+import { sendJson } from "@ogham/http-kit/response";
+
 import {
   closeResolver,
   closeSession,
@@ -8,7 +10,6 @@ import {
 import { SessionStatus } from "../../../types/enums.js";
 import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { sendJson } from "../utils/sendJson.js";
 
 /** POST /api/close — close a single session (viewer-initiated). */
 export async function handleClose(

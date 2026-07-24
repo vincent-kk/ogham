@@ -128,4 +128,33 @@ describe("routes-validation (discriminated schema + on-prem PAT routing)", () =>
     expect(savedCreds?.jira?.bearer?.token).toBe("pat-secret-token");
     expect(savedCreds?.jira?.basic).toBeUndefined();
   });
+
+  it("POST /submit — a body over the 1 MB cap is rejected with 413 and never saved", async () => {
+    const ctx = makeContext();
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const huge = { deployment_type: "cloud", blob: "x".repeat(1_100_000) };
+    const res = await postJson(withToken(baseUrl, "/submit"), huge);
+
+    expect(res.status).toBe(413);
+    const data = await readJson(res);
+    expect(data.success).toBe(false);
+    expect(ctx.saveConfig).not.toHaveBeenCalled();
+  });
+
+  it("POST /submit — a malformed JSON body is a client fault (400, not 500)", async () => {
+    const ctx = makeContext();
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await fetch(withToken(baseUrl, "/submit"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{not json",
+    });
+
+    expect(res.status).toBe(400);
+    expect(ctx.saveConfig).not.toHaveBeenCalled();
+  });
 });

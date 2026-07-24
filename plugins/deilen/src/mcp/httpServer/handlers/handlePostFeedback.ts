@@ -1,5 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import { RequestTooLargeError, parseBody } from "@ogham/http-kit/body";
+import { sendJson } from "@ogham/http-kit/response";
+
 import { saveFeedback } from "../../../core/feedbackStore/index.js";
 import {
   closeSession,
@@ -17,9 +20,7 @@ import {
 } from "../../../types/feedback.js";
 import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { parseJsonBody } from "../utils/parseJsonBody.js";
 import { parseMultipart } from "../utils/parseMultipart.js";
-import { sendJson } from "../utils/sendJson.js";
 
 const MB = 1024 * 1024;
 
@@ -81,10 +82,15 @@ export async function handlePostFeedback(
       });
       rawPayload = parsed.payload;
       images = parsed.images;
-    } else
-      rawPayload = await parseJsonBody(request, config.max_payload_mb * MB);
+    } else rawPayload = await parseBody(request, config.max_payload_mb * MB);
   } catch (error) {
-    sendJson(response, 400, { ok: false, message: (error as Error).message });
+    // Size caps answer 413 like handleGetImage does; malformed or unsupported
+    // parts stay 400.
+    const status = error instanceof RequestTooLargeError ? 413 : 400;
+    sendJson(response, status, {
+      ok: false,
+      message: (error as Error).message,
+    });
     return;
   }
 

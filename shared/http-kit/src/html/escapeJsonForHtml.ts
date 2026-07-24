@@ -5,6 +5,10 @@ const ESCAPE_BY_CHARACTERS = {
   "<": "\\u003c",
   ">": "\\u003e",
   "&": "\\u0026",
+  // Consumers splice this output into a page as the replacement *string* of
+  // String.prototype.replace, where $& $` $' $n are substitution patterns —
+  // an unescaped $ there would splice surrounding page HTML into the script.
+  $: "\\u0024",
   [LINE_SEPARATOR]: "\\u2028",
   [PARAGRAPH_SEPARATOR]: "\\u2029",
 } as const;
@@ -19,6 +23,7 @@ const UNSAFE_IN_SCRIPT_PATTERN = new RegExp(
 export function escapeJsonForHtml(value: unknown): string {
   return JSON.stringify(value).replace(
     UNSAFE_IN_SCRIPT_PATTERN,
-    (character) => ESCAPE_BY_CHARACTERS[character],
+    (character) =>
+      ESCAPE_BY_CHARACTERS[character as keyof typeof ESCAPE_BY_CHARACTERS],
   );
 }

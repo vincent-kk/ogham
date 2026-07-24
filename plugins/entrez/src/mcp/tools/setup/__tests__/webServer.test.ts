@@ -105,6 +105,26 @@ describe("setup web server", () => {
     expect(res.status).toBe(415);
   });
 
+  it("rejects a body over the 1 MB cap with 413, not 500", async () => {
+    const res = await postJson("/submit", {
+      ...VALID,
+      blob: "x".repeat(1_100_000),
+    });
+    expect(res.status).toBe(413);
+    const body = (await res.json()) as { success: boolean; message: string };
+    expect(body.success).toBe(false);
+    expect(body.message).toBe("Request body too large");
+  });
+
+  it("rejects a malformed JSON body with 400, not 500", async () => {
+    const res = await fetch(`${base}/submit?token=${handle.token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{not json",
+    });
+    expect(res.status).toBe(400);
+  });
+
   it("runs the EInfo probe on POST /test", async () => {
     const res = await postJson("/test", VALID);
     const body = (await res.json()) as ConnectionTestResult;

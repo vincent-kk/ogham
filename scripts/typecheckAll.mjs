@@ -10,7 +10,9 @@
  * `Cannot find module '@ogham/<provider>'` shows up everywhere.
  *
  *   PROVIDERS  — built first to emit .d.ts under dist/.
- *   CONSUMERS  — typechecked in parallel afterwards.
+ *   CONSUMERS  — typechecked in parallel afterwards, together with the
+ *                providers' own `typecheck` (their build runs
+ *                tsconfig.build.json, which excludes their spec files).
  *
  * Each provider build runs `yarn clean` (which already removes its
  * dist + tsbuildinfo if the package's clean script does so) before
@@ -37,6 +39,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
   { name: "@ogham/http-guard", dir: "shared/http-guard" },
+  { name: "@ogham/http-kit", dir: "shared/http-kit" },
   { name: "@ogham/session-finalizer", dir: "shared/session-finalizer" },
 ];
 
@@ -89,10 +92,25 @@ for (const { name, dir } of PROVIDERS) {
   await run("yarn", ["workspace", name, "build"], `${name} build`);
 }
 
-// 2. Typecheck consumers in parallel.
-console.log(`\n→ Typechecking ${CONSUMERS.length} consumers in parallel`);
+// 2. Typecheck consumers and providers in parallel.
+//
+// A provider's build runs tsconfig.build.json, which excludes its spec files,
+// so the provider's own `typecheck` is the only pass that covers them.
+// @ogham/cross-platform is held out: its specs already fail on a pre-existing
+// declaration-site defect (normalizeCodexToolUse is typed `(input: T): T` but
+// returns a rewritten shape). Fixing that signature — and re-checking the hook
+// consumers that rely on it — is its own change; add it back here afterwards.
+const TYPECHECK_TARGETS = [
+  ...PROVIDERS.map(({ name }) => name).filter(
+    (name) => name !== "@ogham/cross-platform",
+  ),
+  ...CONSUMERS,
+];
+console.log(
+  `\n→ Typechecking ${TYPECHECK_TARGETS.length} workspaces in parallel`,
+);
 await Promise.all(
-  CONSUMERS.map((name) =>
+  TYPECHECK_TARGETS.map((name) =>
     run("yarn", ["workspace", name, "typecheck"], `${name} typecheck`),
   ),
 );

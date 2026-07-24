@@ -1,5 +1,8 @@
 import type { ServerResponse } from "node:http";
 
+import { escapeJsonForHtml } from "@ogham/http-kit/html";
+import { sendJson } from "@ogham/http-kit/response";
+
 import {
   getSession,
   readViewerMarkdown,
@@ -11,8 +14,6 @@ import {
   SESSION_ID_PATTERN,
 } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { escapeJsonForHtml } from "../utils/escapeJsonForHtml.js";
-import { sendJson } from "../utils/sendJson.js";
 
 /** GET /r/<session> — serve the viewer HTML with injected `__DEILEN_STATE__`. */
 export async function handleGetViewer(

@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { sendJson } from "../utils/sendJson.js";
+import { sendJson } from "@ogham/http-kit/response";
 
 import { dispatchApiRoute } from "./apiRoutes.js";
 import { tryAssetRoute } from "./assetRoute.js";

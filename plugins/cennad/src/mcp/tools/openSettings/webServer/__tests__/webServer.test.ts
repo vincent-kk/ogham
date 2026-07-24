@@ -122,6 +122,19 @@ describe('settings web server', () => {
     expect(res.status).toBe(415);
   });
 
+  it('rejects a POST /save body over the 1 MB size cap (413)', async () => {
+    const h = await start();
+    const huge = { blob: 'x'.repeat(1_100_000) };
+    const res = await fetch(urlFor(h, '/save'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(huge),
+    });
+    expect(res.status).toBe(413);
+    const body = (await res.json()) as { success: boolean };
+    expect(body.success).toBe(false);
+  });
+
   it('POST /save persists a valid Config', async () => {
     const h = await start();
     const updated: Config = { ...DEFAULT_CONFIG, session_ttl_hours: 24 };

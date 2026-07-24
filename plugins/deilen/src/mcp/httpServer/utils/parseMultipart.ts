@@ -2,6 +2,8 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import { join } from "node:path";
 
+import { RequestTooLargeError } from "@ogham/http-kit/body";
+
 import {
   ALLOWED_IMAGE_MIME,
   IMAGE_EXT_BY_MIME,
@@ -63,7 +65,8 @@ function readBody(request: IncomingMessage, maxBytes: number): Promise<Buffer> {
       chunks.push(chunk);
     });
     request.on("end", () => {
-      if (over) reject(new Error("payload exceeds max_payload_mb"));
+      if (over)
+        reject(new RequestTooLargeError("payload exceeds max_payload_mb"));
       else resolve(Buffer.concat(chunks));
     });
     request.on("error", reject);
@@ -105,7 +108,7 @@ export async function parseMultipart(
       throw new Error(`unsupported image type: ${mimeType}`);
 
     if (part.data.length > options.maxImageBytes)
-      throw new Error("image exceeds max_image_mb");
+      throw new RequestTooLargeError("image exceeds max_image_mb");
 
     const image: AcceptedImage = {
       id: part.name.slice(4),

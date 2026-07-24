@@ -13,7 +13,6 @@ bounded long-poll 을 해소한다.
 webServer.ts   startSettingsServer — closure lifecycle + waiter 레지스트리
 routing/       routes.ts (가드 + 디스패치) · routeContext.ts
 handlers/      GET / · POST /plan · POST /save · POST /close · readSaveBody
-utils/         sendJson · parseBody · escapeJsonForHtml
 ```
 
 ## Conventions

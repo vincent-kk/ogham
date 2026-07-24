@@ -1,9 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import { parseBody } from "@ogham/http-kit/body";
+import { sendJson } from "@ogham/http-kit/response";
+
 import { ConfigSchema } from "../../../types/config.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { parseJsonBody } from "../utils/parseJsonBody.js";
-import { sendJson } from "../utils/sendJson.js";
 
 const MAX_CONFIG_BYTES = 64 * 1024;
 
@@ -15,7 +16,7 @@ export async function handleSaveConfig(
 ): Promise<void> {
   let body: unknown;
   try {
-    body = await parseJsonBody(request, MAX_CONFIG_BYTES);
+    body = await parseBody(request, MAX_CONFIG_BYTES);
   } catch (error) {
     sendJson(response, 400, { ok: false, message: (error as Error).message });
     return;

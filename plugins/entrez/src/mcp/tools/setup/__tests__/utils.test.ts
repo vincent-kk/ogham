@@ -5,7 +5,6 @@ import {
   maskApiKey,
   restoreApiKey,
 } from "../webServer/utils/maskApiKey.js";
-import { escapeJsonForHtml } from "../webServer/utils/escapeJsonForHtml.js";
 import { testConnection } from "../utils/testConnection.js";
 import { RateLimit } from "../../../../types/enums.js";
 
@@ -20,15 +19,6 @@ describe("maskApiKey / restoreApiKey", () => {
     expect(restoreApiKey("", "stored")).toBeUndefined();
     expect(restoreApiKey(undefined, "stored")).toBeUndefined();
     expect(restoreApiKey("fresh", "stored")).toBe("fresh");
-  });
-});
-
-describe("escapeJsonForHtml", () => {
-  it("escapes characters that could break out of a <script> tag", () => {
-    const out = escapeJsonForHtml({ x: "</script><b>" });
-    expect(out).not.toContain("</script>");
-    expect(out).not.toContain("<b>");
-    expect(JSON.parse(out)).toEqual({ x: "</script><b>" });
   });
 });
 

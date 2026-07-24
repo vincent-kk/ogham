@@ -1,8 +1,9 @@
 import type { ServerResponse } from "node:http";
 
+import { sendJson } from "@ogham/http-kit/response";
+
 import type { RouteContext } from "../routeContext.js";
 import { buildStatus } from "../utils/buildStatus.js";
-import { sendJson } from "../utils/sendJson.js";
 
 /** GET /status — current settings (api_key masked) + effective rate. */
 export async function handleStatus(

@@ -123,3 +123,26 @@ const LOOPBACK_ORIGIN = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i;
 **배선** — `scripts/buildAll.mjs` · `scripts/typecheckAll.mjs` PROVIDERS + 루트 `vitest.config.ts` projects 에 `@ogham/http-guard` 추가. 4개 플러그인 `package.json` devDependencies 에 `workspace:^`.
 
 **검증** — 테스트 전 통과: http-guard 19 · deilen 116 · cennad 558 · entrez(setup) 17 · atlassian 370. 신규 가드 테스트가 4중 방어 회귀 확인(rebinding→403 · token→401 · origin→403 · CT→415). 4개 `bridge/mcp-server.cjs` 가 가드를 인라인(`require("@ogham/http-guard")` 누출 0). `public/settings.html`(entrez·atlassian) 은 토큰 전파 반영해 재생성 — 빌드 산출물 커밋은 컨벤션대로 사용자.
+
+---
+
+## 8. http-kit 후속 추출 (2026-07-25)
+
+> **상태**: 구현 완료. §7 이 방어 판정(guard/token)을 단일화한 뒤에도 각 서버가
+> 복제하던 **요청 본문 런타임 3종**(`parseBody`·`escapeJsonForHtml`·`sendJson`)을
+> 별도 패키지로 추출한다. 범위는 webServer 로 page 를 서빙하는 **7개** — §7 의 4개
+> (deilen·cennad·entrez·atlassian) + open_settings 계열 3개(seiri·imbas·filid).
+
+**정체성 분리** — `@ogham/http-guard` 는 "방어 판정"(응답 미전송, verdict 반환) 정체성을 유지하고, `ServerResponse` 에 직접 쓰는 런타임 헬퍼는 신설 `shared/http-kit` = `@ogham/http-kit` (private) 로 분리. organ 3개(deep import 소비):
+
+- `body/` — `parseBody(req, maxBytes?=1MB)` + `RequestTooLargeError` + `describeBodyError`. Content-Length 선검사 + 수신 누적 이중 방어, 초과 시 소켓을 끊지 않고 배수한 뒤 reject — destroy 하면 호출자의 413 이 전달되지 않는다. (seiri 이중방어 + deilen `readBody` drain 정본)
+- `html/` — `escapeJsonForHtml`. 이스케이프 맵에서 정규식 문자 클래스를 파생해 둘이 어긋날 수 없다. (deilen 맵기반 정본)
+- `response/` — `sendJson`. `application/json; charset=utf-8` + Content-Length.
+
+**취약점 해소** — cennad·atlassian 의 로컬 `parseBody` 는 body 크기 상한이 **전무**했다(무제한 버퍼링 → 정상 토큰 세션의 대용량 전송에 메모리 고갈; loopback/토큰/Origin 가드는 외부 악성 페이지만 차단). 공통 `parseBody`(기본 상한 1MB — 설정·setup 폼은 수 KB, seiri·filid·imbas·entrez 의 기존 상한값) + `describeBodyError`→413 매핑 신설으로 해소. 각각 **fail-first** 검증(413 분기 제거 시 red — cennad 400·atlassian 500 —, 복원 시 green). entrez 는 수신 검사만 하던 부분 방어를 이중 방어로 강화하고 413/400 을 답한다(라우트 500 폴백 아님). deilen 은 두 본문 경로(JSON·multipart)와 `handleGetImage` 를 413 으로 통일.
+
+**배선** — `scripts/buildAll.mjs`·`typecheckAll.mjs` PROVIDERS + 루트 `vitest.config.ts` projects 에 http-kit 추가. 7개 `package.json` devDependencies 에 `workspace:^`. 각 webServer INTENT.md Dependencies 에 http-kit 기재(filid·imbas·deilen 은 50줄 캡 경계라 `node:http` 를 http-guard 줄에 병합해 줄수 유지).
+
+**검증** — 전체 `typecheck` clean(provider 자체 `typecheck` 포함) · 루트 `test:run` 4808 pass(seiri·entrez 를 루트 projects 에 편입) · `build:all` 성공 · 재생성한 7개 `bridge/mcp-server.cjs` 에서 새 상한(`1e6`)·`u0024` 이스케이프·`Request body too large` 각 1건, parseBody 내 `req.destroy()` 0건 확인. (번들 검증을 `require("@ogham/http-kit")` 누출 0 으로 주장하면 안 된다 — 애초에 그 모듈을 import 하지 않는 stale 번들에서도 자명하게 참이다. 심볼·상수 존재로 확인할 것.) escapeJsonForHtml 중복 테스트(atlassian 전용 파일·entrez describe)는 정본 http-kit 테스트로 이관해 제거. 빌드 산출물(bridge·public) 재생성·커밋은 사용자.
+
+**리뷰 후속 (같은 날)** — 추출 커밋 리뷰 15건 반영. 정정 계약: ① `escapeJsonForHtml` 이 `$` 를 이스케이프 — 소비처 6곳이 결과를 `String.replace` 의 문자열 치환 인자로 넘기므로 `$'`·`` $` `` 가 페이지 HTML 을 스크립트 안으로 splice 했다(deilen 만 함수 replacer 로 면역). ② 초과 시 drain(위 `body/` 항목). ③ 기본 상한 10MB→1MB 복원. ④ 에러→상태 매핑을 `describeBodyError` 단일 지점으로. ⑤ 7개 라우터 `onError` 에 `res.headersSent` 가드(deilen 선례), seiri 의 동기 핸들러(`handleGetRoot`·`handleClose`)에 try/catch. ⑥ `sendJson` 이 직렬화 불가 body 에 `null` 응답. 배선: 루트 `vitest.config.ts` 에 seiri·entrez, http-kit `tsconfig.json` 이 자체 스펙 typecheck, `typecheckAll.mjs` 가 provider `typecheck` 실행(`@ogham/cross-platform` 은 `normalizeCodexToolUse` 선언부 결함으로 보류 — 별건). 상세: 루트 [REVIEW-FIXES.md](../../REVIEW-FIXES.md).

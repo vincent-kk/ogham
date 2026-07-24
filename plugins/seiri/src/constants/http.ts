@@ -15,7 +15,6 @@ export const HttpMethod = {
 } as const;
 
 export const ContentType = {
-  JSON: 'application/json; charset=utf-8',
   HTML: 'text/html; charset=utf-8',
 } as const;
 

@@ -1,9 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
+import { describeBodyError, parseBody } from '@ogham/http-kit/body';
+import { sendJson } from '@ogham/http-kit/response';
+
 import { SettingsSaveBodySchema } from '../../../../../types/settings.js';
 import type { RouteContext } from '../routing/routeContext.js';
-import { RequestTooLargeError, parseBody } from '../utils/parseBody.js';
-import { sendJson } from '../utils/sendJson.js';
 
 export async function handleSave(
   ctx: RouteContext,
@@ -14,17 +15,8 @@ export async function handleSave(
   try {
     raw = await parseBody(req);
   } catch (err) {
-    if (err instanceof RequestTooLargeError) {
-      sendJson(res, 413, {
-        success: false,
-        message: 'Request body too large',
-      });
-      return;
-    }
-    sendJson(res, 400, {
-      success: false,
-      message: `Invalid JSON body: ${(err as Error).message}`,
-    });
+    const { status, message } = describeBodyError(err);
+    sendJson(res, status, { success: false, message });
     return;
   }
 

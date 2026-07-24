@@ -10,7 +10,7 @@
 | `routing/`      | `routes`(디스패치 + token/CSRF 가드) + `routeContext`(organ)                     |
 | `handlers/`     | GET `/r/<sid>`·`/api/viewer`·`/api/image`·`/assets/<chunk>`, POST `/api/ping` 외 |
 | `constants/`    | 공용 정규식 패턴 (session id·`__DEILEN_STATE__` placeholder) (organ)             |
-| `utils/`        | sendJson·escapeJsonForHtml·publicRoot·resolveAssetPath·loadViewerHtml            |
+| `utils/`        | parseMultipart·publicRoot·resolveAssetPath·loadViewerHtml                        |
 | `index.ts`      | barrel                                                                           |
 
 ## Conventions
@@ -45,5 +45,5 @@
 ## Dependencies
 
 - `node:http`, `node:fs`, `node:path`, `node:url`
-- `@ogham/http-guard` (inspectRequest — host/token/CSRF 가드, generateToken), `@ogham/cross-platform/host-paths` (pluginRoot·projectRoot)
+- `@ogham/http-guard` (inspectRequest — host/token/CSRF 가드, generateToken), `@ogham/http-kit/{body,html,response}` (parseBody·escapeJsonForHtml·sendJson), `@ogham/cross-platform/host-paths` (pluginRoot·projectRoot)
 - `../../core/{configManager,projectHash,sessionStore}`, `../../render` (서버측 base 렌더)

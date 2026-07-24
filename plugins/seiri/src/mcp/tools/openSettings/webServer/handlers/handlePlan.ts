@@ -1,7 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
+import { sendJson } from '@ogham/http-kit/response';
+
 import type { RouteContext } from '../routing/routeContext.js';
-import { sendJson } from '../utils/sendJson.js';
 
 import { readSaveBody } from './readSaveBody.js';
 

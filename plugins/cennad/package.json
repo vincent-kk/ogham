@@ -75,6 +75,7 @@
   "devDependencies": {
     "@ogham/cross-platform": "workspace:^",
     "@ogham/http-guard": "workspace:^",
+    "@ogham/http-kit": "workspace:^",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.24.0",

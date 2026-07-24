@@ -1,5 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import { sendJson } from "@ogham/http-kit/response";
+
 import { handleClose } from "../handlers/handleClose.js";
 import { handleGetConfig } from "../handlers/handleGetConfig.js";
 import { handleGetImage } from "../handlers/handleGetImage.js";
@@ -9,7 +11,6 @@ import { handleGetViewerData } from "../handlers/handleGetViewerData.js";
 import { handlePing } from "../handlers/handlePing.js";
 import { handlePostFeedback } from "../handlers/handlePostFeedback.js";
 import { handleSaveConfig } from "../handlers/handleSaveConfig.js";
-import { sendJson } from "../utils/sendJson.js";
 
 import type { RouteContext } from "./routeContext.js";
 

@@ -1,10 +1,11 @@
 import type { ServerResponse } from "node:http";
 
+import { sendJson } from "@ogham/http-kit/response";
+
 import { getSession } from "../../../core/sessionStore/index.js";
 import { SessionStatus } from "../../../types/enums.js";
 import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { sendJson } from "../utils/sendJson.js";
 
 /**
  * POST /api/ping — viewer heartbeat. The idle-timer reset already happened in

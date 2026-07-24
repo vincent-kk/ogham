@@ -1,7 +1,8 @@
 import type { ServerResponse } from 'node:http';
 
+import { escapeJsonForHtml } from '@ogham/http-kit/html';
+
 import type { RouteContext } from '../routing/routeContext.js';
-import { escapeJsonForHtml } from '../utils/escapeJsonForHtml.js';
 
 export async function handleGetRoot(
   ctx: RouteContext,

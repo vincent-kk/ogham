@@ -146,7 +146,7 @@ describe("feedback flow", () => {
       `${baseUrl}/api/feedback?session=${sid}&token=${token}`,
       { method: "POST", body: form },
     );
-    expect(post.status).toBe(400);
+    expect(post.status).toBe(413);
     await atomicWrite(CONFIG_PATH, JSON.stringify({ auto_open: false }));
   });
 
@@ -170,7 +170,7 @@ describe("feedback flow", () => {
       `${baseUrl}/api/feedback?session=${sid}&token=${token}`,
       { method: "POST", body: form },
     );
-    expect(post.status).toBe(400);
+    expect(post.status).toBe(413);
     await atomicWrite(CONFIG_PATH, JSON.stringify({ auto_open: false }));
   });
 

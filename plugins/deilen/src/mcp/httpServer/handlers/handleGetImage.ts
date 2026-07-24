@@ -4,6 +4,8 @@ import type { ServerResponse } from "node:http";
 import { extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { sendJson } from "@ogham/http-kit/response";
+
 import { DISPLAY_IMAGE_MIME_BY_EXT } from "../../../constants/defaults.js";
 import {
   getSession,
@@ -11,7 +13,6 @@ import {
 } from "../../../core/sessionStore/index.js";
 import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { sendJson } from "../utils/sendJson.js";
 import { getSessionImageSources } from "../utils/sessionImageSources.js";
 
 const MB = 1024 * 1024;

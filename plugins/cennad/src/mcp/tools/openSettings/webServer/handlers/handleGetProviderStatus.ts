@@ -1,9 +1,10 @@
 import type { ServerResponse } from 'node:http';
 
+import { sendJson } from '@ogham/http-kit/response';
+
 import { getAvailableModels } from '../../../../../core/agyModels/index.js';
 import { getCodexModels } from '../../../../../core/codexModels/index.js';
 import { checkExecutable } from '../../../../../lib/checkExecutable.js';
-import { sendJson } from '../utils/sendJson.js';
 
 export async function handleGetProviderStatus(
   res: ServerResponse,

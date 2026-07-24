@@ -12,7 +12,6 @@
 | `webServer.ts` (+`index.ts` barrel) | `startSettingsServer` — closure lifecycle + settle waiter 레지스트리 |
 | `routing/`                          | `routes.ts` (guard + 경로 디스패치), `routeContext.ts`               |
 | `handlers/`                         | GET `/` (상태 주입), POST `/save` (config 영속), `/close`            |
-| `utils/`                            | sendJson, parseBody, escapeJsonForHtml                               |
 
 ## Conventions
 
@@ -44,6 +43,6 @@
 
 ## Dependencies
 
-- `node:http`
-- `@ogham/http-guard/{guard,token}` — `inspectRequest`, `generateToken`
+- `node:http` · `@ogham/http-guard/{guard,token}` — `inspectRequest`, `generateToken`
+- `@ogham/http-kit/{body,html,response}` — `parseBody`, `escapeJsonForHtml`, `sendJson`
 - `src/types/settings.js` — `SettingsSaveBodySchema`, settle 타입

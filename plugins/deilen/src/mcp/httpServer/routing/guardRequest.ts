@@ -1,8 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { inspectRequest } from "@ogham/http-guard/guard";
-
-import { sendJson } from "../utils/sendJson.js";
+import { sendJson } from "@ogham/http-kit/response";
 
 import type { RouteContext } from "./routeContext.js";
 

@@ -2,8 +2,8 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { RouteContext } from "../routeContext.js";
 import type { ConnectionTestResult } from "../../../../../types/index.js";
 import { SetupFormDataSchema } from "../../../../../types/index.js";
-import { sendJson } from "../utils/sendJson.js";
-import { parseBody } from "../utils/parseBody.js";
+import { sendJson } from "@ogham/http-kit/response";
+import { describeBodyError, parseBody } from "@ogham/http-kit/body";
 import { buildCredentials } from "../utils/buildCredentials.js";
 
 export async function handleTest(
@@ -11,7 +11,14 @@ export async function handleTest(
   req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
-  const body = await parseBody(req);
+  let body: unknown;
+  try {
+    body = await parseBody(req);
+  } catch (err) {
+    const { status, message } = describeBodyError(err);
+    sendJson(res, status, { success: false, message });
+    return;
+  }
   const parsed = SetupFormDataSchema.safeParse(body);
   if (!parsed.success) {
     sendJson(res, 400, {

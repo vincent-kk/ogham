@@ -7,8 +7,8 @@ import type {
 } from "../../../../../types/index.js";
 import { SetupFormDataSchema } from "../../../../../types/index.js";
 import { resolveEnvironment } from "../../../../../core/index.js";
-import { sendJson } from "../utils/sendJson.js";
-import { parseBody } from "../utils/parseBody.js";
+import { sendJson } from "@ogham/http-kit/response";
+import { describeBodyError, parseBody } from "@ogham/http-kit/body";
 import { buildCredentials } from "../utils/buildCredentials.js";
 import { restoreMaskedValues } from "../utils/restoreMaskedValues.js";
 
@@ -17,7 +17,14 @@ export async function handleSubmit(
   req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
-  const rawBody = (await parseBody(req)) as Record<string, unknown>;
+  let rawBody: Record<string, unknown>;
+  try {
+    rawBody = (await parseBody(req)) as Record<string, unknown>;
+  } catch (err) {
+    const { status, message } = describeBodyError(err);
+    sendJson(res, status, { success: false, message });
+    return;
+  }
   const cloudSites = (rawBody.cloud_sites as string[] | undefined) ?? [];
 
   const parsed = SetupFormDataSchema.safeParse(rawBody);

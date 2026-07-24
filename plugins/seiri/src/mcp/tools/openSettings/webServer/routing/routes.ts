@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import { inspectRequest } from '@ogham/http-guard/guard';
+import { sendJson } from '@ogham/http-kit/response';
 
 import {
   HttpMethod,
@@ -11,7 +12,6 @@ import { handleClose } from '../handlers/handleClose.js';
 import { handleGetRoot } from '../handlers/handleGetRoot.js';
 import { handlePlan } from '../handlers/handlePlan.js';
 import { handleSave } from '../handlers/handleSave.js';
-import { sendJson } from '../utils/sendJson.js';
 
 import type { RouteContext } from './routeContext.js';
 
@@ -46,21 +46,36 @@ export function createRouteHandler(
       return;
     }
 
+    // headersSent: a throw after a partial response must not writeHead twice —
+    // that would throw inside this handler and surface as an unhandled
+    // rejection, taking the MCP server down with it.
     const onError = (err: unknown): void => {
-      sendJson(res, 500, {
-        success: false,
-        message: err instanceof Error ? err.message : 'Internal server error',
-      });
+      if (!res.headersSent)
+        sendJson(res, 500, {
+          success: false,
+          message: err instanceof Error ? err.message : 'Internal server error',
+        });
+      else res.destroy();
+    };
+
+    // handleGetRoot and handleClose are synchronous, so they need try/catch
+    // where the async routes get .catch(onError).
+    const runSync = (handler: () => void): void => {
+      try {
+        handler();
+      } catch (err) {
+        onError(err);
+      }
     };
 
     if (path === Route.ROOT && req.method === HttpMethod.GET)
-      handleGetRoot(ctx, res);
+      runSync(() => handleGetRoot(ctx, res));
     else if (path === Route.PLAN && req.method === HttpMethod.POST)
       handlePlan(ctx, req, res).catch(onError);
     else if (path === Route.SAVE && req.method === HttpMethod.POST)
       handleSave(ctx, req, res).catch(onError);
     else if (path === Route.CLOSE && req.method === HttpMethod.POST)
-      handleClose(ctx, res);
+      runSync(() => handleClose(ctx, res));
     else sendJson(res, 404, { success: false, message: 'Not found' });
   };
 }

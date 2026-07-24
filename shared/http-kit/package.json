@@ -1,0 +1,50 @@
+{
+  "name": "@ogham/http-kit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Internal to the ogham monorepo — local HTTP server runtime helpers (bounded JSON body parsing, script-safe JSON escaping, JSON responses) shared by plugin setup/settings/viewer servers",
+  "license": "MIT",
+  "author": {
+    "name": "Vincent Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./body": {
+      "types": "./dist/body/index.d.ts",
+      "import": "./dist/body/index.js"
+    },
+    "./html": {
+      "types": "./dist/html/index.d.ts",
+      "import": "./dist/html/index.js"
+    },
+    "./response": {
+      "types": "./dist/response/index.d.ts",
+      "import": "./dist/response/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "yarn clean && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo tsconfig.build.tsbuildinfo",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

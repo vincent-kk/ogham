@@ -60,6 +60,7 @@
   "devDependencies": {
     "@ogham/cross-platform": "workspace:^",
     "@ogham/http-guard": "workspace:^",
+    "@ogham/http-kit": "workspace:^",
     "@playwright/test": "^1.61.0",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.11.0",

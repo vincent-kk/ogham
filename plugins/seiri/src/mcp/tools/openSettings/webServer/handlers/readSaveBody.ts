@@ -1,8 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
+import { describeBodyError, parseBody } from '@ogham/http-kit/body';
+import { sendJson } from '@ogham/http-kit/response';
+
 import { type SaveBody, SaveBodySchema } from '../../types/settingsTypes.js';
-import { RequestTooLargeError, parseBody } from '../utils/parseBody.js';
-import { sendJson } from '../utils/sendJson.js';
 
 /**
  * Parse and validate a /plan or /save body, answering the client itself
@@ -20,13 +21,8 @@ export async function readSaveBody(
   try {
     raw = await parseBody(req);
   } catch (err) {
-    if (err instanceof RequestTooLargeError)
-      sendJson(res, 413, { success: false, message: 'Request body too large' });
-    else
-      sendJson(res, 400, {
-        success: false,
-        message: `Invalid JSON body: ${(err as Error).message}`,
-      });
+    const { status, message } = describeBodyError(err);
+    sendJson(res, status, { success: false, message });
     return null;
   }
 

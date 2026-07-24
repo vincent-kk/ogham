@@ -1,7 +1,8 @@
 import type { ServerResponse } from 'node:http';
 
+import { sendJson } from '@ogham/http-kit/response';
+
 import type { RouteContext } from '../routing/routeContext.js';
-import { sendJson } from '../utils/sendJson.js';
 
 export function handleClose(ctx: RouteContext, res: ServerResponse): void {
   sendJson(res, 200, { success: true, message: 'Closing' });

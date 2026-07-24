@@ -1,5 +1,7 @@
 import type { ServerResponse } from "node:http";
 
+import { sendJson } from "@ogham/http-kit/response";
+
 import {
   getSession,
   readViewerMarkdown,
@@ -7,7 +9,6 @@ import {
 import { renderMarkdown } from "../../../render/index.js";
 import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { sendJson } from "../utils/sendJson.js";
 
 /** GET /api/viewer — re-fetch render HTML+meta, or raw markdown (`format=md`). */
 export async function handleGetViewerData(

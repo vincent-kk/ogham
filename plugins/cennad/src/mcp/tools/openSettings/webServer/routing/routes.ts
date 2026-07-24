@@ -1,13 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import { inspectRequest } from '@ogham/http-guard/guard';
+import { sendJson } from '@ogham/http-kit/response';
 
 import { handleClose } from '../handlers/handleClose.js';
 import { handleGetConfig } from '../handlers/handleGetConfig.js';
 import { handleGetProviderStatus } from '../handlers/handleGetProviderStatus.js';
 import { handleGetRoot } from '../handlers/handleGetRoot.js';
 import { handleSave } from '../handlers/handleSave.js';
-import { sendJson } from '../utils/sendJson.js';
 
 import type { RouteContext } from './routeContext.js';
 
@@ -42,10 +42,13 @@ export function createRouteHandler(
       return;
     }
 
+    // headersSent: a throw after a partial response must not writeHead twice —
+    // that would throw inside this handler.
     const onError = (err: unknown): void => {
       const message =
         err instanceof Error ? err.message : 'Internal server error';
-      sendJson(res, 500, { success: false, message });
+      if (!res.headersSent) sendJson(res, 500, { success: false, message });
+      else res.destroy();
     };
 
     if (path === '/' && req.method === 'GET')

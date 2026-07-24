@@ -6,13 +6,13 @@
 
 ## Structure
 
-| 파일              | 역할                                                                                               |
-| ----------------- | -------------------------------------------------------------------------------------------------- |
-| `webServer.ts`    | `startSetupServer` — 서버 기동, 토큰 발급, resetTimer/closeServer 결선                             |
-| `routes.ts`       | `createRouteHandler` — http-guard 검증 후 method/path 디스패치                                     |
-| `routeContext.ts` | `RouteContext` 타입 — handler 의존성 + lifecycle 콜백                                              |
-| `handlers/`       | `/`·`/status`·`/test`·`/submit` 핸들러 organ                                                       |
-| `utils/`          | `sendJson`·`parseBody`·`maskApiKey`·`escapeJsonForHtml`·`buildStatus`·`buildPathSuggestions` organ |
+| 파일              | 역할                                                                   |
+| ----------------- | ---------------------------------------------------------------------- |
+| `webServer.ts`    | `startSetupServer` — 서버 기동, 토큰 발급, resetTimer/closeServer 결선 |
+| `routes.ts`       | `createRouteHandler` — http-guard 검증 후 method/path 디스패치         |
+| `routeContext.ts` | `RouteContext` 타입 — handler 의존성 + lifecycle 콜백                  |
+| `handlers/`       | `/`·`/status`·`/test`·`/submit` 핸들러 organ                           |
+| `utils/`          | `maskApiKey`·`buildStatus`·`buildPathSuggestions` organ                |
 
 ## Conventions
 
@@ -39,4 +39,5 @@
 ## Dependencies
 
 - `@ogham/http-guard/{guard,token}` — `inspectRequest`(loopback Host → 토큰 → POST loopback Origin → `application/json`), `generateToken`
+- `@ogham/http-kit/{body,html,response}` — `parseBody`, `escapeJsonForHtml`, `sendJson`
 - `../../../../types/setup` · `../../../../constants/defaults`(`SETUP_AUTO_SHUTDOWN_MS`)

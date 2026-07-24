@@ -1,9 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
+import { describeBodyError, parseBody } from '@ogham/http-kit/body';
+import { sendJson } from '@ogham/http-kit/response';
+
 import { ConfigSchema } from '../../../../../types/index.js';
 import type { RouteContext } from '../routing/routeContext.js';
-import { parseBody } from '../utils/parseBody.js';
-import { sendJson } from '../utils/sendJson.js';
 
 export async function handleSave(
   ctx: RouteContext,
@@ -14,10 +15,8 @@ export async function handleSave(
   try {
     raw = await parseBody(req);
   } catch (err) {
-    sendJson(res, 400, {
-      success: false,
-      message: `Invalid JSON body: ${(err as Error).message}`,
-    });
+    const { status, message } = describeBodyError(err);
+    sendJson(res, status, { success: false, message });
     return;
   }
 

@@ -1,11 +1,12 @@
 import type { ServerResponse } from 'node:http';
 
+import { escapeJsonForHtml } from '@ogham/http-kit/html';
+
 import {
   ContentType,
   STATE_PLACEHOLDER,
 } from '../../../../../constants/http.js';
 import type { RouteContext } from '../routing/routeContext.js';
-import { escapeJsonForHtml } from '../utils/escapeJsonForHtml.js';
 
 /** Matches the placeholder with either quote style, as authored or minified. */
 const STATE_SLOT = new RegExp(`["']${STATE_PLACEHOLDER}["']`);

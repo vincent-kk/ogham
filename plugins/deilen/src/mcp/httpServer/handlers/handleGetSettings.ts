@@ -1,8 +1,9 @@
 import type { ServerResponse } from "node:http";
 
+import { escapeJsonForHtml } from "@ogham/http-kit/html";
+
 import { DEILEN_STATE_PLACEHOLDER_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
-import { escapeJsonForHtml } from "../utils/escapeJsonForHtml.js";
 
 /** GET /settings — serve the settings UI with the current Config injected. */
 export async function handleGetSettings(
