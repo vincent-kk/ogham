@@ -1,6 +1,6 @@
 {
   "name": "seiri",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Code authoring quality, review discipline, and development methodology rules for agent-legible codebases",
   "author": {
     "name": "Vincent K. Kelvin"
