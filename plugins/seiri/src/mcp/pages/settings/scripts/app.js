@@ -9,6 +9,7 @@
   var ROUTE = { PLAN: '/plan', SAVE: '/save', CLOSE: '/close' };
   var TOKEN_PARAM = 'token';
   var DIAL_ADVISORY = 'advisory';
+  var DIAL_STANDARD = 'standard';
   var RULES_DIR_LABEL = '.claude/rules/';
   var CONFIG_LABEL = '.seiri/config.json';
   var CONTENT_TYPE_JSON = 'application/json';
@@ -24,13 +25,13 @@
       value: DIAL_ADVISORY,
       label: DIAL_ADVISORY,
       description:
-        'One line at session start naming the active rules. The default, and the floor: nothing is asserted that the repository did not ask for.',
+        'One line at session start naming the active rules. The quiet floor: nothing is asserted that the repository did not ask for.',
     },
     {
-      value: 'standard',
-      label: 'standard',
+      value: DIAL_STANDARD,
+      label: DIAL_STANDARD,
       description:
-        'Also states the dial position, so a long session can tell which posture it is operating under.',
+        'The default. Also states the dial position, so a long session can tell which posture it is operating under.',
     },
     {
       value: 'strict',
@@ -56,7 +57,7 @@
   });
 
   var intervention =
-    (state.config && state.config.intervention) || DIAL_ADVISORY;
+    (state.config && state.config.intervention) || DIAL_STANDARD;
 
   var elements = {
     root: document.getElementById('project-root'),

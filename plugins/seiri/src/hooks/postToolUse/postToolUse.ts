@@ -1,5 +1,5 @@
 import { HookEvent } from '../../constants/hooks.js';
-import { DEFAULT_INTERVENTION } from '../../constants/intervention.js';
+import { SILENT_INTERVENTION } from '../../constants/intervention.js';
 import { INJECTION_PREFIX } from '../../constants/plugin.js';
 import { FAILURE_CHAIN_LINE } from '../../constants/signals.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
@@ -39,10 +39,10 @@ export function processBashOutcome(
   )
     return QUIET;
 
-  // The dial gates before any state is touched: at advisory this hook
-  // costs one config read and writes nothing, which is the state the
+  // The dial gates before any state is touched: at the silent floor this
+  // hook costs one config read and writes nothing, which is the state the
   // dispatch measurements were taken against.
-  if (loadIntervention(input.cwd).effective === DEFAULT_INTERVENTION)
+  if (loadIntervention(input.cwd).effective === SILENT_INTERVENTION)
     return QUIET;
 
   if (input.hook_event_name !== HookEvent.POST_TOOL_USE_FAILURE) {

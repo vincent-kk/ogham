@@ -5,7 +5,7 @@ import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
 import { describe, expect, it } from 'vitest';
 
 import { SHIPPED_SKILLS } from '../constants/budgets.js';
-import { WORKFLOW_CHAIN_LINE } from '../constants/intervention.js';
+import { WORKFLOW_CHAIN_LINE } from '../constants/hooks.js';
 import {
   AUTO_CONDITIONAL_ASK_SKILLS,
   AUTO_INVOCABLE_SKILLS,

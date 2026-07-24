@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   TURN_REMINDER_STANDARD,
   TURN_REMINDER_STRICT,
-} from '../../../constants/intervention.js';
+} from '../../../constants/hooks.js';
 import { INJECTION_PREFIX } from '../../../constants/plugin.js';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';

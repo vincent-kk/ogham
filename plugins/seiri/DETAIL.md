@@ -28,10 +28,10 @@
 ### Configuration
 
 - Intervention dial 은 `<repoRoot>/.seiri/` 아래 두 계층에만 저장되며, 그곳에는 다른 것을 두지 않는다. `config.json` 은 커밋되는 baseline 이며 셋업 표면만 쓴다. `runtime.json` 은 추적되지 않는 세션 밸브이며 `config` 액션만 쓴다.
-- 실제로 적용되는 dial 은 `runtime ?? baseline ?? advisory` 이다. 훅은 실행마다 해석하므로, 변경은 세션 재시작 없이 적용된다.
+- 실제로 적용되는 dial 은 `runtime ?? baseline ?? standard` 이다. 훅은 실행마다 해석하므로, 변경은 세션 재시작 없이 적용된다.
 - Runtime 값이 baseline 과 다르면, dial 이 렌더되는 모든 곳에서 그 사실을 명시한다. 묵시적 override 는 금지한다.
 - 읽기는 절대 throw 하지 않는다. 손상된 계층은 건너뛰고 다음 계층을 적용하며, 무시한 파일을 경고에 명시한다.
-- `runtime.json` 을 처음 쓸 때 `.seiri/.gitignore` 도 만들어, 그 디렉터리의 untracked 구성원을 나열한다. 이미 있으면 그대로 두고, 저장소 루트 ignore 파일은 절대 편집하지 않는다.
+- `.seiri/` 에 처음 쓸 때(설정 저장·밸브 조작 어느 쪽이든) `.gitignore` 도 만들어, 그 디렉터리의 untracked 구성원을 나열한다. 이미 있으면 그대로 두고, 저장소 루트 ignore 파일은 절대 편집하지 않는다.
 
 ## API Contracts
 
@@ -39,7 +39,7 @@
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
 | `loadConfig(projectRoot)`                  | Baseline 계층만: `{ config \| null, path, warning? }`. 절대 throw 하지 않음.                       |
 | `loadIntervention(projectRoot)`            | 두 계층: `{ effective, source, baseline, runtime, warnings }`. 절대 throw 하지 않음.               |
-| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고, 쓴 경로를 반환.                                                       |
+| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 쓴 경로를 반환.                           |
 | `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                   |
 | `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                 |
 | `loadManifest(pluginRoot)`                 | 잘못된 manifest 또는 없는 `templateHash` 에서 throw.                                               |

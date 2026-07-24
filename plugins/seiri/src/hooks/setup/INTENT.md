@@ -18,8 +18,7 @@
   무주입으로 흡수한다. 세션을 그것 때문에 죽이지 않는다.
 - 다이얼은 **렌더 분량만** 바꾼다: advisory 1줄 / standard +다이얼 +규율 체인 /
   strict +우선순위 +완료 계약. 배포 문서는 안 바꾼다 — templateHash 와 충돌.
-- 유효 다이얼은 `loadIntervention`(밸브 ?? 기준선 ?? advisory). 밸브가 살아
-  있으면 출처·기준선을 명시한다 — advisory 로 **내린** 밸브도 마찬가지.
+- 유효 다이얼은 `loadIntervention`(밸브 ?? 기준선 ?? standard). 밸브가 살아 있으면 출처·기준선을 명시한다 — advisory 로 **내린** 밸브도 마찬가지.
 - 드리프트·다이얼 파일 무시 경고는 다이얼과 무관하게 항상 렌더한다.
 - 렌더 총량 기본 ≤5줄 · strict ≤8줄 — `renderStatusLines` 테스트가 고정한다.
 - `filid` 의 SessionStart 와 달리 `selfProbe` 를 쓰지 않는다 — 탐지할 외부

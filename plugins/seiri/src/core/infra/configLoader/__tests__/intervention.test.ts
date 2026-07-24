@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { clearRuntime } from '../loaders/clearRuntime.js';
+import { createDefaultConfig } from '../loaders/createDefaultConfig.js';
 import { loadIntervention } from '../loaders/loadIntervention.js';
 import { writeConfig } from '../loaders/writeConfig.js';
 import { writeRuntime } from '../loaders/writeRuntime.js';
@@ -62,13 +63,17 @@ describe('intervention dial', () => {
     });
   });
 
-  it('falls back to advisory when the project has neither layer', () => {
+  it('falls back to standard when the project has neither layer', () => {
     expect(loadIntervention(seedRepo())).toMatchObject({
-      effective: 'advisory',
+      effective: 'standard',
       source: 'default',
       baseline: null,
       runtime: null,
     });
+  });
+
+  it('proposes standard as the setup default, above the silent floor', () => {
+    expect(createDefaultConfig()).toEqual({ intervention: 'standard' });
   });
 
   it('returns to the baseline once the valve is cleared', () => {
@@ -92,6 +97,14 @@ describe('intervention dial', () => {
     const ignore = readFileSync(join(repoRoot, '.seiri', '.gitignore'), 'utf8');
     expect(ignore).toContain('runtime.json');
     expect(existsSync(join(repoRoot, '.seiri', 'runtime.json'))).toBe(true);
+  });
+
+  it('writes the ignore file at setup time, before any valve is turned', () => {
+    const repoRoot = seedRepo();
+    writeConfig(repoRoot, { intervention: 'standard' });
+
+    const ignore = readFileSync(join(repoRoot, '.seiri', '.gitignore'), 'utf8');
+    expect(ignore).toContain('runtime.json');
   });
 
   it('leaves an existing ignore file alone', () => {

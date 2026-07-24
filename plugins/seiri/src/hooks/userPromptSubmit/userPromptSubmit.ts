@@ -1,7 +1,7 @@
 import {
   TURN_REMINDER_STANDARD,
   TURN_REMINDER_STRICT,
-} from '../../constants/intervention.js';
+} from '../../constants/hooks.js';
 import { INJECTION_PREFIX } from '../../constants/plugin.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';

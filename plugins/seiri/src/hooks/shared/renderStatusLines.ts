@@ -1,4 +1,4 @@
-import { DEFAULT_INTERVENTION } from '../../constants/intervention.js';
+import { SILENT_INTERVENTION } from '../../constants/intervention.js';
 import { INJECTION_PREFIX, RULE_ID_PREFIX } from '../../constants/plugin.js';
 import { describeDial } from '../../core/infra/configLoader/utils/describeDial.js';
 import { renderPostureLines } from '../../core/infra/configLoader/utils/renderPostureLines.js';
@@ -51,7 +51,7 @@ export function renderStatusLines(
 
   // A valve that lowered the dial to advisory still prints: silence there
   // would be indistinguishable from a project that simply never set one.
-  if (dial.effective !== DEFAULT_INTERVENTION || dial.source === 'runtime')
+  if (dial.effective !== SILENT_INTERVENTION || dial.source === 'runtime')
     lines.push(`${INJECTION_PREFIX} ${describeDial(dial)}`);
 
   if (dial.effective === 'strict')

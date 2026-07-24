@@ -18,8 +18,7 @@ utils/      organ — readDialFile · resolveConfigPath · resolveRuntimePath
 ## Conventions
 
 - **2계층**: 기준선 `config.json`(커밋, setup 표면 전용) + 런타임 밸브
-  `runtime.json`(비추적, `config` action 전용). 유효값
-  `runtime ?? baseline ?? advisory` 를 매 훅 실행마다 재계산한다.
+  `runtime.json`(비추적, `config` action 전용). 유효값 `runtime ?? baseline ?? standard` 를 매 훅 재계산한다.
 - 읽기는 **절대 throw 하지 않는다.** 부재는 정상 상태, 손상은 건너뛰고
   `warnings` 가 파일을 지목한다 — 그래야 조용한 오버라이드가 없다.
 - 두 계층은 같은 한 키짜리 객체라 `readDialFile` 하나로 파싱한다.
