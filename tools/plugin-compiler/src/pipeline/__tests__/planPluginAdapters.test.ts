@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { CLAUDE_MANIFEST_PATH } from "../../constants/claudeArtifacts.js";
 import { planPluginAdapters } from "../steps/planPluginAdapters.js";
 
 let pluginDirectory: string;
@@ -110,8 +111,11 @@ describe("planPluginAdapters", () => {
       {
         level: "error",
         code: "plugin-directory-not-found",
+        // Mirror production's native-separator path (join, no norm) so the
+        // substring holds on Windows too — the message carries a raw join()
+        // result (backslashes on Windows), not a forward-slashed path.
         message: expect.stringContaining(
-          norm(join(missingDirectory, ".claude-plugin/plugin.json")),
+          join(missingDirectory, CLAUDE_MANIFEST_PATH),
         ),
       },
     ]);
