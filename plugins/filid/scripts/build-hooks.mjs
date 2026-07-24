@@ -52,18 +52,18 @@ const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [
+  { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
+  {
+    name: 'user-prompt-submit',
+    entry: 'userPromptSubmit',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
   { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: HEAVY_HOOK_BYTES },
   {
     name: 'agent-enforcer',
     entry: 'agentEnforcer',
     maxBytes: LIGHT_HOOK_BYTES,
   },
-  {
-    name: 'user-prompt-submit',
-    entry: 'userPromptSubmit',
-    maxBytes: LIGHT_HOOK_BYTES,
-  },
-  { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
 ];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require

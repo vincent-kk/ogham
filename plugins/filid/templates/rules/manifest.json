@@ -9,40 +9,7 @@
       "required": true,
       "title": "FCA-AI Architecture Rules",
       "description": "Fractal Context Architecture rules: node types, structural rules, documentation constraints, and quality thresholds. Mandatory for every FCA-AI project.",
-      "templateHash": "dbb54ed1e8a7d43a55939ce8519568f13f31fbd345fb5158a41b71e449315d00"
-    },
-    {
-      "id": "filid_reuse-first",
-      "filename": "filid_reuse-first.md",
-      "legacyFilename": "rfx.md",
-      "required": false,
-      "title": "Reuse-First Implementation Rules",
-      "description": "Implementation guidance for FCA-AI projects: solution selection priority, safe extension, file authoring, and naming heuristics.",
-      "templateHash": "eae43ce1f518d0a1adc80be24d2da5bf9057a80f456cce949441a0725229b726"
-    },
-    {
-      "id": "filid_cognitive-discipline",
-      "filename": "filid_cognitive-discipline.md",
-      "required": false,
-      "title": "Cognitive Discipline Rules",
-      "description": "Epistemic standards that block LLM rationalization: evidence over confidence, anti-rationalization principles, and intellectual honesty requirements.",
-      "templateHash": "c73e8dbaa841b2fdf6238c6ac16081a3b23a2bb723543b8b877624238384c93a"
-    },
-    {
-      "id": "filid_test-validity",
-      "filename": "filid_test-validity.md",
-      "required": false,
-      "title": "Test Validity Rules",
-      "description": "Falsification contract for tests: fail-first verification, artifact-under-test checks, snapshot discipline, loud skips, and load-bearing fixes.",
-      "templateHash": "ca73c3f39ed93aaddb86153907a40fc6fa25b6cc28acd2ec39395cee63f83a04"
-    },
-    {
-      "id": "filid_context-efficiency",
-      "filename": "filid_context-efficiency.md",
-      "required": false,
-      "title": "Context Efficiency Rules",
-      "description": "Context budget discipline: generated artifacts are search-only, capture command output once, and never re-read unchanged file sections.",
-      "templateHash": "0ad156654795ce154cd0ea8472e98b018854644ebaef9f07804424f8ef3d2bd1"
+      "templateHash": "71baabd14737956d3e746b958c88ca88dd0daa75629cce8c22d720d9767c05a6"
     }
   ]
 }

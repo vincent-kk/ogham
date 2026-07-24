@@ -7,10 +7,17 @@ import { bench, describe } from 'vitest';
 const DIST_DIR = join(import.meta.dirname, '../../../../..', 'dist');
 
 const HOOK_SCRIPTS = {
+  userPromptSubmit: join(DIST_DIR, 'hooks', 'user-prompt-submit.mjs'),
   preToolUse: join(DIST_DIR, 'hooks', 'pre-tool-use.mjs'),
   agentEnforcer: join(DIST_DIR, 'hooks', 'agent-enforcer.mjs'),
-  userPromptSubmit: join(DIST_DIR, 'hooks', 'user-prompt-submit.mjs'),
 };
+
+const USER_PROMPT_INPUT = JSON.stringify({
+  cwd: '/workspace',
+  session_id: 'bench-session',
+  hook_event_name: 'UserPromptSubmit',
+  prompt: 'Fix the bug',
+});
 
 const PRE_TOOL_INPUT = JSON.stringify({
   cwd: '/workspace',
@@ -29,13 +36,6 @@ const SUBAGENT_INPUT = JSON.stringify({
   hook_event_name: 'SubagentStart',
   agent_type: 'architect',
   agent_id: 'agent-bench-001',
-});
-
-const USER_PROMPT_INPUT = JSON.stringify({
-  cwd: '/workspace',
-  session_id: 'bench-session',
-  hook_event_name: 'UserPromptSubmit',
-  prompt: 'Fix the bug',
 });
 
 async function spawnHook(scriptPath: string, stdinData: string): Promise<void> {
@@ -57,6 +57,14 @@ const scriptsExist = Object.values(HOOK_SCRIPTS).every((p) => existsSync(p));
 if (scriptsExist)
   describe('hook-spawn: end-to-end process spawn', () => {
     bench(
+      'user-prompt-submit spawn',
+      async () => {
+        await spawnHook(HOOK_SCRIPTS.userPromptSubmit, USER_PROMPT_INPUT);
+      },
+      { time: 2000 },
+    );
+
+    bench(
       'pre-tool-use spawn',
       async () => {
         await spawnHook(HOOK_SCRIPTS.preToolUse, PRE_TOOL_INPUT);
@@ -68,14 +76,6 @@ if (scriptsExist)
       'agent-enforcer spawn',
       async () => {
         await spawnHook(HOOK_SCRIPTS.agentEnforcer, SUBAGENT_INPUT);
-      },
-      { time: 2000 },
-    );
-
-    bench(
-      'user-prompt-submit spawn',
-      async () => {
-        await spawnHook(HOOK_SCRIPTS.userPromptSubmit, USER_PROMPT_INPUT);
       },
       { time: 2000 },
     );

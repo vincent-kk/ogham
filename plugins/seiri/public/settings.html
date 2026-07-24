@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>seiri — settings</title>
+    <style>:root{color-scheme:dark;--bg: #0a0a0b;--panel: #131316;--muted: #1c1c20;--muted-hi: #24242a;--border: #26262c;--border-hi: #3a3a42;--fg: #f5f5f7;--fg-muted: #9a9aa3;--fg-faint: #5a5a63;--accent: #f5f5f7;--accent-soft: rgba(245, 245, 247, .08);--accent-ring: rgba(245, 245, 247, .24);--danger: #d97070;--mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;--radius: 8px;--radius-lg: 12px;--transition: .16s ease}*{box-sizing:border-box}::selection{background:var(--accent-ring)}html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}body{font:14px/1.55 var(--mono);min-height:100dvh;padding:48px 24px 80px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}code{font-family:inherit;background:var(--muted);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--fg)}.shell{max-width:720px;margin:0 auto}.masthead{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}.brand{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.brand-name{font-size:22px;font-weight:500;letter-spacing:-.02em}.brand-tag{color:var(--fg-muted);font-size:14px}.lede{margin:0;color:var(--fg-muted);font-size:13px;line-height:1.6}.lede code{overflow-wrap:anywhere}.root{color:var(--fg-faint);font-size:12px;margin:12px 0 0;overflow-wrap:anywhere}.section{padding:24px 0;border-bottom:1px solid var(--border)}.section:last-of-type{border-bottom:none}.section-title{font-size:14px;font-weight:500;margin:0 0 6px}.section-help{margin:0 0 16px;color:var(--fg-muted);font-size:12px;line-height:1.6}.section--collapsible>.section-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;user-select:none}.section--collapsible>.section-summary::-webkit-details-marker{display:none}.section-summary__label{display:flex;flex-direction:column;gap:4px}.section-summary__hint{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-faint)}.section-chevron{flex:none;color:var(--fg-muted);transition:transform var(--transition)}.section--collapsible[open] .section-chevron{transform:rotate(180deg)}.section--collapsible>.section-summary:hover .section-chevron{color:var(--fg)}.section--collapsible>.section-summary:focus-visible{outline:none;border-radius:var(--radius);box-shadow:0 0 0 3px var(--accent-ring)}.section--collapsible[open]>.section-summary{margin-bottom:14px}.rules{display:flex;flex-direction:column;gap:8px}.rule{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;transition:border-color var(--transition)}.rule:focus-within{border-color:var(--border-hi)}.rule-main{display:flex;gap:12px;align-items:flex-start}.rule input[type=checkbox]{appearance:none;flex:0 0 auto;width:16px;height:16px;margin-top:3px;border:1px solid var(--border-hi);border-radius:4px;background:var(--muted);cursor:pointer;transition:background var(--transition),border-color var(--transition)}.rule input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}.rule input[type=checkbox]:checked:after{content:"";display:block;width:4px;height:8px;margin:1px 0 0 5px;border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(45deg)}.rule input[type=checkbox]:focus-visible{outline:2px solid var(--accent-ring);outline-offset:2px}.rule-text{min-width:0}.rule-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font-weight:500;cursor:pointer}.rule-desc{color:var(--fg-muted);font-size:12px;margin:4px 0 0}.rule-file{color:var(--fg-faint);font-size:11px;margin:6px 0 0}.tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:1px solid var(--border-hi);color:var(--fg-muted);white-space:nowrap}.tag-drift{border-color:var(--danger);color:var(--danger)}.rule-drift{margin:12px 0 0;padding:10px 12px;background:var(--muted);border-radius:var(--radius);font-size:12px;color:var(--fg-muted)}.rule-drift label{display:flex;gap:8px;align-items:flex-start;cursor:pointer;margin-top:8px;color:var(--fg)}.rule-drift input[type=checkbox]{margin-top:2px}.dial{display:flex;flex-direction:column;gap:8px}.dial-option{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;cursor:pointer;transition:border-color var(--transition),background var(--transition)}.dial-option:hover{border-color:var(--border-hi)}.dial-option.is-selected{border-color:var(--accent-ring);background:var(--accent-soft)}.dial-option input[type=radio]{appearance:none;flex:0 0 auto;width:16px;height:16px;margin-top:3px;border:1px solid var(--border-hi);border-radius:50%;background:var(--muted);cursor:pointer}.dial-option input[type=radio]:checked{border-color:var(--accent);background:radial-gradient(circle at center,var(--accent) 0 4px,transparent 5px)}.dial-option input[type=radio]:focus-visible{outline:2px solid var(--accent-ring);outline-offset:2px}.dial-name{font-weight:500}.dial-desc{color:var(--fg-muted);font-size:12px;margin:4px 0 0}.facts{margin:0;font-size:12px;display:grid;grid-template-columns:minmax(0,12ch) 1fr;gap:6px 16px}.facts dt{color:var(--fg-faint)}.facts dd{margin:0;color:var(--fg-muted);overflow-wrap:anywhere}.preview-body{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;font-size:12px;color:var(--fg-muted)}.diff{margin:0;display:flex;flex-direction:column;gap:6px}.diff-row{display:flex;gap:10px;align-items:baseline}.diff-mark{flex:0 0 auto;width:1ch;text-align:center;color:var(--fg-faint)}.diff-row[data-action=copy] .diff-mark,.diff-row[data-action=update] .diff-mark{color:var(--fg)}.diff-row[data-action=remove] .diff-mark,.diff-row[data-action=skip] .diff-mark{color:var(--danger)}.diff-file{color:var(--fg)}.diff-note,.empty{color:var(--fg-faint)}.actions{display:flex;justify-content:flex-end;gap:12px;margin-top:32px;flex-wrap:wrap}.btn{font:inherit;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg);cursor:pointer;transition:background var(--transition),border-color var(--transition),opacity var(--transition);min-height:44px}.btn:hover{border-color:var(--border-hi);background:var(--muted-hi)}.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.btn:active:not(:disabled){transform:translateY(1px)}.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:500}.btn-primary:hover{background:#fff;border-color:#fff}.btn-ghost{background:transparent;border-color:transparent;color:var(--fg-muted)}.btn-ghost:hover{background:var(--muted);border-color:var(--border);color:var(--fg)}.btn:disabled{opacity:.4;cursor:not-allowed}.status{margin-top:24px;min-height:20px;font-size:12px;font-weight:500;color:var(--fg-muted);white-space:pre-line;line-height:1.7}.status[data-kind=ok]{color:var(--fg)}.status[data-kind=error]{color:var(--danger)}@media (prefers-reduced-motion: reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}@media (max-width: 560px){body{padding:24px 16px 64px}}</style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-name">seiri</span>
+          <span class="brand-tag">code authoring rules</span>
+        </div>
+        <p class="lede">
+          Rules you select are written to
+          <code>.claude/rules/</code> in this repository, where the harness
+          loads them at the start of every session. Nothing is written until you
+          save, and you can see the exact change first.
+        </p>
+        <p class="root" id="project-root"></p>
+      </header>
+
+      <section class="section" aria-labelledby="rules-heading">
+        <h2 class="section-title" id="rules-heading">Rules</h2>
+        <p class="section-help">
+          Every rule is opt-in. Each one yields to this repository's own
+          instructions and conventions where they disagree.
+        </p>
+        <div id="rules-list" class="rules"></div>
+      </section>
+
+      <section class="section" aria-labelledby="dial-heading">
+        <h2 class="section-title" id="dial-heading">Intervention</h2>
+        <p class="section-help">
+          Changes how much seiri says at the start of a session. It never
+          changes the rule documents themselves.
+        </p>
+        <div
+          id="dial"
+          class="dial"
+          role="radiogroup"
+          aria-labelledby="dial-heading"
+        ></div>
+      </section>
+
+      <details class="section section--collapsible">
+        <summary class="section-summary">
+          <span class="section-summary__label">
+            <span class="section-title">Advanced</span>
+            <span class="section-summary__hint">project · config · rules</span>
+          </span>
+          <svg
+            class="section-chevron"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </summary>
+        <dl class="facts" id="facts"></dl>
+      </details>
+
+      <section class="section" aria-labelledby="preview-heading">
+        <h2 class="section-title" id="preview-heading">Pending changes</h2>
+        <p class="section-help">
+          What saving would do to <code>.claude/rules/</code> right now.
+        </p>
+        <div id="preview" class="preview-body"></div>
+      </section>
+
+      <div class="actions">
+        <button type="button" id="close" class="btn btn-ghost">Close</button>
+        <button type="button" id="save" class="btn btn-primary">Save</button>
+        <button type="button" id="save-close" class="btn">
+          Save &amp; close
+        </button>
+      </div>
+      <div
+        id="status"
+        class="status"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+    </main>
+
+    <script>
+      window.__SEIRI_STATE__ = '__SEIRI_STATE__';
+    </script>
+    <script>(function(){"use strict";var p={PLAN:"/plan",SAVE:"/save",CLOSE:"/close"},w="token",y="advisory",C="standard",A=".claude/rules/",I=".seiri/config.json",T="application/json",r=window.__SEIRI_STATE__;if(!r||typeof r!="object")return;var O=new URLSearchParams(window.location.search).get(w)||"",x=[{value:y,label:y,description:"One line at session start naming the active rules. The quiet floor: nothing is asserted that the repository did not ask for."},{value:C,label:C,description:"The default. Also states the dial position, so a long session can tell which posture it is operating under."},{value:"strict",label:"strict",description:"Also restates the precedence chain each session \u2014 useful where repository conventions and these rules meet often."}],s=r.ruleDocs.entries||[],R=s.some(function(e){return e.deployed}),f={},h={};s.forEach(function(e){f[e.id]=R?e.deployed:e.recommended,h[e.id]=!1});var v=r.config&&r.config.intervention||C,a={root:document.getElementById("project-root"),rules:document.getElementById("rules-list"),dial:document.getElementById("dial"),facts:document.getElementById("facts"),preview:document.getElementById("preview"),status:document.getElementById("status"),save:document.getElementById("save"),saveClose:document.getElementById("save-close"),close:document.getElementById("close")};function l(e,n){a.status.hidden=!1,a.status.setAttribute("data-kind",e),a.status.textContent=n||""}function b(){return{config:{intervention:v},ruleDocs:{selections:f,resync:Object.keys(h).filter(function(e){return h[e]})}}}function m(e,n){return fetch(e+"?"+w+"="+encodeURIComponent(O),{method:"POST",headers:{"Content-Type":T},body:JSON.stringify(n)}).then(function(d){return d.json().then(function(t){if(!d.ok||t.success===!1)throw new Error(t.message||"Request failed");return t})})}function i(e,n,d){var t=document.createElement(e);return n&&(t.className=n),d!==void 0&&(t.textContent=d),t}function B(){if(a.rules.textContent="",s.length===0){a.rules.appendChild(i("p","empty","This build ships no rule documents yet. Nothing to select."));return}s.forEach(function(e){var n=i("div","rule"),d=i("div","rule-main"),t=document.createElement("input");t.type="checkbox",t.id="rule-"+e.id,t.checked=!!f[e.id],t.addEventListener("change",function(){f[e.id]=t.checked,g()});var o=i("div","rule-text"),u=i("label","rule-title");u.htmlFor=t.id,u.appendChild(i("span",null,e.title)),e.recommended&&u.appendChild(i("span","tag","recommended")),e.deployed&&!e.inSync&&u.appendChild(i("span","tag tag-drift","edited locally")),o.appendChild(u),o.appendChild(i("p","rule-desc",e.description)),o.appendChild(i("p","rule-file",A+e.filename)),d.appendChild(t),d.appendChild(o),n.appendChild(d),e.deployed&&!e.inSync&&n.appendChild(_(e)),a.rules.appendChild(n)})}function _(e){var n=i("div","rule-drift");n.appendChild(i("p",null,"The deployed copy of this rule differs from the one this build ships. Your edits are kept unless you say otherwise."));var d=document.createElement("label"),t=document.createElement("input");return t.type="checkbox",t.checked=!1,t.addEventListener("change",function(){h[e.id]=t.checked,g()}),d.appendChild(t),d.appendChild(i("span",null,"Replace it with the shipped version")),n.appendChild(d),n}function k(){a.dial.textContent="",x.forEach(function(e){var n=i("label","dial-option");e.value===v&&n.classList.add("is-selected");var d=document.createElement("input");d.type="radio",d.name="intervention",d.value=e.value,d.checked=e.value===v,d.addEventListener("change",function(){v=e.value,k()});var t=i("div","dial-text");t.appendChild(i("div","dial-name",e.label)),t.appendChild(i("p","dial-desc",e.description)),n.appendChild(d),n.appendChild(t),a.dial.appendChild(n)})}function D(){a.facts.textContent="";var e=[["project",r.projectRoot],["config",r.configExists?I:"not created yet"],["rules",String(s.length)+" available in this build"]];e.forEach(function(n){a.facts.appendChild(i("dt",null,n[0])),a.facts.appendChild(i("dd",null,n[1]))})}var N={copy:"+",update:"~",remove:"\u2212",drift:"!",skip:"!",unchanged:"\xB7"};function S(e){a.preview.textContent="";var n=(e.outcomes||[]).filter(function(t){return t.action!=="unchanged"});if(n.length===0){a.preview.appendChild(i("p","empty","Nothing would change."));return}var d=i("div","diff");n.forEach(function(t){var o=i("div","diff-row");o.setAttribute("data-action",t.action),o.appendChild(i("span","diff-mark",N[t.action]||"?")),o.appendChild(i("span","diff-file",t.filename)),o.appendChild(i("span","diff-note",t.reason?t.action+" \u2014 "+t.reason:t.action)),d.appendChild(o)}),a.preview.appendChild(d)}var E=0;function g(){var e=++E;m(p.PLAN,b()).then(function(n){e===E&&S(n.ruleDocs)}).catch(function(n){e===E&&(a.preview.textContent="",a.preview.appendChild(i("p","empty","Preview unavailable: "+n.message)))})}function c(e){[a.save,a.saveClose,a.close].forEach(function(n){n.disabled=e})}function L(e){c(!0),l("info","Saving\u2026"),m(p.SAVE,b()).then(function(n){if(S(n.ruleDocs),l("ok","Saved. You can return to the session."),e)return m(p.CLOSE,{}).then(P);c(!1)}).catch(function(n){l("error",n.message),c(!1)})}function P(){l("ok","Saved. This tab can be closed."),window.close()}a.save.addEventListener("click",function(){L(!1)}),a.saveClose.addEventListener("click",function(){L(!0)}),a.close.addEventListener("click",function(){c(!0),l("info","Closing\u2026"),m(p.CLOSE,{}).then(function(){window.close()}).catch(function(e){l("error",e.message),c(!1)})}),a.root.textContent=r.projectRoot,B(),k(),D(),g()})();</script>
+  </body>
+</html>

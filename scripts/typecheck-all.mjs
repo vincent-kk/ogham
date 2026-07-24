@@ -51,6 +51,7 @@ const CONSUMERS = [
   "@ogham/filid",
   "@ogham/imbas",
   "@ogham/atlassian",
+  "@ogham/seiri",
 ];
 
 async function clearTscCache(pkgDir) {

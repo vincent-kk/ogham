@@ -1,7 +1,6 @@
-import { existsSync, mkdirSync, renameSync, unlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { createLogger } from '../../../../lib/logger.js';
 import { computeFileSha256 } from '../utils/computeFileSha256.js';
 import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 import { resolvePluginRoot } from '../utils/resolvePluginRoot.js';
@@ -13,8 +12,8 @@ import type {
   RuleDocsManifest,
   SyncRuleDocsOptions,
 } from './manifestTypes.js';
-
-const log = createLogger('config-loader');
+import { migrateLegacyFilenames } from './migrateLegacyFilenames.js';
+import { retireOrphanedRuleDocs } from './retireOrphanedRuleDocs.js';
 
 /**
  * Synchronise `.claude/rules/` with the desired selection.
@@ -27,6 +26,10 @@ const log = createLogger('config-loader');
  * - optional selected + file present + hash differs + id ∉ resync → drift reported, file untouched
  * - not selected + file present → removed
  * - not selected + file absent → unchanged
+ *
+ * After the manifest pass, any `<namespace>_*.md` file absent from the manifest
+ * is retired (a rule this plugin dropped in an earlier version). The namespace
+ * is derived from the manifest's own filenames — no hardcoded retired list.
  *
  * This function MUST be invoked exclusively from setup surfaces: the
  * settings page server (`open_settings`, interactive path) or the
@@ -77,24 +80,7 @@ export function syncRuleDocs(
   const selectionSet = new Set(selection);
   const resyncSet = new Set(opts.resync ?? []);
 
-  // --- Legacy filename migration ---
-  // Rename old-named files (e.g. fca.md → filid_fca-policy.md)
-  // so the main loop sees them under the current name. User edits are preserved
-  // because renameSync is a metadata-only operation (no content rewrite).
-  for (const entry of manifest.rules) {
-    if (!entry.legacyFilename) continue;
-    const legacyPath = join(rulesDir, entry.legacyFilename);
-    const newPath = join(rulesDir, entry.filename);
-    if (existsSync(legacyPath) && !existsSync(newPath))
-      try {
-        renameSync(legacyPath, newPath);
-        log.debug(
-          `migrated rule doc: ${entry.legacyFilename} → ${entry.filename}`,
-        );
-      } catch (err) {
-        log.error(`failed to migrate ${entry.legacyFilename}`, err);
-      }
-  }
+  migrateLegacyFilenames(manifest, rulesDir);
 
   for (const entry of manifest.rules) {
     const desired = entry.required || selectionSet.has(entry.id);
@@ -171,6 +157,8 @@ export function syncRuleDocs(
       });
     }
   }
+
+  retireOrphanedRuleDocs(manifest, rulesDir, result);
 
   return result;
 }

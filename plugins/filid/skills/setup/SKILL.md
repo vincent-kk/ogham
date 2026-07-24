@@ -41,9 +41,9 @@ INTENT.md files for fractal nodes, and produces a validation report.
 
 - Starting a new project that will follow FCA-AI conventions
 - Onboarding an existing codebase into the fractal context system
-- **Managing rule doc application and config** — the settings page opened by
-  this skill is the single entry point for `.claude/rules/*.md` toggling and
-  `.filid/config.json` editing
+- **Managing rule doc application and config** — when optional rule docs exist
+  the settings page toggles `.claude/rules/*.md`; config also edits through
+  `/filid:config-wizard`
 - Regenerating INTENT.md files after a large-scale refactor removed them
 - Creating DETAIL.md scaffolds for modules that lack formal specifications
 - Auditing which directories are correctly classified before running `/filid:scan`
@@ -91,12 +91,14 @@ See [sections/section-0-rule-docs.md — Phase 0a](./sections/section-0-rule-doc
 
 ### Phase 0b — Settings Page <!-- [INTERACTIVE] -->
 
-Call `mcp__plugin_filid_tools__open_settings({ path: "<absolute-target-path>", waitSeconds: 300 })`.
-The tool opens the local settings page (config + rule docs in one form) and
-blocks until the user saves, closes, or the wait elapses. The server
-persists everything on Save — do NOT call `mcp__plugin_filid_tools__rule_docs_sync` here.
+Inspect rule-doc state first to decide whether the browser earns its cost:
+`mcp__plugin_filid_tools__rule_docs_sync({ action: "status", path: "<absolute-target-path>" })`.
 
-Dispatch on `result.status`:
+**Optional docs exist** (`status.entries` non-empty) — open the browser for its
+pre-checked selection UX:
+`mcp__plugin_filid_tools__open_settings({ path: "<absolute-target-path>", waitSeconds: 300 })`.
+The server persists config + rule docs on Save — do NOT also call
+`mcp__plugin_filid_tools__rule_docs_sync`. Dispatch on `result.status`:
 
 - `saved` — print a one-line rule doc summary from `result.summary.ruleDocs`
   (+ two drift hint lines when `drift` is non-empty)
@@ -104,11 +106,17 @@ Dispatch on `result.status`:
   surface `result.url` and STOP
 - `closed` — keep the existing config and continue
 
+**No optional docs** (`status.entries` empty — the plugin ships only required
+docs) — do NOT open the browser; nothing is selectable and the config form
+adds no value over the CLI. Apply the required docs directly with
+`mcp__plugin_filid_tools__rule_docs_sync({ action: "sync", path: "<absolute-target-path>", selections: {} })`,
+print the one-line summary, and direct config edits to `/filid:config-wizard`.
+
 See [sections/section-0-rule-docs.md — Phase 0b](./sections/section-0-rule-docs.md#phase-0b--settings-page)
 for the full dispatch contract and the headless/CI fallback.
 
 **→ If the invocation passed `--rules`, STOP here and emit a short completion
-line (e.g., `"Settings saved — Phase 1–5 skipped"`). Otherwise immediately
+line (e.g., `"Rule docs applied — Phase 1–5 skipped"`). Otherwise immediately
 proceed to Phase 1 in the same response.**
 
 ### Phase 1 — Directory Scan
@@ -154,14 +162,14 @@ See [sections/section-5-validation-report.md](./sections/section-5-validation-re
 
 ## Available MCP Tools
 
-| Tool                                        | Action            | Purpose                                                                 |
-| ------------------------------------------- | ----------------- | ----------------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__project_init`     | —                 | Create `.filid/config.json` with defaults (Phase 0a)                    |
-| `mcp__plugin_filid_tools__open_settings`    | —                 | Open the browser settings page and wait for Save (Phase 0b)             |
-| `mcp__plugin_filid_tools__rule_docs_sync`   | `status` / `sync` | Headless/CI fallback only — the settings page replaces it interactively |
-| `mcp__plugin_filid_tools__fractal_scan`     | —                 | Scan filesystem and retrieve complete project directory hierarchy       |
-| `mcp__plugin_filid_tools__fractal_navigate` | `classify`        | Classify a single directory as fractal / organ / pure-function          |
-| `mcp__plugin_filid_tools__ast_grep_search`  | —                 | AST pattern matching (optional — requires @ast-grep/napi)               |
+| Tool                                        | Action            | Purpose                                                                                                      |
+| ------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| `mcp__plugin_filid_tools__project_init`     | —                 | Create `.filid/config.json` with defaults (Phase 0a)                                                         |
+| `mcp__plugin_filid_tools__open_settings`    | —                 | Open the browser settings page and wait for Save (Phase 0b)                                                  |
+| `mcp__plugin_filid_tools__rule_docs_sync`   | `status` / `sync` | Phase 0b gate: inspect rule-doc state, and apply docs directly when no optional docs exist or in headless/CI |
+| `mcp__plugin_filid_tools__fractal_scan`     | —                 | Scan filesystem and retrieve complete project directory hierarchy                                            |
+| `mcp__plugin_filid_tools__fractal_navigate` | `classify`        | Classify a single directory as fractal / organ / pure-function                                               |
+| `mcp__plugin_filid_tools__ast_grep_search`  | —                 | AST pattern matching (optional — requires @ast-grep/napi)                                                    |
 
 ## Options
 

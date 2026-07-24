@@ -14,9 +14,9 @@ export type {
   HookBaseInput,
   HookOutput,
   SessionStartInput,
+  UserPromptSubmitInput,
   PreToolUseInput,
   SubagentStartInput,
-  UserPromptSubmitInput,
 } from './hooks.js';
 
 // State types
