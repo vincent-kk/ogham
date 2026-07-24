@@ -11,7 +11,7 @@ plugin: seiri
 
 # trace-cause — fix where it started
 
-This skill may be invoked automatically. Do not ask questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
 
 ## Workflow
 

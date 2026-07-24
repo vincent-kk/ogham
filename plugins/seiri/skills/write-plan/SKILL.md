@@ -1,7 +1,6 @@
 ---
 name: write-plan
 user-invocable: true
-disallowed-tools: AskUserQuestion
 description: '[seiri:write-plan] Write an implementation plan a stranger could execute without this conversation. Use when work spans multiple steps or sittings, before touching code.'
 argument-hint: '[the spec or goal to plan]'
 version: '0.1.0'
@@ -11,7 +10,7 @@ plugin: seiri
 
 # write-plan — write it so the session is not needed
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. For a routine change, take the conservative default and say so in one line. A large blast radius — a broad refactor, a new module or feature — earns one focused question before you commit the plan.
 
 ## Workflow
 

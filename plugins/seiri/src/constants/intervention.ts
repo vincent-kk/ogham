@@ -17,7 +17,7 @@ export const DEFAULT_INTERVENTION = 'advisory' as const;
  * away from the sequence has something to snap back to.
  */
 export const WORKFLOW_CHAIN_LINE =
-  'Workflow: implement → verify-done → request-review; failures → trace-cause.';
+  'Workflow: write-plan → execute → implement → verify-done → request-review; failures → trace-cause; indirect code → trace-structure; review feedback → receive-review.';
 
 /**
  * Added at `strict`. Widens which moments count as one of the above, and
