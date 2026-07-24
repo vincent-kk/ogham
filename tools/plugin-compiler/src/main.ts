@@ -8,12 +8,13 @@ import {
   parseCommand,
 } from "./cli/index.js";
 import {
+  ApplyFilesError,
   applyFiles,
   listPluginDirectories,
   planPluginAdapters,
   planRootAdapters,
 } from "./pipeline/index.js";
-import type { AdapterPlan } from "./types/index.js";
+import type { AdapterPlan, FileOutcome } from "./types/index.js";
 
 const REPOSITORY_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -39,10 +40,29 @@ function main(): void {
   const diagnostics = plans.flatMap((plan) => plan.diagnostics);
   stderr.write(formatDiagnostics(diagnostics));
 
-  const outcomes = applyFiles(
-    plans.flatMap((plan) => plan.files),
-    command.check,
-  );
+  let outcomes: FileOutcome[];
+  try {
+    outcomes = applyFiles(
+      plans.flatMap((plan) => plan.files),
+      command.check,
+    );
+  } catch (error) {
+    // A write failed mid-regeneration (ENOSPC/EACCES/EROFS, ...). Report
+    // whatever was already applied plus a formatted diagnostic instead of
+    // letting a raw stacktrace reach the user, then fail the run.
+    if (error instanceof ApplyFilesError)
+      stdout.write(formatOutcomes(error.outcomes, REPOSITORY_ROOT));
+    stderr.write(
+      formatDiagnostics([
+        {
+          level: "error",
+          code: "apply-io-error",
+          message: error instanceof Error ? error.message : String(error),
+        },
+      ]),
+    );
+    exit(1);
+  }
   stdout.write(formatOutcomes(outcomes, REPOSITORY_ROOT));
 
   const hasErrors = diagnostics.some(

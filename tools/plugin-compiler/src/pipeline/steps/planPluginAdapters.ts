@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
   buildAgyHooks,
@@ -13,12 +14,31 @@ import {
   CODEX_MANIFEST_PATH,
   ROOT_MANIFEST_PATH,
 } from "../../constants/adapterPaths.js";
+import { CLAUDE_MANIFEST_PATH } from "../../constants/claudeArtifacts.js";
 import { readPluginFacts } from "../../facts/index.js";
 import { lintHookEvents, lintHookMatchers } from "../../lint/index.js";
 import type { AdapterPlan, GeneratedFile } from "../../types/index.js";
 import { stableJson } from "../../utils/stableJson.js";
 
 export function planPluginAdapters(directory: string): AdapterPlan {
+  // Caller-supplied directories (CLI args in parseCommand.ts) are resolved
+  // but never existence-checked — this is the same manifest-presence gate
+  // listPluginDirectories.ts applies to auto-discovered directories. Without
+  // it, readPluginFacts's unguarded readFileSync throws a raw ENOENT that
+  // bypasses Diagnostic/formatDiagnostics and crashes the CLI.
+  const manifestPath = join(directory, CLAUDE_MANIFEST_PATH);
+  if (!existsSync(manifestPath))
+    return {
+      files: [],
+      diagnostics: [
+        {
+          level: "error",
+          code: "plugin-directory-not-found",
+          message: `directory not found or not a plugin (missing manifest): ${manifestPath}`,
+        },
+      ],
+    };
+
   const facts = readPluginFacts(directory);
   const diagnostics = [...lintHookEvents(facts), ...lintHookMatchers(facts)];
 

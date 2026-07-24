@@ -58,7 +58,7 @@ agy plugin install filid@ogham        # skills + agents
 cp -R plugins/filid ~/.agents/plugins/filid
 ```
 
-Known gaps on agy: **hooks do not run at all** (agy's hook format differs from Claude's and ours fails to parse), and MCP requires the copy step above until the `agy` CLI loads plugin MCP servers from its own install location.
+Known gaps on agy: context-injection hooks (SessionStart, UserPromptSubmit) don't take effect — agy 1.1.2 doesn't render the injected context — though PreToolUse **gating** hooks do run and enforce a `deny` (live-verified), and MCP requires the copy step above until the `agy` CLI loads plugin MCP servers from its own install location.
 
 ---
 

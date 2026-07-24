@@ -1,4 +1,4 @@
-import { env } from "../env/env.js";
+import { env } from "../env/index.js";
 
 interface HintEntry {
   windows?: string;

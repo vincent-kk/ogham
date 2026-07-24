@@ -102,6 +102,21 @@ describe("planPluginAdapters", () => {
     expect(diagnostics.at(-1)?.code).toBe("mcp-variable-args");
   });
 
+  it("reports a missing/non-plugin directory as a diagnostic instead of crashing", () => {
+    const missingDirectory = join(pluginDirectory, "does-not-exist");
+    const { files, diagnostics } = planPluginAdapters(missingDirectory);
+    expect(files).toEqual([]);
+    expect(diagnostics).toEqual([
+      {
+        level: "error",
+        code: "plugin-directory-not-found",
+        message: expect.stringContaining(
+          norm(join(missingDirectory, ".claude-plugin/plugin.json")),
+        ),
+      },
+    ]);
+  });
+
   it("emits agy hooks.json for a plugin with a PreToolUse hook", () => {
     writeJson(".claude-plugin/plugin.json", { name: "filid" });
     writeJson("hooks/hooks.json", {
