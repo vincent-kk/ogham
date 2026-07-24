@@ -98,7 +98,7 @@ describe('wiring', () => {
   });
 
   it('registers each declared tool name in the server', () => {
-    const server = read('src', 'mcp', 'server', 'createServer.ts');
+    const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
     for (const key of Object.keys(ToolName))
       expect(server).toContain(`ToolName.${key}`);
   });

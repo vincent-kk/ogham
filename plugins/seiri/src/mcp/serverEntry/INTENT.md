@@ -3,7 +3,7 @@
 ## Purpose
 
 esbuild 가 `bridge/mcp-server.cjs` 로 번들하는 MCP 서버 stdio 진입점.
-`server/startServer` 를 호출하고 부팅 실패를 stderr 로 보고한다.
+`server/lifecycle/startServer` 를 호출하고 부팅 실패를 stderr 로 보고한다.
 
 ## Structure
 
@@ -19,8 +19,8 @@ entry point 는 `index.ts` 가 아니라 `serverEntry.ts` — esbuild `entryPoin
 
 - `scripts/build-mcp-server.mjs` 의 유일한 esbuild 진입점 — 조립 로직을
   끌어들이면 번들이 커지므로 이 파일은 얇아야 한다.
-- `server/index.ts` 배럴이 아니라 concrete `../server/startServer.js` 를 직접
-  import — 배럴을 거치면 재수출 전체가 번들에 끌려온다.
+- `server/index.ts` 배럴이 아니라 concrete `../server/lifecycle/startServer.js`
+  를 직접 import — 배럴을 거치면 재수출 전체가 번들에 끌려온다.
 - 부팅 실패는 `INJECTION_PREFIX` 접두 + `console.error` + `process.exit(1)` —
   Claude Code 가 서버 죽음을 알아채는 유일한 신호이므로 삼키지 않는다.
 
@@ -43,5 +43,5 @@ entry point 는 `index.ts` 가 아니라 `serverEntry.ts` — esbuild `entryPoin
 
 ## Dependencies
 
-- `../server/startServer.js` (concrete import, `server/index.ts` 배럴 아님)
+- `../server/lifecycle/startServer.js` (concrete import, `server/index.ts` 배럴 아님)
 - `../../constants/plugin.js` (`INJECTION_PREFIX`)

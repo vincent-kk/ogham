@@ -1,13 +1,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { PLUGIN_NAME } from '../../constants/plugin.js';
-import { ToolName } from '../../constants/toolNames.js';
-import { VERSION } from '../../version.js';
-import { handleOpenSettings } from '../tools/openSettings/index.js';
-import { handleRuleDocsSync } from '../tools/ruleDocsSync/index.js';
-
-import { wrapHandler } from './wrapHandler.js';
+import { PLUGIN_NAME } from '../../../constants/plugin.js';
+import { ToolName } from '../../../constants/toolNames.js';
+import { VERSION } from '../../../version.js';
+import { handleOpenSettings } from '../../tools/openSettings/index.js';
+import { handleRuleDocsSync } from '../../tools/ruleDocsSync/index.js';
+import { wrapHandler } from '../serialization/wrapHandler.js';
 
 /**
  * Assemble the seiri MCP server.
