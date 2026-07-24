@@ -31,7 +31,16 @@
 - A project with no deployed rule receives no injection.
 - Any failure yields `{ continue: true }` with no injection. A hook must
   not be able to block a session.
-- InstructionsLoaded persists the whole hook payload and injects nothing.
+- PostToolUse and PostToolUseFailure watch Bash outcomes only. The dial
+  gates the hook before any state is written, so at `advisory` nothing is
+  recorded. A failure chain is announced at most once per session per
+  command hash, and an interrupted call (`is_interrupt`) is not counted
+  as a failure.
+- SubagentStart re-injects the same posture in compact form, capped at
+  two lines, and injects nothing at all at `advisory`.
+- InstructionsLoaded is implemented but not registered in `hooks.json`
+  (dormant). While dormant it never runs; if registered it persists the
+  whole hook payload and injects nothing.
 
 ### Configuration
 
