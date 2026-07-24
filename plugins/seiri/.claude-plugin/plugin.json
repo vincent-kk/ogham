@@ -1,0 +1,20 @@
+{
+  "name": "seiri",
+  "version": "0.0.5",
+  "description": "Code authoring quality, review discipline, and development methodology rules for agent-legible codebases",
+  "author": {
+    "name": "Vincent K. Kelvin"
+  },
+  "repository": "https://github.com/vincent-kk/ogham",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/seiri",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "code-quality",
+    "agent-legible",
+    "rules"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

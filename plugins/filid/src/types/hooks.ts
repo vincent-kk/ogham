@@ -19,6 +19,20 @@ export interface HookBaseInput {
   transcript_path?: string;
 }
 
+/** SessionStart hook input */
+export interface SessionStartInput extends HookBaseInput {
+  hook_event_name: 'SessionStart';
+  /** Start reason: 'startup' | 'resume' | 'clear' | 'compact' (parsed JSON — unknown values no-op). */
+  source?: string;
+}
+
+/** UserPromptSubmit hook input */
+export interface UserPromptSubmitInput extends HookBaseInput {
+  hook_event_name: 'UserPromptSubmit';
+  /** User prompt content */
+  prompt?: string;
+}
+
 /** PreToolUse hook input */
 export interface PreToolUseInput extends HookBaseInput {
   hook_event_name: 'PreToolUse';
@@ -61,13 +75,6 @@ export interface SubagentStartInput extends HookBaseInput {
   agent_id: string;
 }
 
-/** UserPromptSubmit hook input */
-export interface UserPromptSubmitInput extends HookBaseInput {
-  hook_event_name: 'UserPromptSubmit';
-  /** User prompt content */
-  prompt?: string;
-}
-
 /** Hook output (stdout JSON) */
 export interface HookOutput {
   /**
@@ -89,20 +96,13 @@ export interface HookOutput {
   };
 }
 
-/** SessionStart hook input */
-export interface SessionStartInput extends HookBaseInput {
-  hook_event_name: 'SessionStart';
-  /** Start reason: 'startup' | 'resume' | 'clear' | 'compact' (parsed JSON — unknown values no-op). */
-  source?: string;
-}
-
 /** Union of all hook input types */
 export type HookInput =
+  | SessionStartInput
+  | UserPromptSubmitInput
   | PreToolUseInput
   | PostToolUseInput
-  | SubagentStartInput
-  | UserPromptSubmitInput
-  | SessionStartInput;
+  | SubagentStartInput;
 
 /**
  * structure-guard가 출력하는 검증 결과.

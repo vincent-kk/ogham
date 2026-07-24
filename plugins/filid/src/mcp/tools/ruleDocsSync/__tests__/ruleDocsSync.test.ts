@@ -14,10 +14,33 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { handleRuleDocsSync } from '../ruleDocsSync.js';
 
+const pluginRoot = fileURLToPath(new URL('../../../../../', import.meta.url));
+
+// Drive the fixtures off the real shipped manifest, not a hard-coded rule id.
+// When filid ships only the required rule (fca-policy), the optional-doc block
+// below skips loudly and revives automatically the day an optional rule is
+// registered again.
+interface ManifestEntry {
+  id: string;
+  filename: string;
+  required?: boolean;
+}
+const manifest = JSON.parse(
+  readFileSync(join(pluginRoot, 'templates', 'rules', 'manifest.json'), 'utf8'),
+) as { rules: ManifestEntry[] };
+const REQUIRED = manifest.rules.find((r) => r.required);
+if (!REQUIRED) throw new Error('manifest must declare a required rule');
+const OPTIONAL = manifest.rules.find((r) => !r.required);
+const optionalId = OPTIONAL?.id ?? '';
+const optionalFile = OPTIONAL?.filename ?? '';
+
+function template(filename: string): string {
+  return readFileSync(join(pluginRoot, 'templates', 'rules', filename), 'utf8');
+}
+
 describe('handleRuleDocsSync', () => {
   const tempDirs: string[] = [];
   const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
-  const pluginRoot = fileURLToPath(new URL('../../../../../', import.meta.url));
 
   afterEach(() => {
     process.env.CLAUDE_PLUGIN_ROOT = originalPluginRoot;
@@ -39,18 +62,15 @@ describe('handleRuleDocsSync', () => {
     const output = handleRuleDocsSync({
       action: 'sync',
       path: repoRoot,
-      selections: { 'filid_reuse-first': true },
+      selections: { [REQUIRED.id]: true },
     });
 
     expect(output.action).toBe('sync');
     if (output.action !== 'sync') throw new Error('expected sync output');
 
-    expect(output.selections).toEqual({ 'filid_reuse-first': true });
+    expect(output.selections).toEqual({ [REQUIRED.id]: true });
     expect(
-      existsSync(join(repoRoot, '.claude', 'rules', 'filid_fca-policy.md')),
-    ).toBe(true);
-    expect(
-      existsSync(join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md')),
+      existsSync(join(repoRoot, '.claude', 'rules', REQUIRED.filename)),
     ).toBe(true);
   });
 
@@ -60,22 +80,17 @@ describe('handleRuleDocsSync', () => {
     const output = handleRuleDocsSync({
       action: 'sync',
       path: repoRoot,
-      selections: '{"filid_fca-policy":true,"filid_reuse-first":true}',
+      selections: `{"${REQUIRED.id}":true}`,
     });
 
     expect(output.action).toBe('sync');
     if (output.action !== 'sync') throw new Error('expected sync output');
 
-    expect(output.selections).toEqual({
-      'filid_fca-policy': true,
-      'filid_reuse-first': true,
-    });
+    expect(output.selections).toEqual({ [REQUIRED.id]: true });
 
-    const rfxPath = join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md');
-    expect(existsSync(rfxPath)).toBe(true);
-    expect(readFileSync(rfxPath, 'utf8')).toContain(
-      '# Reuse-First Implementation Rules',
-    );
+    const deployed = join(repoRoot, '.claude', 'rules', REQUIRED.filename);
+    expect(existsSync(deployed)).toBe(true);
+    expect(readFileSync(deployed, 'utf8')).toBe(template(REQUIRED.filename));
   });
 
   it('throws a descriptive error for invalid selection strings', () => {
@@ -89,56 +104,6 @@ describe('handleRuleDocsSync', () => {
       }),
     ).toThrow(
       'selections must be a Record<string, boolean> object; received a string that is not valid JSON',
-    );
-  });
-
-  it('reports optional drift without resync opt-in', () => {
-    const repoRoot = createTempRepo();
-
-    // Deploy the optional rule clean.
-    handleRuleDocsSync({
-      action: 'sync',
-      path: repoRoot,
-      selections: { 'filid_reuse-first': true },
-    });
-    const rfxPath = join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md');
-    // Simulate local edits.
-    writeFileSync(rfxPath, '# user tampered\n', 'utf8');
-
-    const output = handleRuleDocsSync({
-      action: 'sync',
-      path: repoRoot,
-      selections: { 'filid_reuse-first': true },
-    });
-    if (output.action !== 'sync') throw new Error('expected sync output');
-    expect(output.result.drift).toContain('filid_reuse-first.md');
-    expect(output.result.updated).not.toContain('filid_reuse-first.md');
-    expect(readFileSync(rfxPath, 'utf8')).toBe('# user tampered\n');
-  });
-
-  it('overwrites optional drift when resync is provided', () => {
-    const repoRoot = createTempRepo();
-
-    handleRuleDocsSync({
-      action: 'sync',
-      path: repoRoot,
-      selections: { 'filid_reuse-first': true },
-    });
-    const rfxPath = join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md');
-    writeFileSync(rfxPath, '# user tampered\n', 'utf8');
-
-    const output = handleRuleDocsSync({
-      action: 'sync',
-      path: repoRoot,
-      selections: { 'filid_reuse-first': true },
-      resync: ['filid_reuse-first'],
-    });
-    if (output.action !== 'sync') throw new Error('expected sync output');
-    expect(output.result.updated).toContain('filid_reuse-first.md');
-    expect(output.result.drift).not.toContain('filid_reuse-first.md');
-    expect(output.resync).toEqual(['filid_reuse-first']);
-    expect(readFileSync(rfxPath, 'utf8')).toContain(
-      '# Reuse-First Implementation Rules',
     );
   });
 
@@ -166,23 +131,21 @@ describe('handleRuleDocsSync', () => {
   it('recovers resync passed as a JSON string array', () => {
     const repoRoot = createTempRepo();
 
-    handleRuleDocsSync({
-      action: 'sync',
-      path: repoRoot,
-      selections: { 'filid_reuse-first': true },
-    });
-    const rfxPath = join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md');
-    writeFileSync(rfxPath, '# user tampered\n', 'utf8');
-
+    // A valid JSON-array string must parse into an array; the unknown id then
+    // lands in `skipped`, exercising the string-parse path without depending on
+    // any optional rule being present.
     const output = handleRuleDocsSync({
       action: 'sync',
       path: repoRoot,
-      selections: { 'filid_reuse-first': true },
-      resync: '["filid_reuse-first"]',
+      selections: {},
+      resync: '["does-not-exist"]',
     });
     if (output.action !== 'sync') throw new Error('expected sync output');
-    expect(output.resync).toEqual(['filid_reuse-first']);
-    expect(output.result.updated).toContain('filid_reuse-first.md');
+    expect(output.result.skipped).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'does-not-exist' }),
+      ]),
+    );
   });
 
   it('throws a descriptive error for invalid resync strings', () => {
@@ -209,8 +172,8 @@ describe('handleRuleDocsSync', () => {
       path: repoRoot,
       selections: {},
     });
-    const fcaPath = join(repoRoot, '.claude', 'rules', 'filid_fca-policy.md');
-    writeFileSync(fcaPath, '# stale required\n', 'utf8');
+    const deployed = join(repoRoot, '.claude', 'rules', REQUIRED.filename);
+    writeFileSync(deployed, '# stale required\n', 'utf8');
 
     const output = handleRuleDocsSync({
       action: 'sync',
@@ -218,28 +181,109 @@ describe('handleRuleDocsSync', () => {
       selections: {},
     });
     if (output.action !== 'sync') throw new Error('expected sync output');
-    expect(output.result.updated).toContain('filid_fca-policy.md');
-    expect(output.result.drift).not.toContain('filid_fca-policy.md');
-    expect(readFileSync(fcaPath, 'utf8')).not.toBe('# stale required\n');
+    expect(output.result.updated).toContain(REQUIRED.filename);
+    expect(output.result.drift).not.toContain(REQUIRED.filename);
+    expect(readFileSync(deployed, 'utf8')).not.toBe('# stale required\n');
   });
 
   it('status exposes templateHash/deployedHash/inSync for deployed entries', () => {
     const repoRoot = createTempRepo();
 
-    handleRuleDocsSync({
-      action: 'sync',
-      path: repoRoot,
-      selections: { 'filid_reuse-first': true },
-    });
-    const rfxPath = join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md');
-    writeFileSync(rfxPath, '# user tampered\n', 'utf8');
+    handleRuleDocsSync({ action: 'sync', path: repoRoot, selections: {} });
+    const deployed = join(repoRoot, '.claude', 'rules', REQUIRED.filename);
+    writeFileSync(deployed, '# user tampered\n', 'utf8');
 
     const output = handleRuleDocsSync({ action: 'status', path: repoRoot });
     if (output.action !== 'status') throw new Error('expected status output');
-    const rfx = output.status.entries.find((e) => e.id === 'filid_reuse-first');
-    expect(rfx).toBeDefined();
-    expect(rfx!.templateHash).toMatch(/^[a-f0-9]{64}$/);
-    expect(rfx!.deployedHash).toMatch(/^[a-f0-9]{64}$/);
-    expect(rfx!.inSync).toBe(false);
+    // Required rules are partitioned into `autoDeployed`; `entries` holds only
+    // optional rules. The hash/inSync computation is identical for both.
+    const entry = output.status.autoDeployed.find((e) => e.id === REQUIRED.id);
+    expect(entry).toBeDefined();
+    expect(entry!.templateHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(entry!.deployedHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(entry!.inSync).toBe(false);
   });
+
+  it('retires orphaned rule docs left in this plugin namespace', () => {
+    const repoRoot = createTempRepo();
+    handleRuleDocsSync({ action: 'sync', path: repoRoot, selections: {} });
+    const rulesDir = join(repoRoot, '.claude', 'rules');
+    // A rule this plugin no longer ships, plus a foreign-namespace file.
+    writeFileSync(
+      join(rulesDir, 'filid_retired-rule.md'),
+      '# retired\n',
+      'utf8',
+    );
+    writeFileSync(
+      join(rulesDir, 'seiri_test-validity.md'),
+      '# foreign\n',
+      'utf8',
+    );
+
+    const output = handleRuleDocsSync({
+      action: 'sync',
+      path: repoRoot,
+      selections: {},
+    });
+    if (output.action !== 'sync') throw new Error('expected sync output');
+    // Orphan in our namespace is retired; required + foreign files survive.
+    expect(output.result.removed).toContain('filid_retired-rule.md');
+    expect(existsSync(join(rulesDir, 'filid_retired-rule.md'))).toBe(false);
+    expect(existsSync(join(rulesDir, REQUIRED.filename))).toBe(true);
+    expect(existsSync(join(rulesDir, 'seiri_test-validity.md'))).toBe(true);
+  });
+
+  // Optional-doc behaviour (deploy → tamper → preserve-or-resync) needs a
+  // `required: false` manifest entry. filid currently ships only fca-policy, so
+  // these skip loudly; they revive automatically once an optional rule returns.
+  describe.skipIf(!OPTIONAL)(
+    'optional rule docs (needs a required:false manifest entry)',
+    () => {
+      it('reports optional drift without resync opt-in', () => {
+        const repoRoot = createTempRepo();
+
+        handleRuleDocsSync({
+          action: 'sync',
+          path: repoRoot,
+          selections: { [optionalId]: true },
+        });
+        const deployed = join(repoRoot, '.claude', 'rules', optionalFile);
+        writeFileSync(deployed, '# user tampered\n', 'utf8');
+
+        const output = handleRuleDocsSync({
+          action: 'sync',
+          path: repoRoot,
+          selections: { [optionalId]: true },
+        });
+        if (output.action !== 'sync') throw new Error('expected sync output');
+        expect(output.result.drift).toContain(optionalFile);
+        expect(output.result.updated).not.toContain(optionalFile);
+        expect(readFileSync(deployed, 'utf8')).toBe('# user tampered\n');
+      });
+
+      it('overwrites optional drift when resync is provided', () => {
+        const repoRoot = createTempRepo();
+
+        handleRuleDocsSync({
+          action: 'sync',
+          path: repoRoot,
+          selections: { [optionalId]: true },
+        });
+        const deployed = join(repoRoot, '.claude', 'rules', optionalFile);
+        writeFileSync(deployed, '# user tampered\n', 'utf8');
+
+        const output = handleRuleDocsSync({
+          action: 'sync',
+          path: repoRoot,
+          selections: { [optionalId]: true },
+          resync: [optionalId],
+        });
+        if (output.action !== 'sync') throw new Error('expected sync output');
+        expect(output.result.updated).toContain(optionalFile);
+        expect(output.result.drift).not.toContain(optionalFile);
+        expect(output.resync).toEqual([optionalId]);
+        expect(readFileSync(deployed, 'utf8')).toBe(template(optionalFile));
+      });
+    },
+  );
 });

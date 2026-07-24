@@ -22,6 +22,21 @@ process.env.CLAUDE_PLUGIN_ROOT = PKG_ROOT;
 
 const TEMPLATES = join(PKG_ROOT, 'templates', 'rules');
 
+// Drive rule-doc fixtures off the real shipped manifest, not hard-coded ids.
+// The optional-doc flows below skip when filid ships no optional rule (only
+// fca-policy) and revive automatically once optional rules are registered.
+interface ManifestEntry {
+  id: string;
+  filename: string;
+  required?: boolean;
+}
+const MANIFEST = JSON.parse(
+  readFileSync(join(TEMPLATES, 'manifest.json'), 'utf8'),
+) as { rules: ManifestEntry[] };
+const OPTIONAL_RULES = MANIFEST.rules.filter((r) => !r.required);
+const REQUIRED_RULE = MANIFEST.rules.find((r) => r.required);
+if (!REQUIRED_RULE) throw new Error('manifest must declare a required rule');
+
 let projectDir: string;
 let activeUrl: string | null = null;
 
@@ -85,10 +100,20 @@ test('serves the built page with injected state and rejects a missing token', as
   await expect(page.locator('#project-chip')).toHaveText(projectDir);
   // Fresh project: no config yet — the page must say saving will create it.
   await expect(page.locator('#init-note')).toBeVisible();
-  // All 8 built-in rules render as editable rows.
+  // All 8 built-in scanner rules render as editable rows.
   await expect(page.locator('#rules-list .ruleitem')).toHaveCount(8);
-  await expect(page.locator('#rule-docs-required .docrow')).toHaveCount(1);
-  await expect(page.locator('#rule-docs-optional .docrow')).toHaveCount(4);
+  // Rule-doc management renders only when there are optional docs to select;
+  // a required-only catalog hides the whole section (nothing to manage).
+  if (OPTIONAL_RULES.length === 0) {
+    await expect(page.locator('#rule-docs-section')).toBeHidden();
+  } else {
+    await expect(page.locator('#rule-docs-required .docrow')).toHaveCount(
+      MANIFEST.rules.filter((r) => r.required).length,
+    );
+    await expect(page.locator('#rule-docs-optional .docrow')).toHaveCount(
+      OPTIONAL_RULES.length,
+    );
+  }
 });
 
 test('full save round-trip persists every edited config field to disk', async ({
@@ -160,38 +185,40 @@ test('plain Save settles the long-poll (window stays open)', async ({
 test('rule docs render deployment state and the save syncs .claude/rules', async ({
   page,
 }) => {
-  // Fixture: reuse-first deployed in sync, test-validity deployed with a local
-  // edit (drift), the other two optional docs not deployed.
+  test.skip(
+    OPTIONAL_RULES.length < 3,
+    'needs ≥3 optional rules in the manifest; filid ships only fca-policy',
+  );
+  const [clean, drifted, applied] = OPTIONAL_RULES;
+  const required = REQUIRED_RULE.filename;
+
+  // Fixture: `clean` deployed in sync, `drifted` deployed with a local edit,
+  // `applied` not deployed yet.
   const rulesDir = join(projectDir, '.claude', 'rules');
   mkdirSync(rulesDir, { recursive: true });
+  writeFileSync(join(rulesDir, clean.filename), template(clean.filename));
   writeFileSync(
-    join(rulesDir, 'filid_reuse-first.md'),
-    template('filid_reuse-first.md'),
-  );
-  writeFileSync(
-    join(rulesDir, 'filid_test-validity.md'),
-    template('filid_test-validity.md') + '\n<!-- local edit -->\n',
+    join(rulesDir, drifted.filename),
+    template(drifted.filename) + '\n<!-- local edit -->\n',
   );
 
   const url = await openSession(projectDir);
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
-  await expect(page.locator('#doc-filid_reuse-first')).toBeChecked();
-  await expect(page.locator('#doc-filid_test-validity')).toBeChecked();
-  await expect(
-    page.locator('#doc-filid_cognitive-discipline'),
-  ).not.toBeChecked();
+  await expect(page.locator(`#doc-${clean.id}`)).toBeChecked();
+  await expect(page.locator(`#doc-${drifted.id}`)).toBeChecked();
+  await expect(page.locator(`#doc-${applied.id}`)).not.toBeChecked();
   await expect(
     page.getByText('UPDATE AVAILABLE', { exact: true }),
   ).toBeVisible();
   await expect(page.getByText('REQUIRED', { exact: true })).toBeVisible();
 
-  // Remove reuse-first, accept the newer template for test-validity, newly
-  // apply cognitive-discipline, leave context-efficiency off.
-  await page.locator('#doc-filid_reuse-first').uncheck();
-  await page.locator('[data-resync-id="filid_test-validity"]').check();
-  await page.locator('#doc-filid_cognitive-discipline').check();
+  // Remove `clean`, accept the newer template for `drifted`, newly apply
+  // `applied`.
+  await page.locator(`#doc-${clean.id}`).uncheck();
+  await page.locator(`[data-resync-id="${drifted.id}"]`).check();
+  await page.locator(`#doc-${applied.id}`).check();
 
   await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
@@ -200,49 +227,47 @@ test('rule docs render deployment state and the save syncs .claude/rules', async
   expect(out.status).toBe('saved');
   // syncRuleDocs reports filenames (not rule ids) in every result array.
   const sync = out.summary!.ruleDocs;
-  expect(sync.removed).toEqual(['filid_reuse-first.md']);
-  expect(sync.updated).toEqual(['filid_test-validity.md']);
-  expect(sync.copied.sort()).toEqual([
-    'filid_cognitive-discipline.md',
-    'filid_fca-policy.md',
-  ]);
+  expect(sync.removed).toEqual([clean.filename]);
+  expect(sync.updated).toEqual([drifted.filename]);
+  expect(sync.copied.sort()).toEqual([applied.filename, required].sort());
   expect(sync.drift).toEqual([]);
 
-  expect(existsSync(join(rulesDir, 'filid_reuse-first.md'))).toBe(false);
-  expect(existsSync(join(rulesDir, 'filid_cognitive-discipline.md'))).toBe(
-    true,
-  );
-  expect(existsSync(join(rulesDir, 'filid_fca-policy.md'))).toBe(true);
-  expect(existsSync(join(rulesDir, 'filid_context-efficiency.md'))).toBe(false);
+  expect(existsSync(join(rulesDir, clean.filename))).toBe(false);
+  expect(existsSync(join(rulesDir, applied.filename))).toBe(true);
+  expect(existsSync(join(rulesDir, required))).toBe(true);
   // Overwrite opt-in replaced the local edit with the shipped template.
-  expect(readFileSync(join(rulesDir, 'filid_test-validity.md'), 'utf8')).toBe(
-    template('filid_test-validity.md'),
+  expect(readFileSync(join(rulesDir, drifted.filename), 'utf8')).toBe(
+    template(drifted.filename),
   );
 });
 
 test('keeping the overwrite box unchecked preserves local edits and reports drift', async ({
   page,
 }) => {
+  test.skip(
+    OPTIONAL_RULES.length < 1,
+    'needs an optional rule in the manifest; filid ships only fca-policy',
+  );
+  const optional = OPTIONAL_RULES[0];
+
   const rulesDir = join(projectDir, '.claude', 'rules');
   mkdirSync(rulesDir, { recursive: true });
-  const edited = template('filid_test-validity.md') + '\n<!-- local edit -->\n';
-  writeFileSync(join(rulesDir, 'filid_test-validity.md'), edited);
+  const edited = template(optional.filename) + '\n<!-- local edit -->\n';
+  writeFileSync(join(rulesDir, optional.filename), edited);
 
   const url = await openSession(projectDir);
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
-  await expect(page.locator('#doc-filid_test-validity')).toBeChecked();
+  await expect(page.locator(`#doc-${optional.id}`)).toBeChecked();
   await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
 
   const out = await waiting;
   expect(out.status).toBe('saved');
-  expect(out.summary!.ruleDocs.drift).toEqual(['filid_test-validity.md']);
+  expect(out.summary!.ruleDocs.drift).toEqual([optional.filename]);
   expect(out.summary!.ruleDocs.updated).toEqual([]);
-  expect(readFileSync(join(rulesDir, 'filid_test-validity.md'), 'utf8')).toBe(
-    edited,
-  );
+  expect(readFileSync(join(rulesDir, optional.filename), 'utf8')).toBe(edited);
 });
 
 test('client validation blocks the save and recovers after the fix', async ({

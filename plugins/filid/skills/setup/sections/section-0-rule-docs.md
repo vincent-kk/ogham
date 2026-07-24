@@ -39,6 +39,25 @@ page's job in Phase 0b. Rule doc state is tracked on the filesystem only
 
 ## Phase 0b — Settings Page <!-- [INTERACTIVE] -->
 
+Decide whether to open the browser at all — inspect rule-doc state first:
+
+```
+mcp__plugin_filid_tools__rule_docs_sync({ action: "status", path: "<absolute-target-path>" })
+```
+
+- **`status.entries` empty** — the plugin ships no optional rule docs, so
+  nothing is selectable and the browser's only remaining surface is the config
+  form, which the CLI covers better. Skip `open_settings`; apply required docs
+  directly and redirect config:
+  ```
+  mcp__plugin_filid_tools__rule_docs_sync({ action: "sync", path: "<absolute-target-path>", selections: {} })
+  ```
+  Print the one-line `result.summary` (required docs auto-deploy), add
+  `"Config: edit .filid/config.json or run /filid:config-wizard."`, and treat
+  this as a `saved` status for the phase chaining below.
+- **`status.entries` non-empty** — optional docs are selectable; the browser's
+  pre-checked UX earns its cost. Open it (below).
+
 Call `mcp__plugin_filid_tools__open_settings` with the ABSOLUTE target path:
 
 ```
@@ -62,7 +81,7 @@ the tool returns. Dispatch on `result.status`:
 - **`saved`** — surface a one-line summary from `result.summary.ruleDocs`
   (`copied` / `updated` / `removed` / `drift` / `unchanged` / `skipped` —
   same shape as `rule_docs_sync`), e.g.
-  `"Rule docs: copied=1, updated=1, removed=0, drift=0, unchanged=3"`.
+  `"Rule docs: copied=1, updated=0, removed=0, drift=0, unchanged=0"`.
   When `drift` is non-empty append TWO hint lines (translate to `[filid:lang]`):
   - Line 1 (status): `"Drift detected: ${drift.join(', ')}"`
   - Line 2 (action): `"→ Accept template update: re-run /filid:setup --rules and check the overwrite box on UPDATE items. Keep local edits: ignore."`
