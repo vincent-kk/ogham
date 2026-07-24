@@ -10,7 +10,7 @@
 | --- | ------------------------------- | -------- | ----------------- | --------------------------- |
 | S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ lite · D9 통과 (07-24)   |
 | S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ lite · D9 통과 (07-24)   |
-| S3  | `seiri_test-validity.md`        | L4       | 혼합              | ✅ 이관본 (§1 프로세스)     |
+| S3  | `seiri_test-validity.md`        | L4       | 혼합              | ✅ 이관본 · **`paths:` 조건부**(유일, 07-24) |
 | S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ lite · D9 통과 (07-24)   |
 | S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite · D9 통과 (07-24)   |
 | S6  | `seiri_structure.md`            | L0·L1    | 방향형            | ✅ 이관본 (방향형)          |
