@@ -59,7 +59,10 @@
     "index.html",
     {
       "basename": "setup.entry.ts",
-      "paths": ["**/plugins/filid/src/hooks/setup"]
+      "paths": [
+        "**/plugins/filid/src/hooks/setup",
+        "**/plugins/seiri/src/hooks/setup"
+      ]
     },
     {
       "basename": "preToolUse.entry.ts",
@@ -71,7 +74,22 @@
     },
     {
       "basename": "userPromptSubmit.entry.ts",
-      "paths": ["**/plugins/filid/src/hooks/userPromptSubmit"]
+      "paths": [
+        "**/plugins/filid/src/hooks/userPromptSubmit",
+        "**/plugins/seiri/src/hooks/userPromptSubmit"
+      ]
+    },
+    {
+      "basename": "postToolUse.entry.ts",
+      "paths": ["**/plugins/seiri/src/hooks/postToolUse"]
+    },
+    {
+      "basename": "subagentStart.entry.ts",
+      "paths": ["**/plugins/seiri/src/hooks/subagentStart"]
+    },
+    {
+      "basename": "instructionsLoaded.entry.ts",
+      "paths": ["**/plugins/seiri/src/hooks/instructionsLoaded"]
     }
   ],
   "additional-route-patterns": ["^_shared$", "^__tests__$"]

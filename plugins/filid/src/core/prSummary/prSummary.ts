@@ -37,6 +37,7 @@ export { RULE_ERROR_PROBABILITY };
 
 // parsers
 export { parseStructureCheckFrontmatter } from './parsers/parseStructureCheck.js';
+export { parseReviewReportFrontmatter } from './parsers/parseReviewReport.js';
 export { parseFixRequests } from './parsers/parseFixRequests.js';
 export {
   extractRevalidateVerdict,

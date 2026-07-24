@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   RULE_ERROR_PROBABILITY,
   parseFixRequests,
+  parseReviewReportFrontmatter,
   parseStructureCheckFrontmatter,
 } from '../../../core/prSummary/index.js';
 
@@ -121,7 +122,59 @@ const FIX_REQUESTS_MULTI = `# Fix Requests — feature/test
 - **Recommended Action**: Move config.yml out of fractal root
 `;
 
+const REVIEW_REPORT_FULL = `---
+verdict: REQUEST_CHANGES
+branch: feature/97-98
+base_ref: main
+run_id: feature--97-98@d8dc44e0
+committee: [engineering-architect, knowledge-manager, design-hci]
+generated_at: 2026-07-23T19:20:00Z
+---
+
+# Code Review Report — feature/97-98
+`;
+
+const REVIEW_REPORT_PARTIAL = `---
+verdict: APPROVED
+branch: feature/test
+---
+
+# Code Review Report — feature/test
+`;
+
 // --- Tests ---
+
+describe('parseReviewReportFrontmatter', () => {
+  it('parses every mandatory field', () => {
+    const result = parseReviewReportFrontmatter(REVIEW_REPORT_FULL);
+    expect(result).not.toBeNull();
+    expect(result!.verdict).toBe('REQUEST_CHANGES');
+    expect(result!.branch).toBe('feature/97-98');
+    expect(result!.baseRef).toBe('main');
+    expect(result!.runId).toBe('feature--97-98@d8dc44e0');
+    expect(result!.committee).toEqual([
+      'engineering-architect',
+      'knowledge-manager',
+      'design-hci',
+    ]);
+    expect(result!.generatedAt).toBe('2026-07-23T19:20:00Z');
+  });
+
+  it('leaves absent fields empty instead of failing', () => {
+    const result = parseReviewReportFrontmatter(REVIEW_REPORT_PARTIAL);
+    expect(result).not.toBeNull();
+    expect(result!.verdict).toBe('APPROVED');
+    expect(result!.baseRef).toBe('');
+    expect(result!.runId).toBe('');
+    expect(result!.committee).toEqual([]);
+  });
+
+  it('returns null for content without frontmatter', () => {
+    expect(
+      parseReviewReportFrontmatter('# Report\n\nno frontmatter'),
+    ).toBeNull();
+  });
+});
 
 describe('parseStructureCheckFrontmatter', () => {
   it('parses valid frontmatter with all stages', () => {

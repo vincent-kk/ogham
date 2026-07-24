@@ -2,3 +2,11 @@
 # Emitted JSON is canonical (JSON.stringify, 2-space); Prettier must not reflow
 # it or the clean-regen byte gate would drift. Edit definitions/, not targets/.
 plugins/*/targets/
+
+# Rule doc templates are hashed byte-for-byte into templates/rules/manifest.json
+# by each plugin's scripts/sync-rule-hashes.mjs. Reformatting them changes those
+# bytes, invalidates every stored templateHash, and makes each user's
+# already-deployed copy report as local drift. This must live at the repo root:
+# the format-on-stop hook runs from here, so a package-level ignore file is
+# never consulted.
+plugins/*/templates/rules/

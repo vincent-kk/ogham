@@ -1,13 +1,12 @@
-import { existsSync, mkdirSync, renameSync, unlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { createLogger } from '../../../../lib/logger.js';
 import { computeFileSha256 } from '../utils/computeFileSha256.js';
 import { writeFileAtomically } from '../utils/writeFileAtomically.js';
 
+import { migrateLegacyFilenames } from './migrateLegacyFilenames.js';
 import type { RuleDocSyncPlan, RuleDocSyncResult } from './manifestTypes.js';
-
-const log = createLogger('config-loader');
+import { retireOrphanedRuleDocs } from './retireOrphanedRuleDocs.js';
 
 /**
  * Deploy rule documents as one file each, under the host's rules directory.
@@ -25,24 +24,9 @@ export function syncRuleDocsToDirectory(
 ): RuleDocSyncResult {
   const rulesDir = join(plan.projectRoot, rulesPath);
 
-  // --- Legacy filename migration ---
-  // Rename old-named files (e.g. fca.md → filid_fca-policy.md)
-  // so the main loop sees them under the current name. User edits are preserved
-  // because renameSync is a metadata-only operation (no content rewrite).
-  for (const entry of plan.manifest.rules) {
-    if (!entry.legacyFilename) continue;
-    const legacyPath = join(rulesDir, entry.legacyFilename);
-    const newPath = join(rulesDir, entry.filename);
-    if (existsSync(legacyPath) && !existsSync(newPath))
-      try {
-        renameSync(legacyPath, newPath);
-        log.debug(
-          `migrated rule doc: ${entry.legacyFilename} → ${entry.filename}`,
-        );
-      } catch (err) {
-        log.error(`failed to migrate ${entry.legacyFilename}`, err);
-      }
-  }
+  // Rename legacy-named files to their current manifest name so the loop
+  // below sees them under the current name (user edits preserved).
+  migrateLegacyFilenames(plan.manifest, rulesDir);
 
   for (const entry of plan.manifest.rules) {
     const desired = entry.required || plan.selection.has(entry.id);
@@ -124,6 +108,9 @@ export function syncRuleDocsToDirectory(
       });
     }
   }
+
+  // Retire this plugin's own <namespace>_*.md files no longer in the manifest.
+  retireOrphanedRuleDocs(plan.manifest, rulesDir, result);
 
   return result;
 }

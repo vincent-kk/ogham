@@ -42,12 +42,12 @@ const LIGHT_HOOK_BYTES = 10 * 1024;
 // kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [
   { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
-  { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: HEAVY_HOOK_BYTES },
   {
     name: 'context-injector',
     entry: 'contextInjector',
     maxBytes: HEAVY_HOOK_BYTES,
   },
+  { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: HEAVY_HOOK_BYTES },
   {
     name: 'agent-enforcer',
     entry: 'agentEnforcer',

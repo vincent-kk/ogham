@@ -9,6 +9,8 @@
 - optional rule: `resync` 파라미터에 해당 rule id를 포함해야만 재동기화된다. 포함하지 않으면 drift만 보고된다.
 - 플러그인 루트는 `resolvePluginRoot`가 단일 해석 지점이다: 호출자 인자 우선, 부재 시 `@ogham/cross-platform/host-paths`의 `pluginRoot()`(env → Codex cwd → 자기 위치 상향 탐색), 그래도 없으면 `null`.
 - 플러그인 루트 해석 실패 시 `syncRuleDocs`는 throw 없이 `skipped` 배열로, `getRuleDocsStatus`는 `pluginRootResolved: false`로 graceful degradation한다.
+- 디렉터리 채널(`syncRuleDocsToDirectory`)은 매니페스트 순회가 끝나면 `.claude/rules/`를 다시 스캔해, 매니페스트 네임스페이스(`<namespace>_*.md` — 첫 rule 파일명에서 파생, 예: `filid_`)로 시작하지만 매니페스트에 없는 파일을 orphan rule doc으로 간주해 `unlinkSync`로 삭제한다(과거 버전에서 빠진 rule 정리 목적). 삭제 성공은 기존 `removed` 목록에, 실패는 `skipped`에 `{ id: <filename>, reason }`으로 함께 보고된다.
+- 이 정리는 파일명 패턴만으로 판별하므로, 매니페스트에 없는 `<namespace>_*.md` 파일은 예외 없이 삭제 대상이 된다 — 사용자가 직접 작성한 `filid_custom.md` 같은 파일도 함께 삭제된다.
 - **읽기 채널 동조**: 훅(`buildMinimalContext`)은 `OGHAM_HOST` 를 못 받으므로 호스트 분기 대신 **모든 채널을 합집합으로 판독**한다. 쓰기만 바꾸고 읽기를 놔두면 훅이 방금 배포한 규칙을 "미배포"로 오판한다.
 
 ## API Contracts

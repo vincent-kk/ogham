@@ -37,6 +37,7 @@
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
     "rStatistics": "yarn workspace @ogham/r-statistics",
     "run:all": "yarn workspaces foreach -A --topological-dev run",
+    "seiri": "yarn workspace @ogham/seiri",
     "sort:packages": "npx sort-package-json '**/package.json'",
     "tag:packages": "./scripts/tagPackages.sh",
     "test": "vitest",

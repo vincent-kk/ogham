@@ -14,7 +14,14 @@ export const DEFAULT_CONFIG: Config = {
   },
   option_flags: {
     codex: { yolo: false, sandbox: 'workspace-write' },
-    antigravity: { sandbox: false, skip_permissions: false },
+    // sandbox + skip_permissions default true as a pair. agy 1.1.3+ auto-denies
+    // permission-gated tools in headless -p (empty stdout, exit 0), so
+    // skip_permissions is needed for tool-using coding prompts to complete; sandbox
+    // keeps that auto-approval inside terminal restrictions (unsandboxed exec stays
+    // blocked) — skipping permissions without the sandbox would be an unbounded
+    // bypass. agy works in its own scratch, not the user's tree. app.js
+    // DEFAULT_OPTION_FLAGS mirrors this.
+    antigravity: { sandbox: true, skip_permissions: true },
     claude: { permission_mode: 'dontAsk' },
   },
   model_map: {

@@ -159,6 +159,7 @@ export {
   extractVerdict,
   generateHumanSummary,
   parseFixRequests,
+  parseReviewReportFrontmatter,
   parseStructureCheckFrontmatter,
   resolveVerdict,
 } from './prSummary/index.js';

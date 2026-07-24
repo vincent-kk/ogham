@@ -26,9 +26,12 @@ const STATE: SettingsPageState = {
   ruleDocs: { entries: [], autoDeployed: [], pluginRootResolved: true },
 };
 
+// An opaque save payload for transport round-trip checks — `persistSave` is
+// mocked, so the selection key is never deployed. Use the always-present
+// required rule id rather than a phantom optional one.
 const VALID_BODY: SaveBody = {
   config: { version: '1.0', rules: {} },
-  ruleDocs: { selections: { 'filid_reuse-first': true }, resync: [] },
+  ruleDocs: { selections: { 'filid_fca-policy': true }, resync: [] },
 };
 
 let handle: SettingsServerInstance | null = null;

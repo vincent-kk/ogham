@@ -2,12 +2,25 @@
 
 ## Content Format by Environment
 
-| Environment | Description Field | Comment Body |
-|---|---|---|
-| Cloud (v3) | ADF (JSON) | ADF (JSON) |
+| Environment    | Description Field  | Comment Body      |
+| -------------- | ------------------ | ----------------- |
+| Cloud (v3)     | ADF (JSON)         | ADF (JSON)        |
 | Server/DC (v2) | Wiki markup / text | Plain text / wiki |
 
 Use `content_format: "markdown"` — MCP auto-converts to the correct format.
+
+## Wiki Markup Special Characters
+
+The markdown→wiki converter escapes literal wiki specials (`[ ] { } | * _ - + ^ ~ !`)
+in plain text, inline code, and bold/italic/strike content, so `[0]`, `{timeout}`,
+`a|b` render literally instead of activating wiki syntax. Markdown-style escapes
+(`\[`) pass through unchanged.
+
+Not protected — keep such content in code blocks or rephrase:
+
+- Link labels and image alt text (wiki cannot escape inside `[alias|url]` / `!url|alt=x!`)
+- Doubled markers `{{` and `??` (per-character escaping cannot defuse them)
+- Literal backslash runs — `\\` is a forced line break in wiki markup (e.g. UNC paths)
 
 ## User Fields
 

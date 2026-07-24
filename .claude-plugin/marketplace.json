@@ -87,6 +87,12 @@
         "reproducible-analysis",
         "multi-agent"
       ]
+    },
+    {
+      "name": "seiri",
+      "source": "./plugins/seiri",
+      "category": "productivity",
+      "tags": ["code-quality", "agent-legible", "rules", "methodology"]
     }
   ]
 }

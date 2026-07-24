@@ -65,8 +65,8 @@ describe("markdownToWiki", () => {
       expect(markdownToWiki("---")).toBe("----");
     });
 
-    it("passes through underscore italic variant as plain text", () => {
-      expect(markdownToWiki("_em_")).toBe("_em_");
+    it("escapes underscore italic variant so Jira renders plain text", () => {
+      expect(markdownToWiki("_em_")).toBe("\\_em\\_");
     });
 
     it("separates paragraphs with blank line", () => {
