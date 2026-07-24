@@ -2,11 +2,9 @@ import {
   TURN_REMINDER_STANDARD,
   TURN_REMINDER_STRICT,
 } from '../../constants/hooks.js';
-import { INJECTION_PREFIX } from '../../constants/plugin.js';
+import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
-
-const QUIET: HookOutput = { continue: true };
 
 /**
  * UserPromptSubmit: re-raise the skill-dispatch reminder once per turn.
@@ -26,7 +24,7 @@ const QUIET: HookOutput = { continue: true };
 export function processUserPromptSubmit(
   input: UserPromptSubmitInput,
 ): HookOutput {
-  if (!input.cwd) return QUIET;
+  if (!input.cwd) return EMPTY_RESULT;
 
   const effective = loadIntervention(input.cwd).effective;
   const line =
@@ -35,7 +33,7 @@ export function processUserPromptSubmit(
       : effective === 'standard'
         ? TURN_REMINDER_STANDARD
         : undefined;
-  if (line === undefined) return QUIET;
+  if (line === undefined) return EMPTY_RESULT;
 
   return {
     continue: true,

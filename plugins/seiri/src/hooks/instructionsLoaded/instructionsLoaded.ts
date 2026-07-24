@@ -1,3 +1,4 @@
+import { EMPTY_RESULT } from '../../constants/plugin.js';
 import type { HookOutput, InstructionsLoadedInput } from '../../types/hooks.js';
 
 import { appendObservation } from './utils/appendObservation.js';
@@ -19,5 +20,5 @@ export function processInstructionsLoaded(
   input: InstructionsLoadedInput,
 ): HookOutput {
   appendObservation({ observedAt: new Date().toISOString(), ...input });
-  return { continue: true };
+  return EMPTY_RESULT;
 }

@@ -2,7 +2,7 @@
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 
 import { HookName } from '../../constants/hooks.js';
-import { PLUGIN_NAME } from '../../constants/plugin.js';
+import { EMPTY_RESULT, PLUGIN_NAME } from '../../constants/plugin.js';
 import type {
   HookOutput,
   PostToolUseFailureInput,
@@ -12,7 +12,7 @@ import { readStdin } from '../shared/readStdin.js';
 
 import { processBashOutcome } from './postToolUse.js';
 
-let result: HookOutput = { continue: true };
+let result: HookOutput = EMPTY_RESULT;
 try {
   const input = JSON.parse(await readStdin()) as
     | PostToolUseInput

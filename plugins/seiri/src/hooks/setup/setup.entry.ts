@@ -2,13 +2,13 @@
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 
 import { HookName } from '../../constants/hooks.js';
-import { PLUGIN_NAME } from '../../constants/plugin.js';
+import { EMPTY_RESULT, PLUGIN_NAME } from '../../constants/plugin.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import { readStdin } from '../shared/readStdin.js';
 
 import { processSessionStart } from './setup.js';
 
-let result: HookOutput = { continue: true };
+let result: HookOutput = EMPTY_RESULT;
 try {
   const input = JSON.parse(await readStdin()) as SessionStartInput;
   result = processSessionStart(input);

@@ -1,6 +1,6 @@
 import { HookEvent } from '../../constants/hooks.js';
 import { SILENT_INTERVENTION } from '../../constants/intervention.js';
-import { INJECTION_PREFIX } from '../../constants/plugin.js';
+import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
 import { FAILURE_CHAIN_LINE } from '../../constants/signals.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import { recordBashFailure } from '../../core/sessionSignals/record/recordBashFailure.js';
@@ -10,8 +10,6 @@ import type {
   PostToolUseFailureInput,
   PostToolUseInput,
 } from '../../types/hooks.js';
-
-const QUIET: HookOutput = { continue: true };
 
 /**
  * Notice when the same shell command keeps failing, and say so once.
@@ -37,23 +35,24 @@ export function processBashOutcome(
     !input.cwd ||
     !input.session_id
   )
-    return QUIET;
+    return EMPTY_RESULT;
 
   // The dial gates before any state is touched: at the silent floor this
   // hook costs one config read and writes nothing, which is the state the
   // dispatch measurements were taken against.
   if (loadIntervention(input.cwd).effective === SILENT_INTERVENTION)
-    return QUIET;
+    return EMPTY_RESULT;
 
   if (input.hook_event_name !== HookEvent.POST_TOOL_USE_FAILURE) {
     recordBashSuccess(input.cwd, input.session_id, command);
-    return QUIET;
+    return EMPTY_RESULT;
   }
 
   // A run the user stopped says nothing about the command.
-  if (input.is_interrupt) return QUIET;
+  if (input.is_interrupt) return EMPTY_RESULT;
 
-  if (!recordBashFailure(input.cwd, input.session_id, command)) return QUIET;
+  if (!recordBashFailure(input.cwd, input.session_id, command))
+    return EMPTY_RESULT;
 
   return {
     continue: true,

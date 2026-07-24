@@ -1,3 +1,5 @@
+import type { HookOutput } from '../types/hooks';
+
 /**
  * Package identity. Used for the plugin cache directory, the error-log
  * scope, and the MCP server name — three places that must agree, because
@@ -15,3 +17,5 @@ export const RULE_ID_PREFIX = `${PLUGIN_NAME}_`;
 
 /** Marker opening every line seiri injects into a session. */
 export const INJECTION_PREFIX = `[${PLUGIN_NAME}]`;
+
+export const EMPTY_RESULT = { continue: true } as const satisfies HookOutput;
