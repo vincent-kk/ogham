@@ -11,7 +11,7 @@ export const PLUGIN_NAME = 'seiri';
  * `.claude/rules/` is shared with every other installed plugin, so the
  * namespace is what keeps two plugins from claiming the same filename.
  */
-export const RULE_ID_PREFIX = 'seiri_';
+export const RULE_ID_PREFIX = `${PLUGIN_NAME}_`;
 
 /** Marker opening every line seiri injects into a session. */
-export const INJECTION_PREFIX = '[seiri]';
+export const INJECTION_PREFIX = `[${PLUGIN_NAME}]`;
