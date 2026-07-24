@@ -17,7 +17,7 @@ import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
 // The tool must not spawn real browser tabs, and rule-doc management needs the
 // plugin root (manifest + templates) that the MCP host normally injects.
 const PKG_ROOT = process.cwd();
-process.env.FILID_NO_BROWSER = '1';
+process.env.OGHAM_NO_BROWSER = '1';
 process.env.CLAUDE_PLUGIN_ROOT = PKG_ROOT;
 
 const TEMPLATES = join(PKG_ROOT, 'templates', 'rules');

@@ -18,7 +18,7 @@
 
 ## Conventions
 
-- 빌드 파이프라인: `clean → version:sync → settings-html → tsc → mcp-server → hooks`
+- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → hooks → compile-plugin`
 - 파이프라인: validate → split → manifest-stories → devplan → manifest-devplan (state phase 는 validate/split/devplan 3개)
 - provider 추상화 (`jira` / `github` / `local`); 실행 state 는 `.imbas/<KEY>/runs/<id>/` (GitHub ref 는 `owner--repo` 디렉토리로 매핑)
 

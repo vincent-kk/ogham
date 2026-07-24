@@ -113,9 +113,9 @@ No code implementation needed for skills (they are LLM-interpreted SKILL.md file
 
 | #   | Task                          | Files                                 | Acceptance                                |
 | --- | ----------------------------- | ------------------------------------- | ----------------------------------------- |
-| 6.1 | Create build-mcp-server.mjs   | `scripts/build-mcp-server.mjs`        | Produces `bridge/mcp-server.cjs`          |
-| 6.2 | Create build-hooks.mjs        | `scripts/build-hooks.mjs`             | Produces `bridge/session-start.mjs`       |
-| 6.3 | Create inject-version.mjs     | `scripts/inject-version.mjs`          | Syncs version to version.ts + plugin.json |
+| 6.1 | Create buildMcpServer.mjs   | `scripts/buildMcpServer.mjs`        | Produces `bridge/mcp-server.cjs`          |
+| 6.2 | Create buildHooks.mjs        | `scripts/buildHooks.mjs`             | Produces `bridge/session-start.mjs`       |
+| 6.3 | Create injectVersion.mjs     | `scripts/injectVersion.mjs`          | Syncs version to version.ts + plugin.json |
 | 6.4 | Create plugin.json            | `.claude-plugin/plugin.json`          | Valid plugin manifest                     |
 | 6.5 | Create .mcp.json              | `.mcp.json`                           | Valid MCP server registration             |
 | 6.6 | Copy libs/find-node.sh        | `libs/find-node.sh`                   | Node.js resolver available                |

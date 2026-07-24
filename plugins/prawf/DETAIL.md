@@ -81,7 +81,7 @@ Advisory Notes(게이트 미만 미해결 finding 목록)는 `review-report.md` 
 ### Versioning
 
 `version:sync` 는 `package.json` 버전을 `plugin.json` 에만 동기화한다(`src/version.ts`
-없음). 루트 `scripts/inject-version.mjs` 는 `src/` 부재 시 version 파일 생성을 건너뛴다.
+없음). 루트 `scripts/injectVersion.mjs` 는 `src/` 부재 시 version 파일 생성을 건너뛴다.
 버전 bump 후에는 `yarn prawf version:sync` 로 `plugin.json` 을 갱신한다.
 
 ## Last Updated

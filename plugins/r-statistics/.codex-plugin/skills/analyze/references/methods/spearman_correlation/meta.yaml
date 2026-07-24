@@ -1,0 +1,7 @@
+technique: spearman_correlation
+family: correlation
+outcome_types: [continuous, categorical]
+required_assumptions: []
+hard_rules: [OUTCOME_METHOD_MISMATCH]
+required_artifacts: [result.correlation, plot.scatter]
+packages: [stats, broom, ggplot2]

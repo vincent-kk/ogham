@@ -110,7 +110,7 @@ yarn dev            # TypeScript watch mode
 yarn test           # Vitest watch
 yarn test:run       # Single run
 yarn typecheck      # Type checking only
-yarn build          # tsc + node scripts/build-mcp-server.mjs
+yarn build          # tsc + node scripts/buildMcpServer.mjs
 ```
 
 ### Tech Stack

@@ -1,0 +1,11 @@
+technique: poisson_regression
+family: regression
+outcome_types: [count]
+required_assumptions:
+  - id: mean_equals_variance
+    severity: soft
+    check: dispersion
+    on_violation: { recommend: [negative_binomial] }
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [model.fit, table.coefficients]
+packages: [stats, broom, MASS]

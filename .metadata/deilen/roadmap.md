@@ -5,7 +5,7 @@ cennad/filid 동일 패키지 골격 위에서 단계적으로 구현한다. 각
 ## Phase 0 — 스캐폴드
 
 - `plugins/deilen/` 골격(package.json, tsconfig, vitest, .claude-plugin/plugin.json, .mcp.json, libs/run.cjs).
-- `scripts/inject-version.mjs` 연동, `src/version.ts`.
+- `scripts/injectVersion.mjs` 연동, `src/version.ts`.
 - marketplace.json + README 에 `deilen` 엔트리 등록.
 
 ## Phase 1 — 렌더 코어

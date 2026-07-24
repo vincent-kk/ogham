@@ -1,0 +1,28 @@
+technique: ancova
+family: regression
+outcome_types: [continuous]
+required_assumptions:
+  - id: linearity
+    severity: soft
+    check: residual_plot
+  - id: residual_normality
+    severity: soft
+    check: shapiro
+  - id: homoscedasticity
+    severity: soft
+    check: breusch_pagan
+  - id: homogeneity_of_slopes
+    severity: soft
+    check: interaction_test
+  - id: no_multicollinearity
+    severity: soft
+    check: vif
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts:
+  [
+    model.fit,
+    table.coefficients,
+    table.adjusted_means,
+    plot.residual_diagnostics,
+  ]
+packages: [stats, car, emmeans, broom, ggplot2]

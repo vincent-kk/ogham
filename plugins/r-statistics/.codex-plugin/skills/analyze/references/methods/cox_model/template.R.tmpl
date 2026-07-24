@@ -1,0 +1,172 @@
+# Cox proportional hazards model — regresses a right-censored time-to-event
+# outcome on one or more predictors, reporting hazard ratios. Proportional
+# hazards (cox.zph / Schoenfeld) and log-linearity (martingale residuals) are
+# checked as soft assumptions.
+# Slot body only: the harness handles seed / contract / manifest / sessionInfo.
+
+# ---- load data ------------------------------------------------------------
+df <- read_data("{{DATA_REF_ID}}")
+df <- as.data.frame(df)
+
+# Bind columns. {{TIME}} is the follow-up time, {{EVENT}} the 0/1 (or
+# FALSE/TRUE) event indicator (1 = event observed, 0 = censored). {{PREDICTORS}}
+# is the right-hand side of the model formula (e.g. "age + sex + stage").
+time_col <- "{{TIME}}"
+event_col <- "{{EVENT}}"
+
+# Drop rows with missing time or event so the Surv() response is well-defined.
+df <- df[!is.na(df[[time_col]]) & !is.na(df[[event_col]]), , drop = FALSE]
+
+# Coerce the event indicator to numeric 0/1 (handles logical or factor input).
+if (is.logical(df[[event_col]])) {
+  df[[event_col]] <- as.integer(df[[event_col]])
+} else if (is.factor(df[[event_col]])) {
+  # A factor event indicator is order-ambiguous: map the LAST level to 1 (event).
+  # Prefer a numeric 0/1 column, or relevel so the event is the last level —
+  # verify the encoding (1 = event observed, 0 = censored) before relying on it.
+  lv <- levels(df[[event_col]])
+  df[[event_col]] <- as.integer(df[[event_col]] == lv[length(lv)])
+} else {
+  df[[event_col]] <- as.numeric(df[[event_col]])
+}
+
+# Surv(time, event) ~ predictors
+fml <- stats::as.formula(
+  sprintf("survival::Surv(%s, %s) ~ {{PREDICTORS}}", time_col, event_col)
+)
+
+# ---- fit Cox model --------------------------------------------------------
+# x = TRUE keeps the model matrix for residual-based diagnostics below.
+fit <- survival::coxph(fml, data = df, x = TRUE)
+fit_summary <- summary(fit)
+
+# Tidy coefficients with hazard ratios (exp(coef)) and CIs.
+coef_tidy <- broom::tidy(fit, exponentiate = TRUE, conf.int = TRUE)
+
+# ---- assumption: proportional hazards (cox.zph / Schoenfeld) --------------
+# cox.zph tests whether the effect of each predictor is constant over time.
+zph <- survival::cox.zph(fit)
+# Last row of the table is the GLOBAL test across all predictors.
+zph_table <- as.data.frame(zph$table)
+zph_table <- cbind(term = rownames(zph_table), zph_table)
+rownames(zph_table) <- NULL
+global_ph_p <- unname(zph$table["GLOBAL", "p"])
+ph_ok <- is.na(global_ph_p) || global_ph_p >= 0.05
+note_assumption("proportional_hazards")
+
+# ---- assumption: log-linearity (martingale residuals) ---------------------
+# Martingale residuals from a null model vs. each continuous covariate should
+# show no systematic (nonlinear) trend. We record the residuals for inspection.
+null_fit <- survival::coxph(
+  stats::as.formula(sprintf("survival::Surv(%s, %s) ~ 1", time_col, event_col)),
+  data = df
+)
+martingale_resid <- as.numeric(stats::residuals(null_fit, type = "martingale"))
+note_assumption("loglinearity")
+
+# ---- human-readable summary ----------------------------------------------
+cat("Cox proportional hazards model\n")
+cat(sprintf("  formula: %s\n", deparse(fml)))
+cat(sprintf(
+  "  n = %d  |  events = %d\n", fit$n, fit$nevent
+))
+cat("\nHazard ratios (exp(coef)) with 95% CI:\n")
+print(
+  data.frame(
+    term = coef_tidy$term,
+    HR = round(coef_tidy$estimate, 4),
+    conf.low = round(coef_tidy$conf.low, 4),
+    conf.high = round(coef_tidy$conf.high, 4),
+    p.value = signif(coef_tidy$p.value, 4)
+  ),
+  row.names = FALSE
+)
+cat(sprintf(
+  "\nModel fit: concordance = %.4f, likelihood-ratio p = %.4g\n",
+  unname(fit_summary$concordance[1]),
+  unname(fit_summary$logtest["pvalue"])
+))
+cat(sprintf(
+  "\nProportional hazards (cox.zph GLOBAL): p = %s -> %s\n",
+  ifelse(is.na(global_ph_p), "NA", sprintf("%.4g", global_ph_p)),
+  ifelse(ph_ok, "OK", "VIOLATED (consider time-varying covariates or stratification)")
+))
+
+# ---- artifact: model.fit --------------------------------------------------
+# Overall model-level fit statistics and global tests.
+model_fit <- list(
+  method = "Cox proportional hazards (survival::coxph)",
+  formula = deparse(fml),
+  n = unname(fit$n),
+  n_events = unname(fit$nevent),
+  concordance = unname(fit_summary$concordance[1]),
+  log_likelihood = unname(as.numeric(stats::logLik(fit))),
+  likelihood_ratio_test = list(
+    statistic = unname(fit_summary$logtest["test"]),
+    df = unname(fit_summary$logtest["df"]),
+    p_value = unname(fit_summary$logtest["pvalue"])
+  )
+)
+write_json_artifact(
+  "model.fit", "model", model_fit, "model_fit.json",
+  description = "Cox model formula, sample/event counts, concordance, and likelihood-ratio test"
+)
+
+# ---- artifact: table.hazard_ratios ----------------------------------------
+# Per-predictor hazard ratios with confidence intervals and p-values, plus the
+# proportional-hazards assumption check.
+hazard_ratios <- list(
+  time = time_col,
+  event = event_col,
+  terms = data.frame(
+    term = coef_tidy$term,
+    hazard_ratio = coef_tidy$estimate,
+    conf_low = coef_tidy$conf.low,
+    conf_high = coef_tidy$conf.high,
+    std_error = coef_tidy$std.error,
+    statistic = coef_tidy$statistic,
+    p_value = coef_tidy$p.value
+  ),
+  assumptions = list(
+    proportional_hazards = list(
+      check = "cox_zph",
+      per_term = zph_table,
+      global_p_value = global_ph_p,
+      satisfied = ph_ok
+    ),
+    loglinearity = list(
+      check = "martingale_residual",
+      note = "Inspect plot.schoenfeld and martingale residuals for nonlinear covariate effects"
+    )
+  )
+)
+write_json_artifact(
+  "table.hazard_ratios", "table", hazard_ratios, "hazard_ratios.json",
+  description = "Hazard ratios with CIs and the proportional-hazards (cox.zph) assumption check"
+)
+
+# ---- artifact: plot.schoenfeld --------------------------------------------
+# Scaled Schoenfeld residuals vs. time for the first predictor: a nonzero slope
+# signals a proportional-hazards violation. Build the ggplot from cox.zph data.
+first_var <- colnames(zph$y)[1]
+schoenfeld_df <- data.frame(
+  time = as.numeric(zph$x),
+  residual = as.numeric(zph$y[, 1])
+)
+schoenfeld_plot <- ggplot2::ggplot(
+  schoenfeld_df, ggplot2::aes(x = time, y = residual)
+) +
+  ggplot2::geom_point(alpha = 0.5) +
+  ggplot2::geom_smooth(method = "loess", formula = y ~ x, se = TRUE) +
+  ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+  ggplot2::labs(
+    title = "Scaled Schoenfeld residuals",
+    subtitle = sprintf("Predictor: %s (flat trend supports proportional hazards)", first_var),
+    x = "Time",
+    y = "Scaled Schoenfeld residual"
+  ) +
+  ggplot2::theme_minimal()
+save_plot_artifact(
+  "plot.schoenfeld", schoenfeld_plot, "schoenfeld.png",
+  description = "Scaled Schoenfeld residuals vs. time for the proportional-hazards check"
+)

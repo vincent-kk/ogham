@@ -1,12 +1,19 @@
 import { readFile, rm } from 'node:fs/promises';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   CENNAD_HOME,
   SETTINGS_SERVER_PATH,
 } from '../../../../constants/paths.js';
 import { handleOpenSettings } from '../openSettings.js';
+
+// `handleOpenSettings` launches the settings page in the user's browser, which
+// is the point of the tool and intolerable in a test run — unmocked, every suite
+// pops a real tab. Mocked the way filid and imbas already mock it; the
+// assertions below read the URL from the handler's own result, never the tab.
+const openBrowser = vi.hoisted(() => vi.fn());
+vi.mock('@ogham/cross-platform/launcher', () => ({ openBrowser }));
 
 async function closeViaHttp(url: string): Promise<void> {
   try {

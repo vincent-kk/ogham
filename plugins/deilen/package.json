@@ -25,12 +25,19 @@
     "public",
     "skills",
     ".claude-plugin",
+    "plugin.json",
+    ".codex-plugin",
     ".mcp.json",
+    "mcp_config.json",
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
-    "build:plugin": "yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && node scripts/buildMcpServer.mjs",
+    "build": "yarn clean && yarn version:sync && yarn build:pages && yarn build:compile && yarn build:mcp && yarn build:compile-plugin",
+    "build:pages": "node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs",
+    "build:compile": "tsc -p tsconfig.build.json",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
+    "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
+    "build:plugin": "yarn build:pages && yarn build:mcp",
     "clean": "rm -rf bridge dist public",
     "dev": "tsc --watch",
     "dev:viewer": "node --import tsx scripts/devViewer.ts",
@@ -43,7 +50,7 @@
     "version:major": "yarn version major",
     "version:minor": "yarn version minor",
     "version:patch": "yarn version patch",
-    "version:sync": "node ../../scripts/inject-version.mjs"
+    "version:sync": "node ../../scripts/injectVersion.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "~1.22.0",

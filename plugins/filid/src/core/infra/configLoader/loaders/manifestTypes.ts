@@ -10,7 +10,7 @@ export interface RuleDocEntry {
   /**
    * SHA-256 hex digest of the template file shipped in
    * `templates/rules/<filename>`. Injected by
-   * `plugins/filid/scripts/sync-rule-hashes.mjs` at build time; the runtime
+   * `plugins/filid/scripts/syncRuleHashes.mjs` at build time; the runtime
    * uses it to detect drift against `.claude/rules/<filename>`.
    */
   templateHash: string;
@@ -20,6 +20,19 @@ export interface RuleDocEntry {
 export interface RuleDocsManifest {
   version: string;
   rules: RuleDocEntry[];
+}
+
+/** Everything a rule-doc channel needs, resolved once by `syncRuleDocs`. */
+export interface RuleDocSyncPlan {
+  /** Plugin install directory — where `templates/rules/` ships. */
+  pluginRoot: string;
+  /** Target project, git root already resolved. */
+  projectRoot: string;
+  manifest: RuleDocsManifest;
+  /** Rule ids the caller opted into. Required rules deploy regardless. */
+  selection: Set<string>;
+  /** Rule ids whose drifted deployment may be overwritten. */
+  resync: Set<string>;
 }
 
 /** Report returned by syncRuleDocs. */

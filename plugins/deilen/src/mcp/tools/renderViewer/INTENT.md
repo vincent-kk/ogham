@@ -39,4 +39,4 @@
 ## Dependencies
 
 - `../../../core` (config·projectHash·sessionStore), `../../httpServer`, `../../../utils`, `../../../types`
-- `node:fs/promises`, `node:path`, `@ogham/cross-platform/host-paths` (projectRoot)
+- `node:fs/promises`, `node:path`, `@ogham/cross-platform/{host-paths,launcher}` (projectRoot, openBrowser)

@@ -1,18 +1,17 @@
+import { HOST_MARKER_ENV, hostFromMarker } from "../hostRegistry/index.js";
+
 import type { Host } from "./types.js";
 
-const KNOWN_HOSTS = new Set<Host>(["claude", "codex", "agy"]);
-
 /**
- * The host that launched this process, from the `OGHAM_HOST` marker the
- * non-Claude adapters inject into their MCP declaration.
+ * The host that launched this process, from the marker the non-Claude adapters
+ * inject into their MCP declaration.
  *
- * Absence means Claude: its `.mcp.json` is shipped unmodified, so it carries no
- * marker. An unrecognised marker resolves to `unknown` rather than defaulting to
- * Claude — assuming the Claude contract on a host that does not honour it is the
- * silent misbehaviour this module exists to prevent.
+ * Marker-only on purpose. This module is documented MCP-only (hooks receive no
+ * marker and must not consume it), so the hook-side signals that
+ * `resolveHostDescriptor` also weighs would be dead weight here — and answering
+ * from a signal this module's callers never see would make `detectHost` mean
+ * something different from what its consumers assume.
  */
 export function detectHost(): Host {
-  const raw = process.env.OGHAM_HOST;
-  if (!raw) return "claude";
-  return KNOWN_HOSTS.has(raw as Host) ? (raw as Host) : "unknown";
+  return hostFromMarker(process.env[HOST_MARKER_ENV]);
 }

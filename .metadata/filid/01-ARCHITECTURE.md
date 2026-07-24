@@ -197,8 +197,8 @@ packages/filid/
 │   ├── mcp/                     # MCP 서버 + 도구 (2+6)
 │   └── __tests__/               # 테스트 (unit + integration)
 ├── scripts/
-│   ├── build-mcp-server.mjs     # MCP 서버 esbuild 번들 스크립트
-│   └── build-hooks.mjs          # Hook 스크립트 esbuild 번들 스크립트
+│   ├── buildMcpServer.mjs     # MCP 서버 esbuild 번들 스크립트
+│   └── buildHooks.mjs          # Hook 스크립트 esbuild 번들 스크립트
 ├── package.json
 ├── tsconfig.json
 └── vitest.config.ts
@@ -268,7 +268,7 @@ mcp/server-entry.ts (시작점)
 
 **맥락**: 플러그인이 `git clone` 후 즉시 동작해야 함. `tsc` 빌드 단계 없이.
 
-**결정**: `scripts/build-mcp-server.mjs` + `scripts/build-hooks.mjs`로 esbuild 번들링 분리. MCP 서버는 CJS, Hook 스크립트는 ESM.
+**결정**: `scripts/buildMcpServer.mjs` + `scripts/buildHooks.mjs`로 esbuild 번들링 분리. MCP 서버는 CJS, Hook 스크립트는 ESM.
 
 **근거**:
 

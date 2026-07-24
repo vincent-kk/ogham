@@ -3,7 +3,7 @@
  * @description esbuild entry point for SessionStart hook.
  * Bundled to bridge/session-start.mjs.
  */
-import { logHookFailure } from "@ogham/cross-platform/error-log";
+import { errorLogPath, logHookFailure } from "@ogham/cross-platform/error-log";
 
 import { probeEnvironment } from "./probe/probeEnvironment.js";
 import { runSessionStart } from "./sessionStart.js";
@@ -26,7 +26,7 @@ async function main() {
     const warning =
       "[maencof-lens] hook bootstrap diagnostic — some hooks may not work:\n" +
       probe.errors.map((e) => `  - ${e}`).join("\n") +
-      "\nSee ~/.claude/plugins/maencof-lens/error-log.json for details.";
+      `\nSee ${errorLogPath("maencof-lens")} for details.`;
     context = context ? `${context}\n\n${warning}` : warning;
   }
 

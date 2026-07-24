@@ -6,6 +6,21 @@ import {
 } from "./projectRootMemo.js";
 
 /**
+ * What the model reads before deciding whether to fill `project_root` in. It is the
+ * only guidance that reaches a direct tool call — a skill body does not — so it is
+ * declared once here and shared by every project-scoped tool, rather than copied into
+ * each schema where the wordings would drift apart.
+ *
+ * It names `~` explicitly because that is the spelling a host is most likely to have
+ * shown the model (the Codex TUI prints `~/Workspace/app`), and a model that believes
+ * `~` will be rejected has no expanded form to fall back on.
+ */
+export const PROJECT_ROOT_ARG_DESCRIPTION =
+  "Absolute path of the workspace directory; a leading `~` is expanded. Omit on Claude " +
+  "Code, where this server already runs from the workspace; required on hosts that " +
+  "launch it from the plugin install directory.";
+
+/**
  * The user's workspace — what file operations, project identity and allow-roots must
  * be scoped to.
  *

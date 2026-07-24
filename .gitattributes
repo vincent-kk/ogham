@@ -2,7 +2,7 @@
 *.ts  linguist-detectable
 *.mjs linguist-detectable
 
-# Rule doc templates must stay LF so sync-rule-hashes.mjs produces deterministic hashes across OS
+# Rule doc templates must stay LF so syncRuleHashes.mjs produces deterministic hashes across OS
 plugins/filid/templates/rules/*.md text eol=lf
 plugins/seiri/templates/rules/*.md text eol=lf
 

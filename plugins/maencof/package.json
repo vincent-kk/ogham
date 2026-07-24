@@ -39,14 +39,22 @@
     "skills",
     "templates",
     ".claude-plugin",
+    "plugin.json",
+    ".codex-plugin",
     ".mcp.json",
+    "mcp_config.json",
+    "hooks.json",
     "README.md"
   ],
   "scripts": {
     "bench": "vitest bench",
     "bench:run": "vitest bench --run",
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build": "yarn clean && yarn version:sync && yarn build:compile && yarn build:mcp && yarn build:hooks && yarn build:compile-plugin",
+    "build:compile": "tsc -p tsconfig.build.json",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
+    "build:hooks": "node scripts/buildHooks.mjs",
+    "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
+    "build:plugin": "yarn build:mcp && yarn build:hooks",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "eval": "vitest run src/__tests__/eval",
@@ -58,7 +66,7 @@
     "version:major": "yarn version major",
     "version:minor": "yarn version minor",
     "version:patch": "yarn version patch",
-    "version:sync": "node ../../scripts/inject-version.mjs"
+    "version:sync": "node ../../scripts/injectVersion.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "~1.22.0",

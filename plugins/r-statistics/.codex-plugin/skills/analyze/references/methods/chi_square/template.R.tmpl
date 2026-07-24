@@ -1,0 +1,112 @@
+# Pearson chi-square test of independence on a two-way contingency table.
+# Slot body only: contract is sourced and seed/manifest are injected by the runner.
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{GROUP}}
+
+library(rstatix)
+
+# ---- data ------------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Two categorical columns: the outcome and the grouping variable.
+outcome <- "{{OUTCOME}}"
+group <- "{{GROUP}}"
+
+# Coerce both to factors so the cross-tabulation is over discrete levels.
+df[[outcome]] <- factor(df[[outcome]])
+df[[group]] <- factor(df[[group]])
+
+# Drop rows missing either column so the table and test see the same data.
+df <- df[stats::complete.cases(df[, c(outcome, group)]), , drop = FALSE]
+df[[outcome]] <- droplevels(df[[outcome]])
+df[[group]] <- droplevels(df[[group]])
+
+# ---- contingency table -----------------------------------------------------
+# Observed counts: rows = group levels, columns = outcome levels.
+tbl <- table(df[[group]], df[[outcome]])
+if (nrow(tbl) < 2L || ncol(tbl) < 2L) {
+  stop(sprintf(
+    "Chi-square needs >= 2 levels in each variable; got %d x %d (%s x %s).",
+    nrow(tbl), ncol(tbl), group, outcome
+  ))
+}
+
+# ---- hypothesis test -------------------------------------------------------
+# correct = FALSE keeps the uncorrected Pearson statistic; Yates' continuity
+# correction would otherwise apply to 2x2 tables and shift the p-value.
+ct <- stats::chisq.test(tbl, correct = FALSE)
+
+# rstatix Cramer's V effect size for the table's association strength.
+eff <- rstatix::cramer_v(tbl)
+
+# broom is not whitelisted here; build a flat one-row tidy frame by hand.
+tidy_test <- data.frame(
+  statistic = unname(ct$statistic),
+  df = unname(ct$parameter),
+  p.value = ct$p.value,
+  method = unname(ct$method),
+  row.names = NULL
+)
+
+# ---- assumption: expected counts >= 5 --------------------------------------
+# chisq.test stores the model-implied expected counts; the large-sample
+# approximation degrades when any cell expects < 5 (-> recommend Fisher exact).
+expected <- ct$expected
+min_expected <- min(expected)
+prop_lt5 <- mean(expected < 5)
+expected_ok <- min_expected >= 5
+cat(sprintf(
+  "Expected-count check: min expected = %.3g, %.1f%% of cells < 5 -> %s\n",
+  min_expected, 100 * prop_lt5,
+  if (expected_ok) "OK" else "VIOLATED (consider Fisher's exact test)"
+))
+note_assumption("expected_count_ge_5")
+
+# ---- human-readable summary ------------------------------------------------
+cat("Pearson chi-square test of independence\n")
+cat(sprintf("  %s x %s contingency table (%d x %d):\n",
+  group, outcome, nrow(tbl), ncol(tbl)
+))
+print(tbl)
+cat(sprintf("  X-squared = %.4g, df = %d, p = %.4g\n",
+  unname(ct$statistic), unname(ct$parameter), ct$p.value
+))
+cat(sprintf("  Effect size (Cramer's V) = %.4g\n", eff))
+
+# ---- artifacts -------------------------------------------------------------
+# result.hypothesis_test: the test statistic, df, p-value, and effect size.
+hypothesis_test <- list(
+  method = unname(ct$method),
+  outcome = outcome,
+  group = group,
+  n = sum(tbl),
+  statistic_chisq = unname(ct$statistic),
+  df = unname(ct$parameter),
+  p_value = ct$p.value,
+  cramers_v = eff,
+  min_expected_count = min_expected,
+  prop_expected_lt5 = prop_lt5,
+  expected_count_ok = expected_ok
+)
+write_json_artifact(
+  "result.hypothesis_test", "model", hypothesis_test,
+  "chi_square_result.json",
+  "Pearson chi-square statistic, df, p-value, and Cramer's V effect size"
+)
+
+# table.contingency: observed counts plus the expected counts under independence.
+contingency <- list(
+  row_variable = group,
+  col_variable = outcome,
+  row_levels = rownames(tbl),
+  col_levels = colnames(tbl),
+  observed = as.data.frame.matrix(tbl),
+  expected = as.data.frame.matrix(round(expected, 4)),
+  row_totals = as.list(rowSums(tbl)),
+  col_totals = as.list(colSums(tbl)),
+  total = sum(tbl)
+)
+write_json_artifact(
+  "table.contingency", "table", contingency,
+  "chi_square_contingency.json",
+  "Observed and expected (under independence) contingency counts with margins"
+)

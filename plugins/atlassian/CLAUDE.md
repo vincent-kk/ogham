@@ -5,8 +5,8 @@
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → settings-html → tsc → mcp-server
-yarn build:plugin       # mcp-server 번들만
+yarn build              # clean → version:sync → pages → compile → mcp → compile-plugin
+yarn build:plugin       # pages + mcp 번들만 (clean/compile/compile-plugin 생략)
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)
 yarn test               # watch
@@ -28,8 +28,8 @@ Dispatcher (Claude Code main agent)
 
 ## Build System
 
-- `scripts/build-mcp-server.mjs`: MCP 서버 → `bridge/mcp-server.cjs`
-- `scripts/build-settings-html.mjs`: settings page HTML 번들 (esbuild + 정적 HTML)
+- `scripts/buildMcpServer.mjs`: MCP 서버 → `bridge/mcp-server.cjs`
+- `scripts/buildSettingsHtml.mjs`: settings page HTML 번들 (esbuild + 정적 HTML)
 
 ## Development Notes
 

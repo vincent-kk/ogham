@@ -1,0 +1,107 @@
+# Kruskal-Wallis rank-sum test (nonparametric one-way, 3+ independent groups).
+# Slot body only: contract is sourced and seed/manifest are injected by the runner.
+
+library(rstatix)
+
+# ---- data ------------------------------------------------------------------
+df <- read_data("{{DATA_REF_ID}}")
+df <- as.data.frame(df)
+
+# Outcome (numeric/ordinal ranks) compared across a multi-level grouping factor.
+outcome <- "{{OUTCOME}}"
+group <- "{{GROUP}}"
+df[[group]] <- factor(df[[group]])
+
+# Drop rows missing either column so the omnibus test and post-hoc see one dataset.
+df <- df[stats::complete.cases(df[, c(outcome, group)]), , drop = FALSE]
+df[[group]] <- droplevels(df[[group]])
+
+group_levels <- levels(df[[group]])
+if (length(group_levels) < 2L) {
+  stop(sprintf(
+    "Kruskal-Wallis requires at least two groups; '%s' has %d.",
+    group, length(group_levels)
+  ))
+}
+
+# outcome ~ group
+fml <- stats::as.formula(sprintf("%s ~ %s", outcome, group))
+
+# ---- assumption: independence (design-level, not data-checkable) -----------
+note_assumption("independence")
+
+# ---- omnibus test ----------------------------------------------------------
+# Kruskal-Wallis: do at least two groups differ in distribution / location?
+kw <- stats::kruskal.test(fml, data = df)
+
+# broom::tidy gives a flat one-row data.frame of the htest result.
+tidy_test <- broom::tidy(kw)
+
+# rstatix effect size: eta-squared based on the H statistic, with magnitude label.
+eff <- rstatix::kruskal_effsize(df, formula = fml)
+
+# Per-group medians and counts for an interpretable summary.
+medians <- tapply(df[[outcome]], df[[group]], stats::median, na.rm = TRUE)
+counts <- tapply(df[[outcome]], df[[group]], length)
+
+# ---- post-hoc: Dunn's test (only when the omnibus is significant / 3+ groups) ----
+# Dunn's pairwise rank comparisons with Benjamini-Hochberg p-adjustment.
+dunn <- rstatix::dunn_test(df, formula = fml, p.adjust.method = "BH")
+
+# ---- human-readable summary ------------------------------------------------
+cat("Kruskal-Wallis rank-sum test\n")
+cat(sprintf("  %s by %s: %d groups, n total = %d\n",
+  outcome, group, length(group_levels), nrow(df)
+))
+cat("  Group medians:\n")
+for (lv in group_levels) {
+  cat(sprintf("    %s: median = %.4g (n = %d)\n",
+    lv, medians[[lv]], counts[[lv]]
+  ))
+}
+cat(sprintf("  H = %.4g, df = %.0f, p = %.4g\n",
+  unname(kw$statistic), unname(kw$parameter), kw$p.value
+))
+cat(sprintf("  Effect size (eta^2[H]) = %.4g (%s)\n",
+  eff$effsize[1], as.character(eff$magnitude[1])
+))
+cat("\nPost-hoc (Dunn's test, BH-adjusted):\n")
+print(as.data.frame(dunn[, c("group1", "group2", "statistic", "p", "p.adj", "p.adj.signif")]),
+  row.names = FALSE
+)
+
+# ---- artifacts -------------------------------------------------------------
+# result.hypothesis_test: omnibus statistic, p-value, effect size, and post-hoc.
+hypothesis_test <- list(
+  method = unname(kw$method),
+  outcome = outcome,
+  group = group,
+  group_levels = group_levels,
+  statistic_H = unname(kw$statistic),
+  df = unname(kw$parameter),
+  p_value = kw$p.value,
+  effect_size_eta2 = eff$effsize[1],
+  effect_magnitude = as.character(eff$magnitude[1]),
+  medians = as.list(medians),
+  group_n = as.list(counts),
+  posthoc_dunn = as.data.frame(dunn)
+)
+write_json_artifact(
+  "result.hypothesis_test", "model", hypothesis_test,
+  "kruskal_wallis_result.json",
+  "Kruskal-Wallis H statistic, p-value, eta-squared effect size, and Dunn's post-hoc comparisons"
+)
+
+# table.test_summary: tidy one-row omnibus result joined with the effect size.
+test_summary <- cbind(
+  tidy_test,
+  effsize = eff$effsize[1],
+  effsize_magnitude = as.character(eff$magnitude[1]),
+  n_groups = length(group_levels),
+  n_total = nrow(df)
+)
+write_json_artifact(
+  "table.test_summary", "table", test_summary,
+  "kruskal_wallis_summary.json",
+  "Tidy Kruskal-Wallis omnibus test summary with effect size"
+)

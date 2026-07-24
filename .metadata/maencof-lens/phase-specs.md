@@ -49,9 +49,9 @@ Create the `packages/maencof-lens` package structure and the config loader that 
   },
   "scripts": {
     "clean": "rm -rf bridge",
-    "version:sync": "node scripts/inject-version.mjs",
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "version:sync": "node scripts/injectVersion.mjs",
+    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
+    "build:plugin": "node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
@@ -560,7 +560,7 @@ Set up the build pipeline and plugin manifest files for Claude Code plugin distr
 
 #### 6.1 Build Scripts
 
-**`scripts/build-mcp-server.mjs`**:
+**`scripts/buildMcpServer.mjs`**:
 
 - Entry: `src/mcp/server-entry.ts`
 - Output: `bridge/mcp-server.cjs`
@@ -568,14 +568,14 @@ Set up the build pipeline and plugin manifest files for Claude Code plugin distr
 - External: none (bundle everything including @ogham/maencof)
 - Pattern: copy from maencof's build script
 
-**`scripts/build-hooks.mjs`**:
+**`scripts/buildHooks.mjs`**:
 
 - Entry: `src/hooks/entries/session-start.entry.ts`
 - Output: `bridge/session-start.mjs`
 - Format: ESM, bundled, node20 target
 - Pattern: copy from maencof's build script
 
-**`scripts/inject-version.mjs`**:
+**`scripts/injectVersion.mjs`**:
 
 - Reads version from `package.json`
 - Writes to `src/version.ts`: `export const VERSION = '0.0.1';`

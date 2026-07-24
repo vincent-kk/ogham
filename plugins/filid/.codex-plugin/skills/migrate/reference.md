@@ -1,0 +1,208 @@
+# migrate Reference
+
+Detailed reference for the `migrate.mjs` script that handles CLAUDE.md/SPEC.md
+to INTENT.md/DETAIL.md batch migration.
+
+---
+
+## Script Location
+
+```
+skills/migrate/migrate.mjs
+```
+
+Runs on Node.js (the same runtime Claude Code itself uses) — no `bash`, `find`,
+or `sed` required, so it behaves identically on macOS, Linux, and Windows.
+
+## Usage
+
+```bash
+node migrate.mjs <target-path> [--dry-run|--execute] [--auto-commit]
+```
+
+| Argument        | Description                                             |
+| --------------- | ------------------------------------------------------- |
+| `<target-path>` | Directory to scan (defaults to `.`)                     |
+| `--dry-run`     | Preview mode — no files modified (default)              |
+| `--execute`     | Perform renames and reference updates                   |
+| `--auto-commit` | Commit the migration changes after successful execution |
+
+---
+
+## Phase 1 — Scan & Conflict Detection
+
+The script recursively scans for `CLAUDE.md` and `SPEC.md` files, excluding:
+
+- `node_modules/`
+- `dist/`
+- `.git/`
+- `.claude/`
+- `.claude-plugin/`
+
+For each file found, it checks if the target name already exists in the same
+directory:
+
+- `CLAUDE.md` + `INTENT.md` coexist → **conflict**, skipped
+- `SPEC.md` + `DETAIL.md` coexist → **conflict**, skipped
+
+### Output
+
+```
+## Phase 1 — Scan & Conflict Detection
+
+Found: 5 CLAUDE.md, 3 SPEC.md
+  RENAME: src/core/CLAUDE.md → src/core/INTENT.md
+  CONFLICT: src/ast/ — both CLAUDE.md and INTENT.md exist
+  ...
+
+Renames planned: 7
+Conflicts (skipped): 1
+```
+
+---
+
+## Phase 2 — Rename
+
+Only runs with `--execute`.
+
+- In git repos: `git mv CLAUDE.md INTENT.md` (preserves history)
+- Outside git: `mv CLAUDE.md INTENT.md` (fallback)
+
+### Output
+
+```
+## Phase 2 — Rename
+Renamed: 7 files
+```
+
+---
+
+## Phase 3 — Scoped Reference Update
+
+Only runs with `--execute`. Uses **relative-path-based scoped replacement** to
+avoid unintended changes to files outside renamed directories.
+
+### How it works
+
+Phase 2 collects which directories had renames (`_renamed_claude_dirs`,
+`_renamed_spec_dirs`). Phase 3 then only searches files **under those
+directories**, using depth-aware patterns:
+
+| File depth (relative to renamed dir) | Patterns replaced          |
+| ------------------------------------ | -------------------------- |
+| 0 (same directory)                   | `CLAUDE.md`, `./CLAUDE.md` |
+| 1 (one level deep)                   | `../CLAUDE.md`             |
+| 2 (two levels deep)                  | `../../CLAUDE.md`          |
+| N                                    | `"../" × N + "CLAUDE.md"`  |
+
+The same logic applies for `SPEC.md` → `DETAIL.md`.
+
+**Files outside renamed directories are never modified.** This prevents:
+
+- Skills prompts referencing `CLAUDE.md` as a concept from being changed
+- Logic code (e.g., `context-injector.ts`) with `CLAUDE.md` string constants
+  from being altered when the file is not under a renamed directory
+
+Within a renamed directory the replacement is plain substring matching (a
+faithful port of the original `sed` pipeline): a depth-0 file mentioning
+`sub/CLAUDE.md` or `MYCLAUDE.md` is rewritten too. Review the dry-run listing
+when such references exist.
+
+Uses in-place string replacement in Node — no `sed`, so the same code path runs
+on every platform.
+
+In dry-run mode, lists matching files with their depth info without modifying.
+
+### Output (dry-run)
+
+```
+## Phase 3 — Reference Update (scoped)
+Scoped reference scan (files that would be updated):
+  src/core/README.md (depth=0: bare + ./)
+  src/core/__tests__/foo.test.ts (depth=1: ../CLAUDE.md)
+Files with scoped references to update: 2
+(dry-run — no changes made)
+```
+
+### Output (execute)
+
+```
+## Phase 3 — Reference Update (scoped)
+Updated references in: 2 files
+```
+
+---
+
+## Phase 4 — Report
+
+Summary of all operations:
+
+```
+## Phase 4 — Report
+
+Mode: execute
+Renames: 7 planned
+Renamed: 7 files
+References updated: 12 files
+Conflicts skipped: 1
+```
+
+### Auto-Commit
+
+When `--auto-commit` is passed with `--execute` in a git repo:
+
+```bash
+# renames are already staged by `git mv`; only reference-updated files are added
+git add -- <reference-updated files>
+git commit -m "refactor: migrate CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md naming
+
+Renamed: 7 files
+References updated: 12 files
+Conflicts skipped: 1"
+```
+
+Only migration-touched files are staged — unrelated working-tree changes stay
+out of the commit.
+
+Output:
+
+```
+## Auto-Commit
+Committed: abc1234
+```
+
+---
+
+## LLM Integration
+
+The LLM should:
+
+1. **Dry-run first**: Always run without `--execute` first
+2. **Report**: Show the script output to the user
+3. **Confirm**: Ask the user before running with `--execute`
+4. **Post-validate** (optional): Run `mcp__plugin_filid_tools__structure_validate` MCP tool after execution
+
+### Resolving the script path
+
+The script is located relative to the filid plugin installation. Use the
+plugin's skill directory:
+
+```bash
+# Find the script path from the plugin directory
+node "<plugin-dir>/skills/migrate/migrate.mjs" <target-path>
+```
+
+---
+
+## Reversal
+
+To undo the migration:
+
+```bash
+# If auto-committed, revert the commit
+git revert <commit-sha>
+
+# Or reset entirely
+git reset HEAD~1
+git checkout .
+```

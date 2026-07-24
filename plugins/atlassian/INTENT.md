@@ -16,7 +16,7 @@
 
 ## Conventions
 
-- 빌드 파이프라인: `clean → version:sync → settings-html → tsc → mcp-server`
+- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → compile-plugin`
 - 의존성 방향 단방향: dispatcher → agent → skill → MCP → REST API
 - skill 은 lazy reference loading — capsule 만 컨텍스트에 적재, 도메인 상세는 필요 시점에 로드
 - credentials 는 `~/.claude/plugins/atlassian/credentials.json` 평문 JSON

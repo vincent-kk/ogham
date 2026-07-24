@@ -1,0 +1,101 @@
+# Two-sample Student's t-test (pooled variance, var.equal = TRUE).
+# Compares the mean of a continuous outcome between two independent groups.
+
+# ---- load + prepare -------------------------------------------------------
+df <- read_data("{{DATA_REF_ID}}")
+df <- as.data.frame(df)
+
+outcome <- "{{OUTCOME}}"   # continuous dependent variable column
+group <- "{{GROUP}}"       # two-level grouping factor column
+
+# Drop rows with missing outcome/group and coerce the grouping column to a factor.
+df <- df[stats::complete.cases(df[, c(outcome, group)]), , drop = FALSE]
+df[[group]] <- factor(df[[group]])
+
+grp_levels <- levels(df[[group]])
+if (length(grp_levels) != 2L) {
+  stop(sprintf(
+    "t_test requires exactly two groups in '%s'; found %d.",
+    group, length(grp_levels)
+  ))
+}
+
+# Student's t-test assumes equal variances; build the y ~ group formula.
+fml <- stats::as.formula(sprintf("%s ~ %s", outcome, group))
+
+# ---- assumptions ----------------------------------------------------------
+# Normality (Shapiro-Wilk) per group — produces evidence for the soft rule.
+shapiro_by_group <- lapply(grp_levels, function(lv) {
+  vals <- df[[outcome]][df[[group]] == lv]
+  if (length(vals) >= 3L && length(vals) <= 5000L) {
+    st <- stats::shapiro.test(vals)
+    list(group = lv, n = length(vals),
+         statistic = unname(st$statistic), p_value = st$p.value)
+  } else {
+    list(group = lv, n = length(vals),
+         statistic = NA_real_, p_value = NA_real_)
+  }
+})
+note_assumption("normality")
+
+# Homogeneity of variance (Levene's test, center = median).
+levene_tbl <- rstatix::levene_test(df, fml)
+note_assumption("homogeneity")
+
+# ---- test -----------------------------------------------------------------
+fit <- stats::t.test(fml, data = df, var.equal = TRUE)
+tidy_fit <- broom::tidy(fit)   # one-row data.frame: estimate, statistic, p.value, conf.* , ...
+
+# Per-group descriptive summary for the reporting table.
+group_summary <- lapply(grp_levels, function(lv) {
+  vals <- df[[outcome]][df[[group]] == lv]
+  list(group = lv, n = length(vals),
+       mean = mean(vals), sd = stats::sd(vals))
+})
+
+# ---- human-readable summary ----------------------------------------------
+cat("Two-sample t-test (Student, var.equal = TRUE):", outcome, "by", group, "\n")
+cat(sprintf("  groups: %s vs %s\n", grp_levels[1], grp_levels[2]))
+print(tidy_fit)
+cat("\nLevene's test (homogeneity of variance):\n")
+print(levene_tbl)
+
+# ---- artifacts ------------------------------------------------------------
+# result.hypothesis_test — the primary test result with its assumption checks.
+write_json_artifact(
+  "result.hypothesis_test", "table",
+  list(
+    method = unname(fit$method),
+    outcome = outcome,
+    group = group,
+    groups = grp_levels,
+    estimate = unname(fit$estimate),
+    mean_difference = unname(fit$estimate[1] - fit$estimate[2]),
+    statistic = unname(fit$statistic),
+    parameter_df = unname(fit$parameter),
+    p_value = fit$p.value,
+    conf_low = fit$conf.int[1],
+    conf_high = fit$conf.int[2],
+    alternative = fit$alternative,
+    assumptions = list(
+      normality = shapiro_by_group,
+      homogeneity = list(
+        statistic = levene_tbl$statistic[1],
+        p_value = levene_tbl$p[1]
+      )
+    )
+  ),
+  "result_hypothesis_test.json",
+  description = "Student's two-sample t-test result with normality/homogeneity checks"
+)
+
+# table.test_summary — tidy result + per-group descriptives for reporting.
+write_json_artifact(
+  "table.test_summary", "table",
+  list(
+    test = as.list(tidy_fit),
+    groups = group_summary
+  ),
+  "table_test_summary.json",
+  description = "Tidy t-test summary and per-group descriptive statistics"
+)

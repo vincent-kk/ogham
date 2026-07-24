@@ -1,0 +1,85 @@
+# Poisson regression slot: fit stats::glm(family = poisson), report
+# coefficients (broom::tidy) on the rate scale, and check the Poisson
+# mean = variance assumption via an overdispersion test.
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{FORMULA}}
+
+# ---- data -----------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Count outcome must be a non-negative integer-valued numeric.
+df[["{{OUTCOME}}"]] <- as.numeric(df[["{{OUTCOME}}"]])
+
+# Drop rows missing the outcome so the model sees complete cases on the response.
+df <- df[!is.na(df[["{{OUTCOME}}"]]), , drop = FALSE]
+
+# ---- model fit ------------------------------------------------------------
+# {{FORMULA}} expands to e.g. count ~ predictor1 + predictor2.
+model_formula <- stats::as.formula("{{FORMULA}}")
+fit <- stats::glm(model_formula, data = df, family = stats::poisson(link = "log"))
+
+# Tidy coefficients: estimates are on the log scale; exponentiate for rate ratios.
+coef_tidy <- broom::tidy(fit, conf.int = TRUE)
+coef_tidy$rate_ratio <- exp(coef_tidy$estimate)
+
+cat("=== Poisson regression (log link) ===\n")
+print(coef_tidy)
+
+# Model-level fit statistics (deviance, AIC, log-likelihood, df).
+glance_tbl <- broom::glance(fit)
+cat("\n=== Model fit summary ===\n")
+print(glance_tbl)
+
+# ---- assumption: mean = variance (overdispersion / dispersion check) -------
+# Pearson dispersion = sum(Pearson residuals^2) / residual df. Poisson assumes
+# mean == variance, so dispersion ~ 1. dispersion >> 1 signals overdispersion.
+pearson_resid <- stats::residuals(fit, type = "pearson")
+resid_df <- stats::df.residual(fit)
+pearson_chisq <- sum(pearson_resid^2)
+dispersion <- if (resid_df > 0) pearson_chisq / resid_df else NA_real_
+
+# Formal score test for overdispersion against a negative-binomial alternative.
+# Wrapped in tryCatch so a degenerate fit never aborts the slot.
+disp_p_value <- tryCatch(
+  {
+    # Compare the Poisson fit to a negative-binomial fit on the same formula.
+    nb_fit <- MASS::glm.nb(model_formula, data = df)
+    lr_stat <- as.numeric(2 * (stats::logLik(nb_fit) - stats::logLik(fit)))
+    # Boundary LR test (theta on the edge): halve the chi-square(1) p-value.
+    0.5 * stats::pchisq(max(lr_stat, 0), df = 1, lower.tail = FALSE)
+  },
+  error = function(e) NA_real_
+)
+
+overdispersed <- !is.na(dispersion) && dispersion > 1.5
+cat("\n=== Dispersion check (mean = variance) ===\n")
+cat(sprintf("Pearson dispersion: %.4f (target ~ 1)\n", dispersion))
+cat(sprintf("Overdispersion LR p-value: %s\n",
+            ifelse(is.na(disp_p_value), "NA", formatC(disp_p_value, format = "g"))))
+note_assumption("mean_equals_variance")
+
+# ---- artifact: model.fit --------------------------------------------------
+# Serialize the fitted glm object so downstream steps can reload it.
+saveRDS(fit, artifact_path("model_fit.rds"))
+add_artifact(
+  "model.fit", "model", "model_fit.rds",
+  "Fitted Poisson GLM (stats::glm, family = poisson, log link)"
+)
+
+# ---- artifact: table.coefficients -----------------------------------------
+# Coefficient table plus the dispersion diagnostic as the primary numeric result.
+coefficients_out <- list(
+  technique = "poisson_regression",
+  outcome = "{{OUTCOME}}",
+  formula = "{{FORMULA}}",
+  n = nrow(df),
+  coefficients = coef_tidy,
+  model_fit = glance_tbl,
+  dispersion = dispersion,
+  overdispersion_p_value = disp_p_value,
+  overdispersed = overdispersed
+)
+write_json_artifact(
+  "table.coefficients", "table",
+  coefficients_out, "coefficients.json",
+  "Poisson GLM coefficients (estimate, std.error, rate_ratio, CI, p.value) with dispersion check"
+)

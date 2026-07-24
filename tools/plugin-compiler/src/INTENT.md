@@ -1,48 +1,43 @@
-# plugin-compiler
-
 ## Purpose
 
-`src/main.ts` 는 `plugin-compiler <extract|compile|verify> <pkgDir>` CLI 오케스트레이터. `extract`=`ir`(현행 산출물→정본 역추출), `compile`=`ir`→`pipeline`(내부적으로 `emit` 호출)→`targets/` 쓰기(`--check` 시 `verify` 게이트로 전환), `verify`=단독 `verify` 게이트. 패키지 전체 계약은 [../INTENT.md](../INTENT.md).
+`@ogham/plugin-compiler` 소스 루트. **Claude 정본 → facts → 어댑터 내용 → 디스크 반영**의 단방향 파이프라인이며, 진입은 `main.ts` (`sync [--check] [pluginDir ...]`).
 
 ## Structure
 
-| Path         | Role                                                    |
-| ------------ | ------------------------------------------------------- |
-| `main.ts`    | CLI 진입점 — **`index.ts` 아님**(barrel 이름 트랩 주의) |
-| `ir/`        | fractal: `definitions/` ⇄ `PluginIR` 로드/역추출        |
-| `profiles/`  | fractal: claude · codex · agy 호스트 규칙               |
-| `emit/`      | fractal: `PluginIR`+Profile → `FileMap`(순수)           |
-| `pipeline/`  | fractal: emit 실행 + `targets/` 디스크 쓰기             |
-| `verify/`    | fractal: 바이트 등가성 게이트                           |
-| `types/`     | organ: IR·Profile·Output 계약                           |
-| `constants/` | organ: `layout.ts`(경로 상수)                           |
-| `tokens/`    | organ(pure): `{{tool}}`/`{{skill}}` 치환·린트           |
-| `json/`      | organ(pure): `stableJson`·`jsonEqual`                   |
-| `fsx/`       | organ(pure): `readTree`(디렉터리 순회)                  |
+| Path         | Role                                                         |
+| ------------ | ------------------------------------------------------------ |
+| `main.ts`    | CLI 진입 — 계획 수립 → 반영 → 출력 → exit 코드 판정          |
+| `types/`     | organ: 정본 형태(source) · facts · 계획(plan) 계약           |
+| `constants/` | organ: Claude 산출물 경로 · 어댑터 경로 · 호스트 마커/이벤트 |
+| `utils/`     | organ: `stableJson` 결정적 직렬화                            |
+| `cli/`       | fractal: 인자 파싱 · 진단/액션 포맷 (순수)                   |
+| `facts/`     | fractal: Claude 정본 → facts (읽기 전용)                     |
+| `adapters/`  | fractal: facts → 어댑터 파일 내용 (순수)                     |
+| `lint/`      | fractal: 호환성 진단 (훅 이벤트 · matcher)                   |
+| `pipeline/`  | fractal: 대상 열거 · 계획 · 쓰기/검사 (유일한 쓰기 지점)     |
 
 ## Conventions
 
-- fractal 5개(`ir`/`profiles`/`emit`/`pipeline`/`verify`)는 각자 INTENT.md 보유 — 이 문서는 소스 루트 조감도, 세부 계약은 하위 INTENT.md 참조.
-- organ 5개(`types`/`constants`/`tokens`/`json`/`fsx`)는 flat 단일·소수 파일, INTENT.md 없음.
-- 커맨드 흐름은 `ir → pipeline(→emit→verify) → targets/` 단방향 — 역방향 import 금지.
+- ESM, import 확장자 `.js`; 디렉터리·파일은 camelCase.
+- fractal 소비는 배럴(`index.ts`) 경유, organ 소비는 concrete 파일 직접 import.
+- 부수효과는 `pipeline/`(디스크)과 `main.ts`(스트림·exit) 두 곳뿐 — 나머지는 순수 함수.
+- 스펙은 대상 fractal 의 `__tests__/` 에 둔다 (organ 하위에 새로 만들지 않는다).
 
 ## Boundaries
 
 ### Always do
 
-- 새 하위 fractal 추가 시 INTENT.md + `index.ts` barrel 갖추기.
-- `main.ts` 는 각 fractal의 barrel(`index.ts`)만 import — 하위 파일 직접 참조 금지.
+- JSON emit 은 `utils/stableJson`(2-space + 개행) 단일 경로 — 재실행 무변경(결정성).
 
 ### Ask first
 
-- `main.ts` 커맨드(`extract`/`compile`/`verify`) 추가·시그니처 변경 — CLI 계약 영향.
-- `src` 최상위에 새 organ/fractal 추가.
+- 새 하위 fractal 추가 · facts 계약(`types/`) 확장 — adapters·lint 소비처 전체에 영향.
 
 ### Never do
 
-- `src` 루트에 barrel/INTENT.md/`main.ts` 외 peer 파일 추가.
-- 한 fractal 내부 파일(`steps/`·`compile/`·`load/` 등)을 다른 fractal이 직접 import — 항상 barrel 경유.
+- Claude 소비 파일 쓰기 — 쓰기 대상은 어댑터 경로 상수로 한정.
+- `adapters/`·`lint/`·`cli/` 에서의 디스크 I/O.
 
 ## Dependencies
 
-- 패키지 개발 의존성·채택 상태는 [../INTENT.md](../INTENT.md) 참조(여기 중복 금지).
+- Node.js ≥ 20 내장 모듈만 (`fs`·`path`·`url`·`process`) — 런타임 외부 의존성 없음.

@@ -2,7 +2,6 @@ import { pluginRoot } from '@ogham/cross-platform/host-paths';
 import { projectRoot } from '@ogham/cross-platform/host-paths';
 import { openBrowser } from '@ogham/cross-platform/launcher';
 
-import { ENV_FLAG_ON, ENV_NO_BROWSER } from '../../../constants/env.js';
 import { Route } from '../../../constants/http.js';
 
 import type { SaveSummary } from './types/settingsTypes.js';
@@ -76,9 +75,9 @@ export async function handleOpenSettings(
       },
     });
     currentServer = { ...handle, projectRoot: root };
-    // ENV_NO_BROWSER suppresses the tab for e2e runs and headless
-    // hosts; the URL is still returned so callers can surface it.
-    if (process.env[ENV_NO_BROWSER] !== ENV_FLAG_ON) openBrowser(handle.url);
+    // openBrowser honours OGHAM_NO_BROWSER (e2e / headless) and no-ops on
+    // failure; the URL is returned regardless so callers can surface it.
+    openBrowser(handle.url);
   }
 
   const server = currentServer;

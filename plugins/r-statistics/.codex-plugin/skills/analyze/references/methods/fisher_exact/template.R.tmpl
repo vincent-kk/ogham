@@ -1,0 +1,103 @@
+# Fisher's exact test for independence in an r x c contingency table.
+# Slot body only: contract is sourced and seed/manifest are injected by the runner.
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{GROUP}}
+
+library(rstatix)
+
+# ---- data ------------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Two categorical columns: the outcome and the grouping variable.
+outcome <- "{{OUTCOME}}"
+group <- "{{GROUP}}"
+df[[outcome]] <- factor(df[[outcome]])
+df[[group]] <- factor(df[[group]])
+
+# Drop rows missing either column so the table reflects complete cases only.
+df <- df[stats::complete.cases(df[, c(outcome, group)]), , drop = FALSE]
+df[[outcome]] <- droplevels(df[[outcome]])
+df[[group]] <- droplevels(df[[group]])
+
+# ---- contingency table -----------------------------------------------------
+# Rows = group levels, columns = outcome levels.
+tbl <- table(df[[group]], df[[outcome]], dnn = c(group, outcome))
+
+if (any(dim(tbl) < 2L)) {
+  stop(sprintf(
+    "Fisher's exact test needs >= 2 levels per variable; got %d (%s) x %d (%s).",
+    nrow(tbl), group, ncol(tbl), outcome
+  ))
+}
+
+# ---- hypothesis test -------------------------------------------------------
+# fisher.test gives an exact p-value from the hypergeometric distribution;
+# odds ratio + CI are reported only for the 2x2 case. Larger tables enlarge
+# the network-algorithm workspace so the computation stays exact and
+# deterministic (no Monte Carlo path, which would depend on the seed).
+is_2x2 <- all(dim(tbl) == 2L)
+ft <- if (is_2x2) {
+  stats::fisher.test(tbl)
+} else {
+  stats::fisher.test(tbl, workspace = 2e8)
+}
+
+# Cramer's V quantifies association strength on the same table.
+cramers_v <- rstatix::cramer_v(tbl)
+
+odds_ratio <- if (is_2x2 && !is.null(ft$estimate)) unname(ft$estimate) else NA_real_
+conf_low <- if (is_2x2 && !is.null(ft$conf.int)) ft$conf.int[1] else NA_real_
+conf_high <- if (is_2x2 && !is.null(ft$conf.int)) ft$conf.int[2] else NA_real_
+
+# ---- human-readable summary ------------------------------------------------
+cat("Fisher's exact test of independence\n")
+cat(sprintf("  %s x %s contingency (%d x %d), n = %d\n",
+  group, outcome, nrow(tbl), ncol(tbl), sum(tbl)
+))
+cat("\n")
+print(tbl)
+cat(sprintf("\n  p = %.4g (%s)\n", ft$p.value, ft$alternative))
+if (is_2x2) {
+  cat(sprintf("  odds ratio = %.4g [%.4g, %.4g]\n", odds_ratio, conf_low, conf_high))
+}
+cat(sprintf("  Cramer's V = %.4g\n", cramers_v))
+
+# ---- artifacts -------------------------------------------------------------
+# result.hypothesis_test: the exact test result, effect size, and (2x2) odds ratio.
+hypothesis_test <- list(
+  method = unname(ft$method),
+  outcome = outcome,
+  group = group,
+  outcome_levels = levels(df[[outcome]]),
+  group_levels = levels(df[[group]]),
+  n = sum(tbl),
+  table_dim = dim(tbl),
+  p_value = ft$p.value,
+  alternative = ft$alternative,
+  odds_ratio = odds_ratio,
+  conf_low = conf_low,
+  conf_high = conf_high,
+  cramers_v = cramers_v
+)
+write_json_artifact(
+  "result.hypothesis_test", "model", hypothesis_test,
+  "fisher_exact_result.json",
+  "Fisher's exact test p-value, odds ratio (2x2), and Cramer's V effect size"
+)
+
+# table.contingency: the observed counts plus row/column/total margins.
+counts <- as.data.frame.matrix(tbl)
+contingency <- list(
+  row_variable = group,
+  col_variable = outcome,
+  row_levels = rownames(tbl),
+  col_levels = colnames(tbl),
+  counts = counts,
+  row_totals = as.integer(rowSums(tbl)),
+  col_totals = as.integer(colSums(tbl)),
+  grand_total = sum(tbl)
+)
+write_json_artifact(
+  "table.contingency", "table", contingency,
+  "fisher_exact_contingency.json",
+  "Observed contingency table of group x outcome counts with margins"
+)

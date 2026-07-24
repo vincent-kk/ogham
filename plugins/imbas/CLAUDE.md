@@ -5,8 +5,8 @@
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → settings-html → tsc → esbuild
-yarn build:plugin       # mcp-server + hooks 번들만
+yarn build              # clean → version:sync → pages → compile → mcp → hooks → compile-plugin
+yarn build:plugin       # pages + mcp + hooks 번들만
 yarn typecheck          # 타입 체크 (emit 없음)
 yarn test:run           # 단일 실행 (CI)
 yarn test:e2e           # settings 페이지 Playwright e2e (빌드 후 실브라우저)

@@ -1,9 +1,19 @@
+import { homedir } from "node:os";
+import { join } from "node:path";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { detectHost } from "../detectHost.js";
+import { locatePluginRoot } from "../locatePluginRoot.js";
 import { pluginRoot } from "../pluginRoot.js";
 import { projectRoot, tryProjectRoot } from "../projectRoot.js";
 import { rememberProjectRoot, resetProjectRoot } from "../projectRootMemo.js";
+
+// Stubbed so the plugin-root fallback is asserted as a decision, not as an accident of
+// where the test file happens to sit on disk. The walk itself is covered by
+// locatePluginRoot.test.ts against a fixture tree.
+vi.mock("../locatePluginRoot.js", () => ({ locatePluginRoot: vi.fn() }));
+const locate = vi.mocked(locatePluginRoot);
 
 const PLUGIN_DIR = "/install/plugins/deilen";
 const WORKSPACE = "/Users/vincent/Workspace/app";
@@ -12,6 +22,7 @@ beforeEach(() => {
   delete process.env.OGHAM_HOST;
   delete process.env.CLAUDE_PLUGIN_ROOT;
   resetProjectRoot();
+  locate.mockReturnValue(null);
   vi.spyOn(process, "cwd").mockReturnValue(PLUGIN_DIR);
 });
 
@@ -44,13 +55,21 @@ describe("pluginRoot", () => {
     expect(pluginRoot()).toBe(PLUGIN_DIR);
   });
 
-  it("returns null on agy, whose mcp_config.json has no cwd field to pin", () => {
+  it("asks the filesystem where it is on agy, whose mcp_config.json has no cwd field to pin", () => {
+    process.env.OGHAM_HOST = "agy";
+    locate.mockReturnValue(PLUGIN_DIR);
+    expect(pluginRoot()).toBe(PLUGIN_DIR);
+    expect(process.cwd).not.toHaveBeenCalled();
+  });
+
+  it("returns null when no channel answers and no manifest sits above the module", () => {
     process.env.OGHAM_HOST = "agy";
     expect(pluginRoot()).toBeNull();
   });
 
-  it("returns null on claude without the env var rather than mistaking cwd for the plugin", () => {
+  it("never mistakes cwd for the plugin on claude — cwd is the workspace there", () => {
     expect(pluginRoot()).toBeNull();
+    expect(process.cwd).not.toHaveBeenCalled();
   });
 });
 
@@ -99,6 +118,18 @@ describe("projectRoot off claude", () => {
   it("canonicalises the supplied path so two spellings hash to one project", () => {
     expect(projectRoot(`${WORKSPACE}/`)).toBe(WORKSPACE);
     expect(projectRoot(`${WORKSPACE}/sub/..`)).toBe(WORKSPACE);
+  });
+
+  it("expands a leading ~, the spelling the Codex TUI shows the model", () => {
+    expect(projectRoot("~/Workspace/app")).toBe(
+      join(homedir(), "Workspace", "app"),
+    );
+    expect(projectRoot("~")).toBe(homedir());
+  });
+
+  it("still rejects ~user, which only a shell can resolve — and says so", () => {
+    expect(() => projectRoot("~someone/app")).toThrow(/~user/);
+    expect(tryProjectRoot("~someone/app")).toBeNull();
   });
 
   it("hands lifecycle callers null so they skip rather than sweep the wrong root", () => {

@@ -1,0 +1,13 @@
+technique: spline_regression
+family: regression
+outcome_types: [continuous]
+required_assumptions:
+  - id: residual_normality
+    severity: soft
+    check: shapiro
+  - id: homoscedasticity
+    severity: soft
+    check: breusch_pagan
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [model.fit, table.coefficients, plot.residual_diagnostics]
+packages: [splines, stats, broom, ggplot2]

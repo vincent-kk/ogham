@@ -14,6 +14,7 @@ export default defineConfig({
       "./shared/cross-platform",
       "./shared/http-guard",
       "./shared/session-finalizer",
+      "./tools/plugin-compiler",
     ],
   },
 });

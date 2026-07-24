@@ -23,7 +23,7 @@ webServer/       sub-fractal — HTTP 서버, 가드, 라우팅, 핸들러
 - 대기는 `[1, MAX_WAIT_SECONDS]` 로 클램프하고 `extra.signal` 을 전파한다.
 - 종료 상태(`saved`·`closed`)는 토큰 없는 origin 만 돌려준다 — 흐름이 끝난 뒤
   일회용 토큰을 다시 노출하지 않는다.
-- `SEIRI_NO_BROWSER=1` 이면 탭을 열지 않는다 (e2e·헤드리스).
+- `OGHAM_NO_BROWSER` 가 설정되면 탭을 열지 않는다 (e2e·헤드리스).
 - **`/plan` 과 `/save` 는 같은 본문 스키마와 같은 판정을 쓴다** — 미리보기가
   save 가 하지 않을 일을 약속하면 미리보기가 없느니만 못하다.
 

@@ -1,0 +1,157 @@
+# Linear regression slot: fit stats::lm, report tidy coefficients (broom),
+# then check linearity, residual normality (Shapiro), homoscedasticity
+# (Breusch-Pagan), independence (Durbin-Watson) and multicollinearity (VIF).
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{FORMULA}} {{PREDICTORS}}
+
+# ---- data -----------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Outcome must be numeric for an OLS fit.
+df[["{{OUTCOME}}"]] <- as.numeric(df[["{{OUTCOME}}"]])
+
+# {{PREDICTORS}} is a comma-separated list of predictor column names; trim it
+# into a character vector so we can build the modelled-column set.
+predictors <- trimws(strsplit("{{PREDICTORS}}", ",")[[1]])
+model_cols <- unique(c("{{OUTCOME}}", predictors))
+
+# Drop rows missing any modelled column so every helper sees complete cases.
+df <- df[stats::complete.cases(df[, model_cols, drop = FALSE]), , drop = FALSE]
+
+# ---- model fit ------------------------------------------------------------
+# {{FORMULA}} expands to e.g. outcome ~ x1 + x2.
+model_formula <- stats::as.formula("{{FORMULA}}")
+fit <- stats::lm(model_formula, data = df)
+
+# Tidy coefficient table + one-row model-level fit statistics.
+coef_tidy <- broom::tidy(fit, conf.int = TRUE)
+glance_tidy <- broom::glance(fit)
+
+cat("=== Linear regression coefficients ===\n")
+print(coef_tidy)
+cat("\n=== Model fit (glance) ===\n")
+print(glance_tidy)
+
+# ---- assumption: linearity (residual_plot) --------------------------------
+# Residuals vs fitted with no systematic curvature supports linearity.
+resid_vec <- stats::residuals(fit)
+fitted_vec <- stats::fitted(fit)
+note_assumption("linearity")
+
+# ---- assumption: residual normality (Shapiro-Wilk) ------------------------
+# Shapiro-Wilk is only valid for 3..5000 observations; guard the bounds.
+n_resid <- length(resid_vec)
+shapiro <- if (n_resid >= 3 && n_resid <= 5000) {
+  broom::tidy(stats::shapiro.test(resid_vec))
+} else {
+  data.frame(statistic = NA_real_, p.value = NA_real_,
+             method = "shapiro-wilk (skipped: n out of range)")
+}
+cat("\n=== Residual normality (Shapiro-Wilk) ===\n")
+print(shapiro)
+note_assumption("residual_normality")
+
+# ---- assumption: homoscedasticity (Breusch-Pagan) -------------------------
+# car::ncvTest is the score test for non-constant error variance.
+bp <- car::ncvTest(fit)
+bp_p <- bp$p
+cat("\n=== Homoscedasticity (Breusch-Pagan / non-constant variance) ===\n")
+print(bp)
+note_assumption("homoscedasticity")
+
+# ---- assumption: independence (Durbin-Watson) -----------------------------
+# car::durbinWatsonTest detects first-order autocorrelation of residuals.
+dw <- car::durbinWatsonTest(fit)
+cat("\n=== Independence (Durbin-Watson) ===\n")
+print(dw)
+note_assumption("independence")
+
+# ---- assumption: no multicollinearity (VIF) -------------------------------
+# VIF needs >= 2 predictor terms; with a single predictor it is undefined.
+vif_vals <- tryCatch(
+  {
+    v <- car::vif(fit)
+    # car::vif returns a matrix for factor terms; reduce to a named vector.
+    if (is.matrix(v)) v[, ncol(v)] else v
+  },
+  error = function(e) stats::setNames(numeric(0), character(0))
+)
+vif_tbl <- if (length(vif_vals) > 0) {
+  data.frame(term = names(vif_vals), vif = as.numeric(vif_vals))
+} else {
+  data.frame(term = character(0), vif = numeric(0))
+}
+cat("\n=== Multicollinearity (VIF) ===\n")
+print(vif_tbl)
+note_assumption("no_multicollinearity")
+
+# ---- artifact: model.fit --------------------------------------------------
+# Model-level summary (formula, n, fit statistics) as the canonical fit record.
+model_fit <- list(
+  technique = "linear_regression",
+  outcome = "{{OUTCOME}}",
+  predictors = predictors,
+  formula = "{{FORMULA}}",
+  n = nrow(df),
+  fit_statistics = glance_tidy
+)
+write_json_artifact(
+  "model.fit", "model",
+  model_fit, "model_fit.json",
+  "Fitted linear model summary (formula, n, R-squared, AIC, residual df)"
+)
+
+# ---- artifact: table.coefficients -----------------------------------------
+# Coefficient estimates with standard errors, t statistics, p values and CIs.
+write_json_artifact(
+  "table.coefficients", "table",
+  coef_tidy, "coefficients.json",
+  "Coefficient table (estimate, std.error, statistic, p.value, conf.low, conf.high)"
+)
+
+# Assumption-check summary travels alongside the coefficient artifact.
+write_json_artifact(
+  "table.coefficients", "assumption_check",
+  list(
+    shapiro_p_value = shapiro$p.value,
+    breusch_pagan_p_value = bp_p,
+    durbin_watson_statistic = dw$dw,
+    durbin_watson_p_value = dw$p,
+    vif = vif_tbl,
+    normality_ok = is.na(shapiro$p.value) || shapiro$p.value >= 0.05,
+    homoscedasticity_ok = is.na(bp_p) || bp_p >= 0.05,
+    independence_ok = is.na(dw$p) || dw$p >= 0.05,
+    multicollinearity_ok = length(vif_vals) == 0 || all(vif_vals < 5)
+  ),
+  "assumption_checks.json",
+  "Regression assumption checks (normality, homoscedasticity, independence, VIF)"
+)
+
+# ---- artifact: plot.residual_diagnostics ----------------------------------
+# Residuals-vs-fitted (linearity + variance structure) and QQ (normality).
+diag_df <- data.frame(
+  .fitted = fitted_vec,
+  .resid = resid_vec
+)
+resid_fitted_plot <- ggplot2::ggplot(diag_df, ggplot2::aes(x = .fitted, y = .resid)) +
+  ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
+  ggplot2::geom_point(alpha = 0.6) +
+  ggplot2::geom_smooth(method = "loess", se = FALSE, colour = "steelblue") +
+  ggplot2::labs(title = "Residuals vs Fitted", x = "Fitted", y = "Residual") +
+  ggplot2::theme_minimal()
+
+qq_plot <- ggplot2::ggplot(diag_df, ggplot2::aes(sample = .resid)) +
+  ggplot2::stat_qq(alpha = 0.6) +
+  ggplot2::stat_qq_line(colour = "grey50") +
+  ggplot2::labs(title = "Normal Q-Q", x = "Theoretical", y = "Sample") +
+  ggplot2::theme_minimal()
+
+save_plot_artifact(
+  "plot.residual_diagnostics", resid_fitted_plot,
+  "residual_vs_fitted.png",
+  "Residuals vs fitted values (linearity and homoscedasticity check)"
+)
+save_plot_artifact(
+  "plot.residual_diagnostics", qq_plot,
+  "residual_qq.png",
+  "Normal Q-Q plot of model residuals (normality check)"
+)

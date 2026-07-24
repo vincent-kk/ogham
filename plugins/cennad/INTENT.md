@@ -19,7 +19,7 @@
 
 ## Conventions
 
-- 빌드 파이프라인은 filid 패턴 — `version:sync → settingsHtml → tsc → mcpServer → hooks`
+- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → hooks → compile-plugin`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`)
 - Agent 는 `courier` 1개 (`cennad:courier`) — 관점(정교화 ≤3콜 · 실패 remedy · tier 의미론)은 courier, 스킬은 행동(파싱→background spawn→릴레이)만 (비블로킹)
 - E2E 는 이중 레이어 (Layer A in-process + Layer B 번들 stdio); `CENNAD_E2E_REAL_CLI=1` 일 때만 real CLI
@@ -38,11 +38,11 @@
 ### Never do
 
 - `dist/` 를 커밋 (`bridge/` · `public/` 는 의도적 커밋 — `package.json:files` 포함)
-- `version.ts` 또는 `.claude-plugin/plugin.json` 의 version 을 손으로 수정 (inject-version.mjs 만)
+- `version.ts` 또는 `.claude-plugin/plugin.json` 의 version 을 손으로 수정 (injectVersion.mjs 만)
 
 ## Dependencies
 
 - **런타임**: `@modelcontextprotocol/sdk ~1.22.0`, `zod ^3.23.8`
 - **개발**: `esbuild ^0.24.0`, `typescript ^5.7.2`, `vitest ^4.1.2`, `@types/node ^20.11.0`
 - **환경**: Node.js >= 20, Yarn 4.12 workspaces
-- **빌드 스크립트**: `scripts/buildSettingsHtml.mjs`, `scripts/buildMcpServer.mjs`, `scripts/buildHooks.mjs`, `../../scripts/inject-version.mjs`
+- **빌드 스크립트**: `scripts/buildSettingsHtml.mjs`, `scripts/buildMcpServer.mjs`, `scripts/buildHooks.mjs`, `../../scripts/injectVersion.mjs`

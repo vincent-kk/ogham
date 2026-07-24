@@ -59,4 +59,4 @@ The Korean design specification is the source of truth at `../../.metadata/prawf
   per-skill `INTENT.md`/`DETAIL.md`. Optionally run `/filid:scan` (this monorepo's
   FCA dev tool — not a prawf runtime dependency) to check structure.
 - **Registration**: listed in root `.claude-plugin/marketplace.json`. Not in
-  `scripts/typecheck-all.mjs` (no TypeScript to typecheck).
+  `scripts/typecheckAll.mjs` (no TypeScript to typecheck).

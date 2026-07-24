@@ -16,7 +16,7 @@ beforeAll(() => {
   if (!existsSync(SETTINGS_HTML_PATH))
     execFileSync(
       "node",
-      [join(PACKAGE_ROOT, "scripts", "build-settings-html.mjs")],
+      [join(PACKAGE_ROOT, "scripts", "buildSettingsHtml.mjs")],
       { cwd: PACKAGE_ROOT, stdio: "inherit" },
     );
 });

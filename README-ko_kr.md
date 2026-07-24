@@ -29,6 +29,37 @@ claude plugin install maencof
 
 > 설치 후 Claude Code에서 바로 스킬을 사용할 수 있습니다. 예를 들어 `/filid:setup`을 입력하면 프로젝트에 FCA-AI를 초기화합니다. 사용 가능한 모든 플러그인은 아래 [전체 패키지 목록](#전체-패키지-목록) 표에서 확인하세요.
 
+### 다른 호스트 — OpenAI Codex · Google Antigravity
+
+Claude Code가 1차 타깃이며 모든 기능이 동작합니다. 같은 플러그인 디렉터리를 **Codex** 에, 그리고 부분적으로 **Antigravity(`agy`)** 에도 설치할 수 있습니다 — 저장소가 Claude 매니페스트 옆에 호스트별 어댑터 매니페스트를 함께 담고 있습니다.
+
+**Codex** (`codex-cli` 0.144.4+) — 스킬 · 훅 · MCP 도구 모두 동작합니다:
+
+```bash
+codex plugin marketplace add https://github.com/vincent-kk/ogham
+codex plugin add filid@ogham
+
+# 그다음 Codex TUI를 한 번 엽니다. 훅을 가진 플러그인이면 "Hooks need review" 가
+# 뜨는데, 여기서 승인하지 않으면 훅이 조용히 동작하지 않습니다.
+codex
+```
+
+> **훅 trust 승인은 필수이고, 승인 전에는 아무 경고 없이 훅이 건너뛰어집니다.** 세션은 정상 종료되므로 사용자가 알아채기 어렵습니다. 다른 도구가 Codex를 헤드리스로 구동할 때도 마찬가지입니다(예: `cennad` 의 codex 위임).
+
+Codex의 알려진 한계: subagent 위원회를 쓸 수 없고(Codex에 `agents` 플러그인 컴포넌트가 없음), `Read` 도구 추적이 발화하지 않습니다(Codex에 `Read` 별칭이 없음).
+
+**Antigravity** (`agy` 1.1.2) — 스킬·에이전트는 동작하고, MCP는 수동 배치가 한 번 필요합니다:
+
+```bash
+agy plugin install filid@ogham        # 스킬 + 에이전트
+
+# MCP 도구를 쓰려면 플러그인이 커스터마이제이션 루트 아래에 있어야 합니다.
+# `agy plugin install` 은 agy가 플러그인 MCP를 절대 띄우지 않는 위치에 설치합니다.
+cp -R plugins/filid ~/.agents/plugins/filid
+```
+
+agy의 알려진 한계: **훅이 전혀 동작하지 않습니다**(agy의 훅 형식이 Claude와 달라 우리 파일이 파싱에 실패합니다). MCP는 `agy` CLI가 자체 설치 위치에서 플러그인 MCP를 로드하기 전까지 위 복사 단계가 필요합니다.
+
 ---
 
 ## 플러그인

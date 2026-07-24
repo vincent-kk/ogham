@@ -3,6 +3,7 @@ import { readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { resetProjectRoot } from "@ogham/cross-platform/host-paths";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DataFormat } from "../../../../types/enums.js";
@@ -81,5 +82,20 @@ describe("resolveDataRefs", () => {
         { id: "rel", format: DataFormat.Csv, path: "in.csv" },
       ]),
     ).rejects.toThrow();
+  });
+
+  it("surfaces the projectRoot guidance off Claude, not DATA_ROOT_INVALID, when no root was supplied", async () => {
+    // Off Claude with neither project_root nor R_STATISTICS_DATA_ROOT, the allow-root
+    // cannot be resolved. The failure must tell the model to retry with project_root;
+    // masking it as DATA_ROOT_INVALID would point at an env var the model cannot set.
+    vi.stubEnv("OGHAM_HOST", "codex");
+    vi.stubEnv("R_STATISTICS_DATA_ROOT", undefined);
+    resetProjectRoot();
+    const dir = tmp("rs-data-");
+    await expect(
+      resolveDataRefs(dir, [
+        { id: "d1", format: DataFormat.Csv, path: "/whatever/in.csv" },
+      ]),
+    ).rejects.toThrow(/project_root/i);
   });
 });

@@ -1,6 +1,6 @@
 import spawn from "cross-spawn";
 import { spawnSync as nodeSpawnSync } from "node:child_process";
-import { normalizeEol } from "../eol/normalizeEol.js";
+import { normalizeEol } from "../eol/index.js";
 import { osTimeout } from "./osTimeout.js";
 import { resolveLauncher } from "./resolveLauncher.js";
 import type { SpawnOptions, SpawnResult } from "./types.js";

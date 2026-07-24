@@ -16,10 +16,16 @@ interface DataRefManifestEntry {
  * Realpath-resolve the allow-root every input path must sit under. A symlinked
  * root is resolved so it compares against realpath-resolved refs. A missing or
  * unresolvable root (misconfigured R_STATISTICS_DATA_ROOT) → DATA_ROOT_INVALID.
+ *
+ * `inputDataRoot()` is read outside the try: off Claude with no `project_root`, it
+ * throws the projectRoot guard's "retry with project_root" guidance, and that must
+ * reach the model rather than be masked as DATA_ROOT_INVALID (which points at an env
+ * var the model cannot set). Only a genuine realpath failure is the invalid-root case.
  */
 async function resolveAllowedRoot(): Promise<string> {
+  const configuredRoot = inputDataRoot();
   try {
-    return await realpath(inputDataRoot());
+    return await realpath(configuredRoot);
   } catch {
     throw new Error(ERROR_MESSAGES.DATA_ROOT_INVALID);
   }

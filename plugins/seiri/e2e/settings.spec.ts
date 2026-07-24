@@ -9,7 +9,7 @@ import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
 // The tool must not spawn a real tab, and rule-doc state comes from the plugin
 // root (manifest + templates) the MCP host normally injects.
 const PKG_ROOT = process.cwd();
-process.env.SEIRI_NO_BROWSER = '1';
+process.env.OGHAM_NO_BROWSER = '1';
 process.env.CLAUDE_PLUGIN_ROOT = PKG_ROOT;
 
 // Drive assertions off the shipped manifest, not hard-coded ids/counts.

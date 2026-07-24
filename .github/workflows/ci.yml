@@ -1,9 +1,17 @@
 name: CI
 
 on:
-  # Run CI only when real source/test code changes.
-  # Docs-only (**.md) or config/manifest-only (**.json) changes skip the matrix.
-  # A PR mixing code with docs/config still runs (any matched path triggers).
+  # Run CI when source/test code changes, and when anything the host adapters are
+  # derived from — or the adapters themselves — changes.
+  #
+  # The adapter files are all .json, so a docs/config-only path filter would let a
+  # hand-edited or stale adapter through without CI ever running. The manifest,
+  # marketplace, .mcp.json and hooks.json entries below are the canonical inputs the
+  # generator reads; plugin.json / mcp_config.json / .agents/** are what it writes.
+  # Both sides must trigger, or `plugin:adapters:check` cannot catch a desync.
+  #
+  # (The list is repeated verbatim below — GitHub Actions does not support YAML
+  # anchors in workflow files. Keep the two copies identical.)
   push:
     branches: [main]
     paths:
@@ -13,6 +21,12 @@ on:
       - "**.jsx"
       - "**.mjs"
       - "**.cjs"
+      - "**/plugin.json"
+      - "**/marketplace.json"
+      - "**/mcp_config.json"
+      - "**/.mcp.json"
+      - "**/hooks.json"
+      - ".agents/**"
   pull_request:
     branches: [main]
     paths:
@@ -22,6 +36,12 @@ on:
       - "**.jsx"
       - "**.mjs"
       - "**.cjs"
+      - "**/plugin.json"
+      - "**/marketplace.json"
+      - "**/mcp_config.json"
+      - "**/.mcp.json"
+      - "**/hooks.json"
+      - ".agents/**"
 
 jobs:
   test:
@@ -51,6 +71,12 @@ jobs:
 
       - name: Typecheck (cennad tests)
         run: yarn cennad typecheck:tests
+
+      # Clean-regen gate: regenerate the host adapters from the Claude canonical
+      # files and fail if the result differs from what is committed. Catches a
+      # hand-edited adapter and a canonical change that was never re-synced.
+      - name: Adapters in sync
+        run: yarn plugin:adapters:check
 
       - name: Build
         run: yarn build:all

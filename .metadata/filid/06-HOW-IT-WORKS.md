@@ -153,9 +153,9 @@ JSON.stringify → stdout 출력
 프로세스 종료
 ```
 
-esbuild 번들(`scripts/build-hooks.mjs`)이므로 외부 의존성 없이 단일 파일로 실행됨.
+esbuild 번들(`scripts/buildHooks.mjs`)이므로 외부 의존성 없이 단일 파일로 실행됨.
 빌드 결과는 ESM `.mjs` 파일로 생성되며, 실행기는 `libs/run.cjs`(구 `find-node.sh` 대체)를 사용한다.
-MCP 서버는 별도로 `scripts/build-mcp-server.mjs`로 빌드되며 `mcp-server.cjs` (~726KB 최소화) 단일 파일로 배포된다.
+MCP 서버는 별도로 `scripts/buildMcpServer.mjs`로 빌드되며 `mcp-server.cjs` (~726KB 최소화) 단일 파일로 배포된다.
 `typescript` 패키지는 MCP 서버에서만 사용되며 Hook 스크립트에는 포함되지 않음.
 
 ---

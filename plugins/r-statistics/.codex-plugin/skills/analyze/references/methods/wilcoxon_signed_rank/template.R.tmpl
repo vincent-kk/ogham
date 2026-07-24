@@ -1,0 +1,71 @@
+# Wilcoxon signed-rank test (paired) — stats::wilcox.test(paired = TRUE)
+# Nonparametric test of the median paired difference between two related
+# continuous measurements (e.g. pre vs post on the same units).
+
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Paired measurement columns: each row is one unit measured under two conditions.
+pre <- df[["{{PRE_COL}}"]]
+post <- df[["{{POST_COL}}"]]
+
+# Drop pairs with any missing value so both vectors stay aligned.
+complete <- stats::complete.cases(pre, post)
+pre <- pre[complete]
+post <- post[complete]
+n_pairs <- length(pre)
+
+# Independence of the sampled units is a design property, not a data check.
+note_assumption("independence")
+
+# Core test: paired Wilcoxon signed-rank on the within-unit differences.
+fit <- stats::wilcox.test(pre, post, paired = TRUE, conf.int = TRUE)
+
+# Tidy the htest into a one-row frame for a stable, machine-readable summary.
+tidy_fit <- broom::tidy(fit)
+
+# rstatix effect size (matched-pairs rank-biserial correlation r).
+pair_df <- data.frame(
+  .unit = rep(seq_len(n_pairs), times = 2L),
+  condition = factor(rep(c("pre", "post"), each = n_pairs), levels = c("pre", "post")),
+  value = c(pre, post)
+)
+eff <- rstatix::wilcox_effsize(pair_df, value ~ condition, paired = TRUE)
+
+# Human-readable console summary.
+cat("Wilcoxon signed-rank test (paired)\n")
+cat(sprintf("Pairs (complete): %d\n", n_pairs))
+cat(sprintf("V = %s, p = %.4g\n", format(fit$statistic), fit$p.value))
+cat(sprintf(
+  "Median diff (pre - post) estimate: %.4g  [%.4g, %.4g]\n",
+  tidy_fit$estimate, tidy_fit$conf.low, tidy_fit$conf.high
+))
+cat(sprintf("Effect size (r = %.4g, magnitude: %s)\n",
+  eff$effsize, as.character(eff$magnitude)))
+print(tidy_fit)
+
+# Artifact: result.hypothesis_test — the full test result as JSON.
+hypothesis_test <- list(
+  method = "wilcoxon_signed_rank_paired",
+  n_pairs = n_pairs,
+  statistic_V = unname(fit$statistic),
+  p_value = fit$p.value,
+  alternative = fit$alternative,
+  estimate_location_shift = unname(tidy_fit$estimate),
+  conf_low = unname(tidy_fit$conf.low),
+  conf_high = unname(tidy_fit$conf.high),
+  effect_size_r = eff$effsize,
+  effect_magnitude = as.character(eff$magnitude)
+)
+write_json_artifact(
+  "result.hypothesis_test", "model", hypothesis_test,
+  "wilcoxon_signed_rank_result.json",
+  "Paired Wilcoxon signed-rank test result (V, p, location shift CI, effect size)"
+)
+
+# Artifact: table.test_summary — tidy one-row summary table as JSON.
+test_summary <- as.data.frame(tidy_fit)
+write_json_artifact(
+  "table.test_summary", "table", test_summary,
+  "wilcoxon_signed_rank_summary.json",
+  "Tidy Wilcoxon signed-rank summary (estimate, statistic, p.value, conf.int)"
+)

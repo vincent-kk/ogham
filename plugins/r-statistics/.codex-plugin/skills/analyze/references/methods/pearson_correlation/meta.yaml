@@ -1,0 +1,15 @@
+technique: pearson_correlation
+family: correlation
+outcome_types: [continuous]
+required_assumptions:
+  - id: normality
+    severity: soft
+    check: shapiro
+    on_violation: { recommend: [spearman_correlation] }
+  - id: linearity
+    severity: soft
+    check: scatter
+    on_violation: { recommend: [spearman_correlation] }
+hard_rules: [OUTCOME_METHOD_MISMATCH]
+required_artifacts: [result.correlation, plot.scatter]
+packages: [stats, broom, ggplot2]

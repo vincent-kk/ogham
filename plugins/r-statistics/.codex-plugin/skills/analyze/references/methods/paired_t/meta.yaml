@@ -1,0 +1,11 @@
+technique: paired_t
+family: parametric
+outcome_types: [continuous]
+required_assumptions:
+  - id: normality_of_diff
+    severity: soft
+    check: shapiro
+    on_violation: { recommend: [wilcoxon_signed_rank] }
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [result.hypothesis_test, table.test_summary]
+packages: [stats, broom, rstatix]

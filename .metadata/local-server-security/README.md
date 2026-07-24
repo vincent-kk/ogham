@@ -120,6 +120,6 @@ const LOOPBACK_ORIGIN = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i;
 
 **결정 — 토큰 전송은 쿼리스트링 유지**: §3/P3 의 "헤더 이동" 안은 **초기 브라우저 GET 네비게이션이 커스텀 헤더를 실을 수 없어** root 페이지 로드에 적용 불가. deilen/cennad 와 동일하게 `?token=` 로 통일(뷰어/설정 URL 은 원래 LLM 에 노출되는 값이라 표면 증가 없음).
 
-**배선** — `scripts/build-all.mjs` · `scripts/typecheck-all.mjs` PROVIDERS + 루트 `vitest.config.ts` projects 에 `@ogham/http-guard` 추가. 4개 플러그인 `package.json` devDependencies 에 `workspace:^`.
+**배선** — `scripts/buildAll.mjs` · `scripts/typecheckAll.mjs` PROVIDERS + 루트 `vitest.config.ts` projects 에 `@ogham/http-guard` 추가. 4개 플러그인 `package.json` devDependencies 에 `workspace:^`.
 
 **검증** — 테스트 전 통과: http-guard 19 · deilen 116 · cennad 558 · entrez(setup) 17 · atlassian 370. 신규 가드 테스트가 4중 방어 회귀 확인(rebinding→403 · token→401 · origin→403 · CT→415). 4개 `bridge/mcp-server.cjs` 가 가드를 인라인(`require("@ogham/http-guard")` 누출 0). `public/settings.html`(entrez·atlassian) 은 토큰 전파 반영해 재생성 — 빌드 산출물 커밋은 컨벤션대로 사용자.

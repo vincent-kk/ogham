@@ -518,7 +518,7 @@ describe('config-loader', () => {
     it('throws manifest shape error when an entry is missing templateHash', () => {
       const pluginRoot = setupFakePluginRoot();
       // Write a manifest without templateHash on any entry to simulate a
-      // plugin build that forgot to run scripts/sync-rule-hashes.mjs.
+      // plugin build that forgot to run scripts/syncRuleHashes.mjs.
       writeFileSync(
         join(pluginRoot, 'templates', 'rules', 'manifest.json'),
         JSON.stringify({

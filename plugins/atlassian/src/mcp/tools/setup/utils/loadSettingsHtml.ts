@@ -11,7 +11,7 @@ import { pluginRoot } from "@ogham/cross-platform/host-paths";
  * Resolution walks up from this module's location until a `public/` directory is
  * found, so it works both in the esbuild CJS bundle (`bridge/`) and when running
  * the TypeScript sources directly (vitest). `import.meta.url` is rewritten to the
- * bundle path by the banner/define shim in `scripts/build-mcp-server.mjs` (esbuild
+ * bundle path by the banner/define shim in `scripts/buildMcpServer.mjs` (esbuild
  * empties bare `import.meta` in CJS output otherwise).
  */
 let cached: string | null = null;

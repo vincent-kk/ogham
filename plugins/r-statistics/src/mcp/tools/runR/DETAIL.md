@@ -22,9 +22,10 @@
 
 - **위협**: 복사 주체는 게이트된 R 이 아니라 MCP(신뢰 코드)다. 무제한 `path` 는 R 정적 게이트를 우회해 임의 호스트 파일(`~/.ssh/id_rsa`, `/etc/*`)을 `data/` 로 끌어와 무해한 read 로 유출하는 exfil 증폭 채널이 된다.
 - **완화**: `resolveDataRefs` 가 `realpath(path)` 를 allow-root 하위로 강제한다(심링크 탈출 포함 거부). 위반 → `DATA_REF_OUTSIDE_ROOT`.
-- **allow-root**: 기본 프로젝트 루트 — Claude Code 에서는 `process.cwd()`(MCP 를 기동한 프로젝트 디렉토리), 그 외 호스트에서는 `project_root` 로 전달된 절대경로(미전달 시 `process.cwd()` 폴백 없이 실패). `R_STATISTICS_DATA_ROOT` 로 재정의. 미해석 시 `DATA_ROOT_INVALID`.
+- **allow-root**: 기본 프로젝트 루트 — Claude Code 에서는 `process.cwd()`(MCP 를 기동한 프로젝트 디렉토리), 그 외 호스트에서는 `project_root` 로 전달된 절대경로. **미전달 시 `process.cwd()` 폴백 없이 `project_root` 재전달을 안내하며 throw** 한다(projectRoot 가드 — 이 안내 메시지는 `DATA_ROOT_INVALID` 로 가려지지 않는다). `R_STATISTICS_DATA_ROOT` 로 재정의하며, **지정된 루트가 realpath 로 해석 불가일 때만** `DATA_ROOT_INVALID`.
 - 실행 안전 계층만 담당 — 통계 정책은 assert 소관.
 
 ## Last Updated
 
+2026-07-15 — allow-root 해석 실패 시 projectRoot 가드 안내를 `DATA_ROOT_INVALID` 로 삼키던 결함 수정 (M2-4 실측). 두 실패를 분리: project_root 미전달 → 재전달 안내 throw, 지정 루트 realpath 불가 → `DATA_ROOT_INVALID`.
 2026-07-12 — `dataRefs[].path` allow-root containment 도입 (operations-sre-3 부채 해소).
