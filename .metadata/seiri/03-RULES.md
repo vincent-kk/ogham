@@ -8,11 +8,11 @@
 
 | #   | 파일                            | 형식 층  | 형태              | 상태                        |
 | --- | ------------------------------- | -------- | ----------------- | --------------------------- |
-| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ lite · D9 통과 (07-24)   |
-| S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ lite · D9 통과 (07-24)   |
-| S3  | `seiri_test-validity.md`        | L4       | 혼합              | ✅ 이관본 · **`paths:` 조건부**(유일, 07-24) |
-| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ lite · D9 통과 (07-24)   |
-| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite · D9 통과 (07-24)   |
+| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ lite   |
+| S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ lite   |
+| S3  | `seiri_test-validity.md`        | L4       | 혼합              | ✅ 이관본 · **`paths:` 조건부**(유일) |
+| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ lite   |
+| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite   |
 | S6  | `seiri_structure.md`            | L0·L1    | 방향형            | ✅ 이관본 (방향형)          |
 | S7  | `seiri_context-efficiency.md`   | 6층 예외 | 레시피            | ✅ 통과 (D8 무삭감)         |
 | S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | ✅ 통과 (D8 무삭감)         |
@@ -20,16 +20,7 @@
 
 **공통 검증**: 전 규칙에 우선순위 사슬·형식 근거·이중 반증 적용. 임계 숫자 0건, 언어 특정 예시 0건, 각 200줄 미만.
 
-**규칙 검증 판정 (2026-07-23)** — 근거·표본 원문 [phase0/](./phase0/) · 종합 [phase0/SYNTHESIS.md](./phase0/SYNTHESIS.md):
-
-- **S1·S2 — 신규 검증 통과 (v1 무수정)**: 함정 구조의 신규 구조 규칙. 단일샷 대조→처치 반전(S1 0/5→5/5 · S2 §1 4/5→0/5 · S2 §2 재설계 5/5→0/5).
-- **S3·S4·S5·S6 — 이관본(filid 계승) 통과**: 단일샷 micro-test에서 대조군 실패 미재현(S3 §1 fail-first 0/5×2설계 · S4 §1 reuse 0/3 · S5 §3 grab-bag 0/3). 규칙 무용이 아니라 **유능한 모델의 단일샷 기본 행동**이라 계측 불가 — 프로세스 규율·좋은 관행은 filid 운영 실적 + 실하니스 10이슈 A/B가 증거.
-- **S7·S8 — 이관본 통과 (D8 확정 2026-07-23: 규칙 무삭감)**: 스킬과의 중복은 원칙(규칙·상시)/절차(스킬·순간)의 altitude 분리로 판정. 상시 예산은 규칙 1벌뿐(스킬 본문은 발화 시에만 로드)이라 I10 이중 지불 불성립, 스킬은 2KB 캡 직하(brainstorm 2048/2048B)라 trim은 이동이 아니라 삭제가 되며, 합리화 계열 조항의 자리는 02-ARCHITECTURE 삼분법의 "순간+**인지 부재**→규칙 잔류" 칸. 드리프트 완화는 리워딩이 아니라 고정 — A-6 rule-lint에 공유 관용구("pays twice"·"fix where it started") 양측 존재 검사를 추가한다. D7 실측 후 재검토 가능.
-- **S9 — D2 확정 (편입 opt-in), 등재는 유보**: Phase 0 대원칙(대조군 없이 만들지 않는다)에 따라 자체 대조군(3표본)이 실패를 보인 뒤 manifest에 opt-in(recommended: false)으로 등재한다.
-
-**A-1c 실행 완료 (2026-07-23)**: S1~S8을 `templates/rules/seiri_*.md`로 무수정 추출(결정적 스크립트, 전 파일 무결성 검사 통과, 최장 107줄, 러너명 금칙 0건) · manifest 8항 등재(권장 3종 S1·S3·S4) · `yarn seiri build`가 templateHash 8건 주입 · `yarn seiri test:run` **45 passed**. S9는 대조군 통과 후 추가 등재.
-
-**D9 슬리밍 완료 (2026-07-24)** — 근거·수치 원문 [phase0/d9-results.md](./phase0/d9-results.md): 구조 4종(S1·S2·S4·S5)을 lite로 재단(볼드 명령+Ask yourself+레시피만 남기고 정당화 삭제 — 레시피 무손상, 불변식 전부 통과). **2-1 성능가드 A/B**(sonnet, full vs lite, 30런): full 15/15 = lite 15/15 hidden-pass, **롤백 0**, 4종 전부 채택. 상시비용 **-13%**(8규칙 4760→4130 단어; 재단 4종만 -27%). sonnet은 양 arm 100% 무차별이라 가드는 무회귀만 확증 — 판별력은 약모델·reuse 차원(lite가 reuse-first §1 무손상 보존). **2-2 프로세스 A/B**(as-is vs to-be S3·S7·S8, 6런): cause-fix 3/3 양측·증상패치 0·거짓done 0 → **lift 없음**(sonnet 기본역량이 원인수정·fail-first·전수인지 수행). 단 긴 세션·컴팩션 국면은 프록시 미도달(메인세션 잔여). S3·S6·S7·S8은 full 무변경.
+**재단·배포**: 구조 4종(agent-legible·public-contract·reuse-first·naming)은 lite로 재단, 프로세스 4종(test-validity·structure·context-efficiency·cognitive-discipline)은 full. S1~S8 배포, S9는 대조군 통과 후 opt-in 등재. 근거·수치는 [phase0/](./phase0/).
 
 ---
 
@@ -172,7 +163,7 @@ Ask yourself: "<행동 앵커>"
 
 ## S3. `seiri_test-validity.md`
 
-**판정 노트**: filid 5조 계승 + §6 무한 축적 금지 신설(하방 개방). 오라클은 전부 역할 지칭 — 구체 명령 0건. §1의 리팩토링 계약 반전 조항은 filid `restructurer` 안전 조항의 원본이므로 문구를 보존합니다.
+**판정 노트**: filid 5조 계승 + §6 무한 축적 금지(하방 개방). 오라클은 전부 역할 지칭 — 구체 명령 0건. §1의 리팩토링 계약 반전 조항은 filid `restructurer` 안전 조항의 원본이므로 문구를 보존합니다.
 
 **조건부 로드 (유일)**: 8종 중 이 규칙만 `paths:` frontmatter를 갖습니다 — 테스트 파일을 연 동안에만 구속하는 유일한 규칙이라 상시 상주시킬 이유가 없습니다.
 
