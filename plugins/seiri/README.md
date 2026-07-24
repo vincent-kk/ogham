@@ -19,6 +19,11 @@ What it does inject is the part the files cannot state about themselves:
 which rules are active, where the intervention dial sits, and whether any
 deployed rule has been edited away from the shipped version.
 
+At `standard` and `strict`, it also re-raises a short skill-dispatch
+reminder at the start of every turn — widened at `strict` to cover
+borderline work and named verification. `advisory` injects nothing
+per turn.
+
 ## Install
 
 ```

@@ -31,13 +31,13 @@
       value: DIAL_STANDARD,
       label: DIAL_STANDARD,
       description:
-        'The default. Also states the dial position, so a long session can tell which posture it is operating under.',
+        'The default. Also states the dial position, so a long session can tell which posture it is operating under, and adds a brief skill-dispatch reminder at the start of every turn.',
     },
     {
       value: 'strict',
       label: 'strict',
       description:
-        'Also restates the precedence chain each session — useful where repository conventions and these rules meet often.',
+        'Also restates the precedence chain each session — useful where repository conventions and these rules meet often — and widens that per-turn reminder to borderline work and a named verification run.',
     },
   ];
 

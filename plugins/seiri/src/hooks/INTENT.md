@@ -20,10 +20,7 @@ instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 
 ## Conventions
 
-- **배럴 import 금지.** 훅 도달 코드는 `index.js` 가 아니라 concrete 파일을
-  직접 import 한다 — 배럴은 재수출하는 모듈 전체를 번들로 끌어온다.
-  typecheck 는 이를 못 잡고 `scripts/build-hooks.mjs` 의 캡·금칙 가드가
-  최종 방어선이다. 훅 소스 변경 후 반드시 `build:plugin` 으로 확인.
+- **배럴 import 금지** — concrete 파일 직접 import (배경은 루트/플러그인 CLAUDE.md·`seiri_agent-legible` 규칙); `build-hooks.mjs` 캡·금칙 가드가 최종 방어선, 소스 변경 후 `build:plugin` 확인.
 - 검증 런타임(zod 등)·MCP SDK·glob 엔진을 훅 번들에 들이지 않는다.
 - `@ogham/cross-platform/host-paths` 를 소비하지 않는다 — 호스트가 훅에
   `CLAUDE_PLUGIN_ROOT` 와 세션 cwd 를 이미 준다. 경로 조합은 `compat` 경유.
