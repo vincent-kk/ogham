@@ -23,6 +23,23 @@ interface HookCase {
 
 const HOOK_CASES: HookCase[] = [
   {
+    name: 'setup',
+    buildInput: (cwd) => ({
+      cwd,
+      session_id: 'smoke',
+      hook_event_name: 'SessionStart',
+    }),
+  },
+  {
+    name: 'user-prompt-submit',
+    buildInput: (cwd) => ({
+      cwd,
+      session_id: 'smoke',
+      prompt: 'hello',
+      hook_event_name: 'UserPromptSubmit',
+    }),
+  },
+  {
     name: 'pre-tool-use',
     buildInput: (cwd) => ({
       cwd,
@@ -39,23 +56,6 @@ const HOOK_CASES: HookCase[] = [
       session_id: 'smoke',
       agent_type: 'general-purpose',
       hook_event_name: 'SubagentStart',
-    }),
-  },
-  {
-    name: 'user-prompt-submit',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      prompt: 'hello',
-      hook_event_name: 'UserPromptSubmit',
-    }),
-  },
-  {
-    name: 'setup',
-    buildInput: (cwd) => ({
-      cwd,
-      session_id: 'smoke',
-      hook_event_name: 'SessionStart',
     }),
   },
 ];

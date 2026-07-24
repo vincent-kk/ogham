@@ -34,10 +34,10 @@ export type {
 
 export type {
   HookBaseInput,
+  UserPromptSubmitInput,
   PreToolUseInput,
   PostToolUseInput,
   SubagentStartInput,
-  UserPromptSubmitInput,
   HookOutput,
   HookInput,
   StructureGuardOutput,

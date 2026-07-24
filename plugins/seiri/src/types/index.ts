@@ -17,11 +17,11 @@ export type {
 } from './manifest.js';
 export type {
   HookBaseInput,
-  HookOutput,
-  InstructionsLoadedInput,
-  PostToolUseFailureInput,
-  PostToolUseInput,
   SessionStartInput,
+  PostToolUseInput,
+  PostToolUseFailureInput,
   SubagentStartInput,
+  InstructionsLoadedInput,
+  HookOutput,
 } from './hooks.js';
 export type { SessionSignals } from './signals.js';

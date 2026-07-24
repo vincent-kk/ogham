@@ -25,14 +25,16 @@ export {
 export { VERSION } from './version.js';
 export type {
   HookOutput,
+  SessionStartInput,
+  PostToolUseInput,
+  PostToolUseFailureInput,
+  SubagentStartInput,
   InstructionsLoadedInput,
   InterventionLevel,
   InterventionSource,
   InterventionState,
   InterventionWarning,
   LoadConfigResult,
-  PostToolUseFailureInput,
-  PostToolUseInput,
   RuleDocAction,
   RuleDocEntry,
   RuleDocOutcome,
@@ -41,7 +43,5 @@ export type {
   RuleDocsManifest,
   SeiriConfig,
   SessionSignals,
-  SessionStartInput,
-  SubagentStartInput,
   SyncRuleDocsOptions,
 } from './types/index.js';

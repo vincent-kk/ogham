@@ -43,8 +43,8 @@ const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 const hookEntries = [
   { name: 'setup', entry: 'setup', maxBytes: LIGHT_HOOK_BYTES },
   {
-    name: 'instructions-loaded',
-    entry: 'instructionsLoaded',
+    name: 'user-prompt-submit',
+    entry: 'userPromptSubmit',
     maxBytes: LIGHT_HOOK_BYTES,
   },
   { name: 'post-tool-use', entry: 'postToolUse', maxBytes: LIGHT_HOOK_BYTES },
@@ -54,8 +54,8 @@ const hookEntries = [
     maxBytes: LIGHT_HOOK_BYTES,
   },
   {
-    name: 'user-prompt-submit',
-    entry: 'userPromptSubmit',
+    name: 'instructions-loaded',
+    entry: 'instructionsLoaded',
     maxBytes: LIGHT_HOOK_BYTES,
   },
 ];

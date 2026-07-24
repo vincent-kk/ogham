@@ -17,22 +17,13 @@ export interface SessionStartInput extends HookBaseInput {
 }
 
 /**
- * InstructionsLoaded hook input.
- *
- * The event fires when a CLAUDE.md or `.claude/rules/*.md` file is read
- * into context. Claude Code's public reference documents the common
- * fields and the load reasons but not the event-specific payload keys, so
- * the extra keys stay open and the observation record persists the raw
- * object — the first live run is what tells us the real shape.
+ * UserPromptSubmit input — fires once per user turn, before the model acts.
+ * `prompt` is the submitted text; the reminder hook does not read it, but
+ * the field is documented so a future use has the shape.
  */
-export interface InstructionsLoadedInput extends HookBaseInput {
-  hook_event_name: 'InstructionsLoaded';
-  /**
-   * Why the file loaded: `session_start` | `nested_traversal` |
-   * `path_glob_match` | `include` | `compact`. Delivered in the payload
-   * rather than through a matcher — this event has no matcher support.
-   */
-  reason?: string;
+export interface UserPromptSubmitInput extends HookBaseInput {
+  hook_event_name: 'UserPromptSubmit';
+  prompt?: string;
   [key: string]: unknown;
 }
 
@@ -72,13 +63,22 @@ export interface SubagentStartInput extends HookBaseInput {
 }
 
 /**
- * UserPromptSubmit input — fires once per user turn, before the model acts.
- * `prompt` is the submitted text; the reminder hook does not read it, but
- * the field is documented so a future use has the shape.
+ * InstructionsLoaded hook input.
+ *
+ * The event fires when a CLAUDE.md or `.claude/rules/*.md` file is read
+ * into context. Claude Code's public reference documents the common
+ * fields and the load reasons but not the event-specific payload keys, so
+ * the extra keys stay open and the observation record persists the raw
+ * object — the first live run is what tells us the real shape.
  */
-export interface UserPromptSubmitInput extends HookBaseInput {
-  hook_event_name: 'UserPromptSubmit';
-  prompt?: string;
+export interface InstructionsLoadedInput extends HookBaseInput {
+  hook_event_name: 'InstructionsLoaded';
+  /**
+   * Why the file loaded: `session_start` | `nested_traversal` |
+   * `path_glob_match` | `include` | `compact`. Delivered in the payload
+   * rather than through a matcher — this event has no matcher support.
+   */
+  reason?: string;
   [key: string]: unknown;
 }
 

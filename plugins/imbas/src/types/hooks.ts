@@ -17,6 +17,13 @@ export interface SessionStartInput extends HookBaseInput {
   hook_event_name: 'SessionStart';
 }
 
+/** UserPromptSubmit hook input */
+export interface UserPromptSubmitInput extends HookBaseInput {
+  hook_event_name: 'UserPromptSubmit';
+  /** User prompt content */
+  prompt?: string;
+}
+
 /** PreToolUse hook input */
 export interface PreToolUseInput extends HookBaseInput {
   hook_event_name: 'PreToolUse';
@@ -31,13 +38,6 @@ export interface SubagentStartInput extends HookBaseInput {
   agent_type: string;
   /** Agent ID */
   agent_id: string;
-}
-
-/** UserPromptSubmit hook input */
-export interface UserPromptSubmitInput extends HookBaseInput {
-  hook_event_name: 'UserPromptSubmit';
-  /** User prompt content */
-  prompt?: string;
 }
 
 /** Hook output (stdout JSON) */
