@@ -53,6 +53,11 @@ const hookEntries = [
     entry: 'subagentStart',
     maxBytes: LIGHT_HOOK_BYTES,
   },
+  {
+    name: 'user-prompt-submit',
+    entry: 'userPromptSubmit',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
 ];
 
 await Promise.all(

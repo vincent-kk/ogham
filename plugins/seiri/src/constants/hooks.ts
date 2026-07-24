@@ -8,6 +8,7 @@
  */
 export const HookEvent = {
   SESSION_START: 'SessionStart',
+  USER_PROMPT_SUBMIT: 'UserPromptSubmit',
   INSTRUCTIONS_LOADED: 'InstructionsLoaded',
   POST_TOOL_USE: 'PostToolUse',
   POST_TOOL_USE_FAILURE: 'PostToolUseFailure',
@@ -25,6 +26,7 @@ export const HookEvent = {
  */
 export const HookName = {
   SETUP: 'setup',
+  USER_PROMPT_SUBMIT: 'user-prompt-submit',
   INSTRUCTIONS_LOADED: 'instructions-loaded',
   POST_TOOL_USE: 'post-tool-use',
   SUBAGENT_START: 'subagent-start',

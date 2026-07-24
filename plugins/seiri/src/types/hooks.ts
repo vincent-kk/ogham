@@ -71,6 +71,17 @@ export interface SubagentStartInput extends HookBaseInput {
   [key: string]: unknown;
 }
 
+/**
+ * UserPromptSubmit input — fires once per user turn, before the model acts.
+ * `prompt` is the submitted text; the reminder hook does not read it, but
+ * the field is documented so a future use has the shape.
+ */
+export interface UserPromptSubmitInput extends HookBaseInput {
+  hook_event_name: 'UserPromptSubmit';
+  prompt?: string;
+  [key: string]: unknown;
+}
+
 /** Hook output (stdout JSON). */
 export interface HookOutput {
   continue: boolean;
