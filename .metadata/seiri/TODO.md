@@ -10,7 +10,7 @@
 
 **2026-07-24 기준. 브랜치 `feature/97-98`.**
 
-**코드 작업은 전부 완료됐습니다.** #97·#98 원안(빌드·MCP·설정 UI·훅·스킬 11종·규칙 8종·filid 슬리밍·통합 검증·D7 프록시 실측·10이슈 A/B·D9 lite 슬리밍)에 더해, **확장 트랙(다이얼 배선·선제 훅·조건부 규칙)도 2026-07-24 착지**했습니다. 완료 절은 이 문서에서 들어냈습니다 — 설계는 원장 4서, 실험 기록은 [phase0/](./phase0/), 변경 이력은 git 에 있습니다(`git log --format='%h %s' main..HEAD` — SHA 는 rebase 로 바뀌므로 제목 줄이 안정 식별자).
+**코드 작업은 전부 완료됐습니다.** #97·#98 원안(빌드·MCP·설정 UI·훅·스킬 12종·규칙 8종·filid 슬리밍·통합 검증·D7 프록시 실측·10이슈 A/B·D9 lite 슬리밍)에 더해, **확장 트랙(다이얼 배선·선제 훅·조건부 규칙)도 2026-07-24 착지**했고, 뒤이어 **UserPromptSubmit 턴 리마인더**(매 턴 스킬 발동 상기, advisory 침묵)가 추가됐습니다. 완료 절은 이 문서에서 들어냈습니다 — 설계는 원장 4서, 실험 기록은 [phase0/](./phase0/), 변경 이력은 git 에 있습니다(`git log --format='%h %s' main..HEAD` — SHA 는 rebase 로 바뀌므로 제목 줄이 안정 식별자).
 
 **남은 것은 세 갈래입니다**: 사람이 해야 하는 것(아래 "사용자 할 일") · 실사용 세션이 있어야 하는 관측(아래 "실하니스 잔여") · 머지 정리.
 
@@ -18,9 +18,9 @@
 
 |           |                                                                                                                                                              |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 동작      | `yarn seiri build` green · 설정 페이지 배포/해제 왕복 · 스킬 11종(각 ≤2KB, 최대 2031B) · 규칙 8종                                                            |
-| 테스트    | `yarn seiri test:run` **89 green** (12 파일) · e2e 5 pass · `yarn typecheck` 9 워크스페이스 clean · filid 회귀 1188 passed / 7 skipped                       |
-| 훅        | 번들 4 = 등록 3 + dormant 1(InstructionsLoaded). **등록은 4개 이벤트** — `post-tool-use` 번들이 `PostToolUseFailure`(카운트)·`PostToolUse`(리셋) 양쪽에 걸림 |
+| 동작      | `yarn seiri build` green · 설정 페이지 배포/해제 왕복 · 스킬 12종(각 ≤2KB, 최대 2041B) · 규칙 8종                                                            |
+| 테스트    | `yarn seiri test:run` **100 green** (14 파일) · e2e 5 pass · `yarn typecheck` 9 워크스페이스 clean · filid 회귀 1188 passed / 7 skipped                     |
+| 훅        | 번들 5 = 등록 4 + dormant 1(InstructionsLoaded). **등록은 5개 이벤트** — `post-tool-use` 번들이 `PostToolUseFailure`(카운트)·`PostToolUse`(리셋) 양쪽에 걸림. `user-prompt-submit`(매 턴 발동 상기)이 5번째 번들 |
 | MCP       | 도구 2(open_settings · rule_docs_sync) — `config` action 흡수 완료 (도구 수 불변)                                                                            |
 | 다이얼    | 2계층 — `.seiri/config.json` 기준선(커밋) / `.seiri/runtime.json` 밸브(비추적). 유효값 `runtime ?? baseline ?? advisory`                                     |
 | 규칙      | 8종 등재(권장 S1·S3·S4) · D9 lite 4종 채택(상시 -13%) · **S3 는 `paths:` 조건부** · S9 는 대조군 통과 후                                                     |
@@ -61,7 +61,7 @@
 
 **둘 다 "구현 중 확정할 것"으로 위임됐던 항목이고, 실측 결과가 원안과 달랐습니다.**
 
-**① D13 — 실패는 별개 이벤트다.** 비-0 종료는 `PostToolUse` 를 발화시키지 않고 `PostToolUseFailure` 로 옵니다. 실패 페이로드엔 `tool_response` 자체가 없어(대신 `error` + `is_interrupt`), 원안이 가정한 "`tool_response` 어디에 실패가 오는지"는 성립하지 않았습니다. 둘 다 `additionalContext` 를 받으므로 **번들 하나를 두 이벤트에 등록** — 실패에서 세고 성공에서 잊습니다. 번들 수는 4 불변, 등록 이벤트만 4개.
+**① D13 — 실패는 별개 이벤트다.** 비-0 종료는 `PostToolUse` 를 발화시키지 않고 `PostToolUseFailure` 로 옵니다. 실패 페이로드엔 `tool_response` 자체가 없어(대신 `error` + `is_interrupt`), 원안이 가정한 "`tool_response` 어디에 실패가 오는지"는 성립하지 않았습니다. 둘 다 `additionalContext` 를 받으므로 **번들 하나를 두 이벤트에 등록** — 실패에서 세고 성공에서 잊습니다. 이 변경(D13)은 번들을 늘리지 않았습니다 — 등록 이벤트만 +1(당시 번들 4·이벤트 4). 이후 UserPromptSubmit이 별도 번들로 더해져 현재 번들 5·이벤트 5입니다.
 
 **② D5 — 키는 `paths:` 하나뿐이다.** 블랙박스 스모크는 성립하지 않았습니다: 규칙 목록 캐시가 `session_start`·`compact` 에서만 무효화되어, 같은 세션에 규칙 파일을 넣으면 어느 키를 쓰든 로드되지 않고 **"키가 틀렸다"와 "캐시가 안 깨졌다"가 같은 관측**으로 나옵니다. 그래서 셸 바이너리(2.1.218)의 파서를 직접 읽었고, 프론트매터 파서 전체가 `if (!t.paths) return { content }` 였습니다. `globs:` 는 읽히지도 않고 버려지며, 그러면 규칙이 **무조건 로드로 되돌아갑니다** — 조건부화 실패가 조용한 이유입니다. 커뮤니티 혼동(#17204·#22170)의 근원도 나왔습니다: `globs` 는 InstructionsLoaded **페이로드의 필드명**이고 문서가 그것을 _"매칭된 `paths:` 패턴"_ 으로 설명합니다 — 관측 이름과 입력 키가 한자리에 등장해 입력 키로 읽힌 것입니다.
 
@@ -91,7 +91,7 @@
 
 # 사용자 할 일
 
-1. **`bridge/` · `public/` 커밋** — 확장 트랙 재빌드분. 신규 산출물 2개(`bridge/post-tool-use.mjs` · `bridge/subagent-start.mjs`)는 **untracked** 이므로 `git add` 필요
+1. **`bridge/` · `public/` 커밋** — 확장 트랙 + UserPromptSubmit 재빌드분. 신규 산출물 `bridge/user-prompt-submit.mjs`(앞서 확장 트랙의 `post-tool-use.mjs`·`subagent-start.mjs` 포함)는 **untracked** 이므로 `git add` 필요
 2. **로컬 재설치 + `/seiri:setup` 재배포** — S3 frontmatter 로 해시가 바뀌어 재배포해야 조건부가 반영됩니다. 재설치 직후 **격리 프로젝트에서 T1 배선 검증 8항목**([phase0/ext-observation.md](./phase0/ext-observation.md) §1) — 끝나면 반드시 `config clear` 로 다이얼 원위치(안 그러면 평소 작업이 처치군이 되어 T2 기준선이 사라집니다)
 3. **`agy` CLI 점검** — antigravity 2연속 "no output" 으로 Phase 0 실험에서 제외됐던 건
 
@@ -125,10 +125,11 @@
 
 - [x] 확장 트랙 전 항목 완료 + 회귀 통과 (2026-07-24)
 - [x] 원장 정합 — §4 훅 표(두 이벤트) · 훅 수 표기 · §5 파서 실측 절 반영 (2026-07-24)
+- [x] 원장 재정합 — UserPromptSubmit 훅(§4 표·다이얼·번들 5)·스킬 12종(§3 `trace-structure`) 전면 반영 (2026-07-24)
 - [x] T1 배선 검증 8/8 PASS — 배선 결함 0, 머지 게이트 통과 (2026-07-24)
 - [ ] 릴리스 노트에 마이그레이션 순서 명시: **`/seiri:setup` 먼저, `/filid:setup` 나중**
 - [ ] [03-RULES.md](./03-RULES.md) 상태표를 최종 확정본으로 갱신 (S3 조건부 포함)
-- [ ] [README.md](./README.md) 현재 상태 절 갱신 (훅 4 · config action · 다이얼 2계층 반영)
+- [x] [README.md](./README.md) 현재 상태 절 갱신 (훅 5 · 스킬 12 · config action · 다이얼 2계층 · UserPromptSubmit 반영, 2026-07-24)
 - [ ] filid `.metadata` 문서에 위계 분담 상호 참조 추가
 - [ ] 이 문서(`TODO.md`) 제거
 - [ ] 이슈 [#97](https://github.com/vincent-kk/ogham/issues/97) · [#98](https://github.com/vincent-kk/ogham/issues/98) 닫기 (같은 PR 로 함께)
