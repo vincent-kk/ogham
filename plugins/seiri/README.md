@@ -69,15 +69,16 @@ Invoked by you:
 
 Dispatched automatically when the moment fits:
 
-| Skill                   | Use                                         |
-| ----------------------- | ------------------------------------------- |
-| `/seiri:write-plan`     | Break multi-step work into reviewable tasks |
-| `/seiri:execute`        | Carry a written plan to done                |
-| `/seiri:implement`      | Make a change test-first                    |
-| `/seiri:trace-cause`    | Trace a failure to where it started         |
-| `/seiri:verify-done`    | Check a completion claim before it is made  |
-| `/seiri:request-review` | Hand work to review with a fixed scope      |
-| `/seiri:receive-review` | Fold review feedback back into the code     |
+| Skill                    | Use                                          |
+| ------------------------ | -------------------------------------------- |
+| `/seiri:write-plan`      | Break multi-step work into reviewable tasks  |
+| `/seiri:execute`         | Carry a written plan to done                 |
+| `/seiri:implement`       | Make a change test-first                     |
+| `/seiri:trace-structure` | Map connections and data flow before judging |
+| `/seiri:trace-cause`     | Trace a failure to where it started          |
+| `/seiri:verify-done`     | Check a completion claim before it is made   |
+| `/seiri:request-review`  | Hand work to review with a fixed scope       |
+| `/seiri:receive-review`  | Fold review feedback back into the code      |
 
 ## License
 

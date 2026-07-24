@@ -66,15 +66,16 @@ English: [README.md](./README.md)
 
 순간이 맞으면 자동으로 발동하는 것:
 
-| 스킬                    | 용도                                 |
-| ----------------------- | ------------------------------------ |
-| `/seiri:write-plan`     | 다단계 작업을 리뷰 가능한 태스크로   |
-| `/seiri:execute`        | 작성된 계획을 완료까지 수행          |
-| `/seiri:implement`      | 변경을 테스트 우선으로 구현          |
-| `/seiri:trace-cause`    | 실패를 드러난 곳이 아니라 시작점까지 |
-| `/seiri:verify-done`    | 완료를 선언하기 전에 주장 검증       |
-| `/seiri:request-review` | 범위를 고정해 리뷰에 넘김            |
-| `/seiri:receive-review` | 리뷰 피드백을 코드에 반영            |
+| 스킬                     | 용도                                  |
+| ------------------------ | ------------------------------------- |
+| `/seiri:write-plan`      | 다단계 작업을 리뷰 가능한 태스크로    |
+| `/seiri:execute`         | 작성된 계획을 완료까지 수행           |
+| `/seiri:implement`       | 변경을 테스트 우선으로 구현           |
+| `/seiri:trace-structure` | 판단 전에 연결관계와 데이터 흐름 추적 |
+| `/seiri:trace-cause`     | 실패를 드러난 곳이 아니라 시작점까지  |
+| `/seiri:verify-done`     | 완료를 선언하기 전에 주장 검증        |
+| `/seiri:request-review`  | 범위를 고정해 리뷰에 넘김             |
+| `/seiri:receive-review`  | 리뷰 피드백을 코드에 반영             |
 
 ## 라이선스
 

@@ -16,7 +16,7 @@ export const SKILL_MAX_BYTES = 2048;
  */
 export const RULE_MAX_LINES = 200;
 
-/** Skills that ship. A twelfth is a budget decision, not a detail. */
+/** Skills that ship. A thirteenth is a budget decision, not a detail. */
 export const SHIPPED_SKILLS = [
   'brainstorm',
   'execute',
@@ -27,6 +27,7 @@ export const SHIPPED_SKILLS = [
   'request-review',
   'setup',
   'trace-cause',
+  'trace-structure',
   'verify-done',
   'write-plan',
 ] as const;
