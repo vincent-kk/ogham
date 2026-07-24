@@ -2,7 +2,7 @@
 
 ## Purpose
 
-seiri 의 훅 구현 4종. **어느 것도 차단하지 않고 어느 것도 규칙 본문을 나르지
+seiri 의 훅 구현 5종. **어느 것도 차단하지 않고 어느 것도 규칙 본문을 나르지
 않는다.** 규칙 파일은 하니스가 이미 자동 로드하므로, 훅이 나르는 것은 파일이
 스스로 말할 수 없는 것뿐이다 — 무엇이 활성인지, 다이얼이 어디인지, 드리프트가
 있는지, 같은 명령이 몇 번째 실패인지.
@@ -12,6 +12,7 @@ seiri 의 훅 구현 4종. **어느 것도 차단하지 않고 어느 것도 규
 ```
 shared/              organ — readStdin · renderStatusLines (setup·subagentStart 공용)
 setup/               SessionStart — 상태 요약 주입
+userPromptSubmit/    UserPromptSubmit — 매 턴 스킬 발동 상기 (다이얼 게이팅)
 postToolUse/         PostToolUse + PostToolUseFailure(Bash) — 실패 연쇄 신호
 subagentStart/       SubagentStart — 상태 요약 축약 재주입
 instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
@@ -40,7 +41,7 @@ instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 
 ### Ask first
 
-- 훅 추가 (현재 4개가 설계 상한 — 매 이벤트 콜드스타트를 지불한다).
+- 훅 추가 (현재 5개가 설계 상한 — 매 이벤트 콜드스타트를 지불한다).
 - 주입 렌더 길이 증가.
 
 ### Never do
