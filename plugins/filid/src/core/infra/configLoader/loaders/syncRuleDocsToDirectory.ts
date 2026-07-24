@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { computeFileSha256 } from '../utils/computeFileSha256.js';
 import { writeFileAtomically } from '../utils/writeFileAtomically.js';
 
-import { migrateLegacyFilenames } from './migrateLegacyFilenames.js';
 import type { RuleDocSyncPlan, RuleDocSyncResult } from './manifestTypes.js';
+import { migrateLegacyFilenames } from './migrateLegacyFilenames.js';
 import { retireOrphanedRuleDocs } from './retireOrphanedRuleDocs.js';
 
 /**
