@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
 import type { HookOutput } from '../../../types/hooks.js';
-import { processBashOutcome } from '../postToolUse.js';
+import { processToolOutcome } from '../postToolUse.js';
 
 /**
  * The failure-chain signal. Its whole risk is misfiring into a deliberate
@@ -45,7 +45,7 @@ describe('bash failure chain', () => {
     command = COMMAND,
     extra: Record<string, unknown> = {},
   ): HookOutput {
-    return processBashOutcome({
+    return processToolOutcome({
       cwd,
       session_id: SESSION,
       hook_event_name: 'PostToolUseFailure',
@@ -57,7 +57,7 @@ describe('bash failure chain', () => {
   }
 
   function succeed(cwd: string, command = COMMAND): HookOutput {
-    return processBashOutcome({
+    return processToolOutcome({
       cwd,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',

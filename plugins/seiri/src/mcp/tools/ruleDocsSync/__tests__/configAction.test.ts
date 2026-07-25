@@ -4,6 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { ELECTION_STRICT_LINE } from '../../../../constants/electionLines.js';
 import { writeConfig } from '../../../../core/infra/configLoader/loaders/writeConfig.js';
 import { handleRuleDocsSync } from '../ruleDocsSync.js';
 
@@ -80,6 +81,20 @@ describe('rule_docs_sync config action', () => {
     });
 
     expect(call(repoRoot, { config_op: 'clear' }).changed).toBe(false);
+  });
+
+  it('carries the election line for the effective dial, and stays silent at advisory', () => {
+    const repoRoot = seedRepo();
+    writeConfig(repoRoot, { intervention: 'standard' });
+
+    const strict = call(repoRoot, { config_op: 'set', intervention: 'strict' });
+    expect(strict.posture).toContain(ELECTION_STRICT_LINE);
+
+    const advisory = call(repoRoot, {
+      config_op: 'set',
+      intervention: 'advisory',
+    });
+    expect(advisory.posture).not.toContain('Election');
   });
 
   it('refuses a set without a valid dial position rather than storing junk', () => {

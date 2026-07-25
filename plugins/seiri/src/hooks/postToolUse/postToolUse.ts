@@ -1,15 +1,44 @@
-import { HookEvent } from '../../constants/hooks.js';
+import { FAILURE_CHAIN_LINE } from '../../constants/failureChain.js';
+import { HookEvent, HostTool } from '../../constants/hooks.js';
 import { SILENT_INTERVENTION } from '../../constants/intervention.js';
 import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
-import { FAILURE_CHAIN_LINE } from '../../constants/signals.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import { recordBashFailure } from '../../core/sessionSignals/record/recordBashFailure.js';
 import { recordBashSuccess } from '../../core/sessionSignals/record/recordBashSuccess.js';
+import { recordWorkflowState } from '../../core/sessionSignals/record/recordWorkflowState.js';
 import type {
   HookOutput,
   PostToolUseFailureInput,
   PostToolUseInput,
 } from '../../types/hooks.js';
+
+/**
+ * Watch two tools and inject at most one line.
+ *
+ * `Skill` is observed and never answered: loading a seiri workflow records
+ * where the session now is, so the next turn can say what that state owes.
+ * `Bash` carries the failure chain below. Both are matcher-selected in
+ * `hooks.json`, so anything else here is a payload that should not have
+ * arrived — it leaves without touching state.
+ */
+export function processToolOutcome(
+  input: PostToolUseInput | PostToolUseFailureInput,
+): HookOutput {
+  if (!input.cwd || !input.session_id) return EMPTY_RESULT;
+
+  // The dial gates before any state is touched: at the silent floor this
+  // hook costs one config read and writes nothing, which is the state the
+  // dispatch measurements were taken against.
+  if (loadIntervention(input.cwd).effective === SILENT_INTERVENTION)
+    return EMPTY_RESULT;
+
+  if (input.tool_name === HostTool.SKILL) {
+    recordWorkflowState(input.cwd, input.session_id, input.tool_input?.skill);
+    return EMPTY_RESULT;
+  }
+
+  return bashFailureChain(input);
+}
 
 /**
  * Notice when the same shell command keeps failing, and say so once.
@@ -24,23 +53,15 @@ import type {
  * indistinguishable from a fix that is not landing, so the text concedes
  * the first case rather than pretending to tell them apart.
  */
-export function processBashOutcome(
+function bashFailureChain(
   input: PostToolUseInput | PostToolUseFailureInput,
 ): HookOutput {
   const command = input.tool_input?.command;
   if (
-    input.tool_name !== 'Bash' ||
+    input.tool_name !== HostTool.BASH ||
     typeof command !== 'string' ||
-    command.trim() === '' ||
-    !input.cwd ||
-    !input.session_id
+    command.trim() === ''
   )
-    return EMPTY_RESULT;
-
-  // The dial gates before any state is touched: at the silent floor this
-  // hook costs one config read and writes nothing, which is the state the
-  // dispatch measurements were taken against.
-  if (loadIntervention(input.cwd).effective === SILENT_INTERVENTION)
     return EMPTY_RESULT;
 
   if (input.hook_event_name !== HookEvent.POST_TOOL_USE_FAILURE) {

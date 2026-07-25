@@ -1,4 +1,4 @@
-import { FAILURE_CHAIN_THRESHOLD } from '../../../constants/signals.js';
+import { FAILURE_CHAIN_THRESHOLD } from '../../../constants/failureChain.js';
 import { readSignals } from '../store/readSignals.js';
 import { writeSignals } from '../store/writeSignals.js';
 import { hashCommand } from '../utils/hashCommand.js';

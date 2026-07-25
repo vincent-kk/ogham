@@ -5,13 +5,14 @@ import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
 import { describe, expect, it } from 'vitest';
 
 import { SHIPPED_SKILLS } from '../constants/budgets.js';
-import { WORKFLOW_CHAIN_LINE } from '../constants/hooks.js';
+import { WORKFLOW_CHAIN_LINE } from '../constants/postureLines.js';
 import {
   AUTO_CONDITIONAL_ASK_SKILLS,
   AUTO_INVOCABLE_SKILLS,
   AUTO_NO_ASK_SKILLS,
   USER_GATED_SKILLS,
 } from '../constants/skillPolicy.js';
+import { WORKFLOW_SKILLS } from '../constants/workflowChain.js';
 
 /**
  * The invocation contract every skill's frontmatter must honour. A skill
@@ -44,6 +45,15 @@ describe('skill invocation policy', () => {
       ...USER_GATED_SKILLS,
     ].sort();
     expect(partitioned).toEqual([...SHIPPED_SKILLS]);
+  });
+
+  // WORKFLOW_SKILLS is a literal copy of the auto-invocable set — kept
+  // out of skillPolicy.ts so hook bundles stay light. `satisfies` rejects
+  // a stranger; this is the completeness direction it cannot express.
+  it('workflow chain membership mirrors the auto-invocable set', () => {
+    expect([...WORKFLOW_SKILLS].sort()).toEqual(
+      [...AUTO_INVOCABLE_SKILLS].sort(),
+    );
   });
 
   it('blocks questions in the auto-invocable disciplines', () => {

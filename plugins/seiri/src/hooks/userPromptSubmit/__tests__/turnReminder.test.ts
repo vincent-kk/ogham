@@ -4,11 +4,11 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { INJECTION_PREFIX } from '../../../constants/plugin.js';
 import {
   TURN_REMINDER_STANDARD,
   TURN_REMINDER_STRICT,
-} from '../../../constants/hooks.js';
-import { INJECTION_PREFIX } from '../../../constants/plugin.js';
+} from '../../../constants/turnReminders.js';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
 import { processUserPromptSubmit } from '../userPromptSubmit.js';
@@ -70,6 +70,13 @@ describe('per-turn dispatch reminder', () => {
   it('leads both lines with skill dispatch — the failure it closes', () => {
     expect(TURN_REMINDER_STANDARD.toLowerCase()).toContain('skill');
     expect(TURN_REMINDER_STRICT.toLowerCase()).toContain('skill');
+  });
+
+  it("reaches a done-claim said or heard, not only the model's own", () => {
+    for (const line of [TURN_REMINDER_STANDARD, TURN_REMINDER_STRICT]) {
+      expect(line).toContain('said or heard');
+      expect(line).toContain("user's");
+    }
   });
 
   it('never blocks a turn when cwd is missing', () => {

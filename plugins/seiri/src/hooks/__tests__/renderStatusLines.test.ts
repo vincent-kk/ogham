@@ -46,8 +46,24 @@ describe('renderStatusLines', () => {
     ).toEqual([]);
   });
 
-  it('injects nothing when the manifest itself is empty', () => {
-    expect(renderStatusLines([], dial('strict'))).toEqual([]);
+  it('injects nothing when the manifest is empty and the dial is down', () => {
+    expect(renderStatusLines([], dial('advisory'))).toEqual([]);
+  });
+
+  it('elects at session start even when the project deployed no rule', () => {
+    for (const level of ['standard', 'strict'] as const) {
+      const lines = renderStatusLines([], dial(level));
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toContain('Election');
+    }
+  });
+
+  it('adds the election line to the session render from standard up', () => {
+    const advisory = renderStatusLines([status()], dial('advisory'));
+    const standard = renderStatusLines([status()], dial('standard'));
+    expect(advisory.some((line) => line.includes('Election'))).toBe(false);
+    expect(standard.some((line) => line.includes('Election'))).toBe(true);
+    expect(standard.some((line) => line.includes('/seiri:verify'))).toBe(true);
   });
 
   it('renders one line at advisory, naming rules without the plugin prefix', () => {
@@ -155,6 +171,28 @@ describe('renderStatusLines', () => {
     expect(line).toContain('baseline: strict');
   });
 
+  it('elects in a subagent even when the project deployed no rule', () => {
+    const lines = renderStatusLines([], dial('standard'), { compact: true });
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('Election');
+  });
+
+  it('names the active rules beside the election line when both apply', () => {
+    const lines = renderStatusLines([status()], dial('strict'), {
+      compact: true,
+    });
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain('Active rules');
+    expect(lines[1]).toContain('Election');
+  });
+
+  it('stays out of a subagent at advisory, deployed rules or not', () => {
+    for (const statuses of [[], [status()]])
+      expect(
+        renderStatusLines(statuses, dial('advisory'), { compact: true }),
+      ).toEqual([]);
+  });
+
   it('stays inside the render budget at its widest', () => {
     const lines = renderStatusLines(
       [status({ deployedHash: 'b'.repeat(64), inSync: false })],
@@ -165,7 +203,7 @@ describe('renderStatusLines', () => {
         ],
       }),
     );
-    expect(lines.length).toBeLessThanOrEqual(8);
+    expect(lines.length).toBeLessThanOrEqual(9);
     expect(
       renderStatusLines([status()], dial('standard')).length,
     ).toBeLessThanOrEqual(5);

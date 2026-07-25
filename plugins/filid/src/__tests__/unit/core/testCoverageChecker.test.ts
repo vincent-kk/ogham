@@ -108,6 +108,31 @@ describe('checkTestCoverage', () => {
     expect(results[0].testCount).toBe(2);
   });
 
+  it('finds a nested module test directory file (Strategy 3)', async () => {
+    const site = makeSite();
+
+    mockReaddirSync.mockReturnValue([
+      'behavior.test.ts' as unknown as ReturnType<typeof readdirSync>[number],
+    ]);
+    mockExistsSync.mockImplementation(
+      (path) => path === '/project/src/core/__tests__/behavior.test.ts',
+    );
+    mockReadFileSync.mockReturnValue('it("works", () => {});');
+    mockCountTestCases.mockReturnValue({
+      filePath: '/project/src/core/__tests__/behavior.test.ts',
+      fileType: 'test',
+      total: 1,
+      basic: 1,
+      complex: 0,
+    });
+
+    const results = await checkTestCoverage([site], '/project');
+
+    expect(results[0].testFilePath).toBe(
+      '/project/src/core/__tests__/behavior.test.ts',
+    );
+  });
+
   it('returns hasTest: false when no test found', async () => {
     const site = makeSite();
 

@@ -12,8 +12,8 @@ seiri 의 훅 구현 5종. **어느 것도 차단하지 않고 어느 것도 규
 ```
 shared/              organ — readStdin · renderStatusLines (setup·subagentStart 공용)
 setup/               SessionStart — 상태 요약 주입
-userPromptSubmit/    UserPromptSubmit — 매 턴 스킬 발동 상기 (다이얼 게이팅)
-postToolUse/         PostToolUse + PostToolUseFailure(Bash) — 실패 연쇄 신호
+userPromptSubmit/    UserPromptSubmit — 매 턴 선출 상기 + 워크플로우 상태 1절
+postToolUse/         PostToolUse(+Failure) — Bash 실패 연쇄 · Skill 로드 관측
 subagentStart/       SubagentStart — 상태 요약 축약 재주입
 instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 ```

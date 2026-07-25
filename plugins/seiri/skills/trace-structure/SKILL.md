@@ -34,4 +34,4 @@ The first plausible reading of complex code is usually wrong somewhere that matt
 - Stop tracing when no unresolved edge can change the answer.
 - Mark untraced paths as untraced, never as understood.
 - Do not modify files while tracing; the enclosing task decides changes.
-- Hand off: when the enclosing work is multi-step, the brief feeds write-plan.
+- Hand off: when the enclosing work is multi-step, the brief feeds `/seiri:write-plan`.

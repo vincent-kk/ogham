@@ -28,4 +28,4 @@ This skill may be invoked automatically. Do not ask the user questions. When a c
 ## Rules
 
 - Deviations from the plan are recorded in the ledger with the reason, in the same turn they happen.
-- All tasks done: run this repository's designated verification in full, then hand off — request-review for the work, finish for the integration decision.
+- All tasks done: run this repository's designated verification in full, then hand off — load `/seiri:request-review` for the work; suggest `/seiri:finish` to the user for the integration decision.

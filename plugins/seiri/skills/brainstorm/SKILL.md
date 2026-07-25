@@ -27,5 +27,5 @@ Steps 1 and 4, isolation, and checkability live in `references/shaping.md`. Befo
 - Disagree with reasoning when the request conflicts with what the repository does. Reflexive agreement is not analysis.
 - Say "I don't know" rather than guessing; name what would settle it.
 - Do not write or modify files here. This skill produces a shape.
-- Hand off: an approved shape goes to write-plan when multi-step, to implement when it is one surgical change.
+- Hand off: an approved shape goes to `/seiri:write-plan` when multi-step, to `/seiri:implement` when it is one surgical change.
 - If the user says to proceed without further questions, stop asking. Write what you have as an artifact, hand it over. Do not modify files or delegate execution on an unfinished interview.

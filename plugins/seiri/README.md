@@ -17,12 +17,18 @@ text, because that would spend the same context twice.
 
 What it does inject is the part the files cannot state about themselves:
 which rules are active, where the intervention dial sits, and whether any
-deployed rule has been edited away from the shipped version.
+deployed rule has been edited away from the shipped version — plus the
+**election contract**: when a moment matches a seiri workflow (a failure
+appearing, multi-step work starting, a done-claim forming, review moving),
+load that workflow before acting and decide after reading. The election
+line renders on the dial alone, rules deployed or not. `standard` frames
+the procedure and names one owner — `/seiri:verify` for done-claims;
+`strict` names every moment's owning skill outright.
 
-At `standard` and `strict`, it also re-raises a short skill-dispatch
-reminder at the start of every turn — widened at `strict` to cover
-borderline work and named verification. `advisory` injects nothing
-per turn.
+At `standard` and `strict`, it also re-raises a short election reminder at
+the start of every turn, plus a one-line hand-off note when a workflow
+skill just ran — what it left behind, and which skill owns the next
+moment. `advisory` injects nothing per turn.
 
 ## Install
 

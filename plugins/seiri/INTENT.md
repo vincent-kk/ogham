@@ -23,7 +23,7 @@
 ## Conventions
 
 - 빌드: `clean → version:sync → rules → pages → compile → mcp → hooks → compile-plugin`
-- 규모 목표: MCP 도구 ≤3 · 훅 번들 5 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤2KB
+- 규모 목표: MCP 도구 ≤3 · 훅 번들 5 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤4KB
   (`references/`는 별도) · 규칙 각 <200줄.
   `src/__tests__/size.test.ts` 가 기계 검사한다.
 - `templates/rules/*.md` 는 raw 바이트로 해시된다 — 루트 `.gitattributes`(LF

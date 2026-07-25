@@ -13,8 +13,10 @@ import { renderStatusLines } from '../shared/renderStatusLines.js';
  * so that every change to a project's `.claude/rules/` is the result of
  * an explicit user action rather than a side effect of opening a session.
  *
- * A project with no seiri rules deployed gets no injection at all — the
- * plugin costs nothing until someone opts in.
+ * A project with no seiri rules deployed still hears the election
+ * contract and nothing else: which workflow owns a moment does not depend
+ * on a deployed file. The dial is what buys silence — at advisory the
+ * render is empty whatever is deployed.
  */
 export function processSessionStart(input: SessionStartInput): HookOutput {
   const pluginRoot = process.env[ENV_PLUGIN_ROOT];

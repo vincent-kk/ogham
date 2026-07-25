@@ -36,4 +36,4 @@ This skill may be invoked automatically. Do not ask the user questions. When a c
 
 ## Rules
 
-- Hand off: substantial work goes to request-review before merging; the integration decision itself belongs to the user — suggest finish.
+- Hand off: substantial work loads `/seiri:request-review` before merging; the integration decision itself belongs to the user — suggest `/seiri:finish`.

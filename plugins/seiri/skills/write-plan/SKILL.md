@@ -28,4 +28,4 @@ This skill may be invoked automatically. For a routine change, take the conserva
 
 - Save the plan where this repository already keeps them; if no convention exists, state where you put it in one line.
 - Global constraints (versions, naming, platform limits) go in one header section, copied verbatim — every task inherits them.
-- Hand off: an approved plan goes to execute. A single surgical change does not need a plan.
+- Hand off: performing this plan is `/seiri:execute`'s moment — load it to carry the plan out. A single surgical change does not need a plan.

@@ -1,3 +1,19 @@
+import type { WorkflowSkill } from '../constants/workflowChain.js';
+
+/**
+ * The seiri workflow this session loaded most recently.
+ *
+ * Where the session is, as opposed to where an injected posture says it
+ * should be — the one fact about the chain that has to be observed rather
+ * than asserted.
+ */
+export interface WorkflowSignal {
+  /** Bare skill name (`write-plan`); the namespace is added when rendered. */
+  skill: WorkflowSkill;
+  /** True once a turn has been told. Nothing is said twice. */
+  announced: boolean;
+}
+
 /**
  * Contents of `<repoRoot>/.seiri/session-signals.json`.
  *
@@ -13,4 +29,6 @@ export interface SessionSignals {
   counts: Record<string, number>;
   /** Command hashes already mentioned once. Nothing is said twice. */
   announced: string[];
+  /** Last workflow loaded, absent until one is. */
+  workflow?: WorkflowSignal;
 }

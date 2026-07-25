@@ -1,7 +1,7 @@
 import { portableJoin } from '@ogham/cross-platform/compat';
 
+import { TRACKED_COMMANDS_CAP } from '../../../constants/failureChain.js';
 import { SIGNALS_FILE } from '../../../constants/files.js';
-import { TRACKED_COMMANDS_CAP } from '../../../constants/signals.js';
 import type { SessionSignals } from '../../../types/signals.js';
 import { ensureSeiriDir } from '../../utils/ensureSeiriDir.js';
 import { writeAtomically } from '../../utils/writeAtomically.js';

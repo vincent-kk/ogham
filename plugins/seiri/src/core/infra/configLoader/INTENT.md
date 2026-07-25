@@ -11,8 +11,8 @@
 index.ts    barrel (외부 소비자 전용 — 훅은 loaders/·utils/ 를 직접 import)
 loaders/    organ — loadConfig · loadIntervention · writeConfig
                     · writeRuntime · clearRuntime · createDefaultConfig
-utils/      organ — readDialFile · resolveConfigPath · resolveRuntimePath
-                    · isInterventionLevel · describeDial · renderPostureLines
+utils/      organ — readDialFile · resolveConfigPath · resolveRuntimePath · isInterventionLevel
+                    · describeDial · renderPostureLines · renderElectionLine
 ```
 
 ## Conventions

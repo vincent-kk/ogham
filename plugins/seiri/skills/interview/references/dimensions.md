@@ -2,11 +2,11 @@
 
 Clarity is not one axis. Read the request along these, and each round aim the next questions at whichever is least clear — not the one that is easiest to ask about.
 
-| Dimension | What it pins down | Weak when (observable) |
-|-----------|-------------------|------------------------|
-| Goal | what actually happens, and to what | you cannot state the objective in one sentence; the core nouns and verbs keep shifting |
-| Constraints | the boundaries and non-goals | you cannot name what is out of scope, or which existing behaviour must not change |
-| Success | how anyone would know it worked | you cannot write a check that would fail on the wrong outcome |
+| Dimension                 | What it pins down                    | Weak when (observable)                                                                  |
+| ------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------- |
+| Goal                      | what actually happens, and to what   | you cannot state the objective in one sentence; the core nouns and verbs keep shifting  |
+| Constraints               | the boundaries and non-goals         | you cannot name what is out of scope, or which existing behaviour must not change       |
+| Success                   | how anyone would know it worked      | you cannot write a check that would fail on the wrong outcome                           |
 | Context (brownfield only) | how it joins the system already here | you cannot say where it attaches, or which existing pattern it extends or diverges from |
 
 The "weak when" column is the whole point: it is how you tell which dimension is weakest without scoring anything. A dimension is weak when its row is true right now.

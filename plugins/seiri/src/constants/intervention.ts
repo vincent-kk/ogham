@@ -9,8 +9,11 @@ export const INTERVENTION = {
 } as const;
 
 /**
- * Intervention dial. Changes the SessionStart render only — never the
- * deployed rule documents, whose bytes must keep matching templateHash.
+ * Intervention dial. Changes what the hooks say and record — the
+ * SessionStart status render, the SubagentStart election line, the
+ * per-turn reminder, and whether `postToolUse` counts a failure at all —
+ * never the deployed rule documents, whose bytes must keep matching
+ * templateHash.
  *
  * A literal tuple, not `Object.values(INTERVENTION)`: `z.enum` and the
  * derived `InterventionLevel` need the fixed shape a plain array widens away.

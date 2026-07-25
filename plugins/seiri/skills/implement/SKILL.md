@@ -38,4 +38,4 @@ This skill may be invoked automatically. Do not ask the user questions. When a c
 
 - This repository's explicit instructions outrank this sequence.
 - Exploring is fine — throw the exploration away and start from the check.
-- Hand off: completion claims go through verify.
+- Hand off: before declaring done, load `/seiri:verify`.

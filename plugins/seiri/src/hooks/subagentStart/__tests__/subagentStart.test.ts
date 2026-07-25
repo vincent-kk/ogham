@@ -61,22 +61,38 @@ describe('subagent status re-injection', () => {
     expect(spawn(seedRepo('advisory'))).toEqual([]);
   });
 
-  it('hands the subagent the active rules and the chain from standard up', () => {
+  it('hands the subagent the active rules and the standard election line', () => {
     const lines = spawn(seedRepo('standard'));
     expect(lines).toHaveLength(2);
     expect(lines[0]).toContain('Active rules');
     expect(lines[0]).toContain('.claude/rules/');
-    expect(lines[1]).toContain('Workflow:');
+    expect(lines[1]).toContain('Election:');
+    // Standard names exactly one moment's owner — the done-claim, whoever
+    // makes it — and leaves the rest as procedure. Strict is where every
+    // moment gets its skill.
+    expect(lines[1]).toContain('/seiri:verify');
+    expect(lines[1]).toContain('said or heard');
+    expect(lines[1]).toContain("user's");
+    expect(lines[1]).not.toContain('/seiri:trace-cause');
+    // Election is forced; adoption stays with the model.
+    expect(lines[1]).toContain('deviations are yours to make');
   });
 
-  it('keeps the subagent render short even at strict', () => {
+  it("names each moment's owning skill at strict, kept short", () => {
     const lines = spawn(seedRepo('strict'));
     expect(lines).toHaveLength(2);
+    expect(lines[1]).toContain('Election contract:');
+    expect(lines[1]).toContain('seiri:trace-cause');
+    expect(lines[1]).toContain('seiri:verify');
+    expect(lines[1]).toContain('said or heard');
     expect(lines.some((line) => line.includes('Precedence'))).toBe(false);
   });
 
-  it('says nothing when the project deployed no rules', () => {
-    expect(spawn(seedRepo('strict', false))).toEqual([]);
+  it('still elects when the project deployed no rules', () => {
+    const lines = spawn(seedRepo('strict', false));
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('Election contract:');
+    expect(lines.some((line) => line.includes('Active rules'))).toBe(false);
   });
 
   it('never blocks a spawn when it cannot locate the plugin', () => {
