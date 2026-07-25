@@ -8,7 +8,7 @@
  */
 
 /** Per-skill file size. A skill is a standing instruction, not a manual. */
-export const SKILL_MAX_BYTES = 2048;
+export const SKILL_MAX_BYTES = 4096;
 
 /**
  * Per-rule line count. Past this length adherence measurably drops, so a

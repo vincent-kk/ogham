@@ -1,6 +1,7 @@
 import { SILENT_INTERVENTION } from '../../constants/intervention.js';
 import { INJECTION_PREFIX, RULE_ID_PREFIX } from '../../constants/plugin.js';
 import { describeDial } from '../../core/infra/configLoader/utils/describeDial.js';
+import { renderElectionLine } from '../../core/infra/configLoader/utils/renderElectionLine.js';
 import { renderPostureLines } from '../../core/infra/configLoader/utils/renderPostureLines.js';
 import type { InterventionState } from '../../types/config.js';
 import type { RuleDocStatus } from '../../types/manifest.js';
@@ -40,13 +41,16 @@ export function renderStatusLines(
   // stored-file warnings are the parent's business, and precedence is
   // already in the rule files the subagent can read.
   //
+  // This is the election-contract line (D7-E, Arm S), not
+  // renderPostureLines: the SubagentStart moment is this experiment's one
+  // variable, so the SessionStart render below stays untouched.
   // The posture axis being empty at advisory is what makes this silent
   // there, which keeps a subagent spawn exactly as it was measured.
   if (options.compact) {
-    const [chain] = renderPostureLines(dial.effective);
-    return chain === undefined
+    const election = renderElectionLine(dial.effective);
+    return election === undefined
       ? []
-      : [...lines, `${INJECTION_PREFIX} ${chain}`];
+      : [...lines, `${INJECTION_PREFIX} ${election}`];
   }
 
   // A valve that lowered the dial to advisory still prints: silence there

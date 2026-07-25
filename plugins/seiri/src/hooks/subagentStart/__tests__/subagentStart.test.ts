@@ -61,17 +61,21 @@ describe('subagent status re-injection', () => {
     expect(spawn(seedRepo('advisory'))).toEqual([]);
   });
 
-  it('hands the subagent the active rules and the chain from standard up', () => {
+  it('hands the subagent the active rules and the standard election line', () => {
     const lines = spawn(seedRepo('standard'));
     expect(lines).toHaveLength(2);
     expect(lines[0]).toContain('Active rules');
     expect(lines[0]).toContain('.claude/rules/');
-    expect(lines[1]).toContain('Workflow:');
+    expect(lines[1]).toContain('Election:');
+    expect(lines[1]).not.toContain('seiri:');
   });
 
-  it('keeps the subagent render short even at strict', () => {
+  it("names each moment's owning skill at strict, kept short", () => {
     const lines = spawn(seedRepo('strict'));
     expect(lines).toHaveLength(2);
+    expect(lines[1]).toContain('Election contract:');
+    expect(lines[1]).toContain('seiri:trace-cause');
+    expect(lines[1]).toContain('seiri:verify');
     expect(lines.some((line) => line.includes('Precedence'))).toBe(false);
   });
 
