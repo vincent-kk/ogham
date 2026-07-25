@@ -27,7 +27,8 @@ _근거: [phase0/d7-election-results.md](./phase0/d7-election-results.md) — S2
   - **SessionStart 렌더에 선출 라인 추가** (B1 원칙 동일 — 다이얼만 게이팅). 총 렌더 ~7줄 내.
   - `WORKFLOW_CHAIN_LINE` → `/seiri:*` 네임스페이스 표기로.
   - `TURN_REMINDER_STANDARD` → 선출 어휘 + `/seiri:verify` 명시(S1.5 정합) · `TURN_REMINDER_STRICT` → 전 순간 `/seiri:*` 직접 명시(S2 정합). 초안은 핸드오프 문서, 채택 잔존 문구 불변 조건 하에 다듬기 허용.
-- [ ] **B4 메인세션 §8 실측** (본 개발 범위 밖, B2 완료 후 별도 발주): 5세대 메인세션 · 긴 세션·컴팩션 관문 통합 · 발화율 + 준수율(D2 도구) 병행 · 선출 라인 컴팩션 생존 관측.
+- [x] **B2-b ✅ 승인 (Vincent 07-25) — `rule_docs_sync` config action의 posture 문자열에 선출 라인 포함** (`83acac1d`): 세션 중 다이얼을 옮기는 **제3 채널**이 선출 라인을 안 나르던 것을 정합. B1 원칙("다이얼이 유일한 게이트, posture를 나르는 모든 표면 동일")의 완결. 유효 다이얼 기준 렌더 · advisory 침묵 · 테스트 1건 추가.
+- [ ] **B4 메인세션 §8 실측** (본 개발 범위 밖, B2 완료 후 별도 발주): 5세대 메인세션 · 긴 세션·컴팩션 관문 통합 · 발화율 + 준수율(D2 도구) 병행 · 선출 라인 컴팩션 생존 관측. **전제 2건**: ①설치본 갱신 — 현 캐시는 Bash matcher만 가진 이전 빌드(Skill matcher·신규 렌더 미탑재) ②재편 후 재빌드 bridge/ 커밋.
 
 ## C. 채택 확정 후 정본화 (B4 통과 게이트 — 본 개발 범위 밖)
 
@@ -47,6 +48,8 @@ _근거: [phase0/d7-election-results.md](./phase0/d7-election-results.md) — S2
 
 ## 착지 요약 (2026-07-25)
 
-**개발 사이클 종료 (2026-07-25)**: A1–A4 · B1 · B2 · D1 · D2 커밋 완료. `yarn seiri test:run` 114/114 green(기존 102 + 신규 12) · typecheck clean · build clean. **B2 정합 완료 — B4(메인세션 §8 실측) 측정 가능.** 남은 것: B4 · C 정본화 · D3. 특기사항은 [phase0/d7e-adopt-handoff.md](./phase0/d7e-adopt-handoff.md) 작업 로그.
+**개발 사이클 종료 (2026-07-25)**: A1–A4 · B1 · B2 · B2-b · D1 · D2 커밋 완료. `yarn seiri test:run` 116/116 green(기존 102 + 신규 14) · typecheck clean · build clean. **B2·B2-b 정합 완료 — B4(메인세션 §8 실측) 측정 가능.** 남은 것: B4 · C 정본화 · D3. 특기사항은 [phase0/d7e-adopt-handoff.md](./phase0/d7e-adopt-handoff.md) 작업 로그. 나오가 지적한 잔여(재편 후 재빌드 bridge/ 6종)는 `23119b75` 로 해소.
+
+**검증 (나오, 2026-07-25 저녁)**: 커밋 9건(로그 8건 + 로그 외 상수 재편 `2f35af82` — 품질 양호, 번들 바이트 격리 개선) 검토 — **차단 결함 0**. templates/rules 불변(신규 규칙 금지 준수) · hooks.json PostToolUse `Skill` matcher 등록 · `chainMember`가 `seiri:` 접두 스트립 후 멤버십 검사 · advisory 침묵/fail-open/consume-once 전부 정합 · 재검증 115/115 green(재편 +1). **작업 세션 미확인 코멘트 해소: Skill 도구의 PostToolUse 발화를 라이브 하니스(CLI 2.1.220, 격리 스크래치)에서 실측 확인** — `hook_event_name:"PostToolUse" · tool_name:"Skill" · tool_input:{"skill":...}`. D1 전제 성립. 잔여: 재편 후 재빌드 bridge/ 6종 미커밋.
 
 D7-E: C 0/9 · S1 10/15 · **S2 13/15 복원** · FP 0/12 · H-0 0/5(일괄 프라이어). 오염 0/56. 선출/채택 분리 문구가 오발화 없이 복원 — "억압 없이 지키기" 성립(s2-c-r4 전체 체인 완주). 코드 검토: 차단 결함 0, 비차단 5건(→ A2·A3·A4·B1·B2). **결정 확정: B1 분리(다이얼만 게이팅, 기본 발화, advisory opt-out 침묵) · B3 S1.5 · D 전면 진행.**

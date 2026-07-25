@@ -112,3 +112,39 @@ typecheck green 확인. 최종 114/114 (기존 102 + 신규 12).
 "input":{"skill":"seiri:execute"}`)에서 확인했다 — 여기까지는 실측 근거가 있다.
 - **미해결(무관)**: `plugins/filid/e2e/setup-settings.spec.ts:107` 의 curly
   경고는 이 작업 이전부터 있던 것으로 건드리지 않았다.
+
+### 2026-07-25 — B2-b (`83acac1d`)
+
+- `rule_docs_sync` config action 의 `posture` 가 선출 라인을 나른다 — 제3
+  채널 정합, B1 원칙("다이얼이 나르는 모든 posture 표면 동일")의 완결.
+- `renderElectionLine` 을 configLoader 배럴에 노출(MCP 쪽 신규 소비자 발생 —
+  훅은 여전히 concrete import). `applyConfigAction` 은 SessionStart 렌더와
+  같은 순서(체인 뒤 선출)·같은 게이팅(유효 다이얼 단독, advisory 는 lookup
+  miss 로 침묵)으로 조합한다.
+- 채널 수를 진술하던 jsdoc 2곳(`electionLines.ts`·`renderElectionLine.ts`)을
+  "두 채널" → 3채널로 정정 — 남겨두면 config 채널이 의도적 제외로 읽힌다.
+- 테스트 1건 추가(effective 다이얼 기준 렌더 + advisory 침묵): 사전 실패
+  관찰 후 구현. 116/116 green · typecheck clean · lint 는 기지의 filid curly
+  경고 1건뿐. 재빌드 `bridge/mcp-server.cjs`(선출 라인 포함 diff 확인) 동커밋.
+- 나오 지적 잔여(재편 후 bridge/ 6종 미커밋)는 본 작업 전 `23119b75` 에서
+  이미 해소되어 있었다.
+
+### 2026-07-25 저녁 — 검증 (나오)
+
+- **커밋 9건 검토** (로그 8건 + 로그 외 `2f35af82` 상수 재편): 차단 결함 0.
+  재편은 electionLines·turnReminders·workflowChain·workflowStateLines 분리로
+  번들 바이트 격리를 개선했고, 재검증 115/115 green(재편 +1) · typecheck clean.
+- **정합 확인**: templates/rules 불변 · hooks.json PostToolUse `Skill` matcher ·
+  `chainMember`의 `seiri:` 접두 스트립 후 `WORKFLOW_SKILLS` 멤버십 검사 ·
+  B1 렌더(다이얼 단독 게이팅, 규칙 0에서도 선출 라인 생존, compact/full 양 경로) ·
+  advisory 침묵(상태 기록 포함) · fail-open 양방향 · 상태 절 consume-once.
+- **★ 미확인 코멘트 1 해소 — Skill 도구의 PostToolUse 발화 실측 확인.**
+  격리 스크래치에 `matcher: "Skill"` 훅 + 최소 스킬을 두고 headless 세션
+  (CLI 2.1.220)을 실행: 훅이 발화했고 페이로드는
+  `hook_event_name:"PostToolUse" · tool_name:"Skill" · tool_input:{"skill":"pingskill"}
+· tool_response:{success:true}` — D1이 기대하는 구조 그대로. 플러그인 스킬의
+  네임스페이스형(`seiri:execute`)은 D7-E transcript에서 기실측. **D1 전제 성립.**
+- **코멘트 2 (config action posture)**: TODO B2-b로 등재 — B1 원칙(다이얼이 나르는
+  모든 posture 표면 동일)의 완결로 **반영 권고**, Vincent 지시 대기.
+- **잔여**: 재편 후 재빌드 `bridge/` 6종 미커밋(Election·상태 절 포함 신선함 확인) ·
+  B4 전제 = 설치본 갱신(현 캐시는 Bash matcher만 가진 이전 빌드).
