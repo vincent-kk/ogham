@@ -39,7 +39,10 @@ export async function handleFractalScan(args: unknown): Promise<ScanResultDto> {
 
   const { config } = loadConfig(input.path);
   const maxDepth = resolveMaxDepth(config, input.depth);
-  const tree: FractalTree = await scanProject(input.path, { maxDepth });
+  const tree: FractalTree = await scanProject(input.path, {
+    maxDepth,
+    additionalOrganNames: config?.['additional-organ-names'],
+  });
 
   let modules: ModuleInfo[] = [];
   if (input.includeModuleInfo) {

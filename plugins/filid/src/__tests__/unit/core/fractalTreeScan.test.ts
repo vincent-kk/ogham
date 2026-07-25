@@ -75,6 +75,41 @@ describe('fractal-tree', () => {
       }
     });
 
+    it('should classify additionalOrganNames dirs as organ end-to-end', async () => {
+      // A nesting content compartment defaults to fractal on structure alone;
+      // the config-supplied name is what makes it an organ, and it must
+      // survive the bottom-up correctNodeTypes pass too.
+      setup({
+        '.': ['INTENT.md'],
+        skills: [],
+        'skills/preview': ['SKILL.md'],
+        // The real shape a nested references/ takes in this repo.
+        'skills/preview/references': [],
+        'skills/preview/references/api': ['endpoints.md'],
+        'leaf-refs': [],
+      });
+
+      try {
+        const bare = await scanProject(tmpDir);
+        expect(bare.nodes.get(join(tmpDir, 'skills'))!.type).toBe('fractal');
+        expect(
+          bare.nodes.get(join(tmpDir, 'skills', 'preview', 'references'))!.type,
+        ).toBe('fractal');
+        // A leaf compartment needs no name entry — priority 6 covers it.
+        expect(bare.nodes.get(join(tmpDir, 'leaf-refs'))!.type).toBe('organ');
+
+        const tree = await scanProject(tmpDir, {
+          additionalOrganNames: ['skills', 'references'],
+        });
+        expect(tree.nodes.get(join(tmpDir, 'skills'))!.type).toBe('organ');
+        expect(
+          tree.nodes.get(join(tmpDir, 'skills', 'preview', 'references'))!.type,
+        ).toBe('organ');
+      } finally {
+        teardown();
+      }
+    });
+
     it('should detect INTENT.md and classify as fractal', async () => {
       setup({
         '.': ['INTENT.md'],

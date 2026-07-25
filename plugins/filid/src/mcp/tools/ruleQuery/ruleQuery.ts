@@ -117,7 +117,10 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
         throw new Error("targetPath is required for action='check'");
 
       const maxDepth = resolveMaxDepth(config);
-      const tree = await scanProject(input.path, { maxDepth });
+      const tree = await scanProject(input.path, {
+        maxDepth,
+        additionalOrganNames: config?.['additional-organ-names'],
+      });
       const result = evaluateRules(tree, activeRules, { maxDepth });
       const absTargetPath = resolve(input.path, input.targetPath);
       const filteredViolations = result.violations.filter(

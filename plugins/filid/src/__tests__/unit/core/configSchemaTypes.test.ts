@@ -13,7 +13,7 @@
  *
  * SSoT anchor for AC12, AC3, and plan §3 rows A/B.
  */
-import { describe, expectTypeOf, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import {
   type AllowedEntry,
@@ -59,6 +59,22 @@ describe('config-schema-types (Commits A + B)', () => {
     expectTypeOf(s).toMatchTypeOf<AllowedEntry>();
     expectTypeOf(o).toMatchTypeOf<AllowedEntry>();
     expectTypeOf(o2).toMatchTypeOf<AllowedEntry>();
+  });
+
+  it('additional-organ-names is a top-level string array', () => {
+    expectTypeOf<FilidConfig['additional-organ-names']>().toEqualTypeOf<
+      string[] | undefined
+    >();
+    const parsed = FilidConfigSchema.parse({
+      version: '1.0',
+      rules: {},
+      'additional-organ-names': ['docs', 'plans'],
+    });
+    expect(parsed['additional-organ-names']).toEqual(['docs', 'plans']);
+    // Placement: nested under a rule it must be rejected, not passed through.
+    expect(() =>
+      RuleOverrideSchema.parse({ 'additional-organ-names': ['docs'] }),
+    ).toThrow();
   });
 
   it('schemas are exported from the public loader facade', () => {

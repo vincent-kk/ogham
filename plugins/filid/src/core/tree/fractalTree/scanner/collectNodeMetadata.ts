@@ -69,6 +69,7 @@ export function collectNodeMetadata(
       hasFractalChildren,
       isLeafDirectory,
       hasIndex,
+      additionalOrganNames: opts.additionalOrganNames,
     });
 
     nodeEntries.push({

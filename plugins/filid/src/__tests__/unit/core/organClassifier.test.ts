@@ -66,8 +66,22 @@ describe('organ-classifier', () => {
       expect(KNOWN_ORGAN_DIR_NAMES).not.toContain('__fixtures__');
     });
 
-    it('should include docs/reference organ names (Claude Code plugin convention)', () => {
-      expect(KNOWN_ORGAN_DIR_NAMES).toContain('references');
+    it('should stay small — repo-specific compartment names live in config', () => {
+      // The open-ended set is not enumerable in a shipped constant;
+      // `additional-organ-names` in .filid/config.json carries it instead.
+      // `references` belongs here too: it is a docs-as-code convention, and
+      // shipping it silently reclassifies a real src/references/ module as an
+      // organ, muting the rules that would otherwise apply to it.
+      for (const name of [
+        'docs',
+        'documents',
+        'plan',
+        'plans',
+        'skills',
+        'agents',
+        'references',
+      ])
+        expect(KNOWN_ORGAN_DIR_NAMES).not.toContain(name);
     });
   });
 
@@ -157,6 +171,67 @@ describe('organ-classifier', () => {
       ],
     ])('leaf/no-markers: %s', (_desc, input, expected) => {
       expect(classifyNode(input)).toBe(expected);
+    });
+
+    it('a leaf compartment is an organ by structure, with no name match', () => {
+      // Most references/ dirs are leaves, so dropping the built-in name
+      // changes nothing for them — priority 6 already classifies them.
+      expect(
+        classifyNode({
+          dirName: 'references',
+          hasIntentMd: false,
+          hasDetailMd: false,
+          hasFractalChildren: false,
+          isLeafDirectory: true,
+        }),
+      ).toBe('organ');
+    });
+
+    it.each([['skills'], ['agents'], ['docs'], ['plans'], ['references']])(
+      'additionalOrganNames makes %s an organ despite child directories',
+      (dirName) => {
+        // Repo-specific content compartments nest (skills/<name>/SKILL.md),
+        // so the name match must beat the non-leaf structure fallback that
+        // would otherwise default them to fractal.
+        expect(
+          classifyNode({
+            dirName,
+            hasIntentMd: false,
+            hasDetailMd: false,
+            hasFractalChildren: false,
+            isLeafDirectory: false,
+            additionalOrganNames: [dirName],
+          }),
+        ).toBe('organ');
+      },
+    );
+
+    it('additionalOrganNames does not override a self-documenting directory', () => {
+      // Priority 1 (INTENT.md → fractal) outranks every name-based match,
+      // config-supplied ones included.
+      expect(
+        classifyNode({
+          dirName: 'plans',
+          hasIntentMd: true,
+          hasDetailMd: false,
+          hasFractalChildren: false,
+          isLeafDirectory: false,
+          additionalOrganNames: ['plans'],
+        }),
+      ).toBe('fractal');
+    });
+
+    it('an unlisted name is unaffected by additionalOrganNames', () => {
+      expect(
+        classifyNode({
+          dirName: 'payments',
+          hasIntentMd: false,
+          hasDetailMd: false,
+          hasFractalChildren: false,
+          isLeafDirectory: false,
+          additionalOrganNames: ['plans'],
+        }),
+      ).toBe('fractal');
     });
   });
 });

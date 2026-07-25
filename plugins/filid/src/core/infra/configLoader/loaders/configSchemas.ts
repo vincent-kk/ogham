@@ -44,6 +44,7 @@ export const FilidConfigSchema = z
     'additional-allowed': z.array(AllowedEntrySchema).optional(),
     'additional-entry-points': z.array(z.string()).optional(),
     'additional-route-patterns': z.array(z.string()).optional(),
+    'additional-organ-names': z.array(z.string()).optional(),
     scan: z
       .object({
         maxDepth: z.number().nonnegative().finite().optional(),

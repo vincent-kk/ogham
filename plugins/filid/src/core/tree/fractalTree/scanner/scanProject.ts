@@ -29,6 +29,10 @@ export async function scanProject(
     opts,
     frameworkReservedArr,
   );
-  const corrected = correctNodeTypes(nodeEntries, childrenMap);
+  const corrected = correctNodeTypes(
+    nodeEntries,
+    childrenMap,
+    opts.additionalOrganNames,
+  );
   return buildFractalTree(corrected);
 }

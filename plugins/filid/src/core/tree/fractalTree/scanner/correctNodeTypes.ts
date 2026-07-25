@@ -8,6 +8,7 @@ import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
 export function correctNodeTypes(
   nodeEntries: NodeEntry[],
   childrenMap: Map<string, string[]>,
+  additionalOrganNames?: readonly string[],
 ): NodeEntry[] {
   const typeMap = new Map<string, string>(
     nodeEntries.map((e) => [e.path, e.type]),
@@ -35,6 +36,7 @@ export function correctNodeTypes(
       hasFractalChildren: hasFractalChildrenActual,
       isLeafDirectory: isLeafActual,
       hasIndex: entry.hasIndex ?? false,
+      additionalOrganNames,
     });
 
     if (newType !== entry.type) {

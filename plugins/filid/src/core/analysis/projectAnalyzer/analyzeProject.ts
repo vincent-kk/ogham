@@ -79,7 +79,10 @@ export async function analyzeProject(
 
   // 1. 스캔
   const scanStart = Date.now();
-  const tree = await scanProject(root, { maxDepth });
+  const tree = await scanProject(root, {
+    maxDepth,
+    additionalOrganNames: config?.['additional-organ-names'],
+  });
   const moduleTargets = [...tree.nodes.values()].filter(
     (n) => n.type === 'fractal' || n.type === 'hybrid',
   );

@@ -69,7 +69,10 @@ export async function handleDriftDetect(
   );
 
   const maxDepth = resolveMaxDepth(config);
-  const tree = await scanProject(input.path, { maxDepth });
+  const tree = await scanProject(input.path, {
+    maxDepth,
+    additionalOrganNames: config?.['additional-organ-names'],
+  });
   const validation = validateStructure(tree, rules, { maxDepth });
   const driftResult = detectDrift(tree, validation.result.violations, {
     generatePlan: false,

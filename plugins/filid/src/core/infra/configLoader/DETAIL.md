@@ -81,6 +81,10 @@ in `loaders/configSchemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>`
   individual rules. Nested forms (`rules["<id>"].additional-route-patterns`)
   are warn+dropped by `RuleOverrideSchema.strict()` — pass-through is
   forbidden.
+- **`additional-organ-names` is a TOP-LEVEL key**, never nested under
+  individual rules. Nested forms (`rules["<id>"].additional-organ-names`)
+  are warn+dropped by `RuleOverrideSchema.strict()` — pass-through is
+  forbidden.
 - **`exempt` is a per-rule key** on `RuleOverride`, accepting path globs
   (`packages/**`, `src/legacy/**`). Invalid glob syntax and the bare `**`
   wildcard are warn+dropped at load time (use a concrete scope instead).
@@ -106,6 +110,7 @@ in `loaders/configSchemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>`
   ],
   "additional-entry-points": ["api.tsx"],
   "additional-route-patterns": ["^@[a-z]+$"],
+  "additional-organ-names": ["docs", "plans"],
   "scan": { "maxDepth": 10 }
 }
 ```
@@ -125,6 +130,19 @@ miss (e.g. `api.tsx`).
 a directory name matching any of them is accepted by `naming-convention`.
 Uncompilable patterns are warn-dropped at config load. Use it for framework
 route-segment naming the built-in framework patterns do not cover.
+
+`additional-organ-names` is a flat array of directory names that classify as
+`organ` alongside `KNOWN_ORGAN_DIR_NAMES`, reaching `classifyNode` through
+`ScanOptions.additionalOrganNames`. The built-in list holds code organs only
+(`utils`, `types`, `hooks`, …); docs-as-code compartments (`references`,
+`docs`, `plans`, `skills`, `agents`) are an open set and belong here, because
+a name shipped in the constant silently reclassifies a real code module of
+that name as an organ, muting the rules that would apply to it. Only
+directories with subdirectories need an entry — a leaf compartment is already
+an organ by classification priority 6. Declaring a name here does not override
+`INTENT.md`/`DETAIL.md`: priority 1–2 still wins, so a directory that
+documents itself stays fractal. The hook layer does not read config — these
+names apply to scan/validate tools only.
 
 ### `loadConfig` return
 

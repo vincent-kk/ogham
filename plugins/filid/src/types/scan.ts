@@ -16,4 +16,9 @@ export interface ScanOptions {
   maxDepth?: number;
   /** 심볼릭 링크 추적 여부. 기본값: false */
   followSymlinks?: boolean;
+  /**
+   * `KNOWN_ORGAN_DIR_NAMES` 에 더해 organ 으로 분류할 디렉토리 이름.
+   * `.filid/config.json` 의 `additional-organ-names` 가 공급한다. 기본값: []
+   */
+  additionalOrganNames?: readonly string[];
 }

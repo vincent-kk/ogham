@@ -247,3 +247,64 @@ describe('fractal-scan tool — output modes & size guard', () => {
     expect(saved.tree.totalNodes).toBe(2);
   });
 });
+
+describe('fractal-scan tool — additional-organ-names wiring', () => {
+  let tmpRoot: string;
+
+  beforeEach(() => {
+    tmpRoot = join(
+      tmpdir(),
+      `filid-organ-names-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    );
+    // A nesting content compartment: fractal on structure alone, organ only
+    // once the config names it.
+    mkdirSync(join(tmpRoot, 'skills', 'preview'), { recursive: true });
+    writeFileSync(join(tmpRoot, 'INTENT.md'), '# root', 'utf8');
+    writeFileSync(
+      join(tmpRoot, 'skills', 'preview', 'SKILL.md'),
+      '# preview',
+      'utf8',
+    );
+    mockedSpawnCliSync.mockImplementation((bin, args) => {
+      if (bin === 'git' && [...args].includes('rev-parse'))
+        return { code: 0, stdout: tmpRoot + '\n', stderr: '', timedOut: false };
+      return {
+        code: 1,
+        stdout: '',
+        stderr: 'unexpected command',
+        timedOut: false,
+        spawnError: new Error('unexpected command'),
+      };
+    });
+  });
+
+  afterEach(() => {
+    rmSync(tmpRoot, { recursive: true, force: true });
+    mockedSpawnCliSync.mockReset();
+  });
+
+  function writeOrganNamesConfig(names: string[] | null): void {
+    const dir = join(tmpRoot, '.filid');
+    mkdirSync(dir, { recursive: true });
+    const body =
+      names === null
+        ? { version: '1.0', rules: {} }
+        : { version: '1.0', rules: {}, 'additional-organ-names': names };
+    writeFileSync(join(dir, 'config.json'), JSON.stringify(body), 'utf8');
+  }
+
+  const typeOf = (result: ScanReportDto, rel: string) =>
+    result.tree.nodes.find((n) => n.path === join(tmpRoot, rel))?.type;
+
+  it('config names reach classifyNode through loadConfig', async () => {
+    writeOrganNamesConfig(['skills']);
+    const result = asReport(await handleFractalScan({ path: tmpRoot }));
+    expect(typeOf(result, 'skills')).toBe('organ');
+  });
+
+  it('without the key the same directory stays fractal', async () => {
+    writeOrganNamesConfig(null);
+    const result = asReport(await handleFractalScan({ path: tmpRoot }));
+    expect(typeOf(result, 'skills')).toBe('fractal');
+  });
+});

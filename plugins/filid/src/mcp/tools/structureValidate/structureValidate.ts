@@ -60,7 +60,10 @@ export async function handleStructureValidate(
   }
 
   const maxDepth = resolveMaxDepth(config);
-  const tree = await scanProject(input.path, { maxDepth });
+  const tree = await scanProject(input.path, {
+    maxDepth,
+    additionalOrganNames: config?.['additional-organ-names'],
+  });
   const report = validateStructure(tree, rulesToApply, { maxDepth });
 
   return {

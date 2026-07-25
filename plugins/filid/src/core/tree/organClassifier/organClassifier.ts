@@ -19,6 +19,12 @@ export interface ClassifyInput {
   hasSideEffects?: boolean;
   /** index.ts/js/mjs/cjs file exists. Treated as fractal module entry point */
   hasIndex?: boolean;
+  /**
+   * Project-declared organ names from `.filid/config.json`
+   * (`additional-organ-names`), matched alongside `KNOWN_ORGAN_DIR_NAMES`.
+   * Callers without config access (the hook layer) simply omit it.
+   */
+  additionalOrganNames?: readonly string[];
 }
 
 /**
@@ -40,7 +46,8 @@ export function isInfraOrgDirectoryByPattern(dirName: string): boolean {
  * 1. INTENT.md exists → fractal (explicit declaration)
  * 2. DETAIL.md exists → fractal (documented module boundary)
  * 3. Name matches __*__ or .* pattern → organ (infrastructure convention)
- * 4. Directory name in KNOWN_ORGAN_DIR_NAMES → organ (name-based, overrides structure)
+ * 4. Directory name in KNOWN_ORGAN_DIR_NAMES or additionalOrganNames → organ
+ *    (name-based, overrides structure)
  * 5. No fractal children + leaf directory → organ
  * 6. No side effects → pure-function
  * 7. Default → fractal (INTENT.md should be added)
@@ -51,14 +58,18 @@ export function classifyNode(input: ClassifyInput): CategoryType {
   const hasIntent = input.hasIntentMd ?? false;
   const hasDetail = input.hasDetailMd ?? false;
 
+  const isOrganName =
+    KNOWN_ORGAN_DIR_NAMES.includes(input.dirName) ||
+    (input.additionalOrganNames ?? []).includes(input.dirName);
+
   if (hasIntent) return 'fractal';
   if (hasDetail) return 'fractal';
   if (isInfraOrgDirectoryByPattern(input.dirName)) return 'organ';
-  if (KNOWN_ORGAN_DIR_NAMES.includes(input.dirName)) return 'organ';
+  if (isOrganName) return 'organ';
   // index file in non-organ, non-infra directory = fractal module entry point
   if (
     (input.hasIndex ?? false) &&
-    !KNOWN_ORGAN_DIR_NAMES.includes(input.dirName) &&
+    !isOrganName &&
     !isInfraOrgDirectoryByPattern(input.dirName)
   )
     return 'fractal';

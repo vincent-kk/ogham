@@ -92,5 +92,7 @@
       "paths": ["**/plugins/seiri/src/hooks/instructionsLoaded"]
     }
   ],
-  "additional-route-patterns": ["^_shared$", "^__tests__$"]
+  "additional-route-patterns": ["^_shared$", "^__tests__$"],
+  "additional-entry-points": ["SKILL.md"],
+  "additional-organ-names": ["skills", "agents", "references"]
 }
