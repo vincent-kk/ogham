@@ -67,7 +67,11 @@ describe('subagent status re-injection', () => {
     expect(lines[0]).toContain('Active rules');
     expect(lines[0]).toContain('.claude/rules/');
     expect(lines[1]).toContain('Election:');
-    expect(lines[1]).not.toContain('seiri:');
+    // Standard names exactly one moment's owner — the done-claim, which
+    // the model reaches by its own reckoning — and leaves the rest as
+    // procedure. Strict is where every moment gets its skill.
+    expect(lines[1]).toContain('/seiri:verify');
+    expect(lines[1]).not.toContain('/seiri:trace-cause');
   });
 
   it("names each moment's owning skill at strict, kept short", () => {

@@ -53,9 +53,12 @@ export const DORMANT_HOOKS: readonly string[] = [HookName.INSTRUCTIONS_LOADED];
  * whole delivery split exists to avoid. What the chain adds is routing:
  * which moment hands off to which, so a long session that has drifted
  * away from the sequence has something to snap back to.
+ *
+ * Written as `/seiri:<name>`, the form a reader can invoke and a model can
+ * dispatch on. A bare name is a word; the namespaced one is an address.
  */
 export const WORKFLOW_CHAIN_LINE =
-  'Workflow: write-plan → execute → implement → verify → request-review; failures → trace-cause; indirect code → trace-structure; review feedback → receive-review.';
+  'Workflow: `/seiri:write-plan` → `/seiri:execute` → `/seiri:implement` → `/seiri:verify` → `/seiri:request-review`; failures → `/seiri:trace-cause`; indirect code → `/seiri:trace-structure`; review feedback → `/seiri:receive-review`.';
 
 /**
  * Added at `strict`. Widens which moments count as one of the above, and
@@ -75,16 +78,24 @@ export const STRICT_POSTURE_LINE =
  * skills first and lets the rule reminder ride second. Silent at advisory —
  * the level the dispatch rates were measured against — where the hook reads
  * the dial and returns without injecting.
+ *
+ * It carries the election vocabulary of `ELECTION_STANDARD_LINE` and names
+ * the same one skill it does: the done-claim moment, which the model
+ * reaches by its own reckoning and therefore misses by its own reckoning.
  */
 export const TURN_REMINDER_STANDARD =
-  'Before acting this turn, dispatch the skill the moment matches — a failing test → trace-cause, multi-step work → write-plan, a "done" claim → verify — and keep changes within the active rules.';
+  'This turn, elect before acting: a failure appearing, multi-step work starting, or review arriving or departing means loading the skill that owns the moment first — and before saying done, fixed, or passing, that skill is `/seiri:verify`. Keep changes within the active rules.';
 
 /**
  * Strict widens the same reminder rather than replacing it: borderline and
- * small work still dispatch, a completion names its verification, and the
- * rules bind rather than advise. It intentionally echoes the strict
- * SessionStart posture — the session injection carries the fuller
- * instruction, this restates its core each turn.
+ * small work still dispatch, and the rules bind rather than advise. Where
+ * standard names one moment's owner, this names them all — the turn is
+ * where a compaction has already dropped the SessionStart election line,
+ * so the mapping has to survive without it.
+ *
+ * The repetition against `ELECTION_STRICT_LINE` is deliberate and is the
+ * whole point of the strict position: once per session is not once per
+ * turn, and the moment that decays is the one that arrives late.
  */
 export const TURN_REMINDER_STRICT =
-  'This turn: dispatch the matching skill even for borderline or small work, name a verification run before any completion claim, and treat the active rules as binding — not advisory.';
+  'This turn, elect the owning skill by name — a failure → `/seiri:trace-cause` · multi-step work → `/seiri:write-plan` · a plan in hand → `/seiri:execute` · before implementing → `/seiri:implement` · before saying done, fixed, or passing → `/seiri:verify` · sending work out → `/seiri:request-review` · feedback arriving → `/seiri:receive-review`. Borderline and small work included; the active rules bind rather than advise.';

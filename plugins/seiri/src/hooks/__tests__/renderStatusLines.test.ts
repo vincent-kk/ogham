@@ -46,8 +46,24 @@ describe('renderStatusLines', () => {
     ).toEqual([]);
   });
 
-  it('injects nothing when the manifest itself is empty', () => {
-    expect(renderStatusLines([], dial('strict'))).toEqual([]);
+  it('injects nothing when the manifest is empty and the dial is down', () => {
+    expect(renderStatusLines([], dial('advisory'))).toEqual([]);
+  });
+
+  it('elects at session start even when the project deployed no rule', () => {
+    for (const level of ['standard', 'strict'] as const) {
+      const lines = renderStatusLines([], dial(level));
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toContain('Election');
+    }
+  });
+
+  it('adds the election line to the session render from standard up', () => {
+    const advisory = renderStatusLines([status()], dial('advisory'));
+    const standard = renderStatusLines([status()], dial('standard'));
+    expect(advisory.some((line) => line.includes('Election'))).toBe(false);
+    expect(standard.some((line) => line.includes('Election'))).toBe(true);
+    expect(standard.some((line) => line.includes('/seiri:verify'))).toBe(true);
   });
 
   it('renders one line at advisory, naming rules without the plugin prefix', () => {
@@ -187,7 +203,7 @@ describe('renderStatusLines', () => {
         ],
       }),
     );
-    expect(lines.length).toBeLessThanOrEqual(8);
+    expect(lines.length).toBeLessThanOrEqual(9);
     expect(
       renderStatusLines([status()], dial('standard')).length,
     ).toBeLessThanOrEqual(5);

@@ -52,7 +52,11 @@ export function renderStatusLines(
       ? []
       : [...lines, `${INJECTION_PREFIX} ${election}`];
 
-  if (deployed.length === 0) return [];
+  // Nothing deployed leaves nothing to report about rules — the dial
+  // position, drift and stored-file warnings all describe deployed files.
+  // The election line is the one fact that survives that emptiness.
+  if (deployed.length === 0)
+    return election === undefined ? [] : [`${INJECTION_PREFIX} ${election}`];
 
   // A valve that lowered the dial to advisory still prints: silence there
   // would be indistinguishable from a project that simply never set one.
@@ -66,6 +70,11 @@ export function renderStatusLines(
 
   for (const line of renderPostureLines(dial.effective))
     lines.push(`${INJECTION_PREFIX} ${line}`);
+
+  // Last of the posture block, after the chain it depends on: the chain
+  // says which workflow follows which, this says a matched moment is
+  // loaded before it is acted on.
+  if (election !== undefined) lines.push(`${INJECTION_PREFIX} ${election}`);
 
   const drifted = deployed.filter((status) => !status.inSync);
   if (drifted.length > 0)
