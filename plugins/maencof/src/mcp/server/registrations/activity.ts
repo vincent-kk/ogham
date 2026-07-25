@@ -3,9 +3,9 @@
  * @description Registers the activity_read plain-read tool.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { handleActivityRead } from '../../tools/activityRead/index.js';
 import { registerReadTool } from '../middlewares/index.js';
 

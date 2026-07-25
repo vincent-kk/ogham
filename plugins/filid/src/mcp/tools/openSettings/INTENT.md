@@ -39,11 +39,11 @@ Phase 로 이어가는 것이 목적.
 ### Never do
 
 - `127.0.0.1` 외 주소로 바인딩
-- token 발급/검증을 `@ogham/http-guard` 밖에서 재구현
+- token 발급/검증을 `@ogham/http-kit` 밖에서 재구현
 - 상한 없는 무한 대기
 
 ## Dependencies
 
 - `../../../core/infra/configLoader` — `loadConfig`, `writeConfig`, `getRuleDocsStatus`, `syncRuleDocs`, `createDefaultConfig`
 - `@ogham/cross-platform/{host-paths,launcher}` — `projectRoot`, `pluginRoot`, `openBrowser`
-- `@ogham/http-guard/{guard,token}` — 요청 가드, 토큰
+- `@ogham/http-kit/{guard,token}` — 요청 가드, 토큰

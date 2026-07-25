@@ -22,7 +22,7 @@ pages/        설정 UI 정적 자산 (빌드가 public/settings.html 로 인라
   해석되지 않는다.
 - 프로젝트 루트는 `@ogham/cross-platform/host-paths` 의 `projectRoot(path?)`,
   플러그인 루트는 `pluginRoot()`. 미해석 시 `process.cwd()` 폴백 금지.
-- 로컬 서버 가드는 `@ogham/http-guard` 재사용 — 토큰·Origin 검증을 재구현하지
+- 로컬 서버 가드는 `@ogham/http-kit` 재사용 — 토큰·Origin 검증을 재구현하지
   않는다.
 - 도구 응답은 `wrapHandler` 를 통해 compact JSON 으로 직렬화하고, throw 는
   모델이 읽을 수 있는 오류 결과로 바꾼다.

@@ -1,6 +1,6 @@
 import { type Server, createServer } from 'node:http';
 
-import { generateToken } from '@ogham/http-guard/token';
+import { generateToken } from '@ogham/http-kit/token';
 
 import { LOOPBACK_HOST, Route } from '../../../../constants/http.js';
 import { INJECTION_PREFIX } from '../../../../constants/plugin.js';

@@ -8,10 +8,7 @@ import { buildAdjacencyList } from '../../core/graphBuilder/index.js';
 import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
 import { extractBestSnippet } from '../../search/contextAssembler/index.js';
-import {
-  query,
-  resolveSeedNodes,
-} from '../../search/queryEngine/index.js';
+import { query, resolveSeedNodes } from '../../search/queryEngine/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

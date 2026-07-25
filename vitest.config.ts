@@ -14,7 +14,6 @@ export default defineConfig({
       "./plugins/maencof-lens",
       "./plugins/seiri",
       "./shared/cross-platform",
-      "./shared/http-guard",
       "./shared/http-kit",
       "./shared/session-finalizer",
       "./tools/plugin-compiler",

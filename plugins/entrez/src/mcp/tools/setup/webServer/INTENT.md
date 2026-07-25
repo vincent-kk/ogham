@@ -37,6 +37,5 @@
 
 ## Dependencies
 
-- `@ogham/http-guard/{guard,token}` — `inspectRequest`(loopback Host → 토큰 → POST loopback Origin → `application/json`), `generateToken`
-- `@ogham/http-kit/{body,html,response}` — `parseBody`, `escapeJsonForHtml`, `sendJson`
+- `@ogham/http-kit/{guard,token,body,html,response}` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
 - `../../../../types/setup` · `../../../../constants/defaults`(`SETUP_AUTO_SHUTDOWN_MS`)

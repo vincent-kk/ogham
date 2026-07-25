@@ -939,7 +939,6 @@ __metadata:
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"
-    "@ogham/http-guard": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^4.1.10"
@@ -956,7 +955,6 @@ __metadata:
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"
-    "@ogham/http-guard": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^4.1.10"
@@ -988,7 +986,6 @@ __metadata:
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"
-    "@ogham/http-guard": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@playwright/test": "npm:^1.61.0"
     "@types/markdown-it": "npm:^14.1.2"
@@ -1011,7 +1008,6 @@ __metadata:
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"
-    "@ogham/http-guard": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^4.1.10"
@@ -1030,7 +1026,6 @@ __metadata:
     "@ast-grep/napi": "npm:^0.42.0"
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"
-    "@ogham/http-guard": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@ogham/session-finalizer": "workspace:^"
     "@playwright/test": "npm:^1.61.0"
@@ -1041,16 +1036,6 @@ __metadata:
     typescript: "npm:^5.7.2"
     vitest: "npm:^4.1.10"
     zod: "npm:^3.23.8"
-  languageName: unknown
-  linkType: soft
-
-"@ogham/http-guard@workspace:^, @ogham/http-guard@workspace:shared/http-guard":
-  version: 0.0.0-use.local
-  resolution: "@ogham/http-guard@workspace:shared/http-guard"
-  dependencies:
-    "@types/node": "npm:^20.11.0"
-    typescript: "npm:^5.7.2"
-    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -1071,7 +1056,6 @@ __metadata:
     "@ast-grep/napi": "npm:^0.42.0"
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"
-    "@ogham/http-guard": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@playwright/test": "npm:^1.61.0"
     "@types/node": "npm:^20.11.0"
@@ -1153,7 +1137,6 @@ __metadata:
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"
-    "@ogham/http-guard": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@ogham/session-finalizer": "workspace:^"
     "@playwright/test": "npm:^1.61.0"

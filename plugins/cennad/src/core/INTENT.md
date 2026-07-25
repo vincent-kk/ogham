@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/cennad` 의 디스크 저장소 게이트웨이. config / counter / session / project-hash 의 read·write 경로를 담당. settings 서버 토큰은 공유 `@ogham/http-guard` 로 이관.
+`@ogham/cennad` 의 디스크 저장소 게이트웨이. config / counter / session / project-hash 의 read·write 경로를 담당. settings 서버 토큰은 공유 `@ogham/http-kit` 으로 이관.
 
 ## Structure
 

@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { inspectRequest } from "@ogham/http-guard/guard";
+import { inspectRequest } from "@ogham/http-kit/guard";
 import { sendJson } from "@ogham/http-kit/response";
 
 import type { RouteContext } from "./routeContext.js";
@@ -12,7 +12,7 @@ import { handleSubmit } from "../handlers/handleSubmit.js";
 export type { RouteContext } from "./routeContext.js";
 
 /** Create an HTTP request handler with the given route context. The shared
- *  @ogham/http-guard canon (loopback host → token → POST origin →
+ *  @ogham/http-kit canon (loopback host → token → POST origin →
  *  application/json) guards every request before method/path dispatch. The
  *  loopback host + POST origin checks block DNS-rebinding; the token gates
  *  every request. Server binds to 127.0.0.1 only; no CORS headers. */

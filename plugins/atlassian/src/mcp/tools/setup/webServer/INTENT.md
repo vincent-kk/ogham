@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩, 5분 inactivity 자동 종료. 공유 `@ogham/http-guard` 로 loopback Host(rebinding 차단)·토큰·CSRF Origin/Content-Type·XSS 방어 라우팅.
+Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩, 5분 inactivity 자동 종료. 공유 `@ogham/http-kit` 으로 loopback Host(rebinding 차단)·토큰·CSRF Origin/Content-Type·XSS 방어 라우팅.
 
 ## Structure
 
@@ -41,7 +41,6 @@ Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩,
 | 대상                 | 이유                                           |
 | -------------------- | ---------------------------------------------- |
 | `node:http`          | HTTP 서버                                      |
-| `@ogham/http-guard`  | inspectRequest(host/token/CSRF), generateToken |
-| `@ogham/http-kit`    | parseBody · escapeJsonForHtml · sendJson       |
+| `@ogham/http-kit`    | inspectRequest · generateToken · parseBody · escapeJsonForHtml · sendJson |
 | `../../../../core/`  | `resolveEnvironment`                           |
 | `../../../../types/` | `SetupFormDataSchema`, `ServiceCredentials` 등 |

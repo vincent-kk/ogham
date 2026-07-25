@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { inspectRequest } from "@ogham/http-guard/guard";
+import { inspectRequest } from "@ogham/http-kit/guard";
 import { sendJson } from "@ogham/http-kit/response";
 
 import type { RouteContext } from "./routeContext.js";
@@ -14,7 +14,7 @@ const ALLOWED_CONTENT_TYPES = [
 /**
  * Host + token + CSRF guards applied after the asset branch. The loopback Host
  * check and the POST Origin check block DNS-rebinding even if the token leaks.
- * Delegates the decision to the shared @ogham/http-guard canon and maps a
+ * Delegates the decision to the shared @ogham/http-kit canon and maps a
  * rejecting verdict onto deilen's { ok, message } envelope. Returns true when
  * the request was rejected (response already sent), false to continue routing.
  */

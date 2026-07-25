@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 
+import type { DispatchInput, MergedHookOutput } from '../../types/dispatch.js';
 import { readStdin } from '../shared/readStdin.js';
 import { writeResult } from '../shared/writeResult.js';
-import type {
-  DispatchInput,
-  MergedHookOutput,
-} from '../../types/dispatch.js';
 
 import { orchestratePostToolUse } from './postToolUse.js';
 

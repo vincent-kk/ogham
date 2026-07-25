@@ -1,15 +1,17 @@
 ## Purpose
 
-`src/` 는 `@ogham/http-kit` 패키지의 진입점 루트다. `index.ts` 는 `body/`·`html/`·`response/` 세 서브 프랙탈의 공개 API 만 재수출하는 순수 배럴이며, 직접 로직을 담지 않는다.
+`src/` 는 `@ogham/http-kit` 패키지의 진입점 루트다. `index.ts` 는 `guard/`·`token/`·`body/`·`html/`·`response/` 서브 프랙탈의 공개 API만 재수출하는 순수 배럴이다.
 
 ## Structure
 
-| Path        | Role                                                                                                                   |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `index.ts`  | 배럴 — `parseBody`/`MAX_BODY_BYTES`/`RequestTooLargeError`/`describeBodyError`, `escapeJsonForHtml`, `sendJson` 재수출 |
-| `body/`     | 크기 상한 JSON 본문 파싱                                                                                               |
-| `html/`     | inline `<script>` 안전 JSON 직렬화                                                                                     |
-| `response/` | JSON 응답 전송                                                                                                         |
+| Path        | Role                                                            |
+| ----------- | --------------------------------------------------------------- |
+| `index.ts`  | 다섯 서브 프랙탈의 공개 심볼 재수출                            |
+| `guard/`    | 요청 host·token·Origin·Content-Type 검사 verdict               |
+| `token/`    | 세션 토큰 발급·timing-safe 검증                                |
+| `body/`     | 크기 상한 JSON 본문 파싱                                       |
+| `html/`     | inline `<script>` 안전 JSON 직렬화                             |
+| `response/` | JSON 응답 전송                                                  |
 
 ## Conventions
 
@@ -22,7 +24,7 @@
 ### Always do
 
 - `index.ts` 를 배럴 전용으로 유지 — 재수출 구문만.
-- `body/`, `html/`, `response/` 각각 entry point 통해서만 import.
+- `guard/`, `token/`, `body/`, `html/`, `response/`의 entry point만 재수출.
 
 ### Ask first
 
@@ -35,4 +37,4 @@
 
 ## Dependencies
 
-- `./body/index.js`, `./html/index.js`, `./response/index.js`.
+- `./guard/index.js`, `./token/index.js`, `./body/index.js`, `./html/index.js`, `./response/index.js`.

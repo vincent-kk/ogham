@@ -1,8 +1,8 @@
 import type { DecisionResult } from '../../../types/metrics.js';
 
-import { handleTestCaseGate } from './utils/handleTestCaseGate.js';
 import { handleCount } from './utils/handleCount.js';
 import { handleDecide } from './utils/handleDecide.js';
+import { handleTestCaseGate } from './utils/handleTestCaseGate.js';
 
 /** File content for test analysis */
 export interface TestFileInput {

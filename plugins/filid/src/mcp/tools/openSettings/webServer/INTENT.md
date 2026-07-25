@@ -1,7 +1,7 @@
 ## Purpose
 
 `open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 공유
-`@ogham/http-guard` 로 loopback Host → one-time token → POST Origin →
+`@ogham/http-kit` 으로 loopback Host → one-time token → POST Origin →
 `application/json` 순 검증. 저장/닫기 이벤트를 settle waiter 로 노출해
 도구의 bounded long-poll 을 해소한다.
 
@@ -43,6 +43,5 @@
 
 ## Dependencies
 
-- `node:http` · `@ogham/http-guard/{guard,token}` — `inspectRequest`, `generateToken`
-- `@ogham/http-kit/{body,html,response}` — `parseBody`, `escapeJsonForHtml`, `sendJson`
+- `node:http` · `@ogham/http-kit/{guard,token,body,html,response}` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
 - `../../../../core/infra/configLoader` — 저장 core (`writeConfig`, `syncRuleDocs`)

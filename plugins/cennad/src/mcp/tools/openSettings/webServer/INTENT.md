@@ -1,6 +1,6 @@
 ## Purpose
 
-`open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 5 분 idle 자동 종료. 공유 `@ogham/http-guard` 로 loopback Host(rebinding 차단) → one-time token → POST Origin(CSRF) → `application/json` 강제 순 검증.
+`open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 5 분 idle 자동 종료. 공유 `@ogham/http-kit` 으로 loopback Host(rebinding 차단) → one-time token → POST Origin(CSRF) → `application/json` 강제 순 검증.
 
 ## Structure
 
@@ -43,7 +43,6 @@
 ## Dependencies
 
 - `node:http`, `node:url`
-- `@ogham/http-guard/{guard,token}` (inspectRequest — host/token/CSRF 가드, generateToken)
-- `@ogham/http-kit/{body,html,response}` (parseBody·escapeJsonForHtml·sendJson)
+- `@ogham/http-kit/{guard,token,body,html,response}` (inspectRequest·generateToken·parseBody·escapeJsonForHtml·sendJson)
 - `../../../core/{configManager,youtubeMcp,agyModels,codexModels}` (loadConfig, saveConfig, provisionYoutube, 모델 카탈로그)
 - `../../../types/index.ts` (`ConfigSchema`)

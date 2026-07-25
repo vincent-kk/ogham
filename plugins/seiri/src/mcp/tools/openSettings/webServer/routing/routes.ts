@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { inspectRequest } from '@ogham/http-guard/guard';
+import { inspectRequest } from '@ogham/http-kit/guard';
 import { sendJson } from '@ogham/http-kit/response';
 
 import {

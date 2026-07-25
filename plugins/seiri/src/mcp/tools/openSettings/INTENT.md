@@ -42,5 +42,5 @@ webServer/       sub-fractal — HTTP 서버, 가드, 라우팅, 핸들러
 ### Never do
 
 - `127.0.0.1` 외 바인딩, CORS 와일드카드.
-- 토큰 검증을 `@ogham/http-guard` 밖에서 재구현.
+- 토큰 검증을 `@ogham/http-kit` 밖에서 재구현.
 - 상한 없는 대기.

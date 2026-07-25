@@ -1,6 +1,6 @@
 import { type Server, createServer } from 'node:http';
 
-import { generateToken } from '@ogham/http-guard/token';
+import { generateToken } from '@ogham/http-kit/token';
 
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
 import {

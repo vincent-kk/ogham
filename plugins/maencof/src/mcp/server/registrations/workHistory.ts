@@ -3,9 +3,9 @@
  * @description Registers the work_history plain-read tool.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { handleWorkHistory } from '../../tools/workHistory/index.js';
 import { registerReadTool } from '../middlewares/index.js';
 

@@ -1,7 +1,7 @@
 ## Purpose
 
 `open_settings` 가 띄우는 `127.0.0.1` 전용 HTTP 서버. 공유
-`@ogham/http-guard` 로 loopback Host → 일회용 토큰 → POST Origin →
+`@ogham/http-kit` 으로 loopback Host → 일회용 토큰 → POST Origin →
 Content-Type 순으로 검증하고, 저장/닫기를 settle waiter 로 노출해 도구의
 bounded long-poll 을 해소한다.
 
@@ -44,6 +44,5 @@ handlers/      GET / · POST /plan · POST /save · POST /close · readSaveBody
 
 ## Dependencies
 
-- `node:http` · `@ogham/http-guard/{guard,token}` — `inspectRequest`, `generateToken`
-- `@ogham/http-kit/{body,html,response}` — `parseBody`, `describeBodyError`, `escapeJsonForHtml`, `sendJson`
+- `node:http` · `@ogham/http-kit/{guard,token,body,html,response}` — `inspectRequest`, `generateToken`, `parseBody`, `describeBodyError`, `escapeJsonForHtml`, `sendJson`
 - `../types/settingsTypes` — save/plan 스키마·settle 타입 · `src/constants/{http,plugin}` · `src/types/manifest`

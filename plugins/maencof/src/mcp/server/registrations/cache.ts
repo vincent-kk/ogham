@@ -3,9 +3,9 @@
  * @description Registers the context_cache_manage plain-read tool.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import {
   contextCacheManageInputSchema,
   handleContextCacheManage,

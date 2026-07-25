@@ -2,7 +2,7 @@
   "name": "@ogham/http-kit",
   "version": "0.0.0",
   "private": true,
-  "description": "Internal to the ogham monorepo — local HTTP server runtime helpers (bounded JSON body parsing, script-safe JSON escaping, JSON responses) shared by plugin setup/settings/viewer servers",
+  "description": "Internal to the ogham monorepo — local HTTP server security and runtime helpers (request guard, session tokens, bounded JSON parsing, script-safe JSON, JSON responses)",
   "license": "MIT",
   "author": {
     "name": "Vincent Kelvin",
@@ -19,6 +19,10 @@
       "types": "./dist/body/index.d.ts",
       "import": "./dist/body/index.js"
     },
+    "./guard": {
+      "types": "./dist/guard/index.d.ts",
+      "import": "./dist/guard/index.js"
+    },
     "./html": {
       "types": "./dist/html/index.d.ts",
       "import": "./dist/html/index.js"
@@ -26,6 +30,10 @@
     "./response": {
       "types": "./dist/response/index.d.ts",
       "import": "./dist/response/index.js"
+    },
+    "./token": {
+      "types": "./dist/token/index.d.ts",
+      "import": "./dist/token/index.js"
     }
   },
   "main": "dist/index.js",

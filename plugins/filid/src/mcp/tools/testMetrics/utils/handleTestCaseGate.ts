@@ -1,9 +1,6 @@
-import { countTestCases } from '../../../../metrics/testCounter/testCounter.js';
 import { checkTestCaseGate } from '../../../../metrics/testCaseGate/testCaseGate.js';
-import type {
-  TestFileInput,
-  TestCaseGateViolation,
-} from '../testMetrics.js';
+import { countTestCases } from '../../../../metrics/testCounter/testCounter.js';
+import type { TestCaseGateViolation, TestFileInput } from '../testMetrics.js';
 
 export function handleTestCaseGate(files: TestFileInput[]): {
   violations: TestCaseGateViolation[];

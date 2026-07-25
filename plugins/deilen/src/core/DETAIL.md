@@ -34,7 +34,7 @@
 ### projectHash
 
 - `getProjectHash(cwd): string` (sha256 12-hex).
-- 세션 토큰(`generateToken`/`verifyToken`)은 공유 `@ogham/http-guard/token` 로 이관.
+- 세션 토큰(`generateToken`/`verifyToken`)은 공유 `@ogham/http-kit/token` 으로 이관.
 
 ## Acceptance
 

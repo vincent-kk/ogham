@@ -8,8 +8,8 @@ import { validatePreToolUse } from '../../hooks/preToolUse/helpers/preToolValida
 import { guardStructure } from '../../hooks/preToolUse/helpers/structureGuard/structureGuard.js';
 import { decide } from '../../metrics/decisionTree/decisionTree.js';
 import { checkPromotionEligibility } from '../../metrics/promotionTracker/promotionTracker.js';
-import { countTestCases } from '../../metrics/testCounter/testCounter.js';
 import { checkTestCaseGate } from '../../metrics/testCaseGate/testCaseGate.js';
+import { countTestCases } from '../../metrics/testCounter/testCounter.js';
 import type { PreToolUseInput } from '../../types/hooks.js';
 
 describe('review pipeline', () => {

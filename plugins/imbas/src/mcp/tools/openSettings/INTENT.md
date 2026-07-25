@@ -37,10 +37,10 @@
 ### Never do
 
 - `127.0.0.1` 외 주소로 바인딩
-- token 발급/검증을 `@ogham/http-guard` 밖에서 재구현
+- token 발급/검증을 `@ogham/http-kit` 밖에서 재구현
 - 상한 없는 무한 대기
 
 ## Dependencies
 
 - `../../../core/configManager` — `loadConfig`, `saveConfig`; `../../../types/settings.js` — 페이지 계약 스키마/타입 (Zod 는 types/ 에만 — imbas src 규약)
-- `@ogham/cross-platform/{host-paths,launcher}`, `@ogham/http-guard/{guard,token}`
+- `@ogham/cross-platform/{host-paths,launcher}`, `@ogham/http-kit/{guard,token}`

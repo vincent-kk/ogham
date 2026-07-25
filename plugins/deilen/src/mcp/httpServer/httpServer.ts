@@ -1,7 +1,7 @@
 import { type Server, createServer } from "node:http";
 
 import { projectRoot } from "@ogham/cross-platform/host-paths";
-import { generateToken } from "@ogham/http-guard/token";
+import { generateToken } from "@ogham/http-kit/token";
 
 import { loadConfig, saveConfig } from "../../core/configManager/index.js";
 import { getProjectHash } from "../../core/projectHash/index.js";

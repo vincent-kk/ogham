@@ -29,7 +29,9 @@ const topicArgs: PersonalContextCaptureArgs = {
 
 describe('personalContextCaptureInputSchema', () => {
   it('정상 state/topic 입력을 통과시킨다', () => {
-    expect(personalContextCaptureInputSchema.safeParse(stateArgs).success).toBe(true);
+    expect(personalContextCaptureInputSchema.safeParse(stateArgs).success).toBe(
+      true,
+    );
     expect(
       personalContextCaptureInputSchema.safeParse({
         ...topicArgs,
@@ -49,7 +51,8 @@ describe('personalContextCaptureInputSchema', () => {
   it('kind는 소문자 kebab 패턴만 허용한다', () => {
     for (const kind of ['Mood', 'physical health', '기분', '-lead'])
       expect(
-        personalContextCaptureInputSchema.safeParse({ ...stateArgs, kind }).success,
+        personalContextCaptureInputSchema.safeParse({ ...stateArgs, kind })
+          .success,
       ).toBe(false);
     expect(
       personalContextCaptureInputSchema.safeParse({
@@ -61,8 +64,10 @@ describe('personalContextCaptureInputSchema', () => {
 
   it('due는 YYYY-MM-DD만, ttlDays는 1–60만 허용한다', () => {
     expect(
-      personalContextCaptureInputSchema.safeParse({ ...topicArgs, due: '07-20' })
-        .success,
+      personalContextCaptureInputSchema.safeParse({
+        ...topicArgs,
+        due: '07-20',
+      }).success,
     ).toBe(false);
     expect(
       personalContextCaptureInputSchema.safeParse({ ...stateArgs, ttlDays: 0 })
@@ -143,7 +148,10 @@ describe('handlePersonalContextCapture', () => {
   });
 
   it('정상 topic capture와 resolve가 왕복 동작한다', async () => {
-    await handlePersonalContextCapture(vaultDir, { ...topicArgs, due: '2026-07-20' });
+    await handlePersonalContextCapture(vaultDir, {
+      ...topicArgs,
+      due: '2026-07-20',
+    });
     expect(readPersonalContext(vaultDir).topics[0]?.due).toBe('2026-07-20');
 
     const resolved = await handlePersonalContextCapture(vaultDir, {
