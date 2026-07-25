@@ -1,7 +1,7 @@
+import { FAILURE_CHAIN_LINE } from '../../constants/failureChain.js';
 import { HookEvent, HostTool } from '../../constants/hooks.js';
 import { SILENT_INTERVENTION } from '../../constants/intervention.js';
 import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
-import { FAILURE_CHAIN_LINE } from '../../constants/signals.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import { recordBashFailure } from '../../core/sessionSignals/record/recordBashFailure.js';
 import { recordBashSuccess } from '../../core/sessionSignals/record/recordBashSuccess.js';

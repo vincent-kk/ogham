@@ -34,7 +34,7 @@
 
 ### Ask first
 
-- 임계값 변경 (`constants/signals.ts`).
+- 임계값 변경 (`constants/failureChain.ts`).
 - matcher 확대 (Bash 외 도구).
 
 ### Never do

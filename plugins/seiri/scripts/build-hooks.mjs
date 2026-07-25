@@ -39,15 +39,23 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // `name` is the bridge output basename, referenced by hooks.json and kept
-// stable. `entry` is the camelCase source directory.
+// stable. `entry` is the camelCase source directory. `forbiddenContent`
+// lists render lines this hook never emits — tree-shaking regression
+// canaries: their presence means a constants file stopped shaking.
 const hookEntries = [
   { name: 'setup', entry: 'setup', maxBytes: LIGHT_HOOK_BYTES },
   {
     name: 'user-prompt-submit',
     entry: 'userPromptSubmit',
     maxBytes: LIGHT_HOOK_BYTES,
+    forbiddenContent: [/Election/],
   },
-  { name: 'post-tool-use', entry: 'postToolUse', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'post-tool-use',
+    entry: 'postToolUse',
+    maxBytes: LIGHT_HOOK_BYTES,
+    forbiddenContent: [/Election/, /A plan was produced/],
+  },
   {
     name: 'subagent-start',
     entry: 'subagentStart',
@@ -110,7 +118,7 @@ const FORBIDDEN_PATTERNS = [
 
 const violations = [];
 
-for (const { name, maxBytes } of hookEntries) {
+for (const { name, maxBytes, forbiddenContent = [] } of hookEntries) {
   const file = resolve(root, `bridge/${name}.mjs`);
   const { size } = await stat(file);
   if (size > maxBytes)
@@ -119,7 +127,7 @@ for (const { name, maxBytes } of hookEntries) {
     );
 
   const content = await readFile(file, 'utf8');
-  for (const pattern of FORBIDDEN_PATTERNS)
+  for (const pattern of [...FORBIDDEN_PATTERNS, ...forbiddenContent])
     if (pattern.test(content))
       violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
 }

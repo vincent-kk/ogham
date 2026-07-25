@@ -1,9 +1,9 @@
+import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
 import {
   TURN_REMINDER_STANDARD,
   TURN_REMINDER_STRICT,
-} from '../../constants/hooks.js';
-import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
-import { WORKFLOW_STATE_LINES } from '../../constants/signals.js';
+} from '../../constants/turnReminders.js';
+import { WORKFLOW_STATE_LINES } from '../../constants/workflowStateLines.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import { consumeWorkflowState } from '../../core/sessionSignals/record/consumeWorkflowState.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';

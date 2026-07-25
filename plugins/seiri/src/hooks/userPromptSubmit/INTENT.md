@@ -18,7 +18,7 @@
 - **상태 1절은 로드 뒤 한 턴만.** `consumeWorkflowState` 가 1회 소비하고,
   읽기·쓰기 실패는 상기만 남긴 채 조용히 지나간다(fail-open).
 - **단계별로 문구가 다르다.** standard 는 선출 어휘 + `/seiri:verify` 하나,
-  strict 는 전 순간을 이름으로 댄다. 정본은 `constants/hooks.ts`
+  strict 는 전 순간을 이름으로 댄다. 정본은 `constants/turnReminders.ts`
   (`TURN_REMINDER_STANDARD` · `TURN_REMINDER_STRICT`).
 - **스킬 축이 앞선다.** 이 훅이 닫는 실패는 "순간이 왔는데 스킬이 안 떴다"
   이므로 순간→스킬을 먼저 대고 규칙 상기를 뒤에 싣는다. 프롬프트 본문은 안 읽는다.
@@ -30,7 +30,7 @@
 ### Always do
 
 - 어떤 실패에도 `{ continue: true }` — 매 턴 도는 훅이다.
-- 문구 변경은 `constants/hooks.ts` 에서. 여기는 선택·주입만.
+- 문구 변경은 `constants/turnReminders.ts` 에서. 여기는 선택·주입만.
 
 ### Ask first
 
@@ -46,4 +46,4 @@
 ## Dependencies
 
 - `../../core/infra/configLoader/loaders/loadIntervention.js` (concrete)
-- `../../constants/` (intervention · plugin · hooks)
+- `../../constants/` (plugin · hooks · turnReminders · workflowStateLines)

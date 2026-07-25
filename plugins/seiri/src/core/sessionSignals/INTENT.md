@@ -36,7 +36,7 @@ utils/     organ — hashCommand · resolveSignalsPath · isWorkflowSignal
 ### Ask first
 
 - 신호 종류 추가 (상시 훅 비용 증가).
-- 임계값·상한 변경 (`constants/signals.ts`).
+- 임계값·상한 변경 (`constants/failureChain.ts`).
 
 ### Never do
 

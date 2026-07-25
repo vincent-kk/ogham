@@ -1,4 +1,4 @@
-import type { WorkflowSkill } from '../constants/signals.js';
+import type { WorkflowSkill } from '../constants/workflowChain.js';
 
 /**
  * The seiri workflow this session loaded most recently.

@@ -1,6 +1,6 @@
 import { SKILL_ID_PREFIX } from '../../../constants/plugin.js';
-import { WORKFLOW_STATE_LINES } from '../../../constants/signals.js';
-import type { WorkflowSkill } from '../../../constants/signals.js';
+import { WORKFLOW_SKILLS } from '../../../constants/workflowChain.js';
+import type { WorkflowSkill } from '../../../constants/workflowChain.js';
 import { readSignals } from '../store/readSignals.js';
 import { writeSignals } from '../store/writeSignals.js';
 
@@ -33,6 +33,8 @@ function chainMember(skillId: unknown): WorkflowSkill | undefined {
   if (typeof skillId !== 'string' || !skillId.startsWith(SKILL_ID_PREFIX))
     return undefined;
 
-  const skill = skillId.slice(SKILL_ID_PREFIX.length) as WorkflowSkill;
-  return Object.hasOwn(WORKFLOW_STATE_LINES, skill) ? skill : undefined;
+  const skill = skillId.slice(SKILL_ID_PREFIX.length);
+  return (WORKFLOW_SKILLS as readonly string[]).includes(skill)
+    ? (skill as WorkflowSkill)
+    : undefined;
 }

@@ -1,7 +1,7 @@
 import {
   STRICT_POSTURE_LINE,
   WORKFLOW_CHAIN_LINE,
-} from '../../../../constants/hooks.js';
+} from '../../../../constants/postureLines.js';
 import type { InterventionLevel } from '../../../../types/config.js';
 
 /**

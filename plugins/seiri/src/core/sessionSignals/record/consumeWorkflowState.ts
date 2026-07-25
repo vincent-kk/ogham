@@ -1,4 +1,4 @@
-import type { WorkflowSkill } from '../../../constants/signals.js';
+import type { WorkflowSkill } from '../../../constants/workflowChain.js';
 import { readSignals } from '../store/readSignals.js';
 import { writeSignals } from '../store/writeSignals.js';
 

@@ -4,11 +4,11 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { INJECTION_PREFIX } from '../../../constants/plugin.js';
 import {
   TURN_REMINDER_STANDARD,
   TURN_REMINDER_STRICT,
-} from '../../../constants/hooks.js';
-import { INJECTION_PREFIX } from '../../../constants/plugin.js';
+} from '../../../constants/turnReminders.js';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
 import { processUserPromptSubmit } from '../userPromptSubmit.js';

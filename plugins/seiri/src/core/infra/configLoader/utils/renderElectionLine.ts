@@ -1,4 +1,4 @@
-import { ELECTION_RENDER } from '../../../../constants/intervention.js';
+import { ELECTION_RENDER } from '../../../../constants/electionLines.js';
 import type { InterventionLevel } from '../../../../types/config.js';
 
 /**

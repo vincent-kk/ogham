@@ -1,4 +1,4 @@
-import { WORKFLOW_STATE_LINES } from '../../../constants/signals.js';
+import { WORKFLOW_SKILLS } from '../../../constants/workflowChain.js';
 import type { WorkflowSignal } from '../../../types/signals.js';
 
 /**
@@ -15,7 +15,7 @@ export function isWorkflowSignal(value: unknown): value is WorkflowSignal {
   const { skill, announced } = value as Partial<WorkflowSignal>;
   return (
     typeof skill === 'string' &&
-    Object.hasOwn(WORKFLOW_STATE_LINES, skill) &&
+    (WORKFLOW_SKILLS as readonly string[]).includes(skill) &&
     typeof announced === 'boolean'
   );
 }
