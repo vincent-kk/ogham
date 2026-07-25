@@ -28,15 +28,25 @@ _근거: [phase0/d7-election-results.md](./phase0/d7-election-results.md) — S2
   - `WORKFLOW_CHAIN_LINE` → `/seiri:*` 네임스페이스 표기로.
   - `TURN_REMINDER_STANDARD` → 선출 어휘 + `/seiri:verify` 명시(S1.5 정합) · `TURN_REMINDER_STRICT` → 전 순간 `/seiri:*` 직접 명시(S2 정합). 초안은 핸드오프 문서, 채택 잔존 문구 불변 조건 하에 다듬기 허용.
 - [x] **B2-b ✅ 승인 (Vincent 07-25) — `rule_docs_sync` config action의 posture 문자열에 선출 라인 포함** (`83acac1d`): 세션 중 다이얼을 옮기는 **제3 채널**이 선출 라인을 안 나르던 것을 정합. B1 원칙("다이얼이 유일한 게이트, posture를 나르는 모든 표면 동일")의 완결. 유효 다이얼 기준 렌더 · advisory 침묵 · 테스트 1건 추가.
-- [ ] **B4 메인세션 §8 실측** (본 개발 범위 밖, B2 완료 후 별도 발주): 5세대 메인세션 · 긴 세션·컴팩션 관문 통합 · 발화율 + 준수율(D2 도구) 병행 · 선출 라인 컴팩션 생존 관측. **전제 2건**: ①설치본 갱신 — 현 캐시는 Bash matcher만 가진 이전 빌드(Skill matcher·신규 렌더 미탑재) ②재편 후 재빌드 bridge/ 커밋.
+- [x] **B4 메인세션 §8 실측** — **결과: [phase0/b4-results.md](./phase0/b4-results.md)**. 전제 PASS · Phase 1 배선 6/6 PASS · **Phase 2 완료(headless 메인세션 스폰 9런, 나오)**: 발화 A 2/3·B 3/3·C 3/3, **체인 전이 6/6**, 오발화 0, 오염 0, 행동층 만점(커밋 차단·원인 수정·다파일+테스트). **§4 사전 등록 판정 충족 → Arm S 채택 확정 — C 게이트 열림.** Phase 3(컴팩션·실사용 사건)은 지속 관측 트랙으로 계속.
 
-## C. 채택 확정 후 정본화 (B4 통과 게이트 — 본 개발 범위 밖)
+## C. 채택 확정 후 정본화 — ✅ 완료 (2026-07-25, 나오 · Vincent 승인)
 
-- [ ] **C1** `02-ARCHITECTURE.md` §3 디스패치 기제 개정 ("+선출 계약 주입, 5세대 이후 1급 기제")
-- [ ] **C2** `01-CONSTITUTION.md` P1 해설 — 화물 축·선출/채택 분리 편입 (Vincent 승인 경유)
-- [ ] **C3** `README.md`·`README-ko_kr.md` — 4KB·선출 라인·다이얼 서술
-- [ ] **C4** `phase0/d7-dispatch.md` §7 처방 착지 주석
-- [ ] **C5** vault 정본화(나오): 원장 §2-2·§4(4KB)·§7#8 · ext-review 기준선 정정(`DEFAULT_INTERVENTION=standard` 실측) · hook-layer-gap G2 재개방
+- [x] **C1** `02-ARCHITECTURE.md` — 규모 표(~7줄/≤9줄·스킬 ≤4KB), 체이닝(`/seiri:*` 명시 + D1 보강), 베팅 절을 "판정 확정"으로 개정(선출 계약 4표면·S1.5/S2·검증 수치)
+- [x] **C2** `01-CONSTITUTION.md` P1 — 화물 축·선출/채택 분리 증보 (Vincent 승인: "C 진행하시죠")
+- [x] **C3** `README.md`·`README-ko_kr.md` — 선출 계약·다이얼별 문구·핸드오프 노트 서술
+- [x] **C4** `phase0/d7-dispatch.md` — 헤더에 베팅 판정·처방 착지 주석
+- [x] **C5** vault 정본화 — 원장(디스패치 기제·4KB·미결 재편), hook-layer-gap §10(G2 부분 재개방), ext-review 재정정(`DEFAULT_INTERVENTION=standard`는 #99 머지부터 — git -S 확정, T2 advisory 전제 무효)
+- [ ] **C-커밋**: 위 저장소 문서 변경분(02-ARCH·01-CONST·README×2·d7-dispatch·b4-results·TODO) 커밋 — Vincent 확인 후
+
+## E. 채택 후 문구 확장 — done-claim "said or heard" (2026-07-25 Vincent 승인, 3사례 게이트 면제)
+
+근거: b4-results a-r3 판독 — S1.5가 명명한 순간은 **자기발** done-claim인데 P-A는 **사용자발** 완료 주장이라 문자 그대로의 순간이 오지 않음. 당초 "3사례 누적 시 검토"로 사전 등록했으나 **Vincent 지시로 선제 적용**(실측 1건 존재 + fail-cheap: 문구 4곳, 제거 가능). 관측은 사후 전환.
+
+- [x] **E1 문구 확장 (코드)** (`7d019cfa`): done-claim 순간 서술을 자기발 한정 → **수신 포함**으로 4곳 — `ELECTION_STANDARD_LINE`("when done, fixed, or passing is said or heard — your claim or the user's") · `ELECTION_STRICT_LINE`·`TURN_REMINDER_STRICT`(나열형은 "said or heard, your claim/yours or the user's") · `TURN_REMINDER_STANDARD`. **불변 조건 유지 확인**: 채택 잔존 문구 그대로(단언 추가) · advisory 완전 침묵(기존 테스트 유지) · 그 외 순간 서술 무변경.
+- [x] **E2 검증 (코드)** (`7d019cfa` 동봉): 단언 테스트 갱신 — turnReminder 신규 1케이스(두 리마인더 공통) + subagentStart standard/strict 케이스 내 확장(잔존 문구 단언 포함). **선변경 red 3건 확인 후 green** — `test:run` 117/117(기존 116+1) · typecheck clean · build clean(훅 번들 가드 ≤16 KB 통과) · eslint 0 · **bridge 4종(setup·subagent-start·user-prompt-submit·mcp-server) 재빌드 같은 커밋**.
+- [x] **E3 관측 문서 정합**: `b4-mainsession.md` §3 표(사용자발 완료 주장 칸)·§4 Phase 3 행, `compliance-checklist.md` §3 판독 규칙 — "3사례 누적 시 검토" → "**선제 적용됨(07-25 Vincent) — 효과·부작용은 사후 관측**". 판독 귀결도 정합: 사용자발 미선출은 이제 문구 경계 사례가 아니라 **미선출로 센다**(주체별 집계는 확장 효과 관측용으로 유지).
+- [ ] **E4 재실측 (나오, E1~E3 커밋 후)**: headless 하니스로 **P-A 셀 3런**(기대: 사용자발 완료 주장에서 선출 3/3) + **FP-1 재확인**(사소한 작업 맥락의 "됐다"에 과잉 verify 없는지 — 오발화 방향이 이 확장의 유일한 리스크). 결과는 `b4-results.md` Phase 2 표본표에 추기.
 
 ## D. 발전 — 전면 진행 (Vincent 07-25)
 
