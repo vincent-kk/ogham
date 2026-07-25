@@ -16,7 +16,7 @@ import {
   planRuleDocs,
 } from '../../../../core/ruleDocs/index.js';
 import type { RuleDocSyncResult } from '../../../../types/manifest.js';
-import type { SaveBody } from '../types/settingsTypes.js';
+import type { SaveBody, SettingsPageState } from '../types/settingsTypes.js';
 import {
   type SettingsServerInstance,
   startSettingsServer,
@@ -121,7 +121,10 @@ describe('settings web server', () => {
   it('injects page state into the state placeholder', async () => {
     const html = await (await fetch(url(server, '/'))).text();
     expect(html).not.toContain('__SEIRI_STATE__');
-    expect(html).toContain(workspace);
+    // The slot carries JSON, so a Windows path lands with its separators
+    // escaped (`C:\\Users`) — read the slot back instead of substring-matching
+    // the raw path against the encoded document.
+    expect(injectedState(html).projectRoot).toBe(workspace);
   });
 
   it('previews a deployment without writing anything', async () => {
@@ -185,6 +188,13 @@ describe('settings web server', () => {
 
 function deployedPath(): string {
   return join(workspace, '.claude', 'rules', RULE_FILE);
+}
+
+/** Reads back the state the server wrote into the page's placeholder slot. */
+function injectedState(html: string): SettingsPageState {
+  const slot = /<body>([\s\S]*)<\/body>/.exec(html);
+  if (!slot) throw new Error(`no state slot in served page: ${html}`);
+  return JSON.parse(slot[1]) as SettingsPageState;
 }
 
 function selected(payload: SaveBody): string[] {

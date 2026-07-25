@@ -4,6 +4,8 @@ import { join } from "node:path";
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
+import { env } from "@ogham/cross-platform/env";
+
 import { startSetupServer } from "../webServer/index.js";
 import type { SetupStatus } from "../webServer/utils/buildStatus.js";
 import type { SetupServerHandle } from "../../../../types/setup.js";
@@ -133,7 +135,7 @@ describe("setup web server", () => {
     expect(lastTested?.api_key).toBe("SECRETKEY");
   });
 
-  it("saves config + credentials (0o600) on POST /submit; key not in response", async () => {
+  it("saves config + credentials on POST /submit; key not in response", async () => {
     const res = await postJson("/submit", VALID);
     const body = (await res.json()) as { success: boolean };
     expect(res.status).toBe(200);
@@ -143,8 +145,17 @@ describe("setup web server", () => {
     const cfg = await loadConfig(configPath);
     expect(cfg?.tool).toBe(ENTREZ_TOOL_NAME);
     expect((await loadCredentials(credPath)).api_key).toBe("SECRETKEY");
-    expect((await stat(credPath)).mode & 0o777).toBe(0o600);
   });
+
+  // Split from the save assertions so Windows keeps them: stat there reports
+  // 0o666 for every writable file, so the 0o600 contract is POSIX-only.
+  it.skipIf(env.isWindows)(
+    "writes the credentials file with 0o600 on POST /submit",
+    async () => {
+      await postJson("/submit", VALID);
+      expect((await stat(credPath)).mode & 0o777).toBe(0o600);
+    },
+  );
 
   it("keeps the server open after a plain Save (closeAfter: false)", async () => {
     const res = await postJson("/submit", { ...VALID, closeAfter: false });
