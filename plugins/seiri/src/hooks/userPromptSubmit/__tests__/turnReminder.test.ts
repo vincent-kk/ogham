@@ -72,6 +72,13 @@ describe('per-turn dispatch reminder', () => {
     expect(TURN_REMINDER_STRICT.toLowerCase()).toContain('skill');
   });
 
+  it("reaches a done-claim said or heard, not only the model's own", () => {
+    for (const line of [TURN_REMINDER_STANDARD, TURN_REMINDER_STRICT]) {
+      expect(line).toContain('said or heard');
+      expect(line).toContain("user's");
+    }
+  });
+
   it('never blocks a turn when cwd is missing', () => {
     const output = processUserPromptSubmit({
       cwd: '',

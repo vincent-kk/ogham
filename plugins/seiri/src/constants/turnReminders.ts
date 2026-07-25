@@ -11,11 +11,11 @@
  * the dial and returns without injecting.
  *
  * It carries the election vocabulary of `ELECTION_STANDARD_LINE` and names
- * the same one skill it does: the done-claim moment, which the model
- * reaches by its own reckoning and therefore misses by its own reckoning.
+ * the same one skill it does: the done-claim moment, which arrives with no
+ * tool call to mark it — whether the model says it or the user does.
  */
 export const TURN_REMINDER_STANDARD =
-  'This turn, elect before acting: a failure appearing, multi-step work starting, or review arriving or departing means loading the skill that owns the moment first — and before saying done, fixed, or passing, that skill is `/seiri:verify`. Keep changes within the active rules.';
+  "This turn, elect before acting: a failure appearing, multi-step work starting, or review arriving or departing means loading the skill that owns the moment first — and when done, fixed, or passing is said or heard, your claim or the user's, that skill is `/seiri:verify`. Keep changes within the active rules.";
 
 /**
  * Strict widens the same reminder rather than replacing it: borderline and
@@ -29,4 +29,4 @@ export const TURN_REMINDER_STANDARD =
  * turn, and the moment that decays is the one that arrives late.
  */
 export const TURN_REMINDER_STRICT =
-  'This turn, elect the owning skill by name — a failure → `/seiri:trace-cause` · multi-step work → `/seiri:write-plan` · a plan in hand → `/seiri:execute` · before implementing → `/seiri:implement` · before saying done, fixed, or passing → `/seiri:verify` · sending work out → `/seiri:request-review` · feedback arriving → `/seiri:receive-review`. Borderline and small work included; the active rules bind rather than advise.';
+  "This turn, elect the owning skill by name — a failure → `/seiri:trace-cause` · multi-step work → `/seiri:write-plan` · a plan in hand → `/seiri:execute` · before implementing → `/seiri:implement` · done, fixed, or passing said or heard, yours or the user's → `/seiri:verify` · sending work out → `/seiri:request-review` · feedback arriving → `/seiri:receive-review`. Borderline and small work included; the active rules bind rather than advise.";
