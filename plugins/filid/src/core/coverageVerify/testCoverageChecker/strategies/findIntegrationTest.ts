@@ -1,6 +1,6 @@
 /**
  * @file findIntegrationTest.ts
- * @description Strategy 3: `src/__tests__/integration/` 아래의 이름 규칙 매칭 테스트 탐색.
+ * @description Strategy 5: `src/__tests__/integration/` 아래의 이름 규칙 매칭 테스트 탐색.
  */
 import { readdirSync } from 'node:fs';
 

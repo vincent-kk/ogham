@@ -1,6 +1,6 @@
 /**
  * @file findCentralizedTest.ts
- * @description Strategy 3: 중앙집중 테스트 레이아웃(`src/__tests__/**`) 탐색.
+ * @description Strategy 4: 중앙집중 테스트 레이아웃(`src/__tests__/**`) 탐색.
  *
  * 이 레이아웃은 테스트를 소스 경로 미러가 아니라 평탄화된 이름으로 보관한다
  * (`__tests__/unit/hooks/shared.test.ts` 가 `hooks/shared/utils/*.ts` 전부를
@@ -45,7 +45,7 @@ function nearestFractalName(
 }
 
 /**
- * Strategy 3: Centralized flattened test layout.
+ * Strategy 4: Centralized flattened test layout.
  *
  * Search `<nearest src>/__tests__/**` for `<basename>.{test,spec}.{ts,tsx}`
  * (exact), then `<fractalName>*.{test,spec}.{ts,tsx}` (prefix).

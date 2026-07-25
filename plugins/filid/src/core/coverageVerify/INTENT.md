@@ -8,11 +8,11 @@ import 경로 해석(`importResolver`)은 추적 단계의 내부 의존성이�
 
 ## Structure
 
-| 서브모듈              | 역할                                                                                                      |
-| --------------------- | --------------------------------------------------------------------------------------------------------- |
-| `usageTracker`        | `FractalTree` 순회로 타겟 모듈을 import하는 peer 파일 수집 → `UsageSite[]`                                |
-| `testCoverageChecker` | 4-Strategy(co-located / mirror / centralized / integration)로 테스트 파일 탐지 → `UsageCoverage[]` + 경고 |
-| `importResolver`      | 상대 경로·ESM `.js↔.ts`·index 해석 (내부 전용)                                                            |
+| 서브모듈              | 역할                                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `usageTracker`        | `FractalTree` 순회로 타겟 모듈을 import하는 peer 파일 수집 → `UsageSite[]`                                         |
+| `testCoverageChecker` | 5-Strategy(co-located / mirror / nested / centralized / integration)로 테스트 파일 탐지 → `UsageCoverage[]` + 경고 |
+| `importResolver`      | 상대 경로·ESM `.js↔.ts`·index 해석 (내부 전용)                                                                     |
 
 실행 순서: `findSubtreeUsages` → `checkTestCoverage` → `generateCoverageWarnings`.
 
