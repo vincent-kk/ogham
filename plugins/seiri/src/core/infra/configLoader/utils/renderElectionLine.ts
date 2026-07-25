@@ -8,8 +8,9 @@ import type { InterventionLevel } from '../../../../types/config.js';
  *
  * Separate from `renderPostureLines` because the two are gated
  * differently: posture lines ride along with the deployed-rule status,
- * this one is gated on the dial alone and renders in both the SessionStart
- * and the SubagentStart compact path.
+ * this one is gated on the dial alone and renders on every surface that
+ * echoes the dial — SessionStart, the SubagentStart compact path, and the
+ * `rule_docs_sync` config posture echo.
  */
 export function renderElectionLine(
   level: InterventionLevel,

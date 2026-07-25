@@ -1,9 +1,10 @@
 import { INTERVENTION } from './intervention.js';
 
 /**
- * The election contract (D7-E, Arm S), restated by both injection
- * channels: SubagentStart, where a spawn inherits none of the parent's
- * SessionStart context, and SessionStart itself. It sits beside
+ * The election contract (D7-E, Arm S), restated by every channel that
+ * carries posture: SubagentStart, where a spawn inherits none of the
+ * parent's SessionStart context, SessionStart itself, and the
+ * `rule_docs_sync` config posture echo. It sits beside
  * `WORKFLOW_CHAIN_LINE` (constants/postureLines.ts) rather than replacing
  * it — the chain says which workflow follows which, this says a matching
  * moment is loaded before it is acted on. Neither touches the deployed

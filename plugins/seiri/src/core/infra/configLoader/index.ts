@@ -6,6 +6,7 @@ export { writeConfig } from './loaders/writeConfig.js';
 export { writeRuntime } from './loaders/writeRuntime.js';
 export { describeDial } from './utils/describeDial.js';
 export { isInterventionLevel } from './utils/isInterventionLevel.js';
+export { renderElectionLine } from './utils/renderElectionLine.js';
 export { renderPostureLines } from './utils/renderPostureLines.js';
 export { resolveConfigPath } from './utils/resolveConfigPath.js';
 export { resolveRuntimePath } from './utils/resolveRuntimePath.js';
