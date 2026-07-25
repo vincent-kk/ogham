@@ -2,7 +2,7 @@ import type { ServerResponse } from "node:http";
 
 import { sendJson } from "@ogham/http-kit/response";
 
-import type { RouteContext } from "../routeContext.js";
+import type { RouteContext } from "../routing/routeContext.js";
 import { buildStatus } from "../utils/buildStatus.js";
 
 /** GET /status — current settings (api_key masked) + effective rate. */

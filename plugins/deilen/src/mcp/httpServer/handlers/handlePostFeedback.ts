@@ -21,27 +21,13 @@ import {
 import { SESSION_ID_PATTERN } from "../constants/patterns.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { parseMultipart } from "../utils/parseMultipart.js";
+import { persistLastIntent } from "../utils/persistLastIntent.js";
 
 const MB = 1024 * 1024;
 
 // Sessions whose complete submit is mid-close. Added synchronously before any
 // await so two concurrent complete POSTs can't both pass the closed-check.
 const closingSessions = new Set<string>();
-
-// Persist the chosen submit intent so the next viewer defaults to it. Best-effort
-// — a config write must never fail the feedback submission itself.
-async function persistLastIntent(
-  context: RouteContext,
-  intent: typeof FeedbackIntent.Revise | typeof FeedbackIntent.Discuss,
-): Promise<void> {
-  try {
-    const config = await context.loadConfig();
-    if (config.last_intent !== intent)
-      await context.saveConfig({ ...config, last_intent: intent });
-  } catch {
-    /* swallow: last_intent is a convenience default, not part of the contract */
-  }
-}
 
 /**
  * POST /api/feedback — persist a submission. JSON bodies are text-only

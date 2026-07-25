@@ -3,7 +3,7 @@ import type {
   Credentials,
   ServiceCredentials,
   ConnectionTestResult,
-} from "../../../../types/index.js";
+} from "../../../../../types/index.js";
 
 /** Shared context handed to every route handler. Defined in its own file so
  *  routes.ts and handlers/* can both depend on the type without creating a

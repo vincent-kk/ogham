@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createServer } from "node:http";
 import type { Server } from "node:http";
-import { createRouteHandler } from "../webServer/routes.js";
-import type { RouteContext } from "../webServer/routes.js";
+import { createRouteHandler } from "../webServer/routing/routes.js";
+import type { RouteContext } from "../webServer/routing/routes.js";
 
 // Tests for the deployment-type discriminated schema and on-prem PAT routing.
 // Live separately from routes.test.ts to respect the 3+12 case ceiling.

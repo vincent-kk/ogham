@@ -6,15 +6,14 @@ Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩,
 
 ## Structure
 
-| 위치              | 역할                                                                      |
-| ----------------- | ------------------------------------------------------------------------- |
-| `index.ts`        | 배럴 — `startSetupServer`, `createRouteHandler`, `RouteContext` 노출      |
-| `webServer.ts`    | `startSetupServer` — closure 기반 서버 lifecycle                          |
-| `routes.ts`       | `createRouteHandler` — shared guard(host/token/origin/CT) + 경로 디스패치 |
-| `routeContext.ts` | `RouteContext` 인터페이스 (routes ↔ handlers 순환 방지)                   |
-| `constants/`      | `MASK` 등 모듈 내 상수                                                    |
-| `utils/`          | build\* 헬퍼 (one function per file)                                      |
-| `handlers/`       | GET/POST 라우트별 핸들러 함수 (one function per file)                     |
+| 위치           | 역할                                                                     |
+| -------------- | ------------------------------------------------------------------------ |
+| `index.ts`     | 배럴 — `startSetupServer`, `createRouteHandler`, `RouteContext` 노출     |
+| `webServer.ts` | `startSetupServer` — closure 기반 서버 lifecycle                         |
+| `routing/`     | `routes.ts`(shared guard + 경로 디스패치) · `routeContext.ts`(순환 방지) |
+| `constants/`   | `MASK` 등 모듈 내 상수                                                   |
+| `utils/`       | build\* 헬퍼 (one function per file)                                     |
+| `handlers/`    | GET/POST 라우트별 핸들러 함수 (one function per file)                    |
 
 ## Boundaries
 

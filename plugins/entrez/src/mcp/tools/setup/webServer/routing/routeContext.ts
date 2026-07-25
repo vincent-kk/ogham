@@ -1,12 +1,12 @@
 import type {
   EntrezConfig,
   EntrezConfigInput,
-} from "../../../../types/config.js";
-import type { EntrezCredentials } from "../../../../types/config.js";
+} from "../../../../../types/config.js";
+import type { EntrezCredentials } from "../../../../../types/config.js";
 import type {
   SetupFormData,
   ConnectionTestResult,
-} from "../../../../types/setup.js";
+} from "../../../../../types/setup.js";
 
 /** Dependencies + lifecycle handed to setup route handlers (avoids cycles). */
 export interface RouteContext {

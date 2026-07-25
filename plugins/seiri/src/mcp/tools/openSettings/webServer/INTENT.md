@@ -1,5 +1,3 @@
-# webServer — 로컬 설정 서버
-
 ## Purpose
 
 `open_settings` 가 띄우는 `127.0.0.1` 전용 HTTP 서버. 공유
@@ -43,3 +41,9 @@ handlers/      GET / · POST /plan · POST /save · POST /close · readSaveBody
 - CORS 와일드카드, `127.0.0.1` 외 바인딩.
 - 모듈 전역 mutable state — 수명주기는 closure 반환값으로만 노출.
 - 응답에 토큰 echo.
+
+## Dependencies
+
+- `node:http` · `@ogham/http-guard/{guard,token}` — `inspectRequest`, `generateToken`
+- `@ogham/http-kit/{body,html,response}` — `parseBody`, `describeBodyError`, `escapeJsonForHtml`, `sendJson`
+- `../types/settingsTypes` — save/plan 스키마·settle 타입 · `src/constants/{http,plugin}` · `src/types/manifest`

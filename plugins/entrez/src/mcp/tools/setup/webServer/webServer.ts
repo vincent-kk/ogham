@@ -5,8 +5,8 @@ import { generateToken } from "@ogham/http-guard/token";
 
 import type { SetupServerHandle } from "../../../../types/setup.js";
 import { SETUP_AUTO_SHUTDOWN_MS } from "../../../../constants/defaults.js";
-import { createRouteHandler } from "./routes.js";
-import type { RouteContext } from "./routeContext.js";
+import { createRouteHandler } from "./routing/routes.js";
+import type { RouteContext } from "./routing/routeContext.js";
 
 export interface SetupServerOptions {
   context: Omit<RouteContext, "resetTimer" | "closeServer" | "token">;

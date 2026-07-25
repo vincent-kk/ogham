@@ -2,7 +2,7 @@ import type { ServerResponse } from "node:http";
 
 import { escapeJsonForHtml } from "@ogham/http-kit/html";
 
-import type { RouteContext } from "../routeContext.js";
+import type { RouteContext } from "../routing/routeContext.js";
 import { buildStatus } from "../utils/buildStatus.js";
 
 const STATE_PLACEHOLDER = "window.__ENTREZ_STATE__ = null;";

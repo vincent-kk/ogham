@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { RouteContext } from "../routeContext.js";
+import type { RouteContext } from "../routing/routeContext.js";
 import type { ConnectionTestResult } from "../../../../../types/index.js";
 import { SetupFormDataSchema } from "../../../../../types/index.js";
 import { sendJson } from "@ogham/http-kit/response";

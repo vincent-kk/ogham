@@ -4,8 +4,8 @@ import type { Server } from "node:http";
 import { generateToken } from "@ogham/http-guard/token";
 
 import type { SetupServerHandle } from "../../../../types/index.js";
-import { createRouteHandler } from "./routes.js";
-import type { RouteContext } from "./routeContext.js";
+import { createRouteHandler } from "./routing/routes.js";
+import type { RouteContext } from "./routing/routeContext.js";
 
 const AUTO_SHUTDOWN_MS = 5 * 60 * 1000; // 5 minutes
 

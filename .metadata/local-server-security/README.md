@@ -141,7 +141,7 @@ const LOOPBACK_ORIGIN = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i;
 
 **취약점 해소** — cennad·atlassian 의 로컬 `parseBody` 는 body 크기 상한이 **전무**했다(무제한 버퍼링 → 정상 토큰 세션의 대용량 전송에 메모리 고갈; loopback/토큰/Origin 가드는 외부 악성 페이지만 차단). 공통 `parseBody`(기본 상한 1MB — 설정·setup 폼은 수 KB, seiri·filid·imbas·entrez 의 기존 상한값) + `describeBodyError`→413 매핑 신설으로 해소. 각각 **fail-first** 검증(413 분기 제거 시 red — cennad 400·atlassian 500 —, 복원 시 green). entrez 는 수신 검사만 하던 부분 방어를 이중 방어로 강화하고 413/400 을 답한다(라우트 500 폴백 아님). deilen 은 두 본문 경로(JSON·multipart)와 `handleGetImage` 를 413 으로 통일.
 
-**배선** — `scripts/buildAll.mjs`·`typecheckAll.mjs` PROVIDERS + 루트 `vitest.config.ts` projects 에 http-kit 추가. 7개 `package.json` devDependencies 에 `workspace:^`. 각 webServer INTENT.md Dependencies 에 http-kit 기재(filid·imbas·deilen 은 50줄 캡 경계라 `node:http` 를 http-guard 줄에 병합해 줄수 유지).
+**배선** — `scripts/buildAll.mjs`·`typecheckAll.mjs` PROVIDERS + 루트 `vitest.config.ts` projects 에 http-kit 추가. 7개 `package.json` devDependencies 에 `workspace:^`. 각 webServer INTENT.md Dependencies 에 http-kit 기재(filid·imbas 는 50줄 캡 경계라 `node:http` 를 http-guard 줄에 병합해 줄수 유지, deilen 은 기존 http-guard·cross-platform 병합 줄에 http-kit 을 삽입 — `node:http` 는 별도 줄, seiri 는 Dependencies 섹션 신설로 기재).
 
 **검증** — 전체 `typecheck` clean(provider 자체 `typecheck` 포함) · 루트 `test:run` 4808 pass(seiri·entrez 를 루트 projects 에 편입) · `build:all` 성공 · 재생성한 7개 `bridge/mcp-server.cjs` 에서 새 상한(`1e6`)·`u0024` 이스케이프·`Request body too large` 각 1건, parseBody 내 `req.destroy()` 0건 확인. (번들 검증을 `require("@ogham/http-kit")` 누출 0 으로 주장하면 안 된다 — 애초에 그 모듈을 import 하지 않는 stale 번들에서도 자명하게 참이다. 심볼·상수 존재로 확인할 것.) escapeJsonForHtml 중복 테스트(atlassian 전용 파일·entrez describe)는 정본 http-kit 테스트로 이관해 제거. 빌드 산출물(bridge·public) 재생성·커밋은 사용자.
 

@@ -1,5 +1,5 @@
 import type { ServerResponse } from "node:http";
-import type { RouteContext } from "../routeContext.js";
+import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "@ogham/http-kit/response";
 import { buildStatus } from "../utils/buildStatus.js";
 

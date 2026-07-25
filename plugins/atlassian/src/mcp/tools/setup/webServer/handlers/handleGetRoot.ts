@@ -1,5 +1,5 @@
 import type { ServerResponse } from "node:http";
-import type { RouteContext } from "../routeContext.js";
+import type { RouteContext } from "../routing/routeContext.js";
 import { buildStatus } from "../utils/buildStatus.js";
 import { buildEditableSitesState } from "../utils/buildEditableSitesState.js";
 import { escapeJsonForHtml } from "@ogham/http-kit/html";

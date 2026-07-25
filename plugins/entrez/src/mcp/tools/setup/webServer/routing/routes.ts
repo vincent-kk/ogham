@@ -3,10 +3,10 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { inspectRequest } from "@ogham/http-guard/guard";
 import { sendJson } from "@ogham/http-kit/response";
 
-import { handleGetRoot } from "./handlers/handleGetRoot.js";
-import { handleStatus } from "./handlers/handleStatus.js";
-import { handleSubmit } from "./handlers/handleSubmit.js";
-import { handleTest } from "./handlers/handleTest.js";
+import { handleGetRoot } from "../handlers/handleGetRoot.js";
+import { handleStatus } from "../handlers/handleStatus.js";
+import { handleSubmit } from "../handlers/handleSubmit.js";
+import { handleTest } from "../handlers/handleTest.js";
 import type { RouteContext } from "./routeContext.js";
 
 export type { RouteContext } from "./routeContext.js";
