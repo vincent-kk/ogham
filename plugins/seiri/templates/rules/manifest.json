@@ -51,6 +51,14 @@
       "templateHash": "f12648d9b720312774c4274cf2ac9b0c39a3fca480462d17f061e90ad81270fd"
     },
     {
+      "id": "seiri_function-boundaries",
+      "filename": "seiri_function-boundaries.md",
+      "title": "Function Boundaries",
+      "description": "Functions compute from their parameters, effects stay at the edge, and one file exports one function.",
+      "recommended": false,
+      "templateHash": "0b55975052160cf53513dfc128e5d276ea631071860366dcc2f986a8df42f32e"
+    },
+    {
       "id": "seiri_context-efficiency",
       "filename": "seiri_context-efficiency.md",
       "title": "Context Efficiency",
