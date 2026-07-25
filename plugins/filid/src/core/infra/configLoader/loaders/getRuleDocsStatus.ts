@@ -21,8 +21,8 @@ const log = createLogger('config-loader');
  *
  * The host's rule-doc channel is the SINGLE source of truth — the directory of files
  * Claude reads, or the merged instruction file Codex reads (see `ruleDocsTarget`):
- * - `deployed` → the document is present in that channel
- * - `selected` → `deployed` for optional entries; always `true` for required
+ * - `deployed` → the document is active in the effective host channel
+ * - `selected` → stored deployment for optional entries; always `true` for required
  *
  * Required entries are partitioned into `autoDeployed` and are NEVER
  * rendered in the checkbox UI — they are auto-synced by `syncRuleDocs`
@@ -100,20 +100,20 @@ export function getRuleDocsStatus(
     const statusEntry: RuleDocStatusEntry = {
       id: entry.id,
       filename: entry.filename,
-      target: inspection.target,
-      displayTarget: inspection.displayTarget,
-      source: inspection.source,
+      target: inspection.activeTarget,
+      displayTarget: inspection.activeDisplayTarget,
+      source: inspection.activeSource,
       required: entry.required,
       title: entry.title,
       description: entry.description,
-      deployed: inspection.deployed,
+      deployed: inspection.active,
       selected: entry.required ? true : inspection.deployed,
       templateHash,
-      deployedHash: inspection.deployedHash,
+      deployedHash: inspection.activeDeployedHash,
       inSync:
-        inspection.deployed &&
-        inspection.deployedHash !== null &&
-        inspection.deployedHash === templateHash,
+        inspection.active &&
+        inspection.activeDeployedHash !== null &&
+        inspection.activeDeployedHash === templateHash,
     };
     if (entry.required) autoDeployed.push(statusEntry);
     else entries.push(statusEntry);

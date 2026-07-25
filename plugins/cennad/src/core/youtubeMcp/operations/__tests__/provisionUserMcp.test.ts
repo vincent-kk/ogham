@@ -2,7 +2,7 @@ import type { McpCliRunResult, McpCliRunner } from '@ogham/agent-artifacts/mcp';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { logger } from '../../../../lib/logger.js';
-import { provisionCodexYoutube } from '../provisionCodex.js';
+import { provisionUserMcpYoutube } from '../provisionUserMcp.js';
 
 function recordingRunner(result: McpCliRunResult): {
   run: McpCliRunner;
@@ -27,10 +27,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('provisionCodexYoutube', () => {
+describe('provisionUserMcpYoutube', () => {
   it('runs `codex mcp add` with the language env when enabling', async () => {
     const { run, calls } = recordingRunner(OK);
-    const result = await provisionCodexYoutube(true, 'ko', run);
+    const result = await provisionUserMcpYoutube('codex', true, 'ko', run);
     expect(result).toEqual({ ok: true, action: 'added' });
     expect(calls).toEqual([
       {
@@ -52,7 +52,7 @@ describe('provisionCodexYoutube', () => {
 
   it('runs `codex mcp remove` when disabling', async () => {
     const { run, calls } = recordingRunner(OK);
-    const result = await provisionCodexYoutube(false, 'en', run);
+    const result = await provisionUserMcpYoutube('codex', false, 'en', run);
     expect(result).toEqual({ ok: true, action: 'removed' });
     expect(calls).toEqual([
       {
@@ -72,7 +72,7 @@ describe('provisionCodexYoutube', () => {
       timedOut: false,
       spawnError: missing,
     });
-    const result = await provisionCodexYoutube(true, 'en', run);
+    const result = await provisionUserMcpYoutube('codex', true, 'en', run);
     expect(result).toEqual({ ok: false, action: 'unchanged' });
     expect(warn).not.toHaveBeenCalled();
   });
@@ -85,11 +85,47 @@ describe('provisionCodexYoutube', () => {
       stderr: 'boom',
       timedOut: false,
     });
-    const result = await provisionCodexYoutube(true, 'en', run);
+    const result = await provisionUserMcpYoutube('codex', true, 'en', run);
     expect(result).toEqual({ ok: false, action: 'unchanged' });
     expect(warn).toHaveBeenCalledWith('codex youtube MCP provisioning failed', {
       code: 1,
       stderr: 'boom',
     });
+  });
+
+  it('runs scoped `claude mcp add` with the language env', async () => {
+    const { run, calls } = recordingRunner(OK);
+    const result = await provisionUserMcpYoutube('claude', true, 'ko', run);
+    expect(result).toEqual({ ok: true, action: 'added' });
+    expect(calls).toEqual([
+      {
+        binary: 'claude',
+        args: [
+          'mcp',
+          'add',
+          '--scope',
+          'user',
+          '--env',
+          'YTDLP_LANG=ko',
+          'yt-dlp-mcp',
+          '--',
+          'npx',
+          '-y',
+          '@ogham/yt-dlp-mcp',
+        ],
+      },
+    ]);
+  });
+
+  it('runs scoped `claude mcp remove` when disabling', async () => {
+    const { run, calls } = recordingRunner(OK);
+    const result = await provisionUserMcpYoutube('claude', false, 'en', run);
+    expect(result).toEqual({ ok: true, action: 'removed' });
+    expect(calls).toEqual([
+      {
+        binary: 'claude',
+        args: ['mcp', 'remove', '--scope', 'user', 'yt-dlp-mcp'],
+      },
+    ]);
   });
 });

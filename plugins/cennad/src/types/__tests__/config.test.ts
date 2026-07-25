@@ -8,6 +8,25 @@ describe('ConfigSchema', () => {
     expect(ConfigSchema.parse(DEFAULT_CONFIG)).toEqual(DEFAULT_CONFIG);
   });
 
+  it('preserves an explicitly enabled Claude YouTube MCP target', () => {
+    const config = {
+      ...DEFAULT_CONFIG,
+      addons: {
+        youtube: {
+          ...DEFAULT_CONFIG.addons.youtube,
+          targets: {
+            ...DEFAULT_CONFIG.addons.youtube.targets,
+            claude: true,
+          },
+        },
+      },
+    };
+
+    const targets = ConfigSchema.parse(config).addons.youtube.targets;
+    expect(targets.claude).toBe(true);
+    expect(Object.keys(targets)).toEqual(['claude', 'codex', 'antigravity']);
+  });
+
   it('rejects intervention_strength outside [-2, +2]', () => {
     expect(() =>
       ConfigSchema.parse({ ...DEFAULT_CONFIG, intervention_strength: 3 }),

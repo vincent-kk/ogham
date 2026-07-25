@@ -1,7 +1,7 @@
 import {
-  createMcpServerManager,
   type McpCliRunResult,
   type McpCliRunner,
+  createMcpServerManager,
 } from '@ogham/agent-artifacts/mcp';
 import { resolveUserMcpTarget } from '@ogham/agent-artifacts/targets/user/mcp';
 
@@ -16,21 +16,22 @@ import {
 
 import type { ProvisionResult } from './provisionResult.js';
 
-export type CodexMcpRunner = McpCliRunner;
-export type CodexRunResult = McpCliRunResult;
+export type YoutubeUserMcpHost = 'codex' | 'claude';
+export type UserMcpRunner = McpCliRunner;
+export type UserMcpRunResult = McpCliRunResult;
 
-// Reconciles the Codex user MCP through the shared artifact manager. Cennad owns
-// only product policy here: the desired yt-dlp definition and its logging/degrade
-// behavior. The manager owns argv construction, spawning, and failure classification.
-export async function provisionCodexYoutube(
+// Reconciles a user-scoped CLI MCP through the shared artifact manager. Cennad
+// owns only the desired yt-dlp definition and its logging/degrade policy.
+export async function provisionUserMcpYoutube(
+  host: YoutubeUserMcpHost,
   enabled: boolean,
   language: YoutubeAddonLanguage,
-  run?: CodexMcpRunner,
+  run?: UserMcpRunner,
 ): Promise<ProvisionResult> {
   try {
     const mcp = createMcpServerManager({
       owner: 'cennad',
-      target: resolveUserMcpTarget({ host: 'codex' }),
+      target: resolveUserMcpTarget({ host }),
     });
     const plan = await mcp.plan({
       name: YOUTUBE_MCP_KEY,
@@ -50,7 +51,7 @@ export async function provisionCodexYoutube(
     );
     if (!result.ok) {
       if (result.failure?.kind !== 'not-installed')
-        logger.warn('codex youtube MCP provisioning failed', {
+        logger.warn(`${host} youtube MCP provisioning failed`, {
           code: result.failure?.code ?? null,
           stderr: result.failure?.stderr.slice(0, 200) ?? '',
         });
@@ -59,7 +60,7 @@ export async function provisionCodexYoutube(
     }
     return { ok: true, action: enabled ? 'added' : 'removed' };
   } catch (err) {
-    logger.warn('codex youtube MCP provisioning threw', {
+    logger.warn(`${host} youtube MCP provisioning threw`, {
       error: err instanceof Error ? err.message : String(err),
     });
     return { ok: false, action: 'unchanged' };

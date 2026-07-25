@@ -21,7 +21,10 @@
 - 소유자는 항상 `filid`로 명시하며 첫 manifest 항목에서 추론하지 않는다.
 - 이 정리는 소유 파일명 패턴만으로 판별하므로, 매니페스트에 없는 `filid_*.md` 파일은 예외 없이 삭제 대상이 된다 — 사용자가 직접 작성한 `filid_custom.md` 같은 파일도 함께 삭제된다.
 - Codex 병합 채널도 `FILID` namespace의 manifest 외 고아 구간만 폐기한다.
-- **읽기 채널 동조**: 설정 UI와 훅은 공유 target 해석을 사용해 현재 host가 실제로 읽는 채널만 판독한다.
+- **읽기 채널 동조**: 설정 UI와 훅은 공유 target 해석을 사용한다.
+  optional 체크박스 선택은 canonical-first 저장본으로 보존하되,
+  배포 여부·경로·source·hash·동기화 상태는 현재 host가 실제로 읽는
+  effective target의 active inspection으로 보고한다.
 
 ## API Contracts
 
@@ -44,14 +47,18 @@
 
 **`RuleDocStatusEntry`** — 상태 스냅샷 단일 항목.
 
-- `target` / `displayTarget` — 공유 manager가 판독한 실제 경로와 UI용
-  project-relative host target.
-- `source` — 현재 주소, legacy 주소, 또는 미배포를 뜻하는
+- `target` / `displayTarget` — 공유 manager가 판독한 active 실제 경로와
+  UI용 project-relative effective host target.
+- `source` — active target의 현재 주소, legacy 주소, 또는 미배포를 뜻하는
   `current | legacy | null`.
-- `deployed: boolean` — 호스트 채널에 배포돼 있는지 여부 (디렉터리 채널=파일 존재, 병합 채널=마커 구간 존재).
-- `selected: boolean` — optional은 `deployed`와 동일; required는 항상 `true`.
+- `deployed: boolean` — effective host 채널에서 규칙이 실제 활성인지 여부
+  (디렉터리 채널=파일 존재, 병합 채널=active target 마커 구간 존재).
+- `selected: boolean` — optional은 canonical-first managed candidate에
+  저장본이 있는지 여부; required는 항상 `true`. Codex override가 저장본을
+  가려도 optional 체크박스 선택은 보존된다.
 - `templateHash: string` — **배포본이 일치해야 할 템플릿 해시**. 디렉터리 채널은 manifest 값(원본 바이트), 병합 채널은 삽입되는 본문(trim)의 해시 — 양쪽 채널에서 `inSync` 불변식이 성립하도록 같은 방식으로 계산한다.
-- `deployedHash: string | null` — 배포본의 SHA-256 hex; 미배포 또는 읽기 불가 시 `null`.
+- `deployedHash: string | null` — active 배포본의 SHA-256 hex; 미배포 또는
+  읽기 불가 시 `null`.
 - `inSync: boolean` — `deployed && deployedHash === templateHash` (두 채널 공통).
 
 **`RuleDocsStatus`** — `getRuleDocsStatus` 반환값.
@@ -171,4 +178,4 @@ cannot slip through as no-op commits.
 
 ## Last Updated
 
-2026-07-26 — rule document 물리 채널을 `@ogham/agent-artifacts`로 위임.
+2026-07-26 — 저장 선택과 active rule 배포 상태의 호환 매핑 명시.

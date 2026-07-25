@@ -34,6 +34,7 @@ export function mergeAddons(
         enabled: asBool(y.enabled, dy.enabled),
         language: asLanguage(y.language, dy.language),
         targets: {
+          claude: asBool(t.claude, false),
           codex: asBool(t.codex, dy.targets.codex),
           antigravity: asBool(t.antigravity, dy.targets.antigravity),
         },
@@ -46,7 +47,7 @@ export function mergeAddons(
       youtube: {
         enabled: asBool(legacyAntigravityYoutube.enabled, false),
         language: dy.language,
-        targets: { codex: false, antigravity: true },
+        targets: { claude: false, codex: false, antigravity: true },
       },
     };
 

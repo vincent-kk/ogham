@@ -49,8 +49,9 @@ async function start(
       (async (next) => {
         provisionedWith = next;
         return {
-          antigravity: { ok: true, action: 'unchanged' },
+          claude: { ok: true, action: 'unchanged' },
           codex: { ok: true, action: 'unchanged' },
+          antigravity: { ok: true, action: 'unchanged' },
         };
       }),
   });
@@ -188,7 +189,7 @@ describe('settings web server', () => {
         youtube: {
           enabled: true,
           language: 'ko',
-          targets: { codex: true, antigravity: true },
+          targets: { claude: true, codex: true, antigravity: true },
         },
       },
     };
@@ -199,14 +200,16 @@ describe('settings web server', () => {
     });
     const body = (await res.json()) as {
       youtube: {
-        antigravity: { ok: boolean; action: string };
+        claude: { ok: boolean; action: string };
         codex: { ok: boolean; action: string };
+        antigravity: { ok: boolean; action: string };
       };
     };
     expect(res.status).toBe(200);
     expect(provisionedWith).toEqual(updated.addons.youtube);
-    expect(body.youtube.antigravity).toEqual({ ok: true, action: 'unchanged' });
+    expect(body.youtube.claude).toEqual({ ok: true, action: 'unchanged' });
     expect(body.youtube.codex).toEqual({ ok: true, action: 'unchanged' });
+    expect(body.youtube.antigravity).toEqual({ ok: true, action: 'unchanged' });
   });
 
   it('POST /save returns 400 with errors[] on invalid Config', async () => {

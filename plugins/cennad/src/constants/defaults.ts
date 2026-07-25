@@ -68,7 +68,7 @@ export const DEFAULT_CONFIG: Config = {
     youtube: {
       enabled: false,
       language: 'en',
-      targets: { codex: true, antigravity: true },
+      targets: { claude: false, codex: true, antigravity: true },
     },
   },
 };

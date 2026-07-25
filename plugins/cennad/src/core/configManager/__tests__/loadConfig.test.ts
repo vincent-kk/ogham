@@ -107,7 +107,7 @@ describe('loadConfig', () => {
         youtube: {
           enabled: true,
           language: 'ko' as const,
-          targets: { codex: true, antigravity: false },
+          targets: { claude: true, codex: true, antigravity: false },
         },
       },
     };
@@ -159,7 +159,7 @@ describe('loadConfig', () => {
     expect(result.addons.youtube).toEqual({
       enabled: true,
       language: 'en',
-      targets: { codex: false, antigravity: true },
+      targets: { claude: false, codex: false, antigravity: true },
     });
     expect(
       (result as unknown as Record<string, unknown>).antigravity_youtube,

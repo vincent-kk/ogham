@@ -21,8 +21,9 @@ async function start(): Promise<SettingsServerInstance> {
     saveConfig: async () => {},
     // Stub provisioning so a passing /save never touches real CLI MCP configs.
     provisionYoutube: async () => ({
-      antigravity: { ok: true, action: 'unchanged' },
+      claude: { ok: true, action: 'unchanged' },
       codex: { ok: true, action: 'unchanged' },
+      antigravity: { ok: true, action: 'unchanged' },
     }),
   });
   return handle;

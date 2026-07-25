@@ -42,11 +42,11 @@ export interface RuleDocSyncResult {
 export interface RuleDocStatusEntry {
   id: string;
   filename: string;
-  /** Physical host target used for inspection. */
+  /** Physical effective host target used for active inspection. */
   target: string;
-  /** Portable project-relative target shown to users and agents. */
+  /** Portable project-relative effective target shown to users and agents. */
   displayTarget: string;
-  /** Whether the current or a legacy address supplied the deployed content. */
+  /** Whether a current or legacy address supplies the active content. */
   source: 'current' | 'legacy' | null;
   required: boolean;
   title: string;
@@ -54,15 +54,16 @@ export interface RuleDocStatusEntry {
   /** Rule exists in the active host's directory or owned-section channel. */
   deployed: boolean;
   /**
-   * Desired state for the checkbox UI. For optional entries this equals
-   * `deployed`; required entries are never rendered in the checkbox UI
-   * (they live in `RuleDocsStatus.autoDeployed`), so this field is
-   * always `true` for entries in `autoDeployed`.
+   * Desired state for the checkbox UI. Optional entries preserve whether a
+   * managed candidate stores the rule even when an effective Codex override
+   * hides it. Required entries are never rendered in the checkbox UI (they
+   * live in `RuleDocsStatus.autoDeployed`), so this field is always `true`
+   * for entries in `autoDeployed`.
    */
   selected: boolean;
   /** SHA-256 of the host-channel form expected from the shipped template. */
   templateHash: string;
-  /** SHA-256 of the deployed file/section body, or null when unavailable. */
+  /** SHA-256 of the active file/section body, or null when unavailable. */
   deployedHash: string | null;
   /** True iff `deployed` and `deployedHash === templateHash`. */
   inSync: boolean;

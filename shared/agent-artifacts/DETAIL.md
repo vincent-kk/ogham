@@ -133,7 +133,19 @@ marker 밖 바이트를 보존하고 실제 기존 파일 변경에만 sibling b
 `McpServerDefinition`은 `stdio`와 `http`의 판별 합집합이다.
 `McpServerRequest`는 이름, 정의 또는 제거를 뜻하는 `null`,
 `replaceDrift`를 가진다.
+Claude 사용자 CLI의 가변 옵션보다 필수 위치 인자를 먼저 둔다. stdio는
+`<name>` 뒤에 `--env <env...>`와 `-- <command> [args...]`를, HTTP는
+`<name> <url>` 뒤에 `--header <header...>`를 둬 이름·URL이 옵션 값으로
+소비되지 않게 한다.
+
+Claude 사용자 정의 적용은 먼저 add를 시도한다. 같은 이름이 있다는 Claude의
+명시적 결과에서 `replaceDrift`가 false면 기존 항목을 보존하고 멱등 성공으로
+정규화하며, true면 user scope에서 제거한 뒤 add를 재시도해 drift 교체를 실제
+상태에 반영한다. 제거할 이름이 없다는 명시적 결과만 멱등 성공으로 취급한다.
+다른 제거 실패는 재시도하지 않고 그대로 실패하며, 정의 제거 요청도 같은
+absent 결과만 성공으로 정규화한다. Codex 사용자 CLI의 단일 명령 적용 계약은
+바꾸지 않는다.
 
 ## Last Updated
 
-2026-07-26 — 프로젝트/사용자 범위와 hook용 목적별 진입점 계약 선언.
+2026-07-26 — Claude 사용자 MCP 인자 순서와 멱등 재조정 계약 추가.

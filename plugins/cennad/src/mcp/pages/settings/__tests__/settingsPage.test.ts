@@ -105,4 +105,22 @@ describe('settings page ratio controls', () => {
     expect(html).toContain('~/.claude/plugins/cennad/');
     expect(html).toContain('CENNAD_CONFIG_PATH');
   });
+
+  it('offers an opt-in Claude user MCP target for the YouTube addon', () => {
+    const html = readSettingsFile('index.html');
+    const app = readSettingsFile('scripts/app.js');
+
+    expect(html).toContain('id="youtube-target-claude"');
+    expect(app).toContain('claude: false');
+    expect(app).toContain(
+      "var youtubeTargetClaude = $('#youtube-target-claude')",
+    );
+    expect(app).toContain('claude: Boolean(youtubeTargetClaude.checked)');
+    expect(app.indexOf('var youtubeTargetClaude')).toBeLessThan(
+      app.indexOf('var youtubeTargetCodex'),
+    );
+    expect(app.indexOf('var youtubeTargetCodex')).toBeLessThan(
+      app.indexOf('var youtubeTargetAntigravity'),
+    );
+  });
 });

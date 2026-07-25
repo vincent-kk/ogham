@@ -110,14 +110,15 @@ export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
 
 // YouTube ingestion via the @ogham/yt-dlp-mcp server, modeled as a standalone MCP
 // addon rather than a per-provider LLM feature. When enabled, cennad provisions the
-// yt-dlp-mcp server into each checked target CLI — antigravity's global
-// mcp_config.json and/or codex's config.toml (via `codex mcp add`). `language`
-// sets the server's YTDLP_LANG (transcript + title/metadata language).
+// yt-dlp-mcp server into each checked target CLI — the claude/codex user MCP
+// scope and/or antigravity's global mcp_config.json. `language` sets the
+// server's YTDLP_LANG (transcript + title/metadata language).
 export const YoutubeAddonLanguageSchema = z.enum(['en', 'ko']);
 
 export type YoutubeAddonLanguage = z.infer<typeof YoutubeAddonLanguageSchema>;
 
 export const YoutubeAddonTargetsSchema = z.object({
+  claude: z.boolean(),
   codex: z.boolean(),
   antigravity: z.boolean(),
 });

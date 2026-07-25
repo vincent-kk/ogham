@@ -33,7 +33,7 @@ export async function handleSave(
   }
 
   // Read the prior config before overwriting it; provisionYoutube uses it to skip
-  // needless `codex mcp` spawns when the effective codex state is unchanged.
+  // needless user MCP CLI spawns when the effective state is unchanged.
   const previous = await ctx.loadConfig();
 
   try {
@@ -56,6 +56,10 @@ export async function handleSave(
   sendJson(res, 200, {
     success: true,
     message: 'Saved',
-    youtube: { antigravity: youtube.antigravity, codex: youtube.codex },
+    youtube: {
+      claude: youtube.claude,
+      codex: youtube.codex,
+      antigravity: youtube.antigravity,
+    },
   });
 }

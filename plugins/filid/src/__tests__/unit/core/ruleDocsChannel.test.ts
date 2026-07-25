@@ -203,6 +203,24 @@ describe('rule docs on the Codex channel', () => {
     expect(status.entries[0]?.selected).toBe(true);
   });
 
+  it('keeps a hidden rule selected but reports the active Codex channel', () => {
+    syncRuleDocs(projectRoot, ['filid_reuse-first'], { pluginRoot });
+    const overridePath = join(projectRoot, 'AGENTS.override.md');
+    writeFileSync(overridePath, '# Active override\n', 'utf8');
+
+    const status = getRuleDocsStatus(projectRoot, pluginRoot);
+
+    expect(status.entries[0]).toMatchObject({
+      selected: true,
+      deployed: false,
+      target: overridePath,
+      displayTarget: 'AGENTS.override.md',
+      source: null,
+      deployedHash: null,
+      inSync: false,
+    });
+  });
+
   it('reports nothing deployed before the first sync', () => {
     const status = getRuleDocsStatus(projectRoot, pluginRoot);
 

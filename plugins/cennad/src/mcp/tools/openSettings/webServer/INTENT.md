@@ -4,12 +4,12 @@
 
 ## Structure
 
-| Path              | Role                                                                                                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `webServer.ts`    | `startSettingsServer` — closure 기반 lifecycle (`{ url, token, close }`)                                                                                                  |
-| `routes.ts`       | `createRouteHandler` — shared guard(host/token/origin/CT) + 경로 디스패치                                                                                                 |
-| `routeContext.ts` | 라우트와 핸들러를 잇는 context 인터페이스                                                                                                                                 |
-| `handlers/`       | GET `/`, `/config`, `/provider-status` (CLI 가용 + `agyModels`·`codexModels` 카탈로그), POST `/save` (저장 후 youtube MCP addon 을 codex·antigravity 에 동기화), `/close` |
+| Path              | Role                                                                                                                                                                             |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `webServer.ts`    | `startSettingsServer` — closure 기반 lifecycle (`{ url, token, close }`)                                                                                                         |
+| `routes.ts`       | `createRouteHandler` — shared guard(host/token/origin/CT) + 경로 디스패치                                                                                                        |
+| `routeContext.ts` | 라우트와 핸들러를 잇는 context 인터페이스                                                                                                                                        |
+| `handlers/`       | GET `/`, `/config`, `/provider-status` (CLI 가용 + `agyModels`·`codexModels` 카탈로그), POST `/save` (저장 후 youtube MCP addon 을 claude·codex·antigravity 에 동기화), `/close` |
 
 ## Conventions
 

@@ -13,10 +13,10 @@ export function buildClaudeUserArguments(
       "add",
       "--scope",
       "user",
+      request.name,
       ...Object.entries(definition.env ?? {})
         .sort(([left], [right]) => left.localeCompare(right))
         .flatMap(([key, value]) => ["--env", `${key}=${value}`]),
-      request.name,
       "--",
       definition.command,
       ...(definition.args ?? []),
@@ -29,10 +29,10 @@ export function buildClaudeUserArguments(
     "user",
     "--transport",
     "http",
+    request.name,
+    definition.url,
     ...Object.entries(definition.headers ?? {})
       .sort(([left], [right]) => left.localeCompare(right))
       .flatMap(([key, value]) => ["--header", `${key}: ${value}`]),
-    request.name,
-    definition.url,
   ];
 }

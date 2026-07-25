@@ -6,6 +6,7 @@ import type {
 import { validateMcpRequest } from "../planning/validateMcpRequest.js";
 import type { CliMcpAdapterContext } from "./adapterTypes.js";
 import { defaultMcpCliRunner } from "./defaultMcpCliRunner.js";
+import { runClaudeUserMcpRequest } from "./runClaudeUserMcpRequest.js";
 import { toMcpCliFailure } from "./toMcpCliFailure.js";
 
 export async function applyCliMcpServer(
@@ -38,10 +39,14 @@ export async function applyCliMcpServer(
     };
 
   try {
-    const result = await (options?.runner ?? defaultMcpCliRunner)(
-      context.target.command,
-      context.buildArguments(plan.request),
-    );
+    const runner = options?.runner ?? defaultMcpCliRunner;
+    const result =
+      context.target.command === "claude"
+        ? await runClaudeUserMcpRequest(context, plan.request, runner)
+        : await runner(
+            context.target.command,
+            context.buildArguments(plan.request),
+          );
     const failure = toMcpCliFailure(result);
     return failure === null
       ? {

@@ -42,7 +42,7 @@
   var DEFAULT_YOUTUBE_ADDON = {
     enabled: false,
     language: 'en',
-    targets: { codex: true, antigravity: true },
+    targets: { claude: false, codex: true, antigravity: true },
   };
 
   var RATIO_MIN = 0;
@@ -196,6 +196,7 @@
   var artifactsLocationWrap = $('#artifacts-location-wrap');
   var youtubeEnabled = $('#youtube-enabled');
   var youtubeDetailWrap = $('#youtube-detail-wrap');
+  var youtubeTargetClaude = $('#youtube-target-claude');
   var youtubeTargetCodex = $('#youtube-target-codex');
   var youtubeTargetAntigravity = $('#youtube-target-antigravity');
   var youtubeAdvancedToggle = $('#youtube-advanced-toggle');
@@ -1114,6 +1115,10 @@
     );
     var targets =
       src.targets && typeof src.targets === 'object' ? src.targets : {};
+    youtubeTargetClaude.checked =
+      typeof targets.claude === 'boolean'
+        ? targets.claude
+        : DEFAULT_YOUTUBE_ADDON.targets.claude;
     youtubeTargetCodex.checked =
       typeof targets.codex === 'boolean'
         ? targets.codex
@@ -1319,6 +1324,7 @@
             DEFAULT_YOUTUBE_ADDON.language,
           ),
           targets: {
+            claude: Boolean(youtubeTargetClaude.checked),
             codex: Boolean(youtubeTargetCodex.checked),
             antigravity: Boolean(youtubeTargetAntigravity.checked),
           },
