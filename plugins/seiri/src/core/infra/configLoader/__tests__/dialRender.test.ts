@@ -30,7 +30,7 @@ describe('dial render', () => {
     const standard = renderPostureLines('standard');
     expect(standard).toHaveLength(1);
     expect(standard[0]).toContain('implement');
-    expect(standard[0]).toContain('verify-done');
+    expect(standard[0]).toContain('verify');
     expect(standard[0]).toContain('request-review');
     expect(standard[0]).toContain('trace-cause');
   });

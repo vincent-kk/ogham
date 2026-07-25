@@ -1,6 +1,6 @@
 # D7 Dispatch Battery — Results (subagent-proxy harness)
 
-> **명명 변경 (2026-07-24, 측정 이후)**: `plan`→`write-plan` · `debug`→`trace-cause` · `verify`→`verify-done` (내장 `/plan`·`/debug`·`/verify` 충돌 회피). 아래 결과·표는 **변경 전 이름으로 측정된 기록**이라 소급 수정하지 않는다.
+> **명명 변경 (2026-07-24, 측정 이후)**: `plan`→`write-plan` · `debug`→`trace-cause` (내장 `/plan`·`/debug` 충돌 회피). `verify`는 같은 날 `verify-done`으로 함께 개명했다가 2026-07-25 `verify`로 환원했다 — 설치본 2.1.220 검사 결과 내장 명령 `/verify`는 없고 번들 스킬 `verify`가 레지스트리에만 존재(세션 스킬 목록 비노출)하며, 동명 충돌은 공식 문서가 shadowing 공존으로 규정한다(네임스페이스형 `/seiri:verify`는 어느 경우든 불변). 아래 결과·표는 **변경 전 이름으로 측정된 기록**이라 소급 수정하지 않는다.
 
 _2026-07-23. Run from session 0fc0faf5 against locally-installed seiri (cache/ogham/seiri/0.0.1, verified identical to source)._
 

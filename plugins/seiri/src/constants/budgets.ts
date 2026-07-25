@@ -28,6 +28,6 @@ export const SHIPPED_SKILLS = [
   'setup',
   'trace-cause',
   'trace-structure',
-  'verify-done',
+  'verify',
   'write-plan',
 ] as const;

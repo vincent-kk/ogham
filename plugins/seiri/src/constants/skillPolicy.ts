@@ -21,7 +21,7 @@ export const AUTO_NO_ASK_SKILLS = [
   'request-review',
   'trace-cause',
   'trace-structure',
-  'verify-done',
+  'verify',
 ] as const;
 
 /**

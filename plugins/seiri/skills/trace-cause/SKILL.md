@@ -33,5 +33,5 @@ Repeated failure of one approach indicts the approach. Reconsider the assumption
 
 - Cite tool output for every claim. Your reasoning about output is not output.
 - Change only what the diagnosis requires; mention other findings.
-- Hand off: completion claims go through verify-done.
+- Hand off: completion claims go through verify.
 - Report an unresolved cause plainly — a disclosed dead end beats a plausible fix nobody verified.

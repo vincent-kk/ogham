@@ -143,7 +143,7 @@ plugins/seiri/
 ├── skills/                      # 호출 4 · 자동 8 — 지도는 §3
 │   ├── setup/ · brainstorm/ · interview/ · finish/        # 호출 전용 (상시 0)
 │   └── trace-cause/ · trace-structure/ · write-plan/ · execute/ · implement/
-│       · verify-done/ · request-review/ · receive-review/  # 자동 (description만)
+│       · verify/ · request-review/ · receive-review/       # 자동 (description만)
 │
 └── e2e/                         # 설정 UI Playwright
 ```
@@ -277,20 +277,20 @@ yarn build:plugin             # 번들만 재생성 (tsc 없이)
 seiri는 superpowers의 **대체재**입니다(원장 §0). 대체가 성립하려면 형식 규칙만이
 아니라 sp가 덮던 **작업 주기의 순간들**을 스킬로 덮어야 합니다. seiri는 이 순간들을 스킬로 덮습니다(현재 **12종**).
 
-| 순간             | 스킬           | 상태   |
-| ---------------- | -------------- | ------ |
-| 설계를 다듬을 때 | brainstorm     | 5 호출 |
-| 요구를 스펙으로  | interview      | 5 호출 |
-| 다단계 작업 전   | write-plan     | 3 자동 |
-| 계획 수행        | execute        | 3 자동 |
-| 변경 구현 직전   | implement      | 3 자동 |
-| 실패 발생        | trace-cause    | 3 자동 |
+| 순간                       | 스킬            | 상태   |
+| -------------------------- | --------------- | ------ |
+| 설계를 다듬을 때           | brainstorm      | 5 호출 |
+| 요구를 스펙으로            | interview       | 5 호출 |
+| 다단계 작업 전             | write-plan      | 3 자동 |
+| 계획 수행                  | execute         | 3 자동 |
+| 변경 구현 직전             | implement       | 3 자동 |
+| 실패 발생                  | trace-cause     | 3 자동 |
 | 간접·다형 코드의 깊은 이해 | trace-structure | 3 자동 |
-| 완료 선언 직전   | verify-done    | 3 자동 |
-| 머지·핸드오프 전 | request-review | 3 자동 |
-| 피드백 수신      | receive-review | 3 자동 |
-| 통합 결정        | finish         | 5 호출 |
-| 규칙 배포        | setup          | 5 호출 |
+| 완료 선언 직전             | verify          | 3 자동 |
+| 머지·핸드오프 전           | request-review  | 3 자동 |
+| 피드백 수신                | receive-review  | 3 자동 |
+| 통합 결정                  | finish          | 5 호출 |
+| 규칙 배포                  | setup           | 5 호출 |
 
 **할당 원리** — 절차(how)는 스킬로 가되, 셋을 가릅니다:
 
@@ -301,8 +301,8 @@ seiri는 superpowers의 **대체재**입니다(원장 §0). 대체가 성립하�
   옮기면 실패가 곧 미발화가 됩니다.
 
 **체이닝**: 각 스킬 말미의 `Hand off` 줄이 다음 순간의 스킬을 **제안**합니다
-(brainstorm→write-plan/implement · write-plan→execute · implement→verify-done · trace-cause→verify-done ·
-verify-done→request-review/finish · receive-review→verify-done). sp의 terminal state 봉쇄
+(brainstorm→write-plan/implement · write-plan→execute · implement→verify · trace-cause→verify ·
+verify→request-review/finish · receive-review→verify). sp의 terminal state 봉쇄
 _"The ONLY skill you invoke…"_ 는 가져오지 않습니다 — 타 플러그인과의 공존을 깨고,
 판단을 몰수합니다(P2).
 
@@ -354,7 +354,7 @@ _"핵심 명사가 두 라운드 불변"_). 수치를 뺀 것은 정확성 손�
 **실패는 별개 이벤트입니다** (페이로드 실측, Claude Code 2.1.218). 비-0 종료는 `PostToolUse`를 발화시키지 않고 `PostToolUseFailure`로 오며, 그 페이로드에는 `tool_response`가 아예 없고 대신 `error`(exit code + stderr)와 `is_interrupt`가 옵니다. 둘 다 플러그인 훅으로 등록 가능하고 둘 다 `hookSpecificOutput.additionalContext`를 받습니다. 그래서 **번들 하나가 두 이벤트에 등록**됩니다 — 실패에서 세고, 성공에서 잊습니다. 연쇄는 아무것도 green이 되지 않은 동안만 연쇄이기 때문입니다.
 
 **차단 훅 없음은 불변입니다.** 신규 훅 포함 전부 주입 전용 — decision 제어를 갖지 않고, 실패 시 무주입 fail-open으로 세션을 막지 않습니다. `PreToolUse`·`Stop`은 계속 쓰지 않습니다 — 진실 소유는 저장소 몫(P2).
-**UserPromptSubmit은 상태가 아니라 _주의_를 나릅니다.** _"상태는 세션 중 거의 안 바뀐다"_ 는 상태 재주입 용도에만 성립하는 근거입니다 — 매 턴 리마인더가 나르는 것은 상태가 아니라 스킬 발동·규칙 준수 상기라, 긴 세션·컴팩션으로 흐려지는 주의를 되살립니다. SessionStart(세션당 1회)가 못 잡는 세션 중 드리프트를 매 턴 커버하며, 정적 한 줄이라 지연은 무시 가능합니다. 여전히 비차단·다이얼 게이팅(advisory 침묵)이라 아래 선제 배선 원칙 안에 있습니다. 세션 중 다이얼 조작은 MCP `config` action 경유입니다.
+**UserPromptSubmit은 상태가 아니라 *주의*를 나릅니다.** _"상태는 세션 중 거의 안 바뀐다"_ 는 상태 재주입 용도에만 성립하는 근거입니다 — 매 턴 리마인더가 나르는 것은 상태가 아니라 스킬 발동·규칙 준수 상기라, 긴 세션·컴팩션으로 흐려지는 주의를 되살립니다. SessionStart(세션당 1회)가 못 잡는 세션 중 드리프트를 매 턴 커버하며, 정적 한 줄이라 지연은 무시 가능합니다. 여전히 비차단·다이얼 게이팅(advisory 침묵)이라 아래 선제 배선 원칙 안에 있습니다. 세션 중 다이얼 조작은 MCP `config` action 경유입니다.
 
 **선제 배선 원칙**: 디스패치 프록시 실측·10이슈 A/B가 검증한 것은 소컨텍스트 정합까지이고, 세션 신호 훅이 겨냥하는 대컨텍스트·다유혹 조건(긴 세션·컴팩션 후·연쇄 실패·위임)의 실측은 긴 메인 세션이 필요해 비용이 금지적입니다. 실측을 기다리지 않고 선제 배선하되 전부 다이얼로 게이팅합니다 — advisory = 조건부 주입 전부 침묵(프록시 실측이 검증한 기준선), 훅 지연 비용은 수용 판정.
 
@@ -363,8 +363,9 @@ _"핵심 명사가 두 라운드 불변"_). 수치를 뺀 것은 정확성 손�
 ```
 [seiri] Active rules: agent-legible, public-contract, test-validity (3/8) — .claude/rules/
 [seiri] Intervention: standard
-[seiri] Workflow: write-plan → execute → implement → verify-done → request-review; failures → trace-cause; indirect code → trace-structure; review feedback → receive-review.
+[seiri] Workflow: write-plan → execute → implement → verify → request-review; failures → trace-cause; indirect code → trace-structure; review feedback → receive-review.
 ```
+
 (기본값 `standard` 렌더. `advisory`로 내리면 첫 줄만 남고 나머지는 침묵합니다.)
 
 드리프트가 있으면 한 줄 추가. **규칙 내용은 절대 복제하지 않습니다.**
@@ -418,11 +419,11 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 
 ### 축과 소비처
 
-| 축                   | advisory           | standard             | strict                       | 소비처                      |
-| -------------------- | ------------------ | -------------------- | ---------------------------- | --------------------------- |
-| 주입 블록            | Active rules 한 줄 | 기본 (규칙 + 다이얼) | 기본 + precedence            | renderStatusLines           |
-| 자동 스킬 발동 폭    | 무언급             | 규율 체인 1줄        | + 경계 순간 · 완료 주장 계약 | renderStatusLines           |
-| 게이트 스캐폴드 권유 | 안 함              | 제안                 | 적극 제안                    | setup 스킬                  |
+| 축                   | advisory           | standard             | strict                       | 소비처                                         |
+| -------------------- | ------------------ | -------------------- | ---------------------------- | ---------------------------------------------- |
+| 주입 블록            | Active rules 한 줄 | 기본 (규칙 + 다이얼) | 기본 + precedence            | renderStatusLines                              |
+| 자동 스킬 발동 폭    | 무언급             | 규율 체인 1줄        | + 경계 순간 · 완료 주장 계약 | renderStatusLines                              |
+| 게이트 스캐폴드 권유 | 안 함              | 제안                 | 적극 제안                    | setup 스킬                                     |
 | 세션 신호 훅         | **침묵**           | 활성                 | 활성                         | PostToolUse · SubagentStart · UserPromptSubmit |
 
 **다이얼 = 조건부 주입 전체의 총 밸브**(선제 배선 원칙). **기본값은 `standard`**이고, advisory는 조건부 주입 전부가 침묵하는 **바닥(opt-out floor)** — 불용 시 여기로 내립니다. 이 침묵 상태가 디스패치 프록시가 검증한(발화 33/35) 무비용 기준선과 동일합니다. 발동 폭 축은 발화를 "만들지" 않습니다 — 실측이 기준선 발화를 확인했으므로, 축은 그 기준선에서 경계 순간을 넓히고 좁힐 뿐입니다.

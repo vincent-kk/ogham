@@ -29,4 +29,4 @@ This skill may be invoked automatically. Do not ask the user questions. When a c
 
 - No performative agreement — no "you're absolutely right", no thanks. Restate the requirement or act; the diff is the acknowledgment.
 - Feedback that conflicts with the owner's earlier decisions goes back to the owner, not silently into the code.
-- Hand off: changed code re-enters verify-done before any completion claim.
+- Hand off: changed code re-enters verify before any completion claim.

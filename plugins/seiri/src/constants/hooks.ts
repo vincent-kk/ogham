@@ -55,7 +55,7 @@ export const DORMANT_HOOKS: readonly string[] = [HookName.INSTRUCTIONS_LOADED];
  * away from the sequence has something to snap back to.
  */
 export const WORKFLOW_CHAIN_LINE =
-  'Workflow: write-plan → execute → implement → verify-done → request-review; failures → trace-cause; indirect code → trace-structure; review feedback → receive-review.';
+  'Workflow: write-plan → execute → implement → verify → request-review; failures → trace-cause; indirect code → trace-structure; review feedback → receive-review.';
 
 /**
  * Added at `strict`. Widens which moments count as one of the above, and
@@ -77,7 +77,7 @@ export const STRICT_POSTURE_LINE =
  * the dial and returns without injecting.
  */
 export const TURN_REMINDER_STANDARD =
-  'Before acting this turn, dispatch the skill the moment matches — a failing test → trace-cause, multi-step work → write-plan, a "done" claim → verify-done — and keep changes within the active rules.';
+  'Before acting this turn, dispatch the skill the moment matches — a failing test → trace-cause, multi-step work → write-plan, a "done" claim → verify — and keep changes within the active rules.';
 
 /**
  * Strict widens the same reminder rather than replacing it: borderline and
