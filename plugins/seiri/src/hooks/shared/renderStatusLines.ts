@@ -28,30 +28,31 @@ export function renderStatusLines(
   options: { compact?: boolean } = {},
 ): string[] {
   const deployed = statuses.filter((status) => status.deployed);
-  if (deployed.length === 0) return [];
+  const election = renderElectionLine(dial.effective);
 
-  const names = deployed.map((status) => shortName(status.id)).join(', ');
-  const lines = [
-    `${INJECTION_PREFIX} Active rules: ${names} (${deployed.length}/${statuses.length}) — ${RULES_DIR_LABEL}`,
-  ];
+  // Two facts, two gates. Which rules are active is only worth saying
+  // when a deployed file exists to point at; which workflow owns a moment
+  // is true of any repository that opted into the dial, so the election
+  // line is gated on the dial alone (D7-E B1). A project with the plugin
+  // installed and no rule deployed still elects.
+  const lines =
+    deployed.length === 0 ? [] : [activeRulesLine(deployed, statuses.length)];
 
   // Compact is for a subagent, which starts without the parent's context
   // and needs the two facts it cannot recover: which rules this
-  // repository turned on, and the order the work runs in. Drift and
-  // stored-file warnings are the parent's business, and precedence is
-  // already in the rule files the subagent can read.
+  // repository turned on, and which workflow owns the moment it is about
+  // to hit. Drift and stored-file warnings are the parent's business, and
+  // precedence is already in the rule files the subagent can read.
   //
-  // This is the election-contract line (D7-E, Arm S), not
-  // renderPostureLines: the SubagentStart moment is this experiment's one
-  // variable, so the SessionStart render below stays untouched.
-  // The posture axis being empty at advisory is what makes this silent
-  // there, which keeps a subagent spawn exactly as it was measured.
-  if (options.compact) {
-    const election = renderElectionLine(dial.effective);
+  // Silence at advisory is the dial's opt-out, not an accident of having
+  // nothing deployed: `renderElectionLine` has no entry there, so a
+  // subagent spawn stays exactly as the dispatch measurements found it.
+  if (options.compact)
     return election === undefined
       ? []
       : [...lines, `${INJECTION_PREFIX} ${election}`];
-  }
+
+  if (deployed.length === 0) return [];
 
   // A valve that lowered the dial to advisory still prints: silence there
   // would be indistinguishable from a project that simply never set one.
@@ -80,6 +81,12 @@ export function renderStatusLines(
     );
 
   return lines;
+}
+
+/** Which rules this repository turned on, counted against the manifest. */
+function activeRulesLine(deployed: RuleDocStatus[], total: number): string {
+  const names = deployed.map((status) => shortName(status.id)).join(', ');
+  return `${INJECTION_PREFIX} Active rules: ${names} (${deployed.length}/${total}) — ${RULES_DIR_LABEL}`;
 }
 
 /** `seiri_agent-legible` reads as `agent-legible` once the source is known. */

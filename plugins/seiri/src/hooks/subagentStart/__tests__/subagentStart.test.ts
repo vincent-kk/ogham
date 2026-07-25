@@ -79,8 +79,11 @@ describe('subagent status re-injection', () => {
     expect(lines.some((line) => line.includes('Precedence'))).toBe(false);
   });
 
-  it('says nothing when the project deployed no rules', () => {
-    expect(spawn(seedRepo('strict', false))).toEqual([]);
+  it('still elects when the project deployed no rules', () => {
+    const lines = spawn(seedRepo('strict', false));
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('Election contract:');
+    expect(lines.some((line) => line.includes('Active rules'))).toBe(false);
   });
 
   it('never blocks a spawn when it cannot locate the plugin', () => {

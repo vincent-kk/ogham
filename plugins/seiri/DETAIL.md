@@ -21,7 +21,7 @@
 - 배포된 규칙이 없는 프로젝트에는 주입하지 않는다.
 - 어떤 실패든 `{ continue: true }` 를 내고 주입하지 않는다. 훅이 세션을 막을 수 없어야 한다.
 - PostToolUse 와 PostToolUseFailure 는 Bash 결과만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다.
-- SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `advisory` 에서는 전혀 주입하지 않는다.
+- SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `advisory` 에서는 전혀 주입하지 않는다. 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트되므로, 배포 0건인 프로젝트의 서브에이전트는 선출 줄 하나만 받는다.
 - UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하며, dial 로 게이트한다. `advisory` 에서는 침묵; `standard` 와 `strict` 는 서로 다른 줄을 쓰고, strict 는 경계성 작업과 명명된 검증까지 넓힌다. 프롬프트 본문은 읽지 않는다.
 - InstructionsLoaded 는 구현되어 있으나 `hooks.json` 에 등록되지 않았다 (dormant). Dormant 인 동안에는 실행되지 않으며, 등록되면 훅 페이로드 전체를 보존하고 아무것도 주입하지 않는다.
 

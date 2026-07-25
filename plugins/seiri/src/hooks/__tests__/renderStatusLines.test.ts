@@ -155,6 +155,28 @@ describe('renderStatusLines', () => {
     expect(line).toContain('baseline: strict');
   });
 
+  it('elects in a subagent even when the project deployed no rule', () => {
+    const lines = renderStatusLines([], dial('standard'), { compact: true });
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('Election');
+  });
+
+  it('names the active rules beside the election line when both apply', () => {
+    const lines = renderStatusLines([status()], dial('strict'), {
+      compact: true,
+    });
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain('Active rules');
+    expect(lines[1]).toContain('Election');
+  });
+
+  it('stays out of a subagent at advisory, deployed rules or not', () => {
+    for (const statuses of [[], [status()]])
+      expect(
+        renderStatusLines(statuses, dial('advisory'), { compact: true }),
+      ).toEqual([]);
+  });
+
   it('stays inside the render budget at its widest', () => {
     const lines = renderStatusLines(
       [status({ deployedHash: 'b'.repeat(64), inSync: false })],
