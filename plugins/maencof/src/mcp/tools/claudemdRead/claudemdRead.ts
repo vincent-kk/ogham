@@ -2,12 +2,7 @@
  * @file claudemdRead.ts
  * @description claudemd_read 도구 핸들러 — CWD의 호스트 지침 문서에서 maencof 섹션 읽기
  */
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-
-import { instructionsFile } from '@ogham/cross-platform/host-paths';
-
-import { readMaencofSection } from '../../../core/claudeMdMerger/index.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
 import type { ClaudeMdReadResult } from '../../../types/mcp.js';
 
 /**
@@ -18,15 +13,10 @@ import type { ClaudeMdReadResult } from '../../../types/mcp.js';
  * @param cwd - CWD 절대 경로 (vault 경로)
  */
 export function handleClaudeMdRead(cwd: string): ClaudeMdReadResult {
-  const targetPath = join(cwd, instructionsFile());
-  const fileExists = existsSync(targetPath);
-
-  if (!fileExists) return { exists: false, content: null, file_exists: false };
-
-  const content = readMaencofSection(targetPath);
+  const inspection = createProjectInstructionManager(cwd).inspect();
   return {
-    exists: content !== null,
-    content,
-    file_exists: true,
+    exists: inspection.status === 'present',
+    content: inspection.status === 'present' ? inspection.sectionContent : null,
+    file_exists: inspection.targetExists,
   };
 }

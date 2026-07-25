@@ -26,6 +26,7 @@ webServer/       sub-fractal — HTTP 서버, 가드, 라우팅, 핸들러
 - `OGHAM_NO_BROWSER` 가 설정되면 탭을 열지 않는다 (e2e·헤드리스).
 - **`/plan` 과 `/save` 는 같은 본문 스키마와 같은 판정을 쓴다** — 미리보기가
   save 가 하지 않을 일을 약속하면 미리보기가 없느니만 못하다.
+- 브라우저는 `/plan` revision 을 `/save` 에 왕복하고 stale 응답을 다시 검토한다.
 
 ## Boundaries
 

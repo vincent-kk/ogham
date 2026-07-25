@@ -1,23 +1,17 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts/rules/status';
+import { resolveContainedPath } from '@ogham/cross-platform/paths/contained';
 
-import { ruleDocsTarget } from '@ogham/cross-platform/host-paths';
-import { readSection } from '@ogham/cross-platform/instructions';
-
-import { ruleDocMarkers } from '../../../../constants/ruleDocs.js';
 import { createLogger } from '../../../../lib/logger.js';
-import { computeFileSha256 } from '../utils/computeFileSha256.js';
-import { computeTextSha256 } from '../utils/computeTextSha256.js';
-import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 import { resolvePluginRoot } from '../utils/resolvePluginRoot.js';
 
+import { loadManagedRuleDocuments } from './loadManagedRuleDocuments.js';
 import { loadRuleDocsManifest } from './loadRuleDocsManifest.js';
 import type {
-  RuleDocEntry,
   RuleDocStatusEntry,
   RuleDocsManifest,
   RuleDocsStatus,
 } from './manifestTypes.js';
+import { resolveFilidRuleTarget } from './resolveFilidRuleTarget.js';
 
 const log = createLogger('config-loader');
 
@@ -50,7 +44,12 @@ export function getRuleDocsStatus(
       manifestPath: null,
     };
 
-  const manifestPath = join(root, 'templates', 'rules', 'manifest.json');
+  const manifestPath = resolveContainedPath(
+    root,
+    'templates',
+    'rules',
+    'manifest.json',
+  );
   let manifest: RuleDocsManifest;
   try {
     manifest = loadRuleDocsManifest(root);
@@ -64,109 +63,61 @@ export function getRuleDocsStatus(
     };
   }
 
-  const resolvedRoot = resolveGitRoot(projectRoot);
-  const target = ruleDocsTarget();
-  const merged =
-    target.kind === 'merge'
-      ? readInstructionFile(join(resolvedRoot, target.file))
-      : null;
+  const target = resolveFilidRuleTarget(projectRoot);
+  if (target === null)
+    return {
+      entries: [],
+      autoDeployed: [],
+      pluginRootResolved: true,
+      manifestPath,
+    };
+
+  let inspections;
+  try {
+    const documents = loadManagedRuleDocuments(root, manifest);
+    inspections = inspectRuleDocumentStatus(
+      { owner: 'filid', target },
+      documents,
+    );
+  } catch (err) {
+    log.error('failed to inspect rule docs', err);
+    return {
+      entries: [],
+      autoDeployed: [],
+      pluginRootResolved: true,
+      manifestPath,
+    };
+  }
 
   const entries: RuleDocStatusEntry[] = [];
   const autoDeployed: RuleDocStatusEntry[] = [];
 
-  for (const entry of manifest.rules) {
-    const deployment =
-      target.kind === 'merge'
-        ? inspectMergedFile(merged ?? '', root, entry)
-        : inspectDirectory(resolvedRoot, target.path, entry);
+  for (const [index, entry] of manifest.rules.entries()) {
+    const inspection = inspections[index];
+    if (inspection === undefined) continue;
+    const templateHash = inspection.expectedHash ?? entry.templateHash;
 
     const statusEntry: RuleDocStatusEntry = {
       id: entry.id,
       filename: entry.filename,
+      target: inspection.target,
+      displayTarget: inspection.displayTarget,
+      source: inspection.source,
       required: entry.required,
       title: entry.title,
       description: entry.description,
-      deployed: deployment.deployed,
-      selected: entry.required ? true : deployment.deployed,
-      templateHash: deployment.templateHash,
-      deployedHash: deployment.deployedHash,
+      deployed: inspection.deployed,
+      selected: entry.required ? true : inspection.deployed,
+      templateHash,
+      deployedHash: inspection.deployedHash,
       inSync:
-        deployment.deployed &&
-        deployment.deployedHash !== null &&
-        deployment.deployedHash === deployment.templateHash,
+        inspection.deployed &&
+        inspection.deployedHash !== null &&
+        inspection.deployedHash === templateHash,
     };
     if (entry.required) autoDeployed.push(statusEntry);
     else entries.push(statusEntry);
   }
 
   return { entries, autoDeployed, pluginRootResolved: true, manifestPath };
-}
-
-interface Deployment {
-  deployed: boolean;
-  deployedHash: string | null;
-  /** What `deployedHash` must equal to be in sync — the shipped template, hashed the
-   *  same way the deployment is, so the comparison holds in either channel. */
-  templateHash: string;
-}
-
-/** One file per rule under the host's rules directory (Claude). */
-function inspectDirectory(
-  projectRoot: string,
-  rulesPath: string,
-  entry: RuleDocEntry,
-): Deployment {
-  const rulesDir = join(projectRoot, rulesPath);
-  const destPath = join(rulesDir, entry.filename);
-  // A legacy-named file counts as deployed until the user runs setup to migrate it.
-  const legacyPath = entry.legacyFilename
-    ? join(rulesDir, entry.legacyFilename)
-    : null;
-
-  const destExists = existsSync(destPath);
-  const legacyExists = legacyPath !== null && existsSync(legacyPath);
-
-  let deployedHash: string | null = null;
-  if (destExists) deployedHash = computeFileSha256(destPath);
-  else if (legacyExists && legacyPath !== null)
-    deployedHash = computeFileSha256(legacyPath);
-
-  return {
-    deployed: destExists || legacyExists,
-    deployedHash,
-    templateHash: entry.templateHash,
-  };
-}
-
-/**
- * One marked section per rule inside the merged instruction file (Codex).
- *
- * The template is hashed as the trimmed body that would be deployed, not as the raw
- * bytes the manifest hashed — otherwise a perfectly deployed section would never match,
- * since merging trims what it writes.
- */
-function inspectMergedFile(
-  content: string,
-  pluginRoot: string,
-  entry: RuleDocEntry,
-): Deployment {
-  const body = readSection(content, ruleDocMarkers(entry.filename));
-  const templatePath = join(pluginRoot, 'templates', 'rules', entry.filename);
-  const templateBody = existsSync(templatePath)
-    ? readFileSync(templatePath, 'utf8').trim()
-    : null;
-
-  return {
-    deployed: body !== null,
-    deployedHash: body === null ? null : computeTextSha256(body),
-    templateHash:
-      templateBody === null
-        ? entry.templateHash
-        : computeTextSha256(templateBody),
-  };
-}
-
-/** Absent instruction file reads as empty — no sections, nothing deployed. */
-function readInstructionFile(path: string): string {
-  return existsSync(path) ? readFileSync(path, 'utf8') : '';
 }

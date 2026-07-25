@@ -1,12 +1,8 @@
 import { spawnCli } from "../spawn/index.js";
-import { logHookFailure } from "./errorLog.js";
-import type { ProbeResult } from "./types.js";
+import { logHookFailure } from "./error/logHookFailure.js";
+import type { ProbeResult, SelfProbeOptions } from "./types.js";
 
-export interface SelfProbeOptions {
-  writeLog?: boolean;
-  pkg?: string;
-  spawnTimeoutMs?: number;
-}
+export type { SelfProbeOptions } from "./types.js";
 
 export async function selfProbe(
   opts: SelfProbeOptions = {},

@@ -11,10 +11,19 @@ function status(overrides: Partial<RuleDocStatus> = {}): RuleDocStatus {
   return {
     id: 'seiri_agent-legible',
     filename: 'seiri_agent-legible.md',
+    target: '/repo/.claude/rules/seiri_agent-legible.md',
+    displayTarget: '.claude/rules/seiri_agent-legible.md',
+    source: 'current',
     title: 'Agent-Legible Code',
     description: 'signposting rules',
     recommended: true,
     deployed: true,
+    active: true,
+    activeTarget: '/repo/.claude/rules/seiri_agent-legible.md',
+    activeDisplayTarget: '.claude/rules/seiri_agent-legible.md',
+    activeDeployedHash: 'a'.repeat(64),
+    activeInSync: true,
+    activeSource: 'current',
     templateHash: 'a'.repeat(64),
     deployedHash: 'a'.repeat(64),
     inSync: true,
@@ -37,13 +46,25 @@ function dial(
 }
 
 describe('renderStatusLines', () => {
-  it('injects nothing when no rule is deployed', () => {
-    expect(
-      renderStatusLines(
-        [status({ deployed: false, deployedHash: null, inSync: false })],
-        dial('advisory'),
-      ),
-    ).toEqual([]);
+  it('does not report a stored rule that the effective host target hides', () => {
+    const hidden = status({
+      target: '/repo/AGENTS.md',
+      displayTarget: 'AGENTS.md',
+      deployed: true,
+      active: false,
+      activeTarget: '/repo/AGENTS.override.md',
+      activeDisplayTarget: 'AGENTS.override.md',
+      activeDeployedHash: null,
+      activeInSync: false,
+      activeSource: null,
+      deployedHash: 'b'.repeat(64),
+      inSync: false,
+    });
+
+    expect(renderStatusLines([hidden], dial('advisory'))).toEqual([]);
+    const strict = renderStatusLines([hidden], dial('strict'));
+    expect(strict.some((line) => line.includes('Active rules'))).toBe(false);
+    expect(strict.some((line) => line.includes('differ from'))).toBe(false);
   });
 
   it('injects nothing when the manifest is empty and the dial is down', () => {
@@ -69,16 +90,26 @@ describe('renderStatusLines', () => {
   it('renders one line at advisory, naming rules without the plugin prefix', () => {
     const lines = renderStatusLines([status()], dial('advisory'));
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain('agent-legible');
-    expect(lines[0]).not.toContain('seiri_agent-legible');
+    expect(lines[0]).toContain('Active rules: agent-legible');
+    expect(lines[0]).not.toContain('Active rules: seiri_agent-legible');
   });
 
   it('reports deployed count against the manifest total', () => {
     const lines = renderStatusLines(
       [
         status(),
-        status({ id: 'seiri_naming', deployed: false, inSync: false }),
-        status({ id: 'seiri_structure', deployed: false, inSync: false }),
+        status({
+          id: 'seiri_naming',
+          deployed: false,
+          active: false,
+          inSync: false,
+        }),
+        status({
+          id: 'seiri_structure',
+          deployed: false,
+          active: false,
+          inSync: false,
+        }),
       ],
       dial('advisory'),
     );
@@ -99,14 +130,36 @@ describe('renderStatusLines', () => {
     expect(strict.some((line) => line.includes('Precedence'))).toBe(true);
   });
 
-  it('never repeats rule content — only points at the directory', () => {
+  it('never repeats rule content — only points at the shared display target', () => {
     const joined = renderStatusLines([status()], dial('strict')).join('\n');
-    expect(joined).toContain('.claude/rules/');
+    expect(joined).toContain('.claude/rules/seiri_agent-legible.md');
     expect(joined).not.toContain('signposting rules');
   });
 
+  it('uses the Codex display target instead of a hardcoded Claude label', () => {
+    const joined = renderStatusLines(
+      [
+        status({
+          target: '/repo/AGENTS.md',
+          displayTarget: 'AGENTS.md',
+          activeTarget: '/repo/AGENTS.md',
+          activeDisplayTarget: 'AGENTS.md',
+        }),
+      ],
+      dial('advisory'),
+    ).join('\n');
+
+    expect(joined).toContain('AGENTS.md');
+    expect(joined).not.toContain('.claude/rules/');
+  });
+
   it('warns about drifted rules at every dial position', () => {
-    const drifted = status({ deployedHash: 'b'.repeat(64), inSync: false });
+    const drifted = status({
+      deployedHash: 'b'.repeat(64),
+      inSync: false,
+      activeDeployedHash: 'b'.repeat(64),
+      activeInSync: false,
+    });
     for (const level of ['advisory', 'standard', 'strict'] as const) {
       const lines = renderStatusLines([drifted], dial(level));
       expect(lines.some((line) => line.includes('differ from'))).toBe(true);
@@ -195,7 +248,14 @@ describe('renderStatusLines', () => {
 
   it('stays inside the render budget at its widest', () => {
     const lines = renderStatusLines(
-      [status({ deployedHash: 'b'.repeat(64), inSync: false })],
+      [
+        status({
+          deployedHash: 'b'.repeat(64),
+          inSync: false,
+          activeDeployedHash: 'b'.repeat(64),
+          activeInSync: false,
+        }),
+      ],
       dial('strict', {
         warnings: [
           { file: '.seiri/config.json', reason: 'not valid JSON' },

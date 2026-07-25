@@ -15,7 +15,8 @@
     },
     "module-entry-point": {
       "enabled": true,
-      "severity": "warning"
+      "severity": "warning",
+      "exempt": ["**/shared/agent-artifacts"]
     },
     "max-depth": {
       "enabled": true,

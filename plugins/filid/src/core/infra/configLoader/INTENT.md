@@ -15,15 +15,13 @@ configLoader/
     loadConfig / writeConfig / createDefaultConfig / loadRuleOverrides
     validateConfigPatch / resolveLanguage / resolveMaxDepth / initProject
     loadRuleDocsManifest.ts
-    syncRuleDocs.ts        호스트 rule doc 채널 분기 (ruleDocsTarget)
-      └ syncRuleDocsToDirectory.ts  .claude/rules/ 파일 1개씩 (Claude)
-      └ syncRuleDocsToFile.ts       AGENTS.md 마커 구간 병합 (Codex)
-    getRuleDocsStatus.ts   두 채널 공통 현황 판독
+    syncRuleDocs.ts        공유 project rule manager 결과 호환 매핑
+    getRuleDocsStatus.ts   공유 read-only 상태를 기존 UI 계약으로 매핑
+    createFilidRuleManager / resolveFilidRuleTarget / loadManagedRuleDocuments
   utils/                organ — 공유 private 헬퍼
     resolveGitRoot.ts, resolvePluginRoot.ts
     formatIssuePath.ts, getAt.ts, deleteAt.ts, parseWithAllowlistWarn.ts
     exemptSanitize.ts, routePatternSanitize.ts
-    writeFileAtomically.ts (파일 복사) / writeTextAtomically.ts (내용 쓰기)
     computeFileSha256.ts / computeTextSha256.ts
 ```
 

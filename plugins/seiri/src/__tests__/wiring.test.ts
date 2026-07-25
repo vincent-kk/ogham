@@ -55,6 +55,21 @@ describe('wiring', () => {
     const buildScript = read('scripts', 'build-hooks.mjs');
     for (const name of Object.values(HookName))
       expect(buildScript).toContain(`name: '${name}'`);
+    expect(buildScript).toContain('metafile: true');
+    expect(buildScript).toContain('FORBIDDEN_INPUT_FRAGMENTS');
+    for (const fragment of [
+      '/hooks/errorLog.',
+      '/paths/index.',
+      '/paths/paths.',
+      '/paths/compat/index.',
+      '/hostRegistry/index.',
+      '/rules/planning/',
+      '/rules/adapters/',
+      '/transactions/',
+      '/filesystem/locking/',
+      '/filesystem/mutation/',
+    ])
+      expect(buildScript).toContain(fragment);
   });
 
   it('declares the state slot the server rewrites', () => {
@@ -73,6 +88,25 @@ describe('wiring', () => {
     const app = read('src', 'mcp', 'pages', 'settings', 'scripts', 'app.js');
     for (const route of [Route.PLAN, Route.SAVE, Route.CLOSE])
       expect(app).toContain(`'${route}'`);
+  });
+
+  it('roundtrips the preview revision in the browser save body', () => {
+    const app = read('src', 'mcp', 'pages', 'settings', 'scripts', 'app.js');
+    const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
+    const setupSkill = read('skills', 'setup', 'SKILL.md');
+    expect(app).toContain('revision: previewRevision');
+    expect(app).toContain('data.ruleDocs.revision');
+    expect(server).toContain('revision: z');
+    expect(setupSkill).toContain('resync, revision');
+  });
+
+  it('renders shared host targets without a hardcoded Claude label', () => {
+    const page = read('src', 'mcp', 'pages', 'settings', 'index.html');
+    const app = read('src', 'mcp', 'pages', 'settings', 'scripts', 'app.js');
+    expect(page).toContain('data-rules-target');
+    expect(app).toContain('entry.displayTarget');
+    expect(app).toContain('entry.activeDisplayTarget');
+    expect(`${page}\n${app}`).not.toContain('.claude/rules/');
   });
 
   it('offers exactly the dial positions the config accepts', () => {

@@ -15,8 +15,12 @@ import {
   applyRuleDocs,
   planRuleDocs,
 } from '../../../../core/ruleDocs/index.js';
-import type { RuleDocSyncResult } from '../../../../types/manifest.js';
+import type {
+  RuleDocSyncResult,
+  SyncRuleDocsOptions,
+} from '../../../../types/manifest.js';
 import type { SaveBody, SettingsPageState } from '../types/settingsTypes.js';
+import { persistSave as persistSettingsSave } from '../utils/persistSave.js';
 import {
   type SettingsServerInstance,
   startSettingsServer,
@@ -26,11 +30,17 @@ const RULE_ID = 'seiri_probe';
 const RULE_FILE = 'seiri_probe.md';
 const RULE_BODY = '# Probe\n\nBody that gets hashed.\n';
 
+type PreviewRuleDocs = SaveBody['ruleDocs'] & {
+  revision?: string | null;
+};
+
 let workspace: string;
 let plugin: string;
 let server: SettingsServerInstance;
 
-function body(overrides: Partial<SaveBody['ruleDocs']> = {}): SaveBody {
+function body(
+  overrides: Partial<PreviewRuleDocs> = {},
+): SaveBody & { ruleDocs: PreviewRuleDocs } {
   return {
     config: { intervention: 'advisory' },
     ruleDocs: { selections: { [RULE_ID]: true }, resync: [], ...overrides },
@@ -43,7 +53,7 @@ function url(server: SettingsServerInstance, path: string): string {
 
 interface SyncResponse {
   success: boolean;
-  ruleDocs: RuleDocSyncResult;
+  ruleDocs: RuleDocSyncResult & { revision?: string };
 }
 
 async function post(path: string, payload: unknown): Promise<Response> {
@@ -101,7 +111,10 @@ beforeEach(async () => {
       configWritten: true,
       ruleDocs: applyRuleDocs(workspace, plugin, selected(payload), {
         resync: payload.ruleDocs.resync,
-      }),
+        ...((payload.ruleDocs as PreviewRuleDocs).revision === undefined
+          ? {}
+          : { revision: (payload.ruleDocs as PreviewRuleDocs).revision }),
+      } as SyncRuleDocsOptions & { revision?: string | null }),
     }),
   });
 });
@@ -136,12 +149,68 @@ describe('settings web server', () => {
 
   it('writes the rule on save, matching what the preview promised', async () => {
     const preview = await postSync('/plan', body());
-    const saved = await postSync('/save', body());
+    const saved = await postSync(
+      '/save',
+      body({ revision: preview.ruleDocs.revision }),
+    );
     expect(saved.ruleDocs.applied).toBe(true);
     expect(saved.ruleDocs.outcomes.map((o) => o.action)).toEqual(
       preview.ruleDocs.outcomes.map((o) => o.action),
     );
     expect(readFileSync(deployedPath(), 'utf8')).toBe(RULE_BODY);
+  });
+
+  it('refuses to apply a stale browser preview over newer user bytes', async () => {
+    const preview = await postSync('/plan', body({ resync: [RULE_ID] }));
+    expect(preview.ruleDocs.revision).toEqual(expect.any(String));
+    mkdirSync(join(workspace, '.claude', 'rules'), { recursive: true });
+    writeFileSync(deployedPath(), '# Concurrent user edit\n');
+    const settled = server.awaitSettled(0.02);
+
+    const saved = await postSync(
+      '/save',
+      body({
+        resync: [RULE_ID],
+        revision: preview.ruleDocs.revision,
+      }),
+    );
+
+    expect(saved.ruleDocs.outcomes[0]).toMatchObject({
+      action: 'skip',
+      reason: expect.stringContaining('preview'),
+    });
+    expect(readFileSync(deployedPath(), 'utf8')).toBe(
+      '# Concurrent user edit\n',
+    );
+    await expect(settled).resolves.toEqual({ kind: 'pending' });
+  });
+
+  it('leaves config and rule bytes unchanged when the browser preview is stale', () => {
+    const configPath = join(workspace, '.seiri', 'config.json');
+    const baseline = '{"intervention":"standard"}\n';
+    mkdirSync(join(workspace, '.seiri'), { recursive: true });
+    writeFileSync(configPath, baseline, 'utf8');
+    const preview = planRuleDocs(workspace, plugin, [RULE_ID], {
+      resync: [RULE_ID],
+    });
+    mkdirSync(join(workspace, '.claude', 'rules'), { recursive: true });
+    writeFileSync(deployedPath(), '# Concurrent user edit\n', 'utf8');
+
+    const saved = persistSettingsSave(
+      workspace,
+      plugin,
+      body({
+        resync: [RULE_ID],
+        revision: preview.revision,
+      }),
+    );
+
+    expect(saved.configWritten).toBe(false);
+    expect(saved.ruleDocs.applied).toBe(false);
+    expect(readFileSync(configPath, 'utf8')).toBe(baseline);
+    expect(readFileSync(deployedPath(), 'utf8')).toBe(
+      '# Concurrent user edit\n',
+    );
   });
 
   it('settles the long poll when the user saves', async () => {

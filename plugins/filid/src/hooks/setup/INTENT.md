@@ -11,6 +11,7 @@
 
 ## Conventions
 
+- Bootstrap 진단은 `selfProbeHook`을 사용해 Node builtin spawn만 번들한다.
 - Phase 1 (Init): `getCacheDir(cwd)` → `setLogDir` → `mkdirSync` (없으면)
 - Phase 2 (Epoch reset): compact/clear에서만; boundary 캐시 재계산 비용은 수용 (fs 사실이라 정합성 무해)
 - Phase 3 (Auto-detect): `!isFcaProject && hasIntentMdInTree(cwd)`면 `.filid/` 생성 후 FCA로 승격
@@ -37,9 +38,11 @@
 - `.claude/rules/filid_fca-policy.md` 등 rule doc 파일을 write
 - `.filid/config.json` 자동 생성 (setup 스킬 전담)
 - daily throttle 게이트 (`isPruneDue` / `isSessionPruneDue`) 우회로 매 세션마다 prune 강제 실행
+- 범용 self-probe·spawn·cross-spawn·which를 SessionStart 번들에 포함
 
 ## Dependencies
 
+- `@ogham/cross-platform/{self-probe/hook,error-log/path,error-log/write}`
 - `../../core/infra/cacheManager/` (`getCacheDir`, `removeSessionFiles`, prune 게이트/실행기 일체)
 - `../../lib/logger.js` (`createLogger`, `setLogDir`)
 - `../../constants/scanDefaults.js` (`SCAN_SKIP_DIRS`), `../../constants/documentFiles.js` (`INTENT_MD`)

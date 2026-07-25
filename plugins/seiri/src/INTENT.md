@@ -3,7 +3,7 @@
 ## Purpose
 
 `@ogham/seiri` 의 소스 루트. 코드 작성 품질·리뷰 규율·개발 방법론 규칙을
-대상 저장소의 `.claude/rules/` 로 배포하고, 그 상태를 세션에 보고한다.
+현재 호스트의 프로젝트 규칙 채널로 배포하고, 그 상태를 세션에 보고한다.
 **규칙 본문을 주입하지 않는다** — 배포된 파일은 하니스가 로드한다.
 
 ## Structure
@@ -33,7 +33,7 @@
 ### Always do
 
 - 새 모듈 추가 시 `index.ts` 에 named export 추가.
-- 규칙 파일을 건드리는 변경은 `planRuleDocs` 로 미리 보여줄 수 있게 유지.
+- 규칙 변경은 `planRuleDocs` 의 target·revision 과 함께 미리 보여준다.
 
 ### Ask first
 

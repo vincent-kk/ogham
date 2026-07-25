@@ -18,6 +18,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
+  readMaencofSection,
 } from '../../core/claudeMdMerger/index.js';
 import { runSessionStart } from '../../hooks/sessionStart/helpers/bootstrap/bootstrap.js';
 import { VERSION } from '../../version.js';
@@ -38,6 +39,7 @@ describe('session-start CLAUDE.md 초기화', () => {
   });
 
   afterEach(() => {
+    delete process.env.PLUGIN_DATA;
     rmSync(vaultDir, {
       recursive: true,
       force: true,
@@ -169,5 +171,43 @@ describe('session-start CLAUDE.md 초기화', () => {
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('CLAUDE.md');
     expect(ctx).toContain('initialized');
+  });
+
+  it('Codex hook signal에서는 유효한 AGENTS.override.md에 초기화한다', () => {
+    process.env.PLUGIN_DATA = '/host-managed/plugin-data';
+    const overridePath = join(vaultDir, 'AGENTS.override.md');
+    writeFileSync(overridePath, '# Codex override\n', 'utf8');
+
+    runSessionStart({ cwd: vaultDir });
+
+    expect(readFileSync(overridePath, 'utf8')).toContain(MAENCOF_START_MARKER);
+    expect(existsSync(join(vaultDir, 'AGENTS.md'))).toBe(false);
+    expect(existsSync(join(vaultDir, 'CLAUDE.md'))).toBe(false);
+  });
+
+  it('현재 버전의 숨겨진 AGENTS.md 섹션도 유효 override로 재배치한다', () => {
+    process.env.PLUGIN_DATA = '/host-managed/plugin-data';
+    const fallbackPath = join(vaultDir, 'AGENTS.md');
+    const overridePath = join(vaultDir, 'AGENTS.override.md');
+    writeFileSync(
+      fallbackPath,
+      `${MAENCOF_START_MARKER}\ncustom directive\n${MAENCOF_END_MARKER}\n`,
+      'utf8',
+    );
+    writeFileSync(overridePath, '# Codex override\n', 'utf8');
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'version.json'),
+      JSON.stringify({
+        version: VERSION,
+        installedAt: new Date().toISOString(),
+        migrationHistory: [],
+      }),
+      'utf8',
+    );
+
+    runSessionStart({ cwd: vaultDir });
+
+    expect(readMaencofSection(overridePath)).toBe('custom directive');
+    expect(readMaencofSection(fallbackPath)).toBeNull();
   });
 });

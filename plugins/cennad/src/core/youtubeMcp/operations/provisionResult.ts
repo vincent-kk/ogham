@@ -1,5 +1,6 @@
-// Outcome of provisioning the yt-dlp-mcp MCP server into one target CLI.
-// Shared by the antigravity (file-write) and codex (`codex mcp`) provisioners.
+// Cennad's stable summary of provisioning one target CLI. Both the Antigravity
+// file adapter and the Codex agent-artifacts adapter map their detailed outcomes
+// to this intentionally small contract.
 export type ProvisionAction = 'added' | 'removed' | 'unchanged';
 
 export interface ProvisionResult {

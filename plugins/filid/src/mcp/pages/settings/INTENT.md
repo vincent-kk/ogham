@@ -2,7 +2,7 @@
 
 `open_settings` 도구가 기동하는 설정 페이지 프런트엔드. `.filid/config.json`
 (8 규칙 enabled/severity/exempt, language, scan.maxDepth, additional-\* 배열)과
-`.claude/rules/` rule doc 적용 상태를 한 폼에서 편집한다. 웹 폼이므로 배포
+현재 host target의 rule doc 적용 상태를 한 폼에서 편집한다. 웹 폼이므로 배포
 상태를 pre-check 로 표시할 수 있어 CLI 체크박스의 재선택 강제 결함이 없다.
 
 ## Structure
@@ -19,6 +19,7 @@
 - 의존성 없는 vanilla JS, SVG 아이콘만 (이모지 금지)
 - 서버 발급 토큰을 `location.search` 에서 읽어 모든 POST 에 `?token=` 부착
 - rule doc 체크박스는 `deployed` 를 pre-check; drift 는 `[UPDATE]` 배지 + 재동기 체크로 표현
+- 각 rule doc은 공유 manager의 `displayTarget`을 표시한다.
 - 상태 배지는 채도 아닌 treatment (모노 대문자 + 박스) 로 구분
 - 저장 성공 시 "Claude Code 로 복귀" 안내 후 탭 자동 닫기 (long-poll 재개 신호)
 - dirty 상태에서 이탈 시 `beforeunload` 확인

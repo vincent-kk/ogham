@@ -14,9 +14,11 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 
 ## Conventions
 
-- 외부 npm 모듈 import 금지 (`node:fs`, `node:path`, `node:os`, `node:crypto` 만)
+- 외부 npm 모듈 import 금지 (`node:fs`, `node:path`, `node:os`, `node:crypto`와
+  cross-platform 단일 목적 entry만)
 - `src/core/`, `src/types/` import 금지 — zod / MCP SDK 가 번들에 빨리면 cap 위반
 - shared path/config mirror 는 `src/constants/paths.ts` 정책과 일치 유지: 기본 `pluginCache('cennad')`, non-blank `CENNAD_CONFIG_PATH` override, `CLAUDE_PLUGIN_DATA`/`CLAUDE_PLUGIN_DADA` 무시
+- plugin cache와 host 판별은 aggregate가 아닌 목적별 subpath를 사용
 - 엔트리는 try/catch → 항상 `{ continue: true }` 출력 후 `process.exit(0)`
 - 응답 JSON: `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }`
 - 수정 후 `yarn cennad build` 로 `bridge/*.mjs` 재생성

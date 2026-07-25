@@ -1,23 +1,7 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
-import {
-  INSTRUCTIONS_FILES,
-  readSection,
-} from '@ogham/cross-platform/instructions';
-
-import {
-  FCA_POLICY_RULE_DOC,
-  LEGACY_FCA_POLICY_RULE_DOC,
-  ruleDocMarkers,
-} from '../../../constants/ruleDocs.js';
 import { findConfigRoot } from '../../utils/findConfigRoot.js';
 import { readHookConfig } from '../../utils/readHookConfig.js';
 
-// Forward-slash literal: this is a display pointer shown to the model, so it must
-// read the same on every OS. `join(root, …)` below still finds the file on Windows —
-// Node accepts forward slashes in FS paths there.
-const RULES_DIR = '.claude/rules';
+import { inspectFcaPolicy } from './inspectFcaPolicy.js';
 
 export function buildMinimalContext(cwd: string): string {
   const lines: string[] = [];
@@ -32,11 +16,11 @@ export function buildMinimalContext(cwd: string): string {
       '[filid] ⚠ Not initialized. Run /filid:setup to create .filid/config.json.',
     );
   else {
-    const deployedAt = locateFcaPolicy(root);
+    const inspection = inspectFcaPolicy(root);
     lines.push(
-      deployedAt === null
-        ? `[filid] ⚠ Rules not deployed. Run /filid:setup to deploy ${RULES_DIR}/${FCA_POLICY_RULE_DOC}.`
-        : `[filid] FCA-AI active. Rules: ${deployedAt}`,
+      inspection?.deployed === true
+        ? `[filid] FCA-AI active. Rules: ${inspection.displayTarget}`
+        : `[filid] ⚠ Rules not deployed. Run /filid:setup to deploy ${inspection?.displayTarget ?? 'the host rule target'}.`,
     );
   }
 
@@ -52,33 +36,4 @@ export function buildMinimalContext(cwd: string): string {
   }
 
   return lines.join('\n');
-}
-
-/**
- * Where the mandatory rule document actually landed, or null if nowhere.
- *
- * Every channel is searched, not just Claude's. Off Claude the MCP server merges rule
- * documents into the host's instruction file instead of writing `.claude/rules/`, and a
- * hook cannot ask which host it is on — the adapters inject `OGHAM_HOST` into the MCP
- * declaration only. Checking one channel would make this hook announce "rules not
- * deployed" over rules the very same plugin had just deployed.
- *
- * Claude's channel is checked first, so the host that already works pays nothing: the
- * instruction files are read only when the directory has nothing to show.
- */
-function locateFcaPolicy(root: string): string | null {
-  for (const filename of [FCA_POLICY_RULE_DOC, LEGACY_FCA_POLICY_RULE_DOC]) {
-    const path = `${RULES_DIR}/${filename}`;
-    if (existsSync(join(root, path))) return path;
-  }
-
-  const markers = ruleDocMarkers(FCA_POLICY_RULE_DOC);
-  for (const filename of INSTRUCTIONS_FILES) {
-    const path = join(root, filename);
-    if (!existsSync(path)) continue;
-    if (readSection(readFileSync(path, 'utf8'), markers) !== null)
-      return filename;
-  }
-
-  return null;
 }

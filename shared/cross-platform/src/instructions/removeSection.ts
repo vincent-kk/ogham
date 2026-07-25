@@ -12,7 +12,5 @@ export function removeSection(
   const endIdx = source.indexOf(markers.end);
   if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) return null;
 
-  const before = source.slice(0, startIdx).trimEnd();
-  const after = source.slice(endIdx + markers.end.length).trimStart();
-  return before + (before && after ? "\n\n" : "") + after;
+  return source.slice(0, startIdx) + source.slice(endIdx + markers.end.length);
 }

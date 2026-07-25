@@ -6,7 +6,7 @@ Codex 도구 호출을 Claude 훅 도구 어휘로 **순수 정규화**. Codex �
 
 | File                  | Role                                                  |
 | --------------------- | ----------------------------------------------------- |
-| `index.ts`            | barrel                                                |
+| `index.ts`            | 호환 aggregate barrel                                 |
 | `types.ts`            | `ApplyPatchOp` · `CodexToolUse` 최소 타입 (organ)     |
 | `parseApplyPatch.ts`  | V4A 패치 → 파일 연산 목록 (순수 파서)                 |
 | `parseBashRead.ts`    | 단순 셸 읽기(`cat foo.md`) → 파일 경로 (순수 파서)    |

@@ -45,5 +45,5 @@
 
 ## Dependencies
 
-- **런타임**: `@ast-grep/napi ^0.42`, `@modelcontextprotocol/sdk ~1.22`, `fast-glob ^3`, `zod ^3.23`
+- **런타임**: `@ogham/agent-artifacts`, `@ast-grep/napi ^0.42`, `@modelcontextprotocol/sdk ~1.22`, `fast-glob ^3`, `zod ^3.23`
 - **개발**: `esbuild ^0.24`, `typescript ^5.7`, `vitest 3.2` — Node.js ≥ 20, Yarn 4.12 workspaces

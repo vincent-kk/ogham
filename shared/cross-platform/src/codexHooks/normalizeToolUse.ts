@@ -29,7 +29,11 @@ import type { CodexToolUse } from "./types.js";
  * per-op iteration is the upgrade path if models start bundling files (they emit
  * one file per patch in practice — measured 2026-07-15).
  */
-export function normalizeCodexToolUse<T extends CodexToolUse>(input: T): T {
+export function normalizeCodexToolUse<
+  T extends CodexToolUse & { tool_input: Record<string, unknown> },
+>(input: T): Omit<T, "tool_input"> & { tool_input: Record<string, unknown> };
+export function normalizeCodexToolUse<T extends CodexToolUse>(input: T): T;
+export function normalizeCodexToolUse(input: CodexToolUse): CodexToolUse {
   const command = input.tool_input?.["command"];
   if (typeof command !== "string") return input;
 

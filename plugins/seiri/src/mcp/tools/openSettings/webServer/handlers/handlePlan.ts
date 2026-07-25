@@ -7,7 +7,7 @@ import type { RouteContext } from '../routing/routeContext.js';
 import { readSaveBody } from './readSaveBody.js';
 
 /**
- * Preview what saving would do to `.claude/rules/`, writing nothing.
+ * Preview what saving would do to the active host rule channel, writing nothing.
  *
  * Rule docs become standing instructions the model reads every session,
  * so the user sees what is about to be installed in their repository

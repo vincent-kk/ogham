@@ -1,20 +1,18 @@
-# youtubeMcp — YouTube MCP addon 프로비저닝
-
 ## Purpose
 
-`@ogham/yt-dlp-mcp`(키 `yt-dlp-mcp`) MCP 서버를 LLM과 분리된 독립 addon으로, 대상 CLI(antigravity·codex)에 멱등 등록·해제한다. antigravity는 글로벌 `mcp_config.json`에, codex는 `codex mcp add|remove`로 `config.toml`에 기록한다(codex가 TOML 소유, 직접 편집 안 함). 두 CLI 모두 헤드리스 모드에서 서버를 스스로 호출하므로 dispatch 경로 변경은 없다. `language`(en/ko)는 서버 env `YTDLP_LANG`로 전달. `/setup` 저장 시점에만 호출.
+`@ogham/yt-dlp-mcp`(키 `yt-dlp-mcp`) MCP 서버를 LLM과 분리된 독립
+addon으로 대상 CLI(antigravity·codex)에 멱등 등록·해제한다. antigravity는
+글로벌 `mcp_config.json`을 관리하고, codex는 목적별 사용자 MCP target과
+manager를 통해 `codex mcp add|remove`를 호출한다. `language`
+(en/ko)는 서버 env `YTDLP_LANG`로 전달하며 `/setup` 저장 시점에만 실행한다.
 
 ## Structure
 
-| 파일                                 | 역할                                                         |
-| ------------------------------------ | ------------------------------------------------------------ |
-| `operations/provisionYoutube.ts`     | orchestrator: addon config(next/prev) → antigravity + codex  |
-| `operations/provisionAntigravity.ts` | mcp_config.json 멱등 write (command/args/env, 변경 시만)     |
-| `operations/provisionCodex.ts`       | `codex mcp add\|remove` (runner 주입 가능, never throw)      |
-| `operations/provisionResult.ts`      | `ProvisionResult` / `ProvisionAction` 타입                   |
-| `utils/resolveCodexAction.ts`        | codex add/remove/skip 결정 (불필요한 spawn 회피, pure)       |
-| `utils/readMcpConfig.ts`             | mcp_config.json 안전 read·정규화 (누락/손상 → 빈 레지스트리) |
-| `constants/youtubeServer.ts`         | key + npx command/args + `youtubeMcpEnv(language)`           |
+| 경로                           | 역할                                           |
+| ------------------------------ | ---------------------------------------------- |
+| `operations/`                  | 두 대상 orchestration·적용·결과 매핑           |
+| `operations/provisionCodex.ts` | Codex 사용자 MCP manager와 Cennad 정책 연결    |
+| `utils/`, `constants/`         | 상태 결정·Antigravity JSON read·서버 정식 정의 |
 
 ## Conventions
 
@@ -22,13 +20,14 @@
 - antigravity 경로 기본값 `AGY_MCP_CONFIG_PATH`(constants/paths); 테스트는 인자 주입
 - 다른 서버·최상위 키 전부 보존; 변경 없으면 write/spawn 생략
 - 모든 file write 는 `atomicWrite`, 디렉토리 부재 시 `0o700` 생성
+- codex argv는 agent-artifacts 계약을 사용하고 테스트 runner로 정확히 검증
 
 ## Boundaries
 
 ### Always do
 
 - read/write/spawn 실패를 throw 하지 않고 `{ ok: false }` 로 degrade
-- codex 미설치(ENOENT)는 조용히 degrade (warn 없음); 그 외 실패만 `logger.warn`
+- codex ENOENT는 경고 없이 `{ ok: false, action: 'unchanged' }`; 그 외 실패만 warn
 - enabled 동안 yt-dlp-mcp 항목은 cennad 가 소유(canonical 정의로 덮어씀)
 
 ### Ask first
@@ -44,6 +43,5 @@
 
 ## Dependencies
 
-- `node:fs/promises`, `node:path`, `@ogham/cross-platform` (spawnCli)
-- `../../lib/{atomicWrite,logger}`, `../../constants/{paths,defaults}`
-- `../../types` (`YoutubeAddonConfig`, `YoutubeAddonLanguage`), `../../utils/isFileNotFound`
+- `node:fs/promises`, `node:path`, `@ogham/agent-artifacts`
+- `../../lib`, `../../constants`, `../../types`, `../../utils/isFileNotFound`

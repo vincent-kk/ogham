@@ -1,46 +1,45 @@
-# hostRegistry
-
 ## Purpose
 
-"어떤 호스트가 존재하고, 각자의 좌표는 무엇인가" 의 **단일 진실원**. 호스트 이름·마커값·상태 루트 env·기본 디렉터리·훅측 판별 신호를 **데이터 테이블**로 보유한다. 소비자는 호스트 정체성으로 분기하지 않고 테이블에 좌표를 묻는다 — 호스트 추가는 새 행이지 새 `if` 가 아니다.
+호스트 ID, 마커, 상태 루트 좌표와 훅 판별 신호의 단일 진실원이다.
 
 ## Structure
 
-| File                       | Role                                                    |
-| -------------------------- | ------------------------------------------------------- |
-| `index.ts`                 | barrel                                                  |
-| `types.ts`                 | `Host`·`KnownHost` (정본) · `HostDescriptor`            |
-| `registry.ts`              | `HOSTS` 테이블 + `HOST_MARKER_ENV` — 순수 데이터        |
-| `hostFromMarker.ts`        | 마커값만으로 판별 (MCP 측). 부재=claude, 미인식=unknown |
-| `resolveHostDescriptor.ts` | 마커 + 훅 신호 양쪽 판별 (상태 경로 결정용)             |
+| File                       | Role                                   |
+| -------------------------- | -------------------------------------- |
+| `index.ts`                 | 공개 배럴                              |
+| `types.ts`                 | `Host`, `KnownHost`, descriptor        |
+| `registry.ts`              | `HOSTS`와 marker env의 순수 데이터     |
+| `hostFromMarker.ts`        | MCP marker 판별                        |
+| `runtime/`                 | marker/훅 신호에서 명시적 host ID 판별 |
+| `resolveHostDescriptor.ts` | 기존 상태 경로 호환용 descriptor 판별  |
 
 ## Conventions
 
-- **내부 의존 0** — 이것이 존재 이유다. `paths` 와 `hostPaths` 가 함께 소비해야 하는데 `hostPaths → paths` 엣지가 이미 있어, leaf 가 아니면 사이클이 된다.
-- `hookSignalEnv` 는 **전부 실측 기반**이다 — Codex=un-prefixed `PLUGIN_DATA`, Claude=`CLAUDE_` 접두만(따라서 신호 없음), agy=`ANTIGRAVITY_CONVERSATION_ID`(1.1.5 에서 agy 가 추가하는 유일한 변수). 추정으로 채우지 않는다.
-- 상태 디렉터리가 미실측인 호스트는 claude 채널을 **명시적으로 차용**한다 (`CLAUDE_STATE_CHANNEL` 공유) — 분기 부재가 아니라 테이블 위의 결정으로 남긴다.
-- 마커가 있으면 **훅 신호 패스를 억제**한다 — 마커는 진술, 훅 신호는 추론이라 둘이 결합해 아무도 지명하지 않은 호스트가 나오면 안 된다.
-- `hookSignalEnv` 는 **신호이지 위치가 아니다** — 존재 여부만 읽고 값(호스트 관리 data dir)은 의도적으로 버린다. 근거는 `../paths/INTENT.md`.
-- `unknown` 은 행이 아니라 **매칭 실패**다. 부재 신호는 `null` 명시가 아니라 **필드 생략**. 이 테이블은 훅 번들에 실리므로 행은 lean 하게 유지한다 (필드 1개 = 모든 훅 콜드스타트 비용).
+- 내부 의존이 없는 leaf를 유지한다.
+- 신호와 상태 좌표는 실측된 값만 테이블에 둔다.
+- marker가 있으면 훅 신호보다 우선하며 미인식 marker는 `unknown`이다.
+- 신호가 없으면 Claude, 서로 다른 훅 신호가 겹치면 `unknown`이다.
+- agy의 Claude 상태 채널 차용은 명시적 테이블 행으로 유지한다.
+- hook은 host ID에는 `host-registry/runtime`, 좌표에는
+  `host-registry/descriptor`, 비교 상수에는 `host-registry/hosts` 단일 목적
+  entry를 사용한다.
 
 ## Boundaries
 
 ### Always do
 
-- 호스트 이름 문자열·호스트별 env 이름은 **이 모듈 안에서만** 리터럴로 등장한다.
-- 새 호스트는 `HOSTS` 에 행을 추가해 도입한다.
+- 호스트 이름과 host-specific env 이름은 이 모듈에서 선언한다.
+- 새 호스트는 조건문이 아니라 `HOSTS` 행으로 추가한다.
 
 ### Ask first
 
-- 새 호스트 행 추가, 기존 행의 `stateRootDir` 변경 (사용자 상태 고아화 위험).
-- `hookSignalEnv` 를 실측 없이 채우기.
+- 새 호스트, 상태 루트, 훅 신호 추가 또는 변경.
 
 ### Never do
 
-- 내부 모듈 import 추가 (leaf 불변식 파괴 → 사이클).
-- 파일 I/O · `process` 직접 읽기 — env 는 인자로 받는다.
+- 내부 모듈 import, 파일 I/O, `process` 직접 읽기.
+- 미인식 호스트를 명시적 Claude 결과로 반환.
 
 ## Dependencies
 
-- 내부: 없음 (leaf).
-- 외부: 없음 (Node 내장조차 불필요 — 순수 데이터 + 순수 함수).
+- 내부/외부: 없음.

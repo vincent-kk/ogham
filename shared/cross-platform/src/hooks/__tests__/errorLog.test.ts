@@ -1,4 +1,10 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -51,6 +57,17 @@ describe("logHookFailure", () => {
     const data = JSON.parse(raw);
     expect(data).toHaveLength(1);
     expect(data[0].hook).toBe("second");
+  });
+
+  it("does not throw when the log path cannot be created", () => {
+    const blockingFile = join(tmp, "not-a-directory");
+    writeFileSync(blockingFile, "occupied");
+
+    expect(() =>
+      logHookFailure("test-pkg", "session-start", new Error("boom"), {
+        logFile: join(blockingFile, "error-log.json"),
+      }),
+    ).not.toThrow();
   });
 
   it("errorLogPath names the file the writer actually uses, per host", () => {

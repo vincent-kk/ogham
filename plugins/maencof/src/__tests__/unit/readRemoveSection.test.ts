@@ -2,7 +2,13 @@
  * @file readRemoveSection.test.ts
  * @description readMaencofSection, removeMaencofSection, ClaudeMdMerger 클래스 단위 테스트
  */
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -51,8 +57,7 @@ describe('readMaencofSection', () => {
     writeFileSync(claudeMdPath, content, 'utf-8');
 
     const section = readMaencofSection(claudeMdPath);
-    expect(section).not.toBeNull();
-    expect(section).toContain('Knowledge Path: ./knowledge/');
+    expect(section).toBe(SAMPLE_MAENCOF_CONTENT);
   });
 });
 
@@ -78,6 +83,19 @@ describe('removeMaencofSection', () => {
     expect(newContent).toContain('Some content.');
     expect(newContent).not.toContain(MAENCOF_START_MARKER);
     expect(newContent).not.toContain(MAENCOF_END_MARKER);
+
+    const backupPath = claudeMdPath + '.bak';
+    expect(existsSync(backupPath)).toBe(true);
+    expect(readFileSync(backupPath, 'utf-8')).toBe(content);
+  });
+
+  it('dry-run이면 섹션을 찾되 파일과 형제 백업을 쓰지 않아야 한다', () => {
+    const content = `before\n${MAENCOF_START_MARKER}\n${SAMPLE_MAENCOF_CONTENT}\n${MAENCOF_END_MARKER}\nafter\n`;
+    writeFileSync(claudeMdPath, content, 'utf-8');
+
+    expect(removeMaencofSection(claudeMdPath, { dryRun: true })).toBe(true);
+    expect(readFileSync(claudeMdPath, 'utf-8')).toBe(content);
+    expect(existsSync(claudeMdPath + '.bak')).toBe(false);
   });
 });
 

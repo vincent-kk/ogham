@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-import { errorLogPath, logHookFailure } from '@ogham/cross-platform/error-log';
-import { selfProbe } from '@ogham/cross-platform/self-probe';
+import { errorLogPath } from '@ogham/cross-platform/error-log/path';
+import { logHookFailure } from '@ogham/cross-platform/error-log/write';
+import { selfProbeHook } from '@ogham/cross-platform/self-probe/hook';
 
 import { createLogger } from '../../lib/logger.js';
 import { readStdin } from '../../lib/stdin.js';
@@ -13,7 +14,7 @@ const log = createLogger('setup');
 // SessionStart first hook entry — diagnose node/git/PATH/CLAUDE_PLUGIN_ROOT.
 // Errors append to the host-aware plugin error log (`errorLogPath`) so silent
 // hook failures (e.g. Windows PATH lacks node) become observable.
-const probe = await selfProbe({ writeLog: true, pkg: 'filid' });
+const probe = await selfProbeHook({ writeLog: true, pkg: 'filid' });
 
 const raw = await readStdin(5000);
 let result: HookOutput;
@@ -27,7 +28,7 @@ try {
 }
 
 // Surface diagnostic failures to the user via additionalContext so they are
-// not silent. selfProbe already wrote a structured error-log entry above.
+// not silent. selfProbeHook already wrote a structured error-log entry above.
 if (probe.errors.length > 0) {
   const warning =
     '[filid] hook bootstrap diagnostic — some hooks may not work:\n' +

@@ -1,20 +1,22 @@
 import { SILENT_INTERVENTION } from '../../constants/intervention.js';
-import { INJECTION_PREFIX, RULE_ID_PREFIX } from '../../constants/plugin.js';
+import { INJECTION_PREFIX } from '../../constants/plugin.js';
 import { describeDial } from '../../core/infra/configLoader/utils/describeDial.js';
 import { renderElectionLine } from '../../core/infra/configLoader/utils/renderElectionLine.js';
 import { renderPostureLines } from '../../core/infra/configLoader/utils/renderPostureLines.js';
 import type { InterventionState } from '../../types/config.js';
 import type { RuleDocStatus } from '../../types/manifest.js';
 
-const RULES_DIR_LABEL = '.claude/rules/';
+import { activeRulesLine } from './activeRulesLine.js';
+import { shortRuleName } from './shortRuleName.js';
+
 const SETUP_COMMAND = '/seiri:setup';
 
 /**
  * Build the SessionStart injection.
  *
  * Deliberately short, and deliberately not the rules themselves: the
- * harness already loads every file under `.claude/rules/` into context,
- * so repeating any of that content here would spend the budget twice.
+ * the host already loads its rule channel into context, so repeating any
+ * of that content here would spend the budget twice.
  * What the files cannot say about themselves is what goes in — which are
  * active, where the dial sits, and whether any drifted from the template.
  *
@@ -27,7 +29,7 @@ export function renderStatusLines(
   dial: InterventionState,
   options: { compact?: boolean } = {},
 ): string[] {
-  const deployed = statuses.filter((status) => status.deployed);
+  const active = statuses.filter((status) => status.active);
   const election = renderElectionLine(dial.effective);
 
   // Two facts, two gates. Which rules are active is only worth saying
@@ -36,7 +38,7 @@ export function renderStatusLines(
   // line is gated on the dial alone (D7-E B1). A project with the plugin
   // installed and no rule deployed still elects.
   const lines =
-    deployed.length === 0 ? [] : [activeRulesLine(deployed, statuses.length)];
+    active.length === 0 ? [] : [activeRulesLine(active, statuses.length)];
 
   // Compact is for a subagent, which starts without the parent's context
   // and needs the two facts it cannot recover: which rules this
@@ -55,7 +57,7 @@ export function renderStatusLines(
   // Nothing deployed leaves nothing to report about rules — the dial
   // position, drift and stored-file warnings all describe deployed files.
   // The election line is the one fact that survives that emptiness.
-  if (deployed.length === 0)
+  if (active.length === 0)
     return election === undefined ? [] : [`${INJECTION_PREFIX} ${election}`];
 
   // A valve that lowered the dial to advisory still prints: silence there
@@ -76,11 +78,11 @@ export function renderStatusLines(
   // loaded before it is acted on.
   if (election !== undefined) lines.push(`${INJECTION_PREFIX} ${election}`);
 
-  const drifted = deployed.filter((status) => !status.inSync);
+  const drifted = active.filter((status) => !status.activeInSync);
   if (drifted.length > 0)
     lines.push(
       `${INJECTION_PREFIX} ${drifted.length} rule(s) differ from the shipped template: ${drifted
-        .map((status) => shortName(status.id))
+        .map((status) => shortRuleName(status.id))
         .join(', ')}. Run ${SETUP_COMMAND} to review.`,
     );
 
@@ -90,15 +92,4 @@ export function renderStatusLines(
     );
 
   return lines;
-}
-
-/** Which rules this repository turned on, counted against the manifest. */
-function activeRulesLine(deployed: RuleDocStatus[], total: number): string {
-  const names = deployed.map((status) => shortName(status.id)).join(', ');
-  return `${INJECTION_PREFIX} Active rules: ${names} (${deployed.length}/${total}) — ${RULES_DIR_LABEL}`;
-}
-
-/** `seiri_agent-legible` reads as `agent-legible` once the source is known. */
-function shortName(id: string): string {
-  return id.startsWith(RULE_ID_PREFIX) ? id.slice(RULE_ID_PREFIX.length) : id;
 }

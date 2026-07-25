@@ -31,6 +31,7 @@ export const SaveBodySchema = z.object({
   ruleDocs: z.object({
     selections: z.record(z.string(), z.boolean()),
     resync: z.array(z.string()),
+    revision: z.string().nullable().optional(),
   }),
 });
 export type SaveBody = z.infer<typeof SaveBodySchema>;

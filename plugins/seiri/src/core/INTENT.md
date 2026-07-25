@@ -2,7 +2,7 @@
 
 ## Purpose
 
-seiri 가 소유하는 세 상태의 구현: 개입 강도 다이얼, `.claude/rules/` 배포 상태,
+seiri 가 소유하는 세 상태의 구현: 개입 강도 다이얼, 호스트 규칙 배포 상태,
 세션 스코프 신호. **진실은 소유하지 않는다** — 코드가 옳은지는 저장소
 (테스트·CI·CLAUDE.md)가 답하고, 여기는 맥락만 다룬다.
 
@@ -28,6 +28,7 @@ sessionSignals/ 실패 연쇄 카운터 (세션 스코프, 비추적)
 - 파일 쓰기는 전부 `writeAtomically` 경유.
 - 해시는 raw 바이트 기준 — 그래서 `.gitattributes` 가 규칙 템플릿을 LF 로
   고정하고, 루트 `.prettierignore` 가 포매터를 막는다.
+- 규칙 대상·판정·revision 은 `@ogham/agent-artifacts` 에 위임한다.
 
 ## Boundaries
 

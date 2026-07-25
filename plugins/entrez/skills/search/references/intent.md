@@ -21,3 +21,18 @@ Classify the request deterministically before entering the state machine.
 Flags override only execution mode, not intent: `--auto` keeps `FULL_SEARCH` but
 runs unattended; `--db` / `--date` bind context. See
 [modes.md](modes.md) and [state-machine.md](state-machine.md).
+
+## Boundaries
+
+### Always do
+
+- Classify the request before entering the state machine.
+- Treat substantive research topics as `FULL_SEARCH` unless clearer signals apply.
+
+### Ask first
+
+- Clarify topic facets, date range, and database when breadth or scope is ambiguous.
+
+### Never do
+
+- Never let execution flags change the classified intent.

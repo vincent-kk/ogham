@@ -8,9 +8,9 @@
  *   3. Optional `[filid] Disabled rules: <ids>` line when overrides disabled
  *      any built-in rule.
  *
- * Deployed rule docs under `.claude/rules/` are auto-injected by Claude Code
- * as project instructions at session start — this module MUST NOT duplicate
- * their content, only point to their location so the LLM can re-read them.
+ * Deployed rule docs are read by the active host from its project rule target.
+ * This module MUST NOT duplicate their content, only point to the inspected
+ * target so the LLM can re-read it.
  *
  * Callers (see `userPromptSubmit.ts`) are responsible for the
  * validateCwd + isFcaProject gate before invoking `injectContext`.

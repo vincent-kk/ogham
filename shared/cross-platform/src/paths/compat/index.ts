@@ -3,6 +3,7 @@ export { isWindowsLikePath } from "./isWindowsLikePath.js";
 export { pathForCompare } from "./pathForCompare.js";
 export { portableBasename } from "./portableBasename.js";
 export { portableDirname } from "./portableDirname.js";
+export { portableIsAbsolute } from "./operations/portableIsAbsolute.js";
 export { portableJoin } from "./portableJoin.js";
 export { portableRelative } from "./portableRelative.js";
 export { portableResolve } from "./portableResolve.js";

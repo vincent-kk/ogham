@@ -1,19 +1,18 @@
-import { mkdirSync, readFileSync, unlinkSync } from 'node:fs';
-
-import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
+import type { ArtifactOutcome } from '@ogham/agent-artifacts/transactions';
 
 import type {
-  RuleDocOutcome,
   RuleDocSyncResult,
   SyncRuleDocsOptions,
 } from '../../../types/manifest.js';
-import { writeAtomically } from '../../utils/writeAtomically.js';
-import { collectRuleDocDecisions } from '../utils/collectRuleDocDecisions.js';
-import { detectOrphanedDocs } from '../utils/detectOrphanedDocs.js';
-import { resolveRulesDir } from '../utils/resolveRulesDir.js';
+import { loadManagedRuleDocuments } from '../loaders/loadManagedRuleDocuments.js';
+import { loadManifest } from '../loaders/loadManifest.js';
+import { createRuleDocumentRequest } from '../utils/createRuleDocumentRequest.js';
+import { createRulePlanRevision } from '../utils/createRulePlanRevision.js';
+import { createSeiriRuleManager } from '../utils/createSeiriRuleManager.js';
+import { mapRuleSyncResult } from '../utils/mapRuleSyncResult.js';
 
 /**
- * Reconcile `.claude/rules/` with the user's selection.
+ * Reconcile the active host's rule channel with the user's selection.
  *
  * Only setup surfaces call this — the settings page's save handler, or
  * the `rule_docs_sync` tool as a headless fallback. Session hooks never
@@ -30,70 +29,58 @@ export function applyRuleDocs(
   selection: Iterable<string>,
   opts: SyncRuleDocsOptions = {},
 ): RuleDocSyncResult {
-  const records = collectRuleDocDecisions(
-    projectRoot,
-    pluginRoot,
+  const manifest = loadManifest(pluginRoot);
+  const documents = loadManagedRuleDocuments(pluginRoot, manifest);
+  const manager = createSeiriRuleManager(projectRoot);
+  if (manager === null)
+    return {
+      applied: false,
+      outcomes: [
+        {
+          id: '*',
+          filename: '*',
+          action: 'skip',
+          reason: 'runtime host is unsupported for rule document deployment',
+        },
+      ],
+    };
+
+  const request = createRuleDocumentRequest(
+    documents,
     selection,
     opts.resync ?? [],
   );
-
-  const outcomes: RuleDocOutcome[] = records.map(
-    ({ entry, decision, destPath, templatePath }) => {
-      const outcome: RuleDocOutcome = {
-        id: entry.id,
-        filename: entry.filename,
-        action: decision.action,
-        reason: decision.reason,
-      };
-
-      try {
-        if (decision.write) {
-          mkdirSync(portableDirname(destPath), { recursive: true });
-          writeAtomically(destPath, readFileSync(templatePath));
-        } else if (decision.remove) unlinkSync(destPath);
-      } catch (err) {
-        return {
-          id: entry.id,
-          filename: entry.filename,
-          action: 'skip',
-          reason: `${decision.action} failed: ${(err as Error).message}`,
-        };
-      }
-
-      return outcome;
-    },
+  const plan = manager.plan(request);
+  const revision = createRulePlanRevision(plan);
+  const hasPreviewRevision = Object.prototype.hasOwnProperty.call(
+    opts,
+    'revision',
   );
 
-  // Retire orphaned docs — files in this plugin's namespace the manifest no
-  // longer lists. Detection is shared with planRuleDocs so the preview and
-  // this write agree; here the files are actually deleted.
-  const rulesDir = resolveRulesDir(projectRoot);
-  try {
-    for (const filename of detectOrphanedDocs(projectRoot, pluginRoot))
-      try {
-        unlinkSync(portableJoin(rulesDir, filename));
-        outcomes.push({
-          id: filename,
-          filename,
-          action: 'remove',
-          reason: 'retired: no longer shipped',
-        });
-      } catch (err) {
-        outcomes.push({
-          id: filename,
-          filename,
-          action: 'skip',
-          reason: `retire failed: ${(err as Error).message}`,
-        });
-      }
-  } catch (err) {
-    outcomes.push({
-      id: rulesDir,
-      filename: rulesDir,
-      action: 'skip',
-      reason: `orphan detection failed: ${(err as Error).message}`,
+  if (hasPreviewRevision && opts.revision !== revision) {
+    const outcomes: ArtifactOutcome[] = plan.outcomes.map((outcome) => ({
+      id: outcome.id,
+      action: 'conflict',
+      target: outcome.target,
+      reason: 'preview is stale; refresh before saving',
+    }));
+    return mapRuleSyncResult({
+      applied: false,
+      outcomes,
+      manifest,
+      revision,
     });
   }
 
-  return { applied: true, outcomes };
+  const applied = manager.apply(plan);
+  const applyConflicted = applied.outcomes.some(
+    (outcome) => outcome.action === 'conflict',
+  );
+  const nextPlan = manager.plan(request);
+  return mapRuleSyncResult({
+    applied: !applyConflicted,
+    outcomes: applied.outcomes,
+    manifest,
+    revision: createRulePlanRevision(nextPlan),
+  });
 }

@@ -13,7 +13,7 @@
 | `locatePluginRoot.ts`    | 매니페스트까지 상향 탐색 — env·cwd 채널이 없는 호스트의 최후 수단  |
 | `projectRoot.ts`         | 사용자 작업물 루트 — `projectRoot`(throw) / `tryProjectRoot`(null) |
 | `projectRootMemo.ts`     | 프로세스당 workspace 좌표 기억 (claude 에서는 무시)                |
-| `absoluteRoot.ts`        | 공급된 경로의 절대성 강제 + `~` 전개 + `portableResolve` 정규화    |
+| `absolute/`              | 절대성 강제·`~` 전개·portable 정규화 organ                        |
 | `instructionsChannel.ts` | `instructionsFile()` · `ruleDocsTarget()` — 호스트별 문서 채널     |
 
 ## Conventions

@@ -27,17 +27,81 @@
       "types": "./dist/paths/index.d.ts",
       "import": "./dist/paths/index.js"
     },
+    "./paths/contained": {
+      "types": "./dist/paths/operations/resolveContainedPath.d.ts",
+      "import": "./dist/paths/operations/resolveContainedPath.js"
+    },
+    "./paths/state-root": {
+      "types": "./dist/paths/state/hostStateRoot.d.ts",
+      "import": "./dist/paths/state/hostStateRoot.js"
+    },
+    "./paths/normalize": {
+      "types": "./dist/paths/operations/normalize.d.ts",
+      "import": "./dist/paths/operations/normalize.js"
+    },
+    "./paths/relative": {
+      "types": "./dist/paths/compat/portableRelative.d.ts",
+      "import": "./dist/paths/compat/portableRelative.js"
+    },
+    "./paths/plugin-cache": {
+      "types": "./dist/paths/state/pluginCache.d.ts",
+      "import": "./dist/paths/state/pluginCache.js"
+    },
+    "./filesystem": {
+      "types": "./dist/filesystem/index.d.ts",
+      "import": "./dist/filesystem/index.js"
+    },
+    "./filesystem/read/utf8": {
+      "types": "./dist/filesystem/read/readUtf8FileIfExistsSync.d.ts",
+      "import": "./dist/filesystem/read/readUtf8FileIfExistsSync.js"
+    },
+    "./filesystem/read/bytes": {
+      "types": "./dist/filesystem/read/readFileIfExistsSync.d.ts",
+      "import": "./dist/filesystem/read/readFileIfExistsSync.js"
+    },
+    "./filesystem/read/directory": {
+      "types": "./dist/filesystem/read/listDirectoryIfExistsSync.d.ts",
+      "import": "./dist/filesystem/read/listDirectoryIfExistsSync.js"
+    },
+    "./filesystem/hook-io": {
+      "types": "./dist/filesystem/hookIo/index.d.ts",
+      "import": "./dist/filesystem/hookIo/index.js"
+    },
     "./host-paths": {
       "types": "./dist/hostPaths/index.d.ts",
       "import": "./dist/hostPaths/index.js"
+    },
+    "./host-paths/absolute-root": {
+      "types": "./dist/hostPaths/absolute/requireAbsoluteRoot.d.ts",
+      "import": "./dist/hostPaths/absolute/requireAbsoluteRoot.js"
     },
     "./host-registry": {
       "types": "./dist/hostRegistry/index.d.ts",
       "import": "./dist/hostRegistry/index.js"
     },
+    "./host-registry/runtime": {
+      "types": "./dist/hostRegistry/runtime/resolveRuntimeHost.d.ts",
+      "import": "./dist/hostRegistry/runtime/resolveRuntimeHost.js"
+    },
+    "./host-registry/descriptor": {
+      "types": "./dist/hostRegistry/resolveHostDescriptor.d.ts",
+      "import": "./dist/hostRegistry/resolveHostDescriptor.js"
+    },
+    "./host-registry/hosts": {
+      "types": "./dist/hostRegistry/registry.d.ts",
+      "import": "./dist/hostRegistry/registry.js"
+    },
     "./instructions": {
       "types": "./dist/instructions/index.d.ts",
       "import": "./dist/instructions/index.js"
+    },
+    "./instructions/read": {
+      "types": "./dist/instructions/read/index.d.ts",
+      "import": "./dist/instructions/read/index.js"
+    },
+    "./instructions/write": {
+      "types": "./dist/instructions/write/index.d.ts",
+      "import": "./dist/instructions/write/index.js"
     },
     "./agy-hooks": {
       "types": "./dist/agyHooks/index.d.ts",
@@ -71,9 +135,21 @@
       "types": "./dist/hooks/errorLog.d.ts",
       "import": "./dist/hooks/errorLog.js"
     },
+    "./error-log/path": {
+      "types": "./dist/hooks/error/errorLogPath.d.ts",
+      "import": "./dist/hooks/error/errorLogPath.js"
+    },
+    "./error-log/write": {
+      "types": "./dist/hooks/error/logHookFailure.d.ts",
+      "import": "./dist/hooks/error/logHookFailure.js"
+    },
     "./self-probe": {
       "types": "./dist/hooks/selfProbe.d.ts",
       "import": "./dist/hooks/selfProbe.js"
+    },
+    "./self-probe/hook": {
+      "types": "./dist/hooks/probe/selfProbeHook.d.ts",
+      "import": "./dist/hooks/probe/selfProbeHook.js"
     },
     "./bootstrap": {
       "types": "./dist/hooks/bootstrap.d.ts",
@@ -86,6 +162,26 @@
     "./compat": {
       "types": "./dist/paths/compat/index.d.ts",
       "import": "./dist/paths/compat/index.js"
+    },
+    "./compat/basename": {
+      "types": "./dist/paths/compat/portableBasename.d.ts",
+      "import": "./dist/paths/compat/portableBasename.js"
+    },
+    "./compat/join": {
+      "types": "./dist/paths/compat/portableJoin.d.ts",
+      "import": "./dist/paths/compat/portableJoin.js"
+    },
+    "./compat/is-absolute": {
+      "types": "./dist/paths/compat/operations/portableIsAbsolute.d.ts",
+      "import": "./dist/paths/compat/operations/portableIsAbsolute.js"
+    },
+    "./compat/path-for-compare": {
+      "types": "./dist/paths/compat/pathForCompare.d.ts",
+      "import": "./dist/paths/compat/pathForCompare.js"
+    },
+    "./compat/resolve": {
+      "types": "./dist/paths/compat/portableResolve.d.ts",
+      "import": "./dist/paths/compat/portableResolve.js"
     }
   },
   "main": "dist/index.js",

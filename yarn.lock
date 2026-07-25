@@ -933,6 +933,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ogham/agent-artifacts@workspace:^, @ogham/agent-artifacts@workspace:shared/agent-artifacts":
+  version: 0.0.0-use.local
+  resolution: "@ogham/agent-artifacts@workspace:shared/agent-artifacts"
+  dependencies:
+    "@ogham/cross-platform": "workspace:^"
+    "@types/node": "npm:^20.11.0"
+    smol-toml: "npm:^1.6.1"
+    typescript: "npm:^5.7.2"
+    vitest: "npm:^4.1.10"
+  languageName: unknown
+  linkType: soft
+
 "@ogham/atlassian@workspace:plugins/atlassian":
   version: 0.0.0-use.local
   resolution: "@ogham/atlassian@workspace:plugins/atlassian"
@@ -954,6 +966,7 @@ __metadata:
   resolution: "@ogham/cennad@workspace:plugins/cennad"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/agent-artifacts": "workspace:^"
     "@ogham/cross-platform": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@types/node": "npm:^20.11.0"
@@ -1025,6 +1038,7 @@ __metadata:
   dependencies:
     "@ast-grep/napi": "npm:^0.42.0"
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/agent-artifacts": "workspace:^"
     "@ogham/cross-platform": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@ogham/session-finalizer": "workspace:^"
@@ -1088,6 +1102,7 @@ __metadata:
   resolution: "@ogham/maencof@workspace:plugins/maencof"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/agent-artifacts": "workspace:^"
     "@ogham/cross-platform": "workspace:^"
     "@ogham/session-finalizer": "workspace:^"
     "@types/node": "npm:^20.11.0"
@@ -1136,6 +1151,7 @@ __metadata:
   resolution: "@ogham/seiri@workspace:plugins/seiri"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/agent-artifacts": "workspace:^"
     "@ogham/cross-platform": "workspace:^"
     "@ogham/http-kit": "workspace:^"
     "@ogham/session-finalizer": "workspace:^"
@@ -6927,6 +6943,13 @@ __metadata:
   version: 4.2.0
   resolution: "smart-buffer@npm:4.2.0"
   checksum: 10c0/a16775323e1404dd43fabafe7460be13a471e021637bc7889468eb45ce6a6b207261f454e4e530a19500cc962c4cc5348583520843b363f4193cee5c00e1e539
+  languageName: node
+  linkType: hard
+
+"smol-toml@npm:^1.6.1":
+  version: 1.7.0
+  resolution: "smol-toml@npm:1.7.0"
+  checksum: 10c0/8eef246b9b96f278a181f6dd2a90c754304cb4cf92ccdfe1d2f714fb980fb3f539ba00283609e8fd2fbcf7c0d48a4ae76b36bc0de556ed286b2c865827a778e8
   languageName: node
   linkType: hard
 

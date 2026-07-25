@@ -10,7 +10,6 @@
   var TOKEN_PARAM = 'token';
   var DIAL_ADVISORY = 'advisory';
   var DIAL_STANDARD = 'standard';
-  var RULES_DIR_LABEL = '.claude/rules/';
   var CONFIG_LABEL = '.seiri/config.json';
   var CONTENT_TYPE_JSON = 'application/json';
 
@@ -58,6 +57,7 @@
 
   var intervention =
     (state.config && state.config.intervention) || DIAL_STANDARD;
+  var previewRevision = null;
 
   var elements = {
     root: document.getElementById('project-root'),
@@ -69,6 +69,7 @@
     save: document.getElementById('save'),
     saveClose: document.getElementById('save-close'),
     close: document.getElementById('close'),
+    ruleTargets: document.querySelectorAll('[data-rules-target]'),
   };
 
   function setStatus(kind, message) {
@@ -85,6 +86,7 @@
         resync: Object.keys(resync).filter(function (id) {
           return resync[id];
         }),
+        revision: previewRevision,
       },
     };
   }
@@ -134,6 +136,7 @@
       checkbox.checked = Boolean(selections[entry.id]);
       checkbox.addEventListener('change', function () {
         selections[entry.id] = checkbox.checked;
+        previewRevision = null;
         refreshPreview();
       });
 
@@ -148,9 +151,7 @@
 
       text.appendChild(title);
       text.appendChild(element('p', 'rule-desc', entry.description));
-      text.appendChild(
-        element('p', 'rule-file', RULES_DIR_LABEL + entry.filename),
-      );
+      text.appendChild(element('p', 'rule-file', entry.displayTarget));
 
       main.appendChild(checkbox);
       main.appendChild(text);
@@ -178,6 +179,7 @@
     overwrite.checked = false;
     overwrite.addEventListener('change', function () {
       resync[entry.id] = overwrite.checked;
+      previewRevision = null;
       refreshPreview();
     });
     label.appendChild(overwrite);
@@ -224,6 +226,43 @@
     facts.forEach(function (pair) {
       elements.facts.appendChild(element('dt', null, pair[0]));
       elements.facts.appendChild(element('dd', null, pair[1]));
+    });
+  }
+
+  function renderRuleTargets() {
+    var targets = entries
+      .map(function (entry) {
+        return entry.activeDisplayTarget;
+      })
+      .filter(function (target, index, all) {
+        return target && all.indexOf(target) === index;
+      });
+    var label =
+      targets.length === 1
+        ? targets[0]
+        : (function () {
+            var first = targets[0] || '';
+            var slash = Math.max(
+              first.lastIndexOf('/'),
+              first.lastIndexOf('\\'),
+            );
+            var directory = first.slice(0, slash + 1);
+            var sharesDirectory =
+              directory &&
+              targets.every(function (target) {
+                var remainder = target.slice(directory.length);
+                return (
+                  target.indexOf(directory) === 0 &&
+                  remainder.indexOf('/') === -1 &&
+                  remainder.indexOf('\\') === -1
+                );
+              });
+            return sharesDirectory
+              ? directory
+              : targets.join(', ') || 'the active host rule channel';
+          })();
+    elements.ruleTargets.forEach(function (node) {
+      node.textContent = label;
     });
   }
 
@@ -274,13 +313,18 @@
   var previewToken = 0;
   function refreshPreview() {
     var current = ++previewToken;
-    post(ROUTE.PLAN, body())
+    return post(ROUTE.PLAN, body())
       .then(function (data) {
         if (current !== previewToken) return;
+        previewRevision =
+          typeof data.ruleDocs.revision === 'string'
+            ? data.ruleDocs.revision
+            : null;
         renderPreview(data.ruleDocs);
       })
       .catch(function (err) {
         if (current !== previewToken) return;
+        previewRevision = null;
         elements.preview.textContent = '';
         elements.preview.appendChild(
           element('p', 'empty', 'Preview unavailable: ' + err.message),
@@ -295,19 +339,34 @@
   }
 
   function save(thenClose) {
+    previewToken += 1;
     setBusy(true);
     setStatus('info', 'Saving…');
     post(ROUTE.SAVE, body())
       .then(function (data) {
+        previewRevision =
+          typeof data.ruleDocs.revision === 'string'
+            ? data.ruleDocs.revision
+            : null;
         renderPreview(data.ruleDocs);
+        if (data.ruleDocs.applied === false) {
+          previewRevision = null;
+          setStatus('error', 'The preview changed. Review it and save again.');
+          return refreshPreview().then(function () {
+            setBusy(false);
+          });
+        }
         setStatus('ok', 'Saved. You can return to the session.');
         if (thenClose) return post(ROUTE.CLOSE, {}).then(closeWindow);
         setBusy(false);
         return undefined;
       })
       .catch(function (err) {
+        previewRevision = null;
         setStatus('error', err.message);
-        setBusy(false);
+        return refreshPreview().then(function () {
+          setBusy(false);
+        });
       });
   }
 
@@ -339,5 +398,6 @@
   renderRules();
   renderDial();
   renderFacts();
+  renderRuleTargets();
   refreshPreview();
 })();

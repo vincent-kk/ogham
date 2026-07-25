@@ -2,11 +2,7 @@
  * @file claudemdRemove.ts
  * @description claudemd_remove 도구 핸들러 — CWD의 호스트 지침 문서에서 maencof 섹션 제거
  */
-import { join } from 'node:path';
-
-import { instructionsFile } from '@ogham/cross-platform/host-paths';
-
-import { removeMaencofSection } from '../../../core/claudeMdMerger/index.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
 import type {
   ClaudeMdRemoveInput,
   ClaudeMdRemoveResult,
@@ -24,13 +20,18 @@ export function handleClaudeMdRemove(
   cwd: string,
   input: ClaudeMdRemoveInput,
 ): ClaudeMdRemoveResult {
-  const targetPath = join(cwd, instructionsFile());
-  const removed = removeMaencofSection(targetPath, {
-    dryRun: input.dry_run ?? false,
+  const manager = createProjectInstructionManager(cwd);
+  const plan = manager.plan({
+    content: null,
+    replaceDrift: false,
+    backup: 'sibling',
   });
+  const result = input.dry_run ? null : manager.apply(plan);
+  const removed = (result ?? plan).outcomes[0]?.action === 'remove';
+  const backupPath = result?.backupPaths[0];
 
   return {
     removed,
-    backup_path: removed ? targetPath + '.bak' : undefined,
+    ...(backupPath === undefined ? {} : { backup_path: backupPath }),
   };
 }

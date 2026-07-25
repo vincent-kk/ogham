@@ -4,20 +4,25 @@
 
 ### Rule deployment
 
-- 규칙 문서는 `templates/rules/` 에 포함되며, 설정 페이지 또는 `rule_docs_sync` 같은 셋업 표면을 통해서만 `<repoRoot>/.claude/rules/<filename>` 으로 배포된다. 세션 훅은 그 경로에 쓰지 않는다.
+- 규칙 문서는 `templates/rules/` 에 포함되며 설정 페이지 또는 `rule_docs_sync` 같은 셋업 표면만 배포한다. 세션 훅은 규칙 아티팩트에 쓰지 않는다.
+- 배포 채널은 현재 호스트가 정한다. Claude 는 `<repoRoot>/.claude/rules/<filename>` 파일을 사용하고, Codex 는 유효한 루트 `AGENTS*.md` 에 `SEIRI` 소유 마커 섹션을 사용한다. 같은 공개 함수가 두 채널을 조정한다.
+- Codex 채널은 마커 밖 사용자 텍스트와 다른 소유자의 섹션을 보존하고, 재실행해도 같은 섹션을 중복하지 않는다.
+- Codex 후보 파일에 저장됐지만 override에 가려진 섹션은 stored target/hash/inSync로 UI의 선택·drift·relocate 입력을 보존하되, 별도 effective target/hash/inSync가 없는 한 활성 규칙으로 보고하지 않는다.
 - 배포 상태는 파일시스템에서 읽는다. 설정에 미러링하지 않는다 — 미러는 그것이 설명한다고 주장하는 파일과 어긋날 수밖에 없다.
 - 모든 규칙은 opt-in 이다. 필수 규칙도, 자동 배포도 없다.
 - 배포된 파일의 바이트가 배포 템플릿과 다르면 drift 이다. Drift 는 보고되고, 호출자가 `resync` 에 해당 규칙 id 를 명시하기 전까지 보존된다. 읽을 수 없는 배포 파일은 일치가 아니라 drift 로 친다.
 - 선택에 없는 규칙 id 는 opt-out 이며, 해당 파일을 제거한다.
+- 은퇴한 아티팩트 정리는 `seiri` 소유 네임스페이스로 제한한다. 매니페스트의 첫 항목이나 다른 플러그인의 파일명으로 소유권을 추론하지 않는다.
 - 부분 실패는 실패 항목을 이유와 함께 `skip` 으로 기록하고 계속한다. 묵시적 실패는 금지한다.
 
 ### Preview
 
-- `plan` 은 `sync` 가 무엇을 할지 답하고, 아무것도 쓰지 않는다. 둘 다 `decideRuleDocAction` 을 거치므로, 미리보기가 실제 쓰기가 만들지 않을 결과를 설명할 수 없다.
+- `plan` 은 `sync` 가 무엇을 할지 답하고 아무것도 쓰지 않으며 대상·선택을 묶은 revision 을 반환한다. 브라우저 저장은 이 revision 을 왕복시켜 현재 계획과 다르면 `skip` 하고 다시 preview 하므로, 더 최신 사용자 편집을 덮지 않는다.
+- 브라우저 저장의 revision 이 없거나 stale 이면 config 와 규칙 채널 모두 한 바이트도 쓰지 않고 세션을 완료하지 않는다. 적용 중 lock/revision conflict 가 나도 config 를 쓰거나 저장 완료로 보고하지 않으며, 새 preview 를 확인한 다음에만 다시 저장할 수 있다.
 
 ### Session reporting
 
-- SessionStart 는 활성 규칙 이름, dial 위치, drift 경고, 선출 계약을 주입한다 — 규칙 본문은 주입하지 않는다. 본문은 하니스가 이미 로드한다.
+- SessionStart 는 현재 호스트의 effective target에서 실제로 읽히는 활성 규칙 이름, dial 위치, drift 경고, 선출 계약을 주입한다 — 규칙 본문은 주입하지 않는다. 본문은 하니스가 이미 로드한다.
 - 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트된다. 배포된 규칙이 없는 프로젝트는 선출 줄만 받고, `advisory` 에서는 배포 여부와 무관하게 아무것도 받지 않는다.
 - 어떤 실패든 `{ continue: true }` 를 내고 주입하지 않는다. 훅이 세션을 막을 수 없어야 한다.
 - PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다.
@@ -44,8 +49,8 @@
 | `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                   |
 | `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                 |
 | `loadManifest(pluginRoot)`                 | 잘못된 manifest 또는 없는 `templateHash` 에서 throw.                                               |
-| `getRuleDocsStatus(projectRoot, plugin)`   | 규칙별 파일시스템 스냅샷 (`inSync` 포함).                                                          |
-| `planRuleDocs(...)` / `applyRuleDocs(...)` | 동일 결정; `applied` 로 preview 와 write 를 구분.                                                  |
+| `getRuleDocsStatus(projectRoot, plugin)`   | 현재 호스트 채널의 규칙별 스냅샷 (`inSync` 포함).                                                  |
+| `planRuleDocs(...)` / `applyRuleDocs(...)` | 동일한 호스트 대상·revision 을 사용; `applied` 로 preview 와 write 를 구분.                        |
 | `open_settings`                            | `{ status: saved \| closed \| pending, url, summary? }`. 대기 시간 상한 있음.                      |
 | `rule_docs_sync`                           | 액션 `status` · `manifest` · `plan` · `sync` · `config`.                                           |
 | `rule_docs_sync` action `config`           | `{ op, changed, dial, posture }`. `set` 은 유효한 `intervention` 필요; baseline 은 절대 쓰지 않음. |
@@ -53,3 +58,7 @@
 ## Scope
 
 범위 밖: 아키텍처 강제, 에이전트 오케스트레이션, 작업 분해, 지식 관리, 알림, 상태 표시, 코드 검색·분석 도구. seiri 가 소유하는 것은 컨텍스트 — 저장소의 진실도, 모델의 판단도 아니다.
+
+## Last Updated
+
+2026-07-26

@@ -5,8 +5,8 @@ import type { SaveBody, SaveSummary } from '../types/settingsTypes.js';
 import { selectedIds } from './selectedIds.js';
 
 /**
- * Persist one save: write the dial, then reconcile `.claude/rules/` with
- * the requested selection.
+ * Persist one save: reconcile the active host's rule channel against the
+ * preview revision, then write the dial only when reconciliation applied.
  *
  * This is one of only two places that write rule files — the other is the
  * `rule_docs_sync` tool used headlessly. Both are reached by an explicit
@@ -17,11 +17,19 @@ export function persistSave(
   pluginRoot: string,
   body: SaveBody,
 ): SaveSummary {
+  const ruleDocs = applyRuleDocs(projectRoot, pluginRoot, selectedIds(body), {
+    resync: body.ruleDocs.resync,
+    revision: body.ruleDocs.revision ?? null,
+  });
+  if (!ruleDocs.applied)
+    return {
+      configWritten: false,
+      ruleDocs,
+    };
+
   writeConfig(projectRoot, body.config);
   return {
     configWritten: true,
-    ruleDocs: applyRuleDocs(projectRoot, pluginRoot, selectedIds(body), {
-      resync: body.ruleDocs.resync,
-    }),
+    ruleDocs,
   };
 }

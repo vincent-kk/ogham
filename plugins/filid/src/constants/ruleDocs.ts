@@ -1,7 +1,7 @@
 import {
   type SectionMarkers,
   sectionMarkers,
-} from '@ogham/cross-platform/instructions';
+} from '@ogham/cross-platform/instructions/read';
 
 /** Namespace owning filid's spans of a host instruction file. */
 export const FILID_SECTION_NAMESPACE = 'FILID';
@@ -19,9 +19,8 @@ export const LEGACY_FCA_POLICY_RULE_DOC = 'fca.md';
  * and no directory) has to hold the whole `.claude/rules` directory in it, and each
  * document still has to be updatable and removable on its own.
  *
- * Shared by the writer (`syncRuleDocsToFile`) and the hook that reports whether rules
- * are deployed — a marker mismatch between those two would make the hook declare
- * "rules not deployed" over a file it had just written.
+ * Kept as a compatibility helper for callers and tests. The shared rule manager uses
+ * the same owner namespace and filename key when it writes or inspects these spans.
  */
 export function ruleDocMarkers(filename: string): SectionMarkers {
   return sectionMarkers(FILID_SECTION_NAMESPACE, filename);

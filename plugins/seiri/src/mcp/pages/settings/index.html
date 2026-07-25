@@ -15,9 +15,10 @@
         </div>
         <p class="lede">
           Rules you select are written to
-          <code>.claude/rules/</code> in this repository, where the harness
-          loads them at the start of every session. Nothing is written until you
-          save, and you can see the exact change first.
+          <code data-rules-target>the active host rule channel</code> in this
+          repository, where the harness loads them at the start of every
+          session. Nothing is written until you save, and you can see the exact
+          change first.
         </p>
         <p class="root" id="project-root"></p>
       </header>
@@ -72,7 +73,8 @@
       <section class="section" aria-labelledby="preview-heading">
         <h2 class="section-title" id="preview-heading">Pending changes</h2>
         <p class="section-help">
-          What saving would do to <code>.claude/rules/</code> right now.
+          What saving would do to
+          <code data-rules-target>the active host rule channel</code> right now.
         </p>
         <div id="preview" class="preview-body"></div>
       </section>

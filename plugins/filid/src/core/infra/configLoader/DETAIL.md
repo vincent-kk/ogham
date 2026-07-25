@@ -1,30 +1,40 @@
 ## Requirements
 
 - 빌드 시 `scripts/syncRuleHashes.mjs`가 각 rule doc 템플릿의 SHA-256 해시를 `templates/rules/manifest.json`의 `templateHash` 필드에 주입한다.
-- **배포 채널은 호스트가 정한다** (`ruleDocsTarget()`): Claude 는 `.claude/rules/<filename>` **파일 1개씩**, Codex 는 `AGENTS.md` **한 파일에 마커 구간**으로 병합한다 (Codex 는 rules 디렉터리를 읽지 않으므로 거기 쓰면 에러가 아니라 **조용한 무효**). agy 는 **미실측** — Claude 와 동일 채널.
+- **배포 채널은 호스트가 정한다**: 목적별 project rule target resolver가 Claude의 `.claude/rules/<filename>` 파일과 Codex의 유효 `AGENTS*.md` 마커 구간을 선택한다. sync만 rule manager를 만들고 status는 read-only entry를 사용한다. agy는 기존 호환성을 위해 Claude로 명시 매핑하며 unknown host는 쓰지 않고 skip한다.
 - drift 감지: 디렉터리 채널은 배포 파일 해시 vs `templateHash`, 병합 채널은 **구간 본문 vs 템플릿 본문(trim)** 을 비교한다 (병합은 trim 후 삽입하므로 원본 바이트 해시와는 절대 일치할 수 없다).
 - 병합 채널은 **재실행 안전** — 같은 규칙을 두 번 배포해도 `AGENTS.md` 에 중복 누적되지 않는다. 마커 밖 사용자 내용은 보존된다.
+- 병합 채널에서 Filid가 소유하는 주소는 `<!-- FILID:START:<filename> -->` / `<!-- FILID:END:<filename> -->` 쌍이다. 동기화는 해당 주소만 변경하며 다른 소유자의 마커 구간도 사용자 텍스트와 함께 보존한다.
 - 병합 채널의 쓰기는 **전 항목 처리 후 파일 1회 원자적 쓰기** — 항목별 쓰기는 실패 시 사용자의 지침 파일을 반쯤 갱신된 상태로 남긴다.
 - required rule: drift 발생 시 `syncRuleDocs`가 자동으로 템플릿으로 덮어써 재동기화한다.
 - optional rule: `resync` 파라미터에 해당 rule id를 포함해야만 재동기화된다. 포함하지 않으면 drift만 보고된다.
+- Claude directory의 legacy optional rule이 drift 상태이면 배포 바이트를
+  보존한 채 current filename으로 이동하고 결과는 `drift`로 보고한다.
 - 플러그인 루트는 `resolvePluginRoot`가 단일 해석 지점이다: 호출자 인자 우선, 부재 시 `@ogham/cross-platform/host-paths`의 `pluginRoot()`(env → Codex cwd → 자기 위치 상향 탐색), 그래도 없으면 `null`.
 - 플러그인 루트 해석 실패 시 `syncRuleDocs`는 throw 없이 `skipped` 배열로, `getRuleDocsStatus`는 `pluginRootResolved: false`로 graceful degradation한다.
-- 디렉터리 채널(`syncRuleDocsToDirectory`)은 매니페스트 순회가 끝나면 `.claude/rules/`를 다시 스캔해, 매니페스트 네임스페이스(`<namespace>_*.md` — 첫 rule 파일명에서 파생, 예: `filid_`)로 시작하지만 매니페스트에 없는 파일을 orphan rule doc으로 간주해 `unlinkSync`로 삭제한다(과거 버전에서 빠진 rule 정리 목적). 삭제 성공은 기존 `removed` 목록에, 실패는 `skipped`에 `{ id: <filename>, reason }`으로 함께 보고된다.
-- 이 정리는 파일명 패턴만으로 판별하므로, 매니페스트에 없는 `<namespace>_*.md` 파일은 예외 없이 삭제 대상이 된다 — 사용자가 직접 작성한 `filid_custom.md` 같은 파일도 함께 삭제된다.
-- **읽기 채널 동조**: 훅(`buildMinimalContext`)은 `OGHAM_HOST` 를 못 받으므로 호스트 분기 대신 **모든 채널을 합집합으로 판독**한다. 쓰기만 바꾸고 읽기를 놔두면 훅이 방금 배포한 규칙을 "미배포"로 오판한다.
+- 템플릿 본문 판독이 ENOENT 외 오류로 실패하면 `getRuleDocsStatus`는 throw
+  대신 resolved manifestPath와 빈 `entries`/`autoDeployed`를 반환한다.
+- directory template이 누락되어도 manifest hash와 deployed hash가 같으면
+  `inSync`는 true다. status 필드의 hash 불변식이 inspection 내부 상태보다
+  우선한다.
+- 공유 디렉터리 어댑터는 매니페스트 순회 뒤 Filid 소유 네임스페이스인 `filid_*.md` 중 매니페스트에 없는 파일을 orphan rule doc으로 간주해 삭제한다. 다른 접두사의 플러그인 파일과 접두사 없는 사용자 파일은 보존한다. 삭제 성공은 기존 `removed` 목록에, 실패는 `skipped`에 `{ id: <filename>, reason }`으로 보고한다.
+- 소유자는 항상 `filid`로 명시하며 첫 manifest 항목에서 추론하지 않는다.
+- 이 정리는 소유 파일명 패턴만으로 판별하므로, 매니페스트에 없는 `filid_*.md` 파일은 예외 없이 삭제 대상이 된다 — 사용자가 직접 작성한 `filid_custom.md` 같은 파일도 함께 삭제된다.
+- Codex 병합 채널도 `FILID` namespace의 manifest 외 고아 구간만 폐기한다.
+- **읽기 채널 동조**: 설정 UI와 훅은 공유 target 해석을 사용해 현재 host가 실제로 읽는 채널만 판독한다.
 
 ## API Contracts
 
 ### 공개 함수
 
-| 함수                   | 시그니처                                                                                              | 설명                                                                                                                          |
-| ---------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `syncRuleDocs`         | `(projectRoot: string, selection: Iterable<string>, opts?: SyncRuleDocsOptions) => RuleDocSyncResult` | 호스트의 rule doc 채널을 선택 상태에 맞게 동기화. setup 전용. 채널별 실행은 `syncRuleDocsToDirectory` / `syncRuleDocsToFile`. |
-| `getRuleDocsStatus`    | `(projectRoot: string, pluginRoot?: string) => RuleDocsStatus`                                        | 호스트 채널을 읽어 rule doc 현황 스냅샷 반환. 뮤테이션 없음.                                                                  |
-| `loadRuleDocsManifest` | `(pluginRoot: string) => RuleDocsManifest`                                                            | `templates/rules/manifest.json` 로드 및 유효성 검사. `templateHash` 누락 시 throw.                                            |
-| `resolvePluginRoot`    | `(pluginRoot?: string) => string \| null`                                                             | 플러그인 설치 디렉터리 해석. 인자 → 호스트 채널(`pluginRoot()`) 순. 미해석 시 `null` (throw 없음).                            |
-| `initProject`          | `(projectRoot: string, language?: string) => InitResult`                                              | `.filid/config.json`을 git root에 생성(부재 시). `language` 제공 시 config에 기록. 기존 config는 덮어쓰지 않음.               |
-| `createDefaultConfig`  | `(language?: string) => FilidConfig`                                                                  | 8개 내장 규칙 기본 config 생성. `language` 제공 시 최상위 `language` 키 포함.                                                 |
+| 함수                   | 시그니처                                                                                              | 설명                                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `syncRuleDocs`         | `(projectRoot: string, selection: Iterable<string>, opts?: SyncRuleDocsOptions) => RuleDocSyncResult` | 공유 project rule manager를 통해 호스트 채널을 선택 상태에 맞게 동기화하는 setup 전용 호환 facade.              |
+| `getRuleDocsStatus`    | `(projectRoot: string, pluginRoot?: string) => RuleDocsStatus`                                        | 호스트 채널을 읽어 rule doc 현황 스냅샷 반환. 뮤테이션 없음.                                                    |
+| `loadRuleDocsManifest` | `(pluginRoot: string) => RuleDocsManifest`                                                            | `templates/rules/manifest.json` 로드 및 유효성 검사. `templateHash` 누락 시 throw.                              |
+| `resolvePluginRoot`    | `(pluginRoot?: string) => string \| null`                                                             | 플러그인 설치 디렉터리 해석. 인자 → 호스트 채널(`pluginRoot()`) 순. 미해석 시 `null` (throw 없음).              |
+| `initProject`          | `(projectRoot: string, language?: string) => InitResult`                                              | `.filid/config.json`을 git root에 생성(부재 시). `language` 제공 시 config에 기록. 기존 config는 덮어쓰지 않음. |
+| `createDefaultConfig`  | `(language?: string) => FilidConfig`                                                                  | 8개 내장 규칙 기본 config 생성. `language` 제공 시 최상위 `language` 키 포함.                                   |
 
 ### 타입 계약
 
@@ -34,6 +44,10 @@
 
 **`RuleDocStatusEntry`** — 상태 스냅샷 단일 항목.
 
+- `target` / `displayTarget` — 공유 manager가 판독한 실제 경로와 UI용
+  project-relative host target.
+- `source` — 현재 주소, legacy 주소, 또는 미배포를 뜻하는
+  `current | legacy | null`.
 - `deployed: boolean` — 호스트 채널에 배포돼 있는지 여부 (디렉터리 채널=파일 존재, 병합 채널=마커 구간 존재).
 - `selected: boolean` — optional은 `deployed`와 동일; required는 항상 `true`.
 - `templateHash: string` — **배포본이 일치해야 할 템플릿 해시**. 디렉터리 채널은 manifest 값(원본 바이트), 병합 채널은 삽입되는 본문(trim)의 해시 — 양쪽 채널에서 `inSync` 불변식이 성립하도록 같은 방식으로 계산한다.
@@ -58,10 +72,6 @@
 
 - `resync?: Iterable<string>` — drift된 optional rule을 덮어쓸 rule id 목록.
 - `pluginRoot?: string` — 호스트가 제공하는 플러그인 루트 대신 사용할 경로.
-
-**`RuleDocSyncPlan`** — `syncRuleDocs`가 1회 해석해 채널 실행기에 넘기는 내부 계약.
-
-- `pluginRoot` / `projectRoot`(git root 해석 완료) / `manifest` / `selection: Set` / `resync: Set`.
 
 ## `.filid/config.json` Schema Reference
 
@@ -158,3 +168,7 @@ validated via `mcp__plugin_filid_tools__config_patch_validate` (calls `validateC
 which uses the shared schema — no local redefinition) before reaching
 `resolve`. Hallucinated keys such as `rules[*].allowed-no-entry`
 cannot slip through as no-op commits.
+
+## Last Updated
+
+2026-07-26 — rule document 물리 채널을 `@ogham/agent-artifacts`로 위임.

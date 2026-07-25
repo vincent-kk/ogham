@@ -1,16 +1,14 @@
-import { ruleDocsTarget } from '@ogham/cross-platform/host-paths';
-
-import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 import { resolvePluginRoot } from '../utils/resolvePluginRoot.js';
 
+import { createFilidRuleManager } from './createFilidRuleManager.js';
+import { loadManagedRuleDocuments } from './loadManagedRuleDocuments.js';
 import { loadRuleDocsManifest } from './loadRuleDocsManifest.js';
 import type {
   RuleDocSyncResult,
   RuleDocsManifest,
   SyncRuleDocsOptions,
 } from './manifestTypes.js';
-import { syncRuleDocsToDirectory } from './syncRuleDocsToDirectory.js';
-import { syncRuleDocsToFile } from './syncRuleDocsToFile.js';
+import { mapRuleSyncResult } from './mapRuleSyncResult.js';
 
 /**
  * Synchronise the host's rule-document channel with the desired selection.
@@ -74,16 +72,36 @@ export function syncRuleDocs(
     return result;
   }
 
-  const plan = {
-    pluginRoot: root,
-    projectRoot: resolveGitRoot(projectRoot),
-    manifest,
-    selection: new Set(selection),
-    resync: new Set(opts.resync ?? []),
-  };
+  const manager = createFilidRuleManager(projectRoot);
+  if (manager === null) {
+    result.skipped.push({
+      id: '*',
+      reason: 'runtime host is unsupported for rule document deployment',
+    });
+    return result;
+  }
 
-  const target = ruleDocsTarget();
-  return target.kind === 'merge'
-    ? syncRuleDocsToFile(plan, target.file, result)
-    : syncRuleDocsToDirectory(plan, target.path, result);
+  try {
+    const documents = loadManagedRuleDocuments(root, manifest);
+    const selected = new Set(selection);
+    const resync = new Set(opts.resync ?? []);
+    const desired = new Set(
+      manifest.rules
+        .filter((entry) => entry.required || selected.has(entry.id))
+        .map((entry) => entry.id),
+    );
+    const replaceDrift = new Set(
+      manifest.rules
+        .filter((entry) => entry.required || resync.has(entry.id))
+        .map((entry) => entry.id),
+    );
+    const plan = manager.plan({ documents, desired, replaceDrift });
+    return mapRuleSyncResult(manager.apply(plan), manifest);
+  } catch (err) {
+    result.skipped.push({
+      id: '*',
+      reason: `rule document sync failed: ${(err as Error).message}`,
+    });
+    return result;
+  }
 }

@@ -73,6 +73,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@ogham/agent-artifacts": "workspace:^",
     "@ogham/cross-platform": "workspace:^",
     "@ogham/http-kit": "workspace:^",
     "@types/node": "^20.11.0",

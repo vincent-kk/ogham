@@ -2,11 +2,7 @@
  * @file claudemdMerge.ts
  * @description claudemd_merge 도구 핸들러 — CWD의 호스트 지침 문서에 maencof 섹션 삽입/업데이트
  */
-import { join } from 'node:path';
-
-import { instructionsFile } from '@ogham/cross-platform/host-paths';
-
-import { mergeMaencofSection } from '../../../core/claudeMdMerger/index.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
 import type {
   ClaudeMdMergeInput,
   ClaudeMdMergeResult,
@@ -25,16 +21,23 @@ export function handleClaudeMdMerge(
   cwd: string,
   input: ClaudeMdMergeInput,
 ): ClaudeMdMergeResult {
-  const targetPath = join(cwd, instructionsFile());
-  const result = mergeMaencofSection(targetPath, input.content, {
-    dryRun: input.dry_run ?? false,
-    createIfMissing: true,
+  const manager = createProjectInstructionManager(cwd);
+  const inspection = manager.inspect();
+  const plan = manager.plan({
+    content: input.content,
+    replaceDrift: true,
+    backup: 'sibling',
   });
+  const result = input.dry_run ? null : manager.apply(plan);
+  const action = (result ?? plan).outcomes[0]?.action;
+  const changed =
+    action === 'copy' || action === 'update' || action === 'relocate';
+  const backupPath = result?.backupPaths[0];
 
   return {
-    changed: result.changed,
-    had_existing_section: result.hadExistingSection,
-    backup_path: result.backupPath,
+    changed,
+    had_existing_section: inspection.status === 'present',
+    ...(backupPath === undefined ? {} : { backup_path: backupPath }),
     section_content: input.content.trim(),
   };
 }

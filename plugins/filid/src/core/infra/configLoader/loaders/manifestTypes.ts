@@ -22,29 +22,16 @@ export interface RuleDocsManifest {
   rules: RuleDocEntry[];
 }
 
-/** Everything a rule-doc channel needs, resolved once by `syncRuleDocs`. */
-export interface RuleDocSyncPlan {
-  /** Plugin install directory — where `templates/rules/` ships. */
-  pluginRoot: string;
-  /** Target project, git root already resolved. */
-  projectRoot: string;
-  manifest: RuleDocsManifest;
-  /** Rule ids the caller opted into. Required rules deploy regardless. */
-  selection: Set<string>;
-  /** Rule ids whose drifted deployment may be overwritten. */
-  resync: Set<string>;
-}
-
 /** Report returned by syncRuleDocs. */
 export interface RuleDocSyncResult {
   copied: string[];
   removed: string[];
   unchanged: string[];
-  /** Files whose content matched an older template and were overwritten
+  /** Artifacts whose content matched an older template and were overwritten
    * with the current template (required rules auto-update; optional rules
    * require an explicit id in the `resync` set). */
   updated: string[];
-  /** Files whose deployed content disagrees with the current template but
+  /** Artifacts whose deployed content disagrees with the current template but
    * were left untouched — either the rule is optional and the caller did
    * not request resync, or the hash could not be computed. */
   drift: string[];
@@ -55,10 +42,16 @@ export interface RuleDocSyncResult {
 export interface RuleDocStatusEntry {
   id: string;
   filename: string;
+  /** Physical host target used for inspection. */
+  target: string;
+  /** Portable project-relative target shown to users and agents. */
+  displayTarget: string;
+  /** Whether the current or a legacy address supplied the deployed content. */
+  source: 'current' | 'legacy' | null;
   required: boolean;
   title: string;
   description: string;
-  /** File currently exists on disk under `.claude/rules/`. */
+  /** Rule exists in the active host's directory or owned-section channel. */
   deployed: boolean;
   /**
    * Desired state for the checkbox UI. For optional entries this equals
@@ -67,9 +60,9 @@ export interface RuleDocStatusEntry {
    * always `true` for entries in `autoDeployed`.
    */
   selected: boolean;
-  /** SHA-256 hex of the plugin-shipped template. Mirrors manifest value. */
+  /** SHA-256 of the host-channel form expected from the shipped template. */
   templateHash: string;
-  /** SHA-256 hex of the deployed file, or null when not deployed or unreadable. */
+  /** SHA-256 of the deployed file/section body, or null when unavailable. */
   deployedHash: string | null;
   /** True iff `deployed` and `deployedHash === templateHash`. */
   inSync: boolean;

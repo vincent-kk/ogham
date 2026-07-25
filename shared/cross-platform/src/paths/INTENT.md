@@ -1,42 +1,47 @@
 ## Purpose
 
-OS 별 경로 추상화. home / tmp / config / cache / plugin cache 와 Windows/POSIX path 문자열 호환성의 단일 진입. 호출자는 `~/.claude/plugins/<pkg>` 같은 하드코딩 대신 본 모듈만 사용.
+OS별 home/tmp/config/cache, 명시적 호스트 상태 루트, Windows/POSIX 경로
+문자열 연산의 단일 진입점이다.
 
 ## Structure
 
-| File       | Role                                                      |
-| ---------- | --------------------------------------------------------- |
-| `index.ts` | barrel                                                    |
-| `paths.ts` | `paths.home/tmp/configDir/cacheDir/pluginCache/normalize` |
-| `compat/`  | Windows/POSIX path 문자열 판별, 조합, 비교                |
+| Path                   | Role                        |
+| ---------------------- | --------------------------- |
+| `index.ts`, `paths.ts` | 기존 aggregate API          |
+| `state/`               | host·cache 상태 경로 organ  |
+| `operations/`          | normalize·containment organ |
+| `compat/`              | portable 경로 연산          |
 
 ## Conventions
 
-- 외부 OS 별 위치 결정은 `env-paths` 위임 — Windows AppData, macOS Library/Application Support, Linux XDG.
-- `pluginCache(pkg, version?)` 는 호스트별 상태 루트 밑 `plugins/<pkg>[/version]` 컨벤션 강제. **어느 호스트인지·그 호스트의 루트가 어디인지는 `hostRegistry` 가 답한다** — 본 모듈은 `$HOME` 상대 조립만 담당하며 호스트 이름·호스트 env 이름을 리터럴로 갖지 않는다.
-- `hostRegistry` 는 배럴이 아니라 구체 파일로 import 한다 — 본 모듈은 훅 도달 코드(`hooks/errorLog.ts`)라 배럴 재노출 전체가 훅 번들로 딸려온다.
-- 호스트가 지정하는 정식 per-plugin data 디렉터리(`CLAUDE_PLUGIN_DATA`·`PLUGIN_DATA` 의 **값**)는 **의도적으로 쓰지 않는다**. 그 경로는 `<plugin>-<marketplace>` 로 install-source 마다 갈리므로(`filid-ogham` ↔ `filid-inline` 실측 공존) 재설치·출처 변경 시 자격증명·설정이 유실되고, Codex 는 그 값을 훅에만 주고 MCP 엔 주지 않아 한 호스트 안에서 두 채널이 분리된다. 우리 `<pkg>` 컨벤션은 install-source 와 채널에 무관하게 안정적이다 — 대가는 uninstall 시 미정리.
-- `normalize(p)` 는 backslash → forward 단방향.
-- `compat/` public 함수는 함수별 파일로 유지해 inline 번들 tree-shaking 을 돕는다.
+- 외부 OS별 config/cache 위치는 `env-paths`에 위임한다.
+- 호스트 좌표는 `hostRegistry`의 행을 읽고 여기서 중복 선언하지 않는다.
+- `pluginCache`는 기존 런타임 호스트 판별을 유지하되, 새 호출자는 가능하면
+  명시적 `hostStateRoot(host, env)`를 사용한다.
+- containment는 절대 세그먼트와 모든 `..` 구성 요소를 입력 단계에서 거부한다.
+- hook은 `paths/plugin-cache`, `paths/normalize` 등 필요한 단일 목적
+  subpath만 import한다.
 
 ## Boundaries
 
 ### Always do
 
-- 모든 plugin cache 디렉토리 결정은 `pluginCache(pkg)` 경유.
-- Windows/POSIX path 문자열 판별과 비교는 `compat/` 경유.
+- 사용자 상태 루트는 해당 호스트의 relocation env를 우선한다.
+- 이식 가능한 경로 입력은 `compat/` 연산으로 처리한다.
+- containment 결과는 루트의 descendant인지 다시 확인한다.
+- aggregate와 목적별 entry point의 결과를 동일하게 유지한다.
 
 ### Ask first
 
-- env-paths 외 다른 위치 결정 라이브러리 채택.
-- `~/.claude/plugins/` 경로 컨벤션 변경 (호환성 영향).
+- 호스트 기본 상태 디렉터리나 plugin cache 컨벤션 변경.
+- `env-paths` 외 위치 결정 라이브러리 채택.
 
 ### Never do
 
-- 호출 측에서 `os.homedir()` / `os.tmpdir()` 직접 호출.
-- `~/.claude/plugins/` 같은 경로 문자열 하드코딩.
+- 호출 측에서 `os.homedir()`나 호스트 상태 경로를 하드코딩.
+- 상대 프로젝트 루트 또는 root 밖 결과를 반환.
 
 ## Dependencies
 
-- 외부: `env-paths ^3` (inline).
-- 내부: `hostRegistry` (상태 루트 좌표 — 구체 파일 직접 import).
+- 내부: `hostRegistry`, `compat`.
+- 외부: `env-paths`, Node `os`/`path`.

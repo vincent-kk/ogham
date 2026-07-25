@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { hostFromMarker } from "../hostFromMarker.js";
 import { HOSTS } from "../registry.js";
 import { resolveHostDescriptor } from "../resolveHostDescriptor.js";
+import { resolveRuntimeHost } from "../runtime/resolveRuntimeHost.js";
 
 describe("hostFromMarker", () => {
   it("treats an absent marker as claude — Claude ships its .mcp.json unmodified", () => {
@@ -58,6 +59,34 @@ describe("resolveHostDescriptor", () => {
       PLUGIN_DATA: "/x",
     });
     expect(d.stateRootDir).toBe(".claude");
+  });
+});
+
+describe("resolveRuntimeHost", () => {
+  it("uses claude only when no explicit or inferred signal exists", () => {
+    expect(resolveRuntimeHost({})).toBe("claude");
+    expect(resolveRuntimeHost({ OGHAM_HOST: "codex" })).toBe("codex");
+    expect(resolveRuntimeHost({ OGHAM_HOST: "agy" })).toBe("agy");
+  });
+
+  it("keeps an unrecognised explicit marker unknown", () => {
+    expect(resolveRuntimeHost({ OGHAM_HOST: "future" })).toBe("unknown");
+  });
+
+  it("infers a host from one measured hook signal", () => {
+    expect(resolveRuntimeHost({ PLUGIN_DATA: "/x" })).toBe("codex");
+    expect(resolveRuntimeHost({ ANTIGRAVITY_CONVERSATION_ID: "id" })).toBe(
+      "agy",
+    );
+  });
+
+  it("returns unknown when multiple hook signals conflict", () => {
+    expect(
+      resolveRuntimeHost({
+        PLUGIN_DATA: "/x",
+        ANTIGRAVITY_CONVERSATION_ID: "id",
+      }),
+    ).toBe("unknown");
   });
 });
 

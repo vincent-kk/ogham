@@ -1,49 +1,49 @@
 ## Purpose
 
-`@ogham/cross-platform` 모노레포 내부 전용 워크스페이스. Windows-Unix 호환성 어댑터의 단일 진실 소스. 6개 플러그인이 esbuild inline 으로 소비.
+`@ogham/cross-platform`은 Ogham 내부의 OS 경로, 파일 시스템, 프로세스 실행
+호환성 계층이다. 플러그인과 상위 공유 패키지는 시스템 호출을 이 경계로
+모은다.
 
 ## Structure
 
-| Path                                   | Role                                                                      |
-| -------------------------------------- | ------------------------------------------------------------------------- |
-| `src/`                                 | TypeScript 소스 (fractal 루트; `index.ts` barrel)                         |
-| `src/spawn/`                           | cross-spawn 래퍼 + 타임아웃 + EOL 정규화 (PR-B 도착)                      |
-| `src/paths/`                           | OS 별 home/tmp/config/cache 경로 추상화                                   |
-| `src/hostPaths/`                       | 호스트별 플러그인 루트 / 프로젝트 루트 / 문서 채널 해석 (MCP 런타임 전용) |
-| `src/instructions/`                    | 지침 문서 파일명 + 마커 구간 순수 연산 (훅 안전 — env 판독 없음)          |
-| `agyHooks/`·`agyRunner/`·`codexHooks/` | agy↔Claude 훅 번역·러너 + Codex `apply_patch`→`Write`/`Edit` 정규화       |
-| `src/env/`                             | 환경변수 / OS 분기 / PATH delimiter / EOL                                 |
-| `src/eol/`                             | CRLF → LF, BOM strip                                                      |
-| `src/binaries/`                        | which/where 디스커버리 + 24h 캐시 + 설치 가이드                           |
-| `src/hooks/`                           | hook bootstrap + selfProbe + errorLog                                     |
-| `src/shim/`                            | Windows `.cmd` shim 자동 생성 (빌드 step)                                 |
-| `src/launcher/`                        | OS 기본 핸들러로 URL/파일 열기 (`openBrowser`)                            |
+| Path                | Role                                     |
+| ------------------- | ---------------------------------------- |
+| `src/`              | 공개 TypeScript 소스와 루트 배럴         |
+| `src/paths/`        | home/tmp/state root와 portable 경로 연산 |
+| `src/filesystem/`   | 안전한 읽기·원자 쓰기·잠금·symlink 방어  |
+| `src/hostRegistry/` | 호스트 ID와 상태 루트 좌표               |
+| `src/hostPaths/`    | 플러그인/프로젝트/문서 채널 해석         |
+| `src/instructions/` | 마커 구간의 순수 문자열 연산             |
+| `src/spawn/`        | 외부 CLI 실행 단일 진입점                |
+| 그 밖의 `src/*`     | 훅, shim, launcher 및 호스트 어댑터      |
 
 ## Conventions
 
-- npm publish 금지 (`private: true`); 각 플러그인의 `devDependencies` 에 `workspace:^` 로만 사용.
-- esbuild inline 전제 → 각 플러그인 `external` 배열에 본 패키지를 넣지 말 것.
-- `process.platform` 분기는 본 패키지 내부에만 두고, 호출자는 추상 API 만 사용.
+- 패키지는 `private: true`이며 workspace 의존성으로만 소비한다.
+- 상위 계층은 `node:fs`, `node:path`, `node:os`, `node:child_process` 대신
+  이 패키지의 공개 서브패스를 사용한다.
+- 경로는 native와 Windows/POSIX 문자열 fixture에서 같은 의미를 가져야 한다.
 
 ## Boundaries
 
 ### Always do
 
-- 모든 외부 CLI stdout 진입점에 `normalizeEol()`.
-- spawn 호출은 `spawnCli()` 단일 진입점.
-- 단위 테스트는 `process.platform` mock + fake binary suite.
+- 일반 외부 CLI는 `spawnCli()`를 사용하고 stdout은 `normalizeEol()`로
+  정규화한다. `self-probe/hook`의 무출력 진단 실행만 Node builtin을 쓴다.
+- 사용자 파일 교체는 sibling 임시 파일과 atomic rename을 사용한다.
+- 프로젝트 하위 출력은 절대 루트, containment, symlink 검사를 거친다.
 
 ### Ask first
 
-- 새 OS 분기 추가 (`freebsd` / `openbsd`).
-- 외부 npm 의존성 추가 (현재 `cross-spawn`, `which`, `env-paths` 만).
+- 새 OS 또는 호스트 행 추가.
+- 외부 npm 의존성 추가.
 
 ### Never do
 
-- `dist/` 커밋.
-- 본 패키지 외부에 `process.platform` 분기를 두지 않음.
-- npm 게시 (모노레포 내부 전용).
+- `dist/`를 커밋하거나 npm에 게시.
+- 잠금 획득 실패 뒤 보호 없이 쓰기를 계속.
+- 상위 패키지로 의존해 DAG를 역전.
 
 ## Dependencies
 
-- **개발**: `cross-spawn ^7`, `which ^4`, `env-paths ^3`, `typescript ^5.7`, `vitest 4.1` — Node.js ≥ 20, Yarn 4.12 workspaces.
+- 외부: `cross-spawn`, `which`, `env-paths`, Node.js 내장 모듈.

@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/maencof` 패키지 루트. 마크다운 기반 Knowledge Graph + Spreading Activation 검색을 제공하는 개인 지식 공간 관리 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
+`@ogham/maencof` 패키지 루트. 마크다운 기반 Knowledge Graph + Spreading Activation 검색을 제공하는 호스트 이식형 개인 지식 공간 관리 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
 ## Structure
 
@@ -44,6 +44,6 @@
 
 ## Dependencies
 
-- **런타임**: `@modelcontextprotocol/sdk ~1.22`, `fast-glob ^3`, `zod ^3.23`
+- **런타임**: `@ogham/agent-artifacts workspace:^`, `@modelcontextprotocol/sdk ~1.22`, `fast-glob ^3`, `zod ^3.23`
 - **개발**: `esbuild ^0.24`, `typescript ^5.7`, `vitest 3.2`
 - **환경**: Node.js ≥ 20, Yarn 4.12 workspaces

@@ -40,6 +40,13 @@ const SAMPLE_MAENCOF_CONTENT = `# maencof Knowledge Space
 - Knowledge Path: ./knowledge/
 - Autonomy Level: 0`;
 
+describe('maencof marker contract', () => {
+  it('keeps the established MAENCOF marker literals', () => {
+    expect(MAENCOF_START_MARKER).toBe('<!-- MAENCOF:START -->');
+    expect(MAENCOF_END_MARKER).toBe('<!-- MAENCOF:END -->');
+  });
+});
+
 describe('mergeMaencofSection — 파일 없음', () => {
   it('파일이 없으면 새로 생성해야 한다', () => {
     const result = mergeMaencofSection(claudeMdPath, SAMPLE_MAENCOF_CONTENT);
@@ -96,9 +103,10 @@ describe('mergeMaencofSection — 마커 없는 기존 파일', () => {
   });
 
   it('백업 파일(.bak)을 생성해야 한다', () => {
-    mergeMaencofSection(claudeMdPath, SAMPLE_MAENCOF_CONTENT);
+    const result = mergeMaencofSection(claudeMdPath, SAMPLE_MAENCOF_CONTENT);
 
     const backupPath = claudeMdPath + '.bak';
+    expect(result.backupPath).toBe(backupPath);
     expect(existsSync(backupPath)).toBe(true);
 
     const backupContent = readFileSync(backupPath, 'utf-8');
@@ -112,6 +120,17 @@ describe('mergeMaencofSection — 마커 없는 기존 파일', () => {
     const existingIdx = content.indexOf('# My Project');
     const markerIdx = content.indexOf(MAENCOF_START_MARKER);
     expect(existingIdx).toBeLessThan(markerIdx);
+  });
+
+  it('dry-run이면 기존 파일과 형제 백업을 쓰지 않아야 한다', () => {
+    const result = mergeMaencofSection(claudeMdPath, SAMPLE_MAENCOF_CONTENT, {
+      dryRun: true,
+    });
+
+    expect(result.changed).toBe(true);
+    expect(result.backupPath).toBeUndefined();
+    expect(readFileSync(claudeMdPath, 'utf-8')).toBe(existingContent);
+    expect(existsSync(claudeMdPath + '.bak')).toBe(false);
   });
 });
 
@@ -167,5 +186,16 @@ describe('mergeMaencofSection — 기존 maencof 섹션 업데이트', () => {
     const result = mergeMaencofSection(claudeMdPath, SAMPLE_MAENCOF_CONTENT);
 
     expect(result.changed).toBe(false);
+  });
+
+  it('불완전한 소유 마커를 복구한다며 덮어쓰지 않아야 한다', () => {
+    const malformed = `# Project\n${MAENCOF_START_MARKER}\nunfinished\n`;
+    writeFileSync(claudeMdPath, malformed, 'utf8');
+
+    const result = mergeMaencofSection(claudeMdPath, SAMPLE_MAENCOF_CONTENT);
+
+    expect(result.changed).toBe(false);
+    expect(readFileSync(claudeMdPath, 'utf8')).toBe(malformed);
+    expect(existsSync(claudeMdPath + '.bak')).toBe(false);
   });
 });

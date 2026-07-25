@@ -10,7 +10,11 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { readSection } from '@ogham/cross-platform/instructions';
+import {
+  mergeSection,
+  readSection,
+  sectionMarkers,
+} from '@ogham/cross-platform/instructions';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ruleDocMarkers } from '../../../constants/ruleDocs.js';
@@ -21,6 +25,7 @@ const REQUIRED_FILE = 'filid_fca-policy.md';
 const OPTIONAL_FILE = 'filid_reuse-first.md';
 const REQUIRED_BODY = '# FCA policy\n';
 const OPTIONAL_BODY = '# Reuse first\n';
+const SEIRI_MARKERS = sectionMarkers('SEIRI', 'seiri_reuse-first.md');
 
 let projectRoot: string;
 let pluginRoot: string;
@@ -88,11 +93,16 @@ describe('rule docs on the Codex channel', () => {
     expect(existsSync(join(projectRoot, '.claude', 'rules'))).toBe(false);
   });
 
-  it('preserves what the user already wrote in AGENTS.md', () => {
-    writeFileSync(agentsMd(), '# House rules\n', 'utf8');
+  it('preserves user text and another owner section in AGENTS.md', () => {
+    writeFileSync(
+      agentsMd(),
+      mergeSection('# House rules\n', SEIRI_MARKERS, '# Seiri rule'),
+      'utf8',
+    );
     syncRuleDocs(projectRoot, [], { pluginRoot });
 
     expect(readAgentsMd()).toContain('# House rules');
+    expect(readSection(readAgentsMd(), SEIRI_MARKERS)).toBe('# Seiri rule');
   });
 
   it('does not stack a second copy when setup is run again', () => {
@@ -188,6 +198,7 @@ describe('rule docs on the Codex channel', () => {
 
     expect(status.autoDeployed[0]?.deployed).toBe(true);
     expect(status.autoDeployed[0]?.inSync).toBe(true);
+    expect(status.autoDeployed[0]?.displayTarget).toBe('AGENTS.md');
     expect(status.entries[0]?.deployed).toBe(true);
     expect(status.entries[0]?.selected).toBe(true);
   });
@@ -224,5 +235,21 @@ describe('rule docs on the Codex channel', () => {
       existsSync(join(projectRoot, '.claude', 'rules', REQUIRED_FILE)),
     ).toBe(true);
     expect(existsSync(agentsMd())).toBe(false);
+  });
+
+  it('retires only orphan files in Filid ownership on the Claude channel', () => {
+    delete process.env.OGHAM_HOST;
+    const rulesDir = join(projectRoot, '.claude', 'rules');
+    mkdirSync(rulesDir, { recursive: true });
+    writeFileSync(join(rulesDir, 'filid_retired.md'), '# retired', 'utf8');
+    writeFileSync(join(rulesDir, 'seiri_foreign.md'), '# foreign', 'utf8');
+    writeFileSync(join(rulesDir, 'team-notes.md'), '# notes', 'utf8');
+
+    const result = syncRuleDocs(projectRoot, [], { pluginRoot });
+
+    expect(result.removed).toContain('filid_retired.md');
+    expect(existsSync(join(rulesDir, 'filid_retired.md'))).toBe(false);
+    expect(existsSync(join(rulesDir, 'seiri_foreign.md'))).toBe(true);
+    expect(existsSync(join(rulesDir, 'team-notes.md'))).toBe(true);
   });
 });

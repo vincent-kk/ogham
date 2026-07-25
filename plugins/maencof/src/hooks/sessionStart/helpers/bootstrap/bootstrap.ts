@@ -5,15 +5,23 @@
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
+import { applyHookInstructionSection } from '@ogham/agent-artifacts/instructions/hook/apply';
+import { inspectHookInstructionSection } from '@ogham/agent-artifacts/instructions/hook/status';
+import { resolveProjectInstructionTarget } from '@ogham/agent-artifacts/targets/project/instructions';
+import { portableBasename } from '@ogham/cross-platform/compat/basename';
+import { resolveHostDescriptor } from '@ogham/cross-platform/host-registry/descriptor';
+
 import { EXPECTED_ARCHITECTURE_VERSION } from '../../../../constants/architecture.js';
 import { buildDefaultDirective } from '../../../../constants/directiveTemplate.js';
+import {
+  MAENCOF_END_MARKER,
+  MAENCOF_START_MARKER,
+} from '../../../../constants/markers.js';
 import {
   META_SKILL_MAX_CHARS,
   META_SKILL_TAG,
 } from '../../../../constants/sessionStart.js';
 import { readChangelogState } from '../../../../core/changelogState/operations/readChangelogState.js';
-import { mergeMaencofSection } from '../../../../core/claudeMdMerger/operations/mergeMaencofSection.js';
-import { readMaencofSection } from '../../../../core/claudeMdMerger/operations/readMaencofSection.js';
 import { normalizeCompanionIdentity } from '../../../../core/companionNormalize/normalizeCompanionIdentity.js';
 import { isDialogueInjectionDisabled } from '../../../../core/dialogueConfig/operations/isDialogueInjectionDisabled.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
@@ -31,7 +39,6 @@ import { buildSessionIdentityBlock } from '../../../../core/turnContext/buildSes
 import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
-import { instructionsPath } from '../../../shared/instructionsPath.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 import { metaPath } from '../../../shared/metaPath.js';
 import { provisionMissingConfigs } from '../../../utils/configProvisioner/configProvisioner.js';
@@ -411,13 +418,13 @@ function loadCompanionIdentity(
 }
 
 /**
- * CLAUDE.md maencof 섹션 초기화 (version.json 기반 조건부 쓰기).
+ * 호스트 project 지침의 maencof 섹션 초기화 (version.json 기반 조건부 쓰기).
  *
  * 판단 로직:
  * - 마커 없음 → 삽입 + version.json 갱신
- * - 마커 있음 + version.json.version === VERSION → 스킵 (idempotent)
- * - 마커 있음 + version.json.version !== VERSION → mergeMaencofSection()으로 업데이트
- * - 마커 있음 + version.json 없음 → version.json 생성 (기존 vault 호환)
+ * - 마커 있음 + version.json.version === VERSION → 본문 보존, 필요 시 유효 후보로 재배치
+ * - 마커 있음 + version.json.version !== VERSION → hook-local writer로 업데이트
+ * - 마커 있음 + version.json 없음 → 필요 시 재배치 + version.json 생성
  *
  * 실패 시 silent fallback (hook 실패로 전파하지 않음)
  */
@@ -428,32 +435,75 @@ function initClaudeMdSection(
 ): boolean {
   let needsProvisioning = false;
   try {
-    const filePath = instructionsPath(cwd);
-    const existing = readMaencofSection(filePath);
+    const host =
+      resolveHostDescriptor(process.env).stateRootDir === '.codex'
+        ? 'codex'
+        : 'claude';
+    const instructionOptions = {
+      target: resolveProjectInstructionTarget({
+        host,
+        projectRoot: cwd,
+      }),
+      markers: {
+        start: MAENCOF_START_MARKER,
+        end: MAENCOF_END_MARKER,
+      },
+    };
+    const inspection = inspectHookInstructionSection(instructionOptions);
+    const existing = inspection.sectionContent;
     const vaultVersion = readVaultVersion(cwd);
 
     if (existing === null) {
       // 마커 없음 → 삽입
       const directive = buildDefaultDirective(cwd, companionName);
-      mergeMaencofSection(filePath, directive, { createIfMissing: true });
+      const applied = applyHookInstructionSection({
+        ...instructionOptions,
+        content: directive,
+        backup: 'sibling',
+      });
+      if (applied.status === 'conflict')
+        throw new Error('Instruction section initialization conflicted');
       writeVaultVersion(cwd, VERSION);
-      messages.push('[maencof] maencof directives initialized in CLAUDE.md.');
+      messages.push(
+        `[maencof] maencof directives initialized in ${portableBasename(inspection.target)}.`,
+      );
       needsProvisioning = true;
     } else if (vaultVersion === null) {
       // 마커 있음 + version.json 없음 → version.json 생성 (기존 vault 호환)
+      const applied = applyHookInstructionSection({
+        ...instructionOptions,
+        content: existing,
+        backup: 'sibling',
+      });
+      if (applied.status === 'conflict')
+        throw new Error('Instruction section relocation conflicted');
       writeVaultVersion(cwd, VERSION);
       needsProvisioning = true;
     } else if (vaultVersion !== VERSION) {
       // 마커 있음 + 다른 버전 → 업데이트
       const directive = buildDefaultDirective(cwd, companionName);
-      mergeMaencofSection(filePath, directive, { createIfMissing: false });
+      const applied = applyHookInstructionSection({
+        ...instructionOptions,
+        content: directive,
+        backup: 'sibling',
+      });
+      if (applied.status === 'conflict')
+        throw new Error('Instruction section update conflicted');
       updateVaultVersion(cwd, vaultVersion);
       messages.push(
-        `[maencof] CLAUDE.md directives updated (${vaultVersion} → ${VERSION}).`,
+        `[maencof] ${portableBasename(inspection.target)} directives updated (${vaultVersion} → ${VERSION}).`,
       );
       needsProvisioning = true;
+    } else {
+      // 마커 있음 + 같은 버전 → 내용은 보존하되 새 유효 후보에 가려졌으면 재배치
+      const applied = applyHookInstructionSection({
+        ...instructionOptions,
+        content: existing,
+        backup: 'sibling',
+      });
+      if (applied.status === 'conflict')
+        throw new Error('Instruction section relocation conflicted');
     }
-    // 마커 있음 + 같은 버전 → 스킵 (idempotent)
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',

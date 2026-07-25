@@ -7,6 +7,8 @@
 | File                | Role                                                                |
 | ------------------- | ------------------------------------------------------------------- |
 | `index.ts`          | barrel                                                              |
+| `read/`             | `readSection`과 marker만 노출하는 hook entry                        |
+| `write/`            | merge/remove와 marker만 노출하는 hook entry                         |
 | `types.ts`          | `SectionMarkers`                                                    |
 | `files.ts`          | `CLAUDE.md` / `AGENTS.md` 상수 + `INSTRUCTIONS_FILES` (합집합)      |
 | `sectionMarkers.ts` | `<!-- NS:START:id -->` 마커 쌍 생성 (id 생략형 = maencof 기존 규약) |
@@ -19,6 +21,8 @@
 - **순수 함수만** — `node:fs` 금지. 파일 I/O 는 소비처가 소유한다 (filid=원자적 쓰기, maencof=`.bak` 백업).
 - 구간은 **부분 문자열 검색**으로 찾는다 — 마커가 다르면 여러 플러그인·여러 규칙 문서가 한 파일에 공존한다.
 - `mergeSection` 은 **재실행 안전** — 같은 본문을 두 번 병합해도 누적되지 않는다.
+- `removeSection` 은 소유 마커 span 밖의 바이트를 공백까지 그대로 보존한다.
+- hook은 필요한 read/write 목적별 entry만 import한다.
 
 ## Boundaries
 

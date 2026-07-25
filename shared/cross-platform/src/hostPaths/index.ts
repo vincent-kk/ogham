@@ -1,4 +1,5 @@
 export { detectHost } from "./detectHost.js";
+export { requireAbsoluteRoot, toAbsoluteRoot } from "./absoluteRoot.js";
 export { instructionsFile, ruleDocsTarget } from "./instructionsChannel.js";
 export { pluginRoot } from "./pluginRoot.js";
 export {

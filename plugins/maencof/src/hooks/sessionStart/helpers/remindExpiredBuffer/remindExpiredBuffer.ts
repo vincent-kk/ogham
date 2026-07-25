@@ -16,7 +16,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { normalize } from '@ogham/cross-platform/paths';
+import { normalize } from '@ogham/cross-platform/paths/normalize';
 
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 

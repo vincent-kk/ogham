@@ -77,6 +77,12 @@ export function createServer(): McpServer {
           .describe(
             'Rule ids whose local edits may be discarded. Drifted rules not listed here keep their edits and are reported instead.',
           ),
+        revision: z
+          .string()
+          .nullish()
+          .describe(
+            'Optional opaque revision returned by plan. A sync carrying a stale revision is skipped so newer user edits are not overwritten.',
+          ),
       },
     },
     wrapHandler(handleRuleDocsSync),

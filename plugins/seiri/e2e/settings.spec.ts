@@ -1,4 +1,11 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -130,6 +137,40 @@ test('save persists the dial and syncs the selected rule docs', async ({
   expect(
     existsSync(join(projectDir, '.claude', 'rules', RECOMMENDED.filename)),
   ).toBe(true);
+});
+
+test('a stale save replans without writing or settling the session', async ({
+  page,
+}) => {
+  const url = await openSession(projectDir);
+  await page.goto(url);
+  await expect(page.locator('#preview .diff-row').first()).toBeVisible();
+
+  const rulesDir = join(projectDir, '.claude', 'rules');
+  const deployed = join(rulesDir, RECOMMENDED.filename);
+  mkdirSync(rulesDir, { recursive: true });
+  writeFileSync(deployed, '# Newer user edit\n', 'utf8');
+
+  const staleWait = handleOpenSettings({
+    path: projectDir,
+    waitSeconds: 1,
+  });
+  await page.locator('#save').click();
+  await expect(page.locator('#status')).toContainText('preview changed', {
+    ignoreCase: true,
+  });
+  await expect(staleWait).resolves.toMatchObject({ status: 'pending' });
+  expect(readFileSync(deployed, 'utf8')).toBe('# Newer user edit\n');
+
+  await expect(
+    page.locator('#preview .diff-row[data-action="drift"]'),
+  ).toBeVisible();
+  await expect(page.locator('#save')).toBeEnabled();
+
+  const finalWait = longPoll(projectDir);
+  await page.locator('#save').click();
+  await expect(finalWait).resolves.toMatchObject({ status: 'saved' });
+  expect(readFileSync(deployed, 'utf8')).toBe('# Newer user edit\n');
 });
 
 test('close without saving resolves closed and leaves no config', async ({

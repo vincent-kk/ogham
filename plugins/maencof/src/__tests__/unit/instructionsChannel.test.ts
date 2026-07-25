@@ -4,6 +4,7 @@
  */
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -14,7 +15,10 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { readMaencofSection } from '../../core/claudeMdMerger/index.js';
+import {
+  mergeMaencofSection,
+  readMaencofSection,
+} from '../../core/claudeMdMerger/index.js';
 import { instructionsPath } from '../../hooks/shared/instructionsPath.js';
 import { handleClaudeMdMerge } from '../../mcp/tools/claudemdMerge/index.js';
 import { handleClaudeMdRead } from '../../mcp/tools/claudemdRead/index.js';
@@ -26,6 +30,7 @@ let vault: string;
 
 const claudeMd = (): string => join(vault, 'CLAUDE.md');
 const agentsMd = (): string => join(vault, 'AGENTS.md');
+const agentsOverrideMd = (): string => join(vault, 'AGENTS.override.md');
 
 beforeEach(() => {
   vault = mkdtempSync(join(tmpdir(), 'maencof-channel-'));
@@ -33,6 +38,7 @@ beforeEach(() => {
 
 afterEach(() => {
   delete process.env.OGHAM_HOST;
+  delete process.env.PLUGIN_DATA;
   rmSync(vault, { recursive: true, force: true });
 });
 
@@ -58,6 +64,17 @@ describe('claudemd tools on the Codex channel', () => {
     });
   });
 
+  it('preserves pre-existing AGENTS.md text and backs up its pre-write bytes', () => {
+    const existing = '# House rules\n\nKeep this text byte-for-byte.\n';
+    writeFileSync(agentsMd(), existing, 'utf8');
+
+    handleClaudeMdMerge(vault, { content: DIRECTIVE });
+
+    expect(readFileSync(agentsMd(), 'utf8').startsWith(existing)).toBe(true);
+    expect(readFileSync(agentsMd() + '.bak', 'utf8')).toBe(existing);
+    expect(existsSync(claudeMd())).toBe(false);
+  });
+
   it('removes from the file it wrote to', () => {
     handleClaudeMdMerge(vault, { content: DIRECTIVE });
 
@@ -65,6 +82,22 @@ describe('claudemd tools on the Codex channel', () => {
 
     expect(result.removed).toBe(true);
     expect(readMaencofSection(agentsMd())).toBeNull();
+  });
+
+  it('relocates a hidden section when a non-empty AGENTS.override.md becomes effective', () => {
+    handleClaudeMdMerge(vault, { content: DIRECTIVE });
+    const overrideBefore = '# Effective override\n';
+    writeFileSync(agentsOverrideMd(), overrideBefore, 'utf8');
+
+    const result = handleClaudeMdMerge(vault, { content: DIRECTIVE });
+
+    expect(result.changed).toBe(true);
+    expect(result.backup_path).toBe(agentsOverrideMd() + '.bak');
+    expect(readMaencofSection(agentsOverrideMd())).toBe(DIRECTIVE);
+    expect(readMaencofSection(agentsMd())).toBeNull();
+    expect(readFileSync(agentsOverrideMd() + '.bak', 'utf8')).toBe(
+      overrideBefore,
+    );
   });
 });
 
@@ -75,13 +108,25 @@ describe('claudemd tools on Claude', () => {
     expect(readMaencofSection(claudeMd())).toBe(DIRECTIVE);
     expect(existsSync(agentsMd())).toBe(false);
   });
+
+  it('updates the unique existing .claude/CLAUDE.md section without forking a root file', () => {
+    const nested = join(vault, '.claude', 'CLAUDE.md');
+    mkdirSync(join(vault, '.claude'), { recursive: true });
+    mergeMaencofSection(nested, 'old directives');
+
+    handleClaudeMdMerge(vault, { content: DIRECTIVE });
+
+    expect(readMaencofSection(nested)).toBe(DIRECTIVE);
+    expect(existsSync(claudeMd())).toBe(false);
+  });
 });
 
-describe('instructionsPath (hook side — no host marker available)', () => {
-  it('follows a section already merged into AGENTS.md instead of forking a second copy', () => {
+describe('instructionsPath (hook-side runtime host signal)', () => {
+  it('uses the Codex project target without an MCP host marker', () => {
     process.env.OGHAM_HOST = 'codex';
     handleClaudeMdMerge(vault, { content: DIRECTIVE });
-    delete process.env.OGHAM_HOST; // hooks never see the marker
+    delete process.env.OGHAM_HOST;
+    process.env.PLUGIN_DATA = '/host-managed/plugin-data';
 
     expect(instructionsPath(vault)).toBe(agentsMd());
   });

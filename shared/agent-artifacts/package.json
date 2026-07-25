@@ -1,0 +1,118 @@
+{
+  "name": "@ogham/agent-artifacts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Internal to the ogham monorepo — project and user scoped Claude Code/Codex rules, instructions, and MCP artifact management",
+  "license": "MIT",
+  "author": {
+    "name": "Vincent Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./project": {
+      "types": "./dist/project/index.d.ts",
+      "import": "./dist/project/index.js"
+    },
+    "./user": {
+      "types": "./dist/user/index.d.ts",
+      "import": "./dist/user/index.js"
+    },
+    "./rules": {
+      "types": "./dist/rules/index.d.ts",
+      "import": "./dist/rules/index.js"
+    },
+    "./rules/presence": {
+      "types": "./dist/rules/status/inspectRuleDocumentPresence.d.ts",
+      "import": "./dist/rules/status/inspectRuleDocumentPresence.js"
+    },
+    "./rules/presence/trusted": {
+      "types": "./dist/rules/status/inspectTrustedRuleDocumentPresence.d.ts",
+      "import": "./dist/rules/status/inspectTrustedRuleDocumentPresence.js"
+    },
+    "./rules/status": {
+      "types": "./dist/rules/status/inspectRuleDocumentStatus.d.ts",
+      "import": "./dist/rules/status/inspectRuleDocumentStatus.js"
+    },
+    "./instructions": {
+      "types": "./dist/instructions/index.d.ts",
+      "import": "./dist/instructions/index.js"
+    },
+    "./instructions/hook": {
+      "types": "./dist/instructions/hook/index.d.ts",
+      "import": "./dist/instructions/hook/index.js"
+    },
+    "./instructions/hook/status": {
+      "types": "./dist/instructions/hook/status/inspectHookInstructionSection.d.ts",
+      "import": "./dist/instructions/hook/status/inspectHookInstructionSection.js"
+    },
+    "./instructions/hook/apply": {
+      "types": "./dist/instructions/hook/apply/applyHookInstructionSection.d.ts",
+      "import": "./dist/instructions/hook/apply/applyHookInstructionSection.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp/index.d.ts",
+      "import": "./dist/mcp/index.js"
+    },
+    "./targets": {
+      "types": "./dist/targets/index.d.ts",
+      "import": "./dist/targets/index.js"
+    },
+    "./targets/project/rules": {
+      "types": "./dist/targets/maps/resolveProjectRuleTarget.d.ts",
+      "import": "./dist/targets/maps/resolveProjectRuleTarget.js"
+    },
+    "./targets/project/instructions": {
+      "types": "./dist/targets/maps/resolveProjectInstructionTarget.d.ts",
+      "import": "./dist/targets/maps/resolveProjectInstructionTarget.js"
+    },
+    "./targets/project/mcp": {
+      "types": "./dist/targets/maps/resolveProjectMcpTarget.d.ts",
+      "import": "./dist/targets/maps/resolveProjectMcpTarget.js"
+    },
+    "./targets/user/rules": {
+      "types": "./dist/targets/maps/resolveUserRuleTarget.d.ts",
+      "import": "./dist/targets/maps/resolveUserRuleTarget.js"
+    },
+    "./targets/user/instructions": {
+      "types": "./dist/targets/maps/resolveUserInstructionTarget.d.ts",
+      "import": "./dist/targets/maps/resolveUserInstructionTarget.js"
+    },
+    "./targets/user/mcp": {
+      "types": "./dist/targets/maps/resolveUserMcpTarget.d.ts",
+      "import": "./dist/targets/maps/resolveUserMcpTarget.js"
+    },
+    "./transactions": {
+      "types": "./dist/transactions/index.d.ts",
+      "import": "./dist/transactions/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "yarn clean && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo tsconfig.build.tsbuildinfo",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ogham/cross-platform": "workspace:^",
+    "smol-toml": "^1.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,28 +1,33 @@
-import { join } from 'node:path';
+import { inspectHookInstructionSection } from '@ogham/agent-artifacts/instructions/hook/status';
+import { resolveProjectInstructionTarget } from '@ogham/agent-artifacts/targets/project/instructions';
+import { resolveHostDescriptor } from '@ogham/cross-platform/host-registry/descriptor';
 
 import {
-  CLAUDE_INSTRUCTIONS_FILE,
-  INSTRUCTIONS_FILES,
-} from '@ogham/cross-platform/instructions';
-
-import { readMaencofSection } from '../../core/claudeMdMerger/operations/readMaencofSection.js';
+  MAENCOF_END_MARKER,
+  MAENCOF_START_MARKER,
+} from '../../constants/markers.js';
 
 /**
  * The instruction file this vault's maencof section lives in.
  *
- * A hook cannot ask which host it is on — the adapters inject `OGHAM_HOST` into the MCP
- * declaration only — so this follows the section rather than the host: whichever
- * instruction file already carries it is the one to keep updating. Off Claude the MCP
- * side writes `AGENTS.md`, and without this the SessionStart hook would find no section
- * in `CLAUDE.md` and insert a second copy of the directives there.
- *
- * Nothing deployed anywhere yet → `CLAUDE.md`, which is what this hook has always
- * written and the only channel measured to work.
+ * This hook-reachable helper deliberately uses purpose-specific entry points:
+ * importing the full project manager would pull its transaction/lock engine
+ * into every SessionStart bundle.
  */
 export function instructionsPath(cwd: string): string {
-  for (const filename of INSTRUCTIONS_FILES) {
-    const path = join(cwd, filename);
-    if (readMaencofSection(path) !== null) return path;
-  }
-  return join(cwd, CLAUDE_INSTRUCTIONS_FILE);
+  const host =
+    resolveHostDescriptor(process.env).stateRootDir === '.codex'
+      ? 'codex'
+      : 'claude';
+  const target = resolveProjectInstructionTarget({
+    host,
+    projectRoot: cwd,
+  });
+  return inspectHookInstructionSection({
+    target,
+    markers: {
+      start: MAENCOF_START_MARKER,
+      end: MAENCOF_END_MARKER,
+    },
+  }).target;
 }

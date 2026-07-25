@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { logHookFailure } from '@ogham/cross-platform/error-log';
+import { logHookFailure } from '@ogham/cross-platform/error-log/write';
 
 import { createLogger } from '../../lib/logger.js';
 import { readStdin } from '../../lib/stdin.js';

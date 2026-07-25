@@ -8,6 +8,9 @@ import { findRepoRoot } from '../../utils/findRepoRoot.js';
  * harness auto-loads, and the single source of truth for which seiri
  * rules are active. Anchored at the repository root so a session opened
  * in a subdirectory still resolves the one real location.
+ *
+ * @deprecated Claude-only compatibility wrapper. Host-aware deployment
+ * uses the shared rule manager and does not call this function.
  */
 export function resolveRulesDir(projectRoot: string): string {
   return portableJoin(findRepoRoot(projectRoot), CLAUDE_DIR, RULES_DIR);

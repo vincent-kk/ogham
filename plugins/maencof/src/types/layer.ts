@@ -3,7 +3,7 @@
  * @description Layer 경로 유틸리티 — 모든 레이어(hooks, mcp, core)에서 의존 가능.
  * 상수 LAYER1_PREFIX 는 constants/directories.ts 의 단일 출처에서 import 한다.
  */
-import { normalize } from '@ogham/cross-platform/paths';
+import { normalize } from '@ogham/cross-platform/paths/normalize';
 
 import { LAYER1_PREFIX } from '../constants/directories.js';
 

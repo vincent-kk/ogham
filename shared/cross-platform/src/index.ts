@@ -1,12 +1,29 @@
 export { env } from "./env/index.js";
 export { normalizeEol } from "./eol/index.js";
-export { paths } from "./paths/index.js";
+export { hostStateRoot, paths, resolveContainedPath } from "./paths/index.js";
+export {
+  assertNoSymlinkDescendantsSync,
+  ensureDirectorySync,
+  listDirectoryIfExistsSync,
+  readFileIfExistsSync,
+  readUtf8FileIfExistsSync,
+  removeFileIfExistsSync,
+  withFileLockSync,
+  writeFileAtomicallySync,
+} from "./filesystem/index.js";
+export type {
+  AtomicWriteOptions,
+  EnsureDirectoryOptions,
+  FileLockOptions,
+  FileLockResult,
+} from "./filesystem/index.js";
 export {
   detectHost,
   instructionsFile,
   pluginRoot,
   PROJECT_ROOT_ARG_DESCRIPTION,
   projectRoot,
+  requireAbsoluteRoot,
   rememberProjectRoot,
   resetProjectRoot,
   ruleDocsTarget,
@@ -18,8 +35,9 @@ export {
   HOSTS,
   hostFromMarker,
   resolveHostDescriptor,
+  resolveRuntimeHost,
 } from "./hostRegistry/index.js";
-export type { Host, HostDescriptor } from "./hostRegistry/index.js";
+export type { Host, HostDescriptor, KnownHost } from "./hostRegistry/index.js";
 export {
   CLAUDE_INSTRUCTIONS_FILE,
   CODEX_INSTRUCTIONS_FILE,

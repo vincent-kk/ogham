@@ -16,10 +16,12 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-// See scripts/typecheckAll.mjs for why only cross-platform emits dist
-// while plugin packages ship via bridge/.
+// Shared providers emit dist while plugin packages ship via bridge/.
+// Keep agent-artifacts after its cross-platform dependency and before
+// every plugin consumer.
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
+  { name: "@ogham/agent-artifacts", dir: "shared/agent-artifacts" },
   { name: "@ogham/http-kit", dir: "shared/http-kit" },
   { name: "@ogham/session-finalizer", dir: "shared/session-finalizer" },
 ];

@@ -130,17 +130,17 @@ const hookEntries = [
   },
 ];
 
-// esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
-// of X is not supported"). cross-spawn (CJS) calls require('child_process') at
-// load time, so without this banner the bundle crashes on import. createRequire
-// from node:module restores a working require for CJS deps inlined into ESM.
+// user-prompt-submit owns the git vault committer and therefore still bundles
+// cross-spawn (CJS). Only that event receives createRequire; adding the banner
+// to the three builtin-only events would be dead bytes.
 const ESM_CJS_REQUIRE_BANNER =
   "import { createRequire as __cpCreateRequire } from 'node:module';\n" +
   'const require = __cpCreateRequire(import.meta.url);\n';
 
-await Promise.all(
-  hookEntries.map(({ name, entryPath }) =>
-    esbuild.build({
+const hookBuilds = await Promise.all(
+  hookEntries.map(async ({ name, entryPath }) => ({
+    name,
+    result: await esbuild.build({
       entryPoints: [resolve(root, 'src/hooks', entryPath)],
       bundle: true,
       platform: 'node',
@@ -150,13 +150,79 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      metafile: true,
       loader: { '.md': 'text' },
-      banner: { js: ESM_CJS_REQUIRE_BANNER },
+      banner:
+        name === 'user-prompt-submit'
+          ? { js: ESM_CJS_REQUIRE_BANNER }
+          : undefined,
     }),
-  ),
+  })),
 );
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
+
+const SESSION_START_FORBIDDEN_IMPORT_PATHS = [
+  {
+    label: 'general instruction manager/planning/apply/status',
+    pattern:
+      /shared\/agent-artifacts\/(?:src|dist)\/instructions\/(?:instructions\.(?:ts|js)|planning\/|apply\/|status\/|compat\/)/,
+  },
+  {
+    label: 'artifact transactions',
+    pattern: /shared\/agent-artifacts\/(?:src|dist)\/transactions\//,
+  },
+  {
+    label: 'filesystem locking',
+    pattern: /shared\/cross-platform\/(?:src|dist)\/filesystem\/locking\//,
+  },
+  {
+    label: 'general CLI spawn',
+    pattern: /shared\/cross-platform\/(?:src|dist)\/spawn\//,
+  },
+  {
+    label: 'cross-spawn/which runtime',
+    pattern: /node_modules\/(?:cross-spawn|which)\//,
+  },
+];
+const sessionStartMetafile = hookBuilds.find(
+  ({ name }) => name === 'session-start',
+)?.result.metafile;
+if (!sessionStartMetafile)
+  throw new Error('build-hooks: SessionStart metafile was not generated');
+const sessionStartInputs = Object.keys(sessionStartMetafile.inputs).map(
+  (input) => input.replaceAll('\\', '/'),
+);
+const sessionStartImportViolations =
+  SESSION_START_FORBIDDEN_IMPORT_PATHS.flatMap(({ label, pattern }) =>
+    sessionStartInputs
+      .filter((input) => pattern.test(input))
+      .map(
+        (input) =>
+          `  session-start.mjs: forbidden import graph (${label}): ${input}`,
+      ),
+  );
+
+const HOOK_FORBIDDEN_AGGREGATE_INPUTS = [
+  'agent-artifacts/dist/instructions/hook/index.js',
+  'cross-platform/dist/hooks/errorLog.js',
+  'cross-platform/dist/hostRegistry/index.js',
+  'cross-platform/dist/paths/index.js',
+  'cross-platform/dist/paths/paths.js',
+  'cross-platform/dist/paths/compat/index.js',
+  'cross-platform/dist/filesystem/read/index.js',
+  'cross-platform/src/filesystem/read/index.ts',
+];
+const aggregateImportViolations = hookBuilds.flatMap(({ name, result }) =>
+  Object.keys(result.metafile.inputs).flatMap((input) => {
+    const normalizedInput = input.replaceAll('\\', '/');
+    return HOOK_FORBIDDEN_AGGREGATE_INPUTS.flatMap((forbidden) =>
+      normalizedInput.includes(forbidden)
+        ? [`  ${name}.mjs: forbidden aggregate input graph ${forbidden}`]
+        : [],
+    );
+  }),
+);
 
 // agy hook runner (shared — bundled from @ogham/cross-platform, not this
 // plugin's src). The emitted agy hooks.json (plugin root, named-group format)
@@ -212,14 +278,14 @@ const FORBIDDEN_PATTERNS = [
   /\brunHookEntry\b/,
   /\bgenerateWindowsCmd\b/,
 ];
-// NOTE: the `Dynamic require of ...` esbuild CJS-shim string is intentionally
-// allowed because @ogham/cross-platform pulls in cross-spawn (CJS) into the
-// session-start bundle. The filid 0.4.0 module-init crash signature was a
-// different failure mode (require at module-init evaluation time, not the
-// lazy require shim). If a future regression revisits the crash, gate on a
-// more specific stack-frame pattern, not the generic shim message.
+// NOTE: the generic esbuild CJS require shim remains allowed only because the
+// user-prompt vault committer intentionally uses cross-spawn. SessionStart's
+// graph guard above separately proves that runtime never reaches that bundle.
 
-const violations = [];
+const violations = [
+  ...sessionStartImportViolations,
+  ...aggregateImportViolations,
+];
 
 const guardedBundles = [
   ...hookEntries,

@@ -14,6 +14,7 @@ describe('buildMinimalContext', () => {
   const tempDirs: string[] = [];
 
   afterEach(() => {
+    delete process.env.PLUGIN_DATA;
     for (const dir of tempDirs.splice(0))
       rmSync(dir, { recursive: true, force: true });
   });
@@ -72,7 +73,7 @@ describe('buildMinimalContext', () => {
     expect(context).not.toContain('Project rule docs');
   });
 
-  it('finds the rule merged into AGENTS.md — a hook has no host marker to branch on', () => {
+  it('finds the rule merged into AGENTS.md from the Codex hook signal', () => {
     const projectRoot = makeProject({ deployFca: false });
     writeFileSync(
       join(projectRoot, 'AGENTS.md'),
@@ -80,6 +81,7 @@ describe('buildMinimalContext', () => {
       'utf8',
     );
 
+    process.env.PLUGIN_DATA = join(projectRoot, '.codex-plugin-data');
     const context = buildMinimalContext(projectRoot);
 
     expect(context).toContain('[filid] FCA-AI active. Rules: AGENTS.md');
@@ -90,9 +92,53 @@ describe('buildMinimalContext', () => {
     const projectRoot = makeProject({ deployFca: false });
     writeFileSync(join(projectRoot, 'AGENTS.md'), '# House rules\n', 'utf8');
 
+    process.env.PLUGIN_DATA = join(projectRoot, '.codex-plugin-data');
     const context = buildMinimalContext(projectRoot);
 
     expect(context).toContain('Rules not deployed');
+  });
+
+  it('ignores a Filid section hidden behind a non-empty Codex override', () => {
+    const projectRoot = makeProject({ deployFca: false });
+    writeFileSync(
+      join(projectRoot, 'AGENTS.md'),
+      `<!-- FILID:START:${RULE_FILE} -->\n# hidden\n<!-- FILID:END:${RULE_FILE} -->\n`,
+      'utf8',
+    );
+    writeFileSync(
+      join(projectRoot, 'AGENTS.override.md'),
+      '# Active override\n',
+      'utf8',
+    );
+    process.env.PLUGIN_DATA = join(projectRoot, '.codex-plugin-data');
+
+    const context = buildMinimalContext(projectRoot);
+
+    expect(context).toContain('Rules not deployed');
+    expect(context).toContain('AGENTS.override.md');
+    expect(context).not.toContain('FCA-AI active');
+  });
+
+  it('finds a legacy Filid section in the effective Codex override', () => {
+    const projectRoot = makeProject({ deployFca: false });
+    writeFileSync(
+      join(projectRoot, 'AGENTS.md'),
+      `<!-- FILID:START:${RULE_FILE} -->\n# hidden\n<!-- FILID:END:${RULE_FILE} -->\n`,
+      'utf8',
+    );
+    writeFileSync(
+      join(projectRoot, 'AGENTS.override.md'),
+      `<!-- FILID:START:${LEGACY_FILE} -->\n# active legacy\n<!-- FILID:END:${LEGACY_FILE} -->\n`,
+      'utf8',
+    );
+    process.env.PLUGIN_DATA = join(projectRoot, '.codex-plugin-data');
+
+    const context = buildMinimalContext(projectRoot);
+
+    expect(context).toContain(
+      '[filid] FCA-AI active. Rules: AGENTS.override.md',
+    );
+    expect(context).not.toContain('Rules not deployed');
   });
 
   it('always emits exactly one [filid:lang] tag', () => {

@@ -10,7 +10,7 @@ seiri 의 훅 구현 5종. **어느 것도 차단하지 않고 어느 것도 규
 ## Structure
 
 ```
-shared/              organ — readStdin · renderStatusLines (setup·subagentStart 공용)
+shared/              organ — stdin · host target 기반 상태 렌더 (두 훅 공용)
 setup/               SessionStart — 상태 요약 주입
 userPromptSubmit/    UserPromptSubmit — 매 턴 선출 상기 + 워크플로우 상태 1절
 postToolUse/         PostToolUse(+Failure) — Bash 실패 연쇄 · Skill 로드 관측
@@ -20,8 +20,9 @@ instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 
 ## Conventions
 
-- **배럴 import 금지** — concrete 파일 직접 import (배경은 루트/플러그인 CLAUDE.md·`seiri_agent-legible` 규칙); `build-hooks.mjs` 캡·금칙 가드가 최종 방어선, 소스 변경 후 `build:plugin` 확인.
+- **배럴 import 금지** — concrete 파일만 쓰며 빌드 cap·metafile이 aggregate/planning/apply/transaction 재유입을 막는다.
 - 검증 런타임(zod 등)·MCP SDK·glob 엔진을 훅 번들에 들이지 않는다.
+- Active rules와 drift는 현재 호스트의 effective target에서 읽히는 규칙만 센다.
 - `@ogham/cross-platform/host-paths` 를 소비하지 않는다 — 호스트가 훅에
   `CLAUDE_PLUGIN_ROOT` 와 세션 cwd 를 이미 준다. 경로 조합은 `compat` 경유.
 - 진입점은 `<name>/<name>.entry.ts`. `build-hooks.mjs` 의 `hookEntries` 가
@@ -43,6 +44,6 @@ instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 
 ### Never do
 
-- `.claude/rules/` 쓰기 — 배포는 setup 표면 전담.
+- 호스트 규칙 채널 쓰기 — 배포는 setup 표면 전담.
 - 배포된 규칙 문서의 내용을 주입에 복제.
 - 차단 훅(`PreToolUse`·`Stop`) 도입 — 진실은 저장소가 소유한다.

@@ -6,7 +6,7 @@
  *
  *   - `status` — inspect current filesystem state, returned as a
  *     checkbox-ready snapshot (includes drift info against template hashes).
- *   - `sync`   — synchronise `.claude/rules/` to match the provided selection.
+ *   - `sync`   — synchronise the active host target to the provided selection.
  *     Drifted optional rules are left untouched unless their id appears in
  *     the `resync` input; drifted required rules are always overwritten.
  *   - `manifest` — return the raw manifest (id/filename/required/title/desc)
@@ -112,9 +112,8 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
     }
 
     case 'sync': {
-      // Normalise selection input. The filesystem under `.claude/rules/`
-      // is the single source of truth for rule doc state — no config-side
-      // tracking and no legacy cleanup.
+      // Normalise selection input. The active host target is the single source
+      // of truth for rule doc state — no config-side tracking.
       const normalizedSelections = normalizeSelections(input.selections);
       const resyncRaw = normalizeResync(input.resync);
 

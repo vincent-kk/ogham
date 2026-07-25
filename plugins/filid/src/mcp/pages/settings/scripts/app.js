@@ -53,6 +53,12 @@
     var desc = document.createElement('p');
     desc.className = 'docrow__desc';
     desc.textContent = entry.description;
+    if (entry.displayTarget) {
+      desc.appendChild(document.createTextNode(' · target: '));
+      var target = document.createElement('code');
+      target.textContent = entry.displayTarget;
+      desc.appendChild(target);
+    }
 
     if (required) {
       title.appendChild(document.createTextNode(entry.title));

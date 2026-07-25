@@ -25,9 +25,10 @@ const hookEntries = [
   { name: 'injectDynamic', maxBytes: LIGHT_HOOK_BYTES },
 ];
 
-await Promise.all(
-  hookEntries.map(({ name }) =>
-    esbuild.build({
+const hookBuilds = await Promise.all(
+  hookEntries.map(async ({ name }) => ({
+    name,
+    result: await esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${name}/build/${name}.entry.ts`)],
       bundle: true,
       platform: 'node',
@@ -37,8 +38,9 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      metafile: true,
     }),
-  ),
+  })),
 );
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
@@ -79,7 +81,21 @@ const FORBIDDEN_PATTERNS = [
   /\bcross-spawn\b/,
 ];
 
-const violations = [];
+const FORBIDDEN_INPUTS = [
+  'cross-platform/dist/paths/index.js',
+  'cross-platform/dist/paths/paths.js',
+  'cross-platform/dist/hostRegistry/index.js',
+];
+const violations = hookBuilds.flatMap(({ name, result }) =>
+  Object.keys(result.metafile.inputs).flatMap((input) => {
+    const normalizedInput = input.replaceAll('\\', '/');
+    return FORBIDDEN_INPUTS.flatMap((forbidden) =>
+      normalizedInput.includes(forbidden)
+        ? [`  ${name}.mjs: forbidden input graph ${forbidden}`]
+        : [],
+    );
+  }),
+);
 
 for (const { name, maxBytes } of hookEntries) {
   const file = resolve(root, `bridge/${name}.mjs`);

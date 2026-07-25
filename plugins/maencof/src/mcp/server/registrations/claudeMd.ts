@@ -6,13 +6,15 @@
  * so the side-effect bookkeeping resolves it per call rather than pinning a constant.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { instructionsFile } from '@ogham/cross-platform/host-paths';
+import { portableRelative } from '@ogham/cross-platform/compat';
 import { z } from 'zod';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
 import { handleClaudeMdMerge } from '../../tools/claudemdMerge/index.js';
 import { handleClaudeMdRead } from '../../tools/claudemdRead/index.js';
 import { handleClaudeMdRemove } from '../../tools/claudemdRemove/index.js';
+import { getVaultPath } from '../graphCache/index.js';
 import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
 
 export function registerClaudeMdTools(server: McpServer): void {
@@ -36,7 +38,13 @@ export function registerClaudeMdTools(server: McpServer): void {
       }),
     },
     async (vaultPath, args) => handleClaudeMdMerge(vaultPath, args),
-    () => instructionsFile(),
+    () => {
+      const vaultPath = getVaultPath();
+      return portableRelative(
+        vaultPath,
+        createProjectInstructionManager(vaultPath).inspect().target,
+      );
+    },
   );
 
   // ─── claudemd_read (plain read) ────────────────────────────────────
@@ -67,6 +75,12 @@ export function registerClaudeMdTools(server: McpServer): void {
       }),
     },
     async (vaultPath, args) => handleClaudeMdRemove(vaultPath, args),
-    () => instructionsFile(),
+    () => {
+      const vaultPath = getVaultPath();
+      return portableRelative(
+        vaultPath,
+        createProjectInstructionManager(vaultPath).inspect().target,
+      );
+    },
   );
 }

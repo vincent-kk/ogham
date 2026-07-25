@@ -1,8 +1,8 @@
 /**
  * @file readMaencofSection.ts
- * @description CLAUDE.md에서 maencof 섹션만 읽기.
+ * @description 전달받은 정확한 지침 파일에서 maencof 섹션만 읽기.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { createResolvedInstructionSectionManager } from '@ogham/agent-artifacts/instructions';
 
 import {
   MAENCOF_END_MARKER,
@@ -10,18 +10,18 @@ import {
 } from '../../../constants/markers.js';
 
 /**
- * @param filePath - CLAUDE.md 절대 경로
+ * @param filePath - 호출자가 이미 해석한 지침 파일의 절대 경로
  * @returns maencof 섹션 내용 (마커 제외), 없으면 null
  */
 export function readMaencofSection(filePath: string): string | null {
-  if (!existsSync(filePath)) return null;
-
-  const content = readFileSync(filePath, 'utf-8');
-  const startIdx = content.indexOf(MAENCOF_START_MARKER);
-  const endIdx = content.indexOf(MAENCOF_END_MARKER);
-
-  if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) return null;
-
-  const sectionStart = startIdx + MAENCOF_START_MARKER.length;
-  return content.slice(sectionStart, endIdx).trim();
+  const manager = createResolvedInstructionSectionManager({
+    owner: 'maencof',
+    targetPath: filePath,
+    markers: {
+      start: MAENCOF_START_MARKER,
+      end: MAENCOF_END_MARKER,
+    },
+  });
+  const inspection = manager.inspect();
+  return inspection.status === 'present' ? inspection.sectionContent : null;
 }

@@ -81,6 +81,14 @@ describe("readSection / removeSection", () => {
     expect(removed).toContain("# Head");
   });
 
+  it("preserves every byte outside the removed marker span", () => {
+    const before = "  # Head  \n\n";
+    const after = "\n\n  tail  \n";
+    const source = `${before}${RULE.start}\nbody\n${RULE.end}${after}`;
+
+    expect(removeSection(source, RULE)).toBe(before + after);
+  });
+
   it("ignores a half-written section rather than splicing on a marker it cannot pair", () => {
     const orphan = `# Head\n${RULE.end}\ntail\n${RULE.start}\n`;
     expect(readSection(orphan, RULE)).toBeNull();

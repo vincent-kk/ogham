@@ -9,7 +9,7 @@
 - `userPromptSubmit.ts` — `handleUserPromptSubmit` (fmap reset + turn 증가 → inject → spike 배너 머지)
 - `userPromptSubmit.entry.ts` — stdin → handler → stdout 파이프
 - `utils/injectContext.ts` — 세션 첫 프롬프트 포인터 주입
-- `utils/buildMinimalContext.ts` — 포인터·언어 태그·비활성 규칙 조립
+- `utils/buildMinimalContext.ts` — host target 포인터·언어 태그·비활성 규칙 조립
 - `utils/buildSpikeBanner.ts` — spike 배너 조립 (비-spike면 null)
 - `__tests__/` organ — 단위 테스트
 
@@ -20,7 +20,6 @@
 - `injectContext`의 Gate: `!isFirstInSession && hasPromptContext` → continue
 - spike 배너는 **세션 캐시 비대상** — 모드가 세션 중 checkout으로 바뀔 수 있어 매 프롬프트 fresh 판정 (fs 읽기 수 회, git spawn 없음)
 - 배너 동적 내용: 경과일(reflog 첫 항목), 미수확 결정 수(reflog 갱신 수), 7일 타임박스 경고, harvest manifest 부재/STALE/EXPIRED/current
-- `continue: false` 절대 없음 — 프롬프트 차단 금지
 
 ## Boundaries
 
@@ -28,7 +27,7 @@
 
 - 규칙 본문을 복제하지 않고 경로만 포인터로 제공
 - fmap reset은 FCA 프로젝트에서만 수행
-- `.claude/rules/`에는 절대 write 금지 (`setup` 스킬 전담)
+- host rule target에는 절대 write 금지 (`setup` 스킬 전담)
 
 ### Ask first
 
@@ -38,12 +37,14 @@
 
 ### Never do
 
-- `.claude/rules/filid_fca-policy.md`에 파일 write
+- 검사한 host rule target에 파일 write
 - `continue: false` 반환
 - spike 배너를 세션 캐시에 태우기 (모드 전이 brain-split 유발)
 - 훅 번들에 zod import (번들 크기 예산 초과 — `readHookConfig` 패턴 사용)
+- 번들 metafile에 범용 manager·planning·apply·transaction graph 포함
 
 ## Dependencies
 
+- `@ogham/agent-artifacts/rules/presence/trusted`, `@ogham/agent-artifacts/targets/project/rules`
 - `../../core/infra/cacheManager/`, `../../constants/spikeMode.js`
 - `../shared/`, `../utils/` (`validateCwd`, `readHookConfig`, git 메타 판독기, `readHarvestManifest`)

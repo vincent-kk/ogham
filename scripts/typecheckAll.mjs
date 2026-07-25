@@ -29,15 +29,13 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-// Only @ogham/cross-platform needs to emit dist (its .d.ts files are
-// consumed via "exports" in its package.json). The plugin packages
-// (cennad, maencof, etc.) intentionally skip dist emission because
-// they ship via bridge/ (esbuild runtime), not npm. Inter-workspace
-// type usage is wired through tsconfig paths instead of dist (see
-// plugins/maencof-lens/tsconfig.json mapping @ogham/maencof to
-// ../maencof/src/index.ts).
+// Shared providers emit dist because consumers resolve their package
+// exports. Plugin packages intentionally skip dist emission because
+// they ship via bridge/ (esbuild runtime). Keep agent-artifacts after
+// cross-platform so the provider dependency graph remains ordered.
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
+  { name: "@ogham/agent-artifacts", dir: "shared/agent-artifacts" },
   { name: "@ogham/http-kit", dir: "shared/http-kit" },
   { name: "@ogham/session-finalizer", dir: "shared/session-finalizer" },
 ];
@@ -95,16 +93,7 @@ for (const { name, dir } of PROVIDERS) {
 //
 // A provider's build runs tsconfig.build.json, which excludes its spec files,
 // so the provider's own `typecheck` is the only pass that covers them.
-// @ogham/cross-platform is held out: its specs already fail on a pre-existing
-// declaration-site defect (normalizeCodexToolUse is typed `(input: T): T` but
-// returns a rewritten shape). Fixing that signature — and re-checking the hook
-// consumers that rely on it — is its own change; add it back here afterwards.
-const TYPECHECK_TARGETS = [
-  ...PROVIDERS.map(({ name }) => name).filter(
-    (name) => name !== "@ogham/cross-platform",
-  ),
-  ...CONSUMERS,
-];
+const TYPECHECK_TARGETS = [...PROVIDERS.map(({ name }) => name), ...CONSUMERS];
 console.log(
   `\n→ Typechecking ${TYPECHECK_TARGETS.length} workspaces in parallel`,
 );

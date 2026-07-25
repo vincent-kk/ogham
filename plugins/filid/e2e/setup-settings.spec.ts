@@ -104,9 +104,9 @@ test('serves the built page with injected state and rejects a missing token', as
   await expect(page.locator('#rules-list .ruleitem')).toHaveCount(8);
   // Rule-doc management renders only when there are optional docs to select;
   // a required-only catalog hides the whole section (nothing to manage).
-  if (OPTIONAL_RULES.length === 0) {
+  if (OPTIONAL_RULES.length === 0) 
     await expect(page.locator('#rule-docs-section')).toBeHidden();
-  } else {
+   else {
     await expect(page.locator('#rule-docs-required .docrow')).toHaveCount(
       MANIFEST.rules.filter((r) => r.required).length,
     );

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { logHookFailure } from '@ogham/cross-platform/error-log';
-import { selfProbe } from '@ogham/cross-platform/self-probe';
+import { logHookFailure } from '@ogham/cross-platform/error-log/write';
+import { selfProbeHook } from '@ogham/cross-platform/self-probe/hook';
 
 import type { DispatchInput, MergedHookOutput } from '../../types/dispatch.js';
 import { readStdin } from '../shared/readStdin.js';
@@ -13,7 +13,7 @@ import { orchestrateSessionStart } from './sessionStart.js';
 // Logging happens below on the FILTERED error set: probeAdvisory drops signals
 // that also fire in healthy sessions (CLAUDE_PLUGIN_ROOT env absence), so the
 // error log and the Claude-facing warning only carry actionable failures.
-const probe = await selfProbe({ writeLog: false, pkg: 'maencof' });
+const probe = await selfProbeHook({ writeLog: false, pkg: 'maencof' });
 
 const raw = await readStdin();
 let result: MergedHookOutput;

@@ -39,6 +39,12 @@ describe('orphan rule-doc retirement', () => {
       'utf8',
     );
     writeFileSync(join(rulesDir, 'filid_fca-policy.md'), '# foreign\n', 'utf8');
+    writeFileSync(
+      join(rulesDir, 'seiriously-foreign.md'),
+      '# foreign\n',
+      'utf8',
+    );
+    writeFileSync(join(rulesDir, 'seiri_retired-rule.txt'), 'not a rule\n');
 
     const result = applyRuleDocs(repoRoot, pluginRoot, [anchor.id]);
     const removed = result.outcomes
@@ -48,6 +54,8 @@ describe('orphan rule-doc retirement', () => {
     expect(existsSync(join(rulesDir, 'seiri_retired-rule.md'))).toBe(false);
     // Foreign namespace and the shipped anchor are untouched.
     expect(existsSync(join(rulesDir, 'filid_fca-policy.md'))).toBe(true);
+    expect(existsSync(join(rulesDir, 'seiriously-foreign.md'))).toBe(true);
+    expect(existsSync(join(rulesDir, 'seiri_retired-rule.txt'))).toBe(true);
     expect(existsSync(join(rulesDir, anchor.filename))).toBe(true);
   });
 

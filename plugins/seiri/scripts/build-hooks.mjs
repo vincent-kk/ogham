@@ -68,9 +68,10 @@ const hookEntries = [
   },
 ];
 
-await Promise.all(
-  hookEntries.map(({ name, entry }) =>
-    esbuild.build({
+const hookBuilds = await Promise.all(
+  hookEntries.map(async ({ name, entry }) => ({
+    name,
+    result: await esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
       platform: 'node',
@@ -80,8 +81,9 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      metafile: true,
     }),
-  ),
+  })),
 );
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
@@ -116,7 +118,35 @@ const FORBIDDEN_PATTERNS = [
   /\bgenerateWindowsCmd\b/,
 ];
 
+// Metafile inputs retain module identity after minification, so these guard
+// the graph itself rather than hoping an implementation string survives in
+// output. Purpose-specific hook entry points must never expand back into the
+// aggregate path, manager, apply, transaction, or write-side filesystem graph.
+const FORBIDDEN_INPUT_FRAGMENTS = [
+  '/shared/cross-platform/src/hooks/errorLog.',
+  '/shared/cross-platform/src/paths/index.',
+  '/shared/cross-platform/src/paths/paths.',
+  '/shared/cross-platform/src/paths/compat/index.',
+  '/shared/cross-platform/src/hostRegistry/index.',
+  '/shared/cross-platform/src/filesystem/read/index.',
+  '/shared/cross-platform/dist/filesystem/read/index.',
+  '/shared/agent-artifacts/src/rules/planning/',
+  '/shared/agent-artifacts/src/rules/adapters/',
+  '/shared/agent-artifacts/src/transactions/',
+  '/shared/cross-platform/src/filesystem/locking/',
+  '/shared/cross-platform/src/filesystem/mutation/',
+];
+
 const violations = [];
+
+for (const { name, result } of hookBuilds) {
+  for (const input of Object.keys(result.metafile.inputs)) {
+    const normalized = input.replaceAll('\\', '/');
+    for (const fragment of FORBIDDEN_INPUT_FRAGMENTS)
+      if (normalized.includes(fragment))
+        violations.push(`  ${name}.mjs: forbidden module input ${normalized}`);
+  }
+}
 
 for (const { name, maxBytes, forbiddenContent = [] } of hookEntries) {
   const file = resolve(root, `bridge/${name}.mjs`);

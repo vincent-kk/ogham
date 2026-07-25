@@ -1,4 +1,9 @@
-import { spawnCli } from '@ogham/cross-platform';
+import {
+  createMcpServerManager,
+  type McpCliRunResult,
+  type McpCliRunner,
+} from '@ogham/agent-artifacts/mcp';
+import { resolveUserMcpTarget } from '@ogham/agent-artifacts/targets/user/mcp';
 
 import { logger } from '../../../lib/logger.js';
 import type { YoutubeAddonLanguage } from '../../../types/index.js';
@@ -6,63 +11,48 @@ import {
   YOUTUBE_MCP_ARGS,
   YOUTUBE_MCP_COMMAND,
   YOUTUBE_MCP_KEY,
+  youtubeMcpEnv,
 } from '../constants/youtubeServer.js';
 
 import type { ProvisionResult } from './provisionResult.js';
 
-export interface CodexRunResult {
-  notInstalled: boolean;
-  failed: boolean;
-  code: number | null;
-  stderr: string;
-}
+export type CodexMcpRunner = McpCliRunner;
+export type CodexRunResult = McpCliRunResult;
 
-// Injectable so tests assert the argv without spawning codex.
-export type CodexMcpRunner = (args: string[]) => Promise<CodexRunResult>;
-
-const defaultRunner: CodexMcpRunner = async (args) => {
-  const result = await spawnCli('codex', args, {});
-  const notInstalled =
-    !!result.spawnError &&
-    (result.spawnError as NodeJS.ErrnoException).code === 'ENOENT';
-  return {
-    notInstalled,
-    failed: !!result.spawnError || result.timedOut || (result.code ?? 1) !== 0,
-    code: result.code,
-    stderr: result.stderr,
-  };
-};
-
-// Registers (enabled) or removes (disabled) the yt-dlp-mcp MCP server in
-// codex's config.toml via `codex mcp add|remove` — codex owns the TOML, so cennad
-// never hand-edits it. `codex mcp add` overwrites idempotently (a language change is
-// reapplied) and `codex mcp remove` is a no-op when absent. Never throws; a missing
-// codex binary degrades quietly to `{ ok: false }` without a warning.
+// Reconciles the Codex user MCP through the shared artifact manager. Cennad owns
+// only product policy here: the desired yt-dlp definition and its logging/degrade
+// behavior. The manager owns argv construction, spawning, and failure classification.
 export async function provisionCodexYoutube(
   enabled: boolean,
   language: YoutubeAddonLanguage,
-  run: CodexMcpRunner = defaultRunner,
+  run?: CodexMcpRunner,
 ): Promise<ProvisionResult> {
-  const args = enabled
-    ? [
-        'mcp',
-        'add',
-        YOUTUBE_MCP_KEY,
-        '--env',
-        `YTDLP_LANG=${language}`,
-        '--',
-        YOUTUBE_MCP_COMMAND,
-        ...YOUTUBE_MCP_ARGS,
-      ]
-    : ['mcp', 'remove', YOUTUBE_MCP_KEY];
-
   try {
-    const result = await run(args);
-    if (result.failed) {
-      if (!result.notInstalled)
+    const mcp = createMcpServerManager({
+      owner: 'cennad',
+      target: resolveUserMcpTarget({ host: 'codex' }),
+    });
+    const plan = await mcp.plan({
+      name: YOUTUBE_MCP_KEY,
+      definition: enabled
+        ? {
+            transport: 'stdio',
+            command: YOUTUBE_MCP_COMMAND,
+            args: YOUTUBE_MCP_ARGS,
+            env: youtubeMcpEnv(language),
+          }
+        : null,
+      replaceDrift: true,
+    });
+    const result = await mcp.apply(
+      plan,
+      run === undefined ? undefined : { runner: run },
+    );
+    if (!result.ok) {
+      if (result.failure?.kind !== 'not-installed')
         logger.warn('codex youtube MCP provisioning failed', {
-          code: result.code,
-          stderr: result.stderr.slice(0, 200),
+          code: result.failure?.code ?? null,
+          stderr: result.failure?.stderr.slice(0, 200) ?? '',
         });
 
       return { ok: false, action: 'unchanged' };

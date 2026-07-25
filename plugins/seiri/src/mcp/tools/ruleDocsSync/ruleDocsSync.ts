@@ -31,6 +31,8 @@ export interface RuleDocsSyncInput {
   selections?: Record<string, boolean> | null;
   /** Rule ids whose local edits may be discarded. Drift is kept otherwise. */
   resync?: string[] | null;
+  /** Optional revision returned by `plan`; stale revisions are not applied. */
+  revision?: string | null;
   /** What the `config` action should do. Defaults to reading the dial. */
   config_op?: ConfigOp | null;
   /** Dial position for `config_op: "set"`. */
@@ -44,7 +46,7 @@ export type RuleDocsSyncOutput =
   | ConfigActionResult;
 
 /**
- * Inspect or reconcile `.claude/rules/`.
+ * Inspect or reconcile the active host's rule channel.
  *
  * The settings page is the interactive path; this tool is the headless
  * fallback for hosts without a browser and for scripted setup. Session
@@ -92,7 +94,12 @@ export function handleRuleDocsSync(
   const selected = Object.entries(selections)
     .filter(([, enabled]) => enabled)
     .map(([id]) => id);
-  const options = { resync: input.resync ?? [] };
+  const options = {
+    resync: input.resync ?? [],
+    ...(Object.prototype.hasOwnProperty.call(input, 'revision')
+      ? { revision: input.revision }
+      : {}),
+  };
 
   if (input.action === 'plan')
     return {

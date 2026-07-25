@@ -7,8 +7,8 @@ Windows/POSIX path 문자열을 현재 실행 OS와 독립적으로 판별, 조�
 | File                  | Role                                           |
 | --------------------- | ---------------------------------------------- |
 | `index.ts`            | public barrel                                  |
-| `is-*-like-path.ts`   | path flavor 판별                               |
-| `portable-*.ts`       | basename/dirname/join/resolve/relative adapter |
+| `operations/`         | 목적별 portable 연산 organ                    |
+| `portable-*.ts`       | basename/dirname/join adapter                  |
 | `path-for-compare.ts` | 비교용 separator/case 정규화                   |
 | `same-path.ts`        | path 동등성 비교                               |
 | `api-for.ts`          | 내부 path API 선택 helper                      |

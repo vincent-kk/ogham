@@ -20,17 +20,18 @@ function toPosixPath(p: string): string {
 
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
+  const existsSyncMock = vi.fn((p: unknown) => {
+    if (typeof p !== 'string') return false;
+    const normalized = toPosixPath(p);
+    if (normalized.endsWith('.filid')) return true;
+    if (normalized.endsWith('.filid/config.json')) return true;
+    if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return true;
+    if (normalized.includes('/prompt-context-')) return false;
+    return false;
+  });
   return {
     ...actual,
-    existsSync: vi.fn((p: unknown) => {
-      if (typeof p !== 'string') return false;
-      const normalized = toPosixPath(p);
-      if (normalized.endsWith('.filid')) return true;
-      if (normalized.endsWith('.filid/config.json')) return true;
-      if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return true;
-      if (normalized.includes('/prompt-context-')) return false;
-      return false;
-    }),
+    existsSync: existsSyncMock,
     statSync: vi.fn(() => {
       throw new Error('no cache');
     }),
@@ -40,6 +41,20 @@ vi.mock('node:fs', async (importOriginal) => {
         toPosixPath(p).endsWith('.filid/config.json')
       )
         return MOCK_CONFIG_JSON;
+      if (
+        typeof p === 'string' &&
+        toPosixPath(p).endsWith('.claude/rules/filid_fca-policy.md') &&
+        existsSyncMock(p)
+      )
+        return Buffer.from('# FCA policy');
+      if (
+        typeof p === 'string' &&
+        (toPosixPath(p).endsWith('.md') ||
+          toPosixPath(p).includes('/.claude/rules/'))
+      )
+        throw Object.assign(new Error(`missing file: ${p}`), {
+          code: 'ENOENT',
+        });
 
       throw new Error(`unexpected readFileSync: ${String(p)}`);
     }),
@@ -150,6 +165,20 @@ describe('user-prompt-submit context injection', () => {
     expect(ctx).toContain('Rules not deployed');
     expect(ctx).toContain('/filid:setup');
     expect(ctx).not.toContain('FCA-AI active');
+  });
+
+  it('ignores a stale Claude rule file when the Codex target is empty', () => {
+    process.env.OGHAM_HOST = 'codex';
+    try {
+      const ctx =
+        handleUserPromptSubmit(baseInput).hookSpecificOutput
+          ?.additionalContext ?? '';
+
+      expect(ctx).toContain('Rules not deployed');
+      expect(ctx).not.toContain('.claude/rules/filid_fca-policy.md');
+    } finally {
+      delete process.env.OGHAM_HOST;
+    }
   });
 
   it('does not inject when prompt-context exists', () => {

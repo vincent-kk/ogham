@@ -1,39 +1,36 @@
-# ruleDocs — 규칙 문서 배포·상태·드리프트
+# ruleDocs — 호스트별 규칙 문서 배포
 
 ## Purpose
 
-플러그인이 배포하는 `templates/rules/*.md` 와 대상 프로젝트의
-`.claude/rules/` 사이를 조정한다. 배포 상태의 단일 진실은 **파일시스템**이며
-config 에 미러링하지 않는다. 규칙 본문 자체는 하니스가 로드하므로 이 모듈은
-파일을 놓고 치울 뿐 내용을 주입하지 않는다.
+`templates/rules/*.md` 를 호스트가 실제로 읽는 프로젝트 채널과 조정한다.
+Claude 는 `.claude/rules/` 파일, Codex 는 유효한 `AGENTS*.md` 의 소유
+섹션을 사용한다. 배포 상태의 진실은 파일시스템이며 config 에 미러링하지 않는다.
 
 ## Structure
 
 ```
 index.ts   barrel (훅은 이 배럴을 거치지 말고 concrete 파일을 직접 import)
 loaders/   organ — loadManifest (매니페스트 파싱·검증)
-status/    organ — getRuleDocsStatus (배포 상태 스냅샷)
-sync/      organ — planRuleDocs (dry-run) · applyRuleDocs (실행)
-utils/     organ — decideRuleDocAction · collectRuleDocDecisions · detectOrphanedDocs · 경로 해석
+status/    organ — 현재 호스트 채널의 배포 상태 스냅샷
+sync/      organ — 동일 계획을 사용하는 dry-run 및 실행 어댑터
+utils/     organ — 매니페스트·host·공유 결과 매핑 (`resolveRulesDir` 는 호환 전용)
 ```
 
 ## Conventions
 
-- **판정은 한 곳**: `decideRuleDocAction` 은 순수 함수이고 plan·apply 가 둘 다
-  이를 경유한다. 갈라지면 미리보기가 거짓말을 하게 된다.
+- 좁은 shared subpath가 Codex stored/active facts를 보존하고 plan/apply는 manager에 위임한다.
 - `loadManifest` 는 throw 한다 — 깨진 매니페스트는 사용자 상태가 아니라 빌드
   결함(`sync-rule-hashes` 누락)이다. 세션 경로 소비자가 이를 흡수한다.
 - 드리프트는 **덮지 않는다.** `resync` 에 id 가 명시된 규칙만 덮어쓴다.
-- 부분 실패는 해당 항목만 `skip` + 사유로 기록하고 계속한다 — 조용한 실패 금지.
-- 읽을 수 없는 배포 파일(해시 null)은 일치가 아니라 드리프트로 취급한다.
-- 경로 조합은 `@ogham/cross-platform/compat` 경유 (네이티브 `node:path` 금지).
+- 마커 밖 사용자 텍스트와 다른 소유자의 아티팩트는 그대로 보존한다.
+- 경로·파일 처리는 공유 패키지를 거치며 이 모듈에서 시스템 호출하지 않는다.
 
 ## Boundaries
 
 ### Always do
 
-- 쓰기 전에 `planRuleDocs` 로 무엇이 쓰일지 보여줄 수 있게 유지.
-- 새 동작을 추가하면 `RuleDocAction` 과 판정 함수 양쪽에 반영.
+- 브라우저 preview revision 과 save 의 새 계획이 같을 때만 apply 한다.
+- 고아 폐기를 명시적인 `seiri` 소유 네임스페이스로 제한.
 
 ### Ask first
 
@@ -43,5 +40,10 @@ utils/     organ — decideRuleDocAction · collectRuleDocDecisions · detectOrp
 ### Never do
 
 - 세션 훅에서 `applyRuleDocs` 호출 (배포는 setup 표면 전담).
-- 매니페스트에 없는 파일 쓰기, 또는 `seiri_*` 네임스페이스 밖 파일 삭제 (네임스페이스 내 은퇴본은 setup 시 정리).
+- `seiri` 소유 밖 파일·섹션 삭제 또는 매니페스트 첫 항목으로 소유권 추론.
 - 사용자의 로컬 편집을 확인 없이 덮어쓰기.
+- 내부 배포에서 deprecated Claude-only `resolveRulesDir` 사용.
+
+## Dependencies
+
+`@ogham/agent-artifacts` 규칙 엔진과 매니페스트 타입에만 의존한다.
