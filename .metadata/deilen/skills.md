@@ -11,14 +11,23 @@ Claude 문서를 페이지로 띄우고 라인 피드백을 자동 수거하는 
 절차:
 
 1. **콘텐츠 확정** — 직전 문서 본문(대화 내) 또는 사용자가 가리키는 파일 경로. 본문이면 `content`, 파일이면 `path`.
-2. **렌더** — `render_viewer({ content | path, title? })` 호출 → `{ session_id, url }` 수신. 사용자에게 URL 안내(자동 오픈됨) + "라인 선택해 코멘트·이미지 남기고 Submit" 안내.
-3. **수거(1회 호출)** — `collect_feedback({ session_id })` 호출(`wait_seconds` 생략 시 config 기본값 600s 적용). 리뷰 전체를 한 번의 대기로 덮는다:
+2. **시각화** — 작성 중인 본문에서 관계(흐름·순서·계층·상태·일정·비율·트레이드오프)를 서술한 문단은 Mermaid 다이어그램 + 요지 한 문장으로 대체. 지침은 [`skills/preview/references/visuals.md`](../../plugins/deilen/skills/preview/references/visuals.md). verbatim 본문(파일·제안 diff)은 대상 아님 — 제안만 하고 사용자 요청을 기다린다.
+3. **렌더** — `render_viewer({ content | path, title? })` 호출 → `{ session_id, url }` 수신. 사용자에게 URL 안내(자동 오픈됨) + "라인 선택해 코멘트·이미지 남기고 Submit" 안내.
+4. **수거(1회 호출)** — `collect_feedback({ session_id })` 호출(`wait_seconds` 생략 시 config 기본값 600s 적용). 리뷰 전체를 한 번의 대기로 덮는다:
    - `status:"complete"` → 피드백 확보.
    - `status:"pending"` → 대기 소진까지 미제출. 재호출하지 말고 "제출하면 말씀해달라"고 안내한 뒤 사용자 메시지를 기다린다(제출분은 버퍼에 남아 다음 호출이 즉시 회수).
-4. **반영** — text 코멘트(라인 앵커별) + image 블록(스크린샷)을 근거로 문서 수정. 라인 앵커로 위치를 특정해 surgical 수정.
-5. **정리(선택)** — `close_viewer({ session_id })`.
+5. **반영** — text 코멘트(라인 앵커별) + image 블록(스크린샷)을 근거로 문서 수정. 라인 앵커로 위치를 특정해 surgical 수정.
+6. **정리(선택)** — `close_viewer({ session_id })`.
 
 원칙: 무한 블로킹 금지. `collect_feedback` 1회 호출이 `wait_seconds`(기본 600s)로 bounded 되어 리뷰 전체를 덮으므로 재호출이 필요 없다.
+
+## 시각화 바이어스 (preview)
+
+뷰어는 Mermaid·KaTeX·highlight 를 lazy 렌더하므로 터미널이 못 싣는 구조를 페이지가 실을 수 있다. 이 여력을 기본값으로 쓰기 위해 `preview` 절차 2 단계에 "관계는 서술하지 말고 그린다" 바이어스를 둔다. 상세(다이어그램 선택표·크기 규율·뷰어 제약)는 스킬 본문이 아니라 `references/visuals.md` 에 두어 SKILL.md 를 얇게 유지한다.
+
+- 적용 범위: **작성 중인 본문만**. 파일 mirror·제안 diff 는 verbatim 원칙(절차 1)이 우선하며, 다이어그램은 제안까지만.
+- 정량 데이터는 Mermaid 가 아니라 실제 플롯 이미지(`file://`) — `xychart-beta` 는 단순 bar/line 에 beta.
+- 뷰어 제약이 곧 작성 규칙: `securityLevel:"strict"`(click 비활성·라벨 HTML 미지원), 테마 연동(색 하드코딩 금지), 파싱 실패 시 `diagram failed to render` 배지 + 소스 노출, 렌더러 토글 off 시 소스 텍스트 노출, 다이어그램 1개 = 코멘트 앵커 1개.
 
 ## `setup`
 
