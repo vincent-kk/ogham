@@ -45,8 +45,9 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 - 스킬 이름에 플러그인 prefix 없음 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`) — 디렉토리 이름 = 스킬 이름
 - **Agent**: `courier` 1개 (`agents/courier.md`, 서브에이전트 타입 `cennad:courier`, model sonnet) — 디스패치 스킬 4종이 background spawn. 관점(정교화 루프 `refine: true` 시 동일 세션 ≤3콜 · 실패 remedy · tier 의미론)은 courier 가 보유, 스킬은 행동(파싱→spawn→릴레이)만. `plugin.json` 에 `agents` 필드는 추가하지 않는다 (`agents/` 디렉토리 자동 발견)
 - MCP 서버 이름은 `tools` — 스킬·에이전트에서 `mcp__plugin_cennad_tools__<name>` full-form 으로 참조
-- **훅 번들 cap**: 10 KB LIGHT (enforced by `scripts/buildHooks.mjs`). injectStatic / injectDynamic 모두 ~3.3 KB minified
-- **훅 번들 금지 import**: `zod`, `@modelcontextprotocol/sdk`, `fast-glob`, `lodash`, `moment`, `date-fns` — `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs` 가 강제
+- **훅 번들 cap**: 10 KB LIGHT (enforced by `scripts/buildHooks.mjs`). injectStatic ~8.8 KB / injectDynamic ~9.1 KB minified — **여유가 1 KB 남짓**이므로 훅에 새 로직을 넣기 전에 크기부터 확인
+- **자동 선출 제외**: 훅이 지목하는 대상은 `enabled` 가 아니라 `electable` (= enabled − `crosscheck_only` − 호스트 자신). 호스트 판정은 `shared/selfProvider.ts` 가 `resolveHostDescriptor` 로 하며 `detectHost()` 는 MCP 전용이라 훅에서 쓰면 항상 claude 로 오판한다. `Active providers:` 줄은 crosscheck 참가자 명단이라 crosscheck 스킬이 읽는다 — `Auto-routing:` 과 혼동 금지. 상세는 [hooks.md](../../.metadata/cennad/hooks.md)
+- **훅 번들 금지 import**: `zod`, `@modelcontextprotocol/sdk`, `fast-glob`, `lodash`, `moment`, `date-fns` — `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs` 가 강제. 가드는 번들 텍스트를 단어 단위로 매칭하므로 **주입 산문에 쓴 일반 단어도 걸린다** — 라우팅 문구가 `moment` 대신 `domain` 어휘를 쓰는 이유
 
 ## Development Notes
 

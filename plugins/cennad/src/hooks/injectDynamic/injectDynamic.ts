@@ -1,36 +1,43 @@
 import type { HookConfig, HookCounter } from '../shared/configTypes.js';
-import { PROVIDER_ORDER } from '../shared/providerOrder.js';
+import { electableProviders } from '../shared/electableProviders.js';
+import { type HookProvider, PROVIDER_ORDER } from '../shared/providerOrder.js';
 
-import { type RatioLane, formatRatio } from './utils/formatRatio.js';
+import { matchDomain } from './utils/matchDomain.js';
+import { matchLine } from './utils/matchLine.js';
+import { nudgeLine } from './utils/nudgeLine.js';
+import { type RatioLane, underShare } from './utils/underShare.js';
 
 export function buildDynamicPayload(
   config: HookConfig,
   counter: HookCounter,
+  prompt: string,
+  self: HookProvider,
 ): string {
+  if (!PROVIDER_ORDER.some((p) => config.ratio[p].enabled))
+    return '[cennad] No provider enabled — run /cennad:setup.';
+
+  const electable = electableProviders(config.ratio, self);
   const lanes: RatioLane[] = PROVIDER_ORDER.map((p) => ({
     name: p,
     count: counter[p],
     weight: config.ratio[p].enabled ? config.ratio[p].value : 0,
+    electable: electable.includes(p),
   }));
-  const total = lanes.reduce((sum, l) => sum + l.count, 0);
-  const anyEnabled = PROVIDER_ORDER.some((p) => config.ratio[p].enabled);
+  const total = lanes.reduce((sum, lane) => sum + lane.count, 0);
 
-  const lines = ['[cennad] Live state', ''];
+  const gap = underShare(lanes);
+  const state =
+    total === 0
+      ? '[cennad] No delegations yet this session.'
+      : `[cennad] Calls: ${lanes
+          .map((lane) => `${lane.name} ${lane.count}`)
+          .join(' · ')} (total ${total})${gap === '' ? '' : ` · ${gap}`}`;
 
-  if (total === 0) lines.push('No calls this session yet.');
-  else {
-    const r = formatRatio(lanes);
-    lines.push(
-      `Calls this session: ${lanes
-        .map((l) => `${l.name} ${l.count}`)
-        .join(' · ')} · total ${total}`,
-    );
-    lines.push(`Current ratio:      ${r.current}`);
-    lines.push(`Target ratio:       ${r.target}`);
-    lines.push(`Drift:              ${r.drift}   (target - current)`);
-  }
+  if (electable.length === 0)
+    return `${state}\nEvery enabled provider is crosscheck-only here; nothing is auto-routed.`;
 
-  if (!anyEnabled) lines.push('Available providers: none — run /setup');
-
+  const lines = [state, nudgeLine(config.intervention_strength, electable)];
+  const match = matchDomain(prompt, config.keywords, electable);
+  if (match) lines.push(matchLine(config.intervention_strength, match));
   return lines.join('\n');
 }

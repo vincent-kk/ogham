@@ -33,7 +33,10 @@ round.
 ## Participant gate
 
 Participants = the enabled providers from the SessionStart
-`[cennad] Static policy` block (`Active providers:` line). Branch BEFORE
+`[cennad] Static policy` block (`Active providers:` line) — NOT the
+`Auto-routing:` line, which is narrower on purpose: it omits providers reserved
+for crosscheck, including the one this session is itself running on. Those are
+exactly the second opinions crosscheck exists to collect. Branch BEFORE
 spawning anything:
 
 - **2+ enabled** → dispatch all in parallel; the host LLM does not participate.

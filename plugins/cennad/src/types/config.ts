@@ -23,6 +23,9 @@ export type InterventionStrength = z.infer<typeof InterventionStrengthSchema>;
 export const ProviderRatioSchema = z.object({
   value: z.number().int().min(0).max(100),
   enabled: z.boolean(),
+  // Auto-routing opt-out. The provider stays a crosscheck participant and an
+  // explicit-call target; only the hooks' own election skips it.
+  crosscheck_only: z.boolean().optional(),
 });
 
 export type ProviderRatio = z.infer<typeof ProviderRatioSchema>;

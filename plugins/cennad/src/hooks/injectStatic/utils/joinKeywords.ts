@@ -1,4 +1,4 @@
-export function joinKeywords(raw: string): string {
+export function joinKeywords(raw: string, fallback = '(none)'): string {
   const trimmed = raw.trim();
-  return trimmed === '' ? '(none)' : trimmed;
+  return trimmed === '' ? fallback : trimmed;
 }

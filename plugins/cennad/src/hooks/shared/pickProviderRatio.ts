@@ -14,5 +14,12 @@ export function pickProviderRatio(
       : fallback.value;
   const enabled =
     typeof rawEnabled === 'boolean' ? rawEnabled : fallback.enabled;
-  return { value, enabled };
+  const rawCrosscheckOnly = raw.crosscheck_only;
+  const crosscheck_only =
+    typeof rawCrosscheckOnly === 'boolean'
+      ? rawCrosscheckOnly
+      : fallback.crosscheck_only;
+  return crosscheck_only === undefined
+    ? { value, enabled }
+    : { value, enabled, crosscheck_only };
 }

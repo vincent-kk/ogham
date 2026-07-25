@@ -1,43 +1,47 @@
 import type { HookConfig } from '../shared/configTypes.js';
-import { PROVIDER_ORDER } from '../shared/providerOrder.js';
+import { electableProviders } from '../shared/electableProviders.js';
+import { type HookProvider, PROVIDER_ORDER } from '../shared/providerOrder.js';
 
-import { joinKeywords } from './utils/joinKeywords.js';
-import { tonePhrase } from './utils/tonePhrase.js';
+import { domainLines } from './utils/domainLines.js';
+import { routingStance } from './utils/routingStance.js';
+import { strengthLabel } from './utils/strengthLabel.js';
 
-export function buildStaticPayload(config: HookConfig): string {
+export function buildStaticPayload(
+  config: HookConfig,
+  self: HookProvider,
+): string {
   const r = config.ratio;
   const active = PROVIDER_ORDER.filter((p) => r[p].enabled);
+  const electable = electableProviders(r, self);
   const ratioLine = PROVIDER_ORDER.map((p) => `${p} ${r[p].value}%`).join(
     ' · ',
   );
-  const activeLine =
-    active.length === 0 ? 'none — run /setup' : active.join(', ');
-  const skillList = active.map((p) => `/cennad:${p}`).join(' and ');
+  const strength = config.intervention_strength;
+  const domains = domainLines(config.keywords, active, electable, self);
 
-  const flags = JSON.stringify(config.option_flags);
-
-  const keywordLines = ['Keyword mapping'];
-  for (const p of active)
-    keywordLines.push(`- ${p} → ${joinKeywords(config.keywords[p])}`);
+  const closing =
+    active.length === 0
+      ? ['- Run /cennad:setup to enable a provider before delegating.']
+      : electable.length === 0
+        ? [
+            '- Nothing is auto-routed here; use `/cennad:crosscheck` or name a provider yourself.',
+          ]
+        : [
+            ...routingStance(strength),
+            '- Dispatch through the skills above; never invoke CLI binaries directly.',
+          ];
 
   return [
     '[cennad] Static policy',
     '',
     `Provider ratio: ${ratioLine}`,
-    `Active providers: ${activeLine}`,
-    `Intervention strength: ${config.intervention_strength} (${tonePhrase(config.intervention_strength)})`,
+    `Active providers: ${active.length === 0 ? 'none — run /setup' : active.join(', ')}`,
+    `Auto-routing: ${electable.length === 0 ? 'none — every enabled provider is crosscheck-only' : electable.join(', ')}`,
+    `Intervention strength: ${strength} (${strengthLabel(strength)})`,
     '',
-    ...keywordLines,
-    '',
+    ...(domains.length === 0 ? [] : [...domains, '']),
     'Routing guidance',
-    `- Option flags:        ${flags}`,
-    "- Delegate when (a) a keyword matches the provider's domain,",
-    "  (b) the task suits the provider's strength (codex: heavy code, sandboxed shell;",
-    '  antigravity: live search, large context; claude: reasoning, writing, analysis), or',
-    '  (c) keeping near the configured ratio.',
-    '- Otherwise handle the task directly in this session.',
-    active.length === 0
-      ? '- Run /cennad:setup to enable a provider before delegating.'
-      : `- Use ${skillList} skill${active.length > 1 ? 's' : ''}, never invoke CLI binaries directly.`,
+    `- Option flags:        ${JSON.stringify(config.option_flags)}`,
+    ...closing,
   ].join('\n');
 }

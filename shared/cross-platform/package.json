@@ -31,6 +31,10 @@
       "types": "./dist/hostPaths/index.d.ts",
       "import": "./dist/hostPaths/index.js"
     },
+    "./host-registry": {
+      "types": "./dist/hostRegistry/index.d.ts",
+      "import": "./dist/hostRegistry/index.js"
+    },
     "./instructions": {
       "types": "./dist/instructions/index.d.ts",
       "import": "./dist/instructions/index.js"

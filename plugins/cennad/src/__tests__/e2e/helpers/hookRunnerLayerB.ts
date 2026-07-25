@@ -6,6 +6,11 @@ import type { HookName, HookResult } from './hookRunnerLayerA.js';
 export interface HookRunOptions {
   env?: Record<string, string>;
   cwd?: string;
+  /**
+   * Raw stdin payload, as the host writes it for UserPromptSubmit. Omitted means
+   * stdin closes immediately, which is the SessionStart case.
+   */
+  input?: string;
 }
 
 export interface HookRunResult {
@@ -53,6 +58,7 @@ export function runHookLayerB(
   const result = spawnSync(process.execPath, [script], {
     cwd: opts.cwd,
     env: { ...process.env, ...(opts.env ?? {}) },
+    input: opts.input,
     encoding: 'utf8',
   });
   const stdout = result.stdout ?? '';

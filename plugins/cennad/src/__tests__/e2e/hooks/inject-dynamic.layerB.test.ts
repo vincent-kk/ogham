@@ -3,9 +3,18 @@ import { rm } from 'node:fs/promises';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { CENNAD_HOME } from '../../../constants/paths.js';
-import { writeCounter, writeRawCounter } from '../helpers/diskAssert.js';
+import {
+  writeCounter,
+  writeRawConfig,
+  writeRawCounter,
+} from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerB } from '../helpers/hookRunnerLayerB.js';
+
+// Shipped keywords are ASCII, so the non-ASCII substring path only exists for
+// keywords a user configures — this suite configures one rather than leaning on
+// a default that may change.
+const NON_ASCII_KEYWORD = '코드';
 
 describe('injectDynamic (Layer B)', () => {
   beforeEach(async () => {
@@ -17,11 +26,11 @@ describe('injectDynamic (Layer B)', () => {
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No calls this session yet.'],
+      contextIncludes: ['No delegations yet this session.'],
     });
   });
 
-  it('with counter (parent_pid = worker pid) — total/current/target', async () => {
+  it('with counter (parent_pid = worker pid) — condensed state + nudge', async () => {
     await writeCounter({
       parent_pid: process.pid,
       codex: 7,
@@ -32,10 +41,29 @@ describe('injectDynamic (Layer B)', () => {
     assertHookEnvelope(result.parsed, {
       event: 'UserPromptSubmit',
       contextIncludes: [
-        'Calls this session: codex 7 · antigravity 3 · claude 0 · total 10',
-        'codex 70%',
-        'antigravity 30%',
+        '[cennad] Calls: codex 7 · antigravity 3 · claude 0 (total 10)',
+        'under share: antigravity 3pt',
+        'Weigh codex or antigravity against handling it here',
       ],
+    });
+  });
+
+  it('reads the stdin prompt and names the owner of a non-ASCII keyword', async () => {
+    await writeRawConfig(
+      JSON.stringify({ keywords: { codex: NON_ASCII_KEYWORD } }),
+    );
+    const result = runHookLayerB('injectDynamic', {
+      input: JSON.stringify({
+        session_id: 'e2e',
+        prompt: `이 ${NON_ASCII_KEYWORD}를 고쳐줘`,
+        cwd: process.cwd(),
+      }),
+    });
+    expect(result.exitCode).toBe(0);
+    assertHookEnvelope(result.parsed, {
+      event: 'UserPromptSubmit',
+      // substring matching is what carries the attached particle in "코드를"
+      contextIncludes: [`Matched "${NON_ASCII_KEYWORD}" → /cennad:codex`],
     });
   });
 
@@ -49,7 +77,7 @@ describe('injectDynamic (Layer B)', () => {
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No calls this session yet.'],
+      contextIncludes: ['No delegations yet this session.'],
     });
   });
 

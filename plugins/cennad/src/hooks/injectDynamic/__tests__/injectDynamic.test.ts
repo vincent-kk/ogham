@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest';
 import type { HookConfig, HookCounter } from '../../shared/configTypes.js';
 import { buildDynamicPayload } from '../injectDynamic.js';
 import { asNonNegInt } from '../utils/asNonNegInt.js';
-import { type RatioLane, formatRatio } from '../utils/formatRatio.js';
-import { signed } from '../utils/signed.js';
 
 describe('asNonNegInt', () => {
   it('returns the integer as-is for a valid non-negative integer', () => {
@@ -25,55 +23,6 @@ describe('asNonNegInt', () => {
 
   it('returns 0 for non-finite values (Infinity)', () => {
     expect(asNonNegInt(Infinity)).toBe(0);
-  });
-});
-
-describe('signed', () => {
-  it('prefixes positive numbers with +', () => {
-    expect(signed(5)).toBe('+5');
-  });
-
-  it('returns the string form of negative numbers without extra prefix', () => {
-    expect(signed(-3)).toBe('-3');
-  });
-
-  it('returns "0" for zero', () => {
-    expect(signed(0)).toBe('0');
-  });
-});
-
-describe('formatRatio', () => {
-  const lanes = (
-    codex: [number, number],
-    antigravity: [number, number],
-    claude: [number, number],
-  ): RatioLane[] => [
-    { name: 'codex', count: codex[0], weight: codex[1] },
-    { name: 'antigravity', count: antigravity[0], weight: antigravity[1] },
-    { name: 'claude', count: claude[0], weight: claude[1] },
-  ];
-
-  it('returns 0% for every lane when total count is zero', () => {
-    const r = formatRatio(lanes([0, 30], [0, 70], [0, 0]));
-    expect(r.current).toBe('codex 0% · antigravity 0% · claude 0%');
-  });
-
-  it('computes rounded percentages from lane counts', () => {
-    // codex=2, antigravity=1, claude=0, total=3 → 67% / 33% / 0%
-    const r = formatRatio(lanes([2, 0], [1, 0], [0, 0]));
-    expect(r.current).toBe('codex 67% · antigravity 33% · claude 0%');
-  });
-
-  it('renders each lane configured weight as the target line', () => {
-    // raw weights 60 / 40 / 0 are shown verbatim
-    const r = formatRatio(lanes([1, 60], [1, 40], [0, 0]));
-    expect(r.target).toBe('codex 60% · antigravity 40% · claude 0%');
-  });
-
-  it('formats drift as signed difference (target - current)', () => {
-    // counts 3/1/0 → current 75/25/0; weights 60/40/0 → target 60/40/0
-    const r = formatRatio(lanes([3, 60], [1, 40], [0, 0]));
-    expect(r.drift).toBe('codex -15 · antigravity +15 · claude 0');
   });
 });
 
@@ -102,21 +51,97 @@ const ZERO_COUNTER: HookCounter = {
 };
 
 describe('buildDynamicPayload', () => {
-  it('shows "No calls this session yet." when total is zero', () => {
-    const out = buildDynamicPayload(BASE_CONFIG, ZERO_COUNTER);
-    expect(out).toContain('No calls this session yet.');
+  it('shows "No delegations yet this session." with no share gap noise', () => {
+    const out = buildDynamicPayload(BASE_CONFIG, ZERO_COUNTER, '', 'claude');
+    expect(out.split('\n')[0]).toBe(
+      '[cennad] No delegations yet this session.',
+    );
   });
 
-  it('shows call counts and ratio lines when calls exist', () => {
-    const counter: HookCounter = { ...ZERO_COUNTER, antigravity: 2, codex: 2 };
-    const out = buildDynamicPayload(BASE_CONFIG, counter);
-    expect(out).toContain('Calls this session:');
-    expect(out).toContain('Current ratio:');
-    expect(out).toContain('Target ratio:');
-    expect(out).toContain('Drift:');
+  it('condenses counts and the under-share conclusion into one line', () => {
+    const counter: HookCounter = { ...ZERO_COUNTER, codex: 3, antigravity: 1 };
+    const out = buildDynamicPayload(BASE_CONFIG, counter, '', 'claude');
+    // counts 3/1/0 → current 75/25; weights 30/70 → antigravity is 45pt short
+    expect(out.split('\n')[0]).toBe(
+      '[cennad] Calls: codex 3 · antigravity 1 · claude 0 (total 4) · under share: antigravity 45pt',
+    );
   });
 
-  it('appends "Available providers: none" when every provider is disabled', () => {
+  it('stays two lines when nothing in the prompt matches a domain', () => {
+    const lines = buildDynamicPayload(
+      BASE_CONFIG,
+      ZERO_COUNTER,
+      'what time is it',
+      'claude',
+    ).split('\n');
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toContain('codex or antigravity');
+  });
+
+  it('adds a third line naming the owner when a keyword matches', () => {
+    const lines = buildDynamicPayload(
+      BASE_CONFIG,
+      ZERO_COUNTER,
+      'please fix the code',
+      'claude',
+    ).split('\n');
+    expect(lines).toHaveLength(3);
+    expect(lines[2]).toBe(
+      'Matched "code" → /cennad:codex or here? Decide before starting.',
+    );
+  });
+
+  it('swaps the nudge with the intervention strength', () => {
+    const strong = buildDynamicPayload(
+      { ...BASE_CONFIG, intervention_strength: 2 },
+      ZERO_COUNTER,
+      '',
+      'claude',
+    );
+    const subtle = buildDynamicPayload(
+      { ...BASE_CONFIG, intervention_strength: -2 },
+      ZERO_COUNTER,
+      '',
+      'claude',
+    );
+    expect(strong).toContain('needs a listed exception');
+    expect(subtle).toContain('only when asked by name');
+  });
+
+  it('never elects the host own provider, even on a keyword match', () => {
+    const config: HookConfig = {
+      ...BASE_CONFIG,
+      ratio: {
+        ...BASE_CONFIG.ratio,
+        claude: { value: 50, enabled: true },
+      },
+    };
+    const out = buildDynamicPayload(
+      config,
+      ZERO_COUNTER,
+      'give me a reason',
+      'claude',
+    );
+    expect(out).not.toContain('/cennad:claude');
+    expect(out).toContain('codex or antigravity');
+  });
+
+  it('reports crosscheck-only when nothing is left to auto-route', () => {
+    const config: HookConfig = {
+      ...BASE_CONFIG,
+      ratio: {
+        codex: { value: 30, enabled: true, crosscheck_only: true },
+        antigravity: { value: 70, enabled: false },
+        claude: { value: 50, enabled: false },
+      },
+    };
+    const out = buildDynamicPayload(config, ZERO_COUNTER, 'code', 'claude');
+    expect(out).toContain(
+      'Every enabled provider is crosscheck-only here; nothing is auto-routed.',
+    );
+  });
+
+  it('drops the nudge and points at setup when every provider is disabled', () => {
     const config: HookConfig = {
       ...BASE_CONFIG,
       ratio: {
@@ -125,7 +150,7 @@ describe('buildDynamicPayload', () => {
         claude: { value: 0, enabled: false },
       },
     };
-    const out = buildDynamicPayload(config, ZERO_COUNTER);
-    expect(out).toContain('Available providers: none — run /setup');
+    const out = buildDynamicPayload(config, ZERO_COUNTER, '', 'claude');
+    expect(out).toBe('[cennad] No provider enabled — run /cennad:setup.');
   });
 });

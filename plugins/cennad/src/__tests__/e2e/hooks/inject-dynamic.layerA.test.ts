@@ -16,11 +16,11 @@ describe('injectDynamic (Layer A)', () => {
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No calls this session yet.'],
+      contextIncludes: ['No delegations yet this session.'],
     });
   });
 
-  it('with counter — total + current + target + drift', async () => {
+  it('with counter — one condensed state line plus the strength nudge', async () => {
     await writeCounter({
       parent_pid: process.ppid,
       codex: 7,
@@ -30,10 +30,10 @@ describe('injectDynamic (Layer A)', () => {
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
       contextIncludes: [
-        'Calls this session: codex 7 · antigravity 3 · claude 0 · total 10',
-        'codex 70%',
-        'antigravity 30%',
-        'Drift:',
+        '[cennad] Calls: codex 7 · antigravity 3 · claude 0 (total 10)',
+        // claude is the host's own model, so its gap is not auto-routable
+        'under share: antigravity 3pt',
+        'Weigh codex or antigravity against handling it here',
       ],
     });
   });
@@ -47,7 +47,7 @@ describe('injectDynamic (Layer A)', () => {
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No calls this session yet.'],
+      contextIncludes: ['No delegations yet this session.'],
     });
   });
 
@@ -56,7 +56,7 @@ describe('injectDynamic (Layer A)', () => {
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No calls this session yet.'],
+      contextIncludes: ['No delegations yet this session.'],
     });
   });
 });

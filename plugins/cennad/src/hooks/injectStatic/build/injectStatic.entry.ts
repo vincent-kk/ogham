@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import { loadConfig } from '../../shared/loadConfig.js';
 import { nowIso } from '../../shared/nowIso.js';
+import { selfProvider } from '../../shared/selfProvider.js';
 import { buildStaticPayload } from '../injectStatic.js';
 
 try {
-  const payload = buildStaticPayload(loadConfig());
+  const payload = buildStaticPayload(loadConfig(), selfProvider());
   process.stdout.write(
     JSON.stringify({
       continue: true,

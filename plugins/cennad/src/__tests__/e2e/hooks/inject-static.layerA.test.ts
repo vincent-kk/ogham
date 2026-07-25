@@ -2,10 +2,17 @@ import { rm } from 'node:fs/promises';
 
 import { beforeEach, describe, it } from 'vitest';
 
+import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { CENNAD_HOME } from '../../../constants/paths.js';
 import { writeConfigFixture } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerA } from '../helpers/hookRunnerLayerA.js';
+
+// Derived from DEFAULT_CONFIG so editing the shipped ratio or keyword lists does
+// not drag these expectations along. Labels and stance wording stay literal —
+// those are the payload spec under test, not defaults.
+const { ratio: RATIO, keywords: KEYWORDS } = DEFAULT_CONFIG;
+const RATIO_LINE = `Provider ratio: codex ${RATIO.codex.value}% · antigravity ${RATIO.antigravity.value}% · claude ${RATIO.claude.value}%`;
 
 describe('injectStatic (Layer A)', () => {
   beforeEach(async () => {
@@ -17,10 +24,14 @@ describe('injectStatic (Layer A)', () => {
     assertHookEnvelope(result, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: codex 34% · antigravity 33% · claude 33%',
+        RATIO_LINE,
         'Active providers: codex, antigravity, claude',
-        'Intervention strength: 0',
-        'balanced',
+        // the host's own model stays a crosscheck participant, not an auto-route
+        'Auto-routing: codex, antigravity',
+        `Intervention strength: ${DEFAULT_CONFIG.intervention_strength} (neutral)`,
+        `- ${KEYWORDS.codex} → \`/cennad:codex\``,
+        `- ${KEYWORDS.claude} → \`/cennad:claude\` (crosscheck only — this session's own model)`,
+        '- a claim worth an independent second opinion → `/cennad:crosscheck`',
       ],
     });
   });
@@ -33,10 +44,10 @@ describe('injectStatic (Layer A)', () => {
       contextIncludes: [
         'codex 30%',
         'antigravity 70%',
-        'Intervention strength: -2',
-        'very conservative',
-        'research, news',
-        'code, tests',
+        'Intervention strength: -2 (subtle)',
+        'Dispatch only when the user asks for a provider by name.',
+        '- research, news → `/cennad:antigravity`',
+        '- code, tests → `/cennad:codex`',
       ],
     });
   });
@@ -56,7 +67,7 @@ describe('injectStatic (Layer A)', () => {
     assertHookEnvelope(result, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: codex 34% · antigravity 33% · claude 33%',
+        RATIO_LINE,
         'Active providers: codex, antigravity, claude',
       ],
     });

@@ -143,6 +143,7 @@
       advancedToggle: $('#advanced-toggle-' + p),
       advancedPanel: $('#advanced-panel-' + p),
       kw: $('#kw-' + p),
+      crosscheckOnly: $('#crosscheck-only-' + p),
       preamble: $('#preamble-' + p),
     };
   });
@@ -200,18 +201,23 @@
   var youtubeAdvancedToggle = $('#youtube-advanced-toggle');
   var youtubeAdvancedPanel = $('#youtube-advanced-panel');
 
+  // crosscheck_only keeps a provider usable by crosscheck and by name while
+  // taking it out of the hooks' own routing.
   var ratioState = {
     codex: {
       value: DEFAULT_RATIO.codex.value,
       enabled: DEFAULT_RATIO.codex.enabled,
+      crosscheck_only: false,
     },
     antigravity: {
       value: DEFAULT_RATIO.antigravity.value,
       enabled: DEFAULT_RATIO.antigravity.enabled,
+      crosscheck_only: false,
     },
     claude: {
       value: DEFAULT_RATIO.claude.value,
       enabled: DEFAULT_RATIO.claude.enabled,
+      crosscheck_only: false,
     },
   };
   var providerStatus = {
@@ -259,14 +265,24 @@
     }
   }
 
-  function activeProviders() {
+  // Providers the ratio bar divides: enabled minus the crosscheck-only ones.
+  // A crosscheck-only provider keeps its stored percent untouched — it simply
+  // stops taking part in the 100% split, which the rest recompute among
+  // themselves.
+  function routableProviders() {
     return PROVIDERS.filter(function (p) {
-      return ratioState[p].enabled;
+      return ratioState[p].enabled && !ratioState[p].crosscheck_only;
     });
   }
 
+  function enabledCount() {
+    return PROVIDERS.filter(function (p) {
+      return ratioState[p].enabled;
+    }).length;
+  }
+
   function distributeEvenly() {
-    var active = activeProviders();
+    var active = routableProviders();
     if (active.length === 0) return;
     var base = Math.floor(RATIO_MAX / active.length);
     var remainder = RATIO_MAX - base * active.length;
@@ -276,7 +292,7 @@
   }
 
   function normalizeEnabledRatios() {
-    var active = activeProviders();
+    var active = routableProviders();
     if (active.length === 0) return;
     var total = active.reduce(function (sum, p) {
       return sum + ratioState[p].value;
@@ -363,12 +379,21 @@
 
   function renderRatio() {
     normalizeEnabledRatios();
-    var active = activeProviders();
+    var active = routableProviders();
     PROVIDERS.forEach(function (p) {
       var st = ratioState[p];
       var el = refs[p];
-      el.pct.textContent = st.enabled ? st.value + '%' : 'OFF';
+      // A crosscheck-only provider keeps its stored percent but shows none:
+      // it is outside the 100% split, so printing it would imply a total over 100.
+      el.pct.textContent = !st.enabled
+        ? 'OFF'
+        : st.crosscheck_only
+          ? ''
+          : st.value + '%';
       el.toggle.setAttribute('aria-checked', String(st.enabled));
+      el.crosscheckOnly.checked = Boolean(st.crosscheck_only);
+      // Keywords only feed auto-routing, so they have nothing to drive here.
+      el.kw.disabled = Boolean(st.crosscheck_only);
       var statusValue = providerStatus[p];
       el.toggle.setAttribute(
         'data-unavailable',
@@ -377,7 +402,9 @@
       el.toggle.setAttribute('data-provider-status', statusValue);
       el.hint.textContent =
         statusValue === 'available'
-          ? 'click to toggle'
+          ? st.enabled && st.crosscheck_only
+            ? 'crosscheck only'
+            : 'click to toggle'
           : statusValue === 'unavailable'
             ? st.enabled
               ? 'enabled · not installed'
@@ -389,11 +416,18 @@
     clearRatioBar();
     renderRatioSegments(active);
     renderRatioHandles(active);
-    ratioWarn.hidden = active.length > 0;
+    if (enabledCount() === 0) {
+      ratioWarn.textContent = 'At least one provider must be enabled.';
+      ratioWarn.hidden = false;
+    } else if (active.length === 0) {
+      ratioWarn.textContent =
+        'Every enabled provider is crosscheck-only — nothing is auto-routed.';
+      ratioWarn.hidden = false;
+    } else ratioWarn.hidden = true;
   }
 
   function setRatioBoundary(index, percent) {
-    var active = activeProviders();
+    var active = routableProviders();
     var boundaries = ratioBoundaries(active);
     if (index < 0 || index >= boundaries.length) return;
     var min = index === 0 ? RATIO_MIN + 1 : boundaries[index - 1] + 1;
@@ -450,7 +484,7 @@
     )
       return;
     var index = Number(ev.target.getAttribute('data-boundary-index'));
-    var current = ratioBoundaries(activeProviders())[index];
+    var current = ratioBoundaries(routableProviders())[index];
     var step = ev.shiftKey ? 10 : 1;
     if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') {
       ev.preventDefault();
@@ -490,13 +524,18 @@
       return {
         value: clamp(Math.floor(Number(raw.value) || 0), RATIO_MIN, RATIO_MAX),
         enabled: Boolean(raw.enabled),
+        crosscheck_only: Boolean(raw.crosscheck_only),
       };
     }
     if (typeof raw === 'number') {
       var n = clamp(Math.floor(raw), RATIO_MIN, RATIO_MAX);
-      return { value: n, enabled: n > 0 };
+      return { value: n, enabled: n > 0, crosscheck_only: false };
     }
-    return { value: fallback.value, enabled: fallback.enabled };
+    return {
+      value: fallback.value,
+      enabled: fallback.enabled,
+      crosscheck_only: Boolean(fallback.crosscheck_only),
+    };
   }
 
   function setRadio(name, value, allowed, fallback) {
@@ -1195,7 +1234,11 @@
   }
 
   function providerRatio(p) {
-    return { value: ratioState[p].value, enabled: ratioState[p].enabled };
+    return {
+      value: ratioState[p].value,
+      enabled: ratioState[p].enabled,
+      crosscheck_only: Boolean(ratioState[p].crosscheck_only),
+    };
   }
 
   function buildConfig() {
@@ -1405,6 +1448,13 @@
   PROVIDERS.forEach(function (p) {
     refs[p].toggle.addEventListener('click', function () {
       toggleProvider(p);
+    });
+    refs[p].crosscheckOnly.addEventListener('change', function () {
+      ratioState[p].crosscheck_only = refs[p].crosscheckOnly.checked;
+      // The remaining routable providers re-split 100% between themselves;
+      // this provider's own percent is left exactly as stored.
+      renderRatio();
+      renderAllSummaries();
     });
     refs[p].advancedToggle.addEventListener('click', function () {
       toggleAdvancedPanel(refs[p].advancedToggle, refs[p].advancedPanel);

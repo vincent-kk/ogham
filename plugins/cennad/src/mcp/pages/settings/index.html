@@ -105,9 +105,22 @@
                     placeholder="comma-separated, e.g. code, refactor, sandbox"
                   ></textarea>
                   <span class="flag-hint"
-                    >Hooks suggest codex when these appear in the prompt.</span
+                    >Hooks suggest codex when these appear in the prompt. Add
+                    keywords in every language you prompt in — matching is
+                    literal.</span
                   >
                 </label>
+                <label class="toggle">
+                  <input id="crosscheck-only-codex" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">crosscheck only</span>
+                </label>
+                <span class="flag-hint"
+                  >Keeps codex available for crosscheck and by name, but hooks
+                  never auto-route to it.</span
+                >
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
@@ -346,10 +359,22 @@
                     placeholder="comma-separated, e.g. research, search, large-context"
                   ></textarea>
                   <span class="flag-hint"
-                    >Hooks suggest antigravity when these appear in the
-                    prompt.</span
+                    >Hooks suggest antigravity when these appear in the prompt.
+                    Add keywords in every language you prompt in — matching is
+                    literal.</span
                   >
                 </label>
+                <label class="toggle">
+                  <input id="crosscheck-only-antigravity" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">crosscheck only</span>
+                </label>
+                <span class="flag-hint"
+                  >Keeps antigravity available for crosscheck and by name, but
+                  hooks never auto-route to it.</span
+                >
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
@@ -582,10 +607,22 @@
                     placeholder="comma-separated, e.g. reasoning, writing, analysis, review"
                   ></textarea>
                   <span class="flag-hint"
-                    >Hooks suggest Anthropic when these appear in the
-                    prompt.</span
+                    >Hooks suggest Anthropic when these appear in the prompt.
+                    Add keywords in every language you prompt in — matching is
+                    literal.</span
                   >
                 </label>
+                <label class="toggle">
+                  <input id="crosscheck-only-claude" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">crosscheck only</span>
+                </label>
+                <span class="flag-hint"
+                  >Keeps Anthropic available for crosscheck and by name, but
+                  hooks never auto-route to it.</span
+                >
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">

@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import type { HookConfig } from '../../shared/configTypes.js';
 import { buildStaticPayload } from '../injectStatic.js';
 import { joinKeywords } from '../utils/joinKeywords.js';
-import { tonePhrase } from '../utils/tonePhrase.js';
 
 const BASE_CONFIG: HookConfig = {
   ratio: {
@@ -22,6 +21,16 @@ const BASE_CONFIG: HookConfig = {
   recency_factor: { codex: 'off', antigravity: 'auto', claude: 'off' },
 };
 
+const allEnabled = (strength: HookConfig['intervention_strength'] = 0) => ({
+  ...BASE_CONFIG,
+  ratio: {
+    codex: { value: 65, enabled: true },
+    antigravity: { value: 25, enabled: true },
+    claude: { value: 10, enabled: true },
+  },
+  intervention_strength: strength,
+});
+
 describe('joinKeywords', () => {
   it('returns the trimmed keyword string as-is when non-empty', () => {
     expect(joinKeywords('research, search')).toBe('research, search');
@@ -31,8 +40,9 @@ describe('joinKeywords', () => {
     expect(joinKeywords('')).toBe('(none)');
   });
 
-  it('returns (none) for a whitespace-only string', () => {
+  it('returns the caller fallback for a whitespace-only string', () => {
     expect(joinKeywords('   ')).toBe('(none)');
+    expect(joinKeywords('   ', 'live web search')).toBe('live web search');
   });
 
   it('trims surrounding whitespace from a non-empty string', () => {
@@ -40,86 +50,64 @@ describe('joinKeywords', () => {
   });
 });
 
-describe('tonePhrase', () => {
-  it('returns very conservative phrase for strength -2', () => {
-    expect(tonePhrase(-2)).toBe(
-      'very conservative — prefer Claude unless strongly indicated',
-    );
-  });
-
-  it('returns conservative phrase for strength -1', () => {
-    expect(tonePhrase(-1)).toBe('conservative — bias to Claude');
-  });
-
-  it('returns balanced phrase for strength 0', () => {
-    expect(tonePhrase(0)).toBe('balanced — follow ratio and keywords');
-  });
-
-  it('returns proactive phrase for strength 1', () => {
-    expect(tonePhrase(1)).toBe('proactive — delegate when reasonable');
-  });
-
-  it('returns aggressive phrase for strength 2', () => {
-    expect(tonePhrase(2)).toBe(
-      'aggressive — delegate by default when any keyword matches',
-    );
-  });
-});
-
 describe('buildStaticPayload', () => {
   it('includes a provider ratio line with each provider value', () => {
-    const config: HookConfig = {
-      ...BASE_CONFIG,
-      ratio: {
-        codex: { value: 40, enabled: true },
-        antigravity: { value: 60, enabled: true },
-        claude: { value: 20, enabled: true },
-      },
-    };
-    const payload = buildStaticPayload(config);
-    expect(payload).toContain('codex 40%');
-    expect(payload).toContain('antigravity 60%');
-    expect(payload).toContain('claude 20%');
+    const payload = buildStaticPayload(allEnabled(), 'claude');
+    expect(payload).toContain(
+      'Provider ratio: codex 65% · antigravity 25% · claude 10%',
+    );
   });
 
-  it('lists active providers and intervention strength in output', () => {
+  it('separates the crosscheck roster from the auto-routing roster', () => {
+    const payload = buildStaticPayload(allEnabled(), 'claude');
+    // every enabled provider stays a crosscheck participant...
+    expect(payload).toContain('Active providers: codex, antigravity, claude');
+    // ...while the host's own model drops out of auto-routing
+    expect(payload).toContain('Auto-routing: codex, antigravity');
+  });
+
+  it('labels the intervention strength with the settings-slider word', () => {
+    expect(buildStaticPayload(allEnabled(1), 'claude')).toContain(
+      'Intervention strength: 1 (active)',
+    );
+  });
+
+  it('swaps the routing stance with the intervention strength', () => {
+    const strong = buildStaticPayload(allEnabled(2), 'claude');
+    const subtle = buildStaticPayload(allEnabled(-2), 'claude');
+    expect(strong).toContain('Nothing else is an exception');
+    expect(subtle).not.toContain('Nothing else is an exception');
+    expect(subtle).toContain('only when the user asks for a provider by name');
+  });
+
+  it('excludes codex instead when codex is the host', () => {
+    const payload = buildStaticPayload(allEnabled(), 'codex');
+    expect(payload).toContain('Auto-routing: antigravity, claude');
+    expect(payload).toContain(
+      "- code → `/cennad:codex` (crosscheck only — this session's own model)",
+    );
+  });
+
+  it('replaces the stance when nothing is left to auto-route', () => {
     const config: HookConfig = {
       ...BASE_CONFIG,
       ratio: {
         ...BASE_CONFIG.ratio,
         claude: { value: 50, enabled: true },
       },
-      intervention_strength: 1,
     };
-    const payload = buildStaticPayload(config);
-    expect(payload).toContain('Active providers: claude');
-    expect(payload).toContain('proactive — delegate when reasonable');
+    const payload = buildStaticPayload(config, 'claude');
+    expect(payload).toContain(
+      'Auto-routing: none — every enabled provider is crosscheck-only',
+    );
+    expect(payload).toContain('Nothing is auto-routed here');
+    expect(payload).not.toContain('Nothing else is an exception');
   });
 
-  it('shows none — run /setup when all providers are disabled', () => {
-    const payload = buildStaticPayload(BASE_CONFIG);
-    expect(payload).toContain('none — run /setup');
+  it('shows none — run /setup and no domain section when all providers are disabled', () => {
+    const payload = buildStaticPayload(BASE_CONFIG, 'claude');
+    expect(payload).toContain('Active providers: none — run /setup');
     expect(payload).toContain('Run /cennad:setup to enable a provider');
-  });
-
-  it('includes keyword mapping for each enabled provider', () => {
-    const config: HookConfig = {
-      ...BASE_CONFIG,
-      ratio: {
-        codex: { value: 50, enabled: true },
-        antigravity: { value: 50, enabled: true },
-        claude: { value: 50, enabled: false },
-      },
-      keywords: {
-        codex: 'code, refactor',
-        antigravity: 'search, youtube',
-        claude: 'reasoning',
-      },
-    };
-    const payload = buildStaticPayload(config);
-    expect(payload).toContain('- codex → code, refactor');
-    expect(payload).toContain('- antigravity → search, youtube');
-    // claude is disabled, so its keyword line is omitted
-    expect(payload).not.toContain('- claude →');
+    expect(payload).not.toContain('Domains with owners');
   });
 });

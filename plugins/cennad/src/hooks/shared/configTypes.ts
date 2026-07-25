@@ -1,4 +1,10 @@
-export type ProviderRatio = { value: number; enabled: boolean };
+export type ProviderRatio = {
+  value: number;
+  enabled: boolean;
+  // Opt out of auto-routing while staying available for crosscheck and
+  // explicit calls. Absent means false.
+  crosscheck_only?: boolean;
+};
 
 export type Ratio = {
   codex: ProviderRatio;
@@ -55,10 +61,16 @@ export interface RecencyFactorConfig {
   claude: RecencyLevel;
 }
 
+export interface Keywords {
+  codex: string;
+  antigravity: string;
+  claude: string;
+}
+
 export interface HookConfig {
   ratio: Ratio;
   intervention_strength: InterventionStrength;
-  keywords: { codex: string; antigravity: string; claude: string };
+  keywords: Keywords;
   option_flags: OptionFlags;
   preamble: PreambleConfig;
   recency_factor: RecencyFactorConfig;

@@ -22,7 +22,8 @@ describe('injectStatic (Layer B)', () => {
       contextIncludes: [
         'Provider ratio: codex 34% · antigravity 33% · claude 33%',
         'Active providers: codex, antigravity, claude',
-        'balanced',
+        'Intervention strength: 0 (neutral)',
+        'Domains with owners',
       ],
     });
   });
@@ -36,8 +37,8 @@ describe('injectStatic (Layer B)', () => {
       contextIncludes: [
         'codex 30%',
         'antigravity 70%',
-        'research, news',
-        'very conservative',
+        '- research, news → `/cennad:antigravity`',
+        'Intervention strength: -2 (subtle)',
       ],
     });
   });

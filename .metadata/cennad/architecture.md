@@ -165,8 +165,9 @@ src/
 │   │   ├── build/
 │   │   │   └── injectStatic.entry.ts
 │   │   └── utils/
-│   │       ├── loadConfig.ts
-│   │       ├── tonePhrase.ts
+│   │       ├── strengthLabel.ts
+│   │       ├── routingStance.ts
+│   │       ├── domainLines.ts
 │   │       └── joinKeywords.ts
 │   ├── injectDynamic/
 │   │   ├── INTENT.md
@@ -175,8 +176,12 @@ src/
 │   │   │   └── injectDynamic.entry.ts
 │   │   └── utils/
 │   │       ├── loadCounter.ts
-│   │       └── formatRatio.ts
-│   └── shared/
+│   │       ├── asNonNegInt.ts
+│   │       ├── behindTarget.ts
+│   │       ├── nudgeLine.ts
+│   │       └── signed.ts
+│   └── shared/                  # LCA organ — loadConfig, pick*, 경로
+│       ├── loadConfig.ts
 │       ├── paths.ts
 │       ├── safeReadJson.ts
 │       └── nowIso.ts

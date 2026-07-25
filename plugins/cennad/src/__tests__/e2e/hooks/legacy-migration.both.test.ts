@@ -27,7 +27,8 @@ describe('legacy ratio migration (both layers)', () => {
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['Target ratio:', 'antigravity 30%', 'codex 70%'],
+      // codex share 70 vs current 50 → the migrated weight surfaces as a 20pt gap
+      contextIncludes: ['under share: codex 20pt'],
     });
   });
 
@@ -46,7 +47,8 @@ describe('legacy ratio migration (both layers)', () => {
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['Target ratio:', 'antigravity 30%', 'codex 70%'],
+      // codex share 70 vs current 50 → the migrated weight surfaces as a 20pt gap
+      contextIncludes: ['under share: codex 20pt'],
     });
   });
 });
