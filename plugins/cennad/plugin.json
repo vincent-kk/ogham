@@ -1,6 +1,6 @@
 {
   "name": "cennad",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Cennad — delegate to Codex / Antigravity / Claude Code CLIs from Claude Code via MCP, skills, and hooks",
   "author": {
     "name": "Vincent K. Kelvin"
@@ -21,7 +21,9 @@
   "mcpServers": {
     "cennad": {
       "command": "node",
-      "args": ["bridge/mcp-server.cjs"],
+      "args": [
+        "bridge/mcp-server.cjs"
+      ],
       "cwd": ".",
       "env": {
         "OGHAM_HOST": "codex"

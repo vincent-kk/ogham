@@ -29,6 +29,251 @@
           </p>
 
           <div class="ratio-panel" id="ratio-panel">
+            <!-- Anthropic (claude) -->
+            <div class="ratio-row" data-provider="claude">
+              <button
+                type="button"
+                id="toggle-claude"
+                class="provider-toggle"
+                role="switch"
+                aria-checked="true"
+                aria-label="Anthropic (claude) provider"
+              >
+                <span class="provider-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M4 18 9.5 4h2.2L17 18h-2.3l-1.2-3.2H7.5L6.3 18H4zm4.2-5h4.4l-2.2-6-2.2 6z"
+                    />
+                  </svg>
+                </span>
+                <span class="provider-meta">
+                  <span class="provider-name">claude</span>
+                  <span class="provider-hint" id="claude-hint"
+                    >click to toggle</span
+                  >
+                </span>
+                <span
+                  class="provider-summary"
+                  id="summary-claude"
+                  aria-hidden="true"
+                ></span>
+                <output id="claude-pct" class="provider-pct">50%</output>
+              </button>
+              <button
+                type="button"
+                id="advanced-toggle-claude"
+                class="advanced-toggle"
+                aria-expanded="false"
+                aria-controls="advanced-panel-claude"
+                aria-label="Anthropic advanced settings"
+                title="Advanced settings"
+              >
+                <span class="advanced-toggle-icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                    />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+            <p class="install-hint" id="claude-install-hint" hidden>
+              Install: <code>npm install -g @anthropic-ai/claude-code</code> —
+              reload after installing.
+            </p>
+            <div
+              class="advanced-panel"
+              id="advanced-panel-claude"
+              role="region"
+              aria-labelledby="advanced-toggle-claude"
+              hidden
+            >
+              <div class="advanced-panel-inner">
+                <label class="field">
+                  <span>trigger keywords</span>
+                  <textarea
+                    id="kw-claude"
+                    rows="1"
+                    placeholder="comma-separated, e.g. reasoning, writing, analysis, review"
+                  ></textarea>
+                  <span class="flag-hint"
+                    >Hooks suggest Anthropic when these appear in the prompt.
+                    Add keywords in every language you prompt in — matching is
+                    literal.</span
+                  >
+                </label>
+                <label class="toggle">
+                  <input id="crosscheck-only-claude" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">crosscheck only</span>
+                </label>
+                <span class="flag-hint"
+                  >Keeps Anthropic available for crosscheck and by name, but
+                  hooks never auto-route to it.</span
+                >
+                <div class="flag-field">
+                  <span class="flag-field-label">default tier</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="low"
+                      /><span>low</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Each
+                    tier maps to a model + effort below.
+                  </p>
+                </div>
+                <div class="flag-field">
+                  <span class="flag-field-label">recency factor</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="off"
+                      /><span
+                        >off
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback.
+                  </p>
+                </div>
+                <label class="field">
+                  <span>prompt preamble</span>
+                  <textarea
+                    id="preamble-claude"
+                    rows="2"
+                    placeholder="e.g. Be concise."
+                  ></textarea>
+                </label>
+                <hr class="advanced-divider" />
+                <div class="flag-field">
+                  <span class="flag-field-label">permission mode</span>
+                  <div class="radio-row" id="claude-permission-radio">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="acceptEdits"
+                      /><span>acceptEdits</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="dontAsk"
+                      /><span
+                        >dontAsk
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="bypassPermissions"
+                      /><span>bypassPermissions — danger</span></label
+                    >
+                  </div>
+                  <span class="warning-inline" id="claude-bypass-warning" hidden
+                    >&#9888; bypassPermissions skips all approvals — only use in
+                    a trusted environment.</span
+                  >
+                  <p class="flag-hint">
+                    claude-code has no sandbox; isolation is permission-based.
+                    cennad always adds <code>--strict-mcp-config</code> and
+                    <code>--safe-mode</code> so the child never inherits this
+                    session's MCP servers, hooks, or CLAUDE.md.
+                  </p>
+                </div>
+                <div class="tier-model-map">
+                  <p class="flag-field-label">per-tier model &amp; effort</p>
+                  <p class="flag-hint">
+                    Map each tier to a model and reasoning effort. Effort
+                    options adapt to the model (haiku has none; sonnet skips
+                    xhigh). Over-cap requests are silently downgraded by
+                    claude-code.
+                  </p>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-high">high</label>
+                    <select id="model-claude-high" class="tier-select"></select>
+                    <select
+                      id="effort-claude-high"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-mid">mid</label>
+                    <select id="model-claude-mid" class="tier-select"></select>
+                    <select id="effort-claude-mid" class="tier-select"></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-low">low</label>
+                    <select id="model-claude-low" class="tier-select"></select>
+                    <select id="effort-claude-low" class="tier-select"></select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- codex -->
             <div class="ratio-row" data-provider="codex">
               <button
@@ -531,251 +776,6 @@
               </div>
             </div>
 
-            <!-- Anthropic (claude) -->
-            <div class="ratio-row" data-provider="claude">
-              <button
-                type="button"
-                id="toggle-claude"
-                class="provider-toggle"
-                role="switch"
-                aria-checked="true"
-                aria-label="Anthropic (claude) provider"
-              >
-                <span class="provider-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      d="M4 18 9.5 4h2.2L17 18h-2.3l-1.2-3.2H7.5L6.3 18H4zm4.2-5h4.4l-2.2-6-2.2 6z"
-                    />
-                  </svg>
-                </span>
-                <span class="provider-meta">
-                  <span class="provider-name">Claude</span>
-                  <span class="provider-hint" id="claude-hint"
-                    >click to toggle</span
-                  >
-                </span>
-                <span
-                  class="provider-summary"
-                  id="summary-claude"
-                  aria-hidden="true"
-                ></span>
-                <output id="claude-pct" class="provider-pct">50%</output>
-              </button>
-              <button
-                type="button"
-                id="advanced-toggle-claude"
-                class="advanced-toggle"
-                aria-expanded="false"
-                aria-controls="advanced-panel-claude"
-                aria-label="Anthropic advanced settings"
-                title="Advanced settings"
-              >
-                <span class="advanced-toggle-icon" aria-hidden="true">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path
-                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
-                    />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                </span>
-              </button>
-            </div>
-            <p class="install-hint" id="claude-install-hint" hidden>
-              Install: <code>npm install -g @anthropic-ai/claude-code</code> —
-              reload after installing.
-            </p>
-            <div
-              class="advanced-panel"
-              id="advanced-panel-claude"
-              role="region"
-              aria-labelledby="advanced-toggle-claude"
-              hidden
-            >
-              <div class="advanced-panel-inner">
-                <label class="field">
-                  <span>trigger keywords</span>
-                  <textarea
-                    id="kw-claude"
-                    rows="1"
-                    placeholder="comma-separated, e.g. reasoning, writing, analysis, review"
-                  ></textarea>
-                  <span class="flag-hint"
-                    >Hooks suggest Anthropic when these appear in the prompt.
-                    Add keywords in every language you prompt in — matching is
-                    literal.</span
-                  >
-                </label>
-                <label class="toggle">
-                  <input id="crosscheck-only-claude" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label">crosscheck only</span>
-                </label>
-                <span class="flag-hint"
-                  >Keeps Anthropic available for crosscheck and by name, but
-                  hooks never auto-route to it.</span
-                >
-                <div class="flag-field">
-                  <span class="flag-field-label">default tier</span>
-                  <div class="radio-row">
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="default-tier-claude"
-                        value="high"
-                      /><span>high</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="default-tier-claude"
-                        value="mid"
-                      /><span
-                        >mid
-                        <small class="default-marker">(default)</small></span
-                      ></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="default-tier-claude"
-                        value="low"
-                      /><span>low</span></label
-                    >
-                  </div>
-                  <p class="flag-hint">
-                    Tier applied when a dispatch omits an explicit tier. Each
-                    tier maps to a model + effort below.
-                  </p>
-                </div>
-                <div class="flag-field">
-                  <span class="flag-field-label">recency factor</span>
-                  <div class="radio-row">
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-claude"
-                        value="off"
-                      /><span
-                        >off
-                        <small class="default-marker">(default)</small></span
-                      ></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-claude"
-                        value="auto"
-                      /><span>auto</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-claude"
-                        value="strict"
-                      /><span>strict</span></label
-                    >
-                  </div>
-                  <p class="flag-hint">
-                    <code>auto</code> recommends source-checking for
-                    time-sensitive facts. <code>strict</code> requires
-                    search-verification with citations or an "unverifiable"
-                    fallback.
-                  </p>
-                </div>
-                <label class="field">
-                  <span>prompt preamble</span>
-                  <textarea
-                    id="preamble-claude"
-                    rows="2"
-                    placeholder="e.g. Be concise."
-                  ></textarea>
-                </label>
-                <hr class="advanced-divider" />
-                <div class="flag-field">
-                  <span class="flag-field-label">permission mode</span>
-                  <div class="radio-row" id="claude-permission-radio">
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="claude-permission-mode"
-                        value="acceptEdits"
-                      /><span>acceptEdits</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="claude-permission-mode"
-                        value="auto"
-                      /><span>auto</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="claude-permission-mode"
-                        value="dontAsk"
-                      /><span
-                        >dontAsk
-                        <small class="default-marker">(default)</small></span
-                      ></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="claude-permission-mode"
-                        value="bypassPermissions"
-                      /><span>bypassPermissions — danger</span></label
-                    >
-                  </div>
-                  <span class="warning-inline" id="claude-bypass-warning" hidden
-                    >&#9888; bypassPermissions skips all approvals — only use in
-                    a trusted environment.</span
-                  >
-                  <p class="flag-hint">
-                    claude-code has no sandbox; isolation is permission-based.
-                    cennad always adds <code>--strict-mcp-config</code> and
-                    <code>--safe-mode</code> so the child never inherits this
-                    session's MCP servers, hooks, or CLAUDE.md.
-                  </p>
-                </div>
-                <div class="tier-model-map">
-                  <p class="flag-field-label">per-tier model &amp; effort</p>
-                  <p class="flag-hint">
-                    Map each tier to a model and reasoning effort. Effort
-                    options adapt to the model (haiku has none; sonnet skips
-                    xhigh). Over-cap requests are silently downgraded by
-                    claude-code.
-                  </p>
-                  <div class="tier-field" data-layout="model-effort">
-                    <label for="model-claude-high">high</label>
-                    <select id="model-claude-high" class="tier-select"></select>
-                    <select
-                      id="effort-claude-high"
-                      class="tier-select"
-                    ></select>
-                  </div>
-                  <div class="tier-field" data-layout="model-effort">
-                    <label for="model-claude-mid">mid</label>
-                    <select id="model-claude-mid" class="tier-select"></select>
-                    <select id="effort-claude-mid" class="tier-select"></select>
-                  </div>
-                  <div class="tier-field" data-layout="model-effort">
-                    <label for="model-claude-low">low</label>
-                    <select id="model-claude-low" class="tier-select"></select>
-                    <select id="effort-claude-low" class="tier-select"></select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div class="ratio-bar-wrap">
               <div
                 id="ratio-bar"
@@ -882,6 +882,17 @@
                 </p>
 
                 <span class="flag-field-label">install on</span>
+                <label class="toggle flag-row">
+                  <input id="youtube-target-claude" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">claude</span>
+                  <span class="flag-desc"
+                    >adds the server to the Claude user scope via
+                    <code>claude mcp add --scope user</code></span
+                  >
+                </label>
                 <label class="toggle flag-row">
                   <input id="youtube-target-codex" type="checkbox" />
                   <span class="toggle-track"
@@ -1009,6 +1020,6 @@
     <script>
       window.__CENNAD_STATE__ = '__CENNAD_STATE__';
     </script>
-    <script>(function(){"use strict";var p={codex:{value:34,enabled:!0},antigravity:{value:33,enabled:!0},claude:{value:33,enabled:!0}},tt=72,at=10*60*1e3,m={codex:{yolo:!1,sandbox:"workspace-write"},antigravity:{sandbox:!0,skip_permissions:!0},claude:{permission_mode:"dontAsk"}},$={enabled:!1,location:"project"},nt={codex:"",antigravity:"",claude:""},k={codex:"off",antigravity:"auto",claude:"off"},I={codex:"mid",antigravity:"mid",claude:"mid"},ve={high:{model:"opus",effort:"max"},mid:{model:"opus",effort:"high"},low:{model:"sonnet",effort:"high"}},he={high:{model:"gpt-5.6-sol",effort:"max"},mid:{model:"gpt-5.6-terra",effort:"high"},low:{model:"gpt-5.6-terra",effort:"medium"}},ge={high:{model:"Gemini 3.1 Pro",effort:"High"},mid:{model:"Gemini 3.5 Flash",effort:"Medium"},low:{model:"Gemini 3.5 Flash",effort:"Low"}},w={enabled:!1,language:"en",targets:{codex:!0,antigravity:!0}},j=0,h=100,ot=1,rt=720,it=1e3,lt=18e5,f=["codex","antigravity","claude"],z=["read-only","workspace-write","danger-full-access","off"],H=["acceptEdits","auto","dontAsk","bypassPermissions"],dt=["opus","sonnet","haiku","fable","best","opus[1m]","sonnet[1m]"],ct=["low","medium","high","xhigh","max"],me={opus:["low","medium","high","xhigh","max"],"opus[1m]":["low","medium","high","xhigh","max"],fable:["low","medium","high","xhigh","max"],best:["low","medium","high","xhigh","max"],sonnet:["low","medium","high","max"],"sonnet[1m]":["low","medium","high","max"],haiku:[]},ye=["low","medium","high","xhigh","max","ultra"],ut=["Low","Medium","High","Thinking"],be={"gpt-5.6-sol":["low","medium","high","xhigh","max","ultra"],"gpt-5.6-terra":["low","medium","high","xhigh","max","ultra"],"gpt-5.6-luna":["low","medium","high","xhigh","max"],"gpt-5.5":["low","medium","high","xhigh"],"gpt-5.4":["low","medium","high","xhigh"],"gpt-5.4-mini":["low","medium","high","xhigh"]},pe=["project","user"],L=["off","auto","strict"],v=["high","mid","low"],xe=["en","ko"],st={"-2":"Subtle","-1":"Soft",0:"Neutral",1:"Active",2:"Strong"},ft=new URLSearchParams(location.search),vt=ft.get("token")||"";function l(e){return document.querySelector(e)}var J=l("#form"),W=l("#status"),Q=l("#save"),G=l("#save-close"),Ee=l("#cancel"),S=l("#ratio-warn"),y=l("#ratio-bar"),X=l("#strength"),ht=l("#strength-label"),_e=l("#ttl"),Ae=l("#spawn-timeout-ms"),c={};f.forEach(function(e){c[e]={toggle:l("#toggle-"+e),pct:l("#"+e+"-pct"),hint:l("#"+e+"-hint"),summary:l("#summary-"+e),installHint:l("#"+e+"-install-hint"),advancedToggle:l("#advanced-toggle-"+e),advancedPanel:l("#advanced-panel-"+e),kw:l("#kw-"+e),crosscheckOnly:l("#crosscheck-only-"+e),preamble:l("#preamble-"+e)}});var T=l("#codex-yolo"),Ce=l("#codex-sandbox-wrap"),ke=l("#codex-sandbox-hint"),gt=l("#codex-full-access-warning"),x={high:l("#model-codex-high"),mid:l("#model-codex-mid"),low:l("#model-codex-low")},Z={high:l("#effort-codex-high"),mid:l("#effort-codex-mid"),low:l("#effort-codex-low")},we=l("#antigravity-sandbox"),ee=l("#antigravity-skip-perms"),M={high:l("#model-antigravity-high"),mid:l("#model-antigravity-mid"),low:l("#model-antigravity-low")},te={high:l("#effort-antigravity-high"),mid:l("#effort-antigravity-mid"),low:l("#effort-antigravity-low")},mt=l("#claude-bypass-warning"),O={high:l("#model-claude-high"),mid:l("#model-claude-mid"),low:l("#model-claude-low")},ae={high:l("#effort-claude-high"),mid:l("#effort-claude-mid"),low:l("#effort-claude-low")},Y=l("#artifacts-enabled"),Le=l("#artifacts-location-wrap"),q=l("#youtube-enabled"),Se=l("#youtube-detail-wrap"),Te=l("#youtube-target-codex"),Me=l("#youtube-target-antigravity"),Oe=l("#youtube-advanced-toggle"),yt=l("#youtube-advanced-panel"),u={codex:{value:p.codex.value,enabled:p.codex.enabled,crosscheck_only:!1},antigravity:{value:p.antigravity.value,enabled:p.antigravity.enabled,crosscheck_only:!1},claude:{value:p.claude.value,enabled:p.claude.enabled,crosscheck_only:!1}},E={codex:"available",antigravity:"available",claude:"available"},D=[],b=[],_={high:{model:"",effort:""},mid:{model:"",effort:""},low:{model:"",effort:""}},R={high:{model:"",effort:""},mid:{model:"",effort:""},low:{model:"",effort:""}},P={high:{model:"",effort:""},mid:{model:"",effort:""},low:{model:"",effort:""}};function ne(e,t,a){return Math.max(t,Math.min(a,e))}function g(e,t,a){if(W.className="status"+(e?" "+e:""),W.innerHTML="",!(!t&&(!a||!a.length))){var n=document.createElement("div");if(n.textContent=t||"",W.appendChild(n),a&&a.length){for(var o=document.createElement("ul"),r=0;r<a.length;r+=1){var i=document.createElement("li");i.textContent=String(a[r]),o.appendChild(i)}W.appendChild(o)}}}function F(){return f.filter(function(e){return u[e].enabled&&!u[e].crosscheck_only})}function bt(){return f.filter(function(e){return u[e].enabled}).length}function De(){var e=F();if(e.length!==0){var t=Math.floor(h/e.length),a=h-t*e.length;e.forEach(function(n,o){u[n].value=t+(o<a?1:0)})}}function pt(){var e=F();if(e.length!==0){var t=e.reduce(function(o,r){return o+u[r].value},0);if(t<=0){De();return}var a=0,n=e.map(function(o,r){var i=u[o].value/t*h,d=Math.floor(i);return a+=d,{provider:o,value:d,remainder:i-d,index:r}});n.slice().sort(function(o,r){return r.remainder!==o.remainder?r.remainder-o.remainder:o.index-r.index}).slice(0,h-a).forEach(function(o){o.value+=1}),n.forEach(function(o){u[o.provider].value=o.value})}}function oe(e){for(var t=[],a=0,n=0;n<e.length-1;n+=1)a+=u[e[n]].value,t.push(a);return t}function xt(){for(;y.firstChild;)y.removeChild(y.firstChild)}function Et(e){var t=0;e.forEach(function(a){var n=document.createElement("div");n.className="ratio-bar-segment",n.setAttribute("data-provider",a),n.style.left=t+"%",n.style.width=u[a].value+"%",y.appendChild(n),t+=u[a].value})}function _t(e){var t=oe(e);t.forEach(function(a,n){var o=e[n],r=e[n+1],i=document.createElement("button");i.type="button",i.className="ratio-bar-handle",i.style.left=a+"%",i.setAttribute("data-boundary-index",String(n)),i.setAttribute("aria-label",o+" / "+r+" ratio"),i.setAttribute("aria-valuemin","0"),i.setAttribute("aria-valuemax","100"),i.setAttribute("aria-valuenow",String(a)),i.setAttribute("role","slider"),y.appendChild(i)})}function B(){pt();var e=F();f.forEach(function(t){var a=u[t],n=c[t];n.pct.textContent=a.enabled?a.crosscheck_only?"":a.value+"%":"OFF",n.toggle.setAttribute("aria-checked",String(a.enabled)),n.crosscheckOnly.checked=!!a.crosscheck_only,n.kw.disabled=!!a.crosscheck_only;var o=E[t];n.toggle.setAttribute("data-unavailable",String(o==="unavailable")),n.toggle.setAttribute("data-provider-status",o),n.hint.textContent=o==="available"?a.enabled&&a.crosscheck_only?"crosscheck only":"click to toggle":o==="unavailable"?a.enabled?"enabled \xB7 not installed":"not installed":a.enabled?"enabled \xB7 status unknown":"status check failed"}),xt(),Et(e),_t(e),bt()===0?(S.textContent="At least one provider must be enabled.",S.hidden=!1):e.length===0?(S.textContent="Every enabled provider is crosscheck-only \u2014 nothing is auto-routed.",S.hidden=!1):S.hidden=!0}function N(e,t){var a=F(),n=oe(a);if(!(e<0||e>=n.length)){var o=e===0?j+1:n[e-1]+1,r=e===n.length-1?h-1:n[e+1]-1;n[e]=ne(Math.round(t),o,r);var i=0;a.forEach(function(d,Ze){var et=Ze<n.length?n[Ze]:h;u[d].value=et-i,i=et}),B()}}function At(e){var t=y.getBoundingClientRect();return t.width<=0?0:(e.clientX-t.left)/t.width*h}var V=null;function re(e){V!==null&&N(V,At(e))}function Re(){V=null,window.removeEventListener("pointermove",re),window.removeEventListener("pointerup",Re)}function Ct(e){!e.target.classList||!e.target.classList.contains("ratio-bar-handle")||(V=Number(e.target.getAttribute("data-boundary-index")),e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId),window.addEventListener("pointermove",re),window.addEventListener("pointerup",Re),re(e))}function kt(e){if(!(!e.target.classList||!e.target.classList.contains("ratio-bar-handle"))){var t=Number(e.target.getAttribute("data-boundary-index")),a=oe(F())[t],n=e.shiftKey?10:1;e.key==="ArrowLeft"||e.key==="ArrowDown"?(e.preventDefault(),N(t,a-n)):e.key==="ArrowRight"||e.key==="ArrowUp"?(e.preventDefault(),N(t,a+n)):e.key==="Home"?(e.preventDefault(),N(t,j)):e.key==="End"&&(e.preventDefault(),N(t,h))}}function wt(e){var t=u[e];if(t.enabled)t.enabled=!1;else{if(E[e]!=="available")return;t.enabled=!0}De(),B(),Ie(),C()}function Pe(){ht.textContent=st[X.value]||"Neutral"}function Lt(e,t){if(e&&typeof e=="object"&&"value"in e)return{value:ne(Math.floor(Number(e.value)||0),j,h),enabled:!!e.enabled,crosscheck_only:!!e.crosscheck_only};if(typeof e=="number"){var a=ne(Math.floor(e),j,h);return{value:a,enabled:a>0,crosscheck_only:!1}}return{value:t.value,enabled:t.enabled,crosscheck_only:!!t.crosscheck_only}}function A(e,t,a,n){for(var o=document.querySelectorAll('input[name="'+e+'"]'),r=a.indexOf(t)>=0?t:a.indexOf(n)>=0?n:a[0],i=0;i<o.length;i+=1)o[i].checked=o[i].value===r}function s(e,t,a){var n=document.querySelector('input[name="'+e+'"]:checked');return n&&t.indexOf(n.value)>=0?n.value:a}function St(){f.forEach(function(e){c[e].installHint.hidden=E[e]!=="unavailable"})}function ie(){var e=document.querySelector('#codex-sandbox-radio input[type="radio"]:checked');gt.hidden=!(e&&e.value==="danger-full-access")}function Fe(){for(var e=T.checked,t=document.querySelectorAll('#codex-sandbox-radio input[type="radio"]'),a=0;a<t.length;a+=1)t[a].disabled=e;e?(Ce.classList.add("is-inert"),ke.hidden=!1):(Ce.classList.remove("is-inert"),ke.hidden=!0),ie()}function Be(){var e=s("claude-permission-mode",H,m.claude.permission_mode);mt.hidden=e!=="bypassPermissions"}function Ne(){Y.checked?Le.classList.remove("is-inert"):Le.classList.add("is-inert")}function Ue(e,t){if(!e.disabled){var a=e.getAttribute("aria-expanded")!=="true";if(e.setAttribute("aria-expanded",a?"true":"false"),a){t.hidden=!1,t.offsetHeight,t.classList.add("is-open");return}t.classList.remove("is-open");var n=!1,o=function(r){n||r&&r.propertyName&&r.propertyName!=="grid-template-rows"||(n=!0,t.hidden=!0,t.removeEventListener("transitionend",o))};t.addEventListener("transitionend",o),setTimeout(o,260)}}function Tt(e){var t=[],a=s("recency-"+e,L,k[e]);if(e==="codex"){T.checked&&t.push({label:"yolo: on",tone:"warn"});var n=s("codex-sandbox",z,m.codex.sandbox);n==="danger-full-access"?t.push({label:"sandbox: full-access",tone:"warn"}):n!=="off"&&t.push({label:"sandbox: "+n})}else if(e==="antigravity")ee.checked&&t.push({label:"skip-perms: on",tone:"warn"});else if(e==="claude"){var o=s("claude-permission-mode",H,m.claude.permission_mode);t.push(o==="bypassPermissions"?{label:"perm: bypass",tone:"warn"}:{label:"perm: "+o})}a!=="off"&&t.push({label:"rec: "+a});var r=(c[e].kw.value||"").trim();r&&t.push({label:"keyword: on",title:r});var i=(c[e].preamble.value||"").trim();return i&&t.push({label:"preamble: on",title:i.slice(0,80)}),t}function K(e){var t=c[e].summary;if(t){for(var a=Tt(e);t.firstChild;)t.removeChild(t.firstChild);for(var n=0;n<a.length;n+=1){var o=document.createElement("span");o.className="summary-chip",a[n].tone&&o.setAttribute("data-tone",a[n].tone),a[n].title&&o.setAttribute("data-tooltip",a[n].title),o.textContent=a[n].label,t.appendChild(o)}}}function C(){f.forEach(K)}function Ie(){f.forEach(function(e){var t=c[e];t.advancedToggle.disabled=E[e]!=="available",E[e]!=="available"&&t.advancedToggle.getAttribute("aria-expanded")==="true"&&(t.advancedToggle.setAttribute("aria-expanded","false"),t.advancedPanel.classList.remove("is-open"),t.advancedPanel.hidden=!0)})}function Mt(e){var t=e&&typeof e=="object"?e:m,a=t.codex&&typeof t.codex=="object"?t.codex:{},n=t.antigravity&&typeof t.antigravity=="object"?t.antigravity:{},o=t.claude&&typeof t.claude=="object"?t.claude:{};T.checked=!!a.yolo,A("codex-sandbox",typeof a.sandbox=="string"?a.sandbox:m.codex.sandbox,z),we.checked=!!n.sandbox,ee.checked=!!n.skip_permissions,A("claude-permission-mode",typeof o.permission_mode=="string"?o.permission_mode:m.claude.permission_mode,H,m.claude.permission_mode),Fe(),ie(),Be()}function Ot(e){var t=e&&typeof e=="object"?e:$;Y.checked=!!t.enabled,A("artifacts-location",typeof t.location=="string"?t.location:$.location,pe),Ne()}function le(e,t,a){var n=e&&typeof e=="object"?e:t;f.forEach(function(o){a(o,typeof n[o]=="string"?n[o]:t[o])})}function Dt(e){le(e,nt,function(t,a){c[t].preamble.value=a})}function Rt(e){le(e,k,function(t,a){A("recency-"+t,a,L)})}function Pt(e){le(e,I,function(t,a){A("default-tier-"+t,a,v)})}function Ft(e){var t=e&&typeof e=="object"?e:{};f.forEach(function(a){c[a].kw.value=typeof t[a]=="string"?t[a]:""})}function de(e,t,a,n){for(;e.firstChild;)e.removeChild(e.firstChild);var o=t.slice();if(a&&o.indexOf(a)<0&&o.unshift(a),o.length===0){var r=document.createElement("option");r.value="",r.textContent=n,e.appendChild(r);return}for(var i=0;i<o.length;i+=1){var d=document.createElement("option");d.value=o[i],d.textContent=o[i],o[i]===a&&(d.selected=!0),e.appendChild(d)}}function je(e){var t=/^(.*?)\s*\(([^()]+)\)\s*$/.exec(String(e||""));return t?{model:t[1].trim(),effort:t[2].trim()}:{model:String(e||"").trim(),effort:""}}function Bt(){for(var e=[],t=0;t<D.length;t+=1){var a=je(D[t]).model;a&&e.indexOf(a)<0&&e.push(a)}return e}function He(e){for(var t=[],a=0;a<D.length;a+=1){var n=je(D[a]);n.model===e&&n.effort&&t.indexOf(n.effort)<0&&t.push(n.effort)}return t}function We(e,t){var a=te[e];if(a){for(var n=He(t);a.firstChild;)a.removeChild(a.firstChild);if(n.length===0){var o=document.createElement("option");o.value="",o.textContent="(no effort)",a.appendChild(o),a.disabled=!0;return}a.disabled=!1;for(var r=ce(_[e].effort,n,ut),i=0;i<n.length;i+=1){var d=document.createElement("option");d.value=n[i],d.textContent=n[i],n[i]===r&&(d.selected=!0),a.appendChild(d)}}}function Ge(){var e=Bt();v.forEach(function(t){var a=M[t];a&&(de(a,e,_[t].model,"(run agy to load models)"),We(t,a.value))})}function Nt(e){var t=te[e];_[e].effort=t&&!t.disabled?t.value:_[e].effort,We(e,M[e].value),K("antigravity")}function ce(e,t,a){if(t.length===0)return"";if(t.indexOf(e)>=0)return e;var n=a.indexOf(e);if(n<0)return t[t.length-1];for(var o=t[0],r=0;r<t.length;r+=1)a.indexOf(t[r])<=n&&(o=t[r]);return o}function Xe(e,t){var a=ae[e];if(a){for(var n=me[t]||[];a.firstChild;)a.removeChild(a.firstChild);if(n.length===0){var o=document.createElement("option");o.value="",o.textContent="(no effort)",a.appendChild(o),a.disabled=!0;return}a.disabled=!1;for(var r=ce(R[e].effort,n,ct),i=0;i<n.length;i+=1){var d=document.createElement("option");d.value=n[i],d.textContent=n[i],n[i]===r&&(d.selected=!0),a.appendChild(d)}}}function Ut(){v.forEach(function(e){var t=O[e];t&&(de(t,dt,R[e].model,"(none)"),Xe(e,t.value))})}function It(e){var t=ae[e];R[e].effort=t&&!t.disabled?t.value:R[e].effort,Xe(e,O[e].value),K("claude")}function ue(e){for(var t=0;t<b.length;t+=1)if(b[t]&&b[t].slug===e)return b[t];return null}function Ye(e){var t=ue(e);return t&&Array.isArray(t.efforts)?t.efforts:be[e]||ye}function jt(){return b.length>0?b.map(function(e){return e&&typeof e.slug=="string"?e.slug:""}).filter(function(e){return e.length>0}):Object.keys(be)}function qe(e){for(var t=0;t<e.options.length;t+=1){var a=ue(e.options[t].value);a&&a.description&&(e.options[t].title=a.description)}var n=ue(e.value);e.title=n&&n.description?n.description:""}function Ve(e,t){var a=Z[e];if(a){for(var n=Ye(t);a.firstChild;)a.removeChild(a.firstChild);if(n.length===0){var o=document.createElement("option");o.value="",o.textContent="(no effort)",a.appendChild(o),a.disabled=!0;return}a.disabled=!1;for(var r=ce(P[e].effort,n,ye),i=0;i<n.length;i+=1){var d=document.createElement("option");d.value=n[i],d.textContent=n[i],n[i]===r&&(d.selected=!0),a.appendChild(d)}}}function Ke(){var e=jt();v.forEach(function(t){var a=x[t];a&&(de(a,e,P[t].model,"(codex default)"),qe(a),Ve(t,a.value))})}function Ht(e){var t=Z[e];P[e].effort=t&&!t.disabled?t.value:P[e].effort,qe(x[e]),Ve(e,x[e].value),K("codex")}function Wt(e){var t=e&&typeof e=="object"?e:{},a=t.antigravity&&typeof t.antigravity=="object"?t.antigravity:{};v.forEach(function(r){var i=a[r]&&typeof a[r]=="object"?a[r]:ge[r];_[r]={model:typeof i.model=="string"?i.model:ge[r].model,effort:typeof i.effort=="string"?i.effort:""}});var n=t.claude&&typeof t.claude=="object"?t.claude:{};v.forEach(function(r){var i=n[r]&&typeof n[r]=="object"?n[r]:ve[r];R[r]={model:typeof i.model=="string"?i.model:ve[r].model,effort:typeof i.effort=="string"?i.effort:""}});var o=t.codex&&typeof t.codex=="object"?t.codex:{};v.forEach(function(r){var i=o[r]&&typeof o[r]=="object"?o[r]:he[r];P[r]={model:typeof i.model=="string"?i.model:he[r].model,effort:typeof i.effort=="string"?i.effort:""}}),Ge(),Ut(),Ke()}function $e(){q.checked?Se.classList.remove("is-inert"):Se.classList.add("is-inert")}function Gt(e){var t=e&&typeof e=="object"?e:w;q.checked=!!t.enabled,A("youtube-language",typeof t.language=="string"?t.language:w.language,xe);var a=t.targets&&typeof t.targets=="object"?t.targets:{};Te.checked=typeof a.codex=="boolean"?a.codex:w.targets.codex,Me.checked=typeof a.antigravity=="boolean"?a.antigravity:w.targets.antigravity,$e()}function ze(e){var t=e.ratio||{};f.forEach(function(a){u[a]=Lt(t[a],u[a])}),X.value=String(e.intervention_strength),Ft(e.keywords),_e.value=e.session_ttl_hours,Ae.value=e.spawn_timeout_ms,Mt(e.option_flags),Ot(e.artifacts),Dt(e.preamble),Rt(e.recency_factor),Pt(e.default_tier),Wt(e.model_map),Gt(e.addons&&e.addons.youtube),B(),Pe(),C()}function Xt(){return{codex:{yolo:!!T.checked,sandbox:s("codex-sandbox",z,m.codex.sandbox)},antigravity:{sandbox:!!we.checked,skip_permissions:!!ee.checked},claude:{permission_mode:s("claude-permission-mode",H,m.claude.permission_mode)}}}function se(e,t,a,n){var o=e?String(e.value||""):"",r={model:o},i=a(o);return t&&!t.disabled&&i.length>0&&t.value?r.effort=t.value:t&&t.disabled&&n&&(r.effort=n),r}function Yt(e){return me[e]||[]}function qt(){var e={},t={},a={};return v.forEach(function(n){e[n]=se(x[n],Z[n],Ye),t[n]=se(M[n],te[n],He,_[n].effort),a[n]=se(O[n],ae[n],Yt)}),{codex:e,antigravity:t,claude:a}}function Vt(){return{enabled:!!Y.checked,location:s("artifacts-location",pe,$.location)}}function fe(e){return{value:u[e].value,enabled:u[e].enabled,crosscheck_only:!!u[e].crosscheck_only}}function Kt(){return{ratio:{codex:fe("codex"),antigravity:fe("antigravity"),claude:fe("claude")},intervention_strength:Number(X.value),keywords:{codex:c.codex.kw.value.trim(),antigravity:c.antigravity.kw.value.trim(),claude:c.claude.kw.value.trim()},option_flags:Xt(),model_map:qt(),default_tier:{codex:s("default-tier-codex",v,I.codex),antigravity:s("default-tier-antigravity",v,I.antigravity),claude:s("default-tier-claude",v,I.claude)},session_ttl_hours:Math.max(ot,Math.min(rt,Math.floor(Number(_e.value)||tt))),spawn_timeout_ms:Math.max(it,Math.min(lt,Math.floor(Number(Ae.value)||at))),artifacts:Vt(),preamble:{codex:String(c.codex.preamble.value||""),antigravity:String(c.antigravity.preamble.value||""),claude:String(c.claude.preamble.value||"")},recency_factor:{codex:s("recency-codex",L,k.codex),antigravity:s("recency-antigravity",L,k.antigravity),claude:s("recency-claude",L,k.claude)},addons:{youtube:{enabled:!!q.checked,language:s("youtube-language",xe,w.language),targets:{codex:!!Te.checked,antigravity:!!Me.checked}}}}}function U(e){return e+"?token="+encodeURIComponent(vt)}function $t(){var e=window.__CENNAD_STATE__;return e&&typeof e=="object"&&e.ratio?(ze(e),!0):!1}async function Je(){try{var e=await fetch(U("/provider-status"));if(!e.ok)return;var t=await e.json();f.forEach(function(a){var n=t[a]&&t[a].status;E[a]=n==="available"||n==="unavailable"||n==="unknown"?n:"unknown"}),D=Array.isArray(t.agyModels)?t.agyModels:[],b=Array.isArray(t.codexModels)?t.codexModels:[],Ge(),Ke()}catch{return}St(),B(),Ie()}async function zt(){if($t()){g("",""),await Je();return}g("","Loading\u2026");try{var e=await fetch(U("/config"));if(!e.ok)throw new Error("HTTP "+e.status);var t=await e.json();ze(t),g("","")}catch(a){g("error","Failed to load config: "+a.message)}await Je()}async function Qe(e){var t=f.some(function(r){return u[r].enabled});if(!t){g("error","At least one provider must be enabled.");return}var a=Kt();g("","Saving\u2026"),Q.disabled=G.disabled=!0;try{var n=await fetch(U("/save"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)}),o=await n.json();if(!n.ok||o.success===!1){g("error",o.message||"Save failed",o.errors);return}if(g("success","Saved."),e){try{await fetch(U("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}g("success","Saved. Server closed."),window.close();return}}catch(r){g("error","Save failed: "+r.message)}finally{e||(Q.disabled=G.disabled=!1)}}async function Jt(){Ee.disabled=Q.disabled=G.disabled=!0;try{await fetch(U("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}window.close()}f.forEach(function(e){c[e].toggle.addEventListener("click",function(){wt(e)}),c[e].crosscheckOnly.addEventListener("change",function(){u[e].crosscheck_only=c[e].crosscheckOnly.checked,B(),C()}),c[e].advancedToggle.addEventListener("click",function(){Ue(c[e].advancedToggle,c[e].advancedPanel)})}),y.addEventListener("pointerdown",Ct),y.addEventListener("keydown",kt),v.forEach(function(e){O[e]&&O[e].addEventListener("change",function(){It(e)}),x[e]&&x[e].addEventListener("change",function(){Ht(e)}),M[e]&&M[e].addEventListener("change",function(){Nt(e)})}),Oe.addEventListener("click",function(){Ue(Oe,yt)}),X.addEventListener("input",Pe),T.addEventListener("change",Fe),document.querySelectorAll('#codex-sandbox-radio input[type="radio"]').forEach(function(e){e.addEventListener("change",ie)}),document.querySelectorAll('input[name="claude-permission-mode"]').forEach(function(e){e.addEventListener("change",Be)}),Y.addEventListener("change",Ne),q.addEventListener("change",$e),J.addEventListener("change",C),J.addEventListener("input",C),J.addEventListener("submit",function(e){e.preventDefault(),Qe(!1)}),G.addEventListener("click",function(){Qe(!0)}),Ee.addEventListener("click",function(){Jt()}),C(),zt()})();</script>
+    <script>(function(){"use strict";var p={codex:{value:34,enabled:!0},antigravity:{value:33,enabled:!0},claude:{value:33,enabled:!0}},at=72,nt=10*60*1e3,m={codex:{yolo:!1,sandbox:"workspace-write"},antigravity:{sandbox:!0,skip_permissions:!0},claude:{permission_mode:"dontAsk"}},$={enabled:!1,location:"project"},ot={codex:"",antigravity:"",claude:""},w={codex:"off",antigravity:"auto",claude:"off"},I={codex:"mid",antigravity:"mid",claude:"mid"},ve={high:{model:"opus",effort:"max"},mid:{model:"opus",effort:"high"},low:{model:"sonnet",effort:"high"}},he={high:{model:"gpt-5.6-sol",effort:"max"},mid:{model:"gpt-5.6-terra",effort:"high"},low:{model:"gpt-5.6-terra",effort:"medium"}},ge={high:{model:"Gemini 3.1 Pro",effort:"High"},mid:{model:"Gemini 3.5 Flash",effort:"Medium"},low:{model:"Gemini 3.5 Flash",effort:"Low"}},x={enabled:!1,language:"en",targets:{claude:!1,codex:!0,antigravity:!0}},j=0,h=100,rt=1,it=720,lt=1e3,dt=18e5,f=["codex","antigravity","claude"],z=["read-only","workspace-write","danger-full-access","off"],H=["acceptEdits","auto","dontAsk","bypassPermissions"],ct=["opus","sonnet","haiku","fable","best","opus[1m]","sonnet[1m]"],ut=["low","medium","high","xhigh","max"],me={opus:["low","medium","high","xhigh","max"],"opus[1m]":["low","medium","high","xhigh","max"],fable:["low","medium","high","xhigh","max"],best:["low","medium","high","xhigh","max"],sonnet:["low","medium","high","max"],"sonnet[1m]":["low","medium","high","max"],haiku:[]},ye=["low","medium","high","xhigh","max","ultra"],st=["Low","Medium","High","Thinking"],be={"gpt-5.6-sol":["low","medium","high","xhigh","max","ultra"],"gpt-5.6-terra":["low","medium","high","xhigh","max","ultra"],"gpt-5.6-luna":["low","medium","high","xhigh","max"],"gpt-5.5":["low","medium","high","xhigh"],"gpt-5.4":["low","medium","high","xhigh"],"gpt-5.4-mini":["low","medium","high","xhigh"]},pe=["project","user"],L=["off","auto","strict"],v=["high","mid","low"],xe=["en","ko"],ft={"-2":"Subtle","-1":"Soft",0:"Neutral",1:"Active",2:"Strong"},vt=new URLSearchParams(location.search),ht=vt.get("token")||"";function l(e){return document.querySelector(e)}var J=l("#form"),W=l("#status"),Q=l("#save"),G=l("#save-close"),Ee=l("#cancel"),S=l("#ratio-warn"),y=l("#ratio-bar"),X=l("#strength"),gt=l("#strength-label"),_e=l("#ttl"),Ae=l("#spawn-timeout-ms"),c={};f.forEach(function(e){c[e]={toggle:l("#toggle-"+e),pct:l("#"+e+"-pct"),hint:l("#"+e+"-hint"),summary:l("#summary-"+e),installHint:l("#"+e+"-install-hint"),advancedToggle:l("#advanced-toggle-"+e),advancedPanel:l("#advanced-panel-"+e),kw:l("#kw-"+e),crosscheckOnly:l("#crosscheck-only-"+e),preamble:l("#preamble-"+e)}});var T=l("#codex-yolo"),ke=l("#codex-sandbox-wrap"),Ce=l("#codex-sandbox-hint"),mt=l("#codex-full-access-warning"),E={high:l("#model-codex-high"),mid:l("#model-codex-mid"),low:l("#model-codex-low")},Z={high:l("#effort-codex-high"),mid:l("#effort-codex-mid"),low:l("#effort-codex-low")},we=l("#antigravity-sandbox"),ee=l("#antigravity-skip-perms"),M={high:l("#model-antigravity-high"),mid:l("#model-antigravity-mid"),low:l("#model-antigravity-low")},te={high:l("#effort-antigravity-high"),mid:l("#effort-antigravity-mid"),low:l("#effort-antigravity-low")},yt=l("#claude-bypass-warning"),O={high:l("#model-claude-high"),mid:l("#model-claude-mid"),low:l("#model-claude-low")},ae={high:l("#effort-claude-high"),mid:l("#effort-claude-mid"),low:l("#effort-claude-low")},Y=l("#artifacts-enabled"),Le=l("#artifacts-location-wrap"),q=l("#youtube-enabled"),Se=l("#youtube-detail-wrap"),Te=l("#youtube-target-claude"),Me=l("#youtube-target-codex"),Oe=l("#youtube-target-antigravity"),De=l("#youtube-advanced-toggle"),bt=l("#youtube-advanced-panel"),u={codex:{value:p.codex.value,enabled:p.codex.enabled,crosscheck_only:!1},antigravity:{value:p.antigravity.value,enabled:p.antigravity.enabled,crosscheck_only:!1},claude:{value:p.claude.value,enabled:p.claude.enabled,crosscheck_only:!1}},_={codex:"available",antigravity:"available",claude:"available"},D=[],b=[],A={high:{model:"",effort:""},mid:{model:"",effort:""},low:{model:"",effort:""}},R={high:{model:"",effort:""},mid:{model:"",effort:""},low:{model:"",effort:""}},P={high:{model:"",effort:""},mid:{model:"",effort:""},low:{model:"",effort:""}};function ne(e,t,a){return Math.max(t,Math.min(a,e))}function g(e,t,a){if(W.className="status"+(e?" "+e:""),W.innerHTML="",!(!t&&(!a||!a.length))){var n=document.createElement("div");if(n.textContent=t||"",W.appendChild(n),a&&a.length){for(var o=document.createElement("ul"),r=0;r<a.length;r+=1){var i=document.createElement("li");i.textContent=String(a[r]),o.appendChild(i)}W.appendChild(o)}}}function F(){return f.filter(function(e){return u[e].enabled&&!u[e].crosscheck_only})}function pt(){return f.filter(function(e){return u[e].enabled}).length}function Re(){var e=F();if(e.length!==0){var t=Math.floor(h/e.length),a=h-t*e.length;e.forEach(function(n,o){u[n].value=t+(o<a?1:0)})}}function xt(){var e=F();if(e.length!==0){var t=e.reduce(function(o,r){return o+u[r].value},0);if(t<=0){Re();return}var a=0,n=e.map(function(o,r){var i=u[o].value/t*h,d=Math.floor(i);return a+=d,{provider:o,value:d,remainder:i-d,index:r}});n.slice().sort(function(o,r){return r.remainder!==o.remainder?r.remainder-o.remainder:o.index-r.index}).slice(0,h-a).forEach(function(o){o.value+=1}),n.forEach(function(o){u[o.provider].value=o.value})}}function oe(e){for(var t=[],a=0,n=0;n<e.length-1;n+=1)a+=u[e[n]].value,t.push(a);return t}function Et(){for(;y.firstChild;)y.removeChild(y.firstChild)}function _t(e){var t=0;e.forEach(function(a){var n=document.createElement("div");n.className="ratio-bar-segment",n.setAttribute("data-provider",a),n.style.left=t+"%",n.style.width=u[a].value+"%",y.appendChild(n),t+=u[a].value})}function At(e){var t=oe(e);t.forEach(function(a,n){var o=e[n],r=e[n+1],i=document.createElement("button");i.type="button",i.className="ratio-bar-handle",i.style.left=a+"%",i.setAttribute("data-boundary-index",String(n)),i.setAttribute("aria-label",o+" / "+r+" ratio"),i.setAttribute("aria-valuemin","0"),i.setAttribute("aria-valuemax","100"),i.setAttribute("aria-valuenow",String(a)),i.setAttribute("role","slider"),y.appendChild(i)})}function B(){xt();var e=F();f.forEach(function(t){var a=u[t],n=c[t];n.pct.textContent=a.enabled?a.crosscheck_only?"":a.value+"%":"OFF",n.toggle.setAttribute("aria-checked",String(a.enabled)),n.crosscheckOnly.checked=!!a.crosscheck_only,n.kw.disabled=!!a.crosscheck_only;var o=_[t];n.toggle.setAttribute("data-unavailable",String(o==="unavailable")),n.toggle.setAttribute("data-provider-status",o),n.hint.textContent=o==="available"?a.enabled&&a.crosscheck_only?"crosscheck only":"click to toggle":o==="unavailable"?a.enabled?"enabled \xB7 not installed":"not installed":a.enabled?"enabled \xB7 status unknown":"status check failed"}),Et(),_t(e),At(e),pt()===0?(S.textContent="At least one provider must be enabled.",S.hidden=!1):e.length===0?(S.textContent="Every enabled provider is crosscheck-only \u2014 nothing is auto-routed.",S.hidden=!1):S.hidden=!0}function N(e,t){var a=F(),n=oe(a);if(!(e<0||e>=n.length)){var o=e===0?j+1:n[e-1]+1,r=e===n.length-1?h-1:n[e+1]-1;n[e]=ne(Math.round(t),o,r);var i=0;a.forEach(function(d,et){var tt=et<n.length?n[et]:h;u[d].value=tt-i,i=tt}),B()}}function kt(e){var t=y.getBoundingClientRect();return t.width<=0?0:(e.clientX-t.left)/t.width*h}var V=null;function re(e){V!==null&&N(V,kt(e))}function Pe(){V=null,window.removeEventListener("pointermove",re),window.removeEventListener("pointerup",Pe)}function Ct(e){!e.target.classList||!e.target.classList.contains("ratio-bar-handle")||(V=Number(e.target.getAttribute("data-boundary-index")),e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId),window.addEventListener("pointermove",re),window.addEventListener("pointerup",Pe),re(e))}function wt(e){if(!(!e.target.classList||!e.target.classList.contains("ratio-bar-handle"))){var t=Number(e.target.getAttribute("data-boundary-index")),a=oe(F())[t],n=e.shiftKey?10:1;e.key==="ArrowLeft"||e.key==="ArrowDown"?(e.preventDefault(),N(t,a-n)):e.key==="ArrowRight"||e.key==="ArrowUp"?(e.preventDefault(),N(t,a+n)):e.key==="Home"?(e.preventDefault(),N(t,j)):e.key==="End"&&(e.preventDefault(),N(t,h))}}function Lt(e){var t=u[e];if(t.enabled)t.enabled=!1;else{if(_[e]!=="available")return;t.enabled=!0}Re(),B(),je(),C()}function Fe(){gt.textContent=ft[X.value]||"Neutral"}function St(e,t){if(e&&typeof e=="object"&&"value"in e)return{value:ne(Math.floor(Number(e.value)||0),j,h),enabled:!!e.enabled,crosscheck_only:!!e.crosscheck_only};if(typeof e=="number"){var a=ne(Math.floor(e),j,h);return{value:a,enabled:a>0,crosscheck_only:!1}}return{value:t.value,enabled:t.enabled,crosscheck_only:!!t.crosscheck_only}}function k(e,t,a,n){for(var o=document.querySelectorAll('input[name="'+e+'"]'),r=a.indexOf(t)>=0?t:a.indexOf(n)>=0?n:a[0],i=0;i<o.length;i+=1)o[i].checked=o[i].value===r}function s(e,t,a){var n=document.querySelector('input[name="'+e+'"]:checked');return n&&t.indexOf(n.value)>=0?n.value:a}function Tt(){f.forEach(function(e){c[e].installHint.hidden=_[e]!=="unavailable"})}function ie(){var e=document.querySelector('#codex-sandbox-radio input[type="radio"]:checked');mt.hidden=!(e&&e.value==="danger-full-access")}function Be(){for(var e=T.checked,t=document.querySelectorAll('#codex-sandbox-radio input[type="radio"]'),a=0;a<t.length;a+=1)t[a].disabled=e;e?(ke.classList.add("is-inert"),Ce.hidden=!1):(ke.classList.remove("is-inert"),Ce.hidden=!0),ie()}function Ne(){var e=s("claude-permission-mode",H,m.claude.permission_mode);yt.hidden=e!=="bypassPermissions"}function Ue(){Y.checked?Le.classList.remove("is-inert"):Le.classList.add("is-inert")}function Ie(e,t){if(!e.disabled){var a=e.getAttribute("aria-expanded")!=="true";if(e.setAttribute("aria-expanded",a?"true":"false"),a){t.hidden=!1,t.offsetHeight,t.classList.add("is-open");return}t.classList.remove("is-open");var n=!1,o=function(r){n||r&&r.propertyName&&r.propertyName!=="grid-template-rows"||(n=!0,t.hidden=!0,t.removeEventListener("transitionend",o))};t.addEventListener("transitionend",o),setTimeout(o,260)}}function Mt(e){var t=[],a=s("recency-"+e,L,w[e]);if(e==="codex"){T.checked&&t.push({label:"yolo: on",tone:"warn"});var n=s("codex-sandbox",z,m.codex.sandbox);n==="danger-full-access"?t.push({label:"sandbox: full-access",tone:"warn"}):n!=="off"&&t.push({label:"sandbox: "+n})}else if(e==="antigravity")ee.checked&&t.push({label:"skip-perms: on",tone:"warn"});else if(e==="claude"){var o=s("claude-permission-mode",H,m.claude.permission_mode);t.push(o==="bypassPermissions"?{label:"perm: bypass",tone:"warn"}:{label:"perm: "+o})}a!=="off"&&t.push({label:"rec: "+a});var r=(c[e].kw.value||"").trim();r&&t.push({label:"keyword: on",title:r});var i=(c[e].preamble.value||"").trim();return i&&t.push({label:"preamble: on",title:i.slice(0,80)}),t}function K(e){var t=c[e].summary;if(t){for(var a=Mt(e);t.firstChild;)t.removeChild(t.firstChild);for(var n=0;n<a.length;n+=1){var o=document.createElement("span");o.className="summary-chip",a[n].tone&&o.setAttribute("data-tone",a[n].tone),a[n].title&&o.setAttribute("data-tooltip",a[n].title),o.textContent=a[n].label,t.appendChild(o)}}}function C(){f.forEach(K)}function je(){f.forEach(function(e){var t=c[e];t.advancedToggle.disabled=_[e]!=="available",_[e]!=="available"&&t.advancedToggle.getAttribute("aria-expanded")==="true"&&(t.advancedToggle.setAttribute("aria-expanded","false"),t.advancedPanel.classList.remove("is-open"),t.advancedPanel.hidden=!0)})}function Ot(e){var t=e&&typeof e=="object"?e:m,a=t.codex&&typeof t.codex=="object"?t.codex:{},n=t.antigravity&&typeof t.antigravity=="object"?t.antigravity:{},o=t.claude&&typeof t.claude=="object"?t.claude:{};T.checked=!!a.yolo,k("codex-sandbox",typeof a.sandbox=="string"?a.sandbox:m.codex.sandbox,z),we.checked=!!n.sandbox,ee.checked=!!n.skip_permissions,k("claude-permission-mode",typeof o.permission_mode=="string"?o.permission_mode:m.claude.permission_mode,H,m.claude.permission_mode),Be(),ie(),Ne()}function Dt(e){var t=e&&typeof e=="object"?e:$;Y.checked=!!t.enabled,k("artifacts-location",typeof t.location=="string"?t.location:$.location,pe),Ue()}function le(e,t,a){var n=e&&typeof e=="object"?e:t;f.forEach(function(o){a(o,typeof n[o]=="string"?n[o]:t[o])})}function Rt(e){le(e,ot,function(t,a){c[t].preamble.value=a})}function Pt(e){le(e,w,function(t,a){k("recency-"+t,a,L)})}function Ft(e){le(e,I,function(t,a){k("default-tier-"+t,a,v)})}function Bt(e){var t=e&&typeof e=="object"?e:{};f.forEach(function(a){c[a].kw.value=typeof t[a]=="string"?t[a]:""})}function de(e,t,a,n){for(;e.firstChild;)e.removeChild(e.firstChild);var o=t.slice();if(a&&o.indexOf(a)<0&&o.unshift(a),o.length===0){var r=document.createElement("option");r.value="",r.textContent=n,e.appendChild(r);return}for(var i=0;i<o.length;i+=1){var d=document.createElement("option");d.value=o[i],d.textContent=o[i],o[i]===a&&(d.selected=!0),e.appendChild(d)}}function He(e){var t=/^(.*?)\s*\(([^()]+)\)\s*$/.exec(String(e||""));return t?{model:t[1].trim(),effort:t[2].trim()}:{model:String(e||"").trim(),effort:""}}function Nt(){for(var e=[],t=0;t<D.length;t+=1){var a=He(D[t]).model;a&&e.indexOf(a)<0&&e.push(a)}return e}function We(e){for(var t=[],a=0;a<D.length;a+=1){var n=He(D[a]);n.model===e&&n.effort&&t.indexOf(n.effort)<0&&t.push(n.effort)}return t}function Ge(e,t){var a=te[e];if(a){for(var n=We(t);a.firstChild;)a.removeChild(a.firstChild);if(n.length===0){var o=document.createElement("option");o.value="",o.textContent="(no effort)",a.appendChild(o),a.disabled=!0;return}a.disabled=!1;for(var r=ce(A[e].effort,n,st),i=0;i<n.length;i+=1){var d=document.createElement("option");d.value=n[i],d.textContent=n[i],n[i]===r&&(d.selected=!0),a.appendChild(d)}}}function Xe(){var e=Nt();v.forEach(function(t){var a=M[t];a&&(de(a,e,A[t].model,"(run agy to load models)"),Ge(t,a.value))})}function Ut(e){var t=te[e];A[e].effort=t&&!t.disabled?t.value:A[e].effort,Ge(e,M[e].value),K("antigravity")}function ce(e,t,a){if(t.length===0)return"";if(t.indexOf(e)>=0)return e;var n=a.indexOf(e);if(n<0)return t[t.length-1];for(var o=t[0],r=0;r<t.length;r+=1)a.indexOf(t[r])<=n&&(o=t[r]);return o}function Ye(e,t){var a=ae[e];if(a){for(var n=me[t]||[];a.firstChild;)a.removeChild(a.firstChild);if(n.length===0){var o=document.createElement("option");o.value="",o.textContent="(no effort)",a.appendChild(o),a.disabled=!0;return}a.disabled=!1;for(var r=ce(R[e].effort,n,ut),i=0;i<n.length;i+=1){var d=document.createElement("option");d.value=n[i],d.textContent=n[i],n[i]===r&&(d.selected=!0),a.appendChild(d)}}}function It(){v.forEach(function(e){var t=O[e];t&&(de(t,ct,R[e].model,"(none)"),Ye(e,t.value))})}function jt(e){var t=ae[e];R[e].effort=t&&!t.disabled?t.value:R[e].effort,Ye(e,O[e].value),K("claude")}function ue(e){for(var t=0;t<b.length;t+=1)if(b[t]&&b[t].slug===e)return b[t];return null}function qe(e){var t=ue(e);return t&&Array.isArray(t.efforts)?t.efforts:be[e]||ye}function Ht(){return b.length>0?b.map(function(e){return e&&typeof e.slug=="string"?e.slug:""}).filter(function(e){return e.length>0}):Object.keys(be)}function Ve(e){for(var t=0;t<e.options.length;t+=1){var a=ue(e.options[t].value);a&&a.description&&(e.options[t].title=a.description)}var n=ue(e.value);e.title=n&&n.description?n.description:""}function Ke(e,t){var a=Z[e];if(a){for(var n=qe(t);a.firstChild;)a.removeChild(a.firstChild);if(n.length===0){var o=document.createElement("option");o.value="",o.textContent="(no effort)",a.appendChild(o),a.disabled=!0;return}a.disabled=!1;for(var r=ce(P[e].effort,n,ye),i=0;i<n.length;i+=1){var d=document.createElement("option");d.value=n[i],d.textContent=n[i],n[i]===r&&(d.selected=!0),a.appendChild(d)}}}function $e(){var e=Ht();v.forEach(function(t){var a=E[t];a&&(de(a,e,P[t].model,"(codex default)"),Ve(a),Ke(t,a.value))})}function Wt(e){var t=Z[e];P[e].effort=t&&!t.disabled?t.value:P[e].effort,Ve(E[e]),Ke(e,E[e].value),K("codex")}function Gt(e){var t=e&&typeof e=="object"?e:{},a=t.antigravity&&typeof t.antigravity=="object"?t.antigravity:{};v.forEach(function(r){var i=a[r]&&typeof a[r]=="object"?a[r]:ge[r];A[r]={model:typeof i.model=="string"?i.model:ge[r].model,effort:typeof i.effort=="string"?i.effort:""}});var n=t.claude&&typeof t.claude=="object"?t.claude:{};v.forEach(function(r){var i=n[r]&&typeof n[r]=="object"?n[r]:ve[r];R[r]={model:typeof i.model=="string"?i.model:ve[r].model,effort:typeof i.effort=="string"?i.effort:""}});var o=t.codex&&typeof t.codex=="object"?t.codex:{};v.forEach(function(r){var i=o[r]&&typeof o[r]=="object"?o[r]:he[r];P[r]={model:typeof i.model=="string"?i.model:he[r].model,effort:typeof i.effort=="string"?i.effort:""}}),Xe(),It(),$e()}function ze(){q.checked?Se.classList.remove("is-inert"):Se.classList.add("is-inert")}function Xt(e){var t=e&&typeof e=="object"?e:x;q.checked=!!t.enabled,k("youtube-language",typeof t.language=="string"?t.language:x.language,xe);var a=t.targets&&typeof t.targets=="object"?t.targets:{};Te.checked=typeof a.claude=="boolean"?a.claude:x.targets.claude,Me.checked=typeof a.codex=="boolean"?a.codex:x.targets.codex,Oe.checked=typeof a.antigravity=="boolean"?a.antigravity:x.targets.antigravity,ze()}function Je(e){var t=e.ratio||{};f.forEach(function(a){u[a]=St(t[a],u[a])}),X.value=String(e.intervention_strength),Bt(e.keywords),_e.value=e.session_ttl_hours,Ae.value=e.spawn_timeout_ms,Ot(e.option_flags),Dt(e.artifacts),Rt(e.preamble),Pt(e.recency_factor),Ft(e.default_tier),Gt(e.model_map),Xt(e.addons&&e.addons.youtube),B(),Fe(),C()}function Yt(){return{codex:{yolo:!!T.checked,sandbox:s("codex-sandbox",z,m.codex.sandbox)},antigravity:{sandbox:!!we.checked,skip_permissions:!!ee.checked},claude:{permission_mode:s("claude-permission-mode",H,m.claude.permission_mode)}}}function se(e,t,a,n){var o=e?String(e.value||""):"",r={model:o},i=a(o);return t&&!t.disabled&&i.length>0&&t.value?r.effort=t.value:t&&t.disabled&&n&&(r.effort=n),r}function qt(e){return me[e]||[]}function Vt(){var e={},t={},a={};return v.forEach(function(n){e[n]=se(E[n],Z[n],qe),t[n]=se(M[n],te[n],We,A[n].effort),a[n]=se(O[n],ae[n],qt)}),{codex:e,antigravity:t,claude:a}}function Kt(){return{enabled:!!Y.checked,location:s("artifacts-location",pe,$.location)}}function fe(e){return{value:u[e].value,enabled:u[e].enabled,crosscheck_only:!!u[e].crosscheck_only}}function $t(){return{ratio:{codex:fe("codex"),antigravity:fe("antigravity"),claude:fe("claude")},intervention_strength:Number(X.value),keywords:{codex:c.codex.kw.value.trim(),antigravity:c.antigravity.kw.value.trim(),claude:c.claude.kw.value.trim()},option_flags:Yt(),model_map:Vt(),default_tier:{codex:s("default-tier-codex",v,I.codex),antigravity:s("default-tier-antigravity",v,I.antigravity),claude:s("default-tier-claude",v,I.claude)},session_ttl_hours:Math.max(rt,Math.min(it,Math.floor(Number(_e.value)||at))),spawn_timeout_ms:Math.max(lt,Math.min(dt,Math.floor(Number(Ae.value)||nt))),artifacts:Kt(),preamble:{codex:String(c.codex.preamble.value||""),antigravity:String(c.antigravity.preamble.value||""),claude:String(c.claude.preamble.value||"")},recency_factor:{codex:s("recency-codex",L,w.codex),antigravity:s("recency-antigravity",L,w.antigravity),claude:s("recency-claude",L,w.claude)},addons:{youtube:{enabled:!!q.checked,language:s("youtube-language",xe,x.language),targets:{claude:!!Te.checked,codex:!!Me.checked,antigravity:!!Oe.checked}}}}}function U(e){return e+"?token="+encodeURIComponent(ht)}function zt(){var e=window.__CENNAD_STATE__;return e&&typeof e=="object"&&e.ratio?(Je(e),!0):!1}async function Qe(){try{var e=await fetch(U("/provider-status"));if(!e.ok)return;var t=await e.json();f.forEach(function(a){var n=t[a]&&t[a].status;_[a]=n==="available"||n==="unavailable"||n==="unknown"?n:"unknown"}),D=Array.isArray(t.agyModels)?t.agyModels:[],b=Array.isArray(t.codexModels)?t.codexModels:[],Xe(),$e()}catch{return}Tt(),B(),je()}async function Jt(){if(zt()){g("",""),await Qe();return}g("","Loading\u2026");try{var e=await fetch(U("/config"));if(!e.ok)throw new Error("HTTP "+e.status);var t=await e.json();Je(t),g("","")}catch(a){g("error","Failed to load config: "+a.message)}await Qe()}async function Ze(e){var t=f.some(function(r){return u[r].enabled});if(!t){g("error","At least one provider must be enabled.");return}var a=$t();g("","Saving\u2026"),Q.disabled=G.disabled=!0;try{var n=await fetch(U("/save"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)}),o=await n.json();if(!n.ok||o.success===!1){g("error",o.message||"Save failed",o.errors);return}if(g("success","Saved."),e){try{await fetch(U("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}g("success","Saved. Server closed."),window.close();return}}catch(r){g("error","Save failed: "+r.message)}finally{e||(Q.disabled=G.disabled=!1)}}async function Qt(){Ee.disabled=Q.disabled=G.disabled=!0;try{await fetch(U("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}window.close()}f.forEach(function(e){c[e].toggle.addEventListener("click",function(){Lt(e)}),c[e].crosscheckOnly.addEventListener("change",function(){u[e].crosscheck_only=c[e].crosscheckOnly.checked,B(),C()}),c[e].advancedToggle.addEventListener("click",function(){Ie(c[e].advancedToggle,c[e].advancedPanel)})}),y.addEventListener("pointerdown",Ct),y.addEventListener("keydown",wt),v.forEach(function(e){O[e]&&O[e].addEventListener("change",function(){jt(e)}),E[e]&&E[e].addEventListener("change",function(){Wt(e)}),M[e]&&M[e].addEventListener("change",function(){Ut(e)})}),De.addEventListener("click",function(){Ie(De,bt)}),X.addEventListener("input",Fe),T.addEventListener("change",Be),document.querySelectorAll('#codex-sandbox-radio input[type="radio"]').forEach(function(e){e.addEventListener("change",ie)}),document.querySelectorAll('input[name="claude-permission-mode"]').forEach(function(e){e.addEventListener("change",Ne)}),Y.addEventListener("change",Ue),q.addEventListener("change",ze),J.addEventListener("change",C),J.addEventListener("input",C),J.addEventListener("submit",function(e){e.preventDefault(),Ze(!1)}),G.addEventListener("click",function(){Ze(!0)}),Ee.addEventListener("click",function(){Qt()}),C(),Jt()})();</script>
   </body>
 </html>

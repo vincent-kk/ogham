@@ -1,6 +1,6 @@
 {
   "name": "deilen",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Deilen — render Claude markdown documents as a readable browser page with line-anchored feedback back to Claude",
   "author": {
     "name": "Vincent K. Kelvin"
@@ -8,12 +8,20 @@
   "repository": "https://github.com/vincent-kk/ogham",
   "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/deilen",
   "license": "MIT",
-  "keywords": ["claude-code", "plugin", "markdown", "viewer", "feedback"],
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "markdown",
+    "viewer",
+    "feedback"
+  ],
   "skills": "./skills/",
   "mcpServers": {
     "deilen": {
       "command": "node",
-      "args": ["bridge/mcp-server.cjs"],
+      "args": [
+        "bridge/mcp-server.cjs"
+      ],
       "cwd": ".",
       "env": {
         "OGHAM_HOST": "codex"

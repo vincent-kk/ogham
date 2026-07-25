@@ -1,6 +1,6 @@
 {
   "name": "maencof-lens",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Read-only vault knowledge access for development contexts",
   "author": {
     "name": "Vincent K. Kelvin"
@@ -8,13 +8,21 @@
   "repository": "https://github.com/vincent-kk/ogham",
   "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/maencof-lens",
   "license": "MIT",
-  "keywords": ["claude-code", "plugin", "knowledge-graph", "read-only", "lens"],
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "knowledge-graph",
+    "read-only",
+    "lens"
+  ],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
   "mcpServers": {
     "maencof-lens": {
       "command": "node",
-      "args": ["bridge/mcp-server.cjs"],
+      "args": [
+        "bridge/mcp-server.cjs"
+      ],
       "cwd": ".",
       "env": {
         "OGHAM_HOST": "codex"
