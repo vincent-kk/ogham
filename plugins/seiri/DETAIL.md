@@ -20,9 +20,10 @@
 - SessionStart 는 활성 규칙 이름, dial 위치, drift 경고, 선출 계약을 주입한다 — 규칙 본문은 주입하지 않는다. 본문은 하니스가 이미 로드한다.
 - 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트된다. 배포된 규칙이 없는 프로젝트는 선출 줄만 받고, `advisory` 에서는 배포 여부와 무관하게 아무것도 받지 않는다.
 - 어떤 실패든 `{ continue: true }` 를 내고 주입하지 않는다. 훅이 세션을 막을 수 없어야 한다.
-- PostToolUse 와 PostToolUseFailure 는 Bash 결과만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다.
+- PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다.
+- `Skill` 로드는 관측만 한다: seiri 워크플로우면 마지막 상태를 `.seiri/session-signals.json` 에 기록하고 아무것도 주입하지 않는다. 체인 밖 스킬(다른 플러그인, 호출형 게이트)은 상태를 남기지 않는다. 상태는 로드마다 재무장되고 다음 턴이 한 번만 소비한다.
 - SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `advisory` 에서는 전혀 주입하지 않는다. 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트되므로, 배포 0건인 프로젝트의 서브에이전트는 선출 줄 하나만 받는다.
-- UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하며, dial 로 게이트한다. `advisory` 에서는 침묵; `standard` 는 선출 어휘로 상기하며 done-claim 순간만 `/seiri:verify` 로 명시하고, `strict` 는 순간마다의 소유 스킬을 전부 이름으로 댄다. 프롬프트 본문은 읽지 않는다.
+- UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하고, 아직 말하지 않은 워크플로우 상태가 있으면 한 절을 덧붙인다(읽기 실패는 리마인더만 남기고 넘어간다). dial 로 게이트한다. `advisory` 에서는 침묵; `standard` 는 선출 어휘로 상기하며 done-claim 순간만 `/seiri:verify` 로 명시하고, `strict` 는 순간마다의 소유 스킬을 전부 이름으로 댄다. 프롬프트 본문은 읽지 않는다.
 - InstructionsLoaded 는 구현되어 있으나 `hooks.json` 에 등록되지 않았다 (dormant). Dormant 인 동안에는 실행되지 않으며, 등록되면 훅 페이로드 전체를 보존하고 아무것도 주입하지 않는다.
 
 ### Configuration

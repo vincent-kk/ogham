@@ -9,14 +9,14 @@
 
 ## Structure
 
-- `userPromptSubmit.ts` — `processUserPromptSubmit` (게이팅 + 다이얼별 문구)
-- `userPromptSubmit.entry.ts` — esbuild 번들 진입점
-  (`bridge/user-prompt-submit.mjs`)
+- `userPromptSubmit.ts` — `processUserPromptSubmit` (게이팅 + 문구 + 상태 1절)
+- `userPromptSubmit.entry.ts` — `bridge/user-prompt-submit.mjs` 번들 진입점
 
 ## Conventions
 
-- **다이얼이 먼저다.** advisory 면 주입 없이 빠져나온다 — 발동율이 측정된
-  그 상태를 유지한다. standard·strict 만 말한다.
+- **다이얼이 먼저다.** advisory 면 상태도 안 읽고 주입 없이 빠져나온다.
+- **상태 1절은 로드 뒤 한 턴만.** `consumeWorkflowState` 가 1회 소비하고,
+  읽기·쓰기 실패는 상기만 남긴 채 조용히 지나간다(fail-open).
 - **단계별로 문구가 다르다.** standard 는 선출 어휘 + `/seiri:verify` 하나,
   strict 는 전 순간을 이름으로 댄다. 정본은 `constants/hooks.ts`
   (`TURN_REMINDER_STANDARD` · `TURN_REMINDER_STRICT`).

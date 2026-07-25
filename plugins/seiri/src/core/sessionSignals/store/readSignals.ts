@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 import type { SessionSignals } from '../../../types/signals.js';
+import { isWorkflowSignal } from '../utils/isWorkflowSignal.js';
 import { resolveSignalsPath } from '../utils/resolveSignalsPath.js';
 
 /**
@@ -39,5 +40,6 @@ export function readSignals(
         ? stored.counts
         : {},
     announced: Array.isArray(stored.announced) ? stored.announced : [],
+    ...(isWorkflowSignal(stored.workflow) ? { workflow: stored.workflow } : {}),
   };
 }

@@ -18,4 +18,11 @@ export const RULE_ID_PREFIX = `${PLUGIN_NAME}_`;
 /** Marker opening every line seiri injects into a session. */
 export const INJECTION_PREFIX = `[${PLUGIN_NAME}]`;
 
+/**
+ * Namespace on every skill reference — `seiri:write-plan` as the model
+ * dispatches it, `/seiri:write-plan` as prose names it. What arrives in a
+ * hook payload is the first form, which is why this carries no slash.
+ */
+export const SKILL_ID_PREFIX = `${PLUGIN_NAME}:`;
+
 export const EMPTY_RESULT = { continue: true } as const satisfies HookOutput;

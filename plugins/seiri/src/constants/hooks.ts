@@ -33,6 +33,19 @@ export const HookName = {
 } as const;
 
 /**
+ * Host tool names the PostToolUse matchers select on.
+ *
+ * `hooks.json` cannot import this file, so each name is stated twice: once
+ * as a matcher there, once as the payload check here — the hook is
+ * registered per tool and still verifies what it received. The wiring test
+ * keeps the two copies in step.
+ */
+export const HostTool = {
+  BASH: 'Bash',
+  SKILL: 'Skill',
+} as const;
+
+/**
  * Hooks that are built but deliberately absent from `hooks/hooks.json`.
  *
  * `instructions-loaded` records which rule files reach the model — a

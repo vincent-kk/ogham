@@ -2,17 +2,17 @@
 
 ## Purpose
 
-세션 안에서만 뜻이 있는 카운터를 담는다. 현재는 하나 — 같은 Bash 명령이
-연달아 실패한 횟수. **판정을 소유하지 않는다**: "몇 번째인가"만 답하고,
-그것이 문제인지는 모델이 판단한다.
+세션 안에서만 뜻이 있는 상태를 담는다. 둘 — 같은 Bash 명령이 연달아 실패한
+횟수, 마지막으로 로드된 워크플로우. **판정을 소유하지 않는다**: "몇 번째인가"·
+"어디까지 왔나"만 답하고, 그것이 무슨 뜻인지는 모델이 판단한다.
 
 ## Structure
 
 ```
-index.ts   barrel
-record/    organ — recordBashFailure(→announce 여부) · recordBashSuccess
+index.ts   barrel (외부 소비자 전용 — 훅은 organ 을 직접 import)
+record/    organ — recordBashFailure · recordBashSuccess · recordWorkflowState · consumeWorkflowState
 store/     organ — readSignals · writeSignals (`.seiri/session-signals.json`)
-utils/     organ — hashCommand · resolveSignalsPath
+utils/     organ — hashCommand · resolveSignalsPath · isWorkflowSignal
 ```
 
 ## Conventions
@@ -21,11 +21,10 @@ utils/     organ — hashCommand · resolveSignalsPath
   부재로 취급한다 — 다음 쓰기가 덮으므로 별도 청소 훅이 필요 없다.
 - 명령은 **해시로만** 저장한다. 필요한 건 "직전과 같은 명령인가" 동치 판정
   뿐이고, 실행 명령 전문을 남기는 건 아무도 요구하지 않은 부채다.
-- 읽기는 절대 throw 하지 않는다. 손상은 빈 상태로 시작 — 제안 하나 늦는
-  비용이 평범한 셸 명령에서 훅 오류가 뜨는 비용보다 싸다.
-- 카운터는 **명령별**이다. 무관한 명령의 성공이 남의 연쇄를 리셋하지 않는다.
-- 추적 명령 수에 상한이 있다 — 스크래치패드지 로그가 아니다. 실패 0건인
-  프로젝트는 상태 파일 자체가 생기지 않는다.
+- 읽기는 절대 throw 하지 않는다. 손상·타 세션 파일은 빈 상태로 시작한다.
+- 카운터는 **명령별**이고 추적 수에 상한이 있다 — 스크래치패드지 로그가 아니다.
+- 워크플로우 상태는 **로드마다 재무장, 1회 소비**한다. 매 턴 되풀이하면
+  배너가 되고, 배너는 무시당한다.
 
 ## Boundaries
 

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
 import { describe, expect, it } from 'vitest';
 
-import { DORMANT_HOOKS, HookName } from '../constants/hooks.js';
+import { DORMANT_HOOKS, HookName, HostTool } from '../constants/hooks.js';
 import { Route, STATE_PLACEHOLDER } from '../constants/http.js';
 import { INTERVENTION_LEVELS } from '../constants/intervention.js';
 import { RULE_ID_PREFIX } from '../constants/plugin.js';
@@ -37,6 +37,12 @@ describe('wiring', () => {
     );
     for (const name of active)
       expect(hooksJson).toContain(`bridge/${name}.mjs`);
+  });
+
+  it('selects each watched tool by name in hooks.json', () => {
+    const hooksJson = read('hooks', 'hooks.json');
+    for (const tool of Object.values(HostTool))
+      expect(hooksJson).toContain(`"matcher": "${tool}"`);
   });
 
   it('keeps dormant hooks out of hooks.json until re-measurement', () => {

@@ -3,7 +3,9 @@ import {
   TURN_REMINDER_STRICT,
 } from '../../constants/hooks.js';
 import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
+import { WORKFLOW_STATE_LINES } from '../../constants/signals.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
+import { consumeWorkflowState } from '../../core/sessionSignals/record/consumeWorkflowState.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 
 /**
@@ -35,11 +37,34 @@ export function processUserPromptSubmit(
         : undefined;
   if (line === undefined) return EMPTY_RESULT;
 
+  const lines = [`${INJECTION_PREFIX} ${line}`];
+  const state = pendingState(input.cwd, input.session_id);
+  if (state !== undefined) lines.push(`${INJECTION_PREFIX} ${state}`);
+
   return {
     continue: true,
     hookSpecificOutput: {
       hookEventName: input.hook_event_name,
-      additionalContext: `${INJECTION_PREFIX} ${line}`,
+      additionalContext: lines.join('\n'),
     },
   };
+}
+
+/**
+ * Where the chain already is, said once per workflow load.
+ *
+ * The reminder says which moments have owners; this says which one just
+ * ran and who owns the next — the part no injected posture can know,
+ * because it comes from what the session actually did.
+ *
+ * Fails open in both directions: unreadable state costs the clause and
+ * never the reminder, and nothing here can stop a turn.
+ */
+function pendingState(cwd: string, sessionId: string): string | undefined {
+  try {
+    const skill = consumeWorkflowState(cwd, sessionId);
+    return skill === undefined ? undefined : WORKFLOW_STATE_LINES[skill];
+  } catch {
+    return undefined;
+  }
 }

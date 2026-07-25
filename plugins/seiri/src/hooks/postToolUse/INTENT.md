@@ -1,25 +1,25 @@
-# postToolUse — Bash 실패 연쇄 신호
+# postToolUse — 실패 연쇄 신호 · 워크플로우 관측
 
 ## Purpose
 
-같은 셸 명령이 초록을 한 번도 못 본 채 연달아 실패하면 **한 줄 제안**을
-주입한다. 그뿐이다 — 차단하지 않고, 실패를 해석하지 않는다.
+같은 셸 명령이 초록 없이 연달아 실패하면 **한 줄 제안**을 주입한다. `Skill`
+로드는 **관측만** 한다 — 주입 0, 말하는 건 다음 턴. 차단은 어느 쪽도 아니다.
 
 ## Structure
 
-- `postToolUse.ts` — `processBashOutcome` (게이팅 + 카운트 + 문구)
+- `postToolUse.ts` — `processToolOutcome` (게이팅 → 도구 분기 → 카운트·관측)
 - `postToolUse.entry.ts` — esbuild 번들 진입점 (`bridge/post-tool-use.mjs`)
 
 ## Conventions
 
-- **이벤트 2개에 등록된다.** 비-0 종료는 `PostToolUseFailure`, 0 종료는
-  `PostToolUse` 로 온다(실측). 앞은 세고 뒤는 잊는다 — 초록을 본 순간
-  연쇄가 아니게 되므로.
-- 실패 페이로드에는 `tool_response` 가 없다. 신호는 `error` 문자열과
-  `is_interrupt` 로 온다. 사용자가 끊은 실행은 명령에 대해 아무것도
-  말해주지 않으므로 세지 않는다.
-- **다이얼이 먼저다.** advisory 면 상태를 건드리기 전에 빠져나온다 — 카운터
-  파일조차 만들지 않는다.
+- **도구 2종 · 이벤트 2개.** matcher 는 `Bash`·`Skill`(정본 `HostTool`,
+  wiring 이 hooks.json 과 대조). 비-0 종료는 `PostToolUseFailure`, 0 종료는
+  `PostToolUse`(실측) — 앞은 세고 뒤는 잊는다.
+- **`Skill` 은 답하지 않는다.** seiri 워크플로우면 마지막 상태만 기록하고
+  무주입으로 빠진다 — 문구는 다음 턴(userPromptSubmit) 몫이다.
+- 실패 페이로드엔 `tool_response` 가 없다. 신호는 `error`·`is_interrupt` 로
+  오며, 사용자가 끊은 실행은 명령에 대해 말해주는 게 없으니 세지 않는다.
+- **다이얼이 먼저다.** advisory 면 상태를 건드리기 전에 빠져나온다.
 - 문구는 fail-first 를 **본문에서 인정한다.** 의도된 red 와 안 먹는 fix 는
   페이로드상 구분 불가라, 구분하는 척하지 않고 양쪽을 다 말한다.
 - 명령당 세션 1회만 말한다. 반복은 제안을 잔소리로 만든다.
