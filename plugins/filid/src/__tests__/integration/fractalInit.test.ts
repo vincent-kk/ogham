@@ -136,7 +136,18 @@ describe('fractal-init pipeline', () => {
   });
 
   it('should validate DETAIL.md structure', () => {
-    const specContent = '# Module Spec\n\n## API\n\n- `function foo(): void`\n';
+    const specContent = [
+      '# Module Spec',
+      '## Requirements',
+      '- Provide foo.',
+      '## API Contracts',
+      '- `function foo(): void`',
+      '## Acceptance Criteria',
+      '### AC-foo — Foo contract',
+      '- Calling foo completes without an error.',
+      '## Last Updated',
+      '2026-07-26',
+    ].join('\n');
     const validation = validateDetailMd(specContent);
 
     expect(validation.valid).toBe(true);

@@ -38,6 +38,8 @@ export interface DetailMdSchema {
   requirements: string[];
   /** API interface definitions */
   apiContracts: string[];
+  /** Stable acceptance groups declared by this contract */
+  acceptanceGroups: DetailAcceptanceGroup[];
   /** Last updated timestamp */
   lastUpdated: string;
   /** Compression metadata */
@@ -71,6 +73,19 @@ export interface DetailMdValidation {
   /** Whether valid */
   valid: boolean;
   /** List of violations */
+  violations: DocumentViolation[];
+  /** Stable acceptance groups extracted from the current document */
+  acceptanceGroups: DetailAcceptanceGroup[];
+}
+
+export interface DetailAcceptanceGroup {
+  id: string;
+  title: string;
+  line: number;
+}
+
+export interface DetailAcceptanceGroupValidation {
+  groups: DetailAcceptanceGroup[];
   violations: DocumentViolation[];
 }
 

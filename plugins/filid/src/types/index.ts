@@ -1,5 +1,7 @@
 export type {
+  NodeType,
   CategoryType,
+  EntryPointDescriptor,
   FractalNode,
   FractalTree,
   FractalTreeDto,
@@ -13,14 +15,41 @@ export type {
 } from './fractal.js';
 
 export type {
+  AdapterClaim,
+  AdapterDiagnostic,
+  AdapterOwnership,
+  AdapterRegistry,
+  AdapterResolution,
+  AnalysisCertainty,
+  DependencyReference,
+  EntryPointInspection,
+  StructureAdapter,
+  VerificationAdapter,
+  VerificationCaseCount,
+  VerificationRole,
+} from './adapters.js';
+
+export type {
   ThreeTierBoundary,
   IntentMdSchema,
   DetailMdSchema,
   CompressionMeta,
   IntentMdValidation,
   DetailMdValidation,
+  DetailAcceptanceGroup,
+  DetailAcceptanceGroupValidation,
   DocumentViolation,
 } from './documents.js';
+
+export type {
+  AnalyzeVerificationInput,
+  ContractGroupsByOwner,
+  DetailContractDocument,
+  VerificationFileAnalysis,
+  VerificationProjectAnalysis,
+  VerificationRuleId,
+  VerificationViolation,
+} from './verification.js';
 
 export type {
   LCOM4Result,

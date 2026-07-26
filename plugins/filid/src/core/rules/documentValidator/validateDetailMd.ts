@@ -3,6 +3,8 @@ import type {
   DocumentViolation,
 } from '../../../types/documents.js';
 
+import { validateDetailAcceptanceGroups } from './acceptanceGroups/validateDetailAcceptanceGroups.js';
+
 /**
  * Detect pure append-only changes.
  * Returns true if all old lines remain at the start of new content
@@ -36,6 +38,8 @@ export function validateDetailMd(
   oldContent?: string,
 ): DetailMdValidation {
   const violations: DocumentViolation[] = [];
+  const acceptance = validateDetailAcceptanceGroups(content);
+  violations.push(...acceptance.violations);
 
   // Detect append-only (when previous content is provided)
   if (oldContent !== undefined && detectAppendOnly(oldContent, content))
@@ -49,5 +53,6 @@ export function validateDetailMd(
   return {
     valid: violations.every((v) => v.severity !== 'error'),
     violations,
+    acceptanceGroups: acceptance.groups,
   };
 }

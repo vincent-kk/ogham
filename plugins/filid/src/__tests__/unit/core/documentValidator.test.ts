@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   countLines,
   detectAppendOnly,
+  validateDetailAcceptanceGroups,
   validateDetailMd,
   validateIntentMd,
 } from '../../../core/rules/documentValidator/documentValidator.js';
@@ -109,9 +110,84 @@ describe('document-validator', () => {
 
   describe('validateDetailMd', () => {
     it('should pass for valid DETAIL.md', () => {
-      const content = '# Spec\n## Requirements\n- Feature A\n';
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- `feature(): void`',
+        '## Acceptance Criteria',
+        '### AC-feature — Feature behavior',
+        '- The feature is observable.',
+        '## Last Updated',
+        '2026-07-26',
+      ].join('\n');
       const result = validateDetailMd(content);
       expect(result.valid).toBe(true);
+    });
+
+    it('should extract stable acceptance groups', () => {
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- `feature(): void`',
+        '## Acceptance Criteria',
+        '### AC-feature — Feature behavior',
+        '- The feature is observable.',
+        '## Last Updated',
+        '2026-07-26',
+      ].join('\n');
+
+      expect(validateDetailAcceptanceGroups(content)).toEqual({
+        groups: [
+          {
+            id: 'AC-feature',
+            title: 'Feature behavior',
+            line: 7,
+          },
+        ],
+        violations: [],
+      });
+    });
+
+    it('should reject a DETAIL.md without required sections or groups', () => {
+      const result = validateDetailMd('# Spec\n## Requirements\n- Feature A\n');
+
+      expect(result.valid).toBe(false);
+      expect(result.violations).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ rule: 'missing-section' }),
+        ]),
+      );
+    });
+
+    it('should reject duplicate acceptance group IDs', () => {
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- `feature(): void`',
+        '## Acceptance Criteria',
+        '### AC-feature — First behavior',
+        '- The first behavior is observable.',
+        '### AC-feature — Second behavior',
+        '- The second behavior is observable.',
+        '## Last Updated',
+        '2026-07-26',
+      ].join('\n');
+
+      const result = validateDetailMd(content);
+
+      expect(result.valid).toBe(false);
+      expect(result.violations).toContainEqual(
+        expect.objectContaining({
+          rule: 'duplicate-id',
+          severity: 'error',
+        }),
+      );
     });
 
     it('should fail when append-only pattern detected', () => {
