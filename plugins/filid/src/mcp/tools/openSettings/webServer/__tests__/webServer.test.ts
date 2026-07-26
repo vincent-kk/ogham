@@ -22,7 +22,13 @@ const EMPTY_SYNC = {
 const STATE: SettingsPageState = {
   projectRoot: '/tmp/project',
   configExists: true,
-  config: { version: '1.0', rules: {} },
+  config: {
+    version: '2.0',
+    adapters: { mode: 'auto', enabled: [] },
+    rules: {},
+  },
+  configDiagnostics: [],
+  structureAdapterId: 'test-adapter',
   ruleDocs: { entries: [], autoDeployed: [], pluginRootResolved: true },
 };
 
@@ -30,7 +36,11 @@ const STATE: SettingsPageState = {
 // mocked, so the selection key is never deployed. Use the always-present
 // required rule id rather than a phantom optional one.
 const VALID_BODY: SaveBody = {
-  config: { version: '1.0', rules: {} },
+  config: {
+    version: '2.0',
+    adapters: { mode: 'auto', enabled: [] },
+    rules: {},
+  },
   ruleDocs: { selections: { 'filid_fca-policy': true }, resync: [] },
 };
 
@@ -109,7 +119,8 @@ describe('filid settings web server', () => {
     const malicious: SettingsPageState = {
       ...STATE,
       config: {
-        version: '1.0',
+        version: '2.0',
+        adapters: { mode: 'auto', enabled: [] },
         rules: {},
         language: '</script><script>alert(1)</script>',
       },

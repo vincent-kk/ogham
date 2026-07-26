@@ -133,58 +133,65 @@ describe('organ-classifier — classifyNode (extended)', () => {
     });
   });
 
-  describe('classifyNode — hasIndex rule', () => {
+  describe('classifyNode — adapter entry-point rule', () => {
+    const entryPoint = {
+      path: '/project/login/module.entry',
+      kind: 'module' as const,
+      adapterId: 'arbitrary-entry',
+      surface: 'enumerated' as const,
+    };
+
     it.each([
       [
-        'non-organ name + hasIndex=true → fractal',
+        'non-organ name + arbitrary entry point → fractal',
         {
           dirName: 'login',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: true,
+          entryPoints: [entryPoint],
         },
         'fractal',
       ],
       [
-        'known-organ name + hasIndex=true → organ (name wins)',
+        'known-organ name + entry point → organ (name wins)',
         {
           dirName: 'helpers',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: true,
+          entryPoints: [entryPoint],
         },
         'organ',
       ],
       [
-        'infra pattern __tests__ + hasIndex=true → organ (pattern wins)',
+        'infra pattern __tests__ + entry point → organ (pattern wins)',
         {
           dirName: '__tests__',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: true,
+          entryPoints: [entryPoint],
         },
         'organ',
       ],
       [
-        'hasIndex=false + leaf → organ',
+        'empty entry point list + leaf → organ',
         {
           dirName: 'login',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: false,
+          entryPoints: [],
         },
         'organ',
       ],
       [
-        'hasIndex=undefined + leaf → organ (fallback)',
+        'entry points undefined + leaf → organ (fallback)',
         {
           dirName: 'login',
           hasIntentMd: false,

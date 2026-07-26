@@ -7,19 +7,28 @@
  */
 export {
   AllowedEntrySchema,
+  AllowedPeerOverrideSchema,
   FilidConfigSchema,
   RuleOverrideSchema,
 } from './loaders/configSchemas.js';
-export type { AllowedEntry, FilidConfig } from './loaders/configSchemas.js';
 export type {
+  AllowedEntry,
+  AllowedPeerOverride,
+  FilidConfig,
+} from './loaders/configSchemas.js';
+export type {
+  ConfigDiagnostic,
+  ConfigMigrationResult,
   ConfigPatchIssue,
   ConfigPatchValidation,
+  InitProjectOptions,
   InitResult,
   LoadConfigResult,
 } from './loaders/configTypes.js';
 export { createDefaultConfig } from './loaders/createDefaultConfig.js';
 export { initProject } from './loaders/initProject.js';
 export { loadConfig } from './loaders/loadConfig.js';
+export { migrateConfigV1 } from './loaders/migrateConfigV1.js';
 export { loadRuleOverrides } from './loaders/loadRuleOverrides.js';
 export { resolveLanguage } from './loaders/resolveLanguage.js';
 export { resolveMaxDepth } from './loaders/resolveMaxDepth.js';

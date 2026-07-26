@@ -1,5 +1,8 @@
 import { KNOWN_ORGAN_DIR_NAMES } from '../../../constants/organNames.js';
-import type { CategoryType } from '../../../types/fractal.js';
+import type {
+  CategoryType,
+  EntryPointDescriptor,
+} from '../../../types/fractal.js';
 
 export { KNOWN_ORGAN_DIR_NAMES };
 
@@ -17,7 +20,9 @@ export interface ClassifyInput {
   isLeafDirectory: boolean;
   /** Whether side effects exist (defaults to true if unspecified) */
   hasSideEffects?: boolean;
-  /** index.ts/js/mjs/cjs file exists. Treated as fractal module entry point */
+  /** Adapter-reported entry points. */
+  entryPoints?: readonly EntryPointDescriptor[];
+  /** @deprecated Transitional compatibility for pre-adapter callers. */
   hasIndex?: boolean;
   /**
    * Project-declared organ names from `.filid/config.json`
@@ -48,9 +53,10 @@ export function isInfraOrgDirectoryByPattern(dirName: string): boolean {
  * 3. Name matches __*__ or .* pattern → organ (infrastructure convention)
  * 4. Directory name in KNOWN_ORGAN_DIR_NAMES or additionalOrganNames → organ
  *    (name-based, overrides structure)
- * 5. No fractal children + leaf directory → organ
- * 6. No side effects → pure-function
- * 7. Default → fractal (INTENT.md should be added)
+ * 5. Adapter-reported entry point → fractal
+ * 6. No fractal children + leaf directory → organ
+ * 7. No side effects → pure-function
+ * 8. Default → fractal (INTENT.md should be added)
  *
  * Ambiguous cases should be delegated to LLM via context-injector by the caller.
  */
@@ -66,9 +72,9 @@ export function classifyNode(input: ClassifyInput): CategoryType {
   if (hasDetail) return 'fractal';
   if (isInfraOrgDirectoryByPattern(input.dirName)) return 'organ';
   if (isOrganName) return 'organ';
-  // index file in non-organ, non-infra directory = fractal module entry point
+  // An adapter-reported entry point establishes a non-organ module boundary.
   if (
-    (input.hasIndex ?? false) &&
+    ((input.entryPoints?.length ?? 0) > 0 || (input.hasIndex ?? false)) &&
     !isOrganName &&
     !isInfraOrgDirectoryByPattern(input.dirName)
   )

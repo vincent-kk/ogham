@@ -17,6 +17,24 @@ export interface InitResult {
 export interface LoadConfigResult {
   config: FilidConfig | null;
   warnings: string[];
+  diagnostics: ConfigDiagnostic[];
+}
+
+export interface ConfigDiagnostic {
+  code:
+    'config-migration-required' | 'config-key-discarded' | 'unknown-adapter-id';
+  message: string;
+  path?: string;
+}
+
+export interface ConfigMigrationResult {
+  config: FilidConfig;
+  diagnostics: ConfigDiagnostic[];
+}
+
+export interface InitProjectOptions {
+  language?: string;
+  adapterIds?: string[];
 }
 
 /** Single validation error returned by `validateConfigPatch`. */

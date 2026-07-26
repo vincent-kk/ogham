@@ -8,7 +8,7 @@ import {
 import { createLogger } from '../../../../lib/logger.js';
 import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 
-import type { InitResult } from './configTypes.js';
+import type { InitProjectOptions, InitResult } from './configTypes.js';
 import { createDefaultConfig } from './createDefaultConfig.js';
 import { writeConfig } from './writeConfig.js';
 
@@ -28,14 +28,19 @@ const log = createLogger('config-loader');
  */
 export function initProject(
   projectRoot: string,
-  language?: string,
+  options?: string | InitProjectOptions,
 ): InitResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
 
   let configCreated = false;
   if (!existsSync(configPath)) {
-    writeConfig(resolvedRoot, createDefaultConfig(language));
+    const normalized =
+      typeof options === 'string' ? { language: options } : (options ?? {});
+    writeConfig(
+      resolvedRoot,
+      createDefaultConfig(normalized.language, normalized.adapterIds),
+    );
     configCreated = true;
     log.debug('created default config', configPath);
   }

@@ -5,6 +5,7 @@
  * 제로 설정(zero-config) 아키텍처: 외부 설정 파일 없이 내장 기본값 사용.
  * 필요 시 프로그래밍적으로 옵션을 전달할 수 있다.
  */
+import type { StructureAdapter } from './adapters.js';
 
 /** 프로젝트 스캔 옵션 */
 export interface ScanOptions {
@@ -21,4 +22,6 @@ export interface ScanOptions {
    * `.filid/config.json` 의 `additional-organ-names` 가 공급한다. 기본값: []
    */
   additionalOrganNames?: readonly string[];
+  /** Structure evidence providers. Defaults to the registered initial adapters. */
+  structureAdapters?: readonly StructureAdapter[];
 }

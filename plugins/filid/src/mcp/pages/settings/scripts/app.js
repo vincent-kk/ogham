@@ -207,20 +207,30 @@
   // --- prefill: general & structure exceptions ----------------------------
   (function prefill() {
     if (state.config.language) $('language').value = state.config.language;
-    if (state.config.scan && typeof state.config.scan.maxDepth === 'number')
-      $('max-depth').value = String(state.config.scan.maxDepth);
+    var structure = state.config.structure || {};
+    if (typeof structure.maxDepth === 'number')
+      $('max-depth').value = String(structure.maxDepth);
 
-    var allowed = state.config['additional-allowed'] || [];
+    var allowed = structure.additionalAllowedPeers || [];
     $('additional-allowed').value = allowed
       .map(function (entry) {
-        return typeof entry === 'string' ? entry : JSON.stringify(entry);
+        if (
+          entry &&
+          typeof entry === 'object' &&
+          typeof entry.basename === 'string' &&
+          !entry.paths &&
+          !entry.adapterId
+        )
+          return entry.basename;
+        return JSON.stringify(entry);
       })
       .join('\n');
+    var entryPointOverrides = structure.entryPointOverrides || {};
     $('additional-entry-points').value = (
-      state.config['additional-entry-points'] || []
+      entryPointOverrides[state.structureAdapterId] || []
     ).join('\n');
-    $('additional-route-patterns').value = (
-      state.config['additional-route-patterns'] || []
+    $('additional-organ-names').value = (
+      structure.additionalOrganNames || []
     ).join('\n');
   })();
 
@@ -326,17 +336,16 @@
           return null;
         }
       } else {
-        entries.push(line);
+        entries.push({ basename: line });
       }
     }
     return entries;
   }
 
   function collectConfig() {
-    var config = {
-      version: state.config.version || '1.0',
-      rules: {},
-    };
+    var config = JSON.parse(JSON.stringify(state.config));
+    config.version = '2.0';
+    config.rules = {};
 
     var enabledBoxes = form.querySelectorAll('[data-rule-enabled]');
     for (var i = 0; i < enabledBoxes.length; i++) {
@@ -360,7 +369,11 @@
 
     var language = $('language').value.trim();
     if (language) config.language = language;
+    else delete config.language;
 
+    var structure = config.structure
+      ? JSON.parse(JSON.stringify(config.structure))
+      : {};
     var maxDepthRaw = $('max-depth').value.trim();
     if (maxDepthRaw !== '') {
       var maxDepth = Number(maxDepthRaw);
@@ -368,19 +381,29 @@
         showFieldError('max-depth', 'Enter a non-negative number.');
         return null;
       }
-      config.scan = { maxDepth: maxDepth };
-    }
+      structure.maxDepth = maxDepth;
+    } else delete structure.maxDepth;
 
     var allowed = collectAllowed();
     if (allowed === null) return null;
-    if (allowed.length) config['additional-allowed'] = allowed;
+    if (allowed.length) structure.additionalAllowedPeers = allowed;
+    else delete structure.additionalAllowedPeers;
 
     var entryPoints = lines('additional-entry-points');
-    if (entryPoints.length) config['additional-entry-points'] = entryPoints;
+    var entryPointOverrides = structure.entryPointOverrides || {};
+    if (entryPoints.length)
+      entryPointOverrides[state.structureAdapterId] = entryPoints;
+    else delete entryPointOverrides[state.structureAdapterId];
+    if (Object.keys(entryPointOverrides).length)
+      structure.entryPointOverrides = entryPointOverrides;
+    else delete structure.entryPointOverrides;
 
-    var routePatterns = lines('additional-route-patterns');
-    if (routePatterns.length)
-      config['additional-route-patterns'] = routePatterns;
+    var organNames = lines('additional-organ-names');
+    if (organNames.length) structure.additionalOrganNames = organNames;
+    else delete structure.additionalOrganNames;
+
+    if (Object.keys(structure).length) config.structure = structure;
+    else delete config.structure;
 
     return config;
   }

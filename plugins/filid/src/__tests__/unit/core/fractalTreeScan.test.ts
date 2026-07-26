@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -8,6 +8,52 @@ import {
   scanProject,
   shouldExclude,
 } from '../../../core/tree/fractalTree/fractalTree.js';
+import type { StructureAdapter } from '../../../types/adapters.js';
+
+const arbitraryEntryAdapter: StructureAdapter = {
+  id: 'arbitrary-entry',
+  async detect() {
+    return { confidence: 1, evidence: ['test fixture'] };
+  },
+  async discoverSourceFiles() {
+    return [];
+  },
+  async findEntryPoints(directoryPath) {
+    const path = join(directoryPath, 'module.entry');
+    return existsSync(path)
+      ? [
+          {
+            path,
+            kind: 'module',
+            adapterId: this.id,
+            surface: 'enumerated',
+          },
+        ]
+      : [];
+  },
+  async inspectEntryPoint(entryPointPath) {
+    return {
+      entryPoint: {
+        path: entryPointPath,
+        kind: 'module',
+        adapterId: this.id,
+        surface: 'enumerated',
+      },
+      exportedNames: [],
+      hasDirectDeclarations: false,
+      certainty: 'exact',
+    };
+  },
+  async extractDependencies() {
+    return [];
+  },
+  async isFrameworkOwnedPeer() {
+    return false;
+  },
+  async suggestEntryPointPath(directoryPath) {
+    return join(directoryPath, 'module.entry');
+  },
+};
 
 describe('fractal-tree', () => {
   describe('shouldExclude', () => {
@@ -145,16 +191,24 @@ describe('fractal-tree', () => {
       }
     });
 
-    it('should detect index.ts presence', async () => {
+    it('uses adapter-reported entry points without assuming a filename', async () => {
       setup({
-        '.': ['INTENT.md', 'index.ts'],
+        '.': ['module.entry'],
       });
 
       try {
-        const tree = await scanProject(tmpDir);
+        const tree = await scanProject(tmpDir, {
+          structureAdapters: [arbitraryEntryAdapter],
+        });
         const root = tree.nodes.get(tmpDir);
 
-        expect(root!.hasIndex).toBe(true);
+        expect(root?.type).toBe('fractal');
+        expect(root?.entryPoints).toEqual([
+          expect.objectContaining({
+            path: join(tmpDir, 'module.entry'),
+            adapterId: 'arbitrary-entry',
+          }),
+        ]);
       } finally {
         teardown();
       }

@@ -1,9 +1,3 @@
-/**
- * @file configLoaderSanitize.test.ts
- * @description Commit C behaviour — strict zod validation + strict-sanitize
- * fallback. Covers AC1 (nested unknown key), AC10b (invalid exempt glob),
- * and the pre-mortem-2 bare `**` exempt drop.
- */
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,13 +6,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loadConfig } from '../../../core/infra/configLoader/configLoader.js';
 
+const V2_BASE = {
+  version: '2.0',
+  adapters: { mode: 'auto', enabled: [] },
+  rules: {},
+} as const;
+
 function writeRaw(root: string, raw: unknown): void {
   const dir = join(root, '.filid');
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'config.json'), JSON.stringify(raw), 'utf8');
 }
 
-describe('config-loader sanitize (Commit C)', () => {
+describe('config-loader v2 sanitize and migration', () => {
   let tmpDir: string;
 
   beforeEach(() => {
@@ -34,217 +34,236 @@ describe('config-loader sanitize (Commit C)', () => {
     vi.restoreAllMocks();
   });
 
-  describe('basic', () => {
-    it('AC1: nested additional-allowed under rules[x] → warn + dropped', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {
-          'zero-peer-file': {
-            enabled: true,
-            severity: 'warning',
-            'additional-allowed': ['CLAUDE.md'],
-          },
+  it('drops and warns for unknown keys nested in a v2 rule override', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      rules: {
+        'zero-peer-file': {
+          enabled: true,
+          unknownPeerSetting: ['manifest.file'],
         },
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config).not.toBeNull();
-      expect(warnings.some((w) => w.includes('additional-allowed'))).toBe(true);
-      expect(
-        'additional-allowed' in (config?.rules['zero-peer-file'] ?? {}),
-      ).toBe(false);
+      },
     });
 
-    it('AC10b: invalid exempt glob → warn + pattern dropped', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {
-          'module-entry-point': {
-            enabled: true,
-            exempt: ['[invalid', 'packages/**'],
-          },
+    const { config, warnings, diagnostics } = loadConfig(tmpDir);
+
+    expect(config?.rules['zero-peer-file']).toEqual({ enabled: true });
+    expect(
+      warnings.some((warning) => warning.includes('unknownPeerSetting')),
+    ).toBe(true);
+    expect(diagnostics).toEqual([]);
+  });
+
+  it('drops invalid exempt globs while keeping valid scoped patterns', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      rules: {
+        'module-entry-point': {
+          exempt: ['[invalid', 'packages/**'],
         },
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config).not.toBeNull();
-      expect(config?.rules['module-entry-point']?.exempt).toEqual([
-        'packages/**',
-      ]);
-      expect(
-        warnings.some(
-          (w) => w.includes('invalid glob syntax') && w.includes('[invalid'),
-        ),
-      ).toBe(true);
+      },
     });
 
-    it('pre-mortem-2: bare "**" exempt pattern dropped at load time', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {
-          'zero-peer-file': {
-            enabled: true,
-            exempt: ['**', 'packages/legacy/**'],
-          },
+    const { config, warnings } = loadConfig(tmpDir);
+
+    expect(config?.rules['module-entry-point']?.exempt).toEqual([
+      'packages/**',
+    ]);
+    expect(
+      warnings.some(
+        (warning) =>
+          warning.includes('invalid glob syntax') &&
+          warning.includes('[invalid'),
+      ),
+    ).toBe(true);
+  });
+
+  it('drops a bare recursive exempt pattern', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      rules: {
+        'zero-peer-file': {
+          exempt: ['**', 'packages/legacy/**'],
         },
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config?.rules['zero-peer-file']?.exempt).toEqual([
-        'packages/legacy/**',
-      ]);
-      expect(
-        warnings.some(
-          (w) => w.includes('bare "**"') || w.includes('concrete scope'),
+      },
+    });
+
+    const { config, warnings } = loadConfig(tmpDir);
+
+    expect(config?.rules['zero-peer-file']?.exempt).toEqual([
+      'packages/legacy/**',
+    ]);
+    expect(warnings.some((warning) => warning.includes('bare "**"'))).toBe(
+      true,
+    );
+  });
+
+  it('drops every unknown v2 top-level key with a warning', () => {
+    writeRaw(tmpDir, { ...V2_BASE, bogus: 1, alsoBogus: 2 });
+
+    const { config, warnings, diagnostics } = loadConfig(tmpDir);
+
+    expect('bogus' in (config ?? {})).toBe(false);
+    expect('alsoBogus' in (config ?? {})).toBe(false);
+    expect(
+      warnings.filter((warning) => warning.includes('(dropped')),
+    ).toHaveLength(2);
+    expect(diagnostics).toEqual([]);
+  });
+
+  it('drops one invalid v2 leaf without discarding its rule override', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      rules: {
+        'module-entry-point': { enabled: true, severity: 'CRITICAL' },
+      },
+    });
+
+    const { config, warnings } = loadConfig(tmpDir);
+
+    expect(config?.rules['module-entry-point']).toEqual({ enabled: true });
+    expect(warnings.some((warning) => warning.includes('severity'))).toBe(true);
+  });
+
+  it('emits returned warnings through the config-loader logger in order', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      rules: {
+        'module-entry-point': { exempt: ['**'] },
+      },
+      unknownSetting: true,
+    });
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    const { warnings } = loadConfig(tmpDir);
+    const loggedWarnings = consoleErrorSpy.mock.calls
+      .filter((call) =>
+        call.some((argument) =>
+          String(argument).includes('[filid:config-loader]'),
         ),
-      ).toBe(true);
+      )
+      .map((call) => call.slice(1).map(String).join(' '));
+
+    expect(warnings.length).toBeGreaterThan(0);
+    expect(loggedWarnings).toHaveLength(warnings.length);
+    warnings.forEach((warning, index) => {
+      expect(loggedWarnings[index]).toContain(warning);
     });
   });
 
-  describe('edge', () => {
-    it('multiple unknown top-level keys produce multiple warnings, all dropped', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {},
-        bogus: 1,
-        also_bogus: 2,
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config).not.toBeNull();
-      expect('bogus' in (config ?? {})).toBe(false);
-      expect('also_bogus' in (config ?? {})).toBe(false);
-      expect(warnings.filter((w) => w.includes('(dropped'))).toHaveLength(2);
-    });
-
-    it('invalid severity enum value is dropped (leaf drop)', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {
-          'naming-convention': { enabled: true, severity: 'CRITICAL' },
-        },
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config?.rules['naming-convention']).toEqual({ enabled: true });
-      expect(warnings.some((w) => w.includes('severity'))).toBe(true);
-    });
-
-    it('AC-Obs: log.warn spy set equals warnings array (order-preserving)', async () => {
-      const logger = await import('../../../lib/logger.js');
-      const createLoggerSpy = vi.spyOn(logger, 'createLogger');
-      void createLoggerSpy; // kept for diagnostic; actual assertion below uses the real logger
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {
-          'zero-peer-file': {
-            enabled: true,
-            'additional-allowed': ['CLAUDE.md'],
-          },
-          'module-entry-point': {
-            enabled: true,
-            exempt: ['**'],
-          },
-        },
-      });
-      // Spy on console.error because log.warn emits via console.error with the tag
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
-      const { warnings } = loadConfig(tmpDir);
-      const configWarnLines = consoleErrorSpy.mock.calls
-        .filter((call) =>
-          call.some((arg) => String(arg).includes('[filid:config-loader]')),
-        )
-        .map((call) =>
-          call
-            .slice(1)
-            .map((a) => String(a))
-            .join(' '),
-        );
-      // Every warning message must appear in console.error output with the
-      // config-loader tag, preserving order.
-      expect(warnings.length).toBeGreaterThan(0);
-      for (let i = 0; i < warnings.length; i++)
-        expect(configWarnLines[i]).toContain(warnings[i]);
-    });
-
-    it('valid config passes zod strict cleanly with empty warnings', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {
-          'naming-convention': { enabled: true, severity: 'warning' },
-        },
-        'additional-allowed': [
-          'type.ts',
-          { basename: 'CLAUDE.md', paths: ['packages/**'] },
+  it('loads a valid v2 config without warnings or diagnostics', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      language: 'Korean',
+      rules: {
+        'module-entry-point': { enabled: true, severity: 'warning' },
+      },
+      structure: {
+        maxDepth: 8,
+        additionalAllowedPeers: [
+          { basename: 'manifest.file', paths: ['packages/**'] },
         ],
-        scan: { maxDepth: 8 },
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config).not.toBeNull();
-      expect(warnings).toEqual([]);
+      },
     });
 
-    it('invalid JSON returns null config with a warning', () => {
-      mkdirSync(join(tmpDir, '.filid'), { recursive: true });
-      writeFileSync(join(tmpDir, '.filid', 'config.json'), 'not-json', 'utf8');
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config).toBeNull();
-      expect(warnings.length).toBeGreaterThan(0);
+    const { config, warnings, diagnostics } = loadConfig(tmpDir);
+
+    expect(config?.version).toBe('2.0');
+    expect(config?.structure?.maxDepth).toBe(8);
+    expect(warnings).toEqual([]);
+    expect(diagnostics).toEqual([]);
+  });
+
+  it('returns null with a warning for invalid JSON', () => {
+    mkdirSync(join(tmpDir, '.filid'), { recursive: true });
+    writeFileSync(join(tmpDir, '.filid', 'config.json'), 'not-json', 'utf8');
+
+    const { config, warnings, diagnostics } = loadConfig(tmpDir);
+
+    expect(config).toBeNull();
+    expect(warnings.length).toBeGreaterThan(0);
+    expect(diagnostics).toEqual([]);
+  });
+
+  it('returns null without diagnostics when config is absent', () => {
+    expect(loadConfig(tmpDir)).toEqual({
+      config: null,
+      warnings: [],
+      diagnostics: [],
+    });
+  });
+
+  it('keeps valid scoped exempt patterns unchanged', () => {
+    const exempt = ['packages/**', 'src/legacy/**', 'literal/path'];
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      rules: { 'module-entry-point': { exempt } },
     });
 
-    it('missing config returns null config with empty warnings', () => {
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config).toBeNull();
-      expect(warnings).toEqual([]);
+    const { config, warnings } = loadConfig(tmpDir);
+
+    expect(config?.rules['module-entry-point']?.exempt).toEqual(exempt);
+    expect(warnings).toEqual([]);
+  });
+
+  it('migrates supported v1 fields in memory and reports persistence needed', () => {
+    writeRaw(tmpDir, {
+      version: '1.0',
+      language: 'Korean',
+      rules: { 'module-entry-point': { severity: 'error' } },
+      scan: { maxDepth: 6 },
+      'additional-organ-names': ['plans'],
+      'additional-allowed': ['manifest.file'],
+      'additional-entry-points': ['module.entry'],
     });
 
-    it('exempt glob dry-validation: only obviously broken patterns are dropped', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {
-          'module-entry-point': {
-            enabled: true,
-            exempt: ['packages/**', 'src/legacy/**', 'literal/path.ts'],
-          },
-        },
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config?.rules['module-entry-point']?.exempt).toEqual([
-        'packages/**',
-        'src/legacy/**',
-        'literal/path.ts',
-      ]);
-      expect(warnings).toEqual([]);
+    const { config, warnings, diagnostics } = loadConfig(tmpDir);
+
+    expect(config).toMatchObject({
+      version: '2.0',
+      language: 'Korean',
+      adapters: { mode: 'auto' },
+      structure: {
+        maxDepth: 6,
+        additionalOrganNames: ['plans'],
+        additionalAllowedPeers: [{ basename: 'manifest.file' }],
+      },
+    });
+    expect(Object.values(config?.structure?.entryPointOverrides ?? {})).toEqual(
+      [['module.entry']],
+    );
+    expect(warnings).toEqual([]);
+    expect(
+      diagnostics.some(
+        (diagnostic) => diagnostic.code === 'config-migration-required',
+      ),
+    ).toBe(true);
+  });
+
+  it('reports removed v1 rules and keys as discarded diagnostics', () => {
+    writeRaw(tmpDir, {
+      version: '1.0',
+      rules: {
+        'naming-convention': { enabled: false },
+        'index-barrel-pattern': { enabled: false },
+      },
+      'additional-route-patterns': ['^legacy'],
+      unknownSetting: true,
     });
 
-    it('invalid additional-route-patterns entry is warn-dropped, valid ones kept', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {},
-        'additional-route-patterns': ['[invalid', '^@@'],
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config).not.toBeNull();
-      expect(config?.['additional-route-patterns']).toEqual(['^@@']);
-      expect(
-        warnings.some(
-          (w) =>
-            w.includes('additional-route-patterns') && w.includes('[invalid'),
-        ),
-      ).toBe(true);
-    });
+    const { config, warnings, diagnostics } = loadConfig(tmpDir);
 
-    it('valid additional-route-patterns pass through with no warnings', () => {
-      writeRaw(tmpDir, {
-        version: '1.0',
-        rules: {},
-        'additional-route-patterns': ['^@@', '^~[a-z]+'],
-      });
-      const { config, warnings } = loadConfig(tmpDir);
-      expect(config?.['additional-route-patterns']).toEqual([
-        '^@@',
-        '^~[a-z]+',
-      ]);
-      expect(
-        warnings.some((w) => w.includes('additional-route-patterns')),
-      ).toBe(false);
-    });
+    expect(config?.rules).toEqual({});
+    expect(warnings).toEqual([]);
+    expect(diagnostics.map((diagnostic) => diagnostic.path)).toEqual(
+      expect.arrayContaining([
+        'rules.naming-convention',
+        'rules.index-barrel-pattern',
+        'additional-route-patterns',
+        'unknownSetting',
+      ]),
+    );
   });
 });

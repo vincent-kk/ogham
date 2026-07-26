@@ -35,7 +35,7 @@ export function correctNodeTypes(
       hasDetailMd: entry.hasDetailMd,
       hasFractalChildren: hasFractalChildrenActual,
       isLeafDirectory: isLeafActual,
-      hasIndex: entry.hasIndex ?? false,
+      entryPoints: entry.entryPoints,
       additionalOrganNames,
     });
 

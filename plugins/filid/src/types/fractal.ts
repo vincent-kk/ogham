@@ -15,7 +15,15 @@
  * - `pure-function`: 단일 책임 함수/유틸리티 모음. 외부 의존이 없어야 한다.
  * - `hybrid`: fractal과 organ의 특성을 모두 갖는 과도기적 형태. 리팩토링 대상.
  */
-export type CategoryType = 'fractal' | 'organ' | 'pure-function' | 'hybrid';
+export type NodeType = 'fractal' | 'organ' | 'pure-function' | 'hybrid';
+export type CategoryType = NodeType;
+
+export interface EntryPointDescriptor {
+  path: string;
+  kind: 'module' | 'executable' | 'framework';
+  adapterId: string;
+  surface: 'enumerated' | 'opaque' | 'unsupported';
+}
 
 /** Fractal node — a domain boundary with independent business logic */
 export interface FractalNode {
@@ -27,16 +35,28 @@ export interface FractalNode {
   type: CategoryType;
   /** Parent fractal path (null if root) */
   parent: string | null;
+  /** Closest owning parent fractal path (null if root) */
+  parentFractalPath: string | null;
   /** Child fractal paths */
   children: string[];
+  /** Child fractal paths */
+  childFractalPaths: string[];
   /** Organ directory paths */
   organs: string[];
+  /** Organ paths owned by this fractal */
+  organPaths: string[];
   /** Whether INTENT.md exists */
   hasIntentMd: boolean;
   /** Whether DETAIL.md exists */
   hasDetailMd: boolean;
+  /** Adapter-reported public entry points */
+  entryPoints: EntryPointDescriptor[];
+  /** Immediate peer files */
+  peerFiles: string[];
+  /** @deprecated Transitional compatibility field; use entryPoints. */
   /** Whether index.ts or index.js exists in this directory */
   hasIndex: boolean;
+  /** @deprecated Transitional compatibility field; use entryPoints. */
   /** Whether main.ts or main.js exists in this directory */
   hasMain: boolean;
   /** Depth from root (root = 0) */

@@ -1,44 +1,43 @@
+import { getDefaultAdapterIds } from '../../../../adapters/index.js';
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 
 import type { FilidConfig } from './configSchemas.js';
 
-/**
- * Generate the default initial config with all 8 built-in rules.
- *
- * @param language - Output language name (English name, e.g. `'Korean'`).
- *   When provided, included as a top-level `language` key; omitted otherwise.
- */
-export function createDefaultConfig(language?: string): FilidConfig {
+const ERROR_RULE_IDS = new Set([
+  'circular-dependency',
+  'detail-document-contract',
+  'intent-document-contract',
+  'max-depth',
+  'organ-no-intentmd',
+  'pure-function-isolation',
+  'spec-contract-link',
+  'spec-document-case-cap',
+  'spec-fragmentation',
+  'test-record-case-cap',
+]);
+
+export function createDefaultConfig(
+  language?: string,
+  adapterIds?: string[],
+): FilidConfig {
+  if (adapterIds?.length === 0)
+    throw new Error('explicit adapter mode requires at least one enabled ID');
+  const rules = Object.fromEntries(
+    Object.values(BUILTIN_RULE_IDS).map((ruleId) => [
+      ruleId,
+      {
+        enabled: true,
+        severity: ERROR_RULE_IDS.has(ruleId) ? 'error' : 'warning',
+      },
+    ]),
+  ) as FilidConfig['rules'];
   return {
-    version: '1.0',
+    version: '2.0',
     ...(language ? { language } : {}),
-    rules: {
-      [BUILTIN_RULE_IDS.NAMING_CONVENTION]: {
-        enabled: true,
-        severity: 'warning',
-      },
-      [BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD]: {
-        enabled: true,
-        severity: 'error',
-      },
-      [BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN]: {
-        enabled: true,
-        severity: 'warning',
-      },
-      [BUILTIN_RULE_IDS.MODULE_ENTRY_POINT]: {
-        enabled: true,
-        severity: 'warning',
-      },
-      [BUILTIN_RULE_IDS.MAX_DEPTH]: { enabled: true, severity: 'error' },
-      [BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY]: {
-        enabled: true,
-        severity: 'error',
-      },
-      [BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION]: {
-        enabled: true,
-        severity: 'error',
-      },
-      [BUILTIN_RULE_IDS.ZERO_PEER_FILE]: { enabled: true, severity: 'warning' },
+    adapters: {
+      mode: adapterIds ? 'explicit' : 'auto',
+      enabled: adapterIds ?? getDefaultAdapterIds(),
     },
+    rules,
   };
 }
