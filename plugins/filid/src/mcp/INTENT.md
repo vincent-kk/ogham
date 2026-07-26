@@ -1,46 +1,43 @@
-# mcp — MCP 서버 모듈
+# mcp — Filid 1.0 protocol boundary
 
 ## Purpose
 
-Model Context Protocol 서버를 초기화하고 19개 FCA-AI 분석 도구를 등록·제공한다. Claude Code 에이전트가 MCP 프로토콜을 통해 filid 기능을 호출하는 진입층이다.
+언어 중립 core를 9개의 작은 MCP 도구로 노출한다. 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다.
 
 ## Structure
 
-| 경로           | 역할                                                                |
-| -------------- | ------------------------------------------------------------------- |
-| `server/`      | MCP 서버 생성 + 19개 도구 등록 (`createServer`, `startServer`)      |
-| `serverEntry/` | esbuild 번들 진입 fractal (`bridge/mcp-server.cjs` 생성 대상)       |
-| `tools/`       | 각 도구의 비즈니스 로직 핸들러 (19개 sub-fractal + `utils/` organ)  |
-| `pages/`       | 로컬 서빙 브라우저 페이지 정적 자산 (`settings/` — `open_settings`) |
+| Path           | Role                                                     |
+| -------------- | -------------------------------------------------------- |
+| `server/`      | 9개 도구 등록, envelope 직렬화와 process lifecycle      |
+| `serverEntry/` | build가 호출하는 MCP executable entry                   |
+| `tools/`       | project/rule/settings/scan/context/plan/validate/review |
+| `pages/`       | `open_settings`가 제공하는 generated settings UI        |
 
 ## Conventions
 
-- MCP SDK(`@modelcontextprotocol/sdk`) + `zod` 스키마 검증 사용
-- 도구 응답: 성공 시 `toolResult()`, 실패 시 `toolError()` 래퍼 사용
-- `Map`/`Set` JSON 직렬화: `mapReplacer` 함수로 처리
-- `serverEntry/`는 `startServer()` 호출만 — 로직 없음
+- 모든 입력은 Zod로 검증하고 모든 출력은 공통 16 KiB artifact envelope를 쓴다.
+- machine path는 정규화된 절대 경로, JSON은 compact serialization을 쓴다.
+- `serverEntry/`는 build wiring만 가지며 core 판단을 구현하지 않는다.
 
 ## Boundaries
 
 ### Always do
 
-- 새 도구 추가 시 `server/server.ts`에 `registerTool` 호출 + `tools/` sub-fractal 추가
-- `src/index.ts`는 외부 소비자에 공개할 핸들러만 선별 re-export (내부 전용 도구 제외)
-- Zod 스키마로 모든 도구 입력 검증
+- tool 결과에 status, 작은 summary와 diagnostics를 포함
+- 큰 payload와 모든 restructure plan을 검증 가능한 ephemeral artifact로 저장
+- structure·verification 판단을 core 공개 entry point에 위임
 
 ### Ask first
 
-- 기존 도구 입력 스키마 변경 (클라이언트 호환성 영향)
-- 도구 이름 변경 (`.mcp.json` 및 스킬 파일 동시 수정 필요)
+- 9개 도구 목록, 입력 schema 또는 envelope budget 변경
+- 프로젝트 파일을 쓰는 새 동작 추가
 
 ### Never do
 
-- `serverEntry/`에 비즈니스 로직 추가
-- `toolResult`/`toolError` 래퍼 없이 raw 응답 반환
-- `core/` 로직을 `server/server.ts`에 직접 인라인 구현
+- 범용 search/replace, AST 편집, 파일 이동, import rewrite 제공
+- commit, push, PR 생성 또는 review fix 실행
+- 언어 확장자·entry filename·test syntax를 MCP DTO에 추가
 
 ## Dependencies
 
-- `@modelcontextprotocol/sdk` — MCP 서버/트랜스포트
-- `zod` — 입력 스키마 검증
-- `../core/`, `../ast/`, `../metrics/`, `../compress/` — 도구 핸들러가 사용하는 로직
+- MCP SDK, Zod, `../core/`, `../adapters/`, host utility packages

@@ -1,49 +1,46 @@
 ## Purpose
 
-`@ogham/filid` 패키지 루트. FCA-AI 프랙탈 컨텍스트 아키텍처 규칙 시행 Claude Code 플러그인. 자체 dogfooding — 스스로를 fractal 노드로 관리. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
+`@ogham/filid` 1.0 패키지 루트. 문서 계약, FCA 구조·DAG 검사, 읽기 전용 배치 계획과 FCA 범위 cross-review를 제공하는 독립 플러그인이다.
 
 ## Structure
 
-| Path                         | Role                                               |
-| ---------------------------- | -------------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md)     |
-| `agents/`                    | 에이전트 정의 (architect, QA, review committee 등) |
-| `hooks/`                     | Claude Code 훅 이벤트 매핑 (`hooks.json`)          |
-| `skills/`                    | 사용자 스킬 디렉토리                               |
-| `libs/`                      | cross-platform Node 러너 (`run.cjs`)               |
-| `scripts/`                   | esbuild 빌드 + rule-hash sync 스크립트             |
-| `bridge/` · `public/`        | 빌드 산출물: MCP/훅 번들 · settings UI (커밋)      |
-| `templates/`                 | 신규 모듈용 INTENT.md / DETAIL.md 템플릿           |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                    |
-| `.mcp.json`                  | MCP 서버 등록 (`bridge/mcp-server.cjs`)            |
+| Path                  | Role                                                   |
+| --------------------- | ------------------------------------------------------ |
+| `src/`                | 어댑터, FCA core, MCP, 훅 TypeScript canonical source  |
+| `skills/`             | 8개 사용자 workflow                                    |
+| `hooks/`              | 생성된 host hook mapping                               |
+| `scripts/`            | rule/page/MCP/hook/plugin 생성 파이프라인              |
+| `bridge/` · `public/` | 커밋되는 MCP·훅·설정 UI 생성물                         |
+| `templates/`          | 문서 템플릿과 managed FCA rule canonical source       |
+| plugin manifests      | plugin-compiler가 만드는 host별 생성물                 |
 
 ## Conventions
 
-- 빌드(도메인 스크립트 조합): `clean → version:sync → rules → pages → compile → mcp → hooks → compile-plugin`
-- 자체 FCA 규약 준수 — 50줄 INTENT.md cap, 3-tier boundary, 3+12 test rule
-- 모든 훅은 `src/hooks/<name>/<name>.entry.ts` 에서 esbuild 로 번들
-- 새 fractal 모듈에는 INTENT.md + DETAIL.md 동반 작성
+- 판단 우선순위: 1. 증거의 확실성 2. FCA 경계 보존 3. 작은 응답과 이식성
+- 빌드: `clean → version:sync → rules → pages → mcp → hooks → compile-plugin`
+- 현재 생태계 리터럴은 `src/adapters/ecmascript/` 안에만 둔다.
+- spec-document는 15, test-record는 32 cases cap을 적용한다.
 
 ## Boundaries
 
 ### Always do
 
-- 빌드 후 `bridge/` 커밋 (`package.json:files` 에 포함됨)
-- 새 built-in rule 의 hash 를 `scripts/syncRuleHashes.mjs` 로 동기화
+- DETAIL.md를 코드보다 먼저 갱신하고 공개 경계 변경 시 INTENT.md도 갱신
+- canonical source를 바꾼 뒤 공식 build로 생성물과 rule hash 동기화
+- 구조 이동 기능은 정확한 계획과 검증 결과만 반환
 
 ### Ask first
 
-- 새 built-in rule 추가 또는 기존 rule severity 변경 (사용자 프로젝트 영향)
-- `templates/` 변경 (신규 모듈 생성에 광범위 영향)
-- INTENT.md 50줄 cap 자체의 수정 (cap 위반은 모듈 분리 신호)
+- built-in rule 의미·severity 또는 1.0 공개 도구·스킬 표면 변경
+- INTENT.md 50줄 cap과 DETAIL acceptance 계약 변경
 
 ### Never do
 
-- `bridge/` 산출물 손편집 (esbuild 가 덮어씀)
-- `src/version.ts` 직접 수정 (`yarn version:sync` 만)
-- `dist/` 커밋 (라이브러리 export, 플러그인 매니페스트에 미포함)
+- 생성된 manifest, `bridge/`, `public/` 또는 버전 소스를 손편집
+- MCP에서 파일 이동, import rewrite, commit, push, PR 생성 수행
+- Seiri나 특정 생태계 parser를 core runtime dependency로 요구
 
 ## Dependencies
 
-- **런타임**: `@ogham/agent-artifacts`, `@ast-grep/napi ^0.42`, `@modelcontextprotocol/sdk ~1.22`, `fast-glob ^3`, `zod ^3.23`
-- **개발**: `esbuild ^0.24`, `typescript ^5.7`, `vitest 3.2` — Node.js ≥ 20, Yarn 4.12 workspaces
+- 런타임: MCP SDK, Zod, Ogham 공통 host·artifact 도구
+- 개발: Node.js ≥20, TypeScript, esbuild, Vitest, Playwright, Yarn workspaces

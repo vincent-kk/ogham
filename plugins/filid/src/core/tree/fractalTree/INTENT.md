@@ -1,46 +1,39 @@
-# fractalTree -- 디렉토리 스캔과 트리 조립
+# fractalTree — adapter-aware scan and tree assembly
 
 ## Purpose
 
-프로젝트 루트를 재귀 스캔해 `FractalTree`(노드 맵·루트·총 노드 수·최대 깊이)를 조립하고, 트리 탐색 유틸(`findNode`, `getAncestors`, `getDescendants`, `getFractalsUnderOrgans`)을 제공한다. filid 모든 분석 파이프라인의 입력 트리를 이 모듈이 생성한다.
+Node 20 filesystem recursion과 StructureAdapter metadata로 `FractalTree`를 만들고 path 관계 탐색을 제공한다.
 
 ## Structure
 
-- `treeBuilder/` organ — 순수 트리 조작: `buildFractalTree`, `findNode`, `getAncestors`, `getDescendants`, `getFractalsUnderOrgans`
-- `scanner/` organ — 파일시스템 I/O와 프레임워크 감지: `scanProject`, `shouldExclude`, `detectFrameworks`, `discoverDirectories`, `collectNodeMetadata`, `correctNodeTypes`
-- `fractalTree.ts` — slim facade (두 organ의 re-export)
-- `index.ts` — 배럴 export (facade 위임)
+- `treeBuilder/` organ — 순수 관계 조립과 path traversal
+- `scanner/` organ — readdir recursion, adapter metadata와 bottom-up correction
+- `fractalTree.ts` — public facade, `index.ts` — named barrel
 
 ## Conventions
 
-- `treeBuilder/`는 순수 함수만 (파일시스템 호출 금지)
-- 파일시스템 접근은 반드시 `scanner/`로 캡슐화
-- `NodeEntry`는 빌드 단계의 input DTO, `FractalNode`는 트리 노드 타입
-- `scanProject`는 프로젝트 루트 절대 경로를 받아 모든 경로를 절대 경로로 저장
-- 재분류(`correctNodeTypes`)는 스캔 직후 한 번만 실행
+- `treeBuilder/`는 순수하고 filesystem 접근은 `scanner/`에만 둔다.
+- `NodeEntry`는 adapter evidence를 보존하고 `FractalNode`가 public tree를 표현한다.
+- reclassification은 deepest-first로 한 번 수행한다.
 
 ## Boundaries
 
 ### Always do
 
-- 새 탐색 함수 추가 시 `treeBuilder/` 파일로 분리 후 facade에 re-export
-- 스캔 옵션 확장 시 `ScanOptions` 타입과 동기화
-- 스캐너 파일 추가 시 `scanner/` organ에 배치 (I/O 분리 원칙)
+- 새 탐색 함수는 `treeBuilder/`, I/O 함수는 `scanner/`에 배치
+- scan option, adapter descriptor와 tree DTO를 함께 동기화
 
 ### Ask first
 
-- 제외 규칙(`shouldExclude`) 기본값 변경
-- 프레임워크 감지 우선순위 변경
+- exclusion, symlink 또는 adapter resolution 정책 변경
+- public tree relation field 변경
 
 ### Never do
 
-- `treeBuilder/`에 파일시스템 호출 추가 (모든 I/O는 `scanner/`)
-- `rules/`, `analysis/` 등 상위 계층 import
-- 트리 mutation을 외부 소비자에게 노출 (읽기 전용)
+- `treeBuilder/`에 filesystem I/O 추가
+- 특정 entry filename/framework/extension 추측
+- `rules/`, `analysis/` 상위 계층 import
 
 ## Dependencies
 
-- `../../../types/fractal.js` (`FractalTree`, `FractalNode`, `NodeEntry`, `ScanOptions`)
-- `../../../constants/scanDefaults.js`, `../../../constants/organNames.js`, `../../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)
-- `../organClassifier/` (classifyNode)
-- `node:fs`, `node:path`, `fast-glob`
+- `../../../types/`, scan/document constants, `../organClassifier/`, adapter contracts, Node filesystem/path

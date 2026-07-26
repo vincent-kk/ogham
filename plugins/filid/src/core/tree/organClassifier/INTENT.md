@@ -1,45 +1,35 @@
-# organClassifier -- 노드 타입 우선순위 분류
+# organClassifier — FCA priority classification
 
 ## Purpose
 
-디렉토리 메타데이터(`ClassifyInput`)를 받아 `fractal` / `organ` / `pure-function` 중 하나로 분류한다. FCA-AI 문서에 정의된 7단계 우선순위를 단일 순수 함수로 구현한 분류 엔진이다.
+언어 중립 directory metadata를 FCA node type으로 분류하는 순수 우선순위 함수다.
 
 ## Structure
 
-- `organClassifier.ts` — `classifyNode`, `isInfraOrgDirectoryByPattern`, `KNOWN_ORGAN_DIR_NAMES` re-export, `ClassifyInput` 인터페이스
+- `organClassifier.ts` — `classifyNode`, infra pattern 판정과 `ClassifyInput`
 
 ## Conventions
 
-- 분류 우선순위(위에서 아래로 짧은 회로):
-  1. `hasIntentMd` → `fractal`
-  2. `hasDetailMd` → `fractal`
-  3. `__name__` 또는 `.name` 인프라 패턴 → `organ`
-  4. `KNOWN_ORGAN_DIR_NAMES` 이름 매치 → `organ`
-  5. `hasIndex` + non-organ 이름 → `fractal`
-  6. `!hasFractalChildren && isLeafDirectory` → `organ`
-  7. `!hasSideEffects` → `pure-function`
-  8. 기본 → `fractal`
-- `hasSideEffects` 미지정 시 `true`로 간주 (안전 기본값)
-- `KNOWN_ORGAN_DIR_NAMES`는 `constants/organNames.ts`에서 import 후 re-export만
+- 순서: documents → known organ → infra pattern → adapter entry → leaf → proven purity → fractal.
+- purity 미지원은 side-effectful 안전 기본값으로 본다.
+- hybrid는 입력에서 명시하지 않는 한 반환하지 않는다.
 
 ## Boundaries
 
 ### Always do
 
-- 우선순위 변경 시 `07-RULES-REFERENCE.md` 문서와 `__tests__/unit/core/tree/organClassifier/` 갱신
-- 새 조건 추가 시 `ClassifyInput` 필드 확장
+- 각 priority override를 table test로 고정
+- entry point는 descriptor 존재 여부로만 판정
 
 ### Ask first
 
-- `KNOWN_ORGAN_DIR_NAMES` 목록 수정 (사용자 프로젝트 영향)
-- 우선순위 단계 추가/재배치
+- known organ 목록 또는 우선순위 단계 변경
 
 ### Never do
 
-- 파일 I/O 수행 (입력은 모두 메타데이터)
-- 이름 기반 분류(`KNOWN_ORGAN_DIR_NAMES`)를 구조 기반 분류보다 우선 적용
+- filesystem I/O 또는 entry filename 해석
+- unsupported purity를 pure-function으로 판정
 
 ## Dependencies
 
-- `../../../types/fractal.js` (`CategoryType`)
-- `../../../constants/organNames.js` (`KNOWN_ORGAN_DIR_NAMES`)
+- `../../../types/fractal.js`, `../../../constants/organNames.js`

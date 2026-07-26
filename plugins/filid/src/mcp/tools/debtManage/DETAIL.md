@@ -1,19 +1,28 @@
-# debtManage — DETAIL
+# debtManage — Removal Contract
 
 ## Requirements
 
-- `create`: Persist a new debt item as markdown under `<projectRoot>/.filid/debt/<id>.md`.
-- `list`: Read every `*.md` in the debt dir; optionally filter by `fractalPath`; return items + total weight.
-- `resolve`: Delete the debt file identified by `debtId`. **MUST reject any `debtId` whose resolved absolute path escapes `<projectRoot>/.filid/debt/`** (path traversal containment).
-- `calculate-bias`: Compute per-debt bias based on changed fractal paths and current commit SHA; idempotent per `last_review_commit`.
+- Filid 1.0은 technical debt lifecycle을 FCA core 또는 MCP 기능으로 소유하지 않는다.
+- `debt_manage`는 1.0 server registry, public exports, generated adapter와 사용자 스킬에서 제거한다.
+- 기존 프로젝트의 `.filid/debt/` 파일은 자동 삭제하거나 변환하지 않는다.
+- debt 판단이나 mutation이 필요하면 Filid 밖의 명시적 workflow가 소유한다.
 
 ## API Contracts
 
-- Input: `DebtManageInput` with `action`, `projectRoot`, and action-specific fields (`debtItem`, `debtId`, `fractalPath`, `debts`, `changedFractalPaths`, `currentCommitSha`).
-- `resolve` guard: before `unlink`, the handler MUST call `assertUnder(debtDir, filePath)` (`src/mcp/tools/utils/fsGuard.ts`). Traversal throws and propagates — no silent `{ deleted: false }`.
-- Weight cap: individual debt weight MUST NOT exceed `DEBT_WEIGHT_CAP`.
-- All file writes occur strictly under `<projectRoot>/.filid/debt/`.
+- Filid 1.0 공개 API 계약은 없다.
+- 제거 과정은 기존 debt 파일을 읽거나 쓰지 않는다.
+
+## Acceptance Criteria
+
+### AC-debt-removal — 공개 표면 제거
+
+- MCP tool list와 generated plugin에서 `debt_manage`가 발견되지 않는다.
+- build와 runtime이 debt type, constants 또는 handler를 import하지 않는다.
+
+### AC-debt-preservation — 사용자 자료 보존
+
+- 설치·migration·scan은 기존 `.filid/debt/` 내용을 변경하지 않는다.
 
 ## Last Updated
 
-- 2026-04-05 — Added path traversal containment requirement for `resolve` action. Introduced shared `assertUnder` helper dependency.
+2026-07-26 — debt workflow를 Filid 1.0 비목표로 명시했다.

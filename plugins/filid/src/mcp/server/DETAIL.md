@@ -1,41 +1,40 @@
-# server — Detail
+# server — Filid 1.0 Contract
 
 ## Requirements
 
-- Initialize the MCP server and register all 18 tool handlers.
-- Wrap every handler with `wrapHandler` so thrown errors become `toolError` responses and successful results pass through `toolResult`.
-- Convert `Map` instances inside handler results to plain objects via `mapReplacer` during JSON serialization (consumers cannot read native Maps across the MCP transport).
-- Own the per-session cache lifecycle (replaces the removed SessionEnd hook — the MCP server process is the only session-end signal common to all hosts):
-  - **Boot sweep** (`bootSweep(cwd?)`): after transport connect, run the same daily-throttled maintenance as the SessionStart hook (`isSessionPruneDue` → `pruneOldSessions`, `isPruneDue` → `pruneStaleCacheDirs`). Marker gates are mtime-based and shared across processes, so a double run (hook + server) stays a no-op. The session-scoped prune is project-scoped: it runs only when `tryProjectRoot(cwd)` resolves, and is skipped otherwise. The stale-cache prune needs no root and always runs. Best-effort: absorb every exception; never block or fail server boot.
-  - **Shutdown cleanup** (`registerShutdown` → `cleanupOwnSessionCache`): on `exit`/`SIGINT`/`SIGTERM`, synchronously remove this session's cache files via `removeSessionFiles(CLAUDE_CODE_SESSION_ID, tryProjectRoot())`. The host kills the process ~400ms after SIGINT (measured), so the handler must be strictly synchronous. `CLAUDE_CODE_SESSION_ID` is an undocumented env var: when absent, skip — the boot sweep covers the files by TTL. Skip likewise when no project root resolves. Register handlers once; never let a cleanup failure affect the exit path.
+- MCP server는 정확히 9개의 Filid 1.0 도구만 등록한다.
+- 모든 handler 입력을 Zod로 검증하고 성공·위반·불확실·미지원 상태를 공통 envelope로 반환한다.
+- inline JSON은 UTF-8 16 KiB 이하의 compact JSON이다.
+- 예산을 넘는 payload는 plugin cache의 content-addressed artifact로 atomic write하고 inline에는 summary와 metadata만 남긴다.
+- `restructure_plan` payload는 크기와 무관하게 artifact를 남긴다.
+- tool artifact의 절대 경로, media type, SHA-256, bytes와 ephemeral 표시는 실제 파일과 일치한다.
+- boot sweep와 shutdown cache cleanup은 best-effort이고 project root 미해석 시 project-scoped 작업을 건너뛴다.
 
 ## API Contracts
 
-### `toolResult(result)`
+- 등록 도구: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
+- `ToolResultEnvelope<Summary, Data>`는 `status`, `summary`, optional `data`, optional `artifact`, `diagnostics`를 가진다.
+- `toolResult(payload)`는 envelope를 compact MCP text content로 직렬화한다.
+- `toolError(error)`는 transport 또는 trust-boundary 실패를 `isError: true` 응답으로 변환한다.
+- `wrapHandler(handler, options)`는 schema·handler 오류를 일관된 tool error로 격리한다.
+- `startServer()`는 stdio transport 연결 후 boot cleanup을 수행하고 동기 shutdown handler를 한 번 등록한다.
 
-```ts
-function toolResult(result: unknown): {
-  content: [{ type: 'text'; text: string }];
-};
-```
+## Acceptance Criteria
 
-- Emits **compact JSON** (no indentation) by default.
-- Honors `FILID_PRETTY_JSON=1` to opt back into 2-space indent for human-side debugging via stderr/log capture.
-- Pretty-printing inflated every response by ~30% with no LLM benefit; JSON parsers ignore whitespace and tokenizers count it.
+### AC-server-surface — 도구 집합
 
-### `toolError(err)`
+- server tool list는 9개 이름과 set-equality를 이루고 제거된 도구를 포함하지 않는다.
 
-```ts
-function toolError(err: unknown): {
-  content: [{ type: 'text'; text: string }];
-  isError: true;
-};
-```
+### AC-server-envelope — 크기 제한
 
-- Always returns `isError: true`.
-- Produces `Error: <message>` text.
+- 16 KiB 이하 data는 inline이고 초과 data는 생략되어 artifact로 전달된다.
+- artifact bytes와 SHA-256이 envelope metadata와 일치한다.
+- summary scan은 전체 tree를 inline하지 않는다.
 
-### `wrapHandler(fn, options?)`
+### AC-server-lifecycle — host 안전성
 
-- Catches thrown errors and converts to `toolError`.
-- When `options.checkErrorField` is set, treats a result with a non-empty `error` field as an error response.
+- root 또는 session env가 없어도 server boot와 shutdown이 실패하지 않는다.
+
+## Last Updated
+
+2026-07-26 — 9개 도구와 공통 artifact envelope를 1.0 server 계약으로 고정했다.
