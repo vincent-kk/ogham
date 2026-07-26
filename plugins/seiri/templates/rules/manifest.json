@@ -56,7 +56,7 @@
       "title": "Function Boundaries",
       "description": "Functions compute from their parameters, effects stay at the edge, and one file exports one function.",
       "recommended": false,
-      "templateHash": "b08d3565aff0737d7045cb996506c39e3b09336604818c4e6966b462be744419"
+      "templateHash": "63c7faa4c9fd83e57650ecdc686fb42565659e40a8a35fa87dbf71e3dc0b558e"
     },
     {
       "id": "seiri_context-efficiency",

@@ -11,10 +11,11 @@ import { computeFileSha256 } from '../core/utils/computeFileSha256.js';
  * A mechanical drift guard, NOT a quality test. It checks only the things
  * about seiri rules that are string-level facts: the B1/B5/B6 skeleton
  * (precedence chain, format grounding, double falsification — presence only),
- * the filid/seiri boundary (numeric thresholds and test-runner names belong to
- * filid, never seiri), and the D8 shared-idiom contract (identical wording in a
- * rule and its skill, so a reword shows up as a red diff). Whether a rule is
- * sound or actually shifts behavior is a semantic question — that lives in the
+ * the filid/seiri boundary (numeric thresholds belong to filid except for the
+ * function-helper readability budget; test-runner names always belong to the
+ * repository), and the D8 shared-idiom contract (identical wording in a rule
+ * and its skill, so a reword shows up as a red diff). Whether a rule is sound
+ * or actually shifts behavior is a semantic question — that lives in the
  * micro-test / 10-issue A/B track, which an LLM evaluates. This file makes no
  * claim about it.
  */
@@ -45,11 +46,25 @@ const THRESHOLD =
 const RUNNER = /\b(npm|yarn|pnpm|pytest|cargo|go test|gradle|mvn)\b/i;
 
 describe('rule invariants (filid/seiri boundary + D8 idiom contract)', () => {
-  it('no rule hard-codes a numeric threshold in prose — thresholds are filid-owned', () => {
-    const offenders = rules
-      .filter((r) => THRESHOLD.test(prose(r.text)))
-      .map((r) => r.name);
-    expect(offenders).toEqual([]);
+  it('only helper implementation bodies carry the eight-line readability budget', () => {
+    const thresholds = rules.flatMap((rule) =>
+      Array.from(
+        prose(rule.text).matchAll(new RegExp(THRESHOLD.source, 'gi')),
+        (match) => ({ rule: rule.name, threshold: match[0] }),
+      ),
+    );
+    expect(thresholds).toEqual([
+      {
+        rule: 'seiri_function-boundaries.md',
+        threshold: '8 lines',
+      },
+    ]);
+    expect(
+      rules.find((rule) => rule.name === 'seiri_function-boundaries.md')
+        ?.text,
+    ).toContain(
+      "each helper's implementation body must be 8 lines or fewer; its declaration or signature and enclosing braces do not count",
+    );
     // The guard bites: a leaked threshold is caught.
     expect(THRESHOLD.test('split files over 500 lines')).toBe(true);
   });
