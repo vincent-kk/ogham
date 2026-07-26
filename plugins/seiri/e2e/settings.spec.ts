@@ -139,6 +139,35 @@ test('save persists the dial and syncs the selected rule docs', async ({
   ).toBe(true);
 });
 
+test('a drifted rule defaults to the latest shipped version', async ({
+  page,
+}) => {
+  const rulesDir = join(projectDir, '.claude', 'rules');
+  const deployed = join(rulesDir, RECOMMENDED.filename);
+  const shipped = readFileSync(
+    join(PKG_ROOT, 'templates', 'rules', RECOMMENDED.filename),
+    'utf8',
+  );
+  mkdirSync(rulesDir, { recursive: true });
+  writeFileSync(deployed, '# Locally edited rule\n', 'utf8');
+
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+  await page.goto(url);
+
+  const rule = page
+    .locator('#rules-list .rule')
+    .filter({ has: page.locator(`#rule-${RECOMMENDED.id}`) });
+  await expect(rule.locator('.rule-drift input[type="checkbox"]')).toBeChecked();
+  await expect(
+    page.locator('#preview .diff-row[data-action="update"]'),
+  ).toContainText(RECOMMENDED.filename);
+
+  await page.locator('#save').click();
+  await expect(waiting).resolves.toMatchObject({ status: 'saved' });
+  expect(readFileSync(deployed, 'utf8')).toBe(shipped);
+});
+
 test('a stale save replans without writing or settling the session', async ({
   page,
 }) => {

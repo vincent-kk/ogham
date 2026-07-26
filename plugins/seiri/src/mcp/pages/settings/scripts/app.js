@@ -52,7 +52,7 @@
   var resync = {};
   entries.forEach(function (entry) {
     selections[entry.id] = anyDeployed ? entry.deployed : entry.recommended;
-    resync[entry.id] = false;
+    resync[entry.id] = Boolean(entry.deployed && !entry.inSync);
   });
 
   var intervention =
@@ -169,14 +169,14 @@
       element(
         'p',
         null,
-        'The deployed copy of this rule differs from the one this build ships. Your edits are kept unless you say otherwise.',
+        'The deployed copy of this rule differs from the one this build ships. The latest shipped version is selected by default; uncheck below to keep your edits.',
       ),
     );
 
     var label = document.createElement('label');
     var overwrite = document.createElement('input');
     overwrite.type = 'checkbox';
-    overwrite.checked = false;
+    overwrite.checked = Boolean(resync[entry.id]);
     overwrite.addEventListener('change', function () {
       resync[entry.id] = overwrite.checked;
       previewRevision = null;
@@ -184,7 +184,7 @@
     });
     label.appendChild(overwrite);
     label.appendChild(
-      element('span', null, 'Replace it with the shipped version'),
+      element('span', null, 'Use the latest shipped version'),
     );
     block.appendChild(label);
     return block;
