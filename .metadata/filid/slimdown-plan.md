@@ -1,5 +1,10 @@
 # filid 경량화 계획 — MCP 도구 정리 및 네이티브 의존성 제거
 
+> **문서 상태: 대체됨.** 이 문서는 v0.8.2 구현을 분석한 역사적 참고 자료다.
+> 승인된 Filid 1.0 설계와 실행 순서는
+> [`vnext-redesign-plan.md`](./vnext-redesign-plan.md)를 따른다. 특히 이 문서의
+> LCA 제거, 3+12/test promotion, 부분적 도구 정리 결론은 1.0 규범이 아니다.
+>
 > 이 계획은 `/seiri:execute` 로 실행한다. 각 작업 전에 `/seiri:implement` 를,
 > 완료를 주장하기 전에 `/seiri:verify` 를 로드한다.
 > 작성 시점 기준 `@ogham/filid` v0.8.2.
