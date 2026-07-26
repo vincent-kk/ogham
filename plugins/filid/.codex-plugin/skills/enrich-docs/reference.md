@@ -1,18 +1,14 @@
 # enrich-docs — Reference Documentation
 
-Detailed workflow, quality rubric, MCP tool call signatures, and output format
-templates for the INTENT.md enrichment skill. For the quick-start overview,
-see [SKILL.md](./SKILL.md).
+Detailed workflow, quality rubric, MCP tool call signatures, and output format templates for the INTENT.md enrichment skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Path Validation
 
 Validation checks, performed in order:
 
-1. Resolve the target path to an absolute path. If `path` is omitted, use the
-   current working directory.
+1. Resolve the target path to an absolute path. If `path` is omitted, use the current working directory.
 2. Confirm the directory exists (fail fast if not).
-3. Walk up from the target to locate the nearest `.filid/config.json`. If
-   none exists, abort with:
+3. Walk up from the target to locate the nearest `.filid/config.json`. If none exists, abort with:
 
    ```
    Error: target <path> is not inside a FCA-AI project (.filid/config.json not found).
@@ -20,10 +16,7 @@ Validation checks, performed in order:
    ```
 
 4. Resolve `--depth`. If omitted, treat as unlimited.
-5. Read the `[filid:lang]` tag injected by the UserPromptSubmit hook (e.g.,
-   `[filid:lang] ko`). If the tag is absent, fall back to the system language
-   and default to English. The resolved language is forwarded to every
-   `context-manager` delegation so rewrites follow the project language.
+5. Read the `[filid:lang]` tag injected by the UserPromptSubmit hook (e.g., `[filid:lang] ko`). If the tag is absent, fall back to the system language and default to English. The resolved language is forwarded to every `context-manager` delegation so rewrites follow the project language.
 
 ## Section 2 — Discovery
 
@@ -64,23 +57,17 @@ Collection steps:
    // Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for node fields
    ```
 
-   Skip `organ` nodes — INTENT.md is prohibited there and should be surfaced
-   as a `scan` violation, not an enrichment target.
+   Skip `organ` nodes — INTENT.md is prohibited there and should be surfaced as a `scan` violation, not an enrichment target.
 
-4. When `--include-detail` is set, also Glob for `DETAIL.md` and add each as
-   a peer `DocEntry` with kind `detail`. DETAIL.md entries are scored on the
-   same rubric but against their own templates (see Section 3.5).
+4. When `--include-detail` is set, also Glob for `DETAIL.md` and add each as a peer `DocEntry` with kind `detail`. DETAIL.md entries are scored on the same rubric but against their own templates (see Section 3.5).
 
-5. Detect `MISSING` candidates: for every `fractal` node in the scan whose
-   module root is under the target directory but lacks an INTENT.md, create
-   a `DocEntry` with `content = null` and `lineCount = 0`.
+5. Detect `MISSING` candidates: for every `fractal` node in the scan whose module root is under the target directory but lacks an INTENT.md, create a `DocEntry` with `content = null` and `lineCount = 0`.
 
 ## Section 3 — Quality Audit
 
 ### 3.1 Scoring Axes
 
-Each INTENT.md receives a score ∈ [0, 100] computed from four independent
-axes, each worth 25 points.
+Each INTENT.md receives a score ∈ [0, 100] computed from four independent axes, each worth 25 points.
 
 | Axis         | What it measures                                                       |
 | ------------ | ---------------------------------------------------------------------- |
@@ -113,24 +100,18 @@ Parse the `## Conventions` section. Count non-empty bullet lines.
 Inspect the three sub-sections (`### Always do`, `### Ask first`, `### Never do`):
 
 - +8 per sub-section that has at least one bullet, capped at +24
-- +1 if no sub-section contains the phrase `모듈 경계 외부 로직 인라인` or
-  `do not import` as its only bullet (boilerplate detector)
-- Cap at 25. Files that literally match the `setup` scaffold template
-  receive 0 on this axis.
+- +1 if no sub-section contains the phrase `모듈 경계 외부 로직 인라인` or `do not import` as its only bullet (boilerplate detector)
+- Cap at 25. Files that literally match the `setup` scaffold template receive 0 on this axis.
 
 ### 3.5 Dependencies axis (25 pts)
 
 Parse the `## Dependencies` section:
 
-- +15 if the section names at least one module path (pattern `src/...`,
-  `packages/...`, or any path segment with `/`)
+- +15 if the section names at least one module path (pattern `src/...`, `packages/...`, or any path segment with `/`)
 - +10 if the section distinguishes internal vs external dependencies
 - Cap at 25.
 
-DETAIL.md rubric differs: replace `Structure` with `Requirements` and
-`Conventions` with `API Contracts`. Boundaries and Dependencies axes do not
-apply — DETAIL.md is scored against `Requirements`, `API Contracts`, and
-`Last Updated` freshness (last-updated within 90 days from today, 2026-04-12).
+DETAIL.md rubric differs: replace `Structure` with `Requirements` and `Conventions` with `API Contracts`. Boundaries and Dependencies axes do not apply — DETAIL.md is scored against `Requirements`, `API Contracts`, and `Last Updated` freshness (last-updated within 90 days from today, 2026-04-12).
 
 ### 3.6 Classification
 
@@ -165,16 +146,13 @@ Axis thresholds for "needs rewrite":
 - Boundaries < 15
 - Dependencies < 10
 
-MISSING items always rewrite all four axes. When a SPARSE item passes every
-axis threshold individually but its total is still below `min-quality`, mark
-all four axes for rewrite.
+MISSING items always rewrite all four axes. When a SPARSE item passes every axis threshold individually but its total is still below `min-quality`, mark all four axes for rewrite.
 
 Implementation file selection heuristic (cap 6 per entry):
 
 1. Pick `index.ts` / `main.ts` if present (priority boost).
 2. Pick the eponymous file (`auth/auth.ts` for directory `auth/`).
-3. Pick up to 4 more source files by size descending, excluding `*.test.ts`,
-   `*.spec.ts`, `*.bench.ts`, `*.d.ts`.
+3. Pick up to 4 more source files by size descending, excluding `*.test.ts`, `*.spec.ts`, `*.bench.ts`, `*.d.ts`.
 
 ## Section 5 — Approval Gate
 
@@ -204,20 +182,15 @@ AskUserQuestion({
 })
 ```
 
-On `modify`, ask the user which files or axes to drop, regenerate the plan,
-and re-prompt. On `cancel`, skip to Stage 8 with status `CANCELLED`. On
-`approve`, proceed to Stage 6.
+On `modify`, ask the user which files or axes to drop, regenerate the plan, and re-prompt. On `cancel`, skip to Stage 8 with status `CANCELLED`. On `approve`, proceed to Stage 6.
 
-`--dry-run` bypasses the prompt entirely — print the plan and jump to
-Stage 8 with status `DRY_RUN`.
+`--dry-run` bypasses the prompt entirely — print the plan and jump to Stage 8 with status `DRY_RUN`.
 
 `--auto-approve` bypasses the prompt and proceeds to Stage 6.
 
 ## Section 6 — Parallel Enrichment
 
-Batch `PlanItem`s into groups of at most 4 and dispatch one `context-manager`
-subagent per batch in a single tool-call block. Each delegation prompt
-includes:
+Batch `PlanItem`s into groups of at most 4 and dispatch one `context-manager` subagent per batch in a single tool-call block. Each delegation prompt includes:
 
 ```
 Target: <docPath>
@@ -258,8 +231,7 @@ Instructions:
 10. Return { docPath, status: "written" | "skipped" | "error", reason? }.
 ```
 
-When `--include-detail` is set, DETAIL.md prompts replace the INTENT.md
-scaffold with:
+When `--include-detail` is set, DETAIL.md prompts replace the INTENT.md scaffold with:
 
 ```
 ## Requirements
@@ -267,8 +239,7 @@ scaffold with:
 ## Last Updated
 ```
 
-The 50-line cap does not apply to DETAIL.md — it has no line limit;
-restructure it in place on each update instead.
+The 50-line cap does not apply to DETAIL.md — it has no line limit; restructure it in place on each update instead.
 
 ## Section 7 — Validate
 
@@ -286,20 +257,9 @@ mcp__plugin_filid_tools__structure_validate({ path: "<moduleRoot>" })
 
 Decision logic:
 
-- Written INTENT.md content exceeds 50 lines (count the lines of the written
-  content; `cap_applies.intent` confirms the cap targets INTENT.md, never
-  DETAIL.md) → dispatch a second-pass `context-manager` with instruction
-  "compress to 50 lines preserving all four rewritten axes"; retry limit = 1.
-  If the second pass still exceeds 50 lines → mark file as `NEEDS_REWORK`,
-  revert the on-disk content, and report in Stage 8.
-- Written content lacks any of the three tier headings (`### Always do`,
-  `### Ask first`, `### Never do`) → mark file as `NEEDS_REWORK`, revert the
-  on-disk content, and report in Stage 8. Check the headings directly on the
-  content — `mcp__plugin_filid_tools__structure_validate` evaluates structural rules only and
-  does not inspect tier sections.
-- `report.result.violations` from `mcp__plugin_filid_tools__structure_validate` reports a
-  structural violation for the module → mark file as `NEEDS_REWORK`, revert,
-  and report in Stage 8.
+- Written INTENT.md content exceeds 50 lines (count the lines of the written content; `cap_applies.intent` confirms the cap targets INTENT.md, never DETAIL.md) → dispatch a second-pass `context-manager` with instruction "compress to 50 lines preserving all four rewritten axes"; retry limit = 1. If the second pass still exceeds 50 lines → mark file as `NEEDS_REWORK`, revert the on-disk content, and report in Stage 8.
+- Written content lacks any of the three tier headings (`### Always do`, `### Ask first`, `### Never do`) → mark file as `NEEDS_REWORK`, revert the on-disk content, and report in Stage 8. Check the headings directly on the content — `mcp__plugin_filid_tools__structure_validate` evaluates structural rules only and does not inspect tier sections.
+- `report.result.violations` from `mcp__plugin_filid_tools__structure_validate` reports a structural violation for the module → mark file as `NEEDS_REWORK`, revert, and report in Stage 8.
 - All checks pass → mark as `ACCEPTED`.
 
 ## Section 8 — Report
@@ -348,5 +308,4 @@ Emit exactly one of:
 - `Enrich-docs skipped: all RICH`
 - `Enrich-docs cancelled`
 
-Register these markers in `.omc/research/terminal-markers.json` per the
-Tier-2b anti-yield contract.
+Register these markers in `.omc/research/terminal-markers.json` per the Tier-2b anti-yield contract.

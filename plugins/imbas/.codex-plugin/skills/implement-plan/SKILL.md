@@ -8,9 +8,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls.
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls.
 >
 > **Valid reasons to yield**:
 >
@@ -19,9 +17,7 @@ plugin: imbas
 
 # implement-plan — DAG-based Implementation Schedule
 
-Computes a parallel+ordered execution schedule from a completed stories-manifest
-(optionally joined with devplan-manifest for cross-story Task dependencies).
-Produces `implement-plan.json` and a human-readable `implement-plan-report.md`.
+Computes a parallel+ordered execution schedule from a completed stories-manifest (optionally joined with devplan-manifest for cross-story Task dependencies). Produces `implement-plan.json` and a human-readable `implement-plan-report.md`.
 
 ## When to Use This Skill
 
@@ -51,18 +47,11 @@ Produces `implement-plan.json` and a human-readable `implement-plan-report.md`.
 
 ## Workflow (Provider-agnostic)
 
-1. Resolve `run_id`: if `--run` omitted, call `mcp__plugin_imbas_tools__run_list` and
-   pick the most recent run whose state satisfies the source precondition
-   (see references/preconditions.md) — do NOT blindly take the latest run.
+1. Resolve `run_id`: if `--run` omitted, call `mcp__plugin_imbas_tools__run_list` and pick the most recent run whose state satisfies the source precondition (see references/preconditions.md) — do NOT blindly take the latest run.
 2. Call `mcp__plugin_imbas_tools__manifest_implement_plan` with `{project_ref, run_id, source, max_parallel}`.
-   - **On failure** (`E-IP-3` missing/wrong source manifest, `E-IP-5` invalid
-     `--max-parallel`, or an unexpected internal error): emit terminal marker
-     `Implement plan BLOCKED: <error_code> — <reason>` (see references/errors.md)
-     and end. Do NOT continue to step 3.
+   - **On failure** (`E-IP-3` missing/wrong source manifest, `E-IP-5` invalid `--max-parallel`, or an unexpected internal error): emit terminal marker `Implement plan BLOCKED: <error_code> — <reason>` (see references/errors.md) and end. Do NOT continue to step 3.
 3. On success, read the summary (`total_groups`, `total_items`, `max_level`, `cycles_broken`).
-4. If summary `cycles_broken > 0` or `unresolved > 0` (both are NUMBERS in the
-   summary; the detailed arrays live in the manifest), surface them in the
-   completion message; do NOT pause — the plan is still saved.
+4. If summary `cycles_broken > 0` or `unresolved > 0` (both are NUMBERS in the summary; the detailed arrays live in the manifest), surface them in the completion message; do NOT pause — the plan is still saved.
 5. Emit terminal marker `Implement plan generated` with the report path.
 
 ## Constraints

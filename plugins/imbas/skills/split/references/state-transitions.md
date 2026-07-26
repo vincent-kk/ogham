@@ -40,7 +40,6 @@ Exit states:
 
 # Output
 
-`stories-manifest.json` saved in the run directory at:
-`.imbas/<KEY>/runs/<run-id>/stories-manifest.json`
+`stories-manifest.json` saved in the run directory at: `.imbas/<KEY>/runs/<run-id>/stories-manifest.json`
 
 Schema defined in `agents/planner.md` (stories-manifest.json output section).

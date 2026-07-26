@@ -8,10 +8,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls, subagent (`analyst`) returns, or
-> [OP: get_confluence] / [OP: search_confluence] operations.
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, subagent (`analyst`) returns, or [OP: get_confluence] / [OP: search_confluence] operations.
 >
 > **Valid reasons to yield**:
 >
@@ -26,8 +23,7 @@ plugin: imbas
 
 # validate — Phase 1 Document Validation
 
-Validates a planning document for internal consistency, producing a structured
-validation report that gates entry to Phase 2 (split).
+Validates a planning document for internal consistency, producing a structured validation report that gates entry to Phase 2 (split).
 
 ## When to Use This Skill
 

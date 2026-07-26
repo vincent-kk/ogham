@@ -34,23 +34,13 @@ Show recent auto-captured insights (from current session's pending captures and 
 
 #### Cross-event handoff semantics
 
-`pending-insight-notification.json` carries captured insights across the
-boundary between the turn that captured them (MCP `capture_insight` call)
-and the turn that surfaces them:
+`pending-insight-notification.json` carries captured insights across the boundary between the turn that captured them (MCP `capture_insight` call) and the turn that surfaces them:
 
-- **Turn N** — `capture_insight` writes/appends the insight payload to
-  `pending-insight-notification.json`.
-- **Turn N+1, UserPromptSubmit** — the `insight-injector` hook is NOT the
-  consumer. It only reads `config.category_filter` to render the
-  `allowed-categories` banner; it does not inspect or mutate the pending file.
-- **Turn N+1, SessionStart (or next session's SessionStart if the session
-  ended before the consumer ran)** — `session-start.ts` reads the pending
-  notifications, surfaces them to Claude via `hookSpecificOutput.additionalContext`
-  ("💡 지난 세션에서 … 자동 캡처했습니다"), and deletes the file.
+- **Turn N** — `capture_insight` writes/appends the insight payload to `pending-insight-notification.json`.
+- **Turn N+1, UserPromptSubmit** — the `insight-injector` hook is NOT the consumer. It only reads `config.category_filter` to render the `allowed-categories` banner; it does not inspect or mutate the pending file.
+- **Turn N+1, SessionStart (or next session's SessionStart if the session ended before the consumer ran)** — `session-start.ts` reads the pending notifications, surfaces them to Claude via `hookSpecificOutput.additionalContext` ("💡 지난 세션에서 … 자동 캡처했습니다"), and deletes the file.
 
-A crash between capture (turn N) and consumption leaves the file intact;
-the next session's SessionStart will pick it up. There is no TTL — the file
-is one-shot and self-cleaning.
+A crash between capture (turn N) and consumption leaves the file intact; the next session's SessionStart will pick it up. There is no TTL — the file is one-shot and self-cleaning.
 
 ### --stats
 

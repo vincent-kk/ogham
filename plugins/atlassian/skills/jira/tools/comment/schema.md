@@ -1,18 +1,18 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud Endpoint | Server Endpoint |
-|---|---|---|---|
-| List comments | GET | `/rest/api/3/issue/{key}/comment` | `/rest/api/2/issue/{key}/comment` |
-| Get comment | GET | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
-| Add comment | POST | `/rest/api/3/issue/{key}/comment` | `/rest/api/2/issue/{key}/comment` |
-| Update comment | PUT | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
+| Operation      | HTTP   | Cloud Endpoint                         | Server Endpoint                        |
+| -------------- | ------ | -------------------------------------- | -------------------------------------- |
+| List comments  | GET    | `/rest/api/3/issue/{key}/comment`      | `/rest/api/2/issue/{key}/comment`      |
+| Get comment    | GET    | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
+| Add comment    | POST   | `/rest/api/3/issue/{key}/comment`      | `/rest/api/2/issue/{key}/comment`      |
+| Update comment | PUT    | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
 | Delete comment | DELETE | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| body | ADF/string | Y (create) | Comment body. Cloud: ADF. Server: text/wiki |
+| Parameter | Type       | Required   | Description                                 |
+| --------- | ---------- | ---------- | ------------------------------------------- |
+| body      | ADF/string | Y (create) | Comment body. Cloud: ADF. Server: text/wiki |
 
 ## Cloud vs Server Branching
 
@@ -21,16 +21,16 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Method | Notes |
-|---|---|---|---|
-| List/Get | `mcp__plugin_atlassian_tools__fetch` | GET | |
-| Add | `mcp__plugin_atlassian_tools__fetch` | POST | Use content_format: "markdown" |
-| Update | `mcp__plugin_atlassian_tools__fetch` | PUT | |
-| Delete | `mcp__plugin_atlassian_tools__fetch` | DELETE | |
+| Operation | MCP Tool                             | Method | Notes                          |
+| --------- | ------------------------------------ | ------ | ------------------------------ |
+| List/Get  | `mcp__plugin_atlassian_tools__fetch` | GET    |                                |
+| Add       | `mcp__plugin_atlassian_tools__fetch` | POST   | Use content_format: "markdown" |
+| Update    | `mcp__plugin_atlassian_tools__fetch` | PUT    |                                |
+| Delete    | `mcp__plugin_atlassian_tools__fetch` | DELETE |                                |
 
 ## URL Patterns
 
-| URL Pattern | Route To |
-|---|---|
+| URL Pattern                                             | Route To                                     |
+| ------------------------------------------------------- | -------------------------------------------- |
 | `...atlassian.net/browse/KAN-27?focusedCommentId=10110` | `GET /rest/api/3/issue/KAN-27/comment/10110` |
-| `...atlassian.net/browse/KAN-27?focusedId=10110` | `GET /rest/api/3/issue/KAN-27/comment/10110` |
+| `...atlassian.net/browse/KAN-27?focusedId=10110`        | `GET /rest/api/3/issue/KAN-27/comment/10110` |

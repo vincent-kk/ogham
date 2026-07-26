@@ -9,14 +9,14 @@ Thorough analysis with many frames and low threshold.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 30 | High frame count for comprehensive coverage |
-| `-t` | 0.2 | Low threshold to keep more subtle changes |
-| `--fps` | 10 | High extraction rate for detailed content |
-| `--max-frames` | 300 | Default cap |
-| `-s` | 720 | Default analysis resolution |
-| `-q` | 80 | Default quality |
+| Flag           | Value | Reasoning                                   |
+| -------------- | ----- | ------------------------------------------- |
+| `-n`           | 30    | High frame count for comprehensive coverage |
+| `-t`           | 0.2   | Low threshold to keep more subtle changes   |
+| `--fps`        | 10    | High extraction rate for detailed content   |
+| `--max-frames` | 300   | Default cap                                 |
+| `-s`           | 720   | Default analysis resolution                 |
+| `-q`           | 80    | Default quality                             |
 
 ## Command
 

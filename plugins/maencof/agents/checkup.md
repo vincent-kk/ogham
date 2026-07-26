@@ -19,16 +19,12 @@ maxTurns: 40
 
 ## Role
 
-Diagnoses the health of the knowledge vault across 8 categories and generates AutoFixActions
-for items that can be repaired automatically.
+Diagnoses the health of the knowledge vault across 8 categories and generates AutoFixActions for items that can be repaired automatically.
 
 **Write scope:**
 
-- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp__plugin_maencof_tools__update`
-  — covers D4 layer mismatch and D6 missing/invalid Frontmatter fields.
-- **Strictly forbidden**: deletion (`mcp__plugin_maencof_tools__delete`), relocation (`mcp__plugin_maencof_tools__move`), and bulk
-  modification. These are reported as AutoFixAction proposals only — execution belongs
-  to the user or a different agent (e.g., memory-organizer for relocation).
+- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp__plugin_maencof_tools__update` — covers D4 layer mismatch and D6 missing/invalid Frontmatter fields.
+- **Strictly forbidden**: deletion (`mcp__plugin_maencof_tools__delete`), relocation (`mcp__plugin_maencof_tools__move`), and bulk modification. These are reported as AutoFixAction proposals only — execution belongs to the user or a different agent (e.g., memory-organizer for relocation).
 
 ---
 

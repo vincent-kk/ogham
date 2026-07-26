@@ -17,8 +17,7 @@
 
 - `loadConfig` 는 `../shared/loadConfig.js` (LCA shared organ) 에서 import
 - payload 라인 순서는 `.metadata/cennad/hooks.md` 와 일치 유지
-- `Active providers` = crosscheck 명단(enabled 전부), `Auto-routing` = electable.
-  crosscheck 스킬이 전자를 읽으므로 의미를 바꾸지 않는다
+- `Active providers` = crosscheck 명단(enabled 전부), `Auto-routing` = electable. crosscheck 스킬이 전자를 읽으므로 의미를 바꾸지 않는다
 - 표에는 제외된 provider 도 남기고 사유를 붙인다 (self host / by setup)
 - 강도의 지시는 stance 가 전담 — 헤더 라벨은 서술하지 않는다 (중복 금지)
 - 산문에 `moment` 단어 금지 — 훅 번들 가드가 moment.js 로 오탐한다

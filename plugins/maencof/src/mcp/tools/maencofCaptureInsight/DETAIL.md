@@ -37,6 +37,4 @@
 
 ### Enforcement sites (grep guard)
 
-`rg -n 'category_filter\[' plugins/maencof/src/` 결과는 정확히 1 개의 enforcement site
-(`maencofCaptureInsight.ts`) 만 반환해야 한다. 이 수가 증가하면 다중 enforcement 로 인한
-문서/코드 drift 가능성이 있으므로 DETAIL.md 와 SKILL.md 둘 다 업데이트할 것.
+`rg -n 'category_filter\[' plugins/maencof/src/` 결과는 정확히 1 개의 enforcement site (`maencofCaptureInsight.ts`) 만 반환해야 한다. 이 수가 증가하면 다중 enforcement 로 인한 문서/코드 drift 가능성이 있으므로 DETAIL.md 와 SKILL.md 둘 다 업데이트할 것.

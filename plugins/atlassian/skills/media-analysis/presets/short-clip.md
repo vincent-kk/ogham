@@ -9,14 +9,14 @@ Clips <= 30 seconds. Full resolution, moderate frame count.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 8 | Enough for scene coverage without redundancy |
-| `-t` | 0.5 | Default threshold |
-| `--fps` | 5 | Default; short clips don't need reduction |
-| `--max-frames` | 300 | Default cap (won't hit for short clips) |
-| `-s` | 720 | Default analysis resolution |
-| `-q` | 85 | Slightly above default for better visual quality |
+| Flag           | Value | Reasoning                                        |
+| -------------- | ----- | ------------------------------------------------ |
+| `-n`           | 8     | Enough for scene coverage without redundancy     |
+| `-t`           | 0.5   | Default threshold                                |
+| `--fps`        | 5     | Default; short clips don't need reduction        |
+| `--max-frames` | 300   | Default cap (won't hit for short clips)          |
+| `-s`           | 720   | Default analysis resolution                      |
+| `-q`           | 85    | Slightly above default for better visual quality |
 
 ## Command
 

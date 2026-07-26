@@ -208,9 +208,7 @@ If `oldSpec.version < newSpec.version`, run the version migrator before diffing.
 
 ### Sentinel preservation rules
 
-Generated files include two kinds of sentinels — see
-`../create/workflow.md` "Sentinel kinds — split-responsibility rule" for the
-authoritative table.
+Generated files include two kinds of sentinels — see `../create/workflow.md` "Sentinel kinds — split-responsibility rule" for the authoritative table.
 
 ```typescript
 // AUTO-MANAGED-START: <reason> (managed by craft-dashboard; do not hand-edit)
@@ -222,8 +220,7 @@ authoritative table.
 // USER-EDIT-END
 ```
 
-MUTATE rewrites lines inside AUTO-MANAGED markers freely and preserves lines
-inside USER-EDIT markers verbatim across patches.
+MUTATE rewrites lines inside AUTO-MANAGED markers freely and preserves lines inside USER-EDIT markers verbatim across patches.
 
 **Sentinel-missing protocol**: If an AUTO-MANAGED or USER-EDIT sentinel is missing in an existing file (because the user manually removed it), follow this staged fallback before stopping:
 
@@ -233,34 +230,14 @@ inside USER-EDIT markers verbatim across patches.
    - `routes/index.ts` domain route imports → end of the last `import ... from './<name>.js'` line in the import block
    - `routes/index.ts` domain route registrations → end of `mountRoutes(...)` body, before the closing `}`
    - panel `<PascalName>.tsx` USER-EDIT zones → at the documented anchor (e.g., immediately after the `useQuery(...)` call for `dataKey` tweaks)
-2. **Single-confirm prompt** (interactive only): Show the user the proposed
-   sentinel insertion with the surrounding 3 lines of context. Ask
-   `Insert sentinel here and proceed? [y/N]` (destructive-safe default).
-3. **Headless run**: do NOT auto-resolve to `N` and silently continue. The
-   patch run aborts immediately with a non-zero exit before
-   `dashboard-spec.json` is rewritten in Phase 4 step 6. Print the missing
-   sentinel reason and the recovery commands the user can run after
-   restoring the markers manually.
-4. **Interactive `y`**: Insert sentinel block, proceed with patch. Note in
-   the hand-off summary that a sentinel was recovered.
-5. **Interactive `N` or non-response**: Skip THAT file's patch, do NOT
-   modify it. Surface the file name and the missing sentinel reason
-   inline. Immediately ask a second prompt:
-   `Continue patching the remaining N-1 files (spec change will be
-partial)? [y/N]`.
-   - **second prompt `N` / non-response**: abort the WHOLE MUTATE run
-     BEFORE `dashboard-spec.json` is rewritten in Phase 4 step 6. Exit
-     non-zero. Hand-off summary lists every file that would have been
-     touched, marked as `not applied`.
-   - **second prompt `y`**: continue patching the remaining files,
-     rewrite `dashboard-spec.json` as usual, but the Phase 5 hand-off
-     summary MUST flag the skipped file with a `partial spec
-application` warning and recommend the user restore the sentinel
-     and re-run MUTATE for that single file.
+2. **Single-confirm prompt** (interactive only): Show the user the proposed sentinel insertion with the surrounding 3 lines of context. Ask `Insert sentinel here and proceed? [y/N]` (destructive-safe default).
+3. **Headless run**: do NOT auto-resolve to `N` and silently continue. The patch run aborts immediately with a non-zero exit before `dashboard-spec.json` is rewritten in Phase 4 step 6. Print the missing sentinel reason and the recovery commands the user can run after restoring the markers manually.
+4. **Interactive `y`**: Insert sentinel block, proceed with patch. Note in the hand-off summary that a sentinel was recovered.
+5. **Interactive `N` or non-response**: Skip THAT file's patch, do NOT modify it. Surface the file name and the missing sentinel reason inline. Immediately ask a second prompt: `Continue patching the remaining N-1 files (spec change will be partial)? [y/N]`.
+   - **second prompt `N` / non-response**: abort the WHOLE MUTATE run BEFORE `dashboard-spec.json` is rewritten in Phase 4 step 6. Exit non-zero. Hand-off summary lists every file that would have been touched, marked as `not applied`.
+   - **second prompt `y`**: continue patching the remaining files, rewrite `dashboard-spec.json` as usual, but the Phase 5 hand-off summary MUST flag the skipped file with a `partial spec application` warning and recommend the user restore the sentinel and re-run MUTATE for that single file.
 
-The fallback prefers progress with a single approval over a hard stall in
-interactive mode, while in headless mode it refuses to leave the
-spec-vs-code state diverged — silent partial application is forbidden.
+The fallback prefers progress with a single approval over a hard stall in interactive mode, while in headless mode it refuses to leave the spec-vs-code state diverged — silent partial application is forbidden.
 
 ### File naming conventions
 
@@ -312,13 +289,10 @@ Backup of previous spec: <target>/dashboard-spec.json.bak
 
 ### Failure handling
 
-- `npm run build` fails: print TypeScript errors, ask the user to inspect.
-  Spec is already swapped — restore via rollback if needed (see "Rollback"
-  below). Re-entry options once investigated:
+- `npm run build` fails: print TypeScript errors, ask the user to inspect. Spec is already swapped — restore via rollback if needed (see "Rollback" below). Re-entry options once investigated:
   - Spec needs more changes → re-run `/maencof:craft-dashboard mutate <target>`.
   - Generated code only → `cd <target> && npm run build` after manual fix.
-- Validation fails: print the specific failure, leave `dashboard-spec.json.bak`
-  in place for rollback.
+- Validation fails: print the specific failure, leave `dashboard-spec.json.bak` in place for rollback.
 
 ---
 

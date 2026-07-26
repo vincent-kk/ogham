@@ -2,8 +2,7 @@
 
 ## Output
 
-`validation-report.md` saved in the run directory at:
-`.imbas/<KEY>/runs/<run-id>/validation-report.md`
+`validation-report.md` saved in the run directory at: `.imbas/<KEY>/runs/<run-id>/validation-report.md`
 
 Report format is defined by the `analyst` agent (see `agents/analyst.md`).
 

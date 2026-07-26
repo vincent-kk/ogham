@@ -1,10 +1,6 @@
 ## Purpose
 
-`open_settings` 도구 진입점. `127.0.0.1` 전용 설정 서버를 기동해 브라우저 폼
-(`.imbas/config.json`)을 열고, **bounded long-poll** 로 사용자의 저장/닫기를
-기다렸다가 결과를 반환한다 — setup init 워크플로가 같은 턴에서 캐시 채우기로
-이어간다. 세션만 아는 데이터(가용 provider, 감지 repo, Jira 프로젝트 목록)는
-`bootstrap` 인자로 주입받아 페이지 상태에 포함한다.
+`open_settings` 도구 진입점. `127.0.0.1` 전용 설정 서버를 기동해 브라우저 폼 (`.imbas/config.json`)을 열고, **bounded long-poll** 로 사용자의 저장/닫기를 기다렸다가 결과를 반환한다 — setup init 워크플로가 같은 턴에서 캐시 채우기로 이어간다. 세션만 아는 데이터(가용 provider, 감지 repo, Jira 프로젝트 목록)는 `bootstrap` 인자로 주입받아 페이지 상태에 포함한다.
 
 ## Structure
 

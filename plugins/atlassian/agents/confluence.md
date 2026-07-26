@@ -57,14 +57,14 @@ Send V2-style logical paths only (`/pages/{id}`, `/spaces/{id}`, `/footer-commen
 
 ### Cloud vs Server/DC Capability Gaps
 
-| Feature                       | Cloud V2 | Server/DC               |
-| ----------------------------- | -------- | ----------------------- |
-| Inline comments               | Yes      | No (V2-only)            |
-| Analytics (views)             | Yes      | No (V2-only)            |
-| Whiteboards / Databases       | Yes      | No (V2-only)            |
-| Smart-link embeds             | Yes      | No (V2-only)            |
-| User identifier               | `accountId` | `userKey` / `username` |
-| Page move                     | Via page update (`parentId`) | Yes (`/pages/{id}/move/{position}/{targetId}` — auto-rewritten to V1) |
+| Feature                 | Cloud V2                     | Server/DC                                                             |
+| ----------------------- | ---------------------------- | --------------------------------------------------------------------- |
+| Inline comments         | Yes                          | No (V2-only)                                                          |
+| Analytics (views)       | Yes                          | No (V2-only)                                                          |
+| Whiteboards / Databases | Yes                          | No (V2-only)                                                          |
+| Smart-link embeds       | Yes                          | No (V2-only)                                                          |
+| User identifier         | `accountId`                  | `userKey` / `username`                                                |
+| Page move               | Via page update (`parentId`) | Yes (`/pages/{id}/move/{position}/{targetId}` — auto-rewritten to V1) |
 
 ### Error Recovery
 

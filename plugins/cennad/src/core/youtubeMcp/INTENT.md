@@ -1,10 +1,6 @@
 ## Purpose
 
-`@ogham/yt-dlp-mcp`(키 `yt-dlp-mcp`) MCP 서버를 LLM과 분리된 독립
-addon으로 대상 CLI(claude·codex·antigravity)에 멱등 등록·해제한다.
-claude·codex는 목적별 사용자 MCP target과 manager를 사용하고, antigravity는
-글로벌 `mcp_config.json`을 관리한다. 공통 `language`
-(en/ko)는 서버 env `YTDLP_LANG`로 전달하며 `/setup` 저장 시점에만 실행한다.
+`@ogham/yt-dlp-mcp`(키 `yt-dlp-mcp`) MCP 서버를 LLM과 분리된 독립 addon으로 대상 CLI(claude·codex·antigravity)에 멱등 등록·해제한다. claude·codex는 목적별 사용자 MCP target과 manager를 사용하고, antigravity는 글로벌 `mcp_config.json`을 관리한다. 공통 `language` (en/ko)는 서버 env `YTDLP_LANG`로 전달하며 `/setup` 저장 시점에만 실행한다.
 
 ## Structure
 

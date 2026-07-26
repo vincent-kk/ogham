@@ -11,8 +11,7 @@ version: 1.0.0
 
 ## Purpose
 
-Enforce consistent naming conventions for documents in the knowledge space.
-Ensure discoverability and automation compatibility.
+Enforce consistent naming conventions for documents in the knowledge space. Ensure discoverability and automation compatibility.
 
 ## Rule Definitions
 
@@ -34,8 +33,7 @@ apiDesignPrinciples.md    # camelCase
 
 ### R2. Lowercase Letters + Digits + Hyphens
 
-Allowed characters in filenames: `a-z`, `0-9`, `-`
-Only `.md` extension is permitted.
+Allowed characters in filenames: `a-z`, `0-9`, `-` Only `.md` extension is permitted.
 
 ```
 # Correct examples
@@ -50,8 +48,7 @@ notes.txt                 # non-.md extension
 
 ### R3. 100-line Limit Warning
 
-Documents exceeding 100 lines receive a recommendation to split.
-Knowledge nodes should remain atomic to improve graph traversal efficiency.
+Documents exceeding 100 lines receive a recommendation to split. Knowledge nodes should remain atomic to improve graph traversal efficiency.
 
 ```
 ⚠️ Document exceeds 100 lines (current: {lines} lines)
@@ -61,8 +58,7 @@ Knowledge nodes should remain atomic to improve graph traversal efficiency.
 
 ### R4. Directory Naming Rules
 
-Layer subdirectories must be named in kebab-case.
-Layer root directories are fixed: `01_Core`, `02_Derived`, `03_External`, `04_Action`.
+Layer subdirectories must be named in kebab-case. Layer root directories are fixed: `01_Core`, `02_Derived`, `03_External`, `04_Action`.
 
 ```
 # Correct examples

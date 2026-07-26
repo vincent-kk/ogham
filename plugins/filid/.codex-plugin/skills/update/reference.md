@@ -1,7 +1,6 @@
 # update — Reference Documentation
 
-Detailed workflow, MCP tool call signatures, and output format templates for the
-code-docs-tests synchronization skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+Detailed workflow, MCP tool call signatures, and output format templates for the code-docs-tests synchronization skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
 
 ## Section 0 — Change Detection
 
@@ -62,8 +61,7 @@ mcp__plugin_filid_tools__drift_detect({ path: "<target-path>", severity: "high" 
 
 ### Severity Normalization Table
 
-`filid:scan` and `filid:sync` use different severity vocabularies. This table maps
-scan violations to Stage 2 gate conditions:
+`filid:scan` and `filid:sync` use different severity vocabularies. This table maps scan violations to Stage 2 gate conditions:
 
 | scan Violation Type                   | Stage 2 Gate                      |
 | ------------------------------------- | --------------------------------- |
@@ -91,8 +89,7 @@ mcp__plugin_filid_tools__structure_validate({ path: "<target-path>" })
 
 ## Section 3 — Doc & Test Update
 
-**Execution mode**: Parallel — `context-manager` and `implementer` operate on
-non-overlapping file sets (docs vs tests) and can run simultaneously.
+**Execution mode**: Parallel — `context-manager` and `implementer` operate on non-overlapping file sets (docs vs tests) and can run simultaneously.
 
 ### Document Update (INTENT.md / DETAIL.md)
 

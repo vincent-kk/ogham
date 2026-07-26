@@ -26,12 +26,12 @@ If empty: prompt to create the first rule.
 
 Present options or detect intent from natural language:
 
-| User Expression | Action |
-|----------------|--------|
-| "No console.log in API files" | Create conditional rule |
-| "Always write tests first" | Create global rule |
-| "Delete the api-security rule" | Remove rule |
-| "Show me all rules" | List rules |
+| User Expression                | Action                  |
+| ------------------------------ | ----------------------- |
+| "No console.log in API files"  | Create conditional rule |
+| "Always write tests first"     | Create global rule      |
+| "Delete the api-security rule" | Remove rule             |
+| "Show me all rules"            | List rules              |
 
 ### Step 3 — Define Rule Content and Scope
 
@@ -45,12 +45,14 @@ Collect rule content and determine scope:
 After user confirmation, write the rule file.
 
 **Conditional rule** (`api-security.md`):
+
 ```markdown
 ---
 paths:
-  - "src/api/**/*.ts"
-  - "src/api/**/*.tsx"
+  - 'src/api/**/*.ts'
+  - 'src/api/**/*.tsx'
 ---
+
 # API Security Rules
 
 - Mandatory input validation for all API endpoints
@@ -59,6 +61,7 @@ paths:
 ```
 
 **Global rule** (`general.md`, no paths):
+
 ```markdown
 # General Rules
 
@@ -75,13 +78,13 @@ Report the created/modified rule with file path, scope, and entry count.
 
 ## Glob Pattern Reference
 
-| Pattern | Target |
-|---------|--------|
-| `**/*.ts` | All TypeScript files |
+| Pattern           | Target                    |
+| ----------------- | ------------------------- |
+| `**/*.ts`         | All TypeScript files      |
 | `src/api/**/*.ts` | TypeScript under src/api/ |
-| `*.{ts,tsx}` | Root-level ts/tsx files |
-| `src/**/*` | All files under src/ |
-| `**/*.test.ts` | All test files |
+| `*.{ts,tsx}`      | Root-level ts/tsx files   |
+| `src/**/*`        | All files under src/      |
+| `**/*.test.ts`    | All test files            |
 
 ## Rules Spec
 
@@ -106,6 +109,7 @@ Executed by the **configurator** agent. The configurator ensures spec compliance
 ```
 
 Natural language:
+
 ```
 "Add a rule: no console.log in production code"
 "Show me all my rules"
@@ -113,13 +117,13 @@ Natural language:
 
 ## Error Handling
 
-| Condition | Resolution |
-|-----------|------------|
-| `rules/` directory missing | Auto-create directory, then proceed |
-| Invalid glob pattern | Show syntax guide with examples |
-| Filename conflict | Display existing file, offer append or overwrite |
-| Rule deletion | Preview content, require double confirmation |
-| Pattern-content mismatch | Warn about relevance, confirm before proceeding |
+| Condition                  | Resolution                                       |
+| -------------------------- | ------------------------------------------------ |
+| `rules/` directory missing | Auto-create directory, then proceed              |
+| Invalid glob pattern       | Show syntax guide with examples                  |
+| Filename conflict          | Display existing file, offer append or overwrite |
+| Rule deletion              | Preview content, require double confirmation     |
+| Pattern-content mismatch   | Warn about relevance, confirm before proceeding  |
 
 ## Acceptance Criteria
 

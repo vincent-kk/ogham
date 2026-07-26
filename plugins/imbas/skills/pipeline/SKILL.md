@@ -8,10 +8,7 @@ complexity: complex
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION.
-> After each phase completes, IMMEDIATELY verify the gate result and proceed
-> to the next phase in the SAME TURN. NEVER yield between phases, after an
-> agent subagent return, MCP tool result, or [OP:] Jira operation.
+> **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION. After each phase completes, IMMEDIATELY verify the gate result and proceed to the next phase in the SAME TURN. NEVER yield between phases, after an agent subagent return, MCP tool result, or [OP:] Jira operation.
 >
 > **Existing CRITICAL directives are authoritative** (do not duplicate):
 >
@@ -30,21 +27,13 @@ plugin: imbas
 > - Phase 2.5 → Phase 3 boundary — manifest-stories success is NOT pipeline completion; immediately spawn `engineer` if `--codebase` present
 > - Phase 3.5 [OP:] Jira batch — honor existing `workflow.md` `Step 2.5.2` / `Step 3.5.2` CRITICAL; do not add duplicate directives
 >
-> **⚠️ DO NOT STOP HERE**: Phase 2.5 → Phase 3 boundary is the highest-stall
-> risk point. When manifest-stories completes successfully and `--codebase`
-> is resolved, you MUST chain `engineer` spawn in the same turn.
-> Emitting a "Stories created" summary without continuing is a FAILURE mode.
+> **⚠️ DO NOT STOP HERE**: Phase 2.5 → Phase 3 boundary is the highest-stall risk point. When manifest-stories completes successfully and `--codebase` is resolved, you MUST chain `engineer` spawn in the same turn. Emitting a "Stories created" summary without continuing is a FAILURE mode.
 >
-> **LIMITATION**: `engineer` (model: opus, maxTurns: 80) subagent-internal
-> context exhaustion cannot be mitigated by this preamble. The agent may
-> exhaust its own turn budget mid-exploration on large codebases. See
-> follow-up issue for checkpoint file contract.
+> **LIMITATION**: `engineer` (model: opus, maxTurns: 80) subagent-internal context exhaustion cannot be mitigated by this preamble. The agent may exhaust its own turn budget mid-exploration on large codebases. See follow-up issue for checkpoint file contract.
 
 # pipeline — End-to-End Pipeline Orchestration
 
-Run the entire imbas pipeline from document to Jira tickets in a single command.
-Auto-approves at each phase boundary when all quality gates pass.
-Stops immediately with a structured blocker report when any gate fails.
+Run the entire imbas pipeline from document to Jira tickets in a single command. Auto-approves at each phase boundary when all quality gates pass. Stops immediately with a structured blocker report when any gate fails.
 
 ## When to Use This Skill
 
@@ -108,13 +97,11 @@ Input is a document path or Confluence URL. `--codebase` absent. Stops after man
 document → validate → split → manifest-stories → STOP (planning complete)
 ```
 
-No codebase means the document still needs refinement at the planning level.
-Subtask generation is deferred until a codebase is provided.
+No codebase means the document still needs refinement at the planning level. Subtask generation is deferred until a codebase is provided.
 
 ### Mode B: Devplan Pipeline (from Stories, `--codebase` required)
 
-Input is one or more Jira Story keys. Skips validate+split, starts at devplan.
-`--codebase` is required — STOP at Phase 0 if absent.
+Input is one or more Jira Story keys. Skips validate+split, starts at devplan. `--codebase` is required — STOP at Phase 0 if absent.
 
 ```
 Story keys → devplan → manifest-devplan
@@ -127,8 +114,7 @@ Mode is auto-detected from the first argument — no flag needed:
 
 ### Smart Defaults (Phase 0)
 
-Before execution begins, pipeline auto-resolves all missing options and displays
-a confirmation banner:
+Before execution begins, pipeline auto-resolves all missing options and displays a confirmation banner:
 
 ```
 imbas pipeline — configuration

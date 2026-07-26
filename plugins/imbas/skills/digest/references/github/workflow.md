@@ -1,19 +1,18 @@
 # digest Workflow — GitHub Provider
 
-Loaded when `config.provider === 'github'`. Steps 1–5 (read-issue delegation,
-state tracking, QA prompting, 3-layer compression, comment formatting) live in
-the shared `../workflow.md`. This file owns Step 6 (preview/publish) and the
-digest marker protocol specific to GitHub.
+Loaded when `config.provider === 'github'`. Steps 1–5 (read-issue delegation, state tracking, QA prompting, 3-layer compression, comment formatting) live in the shared `../workflow.md`. This file owns Step 6 (preview/publish) and the digest marker protocol specific to GitHub.
 
 ## Step 6 — Preview / Publish (GitHub)
 
 ### `--preview` flag set
+
 - Display formatted digest to user.
 - Do NOT post to GitHub.
 - Emit terminal marker: "Digest preview (dry-run)".
 - End.
 
 ### Default (no `--preview`)
+
 1. Display formatted digest to user as preview.
 2. Ask: "Post this digest as a comment to `<owner/repo#N>`?"
 3. If approved:
@@ -22,32 +21,33 @@ digest marker protocol specific to GitHub.
      echo "<comment body>" | gh issue comment <N> --repo <owner/repo> --body-file -
      ```
    - Emit terminal marker: "Digest posted to <owner/repo#N>".
-4. If rejected: end without posting.
-   (This is the other valid yield reason — "User decision genuinely required" —
-   so no terminal marker is emitted on the rejected branch.)
+4. If rejected: end without posting. (This is the other valid yield reason — "User decision genuinely required" — so no terminal marker is emitted on the rejected branch.)
 
 ## Digest Marker Protocol (GitHub-specific)
 
-The posted comment is wrapped in machine-readable markers so `read-issue`
-fast path and `digest --update` can detect prior digests:
+The posted comment is wrapped in machine-readable markers so `read-issue` fast path and `digest --update` can detect prior digests:
 
 ```markdown
 <!-- imbas:digest v1 | generated: {ISO8601} | comments_covered: {start}-{end} -->
+
 ## Summary
+
 ...
 <!-- /imbas:digest -->
 ```
 
 Field reference:
-| Field | Description |
-|-------|-------------|
-| `v1` | Digest format version |
-| `generated` | ISO 8601 timestamp of digest generation |
+
+| Field              | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `v1`               | Digest format version                            |
+| `generated`        | ISO 8601 timestamp of digest generation          |
 | `comments_covered` | Range of comment indices analyzed (e.g., `1-15`) |
 
 ## Re-run Behavior — Last-Wins Policy (GitHub)
 
 **Policy: last-wins.** When re-running `digest` on the same issue:
+
 - `read-issue` detects existing digest comment via `<!-- imbas:digest -->` marker scan.
 - If multiple marked comments exist, the most recent `createdAt` is canonical.
 - Only analyze comments AFTER the covered range (e.g., comments 16+).
@@ -55,14 +55,12 @@ Field reference:
   ```bash
   gh issue comment <N> --repo <owner/repo> --edit-last --body-file -
   ```
-  (`--edit-last` edits the most recent comment from the authenticated user —
-  the imbas marker guarantees it is the canonical digest comment.)
+  (`--edit-last` edits the most recent comment from the authenticated user — the imbas marker guarantees it is the canonical digest comment.)
 - Alternatively, resolve the comment id from the `read-issue` response and use:
   ```bash
   gh api repos/<owner/repo>/issues/comments/<comment_id> --method PATCH -f body=<b>
   ```
-- Default (no `--update`): post a NEW digest comment (do not edit the old one).
-  New digest covers the full range (e.g., `comments_covered: 1-22`).
+- Default (no `--update`): post a NEW digest comment (do not edit the old one). New digest covers the full range (e.g., `comments_covered: 1-22`).
 
 ## Suggestion Trigger (GitHub)
 
@@ -73,6 +71,7 @@ The `imbas:digest` skill is suggested (never auto-executed) when ALL of:
 3. Comments are from ≥ 2 distinct `author.login` values.
 
 When triggered, display:
+
 ```
 This issue has discussion history (N comments from M authors).
 Run /imbas:digest <owner/repo#N> to compress the context?

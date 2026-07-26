@@ -8,15 +8,15 @@ These tokens function as **reserved keywords** or **strict string literals**. Th
 
 ## Token Categories
 
-| Category | Pattern | Examples |
-|----------|---------|----------|
-| **Slash Commands** | `/command-name` | `/pr`, `/edit`, `/review`, `/commit`, `/deploy` |
-| **File Paths** | Relative or absolute paths | `./src/main.ts`, `../config/`, `/usr/local/bin` |
-| **URLs & Links** | `http://` or `https://` | `https://api.example.com/v2` |
-| **Media References** | Attached files or IDs | Image attachments, file upload references |
-| **Code Identifiers** | Backtick-wrapped tokens | `` `functionName` ``, `` `ClassName` `` |
-| **Environment Variables** | `$VAR` or `${VAR}` | `$HOME`, `${API_KEY}` |
-| **CLI Flags** | `--flag` or `-f` | `--verbose`, `-o output.json` |
+| Category                  | Pattern                    | Examples                                        |
+| ------------------------- | -------------------------- | ----------------------------------------------- |
+| **Slash Commands**        | `/command-name`            | `/pr`, `/edit`, `/review`, `/commit`, `/deploy` |
+| **File Paths**            | Relative or absolute paths | `./src/main.ts`, `../config/`, `/usr/local/bin` |
+| **URLs & Links**          | `http://` or `https://`    | `https://api.example.com/v2`                    |
+| **Media References**      | Attached files or IDs      | Image attachments, file upload references       |
+| **Code Identifiers**      | Backtick-wrapped tokens    | `` `functionName` ``, `` `ClassName` ``         |
+| **Environment Variables** | `$VAR` or `${VAR}`         | `$HOME`, `${API_KEY}`                           |
+| **CLI Flags**             | `--flag` or `-f`           | `--verbose`, `-o output.json`                   |
 
 ## Handling Rules
 

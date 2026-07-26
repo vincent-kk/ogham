@@ -8,10 +8,7 @@ complexity: complex
 plugin: filid
 ---
 
-> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
-> After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after `mcp__plugin_filid_tools__cache_manage` gate, `filid:qa-reviewer` subagent return,
-> `filid:context-manager` delegation, or `filid:implementer` completion.
+> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION. After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after `mcp__plugin_filid_tools__cache_manage` gate, `filid:qa-reviewer` subagent return, `filid:context-manager` delegation, or `filid:implementer` completion.
 >
 > **Valid reasons to yield**:
 >
@@ -59,42 +56,29 @@ See [reference.md Section 0](./reference.md#section-0--change-detection).
 
 Scan only files changed in this branch for FCA-AI rule violations.
 
-Agent: `filid:qa-reviewer` (sonnet)
-See [reference.md Section 1](./reference.md#section-1--scan).
+Agent: `filid:qa-reviewer` (sonnet) See [reference.md Section 1](./reference.md#section-1--scan).
 
 ### Stage 2 — Sync (Conditional Structure Correction)
 
-Runs only when Stage 1 detects `critical` or `high` severity violations.
-See `reference.md` Section 2 Severity Normalization Table for the mapping from scan violation types to drift severity levels.
+Runs only when Stage 1 detects `critical` or `high` severity violations. See `reference.md` Section 2 Severity Normalization Table for the mapping from scan violation types to drift severity levels.
 
-Agents: `filid:drift-analyzer` (sonnet) → `filid:restructurer` (sonnet)
-MCP: `mcp__plugin_filid_tools__drift_detect`, `mcp__plugin_filid_tools__lca_resolve`, `mcp__plugin_filid_tools__structure_validate`
-The correction plan from `filid:drift-analyzer` is presented for user approval
-before `filid:restructurer` executes it — skipped when `--auto-approve` is set.
-See [reference.md Section 2](./reference.md#section-2--sync).
+Agents: `filid:drift-analyzer` (sonnet) → `filid:restructurer` (sonnet) MCP: `mcp__plugin_filid_tools__drift_detect`, `mcp__plugin_filid_tools__lca_resolve`, `mcp__plugin_filid_tools__structure_validate` The correction plan from `filid:drift-analyzer` is presented for user approval before `filid:restructurer` executes it — skipped when `--auto-approve` is set. See [reference.md Section 2](./reference.md#section-2--sync).
 
 ### Stage 3 — Doc & Test Update (Parallel)
 
-Update INTENT.md/DETAIL.md and organize test.ts/spec.ts based on changed files.
-Two independent agents run in parallel on non-overlapping file sets.
+Update INTENT.md/DETAIL.md and organize test.ts/spec.ts based on changed files. Two independent agents run in parallel on non-overlapping file sets.
 
-Agent: `filid:context-manager` (sonnet) — document updates (INTENT.md / DETAIL.md)
-Agent: `filid:implementer` (sonnet) — test organization (test.ts / spec.ts)
+Agent: `filid:context-manager` (sonnet) — document updates (INTENT.md / DETAIL.md) Agent: `filid:implementer` (sonnet) — test organization (test.ts / spec.ts)
 
-If either agent (`filid:context-manager` or `filid:implementer`) fails, the orchestrator
-marks the stage as failed. Stage 4 (cache hash save) is skipped when any prior
-stage reported an error, ensuring the failed operation is retried on next run.
+If either agent (`filid:context-manager` or `filid:implementer`) fails, the orchestrator marks the stage as failed. Stage 4 (cache hash save) is skipped when any prior stage reported an error, ensuring the failed operation is retried on next run.
 
 See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ### Stage 4 — Finalize
 
-1. Verify all prior stages completed without errors. If any stage reported an
-   error, skip hash save and report the error — this ensures the next incremental
-   run re-processes the failed work.
+1. Verify all prior stages completed without errors. If any stage reported an error, skip hash save and report the error — this ensures the next incremental run re-processes the failed work.
 2. `mcp__plugin_filid_tools__cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: currentHash })`
-3. Output consolidated report
-   See [reference.md Section 4](./reference.md#section-4--finalize).
+3. Output consolidated report See [reference.md Section 4](./reference.md#section-4--finalize).
 
 ## Available MCP Tools
 

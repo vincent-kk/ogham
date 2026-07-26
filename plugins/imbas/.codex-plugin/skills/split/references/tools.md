@@ -21,19 +21,19 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 ## imbas MCP Tools
 
-| Tool | Usage |
-|------|-------|
-| `mcp__plugin_imbas_tools__run_get` | Load run state, verify preconditions |
-| `mcp__plugin_imbas_tools__run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
-| `mcp__plugin_imbas_tools__manifest_save` | Save stories-manifest.json |
-| `mcp__plugin_imbas_tools__manifest_validate` | Validate manifest structural integrity |
+| Tool                                         | Usage                                                          |
+| -------------------------------------------- | -------------------------------------------------------------- |
+| `mcp__plugin_imbas_tools__run_get`           | Load run state, verify preconditions                           |
+| `mcp__plugin_imbas_tools__run_transition`    | start_phase(split), complete_phase(split), escape_phase(split) |
+| `mcp__plugin_imbas_tools__manifest_save`     | Save stories-manifest.json                                     |
+| `mcp__plugin_imbas_tools__manifest_validate` | Validate manifest structural integrity                         |
 
 ## Jira Operations ([OP:])
 
-| Operation | Usage |
-|-----------|-------|
-| [`[OP: get_issue]`](../../_shared/operations/get_issue.md) | Verify Epic existence when --epic provided |
-| [`[OP: search_jql]`](../../_shared/operations/search_jql.md) | Search for existing related Stories/Epics |
+| Operation                                                    | Usage                                      |
+| ------------------------------------------------------------ | ------------------------------------------ |
+| [`[OP: get_issue]`](../../_shared/operations/get_issue.md)   | Verify Epic existence when --epic provided |
+| [`[OP: search_jql]`](../../_shared/operations/search_jql.md) | Search for existing related Stories/Epics  |
 
 The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
 
@@ -41,10 +41,10 @@ The LLM resolves which tool to use at runtime. Read the linked operation files f
 
 Spawn via the Task tool with the plugin-namespaced type: `subagent_type: "imbas:<agent>"` (e.g., `imbas:analyst`). Bare names are table labels only.
 
-| Agent | Model | Purpose |
-|-------|-------|---------|
+| Agent     | Model                           | Purpose                                               |
+| --------- | ------------------------------- | ----------------------------------------------------- |
 | `planner` | config.defaults.llm_model.split | INVEST-compliant Story splitting from source document |
-| `analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2]) |
+| `analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2])           |
 
 ### planner Spawn Instructions
 

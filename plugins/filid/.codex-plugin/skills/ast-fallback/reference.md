@@ -1,7 +1,6 @@
 # ast-fallback Reference
 
-Detailed workflow steps, language mappings, meta-variable conversion rules,
-and error detection strings for the AST pattern matching fallback skill.
+Detailed workflow steps, language mappings, meta-variable conversion rules, and error detection strings for the AST pattern matching fallback skill.
 
 ---
 
@@ -17,8 +16,7 @@ and error detection strings for the AST pattern matching fallback skill.
 
 ## Section 1 — Native Tool Attempt
 
-Always attempt the native MCP tool first. The fallback should only activate
-when the native tool is genuinely unavailable.
+Always attempt the native MCP tool first. The fallback should only activate when the native tool is genuinely unavailable.
 
 ### Search Request
 
@@ -44,9 +42,7 @@ Input:
   dry_run: true    ← default is true (preview only)
 ```
 
-**Important**: `dry_run` defaults to `true` in the native tool.
-Always show preview first, then re-call with `dry_run: false` after
-user confirmation.
+**Important**: `dry_run` defaults to `true` in the native tool. Always show preview first, then re-call with `dry_run: false` after user confirmation.
 
 ---
 
@@ -60,8 +56,7 @@ The exact error returned by both `mcp__plugin_filid_tools__ast_grep_search` and 
 @ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi
 ```
 
-The response object also includes an `sgLoadError` field with the
-underlying module load failure message.
+The response object also includes an `sgLoadError` field with the underlying module load failure message.
 
 ### Detection Logic
 
@@ -238,8 +233,7 @@ Apply changes? [y/N]
 After user confirmation:
 
 1. Use `Edit` tool for each replacement (one at a time)
-2. Process files in order, matches within each file from bottom to top
-   (to preserve line numbers for subsequent edits)
+2. Process files in order, matches within each file from bottom to top (to preserve line numbers for subsequent edits)
 3. Report summary:
 
 ```
@@ -252,21 +246,15 @@ Applied 2 replacement(s) in 1 file(s) [LLM fallback]
 
 ### Accuracy
 
-- LLM pattern matching is approximate. Complex AST patterns
-  (nested structures, type-aware matching) may produce false positives
-  or miss matches.
-- Regex conversion cannot capture true AST structure — it matches
-  text patterns, not parse tree nodes.
-- Comments and string literals containing matching text may produce
-  false positives (Step 3 of search attempts to filter these).
+- LLM pattern matching is approximate. Complex AST patterns (nested structures, type-aware matching) may produce false positives or miss matches.
+- Regex conversion cannot capture true AST structure — it matches text patterns, not parse tree nodes.
+- Comments and string literals containing matching text may produce false positives (Step 3 of search attempts to filter these).
 
 ### Scale
 
 - Works best for small-to-medium codebases (<500 files per language).
-- For large projects (>1000 files), install `@ast-grep/napi` for
-  performance and accuracy.
-- The native tool processes ~1000 files in seconds; fallback may
-  take significantly longer.
+- For large projects (>1000 files), install `@ast-grep/napi` for performance and accuracy.
+- The native tool processes ~1000 files in seconds; fallback may take significantly longer.
 
 ### Unsupported Features
 

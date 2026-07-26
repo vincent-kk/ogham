@@ -12,8 +12,7 @@ plugin: maencof
 
 # recall — Knowledge Search/Recall
 
-Accepts a natural-language query, traverses the maencof knowledge graph using the Spreading Activation (SA) algorithm,
-finds related documents, assembles context, and returns it.
+Accepts a natural-language query, traverses the maencof knowledge graph using the Spreading Activation (SA) algorithm, finds related documents, assembles context, and returns it.
 
 ## When to Use This Skill
 
@@ -24,11 +23,8 @@ finds related documents, assembles context, and returns it.
 
 ## When to Use vs Adjacent Skills
 
-- **`recall`** — one-shot Spreading Activation search. Returns a ranked
-  list + optional excerpts in a single turn; no follow-up rounds.
-- **`explore`** — interactive multi-round graph traversal (up to 3 rounds).
-  Selects a node, inspects neighbors, optionally re-seeds from a neighbor. Use
-  when you expect to drill down or pivot several times.
+- **`recall`** — one-shot Spreading Activation search. Returns a ranked list + optional excerpts in a single turn; no follow-up rounds.
+- **`explore`** — interactive multi-round graph traversal (up to 3 rounds). Selects a node, inspects neighbors, optionally re-seeds from a neighbor. Use when you expect to drill down or pivot several times.
 
 Rule of thumb: know what you want → `recall`. Want to wander → `explore`.
 
@@ -51,9 +47,7 @@ Extract core keywords and intent from user input.
 
 ### Step 2 — Call kg_search
 
-Call the `mcp__plugin_maencof_tools__kg_search` MCP tool to find seed nodes. The search reports index
-freshness: if no index exists, stop and guide the user to `/maencof:build`; if the
-index is stale, surface a brief warning and continue.
+Call the `mcp__plugin_maencof_tools__kg_search` MCP tool to find seed nodes. The search reports index freshness: if no index exists, stop and guide the user to `/maencof:build`; if the index is stale, surface a brief warning and continue.
 
 ```
 mcp__plugin_maencof_tools__kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)

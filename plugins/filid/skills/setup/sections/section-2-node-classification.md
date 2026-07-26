@@ -1,7 +1,6 @@
 # setup — Node Classification (Phase 2)
 
-> Detail reference for Phase 2 of /filid:setup.
-> See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
+> Detail reference for Phase 2 of /filid:setup. See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
 
 For each directory, call `mcp__plugin_filid_tools__fractal_navigate` with `action: "classify"`:
 
@@ -37,13 +36,11 @@ Pattern-based organ rules (applied before name list, after INTENT.md/DETAIL.md c
 | `__name__` (double-underscore wrapped) | `__tests__`, `__mocks__`, `__custom__`  | organ          |
 | `.name` (dot-prefixed)                 | `.git`, `.github`, `.vscode`, `.claude` | organ          |
 
-> **Important**: Pattern rules apply regardless of directory structure (leaf or
-> not). An explicit INTENT.md always takes precedence over pattern matching.
+> **Important**: Pattern rules apply regardless of directory structure (leaf or not). An explicit INTENT.md always takes precedence over pattern matching.
 
 ## Deep Scan — Fractal Nodes Inside Organ Directories
 
-Organ nodes are never INTENT.md targets, but fractal nodes can exist inside
-them. Phase 2 must handle this by iterating the full `tree.nodes` array.
+Organ nodes are never INTENT.md targets, but fractal nodes can exist inside them. Phase 2 must handle this by iterating the full `tree.nodes` array.
 
 **Core rules**:
 
@@ -71,6 +68,4 @@ for each node in tree.nodes:
         (fractal)                                        ← INTENT.md target ✓
 ```
 
-> `location` is not in `KNOWN_ORGAN_DIR_NAMES` and has a fractal child, so the
-> post-correction pass in `scanProject()` automatically reclassifies it as
-> fractal and places it in `components.children[]`.
+> `location` is not in `KNOWN_ORGAN_DIR_NAMES` and has a fractal child, so the post-correction pass in `scanProject()` automatically reclassifies it as fractal and places it in `components.children[]`.

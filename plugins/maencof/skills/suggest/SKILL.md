@@ -1,9 +1,9 @@
 ---
 name: suggest
 user_invocable: true
-description: "[maencof:suggest] Identifies missing knowledge graph connections using Spreading Activation and Jaccard similarity, recommending new edges to fill structural gaps rather than general graph traversal."
-argument-hint: "[path|tags|text] [--max 1-20] [--min-score 0.0-1.0]"
-version: "1.0.0"
+description: '[maencof:suggest] Identifies missing knowledge graph connections using Spreading Activation and Jaccard similarity, recommending new edges to fill structural gaps rather than general graph traversal.'
+argument-hint: '[path|tags|text] [--max 1-20] [--min-score 0.0-1.0]'
+version: '1.0.0'
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: suggest skill
@@ -12,8 +12,7 @@ plugin: maencof
 
 # suggest — Link Suggestion
 
-Recommends related document connections using Spreading Activation and Jaccard similarity.
-Helps fill gaps in the knowledge graph by discovering potential links.
+Recommends related document connections using Spreading Activation and Jaccard similarity. Helps fill gaps in the knowledge graph by discovering potential links.
 
 > **Difference from `/maencof:explore`**: explore performs SA-based traversal from a seed node. suggest focuses on recommending new connections that don't yet exist.
 
@@ -55,11 +54,11 @@ User selects a suggestion to view details via `mcp__plugin_maencof_tools__read`,
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `mcp__plugin_maencof_tools__kg_status` | Check index status (stale check) |
-| `mcp__plugin_maencof_tools__kg_suggest_links` | SA + Jaccard based link suggestion (primary tool) |
-| `mcp__plugin_maencof_tools__read` | Read suggested document content (optional detail view) |
+| Tool                                          | Purpose                                                |
+| --------------------------------------------- | ------------------------------------------------------ |
+| `mcp__plugin_maencof_tools__kg_status`        | Check index status (stale check)                       |
+| `mcp__plugin_maencof_tools__kg_suggest_links` | SA + Jaccard based link suggestion (primary tool)      |
+| `mcp__plugin_maencof_tools__read`             | Read suggested document content (optional detail view) |
 
 ## Options
 
@@ -67,13 +66,13 @@ User selects a suggestion to view details via `mcp__plugin_maencof_tools__read`,
 /maencof:suggest [path|tags|text] [--max <1-20>] [--min-score <0.0-1.0>]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `path` | none | Target document path |
-| `tags` | none | Comma-separated tag list |
-| `text` | none | Free text content hint |
-| `--max` | 5 | Maximum number of suggestions (1-20) |
-| `--min-score` | 0.2 | Minimum similarity score threshold (0.0-1.0) |
+| Option        | Default | Description                                  |
+| ------------- | ------- | -------------------------------------------- |
+| `path`        | none    | Target document path                         |
+| `tags`        | none    | Comma-separated tag list                     |
+| `text`        | none    | Free text content hint                       |
+| `--max`       | 5       | Maximum number of suggestions (1-20)         |
+| `--min-score` | 0.2     | Minimum similarity score threshold (0.0-1.0) |
 
 ## Usage Examples
 

@@ -1,6 +1,6 @@
 ---
 name: configurator
-description: "Vault configuration specialist focused on environment setup, rules, agents, and MCP integration."
+description: 'Vault configuration specialist focused on environment setup, rules, agents, and MCP integration.'
 model: sonnet
 tools:
   - Read
@@ -23,16 +23,16 @@ Claude Code **project-scope** configuration specialist. Identifies user intent t
 
 ## Managed Scope (Project scope only)
 
-| Target | Path | Description |
-|--------|------|-------------|
-| Project settings | `{CWD}/.claude/settings.json` | Claude Code project settings |
-| MCP config | `{CWD}/.mcp.json` | MCP server registration |
-| Project instructions | `{CWD}/CLAUDE.md` or `{CWD}/.claude/CLAUDE.md` | Claude instruction document |
-| Behavioral rules | `{CWD}/.claude/rules/*.md` | Rules with paths frontmatter |
-| Custom Skills | `{CWD}/.claude/skills/*/SKILL.md` | User-defined slash commands |
-| Custom Agents | `{CWD}/.claude/agents/*.md` | User-defined agents |
-| Lifecycle config | `{CWD}/.maencof-meta/lifecycle.json` | maencof lifecycle policy |
-| Config backups | `{CWD}/.maencof-meta/config-backups/` | Auto-backup storage |
+| Target               | Path                                           | Description                  |
+| -------------------- | ---------------------------------------------- | ---------------------------- |
+| Project settings     | `{CWD}/.claude/settings.json`                  | Claude Code project settings |
+| MCP config           | `{CWD}/.mcp.json`                              | MCP server registration      |
+| Project instructions | `{CWD}/CLAUDE.md` or `{CWD}/.claude/CLAUDE.md` | Claude instruction document  |
+| Behavioral rules     | `{CWD}/.claude/rules/*.md`                     | Rules with paths frontmatter |
+| Custom Skills        | `{CWD}/.claude/skills/*/SKILL.md`              | User-defined slash commands  |
+| Custom Agents        | `{CWD}/.claude/agents/*.md`                    | User-defined agents          |
+| Lifecycle config     | `{CWD}/.maencof-meta/lifecycle.json`           | maencof lifecycle policy     |
+| Config backups       | `{CWD}/.maencof-meta/config-backups/`          | Auto-backup storage          |
 
 ---
 
@@ -85,13 +85,13 @@ Claude Code **project-scope** configuration specialist. Identifies user intent t
 
 ## Access Matrix
 
-| Target | Read | Write | Allowed Operations | Forbidden Operations |
-|--------|------|-------|--------------------|----------------------|
-| Project settings (`.claude/`) | Yes | Yes | read, create, update | bulk-delete |
-| `.mcp.json` | Yes | Yes | read, create, update | — |
-| `CLAUDE.md` | Yes | Yes | read, create, update | — |
-| `settings.local.json` | Yes | **No** | read only | all writes |
-| `~/.claude/settings.json` | **No** | **No** | — | all access |
+| Target                        | Read   | Write  | Allowed Operations   | Forbidden Operations |
+| ----------------------------- | ------ | ------ | -------------------- | -------------------- |
+| Project settings (`.claude/`) | Yes    | Yes    | read, create, update | bulk-delete          |
+| `.mcp.json`                   | Yes    | Yes    | read, create, update | —                    |
+| `CLAUDE.md`                   | Yes    | Yes    | read, create, update | —                    |
+| `settings.local.json`         | Yes    | **No** | read only            | all writes           |
+| `~/.claude/settings.json`     | **No** | **No** | —                    | all access           |
 
 ---
 

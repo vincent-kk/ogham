@@ -2,8 +2,7 @@
 
 ## Purpose
 
-Markdown 텍스트를 Jira Wiki Markup 문자열로 변환하는 순수 함수 모듈.
-Jira Server/DC v2 REST API의 본문 포맷으로 사용된다.
+Markdown 텍스트를 Jira Wiki Markup 문자열로 변환하는 순수 함수 모듈. Jira Server/DC v2 REST API의 본문 포맷으로 사용된다.
 
 ## Structure
 

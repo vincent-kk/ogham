@@ -1,14 +1,13 @@
 ## Purpose
 
-ADF / Storage / Markdown 포맷 간 변환을 수행하는 순수 로컬 MCP 툴 핸들러.
-HTTP 통신 없이 완전히 로컬에서 실행된다.
+ADF / Storage / Markdown 포맷 간 변환을 수행하는 순수 로컬 MCP 툴 핸들러. HTTP 통신 없이 완전히 로컬에서 실행된다.
 
 ## Structure
 
-| 파일 | 역할 |
-|------|------|
+| 파일         | 역할                                                                    |
+| ------------ | ----------------------------------------------------------------------- |
 | `convert.ts` | `handleConvert` — `converter` 모듈에 변환 위임, 오류를 결과 객체로 래핑 |
-| `index.ts` | 배럴 — `handleConvert` 재내보내기 |
+| `index.ts`   | 배럴 — `handleConvert` 재내보내기                                       |
 
 ## Boundaries
 

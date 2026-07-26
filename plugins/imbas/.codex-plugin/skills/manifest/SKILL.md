@@ -8,9 +8,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls, subagent returns, or [OP:] provider operations.
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, subagent returns, or [OP:] provider operations.
 >
 > **Valid reasons to yield**:
 >
@@ -25,9 +23,7 @@ plugin: imbas
 
 # manifest — Manifest Execution (Batch Issue Creation)
 
-Executes a stories-manifest or devplan-manifest to batch-create issues,
-links, and comments across providers (Jira, GitHub, or local). Supports dry-run
-preview, crash recovery via per-item save, and idempotent re-execution.
+Executes a stories-manifest or devplan-manifest to batch-create issues, links, and comments across providers (Jira, GitHub, or local). Supports dry-run preview, crash recovery via per-item save, and idempotent re-execution.
 
 ## When to Use This Skill
 

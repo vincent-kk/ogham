@@ -1,33 +1,29 @@
 # digest Workflow — Jira Provider
 
-Loaded when `config.provider === 'jira'`. Steps 1–5 (read-issue delegation,
-state tracking, QA prompting, 3-layer compression, comment formatting) live in
-the shared `../workflow.md`. This file owns Step 6 (preview/publish) and the
-digest marker protocol specific to Jira.
+Loaded when `config.provider === 'jira'`. Steps 1–5 (read-issue delegation, state tracking, QA prompting, 3-layer compression, comment formatting) live in the shared `../workflow.md`. This file owns Step 6 (preview/publish) and the digest marker protocol specific to Jira.
 
 ## Step 6 — Preview / Publish (Jira)
 
 ### `--preview` flag set
+
 - Display formatted digest to user.
 - Do NOT post to Jira.
 - Emit terminal marker: "Digest preview (dry-run)".
 - End.
 
 ### Default (no `--preview`)
+
 1. Display formatted digest to user as preview.
 2. Ask: "Post this digest as a comment to `{issue-key}`?"
 3. If approved:
    - Call `[OP: add_comment] issue_ref=<issue-key>, body=<formatted_comment>`.
    - The comment body begins with the digest marker (see below).
    - Emit terminal marker: "Digest posted to <issue-key>".
-4. If rejected: end without posting.
-   (This is the other valid yield reason — "User decision genuinely required" —
-   so no terminal marker is emitted on the rejected branch.)
+4. If rejected: end without posting. (This is the other valid yield reason — "User decision genuinely required" — so no terminal marker is emitted on the rejected branch.)
 
 ## Digest Marker Protocol (Jira-specific)
 
-The posted comment is wrapped in machine-readable markers so `read-issue`
-Fast Path and future `re-run` operations can detect prior digests:
+The posted comment is wrapped in machine-readable markers so `read-issue` Fast Path and future `re-run` operations can detect prior digests:
 
 ```
 <!-- imbas:digest v1 | generated: {ISO8601} | comments_covered: {start}-{end} -->
@@ -36,15 +32,17 @@ Fast Path and future `re-run` operations can detect prior digests:
 ```
 
 Field reference:
-| Field | Description |
-|-------|-------------|
-| `v1` | Digest format version |
-| `generated` | ISO 8601 timestamp of digest generation |
+
+| Field              | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `v1`               | Digest format version                            |
+| `generated`        | ISO 8601 timestamp of digest generation          |
 | `comments_covered` | Range of comment indices analyzed (e.g., `1-15`) |
 
 ## Re-run Behavior (Jira)
 
 When re-running digest on the same issue:
+
 - Detect existing digest comment via marker scan of the thread.
 - Only analyze comments AFTER the covered range (e.g., comments 16+).
 - Post a NEW digest comment (do not edit the old one — preserves history).
@@ -59,6 +57,7 @@ The `imbas:digest` skill is suggested (never auto-executed) when ALL of:
 3. Comments are from ≥ 2 distinct authors.
 
 When triggered, display:
+
 ```
 This ticket has discussion history (N comments from M authors).
 Run /imbas:digest {issue-key} to compress the context?

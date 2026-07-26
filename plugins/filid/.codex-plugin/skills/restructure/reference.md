@@ -1,7 +1,6 @@
 # restructure — Reference Documentation
 
-Detailed workflow, MCP tool call signatures, and output format templates for the
-fractal structure restructuring skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+Detailed workflow, MCP tool call signatures, and output format templates for the fractal structure restructuring skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Analysis & Proposal
 
@@ -20,8 +19,7 @@ mcp__plugin_filid_tools__rule_query({ action: "list", path: "<target-path>" })
 // Returns: { rules: Rule[] }
 ```
 
-After `mcp__plugin_filid_tools__drift_detect` completes, call `mcp__plugin_filid_tools__lca_resolve` for each move candidate
-(requires `mcp__plugin_filid_tools__drift_detect` output to identify reclassification targets):
+After `mcp__plugin_filid_tools__drift_detect` completes, call `mcp__plugin_filid_tools__lca_resolve` for each move candidate (requires `mcp__plugin_filid_tools__drift_detect` output to identify reclassification targets):
 
 ```
 // Sequential — after mcp__plugin_filid_tools__drift_detect:

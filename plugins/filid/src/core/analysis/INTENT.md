@@ -6,11 +6,11 @@
 
 ## Structure
 
-| 모듈 | 역할 |
-|------|------|
+| 모듈              | 역할                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------- |
 | `projectAnalyzer` | `scan → validate → drift → healthScore → render` 파이프라인. text/json/markdown 리포트 생성 |
-| `dependencyGraph` | `DependencyEdge[]`에서 DAG 구축, Kahn 위상 정렬, DFS 사이클 감지, 직접 의존 조회 |
-| `lcaCalculator` | 두 노드의 Lowest Common Ancestor 계산. 공유 모듈 배치 위치 제안 (`getModulePlacement`) |
+| `dependencyGraph` | `DependencyEdge[]`에서 DAG 구축, Kahn 위상 정렬, DFS 사이클 감지, 직접 의존 조회            |
+| `lcaCalculator`   | 두 노드의 Lowest Common Ancestor 계산. 공유 모듈 배치 위치 제안 (`getModulePlacement`)      |
 
 ## Conventions
 

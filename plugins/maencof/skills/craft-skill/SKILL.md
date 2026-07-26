@@ -312,8 +312,7 @@ Run `node scripts/enhanced_validator.mjs <skill-path>` for automated validation.
 
 ## Support
 
-**For detailed workflows**: Load reference.md
-**For usage examples**: Load examples.md
+**For detailed workflows**: Load reference.md **For usage examples**: Load examples.md
 
 **Automated assistance**:
 

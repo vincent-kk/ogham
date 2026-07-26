@@ -11,8 +11,7 @@ version: 1.0.0
 
 ## Purpose
 
-Enforce directory structure compliance with the maencof 5-Layer knowledge model.
-Ensure consistency between file paths and the Frontmatter `layer` field.
+Enforce directory structure compliance with the maencof 5-Layer knowledge model. Ensure consistency between file paths and the Frontmatter `layer` field.
 
 ## Rule Definitions
 
@@ -40,8 +39,7 @@ layer: 3  # ERROR: path implies Layer 2 but Frontmatter says Layer 3
 
 ### R3. Layer 1 Outbound Links Prohibited
 
-Documents in `01_Core/` may not contain outbound links to other documents.
-Hub nodes are only referenced by others; they do not reference outward.
+Documents in `01_Core/` may not contain outbound links to other documents. Hub nodes are only referenced by others; they do not reference outward.
 
 ```markdown
 <!-- Violation: inside 01_Core/values.md -->
@@ -51,8 +49,7 @@ Hub nodes are only referenced by others; they do not reference outward.
 
 ### R4. Upper Layer → Layer 4 Links Prohibited
 
-Documents in Layer 1/2/3 may not reference Layer 4 (`04_Action/`) documents.
-Volatile action memory must not be referenced by persistent knowledge.
+Documents in Layer 1/2/3 may not reference Layer 4 (`04_Action/`) documents. Volatile action memory must not be referenced by persistent knowledge.
 
 ## Validation Logic
 

@@ -1,14 +1,10 @@
 # search — state machine (Dispatcher)
 
-States: `INTAKE · CLASSIFY · QUERY_GEN · SEARCH · RANK · COMPLETE` + terminals
-`FAILED · BLOCKED_NEEDS_USER`. `USER_REFINE` is not a state — it is the
-`interactive` checkpoint between `QUERY_GEN` and `SEARCH`.
+States: `INTAKE · CLASSIFY · QUERY_GEN · SEARCH · RANK · COMPLETE` + terminals `FAILED · BLOCKED_NEEDS_USER`. `USER_REFINE` is not a state — it is the `interactive` checkpoint between `QUERY_GEN` and `SEARCH`.
 
 ## SEARCH internal stages (code, not states)
 
-`paper_search` runs these deterministically; they never appear in the transition
-table, only consume `operationBudget`:
-`query_lint → count_probe → date_segment → fetch_ids → fetch_records(POST·batch) → union·dedup → partial_recovery`.
+`paper_search` runs these deterministically; they never appear in the transition table, only consume `operationBudget`: `query_lint → count_probe → date_segment → fetch_ids → fetch_records(POST·batch) → union·dedup → partial_recovery`.
 
 ## Transition table
 
@@ -35,10 +31,7 @@ table, only consume `operationBudget`:
 
 Before leaving `SEARCH`/`RANK`, check union sufficiency:
 
-"Weak" is a **qualitative** judgment, not a fixed number — a sufficient yield is
-topic-dependent, so no absolute threshold is hardcoded. The deterministic
-terminator is the convergence criterion (union growth <5%); weakness only
-decides whether to _enter_ the broadening loop.
+"Weak" is a **qualitative** judgment, not a fixed number — a sufficient yield is topic-dependent, so no absolute threshold is hardcoded. The deterministic terminator is the convergence criterion (union growth <5%); weakness only decides whether to _enter_ the broadening loop.
 
 | Signal                                                    | Action                                                                                                                  |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -48,8 +41,7 @@ decides whether to _enter_ the broadening loop.
 | union growth <5% OR cap exceeded OR user stop             | converged → RANK                                                                                                        |
 | `Count > 10000`                                           | NOT a gate — SEARCH date-segments internally for full coverage                                                          |
 
-Terminate recall = `recallIter ≤ 4` AND (growth <5% OR cap OR user stop) AND
-budget remaining.
+Terminate recall = `recallIter ≤ 4` AND (growth <5% OR cap OR user stop) AND budget remaining.
 
 ## Divergence handling
 
@@ -58,5 +50,4 @@ budget remaining.
 - Agent repeats the same broad query: force a different `QueryRole`.
 - 429 streak past `rateRetry`: `FAILED` (suggest off-peak: US Eastern 21:00–05:00 / weekends).
 
-Methodology SSoT: `../../_shared/query-strategy.md` (generation) and
-`../../_shared/rerank.md` (rerank). Tool contracts: `../../_shared/mcp-tools.md`.
+Methodology SSoT: `../../_shared/query-strategy.md` (generation) and `../../_shared/rerank.md` (rerank). Tool contracts: `../../_shared/mcp-tools.md`.

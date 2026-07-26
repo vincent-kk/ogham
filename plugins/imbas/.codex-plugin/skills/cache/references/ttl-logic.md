@@ -11,11 +11,11 @@
 6. If elapsed_hours < ttl_hours → valid
 ```
 
-Default TTL is 24 hours. This is sufficient because Jira project metadata
-(issue types, link types, workflows) changes infrequently.
+Default TTL is 24 hours. This is sufficient because Jira project metadata (issue types, link types, workflows) changes infrequently.
 
 ## User Access Path
 
 Users do not invoke this skill directly. Access is through:
+
 - `/imbas:setup show` — displays cache status (cached_at, ttl_expired)
 - `/imbas:setup refresh-cache [KEY]` — triggers forced cache refresh

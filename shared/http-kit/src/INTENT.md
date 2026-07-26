@@ -4,14 +4,14 @@
 
 ## Structure
 
-| Path        | Role                                                            |
-| ----------- | --------------------------------------------------------------- |
-| `index.ts`  | 다섯 서브 프랙탈의 공개 심볼 재수출                            |
-| `guard/`    | 요청 host·token·Origin·Content-Type 검사 verdict               |
-| `token/`    | 세션 토큰 발급·timing-safe 검증                                |
-| `body/`     | 크기 상한 JSON 본문 파싱                                       |
-| `html/`     | inline `<script>` 안전 JSON 직렬화                             |
-| `response/` | JSON 응답 전송                                                  |
+| Path        | Role                                             |
+| ----------- | ------------------------------------------------ |
+| `index.ts`  | 다섯 서브 프랙탈의 공개 심볼 재수출              |
+| `guard/`    | 요청 host·token·Origin·Content-Type 검사 verdict |
+| `token/`    | 세션 토큰 발급·timing-safe 검증                  |
+| `body/`     | 크기 상한 JSON 본문 파싱                         |
+| `html/`     | inline `<script>` 안전 JSON 직렬화               |
+| `response/` | JSON 응답 전송                                   |
 
 ## Conventions
 

@@ -1,7 +1,6 @@
 # setup — Reference
 
-Comprehensive reference for the setup interview's target schema, dynamic discovery guidelines, and document templates.
-Load this file when executing any setup stage.
+Comprehensive reference for the setup interview's target schema, dynamic discovery guidelines, and document templates. Load this file when executing any setup stage.
 
 **Language Mandate:** Always follow the user's configured language. Translate the English templates below naturally at runtime to match the user's preference.
 

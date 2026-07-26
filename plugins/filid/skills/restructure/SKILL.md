@@ -8,13 +8,9 @@ complexity: complex
 plugin: filid
 ---
 
-> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a
-> SINGLE CONTINUOUS OPERATION EXCEPT at Stage 2 (Plan Review & Approval)
-> when `--auto-approve` is absent. At that EXACT step, `AskUserQuestion`
-> yield is REQUIRED. At all other stages, NEVER yield.
+> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a SINGLE CONTINUOUS OPERATION EXCEPT at Stage 2 (Plan Review & Approval) when `--auto-approve` is absent. At that EXACT step, `AskUserQuestion` yield is REQUIRED. At all other stages, NEVER yield.
 >
-> **Under `--auto-approve` mode**: Stage 2 approval is skipped; EXECUTION
-> MODEL applies to every stage without exception.
+> **Under `--auto-approve` mode**: Stage 2 approval is skipped; EXECUTION MODEL applies to every stage without exception.
 >
 > **Valid reasons to yield**:
 >
@@ -30,14 +26,9 @@ plugin: filid
 
 # restructure — Fractal Structure Restructuring
 
-Analyze the current project directory structure and restructure it according to
-fractal principles. The `fractal-architect` agent performs the analysis and produces
-a concrete proposal; after user approval the `restructurer` agent executes the file
-moves, renames, index.ts creations, and import path updates.
+Analyze the current project directory structure and restructure it according to fractal principles. The `fractal-architect` agent performs the analysis and produces a concrete proposal; after user approval the `restructurer` agent executes the file moves, renames, index.ts creations, and import path updates.
 
-> **Detail Reference**: For detailed workflow steps, MCP tool call examples,
-> and output format templates, read the `reference.md` file in this
-> skill's directory (same location as this SKILL.md).
+> **Detail Reference**: For detailed workflow steps, MCP tool call examples, and output format templates, read the `reference.md` file in this skill's directory (same location as this SKILL.md).
 
 ## When to Use This Skill
 
@@ -59,43 +50,30 @@ The skill invokes MCP tools and passes the results to `fractal-architect` for an
 
 > `fractal-architect` does not call MCP tools directly — the skill owns all MCP invocations and injects results into the agent's task prompt (consistent with the Capability Model in Stage 4).
 
-After all calls complete, `fractal-architect` generates a concrete restructuring proposal.
-See [reference.md Section 1](./reference.md#section-1--analysis--proposal).
+After all calls complete, `fractal-architect` generates a concrete restructuring proposal. See [reference.md Section 1](./reference.md#section-1--analysis--proposal).
 
 ### Stage 2 — Plan Review & Approval
 
-The restructuring plan is presented to the user with a summary of affected files.
-Explicit approval is required before any changes are made.
-`--auto-approve` skips this stage.
-`--dry-run` presents the plan, emits the terminal marker `Restructure dry-run complete`, and ENDS execution (Stages 3-4 are skipped).
-See [reference.md Section 2](./reference.md#section-2--plan-review--approval).
+The restructuring plan is presented to the user with a summary of affected files. Explicit approval is required before any changes are made. `--auto-approve` skips this stage. `--dry-run` presents the plan, emits the terminal marker `Restructure dry-run complete`, and ENDS execution (Stages 3-4 are skipped). See [reference.md Section 2](./reference.md#section-2--plan-review--approval).
 
 ### Stage 3 — Execution
 
-`restructurer` applies the approved plan in priority order: file moves, renames,
-index.ts creation, and import path updates.
-`--dry-run` skips this stage (no file changes are made).
-See [reference.md Section 3](./reference.md#section-3--execution).
+`restructurer` applies the approved plan in priority order: file moves, renames, index.ts creation, and import path updates. `--dry-run` skips this stage (no file changes are made). See [reference.md Section 3](./reference.md#section-3--execution).
 
 ### Stage 4 — Validation
 
-**The skill (not the agent) invokes `mcp__plugin_filid_tools__structure_validate`** on the modified tree
-after `restructurer` returns, then passes the validation report to
-`fractal-architect` for interpretation and remediation recommendations.
-Per the agent Capability Model (`agents/INTENT.md`-equivalent policy), agents
-do not call MCP tools directly — orchestrating skills own all MCP invocations.
+**The skill (not the agent) invokes `mcp__plugin_filid_tools__structure_validate`** on the modified tree after `restructurer` returns, then passes the validation report to `fractal-architect` for interpretation and remediation recommendations. Per the agent Capability Model (`agents/INTENT.md`-equivalent policy), agents do not call MCP tools directly — orchestrating skills own all MCP invocations.
 
 1. Skill calls `mcp__plugin_filid_tools__structure_validate({ path, rules })` with the modified tree root.
 2. Skill forwards the `ValidationReport` to `fractal-architect` in the task prompt.
 3. `fractal-architect` reads the report and reports any remaining violations.
 
-`--dry-run` skips this stage.
-See [reference.md Section 4](./reference.md#section-4--validation).
+`--dry-run` skips this stage. See [reference.md Section 4](./reference.md#section-4--validation).
 
 ## Available MCP Tools
 
-| Tool                       | Stage | Purpose                             |
-| -------------------------- | ----- | ----------------------------------- |
+| Tool                                          | Stage | Purpose                             |
+| --------------------------------------------- | ----- | ----------------------------------- |
 | `mcp__plugin_filid_tools__fractal_scan`       | 1     | Full structure scan                 |
 | `mcp__plugin_filid_tools__drift_detect`       | 1     | Detect fractal principle deviations |
 | `mcp__plugin_filid_tools__lca_resolve`        | 1     | Resolve move targets via LCA        |

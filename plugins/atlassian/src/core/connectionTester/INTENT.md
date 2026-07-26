@@ -6,10 +6,10 @@ Jira/Confluence 인스턴스에 실제 HTTP 요청을 보내 연결 가능 여�
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일                  | 역할                                                            |
+| --------------------- | --------------------------------------------------------------- |
 | `connectionTester.ts` | `testConnection` 구현 (환경 감지 → 엔드포인트 선택 → 요청 실행) |
-| `index.ts` | 배럴 재내보내기 |
+| `index.ts`            | 배럴 재내보내기                                                 |
 
 ## Boundaries
 
@@ -33,9 +33,9 @@ Jira/Confluence 인스턴스에 실제 HTTP 요청을 보내 연결 가능 여�
 
 ## Dependencies
 
-| 대상 | 이유 |
-|---|---|
-| `../../types/` | `ConnectionTestResult`, `HttpClientConfig`, `TestConnectionParams` |
-| `../../constants/` | `CONNECTION_TEST_TIMEOUT` |
-| `../index` | `resolveEnvironment`, `getApiVersion`, `executeRequest` |
-| `../../utils/` | `buildAuthHeader` |
+| 대상               | 이유                                                               |
+| ------------------ | ------------------------------------------------------------------ |
+| `../../types/`     | `ConnectionTestResult`, `HttpClientConfig`, `TestConnectionParams` |
+| `../../constants/` | `CONNECTION_TEST_TIMEOUT`                                          |
+| `../index`         | `resolveEnvironment`, `getApiVersion`, `executeRequest`            |
+| `../../utils/`     | `buildAuthHeader`                                                  |

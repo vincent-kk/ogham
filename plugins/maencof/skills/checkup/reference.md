@@ -135,8 +135,7 @@ Recommended: Run /maencof:build --full or /maencof:checkup
 
 ### Sub-Layer Distribution
 
-Always include sub-layer distribution from the `mcp__plugin_maencof_tools__kg_status` response
-(`subLayerDistribution` field) after the status banner:
+Always include sub-layer distribution from the `mcp__plugin_maencof_tools__kg_status` response (`subLayerDistribution` field) after the status banner:
 
 ```
 Sub-Layer Distribution:

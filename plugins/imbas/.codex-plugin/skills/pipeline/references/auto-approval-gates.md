@@ -1,7 +1,6 @@
 # Auto-Approval Gates
 
-Pipeline replaces manual user-review steps with automated quality gates.
-Each gate evaluates specific fields and either auto-approves or stops the pipeline.
+Pipeline replaces manual user-review steps with automated quality gates. Each gate evaluates specific fields and either auto-approves or stops the pipeline.
 
 ---
 
@@ -21,8 +20,7 @@ STOP when:
     → Emit blocker report listing all BLOCKING issues from validation-report.md
 ```
 
-This gate matches the existing validate → split transition rule in state-manager.ts.
-No behavioral change from the individual skill — validate PASS/PASS_WITH_WARNINGS always allowed split entry.
+This gate matches the existing validate → split transition rule in state-manager.ts. No behavioral change from the individual skill — validate PASS/PASS_WITH_WARNINGS always allowed split entry.
 
 ---
 
@@ -54,12 +52,14 @@ ALL conditions must be true for auto-approval:
 ```
 
 When all criteria pass:
+
 - Call mcp__plugin_imbas_tools__run_transition(complete_phase, split, pending_review: false, stories_created: N)
 - Proceed to Phase 2.5 (manifest-stories)
 
 ### Special Case: E2-3 (Split Unnecessary)
 
 When `planner` determines the document is already at appropriate Story size:
+
 - Call mcp__plugin_imbas_tools__run_transition(escape_phase, split, escape_code: "E2-3")
 - SKIP Phase 2.5 (manifest-stories) entirely
 - Proceed directly to Phase 3 (devplan)
@@ -107,6 +107,7 @@ Manifest validation errors:
 ### Why This Gate is Safe
 
 The auto-approval criteria are strictly more conservative than what a human reviewer checks:
+
 - Anchor links verified → every Story traces to source
 - Coherence verified → no semantic drift
 - Reverse-inference verified → no content lost or invented
@@ -135,6 +136,7 @@ ALL conditions must be true:
 ```
 
 When all criteria pass:
+
 - Call mcp__plugin_imbas_tools__run_transition(complete_phase, devplan, pending_review: false)
 - Proceed to Phase 3.5 (manifest-devplan)
 
@@ -173,12 +175,9 @@ needs_review flagged items:
 
 Evaluated after manifest execution (Phase 2.5 and Phase 3.5).
 
-**General rule (Phase 3.5 / devplan manifest)**: This gate does NOT stop the pipeline because
-issue writes are irreversible — already-created items cannot be undone. Partial failures are
-reported and the user is guided to retry via `/imbas:manifest devplan`.
+**General rule (Phase 3.5 / devplan manifest)**: This gate does NOT stop the pipeline because issue writes are irreversible — already-created items cannot be undone. Partial failures are reported and the user is guided to retry via `/imbas:manifest devplan`.
 
-**Exception (Phase 2.5 / stories manifest)**: Failures here DO stop the pipeline because Phase 3
-(devplan) requires all Stories to have valid issue_refs. See the EXCEPTION block below.
+**Exception (Phase 2.5 / stories manifest)**: Failures here DO stop the pipeline because Phase 3 (devplan) requires all Stories to have valid issue_refs. See the EXCEPTION block below.
 
 ```
 SUCCESS:

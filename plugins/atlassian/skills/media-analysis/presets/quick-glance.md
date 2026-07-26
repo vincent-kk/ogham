@@ -9,14 +9,14 @@ Fast summary with minimal frames. Low resolution for speed.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 5 | Minimal frames for fast overview |
-| `-t` | 0.5 | Default threshold |
-| `--fps` | 2 | Reduced for speed |
-| `--max-frames` | 300 | Default cap |
-| `-s` | 480 | Reduced resolution for speed |
-| `-q` | 80 | Default quality |
+| Flag           | Value | Reasoning                        |
+| -------------- | ----- | -------------------------------- |
+| `-n`           | 5     | Minimal frames for fast overview |
+| `-t`           | 0.5   | Default threshold                |
+| `--fps`        | 2     | Reduced for speed                |
+| `--max-frames` | 300   | Default cap                      |
+| `-s`           | 480   | Reduced resolution for speed     |
+| `-q`           | 80    | Default quality                  |
 
 ## Command
 

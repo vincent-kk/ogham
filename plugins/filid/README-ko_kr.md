@@ -121,9 +121,7 @@ INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTE
 
 ### 시추와 수확 (탐사 작업)
 
-완료 기준을 아직 모르는 작업은 `spike/*` 브랜치에서 탐사하세요. 그
-브랜치에서는 문서 위생 차단(INTENT.md 50줄 제한, DETAIL.md append-only)이
-면제되고, 매 프롬프트 배너가 경과일과 미수확 결정 수를 추적합니다.
+완료 기준을 아직 모르는 작업은 `spike/*` 브랜치에서 탐사하세요. 그 브랜치에서는 문서 위생 차단(INTENT.md 50줄 제한, DETAIL.md append-only)이 면제되고, 매 프롬프트 배너가 경과일과 미수확 결정 수를 추적합니다.
 
 ```
 # 자유롭게 시추
@@ -133,9 +131,7 @@ git checkout -b spike/my-idea
 /filid:harvest
 ```
 
-`/filid:harvest`는 keep으로 확정된 결정을 PASS/FAIL 판정 가능한 claim으로
-`.filid/criteria.md`에 기록합니다. 이후 리뷰가 그 claim들을 판정하며,
-수확하지 않은 spike는 파이프라인이 머지 트랙 진입을 거부합니다.
+`/filid:harvest`는 keep으로 확정된 결정을 PASS/FAIL 판정 가능한 claim으로 `.filid/criteria.md`에 기록합니다. 이후 리뷰가 그 claim들을 판정하며, 수확하지 않은 spike는 파이프라인이 머지 트랙 진입을 거부합니다.
 
 ### FCA-AI가 뭔지 잘 모르겠을 때
 

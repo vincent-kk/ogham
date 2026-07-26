@@ -10,16 +10,11 @@ plugin: r-statistics
 
 # assumption-check — Verify Method Assumptions
 
-Run the statistical assumptions a chosen method requires and produce
-`assumption.{id}` artifacts (each with a `passed` boolean) that
-`assert_analysis_plan` consumes. Execution runs through `mcp__plugin_r-statistics_tools__run_r`.
+Run the statistical assumptions a chosen method requires and produce `assumption.{id}` artifacts (each with a `passed` boolean) that `assert_analysis_plan` consumes. Execution runs through `mcp__plugin_r-statistics_tools__run_r`.
 
 ## Steps
 
-1. **Resolve the assumption set.** Read the chosen technique's
-   `../analyze/references/methods/{technique}/meta.yaml`
-   `required_assumptions` (id + check). For a partial-step call, infer the
-   assumptions from the method the user names.
+1. **Resolve the assumption set.** Read the chosen technique's `../analyze/references/methods/{technique}/meta.yaml` `required_assumptions` (id + check). For a partial-step call, infer the assumptions from the method the user names.
 2. **Run each check** in R (via `run_r`), mapping check → test:
 
    | check                 | R                                                                                                                                             |
@@ -39,22 +34,12 @@ Run the statistical assumptions a chosen method requires and produce
    | `epv`                 | events ÷ predictors (common screening threshold ≥ 10; Peduzzi et al. 1996, clinical prediction-model practice, may be conservative elsewhere) |
    | `design`              | design assumption — `note_assumption(id)`, pass by design (no test)                                                                           |
 
-3. **Emit artifacts.** For each assumption, write
-   `assumption.{id}` (kind `assumption_check`) with the test statistic, p-value,
-   and a `passed` boolean, then `note_assumption("{id}")`. Use a conventional
-   threshold (e.g. p ≥ 0.05 for normality/homogeneity) and state it. Visual
-   checks (`residual_plot`, `scatter`, `martingale_residual`) emit the diagnostic
-   plot plus a heuristic `passed`; metric/count-threshold checks (`vif`,
-   `dispersion`, `expected_counts`, `epv`) emit their ratio/count with `passed`
-   against the threshold; `design` records `passed: true` as a design assumption.
-   EPV thresholds come from clinical prediction-model practice (Peduzzi et al. 1996) and may be conservative for other application domains. These non-test
-   checks carry no p-value.
+3. **Emit artifacts.** For each assumption, write `assumption.{id}` (kind `assumption_check`) with the test statistic, p-value, and a `passed` boolean, then `note_assumption("{id}")`. Use a conventional threshold (e.g. p ≥ 0.05 for normality/homogeneity) and state it. Visual checks (`residual_plot`, `scatter`, `martingale_residual`) emit the diagnostic plot plus a heuristic `passed`; metric/count-threshold checks (`vif`, `dispersion`, `expected_counts`, `epv`) emit their ratio/count with `passed` against the threshold; `design` records `passed: true` as a design assumption. EPV thresholds come from clinical prediction-model practice (Peduzzi et al. 1996) and may be conservative for other application domains. These non-test checks carry no p-value.
 
 ## Output
 
 - One `assumption.{id}` artifact per required assumption (`passed` flag).
-- A summary table the dispatcher passes to `assert_analysis_plan` as
-  `assumptionArtifacts`.
+- A summary table the dispatcher passes to `assert_analysis_plan` as `assumptionArtifacts`.
 
 ## Boundaries
 

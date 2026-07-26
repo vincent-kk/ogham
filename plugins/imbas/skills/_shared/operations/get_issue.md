@@ -4,9 +4,7 @@ Fetch a single issue by key, including metadata, description, status, assignee, 
 
 ## Provider Resolution
 
-The sections below document the Jira semantics. When a skill invokes this
-operation without a provider-specific workflow file (e.g., `split`), resolve
-by `config.provider`:
+The sections below document the Jira semantics. When a skill invokes this operation without a provider-specific workflow file (e.g., `split`), resolve by `config.provider`:
 
 - `jira` — Jira MCP tool or REST endpoint below
 - `github` — `gh issue view <number> --repo <owner/repo> --json number,title,body,state,labels,assignees,comments`

@@ -9,14 +9,14 @@ UI walkthroughs and screen recordings with sparse changes.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 12 | Good step coverage for UI flows |
-| `-t` | 0.3 | Lower threshold to catch subtle UI state changes |
-| `--fps` | 2 | Low FPS; screen recordings have sparse changes |
-| `--max-frames` | 300 | Default cap |
-| `-s` | 720 | Default analysis resolution |
-| `-q` | 80 | Default quality |
+| Flag           | Value | Reasoning                                        |
+| -------------- | ----- | ------------------------------------------------ |
+| `-n`           | 12    | Good step coverage for UI flows                  |
+| `-t`           | 0.3   | Lower threshold to catch subtle UI state changes |
+| `--fps`        | 2     | Low FPS; screen recordings have sparse changes   |
+| `--max-frames` | 300   | Default cap                                      |
+| `-s`           | 720   | Default analysis resolution                      |
+| `-q`           | 80    | Default quality                                  |
 
 ## Command
 

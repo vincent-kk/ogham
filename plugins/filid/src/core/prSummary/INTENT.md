@@ -2,17 +2,16 @@
 
 ## Purpose
 
-PR 검증 파일들(fix-requests.md, review-report.md, re-validate.md — 레거시 세션의
-structure-check.md 포함)을 파싱하여 인간 친화적 HumanSummary를 생성한다.
+PR 검증 파일들(fix-requests.md, review-report.md, re-validate.md — 레거시 세션의 structure-check.md 포함)을 파싱하여 인간 친화적 HumanSummary를 생성한다.
 
 ## Structure
 
-| 오르간 | 책임 |
-|--------|------|
-| `parsers/` | 원시 마크다운/YAML 파싱 (parseStructureCheck, parseFixRequests) |
-| `aggregators/` | 파싱 결과 → SummaryItem 변환 및 verdict 결정 |
-| `renderers/` | SummaryItem → 마크다운 렌더링 |
-| `prSummary.ts` | 오케스트레이터 facade (generateHumanSummary 진입점) |
+| 오르간         | 책임                                                            |
+| -------------- | --------------------------------------------------------------- |
+| `parsers/`     | 원시 마크다운/YAML 파싱 (parseStructureCheck, parseFixRequests) |
+| `aggregators/` | 파싱 결과 → SummaryItem 변환 및 verdict 결정                    |
+| `renderers/`   | SummaryItem → 마크다운 렌더링                                   |
+| `prSummary.ts` | 오케스트레이터 facade (generateHumanSummary 진입점)             |
 
 ## Conventions
 

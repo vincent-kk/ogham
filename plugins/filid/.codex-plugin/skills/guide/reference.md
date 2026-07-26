@@ -1,7 +1,6 @@
 # guide — Reference Documentation
 
-Detailed workflow, MCP tool call signatures, and output format templates for the
-fractal structure `filid:guide` skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+Detailed workflow, MCP tool call signatures, and output format templates for the fractal structure `filid:guide` skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Project Scan
 
@@ -11,11 +10,7 @@ Call `mcp__plugin_filid_tools__fractal_scan` to retrieve the complete directory 
 mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
 ```
 
-> **Size guard**: an oversized result comes back as
-> `{ truncated: true, reportPath, summary }` — the full report is at
-> `reportPath` (line-structured JSON); grep it for the fields you need
-> instead of reading it whole. Pass `outputMode: "summary"` when only
-> counts are needed.
+> **Size guard**: an oversized result comes back as `{ truncated: true, reportPath, summary }` — the full report is at `reportPath` (line-structured JSON); grep it for the fields you need instead of reading it whole. Pass `outputMode: "summary"` when only counts are needed.
 
 The response is a `ScanReportDto` containing:
 
@@ -53,8 +48,7 @@ Rule categories (`RuleCategory`):
 
 ## Section 3 — Classification Summary
 
-Build the category distribution table by counting `tree.nodes` from the scan
-response by node type (the response has no precomputed `summary` object):
+Build the category distribution table by counting `tree.nodes` from the scan response by node type (the response has no precomputed `summary` object):
 
 ```
 categoryTable = {
@@ -66,8 +60,7 @@ categoryTable = {
 }
 ```
 
-If violations are present, sort by severity and include them in the summary section
-so readers understand the current health status before the rule list.
+If violations are present, sort by severity and include them in the summary section so readers understand the current health status before the rule list.
 
 ## Section 4 — Guide Document Output
 

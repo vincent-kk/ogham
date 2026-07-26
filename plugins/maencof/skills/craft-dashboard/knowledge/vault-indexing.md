@@ -23,10 +23,7 @@ Schema mirrors `KnowledgeNode` and `KnowledgeEdge` from `@ogham/maencof/src/type
 
 ## Boot sequence
 
-Server boot wires the vault modules. Constructor and factory signatures are
-authoritative in [`interfaces.md`](./interfaces.md) — see the actual
-`templates/backend/src/server.ts` shell for the call site that this file
-documents.
+Server boot wires the vault modules. Constructor and factory signatures are authoritative in [`interfaces.md`](./interfaces.md) — see the actual `templates/backend/src/server.ts` shell for the call site that this file documents.
 
 `GraphStore.fromVault(vaultRoot, vaultIndex)`:
 
@@ -40,8 +37,7 @@ documents.
    - `byLink: { inbound: Map<string, string[]>, outbound: Map<string, string[]> }`
 5. Return store handle
 
-`vaultIndex === 'independent'` skips steps 1–3 and falls back to the file-walk
-path (see "Independent fallback" below).
+`vaultIndex === 'independent'` skips steps 1–3 and falls back to the file-walk path (see "Independent fallback" below).
 
 Fast: ~50 ms for a 1000-node graph. Acceptable boot time.
 
@@ -83,10 +79,7 @@ chokidar
 
 500 ms debounce for graph file changes; 800 ms for markdown (matches falias).
 
-Frontend's `api/sse.ts` (`startSse`) invalidates TanStack Query caches per
-topic. A `graph` reload changes every derived view (each domain-panel
-aggregation, plus the search/tags/backlinks indices), so it MUST invalidate the
-whole cache; the other topics are scoped:
+Frontend's `api/sse.ts` (`startSse`) invalidates TanStack Query caches per topic. A `graph` reload changes every derived view (each domain-panel aggregation, plus the search/tags/backlinks indices), so it MUST invalidate the whole cache; the other topics are scoped:
 
 ```typescript
 // inside startSse(qc, listener?)
@@ -102,49 +95,26 @@ es.addEventListener('stale', () => {
 });
 ```
 
-**Why `graph` invalidates everything**: panel components key their queries on
-`['<dataDomain>']` (kebab-case, e.g. `['activity-counts']` — see
-`visualization-catalog.md`). An allow-list like `[['nodes'], ['search'], …]`
-shares no prefix with those keys, so the panels — the dashboard's primary
-content — would never refetch after a vault rebuild. Invalidating the whole
-cache on `graph` is the only mapping that actually refreshes the panels. `vault`
-and `stale` stay narrow because only doc bodies / the stale banner depend on
-them. (`['status']`, not `['stale']`, is the key `StaleBanner` uses for
-`api.status()`.) The doc viewer (LLM-authored) keys its query on
-`['doc', path]`, which the `['doc']` prefix invalidation matches.
+**Why `graph` invalidates everything**: panel components key their queries on `['<dataDomain>']` (kebab-case, e.g. `['activity-counts']` — see `visualization-catalog.md`). An allow-list like `[['nodes'], ['search'], …]` shares no prefix with those keys, so the panels — the dashboard's primary content — would never refetch after a vault rebuild. Invalidating the whole cache on `graph` is the only mapping that actually refreshes the panels. `vault` and `stale` stay narrow because only doc bodies / the stale banner depend on them. (`['status']`, not `['stale']`, is the key `StaleBanner` uses for `api.status()`.) The doc viewer (LLM-authored) keys its query on `['doc', path]`, which the `['doc']` prefix invalidation matches.
 
 ### Connection status (HeaderBar)
 
-`startSse(qc, listener?)` also reports the EventSource lifecycle so the
-`HeaderBar` status dot reflects reality:
+`startSse(qc, listener?)` also reports the EventSource lifecycle so the `HeaderBar` status dot reflects reality:
 
 - `es.onopen` → status `'open'`; `es.onerror` → status `'closed'`.
-- Write the status into the optional `uiStore` (zustand) — or surface it via the
-  `listener` callback — and have `HeaderBar` read it and set
-  `<div className="header-sse" data-status={status}>` (`globals.css` styles
-  `data-status='open'|'closed'`).
-- When `refresh === 'manual'` no EventSource is opened (see
-  `methods/create/workflow.md` Turn 6), so `HeaderBar` MUST omit the
-  `.header-sse` block (or render a neutral state) instead of a permanently
-  `closed` dot.
+- Write the status into the optional `uiStore` (zustand) — or surface it via the `listener` callback — and have `HeaderBar` read it and set `<div className="header-sse" data-status={status}>` (`globals.css` styles `data-status='open'|'closed'`).
+- When `refresh === 'manual'` no EventSource is opened (see `methods/create/workflow.md` Turn 6), so `HeaderBar` MUST omit the `.header-sse` block (or render a neutral state) instead of a permanently `closed` dot.
 
 ---
 
 ## Body cache (lazy)
 
-Bodies are read only when a panel or doc viewer asks for them. Class shape
-(`get(relPath)`, `invalidate(absPath)`) is defined in
-[`interfaces.md`](./interfaces.md).
+Bodies are read only when a panel or doc viewer asks for them. Class shape (`get(relPath)`, `invalidate(absPath)`) is defined in [`interfaces.md`](./interfaces.md).
 
 Behaviour:
 
-1. `get(relPath)` returns from LRU when warm; otherwise reads
-   `<vault>/<relPath>`, parses frontmatter (`gray-matter`), renders HTML
-   (`markdown-it` + `markdown-it-task-lists` with wikilink rewriting), caches
-   the `RenderedDoc`, and evicts the oldest entry when the LRU exceeds
-   `maxEntries` (default 256).
-2. `invalidate(absPath)` removes a single entry; called by the watcher when a
-   markdown file changes.
+1. `get(relPath)` returns from LRU when warm; otherwise reads `<vault>/<relPath>`, parses frontmatter (`gray-matter`), renders HTML (`markdown-it` + `markdown-it-task-lists` with wikilink rewriting), caches the `RenderedDoc`, and evicts the oldest entry when the LRU exceeds `maxEntries` (default 256).
+2. `invalidate(absPath)` removes a single entry; called by the watcher when a markdown file changes.
 
 LRU bounded so a huge vault doesn't OOM the dashboard.
 
@@ -152,20 +122,11 @@ LRU bounded so a huge vault doesn't OOM the dashboard.
 
 ## Search service
 
-`SearchService` exposes `lexical`, `tag`, `backlinks`, and `semantic` methods.
-The class shape — including the required `(graph, config)` constructor — is
-defined in [`interfaces.md`](./interfaces.md). Algorithmic detail (Fuse.js
-options, tag prefix matching, backlinks shape, spreading-activation tuning) is
-in [`search-design.md`](./search-design.md). Reload semantics: the service
-subscribes to `graph.onReload()` and refreshes its Fuse index on every
-change.
+`SearchService` exposes `lexical`, `tag`, `backlinks`, and `semantic` methods. The class shape — including the required `(graph, config)` constructor — is defined in [`interfaces.md`](./interfaces.md). Algorithmic detail (Fuse.js options, tag prefix matching, backlinks shape, spreading-activation tuning) is in [`search-design.md`](./search-design.md). Reload semantics: the service subscribes to `graph.onReload()` and refreshes its Fuse index on every change.
 
 ### Semantic SA — optional import
 
-Loader pattern is **lazy** — see `loadSA()` in
-[`search-design.md`](./search-design.md). Generated backend declares
-`@ogham/maencof` as `optionalDependencies`; when absent, semantic mode is
-hidden from the UI and `/api/search?mode=semantic` returns 501.
+Loader pattern is **lazy** — see `loadSA()` in [`search-design.md`](./search-design.md). Generated backend declares `@ogham/maencof` as `optionalDependencies`; when absent, semantic mode is hidden from the UI and `/api/search?mode=semantic` returns 501.
 
 ---
 
@@ -244,11 +205,7 @@ Writes are confined to:
 - `<target>/.run/server.pid`
 - `<target>/backend/app/static/**` (build output only)
 
-This is enforced by convention — the generated routes are read-only and the
-LLM authoring backend modules MUST NOT introduce write sites outside the list
-above. There is no `safe-write.ts` runtime wrapper; instead, every PR or
-MUTATE patch that adds an `fs.writeFile`/`fs.promises.writeFile` call inside
-`<target>/backend/src/` MUST be reviewed against this list.
+This is enforced by convention — the generated routes are read-only and the LLM authoring backend modules MUST NOT introduce write sites outside the list above. There is no `safe-write.ts` runtime wrapper; instead, every PR or MUTATE patch that adds an `fs.writeFile`/`fs.promises.writeFile` call inside `<target>/backend/src/` MUST be reviewed against this list.
 
 ---
 

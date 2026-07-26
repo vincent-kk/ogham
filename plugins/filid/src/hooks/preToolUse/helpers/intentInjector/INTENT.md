@@ -2,11 +2,7 @@
 
 ## Purpose
 
-Read | Write | Edit 공용 방문 파이프라인. 전달 모델("규칙이 live 컨텍스트에
-존재하면 전달된 상태")의 3-상태(미전달/stale/fresh)에 따라 소유 fractal의
-`[filid:ctx]`(INTENT 본문 인라인 + chain + detail 힌트)를 주입하고, 미전달
-모듈의 mutation은 deny reason에 규칙 본문을 실어 1왕복으로 차단-전달한다
-(`[filid:gate]`). `[filid:map]`은 방문 집합이 변한 경우에만 방출.
+Read | Write | Edit 공용 방문 파이프라인. 전달 모델("규칙이 live 컨텍스트에 존재하면 전달된 상태")의 3-상태(미전달/stale/fresh)에 따라 소유 fractal의 `[filid:ctx]`(INTENT 본문 인라인 + chain + detail 힌트)를 주입하고, 미전달 모듈의 mutation은 deny reason에 규칙 본문을 실어 1왕복으로 차단-전달한다 (`[filid:gate]`). `[filid:map]`은 방문 집합이 변한 경우에만 방출.
 
 ## Structure
 
@@ -15,14 +11,10 @@ Read | Write | Edit 공용 방문 파이프라인. 전달 모델("규칙이 live
 
 ## Conventions
 
-- 상태 판정·기록의 최종 권위는 `commitVisit`(cacheManager) lock 트랜잭션;
-  메모리 판정은 advisory 사전 필터. 같은 턴 재방문 디렉토리는 완전 무출력
-- fresh(경과 < `injection.ctxTtlTurns`, 기본 5턴) → 무출력; stale → soft ctx
-  재전달; 미전달 → Read는 ctx, mutation은 deny(+본문) 후 재시도 통과
-- 게이트 면제: INTENT/DETAIL/criteria.md 대상(문서 위생은 validator 전담),
-  owner INTENT 부재, spike 모드. INTENT.md 자기-작성은 전달로 마킹
-- 전달 단위는 소유 fractal(chain 상향 첫 INTENT.md 보유 dir); 키는 `{boundary}\t{relDir}`;
-  서브 스코프 분리는 판별 transcript_path 제공 시 자동 활성 (현행 미제공 → 세션 공유, DETAIL 참조)
+- 상태 판정·기록의 최종 권위는 `commitVisit`(cacheManager) lock 트랜잭션; 메모리 판정은 advisory 사전 필터. 같은 턴 재방문 디렉토리는 완전 무출력
+- fresh(경과 < `injection.ctxTtlTurns`, 기본 5턴) → 무출력; stale → soft ctx 재전달; 미전달 → Read는 ctx, mutation은 deny(+본문) 후 재시도 통과
+- 게이트 면제: INTENT/DETAIL/criteria.md 대상(문서 위생은 validator 전담), owner INTENT 부재, spike 모드. INTENT.md 자기-작성은 전달로 마킹
+- 전달 단위는 소유 fractal(chain 상향 첫 INTENT.md 보유 dir); 키는 `{boundary}\t{relDir}`; 서브 스코프 분리는 판별 transcript_path 제공 시 자동 활성 (현행 미제공 → 세션 공유, DETAIL 참조)
 - `GUIDE_BLOCK`은 스코프당 1회, 첫 ctx(또는 첫 deny reason)에 선행
 
 ## Boundaries

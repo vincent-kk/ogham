@@ -1,11 +1,8 @@
 # prawf Deliverable Templates
 
-> The **literal output formats** for the deliverables written by the chair and the strategist. This file defines the
-> _body structure_ that pairs with the frontmatter contract in [`orchestration.md`](./orchestration.md) §5.
+> The **literal output formats** for the deliverables written by the chair and the strategist. This file defines the _body structure_ that pairs with the frontmatter contract in [`orchestration.md`](./orchestration.md) §5.
 >
-> **Output language**: write deliverables in the user's language — match the language of the request (or the paper);
-> default to English when unspecified. The examples below are in English. Axis ids, framework names, finding-ids, and
-> verdict enums are kept verbatim. The chair reads this file before writing any deliverable.
+> **Output language**: write deliverables in the user's language — match the language of the request (or the paper); default to English when unspecified. The examples below are in English. Axis ids, framework names, finding-ids, and verdict enums are kept verbatim. The chair reads this file before writing any deliverable.
 
 ## 1. `review-report.md` (chair) — main deliverable
 
@@ -115,9 +112,7 @@ The 6 soundness axes have **0 unresolved findings at or above the gate** (`<gate
 evidence basis, so we conclude PASS. (Demonstrating integrity is itself part of verification.)
 ```
 
-> When the advisory list is non-empty, present the verdict as **ACCEPT (WITH NOTES)** in the report header/body and
-> list the items in Advisory Notes — the frontmatter `verdict` and the terminal marker stay `accept` (no new enum
-> value; cf. the provisional-accept pattern in §1.2).
+> When the advisory list is non-empty, present the verdict as **ACCEPT (WITH NOTES)** in the report header/body and list the items in Advisory Notes — the frontmatter `verdict` and the terminal marker stay `accept` (no new enum value; cf. the provisional-accept pattern in §1.2).
 
 ### 1.2 Provisional variant — `external_verification: unavailable`
 
@@ -212,8 +207,7 @@ external_refs: ["Bonferroni 1936", "OSF/abc123"]
 - **Note**: fatal-flaw (Temporality) axis → no forced defense, keep UNRESOLVED.
 ```
 
-> A `tactic: sidestep`, or a `justification` without external evidence, **cannot have a `proposed_status` of
-> mitigated/defended** (no verified artifact) — the chair treats it as `CONTESTED` (orchestration §4.3).
+> A `tactic: sidestep`, or a `justification` without external evidence, **cannot have a `proposed_status` of mitigated/defended** (no verified artifact) — the chair treats it as `CONTESTED` (orchestration §4.3).
 
 ## 4. Intermediate deliverables (summary format)
 

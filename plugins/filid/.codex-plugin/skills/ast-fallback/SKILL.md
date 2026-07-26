@@ -1,28 +1,20 @@
 ---
 name: ast-fallback
 user_invocable: false
-description: "[filid:ast-fallback] LLM-based AST pattern search and replace fallback using Grep, Read, and Edit when the @ast-grep/napi native module is unavailable. Supports 17 languages with meta-variable approximation."
-argument-hint: "<pattern> [--language LANG] [--path DIR] [--replace REPLACEMENT]"
-version: "1.0.0"
+description: '[filid:ast-fallback] LLM-based AST pattern search and replace fallback using Grep, Read, and Edit when the @ast-grep/napi native module is unavailable. Supports 17 languages with meta-variable approximation.'
+argument-hint: '<pattern> [--language LANG] [--path DIR] [--replace REPLACEMENT]'
+version: '1.0.0'
 complexity: simple
 plugin: filid
 ---
 
 # ast-fallback — AST Pattern Matching Fallback
 
-Provide best-effort AST pattern search and replace using LLM capabilities
-with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
+Provide best-effort AST pattern search and replace using LLM capabilities with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
 
-> **Detail Reference**: For language-to-extension mappings, meta-variable
-> conversion rules, and exact MCP error detection strings, read the
-> `reference.md` file in this skill's directory (same location as this SKILL.md).
+> **Detail Reference**: For language-to-extension mappings, meta-variable conversion rules, and exact MCP error detection strings, read the `reference.md` file in this skill's directory (same location as this SKILL.md).
 
-> **Internal skill** (`user_invocable: false`) — orchestrator skills (or the
-> plugin host) invoke this fallback when `mcp__plugin_filid_tools__ast_grep_search` /
-> `mcp__plugin_filid_tools__ast_grep_replace` reports `@ast-grep/napi is not available`. Not
-> intended for direct user invocation via `/filid:ast-fallback`. The
-> syntax examples below document the invocation shape for callers, not
-> end users.
+> **Internal skill** (`user_invocable: false`) — orchestrator skills (or the plugin host) invoke this fallback when `mcp__plugin_filid_tools__ast_grep_search` / `mcp__plugin_filid_tools__ast_grep_replace` reports `@ast-grep/napi is not available`. Not intended for direct user invocation via `/filid:ast-fallback`. The syntax examples below document the invocation shape for callers, not end users.
 
 ## When to Use This Skill
 
@@ -31,44 +23,32 @@ with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
 - Quick one-off pattern searches where exact AST precision is not critical
 - Searching across multiple languages in a single pass
 
-> **Note**: This is a fallback. For production use, install ast-grep:
-> `npm install -g @ast-grep/napi`
+> **Note**: This is a fallback. For production use, install ast-grep: `npm install -g @ast-grep/napi`
 
 ## Core Workflow
 
 ### Phase 1 — Attempt Native Tool
 
-Call `mcp__plugin_filid_tools__ast_grep_search` (or `mcp__plugin_filid_tools__ast_grep_replace`) MCP tool with the user's
-pattern. If it succeeds, return the result directly. No fallback needed.
-See [reference.md Section 1](./reference.md#section-1--native-tool-attempt).
+Call `mcp__plugin_filid_tools__ast_grep_search` (or `mcp__plugin_filid_tools__ast_grep_replace`) MCP tool with the user's pattern. If it succeeds, return the result directly. No fallback needed. See [reference.md Section 1](./reference.md#section-1--native-tool-attempt).
 
 ### Phase 2 — Detect Unavailability
 
-If the MCP response contains the error string, switch to fallback mode
-and inform the user.
-See [reference.md Section 2](./reference.md#section-2--unavailability-detection).
+If the MCP response contains the error string, switch to fallback mode and inform the user. See [reference.md Section 2](./reference.md#section-2--unavailability-detection).
 
 ### Phase 3 — LLM Search Fallback
 
-Convert AST meta-variables to regex approximations, find matching files
-by language extension, search with Grep, then filter false positives
-using LLM code understanding.
-See [reference.md Section 3](./reference.md#section-3--llm-search-fallback).
+Convert AST meta-variables to regex approximations, find matching files by language extension, search with Grep, then filter false positives using LLM code understanding. See [reference.md Section 3](./reference.md#section-3--llm-search-fallback).
 
 If `--replace` is **not** provided, emit the search results and stop here.
 
 ### Phase 4 — LLM Replace Fallback (only when `--replace` is provided)
 
-Perform search (Phase 3), emit a dry-run preview of the proposed changes
-in the response, then apply the replacements via the Edit tool. The
-preview is emitted alongside the Edit calls so the diff stays visible to
-the caller without requiring an interactive confirmation gate.
-See [reference.md Section 4](./reference.md#section-4--llm-replace-fallback).
+Perform search (Phase 3), emit a dry-run preview of the proposed changes in the response, then apply the replacements via the Edit tool. The preview is emitted alongside the Edit calls so the diff stays visible to the caller without requiring an interactive confirmation gate. See [reference.md Section 4](./reference.md#section-4--llm-replace-fallback).
 
 ## Available MCP Tools
 
-| Tool               | Purpose                                      | Fallback          |
-| ------------------ | -------------------------------------------- | ----------------- |
+| Tool                                        | Purpose                                      | Fallback          |
+| ------------------------------------------- | -------------------------------------------- | ----------------- |
 | `mcp__plugin_filid_tools__ast_grep_search`  | Native AST pattern search (Phase 1 attempt)  | Grep + Read + LLM |
 | `mcp__plugin_filid_tools__ast_grep_replace` | Native AST pattern replace (Phase 1 attempt) | Edit + LLM        |
 

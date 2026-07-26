@@ -1,9 +1,6 @@
 ## Purpose
 
-`open_settings` 도구 진입점. `127.0.0.1` 전용 설정 서버를 기동해 브라우저 폼
-(`.filid/config.json` + rule docs)을 열고, **bounded long-poll** 로 사용자의
-저장/닫기를 기다렸다가 결과를 반환한다 — setup 스킬이 같은 턴에서 다음
-Phase 로 이어가는 것이 목적.
+`open_settings` 도구 진입점. `127.0.0.1` 전용 설정 서버를 기동해 브라우저 폼 (`.filid/config.json` + rule docs)을 열고, **bounded long-poll** 로 사용자의 저장/닫기를 기다렸다가 결과를 반환한다 — setup 스킬이 같은 턴에서 다음 Phase 로 이어가는 것이 목적.
 
 ## Structure
 

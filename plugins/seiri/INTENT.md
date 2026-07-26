@@ -2,9 +2,7 @@
 
 ## Purpose
 
-코드 작성 품질·리뷰 규율·개발 방법론 규칙을 현재 하니스의 프로젝트 규칙 채널로
-배포하는 에이전트 플러그인. 특정 아키텍처에 종속되지 않고 단독 동작한다.
-**규칙 본문은 주입하지 않는다** — 배포 파일은 하니스가 세션마다 로드한다.
+코드 작성 품질·리뷰 규율·개발 방법론 규칙을 현재 하니스의 프로젝트 규칙 채널로 배포하는 에이전트 플러그인. 특정 아키텍처에 종속되지 않고 단독 동작한다. **규칙 본문은 주입하지 않는다** — 배포 파일은 하니스가 세션마다 로드한다.
 
 ## Structure
 
@@ -23,11 +21,8 @@
 ## Conventions
 
 - 빌드: `clean → version:sync → rules → pages → compile → mcp → hooks → compile-plugin`
-- 규모 목표: MCP 도구 ≤3 · 훅 번들 5 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤4KB
-  (`references/`는 별도) · 규칙 각 <200줄.
-  `src/__tests__/size.test.ts` 가 기계 검사한다.
-- `templates/rules/*.md` 는 raw 바이트로 해시된다 — 루트 `.gitattributes`(LF
-  고정)와 루트 `.prettierignore`(포매터 차단)가 그 전제를 지킨다.
+- 규모 목표: MCP 도구 ≤3 · 훅 번들 5 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤4KB (`references/`는 별도) · 규칙 각 <200줄. `src/__tests__/size.test.ts` 가 기계 검사한다.
+- `templates/rules/*.md` 는 raw 바이트로 해시된다 — 루트 `.gitattributes`(LF 고정)와 루트 `.prettierignore`(포매터 차단)가 그 전제를 지킨다.
 
 ## Boundaries
 
@@ -43,7 +38,6 @@
 
 ### Never do
 
-- 아키텍처 강제(filid) · 에이전트 오케스트레이션 · 작업 분해(imbas) ·
-  지식 관리(maencof) · 알림 · 상태 표시 — **역할 밖**.
+- 아키텍처 강제(filid) · 에이전트 오케스트레이션 · 작업 분해(imbas) · 지식 관리(maencof) · 알림 · 상태 표시 — **역할 밖**.
 - 저장소의 진실(검증 명령·임계치) 보유 — 저장소가 소유한다.
 - 차단 훅 도입 · 규칙 본문 주입 · 확인 없는 규칙 파일 쓰기.

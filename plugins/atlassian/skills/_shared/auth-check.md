@@ -4,14 +4,13 @@ Authentication check using the `mcp__plugin_atlassian_tools__auth_check` MCP too
 
 ## Tool
 
-| Tool | Parameter | Default | Description |
-|---|---|---|---|
+| Tool                                      | Parameter         | Default | Description                                                |
+| ----------------------------------------- | ----------------- | ------- | ---------------------------------------------------------- |
 | `mcp__plugin_atlassian_tools__auth_check` | `connection_test` | `false` | When `true`, tests live connectivity and returns user info |
 
 ## General Skills Flow (jira, confluence, download)
 
-Optimistic execution — skip pre-flight auth check and attempt the operation directly.
-Handle authentication errors only when they occur (HTTP 401 with `reauth_required: true`).
+Optimistic execution — skip pre-flight auth check and attempt the operation directly. Handle authentication errors only when they occur (HTTP 401 with `reauth_required: true`).
 
 1. Proceed with the requested operation immediately (no upfront `mcp__plugin_atlassian_tools__auth_check` call)
 2. If the operation succeeds → done
@@ -45,7 +44,9 @@ Handle authentication errors only when they occur (HTTP 401 with `reauth_require
   "authenticated": true,
   "services": {
     "jira": [{ "configured": true, "base_url": "https://xxx.atlassian.net" }],
-    "confluence": [{ "configured": true, "base_url": "https://xxx.atlassian.net/wiki" }]
+    "confluence": [
+      { "configured": true, "base_url": "https://xxx.atlassian.net/wiki" }
+    ]
   }
 }
 ```
@@ -56,18 +57,30 @@ Handle authentication errors only when they occur (HTTP 401 with `reauth_require
 {
   "authenticated": true,
   "services": {
-    "jira": [{
-      "configured": true,
-      "base_url": "https://xxx.atlassian.net",
-      "connection": { "success": true, "message": "Connected to jira (Cloud)", "latency_ms": 230 },
-      "user": { "displayName": "홍길동", "emailAddress": "hong@example.com" }
-    }],
-    "confluence": [{
-      "configured": true,
-      "base_url": "https://xxx.atlassian.net/wiki",
-      "connection": { "success": true, "message": "Connected to confluence (Cloud)", "latency_ms": 180 },
-      "user": null
-    }]
+    "jira": [
+      {
+        "configured": true,
+        "base_url": "https://xxx.atlassian.net",
+        "connection": {
+          "success": true,
+          "message": "Connected to jira (Cloud)",
+          "latency_ms": 230
+        },
+        "user": { "displayName": "홍길동", "emailAddress": "hong@example.com" }
+      }
+    ],
+    "confluence": [
+      {
+        "configured": true,
+        "base_url": "https://xxx.atlassian.net/wiki",
+        "connection": {
+          "success": true,
+          "message": "Connected to confluence (Cloud)",
+          "latency_ms": 180
+        },
+        "user": null
+      }
+    ]
   }
 }
 ```

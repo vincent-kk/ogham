@@ -12,8 +12,7 @@ plugin: maencof
 
 # ingest — External Knowledge Ingestion
 
-Fetches content from external data sources (GitHub issues, Slack messages, web pages, etc.)
-and converts it into maencof documents (Layer 3, 4, or 5) for storage.
+Fetches content from external data sources (GitHub issues, Slack messages, web pages, etc.) and converts it into maencof documents (Layer 3, 4, or 5) for storage.
 
 ## When to Use This Skill
 
@@ -71,8 +70,7 @@ mcp__plugin_maencof_tools__create({
 
 ### Step 5 — Connection Suggestions
 
-Search for existing documents related to the created document via `mcp__plugin_maencof_tools__kg_search`
-and suggest adding links.
+Search for existing documents related to the created document via `mcp__plugin_maencof_tools__kg_search` and suggest adding links.
 
 ## Available Tools
 

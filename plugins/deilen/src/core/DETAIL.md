@@ -22,9 +22,7 @@
 - `clearCollectedFeedback(sessionId): Promise<void>` — feedback.json + 수집 이미지 정리, viewer.md/meta.json 보존(best-effort).
 - `removeSession(sessionId): Promise<void>` — 세션 디렉터리 전체 삭제(TTL/관리용).
 - `pruneExpired(ttlHours): Promise<number>` — 만료 디렉터리 제거 수.
-- resolver: `awaitFeedback(sessionId, waitSeconds, signal?): Promise<SettleValue>`,
-  `deliverComplete(sessionId, feedback)`, `closeResolver(sessionId)`, `settleAllResolvers()`.
-  `SettleValue.kind ∈ {complete, pending, superseded, closing, aborted}`.
+- resolver: `awaitFeedback(sessionId, waitSeconds, signal?): Promise<SettleValue>`, `deliverComplete(sessionId, feedback)`, `closeResolver(sessionId)`, `settleAllResolvers()`. `SettleValue.kind ∈ {complete, pending, superseded, closing, aborted}`.
 
 ### feedbackStore
 

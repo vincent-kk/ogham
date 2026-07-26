@@ -2,8 +2,7 @@
 
 ## Requirements
 
-- `activity_read` MCP 도구는 `.maencof-meta/activity/events/YYYY-MM-DD.jsonl`(NDJSON)을
-  읽어 날짜별 엔트리 목록을 반환한다.
+- `activity_read` MCP 도구는 `.maencof-meta/activity/events/YYYY-MM-DD.jsonl`(NDJSON)을 읽어 날짜별 엔트리 목록을 반환한다.
 - 입력: `date?` (YYYY-MM-DD) / `category?` (enum) / `last_days?` (1-30, 기본 1).
 - `date` 지정 시 해당 날짜만 조회; 미지정 시 오늘부터 N일 최신순.
 - 파일 부재 시 해당 날짜는 결과에서 제외(단일 date 조회는 빈 notes).
@@ -36,8 +35,7 @@
 
 ### LLM Rendering Convention
 
-자연어 프롬프트(예: "오늘 maencof 활동 보여줘")로 직접 호출되므로 LLM이
-다음 형식으로 렌더한다.
+자연어 프롬프트(예: "오늘 maencof 활동 보여줘")로 직접 호출되므로 LLM이 다음 형식으로 렌더한다.
 
 ```markdown
 ## Activity — 2026-06-21

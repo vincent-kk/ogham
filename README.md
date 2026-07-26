@@ -1,8 +1,8 @@
 # Ogham
 
-[![TypeScript](https://img.shields.io/badge/typescript-✔-blue.svg)]()
-[![Claude Code](https://img.shields.io/badge/claude--code-plugin-purple.svg)]()
-[![Node.js](https://img.shields.io/badge/node.js-20+-green.svg)]()
+[![TypeScript](https://img.shields.io/badge/typescript-✔-blue.svg)](<>)
+[![Claude Code](https://img.shields.io/badge/claude--code-plugin-purple.svg)](<>)
+[![Node.js](https://img.shields.io/badge/node.js-20+-green.svg)](<>)
 
 ---
 

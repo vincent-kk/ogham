@@ -70,8 +70,7 @@ Add the required permission settings.
 }
 ```
 
-> **Never modify**: `{CWD}/.claude/settings.local.json`
-> This file contains personal user settings that maencof will never modify.
+> **Never modify**: `{CWD}/.claude/settings.local.json` This file contains personal user settings that maencof will never modify.
 
 ### Step 4 — Collect API Keys/Tokens
 
@@ -120,8 +119,7 @@ Next steps:
 
 ## Guide for Non-developers
 
-This skill involves technical configuration. If the following concepts are unfamiliar,
-please ask for help:
+This skill involves technical configuration. If the following concepts are unfamiliar, please ask for help:
 
 - MCP (Model Context Protocol): how Claude uses external services
 - API token: authentication key for external services

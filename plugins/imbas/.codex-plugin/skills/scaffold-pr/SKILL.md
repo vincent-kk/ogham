@@ -8,10 +8,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls, `/imbas:read-issue` returns, `[OP:]`
-> operations, or `gh`/`git` command results.
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, `/imbas:read-issue` returns, `[OP:]` operations, or `gh`/`git` command results.
 >
 > **Valid reasons to yield**:
 >
@@ -26,8 +23,7 @@ plugin: imbas
 
 # scaffold-pr — Issue-based Draft PR Scaffolding
 
-Create a Draft PR from an issue with its sub-tasks rendered as a checklist
-in the PR body. No code changes — empty commit only.
+Create a Draft PR from an issue with its sub-tasks rendered as a checklist in the PR body. No code changes — empty commit only.
 
 ## When to Use This Skill
 

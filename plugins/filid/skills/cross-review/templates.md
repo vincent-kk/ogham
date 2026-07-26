@@ -1,9 +1,6 @@
 # cross-review — Output Templates
 
-Canonical output formats for review artifacts and the PR comment. The
-chairperson reads this file before writing `review-report.md` and
-`fix-requests.md`; `mcp__plugin_filid_tools__review_manage(format-pr-comment)`
-consumes these conventions when assembling PR comments.
+Canonical output formats for review artifacts and the PR comment. The chairperson reads this file before writing `review-report.md` and `fix-requests.md`; `mcp__plugin_filid_tools__review_manage(format-pr-comment)` consumes these conventions when assembling PR comments.
 
 ## Review Report Format (`review-report.md`)
 
@@ -79,24 +76,15 @@ One entry per arbitration event, in order:
 notes, K findings dismissed as refuted.
 ```
 
-Solo path note: the adjudicator tags each fix_item with a `perspective`;
-Committee Positions becomes a six-row per-lens coverage table (a lens
-with no findings shows its `Checked:` line).
+Solo path note: the adjudicator tags each fix_item with a `perspective`; Committee Positions becomes a six-row per-lens coverage table (a lens with no findings shows its `Checked:` line).
 
 ### INCONCLUSIVE Variant
 
-When the verdict is `INCONCLUSIVE` (majority committee failure or
-evidence unavailable), still write `review-report.md` — the pipeline and
-`format-pr-comment` need a consistent frontmatter `verdict`. Keep the
-frontmatter and header, include Committee Positions (with `N/A (failed)`
-rows) and a single Arbitration Log entry naming the trigger, and omit
-the other sections. `fix-requests.md` is NOT written.
+When the verdict is `INCONCLUSIVE` (majority committee failure or evidence unavailable), still write `review-report.md` — the pipeline and `format-pr-comment` need a consistent frontmatter `verdict`. Keep the frontmatter and header, include Committee Positions (with `N/A (failed)` rows) and a single Arbitration Log entry naming the trigger, and omit the other sections. `fix-requests.md` is NOT written.
 
 ## Fix Requests Format (`fix-requests.md`)
 
-`fix-requests.md` carries the **surviving blocking partition only**
-(severity >= MEDIUM, post-verification); advisory items live exclusively
-in `review-report.md` → `## Advisory Notes`.
+`fix-requests.md` carries the **surviving blocking partition only** (severity >= MEDIUM, post-verification); advisory items live exclusively in `review-report.md` → `## Advisory Notes`.
 
 ````markdown
 # Fix Requests — <branch>
@@ -129,20 +117,13 @@ Type tokens are bare words (never `filid:`-prefixed):
 - `code-fix` — inline code patch (default when omitted)
 - `promote` — stable `test.ts` → `spec.ts` consolidation (advisory; a `.test.ts` is exempt from the 3+12 cap, so this is not a rule violation). A `spec.ts` over the 15-case cap is remedied by `code-fix`/`restructure` (split / parameterize), not promote.
 - `restructure` — LCOM4 >= 2 or structural drift → module reorganization
-- `harvest-required` — oracle gap, not a code defect (never dispatched
-  to code-surgeon): resolved via `/filid:harvest` (spike) or by
-  supplying the claim's `observable` evidence (merge track), then
-  re-running `/filid:cross-review`
+- `harvest-required` — oracle gap, not a code defect (never dispatched to code-surgeon): resolved via `/filid:harvest` (spike) or by supplying the claim's `observable` evidence (merge track), then re-running `/filid:cross-review`
 
 ### Harvest-Required Variant (unharvested spike branch)
 
-When reviewing a `spike/*` branch without a current harvest manifest
-(SKILL.md Step 1 guard), skip all later steps and write directly:
+When reviewing a `spike/*` branch without a current harvest manifest (SKILL.md Step 1 guard), skip all later steps and write directly:
 
-- `review-report.md` — standard header, `verdict: REQUEST_CHANGES`, a
-  `## Claim Verdicts` section with the single row
-  `ALL | <branch> | INSUFFICIENT-EVIDENCE | no current harvest manifest`,
-  and one Arbitration Log entry `Harvest guard: manifest <missing|stale>`.
+- `review-report.md` — standard header, `verdict: REQUEST_CHANGES`, a `## Claim Verdicts` section with the single row `ALL | <branch> | INSUFFICIENT-EVIDENCE | no current harvest manifest`, and one Arbitration Log entry `Harvest guard: manifest <missing|stale>`.
 - `fix-requests.md` — exactly one item:
 
   ```markdown
@@ -163,8 +144,7 @@ When reviewing a `spike/*` branch without a current harvest manifest
 
 ## Advisory Ledger Format (`.filid/review/advisory-ledger.md`)
 
-Project-level, shared across branches — outside per-branch cleanup
-scope. One row per advisory key, updated in place in SKILL.md Step 5:
+Project-level, shared across branches — outside per-branch cleanup scope. One row per advisory key, updated in place in SKILL.md Step 5:
 
 ```markdown
 # Advisory Ledger
@@ -175,22 +155,9 @@ scope. One row per advisory key, updated in place in SKILL.md Step 5:
 ```
 
 - `key` uses the same `path + rule` dedup key as fix_items.
-- `count` increments at most once per run: a row whose `last_run_id`
-  equals the current `session.md` `run_id` is skipped.
-- At `count` 3 with `status: open`: promote via
-  `mcp__plugin_filid_tools__debt_manage(action: "create", projectRoot, debtItem: { severity: "LOW", original_fix_id: <ADV-id>, ... })`,
-  set `status: promoted`, record `debt_id`. Promoted rows are never
-  re-counted — the ledger never becomes an unbounded backlog.
+- `count` increments at most once per run: a row whose `last_run_id` equals the current `session.md` `run_id` is skipped.
+- At `count` 3 with `status: open`: promote via `mcp__plugin_filid_tools__debt_manage(action: "create", projectRoot, debtItem: { severity: "LOW", original_fix_id: <ADV-id>, ... })`, set `status: promoted`, record `debt_id`. Promoted rows are never re-counted — the ledger never becomes an unbounded backlog.
 
 ## PR Comment Format
 
-Use `mcp__plugin_filid_tools__review_manage(action: "format-pr-comment")` —
-it reads `review-report.md` (+ `fix-requests.md` when present), lifts the
-report frontmatter into a `| Field | Value |` table rendered _outside_ the
-collapsible sections (between the `## Code Review Governance — <verdict>`
-header and the first `<details>`), wraps each artifact in a `<details>`
-sections with the raw frontmatter stripped from the report body, handles
-the 50,000-char limit, and returns ready-to-post markdown. Post via
-`gh pr comment --body-file`; when a `Code Review Governance` comment
-already exists, edit it in place
-(`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id>`).
+Use `mcp__plugin_filid_tools__review_manage(action: "format-pr-comment")` — it reads `review-report.md` (+ `fix-requests.md` when present), lifts the report frontmatter into a `| Field | Value |` table rendered _outside_ the collapsible sections (between the `## Code Review Governance — <verdict>` header and the first `<details>`), wraps each artifact in a `<details>` sections with the raw frontmatter stripped from the report body, handles the 50,000-char limit, and returns ready-to-post markdown. Post via `gh pr comment --body-file`; when a `Code Review Governance` comment already exists, edit it in place (`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id>`).

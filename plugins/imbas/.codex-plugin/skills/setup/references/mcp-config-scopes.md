@@ -1,15 +1,14 @@
 # MCP Config Scopes
 
-Claude Code resolves MCP server configurations from three scope levels.
-`.mcp.json` files live **alongside** `.claude/` directories, not inside them.
+Claude Code resolves MCP server configurations from three scope levels. `.mcp.json` files live **alongside** `.claude/` directories, not inside them.
 
 ## Scope Hierarchy
 
-| Scope | File location | Git-tracked | Visibility | Use case |
-|-------|---------------|-------------|------------|----------|
-| **User** | `~/.mcp.json` | No | All projects (personal) | Personal tools used across every project |
-| **Project** | `<project-root>/.mcp.json` | Yes | Team-shared | Team-standard servers, committed to repo |
-| **Local** | `<project-root>/.mcp.json.local` | No (gitignored) | Current project (personal) | Personal overrides, secrets, experiments |
+| Scope       | File location                    | Git-tracked     | Visibility                 | Use case                                 |
+| ----------- | -------------------------------- | --------------- | -------------------------- | ---------------------------------------- |
+| **User**    | `~/.mcp.json`                    | No              | All projects (personal)    | Personal tools used across every project |
+| **Project** | `<project-root>/.mcp.json`       | Yes             | Team-shared                | Team-standard servers, committed to repo |
+| **Local**   | `<project-root>/.mcp.json.local` | No (gitignored) | Current project (personal) | Personal overrides, secrets, experiments |
 
 ## Directory Layout
 
@@ -26,8 +25,7 @@ Claude Code resolves MCP server configurations from three scope levels.
     └── src/
 ```
 
-Key insight: `.mcp.json` and `.claude/` are **sibling entries** at the same directory level.
-They serve different purposes — `.mcp.json` for MCP servers, `.claude/` for Claude Code settings.
+Key insight: `.mcp.json` and `.claude/` are **sibling entries** at the same directory level. They serve different purposes — `.mcp.json` for MCP servers, `.claude/` for Claude Code settings.
 
 ## Precedence (highest wins)
 
@@ -35,8 +33,7 @@ They serve different purposes — `.mcp.json` for MCP servers, `.claude/` for Cl
 Local (.mcp.json.local)  >  Project (.mcp.json)  >  User (~/.mcp.json)
 ```
 
-When the same server name appears in multiple scopes, the highest-precedence scope wins.
-Servers from different scopes with different names are merged additively.
+When the same server name appears in multiple scopes, the highest-precedence scope wins. Servers from different scopes with different names are merged additively.
 
 ## File Format
 
@@ -54,6 +51,7 @@ All three files share the same schema:
 ```
 
 Environment variable expansion is supported in all string values:
+
 - `${VAR}` — expand to env var value
 - `${VAR:-default}` — expand with fallback
 
@@ -72,14 +70,13 @@ claude mcp add --scope local <name> ...
 
 ## Scope Selection Guide for setup
 
-When `register-atlassian-mcp` or similar auto-setup actions write to `.mcp.json`,
-the target scope must be chosen based on context:
+When `register-atlassian-mcp` or similar auto-setup actions write to `.mcp.json`, the target scope must be chosen based on context:
 
-| Condition | Recommended scope | Rationale |
-|-----------|-------------------|-----------|
-| Team project, server needed by all devs | **Project** | `.mcp.json` committed to repo |
-| Personal tool, used across projects | **User** | `~/.mcp.json` in home directory |
-| Testing / experiment / secret URL | **Local** | `.mcp.json.local`, not committed |
+| Condition                               | Recommended scope | Rationale                        |
+| --------------------------------------- | ----------------- | -------------------------------- |
+| Team project, server needed by all devs | **Project**       | `.mcp.json` committed to repo    |
+| Personal tool, used across projects     | **User**          | `~/.mcp.json` in home directory  |
+| Testing / experiment / secret URL       | **Local**         | `.mcp.json.local`, not committed |
 
 ### Decision flow for auto-setup
 

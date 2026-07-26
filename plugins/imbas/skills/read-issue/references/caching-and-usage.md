@@ -1,8 +1,7 @@
 # Caching Policy
 
 - **Issue content is NOT cached** — comments change frequently, so every call queries the provider
-- Digest comment Fast Path reduces processing cost without caching
-  (covered comment range is skipped, only new comments are fully analyzed)
+- Digest comment Fast Path reduces processing cost without caching (covered comment range is skipped, only new comments are fully analyzed)
 - Project metadata (issue types, link types) uses the separate `imbas:cache` skill
 
 # Agent Usage Patterns

@@ -12,8 +12,7 @@ plugin: maencof
 
 # remember — Record New Knowledge
 
-Extracts knowledge from the current conversation or user input and saves it as a markdown document in the appropriate Layer.
-Performs automatic Layer recommendation, tag extraction, and pre-creation duplicate document checking.
+Extracts knowledge from the current conversation or user input and saves it as a markdown document in the appropriate Layer. Performs automatic Layer recommendation, tag extraction, and pre-creation duplicate document checking.
 
 ## When to Use This Skill
 
@@ -48,10 +47,7 @@ Recommend a Layer based on the nature of the content:
 | L4 Action   | To-dos, current session context, temporary notes                       | `04_Action/`   |
 | L5 Context  | Unclassified fragments (buffer inbox), cross-layer MOC/hubs (boundary) | `05_Context/`  |
 
-**L2 recommendation criteria**: knowledge the user has directly acquired, validated concepts, expected to be referenced repeatedly
-**L3 recommendation criteria**: contains URL, references external materials, has explicit `source:`
-**L4 recommendation criteria**: "later", "today", "need to", time-limited, has an expiration date
-**L5 fallback rule**: when none of the L2/L3/L4 criteria clearly applies — the fragment is uncategorized, its context is unclear, or classification confidence is low — do NOT force a layer. Save it to L5 buffer (`05_Context/buffer/`), the inbox for later triage. Buffer items are promoted or expired via `/maencof:organize` and `/maencof:cleanup buffer`.
+**L2 recommendation criteria**: knowledge the user has directly acquired, validated concepts, expected to be referenced repeatedly **L3 recommendation criteria**: contains URL, references external materials, has explicit `source:` **L4 recommendation criteria**: "later", "today", "need to", time-limited, has an expiration date **L5 fallback rule**: when none of the L2/L3/L4 criteria clearly applies — the fragment is uncategorized, its context is unclear, or classification confidence is low — do NOT force a layer. Save it to L5 buffer (`05_Context/buffer/`), the inbox for later triage. Buffer items are promoted or expired via `/maencof:organize` and `/maencof:cleanup buffer`.
 
 #### L3 Sub-Layer Selection
 
@@ -78,8 +74,7 @@ When creating an L5 document, determine the role:
 
 Default to **Buffer** for general L5 content. For **Boundary** documents (project MOC, cross-layer hub linking e.g. L1 values to L3 references), do NOT use `create` — use the dedicated `mcp__plugin_maencof_tools__boundary_create` tool, which writes the required `boundary_type` / `connected_layers` frontmatter that `create` cannot set.
 
-If the user specifies `--layer`, use that Layer.
-Confirm the recommended Layer with the user before proceeding:
+If the user specifies `--layer`, use that Layer. Confirm the recommended Layer with the user before proceeding:
 
 ```
 "I'll save this to Layer {N} ({name}). Is that correct? (y/n or a different Layer number)"
@@ -136,10 +131,7 @@ tags: [extracted tags]
 source: 'original source URL (if available)'
 ```
 
-`confidence` (internalization 0.0-1.0, initial ~0.3) is not a create parameter — set it
-after creation via `mcp__plugin_maencof_tools__update` (frontmatter). Rich sub-layer metadata
-(L3A `person`, L3B `org_type`, etc.) is schema-validated on read but has no MCP write
-path — do not promise those fields during remember.
+`confidence` (internalization 0.0-1.0, initial ~0.3) is not a create parameter — set it after creation via `mcp__plugin_maencof_tools__update` (frontmatter). Rich sub-layer metadata (L3A `person`, L3B `org_type`, etc.) is schema-validated on read but has no MCP write path — do not promise those fields during remember.
 
 **L4 Frontmatter**:
 
@@ -159,9 +151,7 @@ tags: [extracted tags]
 expires: YYYY-MM-DD # optional; buffer items default to a ~30-day triage window
 ```
 
-L5-Boundary documents are created with `mcp__plugin_maencof_tools__boundary_create`
-(`title`, `boundary_type: project_moc|cross_domain|synthesis`, `connected_layers`, `tags`) —
-not with `create`.
+L5-Boundary documents are created with `mcp__plugin_maencof_tools__boundary_create` (`title`, `boundary_type: project_moc|cross_domain|synthesis`, `connected_layers`, `tags`) — not with `create`.
 
 ### Step 6 — Confirmation Report
 

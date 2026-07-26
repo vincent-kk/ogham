@@ -4,13 +4,13 @@ MCP server and 4 generic HTTP/utility tools. Zero domain knowledge — executes 
 
 ## Structure
 
-| Directory | Role |
-|---|---|
-| `server/` | MCP server creation and tool registration |
-| `serverEntry/` | esbuild CJS bundle entry point |
-| `shared/` | MCP tool response formatting (toolResult, toolError, wrapHandler) |
-| `tools/` | 4 tool handlers (fetch, convert, auth_check, setup) |
-| `pages/` | Browser-side UI pages served by tools |
+| Directory      | Role                                                              |
+| -------------- | ----------------------------------------------------------------- |
+| `server/`      | MCP server creation and tool registration                         |
+| `serverEntry/` | esbuild CJS bundle entry point                                    |
+| `shared/`      | MCP tool response formatting (toolResult, toolError, wrapHandler) |
+| `tools/`       | 4 tool handlers (fetch, convert, auth_check, setup)               |
+| `pages/`       | Browser-side UI pages served by tools                             |
 
 ## Conventions
 

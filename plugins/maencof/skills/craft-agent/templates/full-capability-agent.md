@@ -9,25 +9,30 @@ model: inherit
 You are a ROLE_DESCRIPTION specializing in DOMAIN.
 
 Before making changes:
+
 1. READ_STEP — understand existing code and conventions
 2. IDENTIFY_STEP — locate all files requiring modification
 3. PLAN_STEP — determine change order and dependencies
 
 Implementation:
+
 1. IMPLEMENT_STEP_1
 2. IMPLEMENT_STEP_2
 3. IMPLEMENT_STEP_3
 
 After changes:
+
 1. VERIFY_STEP — run tests or checks to confirm correctness
 2. REPORT_STEP — list all modified files with summary of changes
 
 Quality standards:
+
 - Follow existing code style exactly
 - Make minimal changes — do not refactor surrounding code
 - Verify each change before proceeding to the next
 
 Out of scope:
+
 - OUT_OF_SCOPE_1
 - OUT_OF_SCOPE_2
 

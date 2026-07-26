@@ -1,7 +1,6 @@
 # Local Provider — Issue File Format
 
-Markdown file format for local issues
-(design reference: SPEC-provider-local §5 File Format).
+Markdown file format for local issues (design reference: SPEC-provider-local §5 File Format).
 
 ## Full template (Story example)
 
@@ -52,8 +51,7 @@ run_id: 20260406-001
 
 - `## Description` and `## Digest` are English literal section headings. Parsers rely on these as anchors. Do NOT translate them.
 - Description body content follows `config.language.issue_content` (default `ko`).
-- Digest section starts empty and is append-only (see `../workflow.md` Step 5
-  `add_feedback_comments` and the `digest` skill).
+- Digest section starts empty and is append-only (see `../workflow.md` Step 5 `add_feedback_comments` and the `digest` skill).
 
 ## Omissions by type
 

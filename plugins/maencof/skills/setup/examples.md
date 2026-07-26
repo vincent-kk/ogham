@@ -11,28 +11,31 @@ A full Stage 2 interview flow demonstrating the empathetic and structured inquir
 ### Transcript
 
 **AI (Opening):**
-> Welcome to maencof. I am here to help you build a knowledge space that truly resonates with your way of thinking.
-> To begin, could you tell me a bit about the fields or projects you are currently most focused on? And in your experience, what are the most frustrating aspects of managing your information right now?
+
+> Welcome to maencof. I am here to help you build a knowledge space that truly resonates with your way of thinking. To begin, could you tell me a bit about the fields or projects you are currently most focused on? And in your experience, what are the most frustrating aspects of managing your information right now?
 
 **User:**
+
 > Lately, I've been reading a lot of AI papers and frontend articles. The problem is, I understand them when I'm reading, but later when I try to find something, I can't remember where it was. It feels like I'm starting from scratch every time because things aren't organized. Oh, and please call me Vincent.
 
 **AI (Reflect & Probe):**
-> It's a pleasure to meet you, Vincent. It sounds like you're dealing with a common but deeply frustrating gap between understanding information and being able to retrieve it when it matters most. That "starting from scratch" feeling can be quite draining.
-> From what you've described, it seems like **'Systematicity'** and **'Practicality'** are values you hold in high regard—having a structure that works for your actual needs. 
-> As we build this space together, is there a specific promise or a boundary you'd like me to commit to? For instance, something I should absolutely never do with your information?
+
+> It's a pleasure to meet you, Vincent. It sounds like you're dealing with a common but deeply frustrating gap between understanding information and being able to retrieve it when it matters most. That "starting from scratch" feeling can be quite draining. From what you've described, it seems like **'Systematicity'** and **'Practicality'** are values you hold in high regard—having a structure that works for your actual needs. As we build this space together, is there a specific promise or a boundary you'd like me to commit to? For instance, something I should absolutely never do with your information?
 
 **User:**
+
 > Exactly, practicality is key. Hmm.. as for boundaries, I'd say: never change the nuance or delete my original notes without my explicit permission. Summarizing is fine, but the original must stay intact.
 
 **AI (Reflect & Probe):**
-> I understand perfectly. Preserving the integrity and original nuance of your records is paramount. I will make "No unauthorized modification or deletion" a fundamental rule of this space.
-> Lastly, to ensure our future interactions are as helpful as possible, how do you prefer to receive information? Are you someone who values detailed background and context, or do you prefer to get straight to the core conclusions?
+
+> I understand perfectly. Preserving the integrity and original nuance of your records is paramount. I will make "No unauthorized modification or deletion" a fundamental rule of this space. Lastly, to ensure our future interactions are as helpful as possible, how do you prefer to receive information? Are you someone who values detailed background and context, or do you prefer to get straight to the core conclusions?
 
 **User:**
+
 > Just give me the core conclusions and stay concise. I'm usually in a hurry and don't have time for long explanations.
 
 **AI (Completion):**
+
 > Thank you for your clarity, Vincent. Based on our conversation, I've gathered a clear picture of your knowledge management needs:
 >
 > - Name: Vincent

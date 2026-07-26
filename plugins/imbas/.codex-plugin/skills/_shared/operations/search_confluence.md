@@ -10,10 +10,10 @@ GET /wiki/rest/api/content/search?cql=...
 
 ## Parameters
 
-| Name | Required | Description |
-|------|----------|-------------|
-| `cql` | yes | CQL query (e.g., `type = page AND space = DEV AND title ~ "spec"`) |
-| `limit` | no | Max results (default: 25) |
+| Name    | Required | Description                                                        |
+| ------- | -------- | ------------------------------------------------------------------ |
+| `cql`   | yes      | CQL query (e.g., `type = page AND space = DEV AND title ~ "spec"`) |
+| `limit` | no       | Max results (default: 25)                                          |
 
 ## Response Fields
 

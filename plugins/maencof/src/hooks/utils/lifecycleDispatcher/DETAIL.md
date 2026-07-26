@@ -25,6 +25,5 @@ interface LifecycleDispatcherInput {
 
 ### Output envelope (`LifecycleDispatchResult`)
 
-- 지원 이벤트 전부 context-capable:
-  `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }` — Claude 가 메시지를 직접 읽을 수 있음.
+- 지원 이벤트 전부 context-capable: `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }` — Claude 가 메시지를 직접 읽을 수 있음.
 - Top-level `message`, `hookMessage` 필드는 어떤 이벤트에서도 방출되지 않는다 (Claude Code 가 조용히 버리는 필드).

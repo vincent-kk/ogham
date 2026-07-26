@@ -11,15 +11,13 @@ version: 1.0.0
 
 ## Purpose
 
-Protect the integrity of the maencof knowledge space.
-Prevent unauthorized modifications to Layer 1 (Core Identity) and validate required Frontmatter fields.
+Protect the integrity of the maencof knowledge space. Prevent unauthorized modifications to Layer 1 (Core Identity) and validate required Frontmatter fields.
 
 ## Rule Definitions
 
 ### R1. Layer 1 Write Warning
 
-Display a warning when attempting to modify documents in the `01_Core/` directory.
-The Core Identity Hub must not be changed without explicit user intent.
+Display a warning when attempting to modify documents in the `01_Core/` directory. The Core Identity Hub must not be changed without explicit user intent.
 
 ```
 # When a Write/Edit tool targets a path under 01_Core/:
@@ -66,8 +64,7 @@ If the `confidence` field is present, it must be between 0.0 and 1.0 inclusive.
 
 ### R4. Layer 4 Document TTL Warning
 
-Documents in the `04_Action/` directory that have not been updated for 30 or more days are flagged as candidates for cleanup.
-Action memory is volatile and requires periodic cleanup.
+Documents in the `04_Action/` directory that have not been updated for 30 or more days are flagged as candidates for cleanup. Action memory is volatile and requires periodic cleanup.
 
 ## Exceptions
 

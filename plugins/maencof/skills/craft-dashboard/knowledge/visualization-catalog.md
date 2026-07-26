@@ -26,9 +26,7 @@ The component snippets below contain Handlebars-style placeholders. **These are 
 
 **USER-EDIT zones**: each pattern below marks a small zone with `// USER-EDIT-START` / `// USER-EDIT-END` for user-tunable values (color, threshold, dataKey). Keep these zones tiny. Generated body lives outside.
 
-**Standard imports** — every component pattern below assumes these two imports
-have been authored at the top of the file. Patterns omit them for brevity but
-they are mandatory in the generated `.tsx`:
+**Standard imports** — every component pattern below assumes these two imports have been authored at the top of the file. Patterns omit them for brevity but they are mandatory in the generated `.tsx`:
 
 ```tsx
 import { useQuery } from '@tanstack/react-query';
@@ -36,10 +34,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 ```
 
-Chart-library imports (`recharts`, `react-plotly.js`, `react-calendar-heatmap`,
-…) are shown explicitly per pattern. Other helpers (`useState`, `useMemo`,
-local types) are added on demand. The LLM authoring the component MUST include
-the standard imports verbatim; strict TS will fail otherwise.
+Chart-library imports (`recharts`, `react-plotly.js`, `react-calendar-heatmap`, …) are shown explicitly per pattern. Other helpers (`useState`, `useMemo`, local types) are added on demand. The LLM authoring the component MUST include the standard imports verbatim; strict TS will fail otherwise.
 
 ---
 

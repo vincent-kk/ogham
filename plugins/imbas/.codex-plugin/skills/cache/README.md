@@ -4,8 +4,7 @@ Jira 프로젝트 메타데이터 캐시 관리 스킬 (내부 전용, 사용자
 
 ## 개요
 
-Jira 프로젝트의 이슈 타입, 링크 타입, 워크플로우 등 메타데이터를 로컬에 캐싱하여
-다른 스킬들(setup, validate, split, devplan)이 반복적으로 Jira API를 호출하지 않도록 한다.
+Jira 프로젝트의 이슈 타입, 링크 타입, 워크플로우 등 메타데이터를 로컬에 캐싱하여 다른 스킬들(setup, validate, split, devplan)이 반복적으로 Jira API를 호출하지 않도록 한다.
 
 ## 동작 방식
 
@@ -32,14 +31,14 @@ Jira 프로젝트의 이슈 타입, 링크 타입, 워크플로우 등 메타데
 
 ## 사용 도구
 
-| 도구 | 출처 | 용도 |
-|------|------|------|
-| `mcp__plugin_imbas_tools__cache_get` | imbas MCP | 캐시 읽기 및 TTL 상태 확인 |
-| `mcp__plugin_imbas_tools__cache_set` | imbas MCP | 조회된 메타데이터를 캐시에 저장 |
-| `[OP: get_projects]` | Jira ([OP:]) | 프로젝트 목록 조회 |
-| `[OP: get_issue_types]` | Jira ([OP:]) | 이슈 타입 조회 |
-| `[OP: get_issue_type_fields]` | Jira ([OP:]) | 타입별 필수 필드 조회 |
-| `[OP: get_link_types]` | Jira ([OP:]) | 이슈 링크 타입 조회 |
+| 도구                                 | 출처         | 용도                            |
+| ------------------------------------ | ------------ | ------------------------------- |
+| `mcp__plugin_imbas_tools__cache_get` | imbas MCP    | 캐시 읽기 및 TTL 상태 확인      |
+| `mcp__plugin_imbas_tools__cache_set` | imbas MCP    | 조회된 메타데이터를 캐시에 저장 |
+| `[OP: get_projects]`                 | Jira ([OP:]) | 프로젝트 목록 조회              |
+| `[OP: get_issue_types]`              | Jira ([OP:]) | 이슈 타입 조회                  |
+| `[OP: get_issue_type_fields]`        | Jira ([OP:]) | 타입별 필수 필드 조회           |
+| `[OP: get_link_types]`               | Jira ([OP:]) | 이슈 링크 타입 조회             |
 
 ## 참고 파일
 

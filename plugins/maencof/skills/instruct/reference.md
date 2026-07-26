@@ -12,12 +12,12 @@ Detailed workflow, CLAUDE.md spec, diff/split examples, and error handling for t
 
 ## Classification Guide
 
-| Content Type | Best Location | Reason |
-|-------------|--------------|--------|
-| Team-wide conventions | `CLAUDE.md` | Version-controlled, shared |
-| Personal preferences | `CLAUDE.local.md` | Gitignored, private |
-| File-pattern rules | `.claude/rules/*.md` | paths frontmatter support |
-| Long specialized sections | `@import` split | 200-line guideline |
+| Content Type              | Best Location        | Reason                     |
+| ------------------------- | -------------------- | -------------------------- |
+| Team-wide conventions     | `CLAUDE.md`          | Version-controlled, shared |
+| Personal preferences      | `CLAUDE.local.md`    | Gitignored, private        |
+| File-pattern rules        | `.claude/rules/*.md` | paths frontmatter support  |
+| Long specialized sections | `@import` split      | 200-line guideline         |
 
 ## Detailed Workflow
 
@@ -43,6 +43,7 @@ If no CLAUDE.md exists: offer to create one.
 ### Step 2 — Identify Intent
 
 Accept free-form instructions:
+
 ```
 What would you like to change?
 
@@ -56,6 +57,7 @@ Examples:
 ### Step 3 — Classify and Route
 
 Present recommendation and let user choose:
+
 ```
 Recommendation:
   "Always respond in Korean"
@@ -82,6 +84,7 @@ Apply? [Yes / Edit / Cancel]
 ### Step 5 — Write File
 
 Create automatic backup before writing:
+
 ```
 Backup created: .claude/CLAUDE.md.backup.2026-03-01
 ```
@@ -104,6 +107,7 @@ Split now? [Yes / Later / Ignore]
 ```
 
 Auto-split process:
+
 ```
 Extracting "API Rules" section...
   Created: .claude/rules/api-rules.md
@@ -139,6 +143,7 @@ Executed by the **configurator** agent. The configurator creates backups before 
 ```
 
 Natural language:
+
 ```
 "Add a rule to always respond in Korean"
 "Split the long conventions section out"
@@ -147,13 +152,13 @@ Natural language:
 
 ## Error Handling
 
-| Condition | Resolution |
-|-----------|------------|
-| CLAUDE.md not found | Offer to create a new one |
-| @import path mismatch | Verify actual file path, suggest correction |
-| File write permission error | Show permission check instructions |
-| Backup creation failure | Offer manual backup instructions, confirm before proceeding |
-| 200-line exceeded (ignored) | Respect user choice, re-suggest on next edit |
+| Condition                   | Resolution                                                  |
+| --------------------------- | ----------------------------------------------------------- |
+| CLAUDE.md not found         | Offer to create a new one                                   |
+| @import path mismatch       | Verify actual file path, suggest correction                 |
+| File write permission error | Show permission check instructions                          |
+| Backup creation failure     | Offer manual backup instructions, confirm before proceeding |
+| 200-line exceeded (ignored) | Respect user choice, re-suggest on next edit                |
 
 ## Acceptance Criteria
 

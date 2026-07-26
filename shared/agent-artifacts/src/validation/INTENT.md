@@ -5,11 +5,11 @@
 
 ## Structure
 
-| File                          | Role                            |
-| ----------------------------- | ------------------------------- |
-| `index.ts`                    | 내부 명시적 배럴                |
-| `validation.ts`               | 소유자 namespace 유효성 검증    |
-| `helpers/`                    | ASCII 제어문자 범위 판별 organ   |
+| File            | Role                           |
+| --------------- | ------------------------------ |
+| `index.ts`      | 내부 명시적 배럴               |
+| `validation.ts` | 소유자 namespace 유효성 검증   |
+| `helpers/`      | ASCII 제어문자 범위 판별 organ |
 
 ## Conventions
 

@@ -1,13 +1,10 @@
 # pull-request — Reference Documentation
 
-Detailed workflow, git/gh command signatures, base branch detection algorithm,
-PR body templates, and error handling for the FCA-aware PR generator skill.
-For the quick-start overview, see [SKILL.md](./SKILL.md).
+Detailed workflow, git/gh command signatures, base branch detection algorithm, PR body templates, and error handling for the FCA-aware PR generator skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
 
 ## Section 0 — Prerequisites & Validation
 
-Verify preconditions before PR creation. All checks run sequentially before
-Stage 1.
+Verify preconditions before PR creation. All checks run sequentially before Stage 1.
 
 ### 0.1 Git Repository Check
 
@@ -47,8 +44,7 @@ gh auth status
 ```
 
 - Success → proceed to Stage 1
-- Failure → set `GH_AUTH = false` flag. Continue through Stage 3, then save
-  PR body locally in Stage 4 with manual instructions.
+- Failure → set `GH_AUTH = false` flag. Continue through Stage 3, then save PR body locally in Stage 4 with manual instructions.
 
 ## Section 1 — FCA Context Sync
 
@@ -58,9 +54,7 @@ gh auth status
 Skill("filid:update")
 ```
 
-`filid:update` internally runs Stage 0 (Change Detection) → Stage 1 (Scan) →
-Stage 2 (Sync) → Stage 3 (Doc & Test Update) → Stage 4 (Finalize).
-`filid:pull-request` only checks the overall success/failure of this flow.
+`filid:update` internally runs Stage 0 (Change Detection) → Stage 1 (Scan) → Stage 2 (Sync) → Stage 3 (Doc & Test Update) → Stage 4 (Finalize). `filid:pull-request` only checks the overall success/failure of this flow.
 
 - **Input**: None (`filid:update` auto-detects from the current branch)
 - **Success condition**: `filid:update` completes without errors
@@ -191,13 +185,11 @@ Examples:
 - `feat(filid): add "filid:pull-request" skill for automated PR generation`
 - `fix(syncpoint): resolve backup path resolution on macOS`
 
-Falls back to first commit message line (truncated to 70 chars) when prefix
-extraction fails.
+Falls back to first commit message line (truncated to 70 chars) when prefix extraction fails.
 
 ### 3.4 PR Body Template
 
-Generate a 4-section structure. Print "No relevant changes" for any section
-with no applicable changes.
+Generate a 4-section structure. Print "No relevant changes" for any section with no applicable changes.
 
 ```markdown
 ## Summary
@@ -301,11 +293,7 @@ with no applicable changes.
 
 ## Section 4 — PR Publication
 
-Stage 4 first writes the generated body to `.filid/pr-draft/<branch>.md`
-(the `Write` tool creates parent directories). Every publication path
-consumes that file via `--body-file`, deletes it after a successful
-`gh pr create` / `gh pr edit`, and keeps it on failure paths for manual
-use.
+Stage 4 first writes the generated body to `.filid/pr-draft/<branch>.md` (the `Write` tool creates parent directories). Every publication path consumes that file via `--body-file`, deletes it after a successful `gh pr create` / `gh pr edit`, and keeps it on failure paths for manual use.
 
 ### 4.1 GitHub CLI Auth Re-check
 
@@ -342,10 +330,7 @@ Replace the existing PR body entirely?
 - Skip: Exit without updating
 ```
 
-- Overwrite selected →
-  `gh pr edit <N> --body-file .filid/pr-draft/<branch>.md`, then emit
-  the §4.5 report (status: updated), delete the body file, and END —
-  §4.3/§4.4 are create-path only
+- Overwrite selected → `gh pr edit <N> --body-file .filid/pr-draft/<branch>.md`, then emit the §4.5 report (status: updated), delete the body file, and END — §4.3/§4.4 are create-path only
 - Skip selected → keep the body file, print its path, and exit
 - No existing PR → continue to §4.3
 
@@ -368,9 +353,7 @@ gh pr create \
   --body-file .filid/pr-draft/<branch>.md
 ```
 
-Append `--draft` when the option is set. On success, delete
-`.filid/pr-draft/<branch>.md`; on failure, keep it and print the §5
-error format.
+Append `--draft` when the option is set. On success, delete `.filid/pr-draft/<branch>.md`; on failure, keep it and print the §5 error format.
 
 ### 4.5 Final Report
 

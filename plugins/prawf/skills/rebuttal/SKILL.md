@@ -8,26 +8,16 @@ complexity: medium
 plugin: prawf
 ---
 
-> **EXECUTION MODEL (Tier-2a Anti-Yield)**: Execute the whole pipeline as a
-> SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY chain the
-> next tool call in the same response. NEVER yield after a `Task` subagent
-> returns. The intermediate `external-findings.md` and `rebuttal.md` are
-> internal working data — do NOT summarize them mid-pipeline.
+> **EXECUTION MODEL (Tier-2a Anti-Yield)**: Execute the whole pipeline as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY chain the next tool call in the same response. NEVER yield after a `Task` subagent returns. The intermediate `external-findings.md` and `rebuttal.md` are internal working data — do NOT summarize them mid-pipeline.
 >
 > **Valid reasons to yield**:
 >
 > 1. A user decision is genuinely required (no paper or no review comments provided).
-> 2. Terminal marker emitted: `prawf rebuttal: complete` — only after
->    `rebuttal-letter.md` + `revision-checklist.md` are written.
+> 2. Terminal marker emitted: `prawf rebuttal: complete` — only after `rebuttal-letter.md` + `revision-checklist.md` are written.
 
 # rebuttal — Response to External Reviewers
 
-You received real reviewer comments from a venue and must respond. Unlike
-`/prawf:peer-review`, the attack round (R1) is SKIPPED — the external reviewers have
-already filed the findings. You run the prawf **defense round (R2)** over their
-comments and assemble a courteous, point-by-point rebuttal letter plus an
-actionable revision checklist. The chair (`../../agents/chair.md`) assembles; the
-rebuttal-strategist (`../../agents/rebuttal-strategist.md`) defends.
+You received real reviewer comments from a venue and must respond. Unlike `/prawf:peer-review`, the attack round (R1) is SKIPPED — the external reviewers have already filed the findings. You run the prawf **defense round (R2)** over their comments and assemble a courteous, point-by-point rebuttal letter plus an actionable revision checklist. The chair (`../../agents/chair.md`) assembles; the rebuttal-strategist (`../../agents/rebuttal-strategist.md`) defends.
 
 > **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/peer-review/<file>`, fallback `Glob`):
 >
@@ -45,31 +35,17 @@ rebuttal-strategist (`../../agents/rebuttal-strategist.md`) defends.
 
 ### Step 1 — Inputs & comment normalization (chair, direct)
 
-First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
-(`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); all outputs go under
-`REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
+First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); all outputs go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
 
-1. Take the paper and the external review comments (a file or pasted text). If
-   either is missing, ask the user — this is the one valid yield point.
+1. Take the paper and the external review comments (a file or pasted text). If either is missing, ask the user — this is the one valid yield point.
 2. Normalize the paper into `paper-normalized.md` (reuse if it already exists).
-3. Parse the external comments into `external-findings.md`: map each reviewer
-   point to a structured finding (axis, severity, `location` coordinate, claim,
-   reviewer-of-origin). This stands in for `findings/round-1-<axis>.md`; do NOT
-   re-derive findings yourself — take the reviewers' points as given.
+3. Parse the external comments into `external-findings.md`: map each reviewer point to a structured finding (axis, severity, `location` coordinate, claim, reviewer-of-origin). This stands in for `findings/round-1-<axis>.md`; do NOT re-derive findings yourself — take the reviewers' points as given.
 
 **→ Immediately proceed to Step 2.**
 
 ### Step 2 — R2 Defense (strategist)
 
-Spawn `rebuttal-strategist` with `external-findings.md` as input, per
-`../peer-review/prompt-templates.md` §3. Substitute the §3 `SOUNDNESS_FINDINGS` slot
-with the `external-findings.md` path, and the `GATE` slot from a prior review's
-`paper-profile.md` when one exists in this REVIEW_DIR; otherwise default
-`major` (this skill has no `--gate` option). It writes `rebuttal.md`: per comment a
-`tactic` (`revision | justification | clarification | sidestep | deferral`), a
-point-by-point defense, and a `solution` only when one is clear (null otherwise).
-A downgrade claim still requires a verifiable artifact; fatal flaws are answered
-honestly, not waved away.
+Spawn `rebuttal-strategist` with `external-findings.md` as input, per `../peer-review/prompt-templates.md` §3. Substitute the §3 `SOUNDNESS_FINDINGS` slot with the `external-findings.md` path, and the `GATE` slot from a prior review's `paper-profile.md` when one exists in this REVIEW_DIR; otherwise default `major` (this skill has no `--gate` option). It writes `rebuttal.md`: per comment a `tactic` (`revision | justification | clarification | sidestep | deferral`), a point-by-point defense, and a `solution` only when one is clear (null otherwise). A downgrade claim still requires a verifiable artifact; fatal flaws are answered honestly, not waved away.
 
 **→ After `rebuttal.md` is written, immediately proceed to Step 3.**
 
@@ -77,13 +53,8 @@ honestly, not waved away.
 
 Read `../peer-review/templates.md`, then write into `REVIEW_DIR`:
 
-1. `rebuttal-letter.md` — a courteous point-by-point response. Each item is tagged
-   **Revision** (a change made), **Justification** (defended with evidence), or
-   **Clarification** (a limitation acknowledged / misunderstanding corrected),
-   citing the `paper-normalized.md` coordinate of each change. Acceptive, calm tone.
-2. `revision-checklist.md` — every comment as an actionable revision row: comment →
-   planned change → location → status (`done | planned | declined`), with a brief
-   justification for any declined item.
+1. `rebuttal-letter.md` — a courteous point-by-point response. Each item is tagged **Revision** (a change made), **Justification** (defended with evidence), or **Clarification** (a limitation acknowledged / misunderstanding corrected), citing the `paper-normalized.md` coordinate of each change. Acceptive, calm tone.
+2. `revision-checklist.md` — every comment as an actionable revision row: comment → planned change → location → status (`done | planned | declined`), with a brief justification for any declined item.
 
 Emit the terminal marker `prawf rebuttal: complete`.
 
@@ -98,8 +69,7 @@ Emit the terminal marker `prawf rebuttal: complete`.
 
 ## Quick Reference
 
-> **Note**: If `/prawf:peer-review` already ran on the same paper in the same
-> `REVIEW_DIR`, pass a separate `--workdir` to avoid overwriting `rebuttal.md`.
+> **Note**: If `/prawf:peer-review` already ran on the same paper in the same `REVIEW_DIR`, pass a separate `--workdir` to avoid overwriting `rebuttal.md`.
 
 ```
 /prawf:rebuttal paper.pdf reviews.txt      # rebuttal letter + revision checklist

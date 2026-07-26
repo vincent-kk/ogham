@@ -14,6 +14,7 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 ## Execution Model
 
 **Main agent executes directly** for simple operations:
+
 - Single page read (`GET /pages/{id}`)
 - Single CQL search
 - Single comment read/add
@@ -21,6 +22,7 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 - Single attachment download
 
 **Spawn `confluence` agent** only for complex multi-step workflows:
+
 - Multi-page operations (bulk create/update, page tree manipulation)
 - Version conflict resolution chains (fetch → increment → retry on 409)
 - Cross-domain chained operations (create page + attach + label + comment)
@@ -44,16 +46,16 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 
 ## Tool Domains
 
-| Domain | Description |
-|---|---|
-| `page` | Page CRUD, hierarchy navigation, and version management |
-| `search` | CQL-based full-text and metadata search across spaces |
-| `space` | Space listing, metadata retrieval, and space lookup |
-| `comment` | Footer comments and inline comments (inline is Cloud-only via V2) |
-| `attachment` | Upload and download file attachments on pages |
-| `label` | Add, list, and remove labels on pages |
-| `analytics` | Page view statistics — Cloud only |
-| `user` | Current user info and user search by account ID or query |
+| Domain       | Description                                                       |
+| ------------ | ----------------------------------------------------------------- |
+| `page`       | Page CRUD, hierarchy navigation, and version management           |
+| `search`     | CQL-based full-text and metadata search across spaces             |
+| `space`      | Space listing, metadata retrieval, and space lookup               |
+| `comment`    | Footer comments and inline comments (inline is Cloud-only via V2) |
+| `attachment` | Upload and download file attachments on pages                     |
+| `label`      | Add, list, and remove labels on pages                             |
+| `analytics`  | Page view statistics — Cloud only                                 |
+| `user`       | Current user info and user search by account ID or query          |
 
 ## Routing Protocol
 

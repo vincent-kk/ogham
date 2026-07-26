@@ -1,7 +1,6 @@
 # Health Check
 
-Non-blocking environment check executed at Step 0 of init workflow.
-Verifies remote tool availability and offers optional auto-setup for missing items.
+Non-blocking environment check executed at Step 0 of init workflow. Verifies remote tool availability and offers optional auto-setup for missing items.
 
 ## Check Procedures
 
@@ -62,8 +61,7 @@ Set up now? Enter numbers (e.g. 1,2) or [skip]:
 
 ### register-atlassian-mcp
 
-Add Atlassian MCP server entry to a `.mcp.json` file.
-See [MCP Config Scopes](./mcp-config-scopes.md) for scope details.
+Add Atlassian MCP server entry to a `.mcp.json` file. See [MCP Config Scopes](./mcp-config-scopes.md) for scope details.
 
 Server entry:
 
@@ -102,8 +100,7 @@ Steps:
 
 ### install-gh
 
-Install the official GitHub CLI (`cli/cli` — NOT the npm `gh` package, which is
-an unrelated unmaintained project):
+Install the official GitHub CLI (`cli/cli` — NOT the npm `gh` package, which is an unrelated unmaintained project):
 
 ```
 macOS:   brew install gh
@@ -143,9 +140,7 @@ Health check results determine which providers can be offered in Step 1:
 | GitHub CLI ✗  | —                 | Not installed; offer install-gh setup                |
 | (always)      | `local`           | No remote dependency; always available               |
 
-After auto-setup actions complete, re-evaluate availability before proceeding
-to provider selection. For example, if the user installs and authenticates gh
-during Step 0, `github` becomes available for Step 1.
+After auto-setup actions complete, re-evaluate availability before proceeding to provider selection. For example, if the user installs and authenticates gh during Step 0, `github` becomes available for Step 1.
 
 ## Status Icons
 

@@ -1,8 +1,6 @@
 # read-issue Workflow — Jira Provider
 
-Loaded when `config.provider === 'jira'`. The shared skeleton
-(`../workflow.md`) delegates Steps 1–4 to this file and owns Step 5
-(structured output).
+Loaded when `config.provider === 'jira'`. The shared skeleton (`../workflow.md`) delegates Steps 1–4 to this file and owns Step 5 (structured output).
 
 ## Step 1 — Issue query
 
@@ -13,32 +11,17 @@ Loaded when `config.provider === 'jira'`. The shared skeleton
    - `created`, `updated` timestamps
    - `description` (full body)
    - `comments` array (if present)
-3. If `depth == "shallow"`:
-   → Skip comment processing.
-   → Build output with metadata + description only.
-   → Jump to Step 5 in `../workflow.md`.
+3. If `depth == "shallow"`: → Skip comment processing. → Build output with metadata + description only. → Jump to Step 5 in `../workflow.md`.
 
 ## Step 2 — Digest comment Fast Path detection
 
 Scan comments for the imbas:digest marker:
+
 ```
 <!-- imbas:digest v1 | generated: ... | comments_covered: 1-N -->
 ```
 
-If digest marker found → Fast Path:
-  a. Parse digest comment body:
-     - Extract structured sections: decisions, constraints, rejected, open_questions
-     - Extract participants and summary
-  b. Read `comments_covered` range (e.g., "1-15")
-  c. Count comments after the covered range (e.g., comment 16 onwards)
-  d. If no new comments after digest:
-     → Use digest content as the complete context
-     → Set `digest_found: true`, `new_comments_after_digest: 0`
-     → Jump to Step 5
-  e. If new comments exist after digest:
-     → Process only new comments through Step 3-4
-     → Merge new analysis with digest content
-     → Set `digest_found: true`, `new_comments_after_digest: <count>`
+If digest marker found → Fast Path: a. Parse digest comment body: - Extract structured sections: decisions, constraints, rejected, open_questions - Extract participants and summary b. Read `comments_covered` range (e.g., "1-15") c. Count comments after the covered range (e.g., comment 16 onwards) d. If no new comments after digest: → Use digest content as the complete context → Set `digest_found: true`, `new_comments_after_digest: 0` → Jump to Step 5 e. If new comments exist after digest: → Process only new comments through Step 3-4 → Merge new analysis with digest content → Set `digest_found: true`, `new_comments_after_digest: <count>`
 
 If no digest marker found → Full Path: proceed to Step 3.
 
@@ -57,9 +40,7 @@ If no digest marker found → Full Path: proceed to Step 3.
 
 ## Step 4 — Context synthesis
 
-1. Decision extraction (keyword scan in Korean/English): `확정`, `결정`, `합의`,
-   `최종`, `agreed`, `decided`, `let's go with`, `confirmed`, `final`.
-   Record per decision: date, by, content, agreed_by, source_comment_index.
+1. Decision extraction (keyword scan in Korean/English): `확정`, `결정`, `합의`, `최종`, `agreed`, `decided`, `let's go with`, `confirmed`, `final`. Record per decision: date, by, content, agreed_by, source_comment_index.
 2. Latest state determination: latest comment overrides description on conflict.
 3. Open question detection: unanswered questions, `TBD`, `TODO`, `미정`, `추후 결정`.
 4. Participant profiling: comment frequency + role inference (PO / Dev / QA / Designer).

@@ -1,8 +1,6 @@
 # structure-review — Reference Documentation
 
-Detailed stage logic, MCP tool examples, and report format for the
-6-stage PR verification pipeline. For the quick-start guide, see
-[SKILL.md](./SKILL.md).
+Detailed stage logic, MCP tool examples, and report format for the 6-stage PR verification pipeline. For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Structure Verification Details
 
@@ -19,8 +17,7 @@ checks:
     matches actual directory role
 ```
 
-Outcome: `PASS` if all boundaries are clean; `FAIL` with list of
-misclassified paths.
+Outcome: `PASS` if all boundaries are clean; `FAIL` with list of misclassified paths.
 
 ## Section 2 — Document Compliance Details
 
@@ -35,8 +32,7 @@ for each DETAIL.md in scope:
   - document-code synchronization status // content reflects current code
 ```
 
-Outcome: `PASS` if all documents comply; `FAIL` listing each
-non-compliant file and violation.
+Outcome: `PASS` if all documents comply; `FAIL` listing each non-compliant file and violation.
 
 ## Section 3 — Test Compliance Details
 
@@ -51,8 +47,7 @@ checks:
   - coverage assessment for changed modules
 ```
 
-Outcome: `PASS` if all spec.ts files satisfy the 3+12 rule; `FAIL` with
-per-file breakdown showing excess cases.
+Outcome: `PASS` if all spec.ts files satisfy the 3+12 rule; `FAIL` with per-file breakdown showing excess cases.
 
 ## Section 4 — Metric Analysis Details
 
@@ -72,8 +67,7 @@ Thresholds:
 - `LCOM4_SPLIT_THRESHOLD = 2` — modules with LCOM4 ≥ 2 need splitting
 - `CC_THRESHOLD = 15` — functions with CC > 15 need decomposition
 
-Outcome: `PASS` if all metrics within thresholds; `FAIL` with per-file
-values and recommended actions.
+Outcome: `PASS` if all metrics within thresholds; `FAIL` with per-file values and recommended actions.
 
 ## Section 5 — Dependency Verification Details
 
@@ -93,8 +87,7 @@ mcp__plugin_filid_tools__fractal_scan({ path: cwd })
 // Cross-reference with fractal structure to validate dependency directions
 ```
 
-Outcome: `PASS` if DAG is acyclic and topological sort succeeds; `FAIL`
-with each cycle path listed.
+Outcome: `PASS` if DAG is acyclic and topological sort succeeds; `FAIL` with each cycle path listed.
 
 ## Section 6 — Summary Report Format
 
@@ -141,12 +134,12 @@ mcp__plugin_filid_tools__ast_analyze(source: source, analysisType: "lcom4", clas
 
 ## MCP Tool Reference
 
-| Tool                                    | Action / Parameters                             | Stage | Purpose                                      |
-| --------------------------------------- | ----------------------------------------------- | ----- | -------------------------------------------- |
+| Tool                                        | Action / Parameters                             | Stage | Purpose                                      |
+| ------------------------------------------- | ----------------------------------------------- | ----- | -------------------------------------------- |
 | `mcp__plugin_filid_tools__fractal_scan`     | `path: cwd`                                     | 1, 5  | Retrieve module tree; verify classifications |
 | `mcp__plugin_filid_tools__fractal_navigate` | `action: "classify", path, entries`             | 1     | Classify a specific directory                |
 | `mcp__plugin_filid_tools__doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |
-| `mcp__plugin_filid_tools__test_metrics`     | `action: "check-gate", files`                    | 3     | Validate 3+12 rule per spec.ts               |
+| `mcp__plugin_filid_tools__test_metrics`     | `action: "check-gate", files`                   | 3     | Validate 3+12 rule per spec.ts               |
 | `mcp__plugin_filid_tools__test_metrics`     | `action: "decide", decisionInput`               | 4     | Generate split/compress recommendation       |
 | `mcp__plugin_filid_tools__ast_analyze`      | `analysisType: "lcom4", source, className`      | 4     | Compute LCOM4 cohesion metric                |
 | `mcp__plugin_filid_tools__ast_analyze`      | `analysisType: "cyclomatic-complexity", source` | 4     | Compute cyclomatic complexity                |

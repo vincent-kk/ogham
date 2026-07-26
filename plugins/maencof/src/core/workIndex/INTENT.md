@@ -2,8 +2,7 @@
 
 ## Purpose
 
-작업 이력 파생 계층. per-session 레코드 + 활동 로그에서 daily digest 를 멱등 생성하고,
-기간 집계와 토픽/레이어 역색인을 제공한다.
+작업 이력 파생 계층. per-session 레코드 + 활동 로그에서 daily digest 를 멱등 생성하고, 기간 집계와 토픽/레이어 역색인을 제공한다.
 
 ## Structure
 

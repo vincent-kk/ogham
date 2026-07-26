@@ -12,8 +12,7 @@ plugin: maencof
 
 # organize — Knowledge Transition Orchestration
 
-Runs the memory-organizer agent to recommend and execute document transitions between Layers.
-The judge module evaluates candidates, then the execute module performs the actual move after user confirmation.
+Runs the memory-organizer agent to recommend and execute document transitions between Layers. The judge module evaluates candidates, then the execute module performs the actual move after user confirmation.
 
 ## When to Use This Skill
 
@@ -24,15 +23,11 @@ The judge module evaluates candidates, then the execute module performs the actu
 
 ## When to Use vs Adjacent Skills
 
-- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move`
-  after explicit user confirmation. Use when you are ready to apply transitions.
-- **`reflect`** — read-only judge. Produces an analysis report with
-  zero filesystem changes. Use to preview candidates before committing.
-- **`suggest`** — link discovery via SA + tag Jaccard. Complements
-  organize by proposing new edges (not layer promotions).
+- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move` after explicit user confirmation. Use when you are ready to apply transitions.
+- **`reflect`** — read-only judge. Produces an analysis report with zero filesystem changes. Use to preview candidates before committing.
+- **`suggest`** — link discovery via SA + tag Jaccard. Complements organize by proposing new edges (not layer promotions).
 
-Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose
-new links → `suggest`.
+Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose new links → `suggest`.
 
 ## Agent Collaboration Sequence
 
@@ -44,19 +39,15 @@ new links → `suggest`.
               -> [memory-organizer.execute] -> move execution
 ```
 
-> **Note.** Stale-node bookkeeping is handled inside the MCP server middleware
-> layer (around `mcp__plugin_maencof_tools__move` / `mcp__plugin_maencof_tools__update` calls and at boot-time via vault
-> scanning). It never interacts with the organize workflow directly.
+> **Note.** Stale-node bookkeeping is handled inside the MCP server middleware layer (around `mcp__plugin_maencof_tools__move` / `mcp__plugin_maencof_tools__update` calls and at boot-time via vault scanning). It never interacts with the organize workflow directly.
 
-**Orchestrator**: the organize skill coordinates the entire flow.
-Calls the memory-organizer agent sequentially through judge -> (confirmation) -> execute stages.
+**Orchestrator**: the organize skill coordinates the entire flow. Calls the memory-organizer agent sequentially through judge -> (confirmation) -> execute stages.
 
 ## Workflow
 
 ### Step 1 — Pre-check Index Status
 
-Check vault status and stale nodes with the `mcp__plugin_maencof_tools__kg_status` MCP tool before delegating to the agent.
-If no index is found, abort with: "No index found. Please run `/maencof:build` first."
+Check vault status and stale nodes with the `mcp__plugin_maencof_tools__kg_status` MCP tool before delegating to the agent. If no index is found, abort with: "No index found. Please run `/maencof:build` first."
 
 ### Step 2 — judge stage (memory-organizer delegation)
 
@@ -92,8 +83,7 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 
 ## Available MCP Tools
 
-> The organize skill is an orchestrator. MCP tools are invoked by the memory-organizer agent,
-> not directly by this skill. The skill coordinates the workflow and user confirmation flow.
+> The organize skill is an orchestrator. MCP tools are invoked by the memory-organizer agent, not directly by this skill. The skill coordinates the workflow and user confirmation flow.
 
 | Tool                                     | Used by                                 | Purpose                            |
 | ---------------------------------------- | --------------------------------------- | ---------------------------------- |

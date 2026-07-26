@@ -11,10 +11,7 @@ Use `content_format: "markdown"` — MCP auto-converts to the correct format.
 
 ## Wiki Markup Special Characters
 
-The markdown→wiki converter escapes literal wiki specials (`[ ] { } | * _ - + ^ ~ !`)
-in plain text, inline code, and bold/italic/strike content, so `[0]`, `{timeout}`,
-`a|b` render literally instead of activating wiki syntax. Markdown-style escapes
-(`\[`) pass through unchanged.
+The markdown→wiki converter escapes literal wiki specials (`[ ] { } | * _ - + ^ ~ !`) in plain text, inline code, and bold/italic/strike content, so `[0]`, `{timeout}`, `a|b` render literally instead of activating wiki syntax. Markdown-style escapes (`\[`) pass through unchanged.
 
 Not protected — keep such content in code blocks or rephrase:
 

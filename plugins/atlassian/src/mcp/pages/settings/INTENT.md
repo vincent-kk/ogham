@@ -1,7 +1,6 @@
 ## Purpose
 
-Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음.
-로컬 HTTP 서버가 서빙하며, file:// 프로토콜로도 mock-api를 통해 개발 가능.
+Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음. 로컬 HTTP 서버가 서빙하며, file:// 프로토콜로도 mock-api를 통해 개발 가능.
 
 ## Structure
 

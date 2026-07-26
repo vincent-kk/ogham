@@ -12,11 +12,7 @@ plugin: maencof
 
 # checkup — Knowledge Vault Diagnosis
 
-Checks knowledge vault health across 8 diagnostic items and suggests auto-fixes.
-Delegates detailed analysis to the checkup agent.
-Also supports a lightweight `--quick` mode that short-circuits to a single
-`mcp__plugin_maencof_tools__kg_status` call and renders a compact health report (absorbs the former
-`maencof-diagnose` skill).
+Checks knowledge vault health across 8 diagnostic items and suggests auto-fixes. Delegates detailed analysis to the checkup agent. Also supports a lightweight `--quick` mode that short-circuits to a single `mcp__plugin_maencof_tools__kg_status` call and renders a compact health report (absorbs the former `maencof-diagnose` skill).
 
 ## When to Use This Skill
 
@@ -39,8 +35,7 @@ Also supports a lightweight `--quick` mode that short-circuits to a single
                                  → user confirmation → run auto-fix
 ```
 
-The checkup skill delegates to the checkup agent for 8 diagnostics:
-orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontmatter, auto-insight-health, missing-l1-gist.
+The checkup skill delegates to the checkup agent for 8 diagnostics: orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontmatter, auto-insight-health, missing-l1-gist.
 
 > See **reference.md** for diagnostic item details, severity levels, and auto-fix rules.
 

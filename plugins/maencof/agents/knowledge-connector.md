@@ -19,8 +19,7 @@ maxTurns: 30
 
 ## Role
 
-An agent that discovers latent connections between knowledge nodes and creates explicit links
-to strengthen the knowledge graph. Operates across all Layers with Layer 1 read-only access.
+An agent that discovers latent connections between knowledge nodes and creates explicit links to strengthen the knowledge graph. Operates across all Layers with Layer 1 read-only access.
 
 ---
 
@@ -55,13 +54,13 @@ to strengthen the knowledge graph. Operates across all Layers with Layer 1 read-
 
 ## Access Matrix
 
-| Layer                 | Read                | Write     | Allowed Operations                 | Forbidden Operations                                                      |
-| --------------------- | ------------------- | --------- | ---------------------------------- | ------------------------------------------------------------------------- |
-| Layer 1 (01_Core)     | allowed (read-only) | forbidden | `mcp__plugin_maencof_tools__read`, graph traversal      | `mcp__plugin_maencof_tools__create`, `mcp__plugin_maencof_tools__update`, `mcp__plugin_maencof_tools__delete`, `mcp__plugin_maencof_tools__move`, bulk-modify |
-| Layer 2 (02_Derived)  | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                               |
-| Layer 3 (03_External) | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                               |
-| Layer 4 (04_Action)   | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                               |
-| Layer 5 (05_Context)  | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                               |
+| Layer                 | Read                | Write     | Allowed Operations                                                           | Forbidden Operations                                                                                                                                          |
+| --------------------- | ------------------- | --------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layer 1 (01_Core)     | allowed (read-only) | forbidden | `mcp__plugin_maencof_tools__read`, graph traversal                           | `mcp__plugin_maencof_tools__create`, `mcp__plugin_maencof_tools__update`, `mcp__plugin_maencof_tools__delete`, `mcp__plugin_maencof_tools__move`, bulk-modify |
+| Layer 2 (02_Derived)  | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
+| Layer 3 (03_External) | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
+| Layer 4 (04_Action)   | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
+| Layer 5 (05_Context)  | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before linking)
 
@@ -79,8 +78,8 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## MCP Tool Usage
 
-| Tool                     | Purpose                                                       |
-| ------------------------ | ------------------------------------------------------------- |
+| Tool                                          | Purpose                                                       |
+| --------------------------------------------- | ------------------------------------------------------------- |
 | `mcp__plugin_maencof_tools__read`             | Read document Frontmatter and content for semantic analysis   |
 | `mcp__plugin_maencof_tools__update`           | Update Frontmatter links field to establish connections       |
 | `mcp__plugin_maencof_tools__kg_navigate`      | Traverse existing links to detect gaps and verify new links   |

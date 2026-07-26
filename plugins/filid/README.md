@@ -121,10 +121,7 @@ Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
 
 ### Spike & Harvest (exploratory work)
 
-When the acceptance criteria are not known yet, explore on a `spike/*`
-branch: doc-hygiene write blocks (INTENT.md 50-line cap, DETAIL.md
-append-only) are suspended there, and a per-prompt banner tracks the
-spike's age and unharvested decisions.
+When the acceptance criteria are not known yet, explore on a `spike/*` branch: doc-hygiene write blocks (INTENT.md 50-line cap, DETAIL.md append-only) are suspended there, and a per-prompt banner tracks the spike's age and unharvested decisions.
 
 ```
 # Probe freely
@@ -134,9 +131,7 @@ git checkout -b spike/my-idea
 /filid:harvest
 ```
 
-`/filid:harvest` records kept decisions as PASS/FAIL-judgeable claims in
-`.filid/criteria.md`; later reviews judge those claims, and the pipeline
-refuses merge-track entry for any spike that has not been harvested.
+`/filid:harvest` records kept decisions as PASS/FAIL-judgeable claims in `.filid/criteria.md`; later reviews judge those claims, and the pipeline refuses merge-track entry for any spike that has not been harvested.
 
 ### Learn About FCA-AI
 

@@ -65,8 +65,7 @@ Present the plan summary and ask for confirmation. Show:
 
 Then use the `AskUserQuestion` tool to ask:
 
-> "Proceed with this migration plan?"
-> Options: "Yes, execute" / "No, cancel"
+> "Proceed with this migration plan?" Options: "Yes, execute" / "No, cancel"
 
 Wait for the user's answer before taking any action.
 

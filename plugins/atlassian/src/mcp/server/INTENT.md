@@ -1,14 +1,13 @@
 ## Purpose
 
-MCP 서버 인스턴스 생성 및 4개 도구(fetch, convert, auth_check, setup) 등록·라우팅.
-stdio 트랜스포트로 Claude Code와 통신한다.
+MCP 서버 인스턴스 생성 및 4개 도구(fetch, convert, auth_check, setup) 등록·라우팅. stdio 트랜스포트로 Claude Code와 통신한다.
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일        | 역할                                                   |
+| ----------- | ------------------------------------------------------ |
 | `server.ts` | `createServer` — 도구 등록, `startServer` — stdio 연결 |
-| `index.ts` | barrel export |
+| `index.ts`  | barrel export                                          |
 
 ## Boundaries
 

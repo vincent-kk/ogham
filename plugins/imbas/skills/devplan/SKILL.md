@@ -8,9 +8,7 @@ complexity: complex
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls, subagent returns, or manifest validation.
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, subagent returns, or manifest validation.
 >
 > **Valid reasons to yield**:
 >
@@ -24,15 +22,11 @@ plugin: imbas
 > - AST fallback mode detection — log once and continue; do not pause
 > - Devplan-blocked report generation — emit AND end execution in the same turn
 >
-> **LIMITATION**: `engineer` (opus, maxTurns: 80) may exhaust its
-> subagent-internal turn budget on large codebases. This preamble cannot
-> mitigate internal exhaustion — see follow-up issue for checkpoint contract.
+> **LIMITATION**: `engineer` (opus, maxTurns: 80) may exhaust its subagent-internal turn budget on large codebases. This preamble cannot mitigate internal exhaustion — see follow-up issue for checkpoint contract.
 
 # devplan — Phase 3 Development Plan Generation
 
-Generates EARS-format Subtasks per Story and extracts cross-Story Tasks
-by exploring the local codebase. Produces a devplan-manifest.json for
-batch Jira issue creation.
+Generates EARS-format Subtasks per Story and extracts cross-Story Tasks by exploring the local codebase. Produces a devplan-manifest.json for batch Jira issue creation.
 
 ## When to Use This Skill
 

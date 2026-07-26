@@ -1,13 +1,10 @@
 # read-issue Workflow — GitHub Provider
 
-Loaded when `config.provider === 'github'`. The shared skeleton
-(`../workflow.md`) delegates Steps 1–4 to this file and owns Step 5
-(structured output).
+Loaded when `config.provider === 'github'`. The shared skeleton (`../workflow.md`) delegates Steps 1–4 to this file and owns Step 5 (structured output).
 
 ## Step 1 — Issue query
 
-1. Parse `issue_ref` into `owner/repo` and issue number `N`.
-   Format: `owner/repo#N` (§1.3). Accept bare `#N` using `config.github.repo`.
+1. Parse `issue_ref` into `owner/repo` and issue number `N`. Format: `owner/repo#N` (§1.3). Accept bare `#N` using `config.github.repo`.
 2. ```bash
    gh issue view <N> --repo <owner/repo> \
      --json number,title,state,labels,body,comments,createdAt,updatedAt,author,assignees
@@ -19,16 +16,11 @@ Loaded when `config.provider === 'github'`. The shared skeleton
    - `body` → parse `## Sub-tasks` task-list and `## Links` section
    - `comments` array
    - `createdAt`, `updatedAt`, `author.login`, `assignees[*].login`
-4. If `depth == "shallow"`:
-   → Skip comment processing.
-   → Build output with metadata + description + links only.
-   → Jump to Step 5 in `../workflow.md`.
+4. If `depth == "shallow"`: → Skip comment processing. → Build output with metadata + description + links only. → Jump to Step 5 in `../workflow.md`.
 
 ## Step 2 — Digest comment fast path detection
 
-**Last-wins policy**: when multiple `<!-- imbas:digest -->`-marked comments
-exist on the same issue, treat the comment with the most recent `createdAt`
-as canonical. All earlier marked comments are superseded.
+**Last-wins policy**: when multiple `<!-- imbas:digest -->`-marked comments exist on the same issue, treat the comment with the most recent `createdAt` as canonical. All earlier marked comments are superseded.
 
 Scan `comments` array for the `<!-- imbas:digest -->` HTML marker:
 
@@ -37,6 +29,7 @@ Scan `comments` array for the `<!-- imbas:digest -->` HTML marker:
 ```
 
 If any digest-marked comment found:
+
 1. Sort all marked comments by `createdAt` descending.
 2. Take the **first** (most recent) as the canonical digest.
 3. Parse its body:
@@ -44,14 +37,8 @@ If any digest-marked comment found:
    - Extract participants and summary
    - Extract `comments_covered` range (e.g., `"1-15"`)
 4. Count comments in the `comments` array after the covered range index.
-5. If no new comments after digest:
-   → Use digest content as the complete context.
-   → Set `digest_found: true`, `new_comments_after_digest: 0`.
-   → Jump to Step 5.
-6. If new comments exist after digest:
-   → Process only new comments through Steps 3–4.
-   → Merge new analysis with digest content.
-   → Set `digest_found: true`, `new_comments_after_digest: <count>`.
+5. If no new comments after digest: → Use digest content as the complete context. → Set `digest_found: true`, `new_comments_after_digest: 0`. → Jump to Step 5.
+6. If new comments exist after digest: → Process only new comments through Steps 3–4. → Merge new analysis with digest content. → Set `digest_found: true`, `new_comments_after_digest: <count>`.
 
 If no digest-marked comment found → Full Path: proceed to Step 3.
 
@@ -70,9 +57,7 @@ If no digest-marked comment found → Full Path: proceed to Step 3.
 
 ## Step 4 — Context synthesis
 
-1. Decision extraction (keyword scan in Korean/English): `확정`, `결정`, `합의`,
-   `최종`, `agreed`, `decided`, `let's go with`, `confirmed`, `final`.
-   Record per decision: date, by, content, agreed_by, source_comment_index.
+1. Decision extraction (keyword scan in Korean/English): `확정`, `결정`, `합의`, `최종`, `agreed`, `decided`, `let's go with`, `confirmed`, `final`. Record per decision: date, by, content, agreed_by, source_comment_index.
 2. Latest state determination: latest comment overrides description on conflict.
 3. Open question detection: unanswered questions, `TBD`, `TODO`, `미정`, `추후 결정`.
 4. Participant profiling: comment frequency + role inference (PO / Dev / QA / Designer).
@@ -85,10 +70,8 @@ During Step 1, parse the issue body for structured data:
 
 ### `## Sub-tasks` task-list
 
-Extract lines matching `- [ ] #N` or `- [x] #N`. Build child ref list with
-checked/unchecked state. Used to reconstruct the hierarchy.
+Extract lines matching `- [ ] #N` or `- [x] #N`. Build child ref list with checked/unchecked state. Used to reconstruct the hierarchy.
 
 ### `## Links` section
 
-Parse per the grammar in `manifest/references/github/link-handling.md`.
-Returns a map of `linkType → [refList]`.
+Parse per the grammar in `manifest/references/github/link-handling.md`. Returns a map of `linkType → [refList]`.

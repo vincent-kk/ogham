@@ -2,19 +2,18 @@
 
 ## Purpose
 
-Confluence Storage Format XHTML을 Markdown 텍스트로 변환하는 순수 함수 모듈.
-자체 HTML 파서를 사용하며, 파싱 실패 시 태그 제거 폴백으로 안전하게 복원한다.
+Confluence Storage Format XHTML을 Markdown 텍스트로 변환하는 순수 함수 모듈. 자체 HTML 파서를 사용하며, 파싱 실패 시 태그 제거 폴백으로 안전하게 복원한다.
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
-| `storageToMarkdown.ts` | 진입점 — 파싱 → 렌더링 → 공백 정규화, 오류 시 폴백 |
-| `parseHtml.ts` | 재귀 하강 방식 HTML/XHTML 파서 (CDATA, 주석, void 요소 처리) |
-| `htmlNode.ts` | `HtmlElement` / `HtmlNode` 타입 정의 |
-| `renderStorageNode.ts` | HtmlNode를 Markdown 문자열로 재귀 변환 |
-| `renderStorageTable.ts` | table/thead/tbody/tr/td/th를 GFM 파이프 테이블로 렌더링 |
-| `index.ts` | 배럴 — `storageToMarkdown` 단일 재수출 |
+| 파일                    | 역할                                                         |
+| ----------------------- | ------------------------------------------------------------ |
+| `storageToMarkdown.ts`  | 진입점 — 파싱 → 렌더링 → 공백 정규화, 오류 시 폴백           |
+| `parseHtml.ts`          | 재귀 하강 방식 HTML/XHTML 파서 (CDATA, 주석, void 요소 처리) |
+| `htmlNode.ts`           | `HtmlElement` / `HtmlNode` 타입 정의                         |
+| `renderStorageNode.ts`  | HtmlNode를 Markdown 문자열로 재귀 변환                       |
+| `renderStorageTable.ts` | table/thead/tbody/tr/td/th를 GFM 파이프 테이블로 렌더링      |
+| `index.ts`              | 배럴 — `storageToMarkdown` 단일 재수출                       |
 
 ## Boundaries
 

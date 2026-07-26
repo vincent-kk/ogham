@@ -4,13 +4,13 @@ Pure local format conversion: ADF/Storage Format <-> Markdown. Zero dependency o
 
 ## Structure
 
-| File | Role |
-|---|---|
-| `adfToMarkdown/` | ADF JSON → Markdown (port from Python adf.py) |
-| `markdownToAdf/` | Markdown → ADF JSON (port from Python adf.py) |
-| `storageToMarkdown/` | Confluence Storage XHTML → Markdown |
-| `markdownToStorage/` | Markdown → Confluence Storage XHTML |
-| `markdownToWiki/` | Markdown → Jira Wiki Markup (Server/DC v2) |
+| File                 | Role                                          |
+| -------------------- | --------------------------------------------- |
+| `adfToMarkdown/`     | ADF JSON → Markdown (port from Python adf.py) |
+| `markdownToAdf/`     | Markdown → ADF JSON (port from Python adf.py) |
+| `storageToMarkdown/` | Confluence Storage XHTML → Markdown           |
+| `markdownToStorage/` | Markdown → Confluence Storage XHTML           |
+| `markdownToWiki/`    | Markdown → Jira Wiki Markup (Server/DC v2)    |
 
 ## Conventions
 

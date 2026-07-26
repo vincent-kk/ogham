@@ -1,7 +1,6 @@
 # search — intent classification
 
-Classify the request deterministically before entering the state machine.
-`IntentType` ∈ `FULL_SEARCH · QUERY_ONLY · DOWNLOAD · NEEDS_CLARIFICATION`.
+Classify the request deterministically before entering the state machine. `IntentType` ∈ `FULL_SEARCH · QUERY_ONLY · DOWNLOAD · NEEDS_CLARIFICATION`.
 
 | intent                | Signals                                                                | Route                             |
 | --------------------- | ---------------------------------------------------------------------- | --------------------------------- |
@@ -15,12 +14,9 @@ Classify the request deterministically before entering the state machine.
 - Bare ID list (PMID/PMCID) with a fetch verb → `DOWNLOAD`.
 - "query / 검색식 / 쿼리만" without "find/search results" → `QUERY_ONLY`.
 - A research topic in natural language → `FULL_SEARCH` (the default for substantive asks).
-- Ambiguous breadth (e.g. one vague word, no field/scope) → `NEEDS_CLARIFICATION`;
-  ask for topic facets, date range, and db before generating queries.
+- Ambiguous breadth (e.g. one vague word, no field/scope) → `NEEDS_CLARIFICATION`; ask for topic facets, date range, and db before generating queries.
 
-Flags override only execution mode, not intent: `--auto` keeps `FULL_SEARCH` but
-runs unattended; `--db` / `--date` bind context. See
-[modes.md](modes.md) and [state-machine.md](state-machine.md).
+Flags override only execution mode, not intent: `--auto` keeps `FULL_SEARCH` but runs unattended; `--db` / `--date` bind context. See [modes.md](modes.md) and [state-machine.md](state-machine.md).
 
 ## Boundaries
 

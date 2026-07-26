@@ -1,10 +1,6 @@
 # filid Calibration — Seeded-Violation Manifest
 
-> Answer key for `seeded-change.md` and `low-only-change.md`. **Never copy
-> this file (or the sibling variants) into the scratch repo** — reviewers
-> must not be able to glob it (see [calibration.md §2](./calibration.md)).
-> Scoring rules (FP/FN, ± one severity step, exact VETO classes, inflation)
-> are in [calibration.md §3](./calibration.md).
+> Answer key for `seeded-change.md` and `low-only-change.md`. **Never copy this file (or the sibling variants) into the scratch repo** — reviewers must not be able to glob it (see [calibration.md §2](./calibration.md)). Scoring rules (FP/FN, ± one severity step, exact VETO classes, inflation) are in [calibration.md §3](./calibration.md).
 
 ## Seeded Defects (`seeded-change.md`)
 
@@ -15,8 +11,7 @@
 
 ## Golden-LOW Set (`low-only-change.md` and `seeded-change.md`)
 
-Items that MUST stay LOW (advisory) or stay unreported — surfacing any of
-them at MEDIUM or above is a severity-inflation regression:
+Items that MUST stay LOW (advisory) or stay unreported — surfacing any of them at MEDIUM or above is a severity-inflation regression:
 
 | id   | location hint                           | expected lens                  | expected outcome | description                                                                    |
 | ---- | --------------------------------------- | ------------------------------ | ---------------- | ------------------------------------------------------------------------------ |
@@ -25,13 +20,6 @@ them at MEDIUM or above is a severity-inflation regression:
 
 ## Notes
 
-- Expected lens is a routing hint; a defect surfaced under an adjacent lens
-  still counts as detected. Severity (and the VETO class for SV-1) is what
-  is scored.
-- SV-1 exercises the acceptance invariant that VETO classes are
-  gate-independent: no severity-gate configuration may let the seeded run
-  end in anything other than `REQUEST_CHANGES`.
-- GL items exercise the anti-inflation hard rules (style/wording →
-  mechanically LOW) and the advisory channel: on the low-only run they may
-  appear ONLY in `review-report.md` → `## Advisory Notes` (never in
-  `fix-requests.md`), and the verdict MUST remain `APPROVED`.
+- Expected lens is a routing hint; a defect surfaced under an adjacent lens still counts as detected. Severity (and the VETO class for SV-1) is what is scored.
+- SV-1 exercises the acceptance invariant that VETO classes are gate-independent: no severity-gate configuration may let the seeded run end in anything other than `REQUEST_CHANGES`.
+- GL items exercise the anti-inflation hard rules (style/wording → mechanically LOW) and the advisory channel: on the low-only run they may appear ONLY in `review-report.md` → `## Advisory Notes` (never in `fix-requests.md`), and the verdict MUST remain `APPROVED`.

@@ -9,16 +9,16 @@ Visual bug detection with low threshold and animation tracking.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 20 | High count to catch transient visual issues |
-| `-t` | 0.15 | Very low threshold to capture even minor changes |
-| `--fps` | 5 | Default extraction rate |
-| `--max-frames` | 300 | Default cap |
-| `-s` | 720 | Default analysis resolution |
-| `-q` | 80 | Default quality |
-| `-it` | 0.7 | Lower IoU threshold to catch more animation regions |
-| `-at` | 3 | Lower animation threshold for quicker detection |
+| Flag           | Value | Reasoning                                           |
+| -------------- | ----- | --------------------------------------------------- |
+| `-n`           | 20    | High count to catch transient visual issues         |
+| `-t`           | 0.15  | Very low threshold to capture even minor changes    |
+| `--fps`        | 5     | Default extraction rate                             |
+| `--max-frames` | 300   | Default cap                                         |
+| `-s`           | 720   | Default analysis resolution                         |
+| `-q`           | 80    | Default quality                                     |
+| `-it`          | 0.7   | Lower IoU threshold to catch more animation regions |
+| `-at`          | 3     | Lower animation threshold for quicker detection     |
 
 ## Command
 

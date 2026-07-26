@@ -6,15 +6,15 @@ FCA-AI 핵심 알고리즘 구현. 트리 구축, 규칙 평가, 드리프트 �
 
 ## Structure
 
-| sub-fractal | 포함 모듈 |
-|---|---|
-| `tree/` | `fractalTree`, `organClassifier`, `boundaryDetector` |
-| `rules/` | `ruleEngine` (8 규칙), `fractalValidator`, `documentValidator`, `driftDetector` |
-| `analysis/` | `projectAnalyzer`, `dependencyGraph`, `lcaCalculator` |
-| `module/` | `indexAnalyzer`, `moduleMainAnalyzer` |
-| `infra/` | `cacheManager`, `projectHash`, `changeQueue`, `configLoader` |
-| `coverageVerify/` | `usageTracker`, `testCoverageChecker`, `importResolver` |
-| `prSummary/` | PR 요약 parsers/aggregators/renderers |
+| sub-fractal       | 포함 모듈                                                                       |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `tree/`           | `fractalTree`, `organClassifier`, `boundaryDetector`                            |
+| `rules/`          | `ruleEngine` (8 규칙), `fractalValidator`, `documentValidator`, `driftDetector` |
+| `analysis/`       | `projectAnalyzer`, `dependencyGraph`, `lcaCalculator`                           |
+| `module/`         | `indexAnalyzer`, `moduleMainAnalyzer`                                           |
+| `infra/`          | `cacheManager`, `projectHash`, `changeQueue`, `configLoader`                    |
+| `coverageVerify/` | `usageTracker`, `testCoverageChecker`, `importResolver`                         |
+| `prSummary/`      | PR 요약 parsers/aggregators/renderers                                           |
 
 ## Conventions
 

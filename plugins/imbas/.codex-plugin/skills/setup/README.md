@@ -4,22 +4,19 @@
 
 ## 개요
 
-imbas를 사용하기 위한 최초 설정을 담당한다.
-원격 도구(Atlassian MCP, GitHub CLI) 가용성을 점검하고, provider(`jira` / `github` / `local`)를 선택한 뒤,
-설정 파일을 생성하며, provider별 메타데이터를 캐싱한다.
-원격 도구가 없어도 `local` provider로 로컬 전용 워크플로우를 사용할 수 있다.
+imbas를 사용하기 위한 최초 설정을 담당한다. 원격 도구(Atlassian MCP, GitHub CLI) 가용성을 점검하고, provider(`jira` / `github` / `local`)를 선택한 뒤, 설정 파일을 생성하며, provider별 메타데이터를 캐싱한다. 원격 도구가 없어도 `local` provider로 로컬 전용 워크플로우를 사용할 수 있다.
 
 ## 서브커맨드
 
-| 커맨드 | 설명 |
-|--------|------|
-| `init` (기본) | 대화형 초기화 — 프로젝트 선택, config 생성, 캐시 구축 |
-| `show` | 현재 설정 및 캐시 상태 표시 |
-| `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
-| `set-provider <PROVIDER>` | provider 변경 (`jira` / `github` / `local`) + 헬스 체크 + 캐시 재구축 |
-| `set-language <field> <lang>` | 언어 설정 변경 (documents, skills, issue_content, reports) |
-| `refresh-cache [KEY]` | 메타데이터 강제 갱신 (provider별 분기) |
-| `clear-temp` | `.imbas/.temp/` 임시 파일 삭제 |
+| 커맨드                        | 설명                                                                  |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `init` (기본)                 | 대화형 초기화 — 프로젝트 선택, config 생성, 캐시 구축                 |
+| `show`                        | 현재 설정 및 캐시 상태 표시                                           |
+| `set-project <KEY>`           | 기본 프로젝트 변경 + 캐시 갱신                                        |
+| `set-provider <PROVIDER>`     | provider 변경 (`jira` / `github` / `local`) + 헬스 체크 + 캐시 재구축 |
+| `set-language <field> <lang>` | 언어 설정 변경 (documents, skills, issue_content, reports)            |
+| `refresh-cache [KEY]`         | 메타데이터 강제 갱신 (provider별 분기)                                |
+| `clear-temp`                  | `.imbas/.temp/` 임시 파일 삭제                                        |
 
 ## init 워크플로우
 
@@ -53,17 +50,17 @@ imbas를 사용하기 위한 최초 설정을 담당한다.
 
 ## 사용 도구
 
-| 도구 | 출처 | 용도 |
-|------|------|------|
-| `mcp__plugin_imbas_tools__config_get` | imbas MCP | 설정 읽기 |
-| `mcp__plugin_imbas_tools__config_set` | imbas MCP | 설정 생성/수정 |
-| `mcp__plugin_imbas_tools__cache_set` | imbas MCP | 캐시 저장 |
-| `[OP: get_projects]` | Jira ([OP:]) | 프로젝트 목록 조회 |
-| `[OP: get_issue_types]` | Jira ([OP:]) | 이슈 타입 조회 |
-| `[OP: get_issue_type_fields]` | Jira ([OP:]) | 타입별 필수 필드 조회 |
-| `[OP: get_link_types]` | Jira ([OP:]) | 링크 타입 조회 |
-| `[OP: auth_check]` | Atlassian ([OP:]) | 연결 상태 확인 (헬스 체크) |
-| `which gh` / `gh auth status` | Bash | GitHub CLI 설치/인증 확인 (헬스 체크) |
+| 도구                                  | 출처              | 용도                                  |
+| ------------------------------------- | ----------------- | ------------------------------------- |
+| `mcp__plugin_imbas_tools__config_get` | imbas MCP         | 설정 읽기                             |
+| `mcp__plugin_imbas_tools__config_set` | imbas MCP         | 설정 생성/수정                        |
+| `mcp__plugin_imbas_tools__cache_set`  | imbas MCP         | 캐시 저장                             |
+| `[OP: get_projects]`                  | Jira ([OP:])      | 프로젝트 목록 조회                    |
+| `[OP: get_issue_types]`               | Jira ([OP:])      | 이슈 타입 조회                        |
+| `[OP: get_issue_type_fields]`         | Jira ([OP:])      | 타입별 필수 필드 조회                 |
+| `[OP: get_link_types]`                | Jira ([OP:])      | 링크 타입 조회                        |
+| `[OP: auth_check]`                    | Atlassian ([OP:]) | 연결 상태 확인 (헬스 체크)            |
+| `which gh` / `gh auth status`         | Bash              | GitHub CLI 설치/인증 확인 (헬스 체크) |
 
 ## 참고 파일
 

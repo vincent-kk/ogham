@@ -1,8 +1,6 @@
 # analyze — Intent Classification
 
-Deterministic-first classification at `CLASSIFY`. Match the strongest signal;
-when ambiguous between a full run and a single step, prefer asking
-(`needs-clarification`) in `interactive` mode and the fuller path in `--auto`.
+Deterministic-first classification at `CLASSIFY`. Match the strongest signal; when ambiguous between a full run and a single step, prefer asking (`needs-clarification`) in `interactive` mode and the fuller path in `--auto`.
 
 | intent                | signals                                                                                   | route                           |
 | --------------------- | ----------------------------------------------------------------------------------------- | ------------------------------- |
@@ -24,7 +22,6 @@ when ambiguous between a full run and a single step, prefer asking
 
 ## Notes
 
-- A request that supplies data and asks "is the difference significant?" is
-  `full-analysis`, not `partial-step`.
+- A request that supplies data and asks "is the difference significant?" is `full-analysis`, not `partial-step`.
 - "What test should I use?" with no data to run on is `methodology-query`.
 - Treat an explicit `--data PATH` plus a question as `full-analysis`.

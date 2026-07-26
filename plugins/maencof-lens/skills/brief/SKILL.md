@@ -10,8 +10,7 @@ plugin: maencof-lens
 
 # brief — Vault Context Assembly
 
-Assemble a token-budgeted context block from vault documents matching a query.
-For single-doc quick reference, use `/maencof-lens:lookup` instead.
+Assemble a token-budgeted context block from vault documents matching a query. For single-doc quick reference, use `/maencof-lens:lookup` instead.
 
 ## When to Use
 
@@ -45,8 +44,7 @@ Extract query and options from user input:
 mcp__plugin_maencof-lens_tools__context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool, scope?: breadth)
 ```
 
-`mcp__plugin_maencof-lens_tools__context` internally runs SA search + context assembly via `handleKgContext`.
-Do NOT call `mcp__plugin_maencof-lens_tools__search` separately — it is redundant.
+`mcp__plugin_maencof-lens_tools__context` internally runs SA search + context assembly via `handleKgContext`. Do NOT call `mcp__plugin_maencof-lens_tools__search` separately — it is redundant.
 
 No results → suggest different query or broader keywords.
 

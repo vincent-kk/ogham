@@ -1,7 +1,6 @@
 # context-query — Reference Documentation
 
-Detailed workflow, 3-Prompt Limit protocol, and compression strategy for
-the context query skill. For the quick-start guide, see [SKILL.md](./SKILL.md).
+Detailed workflow, 3-Prompt Limit protocol, and compression strategy for the context query skill. For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Question Parsing
 
@@ -11,8 +10,7 @@ Identify from the question:
 - **Relevant file paths** — any paths mentioned explicitly
 - **Query type** — boundary rule lookup | ownership question | structural question
 
-If the question references a file path directly, use that as the navigation
-starting point. Otherwise proceed to Phase 2.
+If the question references a file path directly, use that as the navigation starting point. Otherwise proceed to Phase 2.
 
 ## Section 2 — Navigation Details
 
@@ -22,14 +20,11 @@ Use `mcp__plugin_filid_tools__fractal_scan` to retrieve the full project tree, t
 mcp__plugin_filid_tools__fractal_scan({ path: "<project-root>" })
 ```
 
-> **Size guard**: an oversized result comes back as
-> `{ truncated: true, reportPath, summary }` — grep `reportPath` for the
-> target node instead of reading the file whole.
+> **Size guard**: an oversized result comes back as `{ truncated: true, reportPath, summary }` — grep `reportPath` for the target node instead of reading the file whole.
 
 Scan `tree.nodes` (flat FractalNode array) for the node whose name or path best matches the target — e.g. `tree.nodes.find(n => n.path === target)`.
 
-If the match is ambiguous, use `mcp__plugin_filid_tools__fractal_navigate(classify)` with the node's
-known children from the scan result:
+If the match is ambiguous, use `mcp__plugin_filid_tools__fractal_navigate(classify)` with the node's known children from the scan result:
 
 ```
 mcp__plugin_filid_tools__fractal_navigate({ action: "classify", path: "<candidate-path>", entries: [/* nodes from scan */] })
@@ -45,25 +40,19 @@ Load the INTENT.md chain from the identified leaf node up to the project root:
 [leaf INTENT.md] → [parent INTENT.md] → [grandparent INTENT.md] → [root INTENT.md]
 ```
 
-Claude Code loads `@`-referenced INTENT.md files natively. Construct the
-chain by following `parent` relationships in the fractal tree.
+Claude Code loads `@`-referenced INTENT.md files natively. Construct the chain by following `parent` relationships in the fractal tree.
 
-Only load INTENT.md files that are directly in the ancestor path of the
-target node. Do not load sibling or cousin nodes.
+Only load INTENT.md files that are directly in the ancestor path of the target node. Do not load sibling or cousin nodes.
 
 ## Section 4 — Compression Strategy
 
-If the combined INTENT.md chain exceeds working context limits, call
-`mcp__plugin_filid_tools__doc_compress` before generating the response:
+If the combined INTENT.md chain exceeds working context limits, call `mcp__plugin_filid_tools__doc_compress` before generating the response:
 
 ```
 mcp__plugin_filid_tools__doc_compress({ mode: "auto", filePath: "<INTENT.md path>", content: "<file content>" })
 ```
 
-`auto` mode selects `reversible` compression for structured documents
-(when `filePath`/`content` are provided) and `lossy` compression for
-tool-call history (when `toolCallEntries` are provided). The original
-files remain on disk; only the in-context representation is compressed.
+`auto` mode selects `reversible` compression for structured documents (when `filePath`/`content` are provided) and `lossy` compression for tool-call history (when `toolCallEntries` are provided). The original files remain on disk; only the in-context representation is compressed.
 
 Apply compression only when necessary. Skip if the chain fits in context.
 
@@ -81,5 +70,4 @@ If the question cannot be answered within 3 prompts, respond with:
 2. Which additional INTENT.md files or information would be needed
 3. The specific path or module the user should consult directly
 
-Do not continue searching beyond the 3-prompt budget. Surface what is
-known and stop.
+Do not continue searching beyond the 3-prompt budget. Surface what is known and stop.

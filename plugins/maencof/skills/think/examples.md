@@ -8,10 +8,7 @@
 
 ### Step 1: Candidate Generation
 
-**Interpretation A**: Standard file input (`<input type="file">`) with a preview
-**Interpretation B**: Drag-and-drop zone + file input combination with crop tool
-**Interpretation C**: In-browser camera capture (via `getUserMedia`)
-**Interpretation D**: Upload by pasting an image URL
+**Interpretation A**: Standard file input (`<input type="file">`) with a preview **Interpretation B**: Drag-and-drop zone + file input combination with crop tool **Interpretation C**: In-browser camera capture (via `getUserMedia`) **Interpretation D**: Upload by pasting an image URL
 
 ---
 
@@ -114,11 +111,7 @@ Note: This request is ambiguous — "data" and "export" are both underspecified.
 
 ### Step 1: Candidate Generation
 
-**Interpretation A**: CSV download of tabular records via a button
-**Interpretation B**: JSON export via a REST API endpoint
-**Interpretation C**: PDF report with charts and formatted layout
-**Interpretation D**: Excel (.xlsx) file with multiple sheets
-**Interpretation E**: Print-to-PDF using the browser's native print dialog
+**Interpretation A**: CSV download of tabular records via a button **Interpretation B**: JSON export via a REST API endpoint **Interpretation C**: PDF report with charts and formatted layout **Interpretation D**: Excel (.xlsx) file with multiple sheets **Interpretation E**: Print-to-PDF using the browser's native print dialog
 
 ---
 
@@ -235,11 +228,7 @@ Note: This is an architectural decision with long-term consequences. The evaluat
 
 ### Step 1: Candidate Generation
 
-**Interpretation A**: Redux Toolkit (RTK)
-**Interpretation B**: Zustand
-**Interpretation C**: Jotai
-**Interpretation D**: Recoil
-**Interpretation E**: MobX
+**Interpretation A**: Redux Toolkit (RTK) **Interpretation B**: Zustand **Interpretation C**: Jotai **Interpretation D**: Recoil **Interpretation E**: MobX
 
 ---
 
@@ -368,13 +357,7 @@ Note: Divergent mode does **not** force a single winner-to-build. Output is a ca
 
 explore handed off 4 seeds (`title + path + 1-line summary`); candidates E–G are expansions added by think.
 
-**Candidate A** (seed): Interactive product tour — guided tooltips on first login (baseline known pattern, low novelty)
-**Candidate B** (seed): Checklist-driven activation — gamified "getting started" checklist with progress bar
-**Candidate C** (seed): Personalized setup wizard — branch the flow by role selected at signup
-**Candidate D** (seed): Empty-state seeding — pre-populate the workspace with a sample project
-**Candidate E**: Cohort buddy match — pair each new user with a peer who joined the same week (cross-domain transfer from social apps)
-**Candidate F**: Reverse onboarding — let the user accomplish their _own_ first task immediately, surface guidance contextually as they go (contrarian: violate the "tour first" assumption)
-**Candidate G**: AI-narrated walkthrough — an in-app agent that watches the first session and offers just-in-time nudges (prototype-only, speculative)
+**Candidate A** (seed): Interactive product tour — guided tooltips on first login (baseline known pattern, low novelty) **Candidate B** (seed): Checklist-driven activation — gamified "getting started" checklist with progress bar **Candidate C** (seed): Personalized setup wizard — branch the flow by role selected at signup **Candidate D** (seed): Empty-state seeding — pre-populate the workspace with a sample project **Candidate E**: Cohort buddy match — pair each new user with a peer who joined the same week (cross-domain transfer from social apps) **Candidate F**: Reverse onboarding — let the user accomplish their _own_ first task immediately, surface guidance contextually as they go (contrarian: violate the "tour first" assumption) **Candidate G**: AI-narrated walkthrough — an in-app agent that watches the first session and offers just-in-time nudges (prototype-only, speculative)
 
 ---
 
@@ -427,10 +410,7 @@ Note: Review mode uses **inverted Risk Exposure** — a _higher_ score means a _
 
 ### Step 1: Risk Generation (Strategy E — risk + mitigation pairs)
 
-**Risk 1**: Plan retries failed charges with no idempotency key → duplicate charges on transient gateway errors (unmitigated in the plan)
-**Risk 2**: Fixed 5-retry loop with no backoff → retry storm against the gateway during an outage (partially mitigated — plan caps retries but specifies no delay)
-**Risk 3**: No dead-letter path for permanently-failed payments → silent revenue loss (unmitigated)
-**Risk 4**: Retry worker shares the primary DB connection pool → exhaustion under load (mitigated — plan already isolates a worker pool)
+**Risk 1**: Plan retries failed charges with no idempotency key → duplicate charges on transient gateway errors (unmitigated in the plan) **Risk 2**: Fixed 5-retry loop with no backoff → retry storm against the gateway during an outage (partially mitigated — plan caps retries but specifies no delay) **Risk 3**: No dead-letter path for permanently-failed payments → silent revenue loss (unmitigated) **Risk 4**: Retry worker shares the primary DB connection pool → exhaustion under load (mitigated — plan already isolates a worker pool)
 
 ---
 
@@ -445,8 +425,7 @@ Note: Review mode uses **inverted Risk Exposure** — a _higher_ score means a _
 | 4    | 10 (mitigated)     | 16            | 14                   | 10              | 7         | **57**    | Negligible — acceptable as-is    |
 ```
 
-Read the scale inverted: Risk 1 at **92** is the headline finding (worst), not a winner.
-Risk 4 at **57** is the safest item already handled by the plan.
+Read the scale inverted: Risk 1 at **92** is the headline finding (worst), not a winner. Risk 4 at **57** is the safest item already handled by the plan.
 
 ---
 

@@ -4,14 +4,14 @@ Windows/POSIX path 문자열을 현재 실행 OS와 독립적으로 판별, 조�
 
 ## Structure
 
-| File                  | Role                                           |
-| --------------------- | ---------------------------------------------- |
-| `index.ts`            | public barrel                                  |
-| `operations/`         | 목적별 portable 연산 organ                    |
-| `portable-*.ts`       | basename/dirname/join adapter                  |
-| `path-for-compare.ts` | 비교용 separator/case 정규화                   |
-| `same-path.ts`        | path 동등성 비교                               |
-| `api-for.ts`          | 내부 path API 선택 helper                      |
+| File                  | Role                          |
+| --------------------- | ----------------------------- |
+| `index.ts`            | public barrel                 |
+| `operations/`         | 목적별 portable 연산 organ    |
+| `portable-*.ts`       | basename/dirname/join adapter |
+| `path-for-compare.ts` | 비교용 separator/case 정규화  |
+| `same-path.ts`        | path 동등성 비교              |
+| `api-for.ts`          | 내부 path API 선택 helper     |
 
 ## Conventions
 

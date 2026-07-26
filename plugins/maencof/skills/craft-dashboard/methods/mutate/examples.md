@@ -39,9 +39,7 @@ Only 3 questions because refine already knew the layout, search, and date fields
 
 ### Phase 3 diff preview
 
-The diff below shows the changed slices only. Required top-level fields
-(`version`, `vaultIndex`, `refresh`, `title`) stay unchanged from the existing
-spec — MUTATE never silently drops them.
+The diff below shows the changed slices only. Required top-level fields (`version`, `vaultIndex`, `refresh`, `title`) stay unchanged from the existing spec — MUTATE never silently drops them.
 
 ```diff
 {

@@ -1,14 +1,13 @@
 ## Purpose
 
-Jira / Confluence 인증 설정 상태를 보고하고 선택적으로 연결을 테스트하는
-MCP 툴 핸들러 모듈.
+Jira / Confluence 인증 설정 상태를 보고하고 선택적으로 연결을 테스트하는 MCP 툴 핸들러 모듈.
 
 ## Structure
 
-| 파일 | 역할 |
-|------|------|
+| 파일           | 역할                                                      |
+| -------------- | --------------------------------------------------------- |
 | `authCheck.ts` | `handleAuthCheck` — 설정 로드, 자격증명 확인, 연결 테스트 |
-| `index.ts` | 배럴 — `handleAuthCheck` 재내보내기 |
+| `index.ts`     | 배럴 — `handleAuthCheck` 재내보내기                       |
 
 ## Boundaries
 

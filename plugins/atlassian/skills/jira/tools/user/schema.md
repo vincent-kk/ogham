@@ -1,10 +1,10 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud Endpoint | Server Endpoint |
-|---|---|---|---|
-| Current user | GET | `/rest/api/3/myself` | `/rest/api/2/myself` |
-| Search users | GET | `/rest/api/3/user/search?query={q}` | `/rest/api/2/user/search?username={q}` |
-| Get user | GET | `/rest/api/3/user?accountId={id}` | `/rest/api/2/user?key={key}` |
+| Operation    | HTTP | Cloud Endpoint                      | Server Endpoint                        |
+| ------------ | ---- | ----------------------------------- | -------------------------------------- |
+| Current user | GET  | `/rest/api/3/myself`                | `/rest/api/2/myself`                   |
+| Search users | GET  | `/rest/api/3/user/search?query={q}` | `/rest/api/2/user/search?username={q}` |
+| Get user     | GET  | `/rest/api/3/user?accountId={id}`   | `/rest/api/2/user?key={key}`           |
 
 ## Cloud vs Server Branching
 
@@ -13,6 +13,6 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Method | Notes |
-|---|---|---|---|
-| All operations | `mcp__plugin_atlassian_tools__fetch` | GET | Read-only |
+| Operation      | MCP Tool                             | Method | Notes     |
+| -------------- | ------------------------------------ | ------ | --------- |
+| All operations | `mcp__plugin_atlassian_tools__fetch` | GET    | Read-only |

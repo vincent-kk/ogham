@@ -9,15 +9,15 @@ Videos > 30min. Aggressive performance caps to prevent timeout/OOM.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 20 | Broad coverage without overwhelming output |
-| `-t` | 0.5 | Default threshold |
-| `--fps` | 1 | Minimal extraction rate |
-| `--max-frames` | 150 | Tight cap for memory safety |
-| `-s` | 480 | Reduced resolution for speed |
-| `-q` | 80 | Default quality |
-| `--concurrency` | 1 | Single-threaded to limit memory |
+| Flag            | Value | Reasoning                                  |
+| --------------- | ----- | ------------------------------------------ |
+| `-n`            | 20    | Broad coverage without overwhelming output |
+| `-t`            | 0.5   | Default threshold                          |
+| `--fps`         | 1     | Minimal extraction rate                    |
+| `--max-frames`  | 150   | Tight cap for memory safety                |
+| `-s`            | 480   | Reduced resolution for speed               |
+| `-q`            | 80    | Default quality                            |
+| `--concurrency` | 1     | Single-threaded to limit memory            |
 
 ## Command
 

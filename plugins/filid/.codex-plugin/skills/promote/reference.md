@@ -1,14 +1,10 @@
 # promote — Reference Documentation
 
-Detailed workflow, eligibility rules, and spec generation logic for the
-`filid:promote` skill. For the quick-start guide, see [SKILL.md](./SKILL.md).
+Detailed workflow, eligibility rules, and spec generation logic for the `filid:promote` skill. For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Discovery Details
 
-> **Subject attribution**: All `Glob` / MCP / Bash calls below are executed
-> by the orchestrating skill. The `qa-reviewer` Task receives the aggregated
-> output and analyzes it. Agents never invoke MCP or Bash directly (per the
-> Capability Model).
+> **Subject attribution**: All `Glob` / MCP / Bash calls below are executed by the orchestrating skill. The `qa-reviewer` Task receives the aggregated output and analyzes it. Agents never invoke MCP or Bash directly (per the Capability Model).
 
 Locate all `test.ts` files and analyze their content:
 
@@ -23,10 +19,7 @@ for each file in testFiles:
 
 ## Section 2 — Eligibility Rules
 
-> **Subject attribution**: The skill owns the `git log` / Read calls that
-> produce the `stableDays` / `lastFailure` values. The `qa-reviewer` Task
-> then evaluates the `checkPromotionEligibility` predicate on the
-> skill-supplied data.
+> **Subject attribution**: The skill owns the `git log` / Read calls that produce the `stableDays` / `lastFailure` values. The `qa-reviewer` Task then evaluates the `checkPromotionEligibility` predicate on the skill-supplied data.
 
 Apply promotion eligibility criteria:
 
@@ -62,8 +55,7 @@ Promotion candidates (5 files found):
 For each eligible file, analyze internal test structure:
 
 - Read test.ts and identify all test cases
-- Categorize each case as basic (simple assertion, single path) or complex
-  (multiple assertions, branching, setup/teardown, mocked dependencies)
+- Categorize each case as basic (simple assertion, single path) or complex (multiple assertions, branching, setup/teardown, mocked dependencies)
 - Identify duplicate or structurally identical test cases
 - Map test inputs/outputs that can be expressed as parameter rows
 - Determine if total cases exceed 15 and which can be consolidated
@@ -93,10 +85,7 @@ for each eligible file:
 
 ## Section 5 — Validation and Migration
 
-> **Subject attribution**: Validation MCP calls are issued by the skill; the
-> `qa-reviewer` Task interprets the result. Migration Write/Bash operations
-> are executed by the `implementer` Task (Write/Edit/Bash are part of its
-> toolset).
+> **Subject attribution**: Validation MCP calls are issued by the skill; the `qa-reviewer` Task interprets the result. Migration Write/Bash operations are executed by the `implementer` Task (Write/Edit/Bash are part of its toolset).
 
 ### Validation (skill → `qa-reviewer`)
 

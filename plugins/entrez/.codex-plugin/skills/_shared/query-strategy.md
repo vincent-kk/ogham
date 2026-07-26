@@ -1,18 +1,15 @@
 # query-strategy (generation mode SSoT)
 
-Methodology for building a recall-maximizing query set. The goal is **coverage**,
-not precision — precision is the rerank step's job, and the deterministic union
-keeps everything.
+Methodology for building a recall-maximizing query set. The goal is **coverage**, not precision — precision is the rerank step's job, and the deterministic union keeps everything.
 
 ## 1. Decompose into facets
 
-Break the topic into independent concept facets (PICO: Population, Intervention,
-Comparison, Outcome — or domain-appropriate). Each facet is searched several ways
-and combined; recall comes from expressing each facet broadly, then ANDing facets.
+Break the topic into independent concept facets (PICO: Population, Intervention, Comparison, Outcome — or domain-appropriate). Each facet is searched several ways and combined; recall comes from expressing each facet broadly, then ANDing facets.
 
 ## 2. MeSH lookup per facet
 
 Call `mesh_lookup`. Use:
+
 - `descriptorName` / `descriptorUi` → the controlled term.
 - `treeNumbers` → judge explosion scope (does `[mh]` pull in the right narrower terms?).
 - `entryTerms` → synonyms for the `[tiab]` free-text role.
@@ -20,17 +17,16 @@ Call `mesh_lookup`. Use:
 
 ## 3. QueryRole spectrum (express each facet multiple ways)
 
-| Role | Form | Breadth | Purpose |
-|---|---|---|---|
-| `ATM_BROAD` | untagged keywords | BROAD | leverage PubMed Automatic Term Mapping |
-| `MESH_EXPLODED` | `Term[mh]` | BROAD | explosion — includes narrower MeSH |
-| `MESH_NOEXP` | `Term[mh:noexp]` | NARROW | precise verification slice |
-| `TIAB_SYNONYM` | synonyms/variants/abbrevs/US+UK spellings `[tiab]` | MEDIUM | catch not-yet-indexed recent papers |
-| `ALL_FIELDS` | broad fallback | BROAD | safety net |
-| `SIMILAR` (optional) | ELink Similar Articles via `seedPmids` | — | known-item expansion |
+| Role                 | Form                                               | Breadth | Purpose                                |
+| -------------------- | -------------------------------------------------- | ------- | -------------------------------------- |
+| `ATM_BROAD`          | untagged keywords                                  | BROAD   | leverage PubMed Automatic Term Mapping |
+| `MESH_EXPLODED`      | `Term[mh]`                                         | BROAD   | explosion — includes narrower MeSH     |
+| `MESH_NOEXP`         | `Term[mh:noexp]`                                   | NARROW  | precise verification slice             |
+| `TIAB_SYNONYM`       | synonyms/variants/abbrevs/US+UK spellings `[tiab]` | MEDIUM  | catch not-yet-indexed recent papers    |
+| `ALL_FIELDS`         | broad fallback                                     | BROAD   | safety net                             |
+| `SIMILAR` (optional) | ELink Similar Articles via `seedPmids`             | —       | known-item expansion                   |
 
-Combine facets with AND; combine roles within a facet with OR (the union does the
-OR across queries). Cover synonyms, spelling variants (US/UK), abbreviations.
+Combine facets with AND; combine roles within a facet with OR (the union does the OR across queries). Cover synonyms, spelling variants (US/UK), abbreviations.
 
 ## 4. Keep mappings alive (recall hazards)
 
@@ -42,10 +38,9 @@ OR across queries). Cover synonyms, spelling variants (US/UK), abbreviations.
 ## 5. Recall gate & ESpell
 
 After `paper_search`, inspect `union.total_unique` and `warnings`:
-- weak union → broaden: raise `breadth`, add `ATM_BROAD`/`MESH_EXPLODED`/`ALL_FIELDS`,
-  relax narrow tags.
+
+- weak union → broaden: raise `breadth`, add `ATM_BROAD`/`MESH_EXPLODED`/`ALL_FIELDS`, relax narrow tags.
 - ESpell OOV / spelling-warning / union 0 → apply the correction and regenerate.
 - Stop when union growth <5%, or cap is exceeded, or budget/`recallIter ≤ 4` is reached.
 
-Evaluation = facet coverage · role-spectrum completeness · synonym/spelling breadth
-· lint-clean · ATM/explosion preserved.
+Evaluation = facet coverage · role-spectrum completeness · synonym/spelling breadth · lint-clean · ATM/explosion preserved.

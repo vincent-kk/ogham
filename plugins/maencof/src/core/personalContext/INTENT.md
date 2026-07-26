@@ -2,9 +2,7 @@
 
 ## Purpose
 
-Personal Context 층(사용자 상태 `states` + 최근 동향 `topics`)의 IO·정규화·렌더·수명주기 커널.
-`.maencof-meta/personal-context.json` 단일 envelope을 다룬다. 설계 정본:
-`.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`.
+Personal Context 층(사용자 상태 `states` + 최근 동향 `topics`)의 IO·정규화·렌더·수명주기 커널. `.maencof-meta/personal-context.json` 단일 envelope을 다룬다. 설계 정본: `.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`.
 
 ## Structure
 

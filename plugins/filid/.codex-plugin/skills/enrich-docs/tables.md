@@ -1,41 +1,32 @@
 # enrich-docs — Tables
 
-Consolidated lookup tables for the INTENT.md enrichment skill. Load this file
-when you need argument defaults, MCP tool signatures, agent roles, or the
-comparison against `update`. For the workflow itself see
-[SKILL.md](./SKILL.md); for detailed per-stage implementation see
-[reference.md](./reference.md).
+Consolidated lookup tables for the INTENT.md enrichment skill. Load this file when you need argument defaults, MCP tool signatures, agent roles, or the comparison against `update`. For the workflow itself see [SKILL.md](./SKILL.md); for detailed per-stage implementation see [reference.md](./reference.md).
 
 ## Difference from update
 
-Both skills touch INTENT.md, but they occupy different triggers and detection
-models. Use this table to pick the right one.
+Both skills touch INTENT.md, but they occupy different triggers and detection models. Use this table to pick the right one.
 
-| Skill         | Trigger               | Detection                 | Incremental gate                | Invocation                           |
-| ------------- | --------------------- | ------------------------- | ------------------------------- | ------------------------------------ |
+| Skill         | Trigger               | Detection                 | Incremental gate                                   | Invocation                           |
+| ------------- | --------------------- | ------------------------- | -------------------------------------------------- | ------------------------------------ |
 | `update`      | Branch git diff       | Rule violations           | Hash-based (mcp__plugin_filid_tools__cache_manage) | Internal (`user_invocable: false`)   |
-| `enrich-docs` | Target directory path | Quality smell (heuristic) | None (quality re-eval)          | User-facing (`user_invocable: true`) |
+| `enrich-docs` | Target directory path | Quality smell (heuristic) | None (quality re-eval)                             | User-facing (`user_invocable: true`) |
 
 Practical guidance:
 
-- Pick `update` when you just edited code and need docs/tests to catch up
-  on the diff.
-- Pick `enrich-docs` when the INTENT.md content itself is thin or
-  boilerplate-heavy, regardless of recent edits.
+- Pick `update` when you just edited code and need docs/tests to catch up on the diff.
+- Pick `enrich-docs` when the INTENT.md content itself is thin or boilerplate-heavy, regardless of recent edits.
 
 ## Available MCP Tools
 
-Only tools directly called by this skill are listed. `context-manager` owns
-its own reads via the Read/Glob tools — they are not documented here.
+Only tools directly called by this skill are listed. `context-manager` owns its own reads via the Read/Glob tools — they are not documented here.
 
-| Tool                       | Stage | Purpose                                          | Signature summary                                                               |
-| -------------------------- | ----- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Tool                                          | Stage | Purpose                                          | Signature summary                                                               |
+| --------------------------------------------- | ----- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
 | `mcp__plugin_filid_tools__fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReportDto`                                                    |
 | `mcp__plugin_filid_tools__doc_compress`       | 7     | 50-line limit enforcement                        | `{ mode, filePath, content }` → `{ compacted?, summary?, meta?, cap_applies? }` |
 | `mcp__plugin_filid_tools__structure_validate` | 7     | Structural rule check on the enriched module     | `{ path }` → `{ report, rulesApplied, rulesSkipped, configWarnings }`           |
 
-Full tool signatures and return-type schemas live in
-[reference.md Sections 2 and 7](./reference.md#section-2--discovery).
+Full tool signatures and return-type schemas live in [reference.md Sections 2 and 7](./reference.md#section-2--discovery).
 
 ## Agents
 
@@ -43,8 +34,7 @@ Full tool signatures and return-type schemas live in
 | ----------------- | --------------------- | --------------------------------------------------------- |
 | `context-manager` | Write (INTENT/DETAIL) | Stage 6 — rewrites flagged axes using real source context |
 
-No other agent is used. `context-manager` is the only write-capable agent the
-skill invokes, and it never runs without an upstream plan from Stage 4.
+No other agent is used. `context-manager` is the only write-capable agent the skill invokes, and it never runs without an upstream plan from Stage 4.
 
 ## Options
 
@@ -58,9 +48,7 @@ skill invokes, and it never runs without an upstream plan from Stage 4.
 | `--auto-approve`   | flag    | off       | Skip Stage 5 approval gate                          |
 | `--include-detail` | flag    | off       | Also audit and enrich DETAIL.md                     |
 
-Options are LLM-interpreted hints, not strict CLI flags. Natural language
-works equally well — e.g. "RICH은 건너뛰고 core만" instead of
-`--skip-rich packages/filid/src/core`.
+Options are LLM-interpreted hints, not strict CLI flags. Natural language works equally well — e.g. "RICH은 건너뛰고 core만" instead of `--skip-rich packages/filid/src/core`.
 
 ### Quality threshold guidance
 
@@ -79,8 +67,7 @@ Depth restricts how many nested fractal boundaries below `path` are in scope:
 
 ## Terminal Stage Markers
 
-Emit exactly one of the following strings in the final report so the
-Tier-2b anti-yield contract can detect completion:
+Emit exactly one of the following strings in the final report so the Tier-2b anti-yield contract can detect completion:
 
 | Marker                                   | Meaning                                  |
 | ---------------------------------------- | ---------------------------------------- |
@@ -89,5 +76,4 @@ Tier-2b anti-yield contract can detect completion:
 | `Enrich-docs skipped: all RICH`          | Nothing above the min-quality threshold  |
 | `Enrich-docs cancelled`                  | User chose `cancel` at the approval gate |
 
-Register these markers in `.omc/research/terminal-markers.json` per the
-Tier-2b anti-yield contract.
+Register these markers in `.omc/research/terminal-markers.json` per the Tier-2b anti-yield contract.

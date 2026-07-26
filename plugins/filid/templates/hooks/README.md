@@ -1,7 +1,6 @@
 # filid Hooks Reference
 
-filid registers Claude Code hooks that enforce FCA-AI architecture rules automatically at runtime.
-Hooks operate at Layer 1 of the 4-layer architecture and fire without user interaction.
+filid registers Claude Code hooks that enforce FCA-AI architecture rules automatically at runtime. Hooks operate at Layer 1 of the 4-layer architecture and fire without user interaction.
 
 ## Hook Overview
 
@@ -20,8 +19,7 @@ Built entry files live in `bridge/` after `yarn build:plugin`.
 
 ### 1. PreToolUse — Unified Pre-Tool-Use Hook
 
-**Entry**: `src/hooks/pre-tool-use/pre-tool-use.entry.ts`
-**Built output**: `bridge/pre-tool-use.mjs`
+**Entry**: `src/hooks/pre-tool-use/pre-tool-use.entry.ts` **Built output**: `bridge/pre-tool-use.mjs`
 
 A single consolidated hook that orchestrates three sub-hooks for every `Read`, `Write`, or `Edit` tool call:
 
@@ -49,11 +47,9 @@ A single consolidated hook that orchestrates three sub-hooks for every `Read`, `
 
 ### 2. SubagentStart — Agent Role Enforcer
 
-**Entry**: `src/hooks/agent-enforcer/agent-enforcer.entry.ts`
-**Built output**: `bridge/agent-enforcer.mjs`
+**Entry**: `src/hooks/agent-enforcer/agent-enforcer.entry.ts` **Built output**: `bridge/agent-enforcer.mjs`
 
-Fires when any subagent starts. Injects role-based tool restrictions into the agent's context via `additionalContext`.
-Does not block agent startup; restrictions are communicated as instructions.
+Fires when any subagent starts. Injects role-based tool restrictions into the agent's context via `additionalContext`. Does not block agent startup; restrictions are communicated as instructions.
 
 **Supported FCA-AI agent roles and their restrictions**:
 
@@ -73,8 +69,7 @@ Unrecognized agent types pass through with no restriction.
 
 ### 3. UserPromptSubmit — FCA-AI Context Injector
 
-**Entry**: `src/hooks/user-prompt-submit/user-prompt-submit.entry.ts`
-**Built output**: `bridge/user-prompt-submit.mjs`
+**Entry**: `src/hooks/user-prompt-submit/user-prompt-submit.entry.ts` **Built output**: `bridge/user-prompt-submit.mjs`
 
 Fires on each user prompt submission. Resets the per-turn visit map (including subagent-scoped maps), increments the session turn counter (the delivery-TTL clock), and injects FCA-AI rules into Claude's context on the first prompt of each session.
 
@@ -89,8 +84,7 @@ Fires on each user prompt submission. Resets the per-turn visit map (including s
 1. Active FCA-AI project path
 2. Core FCA-AI rules summary:
    - INTENT.md max 50 lines (hard cap) with 3-tier boundary sections
-   - DETAIL.md has no line cap; updates must restructure in place
-     (append-only growth forbidden, required sections preserved)
+   - DETAIL.md has no line cap; updates must restructure in place (append-only growth forbidden, required sections preserved)
    - Organ directories must not have INTENT.md
    - Spec files max 15 cases (3 basic + 12 complex); test.ts exempt
    - LCOM4 >= 2 triggers module split; CC > 15 triggers compress/abstract
@@ -103,31 +97,21 @@ Never blocks user prompts (always `continue: true`).
 
 ### 4. Session Cleanup — MCP Server Lifecycle
 
-filid no longer registers a `SessionEnd` hook. `SessionEnd` is Claude-only, so
-session-scoped cleanup moved to the **MCP server process lifecycle** — the server
-is spawned and killed once per session, making its termination the only session-end
-signal common to all three hosts (Claude, Codex, Antigravity).
+filid no longer registers a `SessionEnd` hook. `SessionEnd` is Claude-only, so session-scoped cleanup moved to the **MCP server process lifecycle** — the server is spawned and killed once per session, making its termination the only session-end signal common to all three hosts (Claude, Codex, Antigravity).
 
 **Entry**: `src/mcp/server/` (`registerShutdown` + `bootSweep`)
 
 **Behavior**:
 
-- **Shutdown** (`exit`/`SIGINT`/`SIGTERM`) — synchronously deletes this session's own
-  cache/marker files (`session-context-<hash>` and its siblings), keyed by the
-  `CLAUDE_CODE_SESSION_ID` env var. No-op when the var is absent.
-- **Boot sweep** — on the next server start, prunes stale session files and cache
-  directories past their TTL (daily-throttled, idempotent). This is the fallback
-  that finalizes any session whose shutdown was cut off.
-- Best-effort + TTL-backed, not a guaranteed per-session hook. Only ever removes
-  filid's own cache files, never project files.
+- **Shutdown** (`exit`/`SIGINT`/`SIGTERM`) — synchronously deletes this session's own cache/marker files (`session-context-<hash>` and its siblings), keyed by the `CLAUDE_CODE_SESSION_ID` env var. No-op when the var is absent.
+- **Boot sweep** — on the next server start, prunes stale session files and cache directories past their TTL (daily-throttled, idempotent). This is the fallback that finalizes any session whose shutdown was cut off.
+- Best-effort + TTL-backed, not a guaranteed per-session hook. Only ever removes filid's own cache files, never project files.
 
 ---
 
 ## Hook Registration
 
-Hooks are registered via `hooks/hooks.json` in the package root.
-Each hook command runs through `libs/run.cjs` (cross-platform Node runner
-using `process.execPath`), which executes the built `.mjs` file in `bridge/`.
+Hooks are registered via `hooks/hooks.json` in the package root. Each hook command runs through `libs/run.cjs` (cross-platform Node runner using `process.execPath`), which executes the built `.mjs` file in `bridge/`.
 
 ```json
 {

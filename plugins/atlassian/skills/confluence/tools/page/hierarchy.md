@@ -12,6 +12,7 @@ Endpoint: /pages/{id}/children
 ## Get Ancestors (Breadcrumb)
 
 V1/DC: fetch the page with `expand=ancestors` query parameter:
+
 ```
 Tool: fetch (method: GET)
 Endpoint: /pages/{id}?expand=ancestors

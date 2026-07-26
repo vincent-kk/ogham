@@ -1,9 +1,6 @@
 ## Purpose
 
-`open_settings` 가 띄우는 `127.0.0.1` 전용 HTTP 서버. 공유
-`@ogham/http-kit` 으로 loopback Host → 일회용 토큰 → POST Origin →
-Content-Type 순으로 검증하고, 저장/닫기를 settle waiter 로 노출해 도구의
-bounded long-poll 을 해소한다.
+`open_settings` 가 띄우는 `127.0.0.1` 전용 HTTP 서버. 공유 `@ogham/http-kit` 으로 loopback Host → 일회용 토큰 → POST Origin → Content-Type 순으로 검증하고, 저장/닫기를 settle waiter 로 노출해 도구의 bounded long-poll 을 해소한다.
 
 ## Structure
 
@@ -16,12 +13,10 @@ handlers/      GET / · POST /plan · POST /save · POST /close · readSaveBody
 ## Conventions
 
 - 응답 본문은 `{ success, message?, errors?, ...data }` 형태로 통일.
-- `/plan` 과 `/save` 는 `readSaveBody` 로 **같은 스키마 검증**을 공유한다 —
-  미리보기가 통과시킨 본문을 저장이 거절하면 보여준 diff 가 적용 불가가 된다.
+- `/plan` 과 `/save` 는 `readSaveBody` 로 **같은 스키마 검증**을 공유한다 — 미리보기가 통과시킨 본문을 저장이 거절하면 보여준 diff 가 적용 불가가 된다.
 - `/save` 는 rule apply 성공만 `saved` 로 settle 한다. stale preview 는 pending.
 - `/close` 와 서버 종료는 `{ kind: 'closed' }` 로 settle 한다.
-- idle 5분 자동 종료. 단 **대기 중인 waiter 가 있으면 연장** — 작성 중인 폼을
-  사용자 밑에서 닫지 않는다.
+- idle 5분 자동 종료. 단 **대기 중인 waiter 가 있으면 연장** — 작성 중인 폼을 사용자 밑에서 닫지 않는다.
 - 상태 주입은 `escapeJsonForHtml` 경유 (script 종료 문자·JS 줄 구분자 이스케이프).
 
 ## Boundaries

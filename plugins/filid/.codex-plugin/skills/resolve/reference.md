@@ -1,7 +1,6 @@
 # resolve — Reference Documentation
 
-Output format templates and detailed workflow reference for the
-fix request resolution skill.
+Output format templates and detailed workflow reference for the fix request resolution skill.
 
 ## justifications.md Format
 
@@ -37,10 +36,7 @@ rejected: <rejected count>
 ---
 ```
 
-> **Note**: `justifications.md` is a local inter-stage communication file. It is
-> NOT committed to git. It lives in `.filid/review/<branch>/` which is gitignored.
-> `filid:revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter.
-> Explicitly `git add`-ing a gitignored path overrides the exclusion — never stage this file.
+> **Note**: `justifications.md` is a local inter-stage communication file. It is NOT committed to git. It lives in `.filid/review/<branch>/` which is gitignored. `filid:revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter. Explicitly `git add`-ing a gitignored path overrides the exclusion — never stage this file.
 
 ## ADR Refinement Guidelines
 
@@ -62,8 +58,7 @@ Consequences: <technical debt created, future impact, estimated resolution>
 
 ## Fix Item Types
 
-Each fix item in `fix-requests.md` has an optional `type` field that determines
-how the `filid:resolve` skill processes it:
+Each fix item in `fix-requests.md` has an optional `type` field that determines how the `filid:resolve` skill processes it:
 
 | Type               | Default | Handler                      | Description                                                                                                                  |
 | ------------------ | ------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -72,16 +67,11 @@ how the `filid:resolve` skill processes it:
 | `restructure`      | no      | `Skill("filid:restructure")` | Module split/reorganization (LCOM4 >= 2)                                                                                     |
 | `harvest-required` | no      | NONE — aborts resolve        | Oracle gap (unharvested spike / claim INSUFFICIENT-EVIDENCE) — human-gated `/filid:harvest` interview, never auto-dispatched |
 
-When `type` is absent, the item is treated as `code-fix`. Any
-`harvest-required` item aborts resolve before dispatch (see SKILL.md
-Step 2 harvest gate) — it marks a missing oracle, and re-review is
-required after the harvest updates `.filid/criteria.md`.
+When `type` is absent, the item is treated as `code-fix`. Any `harvest-required` item aborts resolve before dispatch (see SKILL.md Step 2 harvest gate) — it marks a missing oracle, and re-review is required after the harvest updates `.filid/criteria.md`.
 
 ### Fix Item Format by Type
 
-`fix-requests.md` carries blocking items only (severity >= MEDIUM) —
-LOW items are advisory and stay in `review-report.md` → `## Advisory
-Notes`, so they never reach resolve.
+`fix-requests.md` carries blocking items only (severity >= MEDIUM) — LOW items are advisory and stay in `review-report.md` → `## Advisory Notes`, so they never reach resolve.
 
 **code-fix** (default):
 
@@ -124,15 +114,12 @@ Notes`, so they never reach resolve.
 ### Dispatch Sequence
 
 1. **Phase 4a**: All `code-fix` items dispatched to `code-surgeon` in parallel
-2. **Phase 4b**: After code fixes complete, `filid:promote` and `filid:restructure` items
-   processed sequentially via their respective skills
+2. **Phase 4b**: After code fixes complete, `filid:promote` and `filid:restructure` items processed sequentially via their respective skills
 3. Structural fix failures are **non-blocking** — logged and skipped
 
 ## Accepted Fix Output Format
 
-Accepted fixes are applied directly to source files via parallel `code-surgeon`
-subagents (code-fix type) or via skill invocations (promote/restructure type).
-After all handlers complete, report results:
+Accepted fixes are applied directly to source files via parallel `code-surgeon` subagents (code-fix type) or via skill invocations (promote/restructure type). After all handlers complete, report results:
 
 ```markdown
 ### FIX-<ID>: <title> — APPLIED

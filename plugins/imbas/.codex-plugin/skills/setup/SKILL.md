@@ -10,12 +10,7 @@ plugin: imbas
 
 # setup — Initialization & Configuration
 
-Initialize the `.imbas/` working directory, configure everything (provider,
-project reference, labels, languages, defaults) in the **browser settings
-page** opened by `mcp__plugin_imbas_tools__open_settings`, and populate metadata
-caches. Entry point for all imbas workflows. The open_settings call blocks
-until the user saves — after it returns, continue the init workflow in the
-same response (never yield between steps).
+Initialize the `.imbas/` working directory, configure everything (provider, project reference, labels, languages, defaults) in the **browser settings page** opened by `mcp__plugin_imbas_tools__open_settings`, and populate metadata caches. Entry point for all imbas workflows. The open_settings call blocks until the user saves — after it returns, continue the init workflow in the same response (never yield between steps).
 
 ## When to Use This Skill
 

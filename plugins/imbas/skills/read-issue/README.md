@@ -4,9 +4,7 @@ Jira 이슈를 전체 댓글 스레드와 함께 읽어 구조화된 JSON 요약
 
 ## 개요
 
-Jira 이슈의 메타데이터, 설명, 댓글을 읽어 대화 맥락을 재구성하고,
-의사결정, 미해결 질문, 참여자 역할 등을 추출하여 구조화된 JSON으로 반환한다.
-validate, split, devplan, `imbas:digest` 스킬 및 각 에이전트에서 내부적으로 호출한다.
+Jira 이슈의 메타데이터, 설명, 댓글을 읽어 대화 맥락을 재구성하고, 의사결정, 미해결 질문, 참여자 역할 등을 추출하여 구조화된 JSON으로 반환한다. validate, split, devplan, `imbas:digest` 스킬 및 각 에이전트에서 내부적으로 호출한다.
 
 ## 사용법
 
@@ -19,6 +17,7 @@ imbas:read-issue <issue-key> [--depth shallow|full]
 ## Digest 댓글 Fast Path
 
 기존 imbas digest 댓글(`<!-- imbas:digest ... -->`)이 감지되면:
+
 - 새 댓글이 없을 경우 → digest를 완전한 컨텍스트로 사용 (빠른 경로)
 - 새 댓글이 있을 경우 → 새 댓글만 처리 후 digest와 병합
 - digest가 없으면 → 전체 댓글을 처리하는 Full Path로 진행
@@ -43,8 +42,8 @@ imbas:read-issue <issue-key> [--depth shallow|full]
 
 ## 사용 도구
 
-| 도구 | 출처 | 용도 |
-|------|------|------|
+| 도구              | 출처         | 용도                             |
+| ----------------- | ------------ | -------------------------------- |
 | `[OP: get_issue]` | Jira ([OP:]) | 이슈 메타데이터, 설명, 댓글 조회 |
 
 에이전트 스폰 없음. 스킬이 직접 실행하고 구조화된 데이터를 반환한다.

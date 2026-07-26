@@ -6,8 +6,8 @@
 
 ## Structure
 
-| Directory | Role |
-|---|---|
+| Directory | Role                                                  |
+| --------- | ----------------------------------------------------- |
 | `github/` | GitHub Issues 프로바이더 — Links 파싱, 메타 블록 처리 |
 
 ## Conventions

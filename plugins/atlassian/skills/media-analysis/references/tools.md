@@ -4,8 +4,8 @@
 
 ### Atlassian MCP Tools
 
-| Tool | Usage |
-|------|-------|
+| Tool                                 | Usage                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------ |
 | `mcp__plugin_atlassian_tools__fetch` | Download binary attachments with `accept_format: "raw"` and `save_to_path` parameter |
 
 ### Download Protocol
@@ -26,19 +26,18 @@ See [download-flow.md](../../download/references/download-flow.md) for Jira/Conf
 
 ## Agent Spawn
 
-| Agent | When | Purpose |
-|-------|------|---------|
+| Agent   | When                                                       | Purpose                                                                        |
+| ------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | `media` | After scene-sieve extraction, when `--analyze` flag is set | Read frames sequentially (multimodal), classify scenes, generate analysis.json |
 
 The `media` agent receives:
+
 - Absolute path to frames/ directory
 - Absolute path to .metadata.json
 - Analysis purpose context from caller
 - Target path for analysis.json output
 
-The agent reads each frame image via the Read tool (multimodal), builds scene descriptions,
-and saves the structured analysis.json. The main agent context is never polluted with
-frame image data — only the text summary is returned.
+The agent reads each frame image via the Read tool (multimodal), builds scene descriptions, and saves the structured analysis.json. The main agent context is never polluted with frame image data — only the text summary is returned.
 
 ## Caching
 

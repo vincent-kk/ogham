@@ -8,27 +8,16 @@ complexity: medium
 plugin: prawf
 ---
 
-> **EXECUTION MODEL (Tier-2a Anti-Yield)**: Execute the whole pipeline as a
-> SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY chain the
-> next tool call in the same response. NEVER yield after a Read returns. The
-> classification table is internal working data — do NOT dump it; report the
-> applied/manual summary at the end.
+> **EXECUTION MODEL (Tier-2a Anti-Yield)**: Execute the whole pipeline as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY chain the next tool call in the same response. NEVER yield after a Read returns. The classification table is internal working data — do NOT dump it; report the applied/manual summary at the end.
 >
 > **Valid reasons to yield**:
 >
-> 1. A user decision is genuinely required — no review outputs found, or no
->    editable manuscript source (PDF-only), or an ambiguous manuscript path.
-> 2. Terminal marker emitted: `prawf auto-fix: <N> applied, <M> manual` — only
->    after `applied-fixes.md` (and `manual-fixes.md`) are written.
+> 1. A user decision is genuinely required — no review outputs found, or no editable manuscript source (PDF-only), or an ambiguous manuscript path.
+> 2. Terminal marker emitted: `prawf auto-fix: <N> applied, <M> manual` — only after `applied-fixes.md` (and `manual-fixes.md`) are written.
 
 # auto-fix — Apply Auto-Fixable Review Revisions
 
-A post-review step. You read the verdict artifacts a prior `/prawf:peer-review`
-produced (`review-report.md` + `qa-sheet.md`) and apply ONLY the revisions that
-are mechanical and already backed by a concrete solution to the manuscript
-source. You are a careful copy-editor, not a reviewer: you never re-judge the
-paper, never invent content, and never touch a finding that needs the author's
-own work.
+A post-review step. You read the verdict artifacts a prior `/prawf:peer-review` produced (`review-report.md` + `qa-sheet.md`) and apply ONLY the revisions that are mechanical and already backed by a concrete solution to the manuscript source. You are a careful copy-editor, not a reviewer: you never re-judge the paper, never invent content, and never touch a finding that needs the author's own work.
 
 > **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/peer-review/<file>`, fallback `Glob`):
 >
@@ -51,46 +40,23 @@ A finding is **AUTO** (apply) only when ALL hold; otherwise it is **MANUAL** (li
 | `tactic` ∈ {`revision`, `clarification`, `justification`(+text)}    | `tactic` = `sidestep`, or the defense is a qa-sheet-only argument |
 | the target text is unambiguously locatable in the manuscript source | a fatal-flaw axis finding, or the edit needs new analysis/data    |
 
-Any **Never apply when** condition overrides a matching **Apply when** condition —
-e.g. a `minor` finding that is still `unresolved` is **MANUAL**, never AUTO. A
-below-gate **advisory finding** (one listed in Advisory Notes) is NOT excluded by
-the qa-sheet-only defense row — it stays governed by the severity/status rows above.
+Any **Never apply when** condition overrides a matching **Apply when** condition — e.g. a `minor` finding that is still `unresolved` is **MANUAL**, never AUTO. A below-gate **advisory finding** (one listed in Advisory Notes) is NOT excluded by the qa-sheet-only defense row — it stays governed by the severity/status rows above.
 
-Auto-fixable examples: add a data-availability / COI statement, add a Limitation
-paragraph the strategist already drafted, fix notation/terminology consistency,
-add a citation the review identified by name, soften an overclaim to match the
-evidence, insert a correction the author already supplied in the rebuttal.
+Auto-fixable examples: add a data-availability / COI statement, add a Limitation paragraph the strategist already drafted, fix notation/terminology consistency, add a citation the review identified by name, soften an overclaim to match the evidence, insert a correction the author already supplied in the rebuttal.
 
 ## Core Workflow
 
 ### Step 1 — Locate inputs (direct)
 
-1. Resolve `WORKDIR` per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
-   (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`), then the review directory: from
-   `<paper-slug | review-dir>` or the most recent `<WORKDIR>/review/<slug>/`. Read
-   `review-report.md` and `qa-sheet.md`. If `review-report.md` is missing, stop and tell
-   the user to run `/prawf:peer-review` first. If `review-report.md` exists but `qa-sheet.md`
-   does not (e.g. after `/prawf:peer-review --solo`, which writes no `qa-sheet.md`), proceed on
-   `review-report.md` alone — the `tactic`/`solution` columns are then unavailable, so any
-   finding whose AUTO classification would require a `tactic` or `solution` it cannot read
-   defaults to `MANUAL`.
-2. Resolve the **manuscript source**: prefer `<manuscript-path>`; otherwise read
-   the input recorded in `paper-profile.md`. It MUST be an editable text source
-   (markdown / LaTeX). If only a PDF exists, do NOT edit — skip to Step 4 and
-   emit the fixes as an instruction list for the author.
-3. Read `paper-normalized.md` to map each finding's coordinate to the quoted
-   source text (line numbers differ between the snapshot and the source — match
-   by the quoted evidence, never by raw line number).
+1. Resolve `WORKDIR` per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`), then the review directory: from `<paper-slug | review-dir>` or the most recent `<WORKDIR>/review/<slug>/`. Read `review-report.md` and `qa-sheet.md`. If `review-report.md` is missing, stop and tell the user to run `/prawf:peer-review` first. If `review-report.md` exists but `qa-sheet.md` does not (e.g. after `/prawf:peer-review --solo`, which writes no `qa-sheet.md`), proceed on `review-report.md` alone — the `tactic`/`solution` columns are then unavailable, so any finding whose AUTO classification would require a `tactic` or `solution` it cannot read defaults to `MANUAL`.
+2. Resolve the **manuscript source**: prefer `<manuscript-path>`; otherwise read the input recorded in `paper-profile.md`. It MUST be an editable text source (markdown / LaTeX). If only a PDF exists, do NOT edit — skip to Step 4 and emit the fixes as an instruction list for the author.
+3. Read `paper-normalized.md` to map each finding's coordinate to the quoted source text (line numbers differ between the snapshot and the source — match by the quoted evidence, never by raw line number).
 
 **→ Immediately proceed to Step 2.**
 
 ### Step 2 — Classify (direct)
 
-Walk every finding in `review-report.md`, joined with its `qa-sheet.md` row when
-`qa-sheet.md` is present (after `--solo` there is none — walk `review-report.md` alone and
-default every `tactic`/`solution`-dependent finding to `MANUAL`). Tag each `AUTO` or
-`MANUAL` per the rubric above. When in doubt, choose `MANUAL` — a missed easy fix is far
-safer than a wrong edit to someone's paper.
+Walk every finding in `review-report.md`, joined with its `qa-sheet.md` row when `qa-sheet.md` is present (after `--solo` there is none — walk `review-report.md` alone and default every `tactic`/`solution`-dependent finding to `MANUAL`). Tag each `AUTO` or `MANUAL` per the rubric above. When in doubt, choose `MANUAL` — a missed easy fix is far safer than a wrong edit to someone's paper.
 
 **→ Immediately proceed to Step 3.**
 
@@ -99,16 +65,12 @@ safer than a wrong edit to someone's paper.
 For each `AUTO` finding, in source order:
 
 1. Locate the target text in the manuscript by its quoted evidence/context.
-2. Apply the minimal localized `Edit`. Use the `solution` text verbatim where the
-   strategist supplied it; otherwise make the smallest change that resolves the
-   finding. **Never fabricate** data, results, citations, or references — if the
-   fix would require inventing content, re-tag it `MANUAL`.
+2. Apply the minimal localized `Edit`. Use the `solution` text verbatim where the strategist supplied it; otherwise make the smallest change that resolves the finding. **Never fabricate** data, results, citations, or references — if the fix would require inventing content, re-tag it `MANUAL`.
 3. If the target cannot be located unambiguously, re-tag it `MANUAL` (do not guess).
 
 With `--dry-run`, do NOT edit — record the intended before/after only.
 
-> **Safety**: edit the manuscript in place; work on a version-controlled or backed-up
-> copy. The `applied-fixes.md` changelog is the audit trail for reverting.
+> **Safety**: edit the manuscript in place; work on a version-controlled or backed-up copy. The `applied-fixes.md` changelog is the audit trail for reverting.
 
 **→ After all AUTO edits (or dry-run preview), immediately proceed to Step 4.**
 
@@ -116,11 +78,8 @@ With `--dry-run`, do NOT edit — record the intended before/after only.
 
 Write to the review directory:
 
-1. `applied-fixes.md` — one row per applied (or, in dry-run, would-apply) edit:
-   finding-id, axis, location, before → after, and the source rationale.
-2. `manual-fixes.md` — every `MANUAL` finding with its reason (unresolved /
-   needs-data / ambiguous / fatal-flaw), the `qa-sheet` question (when a `qa-sheet`
-   exists), and any drafted solution, so the author can act on it.
+1. `applied-fixes.md` — one row per applied (or, in dry-run, would-apply) edit: finding-id, axis, location, before → after, and the source rationale.
+2. `manual-fixes.md` — every `MANUAL` finding with its reason (unresolved / needs-data / ambiguous / fatal-flaw), the `qa-sheet` question (when a `qa-sheet` exists), and any drafted solution, so the author can act on it.
 
 Emit the terminal marker `prawf auto-fix: <N> applied, <M> manual`.
 
@@ -129,8 +88,7 @@ Emit the terminal marker `prawf auto-fix: <N> applied, <M> manual`.
 ## Hard Rules
 
 - Apply ONLY per the rubric; default to `MANUAL` on any doubt.
-- NEVER fabricate content, NEVER touch `unresolved` / `critical` / fatal-flaw
-  findings, NEVER re-run or re-judge the review.
+- NEVER fabricate content, NEVER touch `unresolved` / `critical` / fatal-flaw findings, NEVER re-run or re-judge the review.
 - NEVER edit anything outside the manuscript source and the review directory.
 - `--dry-run` must apply zero edits.
 

@@ -4,10 +4,10 @@
 
 ### imbas MCP Tools
 
-| Tool | Usage |
-|------|-------|
-| `mcp__plugin_imbas_tools__run_get` | Read state.json for a specific or most recent run |
-| `mcp__plugin_imbas_tools__run_list` | List all runs for a project |
+| Tool                                | Usage                                             |
+| ----------------------------------- | ------------------------------------------------- |
+| `mcp__plugin_imbas_tools__run_get`  | Read state.json for a specific or most recent run |
+| `mcp__plugin_imbas_tools__run_list` | List all runs for a project                       |
 
 ### Jira Operations ([OP:])
 

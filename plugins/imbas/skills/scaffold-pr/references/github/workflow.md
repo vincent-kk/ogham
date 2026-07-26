@@ -1,12 +1,10 @@
 # scaffold-pr Workflow — GitHub Provider
 
-Loaded when `config.provider === 'github'`. Handles Step 3 (sub-task fetching)
-from the shared skeleton (`../workflow.md`).
+Loaded when `config.provider === 'github'`. Handles Step 3 (sub-task fetching) from the shared skeleton (`../workflow.md`).
 
 ## Step 3 — Fetch sub-tasks
 
-1. Parse issue reference into `owner/repo` and issue number `N`.
-   Accept `owner/repo#N` or bare `#N` (using `config.github.repo`).
+1. Parse issue reference into `owner/repo` and issue number `N`. Accept `owner/repo#N` or bare `#N` (using `config.github.repo`).
 
 2. Fetch the issue body:
 
@@ -14,8 +12,7 @@ from the shared skeleton (`../workflow.md`).
    gh issue view <N> --repo <owner/repo> --json body,url --jq '{body: .body, url: .url}'
    ```
 
-3. Parse the issue body for the `## Sub-tasks` section.
-   Extract task-list items matching the pattern:
+3. Parse the issue body for the `## Sub-tasks` section. Extract task-list items matching the pattern:
 
    ```
    - [ ] #<number> <optional-title>

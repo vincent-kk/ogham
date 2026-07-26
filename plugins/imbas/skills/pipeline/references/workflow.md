@@ -104,8 +104,7 @@ Step 0.6 — Route
 
 ## Phase 1 — VALIDATE
 
-Replicates `imbas:validate` skill workflow with automatic gate evaluation.
-Skipped in devplan pipeline mode (input is Story keys).
+Replicates `imbas:validate` skill workflow with automatic gate evaluation. Skipped in devplan pipeline mode (input is Story keys).
 
 ```
 Step 1.1 — Run Initialization
@@ -279,13 +278,12 @@ Step 2.7 — Manifest Generation
 
 Replicates `imbas:manifest` skill workflow for "stories" type. No user confirmation — pipeline invocation is implicit consent.
 
-**Drift auto-resolution policy** (pipeline-specific override of manifest Step 2.5):
-Interactive [y/N] prompts from `imbas:manifest` Step 2.5 (Idempotency Check) are
-replaced by deterministic auto-answers on pipeline resume:
-  - DRIFT_DELETED → auto-answer "yes" (clear issue_ref, set status "pending", re-create)
-  - DRIFT_STATE   → auto-answer "yes" (mark status "skipped", do not re-create)
-  - Both events are recorded in the final pipeline report under "Drift Resolutions"
-  - Override: `--strict-drift` flag (if set) converts DRIFT_* into blocker STOP instead
+**Drift auto-resolution policy** (pipeline-specific override of manifest Step 2.5): Interactive [y/N] prompts from `imbas:manifest` Step 2.5 (Idempotency Check) are replaced by deterministic auto-answers on pipeline resume:
+
+- DRIFT_DELETED → auto-answer "yes" (clear issue_ref, set status "pending", re-create)
+- DRIFT_STATE → auto-answer "yes" (mark status "skipped", do not re-create)
+- Both events are recorded in the final pipeline report under "Drift Resolutions"
+- Override: `--strict-drift` flag (if set) converts DRIFT_* into blocker STOP instead
 
 ```
 Step 2.5.1 — Dry-Run Check
@@ -365,6 +363,7 @@ Step 2.5.4 — Post-Execution Label Transitions (stories type)
 Replicates `imbas:devplan` skill workflow (Steps 1-4) with auto-approval gate replacing Step 4 user review.
 
 **Two entry paths:**
+
 - FULL PIPELINE: arrives here after Phase 2.5 with stories-manifest populated
 - Devplan pipeline (Story keys input): enters directly with Stories from Jira
 

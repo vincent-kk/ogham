@@ -34,15 +34,15 @@ yarn clean              # 전체 dist / .tsbuildinfo 제거
 build = clean && version:sync && [build:rules] && [build:pages] && [build:compile] && [build:mcp] && [build:hooks] && build:compile-plugin
 ```
 
-| 스크립트               | 역할                                                                                    | 산출물                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 스크립트               | 역할                                                                                   | 산출물                                                             |
+| ---------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | `version:sync`         | `package.json` → `src/version.ts` + `.claude-plugin/plugin.json` (`injectVersion.mjs`) | —                                                                  |
-| `build:rules`          | built-in rule hash 동기화 (filid 전용)                                                  | rule registry                                                      |
-| `build:pages`          | settings / viewer / renderers HTML (esbuild)                                            | `public/`                                                          |
-| `build:compile`        | `tsc -p tsconfig.build.json`                                                            | `dist/` (라이브러리 export)                                        |
-| `build:mcp`            | MCP 서버 번들 (esbuild)                                                                 | `bridge/mcp-server.cjs`                                            |
-| `build:hooks`          | 훅 번들 (esbuild, 훅별 개별)                                                            | `bridge/<hook>.mjs`                                                |
-| `build:compile-plugin` | plugin-compiler 로 Codex/agy 어댑터 재생성 (`sync .`)                                   | `.codex-plugin/`·`mcp_config.json`·루트 `plugin.json`·`hooks.json` |
+| `build:rules`          | built-in rule hash 동기화 (filid 전용)                                                 | rule registry                                                      |
+| `build:pages`          | settings / viewer / renderers HTML (esbuild)                                           | `public/`                                                          |
+| `build:compile`        | `tsc -p tsconfig.build.json`                                                           | `dist/` (라이브러리 export)                                        |
+| `build:mcp`            | MCP 서버 번들 (esbuild)                                                                | `bridge/mcp-server.cjs`                                            |
+| `build:hooks`          | 훅 번들 (esbuild, 훅별 개별)                                                           | `bridge/<hook>.mjs`                                                |
+| `build:compile-plugin` | plugin-compiler 로 Codex/agy 어댑터 재생성 (`sync .`)                                  | `.codex-plugin/`·`mcp_config.json`·루트 `plugin.json`·`hooks.json` |
 
 - `build:compile-plugin` 이 배포 어댑터를 build 에 자동 편입한다 — 빌드-배포 시 항상 최신. 결정적·멱등(무변경이면 재작성 없음).
 - `build:plugin` = 런타임 번들만 빠르게 재빌드 (`build:pages && build:mcp && build:hooks`, clean/compile/compile-plugin 제외) — 훅·MCP 반복 개발용.

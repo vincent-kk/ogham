@@ -10,8 +10,7 @@
 
 - 모든 훅에서 공유하는 상수/함수 제공
 - MAENCOF_DIR/META_DIR 경로 상수
-- 지침 경로는 runtime host, 목적별 project instruction target,
-  `instructions/hook/status`로 해석
+- 지침 경로는 runtime host, 목적별 project instruction target, `instructions/hook/status`로 해석
 
 ### Ask first
 
@@ -23,6 +22,4 @@
 
 ## Dependencies
 
-- `@ogham/agent-artifacts/instructions/hook/status`,
-  `@ogham/agent-artifacts/targets/project/instructions`,
-  `@ogham/cross-platform/host-registry/descriptor`.
+- `@ogham/agent-artifacts/instructions/hook/status`, `@ogham/agent-artifacts/targets/project/instructions`, `@ogham/cross-platform/host-registry/descriptor`.

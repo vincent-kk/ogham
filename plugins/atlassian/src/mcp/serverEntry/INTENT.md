@@ -1,14 +1,13 @@
 ## Purpose
 
-esbuild CJS 번들 진입점. `node bridge/mcp-server.cjs` 실행 시
-MCP 서버를 stdio 모드로 기동하는 단일 책임 파일.
+esbuild CJS 번들 진입점. `node bridge/mcp-server.cjs` 실행 시 MCP 서버를 stdio 모드로 기동하는 단일 책임 파일.
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일             | 역할                                     |
+| ---------------- | ---------------------------------------- |
 | `serverEntry.ts` | `startServer()` 호출 및 치명적 오류 처리 |
-| `index.ts` | barrel export (빈 re-export) |
+| `index.ts`       | barrel export (빈 re-export)             |
 
 ## Boundaries
 

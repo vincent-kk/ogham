@@ -38,9 +38,9 @@ Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩,
 
 ## Dependencies
 
-| 대상                 | 이유                                           |
-| -------------------- | ---------------------------------------------- |
-| `node:http`          | HTTP 서버                                      |
+| 대상                 | 이유                                                                      |
+| -------------------- | ------------------------------------------------------------------------- |
+| `node:http`          | HTTP 서버                                                                 |
 | `@ogham/http-kit`    | inspectRequest · generateToken · parseBody · escapeJsonForHtml · sendJson |
-| `../../../../core/`  | `resolveEnvironment`                           |
-| `../../../../types/` | `SetupFormDataSchema`, `ServiceCredentials` 등 |
+| `../../../../core/`  | `resolveEnvironment`                                                      |
+| `../../../../types/` | `SetupFormDataSchema`, `ServiceCredentials` 등                            |

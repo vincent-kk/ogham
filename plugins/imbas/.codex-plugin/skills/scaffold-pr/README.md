@@ -4,9 +4,7 @@ Jira Story나 GitHub 이슈로부터 서브태스크 체크리스트가 포함�
 
 ## 개요
 
-이슈(Story, Task, Bug)의 메타데이터와 서브태스크 목록을 읽어, 해당 이슈 전용 브랜치를 생성하고 빈 커밋(empty commit)을 추가한 뒤 Draft PR을 생성한다.
-PR 본문에는 각 서브태스크가 체크리스트 형태로 포함되어 진행 상황을 추적할 수 있다.
-코드 변경 없이 인프라와 추적 구조만 먼저 구성할 때 유용하다.
+이슈(Story, Task, Bug)의 메타데이터와 서브태스크 목록을 읽어, 해당 이슈 전용 브랜치를 생성하고 빈 커밋(empty commit)을 추가한 뒤 Draft PR을 생성한다. PR 본문에는 각 서브태스크가 체크리스트 형태로 포함되어 진행 상황을 추적할 수 있다. 코드 변경 없이 인프라와 추적 구조만 먼저 구성할 때 유용하다.
 
 ## 사용법
 
@@ -29,22 +27,22 @@ PR 본문에는 각 서브태스크가 체크리스트 형태로 포함되어 �
 
 ## 브랜치 명명 규칙
 
-| 이슈 타입 | 접두사 | 예시 |
-|-----------|--------|------|
-| `Story` | `feature/` | `feature/PROJ-123` |
-| `Bug` | `bug/` | `bug/PROJ-456` |
-| `Task` | `task/` | `task/PROJ-789` |
-| 기타 | `feature/` | `feature/PROJ-000` |
+| 이슈 타입 | 접두사     | 예시               |
+| --------- | ---------- | ------------------ |
+| `Story`   | `feature/` | `feature/PROJ-123` |
+| `Bug`     | `bug/`     | `bug/PROJ-456`     |
+| `Task`    | `task/`    | `task/PROJ-789`    |
+| 기타      | `feature/` | `feature/PROJ-000` |
 
 ## 사용 도구
 
-| 도구 | 출처 | 용도 |
-|------|------|------|
-| `imbas:read-issue` | imbas 내부 스킬 | 이슈 메타데이터 및 서브태스크 조회 |
-| `mcp__plugin_imbas_tools__config_get` | imbas MCP | provider 설정 확인 |
-| `git` | Bash | 브랜치 및 빈 커밋 생성 |
-| `gh repo view` | GitHub CLI | 기본 브랜치 감지 |
-| `gh pr create` | GitHub CLI | PR 생성 |
+| 도구                                  | 출처            | 용도                               |
+| ------------------------------------- | --------------- | ---------------------------------- |
+| `imbas:read-issue`                    | imbas 내부 스킬 | 이슈 메타데이터 및 서브태스크 조회 |
+| `mcp__plugin_imbas_tools__config_get` | imbas MCP       | provider 설정 확인                 |
+| `git`                                 | Bash            | 브랜치 및 빈 커밋 생성             |
+| `gh repo view`                        | GitHub CLI      | 기본 브랜치 감지                   |
+| `gh pr create`                        | GitHub CLI      | PR 생성                            |
 
 에이전트 스폰 없음. 스킬이 직접 Git 및 GitHub CLI 명령을 실행한다.
 

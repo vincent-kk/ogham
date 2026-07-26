@@ -9,14 +9,14 @@ Videos 30s-5min. Balanced defaults work well.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 12 | Good coverage for medium-length content |
-| `-t` | 0.5 | Default threshold |
-| `--fps` | 5 | Default extraction rate |
-| `--max-frames` | 300 | Default cap |
-| `-s` | 720 | Default analysis resolution |
-| `-q` | 80 | Default quality |
+| Flag           | Value | Reasoning                               |
+| -------------- | ----- | --------------------------------------- |
+| `-n`           | 12    | Good coverage for medium-length content |
+| `-t`           | 0.5   | Default threshold                       |
+| `--fps`        | 5     | Default extraction rate                 |
+| `--max-frames` | 300   | Default cap                             |
+| `-s`           | 720   | Default analysis resolution             |
+| `-q`           | 80    | Default quality                         |
 
 ## Command
 

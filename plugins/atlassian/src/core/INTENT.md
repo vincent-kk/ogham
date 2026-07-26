@@ -4,13 +4,13 @@ Shared infrastructure modules for MCP tools: config, auth, environment detection
 
 ## Structure
 
-| Directory | Role |
-|---|---|
-| `configManager/` | Load/save config.json with Zod validation |
-| `authManager/` | Credential storage (plain JSON), header injection |
-| `environmentResolver/` | Cloud/Server detection, URL normalization |
-| `httpClient/` | Fetch wrapper with retry, SSRF guard, auth injection |
-| `connectionTester/` | Jira/Confluence connectivity test via core modules |
+| Directory              | Role                                                 |
+| ---------------------- | ---------------------------------------------------- |
+| `configManager/`       | Load/save config.json with Zod validation            |
+| `authManager/`         | Credential storage (plain JSON), header injection    |
+| `environmentResolver/` | Cloud/Server detection, URL normalization            |
+| `httpClient/`          | Fetch wrapper with retry, SSRF guard, auth injection |
+| `connectionTester/`    | Jira/Confluence connectivity test via core modules   |
 
 ## Conventions
 

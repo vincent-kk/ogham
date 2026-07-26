@@ -1,9 +1,6 @@
 ## Purpose
 
-`open_settings` 도구가 기동하는 설정 페이지 프런트엔드. `.filid/config.json`
-(8 규칙 enabled/severity/exempt, language, scan.maxDepth, additional-\* 배열)과
-현재 host target의 rule doc 적용 상태를 한 폼에서 편집한다. 웹 폼이므로 배포
-상태를 pre-check 로 표시할 수 있어 CLI 체크박스의 재선택 강제 결함이 없다.
+`open_settings` 도구가 기동하는 설정 페이지 프런트엔드. `.filid/config.json` (8 규칙 enabled/severity/exempt, language, scan.maxDepth, additional-\* 배열)과 현재 host target의 rule doc 적용 상태를 한 폼에서 편집한다. 웹 폼이므로 배포 상태를 pre-check 로 표시할 수 있어 CLI 체크박스의 재선택 강제 결함이 없다.
 
 ## Structure
 

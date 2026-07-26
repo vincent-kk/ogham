@@ -12,18 +12,13 @@ Reference documentation for `cross-review` is split into focused files.
 ## Cross-Reference Map
 
 - Writing `review-report.md` or `fix-requests.md`? → `templates.md`
-- Committee list for a complexity tier? → `contracts.md` →
-  "Complexity → Committee Mapping"
-- Validating an opinion frontmatter? → `contracts.md` → "Opinion
-  Frontmatter Contract"
-- Severity gate, consequence requirement, anti-inflation rules? →
-  `contracts.md` → "Severity Gate & Finding Discipline"
-- Verifier prompts and CONFIRMED/PLAUSIBLE/REFUTED semantics? →
-  `contracts.md` → "Verifier Verdict Ladder"
+- Committee list for a complexity tier? → `contracts.md` → "Complexity → Committee Mapping"
+- Validating an opinion frontmatter? → `contracts.md` → "Opinion Frontmatter Contract"
+- Severity gate, consequence requirement, anti-inflation rules? → `contracts.md` → "Severity Gate & Finding Discipline"
+- Verifier prompts and CONFIRMED/PLAUSIBLE/REFUTED semantics? → `contracts.md` → "Verifier Verdict Ladder"
 - Deriving the final verdict? → `contracts.md` → "Verdict Derivation"
 - Which MCP tool measures what, and when? → `phases/evidence.md`
-- Acceptance-claim scoping, aggregation, folding? → `contracts.md` →
-  "Acceptance Claims (criteria ledger)"
+- Acceptance-claim scoping, aggregation, folding? → `contracts.md` → "Acceptance Claims (criteria ledger)"
 - Advisory Notes / advisory ledger? → `templates.md`
 - Regression-testing the reviewer itself? → `calibration/calibration.md`
 

@@ -6,11 +6,11 @@
 
 ## Structure
 
-| 모듈 | 역할 |
-|------|------|
-| `fractalTree` | 디렉토리 스캔 + 트리 조립. `treeBuilder/` (트리 구성)과 `scanner/` (파일시스템 I/O)의 두 sub-organ을 포함 |
-| `organClassifier` | 7단계 우선순위 분류 (`INTENT.md` → `DETAIL.md` → 인프라 패턴 → 알려진 organ 이름 → `index` 파일 → leaf 여부 → 부작용 여부) |
-| `boundaryDetector` | `package.json`을 경계로 하여 파일 → 루트까지 조상 체인 수집, `INTENT.md`/`DETAIL.md` 유무 맵 반환 |
+| 모듈               | 역할                                                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `fractalTree`      | 디렉토리 스캔 + 트리 조립. `treeBuilder/` (트리 구성)과 `scanner/` (파일시스템 I/O)의 두 sub-organ을 포함                  |
+| `organClassifier`  | 7단계 우선순위 분류 (`INTENT.md` → `DETAIL.md` → 인프라 패턴 → 알려진 organ 이름 → `index` 파일 → leaf 여부 → 부작용 여부) |
+| `boundaryDetector` | `package.json`을 경계로 하여 파일 → 루트까지 조상 체인 수집, `INTENT.md`/`DETAIL.md` 유무 맵 반환                          |
 
 ## Conventions
 

@@ -1,15 +1,14 @@
 ## Purpose
 
-인증 주입, 재시도 로직, SSRF 방어를 갖춘 HTTP 클라이언트.
-외부 Atlassian REST API 호출의 유일한 진입점.
+인증 주입, 재시도 로직, SSRF 방어를 갖춘 HTTP 클라이언트. 외부 Atlassian REST API 호출의 유일한 진입점.
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일            | 역할                                         |
+| --------------- | -------------------------------------------- |
 | `httpClient.ts` | `executeRequest` — 재시도·인증·타임아웃 처리 |
-| `ssrfGuard.ts` | `validateUrl` — DNS 해석 기반 SSRF 방어 |
-| `index.ts` | barrel export |
+| `ssrfGuard.ts`  | `validateUrl` — DNS 해석 기반 SSRF 방어      |
+| `index.ts`      | barrel export                                |
 
 ## Boundaries
 

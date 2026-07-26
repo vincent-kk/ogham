@@ -6,23 +6,27 @@
 
 ## Structure
 
-| 모듈 | 역할 |
-|------|------|
-| `cacheManager` | 세션/프롬프트 캐시, 프랙탈 맵 관리 |
-| `projectHash` | 프로젝트 구조 해시 계산 |
-| `changeQueue` | 변경 기록 큐 |
+| 모듈           | 역할                                         |
+| -------------- | -------------------------------------------- |
+| `cacheManager` | 세션/프롬프트 캐시, 프랙탈 맵 관리           |
+| `projectHash`  | 프로젝트 구조 해시 계산                      |
+| `changeQueue`  | 변경 기록 큐                                 |
 | `configLoader` | `.filid/config.json` 로딩 및 프로젝트 초기화 |
 
 ## Boundaries
 
 ### Always do
+
 - 캐시 파일은 `getCacheDir()` 경로에만 저장
 
 ### Ask first
+
 - 캐시 디렉토리 구조 변경
 
 ### Never do
+
 - 프로젝트 소스 코드 직접 수정
 
 ## Dependencies
+
 - `../../lib/`, `../../types/`

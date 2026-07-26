@@ -18,17 +18,18 @@
 
 ## 1. 자막/콘텐츠 획득 방법론 비교
 
-| 방법 | 견고성 | 유지보수성 | ToS/법적 리스크 | poToken 대응 | 2026 적합성 |
-|------|--------|-----------|----------------|--------------|-------------|
-| (a) InnerTube 직접 호출(현재 방식) | 중(잘 짜면) / 하(수작업) | 나쁨 | 높음(비공식 API) | 전부 직접 부담(버전·visitorData·토큰·응답변형) | 보통 |
-| (b) 공식 Data API v3 `captions.download` | 높음(인가된 영상) | 높음 | **가장 낮음** | 무관(OAuth) | **낮음** — 본인 소유/인가 영상만, 호출당 200 quota |
-| (c) **youtubei.js (YouTube.js)** | InnerTube 추상화 최선 | 좋음(활발히 관리) | 높음(비공식) | `po_token`/`visitor_data`/client type 옵션 지원, BgUtils 결합 | **높음 — 권장 primary** |
-| (d) youtube-transcript류 | 스크립트용으론 OK, 프로덕션 약함 | 가변 | 높음 | 대부분 없음, 차단에 취약 | 낮음(포크 `@danielxceron/...`만 부분 작동) |
-| (e) yt-dlp 서브프로세스 | **실전 커버리지 최고** | 중(외부 바이너리 수명) | 높음(추출기 우회) | PO-token provider 플러그인 가장 완벽 | 높음(opt-in 폴백) |
-| (f) 레거시 timedtext API | 캡션 URL 알면 단순·빠름 | 낮음(비공식) | 높음 | 없음, poToken 없이 대부분 403 | **낮음**(사실상 차단 추세) |
-| (g) Whisper/STT 폴백 | 오디오만 얻으면 견고 | 중~높음(인프라 비용) | 권리/저장/동의 의존 | 캡션 poToken 회피(오디오는 별도 차단) | **최후 보루(권장)** |
+| 방법                                     | 견고성                           | 유지보수성             | ToS/법적 리스크     | poToken 대응                                                  | 2026 적합성                                        |
+| ---------------------------------------- | -------------------------------- | ---------------------- | ------------------- | ------------------------------------------------------------- | -------------------------------------------------- |
+| (a) InnerTube 직접 호출(현재 방식)       | 중(잘 짜면) / 하(수작업)         | 나쁨                   | 높음(비공식 API)    | 전부 직접 부담(버전·visitorData·토큰·응답변형)                | 보통                                               |
+| (b) 공식 Data API v3 `captions.download` | 높음(인가된 영상)                | 높음                   | **가장 낮음**       | 무관(OAuth)                                                   | **낮음** — 본인 소유/인가 영상만, 호출당 200 quota |
+| (c) **youtubei.js (YouTube.js)**         | InnerTube 추상화 최선            | 좋음(활발히 관리)      | 높음(비공식)        | `po_token`/`visitor_data`/client type 옵션 지원, BgUtils 결합 | **높음 — 권장 primary**                            |
+| (d) youtube-transcript류                 | 스크립트용으론 OK, 프로덕션 약함 | 가변                   | 높음                | 대부분 없음, 차단에 취약                                      | 낮음(포크 `@danielxceron/...`만 부분 작동)         |
+| (e) yt-dlp 서브프로세스                  | **실전 커버리지 최고**           | 중(외부 바이너리 수명) | 높음(추출기 우회)   | PO-token provider 플러그인 가장 완벽                          | 높음(opt-in 폴백)                                  |
+| (f) 레거시 timedtext API                 | 캡션 URL 알면 단순·빠름          | 낮음(비공식)           | 높음                | 없음, poToken 없이 대부분 403                                 | **낮음**(사실상 차단 추세)                         |
+| (g) Whisper/STT 폴백                     | 오디오만 얻으면 견고             | 중~높음(인프라 비용)   | 권리/저장/동의 의존 | 캡션 poToken 회피(오디오는 별도 차단)                         | **최후 보루(권장)**                                |
 
 요점:
+
 - **공식 API는 범용 불가** — 타인 영상 자막은 받을 수 없다. "본인 채널 추출" 특수 모드로만 의미.
 - **youtubei.js를 코어로** 두면 수작업 protobuf/regex/클라이언트 위장의 churn을 라이브러리가 대신 흡수한다.
 - **단일 방법에 의존하지 말 것** → 다계층 폴백.
@@ -90,6 +91,7 @@
 ```
 
 모듈 구성(관심사 분리 — 획득/정규화/후처리/전송/관측을 독립적으로):
+
 - `providers/TranscriptProvider.ts` — 공통 인터페이스
 - `providers/YoutubeJsProvider.ts` — primary
 - `providers/TimedTextProvider.ts` — 단순 캡션 폴백(주력 금지)
@@ -104,6 +106,7 @@
 - `errors.ts` — 타입드 에러 taxonomy
 
 라이브러리 선택:
+
 - InnerTube: **`youtubei.js`**
 - poToken(옵션): **`bgutils-js`**
 - MCP: **`@modelcontextprotocol/sdk`** (+ Streamable HTTP 필요 시)
@@ -135,13 +138,13 @@
 
 ## 8. 두 AI의 의견 차이 (참고)
 
-| 쟁점 | codex(설계/보수적) | antigravity(라이브 리서치/실용적) |
-|------|-------------------|-----------------------------------|
-| BgUtils/poToken | mandatory 금지, optional 인터페이스로 "BYO provider" | `youtubei.js + bgutils-js`를 1순위 권장 경로로 적극 채택 |
-| 2차 폴백 | timedtext 단순 폴백, youtube-transcript류 회의적 | `@danielxceron/youtube-transcript` 포크는 쓸 만하다고 평가 |
-| timedtext 현황 | 캡션 URL 알면 유효한 폴백 | "사실상 차단" — 매우 낮음 |
-| 프록시 | 명시적 config, 순수 로테이션은 리스크, 캐싱 우선 | 대규모 운영 시 주거용 프록시 회전 "필수" |
-| 법적 리스크 | ToS 표기 + 회피 기본값 금지 수준 | **DMCA 1201조 집단소송 동향** 강하게 경고 |
+| 쟁점            | codex(설계/보수적)                                   | antigravity(라이브 리서치/실용적)                          |
+| --------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
+| BgUtils/poToken | mandatory 금지, optional 인터페이스로 "BYO provider" | `youtubei.js + bgutils-js`를 1순위 권장 경로로 적극 채택   |
+| 2차 폴백        | timedtext 단순 폴백, youtube-transcript류 회의적     | `@danielxceron/youtube-transcript` 포크는 쓸 만하다고 평가 |
+| timedtext 현황  | 캡션 URL 알면 유효한 폴백                            | "사실상 차단" — 매우 낮음                                  |
+| 프록시          | 명시적 config, 순수 로테이션은 리스크, 캐싱 우선     | 대규모 운영 시 주거용 프록시 회전 "필수"                   |
+| 법적 리스크     | ToS 표기 + 회피 기본값 금지 수준                     | **DMCA 1201조 집단소송 동향** 강하게 경고                  |
 
 **종합 판단**: poToken은 antigravity 말대로 점점 불가피하지만, 공개 배포 패키지의 기본값으로 BgUtils/프록시 회피를 켜는 것은 codex의 보수적 입장(법적·유지보수 리스크)을 따라 **opt-in**으로 둔다. timedtext는 antigravity의 비관적 최신 평가를 신뢰해 **주력으로 삼지 않는다**. 법적으로는 회피 기술을 기본 번들하지 않고 문서로 명시(특히 상업적 대량 수집 시 DMCA 1201 검토 권고).
 

@@ -1,9 +1,9 @@
 ---
 name: rule
 user_invocable: true
-description: "[maencof:rule] Adds, edits, or removes AI behavioral rules in .claude/rules/, supporting global and path-conditional rules. Also migrates inline CLAUDE.md rules to dedicated rule files."
-argument-hint: "[mode] [name]"
-version: "1.1.0"
+description: '[maencof:rule] Adds, edits, or removes AI behavioral rules in .claude/rules/, supporting global and path-conditional rules. Also migrates inline CLAUDE.md rules to dedicated rule files.'
+argument-hint: '[mode] [name]'
+version: '1.1.0'
 complexity: medium
 context_layers: []
 orchestrator: configurator
@@ -24,35 +24,40 @@ Manage behavioral rules in `.claude/rules/` via conversation. Supports global ru
 
 ## Scope
 
-| Area | Path | Write |
-|------|------|-------|
-| Execution | `{CWD}/.claude/rules/*.md` | **Yes** |
-| Execution | `{CWD}/CLAUDE.md` | No — use `/maencof:instruct` |
-| Execution | `{CWD}/.claude/settings.local.json` | **Never** |
+| Area      | Path                                | Write                        |
+| --------- | ----------------------------------- | ---------------------------- |
+| Execution | `{CWD}/.claude/rules/*.md`          | **Yes**                      |
+| Execution | `{CWD}/CLAUDE.md`                   | No — use `/maencof:instruct` |
+| Execution | `{CWD}/.claude/settings.local.json` | **Never**                    |
 
 ## Workflow
 
 ### Step 1 — Display Current Rules
+
 Scan `.claude/rules/` and show registered rules (global vs conditional).
 
 ### Step 2 — Identify Intent
+
 Detect action from natural language or menu: add, edit, remove, show.
 
 ### Step 3 — Define Rule
+
 Collect rule content and scope (global or conditional with glob patterns).
 
 ### Step 4 — Create/Edit File
+
 Write rule file with optional `paths` frontmatter after user confirmation.
 
 ### Step 5 — Confirmation
+
 Report created/modified rule with file path, scope, and entry count.
 
 > Load `reference.md` for detailed step workflows, examples, and glob pattern reference.
 
 ## Resources
 
-| File | Content |
-|------|---------|
+| File           | Content                                                                               |
+| -------------- | ------------------------------------------------------------------------------------- |
 | `reference.md` | Detailed workflow steps, glob patterns, examples, error handling, acceptance criteria |
 
 ## Options
@@ -61,10 +66,10 @@ Report created/modified rule with file path, scope, and entry count.
 /maencof:rule [mode] [name]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `list` | Display current rule list |
-| `add` | Add a new rule (interactive) |
-| `edit <name>` | Edit an existing rule |
-| `remove <name>` | Remove a rule file |
-| `show <name>` | Display a specific rule's content |
+| Option          | Description                       |
+| --------------- | --------------------------------- |
+| `list`          | Display current rule list         |
+| `add`           | Add a new rule (interactive)      |
+| `edit <name>`   | Edit an existing rule             |
+| `remove <name>` | Remove a rule file                |
+| `show <name>`   | Display a specific rule's content |

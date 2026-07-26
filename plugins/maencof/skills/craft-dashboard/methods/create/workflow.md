@@ -91,11 +91,7 @@ Do not echo the priming file to the user as a chat-rendered code block. It is fo
 
 ### Inlined refine contract (summary)
 
-See `../../knowledge/refine-protocol.md` for the full shared summary (one
-question per turn, 5–7 question budget for CREATE (hard cap 7),
-immutable-object preservation, Phase 3 stop rule, token-budget safety).
-Both CREATE and MUTATE workflows reference the same file — do not
-duplicate the contract here.
+See `../../knowledge/refine-protocol.md` for the full shared summary (one question per turn, 5–7 question budget for CREATE (hard cap 7), immutable-object preservation, Phase 3 stop rule, token-budget safety). Both CREATE and MUTATE workflows reference the same file — do not duplicate the contract here.
 
 ---
 
@@ -475,24 +471,18 @@ Two sentinel kinds split responsibility cleanly:
 **AUTO-MANAGED zones** — owned by the skill. Never preserve user edits inside:
 
 - Panel imports + panel grid entries inside `Dashboard.tsx`.
-- Domain route imports + registrations inside `mountRoutes()` of
-  `routes/index.ts`.
+- Domain route imports + registrations inside `mountRoutes()` of `routes/index.ts`.
 
 **USER-EDIT zones** — owned by the user. Preserve verbatim:
 
 - `dataKey` props, color mappings, chart axis labels in panel components.
-- `layerFilter` literal in domain routes (single literal, not the whole node
-  selection block).
-- `post-aggregate transform` block at the END of an aggregator (small chain
-  applied after the LLM-generated bucket logic).
+- `layerFilter` literal in domain routes (single literal, not the whole node selection block).
+- `post-aggregate transform` block at the END of an aggregator (small chain applied after the LLM-generated bucket logic).
 
 Forbidden uses (both markers):
 
-- Wrapping an entire function body. The function body is generated code and
-  MUTATE must be able to regenerate it.
-- Marking the only copy of business logic. Generated logic is always
-  re-derivable from the spec; user logic that diverges goes into the
-  post-aggregate transform USER-EDIT zone.
+- Wrapping an entire function body. The function body is generated code and MUTATE must be able to regenerate it.
+- Marking the only copy of business logic. Generated logic is always re-derivable from the spec; user logic that diverges goes into the post-aggregate transform USER-EDIT zone.
 
 ### Vault path resolution
 
@@ -500,12 +490,7 @@ Generated `<target>/backend/src/config.ts` reads `VAULT_ROOT` from env or falls 
 
 ### Domain Route Pattern
 
-**Response envelope (contract):** every Domain Route returns
-`{ items, window?, durationMs }` where `items` IS the aggregator's return value
-verbatim (array for `count-*`, single object for `sum`). Frontend panels read
-`data.items` and call `api.domain<{ items: … }>(...)`; never emit
-`points`/`groups`/`values` keys. See ../../knowledge/visualization-catalog.md
-"Response envelope + typing rule".
+**Response envelope (contract):** every Domain Route returns `{ items, window?, durationMs }` where `items` IS the aggregator's return value verbatim (array for `count-*`, single object for `sum`). Frontend panels read `data.items` and call `api.domain<{ items: … }>(...)`; never emit `points`/`groups`/`values` keys. See ../../knowledge/visualization-catalog.md "Response envelope + typing rule".
 
 ```typescript
 // backend/src/routes/<kebab>.ts
@@ -605,23 +590,13 @@ export async function <camelAgg>(
 }
 ```
 
-The bucket logic and projection live outside USER-EDIT so MUTATE can
-regenerate them when `spec.dataDomains[i].aggregate`, `.filterIntent`, or
-`.include` change. The two USER-EDIT blocks (pre-aggregate filter and
-post-aggregate transform) are the only zones preserved verbatim across
-MUTATE patches.
+The bucket logic and projection live outside USER-EDIT so MUTATE can regenerate them when `spec.dataDomains[i].aggregate`, `.filterIntent`, or `.include` change. The two USER-EDIT blocks (pre-aggregate filter and post-aggregate transform) are the only zones preserved verbatim across MUTATE patches.
 
 ### Chained domain (`fromDomain`) handling
 
-When `spec.dataDomains[i].fromDomain` is set, the child domain consumes the
-parent domain's pre-aggregated items instead of `graphStore.allNodes()`.
-Chains can be N levels deep, so calling the parent aggregator directly with
-`graphStore.byLayer.get(parentLayer)` is **only correct for the
-root** — a parent that is itself chained expects its own parent's output,
-not raw nodes.
+When `spec.dataDomains[i].fromDomain` is set, the child domain consumes the parent domain's pre-aggregated items instead of `graphStore.allNodes()`. Chains can be N levels deep, so calling the parent aggregator directly with `graphStore.byLayer.get(parentLayer)` is **only correct for the root** — a parent that is itself chained expects its own parent's output, not raw nodes.
 
-To make any chain depth safe, Phase 4 Turn 7 authors a uniform service
-function per domain:
+To make any chain depth safe, Phase 4 Turn 7 authors a uniform service function per domain:
 
 ```typescript
 // backend/src/services/domain-<kebab>.ts (NEW — one per dataDomain)
@@ -692,15 +667,9 @@ export async function resolveDomain(
 }
 ```
 
-Phase 4 Turn 7 iterates dataDomains in `authorOrder` and patches both
-AUTO-MANAGED blocks (`import { get<Pascal>Items } from './domain-<kebab>.js';`
-plus `case '<kebab>': return get<Pascal>Items(app);`). MUTATE updates these
-the same way.
+Phase 4 Turn 7 iterates dataDomains in `authorOrder` and patches both AUTO-MANAGED blocks (`import { get<Pascal>Items } from './domain-<kebab>.js';` plus `case '<kebab>': return get<Pascal>Items(app);`). MUTATE updates these the same way.
 
-The child aggregator's signature still accepts the parent's output type
-(typically `unknown[]` or a domain-specific shape). Cycles in `fromDomain`
-remain a spec error — Phase 3 schema validation MUST detect them before
-scaffold.
+The child aggregator's signature still accepts the parent's output type (typically `unknown[]` or a domain-specific shape). Cycles in `fromDomain` remain a spec error — Phase 3 schema validation MUST detect them before scaffold.
 
 ---
 
@@ -722,9 +691,7 @@ scaffold.
 
 ### Run-skill generation
 
-Unless `--no-run-skill` is passed, author a vault skill the user can invoke to
-launch this dashboard. It is written **outside `<target>`**, so confirm first
-(SKILL.md "Ask first").
+Unless `--no-run-skill` is passed, author a vault skill the user can invoke to launch this dashboard. It is written **outside `<target>`**, so confirm first (SKILL.md "Ask first").
 
 ```
 1. Resolve <vault> exactly as config.ts does:
@@ -744,8 +711,7 @@ launch this dashboard. It is written **outside `<target>`**, so confirm first
    Verify no literal "{{" remains.
 ```
 
-**Run-skill template** (English — it is a Claude component file; author with the
-substitutions above):
+**Run-skill template** (English — it is a Claude component file; author with the substitutions above):
 
 ````markdown
 ---
@@ -800,9 +766,7 @@ The server keeps running in the background. To stop it, read the `pid` from
   `.maencof/`.
 ````
 
-If the run-skill write is declined or `--no-run-skill` is set, omit the
-`/run-<slug>` line from the hand-off message and tell the user to use
-`make serve` directly.
+If the run-skill write is declined or `--no-run-skill` is set, omit the `/run-<slug>` line from the hand-off message and tell the user to use `make serve` directly.
 
 ### Hand-off message
 
@@ -824,19 +788,15 @@ whatever port the backend actually bound. The bound port + URL are written to
 <target>/.dashboard-runtime.json.
 ```
 
-Drop the `/run-<slug>` line when the run-skill was skipped (`--no-run-skill` or
-declined).
+Drop the `/run-<slug>` line when the run-skill was skipped (`--no-run-skill` or declined).
 
 ### Failure handling
 
 - `npm install` fails: surface npm error, suggest `--registry` flag, do not retry blindly.
-- `npm run build` fails: print TypeScript errors, ask the user to inspect.
-  Re-entry options once the user has investigated:
+- `npm run build` fails: print TypeScript errors, ask the user to inspect. Re-entry options once the user has investigated:
   - Spec is wrong → `/maencof:craft-dashboard mutate <target>` to revise the spec.
-  - Generated code only → `cd <target> && npm run build` after manual fix.
-    Partial output stays under `<target>/` so the user can read what was authored.
-- Validation fails: keep partial output (do not delete) for inspection; report
-  the failing field path and which Phase 4 sub-step produced it.
+  - Generated code only → `cd <target> && npm run build` after manual fix. Partial output stays under `<target>/` so the user can read what was authored.
+- Validation fails: keep partial output (do not delete) for inspection; report the failing field path and which Phase 4 sub-step produced it.
 
 ---
 

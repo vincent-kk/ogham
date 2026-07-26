@@ -1,7 +1,6 @@
 ## Purpose
 
-codex-cli `codex exec` 의 JSONL stdout 을 라인 단위로 파싱해
-`{ threadId, response, resolvedModel }` 을 추출. 알 수 없는 이벤트 shape 는 silently skip.
+codex-cli `codex exec` 의 JSONL stdout 을 라인 단위로 파싱해 `{ threadId, response, resolvedModel }` 을 추출. 알 수 없는 이벤트 shape 는 silently skip.
 
 ## Structure
 

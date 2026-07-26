@@ -1,8 +1,6 @@
 # scaffold-pr Workflow — Provider-agnostic skeleton
 
-This file defines the overall flow. Sub-task fetching (Step 3) is delegated to the
-provider-specific workflow file (`jira/workflow.md` or `github/workflow.md`),
-selected by `config.provider`. Steps 0, 1, 2, 4 are shared.
+This file defines the overall flow. Sub-task fetching (Step 3) is delegated to the provider-specific workflow file (`jira/workflow.md` or `github/workflow.md`), selected by `config.provider`. Steps 0, 1, 2, 4 are shared.
 
 ## Step 0 — Provider gate
 
@@ -54,8 +52,7 @@ The remaining shared steps (branch creation, empty commit, PR build + create) al
    | Other      | `feature/` |
 
 3. Branch name: `{prefix}{issue-key}` (e.g., `feature/PROJ-123`, `bug/PROJ-456`).
-   - For GitHub issues: use the naming defined in `github/workflow.md` —
-     `{prefix}{number}` (e.g., `feature/42`; avoids `#` and other special characters).
+   - For GitHub issues: use the naming defined in `github/workflow.md` — `{prefix}{number}` (e.g., `feature/42`; avoids `#` and other special characters).
 4. Check if branch already exists:
 
    ```bash

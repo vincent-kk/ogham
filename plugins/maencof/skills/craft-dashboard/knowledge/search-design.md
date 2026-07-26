@@ -85,27 +85,15 @@ GET /api/search?mode=tag&q=ai&prefix=true
      }
 ```
 
-Both exact and prefix matching exposed. The same `toHit` projection is
-applied to lexical and backlinks responses so every `SearchResponse.items`
-member is a `SearchHit` regardless of mode.
+Both exact and prefix matching exposed. The same `toHit` projection is applied to lexical and backlinks responses so every `SearchResponse.items` member is a `SearchHit` regardless of mode.
 
 ---
 
 ## Backlinks
 
-Backlinks is **path-keyed, not a free-text mode**. The request is
-`GET /api/search?mode=backlinks&path=<vault-rel-path>` and the response shape
-differs from text search, so the frontend consumes it via `api.backlinks(path)`
-(see `interfaces.md`) from a dedicated "backlinks of X" panel — NOT from the
-global `SearchBar`, which offers only the text-query modes (`lexical` / `tag` /
-`semantic`). Never wire `backlinks` into the SearchBar toggle row, and never
-call `api.search('backlinks', …)` — the unified `search()` signature does not
-include it.
+Backlinks is **path-keyed, not a free-text mode**. The request is `GET /api/search?mode=backlinks&path=<vault-rel-path>` and the response shape differs from text search, so the frontend consumes it via `api.backlinks(path)` (see `interfaces.md`) from a dedicated "backlinks of X" panel — NOT from the global `SearchBar`, which offers only the text-query modes (`lexical` / `tag` / `semantic`). Never wire `backlinks` into the SearchBar toggle row, and never call `api.search('backlinks', …)` — the unified `search()` signature does not include it.
 
-Backlinks does not flow through `SearchResponse.items` because its
-payload shape is fundamentally different: inbound/outbound path arrays
-plus optional cross-layer edges. The handler resolves each path to its
-`KnowledgeNode` via `graphStore.nodes` and projects to `SearchHit`:
+Backlinks does not flow through `SearchResponse.items` because its payload shape is fundamentally different: inbound/outbound path arrays plus optional cross-layer edges. The handler resolves each path to its `KnowledgeNode` via `graphStore.nodes` and projects to `SearchHit`:
 
 ```typescript
 function hitsForPaths(paths: string[]): SearchHit[] {
@@ -126,11 +114,7 @@ GET /api/search?mode=backlinks&path=02_Derived/foo.md
      }
 ```
 
-The response shape is `{ mode: 'backlinks'; inbound: SearchHit[];
-outbound: SearchHit[]; crossLayer: KnowledgeEdge[] }` — frontend
-consumers MUST handle this branch separately from the unified
-`SearchResponse`. Cross-layer edges (via L5-Boundary) returned
-separately so UI can highlight them.
+The response shape is `{ mode: 'backlinks'; inbound: SearchHit[]; outbound: SearchHit[]; crossLayer: KnowledgeEdge[] }` — frontend consumers MUST handle this branch separately from the unified `SearchResponse`. Cross-layer edges (via L5-Boundary) returned separately so UI can highlight them.
 
 ---
 
@@ -214,11 +198,7 @@ app.get('/api/search', async (req, reply) => {
 | `@ogham/maencof` not installed AND mode === 'semantic'  | 501       |
 | Valid request                                           | 200       |
 
-**Precedence is fixed**: 400 (union) → 404 (spec) → 501 (loadSA). Each
-check runs only after the previous one passes. Never cast `req.query`
-straight to `SearchQuery` — validate `mode` against `KNOWN_MODES` first
-so unknown values never reach the `spec.search.modes.includes(...)`
-test (which would misclassify them as "disabled" instead of "unknown").
+**Precedence is fixed**: 400 (union) → 404 (spec) → 501 (loadSA). Each check runs only after the previous one passes. Never cast `req.query` straight to `SearchQuery` — validate `mode` against `KNOWN_MODES` first so unknown values never reach the `spec.search.modes.includes(...)` test (which would misclassify them as "disabled" instead of "unknown").
 
 ### Why not call maencof MCP
 
@@ -264,9 +244,7 @@ Frontend uses `score` to sort and `matches` to render highlights inside the titl
 
 When `spec.search.modes` has no text-query mode, `SearchBar` returns `null` — no DOM, no toggle, no input. When only one text mode is configured, the toggle row is omitted but the input remains. `backlinks` is excluded from the SearchBar's modes (it is path-keyed — see "Backlinks"); a spec whose `search.modes` is only `['backlinks']` renders the SearchBar as `null`, and backlinks is shown by a dedicated panel instead.
 
-SearchBar is **self-contained** — no external `useDebounce` hook, no
-`SearchResults` import, no `../api/types` module. The pattern below is the
-only file the LLM authors for the search UI:
+SearchBar is **self-contained** — no external `useDebounce` hook, no `SearchResults` import, no `../api/types` module. The pattern below is the only file the LLM authors for the search UI:
 
 ```tsx
 // <target>/frontend/src/components/SearchBar.tsx (authored during Phase 4)
@@ -424,8 +402,6 @@ Spec's `search.modes` controls both backend route enablement and frontend UI at 
 - `modes: ['lexical', 'tag']` → tag chips visible; backlinks/semantic hidden
 - `modes: []` → SearchBar renders `null` (no DOM, no toggle, no input)
 
-`backlinks`, even when enabled in `search.modes`, never appears as a SearchBar
-text toggle — it is path-keyed and surfaced by a dedicated panel via
-`api.backlinks(path)` (see "Backlinks").
+`backlinks`, even when enabled in `search.modes`, never appears as a SearchBar text toggle — it is path-keyed and surfaced by a dedicated panel via `api.backlinks(path)` (see "Backlinks").
 
 The SearchBar component file is always authored at scaffold time and always imported by `Dashboard.tsx`. Runtime gating happens inside the component via `/api/spec`. `fuse.js` lives **only in the backend** — frontend never imports it. When the user later enables search there is no frontend dependency change required.

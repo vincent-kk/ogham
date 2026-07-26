@@ -163,12 +163,7 @@ Both hook bundles currently land near 3.3 KB minified and use only Node builtins
 
 ## Disk Layout
 
-cennad stores persistent state under `~/.claude/plugins/cennad/` by default.
-Set `CENNAD_CONFIG_PATH` to point cennad at a dedicated alternate directory.
-`CLAUDE_PLUGIN_DATA` and `CLAUDE_PLUGIN_DADA` are ignored for cennad storage.
-If an alternate home has no readable config, cennad may read
-`~/.claude/plugins/cennad/config.json` as a read-only fallback; it does not copy
-or migrate that file, and saves still go to the active home.
+cennad stores persistent state under `~/.claude/plugins/cennad/` by default. Set `CENNAD_CONFIG_PATH` to point cennad at a dedicated alternate directory. `CLAUDE_PLUGIN_DATA` and `CLAUDE_PLUGIN_DADA` are ignored for cennad storage. If an alternate home has no readable config, cennad may read `~/.claude/plugins/cennad/config.json` as a read-only fallback; it does not copy or migrate that file, and saves still go to the active home.
 
 ```
 ~/.claude/plugins/cennad/

@@ -34,8 +34,7 @@
    - If dependencies not met → display warning and confirm with user.
 3. Call `mcp__plugin_imbas_tools__config_set` with `{ "provider": "<PROVIDER>" }`.
 4. If switching to `local` from a remote provider:
-   - Display banner: "Switching to local will not migrate existing remote issues.
-     Export manually before changing provider."
+   - Display banner: "Switching to local will not migrate existing remote issues. Export manually before changing provider."
 5. If switching to a remote provider:
    - Execute cache population for the new provider (Step 5 of Init Workflow).
 6. Display updated provider setting.
@@ -47,34 +46,21 @@
 1. Call `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
 2. Display label table:
 
-   Key | Value | Applied When
-   -----------------+------------------+-------------------------------
-   managed | <value> | Issue creation (all types)
-   review_pending | <value> | Phase 2 complete
-   review_complete | <value> | Review approved
-   dev_waiting | <value> | Phase 3.5 complete
-   dev_in_progress | <value> | (external trigger only)
-   dev_done | <value> | (external trigger only)
+   Key | Value | Applied When -----------------+------------------+------------------------------- managed | <value> | Issue creation (all types) review_pending | <value> | Phase 2 complete review_complete | <value> | Review approved dev_waiting | <value> | Phase 3.5 complete dev_in_progress | <value> | (external trigger only) dev_done | <value> | (external trigger only)
 
 ### labels edit
 
-1. Call `mcp__plugin_imbas_tools__open_settings` (absolute `project_root`) — the
-   settings page's Labels section edits all six values with the current
-   values prefilled. Dispatch on `status` as in the init workflow (Step 3).
-2. Headless fallback: call `mcp__plugin_imbas_tools__config_set` with an updated
-   `labels` section from chat-provided values.
+1. Call `mcp__plugin_imbas_tools__open_settings` (absolute `project_root`) — the settings page's Labels section edits all six values with the current values prefilled. Dispatch on `status` as in the init workflow (Step 3).
+2. Headless fallback: call `mcp__plugin_imbas_tools__config_set` with an updated `labels` section from chat-provided values.
 3. Display confirmation with updated values.
 
 ### labels provision (GitHub only)
 
-1. If `config.provider !== 'github'`:
-   Display: "Provisioning is GitHub-only. Jira labels are free-form and created automatically."
-   Return.
+1. If `config.provider !== 'github'`: Display: "Provisioning is GitHub-only. Jira labels are free-form and created automatically." Return.
 2. Load `config.labels` values via `mcp__plugin_imbas_tools__config_get`.
 3. Run: `gh label list --repo <config.github.repo> --json name` → parse existing label names.
 4. Compute missing labels: config label values NOT in existing set.
-5. For each missing label:
-   `gh label create "<value>" --repo <config.github.repo> --color c5def5`
+5. For each missing label: `gh label create "<value>" --repo <config.github.repo> --color c5def5`
 6. Report: "N created, M already existed."
 
 ### labels sync
@@ -86,10 +72,8 @@
      - Missing in repo: list with "⚠ Missing" marker.
      - Present in repo: list with "✓ Synced" marker.
    - Display summary table. If missing labels found, suggest `setup labels provision`.
-3. [jira]
-   Display: "Jira labels are free-form — sync not applicable."
-4. [local]
-   Display: "Local provider — sync not applicable."
+3. [jira] Display: "Jira labels are free-form — sync not applicable."
+4. [local] Display: "Local provider — sync not applicable."
 
 ## clear-temp
 

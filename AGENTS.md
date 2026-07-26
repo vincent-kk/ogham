@@ -1,4 +1,5 @@
 <!-- FILID:START:filid_fca-policy.md -->
+
 # FCA-AI Rules
 
 **Every module is a fractal. Every boundary is enforced. The graph is a DAG.**
@@ -182,9 +183,11 @@ Before any implementation that touches a fractal module:
 4. Implement the change.
 5. Run `/filid:scan` and clear new findings — `warning` findings count as findings;
    do not declare compliance while they remain.
+
 <!-- FILID:END:filid_fca-policy.md -->
 
 <!-- SEIRI:START:seiri_agent-legible.md -->
+
 # Agent-Legible Code
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >
@@ -262,6 +265,7 @@ framework — label framework conventions and leave them standing.
 <!-- SEIRI:END:seiri_agent-legible.md -->
 
 <!-- SEIRI:START:seiri_public-contract.md -->
+
 # Public Contract
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >
@@ -328,23 +332,27 @@ notebook with no module boundary — there is no contract to keep small.
 <!-- SEIRI:END:seiri_public-contract.md -->
 
 <!-- SEIRI:START:seiri_test-validity.md -->
+
 ---
+
 paths:
-  - '*.test.*'
-  - '*.spec.*'
-  - '*_test.*'
-  - '*_spec.*'
-  - 'test_*.*'
-  - '*Test.*'
-  - '*Tests.*'
-  - '*Spec.*'
-  - 'conftest.py'
-  - '__tests__'
-  - 'test'
-  - 'tests'
-  - 'spec'
-  - 'specs'
-  - 'e2e'
+
+- '_.test._'
+- '_.spec._'
+- '_\_test._'
+- '_\_spec._'
+- 'test__._'
+- '_Test._'
+- '_Tests._'
+- '_Spec._'
+- 'conftest.py'
+- '**tests**'
+- 'test'
+- 'tests'
+- 'spec'
+- 'specs'
+- 'e2e'
+
 ---
 
 # Test Validity
@@ -455,6 +463,7 @@ fail proves nothing either way.
 <!-- SEIRI:END:seiri_test-validity.md -->
 
 <!-- SEIRI:START:seiri_reuse-first.md -->
+
 # Reuse First
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >
@@ -531,6 +540,7 @@ once the first patterns exist.
 <!-- SEIRI:END:seiri_reuse-first.md -->
 
 <!-- SEIRI:START:seiri_naming.md -->
+
 # Naming
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >
@@ -597,6 +607,7 @@ don't fight its output.
 <!-- SEIRI:END:seiri_naming.md -->
 
 <!-- SEIRI:START:seiri_structure.md -->
+
 # Structure
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >
@@ -677,6 +688,7 @@ a generator owns that structure; change the generator or leave it be
 <!-- SEIRI:END:seiri_structure.md -->
 
 <!-- SEIRI:START:seiri_function-boundaries.md -->
+
 # Function Boundaries
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >
@@ -766,6 +778,7 @@ to the convention.
 <!-- SEIRI:END:seiri_function-boundaries.md -->
 
 <!-- SEIRI:START:seiri_context-efficiency.md -->
+
 # Context Efficiency
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >
@@ -839,6 +852,7 @@ one broad read, reorient, and return to targeted reads.
 <!-- SEIRI:END:seiri_context-efficiency.md -->
 
 <!-- SEIRI:START:seiri_cognitive-discipline.md -->
+
 # Cognitive Discipline
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) >

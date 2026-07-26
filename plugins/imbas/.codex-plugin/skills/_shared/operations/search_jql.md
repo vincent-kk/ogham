@@ -4,9 +4,7 @@ Search for issues using JQL (Jira Query Language).
 
 ## Provider Resolution
 
-The sections below document the Jira semantics. When a skill invokes this
-operation without a provider-specific workflow file (e.g., `split`), resolve
-by `config.provider`:
+The sections below document the Jira semantics. When a skill invokes this operation without a provider-specific workflow file (e.g., `split`), resolve by `config.provider`:
 
 - `jira` — Jira MCP tool or REST endpoint below
 - `github` — `gh issue list --repo <owner/repo> --label <type:label> --search "<terms>" --json number,title,labels,state`

@@ -6,10 +6,10 @@ Atlassian URL을 검사해 Cloud/Server 환경을 판별하고, API 버전 선�
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일                     | 역할                                                                    |
+| ------------------------ | ----------------------------------------------------------------------- |
 | `environmentResolver.ts` | `resolveEnvironment`, `getApiVersion` 구현, `EnvironmentInfo` 타입 정의 |
-| `index.ts` | 배럴 재내보내기 (타입 포함) |
+| `index.ts`               | 배럴 재내보내기 (타입 포함)                                             |
 
 ## Boundaries
 
@@ -33,7 +33,7 @@ Atlassian URL을 검사해 Cloud/Server 환경을 판별하고, API 버전 선�
 
 ## Dependencies
 
-| 대상 | 이유 |
-|---|---|
+| 대상               | 이유                     |
+| ------------------ | ------------------------ |
 | `../../constants/` | `CLOUD_HOSTNAME_PATTERN` |
-| `../../utils/` | `extractHostname` |
+| `../../utils/`     | `extractHostname`        |

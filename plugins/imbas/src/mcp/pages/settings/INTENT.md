@@ -1,9 +1,6 @@
 ## Purpose
 
-`open_settings` 도구가 기동하는 설정 페이지 프런트엔드. `.imbas/config.json`
-전체(provider, project 참조, 라이프사이클 라벨 6종, 언어 4종, LLM 모델·subtask
-한도, provider별 고급 섹션)를 한 폼에서 편집한다. 세션만 아는 데이터(가용
-provider, 감지된 repo, Jira 프로젝트 목록)는 LLM 이 `bootstrap` 인자로 주입한다.
+`open_settings` 도구가 기동하는 설정 페이지 프런트엔드. `.imbas/config.json` 전체(provider, project 참조, 라이프사이클 라벨 6종, 언어 4종, LLM 모델·subtask 한도, provider별 고급 섹션)를 한 폼에서 편집한다. 세션만 아는 데이터(가용 provider, 감지된 repo, Jira 프로젝트 목록)는 LLM 이 `bootstrap` 인자로 주입한다.
 
 ## Structure
 

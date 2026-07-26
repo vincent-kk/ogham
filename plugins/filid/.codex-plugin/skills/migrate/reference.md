@@ -1,7 +1,6 @@
 # migrate Reference
 
-Detailed reference for the `migrate.mjs` script that handles CLAUDE.md/SPEC.md
-to INTENT.md/DETAIL.md batch migration.
+Detailed reference for the `migrate.mjs` script that handles CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md batch migration.
 
 ---
 
@@ -11,8 +10,7 @@ to INTENT.md/DETAIL.md batch migration.
 skills/migrate/migrate.mjs
 ```
 
-Runs on Node.js (the same runtime Claude Code itself uses) — no `bash`, `find`,
-or `sed` required, so it behaves identically on macOS, Linux, and Windows.
+Runs on Node.js (the same runtime Claude Code itself uses) — no `bash`, `find`, or `sed` required, so it behaves identically on macOS, Linux, and Windows.
 
 ## Usage
 
@@ -39,8 +37,7 @@ The script recursively scans for `CLAUDE.md` and `SPEC.md` files, excluding:
 - `.claude/`
 - `.claude-plugin/`
 
-For each file found, it checks if the target name already exists in the same
-directory:
+For each file found, it checks if the target name already exists in the same directory:
 
 - `CLAUDE.md` + `INTENT.md` coexist → **conflict**, skipped
 - `SPEC.md` + `DETAIL.md` coexist → **conflict**, skipped
@@ -79,14 +76,11 @@ Renamed: 7 files
 
 ## Phase 3 — Scoped Reference Update
 
-Only runs with `--execute`. Uses **relative-path-based scoped replacement** to
-avoid unintended changes to files outside renamed directories.
+Only runs with `--execute`. Uses **relative-path-based scoped replacement** to avoid unintended changes to files outside renamed directories.
 
 ### How it works
 
-Phase 2 collects which directories had renames (`_renamed_claude_dirs`,
-`_renamed_spec_dirs`). Phase 3 then only searches files **under those
-directories**, using depth-aware patterns:
+Phase 2 collects which directories had renames (`_renamed_claude_dirs`, `_renamed_spec_dirs`). Phase 3 then only searches files **under those directories**, using depth-aware patterns:
 
 | File depth (relative to renamed dir) | Patterns replaced          |
 | ------------------------------------ | -------------------------- |
@@ -100,16 +94,11 @@ The same logic applies for `SPEC.md` → `DETAIL.md`.
 **Files outside renamed directories are never modified.** This prevents:
 
 - Skills prompts referencing `CLAUDE.md` as a concept from being changed
-- Logic code (e.g., `context-injector.ts`) with `CLAUDE.md` string constants
-  from being altered when the file is not under a renamed directory
+- Logic code (e.g., `context-injector.ts`) with `CLAUDE.md` string constants from being altered when the file is not under a renamed directory
 
-Within a renamed directory the replacement is plain substring matching (a
-faithful port of the original `sed` pipeline): a depth-0 file mentioning
-`sub/CLAUDE.md` or `MYCLAUDE.md` is rewritten too. Review the dry-run listing
-when such references exist.
+Within a renamed directory the replacement is plain substring matching (a faithful port of the original `sed` pipeline): a depth-0 file mentioning `sub/CLAUDE.md` or `MYCLAUDE.md` is rewritten too. Review the dry-run listing when such references exist.
 
-Uses in-place string replacement in Node — no `sed`, so the same code path runs
-on every platform.
+Uses in-place string replacement in Node — no `sed`, so the same code path runs on every platform.
 
 In dry-run mode, lists matching files with their depth info without modifying.
 
@@ -161,8 +150,7 @@ References updated: 12 files
 Conflicts skipped: 1"
 ```
 
-Only migration-touched files are staged — unrelated working-tree changes stay
-out of the commit.
+Only migration-touched files are staged — unrelated working-tree changes stay out of the commit.
 
 Output:
 
@@ -184,8 +172,7 @@ The LLM should:
 
 ### Resolving the script path
 
-The script is located relative to the filid plugin installation. Use the
-plugin's skill directory:
+The script is located relative to the filid plugin installation. Use the plugin's skill directory:
 
 ```bash
 # Find the script path from the plugin directory

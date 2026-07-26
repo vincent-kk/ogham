@@ -1,16 +1,12 @@
 # analyze — State Machine
 
-The dispatcher's deterministic core. States, transitions, iteration guards, and
-divergence handling. Only the dispatcher transitions; agents recommend only.
+The dispatcher's deterministic core. States, transitions, iteration guards, and divergence handling. Only the dispatcher transitions; agents recommend only.
 
 ## States
 
-`INTAKE · CLASSIFY · STATISTICIAN_PLAN · ASSERT_PLAN · R_EXECUTION · VALIDATION ·
-REPORTING · COMPLETE` plus terminals `FAILED` and `BLOCKED_NEEDS_USER`.
+`INTAKE · CLASSIFY · STATISTICIAN_PLAN · ASSERT_PLAN · R_EXECUTION · VALIDATION · REPORTING · COMPLETE` plus terminals `FAILED` and `BLOCKED_NEEDS_USER`.
 
-`methodology-query`, `troubleshoot`, and `partial-step` are terminating branches
-of `CLASSIFY`. Human confirmation is not a separate state — it is `interactive`
-mode's checkpoint behavior.
+`methodology-query`, `troubleshoot`, and `partial-step` are terminating branches of `CLASSIFY`. Human confirmation is not a separate state — it is `interactive` mode's checkpoint behavior.
 
 ## Transition table
 
@@ -38,9 +34,7 @@ mode's checkpoint behavior.
 
 ## Iteration guards (multi-layer)
 
-`methodologyIter ≤ 3` · `rRepairIter ≤ 3` · `validatorIter ≤ 2` ·
-`totalTransitions ≤ 25`. Exceeding any → `FAILED` with the reason and the
-partial artifacts collected so far.
+`methodologyIter ≤ 3` · `rRepairIter ≤ 3` · `validatorIter ≤ 2` · `totalTransitions ≤ 25`. Exceeding any → `FAILED` with the reason and the partial artifacts collected so far.
 
 ## Divergence handling
 
@@ -54,6 +48,4 @@ partial artifacts collected so far.
 
 ## Hand-off (immutable · auditable)
 
-The dispatcher passes the SAP, artifact references, and `priorDecisions`
-(an append-only `DecisionRecord[]`) to each agent; agents return a structured
-delta. Every transition and decision is recorded for reproducibility.
+The dispatcher passes the SAP, artifact references, and `priorDecisions` (an append-only `DecisionRecord[]`) to each agent; agents return a structured delta. Every transition and decision is recorded for reproducibility.

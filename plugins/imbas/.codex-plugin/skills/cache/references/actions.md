@@ -2,14 +2,11 @@
 
 ## Actions
 
-**Provider gate (ensure/refresh)**: read `config.provider` first. If it is not
-`"jira"`, return immediately as a no-op — github metadata is cached by `setup`,
-and local mode has nothing to cache. `clear` works for any provider.
+**Provider gate (ensure/refresh)**: read `config.provider` first. If it is not `"jira"`, return immediately as a no-op — github metadata is cached by `setup`, and local mode has nothing to cache. `clear` works for any provider.
 
 ### ensure
 
-Check if the cache exists and is within TTL. If valid, do nothing. If expired or missing,
-automatically refresh.
+Check if the cache exists and is within TTL. If valid, do nothing. If expired or missing, automatically refresh.
 
 ```
 1. Determine project key: --project argument > config.defaults.project_ref

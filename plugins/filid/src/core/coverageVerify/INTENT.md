@@ -2,9 +2,7 @@
 
 ## Purpose
 
-공유 모듈의 프랙탈 서브트리 사용처를 추적(`usageTracker`)하고,
-각 사용처의 대표 테스트 파일 존재 여부를 검증(`testCoverageChecker`)한다.
-import 경로 해석(`importResolver`)은 추적 단계의 내부 의존성이다.
+공유 모듈의 프랙탈 서브트리 사용처를 추적(`usageTracker`)하고, 각 사용처의 대표 테스트 파일 존재 여부를 검증(`testCoverageChecker`)한다. import 경로 해석(`importResolver`)은 추적 단계의 내부 의존성이다.
 
 ## Structure
 

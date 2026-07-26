@@ -12,8 +12,7 @@ plugin: maencof
 
 # mcp-setup — External MCP Server Setup
 
-Installs and configures MCP servers for external data sources (GitHub, Atlassian, Slack, Notion, etc.) in the current project.
-Runs standalone or as part of the `/maencof:bridge` pipeline.
+Installs and configures MCP servers for external data sources (GitHub, Atlassian, Slack, Notion, etc.) in the current project. Runs standalone or as part of the `/maencof:bridge` pipeline.
 
 > **Area distinction (important)**:
 >
@@ -34,8 +33,7 @@ Runs standalone or as part of the `/maencof:bridge` pipeline.
 ## Prerequisites
 
 - maencof must be initialized
-- If data sources are registered, the corresponding MCP is automatically suggested
-  (see `.maencof-meta/data-sources.json`)
+- If data sources are registered, the corresponding MCP is automatically suggested (see `.maencof-meta/data-sources.json`)
 
 ## Supported MCP Servers
 

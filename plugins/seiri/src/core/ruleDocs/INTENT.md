@@ -2,9 +2,7 @@
 
 ## Purpose
 
-`templates/rules/*.md` 를 호스트가 실제로 읽는 프로젝트 채널과 조정한다.
-Claude 는 `.claude/rules/` 파일, Codex 는 유효한 `AGENTS*.md` 의 소유
-섹션을 사용한다. 배포 상태의 진실은 파일시스템이며 config 에 미러링하지 않는다.
+`templates/rules/*.md` 를 호스트가 실제로 읽는 프로젝트 채널과 조정한다. Claude 는 `.claude/rules/` 파일, Codex 는 유효한 `AGENTS*.md` 의 소유 섹션을 사용한다. 배포 상태의 진실은 파일시스템이며 config 에 미러링하지 않는다.
 
 ## Structure
 
@@ -19,8 +17,7 @@ utils/     organ — 매니페스트·host·공유 결과 매핑 (`resolveRulesD
 ## Conventions
 
 - 좁은 shared subpath가 Codex stored/active facts를 보존하고 plan/apply는 manager에 위임한다.
-- `loadManifest` 는 throw 한다 — 깨진 매니페스트는 사용자 상태가 아니라 빌드
-  결함(`sync-rule-hashes` 누락)이다. 세션 경로 소비자가 이를 흡수한다.
+- `loadManifest` 는 throw 한다 — 깨진 매니페스트는 사용자 상태가 아니라 빌드 결함(`sync-rule-hashes` 누락)이다. 세션 경로 소비자가 이를 흡수한다.
 - 드리프트는 **덮지 않는다.** `resync` 에 id 가 명시된 규칙만 덮어쓴다.
 - 마커 밖 사용자 텍스트와 다른 소유자의 아티팩트는 그대로 보존한다.
 - 경로·파일 처리는 공유 패키지를 거치며 이 모듈에서 시스템 호출하지 않는다.

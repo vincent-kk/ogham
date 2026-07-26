@@ -1,15 +1,8 @@
 # prawf Orchestration
 
-> Specifies how the nine personas defined in `../../agents/` are operated as a
-> Claude Code native team: the **round flow, state machine, and deliverable
-> contracts**.
+> Specifies how the nine personas defined in `../../agents/` are operated as a Claude Code native team: the **round flow, state machine, and deliverable contracts**.
 >
-> Execution environment: **inside a claude-code session**. Every round runs as a
-> native Team (`TeamCreate`/`Task`/`SendMessage`); external LLM and search calls
-> are delegated by personas only as capabilities. Field expertise is injected as
-> data by the [field profiles](./field-profiles.md). This is a pure-markdown
-> plugin with no dependence on external servers or hooks — all review behavior
-> happens inside the session.
+> Execution environment: **inside a claude-code session**. Every round runs as a native Team (`TeamCreate`/`Task`/`SendMessage`); external LLM and search calls are delegated by personas only as capabilities. Field expertise is injected as data by the [field profiles](./field-profiles.md). This is a pure-markdown plugin with no dependence on external servers or hooks — all review behavior happens inside the session.
 
 ## 1. The prawf Review Model
 
@@ -42,10 +35,8 @@ ADJ ADJUDICATE chair              dedup → finalize finding status → verdict 
 
 0. **Resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md): `--workdir` > `PRAWF_WORKDIR` > `./.prawf`. All deliverables go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
 1. **Detect type & field** → load a [field profile](./field-profiles.md). Priority: `--profile` override (a built-in or a user-authored `<WORKDIR>/profiles/<name>.yaml` custom profile) > P0 auto-detection of a built-in (default) > universal fallback. A custom yaml is selected only by naming it with `--profile`; it is never auto-detected (see [field-profiles §5](./field-profiles.md)).
-2. **Validate the profile**: confirm the loaded profile's minimum schema (required keys, axis-reference consistency, presence of `severity_examples`).
-   **The mandatory soundness axes (argument, methodology, integrity) cannot be turned off via `disabled_axes`** — only statistics, causality, and bias may be conditionally disabled, and only when accompanied by an `absorb_map`. A profile that violates this is rejected and the universal fallback is used instead.
-3. **Normalize input**: convert PDF/LaTeX/markdown input into **`paper-normalized.md`** (a normalized snapshot to which the chair assigns line numbers).
-   Every Reviewer cites the **`§<section>¶<paragraph>` and line numbers of this snapshot**, not the original — this establishes a shared coordinate system.
+2. **Validate the profile**: confirm the loaded profile's minimum schema (required keys, axis-reference consistency, presence of `severity_examples`). **The mandatory soundness axes (argument, methodology, integrity) cannot be turned off via `disabled_axes`** — only statistics, causality, and bias may be conditionally disabled, and only when accompanied by an `absorb_map`. A profile that violates this is rejected and the universal fallback is used instead.
+3. **Normalize input**: convert PDF/LaTeX/markdown input into **`paper-normalized.md`** (a normalized snapshot to which the chair assigns line numbers). Every Reviewer cites the **`§<section>¶<paragraph>` and line numbers of this snapshot**, not the original — this establishes a shared coordinate system.
 4. **Record the gate**: parse `--gate <critical|major|minor>` (default **`major`**) — the lowest severity that can block acceptance (see §4.5) — and record it in `paper-profile.md`. ADJ and the solo `adjudicator` read it from there / from the spawn prompt.
 5. Output: `paper-profile.md` (input source path, type, profile, convened panel, gate) + `paper-normalized.md`.
 
@@ -59,8 +50,7 @@ ADJ ADJUDICATE chair              dedup → finalize finding status → verdict 
 | `--solo`   | `adjudicator` consolidates 1~6 axes in one pass | —                | fast pre-screen         |
 
 - `argument-analyst`, `chair`, and `rebuttal-strategist` are **always convened**, regardless of field.
-- **Convened axes = the profile's `paper_types[type].axes`**. If the profile specifies `disabled_axes` (e.g. causality for mathematics), that axis is _not deleted_ but transferred to the absorber that the profile's `absorb_map` (e.g. `{ causality: argument }`) designates.
-  **In P0 the chair injects the invariant questions of the disabled axis directly into the absorber persona's R1 prompt** — closing the coverage gap by behavior, not by declaration (the absorption must also be reflected in the absorber's profile menu).
+- **Convened axes = the profile's `paper_types[type].axes`**. If the profile specifies `disabled_axes` (e.g. causality for mathematics), that axis is _not deleted_ but transferred to the absorber that the profile's `absorb_map` (e.g. `{ causality: argument }`) designates. **In P0 the chair injects the invariant questions of the disabled axis directly into the absorber persona's R1 prompt** — closing the coverage gap by behavior, not by declaration (the absorption must also be reflected in the absorber's profile menu).
 - `integrity-auditor`, when convened, runs regardless of external-tool availability; on entire absence its capability-dependent checks degrade to `reasoning_gaps` (see §8) and the axis is never dropped for lack of tools.
 
 ## 3. Finding State Machine
@@ -253,8 +243,7 @@ chair = **main session = team lead** (the chair orchestrates the rounds; it is n
 1. After P0, `TeamCreate prawf-<paper-slug>`.
 2. **R1**: spawn the convened soundness Reviewers + impact-assessor as `Task(team worker)` **in parallel** → each produces its deliverable. `await all`.
 3. **R2**: spawn one `rebuttal-strategist` (input: R1 soundness findings) → `rebuttal.md`.
-4. **R3 (conditional)**: first apply the §4.3 downgrade check — a finding whose `proposed_status` is `defended`/`mitigated` but whose defense rests only on a `sidestep` or an unbacked `justification` is reclassified `contested`. Then re-spawn only the Reviewers of axes with a finding **at or above the gate** whose status is `unresolved|mitigated|withdrawn-proposed|contested`. Below-gate findings keep their R2 `proposed_status` as final — except one caught by the §4.3 downgrade check (a `sidestep` or an unbacked `justification`), which the chair finalizes as `unresolved` without convening R3 (recording the reclassification in the review-report Deliberation Log), so the audit trail never records an unverified `defended`. They cannot affect the verdict (they remain visible in the report and the qa-sheet).
-   If every at/above-gate finding is a verifiably-backed `defended` (or none exists), skip R3 and go straight to consensus.
+4. **R3 (conditional)**: first apply the §4.3 downgrade check — a finding whose `proposed_status` is `defended`/`mitigated` but whose defense rests only on a `sidestep` or an unbacked `justification` is reclassified `contested`. Then re-spawn only the Reviewers of axes with a finding **at or above the gate** whose status is `unresolved|mitigated|withdrawn-proposed|contested`. Below-gate findings keep their R2 `proposed_status` as final — except one caught by the §4.3 downgrade check (a `sidestep` or an unbacked `justification`), which the chair finalizes as `unresolved` without convening R3 (recording the reclassification in the review-report Deliberation Log), so the audit trail never records an unverified `defended`. They cannot affect the verdict (they remain visible in the report and the qa-sheet). If every at/above-gate finding is a verifiably-backed `defended` (or none exists), skip R3 and go straight to consensus.
 5. chair: dedup → verdict → `review-report.md` + `qa-sheet.md` → `TeamDelete`.
 
 **chair invariants**:
@@ -294,6 +283,4 @@ Separately from the review report, output an independent sheet of **the anticipa
 | CAUS-2     | causality  | "Is reverse causation ruled out?"            | good | deferral       | _(unresolved — longitudinal data needed)_ | unresolved   |
 | INTEG-1    | integrity  | "What about data availability?"              | good | clarification  | Add OSF link                              | defended     |
 
-Fill the Solution column **only when clear**; when unclear, leave it honestly empty as _unresolved / elevated to a Limitation_.
-Below-gate advisory findings (§4.5) still appear in the qa-sheet with their real final statuses — being excluded from the verdict does not remove them from the author's question sheet.
-Separately, append a _Significance & Scope_ note (impact rating + applicability range) at the end.
+Fill the Solution column **only when clear**; when unclear, leave it honestly empty as _unresolved / elevated to a Limitation_. Below-gate advisory findings (§4.5) still appear in the qa-sheet with their real final statuses — being excluded from the verdict does not remove them from the author's question sheet. Separately, append a _Significance & Scope_ note (impact rating + applicability range) at the end.

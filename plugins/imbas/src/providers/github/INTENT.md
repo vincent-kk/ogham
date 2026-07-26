@@ -6,8 +6,8 @@ GitHub Issues 프로바이더 구현. `## Links` 섹션 파싱 및 이슈 바디
 
 ## Structure
 
-| File | Role |
-|---|---|
+| File            | Role                                                    |
+| --------------- | ------------------------------------------------------- |
 | `parseLinks.ts` | `## Links` 섹션 → `GithubLinks` 레코드 파서 (순수 함수) |
 
 ## Conventions

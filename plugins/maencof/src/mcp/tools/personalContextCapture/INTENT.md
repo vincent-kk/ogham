@@ -2,8 +2,7 @@
 
 ## Purpose
 
-`capture_personal_context` 도구 — 사용자 상태(states)·최근 동향(topics)의 조용한 upsert/해소.
-target/action 조합별 필수 필드 검증 후 `core/personalContext`에 위임한다.
+`capture_personal_context` 도구 — 사용자 상태(states)·최근 동향(topics)의 조용한 upsert/해소. target/action 조합별 필수 필드 검증 후 `core/personalContext`에 위임한다.
 
 ## Boundaries
 

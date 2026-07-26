@@ -2,8 +2,7 @@
 
 ## Requirements
 
-`parseLinks(body: string): GithubLinks` 함수는 GitHub 이슈 바디에서 `## Links` 섹션을 파싱하여
-링크 타입별 이슈 참조 배열을 반환한다.
+`parseLinks(body: string): GithubLinks` 함수는 GitHub 이슈 바디에서 `## Links` 섹션을 파싱하여 링크 타입별 이슈 참조 배열을 반환한다.
 
 - `## Links` 섹션이 없으면 `{}` 반환
 - 섹션이 있지만 항목이 없으면 `{}` 반환
@@ -16,10 +15,12 @@
 ## API Contracts
 
 ```typescript
-export type GithubLinks = Partial<Record<
-  'blocks' | 'blocked-by' | 'split-from' | 'split-into' | 'relates',
-  string[]
->>;
+export type GithubLinks = Partial<
+  Record<
+    'blocks' | 'blocked-by' | 'split-from' | 'split-into' | 'relates',
+    string[]
+  >
+>;
 
 export function parseLinks(body: string): GithubLinks;
 ```
@@ -46,13 +47,13 @@ export function parseLinks(body: string): GithubLinks;
 
 ### Edge cases
 
-| Input | Output |
-|---|---|
-| No `## Links` section | `{}` |
-| Empty `## Links` section | `{}` |
-| Duplicate `linkType` | merged array (union) |
-| Unknown `linkType` | warn + skip |
-| Extra whitespace | trimmed |
+| Input                    | Output               |
+| ------------------------ | -------------------- |
+| No `## Links` section    | `{}`                 |
+| Empty `## Links` section | `{}`                 |
+| Duplicate `linkType`     | merged array (union) |
+| Unknown `linkType`       | warn + skip          |
+| Extra whitespace         | trimmed              |
 
 ## Last Updated
 

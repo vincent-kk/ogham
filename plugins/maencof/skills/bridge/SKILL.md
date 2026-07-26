@@ -1,9 +1,9 @@
 ---
 name: bridge
 user_invocable: true
-description: "[maencof:bridge] Connects an external service (Slack, Jira, GitHub, Notion) to maencof end-to-end: installs the MCP server, defines data workflows, and auto-generates a ready-to-use integration skill."
-argument-hint: "[service]"
-version: "1.1.0"
+description: '[maencof:bridge] Connects an external service (Slack, Jira, GitHub, Notion) to maencof end-to-end: installs the MCP server, defines data workflows, and auto-generates a ready-to-use integration skill.'
+argument-hint: '[service]'
+version: '1.1.0'
 complexity: complex
 context_layers: []
 orchestrator: configurator
@@ -29,40 +29,46 @@ End-to-end external service integration pipeline. Discovers MCP servers, install
 
 ## Scope
 
-| Area | Path | Access |
-|------|------|--------|
-| Execution | `{CWD}/.mcp.json` | Delegated → `/maencof:mcp-setup` |
-| Execution | `{CWD}/.claude/settings.json` | Delegated → `/maencof:mcp-setup` |
-| Execution | `{CWD}/.maencof-meta/data-sources.json` | Delegated → `/maencof:connect` |
-| Execution | `{CWD}/.claude/skills/{name}/SKILL.md` | Delegated → `/maencof:craft-skill` |
-| Execution | `{CWD}/.claude/settings.local.json` | **Never** |
+| Area      | Path                                    | Access                             |
+| --------- | --------------------------------------- | ---------------------------------- |
+| Execution | `{CWD}/.mcp.json`                       | Delegated → `/maencof:mcp-setup`   |
+| Execution | `{CWD}/.claude/settings.json`           | Delegated → `/maencof:mcp-setup`   |
+| Execution | `{CWD}/.maencof-meta/data-sources.json` | Delegated → `/maencof:connect`     |
+| Execution | `{CWD}/.claude/skills/{name}/SKILL.md`  | Delegated → `/maencof:craft-skill` |
+| Execution | `{CWD}/.claude/settings.local.json`     | **Never**                          |
 
 ## Workflow
 
 ### Step 1 — Discovery
+
 Read `.mcp.json` to list installed/available servers. Select service to connect.
 
 ### Step 2 — MCP Installation
+
 Delegate to `/maencof:mcp-setup` for uninstalled servers.
 
 ### Step 3 — Workflow Definition
+
 Define data collection via conversation: target, layer, tags, frequency, processing.
 
 ### Step 4 — Auto-Generate Workflow Skill
+
 Delegate to `/maencof:craft-skill` to create a dedicated workflow skill.
 
 ### Step 5 — Register Data Source
+
 Delegate to `/maencof:connect` to register the data source.
 
 ### Step 6 — Confirmation and Test
+
 Show all created files and offer end-to-end test.
 
 > Load `reference.md` for detailed step workflows, service examples, pipeline diagram, and error handling.
 
 ## Resources
 
-| File | Content |
-|------|---------|
+| File           | Content                                                                                                                            |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `reference.md` | Pipeline diagram, detailed step workflows, service-specific examples, generated skill samples, error handling, acceptance criteria |
 
 ## Options
@@ -71,6 +77,6 @@ Show all created files and offer end-to-end test.
 /maencof:bridge [service]
 ```
 
-| Option | Description |
-|--------|-------------|
+| Option    | Description                                                         |
+| --------- | ------------------------------------------------------------------- |
 | `service` | Service name (e.g., `slack`, `jira`). Omit to start with discovery. |

@@ -8,10 +8,7 @@ complexity: complex
 plugin: filid
 ---
 
-> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
-> After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after parallel subagent returns, MCP tool completion, or
-> cross-stage aggregation.
+> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION. After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after parallel subagent returns, MCP tool completion, or cross-stage aggregation.
 >
 > **Valid reasons to yield**:
 >
@@ -26,12 +23,9 @@ plugin: filid
 
 # structure-review — 6-Stage PR Verification
 
-Execute the FCA-AI 6-stage PR verification pipeline. Validate structure,
-documents, tests, metrics, and dependencies, then emit a consolidated verdict.
+Execute the FCA-AI 6-stage PR verification pipeline. Validate structure, documents, tests, metrics, and dependencies, then emit a consolidated verdict.
 
-> **Detail Reference**: For detailed workflow steps, MCP tool examples,
-> and output format templates, read the `reference.md` file in this
-> skill's directory (same location as this SKILL.md).
+> **Detail Reference**: For detailed workflow steps, MCP tool examples, and output format templates, read the `reference.md` file in this skill's directory (same location as this SKILL.md).
 
 ## When to Use This Skill
 
@@ -44,55 +38,41 @@ documents, tests, metrics, and dependencies, then emit a consolidated verdict.
 
 ### Relationship with update
 
-`/filid:update` Stage 3 performs document and test updates using `context-manager` and `implementer`
-agents directly. This standalone skill (`/filid:structure-review`) runs the full 6-stage verification
-pipeline independently and can be used to validate results after `/filid:update` completes.
+`/filid:update` Stage 3 performs document and test updates using `context-manager` and `implementer` agents directly. This standalone skill (`/filid:structure-review`) runs the full 6-stage verification pipeline independently and can be used to validate results after `/filid:update` completes.
 
 ## Core Workflow
 
-> **`--stage=N` mode**: When a single stage is specified, spawn **only that stage**
-> as a Task subagent — do NOT spawn the other stages. Stage 6 then reports only
-> the result of the selected stage (no cross-stage aggregation).
+> **`--stage=N` mode**: When a single stage is specified, spawn **only that stage** as a Task subagent — do NOT spawn the other stages. Stage 6 then reports only the result of the selected stage (no cross-stage aggregation).
 
 Stages 1–5 are **independent** and run **in parallel** as separate Task subagents (`general-purpose`, model: `sonnet`, `run_in_background: false` — omitting the flag or passing `true` spawns BACKGROUND agents whose results never return to the turn). Stage 6 aggregates their results and runs after all parallel calls return.
 
 ### Stages 1–5 (Parallel — full run only)
 
-When running without `--stage=N`: spawn all five stages **in the same
-response** as parallel foreground calls — they return together, and
-Stage 6 proceeds in that same response.
+When running without `--stage=N`: spawn all five stages **in the same response** as parallel foreground calls — they return together, and Stage 6 proceeds in that same response.
 
 ### Stage 1 — Structure Verification
 
-Validate directory classifications respect FCA-AI fractal/organ boundaries.
-See [reference.md Section 1](./reference.md#section-1--structure-verification-details).
+Validate directory classifications respect FCA-AI fractal/organ boundaries. See [reference.md Section 1](./reference.md#section-1--structure-verification-details).
 
 ### Stage 2 — Document Compliance
 
-Verify INTENT.md (≤50 lines, 3-tier sections) and DETAIL.md (no append-only).
-See [reference.md Section 2](./reference.md#section-2--document-compliance-details).
+Verify INTENT.md (≤50 lines, 3-tier sections) and DETAIL.md (no append-only). See [reference.md Section 2](./reference.md#section-2--document-compliance-details).
 
 ### Stage 3 — Test Compliance
 
-Validate `*.spec.ts` files against the 3+12 rule (≤15 cases) via `mcp__plugin_filid_tools__test_metrics`.
-See [reference.md Section 3](./reference.md#section-3--test-compliance-details).
+Validate `*.spec.ts` files against the 3+12 rule (≤15 cases) via `mcp__plugin_filid_tools__test_metrics`. See [reference.md Section 3](./reference.md#section-3--test-compliance-details).
 
 ### Stage 4 — Metric Analysis
 
-Measure LCOM4 (split at ≥2) and CC (compress at >15) via `mcp__plugin_filid_tools__ast_analyze`. When using `analysisType: "lcom4"`, the `className` parameter must be provided; extract class names from the source file by scanning for `class X` declarations.
-See [reference.md Section 4](./reference.md#section-4--metric-analysis-details).
+Measure LCOM4 (split at ≥2) and CC (compress at >15) via `mcp__plugin_filid_tools__ast_analyze`. When using `analysisType: "lcom4"`, the `className` parameter must be provided; extract class names from the source file by scanning for `class X` declarations. See [reference.md Section 4](./reference.md#section-4--metric-analysis-details).
 
 ### Stage 5 — Dependency Verification
 
-Build the dependency DAG and verify acyclicity via `mcp__plugin_filid_tools__ast_analyze`.
-See [reference.md Section 5](./reference.md#section-5--dependency-verification-details).
+Build the dependency DAG and verify acyclicity via `mcp__plugin_filid_tools__ast_analyze`. See [reference.md Section 5](./reference.md#section-5--dependency-verification-details).
 
 ### Stage 6 — Summary Report (Sequential — after all spawned stages complete)
 
-Aggregate all stage results into a structured pass/fail verdict.
-When `--stage=N` is specified, only one stage was spawned; Stage 6 reports
-only that stage's result (no aggregation across other stages).
-See [reference.md Section 6](./reference.md#section-6--summary-report-format).
+Aggregate all stage results into a structured pass/fail verdict. When `--stage=N` is specified, only one stage was spawned; Stage 6 reports only that stage's result (no aggregation across other stages). See [reference.md Section 6](./reference.md#section-6--summary-report-format).
 
 ## Available MCP Tools
 

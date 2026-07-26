@@ -6,14 +6,14 @@
 
 ## Structure
 
-| 모듈 | 역할 |
-|------|------|
-| `parser` | `parseSource`/`parseFile`/`walk` 공용 진입점. 언어 자동 감지 |
-| `astGrepShared` | `@ast-grep/napi` lazy 로더, 언어 매핑, 파일 탐색, 매치 포맷터 |
-| `cyclomaticComplexity` | 함수/메서드별 McCabe CC 계산 (`CC = 1 + 결정점 수`) |
-| `lcom4` | 클래스 응집도(메서드-필드 공유 그래프의 connected components 수) |
-| `dependencyExtractor` | import/export/call 구문 추출 → `DependencyInfo` |
-| `treeDiff` | 최상위 선언 added/removed/modified 시맨틱 diff |
+| 모듈                   | 역할                                                             |
+| ---------------------- | ---------------------------------------------------------------- |
+| `parser`               | `parseSource`/`parseFile`/`walk` 공용 진입점. 언어 자동 감지     |
+| `astGrepShared`        | `@ast-grep/napi` lazy 로더, 언어 매핑, 파일 탐색, 매치 포맷터    |
+| `cyclomaticComplexity` | 함수/메서드별 McCabe CC 계산 (`CC = 1 + 결정점 수`)              |
+| `lcom4`                | 클래스 응집도(메서드-필드 공유 그래프의 connected components 수) |
+| `dependencyExtractor`  | import/export/call 구문 추출 → `DependencyInfo`                  |
+| `treeDiff`             | 최상위 선언 added/removed/modified 시맨틱 diff                   |
 
 ## Conventions
 

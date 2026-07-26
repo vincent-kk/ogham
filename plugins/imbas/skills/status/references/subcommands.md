@@ -1,11 +1,6 @@
 # status — Subcommand Behaviors
 
-> **Provider scope**: This skill is fully provider-agnostic and is NOT
-> partitioned. It reads only imbas run state (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__run_list`)
-> and manifest summary counts. Issue-count displays work identically for every
-> provider because they count `issue_ref` presence, which is provider-agnostic
-> by schema (see `src/types/manifest.ts:StoryItemSchema.issue_ref`).
-
+> **Provider scope**: This skill is fully provider-agnostic and is NOT partitioned. It reads only imbas run state (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__run_list`) and manifest summary counts. Issue-count displays work identically for every provider because they count `issue_ref` presence, which is provider-agnostic by schema (see `src/types/manifest.ts:StoryItemSchema.issue_ref`).
 
 ## (default) — Current Run Status
 
@@ -29,12 +24,14 @@
 ```
 
 Phase status indicators:
+
 - `✓` completed (with result for validate: PASS/PASS_WITH_WARNINGS/BLOCKED)
 - `●` in_progress
 - `○` pending
 - `✗` escaped (with escape code)
 
 If manifests are available, include summary:
+
 - stories-manifest: total/pending/created counts
 - devplan-manifest: tasks/subtasks/links counts
 
@@ -91,20 +88,20 @@ Phase 3 — devplan
 2. If run not found: display "Run <run-id> not found."
 3. Analyze current state and determine next action:
 
-| Current State | Guidance |
-|---------------|----------|
-| validate.status == "pending" | "Run /imbas:validate <source> --run <run-id>" |
-| validate.status == "in_progress" | "Validate was interrupted. Re-run /imbas:validate <source>" |
-| validate.status == "completed", result == "BLOCKED" | "Validation blocked. Fix source document, then re-validate." |
-| validate.status == "completed", result in [PASS, PASS_WITH_WARNINGS] && split.status == "pending" | "Run /imbas:split --run <run-id>" |
-| split.status == "in_progress" | "Split was interrupted. Re-run /imbas:split --run <run-id>" |
-| split.status == "escaped", code in [E2-1, E2-2, EC-1, EC-2] | "Split escaped (<code>). Human intervention required. See escape report." |
-| split.status == "escaped", code == "E2-3" | "Split unnecessary. Run /imbas:devplan --run <run-id>" |
-| split.status == "completed", pending_review == true | "Split needs review. Run /imbas:split --run <run-id> to review." |
-| split.status == "completed", pending_review == false && stories pending | "Run /imbas:manifest stories --run <run-id>" |
-| split.status == "completed" && all stories created && devplan.status == "pending" | "Run /imbas:devplan --run <run-id>" |
-| devplan.status == "in_progress" | "Devplan was interrupted. Re-run /imbas:devplan --run <run-id>" |
-| devplan.status == "completed", pending_review == true | "Devplan needs review. Run /imbas:devplan --run <run-id> to review." |
-| devplan.status == "completed", pending_review == false | "Run /imbas:manifest devplan --run <run-id>" |
+| Current State                                                                                     | Guidance                                                                  |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| validate.status == "pending"                                                                      | "Run /imbas:validate <source> --run <run-id>"                             |
+| validate.status == "in_progress"                                                                  | "Validate was interrupted. Re-run /imbas:validate <source>"               |
+| validate.status == "completed", result == "BLOCKED"                                               | "Validation blocked. Fix source document, then re-validate."              |
+| validate.status == "completed", result in [PASS, PASS_WITH_WARNINGS] && split.status == "pending" | "Run /imbas:split --run <run-id>"                                         |
+| split.status == "in_progress"                                                                     | "Split was interrupted. Re-run /imbas:split --run <run-id>"               |
+| split.status == "escaped", code in [E2-1, E2-2, EC-1, EC-2]                                       | "Split escaped (<code>). Human intervention required. See escape report." |
+| split.status == "escaped", code == "E2-3"                                                         | "Split unnecessary. Run /imbas:devplan --run <run-id>"                    |
+| split.status == "completed", pending_review == true                                               | "Split needs review. Run /imbas:split --run <run-id> to review."          |
+| split.status == "completed", pending_review == false && stories pending                           | "Run /imbas:manifest stories --run <run-id>"                              |
+| split.status == "completed" && all stories created && devplan.status == "pending"                 | "Run /imbas:devplan --run <run-id>"                                       |
+| devplan.status == "in_progress"                                                                   | "Devplan was interrupted. Re-run /imbas:devplan --run <run-id>"           |
+| devplan.status == "completed", pending_review == true                                             | "Devplan needs review. Run /imbas:devplan --run <run-id> to review."      |
+| devplan.status == "completed", pending_review == false                                            | "Run /imbas:manifest devplan --run <run-id>"                              |
 
 4. Display the guidance message with the exact command to run.

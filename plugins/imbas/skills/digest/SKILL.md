@@ -8,10 +8,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls, media fetch delegation, or provider
-> publish operations.
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, media fetch delegation, or provider publish operations.
 >
 > **Valid reasons to yield**:
 >
@@ -26,10 +23,7 @@ plugin: imbas
 
 # digest — Issue Context Compression
 
-Compresses an issue's full context (description, comment thread, and attached media)
-into a structured summary and posts it as a comment or digest entry. Supports Jira,
-GitHub, and local providers. Designed for ticket closing or pre-analysis compression.
-Uses a State Tracking + QA-Prompting hybrid approach.
+Compresses an issue's full context (description, comment thread, and attached media) into a structured summary and posts it as a comment or digest entry. Supports Jira, GitHub, and local providers. Designed for ticket closing or pre-analysis compression. Uses a State Tracking + QA-Prompting hybrid approach.
 
 > **Prerequisite**: Media analysis requires the `@ogham/atlassian` plugin. If not installed, media analysis steps are skipped with a warning.
 

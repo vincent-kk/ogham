@@ -9,14 +9,14 @@ High-quality screenshots at full resolution.
 
 ## Flags
 
-| Flag | Value | Reasoning |
-|------|-------|-----------|
-| `-n` | 8 | Moderate count; focus is on quality not quantity |
-| `-t` | 0.5 | Default threshold |
-| `--fps` | 5 | Default extraction rate |
-| `--max-frames` | 300 | Default cap |
-| `-s` | 1080 | Full HD resolution for crisp output |
-| `-q` | 95 | Near-lossless JPEG quality |
+| Flag           | Value | Reasoning                                        |
+| -------------- | ----- | ------------------------------------------------ |
+| `-n`           | 8     | Moderate count; focus is on quality not quantity |
+| `-t`           | 0.5   | Default threshold                                |
+| `--fps`        | 5     | Default extraction rate                          |
+| `--max-frames` | 300   | Default cap                                      |
+| `-s`           | 1080  | Full HD resolution for crisp output              |
+| `-q`           | 95    | Near-lossless JPEG quality                       |
 
 ## Command
 

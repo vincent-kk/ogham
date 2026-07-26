@@ -1,19 +1,12 @@
 # scaffold-pr Workflow — Jira Provider
 
-Loaded when `config.provider === 'jira'`. Handles Step 3 (sub-task fetching)
-from the shared skeleton (`../workflow.md`).
+Loaded when `config.provider === 'jira'`. Handles Step 3 (sub-task fetching) from the shared skeleton (`../workflow.md`).
 
 ## Step 3 — Fetch sub-tasks
 
-1. Read `config.jira.base_url` via `mcp__plugin_imbas_tools__config_get` to build issue URLs.
-   If `base_url` is null or unset, derive the host from the `self` field of the
-   `[OP: get_issue]` response (scheme + host, e.g. `https://site.atlassian.net`)
-   and build `<host>/browse/<key>`. If neither is available, render issue keys
-   without links (do not guess a host).
+1. Read `config.jira.base_url` via `mcp__plugin_imbas_tools__config_get` to build issue URLs. If `base_url` is null or unset, derive the host from the `self` field of the `[OP: get_issue]` response (scheme + host, e.g. `https://site.atlassian.net`) and build `<host>/browse/<key>`. If neither is available, render issue keys without links (do not guess a host).
 
-2. Call `[OP: get_issue] issue_ref=<issue-key>` with subtask fields.
-   The Jira issue response includes a `subtasks` array for direct sub-task
-   relationships (parent-child).
+2. Call `[OP: get_issue] issue_ref=<issue-key>` with subtask fields. The Jira issue response includes a `subtasks` array for direct sub-task relationships (parent-child).
 
 3. For each sub-task in the response, extract:
    - `key`: sub-task issue key (e.g., `PROJ-124`)
@@ -32,8 +25,7 @@ from the shared skeleton (`../workflow.md`).
    ]
    ```
 
-5. If the `subtasks` array is empty, return an empty list.
-   Do NOT search for issue links — only direct sub-task relationships are included.
+5. If the `subtasks` array is empty, return an empty list. Do NOT search for issue links — only direct sub-task relationships are included.
 
 ## Issue URL construction
 

@@ -1,11 +1,8 @@
 # prawf Calibration — Seeded-Defect Manifest
 
-> Answer key for `mutated-paper.md`. **Never copy this file (or the twin paper) into the review scratch workdir** —
-> reviewers must not be able to glob it (see [calibration.md §2](./calibration.md)). Scoring rules (FP/FN, ± one
-> severity step, exact fatal-flaw classes) are in [calibration.md §3](./calibration.md).
+> Answer key for `mutated-paper.md`. **Never copy this file (or the twin paper) into the review scratch workdir** — reviewers must not be able to glob it (see [calibration.md §2](./calibration.md)). Scoring rules (FP/FN, ± one severity step, exact fatal-flaw classes) are in [calibration.md §3](./calibration.md).
 
-`mutated-paper.md` is `clean-paper.md` with exactly five defects injected. Everything not listed below is unchanged
-in substance and should NOT produce at-or-above-gate findings.
+`mutated-paper.md` is `clean-paper.md` with exactly five defects injected. Everything not listed below is unchanged in substance and should NOT produce at-or-above-gate findings.
 
 ## Manifest
 
@@ -19,9 +16,6 @@ in substance and should NOT produce at-or-above-gate findings.
 
 ## Notes
 
-- Expected axis is the dedup-ownership hint (orchestration §4.1); a seeded defect surfaced on an adjacent convened
-  axis still counts as detected. Severity is what is scored.
-- SD-1 and SD-2 must surface as `critical` with their exact fatal-flaw classes — the mutation run must end
-  `prawf verdict: reject` at any gate (the fatal-flaw override is gate-independent, orchestration §4.3 / §4.5).
-- SD-5 sits below the default gate (`major`): a calibrated review surfaces it as a below-gate advisory finding
-  (Advisory Notes + the Findings by Axis audit table) without letting it block the verdict.
+- Expected axis is the dedup-ownership hint (orchestration §4.1); a seeded defect surfaced on an adjacent convened axis still counts as detected. Severity is what is scored.
+- SD-1 and SD-2 must surface as `critical` with their exact fatal-flaw classes — the mutation run must end `prawf verdict: reject` at any gate (the fatal-flaw override is gate-independent, orchestration §4.3 / §4.5).
+- SD-5 sits below the default gate (`major`): a calibrated review surfaces it as a below-gate advisory finding (Advisory Notes + the Findings by Axis audit table) without letting it block the verdict.

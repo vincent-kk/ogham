@@ -1,7 +1,6 @@
 # scan — Reference Documentation
 
-Detailed workflow, severity definitions, and report formats for the FCA-AI
-rule scanner. For the quick-start guide, see [SKILL.md](./SKILL.md).
+Detailed workflow, severity definitions, and report formats for the FCA-AI rule scanner. For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Tree Construction
 
@@ -11,18 +10,9 @@ Call `mcp__plugin_filid_tools__fractal_scan` to build the complete hierarchy by 
 mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>", outputMode: "paths" })
 ```
 
-Use `outputMode: "paths"` for this skill — the scan phases only need
-`{ path, type, hasIntentMd, hasDetailMd }` per node, and the full
-`ScanReportDto` overflows the tool-result budget on non-trivial projects.
-The `paths` response is `{ outputMode, root, totalNodes, nodes }` where
-`nodes` is a **flat array**. Iterate with `nodes.map(...)` /
-`nodes.filter(...)` — the array is the single source of truth.
+Use `outputMode: "paths"` for this skill — the scan phases only need `{ path, type, hasIntentMd, hasDetailMd }` per node, and the full `ScanReportDto` overflows the tool-result budget on non-trivial projects. The `paths` response is `{ outputMode, root, totalNodes, nodes }` where `nodes` is a **flat array**. Iterate with `nodes.map(...)` / `nodes.filter(...)` — the array is the single source of truth.
 
-**Size-guard fallback**: if the response instead has
-`{ truncated: true, reportPath, summary }`, the full report was written to
-`reportPath` (line-structured JSON). Grep it for the node fields you need
-(e.g. `grep '"hasIntentMd"' <reportPath>` with surrounding lines) instead of
-reading the whole file into context.
+**Size-guard fallback**: if the response instead has `{ truncated: true, reportPath, summary }`, the full report was written to `reportPath` (line-structured JSON). Grep it for the node fields you need (e.g. `grep '"hasIntentMd"' <reportPath>` with surrounding lines) instead of reading the whole file into context.
 
 Partition into three working sets:
 
@@ -54,21 +44,17 @@ Verify that all three required headings are present:
 | ------------------- | -------- | ------------------------------ |
 | Any section missing | high     | `INTENT_MD_MISSING_BOUNDARIES` |
 
-Note: The validator matches English headings only (`### Always do`, `### Ask first`,
-`### Never do`). These headings MUST remain in English. Content follows the language specified by the `[filid:lang]` tag; default to English if absent.
+Note: The validator matches English headings only (`### Always do`, `### Ask first`, `### Never do`). These headings MUST remain in English. Content follows the language specified by the `[filid:lang]` tag; default to English if absent.
 
 ## Section 3 — Organ Directory Validation
 
-For every directory whose name matches `ORGAN_DIR_NAMES`, check that no
-INTENT.md is present inside it.
+For every directory whose name matches `ORGAN_DIR_NAMES`, check that no INTENT.md is present inside it.
 
 | Condition                     | Severity | Violation ID              | Auto-fixable |
 | ----------------------------- | -------- | ------------------------- | ------------ |
 | INTENT.md exists in organ dir | critical | `ORGAN_INTENT_MD_PRESENT` | Yes (delete) |
 
-`ORGAN_DIR_NAMES` (name-matched) = `components`, `utils`, `types`, `hooks`, `helpers`,
-`lib`, `styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`,
-`fixtures`, `e2e`, `references`.
+`ORGAN_DIR_NAMES` (name-matched) = `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`, `references`.
 
 Pattern-matched (priority 3, NOT list members): `__name__` wrapping (e.g., `__tests__`, `__mocks__`, `__fixtures__`), `.name` dot-prefix — see `templates/rules/filid_fca-policy.md` → **Node Classification Priority**.
 
@@ -83,8 +69,7 @@ mcp__plugin_filid_tools__test_metrics({
 })
 ```
 
-The 3+12 rule: each `*.spec.ts` file must have at most **15 test cases**
-total, with a recommended distribution of 3 basic + 12 complex.
+The 3+12 rule: each `*.spec.ts` file must have at most **15 test cases** total, with a recommended distribution of 3 basic + 12 complex.
 
 | Condition                     | Severity | Violation ID        |
 | ----------------------------- | -------- | ------------------- |
@@ -124,9 +109,7 @@ Run with --fix to apply automatic remediations.
 Scan complete: <N> violations
 ```
 
-The final `Scan complete: <N> violations` line (or
-`Scan complete: no violations found` when N=0) is the **terminal marker** —
-emit it as the last line of the response, then end execution.
+The final `Scan complete: <N> violations` line (or `Scan complete: no violations found` when N=0) is the **terminal marker** — emit it as the last line of the response, then end execution.
 
 ### With `--fix` — apply remediations then re-validate
 
@@ -139,12 +122,7 @@ emit it as the last line of the response, then end execution.
 
 ### Auto-fix Dispatch — parallel `Agent` calls
 
-Launch all applicable fix agents in **a single response, parallel block** of
-`Agent` tool calls. Do NOT use `run_in_background: true` — that yields the turn.
-Mix different `subagent_type` values in the same block freely;
-`filid:context-manager` and `filid:code-surgeon` target non-overlapping file
-types (INTENT.md/DETAIL.md vs. file deletion / test refactoring) so parallel
-execution is safe without file locking.
+Launch all applicable fix agents in **a single response, parallel block** of `Agent` tool calls. Do NOT use `run_in_background: true` — that yields the turn. Mix different `subagent_type` values in the same block freely; `filid:context-manager` and `filid:code-surgeon` target non-overlapping file types (INTENT.md/DETAIL.md vs. file deletion / test refactoring) so parallel execution is safe without file locking.
 
 For an `INTENT_MD_LINE_LIMIT` violation:
 
@@ -186,12 +164,9 @@ Agent(
 )
 ```
 
-Violations requiring architectural decisions (reclassification, missing index.ts,
-structural drift) are reported but not auto-fixed — run `/filid:sync` or
-`/filid:restructure` for those.
+Violations requiring architectural decisions (reclassification, missing index.ts, structural drift) are reported but not auto-fixed — run `/filid:sync` or `/filid:restructure` for those.
 
-After all agent fixes complete, re-run Phases 2–4 on fixed files and append
-a fix summary:
+After all agent fixes complete, re-run Phases 2–4 on fixed files and append a fix summary:
 
 ```
 Auto-fix Summary
@@ -202,8 +177,7 @@ Skipped : <n> (require manual remediation)
 Scan complete: <N> violations
 ```
 
-`<N>` here is the count of **remaining** violations after re-validation.
-Use `Scan complete: no violations found` when zero remain.
+`<N>` here is the count of **remaining** violations after re-validation. Use `Scan complete: no violations found` when zero remain.
 
 ## Violation Quick Lookup
 

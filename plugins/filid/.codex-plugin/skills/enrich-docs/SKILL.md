@@ -8,13 +8,9 @@ complexity: complex
 plugin: filid
 ---
 
-> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a
-> SINGLE CONTINUOUS OPERATION EXCEPT at Stage 5 (Approval Gate) when
-> `--auto-approve` is absent. At that EXACT step, `AskUserQuestion` yield
-> is REQUIRED. At all other stages, NEVER yield.
+> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a SINGLE CONTINUOUS OPERATION EXCEPT at Stage 5 (Approval Gate) when `--auto-approve` is absent. At that EXACT step, `AskUserQuestion` yield is REQUIRED. At all other stages, NEVER yield.
 >
-> **Under `--auto-approve` mode**: Stage 5 approval is skipped; EXECUTION
-> MODEL applies to every stage without exception.
+> **Under `--auto-approve` mode**: Stage 5 approval is skipped; EXECUTION MODEL applies to every stage without exception.
 >
 > **Valid reasons to yield**:
 >
@@ -31,11 +27,7 @@ plugin: filid
 
 # enrich-docs — INTENT.md Quality Enrichment
 
-Audit INTENT.md files under a target directory, score their documentation
-quality, and rewrite low-quality entries by delegating to `context-manager`
-with real source-file context. Unlike `update`, this skill has no
-hash-based incremental gate — quality is always re-evaluated against heuristic
-thresholds.
+Audit INTENT.md files under a target directory, score their documentation quality, and rewrite low-quality entries by delegating to `context-manager` with real source-file context. Unlike `update`, this skill has no hash-based incremental gate — quality is always re-evaluated against heuristic thresholds.
 
 ## Resource Index
 
@@ -50,94 +42,51 @@ Load these on demand; none are required to execute the workflow end-to-end.
 ## When to Use This Skill
 
 - After initial `setup` scaffolded empty or boilerplate INTENT.md files
-- When a directory tree contains INTENT.md files written before the underlying
-  implementation stabilized
+- When a directory tree contains INTENT.md files written before the underlying implementation stabilized
 - To raise documentation quality across a subtree without waiting for a git diff
-- Before `cross-review` or `context-query` to ensure the module chain
-  carries enough signal for downstream consumers
+- Before `cross-review` or `context-query` to ensure the module chain carries enough signal for downstream consumers
 
-For the precise distinction from `update`, see
-[tables.md — Difference from update](./tables.md#difference-from-update).
+For the precise distinction from `update`, see [tables.md — Difference from update](./tables.md#difference-from-update).
 
 ## Core Workflow
 
 ### Stage 1 — Path Validation
 
-Verify the target directory exists and belongs to a FCA-AI project (presence
-of `.filid/config.json` at any ancestor). Resolve `--depth` against the
-target. Capture the `[filid:lang]` tag from the UserPromptSubmit hook for
-downstream delegations.
-See [reference.md Section 1](./reference.md#section-1--path-validation).
+Verify the target directory exists and belongs to a FCA-AI project (presence of `.filid/config.json` at any ancestor). Resolve `--depth` against the target. Capture the `[filid:lang]` tag from the UserPromptSubmit hook for downstream delegations. See [reference.md Section 1](./reference.md#section-1--path-validation).
 
 ### Stage 2 — Discovery
 
-Collect every `INTENT.md` under the target directory with `Glob`, then for
-each file capture: absolute path, content, line count, owning directory, and
-immediate child directories. When `--include-detail` is set, DETAIL.md files
-are collected alongside INTENT.md entries. Classify every module root via
-`mcp__plugin_filid_tools__fractal_scan` and drop `organ` nodes (INTENT.md is prohibited there).
-See [reference.md Section 2](./reference.md#section-2--discovery).
+Collect every `INTENT.md` under the target directory with `Glob`, then for each file capture: absolute path, content, line count, owning directory, and immediate child directories. When `--include-detail` is set, DETAIL.md files are collected alongside INTENT.md entries. Classify every module root via `mcp__plugin_filid_tools__fractal_scan` and drop `organ` nodes (INTENT.md is prohibited there). See [reference.md Section 2](./reference.md#section-2--discovery).
 
 ### Stage 3 — Quality Audit
 
-Score each file against the four-axis heuristic (Structure, Conventions,
-Boundaries, Dependencies). Each axis contributes 25 points; total ∈ [0, 100].
-Classify by thresholds:
+Score each file against the four-axis heuristic (Structure, Conventions, Boundaries, Dependencies). Each axis contributes 25 points; total ∈ [0, 100]. Classify by thresholds:
 
 - **RICH** (score ≥ `min-quality`, default 70) → skipped
 - **SPARSE** (0 < score < `min-quality`) → enrichment candidate
 - **MISSING** (file absent in a fractal directory) → creation candidate
 
-See [reference.md Section 3](./reference.md#section-3--quality-audit) for the
-full rubric, signal detectors, and DETAIL.md rubric overrides.
+See [reference.md Section 3](./reference.md#section-3--quality-audit) for the full rubric, signal detectors, and DETAIL.md rubric overrides.
 
 ### Stage 4 — Enrichment Plan
 
-For each SPARSE/MISSING entry, build an enrichment scope: target INTENT.md
-path, child directories to cite in Structure, implementation files under the
-module root to read (capped at 6 per file to preserve context), and the set
-of axes to rewrite. `--skip-rich` is always in effect — RICH entries never
-appear in the plan.
-See [reference.md Section 4](./reference.md#section-4--enrichment-plan).
+For each SPARSE/MISSING entry, build an enrichment scope: target INTENT.md path, child directories to cite in Structure, implementation files under the module root to read (capped at 6 per file to preserve context), and the set of axes to rewrite. `--skip-rich` is always in effect — RICH entries never appear in the plan. See [reference.md Section 4](./reference.md#section-4--enrichment-plan).
 
 ### Stage 5 — Approval Gate <!-- [INTERACTIVE] -->
 
-Unless `--auto-approve` is set, present the plan summary (counts by class,
-per-file axes to rewrite, estimated enrichments) and call `AskUserQuestion`
-with three options: `approve`, `modify`, `cancel`. `--dry-run` short-circuits
-to Stage 8 without approval and without writes.
-See [reference.md Section 5](./reference.md#section-5--approval-gate).
+Unless `--auto-approve` is set, present the plan summary (counts by class, per-file axes to rewrite, estimated enrichments) and call `AskUserQuestion` with three options: `approve`, `modify`, `cancel`. `--dry-run` short-circuits to Stage 8 without approval and without writes. See [reference.md Section 5](./reference.md#section-5--approval-gate).
 
 ### Stage 6 — Parallel Enrichment
 
-Dispatch batched `context-manager` subagent calls. Each batch contains at
-most 4 files so downstream agent prompts stay bounded. Batches run in
-parallel in a single tool-call block. Every delegation includes the target
-path, current content (or `MISSING`), implementation files to read, axes to
-rewrite, the resolved language, and the 50-line + English-heading constraint.
-See [reference.md Section 6](./reference.md#section-6--parallel-enrichment)
-for the full delegation template.
+Dispatch batched `context-manager` subagent calls. Each batch contains at most 4 files so downstream agent prompts stay bounded. Batches run in parallel in a single tool-call block. Every delegation includes the target path, current content (or `MISSING`), implementation files to read, axes to rewrite, the resolved language, and the 50-line + English-heading constraint. See [reference.md Section 6](./reference.md#section-6--parallel-enrichment) for the full delegation template.
 
 ### Stage 7 — Validate
 
-For every rewritten file, enforce the 50-line cap directly on the written
-content (`mcp__plugin_filid_tools__doc_compress` supplies compaction metadata; the cap check is
-the line count itself), verify the three tier headings (`### Always do` /
-`### Ask first` / `### Never do`) are present, then call
-`mcp__plugin_filid_tools__structure_validate` for structural rule violations — the tool does not
-inspect tier sections. A 50-line overflow triggers one second-pass retry via
-`context-manager`; any other validation failure — missing tier heading,
-structural violation, or a second pass still over 50 lines — reverts the
-on-disk content and marks the file as `NEEDS_REWORK`.
-See [reference.md Section 7](./reference.md#section-7--validate).
+For every rewritten file, enforce the 50-line cap directly on the written content (`mcp__plugin_filid_tools__doc_compress` supplies compaction metadata; the cap check is the line count itself), verify the three tier headings (`### Always do` / `### Ask first` / `### Never do`) are present, then call `mcp__plugin_filid_tools__structure_validate` for structural rule violations — the tool does not inspect tier sections. A 50-line overflow triggers one second-pass retry via `context-manager`; any other validation failure — missing tier heading, structural violation, or a second pass still over 50 lines — reverts the on-disk content and marks the file as `NEEDS_REWORK`. See [reference.md Section 7](./reference.md#section-7--validate).
 
 ### Stage 8 — Report
 
-Emit the consolidated report: totals by class, per-file before/after line
-counts, axes rewritten, skipped RICH count, validation outcomes, and the
-terminal stage marker. Terminal marker strings are listed in
-[tables.md — Terminal Stage Markers](./tables.md#terminal-stage-markers).
-See [reference.md Section 8](./reference.md#section-8--report).
+Emit the consolidated report: totals by class, per-file before/after line counts, axes rewritten, skipped RICH count, validation outcomes, and the terminal stage marker. Terminal marker strings are listed in [tables.md — Terminal Stage Markers](./tables.md#terminal-stage-markers). See [reference.md Section 8](./reference.md#section-8--report).
 
 ## Key Rules
 
@@ -148,5 +97,4 @@ See [reference.md Section 8](./reference.md#section-8--report).
 - `context-manager` is the only write-capable agent used by this skill
 - `organ` modules are excluded from the audit — they must never hold INTENT.md
 
-For argument defaults, MCP tool signatures, agent roles, and invocation
-examples, load the resource index files above instead of inlining them here.
+For argument defaults, MCP tool signatures, agent roles, and invocation examples, load the resource index files above instead of inlining them here.

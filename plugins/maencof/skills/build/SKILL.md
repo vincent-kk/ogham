@@ -12,10 +12,7 @@ plugin: maencof
 
 # build — Index Build & Rebuild
 
-Scans markdown documents in the vault and builds the knowledge graph index.
-Uses incremental build by default, reprocessing only changed files.
-Supports forced full rebuild (`--full` / `--force`) and cache-discarding rebuild
-(`--reset-cache`) for recovery from corruption, large-scale file moves, or index structure migration.
+Scans markdown documents in the vault and builds the knowledge graph index. Uses incremental build by default, reprocessing only changed files. Supports forced full rebuild (`--full` / `--force`) and cache-discarding rebuild (`--reset-cache`) for recovery from corruption, large-scale file moves, or index structure migration.
 
 ## When to Use This Skill
 
@@ -57,8 +54,7 @@ Build pipeline:
 6. MetadataStore: save to .maencof/ JSON
 ```
 
-For incremental build: recompute only changed files + 1-hop neighbors.
-For full/force mode: call `mcp__plugin_maencof_tools__kg_build(force=true)` to reprocess every node.
+For incremental build: recompute only changed files + 1-hop neighbors. For full/force mode: call `mcp__plugin_maencof_tools__kg_build(force=true)` to reprocess every node.
 
 ### Step 3 — Completion Report
 
@@ -69,8 +65,7 @@ Time: 2.3s
 Build type: incremental (12 files updated)
 ```
 
-For full rebuilds triggered by `--force` or `--reset-cache`, include before/after deltas
-when the prior index existed (from `mcp__plugin_maencof_tools__kg_status` snapshot taken in Step 1 before cache reset):
+For full rebuilds triggered by `--force` or `--reset-cache`, include before/after deltas when the prior index existed (from `mcp__plugin_maencof_tools__kg_status` snapshot taken in Step 1 before cache reset):
 
 ```
 ## Rebuild Complete
@@ -83,13 +78,12 @@ when the prior index existed (from `mcp__plugin_maencof_tools__kg_status` snapsh
 
 If the change is large (nodes ±20% or more), warn and recommend investigating the cause.
 
-> Note: Layer-by-layer node distribution is not available from `mcp__plugin_maencof_tools__kg_status` / `mcp__plugin_maencof_tools__kg_build` responses.
-> To inspect layer distribution, use `/maencof:checkup --quick --verbose`.
+> Note: Layer-by-layer node distribution is not available from `mcp__plugin_maencof_tools__kg_status` / `mcp__plugin_maencof_tools__kg_build` responses. To inspect layer distribution, use `/maencof:checkup --quick --verbose`.
 
 ## Available MCP Tools
 
-| Tool              | Purpose                                                          |
-| ----------------- | ---------------------------------------------------------------- |
+| Tool                                   | Purpose                                                          |
+| -------------------------------------- | ---------------------------------------------------------------- |
 | `mcp__plugin_maencof_tools__kg_status` | Check current index status (pre- and post-rebuild snapshots)     |
 | `mcp__plugin_maencof_tools__kg_build`  | Run index build (incremental: `force=false`, full: `force=true`) |
 

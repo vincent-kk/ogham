@@ -2,8 +2,7 @@
 
 ## Purpose
 
-`UsageSite[]`의 각 항목에 대해 대표 테스트 파일을 5-Strategy로 탐지하고,
-`UsageCoverage[]`와 사람이 읽을 수 있는 경고 문자열을 생성한다.
+`UsageSite[]`의 각 항목에 대해 대표 테스트 파일을 5-Strategy로 탐지하고, `UsageCoverage[]`와 사람이 읽을 수 있는 경고 문자열을 생성한다.
 
 ## Strategies (우선순위 순, 앵커 = 소스 파일의 nearest `src` 루트)
 

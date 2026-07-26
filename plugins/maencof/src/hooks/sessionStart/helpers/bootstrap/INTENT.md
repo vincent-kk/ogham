@@ -9,8 +9,7 @@
 ### Always do
 
 - host별 project 후보에서 MAENCOF 소유 섹션만 관리
-- 훅 번들 예산을 위해 `instructions/hook` 경량 API만 import하고 범용
-  manager·plan·revision·lock 그래프 제외
+- 훅 번들 예산을 위해 `instructions/hook` 경량 API만 import하고 범용 manager·plan·revision·lock 그래프 제외
 - 아키텍처 버전 검증 및 마이그레이션 트리거
 - companion identity 검증
 - metaSkillBody.md 내용을 `hookSpecificOutput.additionalContext` 로 주입 (off-switch 해제 시; 예산 초과 skip 은 error-log 기록)
@@ -30,5 +29,4 @@
 
 ## Dependencies
 
-- `@ogham/agent-artifacts/instructions/hook`, 목적별 project instruction
-  target, 기존 bootstrap 도메인 모듈.
+- `@ogham/agent-artifacts/instructions/hook`, 목적별 project instruction target, 기존 bootstrap 도메인 모듈.

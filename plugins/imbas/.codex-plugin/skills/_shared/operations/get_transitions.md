@@ -17,9 +17,7 @@ GET /rest/api/3/issue/{issueIdOrKey}/transitions
 
 ## Notes
 
-Not all transitions are always available — Jira workflow guards may restrict
-which transitions can be performed from the current state. Always check this
-operation before calling `[OP: transition_issue]`.
+Not all transitions are always available — Jira workflow guards may restrict which transitions can be performed from the current state. Always check this operation before calling `[OP: transition_issue]`.
 
 ## Used By
 

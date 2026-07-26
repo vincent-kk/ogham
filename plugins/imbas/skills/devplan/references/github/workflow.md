@@ -1,8 +1,6 @@
 # devplan Workflow — GitHub Provider
 
-Loaded when `config.provider === 'github'`. The shared skeleton (`../workflow.md`)
-owns Steps 1, 2, 4. This file owns only the GitHub-specific Step 3 semantics and
-the final-message text.
+Loaded when `config.provider === 'github'`. The shared skeleton (`../workflow.md`) owns Steps 1, 2, 4. This file owns only the GitHub-specific Step 3 semantics and the final-message text.
 
 ## Step 3 — B→A Feedback Collection (GitHub)
 
@@ -15,28 +13,21 @@ comment:       "<divergence description>"
 type:          "mapping_divergence" | "story_split_issue"
 ```
 
-These feedback_comments are later posted to GitHub by the `imbas:manifest
-devplan` skill via `gh issue comment`. The `target_ref` MUST be the fully
-qualified `owner/repo#N` format so the manifest skill can dispatch directly
-without re-resolving the repo.
+These feedback_comments are later posted to GitHub by the `imbas:manifest devplan` skill via `gh issue comment`. The `target_ref` MUST be the fully qualified `owner/repo#N` format so the manifest skill can dispatch directly without re-resolving the repo.
 
-**Principle**: "Problem space tree unchanged" — Stories themselves are NOT
-modified. Divergences become GitHub issue comments only, mirroring the
-Jira-side "comments only" invariant.
+**Principle**: "Problem space tree unchanged" — Stories themselves are NOT modified. Divergences become GitHub issue comments only, mirroring the Jira-side "comments only" invariant.
 
 Call `mcp__plugin_imbas_tools__manifest_save` to persist feedback_comments in devplan-manifest.json.
 
 ## Step 4 — Final user guidance (GitHub)
 
-After the shared workflow.md emits the terminal marker (Step 4 Option A Step 3),
-display the next-step command:
+After the shared workflow.md emits the terminal marker (Step 4 Option A Step 3), display the next-step command:
 
 > "Run /imbas:manifest devplan to create GitHub issues in `<owner/repo>`."
 
 ## Delegated reads (optional)
 
-During Step 2 exploration, the `engineer` agent MAY additionally query
-existing GitHub issues to enrich its understanding of current state:
+During Step 2 exploration, the `engineer` agent MAY additionally query existing GitHub issues to enrich its understanding of current state:
 
 ```bash
 gh issue list --repo owner/repo --label type:story --state all \
@@ -47,6 +38,4 @@ gh issue list --repo owner/repo --label type:story --state all \
 gh issue view <N> --repo owner/repo --json title,body,labels,state
 ```
 
-These are optional, not required. The core exploration (Step 2a–2e) relies on
-`mcp__plugin_imbas_tools__ast_search`, `mcp__plugin_imbas_tools__ast_analyze`, `Read`, `Grep`, `Glob` which are provider-agnostic.
-GitHub queries are supplemental context only.
+These are optional, not required. The core exploration (Step 2a–2e) relies on `mcp__plugin_imbas_tools__ast_search`, `mcp__plugin_imbas_tools__ast_analyze`, `Read`, `Grep`, `Glob` which are provider-agnostic. GitHub queries are supplemental context only.

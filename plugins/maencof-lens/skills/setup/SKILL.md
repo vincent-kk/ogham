@@ -18,8 +18,7 @@ Manage `.maencof-lens/config.json` for read-only vault access.
 
 ### `init` (default)
 
-Interactive setup: ask vault path + name → create config with default layers `[2, 3, 4, 5]`.
-If config exists: show current config, ask to overwrite.
+Interactive setup: ask vault path + name → create config with default layers `[2, 3, 4, 5]`. If config exists: show current config, ask to overwrite.
 
 ### `show`
 

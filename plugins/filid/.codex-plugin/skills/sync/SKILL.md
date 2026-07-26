@@ -1,26 +1,24 @@
 ---
 name: sync
 user_invocable: true
-description: "[filid:sync] Detect deviations between the current project structure and fractal principles, then apply targeted corrections with severity filtering, dry-run preview, and auto-approve support for CI pipelines."
-argument-hint: "[path] [--severity critical|high|medium|low] [--dry-run] [--auto-approve]"
-version: "1.0.0"
+description: '[filid:sync] Detect deviations between the current project structure and fractal principles, then apply targeted corrections with severity filtering, dry-run preview, and auto-approve support for CI pipelines.'
+argument-hint: '[path] [--severity critical|high|medium|low] [--dry-run] [--auto-approve]'
+version: '1.0.0'
 complexity: complex
 plugin: filid
 ---
 
-> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a
-> SINGLE CONTINUOUS OPERATION EXCEPT at Stage 3 (Plan & Approval) when
-> `--auto-approve` is absent. At that EXACT step, `AskUserQuestion` yield
-> is REQUIRED. At all other stages, NEVER yield.
+> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a SINGLE CONTINUOUS OPERATION EXCEPT at Stage 3 (Plan & Approval) when `--auto-approve` is absent. At that EXACT step, `AskUserQuestion` yield is REQUIRED. At all other stages, NEVER yield.
 >
-> **Under `--auto-approve` mode**: Stage 3 approval is skipped; EXECUTION
-> MODEL applies to every stage without exception.
+> **Under `--auto-approve` mode**: Stage 3 approval is skipped; EXECUTION MODEL applies to every stage without exception.
 >
 > **Valid reasons to yield**:
+>
 > 1. Stage 3 interactive approval active (no `--auto-approve`)
 > 2. Terminal stage marker emitted: `Sync complete: N corrections applied` or `Sync dry-run complete`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After Stage 1 `drift-analyzer` returns scan results — immediately chain Stage 2 classification
 > - After Stage 2 severity classification — chain Stage 3 plan generation or `--auto-approve` execution in the same turn
 > - Stage 4 `restructurer` execution — do NOT pause between corrections; continue until batch complete
@@ -28,14 +26,9 @@ plugin: filid
 
 # sync — Structural Drift Synchronization
 
-Detect deviations between the current project structure and fractal principles,
-then apply targeted corrections. `drift-analyzer` scans and classifies drift items,
-`fractal-architect` reviews the correction plan, and `restructurer` executes the
-approved corrections.
+Detect deviations between the current project structure and fractal principles, then apply targeted corrections. `drift-analyzer` scans and classifies drift items, `fractal-architect` reviews the correction plan, and `restructurer` executes the approved corrections.
 
-> **Detail Reference**: For detailed workflow steps, MCP tool call examples,
-> and output format templates, read the `reference.md` file in this
-> skill's directory (same location as this SKILL.md).
+> **Detail Reference**: For detailed workflow steps, MCP tool call examples, and output format templates, read the `reference.md` file in this skill's directory (same location as this SKILL.md).
 
 ## When to Use This Skill
 
@@ -47,44 +40,32 @@ approved corrections.
 
 ### Integration with update
 
-When invoked via `/filid:update`, this skill runs as Stage 2 only when `critical` or `high`
-severity violations are detected in Stage 1. Standalone execution (`/filid:sync`) always
-operates independently.
+When invoked via `/filid:update`, this skill runs as Stage 2 only when `critical` or `high` severity violations are detected in Stage 1. Standalone execution (`/filid:sync`) always operates independently.
 
 ## Core Workflow
 
 ### Stage 1 — Scan
 
-`drift-analyzer` scans the full project using `mcp__plugin_filid_tools__fractal_scan` to establish the
-current structural state.
-See [reference.md Section 1](./reference.md#section-1--scan).
+`drift-analyzer` scans the full project using `mcp__plugin_filid_tools__fractal_scan` to establish the current structural state. See [reference.md Section 1](./reference.md#section-1--scan).
 
 ### Stage 2 — Detect & Classify
 
-`mcp__plugin_filid_tools__drift_detect` identifies all drift items and classifies them by severity:
-`critical`, `high`, `medium`, `low`. The `--severity` option restricts which
-items are included in the correction plan.
-See [reference.md Section 2](./reference.md#section-2--detect--classify).
+`mcp__plugin_filid_tools__drift_detect` identifies all drift items and classifies them by severity: `critical`, `high`, `medium`, `low`. The `--severity` option restricts which items are included in the correction plan. See [reference.md Section 2](./reference.md#section-2--detect--classify).
 
 ### Stage 3 — Plan & Approval
 
-`drift-analyzer` generates the correction plan. `fractal-architect` reviews
-reclassification candidates using `mcp__plugin_filid_tools__lca_resolve`. The plan is presented to the
-user for approval unless `--auto-approve` is set.
-See [reference.md Section 3](./reference.md#section-3--plan--approval).
+`drift-analyzer` generates the correction plan. `fractal-architect` reviews reclassification candidates using `mcp__plugin_filid_tools__lca_resolve`. The plan is presented to the user for approval unless `--auto-approve` is set. See [reference.md Section 3](./reference.md#section-3--plan--approval).
 
 ### Stage 4 — Correction Execution
 
 Skipped when `--dry-run` is set — the plan from Stage 3 is printed and the skill exits without modifying any files.
 
-Otherwise, `restructurer` executes the approved corrections and `mcp__plugin_filid_tools__structure_validate` confirms
-the result.
-See [reference.md Section 4](./reference.md#section-4--correction-execution).
+Otherwise, `restructurer` executes the approved corrections and `mcp__plugin_filid_tools__structure_validate` confirms the result. See [reference.md Section 4](./reference.md#section-4--correction-execution).
 
 ## Available MCP Tools
 
-| Tool                 | Stage | Purpose                                                     |
-| -------------------- | ----- | ----------------------------------------------------------- |
+| Tool                                          | Stage | Purpose                                                     |
+| --------------------------------------------- | ----- | ----------------------------------------------------------- |
 | `mcp__plugin_filid_tools__fractal_scan`       | 1     | Full project structure scan                                 |
 | `mcp__plugin_filid_tools__drift_detect`       | 2     | Identify drift items                                        |
 | `mcp__plugin_filid_tools__lca_resolve`        | 3     | Determine correct placement for reclassification candidates |

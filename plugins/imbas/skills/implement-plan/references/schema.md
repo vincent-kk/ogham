@@ -46,5 +46,4 @@ interface BatchCycleBroken {
 
 ## File location
 
-`.imbas/<KEY>/runs/<run-id>/implement-plan.json`
-`.imbas/<KEY>/runs/<run-id>/implement-plan-report.md`
+`.imbas/<KEY>/runs/<run-id>/implement-plan.json` `.imbas/<KEY>/runs/<run-id>/implement-plan-report.md`

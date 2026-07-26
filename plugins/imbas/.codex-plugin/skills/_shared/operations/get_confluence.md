@@ -10,10 +10,10 @@ GET /wiki/api/v2/pages/{pageId}?body-format=storage
 
 ## Parameters
 
-| Name | Required | Description |
-|------|----------|-------------|
-| `pageId` | yes | Confluence page ID (numeric) |
-| `body-format` | no | `storage` (HTML-like) or `atlas_doc_format` (ADF). Default: `storage` |
+| Name          | Required | Description                                                           |
+| ------------- | -------- | --------------------------------------------------------------------- |
+| `pageId`      | yes      | Confluence page ID (numeric)                                          |
+| `body-format` | no       | `storage` (HTML-like) or `atlas_doc_format` (ADF). Default: `storage` |
 
 ## Response Fields
 

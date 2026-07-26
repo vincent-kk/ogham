@@ -1,10 +1,6 @@
 # enrich-docs — Usage Examples
 
-Concrete invocation patterns for the INTENT.md enrichment skill. Load this
-file when you need to pick an invocation style that matches a user intent or
-CI environment. For the workflow itself see [SKILL.md](./SKILL.md); for
-argument defaults see [tables.md](./tables.md); for detailed per-stage
-mechanics see [reference.md](./reference.md).
+Concrete invocation patterns for the INTENT.md enrichment skill. Load this file when you need to pick an invocation style that matches a user intent or CI environment. For the workflow itself see [SKILL.md](./SKILL.md); for argument defaults see [tables.md](./tables.md); for detailed per-stage mechanics see [reference.md](./reference.md).
 
 ## Quick Invocation Patterns
 
@@ -26,8 +22,7 @@ mechanics see [reference.md](./reference.md).
 ```
 
 - Scores every INTENT.md under `src/core`.
-- Prints the plan (classification counts, per-file axes to rewrite,
-  implementation files each enrichment will read) and exits.
+- Prints the plan (classification counts, per-file axes to rewrite, implementation files each enrichment will read) and exits.
 - Makes zero writes. Safe to run as a quality report.
 - Best fit: investigating whether a submodule needs a cleanup pass.
 
@@ -48,10 +43,8 @@ mechanics see [reference.md](./reference.md).
 /filid:enrich-docs packages/filid --min-quality 80 --include-detail
 ```
 
-- Uses the stricter 80-point threshold, so moderately sparse files are
-  upgraded.
-- `--include-detail` extends the audit rubric to DETAIL.md with the
-  `Requirements` / `API Contracts` / `Last Updated` axes.
+- Uses the stricter 80-point threshold, so moderately sparse files are upgraded.
+- `--include-detail` extends the audit rubric to DETAIL.md with the `Requirements` / `API Contracts` / `Last Updated` axes.
 - Interactive — the plan is reviewed before writes.
 - Best fit: pre-release documentation pass.
 
@@ -67,16 +60,15 @@ mechanics see [reference.md](./reference.md).
 
 ## Natural-language Equivalents
 
-Options are LLM-interpreted hints, not strict CLI flags. These phrasings are
-equally valid invocations — the skill parses them into the same argument set:
+Options are LLM-interpreted hints, not strict CLI flags. These phrasings are equally valid invocations — the skill parses them into the same argument set:
 
-| Natural phrasing                                       | Equivalent flags                        |
-| ------------------------------------------------------ | --------------------------------------- |
-| "core 디렉토리 품질만 미리 보여줘"                    | `packages/filid/src/core --dry-run`     |
-| "RICH은 건너뛰고 나머지만 빡세게 보강해"              | `--min-quality 80`                      |
-| "CI에서 돌릴거니까 확인 없이 진행"                     | `--auto-approve`                        |
-| "DETAIL.md까지 같이 채워줘"                           | `--include-detail`                      |
-| "한 depth만 훑어봐"                                   | `--depth 1`                             |
+| Natural phrasing                         | Equivalent flags                    |
+| ---------------------------------------- | ----------------------------------- |
+| "core 디렉토리 품질만 미리 보여줘"       | `packages/filid/src/core --dry-run` |
+| "RICH은 건너뛰고 나머지만 빡세게 보강해" | `--min-quality 80`                  |
+| "CI에서 돌릴거니까 확인 없이 진행"       | `--auto-approve`                    |
+| "DETAIL.md까지 같이 채워줘"              | `--include-detail`                  |
+| "한 depth만 훑어봐"                      | `--depth 1`                         |
 
 ## Report Snippets
 
@@ -126,11 +118,6 @@ Enrich-docs skipped: all RICH
 
 ## Integration Hints
 
-- Running immediately before `/filid:cross-review` raises the signal-to-noise
-  ratio of the review committee's context.
-- Running after `/filid:restructure` or `/filid:sync` re-aligns
-  INTENT.md content with any directories that moved, since the scoring axes
-  reference the concrete child directories and source files.
-- Do not chain `enrich-docs` inside `update` — the two skills
-  deliberately stay on separate triggers (git diff vs path + quality), and
-  `update` already has its own doc-sync stage for diff-affected files.
+- Running immediately before `/filid:cross-review` raises the signal-to-noise ratio of the review committee's context.
+- Running after `/filid:restructure` or `/filid:sync` re-aligns INTENT.md content with any directories that moved, since the scoring axes reference the concrete child directories and source files.
+- Do not chain `enrich-docs` inside `update` — the two skills deliberately stay on separate triggers (git diff vs path + quality), and `update` already has its own doc-sync stage for diff-affected files.

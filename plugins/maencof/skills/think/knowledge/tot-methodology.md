@@ -281,5 +281,4 @@ Minimum 3 risks. Each risk MUST carry at least 1 mitigation alternative; unmitig
 
 ---
 
-> **Core Principle**: Decision-making based on evaluation criteria, not intuition
-> **When to Apply**: When requirements are unclear, when multiple implementation methods exist, when making high-risk decisions
+> **Core Principle**: Decision-making based on evaluation criteria, not intuition **When to Apply**: When requirements are unclear, when multiple implementation methods exist, when making high-risk decisions

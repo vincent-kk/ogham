@@ -6,17 +6,17 @@ imbas 플러그인 소스 코드 루트. 기획문서 검증→분할→개발 �
 
 ## Structure
 
-| Directory    | Role                                         |
-| ------------ | -------------------------------------------- |
-| `constants/` | 파일명·경로·파이프라인·에이전트 상수         |
-| `utils/`     | 순수 유틸리티 함수 (collections, objects)    |
-| `types/`     | Zod 스키마 및 타입 정의                      |
-| `core/`      | 상태·설정·매니페스트·캐시 비즈니스 로직      |
-| `ast/`       | @ast-grep/napi 기반 코드 분석                |
-| `mcp/`       | MCP 서버 및 17개 도구 핸들러 (ping 포함) + 설정 페이지 정적 자산     |
-| `hooks/`     | 4개 Claude Code lifecycle hook 구현체        |
-| `lib/`       | 공통 유틸리티 (logger, stdin, fileIo)        |
-| `providers/` | 이슈 트래커 프로바이더 파싱 로직 (github 등) |
+| Directory    | Role                                                             |
+| ------------ | ---------------------------------------------------------------- |
+| `constants/` | 파일명·경로·파이프라인·에이전트 상수                             |
+| `utils/`     | 순수 유틸리티 함수 (collections, objects)                        |
+| `types/`     | Zod 스키마 및 타입 정의                                          |
+| `core/`      | 상태·설정·매니페스트·캐시 비즈니스 로직                          |
+| `ast/`       | @ast-grep/napi 기반 코드 분석                                    |
+| `mcp/`       | MCP 서버 및 17개 도구 핸들러 (ping 포함) + 설정 페이지 정적 자산 |
+| `hooks/`     | 4개 Claude Code lifecycle hook 구현체                            |
+| `lib/`       | 공통 유틸리티 (logger, stdin, fileIo)                            |
+| `providers/` | 이슈 트래커 프로바이더 파싱 로직 (github 등)                     |
 
 ## Boundaries
 

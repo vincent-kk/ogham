@@ -8,23 +8,14 @@ When authoring or patching a module, treat the matching signature here as the co
 
 ## Shared types — local mirror in `backend/src/types/graph.ts`
 
-The dashboard reads `.maencof/nodes.json` and `.maencof/edges.json` which
-serialise the maencof graph. The generated backend declares its own copy of
-the node/edge type definitions at `backend/src/types/graph.ts` and imports
-from that local path. This avoids depending on `@ogham/maencof` being
-resolvable on disk — the package is `optionalDependencies` for the spreading
-activation algorithm, not a guaranteed npm-published type provider.
+The dashboard reads `.maencof/nodes.json` and `.maencof/edges.json` which serialise the maencof graph. The generated backend declares its own copy of the node/edge type definitions at `backend/src/types/graph.ts` and imports from that local path. This avoids depending on `@ogham/maencof` being resolvable on disk — the package is `optionalDependencies` for the spreading activation algorithm, not a guaranteed npm-published type provider.
 
 ```typescript
 // backend/src/types/graph.ts (authored during Phase 4 Turn 1)
 export type NodeId = string;
 export type Layer = 1 | 2 | 3 | 4 | 5;
 export type SubLayer =
-  | 'relational'
-  | 'structural'
-  | 'topical'
-  | 'buffer'
-  | 'boundary';
+  'relational' | 'structural' | 'topical' | 'buffer' | 'boundary';
 
 export interface KnowledgeNode {
   /* fields below */
@@ -47,8 +38,7 @@ import type {
 export type { KnowledgeNode, KnowledgeEdge, NodeId, Layer, SubLayer };
 ```
 
-Inside the ogham monorepo the mirror MAY be kept in sync with
-`@ogham/maencof/src/types/graph.ts`; in other environments it stands alone.
+Inside the ogham monorepo the mirror MAY be kept in sync with `@ogham/maencof/src/types/graph.ts`; in other environments it stands alone.
 
 Authoritative shapes:
 
@@ -258,29 +248,22 @@ export const CONFIG: {
 export function ensureSpec(): Promise<RuntimeSpec>;
 ```
 
-The generated `config.ts` MUST use ESM-safe `import.meta.url` resolution (above)
-— `__dirname` is undefined under `"type": "module"`.
+The generated `config.ts` MUST use ESM-safe `import.meta.url` resolution (above) — `__dirname` is undefined under `"type": "module"`.
 
 **Vault path priority** inside `ensureSpec()`:
 
 1. `process.env.VAULT_ROOT` (explicit override)
 2. `dashboardSpec.vaultPath` (persisted absolute path from spec)
-3. `resolve(__dirname, '../../..')` (parent of dashboard target — three levels:
-   `dist|src` → `backend` → `<target>` → its parent, the vault)
+3. `resolve(__dirname, '../../..')` (parent of dashboard target — three levels: `dist|src` → `backend` → `<target>` → its parent, the vault)
 
-The resolved value becomes `RuntimeSpec.vaultPath` and is the **single source of
-truth** consumed by `server.ts`, `GraphStore.fromVault`, `BodyCache`,
-`VaultWatcher`. `CONFIG.VAULT_ROOT` is exposed only as a debug fallback; runtime
-code MUST read `spec.vaultPath`, not `CONFIG.VAULT_ROOT`.
+The resolved value becomes `RuntimeSpec.vaultPath` and is the **single source of truth** consumed by `server.ts`, `GraphStore.fromVault`, `BodyCache`, `VaultWatcher`. `CONFIG.VAULT_ROOT` is exposed only as a debug fallback; runtime code MUST read `spec.vaultPath`, not `CONFIG.VAULT_ROOT`.
 
 **Vault index priority** inside `ensureSpec()`:
 
 1. `process.env.VAULT_INDEX` (when set to `maencof` | `independent`)
 2. `dashboardSpec.vaultIndex` (persisted from `--vault-index` at create time)
 
-The resolved value becomes `RuntimeSpec.vaultIndex`, consumed by
-`GraphStore.fromVault(vaultPath, vaultIndex)`. This is the runtime knob the
-generated `README.md` documents as `VAULT_INDEX`.
+The resolved value becomes `RuntimeSpec.vaultIndex`, consumed by `GraphStore.fromVault(vaultPath, vaultIndex)`. This is the runtime knob the generated `README.md` documents as `VAULT_INDEX`.
 
 ```typescript
 // spec-schema.ts
@@ -338,9 +321,4 @@ export function startSse(
 ): () => void;
 ```
 
-The returned disposer stops the EventSource. Topic → cache invalidation mapping
-lives inside `startSse` (see `vault-indexing.md` "Hot reload via chokidar"; a
-`graph` event invalidates the whole cache so domain panels refetch). `startSse`
-also wires `EventSource.onopen`/`onerror` to a connection-status sink (the
-optional `uiStore`, or via `listener`) so `HeaderBar` can set its `data-status`
-dot — see `vault-indexing.md` "Connection status (HeaderBar)".
+The returned disposer stops the EventSource. Topic → cache invalidation mapping lives inside `startSse` (see `vault-indexing.md` "Hot reload via chokidar"; a `graph` event invalidates the whole cache so domain panels refetch). `startSse` also wires `EventSource.onopen`/`onerror` to a connection-status sink (the optional `uiStore`, or via `listener`) so `HeaderBar` can set its `data-status` dot — see `vault-indexing.md` "Connection status (HeaderBar)".

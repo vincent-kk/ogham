@@ -1,12 +1,10 @@
 # sync — Reference Documentation
 
-Detailed workflow, MCP tool call signatures, and output format templates for the
-structural drift synchronization skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+Detailed workflow, MCP tool call signatures, and output format templates for the structural drift synchronization skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Scan
 
-`drift-analyzer` calls `mcp__plugin_filid_tools__fractal_scan` to retrieve the full directory tree and current
-node classifications.
+`drift-analyzer` calls `mcp__plugin_filid_tools__fractal_scan` to retrieve the full directory tree and current node classifications.
 
 ```
 mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
@@ -52,8 +50,7 @@ Each `DriftItem` fields:
 
 ## Section 3 — Plan & Approval
 
-`drift-analyzer` generates the correction plan. For reclassification candidates,
-`fractal-architect` uses `mcp__plugin_filid_tools__lca_resolve` to confirm the correct target location.
+`drift-analyzer` generates the correction plan. For reclassification candidates, `fractal-architect` uses `mcp__plugin_filid_tools__lca_resolve` to confirm the correct target location.
 
 ```
 mcp__plugin_filid_tools__lca_resolve({ path: "<drifted-path>", moduleA: "<neighbor1>", moduleB: "<neighbor2>" })
@@ -108,8 +105,7 @@ Drift items: N  |  Affected files: N
 
 ## Section 4 — Correction Execution
 
-`restructurer` applies each action from the approved sync-plan in this order:
-`reclassify` → `move` → `rename` → `create-index` → `create-main`
+`restructurer` applies each action from the approved sync-plan in this order: `reclassify` → `move` → `rename` → `create-index` → `create-main`
 
 After each move or rename, import paths are updated immediately:
 

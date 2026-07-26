@@ -35,5 +35,4 @@
 
 ### 파일명 유지 규칙
 
-이동 시 파일명은 `basename(path)`을 유지한다. 소스의 중첩 디렉토리는 보존되지 않으며,
-대상 배치는 `target_sub_layer`/`target_subdirectory` 조합으로만 결정된다.
+이동 시 파일명은 `basename(path)`을 유지한다. 소스의 중첩 디렉토리는 보존되지 않으며, 대상 배치는 `target_sub_layer`/`target_subdirectory` 조합으로만 결정된다.

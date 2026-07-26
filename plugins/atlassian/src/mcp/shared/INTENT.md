@@ -1,15 +1,14 @@
 ## Purpose
 
-MCP 툴 응답 포맷 표준화 + fetch 컨텍스트 빌더 등 MCP 계층 공유 유틸리티.
-성공/오류 응답 생성, 핸들러 래핑, FetchContext 조립 함수를 제공한다.
+MCP 툴 응답 포맷 표준화 + fetch 컨텍스트 빌더 등 MCP 계층 공유 유틸리티. 성공/오류 응답 생성, 핸들러 래핑, FetchContext 조립 함수를 제공한다.
 
 ## Structure
 
-| 파일 | 역할 |
-|------|------|
-| `toolResponse.ts` | `toolResult`, `toolError`, `mapReplacer`, `wrapHandler` 구현 |
+| 파일                   | 역할                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| `toolResponse.ts`      | `toolResult`, `toolError`, `mapReplacer`, `wrapHandler` 구현                   |
 | `buildFetchContext.ts` | `buildFetchContext` — 서비스+사이트+인증 헤더+API버전을 합쳐 FetchContext 생성 |
-| `index.ts` | 배럴 — 위 5개 함수 재내보내기 |
+| `index.ts`             | 배럴 — 위 5개 함수 재내보내기                                                  |
 
 ## Boundaries
 

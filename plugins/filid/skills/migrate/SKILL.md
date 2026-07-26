@@ -10,13 +10,9 @@ plugin: filid
 
 # migrate — CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md Migration
 
-Migrate an existing FCA-AI project from the legacy `CLAUDE.md`/`SPEC.md` naming
-convention to the new `INTENT.md`/`DETAIL.md` naming. Uses a cross-platform
-Node script for batch processing — the LLM only reads the script output and
-reports to the user.
+Migrate an existing FCA-AI project from the legacy `CLAUDE.md`/`SPEC.md` naming convention to the new `INTENT.md`/`DETAIL.md` naming. Uses a cross-platform Node script for batch processing — the LLM only reads the script output and reports to the user.
 
-> **Detail Reference**: For script usage and implementation details,
-> read the `reference.md` file in this skill's directory.
+> **Detail Reference**: For script usage and implementation details, read the `reference.md` file in this skill's directory.
 
 ## When to Use This Skill
 
@@ -32,8 +28,7 @@ reports to the user.
 
 ## Core Workflow
 
-All phases are handled by `migrate.mjs`. The LLM executes the script and
-reports the output to the user.
+All phases are handled by `migrate.mjs`. The LLM executes the script and reports the output to the user.
 
 ### Step 1 — Dry-Run (default)
 
@@ -43,9 +38,7 @@ Run the script without `--execute` to preview the migration plan:
 node "${CLAUDE_PLUGIN_ROOT}/skills/migrate/migrate.mjs" <target-path>
 ```
 
-> **Script resolution**: Use `${CLAUDE_PLUGIN_ROOT}` to resolve the absolute path.
-> If `CLAUDE_PLUGIN_ROOT` is not set, use `Glob(**/skills/migrate/migrate.mjs)`
-> to locate the script. If the script is not found, abort with an error message.
+> **Script resolution**: Use `${CLAUDE_PLUGIN_ROOT}` to resolve the absolute path. If `CLAUDE_PLUGIN_ROOT` is not set, use `Glob(**/skills/migrate/migrate.mjs)` to locate the script. If the script is not found, abort with an error message.
 
 The script outputs:
 
@@ -54,9 +47,7 @@ The script outputs:
 - Phase 3: Cross-file references that would be updated
 - Phase 4: Summary report
 
-Report the output to the user. The user re-runs the skill with `--execute`
-to apply the migration; no inline confirmation prompt is issued from this
-skill (the explicit `--execute` flag is the gate).
+Report the output to the user. The user re-runs the skill with `--execute` to apply the migration; no inline confirmation prompt is issued from this skill (the explicit `--execute` flag is the gate).
 
 ### Step 2 — Execute (with `--execute` flag)
 
@@ -89,8 +80,7 @@ After execution, optionally run `mcp__plugin_filid_tools__structure_validate` to
 
 ## Reversibility
 
-Migration uses `git mv`, so it is fully reversible via `git checkout` or by
-running the inverse renames. See reference.md for reversal steps.
+Migration uses `git mv`, so it is fully reversible via `git checkout` or by running the inverse renames. See reference.md for reversal steps.
 
 ## Quick Reference
 

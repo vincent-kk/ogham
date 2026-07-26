@@ -5,15 +5,15 @@ self-probe 계열은 node/git/PATH/plugin root를 진단하며, 실패를 기록
 
 ## Structure
 
-| File               | Role                                                 |
-| ------------------ | ---------------------------------------------------- |
-| `index.ts`         | barrel                                               |
-| `types.ts`         | ProbeResult·SelfProbeOptions                         |
-| `bootstrap.ts`     | runHookEntry — spawnSync(process.execPath, [target]) |
-| `selfProbe.ts`     | 범용 spawnCli 기반 selfProbe                         |
-| `probe/`           | Node builtin 전용 경량 SessionStart probe organ      |
-| `errorLog.ts`      | 기존 error-log 호환 barrel                           |
-| `error/`           | 경로·JSON 기록·직렬화 함수 organ                     |
+| File           | Role                                                 |
+| -------------- | ---------------------------------------------------- |
+| `index.ts`     | barrel                                               |
+| `types.ts`     | ProbeResult·SelfProbeOptions                         |
+| `bootstrap.ts` | runHookEntry — spawnSync(process.execPath, [target]) |
+| `selfProbe.ts` | 범용 spawnCli 기반 selfProbe                         |
+| `probe/`       | Node builtin 전용 경량 SessionStart probe organ      |
+| `errorLog.ts`  | 기존 error-log 호환 barrel                           |
+| `error/`       | 경로·JSON 기록·직렬화 함수 organ                     |
 
 ## Conventions
 

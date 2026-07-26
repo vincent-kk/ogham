@@ -4,9 +4,7 @@ imbas 파이프라인 Phase 3. 승인된 Story를 기반으로 코드베이스�
 
 ## 개요
 
-로컬 코드베이스를 실제로 분석하여 각 Story의 구현 계획(Subtask)을 만든다.
-`engineer` 에이전트(opus)가 코드 탐색, Subtask 초안 작성, 중복 감지, Task 추출까지 수행하며,
-최종 결과물은 `devplan-manifest.json`으로 Jira 일괄 생성에 사용된다.
+로컬 코드베이스를 실제로 분석하여 각 Story의 구현 계획(Subtask)을 만든다. `engineer` 에이전트(opus)가 코드 탐색, Subtask 초안 작성, 중복 감지, Task 추출까지 수행하며, 최종 결과물은 `devplan-manifest.json`으로 Jira 일괄 생성에 사용된다.
 
 ## 선행 조건
 
@@ -28,6 +26,7 @@ imbas 파이프라인 Phase 3. 승인된 Story를 기반으로 코드베이스�
 ## AST 폴백
 
 `mcp__plugin_imbas_tools__ast_search`/`mcp__plugin_imbas_tools__ast_analyze`에서 `sgLoadError` 발생 시:
+
 - 메타변수를 정규식으로 변환하여 Grep 기반 검색으로 전환
 - LLM이 오탐을 필터링하는 근사 모드로 계속 실행
 
@@ -37,16 +36,16 @@ imbas 파이프라인 Phase 3. 승인된 Story를 기반으로 코드베이스�
 
 ## 사용 도구
 
-| 도구 | 출처 | 용도 |
-|------|------|------|
-| `mcp__plugin_imbas_tools__run_get` | imbas MCP | 런 상태 로드 |
-| `mcp__plugin_imbas_tools__run_transition` | imbas MCP | 단계 시작/완료 전이 |
-| `mcp__plugin_imbas_tools__manifest_get` | imbas MCP | stories-manifest 로드 |
-| `mcp__plugin_imbas_tools__manifest_save` | imbas MCP | devplan-manifest 저장 |
-| `mcp__plugin_imbas_tools__manifest_validate` | imbas MCP | 매니페스트 유효성 검증 |
-| `mcp__plugin_imbas_tools__ast_search` | imbas MCP | AST 패턴 검색 |
-| `mcp__plugin_imbas_tools__ast_analyze` | imbas MCP | 의존성 그래프/복잡도 분석 |
-| `engineer` | 에이전트(opus) | 코드 탐색 및 Subtask 생성 |
+| 도구                                         | 출처           | 용도                      |
+| -------------------------------------------- | -------------- | ------------------------- |
+| `mcp__plugin_imbas_tools__run_get`           | imbas MCP      | 런 상태 로드              |
+| `mcp__plugin_imbas_tools__run_transition`    | imbas MCP      | 단계 시작/완료 전이       |
+| `mcp__plugin_imbas_tools__manifest_get`      | imbas MCP      | stories-manifest 로드     |
+| `mcp__plugin_imbas_tools__manifest_save`     | imbas MCP      | devplan-manifest 저장     |
+| `mcp__plugin_imbas_tools__manifest_validate` | imbas MCP      | 매니페스트 유효성 검증    |
+| `mcp__plugin_imbas_tools__ast_search`        | imbas MCP      | AST 패턴 검색             |
+| `mcp__plugin_imbas_tools__ast_analyze`       | imbas MCP      | 의존성 그래프/복잡도 분석 |
+| `engineer`                                   | 에이전트(opus) | 코드 탐색 및 Subtask 생성 |
 
 ## 참고 파일
 

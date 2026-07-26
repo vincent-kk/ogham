@@ -1,7 +1,6 @@
 ## Purpose
 
-HTTP GET/POST/PUT/PATCH/DELETE를 통합 처리하는 MCP 툴 핸들러.
-ADF 자동 변환, 바이너리 에셋 다운로드, Markdown→ADF/Storage/Wiki 변환을 조율한다.
+HTTP GET/POST/PUT/PATCH/DELETE를 통합 처리하는 MCP 툴 핸들러. ADF 자동 변환, 바이너리 에셋 다운로드, Markdown→ADF/Storage/Wiki 변환을 조율한다.
 
 ## Structure
 

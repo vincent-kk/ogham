@@ -10,8 +10,7 @@ plugin: imbas
 
 # status — Run Status & History
 
-Display current or historical imbas run status including phase progress,
-manifest summaries, and blocking issues. Supports resuming interrupted runs.
+Display current or historical imbas run status including phase progress, manifest summaries, and blocking issues. Supports resuming interrupted runs.
 
 ## When to Use This Skill
 

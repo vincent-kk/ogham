@@ -2,12 +2,9 @@
 
 ## Requirements
 
-- `work_history` MCP 도구는 daily digest(`activity/digests/daily/YYYY-MM-DD.json`)를
-  집계하여 "그동안 무슨 작업을 했나"에 답한다. 읽기 전용(`needsFreshness: false`).
-- 모드 우선순위: `topic` → `layer` → 기간 요약(period). `topic`/`layer` 가 있으면
-  역색인 기반 작업일자 이력(lookup)을, 없으면 daily digest 합산(period)을 반환한다.
-- 기간 결정: `from`+`to` 가 모두 주어지면 그 범위, 아니면 오늘 기준 `last_days` 윈도우
-  (기본 7, 1-90 clamp).
+- `work_history` MCP 도구는 daily digest(`activity/digests/daily/YYYY-MM-DD.json`)를 집계하여 "그동안 무슨 작업을 했나"에 답한다. 읽기 전용(`needsFreshness: false`).
+- 모드 우선순위: `topic` → `layer` → 기간 요약(period). `topic`/`layer` 가 있으면 역색인 기반 작업일자 이력(lookup)을, 없으면 daily digest 합산(period)을 반환한다.
+- 기간 결정: `from`+`to` 가 모두 주어지면 그 범위, 아니면 오늘 기준 `last_days` 윈도우 (기본 7, 1-90 clamp).
 - 모든 로직은 `core/workIndex` 에 위임한다 (이 도구는 입력 검증 + 모드 분기만 수행).
 
 ## API Contracts
@@ -48,11 +45,9 @@
 
 ### LLM Rendering Convention
 
-자연어 프롬프트("그동안 뭐 했지", "01_Core 마지막 작업 언제")로 호출되므로 LLM이
-결과를 간결한 요약으로 렌더한다.
+자연어 프롬프트("그동안 뭐 했지", "01_Core 마지막 작업 언제")로 호출되므로 LLM이 결과를 간결한 요약으로 렌더한다.
 
-- **period**: `from~to` 범위에서 활동일 `activeDays`일 / 세션 `sessionCount`회 /
-  누적 `totalDurationMin`분, 상위 토픽(`topTopics`)·레이어(`layers`)·`vaultOps` 요약.
+- **period**: `from~to` 범위에서 활동일 `activeDays`일 / 세션 `sessionCount`회 / 누적 `totalDurationMin`분, 상위 토픽(`topTopics`)·레이어(`layers`)·`vaultOps` 요약.
 - **lookup**: `key` 를 마지막으로 작업한 날(`lastWorkedOn`)과 전체 작업일자 목록(`dates`).
 
 ### Empty Result

@@ -28,9 +28,7 @@ NCBI E-utilities (PubMed · PMC · MeSH) academic paper search plugin for Claude
 
 ## Setup
 
-Run the `setup` skill (or `auth_check`). A local browser form collects your NCBI
-`tool` / `email` (required) and optional `api_key`. The API key is written to
-`credentials.json` (0o600) and is **never** exposed to the chat or logs.
+Run the `setup` skill (or `auth_check`). A local browser form collects your NCBI `tool` / `email` (required) and optional `api_key`. The API key is written to `credentials.json` (0o600) and is **never** exposed to the chat or logs.
 
 ## Build
 

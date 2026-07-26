@@ -222,9 +222,7 @@ user:   Daily checkable list of decisions, sorted by urgency.
 
 ### Generated route excerpt
 
-`expires` lives in the markdown frontmatter, not on `KnowledgeNode` directly,
-so the aggregator joins it via `BodyCache.get(node.path).frontmatter.expires`.
-`byLayer` is a `Map`, accessed via `.get(layer) ?? []`.
+`expires` lives in the markdown frontmatter, not on `KnowledgeNode` directly, so the aggregator joins it via `BodyCache.get(node.path).frontmatter.expires`. `byLayer` is a `Map`, accessed via `.get(layer) ?? []`.
 
 ```typescript
 // backend/src/routes/active-actions.ts

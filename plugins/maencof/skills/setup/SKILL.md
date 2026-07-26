@@ -12,8 +12,7 @@ plugin: maencof
 
 # setup — maencof Onboarding Consultation
 
-A 7-stage goal-driven dynamic interview for first-time maencof setup or Core Identity reset.
-Instead of a rigid questionnaire, the AI acts as a **"Professional Counselor"**—logical, empathetic, and structured. It helps you explore your knowledge management patterns and organically constructs your Core Identity schema.
+A 7-stage goal-driven dynamic interview for first-time maencof setup or Core Identity reset. Instead of a rigid questionnaire, the AI acts as a **"Professional Counselor"**—logical, empathetic, and structured. It helps you explore your knowledge management patterns and organically constructs your Core Identity schema.
 
 ## When to Use This Skill
 
@@ -24,40 +23,27 @@ Instead of a rigid questionnaire, the AI acts as a **"Professional Counselor"**�
 
 ## When to Use vs Adjacent Skills
 
-- **`setup`** — one-time onboarding consultation. Runs a 7-stage
-  "Professional Counselor" interview that constructs your Core Identity,
-  synthesizes an AI companion persona, scaffolds Layer directories, and
-  builds the initial index. Re-run a specific stage via `--step` or reset
-  Core Identity via `--reset`.
-- **`configure`** — ongoing configuration router. Scans, health-
-  checks, and delegates to 7 sub-skills (bridge, instruct, rule, lifecycle,
-  craft-skill, craft-agent, checkup) for post-onboarding environment drift.
+- **`setup`** — one-time onboarding consultation. Runs a 7-stage "Professional Counselor" interview that constructs your Core Identity, synthesizes an AI companion persona, scaffolds Layer directories, and builds the initial index. Re-run a specific stage via `--step` or reset Core Identity via `--reset`.
+- **`configure`** — ongoing configuration router. Scans, health- checks, and delegates to 7 sub-skills (bridge, instruct, rule, lifecycle, craft-skill, craft-agent, checkup) for post-onboarding environment drift.
 
-Rule of thumb: vault does not yet exist, or Core Identity needs reset →
-`setup`. Vault exists and something needs tuning → `configure`.
+Rule of thumb: vault does not yet exist, or Core Identity needs reset → `setup`. Vault exists and something needs tuning → `configure`.
 
 ## 7-Stage Consultation Flow
 
-→ Load **reference.md** when executing any stage to access schema definitions, guidelines, and output templates.
-**Important:** All interactions must follow the user's configured language. While templates are provided in English, translate them naturally at runtime.
+→ Load **reference.md** when executing any stage to access schema definitions, guidelines, and output templates. **Important:** All interactions must follow the user's configured language. While templates are provided in English, translate them naturally at runtime.
 
 ### Stage 1 — Welcome & Space Initialization (Path Setup)
 
-Collect the vault absolute path via `AskUserQuestion`.
-→ Use templates T1-1, T1-2, T1-3 from reference.md.
+Collect the vault absolute path via `AskUserQuestion`. → Use templates T1-1, T1-2, T1-3 from reference.md.
 
 - Default: `~/.maencof/`
 - If the path does not exist, confirm whether to create it.
 - Also create the `.maencof/` cache directory and `.maencof-meta/` metadata directory.
-- **Provision default config files**: After creating directories, provision all missing
-  config files with defaults (insight-config.json, vault-commit.json, lifecycle.json,
-  data-sources.json, auto-insight-stats.json, usage-stats.json).
-  Display the list of provisioned files to the user.
+- **Provision default config files**: After creating directories, provision all missing config files with defaults (insight-config.json, vault-commit.json, lifecycle.json, data-sources.json, auto-insight-stats.json, usage-stats.json). Display the list of provisioned files to the user.
 
 ### Stage 2 — Dynamic Identity Discovery (The Interview)
 
-**Goal:** Through natural, empathetic conversation, collect the 5 key dimensions of the `CoreIdentitySchema` defined in `reference.md`.
-**Tool:** Use `AskUserQuestion` (type: `text` for open-ended, `choice` only when narrowing down is helpful).
+**Goal:** Through natural, empathetic conversation, collect the 5 key dimensions of the `CoreIdentitySchema` defined in `reference.md`. **Tool:** Use `AskUserQuestion` (type: `text` for open-ended, `choice` only when narrowing down is helpful).
 
 **Execution Loop:**
 
@@ -70,8 +56,7 @@ _Crucial:_ Maintain the persona of a professional counselor. Do NOT use medical 
 
 ### Stage 3 — AI Companion Proposal (Persona Synthesis)
 
-Synthesize an AI companion persona holistically based on the Stage 2 discovery.
-→ See `reference.md` § Stage 3 for the Synthesis Guidelines. Load **examples.md** § Example 2 for sample output.
+Synthesize an AI companion persona holistically based on the Stage 2 discovery. → See `reference.md` § Stage 3 for the Synthesis Guidelines. Load **examples.md** § Example 2 for sample output.
 
 1. **Synthesize Persona**: Holistically design a companion that acts as a perfect partner for the user's stated needs and work style. Fill the v2 companion schema — core fields (`name`, `greeting`) plus uniform `sections` (one per character axis: role, tone, taboos, principles, traits, origin, and any custom axis).
 2. **Propose & Refine**: Present the proposed persona (template T3-1) via `AskUserQuestion` with options:
@@ -83,8 +68,7 @@ Synthesize an AI companion persona holistically based on the Stage 2 discovery.
 
 ### Stage 4 — Initial Knowledge Tree Scaffolding
 
-Generate Layer 1 documents from the synthesized discovery.
-→ Use templates T4-1, T4-2 from `reference.md`.
+Generate Layer 1 documents from the synthesized discovery. → Use templates T4-1, T4-2 from `reference.md`.
 
 | File                     | Content                                               |
 | ------------------------ | ----------------------------------------------------- |
@@ -93,8 +77,7 @@ Generate Layer 1 documents from the synthesized discovery.
 | `01_Core/boundaries.md`  | Absolute boundaries                                   |
 | `01_Core/preferences.md` | Communication preferences                             |
 
-Create the 4 markdown documents above with `mcp__plugin_maencof_tools__create` (layer=1; tags AND gist required — every L1 document must include a one-line `gist`, or create rejects it).
-Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `mcp__plugin_maencof_tools__create`, which requires layer/tags and always emits Frontmatter markdown.
+Create the 4 markdown documents above with `mcp__plugin_maencof_tools__create` (layer=1; tags AND gist required — every L1 document must include a one-line `gist`, or create rejects it). Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `mcp__plugin_maencof_tools__create`, which requires layer/tags and always emits Frontmatter markdown.
 
 Also create the Layer directories and sub-layer subdirectories:
 

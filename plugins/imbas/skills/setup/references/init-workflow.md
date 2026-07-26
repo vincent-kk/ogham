@@ -124,7 +124,4 @@ Step 7 — Result display
 
 ## Headless / CI fallback
 
-`open_settings` needs a local browser. Automation that cannot open one
-configures directly instead: `mcp__plugin_imbas_tools__config_set` with dot-path
-updates (e.g. `{ "provider": "local", "defaults.project_ref": "KEY" }`),
-then continue from Step 5.
+`open_settings` needs a local browser. Automation that cannot open one configures directly instead: `mcp__plugin_imbas_tools__config_set` with dot-path updates (e.g. `{ "provider": "local", "defaults.project_ref": "KEY" }`), then continue from Step 5.

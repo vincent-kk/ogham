@@ -14,8 +14,7 @@ SessionStart 이벤트 디스패처. `helpers/bootstrap`(볼트 init·CLAUDE.md 
 ## Conventions
 
 - 헬퍼·공유 관심사·core 는 concrete 경로로 import (배럴 `index.js` 금지)
-- entry는 `self-probe/hook` 경량 진단만 사용하고 probeAdvisory가 필터한
-  오류만 additionalContext 끝에 덧붙임 (정상 동작 신호는 침묵)
+- entry는 `self-probe/hook` 경량 진단만 사용하고 probeAdvisory가 필터한 오류만 additionalContext 끝에 덧붙임 (정상 동작 신호는 침묵)
 - 실행 순서: bootstrap → lifecycle
 
 ## Boundaries

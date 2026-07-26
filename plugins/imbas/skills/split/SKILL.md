@@ -8,10 +8,7 @@ complexity: complex
 plugin: imbas
 ---
 
-> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls, subagent returns, or during the 3→1→2
-> verification loop.
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, subagent returns, or during the 3→1→2 verification loop.
 >
 > **Valid reasons to yield**:
 >
@@ -27,8 +24,7 @@ plugin: imbas
 
 # split — Phase 2 Story Splitting
 
-Splits a validated planning document into INVEST-compliant Jira Stories with
-3→1→2 verification, size checks, and horizontal splitting when needed.
+Splits a validated planning document into INVEST-compliant Jira Stories with 3→1→2 verification, size checks, and horizontal splitting when needed.
 
 ## When to Use This Skill
 

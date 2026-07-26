@@ -2,10 +2,10 @@
 
 V2-style logical paths — MCP rewrites `/users/current` to `/user/current` on DC.
 
-| Operation | HTTP | Endpoint |
-|---|---|---|
-| Current user | GET | `/users/current` |
-| Search users | GET | `/search/user?cql=...` (V1/DC only — Cloud V2 has no equivalent; use CQL search instead) |
+| Operation    | HTTP | Endpoint                                                                                 |
+| ------------ | ---- | ---------------------------------------------------------------------------------------- |
+| Current user | GET  | `/users/current`                                                                         |
+| Search users | GET  | `/search/user?cql=...` (V1/DC only — Cloud V2 has no equivalent; use CQL search instead) |
 
 ## Identifier
 
@@ -14,6 +14,6 @@ V2-style logical paths — MCP rewrites `/users/current` to `/user/current` on D
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Method | Notes |
-|---|---|---|---|
-| All operations | `mcp__plugin_atlassian_tools__fetch` | GET | Read-only |
+| Operation      | MCP Tool                             | Method | Notes     |
+| -------------- | ------------------------------------ | ------ | --------- |
+| All operations | `mcp__plugin_atlassian_tools__fetch` | GET    | Read-only |

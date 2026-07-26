@@ -2,8 +2,7 @@
 
 ## Purpose
 
-`extractDependencies`가 추출한 raw import source 문자열을
-현재 파일 기준 절대 경로로 해석한다. `usageTracker` 내부 전용 유틸.
+`extractDependencies`가 추출한 raw import source 문자열을 현재 파일 기준 절대 경로로 해석한다. `usageTracker` 내부 전용 유틸.
 
 ## Scope
 
@@ -23,15 +22,18 @@
 ## Boundaries
 
 ### Always do
+
 - `existsSync` 기반 검증만 수행 (파일 내용 읽지 않음)
 - 실패는 `null`로 반환, 예외 전파 금지
 
 ### Ask first
+
 - 공개 시그니처 `resolveImportPath` 변경
 - tsconfig paths / node_modules / barrel 지원 확장
 - 확장자 우선순위 변경
 
 ### Never do
+
 - 파일 내용 파싱 또는 AST 분석
 - 네트워크·외부 프로세스 호출
 - 상위 모듈(`coverageVerify`, `usageTracker`)에서 직접 import되는 공개 API로 재분류

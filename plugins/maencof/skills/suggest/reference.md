@@ -18,12 +18,12 @@ mcp__plugin_maencof_tools__kg_status()
 
 Determine the target from user input:
 
-| Input Type | Detection | Parameter |
-|-----------|-----------|-----------|
-| Direct file path | contains `.md` or `/` | `path` |
-| Tags | comma-separated keywords | `tags` |
-| Free text | description | `content_hint` |
-| Not specified | — | ask user |
+| Input Type       | Detection                | Parameter      |
+| ---------------- | ------------------------ | -------------- |
+| Direct file path | contains `.md` or `/`    | `path`         |
+| Tags             | comma-separated keywords | `tags`         |
+| Free text        | description              | `content_hint` |
+| Not specified    | —                        | ask user       |
 
 ### Step 3 — Run Link Suggestion
 
@@ -44,10 +44,10 @@ If 0 results: "No related documents found above the minimum score threshold. Try
 ```markdown
 ## Link Suggestions for "{target}"
 
-| # | Document | Layer | Score | Reason |
-|---|----------|-------|-------|--------|
-| 1 | {target_title} | L{target_layer} | {score} | {reason} |
-| 2 | ... | ... | ... | ... |
+| #   | Document       | Layer           | Score   | Reason   |
+| --- | -------------- | --------------- | ------- | -------- |
+| 1   | {target_title} | L{target_layer} | {score} | {reason} |
+| 2   | ...            | ...             | ...     | ...      |
 
 Tags: {target_tags}
 SA Score: {sa_score} | Tag Score: {tag_score}

@@ -4,12 +4,12 @@ MCP setup tool with local HTTP server for Atlassian auth configuration UI.
 
 ## Structure
 
-| Directory            | Role                                                                   |
-| -------------------- | ---------------------------------------------------------------------- |
+| Directory           | Role                                                                   |
+| ------------------- | ---------------------------------------------------------------------- |
 | `webServer/`        | node:http server, closure pattern, 5min auto-shutdown                  |
 | `connectionTester/` | Jira/Confluence connection test via core modules                       |
-| `utils/`             | `loadSettingsHtml` — reads `public/settings.html` from disk at runtime |
-| `__tests__/`         | Unit tests for all sub-organs                                          |
+| `utils/`            | `loadSettingsHtml` — reads `public/settings.html` from disk at runtime |
+| `__tests__/`        | Unit tests for all sub-organs                                          |
 
 ## Conventions
 

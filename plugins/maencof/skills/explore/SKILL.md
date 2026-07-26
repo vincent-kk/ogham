@@ -12,8 +12,7 @@ plugin: maencof
 
 # explore — Interactive Knowledge Exploration
 
-Interactively traverses the knowledge graph using Spreading Activation (SA).
-Energy spreads from a seed node, uncovering unexpected connections along the way.
+Interactively traverses the knowledge graph using Spreading Activation (SA). Energy spreads from a seed node, uncovering unexpected connections along the way.
 
 ## When to Use This Skill
 
@@ -25,11 +24,8 @@ Energy spreads from a seed node, uncovering unexpected connections along the way
 
 ## When to Use vs Adjacent Skills
 
-- **`explore`** — interactive, up to 3 rounds. Select a node, inspect
-  neighbors (inbound/outbound/hierarchy), optionally re-seed. Best when you
-  expect to pivot.
-- **`recall`** — one-shot Spreading Activation. Returns a ranked list
-  in a single turn; no drill-down. Best when the query is specific.
+- **`explore`** — interactive, up to 3 rounds. Select a node, inspect neighbors (inbound/outbound/hierarchy), optionally re-seed. Best when you expect to pivot.
+- **`recall`** — one-shot Spreading Activation. Returns a ranked list in a single turn; no drill-down. Best when the query is specific.
 
 Rule of thumb: want to wander → `explore`. Know what you want → `recall`.
 
@@ -120,8 +116,7 @@ mcp__plugin_maencof_tools__kg_navigate(
 )
 ```
 
-Display inbound/outbound/parent/child/sibling nodes and ask whether to continue exploring.
-When the node has CROSS_LAYER edges (via L5-Boundary), highlight them separately as cross-layer connections.
+Display inbound/outbound/parent/child/sibling nodes and ask whether to continue exploring. When the node has CROSS_LAYER edges (via L5-Boundary), highlight them separately as cross-layer connections.
 
 When `--detail` is specified or the user requests full content, read the document body:
 
@@ -137,13 +132,12 @@ mcp__plugin_maencof_tools__kg_context(query: current seed or keyword, token_budg
 
 ### Step 6 — Interactive Expansion (Up to 3 Rounds)
 
-If the user selects a neighbor node as a new seed, re-run from Step 3.
-After 3 rounds: "Exploration depth limit reached."
+If the user selects a neighbor node as a new seed, re-run from Step 3. After 3 rounds: "Exploration depth limit reached."
 
 ## Available MCP Tools
 
-| Tool                | Purpose                                                        |
-| ------------------- | -------------------------------------------------------------- |
+| Tool                                     | Purpose                                                        |
+| ---------------------------------------- | -------------------------------------------------------------- |
 | `mcp__plugin_maencof_tools__kg_status`   | Check index status (stale check)                               |
 | `mcp__plugin_maencof_tools__kg_search`   | SA-based related document search                               |
 | `mcp__plugin_maencof_tools__kg_navigate` | Look up a node's neighbors (inbound/outbound links, hierarchy) |

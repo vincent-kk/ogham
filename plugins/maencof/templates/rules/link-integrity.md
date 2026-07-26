@@ -11,15 +11,13 @@ version: 1.0.0
 
 ## Purpose
 
-Ensure the validity of links in the maencof knowledge graph.
-Detect broken links, malformed link formats, and Layer directionality violations.
+Ensure the validity of links in the maencof knowledge graph. Detect broken links, malformed link formats, and Layer directionality violations.
 
 ## Rule Definitions
 
 ### R1. Relative Paths Only
 
-Markdown links must use relative paths exclusively.
-Absolute paths and external URLs are recorded in the `source` Frontmatter field.
+Markdown links must use relative paths exclusively. Absolute paths and external URLs are recorded in the `source` Frontmatter field.
 
 ```markdown
 <!-- Correct examples -->
@@ -32,8 +30,7 @@ Absolute paths and external URLs are recorded in the `source` Frontmatter field.
 
 ### R2. Link Target Must Exist
 
-The target file of a `[text](path)` link must exist.
-Links referencing non-existent files are recorded in `.maencof-meta/broken-links.json`.
+The target file of a `[text](path)` link must exist. Links referencing non-existent files are recorded in `.maencof-meta/broken-links.json`.
 
 ### R3. Layer Directionality Compliance
 
@@ -48,13 +45,11 @@ Link direction must follow Layer policy (per 06-link-policy.md):
 
 ### R4. Circular Reference Warning
 
-Cycles where two documents reference each other (A→B→A) cause DAGConverter to weaken edge weights (0.1),
-but direct mutual references are reported as a warning.
+Cycles where two documents reference each other (A→B→A) cause DAGConverter to weaken edge weights (0.1), but direct mutual references are reported as a warning.
 
 ### R5. Backlink Index Consistency
 
-Entries in `.maencof-meta/backlink-index.json` must match the actual file system.
-Inconsistencies are detected and recorded by the SessionStart Hook.
+Entries in `.maencof-meta/backlink-index.json` must match the actual file system. Inconsistencies are detected and recorded by the SessionStart Hook.
 
 ## Validation Logic
 
@@ -108,8 +103,7 @@ function validateLinkIntegrity(
 
 ## Auto-fix
 
-All link integrity violations are **not auto-fixable**.
-Manual review required:
+All link integrity violations are **not auto-fixable**. Manual review required:
 - Broken links: remove the link or restore the target file
 - Layer violations: remove the link or move the document
 

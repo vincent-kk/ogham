@@ -2,8 +2,7 @@
 
 ## Purpose
 
-호스트별 지침 파일의 maencof 섹션 병합/읽기/제거. 호출자가 결정한 파일에서
-`<!-- MAENCOF:START -->` / `<!-- MAENCOF:END -->` 마커만 소유한다.
+호스트별 지침 파일의 maencof 섹션 병합/읽기/제거. 호출자가 결정한 파일에서 `<!-- MAENCOF:START -->` / `<!-- MAENCOF:END -->` 마커만 소유한다.
 
 ## Structure
 
@@ -35,6 +34,4 @@
 
 ## Dependencies
 
-- `@ogham/agent-artifacts/instructions`,
-  `@ogham/agent-artifacts/targets/project/instructions`,
-  `@ogham/cross-platform/host-registry`.
+- `@ogham/agent-artifacts/instructions`, `@ogham/agent-artifacts/targets/project/instructions`, `@ogham/cross-platform/host-registry`.

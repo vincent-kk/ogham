@@ -1,7 +1,6 @@
 # GitHub Provider — Link Handling (Bidirectional)
 
-Documents the `## Links` section write protocol for the manifest skill.
-See `SPEC-provider-github.md §4` for the data contract.
+Documents the `## Links` section write protocol for the manifest skill. See `SPEC-provider-github.md §4` for the data contract.
 
 ## `## Links` section grammar
 
@@ -19,6 +18,7 @@ The `## Links` section lives in the GitHub issue body at h2 level:
 ```
 
 Parser rules (also governs writes):
+
 - Header is literal `## Links` (h2). Missing section → `{}`.
 - Each line: `- <linkType>: <refList>`.
 - `linkType` ∈ `{blocks, blocked-by, split-from, split-into, relates}` (matches `config.github.linkTypes` default).
@@ -32,7 +32,7 @@ Parser rules (also governs writes):
 When source A records link type X pointing to B, target B records the reverse:
 
 | Source type (A → B) | Reverse type (B → A) |
-|---------------------|----------------------|
+| ------------------- | -------------------- |
 | `blocks`            | `blocked-by`         |
 | `blocked-by`        | `blocks`             |
 | `split-from`        | `split-into`         |
@@ -58,15 +58,14 @@ For each link operation:
 5. Read current body of target issue (same `gh issue view`).
 6. Append `- <reverseType>: <source_ref>` under target's `## Links`.
 7. PATCH target body.
-8. If either PATCH fails, report the failure but do NOT roll back the other side.
-   A future `imbas:repair-links` operation handles asymmetric state.
+8. If either PATCH fails, report the failure but do NOT roll back the other side. A future `imbas:repair-links` operation handles asymmetric state.
 
 ## Task-list hierarchy maintenance
 
-Creating a child issue (Story under Epic, Task under Story, Subtask under Task)
-requires updating the parent body's `## Sub-tasks` section.
+Creating a child issue (Story under Epic, Task under Story, Subtask under Task) requires updating the parent body's `## Sub-tasks` section.
 
 Protocol:
+
 1. Read parent body.
 2. Locate the `## Sub-tasks` section. If absent, append it before `## Links`.
 3. Append `- [ ] #<child_number>` as a new line item.
@@ -75,6 +74,7 @@ Protocol:
 ### Transaction semantics
 
 If the parent PATCH fails after the child issue was already created:
+
 - Report the failure to the user.
 - Do NOT roll back the child issue (it is a valid standalone issue).
 - Record the parent PATCH failure in the manifest item for the child.
@@ -82,13 +82,8 @@ If the parent PATCH fails after the child issue was already created:
 
 ## Idempotency
 
-Before appending any link entry, check for an exact match of
-`- <linkType>: <ref>` in the existing `## Links` block.
-If already present, skip the append. Re-execution is safe.
+Before appending any link entry, check for an exact match of `- <linkType>: <ref>` in the existing `## Links` block. If already present, skip the append. Re-execution is safe.
 
 ## 1:N expansion
 
-The manifest link schema allows `link.to` to be an array. For each target,
-repeat the write protocol independently. Per-target outcomes feed into the
-manifest link status: `created` / `partial` / `failed`.
-Successful targets are NOT rolled back if a later target fails.
+The manifest link schema allows `link.to` to be an array. For each target, repeat the write protocol independently. Per-target outcomes feed into the manifest link status: `created` / `partial` / `failed`. Successful targets are NOT rolled back if a later target fails.

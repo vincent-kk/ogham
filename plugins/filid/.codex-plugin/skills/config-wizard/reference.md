@@ -1,26 +1,17 @@
 # config-wizard — Reference
 
-Detailed specifications for config path resolution, output formatting,
-and validation logic.
+Detailed specifications for config path resolution, output formatting, and validation logic.
 
 ## Schema Source
 
-The authoritative `FilidConfig` interface lives in the filid plugin's
-internal source file `src/core/infra/config-loader/loaders/config-schemas.ts`.
-That file is **not** distributed to user projects (the plugin ships as a
-bundled `bridge/mcp-server.cjs`), so this skill MUST NOT attempt to Read
-it at runtime — any such Read resolves against CWD and fails.
+The authoritative `FilidConfig` interface lives in the filid plugin's internal source file `src/core/infra/config-loader/loaders/config-schemas.ts`. That file is **not** distributed to user projects (the plugin ships as a bundled `bridge/mcp-server.cjs`), so this skill MUST NOT attempt to Read it at runtime — any such Read resolves against CWD and fails.
 
 Discover field names the safe way:
 
 1. `Read .filid/config.json` to see what the current project already stores.
-2. If you need the default shape (e.g., for `reset`), rely on
-   `mcp__plugin_filid_tools__project_init` — the handler writes `createDefaultConfig()` output
-   onto disk when no config file is present. Delete first, then call the MCP
-   tool (see `SKILL.md` → Step 3 `reset`).
+2. If you need the default shape (e.g., for `reset`), rely on `mcp__plugin_filid_tools__project_init` — the handler writes `createDefaultConfig()` output onto disk when no config file is present. Delete first, then call the MCP tool (see `SKILL.md` → Step 3 `reset`).
 
-Do NOT hardcode field lists in this skill. Do NOT embed `Read
-src/core/infra/...` instructions anywhere.
+Do NOT hardcode field lists in this skill. Do NOT embed `Read src/core/infra/...` instructions anywhere.
 
 ## Dot-Notation Path Resolution
 
@@ -90,8 +81,7 @@ Notes:
 - `✓` for enabled, `✗` for disabled
 - If `language` is not set, show `(default: en)` as the value
 - Any additional top-level fields should be shown in the first table
-- `additional-entry-points` and `additional-route-patterns` appear in the
-  first table only when set in `.filid/config.json`. Example:
+- `additional-entry-points` and `additional-route-patterns` appear in the first table only when set in `.filid/config.json`. Example:
 
 ```markdown
 | Key                       | Value                      |
@@ -140,11 +130,7 @@ Current config:
 
 ## Validation Rules
 
-After any write operation, validate the written config against the schema with
-`mcp__plugin_filid_tools__config_patch_validate({ patch_json: <file contents> })` —
-its `errors[]` is the authoritative check for shape, enum, and type errors. The
-items below are additional sanity checks, some stricter than the schema (which
-accepts an empty `version` or empty `rules`), so keep applying them:
+After any write operation, validate the written config against the schema with `mcp__plugin_filid_tools__config_patch_validate({ patch_json: <file contents> })` — its `errors[]` is the authoritative check for shape, enum, and type errors. The items below are additional sanity checks, some stricter than the schema (which accepts an empty `version` or empty `rules`), so keep applying them:
 
 1. **Valid JSON**: File parses without error
 2. **Version exists**: `config.version` is a non-empty string

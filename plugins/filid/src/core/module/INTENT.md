@@ -6,9 +6,9 @@
 
 ## Structure
 
-| 모듈 | 역할 |
-|------|------|
-| `indexAnalyzer` | 정규식 기반 export 구문 추출. barrel 순수성(직접 선언 0개) 판정 |
+| 모듈                 | 역할                                                                      |
+| -------------------- | ------------------------------------------------------------------------- |
+| `indexAnalyzer`      | 정규식 기반 export 구문 추출. barrel 순수성(직접 선언 0개) 판정           |
 | `moduleMainAnalyzer` | 진입점 파일 탐색, import 파싱, `extractPublicApi`, 최종 `ModuleInfo` 조립 |
 
 ## Conventions

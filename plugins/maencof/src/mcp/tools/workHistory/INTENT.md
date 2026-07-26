@@ -2,8 +2,7 @@
 
 ## Purpose
 
-work_history 읽기 도구. "그동안 무슨 작업을 했나"를 daily digest 기반으로 답한다.
-기간 요약(기본) 또는 토픽/레이어 작업 이력 조회.
+work_history 읽기 도구. "그동안 무슨 작업을 했나"를 daily digest 기반으로 답한다. 기간 요약(기본) 또는 토픽/레이어 작업 이력 조회.
 
 ## Boundaries
 

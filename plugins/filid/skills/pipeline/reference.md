@@ -1,13 +1,10 @@
 # pipeline — Reference Documentation
 
-Auto-detection details, flag passthrough, and inter-stage file contracts
-for the pipeline orchestrator. The canonical stage alias table lives in
-`SKILL.md` → "Stage Alias Table (SSoT)".
+Auto-detection details, flag passthrough, and inter-stage file contracts for the pipeline orchestrator. The canonical stage alias table lives in `SKILL.md` → "Stage Alias Table (SSoT)".
 
 ## Auto-Detection Algorithm
 
-When `--from` is omitted, check signals in strict priority order — first
-match wins.
+When `--from` is omitted, check signals in strict priority order — first match wins.
 
 ```
 1. Detect branch: git branch --show-current
@@ -68,8 +65,7 @@ Signal 4: does a PR exist? (gh pr view exit code)
 | `--force`       |           | ✓      |         |            |
 | `--auto`        |           |        | always  |            |
 
-> `--auto` is **always** passed to resolve regardless of user input —
-> the pipeline implies full automation for the resolve stage.
+> `--auto` is **always** passed to resolve regardless of user input — the pipeline implies full automation for the resolve stage.
 
 ## Inter-Stage File Contracts
 
@@ -82,8 +78,7 @@ All paths relative to `.filid/review/<normalized>/`.
 | resolve    | `justifications.md`, `.filid/debt/*.md` (rejections), commit + push                                                                 | `fix-requests.md`                                          | `justifications.md` exists |
 | revalidate | `re-validate.md`, PR comment                                                                                                        | `justifications.md`, `fix-requests.md`, `review-report.md` | `re-validate.md` exists    |
 
-The review stage's verdict is read from `review-report.md` frontmatter
-(`verdict:`); a missing field is treated as `INCONCLUSIVE`.
+The review stage's verdict is read from `review-report.md` frontmatter (`verdict:`); a missing field is treated as `INCONCLUSIVE`.
 
 ## Stage Transition Table
 

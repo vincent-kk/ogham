@@ -1,9 +1,6 @@
 ## Purpose
 
-`open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 공유
-`@ogham/http-kit` 으로 loopback Host → one-time token → POST Origin →
-`application/json` 순 검증. 저장/닫기 이벤트를 settle waiter 로 노출해
-도구의 bounded long-poll 을 해소한다.
+`open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 공유 `@ogham/http-kit` 으로 loopback Host → one-time token → POST Origin → `application/json` 순 검증. 저장/닫기 이벤트를 settle waiter 로 노출해 도구의 bounded long-poll 을 해소한다.
 
 ## Structure
 
@@ -17,8 +14,7 @@
 
 - 응답 본문 형태: `{ success: bool, message?, errors?, ...data }`
 - `__IMBAS_STATE__` 슬롯에 `escapeJsonForHtml` 직렬화 상태 주입
-- `/save` 성공이 waiter 를 `{ kind: 'saved', summary }` 로 settle; `/close` 와
-  서버 종료는 `{ kind: 'closed' }` 로 settle
+- `/save` 성공이 waiter 를 `{ kind: 'saved', summary }` 로 settle; `/close` 와 서버 종료는 `{ kind: 'closed' }` 로 settle
 - idle 5 분 자동 종료 — 단, 활성 waiter 가 있으면 타이머를 연장
 - 요청마다 idle 타이머 리셋; 테스트는 `idleMs` 옵션으로 단축
 

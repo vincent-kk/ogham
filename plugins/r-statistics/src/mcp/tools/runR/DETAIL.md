@@ -27,5 +27,4 @@
 
 ## Last Updated
 
-2026-07-15 — allow-root 해석 실패 시 projectRoot 가드 안내를 `DATA_ROOT_INVALID` 로 삼키던 결함 수정 (M2-4 실측). 두 실패를 분리: project_root 미전달 → 재전달 안내 throw, 지정 루트 realpath 불가 → `DATA_ROOT_INVALID`.
-2026-07-12 — `dataRefs[].path` allow-root containment 도입 (operations-sre-3 부채 해소).
+2026-07-15 — allow-root 해석 실패 시 projectRoot 가드 안내를 `DATA_ROOT_INVALID` 로 삼키던 결함 수정 (M2-4 실측). 두 실패를 분리: project_root 미전달 → 재전달 안내 throw, 지정 루트 realpath 불가 → `DATA_ROOT_INVALID`. 2026-07-12 — `dataRefs[].path` allow-root containment 도입 (operations-sre-3 부채 해소).

@@ -11,8 +11,7 @@ version: 1.0.0
 
 ## Purpose
 
-Enforce that all maencof markdown documents include valid Frontmatter.
-Apply validation based on FrontmatterSchema (Zod).
+Enforce that all maencof markdown documents include valid Frontmatter. Apply validation based on FrontmatterSchema (Zod).
 
 ## Required Fields
 
@@ -58,8 +57,7 @@ The `tags` array must not be empty.
 
 ### R4. created Is Immutable
 
-The `created` field must not be changed after initial creation.
-MCP tools auto-update only the `updated` field.
+The `created` field must not be changed after initial creation. MCP tools auto-update only the `updated` field.
 
 ### R5. Layer 4 Expiry Date Recommended
 

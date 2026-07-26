@@ -64,8 +64,8 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 ## Available MCP Tools
 
-| Tool                    | Purpose                                                    |
-| ----------------------- | ---------------------------------------------------------- |
+| Tool                                         | Purpose                                                    |
+| -------------------------------------------- | ---------------------------------------------------------- |
 | `mcp__plugin_maencof_tools__delete`          | Delete vault document (document mode)                      |
 | `mcp__plugin_maencof_tools__read`            | Preview document before deletion (document mode)           |
 | `mcp__plugin_maencof_tools__kg_search`       | Keyword search to identify deletion target (document mode) |

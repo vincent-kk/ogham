@@ -4,8 +4,7 @@ imbas 파이프라인 Phase 2. 검증된 문서를 INVEST 원칙에 따라 Jira 
 
 ## 개요
 
-Phase 1(validate)에서 통과한 기획 문서를 `planner` 에이전트가 INVEST 원칙에 맞는 Story로 분할하고,
-3→1→2 검증 체계로 품질을 확인한다. 크기가 초과되면 수평 분할, 개념적으로 하위 Story가 필요하면 우산 패턴을 적용한다.
+Phase 1(validate)에서 통과한 기획 문서를 `planner` 에이전트가 INVEST 원칙에 맞는 Story로 분할하고, 3→1→2 검증 체계로 품질을 확인한다. 크기가 초과되면 수평 분할, 개념적으로 하위 Story가 필요하면 우산 패턴을 적용한다.
 
 ## 사용법
 
@@ -37,13 +36,13 @@ Phase 1(validate)에서 통과한 기획 문서를 `planner` 에이전트가 INV
 
 ## 이스케이프 코드
 
-| 코드 | 의미 | 후속 조치 |
-|------|------|-----------|
-| **E2-1** | 정보 부족 | 누락 항목 목록, 보충 요청 |
-| **E2-2** | 모순 발견 | 충돌 지점 명시, 인간 판단 요청 |
+| 코드     | 의미                           | 후속 조치                           |
+| -------- | ------------------------------ | ----------------------------------- |
+| **E2-1** | 정보 부족                      | 누락 항목 목록, 보충 요청           |
+| **E2-2** | 모순 발견                      | 충돌 지점 명시, 인간 판단 요청      |
 | **E2-3** | 분할 불필요 (이미 적절한 크기) | Phase 3(devplan)으로 직접 진행 가능 |
-| **EC-1** | 이해 불가 | 범위 동결, 명확화 질의 구성 |
-| **EC-2** | 원본 결함 발견 | 결함 보고서 생성, 재검증 권고 |
+| **EC-1** | 이해 불가                      | 범위 동결, 명확화 질의 구성         |
+| **EC-2** | 원본 결함 발견                 | 결함 보고서 생성, 재검증 권고       |
 
 ## 출력
 
@@ -51,15 +50,15 @@ Phase 1(validate)에서 통과한 기획 문서를 `planner` 에이전트가 INV
 
 ## 사용 도구
 
-| 도구 | 출처 | 용도 |
-|------|------|------|
-| `mcp__plugin_imbas_tools__run_get` | imbas MCP | 런 상태 로드 |
-| `mcp__plugin_imbas_tools__run_transition` | imbas MCP | 단계 전이 (시작/완료/이스케이프) |
-| `mcp__plugin_imbas_tools__manifest_save` | imbas MCP | stories-manifest 저장 |
-| `mcp__plugin_imbas_tools__manifest_validate` | imbas MCP | 매니페스트 유효성 검증 |
-| `[OP: get_issue]` | Jira ([OP:]) | Epic 존재 확인 |
-| `planner` | 에이전트(sonnet) | INVEST Story 분할 |
-| `analyst` | 에이전트(sonnet) | 역추론 검증 |
+| 도구                                         | 출처             | 용도                             |
+| -------------------------------------------- | ---------------- | -------------------------------- |
+| `mcp__plugin_imbas_tools__run_get`           | imbas MCP        | 런 상태 로드                     |
+| `mcp__plugin_imbas_tools__run_transition`    | imbas MCP        | 단계 전이 (시작/완료/이스케이프) |
+| `mcp__plugin_imbas_tools__manifest_save`     | imbas MCP        | stories-manifest 저장            |
+| `mcp__plugin_imbas_tools__manifest_validate` | imbas MCP        | 매니페스트 유효성 검증           |
+| `[OP: get_issue]`                            | Jira ([OP:])     | Epic 존재 확인                   |
+| `planner`                                    | 에이전트(sonnet) | INVEST Story 분할                |
+| `analyst`                                    | 에이전트(sonnet) | 역추론 검증                      |
 
 ## 참고 파일
 

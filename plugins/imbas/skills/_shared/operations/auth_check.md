@@ -16,8 +16,7 @@ GET /rest/api/3/myself
 
 ## Notes
 
-This is a lightweight endpoint suitable for connection verification.
-If the call succeeds, the Atlassian integration is properly configured.
+This is a lightweight endpoint suitable for connection verification. If the call succeeds, the Atlassian integration is properly configured.
 
 ## Used By
 

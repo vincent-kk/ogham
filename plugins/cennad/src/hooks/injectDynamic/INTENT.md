@@ -11,8 +11,7 @@
 - `utils/readPromptFromStdin.ts` — 훅 stdin JSON 에서 `prompt` 추출 (2s 타임아웃)
 - `utils/loadCounter.ts` · `utils/asNonNegInt.ts` — counter read + 정수 가드
 - `utils/underShare.ts` — electable 중 점유율 미달 → `under share: <p> Npt`
-- `utils/matchDomain.ts` — 프롬프트 × 키워드 → 소유 provider (정규식 미사용;
-  `isAsciiOnly` + `hasWordBoundaryMatch` 로 매칭 규칙 분기)
+- `utils/matchDomain.ts` — 프롬프트 × 키워드 → 소유 provider (정규식 미사용; `isAsciiOnly` + `hasWordBoundaryMatch` 로 매칭 규칙 분기)
 - `utils/nudgeLine.ts` · `utils/matchLine.ts` · `utils/providerList.ts` — 문구
 
 ## Conventions

@@ -1,6 +1,7 @@
 # Preconditions
 
 From state.json:
+
 - `validate.status == "completed"`
 - `validate.result` in `["PASS", "PASS_WITH_WARNINGS"]`
 

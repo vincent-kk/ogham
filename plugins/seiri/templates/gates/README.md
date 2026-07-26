@@ -1,13 +1,8 @@
 # gates — repository gate scaffolds (values-free)
 
-`setup` may drop these scaffolds into a target repository. seiri **deploys
-rules, it does not own a repository's thresholds or verification commands** —
-so every file here is a **values-free skeleton**: it gives the shape, you fill
-in the checks.
+`setup` may drop these scaffolds into a target repository. seiri **deploys rules, it does not own a repository's thresholds or verification commands** — so every file here is a **values-free skeleton**: it gives the shape, you fill in the checks.
 
-The intervention dial (`advisory` / `standard` / `strict`) changes only how
-strongly the skill _offers_ these scaffolds. The file contents shipped here are
-identical regardless of the dial.
+The intervention dial (`advisory` / `standard` / `strict`) changes only how strongly the skill _offers_ these scaffolds. The file contents shipped here are identical regardless of the dial.
 
 ## pre-commit skeleton
 

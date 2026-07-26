@@ -163,14 +163,7 @@ Claude Code session
 
 ## 디스크 레이아웃
 
-cennad 의 영구 상태는 기본적으로 `~/.claude/plugins/cennad/` 디렉터리에
-저장됩니다. 전용 위치가 필요하면 `CENNAD_CONFIG_PATH` 로 cennad 전용
-디렉터리를 지정할 수 있습니다.
-`CLAUDE_PLUGIN_DATA` 와 `CLAUDE_PLUGIN_DADA` 는 cennad 저장 경로로 사용하지
-않습니다. 별도 home 의 config 를 읽을 수 없을 때는
-`~/.claude/plugins/cennad/config.json` 을 읽기 전용 fallback 으로 시도할 수
-있지만, 파일을 복사·마이그레이션하지 않으며 저장은 계속 active home 에
-수행됩니다.
+cennad 의 영구 상태는 기본적으로 `~/.claude/plugins/cennad/` 디렉터리에 저장됩니다. 전용 위치가 필요하면 `CENNAD_CONFIG_PATH` 로 cennad 전용 디렉터리를 지정할 수 있습니다. `CLAUDE_PLUGIN_DATA` 와 `CLAUDE_PLUGIN_DADA` 는 cennad 저장 경로로 사용하지 않습니다. 별도 home 의 config 를 읽을 수 없을 때는 `~/.claude/plugins/cennad/config.json` 을 읽기 전용 fallback 으로 시도할 수 있지만, 파일을 복사·마이그레이션하지 않으며 저장은 계속 active home 에 수행됩니다.
 
 ```
 ~/.claude/plugins/cennad/

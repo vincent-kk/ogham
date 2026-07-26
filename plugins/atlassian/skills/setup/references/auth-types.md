@@ -31,9 +31,9 @@
 
 ## Recommendation
 
-| Use Case | Recommended Auth |
-|---|---|
-| Personal Cloud use | Basic (API token) |
-| Personal Server/DC use | PAT |
-| CI/CD pipeline | Basic or PAT |
-| Multi-user application | OAuth 2.0 |
+| Use Case               | Recommended Auth  |
+| ---------------------- | ----------------- |
+| Personal Cloud use     | Basic (API token) |
+| Personal Server/DC use | PAT               |
+| CI/CD pipeline         | Basic or PAT      |
+| Multi-user application | OAuth 2.0         |

@@ -10,8 +10,7 @@ plugin: maencof-lens
 
 # lookup — Vault Knowledge Lookup
 
-Search → Read → Summarize pipeline for single-document quick reference.
-For multi-doc context assembly, use `/maencof-lens:brief` instead.
+Search → Read → Summarize pipeline for single-document quick reference. For multi-doc context assembly, use `/maencof-lens:brief` instead.
 
 ## When to Use
 
@@ -36,8 +35,7 @@ Cross-language recall: include each key concept in BOTH the user's working langu
 mcp__plugin_maencof-lens_tools__search(seed: [keyword1, keyword1_en, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
 ```
 
-Optional SA tuning parameters — pass only when user explicitly specifies:
-`decay`, `threshold`, `max_hops`, `sub_layer`
+Optional SA tuning parameters — pass only when user explicitly specifies: `decay`, `threshold`, `max_hops`, `sub_layer`
 
 No results → suggest different keywords.
 
@@ -53,8 +51,7 @@ mcp__plugin_maencof-lens_tools__read(path: top_result.path, vault: same_vault)
 
 ### Step 3 — Summarize & Present
 
-Summarize document content in context of the query (1-3 paragraphs).
-Show remaining results as a numbered list for optional deeper exploration.
+Summarize document content in context of the query (1-3 paragraphs). Show remaining results as a numbered list for optional deeper exploration.
 
 ```markdown
 ## Lookup: "{keyword}"
@@ -77,8 +74,8 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 
 ## MCP Tools
 
-| Tool           | Purpose                                    |
-| -------------- | ------------------------------------------ |
+| Tool                                     | Purpose                                    |
+| ---------------------------------------- | ------------------------------------------ |
 | `mcp__plugin_maencof-lens_tools__search` | SA-based keyword search across vault graph |
 | `mcp__plugin_maencof-lens_tools__read`   | Read document content by path              |
 

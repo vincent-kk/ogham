@@ -2,8 +2,7 @@
 
 ## Purpose
 
-Story와 cross-story Task를 DAG로 해석해 병렬 가능한 그룹과 실행 순서를 계산한다.
-의존성은 StoryLink(blocks/is-blocked-by)와 devplan Task.blocks에서 수집한다.
+Story와 cross-story Task를 DAG로 해석해 병렬 가능한 그룹과 실행 순서를 계산한다. 의존성은 StoryLink(blocks/is-blocked-by)와 devplan Task.blocks에서 수집한다.
 
 ## Structure
 

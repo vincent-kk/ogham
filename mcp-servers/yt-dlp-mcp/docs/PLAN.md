@@ -17,6 +17,7 @@
 5. 네트워크가 필요한 통합 테스트는 env-gate로 기본 skip. 단위/fixture로 로직을 증명한다.
 
 ### 새 세션 시작 요청 예시
+
 > "이 디렉토리의 `PLAN.md`를 읽고 Phase 0부터 순서대로 구현해줘. 각 Phase의 DoD를 통과하며 진행하고, 외부 라이브러리는 구현 직전에 최신 API를 확인해."
 
 ---
@@ -24,10 +25,13 @@
 ## 1. 목표 & 검증된 배경
 
 ### 무엇을 만드는가
+
 YouTube(및 yt-dlp 지원 플랫폼) 영상의 **자막(transcript)과 콘텐츠(메타데이터·자막목록 등)** 를 추출하는 **MCP 서버**. 셸이 없는 호스트(Claude Desktop 등)와 배포 대상.
 
 ### 왜 이 설계인가 (POC 실측 결론)
+
 2026-06 기준 실측으로 확인된 사실(`poc/FINDINGS.md`):
+
 - **순수 HTTP로는 자막 본문을 못 가져온다.** 레퍼런스 구현의 InnerTube `get_transcript`(수작업 protobuf), youtubei.js v17 `getTranscript()`, timedtext baseUrl **전부 실패**(HTTP 400 / 200-empty) — poToken/BotGuard 때문. 주거용 IP에서도 동일(IP 문제 아님).
 - **메타데이터/자막목록은 순수 HTTP(youtubei.js)로 가능**하나, 자막 본문이 안 되면 반쪽.
 - **yt-dlp는 자막+메타데이터를 모두 가져온다** — bgutil 토큰 서버 없이도, JS 챌린지를 외부 JS 런타임으로 자체 해결.
@@ -36,6 +40,7 @@ YouTube(및 yt-dlp 지원 플랫폼) 영상의 **자막(transcript)과 콘텐츠
 → **결론: 자막 본문은 yt-dlp가 유일하게 견고. 단, "셸 없는 호스트 배포"가 목표이므로 yt-dlp를 MCP가 자동 확보해 단독 동작시킨다.**
 
 ### MCP가 정당한 이유 (왜 "LLM이 yt-dlp 직접 호출"이 아닌가)
+
 셸 없는 호스트(Claude Desktop 등)는 임의 셸 실행을 안 준다 → MCP 툴이 유일한 통로. 또한 MCP는 prompt-injection 방어(옵션 화이트리스트), 검증된 플래그/파싱 캡슐화, 배포/재사용을 제공한다.
 
 ---
@@ -56,19 +61,22 @@ YouTube(및 yt-dlp 지원 플랫폼) 영상의 **자막(transcript)과 콘텐츠
 - 런타임: Node ≥ 20 (전역 `fetch`, `AbortController`), **ESM**, TS strict.
 
 ### dependencies
-| 패키지 | 용도 |
-|--------|------|
+
+| 패키지                      | 용도                                   |
+| --------------------------- | -------------------------------------- |
 | `@modelcontextprotocol/sdk` | MCP 서버(`McpServer` + `registerTool`) |
-| `zod` | 입력/설정 스키마 검증 |
-| `execa` | yt-dlp 서브프로세스 호출 |
-| `p-limit` | yt-dlp 동시성 제한 |
-| `pino` | 구조화 로깅(**stderr 전용**) |
+| `zod`                       | 입력/설정 스키마 검증                  |
+| `execa`                     | yt-dlp 서브프로세스 호출               |
+| `p-limit`                   | yt-dlp 동시성 제한                     |
+| `pino`                      | 구조화 로깅(**stderr 전용**)           |
 
 ### 외부(자동 확보, 번들 아님)
+
 - **yt-dlp standalone** — 런타임 온디맨드 다운로드(§6-2). 시스템 설치 불필요.
 - JS 런타임 — **MCP의 Node 재사용**(`process.execPath`). 별도 설치 불필요.
 
 ### devDependencies
+
 `typescript`, `@types/node`, `tsx`, `vitest`
 
 ---
@@ -85,6 +93,7 @@ Cache / Observability / Config
 ```
 
 ### get_transcript 흐름
+
 ```
 url → videoId 파싱 → 캐시 조회(HIT 반환)
  → ensureYtDlp(): 캐시에 안전버전 바이너리 보장(없으면 다운로드+검증)
@@ -130,21 +139,36 @@ url → videoId 파싱 → 캐시 조회(HIT 반환)
 ## 6. 핵심 계약 (검증된 POC 기반 — 그대로 구현, 호출부만 최신화)
 
 ### 6-1. 도메인 타입 — `src/domain/types.ts`
+
 ```ts
-export interface TranscriptSegment { text: string; startMs: number; durationMs: number; }
+export interface TranscriptSegment {
+  text: string;
+  startMs: number;
+  durationMs: number;
+}
 export interface VideoMetadata {
-  videoId: string; title: string; channel: string;
-  viewCount?: number; durationSec?: number; uploadDate?: string;
+  videoId: string;
+  title: string;
+  channel: string;
+  viewCount?: number;
+  durationSec?: number;
+  uploadDate?: string;
 }
 export interface TranscriptResult {
-  videoId: string; language: string; availableSubs: string[];
-  segments: TranscriptSegment[]; metadata: VideoMetadata;
-  source: 'yt-dlp'; warnings: string[];
+  videoId: string;
+  language: string;
+  availableSubs: string[];
+  segments: TranscriptSegment[];
+  metadata: VideoMetadata;
+  source: 'yt-dlp';
+  warnings: string[];
 }
 ```
 
 ### 6-2. 바이너리 관리 — `src/ytdlp/ensure-binary.ts` + `version.ts`
+
 검증된 POC(`poc/src/ytdlp/ensure-binary.ts`)를 기반으로 **§7 운영/보안을 보강**한다:
+
 - OS/arch asset: `yt-dlp.exe`(win) / `yt-dlp_macos` / `yt-dlp_linux` / `yt-dlp_linux_aarch64`.
 - **안전버전(cooldown)**: `releases` API로 목록 조회 → `published_at < now - COOLDOWN_DAYS(기본 7)` 중 최신 태그 선택. `releases/latest` 직행 금지.
 - **체크섬 검증**: 같은 릴리스의 `SHA2-256SUMS` 받아 다운로드 바이너리 SHA-256 대조. 불일치 폐기.
@@ -154,20 +178,37 @@ export interface TranscriptResult {
 - `--update-to <tag>`로 바이너리 self-update도 가능(대안).
 
 ### 6-3. 추출 — `src/ytdlp/extract.ts` (POC에서 검증된 핵심)
+
 ```ts
-const { stdout } = await execa(binPath, [
-  '--js-runtimes', `node:${process.execPath}`, // deno 불필요
-  '--skip-download', '--write-subs', '--write-auto-subs',
-  '--sub-langs', `${lang},${lang}-orig,en`, '--sub-format', 'json3',
-  '--no-simulate',           // ★ --dump-single-json은 simulate라 자막 안 씀 → 반드시 --no-simulate + --print
-  '--print', metaPrintFmt,   // id<US>title<US>channel<US>view_count<US>duration<US>upload_date
-  '--no-warnings', '-o', outTmpl, videoUrl,
-], { reject: true, timeout: 90_000 });
+const { stdout } = await execa(
+  binPath,
+  [
+    '--js-runtimes',
+    `node:${process.execPath}`, // deno 불필요
+    '--skip-download',
+    '--write-subs',
+    '--write-auto-subs',
+    '--sub-langs',
+    `${lang},${lang}-orig,en`,
+    '--sub-format',
+    'json3',
+    '--no-simulate', // ★ --dump-single-json은 simulate라 자막 안 씀 → 반드시 --no-simulate + --print
+    '--print',
+    metaPrintFmt, // id<US>title<US>channel<US>view_count<US>duration<US>upload_date
+    '--no-warnings',
+    '-o',
+    outTmpl,
+    videoUrl,
+  ],
+  { reject: true, timeout: 90_000 },
+);
 // stdout → 메타데이터, tmpDir의 *.json3 → parseJson3 → segments. finally: rmSync(tmpDir).
 ```
+
 - `parseJson3`: `events[].segs[].utf8` 결합, `tStartMs`/`dDurationMs` → 초. 빈 세그먼트 제거.
 
 ### 6-4. 설정 — `src/config.ts` (env → zod)
+
 ```
 # 경로 (ADR-9)
 YTDLP_HOME=~/.yt-dlp                 # bin/ temp/ downloads/ 루트
@@ -186,6 +227,7 @@ YTDLP_COOKIES_FROM_BROWSER, YTDLP_PROXY, YTDLP_LOG_LEVEL=info
 ```
 
 ### 6-5. 에러 taxonomy — `src/domain/errors.ts`
+
 `INVALID_INPUT · NO_CAPTIONS · VIDEO_UNAVAILABLE · AGE_RESTRICTED · BLOCKED · RATE_LIMITED · BINARY_UNAVAILABLE · TIMEOUT · NETWORK · UNKNOWN` (retriable: RATE_LIMITED/NETWORK/TIMEOUT). yt-dlp stderr 문자열 → 코드 매핑(yt-dlp-mcp 참고: "Unsupported URL"/"unavailable"/"private"/"Sign in to confirm").
 
 ---
@@ -193,18 +235,22 @@ YTDLP_COOKIES_FROM_BROWSER, YTDLP_PROXY, YTDLP_LOG_LEVEL=info
 ## 7. 운영 & 보안 정책 (사용자 4대 질문 반영)
 
 ### 7-1. 복수 인스턴스 — 메모리/용량
+
 - **용량**: 공유 캐시 1개(35MB), 인스턴스 간 미복사.
 - **메모리**: 서버는 인스턴스당 Node(상주). yt-dlp는 **요청 시 spawn → 종료(비상주)**. PyInstaller 언팩 peak ~100–150MB.
 - **대응**: ① `p-limit`로 인스턴스당 yt-dlp 동시 1–2개 ② 첫 기동 동시 다운로드는 lock으로 1회화.
 
 ### 7-2. 업데이트
+
 - TTL(`REFRESH_DAYS`) 경과 시 갱신 + 추출 실패(봇차단/포맷) 트리거 갱신. `--update-to`/재다운로드 택1.
 
 ### 7-3. 안전 버전 (공급망 방어) — 핵심
+
 - **cooldown 핀**: `published_at`이 7일 이상 지난 최신 릴리스만 채택(컴프로마이즈 latest 즉시 수령 차단).
 - **체크섬 + (선택)서명**: `SHA2-256SUMS` 대조, 여유되면 `SHA2-256SUMS.sig` PGP 검증(공개키 핀).
 
 ### 7-4. JS 포팅 안 함
+
 - yt-dlp youtube extractor(11k+ LOC)·jsinterp·pot/jsc를 JS로 재구현하는 것은 유지보수 지옥. **바이너리 위임이 정답.** 받아둔 `~/Workspace/yt-dlp` 소스는 이해/디버깅 참고용.
 
 ---
@@ -213,20 +259,20 @@ YTDLP_COOKIES_FROM_BROWSER, YTDLP_PROXY, YTDLP_LOG_LEVEL=info
 
 **기본 4개 always-on, 나머지는 `YTDLP_ENABLE_*=1`일 때만 등록**(미사용 시 context 절약). 상세 카탈로그·주석은 `ARCHITECTURE.md §7`.
 
-| 툴 | 등록 조건 | 비고 |
-|----|----------|------|
-| `ytdlp_search_videos` | **기본** | 검색(페이지네이션/날짜필터) |
-| `ytdlp_list_subtitle_languages` | **기본** | |
-| `ytdlp_download_transcript` | **기본** | 자막 텍스트(타임스탬프 옵션, 광고 스트립) |
-| `ytdlp_get_video_metadata` | **기본** | fields 선택 |
-| `ytdlp_get_video_subtitles` | `ENABLE_SUBTITLES` | 원본 자막(json3/타임스탬프 보존) |
-| `ytdlp_get_video_metadata_summary` | `ENABLE_METADATA_SUMMARY` | 사람이 읽는 요약 |
-| `ytdlp_get_comments` / `_summary` | `ENABLE_COMMENTS` | flat/threaded/markdown_tree |
-| `ytdlp_get_chapters` | `ENABLE_CHAPTERS` | 구간 목차 |
-| `ytdlp_get_heatmap` | `ENABLE_HEATMAP` | most-replayed |
-| `ytdlp_get_thumbnail` | `ENABLE_THUMBNAIL` | 다운로드(파일·¬readOnly) |
-| `ytdlp_download_video` / `_audio` | `ENABLE_DOWNLOAD` | 파일 생성·¬idempotent |
-| `ytdlp_get_playlist` | `ENABLE_PLAYLIST` | 항목/채널 목록 |
+| 툴                                 | 등록 조건                 | 비고                                      |
+| ---------------------------------- | ------------------------- | ----------------------------------------- |
+| `ytdlp_search_videos`              | **기본**                  | 검색(페이지네이션/날짜필터)               |
+| `ytdlp_list_subtitle_languages`    | **기본**                  |                                           |
+| `ytdlp_download_transcript`        | **기본**                  | 자막 텍스트(타임스탬프 옵션, 광고 스트립) |
+| `ytdlp_get_video_metadata`         | **기본**                  | fields 선택                               |
+| `ytdlp_get_video_subtitles`        | `ENABLE_SUBTITLES`        | 원본 자막(json3/타임스탬프 보존)          |
+| `ytdlp_get_video_metadata_summary` | `ENABLE_METADATA_SUMMARY` | 사람이 읽는 요약                          |
+| `ytdlp_get_comments` / `_summary`  | `ENABLE_COMMENTS`         | flat/threaded/markdown_tree               |
+| `ytdlp_get_chapters`               | `ENABLE_CHAPTERS`         | 구간 목차                                 |
+| `ytdlp_get_heatmap`                | `ENABLE_HEATMAP`          | most-replayed                             |
+| `ytdlp_get_thumbnail`              | `ENABLE_THUMBNAIL`        | 다운로드(파일·¬readOnly)                  |
+| `ytdlp_download_video` / `_audio`  | `ENABLE_DOWNLOAD`         | 파일 생성·¬idempotent                     |
+| `ytdlp_get_playlist`               | `ENABLE_PLAYLIST`         | 항목/채널 목록                            |
 
 - **등록**: `mcp/registry.ts`의 `ToolDefinition[]`를 부팅 시 config flag로 조건부 `registerTool`(ADR-8). 꺼두면 `tools/list`에 미노출.
 - **공통**: `{title, description(Args/Returns/Use when/Don't use/Error), inputSchema(zod), annotations}`, 모두 **`handleToolExecution`** 경유(통일 `isError` + character-limit truncation), 입력 zod 검증.
@@ -262,6 +308,7 @@ DoD: 핵심 커버리지 ≥80% · 전 테스트 green(네트워크 gated) · **
 ---
 
 ## 10. 테스트 전략
+
 - **단위**: youtube-id, 언어폴백, parseJson3, cooldown 버전선택, 에러매핑, config.
 - **ytdlp fixture**: 녹화 json3 + `--print` stdout 샘플 → 정규화 검증(yt-dlp 모킹/주입).
 - **MCP 계약**: SDK 클라이언트 ↔ stdio, service 가짜 주입.
@@ -271,6 +318,7 @@ DoD: 핵심 커버리지 ≥80% · 전 테스트 green(네트워크 gated) · **
 ---
 
 ## 11. 코딩 규칙 & 함정
+
 1. **stdout 금지(최우선)** — stdio MCP에서 `console.log`/`process.stdout`는 JSON-RPC 오염. 로그는 pino fd 2.
 2. **`--no-simulate` 필수** — `--dump-single-json`/`--print`는 simulate를 켜 `--write-subs`를 무력화. 자막 파일 받으려면 `--no-simulate`.
 3. **JS 런타임은 `node:${process.execPath}`** — deno 가정 금지.
@@ -285,7 +333,8 @@ DoD: 핵심 커버리지 ≥80% · 전 테스트 green(네트워크 gated) · **
 ---
 
 ## 12. 완료 기준 (DoD)
-- [ ] Phase 0~6 DoD 통과 (7~9 opt-in)
+
+- [ ] Phase 0~~6 DoD 통과 (7~~9 opt-in)
 - [ ] `npm run build`/`npm test` green, `console.log`/`process.stdout` 0건
 - [ ] Claude Desktop 등록 → `ytdlp_get_transcript`로 실제 자막+메타 반환(수동)
 - [ ] 시스템에 yt-dlp 미설치 상태에서 단독 동작(자동 다운로드) 확인
@@ -294,6 +343,7 @@ DoD: 핵심 커버리지 ≥80% · 전 테스트 green(네트워크 gated) · **
 ---
 
 ## 13. 부록 — 실측 출처 & 참고
+
 - **실측 전부**: `poc/FINDINGS.md` (probe1~6 + yt-dlp end-to-end 성공). 검증 코드: `poc/src/ytdlp/`.
 - **설계 근거**: `docs/current-implementation-analysis.md`, `docs/improvement-options-2026.md`.
 - **참고 프로젝트**: `@kevinwatt/yt-dlp-mcp`(`~/Workspace/yt-dlp-mcp`) — 차용: `ytdlp_` 프리픽스, `registerTool` description 양식, `handleToolExecution`, character limit, temp+finally, fixture 테스트, 에러 메시지 매핑. **차별점(우리 우위)**: 바이너리 자동확보(안전버전+체크섬), node 런타임 주입(deno 불필요), json3 구조화. MCP 모범사례: `~/Workspace/yt-dlp-mcp/.claude/skills/mcp-builder/reference/node_mcp_server.md`.

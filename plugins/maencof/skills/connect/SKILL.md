@@ -12,8 +12,7 @@ plugin: maencof
 
 # connect — Data Source Registration/Management
 
-Connects external data sources (GitHub, Jira, Slack, etc.) to maencof and configures ingestion schedules.
-Runs standalone or as part of the `/maencof:bridge` pipeline.
+Connects external data sources (GitHub, Jira, Slack, etc.) to maencof and configures ingestion schedules. Runs standalone or as part of the `/maencof:bridge` pipeline.
 
 > **Area distinction**:
 >

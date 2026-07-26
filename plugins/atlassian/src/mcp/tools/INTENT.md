@@ -4,12 +4,12 @@
 
 ## Structure
 
-| Directory | Role |
-|---|---|
-| `fetch/` | HTTP GET/POST/PUT/PATCH/DELETE 핸들러 |
-| `convert/` | ADF/Storage ↔ Markdown 변환 핸들러 |
-| `setup/` | 인증 설정 위저드 핸들러 |
-| `authCheck/` | 인증 상태 확인 핸들러 |
+| Directory    | Role                                  |
+| ------------ | ------------------------------------- |
+| `fetch/`     | HTTP GET/POST/PUT/PATCH/DELETE 핸들러 |
+| `convert/`   | ADF/Storage ↔ Markdown 변환 핸들러    |
+| `setup/`     | 인증 설정 위저드 핸들러               |
+| `authCheck/` | 인증 상태 확인 핸들러                 |
 
 ## Conventions
 

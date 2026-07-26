@@ -1,9 +1,9 @@
 ---
 name: reflect
 user_invocable: true
-description: "[maencof:reflect] Generates a read-only vault analysis report identifying layer transition candidates and duplicate documents, without making any filesystem changes. Run before organize to preview recommendations."
-argument-hint: "[--layer 3|4|5] [--show-all]"
-version: "1.0.0"
+description: '[maencof:reflect] Generates a read-only vault analysis report identifying layer transition candidates and duplicate documents, without making any filesystem changes. Run before organize to preview recommendations.'
+argument-hint: '[--layer 3|4|5] [--show-all]'
+version: '1.0.0'
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: memory-organizer
@@ -12,8 +12,7 @@ plugin: maencof
 
 # reflect — Knowledge Vault Analysis Report
 
-Runs only the **judge module** of memory-organizer to analyze transition candidates and duplicate documents.
-Generates a pure analysis report with no filesystem changes.
+Runs only the **judge module** of memory-organizer to analyze transition candidates and duplicate documents. Generates a pure analysis report with no filesystem changes.
 
 ## When to Use This Skill
 
@@ -24,14 +23,10 @@ Generates a pure analysis report with no filesystem changes.
 
 ## When to Use vs Adjacent Skills
 
-- **`reflect`** — read-only judge. No filesystem changes, ever. Use for
-  diagnostic reports and dry-run-style previews of organize candidates.
-- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move`
-  after user confirmation. Use when you are ready to apply the transitions
-  `reflect` surfaced.
+- **`reflect`** — read-only judge. No filesystem changes, ever. Use for diagnostic reports and dry-run-style previews of organize candidates.
+- **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move` after user confirmation. Use when you are ready to apply the transitions `reflect` surfaced.
 
-Rule of thumb: inspect without side effects → `reflect`; apply transitions →
-`organize`.
+Rule of thumb: inspect without side effects → `reflect`; apply transitions → `organize`.
 
 ## Agent Collaboration Sequence
 
@@ -52,6 +47,7 @@ Query the current index status, node count, and stale node list via `mcp__plugin
 ### Step 2 — Run judge Module
 
 Execute memory-organizer judge logic:
+
 - Full scan of Layer 3/4/5 (including sub-layer directories)
 - Calculate transition score for each node (access frequency, tags, connection density, confidence)
 - Detect duplicate candidate pairs
@@ -63,27 +59,34 @@ Execute memory-organizer judge logic:
 ## Knowledge Vault Analysis Report
 
 ### Transition Candidates (Layer 3 -> Layer 2)
+
 | File | Sub-Layer | Access Count | Tag Matching | confidence | Recommendation |
-|------|-----------|-------------|-------------|-----------|----------------|
+| ---- | --------- | ------------ | ------------ | ---------- | -------------- |
 
 ### Transition Candidates (Layer 4 -> Layer 3)
+
 | File | Last Accessed | Expiration | Target Sub-Layer | Recommendation |
 
 ### L5-Buffer Promotion Candidates
+
 | File | Age (days) | Connections | Recommended Target |
 
 ### L5-Boundary Health
+
 | Boundary Node | Connected Layers | CROSS_LAYER Edges | Status |
 (OK / No edges / Overcrowded)
 
 ### Duplicate Detection
+
 | File A | File B | Common Tags | Similarity |
 
 ### Sub-Layer Distribution
+
 | Layer | Sub-Layer | Count |
 (L3: relational/structural/topical, L5: buffer/boundary)
 
 ### Summary
+
 - Transition candidates: N
 - Buffer promotion candidates: N
 - Boundary health issues: N
@@ -93,11 +96,11 @@ Execute memory-organizer judge logic:
 
 ## MCP Tools (used by memory-organizer.judge)
 
-| Tool | Purpose |
-|------|---------|
-| `mcp__plugin_maencof_tools__kg_status` | Query vault status |
+| Tool                                     | Purpose                     |
+| ---------------------------------------- | --------------------------- |
+| `mcp__plugin_maencof_tools__kg_status`   | Query vault status          |
 | `mcp__plugin_maencof_tools__kg_navigate` | Traverse link relationships |
-| `mcp__plugin_maencof_tools__read` | Read document Frontmatter |
+| `mcp__plugin_maencof_tools__read`        | Read document Frontmatter   |
 
 ## Error Handling
 
@@ -108,6 +111,7 @@ Execute memory-organizer judge logic:
 ### Auto-Insight Status
 
 Include in reflection output:
+
 - Auto-insight capture: enabled/disabled, sensitivity level
 - Recent capture stats: total, L2, L5
 - Noise ratio estimate: archived / total (if available)
@@ -119,7 +123,7 @@ Include in reflection output:
 /maencof:reflect [--layer <3|4|5>] [--show-all]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--layer` | 3,4,5 | Target Layer(s) to analyze |
-| `--show-all` | false | Show all candidates regardless of confidence |
+| Option       | Default | Description                                  |
+| ------------ | ------- | -------------------------------------------- |
+| `--layer`    | 3,4,5   | Target Layer(s) to analyze                   |
+| `--show-all` | false   | Show all candidates regardless of confidence |

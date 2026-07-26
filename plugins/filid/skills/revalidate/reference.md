@@ -1,12 +1,10 @@
 # revalidate — Reference Documentation
 
-Output templates, PR comment format, and verification reference for the
-delta re-validation skill.
+Output templates, PR comment format, and verification reference for the delta re-validation skill.
 
 ## verification-ledger.md Template
 
-Authored and completed by the main orchestrator (Step 3 rows, Step 6
-`post_count`/`status` derivation). One row per accepted fix:
+Authored and completed by the main orchestrator (Step 3 rows, Step 6 `post_count`/`status` derivation). One row per accepted fix:
 
 ```markdown
 # Verification Ledger — <branch name>
@@ -65,15 +63,11 @@ Authored and completed by the main orchestrator (Step 3 rows, Step 6
 <If FAIL>: Unresolved items remain — list them with what re-measurement showed.
 ```
 
-Claim rows (`rule_id` = `CLM-*`) cite the re-judgment evidence in the
-Detail column (observable evaluated → expected matched / not matched).
+Claim rows (`rule_id` = `CLM-*`) cite the re-judgment evidence in the Detail column (observable evaluated → expected matched / not matched).
 
 ## PR Comment Format
 
-`mcp__plugin_filid_tools__review_manage(action: "format-revalidate-comment")`
-reads `re-validate.md`, wraps it in a collapsible `<details>` section,
-handles the 50,000-char limit, extracts the PASS/FAIL verdict, and
-returns ready-to-post markdown. Post via `gh pr comment --body`.
+`mcp__plugin_filid_tools__review_manage(action: "format-revalidate-comment")` reads `re-validate.md`, wraps it in a collapsible `<details>` section, handles the 50,000-char limit, extracts the PASS/FAIL verdict, and returns ready-to-post markdown. Post via `gh pr comment --body`.
 
 ```markdown
 ## Re-validation — ✅ PASS (or ❌ FAIL)
@@ -89,21 +83,20 @@ returns ready-to-post markdown. Post via `gh pr comment --body`.
 
 ## Verification MCP Tool Map
 
-| Fix rule kind       | Verification tool                                         | Pass condition         |
-| ------------------- | --------------------------------------------------------- | ---------------------- |
+| Fix rule kind       | Verification tool                                             | Pass condition         |
+| ------------------- | ------------------------------------------------------------- | ---------------------- |
 | LCOM4 violation     | `mcp__plugin_filid_tools__ast_analyze(lcom4)`                 | LCOM4 < 2              |
 | CC violation        | `mcp__plugin_filid_tools__ast_analyze(cyclomatic-complexity)` | CC <= 15               |
-| 3+12 violation      | `mcp__plugin_filid_tools__test_metrics(check-gate)`            | All files PASS         |
+| 3+12 violation      | `mcp__plugin_filid_tools__test_metrics(check-gate)`           | All files PASS         |
 | Structure violation | `mcp__plugin_filid_tools__structure_validate`                 | No matching violations |
 | Circular dependency | `mcp__plugin_filid_tools__ast_analyze(dependency-graph)`      | No cycles              |
 | Drift               | `mcp__plugin_filid_tools__drift_detect`                       | No drift               |
 | Document compliance | `mcp__plugin_filid_tools__doc_compress(auto)` + Read          | INTENT.md <= 50 lines  |
-| Acceptance claim    | none — direct re-judgment vs `.filid/criteria.md`         | claim judged PASS      |
+| Acceptance claim    | none — direct re-judgment vs `.filid/criteria.md`             | claim judged PASS      |
 
 ## Non-Negotiable Rules (Constitutional)
 
-These rules cannot be deferred via justification — any justification
-attempting to is marked UNCONSTITUTIONAL:
+These rules cannot be deferred via justification — any justification attempting to is marked UNCONSTITUTIONAL:
 
 1. **Hardcoded secrets/credentials** — always FAIL
 2. **Circular dependencies** — always FAIL

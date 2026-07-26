@@ -1,8 +1,6 @@
 # Manifest Execution Workflow — Provider-agnostic skeleton
 
-This file contains the shared steps that run identically for every provider.
-Provider-specific execution (Step 2.5 drift check and Step 4 batch execution)
-lives in `jira/workflow.md`, `github/workflow.md`, or `local/workflow.md`, selected by `config.provider`.
+This file contains the shared steps that run identically for every provider. Provider-specific execution (Step 2.5 drift check and Step 4 batch execution) lives in `jira/workflow.md`, `github/workflow.md`, or `local/workflow.md`, selected by `config.provider`.
 
 ## Preconditions
 
@@ -27,31 +25,24 @@ Before loading the manifest, verify pipeline state:
 3. Calculate pending items:
    - Count items where `status == "pending"` (no `issue_ref`).
    - Items with existing `issue_ref` are SKIPPED (idempotency).
-4. If pending count == 0:
-   Display: "All items already created. Nothing to execute."
-   → Exit.
+4. If pending count == 0: Display: "All items already created. Nothing to execute." → Exit.
 
 ## Step 2 — Dry-Run Mode (when `--dry-run` is specified)
 
-For `stories` type:
-Display planned actions:
+For `stories` type: Display planned actions:
 
 1. Epic creation (if manifest has epic entry without `issue_ref`)
 2. Story creation (list: id, title, type)
 3. Link creation (list: type, from → to)
-4. Source issue transitions (list: issue_ref → target_status, reason)
-   → Exit after display.
+4. Source issue transitions (list: issue_ref → target_status, reason) → Exit after display.
 
-For `devplan` type:
-Call `mcp__plugin_imbas_tools__manifest_plan(project_ref, run_id)` for execution plan.
-Display each step:
+For `devplan` type: Call `mcp__plugin_imbas_tools__manifest_plan(project_ref, run_id)` for execution plan. Display each step:
 
 1. Tasks to create (id, title)
 2. Task Subtasks to create (id, title, parent task)
 3. Links to create (type, from → to)
 4. Story Subtasks to create (id, title, parent story)
-5. Feedback comments to post (target story, type)
-   → Exit after display.
+5. Feedback comments to post (target story, type) → Exit after display.
 
 ## Step 2.5 — Drift Check (State Reconciliation) — provider-specific
 
@@ -90,9 +81,7 @@ Ask: "Proceed with issue creation? (y/n)"
 
 ## Step 4 — Batch Execution — provider-specific
 
-Note on numbering: "Phase 4a–4d" in the provider files are manifest-internal
-subdivisions of this Step 4. They are unrelated to the pipeline-level labels
-"Phase 2.5 / 3.5" (which denote when the manifest skill runs in the pipeline).
+Note on numbering: "Phase 4a–4d" in the provider files are manifest-internal subdivisions of this Step 4. They are unrelated to the pipeline-level labels "Phase 2.5 / 3.5" (which denote when the manifest skill runs in the pipeline).
 
 Provider routing:
 
@@ -102,10 +91,8 @@ Provider routing:
 
 Both branches must honor:
 
-- **Per-item save**: after EACH item, immediately `mcp__plugin_imbas_tools__manifest_save` so re-runs
-  resume cleanly.
-- **Idempotency**: check `status` and `issue_ref` before acting; skip if
-  `issue_ref` already set.
+- **Per-item save**: after EACH item, immediately `mcp__plugin_imbas_tools__manifest_save` so re-runs resume cleanly.
+- **Idempotency**: check `status` and `issue_ref` before acting; skip if `issue_ref` already set.
 
 ### Partial Failure Handling (1:N Links)
 
@@ -147,8 +134,7 @@ Display execution results:
 
 If failures exist:
 
-- Emit terminal marker with retry guidance:
-  "Manifest partial failure: <created_count> created, <failed_count> failed. Re-run `/imbas:manifest <type> --run <run-id>` to retry failed items."
+- Emit terminal marker with retry guidance: "Manifest partial failure: <created_count> created, <failed_count> failed. Re-run `/imbas:manifest <type> --run <run-id>` to retry failed items."
 - List failed items with error details.
 
 If all succeeded, emit terminal marker with next-step guidance:

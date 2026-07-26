@@ -1,12 +1,10 @@
 # setup — Validation and Report Format (Phase 5)
 
-> Detail reference for Phase 5 of /filid:setup.
-> See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
+> Detail reference for Phase 5 of /filid:setup. See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
 
 After all files are written, validate the resulting structure:
 
-- Each fractal node's INTENT.md passes `validateIntentMd()` (≤ 50 lines,
-  3-tier boundary sections present)
+- Each fractal node's INTENT.md passes `validateIntentMd()` (≤ 50 lines, 3-tier boundary sections present)
 - No organ directory contains a INTENT.md
 - All DETAIL.md files pass `validateDetailMd()`
 

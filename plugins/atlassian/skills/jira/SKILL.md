@@ -70,8 +70,7 @@ Domain-based routing layer for all Jira REST API operations.
 
 ## Lazy Reference Loading
 
-Read `tools/<domain>/schema.md` ONLY when you need endpoint details for that domain.
-Do not preload all schema files — load on demand per operation.
+Read `tools/<domain>/schema.md` ONLY when you need endpoint details for that domain. Do not preload all schema files — load on demand per operation.
 
 ## URL Routing
 

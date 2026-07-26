@@ -12,8 +12,7 @@ plugin: maencof
 
 # manage — Skill and Agent Management
 
-Manages the lifecycle of skills and agents in the maencof plugin.
-Supports usage frequency reporting based on usage-stats.json, as well as disable/enable operations.
+Manages the lifecycle of skills and agents in the maencof plugin. Supports usage frequency reporting based on usage-stats.json, as well as disable/enable operations.
 
 ## When to Use This Skill
 
@@ -56,8 +55,7 @@ Analyze usage-stats.json and generate a usage frequency report:
 /maencof:manage disable <name>
 ```
 
-Disable a skill or agent.
-Registers it in disabled-registry.json to be skipped during plugin load.
+Disable a skill or agent. Registers it in disabled-registry.json to be skipped during plugin load.
 
 ### enable mode
 
@@ -73,8 +71,7 @@ Re-enable a disabled skill/agent.
 /maencof:manage delete <name> [--force]
 ```
 
-Permanently delete a custom skill/agent.
-Built-in items cannot be deleted (use disable instead).
+Permanently delete a custom skill/agent. Built-in items cannot be deleted (use disable instead).
 
 ### create mode
 
@@ -117,12 +114,9 @@ Generate a new custom skill/agent template:
 | `Read`  | Read `.maencof-meta/usage-stats.json`, `.maencof-meta/disabled-registry.json`                                                                                                                                    |
 | `Write` | Write `.maencof-meta/disabled-registry.json` (disable/enable operations); create new skill/agent template files in the Execution Area (`{CWD}/.claude/skills/<name>/SKILL.md`, `{CWD}/.claude/agents/<name>.md`) |
 
-> Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.maencof-meta/`
-> (not vault documents). They are accessed with Read/Write tools, not maencof MCP tools.
+> Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.maencof-meta/` (not vault documents). They are accessed with Read/Write tools, not maencof MCP tools.
 >
-> Note: `mcp__plugin_maencof_tools__create` is intentionally excluded here. It creates vault knowledge documents
-> (requires Layer + tags + Frontmatter) and is not suitable for generating plugin structure files
-> such as SKILL.md or agent definitions. Use the `Write` tool for those.
+> Note: `mcp__plugin_maencof_tools__create` is intentionally excluded here. It creates vault knowledge documents (requires Layer + tags + Frontmatter) and is not suitable for generating plugin structure files such as SKILL.md or agent definitions. Use the `Write` tool for those.
 
 ## Error Handling
 

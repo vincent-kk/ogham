@@ -4,17 +4,18 @@ Detailed workflow, routing table, health check format, and error handling for th
 
 ## Scan Targets
 
-| Target | Path | Purpose |
-|--------|------|---------|
-| MCP config | `.mcp.json` | MCP server registration |
-| Project settings | `.claude/settings.json` | Claude Code permissions |
-| Instructions | `CLAUDE.md` / `.claude/CLAUDE.md` | AI behavioral instructions |
-| Rules | `.claude/rules/` | Conditional behavior rules |
-| Skills | `.claude/skills/` | Custom slash commands |
-| Agents | `.claude/agents/` | Custom sub-agents |
-| Metadata | `.maencof-meta/` | maencof lifecycle/config data |
+| Target           | Path                              | Purpose                       |
+| ---------------- | --------------------------------- | ----------------------------- |
+| MCP config       | `.mcp.json`                       | MCP server registration       |
+| Project settings | `.claude/settings.json`           | Claude Code permissions       |
+| Instructions     | `CLAUDE.md` / `.claude/CLAUDE.md` | AI behavioral instructions    |
+| Rules            | `.claude/rules/`                  | Conditional behavior rules    |
+| Skills           | `.claude/skills/`                 | Custom slash commands         |
+| Agents           | `.claude/agents/`                 | Custom sub-agents             |
+| Metadata         | `.maencof-meta/`                  | maencof lifecycle/config data |
 
 Detection categories:
+
 - **Spec violations**: invalid frontmatter, missing required fields
 - **Legacy formats**: outdated structure from previous versions
 - **Broken files**: JSON parse errors, @import path mismatches
@@ -22,27 +23,27 @@ Detection categories:
 
 ## Routing Table
 
-| Intent | Target Skill | Description |
-|--------|-------------|-------------|
-| MCP server install/connect | `/maencof:bridge` | Install + workflow integration |
-| Skill creation | `/maencof:craft-skill` | SKILL.md auto-generation |
-| Agent creation | `/maencof:craft-agent` | Agent .md auto-generation |
-| CLAUDE.md editing | `/maencof:instruct` | Safe instruction management |
-| Rule management | `/maencof:rule` | Conditional rule CRUD |
-| Hook management | `/maencof:lifecycle` | Dynamic action registration |
-| Vault health check | `/maencof:checkup` | 7 diagnostic checks + auto-fix |
-| Migration | Handled directly | Legacy format → current spec |
+| Intent                     | Target Skill           | Description                    |
+| -------------------------- | ---------------------- | ------------------------------ |
+| MCP server install/connect | `/maencof:bridge`      | Install + workflow integration |
+| Skill creation             | `/maencof:craft-skill` | SKILL.md auto-generation       |
+| Agent creation             | `/maencof:craft-agent` | Agent .md auto-generation      |
+| CLAUDE.md editing          | `/maencof:instruct`    | Safe instruction management    |
+| Rule management            | `/maencof:rule`        | Conditional rule CRUD          |
+| Hook management            | `/maencof:lifecycle`   | Dynamic action registration    |
+| Vault health check         | `/maencof:checkup`     | 7 diagnostic checks + auto-fix |
+| Migration                  | Handled directly       | Legacy format → current spec   |
 
 Natural language routing:
 
-| User Expression | Route |
-|----------------|-------|
-| "Connect GitHub" | `/maencof:bridge` |
-| "Always respond in Korean" | `/maencof:instruct` |
-| "Create a test agent" | `/maencof:craft-agent` |
-| "Add a rule for API files" | `/maencof:rule` |
-| "Run vault health check" | `/maencof:checkup` |
-| "Something seems broken" | Health report |
+| User Expression            | Route                  |
+| -------------------------- | ---------------------- |
+| "Connect GitHub"           | `/maencof:bridge`      |
+| "Always respond in Korean" | `/maencof:instruct`    |
+| "Create a test agent"      | `/maencof:craft-agent` |
+| "Add a rule for API files" | `/maencof:rule`        |
+| "Run vault health check"   | `/maencof:checkup`     |
+| "Something seems broken"   | Health report          |
 
 ## Detailed Workflow
 
@@ -122,6 +123,7 @@ configurator agent
 ```
 
 Natural language:
+
 ```
 "Check my project settings"
 "Something is broken, help me fix it"
@@ -130,13 +132,13 @@ Natural language:
 
 ## Error Handling
 
-| Condition | Resolution |
-|-----------|------------|
-| maencof not initialized | Suggest `/maencof:setup` for full setup |
-| JSON parse error | Identify file, create backup, offer manual merge guidance |
-| Sub-skill routing failure | Provide direct instructions as fallback |
-| Permission error | Show `.claude/settings.json` manual edit guide |
-| @import path mismatch | Verify file existence, suggest path correction |
+| Condition                 | Resolution                                                |
+| ------------------------- | --------------------------------------------------------- |
+| maencof not initialized   | Suggest `/maencof:setup` for full setup                   |
+| JSON parse error          | Identify file, create backup, offer manual merge guidance |
+| Sub-skill routing failure | Provide direct instructions as fallback                   |
+| Permission error          | Show `.claude/settings.json` manual edit guide            |
+| @import path mismatch     | Verify file existence, suggest path correction            |
 
 ## Acceptance Criteria
 
