@@ -1,38 +1,43 @@
-# lcaCalculator -- 최소 공통 조상과 모듈 배치 제안
+# lcaCalculator — multi-consumer lowest common fractal
 
 ## Purpose
 
-프랙탈 트리에서 두 노드의 Lowest Common Ancestor를 계산하고, 여러 의존 모듈을 분석해 공유 코드를 배치할 최적 fractal 레벨(suggestedParent)을 제안한다. FCA-AI "공유 코드는 LCA에 둔다" 원칙의 계산 엔진이다.
+파일·디렉터리 소비자를 소유 프랙탈로 올린 뒤 모든 owner가 공유하는 가장
+깊은 fractal을 계산한다.
 
 ## Structure
 
-- `lcaCalculator.ts` — `getAncestorPaths`, `findLCA`, `getModulePlacement`
+| Path                           | Role                                          |
+| ------------------------------ | --------------------------------------------- |
+| `lcaCalculator.ts`, `index.ts` | named public barrel                           |
+| `resolveOwningFractal.ts`      | portable file/directory owner 해석            |
+| `findLowestCommonFractal.ts`   | 모든 owner ancestor 교집합 계산               |
 
 ## Conventions
 
-- `fractalTree.getAncestors`를 재사용해 조상 경로를 구성 (자체 탐색 금지)
-- 존재하지 않는 노드 경로에는 null/빈 배열 반환 (예외로 던지지 않음)
-- `getModulePlacement`는 모든 의존 쌍의 LCA 중 `depth`가 가장 깊은 것을 선택
-- confidence는 `foundCount / pairCount` — 0 의존성 입력 시 root 반환하고 confidence 0
+- 판단 우선순위: 1. portable path identity 2. 모든 소비자 교집합 3. 깊이.
+- owner chain은 `parentFractalPath`를 따라가며 organ을 LCA로 선택하지 않는다.
+- 알 수 없는 consumer가 하나라도 있으면 임의 root fallback 대신 null이다.
 
 ## Boundaries
 
 ### Always do
 
-- 동일 노드 입력(`pathA === pathB`) 시 해당 노드를 즉시 반환
-- LCA가 없으면 트리 루트를 fallback으로 반환
+- 소비자 path를 현재 host와 무관하게 정규화·비교
+- 반환 path는 snapshot tree에 저장된 canonical machine path 사용
+- tree를 읽기 전용으로 유지
 
 ### Ask first
 
-- 알고리즘을 naive traversal에서 Tarjan off-line / Euler tour RMQ로 교체
-- `suggestedParent` 선택 기준 변경 (depth → 의존 수 등)
+- owner 또는 fractal 선택 우선순위 변경
+- owner 또는 LCA 반환 DTO 변경
 
 ### Never do
 
-- 트리 구조를 직접 mutate (읽기 전용)
-- 파일 I/O 수행 (순수 계산 함수)
+- 문자열 prefix나 host-native path만으로 containment 판정
+- organ, pure-function 또는 hybrid를 lowest common fractal로 반환
+- 존재하지 않는 consumer를 root가 소유한다고 추측
 
 ## Dependencies
 
-- `../../tree/fractalTree/` (getAncestors)
-- `../../../types/fractal.js` (`FractalNode`, `FractalTree`)
+- `../../../types/fractal.js`, `../../../constants/`, `@ogham/cross-platform`

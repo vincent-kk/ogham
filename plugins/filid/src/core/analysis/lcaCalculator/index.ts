@@ -1,1 +1,4 @@
-export * from './lcaCalculator.js';
+export {
+  findLowestCommonFractal,
+  resolveOwningFractal,
+} from './lcaCalculator.js';

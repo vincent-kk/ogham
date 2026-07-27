@@ -1,6 +1,6 @@
 import type { FractalTree } from '../../../types/fractal.js';
 
-import { findLCA } from './findLca.js';
+import { findLowestCommonFractal } from './findLowestCommonFractal.js';
 
 /**
  * 여러 의존 모듈을 분석하여 공유 코드를 배치할 최적 fractal 레벨을 제안한다.
@@ -24,26 +24,9 @@ export function getModulePlacement(
     return { suggestedParent: parent, confidence: 0.5 };
   }
 
-  let deepestLCA: ReturnType<typeof findLCA> = null;
-  let maxDepth = -1;
-  let pairCount = 0;
-  let foundCount = 0;
-
-  for (let i = 0; i < dependencies.length; i++)
-    for (let j = i + 1; j < dependencies.length; j++) {
-      pairCount++;
-      const lca = findLCA(tree, dependencies[i], dependencies[j]);
-      if (lca) {
-        foundCount++;
-        if (lca.depth > maxDepth) {
-          maxDepth = lca.depth;
-          deepestLCA = lca;
-        }
-      }
-    }
-
-  const suggestedParent = deepestLCA?.path ?? tree.root;
-  const confidence = pairCount > 0 ? foundCount / pairCount : 0;
-
-  return { suggestedParent, confidence };
+  const commonFractal = findLowestCommonFractal(tree, dependencies);
+  return {
+    suggestedParent: commonFractal?.path ?? tree.root,
+    confidence: commonFractal ? 1 : 0,
+  };
 }

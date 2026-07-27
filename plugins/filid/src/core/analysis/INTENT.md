@@ -2,7 +2,7 @@
 
 ## Purpose
 
-프로젝트 전체 분석을 오케스트레이션하는 sub-fractal. 스캔/검증/드리프트 결과를 종합해 `AnalysisReport`와 건강도 점수를 산출하고, 의존성 DAG와 LCA 계산으로 공유 코드 배치 위치를 제안한다.
+프로젝트 전체 분석을 오케스트레이션하는 sub-fractal. 스캔/검증 결과를 종합해 `AnalysisReport`와 건강도 점수를 산출하고, 실제 의존성 DAG와 multi-consumer LCA를 계산한다.
 
 ## Structure
 
@@ -10,7 +10,7 @@
 | ----------------- | ------------------------------------------------------------------------------------------- |
 | `projectAnalyzer` | `scan → validate → drift → healthScore → render` 파이프라인. text/json/markdown 리포트 생성 |
 | `dependencyGraph` | `DependencyEdge[]`에서 DAG 구축, Kahn 위상 정렬, DFS 사이클 감지, 직접 의존 조회            |
-| `lcaCalculator`   | 두 노드의 Lowest Common Ancestor 계산. 공유 모듈 배치 위치 제안 (`getModulePlacement`)      |
+| `lcaCalculator`   | 소비자 owner 전체의 lowest common fractal과 portable ownership 계산                       |
 
 ## Conventions
 

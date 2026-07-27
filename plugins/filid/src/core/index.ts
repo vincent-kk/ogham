@@ -58,15 +58,25 @@ export {
 export { generateReport } from './analysis/projectAnalyzer/renderers/index.js';
 export {
   buildDAG,
+  buildDependencyGraph,
   detectCycles,
   getDirectDependencies,
   topologicalSort,
 } from './analysis/dependencyGraph/dependencyGraph.js';
 export {
-  findLCA,
-  getAncestorPaths,
-  getModulePlacement,
-} from './analysis/lcaCalculator/lcaCalculator.js';
+  computeSnapshotHash,
+  createProjectSnapshot,
+} from './projectSnapshot/index.js';
+export { resolveContext } from './contextResolver/index.js';
+export {
+  findLowestCommonFractal,
+  resolveOwningFractal,
+} from './analysis/lcaCalculator/index.js';
+export {
+  createRestructurePlan,
+  validatePlanPostconditions,
+  validatePlanPreconditions,
+} from './restructure/index.js';
 
 // module
 export {
@@ -122,6 +132,7 @@ export {
   loadRuleDocsManifest,
   loadRuleOverrides,
   resolveLanguage,
+  resolveMaxDepth,
   syncRuleDocs,
   writeConfig,
 } from './infra/configLoader/configLoader.js';
@@ -147,12 +158,6 @@ export {
 } from './coverageVerify/testCoverageChecker/testCoverageChecker.js';
 export { resolveImportPath } from './coverageVerify/importResolver/importResolver.js';
 
-// utils
-export {
-  ALLOWED_FRACTAL_ROOT_FILES,
-  FRAMEWORK_PACKAGES,
-  FRAMEWORK_RESERVED_FILES,
-} from '../constants/allowedPeerFiles.js';
 export {
   RULE_ERROR_PROBABILITY,
   extractRevalidateVerdict,

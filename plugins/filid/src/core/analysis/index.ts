@@ -1,5 +1,11 @@
-// barrel -- re-exports all public APIs
-
-export * from './dependencyGraph/dependencyGraph.js';
-export * from './lcaCalculator/lcaCalculator.js';
-export * from './projectAnalyzer/projectAnalyzer.js';
+export {
+  buildDAG,
+  buildDependencyGraph,
+  detectCycles,
+  getDirectDependencies,
+  topologicalSort,
+} from './dependencyGraph/index.js';
+export {
+  findLowestCommonFractal,
+  resolveOwningFractal,
+} from './lcaCalculator/index.js';
