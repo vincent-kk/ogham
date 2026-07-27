@@ -20,9 +20,6 @@ export const CACHE_PREFIX = {
 /** Skill-run hash cache prefix — keyed by skill name, not by session. */
 export const RUN_HASH_PREFIX = 'run-';
 
-/** Fixed, non-hashed cache filename (spike-mode gate audit trail). */
-export const MODE_AUDIT_FILE = 'mode-audit.jsonl';
-
 /** Fractal-map lock directory suffix (mkdir mutex beside the map file). */
 export const LOCK_SUFFIX = '.lock';
 

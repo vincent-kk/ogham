@@ -1,8 +1,8 @@
-# cacheManager -- 세션/프롬프트 캐시 및 프랙탈 맵 관리
+# cacheManager — hook delivery cache
 
 ## Purpose
 
-세션/프롬프트 캐시 및 프랙탈 맵 관리.
+hook의 session, prompt context, boundary, turn-scoped fractal map과 INTENT delivery 상태를 임시 저장한다. criteria, spike, agent 역할과 review verdict는 소유하지 않는다.
 
 ## Structure
 
@@ -11,7 +11,7 @@
 | 파일                           | 담당                                                                                                                                        |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `caches/utils/`                | 도메인 중립 유틸 organ: cwdHash·sessionIdHash·getCacheDir·getPluginRoot·fcaMapPath·turnPath·ownerPath·deliveredPath·writeAtomic·canonicalOf |
-| `caches/constants/`            | 캐시 파일명 규약 상수 organ: CACHE_PREFIX·RUN_HASH_PREFIX·MODE_AUDIT_FILE (prune/remove 단일 출처)                                          |
+| `caches/constants/`            | cache 파일명 규약 상수 organ                                                                                                                |
 | `caches/sessionCache.ts`       | 세션 마커·prune throttle 게이트 파사드 (util 재수출)                                                                                        |
 | `caches/promptContextCache.ts` | 프롬프트 컨텍스트 읽기/쓰기/존재확인                                                                                                        |
 | `caches/boundaryCache.ts`      | 경계 캐시 읽기/쓰기                                                                                                                         |
@@ -21,19 +21,22 @@
 | `caches/turnCounter.ts`        | 세션 턴 카운터 읽기/증가 (TTL 기준값)                                                                                                       |
 | `caches/runHashCache.ts`       | 스킬 실행 해시 저장/읽기                                                                                                                    |
 | `caches/guideCache.ts`         | 가이드 주입 마커 확인/기록                                                                                                                  |
-| `caches/modeAuditCache.ts`     | spike 모드 게이트 판정 audit (JSONL append); `ModeAuditEntry` 타입                                                                          |
 
 ## Boundaries
 
 ### Always do
 
 - 변경 후 관련 테스트 업데이트
+- cache miss와 I/O 실패를 안전한 빈 상태로 저하
+- 방문 delivery 판정은 `commitVisit` lock transaction으로 직렬화
 
 ### Ask first
 
 - 공개 API 시그니처 변경
+- session/subagent scope 식별 방식 변경
 
 ### Never do
 
 - 모듈 경계 외부 로직 인라인
 - `caches/` organ에 INTENT.md 추가
+- criteria, spike, agent 역할 또는 review verdict 상태 저장

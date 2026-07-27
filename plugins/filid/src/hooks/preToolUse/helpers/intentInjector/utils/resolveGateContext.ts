@@ -1,10 +1,8 @@
-import * as path from 'node:path';
+import { normalize } from '@ogham/cross-platform/paths/normalize';
+import { portableRelative } from '@ogham/cross-platform/paths/relative';
 
-import {
-  isCriteriaMd,
-  isDetailMd,
-  isIntentMd,
-} from '../../../../shared/shared.js';
+import { PORTABLE_PATH_MARKERS } from '../../../../../constants/pathMarkers.js';
+import { isDetailMd, isIntentMd } from '../../../../shared/shared.js';
 
 import { resolveOwnerIntent } from './resolveOwnerIntent.js';
 import { visitKey } from './visitKey.js';
@@ -31,7 +29,6 @@ export function resolveGateContext(
   boundary: string,
   readKey: string,
   mutation: boolean,
-  spikeMode: boolean,
 ): GateContext {
   const selfAuthoring = mutation && isIntentMd(filePath);
   const { intentContent, ownerDir } = resolveOwnerIntent(
@@ -41,7 +38,8 @@ export function resolveGateContext(
   );
   const hasOwner = intentContent !== undefined;
   const ownerRelDir =
-    path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
+    normalize(portableRelative(boundary, ownerDir)) ||
+    PORTABLE_PATH_MARKERS.CURRENT;
   // Self-authoring delivers the module being documented, whether or not its
   // INTENT.md existed on disk before this write.
   const ownerKey = selfAuthoring
@@ -50,9 +48,8 @@ export function resolveGateContext(
       ? visitKey(boundary, ownerRelDir)
       : null;
 
-  const docTarget =
-    isIntentMd(filePath) || isDetailMd(filePath) || isCriteriaMd(filePath);
-  const gateEligible = mutation && hasOwner && !docTarget && !spikeMode;
+  const docTarget = isIntentMd(filePath) || isDetailMd(filePath);
+  const gateEligible = mutation && hasOwner && !docTarget;
 
   return {
     intentContent,

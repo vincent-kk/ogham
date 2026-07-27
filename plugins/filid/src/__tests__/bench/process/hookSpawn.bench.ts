@@ -1,46 +1,62 @@
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 
+import { portableResolve } from '@ogham/cross-platform/compat/resolve';
 import { bench, describe } from 'vitest';
 
-const DIST_DIR = join(import.meta.dirname, '../../../../..', 'dist');
+const DIST_DIR = portableResolve(
+  import.meta.dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  '..',
+  'dist',
+);
+const BENCH_WORKSPACE = portableResolve(process.cwd(), 'workspace');
+const HOOK_EVENT_NAME = Object.freeze({
+  USER_PROMPT_SUBMIT: 'UserPromptSubmit',
+  PRE_TOOL_USE: 'PreToolUse',
+});
+const HOOK_BUNDLE_NAME = Object.freeze({
+  USER_PROMPT_SUBMIT: 'user-prompt-submit.mjs',
+  PRE_TOOL_USE: 'pre-tool-use.mjs',
+});
+const HOOK_SPAWN_TIMEOUT_MS = 5_000;
+const BENCHMARK_TIME_MS = 2_000;
 
 const HOOK_SCRIPTS = {
-  userPromptSubmit: join(DIST_DIR, 'hooks', 'user-prompt-submit.mjs'),
-  preToolUse: join(DIST_DIR, 'hooks', 'pre-tool-use.mjs'),
-  agentEnforcer: join(DIST_DIR, 'hooks', 'agent-enforcer.mjs'),
+  userPromptSubmit: portableResolve(
+    DIST_DIR,
+    'hooks',
+    HOOK_BUNDLE_NAME.USER_PROMPT_SUBMIT,
+  ),
+  preToolUse: portableResolve(DIST_DIR, 'hooks', HOOK_BUNDLE_NAME.PRE_TOOL_USE),
 };
 
 const USER_PROMPT_INPUT = JSON.stringify({
-  cwd: '/workspace',
+  cwd: BENCH_WORKSPACE,
   session_id: 'bench-session',
-  hook_event_name: 'UserPromptSubmit',
+  hook_event_name: HOOK_EVENT_NAME.USER_PROMPT_SUBMIT,
   prompt: 'Fix the bug',
 });
 
 const PRE_TOOL_INPUT = JSON.stringify({
-  cwd: '/workspace',
+  cwd: BENCH_WORKSPACE,
   session_id: 'bench-session',
-  hook_event_name: 'PreToolUse',
+  hook_event_name: HOOK_EVENT_NAME.PRE_TOOL_USE,
   tool_name: 'Write',
   tool_input: {
-    file_path: '/workspace/INTENT.md',
+    file_path: portableResolve(BENCH_WORKSPACE, 'INTENT.md'),
     content: Array.from({ length: 50 }, (_, i) => `Line ${i + 1}`).join('\n'),
   },
 });
 
-const SUBAGENT_INPUT = JSON.stringify({
-  cwd: '/workspace',
-  session_id: 'bench-session',
-  hook_event_name: 'SubagentStart',
-  agent_type: 'architect',
-  agent_id: 'agent-bench-001',
-});
-
 async function spawnHook(scriptPath: string, stdinData: string): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const child = spawn('node', [scriptPath], { timeout: 5000 });
+    const child = spawn(process.execPath, [scriptPath], {
+      timeout: HOOK_SPAWN_TIMEOUT_MS,
+    });
     child.stdin?.write(stdinData);
     child.stdin?.end();
     child.on('error', reject);
@@ -61,7 +77,7 @@ if (scriptsExist)
       async () => {
         await spawnHook(HOOK_SCRIPTS.userPromptSubmit, USER_PROMPT_INPUT);
       },
-      { time: 2000 },
+      { time: BENCHMARK_TIME_MS },
     );
 
     bench(
@@ -69,15 +85,7 @@ if (scriptsExist)
       async () => {
         await spawnHook(HOOK_SCRIPTS.preToolUse, PRE_TOOL_INPUT);
       },
-      { time: 2000 },
-    );
-
-    bench(
-      'agent-enforcer spawn',
-      async () => {
-        await spawnHook(HOOK_SCRIPTS.agentEnforcer, SUBAGENT_INPUT);
-      },
-      { time: 2000 },
+      { time: BENCHMARK_TIME_MS },
     );
   });
 else

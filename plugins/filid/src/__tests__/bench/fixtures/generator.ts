@@ -2,7 +2,6 @@ import { ChangeQueue } from '../../../core/infra/changeQueue/changeQueue.js';
 import type {
   PostToolUseInput,
   PreToolUseInput,
-  SubagentStartInput,
   UserPromptSubmitInput,
 } from '../../../types/hooks.js';
 
@@ -122,19 +121,6 @@ export function generatePostToolUseInput(tier: Tier): PostToolUseInput {
     tool_response: {
       success: true,
     },
-  };
-}
-
-/**
- * SubagentStart 입력 생성
- */
-export function generateSubagentInput(agentType: string): SubagentStartInput {
-  return {
-    cwd: '/workspace',
-    session_id: 'bench-session',
-    hook_event_name: 'SubagentStart',
-    agent_type: agentType,
-    agent_id: `agent-${agentType}-bench`,
   };
 }
 

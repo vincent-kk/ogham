@@ -11,11 +11,9 @@ export * from './caches/deliveredCache.js';
 export * from './caches/turnCounter.js';
 export * from './caches/runHashCache.js';
 export * from './caches/guideCache.js';
-export * from './caches/modeAuditCache.js';
 export type { FractalMap, VisitScope } from './caches/fractalMapCache.js';
 export type {
   DeliveredState,
   VisitArgs,
   VisitDecision,
 } from './caches/fractalMapCache.js';
-export type { ModeAuditEntry } from './caches/modeAuditCache.js';

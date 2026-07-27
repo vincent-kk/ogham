@@ -20,6 +20,7 @@
 - `readTurn`, `incrementTurn`, `hasGuideInjected`, `markGuideInjected` — turn과 guide delivery를 관리한다.
 - `pruneOldSessions`, `pruneStaleCacheDirs` — cache lifecycle cleanup을 best-effort로 수행한다.
 - 공개 함수는 cache miss 또는 I/O 실패 시 안전한 빈 값으로 저하하며 project source를 변경하지 않는다.
+- mode audit 또는 branch lifecycle audit API를 노출하지 않는다.
 
 ## Acceptance Criteria
 
@@ -39,4 +40,4 @@
 
 ## Last Updated
 
-2026-07-26 — criteria/spike/agent 역할 상태를 제거한 1.0 cache 경계로 재정의했다.
+2026-07-27 — mode audit API까지 제거한 1.0 hook delivery cache 경계로 재구성했다.

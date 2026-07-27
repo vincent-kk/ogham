@@ -1,11 +1,11 @@
-import { DETAIL_MD } from '../../../constants/documentFiles.js';
+import { portableBasename } from '@ogham/cross-platform/compat/basename';
 
-import { fileBasename } from './fileBasename.js';
+import { DETAIL_MD } from '../../../constants/documentFiles.js';
 
 /**
  * Check if a file path targets DETAIL.md.
  * Handles both POSIX (/) and Windows (\) path separators.
  */
 export function isDetailMd(filePath: string): boolean {
-  return fileBasename(filePath) === DETAIL_MD;
+  return portableBasename(filePath) === DETAIL_MD;
 }

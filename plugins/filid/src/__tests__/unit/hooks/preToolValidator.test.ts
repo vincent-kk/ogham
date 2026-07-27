@@ -165,77 +165,15 @@ describe('pre-tool-validator', () => {
     expect(result.continue).toBe(true);
   });
 
-  it('spikeExempt should allow INTENT.md Write over 50 lines', () => {
-    const content = Array.from({ length: 60 }, (_, i) => `Line ${i + 1}`).join(
-      '\n',
-    );
-    const input: PreToolUseInput = {
-      ...baseInput,
-      tool_input: { file_path: '/app/INTENT.md', content },
-    };
-    const result = validatePreToolUse(input, undefined, true);
-    expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput).toBeUndefined();
-  });
-
-  it('spikeExempt should allow append-only DETAIL.md Write', () => {
-    const input: PreToolUseInput = {
-      ...baseInput,
-      tool_input: {
-        file_path: '/app/DETAIL.md',
-        content: 'line1\nline2\nline3\nline4\n',
-      },
-    };
-    const result = validatePreToolUse(input, 'line1\nline2\n', true);
-    expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput).toBeUndefined();
-  });
-
-  it('criteria.md claim deletion should be denied even with spikeExempt', () => {
-    const oldLedger = [
-      '# Ledger',
-      '## CLM-001: keep me',
-      '- status: active',
-      '- scope: src/a',
-      '- claim: hook denies removal',
-      '- observable: this unit test',
-      '- expected: deny decision returned',
-    ].join('\n');
+  it('should pass .filid/criteria.md through without a hook-specific decision', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
         file_path: '/repo/.filid/criteria.md',
-        content: '# Ledger\n',
+        content: '',
       },
     };
-    const result = validatePreToolUse(input, oldLedger, true);
-    expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      'CLM-001',
-    );
-  });
-
-  it('criteria.md valid append should pass through', () => {
-    const oldLedger = '# Ledger\n';
-    const newLedger = [
-      '# Ledger',
-      '## CLM-001: spike gate',
-      '- status: active',
-      '- scope: src/hooks/preToolUse',
-      '- claim: spike branches bypass doc-hygiene denies',
-      '- observable: bundle smoke test on a spike fixture repo',
-      '- expected: 51-line INTENT.md Write returns no deny decision',
-    ].join('\n');
-    const input: PreToolUseInput = {
-      ...baseInput,
-      tool_input: {
-        file_path: '/repo/.filid/criteria.md',
-        content: newLedger,
-      },
-    };
-    const result = validatePreToolUse(input, oldLedger);
-    expect(result.continue).toBe(true);
+    const result = validatePreToolUse(input);
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 });

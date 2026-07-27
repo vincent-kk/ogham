@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -8,13 +8,7 @@ import { getCacheDir } from '../../../core/infra/cacheManager/cacheManager.js';
 import { handlePreToolUse } from '../../../hooks/preToolUse/preToolUse.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
-function readLastAuditEntry(cwd: string): Record<string, unknown> {
-  const raw = readFileSync(join(getCacheDir(cwd), 'mode-audit.jsonl'), 'utf-8');
-  return JSON.parse(raw.trim().split('\n').at(-1) ?? '{}') as Record<
-    string,
-    unknown
-  >;
-}
+const LEGACY_MODE_AUDIT_FILE = 'mode-audit.jsonl';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -290,7 +284,7 @@ describe('handlePreToolUse', () => {
     expect(ctx).not.toContain('[filid:ctx]');
   });
 
-  it('spike branch → over-50-line INTENT.md Write is exempted and audited', async () => {
+  it('spike branch → over-50-line INTENT.md Write stays denied without mode audit', async () => {
     mkdirSync(join(tmpDir, '.git'), { recursive: true });
     writeFileSync(join(tmpDir, '.git', 'HEAD'), 'ref: refs/heads/spike/poc\n');
     const content = Array.from({ length: 60 }, (_, i) => `Line ${i + 1}`).join(
@@ -305,15 +299,13 @@ describe('handlePreToolUse', () => {
     );
 
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
-
-    const entry = readLastAuditEntry(tmpDir);
-    expect(entry.mode).toBe('spike');
-    expect(entry.decision).toBe('exempt');
-    expect(entry.rule).toBe('intent-hygiene');
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(existsSync(join(getCacheDir(tmpDir), LEGACY_MODE_AUDIT_FILE))).toBe(
+      false,
+    );
   });
 
-  it('normal branch → over-50-line INTENT.md Write stays denied and audited', async () => {
+  it('normal branch → over-50-line INTENT.md Write stays denied without mode audit', async () => {
     mkdirSync(join(tmpDir, '.git'), { recursive: true });
     writeFileSync(join(tmpDir, '.git', 'HEAD'), 'ref: refs/heads/main\n');
     const content = Array.from({ length: 60 }, (_, i) => `Line ${i + 1}`).join(
@@ -329,10 +321,33 @@ describe('handlePreToolUse', () => {
 
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
 
-    const entry = readLastAuditEntry(tmpDir);
-    expect(entry.mode).toBe('normal');
-    expect(entry.decision).toBe('deny');
-    expect(entry.reason).toBeDefined();
+    expect(existsSync(join(getCacheDir(tmpDir), LEGACY_MODE_AUDIT_FILE))).toBe(
+      false,
+    );
+  });
+
+  it('.filid/criteria.md Write is not a hook-specific deny or audit target', async () => {
+    const criteriaPath = join(tmpDir, '.filid', 'criteria.md');
+    mkdirSync(join(tmpDir, '.filid'), { recursive: true });
+    await handlePreToolUse(
+      makeInput({
+        tool_name: 'Read',
+        tool_input: { file_path: join(tmpDir, 'INTENT.md') },
+      }),
+    );
+
+    const result = await handlePreToolUse(
+      makeInput({
+        tool_name: 'Write',
+        tool_input: { file_path: criteriaPath, content: '' },
+      }),
+    );
+
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
+    expect(existsSync(join(getCacheDir(tmpDir), LEGACY_MODE_AUDIT_FILE))).toBe(
+      false,
+    );
   });
 
   it('Write .ts with ancestor import (module delivered) → guard + map context present', async () => {

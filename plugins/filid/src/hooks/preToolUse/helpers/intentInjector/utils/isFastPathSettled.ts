@@ -1,5 +1,7 @@
-import * as path from 'node:path';
+import { normalize } from '@ogham/cross-platform/paths/normalize';
+import { portableRelative } from '@ogham/cross-platform/paths/relative';
 
+import { PORTABLE_PATH_MARKERS } from '../../../../../constants/pathMarkers.js';
 import {
   readBoundary,
   readFractalMap,
@@ -29,7 +31,8 @@ export function isFastPathSettled(
   const cachedBoundary = readBoundary(cwd, sessionId, fileDir);
   if (cachedBoundary === null) return { cachedBoundary, settled: false };
   const relDir =
-    path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
+    normalize(portableRelative(cachedBoundary, fileDir)) ||
+    PORTABLE_PATH_MARKERS.CURRENT;
   const settled = readFractalMap(cwd, scope).reads.includes(
     visitKey(cachedBoundary, relDir),
   );

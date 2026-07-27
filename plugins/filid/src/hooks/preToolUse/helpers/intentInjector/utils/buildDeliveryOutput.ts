@@ -1,4 +1,4 @@
-import { GUIDE_BLOCK } from '../../../../../constants/agentContext.js';
+import { HOOK_GUIDE_BLOCK } from '../../../../../constants/hookContext.js';
 import type { VisitDecision } from '../../../../../core/infra/cacheManager/cacheManager.js';
 import type { HookOutput } from '../../../../../types/hooks.js';
 
@@ -27,7 +27,7 @@ export function buildDeliveryOutput(
     decision.deliveredState !== 'fresh' &&
     !selfAuthoring
   ) {
-    if (decision.guideNeeded) blocks.push(GUIDE_BLOCK);
+    if (decision.guideNeeded) blocks.push(HOOK_GUIDE_BLOCK);
     blocks.push(ctxBlock());
   }
   if (decision.mapChanged) blocks.push(buildMapBlock(decision.reads, relDir));

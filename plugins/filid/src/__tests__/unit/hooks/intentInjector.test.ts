@@ -2,7 +2,14 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+} from 'vitest';
 
 import {
   incrementTurn,
@@ -12,7 +19,7 @@ import {
   processVisit,
   visitKey,
 } from '../../../hooks/preToolUse/helpers/intentInjector/index.js';
-import type { PreToolUseInput } from '../../../types/hooks.js';
+import type { HookOutput, PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -398,19 +405,11 @@ describe('processVisit (mutation path — deny gate)', () => {
     expect(denyOf(result)).toBe(false);
   });
 
-  it('spike mode → gate suspended (undelivered mutation passes)', () => {
-    makeRootProject();
-    const result = processVisit(
-      makeInput({
-        tool_name: 'Write',
-        tool_input: {
-          file_path: join(tmpDir, 'spikefile.ts'),
-          content: 'export {};\n',
-        },
-      }),
-      true,
-    );
-    expect(denyOf(result)).toBe(false);
+  it('exposes a single-input visit contract with no branch mode parameter', () => {
+    expect(processVisit.length).toBe(1);
+    expectTypeOf(processVisit).toEqualTypeOf<
+      (input: PreToolUseInput) => HookOutput
+    >();
   });
 
   it('unread-intent is gone: Write-then-Read never emits the legacy warning', () => {
