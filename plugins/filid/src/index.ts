@@ -46,12 +46,18 @@ export {
   calculateHealthScore,
   generateReport,
   buildDAG,
+  buildDependencyGraph,
   detectCycles,
   getDirectDependencies,
   topologicalSort,
-  findLCA,
-  getAncestorPaths,
-  getModulePlacement,
+  findLowestCommonFractal,
+  resolveOwningFractal,
+  createProjectSnapshot,
+  computeSnapshotHash,
+  resolveContext,
+  createRestructurePlan,
+  validatePlanPostconditions,
+  validatePlanPreconditions,
   // module
   analyzeIndex,
   extractModuleExports,
@@ -99,10 +105,6 @@ export {
   checkTestCoverage,
   generateCoverageWarnings,
   resolveImportPath,
-  // utils
-  ALLOWED_FRACTAL_ROOT_FILES,
-  FRAMEWORK_PACKAGES,
-  FRAMEWORK_RESERVED_FILES,
   RULE_ERROR_PROBABILITY,
   extractRevalidateVerdict,
   extractVerdict,
@@ -148,13 +150,9 @@ export { computeTreeDiff } from './ast/treeDiff/treeDiff.js';
 // Hooks
 export { handlePreToolUse } from './hooks/preToolUse/preToolUse.js';
 
-export { enforceAgentRole } from './hooks/agentEnforcer/agentEnforcer.js';
 export { handleUserPromptSubmit } from './hooks/userPromptSubmit/userPromptSubmit.js';
 export { processSetup } from './hooks/setup/setup.js';
 
-// AST Grep tools (pattern matching via @ast-grep/napi)
-export { handleAstGrepSearch } from './mcp/tools/astGrepSearch/astGrepSearch.js';
-export { handleAstGrepReplace } from './mcp/tools/astGrepReplace/astGrepReplace.js';
 export {
   getSgModule,
   getSgLoadError,
@@ -165,25 +163,17 @@ export {
   toLangEnum,
 } from './ast/astGrepShared/astGrepShared.js';
 
-// MCP tool handlers
-export { handleAstAnalyze } from './mcp/tools/astAnalyze/astAnalyze.js';
-export { handleConfigPatchValidate } from './mcp/tools/configPatchValidate/configPatchValidate.js';
-export { handleFractalNavigate } from './mcp/tools/fractalNavigate/fractalNavigate.js';
-export { handleDocCompress } from './mcp/tools/docCompress/docCompress.js';
-export { handleTestMetrics } from './mcp/tools/testMetrics/testMetrics.js';
-export { handleFractalScan } from './mcp/tools/fractalScan/fractalScan.js';
-export { handleDriftDetect } from './mcp/tools/driftDetect/driftDetect.js';
-export { handleLcaResolve } from './mcp/tools/lcaResolve/lcaResolve.js';
-export { handleRuleQuery } from './mcp/tools/ruleQuery/ruleQuery.js';
-export { handleStructureValidate } from './mcp/tools/structureValidate/structureValidate.js';
-export { handleReviewManage } from './mcp/tools/reviewManage/reviewManage.js';
-export { handleDebtManage } from './mcp/tools/debtManage/debtManage.js';
-export { handleCacheManage } from './mcp/tools/cacheManage/cacheManage.js';
-export { handleCoverageVerify } from './mcp/tools/coverageVerify/coverageVerify.js';
-
-// Note: format/* and utils/* helpers under review-manage are internal organs
-// (Stage 3 / v0.2.0 — see .omc/plans/filid-structural-fix-round1.md T7). They
-// are no longer re-exported from the public barrel.
+export {
+  handleContextResolve,
+  handleFractalScan,
+  handleRestructurePlan,
+  handleReviewState,
+  handleStructureValidate,
+  handleVerificationScan,
+} from './mcp/tools/index.js';
+export { handleOpenSettingsTool as handleOpenSettings } from './mcp/server/handlers/handleOpenSettingsTool.js';
+export { handleProjectInitTool as handleProjectInit } from './mcp/server/handlers/handleProjectInitTool.js';
+export { handleRuleDocsSyncTool as handleRuleDocsSync } from './mcp/server/handlers/handleRuleDocsSyncTool.js';
 
 // MCP server
 export { createServer, startServer } from './mcp/index.js';

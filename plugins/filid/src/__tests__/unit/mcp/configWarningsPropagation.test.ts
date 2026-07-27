@@ -11,14 +11,21 @@
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
+import { portableJoin } from '@ogham/cross-platform/paths';
 import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
+import { SNAPSHOT_TOOL_DIAGNOSTIC_CODES } from '../../../constants/mcpContracts.js';
 import { handleDriftDetect } from '../../../mcp/tools/driftDetect/driftDetect.js';
 import { handleRuleQuery } from '../../../mcp/tools/ruleQuery/ruleQuery.js';
 import { handleStructureValidate } from '../../../mcp/tools/structureValidate/structureValidate.js';
+import type {
+  StructureValidateData,
+  ValidationReport,
+} from '../../../types/report.js';
+import type { ToolDiagnostic } from '../../../types/toolEnvelope.js';
 
 vi.mock('@ogham/cross-platform/spawn', async () => {
   const actual = await vi.importActual<
@@ -28,18 +35,49 @@ vi.mock('@ogham/cross-platform/spawn', async () => {
 });
 
 const mockedSpawnCliSync = vi.mocked(spawnCliSync);
+const PEER_FIXTURE_DIRECTORY = 'peer-fixture';
+const PEER_FIXTURE_FILE = 'unexpected.txt';
+
+function getConfigWarnings(diagnostics: ToolDiagnostic[]): string[] {
+  return diagnostics
+    .filter(
+      (diagnostic) =>
+        diagnostic.code === SNAPSHOT_TOOL_DIAGNOSTIC_CODES.CONFIG_WARNING,
+    )
+    .map((diagnostic) => diagnostic.message);
+}
+
+function getValidationReport(
+  data: StructureValidateData | undefined,
+): ValidationReport {
+  if (!data || !('result' in data))
+    throw new Error('expected project validation report');
+  return data;
+}
 
 function writeRaw(root: string, raw: unknown): void {
-  const dir = join(root, '.filid');
+  const dir = portableJoin(root, '.filid');
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'config.json'), JSON.stringify(raw), 'utf8');
+  writeFileSync(portableJoin(dir, 'config.json'), JSON.stringify(raw), 'utf8');
+}
+
+function writePeerViolationFixture(root: string): void {
+  const modulePath = portableJoin(root, PEER_FIXTURE_DIRECTORY);
+  mkdirSync(modulePath, { recursive: true });
+  writeFileSync(
+    portableJoin(modulePath, 'INTENT.md'),
+    '# peer fixture\n',
+    'utf8',
+  );
+  writeFileSync(portableJoin(modulePath, 'index.ts'), 'export {};\n', 'utf8');
+  writeFileSync(portableJoin(modulePath, PEER_FIXTURE_FILE), 'peer\n', 'utf8');
 }
 
 describe('configWarnings propagation', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = join(
+    tmpDir = portableJoin(
       tmpdir(),
       `filid-warnings-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     );
@@ -82,10 +120,13 @@ describe('configWarnings propagation', () => {
         },
       });
       const result = await handleStructureValidate({ path: tmpDir });
-      expect(Array.isArray(result.configWarnings)).toBe(true);
-      expect(result.configWarnings.length).toBeGreaterThan(0);
+      const configWarnings = getConfigWarnings(result.diagnostics);
+      expect(Array.isArray(configWarnings)).toBe(true);
+      expect(configWarnings.length).toBeGreaterThan(0);
       expect(
-        result.configWarnings.some((w) => w.includes('additional-allowed')),
+        configWarnings.some((warning) =>
+          warning.includes('additional-allowed'),
+        ),
       ).toBe(true);
     });
 
@@ -126,60 +167,61 @@ describe('configWarnings propagation', () => {
 
   describe('rule set propagation', () => {
     it('drift-detect honours rule overrides from config', async () => {
-      // snake_case fractal dir — a naming-convention violation.
-      mkdirSync(join(tmpDir, 'bad_name'), { recursive: true });
-      writeFileSync(
-        join(tmpDir, 'bad_name', 'INTENT.md'),
-        '# bad_name\n',
-        'utf8',
-      );
+      writePeerViolationFixture(tmpDir);
 
       writeRaw(tmpDir, {
         version: '1.0',
-        rules: { 'naming-convention': { enabled: true, severity: 'warning' } },
+        rules: {
+          [BUILTIN_RULE_IDS.ZERO_PEER_FILE]: {
+            enabled: true,
+            severity: 'warning',
+          },
+        },
       });
       const enabled = await handleDriftDetect({ path: tmpDir });
-      expect(enabled.items.some((i) => i.rule === 'naming-convention')).toBe(
-        true,
-      );
+      expect(
+        enabled.items.some(
+          (item) => item.rule === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
+        ),
+      ).toBe(true);
 
       // Disabling it must silence the drift item too. drift-detect used to call
       // validateStructure() with no rules, which falls back to the unconfigured
       // builtin set — so it reported violations the project had exempted.
       writeRaw(tmpDir, {
         version: '1.0',
-        rules: { 'naming-convention': { enabled: false } },
+        rules: { [BUILTIN_RULE_IDS.ZERO_PEER_FILE]: { enabled: false } },
       });
       const disabled = await handleDriftDetect({ path: tmpDir });
-      expect(disabled.items.some((i) => i.rule === 'naming-convention')).toBe(
-        false,
-      );
+      expect(
+        disabled.items.some(
+          (item) => item.rule === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
+        ),
+      ).toBe(false);
     });
 
     it('drift-detect and structure-validate agree on the configured rule set', async () => {
-      mkdirSync(join(tmpDir, 'bad_name'), { recursive: true });
-      writeFileSync(
-        join(tmpDir, 'bad_name', 'INTENT.md'),
-        '# bad_name\n',
-        'utf8',
-      );
+      writePeerViolationFixture(tmpDir);
 
       writeRaw(tmpDir, {
         version: '1.0',
-        rules: { 'naming-convention': { enabled: false } },
+        rules: { [BUILTIN_RULE_IDS.ZERO_PEER_FILE]: { enabled: false } },
       });
 
       const validated = await handleStructureValidate({ path: tmpDir });
       const drifted = await handleDriftDetect({ path: tmpDir });
+      const report = getValidationReport(validated.data);
 
       expect(
-        validated.report.result.violations.some(
-          (v) => v.ruleId === 'naming-convention',
+        report.result.violations.some(
+          (violation) => violation.ruleId === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
         ),
       ).toBe(false);
-      expect(drifted.items.some((i) => i.rule === 'naming-convention')).toBe(
-        false,
-      );
+      expect(
+        drifted.items.some(
+          (item) => item.rule === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
+        ),
+      ).toBe(false);
     });
   });
 
@@ -212,10 +254,11 @@ describe('configWarnings propagation', () => {
             .map((a) => String(a))
             .join(' '),
         );
-      expect(result.configWarnings.length).toBeGreaterThan(0);
+      const configWarnings = getConfigWarnings(result.diagnostics);
+      expect(configWarnings.length).toBeGreaterThan(0);
       // Each warning appears in log.warn output; order preserved.
-      for (let i = 0; i < result.configWarnings.length; i++)
-        expect(configLoaderLines[i]).toContain(result.configWarnings[i]);
+      for (let i = 0; i < configWarnings.length; i++)
+        expect(configLoaderLines[i]).toContain(configWarnings[i]);
     });
 
     it('empty warnings when config is strictly valid', async () => {
@@ -226,14 +269,14 @@ describe('configWarnings propagation', () => {
         },
       });
       const r1 = await handleStructureValidate({ path: tmpDir });
-      expect(r1.configWarnings).toEqual([]);
+      expect(getConfigWarnings(r1.diagnostics)).toEqual([]);
       const r2 = await handleDriftDetect({ path: tmpDir });
       expect(r2.configWarnings).toEqual([]);
     });
 
     it('empty warnings when config is missing', async () => {
       const result = await handleStructureValidate({ path: tmpDir });
-      expect(result.configWarnings).toEqual([]);
+      expect(getConfigWarnings(result.diagnostics)).toEqual([]);
     });
 
     it('invalid exempt glob is warned and dropped, surfaces to tool response', async () => {
@@ -247,8 +290,11 @@ describe('configWarnings propagation', () => {
         },
       });
       const result = await handleStructureValidate({ path: tmpDir });
+      const configWarnings = getConfigWarnings(result.diagnostics);
       expect(
-        result.configWarnings.some((w) => w.includes('invalid glob syntax')),
+        configWarnings.some((warning) =>
+          warning.includes('invalid glob syntax'),
+        ),
       ).toBe(true);
     });
   });

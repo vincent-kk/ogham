@@ -12,7 +12,8 @@
 ## API Contracts
 
 - Input: `{ path?: string, language?: string, adapterIds?: string[] }`.
-- Output reports whether the config was created and its path.
+- Output uses the common envelope; summary reports whether the config was
+  created and its absolute path.
 - Existing configuration is never overwritten.
 
 ## Acceptance Criteria

@@ -1,12 +1,22 @@
 export type {
   NodeType,
   CategoryType,
+  AnalysisCertainty,
   EntryPointDescriptor,
+  EntryPointSurfaceEvidence,
+  DocumentContractFinding,
+  FractalDocumentEvidence,
   FractalNode,
   FractalTree,
   FractalTreeDto,
   DependencyEdge,
   DependencyDAG,
+  DependencyEvidence,
+  DependencyGraphEdge,
+  DependencyGraph,
+  SnapshotDiagnostic,
+  LegacyCriteriaLedgerEvidence,
+  ProjectSnapshot,
   DirEntry,
   ModuleInfo,
   ModuleExportInfo,
@@ -14,13 +24,43 @@ export type {
   PublicApi,
 } from './fractal.js';
 
+export type { ContextDocumentRef, ContextResolution } from './context.js';
+
+export type {
+  PlacementBasis,
+  RequiredArtifactRole,
+  RestructureUnitKind,
+  RestructureNodeType,
+  ContractIntent,
+  RestructureDecisionReason,
+  RestructureValidationCode,
+  RequiredArtifact,
+  ImportRewrite,
+  ImportRewriteBuildResult,
+  PlacementRequest,
+  RestructurePlanInput,
+  MoveInstruction,
+  RestructurePlan,
+  PlanValidationFinding,
+  PlanValidationResult,
+} from './restructure.js';
+
+export type {
+  ToolArtifact,
+  ToolDiagnostic,
+  ToolMediaType,
+  ToolPayload,
+  ToolPersistence,
+  ToolResultEnvelope,
+  ToolStatus,
+} from './toolEnvelope.js';
+
 export type {
   AdapterClaim,
   AdapterDiagnostic,
   AdapterOwnership,
   AdapterRegistry,
   AdapterResolution,
-  AnalysisCertainty,
   DependencyReference,
   EntryPointInspection,
   StructureAdapter,
@@ -66,7 +106,6 @@ export type {
   UserPromptSubmitInput,
   PreToolUseInput,
   PostToolUseInput,
-  SubagentStartInput,
   HookOutput,
   HookInput,
   StructureGuardOutput,
@@ -89,11 +128,14 @@ export type {
 export type {
   RuleSeverity,
   RuleCategory,
+  RuleScope,
+  RuleGranularity,
   RuleContext,
   RuleViolation,
   Rule,
   RuleSet,
   RuleEvaluationResult,
+  RuleEvaluationOptions,
   RuleOverride,
   BuiltinRuleId,
 } from './rules.js';
@@ -111,6 +153,9 @@ export type {
 } from './drift.js';
 
 export type {
+  VerificationRoleSummary,
+  VerificationScanSummary,
+  VerificationScanData,
   ScanReport,
   ScanReportDto,
   ValidationReport,

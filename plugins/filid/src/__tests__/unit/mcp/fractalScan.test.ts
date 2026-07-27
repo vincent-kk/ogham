@@ -1,23 +1,42 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
+import { portableJoin } from '@ogham/cross-platform/paths';
 import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  buildScanResult,
-  handleFractalScan,
-} from '../../../mcp/tools/fractalScan/index.js';
-import type { ScanReportDto, ScanResultDto } from '../../../types/report.js';
+import { FRACTAL_SCAN_DETAILS } from '../../../constants/mcpContracts.js';
+import { NODE_TYPES } from '../../../constants/nodeTypes.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scanDefaults.js';
+import { handleFractalScan } from '../../../mcp/tools/fractalScan/index.js';
+import type {
+  FractalScanData,
+  FractalScanFullData,
+  FractalScanPathsData,
+  FractalScanSummary,
+} from '../../../types/report.js';
+import type { ToolPayload } from '../../../types/toolEnvelope.js';
 
-/** Narrow the outputMode union to the full report (default mode in tests). */
-function asReport(result: ScanResultDto): ScanReportDto {
-  if (!('tree' in result))
-    throw new Error(
-      `expected full ScanReportDto, got: ${JSON.stringify(result).slice(0, 120)}`,
-    );
-  return result;
+const CONFIG_VERSION = '1.0';
+const INTENT_FILE_NAME = 'INTENT.md';
+const ENTRY_POINT_FILE_NAME = 'index.ts';
+const CONFIG_DIRECTORY_NAME = '.filid';
+const CONFIG_FILE_NAME = 'config.json';
+
+function getFullData(
+  result: ToolPayload<FractalScanSummary, FractalScanData>,
+): FractalScanFullData {
+  if (!result.data || !('snapshot' in result.data))
+    throw new Error('expected full fractal scan data');
+  return result.data as FractalScanFullData;
+}
+
+function getPathsData(
+  result: ToolPayload<FractalScanSummary, FractalScanData>,
+): FractalScanPathsData {
+  if (!result.data || !('nodes' in result.data))
+    throw new Error('expected paths fractal scan data');
+  return result.data as FractalScanPathsData;
 }
 
 vi.mock('@ogham/cross-platform/spawn', async () => {
@@ -30,31 +49,34 @@ vi.mock('@ogham/cross-platform/spawn', async () => {
 const mockedSpawnCliSync = vi.mocked(spawnCliSync);
 
 describe('fractal-scan tool — DTO shape', () => {
-  it('should expose tree.nodes as a flat array', async () => {
-    const result = asReport(
-      await handleFractalScan({ path: import.meta.dirname }),
-    );
+  it('should expose full tree.nodes as a flat array', async () => {
+    const result = await handleFractalScan({
+      path: import.meta.dirname,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+    const { tree } = getFullData(result).snapshot;
 
-    expect(result.tree).toBeDefined();
-    expect(Array.isArray(result.tree.nodes)).toBe(true);
-    expect(result.tree.nodes.length).toBeGreaterThan(0);
+    expect(Array.isArray(tree.nodes)).toBe(true);
+    expect(tree.nodes.length).toBeGreaterThan(0);
   });
 
-  it('should NOT serialize tree.nodes as a Map', async () => {
-    const result = asReport(
-      await handleFractalScan({ path: import.meta.dirname }),
-    );
+  it('should NOT serialize full tree.nodes as a Map', async () => {
+    const result = await handleFractalScan({
+      path: import.meta.dirname,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
 
-    // DTO uses an array; in-process FractalTree (Map) is not exposed.
-    expect(result.tree.nodes).not.toBeInstanceOf(Map);
+    expect(getFullData(result).snapshot.tree.nodes).not.toBeInstanceOf(Map);
   });
 
   it('should preserve totalNodes parity with nodes.length', async () => {
-    const result = asReport(
-      await handleFractalScan({ path: import.meta.dirname }),
-    );
+    const result = await handleFractalScan({
+      path: import.meta.dirname,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+    const { tree } = getFullData(result).snapshot;
 
-    expect(result.tree.nodes.length).toBe(result.tree.totalNodes);
+    expect(tree.nodes.length).toBe(tree.totalNodes);
   });
 });
 
@@ -62,38 +84,34 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
   let tmpRoot: string;
 
   beforeEach(() => {
-    tmpRoot = join(
+    tmpRoot = portableJoin(
       tmpdir(),
       `filid-fractal-scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     );
-    // Build a synthetic project with nested fractal dirs to exercise depth.
-    //   tmpRoot/
-    //     INTENT.md                 (depth 0)
-    //     index.ts
-    //     a/INTENT.md + a/index.ts  (depth 1)
-    //       a/b/INTENT.md + a/b/index.ts (depth 2)
-    //         a/b/c/INTENT.md + a/b/c/index.ts (depth 3)
-    const nested = join(tmpRoot, 'a', 'b', 'c');
-    mkdirSync(nested, { recursive: true });
-    for (const dir of [
+    const nested = portableJoin(tmpRoot, 'a', 'b', 'c');
+    const fixtureDirectories = [
       tmpRoot,
-      join(tmpRoot, 'a'),
-      join(tmpRoot, 'a', 'b'),
+      portableJoin(tmpRoot, 'a'),
+      portableJoin(tmpRoot, 'a', 'b'),
       nested,
-    ]) {
-      writeFileSync(join(dir, 'INTENT.md'), '# x', 'utf8');
-      writeFileSync(join(dir, 'index.ts'), 'export {};\n', 'utf8');
+    ];
+    mkdirSync(nested, { recursive: true });
+    for (const directory of fixtureDirectories) {
+      writeFileSync(portableJoin(directory, INTENT_FILE_NAME), '# x', 'utf8');
+      writeFileSync(
+        portableJoin(directory, ENTRY_POINT_FILE_NAME),
+        'export {};\n',
+        'utf8',
+      );
     }
-    // Pretend tmpRoot is its own git repo root for loadConfig's resolveGitRoot.
     mockedSpawnCliSync.mockImplementation((bin, args) => {
       if (bin === 'git' && [...args].includes('rev-parse'))
         return {
           code: 0,
-          stdout: tmpRoot + '\n',
+          stdout: `${tmpRoot}\n`,
           stderr: '',
           timedOut: false,
         };
-
       return {
         code: 1,
         stdout: '',
@@ -110,85 +128,85 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
   });
 
   function writeScanConfig(maxDepth: number | null): void {
-    const dir = join(tmpRoot, '.filid');
-    mkdirSync(dir, { recursive: true });
+    const directory = portableJoin(tmpRoot, CONFIG_DIRECTORY_NAME);
+    mkdirSync(directory, { recursive: true });
     const body =
       maxDepth === null
-        ? { version: '1.0', rules: {} }
-        : { version: '1.0', rules: {}, scan: { maxDepth } };
-    writeFileSync(join(dir, 'config.json'), JSON.stringify(body), 'utf8');
+        ? { version: CONFIG_VERSION, rules: {} }
+        : {
+            version: CONFIG_VERSION,
+            rules: {},
+            scan: { maxDepth },
+          };
+    writeFileSync(
+      portableJoin(directory, CONFIG_FILE_NAME),
+      JSON.stringify(body),
+      'utf8',
+    );
   }
 
   it('input.depth takes precedence over config.scan.maxDepth', async () => {
     writeScanConfig(3);
-    const result = asReport(
-      await handleFractalScan({ path: tmpRoot, depth: 1 }),
-    );
-    // With depth=1, nodes at depth 2 and 3 must not appear.
-    for (const node of result.tree.nodes)
-      expect(node.depth).toBeLessThanOrEqual(1);
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      depth: 1,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+    const data = getFullData(result);
+
+    expect(data.validation.scanOptions?.maxDepth).toBe(1);
+    expect(data.snapshot.tree.depth).toBeGreaterThan(1);
   });
 
   it('config.scan.maxDepth is used when input.depth is omitted', async () => {
     writeScanConfig(1);
-    const result = asReport(await handleFractalScan({ path: tmpRoot }));
-    for (const node of result.tree.nodes)
-      expect(node.depth).toBeLessThanOrEqual(1);
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+    const data = getFullData(result);
+
+    expect(data.validation.scanOptions?.maxDepth).toBe(1);
+    expect(data.snapshot.tree.depth).toBeGreaterThan(1);
   });
 
-  it('falls back to default (10) when neither is set', async () => {
+  it('falls back to default when neither is set', async () => {
     writeScanConfig(null);
-    const result = asReport(await handleFractalScan({ path: tmpRoot }));
-    // All 4 nested dirs (depths 0..3) should fit under the default cap.
-    const depths = result.tree.nodes.map((n) => n.depth);
-    expect(Math.max(...depths)).toBeGreaterThanOrEqual(3);
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+    const data = getFullData(result);
+
+    expect(data.validation.scanOptions?.maxDepth).toBe(
+      DEFAULT_SCAN_OPTIONS.maxDepth,
+    );
+    expect(data.snapshot.tree.depth).toBeGreaterThanOrEqual(3);
   });
 });
 
-describe('fractal-scan tool — output modes & size guard', () => {
-  let tmpConfig: string;
-
-  beforeEach(() => {
-    tmpConfig = join(
-      tmpdir(),
-      `filid-scan-mode-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    );
-    mkdirSync(tmpConfig, { recursive: true });
-    process.env.CLAUDE_CONFIG_DIR = tmpConfig;
-  });
-
-  afterEach(() => {
-    delete process.env.CLAUDE_CONFIG_DIR;
-    rmSync(tmpConfig, { recursive: true, force: true });
-  });
-
-  it('summary mode returns counts without a nodes payload', async () => {
+describe('fractal-scan tool — detail projections', () => {
+  it('summary detail returns counts without a nodes payload', async () => {
     const result = await handleFractalScan({
       path: import.meta.dirname,
-      outputMode: 'summary',
+      detail: FRACTAL_SCAN_DETAILS.SUMMARY,
     });
-    expect(result).toMatchObject({ outputMode: 'summary' });
-    expect(result).not.toHaveProperty('nodes');
-    expect(result).not.toHaveProperty('tree');
-    if (!('totalNodes' in result) || !('nodesByType' in result))
-      throw new Error('expected summary mode');
-    expect(result.totalNodes).toBeGreaterThan(0);
-    expect(Object.keys(result.nodesByType).length).toBeGreaterThan(0);
+
+    expect(result.data).toBeUndefined();
+    expect(result.summary.totalNodes).toBeGreaterThan(0);
+    expect(Object.keys(result.summary.nodesByType).length).toBeGreaterThan(0);
   });
 
-  it('paths mode projects nodes down to path/type/INTENT flags', async () => {
+  it('paths detail projects node identity and boundary flags', async () => {
     const result = await handleFractalScan({
       path: import.meta.dirname,
-      outputMode: 'paths',
+      detail: FRACTAL_SCAN_DETAILS.PATHS,
     });
-    if (
-      !('outputMode' in result) ||
-      result.outputMode !== 'paths' ||
-      !('nodes' in result)
-    )
-      throw new Error('expected paths projection');
-    expect(result.nodes.length).toBe(result.totalNodes);
-    expect(Object.keys(result.nodes[0]).sort()).toEqual([
+    const data = getPathsData(result);
+
+    expect(data.nodes.length).toBe(result.summary.totalNodes);
+    expect(Object.keys(data.nodes[0]).sort()).toEqual([
+      'entryPointCount',
       'hasDetailMd',
       'hasIntentMd',
       'path',
@@ -196,65 +214,16 @@ describe('fractal-scan tool — output modes & size guard', () => {
     ]);
   });
 
-  it('oversized payloads degrade to a { truncated, reportPath, summary } envelope', () => {
-    const report: ScanReportDto = {
-      tree: {
-        root: '/proj',
-        depth: 1,
-        totalNodes: 2,
-        nodes: [
-          {
-            path: '/proj',
-            name: 'proj',
-            type: 'fractal',
-            parent: null,
-            parentFractalPath: null,
-            children: [],
-            childFractalPaths: [],
-            organs: [],
-            organPaths: [],
-            hasIntentMd: true,
-            hasDetailMd: false,
-            entryPoints: [],
-            peerFiles: [],
-            hasIndex: true,
-            hasMain: false,
-            depth: 0,
-            metadata: {},
-          },
-          {
-            path: '/proj/src',
-            name: 'src',
-            type: 'fractal',
-            parent: '/proj',
-            parentFractalPath: '/proj',
-            children: [],
-            childFractalPaths: [],
-            organs: [],
-            organPaths: [],
-            hasIntentMd: false,
-            hasDetailMd: false,
-            entryPoints: [],
-            peerFiles: [],
-            hasIndex: true,
-            hasMain: false,
-            depth: 1,
-            metadata: {},
-          },
-        ],
-      },
-      modules: [],
-      timestamp: '2026-07-07T00:00:00.000Z',
-      duration: 1,
-    };
+  it('full detail uses the common payload without a scan-specific report path', async () => {
+    const result = await handleFractalScan({
+      path: import.meta.dirname,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+    const data = getFullData(result);
 
-    const result = buildScanResult(report, 'full', 10, '/proj');
-    if (!('truncated' in result)) throw new Error('expected truncation');
-    expect(result.truncated).toBe(true);
-    expect(result.summary.totalNodes).toBe(2);
-    expect(result.summary.missingIntentFractals).toBe(1);
-    const saved = JSON.parse(readFileSync(result.reportPath, 'utf-8'));
-    expect(saved.tree.totalNodes).toBe(2);
+    expect(data.snapshot.tree.totalNodes).toBeGreaterThan(0);
+    expect(result).not.toHaveProperty('reportPath');
+    expect(result).not.toHaveProperty('truncated');
   });
 });
 
@@ -262,22 +231,27 @@ describe('fractal-scan tool — additional-organ-names wiring', () => {
   let tmpRoot: string;
 
   beforeEach(() => {
-    tmpRoot = join(
+    tmpRoot = portableJoin(
       tmpdir(),
       `filid-organ-names-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     );
-    // A nesting content compartment: fractal on structure alone, organ only
-    // once the config names it.
-    mkdirSync(join(tmpRoot, 'skills', 'preview'), { recursive: true });
-    writeFileSync(join(tmpRoot, 'INTENT.md'), '# root', 'utf8');
+    mkdirSync(portableJoin(tmpRoot, 'skills', 'preview'), {
+      recursive: true,
+    });
+    writeFileSync(portableJoin(tmpRoot, INTENT_FILE_NAME), '# root', 'utf8');
     writeFileSync(
-      join(tmpRoot, 'skills', 'preview', 'SKILL.md'),
+      portableJoin(tmpRoot, 'skills', 'preview', 'SKILL.md'),
       '# preview',
       'utf8',
     );
     mockedSpawnCliSync.mockImplementation((bin, args) => {
       if (bin === 'git' && [...args].includes('rev-parse'))
-        return { code: 0, stdout: tmpRoot + '\n', stderr: '', timedOut: false };
+        return {
+          code: 0,
+          stdout: `${tmpRoot}\n`,
+          stderr: '',
+          timedOut: false,
+        };
       return {
         code: 1,
         stdout: '',
@@ -294,27 +268,46 @@ describe('fractal-scan tool — additional-organ-names wiring', () => {
   });
 
   function writeOrganNamesConfig(names: string[] | null): void {
-    const dir = join(tmpRoot, '.filid');
-    mkdirSync(dir, { recursive: true });
+    const directory = portableJoin(tmpRoot, CONFIG_DIRECTORY_NAME);
+    mkdirSync(directory, { recursive: true });
     const body =
       names === null
-        ? { version: '1.0', rules: {} }
-        : { version: '1.0', rules: {}, 'additional-organ-names': names };
-    writeFileSync(join(dir, 'config.json'), JSON.stringify(body), 'utf8');
+        ? { version: CONFIG_VERSION, rules: {} }
+        : {
+            version: CONFIG_VERSION,
+            rules: {},
+            'additional-organ-names': names,
+          };
+    writeFileSync(
+      portableJoin(directory, CONFIG_FILE_NAME),
+      JSON.stringify(body),
+      'utf8',
+    );
   }
 
-  const typeOf = (result: ScanReportDto, rel: string) =>
-    result.tree.nodes.find((n) => n.path === join(tmpRoot, rel))?.type;
+  function typeOf(result: FractalScanFullData, relativePath: string) {
+    const targetPath = portableJoin(tmpRoot, relativePath);
+    return result.snapshot.tree.nodes.find((node) => node.path === targetPath)
+      ?.type;
+  }
 
-  it('config names reach classifyNode through loadConfig', async () => {
+  it('config names reach classifyNode through migrated config', async () => {
     writeOrganNamesConfig(['skills']);
-    const result = asReport(await handleFractalScan({ path: tmpRoot }));
-    expect(typeOf(result, 'skills')).toBe('organ');
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+
+    expect(typeOf(getFullData(result), 'skills')).toBe(NODE_TYPES.ORGAN);
   });
 
   it('without the key the same directory stays fractal', async () => {
     writeOrganNamesConfig(null);
-    const result = asReport(await handleFractalScan({ path: tmpRoot }));
-    expect(typeOf(result, 'skills')).toBe('fractal');
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.FULL,
+    });
+
+    expect(typeOf(getFullData(result), 'skills')).toBe(NODE_TYPES.FRACTAL);
   });
 });

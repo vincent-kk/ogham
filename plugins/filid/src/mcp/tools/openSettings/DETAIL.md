@@ -12,7 +12,8 @@
 ## API Contracts
 
 - Input: `{ path?: string, waitSeconds?: number }`.
-- Output: `{ status: 'saved' | 'closed' | 'pending', url, summary? }`.
+- Output uses the common envelope; summary preserves saved/closed/pending,
+  URL, message and optional save summary.
 - `SettingsPageState` includes project root, config existence, config v2,
   config diagnostics, and rule-document status.
 - `SaveBody.config` is strict config v2; unknown or legacy keys are rejected.

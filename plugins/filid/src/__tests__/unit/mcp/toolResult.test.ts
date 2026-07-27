@@ -1,6 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { McpToolName } from '../../../constants/mcpToolNames.js';
+import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
 import { toolResult } from '../../../mcp/server/toolResult.js';
+
+const PROJECT_ROOT = '/project';
+const EMPTY_DIAGNOSTICS: never[] = [];
+const SIMPLE_PAYLOAD = {
+  projectRoot: PROJECT_ROOT,
+  status: TOOL_STATUSES.OK,
+  summary: { count: 1 },
+  data: { value: 1 },
+  diagnostics: EMPTY_DIAGNOSTICS,
+};
+const MAP_PAYLOAD = {
+  projectRoot: PROJECT_ROOT,
+  status: TOOL_STATUSES.OK,
+  summary: { count: 1 },
+  data: { m: new Map([['k', 'v']]) },
+  diagnostics: EMPTY_DIAGNOSTICS,
+};
 
 describe('toolResult — compact JSON output', () => {
   const original = process.env.FILID_PRETTY_JSON;
@@ -15,19 +34,22 @@ describe('toolResult — compact JSON output', () => {
   });
 
   it('should emit JSON without indentation by default', () => {
-    const r = toolResult({ a: 1, b: { c: 2 } });
-    expect(r.content[0].text).toBe('{"a":1,"b":{"c":2}}');
+    const result = toolResult(McpToolName.FRACTAL_SCAN, SIMPLE_PAYLOAD);
+    expect(result.content[0].text).toBe(
+      '{"status":"ok","summary":{"count":1},"data":{"value":1},"diagnostics":[]}',
+    );
   });
 
-  it('should still convert Map → object via mapReplacer', () => {
-    const r = toolResult({ m: new Map([['k', 'v']]) });
-    expect(r.content[0].text).toBe('{"m":{"k":"v"}}');
+  it('should still convert Map → object via the compact serializer', () => {
+    const result = toolResult(McpToolName.FRACTAL_SCAN, MAP_PAYLOAD);
+    expect(JSON.parse(result.content[0].text).data).toEqual({
+      m: { k: 'v' },
+    });
   });
 
-  it('should opt back into 2-space indent when FILID_PRETTY_JSON=1', () => {
+  it('stays compact when the legacy pretty environment flag is set', () => {
     process.env.FILID_PRETTY_JSON = '1';
-    const r = toolResult({ a: 1 });
-    expect(r.content[0].text).toContain('\n');
-    expect(r.content[0].text).toContain('  "a": 1');
+    const result = toolResult(McpToolName.FRACTAL_SCAN, SIMPLE_PAYLOAD);
+    expect(result.content[0].text).not.toContain('\n');
   });
 });

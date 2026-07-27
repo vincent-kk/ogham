@@ -1,3 +1,8 @@
+import { type ZodTypeAny, z } from 'zod';
+
+import type { McpToolName } from '../../constants/mcpToolNames.js';
+import type { ToolPayload } from '../../types/toolEnvelope.js';
+
 import { toolError } from './toolError.js';
 import { toolResult } from './toolResult.js';
 
@@ -7,41 +12,28 @@ export interface HandlerExtra {
 }
 
 /**
- * Wrap a tool handler with standard try/catch error handling.
- * Reduces repetitive boilerplate across all 19 registerTool callbacks.
- * The MCP request extra is forwarded so long-polling handlers can observe
- * the call's AbortSignal; single-param handlers simply ignore it.
+ * Wrap one payload-producing handler with the common artifact boundary.
  */
-export function wrapHandler<T>(
-  fn: (args: T, extra?: HandlerExtra) => unknown | Promise<unknown>,
-  options?: { checkErrorField?: boolean },
+export function wrapHandler<Schema extends ZodTypeAny, Summary, Data>(
+  toolName: McpToolName,
+  schema: Schema,
+  fn: (
+    args: z.output<Schema>,
+    extra?: HandlerExtra,
+  ) => ToolPayload<Summary, Data> | Promise<ToolPayload<Summary, Data>>,
 ): (
-  args: T,
+  args: unknown,
   extra?: HandlerExtra,
 ) => Promise<
   | ReturnType<typeof toolResult>
   | ReturnType<typeof toolError>
   | { content: Array<{ type: 'text'; text: string }> }
 > {
-  return async (args: T, extra?: HandlerExtra) => {
+  return async (args: unknown, extra?: HandlerExtra) => {
     try {
-      const result = await fn(args, extra);
-      if (
-        options?.checkErrorField &&
-        result &&
-        typeof result === 'object' &&
-        'error' in result
-      )
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: String((result as { error: unknown }).error),
-            },
-          ],
-        };
-
-      return toolResult(result);
+      const input = await schema.parseAsync(args);
+      const result = await fn(input, extra);
+      return toolResult(toolName, result);
     } catch (error) {
       return toolError(error);
     }

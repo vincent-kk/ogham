@@ -1,2 +1,2 @@
-export * from './fractalScan.js';
-export { buildScanResult } from './utils/buildScanResult.js';
+export { handleFractalScan } from './fractalScan.js';
+export type { FractalScanInput } from './fractalScan.js';

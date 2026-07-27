@@ -17,6 +17,11 @@
  * Session hooks MUST NOT invoke this tool.
  */
 import {
+  RULE_DOC_ACTIONS,
+  RULE_DOC_INPUT_ERROR_MESSAGES,
+  RULE_DOC_UNRESOLVED_MANIFEST_SKIPPED,
+} from '../../../constants/mcpContracts.js';
+import {
   type RuleDocSyncResult,
   type RuleDocsManifest,
   type RuleDocsStatus,
@@ -30,7 +35,13 @@ import { normalizeResync } from './utils/normalizeResync.js';
 import { normalizeSelections } from './utils/normalizeSelections.js';
 import { validateResyncIds } from './utils/validateResyncIds.js';
 
-export type RuleDocsAction = 'status' | 'sync' | 'manifest';
+const UNRESOLVED_RULE_DOCS_MANIFEST: RuleDocsManifest = {
+  version: '',
+  rules: [],
+};
+
+export type RuleDocsAction =
+  (typeof RULE_DOC_ACTIONS)[keyof typeof RULE_DOC_ACTIONS];
 
 export interface RuleDocsSyncInput {
   action: RuleDocsAction;
@@ -61,15 +72,16 @@ export interface RuleDocsSyncInput {
 }
 
 export type RuleDocsSyncOutput =
-  | { action: 'status'; status: RuleDocsStatus }
+  | { action: typeof RULE_DOC_ACTIONS.STATUS; status: RuleDocsStatus }
   | {
-      action: 'manifest';
+      action: typeof RULE_DOC_ACTIONS.MANIFEST;
+      pluginRootResolved: boolean;
       manifest: RuleDocsManifest;
       /** Populated when the plugin root could not be resolved. */
-      skipped?: Array<{ id: string; reason: string }>;
+      skipped?: ReadonlyArray<{ id: string; reason: string }>;
     }
   | {
-      action: 'sync';
+      action: typeof RULE_DOC_ACTIONS.SYNC;
       result: RuleDocSyncResult;
       selections: Record<string, boolean>;
       /** Rule ids that were actually applied as resync targets after
@@ -86,32 +98,37 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
   const input = args as RuleDocsSyncInput;
 
   if (!input || typeof input !== 'object')
-    throw new Error('input object is required');
+    throw new Error(RULE_DOC_INPUT_ERROR_MESSAGES.INPUT_REQUIRED);
 
-  if (!input.path) throw new Error('path is required');
+  if (!input.path) throw new Error(RULE_DOC_INPUT_ERROR_MESSAGES.PATH_REQUIRED);
 
   if (!input.action)
-    throw new Error('action is required (status | sync | manifest)');
+    throw new Error(RULE_DOC_INPUT_ERROR_MESSAGES.ACTION_REQUIRED);
 
   switch (input.action) {
-    case 'status': {
+    case RULE_DOC_ACTIONS.STATUS: {
       const status = getRuleDocsStatus(input.path);
-      return { action: 'status', status };
+      return { action: RULE_DOC_ACTIONS.STATUS, status };
     }
 
-    case 'manifest': {
+    case RULE_DOC_ACTIONS.MANIFEST: {
       const pluginRoot = resolvePluginRoot();
       if (pluginRoot === null)
         return {
-          action: 'manifest',
-          manifest: { version: '', rules: [] },
-          skipped: [{ id: '*', reason: 'plugin root could not be resolved' }],
+          action: RULE_DOC_ACTIONS.MANIFEST,
+          pluginRootResolved: false,
+          manifest: UNRESOLVED_RULE_DOCS_MANIFEST,
+          skipped: RULE_DOC_UNRESOLVED_MANIFEST_SKIPPED,
         };
       const manifest = loadRuleDocsManifest(pluginRoot);
-      return { action: 'manifest', manifest };
+      return {
+        action: RULE_DOC_ACTIONS.MANIFEST,
+        pluginRootResolved: true,
+        manifest,
+      };
     }
 
-    case 'sync': {
+    case RULE_DOC_ACTIONS.SYNC: {
       // Normalise selection input. The active host target is the single source
       // of truth for rule doc state — no config-side tracking.
       const normalizedSelections = normalizeSelections(input.selections);
@@ -131,7 +148,7 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
       if (preSkipped.length > 0) result.skipped.push(...preSkipped);
 
       return {
-        action: 'sync',
+        action: RULE_DOC_ACTIONS.SYNC,
         result,
         selections: normalizedSelections,
         resync: resyncAccepted,

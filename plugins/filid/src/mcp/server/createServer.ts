@@ -1,439 +1,300 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { SUPPORTED_LANGUAGES } from '../../ast/astGrepShared/astGrepShared.js';
+import {
+  FRACTAL_SCAN_DETAILS,
+  MCP_SERVER_NAME,
+  MCP_TOOL_DESCRIPTIONS,
+  RULE_DOC_ACTIONS,
+  STRUCTURE_VALIDATION_MODES,
+  STRUCTURE_VALIDATION_SCOPES,
+  VERIFICATION_SCAN_DETAILS,
+} from '../../constants/mcpContracts.js';
 import { McpToolName } from '../../constants/mcpToolNames.js';
+import { CONTRACT_INTENTS } from '../../constants/restructure.js';
+import { REVIEW_STATE_ACTIONS } from '../../constants/reviewState.js';
 import { VERSION } from '../../version.js';
-import { handleAstAnalyze } from '../tools/astAnalyze/astAnalyze.js';
-import { handleAstGrepReplace } from '../tools/astGrepReplace/astGrepReplace.js';
-import { handleAstGrepSearch } from '../tools/astGrepSearch/astGrepSearch.js';
-import { handleCacheManage } from '../tools/cacheManage/cacheManage.js';
-import { handleConfigPatchValidate } from '../tools/configPatchValidate/configPatchValidate.js';
-import { handleCoverageVerify } from '../tools/coverageVerify/coverageVerify.js';
-import { handleDebtManage } from '../tools/debtManage/debtManage.js';
-import { handleDocCompress } from '../tools/docCompress/docCompress.js';
-import { handleDriftDetect } from '../tools/driftDetect/driftDetect.js';
-import { handleFractalNavigate } from '../tools/fractalNavigate/fractalNavigate.js';
-import { handleFractalScan } from '../tools/fractalScan/fractalScan.js';
-import { handleLcaResolve } from '../tools/lcaResolve/lcaResolve.js';
-import { handleOpenSettings } from '../tools/openSettings/openSettings.js';
-import { handleProjectInit } from '../tools/projectInit/projectInit.js';
-import { handleReviewManage } from '../tools/reviewManage/reviewManage.js';
-import { handleRuleDocsSync } from '../tools/ruleDocsSync/ruleDocsSync.js';
-import { handleRuleQuery } from '../tools/ruleQuery/ruleQuery.js';
-import { handleStructureValidate } from '../tools/structureValidate/structureValidate.js';
-import { handleTestMetrics } from '../tools/testMetrics/testMetrics.js';
+import {
+  handleContextResolve,
+  handleFractalScan,
+  handleRestructurePlan,
+  handleReviewState,
+  handleStructureValidate,
+  handleVerificationScan,
+} from '../tools/index.js';
 
-import { wrapHandler } from './serverHelpers.js';
+import { handleOpenSettingsTool } from './handlers/handleOpenSettingsTool.js';
+import { handleProjectInitTool } from './handlers/handleProjectInitTool.js';
+import { handleRuleDocsSyncTool } from './handlers/handleRuleDocsSyncTool.js';
+import { deferInputValidation } from './utils/deferInputValidation.js';
+import { wrapHandler } from './wrapHandler.js';
 
-/**
- * Create and configure the FCA-AI MCP server.
- */
+const PROJECT_INIT_INPUT_SCHEMA = z.object({
+  path: z.string().optional(),
+  language: z.string().optional(),
+  adapterIds: z.array(z.string().min(1)).min(1).optional(),
+});
+
+const RULE_DOCS_SYNC_INPUT_SCHEMA = z.object({
+  action: z.nativeEnum(RULE_DOC_ACTIONS),
+  path: z.string(),
+  selections: z
+    .union([z.record(z.string(), z.boolean()), z.string()])
+    .nullish(),
+  resync: z.union([z.array(z.string()), z.string()]).nullish(),
+});
+
+const OPEN_SETTINGS_INPUT_SCHEMA = z.object({
+  path: z.string().optional(),
+  waitSeconds: z.number().positive().optional(),
+});
+
+const FRACTAL_SCAN_INPUT_SCHEMA = z.object({
+  path: z.string(),
+  depth: z.number().int().nonnegative().optional(),
+  detail: z.nativeEnum(FRACTAL_SCAN_DETAILS).optional(),
+});
+
+const CONTEXT_RESOLVE_INPUT_SCHEMA = z.object({
+  path: z.string(),
+  targetPath: z.string(),
+});
+
+const RESTRUCTURE_PLAN_INPUT_SCHEMA = z.object({
+  path: z.string(),
+  requests: z.array(
+    z.object({
+      sourcePath: z.string(),
+      consumerPaths: z.array(z.string()).optional(),
+      contractIntent: z.nativeEnum(CONTRACT_INTENTS).optional(),
+      organNameHint: z.string().optional(),
+    }),
+  ),
+});
+
+const STRUCTURE_VALIDATION_COMMON_SCHEMA = {
+  path: z.string(),
+  scopes: z.array(z.nativeEnum(STRUCTURE_VALIDATION_SCOPES)).optional(),
+};
+
+const STRUCTURE_VALIDATE_INPUT_SCHEMA = z.union([
+  z.object({
+    ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
+    mode: z.literal(STRUCTURE_VALIDATION_MODES.PROJECT).optional(),
+    planPath: z.string().optional(),
+  }),
+  z.object({
+    ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
+    mode: z.literal(STRUCTURE_VALIDATION_MODES.PLAN_PRECONDITION),
+    planPath: z.string(),
+  }),
+  z.object({
+    ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
+    mode: z.literal(STRUCTURE_VALIDATION_MODES.PLAN_POSTCONDITION),
+    planPath: z.string(),
+  }),
+]);
+
+const STRUCTURE_VALIDATE_ADVERTISED_INPUT_SCHEMA = z.object({
+  ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
+  mode: z.nativeEnum(STRUCTURE_VALIDATION_MODES).optional(),
+  planPath: z.string().optional(),
+});
+
+const VERIFICATION_SCAN_INPUT_SCHEMA = z.object({
+  path: z.string(),
+  filePaths: z.array(z.string()).optional(),
+  detail: z.nativeEnum(VERIFICATION_SCAN_DETAILS).optional(),
+});
+
+const REVIEW_STATE_COMMON_SCHEMA = {
+  projectRoot: z.string(),
+  branchName: z.string().min(1),
+};
+
+const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
+    action: z.literal(REVIEW_STATE_ACTIONS.PREPARE),
+    baseRef: z.string().min(1),
+    force: z.boolean().optional(),
+  }),
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
+    action: z.literal(REVIEW_STATE_ACTIONS.CHECKPOINT),
+    baseRef: z.string().min(1).optional(),
+  }),
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
+    action: z.literal(REVIEW_STATE_ACTIONS.SEAL),
+    baseRef: z.string().min(1).optional(),
+  }),
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
+    action: z.literal(REVIEW_STATE_ACTIONS.CLEANUP),
+    confirm: z.literal(true),
+  }),
+]);
+
+const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
+  ...REVIEW_STATE_COMMON_SCHEMA,
+  action: z.nativeEnum(REVIEW_STATE_ACTIONS),
+  baseRef: z.string().min(1).optional(),
+  force: z.boolean().optional(),
+  confirm: z.literal(true).optional(),
+});
+
+const MCP_SERVER_INFO = {
+  name: MCP_SERVER_NAME,
+  version: VERSION,
+};
+
+const PROJECT_INIT_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.PROJECT_INIT,
+  inputSchema: deferInputValidation(PROJECT_INIT_INPUT_SCHEMA),
+};
+
+const RULE_DOCS_SYNC_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.RULE_DOCS_SYNC,
+  inputSchema: deferInputValidation(RULE_DOCS_SYNC_INPUT_SCHEMA),
+};
+
+const OPEN_SETTINGS_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.OPEN_SETTINGS,
+  inputSchema: deferInputValidation(OPEN_SETTINGS_INPUT_SCHEMA),
+};
+
+const FRACTAL_SCAN_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.FRACTAL_SCAN,
+  inputSchema: deferInputValidation(FRACTAL_SCAN_INPUT_SCHEMA),
+};
+
+const CONTEXT_RESOLVE_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.CONTEXT_RESOLVE,
+  inputSchema: deferInputValidation(CONTEXT_RESOLVE_INPUT_SCHEMA),
+};
+
+const RESTRUCTURE_PLAN_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.RESTRUCTURE_PLAN,
+  inputSchema: deferInputValidation(RESTRUCTURE_PLAN_INPUT_SCHEMA),
+};
+
+const STRUCTURE_VALIDATE_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.STRUCTURE_VALIDATE,
+  inputSchema: deferInputValidation(STRUCTURE_VALIDATE_ADVERTISED_INPUT_SCHEMA),
+};
+
+const VERIFICATION_SCAN_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.VERIFICATION_SCAN,
+  inputSchema: deferInputValidation(VERIFICATION_SCAN_INPUT_SCHEMA),
+};
+
+const REVIEW_STATE_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.REVIEW_STATE,
+  inputSchema: deferInputValidation(REVIEW_STATE_ADVERTISED_INPUT_SCHEMA),
+};
+
+const PROJECT_INIT_HANDLER = wrapHandler(
+  McpToolName.PROJECT_INIT,
+  PROJECT_INIT_INPUT_SCHEMA,
+  handleProjectInitTool,
+);
+
+const RULE_DOCS_SYNC_HANDLER = wrapHandler(
+  McpToolName.RULE_DOCS_SYNC,
+  RULE_DOCS_SYNC_INPUT_SCHEMA,
+  handleRuleDocsSyncTool,
+);
+
+const OPEN_SETTINGS_HANDLER = wrapHandler(
+  McpToolName.OPEN_SETTINGS,
+  OPEN_SETTINGS_INPUT_SCHEMA,
+  handleOpenSettingsTool,
+);
+
+const FRACTAL_SCAN_HANDLER = wrapHandler(
+  McpToolName.FRACTAL_SCAN,
+  FRACTAL_SCAN_INPUT_SCHEMA,
+  handleFractalScan,
+);
+
+const CONTEXT_RESOLVE_HANDLER = wrapHandler(
+  McpToolName.CONTEXT_RESOLVE,
+  CONTEXT_RESOLVE_INPUT_SCHEMA,
+  handleContextResolve,
+);
+
+const RESTRUCTURE_PLAN_HANDLER = wrapHandler(
+  McpToolName.RESTRUCTURE_PLAN,
+  RESTRUCTURE_PLAN_INPUT_SCHEMA,
+  handleRestructurePlan,
+);
+
+const STRUCTURE_VALIDATE_HANDLER = wrapHandler(
+  McpToolName.STRUCTURE_VALIDATE,
+  STRUCTURE_VALIDATE_INPUT_SCHEMA,
+  handleStructureValidate,
+);
+
+const VERIFICATION_SCAN_HANDLER = wrapHandler(
+  McpToolName.VERIFICATION_SCAN,
+  VERIFICATION_SCAN_INPUT_SCHEMA,
+  handleVerificationScan,
+);
+
+const REVIEW_STATE_HANDLER = wrapHandler(
+  McpToolName.REVIEW_STATE,
+  REVIEW_STATE_INPUT_SCHEMA,
+  handleReviewState,
+);
+
 export function createServer(): McpServer {
-  const server = new McpServer({ name: 'filid', version: VERSION });
-
-  server.registerTool(
-    McpToolName.AST_ANALYZE,
-    {
-      description:
-        'Analyze source code AST: dependencies, LCOM4, cyclomatic complexity, or semantic diff.',
-      inputSchema: z.object({
-        source: z.string(),
-        filePath: z.string().optional(),
-        analysisType: z.enum([
-          'dependency-graph',
-          'lcom4',
-          'cyclomatic-complexity',
-          'tree-diff',
-          'full',
-        ]),
-        className: z.string().optional(),
-        oldSource: z.string().optional(),
-      }),
-    },
-    wrapHandler(handleAstAnalyze, { checkErrorField: true }),
-  );
-
-  server.registerTool(
-    McpToolName.FRACTAL_NAVIGATE,
-    {
-      description:
-        'Navigate the FCA-AI fractal tree: classify, sibling-list, or full tree.',
-      inputSchema: z.object({
-        action: z.enum(['classify', 'sibling-list', 'tree']),
-        path: z.string(),
-        entries: z.array(
-          z.object({
-            name: z.string(),
-            path: z.string(),
-            type: z.enum([
-              'fractal',
-              'organ',
-              'pure-function',
-              'hybrid',
-              'directory',
-            ]),
-            hasIntentMd: z.boolean(),
-            hasDetailMd: z.boolean(),
-            hasIndex: z.boolean().optional(),
-            hasMain: z.boolean().optional(),
-          }),
-        ),
-      }),
-    },
-    // 'directory' in zod schema is resolved via classifyNode() inside the handler
-    wrapHandler((args) =>
-      handleFractalNavigate(
-        args as Parameters<typeof handleFractalNavigate>[0],
-      ),
-    ),
-  );
-
-  server.registerTool(
-    McpToolName.DOC_COMPRESS,
-    {
-      description:
-        'Compress documents for context management via reversible, lossy, or auto mode.',
-      inputSchema: z.object({
-        mode: z.enum(['reversible', 'lossy', 'auto']),
-        filePath: z.string().optional(),
-        content: z.string().optional(),
-        exports: z.array(z.string()).optional(),
-        toolCallEntries: z
-          .array(
-            z.object({
-              tool: z.string(),
-              path: z.string(),
-              timestamp: z.string(),
-            }),
-          )
-          .optional(),
-      }),
-    },
-    wrapHandler(handleDocCompress),
-  );
-
-  server.registerTool(
-    McpToolName.TEST_METRICS,
-    {
-      description:
-        'Analyze test metrics: count cases, check 3+12 rule, or run decision tree.',
-      inputSchema: z.object({
-        action: z.enum(['count', 'check-gate', 'decide']),
-        files: z
-          .array(z.object({ filePath: z.string(), content: z.string() }))
-          .optional(),
-        decisionInput: z
-          .object({
-            testCount: z.number(),
-            lcom4: z.number(),
-            cyclomaticComplexity: z.number(),
-          })
-          .optional(),
-      }),
-    },
-    wrapHandler(handleTestMetrics),
-  );
+  const server = new McpServer(MCP_SERVER_INFO);
 
   server.registerTool(
     McpToolName.PROJECT_INIT,
-    {
-      description:
-        'Initialize FCA-AI project config only (.filid/config.json). Rule doc deployment is handled separately by rule_docs_sync via the setup skill.',
-      inputSchema: z.object({
-        path: z.string(),
-        language: z
-          .string()
-          .optional()
-          .describe(
-            "Output language name for FCA-AI generated content (e.g. 'Korean'). Omit for English.",
-          ),
-      }),
-    },
-    wrapHandler(handleProjectInit),
+    PROJECT_INIT_TOOL_CONFIG,
+    PROJECT_INIT_HANDLER,
   );
-
   server.registerTool(
     McpToolName.RULE_DOCS_SYNC,
-    {
-      description:
-        'Filid-setup skill only: inspect or synchronise `.claude/rules/*.md` deployment against the user selection. Actions: status | sync | manifest.',
-      inputSchema: z.object({
-        action: z.enum(['status', 'sync', 'manifest']),
-        path: z.string(),
-        // `.nullish()` accepts `undefined` OR `null`. Some LLM callers
-        // spuriously emit `selections: null` when the field is absent;
-        // without `nullish` the generated JSON Schema rejects that shape
-        // and the call fails with "Invalid tool parameters".
-        selections: z
-          .union([z.record(z.string(), z.boolean()), z.string()])
-          .nullish(),
-        // Rule ids whose drifted deployed files should be overwritten with
-        // the current template. Accepts a string array, a JSON-encoded
-        // string array, or null/undefined for none. Ignored for required
-        // rules — they auto-resync on drift.
-        resync: z.union([z.array(z.string()), z.string()]).nullish(),
-      }),
-    },
-    wrapHandler(handleRuleDocsSync),
+    RULE_DOCS_SYNC_TOOL_CONFIG,
+    RULE_DOCS_SYNC_HANDLER,
   );
-
   server.registerTool(
     McpToolName.OPEN_SETTINGS,
-    {
-      description:
-        'Open the local filid settings page (.filid/config.json + rule docs) in a browser and long-poll until the user saves. Returns status: saved (summary included) | closed (kept existing config) | pending (wait elapsed; page still open — call again to keep waiting).',
-      inputSchema: z.object({
-        path: z
-          .string()
-          .optional()
-          .describe('Absolute path of the target workspace root.'),
-        waitSeconds: z
-          .number()
-          .optional()
-          .describe('Bounded wait for the save event (default 300, max 600).'),
-      }),
-    },
-    wrapHandler(handleOpenSettings),
+    OPEN_SETTINGS_TOOL_CONFIG,
+    OPEN_SETTINGS_HANDLER,
   );
-
   server.registerTool(
     McpToolName.FRACTAL_SCAN,
-    {
-      description:
-        'Scan project directory to build FractalTree. outputMode: full (ScanReportDto), summary (counts only), paths (path/type/INTENT flags per node). Oversized results are saved to a report file and returned as { truncated, reportPath, summary } — Read/grep the file for details.',
-      inputSchema: z.object({
-        path: z.string(),
-        depth: z.number().min(1).max(20).optional(),
-        includeModuleInfo: z.boolean().optional(),
-        outputMode: z.enum(['full', 'summary', 'paths']).optional(),
-      }),
-    },
-    wrapHandler(handleFractalScan),
+    FRACTAL_SCAN_TOOL_CONFIG,
+    FRACTAL_SCAN_HANDLER,
   );
-
   server.registerTool(
-    McpToolName.DRIFT_DETECT,
-    {
-      description: 'Detect structural drift between project and FCA-AI rules.',
-      inputSchema: z.object({
-        path: z.string(),
-        severity: z.enum(['critical', 'high', 'medium', 'low']).optional(),
-        generatePlan: z.boolean().optional(),
-      }),
-    },
-    wrapHandler(handleDriftDetect),
+    McpToolName.CONTEXT_RESOLVE,
+    CONTEXT_RESOLVE_TOOL_CONFIG,
+    CONTEXT_RESOLVE_HANDLER,
   );
-
   server.registerTool(
-    McpToolName.LCA_RESOLVE,
-    {
-      description:
-        'Compute Lowest Common Ancestor of two modules in the fractal tree.',
-      inputSchema: z.object({
-        path: z.string(),
-        moduleA: z.string(),
-        moduleB: z.string(),
-      }),
-    },
-    wrapHandler(handleLcaResolve),
+    McpToolName.RESTRUCTURE_PLAN,
+    RESTRUCTURE_PLAN_TOOL_CONFIG,
+    RESTRUCTURE_PLAN_HANDLER,
   );
-
-  server.registerTool(
-    McpToolName.RULE_QUERY,
-    {
-      description: 'Query or check compliance of FCA-AI structure rules.',
-      inputSchema: z.object({
-        action: z.enum(['list', 'get', 'check']),
-        path: z.string(),
-        ruleId: z.string().optional(),
-        category: z
-          .enum([
-            'naming',
-            'structure',
-            'dependency',
-            'documentation',
-            'index',
-            'module',
-          ])
-          .optional(),
-        targetPath: z.string().optional(),
-      }),
-    },
-    wrapHandler(handleRuleQuery),
-  );
-
   server.registerTool(
     McpToolName.STRUCTURE_VALIDATE,
-    {
-      description:
-        'Validate fractal structure compliance and return violations (read-only; auto-fix not supported).',
-      inputSchema: z.object({
-        path: z.string(),
-        rules: z.array(z.string()).optional(),
-      }),
-    },
-    wrapHandler(handleStructureValidate),
+    STRUCTURE_VALIDATE_TOOL_CONFIG,
+    STRUCTURE_VALIDATE_HANDLER,
   );
-
   server.registerTool(
-    McpToolName.REVIEW_MANAGE,
-    {
-      description: 'Manage code review governance sessions.',
-      inputSchema: z.object({
-        action: z.enum([
-          'normalize-branch',
-          'ensure-dir',
-          'checkpoint',
-          'elect-committee',
-          'cleanup',
-          'content-hash',
-          'check-cache',
-          'format-pr-comment',
-          'format-revalidate-comment',
-          'generate-human-summary',
-        ]),
-        projectRoot: z.string(),
-        branchName: z.string().optional(),
-        baseRef: z.string().optional(),
-        changedFilesCount: z.number().optional(),
-        changedFractalsCount: z.number().optional(),
-        hasInterfaceChanges: z.boolean().optional(),
-        hasDocumentChanges: z.boolean().optional(),
-        adjudicatorMode: z.boolean().optional(),
-      }),
-    },
-    wrapHandler(handleReviewManage),
+    McpToolName.VERIFICATION_SCAN,
+    VERIFICATION_SCAN_TOOL_CONFIG,
+    VERIFICATION_SCAN_HANDLER,
   );
-
   server.registerTool(
-    McpToolName.DEBT_MANAGE,
-    {
-      description:
-        'Manage technical debt items: create, list, resolve, or calculate bias.',
-      inputSchema: z.object({
-        action: z.enum(['create', 'list', 'resolve', 'calculate-bias']),
-        projectRoot: z.string(),
-        debtItem: z
-          .object({
-            fractal_path: z.string(),
-            file_path: z.string(),
-            created_at: z.string(),
-            review_branch: z.string(),
-            original_fix_id: z.string(),
-            severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-            rule_violated: z.string(),
-            metric_value: z.string(),
-            title: z.string(),
-            original_request: z.string(),
-            developer_justification: z.string(),
-            refined_adr: z.string(),
-          })
-          .optional(),
-        fractalPath: z.string().optional(),
-        debtId: z.string().optional(),
-        debts: z
-          .array(
-            z.object({
-              id: z.string(),
-              fractal_path: z.string(),
-              file_path: z.string(),
-              created_at: z.string(),
-              review_branch: z.string(),
-              original_fix_id: z.string(),
-              severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-              weight: z.number(),
-              touch_count: z.number(),
-              last_review_commit: z.string().nullable(),
-              rule_violated: z.string(),
-              metric_value: z.string(),
-              title: z.string(),
-              original_request: z.string(),
-              developer_justification: z.string(),
-              refined_adr: z.string(),
-            }),
-          )
-          .optional(),
-        changedFractalPaths: z.array(z.string()).optional(),
-        currentCommitSha: z.string().optional(),
-      }),
-    },
-    wrapHandler(handleDebtManage),
-  );
-
-  server.registerTool(
-    McpToolName.CACHE_MANAGE,
-    {
-      description:
-        'Manage filid incremental cache: compute, save, or retrieve hashes.',
-      inputSchema: z.object({
-        action: z.enum(['compute-hash', 'save-hash', 'get-hash']),
-        cwd: z.string(),
-        skillName: z.string().optional(),
-        hash: z.string().optional(),
-      }),
-    },
-    wrapHandler(handleCacheManage),
-  );
-
-  // AST Grep tools — gracefully degrade if @ast-grep/napi is unavailable
-  server.registerTool(
-    McpToolName.AST_GREP_SEARCH,
-    {
-      description:
-        'Search for code patterns using AST matching with meta-variables.',
-      inputSchema: z.object({
-        pattern: z.string(),
-        language: z.enum(SUPPORTED_LANGUAGES),
-        path: z.string().optional(),
-        context: z.number().int().min(0).max(10).optional(),
-        max_results: z.number().int().min(1).max(100).optional(),
-      }),
-    },
-    wrapHandler(handleAstGrepSearch, { checkErrorField: true }),
-  );
-
-  server.registerTool(
-    McpToolName.AST_GREP_REPLACE,
-    {
-      description:
-        'Replace code patterns using AST matching. dry_run=true by default.',
-      inputSchema: z.object({
-        pattern: z.string(),
-        replacement: z.string(),
-        language: z.enum(SUPPORTED_LANGUAGES),
-        path: z.string().optional(),
-        dry_run: z.boolean().optional(),
-      }),
-    },
-    wrapHandler(handleAstGrepReplace, { checkErrorField: true }),
-  );
-
-  server.registerTool(
-    McpToolName.CONFIG_PATCH_VALIDATE,
-    {
-      description:
-        'Validate a prospective .filid/config.json patch against FilidConfigSchema. Returns { valid, errors[], suggestion? } — errors[] is non-empty when the patch breaks strict schema; suggestion is a sanitised JSON string that would pass. Use this before emitting any .filid/config.json code patch in Phase D (review Step D.6.4).',
-      inputSchema: z.object({
-        patch_json: z.string(),
-        source_context: z.string().optional(),
-      }),
-    },
-    wrapHandler(handleConfigPatchValidate),
-  );
-
-  server.registerTool(
-    McpToolName.COVERAGE_VERIFY,
-    {
-      description: 'Verify per-consumer test coverage for a shared module.',
-      inputSchema: z.object({
-        projectRoot: z.string(),
-        targetPath: z.string(),
-        subtreeRoot: z.string().optional(),
-        exportNames: z.array(z.string()).optional(),
-      }),
-    },
-    wrapHandler(handleCoverageVerify),
+    McpToolName.REVIEW_STATE,
+    REVIEW_STATE_TOOL_CONFIG,
+    REVIEW_STATE_HANDLER,
   );
 
   return server;
