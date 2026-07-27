@@ -7,8 +7,13 @@ import {
   validateDetailMd,
   validateIntentMd,
 } from '../../../core/rules/documentValidator/documentValidator.js';
+import * as documentValidator from '../../../core/rules/documentValidator/documentValidator.js';
 
 describe('document-validator', () => {
+  it('does not expose a legacy criteria ledger validator', () => {
+    expect('validateCriteriaMd' in documentValidator).toBe(false);
+  });
+
   describe('countLines', () => {
     it('should count lines correctly', () => {
       expect(countLines('')).toBe(0);

@@ -7,11 +7,12 @@
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
+import { portableJoin } from '@ogham/cross-platform/paths';
 import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ECMASCRIPT_ADAPTER_ID } from '../../../adapters/ecmascript/index.js';
 import { analyzeProject } from '../../../core/analysis/projectAnalyzer/projectAnalyzer.js';
 
 vi.mock('@ogham/cross-platform/spawn', async () => {
@@ -24,24 +25,24 @@ vi.mock('@ogham/cross-platform/spawn', async () => {
 const mockedSpawnCliSync = vi.mocked(spawnCliSync);
 
 function writeConfig(root: string, raw: unknown): void {
-  const dir = join(root, '.filid');
+  const dir = portableJoin(root, '.filid');
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'config.json'), JSON.stringify(raw), 'utf8');
+  writeFileSync(portableJoin(dir, 'config.json'), JSON.stringify(raw), 'utf8');
 }
 
 describe('analyzeProject config awareness', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = join(
+    tmpDir = portableJoin(
       tmpdir(),
       `filid-analyze-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     );
-    // snake_case fractal dir — a naming-convention violation when enabled.
-    mkdirSync(join(tmpDir, 'bad_name'), { recursive: true });
+    // Documented fractal without an adapter-reported entry point.
+    mkdirSync(portableJoin(tmpDir, 'module'), { recursive: true });
     writeFileSync(
-      join(tmpDir, 'bad_name', 'INTENT.md'),
-      '# bad_name\n',
+      portableJoin(tmpDir, 'module', 'INTENT.md'),
+      '# module\n',
       'utf8',
     );
     // Pretend tmpDir is its own git root so loadConfig resolves here.
@@ -66,27 +67,79 @@ describe('analyzeProject config awareness', () => {
 
   it('reports the violation while the rule is enabled', async () => {
     writeConfig(tmpDir, {
-      version: '1.0',
-      rules: { 'naming-convention': { enabled: true, severity: 'warning' } },
+      version: '2.0',
+      adapters: {
+        mode: 'explicit',
+        enabled: [ECMASCRIPT_ADAPTER_ID],
+      },
+      rules: {
+        'module-entry-point': { enabled: true, severity: 'warning' },
+      },
     });
     const report = await analyzeProject(tmpDir, { detailed: false });
     expect(
       report.validation.result.violations.some(
-        (v) => v.ruleId === 'naming-convention',
+        (v) => v.ruleId === 'module-entry-point',
       ),
     ).toBe(true);
   });
 
   it('honours a disabled rule instead of falling back to defaults', async () => {
     writeConfig(tmpDir, {
-      version: '1.0',
-      rules: { 'naming-convention': { enabled: false } },
+      version: '2.0',
+      adapters: {
+        mode: 'explicit',
+        enabled: [ECMASCRIPT_ADAPTER_ID],
+      },
+      rules: { 'module-entry-point': { enabled: false } },
     });
     const report = await analyzeProject(tmpDir, { detailed: false });
     expect(
       report.validation.result.violations.some(
-        (v) => v.ruleId === 'naming-convention',
+        (v) => v.ruleId === 'module-entry-point',
       ),
     ).toBe(false);
+  });
+
+  it('reports from the same configured snapshot used by the scan', async () => {
+    writeConfig(tmpDir, {
+      version: '2.0',
+      language: 'Korean',
+      adapters: {
+        mode: 'explicit',
+        enabled: [ECMASCRIPT_ADAPTER_ID],
+      },
+      rules: {},
+    });
+
+    const report = await analyzeProject(tmpDir, { detailed: false });
+
+    expect(report.snapshot.tree).toBe(report.scan.tree);
+    expect(report.snapshot.outputLanguage).toBe('Korean');
+    expect(report.snapshot.snapshotHash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('reports nodes beyond maxDepth instead of truncating the snapshot there', async () => {
+    const nested = portableJoin(tmpDir, 'module', 'nested');
+    mkdirSync(nested, { recursive: true });
+    writeConfig(tmpDir, {
+      version: '2.0',
+      adapters: {
+        mode: 'explicit',
+        enabled: [ECMASCRIPT_ADAPTER_ID],
+      },
+      rules: {},
+      structure: { maxDepth: 1 },
+    });
+
+    const report = await analyzeProject(tmpDir, { detailed: false });
+
+    expect(report.snapshot.tree.nodes.has(nested)).toBe(true);
+    expect(report.validation.result.violations).toContainEqual(
+      expect.objectContaining({
+        ruleId: 'max-depth',
+        path: nested,
+      }),
+    );
   });
 });

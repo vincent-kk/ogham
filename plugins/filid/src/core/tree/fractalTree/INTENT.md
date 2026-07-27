@@ -22,6 +22,8 @@ Node 20 filesystem recursion과 StructureAdapter metadata로 `FractalTree`를 �
 
 - 새 탐색 함수는 `treeBuilder/`, I/O 함수는 `scanner/`에 배치
 - scan option, adapter descriptor와 tree DTO를 함께 동기화
+- parent/owner와 entry ownership은 portable path identity로 판정
+- entry override의 이름 의미를 해석하지 않고 adapter ID별로 전달
 
 ### Ask first
 

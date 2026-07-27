@@ -60,6 +60,16 @@ export function createAdapterRegistry(
       throw new Error(`Adapter ID already registered: ${adapter.id}`);
     target.set(adapter.id, adapter);
   };
+  const select = <T>(
+    target: ReadonlyMap<string, T>,
+    enabledIds?: readonly string[],
+  ): T[] => {
+    const ids = enabledIds ?? [...target.keys()];
+    const unknown = ids.filter((id) => !target.has(id));
+    if (unknown.length > 0)
+      throw new Error(`unknown-adapter-id: ${unknown.join(', ')}`);
+    return ids.map((id) => target.get(id)!);
+  };
 
   const defaults = initial === undefined;
   for (const adapter of initial?.structure ??
@@ -75,6 +85,12 @@ export function createAdapterRegistry(
     },
     registerVerification(adapter) {
       register(verification, adapter);
+    },
+    selectStructure(enabledIds) {
+      return select(structure, enabledIds);
+    },
+    selectVerification(enabledIds) {
+      return select(verification, enabledIds);
     },
     resolveStructure(root, enabledIds) {
       return resolveDetected(root, structure.values(), enabledIds);

@@ -1,6 +1,8 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
+import { pathForCompare } from '@ogham/cross-platform/paths';
+
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import type { StructureAdapter } from '../../../../types/adapters.js';
 import type { ScanOptions } from '../../../../types/scan.js';
@@ -36,15 +38,27 @@ export async function collectNodeMetadata(
         .sort();
       const entryPoints = (
         await Promise.all(
-          adapters.map((adapter) => adapter.findEntryPoints(path)),
+          adapters.map((adapter) =>
+            adapter.findEntryPoints(
+              path,
+              opts.entryPointOverrides?.[adapter.id],
+            ),
+          ),
         )
       )
         .flat()
         .filter(
+          (entryPoint) =>
+            !opts.enforceStructureOwnership ||
+            opts.structureOwnership.get(pathForCompare(entryPoint.path)) ===
+              entryPoint.adapterId,
+        )
+        .filter(
           (entryPoint, index, entries) =>
             entries.findIndex(
               (candidate) =>
-                candidate.path === entryPoint.path &&
+                pathForCompare(candidate.path) ===
+                  pathForCompare(entryPoint.path) &&
                 candidate.adapterId === entryPoint.adapterId,
             ) === index,
         )

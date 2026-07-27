@@ -55,6 +55,24 @@ function makeReport(
   ];
 
   return {
+    snapshot: {
+      schemaVersion: 1,
+      projectRoot: '/app',
+      outputLanguage: 'en',
+      snapshotHash: 'fixture-snapshot',
+      tree,
+      dependencyGraph: {
+        nodePaths: ['/app'],
+        edges: [],
+        cycles: [],
+        certainty: 'exact',
+      },
+      adapterIds: [],
+      verification: { files: [], violations: [], certainty: 'exact' },
+      legacyCriteriaLedger: null,
+      diagnostics: [],
+      createdAt: new Date().toISOString(),
+    },
     scan: {
       tree,
       modules: [],

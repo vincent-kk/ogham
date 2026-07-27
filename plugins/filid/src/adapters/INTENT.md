@@ -22,6 +22,8 @@
 
 - file ownership claim에 adapter ID, confidence와 evidence를 보존
 - 같은 confidence의 중복 ownership을 명시적 ambiguity finding으로 반환
+- candidate 선택과 evidence 탐지를 분리해 snapshot에서 detect를 반복하지 않음
+- entry point override의 파일명 의미는 대상 adapter 안에서만 해석
 - source discovery는 Node 20 `readdir` recursion으로 구현
 
 ### Ask first

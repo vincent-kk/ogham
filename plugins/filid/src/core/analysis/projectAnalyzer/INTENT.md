@@ -1,43 +1,44 @@
-# projectAnalyzer -- 분석 파이프라인 오케스트레이터
+# projectAnalyzer -- snapshot 분석 파이프라인
 
 ## Purpose
 
-프로젝트 루트에서 `scan → validate → drift → healthScore → render` 파이프라인을 실행하고 `AnalysisReport`를 생성한다. text/json/markdown 세 가지 출력 형식을 지원한다.
+프로젝트 설정에서 하나의 `ProjectSnapshot`을 만들고 검증, drift, health score, report 생성을 순서대로 조합한다.
 
 ## Structure
 
-- `projectAnalyzer.ts` — `analyzeProject`, `calculateHealthScore`
-- `renderers/` organ — `generateReport`, `renderTextReport`, `renderMarkdownReport`
+- `analyzeProject.ts` — snapshot 생성부터 report까지 오케스트레이션한다.
+- `calculateHealthScore.ts` — finding과 drift의 건강도 점수를 계산한다.
+- `renderers/` organ — text, JSON, Markdown 출력을 렌더링한다.
+- entry point는 `index.ts`이며 `projectAnalyzer.ts`는 호환 facade다.
 
 ## Conventions
 
-- `analyzeProject`는 오케스트레이션만 담당하고 알고리즘은 `tree/`, `rules/`, `module/`에 위임
-- 모듈 분석은 `Promise.allSettled`로 실패 허용 (rejected 결과는 드롭)
-- 건강도 점수는 0~100 범위로 `Math.max(0, score)` 클램프
-- 페널티·가중치 상수는 `constants/healthScore.ts`에서만 참조
+- tradeoff 우선순위는 1. 동일 snapshot 증거 2. 진단 보존 3. 출력 호환이다.
+- 알고리즘은 snapshot, tree, rules, drift 모듈에 위임한다.
+- 중간 단계 실패를 조용히 드롭하지 않고 report 진단으로 보존한다.
 
 ## Boundaries
 
 ### Always do
 
-- 파이프라인 단계 추가 시 `AnalysisReport`/`ScanReport`/`DriftReport` 타입 동시 갱신
-- 렌더러 분기 추가 시 `format: 'text' | 'json' | 'markdown'` 유니온 확장
+- scan, validate, drift가 같은 snapshot과 hash를 참조하게 한다.
+- 파이프라인 결과를 `AnalysisReport` 타입에 명시적으로 포함한다.
+- health score는 모든 구조 finding이 모인 뒤 계산한다.
 
 ### Ask first
 
-- `calculateHealthScore` 가중치 변경 (기본: error -5/-50, warning -2/-20, critical drift -10/-30, high drift -5/-20)
-- 파이프라인 순서 변경 (scan은 항상 최초, healthScore는 항상 최후)
+- 파이프라인 단계 순서나 health score 가중치를 변경한다.
+- report 공개 포맷 유니온을 확장한다.
 
 ### Never do
 
-- 렌더 content 문자열을 타입 없이 조립 (반드시 `RenderedReport` 반환)
-- 분석 단계 중간 결과를 전역 상태로 캐싱
+- 단계별로 프로젝트를 다시 scan해 서로 다른 시점의 증거를 섞는다.
+- rejected 분석을 PASS 또는 빈 결과로 바꾼다.
+- 중간 결과를 전역 상태에 캐시한다.
 
 ## Dependencies
 
-- `../../tree/fractalTree/` (scanProject)
-- `../../rules/fractalValidator/`, `../../rules/driftDetector/`, `../../rules/ruleEngine/` (loadBuiltinRules, getActiveRules)
-- `../../infra/configLoader/` (loadConfig, resolveMaxDepth — 설정 룰셋으로 검증)
-- `../../module/moduleMainAnalyzer/` (analyzeModule)
-- `../../../types/report.js`, `../../../types/drift.js`, `../../../types/fractal.js`
-- `../../../constants/healthScore.js`
+- `../../projectSnapshot/`
+- `../../rules/fractalValidator/`, `../../rules/driftDetector/`
+- `../../infra/configLoader/`
+- `../../../types/`

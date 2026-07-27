@@ -1,6 +1,6 @@
-import type { EntryPointDescriptor } from './fractal.js';
+import type { AnalysisCertainty, EntryPointDescriptor } from './fractal.js';
 
-export type AnalysisCertainty = 'exact' | 'indeterminate' | 'unsupported';
+export type { AnalysisCertainty } from './fractal.js';
 export type VerificationRole = 'spec-document' | 'test-record';
 
 export interface AdapterClaim {
@@ -26,7 +26,10 @@ export interface StructureAdapter {
   id: string;
   detect(projectRoot: string): Promise<AdapterClaim>;
   discoverSourceFiles(projectRoot: string): Promise<string[]>;
-  findEntryPoints(directoryPath: string): Promise<EntryPointDescriptor[]>;
+  findEntryPoints(
+    directoryPath: string,
+    overrides?: readonly string[],
+  ): Promise<EntryPointDescriptor[]>;
   inspectEntryPoint(entryPointPath: string): Promise<EntryPointInspection>;
   extractDependencies(filePath: string): Promise<DependencyReference[]>;
   isFrameworkOwnedPeer(filePath: string): Promise<boolean>;
@@ -72,6 +75,8 @@ export interface AdapterResolution {
 export interface AdapterRegistry {
   registerStructure(adapter: StructureAdapter): void;
   registerVerification(adapter: VerificationAdapter): void;
+  selectStructure(enabledIds?: readonly string[]): StructureAdapter[];
+  selectVerification(enabledIds?: readonly string[]): VerificationAdapter[];
   resolveStructure(
     projectRoot: string,
     enabledIds?: readonly string[],

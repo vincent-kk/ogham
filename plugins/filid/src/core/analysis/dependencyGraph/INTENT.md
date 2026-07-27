@@ -1,37 +1,44 @@
-# dependencyGraph -- DAG 구축·순환 감지·위상 정렬
+# dependencyGraph — 실제 owner dependency DAG
 
 ## Purpose
 
-`DependencyEdge[]` 입력으로 DAG(`DependencyDAG`)를 구축하고, Kahn 알고리즘 기반 위상 정렬과 DFS 기반 순환 감지를 제공한다. `projectAnalyzer`가 FCA-AI 순환 의존성 규칙을 검사할 때 사용한다.
+Adapter dependency reference를 owner-level evidence edge로 집계하고 실제 cycle과 certainty를 계산한다.
 
 ## Structure
 
-- `dependencyGraph.ts` — `buildDAG`, `topologicalSort`, `detectCycles`, `getDirectDependencies`
+- `builders/` organ — owner 해석, evidence edge 집계와 graph 조립
+- `cycles/` organ — cyclic component에서 stable directed closed route 추출
+- `buildDag.ts`와 query helper — 작업 8 전 legacy characterization 경계
+- `detectCycles.ts` — legacy/target graph를 cycle algorithm에 연결
+- `dependencyGraph.ts` — named-export public facade
+- legacy query helper는 작업 8 제거 전까지만 유지한다.
 
 ## Conventions
 
-- 입력 edge 배열은 불변 처리 — 원본 참조를 그대로 유지한 `DependencyDAG` 반환
-- 정점 집합은 `Set<string>`, 인접 리스트는 `Map<string, string[]>`로 고정
-- 순환 존재 시 `topologicalSort`는 null 반환 (예외로 던지지 않음)
-- `detectCycles`는 가능한 모든 사이클 경로 배열을 반환 — 빈 배열이면 DAG
+- tradeoff 우선순위: 1. 증거 정확성 2. 결정론 3. query 편의
+- same-owner evidence는 boundary 검사에 남기되 cycle adjacency에서 제외한다.
 
 ## Boundaries
 
 ### Always do
 
-- 새 그래프 연산 추가 시 입력을 `DependencyDAG` 타입으로 받도록 통일
-- DFS 색칠(WHITE/GRAY/BLACK) 상태 기계 유지
+- source, raw specifier와 resolved path를 edge evidence에 보존
+- logical path alias를 canonical owner 하나로 모으고 edge를 안정적으로 정렬
+- 각 cyclic component를 실제 directed edge로 닫히는 대표 route로 반환
+- owner identity는 portable path 비교로 판정하되 선택한 원문 path는 보존
+- unresolved가 결론에 영향을 주면 certainty를 indeterminate로 반환
 
 ### Ask first
 
-- 알고리즘 교체 (Kahn → Tarjan SCC 등)
-- 반환 타입을 null에서 throw로 변경
+- cycle canonicalization 또는 certainty 집계 정책 변경
+- owner-level edge보다 낮은 graph public surface 추가
 
 ### Never do
 
-- 노드 문자열을 임의 정규화·소문자화 (경로 대소문자 보존)
-- 파일 I/O 수행 (순수 함수 유지)
+- hierarchy children/organs를 import dependency로 사용
+- path 대소문자 또는 adapter evidence를 임의 정규화
+- 파일 I/O 또는 생태계 specifier 해석
 
 ## Dependencies
 
-- `../../../types/fractal.js` (`DependencyDAG`, `DependencyEdge`)
+- `../../../types/fractal.js`의 언어 중립 graph DTO

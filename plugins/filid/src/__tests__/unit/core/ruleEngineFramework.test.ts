@@ -38,39 +38,42 @@ function makeTree(nodes: FractalNode[]): FractalTree {
   return { root, nodes: map, depth: 2, totalNodes: nodes.length };
 }
 
-function entryRule(additionalEntryPoints?: string[]) {
-  return loadBuiltinRules(undefined, undefined, additionalEntryPoints).find(
+function entryRule() {
+  return loadBuiltinRules().find(
     (r) => r.id === BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
   )!;
 }
 
-function namingRule(additionalRoutePatterns?: string[]) {
-  return loadBuiltinRules(
-    undefined,
-    undefined,
-    undefined,
-    additionalRoutePatterns,
-  ).find((r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION)!;
-}
-
 describe('module-entry-point — framework awareness', () => {
-  // --- basic ---
-  it('passes a route segment with page.tsx and no index.ts', () => {
+  it('passes a framework entry point reported by an adapter', () => {
     const rule = entryRule();
     const node = makeNode({
-      metadata: {
-        peerFiles: ['page.tsx'],
-        frameworkReservedFiles: ['page.tsx', 'layout.tsx'],
-      },
+      entryPoints: [
+        {
+          path: '/root/module/framework.entry',
+          kind: 'framework',
+          adapterId: 'fixture',
+          surface: 'enumerated',
+        },
+      ],
     });
     const tree = makeTree([node]);
     const ctx: RuleContext = { node, tree };
     expect(rule.check(ctx)).toHaveLength(0);
   });
 
-  it('passes a node holding a configured additional-entry-point', () => {
-    const rule = entryRule(['api.tsx']);
-    const node = makeNode({ metadata: { peerFiles: ['api.tsx'] } });
+  it('passes a configured entry point after its adapter reports it', () => {
+    const rule = entryRule();
+    const node = makeNode({
+      entryPoints: [
+        {
+          path: '/root/module/configured.entry',
+          kind: 'module',
+          adapterId: 'fixture',
+          surface: 'enumerated',
+        },
+      ],
+    });
     const tree = makeTree([node]);
     const ctx: RuleContext = { node, tree };
     expect(rule.check(ctx)).toHaveLength(0);
@@ -86,8 +89,7 @@ describe('module-entry-point — framework awareness', () => {
     expect(rule.check(ctx)).toHaveLength(1);
   });
 
-  // --- complex ---
-  it('still flags a non-framework fractal without index.ts (regression)', () => {
+  it('still flags a non-framework fractal without adapter evidence', () => {
     const rule = entryRule();
     const node = makeNode({ metadata: { peerFiles: ['helper.ts'] } });
     const tree = makeTree([node]);
@@ -95,83 +97,26 @@ describe('module-entry-point — framework awareness', () => {
     expect(rule.check(ctx)).toHaveLength(1);
   });
 
-  it('passes a route segment with route.ts', () => {
+  it('passes any framework-owned entry path supplied by its adapter', () => {
     const rule = entryRule();
     const node = makeNode({
-      metadata: {
-        peerFiles: ['route.ts'],
-        frameworkReservedFiles: ['route.ts'],
-      },
+      entryPoints: [
+        {
+          path: '/root/module/alternate.framework-entry',
+          kind: 'framework',
+          adapterId: 'fixture',
+          surface: 'enumerated',
+        },
+      ],
     });
     const tree = makeTree([node]);
     const ctx: RuleContext = { node, tree };
     expect(rule.check(ctx)).toHaveLength(0);
   });
 
-  it('does not treat page.tsx as an entry point without framework detection', () => {
+  it('does not infer an entry point from an unclaimed peer file', () => {
     const rule = entryRule();
-    const node = makeNode({ metadata: { peerFiles: ['page.tsx'] } });
-    const tree = makeTree([node]);
-    const ctx: RuleContext = { node, tree };
-    expect(rule.check(ctx)).toHaveLength(1);
-  });
-});
-
-describe('naming-convention — framework awareness', () => {
-  // --- basic ---
-  it('passes a route group name (app) when a framework is detected', () => {
-    const rule = namingRule();
-    const node = makeNode({
-      name: '(app)',
-      metadata: { frameworkReservedFiles: ['page.tsx'] },
-    });
-    const tree = makeTree([node]);
-    const ctx: RuleContext = { node, tree };
-    expect(rule.check(ctx)).toHaveLength(0);
-  });
-
-  it('passes a dynamic segment name [id] when a framework is detected', () => {
-    const rule = namingRule();
-    const node = makeNode({
-      name: '[id]',
-      metadata: { frameworkReservedFiles: ['page.tsx'] },
-    });
-    const tree = makeTree([node]);
-    const ctx: RuleContext = { node, tree };
-    expect(rule.check(ctx)).toHaveLength(0);
-  });
-
-  it('still flags a route-group-shaped name in a non-framework project', () => {
-    const rule = namingRule();
-    const node = makeNode({ name: '(app)', metadata: {} });
-    const tree = makeTree([node]);
-    const ctx: RuleContext = { node, tree };
-    expect(rule.check(ctx)).toHaveLength(1);
-  });
-
-  // --- complex ---
-  it('passes a catch-all segment name [...slug] when a framework is detected', () => {
-    const rule = namingRule();
-    const node = makeNode({
-      name: '[...slug]',
-      metadata: { frameworkReservedFiles: ['page.tsx'] },
-    });
-    const tree = makeTree([node]);
-    const ctx: RuleContext = { node, tree };
-    expect(rule.check(ctx)).toHaveLength(0);
-  });
-
-  it('passes a name matching a configured additional-route-pattern', () => {
-    const rule = namingRule(['^@@']);
-    const node = makeNode({ name: '@@special', metadata: {} });
-    const tree = makeTree([node]);
-    const ctx: RuleContext = { node, tree };
-    expect(rule.check(ctx)).toHaveLength(0);
-  });
-
-  it('skips an uncompilable additional-route-pattern without crashing', () => {
-    const rule = namingRule(['[']);
-    const node = makeNode({ name: 'has space', metadata: {} });
+    const node = makeNode({ peerFiles: ['unclaimed.peer'] });
     const tree = makeTree([node]);
     const ctx: RuleContext = { node, tree };
     expect(rule.check(ctx)).toHaveLength(1);

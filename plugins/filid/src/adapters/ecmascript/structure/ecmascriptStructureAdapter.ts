@@ -130,8 +130,8 @@ export const ecmascriptStructureAdapter: StructureAdapter = {
   async discoverSourceFiles(projectRoot) {
     return discoverEcmascriptFiles(projectRoot);
   },
-  async findEntryPoints(directoryPath) {
-    return findEntryPoints(directoryPath);
+  async findEntryPoints(directoryPath, overrides) {
+    return findEntryPoints(directoryPath, overrides);
   },
   async inspectEntryPoint(entryPointPath) {
     const entryPoint = (await findEntryPoints(dirname(entryPointPath))).find(

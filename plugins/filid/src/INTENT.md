@@ -6,19 +6,20 @@ Filid 1.0의 canonical TypeScript source. 생태계 어댑터가 사실을 수�
 
 ## Structure
 
-| Path        | Role                                                     |
-| ----------- | -------------------------------------------------------- |
-| `adapters/` | 생태계 탐지·구조·verification 증거 수집                  |
-| `core/`     | 문서, snapshot, tree, policy, context, placement, artifact |
-| `mcp/`      | 9개 도구와 settings page의 host boundary                |
-| `hooks/`    | INTENT/DETAIL write gate와 최소 context delivery         |
-| `types/`    | 언어 중립 public DTO organ                               |
-| `constants/`| FCA rule·verification 상수 organ                         |
-| `lib/`      | 작은 runtime utility organ                              |
+| Path         | Role                                                       |
+| ------------ | ---------------------------------------------------------- |
+| `adapters/`  | 생태계 탐지·구조·verification 증거 수집                    |
+| `core/`      | 문서, snapshot, tree, policy, context, placement, artifact |
+| `mcp/`       | 9개 도구와 settings page의 host boundary                   |
+| `hooks/`     | INTENT/DETAIL write gate와 최소 context delivery           |
+| `types/`     | 언어 중립 public DTO organ                                 |
+| `constants/` | FCA rule·verification 상수 organ                           |
+| `lib/`       | 작은 runtime utility organ                                 |
 
 ## Conventions
 
 - ESM import와 명시적 named export를 사용한다.
+- 공개 MCP handler 9개는 모두 공통 `ToolPayload` adapter 의미를 가진다.
 - entry point는 MCP와 hook build entry다. `src/index.ts`는 npm library entry가 아니다.
 - core/policy/DTO에 확장자, 진입점 이름, 테스트 호출 문법을 두지 않는다.
 

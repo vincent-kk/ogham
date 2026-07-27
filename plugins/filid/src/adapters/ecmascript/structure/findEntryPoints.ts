@@ -52,7 +52,10 @@ function detectedFrameworks(directoryPath: string): string[] {
   }
 }
 
-export function findEntryPoints(directoryPath: string): EntryPointDescriptor[] {
+export function findEntryPoints(
+  directoryPath: string,
+  overrides: readonly string[] = [],
+): EntryPointDescriptor[] {
   const frameworks = detectedFrameworks(directoryPath);
   const entries = readdirSync(directoryPath, { withFileTypes: true })
     .filter((entry) => entry.isFile())
@@ -69,7 +72,8 @@ export function findEntryPoints(directoryPath: string): EntryPointDescriptor[] {
     const extension = extname(name);
     const stem = basename(name, extension);
     let kind: EntryPointDescriptor['kind'] | null = null;
-    if ((MODULE_ENTRY_BASENAMES as readonly string[]).includes(stem))
+    if (overrides.includes(name)) kind = 'module';
+    else if ((MODULE_ENTRY_BASENAMES as readonly string[]).includes(stem))
       kind = 'module';
     else if ((EXECUTABLE_ENTRY_BASENAMES as readonly string[]).includes(stem))
       kind = 'executable';

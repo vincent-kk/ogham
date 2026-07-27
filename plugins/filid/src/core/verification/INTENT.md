@@ -22,6 +22,9 @@ adapter가 분석한 실행 가능 검증 문서를 spec-document와 test-record
 ### Always do
 
 - indeterminate와 unsupported를 PASS와 구분
+- 같은 confidence의 adapter가 주장한 파일은 임의 owner를 고르지 않고 제외
+- snapshot의 portable absolute path discovery를 재조회하지 않고 중복
+  claim을 하나로 정규화
 - spec 여러 개는 서로 겹치지 않는 실제 DETAIL group에 연결
 - test-record coverage를 cap 충족 목적으로 삭제하지 않음
 
@@ -34,6 +37,7 @@ adapter가 분석한 실행 가능 검증 문서를 spec-document와 test-record
 
 - 3+12 분할이나 test-to-spec promotion 복원
 - project 전체 test-record 총수 제한
+- discovery 실패나 경합을 빈 exact 분석으로 축소
 - 생태계 syntax를 core policy에 추가
 
 ## Dependencies

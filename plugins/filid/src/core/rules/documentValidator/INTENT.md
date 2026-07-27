@@ -2,14 +2,13 @@
 
 ## Purpose
 
-INTENT.md의 50줄·경계와 DETAIL.md의 현재 계약·acceptance group을 검증하고 legacy criteria reader를 이행 기간 동안 격리한다.
+INTENT.md(50줄 제한)의 3-tier 경계와 DETAIL.md(append-only 방지)의 현재 계약·acceptance group을 검증한다.
 
 ## Structure
 
 - `validateIntentMd.ts` — 50줄 제한 + 3-tier boundary 존재 검사
 - `validateDetailMd.ts` — append-only와 acceptance group 검사 조합
 - `acceptanceGroups/` — 필수 section과 안정 group ID 검사 organ
-- `validateCriteriaMd.ts` — 제거 예정 legacy criteria 검사
 - `countLines.ts` — 줄 수 계산
 
 ## Boundaries
@@ -28,3 +27,4 @@ INTENT.md의 50줄·경계와 DETAIL.md의 현재 계약·acceptance group을 �
 
 - 모듈 경계 외부 로직 인라인
 - adapter별 contract marker syntax 해석
+- criteria ledger나 branch mode 문서 검증 추가

@@ -89,14 +89,6 @@ export interface DetailAcceptanceGroupValidation {
   violations: DocumentViolation[];
 }
 
-/** criteria.md (acceptance-criteria ledger) validation result */
-export interface CriteriaMdValidation {
-  /** Whether valid */
-  valid: boolean;
-  /** List of violations */
-  violations: DocumentViolation[];
-}
-
 /** Document rule violation */
 export interface DocumentViolation {
   /** Violated rule */
@@ -107,10 +99,7 @@ export interface DocumentViolation {
     | 'missing-boundaries'
     | 'missing-section'
     | 'missing-field'
-    | 'invalid-status'
-    | 'duplicate-id'
-    | 'claim-removed'
-    | 'tautology';
+    | 'duplicate-id';
   /** Violation description */
   message: string;
   /** Severity level */

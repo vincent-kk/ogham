@@ -5,6 +5,12 @@
  * FractalTree는 프로젝트 디렉토리를 계층적 노드 그래프로 표현하며,
  * 각 노드(FractalNode)는 자신의 분류 타입(CategoryType)과 부모/자식 관계를 보유한다.
  */
+import { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
+
+import type { VerificationProjectAnalysis } from './verification.js';
+
+export type AnalysisCertainty =
+  (typeof ANALYSIS_CERTAINTIES)[keyof typeof ANALYSIS_CERTAINTIES];
 
 /**
  * 디렉토리의 프랙탈 분류 타입.
@@ -23,6 +29,28 @@ export interface EntryPointDescriptor {
   kind: 'module' | 'executable' | 'framework';
   adapterId: string;
   surface: 'enumerated' | 'opaque' | 'unsupported';
+}
+
+export interface EntryPointSurfaceEvidence {
+  entryPoint: EntryPointDescriptor;
+  exportedNames: string[];
+  hasDirectDeclarations: boolean;
+  certainty: AnalysisCertainty;
+}
+
+export interface DocumentContractFinding {
+  document: 'intent' | 'detail';
+  rule: string;
+  message: string;
+  severity: 'error' | 'warning';
+}
+
+export interface FractalDocumentEvidence {
+  intentPath: string | null;
+  detailPath: string | null;
+  intentLines?: number;
+  status: 'valid' | 'violations' | 'missing';
+  findings: DocumentContractFinding[];
 }
 
 /** Fractal node — a domain boundary with independent business logic */
@@ -51,6 +79,10 @@ export interface FractalNode {
   hasDetailMd: boolean;
   /** Adapter-reported public entry points */
   entryPoints: EntryPointDescriptor[];
+  /** Snapshot-time inspections of each public entry point. */
+  entryPointSurfaces?: EntryPointSurfaceEvidence[];
+  /** Snapshot-time document paths and contract findings. */
+  documentEvidence?: FractalDocumentEvidence;
   /** Immediate peer files */
   peerFiles: string[];
   /** @deprecated Transitional compatibility field; use entryPoints. */
@@ -80,8 +112,8 @@ export interface FractalTree {
 /**
  * MCP-response-only flat tree shape.
  *
- * `FractalTree.nodes` is a `Map` in process; serializing the Map directly (via
- * `mapReplacer`) inflated MCP responses. MCP handlers convert to this DTO so
+ * `FractalTree.nodes` is a `Map` in process; serializing the Map directly
+ * inflated MCP responses. MCP handlers convert to this DTO so
  * clients see one `nodes: FractalNode[]` array — smaller payloads and a single,
  * unambiguous iteration path for LLMs.
  */
@@ -110,6 +142,50 @@ export interface DependencyDAG {
   edges: DependencyEdge[];
   /** Adjacency list (from → to[]) */
   adjacency: Map<string, string[]>;
+}
+
+export interface DependencyEvidence {
+  sourceFile: string;
+  rawSpecifier: string;
+  resolvedPath: string;
+}
+
+export interface DependencyGraphEdge {
+  fromFractalPath: string;
+  toFractalPath: string;
+  evidence: DependencyEvidence[];
+}
+
+export interface DependencyGraph {
+  nodePaths: string[];
+  edges: DependencyGraphEdge[];
+  cycles: string[][];
+  certainty: AnalysisCertainty;
+}
+
+export interface SnapshotDiagnostic {
+  code: string;
+  message: string;
+  path?: string;
+}
+
+export interface LegacyCriteriaLedgerEvidence {
+  path: string;
+  targetDetailPath: string;
+}
+
+export interface ProjectSnapshot {
+  schemaVersion: 1;
+  projectRoot: string;
+  outputLanguage: string;
+  snapshotHash: string;
+  tree: FractalTree;
+  dependencyGraph: DependencyGraph;
+  adapterIds: string[];
+  verification: VerificationProjectAnalysis;
+  legacyCriteriaLedger: LegacyCriteriaLedgerEvidence | null;
+  diagnostics: SnapshotDiagnostic[];
+  createdAt: string;
 }
 
 /** 디렉토리 항목 정보. 스캔 과정에서 내부적으로 사용한다. */

@@ -7,7 +7,7 @@
   group ID를 검증한다.
 - acceptance group heading은 `### <stable-id> — <title>` 형태이며 한 문서
   안에서 중복될 수 없다.
-- legacy criteria.md validator는 migration seam 동안만 유지한다.
+- criteria ledger나 branch mode 문서는 이 validator의 계약이 아니다.
 
 ## API Contracts
 
@@ -16,7 +16,6 @@
   DETAIL validation result.
 - `validateDetailAcceptanceGroups(content)` — 추출된 groups와 document
   violations.
-- `validateCriteriaMd(content, previous?)` — 제거 예정 legacy validator.
 
 ## Acceptance Criteria
 
@@ -31,6 +30,11 @@
 - 이전 내용 뒤에 기록만 붙인 변경은 error이고 재구성한 현재 계약은
   append-only finding을 만들지 않는다.
 
+### AC-document-surface — 1.0 document surface
+
+- public surface는 INTENT.md와 DETAIL.md validator만 제공한다.
+- `.filid/criteria.md` 전용 validator나 validation type을 노출하지 않는다.
+
 ## Last Updated
 
-2026-07-26 — DETAIL acceptance group validation을 추가했다.
+2026-07-27 — legacy criteria validator를 제거한 1.0 문서 계약으로 재구성했다.

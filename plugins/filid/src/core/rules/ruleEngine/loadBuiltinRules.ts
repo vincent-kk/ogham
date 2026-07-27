@@ -1,123 +1,212 @@
 import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
+import { LEGACY_CRITERIA_LEDGER_RULE } from '../../../constants/legacyCriteriaLedger.js';
 import type { Rule, RuleOverride } from '../../../types/rules.js';
 import type { AllowedEntry } from '../../infra/configLoader/loaders/configSchemas.js';
 
 import { applyOverrides } from './applyOverrides.js';
-import { checkCircularDependency } from './utils/checkCircularDependency.js';
-import { checkIndexBarrelPattern } from './utils/checkIndexBarrelPattern.js';
+import { checkDependencyCycles } from './utils/checkDependencyCycles.js';
+import { checkDocumentContract } from './utils/checkDocumentContract.js';
+import { checkEntryPointSurface } from './utils/checkEntryPointSurface.js';
+import { checkExternalImportBoundary } from './utils/checkExternalImportBoundary.js';
+import { checkLegacyCriteriaLedger } from './utils/checkLegacyCriteriaLedger.js';
 import { checkMaxDepth } from './utils/checkMaxDepth.js';
 import { checkModuleEntryPoint } from './utils/checkModuleEntryPoint.js';
-import { checkNamingConvention } from './utils/checkNamingConvention.js';
 import { checkOrganNoIntentMd } from './utils/checkOrganNoIntentmd.js';
 import { checkPureFunctionIsolation } from './utils/checkPureFunctionIsolation.js';
+import { checkVerificationPolicy } from './utils/checkVerificationPolicy.js';
 import { checkZeroPeerFile } from './utils/checkZeroPeerFile.js';
 
 /**
- * 8개 내장 규칙 인스턴스를 생성하여 반환한다.
- * overrides가 전달되면 enabled/severity/exempt를 프로젝트별로 재정의한다.
- * additionalAllowed의 객체형 엔트리는 `paths` glob이 현재 노드 경로와 일치할 때만 basename을 허용한다.
- * additionalEntryPoints는 module-entry-point가 index/main 외에 추가로 인식할 진입 파일명 목록이다.
- * additionalRoutePatterns는 naming-convention이 예외 처리할 라우트 이름 정규식 문자열 목록이다.
+ * Builds the canonical Filid 1.0 rule roster.
+ *
+ * The positional parameters remain during the MCP migration seam. Entry-point
+ * and route-name parameters are intentionally ignored because adapters now own
+ * those facts.
  */
 export function loadBuiltinRules(
   overrides?: Record<string, RuleOverride>,
   additionalAllowed?: AllowedEntry[],
-  additionalEntryPoints?: string[],
-  additionalRoutePatterns?: string[],
+  _additionalEntryPoints?: string[],
+  _additionalRoutePatterns?: string[],
 ): Rule[] {
   const rules: Rule[] = [
-    // 1. naming-convention: 이름은 camelCase(기본), kebab-case, 또는 PascalCase 중 하나여야 한다
     {
-      id: BUILTIN_RULE_IDS.NAMING_CONVENTION,
-      name: 'Naming Convention',
-      description:
-        'Directory and file names must follow camelCase (default), kebab-case, or PascalCase.',
-      category: 'naming',
-      severity: 'warning',
+      id: BUILTIN_RULE_IDS.INTENT_DOCUMENT_CONTRACT,
+      name: 'INTENT Document Contract',
+      description: 'INTENT documents satisfy the FCA document contract.',
+      category: 'documentation',
+      severity: 'error',
       enabled: true,
-      check: checkNamingConvention(additionalRoutePatterns),
+      scope: 'documents',
+      granularity: 'node',
+      check: checkDocumentContract('intent'),
     },
-
-    // 2. organ-no-intentmd: organ 노드에 INTENT.md가 없어야 한다
+    {
+      id: BUILTIN_RULE_IDS.DETAIL_DOCUMENT_CONTRACT,
+      name: 'DETAIL Document Contract',
+      description: 'DETAIL documents describe a current public contract.',
+      category: 'documentation',
+      severity: 'error',
+      enabled: true,
+      scope: 'documents',
+      granularity: 'node',
+      check: checkDocumentContract('detail'),
+    },
     {
       id: BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
-      name: 'Organ No INTENT.md',
-      description: 'Organ nodes must not contain INTENT.md.',
+      name: 'Organ No INTENT',
+      description: 'Organ nodes do not own an independent INTENT document.',
       category: 'structure',
       severity: 'error',
       enabled: true,
+      scope: 'nodes',
+      granularity: 'node',
       check: checkOrganNoIntentMd,
     },
-
-    // 3. index-barrel-pattern: fractal 노드의 index.ts가 순수 barrel이어야 한다
     {
-      id: BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN,
-      name: 'Index Barrel Pattern',
-      description:
-        'index.ts in fractal nodes must follow the pure barrel (re-export only) pattern.',
-      category: 'index',
+      id: BUILTIN_RULE_IDS.ENTRY_POINT_SURFACE,
+      name: 'Entry Point Surface',
+      description: 'Public entry-point surfaces are exactly enumerable.',
+      category: 'module',
       severity: 'warning',
       enabled: true,
-      check: checkIndexBarrelPattern,
+      scope: 'entry-points',
+      granularity: 'node',
+      check: checkEntryPointSurface,
     },
-
-    // 4. module-entry-point: 모든 fractal 노드에 index.ts 또는 main.ts가 있어야 한다
     {
       id: BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
       name: 'Module Entry Point',
       description:
-        'Every fractal node must have either index.ts or main.ts as an entry point.',
+        'Every fractal boundary has an adapter-reported entry point.',
       category: 'module',
       severity: 'warning',
       enabled: true,
-      check: checkModuleEntryPoint(additionalEntryPoints),
+      scope: 'entry-points',
+      granularity: 'node',
+      check: checkModuleEntryPoint,
     },
-
-    // 5. max-depth: 트리 깊이가 maxDepth를 초과하면 안 된다
     {
       id: BUILTIN_RULE_IDS.MAX_DEPTH,
       name: 'Max Depth',
-      description:
-        'The depth of the fractal tree must not exceed the maximum allowed depth.',
+      description: 'The fractal tree remains within its configured depth.',
       category: 'structure',
       severity: 'error',
       enabled: true,
+      scope: 'nodes',
+      granularity: 'node',
       check: checkMaxDepth,
     },
-
-    // 6. circular-dependency: 순환 의존 감지 (placeholder - 빈 배열 반환)
     {
       id: BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY,
       name: 'Circular Dependency',
-      description: 'There must be no circular dependencies between modules.',
+      description: 'The snapshot dependency graph contains no cycle.',
       category: 'dependency',
       severity: 'error',
       enabled: true,
-      check: checkCircularDependency,
+      scope: 'dag',
+      granularity: 'project',
+      check: checkDependencyCycles,
     },
-
-    // 7. pure-function-isolation: pure-function 노드는 부작용이 없어야 한다
     {
       id: BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION,
       name: 'Pure Function Isolation',
-      description:
-        'pure-function nodes must not import parent fractal modules.',
+      description: 'Pure-function nodes do not depend on stateful fractals.',
       category: 'dependency',
       severity: 'error',
       enabled: true,
+      scope: 'dag',
+      granularity: 'node',
       check: checkPureFunctionIsolation,
     },
-
-    // 8. zero-peer-file: 카테고리 기반 예외 시스템 (static + eponymous + framework)
     {
       id: BUILTIN_RULE_IDS.ZERO_PEER_FILE,
       name: 'Zero Peer File',
-      description:
-        'Fractal roots must not contain standalone peer files beyond the allowed categories (index/main, documentation, eponymous, framework reserved).',
+      description: 'Fractal roots contain only files with an allowed FCA role.',
       category: 'structure',
       severity: 'warning',
       enabled: true,
+      scope: 'nodes',
+      granularity: 'node',
       check: checkZeroPeerFile(additionalAllowed),
+    },
+    {
+      id: BUILTIN_RULE_IDS.EXTERNAL_IMPORT_BOUNDARY,
+      name: 'External Import Boundary',
+      description: 'Dependencies cross module boundaries through entry points.',
+      category: 'dependency',
+      severity: 'error',
+      enabled: true,
+      scope: 'boundaries',
+      granularity: 'project',
+      check: (context) =>
+        context.snapshot
+          ? checkExternalImportBoundary({ snapshot: context.snapshot })
+          : [
+              {
+                ruleId: BUILTIN_RULE_IDS.EXTERNAL_IMPORT_BOUNDARY,
+                severity: 'warning',
+                message:
+                  'Import-boundary evaluation requires a project snapshot.',
+                path: context.tree.root,
+                certainty: 'indeterminate',
+              },
+            ],
+    },
+    {
+      id: BUILTIN_RULE_IDS.SPEC_DOCUMENT_CASE_CAP,
+      name: 'Spec Document Case Cap',
+      description: 'Each spec document stays within its semantic case cap.',
+      category: 'verification',
+      severity: 'error',
+      enabled: true,
+      scope: 'verification',
+      granularity: 'project',
+      check: checkVerificationPolicy('spec-document-case-cap'),
+    },
+    {
+      id: BUILTIN_RULE_IDS.TEST_RECORD_CASE_CAP,
+      name: 'Test Record Case Cap',
+      description: 'Each test record stays within its semantic case cap.',
+      category: 'verification',
+      severity: 'error',
+      enabled: true,
+      scope: 'verification',
+      granularity: 'project',
+      check: checkVerificationPolicy('test-record-case-cap'),
+    },
+    {
+      id: BUILTIN_RULE_IDS.SPEC_FRAGMENTATION,
+      name: 'Spec Fragmentation',
+      description: 'Spec documents are not split to evade the case cap.',
+      category: 'verification',
+      severity: 'error',
+      enabled: true,
+      scope: 'verification',
+      granularity: 'project',
+      check: checkVerificationPolicy('spec-fragmentation'),
+    },
+    {
+      id: BUILTIN_RULE_IDS.SPEC_CONTRACT_LINK,
+      name: 'Spec Contract Link',
+      description: 'Multiple spec documents link to explicit contract groups.',
+      category: 'verification',
+      severity: 'warning',
+      enabled: true,
+      scope: 'verification',
+      granularity: 'project',
+      check: checkVerificationPolicy('spec-contract-link'),
+    },
+    {
+      id: BUILTIN_RULE_IDS.LEGACY_CRITERIA_LEDGER,
+      name: LEGACY_CRITERIA_LEDGER_RULE.NAME,
+      description: LEGACY_CRITERIA_LEDGER_RULE.DESCRIPTION,
+      category: LEGACY_CRITERIA_LEDGER_RULE.CATEGORY,
+      severity: LEGACY_CRITERIA_LEDGER_RULE.SEVERITY,
+      enabled: true,
+      scope: LEGACY_CRITERIA_LEDGER_RULE.SCOPE,
+      granularity: LEGACY_CRITERIA_LEDGER_RULE.GRANULARITY,
+      check: checkLegacyCriteriaLedger,
     },
   ];
   return overrides ? applyOverrides(rules, overrides) : rules;

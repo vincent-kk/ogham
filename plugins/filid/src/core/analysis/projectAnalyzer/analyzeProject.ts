@@ -1,5 +1,5 @@
+import { createAdapterRegistry } from '../../../adapters/index.js';
 import type { SyncPlan } from '../../../types/drift.js';
-import type { ModuleInfo } from '../../../types/fractal.js';
 import type {
   AnalysisReport,
   AnalyzeOptions,
@@ -8,10 +8,11 @@ import type {
   ValidationReport,
 } from '../../../types/report.js';
 import {
+  createDefaultConfig,
   loadConfig,
   resolveMaxDepth,
 } from '../../infra/configLoader/configLoader.js';
-import { analyzeModule } from '../../module/moduleMainAnalyzer/moduleMainAnalyzer.js';
+import { createProjectSnapshot } from '../../projectSnapshot/index.js';
 import {
   detectDrift,
   generateSyncPlan,
@@ -21,7 +22,6 @@ import {
   getActiveRules,
   loadBuiltinRules,
 } from '../../rules/ruleEngine/ruleEngine.js';
-import { scanProject } from '../../tree/fractalTree/fractalTree.js';
 
 import { calculateHealthScore } from './calculateHealthScore.js';
 
@@ -67,43 +67,37 @@ export async function analyzeProject(
   // healthScore 에 그대로 새어 들어간다 (drift_detect 에서 실측된 버그와
   // 동일 계열). 반드시 structure_validate 와 같은 룰셋으로 평가한다.
   const { config } = loadConfig(root);
+  const effectiveConfig = config ?? createDefaultConfig();
   const rules = getActiveRules(
     loadBuiltinRules(
-      config?.rules ?? {},
-      config?.['additional-allowed'],
-      config?.['additional-entry-points'],
-      config?.['additional-route-patterns'],
+      effectiveConfig.rules,
+      effectiveConfig.structure?.additionalAllowedPeers,
     ),
   );
-  const maxDepth = resolveMaxDepth(config);
+  const maxDepth = resolveMaxDepth(effectiveConfig);
 
-  // 1. 스캔
+  // 1. 동일 snapshot 생성
   const scanStart = Date.now();
-  const tree = await scanProject(root, {
-    maxDepth,
-    additionalOrganNames: config?.['additional-organ-names'],
-  });
-  const moduleTargets = [...tree.nodes.values()].filter(
-    (n) => n.type === 'fractal' || n.type === 'hybrid',
+  const snapshot = await createProjectSnapshot(
+    root,
+    createAdapterRegistry(),
+    effectiveConfig,
   );
-  const moduleResults = await Promise.allSettled(
-    moduleTargets.map((n) => analyzeModule(n.path)),
-  );
-  const modules: ModuleInfo[] = [];
-  for (const r of moduleResults)
-    if (r.status === 'fulfilled') modules.push(r.value);
+  const tree = snapshot.tree;
 
   const scanReport: ScanReport = {
     tree,
-    modules,
+    modules: [],
     timestamp: new Date().toISOString(),
     duration: Date.now() - scanStart,
   };
 
   // 2. 검증
-  const validationReport: ValidationReport = validateStructure(tree, rules, {
-    maxDepth,
-  });
+  const validationReport: ValidationReport = validateStructure(
+    snapshot,
+    rules,
+    { maxDepth },
+  );
 
   // 3. 이격 감지
   let driftReport: DriftReport;
@@ -130,6 +124,7 @@ export async function analyzeProject(
   };
 
   const report: AnalysisReport = {
+    snapshot,
     scan: scanReport,
     validation: validationReport,
     drift: driftReport,

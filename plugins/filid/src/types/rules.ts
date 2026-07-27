@@ -4,7 +4,14 @@
  *
  * Rule은 순수 함수 `check`를 통해 RuleViolation[] 을 반환하는 구조이다.
  */
-import type { FractalNode, FractalTree } from './fractal.js';
+import { RULE_SCOPES } from '../constants/ruleScopes.js';
+
+import type {
+  AnalysisCertainty,
+  FractalNode,
+  FractalTree,
+  ProjectSnapshot,
+} from './fractal.js';
 import type { ScanOptions } from './scan.js';
 
 /** 규칙 위반의 심각도 수준. */
@@ -12,17 +19,19 @@ export type RuleSeverity = 'error' | 'warning' | 'info';
 
 /** 규칙이 다루는 관심 영역 분류. */
 export type RuleCategory =
-  | 'naming'
-  | 'structure'
-  | 'dependency'
-  | 'documentation'
-  | 'index'
-  | 'module';
+  'structure' | 'dependency' | 'documentation' | 'module' | 'verification';
+
+/** 검증 요청이 선택할 수 있는 Filid 1.0 증거 영역. */
+export type RuleScope = (typeof RULE_SCOPES)[keyof typeof RULE_SCOPES];
+
+/** 규칙 실행 단위. 생략한 legacy/custom rule은 node 단위로 평가한다. */
+export type RuleGranularity = 'node' | 'project';
 
 /** 단일 규칙의 검사 컨텍스트. `Rule.check` 함수에 전달된다. */
 export interface RuleContext {
   node: FractalNode;
   tree: FractalTree;
+  snapshot?: ProjectSnapshot;
   scanOptions?: ScanOptions;
 }
 
@@ -33,6 +42,7 @@ export interface RuleViolation {
   message: string;
   path: string;
   suggestion?: string;
+  certainty?: AnalysisCertainty;
 }
 
 /** 단일 규칙 정의. `check` 함수는 순수 함수여야 하며 부작용이 없어야 한다. */
@@ -43,6 +53,9 @@ export interface Rule {
   category: RuleCategory;
   severity: RuleSeverity;
   enabled: boolean;
+  /** Transitional custom rules may omit these and default to nodes/node. */
+  scope?: RuleScope;
+  granularity?: RuleGranularity;
   check: (context: RuleContext) => RuleViolation[];
 }
 
@@ -60,6 +73,11 @@ export interface RuleEvaluationResult {
   failed: number;
   skipped: number;
   duration: number;
+}
+
+/** Rule evaluation options retain the legacy scan limits and add scope filters. */
+export interface RuleEvaluationOptions extends ScanOptions {
+  scopes?: RuleScope[];
 }
 
 export type { BuiltinRuleId } from '../constants/builtinRuleIds.js';

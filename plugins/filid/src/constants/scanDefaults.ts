@@ -21,6 +21,9 @@ export const DEFAULT_SCAN_OPTIONS: Required<ScanOptions> = {
   followSymlinks: false,
   additionalOrganNames: [],
   structureAdapters: [],
+  entryPointOverrides: {},
+  structureOwnership: new Map(),
+  enforceStructureOwnership: false,
 };
 
 export const SCAN_SKIP_DIRS = new Set([

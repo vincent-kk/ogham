@@ -75,6 +75,22 @@ describe('ecmascript structure adapter', () => {
     );
   });
 
+  it('interprets only exact configured peer names as entry overrides', async () => {
+    const root = project();
+    const configured = write(root, 'module/public.ts', 'export {};');
+    write(root, 'module/public-extra.ts', 'export {};');
+    const directory = join(root, 'module');
+
+    expect(await ecmascriptStructureAdapter.findEntryPoints(directory)).toEqual(
+      [],
+    );
+    expect(
+      await ecmascriptStructureAdapter.findEntryPoints(directory, [
+        'public.ts',
+      ]),
+    ).toEqual([expect.objectContaining({ path: configured, kind: 'module' })]);
+  });
+
   it('reports framework-owned entry points from package evidence', async () => {
     const root = project();
     write(
@@ -118,6 +134,27 @@ describe('ecmascript structure adapter', () => {
     expect(dependencies.map((item) => item.resolvedPath)).toEqual([
       target,
       target,
+    ]);
+  });
+
+  it('skips external packages but preserves unresolved project-local dependencies', async () => {
+    const root = project();
+    const source = write(
+      root,
+      'src/source.ts',
+      [
+        "import { library } from 'external-package';",
+        "import { missing } from './missing.js';",
+      ].join('\n'),
+    );
+
+    expect(
+      await ecmascriptStructureAdapter.extractDependencies(source),
+    ).toEqual([
+      expect.objectContaining({
+        rawSpecifier: './missing.js',
+        resolvedPath: null,
+      }),
     ]);
   });
 

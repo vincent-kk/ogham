@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { pathForCompare, portableResolve } from '@ogham/cross-platform/paths';
 
 import type {
   AdapterClaim,
@@ -11,7 +11,7 @@ import type {
 interface ClaimedAdapter {
   adapter: StructureAdapter;
   claim: AdapterClaim;
-  files: Set<string>;
+  files: Map<string, string>;
 }
 
 export async function resolveAdapters(
@@ -33,29 +33,33 @@ export async function resolveAdapters(
         left.adapter.id.localeCompare(right.adapter.id),
     );
   const claimed: ClaimedAdapter[] = await Promise.all(
-    active.map(async ({ adapter, claim }) => ({
-      adapter,
-      claim,
-      files: new Set(
-        (await adapter.discoverSourceFiles(projectRoot)).map((path) =>
-          resolve(path),
-        ),
-      ),
-    })),
+    active.map(async ({ adapter, claim }) => {
+      const files = new Map<string, string>();
+      for (const path of await adapter.discoverSourceFiles(projectRoot)) {
+        const absolutePath = portableResolve(projectRoot, path);
+        const key = pathForCompare(absolutePath);
+        if (!files.has(key)) files.set(key, absolutePath);
+      }
+      return { adapter, claim, files };
+    }),
   );
-  const paths = [
-    ...new Set(
-      (requestedPaths ?? claimed.flatMap(({ files }) => [...files])).map(
-        (path) => resolve(path),
-      ),
-    ),
-  ].sort();
+  const requested = new Map<string, string>();
+  for (const path of requestedPaths ??
+    claimed.flatMap(({ files }) => [...files.values()])) {
+    const absolutePath = portableResolve(projectRoot, path);
+    const key = pathForCompare(absolutePath);
+    if (!requested.has(key)) requested.set(key, absolutePath);
+  }
+  const paths = [...requested.values()].sort((left, right) =>
+    pathForCompare(left).localeCompare(pathForCompare(right)),
+  );
   const ownership = new Map<string, AdapterOwnership>();
   const unsupportedPaths: string[] = [];
   const diagnostics: AdapterDiagnostic[] = [];
 
   for (const path of paths) {
-    const candidates = claimed.filter(({ files }) => files.has(path));
+    const key = pathForCompare(path);
+    const candidates = claimed.filter(({ files }) => files.has(key));
     if (candidates.length === 0) {
       unsupportedPaths.push(path);
       diagnostics.push({

@@ -1,49 +1,67 @@
-import type { FractalTree } from '../../../types/fractal.js';
+import type { FractalTree, ProjectSnapshot } from '../../../types/fractal.js';
 import type {
   Rule,
   RuleContext,
+  RuleEvaluationOptions,
   RuleEvaluationResult,
   RuleViolation,
 } from '../../../types/rules.js';
-import type { ScanOptions } from '../../../types/scan.js';
 
 import { evaluateRule } from './evaluateRule.js';
-import { getActiveRules } from './getActiveRules.js';
 import { loadBuiltinRules } from './loadBuiltinRules.js';
 
-/**
- * FractalTree의 모든 노드에 대해 활성화된 규칙을 평가한다.
- *
- * @param tree - 검증할 프랙탈 트리
- * @param rules - 평가할 규칙 목록 (생략 시 내장 규칙 사용)
- * @param options - 스캔 옵션 (maxDepth 등)
- * @returns 전체 평가 결과
- */
+function isProjectSnapshot(
+  input: ProjectSnapshot | FractalTree,
+): input is ProjectSnapshot {
+  return 'tree' in input && 'dependencyGraph' in input;
+}
+
 export function evaluateRules(
-  tree: FractalTree,
+  input: ProjectSnapshot | FractalTree,
   rules?: Rule[],
-  options?: ScanOptions,
+  options?: RuleEvaluationOptions,
 ): RuleEvaluationResult {
   const start = Date.now();
-  const activeRules = getActiveRules(rules ?? loadBuiltinRules());
+  let snapshot: ProjectSnapshot | undefined;
+  let tree: FractalTree;
+  if (isProjectSnapshot(input)) {
+    snapshot = input;
+    tree = input.tree;
+  } else tree = input;
+  const selectedRules = (rules ?? loadBuiltinRules()).filter(
+    (rule) =>
+      !options?.scopes || options.scopes.includes(rule.scope ?? 'nodes'),
+  );
   const violations: RuleViolation[] = [];
   let passed = 0;
   let failed = 0;
   let skipped = 0;
 
-  for (const [, node] of tree.nodes) {
-    const context: RuleContext = { node, tree, scanOptions: options };
-    for (const rule of activeRules) {
-      if (!rule.enabled) {
+  for (const rule of selectedRules) {
+    if (!rule.enabled) {
+      skipped +=
+        rule.granularity === 'project' ? 1 : Math.max(tree.totalNodes, 1);
+      continue;
+    }
+    const nodes =
+      rule.granularity === 'project'
+        ? [tree.nodes.get(tree.root) ?? tree.nodes.values().next().value]
+        : [...tree.nodes.values()];
+    for (const node of nodes) {
+      if (!node) {
         skipped++;
         continue;
       }
-      const nodeViolations = evaluateRule(rule, context);
-      if (nodeViolations.length === 0) passed++;
-      else {
-        failed++;
-        violations.push(...nodeViolations);
-      }
+      const context: RuleContext = {
+        node,
+        tree,
+        snapshot,
+        scanOptions: options,
+      };
+      const findings = evaluateRule(rule, context);
+      if (findings.length === 0) passed++;
+      else failed++;
+      violations.push(...findings);
     }
   }
 

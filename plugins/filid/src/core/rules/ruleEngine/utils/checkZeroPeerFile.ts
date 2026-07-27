@@ -1,5 +1,7 @@
-import { ALLOWED_FRACTAL_ROOT_FILES } from '../../../../constants/allowedPeerFiles.js';
+import { portableBasename } from '@ogham/cross-platform/paths';
+
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
+import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
 import type { AllowedEntry } from '../../../infra/configLoader/loaders/configSchemas.js';
 
@@ -18,24 +20,23 @@ export function checkZeroPeerFile(
     const { node } = context;
     if (node.type !== 'fractal' && node.type !== 'hybrid') return [];
 
-    const peerFiles = node.metadata['peerFiles'] as string[] | undefined;
-    if (!peerFiles || peerFiles.length === 0) return [];
+    const peerFiles = node.peerFiles;
+    if (peerFiles.length === 0) return [];
 
-    // Compose the full allowed set for THIS node
-    const allowed = new Set(ALLOWED_FRACTAL_ROOT_FILES);
+    const allowed = new Set([INTENT_MD, DETAIL_MD]);
+    for (const entryPoint of node.entryPoints)
+      allowed.add(portableBasename(entryPoint.path));
 
     // Category: eponymous file (max 1, auto-detected by scanProject)
     const eponymous = node.metadata['eponymousFile'] as
-      | string
-      | null
-      | undefined;
-    if (eponymous) allowed.add(eponymous);
+      string | null | undefined;
+    if (eponymous) allowed.add(portableBasename(eponymous));
 
     // Category: framework reserved files (auto-detected from package.json)
     const fwFiles = node.metadata['frameworkReservedFiles'] as
-      | string[]
-      | undefined;
-    if (fwFiles) for (const f of fwFiles) allowed.add(f);
+      string[] | undefined;
+    if (fwFiles)
+      for (const file of fwFiles) allowed.add(portableBasename(file));
 
     // Category: additional-allowed from .filid/config.json
     //   string entry  → allowed everywhere (backward-compat).
@@ -47,10 +48,19 @@ export function checkZeroPeerFile(
           continue;
         }
         if (entry.paths && !isExempt(node, entry.paths)) continue;
+        if (
+          entry.adapterId &&
+          !node.entryPoints.some(
+            (entryPoint) => entryPoint.adapterId === entry.adapterId,
+          )
+        )
+          continue;
         allowed.add(entry.basename);
       }
 
-    const disallowed = peerFiles.filter((f) => !allowed.has(f));
+    const disallowed = peerFiles.filter(
+      (file) => !allowed.has(portableBasename(file)),
+    );
     if (disallowed.length === 0) return [];
 
     return disallowed.map((file) => ({
@@ -58,7 +68,7 @@ export function checkZeroPeerFile(
       severity: 'warning' as const,
       message: `Fractal root "${node.name}" contains peer file "${file}" not in any allowed category. Promote it to a sub-fractal directory.`,
       path: node.path,
-      suggestion: `Create a subdirectory for "${file}" or add it to .filid/config.json additional-allowed if it belongs at the root.`,
+      suggestion: `Create a subdirectory for "${file}" or configure it as an allowed peer for this boundary.`,
     }));
   };
 }

@@ -24,4 +24,10 @@ export interface ScanOptions {
   additionalOrganNames?: readonly string[];
   /** Structure evidence providers. Defaults to the registered initial adapters. */
   structureAdapters?: readonly StructureAdapter[];
+  /** Adapter-specific entry names passed through without core interpretation. */
+  entryPointOverrides?: Readonly<Record<string, readonly string[]>>;
+  /** Portable source path identity to selected owner adapter ID. */
+  structureOwnership?: ReadonlyMap<string, string>;
+  /** Whether entry descriptors without matching ownership are excluded. */
+  enforceStructureOwnership?: boolean;
 }

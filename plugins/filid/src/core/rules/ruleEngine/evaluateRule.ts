@@ -14,7 +14,16 @@ export function evaluateRule(
   if (!rule.enabled) return [];
   try {
     return rule.check(context);
-  } catch {
-    return [];
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return [
+      {
+        ruleId: rule.id,
+        severity: 'warning',
+        message: `Rule evaluation is indeterminate: ${message}`,
+        path: context.node.path,
+        certainty: 'indeterminate',
+      },
+    ];
   }
 }

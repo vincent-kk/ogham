@@ -10,6 +10,13 @@
 - 같은 owner fractal의 여러 spec-document는 실제 DETAIL acceptance group을
   선언하고 파일 간 group이 겹치지 않아야 한다.
 - adapter가 역할, case count와 `filid:contract` marker를 해석한다.
+- 같은 최고 confidence의 adapter가 한 파일을 주장하면
+  `ambiguous-adapter-claim` 진단을 남기고 해당 파일을 policy 분석에서
+  제외한다.
+- snapshot이 제공한 discovery 결과는 절대 portable path로 정규화해 한 번만
+  소비하며, 동일 adapter의 중복 path는 한 claim으로 취급한다.
+- discovery 실패나 adapter 경합으로 일부 파일을 판정하지 못하면 project
+  certainty는 `indeterminate`이며 빈 exact 분석으로 축소하지 않는다.
 
 ## API Contracts
 
@@ -34,6 +41,9 @@
 
 - 동적 table과 알 수 없는 syntax는 PASS가 아니라 indeterminate 또는
   unsupported finding이다.
+- 동률 adapter가 주장한 파일은 첫 adapter가 임의로 소유하지 않는다.
+- 같은 파일의 상대/절대 표기와 중복 discovery는 소유권 판정을 바꾸지 않는다.
+- snapshot discovery는 adapter마다 한 번만 실행된다.
 
 ### AC-verification-contracts — Multiple specs
 
@@ -43,4 +53,4 @@
 
 ## Last Updated
 
-2026-07-26 — Filid 1.0의 15/32 verification-document 모델을 정의했다.
+2026-07-27 — portable path claim과 단일 discovery의 불확실성을 보존했다.

@@ -17,7 +17,9 @@ export function validateNode(
 ): RuleViolation[] {
   if (rule) return rule.check(context);
 
-  const rules = loadBuiltinRules();
+  const rules = loadBuiltinRules().filter(
+    (candidate) => candidate.granularity !== 'project',
+  );
   const violations: RuleViolation[] = [];
   for (const r of rules) if (r.enabled) violations.push(...r.check(context));
 

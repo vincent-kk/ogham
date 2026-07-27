@@ -1,5 +1,4 @@
-import { join } from 'node:path';
-
+import { portableJoin } from '@ogham/cross-platform/paths';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -38,7 +37,7 @@ function structureAdapter(
       return false;
     },
     async suggestEntryPointPath(directoryPath): Promise<string> {
-      return join(directoryPath, `${id}.entry`);
+      return portableJoin(directoryPath, `${id}.entry`);
     },
   };
 }
@@ -126,5 +125,21 @@ describe('adapter registry', () => {
     expect(result.ownership.get(filePath)?.claim.evidence).toEqual([
       'primary:0.9',
     ]);
+  });
+
+  it('treats Windows case and separator aliases as one requested path', async () => {
+    const root = String.raw`C:\Project`;
+    const ownedPath = String.raw`C:\Project\Feature\source.any`;
+    const requestedAlias = 'c:/project/feature/source.any';
+
+    const result = await resolveAdapters(
+      root,
+      [structureAdapter('portable', 1, [ownedPath])],
+      [requestedAlias],
+    );
+
+    expect(result.ownership).toHaveLength(1);
+    expect(result.unsupportedPaths).toEqual([]);
+    expect([...result.ownership.values()][0]?.adapter.id).toBe('portable');
   });
 });

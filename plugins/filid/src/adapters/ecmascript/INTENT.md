@@ -22,6 +22,7 @@
 
 - dependency에 source file, raw specifier, resolved path와 kind를 보존
 - framework convention은 package evidence와 exact peer path로 보고
+- adapter별 entry override를 exact peer filename으로만 해석
 - Node 20-compatible recursive filesystem traversal 사용
 
 ### Ask first

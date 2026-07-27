@@ -46,4 +46,6 @@ export interface AnalyzeVerificationInput {
   adapters: readonly VerificationAdapter[];
   ownerFractalPath(filePath: string): string;
   detailDocuments?: readonly DetailContractDocument[];
+  discoveredPathsByAdapter?: ReadonlyMap<string, readonly string[]>;
+  discoveryCertainty?: AnalysisCertainty;
 }

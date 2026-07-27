@@ -70,6 +70,8 @@ export function extractDependencyReferences(
       dependency = dependencyStringAfter(tokens, index + 1);
     }
     if (!kind || !dependency) continue;
+    if (!dependency.value.startsWith('.') && !dependency.value.startsWith('/'))
+      continue;
 
     references.push({
       sourceFile: filePath,

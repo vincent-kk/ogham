@@ -6,16 +6,16 @@
 
 ## Structure
 
-| Sub-fractal       | Role                                              |
-| ----------------- | ------------------------------------------------- |
-| `tree/`           | node discovery, owner와 classification            |
-| `rules/`          | 문서 parser와 14개 FCA policy rule                |
-| `analysis/`       | dependency graph와 multi-consumer LCA             |
-| `verification/`   | spec-document/test-record 분석과 contract link     |
-| `projectSnapshot/`| tree·DAG·verification의 content-addressed snapshot |
-| `contextResolver/`| owner-to-root INTENT/DETAIL 경로 chain             |
-| `restructure/`    | read-only placement plan과 pre/postcondition       |
-| `infra/`          | config, cache와 ephemeral artifact persistence     |
+| Sub-fractal        | Role                                               |
+| ------------------ | -------------------------------------------------- |
+| `tree/`            | node discovery, owner와 classification             |
+| `rules/`           | 문서 parser와 15개 FCA policy rule                 |
+| `analysis/`        | dependency graph와 multi-consumer LCA              |
+| `verification/`    | spec-document/test-record 분석과 contract link     |
+| `projectSnapshot/` | tree·DAG·verification의 content-addressed snapshot |
+| `contextResolver/` | owner-to-root INTENT/DETAIL 경로 chain             |
+| `restructure/`     | read-only placement plan과 pre/postcondition       |
+| `infra/`           | config, cache와 ephemeral artifact persistence     |
 
 ## Conventions
 
@@ -32,7 +32,7 @@
 
 ### Ask first
 
-- node classification 우선순위나 14개 built-in rule 의미 변경
+- node classification 우선순위나 15개 built-in rule 의미 변경
 - snapshot, context 또는 restructure 공개 DTO 변경
 
 ### Never do

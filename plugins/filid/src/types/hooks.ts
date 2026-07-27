@@ -66,15 +66,6 @@ export interface PostToolUseInput extends HookBaseInput {
   };
 }
 
-/** SubagentStart hook input */
-export interface SubagentStartInput extends HookBaseInput {
-  hook_event_name: 'SubagentStart';
-  /** Agent type */
-  agent_type: string;
-  /** Agent ID */
-  agent_id: string;
-}
-
 /** Hook output (stdout JSON) */
 export interface HookOutput {
   /**
@@ -101,8 +92,7 @@ export type HookInput =
   | SessionStartInput
   | UserPromptSubmitInput
   | PreToolUseInput
-  | PostToolUseInput
-  | SubagentStartInput;
+  | PostToolUseInput;
 
 /**
  * structure-guard가 출력하는 검증 결과.

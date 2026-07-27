@@ -6,7 +6,8 @@
 - snapshot은 FCA tree, 실제 dependency graph, verification analysis, adapter ID와 content-derived hash를 함께 가진다.
 - 노드는 문서, organ convention, 어댑터 entry point, leaf와 purity 증거 순서로 fractal/organ/pure-function을 분류한다. hybrid는 자동 분류하지 않는다.
 - INTENT 50줄·3-tier와 DETAIL 필수 섹션·acceptance group을 검증한다.
-- 14개 built-in rule은 문서, 노드, entry point, boundary, DAG, verification 증거만 평가한다.
+- 15개 built-in rule은 문서, 노드, entry point, boundary, DAG, verification,
+  legacy criteria migration 증거만 평가한다.
 - context resolution은 owner에서 root까지 문서 경로만 반환하고 본문을 복제하지 않는다.
 - placement는 소비자 owner의 lowest common fractal을 사용해 읽기 전용 move plan과 pre/postcondition을 만든다.
 - 불확실한 adapter 분석은 `indeterminate` 또는 `unsupported`이며 PASS가 아니다.
@@ -14,13 +15,13 @@
 
 ## API Contracts
 
-- `createProjectSnapshot(projectRoot, registry, config): Promise<ProjectSnapshot>` — 동일 scan·validate·plan이 소비하는 snapshot 생성.
+- `createProjectSnapshot(projectRoot, registry, config): Promise<ProjectSnapshot>` — 동일 scan·validate·plan이 소비하는 snapshot과 config-derived output language 생성.
 - `resolveContext(snapshot, targetPath): ContextResolution` — owner와 leaf-to-root document refs 반환.
 - `findLowestCommonFractal(tree, consumerPaths): FractalNode | null` — owner ancestor 교집합의 가장 깊은 fractal 반환.
 - `createRestructurePlan(snapshot, input): RestructurePlan` — 절대 source/target, 근거, artifact, import rewrite와 decision 상태 산출.
 - `validatePlanPreconditions(snapshot, plan)` / `validatePlanPostconditions(snapshot, plan)` — hash와 exact target·boundary·DAG 검사.
 - `analyzeVerification(projectRoot, adapters): Promise<VerificationProjectAnalysis>` — 역할, case count, contract link와 certainty 산출.
-- `evaluateRules(snapshot, rules, scopes): RuleEvaluation` — 14개 FCA rule 결과 반환.
+- `evaluateRules(snapshot, rules, scopes): RuleEvaluation` — 15개 FCA rule 결과 반환.
 - built-in IDs: `intent-document-contract`, `detail-document-contract`, `organ-no-intentmd`, `entry-point-surface`, `module-entry-point`, `max-depth`, `circular-dependency`, `pure-function-isolation`, `zero-peer-file`, `external-import-boundary`, `spec-document-case-cap`, `test-record-case-cap`, `spec-fragmentation`, `spec-contract-link`.
 
 ## Acceptance Criteria

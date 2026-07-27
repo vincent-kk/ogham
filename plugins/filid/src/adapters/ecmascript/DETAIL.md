@@ -4,8 +4,13 @@
 
 - adapter는 현재 생태계 source file과 package/framework evidence를 탐지한다.
 - module, executable과 framework entry point를 exact path와 adapter ID로 보고한다.
+- config가 이 adapter에 전달한 exact peer filename은 module entry override로
+  해석한다.
 - entry point의 named exports, direct declarations와 certainty를 lexical scan으로 판정한다.
-- static/dynamic import, re-export와 지원 가능한 framework dependency를 추출하고 local specifier를 정규화한다.
+- static/dynamic import와 re-export 중 project-internal dependency를 추출하고
+  local specifier를 정규화한다.
+- package-level external dependency는 project DAG 후보에서 제외하고, 해석할
+  수 없는 local dependency는 `resolvedPath: null`로 보존한다.
 - strings, comments와 template text 안의 가짜 syntax를 dependency나 export로 세지 않는다.
 - 지원 불가능한 alias·동적 표현은 unsupported/indeterminate evidence를 남긴다.
 - verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
@@ -15,7 +20,8 @@
 - `ecmascriptStructureAdapter: StructureAdapter` — registry에 등록되는 초기 structure adapter.
 - `scanLexicalTokens(source)` — comment/string/template와 delimiter nesting을 보존한 lexical token stream.
 - `extractDependencyReferences(filePath)` — adapter 중립 `DependencyReference[]`.
-- `findEntryPoints(directoryPath)` — module/executable/framework descriptor 배열.
+- `findEntryPoints(directoryPath, overrides?)` —
+  module/executable/framework/configured descriptor 배열.
 - `ecmascriptVerificationAdapter` — spec/test role, semantic case count와
   contract group marker를 분석하는 초기 verification adapter.
 - `countSemanticCases(source)` — 일반/skip/todo/property와 정적 parameterized
@@ -33,7 +39,10 @@
 ### AC-ecmascript-structure — entry와 dependency
 
 - module·executable·framework entry point를 구분하고 named surface를 검사한다.
+- 다른 adapter ID의 override와 섞지 않고 전달된 exact filename만 인식한다.
 - 주석과 문자열 안의 가짜 import/export를 무시한다.
+- 외부 package import는 project DAG를 indeterminate로 만들지 않으며
+  해석되지 않은 local import는 숨기지 않는다.
 
 ### AC-ecmascript-portability — 외부 parser 불필요
 
@@ -47,4 +56,4 @@
 
 ## Last Updated
 
-2026-07-26 — 초기 생태계의 structure·verification 책임을 adapter 내부로 고정했다.
+2026-07-27 — project dependency 경계와 adapter별 entry override를 명시했다.

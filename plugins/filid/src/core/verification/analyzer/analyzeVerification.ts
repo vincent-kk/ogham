@@ -1,3 +1,5 @@
+import { pathForCompare, portableResolve } from '@ogham/cross-platform/paths';
+
 import type {
   AnalyzeVerificationInput,
   VerificationFileAnalysis,
@@ -13,12 +15,26 @@ export async function analyzeVerification(
   const claimedPaths = new Set<string>();
 
   for (const adapter of input.adapters) {
-    const discovered = [...(await adapter.discover(input.projectRoot))].sort();
+    const supplied = input.discoveredPathsByAdapter;
+    const rawPaths = supplied
+      ? (supplied.get(adapter.id) ?? [])
+      : await adapter.discover(input.projectRoot);
+    const discovered = [
+      ...new Map(
+        rawPaths.map((path) => {
+          const absolutePath = portableResolve(input.projectRoot, path);
+          return [pathForCompare(absolutePath), absolutePath] as const;
+        }),
+      ).values(),
+    ].sort((left, right) =>
+      pathForCompare(left).localeCompare(pathForCompare(right)),
+    );
     for (const path of discovered) {
-      if (claimedPaths.has(path)) continue;
+      const key = pathForCompare(path);
+      if (claimedPaths.has(key)) continue;
       const role = await adapter.classify(path);
       if (role === 'unsupported') continue;
-      claimedPaths.add(path);
+      claimedPaths.add(key);
       files.push({
         path,
         adapterId: adapter.id,
@@ -30,8 +46,11 @@ export async function analyzeVerification(
     }
   }
 
-  return evaluateVerificationPolicy(
+  const analysis = evaluateVerificationPolicy(
     files,
     resolveContractGroups(input.detailDocuments ?? []),
   );
+  return analysis.certainty === 'exact' && input.discoveryCertainty
+    ? { ...analysis, certainty: input.discoveryCertainty }
+    : analysis;
 }

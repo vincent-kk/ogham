@@ -2,11 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildDAG,
+  buildDependencyGraph,
   detectCycles,
   getDirectDependencies,
   topologicalSort,
 } from '../../../core/analysis/dependencyGraph/dependencyGraph.js';
-import type { DependencyEdge } from '../../../types/fractal.js';
+import type { DependencyReference } from '../../../types/adapters.js';
+import type {
+  DependencyEdge,
+  DependencyGraph,
+} from '../../../types/fractal.js';
 
 describe('dependency-graph', () => {
   describe('buildDAG', () => {
@@ -139,6 +144,40 @@ describe('dependency-graph', () => {
       const cycles = detectCycles(dag);
       expect(cycles.length).toBeGreaterThan(0);
     });
+
+    it('returns an actual directed closed route rather than sorted component labels', () => {
+      const dag = buildDAG([
+        { from: 'A', to: 'C', type: 'import' },
+        { from: 'C', to: 'B', type: 'import' },
+        { from: 'B', to: 'A', type: 'import' },
+      ]);
+
+      expect(detectCycles(dag)).toEqual([['A', 'C', 'B', 'A']]);
+    });
+
+    it('does not treat Windows path aliases as a cycle', () => {
+      const canonicalOwner = String.raw`C:\Project\feature`;
+      const aliasOwner = 'c:/project/FEATURE';
+      const graph: DependencyGraph = {
+        nodePaths: [canonicalOwner, aliasOwner],
+        edges: [
+          {
+            fromFractalPath: canonicalOwner,
+            toFractalPath: aliasOwner,
+            evidence: [],
+          },
+          {
+            fromFractalPath: aliasOwner,
+            toFractalPath: canonicalOwner,
+            evidence: [],
+          },
+        ],
+        cycles: [],
+        certainty: 'exact',
+      };
+
+      expect(detectCycles(graph)).toEqual([]);
+    });
   });
 
   describe('getDirectDependencies', () => {
@@ -164,6 +203,185 @@ describe('dependency-graph', () => {
     it('should return empty array for non-existent node', () => {
       const dag = buildDAG([]);
       expect(getDirectDependencies(dag, 'X')).toHaveLength(0);
+    });
+  });
+
+  describe('buildDependencyGraph', () => {
+    it('detects an actual owner cycle from adapter dependency evidence', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/a/source.ts',
+          rawSpecifier: '../b/entry.js',
+          resolvedPath: '/project/b/entry.ts',
+          kind: 'static',
+        },
+        {
+          sourceFile: '/project/b/source.ts',
+          rawSpecifier: '../a/entry.js',
+          resolvedPath: '/project/a/entry.ts',
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        ['/project/a', '/project/b'],
+        references,
+        'exact',
+      );
+
+      expect(graph.cycles).toHaveLength(1);
+      expect(new Set(graph.cycles[0])).toEqual(
+        new Set(['/project/a', '/project/b']),
+      );
+    });
+
+    it('aggregates and sorts evidence for the same owner pair', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/a/z-source.ts',
+          rawSpecifier: '../b/z.js',
+          resolvedPath: '/project/b/z.ts',
+          kind: 'static',
+        },
+        {
+          sourceFile: '/project/a/a-source.ts',
+          rawSpecifier: '../b/a.js',
+          resolvedPath: '/project/b/a.ts',
+          kind: 're-export',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        ['/project/b', '/project/a'],
+        references,
+        'exact',
+      );
+
+      expect(graph.edges).toEqual([
+        {
+          fromFractalPath: '/project/a',
+          toFractalPath: '/project/b',
+          evidence: [
+            {
+              sourceFile: '/project/a/a-source.ts',
+              rawSpecifier: '../b/a.js',
+              resolvedPath: '/project/b/a.ts',
+            },
+            {
+              sourceFile: '/project/a/z-source.ts',
+              rawSpecifier: '../b/z.js',
+              resolvedPath: '/project/b/z.ts',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('preserves same-owner evidence without creating a self-cycle', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/a/source.ts',
+          rawSpecifier: './helper.js',
+          resolvedPath: '/project/a/helper.ts',
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(['/project/a'], references, 'exact');
+
+      expect(graph.edges).toEqual([
+        {
+          fromFractalPath: '/project/a',
+          toFractalPath: '/project/a',
+          evidence: [
+            {
+              sourceFile: '/project/a/source.ts',
+              rawSpecifier: './helper.js',
+              resolvedPath: '/project/a/helper.ts',
+            },
+          ],
+        },
+      ]);
+      expect(graph.cycles).toEqual([]);
+    });
+
+    it('marks the graph indeterminate when an internal dependency is unresolved', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/a/source.ts',
+          rawSpecifier: '../missing/entry.js',
+          resolvedPath: null,
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(['/project/a'], references, 'exact');
+
+      expect(graph.certainty).toBe('indeterminate');
+      expect(graph.cycles).toEqual([]);
+    });
+
+    it('resolves Windows owner paths independently of the host OS', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: String.raw`C:\project\a\source.ts`,
+          rawSpecifier: '../b/entry.js',
+          resolvedPath: String.raw`C:\project\b\entry.ts`,
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        [String.raw`C:\project\a`, String.raw`C:\project\b`],
+        references,
+        'exact',
+      );
+
+      expect(graph.edges).toEqual([
+        expect.objectContaining({
+          fromFractalPath: String.raw`C:\project\a`,
+          toFractalPath: String.raw`C:\project\b`,
+        }),
+      ]);
+      expect(graph.certainty).toBe('exact');
+    });
+
+    it('collapses Windows case and separator aliases to canonical owners', () => {
+      const ownerA = String.raw`C:\Project\a`;
+      const ownerB = String.raw`C:\Project\b`;
+      const references: DependencyReference[] = [
+        {
+          sourceFile: 'c:/PROJECT/A/source.ts',
+          rawSpecifier: '../b/entry.js',
+          resolvedPath: String.raw`C:\project\B\entry.ts`,
+          kind: 'static',
+        },
+        {
+          sourceFile: String.raw`c:\project\b\source.ts`,
+          rawSpecifier: '../a/entry.js',
+          resolvedPath: 'C:/PROJECT/A/entry.ts',
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        [ownerA, 'c:/project/A', ownerB, 'c:/PROJECT/B'],
+        references,
+        'exact',
+      );
+
+      expect(graph.nodePaths).toEqual([ownerA, ownerB]);
+      expect(graph.edges).toEqual([
+        expect.objectContaining({
+          fromFractalPath: ownerA,
+          toFractalPath: ownerB,
+        }),
+        expect.objectContaining({
+          fromFractalPath: ownerB,
+          toFractalPath: ownerA,
+        }),
+      ]);
+      expect(graph.cycles).toEqual([[ownerA, ownerB, ownerA]]);
     });
   });
 });
