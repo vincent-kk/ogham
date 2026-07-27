@@ -64,6 +64,11 @@
 - 새 규칙과 MCP 계약은 JS/TS 확장자나 특정 테스트 프레임워크 이름을 core,
   policy, DTO에 넣지 않는다. 현재 생태계의 리터럴은 초기 어댑터 안에서만
   허용한다.
+- machine path의 비교·조합·정규화는 현재 host 파일시스템을 직접 읽는
+  경계를 제외하고 `@ogham/cross-platform`의 portable API를 사용한다.
+- 정적 상수 객체와 배열은 함수 컨텍스트 밖의 module scope에 둔다. 반복되는
+  안정적 문자열 값은 `src/constants`의 object enum 또는 문자열 상수가
+  소유하며, 함수 안에는 입력으로부터 계산되는 동적 collection만 둔다.
 
 ## 목표와 완료 정의
 
@@ -423,13 +428,20 @@ export interface AllowedPeerOverride {
 export interface ProjectSnapshot {
   schemaVersion: 1;
   projectRoot: string;
+  outputLanguage: string;
   snapshotHash: string;
   tree: FractalTree;
   dependencyGraph: DependencyGraph;
   adapterIds: string[];
   verification: VerificationProjectAnalysis;
+  legacyCriteriaLedger: LegacyCriteriaLedgerEvidence | null;
   diagnostics: SnapshotDiagnostic[];
   createdAt: string;
+}
+
+export interface LegacyCriteriaLedgerEvidence {
+  path: string;
+  targetDetailPath: string;
 }
 
 export interface DependencyEvidence {
@@ -466,6 +478,12 @@ export interface SnapshotDiagnostic {
 
 - snapshot hash는 정렬된 상대 경로와 구조 판정에 사용된 파일 내용의 SHA-256을
   결합한다. mtime만으로 판정하지 않는다.
+- legacy `.filid/criteria.md`가 존재하면 snapshot은 절대 ledger path와
+  migration target인 root `DETAIL.md` path를 evidence로 보존하고 ledger
+  내용도 snapshot hash 입력에 포함한다. project-granularity
+  `legacy-criteria-ledger` rule이 이를 violation으로 변환한다.
+- `outputLanguage`는 snapshot 생성에 사용한 config의 문서 출력 언어이며
+  `context_resolve`가 별도 config 재조회 없이 그대로 반환한다.
 - dependency edge는 source file, raw specifier, source/target owner fractal을
   증거로 가진다.
 - 외부 소비자는 대상 fractal의 어댑터 진입점만 참조해야 한다.
@@ -553,6 +571,11 @@ export interface ImportRewrite {
   requiredSpecifier: string;
 }
 
+export interface ImportRewriteBuildResult {
+  rewrites: ImportRewrite[];
+  decisionReasons: RestructureDecisionReason[];
+}
+
 export interface PlacementRequest {
   sourcePath: string;
   consumerPaths?: string[];
@@ -569,7 +592,7 @@ export interface MoveInstruction {
   sourcePath: string;
   targetPath: string;
   unitKind: "file" | "organ" | "fractal";
-  targetNodeType: "organ" | "fractal" | "pure-function";
+  targetNodeType: "organ" | "fractal" | "pure-function" | "undetermined";
   basis: PlacementBasis;
   consumerPaths: string[];
   lowestCommonFractalPath?: string;
@@ -595,11 +618,36 @@ export interface RestructurePlan {
     decisionsRequired: number;
   };
 }
+
+export interface PlanValidationFinding {
+  code: string;
+  message: string;
+  path?: string;
+  sourcePath?: string;
+}
+
+export interface PlanValidationResult {
+  valid: boolean;
+  findings: PlanValidationFinding[];
+}
 ```
 
 - 모든 machine path는 정규화된 절대 경로다.
+- machine path의 비교, containment, relative/join/resolve는
+  `@ogham/cross-platform`의 portable API를 사용해 현재 host OS와 무관하게
+  Windows/POSIX 경로 의미를 보존한다.
 - `requiredArtifacts`는 역할과 실제 경로를 함께 반환한다. core DTO에는
   특정 언어의 진입점 파일명이 없다.
+- 새 fractal의 entry point artifact는 snapshot에 이미 보존된
+  adapter-reported entry point 경로 형태에서만 파생한다. exact evidence가
+  없으면 이름을 추측하지 않고 해당 move를 unresolved로 반환한다.
+- `contractIntent: "unknown"`에서 독립성 증거가 없으면
+  `targetNodeType: "undetermined"`로 반환한다. unresolved move의 target은
+  실행 지시가 아니라 LCA 아래의 검토 후보이며 자동 organ 선택이 아니다.
+- `affectedImports.requiredSpecifier`는 현재 raw specifier가 source machine
+  path를 exact하게 지시하는 path-like evidence일 때만 portable relative
+  target으로 산출한다. alias, runtime-extension mapping 등 adapter 의미가
+  필요한 경우에는 추측하지 않고 move를 unresolved로 반환한다.
 - `restructure_plan`은 프로젝트 파일을 쓰거나 옮기지 않는다. 임시 artifact
   저장만 허용한다.
 - 외부 LLM/도구가 계획을 실행한다.
@@ -609,6 +657,9 @@ export interface RestructurePlan {
 - 사후 snapshot hash는 이동 때문에 달라지는 것이 정상이다. postcondition에서
   pre-execution hash 일치를 요구하지 않는다.
 - 계획과 다른 target으로 옮긴 경우 결과가 기능적으로 동작해도 FAIL이다.
+- `validatePlanPreconditions(snapshot, plan)`과
+  `validatePlanPostconditions(snapshot, plan)`은 `PlanValidationResult`를
+  반환하며 모든 finding이 없을 때만 `valid: true`다.
 
 ## MCP 반환 계약
 
@@ -652,11 +703,29 @@ export interface ToolResultEnvelope<Summary, Data> {
 - 기본 inline 예산은 UTF-8 기준 **16 KiB**다.
 - 예산을 넘으면 `data`를 빼고 전체 payload를 plugin cache의
   `artifacts/<tool-name>/<sha256>.json`에 atomic write한다.
+- artifact와 inline text는 동일한 compact serializer를 사용하며 `Map`과
+  `Set` 정규화, byte 계산, SHA-256 입력이 모두 그 직렬화 결과를 기준으로 한다.
+- artifact path는 lexical containment와 symlink-descendant 검사를 모두
+  통과한 뒤에만 쓴다.
 - `persistence: always`인 restructure plan은 크기와 관계없이 artifact를 남긴다.
+- `persistence: always`인 payload는 저장된 full payload를 단일 data source로
+  사용하고 inline envelope의 `data`를 생략한다.
+- `data` 제거 후 실제 inline envelope도 다시 byte-check한다. diagnostics가
+  예산을 넘기면 full diagnostics는 artifact에만 두고 bounded diagnostic으로
+  대체한다. summary와 artifact metadata만으로도 예산을 넘으면 안정적
+  structured tool error를 반환하며 16 KiB 상한을 깨지 않는다.
 - inline JSON은 들여쓰기 없이 직렬화한다.
 - artifact는 임시 자료이며 장기 원장이 아니다. 없어진 경우 snapshot을 다시
   만들고 계획을 재생성한다.
+- `structure_validate`는 canonical full-payload artifact의 `data`에서
+  `RestructurePlan`을 읽는다. 이행 characterization을 위해 기존 bare-plan
+  artifact도 같은 validator schema로 계속 읽을 수 있다.
 - 반환이 길어질 가능성이 있는 모든 새 도구는 이 envelope를 우회할 수 없다.
+- `toolResult(toolName, payload)`가 tool name과 payload를 받아 materialize와
+  compact MCP text 직렬화를 수행한다.
+- SDK에 광고하는 input schema는 object 형태를 유지하되 사전 오류를 callback
+  경계까지 전달한다. `wrapHandler(toolName, exactSchema, handler)`가 exact
+  schema를 검증하고 parse failure까지 공통 `toolError` envelope로 바꾼다.
 
 ## 목표 MCP 표면
 
@@ -673,6 +742,12 @@ export interface ToolResultEnvelope<Summary, Data> {
 | `structure_validate` | path, mode, scopes, plan path              | 위반 요약 + 필요 시 artifact     | 프로젝트/계획 검증       |
 | `verification_scan`  | path, optional file paths, detail          | 15/32/fragmentation 요약         | 검증 문서 판정           |
 | `review_state`       | prepare/checkpoint/seal/cleanup            | review artifact 상태             | cross-review bookkeeping |
+
+`verification_scan.summary`는 `specDocument`와 `testRecord`별
+`fileCount`, `knownCaseCount`, `caseCap`을 분리하고 전체
+`fragmentationCount`, `violationCount`, certainty를 함께 반환한다.
+`rule_docs_sync`의 status/manifest에서 plugin root를 해석하지 못한 경우는
+`ok`가 아니라 `unsupported`와 안정적 diagnostic을 반환한다.
 
 `structure_validate.mode`은 정확히 다음을 허용한다.
 
@@ -740,6 +815,47 @@ export type ReviewStateInput =
       confirm: true;
     };
 ```
+
+review state의 persisted/output 계약은 다음으로 고정한다.
+
+```ts
+export type ReviewStatePhase = "prepared" | "sealed";
+export type ReviewStateDisposition =
+  | "fresh"
+  | "resumable"
+  | "cached"
+  | "stale"
+  | "missing"
+  | "sealed"
+  | "cleaned";
+
+export interface ReviewStateRecord {
+  schemaVersion: 1;
+  projectRoot: string;
+  branchName: string;
+  normalizedBranch: string;
+  baseRef: string;
+  baseCommit: string;
+  sourceHash: string;
+  fileHashes: Record<string, string>;
+  phase: ReviewStatePhase;
+  preparedAt: string;
+  sealedAt?: string;
+}
+```
+
+- `prepare`는 새 state면 `fresh`, 같은 hash의 prepared state면 `resumable`,
+  같은 hash의 sealed state와 report가 있으면 `cached`다. `force: true`는
+  cache를 사용하지 않고 fresh prepared state를 쓴다.
+- `checkpoint`는 state 부재 `missing`, hash 불일치 `stale`, matching prepared
+  `resumable`, matching sealed+report `cached`다. state, review directory,
+  정렬된 canonical artifact file 목록과 optional report path를 반환한다.
+- `seal`은 matching prepared hash와 review report가 있을 때만 state를
+  `sealed`로 바꾸고 disposition `sealed`을 반환한다.
+- `cleanup`은 literal `confirm: true` 뒤 branch directory만 제거하고
+  disposition `cleaned`을 반환한다.
+- `stale`과 `missing`은 `ok` status가 아니며 message parsing 없이 stable
+  disposition과 diagnostics로 판정할 수 있어야 한다.
 
 - `restructure_plan`은 위 `RestructurePlanInput`을 그대로 쓴다.
 - 생략된 `consumerPaths`는 dependency graph의 incoming edge로 계산한다.
@@ -846,6 +962,7 @@ finding을 `CONFIRMED | PLAUSIBLE | REFUTED`로 판정한다. REFUTED는 verdict
 | `test-record-case-cap`     | VerificationAdapter                | 파일별 32                  |
 | `spec-fragmentation`       | DETAIL groups + verification files | cap 회피 분할 금지         |
 | `spec-contract-link`       | DETAIL groups + adapter marker     | 다중 spec의 계약 연결      |
+| `legacy-criteria-ledger`   | ProjectSnapshot legacy evidence    | root DETAIL migration 경고 |
 
 `naming-convention`, CC, LCOM4, file-size, coverage rule은 Filid built-in에서
 제거한다. adapter가 정확히 측정하지 못한 rule은 PASS 대신
@@ -876,7 +993,7 @@ finding을 `CONFIRMED | PLAUSIBLE | REFUTED`로 판정한다. REFUTED는 verdict
 
 계약:
 
-- 이 문서의 소유권 표, 14개 rule, 15/32 의미, language-neutral adapter,
+- 이 문서의 소유권 표, 15개 rule, 15/32 의미, language-neutral adapter,
   read-only restructure와 FCA-scope cross-review를 반영한다.
 - DETAIL.md에 `## Acceptance Criteria`를 추가한다.
 - 생성물 `AGENTS.md`는 직접 수정하지 않는다.
@@ -1119,12 +1236,29 @@ yarn filid typecheck
 - `plugins/filid/src/core/restructure/index.ts`
 - `plugins/filid/src/core/restructure/planner/createRestructurePlan.ts`
 - `plugins/filid/src/core/restructure/planner/planMoveInstruction.ts`
+- `plugins/filid/src/core/restructure/planner/resolveConsumerPaths.ts`
+- `plugins/filid/src/core/restructure/planner/resolveContractIntent.ts`
+- `plugins/filid/src/core/restructure/planner/resolveUnitKind.ts`
+- `plugins/filid/src/core/restructure/planner/buildTargetCandidate.ts`
+- `plugins/filid/src/core/restructure/planner/buildRequiredArtifacts.ts`
 - `plugins/filid/src/core/restructure/imports/buildImportRewrites.ts`
 - `plugins/filid/src/core/restructure/validator/validatePlanPreconditions.ts`
 - `plugins/filid/src/core/restructure/validator/validatePlanPostconditions.ts`
+- `plugins/filid/src/core/restructure/validator/snapshotContainsPath.ts`
+- `plugins/filid/src/core/restructure/validator/resolveTargetNode.ts`
+- `plugins/filid/src/core/restructure/validator/validateRequiredArtifacts.ts`
+- `plugins/filid/src/core/restructure/validator/validateImportRewrites.ts`
+- `plugins/filid/src/core/restructure/validator/validateMovePostconditions.ts`
+- `plugins/filid/src/core/restructure/validator/validateBoundaryPostconditions.ts`
+- `plugins/filid/src/core/restructure/validator/validateDependencyPostconditions.ts`
 - `plugins/filid/src/core/analysis/lcaCalculator/findLowestCommonFractal.ts`
 - `plugins/filid/src/core/analysis/lcaCalculator/resolveOwningFractal.ts`
 - `plugins/filid/src/core/analysis/lcaCalculator/DETAIL.md`
+- `plugins/filid/src/constants/analysisCertainties.ts`
+- `plugins/filid/src/constants/nodeTypes.ts`
+- `plugins/filid/src/constants/pathMarkers.ts`
+- `plugins/filid/src/constants/restructure.ts`
+- `plugins/filid/src/constants/ruleScopes.ts`
 - `plugins/filid/src/types/restructure.ts`
 
 수정:
@@ -1166,6 +1300,16 @@ yarn filid typecheck
 모든 명령은 exit 0이어야 하며 테스트 임시 project의 plan 전·후 file tree
 비교에서 plan 생성 자체의 변경은 0개여야 한다.
 
+Task 4의 고정 placement kind, artifact role, decision reason과 validation code는
+`src/constants/restructure.ts`의 module-scope object enum/문자열 상수가
+소유한다. 함수 내부에는 입력에서 계산된 동적 collection만 두며 같은 domain
+값을 raw 문자열로 반복하지 않는다.
+
+`planner/`, `imports/`, `validator/`는 leaf organ으로 유지한다. organ 아래
+`helpers/`를 만들지 않고 분리 함수 파일을 해당 organ에 flat하게 둔다. Seiri의
+helper 하위 배치 기본과 FCA organ leaf 규칙이 충돌할 때 저장소 FCA 규칙이
+우선한다.
+
 ### 작업 5 — 공통 artifact envelope와 9개 MCP 도구
 
 생성:
@@ -1174,8 +1318,12 @@ yarn filid typecheck
 - `plugins/filid/src/core/infra/artifactStore/DETAIL.md`
 - `plugins/filid/src/core/infra/artifactStore/index.ts`
 - `plugins/filid/src/core/infra/artifactStore/artifactStore.ts`
-- `plugins/filid/src/core/infra/artifactStore/writeArtifactAtomic.ts`
+- `plugins/filid/src/core/infra/artifactStore/operations/writeArtifactAtomic.ts`
+- `plugins/filid/src/constants/toolEnvelope.ts`
+- `plugins/filid/src/constants/mcpContracts.ts`
+- `plugins/filid/src/constants/reviewState.ts`
 - `plugins/filid/src/types/toolEnvelope.ts`
+- `plugins/filid/src/mcp/tools/utils/createToolSnapshot.ts`
 - `plugins/filid/src/mcp/tools/contextResolve/INTENT.md`
 - `plugins/filid/src/mcp/tools/contextResolve/DETAIL.md`
 - `plugins/filid/src/mcp/tools/contextResolve/index.ts`
@@ -1196,6 +1344,11 @@ yarn filid typecheck
 - `plugins/filid/src/mcp/tools/reviewState/handlers/readReviewCheckpoint.ts`
 - `plugins/filid/src/mcp/tools/reviewState/handlers/sealReviewState.ts`
 - `plugins/filid/src/mcp/tools/reviewState/handlers/cleanupReviewState.ts`
+- `plugins/filid/src/mcp/server/handlers/handleProjectInitTool.ts`
+- `plugins/filid/src/mcp/server/handlers/handleRuleDocsSyncTool.ts`
+- `plugins/filid/src/mcp/server/handlers/handleOpenSettingsTool.ts`
+- `plugins/filid/src/mcp/tools/structureValidate/DETAIL.md`
+- `plugins/filid/src/mcp/tools/ruleDocsSync/DETAIL.md`
 
 수정:
 
@@ -1204,46 +1357,41 @@ yarn filid typecheck
 - `plugins/filid/src/mcp/server/toolResult.ts`
 - `plugins/filid/src/mcp/server/toolError.ts`
 - `plugins/filid/src/mcp/server/wrapHandler.ts`
-- `plugins/filid/src/mcp/server/serverHelpers.ts`
 - `plugins/filid/src/mcp/tools/index.ts`
 - `plugins/filid/src/index.ts`
 - `plugins/filid/src/core/index.ts`
 - `plugins/filid/src/core/analysis/index.ts`
 - `plugins/filid/src/core/analysis/lcaCalculator/lcaCalculator.ts`
+- `plugins/filid/src/core/analysis/lcaCalculator/INTENT.md`
+- `plugins/filid/src/core/analysis/lcaCalculator/DETAIL.md`
+- `plugins/filid/src/core/infra/INTENT.md`
+- `plugins/filid/src/mcp/tools/INTENT.md`
 - `plugins/filid/src/mcp/tools/fractalScan/fractalScan.ts`
 - `plugins/filid/src/mcp/tools/fractalScan/utils/buildScanResult.ts`
+- `plugins/filid/src/mcp/tools/fractalScan/INTENT.md`
 - `plugins/filid/src/mcp/tools/fractalScan/DETAIL.md`
+- `plugins/filid/src/mcp/tools/structureValidate/INTENT.md`
 - `plugins/filid/src/mcp/tools/structureValidate/structureValidate.ts`
+- `plugins/filid/src/mcp/tools/projectInit/INTENT.md`
+- `plugins/filid/src/mcp/tools/projectInit/DETAIL.md`
 - `plugins/filid/src/mcp/tools/projectInit/projectInit.ts`
+- `plugins/filid/src/mcp/tools/ruleDocsSync/INTENT.md`
 - `plugins/filid/src/mcp/tools/ruleDocsSync/ruleDocsSync.ts`
+- `plugins/filid/src/mcp/tools/openSettings/INTENT.md`
+- `plugins/filid/src/mcp/tools/openSettings/DETAIL.md`
 - `plugins/filid/src/mcp/tools/openSettings/openSettings.ts`
 - `plugins/filid/src/types/report.ts`
 - `plugins/filid/src/types/review.ts`
 - `plugins/filid/src/types/index.ts`
 
-삭제:
+Task 5에서는 아래 legacy 구현을 server registry, tool-name object enum과 public
+barrel에서 제거해 관찰 가능한 MCP/core 표면을 닫는다. 구현 파일과 직접
+characterization test의 물리 삭제는 import graph가 함께 사라지는 Task 8로
+연기한다.
 
-- `plugins/filid/src/mcp/tools/astAnalyze/`
-- `plugins/filid/src/mcp/tools/astGrepReplace/`
-- `plugins/filid/src/mcp/tools/astGrepSearch/`
-- `plugins/filid/src/mcp/tools/cacheManage/`
-- `plugins/filid/src/mcp/tools/configPatchValidate/`
-- `plugins/filid/src/mcp/tools/coverageVerify/`
-- `plugins/filid/src/mcp/tools/debtManage/`
-- `plugins/filid/src/mcp/tools/docCompress/`
-- `plugins/filid/src/mcp/tools/driftDetect/`
-- `plugins/filid/src/mcp/tools/fractalNavigate/`
-- `plugins/filid/src/mcp/tools/lcaResolve/`
-- `plugins/filid/src/mcp/tools/reviewManage/`
-- `plugins/filid/src/mcp/tools/ruleQuery/`
-- `plugins/filid/src/mcp/tools/testMetrics/`
-- `plugins/filid/src/metrics/`
-- `plugins/filid/src/constants/qualityThresholds.ts`
-- `plugins/filid/src/core/rules/driftDetector/`
-- `plugins/filid/src/types/drift.ts`
-- `plugins/filid/src/constants/driftMappings.ts`
-- `plugins/filid/src/core/analysis/lcaCalculator/findLca.ts`
-- `plugins/filid/src/core/analysis/lcaCalculator/getModulePlacement.ts`
+더 이상 consumer가 없는 `plugins/filid/src/mcp/server/serverHelpers.ts`
+grab-bag facade는 Task 5에서 삭제하고 server assembly는 concrete helper를
+직접 import한다.
 
 테스트:
 
@@ -1266,24 +1414,6 @@ yarn filid typecheck
   `plugins/filid/src/__tests__/unit/mcp/toolResult.test.ts`
 - 수정
   `plugins/filid/src/__tests__/unit/mcp/serverLifecycle.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/mcp/reviewManage.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/mcp/reviewManageSummary.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/mcp/reviewFormat.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/core/driftDetector.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/core/driftDetectorSync.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/metrics/decisionTree.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/metrics/promotionTracker.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/metrics/testCaseGate.test.ts`
-- 삭제
-  `plugins/filid/src/__tests__/unit/metrics/testCounter.test.ts`
 
 필수 결과:
 
@@ -1321,10 +1451,30 @@ yarn filid typecheck
 - `plugins/filid/src/core/infra/cacheManager/cacheManager.ts`
 - `plugins/filid/src/core/infra/cacheManager/DETAIL.md`
 - `plugins/filid/src/core/infra/cacheManager/INTENT.md`
+- `plugins/filid/src/core/projectSnapshot/projectSnapshot.ts`
+- `plugins/filid/src/core/projectSnapshot/DETAIL.md`
+- `plugins/filid/src/core/projectSnapshot/INTENT.md`
+- `plugins/filid/src/core/rules/ruleEngine/loadBuiltinRules.ts`
+- `plugins/filid/src/core/rules/ruleEngine/DETAIL.md`
+- `plugins/filid/src/core/rules/ruleEngine/INTENT.md`
+- `plugins/filid/src/constants/builtinRuleIds.ts`
 - `plugins/filid/src/constants/documentValidation.ts`
 - `plugins/filid/src/types/documents.ts`
+- `plugins/filid/src/types/hooks.ts`
+- `plugins/filid/src/types/index.ts`
+- `plugins/filid/src/types/fractal.ts`
+- `plugins/filid/src/index.ts`
+- `plugins/filid/src/hooks/index.ts`
+- `plugins/filid/src/__tests__/bench/fixtures/generator.ts`
 - `plugins/filid/scripts/buildHooks.mjs`
 - `plugins/filid/hooks/hooks.json`
+- `plugins/filid/templates/hooks/README.md`
+- `plugins/filid/src/__tests__/bench/process/hookSpawn.bench.ts`
+
+생성:
+
+- `plugins/filid/src/core/projectSnapshot/evidence/collectLegacyCriteriaLedger.ts`
+- `plugins/filid/src/core/rules/ruleEngine/utils/checkLegacyCriteriaLedger.ts`
 
 삭제:
 
@@ -1358,6 +1508,10 @@ yarn filid typecheck
   `plugins/filid/src/hooks/userPromptSubmit/__tests__/userPromptSubmit.test.ts`
 - 수정
   `plugins/filid/src/__tests__/integration/hookBundles.test.ts`
+- 수정
+  `plugins/filid/src/core/projectSnapshot/__tests__/projectSnapshot.spec.ts`
+- 수정
+  `plugins/filid/src/__tests__/unit/core/ruleEngineRules.test.ts`
 - 삭제
   `plugins/filid/src/__tests__/unit/core/validateCriteriaMd.test.ts`
 - 삭제
@@ -1421,6 +1575,7 @@ cross-review에서 삭제:
 
 제거:
 
+- `plugins/filid/skills/.DS_Store`
 - `plugins/filid/skills/ast-fallback/`
 - `plugins/filid/skills/config-wizard/`
 - `plugins/filid/skills/harvest/`
@@ -1448,11 +1603,12 @@ finding만 포함하도록 갱신한다.
 
 ```bash
 yarn plugin:adapters
-rg -n "ast_analyze|test_metrics|lca_resolve|code-surgeon|criteria\\.md|3\\+12|LCOM4|cyclomatic" plugins/filid/skills
+rg -n "ast_analyze|ast_grep|test_metrics|fractal_navigate|rule_query|drift_detect|lca_resolve|config_patch_validate|coverage_verify|debt_manage|cache_manage|review_manage|code-surgeon|criteria\\.md|3\\+12|LCOM4|cyclomatic" plugins/filid/skills
+find plugins/filid/skills -mindepth 1 -maxdepth 1 -type d | wc -l
 ```
 
 첫 명령 후 생성 adapter가 8개 스킬만 포함해야 한다. 두 번째 명령의 남은
-매치는 0이어야 한다.
+매치는 0이어야 하며 세 번째 명령은 8이어야 한다.
 
 ### 작업 8 — stale source와 npm library 표면 제거
 
@@ -1460,25 +1616,49 @@ rg -n "ast_analyze|test_metrics|lca_resolve|code-surgeon|criteria\\.md|3\\+12|LC
 
 - `plugins/filid/src/ast/`
 - `plugins/filid/src/compress/`
+- `plugins/filid/src/mcp/tools/astAnalyze/`
+- `plugins/filid/src/mcp/tools/astGrepReplace/`
+- `plugins/filid/src/mcp/tools/astGrepSearch/`
+- `plugins/filid/src/mcp/tools/cacheManage/`
+- `plugins/filid/src/mcp/tools/configPatchValidate/`
+- `plugins/filid/src/mcp/tools/coverageVerify/`
+- `plugins/filid/src/mcp/tools/debtManage/`
+- `plugins/filid/src/mcp/tools/docCompress/`
+- `plugins/filid/src/mcp/tools/driftDetect/`
+- `plugins/filid/src/mcp/tools/fractalNavigate/`
+- `plugins/filid/src/mcp/tools/lcaResolve/`
+- `plugins/filid/src/mcp/tools/reviewManage/`
+- `plugins/filid/src/mcp/tools/ruleQuery/`
+- `plugins/filid/src/mcp/tools/testMetrics/`
 - `plugins/filid/src/core/coverageVerify/`
 - `plugins/filid/src/core/analysis/projectAnalyzer/`
+- `plugins/filid/src/core/analysis/lcaCalculator/findLca.ts`
+- `plugins/filid/src/core/analysis/lcaCalculator/getModulePlacement.ts`
+- `plugins/filid/src/core/rules/driftDetector/`
 - `plugins/filid/src/core/module/`
 - `plugins/filid/src/core/prSummary/`
 - `plugins/filid/src/core/infra/changeQueue/`
+- `plugins/filid/src/core/infra/projectHash/`
 - `plugins/filid/src/hooks/changeTracker/`
+- `plugins/filid/src/metrics/`
 - `plugins/filid/src/types/ast.ts`
 - `plugins/filid/src/types/coverage.ts`
 - `plugins/filid/src/types/debt.ts`
+- `plugins/filid/src/types/drift.ts`
 - `plugins/filid/src/types/handoff.ts`
 - `plugins/filid/src/types/metrics.ts`
+- `plugins/filid/src/types/review.ts`
 - `plugins/filid/src/types/summary.ts`
 - `plugins/filid/src/constants/astLanguages.ts`
 - `plugins/filid/src/constants/debtDefaults.ts`
 - `plugins/filid/src/constants/decisionPoints.ts`
+- `plugins/filid/src/constants/driftMappings.ts`
 - `plugins/filid/src/constants/entryCandidates.ts`
 - `plugins/filid/src/constants/handoffTokens.ts`
 - `plugins/filid/src/constants/healthScore.ts`
+- `plugins/filid/src/constants/qualityThresholds.ts`
 - `plugins/filid/src/constants/reviewProbabilities.ts`
+- `plugins/filid/src/constants/reviewDefaults.ts`
 - `plugins/filid/src/lib/normalizeFixRequest.ts`
 - `plugins/filid/src/__tests__/unit/types/handoff.test.ts`
 - `plugins/filid/src/index.ts`
@@ -1495,6 +1675,8 @@ rg -n "ast_analyze|test_metrics|lca_resolve|code-surgeon|criteria\\.md|3\\+12|LC
 - `plugins/filid/src/__tests__/unit/compress/reversibleCompactor.test.ts`
 - `plugins/filid/src/__tests__/unit/core/analyzeProjectConfig.test.ts`
 - `plugins/filid/src/__tests__/unit/core/changeQueue.test.ts`
+- `plugins/filid/src/__tests__/unit/core/driftDetector.test.ts`
+- `plugins/filid/src/__tests__/unit/core/driftDetectorSync.test.ts`
 - `plugins/filid/src/__tests__/unit/core/extractVerdict.test.ts`
 - `plugins/filid/src/__tests__/unit/core/findCentralizedTest.test.ts`
 - `plugins/filid/src/__tests__/unit/core/findNestedModuleTest.test.ts`
@@ -1519,19 +1701,39 @@ rg -n "ast_analyze|test_metrics|lca_resolve|code-surgeon|criteria\\.md|3\\+12|LC
 - `plugins/filid/src/__tests__/unit/mcp/debtManage.test.ts`
 - `plugins/filid/src/__tests__/unit/mcp/docCompress.test.ts`
 - `plugins/filid/src/__tests__/unit/mcp/fractalNavigate.test.ts`
+- `plugins/filid/src/__tests__/unit/mcp/configWarningsPropagation.test.ts`
+- `plugins/filid/src/__tests__/unit/mcp/reviewFormat.test.ts`
+- `plugins/filid/src/__tests__/unit/mcp/reviewManage.test.ts`
+- `plugins/filid/src/__tests__/unit/mcp/reviewManageSummary.test.ts`
 - `plugins/filid/src/__tests__/unit/mcp/testMetrics.test.ts`
+- `plugins/filid/src/__tests__/unit/metrics/decisionTree.test.ts`
+- `plugins/filid/src/__tests__/unit/metrics/promotionTracker.test.ts`
+- `plugins/filid/src/__tests__/unit/metrics/testCaseGate.test.ts`
+- `plugins/filid/src/__tests__/unit/metrics/testCounter.test.ts`
 - `plugins/filid/src/__tests__/bench/hooks/changeTracker.bench.ts`
 
 수정:
 
 - `plugins/filid/package.json`
+- `plugins/filid/DETAIL.md`
+- `plugins/filid/CLAUDE.md`
+- `plugins/filid/src/adapters/INTENT.md`
+- `plugins/filid/src/adapters/ecmascript/INTENT.md`
+- `plugins/filid/src/core/tree/fractalTree/DETAIL.md`
 - `plugins/filid/scripts/buildMcpServer.mjs`
 - `plugins/filid/src/core/index.ts`
+- `plugins/filid/src/core/infra/index.ts`
+- `plugins/filid/src/core/infra/INTENT.md`
+- `plugins/filid/src/core/rules/ruleEngine/utils/isExempt.ts`
 - `plugins/filid/src/types/report.ts`
 - `plugins/filid/src/types/index.ts`
 - `plugins/filid/src/mcp/tools/index.ts`
+- `plugins/filid/src/__tests__/unit/core/lcaCalculator.test.ts`
+- `plugins/filid/src/__tests__/unit/core/cacheManager.test.ts`
+- `plugins/filid/src/__tests__/unit/core/isExempt.test.ts`
 - `plugins/filid/src/__tests__/bench/fixtures/generator.ts`
 - `plugins/filid/src/__tests__/bench/scaling/complexityScaling.bench.ts`
+- `plugins/filid/scripts/buildHooks.mjs`
 - `yarn.lock`
 
 package 결정:
@@ -1604,6 +1806,28 @@ git status --short
 - build와 adapter check, e2e가 exit 0이다.
 - 생성물 diff에 9개 MCP 도구, 8개 스킬, agent-enforcer 부재가 반영된다.
 - `git status --short`에는 의도한 Filid와 `.metadata/filid` 변경만 보인다.
+
+### 작업 10 — 전역 상수·함수 경계·FCA 적합성과 독립 검증
+
+작업 0–9 완료 후 `plugins/filid`의 canonical source와 문서를 전체 감사한다.
+생성물은 source 변경 후 공식 build 결과만 검토하며 직접 고치지 않는다.
+
+- 반복되는 domain/protocol/status/role/path/config 문자열은
+  `src/constants`의 object enum 또는 문자열 상수가 소유한다. 자연어 진단,
+  단일 테스트 fixture content처럼 중앙 관리 대상이 아닌 문자열은 제외한다.
+- 정적 상수 객체·배열은 module scope에 둔다. 입력에서 계산되는 collection만
+  함수 context에 둔다.
+- 새로 쓰거나 이동한 함수는 한 파일 한 exported function과 graspable
+  orchestration을 지킨다. organ은 flat leaf라는 FCA 규칙이 helper 하위 배치
+  기본보다 우선한다.
+- 각 fractal의 문서, named entry point, 외부 import 경계와 touched dependency
+  DAG를 검사하고 새 finding을 0으로 만든다. 전체 Filid 구조검사는 컨텍스트
+  비용을 줄이기 위해 모든 개발·리팩터링이 끝난 뒤 이 작업에서 한 번 수행한다.
+- 최소 두 개의 독립 review context가 전체 plugin diff와 AC-01~AC-20 증거를
+  각각 검토한다. 지적은 `/seiri:receive-review`로 실제 코드에서 재검증한 뒤
+  수용하거나 근거와 함께 기각한다.
+- full test/build/e2e와 아래 최종 검증을 통과한 후 review seam별로 커밋한다.
+  push와 PR 생성은 하지 않는다.
 
 ## Acceptance Criteria
 
