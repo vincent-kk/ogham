@@ -1,83 +1,100 @@
 ---
 name: guide
 user_invocable: true
-description: '[filid:guide] Scan the project hierarchy and query all active rules to generate a human-readable fractal structure guide with node classifications and new-module placement guidance for teams.'
+description: '[filid:guide] Explain the current FCA tree, classifications, validation findings, and evidence-based placement rules without changing project structure.'
 argument-hint: '[path]'
-version: '1.0.0'
+version: '2.0.0'
 complexity: simple
 plugin: filid
 ---
 
-# guide — Fractal Structure Guide
+# guide — Current FCA Structure
 
-Scan the project's fractal structure and query all active rules to produce a human-readable guidance document. Helps team members understand filid conventions and how the current project is classified, so new modules are placed correctly.
+Produce a human-readable guide to the current tree and its placement rules.
+The guide describes observed evidence and does not modify files.
 
-> **Detail Reference**: For detailed workflow steps, MCP tool call examples, and output format templates, read the `reference.md` file in this skill's directory (same location as this SKILL.md).
+See [reference.md](./reference.md) for exact calls, placement interpretation,
+and output format.
 
-## When to Use This Skill
+## When to Use
 
-- Introducing filid to a team and explaining its rules in project context
-- Quickly checking how well the current structure follows fractal principles
-- Confirming the category (fractal / organ / pure-function / hybrid) of a directory
-- Getting guidance on where to place a new module without causing violations
-- Reviewing the current state before running `/filid:restructure` or `/filid:sync`
+- onboarding a team to the current FCA structure
+- locating fractal, organ, pure-function, and hybrid nodes
+- understanding current document, entry-point, boundary, or DAG findings
+- deciding where a new module belongs before requesting a movement plan
 
-## Core Workflow
+Use `/filid:scan` for the full audit verdict. Use `/filid:restructure` when a
+specific source-to-target plan and postconditions are needed.
 
-### Phase 1 — Project Scan
+## Workflow
 
-Retrieve the full directory tree and node classifications using the `mcp__plugin_filid_tools__fractal_scan` MCP tool. If `mcp__plugin_filid_tools__fractal_scan` returns an empty tree (no FCA-AI project detected or empty directory), report "No FCA-AI structure found at the target path. Run `/filid:setup` to initialize the project." and exit. See [reference.md Section 1](./reference.md#section-1--project-scan).
+### Phase 1 — Current Tree
 
-### Phase 2 — Rule Query
+Call:
 
-Fetch all active rules using `mcp__plugin_filid_tools__rule_query` (`action: "list"`) to build the rule reference table included in the guide. See [reference.md Section 2](./reference.md#section-2--rule-query).
-
-### Phase 3 — Classification Summary
-
-Summarise the node category distribution from the scan results. Include any existing violations so readers know the current health status. See [reference.md Section 3](./reference.md#section-3--classification-summary).
-
-### Phase 4 — Guide Document Output
-
-Combine rules, category criteria, the classification summary, and a new-module checklist into a single guide document. See [reference.md Section 4](./reference.md#section-4--guide-document-output).
-
-## Available MCP Tools
-
-| Tool                                    | Action | Purpose                                                      |
-| --------------------------------------- | ------ | ------------------------------------------------------------ |
-| `mcp__plugin_filid_tools__fractal_scan` | —      | Retrieve complete project hierarchy and node classifications |
-| `mcp__plugin_filid_tools__rule_query`   | `list` | Fetch all active rules                                       |
-
-## Options
-
-> Options are LLM-interpreted hints, not strict CLI flags. Natural language works equally well.
-
-```
-/filid:guide [path]
+```text
+mcp__plugin_filid_tools__fractal_scan({
+  path: "<target-path>",
+  detail: "paths"
+})
 ```
 
-| Parameter | Type   | Default                   | Description                         |
-| --------- | ------ | ------------------------- | ----------------------------------- |
-| `path`    | string | Current working directory | Root directory to scan and document |
+Use the returned classifications, document state, and entry-point counts
+directly. Preserve snapshot hash, adapter IDs, certainty, status, and
+diagnostics.
 
-## Quick Reference
+### Phase 2 — Current Findings
 
-```bash
-# Guide for current project
-/filid:guide
+Call:
 
-# Guide for a specific sub-directory
-/filid:guide src/features
-
-# Category classification criteria (priority order per .claude/rules/filid_fca-policy.md)
-fractal       = INTENT.md or DETAIL.md present, or default when no organ/pure rule applies
-organ         = Directory name in KNOWN_ORGAN_DIR_NAMES (priority 2, name-based), or __wrapped__, or .dot-prefixed, or leaf dir with no fractal children
-pure-function = Stateless, no side effects, no I/O
-hybrid        = Mix of fractal children and organ-like files
+```text
+mcp__plugin_filid_tools__structure_validate({
+  path: "<target-path>",
+  mode: "project",
+  scopes: [
+    "documents",
+    "nodes",
+    "entry-points",
+    "boundaries",
+    "dag",
+    "verification"
+  ]
+})
 ```
 
-Key rules:
+Present configured validation by scope and cite rule IDs from actual findings.
+Do not invent a separate active-rule list.
 
-- Organ directories must not contain fractal child nodes
-- Fractal nodes must have an index.ts barrel export
-- index.ts (barrel) is the primary entry point for a fractal node; main.ts is used for executable/CLI modules
-- Naming convention: camelCase (default); kebab-case or PascalCase (e.g., React components) allowed per domain
+### Phase 3 — Placement Guidance
+
+Explain placement from the observed owner graph:
+
+- shared code goes at the nearest common ancestor of consumers
+- new fractals require documented boundaries and an entry point
+- organs stay flat and do not contain INTENT.md
+- external imports use module entry points
+- sibling imports target the sibling entry point
+- dependencies remain acyclic
+
+When consumers or ownership are uncertain, label the answer unresolved rather
+than naming a target path.
+
+### Phase 4 — Guide
+
+Emit the current-structure table, current findings, placement rules, and new
+module checklist from the reference. Non-OK status or diagnostics remain
+visible.
+
+## MCP Surface
+
+| Tool                                          | Purpose                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------- |
+| `mcp__plugin_filid_tools__fractal_scan`       | current tree, classifications, documents, and entry-point counts |
+| `mcp__plugin_filid_tools__structure_validate` | current FCA findings by canonical scope                          |
+
+## Invariants
+
+- Guide is read-only.
+- It distinguishes observed facts from unresolved placement.
+- It never claims that Filid's validation call moves files or rewrites imports.
+- A fractal below an organ remains visible as an independent node.

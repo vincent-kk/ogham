@@ -1,47 +1,23 @@
-# setup — INTENT.md Generation Template (Phase 3)
+# setup — INTENT.md Proposal
 
-> Detail reference for Phase 3 of /filid:setup. See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
+> Reference for Phase 4 of `/filid:setup`.
 
-For each directory classified as fractal that does not yet have a INTENT.md, generate one using the context-manager agent.
+From the `fractal_scan(detail: "paths")` result and document findings from
+`structure_validate`, list fractal nodes that lack INTENT.md. Setup proposes
+these files; it does not author or overwrite them.
 
-INTENT.md structure (hard limit: 50 lines):
+Each proposed INTENT.md must later satisfy:
 
-```markdown
-# <Module Name>
+- no more than 50 lines
+- English machine-readable headings
+- `## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`, and
+  `## Dependencies`
+- all three boundary headings: `### Always do`, `### Ask first`, and
+  `### Never do`
+- descriptive content in the snapshot's output language
 
-## Purpose
+Never propose INTENT.md for an organ. Existing documents are reported as
+present and remain untouched.
 
-<1–2 sentence description of what this module does>
-
-## Structure
-
-<key files and sub-directories with one-line descriptions>
-
-## Conventions
-
-<language, patterns, naming rules specific to this module>
-
-## Boundaries
-
-### Always do
-
-- <rule 1>
-- <rule 2>
-
-### Ask first
-
-- <action that requires user confirmation before proceeding>
-
-### Never do
-
-- <prohibited action 1>
-- <prohibited action 2>
-
-## Dependencies
-
-<list of modules this directory depends on>
-```
-
-**Language**: Section headings (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`, `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`) MUST remain in English. All content text MUST be written in the language specified by the `[filid:lang]` tag. If no tag is present, follow the system's language setting; default to English.
-
-Enforce: file must not exceed 50 lines. If generation would exceed the limit, summarize the most important conventions and boundary rules.
+The proposal entry contains the node path, proposed document path,
+classification, and the corresponding validation finding.

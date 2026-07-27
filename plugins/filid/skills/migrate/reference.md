@@ -161,14 +161,20 @@ Committed: abc1234
 
 ---
 
-## LLM Integration
+## Workflow Integration
 
-The LLM should:
+The workflow must:
 
 1. **Dry-run first**: Always run without `--execute` first
 2. **Report**: Show the script output to the user
-3. **Confirm**: Ask the user before running with `--execute`
-4. **Post-validate** (optional): Run `mcp__plugin_filid_tools__structure_validate` MCP tool after execution
+3. **Use the execution gate**: Only run mutations when the invocation explicitly
+   includes `--execute`; never promote a dry run to execution automatically
+4. **Post-validate**: After execution call
+   `mcp__plugin_filid_tools__structure_validate` with `mode: "project"` and
+   scopes `documents`, `nodes`, and `entry-points`
+
+The common envelope status, diagnostics, and findings are reported verbatim.
+A non-`ok` result is not presented as a verified migration.
 
 ### Resolving the script path
 
@@ -188,8 +194,7 @@ To undo the migration:
 ```bash
 # If auto-committed, revert the commit
 git revert <commit-sha>
-
-# Or reset entirely
-git reset HEAD~1
-git checkout .
 ```
+
+Without an auto-commit, reverse only the rename and reference-update paths shown
+by the migration report. Do not reset unrelated working-tree changes.

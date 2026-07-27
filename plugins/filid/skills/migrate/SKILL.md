@@ -1,7 +1,7 @@
 ---
 name: migrate
 user_invocable: true
-description: '[filid:migrate] Migrate legacy CLAUDE.md and SPEC.md files to INTENT.md and DETAIL.md naming using a cross-platform Node script for batch git-mv renames, reference updates, and optional auto-commit.'
+description: '[filid:migrate] Explicitly migrate legacy CLAUDE.md and SPEC.md names to INTENT.md and DETAIL.md with a portable dry-run-first script and post-validation.'
 argument-hint: '[path] [--execute] [--auto-commit]'
 version: '2.0.0'
 complexity: simple
@@ -22,9 +22,12 @@ Migrate an existing FCA-AI project from the legacy `CLAUDE.md`/`SPEC.md` naming 
 
 ### Relationship with Other Skills
 
-- **`filid:scan`**: May report legacy `CLAUDE.md` files as violations — run this skill to fix them.
-- **`filid:setup`**: Generates `INTENT.md`/`DETAIL.md` for new projects. This skill migrates old projects to the same convention.
-- **`filid:update`**: After migration, use `filid:update` to verify INTENT.md/DETAIL.md content is current.
+- **`filid:scan`**: Reports legacy document names; this skill performs the
+  explicit rename.
+- **`filid:setup`**: Creates current document names for new projects; this
+  workflow is only for existing legacy files.
+- **`filid:enrich-docs`**: May improve document content after this naming
+  migration, as a separate approved workflow.
 
 ## Core Workflow
 
@@ -58,12 +61,23 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/migrate/migrate.mjs" <target-path> --execute 
 The script performs:
 
 1. `git mv` renames (falls back to `mv` if not a git repo)
-2. `sed` reference updates across `.md`, `.ts`, `.js` files
+2. portable Node reference updates across supported text files
 3. Optional auto-commit with structured commit message
 
-### Step 3 — Post-Migration Validation (optional)
+### Step 3 — Post-Migration Validation
 
-After execution, optionally run `mcp__plugin_filid_tools__structure_validate` to confirm compliance.
+After execution, call:
+
+```text
+mcp__plugin_filid_tools__structure_validate({
+  path: "<target-path>",
+  mode: "project",
+  scopes: ["documents", "nodes", "entry-points"]
+})
+```
+
+Preserve diagnostics and findings in the report. A non-`ok` result means the
+migration ran but compliance is not verified.
 
 ## Options
 
@@ -80,7 +94,9 @@ After execution, optionally run `mcp__plugin_filid_tools__structure_validate` to
 
 ## Reversibility
 
-Migration uses `git mv`, so it is fully reversible via `git checkout` or by running the inverse renames. See reference.md for reversal steps.
+Migration uses `git mv` inside a repository, so history records the rename.
+Outside a repository, reverse the listed rename plan manually. See reference.md
+for bounded reversal guidance.
 
 ## Quick Reference
 

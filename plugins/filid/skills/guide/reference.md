@@ -1,120 +1,109 @@
-# guide — Reference Documentation
+# guide — Current Structure and Placement Reference
 
-Detailed workflow, MCP tool call signatures, and output format templates for the fractal structure `filid:guide` skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+## Section 1 — Read the Current Tree
 
-## Section 1 — Project Scan
+Call:
 
-Call `mcp__plugin_filid_tools__fractal_scan` to retrieve the complete directory tree and node classifications.
-
-```
-mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
-```
-
-> **Size guard**: an oversized result comes back as `{ truncated: true, reportPath, summary }` — the full report is at `reportPath` (line-structured JSON); grep it for the fields you need instead of reading it whole. Pass `outputMode: "summary"` when only counts are needed.
-
-The response is a `ScanReportDto` containing:
-
-- `tree.nodes`: **flat array** of FractalNode objects (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)
-- `tree.root`: root directory path
-- `tree.totalNodes`: total node count
-- `modules`: optional ModuleInfo list (empty unless `includeModuleInfo: true`)
-
-Build three working sets from `tree.nodes` (e.g. `tree.nodes.filter(...)`):
-
-- **fractal nodes** — `type === "fractal"` or `hasIntentMd === true`
-- **organ nodes** — `type === "organ"`
-- **pure-function / hybrid nodes** — remaining types
-
-## Section 2 — Rule Query
-
-Call `mcp__plugin_filid_tools__rule_query` to retrieve the full list of active rules.
-
-```
-mcp__plugin_filid_tools__rule_query({ action: "list", path: "<target-path>" })
+```text
+mcp__plugin_filid_tools__fractal_scan({
+  path: "<target-path>",
+  detail: "paths"
+})
 ```
 
-Response fields:
+Use the summary for project root, snapshot hash, adapters, depth, node counts,
+certainty, and diagnostics. Use path detail for the current node table,
+document presence, entry-point count, and classification.
 
-- `rules`: Array of rule objects (`id`, `name`, `category`, `severity`, `description`, `examples`)
+If detailed data is persisted as an artifact, read only the path projection
+needed for the guide. Do not load the full snapshot.
 
-Rule categories (`RuleCategory`):
+## Section 2 — Read Current FCA Findings
 
-- `naming` — Directory and file naming conventions
-- `structure` — Node structure and hierarchy rules
-- `dependency` — Import/export dependency rules
-- `documentation` — Documentation requirements
-- `index` — index.ts barrel export rules
-- `module` — main.ts entry point rules
+Call:
 
-## Section 3 — Classification Summary
-
-Build the category distribution table by counting `tree.nodes` from the scan response by node type (the response has no precomputed `summary` object):
-
+```text
+mcp__plugin_filid_tools__structure_validate({
+  path: "<target-path>",
+  mode: "project",
+  scopes: [
+    "documents",
+    "nodes",
+    "entry-points",
+    "boundaries",
+    "dag",
+    "verification"
+  ]
+})
 ```
-categoryTable = {
-  fractal:      count of tree.nodes where type == "fractal",
-  organ:        count of tree.nodes where type == "organ",
-  pureFunction: count of tree.nodes where type == "pure-function",
-  hybrid:       count of tree.nodes where type == "hybrid",
-  total:        tree.totalNodes
-}
-```
 
-If violations are present, sort by severity and include them in the summary section so readers understand the current health status before the rule list.
+The configured validation result is the authority for current findings. There
+is no separate rule-list query. Present rules by the canonical FCA scopes
+above, and cite returned rule IDs only when the validator produced evidence.
 
-## Section 4 — Guide Document Output
+Do not describe a non-OK or non-exact result as healthy merely because no
+finding was returned.
 
-### Standard output format
+## Section 3 — Explain Classification
 
-```
-## filid Fractal Structure Guide — <target path>
+Summarize the path projection by node type:
 
-### Project Structure Status
-| Category | Nodes | Description |
-|----------|-------|-------------|
-| fractal | N | Stateful or hierarchical modules |
-| organ | N | Shared utility / component directories |
-| pure-function | N | Stateless pure-function modules |
-| hybrid | N | Mixed fractal + organ modules |
-| Total | N | — |
+| Type          | Meaning                                                     |
+| ------------- | ----------------------------------------------------------- |
+| fractal       | Independent module with documented boundary and entry point |
+| organ         | Leaf compartment; INTENT.md is prohibited                   |
+| pure-function | Stateless, isolated computation                             |
+| hybrid        | Explicit transitional classification with an entry point    |
 
-Current violations: N (error: X, warning: Y, info: Z)
+Classification follows the repository policy priority. A fractal below an
+organ remains an independent node and is not hidden from the guide.
 
-### Active Rules
+## Section 4 — Explain Placement
 
-#### naming rules
-| Rule ID | Severity | Description |
-|---------|----------|-------------|
-| HOL-N001 | error | Names must use camelCase (default), kebab-case, or PascalCase |
+Guide placement from the observed owner graph and these FCA rules:
 
-#### structure rules
-| Rule ID | Severity | Description |
-|---------|----------|-------------|
-| HOL-S001 | error | Organ directories must not contain fractal children |
-| HOL-S002 | warning | Fractal nodes must have an index.ts barrel export |
+- place shared code at the nearest common ancestor of all consumers
+- a new independent module needs INTENT.md and a named-export entry point
+- an organ remains flat and contains no INTENT.md
+- external consumers import a fractal through its entry point
+- siblings import the target sibling entry point, never an internal file or
+  the shared parent barrel
+- preserve a dependency DAG
 
-#### index rules
-| Rule ID | Severity | Description |
-|---------|----------|-------------|
-| HOL-I001 | warning | index.ts must re-export all public symbols |
+When the evidence does not identify all consumers or a public contract, label
+the placement `unresolved`. Do not fabricate a target path. A requested
+source-to-target move belongs to `/filid:restructure`, which creates and
+validates a plan without moving files itself.
 
-(Remaining rule categories follow the same format)
+## Section 5 — Guide Format
 
-### Category Classification Criteria
-| Category | Identification Criteria |
-|----------|------------------------|
-| fractal | Holds state, contains fractal children, or default classification |
-| organ | Leaf directory with no fractal children (structure-based auto-classification) |
-| pure-function | Stateless, no side effects, no I/O |
-| hybrid | Contains both fractal children and organ-like files |
+```text
+## Filid FCA Guide — <project root>
+
+Snapshot: <hash>
+Adapters: <ids>
+Certainty: <certainty>
+
+### Current Structure
+| Path | Type | Documents | Entry points |
+| ---- | ---- | --------- | ------------ |
+
+### Current Findings
+| Rule | Severity | Evidence | Message |
+| ---- | -------- | -------- | ------- |
+
+### Placement Rules
+<concise rules from Section 4>
 
 ### New Module Checklist
-- [ ] Does the directory name follow the accepted convention (camelCase by default; kebab-case or PascalCase per domain) — or, in a detected framework, a route-segment pattern such as `(app)`/`[id]`?
-- [ ] If classified as organ, does it have no fractal children?
-- [ ] If classified as fractal, does it have an `index.ts` — or, in a detected framework, a framework entry file such as `page.tsx`/`route.ts`?
-- [ ] If there is a primary feature, does it have a main.ts?
-- [ ] Are no fractal children placed under an organ directory?
+- [ ] owner and consumers are identified
+- [ ] shared code is at the consumer LCA
+- [ ] the node type matches its contract
+- [ ] fractal documents and entry point are present
+- [ ] imports preserve boundaries and the DAG
 
-(If violations exist)
-⚠ N violation(s) detected. Run /filid:sync to apply corrections.
+Diagnostics: <none or stable codes/messages>
 ```
+
+The guide is descriptive and read-only. It does not apply structural changes
+or claim that validation can move files.
