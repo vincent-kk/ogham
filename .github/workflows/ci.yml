@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  # Manual run (e.g. after docs/adapter-only changes that path filters skip).
+  workflow_dispatch:
   # Run CI when source/test code changes, and when anything the host adapters are
   # derived from — or the adapters themselves — changes.
   #

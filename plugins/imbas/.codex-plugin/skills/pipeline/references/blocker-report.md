@@ -41,21 +41,24 @@ Escape code: <code>
 <escape report content — structured per escape type>
 
 If verification failure:
-| # | Story | Field | Expected | Actual |
-|---|-------|-------|----------|--------|
-| 1 | S-001 | anchor_link | true | false |
-| 2 | S-003 | coherence | PASS | FAIL |
+
+| #   | Story | Field       | Expected | Actual |
+| --- | ----- | ----------- | -------- | ------ |
+| 1   | S-001 | anchor_link | true     | false  |
+| 2   | S-003 | coherence   | PASS     | FAIL   |
 
 For GATE 3 (Devplan Quality):
 If validation errors:
-| # | Error |
-|---|-------|
-| 1 | Duplicate task ID: "T1" |
+
+| #   | Error                   |
+| --- | ----------------------- |
+| 1   | Duplicate task ID: "T1" |
 
 If needs_review flags:
-| # | Item | Reason |
-|---|------|--------|
-| 1 | T1-ST2 | Cross-layer: API + DB in one Subtask |
+
+| #   | Item   | Reason                               |
+| --- | ------ | ------------------------------------ |
+| 1   | T1-ST2 | Cross-layer: API + DB in one Subtask |
 
 ### Warnings (accumulated from earlier phases)
 
