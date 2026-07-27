@@ -41,5 +41,5 @@
 ## Dependencies
 
 - 런타임: `@modelcontextprotocol/sdk ~1.22`, `zod ^3.23`, `markdown-it`
-- 개발: `esbuild`, `typescript`, `vitest`, `@types/node`; 브라우저 자산용 `highlight.js`, `mermaid`, `katex`(번들 미포함)
+- 개발: `esbuild`, `typescript`, `vitest`, `@types/node`, `jsdom`(mermaid 사전 파싱); 브라우저 자산용 `highlight.js`, `mermaid`, `katex`(번들 미포함)
 - 환경: Node.js >= 20, Yarn 4.12 workspaces

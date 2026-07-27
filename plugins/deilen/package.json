@@ -66,6 +66,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.24.0",
     "highlight.js": "^11.11.1",
+    "jsdom": "^29.1.1",
     "katex": "^0.18.0",
     "mermaid": "^11.16.0",
     "typescript": "^5.7.2",
