@@ -479,6 +479,73 @@ code {
   color: var(--danger);
 }
 
+/* Scope UI — user/project namespaces.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". The badge and the
+   clear button are injected by app.js into every [data-config-path]; what
+   decides whether they show is [data-scope-state] alone. */
+
+.scope-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.scope-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+[data-config-path] {
+  position: relative;
+}
+
+.scope-badge,
+.scope-clear {
+  display: none;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.scope-badge {
+  color: var(--text-muted);
+}
+
+[data-scope-state="inherited"] > .scope-badge,
+[data-scope-state="overridden"] > .scope-badge {
+  display: block;
+}
+
+[data-scope-state="inherited"] > .scope-badge::before {
+  content: "Inherited from user";
+}
+
+[data-scope-state="overridden"] > .scope-badge::before {
+  content: "Overridden for this project";
+  color: var(--accent);
+  font-weight: 600;
+}
+
+[data-scope-state="overridden"] > .scope-clear {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+[data-scope-state="overridden"] > .scope-clear:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
 @media (max-width: 560px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);

@@ -1,0 +1,19 @@
+import { resolveConfigLayers } from "@ogham/cross-platform/config-scope";
+import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+import { tryProjectRoot } from "@ogham/cross-platform/host-paths";
+
+/**
+ * Where deilen's two config layers live for the current workspace.
+ *
+ * The project root is reached for rather than passed in, because loadConfig is
+ * called from tool handlers and server lifecycle code that have no workspace
+ * argument to thread. `tryProjectRoot()` yields `process.cwd()` on Claude and
+ * the remembered root elsewhere; when nothing supplied one it returns null and
+ * the project layer switches off. Pass `projectRoot` explicitly in tests so a
+ * run never writes into the repository it happens to execute from.
+ */
+export function configLayers(
+  projectRoot: string | null = tryProjectRoot(),
+): ConfigLayerPaths {
+  return resolveConfigLayers({ pluginName: "deilen", projectRoot });
+}

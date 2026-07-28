@@ -49,10 +49,26 @@
         </p>
       </header>
 
+      <div class="scope-bar">
+        <div class="radio-row" id="config_scope">
+          <label class="radio"
+            ><input type="radio" name="config_scope" value="user" /><span
+              >User</span
+            ></label
+          >
+          <label class="radio"
+            ><input type="radio" name="config_scope" value="project" /><span
+              >Project</span
+            ></label
+          >
+        </div>
+        <p class="scope-hint" id="scope_hint"></p>
+      </div>
+
       <form id="form" class="form" novalidate>
         <section class="section">
           <h2 class="section-title">Appearance</h2>
-          <div class="field">
+          <div class="field" data-config-path="theme">
             <span class="field-label">Theme</span>
             <div class="radio-row" id="theme">
               <label class="radio"
@@ -72,7 +88,7 @@
               >
             </div>
           </div>
-          <div class="field">
+          <div class="field" data-config-path="content_width_px">
             <label class="field-label" for="content_width_px"
               >Content width (px)</label
             >
@@ -84,7 +100,7 @@
               max="1600"
             />
           </div>
-          <div class="field">
+          <div class="field" data-config-path="font_family">
             <label class="field-label" for="font_family"
               >Body font family</label
             >
@@ -99,7 +115,7 @@
 
         <section class="section">
           <h2 class="section-title">Behavior</h2>
-          <label class="toggle">
+          <label class="toggle" data-config-path="auto_open">
             <input type="checkbox" id="auto_open" />
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span class="toggle-label"
@@ -107,7 +123,7 @@
             >
           </label>
           <div class="grid">
-            <div class="field">
+            <div class="field" data-config-path="collect_timeout_seconds">
               <label class="field-label" for="collect_timeout_seconds"
                 >Collect timeout (s)</label
               >
@@ -119,7 +135,7 @@
                 max="600"
               />
             </div>
-            <div class="field">
+            <div class="field" data-config-path="idle_shutdown_minutes">
               <label class="field-label" for="idle_shutdown_minutes"
                 >Idle shutdown (min)</label
               >
@@ -131,7 +147,7 @@
                 max="120"
               />
             </div>
-            <div class="field">
+            <div class="field" data-config-path="session_ttl_hours">
               <label class="field-label" for="session_ttl_hours"
                 >Session TTL (h)</label
               >
@@ -143,7 +159,7 @@
                 max="720"
               />
             </div>
-            <div class="field">
+            <div class="field" data-config-path="preferred_port">
               <label class="field-label" for="preferred_port"
                 >Port (0 = dynamic)</label
               >
@@ -164,17 +180,17 @@
             Disabling a renderer skips its client-side enhancement; source stays
             readable.
           </p>
-          <label class="toggle">
+          <label class="toggle" data-config-path="renderers.highlight">
             <input type="checkbox" id="renderer_highlight" />
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span class="toggle-label">Syntax highlighting</span>
           </label>
-          <label class="toggle">
+          <label class="toggle" data-config-path="renderers.mermaid">
             <input type="checkbox" id="renderer_mermaid" />
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span class="toggle-label">Mermaid diagrams</span>
           </label>
-          <label class="toggle">
+          <label class="toggle" data-config-path="renderers.math">
             <input type="checkbox" id="renderer_math" />
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span class="toggle-label">Math (KaTeX)</span>
@@ -184,7 +200,7 @@
         <section class="section">
           <h2 class="section-title">Limits</h2>
           <div class="grid">
-            <div class="field">
+            <div class="field" data-config-path="max_image_mb">
               <label class="field-label" for="max_image_mb"
                 >Max image (MB)</label
               >
@@ -196,7 +212,7 @@
                 max="100"
               />
             </div>
-            <div class="field">
+            <div class="field" data-config-path="max_payload_mb">
               <label class="field-label" for="max_payload_mb"
                 >Max payload (MB)</label
               >
@@ -208,7 +224,7 @@
                 max="200"
               />
             </div>
-            <div class="field">
+            <div class="field" data-config-path="max_viewer_mb">
               <label class="field-label" for="max_viewer_mb"
                 >Max document (MB)</label
               >

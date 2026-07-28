@@ -1,20 +1,40 @@
-import { CONFIG_PATH } from "../../../constants/paths.js";
-import { atomicWrite } from "../../../lib/atomicWrite.js";
 import {
-  CONFIG_VERSION,
-  type Config,
-  ConfigSchema,
-} from "../../../types/config.js";
+  buildConfigScopeState,
+  writeConfigLayer,
+} from "@ogham/cross-platform/config-scope";
+import type {
+  ConfigLayerPaths,
+  ConfigScope,
+  ConfigScopeState,
+} from "@ogham/cross-platform/config-scope";
+
+import { DIR_MODE, FILE_MODE } from "../../../constants/defaults.js";
+import { CONFIG_VERSION } from "../../../types/config.js";
+import { configLayers } from "../utils/configLayers.js";
 
 /**
- * Validate and atomically persist config.json, stamped at CONFIG_VERSION.
- * The stamp is unconditional: callers (settings form POST) may carry version 0,
- * and a 0 on disk would re-run every migration on the next load.
+ * Persist one config layer and return the state the caller should render next.
+ *
+ * The document is written as given — validation belongs to the caller, because
+ * a project layer holds only the overridden keys and cannot satisfy the strict
+ * schema on its own. What the settings page validates is the merged preview.
+ *
+ * Only the user layer carries `config_version`. It is the baseline that can
+ * predate versioning, and stamping a partial project override would surface the
+ * version in the UI as an override nobody chose.
  */
-export async function saveConfig(config: Config): Promise<void> {
-  const validated = ConfigSchema.parse({
-    ...config,
-    config_version: CONFIG_VERSION,
+export async function saveConfig(
+  scope: ConfigScope,
+  document: Record<string, unknown>,
+  layers: ConfigLayerPaths = configLayers(),
+): Promise<ConfigScopeState> {
+  const stamped =
+    scope === "user"
+      ? { ...document, config_version: CONFIG_VERSION }
+      : document;
+  writeConfigLayer(layers, scope, stamped, {
+    fileMode: FILE_MODE,
+    directoryMode: DIR_MODE,
   });
-  await atomicWrite(CONFIG_PATH, `${JSON.stringify(validated, null, 2)}\n`);
+  return buildConfigScopeState(layers);
 }

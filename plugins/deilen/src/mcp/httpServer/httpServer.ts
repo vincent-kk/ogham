@@ -3,7 +3,12 @@ import { type Server, createServer } from "node:http";
 import { projectRoot } from "@ogham/cross-platform/host-paths";
 import { generateToken } from "@ogham/http-kit/token";
 
-import { loadConfig, saveConfig } from "../../core/configManager/index.js";
+import {
+  configLayers,
+  loadConfig,
+  loadConfigState,
+  saveConfig,
+} from "../../core/configManager/index.js";
 import { getProjectHash } from "../../core/projectHash/index.js";
 import { hasPendingWaiters } from "../../core/sessionStore/index.js";
 import { logger } from "../../lib/logger.js";
@@ -59,9 +64,14 @@ export function getHttpServer(): HttpServerInstance | null {
 async function startHttpServer(
   workspace?: string,
 ): Promise<HttpServerInstance> {
-  const config = await loadConfig();
+  // Pin the config layers to the same workspace the session hash is scoped to,
+  // once at start-up. Re-resolving per request would let the two disagree if the
+  // process cwd moved under the server.
+  const workspaceRoot = projectRoot(workspace);
+  const layers = configLayers(workspaceRoot);
+  const config = await loadConfig(layers);
   const token = generateToken();
-  const projectHash = getProjectHash(projectRoot(workspace));
+  const projectHash = getProjectHash(workspaceRoot);
   const idleMs = config.idle_shutdown_minutes * MINUTE_MS;
 
   let server: Server | null = null;
@@ -115,8 +125,9 @@ async function startHttpServer(
     projectHash,
     loadViewerHtml,
     loadSettingsHtml,
-    loadConfig,
-    saveConfig,
+    loadConfig: () => loadConfig(layers),
+    loadConfigState: () => loadConfigState(layers),
+    saveConfig: (scope, document) => saveConfig(scope, document, layers),
     resolveAssetPath,
     touch,
   });
