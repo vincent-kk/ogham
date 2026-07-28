@@ -176,16 +176,40 @@ export interface FractalNode {
 `hybrid`는 자동 분류하지 않는다. `pure-function`의 순수성을 어댑터가 판단할 수
 없으면 `unsupported`로 남기며 추측으로 PASS시키지 않는다.
 
+> **개정 (2026-07-28) — 분류와 organ 경계 재정의.** 자기 자신에 대한 첫 전체 구조검사가 832건을 냈고, 그 중 708건(`external-import-boundary`)과 cycle 3건이 하나의 뿌리에서 나왔다. 소유자 판단으로 아래 세 가지를 고친다. 상세 근거는 진행 원장의 「작업 10 후속」 절에 있다.
+>
+> **(1) organ에 진입점 경유를 요구하지 않는다.** "외부 소비자는 진입점만 참조하라"를 organ에 적용한 것은 잘못된 규칙이었다. 진입점을 갖지 않는 것이 organ의 정의이므로 경유할 대상이 없고, 결과적으로 organ 파일 참조가 전부 위반이 됐다.
+>
+> organ의 올바른 규칙은 **소유 프랙탈 바깥에서는 직접 참조할 수 없다**이다. 소유 프랙탈의 subtree 안에서는 — 중첩된 하위 fractal을 포함해 — 구체 파일을 직접 참조하는 것이 정상이다. 이것이 "공유 코드는 소비자들의 LCA에 둔다"는 배치 원칙과 짝을 이룬다. `src/types`가 `src`에 놓이는 이유가 `src` 하위 소비자들이 쓰기 위함이기 때문이다.
+>
+> **(2) 디렉터리를 fractal로 만드는 것은 `INTENT.md`의 존재 또는 index 파일의 존재다.** 어댑터가 임의 파일을 "진입점"으로 보고했다는 사실만으로 fractal이 되지 않는다. 이 둘 중 어느 것도 없으면 organ이다.
+>
+> **(3) `SKILL.md` 같은 markdown-as-implementation은 진입점이 아니다.** 스킬과 에이전트는 md 자체가 구현이며, 코드에 맞춰진 FCA 규칙을 그대로 적용하면 의미가 와전된다. `skills/`는 organ이 맞고 INTENT.md를 두지 않는다.
+
 자동 분류 우선순위는 다음으로 고정한다.
 
 1. INTENT.md 또는 DETAIL.md가 있으면 `fractal`
 2. config를 포함한 known organ name이면 `organ`
 3. `__name__` 또는 `.name` infrastructure pattern이면 `organ`
-4. StructureAdapter가 entry point를 보고하면 `fractal`
-5. fractal child가 없는 leaf directory면 `organ`
-6. non-leaf이고 어댑터가 side-effect 없음과 stateless를 확정하면
-   `pure-function`
-7. 그 밖에는 `fractal`
+4. StructureAdapter가 **module index**를 보고하면 `fractal`
+5. 어댑터가 side-effect 없음과 stateless를 확정하면 `pure-function`
+6. 그 밖에는 `organ`
+
+우선순위 4가 보는 것은 **module index 하나뿐이다.** 어댑터가
+`EntryPointDescriptor`로 보고하는 값 중 `kind: "module"`만 분류에 쓰이며,
+`kind: "executable"`이나 `kind: "framework"`, 그리고 config의
+`entryPointOverrides`가 주입한 경로는 분류를 바꾸지 못한다. core는 여전히
+파일명을 모른다 — "여기에 module index가 있는가"를 어댑터에 물을 뿐이다.
+
+`entryPointOverrides`는 `entry-point-surface` 규칙의 입력이지 분류 입력이
+아니다. 이 구분이 없으면 `SKILL.md` 같은 markdown-as-implementation이
+디렉터리를 fractal로 만들어 코드용 규칙을 md에 적용하게 된다.
+
+우선순위 6이 `organ`인 것이 이 개정의 핵심이다. 문서도 index도 없는
+디렉터리는 독립 계약을 선언한 적이 없으므로 fractal이 아니다. 이전 규범은
+기본값을 `fractal`로 두어 "INTENT.md를 추가하라"는 요구를 자동 생성했고,
+그 결과 `skills/setup`처럼 하위 디렉터리를 가졌다는 이유만으로 md 묶음이
+fractal이 되는 임의성이 생겼다.
 
 기본 known organ name은 `components`, `utils`, `types`, `hooks`, `helpers`,
 `lib`, `styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`,
@@ -486,10 +510,32 @@ export interface SnapshotDiagnostic {
   `context_resolve`가 별도 config 재조회 없이 그대로 반환한다.
 - dependency edge는 source file, raw specifier, source/target owner fractal을
   증거로 가진다.
-- 외부 소비자는 대상 fractal의 어댑터 진입점만 참조해야 한다.
+- 외부 소비자는 대상 **fractal**의 어댑터 진입점만 참조해야 한다.
 - 같은 fractal 내부 파일은 local entry point를 경유하지 않고 구체 내부 파일을
   직접 참조한다.
 - 형제 fractal은 대상 형제의 진입점을 참조하며 부모 barrel로 우회하지 않는다.
+- **organ 참조는 소비자 위치로 판정한다.** organ은 진입점을 갖지 않으므로
+  "organ의 진입점을 경유하라"는 요구는 성립하지 않는다. 대신:
+
+  | 소비자 위치              | 참조 경로                     | 판정                              |
+  | ------------------------ | ----------------------------- | --------------------------------- |
+  | 소유 프랙탈의 subtree 안 | organ의 구체 파일 직접 import | OK                                |
+  | subtree 밖               | **소유 프랙탈의 index 경유**  | OK — 단 LCA 미이동 사유 필요      |
+  | subtree 밖               | organ의 구체 파일 직접 import | 위반 — 단 선언된 면책이 있으면 OK |
+
+- subtree 안에서는 중첩된 하위 fractal이 organ의 구체 파일을 직접 참조하는
+  것이 정상이며 위반이 아니다.
+- 소유 프랙탈의 index가 organ 심볼을 재수출하면 외부 소비가 적법하다. 다만
+  **그 organ이 소비자들의 LCA로 이동하지 않은 이유가 있어야 한다.** 외부
+  소비자를 가진 단위의 자연스러운 자리는 그 소비자들의 LCA이며, 제자리에
+  남는 것은 의도적 선택이므로 근거를 남긴다.
+- 직접 import 면책이 필요한 실제 사례가 있다. **index를 경유하면 불필요한
+  코드가 딸려오는 경우** — 훅 스크립트가 대표적이다. 배럴을 거치면 번들러가
+  배럴이 재수출하는 모듈 전체를 훅 번들로 끌어온다. 이때는 구체 파일 직접
+  import가 옳으며, 면책은 사유와 함께 선언된다.
+- 이 구분이 cycle 판정에도 적용된다. 자식 fractal이 부모 소유 organ을
+  참조하는 것은 부모로 향하는 의존 edge가 아니다. 그렇게 승격하면 부모
+  barrel이 자식을 재수출하는 정상적인 FCA 형태가 순환으로 오판된다.
 - `circular-dependency`는 snapshot graph의 실제 cycle을 반환한다. 그래프를
   만들 수 없는 파일이 cycle 결과에 영향을 줄 수 있으면 전체 결과는
   `indeterminate`다.
@@ -976,23 +1022,23 @@ finding을 `CONFIRMED | PLAUSIBLE | REFUTED`로 판정한다. REFUTED는 verdict
 
 ## 1.0 built-in rule 집합
 
-| Rule ID                    | 소유 증거                          | 결과                       |
-| -------------------------- | ---------------------------------- | -------------------------- |
-| `intent-document-contract` | INTENT parser                      | 50줄/3-tier                |
-| `detail-document-contract` | DETAIL parser                      | 필수 섹션/현재 상태        |
-| `organ-no-intentmd`        | node classification                | organ의 INTENT 금지        |
-| `entry-point-surface`      | StructureAdapter                   | 열거 가능한 public surface |
-| `module-entry-point`       | StructureAdapter                   | fractal/hybrid entry point |
-| `max-depth`                | tree                               | 설정 depth                 |
-| `circular-dependency`      | dependency graph                   | 실제 cycle 금지            |
-| `pure-function-isolation`  | dependency graph                   | pure node 격리             |
-| `zero-peer-file`           | adapter peer roles                 | fractal root peer 제한     |
-| `external-import-boundary` | dependency graph + entry point     | 외부 internal import 금지  |
-| `spec-document-case-cap`   | VerificationAdapter                | 파일별 15                  |
-| `test-record-case-cap`     | VerificationAdapter                | 파일별 32                  |
-| `spec-fragmentation`       | DETAIL groups + verification files | cap 회피 분할 금지         |
-| `spec-contract-link`       | DETAIL groups + adapter marker     | 다중 spec의 계약 연결      |
-| `legacy-criteria-ledger`   | ProjectSnapshot legacy evidence    | root DETAIL migration 경고 |
+| Rule ID                    | 소유 증거                          | 결과                                                     |
+| -------------------------- | ---------------------------------- | -------------------------------------------------------- |
+| `intent-document-contract` | INTENT parser                      | 50줄/3-tier                                              |
+| `detail-document-contract` | DETAIL parser                      | 필수 섹션/현재 상태                                      |
+| `organ-no-intentmd`        | node classification                | organ의 INTENT 금지                                      |
+| `entry-point-surface`      | StructureAdapter                   | 열거 가능한 public surface                               |
+| `module-entry-point`       | StructureAdapter                   | fractal/hybrid entry point                               |
+| `max-depth`                | tree                               | 설정 depth                                               |
+| `circular-dependency`      | dependency graph                   | 실제 cycle 금지                                          |
+| `pure-function-isolation`  | dependency graph                   | pure node 격리                                           |
+| `zero-peer-file`           | adapter peer roles                 | fractal root peer 제한                                   |
+| `external-import-boundary` | dependency graph + entry point     | fractal은 진입점 경유, organ은 소유 subtree 밖 참조 금지 |
+| `spec-document-case-cap`   | VerificationAdapter                | 파일별 15                                                |
+| `test-record-case-cap`     | VerificationAdapter                | 파일별 32                                                |
+| `spec-fragmentation`       | DETAIL groups + verification files | cap 회피 분할 금지                                       |
+| `spec-contract-link`       | DETAIL groups + adapter marker     | 다중 spec의 계약 연결                                    |
+| `legacy-criteria-ledger`   | ProjectSnapshot legacy evidence    | root DETAIL migration 경고                               |
 
 `naming-convention`, CC, LCOM4, file-size, coverage rule은 Filid built-in에서
 제거한다. adapter가 정확히 측정하지 못한 rule은 PASS 대신
@@ -1942,34 +1988,64 @@ yarn plugin:adapters
 | PR 시점 **강제**               | `pull-request` Stage 1 → `enrich-docs` |
 | legacy 문서명 이관             | `migrate`                              |
 
+### 작업 12 — 분류와 organ 경계 개정을 코드에 반영 (2026-07-28 추가)
+
+자기 자신에 대한 첫 전체 구조검사가 832건을 냈고, 그중 711건(`external-import-boundary` 708 + cycle 3)이 하나의 뿌리에서 나왔다. 「노드」 절과 「프로젝트 snapshot과 DAG」 절의 개정을 코드에 반영한다.
+
+**완료된 부분 (2026-07-28)**
+
+- `templates/rules/filid_fca-policy.md` — 분류 6단계, "분류는 서술이지 규범이 아니다" 원칙, organ 접근 표, 면책 계약을 반영했다. `build:rules`로 manifest hash를 갱신하고 `rule_docs_sync`로 `.claude/rules/`에 재배포해 `inSync: true`를 확인했다.
+
+  배포 드리프트가 실재했다. 작업 0이 canonical 원본만 고치고 재배포하지 않아 `.claude/rules/filid_fca-policy.md`가 158줄 v0.8.x 그대로였다 — 이 저장소에서 일하는 에이전트들이 세션 내내 stale 규칙(`index-barrel-pattern`, LCOM4, 3+12)을 읽고 있었다. **canonical rule 문서를 고치면 `build:rules` + `rule_docs_sync`까지가 한 단위다.**
+
+**남은 수정 대상**
+
+- `src/core/tree/organClassifier/` — 우선순위 사다리를 6단계로 축소. 기본값을 `fractal`에서 `organ`으로 뒤집고, 분류 입력을 `kind: "module"` entry point로 한정한다.
+- `src/adapters/ecmascript/structure/findEntryPoints.ts` — module index와 config override로 주입된 경로를 서로 다른 `kind`로 보고한다.
+- `src/core/rules/ruleEngine/utils/checkExternalImportBoundary.ts` — 대상이 organ이면 소비자 위치로 판정한다. 현재 이 함수에는 **면책 경로가 아예 없다** — `isExempt` 호출이 없어 config의 `exempt`가 이 규칙에서 무시된다.
+- `src/core/analysis/dependencyGraph/` — 소유 subtree 안의 organ 참조를 부모 fractal edge로 승격하지 않는다. cycle 오판의 원인이다.
+- `src/core/rules/documentValidator/` — DETAIL.md의 조건부 `## Organ Exemptions` 섹션을 파싱한다. acceptance group과 같은 `### <organ path> — <title>` 형태이므로 기존 파서를 재사용한다. **없는 것이 정상이며 면책을 선언할 때만 존재한다.** `Reason`이 비면 면책이 아니라 미충족 계약이다.
+- `.filid/config.json` — `structure.entryPointOverrides.ecmascript`에서 `SKILL.md`를 제거한다.
+
+**검증**
+
+- 재스캔에서 `external-import-boundary`가 소유 subtree 안의 organ 참조를 내지 않는다.
+- `src/hooks -> src/hooks/preToolUse -> src/hooks` cycle이 사라진다.
+- `skills/setup`과 `skills/cross-review`가 organ으로 분류되고 INTENT/DETAIL·entry-point·zero-peer finding을 내지 않는다.
+- 소유 subtree **밖**에서 organ을 직접 참조하는 fixture는 여전히 위반으로 잡히고, DETAIL에 면책을 선언하면 통과한다. 규칙이 느슨해진 것이 아니라 대상이 바뀐 것임을 보이는 fail-first가 양쪽 다 필요하다.
+- 훅 경로가 면책 선언으로 통과하고, 선언을 지우면 다시 위반이 된다.
+
 ## Acceptance Criteria
 
-| ID    | 검증할 결과                                                                                   |
-| ----- | --------------------------------------------------------------------------------------------- |
-| AC-01 | spec-document 15 cases는 PASS, 16은 violation                                                 |
-| AC-02 | test-record 32 cases는 PASS, 33은 violation                                                   |
-| AC-03 | 여러 test-record의 총 case 수에는 제한이 없음                                                 |
-| AC-04 | 정적 parameterized 16 rows는 16으로 계산되어 violation                                        |
-| AC-05 | dynamic/unsupported count는 PASS가 아닌 `indeterminate`/`unsupported`                         |
-| AC-06 | 서로 다른 DETAIL acceptance group의 여러 spec은 PASS                                          |
-| AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                                            |
-| AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획                           |
-| AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획                                          |
-| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않음                                            |
-| AC-11 | stale snapshot은 plan precondition FAIL                                                       |
-| AC-12 | 잘못된 target/entry/import/DAG는 postcondition FAIL                                           |
-| AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path 반환                              |
-| AC-14 | 새 verification 생태계는 core/policy/MCP DTO 수정 없이 adapter 등록                           |
-| AC-15 | Filid는 Seiri가 설치되지 않아도 모든 자체 기능 수행                                           |
-| AC-16 | `@ast-grep/napi`, global npm 탐색과 `fast-glob` 없이 build                                    |
-| AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없음                                      |
-| AC-18 | cross-review finding은 FCA 증거만 인용하고 구조 수정은 exact plan을 사용                      |
-| AC-19 | 목표 MCP tool은 정확히 9개, 사용자 skill은 정확히 12개                                        |
-| AC-20 | core/policy/DTO에는 초기 생태계의 확장자·테스트 호출 리터럴이 없음                            |
-| AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않음                  |
-| AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 외부에 위임하며, 수용/거부 결정과 사유는 기록됨  |
-| AC-23 | `pipeline --auto`가 pr-create → review → resolve → revalidate를 중단 없이 연결                |
-| AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결됨 |
+| ID    | 검증할 결과                                                                                                         |
+| ----- | ------------------------------------------------------------------------------------------------------------------- |
+| AC-01 | spec-document 15 cases는 PASS, 16은 violation                                                                       |
+| AC-02 | test-record 32 cases는 PASS, 33은 violation                                                                         |
+| AC-03 | 여러 test-record의 총 case 수에는 제한이 없음                                                                       |
+| AC-04 | 정적 parameterized 16 rows는 16으로 계산되어 violation                                                              |
+| AC-05 | dynamic/unsupported count는 PASS가 아닌 `indeterminate`/`unsupported`                                               |
+| AC-06 | 서로 다른 DETAIL acceptance group의 여러 spec은 PASS                                                                |
+| AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                                                                  |
+| AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획                                                 |
+| AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획                                                                |
+| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않음                                                                  |
+| AC-11 | stale snapshot은 plan precondition FAIL                                                                             |
+| AC-12 | 잘못된 target/entry/import/DAG는 postcondition FAIL                                                                 |
+| AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path 반환                                                    |
+| AC-14 | 새 verification 생태계는 core/policy/MCP DTO 수정 없이 adapter 등록                                                 |
+| AC-15 | Filid는 Seiri가 설치되지 않아도 모든 자체 기능 수행                                                                 |
+| AC-16 | `@ast-grep/napi`, global npm 탐색과 `fast-glob` 없이 build                                                          |
+| AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없음                                                            |
+| AC-18 | cross-review finding은 FCA 증거만 인용하고 구조 수정은 exact plan을 사용                                            |
+| AC-19 | 목표 MCP tool은 정확히 9개, 사용자 skill은 정확히 12개                                                              |
+| AC-20 | core/policy/DTO에는 초기 생태계의 확장자·테스트 호출 리터럴이 없음                                                  |
+| AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않음                                        |
+| AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 외부에 위임하며, 수용/거부 결정과 사유는 기록됨                        |
+| AC-23 | `pipeline --auto`가 pr-create → review → resolve → revalidate를 중단 없이 연결                                      |
+| AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결됨                       |
+| AC-25 | 문서도 module index도 없는 디렉터리는 `organ`으로 분류되고, `SKILL.md` 같은 override 경로는 분류를 바꾸지 못함      |
+| AC-26 | 소유 subtree 안의 organ 직접 참조는 통과, 밖에서의 직접 참조는 위반, DETAIL의 `Organ Exemptions` 선언이 있으면 통과 |
+| AC-27 | 자식 fractal이 부모 소유 organ을 참조해도 cycle로 판정되지 않음                                                     |
 
 ## 최종 검증 순서
 

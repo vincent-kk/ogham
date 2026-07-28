@@ -704,6 +704,106 @@ boundary`. 즉 상당수가 **organ(`constants/`, `types/`) 직접 import**,
 
 - 상태: 완료.
 
+### 작업 10 후속 — config v2 이관과 finding 원인 규명
+
+- `.filid/config.json`을 실제 마이그레이션 경로(`loadConfig` → `writeConfig`)로 v1 → v2 이관했다. 손으로 쓰지 않고 제품 코드를 dogfooding했다. 진단 3건이 예상대로 나왔다: `rules.naming-convention`, `rules.index-barrel-pattern`, `additional-route-patterns`는 1.0에서 제거된 키이므로 버려졌다. `additional-organ-names` → `structure.additionalOrganNames`, `additional-allowed` → `structure.additionalAllowedPeers`(문자열은 객체로 정규화), `additional-entry-points` → `structure.entryPointOverrides.ecmascript`로 이관됐다.
+- 재스캔: findingCount 832, passed 1143 → **1175**, failed 72. 마이그레이션이 의미를 보존하므로 finding 수는 그대로다.
+
+#### 원인 1 — `external-import-boundary` 708건의 대부분은 organ import다
+
+무엇을 뚫었는지로 집계하면 상위 10개가 다음과 같다.
+
+| 건수 | 대상                          | 노드 타입 |
+| ---- | ----------------------------- | --------- |
+| 83   | `core/infra`                  | fractal   |
+| 74   | `types/fractal.js`            | **organ** |
+| 33   | `types/rules.js`              | **organ** |
+| 31   | `types/hooks.js`              | **organ** |
+| 27   | `types/toolEnvelope.js`       | **organ** |
+| 24   | `constants/toolEnvelope.js`   | **organ** |
+| 23   | `lib/logger.js`               | **organ** |
+| 21   | `constants/builtinRuleIds.js` | **organ** |
+| 21   | `types/restructure.js`        | **organ** |
+| 20   | `constants/reviewState.js`    | **organ** |
+
+**이것은 규칙 간 모순이다.** `module-entry-point`는 organ에 진입점을 요구하지 않는다 — organ은 진입점을 갖지 않는 것이 정의다. 그런데 `external-import-boundary`는 "외부 소비자는 진입점만 참조하라"를 organ에도 적용한다. 존재하지 않는 진입점을 경유하라고 요구하므로 organ의 모든 파일 참조가 자동으로 위반이 된다.
+
+708건 중 organ 대상이 압도적이므로, 이것은 708개 import를 고칠 문제가 아니라 **규칙 의미를 정할 문제다.**
+
+#### 원인 2 — skills 오탐의 정확한 기전
+
+`skills/setup`과 `skills/cross-review` **둘만** INTENT/DETAIL/entry-point finding을 받는다. 나머지 10개 스킬은 받지 않는다.
+
+기전은 세 규칙의 상호작용이다.
+
+1. config가 `skills`를 `additionalOrganNames`로 선언 → 분류 우선순위 2에 의해 `skills`는 organ.
+2. config가 `SKILL.md`를 `entryPointOverrides.ecmascript`로 선언 → 각 스킬 디렉터리가 진입점을 가진 것으로 관찰됨.
+3. organ 아래 traversal은 계속되고, 진입점을 가진 하위 디렉터리는 독립 fractal로 재분류된다.
+
+그런데 우선순위 5("fractal child 없는 leaf directory → organ")가 먼저 걸리는 스킬은 organ으로 남는다. `setup`(`sections/`)과 `cross-review`(`phases/`, `reviewers/`, `calibration/`)만 하위 디렉터리를 가지므로 leaf가 아니고, 따라서 fractal이 된다.
+
+**결과적으로 "하위 디렉터리가 있는 스킬만 INTENT.md를 요구받는다."** 사용자 관점에서 임의적이며, 이 오탐은 8개 플러그인 전체에서 재현된다.
+
+#### 원인 3 — cycle 2건은 owner 승격 인공물
+
+`src/hooks -> src/hooks/preToolUse -> src/hooks` 확인 완료. 부모 배럴이 자식을 재수출하고, 자식이 부모 소유 organ(`shared/`, `utils/`)을 참조해 생긴 왕복이다. 런타임 순환은 없다. 원인 1과 같은 뿌리다 — organ 참조를 부모 fractal edge로 승격하는 규칙.
+
+### spec 개정 — 분류 기준과 organ 경계 (2026-07-28)
+
+소유자와의 논의로 세 가지가 확정됐고 canonical rule 문서에 반영했다.
+
+1. **분류는 서술이지 규범이 아니다.** 이전 사다리는 "그 밖에는 fractal"을 기본값으로 두어, 아직 FCA가 아닌 코드베이스에서 "INTENT.md를 추가하라"는 요구를 자동 생성했다. 반대로 `INTENT.md ∨ index → fractal`만으로 바꾸면 채택 과정에 눈이 먼다 — 아무것도 fractal이 아니니 `setup`이 제안할 게 없다.
+
+   해법은 두 일을 분리하는 것이다. **분류기**는 파일 존재만 관찰하고(문서 ∨ module index → fractal, 그 밖 organ), **규칙 엔진**이 "소유 subtree 밖에서 소비되는 organ은 외부 경계를 가진 것"이라는 FCA 정의로 누락 fractal을 보고한다. 후자의 증거는 filid가 이미 계산하는 의존성 그래프이며 LCA 배치가 쓰는 증거와 같다.
+
+2. **organ 접근은 소비자 위치로 판정한다.** organ에 "진입점을 경유하라"를 적용한 것이 708건의 원인이었다 — organ은 진입점을 갖지 않는 것이 정의이므로 경유할 대상이 없다. 소유 subtree 안에서는 구체 파일 직접 참조가 정상이고, 밖에서는 소유 프랙탈의 index를 경유한다. 밖에서의 직접 참조는 선언된 면책이 있을 때만 허용된다.
+
+3. **면책과 LCA 미이동 사유는 소유 프랙탈의 DETAIL.md에 조건부로 선언한다.** 보편 문서 계약을 늘리지 않는다 — 면책이 실제로 필요한 프랙탈만 `## Organ Exemptions`를 갖고, DETAIL.md가 없으면 그 목적으로 추가한다. `Reason`이 비면 면책이 아니라 미충족 계약이다.
+
+   직접 import 면책의 표준 사례는 훅 번들이다. 배럴을 import하면 번들러가 배럴이 재수출하는 모듈 전체를 끌어온다.
+
+`SKILL.md`가 진입점에서 빠진 이유도 여기 있다. 스킬과 에이전트는 md 자체가 구현이라 코드용 규칙을 그대로 적용하면 의미가 와전된다.
+
+#### 배포 드리프트 발견
+
+`templates/rules/filid_fca-policy.md`(canonical, 251줄)와 `.claude/rules/filid_fca-policy.md`(배포본, **158줄**)가 달랐다. 작업 0이 원본만 고치고 재배포하지 않아 배포본이 v0.8.x 그대로였고, 이 저장소에서 일하는 에이전트들이 세션 내내 `index-barrel-pattern`·LCOM4·3+12 같은 제거된 규칙을 읽고 있었다.
+
+원본을 320줄로 개정한 뒤 `yarn filid build:rules`로 manifest hash를 갱신하고, 제품 도구 `rule_docs_sync`로 배포해 `inSync: true`를 확인했다(`updated: 1`). **canonical rule 문서 수정은 `build:rules` + `rule_docs_sync`까지가 한 단위다.**
+
+코드 반영은 작업 12로 계획 원장에 기록했다. AC-25~27 추가.
+
+### 작업 12 진행 — 분류 사다리 (1/6 완료)
+
+**fail-first**: `organClassifierClassify.test.ts`에 "describes, never prescribes" 4 케이스를 먼저 추가했다. 3건이 의도한 이유로 실패했고(문서·index 없는 non-leaf → fractal, executable/framework entry → fractal), `module` entry → fractal 1건은 처음부터 통과해 과잉 교정을 막는 대조군이 됐다.
+
+**변경**: `classifyNode`의 5단계를 `kind: 'module'` entry point로 한정하고 기본값을 `fractal` → `organ`으로 뒤집었다. `pure-function`은 논의 밖 동작 변경을 피하려고 leaf 단계를 유지해 기존대로 non-leaf에서만 나온다.
+
+**파급 6건과 처리**:
+
+- `structureGuard` 2건 — 기본값이 organ이 되자 선언 없는 모든 디렉터리에 flatness 경고가 붙었다. `.filid/review/<branch>/` 같은 정상 경로가 매번 걸린다. `isOrganByStructure`를 **선언된 organ**(known name 또는 `__name__`/`.name` 패턴)으로 좁혔다 — 가드 주석이 이미 밝히던 의도("only named code organs keep it")이며, 문서가 있으면 여전히 fractal이다.
+- 나머지 4건 — 전부 "config에 없는 이름은 fractal로 남는다"를 대조군으로 쓰던 케이스다. 기본값이 organ이 되면서 **대조 능력을 잃었다**(양쪽 다 organ). 각 fixture에 module index를 주어 판별력을 되살렸다: index가 fractal로 만들고 config 이름이 그것을 덮는다. 기대값만 뒤집으면 아무것도 증명하지 않는 테스트가 됐을 것이다.
+
+**검증**: `yarn filid test:run` 78 files / **809 passed** / 7 skipped, exit 0. `yarn filid typecheck` exit 0.
+
+**자체 재스캔 실측** (`build:mcp` 후 새 번들 구동):
+
+| 지표                       | 이전 | 이후    |
+| -------------------------- | ---- | ------- |
+| findingCount               | 832  | **707** |
+| failed                     | 72   | **54**  |
+| passed                     | 1175 | 1193    |
+| `intent-document-contract` | 5    | **0**   |
+| `detail-document-contract` | 20   | 15      |
+| `zero-peer-file`           | 59   | 28      |
+| `module-entry-point`       | 9    | 4       |
+| `external-import-boundary` | 708  | 630     |
+| `circular-dependency`      | 3    | 2       |
+| skills 관련 finding        | 10   | **0**   |
+
+skills 오탐이 완전히 사라졌다(AC-25의 스캔 수준 근거). 남은 630건은 대상 3(organ 소비자 위치 판정)이 처리할 몫이며 아직 손대지 않았다.
+
+**남은 대상 5개**: `findEntryPoints`의 kind 분리, `checkExternalImportBoundary`의 organ 판정과 면책, `dependencyGraph`의 organ edge 승격 제외, `documentValidator`의 `Organ Exemptions` 파서, `.filid/config.json`의 `SKILL.md` 제거.
+
 ## 최종 Acceptance Criteria
 
 AC-01부터 AC-24까지의 증거는 작업별 기록과 최종 검증 기록에 연결한다.

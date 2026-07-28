@@ -2,157 +2,319 @@
 
 **Every module is a fractal. Every boundary is enforced. The graph is a DAG.**
 
-- Modules document themselves (`INTENT.md`) and define contracts (`DETAIL.md`).
-- Consumers import through entry points; files inside a module import each other directly.
-- Documentation precedes code. `INTENT.md` ≤ 50 lines. Spec files ≤ 15 cases.
+- Modules document intent in `INTENT.md` and current contracts in `DETAIL.md`.
+- Consumers cross a module only through an adapter-reported entry point.
+- Documentation precedes code. `INTENT.md` is at most 50 lines.
+- Verification documents are roles, not a promotion ladder: spec-document ≤15 cases,
+  test-record ≤32 cases per file.
 
-Fractal Context Architecture (FCA-AI) is a recursive module organization system for AI-operated codebases. Every independent module is a "fractal node" with documentation, entry point, and boundary rules. The dependency graph MUST be a DAG. External consumers MUST import only from a module's entry point, never its internal files; files within the same module import each other directly.
+Fractal Context Architecture (FCA-AI) recursively organizes independent modules as
+fractal nodes. Each fractal owns a contract and a public boundary. Organs are internal
+compartments owned by one fractal. Dependency edges MUST form a DAG.
 
----
+## Product Boundary
+
+Filid owns:
+
+- INTENT/DETAIL document contracts and minimal context chains;
+- fractal/organ/pure-function/hybrid classification;
+- entry-point surfaces, external import boundaries and the dependency DAG;
+- lowest common fractal placement and read-only `sourcePath → targetPath` plans;
+- verification-document roles, file caps, fragmentation and contract links;
+- FCA-scoped cross-review evidence.
+
+Filid does not own function splitting, naming, file size, cyclomatic complexity, LCOM4,
+coverage quality, fail-first practice, general AST editing, file moves, import rewrites,
+commits, pushes or pull requests. A restructure tool plans and validates; an external
+actor performs the change.
 
 ## Node Types
 
-| Type            | INTENT.md | Children   | Entry point  | Description                                |
-| --------------- | --------- | ---------- | ------------ | ------------------------------------------ |
-| `fractal`       | required  | allowed    | required     | Independent module with public API         |
-| `organ`         | forbidden | files only | not required | Leaf compartment (single concern)          |
-| `pure-function` | optional  | none       | not required | Stateless functions, no side effects       |
-| `hybrid`        | optional  | allowed    | required     | Transitional node (fractal + organ traits) |
-
----
+| Type            | INTENT.md | Children | Entry point | Meaning                                      |
+| --------------- | --------- | -------- | ----------- | -------------------------------------------- |
+| `fractal`       | required  | allowed  | required    | Independent module with a public contract    |
+| `organ`         | forbidden | files    | not required| Internal compartment owned by one fractal    |
+| `pure-function` | optional  | none     | not required| Explicitly isolated effect-free FCA unit     |
+| `hybrid`        | optional  | allowed  | required    | Manually assigned transitional node          |
 
 ## Node Classification Priority
 
-Classification is determined by directory inspection in this strict priority order:
+Classification uses this strict order:
 
-1. **INTENT.md or DETAIL.md present** → `fractal` (preserve existing, skip generation)
-2. **Directory name in known organ list** → `organ` (INTENT.md prohibited)
-3. **Pattern `__name__`** (double-underscore wrapped) → `organ`
-4. **Pattern `.name`** (dot-prefixed) → `organ`
-5. **Entry-point file present** (`index.ts`/`.js`/`.mjs`/`.cjs`) in a non-organ, non-infra directory → `fractal`
-6. **No fractal children + leaf directory** → `organ`
-7. **No observable side effects, stateless** → `pure-function` (non-leaf directories only — leaves are captured by rule 6; purity is scanner-supplied and defaults to side-effectful)
-8. **Default** → `fractal` (generate INTENT.md)
+1. `INTENT.md` or `DETAIL.md` present → `fractal`.
+2. Directory name in the configured known organ list → `organ`.
+3. Double-underscore-wrapped or dot-prefixed infrastructure name → `organ`.
+4. A registered StructureAdapter reports a **module index** → `fractal`.
+5. An adapter proves both statelessness and no side effects → `pure-function`.
+6. Otherwise → `organ`.
 
-**Known organ names** (priority 2):
+Step 4 reads one signal only: a module index. Of the entry points an adapter reports,
+only `kind: "module"` classifies. An `executable` or `framework` entry, and any path
+injected by the config `entryPointOverrides`, never turns a directory into a fractal.
+Core still knows no filenames — it asks the adapter whether a module index exists here.
+`entryPointOverrides` feeds `entry-point-surface`, not classification. Without that
+split, markdown-as-implementation such as `SKILL.md` would make a directory a fractal
+and subject prose to rules written for code.
 
-- **Base** (shared/UI): `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`
-- **Test/infra**: `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
-- **Docs**: `references`
+Step 6 is `organ` on purpose. A directory that declares neither a document nor an index
+has never claimed an independent contract, so it is not a fractal. A default of
+`fractal` manufactures "add INTENT.md" demands and makes classification depend on
+incidentals — whether a directory happens to have a subdirectory, for instance.
 
-**Pattern-matched organs** (priorities 3–4, not listed by name):
+**Classification describes; it never prescribes.** What a node *is* comes from files
+that exist. What a node *should be* is a rule result, not a classification: an organ
+consumed from outside its owner's subtree has an external boundary, and
+`external-import-boundary` reports that with the consumer paths as evidence. Keeping
+the two apart is what lets a non-FCA codebase be adopted — the scanner names the
+fractals that are missing instead of silently assuming them.
 
-- `__name__` (double-underscore wrapped): e.g. `__tests__`, `__mocks__`, `__fixtures__`.
-- `.name` (dot-prefixed): e.g. `.config`, `.hidden`.
+`hybrid` is never auto-classified. An unsupported purity analysis is not proof of purity.
+Traversal continues inside organs: a nested directory with documents or a module index
+is reclassified as its own fractal.
 
-Fractal nodes MAY appear inside organ directories; traversal MUST re-classify such subdirectories — they become independent fractal nodes, not children of the organ. `hybrid` is never auto-classified: it is assigned manually during incremental migration.
+Default organ names are `components`, `utils`, `types`, `hooks`, `helpers`, `lib`,
+`styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
+and `references`. Config may extend this FCA convention.
 
----
+## Adapter Boundary
 
-## Structural Rules
+Core, policy and MCP DTOs MUST NOT encode programming-language extensions, entry-point
+filenames, framework route names or test-framework call syntax. Registered adapters
+provide those facts.
 
-Structural rules the scanner evaluates against every node — enable/disable and set severity in `.filid/config.json`: `{ "rules": { "<rule-id>": { "enabled": true|false } } }` Naming and depth checks are configured the same way as the rules below; acyclicity (the DAG requirement above) is a discipline the scan does not yet verify — trace the edges you touch rather than trusting a green run.
+- Equal-confidence ownership claims for one file are an
+  `ambiguous-adapter-claim` error.
+- A file owned by no adapter is `unsupported`.
+- A requested but unregistered adapter ID is a validation finding.
+- `indeterminate` and `unsupported` evidence MUST NOT be converted to PASS.
+- Adding an ecosystem adapter MUST NOT require changes to core types, policy rules or
+  MCP schemas.
+
+## Built-in Structural Rules
+
+### intent-document-contract
+
+- `INTENT.md` MUST be at most 50 lines.
+- It MUST contain `Always do`, `Ask first` and `Never do` boundary sections.
+- An organ MUST NOT use INTENT as local documentation.
+
+### detail-document-contract
+
+- `DETAIL.md` MUST describe current state, not append-only history.
+- It MUST contain `Requirements`, `API Contracts`, `Acceptance Criteria` and
+  `Last Updated`.
+- Acceptance groups use stable IDs unique within that DETAIL document.
 
 ### organ-no-intentmd
 
-**Severity**: error | **Applies to**: organ nodes
+- An organ MUST NOT contain `INTENT.md`.
+- Independent documentation means the directory should be reclassified as a fractal.
 
-- Organ nodes MUST NOT contain INTENT.md.
-- If an organ needs independent documentation, reclassify it as `fractal`.
+### entry-point-surface
 
-### index-barrel-pattern
-
-**Severity**: warning | **Applies to**: fractal and hybrid nodes with index.ts
-
-- `index.ts` in fractal/hybrid nodes MUST be a pure barrel — named re-export statements only, with no direct function, class, constant, or type declarations. The scan checks this shape; which symbols belong in the public surface is a separate concern.
-- Does NOT apply to organ or pure-function nodes.
+- A fractal or hybrid public surface MUST be adapter-inspectable.
+- An enumerated surface declares exports by name; widening it is a contract change.
+- Opaque or unsupported framework surfaces retain their certainty instead of passing.
 
 ### module-entry-point
 
-**Severity**: warning | **Applies to**: fractal and hybrid nodes
+- Every fractal and hybrid MUST have an adapter-reported module, executable or framework
+  entry point.
+- Organs and pure-function nodes do not require one.
 
-- Every fractal/hybrid node MUST have an entry point: `index.ts` (barrel) or `main.ts` (executable/CLI).
-- A framework-invoked entry file (e.g. Next.js `page.*`/`route.*`) also satisfies the requirement when a framework is detected. Projects MAY register more via `.filid/config.json` `additional-entry-points`.
-- External consumers MUST import from the entry point, never from internal files. Files inside the module import their peers directly — the local barrel serves outside consumers, not internal routing. Internal implementation files import concrete internal files directly, not through the local `index.ts`; the local `index.ts` is an external boundary, not a default indirection layer.
-- organ and pure-function nodes do NOT require an entry point.
+### max-depth
+
+- A node MUST stay within the configured structural depth.
+- Depth is measured from the scanned project root over classified nodes.
+
+### circular-dependency
+
+- The dependency graph MUST be acyclic.
+- A cycle result includes source files and resolved dependency evidence.
+- If unresolved dependencies can change the cycle conclusion, the result is
+  `indeterminate`.
 
 ### pure-function-isolation
 
-**Severity**: error | **Applies to**: pure-function nodes
-
-- `pure-function` nodes MUST NOT import from `fractal` or `hybrid` modules.
-- Pure functions have no side effects, no I/O, no stateful module dependencies.
-- Fix: move into the fractal module as organ, pass dependencies as arguments, or reclassify as organ/fractal.
+- A pure-function node MUST NOT depend on a fractal or hybrid.
+- If isolation cannot be proven, reclassify or pass dependencies as inputs.
 
 ### zero-peer-file
 
-**Severity**: warning | **Applies to**: fractal and hybrid nodes
+- A fractal root contains documents, adapter-reported entry points, at most one
+  eponymous implementation, and adapter-confirmed framework peers.
+- Other implementation files belong in an organ or child fractal unless config grants a
+  scoped allowed-peer override.
 
-- Fractal roots MUST NOT contain standalone peer files outside the allowed categories:
-  - **Static allowed**: `index.ts`, `index.js`, `index.tsx`, `index.mjs`, `index.cjs`, `main.ts`, `main.js`, `INTENT.md`, `DETAIL.md`
-  - **Eponymous file** (max 1): file whose base name matches the directory name (e.g., `auth/auth.ts`)
-  - **Framework reserved**: auto-detected from `package.json` dependencies (Next.js, Remix, Nuxt, SvelteKit) at scan time
-- Fix: promote peer file to a subdirectory, or add to `.filid/config.json` `additional-allowed`.
+### external-import-boundary
 
----
+- External consumers import only an entry point of the target fractal.
+- Files inside one fractal import concrete internal peers directly, not their local
+  public entry point.
+- Sibling fractals import the sibling entry point, never an internal file and never a
+  shared parent barrel that re-exports the sibling.
 
-## Documentation Constraints
+An organ has no entry point, so "route through the entry point" cannot apply to it.
+Organ access is judged by where the consumer sits:
+
+| Consumer                        | Path                              | Verdict                          |
+| ------------------------------- | --------------------------------- | -------------------------------- |
+| Inside the owner's subtree      | organ file, directly              | allowed                          |
+| Outside                         | the owner fractal's entry point   | allowed — needs a retention reason |
+| Outside                         | organ file, directly              | violation — unless exempted      |
+
+Inside the owner's subtree a nested fractal may import an organ's concrete files
+directly. That is the shape LCA placement produces: shared code sits at the lowest
+common fractal of its consumers precisely so those descendants can use it.
+
+When the owner's entry point re-exports an organ symbol, external use is legitimate —
+but a unit with external consumers naturally belongs at *their* lowest common fractal,
+so staying put is a deliberate choice that carries a reason.
+
+Direct import from outside is sometimes correct. The standing case is a bundle that
+must not pull in what a barrel re-exports — hook scripts, where importing the barrel
+drags every re-exported module into the hook bundle. Such an exemption is declared, not
+assumed, and it carries its reason.
+
+Both the retention reason and the direct-import exemption are declared in the owning
+fractal's `DETAIL.md`. Declare them only when an exemption is actually needed; a fractal
+that needs one and has no `DETAIL.md` adds one for this purpose.
+
+An organ consumed from outside its owner's subtree with neither a declaration nor an
+exemption is the signal that it has an external boundary. The finding names both
+resolutions — promote it to a fractal, or move it to its consumers' lowest common
+fractal — and cites the consumer paths. Filid does not choose between them.
+
+### spec-document-case-cap
+
+- A spec-document contains at most 15 semantic cases.
+
+### test-record-case-cap
+
+- A test-record contains at most 32 semantic cases per file.
+- Project-wide test-record file and case totals are unlimited.
+
+### spec-fragmentation
+
+- Multiple spec-documents may not split one acceptance group merely to evade the cap.
+- Contract group sets declared by sibling spec-documents MUST NOT overlap.
+
+### spec-contract-link
+
+- When one fractal has multiple spec-documents, it MUST have a DETAIL document.
+- Each spec-document declares at least one existing DETAIL acceptance group through the
+  adapter-recognized `filid:contract <group-id>` marker.
+
+## Verification Semantics
+
+The adapter classifies verification files by role, independent of filename:
+
+- `spec-document`: current executable contract; maximum 15 semantic cases.
+- `test-record`: QA, regression and incident history; maximum 32 cases per file.
+
+Counting rules:
+
+- a normal case, skip or todo counts as one;
+- statically enumerable parameter rows count by row;
+- a case inside a static parameterized suite multiplies by the suite row count;
+- a property declaration counts as one regardless of generated trials;
+- dynamic tables, unknown wrappers or ambiguous aliases are `indeterminate`.
+
+Never remove coverage to meet a cap. Split test-records by behavior or incident, and
+organize spec-documents by non-overlapping DETAIL acceptance groups. Test-records are not
+promoted into spec-documents.
+
+## Documentation Contracts
 
 ### INTENT.md
 
-- Hard limit: **50 lines**. Exceeding 50 lines is blocked by the pre-tool-use hook.
-- MUST include 3-tier boundary sections:
-  - `### Always do` — actions that must always be taken in this module
-  - `### Ask first` — actions requiring discussion before proceeding
-  - `### Never do` — actions strictly prohibited in this module
-- Approaching 50 lines signals the module MUST be decomposed into smaller fractal nodes.
-- MUST NOT increase the limit; restructure the module instead.
-- `## Structure` SHOULD call out name traps when present (e.g., "entry point is `cli.ts`, NOT `index.ts`") — one line that pre-empts the most expensive misread.
-- `## Conventions` SHOULD rank the module's tradeoff priorities when they exist (e.g., "when making tradeoffs, in order: 1. correctness 2. throughput") — a decision rule guides an agent further than any list of actions.
-- Section headings (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`, `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`) MUST remain in English — machine-readable anchors for the validator.
-- Descriptive content MUST follow the language specified by `[filid:lang]`; default to English if absent.
+- Section headings `Purpose`, `Structure`, `Conventions`, `Boundaries`, `Always do`,
+  `Ask first`, `Never do` and `Dependencies` remain in English.
+- Descriptive content follows `[filid:lang]`, defaulting to English.
+- Record only the fractal's own purpose, ownership and boundaries; do not copy ancestors.
+- Update only when the public boundary or contract changes.
+- A misleading conventional name is called out in `Structure`.
 
 ### DETAIL.md
 
-- MUST NOT grow append-only. Each update MUST restructure to reflect current state.
-- Defines public API contract, acceptance criteria, and scope boundaries.
-- MUST reflect current intended behavior, not historical evolution.
-- Update DETAIL.md **before** code changes. Update INTENT.md when boundaries change.
-- Section headings (`## Requirements`, `## API Contracts`, `## Last Updated`) MUST remain in English — machine-readable anchors for the validator.
-- Descriptive content MUST follow the language specified by `[filid:lang]`; default to English if absent.
+- Section headings `Requirements`, `API Contracts`, `Acceptance Criteria` and
+  `Last Updated` remain in English.
+- Descriptive content follows `[filid:lang]`, defaulting to English.
+- Restructure the document to current intended behavior on every update.
+- Update DETAIL before code.
+- `DETAIL.md` is the sole acceptance-criteria ledger.
+- Legacy `.filid/criteria.md` is reported as `legacy-criteria-ledger`; it is never
+  auto-deleted or silently migrated.
+- `Organ Exemptions` is conditional: present only when this fractal actually grants one.
+  A fractal with no exemption never carries the section, and a fractal that needs one
+  and has no `DETAIL.md` adds the document for this purpose.
 
----
+An exemption entry uses the acceptance-group shape, so one parser reads both:
 
-## Quality Thresholds
+```md
+## Organ Exemptions
 
-| Metric                   | Threshold                                | Action                      |
-| ------------------------ | ---------------------------------------- | --------------------------- |
-| LCOM4 (Lack of Cohesion) | >= 2                                     | Split into separate modules |
-| Cyclomatic Complexity    | > 15                                     | Compress or abstract        |
-| File size                | > 500 lines (advisory; no code constant) | Consider splitting          |
+### <organ path> — <short title>
 
-Metrics are computed by `/filid:scan` — do not estimate them by inspection.
+- **Consumers**: <paths or globs, or `entry-point` when access is through the barrel>
+- **Direct import**: allowed | not allowed
+- **Reason**: <why the barrel cannot serve these consumers, or why the organ has not
+  moved to its consumers' lowest common fractal>
+```
 
-**Test file conventions (15-case rule)**: at most **15 cases** per spec file — the scan gate checks the total only; "~3 basic + ~12 complex" is the recommended shape, not a separately enforced pair. Exceeding 15 signals the spec (or module) should be split. Never delete or omit a needed test to satisfy the cap — coverage outranks the cap; split the spec file instead.
+`Reason` is the load-bearing field. An exemption without one is a disabled rule wearing
+a declaration, and the scan treats a missing or empty reason as an unmet contract rather
+than a granted exemption.
 
----
+## Placement and Restructure
+
+- Shared code goes under the lowest common **fractal** of its consumer owners.
+- A single-consumer internal unit defaults to an organ of that owner.
+- An independent public contract becomes a child fractal with intent, detail and entry
+  point artifacts.
+- An organ cannot be an LCA.
+- If no meaningful organ name is supported by evidence, the plan sets
+  `requiresDecision: true`; do not invent `shared` or `common`.
+- A plan reports normalized absolute source and target paths, basis, consumers, LCA,
+  required artifacts, import rewrites and decision reasons.
+- Planning is read-only. It may write only an ephemeral plan artifact.
+- A precondition checks the snapshot hash immediately before execution.
+- A postcondition checks exact target, source absence, node type, documents, entry point,
+  import boundary, required rewrites and DAG. A functionally working but different target
+  fails.
+
+## Cross-review Scope
+
+Filid cross-review uses only:
+
+- changed INTENT/DETAIL contracts and acceptance groups;
+- node ownership and classification;
+- entry-point surface and external import boundary;
+- dependency DAG evidence;
+- LCA placement and approved restructure-plan postconditions;
+- verification roles, 15/32 caps, fragmentation, links and certainty.
+
+Its contract, structure and verification perspectives produce one opinion round. An
+adversarial verifier classifies blocking findings as `CONFIRMED`, `PLAUSIBLE` or
+`REFUTED`. Refuted findings stay in the arbitration log but not the verdict. The verdict
+is explicitly FCA-scoped.
 
 ## Structure Principles
 
-- **New module** → MUST create INTENT.md (3-tier boundaries) + index.ts (barrel export).
-- **Leaf utility dirs** (`components/`, `utils/`, `types/`) → organ: no INTENT.md, keep flat.
-- **Shared code** → MUST be placed at the nearest common ancestor (LCA) of its consumers.
-- **Sibling imports** → import the sibling's own entry point (`../sibling`), never its internals — and never route through the shared parent's entry point (the parent barrel re-exports you; that path is a cycle).
-- **New file in fractal root** → MUST go into an existing organ or new sub-fractal; MUST NOT leave as peer file unless in an allowed category.
-
----
+- A new fractal gets INTENT, DETAIL and a named-export entry point.
+- A leaf utility organ stays flat and has no INTENT.
+- Shared code is placed at the nearest common fractal ancestor of consumers.
+- Dependency edges point from consumers to sibling entry points and never form cycles.
+- A new implementation file does not remain as an unclassified fractal-root peer.
 
 ## Development Workflow
 
-Before any implementation that touches a fractal module:
+Before implementation that touches a fractal:
 
-1. Identify all affected fractal modules.
-2. Update DETAIL.md with new or changed requirements.
-3. Update INTENT.md if the module's public interface or boundaries change.
-4. Implement the change.
-5. Run `/filid:scan` and clear new findings — `warning` findings count as findings; do not declare compliance while they remain.
+1. Identify every affected fractal.
+2. Update each affected DETAIL contract.
+3. Update INTENT when a public interface or boundary changes.
+4. For new behavior or fixes, write a check and observe the intended failure.
+5. Implement the minimum change.
+6. Run scoped verification and the FCA scan; warnings count as findings.
+7. Record the result and any plan deviation before moving to the next review seam.

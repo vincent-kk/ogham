@@ -122,12 +122,13 @@ describe('fractal-tree', () => {
     });
 
     it('should classify additionalOrganNames dirs as organ end-to-end', async () => {
-      // A nesting content compartment defaults to fractal on structure alone;
-      // the config-supplied name is what makes it an organ, and it must
-      // survive the bottom-up correctNodeTypes pass too.
+      // A module index makes `skills` a fractal on structure alone; the
+      // config-supplied name overrides that, and the override must survive the
+      // bottom-up correctNodeTypes pass too. Without the index there would be
+      // nothing to override — an undeclared directory is already an organ.
       setup({
         '.': ['INTENT.md'],
-        skills: [],
+        skills: ['index.ts'],
         'skills/preview': ['SKILL.md'],
         // The real shape a nested references/ takes in this repo.
         'skills/preview/references': [],
@@ -138,10 +139,11 @@ describe('fractal-tree', () => {
       try {
         const bare = await scanProject(tmpDir);
         expect(bare.nodes.get(join(tmpDir, 'skills'))!.type).toBe('fractal');
+        // Markdown-only compartments declare no contract, so they need no
+        // config entry to stay organ — a subdirectory does not promote them.
         expect(
           bare.nodes.get(join(tmpDir, 'skills', 'preview', 'references'))!.type,
-        ).toBe('fractal');
-        // A leaf compartment needs no name entry — priority 6 covers it.
+        ).toBe('organ');
         expect(bare.nodes.get(join(tmpDir, 'leaf-refs'))!.type).toBe('organ');
 
         const tree = await scanProject(tmpDir, {

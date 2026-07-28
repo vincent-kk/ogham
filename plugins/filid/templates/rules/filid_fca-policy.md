@@ -44,14 +44,32 @@ Classification uses this strict order:
 1. `INTENT.md` or `DETAIL.md` present → `fractal`.
 2. Directory name in the configured known organ list → `organ`.
 3. Double-underscore-wrapped or dot-prefixed infrastructure name → `organ`.
-4. A registered StructureAdapter reports an entry point → `fractal`.
-5. No fractal children and leaf directory → `organ`.
-6. Non-leaf and an adapter proves both statelessness and no side effects →
-   `pure-function`.
-7. Otherwise → `fractal`.
+4. A registered StructureAdapter reports a **module index** → `fractal`.
+5. An adapter proves both statelessness and no side effects → `pure-function`.
+6. Otherwise → `organ`.
+
+Step 4 reads one signal only: a module index. Of the entry points an adapter reports,
+only `kind: "module"` classifies. An `executable` or `framework` entry, and any path
+injected by the config `entryPointOverrides`, never turns a directory into a fractal.
+Core still knows no filenames — it asks the adapter whether a module index exists here.
+`entryPointOverrides` feeds `entry-point-surface`, not classification. Without that
+split, markdown-as-implementation such as `SKILL.md` would make a directory a fractal
+and subject prose to rules written for code.
+
+Step 6 is `organ` on purpose. A directory that declares neither a document nor an index
+has never claimed an independent contract, so it is not a fractal. A default of
+`fractal` manufactures "add INTENT.md" demands and makes classification depend on
+incidentals — whether a directory happens to have a subdirectory, for instance.
+
+**Classification describes; it never prescribes.** What a node *is* comes from files
+that exist. What a node *should be* is a rule result, not a classification: an organ
+consumed from outside its owner's subtree has an external boundary, and
+`external-import-boundary` reports that with the consumer paths as evidence. Keeping
+the two apart is what lets a non-FCA codebase be adopted — the scanner names the
+fractals that are missing instead of silently assuming them.
 
 `hybrid` is never auto-classified. An unsupported purity analysis is not proof of purity.
-Traversal continues inside organs: a nested directory with documents or an entry point
+Traversal continues inside organs: a nested directory with documents or a module index
 is reclassified as its own fractal.
 
 Default organ names are `components`, `utils`, `types`, `hooks`, `helpers`, `lib`,
@@ -136,6 +154,37 @@ provide those facts.
 - Sibling fractals import the sibling entry point, never an internal file and never a
   shared parent barrel that re-exports the sibling.
 
+An organ has no entry point, so "route through the entry point" cannot apply to it.
+Organ access is judged by where the consumer sits:
+
+| Consumer                        | Path                              | Verdict                          |
+| ------------------------------- | --------------------------------- | -------------------------------- |
+| Inside the owner's subtree      | organ file, directly              | allowed                          |
+| Outside                         | the owner fractal's entry point   | allowed — needs a retention reason |
+| Outside                         | organ file, directly              | violation — unless exempted      |
+
+Inside the owner's subtree a nested fractal may import an organ's concrete files
+directly. That is the shape LCA placement produces: shared code sits at the lowest
+common fractal of its consumers precisely so those descendants can use it.
+
+When the owner's entry point re-exports an organ symbol, external use is legitimate —
+but a unit with external consumers naturally belongs at *their* lowest common fractal,
+so staying put is a deliberate choice that carries a reason.
+
+Direct import from outside is sometimes correct. The standing case is a bundle that
+must not pull in what a barrel re-exports — hook scripts, where importing the barrel
+drags every re-exported module into the hook bundle. Such an exemption is declared, not
+assumed, and it carries its reason.
+
+Both the retention reason and the direct-import exemption are declared in the owning
+fractal's `DETAIL.md`. Declare them only when an exemption is actually needed; a fractal
+that needs one and has no `DETAIL.md` adds one for this purpose.
+
+An organ consumed from outside its owner's subtree with neither a declaration nor an
+exemption is the signal that it has an external boundary. The finding names both
+resolutions — promote it to a fractal, or move it to its consumers' lowest common
+fractal — and cites the consumer paths. Filid does not choose between them.
+
 ### spec-document-case-cap
 
 - A spec-document contains at most 15 semantic cases.
@@ -196,6 +245,26 @@ promoted into spec-documents.
 - `DETAIL.md` is the sole acceptance-criteria ledger.
 - Legacy `.filid/criteria.md` is reported as `legacy-criteria-ledger`; it is never
   auto-deleted or silently migrated.
+- `Organ Exemptions` is conditional: present only when this fractal actually grants one.
+  A fractal with no exemption never carries the section, and a fractal that needs one
+  and has no `DETAIL.md` adds the document for this purpose.
+
+An exemption entry uses the acceptance-group shape, so one parser reads both:
+
+```md
+## Organ Exemptions
+
+### <organ path> — <short title>
+
+- **Consumers**: <paths or globs, or `entry-point` when access is through the barrel>
+- **Direct import**: allowed | not allowed
+- **Reason**: <why the barrel cannot serve these consumers, or why the organ has not
+  moved to its consumers' lowest common fractal>
+```
+
+`Reason` is the load-bearing field. An exemption without one is a disabled rule wearing
+a declaration, and the scan treats a missing or empty reason as an unmet contract rather
+than a granted exemption.
 
 ## Placement and Restructure
 

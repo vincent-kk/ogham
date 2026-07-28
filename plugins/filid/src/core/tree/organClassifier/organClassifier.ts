@@ -53,12 +53,20 @@ export function isInfraOrgDirectoryByPattern(dirName: string): boolean {
  * 3. Name matches __*__ or .* pattern → organ (infrastructure convention)
  * 4. Directory name in KNOWN_ORGAN_DIR_NAMES or additionalOrganNames → organ
  *    (name-based, overrides structure)
- * 5. Adapter-reported entry point → fractal
+ * 5. Adapter-reported MODULE INDEX → fractal
  * 6. No fractal children + leaf directory → organ
  * 7. No side effects → pure-function
- * 8. Default → fractal (INTENT.md should be added)
+ * 8. Default → organ
  *
- * Ambiguous cases should be delegated to LLM via context-injector by the caller.
+ * Classification describes; it never prescribes. What a node *is* comes from
+ * files that exist. What a node *should be* is a rule result — an organ consumed
+ * from outside its owner's subtree is reported by `external-import-boundary`,
+ * not manufactured here by defaulting to fractal.
+ *
+ * Step 5 reads `kind: 'module'` only. An `executable` or `framework` entry, and
+ * any path injected through config `entryPointOverrides`, does not classify:
+ * otherwise markdown-as-implementation such as `SKILL.md` would turn a prose
+ * directory into a fractal and subject it to rules written for code.
  */
 export function classifyNode(input: ClassifyInput): CategoryType {
   const hasIntent = input.hasIntentMd ?? false;
@@ -68,19 +76,19 @@ export function classifyNode(input: ClassifyInput): CategoryType {
     KNOWN_ORGAN_DIR_NAMES.includes(input.dirName) ||
     (input.additionalOrganNames ?? []).includes(input.dirName);
 
+  const hasModuleIndex =
+    (input.entryPoints ?? []).some(
+      (entryPoint) => entryPoint.kind === 'module',
+    ) ||
+    (input.hasIndex ?? false);
+
   if (hasIntent) return 'fractal';
   if (hasDetail) return 'fractal';
   if (isInfraOrgDirectoryByPattern(input.dirName)) return 'organ';
   if (isOrganName) return 'organ';
-  // An adapter-reported entry point establishes a non-organ module boundary.
-  if (
-    ((input.entryPoints?.length ?? 0) > 0 || (input.hasIndex ?? false)) &&
-    !isOrganName &&
-    !isInfraOrgDirectoryByPattern(input.dirName)
-  )
-    return 'fractal';
+  if (hasModuleIndex) return 'fractal';
   if (!input.hasFractalChildren && input.isLeafDirectory) return 'organ';
   const hasSideEffects = input.hasSideEffects ?? true;
   if (!hasSideEffects) return 'pure-function';
-  return 'fractal';
+  return 'organ';
 }

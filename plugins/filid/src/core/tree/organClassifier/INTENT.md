@@ -10,7 +10,8 @@
 
 ## Conventions
 
-- 순서: documents → known organ → infra pattern → adapter entry → leaf → proven purity → fractal.
+- 순서: documents → infra pattern → known organ → module index → leaf → proven purity → organ.
+- 분류는 서술이지 규범이 아니다. 선언이 없으면 organ이며, 무엇이 fractal이어야 하는지는 규칙 결과다.
 - purity 미지원은 side-effectful 안전 기본값으로 본다.
 - hybrid는 입력에서 명시하지 않는 한 반환하지 않는다.
 
@@ -19,7 +20,7 @@
 ### Always do
 
 - 각 priority override를 table test로 고정
-- entry point는 descriptor 존재 여부로만 판정
+- 분류에는 `kind: 'module'` entry point만 사용 — executable·framework·config override는 제외
 
 ### Ask first
 

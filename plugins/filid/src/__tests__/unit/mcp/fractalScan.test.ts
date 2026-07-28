@@ -239,6 +239,14 @@ describe('fractal-scan tool — additional-organ-names wiring', () => {
       recursive: true,
     });
     writeFileSync(portableJoin(tmpRoot, INTENT_FILE_NAME), '# root', 'utf8');
+    // A module index makes `skills` a fractal on structure alone, so the
+    // config-supplied organ name has something to override. Without it the
+    // directory is already an organ and the two cases stop discriminating.
+    writeFileSync(
+      portableJoin(tmpRoot, 'skills', 'index.ts'),
+      'export {};\n',
+      'utf8',
+    );
     writeFileSync(
       portableJoin(tmpRoot, 'skills', 'preview', 'SKILL.md'),
       '# preview',
