@@ -1,12 +1,13 @@
 ## Purpose
 
-codex-cli `codex exec` 의 JSONL stdout 을 라인 단위로 파싱해 `{ threadId, response, resolvedModel }` 을 추출. 알 수 없는 이벤트 shape 는 silently skip.
+codex-cli `codex exec` 의 JSONL stdout 을 라인 단위로 파싱해 `{ threadId, response, resolvedModel, errorMessage }` 를 추출. 알 수 없는 이벤트 shape 는 silently skip.
 
 ## Structure
 
 | Path                      | Role                                                           |
 | ------------------------- | -------------------------------------------------------------- |
 | `jsonlParser.ts`          | 메인 — 라인 split, JSON parse, 이벤트 종류별 분기              |
+| `utils/readEventText.ts`  | 이벤트 1건 → `{response?, errorMessage?}` (type 별 분기 담당)  |
 | `utils/findThreadId.ts`   | `thread.started` / `session_id` 변종 모두 허용해 threadId 추출 |
 | `utils/readObject.ts`     | 안전한 nested object 필드 access                               |
 | `utils/readString.ts`     | 안전한 string 필드 access                                      |
@@ -18,6 +19,7 @@ codex-cli `codex exec` 의 JSONL stdout 을 라인 단위로 파싱해 `{ thread
 
 - 알 수 없는 shape 는 silently skip — 파싱 중단 금지
 - 최종 응답 우선순위: 마지막 `agent.message` / `agent.complete` / `item.completed(agent_message)` 텍스트
+- `errorMessage` 는 마지막 `error.message` / `turn.failed.error.message` — codex 는 실패 사유를 여기에만 싣고 stderr 에는 남기지 않으므로 `errorMap` 이 이 값으로 분류·전달한다
 - threadId 는 첫 발견 값 고정 — 이후 라인에서 변경 금지
 - JSON parse 실패 라인은 skip, 에러 전파 없음
 - 모델 문자열은 `inner.model` → `parsed.model` 순으로 탐색

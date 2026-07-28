@@ -13,7 +13,9 @@ export function spawnCliSync(
   const encoding = options.encoding ?? "utf8";
   const normalize = options.normalizeEol !== false;
   const timeoutMs =
-    options.timeoutMs !== undefined ? osTimeout(options.timeoutMs) : undefined;
+    options.timeoutMs !== undefined
+      ? osTimeout(options.timeoutMs, options.scaleWindowsTimeout !== false)
+      : undefined;
 
   const launcher = resolveLauncher(bin, { env: options.env });
   const result = launcher

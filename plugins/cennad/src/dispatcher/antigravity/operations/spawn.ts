@@ -1,5 +1,8 @@
 import { spawnCli } from '@ogham/cross-platform';
 
+import { MAX_CLI_OUTPUT_CHARS } from '../../../constants/spawnLimits.js';
+import { timeoutError } from '../../utils/timeoutError.js';
+
 export interface AgySpawnResult {
   exitCode: number;
   stdout: string;
@@ -11,6 +14,7 @@ export interface AgySpawnOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
   timeoutMs?: number;
+  idleTimeoutMs?: number;
 }
 
 export async function spawnAgy(
@@ -21,12 +25,19 @@ export async function spawnAgy(
     cwd: options.cwd,
     env: { ...process.env, ...options.env },
     timeoutMs: options.timeoutMs,
+    idleTimeoutMs: options.idleTimeoutMs,
+    // Both limits are ceilings config chose, and the cap also goes to agy as
+    // --print-timeout: a Windows ×3 here would let the child's copy fire first.
+    scaleWindowsTimeout: false,
+    maxOutputChars: MAX_CLI_OUTPUT_CHARS,
   });
   if (result.timedOut) {
-    const err = new Error(
-      `agy spawn timed out after ${options.timeoutMs}ms`,
-    ) as NodeJS.ErrnoException;
-    err.code = 'ETIMEDOUT';
+    const err = timeoutError({
+      cli: 'agy',
+      timeoutKind: result.timeoutKind,
+      idleTimeoutMs: options.idleTimeoutMs,
+      hardCapMs: options.timeoutMs,
+    });
     return {
       exitCode: -1,
       stdout: result.stdout,

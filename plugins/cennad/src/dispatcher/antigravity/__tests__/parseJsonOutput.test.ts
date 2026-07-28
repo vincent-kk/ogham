@@ -8,6 +8,42 @@ describe('parseJsonOutput', () => {
     expect(parseJsonOutput('   \n')).toBeNull();
   });
 
+  // A recognised stream with no readable answer is a failure. Falling through to
+  // the legacy paths would hand the caller the whole JSONL as if it were prose,
+  // and skip the transcript recovery callAgy runs on null.
+  it('returns null for a stream whose result carries no response', () => {
+    const stream = [
+      JSON.stringify({ event: 'init', conversation_id: 'c1' }),
+      JSON.stringify({ event: 'step_update', step_update: { state: 'DONE' } }),
+      JSON.stringify({
+        event: 'result',
+        result: { conversation_id: 'c1', status: 'SUCCESS', response: '  ' },
+      }),
+    ].join('\n');
+    expect(parseJsonOutput(stream)).toBeNull();
+  });
+
+  // One non-JSON line ahead of the stream — a version notice — must not disable the
+  // guard and turn the whole JSONL dump into the answer.
+  it('returns null for a recognised stream that a banner line precedes', () => {
+    const stream = [
+      'Warning: a new version of agy is available',
+      JSON.stringify({
+        event: 'result',
+        result: { status: 'ERROR', error: 'invalid model selection' },
+      }),
+    ].join('\n');
+    expect(parseJsonOutput(stream)).toBeNull();
+  });
+
+  it('returns null for a stream that never emits a result event', () => {
+    const stream = [
+      JSON.stringify({ event: 'init', conversation_id: 'c1' }),
+      JSON.stringify({ event: 'step_update', step_update: { state: 'DONE' } }),
+    ].join('\n');
+    expect(parseJsonOutput(stream)).toBeNull();
+  });
+
   it('extracts the response field from a json object', () => {
     expect(parseJsonOutput(JSON.stringify({ response: 'hello' }))).toBe(
       'hello',

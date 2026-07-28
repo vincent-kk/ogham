@@ -1,10 +1,29 @@
+import { AGY_VARIANT_SUFFIXES } from '../../../constants/agyModels.js';
 import type { AntigravityModelMap, Tier } from '../../../types/index.js';
 
+// A name that already carries its variant — parenthesised, or a slug ending in a
+// known suffix — is complete and must be sent as-is.
+function isComplete(model: string): boolean {
+  if (model.includes('(')) return true;
+  if (model.includes(' ')) return false;
+  const lower = model.toLowerCase();
+  return AGY_VARIANT_SUFFIXES.some((variant) => lower.endsWith(`-${variant}`));
+}
+
+// The join follows the spelling of the base: display names take " (Variant)",
+// catalog slugs take "-variant".
+function joinName(model: string, effort: string): string {
+  return model.includes(' ')
+    ? `${model} (${effort})`
+    : `${model}-${effort.toLowerCase()}`;
+}
+
 // Resolves a tier to the concrete agy model name from config's model_map.antigravity.
-// agy carries the variant inside the display name ("Gemini 3.5 Flash (Medium)"), so
-// model + effort are recomposed into that form here. A missing map or an empty model
-// omits --model, letting agy pick its default. Model names are never hardcoded — they
-// live entirely in config.
+// agy takes ONE complete name and rejects any mixture of its two spellings
+// (measured 2026-07-28): "Gemini 3.6 Flash (High)" ok · "gemini-3.6-flash-high" ok ·
+// "gemini-3.6-flash" + --effort high ok · "gemini-3.6-flash-medium (High)" rejected.
+// A missing map or an empty model omits --model, letting agy pick its default. Model
+// names are never hardcoded — they live entirely in config.
 export function resolveAntigravityModel(
   tier: Tier,
   map: AntigravityModelMap | undefined,
@@ -14,5 +33,6 @@ export function resolveAntigravityModel(
   const trimmedModel = model.trim();
   if (trimmedModel.length === 0) return null;
   const trimmedEffort = effort?.trim();
-  return trimmedEffort ? `${trimmedModel} (${trimmedEffort})` : trimmedModel;
+  if (!trimmedEffort || isComplete(trimmedModel)) return trimmedModel;
+  return joinName(trimmedModel, trimmedEffort);
 }

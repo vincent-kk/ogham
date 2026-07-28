@@ -40,6 +40,26 @@ describe('saveConfig', () => {
     expect(await loadConfig()).toEqual(config);
   });
 
+  // The top effort level has to survive the save→load round trip, or picking it in
+  // the settings UI silently reverts to whatever the merge falls back to.
+  it('roundtrips a claude tier pinned to ultracode', async () => {
+    const config: Config = {
+      ...DEFAULT_CONFIG,
+      model_map: {
+        ...DEFAULT_CONFIG.model_map,
+        claude: {
+          ...DEFAULT_CONFIG.model_map.claude,
+          apex: { model: 'opus[1m]', effort: 'ultracode' },
+        },
+      },
+    };
+    await saveConfig(config);
+    expect((await loadConfig()).model_map.claude.apex).toEqual({
+      model: 'opus[1m]',
+      effort: 'ultracode',
+    });
+  });
+
   it('rejects invalid input via the Zod schema', async () => {
     await expect(
       saveConfig({

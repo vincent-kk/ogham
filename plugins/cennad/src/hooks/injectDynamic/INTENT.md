@@ -2,7 +2,7 @@
 
 ## Purpose
 
-매 사용자 프롬프트마다 stdin 의 `prompt` + `runtime/counter.json` + `config.json` 을 읽어 **2–3줄**을 출력한다: 호출 카운트 + 점유율 미달 provider 한 줄, 강도별 nudge 한 줄, 키워드가 매치된 턴에만 소유자 지목 한 줄. 매 턴 주입이므로 토큰 점유 최소화가 이 훅의 제1 제약이다. counter 가 없거나 `parent_pid` 가 다르면 0 으로 표시하며, counter 는 read-only — 리셋은 counterManager 책임.
+매 사용자 프롬프트마다 stdin 의 `prompt` + `runtime/counter.json` + `config.json` 을 읽어 **2–3줄**을 출력한다: 호출 카운트 + 점유율 미달 provider 한 줄, 강도별 nudge 한 줄, 키워드가 매치된 턴에만 소유자 지목 한 줄. 매 턴 주입이므로 토큰 점유 최소화가 이 훅의 제1 제약이다. counter 가 없거나 `parent_pid` 가 현재 호스트(`hostPid()`)와 다르면 0 으로 표시하며, counter 는 read-only — 리셋은 counterManager 책임.
 
 ## Structure
 
@@ -45,4 +45,4 @@
 
 ## Dependencies
 
-- `../shared/{loadConfig,configTypes,providerOrder,electableProviders,selfProvider,isPlainObject,paths,safeReadJson,nowIso}.js`
+- `../shared/{loadConfig,configTypes,providerOrder,electableProviders,selfProvider,isPlainObject,paths,safeReadJson,nowIso,hostPid}.js`

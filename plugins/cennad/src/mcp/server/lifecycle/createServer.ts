@@ -37,9 +37,12 @@ export function createServer(): McpServer {
         tier: TierSchema.optional().describe(
           'Optional capability/cost tier; omit to use the configured default for ' +
             'that provider. Higher is stronger but much more likely to hit ' +
-            'rate_limit or budget_exhausted. Use mid as the normal tier for almost ' +
-            'all work; low for clearly simple tasks; high only with a specific reason ' +
-            'to expect mid will be insufficient — not merely because the task looks complex.',
+            'rate_limit or budget_exhausted, and it also widens how long the CLI is ' +
+            'allowed to run. Use mid as the normal tier for almost all work; low for ' +
+            'clearly simple tasks; high only with a specific reason to expect mid will ' +
+            'be insufficient — not merely because the task looks complex; apex only for ' +
+            'work that must run autonomously across many steps or files, where the run ' +
+            'is expected to take a long time.',
         ),
         project_root: z
           .string()
@@ -76,10 +79,12 @@ export function createServer(): McpServer {
             'Follow-up message; the CLI keeps its own prior turns but still cannot see this Claude conversation.',
           ),
         tier: TierSchema.optional().describe(
-          'Optional capability/cost tier for THIS turn; omit to use the configured ' +
-            'default for that provider. Higher is stronger but much more likely to hit ' +
-            'rate_limit or budget_exhausted. Use mid for normal work, low for clearly ' +
-            'simple tasks; high only with a specific reason to expect mid will be insufficient.',
+          'Optional capability/cost tier for THIS turn; omit to keep the tier the ' +
+            'session started with. Higher is stronger but much more likely to hit ' +
+            'rate_limit or budget_exhausted, and it also widens how long the CLI is ' +
+            'allowed to run. Use mid for normal work, low for clearly simple tasks; ' +
+            'high only with a specific reason to expect mid will be insufficient; apex ' +
+            'only for work that must run autonomously across many steps or files.',
         ),
         project_root: z
           .string()

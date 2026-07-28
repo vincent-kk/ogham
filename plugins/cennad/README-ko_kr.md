@@ -53,7 +53,7 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 /setup
 ```
 
-로컬 웹 UI 를 띄워 provider 비율(target % + provider 별 활성화 토글), intervention strength(`-2` … `+2`), 키워드 라우팅 힌트, tier 별 모델·옵션 매핑을 설정합니다. 3개 레인(codex / antigravity / Anthropic)이 각각 독립적으로 구성됩니다. UI 는 `127.0.0.1` 에서 일회용 토큰과 함께 실행되며 5분 idle 후 자동 종료됩니다.
+로컬 웹 UI 를 띄워 provider 비율(target % + provider 별 활성화 토글), intervention strength(`-2` … `+2`), 키워드 라우팅 힌트, tier 별 모델·effort 매핑, CLI liveness 한도, provider 별 기본 옵션을 설정합니다. 3개 레인(codex / antigravity / Anthropic)이 각각 독립적으로 구성됩니다. UI 는 `127.0.0.1` 에서 일회용 토큰과 함께 실행되며 5분 idle 후 자동 종료됩니다.
 
 ### Codex 위임
 
@@ -182,17 +182,20 @@ cennad 의 영구 상태는 기본적으로 `~/.claude/plugins/cennad/` 디렉�
 
 ## 티어
 
-각 provider 는 3개 tier alias 를 노출합니다. codex 와 claude 는 각 tier 가 `{model, effort}` 쌍으로 config(`model_map.codex`, `model_map.claude`)에 저장됩니다. antigravity 는 여러 모델 패밀리를 서빙하므로, 각 tier 가 `/setup` 에서 고른 모델 풀네임(`agy models` 목록 기반)에 매핑되어 `model_map.antigravity` 에 저장됩니다. 셋 다 `/setup` 에서 tier 별로 선택합니다.
+각 provider 는 4개 tier alias 를 노출합니다. codex 와 claude 는 각 tier 가 `{model, effort}` 쌍으로 config(`model_map.codex`, `model_map.claude`)에 저장됩니다. antigravity 는 여러 모델 패밀리를 서빙하므로, 각 tier 가 `/setup` 에서 고른 모델 풀네임(`agy models` 목록 기반)에 매핑되어 `model_map.antigravity` 에 저장됩니다. 셋 다 `/setup` 에서 tier 별로 선택합니다.
 
-| tier   | 의미                                                    |
-| ------ | ------------------------------------------------------- |
-| `high` | provider 의 가장 강력한 모델 (antigravity: 매핑한 모델) |
-| `mid`  | 균형 잡힌 모델                                          |
-| `low`  | 가장 빠르고 저렴한 모델                                 |
+| tier   | 의미                                                            |
+| ------ | --------------------------------------------------------------- |
+| `apex` | provider 가 스스로 탐색·수정하며 장시간 자율 실행해야 하는 작업 |
+| `high` | 여러 파일·상충 제약을 아우르는 판단 (antigravity: 매핑한 모델)  |
+| `mid`  | 기본값. 한 모듈 범위의 구현·리뷰·설명                           |
+| `low`  | 조회 하나, 변환 하나 — 가장 빠르고 저렴한 모델                  |
+
+tier 는 난이도가 아니라 **provider 가 무엇을 해야 하는지**로 고릅니다. `apex` 는 가장 비싸고 rate-limit 슬롯을 가장 오래 점유하므로 범위와 자율성이 필요할 때만 씁니다.
 
 codex 의 reasoning effort 스케일은 `low < medium < high < xhigh < max < ultra` 이며, **모델마다 받는 레벨이 다릅니다** — `ultra` 는 5.6 frontier 라인 전용이고 5.5/5.4 라인은 `xhigh` 가 상한입니다. claude-code 와 달리 codex 는 미지원 effort 를 낮춰주지 않고 그대로 실패시키므로, `/setup` 은 선택한 모델이 광고한 레벨만 노출합니다(`codex debug models` 실시간 조회). 기본값은 frontier 모델을 `high` 에만 쓰고, `mid` 와 `low` 는 같은 balanced 모델을 effort 로 가릅니다 — `high` = `gpt-5.6-sol`(frontier) / `max`, `mid` = `gpt-5.6-terra`(balanced) / `high`, `low` = `gpt-5.6-terra` / `medium`. tier 의 model 이나 effort 를 비우면 해당 플래그를 생략하므로 사용자의 `~/.codex/config.toml` 이 그 차원을 결정합니다.
 
-tier env override: `CENNAD_CODEX_{HIGH,MID,LOW}_MODEL` / `_EFFORT`, `CENNAD_CLAUDE_{HIGH,MID,LOW}_MODEL` / `_EFFORT` (예: `CENNAD_CODEX_HIGH_EFFORT=ultra`). antigravity tier 는 env 가 아니라 `/setup` 에서 매핑합니다.
+tier env override: `CENNAD_CODEX_<TIER>_MODEL` / `_EFFORT`, `CENNAD_CLAUDE_<TIER>_MODEL` / `_EFFORT` (`<TIER>` = `APEX`\|`HIGH`\|`MID`\|`LOW`, 예: `CENNAD_CODEX_HIGH_EFFORT=ultra`). antigravity tier 는 env 가 아니라 `/setup` 에서 매핑합니다.
 
 ---
 

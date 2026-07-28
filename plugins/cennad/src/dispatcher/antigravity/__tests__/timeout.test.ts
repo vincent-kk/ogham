@@ -25,21 +25,24 @@ import { antigravityDispatcher } from '../index.js';
 
 const FLAGS: AntigravityFlags = { sandbox: false, skip_permissions: false };
 
-// Sleeps longer than the test spawnTimeoutMs so ETIMEDOUT fires before exit.
+// Stays silent longer than the test idle limit, so ETIMEDOUT fires before exit.
 const SLEEP_SCRIPT = `#!/usr/bin/env node
 const args = process.argv.slice(2);
 if (args[0] === 'models') {
   process.stdout.write('Gemini 3.1 Pro\\n');
   process.exit(0);
 }
-// Never writes stdout. Default 2 s lets spawnTimeoutMs (250 ms) fire first on
-// POSIX. On Windows osTimeout floors the timeout to 5 s, so a 2 s exit would beat
-// it; the cleanup test overrides FAKE_AGY_SLEEP_MS to outlive any platform timeout.
+// Never writes stdout — that silence is what the idle limit (250 ms) catches on
+// POSIX. On Windows osTimeout floors it to 5 s, so a 2 s exit would beat it; the
+// cleanup test overrides FAKE_AGY_SLEEP_MS to outlive any platform timeout.
 const sleepMs = Number(process.env.FAKE_AGY_SLEEP_MS) || 2000;
 setTimeout(() => { process.exit(0); }, sleepMs);
 `;
 
-const SPAWN_TIMEOUT_MS = 250;
+// The ceiling stays far out of reach: a silent agy must be stopped by the idle
+// limit, not by running out of tier budget.
+const IDLE_TIMEOUT_MS = 250;
+const HARD_CAP_MS = 120_000;
 
 let handle: ReturnType<typeof installFakeBinary>;
 let restorePath: () => void;
@@ -75,7 +78,8 @@ function baseOptions(): DispatchOptions<AntigravityFlags> {
     sessionId: 'timeout-session',
     cwd: process.cwd(),
     flags: FLAGS,
-    spawnTimeoutMs: SPAWN_TIMEOUT_MS,
+    idleTimeoutMs: IDLE_TIMEOUT_MS,
+    hardCapMs: HARD_CAP_MS,
   };
 }
 
@@ -106,7 +110,7 @@ async function waitUntilGone(p: string, timeoutMs: number): Promise<void> {
 }
 
 describe('antigravityDispatcher timeout — start()', () => {
-  it('returns failure status when agy exceeds spawnTimeoutMs', async () => {
+  it('returns failure status when agy goes silent past the idle limit', async () => {
     const result = await antigravityDispatcher.start(baseOptions());
     expect(result.status).toBe('failure');
   });
@@ -117,7 +121,7 @@ describe('antigravityDispatcher timeout — start()', () => {
   });
 
   it('removes the antigravity-cwd dir after timeout (cleanupCwdOnTimeout fire-and-forget)', async () => {
-    // Windows osTimeout floors spawnTimeoutMs (250 ms) to 5 s, so a 2 s self-exit
+    // Windows osTimeout floors the idle limit (250 ms) to 5 s, so a 2 s self-exit
     // would beat the timeout and skip cleanup. 60 s guarantees the process is
     // always killed by the timeout on every platform, so timedOut === true.
     process.env.FAKE_AGY_SLEEP_MS = '60000';
@@ -148,6 +152,7 @@ describe('antigravityDispatcher timeout — start()', () => {
       ...baseOptions(),
       tier: 'high',
       modelMap: {
+        apex: { model: 'Gemini 3.1 Pro' },
         high: { model: 'Gemini 3.1 Pro' },
         mid: { model: 'x' },
         low: { model: 'y' },
@@ -158,7 +163,7 @@ describe('antigravityDispatcher timeout — start()', () => {
 });
 
 describe('antigravityDispatcher timeout — resume()', () => {
-  it('returns failure status when agy exceeds spawnTimeoutMs', async () => {
+  it('returns failure status when agy goes silent past the idle limit', async () => {
     const result = await antigravityDispatcher.resume(
       resumeOptions('/stored/cwd'),
     );
@@ -200,6 +205,7 @@ describe('antigravityDispatcher timeout — resume()', () => {
       ...resumeOptions('/stored/cwd'),
       tier: 'mid',
       modelMap: {
+        apex: { model: 'Gemini 3.1 Pro' },
         high: { model: 'Gemini 3.1 Pro' },
         mid: { model: 'Gemini 2.5 Flash' },
         low: { model: 'y' },

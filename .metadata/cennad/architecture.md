@@ -284,11 +284,11 @@ agy 는 headless conversation-id 를 발급하지 않는다 (Issue #7). cennad �
 
 start 타임아웃 시 cwd 를 삭제한다. resume 타임아웃 시에는 삭제하지 않는다 (삭제하면 이후 `--continue` 가 새 대화를 시작해 컨텍스트가 소실됨).
 
-**모델 해석**: `resolveAntigravityModel` 이 `tier` (`high`/`mid`/`low`) 를 config `model_map.antigravity` 에서 조회한다. 맵 미설정이면 `-m` 을 생략해 agy 기본 모델을 사용한다. 모델 문자열은 `src/dispatcher/antigravity/operations/modelAlias.ts` 에만 존재하며, 다른 파일은 tier 만 참조한다.
+**모델 해석**: `resolveAntigravityModel` 이 `tier` (`apex`/`high`/`mid`/`low`) 를 config `model_map.antigravity` 에서 조회한다. 맵 미설정이면 `-m` 을 생략해 agy 기본 모델을 사용한다. 모델 문자열은 `src/dispatcher/antigravity/operations/modelAlias.ts` 에만 존재하며, 다른 파일은 tier 만 참조한다.
 
 **agy 모델 목록** (`core/agyModels`): `agy models` 출력을 파싱해 `ANTIGRAVITY_CWD_DIR/../agy-models.json` 에 캐시한다 (TTL 1 시간). settings UI 의 `/provider-status` 웹 라우트가 `getAvailableModels` 를 직접 호출해 이 캐시를 서빙한다. 캐시 미스·갱신 실패 시 빈 목록을 반환하며 절대 throw 하지 않는다.
 
-**설정 UI**: antigravity 활성 시 per-tier model 드롭다운(`model-antigravity-high`, `model-antigravity-mid`, `model-antigravity-low`)과 option_flags(`--dangerously-skip-permissions`)가 표시된다.
+**설정 UI**: antigravity 활성 시 per-tier model 드롭다운(`model-antigravity-<tier>`, tier 4종)과 option_flags(`--dangerously-skip-permissions`)가 표시된다.
 
 ## Claude 디스패처 상세
 
@@ -304,11 +304,11 @@ cennad 가 claude CLI 를 다음과 같이 호출한다.
 
 **permission_mode**: `default` | `acceptEdits` | `auto` | `dontAsk` | `plan` | `bypassPermissions`. sandbox 플래그 없음 — 격리는 permission 기반.
 
-**모델 해석**: `resolveClaudeModel` 이 `tier` (`high`/`mid`/`low`) 를 config `model_map.claude` 에서 조회한다. 환경변수 `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT` 로 오버라이드 가능. 기본 모델 맵: `high={opus,max}`, `mid={opus,high}`, `low={sonnet,high}`.
+**모델 해석**: `resolveClaudeModel` 이 `tier` (`apex`/`high`/`mid`/`low`) 를 config `model_map.claude` 에서 조회한다. 환경변수 `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT` 로 오버라이드 가능. 기본 모델 맵: `apex={opus[1m],ultracode}`, `high={opus,max}`, `mid={opus,high}`, `low={sonnet,high}` — apex 만 종류가 다르다(멀티에이전트 오케스트레이션), high 는 단일 에이전트 최심도인 `max`.
 
 **모델 별칭**: `opus`, `sonnet`, `haiku`, `fable`, `best`, `opus[1m]`, `sonnet[1m]`.
 
-**effort 스케일**: `low < medium < high < xhigh < max`. 모델별 상한: opus/fable/best/opus[1m] = 전체 5단계; sonnet/sonnet[1m] = low/medium/high/max (xhigh 제외); haiku = effort 없음.
+**effort 스케일**: `low < medium < high < xhigh < max < ultracode`(최상단은 멀티에이전트 오케스트레이션 모드). 모델별 상한은 alias 가 해석되는 모델을 따른다 — Claude 5 계열(opus·sonnet·fable·best 및 `[1m]` 변형)은 6단계 전부, haiku 는 effort 축 없음. 미지원 단계를 claude-code 가 조용히 낮추므로 게이트는 settings UI 의 `MODEL_EFFORT_SETS` 뿐이다.
 
 **crosscheck**: 활성화된 provider(codex / antigravity / claude) 전체가 참여한다. 비활성 provider 는 제외되며, 활성 provider 가 2개 미만이면 교차검증 대신 단독 응답으로 처리된다.
 

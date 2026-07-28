@@ -10,6 +10,8 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.Disabled]:
     'Provider is disabled in cennad config. Enable it via /cennad:setup.',
   [ErrorCode.Network]: 'Network failure while contacting the provider.',
+  [ErrorCode.Timeout]:
+    'Provider was stopped by a liveness limit — raise the tier or narrow the task.',
   [ErrorCode.CliError]: 'External CLI failed to execute.',
   [ErrorCode.Unknown]: 'Unclassified failure.',
 };

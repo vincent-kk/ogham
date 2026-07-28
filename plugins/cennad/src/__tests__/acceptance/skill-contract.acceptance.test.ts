@@ -73,7 +73,12 @@ describe('[acceptance] cennad delegation contracts', () => {
       const skill = readSkill(provider);
 
       expect(skill).toContain('Spawn `cennad:courier`');
-      expect(skill).toContain('Omit unless the user asked');
+      // Picking the tier from task complexity is the skill's job (the courier only
+      // carries what it is handed), but a resume must not switch models mid-thread.
+      expect(skill).toContain('- `apex` —');
+      expect(skill).toContain(
+        'Send nothing on `--continue` unless the user asked',
+      );
       expect(skill).not.toMatch(/drop `tier`/i);
       // Judgment and the MCP call shape belong to the courier — a skill that
       // re-inlines the tool signature has re-absorbed the provider interaction.

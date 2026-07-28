@@ -8,6 +8,7 @@ import { mergeModelMap } from './mergeModelMap.js';
 import { mergeOptionFlags } from './mergeOptionFlags.js';
 import { mergePreamble } from './mergePreamble.js';
 import { mergeRecencyFactor } from './mergeRecencyFactor.js';
+import { mergeTimeouts } from './mergeTimeouts.js';
 import { normalizeRatio } from './normalizeRatio.js';
 
 export function mergeWithDefaults(raw: unknown): unknown {
@@ -25,7 +26,7 @@ export function mergeWithDefaults(raw: unknown): unknown {
     default_tier: mergeDefaultTier(raw.default_tier),
     session_ttl_hours:
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,
-    spawn_timeout_ms: raw.spawn_timeout_ms ?? DEFAULT_CONFIG.spawn_timeout_ms,
+    timeouts: mergeTimeouts(raw.timeouts),
     artifacts: mergeArtifacts(raw.artifacts),
     preamble: mergePreamble(raw.preamble),
     recency_factor: mergeRecencyFactor(raw.recency_factor),

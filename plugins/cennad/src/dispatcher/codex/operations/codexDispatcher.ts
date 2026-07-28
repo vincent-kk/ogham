@@ -20,25 +20,31 @@ export const codexDispatcher: Dispatcher<CodexFlags, CodexModelMap> = {
   async start(
     args: DispatchOptions<CodexFlags, CodexModelMap>,
   ): Promise<DispatchResult> {
+    const resolved = resolveCodexTier(args.tier, args.modelMap);
     return dispatch({
-      argv: buildStartArgs(args, resolveCodexTier(args.tier, args.modelMap)),
+      argv: buildStartArgs(args, resolved),
       cwd: args.cwd,
       options: args.options,
       existingRef: null,
       supportedOptions,
-      spawnTimeoutMs: args.spawnTimeoutMs,
+      idleTimeoutMs: args.idleTimeoutMs,
+      hardCapMs: args.hardCapMs,
+      tierModel: resolved.model ?? null,
     });
   },
   async resume(
     args: DispatchResumeOptions<CodexFlags, CodexModelMap>,
   ): Promise<DispatchResult> {
+    const resolved = resolveCodexTier(args.tier, args.modelMap);
     return dispatch({
-      argv: buildResumeArgs(args, resolveCodexTier(args.tier, args.modelMap)),
+      argv: buildResumeArgs(args, resolved),
       cwd: args.cwd,
       options: args.options,
       existingRef: args.externalSessionRef,
       supportedOptions,
-      spawnTimeoutMs: args.spawnTimeoutMs,
+      idleTimeoutMs: args.idleTimeoutMs,
+      hardCapMs: args.hardCapMs,
+      tierModel: resolved.model ?? null,
     });
   },
 };

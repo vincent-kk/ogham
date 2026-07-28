@@ -10,6 +10,7 @@ import {
 } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerB } from '../helpers/hookRunnerLayerB.js';
+import { HOST_PID, claimHostSession } from '../helpers/hostSession.js';
 
 // Shipped keywords are ASCII, so the non-ASCII substring path only exists for
 // keywords a user configures — this suite configures one rather than leaning on
@@ -18,6 +19,7 @@ const NON_ASCII_KEYWORD = '코드';
 
 describe('injectDynamic (Layer B)', () => {
   beforeEach(async () => {
+    claimHostSession();
     await rm(CENNAD_HOME, { recursive: true, force: true });
   });
 
@@ -30,9 +32,9 @@ describe('injectDynamic (Layer B)', () => {
     });
   });
 
-  it('with counter (parent_pid = worker pid) — condensed state + nudge', async () => {
+  it('with counter (parent_pid = host pid) — condensed state + nudge', async () => {
     await writeCounter({
-      parent_pid: process.pid,
+      parent_pid: HOST_PID,
       codex: 7,
       antigravity: 3,
     });

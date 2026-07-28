@@ -7,10 +7,7 @@ import {
   AGY_LAST_CONVERSATIONS_PATH,
   agyTranscriptPath,
 } from '../../../constants/paths.js';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord } from '../../../utils/isRecord.js';
 
 // agy keys last_conversations.json by the native cwd it ran in; samePath absorbs
 // POSIX/Windows separator and case differences vs cennad's own cwd string.
@@ -34,8 +31,15 @@ function extractPlannerResponse(jsonl: string): string | null {
     } catch {
       continue;
     }
+    if (!isRecord(entry)) continue;
+    // agy appends this turn's USER_INPUT before the model answers, so a DONE
+    // response that precedes it answered the previous prompt. Recovery is for an
+    // answer this run produced and dropped — never for the one before it.
+    if (entry.source === 'USER') {
+      answer = null;
+      continue;
+    }
     if (
-      isRecord(entry) &&
       entry.source === 'MODEL' &&
       entry.type === 'PLANNER_RESPONSE' &&
       entry.status === 'DONE' &&

@@ -143,11 +143,16 @@ cennad가 `start` 시 주입한 `--session-id` 값이 `externalSessionRef`로 �
 
 **모델별 effort 지원 범위:**
 
-| 모델 별칭                           | 지원 effort                                    |
-| :---------------------------------- | :--------------------------------------------- |
-| `opus`, `fable`, `best`, `opus[1m]` | `low` / `medium` / `high` / `xhigh` / `max`    |
-| `sonnet`, `sonnet[1m]`              | `low` / `medium` / `high` / `max` (xhigh 없음) |
-| `haiku`                             | effort 미지원                                  |
+별칭이 해석되는 모델을 따른다 (2026-07-28 실측 — `modelUsage.canonicalModel`).
+
+| 모델 별칭              | 해석 모델          | 지원 effort                                               |
+| :--------------------- | :----------------- | :-------------------------------------------------------- |
+| `opus`, `opus[1m]`     | `claude-opus-5`    | `low` / `medium` / `high` / `xhigh` / `max` / `ultracode` |
+| `sonnet`, `sonnet[1m]` | `claude-sonnet-5`  | `low` / `medium` / `high` / `xhigh` / `max` / `ultracode` |
+| `fable`, `best`        | `claude-fable-5`   | `low` / `medium` / `high` / `xhigh` / `max` / `ultracode` |
+| `haiku`                | `claude-haiku-4-5` | effort 미지원                                             |
+
+`ultracode` 는 `--help` 의 유효값 목록에 없지만 CLI 가 받는다 — 인식 못 하는 값(`banana`)은 경고 후 기본값으로 떨어지는데 `ultracode` 는 경고가 없고 자식 세션이 "Ultracode is on" 을 보고한다. 다만 **모델별 게이트는 CLI 에 없다**: haiku 에 줘도 경고 없이 조용히 무시된다.
 
 ---
 

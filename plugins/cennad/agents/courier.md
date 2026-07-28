@@ -19,7 +19,7 @@ The spawn prompt carries these fields; a missing optional field means "omit":
 - `operation` — `start` or `continue`
 - `provider` — `codex` | `antigravity` | `claude` (start only)
 - `session_id` — cennad session UUID (continue only)
-- `tier` — `high` | `mid` | `low` (optional)
+- `tier` — `apex` | `high` | `mid` | `low` (optional)
 - `refine` — `true` | `false` (absent = `false`)
 - `prompt` — every line after the `prompt:` marker, verbatim
 
@@ -30,7 +30,7 @@ The spawn prompt carries these fields; a missing optional field means "omit":
 
 Send `prompt` verbatim — no rewriting, trimming, or added framing. The input schemas are self-describing; two rules are not in them:
 
-- Include `tier` only when the caller supplied one — never invent it. Tiers are capability labels (`high` strongest/costliest, `mid` balanced, `low` cheapest); the concrete model/effort mapping lives in cennad config, drifts with the provider CLIs, and is never named here. Omission is meaningful: a new session gets the configured default, and a continued session keeps the tier — and therefore the model — it started with.
+- Include `tier` only when the caller supplied one — never invent it. Tiers are capability labels (`apex` for work the provider must run autonomously across many steps, `high` strong, `mid` balanced, `low` cheapest); the concrete model/effort mapping lives in cennad config, drifts with the provider CLIs, and is never named here. Omission is meaningful: a new session gets the configured default, and a continued session keeps the tier — and therefore the model — it started with. A tier also sets how long the provider may run, so an `apex` call can legitimately take far longer than a `mid` one; report what comes back rather than treating the wait as a failure.
 - A refinement follow-up continues the SAME session (`continue_conversation` with the `session_id` from the previous envelope), never a fresh `start` — that would drop the thread.
 
 ## Refinement (only when `refine: true`)
@@ -55,6 +55,7 @@ Never retry, switch provider, or fall back — routing belongs to the caller. Ma
 - `auth` — codex: run `codex login`, then retry · antigravity: run `agy` interactively once and complete the Google OAuth flow, then retry · claude: run `claude` interactively once and complete the login, then retry
 - `disabled` — enable the provider in `/cennad:setup`, then retry
 - `rate_limit` / `budget_exhausted` — pause and retry, or use another provider's skill
+- `timeout` — the provider was still running when a limit fired; `error.message` names which one (no output for N ms, or the tier's ceiling) — relay it and suggest a higher tier or a narrower task, never a plain retry
 - `network` / `cli_error` / `unknown` — relay `error.message` verbatim as the remedy
 
 ## Report

@@ -29,7 +29,8 @@ export const claudeDispatcher: Dispatcher<ClaudeFlags, ClaudeModelMap> = {
       // sessionId itself — no output parsing needed.
       externalSessionRef: args.sessionId,
       supportedOptions,
-      spawnTimeoutMs: args.spawnTimeoutMs,
+      idleTimeoutMs: args.idleTimeoutMs,
+      hardCapMs: args.hardCapMs,
       resolvedModel: resolved.model,
     });
   },
@@ -43,7 +44,8 @@ export const claudeDispatcher: Dispatcher<ClaudeFlags, ClaudeModelMap> = {
       options: args.options,
       externalSessionRef: args.externalSessionRef,
       supportedOptions,
-      spawnTimeoutMs: args.spawnTimeoutMs,
+      idleTimeoutMs: args.idleTimeoutMs,
+      hardCapMs: args.hardCapMs,
       resolvedModel: resolved.model,
     });
   },

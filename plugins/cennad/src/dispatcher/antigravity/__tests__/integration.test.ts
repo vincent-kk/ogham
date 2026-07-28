@@ -39,8 +39,16 @@ if (args[0] === 'models') {
   process.exit(0);
 }
 
-const allowed = new Set(['-p', '--print', '--continue', '-c', '--sandbox', '--dangerously-skip-permissions']);
+const allowed = new Set(['-p', '--print', '--continue', '-c', '--sandbox', '--dangerously-skip-permissions', '--output-format', '--print-timeout']);
+// A build old enough to need the plain-text parser never learned these flags, and
+// agy's own arg check exits before running. Modelling it any other way describes a
+// build that does not exist.
+const modern = new Set(['--output-format', '--print-timeout']);
 for (const a of args) {
+  if (mode === 'no-stream-json' && modern.has(a)) {
+    process.stderr.write('flags provided but not defined: ' + a + '\\n');
+    process.exit(2);
+  }
   if (a.startsWith('-') && !a.startsWith('--model=') && !allowed.has(a)) {
     process.stderr.write('flags provided but not defined: ' + a + '\\n');
     process.exit(2);
@@ -48,7 +56,11 @@ for (const a of args) {
 }
 
 if (mode === 'success') {
-  process.stdout.write('fake antigravity response\\n');
+  process.stdout.write(JSON.stringify({ event: 'step_update', step_update: { step_index: 0, state: 'DONE' } }) + '\\n');
+  process.stdout.write(JSON.stringify({ event: 'result', result: { conversation_id: '11111111-2222-4333-8444-555555555555', status: 'SUCCESS', response: 'fake antigravity response\\n' } }) + '\\n');
+  process.exit(0);
+} else if (mode === 'error-exit-zero') {
+  process.stdout.write(JSON.stringify({ event: 'result', result: { status: 'ERROR', error: 'invalid model selection' } }) + '\\n');
   process.exit(0);
 } else if (mode === 'empty-stdout') {
   process.exit(0);
@@ -95,18 +107,43 @@ function baseOptions(): DispatchOptions<AntigravityFlags> {
     sessionId: 'agy-session',
     cwd: process.cwd(),
     flags: FLAGS,
-    spawnTimeoutMs: 10000,
+    idleTimeoutMs: 5000,
+    hardCapMs: 10000,
   };
 }
 
 describe('antigravityDispatcher.start', () => {
-  it('returns success, parses the json response, and reports the isolated cwd as ref', async () => {
+  it('returns success, parses the streamed result event, and records the conversation id as ref', async () => {
     process.env.CENNAD_FAKE_AGY_MODE = 'success';
     const result = await antigravityDispatcher.start(baseOptions());
     expect(result.status).toBe('success');
     expect(result.error).toBeNull();
     expect(result.response).toBe('fake antigravity response');
-    expect(result.externalSessionRef).toContain('antigravity-cwd');
+    expect(result.externalSessionRef).toBe(
+      '11111111-2222-4333-8444-555555555555',
+    );
+  });
+
+  // start and resume always send --output-format and --print-timeout, so an agy that
+  // does not know them exits on the arg check and never reaches a parser. The
+  // plain-text branch in parseJsonOutput is tolerance for an unexpected shape (its
+  // own spec covers it), not support for an older build — this pins which of the two
+  // the dispatcher actually promises.
+  it('fails with cli_error on an agy build that does not know stream-json', async () => {
+    process.env.CENNAD_FAKE_AGY_MODE = 'no-stream-json';
+    const result = await antigravityDispatcher.start(baseOptions());
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('cli_error');
+  });
+
+  // agy reports a rejected model in the stream and still exits 0. Transcript
+  // recovery must not run for it: the file's newest DONE answered an earlier turn.
+  it('fails with the streamed reason when agy reports an error and exits 0', async () => {
+    process.env.CENNAD_FAKE_AGY_MODE = 'error-exit-zero';
+    const result = await antigravityDispatcher.start(baseOptions());
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('cli_error');
+    expect(result.error?.message).toContain('invalid model selection');
   });
 
   it('fails with cli_error on empty stdout (Issue #76, no transcript recoverable)', async () => {
@@ -170,6 +207,7 @@ describe('antigravityDispatcher.start', () => {
       ...baseOptions(),
       tier: 'high',
       modelMap: {
+        apex: { model: 'Gemini 3.1 Pro' },
         high: { model: 'Gemini 3.1 Pro' },
         mid: { model: 'x' },
         low: { model: 'y' },
@@ -181,13 +219,28 @@ describe('antigravityDispatcher.start', () => {
 });
 
 describe('antigravityDispatcher.resume', () => {
-  it('preserves the stored externalSessionRef on success', async () => {
+  // A ref recorded before agy reported conversation ids is the isolated cwd, which
+  // resumes as "the newest conversation in this directory" — once the stream names
+  // the conversation, that name replaces the directory for good.
+  it('promotes a legacy cwd ref to the conversation id the stream reports', async () => {
     process.env.CENNAD_FAKE_AGY_MODE = 'success';
     const result = await antigravityDispatcher.resume({
       ...baseOptions(),
       externalSessionRef: '/stored/cwd',
     });
     expect(result.status).toBe('success');
+    expect(result.externalSessionRef).toBe(
+      '11111111-2222-4333-8444-555555555555',
+    );
+  });
+
+  it('keeps the stored ref when the run reports no conversation id', async () => {
+    process.env.CENNAD_FAKE_AGY_MODE = 'empty-stdout';
+    const result = await antigravityDispatcher.resume({
+      ...baseOptions(),
+      externalSessionRef: '/stored/cwd',
+    });
+    expect(result.status).toBe('failure');
     expect(result.externalSessionRef).toBe('/stored/cwd');
   });
 });

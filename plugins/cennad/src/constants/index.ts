@@ -3,6 +3,7 @@ export * from './defaults.js';
 export * from './claudeModels.js';
 export * from './codexModels.js';
 export * from './errorCodes.js';
+export * from './spawnLimits.js';
 export * from './recencyPromptTokens.js';
 export * from './recencyPromptAuto.js';
 export * from './recencyPromptStrict.js';

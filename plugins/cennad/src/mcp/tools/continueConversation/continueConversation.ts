@@ -91,7 +91,8 @@ export async function handleContinueConversation(
     sessionId: session.session_id,
     cwd: session.cwd,
     externalSessionRef: session.external_session_ref,
-    spawnTimeoutMs: config.spawn_timeout_ms,
+    idleTimeoutMs: config.timeouts.idle_ms,
+    hardCapMs: config.timeouts.hard_cap_ms[tier],
   };
   let result: DispatchResult;
   if (session.provider === 'antigravity')
@@ -133,6 +134,10 @@ export async function handleContinueConversation(
   const nextTurn = session.turn_count + 1;
   await updateSession({
     ...session,
+    // A dispatcher can hand back a better ref than the one it was given: agy trades
+    // a legacy cwd for the conversation id as soon as its stream reports one.
+    external_session_ref:
+      result.externalSessionRef || session.external_session_ref,
     last_used_at: isoNow(),
     turn_count: nextTurn,
   });

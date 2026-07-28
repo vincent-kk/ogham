@@ -128,6 +128,13 @@
                       ><input
                         type="radio"
                         name="default-tier-claude"
+                        value="apex"
+                      /><span>apex</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
                         value="high"
                       /><span>high</span></label
                     >
@@ -150,8 +157,10 @@
                     >
                   </div>
                   <p class="flag-hint">
-                    Tier applied when a dispatch omits an explicit tier. Each
-                    tier maps to a model + effort below.
+                    Tier used when a call omits one — a direct
+                    <code>start_conversation</code>. The dispatch skills pick a
+                    tier per task, so this does not apply to them. Each tier
+                    maps to a model + effort below.
                   </p>
                 </div>
                 <div class="flag-field">
@@ -252,6 +261,14 @@
                     xhigh). Over-cap requests are silently downgraded by
                     claude-code.
                   </p>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-apex">apex</label>
+                    <select id="model-claude-apex" class="tier-select"></select>
+                    <select
+                      id="effort-claude-apex"
+                      class="tier-select"
+                    ></select>
+                  </div>
                   <div class="tier-field" data-layout="model-effort">
                     <label for="model-claude-high">high</label>
                     <select id="model-claude-high" class="tier-select"></select>
@@ -373,6 +390,13 @@
                       ><input
                         type="radio"
                         name="default-tier-codex"
+                        value="apex"
+                      /><span>apex</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-codex"
                         value="high"
                       /><span>high</span></label
                     >
@@ -395,9 +419,10 @@
                     >
                   </div>
                   <p class="flag-hint">
-                    Tier applied when a dispatch omits an explicit tier. Higher
-                    is stronger but more rate-limit/budget-prone — mid suits
-                    almost all work.
+                    Tier used when a call omits one — a direct
+                    <code>start_conversation</code>. The dispatch skills pick a
+                    tier per task, so this does not apply to them. Each tier
+                    maps to a model + effort below.
                   </p>
                 </div>
                 <div class="flag-field">
@@ -505,6 +530,11 @@
                     adapt to the model — codex rejects an effort the model does
                     not advertise instead of downgrading it.
                   </p>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-codex-apex">apex</label>
+                    <select id="model-codex-apex" class="tier-select"></select>
+                    <select id="effort-codex-apex" class="tier-select"></select>
+                  </div>
                   <div class="tier-field" data-layout="model-effort">
                     <label for="model-codex-high">high</label>
                     <select id="model-codex-high" class="tier-select"></select>
@@ -627,6 +657,13 @@
                       ><input
                         type="radio"
                         name="default-tier-antigravity"
+                        value="apex"
+                      /><span>apex</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-antigravity"
                         value="high"
                       /><span>high</span></label
                     >
@@ -649,9 +686,10 @@
                     >
                   </div>
                   <p class="flag-hint">
-                    Tier applied when a dispatch omits an explicit tier. Higher
-                    is stronger but more rate-limit/budget-prone — mid suits
-                    almost all work.
+                    Tier used when a call omits one — a direct
+                    <code>start_conversation</code>. The dispatch skills pick a
+                    tier per task, so this does not apply to them. Each tier
+                    maps to a model + effort below.
                   </p>
                 </div>
                 <div class="flag-field">
@@ -740,6 +778,17 @@
                     them).
                   </p>
                   <div class="tier-field" data-layout="model-effort">
+                    <label for="model-antigravity-apex">apex</label>
+                    <select
+                      id="model-antigravity-apex"
+                      class="tier-select"
+                    ></select>
+                    <select
+                      id="effort-antigravity-apex"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
                     <label for="model-antigravity-high">high</label>
                     <select
                       id="model-antigravity-high"
@@ -777,11 +826,16 @@
             </div>
 
             <div class="ratio-bar-wrap">
+              <!-- Two layers on purpose: segments live clipped inside the track,
+                   handles sit above it. Mixing them in one parent is what let a
+                   handle become :last-child and square off the end segment. -->
               <div
                 id="ratio-bar"
                 class="ratio-bar"
                 aria-label="Provider routing ratio"
-              ></div>
+              >
+                <div id="ratio-bar-track" class="ratio-bar-track"></div>
+              </div>
             </div>
             <p id="ratio-warn" class="ratio-warn" hidden>
               At least one provider must be enabled.
@@ -945,21 +999,46 @@
         </section>
 
         <section class="section">
-          <h2 class="section-title">CLI spawn timeout</h2>
+          <h2 class="section-title">CLI liveness limits</h2>
           <p class="section-help">
-            Hard timeout (ms) for each provider CLI invocation. Hung processes
-            are killed and surface as <code>error.code: network</code>.
+            A delegation is stopped when the CLI goes quiet, not when it takes
+            long — the defaults fit almost every setup.
           </p>
-          <label class="field">
-            <span>ms (1000–1800000)</span>
-            <input
-              id="spawn-timeout-ms"
-              type="number"
-              min="1000"
-              max="1800000"
-              step="1000"
-            />
-          </label>
+          <details class="limits">
+            <summary class="limits-summary">
+              <span class="limits-summary-label">Adjust limits</span>
+              <output class="limits-summary-value" id="limits-summary"></output>
+            </summary>
+            <div class="limits-body">
+              <p class="section-help">
+                Every provider streams progress events, so a model that is still
+                working keeps resetting the idle timer; only a stalled process
+                trips it. The ceiling is the absolute stop, per tier — raise it
+                for work you expect to run for hours. Both surface as
+                <code>error.code: network</code>.
+              </p>
+              <label class="field">
+                <span>idle limit — minutes without output (1–120)</span>
+                <input id="idle-timeout-min" type="number" min="1" max="120" />
+              </label>
+              <label class="field">
+                <span>apex ceiling — minutes (1–1440)</span>
+                <input id="hard-cap-apex" type="number" min="1" max="1440" />
+              </label>
+              <label class="field">
+                <span>high ceiling — minutes (1–1440)</span>
+                <input id="hard-cap-high" type="number" min="1" max="1440" />
+              </label>
+              <label class="field">
+                <span>mid ceiling — minutes (1–1440)</span>
+                <input id="hard-cap-mid" type="number" min="1" max="1440" />
+              </label>
+              <label class="field">
+                <span>low ceiling — minutes (1–1440)</span>
+                <input id="hard-cap-low" type="number" min="1" max="1440" />
+              </label>
+            </div>
+          </details>
         </section>
 
         <section class="section">

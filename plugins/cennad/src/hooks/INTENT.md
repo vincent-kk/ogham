@@ -6,11 +6,11 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 
 ## Structure
 
-| 모듈            | 이벤트           | 역할                                                                                               |
-| --------------- | ---------------- | -------------------------------------------------------------------------------------------------- |
-| `injectStatic`  | SessionStart     | config 기반 정적 정책 1회 주입                                                                     |
-| `injectDynamic` | UserPromptSubmit | counter 기반 라이브 상태 매 턴 주입                                                                |
-| `shared` organ  | -                | `paths`, `safeReadJson`, `nowIso`, 공유 config 로더, `pick*`, `selfProvider`, `electableProviders` |
+| 모듈            | 이벤트           | 역할                                                                                                          |
+| --------------- | ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `injectStatic`  | SessionStart     | config 기반 정적 정책 1회 주입                                                                                |
+| `injectDynamic` | UserPromptSubmit | counter 기반 라이브 상태 매 턴 주입                                                                           |
+| `shared` organ  | -                | `paths`, `safeReadJson`, `nowIso`, `hostPid`, 공유 config 로더, `pick*`, `selfProvider`, `electableProviders` |
 
 ## Conventions
 
@@ -18,6 +18,7 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 - `src/core/`, `src/types/` import 금지 — zod / MCP SDK 가 번들에 빨리면 cap 위반
 - shared path/config mirror 는 `src/constants/paths.ts` 정책과 일치 유지: 기본 `pluginCache('cennad')`, non-blank `CENNAD_CONFIG_PATH` override, `CLAUDE_PLUGIN_DATA`/`CLAUDE_PLUGIN_DADA` 무시
 - plugin cache와 host 판별은 aggregate가 아닌 목적별 subpath를 사용
+- 세션 동일성은 `hostPid()` (CLAUDE_PID) 로 판정 — 훅은 `libs/run.cjs` 아래에서 실행되어 `process.ppid` 가 러너를 가리킨다
 - 엔트리는 try/catch → 항상 `{ continue: true }` 출력 후 `process.exit(0)`
 - 응답 JSON: `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }`
 - 수정 후 `yarn cennad build` 로 `bridge/*.mjs` 재생성

@@ -77,6 +77,26 @@ export const DefaultTierSchema = z.object({
 
 export type DefaultTier = z.infer<typeof DefaultTierSchema>;
 
+export const TierDurationSchema = z.object({
+  apex: z.number().int().positive(),
+  high: z.number().int().positive(),
+  mid: z.number().int().positive(),
+  low: z.number().int().positive(),
+});
+
+export type TierDuration = z.infer<typeof TierDurationSchema>;
+
+// Liveness-based dispatch limits. idle_ms is the no-output ceiling: every provider
+// CLI streams progress events, so a model that is still thinking keeps resetting
+// it and only a stalled process trips it. hard_cap_ms is the absolute stop, per
+// tier — an agentic run is expected to take far longer than a cheap one.
+export const TimeoutsConfigSchema = z.object({
+  idle_ms: z.number().int().positive(),
+  hard_cap_ms: TierDurationSchema,
+});
+
+export type TimeoutsConfig = z.infer<typeof TimeoutsConfigSchema>;
+
 export const ArtifactLocationSchema = z.enum(['project', 'user']);
 
 export type ArtifactLocation = z.infer<typeof ArtifactLocationSchema>;
@@ -149,7 +169,7 @@ export const ConfigObjectSchema = z.object({
   model_map: ModelMapSchema,
   default_tier: DefaultTierSchema,
   session_ttl_hours: z.number().int().positive(),
-  spawn_timeout_ms: z.number().int().positive(),
+  timeouts: TimeoutsConfigSchema,
   artifacts: ArtifactsConfigSchema,
   preamble: PreambleConfigSchema,
   recency_factor: RecencyFactorConfigSchema,
