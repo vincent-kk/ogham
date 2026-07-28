@@ -4,15 +4,16 @@
 
 ## Structure
 
-| Path                                       | Role                                              |
-| ------------------------------------------ | ------------------------------------------------- |
-| `index.html`                               | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯       |
-| `styles/styles.css`                        | 테마(light/dark/auto) 토큰·타이포                 |
-| `scripts/app.js`                           | 진입점 — state hydrate·마운트·테마·heartbeat      |
-| `scripts/enhance.js`                       | `/assets/*` lazy import (highlight/mermaid/katex) |
-| `scripts/{comments,images,submit,copy}.js` | 코멘트·이미지·피드백 전송·복사                    |
-| `renderers/*.entry.ts`                     | 무거운 렌더러 esbuild 진입점 → `public/assets/`   |
-| `index.ts`                                 | 빌드 입력 표식 (`export {}`)                      |
+| Path                                                                | Role                                                 |
+| ------------------------------------------------------------------- | ---------------------------------------------------- |
+| `index.html`                                                        | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯          |
+| `styles/styles.css`                                                 | 테마(light/dark/auto) 토큰·타이포                    |
+| `scripts/app.js`                                                    | 진입점 — state hydrate·마운트·테마·heartbeat         |
+| `scripts/enhance.js`                                                | `/assets/*` lazy import (highlight/mermaid/katex)    |
+| `scripts/{comments,images,submit,copy}.js`                          | 코멘트·이미지·피드백 전송·복사                       |
+| `renderers/*.entry.ts`                                              | 무거운 렌더러 esbuild 진입점 → `public/assets/`      |
+| `renderers/{expandButton,diagramLightbox,lightboxFrame,panZoom}.ts` | 다이어그램 확대 라이트박스 — mermaid chunk 에만 동봉 |
+| `index.ts`                                                          | 빌드 입력 표식 (`export {}`)                         |
 
 ## Conventions
 
@@ -20,6 +21,7 @@
 - 무거운 렌더러는 `/assets/*` 로 lazy — 실패 시 읽을 수 있는 source fallback 유지
 - 동봉 폰트 없음: KaTeX 는 MathML, highlight 는 page CSS, mermaid 는 SVG
 - `prefers-reduced-motion`·`prefers-color-scheme` 존중
+- 코멘트 편집 중에는 열린 composer 가 원본 카드를 대신한다 (목록에서 숨김, 닫히면 복귀)
 - 푸터 제출은 2 의도(`revise`/`discuss`, 동일 스타일·disabled 만 색조 구분) + 상단바 Close(`dismiss`). 코멘트 하이라이트는 앰버(`--mark`), 작성 중은 더스티 로즈(`--pending`); 크롬은 모노크롬 잉크(`--accent`=글자색), 보르도 `--seal` 은 브랜드 마크·전송 완료 아이콘 전용 — 정본 [`DESIGN.md`](../DESIGN.md)
 
 ## Boundaries
