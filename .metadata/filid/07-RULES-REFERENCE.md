@@ -134,6 +134,8 @@ const ANALYSIS_CERTAINTIES = {
 
 **5단계는 `kind: "module"`만 읽는다.** `executable`·`framework` 진입점과 config `structure.entryPointOverrides`로 주입된 경로는 분류를 바꾸지 못한다. 그 구분이 없으면 `SKILL.md` 같은 markdown-as-implementation이 산문 디렉터리를 fractal로 만들어, 코드용으로 쓰인 규칙을 산문에 적용하게 된다. override는 진입점 표면(`entry-point-surface`)의 입력이지 분류 입력이 아니다.
 
+**6단계가 순수성보다 앞선다.** 따라서 `pure-function`은 하위 디렉터리를 가진 노드에서만 나온다. leaf compartment는 그 안의 무엇도 부작용이 없더라도 organ이다 — 이름 붙일 만한 격리는 모듈에 대한 주장이고, 그 주장을 한 적 없는 leaf에는 적용하지 않는다.
+
 **8단계가 organ인 것이 설계다.** 기본값을 fractal로 두면 아직 FCA가 아닌 코드베이스의 모든 디렉터리에 "INTENT.md를 추가하라"는 요구가 자동 생성되고, 분류가 "하위 디렉터리가 우연히 있는지" 같은 우발적 사실에 좌우된다.
 
 `hybrid`는 자동 분류하지 않는다. 점진적 이행을 위해 수동으로만 지정한다. 어댑터가 순수성을 판단할 수 없으면 `unsupported`로 남기며 추측으로 PASS시키지 않는다.
