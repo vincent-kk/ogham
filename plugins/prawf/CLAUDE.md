@@ -1,42 +1,10 @@
 # CLAUDE.md — @ogham/prawf
 
-Working guide for the `@ogham/prawf` package. See [INTENT.md](./INTENT.md) for the package contract and [DETAIL.md](./DETAIL.md) for the skill/persona API surface.
+현재 계약은 [INTENT.md](./INTENT.md), skill·persona API는 [DETAIL.md](./DETAIL.md)를 따른다. 한국어 설계 정본은 [`.metadata/prawf/`](../../.metadata/prawf/)이며 구현 문서는 영어로 유지한다.
 
-> **What this is.** A pure-markdown Claude Code plugin for multi-agent academic peer review. Capabilities ship entirely as `skills/` + `agents/` — there is no MCP server, no hooks, no esbuild `bridge/`, and no runtime dependency.
+## Authoring contract
 
-## Commands
-
-```bash
-yarn prawf version:sync   # mirror package.json version → .claude-plugin/plugin.json
-```
-
-There is intentionally no `build`, `typecheck`, or `test` script — the plugin is markdown only. `build:all` skips this package (it defines no `build` script).
-
-## Architecture
-
-```
-/prawf:peer-review            → skills/peer-review/        — 9-persona native team (P0→R1→R2→R3→ADJ)
-/prawf:simulate-defense  → skills/simulate-defense/ — committee Q&A → author answers → coaching
-/prawf:rebuttal          → skills/rebuttal/      — external review comments → rebuttal letter
-/prawf:auto-fix          → skills/auto-fix/      — apply auto-fixable review revisions to the manuscript
-agents/<persona>.md      → 10 reviewer personas spawned via Task/TeamCreate
-```
-
-Evaluation is persona _reasoning_, not deterministic measurement — that is why the package carries no analysis tooling. External lookups (prior work, preregistration, plagiarism) are delegated as a capability; never hardcode a specific tool name.
-
-## Authoring Notes
-
-- **Skills** — drop `skills/<name>/SKILL.md` (English) with `name`, `user_invocable`, `description` frontmatter. The `"skills": "./skills/"` field is already wired in `plugin.json`.
-- **Agents** — drop `agents/<name>.md` (English). Auto-discovered; do NOT add an `agents` field to `plugin.json`.
-- **Anti-yield** — `skills/peer-review/SKILL.md` uses the Tier-2a anti-yield discipline (round-to-round chaining, never yield mid-pipeline). An interactive `simulate-defense` uses the Tier-2b `<!-- [INTERACTIVE] -->` escape hatch.
-- **Cross-references** — persona ids and deliverable filenames must stay identical across agents, orchestration, prompt-templates, templates, and every SKILL.md.
-
-## Design SSoT
-
-The Korean design specification is the source of truth at `../../.metadata/prawf/` (read-only): `personas.md`, `orchestration.md`, `field-profiles.md`, `templates.md`, `prompt-templates.md`, `scaffold.md`. This package is the English implementation.
-
-## Development Notes
-
-- **Version**: use `yarn prawf version:sync` only; `plugin.json` version is generated, never hand-edited.
-- **FCA**: root `INTENT.md` (≤ 50 lines, 3-tier boundaries) and `DETAIL.md` are written in Korean (section headings stay English as machine-readable anchors). A skill is self-describing: a skill directory carries `SKILL.md` only — no per-skill `INTENT.md`/`DETAIL.md`. Optionally run `/filid:scan` (this monorepo's FCA dev tool — not a prawf runtime dependency) to check structure.
-- **Registration**: listed in root `.claude-plugin/marketplace.json`. Not in `scripts/typecheckAll.mjs` (no TypeScript to typecheck).
+- 외부 조사 기능은 특정 도구명이 아니라 capability로 위임한다.
+- persona id, axis id, 상태 enum, 산출물 파일명은 agent·orchestration·prompt·template·모든 skill에서 동일해야 한다.
+- 비상호작용 skill은 Tier-2a로 끝까지 이어간다. `simulate-defense`만 명시된 `<!-- [INTERACTIVE] -->` 지점에서 답변을 기다리는 Tier-2b이며 `--batch`에서는 Tier-2a가 된다.
+- `.metadata/prawf/`는 설계 참조이고 `agents/`·`skills/`는 배포 구현이다. 구현 중 설계 기록을 산출물처럼 갱신하지 않는다.
