@@ -849,24 +849,18 @@ details[open] .advanced-toggle::after {
   cursor: not-allowed;
 }
 
-/* Meaning on the left, path on the right — the sentence keeps the title's left
-   edge while the file it names sits at the card's right edge. */
+/* Two lines rather than a row: an absolute path is long enough that setting it
+   beside the sentence wraps it anyway, and a wrapped right-aligned path reads
+   worse than a plain second line. */
 .scope-hint {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 16px;
+  flex-direction: column;
+  gap: 2px;
   margin: -12px 0 20px;
   font-size: 12px;
   color: var(--gray-600);
 }
 
-/* space-between only reaches the right edge while both halves share a line; a
-   long path wraps to its own line, where the auto margin is what keeps it
-   at the right edge. */
 .scope-hint__path {
-  margin-left: auto;
-  text-align: right;
   word-break: break-all;
 }

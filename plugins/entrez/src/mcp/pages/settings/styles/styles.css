@@ -525,25 +525,20 @@ code {
   cursor: not-allowed;
 }
 
-/* Meaning on the left, path on the right. The padding matches the card head's
-   inset so the hint lines up with the brand above and the form below. */
+/* Two lines rather than a row: an absolute path is long enough that setting it
+   beside the sentence wraps it anyway, and a wrapped right-aligned path reads
+   worse than a plain second line. The padding matches the card head's inset so
+   the hint lines up with the brand above and the form below. */
 .scope-hint {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 16px;
+  flex-direction: column;
+  gap: 2px;
   margin: 0;
   padding: 10px 24px 0;
   font-size: 12px;
   color: var(--fg-muted);
 }
 
-/* space-between only reaches the right edge while both halves share a line. At
-   this card width the path usually wraps to its own line, where the auto
-   margin is what keeps it there. */
 .scope-hint__path {
-  margin-left: auto;
-  text-align: right;
   word-break: break-all;
 }

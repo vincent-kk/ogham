@@ -702,20 +702,18 @@ input[type='checkbox']:focus-visible {
   cursor: not-allowed;
 }
 
-/* Meaning on the left, path on the right — the sentence keeps the lede's
-   left edge while the file it names sits at the header's right edge. */
+/* Two lines rather than a row: an absolute path is long enough that setting it
+   beside the sentence wraps it anyway, and a wrapped right-aligned path reads
+   worse than a plain second line. */
 .scope-hint {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 16px;
+  flex-direction: column;
+  gap: 2px;
   margin: 10px 0 0;
   font-size: 12px;
   color: var(--fg-faint);
 }
 
 .scope-hint__path {
-  text-align: right;
   word-break: break-all;
 }
