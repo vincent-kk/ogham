@@ -107,7 +107,10 @@ describe('handleConfigSet', () => {
 
   it('updates and saves config field', async () => {
     writeConfig(tmpDir, BASE_CONFIG);
-    await handleConfigSet({ updates: { 'defaults.project_ref': 'UPDATED' } });
+    await handleConfigSet({
+      scope: 'project',
+      updates: { 'defaults.project_ref': 'UPDATED' },
+    });
 
     // Verify the saved value
     const result = (await handleConfigGet({
@@ -119,6 +122,7 @@ describe('handleConfigSet', () => {
   it('applies multiple dot-path updates at once', async () => {
     writeConfig(tmpDir, BASE_CONFIG);
     await handleConfigSet({
+      scope: 'project',
       updates: {
         'defaults.project_ref': 'X',
         'defaults.llm_model.validate': 'opus',

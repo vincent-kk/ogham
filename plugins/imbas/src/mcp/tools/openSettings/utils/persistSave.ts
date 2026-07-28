@@ -5,7 +5,7 @@ import type {
 } from '../../../../types/settings.js';
 
 /**
- * Persist one settings-page save: atomically write `.imbas/config.json` and
+ * Persist one settings-page save: atomically write the named config layer and
  * summarize the page-level intents for the setup skill (label provisioning
  * runs in-session after the tool returns, not here).
  */
@@ -13,7 +13,7 @@ export async function persistSave(
   projectRoot: string,
   body: SettingsSaveBody,
 ): Promise<SettingsSaveSummary> {
-  await saveConfig(projectRoot, body.config);
+  await saveConfig(projectRoot, body.scope, body.config);
   return {
     configWritten: true,
     provider: body.config.provider,

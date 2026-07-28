@@ -1,19 +1,17 @@
-import { existsSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { basename } from 'node:path';
 
 import {
-  CONFIG_FILENAME,
-  IMBAS_ROOT_DIRNAME,
-} from '../../../../constants/index.js';
-import { loadConfig } from '../../../../core/configManager/configManager.js';
+  loadConfig,
+  loadConfigScope,
+} from '../../../../core/configManager/configManager.js';
 import type {
   SettingsBootstrap,
   SettingsPageState,
 } from '../../../../types/settings.js';
 
 /**
- * Assemble the state injected into the settings page: the current config
- * (schema defaults when the project has none yet) plus the session-supplied
+ * Assemble the state injected into the settings page: the config in effect
+ * across both layers, which layer said what, plus the session-supplied
  * bootstrap facts and a local-provider key suggestion.
  */
 export async function buildSettingsState(
@@ -21,14 +19,16 @@ export async function buildSettingsState(
   bootstrap: SettingsBootstrap,
 ): Promise<SettingsPageState> {
   const config = await loadConfig(projectRoot);
+  const scope = loadConfigScope(projectRoot);
   const suggested = basename(projectRoot)
     .replace(/[^A-Za-z0-9]/g, '')
     .toUpperCase();
   return {
     projectRoot,
-    configExists: existsSync(
-      join(projectRoot, IMBAS_ROOT_DIRNAME, CONFIG_FILENAME),
-    ),
+    // The project layer's presence, not the file's — a workspace with only a
+    // user layer has a usable config but nothing committed here yet.
+    configExists: scope.layers.project !== null,
+    scope,
     config,
     suggestedLocalKey: suggested.length > 0 ? suggested : 'LOCAL',
     bootstrap,

@@ -638,3 +638,34 @@ input[type='checkbox']:focus-visible {
     gap: 10px;
   }
 }
+
+/* Scope UI — user/project namespaces.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". imbas edits the config
+   as a whole document per layer, so the toggle names the file rather than
+   badging individual fields. */
+
+.scope-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.scope-toggle {
+  display: flex;
+  gap: 14px;
+}
+
+.scope-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.scope-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.72;
+  word-break: break-all;
+}

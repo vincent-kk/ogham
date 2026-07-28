@@ -46,6 +46,52 @@
   $('project-chip').title = state.projectRoot;
   if (!state.configExists) $('init-note').hidden = false;
 
+  // --- config scope (user / project) ---------------------------------------
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". This page is minified
+  // but never bundled, so it cannot import the shared merge helpers — it only
+  // needs to name the layer it is writing.
+  var scopeState = state.scope || {
+    paths: { user: '', project: null },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  // Open on the layer that is currently deciding, so pressing Save without
+  // touching the toggle rewrites the file the config already came from.
+  var scope = scopeState.layers.project === null ? 'user' : 'project';
+
+  function renderScope() {
+    var host = $('config_scope');
+    if (!host) return;
+    host.textContent = '';
+    [
+      ['user', 'User', 'Applies to every workspace you open.'],
+      ['project', 'Project', 'Committed with the repository; overrides User.'],
+    ].forEach(function (option) {
+      var label = document.createElement('label');
+      label.className = 'scope-option';
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.disabled = option[0] === 'project' && !scopeState.paths.project;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        renderScope();
+      });
+      var text = document.createElement('span');
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+      if (option[0] === scope)
+        $('scope_hint').textContent =
+          option[2] + ' — ' + (scopeState.paths[scope] || '');
+    });
+  }
+
+  renderScope();
+
   // --- provider radios + availability hints ------------------------------
   function providerHint(name) {
     if (name === 'local') return { text: 'always available', tone: 'ok' };
@@ -411,7 +457,11 @@
     var btn = closeAfter ? saveCloseBtn : saveBtn;
     busy(btn, true, 'Saving…');
     setStatus('info', 'Validating and saving…');
-    post('/save', { config: next, options: { provision_labels: provision } })
+    post('/save', {
+      scope: scope,
+      config: next,
+      options: { provision_labels: provision },
+    })
       .then(function (r) {
         return r.json().then(function (res) {
           return { status: r.status, res: res };

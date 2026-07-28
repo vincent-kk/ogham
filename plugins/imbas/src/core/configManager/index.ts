@@ -1,5 +1,6 @@
 export {
   loadConfig,
+  loadConfigScope,
   saveConfig,
   getConfigValue,
   setConfigValue,
