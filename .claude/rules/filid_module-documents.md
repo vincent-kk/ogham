@@ -55,17 +55,18 @@ Ask yourself: "Does this document describe the code as it should be now, or as i
 
 **`Reason` is the load-bearing field.**
 
-- `Organ Exemptions` is conditional: present only when this fractal actually grants one. A fractal with no exemption never carries the section, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose.
+- `Boundary Exemptions` is conditional: present only when this fractal actually grants one. A fractal with no exemption never carries the section, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose. `## Organ Exemptions` is the same syntax under this section's former name and is still read.
+- The target is an organ path or a path inside this fractal — a consumer that cannot route through the entry point needs the same escape hatch either way. A path names itself and everything under it.
 - An entry uses the acceptance-group shape, so one parser reads both:
 
 ```md
-## Organ Exemptions
+## Boundary Exemptions
 
-### <organ path> — <short title>
+### <target path> — <short title>
 
 - **Consumers**: <paths or globs, or `entry-point` when access is through the barrel>
 - **Direct import**: allowed | not allowed
-- **Reason**: <why the barrel cannot serve these consumers, or why the organ has not
+- **Reason**: <why the barrel cannot serve these consumers, or why the unit has not
   moved to its consumers' lowest common fractal>
 ```
 

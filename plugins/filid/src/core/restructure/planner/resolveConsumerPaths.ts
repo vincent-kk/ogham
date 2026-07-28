@@ -11,7 +11,7 @@ import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type { RestructureDecisionReason } from '../../../types/restructure.js';
-import { resolveOwningFractal } from '../../analysis/lcaCalculator/lcaCalculator.js';
+import { resolveOwningFractal } from '../../analysis/lcaCalculator/index.js';
 
 export interface ConsumerPathResolution {
   paths: string[];

@@ -25,6 +25,14 @@
 - 기존 DETAIL.md 뒤에 내용만 붙인 Write는 deny되고 현재 계약을 재구성한 Write는 통과한다.
 - `.filid/criteria.md` Write/Edit은 별도 처리나 진단 없이 통과한다.
 
+## Boundary Exemptions
+
+### preToolValidator.ts — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
+
 ## Last Updated
 
 2026-07-27 — spike 면제와 criteria ledger validator를 제거한 1.0 계약으로 재구성했다.

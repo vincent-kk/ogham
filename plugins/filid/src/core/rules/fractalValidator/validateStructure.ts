@@ -1,7 +1,7 @@
 import type { FractalTree, ProjectSnapshot } from '../../../types/fractal.js';
 import type { ValidationReport } from '../../../types/report.js';
 import type { Rule, RuleEvaluationOptions } from '../../../types/rules.js';
-import { evaluateRules } from '../ruleEngine/ruleEngine.js';
+import { evaluateRules } from '../ruleEngine/index.js';
 
 export function validateStructure(
   input: ProjectSnapshot | FractalTree,

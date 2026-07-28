@@ -77,7 +77,7 @@ export interface DetailMdValidation {
   /** Stable acceptance groups extracted from the current document */
   acceptanceGroups: DetailAcceptanceGroup[];
   /** Organ exemptions this fractal declares (empty when the section is absent) */
-  organExemptions: OrganExemptionDeclaration[];
+  boundaryExemptions: BoundaryExemptionDeclaration[];
 }
 
 /**
@@ -87,9 +87,9 @@ export interface DetailMdValidation {
  * carries it. `reason` is load-bearing — an empty one is an unmet contract, not
  * a granted exemption.
  */
-export interface OrganExemptionDeclaration {
+export interface BoundaryExemptionDeclaration {
   /** Organ path exactly as declared; normalized against the owner when stored */
-  organPath: string;
+  targetPath: string;
   title: string;
   /** Consumer globs, or the literal `entry-point` for barrel-only access */
   consumers: string[];
@@ -99,8 +99,8 @@ export interface OrganExemptionDeclaration {
   line: number;
 }
 
-export interface OrganExemptionValidation {
-  exemptions: OrganExemptionDeclaration[];
+export interface BoundaryExemptionValidation {
+  exemptions: BoundaryExemptionDeclaration[];
   violations: DocumentViolation[];
 }
 

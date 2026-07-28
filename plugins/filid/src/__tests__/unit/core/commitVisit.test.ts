@@ -12,8 +12,8 @@ import {
   readDelivered,
   readFractalMap,
   removeFractalMap,
-} from '../../../core/infra/cacheManager/cacheManager.js';
-import type { VisitScope } from '../../../core/infra/cacheManager/cacheManager.js';
+} from '../../../core/infra/cacheManager/index.js';
+import type { VisitScope } from '../../../core/infra/cacheManager/index.js';
 
 // commitVisit — the visit transaction: delivery 3-state, read merge, lastMap
 // compare-and-set, guide once. Sequential calls emulate concurrent hook

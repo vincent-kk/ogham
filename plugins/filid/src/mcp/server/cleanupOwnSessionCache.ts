@@ -1,6 +1,6 @@
 import { tryProjectRoot } from '@ogham/cross-platform/host-paths';
 
-import { removeSessionFiles } from '../../core/infra/cacheManager/cacheManager.js';
+import { removeSessionFiles } from '../../core/infra/cacheManager/index.js';
 
 /**
  * Eagerly remove this session's cache files at server shutdown. Strictly

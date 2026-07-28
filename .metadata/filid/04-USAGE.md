@@ -429,7 +429,7 @@ v1 config는 읽을 때 메모리에서만 v2로 변환된다. 디스크 기록�
 3. **면책 선언** — 소유 프랙탈의 `DETAIL.md`에 조건부 섹션을 추가한다.
 
 ```md
-## Organ Exemptions
+## Boundary Exemptions
 
 ### /abs/path/to/owner/utils — Hook bundle direct import
 

@@ -1,7 +1,7 @@
 import {
   syncRuleDocs,
   writeConfig,
-} from '../../../../core/infra/configLoader/configLoader.js';
+} from '../../../../core/infra/configLoader/index.js';
 import type { SaveBody, SaveSummary } from '../types/settingsTypes.js';
 
 /**

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createLogger } from '../../lib/logger.js';
-import { startServer } from '../server/server.js';
+import { startServer } from '../server/index.js';
 
 const log = createLogger('mcp');
 

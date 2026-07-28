@@ -21,7 +21,7 @@ import {
   resolveLanguage,
   resolveMaxDepth,
   writeConfig,
-} from '../../../core/infra/configLoader/configLoader.js';
+} from '../../../core/infra/configLoader/index.js';
 
 function writeRawConfig(root: string, raw: unknown): string {
   const dir = join(root, '.filid');

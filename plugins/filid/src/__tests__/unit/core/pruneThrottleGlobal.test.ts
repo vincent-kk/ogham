@@ -49,20 +49,20 @@ describe('prune-throttle (global)', () => {
   // Basic (3) — happy-path round-trip
   it('isPruneDue: returns true when marker absent', async () => {
     const { isPruneDue } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     expect(isPruneDue()).toBe(true);
   });
 
   it('markPruneRun: creates marker file at <pluginRoot>/.last-prune', async () => {
     const { markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     expect(existsSync(markerPath)).toBe(true);
   });
 
   it('round-trip: after markPruneRun, isPruneDue returns false', async () => {
     const { isPruneDue, markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     expect(isPruneDue()).toBe(false);
   });
@@ -70,7 +70,7 @@ describe('prune-throttle (global)', () => {
   // Edge — backdate / boundary (4)
   it('isPruneDue: returns true when marker mtime backdated 25h', async () => {
     const { isPruneDue, markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     const past = Date.now() / 1000 - 25 * 3600;
     utimesSync(markerPath, past, past);
@@ -79,7 +79,7 @@ describe('prune-throttle (global)', () => {
 
   it('isPruneDue: returns false when marker mtime is 1h ago', async () => {
     const { isPruneDue, markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     const past = Date.now() / 1000 - 3600;
     utimesSync(markerPath, past, past);
@@ -88,7 +88,7 @@ describe('prune-throttle (global)', () => {
 
   it('isPruneDue: boundary — just inside PRUNE_THROTTLE_MS returns false', async () => {
     const { isPruneDue, markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     // 1s buffer absorbs ms-level drift between Date.now() and isPruneDue();
     // the impl uses strict `>` so any positive delta past the boundary flips.
@@ -99,7 +99,7 @@ describe('prune-throttle (global)', () => {
 
   it('markPruneRun: called twice updates mtime (re-throttle works)', async () => {
     const { markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     const past = Date.now() / 1000 - 25 * 3600;
     utimesSync(markerPath, past, past);
@@ -112,7 +112,7 @@ describe('prune-throttle (global)', () => {
   // Edge — env / paths (3)
   it('honors CLAUDE_CONFIG_DIR override (marker lands in tempDir)', async () => {
     const { markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     expect(markerPath.startsWith(tempDir)).toBe(true);
     expect(existsSync(markerPath)).toBe(true);
@@ -122,7 +122,7 @@ describe('prune-throttle (global)', () => {
     rmSync(pluginDir, { recursive: true, force: true });
     expect(existsSync(pluginDir)).toBe(false);
     const { markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     expect(existsSync(markerPath)).toBe(true);
   });
@@ -130,7 +130,7 @@ describe('prune-throttle (global)', () => {
   it('isPruneDue: plugin root missing → returns true', async () => {
     rmSync(pluginDir, { recursive: true, force: true });
     const { isPruneDue } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     expect(isPruneDue()).toBe(true);
   });
 
@@ -138,7 +138,7 @@ describe('prune-throttle (global)', () => {
   it('isPruneDue: marker path is a directory → returns true', async () => {
     mkdirSync(markerPath, { recursive: true });
     const { isPruneDue } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     expect(isPruneDue()).toBe(true);
   });
 
@@ -146,7 +146,7 @@ describe('prune-throttle (global)', () => {
     'markPruneRun: swallows write error silently (read-only parent)',
     async () => {
       const { markPruneRun } =
-        await import('../../../core/infra/cacheManager/cacheManager.js');
+        await import('../../../core/infra/cacheManager/index.js');
       rmSync(markerPath, { force: true });
       chmodSync(pluginDir, 0o555);
       try {
@@ -160,7 +160,7 @@ describe('prune-throttle (global)', () => {
 
   it('end-to-end: backdate → due → mark → not due', async () => {
     const { isPruneDue, markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     const past = Date.now() / 1000 - 25 * 3600;
     utimesSync(markerPath, past, past);
@@ -171,7 +171,7 @@ describe('prune-throttle (global)', () => {
 
   it('markPruneRun: overwrites mtime when called on existing marker', async () => {
     const { markPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markPruneRun();
     const past = Date.now() / 1000 - 10 * 3600;
     utimesSync(markerPath, past, past);
@@ -185,7 +185,7 @@ describe('prune-throttle (global)', () => {
     'after silent markPruneRun failure, isPruneDue still returns true',
     async () => {
       const { isPruneDue, markPruneRun } =
-        await import('../../../core/infra/cacheManager/cacheManager.js');
+        await import('../../../core/infra/cacheManager/index.js');
       rmSync(markerPath, { force: true });
       chmodSync(pluginDir, 0o555);
       try {

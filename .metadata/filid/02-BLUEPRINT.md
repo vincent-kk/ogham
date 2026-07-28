@@ -158,7 +158,7 @@ validateDetailMd(content, previous?) → DetailMdValidation
 countLines(content)                  → number
 ```
 
-`acceptanceGroups/` organ이 `### <stable-id> — <title>` 형식의 acceptance group을 추출하고 누락·중복을 거부한다. `organExemptions/` organ의 `parseOrganExemptions(content)`가 조건부 `## Organ Exemptions` 섹션을 읽어 `DetailMdValidation.organExemptions`를 채운다. 두 파서는 heading 형태를 공유하지만 ID 문자 집합은 공유하지 않는다 — organ path에는 경로 구분자가 온다. 섹션 부재가 정상이며, `Reason`이 빈 항목은 면책이 아니라 미충족 계약으로 보고된다.
+`acceptanceGroups/` organ이 `### <stable-id> — <title>` 형식의 acceptance group을 추출하고 누락·중복을 거부한다. `boundaryExemptions/` organ의 `parseBoundaryExemptions(content)`가 조건부 `## Boundary Exemptions` 섹션을 읽어 `DetailMdValidation.boundaryExemptions`를 채운다. 두 파서는 heading 형태를 공유하지만 ID 문자 집합은 공유하지 않는다 — organ path에는 경로 구분자가 온다. 섹션 부재가 정상이며, `Reason`이 빈 항목은 면책이 아니라 미충족 계약으로 보고된다.
 
 ### ruleEngine/
 

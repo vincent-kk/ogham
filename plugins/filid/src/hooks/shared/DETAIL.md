@@ -24,6 +24,14 @@
 - public surface는 FCA 프로젝트, INTENT.md와 DETAIL.md predicate만 열거한다.
 - `.filid/criteria.md` 전용 predicate를 노출하지 않는다.
 
+## Boundary Exemptions
+
+### shared.ts — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
+
 ## Last Updated
 
 2026-07-27 — criteria predicate를 제거한 1.0 공통 hook 계약으로 재구성했다.

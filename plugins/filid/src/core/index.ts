@@ -9,19 +9,19 @@ export {
   getFractalsUnderOrgans,
   scanProject,
   shouldExclude,
-} from './tree/fractalTree/fractalTree.js';
-export type { NodeEntry } from './tree/fractalTree/fractalTree.js';
+} from './tree/fractalTree/index.js';
+export type { NodeEntry } from './tree/fractalTree/index.js';
 export {
   classifyNode,
   isInfraOrgDirectoryByPattern,
   KNOWN_ORGAN_DIR_NAMES,
-} from './tree/organClassifier/organClassifier.js';
-export type { ClassifyInput } from './tree/organClassifier/organClassifier.js';
+} from './tree/organClassifier/index.js';
+export type { ClassifyInput } from './tree/organClassifier/index.js';
 export {
   buildChain,
   findBoundary,
-} from './tree/boundaryDetector/boundaryDetector.js';
-export type { ChainResult } from './tree/boundaryDetector/boundaryDetector.js';
+} from './tree/boundaryDetector/index.js';
+export type { ChainResult } from './tree/boundaryDetector/index.js';
 
 // rules
 export {
@@ -30,18 +30,18 @@ export {
   evaluateRules,
   getActiveRules,
   loadBuiltinRules,
-} from './rules/ruleEngine/ruleEngine.js';
+} from './rules/ruleEngine/index.js';
 export {
   validateDependencies,
   validateNode,
   validateStructure,
-} from './rules/fractalValidator/fractalValidator.js';
+} from './rules/fractalValidator/index.js';
 export {
   countLines,
   detectAppendOnly,
   validateDetailMd,
   validateIntentMd,
-} from './rules/documentValidator/documentValidator.js';
+} from './rules/documentValidator/index.js';
 
 // analysis
 export {
@@ -50,7 +50,7 @@ export {
   detectCycles,
   getDirectDependencies,
   topologicalSort,
-} from './analysis/dependencyGraph/dependencyGraph.js';
+} from './analysis/dependencyGraph/index.js';
 export {
   computeSnapshotHash,
   createProjectSnapshot,
@@ -89,14 +89,14 @@ export {
   sessionIdHash,
   writeBoundary,
   writePromptContext,
-} from './infra/cacheManager/cacheManager.js';
+} from './infra/cacheManager/index.js';
 export type {
   DeliveredState,
   FractalMap,
   VisitArgs,
   VisitDecision,
   VisitScope,
-} from './infra/cacheManager/cacheManager.js';
+} from './infra/cacheManager/index.js';
 export {
   createDefaultConfig,
   getRuleDocsStatus,
@@ -108,7 +108,7 @@ export {
   resolveMaxDepth,
   syncRuleDocs,
   writeConfig,
-} from './infra/configLoader/configLoader.js';
+} from './infra/configLoader/index.js';
 export type {
   FilidConfig,
   InitResult,
@@ -118,4 +118,4 @@ export type {
   RuleDocsManifest,
   RuleDocsStatus,
   SyncRuleDocsOptions,
-} from './infra/configLoader/configLoader.js';
+} from './infra/configLoader/index.js';

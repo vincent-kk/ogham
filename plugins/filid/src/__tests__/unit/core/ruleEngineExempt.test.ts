@@ -11,7 +11,7 @@ import {
   applyOverrides,
   evaluateRules,
   loadBuiltinRules,
-} from '../../../core/rules/ruleEngine/ruleEngine.js';
+} from '../../../core/rules/ruleEngine/index.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 
 function makeNode(overrides: Partial<FractalNode>): FractalNode {

@@ -21,9 +21,14 @@
   | 소유 프랙탈 subtree | organ 구체 파일 직접 | 통과                             |
   | subtree 밖          | organ 구체 파일 직접 | 위반 — 선언된 면책이 있으면 통과 |
 
-- 면책은 소유 프랙탈 DETAIL.md의 `## Organ Exemptions` 선언에서 온다. 대상
-  organ이 일치하고, `Direct import`가 allowed이며, consumer glob이 소비 파일에
-  매치하고, `Reason`이 비어 있지 않을 때만 통과시킨다.
+- 대상이 fractal 내부 파일일 때도 같은 면책을 조회한다. 진입점을 경유할 수
+  **없는** 정당한 소비자가 존재하기 때문이다 — 표준 사례는 훅 번들이며,
+  배럴을 import하면 번들러가 배럴이 재노출하는 모듈 전체를 끌어온다.
+  면책이 없으면 기존 진입점 규칙 그대로 위반이다.
+- 면책은 소유 프랙탈 DETAIL.md의 `## Boundary Exemptions` 선언에서 온다
+  (`## Organ Exemptions`는 legacy 별칭으로 계속 인정한다). 선언된
+  `targetPath`가 대상 경로를 담고, `Direct import`가 allowed이며, consumer
+  glob이 소비 파일에 매치하고, `Reason`이 비어 있지 않을 때만 통과시킨다.
 
 ## API Contracts
 
@@ -57,9 +62,18 @@
 - 소유 프랙탈 subtree 안의 fractal이 그 프랙탈 소유 organ 파일을 직접
   참조하면 통과한다.
 - subtree 밖에서의 직접 참조는 위반이며, organ을 소유하지 않은 구체 파일
-  참조는 기존 진입점 규칙 그대로 위반으로 남는다.
+  참조는 선언이 그 경로를 담지 않는 한 기존 진입점 규칙 그대로 위반으로
+  남는다.
 - 소유 프랙탈 DETAIL.md의 유효한 면책 선언이 있으면 통과하고, reason 부재·
   direct import 미허용·consumer 불일치는 통과시키지 않는다.
+
+### AC-rules-fractal-exemption — fractal 대상 면책
+
+- 소유 프랙탈이 선언한 면책의 `targetPath`가 대상 fractal 내부 파일을 담으면
+  subtree 밖 직접 참조가 통과한다.
+- 선언이 없거나 `targetPath`가 대상을 담지 않으면 진입점 규칙대로 위반이다.
+- reason 부재·direct import 미허용·consumer 불일치는 organ 대상과 동일하게
+  통과시키지 않는다.
 
 ### AC-rules-granularity — 중복 없는 평가
 
@@ -70,6 +84,14 @@
 - Windows target path는 POSIX separator로 작성된 literal/glob scope와
   동일하게 매치된다.
 
+## Boundary Exemptions
+
+### utils — Verification reaches module internals
+
+- **Consumers**: `**/__tests__/**`, `**/e2e/**`
+- **Direct import**: allowed
+- **Reason**: 검증 파일이 내부 단위를 직접 검사한다. 이를 위해 진입점에 export 를 추가하면 소비자가 테스트뿐인 공개 심볼이 생기므로(`seiri_public-contract` §1) 구체 파일을 참조한다. 훅 테스트는 훅이 실제로 import 하는 경로를 mock 해야 하므로 같은 이유가 적용된다.
+
 ## Last Updated
 
-2026-07-28 — organ 접근을 소비자 위치로 판정하고 DETAIL 면책 선언을 boundary rule에 연결했다.
+2026-07-28 — organ 접근을 소비자 위치로 판정하고, DETAIL 면책 선언을 organ과 fractal 대상 모두에 연결했다.

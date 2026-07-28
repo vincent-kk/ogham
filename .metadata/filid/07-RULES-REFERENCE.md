@@ -214,12 +214,12 @@ edge는 organ을 소유 fractal로 승격한 뒤라 organ 정체성이 없으므
 
 finding은 organ 경로와 소유자를 함께 밝히고 해소책 셋을 제시한다: organ을 fractal로 승격 · 소비자들의 lowest common fractal로 이동 · 소유자 DETAIL.md에 면책 선언.
 
-#### organ 면책 (`## Organ Exemptions`)
+#### 경계 면책 (`## Boundary Exemptions`)
 
 면책은 **소유 프랙탈의 DETAIL.md에 조건부로** 선언한다. 보편 문서 계약을 늘리지 않기 위해, 면책이 실제로 필요한 프랙탈만 이 섹션을 갖는다. 섹션이 없는 것이 정상이며 그 자체로는 위반이 아니다.
 
 ```md
-## Organ Exemptions
+## Boundary Exemptions
 
 ### <organ path> — <short title>
 

@@ -2,7 +2,7 @@ import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem/read/
 import { portableIsAbsolute, portableJoin } from '@ogham/cross-platform/paths';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
-import type { OrganExemptionDeclaration } from '../../../types/documents.js';
+import type { BoundaryExemptionDeclaration } from '../../../types/documents.js';
 import type {
   DocumentContractFinding,
   FractalTree,
@@ -21,13 +21,13 @@ import {
  */
 function normalizeExemptions(
   ownerPath: string,
-  exemptions: readonly OrganExemptionDeclaration[],
-): OrganExemptionDeclaration[] {
+  exemptions: readonly BoundaryExemptionDeclaration[],
+): BoundaryExemptionDeclaration[] {
   return exemptions.map((exemption) => ({
     ...exemption,
-    organPath: portableIsAbsolute(exemption.organPath)
-      ? exemption.organPath
-      : portableJoin(ownerPath, exemption.organPath),
+    targetPath: portableIsAbsolute(exemption.targetPath)
+      ? exemption.targetPath
+      : portableJoin(ownerPath, exemption.targetPath),
   }));
 }
 
@@ -68,7 +68,7 @@ export function collectDocumentEvidence(
         severity: 'error',
       });
 
-    let organExemptions: OrganExemptionDeclaration[] | undefined;
+    let boundaryExemptions: BoundaryExemptionDeclaration[] | undefined;
     if (detailContent !== null) {
       filePaths.push(detailPath);
       const detail = validateDetailMd(detailContent);
@@ -78,10 +78,10 @@ export function collectDocumentEvidence(
           ...finding,
         })),
       );
-      if (detail.organExemptions.length > 0)
-        organExemptions = normalizeExemptions(
+      if (detail.boundaryExemptions.length > 0)
+        boundaryExemptions = normalizeExemptions(
           node.path,
-          detail.organExemptions,
+          detail.boundaryExemptions,
         );
       if (node.type !== 'organ')
         detailDocuments.push({
@@ -111,7 +111,7 @@ export function collectDocumentEvidence(
           ? 'violations'
           : 'valid',
       findings,
-      ...(organExemptions ? { organExemptions } : {}),
+      ...(boundaryExemptions ? { boundaryExemptions } : {}),
     };
     diagnostics.push(
       ...findings.map((finding) => ({

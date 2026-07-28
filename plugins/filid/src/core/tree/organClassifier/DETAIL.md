@@ -25,6 +25,14 @@
 
 - classifier 입력과 구현에 특정 entry filename/extension이 없다.
 
+## Boundary Exemptions
+
+### organClassifier.ts — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
+
 ## Last Updated
 
 2026-07-26 — hasIndex 대신 adapter entry descriptor를 소비하는 계약으로 변경했다.

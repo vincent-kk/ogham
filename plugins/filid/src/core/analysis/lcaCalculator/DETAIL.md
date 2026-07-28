@@ -31,6 +31,14 @@
   해석한다.
 - project 밖 또는 하나라도 unknown인 consumer 집합은 null이다.
 
+## Boundary Exemptions
+
+### lcaCalculator.ts — Verification reaches module internals
+
+- **Consumers**: `**/__tests__/**`, `**/e2e/**`
+- **Direct import**: allowed
+- **Reason**: 검증 파일이 내부 단위를 직접 검사한다. 이를 위해 진입점에 export 를 추가하면 소비자가 테스트뿐인 공개 심볼이 생기므로(`seiri_public-contract` §1) 구체 파일을 참조한다. 훅 테스트는 훅이 실제로 import 하는 경로를 mock 해야 하므로 같은 이유가 적용된다.
+
 ## Last Updated
 
 2026-07-27 — portable owner와 true multi-consumer lowest common fractal 계약.

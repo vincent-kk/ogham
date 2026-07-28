@@ -67,7 +67,7 @@ vi.mock('node:fs', async (importOriginal) => {
 });
 
 const { handleUserPromptSubmit } =
-  await import('../../../hooks/userPromptSubmit/userPromptSubmit.js');
+  await import('../../../hooks/userPromptSubmit/index.js');
 const { existsSync, readdirSync } = await import('node:fs');
 
 const baseInput: UserPromptSubmitInput = {

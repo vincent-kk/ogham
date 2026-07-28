@@ -71,6 +71,7 @@ Ask yourself: "If I list this directory, can I tell the contract from the implem
 - When the owner's entry point re-exports an organ symbol, external use is legitimate — but a unit with external consumers naturally belongs at _their_ lowest common fractal, so staying put is a deliberate choice that carries a reason.
 - Direct import from outside is sometimes correct. The standing case is a bundle that must not pull in what a barrel re-exports — hook scripts, where importing the barrel drags every re-exported module into the bundle. Such an exemption is declared, not assumed, and it carries its reason.
 - Both the retention reason and the direct-import exemption are declared in the owning fractal's `DETAIL.md`; the entry shape lives in `filid_module-documents.md`. An organ consumed from outside with neither is the signal that it has an external boundary — promote it to a fractal, or move it to its consumers' lowest common fractal. The finding names both resolutions and cites the consumer paths; it does not choose between them.
+- The same declaration covers a fractal's internals. A consumer barred from the entry point by something the boundary cannot see — the hook bundle again, or a verification file that would otherwise force a test-only export onto the public surface — declares the exemption rather than widening the contract. Undeclared, it stays a violation.
 
 Ask yourself: "Does this consumer sit inside the owner's subtree — and if not, where is the declaration?"
 

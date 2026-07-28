@@ -7,7 +7,7 @@
  */
 import type { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
 
-import type { OrganExemptionDeclaration } from './documents.js';
+import type { BoundaryExemptionDeclaration } from './documents.js';
 import type { VerificationProjectAnalysis } from './verification.js';
 
 export type AnalysisCertainty =
@@ -53,11 +53,11 @@ export interface FractalDocumentEvidence {
   status: 'valid' | 'violations' | 'missing';
   findings: DocumentContractFinding[];
   /**
-   * Organ exemptions this fractal's DETAIL.md declares, with each `organPath`
-   * normalized to an absolute path against the owning fractal. Absent unless
-   * the document carries a `## Organ Exemptions` section.
+   * Boundary exemptions this fractal's DETAIL.md declares, with each
+   * `targetPath` normalized to an absolute path against the owning fractal.
+   * Absent unless the document carries a `## Boundary Exemptions` section.
    */
-  organExemptions?: OrganExemptionDeclaration[];
+  boundaryExemptions?: BoundaryExemptionDeclaration[];
 }
 
 /** Fractal node — a domain boundary with independent business logic */

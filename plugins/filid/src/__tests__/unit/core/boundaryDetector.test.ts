@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   buildChain,
   findBoundary,
-} from '../../../core/tree/boundaryDetector/boundaryDetector.js';
+} from '../../../core/tree/boundaryDetector/index.js';
 
 let tmp: string;
 

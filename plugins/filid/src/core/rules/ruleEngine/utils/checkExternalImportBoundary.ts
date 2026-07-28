@@ -12,7 +12,7 @@ import type {
 import type { RuleViolation } from '../../../../types/rules.js';
 import { resolveOwningOrganPath } from '../../../analysis/dependencyGraph/index.js';
 
-import { isOrganExemptionGranted } from './isOrganExemptionGranted.js';
+import { isBoundaryExemptionGranted } from './isBoundaryExemptionGranted.js';
 
 const RULE_ID = 'external-import-boundary';
 
@@ -68,7 +68,9 @@ export function checkExternalImportBoundary(context: {
       );
       if (organPath !== null) {
         if (isPathWithin(targetNode.path, evidence.sourceFile)) continue;
-        if (isOrganExemptionGranted(targetNode, organPath, evidence.sourceFile))
+        if (
+          isBoundaryExemptionGranted(targetNode, organPath, evidence.sourceFile)
+        )
           continue;
         violations.push({
           ruleId: RULE_ID,
@@ -76,7 +78,7 @@ export function checkExternalImportBoundary(context: {
           message: `Import "${evidence.rawSpecifier}" reaches organ "${organPath}" from outside its owner "${targetNode.path}".`,
           path: evidence.sourceFile,
           suggestion:
-            'Promote the organ to a fractal, move it to its consumers lowest common fractal, or declare the exemption with a reason under "## Organ Exemptions" in the owner DETAIL.md.',
+            'Promote the organ to a fractal, move it to its consumers lowest common fractal, or declare the exemption with a reason under "## Boundary Exemptions" in the owner DETAIL.md.',
         });
         continue;
       }
@@ -94,6 +96,14 @@ export function checkExternalImportBoundary(context: {
       const externalInternalImport = !sameOwner && !targetIsEntryPoint;
       if (!parentBarrelBypass && !localBarrelImport && !externalInternalImport)
         continue;
+      if (
+        isBoundaryExemptionGranted(
+          targetNode,
+          evidence.resolvedPath,
+          evidence.sourceFile,
+        )
+      )
+        continue;
 
       violations.push({
         ruleId: RULE_ID,
@@ -101,7 +111,7 @@ export function checkExternalImportBoundary(context: {
         message: `Import "${evidence.rawSpecifier}" bypasses the target module boundary.`,
         path: evidence.sourceFile,
         suggestion:
-          'Use the target module entry point externally and concrete files internally.',
+          'Use the target module entry point externally and concrete files internally, or declare the exemption with a reason under "## Boundary Exemptions" in the owner DETAIL.md.',
       });
     }
   }

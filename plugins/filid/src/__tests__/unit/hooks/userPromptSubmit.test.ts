@@ -8,8 +8,8 @@ import {
   commitVisit,
   readFractalMap,
   readTurn,
-} from '../../../core/infra/cacheManager/cacheManager.js';
-import { handleUserPromptSubmit } from '../../../hooks/userPromptSubmit/userPromptSubmit.js';
+} from '../../../core/infra/cacheManager/index.js';
+import { handleUserPromptSubmit } from '../../../hooks/userPromptSubmit/index.js';
 import type { UserPromptSubmitInput } from '../../../types/hooks.js';
 
 let tempDir: string;

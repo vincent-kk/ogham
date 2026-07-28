@@ -1,6 +1,6 @@
 import type { FractalNode } from '../../../types/fractal.js';
 import type { Rule, RuleContext, RuleViolation } from '../../../types/rules.js';
-import { loadBuiltinRules } from '../ruleEngine/ruleEngine.js';
+import { loadBuiltinRules } from '../ruleEngine/index.js';
 
 /**
  * 단일 노드를 특정 규칙으로 검증한다.

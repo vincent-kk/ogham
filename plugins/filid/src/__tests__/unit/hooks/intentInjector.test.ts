@@ -14,7 +14,7 @@ import {
 import {
   incrementTurn,
   removeFractalMap,
-} from '../../../core/infra/cacheManager/cacheManager.js';
+} from '../../../core/infra/cacheManager/index.js';
 import {
   processVisit,
   visitKey,

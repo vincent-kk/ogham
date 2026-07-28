@@ -7,7 +7,7 @@ import {
   markSessionPruneRun,
   pruneOldSessions,
   pruneStaleCacheDirs,
-} from '../../core/infra/cacheManager/cacheManager.js';
+} from '../../core/infra/cacheManager/index.js';
 
 /**
  * Boot-time stale-session sweep — the guaranteed cleanup path now that the

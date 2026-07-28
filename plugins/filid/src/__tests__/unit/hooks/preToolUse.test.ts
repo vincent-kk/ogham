@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getCacheDir } from '../../../core/infra/cacheManager/cacheManager.js';
-import { handlePreToolUse } from '../../../hooks/preToolUse/preToolUse.js';
+import { getCacheDir } from '../../../core/infra/cacheManager/index.js';
+import { handlePreToolUse } from '../../../hooks/preToolUse/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 const LEGACY_MODE_AUDIT_FILE = 'mode-audit.jsonl';

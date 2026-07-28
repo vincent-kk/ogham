@@ -1,0 +1,56 @@
+# src contract
+
+## Requirements
+
+- 레이어 의존 방향은 `mcp`/`hooks` → `core` → `adapters` → `types`/`constants`/`lib`
+  한 방향이며 역방향 edge는 0이다.
+- `core`는 생태계 리터럴을 알지 못한다. 확장자, 진입점 파일명, import 문법,
+  테스트 호출 문법은 `adapters/` 안에만 존재한다.
+- `mcp`와 `hooks`는 host 경계이며 정책 판단을 하지 않는다.
+- 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
+- `src/index.ts` npm barrel은 존재하지 않는다. 빌드 대상은 MCP 진입점(CJS)과
+  훅 진입점(ESM)뿐이다.
+- `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로
+  고치지 않는다.
+
+## API Contracts
+
+- MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`,
+  `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`,
+  `verification_scan`, `review_state`.
+- 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
+- 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
+
+## Acceptance Criteria
+
+### AC-src-layering — 단방향 레이어
+
+- `adapters/`에서 `core/`를 참조하는 import가 0건이다.
+- `core/`와 MCP DTO에 생태계 확장자·테스트 호출 리터럴이 없다.
+
+### AC-src-surface — 1.0 표면
+
+- MCP 도구가 정확히 9개 등록되고, npm library entry가 존재하지 않는다.
+
+### AC-src-generated — 생성물 불가침
+
+- `version.ts`, `bridge/`, `public/`, host 매니페스트는 생성기가 소유하며
+  손편집 흔적이 없다.
+
+## Boundary Exemptions
+
+### constants — Verification reaches module internals
+
+- **Consumers**: `**/__tests__/**`, `**/e2e/**`
+- **Direct import**: allowed
+- **Reason**: 검증 파일이 내부 단위를 직접 검사한다. 이를 위해 진입점에 export 를 추가하면 소비자가 테스트뿐인 공개 심볼이 생기므로(`seiri_public-contract` §1) 구체 파일을 참조한다. 훅 테스트는 훅이 실제로 import 하는 경로를 mock 해야 하므로 같은 이유가 적용된다.
+
+### version.ts — Generated version constant has no entry point
+
+- **Consumers**: `**/src/**`
+- **Direct import**: allowed
+- **Reason**: `src`는 1.0에서 npm barrel을 갖지 않으므로(ADR-09) 경유할 진입점이 없다. `version.ts`는 `scripts/injectVersion.mjs`가 만드는 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다.
+
+## Last Updated
+
+2026-07-28 — 레이어 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.

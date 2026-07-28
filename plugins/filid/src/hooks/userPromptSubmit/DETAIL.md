@@ -28,6 +28,14 @@
 - spike 이름의 branch에서도 첫 prompt 출력은 session-first FCA context만 포함한다.
 - 이후 prompt에는 spike/harvest 관련 배너가 다시 주입되지 않는다.
 
+## Boundary Exemptions
+
+### userPromptSubmit.ts — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
+
 ## Last Updated
 
 2026-07-28 — 규칙 문서가 4개로 분할되어 대표 문서 포인터와 legacy 주소 사슬을 계약에 명시했다.

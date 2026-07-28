@@ -1,6 +1,6 @@
 import { bench, describe } from 'vitest';
 
-import { guardStructure } from '../../../hooks/preToolUse/helpers/structureGuard/structureGuard.js';
+import { guardStructure } from '../../../hooks/preToolUse/helpers/structureGuard/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 import { generateFilePath } from '../fixtures/generator.js';
 

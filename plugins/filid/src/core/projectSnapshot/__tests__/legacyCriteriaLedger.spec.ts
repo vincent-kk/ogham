@@ -13,7 +13,7 @@ import {
   LEGACY_CRITERIA_LEDGER_RULE,
 } from '../../../constants/legacyCriteriaLedger.js';
 import { createDefaultConfig } from '../../infra/configLoader/index.js';
-import { validateStructure } from '../../rules/fractalValidator/fractalValidator.js';
+import { validateStructure } from '../../rules/fractalValidator/index.js';
 import { loadBuiltinRules } from '../../rules/ruleEngine/index.js';
 import { createProjectSnapshot } from '../index.js';
 

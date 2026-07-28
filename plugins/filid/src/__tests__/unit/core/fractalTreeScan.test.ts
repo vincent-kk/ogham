@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   scanProject,
   shouldExclude,
-} from '../../../core/tree/fractalTree/fractalTree.js';
+} from '../../../core/tree/fractalTree/index.js';
 import type { StructureAdapter } from '../../../types/adapters.js';
 
 const arbitraryEntryAdapter: StructureAdapter = {

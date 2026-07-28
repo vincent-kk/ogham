@@ -1,5 +1,5 @@
-import { initProject } from '../../../core/infra/configLoader/configLoader.js';
-import type { InitResult } from '../../../core/infra/configLoader/configLoader.js';
+import { initProject } from '../../../core/infra/configLoader/index.js';
+import type { InitResult } from '../../../core/infra/configLoader/index.js';
 
 export interface ProjectInitInput {
   path: string;

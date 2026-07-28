@@ -3,12 +3,12 @@ import { describe, expect, it } from 'vitest';
 import {
   countLines,
   detectAppendOnly,
-  parseOrganExemptions,
+  parseBoundaryExemptions,
   validateDetailAcceptanceGroups,
   validateDetailMd,
   validateIntentMd,
-} from '../../../core/rules/documentValidator/documentValidator.js';
-import * as documentValidator from '../../../core/rules/documentValidator/documentValidator.js';
+} from '../../../core/rules/documentValidator/index.js';
+import * as documentValidator from '../../../core/rules/documentValidator/index.js';
 
 describe('document-validator', () => {
   it('does not expose a legacy criteria ledger validator', () => {
@@ -245,7 +245,7 @@ describe('document-validator', () => {
     });
   });
 
-  describe('parseOrganExemptions', () => {
+  describe('parseBoundaryExemptions', () => {
     const exemptionSection = (
       reason: string,
       directImport = 'allowed',
@@ -262,21 +262,21 @@ describe('document-validator', () => {
       ].join('\n');
 
     it('returns nothing when the conditional section is absent', () => {
-      expect(parseOrganExemptions('## Requirements\n\n- none\n')).toEqual({
+      expect(parseBoundaryExemptions('## Requirements\n\n- none\n')).toEqual({
         exemptions: [],
         violations: [],
       });
     });
 
     it('parses organ path, consumers, direct import and reason', () => {
-      const result = parseOrganExemptions(
+      const result = parseBoundaryExemptions(
         exemptionSection('The barrel drags every re-export into the bundle.'),
       );
 
       expect(result.violations).toEqual([]);
       expect(result.exemptions).toHaveLength(1);
       expect(result.exemptions[0]).toMatchObject({
-        organPath: 'shared',
+        targetPath: 'shared',
         title: 'hook bundle isolation',
         consumers: ['**/src/hooks/**'],
         directImport: true,
@@ -285,7 +285,7 @@ describe('document-validator', () => {
     });
 
     it('treats an empty reason as an unmet contract', () => {
-      const result = parseOrganExemptions(exemptionSection('   '));
+      const result = parseBoundaryExemptions(exemptionSection('   '));
 
       expect(result.violations).toHaveLength(1);
       expect(result.violations[0]).toMatchObject({
@@ -295,7 +295,7 @@ describe('document-validator', () => {
     });
 
     it('reads entry-point consumers and a withheld direct import', () => {
-      const result = parseOrganExemptions(
+      const result = parseBoundaryExemptions(
         exemptionSection(
           'Stays put for LCA reasons.',
           'not allowed',
@@ -321,7 +321,7 @@ describe('document-validator', () => {
       ].join('\n');
       const result = validateDetailMd(content);
 
-      expect(result.organExemptions).toHaveLength(1);
+      expect(result.boundaryExemptions).toHaveLength(1);
       expect(result.valid).toBe(false);
     });
   });

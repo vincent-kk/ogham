@@ -14,7 +14,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   getRuleDocsStatus,
   syncRuleDocs,
-} from '../../../core/infra/configLoader/configLoader.js';
+} from '../../../core/infra/configLoader/index.js';
 
 const REQUIRED_ID = 'filid_fractal-boundaries';
 const REQUIRED_FILE = 'filid_fractal-boundaries.md';

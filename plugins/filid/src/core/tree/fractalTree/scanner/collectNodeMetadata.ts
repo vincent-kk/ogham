@@ -6,7 +6,7 @@ import { pathForCompare } from '@ogham/cross-platform/paths';
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import type { StructureAdapter } from '../../../../types/adapters.js';
 import type { ScanOptions } from '../../../../types/scan.js';
-import { classifyNode } from '../../organClassifier/organClassifier.js';
+import { classifyNode } from '../../organClassifier/index.js';
 import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
 
 export async function collectNodeMetadata(

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { loadConfig } from '../../../core/infra/configLoader/configLoader.js';
+import { loadConfig } from '../../../core/infra/configLoader/index.js';
 
 const V2_BASE = {
   version: '2.0',

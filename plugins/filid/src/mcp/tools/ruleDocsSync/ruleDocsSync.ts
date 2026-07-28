@@ -29,7 +29,7 @@ import {
   loadRuleDocsManifest,
   resolvePluginRoot,
   syncRuleDocs,
-} from '../../../core/infra/configLoader/configLoader.js';
+} from '../../../core/infra/configLoader/index.js';
 
 import { normalizeResync } from './utils/normalizeResync.js';
 import { normalizeSelections } from './utils/normalizeSelections.js';

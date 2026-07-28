@@ -18,8 +18,8 @@ import type {
   MoveInstruction,
   RestructurePlan,
 } from '../../../types/restructure.js';
-import { buildFractalTree } from '../../tree/fractalTree/fractalTree.js';
-import type { NodeEntry } from '../../tree/fractalTree/fractalTree.js';
+import { buildFractalTree } from '../../tree/fractalTree/index.js';
+import type { NodeEntry } from '../../tree/fractalTree/index.js';
 import {
   validatePlanPostconditions,
   validatePlanPreconditions,

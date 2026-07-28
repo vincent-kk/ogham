@@ -28,8 +28,8 @@ import type {
   PlacementRequest,
   RestructurePlan,
 } from '../../../types/restructure.js';
-import { buildFractalTree } from '../../tree/fractalTree/fractalTree.js';
-import type { NodeEntry } from '../../tree/fractalTree/fractalTree.js';
+import { buildFractalTree } from '../../tree/fractalTree/index.js';
+import type { NodeEntry } from '../../tree/fractalTree/index.js';
 import { createRestructurePlan } from '../index.js';
 
 const PATHS = {

@@ -6,7 +6,7 @@ import {
   FilidConfigSchema,
   type RuleDocStatusEntry,
   type RuleDocSyncResult,
-} from '../../../../core/infra/configLoader/configLoader.js';
+} from '../../../../core/infra/configLoader/index.js';
 
 /** State injected into the settings page as `__FILID_STATE__`. */
 export interface SettingsPageState {

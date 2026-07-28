@@ -12,7 +12,7 @@ import {
   loadConfig,
   loadRuleOverrides,
   writeConfig,
-} from '../../../core/infra/configLoader/configLoader.js';
+} from '../../../core/infra/configLoader/index.js';
 
 vi.mock('@ogham/cross-platform/spawn', async () => {
   const actual = await vi.importActual<

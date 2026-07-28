@@ -6,7 +6,7 @@ import {
   type FilidConfig,
   FilidConfigSchema,
   RuleOverrideSchema,
-} from '../../../core/infra/configLoader/configLoader.js';
+} from '../../../core/infra/configLoader/index.js';
 import type { RuleOverride, RuleSeverity } from '../../../types/rules.js';
 
 describe('config-schema-types v2', () => {

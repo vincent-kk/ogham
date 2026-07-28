@@ -26,6 +26,20 @@
 - 모든 branch에서 미전달 일반 mutation은 한 번 deny되고 동일 재시도는 통과한다.
 - INTENT.md/DETAIL.md mutation과 owner INTENT가 없는 mutation은 방문 gate로 deny하지 않는다.
 
+## Boundary Exemptions
+
+### utils — Verification reaches module internals
+
+- **Consumers**: `**/__tests__/**`, `**/e2e/**`
+- **Direct import**: allowed
+- **Reason**: 검증 파일이 내부 단위를 직접 검사한다. 이를 위해 진입점에 export 를 추가하면 소비자가 테스트뿐인 공개 심볼이 생기므로(`seiri_public-contract` §1) 구체 파일을 참조한다. 훅 테스트는 훅이 실제로 import 하는 경로를 mock 해야 하므로 같은 이유가 적용된다.
+
+### intentInjector.ts — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
+
 ## Last Updated
 
 2026-07-27 — spike mode 인자를 제거하고 branch-independent delivery 계약으로 재구성했다.

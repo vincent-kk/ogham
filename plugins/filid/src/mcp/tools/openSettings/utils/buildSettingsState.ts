@@ -3,7 +3,7 @@ import {
   createDefaultConfig,
   getRuleDocsStatus,
   loadConfig,
-} from '../../../../core/infra/configLoader/configLoader.js';
+} from '../../../../core/infra/configLoader/index.js';
 import type { SettingsPageState } from '../types/settingsTypes.js';
 
 /**

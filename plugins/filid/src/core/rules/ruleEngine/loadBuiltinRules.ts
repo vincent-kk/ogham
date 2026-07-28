@@ -1,7 +1,7 @@
 import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
 import { LEGACY_CRITERIA_LEDGER_RULE } from '../../../constants/legacyCriteriaLedger.js';
 import type { Rule, RuleOverride } from '../../../types/rules.js';
-import type { AllowedPeerOverride } from '../../infra/configLoader/loaders/configSchemas.js';
+import type { AllowedPeerOverride } from '../../infra/configLoader/index.js';
 
 import { applyOverrides } from './applyOverrides.js';
 import { checkDependencyCycles } from './utils/checkDependencyCycles.js';

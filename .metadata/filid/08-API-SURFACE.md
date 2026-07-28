@@ -271,7 +271,7 @@ interface FractalDocumentEvidence {
   status: "valid" | "violations" | "missing";
   findings: DocumentContractFinding[];
   /** 소유자 기준 절대 경로로 정규화된 organ 면책. 섹션이 없으면 부재. */
-  organExemptions?: OrganExemptionDeclaration[];
+  boundaryExemptions?: BoundaryExemptionDeclaration[];
 }
 
 interface FractalNode {
@@ -515,9 +515,9 @@ interface DetailAcceptanceGroup {
   line: number;
 }
 
-interface OrganExemptionDeclaration {
+interface BoundaryExemptionDeclaration {
   /** 선언된 그대로의 organ path. 저장 시 소유자 기준으로 정규화된다. */
-  organPath: string;
+  targetPath: string;
   title: string;
   /** 소비자 glob. barrel 경유 접근이면 리터럴 `entry-point`. */
   consumers: string[];
@@ -527,8 +527,8 @@ interface OrganExemptionDeclaration {
   line: number;
 }
 
-interface OrganExemptionValidation {
-  exemptions: OrganExemptionDeclaration[];
+interface BoundaryExemptionValidation {
+  exemptions: BoundaryExemptionDeclaration[];
   violations: DocumentViolation[];
 }
 
@@ -537,7 +537,7 @@ interface DetailMdValidation {
   violations: DocumentViolation[];
   acceptanceGroups: DetailAcceptanceGroup[];
   /** 이 프랙탈이 선언한 organ 면책. 섹션이 없으면 빈 배열. */
-  organExemptions: OrganExemptionDeclaration[];
+  boundaryExemptions: BoundaryExemptionDeclaration[];
 }
 
 interface DocumentViolation {
@@ -549,7 +549,7 @@ interface DocumentViolation {
 
 DETAIL.md 필수 섹션은 `## Requirements`, `## API Contracts`, `## Acceptance Criteria`, `## Last Updated` 넷이다. acceptance group은 `### <stable-id> — <title>` 형식이며 그 문서 안에서 ID가 고유해야 한다.
 
-`## Organ Exemptions`는 **조건부 섹션**이다. 면책을 실제로 부여하는 프랙탈만 갖고, 부재가 정상이며 그 자체로는 위반이 아니다. 항목 heading은 acceptance group과 같은 `### <organ path> — <title>` 형태를 쓰지만 ID 문자 집합은 공유하지 않는다 — organ path에는 경로 구분자가 온다. `reason`이 비면 면책이 아니라 미충족 계약으로 보고된다.
+`## Boundary Exemptions`는 **조건부 섹션**이다. 면책을 실제로 부여하는 프랙탈만 갖고, 부재가 정상이며 그 자체로는 위반이 아니다. 항목 heading은 acceptance group과 같은 `### <target path> — <title>` 형태를 쓰지만 ID 문자 집합은 공유하지 않는다 — 경로에는 구분자가 온다. target은 organ 경로일 수도, fractal 내부 경로일 수도 있으며 자기 자신과 그 아래 전부를 가리킨다. `reason`이 비면 면책이 아니라 미충족 계약으로 보고된다.
 
 ### 훅 (`types/hooks.ts`)
 

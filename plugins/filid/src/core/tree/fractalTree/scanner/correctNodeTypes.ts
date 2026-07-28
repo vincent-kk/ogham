@@ -1,4 +1,4 @@
-import { classifyNode } from '../../organClassifier/organClassifier.js';
+import { classifyNode } from '../../organClassifier/index.js';
 import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
 
 /**

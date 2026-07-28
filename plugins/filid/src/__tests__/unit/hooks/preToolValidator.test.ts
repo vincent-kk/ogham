@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { validatePreToolUse } from '../../../hooks/preToolUse/helpers/preToolValidator/preToolValidator.js';
-import { isDetailMd } from '../../../hooks/shared/shared.js';
+import { validatePreToolUse } from '../../../hooks/preToolUse/helpers/preToolValidator/index.js';
+import { isDetailMd } from '../../../hooks/shared/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 const baseInput: PreToolUseInput = {

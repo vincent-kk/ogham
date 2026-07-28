@@ -61,6 +61,20 @@ interface FilidConfigV2 {
 - legacy 주소 `fca.md`는 대표 엔트리 `filid_fractal-boundaries` 하나만 승계한다. shared rule manager가 filename과 legacyFilenames 전역 유일성을 강제하므로 둘 이상이 같은 legacy를 주장하면 sync가 실패한다.
 - manifest에서 사라진 구 문서 `filid_fca-policy.md`는 `filid_` 접두사 기반 owned orphan 스윕이 회수한다. 별도의 마이그레이션 경로를 두지 않는다.
 
+## Boundary Exemptions
+
+### loaders — Verification reaches module internals
+
+- **Consumers**: `**/__tests__/**`, `**/e2e/**`
+- **Direct import**: allowed
+- **Reason**: 검증 파일이 내부 단위를 직접 검사한다. 이를 위해 진입점에 export 를 추가하면 소비자가 테스트뿐인 공개 심볼이 생기므로(`seiri_public-contract` §1) 구체 파일을 참조한다. 훅 테스트는 훅이 실제로 import 하는 경로를 mock 해야 하므로 같은 이유가 적용된다.
+
+### configLoader.ts — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
+
 ## Last Updated
 
 2026-07-28 — rule docs manifest가 4개 required 엔트리로 바뀌어 legacy 승계와 orphan 회수 계약을 명시했다.

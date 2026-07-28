@@ -6,8 +6,8 @@ import {
   getAncestorPaths,
   resolveOwningFractal,
 } from '../../../core/analysis/lcaCalculator/lcaCalculator.js';
-import { buildFractalTree } from '../../../core/tree/fractalTree/fractalTree.js';
-import type { NodeEntry } from '../../../core/tree/fractalTree/fractalTree.js';
+import { buildFractalTree } from '../../../core/tree/fractalTree/index.js';
+import type { NodeEntry } from '../../../core/tree/fractalTree/index.js';
 import type { FractalTree } from '../../../types/fractal.js';
 
 const POSIX_PATHS = {

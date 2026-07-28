@@ -189,7 +189,7 @@ projectRoot
     │
     ▼
 5. document evidence (INTENT/DETAIL 상태 + 선언된 organ 면책)
-   → organExemptions의 organPath는 소유 프랙탈 기준 절대 경로로 정규화된다
+   → boundaryExemptions의 targetPath는 소유 프랙탈 기준 절대 경로로 정규화된다
     │
     ▼
 6. legacy evidence (.filid/criteria.md 존재 여부와 이관 대상 경로)

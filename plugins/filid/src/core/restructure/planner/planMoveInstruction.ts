@@ -16,7 +16,7 @@ import type {
 import {
   findLowestCommonFractal,
   resolveOwningFractal,
-} from '../../analysis/lcaCalculator/lcaCalculator.js';
+} from '../../analysis/lcaCalculator/index.js';
 import { buildImportRewrites } from '../imports/buildImportRewrites.js';
 
 import { buildRequiredArtifacts } from './buildRequiredArtifacts.js';

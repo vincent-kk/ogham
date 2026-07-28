@@ -6,7 +6,7 @@ import {
   detectCycles,
   getDirectDependencies,
   topologicalSort,
-} from '../../../core/analysis/dependencyGraph/dependencyGraph.js';
+} from '../../../core/analysis/dependencyGraph/index.js';
 import type { DependencyReference } from '../../../types/adapters.js';
 import type {
   DependencyEdge,

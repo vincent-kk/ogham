@@ -326,7 +326,9 @@ contract·structure·verification 세 관점이 한 번 병렬로 의견을 내�
 
 **상태**: 채택
 
-organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유하라"를 적용할 대상이 없다. 소유 subtree **안**에서는 구체 파일 직접 참조가 정상이고, **밖**에서는 소유 프랙탈의 진입점을 경유한다. 밖에서의 직접 참조는 소유 프랙탈 `DETAIL.md`의 조건부 `## Organ Exemptions`에 선언된 면책이 있을 때만 허용된다.
+organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유하라"를 적용할 대상이 없다. 소유 subtree **안**에서는 구체 파일 직접 참조가 정상이고, **밖**에서는 소유 프랙탈의 진입점을 경유한다. 밖에서의 직접 참조는 소유 프랙탈 `DETAIL.md`의 조건부 `## Boundary Exemptions`에 선언된 면책이 있을 때만 허용된다.
+
+**같은 선언이 fractal 내부에도 적용된다.** 진입점을 경유할 수 _없는_ 정당한 소비자가 있기 때문이다. 표준 사례는 둘이다 — 훅 번들은 배럴을 import하면 배럴이 재노출하는 모듈 전체를 끌어오고, 검증 파일은 내부 단위를 검사하려다 테스트만이 소비자인 export를 공개 표면에 밀어넣게 된다. 선언하지 않으면 그대로 위반으로 남는다.
 
 **근거**: 존재하지 않는 경유지를 요구하면 organ의 모든 파일 참조가 자동으로 위반이 된다. 이 저장소 자체 스캔에서 `external-import-boundary` 708건 중 대부분이 organ 대상이었다 — 708개 import를 고칠 문제가 아니라 규칙 의미를 정할 문제였다.
 
@@ -367,7 +369,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-23 | `pipeline --auto`가 pull-request → cross-review → resolve → revalidate를 중단 없이 잇는다       | [03](./03-LIFECYCLE.md)                             |
 | AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결된다 | [04](./04-USAGE.md)                                 |
 | AC-25 | 문서도 module index도 없는 디렉터리는 `organ`이며, override 경로는 분류를 바꾸지 못한다         | ADR-11 · [07](./07-RULES-REFERENCE.md)              |
-| AC-26 | 소유 subtree 안의 organ 직접 참조는 통과, 밖은 위반, `Organ Exemptions` 선언이 있으면 통과      | ADR-12 · [07](./07-RULES-REFERENCE.md)              |
+| AC-26 | 소유 subtree 안의 organ 직접 참조는 통과, 밖은 위반, `Boundary Exemptions` 선언이 있으면 통과   | ADR-12 · [07](./07-RULES-REFERENCE.md)              |
 | AC-27 | 자식 fractal이 부모 소유 organ을 참조해도 cycle로 판정되지 않는다                               | ADR-12 · [06](./06-HOW-IT-WORKS.md)                 |
 
 ---

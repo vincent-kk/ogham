@@ -1,7 +1,7 @@
 import { bench, describe } from 'vitest';
 
-import { validatePreToolUse } from '../../../hooks/preToolUse/helpers/preToolValidator/preToolValidator.js';
-import { guardStructure } from '../../../hooks/preToolUse/helpers/structureGuard/structureGuard.js';
+import { validatePreToolUse } from '../../../hooks/preToolUse/helpers/preToolValidator/index.js';
+import { guardStructure } from '../../../hooks/preToolUse/helpers/structureGuard/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 import {
   generateClaudeMdContent,

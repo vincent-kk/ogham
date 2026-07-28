@@ -62,6 +62,14 @@
 - 동적 table, alias와 알 수 없는 문법은 indeterminate이며 skip, todo와
   property declaration은 각각 1 case다.
 
+## Boundary Exemptions
+
+### index.ts — Verification checks the published contract
+
+- **Consumers**: `**/__tests__/**`, `**/e2e/**`
+- **Direct import**: allowed
+- **Reason**: 콜로케이션된 검증 파일이 이 모듈의 **공개 계약**을 진입점으로 검사한다. 같은 소유자 안에서는 로컬 배럴 경유가 일반적으로 금지되지만, DETAIL acceptance group 에 결합하는 spec 은 그 group 이 공개하는 표면을 봐야 한다.
+
 ## Last Updated
 
 2026-07-28 — config entry override를 module이 아닌 kind로 분리해 분류 입력에서 제외했다.

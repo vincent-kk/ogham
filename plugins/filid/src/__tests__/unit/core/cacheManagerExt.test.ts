@@ -18,7 +18,7 @@ import {
   removeSessionFiles,
   sessionIdHash,
   writeBoundary,
-} from '../../../core/infra/cacheManager/cacheManager.js';
+} from '../../../core/infra/cacheManager/index.js';
 
 let tempDir: string;
 

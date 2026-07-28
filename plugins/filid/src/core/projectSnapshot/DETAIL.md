@@ -75,6 +75,14 @@
 - 선택 가능한 structure/verification adapter가 없으면 빈 exact PASS가 아니라
   해당 분석 certainty가 `unsupported`다.
 
+## Boundary Exemptions
+
+### index.ts — Verification checks the published contract
+
+- **Consumers**: `**/__tests__/**`, `**/e2e/**`
+- **Direct import**: allowed
+- **Reason**: 콜로케이션된 검증 파일이 이 모듈의 **공개 계약**을 진입점으로 검사한다. 같은 소유자 안에서는 로컬 배럴 경유가 일반적으로 금지되지만, DETAIL acceptance group 에 결합하는 spec 은 그 group 이 공개하는 표면을 봐야 한다.
+
 ## Last Updated
 
 2026-07-28 — organ 면책 evidence와 graph organ path 입력을 계약에 추가했다.

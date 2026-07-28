@@ -3,7 +3,7 @@ import { portableBasename } from '@ogham/cross-platform/paths';
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
-import type { AllowedPeerOverride } from '../../../infra/configLoader/loaders/configSchemas.js';
+import type { AllowedPeerOverride } from '../../../infra/configLoader/index.js';
 
 import { isExempt } from './isExempt.js';
 

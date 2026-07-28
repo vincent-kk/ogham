@@ -5,9 +5,9 @@ import {
   validateDependencies,
   validateNode,
   validateStructure,
-} from '../../../core/rules/fractalValidator/fractalValidator.js';
-import { buildFractalTree } from '../../../core/tree/fractalTree/fractalTree.js';
-import type { NodeEntry } from '../../../core/tree/fractalTree/fractalTree.js';
+} from '../../../core/rules/fractalValidator/index.js';
+import { buildFractalTree } from '../../../core/tree/fractalTree/index.js';
+import type { NodeEntry } from '../../../core/tree/fractalTree/index.js';
 import type { CategoryType, DependencyGraph } from '../../../types/fractal.js';
 import type { Rule, RuleContext } from '../../../types/rules.js';
 
