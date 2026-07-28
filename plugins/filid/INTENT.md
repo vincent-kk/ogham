@@ -4,15 +4,15 @@
 
 ## Structure
 
-| Path                  | Role                                                   |
-| --------------------- | ------------------------------------------------------ |
-| `src/`                | 어댑터, FCA core, MCP, 훅 TypeScript canonical source  |
-| `skills/`             | 8개 사용자 workflow                                    |
-| `hooks/`              | 생성된 host hook mapping                               |
-| `scripts/`            | rule/page/MCP/hook/plugin 생성 파이프라인              |
-| `bridge/` · `public/` | 커밋되는 MCP·훅·설정 UI 생성물                         |
+| Path                  | Role                                                  |
+| --------------------- | ----------------------------------------------------- |
+| `src/`                | 어댑터, FCA core, MCP, 훅 TypeScript canonical source |
+| `skills/`             | 12개 사용자 workflow (merge-track 5 포함)             |
+| `hooks/`              | 생성된 host hook mapping                              |
+| `scripts/`            | rule/page/MCP/hook/plugin 생성 파이프라인             |
+| `bridge/` · `public/` | 커밋되는 MCP·훅·설정 UI 생성물                        |
 | `templates/`          | 문서 템플릿과 managed FCA rule canonical source       |
-| plugin manifests      | plugin-compiler가 만드는 host별 생성물                 |
+| plugin manifests      | plugin-compiler가 만드는 host별 생성물                |
 
 ## Conventions
 

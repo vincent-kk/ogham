@@ -11,18 +11,37 @@
 
 ## 현재 상태
 
-- 진행 중: 작업 5 — 공통 artifact envelope와 9개 MCP 도구
-- 완료: 작업 0, 작업 1, 작업 2, 작업 3, 작업 4
-- 후속 완료 조건: 작업 0–9 뒤 전체 상수·함수 경계·FCA 적합성 리팩터링,
+- 진행 중: 작업 10(감사·최종 검증)과 작업 11(merge-track 5스킬 재작성)
+- 완료: 작업 0–9
+- **계획 개정 (2026-07-28)**: 소유자 판단으로 merge-track 절차
+  `pull-request` → `cross-review` → `resolve` → `revalidate`와 이를 잇는
+  `pipeline`을 필수 부속으로 되살린다. 유지 스킬 8 → **12**, AC-19 갱신,
+  AC-21~24 추가. 작업 7이 제거한 네 스킬은 제거된 도구에 의존하므로 복원이
+  아니라 9개 도구 위로 재작성한다(작업 11). `resolve`는 자체 코드작성
+  에이전트를 잃고 **결정과 기록이라는 절차만** 소유하며, 적용은 메인
+  에이전트나 다른 플러그인에 위임한다.
+  `promote`·`harvest`·`sync`·`update`·`config-wizard`·`structure-review`·
+  `ast-fallback`은 제거 유지하되 계획 원장에 각각의 사유를 명시했다.
+- 검증 정책 변경: 중간 gate에 전체 `yarn filid test:run`(약 30초)을 추가한다.
+  컨텍스트 비용이 실제로 드는 전체 Filid 구조검사만 작업 10으로 미룬다.
+  이전 정책이 전체 스위트까지 유예한 결과, 작업 7이 만든 회귀를 포함해
+  12건이 RED인 채로 8개 seam이 커밋됐다 — 아래 「선행 정리」 참조.
+- 후속 완료 조건: 작업 9 뒤 전역 상수·함수 경계·FCA 적합성 리팩터링,
   독립 plugin 리뷰, AC 문서 대조 검증과 review seam별 로컬 커밋
-- 검증 순서: 중간 작업에서는 scoped test/typecheck/build만 실행하고 전체
-  Filid 구조검사는 개발·리팩터링 완료 후 한 번 수행
 - 계획 이탈: 작업 1의 FCA 문서 보강/settings field rename과 작업 2의
   runnable spec 설정/acceptance validator organ 이동, 작업 3의 snapshot
   output-language 계약·내부 helper organ 보완, 작업 4의 flat organ helper
-  배치와 compatibility wrapper 조기 전환
-- 최종 검증 대기: loopback settings unit 16건과 Playwright는 sandbox의
-  `listen EPERM` 및 비샌드박스 승인 사용 한도로 실행하지 못함
+  배치와 compatibility wrapper 조기 전환, 작업 8의 legacy 테스트 동반 삭제
+- 해소됨(2026-07-28): 작업 1부터 대기 상태였던 **loopback settings unit 16건이
+  통과했다** — `yarn filid test:run src/mcp/tools/openSettings`, 2 files 16/16,
+  exit 0. 이전 세션의 `listen EPERM`은 환경 제약이었고 코드 결함이 아니었음이
+  확인됐다. `persistSave → writeConfig`(v2 strict schema)와
+  `buildSettingsState → loadConfig`(`adapters`·`structure` 판독) 경로가
+  동작하므로 AC-24(`config-wizard` 없이 config 관리 완결)의 단위 근거가 섰다.
+- 최종 검증 대기: `yarn filid test:e2e`(Playwright) 미실행
+- 작업 10 이월: `initProject(projectRoot, options?: string |
+InitProjectOptions)`의 문자열 호환 shim 제거 (저장소 규칙 — 리팩터 완료
+  후 호환 shim 제거)
 
 ## 작업 기록
 
@@ -319,20 +338,20 @@
   - `src/core/infra/artifactStore/`, `src/constants/toolEnvelope.ts`,
     `src/types/toolEnvelope.ts`
   - `src/mcp/server/`, `src/mcp/tools/{contextResolve,restructurePlan,
-    verificationScan,reviewState}/`
+verificationScan,reviewState}/`
   - `src/mcp/tools/{fractalScan,structureValidate}/`,
     `src/constants/{mcpContracts,reviewState}.ts`, `src/types/report.ts`
 - scoped verification:
   - `yarn filid test:run src/mcp/server/__tests__/toolEnvelope.spec.ts
-    src/mcp/server/__tests__/legacyToolPayloads.test.ts
-    src/__tests__/integration/vnextToolSurface.test.ts
-    src/__tests__/unit/mcp/vnextSnapshotTools.test.ts
-    src/__tests__/unit/mcp/verificationScanSummary.test.ts
-    src/__tests__/unit/mcp/reviewStateLifecycle.test.ts
-    src/__tests__/unit/mcp/reviewStateCache.test.ts
-    src/__tests__/unit/mcp/reviewStateHash.test.ts
-    src/__tests__/unit/mcp/toolResult.test.ts
-    src/__tests__/unit/mcp/fractalScan.test.ts`
+src/mcp/server/__tests__/legacyToolPayloads.test.ts
+src/__tests__/integration/vnextToolSurface.test.ts
+src/__tests__/unit/mcp/vnextSnapshotTools.test.ts
+src/__tests__/unit/mcp/verificationScanSummary.test.ts
+src/__tests__/unit/mcp/reviewStateLifecycle.test.ts
+src/__tests__/unit/mcp/reviewStateCache.test.ts
+src/__tests__/unit/mcp/reviewStateHash.test.ts
+src/__tests__/unit/mcp/toolResult.test.ts
+src/__tests__/unit/mcp/fractalScan.test.ts`
     — 10 files, 90/90 passed, exit 0.
   - `yarn filid typecheck` — exit 0.
   - `git diff --check -- plugins/filid .metadata/filid` — exit 0.
@@ -406,6 +425,285 @@
     구현과 전역 리팩터링이 끝난 최종 단계로 연기했다.
 - 상태: 완료.
 
+### 작업 7 — 스킬과 cross-review를 FCA 범위로 재작성
+
+이 항목은 커밋 `d8359df8`이 만들어진 세션에서 기록되지 못했고, 후속 세션이
+커밋과 저장소 상태를 근거로 사후 재구성했다. 아래 검증은 재구성 시점에
+직접 실행한 결과다.
+
+- 변경: `agents/` 14개 persona 파일과 legacy 스킬 12개(`ast-fallback`,
+  `config-wizard`, `harvest`, `pipeline`, `promote`, `pull-request`,
+  `resolve`, `revalidate`, `structure-review`, `sync`, `update`)를 제거하고
+  cross-review를 contract·structure·verification 세 관점과 adversarial
+  판정 계약으로 전면 재작성했다. `reviewPipeline`/`syncPipeline` 통합
+  테스트도 함께 삭제했다. 77 files, +2014 / −7299.
+- 주요 파일: `skills/` 8개 workflow,
+  `skills/cross-review/{SKILL.md,contracts.md,phases/evidence.md,
+reference.md,templates.md}`,
+  `skills/cross-review/reviewers/{contract,structure,verification,
+adversarial}.md`,
+  `skills/cross-review/calibration/contract-change.md`.
+- 사후 검증:
+  - `find skills -mindepth 1 -maxdepth 1 -type d | wc -l` — 8.
+  - `agents/` 부재 확인.
+  - 금지 토큰 `rg`(제거 도구 12종 + `code-surgeon`/`criteria.md`/`3+12`/
+    `LCOM4`/`cyclomatic`) — `skills/`에서 매치 0.
+  - `skills/cross-review/reviewers/` 4개 파일 존재.
+- 미검출 회귀: 이 작업의 검증 명령에 테스트 실행이 없어
+  `src/__tests__/unit/docsLanguage.test.ts`가 삭제된 `agents/*.md`를
+  계속 읽는 3건을 놓쳤다. 선행 정리에서 닫았다.
+- 상태: 완료.
+
+### 선행 정리 — 원장 정정과 RED 3파일
+
+작업 8 재개 전에 저장소를 green으로 되돌리고 원장을 실제 상태에 맞췄다.
+
+- fail-first(이미 관측된 실패): 재개 시점 `yarn filid test:run`은
+  12 failed / 1324 passed / 3 files, exit 1이었다.
+  - `docsLanguage.test.ts` 3건 — `ENOENT .../agents/qa-reviewer.md`,
+    `agents/knowledge-manager.md`. 작업 7 회귀.
+  - `configPatchValidate.test.ts` 8건 — config v2 이후 계약 불일치.
+    이 브랜치에서 한 번도 수정되지 않았고 작업 8 삭제 대상이다.
+  - `src/core/infra/configLoader/__tests__/configLoader.test.ts` 1건 —
+    `createDefaultConfig` 키 순서에 v2의 `adapters` 미반영. 작업 1이
+    검증한 파일은 같은 이름의 `src/__tests__/unit/core/configLoader.test.ts`
+    로, 동명 파일 name trap이 scoped 검증을 빗나가게 했다.
+- 변경: `docsLanguage.test.ts`의 `SCOPE`/`GUIDE_SCOPE`에서 `agents/` 항목을
+  제거하고, 대상이 모두 사라진 whitelist case는 삭제했다. 남은 두 scope는
+  각각 실재하는 4개 파일을 검사한다. 콜로케이트 `configLoader.test.ts`는
+  기대 키 순서를 `['version','language','adapters','rules']`로 고치고 이제
+  거짓이 된 case 이름(`orders language between version and rules`)도 함께
+  바꿨다.
+- 검증: `yarn filid test:run src/__tests__/unit/docsLanguage.test.ts
+src/core/infra/configLoader/__tests__/configLoader.test.ts`
+  — 2 files, 8/8, exit 0.
+- 이월: `configPatchValidate.test.ts` 8건은 작업 8이 도구와 함께 삭제한다.
+
+### 작업 8 — stale source와 npm library 표면 제거
+
+- 변경: 계획의 삭제 목록을 수행해 `src/{ast,compress,metrics}`,
+  `core/{module,prSummary,coverageVerify,rules/driftDetector,
+analysis/projectAnalyzer,infra/{changeQueue,projectHash}}`,
+  `hooks/changeTracker`, legacy MCP tool 14개 디렉터리, 대응 types·constants
+  ·테스트를 제거했다. `src/index.ts` npm barrel과 `tsconfig.build.json`도
+  삭제해 MCP·hook entry만 build 대상으로 남겼다. 총 294개 파일 삭제.
+- 변경: `core/`, `core/infra/`, `core/rules/`, `hooks/`, `types/`,
+  `lcaCalculator` 배럴에서 사라진 심볼을 제거하고, 같은 모듈의 INTENT.md
+  Structure 표에서도 `projectHash`·`changeQueue`·`driftDetector`·
+  `changeTracker` 행을 지웠다. `types/report.ts`의 drift 의존
+  `DriftReport`/`AnalysisReport`/`AnalyzeOptions`/`RenderedReport`도 함께
+  제거했다.
+- 변경: `isExempt.ts`의 유일한 `fast-glob` 사용처(`fg.isDynamicPattern`)를
+  `src/lib/isDynamicGlob.ts`로 대체했다. magic 집합을 `globToRegexp.ts`가
+  실제로 확장하는 `**`/`*`/`?`로 한정해도, 그 밖의 문자는 어차피 리터럴로
+  escape되므로 두 경로의 매칭 결과는 동일하다.
+- 변경: package는 `private: true`, `exports`/`main`/`types`와 `files`의
+  `dist`·`agents` 제거, `build:compile` 단계 제거, `@ast-grep/napi`와
+  `fast-glob` dependency 제거, 0.8.4 → **1.0.0**. MCP build에서 global
+  `NODE_PATH` banner와 native external 설정도 제거했다.
+- 계획 이탈:
+  - 계획에 없던 `src/__tests__/integration/reviewCache.test.ts`를 함께
+    삭제했다. 유일한 대상 `handleReviewManage`가 사라졌고, 작업 5의
+    `reviewState*` lifecycle 테스트가 대체 커버리지다.
+  - `lcaCalculator.test.ts`에서 `findLCA`/`getModulePlacement` describe
+    11건을 제거하는 대신, 두 describe가 갖고 있던 "서로 다른 branch의
+    소비자 → root" 동작을 `findLowestCommonFractal`의 신규 case로 옮겼다.
+    커버리지를 버리지 않기 위한 병합이며 파일은 25 → 15 cases다.
+  - `plugins/filid/CLAUDE.md`의 Anti-Yield Discipline 절을 삭제했다. 참조
+    대상 `skills/pipeline/SKILL.md`와 `.omc/research/terminal-markers.json`
+    이 작업 7에서 사라졌고, 남은 8개 스킬에 EXECUTION MODEL / DO NOT STOP /
+    `[INTERACTIVE]` 마커가 하나도 없음을 `rg`로 확인했다.
+- 검증:
+  - `yarn filid typecheck` — exit 0.
+  - `yarn filid test:run` — 78 files, 805 passed / 7 skipped, exit 0.
+  - `yarn filid build` — exit 0. hook bundle guard(session-start ≤ 49152,
+    heavy ≤ 32768, light ≤ 16384, 금지 모듈 없음) 통과.
+  - `yarn typecheck`(모노레포 `tsc -b`) — 14 workspaces clean, exit 0.
+  - `yarn filid test:run src/__tests__/unit/core/isExempt.test.ts
+src/__tests__/unit/core/cacheManager.test.ts` — 29/29, exit 0.
+    `isExempt` 테스트를 **무수정**으로 통과시켜 fast-glob 제거가
+    동작 보존 리팩터임을 특성화했다.
+  - `yarn why` — `@ast-grep/napi`는 `@ogham/imbas`, `fast-glob`은
+    `@ogham/maencof`와 `globby` 경유만 남고 Filid dependency edge는 없다.
+    lockfile에 두 패키지가 남는 이유가 이것이다.
+- rg gate 잔여 매치와 사유:
+  - `README.md` · `README-ko_kr.md` — 작업 9에서 갱신한다.
+  - `scripts/buildHooks.mjs` 2건 — 금지 모듈 guard 자체와 그 주석.
+    이름을 지우면 guard가 사라진다.
+  - `DETAIL.md`, `src/adapters/INTENT.md`,
+    `src/adapters/ecmascript/INTENT.md`,
+    `src/core/tree/fractalTree/DETAIL.md` 4건 — "의존하지 않는다"를
+    선언하는 경계·수용 기준 문장이다. 금지 대상을 명시하는 것이 문장의
+    목적이므로 유지한다.
+- 상태: 완료.
+
+### 작업 9 — 생성물과 사용자 문서를 실제 1.0 상태로 동기화
+
+- 변경(생성물): `yarn filid build`와 `yarn plugin:adapters`로 재생성했다.
+  plugin-compiler에 prune 단계가 없어 삭제된 스킬 11개
+  (`ast-fallback`, `config-wizard`, `harvest`, `pipeline`, `promote`,
+  `pull-request`, `resolve`, `revalidate`, `structure-review`, `sync`,
+  `update`)의 `.codex-plugin/skills/` 생성물이 고아로 남아 있었다. 해당
+  디렉터리만 제거한 뒤 sync를 재실행해 8개 스킬 + `_shared`로 수렴시켰다.
+- 변경(사용자 문서): `README.md`와 `README-ko_kr.md`를 1.0 표면으로 다시 썼다.
+  9개 MCP 도구, 8개 스킬, 15개 규칙, 훅 3개, native 의존 없음, 16 KiB envelope를
+  반영하고 제거된 스킬·도구·메트릭 서술을 걷어냈다.
+- 변경(기술 문서): `.metadata/filid/01`–`08` 여덟 문서를 전부 재작성했다.
+  기존 문서는 v0.8.x 스냅샷으로 `ast/`, `metrics/`, `compress/`, 페르소나 위원회,
+  의사결정 트리, 압축 메커니즘, npm 라이브러리 표면처럼 **더는 존재하지 않는
+  구조**를 서술하고 있었다.
+  - `01-ARCHITECTURE` — 책임 4가지·비목표·Seiri 경계표, 실제 `core → adapters`
+    의존 방향, ADR 10개(native parser 제거, 어댑터 격리, read-only restructure,
+    단일 snapshot, DETAIL 단일 원장, 15/32, envelope, 품질규칙 비소유,
+    private plugin, 3관점 cross-review)
+  - `02-BLUEPRINT` — 13개 모듈군의 목적·알고리즘·공개 시그니처와 데이터 흐름
+  - `03-LIFECYCLE` — 8개 스킬 워크플로, cross-review 5단계, review state 수명주기,
+    훅 타임라인
+  - `04-USAGE` — 설치·빌드 파이프라인(`build:compile` 없음), config v2 전체 스키마,
+    hooks.json 실제 내용, 도구 호출 예시, 트러블슈팅(게이트 재시도·훅 캡 포함)
+  - `05-COST-ANALYSIS` — 빌드 산출물 **실측** 크기와 바이트 캡·사용률.
+    지연 시간(ms)은 이 개정에서 재측정하지 않았으므로 싣지 않고, 필요 시
+    `yarn filid bench:run`으로 측정하라고 명시했다.
+  - `06-HOW-IT-WORKS` — 훅 파이프라인과 gate 재시도 계약, lexical scanner,
+    snapshot/hash, 그래프·cycle, LCA·계획, 검증 계산, envelope 축소 경로
+  - `07-RULES-REFERENCE` — 1.0 상수표, 15개 rule의 category/severity/scope/
+    granularity, 분류 7단계, 제거된 규칙과 사유
+  - `08-API-SURFACE` — npm 표면이 없어졌음을 명시하고 9개 도구 계약과 core DTO로
+    재구성
+- 검증:
+  - `yarn filid build` — exit 0. hook bundle guard 통과, `sync: 5 unchanged`.
+  - `yarn plugin:adapters:check` — `sync: 254 unchanged`, stale 0.
+  - `.codex-plugin/skills` — 8개 스킬 + `_shared`.
+  - 문서 잔여 stale 토큰 `rg` — 매치는 전부 "1.0에서 제거된 도구/규칙" 표와
+    "filid가 소유하지 않는 것" 문장이다. 제거 대상을 명시하는 것이 그 문장의
+    목적이므로 유지한다.
+- 계획 이탈:
+  - 계획은 생성물을 "생성 명령으로만 갱신"하라고 하지만, plugin-compiler는
+    파일을 만들고 갱신할 뿐 삭제하지 않는다. 소스가 사라진 생성물을 지우는 것은
+    손편집이 아니라 고아 제거로 판단해 수행했다. **plugin-compiler에 prune 단계가
+    없다는 점은 6개 플러그인 공통 문제이므로 별도 과제로 남긴다.**
+  - `plugins/filid/CLAUDE.md`의 Anti-Yield Discipline 절 제거는 작업 8에 기록했다.
+- 상태: 완료.
+
+### 작업 10 — 전역 감사와 최종 검증 (진행 중)
+
+#### 완료: 호환 shim과 고아 코드 제거
+
+- `initProject(projectRoot, options?: string | InitProjectOptions)`의 문자열
+  분기를 제거했다. 유일한 문자열 호출자는 콜로케이트 legacy 테스트였고,
+  production 호출자(`projectInit.ts`)는 이미 객체 형태였다.
+- `configSchemas.ts`의 `AllowedEntrySchema` / `AllowedEntry`와 `FilidConfig`
+  transitional alias 5키(`additional-allowed`, `additional-entry-points`,
+  `additional-route-patterns`, `additional-organ-names`, `scan`)를 제거했다.
+  v1 migration이 `additional-allowed` 문자열을 `AllowedPeerOverride`로
+  정규화하고 v2 스키마가 객체만 받으므로, `checkZeroPeerFile`의 문자열 분기는
+  **도달 불가능한 죽은 코드**였다.
+- 이 제거가 `src/core/infra/configLoader/utils/routePatternSanitize.ts`를
+  드러냈다 — 소비자 0개의 완전 고아이며 v2에서 폐기된
+  `additional-route-patterns`만 다루고 있었다. alias 타입이 유일하게 이것을
+  컴파일 가능하게 유지하고 있었다. 파일을 삭제했다.
+- `ruleEngineExempt.test.ts`의 "bare string entries" case는 v1 호환 경로를
+  검증하고 있었다. 대상이 사라졌으므로 `paths` 없는 객체 entry가 모든 경계에서
+  허용되는지를 검증하도록 바꿨다 — 살아 있는 동작의 커버리지는 보존했다.
+- 검증: `yarn filid typecheck` exit 0, `yarn filid test:run`
+  78 files / 805 passed / 7 skipped, exit 0.
+
+#### 완료: 전체 Filid 구조검사 1회
+
+세션에 로드된 MCP 서버는 재빌드 이전 번들이므로, **방금 빌드한
+`bridge/mcp-server.cjs`를 직접 stdio로 구동**해 검사했다
+(`scanSelf.mjs`, scratchpad).
+
+- `tools/list` — **정확히 9개**. `context_resolve, fractal_scan, open_settings,
+project_init, restructure_plan, review_state, rule_docs_sync,
+structure_validate, verification_scan`. AC-19의 도구 절반을 실제 번들에서 확인.
+- `structure_validate(mode: project)` — status `indeterminate`,
+  passed 1143 / failed 72 / findingCount **832**, 299,599 byte artifact.
+- `verification_scan` — 80 files (spec 9 / 83 cases, test-record 71 / 736 cases),
+  fragmentation 0, violationCount 4, certainty `indeterminate`.
+
+규칙별 집계:
+
+| 건수 | rule                       | severity            |
+| ---- | -------------------------- | ------------------- |
+| 707  | `external-import-boundary` | error               |
+| 59   | `zero-peer-file`           | warning             |
+| 22   | `entry-point-surface`      | warning             |
+| 20   | `detail-document-contract` | error               |
+| 9    | `module-entry-point`       | warning             |
+| 5    | `intent-document-contract` | error               |
+| 3    | `spec-contract-link`       | error               |
+| 3    | `circular-dependency`      | error 2 / warning 1 |
+| 3    | case-cap · fragmentation   | warning             |
+
+#### 미완료: finding 분류와 잔여 검증
+
+아래는 사용자 판단이 필요하거나 별도 분량의 작업이다.
+
+1. **cycle 2건** — 추적 결과 **런타임 순환이 아니라 owner 승격 인공물**이다.
+   - `src/hooks -> src/hooks/preToolUse -> src/hooks` — 확인 완료.
+     `src/hooks/index.ts`(부모 배럴)가 `preToolUse`를 재수출하고,
+     `preToolUse.ts`는 `../shared/shared.js`와 `../utils/validateCwd.js`를
+     import한다. 두 organ은 `src/hooks` 소유이므로 `preToolUse -> src/hooks`
+     edge가 생기고, 배럴이 반대 방향 edge를 만든다. `preToolUse`는
+     `hooks/index.ts`를 import하지 않는다.
+   - `src -> src/core/rules/documentValidator -> src` — 같은 형태로 보인다.
+     documentValidator가 `src/constants/` organ(= `src` 소유)을 참조하는 쪽은
+     확인했고, 반대 방향 edge의 출처는 미확정이다.
+   - **판단 필요**: organ 참조가 부모 fractal로 승격되는 현재 규칙은
+     "부모 배럴 + 부모 organ" 이라는 정상적인 FCA 형태를 순환으로 판정한다.
+     owner 승격을 바꿀지, organ edge를 cycle 계산에서 제외할지, 배럴 edge를
+     제외할지는 규칙 설계 결정이다.
+2. **`external-import-boundary` 707건의 성격** — 소비자 분포는
+   `src/core` 281 · `src/__tests__` 182 · `src/mcp` 140 · `src/hooks` 93 ·
+   `src/adapters` 9다. 대표 메시지는
+   `Import "../src/constants/builtinRuleIds.js" bypasses the target module
+boundary`. 즉 상당수가 **organ(`constants/`, `types/`) 직접 import**,
+   **테스트의 내부 import**, 그리고 **저장소가 명시적으로 요구하는 훅 직접
+   import 예외**다. 707개 import를 고치는 문제가 아니라 규칙·config 보정
+   문제로 보인다 — 판단이 필요하다.
+3. **`.filid/config.json`이 아직 v1이다.** 스캔이
+   `config-migration-required`와 discarded key 3건
+   (`rules.naming-convention`, `rules.index-barrel-pattern`,
+   `additional-route-patterns`)을 보고했다. 저장소가 자기 제품의 v2를
+   dogfooding하지 않고 있다.
+4. **`spec-contract-link` 3건** — `src/core/projectSnapshot`의 spec 3개가
+   DETAIL acceptance group을 선언해야 한다. 실제로 고칠 수 있는 finding이다.
+5. **`indeterminate` 원인** — `legacyToolPayloads.test.ts`의 dynamic table
+   parameterized case 1건이 프로젝트 전체 certainty를 끌어내린다.
+6. **독립 review 2개** — 계획이 요구하지만 subagent 실행은 사용자 승인이
+   필요하다.
+7. **`yarn filid test:e2e`** — Playwright 미실행. loopback settings unit 16건과
+   함께 여전히 최종 검증 대기 상태다.
+8. **커밋** — 계획대로 최종 검증 통과 후 review seam별로 생성한다. 현재
+   미커밋.
+
+### 작업 11 — merge-track 5스킬을 9개 도구 위로 재작성
+
+- 생성: `skills/{pull-request,resolve,revalidate,pipeline}/{SKILL.md,reference.md}` 8개 파일. `git checkout` 복원이 아니라 재작성이다 — 네 스킬 모두 제거된 도구에 걸려 있었다(`review_manage`, `debt_manage`, `ast_analyze`, `test_metrics`, `code-surgeon` 에이전트, `filid:update`/`harvest`/`promote`/`structure-review` 스킬).
+- `resolve`의 역할 변경을 계약으로 명시했다. 코드를 쓰지 않고 delegation brief(경로·규칙·필요 변경·경계)를 만들어 메인 에이전트나 다른 플러그인에 넘긴다. 적용 여부는 `revalidate`의 재측정이 판정하며, 적용되지 않은 수용 항목은 `unapplied`로 **보고되지 숨겨지지 않는다.**
+- 거부 기록은 `.filid/review/<branch>/justifications.md` 하나로 통일했다. 커밋되는 부채 원장은 되살리지 않았다. `revalidate`가 각 거부의 Context/Decision/Consequences 3부를 헌법성 규칙으로 판정한다.
+- `pull-request` Stage 1은 `enrich-docs`가 담당한다. branch diff에서 `context_resolve`로 변경 프랙탈을 도출해 그 범위만 감사하고, `INTENT.md`/`DETAIL.md`만 stage해 커밋한다. PR 범위와 문서 감사 범위를 일치시킨다.
+- 검증:
+  - 스킬 12개, 금지 토큰 `rg` 매치 0.
+  - `yarn filid build` — exit 0, hook bundle guard 통과.
+  - `yarn plugin:adapters:check` — `sync: 254 unchanged`, stale 0.
+  - 루트 `INTENT.md` 46줄(50 이하), `skills/` 행을 12개로 갱신.
+
+#### 작업 9의 `.codex-plugin/skills` 조치 정정
+
+작업 9에서 삭제된 스킬 11개의 `.codex-plugin/skills/` 생성물을 "고아"로 보고 개별 삭제해 8개로 수렴시켰다. **이 조치는 틀렸다.**
+
+`buildCodexSkills`의 `emitsCodexSkillVariant`는 (a) 플러그인이 opt-in 목록에 있고, (b) `agentFiles`가 비어 있지 않고, (c) persona spawn을 하는 스킬이 있을 때만 트리를 생성한다. 작업 7이 `agents/`를 지운 뒤로 filid는 (b)와 (c)를 모두 잃었으므로 컴파일러는 이 트리를 **더 이상 만들지도 관리하지도 않는다.** 세 매니페스트(`.claude-plugin/plugin.json`, 루트 `plugin.json`, `.codex-plugin/plugin.json`)가 모두 `"skills": "./skills/"`를 가리키므로 참조하는 곳도 없다.
+
+따라서 올바른 조치는 큐레이션이 아니라 `plugins/filid/.codex-plugin/skills/` 전체 삭제였다. 지금 삭제했고, 재생성되지 않음을 `build:compile-plugin` 재실행으로 확인했다. `.codex-plugin`에는 컴파일러가 실제로 관리하는 `plugin.json`과 `hooks.json`만 남는다.
+
+#### 문서 개행 규칙 정정
+
+저장소 규칙은 하드 랩 없음(문단 = 한 줄)이다 — 원본 `README-ko_kr.md` 최대 275자, 기존 `skills/*/SKILL.md` 177–232자. 작업 9에서 재작성한 `.metadata/filid/01`–`08`과 작업 11의 스킬 8파일을 80칼럼으로 접어 이 규칙을 깼다. scratchpad의 기계적 unwrapper로 산문·리스트·블록인용을 되돌렸고 표·코드펜스·frontmatter는 보존했다. 두 원장(`vnext-redesign-plan.md`, 이 파일)은 이전 세션 내용이 섞여 있어 전체 reflow가 diff를 묻어버리므로 제외했다.
+
+- 상태: 완료.
+
 ## 최종 Acceptance Criteria
 
-AC-01부터 AC-20까지의 증거는 작업별 기록과 최종 검증 기록에 연결한다.
+AC-01부터 AC-24까지의 증거는 작업별 기록과 최종 검증 기록에 연결한다.

@@ -22,33 +22,6 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-vi.mock('fast-glob', () => ({
-  default: vi.fn(async () => []),
-  glob: vi.fn(async () => []),
-}));
-
-vi.mock('../../../core/infra/projectHash/projectHash.js', async () => {
-  const { glob } = await import('fast-glob');
-  const { statSync } = await import('node:fs');
-  const { createHash } = await import('node:crypto');
-  return {
-    computeProjectHash: async (cwd: string) => {
-      const files = (await glob('**/*', { cwd, dot: true })) as string[];
-      const content = files
-        .map((f) => {
-          try {
-            const s = statSync(f);
-            return `${f}:${s.mtimeMs}`;
-          } catch {
-            return `${f}:0`;
-          }
-        })
-        .join('\n');
-      return createHash('sha256').update(content).digest('hex').slice(0, 16);
-    },
-  };
-});
-
 describe('cache-manager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -218,24 +191,5 @@ describe('cache-manager', () => {
     const { getLastRunHash } =
       await import('../../../core/infra/cacheManager/cacheManager.js');
     expect(getLastRunHash('/proj', 'scan')).toBeNull();
-  });
-
-  // Test 15: computeProjectHash — deterministic hash for same fast-glob result
-  it('computeProjectHash: returns deterministic hash for same file list', async () => {
-    const fg = await import('fast-glob');
-    const statSync = (await import('node:fs')).statSync;
-
-    vi.mocked(fg.default).mockResolvedValue(['src/index.ts', 'README.md']);
-    vi.mocked(statSync).mockReturnValue({
-      mtimeMs: 1700000000000,
-    } as ReturnType<typeof statSync>);
-
-    const { computeProjectHash } =
-      await import('../../../core/infra/projectHash/projectHash.js');
-    const h1 = await computeProjectHash('/proj');
-    const h2 = await computeProjectHash('/proj');
-
-    expect(h1).toBe(h2);
-    expect(h1).toHaveLength(16);
   });
 });

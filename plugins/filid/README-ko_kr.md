@@ -1,8 +1,10 @@
 # @ogham/filid
 
-Claude Code 프로젝트의 구조와 문서를 자동으로 관리하는 플러그인입니다.
+코드베이스의 모듈 경계와 계약 문서를 정직하게 유지하는 Claude Code 플러그인입니다.
 
-코드베이스가 커지면 AI 에이전트가 맥락을 잃고, 문서는 코드와 어긋나고, 디렉토리 구조는 일관성을 잃습니다. filid는 이 문제를 **프랙탈 아키텍처(FCA-AI)** 기반의 자동화된 규칙 시행으로 해결합니다.
+코드베이스가 커지면 AI 에이전트가 맥락을 잃고, 문서는 코드와 어긋나고, 디렉터리 구조는 형태를 잃습니다. filid는 **프랙탈 아키텍처(FCA-AI)** 로 정확히 그 문제만 다룹니다. `INTENT.md`와 `DETAIL.md`를 소유하고, fractal/organ 구조와 의존성 DAG를 검사하고, 공유 단위가 있어야 할 위치를 결정하고, 그 증거만으로 변경을 리뷰합니다.
+
+범용 코드 품질 도구가 아닙니다. 이름, 함수 크기, 순환 복잡도, 응집도 지표, 테스트 품질과 커버리지는 filid의 소유가 아닙니다. filid는 구조와 계약에 대해 증명할 수 있는 것만 보고하며, 확신할 수 없으면 추측 대신 `indeterminate`를 반환합니다.
 
 ---
 
@@ -18,7 +20,7 @@ claude plugin marketplace add https://github.com/vincent-kk/ogham
 claude plugin install filid
 ```
 
-설치 후 별도 설정 없이 모든 컴포넌트(Skills, MCP, Agents, Hooks)가 자동 등록됩니다.
+설치 후 별도 설정 없이 스킬, MCP 서버, 훅이 자동 등록됩니다.
 
 ### 개발자용 로컬 설치
 
@@ -27,23 +29,25 @@ claude plugin install filid
 yarn install
 
 # 플러그인 빌드
-cd plugins/filid
-yarn build          # TypeScript 컴파일 + 번들링
+yarn filid build
 
-# Claude Code에서 플러그인 로드
+# Claude Code에 로드
 claude --plugin-dir ./plugins/filid
 ```
 
-빌드하면 두 가지 산출물이 생성됩니다:
+빌드 산출물은 다음과 같습니다.
 
-- `bridge/mcp-server.cjs` — MCP 서버 (분석 도구 18개)
-- `bridge/*.mjs` — Hook 스크립트 4개 (자동 규칙 시행)
+- `bridge/mcp-server.cjs` — MCP 서버 (도구 9개)
+- `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 훅 스크립트 3개
+- `public/settings.html` — `open_settings`가 서빙하는 설정 UI
+
+native 의존성과 전역 모듈 탐색이 없습니다. 런타임에 필요한 것은 MCP SDK와 Zod뿐입니다.
 
 ---
 
 ## 사용법
 
-filid 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Claude Code 안에서 자연어로 대화하듯 호출합니다. `--fix` 같은 플래그도 LLM이 해석하는 힌트이므로, 자연어로 써도 동일하게 동작합니다.
+filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Code에서 자연어로 호출하며, 플래그 없이 평범한 문장으로도 동작합니다.
 
 ### 프로젝트 초기화
 
@@ -52,188 +56,169 @@ filid 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Claud
 /filid:setup ./packages/my-app
 ```
 
-프로젝트 디렉토리를 스캔하여 각 모듈에 `INTENT.md` 경계 문서를 생성합니다. `components/`, `utils/` 같은 유틸리티 디렉토리(organ)는 자동으로 건너뜁니다.
+`.filid/config.json`을 쓰고, managed FCA rule 문서를 배포하고, 구조 스냅샷을 뜬 뒤 누락된 `INTENT.md` / `DETAIL.md`를 제안합니다. 기존 문서는 건드리지 않습니다.
 
-### 규칙 위반 찾고 수정하기
+### 프로젝트 감사
 
 ```
 /filid:scan
 /filid:scan src/core 쪽만 봐줘
-/filid:scan 고칠 수 있는 건 고쳐줘
 ```
 
-INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTENT.md 존재 등을 검출합니다.
+전체 FCA 감사의 유일한 진입점입니다. node 분류, 문서 계약, entry point 표면, 외부 import 경계, 실제 의존성 DAG, 검증 문서 cap을 하나의 스냅샷에 대해 한 번에 평가합니다.
 
-### 코드 변경 후 문서 동기화
-
-```
-/filid:sync
-/filid:sync 바뀌는 것만 미리 보여줘
-/filid:sync critical 이상만 처리해줘
-```
-
-코드 변경으로 인한 구조적 drift를 감지하고, 해당 모듈의 INTENT.md/DETAIL.md를 갱신합니다. 내부적으로 `drift-detect` MCP 도구를 사용합니다.
-
-### 전체 프로젝트 구조 점검
+### 좁은 질문 던지기
 
 ```
-/filid:structure-review
-/filid:structure-review 3단계만 실행해줘
+/filid:context-query src/core/restructure
+/filid:guide organ 디렉터리엔 뭘 두면 돼?
 ```
 
-**전체 프로젝트**를 대상으로 6단계 구조 검증을 실행합니다: 경계 검사 → 문서 검증 → 의존성 분석 → 테스트 메트릭 → 복잡도 평가 → 최종 판정.
+`context-query`는 대상 경로의 소유 프랙탈과 owner-to-root 최소 문서 체인을 해석한 뒤 3라운드 안에 답합니다. `guide`는 현재 트리와 배치 규칙을 설명하며 아무것도 바꾸지 않습니다.
 
-> 주기적인 구조 건강 점검이나 대규모 리팩토링 전후에 사용하세요. PR마다 매번 실행하면 비용이 크게 증가합니다.
-
-### AI 코드 리뷰 (PR 단위)
-
-가장 강력한 기능입니다. 다중 페르소나 합의체가 **이번 PR에서 변경된 파일만** 대상으로 리뷰합니다.
+### 문서 품질 개선
 
 ```
-# 현재 브랜치 리뷰
+/filid:enrich-docs src/core
+```
+
+스냅샷 증거를 근거로 `INTENT.md` / `DETAIL.md`를 개선합니다. 편집 전에 승인을 받고, 편집 후 구조를 검증합니다.
+
+### 코드를 있어야 할 곳으로
+
+```
+/filid:restructure src/shared/formatDate.ts
+```
+
+읽기 전용 배치 계획을 만듭니다. `sourcePath → targetPath`, 각 이동의 근거, 필요한 문서와 진입점, 정확한 import rewrite를 반환합니다. filid는 파일을 옮기지 않습니다. 실행은 사용자나 에이전트가 하고, filid는 그 뒤 사후조건을 정확히 검증합니다. 계획과 다른 위치로 옮기면 기능이 동작해도 FAIL입니다.
+
+### 변경 리뷰
+
+```
 /filid:cross-review
-
-# 특정 PR 리뷰
 /filid:cross-review https://github.com/owner/repo/pull/123
-
-# 처음부터 다시 시작
-/filid:cross-review 처음부터 다시 해줘
-
-# 리뷰 후 — 수정 요청 처리
-/filid:resolve
-
-# 수정 후 — 최종 판정
-/filid:revalidate
 ```
 
-**흐름:**
+contract·structure·verification 세 관점이 커밋된 변경을 병렬로 리뷰한 뒤, 별도의 adversarial 판정자가 모든 blocking finding을 `CONFIRMED | PLAUSIBLE | REFUTED`로 판정합니다. REFUTED는 verdict에서 빠지되 arbitration log에 남습니다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 명시적으로 FCA 범위입니다. 보안·제품성·UX 리뷰가 아닙니다.
 
-1. **`/filid:cross-review`** — 구조 검사(diff) → 위원회 선출 → 기술 검증 → 합의 → 리뷰 보고서 생성
-2. **`/filid:resolve`** — 각 수정 요청에 대해 수용 또는 거부(사유 입력) 선택
-3. **`/filid:revalidate`** — 수정 사항 반영 후 PASS/FAIL 최종 판정
-
-산출물은 `.filid/review/<branch>/`에, 기술 부채는 `.filid/debt/`에 저장됩니다.
-
-> **`filid:structure-review` vs `filid:cross-review` 요약:**
->
-> - `filid:structure-review` — 전체 프로젝트 스캔 (주기적 점검용)
-> - `filid:cross-review` — 변경된 파일만 검사 + 다중 페르소나 리뷰 (PR마다 사용)
-
-### 시추와 수확 (탐사 작업)
-
-완료 기준을 아직 모르는 작업은 `spike/*` 브랜치에서 탐사하세요. 그 브랜치에서는 문서 위생 차단(INTENT.md 50줄 제한, DETAIL.md append-only)이 면제되고, 매 프롬프트 배너가 경과일과 미수확 결정 수를 추적합니다.
+### legacy 문서명 이관
 
 ```
-# 자유롭게 시추
-git checkout -b spike/my-idea
-
-# 시추가 끝나면 — keep/discard/defer 인터뷰
-/filid:harvest
+/filid:migrate
 ```
 
-`/filid:harvest`는 keep으로 확정된 결정을 PASS/FAIL 판정 가능한 claim으로 `.filid/criteria.md`에 기록합니다. 이후 리뷰가 그 claim들을 판정하며, 수확하지 않은 spike는 파이프라인이 머지 트랙 진입을 거부합니다.
-
-### FCA-AI가 뭔지 잘 모르겠을 때
-
-```
-/filid:guide
-/filid:guide fractal 구조에 대해 알려줘
-/filid:context-query organ 디렉토리에서 뭘 할 수 있어?
-```
-
-### 모듈 구조 개선이 필요할 때
-
-```
-/filid:restructure ./src/core
-/filid:promote
-```
+`CLAUDE.md` → `INTENT.md`, `SPEC.md` → `DETAIL.md`를 dry-run 우선의 이식 가능한 스크립트로 옮기고 결과를 검증합니다.
 
 ---
 
-## 자동으로 동작하는 것들
+## 자동으로 동작하는 것
 
-플러그인이 활성화되면 아래 Hook들이 **사용자 개입 없이** 자동 실행됩니다:
+훅 3개가 사용자 개입 없이 동작합니다.
 
-| 언제                          | 무엇을                                | 왜                                         |
-| ----------------------------- | ------------------------------------- | ------------------------------------------ |
-| 파일을 Write/Edit할 때        | INTENT.md 50줄 초과 검사              | 문서가 비대해지는 것을 방지                |
-| 파일을 Write/Edit할 때        | organ 디렉토리 내 INTENT.md 생성 차단 | 유틸리티 폴더의 불필요한 문서화 방지       |
-| 서브에이전트가 시작할 때      | 에이전트 역할 제한 주입               | architect가 코드를 수정하는 등의 월권 방지 |
-| 사용자가 프롬프트를 입력할 때 | FCA-AI 규칙 컨텍스트 주입             | 에이전트가 규칙을 인지하고 작업하도록 보장 |
+| 이벤트             | 동작                                                               |
+| ------------------ | ------------------------------------------------------------------ |
+| `SessionStart`     | 세션 캐시 초기화, FCA 프로젝트 여부 감지                           |
+| `UserPromptSubmit` | 턴당 visit map 리셋, 세션 첫 FCA 규칙 포인터 주입                  |
+| `PreToolUse`       | 소유 모듈의 INTENT 체인 전달, `INTENT.md` / `DETAIL.md` write gate |
 
-차단이 발생하면 이유와 함께 메시지가 표시되므로 별도 대응은 필요 없습니다.
-
----
-
-## 전체 스킬 목록
-
-| 스킬                      | 범위              | 설명                                                 |
-| ------------------------- | ----------------- | ---------------------------------------------------- |
-| `/filid:setup`            | —                 | 프로젝트 FCA-AI 초기화                               |
-| `/filid:scan`             | 전체 프로젝트     | 규칙 위반 검출 (자동 수정 가능)                      |
-| `/filid:sync`             | 전체 프로젝트     | 코드-문서 동기화                                     |
-| `/filid:structure-review` | **전체 프로젝트** | 구조 건강 점검 (6단계) — 주기적 점검 / 리팩토링 전후 |
-| `/filid:promote`          | —                 | 안정된 테스트를 spec으로 승격                        |
-| `/filid:context-query`    | —                 | 구조 관련 질의응답                                   |
-| `/filid:guide`            | —                 | FCA-AI 가이드                                        |
-| `/filid:restructure`      | —                 | 모듈 리팩토링 가이드 + 마이그레이션 단계             |
-| `/filid:cross-review`     | **변경 파일만**   | 다중 페르소나 거버넌스 코드 리뷰 — PR마다 사용       |
-| `/filid:resolve`          | —                 | 수정 요청 해결                                       |
-| `/filid:revalidate`       | —                 | 수정 후 재검증 (PASS/FAIL)                           |
-| `/filid:harvest`          | —                 | spike 수확 인터뷰 — 수용 기준 claim 기록             |
+차단이 발생하면 사유를 설명하고 해당 도구 호출 하나만 거부합니다. 턴은 중단되지 않습니다.
 
 ---
 
-## 핵심 규칙 요약
+## 스킬 목록
 
-filid가 시행하는 주요 규칙입니다:
+| 스킬                   | 역할                                               |
+| ---------------------- | -------------------------------------------------- |
+| `/filid:setup`         | config·rule 문서 초기화, 누락 INTENT/DETAIL 제안   |
+| `/filid:scan`          | 전체 FCA 감사의 유일한 진입점                      |
+| `/filid:context-query` | 소유 프랙탈과 최소 문서 체인 해석                  |
+| `/filid:guide`         | 현재 트리·분류·배치 규칙 설명                      |
+| `/filid:enrich-docs`   | 스냅샷 증거 기반 INTENT/DETAIL 개선 (승인 후 편집) |
+| `/filid:restructure`   | 읽기 전용 계획 → 승인 → 외부 실행 → 사후조건 검증  |
+| `/filid:cross-review`  | 3관점 FCA 리뷰와 adversarial 판정                  |
+| `/filid:migrate`       | legacy CLAUDE.md / SPEC.md 이름 이관               |
 
-| 규칙                 | 기준                                               | 시행 방식                |
-| -------------------- | -------------------------------------------------- | ------------------------ |
-| INTENT.md 줄 수 제한 | 50줄 이하                                          | Hook 자동 차단           |
-| 3-tier 경계 섹션     | "Always do" / "Ask first" / "Never do" 필수        | Hook 경고                |
-| Organ 디렉토리 보호  | `components`, `utils`, `types` 등에 INTENT.md 금지 | Hook 자동 차단           |
-| 테스트 밀도          | spec.ts당 최대 15개 (3 core + 12 edge)             | MCP 분석                 |
-| 모듈 응집도          | LCOM4 >= 2이면 분할 권고                           | MCP 분석 + 의사결정 트리 |
-| 순환 의존성          | 비순환 그래프(DAG) 유지                            | Core 검증                |
+---
+
+## 핵심 규칙
+
+filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙 15개입니다.
+
+| 규칙                       | 검사 내용                                               |
+| -------------------------- | ------------------------------------------------------- |
+| `intent-document-contract` | INTENT.md 50줄 이하와 3-tier 경계 섹션                  |
+| `detail-document-contract` | DETAIL.md 필수 섹션과 acceptance group                  |
+| `organ-no-intentmd`        | organ 디렉터리의 INTENT.md 금지                         |
+| `entry-point-surface`      | 진입점의 공개 표면을 열거할 수 있는가                   |
+| `module-entry-point`       | 모든 fractal / hybrid 노드의 진입점 존재                |
+| `max-depth`                | 설정된 트리 깊이                                        |
+| `circular-dependency`      | 실제 의존성 그래프에 cycle 없음                         |
+| `pure-function-isolation`  | `pure-function` 노드가 fractal·hybrid를 import하지 않음 |
+| `zero-peer-file`           | fractal root의 허용되지 않은 peer 파일 금지             |
+| `external-import-boundary` | 외부 소비자는 내부 파일이 아닌 진입점을 import          |
+| `spec-document-case-cap`   | spec-document 파일당 의미론적 case 15개 이하            |
+| `test-record-case-cap`     | test-record 파일당 의미론적 case 32개 이하              |
+| `spec-fragmentation`       | cap 회피를 위한 계약 그룹 분할 금지                     |
+| `spec-contract-link`       | 여러 spec-document가 서로 다른 DETAIL group을 선언      |
+| `legacy-criteria-ledger`   | legacy `.filid/criteria.md`와 이관 대상 DETAIL.md 보고  |
+
+어댑터가 정확히 측정하지 못한 규칙은 PASS가 아니라 `indeterminate` finding을 냅니다.
+
+---
+
+## MCP 도구
+
+| 도구                 | 역할                                    |
+| -------------------- | --------------------------------------- |
+| `project_init`       | 프로젝트 FCA 초기화                     |
+| `rule_docs_sync`     | managed rule 문서 동기화                |
+| `open_settings`      | 설정 UI                                 |
+| `fractal_scan`       | 스냅샷 트리 검사                        |
+| `context_resolve`    | 소유 프랙탈과 INTENT/DETAIL 경로 체인   |
+| `restructure_plan`   | 배치 결정, plan artifact 반환           |
+| `structure_validate` | 프로젝트 또는 계획의 사전·사후조건 검증 |
+| `verification_scan`  | spec-document / test-record 계약 판정   |
+| `review_state`       | cross-review bookkeeping                |
+
+모든 도구가 동일한 envelope를 사용합니다. 반환은 작게 유지되며, 16 KiB를 넘으면 content-addressed artifact로 저장하고 경로와 SHA-256으로 참조합니다.
 
 ---
 
 ## 개발
 
 ```bash
-yarn dev            # TypeScript watch 모드
-yarn test           # Vitest watch
-yarn test:run       # 1회 실행
-yarn typecheck      # 타입 체크
-yarn build          # tsc + esbuild (mcp-server + hooks)
+yarn filid test:run     # 단일 실행 (CI)
+yarn filid typecheck    # 타입 체크
+yarn filid build        # rules + pages + mcp + hooks + plugin adapters
+yarn filid build:plugin # pages + mcp + hooks만 — 훅·MCP 반복 개발용
+yarn filid test:e2e     # 설정 페이지 Playwright e2e
 ```
 
 ### 기술 스택
 
-TypeScript 5.7 (+ Compiler API), @modelcontextprotocol/sdk, fast-glob, esbuild, Vitest, Zod
+TypeScript 5.7, @modelcontextprotocol/sdk, Zod, esbuild, Vitest, Playwright
 
 ---
 
-## 상세 문서
+## 문서
 
-기술적 세부사항은 [`.metadata/`](../../.metadata/filid/) 디렉토리를 참조하세요:
+기술 문서는 [`.metadata/`](../../.metadata/filid/) 디렉터리를 참조하세요.
 
-| 문서                                                           | 내용                                           |
-| -------------------------------------------------------------- | ---------------------------------------------- |
-| [ARCHITECTURE](../../.metadata/filid/01-ARCHITECTURE.md)       | 설계 철학, 4계층 아키텍처, ADR                 |
-| [BLUEPRINT](../../.metadata/filid/02-BLUEPRINT.md)             | 30+ 모듈별 기술 청사진                         |
-| [LIFECYCLE](../../.metadata/filid/03-LIFECYCLE.md)             | 스킬 워크플로우, 에이전트 협업, Hook 타임라인  |
-| [USAGE](../../.metadata/filid/04-USAGE.md)                     | 설정 파일 구조, MCP/Hook JSON 예시, 트러블슈팅 |
-| [COST-ANALYSIS](../../.metadata/filid/05-COST-ANALYSIS.md)     | Hook 오버헤드, 번들 크기, 컨텍스트 토큰 비용   |
-| [HOW-IT-WORKS](../../.metadata/filid/06-HOW-IT-WORKS.md)       | AST 엔진, 의사결정 트리, MCP 라우팅            |
-| [RULES-REFERENCE](../../.metadata/filid/07-RULES-REFERENCE.md) | 전체 규칙 카탈로그, 상수, 임계값               |
-| [API-SURFACE](../../.metadata/filid/08-API-SURFACE.md)         | 공개 API 레퍼런스 (33 함수 + 30 타입)          |
+| 문서                                                           | 내용                                       |
+| -------------------------------------------------------------- | ------------------------------------------ |
+| [ARCHITECTURE](../../.metadata/filid/01-ARCHITECTURE.md)       | 설계 철학, 레이어링, ADR                   |
+| [BLUEPRINT](../../.metadata/filid/02-BLUEPRINT.md)             | 모듈별 기술 청사진                         |
+| [LIFECYCLE](../../.metadata/filid/03-LIFECYCLE.md)             | 스킬 워크플로와 훅 타임라인                |
+| [USAGE](../../.metadata/filid/04-USAGE.md)                     | 설정 구조, MCP/Hook 예시, 트러블슈팅       |
+| [COST-ANALYSIS](../../.metadata/filid/05-COST-ANALYSIS.md)     | 훅 오버헤드, 번들 크기, 컨텍스트 토큰 비용 |
+| [HOW-IT-WORKS](../../.metadata/filid/06-HOW-IT-WORKS.md)       | 어댑터, 스냅샷, DAG, MCP 라우팅            |
+| [RULES-REFERENCE](../../.metadata/filid/07-RULES-REFERENCE.md) | 상수와 임계값을 포함한 전체 규칙 카탈로그  |
+| [API-SURFACE](../../.metadata/filid/08-API-SURFACE.md)         | MCP 도구 계약과 core DTO                   |
 
-[English documentation (README.md)](./README.md) is also available.
+[영문 문서(README.md)](./README.md)도 제공합니다.
 
 ---
 
-## License
+## 라이선스
 
 MIT

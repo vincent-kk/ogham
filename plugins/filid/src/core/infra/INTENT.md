@@ -2,18 +2,16 @@
 
 ## Purpose
 
-config, cache, project hash와 content-addressed ephemeral tool artifact의
-host I/O를 소유한다.
+config, cache와 content-addressed ephemeral tool artifact의 host I/O를
+소유한다.
 
 ## Structure
 
-| Module          | Role                                             |
-| --------------- | ------------------------------------------------ |
+| Module          | Role                                            |
+| --------------- | ----------------------------------------------- |
 | `artifactStore` | 16 KiB envelope overflow와 always artifact 저장 |
-| `cacheManager`  | 세션/프롬프트 cache 관리                         |
-| `projectHash`   | 프로젝트 구조 hash                               |
-| `changeQueue`   | Task 8 전까지 유지되는 legacy queue              |
-| `configLoader`  | config v2와 managed rule document I/O             |
+| `cacheManager`  | 세션/프롬프트 cache 관리                        |
+| `configLoader`  | config v2와 managed rule document I/O           |
 
 ## Conventions
 

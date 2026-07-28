@@ -42,20 +42,8 @@ export {
   validateDetailMd,
   validateIntentMd,
 } from './rules/documentValidator/documentValidator.js';
-export {
-  SEVERITY_ORDER,
-  calculateSeverity,
-  compareCurrent,
-  detectDrift,
-  generateSyncPlan,
-} from './rules/driftDetector/driftDetector.js';
 
 // analysis
-export {
-  analyzeProject,
-  calculateHealthScore,
-} from './analysis/projectAnalyzer/projectAnalyzer.js';
-export { generateReport } from './analysis/projectAnalyzer/renderers/index.js';
 export {
   buildDAG,
   buildDependencyGraph,
@@ -77,18 +65,6 @@ export {
   validatePlanPostconditions,
   validatePlanPreconditions,
 } from './restructure/index.js';
-
-// module
-export {
-  analyzeIndex,
-  extractModuleExports,
-} from './module/indexAnalyzer/indexAnalyzer.js';
-export {
-  analyzeModule,
-  extractImports,
-  extractPublicApi,
-  findEntryPoint,
-} from './module/moduleMainAnalyzer/moduleMainAnalyzer.js';
 
 // infra
 export {
@@ -121,9 +97,6 @@ export type {
   VisitDecision,
   VisitScope,
 } from './infra/cacheManager/cacheManager.js';
-export { computeProjectHash } from './infra/projectHash/projectHash.js';
-export { ChangeQueue } from './infra/changeQueue/changeQueue.js';
-export type { ChangeRecord } from './infra/changeQueue/changeQueue.js';
 export {
   createDefaultConfig,
   getRuleDocsStatus,
@@ -146,26 +119,3 @@ export type {
   RuleDocsStatus,
   SyncRuleDocsOptions,
 } from './infra/configLoader/configLoader.js';
-
-// coverage
-export {
-  findSubtreeUsages,
-  getModuleName,
-} from './coverageVerify/usageTracker/usageTracker.js';
-export {
-  checkTestCoverage,
-  generateCoverageWarnings,
-} from './coverageVerify/testCoverageChecker/testCoverageChecker.js';
-export { resolveImportPath } from './coverageVerify/importResolver/importResolver.js';
-
-export {
-  RULE_ERROR_PROBABILITY,
-  extractRevalidateVerdict,
-  extractVerdict,
-  generateHumanSummary,
-  parseFixRequests,
-  parseReviewReportFrontmatter,
-  parseStructureCheckFrontmatter,
-  resolveVerdict,
-} from './prSummary/index.js';
-export type { GenerateSummaryInput } from './prSummary/index.js';

@@ -2,10 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import {
-  findLCA,
   findLowestCommonFractal,
   getAncestorPaths,
-  getModulePlacement,
   resolveOwningFractal,
 } from '../../../core/analysis/lcaCalculator/lcaCalculator.js';
 import { buildFractalTree } from '../../../core/tree/fractalTree/fractalTree.js';
@@ -81,12 +79,9 @@ const AX_ANCESTORS = [POSIX_PATHS.AX, POSIX_PATHS.A, POSIX_PATHS.ROOT];
 const ROOT_ANCESTORS = [POSIX_PATHS.ROOT];
 const WINDOWS_A_ANCESTORS = [WINDOWS_PATHS.A, WINDOWS_PATHS.ROOT];
 const NO_PATHS: string[] = [];
-const SINGLE_DEPENDENCY = [POSIX_PATHS.AX];
-const SIBLING_DEPENDENCIES = [POSIX_PATHS.AX, POSIX_PATHS.AY];
-const CROSS_BRANCH_DEPENDENCIES = [POSIX_PATHS.AX, POSIX_PATHS.BZ];
-const THREE_DEPENDENCIES = [POSIX_PATHS.AX, POSIX_PATHS.AY, POSIX_PATHS.BZ];
 const SINGLE_CONSUMER = [POSIX_PATHS.AX_FILE];
 const SIBLING_CONSUMERS = [POSIX_PATHS.AX_FILE, POSIX_PATHS.AY_FILE];
+const CROSS_BRANCH_CONSUMERS = [POSIX_PATHS.AX_FILE, POSIX_PATHS.BZ_FILE];
 const THREE_CONSUMERS = [
   POSIX_PATHS.AX_FILE,
   POSIX_PATHS.AY_FILE,
@@ -131,79 +126,6 @@ describe('lca-calculator', () => {
       const tree = buildTestTree();
       const paths = getAncestorPaths(tree, POSIX_PATHS.UNKNOWN);
       expect(paths).toEqual(NO_PATHS);
-    });
-  });
-
-  describe('findLCA', () => {
-    it('should find LCA of siblings (same parent)', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a/x', '/root/a/y');
-      expect(lca?.path).toBe('/root/a');
-    });
-
-    it('should find LCA of nodes in different subtrees', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a/x', '/root/b/z');
-      expect(lca?.path).toBe('/root');
-    });
-
-    it('should return the node itself when pathA === pathB', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/root/a');
-      expect(lca?.path).toBe('/root/a');
-    });
-
-    it('should return ancestor when one path is ancestor of other', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/root/a/x');
-      expect(lca?.path).toBe('/root/a');
-    });
-
-    it('should return null for unknown node', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/nonexistent');
-      expect(lca).toBeNull();
-    });
-
-    it("should return root as LCA of root's direct children", () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/root/b');
-      expect(lca?.path).toBe('/root');
-    });
-  });
-
-  describe('getModulePlacement', () => {
-    it('should return root for empty dependencies', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, NO_PATHS);
-      expect(result.suggestedParent).toBe(POSIX_PATHS.ROOT);
-      expect(result.confidence).toBe(0);
-    });
-
-    it('should return parent of single dependency', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, SINGLE_DEPENDENCY);
-      expect(result.suggestedParent).toBe(POSIX_PATHS.A);
-      expect(result.confidence).toBe(0.5);
-    });
-
-    it('should suggest deepest common ancestor for siblings', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, SIBLING_DEPENDENCIES);
-      expect(result.suggestedParent).toBe(POSIX_PATHS.A);
-      expect(result.confidence).toBeGreaterThan(0);
-    });
-
-    it('should suggest root for nodes in different branches', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, CROSS_BRANCH_DEPENDENCIES);
-      expect(result.suggestedParent).toBe(POSIX_PATHS.ROOT);
-    });
-
-    it('should intersect all dependency owner chains', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, THREE_DEPENDENCIES);
-      expect(result.suggestedParent).toBe(POSIX_PATHS.ROOT);
     });
   });
 
@@ -256,6 +178,12 @@ describe('lca-calculator', () => {
       expect(
         findLowestCommonFractal(buildTestTree(), SIBLING_CONSUMERS)?.path,
       ).toBe(POSIX_PATHS.A);
+    });
+
+    it('returns the root fractal for consumers in different branches', () => {
+      expect(
+        findLowestCommonFractal(buildTestTree(), CROSS_BRANCH_CONSUMERS)?.path,
+      ).toBe(POSIX_PATHS.ROOT);
     });
 
     it('intersects all three consumer owner chains', () => {

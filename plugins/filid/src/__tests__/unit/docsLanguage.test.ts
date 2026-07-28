@@ -18,9 +18,6 @@ const INTENT_CAP_DESCRIPTION = /INTENT\.md at 50 lines or fewer/;
 const DETAIL_APPEND_DESCRIPTION = /append-only DETAIL\.md/;
 
 const GUIDE_SCOPE = [
-  'agents/qa-reviewer.md',
-  'agents/engineering-architect.md',
-  'agents/operations-sre.md',
   'skills/cross-review/phases/evidence.md',
   'skills/cross-review/contracts.md',
   'skills/cross-review/templates.md',
@@ -32,25 +29,11 @@ const SCOPE = [
   'src/core/DETAIL.md',
   'src/core/rules/documentValidator/INTENT.md',
   'templates/hooks/README.md',
-  'agents/qa-reviewer.md',
-  'agents/engineering-architect.md',
-  'agents/operations-sre.md',
-  'agents/adjudicator.md',
 ];
-
-const WHITELIST = ['agents/knowledge-manager.md', 'agents/context-manager.md'];
 
 describe('docs-language: cap-rule expression hygiene', () => {
   it('forbids joint INTENT/DETAIL cap expression in cascade-source scope files', () => {
     for (const rel of SCOPE) {
-      const path = resolve(repoRoot, rel);
-      const content = readFileSync(path, 'utf-8');
-      expect(content, `file=${rel}`).not.toMatch(FORBIDDEN_JOINT_CAP);
-    }
-  });
-
-  it('whitelist references in knowledge-manager/context-manager are unaffected', () => {
-    for (const rel of WHITELIST) {
       const path = resolve(repoRoot, rel);
       const content = readFileSync(path, 'utf-8');
       expect(content, `file=${rel}`).not.toMatch(FORBIDDEN_JOINT_CAP);

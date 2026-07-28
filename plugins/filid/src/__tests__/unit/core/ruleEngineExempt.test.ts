@@ -117,13 +117,13 @@ describe('rule-engine exempt (Commit B)', () => {
       expect(zpf.map((v) => v.path)).toEqual(['src/deep']);
     });
 
-    it('treats bare string entries as globally allowed (backward-compat)', () => {
+    it('treats an entry without paths as allowed at every boundary', () => {
       const node = makeNode({
         path: 'src/any',
         hasIndex: true,
         peerFiles: ['type.ts'],
       });
-      const rules = loadBuiltinRules(undefined, ['type.ts']);
+      const rules = loadBuiltinRules(undefined, [{ basename: 'type.ts' }]);
       const result = evaluateRules(treeOf([node]), rules);
       const zpf = result.violations.filter(
         (v) => v.ruleId === BUILTIN_RULE_IDS.ZERO_PEER_FILE,

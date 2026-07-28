@@ -6,15 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { STRUCTURE_VALIDATION_MODES } from '../../constants/mcpContracts.js';
 import { MCP_TOOL_NAMES, McpToolName } from '../../constants/mcpToolNames.js';
 import { TOOL_ERROR_DIAGNOSTIC_CODE } from '../../constants/toolEnvelope.js';
-import {
-  handleOpenSettings as publicHandleOpenSettings,
-  handleProjectInit as publicHandleProjectInit,
-  handleRuleDocsSync as publicHandleRuleDocsSync,
-} from '../../index.js';
 import { createServer } from '../../mcp/server/createServer.js';
-import { handleOpenSettingsTool } from '../../mcp/server/handlers/handleOpenSettingsTool.js';
-import { handleProjectInitTool } from '../../mcp/server/handlers/handleProjectInitTool.js';
-import { handleRuleDocsSyncTool } from '../../mcp/server/handlers/handleRuleDocsSyncTool.js';
 
 const EXPECTED_TOOL_NAMES = [
   'project_init',
@@ -107,12 +99,6 @@ describe('Filid 1.0 MCP tool surface', () => {
     const registered = new Set(collectRegisteredToolNames());
     for (const name of REMOVED_TOOL_NAMES)
       expect(registered.has(name)).toBe(false);
-  });
-
-  it('exports envelope adapters for every legacy-backed public tool', () => {
-    expect(publicHandleProjectInit).toBe(handleProjectInitTool);
-    expect(publicHandleRuleDocsSync).toBe(handleRuleDocsSyncTool);
-    expect(publicHandleOpenSettings).toBe(handleOpenSettingsTool);
   });
 
   it('advertises literal cleanup confirmation for review_state', async () => {

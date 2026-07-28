@@ -6,13 +6,11 @@
  * utils/: resolve-plugin-root (public), other helpers are internal-only.
  */
 export {
-  AllowedEntrySchema,
   AllowedPeerOverrideSchema,
   FilidConfigSchema,
   RuleOverrideSchema,
 } from './loaders/configSchemas.js';
 export type {
-  AllowedEntry,
   AllowedPeerOverride,
   FilidConfig,
 } from './loaders/configSchemas.js';

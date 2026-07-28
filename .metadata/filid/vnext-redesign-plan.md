@@ -821,13 +821,7 @@ review state의 persisted/output 계약은 다음으로 고정한다.
 ```ts
 export type ReviewStatePhase = "prepared" | "sealed";
 export type ReviewStateDisposition =
-  | "fresh"
-  | "resumable"
-  | "cached"
-  | "stale"
-  | "missing"
-  | "sealed"
-  | "cleaned";
+  "fresh" | "resumable" | "cached" | "stale" | "missing" | "sealed" | "cleaned";
 
 export interface ReviewStateRecord {
   schemaVersion: 1;
@@ -884,7 +878,22 @@ export interface ReviewStateRecord {
 
 ## 목표 스킬 표면
 
-유지하는 사용자 스킬은 8개다.
+> **개정 (2026-07-28)**: 최초 계획은 스킬을 8개로 줄이면서 merge-track 절차
+> 전체(`pull-request` → `cross-review` → `resolve` → `revalidate`)와 이를 잇는
+> `pipeline`을 제거했다. 소유자 판단으로 **이 다섯은 제품의 필수 부속이다.**
+> 브랜치가 머지될 때 PR 형식·리뷰 형식·수정 형식·재검증 형식이 모두 지켜져야
+> 하며, `pipeline`의 auto 흐름이 주 사용 경로다. 따라서 유지 스킬은 **12개**다.
+>
+> 다만 되살리는 네 스킬은 제거된 도구에 의존했으므로 **원본 복원이 아니라 9개
+> 도구 표면 위로 재작성**한다. `review_manage` → `review_state`,
+> `ast_analyze`/`test_metrics` → `verification_scan`·`structure_validate`.
+>
+> **역할 변경**: `resolve`는 더 이상 자체 코드작성 에이전트를 갖지 않는다.
+> 수용된 수정의 적용은 메인 에이전트 또는 다른 플러그인에 위임하고, `resolve`는
+> **수용/거부 결정과 그 기록이라는 절차만** 소유한다. 이것이 "MCP가 코드 수정을
+> 대신하지 않는다"는 비목표와 양립하는 형태다.
+
+유지하는 사용자 스킬은 12개다.
 
 | 스킬            | 1.0 책임                                                     |
 | --------------- | ------------------------------------------------------------ |
@@ -894,21 +903,42 @@ export interface ReviewStateRecord {
 | `guide`         | 현재 tree와 placement 규칙 설명                              |
 | `enrich-docs`   | INTENT/DETAIL 품질 개선; 승인 후 LLM이 편집                  |
 | `restructure`   | plan → 승인 → 외부 실행 → postcondition                      |
-| `cross-review`  | FCA 증거 기반 다관점 review                                  |
 | `migrate`       | legacy 문서명을 INTENT/DETAIL로 옮기는 명시적 migration      |
+
+merge-track 절차 4개와 오케스트레이터 1개를 함께 유지한다.
+
+| 스킬           | 1.0 책임                                                        |
+| -------------- | --------------------------------------------------------------- |
+| `pull-request` | PR 형식을 지켜 브랜치에서 PR을 만든다                           |
+| `cross-review` | FCA 증거 기반 3관점 review와 adversarial 판정                   |
+| `resolve`      | fix 항목별 수용/거부 결정과 거부 사유 기록. **적용은 위임한다** |
+| `revalidate`   | 수정 후 delta 재측정과 PASS/FAIL 재판정                         |
+| `pipeline`     | 위 넷을 `--auto`로 연속 실행하는 오케스트레이터                 |
+
+이 다섯은 하나의 라이프사이클이다. 각 단계의 **형식**(PR 본문, 리뷰 보고서,
+fix 요청, 재검증 결과)이 계약이며, 형식이 지켜지지 않으면 다음 단계가 입력을
+잃는다.
 
 다음 스킬은 제거한다.
 
-- `ast-fallback`: 제거된 AST 기능의 fallback이다.
-- `config-wizard`: `setup`과 `open_settings`에 중복된다.
-- `harvest`: acceptance ledger와 spike lifecycle을 DETAIL 기반 일반 개발
-  workflow로 되돌린다.
-- `pipeline`, `pull-request`, `resolve`, `revalidate`: PR 생성·코드 수정·push는
-  Filid 소유가 아니다. cross-review 재실행이 FCA 재검증이다.
-- `promote`: spec/test는 승격 관계가 아니다.
-- `structure-review`: `scan`과 `cross-review`에 중복된다.
-- `sync`: 구조 변경은 `restructure`, 문서 변경은 `enrich-docs`로 분리한다.
-- `update`: 코드 후 문서·테스트 자동 재작성 workflow를 제거한다.
+- `ast-fallback`: 제거된 AST 기능의 fallback이다. 원래 기능이 없으므로 fallback도
+  대상이 없다.
+- `structure-review`: `scan`(전체 감사)과 `cross-review`(변경 감사)가 이미 그
+  범위를 나눠 갖는다. 세 번째 진입점은 어느 쪽을 써야 하는지만 모호하게 만든다.
+- `promote`: spec-document와 test-record는 서로 다른 문서 역할이며 승격 관계가
+  아니다(ADR-06). 승격이라는 동작 자체가 1.0 모델에 존재하지 않는다.
+- `harvest`: acceptance 원장을 DETAIL.md 하나로 통일했으므로(ADR-05)
+  `.filid/criteria.md`에 claim을 수확해 넣을 대상이 없다. spike lifecycle은
+  일반 개발 workflow로 되돌린다.
+- `sync`: 한 스킬이 구조 이동과 문서 갱신을 동시에 하면 어느 쪽이 실패했는지
+  구분되지 않는다. 구조는 `restructure`(계획·승인·검증), 문서는
+  `enrich-docs`(승인 후 편집)로 분리한다. 두 절차의 승인 지점이 다르다.
+- `update`: 코드 변경 뒤 문서와 테스트를 자동 재작성하는 workflow다. 자동
+  재작성은 승인 지점이 없어 "무엇이 왜 바뀌었는지"가 남지 않는다. 같은 목적은
+  `enrich-docs`(승인 후 문서 편집)가 수행한다.
+- `config-wizard`: config 관리는 `project_init`(생성)과 `open_settings`(조회·수정)
+  두 MCP 도구가 이미 소유한다. **이 스킬이 없어도 config 관리가 동작해야 하며,
+  그 조건은 settings UI가 v2를 round-trip 저장하는 것이다.**
 
 ## cross-review 1.0
 
@@ -1829,30 +1859,117 @@ git status --short
 - full test/build/e2e와 아래 최종 검증을 통과한 후 review seam별로 커밋한다.
   push와 PR 생성은 하지 않는다.
 
+### 작업 11 — merge-track 5스킬을 9개 도구 위로 재작성 (2026-07-28 추가)
+
+작업 7이 제거한 `pull-request`, `resolve`, `revalidate`, `pipeline`을 되살린다.
+`git checkout`으로 복원하지 않는다 — 넷 모두 제거된 도구에 의존하므로 재작성한다.
+
+생성:
+
+- `plugins/filid/skills/pull-request/{SKILL.md,reference.md}`
+- `plugins/filid/skills/resolve/{SKILL.md,reference.md}`
+- `plugins/filid/skills/revalidate/{SKILL.md,reference.md,spec.md}`
+- `plugins/filid/skills/pipeline/{SKILL.md,reference.md}`
+
+도구 매핑(제거된 것 → 대체):
+
+| 제거된 참조                       | 대체                                                     |
+| --------------------------------- | -------------------------------------------------------- |
+| `review_manage(normalize-branch)` | `review_state(prepare\|checkpoint)`의 `normalizedBranch` |
+| `review_manage(checkpoint)`       | `review_state(checkpoint)`                               |
+| `review_manage(cleanup)`          | `review_state(cleanup, confirm: true)`                   |
+| `review_manage(elect-committee)`  | 제거 — 1.0의 관점은 고정 3개다                           |
+| `ast_analyze`, `test_metrics`     | `verification_scan`, `structure_validate`                |
+| `config_patch_validate`           | `open_settings` 내부 검증                                |
+| `filid:code-surgeon` 에이전트     | 메인 에이전트 또는 다른 플러그인에 위임                  |
+
+계약:
+
+- `resolve`는 코드를 직접 수정하지 않는다. 각 fix 항목의 수용/거부를 받고,
+  수용 항목은 **적용 지시와 대상 경로를 외부 실행자에게 넘긴다.** 적용 여부
+  확인은 `revalidate`의 재측정이 담당한다.
+- 네 스킬 모두 제거된 스킬(`update`, `harvest`, `promote`, `structure-review`)을
+  참조하지 않는다.
+- 각 단계의 산출 형식은 계약이다. `.filid/review/<branch>/` 아래 파일명과
+  frontmatter는 다음 단계의 입력 스키마다.
+
+검증:
+
+```bash
+find plugins/filid/skills -mindepth 1 -maxdepth 1 -type d | wc -l   # 12
+rg -n "review_manage|debt_manage|ast_analyze|test_metrics|config_patch_validate|coverage_verify|drift_detect|lca_resolve|rule_query|doc_compress|fractal_navigate|cache_manage|code-surgeon|filid:update|filid:harvest|filid:promote|filid:structure-review" plugins/filid/skills
+yarn plugin:adapters
+```
+
+두 번째 명령의 매치는 0이어야 하고, 세 번째 명령 후 생성 adapter가 12개 스킬을
+포함해야 한다.
+
+**결정됨 (2026-07-28, 소유자):**
+
+1. **거부 기록은 `.filid/review/<branch>/justifications.md`에만 남긴다.**
+   커밋되는 부채 원장(`.filid/debt/`)은 되살리지 않는다. `revalidate`는 이
+   파일의 거부 항목을 재판정 입력으로 읽는다. 필요한 것은 절차와 기록이며,
+   별도 debt workflow는 여전히 Filid 소유가 아니다.
+
+2. **`pull-request` Stage 1은 `enrich-docs`가 담당한다.** 문서 최신화의 최종
+   책임은 PR 시점에 있다는 것이 저장소 정책이므로, Stage 1을 검사-보고로
+   약화시키지 않는다.
+
+   `update`를 제거한 이유는 "문서를 PR 시점에 갱신하는 것"이 아니라 "승인
+   지점 없이 자동 재작성하는 것"이었다. `enrich-docs`는 같은 일을 승인 게이트와
+   사후 구조 검증을 붙여 수행하며, 그 `When to Use`가 이미 drift를 포함한다 —
+   "INTENT.md ... no longer describes its module", "DETAIL.md does not express
+   the current public contract". 따라서 대체가 아니라 **정상 계승**이다.
+
+   구현 계약:
+   - Stage 1은 branch diff에서 변경된 프랙탈 경로를 도출해 `enrich-docs`의
+     target으로 넘긴다. 전체 트리를 감사하지 않는다 — PR 범위와 문서 감사
+     범위를 일치시킨다.
+   - `pipeline --auto` 경로에서는 `--auto-approve`로 호출하고, 단독 실행에서는
+     `enrich-docs`의 승인 절차를 그대로 통과시킨다.
+   - Stage 1 이후 `INTENT.md`/`DETAIL.md` 경로만 stage하고
+     `docs(filid): sync INTENT.md / DETAIL.md via enrich-docs`로 커밋한다.
+     그 밖의 파일이 dirty면 Stage 0에서 중단한다 — 기존 계약과 동일하다.
+   - `--skip-enrich` 플래그로 이 단계를 건너뛸 수 있다(구 `--skip-update`).
+
+**문서 갱신 책임의 현재 소유자 (참고):**
+
+| 작업                           | 소유 스킬                              |
+| ------------------------------ | -------------------------------------- |
+| 문서 위반·drift **탐지**       | `scan` (전체), `cross-review` (변경분) |
+| 문서 **갱신** (승인 후 편집)   | `enrich-docs`                          |
+| 누락 문서 **제안** (초기화 시) | `setup`                                |
+| PR 시점 **강제**               | `pull-request` Stage 1 → `enrich-docs` |
+| legacy 문서명 이관             | `migrate`                              |
+
 ## Acceptance Criteria
 
-| ID    | 검증할 결과                                                              |
-| ----- | ------------------------------------------------------------------------ |
-| AC-01 | spec-document 15 cases는 PASS, 16은 violation                            |
-| AC-02 | test-record 32 cases는 PASS, 33은 violation                              |
-| AC-03 | 여러 test-record의 총 case 수에는 제한이 없음                            |
-| AC-04 | 정적 parameterized 16 rows는 16으로 계산되어 violation                   |
-| AC-05 | dynamic/unsupported count는 PASS가 아닌 `indeterminate`/`unsupported`    |
-| AC-06 | 서로 다른 DETAIL acceptance group의 여러 spec은 PASS                     |
-| AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                       |
-| AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획      |
-| AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획                     |
-| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않음                       |
-| AC-11 | stale snapshot은 plan precondition FAIL                                  |
-| AC-12 | 잘못된 target/entry/import/DAG는 postcondition FAIL                      |
-| AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path 반환         |
-| AC-14 | 새 verification 생태계는 core/policy/MCP DTO 수정 없이 adapter 등록      |
-| AC-15 | Filid는 Seiri가 설치되지 않아도 모든 자체 기능 수행                      |
-| AC-16 | `@ast-grep/napi`, global npm 탐색과 `fast-glob` 없이 build               |
-| AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없음                 |
-| AC-18 | cross-review finding은 FCA 증거만 인용하고 구조 수정은 exact plan을 사용 |
-| AC-19 | 목표 MCP tool은 정확히 9개, 사용자 skill은 정확히 8개                    |
-| AC-20 | core/policy/DTO에는 초기 생태계의 확장자·테스트 호출 리터럴이 없음       |
+| ID    | 검증할 결과                                                                                   |
+| ----- | --------------------------------------------------------------------------------------------- |
+| AC-01 | spec-document 15 cases는 PASS, 16은 violation                                                 |
+| AC-02 | test-record 32 cases는 PASS, 33은 violation                                                   |
+| AC-03 | 여러 test-record의 총 case 수에는 제한이 없음                                                 |
+| AC-04 | 정적 parameterized 16 rows는 16으로 계산되어 violation                                        |
+| AC-05 | dynamic/unsupported count는 PASS가 아닌 `indeterminate`/`unsupported`                         |
+| AC-06 | 서로 다른 DETAIL acceptance group의 여러 spec은 PASS                                          |
+| AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                                            |
+| AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획                           |
+| AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획                                          |
+| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않음                                            |
+| AC-11 | stale snapshot은 plan precondition FAIL                                                       |
+| AC-12 | 잘못된 target/entry/import/DAG는 postcondition FAIL                                           |
+| AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path 반환                              |
+| AC-14 | 새 verification 생태계는 core/policy/MCP DTO 수정 없이 adapter 등록                           |
+| AC-15 | Filid는 Seiri가 설치되지 않아도 모든 자체 기능 수행                                           |
+| AC-16 | `@ast-grep/napi`, global npm 탐색과 `fast-glob` 없이 build                                    |
+| AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없음                                      |
+| AC-18 | cross-review finding은 FCA 증거만 인용하고 구조 수정은 exact plan을 사용                      |
+| AC-19 | 목표 MCP tool은 정확히 9개, 사용자 skill은 정확히 12개                                        |
+| AC-20 | core/policy/DTO에는 초기 생태계의 확장자·테스트 호출 리터럴이 없음                            |
+| AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않음                  |
+| AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 외부에 위임하며, 수용/거부 결정과 사유는 기록됨  |
+| AC-23 | `pipeline --auto`가 pr-create → review → resolve → revalidate를 중단 없이 연결                |
+| AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결됨 |
 
 ## 최종 검증 순서
 

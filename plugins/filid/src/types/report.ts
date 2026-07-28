@@ -8,7 +8,6 @@
 import type { STRUCTURE_VALIDATION_MODES } from '../constants/mcpContracts.js';
 
 import type { ContextResolution } from './context.js';
-import type { DriftResult, SyncPlan } from './drift.js';
 import type {
   AnalysisCertainty,
   FractalTree,
@@ -178,35 +177,4 @@ export interface ValidationReport {
   result: RuleEvaluationResult;
   scanOptions?: ScanOptions;
   timestamp: string;
-}
-
-export interface DriftReport {
-  drift: DriftResult;
-  syncPlan: SyncPlan | null;
-  timestamp: string;
-}
-
-export interface AnalysisReport {
-  snapshot: ProjectSnapshot;
-  scan: ScanReport;
-  validation: ValidationReport;
-  drift: DriftReport;
-  summary: {
-    totalModules: number;
-    violations: number;
-    drifts: number;
-    healthScore: number;
-  };
-}
-
-export interface AnalyzeOptions {
-  detailed?: boolean;
-  includeDrift?: boolean;
-  generateSyncPlan?: boolean;
-}
-
-export interface RenderedReport {
-  content: string;
-  format: 'text' | 'json' | 'markdown';
-  duration: number;
 }

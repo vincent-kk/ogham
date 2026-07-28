@@ -2,16 +2,15 @@
 
 ## Purpose
 
-15개 내장 FCA-AI 규칙 정의, 평가, 문서 유효성 검증, 드리프트 감지를 수행한다.
+15개 내장 FCA-AI 규칙 정의, 평가와 INTENT/DETAIL 문서 유효성 검증을 수행한다.
 
 ## Structure
 
-| 모듈                | 역할                                             |
-| ------------------- | ------------------------------------------------ |
-| `ruleEngine`        | 15개 내장 규칙 로딩, 평가, 오버라이드 적용       |
-| `fractalValidator`  | 구조 유효성 검증, 의존성 검증                    |
-| `documentValidator` | INTENT.md/DETAIL.md 유효성 검증                  |
-| `driftDetector`     | 규칙 위반 기반 드리프트 감지 및 동기화 계획 생성 |
+| 모듈                | 역할                                       |
+| ------------------- | ------------------------------------------ |
+| `ruleEngine`        | 15개 내장 규칙 로딩, 평가, 오버라이드 적용 |
+| `fractalValidator`  | 구조 유효성 검증, 의존성 검증              |
+| `documentValidator` | INTENT.md/DETAIL.md 유효성 검증            |
 
 ## Boundaries
 

@@ -22,24 +22,22 @@ const log = createLogger('config-loader');
  * handled exclusively by the `/filid:setup` skill via `syncRuleDocs`.
  *
  * @param projectRoot - Target project directory (git root will be resolved from this)
- * @param language - Output language name (English name, e.g. `'Korean'`).
- *   When provided, recorded in the freshly created config; ignored when the
- *   config already exists (existing config is never overwritten).
+ * @param options - Output language name and adapter IDs. Both are recorded in
+ *   the freshly created config and ignored when the config already exists
+ *   (an existing config is never overwritten).
  */
 export function initProject(
   projectRoot: string,
-  options?: string | InitProjectOptions,
+  options?: InitProjectOptions,
 ): InitResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
 
   let configCreated = false;
   if (!existsSync(configPath)) {
-    const normalized =
-      typeof options === 'string' ? { language: options } : (options ?? {});
     writeConfig(
       resolvedRoot,
-      createDefaultConfig(normalized.language, normalized.adapterIds),
+      createDefaultConfig(options?.language, options?.adapterIds),
     );
     configCreated = true;
     log.debug('created default config', configPath);

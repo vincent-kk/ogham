@@ -3,18 +3,18 @@ import { portableBasename } from '@ogham/cross-platform/paths';
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
-import type { AllowedEntry } from '../../../infra/configLoader/loaders/configSchemas.js';
+import type { AllowedPeerOverride } from '../../../infra/configLoader/loaders/configSchemas.js';
 
 import { isExempt } from './isExempt.js';
 
 /**
  * Factory returning the zero-peer-file check bound to the project's
- * `additional-allowed` config. Using a factory keeps the closure over
- * `additionalAllowed` explicit while letting the returned function satisfy
+ * `structure.additionalAllowedPeers` config. Using a factory keeps the closure
+ * over `additionalAllowed` explicit while letting the returned function satisfy
  * the `Rule.check` signature.
  */
 export function checkZeroPeerFile(
-  additionalAllowed?: AllowedEntry[],
+  additionalAllowed?: AllowedPeerOverride[],
 ): (context: RuleContext) => RuleViolation[] {
   return (context: RuleContext): RuleViolation[] => {
     const { node } = context;
@@ -38,15 +38,11 @@ export function checkZeroPeerFile(
     if (fwFiles)
       for (const file of fwFiles) allowed.add(portableBasename(file));
 
-    // Category: additional-allowed from .filid/config.json
-    //   string entry  → allowed everywhere (backward-compat).
-    //   object entry  → allowed only when entry.paths glob matches node.path.
+    // Category: structure.additionalAllowedPeers from .filid/config.json —
+    // allowed only when entry.paths glob matches node.path (paths omitted =
+    // every boundary) and entry.adapterId matches a reported entry point.
     if (additionalAllowed)
       for (const entry of additionalAllowed) {
-        if (typeof entry === 'string') {
-          allowed.add(entry);
-          continue;
-        }
         if (entry.paths && !isExempt(node, entry.paths)) continue;
         if (
           entry.adapterId &&

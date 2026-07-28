@@ -18,14 +18,6 @@ export const AllowedPeerOverrideSchema = z
 
 export type AllowedPeerOverride = z.infer<typeof AllowedPeerOverrideSchema>;
 
-/** @deprecated v1 compatibility for rule consumers removed in later seams. */
-export const AllowedEntrySchema = z.union([
-  z.string(),
-  AllowedPeerOverrideSchema,
-]);
-/** @deprecated v1 compatibility for rule consumers removed in later seams. */
-export type AllowedEntry = z.infer<typeof AllowedEntrySchema>;
-
 const AdapterSelectionSchema = z
   .object({
     mode: z.enum(['auto', 'explicit']),
@@ -65,16 +57,4 @@ export const FilidConfigSchema = z
   })
   .strict();
 
-type StrictFilidConfig = z.infer<typeof FilidConfigSchema>;
-
-/**
- * Transitional aliases keep pre-1.0 rule consumers type-safe while their
- * seams move to `structure`. The v2 schema never accepts or emits these keys.
- */
-export type FilidConfig = StrictFilidConfig & {
-  'additional-allowed'?: AllowedEntry[];
-  'additional-entry-points'?: string[];
-  'additional-route-patterns'?: string[];
-  'additional-organ-names'?: string[];
-  scan?: { maxDepth?: number };
-};
+export type FilidConfig = z.infer<typeof FilidConfigSchema>;

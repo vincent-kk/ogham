@@ -92,16 +92,6 @@ export type {
 } from './verification.js';
 
 export type {
-  LCOM4Result,
-  CyclomaticComplexityResult,
-  TestCaseCount,
-  TestCaseGateResult,
-  DecisionAction,
-  DecisionResult,
-  PromotionCandidate,
-} from './metrics.js';
-
-export type {
   HookBaseInput,
   UserPromptSubmitInput,
   PreToolUseInput,
@@ -111,19 +101,6 @@ export type {
   StructureGuardOutput,
   FractalContextSummary,
 } from './hooks.js';
-
-export type {
-  SgModule,
-  NapiLang,
-  ImportInfo,
-  ExportInfo,
-  CallInfo,
-  DependencyInfo,
-  MethodInfo,
-  ClassInfo,
-  TreeDiffChange,
-  TreeDiffResult,
-} from './ast.js';
 
 export type {
   RuleSeverity,
@@ -143,57 +120,10 @@ export type {
 export type { ScanOptions } from './scan.js';
 
 export type {
-  DriftSeverity,
-  SyncAction,
-  DriftItem,
-  DriftResult,
-  SyncPlanAction,
-  SyncPlan,
-  DetectDriftOptions,
-} from './drift.js';
-
-export type {
   VerificationRoleSummary,
   VerificationScanSummary,
   VerificationScanData,
   ScanReport,
   ScanReportDto,
   ValidationReport,
-  DriftReport,
-  AnalysisReport,
-  AnalyzeOptions,
-  RenderedReport,
 } from './report.js';
-
-export type {
-  Complexity,
-  PersonaId,
-  CheckpointPhase,
-  CheckpointStatus,
-  CommitteeElection,
-  ReviewSession,
-  StateMachineState,
-  ReviewVerdict,
-} from './review.js';
-
-export type {
-  DebtSeverity,
-  BiasLevel,
-  DebtItem,
-  DebtItemCreate,
-  BiasResult,
-} from './debt.js';
-
-export type {
-  UsageSite,
-  UsageCoverage,
-  CoverageVerifyResult,
-} from './coverage.js';
-
-export type {
-  SummaryItemSeverity,
-  SummaryItem,
-  HumanSummary,
-} from './summary.js';
-
-export type { FixRequestType, DebtAction, PipelineStage } from './handoff.js';

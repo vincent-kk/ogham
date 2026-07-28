@@ -14,7 +14,6 @@ Claude Code의 SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·Pre
 | `preToolValidator` | PreToolUse (내부) | INTENT/DETAIL write gate                    |
 | `structureGuard`   | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고        |
 | `preToolUse`       | PreToolUse        | 위 3개 서브모듈 오케스트레이션              |
-| `changeTracker`    | PostToolUse       | 변경 추적 (현재 비활성)                     |
 | `shared` organ     | -                 | `isFcaProject`/`isIntentMd`/`isDetailMd`    |
 | `utils` organ      | -                 | `validateCwd`, organ 구조 검사 등           |
 

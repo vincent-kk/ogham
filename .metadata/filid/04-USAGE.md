@@ -1,6 +1,6 @@
 # 04. 설치, 설정, 사용 방법
 
-> filid 플러그인의 설치, 빌드, 설정 파일 구조, 스킬/MCP/에이전트 사용법, 트러블슈팅.
+> `@ogham/filid` 1.0 기준. 설치, 빌드, 설정 파일 구조, 스킬/MCP 사용법, 트러블슈팅.
 
 ---
 
@@ -12,109 +12,123 @@
 | ----------- | --------- | --------------------------- |
 | Node.js     | >= 20.0.0 | `package.json` engines 명시 |
 | Claude Code | 최신      | 플러그인 시스템 지원 버전   |
-| npm / yarn  | -         | 의존성 설치용               |
+| Yarn        | 4.x       | 모노레포 workspaces         |
 
-### 의존성 설치
+`fs.globSync` / `fs.glob`은 Node 22+ API이므로 사용하지 않는다. 디렉터리 탐색은 `fs.readdirSync(dir, { withFileTypes: true })` 재귀만 쓴다.
+
+### Marketplace 설치
 
 ```bash
-# 모노레포 루트에서
-yarn install
-
-# 또는 filid 패키지 디렉토리에서
-cd packages/filid
-npm install
+claude plugin marketplace add https://github.com/vincent-kk/ogham
+claude plugin install filid
 ```
 
-핵심 런타임 의존성:
+### 런타임 의존성
 
-| 패키지                      | 용도                                       |
-| --------------------------- | ------------------------------------------ |
-| `typescript`                | Compiler API (AST 파싱), MCP 서버에서 사용 |
-| `@modelcontextprotocol/sdk` | MCP 서버 프레임워크                        |
-| `fast-glob`                 | 파일 패턴 탐색                             |
-| `yaml`                      | YAML 설정 파싱                             |
-| `zod`                       | 입력 스키마 검증                           |
+| 패키지                      | 용도                |
+| --------------------------- | ------------------- |
+| `@modelcontextprotocol/sdk` | MCP 서버 프레임워크 |
+| `zod`                       | 입력 스키마 검증    |
+
+**native 바이너리 의존과 전역 npm 모듈 탐색이 없다.** 1.0은 `@ast-grep/napi`, TypeScript Compiler API, `fast-glob` 없이 설치·실행된다.
 
 ---
 
 ## 빌드
 
-### 플러그인 빌드 (번들링)
-
 ```bash
-node build-plugin.mjs
+yarn install          # 모노레포 루트에서
+yarn filid build      # 전체 빌드
 ```
 
-이 명령은 esbuild로 두 가지 산출물을 생성:
+파이프라인은 다음 순서로 고정되어 있다.
 
-1. **MCP 서버 번들**: `bridge/mcp-server.cjs` (~516KB, CJS)
-2. **Hook 스크립트 번들**: `bridge/*.mjs` (6개, ESM)
-
-### TypeScript 컴파일 (라이브러리 빌드)
-
-```bash
-# tsconfig.build.json 기반 컴파일
-tsc -p tsconfig.build.json
-
-# 또는 전체 빌드 (컴파일 + 번들링)
-yarn build  # = tsc + node build-plugin.mjs
+```
+clean → version:sync → build:rules → build:pages → build:mcp → build:hooks → build:compile-plugin
 ```
 
-### 개발 모드
+| 스크립트               | 역할                                    | 산출물                                        |
+| ---------------------- | --------------------------------------- | --------------------------------------------- |
+| `version:sync`         | `package.json` → 버전 소스와 매니페스트 | `src/version.ts`, `*/plugin.json`             |
+| `build:rules`          | built-in rule hash 동기화               | `templates/rules/manifest.json`               |
+| `build:pages`          | 설정 UI 인라인 단일 파일                | `public/settings.html`                        |
+| `build:mcp`            | MCP 서버 번들 (esbuild, CJS)            | `bridge/mcp-server.cjs`                       |
+| `build:hooks`          | 훅 번들 (esbuild, ESM, 훅별 개별)       | `bridge/*.mjs`                                |
+| `build:compile-plugin` | plugin-compiler 로 host 어댑터 재생성   | `.codex-plugin/`, `plugin.json`, `hooks.json` |
+
+**`build:compile` (tsc) 단계는 1.0에 없다.** 라이브러리 산출물(`dist/`)을 만들지 않으며 `package.json`은 `private: true`다.
+
+훅·MCP만 빠르게 재빌드하려면:
 
 ```bash
-yarn dev  # = tsc --watch
+yarn filid build:plugin   # = build:pages && build:mcp && build:hooks
 ```
 
 ### 테스트
 
 ```bash
-yarn test       # vitest (watch 모드)
-yarn test:run   # 1회 실행
+yarn filid test:run       # 단일 실행 (CI)
+yarn filid typecheck      # 타입 체크
+yarn filid test:e2e       # 설정 페이지 Playwright e2e
+yarn filid bench:run      # 벤치마크
 ```
+
+### 생성물 편집 금지
+
+`bridge/`, `public/`, `.codex-plugin/`, 루트 `plugin.json`, `mcp_config.json`, `hooks.json`, `AGENTS.md`, `src/version.ts`는 생성물이다. 손으로 고치지 않고 생성기를 고친다. 특히 루트 `AGENTS.md`의 원본은 `plugins/filid/templates/rules/filid_fca-policy.md`이며, 해시가 `templates/rules/manifest.json`에 기록된다.
 
 ---
 
 ## 설정 파일
 
-### `.claude-plugin/plugin.json` — 플러그인 매니페스트
+### `.filid/config.json` — 프로젝트 설정 (schema 2.0)
 
 ```json
 {
-  "name": "filid",
-  "version": "1.0.0",
-  "description": "FCA-AI rule enforcement for Claude Code agent workflows",
-  "author": { "name": "Vincent K. Kelvin" },
-  "repository": "https://github.com/vincent-kk/ogham",
-  "license": "MIT",
-  "keywords": ["claude-code", "plugin", "fca-ai", "fractal", "context"],
-  "skills": "./skills/",
-  "mcpServers": "./.mcp.json"
-}
-```
-
-| 필드         | 설명                                                         |
-| ------------ | ------------------------------------------------------------ |
-| `skills`     | 스킬 디렉토리 경로. 하위의 `*/SKILL.md` 파일이 스킬로 등록됨 |
-| `mcpServers` | MCP 서버 설정 파일 경로                                      |
-
-### `.mcp.json` — MCP 서버 등록
-
-```json
-{
-  "mcpServers": {
-    "tools": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"]
+  "version": "2.0",
+  "language": "ko",
+  "adapters": {
+    "mode": "auto",
+    "enabled": ["ecmascript"]
+  },
+  "rules": {
+    "intent-document-contract": { "enabled": true, "severity": "error" },
+    "zero-peer-file": { "enabled": true, "severity": "warning" }
+  },
+  "structure": {
+    "maxDepth": 10,
+    "additionalOrganNames": ["fixtures"],
+    "additionalAllowedPeers": [
+      { "basename": "vite.config.ts", "paths": ["packages/*"] }
+    ],
+    "entryPointOverrides": {
+      "ecmascript": ["route.ts", "page.tsx"]
     }
   }
 }
 ```
 
-| 필드      | 설명                                                           |
-| --------- | -------------------------------------------------------------- |
-| `command` | 서버 실행 명령 (`node`)                                        |
-| `args`    | 서버 번들 경로. `${CLAUDE_PLUGIN_ROOT}`는 플러그인 루트로 치환 |
+| 필드                               | 설명                                                              |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| `version`                          | `"2.0"` 고정                                                      |
+| `language`                         | **문서 출력 언어.** 프로그래밍 언어 선택값이 아니다.              |
+| `adapters.mode`                    | `auto` = 등록 어댑터의 claim 사용 / `explicit` = `enabled`만 사용 |
+| `adapters.enabled`                 | 어댑터 ID 목록. `explicit`인데 비어 있으면 validation error       |
+| `rules.<id>`                       | `enabled` · `severity`(`error\|warning\|info`) · `exempt` glob    |
+| `structure.maxDepth`               | 트리 깊이 한계 (기본 10)                                          |
+| `structure.additionalOrganNames`   | organ으로 취급할 추가 디렉터리 이름                               |
+| `structure.additionalAllowedPeers` | fractal root 허용 peer. `paths` glob으로 범위 제한 가능           |
+| `structure.entryPointOverrides`    | **key가 adapter ID다.** core가 파일명 의미를 해석하지 않고 전달   |
+
+스키마는 `strict`다. 알 수 없는 key는 조용히 무시되지 않고 거부된다.
+
+#### v1 config 이관
+
+v1 config가 발견되면 **읽을 때 메모리에서 v2로 변환**하고 `config-migration-required` 진단을 낸다. **자동으로 파일을 쓰지 않는다.**
+
+- 기존 organ / depth / allowed / entry-point 값은 대응하는 v2 필드로 옮겨진다.
+- 제거된 naming rule, route pattern, CC/LCOM4/promotion 설정은 버려지며 각 key가 migration diagnostic에 기록된다.
+- 사용자가 `setup`에서 저장을 승인할 때만 v2가 디스크에 기록된다.
 
 ### `hooks/hooks.json` — Hook 이벤트 등록
 
@@ -127,7 +141,19 @@ yarn test:run   # 1회 실행
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"",
             "timeout": 5
           }
         ]
@@ -139,70 +165,8 @@ yarn test:run   # 1회 실행
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/intent-injector.mjs\"",
-            "timeout": 3
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-validator.mjs\"",
-            "timeout": 3
-          },
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/structure-guard.mjs\"",
-            "timeout": 3
-          }
-        ]
-      },
-      {
-        "matcher": "ExitPlanMode",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"",
-            "timeout": 3
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [],
-    "SubagentStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"",
-            "timeout": 3
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/context-injector.mjs\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"",
-            "timeout": 3
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
+            "timeout": 10
           }
         ]
       }
@@ -211,404 +175,185 @@ yarn test:run   # 1회 실행
 }
 ```
 
-| Hook 이벤트      | matcher             | 스크립트                            | timeout |
-| ---------------- | ------------------- | ----------------------------------- | ------- |
-| SessionStart     | `*` (모든 세션)     | setup                               | 5초     |
-| PreToolUse       | `Read\|Write\|Edit` | intent-injector                     | 3초     |
-| PreToolUse       | `Write\|Edit`       | pre-tool-validator, structure-guard | 3초     |
-| PreToolUse       | `ExitPlanMode`      | plan-gate                           | 3초     |
-| PostToolUse      | —                   | _(disabled)_                        | —       |
-| SubagentStart    | `*` (모든 에이전트) | agent-enforcer                      | 3초     |
-| UserPromptSubmit | `*` (모든 프롬프트) | context-injector                    | 5초     |
-| SessionEnd       | `*` (모든 세션)     | session-cleanup                     | 3초     |
+| Hook 이벤트      | matcher             | 스크립트           | timeout |
+| ---------------- | ------------------- | ------------------ | ------- |
+| SessionStart     | `*`                 | setup              | 30초    |
+| UserPromptSubmit | `*`                 | user-prompt-submit | 5초     |
+| PreToolUse       | `Read\|Write\|Edit` | pre-tool-use       | 10초    |
+
+`PostToolUse`, `SubagentStart`, `SessionEnd`, `ExitPlanMode` 훅은 1.0에 없다. 실행 진입은 `libs/run.cjs` 크로스 플랫폼 러너가 담당한다.
 
 ---
 
 ## 스킬 사용법
 
-### /filid:setup — 프로젝트 초기화
+스킬은 CLI 명령이 아니라 **LLM 프롬프트**다. 자연어 문장이 플래그만큼 잘 동작한다.
+
+### /filid:setup
 
 ```
 /filid:setup [path]
 ```
 
-| 옵션   | 기본값 | 설명          |
-| ------ | ------ | ------------- |
-| `path` | cwd    | 대상 디렉토리 |
+config와 managed rule 문서를 초기화하고, snapshot을 확인한 뒤 누락된 INTENT.md / DETAIL.md를 **제안한다.** 기존 문서를 편집하지 않는다.
 
-**예시**:
+### /filid:scan
 
 ```
-/filid:setup
-/filid:setup ./packages/my-app
+/filid:scan [path]
+/filid:scan src/core 쪽만 봐줘
 ```
 
-**결과**: fractal 디렉토리에 INTENT.md 생성, organ 디렉토리 건너뜀.
+전체 FCA 감사의 유일한 진입점. documents / nodes / entry-points / boundaries / dag / verification 전체 scope를 한 snapshot에 대해 평가한다.
 
-### /filid:scan — 규칙 위반 검출
+> `--fix` 자동 수정은 1.0에 없다. scan은 판정하고, 이동은 `restructure`가, 문서 개선은 `enrich-docs`가 담당한다.
 
-```
-/filid:scan [path] [--fix]
-```
-
-| 옵션    | 기본값 | 설명                       |
-| ------- | ------ | -------------------------- |
-| `path`  | cwd    | 대상 디렉토리              |
-| `--fix` | (없음) | 자동 수정 가능한 위반 해결 |
-
-**예시**:
+### /filid:context-query
 
 ```
-/filid:scan
-/filid:scan --fix
-/filid:scan ./src --fix
+/filid:context-query <path 또는 질문>
 ```
 
-**결과**: 위반 목록 (severity, 위치, 해결 방법 포함).
+소유 프랙탈과 owner-to-root 최소 문서 체인을 해석한 뒤 3라운드 안에 답한다. 문서 본문은 반환되지 않는다 — 호출자가 필요한 경로만 읽는다.
 
-### /filid:sync — 문서 동기화
-
-```
-/filid:sync [--dry-run]
-```
-
-| 옵션        | 기본값 | 설명                    |
-| ----------- | ------ | ----------------------- |
-| `--dry-run` | (없음) | 실제 변경 없이 미리보기 |
-
-**예시**:
+### /filid:guide
 
 ```
-/filid:sync
-/filid:sync --dry-run
+/filid:guide organ 디렉터리엔 뭘 두면 돼?
 ```
 
-**결과**: 변경된 프랙탈의 INTENT.md/DETAIL.md 갱신.
+현재 트리·분류·검증 finding·배치 규칙을 설명한다. 읽기 전용이다.
 
-### /filid:update — 문서/구조 갱신
-
-```
-/filid:update [path]
-```
-
-| 옵션   | 기본값 | 설명          |
-| ------ | ------ | ------------- |
-| `path` | cwd    | 대상 디렉토리 |
-
-**예시**:
+### /filid:enrich-docs
 
 ```
-/filid:update
-/filid:update ./src/core
+/filid:enrich-docs [path]
 ```
 
-**결과**: 구조 변경 후 INTENT.md/DETAIL.md 및 관련 문서 갱신.
+snapshot 증거로 INTENT.md / DETAIL.md를 개선한다. **편집 전에 승인을 받고** 편집 후 구조를 검증한다.
 
-### /filid:migrate — 구조 마이그레이션
+### /filid:restructure
+
+```
+/filid:restructure <path>
+```
+
+읽기 전용 계획 → 사전조건 → 승인 → 외부 실행 → 사후조건. filid는 파일을 옮기지 않는다. 계획과 다른 위치로 옮기면 기능이 동작해도 FAIL이다.
+
+### /filid:cross-review
+
+```
+/filid:cross-review
+/filid:cross-review https://github.com/owner/repo/pull/123
+/filid:cross-review 처음부터 다시 해줘        # force
+```
+
+contract·structure·verification 3관점 병렬 리뷰 + adversarial 판정. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 **FCA scope**로 명시된다. PR 코멘트는 사용자가 PR scope를 요청했을 때만 게시한다.
+
+### /filid:migrate
 
 ```
 /filid:migrate [path]
 ```
 
-| 옵션   | 기본값 | 설명          |
-| ------ | ------ | ------------- |
-| `path` | cwd    | 대상 디렉토리 |
-
-**예시**:
-
-```
-/filid:migrate
-/filid:migrate ./packages/legacy
-```
-
-**결과**: 기존 CLAUDE.md/SPEC.md를 INTENT.md/DETAIL.md로 마이그레이션.
-
-### /filid:structure-review — PR 검증 파이프라인
-
-```
-/filid:structure-review [--stage=1-6] [--verbose]
-```
-
-| 옵션        | 기본값 | 설명                   |
-| ----------- | ------ | ---------------------- |
-| `--stage`   | all    | 특정 단계만 실행 (1-6) |
-| `--verbose` | (없음) | 상세 분석 포함         |
-
-**예시**:
-
-```
-/filid:structure-review
-/filid:structure-review --stage=3
-/filid:structure-review --verbose
-```
-
-**결과**: 6단계 검증 보고서 (PASS/FAIL + 이슈 목록).
-
-### /filid:promote — 테스트 승격
-
-```
-/filid:promote [path] [--days=90]
-```
-
-| 옵션     | 기본값 | 설명                |
-| -------- | ------ | ------------------- |
-| `path`   | cwd    | 대상 디렉토리       |
-| `--days` | 90     | 최소 안정 기간 (일) |
-
-**예시**:
-
-```
-/filid:promote
-/filid:promote --days=60
-/filid:promote ./src/core
-```
-
-**결과**: 승격 후보 목록 + eligible 상태.
-
-### /filid:context-query — 컨텍스트 질의
-
-```
-/filid:context-query <question>
-```
-
-**예시**:
-
-```
-/filid:context-query fractal-tree 모듈의 역할은?
-/filid:context-query organ 디렉토리에서 허용되는 작업은?
-```
-
-**결과**: 3-Prompt Limit 내에서 답변. 컨텍스트 초과 시 압축 적용.
-
-### /filid:pipeline — 거버넌스 파이프라인 오케스트레이션
-
-```
-/filid:pipeline [--from=stage] [--base=ref] [--draft] [--skip-update] [--force] [--title=t]
-```
-
-| 옵션            | 기본값 | 설명                                                |
-| --------------- | ------ | --------------------------------------------------- |
-| `--from`        | auto   | 진입 스테이지 (pr-create/review/resolve/revalidate) |
-| `--base`        | auto   | 베이스 브랜치 (pr-create·review에 전달)             |
-| `--draft`       | (없음) | 드래프트 PR 생성 (pr-create)                        |
-| `--skip-update` | (없음) | pr-create 내부의 update 동기화 생략                 |
-| `--force`       | (없음) | 리뷰 강제 재시작 (review)                           |
-| `--title`       | auto   | PR 제목 (pr-create)                                 |
-
-**예시**:
-
-```
-/filid:pipeline
-/filid:pipeline --from=review --force
-```
-
-**결과**: `pr-create` → `review` → `resolve --auto` → `revalidate` 자동 실행 (진입점 자동 감지, 실패 시 재실행으로 재개).
-
-### /filid:pull-request — PR 생성 자동화
-
-```
-/filid:pull-request [--base=ref] [--skip-update] [--draft] [--title=t]
-```
-
-| 옵션            | 기본값 | 설명                          |
-| --------------- | ------ | ----------------------------- |
-| `--base`        | auto   | 베이스 브랜치 (자동 감지)     |
-| `--skip-update` | (없음) | Stage 1 (update 동기화) 생략  |
-| `--draft`       | (없음) | 드래프트 PR 생성              |
-| `--title`       | auto   | PR 제목 (미지정 시 자동 생성) |
-
-**예시**:
-
-```
-/filid:pull-request
-/filid:pull-request --draft
-```
-
-**결과**: FCA-AI 검증 통과 후 PR 자동 생성.
-
-### /filid:resolve — 수정 사항 해결
-
-```
-/filid:resolve [--auto]
-```
-
-현재 브랜치 자동 감지. `--auto`는 전체 수용·프롬프트 생략·자동 커밋/푸시/재검증.
-
-**예시**:
-
-```
-/filid:resolve
-/filid:resolve --auto
-```
-
-**결과**: 각 fix 항목 수용/거부 → 수용분 code-surgeon 병렬 적용 + typecheck → 거부분 소명·ADR·부채 생성 → justifications.md + 커밋/푸시.
-
-### /filid:revalidate — Delta 재검증
-
-```
-/filid:revalidate
-```
-
-파라미터 없음. 현재 브랜치 자동 감지.
-
-**예시**:
-
-```
-/filid:revalidate
-```
-
-**결과**: PASS/FAIL 판정 → re-validate.md 생성. `gh` 인증 시 PR 코멘트 게시.
-
-### .filid/ 디렉토리 구조
-
-거버넌스 스킬이 사용하는 파일 시스템:
-
-```
-.filid/
-├── review/<branch>/       # 브랜치별 리뷰 산출물
-│   ├── session.md            # Step 1: 위원회 선출·run_id
-│   ├── verification.md       # Step 2: 기술 측정 결과
-│   ├── opinions/<persona>.md # Step 3: 페르소나 의견
-│   ├── review-report.md      # Step 5: 최종 리뷰 보고서
-│   ├── fix-requests.md       # Step 5: 차단급 수정 요청
-│   ├── justifications.md     # /filid:resolve: 수용/거부 결정
-│   └── re-validate.md        # /filid:revalidate: PASS/FAIL 판정
-├── review/advisory-ledger.md # advisory(LOW) 재발 추적 (브랜치 공유)
-└── debt/                  # 기술 부채 (전체 공유, 커밋 대상)
-    └── <debt-id>.md          # 개별 부채 항목 (YAML frontmatter)
-```
-
-- `.filid/review/` — 로컬 전용 (gitignore; 단계 간 통신 파일, revalidate PASS 시 정리)
-- `.filid/debt/` — 커밋 대상 (팀 간 부채 공유)
+`CLAUDE.md` → `INTENT.md`, `SPEC.md` → `DETAIL.md`. dry-run 우선 실행 후 검증한다.
 
 ---
 
 ## MCP 도구 사용법
 
-에이전트가 MCP 도구를 호출하는 JSON 입출력 예시.
+모든 도구가 동일한 envelope를 반환한다.
 
-### ast_analyze: 의존성 분석
+```typescript
+interface ToolResultEnvelope<Summary, Data> {
+  status: "ok" | "violations" | "indeterminate" | "unsupported";
+  summary: Summary;
+  data?: Data; // 16 KiB 초과 시 생략되고 artifact로 이동
+  artifact?: ToolArtifact;
+  diagnostics: ToolDiagnostic[];
+}
+```
+
+### fractal_scan
 
 ```json
-// 입력
-{
-  "source": "import { readFile } from 'fs/promises';\nexport function load() { return readFile('test'); }",
-  "analysisType": "dependency-graph"
-}
-
-// 출력
-{
-  "imports": [{ "source": "fs/promises", "specifiers": ["readFile"], "isTypeOnly": false, "line": 1 }],
-  "exports": [{ "name": "load", "isTypeOnly": false, "isDefault": false, "line": 2 }],
-  "calls": [{ "callee": "readFile", "line": 2 }]
-}
+{ "path": "/repo", "depth": 3, "detail": "summary" }
 ```
 
-### ast_analyze: LCOM4 계산
+`detail`은 `summary | paths | full`. summary만 요청하면 대형 트리를 인라인하지 않는다.
+
+### context_resolve
 
 ```json
-// 입력
-{
-  "source": "class Foo { x = 0; y = 0; getX() { return this.x; } getY() { return this.y; } }",
-  "analysisType": "lcom4",
-  "className": "Foo"
-}
-
-// 출력
-{
-  "value": 2,
-  "components": [["getX"], ["getY"]],
-  "methodCount": 2,
-  "fieldCount": 2
-}
+{ "path": "/repo", "targetPath": "/repo/src/core/restructure" }
 ```
-
-### test_metrics: 의사결정 트리
 
 ```json
-// 입력
 {
-  "action": "decide",
-  "decisionInput": { "testCount": 20, "lcom4": 3, "cyclomaticComplexity": 10 }
-}
-
-// 출력
-{
-  "decision": {
-    "action": "split",
-    "reason": "LCOM4 = 3 indicates multiple responsibilities. Extract into sub-fractals along component boundaries.",
-    "metrics": { "testCount": 20, "lcom4": 3, "cyclomaticComplexity": 10 }
-  }
+  "ownerFractalPath": "/repo/src/core/restructure",
+  "chain": [
+    {
+      "fractalPath": "...",
+      "intentPath": "...",
+      "detailPath": "...",
+      "documentStatus": "valid"
+    }
+  ],
+  "nearestDetailPath": "...",
+  "outputLanguage": "ko"
 }
 ```
 
-### fractal_navigate: 디렉토리 분류
+### restructure_plan
 
 ```json
-// 입력
 {
-  "action": "classify",
-  "path": "/src/components",
-  "entries": []
-}
-
-// 출력
-{
-  "classification": "organ"
+  "path": "/repo",
+  "requests": [
+    {
+      "sourcePath": "/repo/src/shared/formatDate.ts",
+      "contractIntent": "unknown"
+    }
+  ]
 }
 ```
 
-### doc_compress: 가역적 압축
+`consumerPaths`를 생략하면 dependency graph의 incoming edge로 계산한다. `contractIntent`가 생략되면 `unknown`이며, 독립성 증거가 없으면 `targetNodeType: "undetermined"`인 unresolved move로 남는다. `organNameHint`는 이름 제안일 뿐 LCA와 boundary 사후조건을 바꾸지 못한다.
+
+**크기와 무관하게 항상 plan artifact를 남긴다.**
+
+### structure_validate
 
 ```json
-// 입력
 {
-  "mode": "reversible",
-  "filePath": "/src/core/fractal-tree.ts",
-  "content": "...",
-  "exports": ["buildFractalTree", "findNode"]
-}
-
-// 출력
-{
-  "compacted": "[REF] /src/core/fractal-tree.ts\n[EXPORTS] buildFractalTree, findNode\n[LINES] 129",
-  "meta": { "method": "reversible", "originalLines": 129, "compressedLines": 3, "recoverable": true, "timestamp": "..." }
+  "path": "/repo",
+  "mode": "project",
+  "scopes": ["documents", "dag"]
 }
 ```
 
----
+`mode`는 `project | plan-precondition | plan-postcondition`. plan mode에서는 `planPath`가 필수다. `scopes`를 생략하면 전부 검사한다.
 
-## 에이전트 사용법
+### verification_scan
 
-`agents/` 디렉토리의 에이전트는 Claude Code의 subagent 시스템에 등록됨.
-
-### 에이전트 호출 (Claude Code 내부)
-
-에이전트는 Claude Code가 자동으로 인식. 사용자가 직접 호출하거나,
-스킬 실행 시 자동으로 적절한 에이전트가 활성화됨.
-
-### 에이전트 YAML Frontmatter 구조
-
-```yaml
----
-name: architect
-description: "FCA-AI Architect agent — read-only design and planning"
-disallowedTools: # 선택적 — 도구 제한
-  - Write
-  - Edit
-  - Bash
----
+```json
+{ "path": "/repo", "detail": "summary" }
 ```
 
-| 에이전트        | disallowedTools   | 주 용도                         |
-| --------------- | ----------------- | ------------------------------- |
-| architect       | Write, Edit, Bash | 설계, 분석, DETAIL.md 초안 제안 |
-| qa-reviewer     | Write, Edit, Bash | 규칙 검증, 메트릭 분석, PR 리뷰 |
-| implementer     | (없음)            | DETAIL.md 범위 내 코드 구현     |
-| context-manager | (없음)            | INTENT.md/DETAIL.md 문서 관리   |
-| drift-analyzer  | Write, Edit, Bash | 구조 이탈 감지 및 분석          |
-| restructurer    | (없음)            | 승인된 구조 변경 실행           |
-| code-surgeon    | (없음)            | 정밀 코드 수술 및 리팩토링      |
+summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `caseCap`을 분리하고 전체 `fragmentationCount`, `violationCount`, certainty를 함께 반환한다.
+
+### review_state
+
+```json
+{
+  "action": "prepare",
+  "projectRoot": "/repo",
+  "branchName": "feat/x",
+  "baseRef": "main"
+}
+```
+
+`prepare | checkpoint | seal | cleanup`. `cleanup`은 리터럴 `confirm: true`를 요구한다.
 
 ---
 
@@ -618,57 +363,45 @@ disallowedTools: # 선택적 — 도구 제한
 
 **증상**: 도구 호출 시 "MCP server not found" 또는 timeout.
 
-**원인 및 해결**:
+1. `bridge/mcp-server.cjs` 미존재 → `yarn filid build:mcp`
+2. Node.js < 20 → 업그레이드
 
-1. `bridge/mcp-server.cjs` 미존재 → `node build-plugin.mjs` 실행
-2. `typescript` 미설치 → `npm install` 실행
-3. Node.js 버전 < 20 → 업그레이드
+> 1.0은 external 의존이 0개다. `typescript`나 `@ast-grep/napi` 전역 설치 문제로 서버가 뜨지 않는 상황은 더 이상 발생하지 않는다.
 
 ### Hook이 동작하지 않음
 
-**증상**: INTENT.md 50줄 초과해도 차단 안 됨.
+**증상**: INTENT.md 50줄을 넘겨도 차단되지 않음.
 
-**원인 및 해결**:
+1. `bridge/*.mjs` 미존재 → `yarn filid build:hooks`
+2. `hooks.json`의 `${CLAUDE_PLUGIN_ROOT}` 치환 확인
+3. `libs/run.cjs` 미존재 → `yarn filid build`
 
-1. `bridge/*.mjs` 미존재 → `node build-plugin.mjs` 실행
-2. `hooks.json` 경로 오류 → `${CLAUDE_PLUGIN_ROOT}` 변수 확인
-3. 플러그인 미등록 → `.claude-plugin/plugin.json` 확인
-4. `libs/run.cjs` 미존재 → `node build-plugin.mjs` 실행 (크로스 플랫폼 훅 런너)
+### mutation이 한 번 거부됨
 
-### Hook이 timeout으로 실패
+**증상**: `[filid:gate] First mutation in module '...' before its INTENT rules were delivered this session.`
 
-**증상**: "Hook timed out" 오류.
+정상 동작이다. 함께 전달된 규칙을 읽고 **같은 호출을 그대로 재시도하면 통과한다.**
 
-**원인 및 해결**:
+### 빌드가 훅 크기로 실패
 
-1. 대형 파일 Write 시 stdin 처리 지연 → 정상 동작, timeout 내 처리됨
-2. Node.js 초기 로딩 느림 → 콜드 스타트 문제, 재시도하면 해결
+**증상**: `Hook bundle guards` 실패 또는 금지 모듈 감지.
 
-### 에이전트 역할 제한이 적용되지 않음
+훅 도달 코드가 배럴(`index.js`)을 import했을 가능성이 높다. esbuild가 배럴이 재노출하는 모듈 전체를 끌어온다. **구체 파일 경로로 직접 import**한다 (예: `../shared/shared.js`). typecheck는 이것을 잡지 못한다.
 
-**증상**: architect 에이전트가 파일을 수정함.
+### config가 저장되지 않음
 
-**원인 및 해결**:
+v1 config는 읽을 때 메모리에서만 v2로 변환된다. 디스크 기록은 `setup`에서 사용자가 저장을 승인할 때만 일어난다. `config-migration-required` 진단이 보이면 의도된 동작이다.
 
-1. `agent-enforcer` 훅은 지시만 주입 → 에이전트가 무시할 수 있음
-2. `agents/*.md`의 `disallowedTools` 확인 — 이것이 실제 도구 차단 메커니즘
-3. 두 메커니즘이 모두 올바르게 설정되어야 함
+### scan 결과가 잘려 보임
 
-### 빌드 실패
-
-**증상**: `build-plugin.mjs` 실행 시 에러.
-
-**원인 및 해결**:
-
-1. esbuild 미설치 → `npm install` (devDependencies)
-2. TypeScript 문법 에러 → `yarn typecheck` 으로 확인
-3. `bridge/` 디렉토리 권한 → `mkdir -p` 로 재생성
+16 KiB를 넘으면 `data`가 artifact로 이동한다. envelope의 `artifact.path`를 읽는다. artifact는 임시 자료다. 사라졌으면 snapshot을 다시 만들고 재실행한다.
 
 ---
 
 ## 관련 문서
 
-- [01-ARCHITECTURE.md](./01-ARCHITECTURE.md) — 설정 파일의 전체 구조 내 위치
+- [01-ARCHITECTURE.md](./01-ARCHITECTURE.md) — 설정이 전체 구조에서 차지하는 위치
 - [03-LIFECYCLE.md](./03-LIFECYCLE.md) — 각 스킬의 상세 워크플로우
 - [05-COST-ANALYSIS.md](./05-COST-ANALYSIS.md) — 빌드 산출물 크기 분석
 - [07-RULES-REFERENCE.md](./07-RULES-REFERENCE.md) — 스킬이 시행하는 규칙 상세
+- [08-API-SURFACE.md](./08-API-SURFACE.md) — 도구 입력 스키마와 DTO
