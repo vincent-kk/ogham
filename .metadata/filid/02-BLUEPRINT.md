@@ -270,6 +270,8 @@ organ 구성:
 
 `specifiers/`는 `imports/`와 `validator/` 둘의 소비 대상이므로 두 organ의 lowest common fractal인 `restructure` 아래에 놓였다. specifier가 resolved file을 가리키는지는 마지막 세그먼트의 확장자를 제거한 stem으로 판정하고, 산출된 specifier에는 소비자가 쓰던 표기를 되돌려 준다 — 판정과 복원이 한 곳에 있어야 계획과 사후조건이 같은 기준을 쓴다.
 
+instruction은 세 갈래로 나뉜다. decision이 필요하면 `unresolved`, 계산된 target이 source와 같으면 `alreadyPlaced`, 나머지가 실행 가능한 `moves`다. 가운데 갈래가 없으면 postcondition이 한 경로에 "source 부재"와 "target 존재"를 동시에 요구해 어떤 실행으로도 만족시킬 수 없다.
+
 **핵심 계약**: 프로젝트 파일을 쓰거나 옮기지 않는다. 불확실한 contract, 이름, adapter entry shape, graph 또는 specifier는 추측하지 않고 unresolved reason으로 남긴다. 확장자 표기 차이는 순수 lexical 연산이라 core가 처리하지만, alias 해석처럼 **어댑터 의미**가 필요한 rewrite는 계산하지 않는다.
 
 ---

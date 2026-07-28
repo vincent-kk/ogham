@@ -73,11 +73,13 @@ export interface RestructurePlan {
   snapshotHash: string;
   createdAt: string;
   moves: MoveInstruction[];
+  alreadyPlaced: MoveInstruction[];
   unresolved: MoveInstruction[];
   summary: {
     moveCount: number;
     fractalsCreated: number;
     organsCreated: number;
+    alreadyPlacedCount: number;
     decisionsRequired: number;
   };
 }

@@ -31,6 +31,10 @@ Translate explicit placement requests into `RestructurePlanInput` and call
 `restructure_plan`. Read the persisted artifact's `.data`; verify its artifact
 hash. Stop when the envelope is non-`ok` or the plan contains unresolved moves.
 
+A request whose computed target equals its current path arrives in
+`alreadyPlaced`, never in `moves`. Report it as already correctly placed, execute
+nothing for it, and do not treat it as a failure.
+
 The MCP call calculates consumer placement, LCA, target node type, required
 artifacts, and import rewrites. It does not modify the project tree.
 

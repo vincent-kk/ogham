@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 
+import { samePath } from '@ogham/cross-platform/paths';
+
 import {
   RESTRUCTURE_HASH_ALGORITHM,
   RESTRUCTURE_HASH_ENCODING,
@@ -23,8 +25,14 @@ export function createRestructurePlan(
   const instructions = input.requests.map((request) =>
     planMoveInstruction(snapshot, request),
   );
-  const moves = instructions.filter((move) => !move.requiresDecision);
   const unresolved = instructions.filter((move) => move.requiresDecision);
+  const resolved = instructions.filter((move) => !move.requiresDecision);
+  const alreadyPlaced = resolved.filter((move) =>
+    samePath(move.sourcePath, move.targetPath),
+  );
+  const moves = resolved.filter(
+    (move) => !samePath(move.sourcePath, move.targetPath),
+  );
   const planHash = createHash(RESTRUCTURE_HASH_ALGORITHM)
     .update(snapshot.snapshotHash)
     .update(RESTRUCTURE_PLAN_HASH_SEPARATOR)
@@ -37,6 +45,7 @@ export function createRestructurePlan(
     snapshotHash: snapshot.snapshotHash,
     createdAt: snapshot.createdAt,
     moves,
+    alreadyPlaced,
     unresolved,
     summary: {
       moveCount: moves.length,
@@ -46,6 +55,7 @@ export function createRestructurePlan(
       organsCreated: moves.filter(
         (move) => move.targetNodeType === RESTRUCTURE_NODE_TYPES.ORGAN,
       ).length,
+      alreadyPlacedCount: alreadyPlaced.length,
       decisionsRequired: unresolved.length,
     },
   };

@@ -175,11 +175,13 @@ const VALID_RESTRUCTURE_PLAN: RestructurePlan = {
   snapshotHash: SNAPSHOT.snapshotHash,
   createdAt: '2026-07-27T00:00:00.000Z',
   moves: [],
+  alreadyPlaced: [],
   unresolved: [],
   summary: {
     moveCount: 0,
     fractalsCreated: 0,
     organsCreated: 0,
+    alreadyPlacedCount: 0,
     decisionsRequired: 0,
   },
 };

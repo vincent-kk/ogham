@@ -36,8 +36,15 @@ envelope before using it.
 
 The plan contains exact `sourcePath -> targetPath` moves, target node type,
 placement basis, consumers, lowest common fractal path, required artifacts,
-affected import rewrites, and unresolved decisions. A non-`ok` status or a
-non-empty `unresolved` list must be shown as unresolved and cannot be executed.
+affected import rewrites, `alreadyPlaced` entries, and unresolved decisions. A
+non-`ok` status or a non-empty `unresolved` list must be shown as unresolved and
+cannot be executed.
+
+`alreadyPlaced` holds requests whose computed target equals their current path.
+They carry the same computed evidence as a move but nothing to execute, so they
+are excluded from `moves` and from postcondition validation — a postcondition
+would otherwise demand that one path be both absent and present. `summary`
+counts them under `alreadyPlacedCount`, separate from `moveCount`.
 
 ## Section 2 — Precondition Validation
 

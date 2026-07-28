@@ -16,6 +16,12 @@
   위해서다. stem이 다르면(디렉터리 index 참조 등) 여전히 decision reason이다.
 - rewrite 결과는 소비자가 쓰던 확장자 표기를 보존한다. core는 어느 확장자가
   유효한지 알지 못하며, 원래 specifier의 표기를 그대로 되돌려 준다.
+- 계산된 target이 source와 같으면 옮길 것이 없다. 그런 instruction은
+  `moves`가 아니라 `alreadyPlaced`로 분리한다. `moves`는 실행 가능한 재배치만
+  담고, postcondition은 `moves`만 순회하므로 "source 부재"와 "target 존재"가
+  같은 경로에 동시에 요구되는 모순이 생기지 않는다.
+- 요청을 조용히 버리지 않는다. 이미 제자리인 유닛도 계산된 LCA·basis·consumer와
+  남은 required artifact를 그대로 실은 instruction으로 돌려준다.
 - validation은 post-execution snapshot만으로 exact target, source 부재,
   artifact, entry point, import boundary와 DAG를 검사한다. import rewrite
   대조도 계획 산출과 같은 stem 판정을 쓴다.
@@ -25,7 +31,8 @@
 ## API Contracts
 
 - `createRestructurePlan(snapshot, input): RestructurePlan` — deterministic
-  plan ID, snapshot timestamp, resolved moves, unresolved와 summary 반환.
+  plan ID, snapshot timestamp, 실행 가능한 moves, alreadyPlaced, unresolved와
+  summary 반환. 분류 순서는 unresolved → alreadyPlaced → moves다.
 - `planMoveInstruction(snapshot, request): MoveInstruction` — 한 request의
   normalized source/target, basis, LCA와 decision 상태 계산.
 - `buildImportRewrites(snapshot, sourcePath, targetPath, consumerPaths):
@@ -60,6 +67,14 @@ ImportRewriteBuildResult` — source를 exact하게 가리키는 path-like
 - stem이 일치하지 않는 디렉터리 index 참조는 decision reason으로 남는다.
 - 소비자를 가진 move가 이 사유만으로 `unresolved`가 되지 않는다.
 
+### AC-restructure-already-placed — 옮길 것 없는 요청
+
+- 계산된 target이 source와 같은 instruction은 `alreadyPlaced`에만 들어가고
+  `moves`에는 없다.
+- 그 계획의 postcondition은 `source-still-present`를 내지 않는다.
+- `summary.moveCount`는 그런 요청을 세지 않고 `alreadyPlacedCount`가 센다.
+- decision이 필요한 요청은 target이 source와 같아도 `unresolved`에 남는다.
+
 ### AC-restructure-validation — 실행 이탈 검출
 
 - stale snapshot은 precondition FAIL이다.
@@ -69,4 +84,4 @@ ImportRewriteBuildResult` — source를 exact하게 가리키는 path-like
 ## Last Updated
 
 2026-07-28 — specifier stem 판정으로 생태계 확장자 관례 아래 exact import
-rewrite 지원.
+rewrite를 지원하고, 옮길 것 없는 요청을 `alreadyPlaced`로 분리한다.

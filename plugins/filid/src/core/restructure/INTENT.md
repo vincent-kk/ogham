@@ -40,7 +40,7 @@
 
 - project file 생성·이동·삭제·수정
 - 언어 확장자, entry filename, alias 의미 또는 grab-bag 이름 추측
-- unresolved move를 실행 가능한 `moves`에 포함
+- unresolved move나 source==target instruction을 실행 가능한 `moves`에 포함
 
 ## Dependencies
 

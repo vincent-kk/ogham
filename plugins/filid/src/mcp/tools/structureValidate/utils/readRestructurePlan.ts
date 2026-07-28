@@ -51,11 +51,13 @@ const RESTRUCTURE_PLAN_SCHEMA = z.object({
   snapshotHash: z.string(),
   createdAt: z.string(),
   moves: z.array(MOVE_INSTRUCTION_SCHEMA),
+  alreadyPlaced: z.array(MOVE_INSTRUCTION_SCHEMA).default([]),
   unresolved: z.array(MOVE_INSTRUCTION_SCHEMA),
   summary: z.object({
     moveCount: z.number(),
     fractalsCreated: z.number(),
     organsCreated: z.number(),
+    alreadyPlacedCount: z.number().default(0),
     decisionsRequired: z.number(),
   }),
 });

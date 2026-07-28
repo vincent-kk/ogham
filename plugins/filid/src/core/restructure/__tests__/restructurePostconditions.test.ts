@@ -143,6 +143,7 @@ function makePlan(
     snapshotHash,
     createdAt: CREATED_AT,
     moves: [move],
+    alreadyPlaced: [],
     unresolved: [],
     summary: {
       moveCount: 1,
@@ -150,6 +151,7 @@ function makePlan(
         move.targetNodeType === RESTRUCTURE_NODE_TYPES.FRACTAL ? 1 : 0,
       organsCreated:
         move.targetNodeType === RESTRUCTURE_NODE_TYPES.ORGAN ? 1 : 0,
+      alreadyPlacedCount: 0,
       decisionsRequired: 0,
     },
   };

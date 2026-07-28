@@ -10,9 +10,10 @@
 ## API Contracts
 
 - Input: core `RestructurePlanInput`.
-- Summary: plan ID/hash, move/fractal/organ/decision count.
+- Summary: plan ID/hash, move/fractal/organ/already-placed/decision count.
 - Data: core `RestructurePlan`, `persistence: always`.
-- unresolved move가 있으면 status는 `indeterminate`다.
+- unresolved move가 있으면 status는 `indeterminate`다. 옮길 것이 없어
+  `alreadyPlaced`로만 분류된 요청은 실패가 아니므로 status를 낮추지 않는다.
 
 ## Acceptance Criteria
 

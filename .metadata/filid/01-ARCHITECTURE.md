@@ -342,38 +342,39 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 
 각 항목은 **관찰 가능한 결과**다. 하나라도 깨지면 그것은 의견 차이가 아니라 회귀다. 상세는 오른쪽 원장 문서에 있다.
 
-| ID    | 계약                                                                                                                                   | 상세                                                |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| AC-01 | spec-document 15 cases는 PASS, 16은 violation                                                                                          | [07](./07-RULES-REFERENCE.md)                       |
-| AC-02 | test-record 32 cases는 PASS, 33은 violation                                                                                            | [07](./07-RULES-REFERENCE.md)                       |
-| AC-03 | 여러 test-record의 총 case 수에는 제한이 없다                                                                                          | [07](./07-RULES-REFERENCE.md)                       |
-| AC-04 | 정적 parameterized 16 rows는 16으로 계산되어 violation                                                                                 | [07](./07-RULES-REFERENCE.md)                       |
-| AC-05 | dynamic·unsupported count는 PASS가 아니라 `indeterminate`/`unsupported`                                                                | [07](./07-RULES-REFERENCE.md)                       |
-| AC-06 | 서로 다른 DETAIL acceptance group의 여러 spec은 PASS                                                                                   | [07](./07-RULES-REFERENCE.md)                       |
-| AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                                                                                     | [07](./07-RULES-REFERENCE.md)                       |
-| AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획된다                                                                | [06](./06-HOW-IT-WORKS.md)                          |
-| AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획된다                                                                               | [06](./06-HOW-IT-WORKS.md)                          |
-| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않는다                                                                                   | ADR-03                                              |
-| AC-11 | stale snapshot은 plan precondition FAIL                                                                                                | [06](./06-HOW-IT-WORKS.md)                          |
-| AC-12 | 잘못된 target·entry·import·DAG는 postcondition FAIL                                                                                    | [06](./06-HOW-IT-WORKS.md)                          |
-| AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path를 반환한다                                                                 | ADR-07 · [08](./08-API-SURFACE.md)                  |
-| AC-14 | 새 verification 생태계는 core·policy·MCP DTO 수정 없이 adapter 등록만으로 추가된다                                                     | ADR-02                                              |
-| AC-15 | Seiri가 설치되지 않아도 filid는 모든 자체 기능을 수행한다                                                                              | 위 소유권 경계표                                    |
-| AC-16 | `@ast-grep/napi`, 전역 npm 탐색, `fast-glob` 없이 build가 성공한다                                                                     | ADR-01 · ADR-09                                     |
-| AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없다                                                                               | [07](./07-RULES-REFERENCE.md)                       |
-| AC-18 | cross-review finding은 FCA 증거만 인용하고 구조 수정은 exact plan을 쓴다                                                               | ADR-10 · [03](./03-LIFECYCLE.md)                    |
-| AC-19 | MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개                                                                                       | [08](./08-API-SURFACE.md) · [03](./03-LIFECYCLE.md) |
-| AC-20 | core·policy·DTO에는 특정 생태계의 확장자·테스트 호출 리터럴이 없다                                                                     | ADR-02                                              |
-| AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                                                         | [03](./03-LIFECYCLE.md)                             |
-| AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 위임하며, 수용·거부 결정과 사유가 기록된다                                                | [03](./03-LIFECYCLE.md)                             |
-| AC-23 | `pipeline --auto`가 pull-request → cross-review → resolve → revalidate를 중단 없이 잇는다                                              | [03](./03-LIFECYCLE.md)                             |
-| AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결된다                                        | [04](./04-USAGE.md)                                 |
-| AC-25 | 문서도 module index도 없는 디렉터리는 `organ`이며, override 경로는 분류를 바꾸지 못한다                                                | ADR-11 · [07](./07-RULES-REFERENCE.md)              |
-| AC-26 | 소유 subtree 안의 organ 직접 참조는 통과, 밖은 위반, `Boundary Exemptions` 선언이 있으면 통과                                          | ADR-12 · [07](./07-RULES-REFERENCE.md)              |
-| AC-27 | 자식 fractal이 부모 소유 organ을 참조해도 cycle로 판정되지 않는다                                                                      | ADR-12 · [06](./06-HOW-IT-WORKS.md)                 |
-| AC-28 | organ 이름 디렉터리가 INTENT.md만으로 fractal이 되면 `organ-no-intentmd` warning이 나오고, DETAIL.md나 module 진입점이 있으면 침묵한다 | ADR-11 · [07](./07-RULES-REFERENCE.md)              |
-| AC-29 | 소스 확장자를 그대로 적을 수 없는 생태계(`.js`로 참조되는 `.ts`, 확장자 생략)에서도 import rewrite가 exact evidence로 산출된다         | [08](./08-API-SURFACE.md)                           |
-| AC-30 | git이 무시하면서 추적하지 않는 경로는 snapshot 증거에 들어가지 않고, git이 없으면 필터 이전과 동일하게 스캔한다                        | [06](./06-HOW-IT-WORKS.md)                          |
+| ID    | 계약                                                                                                                                           | 상세                                                |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| AC-01 | spec-document 15 cases는 PASS, 16은 violation                                                                                                  | [07](./07-RULES-REFERENCE.md)                       |
+| AC-02 | test-record 32 cases는 PASS, 33은 violation                                                                                                    | [07](./07-RULES-REFERENCE.md)                       |
+| AC-03 | 여러 test-record의 총 case 수에는 제한이 없다                                                                                                  | [07](./07-RULES-REFERENCE.md)                       |
+| AC-04 | 정적 parameterized 16 rows는 16으로 계산되어 violation                                                                                         | [07](./07-RULES-REFERENCE.md)                       |
+| AC-05 | dynamic·unsupported count는 PASS가 아니라 `indeterminate`/`unsupported`                                                                        | [07](./07-RULES-REFERENCE.md)                       |
+| AC-06 | 서로 다른 DETAIL acceptance group의 여러 spec은 PASS                                                                                           | [07](./07-RULES-REFERENCE.md)                       |
+| AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                                                                                             | [07](./07-RULES-REFERENCE.md)                       |
+| AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획된다                                                                        | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획된다                                                                                       | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않는다                                                                                           | ADR-03                                              |
+| AC-11 | stale snapshot은 plan precondition FAIL                                                                                                        | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-12 | 잘못된 target·entry·import·DAG는 postcondition FAIL                                                                                            | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path를 반환한다                                                                         | ADR-07 · [08](./08-API-SURFACE.md)                  |
+| AC-14 | 새 verification 생태계는 core·policy·MCP DTO 수정 없이 adapter 등록만으로 추가된다                                                             | ADR-02                                              |
+| AC-15 | Seiri가 설치되지 않아도 filid는 모든 자체 기능을 수행한다                                                                                      | 위 소유권 경계표                                    |
+| AC-16 | `@ast-grep/napi`, 전역 npm 탐색, `fast-glob` 없이 build가 성공한다                                                                             | ADR-01 · ADR-09                                     |
+| AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없다                                                                                       | [07](./07-RULES-REFERENCE.md)                       |
+| AC-18 | cross-review finding은 FCA 증거만 인용하고 구조 수정은 exact plan을 쓴다                                                                       | ADR-10 · [03](./03-LIFECYCLE.md)                    |
+| AC-19 | MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개                                                                                               | [08](./08-API-SURFACE.md) · [03](./03-LIFECYCLE.md) |
+| AC-20 | core·policy·DTO에는 특정 생태계의 확장자·테스트 호출 리터럴이 없다                                                                             | ADR-02                                              |
+| AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                                                                 | [03](./03-LIFECYCLE.md)                             |
+| AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 위임하며, 수용·거부 결정과 사유가 기록된다                                                        | [03](./03-LIFECYCLE.md)                             |
+| AC-23 | `pipeline --auto`가 pull-request → cross-review → resolve → revalidate를 중단 없이 잇는다                                                      | [03](./03-LIFECYCLE.md)                             |
+| AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결된다                                                | [04](./04-USAGE.md)                                 |
+| AC-25 | 문서도 module index도 없는 디렉터리는 `organ`이며, override 경로는 분류를 바꾸지 못한다                                                        | ADR-11 · [07](./07-RULES-REFERENCE.md)              |
+| AC-26 | 소유 subtree 안의 organ 직접 참조는 통과, 밖은 위반, `Boundary Exemptions` 선언이 있으면 통과                                                  | ADR-12 · [07](./07-RULES-REFERENCE.md)              |
+| AC-27 | 자식 fractal이 부모 소유 organ을 참조해도 cycle로 판정되지 않는다                                                                              | ADR-12 · [06](./06-HOW-IT-WORKS.md)                 |
+| AC-28 | organ 이름 디렉터리가 INTENT.md만으로 fractal이 되면 `organ-no-intentmd` warning이 나오고, DETAIL.md나 module 진입점이 있으면 침묵한다         | ADR-11 · [07](./07-RULES-REFERENCE.md)              |
+| AC-29 | 소스 확장자를 그대로 적을 수 없는 생태계(`.js`로 참조되는 `.ts`, 확장자 생략)에서도 import rewrite가 exact evidence로 산출된다                 | [08](./08-API-SURFACE.md)                           |
+| AC-30 | git이 무시하면서 추적하지 않는 경로는 snapshot 증거에 들어가지 않고, git이 없으면 필터 이전과 동일하게 스캔한다                                | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-31 | 계산된 target이 source와 같은 요청은 `alreadyPlaced`로 분리되어 `moves`에 없고, 그 계획의 postcondition은 `source-still-present`를 내지 않는다 | [08](./08-API-SURFACE.md)                           |
 
 ---
 

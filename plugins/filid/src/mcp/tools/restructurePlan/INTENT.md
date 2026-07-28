@@ -12,7 +12,7 @@ snapshot evidence로 `sourcePath → targetPath`, required artifact와 import re
 
 ## Conventions
 
-- resolved와 unresolved move count는 summary에 항상 남긴다.
+- move, already-placed와 unresolved count는 summary에 항상 남긴다.
 - full plan은 inline이 아니라 artifact가 실행자와 validator의 교환 형식이다.
 
 ## Boundaries
