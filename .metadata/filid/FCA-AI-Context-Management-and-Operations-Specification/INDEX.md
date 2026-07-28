@@ -1,8 +1,8 @@
 # 프랙탈 컨텍스트 아키텍처(FCA-AI) 기반 자율형 소프트웨어 공학: 다중 에이전트 시스템의 맥락 관리 및 운영 명세 심층 분석
 
 > **문서 상태: 역사 자료.** 이 디렉터리는 FCA-AI 초기 운영 명세를 보존한다.
-> Filid 1.0의 승인된 규범은
-> [`../vnext-redesign-plan.md`](../vnext-redesign-plan.md)가 우선한다.
+> Filid 1.0의 승인된 규범은 [`../01-ARCHITECTURE.md`](../01-ARCHITECTURE.md)와
+> [`../07-RULES-REFERENCE.md`](../07-RULES-REFERENCE.md)가 우선한다.
 > 이 자료의 CLAUDE.md/SPEC.md 명칭, 3+12 promotion, AST 동기화와 고정
 > 에이전트 체계는 1.0 계약으로 간주하지 않는다.
 

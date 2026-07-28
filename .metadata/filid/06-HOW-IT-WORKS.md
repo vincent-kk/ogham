@@ -178,7 +178,8 @@ projectRoot
      (초과 node도 진단 대상에 남는다)
     │
     ▼
-3. node classification (분류 우선순위 1~7)
+3. node classification (분류 우선순위 1~8, 기본값 organ)
+   → 5단계는 kind: "module" 진입점만 읽는다
     │
     ▼
 4. adapter 증거 수집
@@ -187,10 +188,14 @@ projectRoot
    └─ verification files (role + case count + contract group IDs)
     │
     ▼
-5. legacy evidence (.filid/criteria.md 존재 여부와 이관 대상 경로)
+5. document evidence (INTENT/DETAIL 상태 + 선언된 organ 면책)
+   → organExemptions의 organPath는 소유 프랙탈 기준 절대 경로로 정규화된다
     │
     ▼
-6. snapshotHash = SHA-256(정렬된 상대 경로 + 구조 판정에 쓰인 파일 내용)
+6. legacy evidence (.filid/criteria.md 존재 여부와 이관 대상 경로)
+    │
+    ▼
+7. snapshotHash = SHA-256(정렬된 상대 경로 + 구조 판정에 쓰인 파일 내용)
     │
     ▼
 ProjectSnapshot { tree, dependencyGraph, verification, diagnostics, ... }
@@ -201,7 +206,7 @@ hash 설계에서 중요한 두 가지:
 - **root 경로에 독립적이다.** 같은 트리를 다른 위치에 clone해도 hash가 같다.
 - **mtime을 쓰지 않는다.** checkout이나 touch가 거짓 무효화를 만들지 않는다. 내용이 바뀌어야 hash가 바뀐다.
 
-legacy ledger가 존재하면 그 내용도 hash 입력에 포함된다 — ledger가 바뀌면 snapshot도 새로 만들어야 하기 때문이다.
+legacy ledger가 존재하면 그 내용도 hash 입력에 포함된다 — ledger가 바뀌면 snapshot도 새로 만들어야 하기 때문이다. `documentEvidence` 역시 이미 hash 입력이므로, DETAIL.md의 면책 선언을 고치면 snapshot이 새로 만들어진다. 면책은 별도 hash 계약을 만들지 않고 문서 증거의 일부로 따라온다.
 
 ---
 
@@ -220,6 +225,9 @@ DependencyGraphEdge {
 }
     │
     ▼
+cycle adjacency 구성 — 소유 subtree 안의 organ 참조는 제외
+    │
+    ▼
 cycle 탐지 — 실제 directed closed route를 반환
     │
     ▼
@@ -230,16 +238,28 @@ DependencyGraph { nodePaths, edges, cycles, certainty }
 - 그래프를 만들 수 없는 파일이 cycle 결론에 영향을 줄 수 있으면 **전체 결과가 `indeterminate`** 다. 일부만 확실할 때 확실한 척하지 않는다.
 - 외부 package reference는 unresolved local evidence로 제외된다. 이것이 초기 어댑터의 계약이며, core가 생태계 해석을 하지 않는 이유다.
 
+`buildDependencyGraph(nodePaths, references, certainty, { organPaths })`는 owned-organ 참조를 **edge로는 보존하되 cycle adjacency에서만 뺀다.** 자식 fractal이 부모 소유 organ을 참조하면 organ이 부모로 승격되면서 `부모 → 자식 → 부모` 왕복이 생기는데, 이는 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다 — 지우면 LCA 배치가 내부 소비자에 눈이 먼다.
+
 ### 경계 판정
 
+대상이 organ인지 fractal인지가 먼저 갈린다. `resolveOwningOrganPath(organPaths, ownerPath, resolvedPath)`가 소유자 안에 있으면서 그 파일을 담는 가장 깊은 organ을 돌려주고, 결과가 `null`이면 fractal 경로로 간다.
+
 ```
-edge (from → to)
+edge (from → to), evidence 단위로 판정
     │
-    ├─ from과 to가 같은 fractal        → 내부 참조. 구체 파일 직접 참조가 정상.
-    ├─ to의 진입점을 참조              → OK
-    ├─ to의 내부 파일을 외부에서 참조  → external-import-boundary 위반
-    └─ 부모 barrel을 경유한 형제 참조  → 위반 (부모가 나를 재노출 → 순환)
+    ├─ to의 owned organ을 가리킴
+    │     ├─ 소비자가 소유 subtree 안       → OK (LCA 배치가 만드는 정상 형태)
+    │     ├─ DETAIL.md 면책이 인정됨        → OK
+    │     └─ 그 밖                          → 위반 (organ 경로·소유자·해소책 3안 제시)
+    │
+    └─ to의 fractal 경계
+          ├─ from과 to가 같은 fractal       → 내부 참조. 구체 파일 직접 참조가 정상.
+          ├─ to의 진입점을 참조             → OK
+          ├─ to의 내부 파일을 외부에서 참조 → 위반
+          └─ 부모 barrel을 경유한 형제 참조 → 위반 (부모가 나를 재노출 → 순환)
 ```
+
+organ에 "진입점을 경유하라"를 적용할 수 없는 이유는 정의상 organ이 진입점을 갖지 않기 때문이다. 존재하지 않는 경유지를 요구하면 organ의 모든 파일 참조가 자동으로 위반이 된다.
 
 ---
 

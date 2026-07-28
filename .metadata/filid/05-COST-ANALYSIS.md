@@ -13,8 +13,8 @@
 | 훅                       | 이벤트             | matcher             | timeout | 번들 크기 |
 | ------------------------ | ------------------ | ------------------- | ------- | --------- |
 | `setup.mjs`              | `SessionStart`     | `*`                 | 30초    | 9,582 B   |
-| `user-prompt-submit.mjs` | `UserPromptSubmit` | `*`                 | 5초     | 11,676 B  |
-| `pre-tool-use.mjs`       | `PreToolUse`       | `Read\|Write\|Edit` | 10초    | 24,328 B  |
+| `user-prompt-submit.mjs` | `UserPromptSubmit` | `*`                 | 5초     | 11,702 B  |
+| `pre-tool-use.mjs`       | `PreToolUse`       | `Read\|Write\|Edit` | 10초    | 25,405 B  |
 
 `run-hook.cmd`(54 B, Windows shim)와 `run-agy.mjs`(3,351 B, agy host 러너)는 훅이 아니라 러너다. 실행 진입은 `libs/run.cjs`가 담당한다.
 
@@ -31,7 +31,7 @@
 | light         | 16,384 B | `user-prompt-submit.mjs` |
 | run-agy       | 12,288 B | `run-agy.mjs`            |
 
-현재 사용률은 각각 약 19%, 74%, 71%, 27%다. 캡보다 더 강한 방어선은 금지 모듈 가드다 — 훅 도달 코드가 배럴(`index.js`)을 import하면 esbuild가 배럴이 재노출하는 모듈 전체를 훅 번들로 끌어오고, 이 가드가 그것을 잡는다.
+현재 사용률은 각각 약 20%, 78%, 71%, 27%다. 캡보다 더 강한 방어선은 금지 모듈 가드다 — 훅 도달 코드가 배럴(`index.js`)을 import하면 esbuild가 배럴이 재노출하는 모듈 전체를 훅 번들로 끌어오고, 이 가드가 그것을 잡는다.
 
 ### 호출 빈도
 
@@ -112,16 +112,16 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 | 파일                            | 크기                    | 형식 |
 | ------------------------------- | ----------------------- | ---- |
-| `bridge/mcp-server.cjs`         | 394,460 B               | CJS  |
-| `bridge/pre-tool-use.mjs`       | 24,328 B                | ESM  |
-| `bridge/user-prompt-submit.mjs` | 11,676 B                | ESM  |
+| `bridge/mcp-server.cjs`         | 396,740 B               | CJS  |
+| `bridge/pre-tool-use.mjs`       | 25,405 B                | ESM  |
+| `bridge/user-prompt-submit.mjs` | 11,702 B                | ESM  |
 | `bridge/setup.mjs`              | 9,582 B                 | ESM  |
 | `bridge/run-agy.mjs`            | 3,351 B                 | ESM  |
 | `bridge/run-hook.cmd`           | 54 B                    | cmd  |
 | `public/settings.html`          | 26,157 B                | HTML |
-| **합계**                        | **469,608 B (≈459 KB)** |      |
+| **합계**                        | **472,991 B (≈461 KB)** |      |
 
-훅 3개 합계는 45,586 B다. `dist/` 라이브러리 산출물은 1.0에 존재하지 않는다.
+훅 3개 합계는 46,689 B다. `dist/` 라이브러리 산출물은 1.0에 존재하지 않는다.
 
 ---
 

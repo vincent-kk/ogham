@@ -1,8 +1,8 @@
 # **AI 에이전트를 위한 프랙탈 컨텍스트 아키텍처(FCA-AI) 심층 분석 및 미결제 과제 해결 보고서**
 
 > **문서 상태: 역사적 이론 자료.** Filid 1.0의 제품 경계와 규범은
-> [`vnext-redesign-plan.md`](./vnext-redesign-plan.md)를 따른다. 이 문서의
-> 3+12, promotion, LCOM4/CC 의사결정과 AST 자동화는 배경 가설로만 보존한다.
+> [`01-ARCHITECTURE.md`](./01-ARCHITECTURE.md)와 [`07-RULES-REFERENCE.md`](./07-RULES-REFERENCE.md)를
+> 따른다. 이 문서의 3+12, promotion, LCOM4/CC 의사결정과 AST 자동화는 배경 가설로만 보존한다.
 
 ## **1\. 서론: AI 에이전트와 컨텍스트 부패(Context Rot)의 한계**
 

@@ -140,7 +140,7 @@ findNode / getAncestors / getDescendants / getFractalsUnderOrgans
 classifyNode(ClassifyInput) → NodeType
 ```
 
-**핵심 알고리즘**: 7단계 우선순위 ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#분류-우선순위) 참조). organ 아래에서도 traversal이 멈추지 않으며, organ 안에서 문서나 진입점을 가진 하위 디렉터리는 **독립 fractal로 재분류된다.**
+**핵심 알고리즘**: 8단계 우선순위 ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#분류-우선순위) 참조). **분류는 서술이지 규범이 아니다** — 문서도 module index도 없는 디렉터리는 독립 계약을 주장한 적이 없으므로 기본값이 `organ`이고, 무엇이 fractal이어야 하는가는 `external-import-boundary`의 규칙 결과로 보고된다. 진입점 중 `kind: 'module'`만 분류 신호로 읽으므로 `executable`·`framework`와 config override는 노드 타입을 바꾸지 못한다. organ 아래에서도 traversal이 멈추지 않으며, organ 안에서 문서나 module index를 가진 하위 디렉터리는 **독립 fractal로 재분류된다.**
 
 ### boundaryDetector/
 
@@ -158,7 +158,7 @@ validateDetailMd(content, previous?) → DetailMdValidation
 countLines(content)                  → number
 ```
 
-`acceptanceGroups/` organ이 `### <stable-id> — <title>` 형식의 acceptance group을 추출하고 누락·중복을 거부한다.
+`acceptanceGroups/` organ이 `### <stable-id> — <title>` 형식의 acceptance group을 추출하고 누락·중복을 거부한다. `organExemptions/` organ의 `parseOrganExemptions(content)`가 조건부 `## Organ Exemptions` 섹션을 읽어 `DetailMdValidation.organExemptions`를 채운다. 두 파서는 heading 형태를 공유하지만 ID 문자 집합은 공유하지 않는다 — organ path에는 경로 구분자가 온다. 섹션 부재가 정상이며, `Reason`이 빈 항목은 면책이 아니라 미충족 계약으로 보고된다.
 
 ### ruleEngine/
 
@@ -183,12 +183,17 @@ thrown check와 unsupported evidence는 **PASS가 아니라 finding**으로 변�
 ### dependencyGraph/
 
 ```
-buildDependencyGraph(evidence) → DependencyGraph
-detectCycles(graph)            → string[][]
+buildDependencyGraph(nodePaths, references, certainty?, { organPaths }?) → DependencyGraph
+resolveOwningOrganPath(organPaths, ownerPath, filePath)                 → string | null
+detectCycles(graph)                                                      → string[][]
 getDirectDependencies / topologicalSort
 ```
 
 **핵심 알고리즘**: 어댑터의 dependency reference를 소유 fractal로 승격해 edge를 만들고, 각 edge는 `sourceFile` · `rawSpecifier` · `resolvedPath`를 증거로 갖는다. cycle은 **실제 directed closed route**를 반환한다. 그래프를 만들 수 없는 파일이 결론에 영향을 줄 수 있으면 전체 결과가 `indeterminate`다.
+
+소유 subtree 안의 organ 참조는 **edge로는 보존되지만 cycle adjacency에서 빠진다.** 부모 소유 organ을 자식 fractal이 참조할 때 생기는 `부모 → 자식 → 부모` 왕복은 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다.
+
+`resolveOwningOrganPath`는 `ownerPath` 안에 있으면서 `filePath`를 담는 **가장 깊은** organ을 돌려준다. organ이 fractal의 조상일 수도 있어 owner 안 containment를 함께 요구한다. 진입점에서 공개되므로 그래프와 rule engine이 같은 판정을 공유한다.
 
 `builders/`와 `cycles/` organ으로 나뉘어 있다 — 파일당 공개 함수 하나 규칙 때문이다.
 

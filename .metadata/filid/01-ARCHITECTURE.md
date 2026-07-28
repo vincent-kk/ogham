@@ -1,6 +1,6 @@
 # 01. 전체 구조 & 설계 철학
 
-> `@ogham/filid` 1.0 기준. 설계·개발의 단일 원장은 [vnext-redesign-plan.md](./vnext-redesign-plan.md) 이며, 이 문서는 그 결과로 실제 구현된 상태를 서술한다.
+> `@ogham/filid` 1.0 기준. 이 문서가 아키텍처와 설계 결정의 원장이며, 실제 구현된 상태를 서술한다.
 
 ---
 
@@ -25,12 +25,12 @@ AI 에이전트가 대규모 코드베이스를 다룰 때의 핵심 문제는 �
 
 노드 타입은 넷이다.
 
-| 타입            | 의미                                         | 자동 분류      |
-| --------------- | -------------------------------------------- | -------------- |
-| `fractal`       | 독립 계약과 외부 경계를 가진 모듈            | 예             |
-| `organ`         | 한 프랙탈에 소유되는 내부 관심사 compartment | 예             |
-| `pure-function` | 외부 효과 없이 격리된 단위                   | 증거가 있을 때 |
-| `hybrid`        | 점진적 이행을 위한 수동 transitional 상태    | 아니오         |
+| 타입            | 의미                                         | 자동 분류 조건                              |
+| --------------- | -------------------------------------------- | ------------------------------------------- |
+| `fractal`       | 독립 계약과 외부 경계를 가진 모듈            | 문서 또는 `kind: "module"` 진입점이 있을 때 |
+| `organ`         | 한 프랙탈에 소유되는 내부 관심사 compartment | **기본값** (아무것도 선언하지 않았을 때)    |
+| `pure-function` | 외부 효과 없이 격리된 단위                   | 어댑터가 무부작용을 증명했을 때             |
+| `hybrid`        | 점진적 이행을 위한 수동 transitional 상태    | 없음 — 수동 지정만                          |
 
 그리고 전체 의존성 그래프는 **DAG여야 한다.** 순환은 두 모듈이 하나인 척하는 상태이며, 읽는 순서가 존재하지 않는다는 뜻이다.
 
@@ -134,16 +134,49 @@ AI 에이전트가 대규모 코드베이스를 다룰 때의 핵심 문제는 �
 
 ### 외부 의존성
 
-| 패키지                        | 용도                 |
-| ----------------------------- | -------------------- |
-| `@modelcontextprotocol/sdk`   | MCP 서버 프레임워크  |
-| `zod`                         | 스키마 검증          |
-| `@ogham/cross-platform`       | portable path 계산   |
-| `@ogham/agent-artifacts`      | 호스트 artifact 경로 |
-| `esbuild` (dev)               | 번들링               |
-| `vitest` · `playwright` (dev) | 테스트               |
+런타임 `dependencies`는 둘뿐이다.
+
+| 패키지                      | 용도                |
+| --------------------------- | ------------------- |
+| `@modelcontextprotocol/sdk` | MCP 서버 프레임워크 |
+| `zod`                       | 스키마 검증         |
+
+나머지는 `devDependencies`이며 번들 시점에 소스로 들어가거나 빌드·테스트에만 쓰인다.
+
+| 패키지                     | 용도                                  |
+| -------------------------- | ------------------------------------- |
+| `@ogham/cross-platform`    | portable path 계산 (소스 최다 사용처) |
+| `@ogham/agent-artifacts`   | 호스트 artifact 경로                  |
+| `@ogham/http-kit`          | settings 페이지 loopback 서버         |
+| `@ogham/session-finalizer` | 세션 종료 시 캐시 정리                |
+| `esbuild`                  | MCP·hook 번들링                       |
+| `vitest` · `playwright`    | 단위·E2E 테스트                       |
 
 native 바이너리 의존과 전역 npm 모듈 탐색은 없다.
+
+### 0.8.x에서 사라진 것
+
+1.0은 표면을 줄이는 릴리스다. 아래는 **되돌릴 계획이 없는 제거**이며, 각 항목의 대체 경로를 함께 적는다.
+
+| 사라진 것                                                                   | 개수 변화  | 대체 / 사유                                                            |
+| --------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------- |
+| `@ast-grep/napi` (tree-sitter native)                                       | 의존 제거  | 어댑터의 lexical scanner + certainty 3분법 (ADR-01)                    |
+| `fast-glob`                                                                 | 의존 제거  | `fs.readdirSync` 재귀 traversal                                        |
+| TypeScript Compiler API 사용                                                | 제거       | 같음 (ADR-01)                                                          |
+| npm 라이브러리 표면 (`exports`·`main`·`types`·`dist`)                       | 제거       | `private: true`. 빌드 대상은 MCP(CJS)·hook(ESM) 진입점뿐 (ADR-09)      |
+| `build:compile` (`tsc -p tsconfig.build.json`)                              | 제거       | 라이브러리 산출물이 없으므로 컴파일 단계 자체가 불필요                 |
+| MCP 도구 19개 → **9개**                                                     | −10        | [08-API-SURFACE](./08-API-SURFACE.md#10에서-제거된-도구) 대응표        |
+| 사용자 스킬 19개 → **12개**                                                 | −7         | [03-LIFECYCLE](./03-LIFECYCLE.md) 제거 사유표                          |
+| 페르소나 에이전트 14개 → **0개**                                            | −14        | cross-review 고정 3관점 + 적대적 판정 (ADR-10)                         |
+| Hook 이벤트 4개 → **3개**                                                   | −1         | `SubagentStart` 역할 제한 훅 제거 (에이전트 계층이 사라짐)             |
+| Hook 모듈 `changeTracker`·`agentEnforcer`                                   | 제거       | `PostToolUse` change tracking과 subagent 역할 강제를 하지 않는다       |
+| `.filid/criteria.md` acceptance 원장                                        | 폐지       | DETAIL.md 단일 원장. 발견 시 `legacy-criteria-ledger` finding (ADR-05) |
+| `.filid/debt.md` 부채 원장                                                  | 폐지       | 거부 사유는 `.filid/review/<branch>/justifications.md` 하나로 통일     |
+| "3 basic + 12 complex" 테스트 규칙과 승격                                   | 폐지       | spec-document 15 / test-record 32 역할 구분 (ADR-06)                   |
+| `naming-convention`·`index-barrel-pattern`·CC·LCOM4·file-size·coverage 규칙 | 제거       | 코드 품질은 filid의 개념 소유가 아니다 (ADR-08)                        |
+| canonical 규칙 문서 `filid_fca-policy.md` 1개                               | 4개로 분할 | 로딩 조건이 다른 4개 required 문서                                     |
+
+계약 수준의 파급은 셋이다. **첫째**, 플러그인을 npm 패키지로 import하던 경로가 없다 — 소비 경로는 MCP 도구와 훅뿐이다. **둘째**, 제거된 도구를 호출하던 스킬은 복원이 아니라 9개 도구 위로 재작성됐다. **셋째**, `resolve`는 코드를 쓰지 않는다 — 수용·거부 결정과 기록만 소유하고 적용은 메인 에이전트나 다른 플러그인에 위임하며, 적용되지 않은 수용 항목은 `revalidate`가 `unapplied`로 보고한다.
 
 ---
 
@@ -276,6 +309,66 @@ scan, validate, plan이 같은 `ProjectSnapshot`을 읽는다. hash는 정렬된
 contract·structure·verification 세 관점이 한 번 병렬로 의견을 내고, 별도 판정자가 모든 blocking finding을 `CONFIRMED | PLAUSIBLE | REFUTED`로 판정한다. REFUTED는 verdict에서 빠지되 arbitration log에 남는다.
 
 **근거**: 결정론적 위원회 선출은 재현성을 주었지만 관점 수만큼 비용을 곱했다. FCA 증거는 세 축으로 나뉘고, 오탐 제거는 관점 추가가 아니라 반증으로 해결된다.
+
+### ADR-11 — 분류는 서술이지 규범이 아니다
+
+**상태**: 채택 (기본값 `fractal` → `organ`)
+
+분류기는 디스크에 있는 파일만 관찰한다. 문서도 module index도 선언하지 않은 디렉터리는 `organ`이다. 무엇이 fractal이어야 *하는가*는 분류 기본값이 아니라 규칙 결과다 — 소유 subtree 밖에서 소비되는 organ을 `external-import-boundary`가 소비자 경로를 증거로 보고한다.
+
+**근거**: 기본값이 fractal이면 아직 FCA를 채택하지 않은 코드베이스의 모든 디렉터리에 "INTENT.md를 추가하라"는 요구가 자동 생성되고, 분류가 "하위 디렉터리가 우연히 있는지" 같은 우발적 사실에 좌우된다. 반대로 분류기를 `INTENT.md ∨ index`만으로 좁히면 채택 과정에 눈이 먼다 — 아무것도 fractal이 아니니 `setup`이 제안할 것이 없다. 두 일을 분리하는 것이 해법이다: 분류기는 관찰하고, 규칙 엔진이 누락 fractal을 보고한다.
+
+**트레이드오프**: FCA를 이미 채택한 트리에서도 index 없는 fractal은 organ으로 보인다. 그것이 의도다 — 진입점 없는 모듈은 아직 경계를 선언하지 않았다.
+
+**파급**: 분류 입력은 `kind: "module"` 진입점으로 한정된다. `executable`·`framework` 진입점과 config `entryPointOverrides`로 주입된 경로는 분류를 바꾸지 못한다. 그 구분이 없으면 `SKILL.md` 같은 markdown-as-implementation이 산문 디렉터리를 fractal로 만들어, 코드용으로 쓰인 규칙을 산문에 적용하게 된다.
+
+### ADR-12 — organ 접근은 소비자 위치로 판정하고, 면책은 선언한다
+
+**상태**: 채택
+
+organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유하라"를 적용할 대상이 없다. 소유 subtree **안**에서는 구체 파일 직접 참조가 정상이고, **밖**에서는 소유 프랙탈의 진입점을 경유한다. 밖에서의 직접 참조는 소유 프랙탈 `DETAIL.md`의 조건부 `## Organ Exemptions`에 선언된 면책이 있을 때만 허용된다.
+
+**근거**: 존재하지 않는 경유지를 요구하면 organ의 모든 파일 참조가 자동으로 위반이 된다. 이 저장소 자체 스캔에서 `external-import-boundary` 708건 중 대부분이 organ 대상이었다 — 708개 import를 고칠 문제가 아니라 규칙 의미를 정할 문제였다.
+
+**트레이드오프**: 면책이 규칙을 끄는 우회로가 될 수 있다. 그래서 `Reason`이 load-bearing이다 — 비어 있으면 면책이 아니라 미충족 계약으로 보고된다. 직접 import 면책의 표준 사례는 훅 번들이다.
+
+**파급**: 소유 subtree 안의 organ 참조는 cycle adjacency에서도 빠진다. 자식이 부모 소유 organ을 참조해 생기는 왕복은 승격 인공물이지 런타임 순환이 아니다. edge 자체는 보존한다 — `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다.
+
+---
+
+## 1.0 계약 수용 기준
+
+각 항목은 **관찰 가능한 결과**다. 하나라도 깨지면 그것은 의견 차이가 아니라 회귀다. 상세는 오른쪽 원장 문서에 있다.
+
+| ID    | 계약                                                                                            | 상세                                                |
+| ----- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| AC-01 | spec-document 15 cases는 PASS, 16은 violation                                                   | [07](./07-RULES-REFERENCE.md)                       |
+| AC-02 | test-record 32 cases는 PASS, 33은 violation                                                     | [07](./07-RULES-REFERENCE.md)                       |
+| AC-03 | 여러 test-record의 총 case 수에는 제한이 없다                                                   | [07](./07-RULES-REFERENCE.md)                       |
+| AC-04 | 정적 parameterized 16 rows는 16으로 계산되어 violation                                          | [07](./07-RULES-REFERENCE.md)                       |
+| AC-05 | dynamic·unsupported count는 PASS가 아니라 `indeterminate`/`unsupported`                         | [07](./07-RULES-REFERENCE.md)                       |
+| AC-06 | 서로 다른 DETAIL acceptance group의 여러 spec은 PASS                                            | [07](./07-RULES-REFERENCE.md)                       |
+| AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                                              | [07](./07-RULES-REFERENCE.md)                       |
+| AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획된다                         | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획된다                                        | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않는다                                            | ADR-03                                              |
+| AC-11 | stale snapshot은 plan precondition FAIL                                                         | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-12 | 잘못된 target·entry·import·DAG는 postcondition FAIL                                             | [06](./06-HOW-IT-WORKS.md)                          |
+| AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path를 반환한다                          | ADR-07 · [08](./08-API-SURFACE.md)                  |
+| AC-14 | 새 verification 생태계는 core·policy·MCP DTO 수정 없이 adapter 등록만으로 추가된다              | ADR-02                                              |
+| AC-15 | Seiri가 설치되지 않아도 filid는 모든 자체 기능을 수행한다                                       | 위 소유권 경계표                                    |
+| AC-16 | `@ast-grep/napi`, 전역 npm 탐색, `fast-glob` 없이 build가 성공한다                              | ADR-01 · ADR-09                                     |
+| AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없다                                        | [07](./07-RULES-REFERENCE.md)                       |
+| AC-18 | cross-review finding은 FCA 증거만 인용하고 구조 수정은 exact plan을 쓴다                        | ADR-10 · [03](./03-LIFECYCLE.md)                    |
+| AC-19 | MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개                                                | [08](./08-API-SURFACE.md) · [03](./03-LIFECYCLE.md) |
+| AC-20 | core·policy·DTO에는 특정 생태계의 확장자·테스트 호출 리터럴이 없다                              | ADR-02                                              |
+| AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                  | [03](./03-LIFECYCLE.md)                             |
+| AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 위임하며, 수용·거부 결정과 사유가 기록된다         | [03](./03-LIFECYCLE.md)                             |
+| AC-23 | `pipeline --auto`가 pull-request → cross-review → resolve → revalidate를 중단 없이 잇는다       | [03](./03-LIFECYCLE.md)                             |
+| AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결된다 | [04](./04-USAGE.md)                                 |
+| AC-25 | 문서도 module index도 없는 디렉터리는 `organ`이며, override 경로는 분류를 바꾸지 못한다         | ADR-11 · [07](./07-RULES-REFERENCE.md)              |
+| AC-26 | 소유 subtree 안의 organ 직접 참조는 통과, 밖은 위반, `Organ Exemptions` 선언이 있으면 통과      | ADR-12 · [07](./07-RULES-REFERENCE.md)              |
+| AC-27 | 자식 fractal이 부모 소유 organ을 참조해도 cycle로 판정되지 않는다                               | ADR-12 · [06](./06-HOW-IT-WORKS.md)                 |
 
 ---
 

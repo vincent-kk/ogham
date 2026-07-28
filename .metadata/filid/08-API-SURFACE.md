@@ -264,6 +264,16 @@ interface EntryPointDescriptor {
   surface: "enumerated" | "opaque" | "unsupported";
 }
 
+interface FractalDocumentEvidence {
+  intentPath: string | null;
+  detailPath: string | null;
+  intentLines?: number;
+  status: "valid" | "violations" | "missing";
+  findings: DocumentContractFinding[];
+  /** 소유자 기준 절대 경로로 정규화된 organ 면책. 섹션이 없으면 부재. */
+  organExemptions?: OrganExemptionDeclaration[];
+}
+
 interface FractalNode {
   path: string;
   name: string;
@@ -271,15 +281,19 @@ interface FractalNode {
   parentFractalPath: string | null;
   childFractalPaths: string[];
   organPaths: string[];
-  hasIntentDocument: boolean;
-  hasDetailDocument: boolean;
+  hasIntentMd: boolean;
+  hasDetailMd: boolean;
   entryPoints: EntryPointDescriptor[];
+  entryPointSurfaces?: EntryPointSurfaceEvidence[];
+  documentEvidence?: FractalDocumentEvidence;
   depth: number;
   peerFiles: string[];
 }
 ```
 
 core의 노드는 **진입점 파일명을 직접 알지 않는다.** 어댑터가 정확한 파일 경로와 종류를 제공한다.
+
+`kind`는 표면 정보이자 **분류 입력**이다. `classifyNode`는 `kind: "module"`만 fractal 신호로 읽는다. `executable`·`framework`와 config `entryPointOverrides`로 주입된 경로는 진입점 목록에는 들어가지만 노드 타입을 바꾸지 않는다. override가 `executable` / `surface: "enumerated"`로 보고되는 이유도 여기 있다 — `framework`를 쓰면 `surface`가 `opaque`로 파생되어 정당한 override마다 영구적인 `entry-point-surface` 경고가 생긴다.
 
 ### snapshot과 그래프
 
@@ -498,6 +512,32 @@ interface ThreeTierBoundary {
 interface DetailAcceptanceGroup {
   id: string;
   title: string;
+  line: number;
+}
+
+interface OrganExemptionDeclaration {
+  /** 선언된 그대로의 organ path. 저장 시 소유자 기준으로 정규화된다. */
+  organPath: string;
+  title: string;
+  /** 소비자 glob. barrel 경유 접근이면 리터럴 `entry-point`. */
+  consumers: string[];
+  /** 명시적 `Direct import: allowed` 일 때만 true. */
+  directImport: boolean;
+  reason: string;
+  line: number;
+}
+
+interface OrganExemptionValidation {
+  exemptions: OrganExemptionDeclaration[];
+  violations: DocumentViolation[];
+}
+
+interface DetailMdValidation {
+  valid: boolean;
+  violations: DocumentViolation[];
+  acceptanceGroups: DetailAcceptanceGroup[];
+  /** 이 프랙탈이 선언한 organ 면책. 섹션이 없으면 빈 배열. */
+  organExemptions: OrganExemptionDeclaration[];
 }
 
 interface DocumentViolation {
@@ -508,6 +548,8 @@ interface DocumentViolation {
 ```
 
 DETAIL.md 필수 섹션은 `## Requirements`, `## API Contracts`, `## Acceptance Criteria`, `## Last Updated` 넷이다. acceptance group은 `### <stable-id> — <title>` 형식이며 그 문서 안에서 ID가 고유해야 한다.
+
+`## Organ Exemptions`는 **조건부 섹션**이다. 면책을 실제로 부여하는 프랙탈만 갖고, 부재가 정상이며 그 자체로는 위반이 아니다. 항목 heading은 acceptance group과 같은 `### <organ path> — <title>` 형태를 쓰지만 ID 문자 집합은 공유하지 않는다 — organ path에는 경로 구분자가 온다. `reason`이 비면 면책이 아니라 미충족 계약으로 보고된다.
 
 ### 훅 (`types/hooks.ts`)
 
@@ -583,7 +625,7 @@ interface AllowedPeerOverride {
 
 - `language`는 **문서 출력 언어**이며 프로그래밍 언어 선택값이 아니다.
 - `explicit` 모드에서 `enabled`가 빈 배열이면 validation error다.
-- `entryPointOverrides`의 key는 **adapter ID**다. core가 파일명 의미를 해석하지 않고 해당 어댑터에 전달한다.
+- `entryPointOverrides`의 key는 **adapter ID**다. core가 파일명 의미를 해석하지 않고 해당 어댑터에 전달한다. 주입된 경로는 `kind: "executable"`로 보고되므로 **노드 분류를 바꾸지 않는다.** `zero-peer-file`과 `entry-point-surface`의 입력일 뿐이다.
 - v1 config는 읽을 때 메모리에서 v2로 변환하고 `config-migration-required` 진단을 낸다. **자동으로 파일을 쓰지 않는다.**
 - 스키마는 `strict`다. 알 수 없는 key는 무시되지 않고 거부된다.
 

@@ -31,15 +31,17 @@ yarn version:sync       # package.json → src/version.ts
 - **훅 수정**: `src/hooks/<name>/<name>.entry.ts` 수정 후 `yarn build:plugin` 으로 재빌드
 - **훅 직접 import 원칙**: 훅 도달 코드는 배럴(`index.js`) import 금지 — 구체 파일 직접 import (`../shared/shared.js` 패턴). 리뷰가 module-entry-point 위반으로 지적해도 훅 코드는 예외 (루트 CLAUDE.md 참조)
 - **테스트**: `src/**/__tests__/**/*.{test,spec}.ts`, 벤치마크는 `**/*.bench.ts`. spec-document 는 파일당 15 cases, test-record 는 32 cases 상한.
+- **경로 처리**: machine path 의 비교·조합·정규화는 host 파일시스템을 직접 읽는 경계를 제외하고 `@ogham/cross-platform` 의 portable API 를 쓴다. `fs.globSync`/`fs.glob` 은 Node 22+ 이므로 금지 — `fs.readdirSync(dir, { withFileTypes: true })` 재귀만 사용한다.
+- **상수 배치**: 정적 상수 객체·배열은 함수 밖 module scope 에 둔다. 반복되는 안정 문자열은 `src/constants` 의 object enum 이 소유하고, 함수 안에는 입력으로부터 계산되는 동적 collection 만 둔다.
+- **규칙 문서 변경**: `templates/rules/*.md` 를 고치면 `yarn build:rules` + `rule_docs_sync` 배포까지가 한 단위다. 원본만 고치면 이 저장소의 에이전트가 stale 규칙을 읽는다.
 - **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용
 - **MCP 도구 참조**: 스킬은 full-form `mcp__plugin_filid_tools__<tool>` 로 참조 (서버 키 `tools`). short-form `mcp_tools_*` 는 서브에이전트에서 해석되지 않으므로 사용 금지.
 
 ## References
 
-`../../.metadata/filid/`:
+`../../.metadata/filid/` (01–08 이 1.0 설계·계약의 원장):
 
-- `vnext-redesign-plan.md` — 1.0 설계·개발 단일 원장
-- `01-ARCHITECTURE.md` — 설계
+- `01-ARCHITECTURE.md` — 설계·ADR
 - `06-HOW-IT-WORKS.md` — 동작 원리
 - `07-RULES-REFERENCE.md` — 규칙
 - `08-API-SURFACE.md` — API

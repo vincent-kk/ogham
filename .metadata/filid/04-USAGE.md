@@ -73,6 +73,26 @@ yarn filid test:e2e       # 설정 페이지 Playwright e2e
 yarn filid bench:run      # 벤치마크
 ```
 
+### 릴리스 전 전체 검증 순서
+
+계약 수준 변경([01-ARCHITECTURE의 수용 기준](./01-ARCHITECTURE.md#10-계약-수용-기준))을 건드린 뒤에는 이 순서를 그대로 실행한다.
+
+```bash
+yarn filid typecheck
+yarn filid test:run
+yarn filid build
+yarn plugin:adapters:check
+yarn filid test:e2e
+rg -n "@ast-grep/napi|fast-glob|ast_analyze|ast_grep_search|ast_grep_replace|test_metrics|3\+12|LCOM4|CC_THRESHOLD" plugins/filid --glob '!bridge/**' --glob '!public/**'
+git diff --check
+git status --short
+```
+
+- 앞의 다섯 명령과 `git diff --check`는 exit 0이어야 한다.
+- `rg`는 live source·skill·rule에서 매치 0이어야 한다. 남는 매치는 "의존하지 않는다"는 선언, 제거된 도구의 oracle, 훅 번들 가드 자체뿐이다.
+- build 후 생성물 diff를 검토해 손편집 흔적이 없어야 한다.
+- **canonical 규칙 문서를 고쳤다면 `yarn filid build:rules` 뒤 `rule_docs_sync`로 배포까지 해야 한 단위가 끝난다.** 원본만 고치면 이 저장소의 에이전트가 stale 규칙을 계속 읽는다.
+
 ### 생성물 편집 금지
 
 `bridge/`, `public/`, `.codex-plugin/`, 루트 `plugin.json`, `mcp_config.json`, `hooks.json`, `AGENTS.md`, `src/version.ts`는 생성물이다. 손으로 고치지 않고 생성기를 고친다. 특히 루트 `AGENTS.md`의 원본은 `plugins/filid/templates/rules/`의 규칙 문서 4개(`filid_fractal-boundaries.md`, `filid_module-documents.md`, `filid_verification-records.md`, `filid_code-placement.md`)이며, 각각의 해시가 `templates/rules/manifest.json`에 기록된다. Codex는 디렉토리가 아니라 단일 지시 파일만 읽으므로 4개 문서가 `AGENTS.md` 안에서 파일명으로 구분된 marker 구간이 된다.
@@ -119,6 +139,8 @@ yarn filid bench:run      # 벤치마크
 | `structure.additionalOrganNames`   | organ으로 취급할 추가 디렉터리 이름                               |
 | `structure.additionalAllowedPeers` | fractal root 허용 peer. `paths` glob으로 범위 제한 가능           |
 | `structure.entryPointOverrides`    | **key가 adapter ID다.** core가 파일명 의미를 해석하지 않고 전달   |
+
+`entryPointOverrides`로 주입한 경로는 `kind: "executable"`로 보고되어 **노드 분류를 바꾸지 않는다.** `zero-peer-file`의 허용 peer와 `entry-point-surface`의 입력으로만 쓰인다. 디렉터리를 fractal로 만들려면 `INTENT.md`/`DETAIL.md`를 두거나 어댑터가 module index로 인식하는 진입점(예: `index.ts`)을 둔다.
 
 스키마는 `strict`다. 알 수 없는 key는 조용히 무시되지 않고 거부된다.
 
@@ -395,6 +417,32 @@ v1 config는 읽을 때 메모리에서만 v2로 변환된다. 디스크 기록�
 ### scan 결과가 잘려 보임
 
 16 KiB를 넘으면 `data`가 artifact로 이동한다. envelope의 `artifact.path`를 읽는다. artifact는 임시 자료다. 사라졌으면 snapshot을 다시 만들고 재실행한다.
+
+### organ 파일 참조가 `external-import-boundary` 위반으로 잡힘
+
+먼저 소비자가 **어디에 앉아 있는지**를 본다. 소유 프랙탈 subtree 안에서의 직접 참조는 위반이 아니다 — 그런데도 잡힌다면 소비자가 소유자 밖에 있는 것이다.
+
+해소책은 셋이며 finding이 세 가지를 모두 제시한다.
+
+1. **organ을 fractal로 승격** — 외부 계약이 실재한다면 문서와 진입점을 준다.
+2. **소비자들의 lowest common fractal로 이동** — `restructure_plan`이 목표 경로를 계산한다.
+3. **면책 선언** — 소유 프랙탈의 `DETAIL.md`에 조건부 섹션을 추가한다.
+
+```md
+## Organ Exemptions
+
+### /abs/path/to/owner/utils — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`
+- **Direct import**: allowed
+- **Reason**: 훅 번들이 배럴을 import하면 배럴이 재수출하는 모듈 전체가 번들에 들어온다.
+```
+
+네 조건이 모두 맞아야 면책이 인정된다: organ path 일치 · `Direct import: allowed` · 소비자 glob 매치 · `Reason` 비어 있지 않음. **`Reason`을 비우면 면책이 무효가 될 뿐 아니라 `detail-document-contract` finding이 하나 더 붙는다.**
+
+### 스킬·문서 디렉터리에 INTENT.md를 요구받음
+
+1.0에서는 발생하지 않는다. 문서도 module index도 없는 디렉터리는 `organ`으로 분류되므로 문서 계약이 적용되지 않는다. 여전히 발생한다면 그 디렉터리에 `INTENT.md`/`DETAIL.md`가 이미 있거나, 어댑터가 `index.ts` 같은 module index를 인식한 것이다. `entryPointOverrides`에 `SKILL.md` 같은 항목을 넣어도 분류는 바뀌지 않는다.
 
 ---
 

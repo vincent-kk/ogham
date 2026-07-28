@@ -35,7 +35,19 @@
 
 `pipeline`이 주 사용 경로다. 네 단계를 진입점 자동 감지와 함께 한 번에 돈다.
 
-1.0에는 승격(`promote`), 동기화(`sync`), 갱신(`update`), 전체 구조 리뷰(`structure-review`), 수확(`harvest`), 설정 마법사(`config-wizard`), AST fallback(`ast-fallback`)이 없다. 각각의 제거 사유는 계획 원장의 「목표 스킬 표면」 절에 있다.
+### 1.0에서 제거된 스킬
+
+| 스킬               | 제거 사유                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ast-fallback`     | 제거된 AST 기능의 fallback이다. 원래 기능이 없으므로 fallback도 대상이 없다.                                                               |
+| `structure-review` | `scan`(전체 감사)과 `cross-review`(변경 감사)가 이미 범위를 나눠 갖는다. 세 번째 진입점은 어느 쪽을 써야 하는지만 모호하게 만든다.         |
+| `promote`          | spec-document와 test-record는 서로 다른 문서 역할이며 승격 관계가 아니다(ADR-06). 승격이라는 동작 자체가 1.0 모델에 없다.                  |
+| `harvest`          | acceptance 원장을 DETAIL.md 하나로 통일했으므로(ADR-05) `.filid/criteria.md`에 claim을 수확해 넣을 대상이 없다.                            |
+| `sync`             | 한 스킬이 구조 이동과 문서 갱신을 동시에 하면 어느 쪽이 실패했는지 구분되지 않는다. 구조는 `restructure`, 문서는 `enrich-docs`로 분리했다. |
+| `update`           | 코드 변경 뒤 문서·테스트를 자동 재작성하는 workflow다. 승인 지점이 없어 "무엇이 왜 바뀌었는지"가 남지 않는다. `enrich-docs`가 대체한다.    |
+| `config-wizard`    | config 관리는 `project_init`(생성)과 `open_settings`(조회·수정) 두 MCP 도구가 이미 소유한다.                                               |
+
+merge-track 네 스킬은 한때 제거 대상이었으나 되살렸다. 다만 모두 제거된 도구(`review_manage`, `debt_manage`, `ast_analyze`, `test_metrics`)와 `code-surgeon` 에이전트에 걸려 있었으므로 **원본 복원이 아니라 9개 도구 표면 위로 재작성**됐다.
 
 문서 갱신 책임의 소유자는 다음과 같다.
 

@@ -1,37 +1,46 @@
 # .metadata — filid 플러그인 설계 문서 아카이브
 
-> **목적**: 코드를 읽지 않아도 filid 플러그인의 전체상을 이해할 수 있는 역설계 문서 모음.
+> **목적**: 코드를 읽지 않아도 filid 플러그인의 전체상을 이해할 수 있는 설계 문서 모음.
 >
 > FCA-AI (Fractal Context Architecture for AI Agents) 규칙 시행 플러그인의 구조, 설계 의도,
 > 라이프사이클, 사용법, 비용 분석, 동작 메커니즘을 문서화한다.
 
 ## 문서 상태와 우선순위
 
-| 문서                                               | 상태                 | 용도                                     |
-| -------------------------------------------------- | -------------------- | ---------------------------------------- |
-| [vnext-redesign-plan.md](./vnext-redesign-plan.md) | **승인된 단일 원장** | Filid 1.0 목표 설계와 개발 순서          |
-| [slimdown-plan.md](./slimdown-plan.md)             | 대체됨               | v0.8.2 경량화 분석의 역사적 참고         |
-| 01–08 역설계 문서                                  | 현재 구현 스냅샷     | v0.8.x 코드를 설명하며 1.0 구현 후 갱신  |
-| FCA-AI 원자료·운영 명세                            | 역사 자료            | 사상의 출발점; 1.0 규범은 새 원장이 우선 |
+| 문서                    | 상태          | 용도                                       |
+| ----------------------- | ------------- | ------------------------------------------ |
+| 01–08                   | **현행 원장** | `@ogham/filid` 1.0의 승인된 설계·계약 서술 |
+| FCA-AI 원자료·운영 명세 | 역사 자료     | 사상의 출발점; 1.0 규범은 01–08이 우선     |
 
-목표 상태를 판단할 때는 `vnext-redesign-plan.md`를, 현재 코드가 실제로 무엇을
-하는지 판단할 때는 01–08 문서와 코드를 사용한다. 구현 전에 01–08 문서를 목표
-상태로 덮어써 현재와 목표를 혼동하지 않는다.
+01–08이 현재 계약의 단일 원장이다. 별도의 목표/계획 원장은 없다 — 목표가 곧 현재 구현이며,
+설계가 바뀌면 코드와 이 문서를 같은 변경에서 함께 고친다. 코드와 이 문서가 어긋나면
+**코드가 사실이고 문서가 결함이다.**
+
+각 문서는 자기 영역의 원장이다. 다른 문서에서 같은 내용을 다시 쓰지 않고 링크한다.
+
+| 영역                           | 원장 문서          |
+| ------------------------------ | ------------------ |
+| 아키텍처 결정(ADR)·제거 이력   | 01-ARCHITECTURE    |
+| 모듈 구성과 알고리즘           | 02-BLUEPRINT       |
+| 스킬 워크플로우와 훅 타임라인  | 03-LIFECYCLE       |
+| 설치·설정·트러블슈팅           | 04-USAGE           |
+| 규칙·상수·임계값·분류 우선순위 | 07-RULES-REFERENCE |
+| MCP 계약과 DTO                 | 08-API-SURFACE     |
 
 ---
 
 ## 문서 목록
 
-| #   | 문서                                          | 설명                                                                                          |
-| --- | --------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 01  | [ARCHITECTURE.md](./01-ARCHITECTURE.md)       | 전체 구조 & 설계 철학 — FCA-AI 이론 매핑, 4계층 아키텍처, 디렉토리 구조, ADR                  |
-| 02  | [BLUEPRINT.md](./02-BLUEPRINT.md)             | 모듈별 기술 청사진 — 6개 도메인 30+ 모듈의 목적, 알고리즘, 입출력, 의존 관계                  |
-| 03  | [LIFECYCLE.md](./03-LIFECYCLE.md)             | 라이프사이클 & 워크플로우 — 19개 스킬 기반, 에이전트 협업, Hook 타임라인, 거버넌스 파이프라인 |
-| 04  | [USAGE.md](./04-USAGE.md)                     | 설치, 설정, 사용 방법 — 빌드, 설정 파일, 스킬/MCP/에이전트 사용법, 트러블슈팅                 |
-| 05  | [COST-ANALYSIS.md](./05-COST-ANALYSIS.md)     | 운영 비용 & 성능 영향 — Hook 오버헤드, MCP 비용, 컨텍스트 토큰, 번들 크기                     |
-| 06  | [HOW-IT-WORKS.md](./06-HOW-IT-WORKS.md)       | 내부 동작 메커니즘 — Hook 파이프라인, AST 엔진, 의사결정 트리, MCP 라우팅, 압축               |
-| 07  | [RULES-REFERENCE.md](./07-RULES-REFERENCE.md) | FCA-AI 규칙 레퍼런스 — 전체 상수, 임계값, 규칙 매트릭스, 분류 우선순위                        |
-| 08  | [API-SURFACE.md](./08-API-SURFACE.md)         | 전체 공개 API — 94+ 함수 + 30+ 타입 export, MCP 도구 스키마, 타입 정의                        |
+| #   | 문서                                          | 설명                                                                                       |
+| --- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 01  | [ARCHITECTURE.md](./01-ARCHITECTURE.md)       | 전체 구조 & 설계 철학 — FCA-AI 이론 매핑, 레이어, 디렉터리 구조, ADR 12개, 0.8.x 제거 목록 |
+| 02  | [BLUEPRINT.md](./02-BLUEPRINT.md)             | 모듈별 기술 청사진 — 13개 도메인의 목적, 알고리즘, 입출력, 의존 방향                       |
+| 03  | [LIFECYCLE.md](./03-LIFECYCLE.md)             | 라이프사이클 & 워크플로우 — 스킬 12개, merge-track 5단계, Hook 이벤트 타임라인             |
+| 04  | [USAGE.md](./04-USAGE.md)                     | 설치, 설정, 사용 방법 — 빌드, config v2, 스킬·MCP 사용법, 트러블슈팅                       |
+| 05  | [COST-ANALYSIS.md](./05-COST-ANALYSIS.md)     | 운영 비용 & 성능 영향 — Hook 오버헤드, MCP 비용, 컨텍스트 예산, 번들 크기                  |
+| 06  | [HOW-IT-WORKS.md](./06-HOW-IT-WORKS.md)       | 내부 동작 메커니즘 — Hook 파이프라인, lexical scanner, snapshot, DAG, LCA, envelope        |
+| 07  | [RULES-REFERENCE.md](./07-RULES-REFERENCE.md) | FCA-AI 규칙 레퍼런스 — 규칙 15개, 상수, 분류 우선순위, organ 면책, 검증 문서 모델          |
+| 08  | [API-SURFACE.md](./08-API-SURFACE.md)         | 전체 공개 API — MCP 도구 9개 스키마, 공통 envelope, 핵심 DTO, config 계약                  |
 
 ---
 
@@ -58,28 +67,34 @@
 
 ## 문서 갱신 규칙
 
-| 변경 유형          | 갱신 필요 문서                                  |
-| ------------------ | ----------------------------------------------- |
-| 새 모듈 추가       | 02-BLUEPRINT, 08-API-SURFACE                    |
-| 상수/임계값 변경   | 07-RULES-REFERENCE                              |
-| Hook 추가/수정     | 03-LIFECYCLE, 06-HOW-IT-WORKS, 05-COST-ANALYSIS |
-| MCP 도구 추가/수정 | 04-USAGE, 06-HOW-IT-WORKS, 08-API-SURFACE       |
-| 스킬 추가/수정     | 03-LIFECYCLE, 04-USAGE                          |
-| 에이전트 추가/수정 | 03-LIFECYCLE, 04-USAGE, 07-RULES-REFERENCE      |
-| 아키텍처 변경      | 01-ARCHITECTURE, 02-BLUEPRINT                   |
-| 빌드/의존성 변경   | 04-USAGE, 05-COST-ANALYSIS                      |
+| 변경 유형          | 갱신 필요 문서                                      |
+| ------------------ | --------------------------------------------------- |
+| 새 모듈 추가       | 02-BLUEPRINT, 08-API-SURFACE                        |
+| 상수/임계값 변경   | 07-RULES-REFERENCE                                  |
+| 규칙 의미 변경     | 07-RULES-REFERENCE, 06-HOW-IT-WORKS, 배포 규칙 문서 |
+| Hook 추가/수정     | 03-LIFECYCLE, 06-HOW-IT-WORKS, 05-COST-ANALYSIS     |
+| MCP 도구 추가/수정 | 04-USAGE, 06-HOW-IT-WORKS, 08-API-SURFACE           |
+| 스킬 추가/수정     | 03-LIFECYCLE, 04-USAGE                              |
+| 아키텍처 결정      | 01-ARCHITECTURE, 02-BLUEPRINT                       |
+| 빌드/의존성 변경   | 01-ARCHITECTURE, 04-USAGE, 05-COST-ANALYSIS         |
+
+**canonical 규칙 문서(`plugins/filid/templates/rules/`)를 고치면 `yarn filid build:rules` + `rule_docs_sync`까지가 한 단위다.** 원본만 고치고 재배포하지 않으면 이 저장소에서 일하는 에이전트가 stale 규칙을 읽는다.
 
 ---
 
 ## 플러그인 핵심 수치
 
-| 항목             | 값                                                                                                                                                                                                                                                                                                                                                         |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 소스 파일        | 78개 `.ts` (테스트 제외)                                                                                                                                                                                                                                                                                                                                   |
-| 타입/인터페이스  | 30개+                                                                                                                                                                                                                                                                                                                                                      |
-| 공개 함수/클래스 | 94개+                                                                                                                                                                                                                                                                                                                                                      |
-| MCP 도구         | 14개+ (ast_analyze, fractal_navigate, doc_compress, test_metrics, fractal_scan, drift_detect, lca_resolve, rule_query, structure_validate, review_manage, debt_manage, ast_grep_search, ast_grep_replace, cache_manage)                                                                                                                                    |
-| Hook 스크립트    | 6개 브리지 파일 (pre-tool-use.mjs, agent-enforcer.mjs, context-injector.mjs, plan-gate.mjs, session-cleanup.mjs, setup.mjs)                                                                                                                                                                                                                                |
-| 에이전트         | 7개 (fractal-architect, implementer, context-manager, qa-reviewer, code-surgeon, drift-analyzer, restructurer)                                                                                                                                                                                                                                             |
-| 스킬             | 19개 (/filid:setup, /filid:scan, /filid:sync, /filid:structure-review, /filid:promote, /filid:context-query, /filid:cross-review, /filid:resolve, /filid:revalidate, /filid:guide, /filid:restructure, /filid:migrate, /filid:pipeline, /filid:pull-request, /filid:update, /filid:ast-fallback, /filid:config-wizard, /filid:enrich-docs, /filid:harvest) |
-| 번들 크기        | ~755KB (MCP ~726KB + Hooks ~29KB)                                                                                                                                                                                                                                                                                                                          |
+| 항목           | 값                                                                                                                                                          |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 버전           | 1.0.0 (`private: true` — npm 라이브러리 표면 없음)                                                                                                          |
+| 소스 파일      | 395개 `.ts` (테스트 제외) + 73개 테스트 파일                                                                                                                |
+| 런타임 의존    | 2개 (`@modelcontextprotocol/sdk`, `zod`) — native 바이너리 0                                                                                                |
+| MCP 도구       | **9개** — project_init, rule_docs_sync, open_settings, fractal_scan, context_resolve, restructure_plan, structure_validate, verification_scan, review_state |
+| 내장 규칙      | **15개** ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#내장-규칙-15개))                                                                                     |
+| 배포 규칙 문서 | **4개** (fractal-boundaries, module-documents, verification-records, code-placement — 모두 required)                                                        |
+| 스킬           | **12개** — setup, scan, context-query, guide, enrich-docs, restructure, migrate + merge-track 5(pull-request, cross-review, resolve, revalidate, pipeline)  |
+| 에이전트       | **0개** (cross-review는 고정 3관점 + 적대적 판정)                                                                                                           |
+| Hook 이벤트    | **3개** — SessionStart, UserPromptSubmit, PreToolUse(Read\|Write\|Edit)                                                                                     |
+| Hook 브리지    | 4개 (setup.mjs, user-prompt-submit.mjs, pre-tool-use.mjs, run-agy.mjs)                                                                                      |
+| 번들 크기      | 472,991 B (MCP 396,740 + 훅 3개 46,689 + settings UI 26,157 + 러너)                                                                                         |
+| MCP 반환 예산  | 16 KiB — 초과분은 artifact로 이동                                                                                                                           |
