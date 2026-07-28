@@ -5,6 +5,7 @@ import { DETAIL_MD, INTENT_MD } from '../../constants/documentFiles.js';
 import {
   KNOWN_ORGAN_DIR_NAMES,
   classifyNode,
+  isInfraOrgDirectoryByPattern,
 } from '../../core/tree/organClassifier/organClassifier.js';
 
 /**
@@ -18,9 +19,17 @@ export function clearOrganCache(): void {
 }
 
 /**
- * 디렉토리 경로를 기반으로 organ 여부를 판별.
- * classifyNode()를 사용하여 구조 기반 분류를 수행하고,
- * 파일시스템 접근 실패 시 false를 반환한다.
+ * 이 디렉토리가 **선언된** organ 인지 판별한다 — known organ name 이거나
+ * `__name__` / `.name` infra 패턴인 경우.
+ *
+ * 구조 기본값(`classifyNode` 8단계)으로 organ 이 된 디렉토리는 여기서 false 다.
+ * 1.0 에서 분류 기본값이 `fractal` 에서 `organ` 으로 바뀌면서, 선언 없는 모든
+ * 디렉토리가 organ 이 되었다. 훅 가드가 그 기본값까지 organ 으로 보면
+ * `.filid/review/<branch>/` 같은 정상 경로마다 flatness 경고가 붙는다.
+ * 가드가 말하려는 것은 "이름으로 선언된 compartment 를 flat 하게 두라"이지
+ * "아직 계약을 선언하지 않은 디렉토리를 flat 하게 두라"가 아니다.
+ *
+ * 문서가 있으면 여전히 fractal 이다 — `utils/` 라도 INTENT.md 가 있으면 false.
  *
  * Performance: Uses readdirSync for the target dir and each child dir.
  * For a directory with N subdirs, this makes N+1 sync filesystem calls.
@@ -29,9 +38,15 @@ export function clearOrganCache(): void {
  */
 export function isOrganByStructure(dirPath: string): boolean {
   try {
+    const dirName = path.basename(dirPath);
+    const isDeclaredOrgan =
+      KNOWN_ORGAN_DIR_NAMES.includes(dirName) ||
+      isInfraOrgDirectoryByPattern(dirName);
+    if (!isDeclaredOrgan) return false;
+
     if (!existsSync(dirPath))
-      // 파일시스템에 없으면 레거시 이름 기반 폴백
-      return KNOWN_ORGAN_DIR_NAMES.includes(path.basename(dirPath));
+      // 파일시스템에 없으면 이름 기반 판정으로 확정
+      return true;
 
     const entries = readdirSync(dirPath, { withFileTypes: true });
     const hasIntentMd = entries.some((e) => e.isFile() && e.name === INTENT_MD);

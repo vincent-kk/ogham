@@ -1,6 +1,6 @@
 {
   "name": "@ogham/filid",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "description": "FCA-AI rule enforcement plugin for Claude Code agent workflows",
   "keywords": [
     "claude-code",
@@ -20,17 +20,8 @@
     "email": "lunox273@gmail.com"
   },
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "private": true,
   "files": [
-    "dist",
-    "agents",
     "bridge",
     "libs",
     "hooks",
@@ -48,10 +39,9 @@
   "scripts": {
     "bench": "vitest bench",
     "bench:run": "vitest bench --run",
-    "build": "yarn clean && yarn version:sync && yarn build:rules && yarn build:pages && yarn build:compile && yarn build:mcp && yarn build:hooks && yarn build:compile-plugin",
+    "build": "yarn clean && yarn version:sync && yarn build:rules && yarn build:pages && yarn build:mcp && yarn build:hooks && yarn build:compile-plugin",
     "build:rules": "node scripts/syncRuleHashes.mjs",
     "build:pages": "node scripts/buildSettingsHtml.mjs",
-    "build:compile": "tsc -p tsconfig.build.json",
     "build:mcp": "node scripts/buildMcpServer.mjs",
     "build:hooks": "node scripts/buildHooks.mjs",
     "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
@@ -70,9 +60,7 @@
     "version:sync": "node ../../scripts/injectVersion.mjs"
   },
   "dependencies": {
-    "@ast-grep/napi": "^0.42.0",
     "@modelcontextprotocol/sdk": "~1.22.0",
-    "fast-glob": "^3.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

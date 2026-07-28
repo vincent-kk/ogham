@@ -90,6 +90,18 @@ export function createESLintConfig(
       },
     },
     {
+      // `src/constants/**` is where this repo keeps literal patterns (module-scope
+      // constants convention). A control-character class there is a sanitizer by
+      // construction — e.g. the review-branch guard that rejects control characters
+      // alongside absolute paths and `..` segments. `no-control-regex` exists to
+      // catch control characters that reached a regex by accident, not the guards
+      // whose whole purpose is to detect them.
+      files: ["**/src/constants/**/*.ts"],
+      rules: {
+        "no-control-regex": "off",
+      },
+    },
+    {
       ignores: [
         "**/dist/**",
         "**/node_modules/**",

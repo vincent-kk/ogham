@@ -11,37 +11,58 @@
  * regression). Tiered per-hook byte caps + FORBIDDEN_PATTERNS enforce this at
  * build time.
  */
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { portableResolve } from '@ogham/cross-platform/compat/resolve';
+import { removeFileIfExistsSync } from '@ogham/cross-platform/filesystem';
 import { generateWindowsCmd } from '@ogham/cross-platform/shim';
 import * as esbuild from 'esbuild';
 import { mkdir, readFile, stat } from 'fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..');
+const ROOT = portableResolve(__dirname, '..');
+const BRIDGE_DIRECTORY = portableResolve(ROOT, 'bridge');
 const KILO_BYTE = 1024;
+const HOOK_BUNDLE_NAME = Object.freeze({
+  SETUP: 'setup',
+  USER_PROMPT_SUBMIT: 'user-prompt-submit',
+  PRE_TOOL_USE: 'pre-tool-use',
+});
+const HOOK_ENTRY_NAME = Object.freeze({
+  SETUP: 'setup',
+  USER_PROMPT_SUBMIT: 'userPromptSubmit',
+  PRE_TOOL_USE: 'preToolUse',
+});
+const SHARED_RUNNER_NAME = Object.freeze({
+  AGY: 'run-agy',
+  HOST: 'run-hook.cmd',
+});
+const RETIRED_HOOK_BUNDLE_NAME = 'agent-enforcer.mjs';
+const RETIRED_HOOK_BUNDLES = [
+  portableResolve(BRIDGE_DIRECTORY, RETIRED_HOOK_BUNDLE_NAME),
+];
 
-await mkdir(resolve(root, 'bridge'), { recursive: true });
+await mkdir(BRIDGE_DIRECTORY, { recursive: true });
+for (const retiredBundle of RETIRED_HOOK_BUNDLES)
+  removeFileIfExistsSync(retiredBundle);
 
 // Windows .cmd shim — invoked from hooks.json on win32 when PATH lacks node.
 // Routes through libs/run.cjs (process.execPath via spawnSync) so the actual
 // hook bundle still executes via the same node binary.
 generateWindowsCmd({
-  outputPath: resolve(root, 'bridge/run-hook.cmd'),
+  outputPath: portableResolve(BRIDGE_DIRECTORY, SHARED_RUNNER_NAME.HOST),
   scriptRelativePath: '../libs/run.cjs',
 });
 console.log('  Windows hook shim -> bridge/run-hook.cmd');
 
 // Tiers reflect what each hook pulls from @ogham/cross-platform:
 //   LIGHT         — logHookFailure only (no spawn-dependent helper inlined).
-//                   user-prompt-submit additionally carries the per-prompt
-//                   spike banner (fs-only git meta readers, no spawn).
+//                   user-prompt-submit additionally carries session context.
 //   HEAVY         — guard-heavy orchestration with logHookFailure
 //                   (delivery-state visit pipeline: commitVisit transaction
 //                   + 3-state TTL delivery + mutation gate deny + scoped fmap
-//                   + pre-tool-validator + structure-guard + spike mode gate
-//                   + criteria-ledger lint + mode audit + FCA opt-in gate).
+//                   + pre-tool-validator + structure-guard + FCA opt-in gate).
 //                   Recalibrated 24→28KB for the delivery-model feature set
 //                   (2026-07-17) KILO
 //                   Recalibrated 28→32KB for the hostRegistry state-root table
@@ -63,31 +84,36 @@ const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entry` is the camelCase src module/dir basename.
-const hookEntries = [
-  { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
+const HOOK_ENTRIES = [
   {
-    name: 'user-prompt-submit',
-    entry: 'userPromptSubmit',
+    name: HOOK_BUNDLE_NAME.SETUP,
+    entry: HOOK_ENTRY_NAME.SETUP,
+    maxBytes: SESSION_START_HOOK_BYTES,
+  },
+  {
+    name: HOOK_BUNDLE_NAME.USER_PROMPT_SUBMIT,
+    entry: HOOK_ENTRY_NAME.USER_PROMPT_SUBMIT,
     maxBytes: LIGHT_HOOK_BYTES,
   },
-  { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: HEAVY_HOOK_BYTES },
   {
-    name: 'agent-enforcer',
-    entry: 'agentEnforcer',
-    maxBytes: LIGHT_HOOK_BYTES,
+    name: HOOK_BUNDLE_NAME.PRE_TOOL_USE,
+    entry: HOOK_ENTRY_NAME.PRE_TOOL_USE,
+    maxBytes: HEAVY_HOOK_BYTES,
   },
 ];
 
 const hookBuilds = await Promise.all(
-  hookEntries.map(async ({ name, entry }) => ({
+  HOOK_ENTRIES.map(async ({ name, entry }) => ({
     name,
     result: await esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
+      entryPoints: [
+        portableResolve(ROOT, 'src', 'hooks', entry, `${entry}.entry.ts`),
+      ],
       bundle: true,
       platform: 'node',
       target: 'node20',
       format: 'esm',
-      outfile: resolve(root, `bridge/${name}.mjs`),
+      outfile: portableResolve(BRIDGE_DIRECTORY, `${name}.mjs`),
       minify: true,
       sourcemap: false,
       treeShaking: true,
@@ -96,7 +122,7 @@ const hookBuilds = await Promise.all(
   })),
 );
 
-console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
+console.log(`  Hook scripts (${HOOK_ENTRIES.length}) -> bridge/*.mjs`);
 
 const USER_PROMPT_FORBIDDEN_INPUTS = [
   'agent-artifacts/dist/rules/planning/',
@@ -117,7 +143,7 @@ const USER_PROMPT_FORBIDDEN_INPUTS = [
   'cross-platform/dist/filesystem/safety/',
 ];
 const userPromptBuild = hookBuilds.find(
-  ({ name }) => name === 'user-prompt-submit',
+  ({ name }) => name === HOOK_BUNDLE_NAME.USER_PROMPT_SUBMIT,
 );
 const graphViolations = [];
 for (const input of Object.keys(userPromptBuild.result.metafile.inputs)) {
@@ -144,7 +170,9 @@ const SETUP_FORBIDDEN_INPUTS = [
     pattern: /node_modules\/(?:cross-spawn|which)\//,
   },
 ];
-const setupBuild = hookBuilds.find(({ name }) => name === 'setup');
+const setupBuild = hookBuilds.find(
+  ({ name }) => name === HOOK_BUNDLE_NAME.SETUP,
+);
 for (const input of Object.keys(setupBuild.result.metafile.inputs)) {
   const normalizedInput = input.replaceAll('\\', '/');
   for (const { label, pattern } of SETUP_FORBIDDEN_INPUTS)
@@ -210,7 +238,7 @@ await esbuild.build({
   platform: 'node',
   target: 'node20',
   format: 'esm',
-  outfile: resolve(root, 'bridge/run-agy.mjs'),
+  outfile: portableResolve(BRIDGE_DIRECTORY, `${SHARED_RUNNER_NAME.AGY}.mjs`),
   minify: true,
   sourcemap: false,
   treeShaking: true,
@@ -249,12 +277,12 @@ const FORBIDDEN_PATTERNS = [
 const violations = [...graphViolations];
 
 const guardedBundles = [
-  ...hookEntries,
-  { name: 'run-agy', maxBytes: RUN_AGY_HOOK_BYTES },
+  ...HOOK_ENTRIES,
+  { name: SHARED_RUNNER_NAME.AGY, maxBytes: RUN_AGY_HOOK_BYTES },
 ];
 
 for (const { name, maxBytes } of guardedBundles) {
-  const file = resolve(root, `bridge/${name}.mjs`);
+  const file = portableResolve(BRIDGE_DIRECTORY, `${name}.mjs`);
   const { size } = await stat(file);
   if (size > maxBytes) {
     violations.push(

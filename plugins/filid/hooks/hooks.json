@@ -35,18 +35,6 @@
           }
         ]
       }
-    ],
-    "SubagentStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"",
-            "timeout": 3
-          }
-        ]
-      }
     ]
   }
 }

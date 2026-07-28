@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { validatePreToolUse } from '../../../hooks/preToolUse/helpers/preToolValidator/preToolValidator.js';
+import { validatePreToolUse } from '../../../hooks/preToolUse/helpers/preToolValidator/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 // Write-gate edge cases around empty content — split out of

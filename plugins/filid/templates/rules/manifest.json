@@ -1,15 +1,38 @@
 {
-  "_comment": "Injectable rule docs manifest. Used by syncRuleDocs() to drive optional rule file deployment from the setup skill. Never read by SessionStart hooks.",
+  "_comment": "Injectable rule docs manifest. Used by syncRuleDocs() to drive rule file deployment from the setup skill. Never read by SessionStart hooks. All four entries are required — filid rules are not partially adoptable.",
   "version": "1.0",
   "rules": [
     {
-      "id": "filid_fca-policy",
-      "filename": "filid_fca-policy.md",
-      "legacyFilename": "fca.md",
+      "id": "filid_fractal-boundaries",
+      "filename": "filid_fractal-boundaries.md",
       "required": true,
-      "title": "FCA-AI Architecture Rules",
-      "description": "Fractal Context Architecture rules: node types, structural rules, documentation constraints, and quality thresholds. Mandatory for every FCA-AI project.",
-      "templateHash": "39ae1d7c3e1eb73b8f5aa942fe8a0311e5ad4ade0018cde3d7bc307faab6246c"
+      "title": "Fractal Boundaries",
+      "description": "Node classification, entry-point surfaces, organ access, exemptions, and the acyclic dependency graph.",
+      "templateHash": "27c0c0c2a2d5f01e3f5f41197bae7e78b6254a72eba5e936952bdac87766456a"
+    },
+    {
+      "id": "filid_module-documents",
+      "filename": "filid_module-documents.md",
+      "required": true,
+      "title": "Module Documents",
+      "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the current-state contract ledger, and organ exemption entries.",
+      "templateHash": "d1bff79b5a5fb9e95bab3290e21d37d581dbf726b3f337e9646653d3793c59d4"
+    },
+    {
+      "id": "filid_verification-records",
+      "filename": "filid_verification-records.md",
+      "required": true,
+      "title": "Verification Records",
+      "description": "Spec-document and test-record roles, the 15 and 32 case caps, counting rules, and DETAIL acceptance-group links.",
+      "templateHash": "81999a48a2b059ad49a4dad41337915ec56ac9d041a5d53b6124b6af0a396f5b"
+    },
+    {
+      "id": "filid_code-placement",
+      "filename": "filid_code-placement.md",
+      "required": true,
+      "title": "Code Placement",
+      "description": "Lowest-common-fractal placement, restructure plan preconditions and postconditions, and the document-before-code workflow.",
+      "templateHash": "f363fa3cc169a0b1f2196ebc9ce8c1f33fb1ee750b377c86d08d9028eb6b2b95"
     }
   ]
 }

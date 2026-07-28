@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['src/**/__tests__/**/*.test.ts'],
+    include: ['src/**/__tests__/**/*.{test,spec}.ts'],
     exclude: ['**/fixtures/**'],
     globals: true,
     // Integration tests shell out to real git many times per case; on slow

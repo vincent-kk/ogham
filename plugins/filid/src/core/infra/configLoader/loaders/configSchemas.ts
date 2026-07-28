@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Single RuleOverride entry schema. Strict — unknown keys are surfaced as
- * zod issues so `loadConfig` can warn + physically drop them (never
- * pass-through).
- */
 export const RuleOverrideSchema = z
   .object({
     enabled: z.boolean().optional(),
@@ -13,46 +8,53 @@ export const RuleOverrideSchema = z
   })
   .strict();
 
-/**
- * Entry accepted inside the top-level `additional-allowed` array.
- * Either a bare basename string (applied globally) or an object restricting
- * the basename to specific path globs. Consumed by the `zero-peer-file` rule.
- */
-export const AllowedEntrySchema = z.union([
-  z.string(),
-  z
-    .object({
-      basename: z.string(),
-      paths: z.array(z.string()).optional(),
-    })
-    .strict(),
-]);
-
-/** Allowed-entry union type derived from `AllowedEntrySchema`. */
-export type AllowedEntry = z.infer<typeof AllowedEntrySchema>;
-
-/**
- * Top-level `.filid/config.json` schema. `FilidConfig` is derived via
- * `z.infer` — this schema is the single source of truth for the type shape.
- * `.strict()` ensures unknown keys are reported by zod issues.
- */
-export const FilidConfigSchema = z
+export const AllowedPeerOverrideSchema = z
   .object({
-    version: z.string(),
-    rules: z.record(z.string(), RuleOverrideSchema),
-    language: z.string().optional(),
-    'additional-allowed': z.array(AllowedEntrySchema).optional(),
-    'additional-entry-points': z.array(z.string()).optional(),
-    'additional-route-patterns': z.array(z.string()).optional(),
-    'additional-organ-names': z.array(z.string()).optional(),
-    scan: z
-      .object({
-        maxDepth: z.number().nonnegative().finite().optional(),
-      })
-      .strict()
+    basename: z.string().min(1),
+    paths: z.array(z.string()).optional(),
+    adapterId: z.string().min(1).optional(),
+  })
+  .strict();
+
+export type AllowedPeerOverride = z.infer<typeof AllowedPeerOverrideSchema>;
+
+const AdapterSelectionSchema = z
+  .object({
+    mode: z.enum(['auto', 'explicit']),
+    enabled: z.array(z.string().min(1)),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.mode === 'explicit' && value.enabled.length === 0)
+      context.addIssue({
+        code: z.ZodIssueCode.too_small,
+        minimum: 1,
+        type: 'array',
+        inclusive: true,
+        path: ['enabled'],
+        message: 'explicit adapter mode requires at least one enabled ID',
+      });
+  });
+
+const StructureConfigSchema = z
+  .object({
+    maxDepth: z.number().nonnegative().finite().optional(),
+    additionalOrganNames: z.array(z.string().min(1)).optional(),
+    additionalAllowedPeers: z.array(AllowedPeerOverrideSchema).optional(),
+    entryPointOverrides: z
+      .record(z.string(), z.array(z.string().min(1)))
       .optional(),
   })
   .strict();
 
-/** Schema of .filid/config.json (derived from FilidConfigSchema via zod). */
+export const FilidConfigSchema = z
+  .object({
+    version: z.literal('2.0'),
+    language: z.string().optional(),
+    adapters: AdapterSelectionSchema,
+    rules: z.record(z.string(), RuleOverrideSchema),
+    structure: StructureConfigSchema.optional(),
+  })
+  .strict();
+
 export type FilidConfig = z.infer<typeof FilidConfigSchema>;

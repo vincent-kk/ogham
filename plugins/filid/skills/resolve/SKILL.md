@@ -1,165 +1,135 @@
 ---
 name: resolve
 user_invocable: true
-description: '[filid:resolve] Resolve review fix requests by accepting or rejecting each item, applying accepted fixes via parallel code-surgeon subagents, recording ADR justifications for rejections, then auto-committing and pushing.'
-argument-hint: '[--auto]'
-version: '2.1.1'
-complexity: medium
+description: '[filid:resolve] Decide each cross-review fix request, delegate accepted corrections outward, record rejection justifications, then gate and commit the result.'
+argument-hint: '[--auto] [--base REF]'
+version: '1.0.0'
+complexity: complex
 plugin: filid
 ---
 
-> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all steps as a SINGLE CONTINUOUS OPERATION EXCEPT at steps marked `<!-- [INTERACTIVE] -->` — at THOSE steps yielding is REQUIRED. Under `--auto`, ALL `AskUserQuestion` gates are skipped by design and the anti-yield model applies to every step without exception.
->
-> **Valid reasons to yield**:
->
-> 1. Interactive mode active AND the current step is `[INTERACTIVE]`
-> 2. Terminal stage marker emitted: `Resolve complete — N accepted` or `Resolve aborted`
->
-> **HIGH-RISK YIELD POINTS**:
->
-> - After the parallel code-surgeon block returns — chain typecheck and commit in the same turn
-> - After commit+push in `--auto` — immediately chain `Skill("filid:revalidate")` in the same turn (primary stall point)
+# resolve — Decide, Delegate, Record
 
-# resolve — Fix Request Resolution
+Run this skill as one continuous operation. Yield only at the marked interactive steps. Ending after the commit **is not** completion — the terminal output and the revalidate handoff are part of this skill.
 
-Resolve fix requests from a completed review: accept/reject each item, apply accepted fixes via parallel `code-surgeon` subagents, refine rejection justifications into ADRs with debt records, then auto-commit/push.
+**This skill does not write code.** It owns the procedure: a decision per fix request, delegation of accepted corrections, a justification record for rejections, a verification gate, and a commit. The correction itself is applied by the main agent or another plugin.
 
-> **References**: `reference.md` (justifications.md template, ADR refinement rules, fix-item type formats, debt schema).
+## References
 
-## When to Use
+Resolve files relative to this `SKILL.md`:
 
-- After `/filid:cross-review` generates `fix-requests.md`
-- To selectively accept or reject fix requests with formal justification
-- To auto-accept all fixes and run the full resolve→revalidate cycle (`--auto`)
+- `reference.md` — `justifications.md` template, ADR refinement rules, delegation brief format, per-severity gate.
 
-## Core Workflow
+## Step 1 — Locate the review state
 
-### Step 1 — Branch Detection & Preconditions
+```text
+mcp__plugin_filid_tools__review_state({
+  action: "checkpoint",
+  projectRoot: PROJECT_ROOT,
+  branchName: BRANCH,
+  baseRef: BASE_REF
+})
+```
 
-1. **Dirty-worktree check** — `git status --porcelain` (Bash). Non-empty:
-   - `--auto`: **ABORT** — "Working tree has uncommitted changes. Stash or commit them before running resolve --auto."
-   - interactive: <!-- [INTERACTIVE] AskUserQuestion: dirty worktree --> "Uncommitted changes will be included in the auto-commit. Continue anyway?" — "Continue anyway" / "Abort".
-2. `git branch --show-current` → `mcp__plugin_filid_tools__review_manage(action: "normalize-branch", projectRoot, branchName)`.
-3. Read `.filid/review/<normalized>/fix-requests.md`; missing → abort with "No fix requests found. Run /filid:cross-review first."
+Use `data.reviewDirectory` as `REVIEW_DIR`; **never derive a directory name.**
 
-**→ Immediately proceed to Step 2.**
+| Disposition | Action                                                                   |
+| ----------- | ------------------------------------------------------------------------ |
+| `missing`   | Abort — no review to resolve. Run `/filid:cross-review` first.           |
+| `stale`     | Abort — the source moved since the review. Re-run `/filid:cross-review`. |
+| `resumable` | Continue.                                                                |
+| `cached`    | Continue.                                                                |
 
-### Step 2 — Parse Fix Requests
+`REVIEW_DIR/fix-requests.md` must exist. Its absence means the verdict was not `REQUEST_CHANGES`; report that and end.
 
-Extract per item: Fix ID, title, severity, path, rule, recommended action, code patch, and **Type** (`code-fix` | `promote` | `restructure` | `harvest-required`; default `code-fix`).
+## Step 2 — Read the fix requests
 
-> **Harvest gate**: if ANY item has `Type: harvest-required`, ABORT immediately (both modes): report "fix-requests.md contains harvest-required items — these are oracle gaps, not code defects. On a spike/\* branch, run /filid:harvest. On a merge-track branch, supply the claim's `observable` evidence or revise/retire the claim with explicit human confirmation. Then re-run /filid:cross-review." Emit `Resolve aborted` and END. `harvest-required` items are NEVER dispatched to code-surgeon / promote / restructure — an agent cannot attest its own acceptance criteria.
+Parse each `## FIX-NNN:` block from `fix-requests.md`. Every block carries Severity, Perspective, Path, Rule, Evidence, Consequence, and Recommended Action (schema in `../cross-review/templates.md`, which produced the file).
 
-> **Tolerant parser**: strip a leading `filid:` prefix from type values before enum matching (`filid:promote` ≡ `promote`); unknown tokens fall back to `code-fix`. Canonical matcher: `src/lib/normalizeFixRequest.ts` `normalizeFixRequestType`.
+Do not invent items and do not merge two findings into one decision.
 
-**→ Immediately proceed to Step 3.**
+## Step 3 — Decide each item
 
-### Step 3 — Accept / Reject Selection
+<!-- [INTERACTIVE] AskUserQuestion: per-item accept or reject -->
 
-> `--auto`: **accept ALL items, skip the question, proceed to Step 4.** Note: `--auto` bypasses `INTENT.md` "Ask first" gates — a fix can pass typecheck + tests yet be the wrong _resolution_ (e.g. deleting a planned-but-unimplemented contract field). Review auto-applied contract changes against the design specs before merge.
+For each item, ask with `AskUserQuestion`:
 
-<!-- [INTERACTIVE] AskUserQuestion: per-fix accept/reject decision -->
+```text
+FIX-NNN: <title> (Severity: <severity>)
+Path: <path>
+Recommended Action: <action>
+```
 
-For each item, `AskUserQuestion`: "FIX-XXX: <title> (Severity: <severity>)\nPath: <path>\nAction: <recommended action>" — options **Accept** (apply recommended fix) / **Reject** (defer with justification).
+Options: **Accept** (apply the recommended correction) / **Reject** (decline with a justification).
 
-**→ Immediately proceed to Step 4.**
+`--auto` accepts every item without prompting and skips Step 5 entirely.
 
-### Step 4 — Apply Accepted Fixes
+## Step 4 — Capture the baseline, then delegate
 
-**First**, capture the base SHA: `base_sha = git rev-parse HEAD` — the pre-fix baseline written to `justifications.md` as `resolve_commit_sha` in Step 6 (revalidate diffs `resolve_commit_sha..HEAD`).
+**First** capture the pre-correction baseline:
 
-**Phase 4a — code fixes (parallel).** Dispatch all accepted `code-fix` items **in a single response** as parallel foreground `Agent` calls (`subagent_type: "filid:code-surgeon"`, model `sonnet`, `run_in_background: false` — omitting the flag spawns BACKGROUND agents whose results never return to the turn) — foreground parallel calls return together, giving a deterministic sync point before Phase 4b. Each call carries the target path, the recommended action, and the code patch, with the instruction to apply the fix directly.
+```text
+base_sha = git rev-parse HEAD
+```
 
-**Phase 4b — structural fixes (sequential, after 4a).**
+This value is written to `justifications.md` as `resolve_commit_sha`. `revalidate` diffs `resolve_commit_sha..HEAD`, so it must be read **before** any correction lands.
 
-- `promote` items → `Skill("filid:promote", "<target_path>")`; no eligible files → log "SKIP — no stable test.ts found", continue.
-- `restructure` items → `Skill("filid:restructure", "<target_path> --auto-approve")`; failure or no actionable changes → log "SKIP — restructure not applicable", continue.
+Then hand the accepted items out, routing each by the table in `reference.md` §3 and dispatching them together:
 
-Structural fix failures MUST NOT block the pipeline — `filid:revalidate` catches remaining issues.
+- main-agent items get a delegation brief in the §3 format, applied directly in this turn;
+- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the owning fractal path for `/filid:enrich-docs`. Neither receives the brief.
 
-**→ Immediately proceed to Step 5.**
+This skill states **what must change and where**. It does not choose the edit, and it never edits a file itself.
 
-### Step 5 — Process Rejected Items
+After delegation, confirm with `git status --porcelain` that something changed for each accepted item. An accepted item with no corresponding change is reported in the terminal output as `unapplied` and is **not** silently dropped.
 
-> `--auto`: skip entirely (no rejections exist).
+## Step 5 — Record rejections
 
-For each rejected fix:
+Skipped under `--auto`.
 
-<!-- [INTERACTIVE] AskUserQuestion: rejection justification collection -->
+<!-- [INTERACTIVE] AskUserQuestion: rejection justification -->
 
-1. Collect the developer's justification (`AskUserQuestion`, free text).
-2. Refine it into a structured ADR (Context / Decision / Consequences — rules in `reference.md`).
-3. Create the debt record: `mcp__plugin_filid_tools__debt_manage(action: "create", projectRoot, debtItem: { fractal_path, file_path, created_at, review_branch, original_fix_id, severity, rule_violated, metric_value, title, original_request, developer_justification, refined_adr })`.
+For each rejected item:
 
-**→ Immediately proceed to Step 6.**
+1. Collect the developer's justification as free text.
+2. Refine it into a structured ADR — Context / Decision / Consequences — using the rules in `reference.md` §2.
+3. Append it to the `## Rejected` section of `justifications.md`.
 
-### Step 6 — Write justifications.md
+There is no separate debt ledger in 1.0. `justifications.md` is the record, and `revalidate` reads it to judge whether each rejection holds.
 
-Write `.filid/review/<branch>/justifications.md` (template: `reference.md`) with frontmatter `resolve_commit_sha: <base_sha>` — the Step 4 pre-fix SHA, NOT current HEAD (after the Step 7 commit, HEAD moves; the delta must contain only the fix changes).
+## Step 6 — Write `justifications.md`
 
-**→ Immediately proceed to Step 7.**
+Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, with frontmatter `resolve_commit_sha: <base_sha>` — the Step 4 value, **not** current `HEAD`. After the Step 7 commit `HEAD` moves, and the delta must contain only the correction changes.
 
-### Step 7 — Typecheck, Stage & Commit
+## Step 7 — Gate and commit
 
-With accepted fixes:
+1. Run the repository typecheck. On failure:
+   - interactive → report and stop before committing;
+   - `--auto` → **abort** with `Typecheck failed after applying fixes.`
+2. Stage the corrected source paths only. **Never stage `justifications.md` or anything under `.filid/review/`** — those are local inter-stage files, and an explicit `git add` overrides `.gitignore`.
+3. Commit: `fix(filid): apply cross-review corrections`.
+4. With no accepted items, skip the typecheck and the commit entirely.
 
-1. **Typecheck gate** — `npx tsc --noEmit` (Bash) from the project root (monorepos: add `--project <path>` as needed). FAIL:
-   - `--auto`: **ABORT** — "Typecheck failed after applying fixes. Review code-surgeon output."
-   - interactive: <!-- [INTERACTIVE] AskUserQuestion: typecheck failure --> "Typecheck failed. Commit anyway?" — "Commit anyway" / "Abort and review" (Abort → stop, no commit).
-2. **Stage ONLY code + debt files** — `git add <modified files> <.filid/debt/ files>`. NEVER stage `justifications.md` or anything under `.filid/review/` — those are gitignored local inter-stage files, and an explicit `git add` overrides `.gitignore`.
-3. **Commit**: `fix(filid): resolve <comma-separated accepted FIX-IDs> from review`
+## Step 8 — Hand off
 
-With NO accepted fixes (all rejected): stage and commit only debt files (`chore(filid): record fix rejections from review`); nothing at all → skip commit and typecheck.
+```text
+Resolve: accepted <n>, rejected <m>, unapplied <k>
+Next: /filid:revalidate
+```
 
-**→ Immediately proceed to Step 8.**
-
-### Step 8 — Push
-
-1. `git rev-parse --abbrev-ref @{upstream}` — no upstream → skip push, inform "No upstream branch. Push manually when ready.", proceed to Step 9.
-2. `git push`. On failure:
-   - `--auto`: **ABORT** — "Push failed: `<error>`. Push manually and re-run `/filid:pipeline --from=revalidate`." END (no AskUserQuestion in `--auto`).
-   - interactive: <!-- [INTERACTIVE] AskUserQuestion: push failure --> "Push failed: <error>." — "Continue to revalidate anyway" / "Stop here".
-
-**→ On success (or Continue), immediately proceed to Step 9.**
-
-### Step 9 — Revalidate Handoff <!-- [INTERACTIVE] AskUserQuestion: revalidate offer -->
-
-> `--auto`: skip the question — **immediately invoke `Skill("filid:revalidate")`**, then end.
-
-`AskUserQuestion`: "Fixes committed and pushed. Run revalidate now?" (all-rejected variant: "All fix items were rejected. Run revalidate now to evaluate justifications?") — "Yes — run now" / "Not now".
-
-- **Yes** → invoke `Skill("filid:revalidate")` in the same response — do NOT yield between the answer and the invocation.
-- **Not now** → done. (`filid:revalidate` later evaluates the rejected- item justifications and returns PASS if all are constitutional.)
-
-**After revalidate is invoked (or skipped), execution is COMPLETE.**
-
-## Available MCP Tools
-
-| Tool                                     | Action             | Purpose                      |
-| ---------------------------------------- | ------------------ | ---------------------------- |
-| `mcp__plugin_filid_tools__review_manage` | `normalize-branch` | Review directory resolution  |
-| `mcp__plugin_filid_tools__debt_manage`   | `create`           | Debt record per rejected fix |
+Interactive runs may ask whether to run `revalidate` now. `--auto` runs never ask — `pipeline` chains the next stage itself.
 
 ## Options
 
-> Options are LLM-interpreted hints, not strict CLI flags.
+| Option       | Type   | Default | Effect                                     |
+| ------------ | ------ | ------- | ------------------------------------------ |
+| `--auto`     | flag   | off     | Accept every item, skip prompts and Step 5 |
+| `--base REF` | string | auto    | Base ref passed through to `review_state`  |
 
-| Option   | Type | Default | Description                                                      |
-| -------- | ---- | ------- | ---------------------------------------------------------------- |
-| `--auto` | flag | off     | Accept all fixes, skip user prompts, auto-commit/push/revalidate |
+## Invariants
 
-## Quick Reference
-
-```
-/filid:resolve           # Interactive resolve on current branch
-/filid:resolve --auto    # Accept all, commit, push, revalidate automatically
-
-Input:    .filid/review/<branch>/fix-requests.md
-Outputs:  justifications.md (local), .filid/debt/*.md, git commit + push
-Steps:    1 Preconditions → 2 Parse (+harvest gate) → 3 Select →
-          4 Apply (base SHA; 4a ∥ code-surgeon, 4b promote/restructure) →
-          5 Rejections → 6 justifications.md → 7 Typecheck+commit →
-          8 Push → 9 Revalidate
-Agents:   filid:code-surgeon (4a)   Skills: filid:promote, filid:restructure (4b)
---auto:   aborts on dirty worktree / typecheck failure / push failure
-```
+- No code is authored here. Accepted items are delegated; rejected items are recorded.
+- `resolve_commit_sha` is captured before any correction lands.
+- An accepted item that produced no change is reported, never hidden.
+- Review artifacts are never committed.
+- No debt record is created. `justifications.md` is the single rejection record.

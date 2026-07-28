@@ -38,6 +38,8 @@ export interface DetailMdSchema {
   requirements: string[];
   /** API interface definitions */
   apiContracts: string[];
+  /** Stable acceptance groups declared by this contract */
+  acceptanceGroups: DetailAcceptanceGroup[];
   /** Last updated timestamp */
   lastUpdated: string;
   /** Compression metadata */
@@ -72,13 +74,44 @@ export interface DetailMdValidation {
   valid: boolean;
   /** List of violations */
   violations: DocumentViolation[];
+  /** Stable acceptance groups extracted from the current document */
+  acceptanceGroups: DetailAcceptanceGroup[];
+  /** Organ exemptions this fractal declares (empty when the section is absent) */
+  boundaryExemptions: BoundaryExemptionDeclaration[];
 }
 
-/** criteria.md (acceptance-criteria ledger) validation result */
-export interface CriteriaMdValidation {
-  /** Whether valid */
-  valid: boolean;
-  /** List of violations */
+/**
+ * One `## Organ Exemptions` entry in a DETAIL.md.
+ *
+ * The section is conditional: only a fractal that actually grants an exemption
+ * carries it. `reason` is load-bearing — an empty one is an unmet contract, not
+ * a granted exemption.
+ */
+export interface BoundaryExemptionDeclaration {
+  /** Organ path exactly as declared; normalized against the owner when stored */
+  targetPath: string;
+  title: string;
+  /** Consumer globs, or the literal `entry-point` for barrel-only access */
+  consumers: string[];
+  /** True only for an explicit `Direct import: allowed` */
+  directImport: boolean;
+  reason: string;
+  line: number;
+}
+
+export interface BoundaryExemptionValidation {
+  exemptions: BoundaryExemptionDeclaration[];
+  violations: DocumentViolation[];
+}
+
+export interface DetailAcceptanceGroup {
+  id: string;
+  title: string;
+  line: number;
+}
+
+export interface DetailAcceptanceGroupValidation {
+  groups: DetailAcceptanceGroup[];
   violations: DocumentViolation[];
 }
 
@@ -92,10 +125,7 @@ export interface DocumentViolation {
     | 'missing-boundaries'
     | 'missing-section'
     | 'missing-field'
-    | 'invalid-status'
-    | 'duplicate-id'
-    | 'claim-removed'
-    | 'tautology';
+    | 'duplicate-id';
   /** Violation description */
   message: string;
   /** Severity level */

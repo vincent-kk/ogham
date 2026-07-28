@@ -7,8 +7,15 @@ import type { ConfigPatchIssue, ConfigPatchValidation } from './configTypes.js';
 
 /**
  * Validate a prospective `.filid/config.json` patch JSON string against the
- * shared `FilidConfigSchema`. No local schema is defined — this is the
- * SSoT contract for the `mcp__plugin_filid_tools__config_patch_validate` MCP tool.
+ * shared `FilidConfigSchema`. No local schema is defined here — the schema is
+ * the single source of truth.
+ *
+ * **No consumer today.** This backed the `config_patch_validate` MCP tool, which
+ * 1.0 removed; `src/__tests__/integration/vnextToolSurface.test.ts` asserts that
+ * name stays unregistered. Retained because it is the only schema-level patch
+ * validator: the settings page writes through `writeConfig`, which validates a
+ * whole config, not a partial patch. Delete it together with the next surface
+ * review if no tool has claimed it by then.
  */
 export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
   let parsed: unknown;

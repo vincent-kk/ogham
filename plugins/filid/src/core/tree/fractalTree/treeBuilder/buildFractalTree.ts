@@ -1,5 +1,13 @@
+import {
+  pathForCompare,
+  portableIsAbsolute,
+  portableRelative,
+  samePath,
+} from '@ogham/cross-platform/paths';
+
 import type {
   CategoryType,
+  EntryPointDescriptor,
   FractalNode,
   FractalTree,
 } from '../../../../types/fractal.js';
@@ -11,6 +19,7 @@ export interface NodeEntry {
   type: CategoryType;
   hasIntentMd: boolean;
   hasDetailMd: boolean;
+  entryPoints?: EntryPointDescriptor[];
   hasIndex?: boolean;
   hasMain?: boolean;
   peerFiles?: string[];
@@ -18,28 +27,23 @@ export interface NodeEntry {
   frameworkReservedFiles?: string[];
 }
 
-/**
- * Find the closest parent path.
- * Returns the deepest ancestor path among entries.
- */
-function toComparePath(path: string): string {
-  return path.replace(/\\/g, '/');
-}
-
 function findParentPath(path: string, allPaths: string[]): string | null {
   let bestParent: string | null = null;
   let bestLen = 0;
-  const comparePath = toComparePath(path);
 
   for (const candidate of allPaths) {
-    if (candidate === path) continue;
-    const compareCandidate = toComparePath(candidate);
+    if (samePath(candidate, path)) continue;
+    const relative = portableRelative(candidate, path);
+    const comparable = pathForCompare(relative);
+    const candidateLength = pathForCompare(candidate).length;
     if (
-      comparePath.startsWith(compareCandidate + '/') &&
-      compareCandidate.length > bestLen
+      comparable !== '..' &&
+      !comparable.startsWith('../') &&
+      !portableIsAbsolute(relative) &&
+      candidateLength > bestLen
     ) {
       bestParent = candidate;
-      bestLen = compareCandidate.length;
+      bestLen = candidateLength;
     }
   }
 
@@ -67,10 +71,15 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
       name: e.name,
       type: e.type,
       parent: null,
+      parentFractalPath: null,
       children: [],
+      childFractalPaths: [],
       organs: [],
+      organPaths: [],
       hasIntentMd: e.hasIntentMd,
       hasDetailMd: e.hasDetailMd,
+      entryPoints: e.entryPoints ?? [],
+      peerFiles: e.peerFiles ?? [],
       hasIndex: e.hasIndex ?? false,
       hasMain: e.hasMain ?? false,
       depth: 0,
@@ -97,6 +106,18 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
 
     if (e.type === 'organ') parent.organs.push(e.path);
     else parent.children.push(e.path);
+  }
+
+  for (const node of nodes.values()) {
+    let ownerPath = node.parent;
+    while (ownerPath && nodes.get(ownerPath)?.type === 'organ')
+      ownerPath = nodes.get(ownerPath)?.parent ?? null;
+    node.parentFractalPath = ownerPath;
+    if (!ownerPath) continue;
+    const owner = nodes.get(ownerPath);
+    if (!owner) continue;
+    if (node.type === 'organ') owner.organPaths.push(node.path);
+    else owner.childFractalPaths.push(node.path);
   }
 
   // Root: shortest path among nodes with null parent

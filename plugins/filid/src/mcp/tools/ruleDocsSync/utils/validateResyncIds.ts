@@ -1,7 +1,7 @@
 import {
   loadRuleDocsManifest,
   resolvePluginRoot,
-} from '../../../../core/infra/configLoader/configLoader.js';
+} from '../../../../core/infra/configLoader/index.js';
 
 export interface ResyncValidation {
   resyncAccepted: string[];

@@ -21,7 +21,7 @@ import { ruleDocMarkers } from '../../../constants/ruleDocs.js';
 import { getRuleDocsStatus } from '../../../core/infra/configLoader/loaders/getRuleDocsStatus.js';
 import { syncRuleDocs } from '../../../core/infra/configLoader/loaders/syncRuleDocs.js';
 
-const REQUIRED_FILE = 'filid_fca-policy.md';
+const REQUIRED_FILE = 'filid_fractal-boundaries.md';
 const OPTIONAL_FILE = 'filid_reuse-first.md';
 const REQUIRED_BODY = '# FCA policy\n';
 const OPTIONAL_BODY = '# Reuse first\n';
@@ -48,7 +48,7 @@ function writeTemplates(): void {
       version: '1.0',
       rules: [
         {
-          id: 'filid_fca-policy',
+          id: 'filid_fractal-boundaries',
           filename: REQUIRED_FILE,
           required: true,
           title: 'FCA',

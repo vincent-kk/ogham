@@ -1,23 +1,40 @@
-# setup — Validation and Report Format (Phase 5)
+# setup — Validation and Report
 
-> Detail reference for Phase 5 of /filid:setup. See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
+> Reference for Phase 3–4 of `/filid:setup`.
 
-After all files are written, validate the resulting structure:
+Validate the post-initialization snapshot:
 
-- Each fractal node's INTENT.md passes `validateIntentMd()` (≤ 50 lines, 3-tier boundary sections present)
-- No organ directory contains a INTENT.md
-- All DETAIL.md files pass `validateDetailMd()`
-
-Print a summary report:
-
+```text
+mcp__plugin_filid_tools__structure_validate({
+  path: "<target-path>",
+  mode: "project",
+  scopes: ["documents", "nodes", "entry-points"]
+})
 ```
-FCA-AI Init Report
-==================
-Directories scanned : <n>
-Fractal nodes       : <n>
-Organ nodes         : <n>
-Pure-function nodes : <n>
-INTENT.md created   : <n>
-DETAIL.md created     : <n>
-Warnings            : <list or "none">
+
+Read the findings from the returned result or, when the payload is persisted,
+from its artifact — the same handling `section-1-directory-scan.md` applies to
+the scan call.
+
+The setup report combines this result with
+`fractal_scan(detail: "paths")`. It must not claim compliance when either tool
+returns diagnostics, a non-exact certainty, or a non-OK status.
+
+Use this compact format:
+
+```text
+FCA-AI Setup Report
+===================
+Project root          : <path>
+Snapshot hash         : <hash>
+Adapters              : <ids>
+Nodes                 : <counts by type>
+Missing INTENT.md     : <count and proposed paths>
+Missing DETAIL.md     : <count and proposed paths>
+Validation findings   : <count by severity>
+Certainty             : <certainty>
+Diagnostics           : <list or "none">
 ```
+
+The missing-document sections are proposals only. State explicitly that setup
+did not edit source documents.

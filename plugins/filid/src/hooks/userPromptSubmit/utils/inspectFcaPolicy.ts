@@ -6,8 +6,8 @@ import { resolveProjectRuleTarget } from '@ogham/agent-artifacts/targets/project
 import { resolveRuntimeHost } from '@ogham/cross-platform/host-registry/runtime';
 
 import {
-  FCA_POLICY_RULE_DOC,
-  LEGACY_FCA_POLICY_RULE_DOC,
+  LEGACY_RULE_DOCS,
+  PRIMARY_RULE_DOC,
 } from '../../../constants/ruleDocs.js';
 
 export function inspectFcaPolicy(
@@ -21,8 +21,8 @@ export function inspectFcaPolicy(
   return inspectTrustedRuleDocumentPresence(
     { owner: 'filid', target },
     {
-      filename: FCA_POLICY_RULE_DOC,
-      legacyFilenames: [LEGACY_FCA_POLICY_RULE_DOC],
+      filename: PRIMARY_RULE_DOC,
+      legacyFilenames: [...LEGACY_RULE_DOCS],
     },
   );
 }

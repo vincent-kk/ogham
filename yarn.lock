@@ -1158,7 +1158,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ogham/filid@workspace:plugins/filid"
   dependencies:
-    "@ast-grep/napi": "npm:^0.42.0"
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/agent-artifacts": "workspace:^"
     "@ogham/cross-platform": "workspace:^"
@@ -1168,7 +1167,6 @@ __metadata:
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^4.1.10"
     esbuild: "npm:^0.24.0"
-    fast-glob: "npm:^3.0.0"
     typescript: "npm:^5.7.2"
     vitest: "npm:^4.1.10"
     zod: "npm:^3.23.8"

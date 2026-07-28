@@ -1,9 +1,8 @@
 /**
- * Shared stdin utilities for filid hook scripts
- * Provides timeout-protected stdin reading to prevent hangs in subagent environments.
+ * Shared stdin utilities for filid hook scripts.
  *
- * Ported from OMC (oh-my-claudecode) scripts/lib/stdin.mjs
- * See: https://github.com/Yeachan-Heo/oh-my-claudecode/issues/240
+ * Provides timeout-protected stdin reading so a hook cannot hang when its parent
+ * never closes stdin — the failure mode seen in subagent environments.
  */
 
 /**

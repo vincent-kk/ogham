@@ -5,6 +5,13 @@
  * FractalTree는 프로젝트 디렉토리를 계층적 노드 그래프로 표현하며,
  * 각 노드(FractalNode)는 자신의 분류 타입(CategoryType)과 부모/자식 관계를 보유한다.
  */
+import type { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
+
+import type { BoundaryExemptionDeclaration } from './documents.js';
+import type { VerificationProjectAnalysis } from './verification.js';
+
+export type AnalysisCertainty =
+  (typeof ANALYSIS_CERTAINTIES)[keyof typeof ANALYSIS_CERTAINTIES];
 
 /**
  * 디렉토리의 프랙탈 분류 타입.
@@ -15,7 +22,43 @@
  * - `pure-function`: 단일 책임 함수/유틸리티 모음. 외부 의존이 없어야 한다.
  * - `hybrid`: fractal과 organ의 특성을 모두 갖는 과도기적 형태. 리팩토링 대상.
  */
-export type CategoryType = 'fractal' | 'organ' | 'pure-function' | 'hybrid';
+export type NodeType = 'fractal' | 'organ' | 'pure-function' | 'hybrid';
+export type CategoryType = NodeType;
+
+export interface EntryPointDescriptor {
+  path: string;
+  kind: 'module' | 'executable' | 'framework';
+  adapterId: string;
+  surface: 'enumerated' | 'opaque' | 'unsupported';
+}
+
+export interface EntryPointSurfaceEvidence {
+  entryPoint: EntryPointDescriptor;
+  exportedNames: string[];
+  hasDirectDeclarations: boolean;
+  certainty: AnalysisCertainty;
+}
+
+export interface DocumentContractFinding {
+  document: 'intent' | 'detail';
+  rule: string;
+  message: string;
+  severity: 'error' | 'warning';
+}
+
+export interface FractalDocumentEvidence {
+  intentPath: string | null;
+  detailPath: string | null;
+  intentLines?: number;
+  status: 'valid' | 'violations' | 'missing';
+  findings: DocumentContractFinding[];
+  /**
+   * Boundary exemptions this fractal's DETAIL.md declares, with each
+   * `targetPath` normalized to an absolute path against the owning fractal.
+   * Absent unless the document carries a `## Boundary Exemptions` section.
+   */
+  boundaryExemptions?: BoundaryExemptionDeclaration[];
+}
 
 /** Fractal node — a domain boundary with independent business logic */
 export interface FractalNode {
@@ -27,16 +70,32 @@ export interface FractalNode {
   type: CategoryType;
   /** Parent fractal path (null if root) */
   parent: string | null;
+  /** Closest owning parent fractal path (null if root) */
+  parentFractalPath: string | null;
   /** Child fractal paths */
   children: string[];
+  /** Child fractal paths */
+  childFractalPaths: string[];
   /** Organ directory paths */
   organs: string[];
+  /** Organ paths owned by this fractal */
+  organPaths: string[];
   /** Whether INTENT.md exists */
   hasIntentMd: boolean;
   /** Whether DETAIL.md exists */
   hasDetailMd: boolean;
+  /** Adapter-reported public entry points */
+  entryPoints: EntryPointDescriptor[];
+  /** Snapshot-time inspections of each public entry point. */
+  entryPointSurfaces?: EntryPointSurfaceEvidence[];
+  /** Snapshot-time document paths and contract findings. */
+  documentEvidence?: FractalDocumentEvidence;
+  /** Immediate peer files */
+  peerFiles: string[];
+  /** @deprecated Transitional compatibility field; use entryPoints. */
   /** Whether index.ts or index.js exists in this directory */
   hasIndex: boolean;
+  /** @deprecated Transitional compatibility field; use entryPoints. */
   /** Whether main.ts or main.js exists in this directory */
   hasMain: boolean;
   /** Depth from root (root = 0) */
@@ -60,8 +119,8 @@ export interface FractalTree {
 /**
  * MCP-response-only flat tree shape.
  *
- * `FractalTree.nodes` is a `Map` in process; serializing the Map directly (via
- * `mapReplacer`) inflated MCP responses. MCP handlers convert to this DTO so
+ * `FractalTree.nodes` is a `Map` in process; serializing the Map directly
+ * inflated MCP responses. MCP handlers convert to this DTO so
  * clients see one `nodes: FractalNode[]` array — smaller payloads and a single,
  * unambiguous iteration path for LLMs.
  */
@@ -90,6 +149,50 @@ export interface DependencyDAG {
   edges: DependencyEdge[];
   /** Adjacency list (from → to[]) */
   adjacency: Map<string, string[]>;
+}
+
+export interface DependencyEvidence {
+  sourceFile: string;
+  rawSpecifier: string;
+  resolvedPath: string;
+}
+
+export interface DependencyGraphEdge {
+  fromFractalPath: string;
+  toFractalPath: string;
+  evidence: DependencyEvidence[];
+}
+
+export interface DependencyGraph {
+  nodePaths: string[];
+  edges: DependencyGraphEdge[];
+  cycles: string[][];
+  certainty: AnalysisCertainty;
+}
+
+export interface SnapshotDiagnostic {
+  code: string;
+  message: string;
+  path?: string;
+}
+
+export interface LegacyCriteriaLedgerEvidence {
+  path: string;
+  targetDetailPath: string;
+}
+
+export interface ProjectSnapshot {
+  schemaVersion: 1;
+  projectRoot: string;
+  outputLanguage: string;
+  snapshotHash: string;
+  tree: FractalTree;
+  dependencyGraph: DependencyGraph;
+  adapterIds: string[];
+  verification: VerificationProjectAnalysis;
+  legacyCriteriaLedger: LegacyCriteriaLedgerEvidence | null;
+  diagnostics: SnapshotDiagnostic[];
+  createdAt: string;
 }
 
 /** 디렉토리 항목 정보. 스캔 과정에서 내부적으로 사용한다. */

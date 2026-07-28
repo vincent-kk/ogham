@@ -1,33 +1,37 @@
-# server -- MCP 서버 초기화 및 19개 도구 등록
+# server — 9-tool MCP assembly
 
 ## Purpose
 
-MCP 서버 초기화, 19개 도구 등록, 세션 캐시 수명주기 소유 (boot sweep + shutdown 정리 — SessionEnd 훅 대체).
+Filid 1.0의 9개 도구를 등록하고 공통 artifact envelope, stdio transport와 cache lifecycle을 조립한다.
 
 ## Structure
 
-- `createServer.ts` / `startServer.ts` / `serverHelpers.ts` — 서버 조립·기동
-- `bootSweep.ts` — 부팅 시 스로틀 게이트 prune (보장 경로)
-- `registerShutdown.ts` → `cleanupOwnSessionCache.ts` — exit/SIGINT/SIGTERM 시 자기 세션 캐시 동기 삭제 (best-effort)
-
-프로젝트 루트는 `@ogham/cross-platform/host-paths`의 `tryProjectRoot()`로 해석한다. boot/shutdown 경로는 도구 입력이 없어 미해석이 가능하며, 이때는 프로젝트 스코프 작업(세션 prune·세션 캐시 삭제)을 **건너뛴다**. 전역 stale-cache prune 은 루트가 필요 없어 항상 실행.
+- `lifecycle/` organ — `createServer`(고정 tool registry 조립), `startServer`, `bootSweep`, `registerShutdown`, `cleanupOwnSessionCache`
+- `envelope/` organ — `toolResult` / `toolError` / `wrapHandler`, envelope와 오류 경계
+- `handlers/` organ — legacy-compatible tool 결과를 공통 payload로 변환
+- `utils/` organ — `deferInputValidation`
+- executable entry는 `serverEntry/`이며 이 디렉터리의 `index.ts`가 아니다.
 
 ## Boundaries
 
 ### Always do
 
-- 변경 후 관련 테스트 업데이트
-- 모든 도구 응답은 `toolResult`를 통해 compact JSON으로 직렬화
-- shutdown 핸들러는 1회만 등록, 동기 작업만 (SIGKILL grace ~400ms 실측)
+- 모든 handler를 schema validation과 envelope 경계로 감싸기
+- tool 이름과 등록 수를 integration test로 고정
+- shutdown handler는 한 번만 등록하고 동기 cleanup만 수행
 
 ### Ask first
 
-- 공개 API 시그니처 변경
-- prune·shutdown 정책 변경
+- tool registry, envelope schema·budget 또는 lifecycle 정책 변경
+- 새로운 persistent state 도입
 
 ### Never do
 
-- 모듈 경계 외부 로직 인라인
-- 응답 직렬화에 indent 강제 (디버그는 `FILID_PRETTY_JSON=1` env 사용)
-- shutdown 경로에 async 작업·모델 호출 추가
-- 프로젝트 루트 미해석 시 `process.cwd()` 폴백 (플러그인 설치 디렉터리를 프로젝트로 오인해 청소)
+- core FCA 판단이나 생태계 parsing 인라인
+- 큰 data를 envelope 밖에서 raw 반환
+- root 미해석 시 plugin cwd를 project로 간주
+- shutdown 경로에 async I/O나 모델 호출 추가
+
+## Dependencies
+
+- MCP SDK, Zod, core artifact store와 host path/cache helpers

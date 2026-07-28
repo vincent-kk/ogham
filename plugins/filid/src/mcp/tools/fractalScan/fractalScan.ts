@@ -1,79 +1,32 @@
-import { SCAN_RESULT_MAX_CHARS } from '../../../constants/scanDefaults.js';
-import {
-  loadConfig,
-  resolveMaxDepth,
-} from '../../../core/infra/configLoader/configLoader.js';
-import { analyzeModule } from '../../../core/module/moduleMainAnalyzer/moduleMainAnalyzer.js';
-import { scanProject } from '../../../core/tree/fractalTree/fractalTree.js';
-import type { FractalTree, ModuleInfo } from '../../../types/fractal.js';
-import type { ScanReportDto, ScanResultDto } from '../../../types/report.js';
+import { FRACTAL_SCAN_DETAILS } from '../../../constants/mcpContracts.js';
+import { validateStructure } from '../../../core/index.js';
+import type {
+  FractalScanData,
+  FractalScanSummary,
+} from '../../../types/report.js';
+import type { ToolPayload } from '../../../types/toolEnvelope.js';
+import { createToolSnapshot } from '../utils/createToolSnapshot.js';
 
 import { buildScanResult } from './utils/buildScanResult.js';
 
 export interface FractalScanInput {
   path: string;
-  depth?: number;
-  includeModuleInfo?: boolean;
-  outputMode?: 'full' | 'summary' | 'paths';
+  /** Max-depth RULE threshold override — never a traversal limit. */
+  maxDepth?: number;
+  detail?: (typeof FRACTAL_SCAN_DETAILS)[keyof typeof FRACTAL_SCAN_DETAILS];
 }
 
-/**
- * Handle fractal-scan MCP tool calls.
- *
- * Scans a project directory to build a FractalTree, classifying each
- * directory node as fractal / organ / pure-function / hybrid.
- * When includeModuleInfo is true, also analyses each node's entry points.
- *
- * Returns a {@link ScanResultDto} shaped by `outputMode` (default `full` =
- * {@link ScanReportDto}); the in-process `FractalTree` (whose `nodes` is a
- * `Map`) is converted to a flat `nodes: FractalNode[]` array to avoid
- * Map+Array double serialization in the MCP transport. Oversized payloads
- * degrade to a `{ truncated, reportPath, summary }` envelope.
- */
-export async function handleFractalScan(args: unknown): Promise<ScanResultDto> {
-  const input = args as FractalScanInput;
-
-  if (!input.path) throw new Error('path is required');
-
-  const startTime = Date.now();
-
-  const { config } = loadConfig(input.path);
-  const maxDepth = resolveMaxDepth(config, input.depth);
-  const tree: FractalTree = await scanProject(input.path, {
-    maxDepth,
-    additionalOrganNames: config?.['additional-organ-names'],
+export async function handleFractalScan(
+  input: FractalScanInput,
+): Promise<ToolPayload<FractalScanSummary, FractalScanData>> {
+  const context = await createToolSnapshot(input.path, input.maxDepth);
+  const validation = validateStructure(context.snapshot, context.rules, {
+    maxDepth: context.maxDepth,
   });
-
-  let modules: ModuleInfo[] = [];
-  if (input.includeModuleInfo) {
-    const nodePaths = Array.from(tree.nodes.keys());
-    const results = await Promise.allSettled(
-      nodePaths.map((nodePath) => analyzeModule(nodePath)),
-    );
-    modules = results
-      .filter(
-        (r): r is PromiseFulfilledResult<ModuleInfo> =>
-          r.status === 'fulfilled',
-      )
-      .map((r) => r.value);
-  }
-
-  const report: ScanReportDto = {
-    tree: {
-      root: tree.root,
-      depth: tree.depth,
-      totalNodes: tree.totalNodes,
-      nodes: Array.from(tree.nodes.values()),
-    },
-    modules,
-    timestamp: new Date().toISOString(),
-    duration: Date.now() - startTime,
-  };
-
   return buildScanResult(
-    report,
-    input.outputMode ?? 'full',
-    SCAN_RESULT_MAX_CHARS,
-    input.path,
+    context.snapshot,
+    validation,
+    input.detail ?? FRACTAL_SCAN_DETAILS.SUMMARY,
+    context.diagnostics,
   );
 }

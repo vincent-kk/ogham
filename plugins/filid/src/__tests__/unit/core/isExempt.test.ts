@@ -26,6 +26,17 @@ describe('isExempt (basic)', () => {
     expect(isExempt(node, ['packages/filid/src/index.ts'])).toBe(true);
     expect(isExempt(node, ['packages/filid/src/other.ts'])).toBe(false);
   });
+
+  it('matches Windows path aliases against portable literal and glob scopes', () => {
+    const windowsNode = {
+      path: String.raw`C:\Project\Packages\Filid\src\index.ts`,
+    };
+
+    expect(
+      isExempt(windowsNode, ['c:/project/packages/filid/src/index.ts']),
+    ).toBe(true);
+    expect(isExempt(windowsNode, ['c:/project/packages/**'])).toBe(true);
+  });
 });
 
 describe('isExempt (edge)', () => {

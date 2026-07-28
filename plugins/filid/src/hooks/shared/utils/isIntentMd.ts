@@ -1,11 +1,11 @@
-import { INTENT_MD } from '../../../constants/documentFiles.js';
+import { portableBasename } from '@ogham/cross-platform/compat/basename';
 
-import { fileBasename } from './fileBasename.js';
+import { INTENT_MD } from '../../../constants/documentFiles.js';
 
 /**
  * Check if a file path targets INTENT.md.
  * Handles both POSIX (/) and Windows (\) path separators.
  */
 export function isIntentMd(filePath: string): boolean {
-  return fileBasename(filePath) === INTENT_MD;
+  return portableBasename(filePath) === INTENT_MD;
 }

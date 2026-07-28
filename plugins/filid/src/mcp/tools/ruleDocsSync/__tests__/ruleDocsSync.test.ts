@@ -17,9 +17,9 @@ import { handleRuleDocsSync } from '../ruleDocsSync.js';
 const pluginRoot = fileURLToPath(new URL('../../../../../', import.meta.url));
 
 // Drive the fixtures off the real shipped manifest, not a hard-coded rule id.
-// When filid ships only the required rule (fca-policy), the optional-doc block
-// below skips loudly and revives automatically the day an optional rule is
-// registered again.
+// filid ships four required rules and no optional entry, so the optional-doc
+// block below skips loudly and revives automatically the day an optional rule
+// is registered.
 interface ManifestEntry {
   id: string;
   filename: string;
@@ -234,7 +234,7 @@ describe('handleRuleDocsSync', () => {
   });
 
   // Optional-doc behaviour (deploy → tamper → preserve-or-resync) needs a
-  // `required: false` manifest entry. filid currently ships only fca-policy, so
+  // `required: false` manifest entry. filid's four rules are all required, so
   // these skip loudly; they revive automatically once an optional rule returns.
   describe.skipIf(!OPTIONAL)(
     'optional rule docs (needs a required:false manifest entry)',

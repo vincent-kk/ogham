@@ -1,1 +1,1 @@
-export * from './projectInit.js';
+export { handleProjectInit } from './projectInit.js';

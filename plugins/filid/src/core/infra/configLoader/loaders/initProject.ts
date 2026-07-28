@@ -8,7 +8,7 @@ import {
 import { createLogger } from '../../../../lib/logger.js';
 import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 
-import type { InitResult } from './configTypes.js';
+import type { InitProjectOptions, InitResult } from './configTypes.js';
 import { createDefaultConfig } from './createDefaultConfig.js';
 import { writeConfig } from './writeConfig.js';
 
@@ -22,20 +22,23 @@ const log = createLogger('config-loader');
  * handled exclusively by the `/filid:setup` skill via `syncRuleDocs`.
  *
  * @param projectRoot - Target project directory (git root will be resolved from this)
- * @param language - Output language name (English name, e.g. `'Korean'`).
- *   When provided, recorded in the freshly created config; ignored when the
- *   config already exists (existing config is never overwritten).
+ * @param options - Output language name and adapter IDs. Both are recorded in
+ *   the freshly created config and ignored when the config already exists
+ *   (an existing config is never overwritten).
  */
 export function initProject(
   projectRoot: string,
-  language?: string,
+  options?: InitProjectOptions,
 ): InitResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
 
   let configCreated = false;
   if (!existsSync(configPath)) {
-    writeConfig(resolvedRoot, createDefaultConfig(language));
+    writeConfig(
+      resolvedRoot,
+      createDefaultConfig(options?.language, options?.adapterIds),
+    );
     configCreated = true;
     log.debug('created default config', configPath);
   }

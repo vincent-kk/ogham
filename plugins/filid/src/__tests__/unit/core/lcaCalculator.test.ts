@@ -1,30 +1,95 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  findLCA,
-  getAncestorPaths,
-  getModulePlacement,
-} from '../../../core/analysis/lcaCalculator/lcaCalculator.js';
-import type { FractalNode, FractalTree } from '../../../types/fractal.js';
+import { NODE_TYPES } from '../../../constants/nodeTypes.js';
+import { findLowestCommonFractal } from '../../../core/analysis/lcaCalculator/resolvers/findLowestCommonFractal.js';
+import { getAncestorPaths } from '../../../core/analysis/lcaCalculator/resolvers/getAncestorPaths.js';
+import { resolveOwningFractal } from '../../../core/analysis/lcaCalculator/resolvers/resolveOwningFractal.js';
+import { buildFractalTree } from '../../../core/tree/fractalTree/index.js';
+import type { NodeEntry } from '../../../core/tree/fractalTree/index.js';
+import type { FractalTree } from '../../../types/fractal.js';
 
-// 헬퍼: FractalNode 생성
-function makeNode(
-  overrides: Partial<FractalNode> & { path: string; name: string },
-): FractalNode {
-  return {
-    type: 'fractal',
-    parent: null,
-    children: [],
-    organs: [],
+const POSIX_PATHS = {
+  ROOT: '/root',
+  A: '/root/a',
+  B: '/root/b',
+  AX: '/root/a/x',
+  AY: '/root/a/y',
+  BZ: '/root/b/z',
+  AX_FILE: '/root/a/x/value.unit',
+  AY_FILE: '/root/a/y/value.unit',
+  BZ_FILE: '/root/b/z/value.unit',
+  UNKNOWN: '/nonexistent',
+  OUTSIDE: '/outside/value.unit',
+  PREFIX_COLLISION: '/rooted/a/value.unit',
+} as const;
+
+const WINDOWS_PATHS = {
+  ROOT: 'C:\\Repo',
+  A: 'C:\\Repo\\A',
+  ORGAN: 'C:\\Repo\\A\\tools',
+  A_ALIAS: 'c:/repo/a',
+  ORGAN_FILE: 'C:\\Repo\\A\\tools\\value.unit',
+  ORGAN_FILE_ALIAS: 'c:/repo/a/tools/value.unit',
+  ORGAN_FILE_ONE: 'C:\\Repo\\A\\tools\\one.unit',
+  ORGAN_FILE_TWO: 'C:\\Repo\\A\\tools\\two.unit',
+} as const;
+
+const TEST_TREE_ENTRIES: NodeEntry[] = [
+  [POSIX_PATHS.ROOT, 'root'],
+  [POSIX_PATHS.A, 'a'],
+  [POSIX_PATHS.B, 'b'],
+  [POSIX_PATHS.AX, 'x'],
+  [POSIX_PATHS.AY, 'y'],
+  [POSIX_PATHS.BZ, 'z'],
+].map(([path, name]) => ({
+  path,
+  name,
+  type: NODE_TYPES.FRACTAL,
+  hasIntentMd: false,
+  hasDetailMd: false,
+}));
+
+const WINDOWS_TREE_ENTRIES: NodeEntry[] = [
+  {
+    path: WINDOWS_PATHS.ROOT,
+    name: 'Repo',
+    type: NODE_TYPES.FRACTAL,
+    hasIntentMd: true,
+    hasDetailMd: true,
+  },
+  {
+    path: WINDOWS_PATHS.A,
+    name: 'A',
+    type: NODE_TYPES.FRACTAL,
+    hasIntentMd: true,
+    hasDetailMd: true,
+  },
+  {
+    path: WINDOWS_PATHS.ORGAN,
+    name: 'tools',
+    type: NODE_TYPES.ORGAN,
     hasIntentMd: false,
     hasDetailMd: false,
-    hasIndex: false,
-    hasMain: false,
-    depth: 0,
-    metadata: {},
-    ...overrides,
-  };
-}
+  },
+];
+
+const AX_ANCESTORS = [POSIX_PATHS.AX, POSIX_PATHS.A, POSIX_PATHS.ROOT];
+const ROOT_ANCESTORS = [POSIX_PATHS.ROOT];
+const WINDOWS_A_ANCESTORS = [WINDOWS_PATHS.A, WINDOWS_PATHS.ROOT];
+const NO_PATHS: string[] = [];
+const SINGLE_CONSUMER = [POSIX_PATHS.AX_FILE];
+const SIBLING_CONSUMERS = [POSIX_PATHS.AX_FILE, POSIX_PATHS.AY_FILE];
+const CROSS_BRANCH_CONSUMERS = [POSIX_PATHS.AX_FILE, POSIX_PATHS.BZ_FILE];
+const THREE_CONSUMERS = [
+  POSIX_PATHS.AX_FILE,
+  POSIX_PATHS.AY_FILE,
+  POSIX_PATHS.BZ_FILE,
+];
+const ORGAN_CONSUMERS = [
+  WINDOWS_PATHS.ORGAN_FILE_ONE,
+  WINDOWS_PATHS.ORGAN_FILE_TWO,
+];
+const PARTIALLY_UNKNOWN_CONSUMERS = [POSIX_PATHS.AX_FILE, POSIX_PATHS.OUTSIDE];
 
 // 헬퍼: 트리 구축
 //  /root
@@ -34,154 +99,107 @@ function makeNode(
 //  └── /root/b
 //      └── /root/b/z
 function buildTestTree(): FractalTree {
-  const root = makeNode({
-    path: '/root',
-    name: 'root',
-    depth: 0,
-    parent: null,
-    children: ['/root/a', '/root/b'],
-  });
-  const a = makeNode({
-    path: '/root/a',
-    name: 'a',
-    depth: 1,
-    parent: '/root',
-    children: ['/root/a/x', '/root/a/y'],
-  });
-  const b = makeNode({
-    path: '/root/b',
-    name: 'b',
-    depth: 1,
-    parent: '/root',
-    children: ['/root/b/z'],
-  });
-  const ax = makeNode({
-    path: '/root/a/x',
-    name: 'x',
-    depth: 2,
-    parent: '/root/a',
-  });
-  const ay = makeNode({
-    path: '/root/a/y',
-    name: 'y',
-    depth: 2,
-    parent: '/root/a',
-  });
-  const bz = makeNode({
-    path: '/root/b/z',
-    name: 'z',
-    depth: 2,
-    parent: '/root/b',
-  });
+  return buildFractalTree(TEST_TREE_ENTRIES);
+}
 
-  const nodes = new Map<string, FractalNode>([
-    ['/root', root],
-    ['/root/a', a],
-    ['/root/b', b],
-    ['/root/a/x', ax],
-    ['/root/a/y', ay],
-    ['/root/b/z', bz],
-  ]);
-
-  return { root: '/root', nodes, depth: 2, totalNodes: 6 };
+function buildWindowsTree(): FractalTree {
+  return buildFractalTree(WINDOWS_TREE_ENTRIES);
 }
 
 describe('lca-calculator', () => {
   describe('getAncestorPaths', () => {
     it('should return path chain from node to root (inclusive)', () => {
       const tree = buildTestTree();
-      const paths = getAncestorPaths(tree, '/root/a/x');
-      expect(paths).toEqual(['/root/a/x', '/root/a', '/root']);
+      const paths = getAncestorPaths(tree, POSIX_PATHS.AX);
+      expect(paths).toEqual(AX_ANCESTORS);
     });
 
     it('should return single element for root node', () => {
       const tree = buildTestTree();
-      const paths = getAncestorPaths(tree, '/root');
-      expect(paths).toEqual(['/root']);
+      const paths = getAncestorPaths(tree, POSIX_PATHS.ROOT);
+      expect(paths).toEqual(ROOT_ANCESTORS);
     });
 
     it('should return empty array for unknown node', () => {
       const tree = buildTestTree();
-      const paths = getAncestorPaths(tree, '/nonexistent');
-      expect(paths).toEqual([]);
+      const paths = getAncestorPaths(tree, POSIX_PATHS.UNKNOWN);
+      expect(paths).toEqual(NO_PATHS);
     });
   });
 
-  describe('findLCA', () => {
-    it('should find LCA of siblings (same parent)', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a/x', '/root/a/y');
-      expect(lca?.path).toBe('/root/a');
+  describe('portable owner resolution', () => {
+    it('returns a canonical ancestor chain for a Windows path alias', () => {
+      expect(
+        getAncestorPaths(buildWindowsTree(), WINDOWS_PATHS.A_ALIAS),
+      ).toEqual(WINDOWS_A_ANCESTORS);
     });
 
-    it('should find LCA of nodes in different subtrees', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a/x', '/root/b/z');
-      expect(lca?.path).toBe('/root');
+    it('resolves an exact fractal directory to itself', () => {
+      expect(resolveOwningFractal(buildTestTree(), POSIX_PATHS.AX)?.path).toBe(
+        POSIX_PATHS.AX,
+      );
     });
 
-    it('should return the node itself when pathA === pathB', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/root/a');
-      expect(lca?.path).toBe('/root/a');
+    it('resolves a file in an organ to the nearest owning fractal', () => {
+      expect(
+        resolveOwningFractal(buildWindowsTree(), WINDOWS_PATHS.ORGAN_FILE)
+          ?.path,
+      ).toBe(WINDOWS_PATHS.A);
     });
 
-    it('should return ancestor when one path is ancestor of other', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/root/a/x');
-      expect(lca?.path).toBe('/root/a');
+    it('resolves Windows separator and case aliases without host assumptions', () => {
+      expect(
+        resolveOwningFractal(buildWindowsTree(), WINDOWS_PATHS.ORGAN_FILE_ALIAS)
+          ?.path,
+      ).toBe(WINDOWS_PATHS.A);
     });
 
-    it('should return null for unknown node', () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/nonexistent');
-      expect(lca).toBeNull();
-    });
-
-    it("should return root as LCA of root's direct children", () => {
-      const tree = buildTestTree();
-      const lca = findLCA(tree, '/root/a', '/root/b');
-      expect(lca?.path).toBe('/root');
+    it('does not confuse a project-root prefix with containment', () => {
+      expect(
+        resolveOwningFractal(buildTestTree(), POSIX_PATHS.PREFIX_COLLISION),
+      ).toBeNull();
     });
   });
 
-  describe('getModulePlacement', () => {
-    it('should return root for empty dependencies', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, []);
-      expect(result.suggestedParent).toBe('/root');
-      expect(result.confidence).toBe(0);
+  describe('findLowestCommonFractal', () => {
+    it('returns null when no consumers are supplied', () => {
+      expect(findLowestCommonFractal(buildTestTree(), NO_PATHS)).toBeNull();
     });
 
-    it('should return parent of single dependency', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, ['/root/a/x']);
-      expect(result.suggestedParent).toBe('/root/a');
-      expect(result.confidence).toBe(0.5);
+    it('returns the owner fractal for one consumer', () => {
+      expect(
+        findLowestCommonFractal(buildTestTree(), SINGLE_CONSUMER)?.path,
+      ).toBe(POSIX_PATHS.AX);
     });
 
-    it('should suggest deepest common ancestor for siblings', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, ['/root/a/x', '/root/a/y']);
-      expect(result.suggestedParent).toBe('/root/a');
-      expect(result.confidence).toBeGreaterThan(0);
+    it('returns the common parent fractal for sibling consumers', () => {
+      expect(
+        findLowestCommonFractal(buildTestTree(), SIBLING_CONSUMERS)?.path,
+      ).toBe(POSIX_PATHS.A);
     });
 
-    it('should suggest root for nodes in different branches', () => {
-      const tree = buildTestTree();
-      const result = getModulePlacement(tree, ['/root/a/x', '/root/b/z']);
-      expect(result.suggestedParent).toBe('/root');
+    it('returns the root fractal for consumers in different branches', () => {
+      expect(
+        findLowestCommonFractal(buildTestTree(), CROSS_BRANCH_CONSUMERS)?.path,
+      ).toBe(POSIX_PATHS.ROOT);
     });
 
-    it('should handle three dependencies correctly', () => {
-      const tree = buildTestTree();
-      // x, y are under /a, z is under /b → deepest pairwise LCA = /root/a (for x,y pair)
-      const result = getModulePlacement(tree, [
-        '/root/a/x',
-        '/root/a/y',
-        '/root/b/z',
-      ]);
-      expect(result.suggestedParent).toBe('/root/a');
+    it('intersects all three consumer owner chains', () => {
+      expect(
+        findLowestCommonFractal(buildTestTree(), THREE_CONSUMERS)?.path,
+      ).toBe(POSIX_PATHS.ROOT);
+    });
+
+    it('returns the owner rather than an organ node', () => {
+      expect(
+        findLowestCommonFractal(buildWindowsTree(), ORGAN_CONSUMERS)?.path,
+      ).toBe(WINDOWS_PATHS.A);
+    });
+
+    it('does not fall back when any consumer owner is unknown', () => {
+      expect(
+        findLowestCommonFractal(buildTestTree(), PARTIALLY_UNKNOWN_CONSUMERS),
+      ).toBeNull();
     });
   });
 });

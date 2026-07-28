@@ -5,7 +5,7 @@ import type { UserPromptSubmitInput } from '../../../types/hooks.js';
 // Default existsSync behavior:
 //   .filid path               → true  (passes isFcaProject gate)
 //   .filid/config.json        → true  (config present)
-//   .claude/rules/filid_fca-policy.md      → true  (rules deployed, active pointer)
+//   .claude/rules/filid_fractal-boundaries.md      → true  (rules deployed, active pointer)
 //   /prompt-context-*         → false (no cached context = triggers fresh build)
 //   others                    → false
 //
@@ -25,7 +25,8 @@ vi.mock('node:fs', async (importOriginal) => {
     const normalized = toPosixPath(p);
     if (normalized.endsWith('.filid')) return true;
     if (normalized.endsWith('.filid/config.json')) return true;
-    if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return true;
+    if (normalized.endsWith('.claude/rules/filid_fractal-boundaries.md'))
+      return true;
     if (normalized.includes('/prompt-context-')) return false;
     return false;
   });
@@ -43,7 +44,7 @@ vi.mock('node:fs', async (importOriginal) => {
         return MOCK_CONFIG_JSON;
       if (
         typeof p === 'string' &&
-        toPosixPath(p).endsWith('.claude/rules/filid_fca-policy.md') &&
+        toPosixPath(p).endsWith('.claude/rules/filid_fractal-boundaries.md') &&
         existsSyncMock(p)
       )
         return Buffer.from('# FCA policy');
@@ -66,7 +67,7 @@ vi.mock('node:fs', async (importOriginal) => {
 });
 
 const { handleUserPromptSubmit } =
-  await import('../../../hooks/userPromptSubmit/userPromptSubmit.js');
+  await import('../../../hooks/userPromptSubmit/index.js');
 const { existsSync, readdirSync } = await import('node:fs');
 
 const baseInput: UserPromptSubmitInput = {
@@ -85,7 +86,7 @@ describe('user-prompt-submit context injection', () => {
         const normalized = toPosixPath(p);
         if (normalized.endsWith('.filid')) return true;
         if (normalized.endsWith('.filid/config.json')) return true;
-        if (normalized.endsWith('.claude/rules/filid_fca-policy.md'))
+        if (normalized.endsWith('.claude/rules/filid_fractal-boundaries.md'))
           return true;
         if (normalized.includes('/prompt-context-')) return false;
         return false;
@@ -98,7 +99,7 @@ describe('user-prompt-submit context injection', () => {
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toBeDefined();
     expect(result.hookSpecificOutput?.additionalContext).toContain(
-      '[filid] FCA-AI active. Rules: .claude/rules/filid_fca-policy.md',
+      '[filid] FCA-AI active. Rules: .claude/rules/filid_fractal-boundaries.md',
     );
   });
 
@@ -130,7 +131,7 @@ describe('user-prompt-submit context injection', () => {
         const normalized = toPosixPath(p);
         if (normalized.endsWith('.filid')) return true;
         if (normalized.endsWith('.filid/config.json')) return false;
-        if (normalized.endsWith('.claude/rules/filid_fca-policy.md'))
+        if (normalized.endsWith('.claude/rules/filid_fractal-boundaries.md'))
           return false;
         if (normalized.includes('/prompt-context-')) return false;
         return false;
@@ -152,7 +153,7 @@ describe('user-prompt-submit context injection', () => {
         const normalized = toPosixPath(p);
         if (normalized.endsWith('.filid')) return true;
         if (normalized.endsWith('.filid/config.json')) return true;
-        if (normalized.endsWith('.claude/rules/filid_fca-policy.md'))
+        if (normalized.endsWith('.claude/rules/filid_fractal-boundaries.md'))
           return false;
         if (normalized.includes('/prompt-context-')) return false;
         return false;
@@ -175,7 +176,7 @@ describe('user-prompt-submit context injection', () => {
           ?.additionalContext ?? '';
 
       expect(ctx).toContain('Rules not deployed');
-      expect(ctx).not.toContain('.claude/rules/filid_fca-policy.md');
+      expect(ctx).not.toContain('.claude/rules/filid_fractal-boundaries.md');
     } finally {
       delete process.env.OGHAM_HOST;
     }
@@ -239,7 +240,7 @@ describe('user-prompt-submit context injection', () => {
     const lines = ctx.split('\n').filter((l: string) => l.trim() !== '');
     expect(lines.length).toBeLessThanOrEqual(3);
     expect(lines[0]).toBe(
-      '[filid] FCA-AI active. Rules: .claude/rules/filid_fca-policy.md',
+      '[filid] FCA-AI active. Rules: .claude/rules/filid_fractal-boundaries.md',
     );
   });
 

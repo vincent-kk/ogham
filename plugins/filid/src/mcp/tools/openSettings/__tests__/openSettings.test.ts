@@ -69,7 +69,12 @@ describe('open_settings tool', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        config: { version: '1.0', rules: {}, language: 'Korean' },
+        config: {
+          version: '2.0',
+          language: 'Korean',
+          adapters: { mode: 'auto', enabled: [] },
+          rules: {},
+        },
         ruleDocs: { selections: {}, resync: [] },
       }),
     });
@@ -101,7 +106,12 @@ describe('open_settings tool', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        config: { version: '1.0', rules: {}, language: 'Korean' },
+        config: {
+          version: '2.0',
+          language: 'Korean',
+          adapters: { mode: 'auto', enabled: [] },
+          rules: {},
+        },
         ruleDocs: { selections: {}, resync: [] },
       }),
     });

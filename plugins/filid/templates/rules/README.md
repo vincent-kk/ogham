@@ -2,11 +2,11 @@
 
 This directory ships rule documentation templates that the `/filid:setup` skill deploys into a target project's `.claude/rules/` directory.
 
-> **Important — deployment is skill-only.** SessionStart hooks do NOT copy or remove these files. The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/config-loader/config-loader.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__rule_docs_sync` MCP tool from the `setup` skill after the user confirms a checkbox selection.
+> **Important — deployment is skill-only.** SessionStart hooks do NOT copy or remove these files. The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/configLoader/loaders/syncRuleDocs.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__rule_docs_sync` MCP tool from the `setup` skill after the user confirms a checkbox selection.
 
 ## manifest.json
 
-`manifest.json` is the single source of truth for which rule docs exist and which are required:
+`manifest.json` is the single source of truth for which rule docs exist and which are required. filid ships four, all required — the rules are not partially adoptable, so there is currently no `required: false` entry:
 
 ```json
 {
@@ -14,30 +14,38 @@ This directory ships rule documentation templates that the `/filid:setup` skill 
   "version": "1.0",
   "rules": [
     {
-      "id": "filid_fca-policy",
-      "filename": "filid_fca-policy.md",
+      "id": "filid_fractal-boundaries",
+      "filename": "filid_fractal-boundaries.md",
       "required": true,
-      "title": "FCA-AI Architecture Rules",
-      "description": "..."
+      "title": "Fractal Boundaries",
+      "description": "...",
+      "templateHash": "<injected by scripts/syncRuleHashes.mjs>"
     }
   ]
 }
 ```
 
+The four documents are `filid_fractal-boundaries.md`, `filid_module-documents.md`, `filid_verification-records.md` and `filid_code-placement.md`. The middle two carry a `paths:` frontmatter block so the harness loads them only while a matching file is open; use `paths:`, never `globs:` — an unknown key is dropped and the rule silently becomes standing context.
+
+A document dropped from the manifest needs no migration entry: the shared rule manager retires any `filid_*.md` in the rules directory that the manifest no longer names.
+
 Fields:
 
-| Field | Meaning |
-|---|---|
-| `id` | Stable identifier for the rule doc (used in logs and the sync response) |
-| `filename` | Source file (under `templates/rules/`) and destination basename (under `.claude/rules/`) |
-| `required` | `true` → always deployed, UI pre-checks and disables the checkbox. `false` → opt-in (pre-checked iff already deployed) |
-| `title` | Short label shown in the `setup` checkbox UI |
-| `description` | One-line summary shown underneath the checkbox |
+| Field            | Meaning                                                                                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`             | Stable identifier for the rule doc (used in logs and the sync response)                                                                                                                                         |
+| `filename`       | Source file (under `templates/rules/`) and destination basename (under `.claude/rules/`)                                                                                                                        |
+| `required`       | `true` → always deployed and auto-resynced on drift; never rendered as a checkbox. `false` → opt-in (pre-checked iff already deployed), and drift is preserved unless the caller passes an explicit `resync` id |
+| `legacyFilename` | Optional. A previous address for this same document, migrated on the next sync. Filenames and legacy filenames must be globally unique across entries — two entries claiming one name fails the sync            |
+| `title`          | Short label shown in the `setup` checkbox UI                                                                                                                                                                    |
+| `description`    | One-line summary shown underneath the checkbox                                                                                                                                                                  |
+| `templateHash`   | SHA-256 of the template bytes, injected by `scripts/syncRuleHashes.mjs`. Never hand-write it                                                                                                                    |
 
 ## Adding a new rule doc
 
-1. Write the markdown under `templates/rules/<your-rule>.md`.
-2. Append an entry to `manifest.json` with `required: false` so the user can opt in via the checkbox.
-3. Rebuild the plugin (`yarn build:plugin`) so the bundled MCP server picks up the new handler context.
-4. Run `/filid:setup` on a test project — the new rule should appear in the checkbox list, pre-unchecked.
-5. If the rule is selected, the file is copied to `.claude/rules/<filename>`. If later unselected on a re-run of the skill, the file is removed.
+1. Write the markdown under `templates/rules/<your-rule>.md`, following the shape the existing four use: a `> **Precedence**:` chain, a "rests on a property/properties" grounding sentence, numbered sections that each close with `Ask yourself:`, and a closing "This rule is working if: / is wrong for you if:" pair. `src/__tests__/unit/core/ruleDocInvariants.test.ts` enforces that skeleton.
+2. Append an entry to `manifest.json`. Use `required: false` if the rule should be opt-in via the checkbox; filid's own four are all `required: true`.
+3. Run `yarn build:rules` to inject `templateHash`. The repo-root `.prettierignore` and `.gitattributes` keep these files byte-stable (no reformatting, LF endings) — that is what makes the hash deterministic, so do not reformat them by hand.
+4. Rebuild the plugin (`yarn build:plugin`) so the bundled MCP server picks up the new handler context.
+5. Run `/filid:setup` on a test project — an optional rule appears in the checkbox list, pre-unchecked; a required rule is auto-deployed and reported in the summary instead.
+6. If the rule is selected, the file is copied to `.claude/rules/<filename>`. If later unselected on a re-run of the skill, the file is removed.

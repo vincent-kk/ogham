@@ -35,7 +35,7 @@
 
 ### Never do
 
-- `.claude/rules/filid_fca-policy.md` 등 rule doc 파일을 write
+- `.claude/rules/filid_*.md` 등 rule doc 파일을 write
 - `.filid/config.json` 자동 생성 (setup 스킬 전담)
 - daily throttle 게이트 (`isPruneDue` / `isSessionPruneDue`) 우회로 매 세션마다 prune 강제 실행
 - 범용 self-probe·spawn·cross-spawn·which를 SessionStart 번들에 포함

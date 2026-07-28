@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { classifyNode } from '../../../core/tree/organClassifier/organClassifier.js';
+import { classifyNode } from '../../../core/tree/organClassifier/index.js';
 
 describe('organ-classifier — classifyNode (extended)', () => {
   describe('classifyNode', () => {
@@ -18,7 +18,7 @@ describe('organ-classifier — classifyNode (extended)', () => {
         'pure-function',
       ],
       [
-        'hasFractalChildren=true → fractal',
+        'hasFractalChildren=true → organ (holding fractals is not a declaration)',
         {
           dirName: 'payments',
           hasIntentMd: false,
@@ -27,10 +27,10 @@ describe('organ-classifier — classifyNode (extended)', () => {
           isLeafDirectory: false,
           hasSideEffects: true,
         },
-        'fractal',
+        'organ',
       ],
       [
-        'non-leaf + hasSideEffects=true → fractal',
+        'non-leaf + hasSideEffects=true → organ',
         {
           dirName: 'checkout',
           hasIntentMd: false,
@@ -39,10 +39,10 @@ describe('organ-classifier — classifyNode (extended)', () => {
           isLeafDirectory: false,
           hasSideEffects: true,
         },
-        'fractal',
+        'organ',
       ],
       [
-        'non-leaf + hasSideEffects=undefined → fractal (default)',
+        'non-leaf + hasSideEffects=undefined → organ (default)',
         {
           dirName: 'checkout',
           hasIntentMd: false,
@@ -50,7 +50,7 @@ describe('organ-classifier — classifyNode (extended)', () => {
           hasFractalChildren: false,
           isLeafDirectory: false,
         },
-        'fractal',
+        'organ',
       ],
     ])('non-leaf: %s', (_desc, input, expected) => {
       expect(classifyNode(input)).toBe(expected);
@@ -133,58 +133,65 @@ describe('organ-classifier — classifyNode (extended)', () => {
     });
   });
 
-  describe('classifyNode — hasIndex rule', () => {
+  describe('classifyNode — adapter entry-point rule', () => {
+    const entryPoint = {
+      path: '/project/login/module.entry',
+      kind: 'module' as const,
+      adapterId: 'arbitrary-entry',
+      surface: 'enumerated' as const,
+    };
+
     it.each([
       [
-        'non-organ name + hasIndex=true → fractal',
+        'non-organ name + arbitrary entry point → fractal',
         {
           dirName: 'login',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: true,
+          entryPoints: [entryPoint],
         },
         'fractal',
       ],
       [
-        'known-organ name + hasIndex=true → organ (name wins)',
+        'known-organ name + entry point → organ (name wins)',
         {
           dirName: 'helpers',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: true,
+          entryPoints: [entryPoint],
         },
         'organ',
       ],
       [
-        'infra pattern __tests__ + hasIndex=true → organ (pattern wins)',
+        'infra pattern __tests__ + entry point → organ (pattern wins)',
         {
           dirName: '__tests__',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: true,
+          entryPoints: [entryPoint],
         },
         'organ',
       ],
       [
-        'hasIndex=false + leaf → organ',
+        'empty entry point list + leaf → organ',
         {
           dirName: 'login',
           hasIntentMd: false,
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
-          hasIndex: false,
+          entryPoints: [],
         },
         'organ',
       ],
       [
-        'hasIndex=undefined + leaf → organ (fallback)',
+        'entry points undefined + leaf → organ (fallback)',
         {
           dirName: 'login',
           hasIntentMd: false,
@@ -193,6 +200,67 @@ describe('organ-classifier — classifyNode (extended)', () => {
           isLeafDirectory: true,
         },
         'organ',
+      ],
+    ])('%s', (_desc, input, expected) => {
+      expect(classifyNode(input)).toBe(expected);
+    });
+  });
+
+  describe('classifyNode — describes, never prescribes', () => {
+    const at = (kind: 'module' | 'executable' | 'framework') => ({
+      path: `/project/skills/setup/entry.${kind}`,
+      kind,
+      adapterId: 'ecmascript',
+      surface: 'enumerated' as const,
+    });
+
+    it.each([
+      [
+        'no document, no index, non-leaf → organ (never a default fractal)',
+        {
+          dirName: 'setup',
+          hasIntentMd: false,
+          hasDetailMd: false,
+          hasFractalChildren: false,
+          isLeafDirectory: false,
+        },
+        'organ',
+      ],
+      [
+        'executable entry only → organ (not a module index)',
+        {
+          dirName: 'setup',
+          hasIntentMd: false,
+          hasDetailMd: false,
+          hasFractalChildren: false,
+          isLeafDirectory: false,
+          entryPoints: [at('executable')],
+        },
+        'organ',
+      ],
+      [
+        'framework entry only → organ (not a module index)',
+        {
+          dirName: 'setup',
+          hasIntentMd: false,
+          hasDetailMd: false,
+          hasFractalChildren: false,
+          isLeafDirectory: false,
+          entryPoints: [at('framework')],
+        },
+        'organ',
+      ],
+      [
+        'module index → fractal (the one classifying signal)',
+        {
+          dirName: 'setup',
+          hasIntentMd: false,
+          hasDetailMd: false,
+          hasFractalChildren: false,
+          isLeafDirectory: false,
+          entryPoints: [at('module')],
+        },
+        'fractal',
       ],
     ])('%s', (_desc, input, expected) => {
       expect(classifyNode(input)).toBe(expected);

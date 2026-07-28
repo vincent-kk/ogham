@@ -1,6 +1,6 @@
 # 02. 모듈별 기술 청사진
 
-> 6개 도메인의 모든 모듈에 대한 목적, 핵심 알고리즘, 입출력 시그니처, 의존 관계 정리.
+> `@ogham/filid` 1.0 기준. 각 모듈의 목적, 핵심 알고리즘, 공개 시그니처, 의존 관계.
 
 ---
 
@@ -8,645 +8,357 @@
 
 ```
 src/
-├── types/      7 파일   38 타입/인터페이스   ← 모든 모듈의 기반 (+review.ts, debt.ts)
-├── core/       7 모듈   10 함수 + 1 클래스    순수 비즈니스 로직
-├── ast/        5 모듈   7 함수               TypeScript AST 분석
-├── metrics/    4 모듈   4 함수               소프트웨어 메트릭
-├── compress/   2 모듈   3 함수               컨텍스트 압축
-├── hooks/      8 모듈   8 함수 + 7 엔트리     Claude Code Hook 연동 (entries/ 하위 디렉토리)
-└── mcp/tools/  15 모듈                       MCP tool 핸들러 (+ast-grep-search, ast-grep-replace, cache-manage)
+├── types/       12 파일   언어 중립 공개 DTO (organ)
+├── constants/   20 파일   rule·verification·envelope 상수 (organ)
+├── lib/                   작은 runtime utility (organ)
+├── adapters/    2 sub     생태계 증거 수집 (registry, ecmascript)
+├── core/        8 sub     언어 중립 FCA 엔진
+├── mcp/         4 sub     9개 도구와 설정 페이지의 host boundary
+└── hooks/       5 sub     3개 수명주기 + shared organ
 ```
+
+의존 방향은 `core → adapters` 이며 역방향 edge는 0이다. 자세한 근거는 [01-ARCHITECTURE](./01-ARCHITECTURE.md#레이어와-의존성-방향) 참조.
 
 ---
 
-## 1. types/ — 타입 정의
+## 1. types/ — 언어 중립 공개 DTO
 
-### fractal.ts (5 타입)
+| 파일              | 소유 개념                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `fractal.ts`      | `NodeType`, `FractalNode`, `FractalTree`, `EntryPointDescriptor`, `DependencyGraph`, `ProjectSnapshot` |
+| `adapters.ts`     | `StructureAdapter`, `VerificationAdapter`, `AdapterRegistry`, `AdapterClaim`, `DependencyReference`    |
+| `verification.ts` | `VerificationFileAnalysis`, `VerificationProjectAnalysis`, `VerificationViolation`                     |
+| `documents.ts`    | `ThreeTierBoundary`, `IntentMdSchema`, `DetailMdSchema`, `DetailAcceptanceGroup`                       |
+| `restructure.ts`  | `MoveInstruction`, `RestructurePlan`, `ImportRewrite`, `PlanValidationResult`                          |
+| `context.ts`      | `ContextDocumentRef`, `ContextResolution`                                                              |
+| `toolEnvelope.ts` | `ToolStatus`, `ToolPayload`, `ToolResultEnvelope`, `ToolArtifact`                                      |
+| `rules.ts`        | `Rule`, `RuleViolation`, `RuleEvaluationResult`, `RuleOverride`, `BuiltinRuleId`                       |
+| `report.ts`       | `ScanReport`, `ValidationReport`, `VerificationScanSummary`                                            |
+| `scan.ts`         | `ScanOptions`                                                                                          |
+| `hooks.ts`        | `HookBaseInput`, `PreToolUseInput`, `UserPromptSubmitInput`, `HookOutput`                              |
+| `index.ts`        | 이름 지정 재수출 배럴                                                                                  |
 
-| 타입             | 용도                                                  |
-| ---------------- | ----------------------------------------------------- |
-| `NodeType`       | `'fractal' \| 'organ' \| 'pure-function'` 유니온      |
-| `FractalNode`    | 트리 노드: path, name, type, parent, children, organs |
-| `FractalTree`    | 루트 경로 + `Map<string, FractalNode>`                |
-| `DependencyEdge` | from → to 방향 엣지 + type                            |
-| `DependencyDAG`  | 노드 Set + 엣지 배열 + 인접 리스트                    |
-
-### documents.ts (7 타입)
-
-| 타입                 | 용도                                         |
-| -------------------- | -------------------------------------------- |
-| `ThreeTierBoundary`  | alwaysDo / askFirst / neverDo 문자열 배열    |
-| `IntentMdSchema`     | INTENT.md 파싱 결과 구조                     |
-| `DetailMdSchema`     | DETAIL.md 파싱 결과 구조                     |
-| `CompressionMeta`    | 압축 메타데이터 (method, lines, recoverable) |
-| `IntentMdValidation` | 검증 결과 (valid + violations)               |
-| `DetailMdValidation` | 검증 결과 (valid + violations)               |
-| `DocumentViolation`  | 위반 상세 (rule, message, severity)          |
-
-### metrics.ts (7 타입)
-
-| 타입                         | 용도                                              |
-| ---------------------------- | ------------------------------------------------- |
-| `LCOM4Result`                | 값, components, 메서드/필드 수                    |
-| `CyclomaticComplexityResult` | 값, 함수별 CC, 파일 합계                          |
-| `TestCaseCount`              | 파일별 테스트 카운트 (basic/complex)              |
-| `ThreePlusTwelveResult`      | 위반 여부 + 위반 파일 목록                        |
-| `DecisionAction`             | `'split' \| 'compress' \| 'parameterize' \| 'ok'` |
-| `DecisionResult`             | 액션 + 근거 + 관련 메트릭                         |
-| `PromotionCandidate`         | 승격 후보 정보 + eligible                         |
-
-### hooks.ts (7 타입)
-
-| 타입                    | 용도                                           |
-| ----------------------- | ---------------------------------------------- |
-| `HookBaseInput`         | 공통 입력 (cwd, session_id, hook_event_name)   |
-| `PreToolUseInput`       | tool_name + tool_input (file_path, content 등) |
-| `PostToolUseInput`      | tool_name + tool_input + tool_response         |
-| `SubagentStartInput`    | agent_type + agent_id                          |
-| `UserPromptSubmitInput` | prompt 텍스트                                  |
-| `HookOutput`            | continue 플래그 + additionalContext            |
-| `HookInput`             | 4개 입력 타입 유니온                           |
-
-### ast.ts (8 타입)
-
-| 타입             | 용도                                               |
-| ---------------- | -------------------------------------------------- |
-| `ImportInfo`     | 모듈 경로 + specifier + type-only + line           |
-| `ExportInfo`     | 이름 + type-only + default + line                  |
-| `CallInfo`       | callee 표현식 + line                               |
-| `DependencyInfo` | 파일 전체 의존성 (imports/exports/calls)           |
-| `MethodInfo`     | 메서드명 + 접근 필드 목록                          |
-| `ClassInfo`      | 클래스명 + methods + fields                        |
-| `TreeDiffChange` | 변경 종류 + 선언 kind/name + line                  |
-| `TreeDiffResult` | 변경 목록 + hasSemanticChanges + formatting 카운트 |
+**이 조직의 규범**: 여기에는 프로그래밍 언어의 확장자, 진입점 파일명, 테스트 호출 문법이 등장하지 않는다. `EntryPointDescriptor.path`처럼 어댑터가 채우는 값만 있다.
 
 ---
 
-## 2. core/ — 순수 비즈니스 로직
+## 2. constants/ — 상수 organ
 
-### fractal-tree.ts
+정적 상수 객체와 배열은 함수 밖 module scope에 둔다. 함수 안에는 입력에서 계산되는 동적 collection만 둔다.
 
-**목적**: 프랙탈 트리 자료구조 구축 및 탐색
+| 파일                        | 소유 값                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| `builtinRuleIds.ts`         | 15개 rule ID object enum                                        |
+| `documentValidation.ts`     | `INTENT_MD_LINE_LIMIT`, `BOUNDARY_KEYWORDS`                     |
+| `organNames.ts`             | `KNOWN_ORGAN_DIR_NAMES` (base 9 + test/infra 6)                 |
+| `verificationThresholds.ts` | 15 / 32 cap과 역할별 매핑                                       |
+| `toolEnvelope.ts`           | 16 KiB 예산, artifact 경로·해시 규약, 오류 메시지               |
+| `nodeTypes.ts`              | `fractal / organ / pure-function / hybrid`                      |
+| `analysisCertainties.ts`    | `exact / indeterminate / unsupported`                           |
+| `ruleScopes.ts`             | 6개 검증 scope                                                  |
+| `restructure.ts`            | placement kind, artifact role, decision reason, validation code |
+| `reviewState.ts`            | Git 인자, 해시 규약, branch key 정규화 패턴                     |
+| `mcpContracts.ts`           | 도구 계약 상수 (validation mode, rule-doc action)               |
+| `mcpToolNames.ts`           | 정확히 9개 도구 이름                                            |
+| `legacyCriteriaLedger.ts`   | legacy ledger 경로와 rule metadata                              |
+| `scanDefaults.ts`           | 기본 include/exclude, `maxDepth`, skip 집합                     |
+| `pathMarkers.ts` 등         | 경로 marker, 훅 기본값, infra 기본값, rule 문서 상수            |
 
-**핵심 알고리즘**:
+---
 
-- `buildFractalTree`: 경로 길이 오름차순 정렬 → 전체 노드 생성 → 가장 깊은 조상 매칭으로 부모-자식 관계 수립
-- `findParentPath`: 모든 후보 경로 중 `path.startsWith(candidate + '/')` && 최장 매칭
+## 3. adapters/ — 생태계 증거 수집
 
-**입출력**:
+### registry/
+
+**목적**: 어댑터 등록과 프로젝트별 해석.
 
 ```
-buildFractalTree(NodeEntry[]) → FractalTree
-findNode(FractalTree, string) → FractalNode | undefined
-getAncestors(FractalTree, string) → FractalNode[]  (leaf → root)
-getDescendants(FractalTree, string) → FractalNode[] (BFS, organ 제외)
+registerStructure(adapter) / registerVerification(adapter) → void
+resolveStructure(projectRoot) → Promise<StructureAdapter[]>
+resolveVerification(projectRoot) → Promise<VerificationAdapter[]>
 ```
 
-**의존**: `types/fractal`
+**핵심 알고리즘**: 각 어댑터의 `detect(projectRoot)`가 반환한 `AdapterClaim { confidence, evidence }`를 비교한다.
 
-### organ-classifier.ts
+- 최고 confidence 단일 어댑터 → 소유
+- **동률 다중 어댑터 → `ambiguous-adapter-claim` 오류.** 임의로 하나를 고르지 않는다.
+- 주장 없음 → `unsupported`
+- 요청된 ID가 미등록 → config warning이 아니라 명시적 validation finding
 
-**목적**: 디렉토리 노드의 fractal / organ / pure-function 분류
+**의존**: `types/adapters`
 
-**핵심 알고리즘**: 우선순위 기반 4단계 분류
+### ecmascript/structure/
 
-1. INTENT.md 존재 → fractal
-2. ORGAN_DIR_NAMES 매칭 → organ
-3. 사이드이펙트 없음 → pure-function
-4. 기본값 → fractal
+**목적**: 현재 저장소 생태계의 구조 증거.
 
-**입출력**:
+```
+discoverSourceFiles(projectRoot) → Promise<string[]>
+findEntryPoints(directoryPath)   → Promise<EntryPointDescriptor[]>
+inspectEntryPoint(path)          → Promise<EntryPointInspection>
+extractDependencies(filePath)    → Promise<DependencyReference[]>
+isFrameworkOwnedPeer(filePath)   → Promise<boolean>
+suggestEntryPointPath(dirPath)   → Promise<string>
+```
+
+**핵심 알고리즘**: 외부 native parser를 쓰지 않는 lexical scanner. 문자열·주석 구간과 괄호 nesting만 구분하며, 확실히 계산할 수 없는 구조는 값을 지어내지 않고 `indeterminate`로 반환한다. 정확성보다 **억지 PASS를 피하는 것이 우선**이다.
+
+파일 확장자, 진입점 후보, framework convention, import/export 문법은 이 디렉터리 밖으로 새지 않는다.
+
+### ecmascript/verification/
+
+**목적**: 검증 문서 역할 판정과 의미론적 case 계산.
+
+```
+classify(filePath)               → spec-document | test-record | unsupported
+count(filePath)                  → VerificationCaseCount
+extractContractGroupIds(filePath) → string[]
+```
+
+**핵심 알고리즘**: 일반 case·skip·todo는 각 1, 정적 parameterized row는 행 수만큼, 정적 parameterized suite 안의 case는 suite row 수를 곱한다. property test 선언은 생성 시행과 무관하게 1이다. 동적 table·사용자 wrapper·해석 불가 alias가 개수에 영향을 주면 `indeterminate`다. `filid:contract` 토큰은 주석에서만 추출한다.
+
+---
+
+## 4. core/tree/ — 노드 발견과 분류
+
+### fractalTree/
+
+**목적**: 디렉터리 traversal, 트리 구축, 소유 관계 수립.
+
+```
+scanProject(projectRoot, options) → NodeEntry[]
+buildFractalTree(NodeEntry[])     → FractalTree
+findNode / getAncestors / getDescendants / getFractalsUnderOrgans
+```
+
+**핵심 알고리즘**: `fs.readdirSync(dir, { withFileTypes: true })` 재귀만 사용한다 (`fs.globSync`는 Node 22+ API이므로 금지). 부모-자식은 경로 길이 오름차순 정렬 후 최장 접두 매칭으로 수립한다. `maxDepth`는 traversal 절단이 아니라 **검증 한계**로 적용되므로 초과 node도 진단 대상에 남는다.
+
+### organClassifier/
+
+**목적**: 노드 타입 판정.
 
 ```
 classifyNode(ClassifyInput) → NodeType
-isOrganDirectory(string) → boolean
 ```
 
-**의존**: `types/fractal` (NodeType만)
+**핵심 알고리즘**: 8단계 우선순위 ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#분류-우선순위) 참조). **분류는 서술이지 규범이 아니다** — 문서도 module index도 없는 디렉터리는 독립 계약을 주장한 적이 없으므로 기본값이 `organ`이고, 무엇이 fractal이어야 하는가는 `external-import-boundary`의 규칙 결과로 보고된다. 진입점 중 `kind: 'module'`만 분류 신호로 읽으므로 `executable`·`framework`와 config override는 노드 타입을 바꾸지 못한다. organ 아래에서도 traversal이 멈추지 않으며, organ 안에서 문서나 module index를 가진 하위 디렉터리는 **독립 fractal로 재분류된다.**
 
-### document-validator.ts
+### boundaryDetector/
 
-**목적**: INTENT.md 및 DETAIL.md 문서 규칙 검증
-
-**핵심 알고리즘**:
-
-- `countLines`: 빈 문자열 = 0, 후행 `\n` 무시, `split('\n').length`
-- `validateIntentMd`: 50줄 체크 + 3-tier regex 매칭
-- `detectAppendOnly`: 기존 줄 1:1 비교 + 새 줄 추가만 존재 판별
-- `validateDetailMd`: append-only 감지
-
-**입출력**:
-
-```
-validateIntentMd(string) → IntentMdValidation
-validateDetailMd(string, string?) → DetailMdValidation
-countLines(string) → number
-detectAppendOnly(string, string) → boolean
-```
-
-**의존**: `types/documents`
-
-### dependency-graph.ts
-
-**목적**: 모듈 간 의존 관계 DAG 구축 및 분석
-
-**핵심 알고리즘**:
-
-- `buildDAG`: 엣지 순회 → 노드 Set + 인접 리스트 구축
-- `topologicalSort`: Kahn 알고리즘 (in-degree 0 큐)
-- `detectCycles`: DFS 3색(WHITE/GRAY/BLACK) 사이클 감지
-
-**입출력**:
-
-```
-buildDAG(DependencyEdge[]) → DependencyDAG
-topologicalSort(DependencyDAG) → string[] | null
-detectCycles(DependencyDAG) → string[][]
-getDirectDependencies(DependencyDAG, string) → string[]
-```
-
-**의존**: `types/fractal` (DependencyEdge, DependencyDAG)
-
-### boundary-detector.ts
-
-**목적**: 파일 경로에서 패키지 경계(boundary) 탐색 및 INTENT.md/DETAIL.md 체인 구축
-
-**핵심 알고리즘**:
-
-- `findBoundary`: 파일 경로에서 위로 순회하며 `package.json` 존재 디렉토리 탐색
-- `buildChain`: boundary까지 각 디렉토리의 INTENT.md/DETAIL.md 존재 여부를 Map으로 수집
-
-**입출력**:
-
-```
-findBoundary(filePath: string) → string | null
-buildChain(filePath: string) → ChainResult | null
-```
-
-```typescript
-interface ChainResult {
-  boundary: string; // package.json 포함 디렉토리
-  chain: string[]; // leaf → root 디렉토리 목록
-  intents: Map<string, boolean>; // INTENT.md 존재 여부
-  details: Map<string, boolean>; // DETAIL.md 존재 여부
-}
-```
-
-**의존**: 없음 (Node.js `fs`, `path` 내장)
-
-### cache-manager.ts
-
-**목적**: 세션별 컨텍스트 캐시 관리 (`~/.claude/plugins/filid/{cwdHash}/`)
-
-**핵심 알고리즘**: SHA-256 기반 cwd 해시로 프로젝트별 격리. 세션 ID 해시로 세션별 파일 분리. TTL 24h 초과 파일 자동 정리.
-
-**캐시 파일 종류**:
-
-| 파일 패턴                | 용도                                 |
-| ------------------------ | ------------------------------------ |
-| `session-context-{hash}` | 세션 시작 마커                       |
-| `prompt-context-{hash}`  | FCA 규칙 텍스트 캐시                 |
-| `boundary-{hash}`        | 디렉토리 → boundary 경로 매핑 (JSON) |
-| `fmap-{hash}.json`       | FractalMap (reads/intents/details)   |
-| `guide-{hash}`           | `[filid:guide]` 주입 완료 마커       |
-| `run-{skillName}.hash`   | 스킬 증분 실행용 해시                |
-
-**주요 함수**:
-
-```
-getCacheDir(cwd) → string
-readBoundary/writeBoundary(cwd, sessionId, dir, ...) → string|null/void
-readFractalMap(cwd, scope) / removeFractalMap(cwd, sessionId) → FractalMap/void
-commitVisit(cwd, scope, args) → VisitDecision (locked visit transaction)
-readDelivered/readTurn/incrementTurn(cwd, sessionId) → delivery/turn records
-hasGuideInjected/markGuideInjected(sessionId, cwd) → boolean/void
-pruneOldSessions(cwd) → void
-```
-
-**의존**: Node.js `fs`, `crypto`, `os`
-
-### change-queue.ts
-
-**목적**: PR 시점까지 파일 변경 이력을 누적하는 큐
-
-**핵심 알고리즘**: 단순 배열 기반 큐. `enqueue`로 추가, `drain`으로 전체 소비.
-`getAffectedFractals`는 경로에서 디렉토리를 추출하여 중복 제거.
-
-**입출력**:
-
-```
-enqueue(ChangeRecord) → void
-drain() → ChangeRecord[]
-peek() → ChangeRecord[]
-getChangesByPath() → Map<string, ChangeRecord[]>
-getAffectedFractals() → string[]
-clear/size/isEmpty → void/number/boolean
-```
-
-**의존**: 없음 (자체 `ChangeRecord` 인터페이스)
+**목적**: 파일 경로에서 패키지 경계 탐색과 문서 체인 수집.
 
 ---
 
-## 3. ast/ — TypeScript AST 분석
+## 5. core/rules/ — 문서 parser와 15개 규칙
 
-### parser.ts
-
-**목적**: TypeScript Compiler API 기반 소스 코드 파싱
-
-**핵심 알고리즘**: `ts.createSourceFile()` 래퍼. 확장자에 따라 `ScriptKind.JS`/`TS` 자동 결정. `setParentNodes: true`로 부모 노드 참조 활성화.
-
-**입출력**:
+### documentValidator/
 
 ```
-parseSource(string, string?) → ts.SourceFile
-parseFile(string) → ts.SourceFile
+validateIntentMd(content)            → IntentMdValidation
+validateDetailMd(content, previous?) → DetailMdValidation
+countLines(content)                  → number
 ```
 
-**의존**: `typescript` (외부)
+`acceptanceGroups/` organ이 `### <stable-id> — <title>` 형식의 acceptance group을 추출하고 누락·중복을 거부한다. `boundaryExemptions/` organ의 `parseBoundaryExemptions(content)`가 조건부 `## Boundary Exemptions` 섹션을 읽어 `DetailMdValidation.boundaryExemptions`를 채운다. 두 파서는 heading 형태를 공유하지만 ID 문자 집합은 공유하지 않는다 — organ path에는 경로 구분자가 온다. 섹션 부재가 정상이며, `Reason`이 빈 항목은 면책이 아니라 미충족 계약으로 보고된다.
 
-### dependency-extractor.ts
-
-**목적**: import/export/call 3종 의존성 추출
-
-**핵심 알고리즘**: AST 재귀 순회 (`ts.forEachChild`):
-
-- `ImportDeclaration` → moduleSpecifier + named/default/namespace 바인딩
-- `ExportDeclaration` + `hasExportModifier` → function/class/variable/type/interface
-- `CallExpression` → `getCalleeText` (identifier + property access 재귀)
-
-**입출력**:
+### ruleEngine/
 
 ```
-extractDependencies(string, string?) → DependencyInfo
+loadBuiltinRules(overrides) → RuleSet          (정확히 15개)
+evaluateRules(context)      → RuleEvaluationResult
+evaluateRule(rule, context) → RuleViolation[]
 ```
 
-**의존**: `ast/parser`, `types/ast`
+**핵심 알고리즘**: `granularity: project` 규칙은 snapshot당 한 번, `node` 규칙은 대상 node마다 한 번 실행한다. `utils/` organ에 관심 증거별 순수 check 함수가 있다 (`checkModuleEntryPoint`, `checkExternalImportBoundary`, `checkPureFunctionIsolation`, `checkZeroPeerFile`, `checkVerificationPolicy`, `checkLegacyCriteriaLedger` 등).
 
-### lcom4.ts
+thrown check와 unsupported evidence는 **PASS가 아니라 finding**으로 변환된다.
 
-**목적**: LCOM4 (Lack of Cohesion of Methods) 계산
+### fractalValidator/
 
-**핵심 알고리즘**:
-
-1. `extractClassInfo`: 클래스 선언 탐색 → 필드(PropertyDeclaration) + 메서드(MethodDeclaration) 수집 → 메서드별 `this.field` 접근 추출
-2. `calculateLCOM4`: 무방향 그래프 구축 (메서드 = 노드, 공유 필드 = 엣지) → BFS connected components → 개수 = LCOM4 값
-
-```
-LCOM4 = 1 → 높은 응집도 (양호)
-LCOM4 >= 2 → 분리된 책임 (split 권고)
-LCOM4 = 0 → 분석 대상 메서드 없음
-```
-
-**입출력**:
-
-```
-extractClassInfo(string, string) → ClassInfo | null
-calculateLCOM4(string, string) → LCOM4Result
-```
-
-**의존**: `ast/parser`, `types/metrics`, `types/ast`
-
-### cyclomatic-complexity.ts
-
-**목적**: 함수별/파일별 Cyclomatic Complexity 계산
-
-**핵심 알고리즘**: `CC = 1 (base) + 결정 포인트 수`
-
-결정 포인트 목록:
-| AST 노드 | 설명 |
-|-----------|------|
-| `IfStatement` | if 분기 |
-| `ForStatement` / `ForInStatement` / `ForOfStatement` | for 루프 |
-| `WhileStatement` / `DoStatement` | while/do-while 루프 |
-| `CaseClause` | switch case (default 제외) |
-| `ConditionalExpression` | 삼항 연산자 `?:` |
-| `BinaryExpression(&&)` | 논리 AND |
-| `BinaryExpression(\|\|)` | 논리 OR |
-
-**입출력**:
-
-```
-calculateCC(string, string?) → CyclomaticComplexityResult
-```
-
-**의존**: `ast/parser`, `types/metrics`
-
-### tree-diff.ts
-
-**목적**: 두 소스 버전 간 의미론적 diff
-
-**핵심 알고리즘**:
-
-1. `extractDeclarations`: 최상위 선언(function, class, variable, interface, type) 추출
-2. `normalize`: 노드 텍스트에서 `\s+` → `''` (공백 제거)
-3. 비교: 이름 기반 old→new 매핑 → removed/modified/added 분류
-4. 포맷팅 전용 변경: 선언 diff 없지만 원본 텍스트가 다른 경우 카운트
-
-**입출력**:
-
-```
-computeTreeDiff(string, string, string?) → TreeDiffResult
-```
-
-**의존**: `ast/parser`, `types/ast`
+구조·의존 검증을 노드 단위로 수행한다.
 
 ---
 
-## 4. metrics/ — 소프트웨어 메트릭
+## 6. core/analysis/ — 그래프와 배치
 
-### test-counter.ts
-
-**목적**: 테스트 파일의 케이스 수 카운팅
-
-**핵심 알고리즘**: 줄 단위 스캔:
-
-- `describe` 패턴 → depth++
-- `it`/`test` 패턴 → depth <= 1이면 basic++, 아니면 complex++
-- `});` 패턴 → depth-- (depth > 0일 때만)
-
-**입출력**:
+### dependencyGraph/
 
 ```
-countTestCases(RawTestFile) → TestCaseCount
+buildDependencyGraph(nodePaths, references, certainty?, { organPaths }?) → DependencyGraph
+resolveOwningOrganPath(organPaths, ownerPath, filePath)                 → string | null
+detectCycles(graph)                                                      → string[][]
+getDirectDependencies / topologicalSort
 ```
 
-**의존**: `types/metrics`
+**핵심 알고리즘**: 어댑터의 dependency reference를 소유 fractal로 승격해 edge를 만들고, 각 edge는 `sourceFile` · `rawSpecifier` · `resolvedPath`를 증거로 갖는다. cycle은 **실제 directed closed route**를 반환한다. 그래프를 만들 수 없는 파일이 결론에 영향을 줄 수 있으면 전체 결과가 `indeterminate`다.
 
-### three-plus-twelve.ts
+소유 subtree 안의 organ 참조는 **edge로는 보존되지만 cycle adjacency에서 빠진다.** 부모 소유 organ을 자식 fractal이 참조할 때 생기는 `부모 → 자식 → 부모` 왕복은 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다.
 
-**목적**: 3+12 규칙 (spec 파일당 최대 15 테스트) 검증
+`resolveOwningOrganPath`는 `ownerPath` 안에 있으면서 `filePath`를 담는 **가장 깊은** organ을 돌려준다. organ이 fractal의 조상일 수도 있어 owner 안 containment를 함께 요구한다. 진입점에서 공개되므로 그래프와 rule engine이 같은 판정을 공유한다.
 
-**핵심 알고리즘**: `fileType === 'spec'` 필터 → `total > 15` 필터 → 위반 파일 수집
+`builders/`와 `cycles/` organ으로 나뉘어 있다 — 파일당 공개 함수 하나 규칙 때문이다.
 
-**입출력**:
-
-```
-check312Rule(TestCaseCount[]) → ThreePlusTwelveResult
-```
-
-**의존**: `types/metrics`
-
-### decision-tree.ts
-
-**목적**: FCA-AI 의사결정 트리 (모듈 액션 결정)
-
-**핵심 알고리즘**: 4단계 파이프라인
+### lcaCalculator/
 
 ```
-testCount <= 15? ──YES──→ ok
-       │ NO
-       ▼
-LCOM4 >= 2? ──YES──→ split
-       │ NO
-       ▼
-CC > 15? ──YES──→ compress
-       │ NO
-       ▼
-parameterize
+resolveOwningFractal(tree, path)          → FractalNode | null
+findLowestCommonFractal(tree, consumers)  → FractalNode | null
+getAncestorPaths(tree, path)              → string[]
 ```
 
-**입출력**:
+**핵심 알고리즘**: 문자열 공통 prefix가 아니다. 각 consumer를 소유 fractal로 올린 뒤 모든 owner의 ancestor chain 교집합에서 가장 깊은 **fractal**을 고른다. organ은 LCA가 될 수 없다. 소비자 중 하나라도 owner를 알 수 없으면 root fallback 없이 `null`.
 
-```
-decide(DecisionInput) → DecisionResult
-```
-
-**의존**: `types/metrics`
-
-### promotion-tracker.ts
-
-**목적**: test.ts → spec.ts 승격 자격 판별
-
-**핵심 알고리즘**: `stableDays >= threshold (90) && lastFailure === null`
-
-**입출력**:
-
-```
-checkPromotionEligibility(PromotionInput, number?) → PromotionCandidate
-```
-
-**의존**: `types/metrics`
+경로 비교·containment는 `@ogham/cross-platform`의 portable API로 수행해 현재 host와 무관하게 POSIX/Windows 의미를 보존한다.
 
 ---
 
-## 5. compress/ — 컨텍스트 압축
-
-### reversible-compactor.ts
-
-**목적**: 파일 내용을 3줄 레퍼런스로 압축 (복원 가능)
-
-**핵심 알고리즘**: 파일 경로 + 내보내기 심볼 + 줄 수를 3줄 텍스트로 변환
+## 7. core/verification/ — 15/32 모델
 
 ```
-[REF] /path/to/file.ts
-[EXPORTS] functionA, functionB
-[LINES] 150
+analyzeVerification(input)          → VerificationProjectAnalysis
+evaluateVerificationPolicy(analysis) → VerificationViolation[]
+findSpecFragmentation(...)          → VerificationViolation[]
+resolveContractGroups(...)          → ContractGroupsByOwner
 ```
 
-**입출력**:
-
-```
-compactReversible(CompactInput) → CompactResult
-restoreFromCompacted(string) → RestoredReference
-```
-
-**의존**: `types/documents` (CompressionMeta)
-
-### lossy-summarizer.ts
-
-**목적**: 도구 호출 이력을 집계 통계로 압축 (복원 불가)
-
-**핵심 알고리즘**: 엔트리 배열 → 도구별 카운트 + 고유 파일 + 시간 범위 집계
-
-**입출력**:
-
-```
-summarizeLossy(ToolCallEntry[]) → LossySummaryResult
-```
-
-**의존**: `types/documents` (CompressionMeta)
+`analyzer/`, `policy/`, `contracts/` organ으로 나뉜다. core는 파일명이나 확장자가 아니라 **역할**(`spec-document` / `test-record`)만 안다.
 
 ---
 
-## 6. hooks/ — Claude Code Hook 연동
+## 8. core/projectSnapshot/ — 단일 사실 원본
 
-### 로직 모듈 (8개)
-
-| 모듈                 | Hook 이벤트      | 동작                                                 |
-| -------------------- | ---------------- | ---------------------------------------------------- |
-| `pre-tool-validator` | PreToolUse       | INTENT.md/DETAIL.md Write 검증                       |
-| `structure-guard`    | PreToolUse       | Organ 디렉토리 INTENT.md 차단                        |
-| `intent-injector`    | PreToolUse       | 파일 접근 시 INTENT.md 컨텍스트 + 프랙탈맵 주입      |
-| `change-tracker`     | _(disabled)_     | ChangeQueue에 변경 기록 (hooks.json에서 제거됨)      |
-| `agent-enforcer`     | SubagentStart    | 에이전트 역할 제한 주입                              |
-| `context-injector`   | UserPromptSubmit | 세션 첫 프롬프트에 FCA-AI 규칙 리마인더 주입         |
-| `setup`              | SessionStart     | 캐시 디렉토리 초기화 + 만료 세션 파일 정리           |
-| `shared`             | _(유틸)_         | `isFcaProject`, `isIntentMd`, `isDetailMd` 공용 헬퍼 |
-
-### 엔트리 스크립트 (7개: `hooks/entries/*.entry.ts`)
-
-각 엔트리는 동일한 패턴:
-
-```typescript
-const chunks: Buffer[] = [];
-for await (const chunk of process.stdin) {
-  chunks.push(chunk as Buffer);
-}
-const input = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
-const result = handler(input);
-process.stdout.write(JSON.stringify(result));
+```
+createProjectSnapshot(projectRoot, options) → Promise<ProjectSnapshot>
+computeSnapshotHash(inputs)                 → string
 ```
 
-stdin에서 JSON 읽기 → 핸들러 호출 → stdout에 JSON 쓰기.
+**핵심 알고리즘**: 정렬된 상대 경로와 구조 판정에 사용된 파일 내용의 SHA-256을 결합한다. **root 경로와 mtime에 독립적이며** 내용과 구조 변화에만 반응한다. `evidence/collectLegacyCriteriaLedger.ts`가 legacy `.filid/criteria.md`의 절대 경로와 이관 대상 root DETAIL 경로를 보존하며, ledger bytes도 hash 입력에 포함된다.
 
-빌드 결과물은 ESM `.mjs` 파일로 생성 (`scripts/buildHooks.mjs` 사용). 후크 실행기는 `find-node.sh` 대신 `libs/run.cjs`를 통해 Node.js를 직접 호출한다.
+`outputLanguage`는 snapshot 생성에 사용한 config의 문서 출력 언어이며 `context_resolve`가 config 재조회 없이 그대로 반환한다.
 
 ---
 
-## 데이터 흐름 다이어그램
+## 9. core/contextResolver/ — 최소 문서 체인
 
 ```
-[Source Code]
-      │
-      ▼
-┌──────────┐    ┌───────────────┐    ┌─────────────┐
-│  parser   │───→│ dependency-   │───→│ DependencyDAG│
-│ (AST)     │    │ extractor     │    │ (buildDAG)   │
-└──────────┘    └───────────────┘    └─────────────┘
-      │
-      ├──────────→ lcom4 ──────────→ LCOM4Result
-      │
-      ├──────────→ cyclomatic-complexity → CCResult
-      │
-      └──────────→ tree-diff ────→ TreeDiffResult
-                                        │
-                          ┌─────────────┤
-                          ▼             ▼
-                   ┌──────────┐  ┌───────────┐
-                   │ decision  │  │ change-   │
-                   │ -tree     │  │ queue     │
-                   └──────────┘  └───────────┘
-                          │             │
-                          ▼             ▼
-                   ┌──────────┐  ┌───────────┐
-                   │ ok/split/ │  │ PR-time   │
-                   │ compress/ │  │ sync      │
-                   │ param.    │  │           │
-                   └──────────┘  └───────────┘
+resolveContext(snapshot, targetPath) → ContextResolution
 ```
+
+owner에서 root 방향의 문서 **경로**만 반환한다. 본문은 반환하지 않으며 호출자가 필요한 경로만 읽는다. target이 project 밖이거나 owner를 결정할 수 없으면 명시적 오류이며 root 문서를 임의 fallback으로 고르지 않는다.
+
+`documents/`와 `pathing/` organ으로 나뉜다.
 
 ---
 
----
-
-## 7. 거버넌스 모듈 — 코드 리뷰 스킬
-
-### skills/cross-review/
-
-**목적**: 다관점 합의 코드 리뷰 — 단일 라운드 병렬 의견 수집 + 적대적 검증
-
-**구조**:
+## 10. core/restructure/ — 읽기 전용 배치 계획
 
 ```
-skills/cross-review/
-├── SKILL.md              # 의장 오케스트레이터 (5-Step 워크플로우)
-├── contracts.md          # 위원회 매핑, 의견 스키마, 심각도 게이트, verdict ladder, 판정 도출
-├── templates.md          # review-report / fix-requests / advisory ledger / PR comment 포맷
-├── reference.md          # 참조 인덱스 + MCP tool 맵
-├── phases/
-│   └── evidence.md       # Evidence subagent: 모든 MCP 기술 측정 (full/half/batch 스코프)
-├── calibration/          # 검증기 회귀 픽스처 (FPR·FNR·인플레이션·claim 오판정)
-├── INTENT.md / DETAIL.md
+createRestructurePlan(snapshot, input)        → RestructurePlan
+validatePlanPreconditions(snapshot, plan)     → PlanValidationResult
+validatePlanPostconditions(snapshot, plan)    → PlanValidationResult
 ```
 
-페르소나 7종은 `agents/<persona-id>.md`의 실제 에이전트 — 병렬 foreground `Agent`로 스폰되어 `opinions/<persona>.md`를 쓴다.
+organ 구성:
 
-**MCP tool 의존**: `review_manage` (세션 관리 액션 전반), `config_patch_validate` (config 패치 게이트), `debt_manage` (calculate-bias·advisory 승격), 측정 도구는 evidence subagent 전담
+| organ         | 역할                                                                  |
+| ------------- | --------------------------------------------------------------------- |
+| `planner/`    | consumer 해석, contract intent, unit kind, target 후보, 필수 artifact |
+| `imports/`    | exact path-like evidence일 때만 portable relative rewrite 산출        |
+| `specifiers/` | specifier stem 판정과 소비자 확장자 표기 복원                         |
+| `validator/`  | 사전·사후조건 검사와 구조화된 finding                                 |
 
-### skills/resolve/
+네 organ은 **flat leaf**다. 그 아래 `helpers/`를 만들지 않고 분리 함수 파일을 organ에 평탄하게 둔다 — FCA organ leaf 규칙이 helper 하위 배치 기본보다 우선한다.
 
-**목적**: 수정 사항 수용/거부 + code-surgeon 병렬 적용 + 소명 ADR + 부채 기록
+`specifiers/`는 `imports/`와 `validator/` 둘의 소비 대상이므로 두 organ의 lowest common fractal인 `restructure` 아래에 놓였다. specifier가 resolved file을 가리키는지는 마지막 세그먼트의 확장자를 제거한 stem으로 판정하고, 산출된 specifier에는 소비자가 쓰던 표기를 되돌려 준다 — 판정과 복원이 한 곳에 있어야 계획과 사후조건이 같은 기준을 쓴다.
 
-**구조**:
+instruction은 세 갈래로 나뉜다. decision이 필요하면 `unresolved`, 계산된 target이 source와 같으면 `alreadyPlaced`, 나머지가 실행 가능한 `moves`다. 가운데 갈래가 없으면 postcondition이 한 경로에 "source 부재"와 "target 존재"를 동시에 요구해 어떤 실행으로도 만족시킬 수 없다.
 
-```
-skills/resolve/
-├── SKILL.md       # 9-step 워크플로우 (--auto 전자동 모드 포함)
-└── reference.md   # justifications.md 포맷, ADR 가이드라인, fix type별 처리
-```
-
-**MCP tool 의존**: `review_manage` (normalize-branch), `debt_manage` (create)
-
-### skills/revalidate/
-
-**목적**: Delta 기반 재측정 검증, PASS/FAIL 최종 판정 (main이 ledger 작성·재도출)
-
-**구조**:
-
-```
-skills/revalidate/
-├── SKILL.md       # 8-step 워크플로우
-├── reference.md   # verification-ledger / re-validate.md 포맷, 비협상 규칙
-└── DETAIL.md      # status 도출 매트릭스, claim 재판정 계약
-```
-
-**MCP tool 의존**: `review_manage` (normalize-branch, cleanup, format-revalidate-comment), `debt_manage` (list, resolve), 측정 도구 (재검증용)
+**핵심 계약**: 프로젝트 파일을 쓰거나 옮기지 않는다. 불확실한 contract, 이름, adapter entry shape, graph 또는 specifier는 추측하지 않고 unresolved reason으로 남긴다. 확장자 표기 차이는 순수 lexical 연산이라 core가 처리하지만, alias 해석처럼 **어댑터 의미**가 필요한 rewrite는 계산하지 않는다.
 
 ---
 
-## 8. 거버넌스 MCP tool 모듈
+## 11. core/infra/ — host persistence 경계
 
-### src/mcp/tools/reviewManage/
+| 모듈            | 역할                                                         |
+| --------------- | ------------------------------------------------------------ |
+| `configLoader`  | config v2 검증·비파괴 migration·승인 저장, managed rule 문서 |
+| `cacheManager`  | 세션/프롬프트 cache, visit 트랜잭션, delivery 기록           |
+| `artifactStore` | 16 KiB overflow와 `persistence: always` artifact 저장        |
 
-**목적**: 리뷰 세션 결정론적 관리 (dispatcher + handlers/format/utils organ)
+`artifactStore`는 lexical containment와 symlink-descendant 검사를 **모두** 통과한 뒤에만 쓰며, atomic rename을 사용한다.
 
-| Action                                                                       | 핵심 알고리즘                                                 |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `normalize-branch`                                                           | `/` → `--`, 특수문자 → `_`, 연속 `--` 보존                    |
-| `ensure-dir`                                                                 | `.filid/review/<normalized>/` 재귀 생성                       |
-| `checkpoint`                                                                 | 세션 아티팩트 존재 목록 반환 (스킬이 resume 지점 판정)        |
-| `elect-committee`                                                            | 복잡도(TRIVIAL/LOW/MED/HIGH) → 위원 1/2/4/6 + adjudicatorMode |
-| `check-cache` / `content-hash`                                               | diff 콘텐츠 해시로 동일 리뷰 스킵                             |
-| `cleanup`                                                                    | 리뷰 디렉토리 재귀 삭제 (revalidate PASS 시)                  |
-| `format-pr-comment` / `format-revalidate-comment` / `generate-human-summary` | 산출물 → 접이식 PR 코멘트/요약                                |
+`configLoader`의 `loaders/`는 v2 schema·types·v1 migration·load/write/init을, `utils/`는 project/plugin root 해석과 strict sanitize를 소유한다.
 
-**의존**: `types/review.ts`
+---
 
-### src/mcp/tools/debt_manage.ts (301줄)
+## 12. mcp/ — host boundary
 
-**목적**: 기술 부채 결정론적 관리
+```
+serverEntry/  startServer()
+server/       createServer(), toolResult(), toolError(), wrapHandler()
+tools/        9개 handler
+pages/settings/ 설정 UI canonical source (esbuild → public/settings.html)
+```
 
-| Action           | 핵심 알고리즘                                                   |
-| ---------------- | --------------------------------------------------------------- |
-| `create`         | YAML frontmatter + markdown 본문으로 `.filid/debt/<id>.md` 생성 |
-| `list`           | glob 패턴으로 부채 파일 수집 + 가중치 합계                      |
-| `resolve`        | 부채 파일 삭제 (규칙 충족 시)                                   |
-| `calculate-bias` | `base × 2^touch_count` (cap=16) + `last_review_commit` 멱등성   |
+`wrapHandler(toolName, exactSchema, handler)`는 SDK에 광고하는 object schema를 유지하면서 내부에서 exact schema를 검증하고, parse failure까지 공통 `toolError` envelope로 바꾼다.
 
-**의존**: `types/debt.ts`
+`toolResult(toolName, payload)`가 materialize와 compact MCP text 직렬화를 수행한다. artifact와 inline text는 **같은 serializer**를 쓰며 `Map`/`Set` 정규화, byte 계산, SHA-256 입력이 모두 그 직렬화 결과를 기준으로 한다.
 
-### src/types/review.ts (66줄)
+도구별 organ은 `utils/`에 순수 helper를 둔다 (예: `verificationScan/utils/`의 summary·diagnostics·status 빌더, `structureValidate/utils/readRestructurePlan.ts`).
 
-| 타입                 | 용도                                       |
-| -------------------- | ------------------------------------------ |
-| `ReviewSession`      | 브랜치, 복잡도, 위원회, 변경 프랙탈 목록   |
-| `VerificationResult` | 통과 여부, 치명적 실패 목록, 부채 바이어스 |
-| `CommitteeElection`  | 복잡도 판정, 위원 배열, 적대적 짝짓기      |
-| `CheckpointStatus`   | phase(A/B/C/DONE), 존재 파일 목록          |
+---
 
-### src/types/debt.ts (66줄)
+## 13. hooks/ — Claude Code 훅 계층
 
-| 타입         | 용도                                      |
-| ------------ | ----------------------------------------- |
-| `DebtItem`   | 프랙탈 경로, 규칙 위반, 가중치, 소명, ADR |
-| `DebtWeight` | base, touch_count, calculated, capped     |
-| `BiasLevel`  | LOW_PRESSURE / MODERATE / HIGH / CRITICAL |
-| `BiasResult` | 수준, 총점, 갱신된 부채 목록              |
+| 모듈               | 이벤트             | 역할                                         |
+| ------------------ | ------------------ | -------------------------------------------- |
+| `setup`            | `SessionStart`     | 캐시 초기화, 만료 세션 정리, FCA 감지        |
+| `userPromptSubmit` | `UserPromptSubmit` | 턴당 visit map 리셋, 세션 첫 규칙 포인터     |
+| `preToolUse`       | `PreToolUse`       | INTENT 체인 전달 + INTENT/DETAIL write gate  |
+| `shared` organ     | —                  | `isFcaProject` / `isIntentMd` / `isDetailMd` |
+| `utils` organ      | —                  | `validateCwd`, portable visited-path 해석    |
+
+`preToolUse/helpers/`의 `intentInjector`, `preToolValidator`, `structureGuard`가 한 프로세스 안에서 순차 실행된다. `processVisit(input)` 단일 계약과 POSIX/Windows portable visited-path 해석을 적용한다.
+
+**엔트리 파일(`*.entry.ts`)에는 로직을 두지 않는다.** stdin→핸들러→stdout 파이프뿐이다.
+
+**훅 직접 import 원칙**: 훅 도달 코드는 배럴(`index.js`)을 import하지 않고 구체 파일 경로로 직접 import한다. typecheck는 이를 잡지 못하며 `scripts/buildHooks.mjs`의 바이트 캡과 금지 모듈 가드가 최종 방어선이다.
+
+---
+
+## 데이터 흐름
+
+```
+[프로젝트 디렉터리]
+        │
+        ▼
+ adapters/registry ── detect/claim ──→ 소유 어댑터 결정
+        │
+        ▼
+ adapters/ecmascript ── lexical scan ──→ entry points · dependencies · verification files
+        │
+        ▼
+ core/tree ── traversal + classify ──→ FractalTree
+        │
+        ▼
+ core/projectSnapshot ── hash + evidence ──→ ProjectSnapshot   ← 단일 사실 원본
+        │
+        ├──→ core/rules        ──→ RuleViolation[]  (15 rules)
+        ├──→ core/analysis     ──→ DependencyGraph · LCA
+        ├──→ core/verification ──→ 15/32 · fragmentation · contract link
+        ├──→ core/contextResolver ──→ 문서 경로 chain
+        └──→ core/restructure  ──→ RestructurePlan (읽기 전용)
+                                          │
+                                          ▼
+                              mcp/server ── toolResult ──→ envelope
+                                          │
+                            ≤16 KiB → inline │ >16 KiB → artifact + path/sha256
+```
 
 ---
 
 ## 관련 문서
 
-- [01-ARCHITECTURE.md](./01-ARCHITECTURE.md) — 전체 아키텍처
+- [01-ARCHITECTURE.md](./01-ARCHITECTURE.md) — 전체 아키텍처와 ADR
 - [06-HOW-IT-WORKS.md](./06-HOW-IT-WORKS.md) — 내부 동작 메커니즘
-- [08-API-SURFACE.md](./08-API-SURFACE.md) — API 레퍼런스
+- [07-RULES-REFERENCE.md](./07-RULES-REFERENCE.md) — 규칙과 상수
+- [08-API-SURFACE.md](./08-API-SURFACE.md) — MCP 계약과 DTO

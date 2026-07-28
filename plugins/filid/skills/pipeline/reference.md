@@ -1,113 +1,72 @@
-# pipeline — Reference Documentation
+# pipeline — Reference
 
-Auto-detection details, flag passthrough, and inter-stage file contracts for the pipeline orchestrator. The canonical stage alias table lives in `SKILL.md` → "Stage Alias Table (SSoT)".
+## §1 Entry-point detection
 
-## Auto-Detection Algorithm
+Detection reads `REVIEW_DIR` — obtained from `review_state`, never derived — and the PR state. The **first** matching row wins; do not evaluate further rows.
 
-When `--from` is omitted, check signals in strict priority order — first match wins.
+| Priority | Probe                                               | Meaning                                      |
+| -------- | --------------------------------------------------- | -------------------------------------------- |
+| 1        | `REVIEW_DIR/re-validate.md` exists                  | The cycle already closed                     |
+| 2        | `REVIEW_DIR/justifications.md` + unpushed commits   | Corrections landed but are not on the remote |
+| 3        | `REVIEW_DIR/justifications.md`, working tree pushed | Ready to judge                               |
+| 4        | `REVIEW_DIR/fix-requests.md` exists                 | A review demanded changes                    |
+| 5        | `gh pr view` exit 0                                 | A PR exists but has no review                |
+| 6        | none of the above                                   | No PR yet                                    |
 
-```
-1. Detect branch: git branch --show-current
-2. Normalize: mcp__plugin_filid_tools__review_manage(normalize-branch)
-3. Set review_dir = .filid/review/<normalized>/
+Row 1 reports the recorded verdict and ends. Re-running a closed cycle requires `--from=review --force`.
 
-Signal 0 (spike harvest guard): branch matches spike/*?
-  → YES: read .filid/harvest/<normalized>/manifest.json
-    → missing / unparsable / head_sha != HEAD / created_at > 7 days:
-      route to Skill("filid:harvest") — merge-track entry blocked.
-      Only a current manifest lifts the guard.
-    → current: continue to Signal 1.
-  → NO: continue to Signal 1.
+Unpushed detection: `git rev-list --count @{upstream}..HEAD`. No upstream means the branch was never pushed — treat as unpushed.
 
-Signal 1: re-validate.md exists?
-  → YES: pipeline already complete — report existing results. DONE.
-    (To redo the cycle after new commits:
-     /filid:pipeline --from=review --force.)
+## §2 Resume rules
 
-Signal 2: justifications.md exists?
-  → YES: check unpushed commits (git log @{upstream}..HEAD --oneline)
-    → has unpushed: git push, then start from REVALIDATE
-    → all pushed: start from REVALIDATE
-    → no upstream tracking ref (command fails): skip push, start from
-      REVALIDATE — do not attempt git push -u
-    → push fails: pipeline ERROR — report and END (after a manual push,
-      re-run /filid:pipeline or use --from=revalidate)
+- Re-running `/filid:pipeline` after any stop is safe. Detection re-enters at the correct stage.
+- `--from` overrides detection but never reorders the stages after it.
+- `--force` applies to the review stage only: it makes `cross-review` prepare a fresh state rather than reusing a cached sealed one. It does not delete corrections already committed.
+- A resumed run repeats `review_state(checkpoint)` — a `stale` disposition after corrections is expected, not an error.
 
-Signal 3: fix-requests.md exists?
-  → YES: grep for "Type: harvest-required"
-    → present: do NOT start resolve (its harvest gate would abort and
-      the pipeline would loop). Report the oracle work required and END.
-    → absent: start from RESOLVE.
+## §3 Per-stage failure handling
 
-Signal 4: does a PR exist? (gh pr view exit code)
-  → exit 0: start from REVIEW
-  → non-zero: start from PR-CREATE
-```
+**`pr-create`**
 
-### Edge Cases
+| Failure                     | Pipeline action                                        |
+| --------------------------- | ------------------------------------------------------ |
+| Dirty non-document worktree | Stop. Report the abort message verbatim.               |
+| Document sync blocked       | Stop. Documents are the PR's precondition.             |
+| `gh` unauthenticated        | Continue — the body is saved locally; report the path. |
 
-| Condition                                  | Behavior                                                              |
-| ------------------------------------------ | --------------------------------------------------------------------- |
-| Spike branch, manifest stale (new commits) | Signal 0 routes back to `filid:harvest` — incremental re-harvest      |
-| Spike branch, `--from` given               | Rejected while no current manifest exists — `--from` cannot bypass it |
-| Branch has no upstream tracking ref        | Skip push, start from revalidate directly                             |
-| `gh` CLI not authenticated                 | Signal 4 fails → default to `pr-create` (fails there with auth error) |
-| Review directory does not exist            | All file checks false → falls through to Signal 4                     |
+**`review`**
 
-## Flag Passthrough Matrix
+| Verdict           | Pipeline action                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| `APPROVED`        | Stop and report success. There is nothing to resolve.                                        |
+| `REQUEST_CHANGES` | Continue to `resolve`.                                                                       |
+| `INCONCLUSIVE`    | Stop. Evidence could not settle the question; a resolve run would act on unsettled findings. |
 
-| Flag            | pr-create | review | resolve | revalidate |
-| --------------- | --------- | ------ | ------- | ---------- |
-| `--base`        | ✓         | ✓      |         |            |
-| `--draft`       | ✓         |        |         |            |
-| `--skip-update` | ✓         |        |         |            |
-| `--title`       | ✓         |        |         |            |
-| `--force`       |           | ✓      |         |            |
-| `--auto`        |           |        | always  |            |
+**`resolve`**
 
-> `--auto` is **always** passed to resolve regardless of user input — the pipeline implies full automation for the resolve stage.
+| Failure                      | Pipeline action                                   |
+| ---------------------------- | ------------------------------------------------- |
+| Typecheck failure (`--auto`) | Stop. The corrections left the tree uncompilable. |
+| Accepted item `unapplied`    | Continue — `revalidate` fails it with evidence.   |
 
-## Inter-Stage File Contracts
+**`revalidate`**
 
-All paths relative to `.filid/review/<normalized>/`.
+Never stops the pipeline. Its verdict _is_ the pipeline result:
 
-| Stage      | Writes                                                                                                                              | Reads (requires)                                           | Success signal             |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------- |
-| pr-create  | _(GitHub PR only)_                                                                                                                  | git state                                                  | skill completes            |
-| review     | `session.md`, `verification.md`, `opinions/*.md`, `review-report.md`, `fix-requests.md` (blocking), `content-hash.json`, PR comment | git diff                                                   | `review-report.md` exists  |
-| resolve    | `justifications.md`, `.filid/debt/*.md` (rejections), commit + push                                                                 | `fix-requests.md`                                          | `justifications.md` exists |
-| revalidate | `re-validate.md`, PR comment                                                                                                        | `justifications.md`, `fix-requests.md`, `review-report.md` | `re-validate.md` exists    |
+| Verdict        | Reported as                                     |
+| -------------- | ----------------------------------------------- |
+| `PASS`         | Cycle closed; review directory cleaned up       |
+| `FAIL`         | Open findings remain; directory kept for resume |
+| `INCONCLUSIVE` | Evidence unsettled; directory kept              |
 
-The review stage's verdict is read from `review-report.md` frontmatter (`verdict:`); a missing field is treated as `INCONCLUSIVE`.
+## §4 Why the pipeline does not end at resolve
 
-## Stage Transition Table
+`resolve` finishes with a commit. A commit is the most convincing false terminal in this cycle: the tree is green, something was written, and the turn feels complete. Nothing has been verified at that point — `resolve` delegates corrections and does not measure whether they took.
 
-| #   | Situation                       | Next action                                 |
-| --- | ------------------------------- | ------------------------------------------- |
-| 1   | pr-create succeeds              | Proceed to review                           |
-| 2   | review → `APPROVED`             | Pipeline **PASS** (skip resolve+revalidate) |
-| 3   | review → `REQUEST_CHANGES`      | Proceed to resolve                          |
-| 4   | review → `INCONCLUSIVE`         | Pipeline **FAIL** (skip resolve+revalidate) |
-| 5   | resolve → 0 or N accepted fixes | Proceed to revalidate                       |
-| 6   | revalidate → `PASS`             | Pipeline **PASS**                           |
-| 7   | revalidate → `FAIL`             | Pipeline **FAIL** (report unresolved)       |
-| 8   | Any stage execution error       | Pipeline **ERROR** (report + resume cmd)    |
-| 9   | `--from` prerequisite missing   | Pipeline **ABORT** (before execution)       |
+The cycle closes only when `revalidate` re-measures the delta against `resolve_commit_sha` and issues a verdict. Stopping earlier reports a change as a resolution.
 
-## Example Run
+## §5 What this skill does not do
 
-```
-$ /filid:pipeline --from=pr-create --base=main --draft
-
-[1/4] pr-create   → Skill("filid:pull-request", "--base=main --draft")
-                  → PR #42 created (draft) ✓
-[2/4] review      → Skill("filid:cross-review", "--scope=pr --base=main")
-                  → evidence + 4-persona committee + verification
-                  → Review verdict: REQUEST_CHANGES (5 fix items) ✓
-[3/4] resolve     → Skill("filid:resolve", "--auto")
-                  → 5/5 fixes applied, typecheck PASS, committed + pushed ✓
-[4/4] revalidate  → Skill("filid:revalidate")
-                  → Verdict: PASS (5/5 resolved) → session cleaned up ✓
-
-Pipeline PASS — all stages completed successfully.
-```
+- It does not measure anything. Every finding comes from a stage.
+- It does not edit files, and it calls no MCP tool other than `review_state`.
+- It does not choose per-item accept/reject — it always passes `--auto`. Use `/filid:resolve` directly for per-item decisions.

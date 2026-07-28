@@ -1,4 +1,4 @@
-import type { VisitScope } from '../../core/infra/cacheManager/cacheManager.js';
+import type { VisitScope } from '../../core/infra/cacheManager/caches/fractalMapCache.js';
 import type { HookBaseInput } from '../../types/hooks.js';
 
 /**

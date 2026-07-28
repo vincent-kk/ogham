@@ -2,7 +2,8 @@ import { existsSync } from 'node:fs';
 import * as path from 'node:path';
 
 import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
-import { isDetailMd, isIntentMd } from '../../../shared/shared.js';
+import { isDetailMd } from '../../../shared/utils/isDetailMd.js';
+import { isIntentMd } from '../../../shared/utils/isIntentMd.js';
 import { checkCircularImports } from '../../../utils/checkCircularImports.js';
 import { checkIntentMdReclassification } from '../../../utils/checkIntentMdReclassification.js';
 import { checkOrganSubdirectory } from '../../../utils/checkOrganSubdirectory.js';

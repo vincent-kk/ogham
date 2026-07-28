@@ -1,1 +1,3 @@
-export * from './structureGuard.js';
+export {
+  guardStructure,
+} from './structureGuard.js';

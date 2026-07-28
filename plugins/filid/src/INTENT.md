@@ -1,49 +1,46 @@
-# src — filid 소스 루트
+# src — Filid 1.0 source
 
 ## Purpose
 
-`@ogham/filid`의 소스 루트. FCA-AI 규칙 강제를 위한 core, MCP 서버, AST 분석, 메트릭, 압축, 훅 구현을 모은 패키지 진입 모듈이다.
+Filid 1.0의 canonical TypeScript source. 생태계 어댑터가 사실을 수집하고, 언어 중립 core가 FCA 결과를 만들며, MCP와 훅이 host 경계를 담당한다.
 
 ## Structure
 
-| 경로         | 역할                                                                       |
-| ------------ | -------------------------------------------------------------------------- |
-| `index.ts`   | 공개 API 엔트리포인트 (함수/상수 + 타입 re-export)                         |
-| `version.ts` | 자동 생성 버전 상수 (직접 수정 금지)                                       |
-| `core/`      | 7개 sub-fractal: tree/rules/analysis/module/infra/coverageVerify/prSummary |
-| `ast/`       | `@ast-grep/napi` 기반 AST 분석 (LCOM4, CC, 의존성)                         |
-| `mcp/`       | MCP 서버 + 19개 도구 핸들러 + 설정 페이지 정적 자산                        |
-| `hooks/`     | Claude Code 훅 구현체                                                      |
-| `metrics/`   | 테스트 밀도 · 모듈 분리 결정 메트릭                                        |
-| `compress/`  | 컨텍스트 압축 (가역/손실)                                                  |
-| `constants/` | 공유 상수 organ (임계값·이름 패턴·기본값)                                  |
-| `types/`     | 공유 TypeScript 타입 organ                                                 |
-| `lib/`       | 런타임 유틸 organ (`logger`, `stdin`)                                      |
+| Path         | Role                                                       |
+| ------------ | ---------------------------------------------------------- |
+| `adapters/`  | 생태계 탐지·구조·verification 증거 수집                    |
+| `core/`      | 문서, snapshot, tree, policy, context, placement, artifact |
+| `mcp/`       | 9개 도구와 settings page의 host boundary                   |
+| `hooks/`     | INTENT/DETAIL write gate와 최소 context delivery           |
+| `types/`     | 언어 중립 public DTO organ                                 |
+| `constants/` | FCA rule·verification 상수 organ                           |
+| `lib/`       | 작은 runtime utility organ                                 |
 
 ## Conventions
 
-- ESM (`"type": "module"`), import 확장자 `.js`
-- 공개 API는 `index.ts`에서 re-export
-- `version.ts`는 `yarn version:sync`로만 갱신
+- ESM import와 명시적 named export를 사용한다.
+- 공개 MCP handler 9개는 모두 공통 `ToolPayload` adapter 의미를 가진다.
+- entry point는 MCP와 hook build entry다. `src/index.ts`는 npm library entry가 아니다.
+- core/policy/DTO에 확장자, 진입점 이름, 테스트 호출 문법을 두지 않는다.
 
 ## Boundaries
 
 ### Always do
 
-- 새 모듈 추가 시 `index.ts`에 export 추가
-- `core/` 변경 후 관련 `__tests__/unit/core/` 테스트 갱신
+- 새 fractal에 INTENT.md, DETAIL.md와 named-export entry point 추가
+- 어댑터 증거의 unsupported/indeterminate를 PASS와 구분
 
 ### Ask first
 
-- 새 하위 디렉토리 추가 (아키텍처 결정 필요)
-- 공개 API 제거·시그니처 변경 (breaking change)
+- 새 core 책임 또는 MCP 도구 추가
+- 어댑터 공통 계약과 공개 DTO 변경
 
 ### Never do
 
-- `version.ts` 직접 수정
-- `types/`·`constants/`에 비즈니스 로직 추가
-- 순환 의존성 도입 (core ↔ mcp ↔ hooks)
+- 특정 생태계 리터럴을 adapters 밖으로 유출
+- core에서 프로젝트 파일 이동·import rewrite 실행
+- 생성 버전 파일 또는 build output 손편집
 
 ## Dependencies
 
-- Node.js `>=20`, TypeScript 5.7, `@modelcontextprotocol/sdk`, `zod`, `fast-glob`
+- Node.js ≥20, TypeScript, MCP SDK, Zod와 Ogham 공통 runtime packages

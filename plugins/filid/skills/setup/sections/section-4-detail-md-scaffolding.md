@@ -1,25 +1,17 @@
-# setup — DETAIL.md Scaffolding (Phase 4)
+# setup — DETAIL.md Proposal
 
-> Detail reference for Phase 4 of /filid:setup. See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
+> Reference for Phase 4 of `/filid:setup`.
 
-For fractal modules that expose a public API and lack a DETAIL.md, generate a scaffold:
+Propose DETAIL.md only for a fractal whose public boundary needs a documented
+contract and whose scan evidence reports no DETAIL.md. Setup does not create or
+overwrite the file.
 
-```markdown
-# <Module Name> Specification
+Each proposed DETAIL.md must later satisfy
+[`../../_shared/detail-template.md`](../../_shared/detail-template.md) — its
+required heading set, the acceptance-group shape, and the language rule. Do not
+restate that template here.
 
-## Requirements
-
-- <functional requirement>
-
-## API Contracts
-
-- <function signature and expected behaviour>
-
-## Last Updated
-
-<ISO date>
-```
-
-**Language**: Section headings (`## Requirements`, `## API Contracts`, `## Last Updated`) MUST remain in English. Content follows the language specified by the `[filid:lang]` tag. If no tag is present, follow the system's language setting; default to English.
-
-Only create DETAIL.md when the module clearly has an API surface worth specifying. Do not create DETAIL.md for leaf utility directories.
+The proposal entry contains the node path, proposed document path, observed
+entry-point state, and the evidence that a public contract is required. If the
+available evidence cannot establish a public boundary, report the proposal as
+unresolved instead of guessing.

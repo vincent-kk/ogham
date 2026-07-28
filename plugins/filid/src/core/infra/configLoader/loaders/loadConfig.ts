@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { getDefaultAdapterIds } from '../../../../adapters/index.js';
 import {
   CONFIG_DIR,
   CONFIG_FILE,
@@ -10,87 +11,69 @@ import { sanitizeExemptPatterns } from '../utils/exemptSanitize.js';
 import { formatIssuePath } from '../utils/formatIssuePath.js';
 import { parseWithAllowlistWarn } from '../utils/parseWithAllowlistWarn.js';
 import { resolveGitRoot } from '../utils/resolveGitRoot.js';
-import { sanitizeRoutePatterns } from '../utils/routePatternSanitize.js';
 
 import { FilidConfigSchema } from './configSchemas.js';
-import type { LoadConfigResult } from './configTypes.js';
+import type { ConfigDiagnostic, LoadConfigResult } from './configTypes.js';
+import { migrateConfigV1 } from './migrateConfigV1.js';
 
 const log = createLogger('config-loader');
 
-/**
- * Read `.filid/config.json` from the given project root (resolves git root).
- *
- * Returns `{ config, warnings }`. Zod-based strict validation is applied;
- * unknown top-level or rule-override keys are warn+dropped (never
- * pass-through), and invalid `rules[*].exempt` globs (including the bare
- * `**` wildcard) are rejected at load time. Consumers that do not need
- * warnings may destructure only `{ config }`.
- */
 export function loadConfig(projectRoot: string): LoadConfigResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
   const warnings: string[] = [];
-  const addWarning = (msg: string): void => {
-    warnings.push(msg);
-    log.warn(msg);
+  const diagnostics: ConfigDiagnostic[] = [];
+  const addWarning = (message: string): void => {
+    warnings.push(message);
+    log.warn(message);
   };
-  if (!existsSync(configPath)) {
-    log.debug('config not found', configPath);
-    return { config: null, warnings };
-  }
-
-  let raw: string;
-  try {
-    raw = readFileSync(configPath, 'utf8');
-  } catch (err) {
-    log.error('failed to read config', err);
-    addWarning(`failed to read ${configPath}: ${String(err)}`);
-    return { config: null, warnings };
-  }
+  if (!existsSync(configPath)) return { config: null, warnings, diagnostics };
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
-  } catch (err) {
-    log.error('failed to parse config JSON', err);
-    addWarning(`failed to parse JSON at ${configPath}: ${String(err)}`);
-    return { config: null, warnings };
+    parsed = JSON.parse(readFileSync(configPath, 'utf8'));
+  } catch (error) {
+    addWarning(`failed to parse JSON at ${configPath}: ${String(error)}`);
+    return { config: null, warnings, diagnostics };
   }
 
-  const strict = FilidConfigSchema.safeParse(parsed);
-  if (strict.success) {
-    log.debug('config loaded (strict)', configPath);
-    return {
-      config: sanitizeRoutePatterns(
-        sanitizeExemptPatterns(strict.data, addWarning),
-        addWarning,
-      ),
-      warnings,
-    };
+  let candidate = parsed;
+  if (
+    candidate &&
+    typeof candidate === 'object' &&
+    !Array.isArray(candidate) &&
+    (candidate as Record<string, unknown>).version === '1.0'
+  ) {
+    const [legacyAdapterId] = getDefaultAdapterIds();
+    const migrated = migrateConfigV1(candidate, legacyAdapterId);
+    candidate = migrated.config;
+    diagnostics.push(...migrated.diagnostics);
   }
+
+  const strict = FilidConfigSchema.safeParse(candidate);
+  if (strict.success)
+    return {
+      config: sanitizeExemptPatterns(strict.data, addWarning),
+      warnings,
+      diagnostics,
+    };
 
   const { sanitized } = parseWithAllowlistWarn(
-    parsed,
+    candidate,
     strict.error,
     addWarning,
   );
-
   const retry = FilidConfigSchema.safeParse(sanitized);
-  if (retry.success) {
-    log.debug('config loaded (sanitized)', configPath);
+  if (retry.success)
     return {
-      config: sanitizeRoutePatterns(
-        sanitizeExemptPatterns(retry.data, addWarning),
-        addWarning,
-      ),
+      config: sanitizeExemptPatterns(retry.data, addWarning),
       warnings,
+      diagnostics,
     };
-  }
 
   for (const issue of retry.error.issues)
     addWarning(
       `config validation failed at ${formatIssuePath(issue.path)}: ${issue.message}`,
     );
-
-  return { config: null, warnings };
+  return { config: null, warnings, diagnostics };
 }

@@ -28,7 +28,7 @@ beforeEach(async () => {
   );
   process.env.CLAUDE_CONFIG_DIR = tempDir;
   const { getCacheDir } =
-    await import('../../../core/infra/cacheManager/cacheManager.js');
+    await import('../../../core/infra/cacheManager/index.js');
   cacheDir = getCacheDir(cwd);
   markerPath = join(cacheDir, PRUNE_MARKER_FILENAME);
   mkdirSync(cacheDir, { recursive: true });
@@ -52,20 +52,20 @@ describe('prune-throttle (session)', () => {
   // Basic (3)
   it('isSessionPruneDue: returns true when marker absent', async () => {
     const { isSessionPruneDue } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     expect(isSessionPruneDue(cwd)).toBe(true);
   });
 
   it('markSessionPruneRun: creates marker at <cacheDir>/.last-prune', async () => {
     const { markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     expect(existsSync(markerPath)).toBe(true);
   });
 
   it('round-trip: after markSessionPruneRun, isSessionPruneDue returns false', async () => {
     const { isSessionPruneDue, markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     expect(isSessionPruneDue(cwd)).toBe(false);
   });
@@ -73,7 +73,7 @@ describe('prune-throttle (session)', () => {
   // Edge — backdate / boundary (4)
   it('isSessionPruneDue: returns true when backdated 25h', async () => {
     const { isSessionPruneDue, markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     const past = Date.now() / 1000 - 25 * 3600;
     utimesSync(markerPath, past, past);
@@ -82,7 +82,7 @@ describe('prune-throttle (session)', () => {
 
   it('isSessionPruneDue: returns false when 1h ago', async () => {
     const { isSessionPruneDue, markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     const past = Date.now() / 1000 - 3600;
     utimesSync(markerPath, past, past);
@@ -91,7 +91,7 @@ describe('prune-throttle (session)', () => {
 
   it('isSessionPruneDue: boundary — just inside PRUNE_THROTTLE_MS returns false', async () => {
     const { isSessionPruneDue, markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     // 1s buffer absorbs ms-level drift between Date.now() and isSessionPruneDue();
     // the impl uses strict `>` so any positive delta past the boundary flips.
@@ -102,7 +102,7 @@ describe('prune-throttle (session)', () => {
 
   it('markSessionPruneRun: twice-called updates mtime', async () => {
     const { markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     const past = Date.now() / 1000 - 25 * 3600;
     utimesSync(markerPath, past, past);
@@ -115,7 +115,7 @@ describe('prune-throttle (session)', () => {
   // Edge — cwd / paths (3)
   it('different cwd values produce independent markers', async () => {
     const { getCacheDir, isSessionPruneDue, markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     const cwdA = '/proj/a';
     const cwdB = '/proj/b';
     mkdirSync(getCacheDir(cwdA), { recursive: true });
@@ -129,7 +129,7 @@ describe('prune-throttle (session)', () => {
     rmSync(cacheDir, { recursive: true, force: true });
     expect(existsSync(cacheDir)).toBe(false);
     const { markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     expect(existsSync(markerPath)).toBe(true);
   });
@@ -137,7 +137,7 @@ describe('prune-throttle (session)', () => {
   it('markSessionPruneRun: works under non-existent plugin root (mkdir recursive)', async () => {
     rmSync(tempDir, { recursive: true, force: true });
     const { markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     expect(existsSync(markerPath)).toBe(true);
   });
@@ -146,7 +146,7 @@ describe('prune-throttle (session)', () => {
   it('isSessionPruneDue: marker is a directory → returns true', async () => {
     mkdirSync(markerPath, { recursive: true });
     const { isSessionPruneDue } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     expect(isSessionPruneDue(cwd)).toBe(true);
   });
 
@@ -154,7 +154,7 @@ describe('prune-throttle (session)', () => {
     'markSessionPruneRun: swallows writeFileSync error silently',
     async () => {
       const { markSessionPruneRun } =
-        await import('../../../core/infra/cacheManager/cacheManager.js');
+        await import('../../../core/infra/cacheManager/index.js');
       chmodSync(cacheDir, 0o555);
       try {
         expect(() => markSessionPruneRun(cwd)).not.toThrow();
@@ -166,7 +166,7 @@ describe('prune-throttle (session)', () => {
 
   it('end-to-end: backdate → due → mark → not due', async () => {
     const { isSessionPruneDue, markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     const past = Date.now() / 1000 - 25 * 3600;
     utimesSync(markerPath, past, past);
@@ -177,7 +177,7 @@ describe('prune-throttle (session)', () => {
 
   it('markSessionPruneRun: overwrites existing marker mtime', async () => {
     const { markSessionPruneRun } =
-      await import('../../../core/infra/cacheManager/cacheManager.js');
+      await import('../../../core/infra/cacheManager/index.js');
     markSessionPruneRun(cwd);
     const past = Date.now() / 1000 - 10 * 3600;
     utimesSync(markerPath, past, past);
@@ -191,7 +191,7 @@ describe('prune-throttle (session)', () => {
     'after silent mark failure, isSessionPruneDue returns true',
     async () => {
       const { isSessionPruneDue, markSessionPruneRun } =
-        await import('../../../core/infra/cacheManager/cacheManager.js');
+        await import('../../../core/infra/cacheManager/index.js');
       rmSync(markerPath, { force: true });
       chmodSync(cacheDir, 0o555);
       try {

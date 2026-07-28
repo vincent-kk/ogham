@@ -1,4 +1,4 @@
-import { classifyNode } from '../../organClassifier/organClassifier.js';
+import { classifyNode } from '../../organClassifier/index.js';
 import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
 
 /**
@@ -35,7 +35,7 @@ export function correctNodeTypes(
       hasDetailMd: entry.hasDetailMd,
       hasFractalChildren: hasFractalChildrenActual,
       isLeafDirectory: isLeafActual,
-      hasIndex: entry.hasIndex ?? false,
+      entryPoints: entry.entryPoints,
       additionalOrganNames,
     });
 

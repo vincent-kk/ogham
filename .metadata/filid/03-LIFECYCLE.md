@@ -1,554 +1,321 @@
 # 03. 플러그인 라이프사이클 & 워크플로우
 
-> 19개 스킬 기반 라이프사이클 단계, 에이전트 협업 시퀀스, Hook 이벤트 타임라인, 거버넌스 파이프라인.
+> `@ogham/filid` 1.0 기준. 12개 스킬의 라이프사이클, 훅 이벤트 타임라인, merge-track 파이프라인.
 
 ---
 
 ## 라이프사이클 개요
 
-### 기본 워크플로우 (6개 스킬)
-
 ```
-┌──────────┐    ┌───────────┐    ┌───────────┐    ┌──────────────────┐    ┌─────────┐    ┌───────────────┐
-│ /filid:setup │───→│ /filid:scan │───→│ /filid:sync │───→│ /filid:structure-review │───→│ /filid:promote │───→│ /filid:context-query    │
-│          │    │           │    │           │    │                  │    │             │    │               │
-│ 초기화    │    │ 검증       │    │ 동기화     │    │ PR 구조 리뷰     │    │ 테스트      │    │ 질의           │
-│          │    │           │    │           │    │                  │    │ 승격        │    │               │
-└──────────┘    └───────────┘    └───────────┘    └──────────────────┘    └─────────────┘    └───────────────┘
-  1회성           수시             drift 감지        PR 시점               안정화 후           수시
-```
+┌───────────┐   ┌──────────┐   ┌────────────────┐   ┌──────────┐
+│ setup     │──→│ scan     │──→│ context-query  │   │ guide    │
+│ 초기화     │   │ 전체 감사 │   │ 좁은 질의       │   │ 규칙 설명 │
+│ 1회성      │   │ 수시      │   │ 수시            │   │ 수시     │
+└───────────┘   └──────────┘   └────────────────┘   └──────────┘
 
-### 거버넌스 파이프라인 (4개 스킬)
-
-```
-┌────────────────┐    ┌───────────────┐    ┌──────────────────┐    ┌──────────────────┐
-│ /filid:pipeline   │───→│ /filid:cross-review │───→│ /filid:resolve      │───→│ /filid:revalidate   │
-│                │    │               │    │                  │    │                  │
-│ 전체 파이프라인  │    │ 다중 페르소나  │    │ 수정 해결/소명     │    │ Delta 재검증      │
-│ 오케스트레이션  │    │ 합의 리뷰      │    │ + 부채 관리       │    │ + PASS/FAIL      │
-└────────────────┘    └───────────────┘    └──────────────────┘    └──────────────────┘
-  PR 시점               PR 시점              리뷰 완료 후              수정 적용 후
+┌──────────────┐   ┌──────────────┐   ┌──────────┐
+│ enrich-docs  │   │ restructure  │   │ migrate  │
+│ 문서 갱신     │   │ 배치 계획·검증 │   │ 이름 이관 │
+│ 문서 보강 시   │   │ 이동 필요 시   │   │ 최초 1회 │
+└──────────────┘   └──────────────┘   └──────────┘
 ```
 
-### 보조 스킬 (10개, revalidate 단독 실행 포함)
+### merge-track 라이프사이클 (5개)
+
+브랜치가 머지될 때 밟는 하나의 절차다. 각 단계의 **산출 형식이 계약**이며, 형식이 깨지면 다음 단계가 입력을 잃는다.
 
 ```
-┌───────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐
-│ /filid:guide     │    │ /filid:restructure  │    │ /filid:migrate │    │ /filid:pull-request│    │ /filid:update      │    │ /filid:revalidate│
-│           │    │              │    │             │    │                 │    │                 │    │ (단독 실행)   │
-│ 구조 가이드 │    │ 프랙탈 구조   │    │ 구조 마이그  │    │ PR 생성         │    │ 문서/구조 갱신   │    │ Delta 재검증   │
-│ 생성       │    │ 리팩토링      │    │ 레이션      │    │ 자동화          │    │                 │    │               │
-└───────────┘    └──────────────┘    └─────────────┘    └─────────────────┘    └─────────────────┘    └──────────────┘
-  수시               필요 시            마이그레이션 시    PR 준비 시            구조 변경 후            수정 적용 후
-
-┌──────────────────┐    ┌─────────────────┐    ┌────────────────┐    ┌─────────────────┐
-│ /filid:config-wizard│    │ /filid:enrich-docs │    │ /filid:harvest    │    │ /filid:ast-fallback│
-│                  │    │                 │    │                │    │                 │
-│ config.json 조회/ │    │ INTENT.md 품질   │    │ 스파이크 브랜치 │    │ AST 검색/치환   │
-│ 수정              │    │ 감사/보강        │    │ 결정 수확       │    │ LLM 폴백        │
-└──────────────────┘    └─────────────────┘    └────────────────┘    └─────────────────┘
-  설정 변경 시           문서 보강 시          스파이크 정리 시      네이티브 모듈 부재 시
+┌──────────────┐  ┌───────────────┐  ┌──────────┐  ┌──────────────┐
+│ pull-request │─→│ cross-review  │─→│ resolve  │─→│ revalidate   │
+│ 문서 동기화   │  │ 3관점 + 판정   │  │ 결정·위임 │  │ 재측정·판정   │
+│ + PR 생성    │  │ fix-requests  │  │ justif.  │  │ PASS/FAIL    │
+└──────────────┘  └───────────────┘  └──────────┘  └──────────────┘
+        └────────────────── pipeline (--auto 연속 실행) ──────────────┘
 ```
+
+`pipeline`이 주 사용 경로다. 네 단계를 진입점 자동 감지와 함께 한 번에 돈다.
+
+### 1.0에서 제거된 스킬
+
+| 스킬               | 제거 사유                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ast-fallback`     | 제거된 AST 기능의 fallback이다. 원래 기능이 없으므로 fallback도 대상이 없다.                                                               |
+| `structure-review` | `scan`(전체 감사)과 `cross-review`(변경 감사)가 이미 범위를 나눠 갖는다. 세 번째 진입점은 어느 쪽을 써야 하는지만 모호하게 만든다.         |
+| `promote`          | spec-document와 test-record는 서로 다른 문서 역할이며 승격 관계가 아니다(ADR-06). 승격이라는 동작 자체가 1.0 모델에 없다.                  |
+| `harvest`          | acceptance 원장을 DETAIL.md 하나로 통일했으므로(ADR-05) `.filid/criteria.md`에 claim을 수확해 넣을 대상이 없다.                            |
+| `sync`             | 한 스킬이 구조 이동과 문서 갱신을 동시에 하면 어느 쪽이 실패했는지 구분되지 않는다. 구조는 `restructure`, 문서는 `enrich-docs`로 분리했다. |
+| `update`           | 코드 변경 뒤 문서·테스트를 자동 재작성하는 workflow다. 승인 지점이 없어 "무엇이 왜 바뀌었는지"가 남지 않는다. `enrich-docs`가 대체한다.    |
+| `config-wizard`    | config 관리는 `project_init`(생성)과 `open_settings`(조회·수정) 두 MCP 도구가 이미 소유한다.                                               |
+
+merge-track 네 스킬은 한때 제거 대상이었으나 되살렸다. 다만 모두 제거된 도구(`review_manage`, `debt_manage`, `ast_analyze`, `test_metrics`)와 `code-surgeon` 에이전트에 걸려 있었으므로 **원본 복원이 아니라 9개 도구 표면 위로 재작성**됐다.
+
+문서 갱신 책임의 소유자는 다음과 같다.
+
+| 작업                     | 소유                                   |
+| ------------------------ | -------------------------------------- |
+| 문서 위반·drift 탐지     | `scan`(전체) · `cross-review`(변경분)  |
+| 문서 갱신 (승인 후 편집) | `enrich-docs`                          |
+| 누락 문서 제안           | `setup`                                |
+| **PR 시점 강제**         | `pull-request` Stage 1 → `enrich-docs` |
 
 ---
 
-## 단계 1: /filid:setup — 프로젝트 초기화
+## setup — 프로젝트 초기화
 
-### 트리거 조건
-
-- 프로젝트에 FCA-AI 구조가 없을 때 (최초 1회)
-- 사용자가 `/filid:setup [path]` 명령 실행
-
-### 관여 에이전트
-
-- **architect** (주도): 디렉토리 분석 및 프랙탈 경계 설계
-- **context-manager** (보조): INTENT.md/DETAIL.md 생성
-
-### 사용 MCP 도구
-
-- `fractal_scan`: 전체 계층 구조 스캔 (파일시스템 직접 읽기)
-- `fractal_navigate` (action: `classify`): 개별 디렉토리 분류
-
-### 워크플로우
+**트리거**: 최초 1회, 또는 `/filid:setup [path]`
 
 ```
-1. 디렉토리 트리 스캔
-   fractal_scan(path: <project_root>)
+1. project_init(path, language, adapterIds)
+   → .filid/config.json (schema 2.0) 생성
+   → 이미 있으면 덮어쓰지 않는다
        │
        ▼
-2. 각 디렉토리 분류
-   ├── INTENT.md 존재 → fractal (유지)
-   ├── Organ 패턴 매칭 → organ (INTENT.md 생성 안 함)
-   ├── 사이드이펙트 없음 → pure-function
-   └── 기본 → fractal (INTENT.md 생성 필요)
+2. rule_docs_sync(sync)
+   → managed FCA rule 문서 배포 (templates/rules/ 원본 기준)
        │
        ▼
-3. fractal 디렉토리에 INTENT.md 생성
-   - 50줄 이내
-   - 3-tier 경계 섹션 포함 (Always do / Ask first / Never do)
-   - 프로젝트 구조 및 명령어 기록
+3. fractal_scan(path)
+   → snapshot 기반 트리 확인
        │
        ▼
-4. 필요 시 DETAIL.md 생성
-   - 모듈의 기능 요구사항
-   - API 인터페이스 정의
+4. structure_validate(path, scopes: [documents])
+   → 문서 경계 검증
        │
        ▼
-5. 초기화 요약 보고
-   - 스캔된 디렉토리 수
-   - 생성된 INTENT.md 수
-   - 경고/이슈
+5. 누락 INTENT.md / DETAIL.md 제안
+   → **제안만 한다.** 기존 문서를 편집하지 않는다.
 ```
 
-### 입출력
-
-- **입력**: 대상 디렉토리 경로 (기본: cwd)
-- **출력**: 초기화 보고서 (디렉토리 수, 생성 파일 수, 경고)
+config 저장은 사용자가 승인할 때만 디스크에 기록된다. v1 config가 발견되면 메모리에서 v2로 변환하고 `config-migration-required` 진단을 내되 파일은 쓰지 않는다.
 
 ---
 
-## 단계 2: /filid:scan — 규칙 위반 검출
+## scan — 전체 FCA 감사
 
-### 트리거 조건
+**트리거**: 수시, `/filid:scan [path]`
 
-- 개발 중 수시로 실행
-- 사용자가 `/filid:scan [path] [--fix]` 명령 실행
-
-### 관여 에이전트
-
-- **qa-reviewer** (주도): 규칙 위반 검출 및 보고
-- **context-manager** (--fix 시): 자동 수정 가능한 위반 해결
-
-### 사용 MCP 도구
-
-- `fractal_scan`: 프로젝트 구조 스캔 (파일시스템 직접 읽기)
-- `test_metrics` (action: `check-312`): 3+12 규칙 검사
-
-### 워크플로우
+전체 감사의 **유일한** 진입점이다. 한 snapshot에 대해 모든 scope를 평가한다.
 
 ```
-1. 프로젝트 트리 구축
-   fractal_scan(path: <project_root>)
+fractal_scan(path)              → 트리와 분류
        │
        ▼
-2. INTENT.md 검증
-   각 fractal 노드의 INTENT.md에 대해:
-   ├── 50줄 초과 검사
-   └── 3-tier 경계 섹션 존재 검사
+structure_validate(path, mode: 'project')
+       ├─ documents      → INTENT 50줄·3-tier, DETAIL 섹션·AC group
+       ├─ nodes          → organ-no-intentmd, max-depth, zero-peer-file
+       ├─ entry-points   → module-entry-point, entry-point-surface
+       ├─ boundaries     → external-import-boundary
+       ├─ dag            → circular-dependency, pure-function-isolation
+       └─ verification   → 15/32 cap, fragmentation, contract link
        │
        ▼
-3. Organ 디렉토리 검증
-   각 organ 노드에 대해:
-   └── INTENT.md 존재 여부 검사 (있으면 위반)
+verification_scan(path)         → spec/test 역할별 요약
        │
        ▼
-4. 테스트 파일 검증
-   test_metrics(action: 'check-312', files: [...])
-   └── spec.ts 파일별 15 케이스 초과 검사
-       │
-       ▼
-5. 위반 보고서 생성
-   - 총 검사 수
-   - 위반 수 (severity별)
-   - 자동 수정 가능 수 (--fix 시 실행)
+위반 요약 + certainty 보고
 ```
+
+`scopes`를 생략하면 전부 검사한다. 결과가 16 KiB를 넘으면 요약과 artifact 경로가 돌아온다.
+
+**warning도 finding이다.** warning이 남아 있는 상태를 "준수"라고 부르지 않는다.
 
 ---
 
-## 단계 3: /filid:sync — 구조 Drift 감지 & 동기화
+## context-query — 최소 문서 체인 질의
 
-### 트리거 조건
-
-- 구조적 이탈이 의심될 때
-- 사용자가 `/filid:sync [--dry-run] [--severity=<level>]` 명령 실행
-
-### 관여 에이전트
-
-- **drift-analyzer** (Stage 1-3 주도): drift 감지, 계획 생성
-- **fractal-architect** (보조): 구조 분석 자문
-- **restructurer** (Stage 4): 승인된 수정 실행
-
-### 사용 MCP 도구
-
-- `fractal_scan`: 프로젝트 구조 스캔
-- `drift_detect`: 프랙탈 원칙 이탈 감지
-- `lca_resolve`: 이동 대상 LCA 계산
-- `structure_validate`: 실행 후 구조 검증
-
-### 워크플로우
+**트리거**: 수시, `/filid:context-query <path 또는 질문>`
 
 ```
-1. 프로젝트 스캔
-   fractal_scan(path) → FractalTree
+context_resolve(path, targetPath)
        │
        ▼
-2. Drift 감지
-   drift_detect(path, severity?) → DriftItem[]
-   ├── 각 이탈 항목: expected, actual, severity, correction
-   └── --severity 필터 적용
+{ ownerFractalPath, chain[owner → root], nearestDetailPath, outputLanguage }
        │
        ▼
-3. 수정 계획 수립
-   drift_detect(path, generatePlan: true) → SyncPlan
-   ├── 파일 이동, 디렉토리 재분류
-   └── lca_resolve로 최적 배치 경로 결정
+호출자가 필요한 문서만 읽는다 (본문은 반환되지 않는다)
        │
        ▼
-4. 수정 실행 (승인 후)
-   restructurer가 SyncPlan 실행
-   ├── 파일 이동/이름 변경
-   ├── index.ts 재생성
-   └── import 경로 갱신
-       │
-       ▼
-5. 검증
-   structure_validate(path) → 위반 0건 확인
+3라운드 안에 답변. 불가하면 "파악한 내용 + 추가로 필요한 정보"를 보고한다.
 ```
 
-### 설계 배경
-
-> **Note**: 초기 설계에서는 PostToolUse hook 기반 ChangeQueue로 변경을 추적했으나,
-> hook 프로세스 간 상태 비공유 문제로 MCP 기반 drift 감지로 재설계되었다.
-> ChangeQueue 클래스는 라이브러리 유틸리티로 유지되지만 hook에 의해 자동 채워지지 않는다.
+target이 project root 밖이거나 owner를 결정할 수 없으면 명시적 오류다. root 문서를 임의 fallback으로 고르지 않는다.
 
 ---
 
-## 단계 4: /filid:structure-review — 6단계 PR 검증 파이프라인
+## guide — 규칙과 트리 설명
 
-### 트리거 조건
-
-- PR 제출 시
-- 사용자가 `/filid:structure-review [--stage=1-6] [--verbose]` 명령 실행
-
-### 관여 에이전트
-
-- **qa-reviewer** (주도): 전체 파이프라인 실행
-- **architect** (Stage 1, 5 보조): 구조/의존성 검증
-
-### 사용 MCP 도구
-
-- `fractal_navigate`: Stage 1 (구조), Stage 5 (의존성)
-- `test_metrics`: Stage 3 (테스트), Stage 4 (메트릭)
-- `doc_compress`: Stage 2 (문서 크기 검사)
-
-### 6단계 파이프라인
-
-```
-┌─ Stage 1: Structure ─────────────────────────┐
-│ fractal/organ 경계 준수 검증                    │
-│ - 모든 fractal에 INTENT.md 존재?               │
-│ - organ 디렉토리에 INTENT.md 없음?              │
-│ - 분류가 올바른지?                              │
-└──────────────────────────────────────────────┘
-         │ pass/fail
-         ▼
-┌─ Stage 2: Documents ─────────────────────────┐
-│ INTENT.md/DETAIL.md 규정 준수 검증              │
-│ - INTENT.md: 50줄 제한 + 3-tier 경계           │
-│ - DETAIL.md: append-only 패턴 없음             │
-│ - 문서-코드 동기화 상태                          │
-└──────────────────────────────────────────────┘
-         │ pass/fail
-         ▼
-┌─ Stage 3: Tests ─────────────────────────────┐
-│ 3+12 규칙 + 테스트 커버리지 검증                 │
-│ - spec.ts별 15 케이스 이내?                     │
-│ - basic/complex 분포 적절?                      │
-│ - 테스트 커버리지 충분?                          │
-└──────────────────────────────────────────────┘
-         │ pass/fail
-         ▼
-┌─ Stage 4: Metrics ───────────────────────────┐
-│ LCOM4 + CC 메트릭 분석                          │
-│ - LCOM4 >= 2인 모듈 → split 권고               │
-│ - CC > 15인 함수 → compress 권고               │
-│ - 의사결정 트리 결과 보고                        │
-└──────────────────────────────────────────────┘
-         │ pass/fail
-         ▼
-┌─ Stage 5: Dependencies ──────────────────────┐
-│ 순환 의존성 검증                                │
-│ - DAG 구축 + detectCycles()                    │
-│ - 순환 발견 시 경로 보고                         │
-│ - 위상 정렬 가능 여부 확인                       │
-└──────────────────────────────────────────────┘
-         │ pass/fail
-         ▼
-┌─ Stage 6: Summary ───────────────────────────┐
-│ 종합 보고서 생성                                │
-│ - 단계별 pass/fail 상태                         │
-│ - 발견된 이슈 목록 (severity별)                  │
-│ - 실행 가능한 권고사항                           │
-│ - 전체 PASS/FAIL 판정                           │
-└──────────────────────────────────────────────┘
-```
+현재 트리, 분류, 검증 finding, 증거 기반 배치 규칙을 설명한다. **구조를 바꾸지 않는다.** 읽기 전용이다.
 
 ---
 
-## 단계 5: /filid:promote — 테스트 승격
-
-### 트리거 조건
-
-- 안정화 기간(90일) 경과 후
-- 사용자가 `/filid:promote [path] [--days=90]` 명령 실행
-
-### 관여 에이전트
-
-- **qa-reviewer** (분석): 승격 후보 식별
-- **implementer** (실행): spec.ts 생성
-
-### 사용 MCP 도구
-
-- `test_metrics` (action: `count`): 테스트 케이스 분석
-
-### 워크플로우
+## enrich-docs — 문서 품질 개선
 
 ```
-1. test.ts 파일 탐색 및 분석
-   test_metrics(action: 'count', files: [...])
+1. snapshot 증거 수집 (owner, 경계, 진입점, 소비자)
        │
        ▼
-2. 승격 자격 검사
-   checkPromotionEligibility(input, stabilityThreshold)
-   ├── stableDays >= 90?
-   └── lastFailure === null?
+2. 개선안 제시 → **사용자 승인**
        │
        ▼
-3. 자격 있는 파일에 대해:
-   ├── test.ts의 테스트 패턴 분석
-   ├── 중복 케이스 식별
-   ├── parameterized spec.ts 구조 생성
-   └── 3+12 규칙 검증 (15 케이스 이내 확인)
+3. LLM이 INTENT.md / DETAIL.md 편집
        │
        ▼
-4. spec.ts 작성 + 원본 test.ts 삭제
+4. structure_validate(scopes: [documents])로 사후 검증
 ```
+
+승인 없이 문서를 고치지 않는다.
 
 ---
 
-## 단계 6: /filid:context-query — 인터랙티브 질의
-
-### 트리거 조건
-
-- 개발 중 수시로 실행
-- 사용자가 `/filid:context-query <question>` 명령 실행
-
-### 관여 에이전트
-
-- **architect** (질의 해석 + 응답)
-
-### 사용 MCP 도구
-
-- `fractal_navigate`: 관련 모듈 탐색
-- `doc_compress` (mode: `auto`): 컨텍스트 과다 시 압축
-
-### 3-Prompt Limit 규칙
+## restructure — 계획 → 승인 → 외부 실행 → 검증
 
 ```
-질문 수신
-    │
-    ▼
-Prompt 1: 모듈 위치 파악 + INTENT.md 체인 로드
-    │
-    ▼
-Prompt 2: 상세 분석 또는 추가 정보 수집
-    │
-    ▼
-Prompt 3 (최대): 최종 응답 생성
-    │
-    ▼
-3회 이내 답변 불가 시:
-    "현재까지 파악한 내용 + 추가 필요한 정보" 보고
+1. 읽기 전용 계획 생성
+   restructure_plan({ path, requests: [{ sourcePath, consumerPaths?, contractIntent? }] })
+   → 항상 plan artifact를 남긴다 (persistence: always)
+   → 프로젝트 트리는 변경되지 않는다
+       │
+       ▼
+2. 사전조건 검증
+   structure_validate(mode: 'plan-precondition', planPath)
+   → snapshot hash 일치, unresolved decision 없음
+       │
+       ▼
+3. 계획 제시 → **사용자 승인**
+   Current / Target / Type / Basis / LCA를 그대로 인용한다
+       │
+       ▼
+4. MCP 밖에서 실행
+   파일 이동 + import 편집은 외부 도구가 한다
+       │
+       ▼
+5. 사후조건 검증
+   structure_validate(mode: 'plan-postcondition', planPath)
+   → source 부재, target 존재, node type, 필수 문서, 진입점,
+     import rewrite/boundary, DAG, graph certainty
 ```
+
+계획과 다른 target으로 옮긴 경우 **기능이 동작해도 FAIL이다.** 사후 snapshot hash가 달라지는 것은 정상이며 사전 hash 일치를 요구하지 않는다.
 
 ---
 
-## 에이전트 협업 시퀀스
+## cross-review — FCA 증거 기반 다관점 리뷰
 
-### 일반적인 개발 사이클
+**트리거**: 커밋된 변경 또는 PR, `/filid:cross-review [PR URL]`
 
 ```
-                 ┌──────────┐
-                 │ Architect │ ← 읽기 전용
-                 │ (설계)     │
-                 └─────┬────┘
-                       │ DETAIL.md 초안
-                       ▼
-                 ┌──────────────┐
-                 │ Implementer   │ ← DETAIL 범위 내 코드 작성
-                 │ (구현)         │
-                 └─────┬────────┘
-                       │ 코드 변경
-                       ▼
-                 ┌────────────────┐
-                 │ Context Manager │ ← 문서만 수정
-                 │ (문서 동기화)     │
-                 └─────┬──────────┘
-                       │ INTENT.md/DETAIL.md 갱신
-                       ▼
-                 ┌──────────────┐
-                 │ QA Reviewer   │ ← 읽기 전용
-                 │ (품질 검증)     │
-                 └──────────────┘
-                       │ 검증 보고서
-                       ▼
-                 pass/fail 판정
+Step 1 — Resolve Source and Prepare State
+├── 브랜치/PR 해석, base ref 결정
+├── review_state(prepare) → fresh | resumable | cached
+│     · 같은 hash의 prepared state → resumable (이어서)
+│     · 같은 hash의 sealed state + report → cached (재사용)
+│     · force: true → 캐시 무시하고 fresh
+└── 출력: review state record
+
+Step 2 — Collect Snapshot Evidence
+├── 변경 프랙탈의 snapshot 증거만 수집
+└── 읽는 증거는 아래 목록으로 제한된다
+
+Step 3 — Run Three Independent Perspectives  (병렬, 단일 라운드)
+├── contract     — INTENT/DETAIL/acceptance/public surface
+├── structure    — classification/boundary/DAG/LCA/placement
+└── verification — role/case count/fragmentation/link/certainty
+
+Step 4 — Adversarial Arbitration
+├── 모든 blocking finding을 CONFIRMED | PLAUSIBLE | REFUTED로 판정
+└── REFUTED는 verdict에서 제거하되 arbitration log에 남긴다
+
+Step 5 — Checkpoint, Report, and Seal
+├── review_state(checkpoint) → artifact 목록과 report 경로
+├── verdict: APPROVED | REQUEST_CHANGES | INCONCLUSIVE
+├── review_state(seal) → prepared hash와 report가 있을 때만 sealed
+└── (--scope=pr 요청 시에만) PR 코멘트
 ```
 
-### 역할별 도구 접근 매트릭스
+### cross-review가 읽는 증거
 
-| 에이전트          | Read | Glob | Grep | Write | Edit | Bash | MCP |
-| ----------------- | ---- | ---- | ---- | ----- | ---- | ---- | --- |
-| fractal-architect | O    | O    | O    | X     | X    | X    | O   |
-| implementer       | O    | O    | O    | O     | O    | O    | O   |
-| context-manager   | O    | O    | O    | O\*   | O\*  | X    | O   |
-| qa-reviewer       | O    | O    | O    | X     | X    | X    | O   |
-| drift-analyzer    | O    | O    | O    | X     | X    | X    | O   |
-| restructurer      | O    | O    | O    | O     | O    | O    | O   |
-| code-surgeon      | O    | O    | O    | O     | O    | O    | O   |
+- 변경된 프랙탈의 INTENT.md와 DETAIL.md 계약
+- node classification과 owner
+- entry point surface와 외부 import boundary
+- dependency DAG와 cycle
+- LCA placement 및 승인된 restructure plan 사후조건
+- spec-document 15, test-record 32
+- spec fragmentation과 DETAIL acceptance group link
+- `unsupported` / `indeterminate` 진단
 
-> \*context-manager: INTENT.md, DETAIL.md 문서만 Write/Edit 가능 (역할 제한), Bash 사용 불가
+이 밖의 것은 읽지 않는다. 그래서 verdict 제목과 본문에 **FCA scope**를 명시한다.
+
+### verdict 규칙
+
+| 상황                                                  | verdict           |
+| ----------------------------------------------------- | ----------------- |
+| 명확한 위반                                           | `REQUEST_CHANGES` |
+| evidence가 `indeterminate`이고 merge 안전성 판정 불가 | `INCONCLUSIVE`    |
+| 위반 없음                                             | `APPROVED`        |
+
+cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure_plan`이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
+
+### review state 수명주기
+
+```
+prepare ──→ (작업) ──→ checkpoint ──→ seal ──→ cleanup
+   │                       │
+   │                       ├─ missing   : state 없음
+   │                       ├─ stale     : hash 불일치
+   │                       ├─ resumable : matching prepared
+   │                       └─ cached    : matching sealed + report
+   │
+   └─ force: true → 캐시 무시
+```
+
+`stale`과 `missing`은 `ok` status가 아니다. 메시지 파싱 없이 안정적인 disposition과 diagnostics로 판정할 수 있다. `cleanup`은 리터럴 `confirm: true` 뒤에 해당 브랜치 디렉터리만 제거한다.
+
+---
+
+## migrate — legacy 문서명 이관
+
+`CLAUDE.md` → `INTENT.md`, `SPEC.md` → `DETAIL.md`.
+
+```
+1. 대상 탐색
+2. **dry-run 우선** — 무엇이 바뀌는지 먼저 보여준다
+3. 이식 가능한 스크립트로 실행
+4. structure_validate로 사후 검증
+```
+
+legacy `.filid/criteria.md`는 이 스킬의 대상이 아니다. 자동 변환하지 않고 `legacy-criteria-ledger` finding으로 보고되며, 이관 시점은 사용자가 정한다.
 
 ---
 
 ## Hook 이벤트 타임라인
 
-### 단일 코드 수정 사이클
-
 ```
 시간 →
 
 T0  세션 시작
-    └─ SessionStart → setup
-       세션 초기화, 오래된 캐시 정리
+    └─ SessionStart → setup.mjs
+       캐시 초기화, 만료 세션 정리, FCA 프로젝트 감지
 
 T1  사용자 프롬프트 입력
-    └─ UserPromptSubmit → context-injector
-       "[FCA-AI] Active in: /path ..." (~200자 주입)
+    └─ UserPromptSubmit → user-prompt-submit.mjs
+       턴당 visit map 리셋, 세션 첫 FCA 규칙 포인터
 
-T2  에이전트가 Read/Write 도구 호출
-    └─ PreToolUse (matcher: Read|Write|Edit)
-       ├─ intent-injector: INTENT.md 컨텍스트 주입 (Read|Write|Edit)
-       ├─ pre-tool-validator: INTENT.md/DETAIL.md 검증 (Write|Edit)
-       └─ structure-guard: Organ 디렉토리 보호 (Write|Edit)
-       → pass/block 결정
+T2  에이전트가 Read/Write/Edit 호출
+    └─ PreToolUse (matcher: Read|Write|Edit) → pre-tool-use.mjs
+       ├─ 소유 모듈 첫 접근 → [filid:ctx] 규칙 전달
+       ├─ 방문 집합 변화 → [filid:map]
+       └─ INTENT/DETAIL write → 검증 게이트 (위반 시 deny)
 
-T3  (pass 시) Write 도구 실행 → 파일 생성/수정
-
-T4  PostToolUse (disabled — no active hooks)
-
-T5  에이전트가 서브에이전트 생성
-    └─ SubagentStart (matcher: *)
-       └─ agent-enforcer: 역할 제한 주입
+T3  (통과 시) 도구 실행
 ```
 
----
-
----
-
-## 거버넌스 라이프사이클: 코드 리뷰 → 해결 → 재검증
-
-기존 6단계 라이프사이클과 독립적으로 동작하는 거버넌스 파이프라인.
-`/filid:pipeline`으로 전체 흐름을 오케스트레이션하거나 각 단계를 개별 실행 가능.
-
-```
-┌────────────────┐    ┌──────────────────┐    ┌────────────────┐    ┌──────────────────┐
-│ /filid:pipeline   │    │ /filid:cross-review  │───→│ /filid:resolve    │───→│ /filid:revalidate   │
-│                │───→│                  │    │                │    │                  │
-│ 전체 오케스트레이 │    │ Scope → Evidence  │    │ 수용/거부 선택  │    │ Delta 추출        │
-│ 션 (선택)      │    │ → Committee       │    │ code-surgeon 적용│    │ main 재측정       │
-│                │    │ → Arbitrate/Verify│    │ 소명→ADR→부채   │    │ PASS/FAIL        │
-│                │    │ → Report          │    │ commit + push   │    │ PR 코멘트         │
-└────────────────┘    └──────────────────┘    └────────────────┘    └──────────────────┘
-  PR 시점               PR 시점                 리뷰 완료 후            수정 적용 후
-```
-
-### /filid:cross-review — 5-Step 위임 패턴
-
-```
-Step 1 Scope/Session (의장 직접)
-├── spike harvest 가드, 캐시/체크포인트 확인
-├── review_manage(elect-committee) → 결정론적 위원회 선출 (TRIVIAL=adjudicator/LOW=2/MED=4/HIGH=6)
-└── 출력: session.md
-
-Step 2 Evidence (subagent ×1; >15파일이면 metrics/structure 분할)
-├── 모든 MCP 기술 측정 (structure_validate, ast_analyze, test_metrics, drift, ...)
-├── debt_manage(calculate-bias) + acceptance claims 스코프 필터
-└── 출력: verification.md (완결성 sentinel: verification_passed)
-
-Step 3 Committee (페르소나 Agent 병렬 foreground, 단일 라운드)
-├── 각 페르소나 독립 의견: state(SYNTHESIS|VETO|ABSTAIN) + fix_items + claim_verdicts
-└── 출력: opinions/<persona-id>.md (실패 페르소나 = forced ABSTAIN)
-
-Step 4 Arbitrate/Verify (검증자 Agent 병렬)
-├── dedup(path+rule, 고심각도 승리) + claim worst-wins 폴딩
-├── 차단급(>=MEDIUM) 발견 + VETO 근거 전수 검증: CONFIRMED/PLAUSIBLE/REFUTED
-└── REFUTED 기각 (Arbitration Log 기록), 심각도 게이트로 판정 도출
-
-Step 5 Report (의장 직접)
-├── advisory ledger 갱신(3회 누적 시 부채 승격), config-patch 게이트
-└── 출력: review-report.md, fix-requests.md, content-hash.json, (--scope=pr) PR 코멘트
-```
-
-### /filid:resolve — 수정 사항 해결
-
-```
-1. dirty worktree 가드 + fix-requests.md 로딩 (harvest-required 항목 존재 시 중단)
-2. AskUserQuestion으로 각 fix 항목 수용/거부 (--auto: 전체 수용·전 프롬프트 생략)
-3. 수용 → code-surgeon 병렬 적용 (promote/restructure는 스킬 위임)
-4. 거부 → 소명 수집 → ADR 정제 → debt_manage(create)
-5. justifications.md 출력 (resolve_commit_sha = 적용 전 HEAD)
-6. typecheck 게이트 → 코드+부채 파일만 커밋 → push → revalidate 핸드오프
-```
-
-### /filid:revalidate — Delta 재검증
-
-```
-1. resolve_commit_sha 기반 Delta 추출
-2. main이 verification-ledger 작성 (fix별 pre_count·file_was_modified)
-3. 소명 헌법 검사 ∥ 기존 부채 해소 확인 (병렬 subagent)
-4. main이 fix별 MCP 재측정으로 post_count·status 도출 (CLM-*은 claim 직접 재판정)
-5. PASS/FAIL 판정 → re-validate.md 출력 (PASS 시 세션 디렉토리 cleanup)
-6. (선택) gh pr comment으로 PR 코멘트
-```
-
-### 부채 관리 라이프사이클
-
-```
-┌─────────┐     ┌───────────┐     ┌──────────┐
-│ 발생     │────→│ 누적/가중  │────→│ 해소      │
-│ (create) │     │ (bias)    │     │ (resolve) │
-└─────────┘     └───────────┘     └──────────┘
-
-발생: /resolve에서 거부 시 debt_manage(create)
-누적: 이후 리뷰에서 동일 프랙탈 수정 시 touch_count++ → 가중치 2배
-해소: /revalidate에서 규칙 충족 시 debt_manage(resolve)
-```
-
-### .filid/ 디렉토리 구조
-
-```
-.filid/
-├── review/<branch>/       # 리뷰 중간 산출물 (브랜치별, 로컬 전용)
-│   ├── session.md            # Step 1 출력 (위원회·run_id)
-│   ├── verification.md       # Step 2 출력 (기술 측정)
-│   ├── opinions/<persona>.md # Step 3 출력 (페르소나 의견)
-│   ├── review-report.md      # Step 5 출력 (판정 + Arbitration Log)
-│   ├── fix-requests.md       # Step 5 출력 (차단급 수정 요청)
-│   ├── content-hash.json     # 리뷰 캐시 키
-│   ├── justifications.md     # /filid:resolve 출력
-│   ├── verification-ledger.md# /filid:revalidate 작업 ledger
-│   └── re-validate.md        # /filid:revalidate 출력
-├── review/advisory-ledger.md # advisory(LOW) 재발 추적 (브랜치 공유)
-└── debt/                  # 기술 부채 파일 (전체 공유)
-    └── <debt-id>.md          # 개별 부채 항목
-```
+`PostToolUse`와 `SubagentStart`에는 훅이 없다.
 
 ---
 
 ## 관련 문서
 
-- [01-ARCHITECTURE.md](./01-ARCHITECTURE.md) — 4계층 구조와 에이전트 개요
+- [01-ARCHITECTURE.md](./01-ARCHITECTURE.md) — 레이어와 책임 경계
 - [04-USAGE.md](./04-USAGE.md) — 스킬 사용법 상세
-- [06-HOW-IT-WORKS.md](./06-HOW-IT-WORKS.md) — Hook/MCP 내부 동작
+- [06-HOW-IT-WORKS.md](./06-HOW-IT-WORKS.md) — 훅·MCP 내부 동작
 - [07-RULES-REFERENCE.md](./07-RULES-REFERENCE.md) — 각 단계에서 적용되는 규칙

@@ -1,311 +1,177 @@
 # enrich-docs — Reference Documentation
 
-Detailed workflow, quality rubric, MCP tool call signatures, and output format templates for the INTENT.md enrichment skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+Detailed evidence, approval, editing, and validation contract for
+[SKILL.md](./SKILL.md).
 
-## Section 1 — Path Validation
+## Section 1 — Project Evidence
 
-Validation checks, performed in order:
+Resolve the requested path without assuming a path separator, confirm that it is
+inside a project containing `.filid/config.json`, and call:
 
-1. Resolve the target path to an absolute path. If `path` is omitted, use the current working directory.
-2. Confirm the directory exists (fail fast if not).
-3. Walk up from the target to locate the nearest `.filid/config.json`. If none exists, abort with:
-
-   ```
-   Error: target <path> is not inside a FCA-AI project (.filid/config.json not found).
-   Run /filid:setup first.
-   ```
-
-4. Resolve `--depth`. If omitted, treat as unlimited.
-5. Read the `[filid:lang]` tag injected by the UserPromptSubmit hook (e.g., `[filid:lang] ko`). If the tag is absent, fall back to the system language and default to English. The resolved language is forwarded to every `context-manager` delegation so rewrites follow the project language.
-
-## Section 2 — Discovery
-
-Collection steps:
-
-1. Glob for INTENT.md under the target directory, respecting `--depth`:
-
-   ```
-   // depth unlimited
-   Glob("<path>/**/INTENT.md")
-
-   // depth N (e.g., N = 3)
-   Glob("<path>/INTENT.md")
-   Glob("<path>/*/INTENT.md")
-   Glob("<path>/*/*/INTENT.md")
-   Glob("<path>/*/*/*/INTENT.md")
-   ```
-
-2. For every hit, build a `DocEntry`:
-
-   ```ts
-   type DocEntry = {
-     absPath: string; // absolute INTENT.md path
-     moduleRoot: string; // directory containing INTENT.md
-     content: string; // full file content
-     lineCount: number;
-     children: string[]; // immediate child directories of moduleRoot
-     implFiles: string[]; // *.ts, *.tsx, *.js under moduleRoot (non-test, non-nested fractal)
-     classification: 'fractal' | 'organ' | 'hybrid' | 'pure-function';
-   };
-   ```
-
-3. Resolve classification for each `moduleRoot` via a single `mcp__plugin_filid_tools__fractal_scan`:
-
-   ```
-   mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
-   // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: [...], ... }
-   // Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for node fields
-   ```
-
-   Skip `organ` nodes — INTENT.md is prohibited there and should be surfaced as a `scan` violation, not an enrichment target.
-
-4. When `--include-detail` is set, also Glob for `DETAIL.md` and add each as a peer `DocEntry` with kind `detail`. DETAIL.md entries are scored on the same rubric but against their own templates (see Section 3.5).
-
-5. Detect `MISSING` candidates: for every `fractal` node in the scan whose module root is under the target directory but lacks an INTENT.md, create a `DocEntry` with `content = null` and `lineCount = 0`.
-
-## Section 3 — Quality Audit
-
-### 3.1 Scoring Axes
-
-Each INTENT.md receives a score ∈ [0, 100] computed from four independent axes, each worth 25 points.
-
-| Axis         | What it measures                                                       |
-| ------------ | ---------------------------------------------------------------------- |
-| Structure    | Does the file cite real child directories or real file/function names? |
-| Conventions  | Does the file list 3+ concrete rules specific to the module?           |
-| Boundaries   | Do the 3-tier sections go beyond generic boilerplate?                  |
-| Dependencies | Does the file name concrete upstream or downstream modules?            |
-
-### 3.2 Structure axis (25 pts)
-
-Parse the `## Structure` section:
-
-- +10 if any child directory listed in `DocEntry.children` appears verbatim
-- +10 if any implementation filename (`implFiles` without extension) appears
-- +5 if the section uses a table (`| ... |`) rather than a raw list
-- Cap at 25.
-
-### 3.3 Conventions axis (25 pts)
-
-Parse the `## Conventions` section. Count non-empty bullet lines.
-
-- 0 pts for 0 bullets
-- 10 pts for 1-2 bullets
-- 20 pts for 3-4 bullets
-- 25 pts for 5+ bullets
-- Subtract 10 if every bullet is < 40 characters (too terse to be useful)
-
-### 3.4 Boundaries axis (25 pts)
-
-Inspect the three sub-sections (`### Always do`, `### Ask first`, `### Never do`):
-
-- +8 per sub-section that has at least one bullet, capped at +24
-- +1 if no sub-section contains the phrase `모듈 경계 외부 로직 인라인` or `do not import` as its only bullet (boilerplate detector)
-- Cap at 25. Files that literally match the `setup` scaffold template receive 0 on this axis.
-
-### 3.5 Dependencies axis (25 pts)
-
-Parse the `## Dependencies` section:
-
-- +15 if the section names at least one module path (pattern `src/...`, `packages/...`, or any path segment with `/`)
-- +10 if the section distinguishes internal vs external dependencies
-- Cap at 25.
-
-DETAIL.md rubric differs: replace `Structure` with `Requirements` and `Conventions` with `API Contracts`. Boundaries and Dependencies axes do not apply — DETAIL.md is scored against `Requirements`, `API Contracts`, and `Last Updated` freshness (last-updated within 90 days from today, 2026-04-12).
-
-### 3.6 Classification
-
-```
-score >= min-quality        → RICH   (skip)
-0 < score < min-quality     → SPARSE (enrich)
-content is null             → MISSING (create)
-```
-
-Default `min-quality = 70`.
-
-## Section 4 — Enrichment Plan
-
-Build a `PlanItem` per SPARSE / MISSING entry:
-
-```ts
-type PlanItem = {
-  docPath: string; // INTENT.md path (may not yet exist)
-  moduleRoot: string; // directory to scope the rewrite
-  kind: 'sparse' | 'missing';
-  currentScore: number; // 0 for missing
-  axesToRewrite: Axis[]; // axes under their threshold
-  implFilesToRead: string[]; // capped at 6
-  childDirs: string[]; // fed into Structure section
-};
-```
-
-Axis thresholds for "needs rewrite":
-
-- Structure < 15
-- Conventions < 15
-- Boundaries < 15
-- Dependencies < 10
-
-MISSING items always rewrite all four axes. When a SPARSE item passes every axis threshold individually but its total is still below `min-quality`, mark all four axes for rewrite.
-
-Implementation file selection heuristic (cap 6 per entry):
-
-1. Pick `index.ts` / `main.ts` if present (priority boost).
-2. Pick the eponymous file (`auth/auth.ts` for directory `auth/`).
-3. Pick up to 4 more source files by size descending, excluding `*.test.ts`, `*.spec.ts`, `*.bench.ts`, `*.d.ts`.
-
-## Section 5 — Approval Gate
-
-Summary printed before asking:
-
-```
-## Enrich-docs Plan — <path>
-
-**Total discovered**: <n> INTENT.md (+<m> DETAIL.md)
-**Classification**: RICH=<r>, SPARSE=<s>, MISSING=<x>
-**Will enrich**: <s + x> files
-**Axes rewritten**: Structure=<a>, Conventions=<b>, Boundaries=<c>, Dependencies=<d>
-
-<file list with per-item axes and impl files>
-```
-
-Then call `AskUserQuestion`:
-
-```
-AskUserQuestion({
-  question: "Approve INTENT.md enrichment for <s+x> files?",
-  options: [
-    { label: "approve",  description: "Proceed with parallel enrichment" },
-    { label: "modify",   description: "I want to adjust the plan" },
-    { label: "cancel",   description: "Abort without changes" },
-  ],
+```text
+mcp__plugin_filid_tools__fractal_scan({
+  path: "<target-path>",
+  detail: "paths",
+  maxDepth: <optional --depth value>
 })
 ```
 
-On `modify`, ask the user which files or axes to drop, regenerate the plan, and re-prompt. On `cancel`, skip to Stage 8 with status `CANCELLED`. On `approve`, proceed to Stage 6.
+The skill's `--depth` flag maps to the tool's `maxDepth` input — the flag keeps
+its short name, the tool input says what it does.
 
-`--dry-run` bypasses the prompt entirely — print the plan and jump to Stage 8 with status `DRY_RUN`.
+The response is a common Filid envelope. Stop before editing when `status` is not
+`ok`; report its diagnostics instead of treating incomplete adapter evidence as a
+clean snapshot.
 
-`--auto-approve` bypasses the prompt and proceeds to Stage 6.
+The snapshot tree is always built to full depth — `maxDepth` sets the `max-depth`
+rule threshold, not a traversal limit — so on a large project this payload can
+exceed the inline envelope budget, in which case it is persisted and `data` is
+not inline. Treat a returned artifact as the canonical full payload for this call
+and read the node projection from it; an absent inline `data` is never an empty
+candidate set.
 
-## Section 6 — Parallel Enrichment
+Use `data.nodes` as the authoritative candidate set. Each node contains its
+normalized path, classification, INTENT/DETAIL presence, and entry-point count.
+Exclude `organ` nodes because they must not own INTENT.md. A fractal or hybrid
+node without INTENT.md is `MISSING`.
 
-Batch `PlanItem`s into groups of at most 4 and dispatch one `context-manager` subagent per batch in a single tool-call block. Each delegation prompt includes:
+For every existing or missing document candidate, call:
 
-```
-Target: <docPath>
-Kind: SPARSE | MISSING
-Module root: <moduleRoot>
-Language: <lang from .filid/config.json>
-Axes to rewrite: [Structure, Conventions, Boundaries, Dependencies]
-Implementation files to read before writing: [...]
-Child directories: [...]
-
-Instructions:
-1. Read every file listed above before writing.
-2. Preserve English section headings exactly:
-   ## Purpose / ## Structure / ## Conventions / ## Boundaries
-   ### Always do / ### Ask first / ### Never do / ## Dependencies
-3. Body text MUST be in <language>.
-4. INTENT.md MUST stay within 50 lines total.
-5. Structure section MUST reference at least one real child directory or
-   real file/function name from the implementation files above.
-6. Conventions section MUST contain 3+ concrete rules specific to this
-   module (not generic FCA-AI advice).
-7. Boundaries sections MUST NOT be boilerplate; cite real boundary cases.
-8. Dependencies section MUST name concrete upstream/downstream modules.
-9. For MISSING targets, create the file with this scaffold then fill it in:
-
-   # <module-name> — <one-line description>
-
-   ## Purpose
-   ## Structure
-   | File | Role |
-   ## Conventions
-   ## Boundaries
-   ### Always do
-   ### Ask first
-   ### Never do
-   ## Dependencies
-
-10. Return { docPath, status: "written" | "skipped" | "error", reason? }.
+```text
+mcp__plugin_filid_tools__context_resolve({
+  path: "<project-path>",
+  targetPath: "<node-path>"
+})
 ```
 
-When `--include-detail` is set, DETAIL.md prompts replace the INTENT.md scaffold with:
+`context_resolve` returns document references, not document bodies. Read only:
 
-```
-## Requirements
-## API Contracts
-## Last Updated
-```
+- the target INTENT.md or DETAIL.md when present;
+- the owner-to-root `data.chain` document paths;
+- `data.nearestDetailPath` when present;
+- the target entry point and at most five other implementation files needed to
+  understand the module.
 
-The 50-line cap does not apply to DETAIL.md — it has no line limit; restructure it in place on each update instead.
+Do not read sibling subtrees or an inline full project tree. Record the
+`snapshotHash` from the scan summary and the resolved output language for the
+plan and final report.
 
-## Section 7 — Validate
+## Section 2 — Quality Audit
 
-For every file the agent reports as `written`:
+Score INTENT.md on four independent 25-point axes:
 
-```
-mcp__plugin_filid_tools__doc_compress({ mode: "auto", filePath: "<docPath>", content: "<new content>" })
-// Returns: { compacted?: string, summary?: ToolCallSummary, meta?: CompressionMeta,
-//            cap_applies?: { intent: boolean, detail: boolean }, error?: string }
+| Axis         | Evidence                                         |
+| ------------ | ------------------------------------------------ |
+| Structure    | Real child, entry point, or implementation names |
+| Conventions  | Concrete module-specific decision rules          |
+| Boundaries   | Non-boilerplate Always/Ask/Never clauses         |
+| Dependencies | Concrete upstream/downstream boundaries          |
 
-mcp__plugin_filid_tools__structure_validate({ path: "<moduleRoot>" })
-// Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
-// (passed / violations live at report.result)
-```
+Classify the result:
 
-Decision logic:
-
-- Written INTENT.md content exceeds 50 lines (count the lines of the written content; `cap_applies.intent` confirms the cap targets INTENT.md, never DETAIL.md) → dispatch a second-pass `context-manager` with instruction "compress to 50 lines preserving all four rewritten axes"; retry limit = 1. If the second pass still exceeds 50 lines → mark file as `NEEDS_REWORK`, revert the on-disk content, and report in Stage 8.
-- Written content lacks any of the three tier headings (`### Always do`, `### Ask first`, `### Never do`) → mark file as `NEEDS_REWORK`, revert the on-disk content, and report in Stage 8. Check the headings directly on the content — `mcp__plugin_filid_tools__structure_validate` evaluates structural rules only and does not inspect tier sections.
-- `report.result.violations` from `mcp__plugin_filid_tools__structure_validate` reports a structural violation for the module → mark file as `NEEDS_REWORK`, revert, and report in Stage 8.
-- All checks pass → mark as `ACCEPTED`.
-
-## Section 8 — Report
-
-```
-## Enrich-docs Report — <path>
-
-**Date**: <ISO 8601>
-**Mode**: normal | dry-run | auto-approve
-**Target**: <absolute path>
-**Language**: <lang>
-
-### Discovery
-INTENT.md files discovered: <n>
-DETAIL.md files discovered: <m> (--include-detail only)
-Fractal modules: <f>, Organ modules skipped: <o>
-
-### Quality Audit
-RICH:    <r> (score >= <min-quality>)
-SPARSE:  <s>
-MISSING: <x>
-Average score: <avg>/100
-
-### Enrichment
-Status: APPLIED | DRY_RUN | CANCELLED | SKIPPED_ALL_RICH
-Batches dispatched: <b>
-Files accepted: <a>
-Files needing rework: <nr>
-Files errored: <e>
-
-### Per-file Changes
-
-| File | Kind | Score before → after | Lines before → after | Axes rewritten | Status |
-| ---- | ---- | -------------------- | -------------------- | -------------- | ------ |
-
-### Summary
-Overall: PASS | NEEDS_ATTENTION | FAIL
+```text
+score >= min-quality    RICH
+0 < score < min-quality SPARSE
+document absent         MISSING
 ```
 
-### Terminal stage markers
+The default `min-quality` is 70. RICH documents are never edited.
 
-Emit exactly one of:
+When `--include-detail` is present, score DETAIL.md against the required section
+set in [`../_shared/detail-template.md`](../_shared/detail-template.md).
+DETAIL.md has no line cap, but every edit must restructure it as the current
+contract rather than append history.
 
-- `Enrich-docs complete: <a> files enriched`
+## Section 3 — Edit Plan
+
+Create one plan item per SPARSE or MISSING document:
+
+```text
+docPath
+nodePath
+kind: sparse | missing
+currentScore
+sectionsToRewrite
+contextDocumentPaths
+implementationPaths
+snapshotHash
+```
+
+Every path in the plan must come from scan/context evidence or a direct child of
+the resolved node. Do not invent a module boundary or a missing-document target.
+
+The plan summary includes classification totals, per-document sections, evidence
+paths, and the expected number of writes.
+
+## Section 4 — Approval Gate
+
+`--dry-run` prints the plan and ends without writes.
+
+Without `--auto-approve`, ask for explicit approval after presenting the complete
+plan. `approve` continues, `modify` removes or narrows requested items and
+re-presents the plan, and `cancel` ends without writes. `--auto-approve` is
+explicit prior authorization for the displayed plan; it never permits writes
+outside that plan.
+
+No LLM document edit may begin before this gate has passed.
+
+## Section 5 — LLM Document Edits
+
+For each approved item, give the LLM writer:
+
+- the exact target path and approved sections;
+- current target content or `MISSING`;
+- the resolved owner-to-root document content;
+- the bounded implementation evidence;
+- output language and snapshot hash.
+
+For INTENT.md, preserve the English anchors and the 50-line cap defined in
+[`../_shared/intent-template.md`](../_shared/intent-template.md).
+
+Body text follows the resolved project language. For a public-boundary change,
+update INTENT.md before implementation; for
+all contract changes, update DETAIL.md before implementation. This workflow edits
+only the approved documents and does not move source files.
+
+## Section 6 — Validation
+
+Validate each edited INTENT.md directly before invoking Filid:
+
+1. line count is at most 50;
+2. all English anchors are present;
+3. named paths and symbols exist in the evidence read for the edit;
+4. no unapproved document changed.
+
+Validate each edited DETAIL.md against the required section set in
+[`../_shared/detail-template.md`](../_shared/detail-template.md).
+
+Then call:
+
+```text
+mcp__plugin_filid_tools__structure_validate({
+  path: "<target-path>",
+  mode: "project",
+  scopes: ["documents", "nodes"]
+})
+```
+
+Read the findings from the returned result or, when the payload is persisted,
+from its artifact. This call decides whether an edited document is reverted, so
+treating an absent inline `data` as "no findings" would silently keep a failed
+edit.
+
+A non-`ok` status, diagnostic, or finding affecting an edited document is not a
+pass. Revert that document to its captured pre-edit content and mark it
+`NEEDS_REWORK`. An INTENT.md over 50 lines gets one bounded compression retry;
+the retry may reorganize prose but may not drop an approved contract clause.
+
+## Section 7 — Report
+
+Report project path, snapshot hash, classification totals, approval mode,
+before/after line counts, sections rewritten, evidence paths, validation status,
+and reverted items. End with exactly one terminal marker:
+
+- `Enrich-docs complete: <N> files enriched`
 - `Enrich-docs dry-run complete`
 - `Enrich-docs skipped: all RICH`
 - `Enrich-docs cancelled`
-
-Register these markers in `.omc/research/terminal-markers.json` per the Tier-2b anti-yield contract.

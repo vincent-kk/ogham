@@ -1,112 +1,142 @@
-# revalidate — Reference Documentation
+# revalidate — Reference
 
-Output templates, PR comment format, and verification reference for the delta re-validation skill.
+## §1 Status derivation matrix
 
-## verification-ledger.md Template
+One status per accepted item, derived from re-measurement only.
 
-Authored and completed by the main orchestrator (Step 3 rows, Step 6 `post_count`/`status` derivation). One row per accepted fix:
+| Original finding present? | Item path in delta? | Evidence certainty | Status         |
+| ------------------------- | ------------------- | ------------------ | -------------- |
+| gone                      | yes                 | `exact`            | `resolved`     |
+| gone                      | no                  | `exact`            | `resolved`\*   |
+| still present             | yes                 | `exact`            | `unresolved`   |
+| still present             | no                  | `exact`            | `unapplied`    |
+| any                       | any                 | `indeterminate`    | `inconclusive` |
+| any                       | any                 | `unsupported`      | `inconclusive` |
 
-```markdown
-# Verification Ledger — <branch name>
+\* A finding can disappear because a sibling correction removed its cause. That is a genuine resolution; record the observed cause in the report line.
 
-**Resolve Commit**: <resolve_commit_sha>
+Never invert this table. "The file changed, so it must be fixed" is the failure mode the matrix exists to block.
 
-| fix_id  | target_path           | rule_id            | pre_count | post_count | file_was_modified | status     |
-| ------- | --------------------- | ------------------ | --------- | ---------- | ----------------- | ---------- |
-| FIX-001 | packages/foo/index.ts | module-entry-point | 1         | 0          | true              | RESOLVED   |
-| FIX-002 | src/legacy/big.ts     | lcom4              | 3         | 2          | true              | UNRESOLVED |
+### Re-measurement scope
+
+Scope each call to the item's owning fractal, resolved through:
+
+```text
+mcp__plugin_filid_tools__context_resolve({
+  path: PROJECT_ROOT,
+  targetPath: <item path>
+})
 ```
 
-## re-validate.md Format
+Comparing a whole-project count before and after is not a per-item measurement — two items in the same run would each claim the other's improvement.
+
+## §2 Constitutionality rules for rejections
+
+A rejection holds only when all three parts stand on their own.
+
+| Part         | Holds when                                             | Fails when                       |
+| ------------ | ------------------------------------------------------ | -------------------------------- |
+| Context      | States a condition that is checkable                   | States a preference or a feeling |
+| Decision     | Names what is done _instead of_ the recommended action | Restates the finding             |
+| Consequences | Names what the project now accepts and must keep true  | Empty, or repeats the Context    |
+
+Rejected rationales, verbatim:
+
+- "Out of scope for this PR" — timing is not a rationale.
+- "Pre-existing" — age is not a rationale.
+- "Will fix later" — no decision and no consequence.
+- "Team convention" — name the convention and where it is written, or it is a preference.
+
+An `unconstitutional` rejection is an open finding. It does not become acceptable by being repeated in a later cycle.
+
+## §3 `re-validate.md` template
 
 ```markdown
-# Re-validation Result — <branch name>
+---
+branch: <branch>
+base_ref: <base ref>
+resolve_commit_sha: <baseline from justifications.md>
+head_sha: <current HEAD>
+verdict: PASS | FAIL | INCONCLUSIVE
+---
 
-**Date**: <ISO 8601>
-**Verdict**: PASS | FAIL
-**Delta Base**: <resolve_commit_sha>
-**Delta Commits**: <commit count since resolve>
+# FCA Revalidate — <branch>
 
-## Delta Analysis
+## Delta
 
-| File   | Change Type            | Related Fix |
-| ------ | ---------------------- | ----------- |
-| <path> | added/modified/deleted | FIX-<ID>    |
+<files changed between resolve_commit_sha and HEAD, or `none`>
 
-## Fix Verification
+## Accepted Items
 
-| Fix ID  | Status           | Detail                               |
-| ------- | ---------------- | ------------------------------------ |
-| FIX-001 | RESOLVED         | <metric before → after>              |
-| FIX-002 | DEFERRED         | Justification accepted, debt created |
-| FIX-003 | UNRESOLVED       | <what remains unfixed>               |
-| FIX-004 | UNCONSTITUTIONAL | <non-negotiable rule violated>       |
+| ID      | Path | Rule | Status   | Evidence                                    |
+| ------- | ---- | ---- | -------- | ------------------------------------------- |
+| FIX-001 | ...  | ...  | resolved | <tool + scope that showed the finding gone> |
 
-## Debt Changes
+## Rejections
 
-| Change   | Debt File    | Detail               |
-| -------- | ------------ | -------------------- |
-| CREATED  | <debt-id>.md | <from resolve>       |
-| RESOLVED | <debt-id>.md | <rule now satisfied> |
+| ID      | Rule | Judgement        | Reason                                |
+| ------- | ---- | ---------------- | ------------------------------------- |
+| FIX-002 | ...  | constitutional   | —                                     |
+| FIX-003 | ...  | unconstitutional | Consequences section restates Context |
 
-## New Violations Check
+## Verdict
 
-| Check                   | Result       | Detail                |
-| ----------------------- | ------------ | --------------------- |
-| New critical violations | NONE / FOUND | <if found, list them> |
+<PASS | FAIL | INCONCLUSIVE>
 
-## Final Verdict
-
-**<PASS|FAIL>** — <summary statement>
-
-<If PASS>: All fixes resolved or validly deferred. PR is ready for merge.
-<If FAIL>: Unresolved items remain — list them with what re-measurement showed.
+<One paragraph: what closed, what is open, and what the next action is.>
 ```
 
-Claim rows (`rule_id` = `CLM-*`) cite the re-judgment evidence in the Detail column (observable evaluated → expected matched / not matched).
+## §4 PR comment format
 
-## PR Comment Format
-
-`mcp__plugin_filid_tools__review_manage(action: "format-revalidate-comment")` reads `re-validate.md`, wraps it in a collapsible `<details>` section, handles the 50,000-char limit, extracts the PASS/FAIL verdict, and returns ready-to-post markdown. Post via `gh pr comment --body`.
+Posted only when the branch has a pull request. The verdict table stays
+**outside** the collapsible section so the result reads without expanding
+anything.
 
 ```markdown
-## Re-validation — ✅ PASS (or ❌ FAIL)
+## Re-validation — <✅ PASS | ❌ FAIL | ⚠️ INCONCLUSIVE>
 
-<details><summary>Re-validation Details</summary>
+| Field    | Value                                                            |
+| -------- | ---------------------------------------------------------------- |
+| Verdict  | <PASS \| FAIL \| INCONCLUSIVE>                                   |
+| Branch   | `<branch>`                                                       |
+| Baseline | `<resolve_commit_sha>` → `<head_sha>`                            |
+| Accepted | <r> resolved · <u> unresolved · <k> unapplied · <i> inconclusive |
+| Rejected | <n> constitutional · <c> unconstitutional                        |
 
-{full re-validate.md content}
+<details><summary>Accepted items (<n>)</summary>
+
+<the Accepted Items table from re-validate.md>
 
 </details>
 
-> Full report: `.filid/review/<branch>/re-validate.md`
+<details><summary>Rejections</summary>
+
+<the Rejections table and its per-part judgement>
+
+</details>
+
+> Full report: `<REVIEW_DIR>/re-validate.md`
 ```
 
-## Verification MCP Tool Map
+Rules:
 
-| Fix rule kind       | Verification tool                                             | Pass condition         |
-| ------------------- | ------------------------------------------------------------- | ---------------------- |
-| LCOM4 violation     | `mcp__plugin_filid_tools__ast_analyze(lcom4)`                 | LCOM4 < 2              |
-| CC violation        | `mcp__plugin_filid_tools__ast_analyze(cyclomatic-complexity)` | CC <= 15               |
-| 3+12 violation      | `mcp__plugin_filid_tools__test_metrics(check-gate)`           | All files PASS         |
-| Structure violation | `mcp__plugin_filid_tools__structure_validate`                 | No matching violations |
-| Circular dependency | `mcp__plugin_filid_tools__ast_analyze(dependency-graph)`      | No cycles              |
-| Drift               | `mcp__plugin_filid_tools__drift_detect`                       | No drift               |
-| Document compliance | `mcp__plugin_filid_tools__doc_compress(auto)` + Read          | INTENT.md <= 50 lines  |
-| Acceptance claim    | none — direct re-judgment vs `.filid/criteria.md`             | claim judged PASS      |
+- Strip the raw frontmatter from any body copied into a `<details>` block — the table above already carries those fields.
+- Keep the comment within the host's comment size limit. When it would exceed, keep the table, replace the folded blocks with the report pointer, and say that the rest was truncated.
+- A comment carrying the `## Re-validation` heading is this skill's own. Update it in place rather than adding a second one, so repeated cycles leave one comment per branch.
+- On `PASS` the review directory is deleted in Step 8, so the report pointer names a path that no longer exists. Keep it anyway — it tells a reader where the record lived, and the comment itself carries the verdict.
 
-## Non-Negotiable Rules (Constitutional)
+## §5 Failure handling
 
-These rules cannot be deferred via justification — any justification attempting to is marked UNCONSTITUTIONAL:
+| Situation                                    | Action                                                       |
+| -------------------------------------------- | ------------------------------------------------------------ |
+| `justifications.md` missing                  | Report that `resolve` has not run; end without a verdict.    |
+| `resolve_commit_sha` missing or unresolvable | Abort. The baseline cannot be reconstructed after the fact.  |
+| Empty delta with accepted items              | Every accepted item is `unapplied`; verdict `FAIL`.          |
+| `review_state` disposition `missing`         | Abort. The review directory was removed before revalidation. |
 
-1. **Hardcoded secrets/credentials** — always FAIL
-2. **Circular dependencies** — always FAIL
-3. **Security vulnerabilities** (injection, auth bypass) — always FAIL
+## §6 What this skill does not do
 
-## Debt Resolution Criteria
-
-A debt item is resolved only when BOTH hold:
-
-1. The file at `debt.file_path` was modified in the delta.
-2. The violated rule re-verifies as satisfied.
-
-Partial resolution is not supported (1 debt = 1 rule violation).
+- It does not edit source, commit, or push.
+- It does not re-run `cross-review`. A new review is a new cycle.
+- It does not resolve debt records; 1.0 has no debt ledger.
+- It does not post a PR comment when the branch has no pull request, and it does not open one.

@@ -1,34 +1,37 @@
 # cross-review — Reference Index
 
-Reference documentation for `cross-review` is split into focused files.
-
-| File                 | Contents                                                                                                                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `contracts.md`       | Committee → agent mapping, opinion frontmatter schema, severity gate, verifier verdict ladder, verdict derivation, acceptance claims, subagent prompt rules, config-patch gate |
-| `templates.md`       | Review report, fix requests, advisory ledger, and PR comment formats                                                                                                           |
-| `phases/evidence.md` | Evidence subagent instructions (MCP measurement stages, output schema, half scopes, merge protocol)                                                                            |
-| `calibration/`       | Verdict regression fixtures (clean / low-only / seeded / claim runs; FPR, FNR, severity-inflation, claim scoring)                                                              |
+| File                        | Contents                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `specification.md`          | Public contract specification: run requirements and review-report frontmatter     |
+| `contracts.md`              | Scope, state lifecycle, evidence identity, opinion schema, arbitration, verdicts  |
+| `templates.md`              | Canonical session, evidence, opinion, report, fix-request, and PR comment layouts |
+| `phases/evidence.md`        | Exact snapshot-backed evidence collection                                         |
+| `reviewers/contract.md`     | Contract perspective instructions                                                 |
+| `reviewers/structure.md`    | Structure perspective instructions                                                |
+| `reviewers/verification.md` | Verification perspective instructions                                             |
+| `reviewers/adversarial.md`  | Candidate arbitration instructions                                                |
+| `calibration/`              | Clean, warning-only, seeded, and contract-change regression fixtures              |
 
 ## Cross-Reference Map
 
-- Writing `review-report.md` or `fix-requests.md`? → `templates.md`
-- Committee list for a complexity tier? → `contracts.md` → "Complexity → Committee Mapping"
-- Validating an opinion frontmatter? → `contracts.md` → "Opinion Frontmatter Contract"
-- Severity gate, consequence requirement, anti-inflation rules? → `contracts.md` → "Severity Gate & Finding Discipline"
-- Verifier prompts and CONFIRMED/PLAUSIBLE/REFUTED semantics? → `contracts.md` → "Verifier Verdict Ladder"
-- Deriving the final verdict? → `contracts.md` → "Verdict Derivation"
-- Which MCP tool measures what, and when? → `phases/evidence.md`
-- Acceptance-claim scoping, aggregation, folding? → `contracts.md` → "Acceptance Claims (criteria ledger)"
-- Advisory Notes / advisory ledger? → `templates.md`
-- Regression-testing the reviewer itself? → `calibration/calibration.md`
+- Checking what the run as a whole must satisfy → `specification.md` → Requirements
+- Starting or resuming a run → `contracts.md` → Review-State Lifecycle
+- Collecting tool evidence → `phases/evidence.md`
+- Writing an opinion → `contracts.md` → Opinion Contract
+- Delivering the verdict to a pull request → `templates.md` → PR Comment
+- Resolving disagreement → `contracts.md` → Arbitration Contract
+- Deriving a verdict → `contracts.md` → Verdict Derivation
+- Writing artifacts → `templates.md`
+- Regression-checking the reviewer → `calibration/calibration.md`
 
-## MCP Tools Used
+## Filid Tools
 
-| Tool                                                                                                                                        | Caller         | Purpose                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `review_manage` (session actions)                                                                                                           | chairperson    | normalize-branch, check-cache, checkpoint, cleanup, ensure-dir, elect-committee, content-hash, format-pr-comment |
-| `fractal_scan`, `structure_validate`, `ast_analyze`, `test_metrics`, `coverage_verify`, `drift_detect`, `debt_manage(list, calculate-bias)` | evidence agent | all technical measurement (`phases/evidence.md`)                                                                 |
-| `config_patch_validate`                                                                                                                     | chairperson    | config-patch gate before fix-requests emission (bookkeeping)                                                     |
-| `debt_manage(create)`                                                                                                                       | chairperson    | advisory-ledger promotion at count 3 (bookkeeping)                                                               |
+| Tool                 | Purpose                                                                             |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| `review_state`       | Prepare, checkpoint, seal, or explicitly clean the branch review state              |
+| `fractal_scan`       | Produce snapshot identity, node paths, document state, and entry evidence           |
+| `structure_validate` | Evaluate documents, nodes, entry points, boundaries, DAG, and verification scope    |
+| `verification_scan`  | Evaluate spec-document and test-record evidence with role-specific caps             |
+| `context_resolve`    | Optionally resolve the owner-to-root document chain for an ambiguous changed target |
 
-All tool names use the full form `mcp__plugin_filid_tools__<tool>`.
+Use the full MCP form `mcp__plugin_filid_tools__<tool>`.

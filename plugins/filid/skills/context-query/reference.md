@@ -1,73 +1,81 @@
-# context-query — Reference Documentation
+# context-query — Minimal Context Reference
 
-Detailed workflow, 3-Prompt Limit protocol, and compression strategy for the context query skill. For the quick-start guide, see [SKILL.md](./SKILL.md).
+## Section 1 — Parse the Question
 
-## Section 1 — Question Parsing
+Extract:
 
-Identify from the question:
+- the project path, defaulting to the current working directory
+- a target file or directory path
+- whether the question concerns ownership, boundaries, public contract, or
+  placement context
 
-- **Target module or concept** — e.g., "payments", "retry logic", "auth"
-- **Relevant file paths** — any paths mentioned explicitly
-- **Query type** — boundary rule lookup | ownership question | structural question
+If no target path can be derived, ask for one concise path. Do not substitute a
+whole-project search for an unresolved target.
 
-If the question references a file path directly, use that as the navigation starting point. Otherwise proceed to Phase 2.
+## Section 2 — Resolve Ownership and Document Chain
 
-## Section 2 — Navigation Details
+Call exactly once:
 
-Use `mcp__plugin_filid_tools__fractal_scan` to retrieve the full project tree, then find the node matching the target:
-
-```
-mcp__plugin_filid_tools__fractal_scan({ path: "<project-root>" })
-```
-
-> **Size guard**: an oversized result comes back as `{ truncated: true, reportPath, summary }` — grep `reportPath` for the target node instead of reading the file whole.
-
-Scan `tree.nodes` (flat FractalNode array) for the node whose name or path best matches the target — e.g. `tree.nodes.find(n => n.path === target)`.
-
-If the match is ambiguous, use `mcp__plugin_filid_tools__fractal_navigate(classify)` with the node's known children from the scan result:
-
-```
-mcp__plugin_filid_tools__fractal_navigate({ action: "classify", path: "<candidate-path>", entries: [/* nodes from scan */] })
+```text
+mcp__plugin_filid_tools__context_resolve({
+  path: "<project-path>",
+  targetPath: "<target-path>"
+})
 ```
 
-This counts as **Prompt 1** of the 3-Prompt budget.
+The response identifies:
 
-## Section 3 — Context Chain Loading
+- the normalized target
+- the nearest owner fractal
+- the owner-to-root document-reference chain
+- the nearest DETAIL.md
+- the configured output language
 
-Load the INTENT.md chain from the identified leaf node up to the project root:
+The tool returns document references, not document bodies. It also excludes
+sibling and cousin subtrees by contract.
 
+An ownerless target, a target outside the project, a non-OK status, or
+diagnostics is not a successful resolution. Report the stable diagnostic
+instead of guessing ownership.
+
+## Section 3 — Read the Minimum Evidence
+
+Read only the referenced documents needed for the question:
+
+- boundary question: INTENT.md from owner toward root until the applicable
+  rule is found
+- public-contract question: nearest DETAIL.md, plus owner INTENT.md when its
+  boundary constrains the answer
+- ownership question: the resolution summary is normally sufficient
+- placement-context question: owner and parent INTENT.md, plus nearest
+  DETAIL.md when public ownership matters
+
+Do not read every document in the returned chain by default. Never load sibling
+documents to enrich a focused answer.
+
+## Section 4 — Three-Round Budget
+
+| Round | Work                                          |
+| ----- | --------------------------------------------- |
+| 1     | Parse the question and call `context_resolve` |
+| 2     | Read the minimum referenced documents         |
+| 3     | Answer with evidence paths and certainty      |
+
+If the required evidence cannot fit this budget, state what is known and list
+the unresolved referenced paths. Do not add a broad scan.
+
+## Section 5 — Response Shape
+
+```text
+Owner: <fractal path>
+Contract: <nearest DETAIL path or "none">
+Applicable chain: <paths actually read>
+
+<direct answer>
+
+Certainty: exact | indeterminate
+Diagnostics: <none or stable codes/messages>
 ```
-[leaf INTENT.md] → [parent INTENT.md] → [grandparent INTENT.md] → [root INTENT.md]
-```
 
-Claude Code loads `@`-referenced INTENT.md files natively. Construct the chain by following `parent` relationships in the fractal tree.
-
-Only load INTENT.md files that are directly in the ancestor path of the target node. Do not load sibling or cousin nodes.
-
-## Section 4 — Compression Strategy
-
-If the combined INTENT.md chain exceeds working context limits, call `mcp__plugin_filid_tools__doc_compress` before generating the response:
-
-```
-mcp__plugin_filid_tools__doc_compress({ mode: "auto", filePath: "<INTENT.md path>", content: "<file content>" })
-```
-
-`auto` mode selects `reversible` compression for structured documents (when `filePath`/`content` are provided) and `lossy` compression for tool-call history (when `toolCallEntries` are provided). The original files remain on disk; only the in-context representation is compressed.
-
-Apply compression only when necessary. Skip if the chain fits in context.
-
-## Section 5 — 3-Prompt Limit Protocol
-
-| Prompt      | Purpose                                                         |
-| ----------- | --------------------------------------------------------------- |
-| 1           | Module location via `mcp__plugin_filid_tools__fractal_navigate` |
-| 2           | Detailed analysis or additional context loading if required     |
-| 3 (maximum) | Final response generation                                       |
-
-If the question cannot be answered within 3 prompts, respond with:
-
-1. What is known from the loaded context
-2. Which additional INTENT.md files or information would be needed
-3. The specific path or module the user should consult directly
-
-Do not continue searching beyond the 3-prompt budget. Surface what is known and stop.
+Answer in `outputLanguage`. Cite file paths for every boundary or contract
+claim.

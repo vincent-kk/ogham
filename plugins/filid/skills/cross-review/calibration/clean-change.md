@@ -1,55 +1,65 @@
-# Calibration Fixture — Clean Change
+# Calibration Fixture — Clean FCA Change
 
-> Base tree + a clean one-file change, sound by construction. A calibrated `--solo` review of this branch MUST end `Review verdict: APPROVED` with zero blocking findings. Run protocol: [calibration.md §2](./calibration.md) (this variant is run id `run-a`).
+This base tree and change are sound by construction. `run-a` must end
+`APPROVED` with no confirmed findings.
 
-## 1. Base Tree (commit on `main`)
+## Base Tree
 
-`package.json`:
-
-```json
-{
-  "name": "filid-calibration-fixture",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module"
-}
-```
-
-`.filid/config.json` — registers `package.json` as an allowed root peer file so the base tree passes `zero-peer-file` by construction:
-
-```json
-{
-  "version": "1.0",
-  "rules": {},
-  "additional-allowed": ["package.json"]
-}
-```
-
-`INTENT.md` (repository root):
+`INTENT.md`:
 
 ```markdown
-# filid-calibration-fixture
+# fixture
 
 ## Purpose
 
-Synthetic fixture repository for filid review calibration runs.
+Expose one source fractal for slug generation.
+
+## Structure
+
+- `src/` owns the public implementation.
+
+## Conventions
+
+- Route consumers through named entry points.
 
 ## Boundaries
 
 ### Always do
 
-- Keep the tree minimal — one child fractal (`src/`).
+- Preserve the documented public surface.
 
 ### Ask first
 
-- Adding files outside `src/`.
+- Add another top-level fractal.
 
 ### Never do
 
-- Adding runtime dependencies.
+- Import a child implementation file from outside that child.
+
+## Dependencies
+
+- `src/`
 ```
 
-`index.ts` (repository root — satisfies `module-entry-point` on the root fractal):
+`DETAIL.md`:
+
+```markdown
+# fixture contract
+
+## Requirements
+
+- Export slug generation through the root entry point.
+
+## API Contracts
+
+- `slugify(input)` returns a normalized slug string.
+
+## Last Updated
+
+2026-07-27
+```
+
+`index.ts`:
 
 ```typescript
 export { slugify } from './src/index.js';
@@ -62,21 +72,51 @@ export { slugify } from './src/index.js';
 
 ## Purpose
 
-Source root for the calibration fixture. Single child fractal: `slugify/`.
+Own source fractals.
+
+## Structure
+
+- `slugify/` owns slug generation.
+
+## Conventions
+
+- Import child fractals through their entry points.
 
 ## Boundaries
 
 ### Always do
 
-- Route external imports through `index.ts`.
+- Keep the source dependency graph directed.
 
 ### Ask first
 
-- Adding a new child fractal.
+- Add a shared child.
 
 ### Never do
 
-- Adding runtime dependencies.
+- Re-export child internals.
+
+## Dependencies
+
+- `slugify/`
+```
+
+`src/DETAIL.md`:
+
+```markdown
+# source contract
+
+## Requirements
+
+- Expose each child through a named entry point.
+
+## API Contracts
+
+- `index.ts` re-exports `slugify`.
+
+## Last Updated
+
+2026-07-27
 ```
 
 `src/index.ts`:
@@ -92,21 +132,53 @@ export { slugify } from './slugify/index.js';
 
 ## Purpose
 
-URL-safe slug generation. Pure string transformation, no I/O.
+Generate URL-safe slugs without I/O.
+
+## Structure
+
+- `index.ts` is the public entry; `slugify.ts` implements it.
+
+## Conventions
+
+- Keep transformation deterministic.
 
 ## Boundaries
 
 ### Always do
 
-- Keep `slugify` pure and side-effect free.
+- Keep the exported signature stable.
 
 ### Ask first
 
-- Changing the public signature of `slugify`.
+- Change normalization behavior.
 
 ### Never do
 
-- Adding I/O, network calls, or environment access.
+- Add effects or ambient state.
+
+## Dependencies
+
+- None.
+```
+
+`src/slugify/DETAIL.md`:
+
+```markdown
+# slugify contract
+
+## Requirements
+
+- Lowercase input and collapse separator runs.
+- Trim separators at both edges.
+- Limit output to 64 characters.
+
+## API Contracts
+
+- `slugify(input: string): string` is exported from `index.ts`.
+
+## Last Updated
+
+2026-07-27
 ```
 
 `src/slugify/index.ts`:
@@ -129,7 +201,7 @@ export function slugify(input: string): string {
 }
 ```
 
-`src/slugify/tests/slugify.spec.ts` — the spec lives in a `tests/` organ (known organ name), NOT as a fractal-root peer file; `__tests__` is avoided because the double-underscore form trips the `naming-convention` rule:
+`src/slugify/tests/slugify.spec.ts`:
 
 ```typescript
 import { describe, expect, it } from 'vitest';
@@ -137,23 +209,19 @@ import { describe, expect, it } from 'vitest';
 import { slugify } from '../slugify.js';
 
 describe('slugify', () => {
-  it('lowercases and hyphenates words', () => {
+  it('normalizes words', () => {
     expect(slugify('Hello World')).toBe('hello-world');
   });
 
-  it('strips leading and trailing separators', () => {
+  it('trims separators', () => {
     expect(slugify('--Hello--')).toBe('hello');
-  });
-
-  it('truncates long input to 64 characters', () => {
-    expect(slugify('a'.repeat(80)).length).toBeLessThanOrEqual(64);
   });
 });
 ```
 
-## 2. Changed File (commit on `calib/run-a`)
+## Clean Change
 
-Overwrite `src/slugify/slugify.ts` only — truncation could leave a trailing hyphen; strip it after slicing. No interface change:
+On `calib/run-a`, overwrite only `src/slugify/slugify.ts`:
 
 ```typescript
 const MAX_SLUG_LENGTH = 64;
@@ -167,9 +235,5 @@ export function slugify(input: string): string {
 }
 ```
 
-## 3. Soundness by Construction
-
-- One changed file, one fractal, no interface change (TRIVIAL-tier shape).
-- The base tree passes **all 8 built-in structural rules with zero violations** (`mcp__plugin_filid_tools__structure_validate` on the materialized tree: `violations: [], failed: 0, rulesApplied: 8`): naming-convention, organ-no-intentmd, index-barrel-pattern, module-entry-point (root `index.ts`), max-depth, circular-dependency, pure-function-isolation, and zero-peer-file (spec in the `tests/` organ; `package.json` via `additional-allowed`).
-- CC ≈ 1, LCOM4 = 1, spec has 3 cases (3+12 satisfied), no secret, INTENT.md files well under the 50-line cap.
-- Any blocking finding (severity >= MEDIUM) raised on this branch is a false positive by definition.
+The change preserves contracts, entry surfaces, node placement, dependency
+direction, and verification-document policy.
