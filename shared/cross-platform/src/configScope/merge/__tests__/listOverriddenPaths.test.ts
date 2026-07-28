@@ -18,7 +18,9 @@ describe("listOverriddenPaths", () => {
   });
 
   it("treats an array as a leaf because it is the replacement unit", () => {
-    expect(listOverriddenPaths({ vaults: [{ name: "a" }] })).toEqual(["vaults"]);
+    expect(listOverriddenPaths({ vaults: [{ name: "a" }] })).toEqual([
+      "vaults",
+    ]);
   });
 
   it("treats an empty object as a leaf", () => {
@@ -31,7 +33,9 @@ describe("listOverriddenPaths", () => {
 
   it("lists every sibling leaf", () => {
     expect(
-      listOverriddenPaths({ a: 1, b: { c: 2, d: { e: 3 } } }).slice().sort(),
+      listOverriddenPaths({ a: 1, b: { c: 2, d: { e: 3 } } })
+        .slice()
+        .sort(),
     ).toEqual(["a", "b.c", "b.d.e"]);
   });
 

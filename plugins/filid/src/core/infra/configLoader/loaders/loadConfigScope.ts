@@ -1,6 +1,6 @@
 import {
-  buildConfigScopeState,
   type ConfigScopeState,
+  buildConfigScopeState,
 } from '@ogham/cross-platform/config-scope';
 
 import { configLayers } from '../utils/configLayers.js';

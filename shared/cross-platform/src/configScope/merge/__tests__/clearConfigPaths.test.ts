@@ -28,7 +28,9 @@ describe("clearConfigPaths", () => {
   });
 
   it("removes several paths in one call", () => {
-    expect(clearConfigPaths({ a: 1, b: 2, c: 3 }, ["a", "c"])).toEqual({ b: 2 });
+    expect(clearConfigPaths({ a: 1, b: 2, c: 3 }, ["a", "c"])).toEqual({
+      b: 2,
+    });
   });
 
   it("does not mutate the input", () => {
@@ -59,7 +61,7 @@ describe("clearConfigPaths", () => {
 
     expect(cleared).toBe(source);
     expect(Object.hasOwn(cleared, "__proto__")).toBe(true);
-    expect((({}) as Record<string, unknown>).polluted).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   });
 
   it("ignores a nested path that descends through __proto__", () => {

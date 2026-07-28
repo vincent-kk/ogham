@@ -5,12 +5,11 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { readHookConfig } from '../../../../hooks/utils/readHookConfig.js';
+import type { FilidConfig } from '../loaders/configSchemas.js';
 import { loadConfig } from '../loaders/loadConfig.js';
 import { loadConfigScope } from '../loaders/loadConfigScope.js';
 import { writeConfig } from '../loaders/writeConfig.js';
 import { configLayers } from '../utils/configLayers.js';
-
-import type { FilidConfig } from '../loaders/configSchemas.js';
 
 /**
  * The config now resolves across two layers: a personal user default and the
@@ -96,7 +95,11 @@ describe('config namespaces', () => {
   it('keeps the project layer at .filid/config.json and the two apart', () => {
     const repoRoot = seedRepo();
     writeConfig(repoRoot, 'user', config({ language: 'ko' }));
-    const written = writeConfig(repoRoot, 'project', config({ language: 'en' }));
+    const written = writeConfig(
+      repoRoot,
+      'project',
+      config({ language: 'en' }),
+    );
 
     expect(written).toBe(join(repoRoot, '.filid', 'config.json'));
     const scope = loadConfigScope(repoRoot);

@@ -1,4 +1,10 @@
-import { mkdtempSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -133,7 +139,12 @@ describe("writeConfigLayer", () => {
   it.skipIf(process.platform === "win32")(
     "applies an owner-only file mode when asked",
     () => {
-      writeConfigLayer(layers, "user", { token: "secret" }, { fileMode: 0o600 });
+      writeConfigLayer(
+        layers,
+        "user",
+        { token: "secret" },
+        { fileMode: 0o600 },
+      );
 
       expect(statSync(layers.user).mode & 0o777).toBe(0o600);
     },

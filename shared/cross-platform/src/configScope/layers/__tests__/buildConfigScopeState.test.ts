@@ -87,9 +87,11 @@ describe("buildConfigScopeState", () => {
 
     const state = buildConfigScopeState(layers);
 
-    expect((({}) as Record<string, unknown>).polluted).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
     expect(Object.getPrototypeOf(state.effective)).toBe(Object.prototype);
-    expect((state.effective as { polluted?: unknown }).polluted).toBeUndefined();
+    expect(
+      (state.effective as { polluted?: unknown }).polluted,
+    ).toBeUndefined();
     expect(state.effective).toEqual({ theme: "dark" });
     expect(state.overridden).toEqual([]);
     expect(state.warnings).toHaveLength(1);

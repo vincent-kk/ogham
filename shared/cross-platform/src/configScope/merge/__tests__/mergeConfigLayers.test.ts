@@ -55,7 +55,9 @@ describe("mergeConfigLayers", () => {
   });
 
   it("treats an explicit null in the override as a replacing value", () => {
-    expect(mergeConfigLayers({ v: { a: 1 } }, { v: null })).toEqual({ v: null });
+    expect(mergeConfigLayers({ v: { a: 1 } }, { v: null })).toEqual({
+      v: null,
+    });
   });
 
   it("recurses through three levels of nesting", () => {
@@ -92,7 +94,7 @@ describe("mergeConfigLayers", () => {
     // 통과한다 — 프로토타입 동일성과 상속 조회를 함께 봐야 가드가 검증된다.
     expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
     expect((merged as { polluted?: unknown }).polluted).toBeUndefined();
-    expect((({}) as Record<string, unknown>).polluted).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
     expect(merged).toEqual({ theme: "dark" });
   });
 
@@ -112,10 +114,9 @@ describe("mergeConfigLayers", () => {
   });
 
   it("drops a __proto__ key present only in the base layer", () => {
-    const base = JSON.parse('{"__proto__":{"polluted":"x"},"keep":1}') as Record<
-      string,
-      unknown
-    >;
+    const base = JSON.parse(
+      '{"__proto__":{"polluted":"x"},"keep":1}',
+    ) as Record<string, unknown>;
 
     const merged = mergeConfigLayers(base, { add: 2 });
 

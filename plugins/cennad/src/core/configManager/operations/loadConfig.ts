@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
-import { mergeConfigLayers } from '@ogham/cross-platform/config-scope/merge';
 import type { ConfigLayerPaths } from '@ogham/cross-platform/config-scope';
+import { mergeConfigLayers } from '@ogham/cross-platform/config-scope/merge';
 
 import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { FALLBACK_CONFIG_PATH } from '../../../constants/paths.js';
