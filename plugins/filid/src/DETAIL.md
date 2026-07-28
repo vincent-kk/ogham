@@ -2,22 +2,16 @@
 
 ## Requirements
 
-- 레이어 의존 방향은 `mcp`/`hooks` → `core` → `adapters` → `types`/`constants`/`lib`
-  한 방향이며 역방향 edge는 0이다.
-- `core`는 생태계 리터럴을 알지 못한다. 확장자, 진입점 파일명, import 문법,
-  테스트 호출 문법은 `adapters/` 안에만 존재한다.
+- 레이어 의존 방향은 `mcp`/`hooks` → `core` → `adapters` → `types`/`constants`/`lib` 한 방향이며 역방향 edge는 0이다.
+- `core`는 생태계 리터럴을 알지 못한다. 확장자, 진입점 파일명, import 문법, 테스트 호출 문법은 `adapters/` 안에만 존재한다.
 - `mcp`와 `hooks`는 host 경계이며 정책 판단을 하지 않는다.
 - 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
-- `src/index.ts` npm barrel은 존재하지 않는다. 빌드 대상은 MCP 진입점(CJS)과
-  훅 진입점(ESM)뿐이다.
-- `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로
-  고치지 않는다.
+- `src/index.ts` npm barrel은 존재하지 않는다. 빌드 대상은 MCP 진입점(CJS)과 훅 진입점(ESM)뿐이다.
+- `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로 고치지 않는다.
 
 ## API Contracts
 
-- MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`,
-  `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`,
-  `verification_scan`, `review_state`.
+- MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
 - 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
 
@@ -34,8 +28,7 @@
 
 ### AC-src-generated — 생성물 불가침
 
-- `version.ts`, `bridge/`, `public/`, host 매니페스트는 생성기가 소유하며
-  손편집 흔적이 없다.
+- `version.ts`, `bridge/`, `public/`, host 매니페스트는 생성기가 소유하며 손편집 흔적이 없다.
 
 ## Boundary Exemptions
 

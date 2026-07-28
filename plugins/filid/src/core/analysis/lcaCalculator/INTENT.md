@@ -2,16 +2,15 @@
 
 ## Purpose
 
-파일·디렉터리 소비자를 소유 프랙탈로 올린 뒤 모든 owner가 공유하는 가장
-깊은 fractal을 계산한다.
+파일·디렉터리 소비자를 소유 프랙탈로 올린 뒤 모든 owner가 공유하는 가장 깊은 fractal을 계산한다.
 
 ## Structure
 
-| Path                           | Role                                          |
-| ------------------------------ | --------------------------------------------- |
-| `index.ts`                     | named public entry point                      |
-| `resolveOwningFractal.ts`      | portable file/directory owner 해석            |
-| `findLowestCommonFractal.ts`   | 모든 owner ancestor 교집합 계산               |
+| Path                         | Role                               |
+| ---------------------------- | ---------------------------------- |
+| `index.ts`                   | named public entry point           |
+| `resolveOwningFractal.ts`    | portable file/directory owner 해석 |
+| `findLowestCommonFractal.ts` | 모든 owner ancestor 교집합 계산    |
 
 ## Conventions
 

@@ -88,9 +88,7 @@ verdict: PASS | FAIL | INCONCLUSIVE
 
 ## §4 PR comment format
 
-Posted only when the branch has a pull request. The verdict table stays
-**outside** the collapsible section so the result reads without expanding
-anything.
+Posted only when the branch has a pull request. The verdict table stays **outside** the collapsible section so the result reads without expanding anything.
 
 ```markdown
 ## Re-validation — <✅ PASS | ❌ FAIL | ⚠️ INCONCLUSIVE>

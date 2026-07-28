@@ -12,16 +12,14 @@
 - Input: core `RestructurePlanInput`.
 - Summary: plan ID/hash, move/fractal/organ/already-placed/decision count.
 - Data: core `RestructurePlan`, `persistence: always`.
-- unresolved move가 있으면 status는 `indeterminate`다. 옮길 것이 없어
-  `alreadyPlaced`로만 분류된 요청은 실패가 아니므로 status를 낮추지 않는다.
+- unresolved move가 있으면 status는 `indeterminate`다. 옮길 것이 없어 `alreadyPlaced`로만 분류된 요청은 실패가 아니므로 status를 낮추지 않는다.
 
 ## Acceptance Criteria
 
 ### AC-plan-artifact — Always persisted
 
 - 작은 plan도 inline data 없이 absolute artifact path와 matching hash를 가진다.
-- artifact JSON은 full common `ToolPayload`를 저장하고 `.data`에서 같은 plan과
-  precondition snapshot hash를 복원할 수 있다.
+- artifact JSON은 full common `ToolPayload`를 저장하고 `.data`에서 같은 plan과 precondition snapshot hash를 복원할 수 있다.
 
 ### AC-plan-read-only — No executor
 
@@ -29,5 +27,4 @@
 
 ## Last Updated
 
-2026-07-27 — full ToolPayload artifact를 사용하는 always-persist read-only
-placement plan 계약.
+2026-07-27 — full ToolPayload artifact를 사용하는 always-persist read-only placement plan 계약.

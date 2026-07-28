@@ -2,8 +2,7 @@
 
 ## Purpose
 
-committed diff content hash와 branch-scoped review artifact lifecycle만 관리한다.
-review 판단, committee 선택, 코드 수정과 PR 동작은 소유하지 않는다.
+committed diff content hash와 branch-scoped review artifact lifecycle만 관리한다. review 판단, committee 선택, 코드 수정과 PR 동작은 소유하지 않는다.
 
 ## Structure
 

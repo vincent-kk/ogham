@@ -2,8 +2,7 @@
 
 ## Purpose
 
-MCP payload를 16 KiB inline budget에 맞추고 overflow 또는 always-persist
-payload를 plugin cache의 content-addressed JSON artifact로 atomic 저장한다.
+MCP payload를 16 KiB inline budget에 맞추고 overflow 또는 always-persist payload를 plugin cache의 content-addressed JSON artifact로 atomic 저장한다.
 
 ## Structure
 
@@ -39,5 +38,4 @@ payload를 plugin cache의 content-addressed JSON artifact로 atomic 저장한�
 
 ## Dependencies
 
-- `../../../types/toolEnvelope.js`, `../../../constants/`,
-  `@ogham/cross-platform`
+- `../../../types/toolEnvelope.js`, `../../../constants/`, `@ogham/cross-platform`

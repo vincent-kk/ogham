@@ -22,12 +22,9 @@ Migrate an existing FCA-AI project from the legacy `CLAUDE.md`/`SPEC.md` naming 
 
 ### Relationship with Other Skills
 
-- **`filid:scan`**: Reports legacy document names; this skill performs the
-  explicit rename.
-- **`filid:setup`**: Creates current document names for new projects; this
-  workflow is only for existing legacy files.
-- **`filid:enrich-docs`**: May improve document content after this naming
-  migration, as a separate approved workflow.
+- **`filid:scan`**: Reports legacy document names; this skill performs the explicit rename.
+- **`filid:setup`**: Creates current document names for new projects; this workflow is only for existing legacy files.
+- **`filid:enrich-docs`**: May improve document content after this naming migration, as a separate approved workflow.
 
 ## Core Workflow
 
@@ -76,12 +73,9 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
-Read the findings from the returned result or, when the payload exceeds the
-inline envelope budget, from its artifact — a whole-project migration can push
-it over. An absent inline `data` is not an empty finding set.
+Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact — a whole-project migration can push it over. An absent inline `data` is not an empty finding set.
 
-Preserve diagnostics and findings in the report. A non-`ok` result means the
-migration ran but compliance is not verified.
+Preserve diagnostics and findings in the report. A non-`ok` result means the migration ran but compliance is not verified.
 
 ## Options
 
@@ -98,9 +92,7 @@ migration ran but compliance is not verified.
 
 ## Reversibility
 
-Migration uses `git mv` inside a repository, so history records the rename.
-Outside a repository, reverse the listed rename plan manually. See reference.md
-for bounded reversal guidance.
+Migration uses `git mv` inside a repository, so history records the rename. Outside a repository, reverse the listed rename plan manually. See reference.md for bounded reversal guidance.
 
 ## Quick Reference
 

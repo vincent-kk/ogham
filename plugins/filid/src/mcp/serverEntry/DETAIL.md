@@ -3,8 +3,7 @@
 ## Requirements
 
 - MCP 서버 esbuild 번들의 진입점이다.
-- 로직을 담지 않는다. 서버를 기동하고 치명적 실패를 stderr로 보고한 뒤
-  종료 코드를 남기는 것이 전부다.
+- 로직을 담지 않는다. 서버를 기동하고 치명적 실패를 stderr로 보고한 뒤 종료 코드를 남기는 것이 전부다.
 - 기동 실패는 `FILID_DEBUG`와 무관하게 항상 stderr에 보인다.
 
 ## API Contracts

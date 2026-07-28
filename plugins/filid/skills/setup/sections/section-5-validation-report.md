@@ -12,13 +12,9 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
-Read the findings from the returned result or, when the payload is persisted,
-from its artifact — the same handling `section-1-directory-scan.md` applies to
-the scan call.
+Read the findings from the returned result or, when the payload is persisted, from its artifact — the same handling `section-1-directory-scan.md` applies to the scan call.
 
-The setup report combines this result with
-`fractal_scan(detail: "paths")`. It must not claim compliance when either tool
-returns diagnostics, a non-exact certainty, or a non-OK status.
+The setup report combines this result with `fractal_scan(detail: "paths")`. It must not claim compliance when either tool returns diagnostics, a non-exact certainty, or a non-OK status.
 
 Use this compact format:
 
@@ -36,5 +32,4 @@ Certainty             : <certainty>
 Diagnostics           : <list or "none">
 ```
 
-The missing-document sections are proposals only. State explicitly that setup
-did not edit source documents.
+The missing-document sections are proposals only. State explicitly that setup did not edit source documents.

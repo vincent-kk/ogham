@@ -1,4 +1,5 @@
 <!-- FILID:START:filid_fractal-boundaries.md -->
+
 # Fractal Boundaries
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
@@ -34,7 +35,7 @@ Ask yourself: "Which step in the order decided this — and does the file it nam
 
 - Traversal continues inside organs: a nested directory with its own documents or module index is reclassified as its own fractal.
 - `hybrid` is never auto-assigned. An unsupported purity analysis is not proof of purity — an unproven node stays an organ.
-- What a node *should* be is a rule result, not a classification. An organ consumed from outside its owner's subtree has an external boundary, and that is reported with the consumer paths as evidence rather than by silently reclassifying it. Keeping the two apart is what lets a non-FCA codebase be adopted: the scan names the fractals that are missing instead of assuming them.
+- What a node _should_ be is a rule result, not a classification. An organ consumed from outside its owner's subtree has an external boundary, and that is reported with the consumer paths as evidence rather than by silently reclassifying it. Keeping the two apart is what lets a non-FCA codebase be adopted: the scan names the fractals that are missing instead of assuming them.
 
 Ask yourself: "Am I reading what the tree says, or what I wish it said?"
 
@@ -94,10 +95,14 @@ Ask yourself: "Can I order these modules so every reference points one way — a
 <!-- FILID:END:filid_fractal-boundaries.md -->
 
 <!-- FILID:START:filid_module-documents.md -->
+
 ---
+
 paths:
-  - 'INTENT.md'
-  - 'DETAIL.md'
+
+- 'INTENT.md'
+- 'DETAIL.md'
+
 ---
 
 # Module Documents
@@ -188,23 +193,27 @@ Ask yourself: "Would someone who has never seen this code understand why the exe
 <!-- FILID:END:filid_module-documents.md -->
 
 <!-- FILID:START:filid_verification-records.md -->
+
 ---
+
 paths:
-  - '*.test.*'
-  - '*.spec.*'
-  - '*_test.*'
-  - '*_spec.*'
-  - 'test_*.*'
-  - '*Test.*'
-  - '*Tests.*'
-  - '*Spec.*'
-  - 'conftest.py'
-  - '__tests__'
-  - 'test'
-  - 'tests'
-  - 'spec'
-  - 'specs'
-  - 'e2e'
+
+- '_.test._'
+- '_.spec._'
+- '_\_test._'
+- '_\_spec._'
+- 'test__._'
+- '_Test._'
+- '_Tests._'
+- '_Spec._'
+- 'conftest.py'
+- '**tests**'
+- 'test'
+- 'tests'
+- 'spec'
+- 'specs'
+- 'e2e'
+
 ---
 
 # Verification Records
@@ -271,6 +280,7 @@ Ask yourself: "Which acceptance group does this file answer for — and does a s
 <!-- FILID:END:filid_verification-records.md -->
 
 <!-- FILID:START:filid_code-placement.md -->
+
 # Code Placement
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
@@ -338,6 +348,7 @@ Ask yourself: "Did the contract change before the code, or am I about to write i
 <!-- FILID:END:filid_code-placement.md -->
 
 <!-- SEIRI:START:seiri_agent-legible.md -->
+
 # Agent-Legible Code
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -392,6 +403,7 @@ Ask yourself: "Can I state what this file does without opening a second file?"
 <!-- SEIRI:END:seiri_agent-legible.md -->
 
 <!-- SEIRI:START:seiri_public-contract.md -->
+
 # Public Contract
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -438,23 +450,27 @@ Ask yourself: "What breaks at runtime if I change this export's shape — and wo
 <!-- SEIRI:END:seiri_public-contract.md -->
 
 <!-- SEIRI:START:seiri_test-validity.md -->
+
 ---
+
 paths:
-  - '*.test.*'
-  - '*.spec.*'
-  - '*_test.*'
-  - '*_spec.*'
-  - 'test_*.*'
-  - '*Test.*'
-  - '*Tests.*'
-  - '*Spec.*'
-  - 'conftest.py'
-  - '__tests__'
-  - 'test'
-  - 'tests'
-  - 'spec'
-  - 'specs'
-  - 'e2e'
+
+- '_.test._'
+- '_.spec._'
+- '_\_test._'
+- '_\_spec._'
+- 'test__._'
+- '_Test._'
+- '_Tests._'
+- '_Spec._'
+- 'conftest.py'
+- '**tests**'
+- 'test'
+- 'tests'
+- 'spec'
+- 'specs'
+- 'e2e'
+
 ---
 
 # Test Validity
@@ -525,6 +541,7 @@ Ask yourself: "Is this file accumulating cases, or organizing them?"
 <!-- SEIRI:END:seiri_test-validity.md -->
 
 <!-- SEIRI:START:seiri_reuse-first.md -->
+
 # Reuse First
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -583,6 +600,7 @@ Ask yourself: "If this file grows one more export, should it split?"
 <!-- SEIRI:END:seiri_reuse-first.md -->
 
 <!-- SEIRI:START:seiri_naming.md -->
+
 # Naming
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -629,6 +647,7 @@ Ask yourself: "From this file's name, can I find the file it serves?"
 <!-- SEIRI:END:seiri_naming.md -->
 
 <!-- SEIRI:START:seiri_structure.md -->
+
 # Structure
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -678,6 +697,7 @@ Ask yourself: "What part of this file keeps attracting changes — and is it the
 <!-- SEIRI:END:seiri_structure.md -->
 
 <!-- SEIRI:START:seiri_function-boundaries.md -->
+
 # Function Boundaries
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -731,6 +751,7 @@ Ask yourself: "From the path alone, can I tell the entry point from its helpers?
 <!-- SEIRI:END:seiri_function-boundaries.md -->
 
 <!-- SEIRI:START:seiri_context-efficiency.md -->
+
 # Context Efficiency
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -774,6 +795,7 @@ Ask yourself: "What new fact will this read give me that the last one didn't?"
 <!-- SEIRI:END:seiri_context-efficiency.md -->
 
 <!-- SEIRI:START:seiri_cognitive-discipline.md -->
+
 # Cognitive Discipline
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -851,6 +873,7 @@ Saying "probably / should / seems to" about your own change · declaring success
 <!-- SEIRI:END:seiri_cognitive-discipline.md -->
 
 <!-- SEIRI:START:seiri_code-comments.md -->
+
 # Code Comments
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.

@@ -6,19 +6,16 @@
 - required rule은 항상 배포하고 optional drift overwrite는 명시된 resync만 허용한다.
 - project source와 config를 수정하지 않는다.
 - 결과는 공통 envelope에서 action별 작은 summary와 필요 시 data로 반환한다.
-- plugin root를 해석하지 못한 status/manifest는 성공으로 오인하지 않도록
-  안정된 diagnostic과 `unsupported` status를 반환한다.
+- plugin root를 해석하지 못한 status/manifest는 성공으로 오인하지 않도록 안정된 diagnostic과 `unsupported` status를 반환한다.
 
 ## API Contracts
 
 - Input: `{ action, path, selections?, resync? }`.
 - defensive string/null 입력 정규화는 기존 setup 호환을 위해 유지한다.
-- manifest data는 `pluginRootResolved`를 명시해 일반 skipped 항목과 host
-  resolution 실패를 구분한다.
+- manifest data는 `pluginRootResolved`를 명시해 일반 skipped 항목과 host resolution 실패를 구분한다.
 - status/manifest 상세는 envelope data이며 예산 초과 시 artifact로 이동한다.
 - sync summary는 created/updated/removed/skipped/drift 수를 노출한다.
-- action discriminant와 diagnostic code/message는 constants의 canonical 값을
-  사용한다.
+- action discriminant와 diagnostic code/message는 constants의 canonical 값을 사용한다.
 
 ## Acceptance Criteria
 

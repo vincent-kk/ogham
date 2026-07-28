@@ -3,8 +3,7 @@
 ## Requirements
 
 - Start or reuse a token-protected loopback settings server for one project.
-- Load config v2, or the in-memory v1 migration result with diagnostics, into
-  the page state.
+- Load config v2, or the in-memory v1 migration result with diagnostics, into the page state.
 - Validate and persist only config v2 save bodies through configLoader.
 - Preserve managed rule-document selection and resynchronization behavior.
 - Bound each wait and return a resumable URL when the form is still pending.
@@ -12,10 +11,8 @@
 ## API Contracts
 
 - Input: `{ path?: string, waitSeconds?: number }`.
-- Output uses the common envelope; summary preserves saved/closed/pending,
-  URL, message and optional save summary.
-- `SettingsPageState` includes project root, config existence, config v2,
-  config diagnostics, and rule-document status.
+- Output uses the common envelope; summary preserves saved/closed/pending, URL, message and optional save summary.
+- `SettingsPageState` includes project root, config existence, config v2, config diagnostics, and rule-document status.
 - `SaveBody.config` is strict config v2; unknown or legacy keys are rejected.
 
 ## Acceptance Criteria

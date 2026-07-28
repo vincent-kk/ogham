@@ -2,8 +2,7 @@
 
 ## Purpose
 
-snapshot evidence로 `sourcePath → targetPath`, required artifact와 import rewrite
-계획을 만들고 크기와 무관하게 ephemeral artifact로 반환한다.
+snapshot evidence로 `sourcePath → targetPath`, required artifact와 import rewrite 계획을 만들고 크기와 무관하게 ephemeral artifact로 반환한다.
 
 ## Structure
 

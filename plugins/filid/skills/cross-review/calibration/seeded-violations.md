@@ -17,7 +17,5 @@ Never copy this file into a scratch repository.
 - `run-b` has only FW-1.
 - `run-c` has only FS-1 and FS-2.
 - `run-d` has only FC-1.
-- Perspective routing is required because each fixture exercises a distinct FCA
-  evidence owner.
-- Arbitration must cite the corresponding entry, document placement, or contract
-  line for every confirmation.
+- Perspective routing is required because each fixture exercises a distinct FCA evidence owner.
+- Arbitration must cite the corresponding entry, document placement, or contract line for every confirmation.

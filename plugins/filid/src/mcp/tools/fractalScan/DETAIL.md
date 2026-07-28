@@ -5,9 +5,7 @@
 - `fractal_scan`은 등록 adapter로 하나의 `ProjectSnapshot`을 만들고 FCA tree 요약을 반환한다.
 - 기본 detail은 `summary`이며 대형 tree를 inline하지 않는다.
 - `paths`는 node path와 type·document·entry point 상태를 반환하고 `full`은 공통 envelope 예산을 따른다.
-- `maxDepth`는 config의 max-depth **규칙 임계값**을 덮어쓸 뿐 탐색 한계가
-  아니다. tree는 언제나 완전 탐색하므로 이 값을 낮추면 노드 수는 그대로인 채
-  depth 규칙 위반만 늘어난다. root 밖 path는 허용하지 않는다.
+- `maxDepth`는 config의 max-depth **규칙 임계값**을 덮어쓸 뿐 탐색 한계가 아니다. tree는 언제나 완전 탐색하므로 이 값을 낮추면 노드 수는 그대로인 채 depth 규칙 위반만 늘어난다. root 밖 path는 허용하지 않는다.
 - unsupported 또는 ambiguous adapter evidence를 diagnostics와 status에 보존한다.
 - scan은 project source와 config를 변경하지 않는다.
 

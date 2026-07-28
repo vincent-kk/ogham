@@ -38,9 +38,7 @@ mcp__plugin_filid_tools__verification_scan({
 })
 ```
 
-Preserve each envelope's status, summary, diagnostics, inline data, and artifact
-metadata. If full data is persisted, read it immediately and copy every
-changed-scope row into the canonical evidence files.
+Preserve each envelope's status, summary, diagnostics, inline data, and artifact metadata. If full data is persisted, read it immediately and copy every changed-scope row into the canonical evidence files.
 
 ## Scope Projection
 
@@ -52,24 +50,20 @@ Build these module-scope sets before calling reviewers:
 - changed public entry points;
 - changed verification documents.
 
-Keep findings that intersect a changed file or owning fractal. Record all other
-tool findings under `Out-of-scope observations`; they never become candidates.
+Keep findings that intersect a changed file or owning fractal. Record all other tool findings under `Out-of-scope observations`; they never become candidates.
 
 ## Identity and Completeness Gate
 
-The snapshot hash from all three summaries must be identical. Record the shared
-value as `SNAPSHOT_HASH`.
+The snapshot hash from all three summaries must be identical. Record the shared value as `SNAPSHOT_HASH`.
 
 Retry the complete evidence phase once when:
 
 - hashes differ;
 - an envelope is missing;
 - an artifact cannot be read;
-- a required changed-scope result is `indeterminate` or `unsupported` because of
-  a transient tool failure.
+- a required changed-scope result is `indeterminate` or `unsupported` because of a transient tool failure.
 
-After the retry, preserve unresolved status in the evidence file. Do not turn an
-empty or unsupported result into `ok`.
+After the retry, preserve unresolved status in the evidence file. Do not turn an empty or unsupported result into `ok`.
 
 ## `verification.md`
 
@@ -143,5 +137,4 @@ created_at: <ISO 8601>
 <rows or `none`>
 ```
 
-Set both completion sentinels only after every retained row has been copied.
-Reviewers cite these files rather than ephemeral tool output.
+Set both completion sentinels only after every retained row has been copied. Reviewers cite these files rather than ephemeral tool output.

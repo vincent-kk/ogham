@@ -10,12 +10,9 @@ plugin: filid
 
 # setup — Filid 1.0 Initialization
 
-Initialize config and managed rule documents, then inspect the resulting FCA
-snapshot. Setup reports missing document contracts as proposals; it does not
-write project source documents.
+Initialize config and managed rule documents, then inspect the resulting FCA snapshot. Setup reports missing document contracts as proposals; it does not write project source documents.
 
-Run the phases continuously. The settings page is the only interactive pause.
-Do not summarize large tool payloads between phases.
+Run the phases continuously. The settings page is the only interactive pause. Do not summarize large tool payloads between phases.
 
 ## References
 
@@ -36,14 +33,12 @@ Load only the reference needed for the active phase:
 - discovering missing INTENT.md or DETAIL.md contracts
 - rechecking initialization after a structural change
 
-Use `/filid:scan` for a complete FCA audit. Setup validates the initialization
-surface and prepares document proposals.
+Use `/filid:scan` for a complete FCA audit. Setup validates the initialization surface and prepares document proposals.
 
 ## Arguments
 
 - `path`: target project path; defaults to the current working directory
-- `--rules`: run project initialization and managed-rule settings only, then
-  stop before snapshot inspection
+- `--rules`: run project initialization and managed-rule settings only, then stop before snapshot inspection
 
 Resolve the absolute target path for settings and rule-document calls.
 
@@ -51,14 +46,10 @@ Resolve the absolute target path for settings and rule-document calls.
 
 ### Phase 1 — Config and Managed Rules
 
-1. Call `mcp__plugin_filid_tools__project_init` with `path`, optional session
-   `language`, and optional non-empty `adapterIds`.
+1. Call `mcp__plugin_filid_tools__project_init` with `path`, optional session `language`, and optional non-empty `adapterIds`.
 2. Call `mcp__plugin_filid_tools__rule_docs_sync` with `action: "status"`.
-3. On an interactive local host, call
-   `mcp__plugin_filid_tools__open_settings` with a bounded wait and dispatch on
-   `saved`, `closed`, or `pending`.
-4. In a headless environment, use `rule_docs_sync` actions `manifest`,
-   `status`, and `sync`; do not invent another config editing workflow.
+3. On an interactive local host, call `mcp__plugin_filid_tools__open_settings` with a bounded wait and dispatch on `saved`, `closed`, or `pending`.
+4. In a headless environment, use `rule_docs_sync` actions `manifest`, `status`, and `sync`; do not invent another config editing workflow.
 
 If `--rules` is present, emit the managed-rule summary and stop.
 
@@ -73,9 +64,7 @@ mcp__plugin_filid_tools__fractal_scan({
 })
 ```
 
-Use returned classifications and document states directly. Preserve
-diagnostics, certainty, status, and snapshot hash. Do not manually reclassify
-nodes.
+Use returned classifications and document states directly. Preserve diagnostics, certainty, status, and snapshot hash. Do not manually reclassify nodes.
 
 ### Phase 3 — Initialization Validation
 
@@ -89,8 +78,7 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
-Non-OK status, diagnostics, or non-exact certainty remain visible and prevent a
-clean result.
+Non-OK status, diagnostics, or non-exact certainty remain visible and prevent a clean result.
 
 ### Phase 4 — Missing-Document Proposals
 
@@ -102,8 +90,7 @@ Combine path detail with validation findings:
 - preserve existing documents without modification
 - mark uncertain public boundaries as unresolved
 
-Emit the compact setup report from the validation reference and finish. Do not
-ask a follow-up question.
+Emit the compact setup report from the validation reference and finish. Do not ask a follow-up question.
 
 ## MCP Surface
 
@@ -117,10 +104,8 @@ ask a follow-up question.
 
 ## Invariants
 
-- Setup may change only config and managed rule documents through their
-  dedicated tools.
-- Setup never authors, deletes, or overwrites INTENT.md, DETAIL.md, source, or
-  generated plugin artifacts.
+- Setup may change only config and managed rule documents through their dedicated tools.
+- Setup never authors, deletes, or overwrites INTENT.md, DETAIL.md, source, or generated plugin artifacts.
 - Required managed documents remain deployed.
 - Optional drift is overwritten only by explicit resynchronization.
 - A diagnostic or uncertain result is reported, never converted to PASS.

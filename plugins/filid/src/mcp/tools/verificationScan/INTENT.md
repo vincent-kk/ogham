@@ -2,8 +2,7 @@
 
 ## Purpose
 
-snapshot의 adapter evidence로 spec-document/test-record case cap,
-fragmentation, DETAIL contract link와 certainty를 요약한다.
+snapshot의 adapter evidence로 spec-document/test-record case cap, fragmentation, DETAIL contract link와 certainty를 요약한다.
 
 ## Structure
 

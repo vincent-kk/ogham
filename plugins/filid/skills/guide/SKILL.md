@@ -10,11 +10,9 @@ plugin: filid
 
 # guide — Current FCA Structure
 
-Produce a human-readable guide to the current tree and its placement rules.
-The guide describes observed evidence and does not modify files.
+Produce a human-readable guide to the current tree and its placement rules. The guide describes observed evidence and does not modify files.
 
-See [reference.md](./reference.md) for exact calls, placement interpretation,
-and output format.
+See [reference.md](./reference.md) for exact calls, placement interpretation, and output format.
 
 ## When to Use
 
@@ -23,8 +21,7 @@ and output format.
 - understanding current document, entry-point, boundary, or DAG findings
 - deciding where a new module belongs before requesting a movement plan
 
-Use `/filid:scan` for the full audit verdict. Use `/filid:restructure` when a
-specific source-to-target plan and postconditions are needed.
+Use `/filid:scan` for the full audit verdict. Use `/filid:restructure` when a specific source-to-target plan and postconditions are needed.
 
 ## Workflow
 
@@ -39,9 +36,7 @@ mcp__plugin_filid_tools__fractal_scan({
 })
 ```
 
-Use the returned classifications, document state, and entry-point counts
-directly. Preserve snapshot hash, adapter IDs, certainty, status, and
-diagnostics.
+Use the returned classifications, document state, and entry-point counts directly. Preserve snapshot hash, adapter IDs, certainty, status, and diagnostics.
 
 ### Phase 2 — Current Findings
 
@@ -62,12 +57,9 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
-Read the findings from the returned result or, when the payload exceeds the
-inline envelope budget, from its artifact. All six scopes at once is the largest
-payload this skill requests; an absent inline `data` is not an empty finding set.
+Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact. All six scopes at once is the largest payload this skill requests; an absent inline `data` is not an empty finding set.
 
-Present configured validation by scope and cite rule IDs from actual findings.
-Do not invent a separate active-rule list.
+Present configured validation by scope and cite rule IDs from actual findings. Do not invent a separate active-rule list.
 
 ### Phase 3 — Placement Guidance
 
@@ -80,14 +72,11 @@ Explain placement from the observed owner graph:
 - sibling imports target the sibling entry point
 - dependencies remain acyclic
 
-When consumers or ownership are uncertain, label the answer unresolved rather
-than naming a target path.
+When consumers or ownership are uncertain, label the answer unresolved rather than naming a target path.
 
 ### Phase 4 — Guide
 
-Emit the current-structure table, current findings, placement rules, and new
-module checklist from the reference. Non-OK status or diagnostics remain
-visible.
+Emit the current-structure table, current findings, placement rules, and new module checklist from the reference. Non-OK status or diagnostics remain visible.
 
 ## MCP Surface
 

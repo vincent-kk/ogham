@@ -3,11 +3,9 @@
 ## Requirements
 
 - 언어 중립 core를 정확히 9개 MCP 도구로 노출한다.
-- 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다. 정책
-  판단과 FCA 결론은 core가 낸다.
+- 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다. 정책 판단과 FCA 결론은 core가 낸다.
 - 모든 도구 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
-- `pages/`는 브라우저 자산, `server/`는 프로토콜 경계, `tools/`는 도구
-  sub-fractal, `serverEntry/`는 번들 진입점이다.
+- `pages/`는 브라우저 자산, `server/`는 프로토콜 경계, `tools/`는 도구 sub-fractal, `serverEntry/`는 번들 진입점이다.
 
 ## API Contracts
 
