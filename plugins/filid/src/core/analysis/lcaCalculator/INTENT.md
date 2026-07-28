@@ -9,7 +9,7 @@
 
 | Path                           | Role                                          |
 | ------------------------------ | --------------------------------------------- |
-| `lcaCalculator.ts`, `index.ts` | named public barrel                           |
+| `index.ts`                     | named public entry point                      |
 | `resolveOwningFractal.ts`      | portable file/directory owner 해석            |
 | `findLowestCommonFractal.ts`   | 모든 owner ancestor 교집합 계산               |
 

@@ -1,3 +1,4 @@
+// filid:contract AC-snapshot-hash
 import { describe, expect, it, vi } from 'vitest';
 
 import { computeSnapshotHash } from '../index.js';

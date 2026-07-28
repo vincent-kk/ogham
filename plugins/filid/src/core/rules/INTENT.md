@@ -16,7 +16,7 @@
 
 ### Always do
 
-- 새 규칙은 `ruleEngine.ts`의 `loadBuiltinRules`에 등록
+- 새 규칙은 `ruleEngine/evaluation/loadBuiltinRules.ts`에 등록
 
 ### Ask first
 

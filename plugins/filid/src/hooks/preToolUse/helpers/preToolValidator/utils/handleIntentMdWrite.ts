@@ -1,6 +1,6 @@
 import { INTENT_MD_LINE_LIMIT } from '../../../../../constants/documentValidation.js';
 import { DENY_RETRY_GUIDANCE } from '../../../../../constants/hookDefaults.js';
-import { validateIntentMd } from '../../../../../core/rules/documentValidator/documentValidator.js';
+import { validateIntentMd } from '../../../../../core/rules/documentValidator/validators/validateIntentMd.js';
 import type { HookOutput } from '../../../../../types/hooks.js';
 
 export function handleIntentMdWrite(content: string): HookOutput {

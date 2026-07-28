@@ -4,10 +4,8 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import {
-  createDefaultConfig,
-  writeConfig,
-} from '../../../core/infra/configLoader/configLoader.js';
+import { createDefaultConfig } from '../../../core/infra/configLoader/loaders/createDefaultConfig.js';
+import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import { buildMinimalContext } from '../utils/buildMinimalContext.js';
 
 describe('buildMinimalContext', () => {

@@ -1,1 +1,2 @@
-export * from './server.js';
+export { createServer } from './lifecycle/createServer.js';
+export { startServer } from './lifecycle/startServer.js';

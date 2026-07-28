@@ -1,9 +1,7 @@
-import {
-  incrementTurn,
-  removeFractalMap,
-} from '../../core/infra/cacheManager/cacheManager.js';
+import { removeFractalMap } from '../../core/infra/cacheManager/caches/fractalMapCache.js';
+import { incrementTurn } from '../../core/infra/cacheManager/caches/turnCounter.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
-import { isFcaProject } from '../shared/shared.js';
+import { isFcaProject } from '../shared/utils/isFcaProject.js';
 import { validateCwd } from '../utils/validateCwd.js';
 
 import { injectContext } from './utils/injectContext.js';

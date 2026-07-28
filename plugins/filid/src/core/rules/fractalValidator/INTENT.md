@@ -9,7 +9,7 @@
 - `validateStructure.ts` — snapshot 전체 규칙을 한 번 평가한다.
 - `validateDependencies.ts` — snapshot dependency graph의 cycle과 certainty를 검증한다.
 - `validateNode.ts` — node 단위 호환 검증을 제공한다.
-- `fractalValidator.ts` — 공개 facade를 구성한다.
+- `index.ts` — 공개 진입점을 구성한다.
 
 ## Conventions
 

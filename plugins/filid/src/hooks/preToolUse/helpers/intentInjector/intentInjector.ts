@@ -6,14 +6,12 @@ import {
   HOOK_TOOL_NAME,
 } from '../../../../constants/hookDefaults.js';
 import { PORTABLE_PATH_MARKERS } from '../../../../constants/pathMarkers.js';
-import {
-  commitVisit,
-  writeBoundary,
-} from '../../../../core/infra/cacheManager/cacheManager.js';
-import type { FractalMap } from '../../../../core/infra/cacheManager/cacheManager.js';
+import { writeBoundary } from '../../../../core/infra/cacheManager/caches/boundaryCache.js';
+import { commitVisit } from '../../../../core/infra/cacheManager/caches/fractalMapCache.js';
+import type { FractalMap } from '../../../../core/infra/cacheManager/caches/fractalMapCache.js';
 import { buildChain } from '../../../../core/tree/boundaryDetector/boundaryDetector.js';
 import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
-import { isFcaProject } from '../../../shared/shared.js';
+import { isFcaProject } from '../../../shared/utils/isFcaProject.js';
 import { readHookConfig } from '../../../utils/readHookConfig.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
 import { visitScope } from '../../../utils/visitScope.js';

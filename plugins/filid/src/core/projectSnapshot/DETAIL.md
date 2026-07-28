@@ -15,8 +15,8 @@
   entry override를 해당 adapter에 전달한다.
 - config `maxDepth`는 validation 한계이며 snapshot tree traversal을 자르지
   않는다.
-- DETAIL.md가 `## Organ Exemptions`를 선언하면 그 항목을
-  `node.documentEvidence.organExemptions`에 보존한다. `organPath`는 소유
+- DETAIL.md가 `## Boundary Exemptions`를 선언하면 그 항목을
+  `node.documentEvidence.boundaryExemptions`에 보존한다. `targetPath`는 소유
   프랙탈 기준으로 정규화한 절대 경로이며, rule engine은 다시 파일을 읽지
   않고 이 evidence만 읽는다.
 - dependency graph는 non-organ owner path와 함께 organ path 목록도 받아,
@@ -62,9 +62,9 @@
   root `.filid/criteria.md`와 root `DETAIL.md`를 가리킨다.
 - collector는 ledger를 삭제하거나 DETAIL로 자동 변환하지 않는다.
 
-### AC-snapshot-organ-exemptions — 선언된 면책 evidence
+### AC-snapshot-boundary-exemptions — 선언된 면책 evidence
 
-- `## Organ Exemptions`가 없는 DETAIL.md는 `organExemptions`를 만들지 않는다.
+- `## Boundary Exemptions`가 없는 DETAIL.md는 `boundaryExemptions`를 만들지 않는다.
 - 선언이 있으면 organ path를 소유 프랙탈 기준 절대 경로로 정규화해 보존하고
   그 변경이 snapshot hash를 바꾼다.
 
@@ -75,14 +75,6 @@
 - 선택 가능한 structure/verification adapter가 없으면 빈 exact PASS가 아니라
   해당 분석 certainty가 `unsupported`다.
 
-## Boundary Exemptions
-
-### index.ts — Verification checks the published contract
-
-- **Consumers**: `**/__tests__/**`, `**/e2e/**`
-- **Direct import**: allowed
-- **Reason**: 콜로케이션된 검증 파일이 이 모듈의 **공개 계약**을 진입점으로 검사한다. 같은 소유자 안에서는 로컬 배럴 경유가 일반적으로 금지되지만, DETAIL acceptance group 에 결합하는 spec 은 그 group 이 공개하는 표면을 봐야 한다.
-
 ## Last Updated
 
-2026-07-28 — organ 면책 evidence와 graph organ path 입력을 계약에 추가했다.
+2026-07-28 — 경계 면책 evidence와 graph organ path 입력을 계약에 추가했다.

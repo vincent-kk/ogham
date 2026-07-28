@@ -260,24 +260,6 @@ const PENDING_OPEN_SETTINGS_PAYLOAD = {
   summary: PENDING_OPEN_SETTINGS_OUTPUT,
   diagnostics: EMPTY_DIAGNOSTICS,
 };
-const OPEN_SETTINGS_CASES = [
-  {
-    status: SAVED_OPEN_SETTINGS_OUTPUT.status,
-    raw: SAVED_OPEN_SETTINGS_OUTPUT,
-    payload: SAVED_OPEN_SETTINGS_PAYLOAD,
-  },
-  {
-    status: CLOSED_OPEN_SETTINGS_OUTPUT.status,
-    raw: CLOSED_OPEN_SETTINGS_OUTPUT,
-    payload: CLOSED_OPEN_SETTINGS_PAYLOAD,
-  },
-  {
-    status: PENDING_OPEN_SETTINGS_OUTPUT.status,
-    raw: PENDING_OPEN_SETTINGS_OUTPUT,
-    payload: PENDING_OPEN_SETTINGS_PAYLOAD,
-  },
-] as const;
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -359,7 +341,26 @@ describe('legacy MCP tool payload adapters', () => {
     );
   });
 
-  it.each(OPEN_SETTINGS_CASES)(
+  // Rows stay inline: a table referenced through a name cannot be counted
+  // statically, and one such file turns the whole verification analysis
+  // indeterminate (filid_verification-records §3).
+  it.each([
+    {
+      status: SAVED_OPEN_SETTINGS_OUTPUT.status,
+      raw: SAVED_OPEN_SETTINGS_OUTPUT,
+      payload: SAVED_OPEN_SETTINGS_PAYLOAD,
+    },
+    {
+      status: CLOSED_OPEN_SETTINGS_OUTPUT.status,
+      raw: CLOSED_OPEN_SETTINGS_OUTPUT,
+      payload: CLOSED_OPEN_SETTINGS_PAYLOAD,
+    },
+    {
+      status: PENDING_OPEN_SETTINGS_OUTPUT.status,
+      raw: PENDING_OPEN_SETTINGS_OUTPUT,
+      payload: PENDING_OPEN_SETTINGS_PAYLOAD,
+    },
+  ])(
     'preserves the $status open-settings result as its summary',
     async ({ raw, payload }) => {
       RAW_TOOL_HANDLERS.handleOpenSettings.mockResolvedValue(raw);

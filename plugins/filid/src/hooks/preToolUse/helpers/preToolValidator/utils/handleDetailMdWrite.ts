@@ -1,5 +1,5 @@
 import { DENY_RETRY_GUIDANCE } from '../../../../../constants/hookDefaults.js';
-import { validateDetailMd } from '../../../../../core/rules/documentValidator/documentValidator.js';
+import { validateDetailMd } from '../../../../../core/rules/documentValidator/validators/validateDetailMd.js';
 import type { HookOutput } from '../../../../../types/hooks.js';
 
 export function handleDetailMdWrite(

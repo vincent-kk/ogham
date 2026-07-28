@@ -9,6 +9,7 @@ import type {
   FractalTree,
   ProjectSnapshot,
 } from '../../../types/fractal.js';
+import type { VerificationFileAnalysis } from '../../../types/verification.js';
 
 const rootNode: FractalNode = {
   path: '/project',
@@ -429,6 +430,58 @@ describe('external-import-boundary — exemptions cover fractal targets', () => 
       '/project/right',
       fractalInternalImport,
     );
+
+    expect(violations).toHaveLength(1);
+  });
+});
+
+const siblingInternalImport = evidence(
+  '/project/left/source.test.ts',
+  '../right/internal.js',
+  '/project/right/internal.ts',
+);
+
+function verificationFile(path: string): VerificationFileAnalysis {
+  return {
+    path,
+    adapterId: 'fixture',
+    role: 'test-record',
+    count: { certainty: 'exact', knownLowerBound: 1, reasons: [] },
+    ownerFractalPath: '/project/left',
+    contractGroupIds: [],
+  };
+}
+
+function checkVerificationBoundary(files: VerificationFileAnalysis[]) {
+  return checkExternalImportBoundary({
+    snapshot: {
+      ...snapshot,
+      verification: { files, violations: [], certainty: 'exact' },
+      dependencyGraph: {
+        ...snapshot.dependencyGraph,
+        edges: [
+          {
+            fromFractalPath: '/project/left',
+            toFractalPath: '/project/right',
+            evidence: [siblingInternalImport],
+          },
+        ],
+      },
+    },
+  });
+}
+
+describe('external-import-boundary — verification consumers', () => {
+  it('does not judge an import whose consumer the adapter reports as a verification file', () => {
+    const violations = checkVerificationBoundary([
+      verificationFile('/project/left/source.test.ts'),
+    ]);
+
+    expect(violations).toEqual([]);
+  });
+
+  it('still judges the same import when no adapter reports it as verification', () => {
+    const violations = checkVerificationBoundary([]);
 
     expect(violations).toHaveLength(1);
   });

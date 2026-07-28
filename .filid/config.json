@@ -13,7 +13,13 @@
     "module-entry-point": {
       "enabled": true,
       "severity": "warning",
-      "exempt": ["**/shared/agent-artifacts"]
+      "exempt": [
+        "**/shared/agent-artifacts",
+        "**/plugins/filid",
+        "**/plugins/filid/src",
+        "**/plugins/filid/hooks",
+        "**/plugins/filid/templates"
+      ]
     },
     "max-depth": {
       "enabled": true,
@@ -40,6 +46,12 @@
       },
       {
         "basename": "hooks.json"
+      },
+      {
+        "basename": "plugin.json"
+      },
+      {
+        "basename": "mcp_config.json"
       },
       {
         "basename": "SKILL.md"

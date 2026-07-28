@@ -8,7 +8,7 @@
       "required": true,
       "title": "Fractal Boundaries",
       "description": "Node classification, entry-point surfaces, organ access, exemptions, and the acyclic dependency graph.",
-      "templateHash": "a3da2a39bae7d865e9261c9068ee19a33466846e35f8f4de0817ef43eaefc0c1"
+      "templateHash": "27c0c0c2a2d5f01e3f5f41197bae7e78b6254a72eba5e936952bdac87766456a"
     },
     {
       "id": "filid_module-documents",

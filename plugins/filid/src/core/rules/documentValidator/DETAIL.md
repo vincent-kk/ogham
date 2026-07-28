@@ -57,7 +57,7 @@
 
 ## Boundary Exemptions
 
-### documentValidator.ts — Hook bundle direct import
+### validators — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
 - **Direct import**: allowed

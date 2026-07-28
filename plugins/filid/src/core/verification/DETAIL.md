@@ -51,14 +51,6 @@
 - 겹치는 group은 `spec-fragmentation`, 누락되거나 존재하지 않는 group은
   `spec-contract-link` violation이다.
 
-## Boundary Exemptions
-
-### index.ts — Verification checks the published contract
-
-- **Consumers**: `**/__tests__/**`, `**/e2e/**`
-- **Direct import**: allowed
-- **Reason**: 콜로케이션된 검증 파일이 이 모듈의 **공개 계약**을 진입점으로 검사한다. 같은 소유자 안에서는 로컬 배럴 경유가 일반적으로 금지되지만, DETAIL acceptance group 에 결합하는 spec 은 그 group 이 공개하는 표면을 봐야 한다.
-
 ## Last Updated
 
 2026-07-27 — portable path claim과 단일 discovery의 불확실성을 보존했다.

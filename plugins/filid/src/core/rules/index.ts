@@ -1,5 +1,22 @@
 // barrel -- re-exports all public APIs
 
-export * from './documentValidator/index.js';
-export * from './fractalValidator/index.js';
-export * from './ruleEngine/index.js';
+export {
+  countLines,
+  detectAppendOnly,
+  parseBoundaryExemptions,
+  validateDetailAcceptanceGroups,
+  validateDetailMd,
+  validateIntentMd,
+} from './documentValidator/index.js';
+export {
+  validateDependencies,
+  validateNode,
+  validateStructure,
+} from './fractalValidator/index.js';
+export {
+  applyOverrides,
+  evaluateRule,
+  evaluateRules,
+  getActiveRules,
+  loadBuiltinRules,
+} from './ruleEngine/index.js';

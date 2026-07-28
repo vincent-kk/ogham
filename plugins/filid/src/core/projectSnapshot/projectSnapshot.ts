@@ -58,23 +58,14 @@ export async function createProjectSnapshot(
     adapterResolution.adapters,
   );
   const dependencies = await collectDependencyReferences(adapterResolution);
-  const dependencyGraph = buildDependencyGraph(
-    [...tree.nodes.values()]
-      .filter((node) => node.type !== 'organ')
-      .map((node) => node.path),
-    dependencies.references,
-    dependencies.certainty,
-    {
-      organPaths: [...tree.nodes.values()]
-        .filter((node) => node.type === 'organ')
-        .map((node) => node.path),
-    },
-  );
   const verificationClaims = await collectVerificationClaims(
     root,
     selectedAdapters.verification,
   );
   const verificationAdapters = verificationClaims.adapters;
+  // Verification is resolved before the graph: its file list decides which
+  // references leave the cycle adjacency. It reads the tree and documents only,
+  // so nothing here depends on the graph.
   const verification = await analyzeVerification({
     projectRoot: root,
     adapters: verificationAdapters,
@@ -85,6 +76,19 @@ export async function createProjectSnapshot(
     discoveredPathsByAdapter: verificationClaims.discoveredPathsByAdapter,
     discoveryCertainty: verificationClaims.certainty,
   });
+  const dependencyGraph = buildDependencyGraph(
+    [...tree.nodes.values()]
+      .filter((node) => node.type !== 'organ')
+      .map((node) => node.path),
+    dependencies.references,
+    dependencies.certainty,
+    {
+      organPaths: [...tree.nodes.values()]
+        .filter((node) => node.type === 'organ')
+        .map((node) => node.path),
+      verificationPaths: verification.files.map((file) => file.path),
+    },
+  );
   const legacyCriteriaLedger = collectLegacyCriteriaLedger(root);
   const adapterDiagnostics: SnapshotDiagnostic[] =
     adapterResolution.diagnostics.map(({ code, message, path }) => ({

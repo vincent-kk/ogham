@@ -288,6 +288,58 @@ describe('dependency-graph', () => {
       expect(graph.cycles).toHaveLength(1);
     });
 
+    it('does not close a cycle through a verification file reference', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/hooks/index.ts',
+          rawSpecifier: './pre/pre.js',
+          resolvedPath: '/project/hooks/pre/pre.ts',
+          kind: 're-export',
+        },
+        {
+          sourceFile: '/project/hooks/pre/pre.test.ts',
+          rawSpecifier: '../index.js',
+          resolvedPath: '/project/hooks/index.ts',
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        ['/project/hooks', '/project/hooks/pre'],
+        references,
+        'exact',
+        { verificationPaths: ['/project/hooks/pre/pre.test.ts'] },
+      );
+
+      expect(graph.cycles).toEqual([]);
+      expect(graph.edges).toHaveLength(2);
+    });
+
+    it('closes the same cycle when the consumer is not a verification file', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/hooks/index.ts',
+          rawSpecifier: './pre/pre.js',
+          resolvedPath: '/project/hooks/pre/pre.ts',
+          kind: 're-export',
+        },
+        {
+          sourceFile: '/project/hooks/pre/pre.test.ts',
+          rawSpecifier: '../index.js',
+          resolvedPath: '/project/hooks/index.ts',
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        ['/project/hooks', '/project/hooks/pre'],
+        references,
+        'exact',
+      );
+
+      expect(graph.cycles).toHaveLength(1);
+    });
+
     it('aggregates and sorts evidence for the same owner pair', () => {
       const references: DependencyReference[] = [
         {

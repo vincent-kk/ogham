@@ -160,6 +160,25 @@ describe('ecmascript structure adapter', () => {
     ]);
   });
 
+  it('does not read import.meta path arithmetic as a dependency', async () => {
+    const root = project();
+    const source = write(
+      root,
+      'src/source.ts',
+      [
+        "import { dirname } from 'node:path';",
+        "import { fileURLToPath } from 'node:url';",
+        '',
+        "const packageRoot = dirname(fileURLToPath(import.meta.url)) + '/../..';",
+        'export { packageRoot };',
+      ].join('\n'),
+    );
+
+    expect(
+      await ecmascriptStructureAdapter.extractDependencies(source),
+    ).toEqual([]);
+  });
+
   it('enumerates named exports and detects direct declarations', async () => {
     const root = project();
     const entry = write(

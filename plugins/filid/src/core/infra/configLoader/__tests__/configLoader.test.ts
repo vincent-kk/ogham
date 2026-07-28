@@ -9,7 +9,7 @@ import {
   createDefaultConfig,
   initProject,
   writeConfig,
-} from '../configLoader.js';
+} from '../index.js';
 
 describe('writeConfig', () => {
   const tempDirs: string[] = [];

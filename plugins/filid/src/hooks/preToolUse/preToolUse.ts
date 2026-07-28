@@ -3,7 +3,8 @@ import { resolve } from 'node:path';
 
 import { HOOK_TOOL_NAME } from '../../constants/hookDefaults.js';
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
-import { isDetailMd, isFcaProject } from '../shared/shared.js';
+import { isDetailMd } from '../shared/utils/isDetailMd.js';
+import { isFcaProject } from '../shared/utils/isFcaProject.js';
 import { validateCwd } from '../utils/validateCwd.js';
 
 import { processVisit } from './helpers/intentInjector/intentInjector.js';

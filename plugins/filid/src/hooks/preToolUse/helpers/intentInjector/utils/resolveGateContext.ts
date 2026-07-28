@@ -2,7 +2,8 @@ import { normalize } from '@ogham/cross-platform/paths/normalize';
 import { portableRelative } from '@ogham/cross-platform/paths/relative';
 
 import { PORTABLE_PATH_MARKERS } from '../../../../../constants/pathMarkers.js';
-import { isDetailMd, isIntentMd } from '../../../../shared/shared.js';
+import { isDetailMd } from '../../../../shared/utils/isDetailMd.js';
+import { isIntentMd } from '../../../../shared/utils/isIntentMd.js';
 
 import { resolveOwnerIntent } from './resolveOwnerIntent.js';
 import { visitKey } from './visitKey.js';

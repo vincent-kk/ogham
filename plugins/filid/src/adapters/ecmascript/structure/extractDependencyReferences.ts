@@ -55,7 +55,14 @@ export function extractDependencyReferences(
     let kind: DependencyReference['kind'] | null = null;
     let dependency: LexicalToken | null = null;
     if (token.kind === 'identifier' && token.value === 'import') {
-      kind = tokens[index + 1]?.value === '(' ? 'dynamic' : 'static';
+      const next = tokens[index + 1]?.value;
+      // `import.meta` is a meta-property, not a declaration. Without this the
+      // next string literal in expressions like
+      // `dirname(fileURLToPath(import.meta.url)) + '/../..'` is read as a
+      // specifier, and the unresolvable result turns the whole graph
+      // indeterminate.
+      if (next === '.') continue;
+      kind = next === '(' ? 'dynamic' : 'static';
       dependency = dependencyStringAfter(tokens, index + 1);
     } else if (token.kind === 'identifier' && token.value === 'export') {
       const fromIndex = tokens

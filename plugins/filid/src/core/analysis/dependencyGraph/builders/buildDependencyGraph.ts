@@ -5,7 +5,7 @@ import type {
   DependencyGraph,
   DependencyGraphEdge,
 } from '../../../../types/fractal.js';
-import { detectCycles } from '../detectCycles.js';
+import { detectCycles } from '../cycles/detectCycles.js';
 
 import { canonicalizeNodePaths } from './canonicalizeNodePaths.js';
 import { resolveOwnerPath } from './resolveOwnerPath.js';
@@ -14,6 +14,14 @@ import { resolveOwningOrganPath } from './resolveOwningOrganPath.js';
 interface DependencyGraphOptions {
   /** Classified organ paths; enables owned-organ cycle exclusion when supplied. */
   organPaths?: readonly string[];
+  /**
+   * Adapter-reported verification file paths. Their references stay in the
+   * evidence — placement still needs to see them — but leave the cycle
+   * adjacency: verification reads a module to check it, which is not a runtime
+   * dependency, and one test reading several modules would otherwise close a
+   * loop that never runs.
+   */
+  verificationPaths?: readonly string[];
 }
 
 /**
@@ -46,6 +54,7 @@ export function buildDependencyGraph(
 ): DependencyGraph {
   const sortedNodePaths = canonicalizeNodePaths(nodePaths);
   const organPaths = options.organPaths ?? [];
+  const verificationPaths = new Set(options.verificationPaths ?? []);
   const grouped = new Map<string, DependencyGraphEdge>();
   const cycleEdgeKeys = new Set<string>();
   let graphCertainty = certainty;
@@ -81,7 +90,10 @@ export function buildDependencyGraph(
     };
     edge.evidence.push(evidence);
     grouped.set(key, edge);
-    if (!isOwnedOrganReference(organPaths, toFractalPath, evidence))
+    if (
+      !isOwnedOrganReference(organPaths, toFractalPath, evidence) &&
+      !verificationPaths.has(evidence.sourceFile)
+    )
       cycleEdgeKeys.add(key);
   }
 

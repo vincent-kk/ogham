@@ -26,7 +26,7 @@
 
 ## Boundary Exemptions
 
-### shared.ts — Hook bundle direct import
+### utils — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
 - **Direct import**: allowed

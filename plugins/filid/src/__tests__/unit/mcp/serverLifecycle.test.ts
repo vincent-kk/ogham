@@ -14,9 +14,9 @@ import {
   getCacheDir,
   sessionIdHash,
 } from '../../../core/infra/cacheManager/index.js';
-import { bootSweep } from '../../../mcp/server/bootSweep.js';
-import { cleanupOwnSessionCache } from '../../../mcp/server/cleanupOwnSessionCache.js';
-import { registerShutdown } from '../../../mcp/server/registerShutdown.js';
+import { bootSweep } from '../../../mcp/server/lifecycle/bootSweep.js';
+import { cleanupOwnSessionCache } from '../../../mcp/server/lifecycle/cleanupOwnSessionCache.js';
+import { registerShutdown } from '../../../mcp/server/lifecycle/registerShutdown.js';
 
 let tempDir: string;
 let savedSessionId: string | undefined;

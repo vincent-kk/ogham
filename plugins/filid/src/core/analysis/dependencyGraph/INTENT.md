@@ -10,7 +10,7 @@ Adapter dependency reference를 owner-level evidence edge로 집계하고 실제
 - `cycles/` organ — cyclic component에서 stable directed closed route 추출
 - `buildDag.ts`와 query helper — 작업 8 전 legacy characterization 경계
 - `detectCycles.ts` — legacy/target graph를 cycle algorithm에 연결
-- `dependencyGraph.ts` — named-export public facade
+- `index.ts` — named-export public entry point
 - legacy query helper는 작업 8 제거 전까지만 유지한다.
 
 ## Conventions

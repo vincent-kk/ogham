@@ -1,6 +1,7 @@
 import { HOOK_TOOL_NAME } from '../../../../constants/hookDefaults.js';
 import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
-import { isDetailMd, isIntentMd } from '../../../shared/shared.js';
+import { isDetailMd } from '../../../shared/utils/isDetailMd.js';
+import { isIntentMd } from '../../../shared/utils/isIntentMd.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
 
 import { handleDetailMdWrite } from './utils/handleDetailMdWrite.js';

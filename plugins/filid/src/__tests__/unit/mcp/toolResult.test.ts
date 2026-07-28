@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
-import { toolResult } from '../../../mcp/server/toolResult.js';
+import { toolResult } from '../../../mcp/server/envelope/toolResult.js';
 
 const PROJECT_ROOT = '/project';
 const EMPTY_DIAGNOSTICS: never[] = [];

@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { STRUCTURE_VALIDATION_MODES } from '../../constants/mcpContracts.js';
 import { MCP_TOOL_NAMES, McpToolName } from '../../constants/mcpToolNames.js';
 import { TOOL_ERROR_DIAGNOSTIC_CODE } from '../../constants/toolEnvelope.js';
-import { createServer } from '../../mcp/server/createServer.js';
+import { createServer } from '../../mcp/server/lifecycle/createServer.js';
 
 const EXPECTED_TOOL_NAMES = [
   'project_init',

@@ -1,5 +1,5 @@
 import { HOOK_GUIDE_BLOCK } from '../../../../../constants/hookContext.js';
-import type { VisitDecision } from '../../../../../core/infra/cacheManager/cacheManager.js';
+import type { VisitDecision } from '../../../../../core/infra/cacheManager/caches/fractalMapCache.js';
 import type { HookOutput } from '../../../../../types/hooks.js';
 
 import { buildGateDeny } from './buildGateDeny.js';

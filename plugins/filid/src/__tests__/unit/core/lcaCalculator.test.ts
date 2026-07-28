@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
-import {
-  findLowestCommonFractal,
-  getAncestorPaths,
-  resolveOwningFractal,
-} from '../../../core/analysis/lcaCalculator/lcaCalculator.js';
+import { findLowestCommonFractal } from '../../../core/analysis/lcaCalculator/resolvers/findLowestCommonFractal.js';
+import { getAncestorPaths } from '../../../core/analysis/lcaCalculator/resolvers/getAncestorPaths.js';
+import { resolveOwningFractal } from '../../../core/analysis/lcaCalculator/resolvers/resolveOwningFractal.js';
 import { buildFractalTree } from '../../../core/tree/fractalTree/index.js';
 import type { NodeEntry } from '../../../core/tree/fractalTree/index.js';
 import type { FractalTree } from '../../../types/fractal.js';

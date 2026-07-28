@@ -18,6 +18,10 @@
 - package-level external dependency는 project DAG 후보에서 제외하고, 해석할
   수 없는 local dependency는 `resolvedPath: null`로 보존한다.
 - strings, comments와 template text 안의 가짜 syntax를 dependency나 export로 세지 않는다.
+- `import.meta`는 dependency가 아니다. `import` 뒤에 `.`이 오면 메타 속성
+  참조이므로 뒤따르는 문자열을 specifier로 읽지 않는다. 이를 구분하지 않으면
+  `join(dirname(fileURLToPath(import.meta.url)), '../..')` 같은 경로 계산이
+  해석 불가 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - 지원 불가능한 alias·동적 표현은 unsupported/indeterminate evidence를 남긴다.
 - verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
 
@@ -51,6 +55,7 @@
 - 주석과 문자열 안의 가짜 import/export를 무시한다.
 - 외부 package import는 project DAG를 indeterminate로 만들지 않으며
   해석되지 않은 local import는 숨기지 않는다.
+- `import.meta.url`을 쓰는 경로 계산은 dependency로 잡히지 않는다.
 
 ### AC-ecmascript-portability — 외부 parser 불필요
 
@@ -61,14 +66,6 @@
 - 정적 parameterized row와 suite multiplier를 exact count에 반영한다.
 - 동적 table, alias와 알 수 없는 문법은 indeterminate이며 skip, todo와
   property declaration은 각각 1 case다.
-
-## Boundary Exemptions
-
-### index.ts — Verification checks the published contract
-
-- **Consumers**: `**/__tests__/**`, `**/e2e/**`
-- **Direct import**: allowed
-- **Reason**: 콜로케이션된 검증 파일이 이 모듈의 **공개 계약**을 진입점으로 검사한다. 같은 소유자 안에서는 로컬 배럴 경유가 일반적으로 금지되지만, DETAIL acceptance group 에 결합하는 spec 은 그 group 이 공개하는 표면을 봐야 한다.
 
 ## Last Updated
 

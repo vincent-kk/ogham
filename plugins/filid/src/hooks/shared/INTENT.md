@@ -11,8 +11,8 @@
   - `isIntentMd.ts` — `isIntentMd` (파일명 정확 일치)
   - `isDetailMd.ts` — `isDetailMd` (파일명 정확 일치)
 - `DETAIL.md` — portable 파일 판별 공개 계약
-- `shared.ts` — facade (`utils/` concrete 파일 재수출; 훅은 이 파일을 import)
-- `index.ts` — barrel (`shared.ts` 재수출)
+- `index.ts` — 진입점 (`utils/` concrete 파일을 이름으로 재수출)
+- 훅 도달 코드는 배럴 대신 `utils/` 구체 파일을 직접 import 한다
 
 ## Conventions
 

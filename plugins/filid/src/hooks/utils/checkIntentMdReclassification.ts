@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { isIntentMd } from '../shared/shared.js';
+import { isIntentMd } from '../shared/utils/isIntentMd.js';
 
 import { isOrganByStructure } from './organStructureChecker.js';
 

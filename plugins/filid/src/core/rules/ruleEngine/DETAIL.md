@@ -21,6 +21,11 @@
   | 소유 프랙탈 subtree | organ 구체 파일 직접 | 통과                             |
   | subtree 밖          | organ 구체 파일 직접 | 위반 — 선언된 면책이 있으면 통과 |
 
+- **소비자가 검증 파일이면 boundary를 적용하지 않는다.** 검증은 계약을
+  확인하는 행위이고, 내부 단위를 검사하려면 내부에 닿아야 한다. 이를 위해
+  진입점을 넓히면 소비자가 테스트뿐인 공개 심볼이 생겨 공개 계약이 오염된다
+  (`seiri_public-contract` §1). 판정 근거는 어댑터가 보고한
+  `snapshot.verification.files`이며, core는 파일명 패턴을 알지 못한다.
 - 대상이 fractal 내부 파일일 때도 같은 면책을 조회한다. 진입점을 경유할 수
   **없는** 정당한 소비자가 존재하기 때문이다 — 표준 사례는 훅 번들이며,
   배럴을 import하면 번들러가 배럴이 재노출하는 모듈 전체를 끌어온다.
@@ -67,6 +72,12 @@
 - 소유 프랙탈 DETAIL.md의 유효한 면책 선언이 있으면 통과하고, reason 부재·
   direct import 미허용·consumer 불일치는 통과시키지 않는다.
 
+### AC-rules-verification-consumer — 검증 파일은 boundary 대상이 아니다
+
+- 어댑터가 검증 파일로 보고한 소비자의 import는 대상이 organ이든 fractal
+  내부이든 위반을 내지 않는다.
+- 같은 경로가 검증 파일로 보고되지 않으면 기존 규칙이 그대로 적용된다.
+
 ### AC-rules-fractal-exemption — fractal 대상 면책
 
 - 소유 프랙탈이 선언한 면책의 `targetPath`가 대상 fractal 내부 파일을 담으면
@@ -83,14 +94,6 @@
 
 - Windows target path는 POSIX separator로 작성된 literal/glob scope와
   동일하게 매치된다.
-
-## Boundary Exemptions
-
-### utils — Verification reaches module internals
-
-- **Consumers**: `**/__tests__/**`, `**/e2e/**`
-- **Direct import**: allowed
-- **Reason**: 검증 파일이 내부 단위를 직접 검사한다. 이를 위해 진입점에 export 를 추가하면 소비자가 테스트뿐인 공개 심볼이 생기므로(`seiri_public-contract` §1) 구체 파일을 참조한다. 훅 테스트는 훅이 실제로 import 하는 경로를 mock 해야 하므로 같은 이유가 적용된다.
 
 ## Last Updated
 

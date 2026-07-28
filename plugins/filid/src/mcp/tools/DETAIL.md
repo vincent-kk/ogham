@@ -33,14 +33,6 @@
 
 - 어떤 handler도 프로젝트 트리를 수정하지 않는다.
 
-## Boundary Exemptions
-
-### utils — Verification reaches module internals
-
-- **Consumers**: `**/__tests__/**`, `**/e2e/**`
-- **Direct import**: allowed
-- **Reason**: 검증 파일이 내부 단위를 직접 검사한다. 이를 위해 진입점에 export 를 추가하면 소비자가 테스트뿐인 공개 심볼이 생기므로(`seiri_public-contract` §1) 구체 파일을 참조한다.
-
 ## Last Updated
 
 2026-07-28 — 9개 도구 계약을 문서화하고 검증 파일의 organ 참조 면책을 선언했다.

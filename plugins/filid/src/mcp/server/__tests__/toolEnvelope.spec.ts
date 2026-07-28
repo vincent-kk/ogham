@@ -28,8 +28,8 @@ import {
   writeArtifactAtomic,
 } from '../../../core/infra/artifactStore/index.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
-import { toolError } from '../toolError.js';
-import { toolResult } from '../toolResult.js';
+import { toolError } from '../envelope/toolError.js';
+import { toolResult } from '../envelope/toolResult.js';
 
 const PROJECT_ROOT = '/project';
 const SMALL_DATA = { value: 'small' };

@@ -2,11 +2,9 @@ import { normalize } from '@ogham/cross-platform/paths/normalize';
 import { portableRelative } from '@ogham/cross-platform/paths/relative';
 
 import { PORTABLE_PATH_MARKERS } from '../../../../../constants/pathMarkers.js';
-import {
-  readBoundary,
-  readFractalMap,
-} from '../../../../../core/infra/cacheManager/cacheManager.js';
-import type { VisitScope } from '../../../../../core/infra/cacheManager/cacheManager.js';
+import { readBoundary } from '../../../../../core/infra/cacheManager/caches/boundaryCache.js';
+import { readFractalMap } from '../../../../../core/infra/cacheManager/caches/fractalMapCache.js';
+import type { VisitScope } from '../../../../../core/infra/cacheManager/caches/fractalMapCache.js';
 
 import { visitKey } from './visitKey.js';
 
