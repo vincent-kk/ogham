@@ -8,13 +8,36 @@
   // Tab identifiers — shared with json-import.js via window.__settingsApp.TABS
   var TABS = { CLOUD: "cloud", ON_PREMISE: "on-premise" };
 
-  // State
+  // State — this page's own UI bookkeeping. It never carries server data.
   var state = {
     tab: TABS.CLOUD,
     editMode: false,
     loading: false,
     cloudSiteCount: 1,
   };
+
+  /**
+   * Reads the state document the server substituted into the page.
+   *
+   * @returns {object|null} The parsed document, or null when the slot was
+   *   never replaced — the page opened outside the settings server — or its
+   *   contents are not valid JSON.
+   */
+  function readInjectedState() {
+    var raw = window.__SETTINGS_STATE__;
+    if (!raw || raw === "__SETTINGS_STATE__") return null;
+    try {
+      return typeof raw === "string" ? JSON.parse(raw) : raw;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Parsed once, at load, because two readers need it at different times: the
+  // edit-mode prefill on DOMContentLoaded and the scope toggle below, which is
+  // derived while this script runs. Parsing per reader is what once left the
+  // toggle reading a field nobody filled.
+  var injected = readInjectedState();
 
   // --- Animation Helper ---
   function animateIn(el) {
@@ -33,21 +56,11 @@
   });
 
   function initApp() {
-    var raw = window.__SETTINGS_STATE__;
-    if (!raw || raw === "__SETTINGS_STATE__") return;
-
-    var parsed;
-    try {
-      parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-    } catch (_) {
-      return;
-    }
-
-    if (!parsed || !parsed.configured) return;
+    if (!injected || !injected.configured) return;
 
     state.editMode = true;
     showWarningBanner();
-    prefillForm(parsed);
+    prefillForm(injected);
   }
 
   function showWarningBanner() {
@@ -455,7 +468,7 @@
   // Contract: cross-platform DETAIL.md "설정 페이지 계약". Credentials are never
   // layered — they stay user-only — so this toggle governs the config file
   // alone: the site URL and account a repository points at.
-  var scopeState = (state && state.scope) || {
+  var scopeState = (injected && injected.scope) || {
     paths: { user: "", project: null },
     layers: { user: null, project: null },
     overridden: [],
