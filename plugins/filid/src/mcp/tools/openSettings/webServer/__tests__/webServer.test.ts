@@ -28,6 +28,16 @@ const STATE: SettingsPageState = {
     rules: {},
   },
   configDiagnostics: [],
+  scope: {
+    paths: {
+      user: '/tmp/user/config.json',
+      project: '/tmp/project/.filid/config.json',
+    },
+    layers: { user: null, project: null },
+    effective: {},
+    overridden: [],
+    warnings: [],
+  },
   structureAdapterId: 'test-adapter',
   ruleDocs: { entries: [], autoDeployed: [], pluginRootResolved: true },
 };
@@ -36,6 +46,7 @@ const STATE: SettingsPageState = {
 // mocked, so the selection key is never deployed. Use the always-present
 // required rule id rather than a phantom optional one.
 const VALID_BODY: SaveBody = {
+  scope: 'project',
   config: {
     version: '2.0',
     adapters: { mode: 'auto', enabled: [] },

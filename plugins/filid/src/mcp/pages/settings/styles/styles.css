@@ -655,3 +655,55 @@ input[type='number']::-webkit-inner-spin-button {
     padding: 2px 12px;
   }
 }
+
+/* Scope UI — user/project namespaces.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". No clear-override
+   button: filid's project layer is a committed file the team owns, so removing
+   it is a git operation rather than a settings click. */
+
+.scope-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.scope-toggle {
+  display: flex;
+  gap: 14px;
+}
+
+.scope-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.scope-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.72;
+  word-break: break-all;
+}
+
+.scope-badge {
+  display: none;
+  margin-top: 10px;
+  font-size: 0.72rem;
+  opacity: 0.72;
+}
+
+[data-scope-state='inherited'] > .scope-badge,
+[data-scope-state='overridden'] > .scope-badge {
+  display: block;
+}
+
+[data-scope-state='inherited'] > .scope-badge::before {
+  content: 'Inherited from your user config';
+}
+
+[data-scope-state='overridden'] > .scope-badge::before {
+  content: 'Set by this project — overrides your user config';
+  opacity: 1;
+}

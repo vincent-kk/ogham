@@ -1,23 +1,30 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { writeConfigLayer } from '@ogham/cross-platform/config-scope';
+import type { ConfigScope } from '@ogham/cross-platform/config-scope';
 
-import {
-  CONFIG_DIR,
-  CONFIG_FILE,
-} from '../../../../constants/infraDefaults.js';
 import { createLogger } from '../../../../lib/logger.js';
-import { resolveGitRoot } from '../utils/resolveGitRoot.js';
+import { configLayers } from '../utils/configLayers.js';
 
 import type { FilidConfig } from './configSchemas.js';
 
 const log = createLogger('config-loader');
 
-/** Write .filid/config.json with the given config. Resolves git root and creates .filid/ if needed. */
-export function writeConfig(projectRoot: string, config: FilidConfig): void {
-  const resolvedRoot = resolveGitRoot(projectRoot);
-  const configDir = join(resolvedRoot, CONFIG_DIR);
-  mkdirSync(configDir, { recursive: true });
-  const configPath = join(configDir, CONFIG_FILE);
-  writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
-  log.debug('config written', configPath);
+/**
+ * Write one config layer and return the path written.
+ *
+ * The project layer keeps landing in `<gitRoot>/.filid/config.json`, where
+ * it has always been. The user layer holds the same shape and supplies
+ * defaults to every project that has not overridden them.
+ */
+export function writeConfig(
+  projectRoot: string,
+  scope: ConfigScope,
+  config: FilidConfig,
+): string {
+  const written = writeConfigLayer(
+    configLayers(projectRoot),
+    scope,
+    config as unknown as Record<string, unknown>,
+  );
+  log.debug('config written', written);
+  return written;
 }

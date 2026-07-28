@@ -28,6 +28,16 @@
         the project root.
       </div>
 
+      <div class="scope-bar">
+        <div
+          id="config_scope"
+          class="scope-toggle"
+          role="radiogroup"
+          aria-label="Which layer to save the config in"
+        ></div>
+        <p id="scope_hint" class="scope-hint"></p>
+      </div>
+
       <form id="settings-form" class="form" novalidate>
         <section
           class="section"
@@ -58,7 +68,11 @@
           </div>
         </section>
 
-        <section class="section" aria-labelledby="rules-title">
+        <section
+          class="section"
+          aria-labelledby="rules-title"
+          data-config-path="rules"
+        >
           <h2 class="section-title" id="rules-title">Structural rules</h2>
           <p class="section-help">
             Per-rule enforcement for <code>/filid:scan</code> and session hooks.
@@ -68,9 +82,14 @@
             <span>rule</span><span>enabled</span><span>severity</span>
           </div>
           <ul id="rules-list" class="rulelist"></ul>
+          <span class="scope-badge"></span>
         </section>
 
-        <section class="section" aria-labelledby="general-title">
+        <section
+          class="section"
+          aria-labelledby="general-title"
+          data-config-path="language"
+        >
           <h2 class="section-title" id="general-title">General</h2>
           <div class="field-grid">
             <label class="field" for="language">
@@ -116,9 +135,13 @@
               <small class="error" data-error-for="max-depth" hidden></small>
             </label>
           </div>
+          <span class="scope-badge"></span>
         </section>
 
-        <details class="section section--collapsible">
+        <details
+          class="section section--collapsible"
+          data-config-path="structure"
+        >
           <summary class="section-summary">
             <span class="section-summary__label">
               <span class="section-title">Structure exceptions</span>
@@ -185,6 +208,7 @@
               compartments.
             </small>
           </label>
+          <span class="scope-badge"></span>
         </details>
 
         <div class="actions">

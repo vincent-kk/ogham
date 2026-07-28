@@ -18,6 +18,75 @@
   var dirty = false;
   var saved = false;
 
+  // --- config scope (user / project) ---------------------------------------
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". This page is minified
+  // but never bundled (see buildSettingsHtml.mjs), so it cannot import the
+  // shared merge helpers — it only needs the overridden-path list the server
+  // already computed.
+  var scopeState = (state && state.scope) || {
+    paths: { user: '', project: '' },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  // Opens on the layer that is currently deciding, so pressing Save without
+  // touching the toggle rewrites the file the config already came from.
+  var scope = scopeState.layers.project === null ? 'user' : 'project';
+
+  var SCOPE_OPTIONS = [
+    ['user', 'User', 'Applies to every project you open.'],
+    ['project', 'Project', 'Committed with the repository; outranks User.'],
+  ];
+
+  function renderScope() {
+    var host = $('config_scope');
+    host.textContent = '';
+    SCOPE_OPTIONS.forEach(function (option) {
+      var label = document.createElement('label');
+      label.className = 'scope-option';
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        dirty = true;
+        renderScope();
+        applyScopeBadges();
+      });
+      var text = document.createElement('span');
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+    });
+
+    var chosen = SCOPE_OPTIONS.filter(function (option) {
+      return option[0] === scope;
+    })[0];
+    $('scope_hint').textContent =
+      chosen[2] + ' — ' + (scopeState.paths[scope] || '');
+  }
+
+  /**
+   * Mark each config-owning section with where its value came from. No
+   * clear-override button: filid's project layer is a committed file the team
+   * owns, so removing it is a git operation rather than a settings click.
+   */
+  function applyScopeBadges() {
+    var owners = document.querySelectorAll('[data-config-path]');
+    for (var i = 0; i < owners.length; i++) {
+      var path = owners[i].getAttribute('data-config-path');
+      var overriding = scopeState.overridden.some(function (entry) {
+        return entry === path || entry.indexOf(path + '.') === 0;
+      });
+      owners[i].setAttribute(
+        'data-scope-state',
+        scope === 'user' ? 'own' : overriding ? 'overridden' : 'inherited',
+      );
+    }
+  }
+
   if (!state) {
     setStatus(
       'error',
@@ -436,7 +505,11 @@
     var btn = closeAfter ? saveCloseBtn : saveBtn;
     busy(btn, true, 'Saving…');
     setStatus('info', 'Validating and saving…');
-    post('/save', { config: config, ruleDocs: collectRuleDocs() })
+    post('/save', {
+      scope: scope,
+      config: config,
+      ruleDocs: collectRuleDocs(),
+    })
       .then(function (r) {
         return r.json().then(function (res) {
           return { status: r.status, res: res };
@@ -487,6 +560,9 @@
         busy(btn, false);
       });
   }
+
+  renderScope();
+  applyScopeBadges();
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();

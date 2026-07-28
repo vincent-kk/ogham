@@ -37,6 +37,7 @@ export function initProject(
   if (!existsSync(configPath)) {
     writeConfig(
       resolvedRoot,
+      'project',
       createDefaultConfig(options?.language, options?.adapterIds),
     );
     configCreated = true;

@@ -1,16 +1,14 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import {
+  mergeConfigLayers,
+  readConfigLayers,
+} from '@ogham/cross-platform/config-scope';
 
 import { getDefaultAdapterIds } from '../../../../adapters/index.js';
-import {
-  CONFIG_DIR,
-  CONFIG_FILE,
-} from '../../../../constants/infraDefaults.js';
 import { createLogger } from '../../../../lib/logger.js';
+import { configLayers } from '../utils/configLayers.js';
 import { sanitizeExemptPatterns } from '../utils/exemptSanitize.js';
 import { formatIssuePath } from '../utils/formatIssuePath.js';
 import { parseWithAllowlistWarn } from '../utils/parseWithAllowlistWarn.js';
-import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 
 import { FilidConfigSchema } from './configSchemas.js';
 import type { ConfigDiagnostic, LoadConfigResult } from './configTypes.js';
@@ -18,38 +16,36 @@ import { migrateConfigV1 } from './migrateConfigV1.js';
 
 const log = createLogger('config-loader');
 
+/**
+ * Read the config in effect: the user layer with the project layer laid
+ * over it.
+ *
+ * v1 migration runs per layer, before the merge, because v1→v2 is a shape
+ * change — merging the two shapes first would produce a document neither
+ * schema describes.
+ *
+ * Only the merged result is validated. A project layer holds just the keys
+ * it overrides and cannot satisfy the strict schema on its own, which is
+ * also why `rules[*].exempt` and every other array is replaced wholesale
+ * rather than merged element by element.
+ */
 export function loadConfig(projectRoot: string): LoadConfigResult {
-  const resolvedRoot = resolveGitRoot(projectRoot);
-  const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
   const warnings: string[] = [];
   const diagnostics: ConfigDiagnostic[] = [];
   const addWarning = (message: string): void => {
     warnings.push(message);
     log.warn(message);
   };
-  if (!existsSync(configPath)) return { config: null, warnings, diagnostics };
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(readFileSync(configPath, 'utf8'));
-  } catch (error) {
-    addWarning(`failed to parse JSON at ${configPath}: ${String(error)}`);
+  const documents = readConfigLayers(configLayers(projectRoot));
+  for (const warning of documents.warnings) addWarning(warning);
+
+  const user = migrateIfV1(documents.user, diagnostics);
+  const project = migrateIfV1(documents.project, diagnostics);
+  if (user === null && project === null)
     return { config: null, warnings, diagnostics };
-  }
 
-  let candidate = parsed;
-  if (
-    candidate &&
-    typeof candidate === 'object' &&
-    !Array.isArray(candidate) &&
-    (candidate as Record<string, unknown>).version === '1.0'
-  ) {
-    const [legacyAdapterId] = getDefaultAdapterIds();
-    const migrated = migrateConfigV1(candidate, legacyAdapterId);
-    candidate = migrated.config;
-    diagnostics.push(...migrated.diagnostics);
-  }
-
+  const candidate = mergeConfigLayers(user, project);
   const strict = FilidConfigSchema.safeParse(candidate);
   if (strict.success)
     return {
@@ -76,4 +72,16 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
       `config validation failed at ${formatIssuePath(issue.path)}: ${issue.message}`,
     );
   return { config: null, warnings, diagnostics };
+}
+
+/** Lift one layer from v1 to v2 shape; anything else passes through. */
+function migrateIfV1(
+  document: Record<string, unknown> | null,
+  diagnostics: ConfigDiagnostic[],
+): Record<string, unknown> | null {
+  if (document === null || document.version !== '1.0') return document;
+  const [legacyAdapterId] = getDefaultAdapterIds();
+  const migrated = migrateConfigV1(document, legacyAdapterId);
+  diagnostics.push(...migrated.diagnostics);
+  return migrated.config as Record<string, unknown>;
 }

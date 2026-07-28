@@ -85,7 +85,7 @@ describe('config git-root resolution', () => {
     const subdirectory = join(repoRoot, 'packages', 'sub');
     mkdirSync(subdirectory, { recursive: true });
     mockRepoRoot(repoRoot);
-    writeConfig(repoRoot, createDefaultConfig());
+    writeConfig(repoRoot, 'project', createDefaultConfig());
 
     const result = loadConfig(subdirectory);
 
@@ -117,7 +117,7 @@ describe('config git-root resolution', () => {
     const subdirectory = join(repoRoot, 'packages', 'sub');
     mkdirSync(subdirectory, { recursive: true });
     mockRepoRoot(repoRoot);
-    writeConfig(repoRoot, createDefaultConfig());
+    writeConfig(repoRoot, 'project', createDefaultConfig());
     mockedSpawnCliSync.mockClear();
 
     loadConfig(subdirectory);

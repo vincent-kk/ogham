@@ -1,3 +1,4 @@
+import type { ConfigScopeState } from '@ogham/cross-platform/config-scope';
 import { z } from 'zod';
 
 import {
@@ -14,6 +15,8 @@ export interface SettingsPageState {
   configExists: boolean;
   config: FilidConfig;
   configDiagnostics: ConfigDiagnostic[];
+  /** Per-layer raw documents and which dot paths the project layer overrode. */
+  scope: ConfigScopeState;
   structureAdapterId: string;
   ruleDocs: {
     entries: RuleDocStatusEntry[];
@@ -23,13 +26,18 @@ export interface SettingsPageState {
 }
 
 /**
- * POST /save body. `config` replaces `.filid/config.json` wholesale;
+ * POST /save body. `config` replaces the named layer wholesale;
  * `ruleDocs.selections` maps optional rule ids to their desired deployed
  * state and `resync` lists drifted-but-kept ids to overwrite with the
  * current template.
+ *
+ * `scope` is required rather than defaulted: the page always knows which
+ * layer it is editing, and a silent default would write the wrong file when
+ * a caller forgets.
  */
 export const SaveBodySchema = z
   .object({
+    scope: z.enum(['user', 'project']),
     config: FilidConfigSchema,
     ruleDocs: z.object({
       selections: z.record(z.string(), z.boolean()),

@@ -3,6 +3,7 @@ import {
   createDefaultConfig,
   getRuleDocsStatus,
   loadConfig,
+  loadConfigScope,
 } from '../../../../core/infra/configLoader/index.js';
 import type { SettingsPageState } from '../types/settingsTypes.js';
 
@@ -19,11 +20,13 @@ export function buildSettingsState(projectRoot: string): SettingsPageState {
   if (!structureAdapterId)
     throw new Error('at least one structure adapter must be registered');
   const status = getRuleDocsStatus(projectRoot);
+  const scope = loadConfigScope(projectRoot);
   return {
     projectRoot,
-    configExists: loaded.config !== null,
+    configExists: scope.layers.project !== null,
     config,
     configDiagnostics: loaded.diagnostics,
+    scope,
     structureAdapterId,
     ruleDocs: {
       entries: status.entries,
