@@ -20,6 +20,9 @@ const packageEntryTargets = new Set(
 );
 
 const boundarySources = [
+  "configScope/layers/resolveConfigLayers.ts",
+  "configScope/layers/utils/readLayer.ts",
+  "configScope/layers/writeConfigLayer.ts",
   "hooks/error/errorLogPath.ts",
   "hostPaths/absolute/toAbsoluteRoot.ts",
   "paths/state/hostStateRoot.ts",

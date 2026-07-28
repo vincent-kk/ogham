@@ -50,6 +50,102 @@ requireAbsoluteRoot(value: string): string;
 
 POSIX와 Windows 절대 경로 문자열을 현재 실행 OS와 무관하게 정규화한다.
 
+### `@ogham/cross-platform/config-scope`
+
+```ts
+type ConfigScope = "user" | "project";
+
+resolveConfigLayers(options: {
+  pluginName: string;
+  projectRoot: string | null;
+  fileName?: string;
+  projectDirName?: string;
+  userDir?: string;
+}): ConfigLayerPaths;
+readConfigLayers(paths: ConfigLayerPaths): ConfigLayerDocuments;
+writeConfigLayer(
+  paths: ConfigLayerPaths,
+  scope: ConfigScope,
+  document: Record<string, unknown>,
+  options?: { fileMode?: number },
+): string;
+buildConfigScopeState(paths: ConfigLayerPaths): ConfigScopeState;
+
+mergeConfigLayers(
+  base: Record<string, unknown> | null,
+  override: Record<string, unknown> | null,
+): Record<string, unknown>;
+listOverriddenPaths(
+  override: Record<string, unknown> | null,
+): readonly string[];
+clearConfigPaths(
+  source: Record<string, unknown>,
+  paths: readonly string[],
+): Record<string, unknown>;
+```
+
+user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
+`<projectRoot>/.<pluginName>/config.json`이며 project가 user를 재정의한다.
+
+레이어 읽기는 throw하지 않는다. 부재와 손상은 모두 `null`이고 손상만
+`warnings`를 남긴다. project 레이어 쓰기 요청인데 경로가 `null`이면 던진다 —
+조용히 user에 쓰지 않는다.
+
+병합은 재귀이며 배열·원시값·`null`은 override가 **통째로** 교체한다. 배열을
+인덱스 단위로 병합하지 않으므로 project 레이어가 목록을 줄일 수 있다. 병합은
+입력 둘 다 변형하지 않고 새 객체를 반환한다. 다만 얕은 복사라 override가
+건드리지 않은 중첩 객체는 base와 참조를 공유한다.
+
+병합은 `__proto__` / `constructor` / `prototype` 키를 버린다. 입력이 디스크의
+JSON이고 `JSON.parse`가 `__proto__`를 own key로 만들기 때문에 실제 벡터다.
+레이어 원문은 정화하지 않고 그대로 노출하며, 해당 키를 발견하면 `warnings`에만
+남긴다 — 걸러내는 지점을 병합 한 곳으로 모아야 "파일에는 있는데 왜 안 먹지"의
+원인이 흩어지지 않는다.
+
+레이어 각각은 스키마 검증하지 않는다. 병합 결과 하나만 소비자의 스키마로
+검증한다. project 레이어는 재정의된 키만 담은 부분 문서라 단독으로는 strict
+스키마를 통과할 수 없다.
+
+`projectRoot` 해석은 호출자 책임이다. 앵커 규칙이 플러그인마다 다르므로
+(git root / repo root / 인자 cwd) 해석된 절대 경로를 넘긴다.
+
+`config-scope/merge`는 node 내장을 import하지 않는다. 브라우저 설정 페이지
+번들과 훅 번들의 공용 경계이며, `merge/__tests__/pureImports.test.ts`가 이를
+강제한다. 파일 I/O가 필요 없는 소비자는 루트 배럴 대신 이 subpath를 쓴다.
+
+### 설정 페이지 계약
+
+두 네임스페이스를 구분해 편집하는 화면은 각 플러그인이 자기 페이지에서
+구현한다. 공유 UI 패키지를 두지 않으므로 **이 절이 8곳의 정본**이고,
+`plugins/deilen/src/mcp/pages/settings/`가 참조 구현이다.
+
+```
+GET  /api/config
+  → { ok: true, state: ConfigScopeState }
+
+POST /api/config
+  body { scope: "user" | "project", config: Record<string, unknown> }
+  → { ok: true, state: ConfigScopeState } | { ok: false, message, errors? }
+```
+
+`scope: "user"`는 전체 필드를 담은 완결 문서를 보낸다. `scope: "project"`는
+재정의된 키만 담으며, 키를 빼는 것이 곧 재정의 해제다 — 별도 clear 라우트를
+두지 않는다. 응답은 항상 갱신된 상태를 돌려줘 클라이언트가 재조회 없이 배지를
+다시 그린다.
+
+저장 검증은 제출 레이어를 저장된 반대편 레이어 위에 병합한 미리보기 결과를
+소비자 스키마로 확인하고, 통과할 때만 파일을 쓴다.
+
+| 요소           | 규약                                                                |
+| -------------- | ------------------------------------------------------------------- |
+| 스코프 토글    | `<input name="config_scope" value="user" \| "project">`             |
+| 필드 식별      | 필드 래퍼에 `data-config-path="renderers.mermaid"` (dot path)       |
+| 상속 상태      | 같은 요소에 `data-scope-state="inherited" \| "overridden" \| "own"` |
+| 배지·해제 버튼 | 표시 여부는 CSS가 `[data-scope-state=...]`로 결정                   |
+
+`paths.project`가 `null`이면 Project 라디오는 `disabled`이고 이유를 한 줄
+표시한다.
+
 ### `@ogham/cross-platform/filesystem`
 
 ```ts
@@ -106,5 +202,7 @@ root 진단 의미를 유지하면서 Node builtin만 사용한다. 범용 `spaw
 `cross-spawn`, executable discovery를 import graph에 포함하지 않는다.
 
 ## Last Updated
+
+2026-07-29 — user/project 두 네임스페이스를 병합해 읽는 `config-scope` 추가.
 
 2026-07-26 — agent artifact 프리미티브와 hook용 목적별 entry point 추가.

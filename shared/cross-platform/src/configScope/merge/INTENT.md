@@ -5,15 +5,15 @@
 
 ## Structure
 
-| File                    | Role                                       |
-| ----------------------- | ------------------------------------------ |
-| `index.ts`              | public barrel                              |
-| `mergeConfigLayers.ts`  | user 위에 project를 재귀 병합              |
-| `listOverriddenPaths.ts`| project 리프의 dot path 열거               |
-| `clearConfigPaths.ts`   | dot path 목록 삭제                         |
-| `utils/isPlainObject.ts`| 순수 객체 판정 3단                         |
-| `utils/forbiddenKeys.ts`| 프로토타입을 건드리는 키 목록              |
-| `utils/removePath.ts`   | segment 열 하나 삭제와 빈 상위 정리        |
+| File                     | Role                                |
+| ------------------------ | ----------------------------------- |
+| `index.ts`               | public barrel                       |
+| `mergeConfigLayers.ts`   | user 위에 project를 재귀 병합       |
+| `listOverriddenPaths.ts` | project 리프의 dot path 열거        |
+| `clearConfigPaths.ts`    | dot path 목록 삭제                  |
+| `utils/isPlainObject.ts` | 순수 객체 판정 3단                  |
+| `utils/forbiddenKeys.ts` | 프로토타입을 건드리는 키 목록       |
+| `utils/removePath.ts`    | segment 열 하나 삭제와 빈 상위 정리 |
 
 ## Conventions
 

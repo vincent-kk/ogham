@@ -5,15 +5,15 @@ user와 project 두 config 레이어 파일의 좌표를 정하고, 읽고, 쓰�
 
 ## Structure
 
-| File                        | Role                                     |
-| --------------------------- | ---------------------------------------- |
-| `index.ts`                  | public barrel                            |
-| `resolveConfigLayers.ts`    | 두 레이어 파일의 절대 경로 계산          |
-| `readConfigLayers.ts`       | 두 레이어 원문 읽기                      |
-| `writeConfigLayer.ts`       | 한 레이어 원자적 교체                    |
-| `buildConfigScopeState.ts`  | 읽기 + 병합 + 재정의 목록 조립           |
-| `utils/readLayer.ts`        | 한 파일 읽기·파싱·경고                   |
-| `utils/findForbiddenKeys.ts`| 원문의 위험 키 dot path 수집             |
+| File                         | Role                            |
+| ---------------------------- | ------------------------------- |
+| `index.ts`                   | public barrel                   |
+| `resolveConfigLayers.ts`     | 두 레이어 파일의 절대 경로 계산 |
+| `readConfigLayers.ts`        | 두 레이어 원문 읽기             |
+| `writeConfigLayer.ts`        | 한 레이어 원자적 교체           |
+| `buildConfigScopeState.ts`   | 읽기 + 병합 + 재정의 목록 조립  |
+| `utils/readLayer.ts`         | 한 파일 읽기·파싱·경고          |
+| `utils/findForbiddenKeys.ts` | 원문의 위험 키 dot path 수집    |
 
 ## Conventions
 

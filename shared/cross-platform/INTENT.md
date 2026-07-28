@@ -11,8 +11,8 @@
 | `src/`              | 공개 TypeScript 소스와 루트 배럴         |
 | `src/paths/`        | home/tmp/state root와 portable 경로 연산 |
 | `src/filesystem/`   | 안전한 읽기·원자 쓰기·잠금·symlink 방어  |
-| `src/hostRegistry/` | 호스트 ID와 상태 루트 좌표               |
-| `src/hostPaths/`    | 플러그인/프로젝트/문서 채널 해석         |
+| `src/host*/`        | 호스트 ID·상태 루트와 플러그인/문서 채널 |
+| `src/configScope/`  | user/project 설정 레이어 해석과 병합     |
 | `src/instructions/` | 마커 구간의 순수 문자열 연산             |
 | `src/spawn/`        | 외부 CLI 실행 단일 진입점                |
 | 그 밖의 `src/*`     | 훅, shim, launcher 및 호스트 어댑터      |
