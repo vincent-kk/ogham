@@ -11,6 +11,14 @@
       "templateHash": "3ba4537bac24fe01de1b5766c548d1142d2404b0648cf8ed51f0ba5d39d66ef1"
     },
     {
+      "id": "seiri_code-comments",
+      "filename": "seiri_code-comments.md",
+      "title": "Code Comments",
+      "description": "Comments carry the current spec and never its history; declarations take the language's own documentation form.",
+      "recommended": true,
+      "templateHash": "5d0e1da9a103c6e9439a33c422cf5ad8b7113bc2bd8bda7f076e9cc7719586eb"
+    },
+    {
       "id": "seiri_public-contract",
       "filename": "seiri_public-contract.md",
       "title": "Public Contract",

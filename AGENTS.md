@@ -20,10 +20,11 @@ Companion rules: `filid_module-documents.md` for the INTENT and DETAIL contracts
 | `pure-function` | optional  | none     | not required | Explicitly isolated effect-free unit      |
 | `hybrid`        | optional  | allowed  | required     | Manually assigned transitional node       |
 
-- Resolve in this strict order: (1) `INTENT.md` or `DETAIL.md` present → fractal; (2) directory name in the configured known organ list → organ; (3) double-underscore-wrapped or dot-prefixed infrastructure name → organ; (4) a registered adapter reports a module index → fractal; (5) an adapter proves both statelessness and no side effects → pure-function; (6) otherwise → organ.
-- Step 4 reads one signal: a module index. Of the entry points an adapter reports, only a module entry classifies. An executable or framework entry, and any path injected by the config `entryPointOverrides`, never turns a directory into a fractal — overrides feed the entry-point surface, not classification. Without that split, markdown-as-implementation such as a skill document would make a directory a fractal and subject prose to rules written for code.
-- Step 6 is organ on purpose. A directory that declares neither a document nor an index has never claimed an independent contract. Defaulting to fractal manufactures "add a boundary document" demands and makes classification depend on incidentals — whether a directory happens to have a subdirectory, for instance.
-- Default organ names are `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e` and `references`. Config may extend this list.
+- Resolve in this strict order: (1) `INTENT.md` present → fractal; (2) `DETAIL.md` present → fractal; (3) double-underscore-wrapped or dot-prefixed infrastructure name → organ; (4) directory name in the configured known organ list → organ; (5) a registered adapter reports a module index → fractal; (6) a leaf directory with no fractal children → organ; (7) an adapter proves both statelessness and no side effects → pure-function; (8) otherwise → organ.
+- Step 5 reads one signal: a module index. Of the entry points an adapter reports, only a module entry classifies. An executable or framework entry, and any path injected by the config `entryPointOverrides`, never turns a directory into a fractal — overrides feed the entry-point surface, not classification. Without that split, markdown-as-implementation such as a skill document would make a directory a fractal and subject prose to rules written for code.
+- Step 6 comes before purity on purpose, so `pure-function` is only ever reached by a directory that has children. A leaf compartment is an organ even when nothing in it has an effect: isolation worth naming is a claim about a module, and a leaf that never declared one has not made it.
+- Step 8 is organ on purpose. A directory that declares neither a document nor an index has never claimed an independent contract. Defaulting to fractal manufactures "add a boundary document" demands and makes classification depend on incidentals — whether a directory happens to have a subdirectory, for instance.
+- Default organ names are `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`, `fixtures` and `e2e`. Docs-as-code compartment names such as `references`, `docs` or `plans` are deliberately absent — shipping one here would silently reclassify a real code module of that name as an organ. Config extends this list through `structure.additionalOrganNames`.
 
 Ask yourself: "Which step in the order decided this — and does the file it names actually exist?"
 
@@ -71,6 +72,8 @@ Ask yourself: "If I list this directory, can I tell the contract from the implem
 - When the owner's entry point re-exports an organ symbol, external use is legitimate — but a unit with external consumers naturally belongs at _their_ lowest common fractal, so staying put is a deliberate choice that carries a reason.
 - Direct import from outside is sometimes correct. The standing case is a bundle that must not pull in what a barrel re-exports — hook scripts, where importing the barrel drags every re-exported module into the bundle. Such an exemption is declared, not assumed, and it carries its reason.
 - Both the retention reason and the direct-import exemption are declared in the owning fractal's `DETAIL.md`; the entry shape lives in `filid_module-documents.md`. An organ consumed from outside with neither is the signal that it has an external boundary — promote it to a fractal, or move it to its consumers' lowest common fractal. The finding names both resolutions and cites the consumer paths; it does not choose between them.
+- The same declaration covers a fractal's internals. A consumer barred from the entry point by something the boundary cannot see — the hook bundle again — declares the exemption rather than widening the contract. Undeclared, it stays a violation.
+- **A verification file is not judged by this rule at all, and its references do not close a cycle.** Verification exists to check a unit, and checking an internal unit means reaching it; the alternative is exporting internals for tests alone, which puts symbols on the public surface whose only consumer is a test. Which files are verification comes from the adapter, not from a filename pattern.
 
 Ask yourself: "Does this consumer sit inside the owner's subtree — and if not, where is the declaration?"
 
@@ -101,7 +104,7 @@ paths:
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
 
-A fractal's contract is written down beside its code: INTENT records the boundary, DETAIL records the current contract. These rules define what those documents must contain to count as one. This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.
+A fractal's contract is written down beside its code: INTENT records the boundary, DETAIL records the current contract and — when a change is worth remembering — the history behind it. These rules define what those documents must contain to count as one. This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.
 
 **Tradeoff:** two documents per fractal to maintain, in exchange for a boundary a newcomer can read without running anything. **Applies when:** you are creating or editing an `INTENT.md` or a `DETAIL.md`.
 
@@ -133,32 +136,45 @@ Ask yourself: "Can a newcomer read this whole file before deciding what to touch
 
 Ask yourself: "Does this directory want its own boundary, or does it belong inside its owner's?"
 
-## 4. DETAIL is current state, not an append-only history
+## 4. DETAIL's contract sections are current state, not an append-only ledger
 
-**A ledger that only grows stops describing anything.**
+**A contract that only grows stops describing anything.**
 
-- Restructure the document to the currently intended behavior on every update. Do not append a changelog of what it used to say.
+- Restructure the contract sections to the currently intended behavior on every update. A superseded clause is removed, not left standing beside its replacement.
 - Update DETAIL before the code it describes.
 - Acceptance groups carry stable IDs, unique within that document.
 - `DETAIL.md` is the sole acceptance-criteria ledger. A legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated.
 
 Ask yourself: "Does this document describe the code as it should be now, or as it has been?"
 
-## 5. An exemption without a reason is a disabled rule in costume
+## 5. History has one address, and the contract is not it
+
+**Every other surface answers "what holds now"; one section answers "how it got here".**
+
+- INTENT carries no history — no changelog, no dated notes, no record of a boundary it used to draw. It has 50 lines to state the boundary that holds today, and a retired boundary leaves by deletion, not by annotation.
+- The code carries none either. A module keeps its history in the documents beside it, not in the source it describes.
+- `## History` in DETAIL is the one place the past is written down. The section is optional, sits below the contract sections and above `## Last Updated`, and lists entries newest first. Record the decision and the reason it was taken or reversed — the diff itself is version control's job, not this section's.
+- `## Last Updated` names the most recent change; `## History` keeps the earlier ones that are still worth carrying. An entry that no longer informs a present decision is dropped, not archived deeper.
+- A history entry accompanies the contract change that produced it. An edit that only appends an entry is the append-only pattern §4 rejects.
+
+Ask yourself: "Is this sentence what holds now, or how it came to hold — and is it in the section for that?"
+
+## 6. An exemption without a reason is a disabled rule in costume
 
 **`Reason` is the load-bearing field.**
 
-- `Organ Exemptions` is conditional: present only when this fractal actually grants one. A fractal with no exemption never carries the section, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose.
+- `Boundary Exemptions` is conditional: present only when this fractal actually grants one. A fractal with no exemption never carries the section, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose. `## Organ Exemptions` is the same syntax under this section's former name and is still read.
+- The target is an organ path or a path inside this fractal — a consumer that cannot route through the entry point needs the same escape hatch either way. A path names itself and everything under it.
 - An entry uses the acceptance-group shape, so one parser reads both:
 
 ```md
-## Organ Exemptions
+## Boundary Exemptions
 
-### <organ path> — <short title>
+### <target path> — <short title>
 
 - **Consumers**: <paths or globs, or `entry-point` when access is through the barrel>
 - **Direct import**: allowed | not allowed
-- **Reason**: <why the barrel cannot serve these consumers, or why the organ has not
+- **Reason**: <why the barrel cannot serve these consumers, or why the unit has not
   moved to its consumers' lowest common fractal>
 ```
 
@@ -168,7 +184,7 @@ Ask yourself: "Would someone who has never seen this code understand why the exe
 
 ---
 
-**This rule is working if:** every fractal's boundary fits on one screen; DETAIL diffs read as contract changes rather than appended notes; every exemption in the tree is explained by reading its own entry. **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.
+**This rule is working if:** every fractal's boundary fits on one screen; DETAIL diffs read as contract changes rather than appended notes; the only past tense in the tree sits under a `## History` heading; every exemption in the tree is explained by reading its own entry. **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.
 <!-- FILID:END:filid_module-documents.md -->
 
 <!-- FILID:START:filid_verification-records.md -->
@@ -833,3 +849,57 @@ Saying "probably / should / seems to" about your own change · declaring success
 
 **This rule is working if:** claims cite tool output; pushback comes with reasoning; fixes do not reappear in new places; skipped checks are skipped out loud. **This rule is wrong for you if:** never — but its checks scale down out loud for trivial work; what never scales down is saying so.
 <!-- SEIRI:END:seiri_cognitive-discipline.md -->
+
+<!-- SEIRI:START:seiri_code-comments.md -->
+# Code Comments
+
+> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
+
+A comment is the one thing in a file nothing checks: no compiler reads it, no test goes red when it lies — and it is believed anyway. This rule rests on properties every codebase has: the language provides a form for comments, and a comment sits beside the code it describes.
+
+**Tradeoff:** a documentation comment per declaration is lines you must keep true as the code moves, in exchange for a surface readers and the language's own tooling can consume without opening the body. **Applies when:** the change is intended to land in version control.
+
+## 1. A comment states the current spec, never its history
+
+**When the code changes, its comment changes in the same edit.**
+
+- No changelog lines, no dated notes, no "previously" or "used to", no commented-out predecessor kept for reference. Nothing verifies any of it, so it rots silently and then misleads with the authority of a comment.
+- History that must be kept goes where this repository keeps it — the version-control trail, a changelog, a decision record, a module document beside the code. Not in the source.
+- An edit that leaves a comment behind has published a false statement. Change the behavior, rewrite the sentence describing the old one; delete the code, delete its comment with it.
+
+Ask yourself: "Reading only this comment, would I describe the code as it is today?"
+
+## 2. A function's documentation comment names its parameters, its result, and its purpose
+
+**The signature says what the types are; the comment says what they mean.**
+
+- Write it in the documentation-comment form the language provides — the one its own tooling and editors already read — and fill every slot that form defines: each parameter, what comes back, and what the function is for.
+- Say what the caller cannot see from the signature: what makes an argument valid, the conditions under which the call fails, the effect it has beyond its return value.
+- Do not restate the signature in prose. A parameter documented as "the id" earned nothing; a parameter documented by what makes it acceptable earned its line.
+
+Ask yourself: "Does this comment tell a caller something the signature could not?"
+
+## 3. Every declaration the form reaches carries one
+
+**Documentation comments are not a function-only convention.**
+
+- Types, fields, members, constants, modules — wherever the language's documentation form applies and its tooling would render the result, the declaration carries a comment in that form.
+- Say what the declaration is for and how it is meant to be used. A name repeated as a sentence adds a line and no information.
+- The scope is the declarations the documentation form reaches. A local inside a body is not one of them — when it needs explaining, a truer name or a split is the fix, not a comment.
+
+Ask yourself: "If a reader met this declaration through generated docs or an editor tooltip, would they know how to use it?"
+
+## 4. Follow the language's own comment convention; do not invent one
+
+**A house format nobody's tooling reads is a private dialect every newcomer has to learn.**
+
+- Take the form from the language and the siblings around the file — its documentation comment, its inline comment, its placement relative to the declaration. This rule fixes no format of its own.
+- An inline comment sits at the code it explains, not in a banner that drifts away from it.
+- A note some other convention of this repository asks you to leave — where invisible wiring is bound, a warning where a name misleads, a dependency the signature cannot show — is a comment like any other: it takes this form, and §1 keeps it current.
+
+Ask yourself: "Would this comment look native in any other file of this repository?"
+
+---
+
+**This rule is working if:** a reader trusts a comment without checking the body against it; a caller can use a function from its documentation comment alone; the past tense lives in the history, never in the source. **This rule is wrong for you if:** the language has no documentation-comment convention and the repository has not adopted one — then §1 still binds, and the rest has no form to follow.
+<!-- SEIRI:END:seiri_code-comments.md -->

@@ -15,8 +15,8 @@
       "filename": "filid_module-documents.md",
       "required": true,
       "title": "Module Documents",
-      "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the current-state contract ledger, and organ exemption entries.",
-      "templateHash": "d1bff79b5a5fb9e95bab3290e21d37d581dbf726b3f337e9646653d3793c59d4"
+      "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the current-state contract ledger, the single history section, and organ exemption entries.",
+      "templateHash": "fc3531e180088ed2c7c68206eacd2c4043dbfba45e29334c6c594cb5fa0c2e16"
     },
     {
       "id": "filid_verification-records",
