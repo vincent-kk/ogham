@@ -47,7 +47,9 @@
 
 ## API Contracts
 
-- `loadBuiltinRules(options?): Rule[]` — config-bound canonical rule roster.
+- `loadBuiltinRules(overrides?, additionalAllowed?, additionalOrganNames?): Rule[]`
+  — config-bound canonical rule roster. 위치 인자이며, 3번째·4번째 자리는
+  어댑터가 사실을 소유하게 되어 무시된다.
 - `evaluateRule(rule, context): RuleViolation[]` — 단일 rule 결과 또는
   indeterminate finding.
 - `evaluateRules(snapshot, rules?, options?): RuleEvaluationResult` —

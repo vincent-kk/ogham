@@ -58,7 +58,7 @@ interface FilidConfigV2 {
 - build hash와 active host 배포 상태가 일치하며 owner marker 밖 사용자 내용은 보존된다.
 - template/root read failure는 예외 대신 진단 가능한 저하 결과다.
 - manifest는 4개 rule 문서를 선언하고 전부 `required`다 — filid 규칙은 부분 채택 대상이 아니므로 optional 엔트리가 없고, 체크박스 UI에는 아무것도 렌더되지 않는다.
-- legacy 주소 `fca.md`는 대표 엔트리 `filid_fractal-boundaries` 하나만 승계한다. shared rule manager가 filename과 legacyFilenames 전역 유일성을 강제하므로 둘 이상이 같은 legacy를 주장하면 sync가 실패한다.
+- manifest 엔트리는 `legacyFilename`을 선언하지 않는다. 접두사 이전 이름 `fca.md`는 오래전에 은퇴해 더 이상 승계 대상이 아니다.
 - manifest에서 사라진 구 문서 `filid_fca-policy.md`는 `filid_` 접두사 기반 owned orphan 스윕이 회수한다. 별도의 마이그레이션 경로를 두지 않는다.
 
 ## Boundary Exemptions

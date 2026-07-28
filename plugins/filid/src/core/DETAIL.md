@@ -20,8 +20,8 @@
 - `findLowestCommonFractal(tree, consumerPaths): FractalNode | null` — owner ancestor 교집합의 가장 깊은 fractal 반환.
 - `createRestructurePlan(snapshot, input): RestructurePlan` — 절대 source/target, 근거, artifact, import rewrite와 decision 상태 산출.
 - `validatePlanPreconditions(snapshot, plan)` / `validatePlanPostconditions(snapshot, plan)` — hash와 exact target·boundary·DAG 검사.
-- `analyzeVerification(projectRoot, adapters): Promise<VerificationProjectAnalysis>` — 역할, case count, contract link와 certainty 산출.
-- `evaluateRules(snapshot, rules, scopes): RuleEvaluation` — 15개 FCA rule 결과 반환.
+- `analyzeVerification(input): Promise<VerificationProjectAnalysis>` — 역할, case count, contract link와 certainty 산출.
+- `evaluateRules(input, rules?, options?): RuleEvaluationResult` — 15개 FCA rule 결과 반환.
 - built-in IDs: `intent-document-contract`, `detail-document-contract`, `organ-no-intentmd`, `entry-point-surface`, `module-entry-point`, `max-depth`, `circular-dependency`, `pure-function-isolation`, `zero-peer-file`, `external-import-boundary`, `spec-document-case-cap`, `test-record-case-cap`, `spec-fragmentation`, `spec-contract-link`, `legacy-criteria-ledger`.
 
 ## Acceptance Criteria
