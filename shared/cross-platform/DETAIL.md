@@ -67,7 +67,7 @@ writeConfigLayer(
   paths: ConfigLayerPaths,
   scope: ConfigScope,
   document: Record<string, unknown>,
-  options?: { fileMode?: number },
+  options?: { fileMode?: number; directoryMode?: number },
 ): string;
 buildConfigScopeState(paths: ConfigLayerPaths): ConfigScopeState;
 
@@ -116,7 +116,7 @@ JSON이고 `JSON.parse`가 `__proto__`를 own key로 만들기 때문에 실제 
 ### 설정 페이지 계약
 
 두 네임스페이스를 구분해 편집하는 화면은 각 플러그인이 자기 페이지에서
-구현한다. 공유 UI 패키지를 두지 않으므로 **이 절이 8곳의 정본**이고,
+구현한다. 공유 UI 패키지를 두지 않으므로 **이 절이 7곳의 정본**이고,
 `plugins/deilen/src/mcp/pages/settings/`가 참조 구현이다.
 
 ```
@@ -136,17 +136,34 @@ POST /api/config
 저장 검증은 제출 레이어를 저장된 반대편 레이어 위에 병합한 미리보기 결과를
 소비자 스키마로 확인하고, 통과할 때만 파일을 쓴다.
 
+설정 페이지는 두 형태 중 하나다. 어느 쪽이든 스코프 토글은 반드시 있다.
+
+**A. 문서 단위** — 페이지가 레이어 하나의 문서 전체를 편집한다
+(`atlassian`, `cennad`, `entrez`, `imbas`). 필드별 재정의 개념이 없으므로
+토글과 경로 힌트만 둔다.
+
+| 요소        | 규약                                                    |
+| ----------- | ------------------------------------------------------- |
+| 스코프 토글 | `<input name="config_scope" value="user" \| "project">` |
+| 경로 힌트   | 선택한 레이어의 절대 경로를 표시                        |
+
+**B. 필드 단위** — project 레이어가 부분 문서이고 필드마다 재정의를 켜고 끈다
+(`deilen`, `filid`, `seiri`). 위에 더해:
+
 | 요소           | 규약                                                                |
 | -------------- | ------------------------------------------------------------------- |
-| 스코프 토글    | `<input name="config_scope" value="user" \| "project">`             |
-| 필드 식별      | 필드 래퍼에 `data-config-path="renderers.mermaid"` (dot path)       |
+| 필드 식별      | 소유 요소에 `data-config-path="renderers.mermaid"` (dot path)       |
 | 상속 상태      | 같은 요소에 `data-scope-state="inherited" \| "overridden" \| "own"` |
 | 배지·해제 버튼 | 표시 여부는 CSS가 `[data-scope-state=...]`로 결정                   |
 
 해제 버튼은 project 레이어가 **부분 문서**인 곳에만 둔다. 키를 빼는 것이 곧
-해제이기 때문이다. project 레이어가 커밋된 단일 결정인 곳(seiri)은 배지만
-두고 해제는 git 작업으로 남긴다 — 팀이 소유한 파일을 설정 클릭으로 지우게
-하는 것이 잘못된 affordance다.
+해제이기 때문이다. project 레이어가 커밋된 단일 결정인 곳(`seiri`, `filid`)은
+배지만 두고 해제는 git 작업으로 남긴다 — 팀이 소유한 파일을 설정 클릭으로
+지우게 하는 것이 잘못된 affordance다.
+
+`data-config-path`의 세밀도는 페이지가 정한다. `deilen`은 필드마다, `filid`는
+config를 소유한 섹션마다 붙이고 배지는 prefix로 판정한다 — 깊게 중첩된 config를
+필드마다 쪼개는 비용이 그 값어치를 하지 않는 경우다.
 
 `paths.project`가 `null`이면 Project 라디오는 `disabled`이고 이유를 한 줄
 표시한다.
