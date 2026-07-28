@@ -51,7 +51,10 @@ export async function handleSubmit(
     return;
   }
 
-  await ctx.saveConfig({
+  // The page names the layer; `user` is the default because tool and contact
+  // email are a person's, and only a repository that deliberately declares its
+  // own writes the project layer.
+  await ctx.saveConfig(readScope(raw), {
     tool: ENTREZ_TOOL_NAME,
     email: data.email,
     default_db: data.default_db,
@@ -70,4 +73,10 @@ export async function handleSubmit(
   // Read from raw — it is a UI control flag, not part of the form-data schema.
   const closeAfter = (raw as Record<string, unknown>).closeAfter !== false;
   if (closeAfter) void ctx.closeServer();
+}
+
+/** The layer the page asked for, defaulting to the personal one. */
+function readScope(raw: unknown): "user" | "project" {
+  if (typeof raw !== "object" || raw === null) return "user";
+  return (raw as { scope?: unknown }).scope === "project" ? "project" : "user";
 }

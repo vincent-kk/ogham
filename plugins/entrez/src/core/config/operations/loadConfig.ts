@@ -1,29 +1,49 @@
-import { stat, chmod } from "node:fs/promises";
+import { chmod, stat } from "node:fs/promises";
+
+import {
+  mergeConfigLayers,
+  readConfigLayers,
+} from "@ogham/cross-platform/config-scope";
+import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
 
 import type { EntrezConfig } from "../../../types/config.js";
 import { EntrezConfigSchema } from "../../../types/config.js";
-import { CONFIG_PATH } from "../../../constants/paths.js";
-import { readJson } from "../../../lib/fileIo.js";
+import { configLayers } from "../utils/configLayers.js";
 
-/**
- * Load config.json. Returns null when not configured (tool/email are required,
- * so an absent file is not a valid empty config). Defense-in-depth: tightens
- * permissions to 0o600 if a pre-existing file drifted.
- */
-export async function loadConfig(
-  path: string = CONFIG_PATH,
-): Promise<EntrezConfig | null> {
+/** Tighten a pre-existing file created under a permissive umask. */
+async function tightenIfLoose(path: string | null): Promise<void> {
+  if (path === null) return;
   try {
     const s = await stat(path);
     if ((s.mode & 0o077) !== 0) await chmod(path, 0o600);
   } catch {
     // ENOENT expected on first run.
   }
-  try {
-    const raw = await readJson<unknown>(path);
-    return EntrezConfigSchema.parse(raw);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
-    throw error;
-  }
+}
+
+/**
+ * The config in effect: the user layer with the project layer laid over it.
+ *
+ * Returns null when the merge does not describe a configured install — `tool`
+ * and `email` are required, so an absent or incomplete config is "not set up"
+ * rather than an empty one. That contract is unchanged; what changed is that
+ * either layer may supply the missing half.
+ *
+ * Only the merged result is validated: a project layer naming just `tool`
+ * cannot satisfy the schema alone, and rejecting it there would defeat the
+ * point of having layers.
+ */
+export async function loadConfig(
+  layers: ConfigLayerPaths = configLayers(),
+): Promise<EntrezConfig | null> {
+  await tightenIfLoose(layers.user);
+  await tightenIfLoose(layers.project);
+
+  const documents = readConfigLayers(layers);
+  if (documents.user === null && documents.project === null) return null;
+
+  const parsed = EntrezConfigSchema.safeParse(
+    mergeConfigLayers(documents.user, documents.project),
+  );
+  return parsed.success ? parsed.data : null;
 }

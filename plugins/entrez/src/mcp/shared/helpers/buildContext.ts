@@ -1,3 +1,5 @@
+import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+
 import type { Db } from "../../../types/enums.js";
 import type { EntrezConfig, EntrezCredentials } from "../../../types/config.js";
 import type { HttpDeps } from "../../../types/http.js";
@@ -20,7 +22,8 @@ export interface ToolContext {
 }
 
 export interface BuildContextOptions {
-  configPath?: string;
+  /** Override both config layer paths. Tests use it to stay off the real home. */
+  configLayers?: ConfigLayerPaths;
   credentialsPath?: string;
   fetchImpl?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
@@ -36,7 +39,7 @@ export interface BuildContextOptions {
 export async function buildToolContext(
   options: BuildContextOptions = {},
 ): Promise<ToolContext> {
-  const config = await loadConfig(options.configPath);
+  const config = await loadConfig(options.configLayers);
   if (!config) throw new Error(Messages.NOT_CONFIGURED);
   const credentials = await loadCredentials(options.credentialsPath);
 

@@ -16,7 +16,9 @@ export async function handleGetRoot(
     ctx.loadConfig(),
     ctx.loadCredentials(),
   ]);
-  const status = buildStatus(config, credentials);
+  // The page needs the per-layer state too: the toggle has to name the file
+  // it will write and say whether a project layer is even available.
+  const status = { ...buildStatus(config, credentials), scope: ctx.loadConfigScope() };
   const html = ctx.settingsHtml.replace(
     STATE_PLACEHOLDER,
     `window.__ENTREZ_STATE__ = ${escapeJsonForHtml(status)};`,

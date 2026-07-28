@@ -1,4 +1,9 @@
 import type {
+  ConfigScope,
+  ConfigScopeState,
+} from "@ogham/cross-platform/config-scope";
+
+import type {
   EntrezConfig,
   EntrezConfigInput,
 } from "../../../../../types/config.js";
@@ -15,7 +20,12 @@ export interface RouteContext {
   settingsHtml: string;
   loadConfig: () => Promise<EntrezConfig | null>;
   loadCredentials: () => Promise<EntrezCredentials>;
-  saveConfig: (config: EntrezConfigInput) => Promise<void>;
+  /** Both layers plus the merge, for the page's scope toggle. */
+  loadConfigScope: () => ConfigScopeState;
+  saveConfig: (
+    scope: ConfigScope,
+    config: Partial<EntrezConfigInput>,
+  ) => Promise<ConfigScopeState>;
   saveCredentials: (credentials: EntrezCredentials) => Promise<void>;
   testConnection: (data: SetupFormData) => Promise<ConnectionTestResult>;
   resetTimer: () => void;

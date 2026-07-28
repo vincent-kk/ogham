@@ -23,7 +23,20 @@ async function start(): Promise<SetupServerHandle> {
       settingsHtml: "<html>__ENTREZ_STATE__</html>",
       loadConfig: async () => null,
       loadCredentials: async () => ({}),
-      saveConfig: async () => {},
+      loadConfigScope: () => ({
+      paths: { user: "/tmp/user/config.json", project: null },
+      layers: { user: null, project: null },
+      effective: {},
+      overridden: [],
+      warnings: [],
+    }),
+  saveConfig: async () => ({
+      paths: { user: "/tmp/user/config.json", project: null },
+      layers: { user: null, project: null },
+      effective: {},
+      overridden: [],
+      warnings: [],
+    }),
       saveCredentials: async () => {},
       testConnection: async (): Promise<ConnectionTestResult> => ({
         success: true,

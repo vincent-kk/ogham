@@ -40,9 +40,17 @@ beforeEach(async () => {
   handle = await startSetupServer({
     context: {
       settingsHtml: HTML,
-      loadConfig: () => loadConfig(configPath),
+      loadConfig: () => loadConfig({ user: configPath, project: null }),
+      loadConfigScope: () => ({
+        paths: { user: "/tmp/user/config.json", project: null },
+        layers: { user: null, project: null },
+        effective: {},
+        overridden: [],
+        warnings: [],
+      }),
       loadCredentials: () => loadCredentials(credPath),
-      saveConfig: (c) => saveConfig(c, configPath),
+      saveConfig: (scope, c) =>
+        saveConfig(scope, c, { user: configPath, project: null }),
       saveCredentials: (c) => saveCredentials(c, credPath),
       testConnection: async (data): Promise<ConnectionTestResult> => {
         lastTested = data;
@@ -79,7 +87,11 @@ const VALID = {
 
 describe("setup web server", () => {
   it("serves the page with injected (masked) state on GET /", async () => {
-    await saveConfig({ tool: "t", email: "e@x.com" }, configPath);
+    await saveConfig(
+      "user",
+      { tool: "t", email: "e@x.com" },
+      { user: configPath, project: null },
+    );
     await saveCredentials({ api_key: "STORED" }, credPath);
 
     const res = await fetch(`${base}/?token=${handle.token}`);
@@ -142,7 +154,7 @@ describe("setup web server", () => {
     expect(body.success).toBe(true);
     expect(JSON.stringify(body)).not.toContain("SECRETKEY");
 
-    const cfg = await loadConfig(configPath);
+    const cfg = await loadConfig({ user: configPath, project: null });
     expect(cfg?.tool).toBe(ENTREZ_TOOL_NAME);
     expect((await loadCredentials(credPath)).api_key).toBe("SECRETKEY");
   });
@@ -160,7 +172,9 @@ describe("setup web server", () => {
   it("keeps the server open after a plain Save (closeAfter: false)", async () => {
     const res = await postJson("/submit", { ...VALID, closeAfter: false });
     expect(res.status).toBe(200);
-    expect((await loadConfig(configPath))?.tool).toBe(ENTREZ_TOOL_NAME);
+    expect((await loadConfig({ user: configPath, project: null }))?.tool).toBe(
+      ENTREZ_TOOL_NAME,
+    );
 
     // A plain Save persists but must not tear down the server — only
     // "Save & Close" closes it, so a follow-up request still succeeds.
@@ -172,7 +186,7 @@ describe("setup web server", () => {
   it("rejects an invalid submit without saving (400)", async () => {
     const res = await postJson("/submit", { email: "not-email" });
     expect(res.status).toBe(400);
-    expect(await loadConfig(configPath)).toBeNull();
+    expect(await loadConfig({ user: configPath, project: null })).toBeNull();
   });
 
   it("does not save when the connection test fails", async () => {

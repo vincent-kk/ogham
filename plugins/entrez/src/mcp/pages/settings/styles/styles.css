@@ -447,3 +447,33 @@ code {
     grid-template-columns: 1fr;
   }
 }
+
+/* Scope UI — user/project namespaces.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". The api_key is never
+   layered; this toggle governs config.json alone. */
+
+.scope-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.scope-toggle {
+  display: flex;
+  gap: 14px;
+}
+
+.scope-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.scope-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.72;
+  word-break: break-all;
+}
