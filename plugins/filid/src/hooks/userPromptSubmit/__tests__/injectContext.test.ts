@@ -49,7 +49,7 @@ describe('buildMinimalContext', () => {
     expect(context).not.toContain('Project rule docs');
   });
 
-  it('falls back to legacy fca.md when new filename is absent', () => {
+  it('falls back to legacy filid_fca-policy.md when new filename is absent', () => {
     const projectRoot = makeProject({ deployFca: true, legacy: true });
 
     const context = buildMinimalContext(projectRoot);

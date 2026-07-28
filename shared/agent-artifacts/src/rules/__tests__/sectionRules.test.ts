@@ -302,7 +302,7 @@ describe("section rule documents", () => {
   });
 
   it("combines multiple owned changes into one write and preserves other content", () => {
-    const foreign = sectionMarkers("FILID", "filid_fca.md");
+    const foreign = sectionMarkers("FILID", "filid_foreign.md");
     writeFileSync(
       effectivePath,
       mergeSection("# user  text\n", foreign, "# foreign"),
