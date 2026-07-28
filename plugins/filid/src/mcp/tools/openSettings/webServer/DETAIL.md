@@ -12,7 +12,8 @@
 
 ## API Contracts
 
-- `startWebServer(options)` — 바인딩된 서버와 settle waiter를 반환한다.
+- `startSettingsServer(options)` — 바인딩된 서버와 settle waiter를 반환한다.
+- `SETTINGS_SERVER_IDLE_MS` — idle 종료 기준값.
 
 ## Acceptance Criteria
 

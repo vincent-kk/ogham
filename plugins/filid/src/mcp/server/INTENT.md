@@ -6,10 +6,10 @@ Filid 1.0의 9개 도구를 등록하고 공통 artifact envelope, stdio transpo
 
 ## Structure
 
-- `createServer.ts` — 고정 tool registry 조립
-- `handlers/` — legacy-compatible tool 결과를 공통 payload로 변환하는 leaf organ
-- `toolResult.ts` / `toolError.ts` / `wrapHandler.ts` — envelope와 오류 경계
-- `startServer.ts` / lifecycle helpers — transport, boot sweep와 동기 shutdown
+- `lifecycle/` organ — `createServer`(고정 tool registry 조립), `startServer`, `bootSweep`, `registerShutdown`, `cleanupOwnSessionCache`
+- `envelope/` organ — `toolResult` / `toolError` / `wrapHandler`, envelope와 오류 경계
+- `handlers/` organ — legacy-compatible tool 결과를 공통 payload로 변환
+- `utils/` organ — `deferInputValidation`
 - executable entry는 `serverEntry/`이며 이 디렉터리의 `index.ts`가 아니다.
 
 ## Boundaries

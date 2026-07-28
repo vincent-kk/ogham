@@ -8,7 +8,7 @@ adapter-aware `.filid/config.json` v2의 검증·비파괴 migration·승인 저
 
 - `loaders/` organ — v2 schema/types, v1 migration, load/write/init와 rule-doc facade
 - `utils/` organ — project/plugin root, strict sanitize와 hash helpers
-- `configLoader.ts` / `index.ts` — enumerated public boundary
+- `index.ts` — enumerated public boundary, 이 fractal의 유일한 공개 표면
 
 ## Boundaries
 

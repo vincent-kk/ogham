@@ -14,7 +14,7 @@
 
 ## API Contracts
 
-- `processSetup`, `processUserPromptSubmit`, `processPreToolUse` — 각
+- `processSetup`, `handleUserPromptSubmit`, `handlePreToolUse` — 각
   이벤트 입력을 받아 `HookOutput`을 반환한다.
 
 ## Acceptance Criteria

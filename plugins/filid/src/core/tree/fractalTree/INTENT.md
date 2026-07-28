@@ -8,7 +8,7 @@ Node 20 filesystem recursion과 StructureAdapter metadata로 `FractalTree`를 �
 
 - `treeBuilder/` organ — 순수 관계 조립과 path traversal
 - `scanner/` organ — readdir recursion, adapter metadata와 bottom-up correction
-- `fractalTree.ts` — public facade, `index.ts` — named barrel
+- `index.ts` — named barrel, 이 fractal의 유일한 공개 표면
 
 ## Conventions
 
