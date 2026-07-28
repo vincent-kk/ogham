@@ -3,6 +3,7 @@ import type {
   ConfigScopeState,
 } from '@ogham/cross-platform/config-scope';
 
+import type { ConfigByScope } from '../../../../../core/configManager/index.js';
 import type { YoutubeProvisionSummary } from '../../../../../core/youtubeMcp/index.js';
 import type { Config, YoutubeAddonConfig } from '../../../../../types/index.js';
 
@@ -11,6 +12,8 @@ export interface RouteContext {
   settingsHtml: string;
   /** The merged config, for callers that only need what is in effect. */
   loadConfig: () => Promise<Config>;
+  /** The document each layer resolves to, for the page's per-scope prefill. */
+  loadConfigByScope: () => Promise<ConfigByScope>;
   /** Both layers plus the merge, for the page's scope toggle. */
   loadConfigState: () => ConfigScopeState;
   saveConfig: (

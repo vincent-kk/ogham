@@ -6,7 +6,7 @@ adapter-aware config v2의 검증·비파괴 migration·승인 저장과 managed
 
 ## Structure
 
-- `loaders/` organ — v2 schema/types, v1 migration, load/write/init와 rule-doc facade
+- `loaders/` organ — v2 schema/types, v1 migration, load(레이어별 `loadConfigByScope` 포함)/write/init와 rule-doc facade
 - `utils/` organ — project/plugin root, strict sanitize와 hash helpers
 - `index.ts` — enumerated public boundary, 이 fractal의 유일한 공개 표면
 

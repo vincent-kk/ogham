@@ -25,7 +25,17 @@ export interface RuleDocsLayerSnapshot {
 export interface SettingsPageState {
   projectRoot: string;
   configExists: boolean;
-  config: FilidConfig;
+  /**
+   * The config each layer resolves to. The page seats its form — and starts
+   * its save document — from the one the toggle names, so a save under `user`
+   * never carries the project layer's overrides back into the user file.
+   * `project` is the effective merge; `user` is that layer alone over the
+   * shipped defaults.
+   */
+  configByScope: {
+    user: FilidConfig;
+    project: FilidConfig;
+  };
   configDiagnostics: ConfigDiagnostic[];
   /** Per-layer raw documents and which dot paths the project layer overrode. */
   scope: ConfigScopeState;

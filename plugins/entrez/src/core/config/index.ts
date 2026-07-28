@@ -1,4 +1,8 @@
 export { loadConfig } from "./operations/loadConfig.js";
+export {
+  type ConfigByScope,
+  loadConfigByScope,
+} from "./operations/loadConfigByScope.js";
 export { loadConfigScope } from "./operations/loadConfigScope.js";
 export { saveConfig } from "./operations/saveConfig.js";
 export { loadCredentials } from "./operations/loadCredentials.js";

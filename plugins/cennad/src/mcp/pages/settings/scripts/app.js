@@ -1517,6 +1517,28 @@
     overridden: [],
   };
   var scope = 'user';
+  // One normalized document per layer, so moving the toggle re-seats the form
+  // without a round trip. The server normalizes both — this page knows neither
+  // the schema nor the defaults, and a merge assembled here would put a value
+  // on screen that nothing obeys.
+  var configByScope = null;
+
+  /**
+   * The document the chosen layer prefills from.
+   *
+   * @returns {object|null} The view for the current scope, or null when the
+   *   server sent no per-layer views — the `/config` fallback path.
+   */
+  function viewForScope() {
+    if (configByScope === null) return null;
+    return configByScope[scope] || null;
+  }
+
+  /** Re-seat the whole form on the layer the toggle now names. */
+  function applyScopeConfig() {
+    var view = viewForScope();
+    if (view !== null) applyConfig(view);
+  }
 
   function adoptScopeState(next) {
     if (!next || typeof next !== 'object') return;
@@ -1549,6 +1571,7 @@
       radio.disabled = option[0] === 'project' && !scopeState.paths.project;
       radio.addEventListener('change', function () {
         scope = option[0];
+        applyScopeConfig();
         renderScope();
       });
       var text = document.createElement('span');
@@ -1607,8 +1630,12 @@
   function tryInlineState() {
     var raw = window.__CENNAD_STATE__;
     if (!raw || typeof raw !== 'object') return false;
+    if (raw.configByScope) configByScope = raw.configByScope;
+    // Adopting the state picks the layer, so the view to seat is settled by
+    // the time the form is filled.
     if (raw.scope) adoptScopeState(raw.scope);
-    var config = raw.config && raw.config.ratio ? raw.config : null;
+    var config =
+      viewForScope() || (raw.config && raw.config.ratio ? raw.config : null);
     if (config === null) return false;
     applyConfig(config);
     return true;
@@ -1652,6 +1679,9 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var body = await res.json();
       adoptScopeState(body.state);
+      // Reached only when the inline slot was missing. `/config` carries the
+      // raw merge and no per-layer views, so the toggle cannot re-seat the
+      // form on this path — it stays on what is in effect.
       applyConfig(body.state.effective);
       setStatus('', '');
     } catch (err) {

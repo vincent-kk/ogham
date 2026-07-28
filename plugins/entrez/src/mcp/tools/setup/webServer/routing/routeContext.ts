@@ -3,6 +3,7 @@ import type {
   ConfigScopeState,
 } from "@ogham/cross-platform/config-scope";
 
+import type { ConfigByScope } from "../../../../../core/config/index.js";
 import type {
   EntrezConfig,
   EntrezConfigInput,
@@ -19,6 +20,8 @@ export interface RouteContext {
   token: string;
   settingsHtml: string;
   loadConfig: () => Promise<EntrezConfig | null>;
+  /** The config each layer resolves to, for the page's per-scope prefill. */
+  loadConfigByScope: () => Promise<ConfigByScope>;
   loadCredentials: () => Promise<EntrezCredentials>;
   /** Both layers plus the merge, for the page's scope toggle. */
   loadConfigScope: () => ConfigScopeState;

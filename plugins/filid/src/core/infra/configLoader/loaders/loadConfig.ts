@@ -2,6 +2,7 @@ import {
   mergeConfigLayers,
   readConfigLayers,
 } from '@ogham/cross-platform/config-scope';
+import type { ConfigLayerPaths } from '@ogham/cross-platform/config-scope';
 
 import { getDefaultAdapterIds } from '../../../../adapters/index.js';
 import { createLogger } from '../../../../lib/logger.js';
@@ -28,8 +29,17 @@ const log = createLogger('config-loader');
  * it overrides and cannot satisfy the strict schema on its own, which is
  * also why `rules[*].exempt` and every other array is replaced wholesale
  * rather than merged element by element.
+ *
+ * @param projectRoot Anchor for the project layer and for v1 migration.
+ * @param layers Layer coordinates to read. Defaults to this project's two;
+ *   pass `project: null` to ask what the user layer decides alone.
+ * @returns The config, plus warnings and migration diagnostics. `config` is
+ *   `null` when no layer supplied one or the merge failed validation.
  */
-export function loadConfig(projectRoot: string): LoadConfigResult {
+export function loadConfig(
+  projectRoot: string,
+  layers: ConfigLayerPaths = configLayers(projectRoot),
+): LoadConfigResult {
   const warnings: string[] = [];
   const diagnostics: ConfigDiagnostic[] = [];
   const addWarning = (message: string): void => {
@@ -37,7 +47,7 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
     log.warn(message);
   };
 
-  const documents = readConfigLayers(configLayers(projectRoot));
+  const documents = readConfigLayers(layers);
   for (const warning of documents.warnings) addWarning(warning);
 
   const user = migrateIfV1(documents.user, diagnostics);

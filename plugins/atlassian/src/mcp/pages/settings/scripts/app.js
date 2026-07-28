@@ -56,11 +56,12 @@
   });
 
   function initApp() {
+    capturePristineFields();
     if (!injected || !injected.configured) return;
 
     state.editMode = true;
     showWarningBanner();
-    prefillForm(injected);
+    prefillForm(viewForScope());
   }
 
   function showWarningBanner() {
@@ -68,8 +69,50 @@
     if (banner) animateIn(banner);
   }
 
+  /**
+   * Drop every site row a previous prefill added.
+   *
+   * The first row is markup the page ships with; the rest are appended per
+   * configured site. Re-seating on another layer without this would stack the
+   * two layers' sites in one list.
+   */
+  function resetSiteEntries() {
+    var container = document.getElementById("cloud-sites-container");
+    if (!container) return;
+    while (container.children.length > 1)
+      container.removeChild(container.lastElementChild);
+    state.cloudSiteCount = 1;
+  }
+
+  // The values the markup ships with, captured before anything is prefilled.
+  // They are the floor a layer that configures nothing falls back to — without
+  // them, switching to an empty layer would leave the other layer's values on
+  // screen under its name.
+  var pristineFields = [];
+
+  /** Snapshot every field's shipped value. Runs once, before the first fill. */
+  function capturePristineFields() {
+    pristineFields = [];
+    document.querySelectorAll("[data-field]").forEach(function (el) {
+      pristineFields.push({ el: el, value: el.value, checked: el.checked });
+    });
+  }
+
+  /** Put every surviving field back to its shipped value. */
+  function restorePristineFields() {
+    for (var i = 0; i < pristineFields.length; i++) {
+      var entry = pristineFields[i];
+      // Fields inside site rows a previous fill added are already detached.
+      if (!entry.el.isConnected) continue;
+      entry.el.value = entry.value;
+      entry.el.checked = entry.checked;
+    }
+  }
+
   function prefillForm(data) {
     var dt = data.deployment_type || "cloud";
+    resetSiteEntries();
+    restorePristineFields();
     activateTab(dt === "onprem" ? TABS.ON_PREMISE : TABS.CLOUD);
 
     if (dt === "cloud" && data.jira) {
@@ -475,6 +518,17 @@
   };
   var configScope = scopeState.layers.project === null ? "user" : "project";
 
+  /**
+   * The prefill view the chosen layer edits.
+   *
+   * @returns {object} That layer's view, or the effective one when the server
+   *   sent no per-layer views.
+   */
+  function viewForScope() {
+    var byScope = injected && injected.configByScope;
+    return (byScope && byScope[configScope]) || injected || {};
+  }
+
   function renderScope() {
     var host = document.getElementById("config_scope");
     if (!host) return;
@@ -497,6 +551,7 @@
       radio.disabled = option[0] === "project" && !scopeState.paths.project;
       radio.addEventListener("change", function () {
         configScope = option[0];
+        prefillForm(viewForScope());
         renderScope();
       });
       var text = document.createElement("span");

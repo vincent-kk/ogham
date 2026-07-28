@@ -1,8 +1,4 @@
-import {
-  createDefaultConfig,
-  loadConfigScope,
-  loadIntervention,
-} from '../../../../core/infra/configLoader/index.js';
+import { loadConfigScope } from '../../../../core/infra/configLoader/index.js';
 import {
   getRuleDocsChannel,
   getRuleDocsStatus,
@@ -15,12 +11,12 @@ import type {
 
 /**
  * Assemble the state the settings page renders from: both stored dial
- * layers, the dial they resolve to, and a filesystem snapshot of every
- * rule doc at each layer.
+ * layers and a filesystem snapshot of every rule doc at each layer.
  *
- * `config` is the effective dial rather than one layer's, so the page opens
- * showing what is actually in force. `scope` is what lets the toggle say
- * which layer said so.
+ * The dial arrives per layer rather than pre-merged, because the toggle
+ * seats the form on the layer it names — a single effective dial would show
+ * the project's value under the User heading. It would also carry the
+ * session valve, which is not an editable layer.
  *
  * Both layers are snapshotted, which costs a second pass over the rule
  * channel: the toggle decides where rules are deployed, so it has to redraw
@@ -41,7 +37,6 @@ export function buildSettingsState(
   pluginRoot: string,
 ): SettingsPageState {
   const scope = loadConfigScope(projectRoot);
-  const dial = loadIntervention(projectRoot);
   // `scripts/app.js` opens its toggle on the same reading of the same
   // snapshot; the page cannot import this, so the two restate one rule.
   const active: SeiriConfigScope =
@@ -49,10 +44,6 @@ export function buildSettingsState(
   return {
     projectRoot,
     configExists: scope.layers.project !== null,
-    config:
-      dial.source === 'default'
-        ? createDefaultConfig()
-        : { intervention: dial.effective },
     scope,
     ruleDocs: {
       pluginRootResolved: true,

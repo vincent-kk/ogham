@@ -32,7 +32,16 @@ export type SettingsBootstrap = z.infer<typeof SettingsBootstrapSchema>;
 export interface SettingsPageState {
   projectRoot: string;
   configExists: boolean;
-  config: ImbasConfig;
+  /**
+   * The config each layer resolves to. The page seats its form — and starts
+   * its save document — from the one the toggle names, so a save under `user`
+   * never carries the project layer's overrides back into the user file.
+   * `project` is the effective merge; `user` is that layer alone.
+   */
+  configByScope: {
+    user: ImbasConfig;
+    project: ImbasConfig;
+  };
   /** Per-layer raw documents and the dot paths the project layer overrode. */
   scope: ConfigScopeState;
   suggestedLocalKey: string;

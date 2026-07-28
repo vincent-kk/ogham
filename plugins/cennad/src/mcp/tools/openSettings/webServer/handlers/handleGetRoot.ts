@@ -7,17 +7,20 @@ import type { RouteContext } from '../routing/routeContext.js';
 /**
  * GET / — the settings page with its state inlined.
  *
- * The page gets the merged config it renders plus the per-layer state the
- * scope toggle needs. `config` stays a top-level key so the page's existing
- * hydrate path is unchanged; `scope` is what the toggle reads.
+ * The page gets one document per layer, the per-layer state the scope toggle
+ * needs, and the merged config. `config` and `configByScope.project` are the
+ * same document: `configByScope` is what the toggle prefills from, and
+ * `config` stays a top-level key because the page's `/config` fallback path
+ * still hydrates from it.
  */
 export async function handleGetRoot(
   ctx: RouteContext,
   res: ServerResponse,
 ): Promise<void> {
-  const config = await ctx.loadConfig();
+  const configByScope = await ctx.loadConfigByScope();
   const inlineState = escapeJsonForHtml({
-    config,
+    config: configByScope.project,
+    configByScope,
     scope: ctx.loadConfigState(),
   });
   const html = ctx.settingsHtml.replace(

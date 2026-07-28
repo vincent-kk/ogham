@@ -63,23 +63,51 @@
     return ruleLayers[scope] || EMPTY_LAYER;
   }
 
-  var entries = layerState().entries || [];
-  var anyDeployed = entries.some(function (entry) {
-    return entry.deployed;
-  });
-
-  // A project that has deployed nothing gets the recommended set offered;
-  // one that already chose gets its own choices back, read from disk. That
-  // way deleting a rule file by hand is respected rather than re-applied.
+  var entries = [];
   var selections = {};
   var resync = {};
-  entries.forEach(function (entry) {
-    selections[entry.id] = anyDeployed ? entry.deployed : entry.recommended;
-    resync[entry.id] = Boolean(entry.deployed && !entry.inSync);
-  });
 
-  var intervention =
-    (state.config && state.config.intervention) || DIAL_STANDARD;
+  /**
+   * Seat the rule list on the layer the toggle names.
+   *
+   * A layer that has deployed nothing gets the recommended set offered; one
+   * that already chose gets its own choices back, read from disk — a rule
+   * file deleted by hand is respected rather than re-applied. The two
+   * channels hold different deployments, so the boxes are rebuilt rather than
+   * carried across; carrying them would tick the other channel's answer.
+   */
+  function seatLayer() {
+    entries = layerState().entries || [];
+    var anyDeployed = entries.some(function (entry) {
+      return entry.deployed;
+    });
+    selections = {};
+    resync = {};
+    entries.forEach(function (entry) {
+      selections[entry.id] = anyDeployed ? entry.deployed : entry.recommended;
+      resync[entry.id] = Boolean(entry.deployed && !entry.inSync);
+    });
+  }
+
+  /**
+   * The dial the chosen layer decides.
+   *
+   * `user` answers from its own file alone; `project` inherits the user value
+   * where it says nothing, because that is what would actually be in force.
+   * The session valve is absent on purpose — a tool call sets it for one
+   * session and it is not an editable layer.
+   *
+   * @returns {string} The dial position, or the default when no layer sets one.
+   */
+  function dialForScope() {
+    var own = scopeState.layers[scope];
+    if (own && own.intervention) return own.intervention;
+    var inherited = scope === 'user' ? null : scopeState.layers.user;
+    return (inherited && inherited.intervention) || DIAL_STANDARD;
+  }
+
+  seatLayer();
+  var intervention = dialForScope();
   var previewRevision = null;
 
   var elements = {
@@ -333,15 +361,17 @@
   }
 
   /**
-   * Point the page at the layer the toggle now names. The rule list, the
-   * channel label and the diff all answer "where do these rules go", so
-   * leaving any of them behind shows one layer's answer under the other's
-   * name. Only the preview needs the server — that judgment is not the
-   * page's to make.
+   * Point the page at the layer the toggle now names. The dial, the rule
+   * list, the channel label and the diff all answer "what does this layer
+   * say", so leaving any of them behind shows one layer's answer under the
+   * other's name. Only the preview needs the server — that judgment is not
+   * the page's to make.
    */
   function useLayer() {
-    entries = layerState().entries || [];
+    seatLayer();
+    intervention = dialForScope();
     renderRules();
+    renderDial();
     renderRuleTargets();
     previewRevision = null;
     refreshPreview();

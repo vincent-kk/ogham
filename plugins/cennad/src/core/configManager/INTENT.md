@@ -4,17 +4,17 @@ config 로드·저장 담당. user(`CENNAD_HOME/config.json`)와 project(`<works
 
 ## Structure
 
-| 파일                                       | 역할                                                                                                                       |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `operations/loadConfig.ts`·`saveConfig.ts` | load: active read + optional read-only fallback + mergeWithDefaults + Zod · save: ConfigSchema.parse 재검증 후 atomicWrite |
-| `utils/mergeWithDefaults.ts`               | raw 객체와 DEFAULT_CONFIG deep merge (전 pipeline 조율)                                                                    |
-| `utils/mergeModelMap.ts`                   | raw model_map + defaults 병합 (codex·claude tier `{model,effort}`, antigravity tier 모델명)                                |
-| `utils/mergeDefaultTier.ts`                | raw default_tier + DEFAULT_CONFIG.default_tier provider별 병합                                                             |
-| `utils/mergePreamble.ts`                   | raw → PreambleConfig (provider별 문자열, 기본값 fallback)                                                                  |
-| `utils/mergeRecencyFactor.ts`              | raw → RecencyFactorConfig (off/auto/strict 검증)                                                                           |
-| `utils/normalizeRatio.ts`                  | legacy 정수 비율 → enabled boolean 정규화                                                                                  |
-| `utils/isPlainObject.ts`                   | plain-object guard (deep merge 전처리)                                                                                     |
-| `index.ts`                                 | barrel: loadConfig, saveConfig                                                                                             |
+| 파일                                       | 역할                                                                                                                                                                                                                |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `operations/loadConfig.ts`·`saveConfig.ts` | load: active read + optional read-only fallback + mergeWithDefaults + Zod (`loadConfigByScope` 는 project 좌표를 끈 채 같은 로더를 다시 태워 레이어별 뷰를 만든다) · save: ConfigSchema.parse 재검증 후 atomicWrite |
+| `utils/mergeWithDefaults.ts`               | raw 객체와 DEFAULT_CONFIG deep merge (전 pipeline 조율)                                                                                                                                                             |
+| `utils/mergeModelMap.ts`                   | raw model_map + defaults 병합 (codex·claude tier `{model,effort}`, antigravity tier 모델명)                                                                                                                         |
+| `utils/mergeDefaultTier.ts`                | raw default_tier + DEFAULT_CONFIG.default_tier provider별 병합                                                                                                                                                      |
+| `utils/mergePreamble.ts`                   | raw → PreambleConfig (provider별 문자열, 기본값 fallback)                                                                                                                                                           |
+| `utils/mergeRecencyFactor.ts`              | raw → RecencyFactorConfig (off/auto/strict 검증)                                                                                                                                                                    |
+| `utils/normalizeRatio.ts`                  | legacy 정수 비율 → enabled boolean 정규화                                                                                                                                                                           |
+| `utils/isPlainObject.ts`                   | plain-object guard (deep merge 전처리)                                                                                                                                                                              |
+| `index.ts`                                 | barrel: loadConfig, saveConfig                                                                                                                                                                                      |
 
 ## Conventions
 

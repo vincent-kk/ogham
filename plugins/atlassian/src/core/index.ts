@@ -1,5 +1,7 @@
 export {
   loadConfig,
+  type ConfigByScope,
+  loadConfigByScope,
   loadConfigScope,
   saveConfig,
   mergeConfig,

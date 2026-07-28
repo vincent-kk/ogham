@@ -25,7 +25,9 @@
   // --- prefill from injected state ---------------------------------------
   function setValue(id, value) {
     var el = $(id);
-    if (el && value !== undefined && value !== null) el.value = value;
+    // Assigned either way: a layer that says nothing about a field has to
+    // clear what the other layer left in it.
+    if (el) el.value = value === undefined || value === null ? "" : value;
   }
 
   function fillPathSuggestions(list) {
@@ -50,23 +52,40 @@
     syncWindowVisibility();
   }
 
-  (function prefill() {
-    setValue("base_url", DEFAULT_BASE);
+  /**
+   * The prefill view the chosen layer edits.
+   *
+   * @returns {object} That layer's view, or the effective one when the server
+   *   sent no per-layer views.
+   */
+  function activeView() {
+    if (!state) return {};
+    var byScope = state.configByScope;
+    return (byScope && byScope[configScope]) || state;
+  }
+
+  /** Seat the config-backed fields on the layer the toggle names. */
+  function prefillConfig() {
+    var view = activeView();
+    setValue("email", view.email);
+    setValue("default_db", view.default_db || "pubmed");
+    setValue("base_url", view.base_url || DEFAULT_BASE);
+    setValue("output_path", view.output_path);
+    prefillWindow(view.default_window_days);
+    var dateTag = $("date_tag");
+    if (dateTag) dateTag.checked = view.date_tag === true;
+  }
+
+  // The api key and the download-path suggestions belong to neither layer —
+  // the key lives in the separate credentials file and the suggestions come
+  // from the host. They are seated once, and the toggle leaves them alone.
+  (function prefillOnce() {
     if (!state) {
-      syncWindowVisibility();
       updateRateBadge();
       return;
     }
     fillPathSuggestions(state.path_suggestions);
-    setValue("email", state.email);
-    setValue("default_db", state.default_db || "pubmed");
-    if (state.base_url) setValue("base_url", state.base_url);
-    setValue("output_path", state.output_path);
     if (state.api_key) apiKeyInput.value = MASK;
-    prefillWindow(state.default_window_days);
-    var dateTag = $("date_tag");
-    if (dateTag && typeof state.date_tag === "boolean")
-      dateTag.checked = state.date_tag;
     updateRateBadge();
   })();
 
@@ -272,6 +291,7 @@
       radio.disabled = option[0] === "project" && !scopeState.paths.project;
       radio.addEventListener("change", function () {
         configScope = option[0];
+        prefillConfig();
         renderScope();
       });
       var text = document.createElement("span");
@@ -317,6 +337,9 @@
   }
 
   renderScope();
+  // Seated after the toggle picks a layer: which view fills the form is the
+  // toggle's answer, so the fields wait for it.
+  prefillConfig();
 
   function doSubmit(closeAfter) {
     if (!localValidate()) {

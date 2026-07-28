@@ -3,7 +3,7 @@ import {
   createDefaultConfig,
   getRuleDocsChannel,
   getRuleDocsStatus,
-  loadConfig,
+  loadConfigByScope,
   loadConfigScope,
 } from '../../../../core/infra/configLoader/index.js';
 import type { SettingsPageState } from '../types/settingsTypes.js';
@@ -19,8 +19,8 @@ import type { SettingsPageState } from '../types/settingsTypes.js';
  * not describing. The second filesystem pass is the price of that.
  */
 export function buildSettingsState(projectRoot: string): SettingsPageState {
-  const loaded = loadConfig(projectRoot);
-  const config = loaded.config ?? createDefaultConfig();
+  const byScope = loadConfigByScope(projectRoot);
+  const config = byScope.project.config ?? createDefaultConfig();
   const structureAdapterId =
     config.adapters.enabled[0] ?? getDefaultAdapterIds()[0];
   if (!structureAdapterId)
@@ -31,8 +31,14 @@ export function buildSettingsState(projectRoot: string): SettingsPageState {
   return {
     projectRoot,
     configExists: scope.layers.project !== null,
-    config,
-    configDiagnostics: loaded.diagnostics,
+    configByScope: {
+      // A user layer that holds nothing falls back to the shipped defaults —
+      // the same floor the project view gets, so the User tab opens on a
+      // complete form rather than an empty one.
+      user: byScope.user.config ?? createDefaultConfig(),
+      project: config,
+    },
+    configDiagnostics: byScope.project.diagnostics,
     scope,
     structureAdapterId,
     ruleDocs: {

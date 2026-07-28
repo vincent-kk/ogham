@@ -17,7 +17,10 @@ afterEach(async () => {
 async function start(): Promise<SettingsServerInstance> {
   handle = await startSettingsServer({
     settingsHtml: '<html>__CENNAD_STATE__</html>',
-    loadConfig: async () => DEFAULT_CONFIG,
+    loadConfigByScope: async () => ({
+      user: DEFAULT_CONFIG,
+      project: DEFAULT_CONFIG,
+    }),
     saveConfig: async (_scope, document) => ({
       paths: { user: '/tmp/user/config.json', project: null },
       layers: { user: document, project: null },

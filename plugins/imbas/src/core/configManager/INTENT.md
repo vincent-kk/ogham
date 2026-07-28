@@ -6,11 +6,11 @@ config 의 dot-path 기반 접근 및 관리. user(호스트 상태 루트)와 p
 
 ## Structure
 
-| File                    | Role                                             |
-| ----------------------- | ------------------------------------------------ |
-| `configManager.ts`      | load(병합) · loadConfigScope · save(단일 레이어) |
-| `utils/configLayers.ts` | 두 레이어 좌표 해석                              |
-| `index.ts`              | barrel                                           |
+| File                    | Role                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `configManager.ts`      | load(병합) · loadConfigByScope(레이어별) · loadConfigScope · save(단일 레이어) |
+| `utils/configLayers.ts` | 두 레이어 좌표 해석                                                            |
+| `index.ts`              | barrel                                                                         |
 
 ## Conventions
 

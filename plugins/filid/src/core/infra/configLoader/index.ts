@@ -19,6 +19,10 @@ export type {
 export { createDefaultConfig } from './loaders/createDefaultConfig.js';
 export { initProject } from './loaders/initProject.js';
 export { loadConfig } from './loaders/loadConfig.js';
+export {
+  type ConfigByScope,
+  loadConfigByScope,
+} from './loaders/loadConfigByScope.js';
 export { loadConfigScope } from './loaders/loadConfigScope.js';
 export { migrateConfigV1 } from './loaders/migrateConfigV1.js';
 export { loadRuleOverrides } from './loaders/loadRuleOverrides.js';

@@ -2,6 +2,7 @@ import type { ConfigScopeState } from '@ogham/cross-platform/config-scope';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../../../constants/defaults.js';
+import type { ConfigByScope } from '../../../../../core/configManager/index.js';
 import type { YoutubeProvisionSummary } from '../../../../../core/youtubeMcp/index.js';
 import type { Config, YoutubeAddonConfig } from '../../../../../types/index.js';
 import { type SettingsServerInstance, startSettingsServer } from '../index.js';
@@ -12,12 +13,20 @@ let savedConfig: Record<string, unknown> | null = null;
 /** A ConfigScopeState whose user layer holds `document` and no project layer. */
 function stateOf(document: Record<string, unknown>): ConfigScopeState {
   return {
-    paths: { user: '/tmp/user/config.json', project: '/tmp/p/.cennad/config.json' },
+    paths: {
+      user: '/tmp/user/config.json',
+      project: '/tmp/p/.cennad/config.json',
+    },
     layers: { user: document, project: null },
     effective: document,
     overridden: [],
     warnings: [],
   };
+}
+
+/** Both layers resolving to the same document — no override under test. */
+function bothLayers(config: Config): ConfigByScope {
+  return { user: config, project: config };
 }
 
 /** POST /save now names the layer; the page never submits a bare Config. */
@@ -37,7 +46,7 @@ afterEach(async () => {
 
 interface StartOverrides {
   idleMs?: number;
-  loadConfig?: () => Promise<Config>;
+  loadConfigByScope?: () => Promise<ConfigByScope>;
   loadConfigState?: () => ConfigScopeState;
   saveConfig?: (
     scope: string,
@@ -58,7 +67,8 @@ async function start(
       overrides.settingsHtml ??
       "<html><script>window.s='__CENNAD_STATE__';</script></html>",
     idleMs: overrides.idleMs,
-    loadConfig: overrides.loadConfig ?? (async () => DEFAULT_CONFIG),
+    loadConfigByScope:
+      overrides.loadConfigByScope ?? (async () => bothLayers(DEFAULT_CONFIG)),
     loadConfigState:
       overrides.loadConfigState ??
       (() => stateOf(DEFAULT_CONFIG as unknown as Record<string, unknown>)),
@@ -134,7 +144,9 @@ describe('settings web server', () => {
         claude: '</script><script>alert(1)</script>',
       },
     };
-    const h = await start({ loadConfig: async () => malicious });
+    const h = await start({
+      loadConfigByScope: async () => bothLayers(malicious),
+    });
     const res = await fetch(urlFor(h, '/'));
     const html = await res.text();
     expect(html).not.toContain('</script><script>');
@@ -179,9 +191,9 @@ describe('settings web server', () => {
     let stored: Config = DEFAULT_CONFIG;
     let loadCalls = 0;
     const h = await start({
-      loadConfig: async () => {
+      loadConfigByScope: async () => {
         loadCalls += 1;
-        return stored;
+        return bothLayers(stored);
       },
       saveConfig: async (_scope, document) => {
         stored = document as unknown as Config;
@@ -293,7 +305,7 @@ describe('settings web server', () => {
     const local = await startSettingsServer({
       settingsHtml: '<html>__CENNAD_STATE__</html>',
       idleMs: 80,
-      loadConfig: async () => DEFAULT_CONFIG,
+      loadConfigByScope: async () => bothLayers(DEFAULT_CONFIG),
       saveConfig: async (_scope, document) => stateOf(document),
       onClose: () => {
         closedCount += 1;

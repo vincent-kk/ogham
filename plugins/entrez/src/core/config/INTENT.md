@@ -6,16 +6,16 @@ config 는 user(플러그인 데이터 디렉터리)와 project(`<workspace>/.en
 
 ## Structure
 
-| 파일                               | 역할                                                       |
-| ---------------------------------- | ---------------------------------------------------------- |
-| `operations/loadConfig.ts`         | `loadConfig` — 두 레이어 병합, 미설정이면 null, 0o600 강화 |
-| `operations/loadConfigScope.ts`    | `loadConfigScope` — 레이어별 원문 + 병합 + 재정의 목록     |
-| `operations/saveConfig.ts`         | `saveConfig` — 단일 레이어에 0o600 기록                    |
-| `utils/configLayers.ts`            | 두 레이어 좌표 해석                                        |
-| `utils/ensureProjectDirIgnored.ts` | project 디렉터리 생성 시 `.gitignore` 동봉                 |
-| `operations/loadCredentials.ts`    | `loadCredentials` — 없으면 {}, 0o600 강화                  |
-| `operations/saveCredentials.ts`    | `saveCredentials` — api_key 0o600 기록                     |
-| `operations/resolveRateLimit.ts`   | `resolveRateLimit` — 키 유무→3/10 per sec                  |
+| 파일                               | 역할                                                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `operations/loadConfig.ts`         | `loadConfig` — 두 레이어 병합, 미설정이면 null, 0o600 강화 · `loadConfigByScope` — project 좌표를 끈 채 같은 로더로 얻는 레이어별 뷰 |
+| `operations/loadConfigScope.ts`    | `loadConfigScope` — 레이어별 원문 + 병합 + 재정의 목록                                                                               |
+| `operations/saveConfig.ts`         | `saveConfig` — 단일 레이어에 0o600 기록                                                                                              |
+| `utils/configLayers.ts`            | 두 레이어 좌표 해석                                                                                                                  |
+| `utils/ensureProjectDirIgnored.ts` | project 디렉터리 생성 시 `.gitignore` 동봉                                                                                           |
+| `operations/loadCredentials.ts`    | `loadCredentials` — 없으면 {}, 0o600 강화                                                                                            |
+| `operations/saveCredentials.ts`    | `saveCredentials` — api_key 0o600 기록                                                                                               |
+| `operations/resolveRateLimit.ts`   | `resolveRateLimit` — 키 유무→3/10 per sec                                                                                            |
 
 ## Conventions
 

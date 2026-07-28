@@ -8,7 +8,8 @@ import { generateToken } from '@ogham/http-kit/token';
 
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
 import {
-  loadConfig as loadConfigDefault,
+  type ConfigByScope,
+  loadConfigByScope as loadConfigByScopeDefault,
   loadConfigState as loadConfigStateDefault,
   saveConfig as saveConfigDefault,
 } from '../../../../core/configManager/index.js';
@@ -27,7 +28,12 @@ import { createRouteHandler } from './routing/routes.js';
 export interface StartSettingsServerOptions {
   settingsHtml: string;
   idleMs?: number;
-  loadConfig?: () => Promise<Config>;
+  /**
+   * How this server reads config. The merged view handlers use is derived
+   * from it, so this is the only config read to override — two seams would
+   * let a caller stub one and get the real file through the other.
+   */
+  loadConfigByScope?: () => Promise<ConfigByScope>;
   loadConfigState?: () => ConfigScopeState;
   saveConfig?: (
     scope: ConfigScope,
@@ -53,14 +59,21 @@ export async function startSettingsServer(
 
   const idleMs = options.idleMs ?? SETTINGS_SERVER_IDLE_MS;
   const token = generateToken();
-  const loadConfigImpl = options.loadConfig ?? loadConfigDefault;
+  const loadConfigByScopeImpl =
+    options.loadConfigByScope ?? loadConfigByScopeDefault;
   const loadConfigStateImpl = options.loadConfigState ?? loadConfigStateDefault;
   const saveConfigImpl = options.saveConfig ?? saveConfigDefault;
   let currentConfig: Config | null = null;
 
   async function loadCurrentConfig(): Promise<Config> {
-    currentConfig = await loadConfigImpl();
+    currentConfig = (await loadConfigByScopeImpl()).project;
     return currentConfig;
+  }
+
+  async function loadCurrentConfigByScope(): Promise<ConfigByScope> {
+    const byScope = await loadConfigByScopeImpl();
+    currentConfig = byScope.project;
+    return byScope;
   }
 
   async function saveAndReloadConfig(
@@ -68,7 +81,7 @@ export async function startSettingsServer(
     document: Record<string, unknown>,
   ): Promise<ConfigScopeState> {
     const state = await saveConfigImpl(scope, document);
-    currentConfig = await loadConfigImpl();
+    currentConfig = (await loadConfigByScopeImpl()).project;
     return state;
   }
 
@@ -108,6 +121,7 @@ export async function startSettingsServer(
     token,
     settingsHtml: options.settingsHtml,
     loadConfig: loadCurrentConfig,
+    loadConfigByScope: loadCurrentConfigByScope,
     loadConfigState: loadConfigStateImpl,
     saveConfig: saveAndReloadConfig,
     provisionYoutube:

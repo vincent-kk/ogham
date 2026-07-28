@@ -28,9 +28,35 @@ import { configLayers } from './utils/configLayers.js';
  * normal first-run state and yields validated defaults.
  */
 export async function loadConfig(cwd: string): Promise<ImbasConfig> {
+  return (await loadConfigByScope(cwd)).project;
+}
+
+/** The config each layer resolves to, as the settings page needs it. */
+export interface ConfigByScope {
+  /** What the user layer decides on its own; the project file is not read. */
+  readonly user: ImbasConfig;
+  /** What is actually in force — the project layer laid over the user one. */
+  readonly project: ImbasConfig;
+}
+
+/**
+ * Both views of the config, for a page that shows one layer at a time.
+ *
+ * Each view goes through the same parse, so both arrive complete: the schema
+ * fills every key neither layer named, which is what lets the form open on
+ * the user layer without empty fields.
+ *
+ * @param cwd Anchor for the project layer.
+ * @returns Both views. `project` is what `loadConfig` returns.
+ */
+export async function loadConfigByScope(cwd: string): Promise<ConfigByScope> {
   const documents = readConfigLayers(configLayers(cwd));
-  const merged = mergeConfigLayers(documents.user, documents.project);
-  return ImbasConfigSchema.parse(merged) as unknown as ImbasConfig;
+  const parse = (document: Record<string, unknown> | null): ImbasConfig =>
+    ImbasConfigSchema.parse(document ?? {}) as unknown as ImbasConfig;
+  return {
+    user: parse(documents.user),
+    project: parse(mergeConfigLayers(documents.user, documents.project)),
+  };
 }
 
 /**

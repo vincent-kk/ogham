@@ -39,11 +39,21 @@ async function readJson(res: Response): Promise<RouteJson> {
 }
 
 function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
+  // A case that names a config states it once, through `loadConfig`. Both
+  // layers resolve to it unless the case says otherwise — letting the two
+  // drift apart in the fixture would test a server that cannot exist.
+  const loadConfig =
+    overrides.loadConfig ??
+    (vi.fn().mockResolvedValue({}) as RouteContext["loadConfig"]);
   return {
     token: TEST_TOKEN,
+    loadConfigByScope: async () => {
+      const config = await loadConfig();
+      return { user: config, project: config };
+    },
     settingsHtml:
       "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
-    loadConfig: vi.fn().mockResolvedValue({}),
+    loadConfig,
     loadConfigScope: vi.fn().mockReturnValue({
       paths: { user: "/tmp/user/config.json", project: null },
       layers: { user: null, project: null },

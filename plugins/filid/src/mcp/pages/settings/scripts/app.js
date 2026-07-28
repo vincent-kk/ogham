@@ -32,6 +32,39 @@
   // touching the toggle rewrites the file the config already came from.
   var scope = scopeState.layers.project === null ? 'user' : 'project';
 
+  // One normalized config per layer, so moving the toggle re-seats the form
+  // without a round trip. The server normalizes both — this page has neither
+  // the schema nor the defaults, and it is also what `collectConfig` starts
+  // from, so a save under User never carries the project's overrides back
+  // into the user file.
+  var configByScope = (state && state.configByScope) || {
+    user: {},
+    project: {},
+  };
+
+  /**
+   * The config document the chosen layer edits.
+   *
+   * @returns {object} That layer's normalized config.
+   */
+  function activeConfig() {
+    return configByScope[scope] || {};
+  }
+
+  /**
+   * The adapter whose entry-point overrides this layer's form edits. Layers
+   * may enable different adapters, so it is read per layer with the server's
+   * effective answer as the floor.
+   *
+   * @returns {string} The structure adapter id.
+   */
+  function adapterId() {
+    var adapters = activeConfig().adapters || {};
+    return (
+      (adapters.enabled && adapters.enabled[0]) || state.structureAdapterId
+    );
+  }
+
   var SCOPE_OPTIONS = [
     ['user', 'User', 'Applies to every project you open.'],
     ['project', 'Project', 'Committed with the repository; outranks User.'],
@@ -57,8 +90,11 @@
         dirty = true;
         renderScope();
         applyScopeBadges();
-        // The toggle decides where rule documents deploy, so the rows that
-        // name the channel are stale the moment it moves.
+        // Everything below answers "what does this layer say" — the form
+        // fields, the rule list, and the channel the rule documents deploy
+        // to. Leaving any of them behind shows one layer under the other's
+        // name.
+        applyScopeConfig();
         renderRuleDocs();
       });
       var text = document.createElement('span');
@@ -330,19 +366,29 @@
     return li;
   }
 
-  (function renderRules() {
+  /**
+   * Draw the structural rules the chosen layer configures. The list is
+   * rebuilt rather than patched: two layers may name different rule sets.
+   */
+  function renderRules() {
     var list = $('rules-list');
-    Object.keys(state.config.rules).forEach(function (id) {
-      list.appendChild(ruleItem(id, state.config.rules[id] || {}));
+    list.textContent = '';
+    var rules = activeConfig().rules || {};
+    Object.keys(rules).forEach(function (id) {
+      list.appendChild(ruleItem(id, rules[id] || {}));
     });
-  })();
+  }
 
   // --- prefill: general & structure exceptions ----------------------------
-  (function prefill() {
-    if (state.config.language) $('language').value = state.config.language;
-    var structure = state.config.structure || {};
-    if (typeof structure.maxDepth === 'number')
-      $('max-depth').value = String(structure.maxDepth);
+  /** Seat the general and structure fields on the chosen layer's config. */
+  function prefillConfig() {
+    var config = activeConfig();
+    $('language').value = config.language || '';
+    var structure = config.structure || {};
+    // Assigned either way: a layer that sets no depth must clear the value the
+    // other layer left in the field.
+    $('max-depth').value =
+      typeof structure.maxDepth === 'number' ? String(structure.maxDepth) : '';
 
     var allowed = structure.additionalAllowedPeers || [];
     $('additional-allowed').value = allowed
@@ -360,12 +406,24 @@
       .join('\n');
     var entryPointOverrides = structure.entryPointOverrides || {};
     $('additional-entry-points').value = (
-      entryPointOverrides[state.structureAdapterId] || []
+      entryPointOverrides[adapterId()] || []
     ).join('\n');
     $('additional-organ-names').value = (
       structure.additionalOrganNames || []
     ).join('\n');
-  })();
+  }
+
+  /**
+   * Re-seat every config-backed field on the layer the toggle now names.
+   * The rule list is part of it: which rules exist is a config question, and
+   * two layers can answer it differently.
+   */
+  function applyScopeConfig() {
+    renderRules();
+    prefillConfig();
+  }
+
+  applyScopeConfig();
 
   // --- dirty tracking ------------------------------------------------------
   form.addEventListener('input', function () {
@@ -476,7 +534,7 @@
   }
 
   function collectConfig() {
-    var config = JSON.parse(JSON.stringify(state.config));
+    var config = JSON.parse(JSON.stringify(activeConfig()));
     config.version = '2.0';
     config.rules = {};
 
@@ -524,9 +582,8 @@
 
     var entryPoints = lines('additional-entry-points');
     var entryPointOverrides = structure.entryPointOverrides || {};
-    if (entryPoints.length)
-      entryPointOverrides[state.structureAdapterId] = entryPoints;
-    else delete entryPointOverrides[state.structureAdapterId];
+    if (entryPoints.length) entryPointOverrides[adapterId()] = entryPoints;
+    else delete entryPointOverrides[adapterId()];
     if (Object.keys(entryPointOverrides).length)
       structure.entryPointOverrides = entryPointOverrides;
     else delete structure.entryPointOverrides;

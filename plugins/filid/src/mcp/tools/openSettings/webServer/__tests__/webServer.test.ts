@@ -22,10 +22,17 @@ const EMPTY_SYNC = {
 const STATE: SettingsPageState = {
   projectRoot: '/tmp/project',
   configExists: true,
-  config: {
-    version: '2.0',
-    adapters: { mode: 'auto', enabled: [] },
-    rules: {},
+  configByScope: {
+    user: {
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+    },
+    project: {
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+    },
   },
   configDiagnostics: [],
   scope: {
@@ -139,11 +146,14 @@ describe('filid settings web server', () => {
   it('escapes </script> inside inlined state fields', async () => {
     const malicious: SettingsPageState = {
       ...STATE,
-      config: {
-        version: '2.0',
-        adapters: { mode: 'auto', enabled: [] },
-        rules: {},
-        language: '</script><script>alert(1)</script>',
+      configByScope: {
+        ...STATE.configByScope,
+        project: {
+          version: '2.0',
+          adapters: { mode: 'auto', enabled: [] },
+          rules: {},
+          language: '</script><script>alert(1)</script>',
+        },
       },
     };
     const h = await start({ loadState: () => malicious });

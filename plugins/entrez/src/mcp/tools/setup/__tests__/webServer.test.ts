@@ -15,6 +15,7 @@ import type {
 } from "../../../../types/setup.js";
 import {
   loadConfig,
+  loadConfigByScope,
   saveConfig,
   loadCredentials,
   saveCredentials,
@@ -41,6 +42,8 @@ beforeEach(async () => {
     context: {
       settingsHtml: HTML,
       loadConfig: () => loadConfig({ user: configPath, project: null }),
+      loadConfigByScope: () =>
+        loadConfigByScope({ user: configPath, project: null }),
       loadConfigScope: () => ({
         paths: { user: "/tmp/user/config.json", project: null },
         layers: { user: null, project: null },

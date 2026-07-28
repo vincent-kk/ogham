@@ -49,4 +49,35 @@ describe("config scope wiring between the settings server and its page", () => {
 
     expect(handler).toContain("scope: ctx.loadConfigScope()");
   });
+
+  it("injects one prefill view per layer and re-seats the form on the toggle", () => {
+    const handler = readFileSync(
+      join(WEB_SERVER_DIR, "handlers/handleGetRoot.ts"),
+      "utf8",
+    );
+    const app = readSettingsFile("scripts/app.js");
+
+    expect(handler).toContain("ctx.loadConfigByScope()");
+    expect(handler).toContain("configByScope");
+    expect(app).toContain("injected.configByScope");
+
+    const toggle = app.slice(
+      app.indexOf('radio.addEventListener("change"'),
+      app.indexOf("var text = document.createElement"),
+    );
+    expect(toggle).toContain("prefillForm(viewForScope())");
+  });
+
+  it("clears what the previous layer left before seating the next one", () => {
+    const app = readSettingsFile("scripts/app.js");
+
+    // Site rows are appended per configured site and fields keep their last
+    // value, so without both resets the two layers would appear merged.
+    const prefill = app.slice(
+      app.indexOf("function prefillForm(data)"),
+      app.indexOf("function fillOnPremFields"),
+    );
+    expect(prefill).toContain("resetSiteEntries()");
+    expect(prefill).toContain("restorePristineFields()");
+  });
 });

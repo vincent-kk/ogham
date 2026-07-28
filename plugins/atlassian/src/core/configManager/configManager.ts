@@ -57,6 +57,33 @@ export async function loadConfig(
   );
 }
 
+/** The config each layer resolves to, as the settings page needs it. */
+export interface ConfigByScope {
+  /** What the user layer decides on its own; the project file is not read. */
+  readonly user: AtlassianConfig;
+  /** What is actually in force — the project layer laid over the user one. */
+  readonly project: AtlassianConfig;
+}
+
+/**
+ * Both views of the config, for a page that shows one layer at a time.
+ *
+ * The user view is the same loader run with the project coordinate switched
+ * off, so validation and the permission tightening stay in one place.
+ *
+ * @param layers Absolute paths of both layer files; omitted uses the defaults.
+ * @returns Both views. `project` is what `loadConfig` returns.
+ */
+export async function loadConfigByScope(
+  layers: ConfigLayerPaths = configLayers(),
+): Promise<ConfigByScope> {
+  const [user, project] = await Promise.all([
+    loadConfig({ user: layers.user, project: null }),
+    loadConfig(layers),
+  ]);
+  return { user, project };
+}
+
 /** Both layers plus the merge, for callers that show which file said what. */
 export function loadConfigScope(
   layers: ConfigLayerPaths = configLayers(),

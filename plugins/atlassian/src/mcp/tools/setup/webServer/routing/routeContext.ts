@@ -3,6 +3,7 @@ import type {
   ConfigScopeState,
 } from "@ogham/cross-platform/config-scope";
 
+import type { ConfigByScope } from "../../../../../core/index.js";
 import type {
   AtlassianConfig,
   Credentials,
@@ -18,6 +19,8 @@ export interface RouteContext {
   token: string;
   settingsHtml: string;
   loadConfig: () => Promise<AtlassianConfig>;
+  /** The config each layer resolves to, for the page's per-scope prefill. */
+  loadConfigByScope: () => Promise<ConfigByScope>;
   /** Both layers plus the merge, for the page's scope toggle. */
   loadConfigScope: () => ConfigScopeState;
   saveConfig: (

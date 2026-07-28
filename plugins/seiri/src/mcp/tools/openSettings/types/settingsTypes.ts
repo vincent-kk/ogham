@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { INTERVENTION_LEVELS } from '../../../../constants/intervention.js';
 import type {
   ConfigScopeSnapshot,
-  SeiriConfig,
   SeiriConfigScope,
 } from '../../../../types/config.js';
 import type {
@@ -29,9 +28,12 @@ export interface SettingsPageState {
   projectRoot: string;
   /** True when the project layer holds a dial — what the page edits by default. */
   configExists: boolean;
-  /** The dial in effect across both stored layers. */
-  config: SeiriConfig;
-  /** Per-layer dials and which one is overriding, for the scope toggle. */
+  /**
+   * Per-layer dials and which one is overriding. The page seats the dial from
+   * the layer the toggle names, so this carries the values as well as the
+   * paths — an effective-dial field beside it would be a second answer to the
+   * same question, and the one the session valve can bend.
+   */
   scope: ConfigScopeSnapshot;
   ruleDocs: {
     pluginRootResolved: boolean;

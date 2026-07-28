@@ -1,7 +1,7 @@
 import { basename } from 'node:path';
 
 import {
-  loadConfig,
+  loadConfigByScope,
   loadConfigScope,
 } from '../../../../core/configManager/configManager.js';
 import type {
@@ -18,7 +18,7 @@ export async function buildSettingsState(
   projectRoot: string,
   bootstrap: SettingsBootstrap,
 ): Promise<SettingsPageState> {
-  const config = await loadConfig(projectRoot);
+  const configByScope = await loadConfigByScope(projectRoot);
   const scope = loadConfigScope(projectRoot);
   const suggested = basename(projectRoot)
     .replace(/[^A-Za-z0-9]/g, '')
@@ -29,7 +29,7 @@ export async function buildSettingsState(
     // user layer has a usable config but nothing committed here yet.
     configExists: scope.layers.project !== null,
     scope,
-    config,
+    configByScope,
     suggestedLocalKey: suggested.length > 0 ? suggested : 'LOCAL',
     bootstrap,
   };

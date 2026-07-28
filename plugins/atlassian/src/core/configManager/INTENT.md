@@ -6,12 +6,12 @@ Atlassian 설정 파일의 로드·저장·병합. user(플러그인 데이터 �
 
 ## Structure
 
-| 파일                               | 역할                                                                               |
-| ---------------------------------- | ---------------------------------------------------------------------------------- |
-| `configManager.ts`                 | `loadConfig`(병합) · `loadConfigScope` · `saveConfig`(단일 레이어) · `mergeConfig` |
-| `utils/configLayers.ts`            | 두 레이어 좌표 해석                                                                |
-| `utils/ensureProjectDirIgnored.ts` | project 디렉터리 생성 시 `.gitignore` 동봉                                         |
-| `index.ts`                         | 배럴 재내보내기                                                                    |
+| 파일                               | 역할                                                                                                                  |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `configManager.ts`                 | `loadConfig`(병합) · `loadConfigByScope`(레이어별 뷰) · `loadConfigScope` · `saveConfig`(단일 레이어) · `mergeConfig` |
+| `utils/configLayers.ts`            | 두 레이어 좌표 해석                                                                                                   |
+| `utils/ensureProjectDirIgnored.ts` | project 디렉터리 생성 시 `.gitignore` 동봉                                                                            |
+| `index.ts`                         | 배럴 재내보내기                                                                                                       |
 
 ## Boundaries
 

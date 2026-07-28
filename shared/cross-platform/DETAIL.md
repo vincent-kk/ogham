@@ -155,6 +155,21 @@ radiogroup 시맨틱이 거기서 나온다.
 둔다(`.scope-hint__meaning` · `.scope-hint__path`). 한 줄에 좌우로 벌리면 절대
 경로가 대개 접혀 오른쪽 정렬이 도리어 어그러진다.
 
+토글을 옮기면 폼은 그 레이어의 값으로 **다시 채워진다**. `user`는 user 레이어
+단독을 그 플러그인의 기본값 위에 얹은 문서를, `project`는 effective(project를
+user 위에 병합한 결과)를 보여준다. project에서 그 레이어가 말하지 않은 필드는
+상속된 유효값이 앉고 출처는 `data-scope-state`가 말한다 — 기본값으로 되돌리면
+전체 문서를 쓰는 페이지에서 user 설정이 기본값으로 덮인다.
+
+병합은 서버가 한다. 페이지는 서버가 준 두 문서 중 **고르기만** 한다 — 레이어
+원문을 페이지가 합치면 스키마를 모르는 쪽이 무엇을 이길지 정하게 된다. 스키마를
+가진 서버가 레이어마다 정규화해 `configByScope: { user, project }`로 실어 보내는
+것이 기본이고, `deilen`처럼 번들되어 기본값을 스스로 아는 페이지는
+`ConfigScopeState`의 `layers.user`와 `effective`를 그대로 골라 쓴다. 어느 쪽이든
+저장 문서도 **고른 그 문서에서 출발한다** — 병합 결과에서 출발하면 user 저장이
+project의 재정의를 user 파일에 구워 넣는다. 떠나는 레이어의 미저장 편집은
+따라오지 않는다.
+
 `filid`와 `seiri`에서는 이 토글이 config 파일뿐 아니라 **규칙 문서가 배포되는
 채널**까지 정한다. user는 호스트 상태 루트(`~/.claude/rules/`), project는 저장소
 채널이다. 규칙이 한 곳에만 존재해야 호스트가 같은 규칙을 두 번 읽지 않으므로,
@@ -250,6 +265,8 @@ root 진단 의미를 유지하면서 Node builtin만 사용한다. 범용 `spaw
 `cross-spawn`, executable discovery를 import graph에 포함하지 않는다.
 
 ## Last Updated
+
+2026-07-29 — 설정 페이지가 scope마다 폼을 다시 채우는 `configByScope` 규약 추가.
 
 2026-07-29 — user/project 두 네임스페이스를 병합해 읽는 `config-scope` 추가.
 
