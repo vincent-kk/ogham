@@ -17,6 +17,8 @@ import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
 let projectRoot: string;
 
+const controlCharacterPathsUnsupported = process.platform === 'win32';
+
 function git(args: readonly string[]): string {
   const result = spawnCliSync('git', args, { cwd: projectRoot });
   if (result.code !== 0 || result.spawnError)
@@ -131,29 +133,35 @@ describe('review_state committed source hash', () => {
     );
   });
 
-  it('preserves newline-containing paths from NUL-delimited Git output', async () => {
-    const relativePath = 'line\nbreak';
-    write(relativePath, 'newline path\n');
-    commit('newline path');
+  it.skipIf(controlCharacterPathsUnsupported)(
+    'preserves newline-containing paths from NUL-delimited Git output',
+    async () => {
+      const relativePath = 'line\nbreak';
+      write(relativePath, 'newline path\n');
+      commit('newline path');
 
-    const state = await sourceState();
+      const state = await sourceState();
 
-    expect(state.data.state!.fileHashes[relativePath]).toMatch(
-      /^[0-9a-f]{40,64}$/,
-    );
-  });
+      expect(state.data.state!.fileHashes[relativePath]).toMatch(
+        /^[0-9a-f]{40,64}$/,
+      );
+    },
+  );
 
-  it('preserves tab-containing paths from NUL-delimited tree output', async () => {
-    const relativePath = 'tab\tpath';
-    write(relativePath, 'tab path\n');
-    commit('tab path');
+  it.skipIf(controlCharacterPathsUnsupported)(
+    'preserves tab-containing paths from NUL-delimited tree output',
+    async () => {
+      const relativePath = 'tab\tpath';
+      write(relativePath, 'tab path\n');
+      commit('tab path');
 
-    const state = await sourceState();
+      const state = await sourceState();
 
-    expect(state.data.state!.fileHashes[relativePath]).toMatch(
-      /^[0-9a-f]{40,64}$/,
-    );
-  });
+      expect(state.data.state!.fileHashes[relativePath]).toMatch(
+        /^[0-9a-f]{40,64}$/,
+      );
+    },
+  );
 
   it('changes when the selected merge base changes', async () => {
     git(['branch', 'older-base', 'main~0']);
