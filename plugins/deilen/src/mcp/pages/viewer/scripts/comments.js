@@ -153,6 +153,7 @@ function openComposer(anchor, editing) {
 
   const card = getElement("div", { class: "composer" });
   card.dataset.composer = "true";
+  if (editing) card.dataset.editing = editing.id;
 
   const chip = getElement("div", {
     class: anchor ? "anchor-chip" : "anchor-chip overall",
@@ -215,6 +216,7 @@ function openComposer(anchor, editing) {
   card.append(chip, textarea, thumbs, actions);
   list.prepend(card);
   renderThumbs();
+  renderSidebar();
   textarea.focus();
   markPending(anchor);
 }
@@ -239,6 +241,8 @@ function commitOpenComposer() {
 function closeComposer() {
   document.querySelector('#comment-list [data-composer="true"]')?.remove();
   markPending(null);
+  // Bring back the card the composer was standing in for.
+  renderSidebar();
 }
 
 /* ── Overall composer (text-only, no anchor) ──────────── */
@@ -249,6 +253,7 @@ function openOverallComposer(editing) {
 
   const card = getElement("div", { class: "composer" });
   card.dataset.composer = "true";
+  if (editing) card.dataset.editing = editing.id;
 
   const chip = getElement("div", {
     class: "anchor-chip overall",
@@ -304,6 +309,7 @@ function openOverallComposer(editing) {
   card.append(chip, textarea, thumbs, actions);
   list.prepend(card);
   renderThumbs();
+  renderSidebar();
   textarea.focus();
   markPending(null);
 }
@@ -408,12 +414,19 @@ function renderSidebar() {
   list.replaceChildren();
   if (composer) list.append(composer);
 
-  const overallNotes = [...store.overall.values()];
+  // The open composer already shows the entry it edits — rendering its card too
+  // would put the same comment in the list twice.
+  const editingId = composer?.dataset.editing;
+  const overallNotes = [...store.overall.values()].filter(
+    (note) => note.id !== editingId,
+  );
   for (const note of overallNotes) list.append(overallNoteCard(note));
 
   // Newest first: the store preserves insertion order, so the most recently
   // added comment sits at the top of the list.
-  const comments = [...store.comments.values()].reverse();
+  const comments = [...store.comments.values()]
+    .reverse()
+    .filter((comment) => comment.id !== editingId);
   for (const comment of comments) list.append(commentCard(comment));
 
   if (!composer && overallNotes.length === 0 && comments.length === 0) {

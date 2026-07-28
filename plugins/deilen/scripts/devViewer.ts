@@ -10,8 +10,11 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// 1. Re-inline styles/scripts into public/viewer.html so src/ edits are served.
+// 1. Re-inline styles/scripts into public/viewer.html so src/ edits are served,
+//    and rebuild the lazy renderer chunks for the same reason — the diagram
+//    lightbox ships inside public/assets/mermaid.js, not the inlined HTML.
 execSync("node scripts/buildViewerHtml.mjs", { cwd: root, stdio: "inherit" });
+execSync("node scripts/buildRenderers.mjs", { cwd: root, stdio: "inherit" });
 
 // 2. Render a sample document and start the viewer server.
 const { handleRenderViewer } =
@@ -38,6 +41,35 @@ const SAMPLE = [
   "- [ ] 남은 태스크",
   "",
   "> 인용문에도 코멘트를 달 수 있습니다.",
+  "",
+  "## 다이어그램",
+  "",
+  "다이어그램 오른쪽 위 확대 버튼을 누르면 전체 화면으로 열립니다 — 휠·`+`/`−` 로 확대, 드래그로 이동, `Fit` 으로 원복, `Esc` 로 닫기.",
+  "",
+  "```mermaid",
+  "flowchart TD",
+  '  user["사용자"] --> preview["preview 스킬"]',
+  '  preview --> renderTool["render_viewer"]',
+  '  renderTool --> httpServer["로컬 HTTP 서버 127.0.0.1"]',
+  '  httpServer --> viewerPage["뷰어 페이지"]',
+  '  viewerPage --> lineComment["라인 코멘트"]',
+  '  viewerPage --> overallNote["전체 노트"]',
+  '  lineComment --> collect["collect_feedback"]',
+  '  overallNote --> collect',
+  '  collect --> conversation["Claude 대화"]',
+  '  conversation --> revise["문서 수정"]',
+  "  revise --> renderTool",
+  '  subgraph browserSide["브라우저"]',
+  "    viewerPage",
+  "    lineComment",
+  "    overallNote",
+  "  end",
+  '  subgraph mcpSide["MCP 서버"]',
+  "    renderTool",
+  "    httpServer",
+  "    collect",
+  "  end",
+  "```",
   "",
   "## 브랜드 요소",
   "",
