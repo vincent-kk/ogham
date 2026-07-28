@@ -62,6 +62,10 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
+Read the findings from the returned result or, when the payload exceeds the
+inline envelope budget, from its artifact. All six scopes at once is the largest
+payload this skill requests; an absent inline `data` is not an empty finding set.
+
 Present configured validation by scope and cite rule IDs from actual findings.
 Do not invent a separate active-rule list.
 

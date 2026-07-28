@@ -51,6 +51,9 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
+Read the validation data from the returned result or, when the payload exceeds
+the inline envelope budget, from its artifact.
+
 The plan is executable only when the response status is `ok` and its validation
 data is valid. A stale snapshot, missing source, invalid artifact, or unresolved
 decision returns to planning; never work around it with an ad-hoc move.
@@ -103,6 +106,10 @@ mcp__plugin_filid_tools__structure_validate({
   planPath: "<absolute-plan-artifact-path>"
 })
 ```
+
+Read the postcondition results from the returned result or, when the payload
+exceeds the inline envelope budget, from its artifact. Treating an absent inline
+`data` as "nothing failed" would turn a failed move into a false pass.
 
 Success requires `status: "ok"` and valid postconditions for source absence,
 target presence, required artifacts, imports, boundary rules, and dependency DAG.

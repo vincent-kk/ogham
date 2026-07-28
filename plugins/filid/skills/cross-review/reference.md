@@ -2,6 +2,7 @@
 
 | File                        | Contents                                                                         |
 | --------------------------- | -------------------------------------------------------------------------------- |
+| `specification.md`          | Public contract specification: run requirements and review-report frontmatter    |
 | `contracts.md`              | Scope, state lifecycle, evidence identity, opinion schema, arbitration, verdicts |
 | `templates.md`              | Canonical session, evidence, opinion, report, and fix-request layouts            |
 | `phases/evidence.md`        | Exact snapshot-backed evidence collection                                        |
@@ -13,6 +14,7 @@
 
 ## Cross-Reference Map
 
+- Checking what the run as a whole must satisfy → `specification.md` → Requirements
 - Starting or resuming a run → `contracts.md` → Review-State Lifecycle
 - Collecting tool evidence → `phases/evidence.md`
 - Writing an opinion → `contracts.md` → Opinion Contract

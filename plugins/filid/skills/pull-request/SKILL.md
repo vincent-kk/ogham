@@ -48,7 +48,11 @@ Skipped entirely when `--skip-enrich` is passed.
    })
    ```
 
-Collect the distinct `ownerFractalPath` values. This is the audit scope — **do not enrich the whole tree.** PR scope and document scope must match. 3. Invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. In an orchestrated run (`pipeline`) append `--auto-approve`; standalone runs keep the skill's own approval step. 4. On enrich-docs failure, print the BLOCKED message (`reference.md` §1) and exit. `--skip-enrich` bypasses this stage. 5. If `git status --porcelain` now reports changes, stage **only** `INTENT.md` / `DETAIL.md` paths and commit:
+   Collect the distinct `ownerFractalPath` values. This is the audit scope — **do not enrich the whole tree.** PR scope and document scope must match.
+
+3. Invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. In an orchestrated run (`pipeline`) append `--auto-approve`; standalone runs keep the skill's own approval step.
+4. On enrich-docs failure, print the BLOCKED message (`reference.md` §1) and exit. `--skip-enrich` bypasses this stage.
+5. If `git status --porcelain` now reports changes, stage **only** `INTENT.md` / `DETAIL.md` paths and commit:
 
 ```text
 docs(filid): sync INTENT.md / DETAIL.md via enrich-docs
@@ -72,7 +76,7 @@ Use `--base` when given. Otherwise resolve in the order documented in `reference
 1. `gh pr view` decides create versus update.
 2. <!-- [INTERACTIVE] --> An existing PR requires an explicit overwrite confirmation before its body is replaced.
 3. `--draft` creates a draft PR.
-4. With `GH_AUTH = false`, write the body to `.filid/review/pr-body.md` and report the path instead of publishing.
+4. With `GH_AUTH = false`, write the body to `.filid/review/<branch>/pr-body.md` and report the path instead of publishing. The branch segment is required — a flat `.filid/review/pr-body.md` lets a second branch overwrite the first branch's saved body.
 
 ## Options
 

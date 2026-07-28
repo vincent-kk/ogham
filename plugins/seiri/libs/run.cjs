@@ -1,21 +1,23 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * OMC Cross-platform hook runner (run.cjs)
+ * Cross-platform hook runner (run.cjs)
  *
  * Uses process.execPath (the Node binary already running this script) to spawn
- * the target .mjs hook, bypassing PATH / shell discovery issues.
+ * the target .mjs hook, bypassing PATH / shell discovery issues — notably on
+ * Windows, where an `sh + find-node.sh` chain fails because /usr/bin/sh is a
+ * PE32+ binary the OS refuses to execute natively.
  *
- * Replaces the `sh + find-node.sh` chain that fails on Windows because
- * /usr/bin/sh is a PE32+ binary the OS refuses to execute natively.
- * Fixes issues #909, #899, #892, #869.
+ * Usage (from hooks.json):
+ *   node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" \
+ *       "${CLAUDE_PLUGIN_ROOT}/bridge/<hook>.mjs" [args...]
  *
- * Usage (from hooks.json, after setup patches the absolute node path in):
- *   /abs/path/to/node "${CLAUDE_PLUGIN_ROOT}/scripts/run.cjs" \
- *       "${CLAUDE_PLUGIN_ROOT}/scripts/<hook>.mjs" [args...]
+ * Hook bundles live under bridge/; scripts/ holds build-time tooling only.
+ * The manifests invoke a bare `node`; nothing rewrites that token at install
+ * time. This script's own use of process.execPath is what makes the nvm/fnm and
+ * Windows cases work, once the host has resolved `node` well enough to start it.
  *
- * During post-install setup, the leading `node` token is replaced with
- * process.execPath so nvm/fnm users and Windows users all get the right binary.
+ * Shared byte-identical across ogham plugins — change every copy together.
  */
 
 const { spawnSync } = require('child_process');
@@ -41,8 +43,6 @@ if (!target) {
  *   3. Scan the plugin cache for the latest available version that has the
  *      same script name and use that instead.
  *   4. If all else fails, return null (caller exits cleanly).
- *
- * See: https://github.com/Yeachan-Heo/oh-my-claudecode/issues/1007
  */
 function resolveTarget(targetPath) {
   // Fast path: target exists (common case)
@@ -57,14 +57,14 @@ function resolveTarget(targetPath) {
   }
 
   // Fallback: scan plugin cache for the same script in the latest version.
-  // CLAUDE_PLUGIN_ROOT is e.g. ~/.claude/plugins/cache/omc/oh-my-claudecode/4.2.14
+  // CLAUDE_PLUGIN_ROOT is e.g. ~/.claude/plugins/cache/<marketplace>/<plugin>/1.0.0
   // We look one level up for sibling version directories.
   try {
     const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
     if (!pluginRoot) return null;
 
-    const cacheBase = dirname(pluginRoot); // .../oh-my-claudecode/
-    const scriptRelative = targetPath.slice(pluginRoot.length); // /scripts/persistent-mode.cjs
+    const cacheBase = dirname(pluginRoot); // .../<plugin>/
+    const scriptRelative = targetPath.slice(pluginRoot.length); // /bridge/<hook>.mjs
 
     if (!scriptRelative || !existsSync(cacheBase)) return null;
 

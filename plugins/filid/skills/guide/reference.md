@@ -37,6 +37,11 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
+All six scopes at once is the largest payload this skill requests; when it
+exceeds the inline envelope budget the findings are persisted instead. Use the
+returned result or its artifact as the authority — an absent inline `data` is
+not an empty finding set.
+
 The configured validation result is the authority for current findings. There
 is no separate rule-list query. Present rules by the canonical FCA scopes
 above, and cite returned rule IDs only when the validator produced evidence.

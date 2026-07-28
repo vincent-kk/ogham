@@ -55,11 +55,19 @@ For each accepted item, re-run the measurement that produced the original findin
 
 ```text
 mcp__plugin_filid_tools__structure_validate({
-  path: PROJECT_ROOT,
+  path: <owning fractal path, from context_resolve — never PROJECT_ROOT>,
   mode: "project",
   scopes: [...]
 })
 ```
+
+`path` is the only scoping knob this tool has. Passing `PROJECT_ROOT` here is the
+whole-project comparison `reference.md` §1 forbids: two items in the same run
+would each claim the other's improvement.
+
+Read the findings from the returned result or, when the payload exceeds the
+inline envelope budget, from its artifact. Reading an absent inline `data` as
+"the finding is gone" is how this step produces a false `resolved`.
 
 Derive each item's status from the matrix in `reference.md` §1. A status is derived from measured evidence only. Never mark an item resolved because the file appears in the delta.
 

@@ -19,6 +19,8 @@ verdict.
 
 Resolve files relative to this `SKILL.md`:
 
+- `specification.md` — the public contract specification: requirements the run
+  must satisfy and the review-report frontmatter contract;
 - `contracts.md` — scope, state lifecycle, evidence, opinions, arbitration,
   verdict derivation;
 - `phases/evidence.md` — exact snapshot-backed MCP calls and evidence layouts;
@@ -26,9 +28,10 @@ Resolve files relative to this `SKILL.md`:
   `reviewers/verification.md` — independent perspectives;
 - `reviewers/adversarial.md` — candidate arbitration;
 - `templates.md` — canonical artifacts;
+- `reference.md` — index of the files above and the tool-purpose table;
 - `calibration/` — reviewer regression fixtures.
 
-Read `contracts.md` and `templates.md` before starting.
+Read `specification.md`, `contracts.md`, and `templates.md` before starting.
 
 ## Scope
 
@@ -124,8 +127,10 @@ Immediately continue to Step 3.
 
 ## Step 3 — Run Three Independent Perspectives
 
-Spawn exactly three independent foreground reviewers in parallel. Each reviewer
-receives:
+Spawn exactly three independent foreground reviewers in parallel, using the
+host's generic subagent facility. Filid ships no agents of its own — never name
+a `filid:*` agent here, since a stale install may still advertise pre-1.0 ones
+whose roles do not match these perspectives. Each reviewer receives:
 
 - its matching file under `reviewers/`;
 - absolute `PROJECT_ROOT` and `REVIEW_DIR`;
@@ -154,7 +159,8 @@ Immediately continue to Step 4 after all three files exist.
 
 ## Step 4 — Adversarial Arbitration
 
-Spawn one fresh foreground reviewer using `reviewers/adversarial.md`. Give it the
+Spawn one fresh foreground reviewer — same generic subagent facility as Step 3 —
+using `reviewers/adversarial.md`. Give it the
 three opinions, canonical evidence files, committed diff, `SOURCE_HASH`, and
 shared snapshot hash. It writes only:
 

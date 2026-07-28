@@ -96,10 +96,10 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 
 ```
 /filid:cross-review
-/filid:cross-review https://github.com/owner/repo/pull/123
+/filid:cross-review --base origin/main
 ```
 
-Three independent perspectives — contract, structure, verification — review the committed change in parallel, then an adversarial arbiter rules every blocking finding `CONFIRMED | PLAUSIBLE | REFUTED`. Refuted findings leave the verdict but stay in the arbitration log. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and is explicitly scoped to FCA — it is not a security, product, or UX review.
+Three independent perspectives — contract, structure, verification — review the committed change in parallel, then an adversarial arbiter rules every blocking finding `CONFIRMED | REFUTED | INDETERMINATE`. Refuted findings drop out of the verdict but stay in the arbitration log. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and is explicitly scoped to FCA — it is not a security, product, or UX review.
 
 ### Migrate legacy document names
 
@@ -137,6 +137,10 @@ A blocked write explains its reason and denies only that one tool call — your 
 | `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions |
 | `/filid:cross-review`  | Three-perspective FCA review with adversarial arbitration                 |
 | `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                  |
+| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR               |
+| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications      |
+| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL          |
+| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support           |
 
 ---
 

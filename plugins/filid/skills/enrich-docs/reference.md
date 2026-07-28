@@ -20,6 +20,13 @@ The response is a common Filid envelope. Stop before editing when `status` is no
 `ok`; report its diagnostics instead of treating incomplete adapter evidence as a
 clean snapshot.
 
+The snapshot tree is always built to full depth — `--depth` sets the `max-depth`
+rule threshold, not a traversal limit — so on a large project this payload can
+exceed the inline envelope budget, in which case it is persisted and `data` is
+not inline. Treat a returned artifact as the canonical full payload for this call
+and read the node projection from it; an absent inline `data` is never an empty
+candidate set.
+
 Use `data.nodes` as the authoritative candidate set. Each node contains its
 normalized path, classification, INTENT/DETAIL presence, and entry-point count.
 Exclude `organ` nodes because they must not own INTENT.md. A fractal or hybrid
@@ -154,6 +161,11 @@ mcp__plugin_filid_tools__structure_validate({
   scopes: ["documents", "nodes"]
 })
 ```
+
+Read the findings from the returned result or, when the payload is persisted,
+from its artifact. This call decides whether an edited document is reverted, so
+treating an absent inline `data` as "no findings" would silently keep a failed
+edit.
 
 A non-`ok` status, diagnostic, or finding affecting an edited document is not a
 pass. Revert that document to its captured pre-edit content and mark it

@@ -2,7 +2,7 @@
 name: enrich-docs
 user_invocable: true
 description: '[filid:enrich-docs] Improve INTENT.md and DETAIL.md from snapshot-backed context evidence, with approval before LLM edits and structural validation afterward.'
-argument-hint: '[path] [--depth N] [--min-quality 0-100] [--skip-rich] [--dry-run] [--auto-approve] [--include-detail]'
+argument-hint: '[path] [--depth N] [--min-quality 0-100] [--dry-run] [--auto-approve] [--include-detail]'
 version: '1.0.0'
 complexity: complex
 plugin: filid

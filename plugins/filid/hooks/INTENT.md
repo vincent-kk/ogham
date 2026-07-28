@@ -17,7 +17,7 @@ Claude Code 플러그인의 Layer 1 자동 실행 계층. 3개 lifecycle 이벤�
 
 ## Conventions
 
-- 모든 hook command는 `libs/run.cjs`를 통해 실행 (크로스 플랫폼 Node 해석기 탐색)
+- Claude·Codex hook command는 `libs/run.cjs`, agy 는 `run-agy.mjs` 를 통해 실행
 - 스크립트 경로는 `${CLAUDE_PLUGIN_ROOT}` 변수로 참조
 - 구현체는 `src/hooks/<name>/<name>.entry.ts`에 위치, `scripts/buildHooks.mjs`로 번들링
 - 공식 hook 빌드는 세 lifecycle bundle과 `run-agy.mjs`·`run-hook.cmd` 공용 runner만 유지
@@ -38,7 +38,7 @@ Claude Code 플러그인의 Layer 1 자동 실행 계층. 3개 lifecycle 이벤�
 ### Never do
 
 - `hooks.json`에 인라인 스크립트 직접 작성 (반드시 bridge 스크립트 경로 참조)
-- `libs/run.cjs` 우회하여 직접 `.mjs` 실행 경로 설정
+- host runner (`libs/run.cjs`·`run-agy.mjs`) 우회하여 직접 `.mjs` 실행 경로 설정
 - 이 디렉터리에 구현 코드 배치 (설정 전용 노드)
 - 루트 `hooks.json`, `.codex-plugin/hooks.json`, `bridge/*` 생성물을 직접 편집
 

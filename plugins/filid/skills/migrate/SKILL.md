@@ -76,6 +76,10 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
+Read the findings from the returned result or, when the payload exceeds the
+inline envelope budget, from its artifact — a whole-project migration can push
+it over. An absent inline `data` is not an empty finding set.
+
 Preserve diagnostics and findings in the report. A non-`ok` result means the
 migration ran but compliance is not verified.
 

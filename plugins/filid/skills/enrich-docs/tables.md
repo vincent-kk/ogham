@@ -16,15 +16,18 @@ the report and is never converted into a successful audit.
 
 ## Options
 
-| Option             | Type    | Default   | Description                                              |
-| ------------------ | ------- | --------- | -------------------------------------------------------- |
-| `path`             | string  | cwd       | Project subtree to audit                                 |
-| `--depth`          | integer | unlimited | Maximum node depth requested from the scan               |
-| `--min-quality`    | integer | `70`      | RICH/SPARSE threshold                                    |
-| `--skip-rich`      | flag    | on        | Keep RICH documents unchanged                            |
-| `--dry-run`        | flag    | off       | Display the evidence-backed plan without writes          |
-| `--auto-approve`   | flag    | off       | Treat invocation as prior approval of the displayed plan |
-| `--include-detail` | flag    | off       | Include DETAIL.md contract quality                       |
+| Option             | Type    | Default | Description                                              |
+| ------------------ | ------- | ------- | -------------------------------------------------------- |
+| `path`             | string  | cwd     | Project subtree to audit                                 |
+| `--depth`          | integer | `10`\*  | `max-depth` rule threshold; not a traversal limit        |
+| `--min-quality`    | integer | `70`    | RICH/SPARSE threshold                                    |
+| `--dry-run`        | flag    | off     | Display the evidence-backed plan without writes          |
+| `--auto-approve`   | flag    | off     | Treat invocation as prior approval of the displayed plan |
+| `--include-detail` | flag    | off     | Include DETAIL.md contract quality                       |
+
+\* The project's configured `structure.maxDepth` when set, otherwise `10`. The
+scan itself always traverses the full tree; this value only decides when a node
+counts as a `max-depth` violation.
 
 ## Terminal Stage Markers
 

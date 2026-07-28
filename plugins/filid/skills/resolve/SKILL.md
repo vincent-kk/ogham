@@ -74,10 +74,10 @@ base_sha = git rev-parse HEAD
 
 This value is written to `justifications.md` as `resolve_commit_sha`. `revalidate` diffs `resolve_commit_sha..HEAD`, so it must be read **before** any correction lands.
 
-Then hand the accepted items out. Build one delegation brief per item using the format in `reference.md` §3 and dispatch them together:
+Then hand the accepted items out, routing each by the table in `reference.md` §3 and dispatching them together:
 
-- in a main-agent session, apply them directly in this turn;
-- when another plugin owns the correction (a structural move belongs to `/filid:restructure`), invoke that skill with the item's path and action.
+- main-agent items get a delegation brief in the §3 format, applied directly in this turn;
+- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the owning fractal path for `/filid:enrich-docs`. Neither receives the brief.
 
 This skill states **what must change and where**. It does not choose the edit, and it never edits a file itself.
 

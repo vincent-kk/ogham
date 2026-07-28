@@ -2,7 +2,7 @@
 
 This directory ships rule documentation templates that the `/filid:setup` skill deploys into a target project's `.claude/rules/` directory.
 
-> **Important — deployment is skill-only.** SessionStart hooks do NOT copy or remove these files. The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/config-loader/config-loader.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__rule_docs_sync` MCP tool from the `setup` skill after the user confirms a checkbox selection.
+> **Important — deployment is skill-only.** SessionStart hooks do NOT copy or remove these files. The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/configLoader/loaders/syncRuleDocs.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__rule_docs_sync` MCP tool from the `setup` skill after the user confirms a checkbox selection.
 
 ## manifest.json
 
@@ -31,15 +31,15 @@ A document dropped from the manifest needs no migration entry: the shared rule m
 
 Fields:
 
-| Field | Meaning |
-|---|---|
-| `id` | Stable identifier for the rule doc (used in logs and the sync response) |
-| `filename` | Source file (under `templates/rules/`) and destination basename (under `.claude/rules/`) |
-| `required` | `true` → always deployed and auto-resynced on drift; never rendered as a checkbox. `false` → opt-in (pre-checked iff already deployed), and drift is preserved unless the caller passes an explicit `resync` id |
-| `legacyFilename` | Optional. A previous address for this same document, migrated on the next sync. Filenames and legacy filenames must be globally unique across entries — two entries claiming one name fails the sync |
-| `title` | Short label shown in the `setup` checkbox UI |
-| `description` | One-line summary shown underneath the checkbox |
-| `templateHash` | SHA-256 of the template bytes, injected by `scripts/syncRuleHashes.mjs`. Never hand-write it |
+| Field            | Meaning                                                                                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`             | Stable identifier for the rule doc (used in logs and the sync response)                                                                                                                                         |
+| `filename`       | Source file (under `templates/rules/`) and destination basename (under `.claude/rules/`)                                                                                                                        |
+| `required`       | `true` → always deployed and auto-resynced on drift; never rendered as a checkbox. `false` → opt-in (pre-checked iff already deployed), and drift is preserved unless the caller passes an explicit `resync` id |
+| `legacyFilename` | Optional. A previous address for this same document, migrated on the next sync. Filenames and legacy filenames must be globally unique across entries — two entries claiming one name fails the sync            |
+| `title`          | Short label shown in the `setup` checkbox UI                                                                                                                                                                    |
+| `description`    | One-line summary shown underneath the checkbox                                                                                                                                                                  |
+| `templateHash`   | SHA-256 of the template bytes, injected by `scripts/syncRuleHashes.mjs`. Never hand-write it                                                                                                                    |
 
 ## Adding a new rule doc
 

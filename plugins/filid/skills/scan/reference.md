@@ -64,6 +64,10 @@ mcp__plugin_filid_tools__verification_scan({
 })
 ```
 
+On a large project this payload exceeds the inline envelope budget and is
+persisted instead. Use the returned report or its artifact as the source of
+verification findings; never treat an absent inline `data` as an empty result.
+
 The summary keeps spec-document and test-record counts separate. Interpret
 their per-file caps as 15 and 32 respectively. Include fragmentation and
 contract-link findings. Dynamic or unsupported discovery makes the result

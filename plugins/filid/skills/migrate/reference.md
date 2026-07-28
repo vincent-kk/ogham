@@ -56,6 +56,19 @@ Renames planned: 7
 Conflicts (skipped): 1
 ```
 
+### Early exits
+
+Phase 1 can terminate the run before Phases 2-4 ever print. Both exits are
+success (`exit 0`), not errors:
+
+| Condition                                    | Message                                                      |
+| -------------------------------------------- | ------------------------------------------------------------ |
+| No `CLAUDE.md` and no `SPEC.md` found        | `Nothing to migrate. No CLAUDE.md or SPEC.md files found.`   |
+| Every candidate is a conflict (0 renameable) | `No files to rename (all have conflicts). Resolve manually.` |
+
+Report the message as-is. In the second case the conflict list from Phase 1 is
+the actionable output — resolve each directory by hand, then re-run.
+
 ---
 
 ## Phase 2 — Rename
@@ -174,7 +187,9 @@ The workflow must:
    scopes `documents`, `nodes`, and `entry-points`
 
 The common envelope status, diagnostics, and findings are reported verbatim.
-A non-`ok` result is not presented as a verified migration.
+Read the findings from the returned result or, when the payload exceeds the
+inline envelope budget, from its artifact — an absent inline `data` is not an
+empty finding set. A non-`ok` result is not presented as a verified migration.
 
 ### Resolving the script path
 

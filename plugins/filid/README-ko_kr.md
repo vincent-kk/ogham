@@ -96,10 +96,10 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 
 ```
 /filid:cross-review
-/filid:cross-review https://github.com/owner/repo/pull/123
+/filid:cross-review --base origin/main
 ```
 
-contract·structure·verification 세 관점이 커밋된 변경을 병렬로 리뷰한 뒤, 별도의 adversarial 판정자가 모든 blocking finding을 `CONFIRMED | PLAUSIBLE | REFUTED`로 판정합니다. REFUTED는 verdict에서 빠지되 arbitration log에 남습니다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 명시적으로 FCA 범위입니다. 보안·제품성·UX 리뷰가 아닙니다.
+contract·structure·verification 세 관점이 커밋된 변경을 병렬로 리뷰한 뒤, 별도의 adversarial 판정자가 모든 blocking finding을 `CONFIRMED | REFUTED | INDETERMINATE`로 판정합니다. REFUTED는 verdict에서 빠지되 arbitration log에 남습니다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 명시적으로 FCA 범위입니다. 보안·제품성·UX 리뷰가 아닙니다.
 
 ### legacy 문서명 이관
 
@@ -137,6 +137,10 @@ contract·structure·verification 세 관점이 커밋된 변경을 병렬로 �
 | `/filid:restructure`   | 읽기 전용 계획 → 승인 → 외부 실행 → 사후조건 검증  |
 | `/filid:cross-review`  | 3관점 FCA 리뷰와 adversarial 판정                  |
 | `/filid:migrate`       | legacy CLAUDE.md / SPEC.md 이름 이관               |
+| `/filid:pull-request`  | 문서 동기화 후 구조화된 GitHub PR 생성             |
+| `/filid:resolve`       | fix request 수용·거부 결정, 위임, 정당화 기록      |
+| `/filid:revalidate`    | 교정 delta 재측정과 최종 PASS/FAIL 판정            |
+| `/filid:pipeline`      | merge-track 4단계를 한 번에 실행 (재개 지원)       |
 
 ---
 
