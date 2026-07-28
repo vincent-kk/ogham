@@ -8,7 +8,7 @@ paths:
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
 
-A fractal's contract is written down beside its code: INTENT records the boundary, DETAIL records the current contract. These rules define what those documents must contain to count as one. This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.
+A fractal's contract is written down beside its code: INTENT records the boundary, DETAIL records the current contract and — when a change is worth remembering — the history behind it. These rules define what those documents must contain to count as one. This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.
 
 **Tradeoff:** two documents per fractal to maintain, in exchange for a boundary a newcomer can read without running anything. **Applies when:** you are creating or editing an `INTENT.md` or a `DETAIL.md`.
 
@@ -40,18 +40,30 @@ Ask yourself: "Can a newcomer read this whole file before deciding what to touch
 
 Ask yourself: "Does this directory want its own boundary, or does it belong inside its owner's?"
 
-## 4. DETAIL is current state, not an append-only history
+## 4. DETAIL's contract sections are current state, not an append-only ledger
 
-**A ledger that only grows stops describing anything.**
+**A contract that only grows stops describing anything.**
 
-- Restructure the document to the currently intended behavior on every update. Do not append a changelog of what it used to say.
+- Restructure the contract sections to the currently intended behavior on every update. A superseded clause is removed, not left standing beside its replacement.
 - Update DETAIL before the code it describes.
 - Acceptance groups carry stable IDs, unique within that document.
 - `DETAIL.md` is the sole acceptance-criteria ledger. A legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated.
 
 Ask yourself: "Does this document describe the code as it should be now, or as it has been?"
 
-## 5. An exemption without a reason is a disabled rule in costume
+## 5. History has one address, and the contract is not it
+
+**Every other surface answers "what holds now"; one section answers "how it got here".**
+
+- INTENT carries no history — no changelog, no dated notes, no record of a boundary it used to draw. It has 50 lines to state the boundary that holds today, and a retired boundary leaves by deletion, not by annotation.
+- The code carries none either. A module keeps its history in the documents beside it, not in the source it describes.
+- `## History` in DETAIL is the one place the past is written down. The section is optional, sits below the contract sections and above `## Last Updated`, and lists entries newest first. Record the decision and the reason it was taken or reversed — the diff itself is version control's job, not this section's.
+- `## Last Updated` names the most recent change; `## History` keeps the earlier ones that are still worth carrying. An entry that no longer informs a present decision is dropped, not archived deeper.
+- A history entry accompanies the contract change that produced it. An edit that only appends an entry is the append-only pattern §4 rejects.
+
+Ask yourself: "Is this sentence what holds now, or how it came to hold — and is it in the section for that?"
+
+## 6. An exemption without a reason is a disabled rule in costume
 
 **`Reason` is the load-bearing field.**
 
@@ -76,4 +88,4 @@ Ask yourself: "Would someone who has never seen this code understand why the exe
 
 ---
 
-**This rule is working if:** every fractal's boundary fits on one screen; DETAIL diffs read as contract changes rather than appended notes; every exemption in the tree is explained by reading its own entry. **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.
+**This rule is working if:** every fractal's boundary fits on one screen; DETAIL diffs read as contract changes rather than appended notes; the only past tense in the tree sits under a `## History` heading; every exemption in the tree is explained by reading its own entry. **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.
