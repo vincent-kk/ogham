@@ -1,3 +1,7 @@
+import { join } from 'node:path';
+
+import { mergeConfigLayers } from '@ogham/cross-platform/config-scope/merge';
+
 import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 
 import type { HookConfig } from './configTypes.js';
@@ -11,13 +15,28 @@ import { pickRecencyFactor } from './pickRecencyFactor.js';
 import { pickStrength } from './pickStrength.js';
 import { safeReadJson } from './safeReadJson.js';
 
+/**
+ * The routing policy in effect, read without zod. Same two layers and same
+ * precedence as `core/configManager`: the user layer under `CENNAD_HOME`,
+ * overridden by `<cwd>/.cennad/config.json`.
+ *
+ * The project root is `process.cwd()` rather than a resolved workspace — the
+ * host launches hooks inside the workspace, and resolving it properly would
+ * pull the host-paths graph into a 10 KB bundle. Only `config-scope/merge`
+ * is added, which imports no node builtin.
+ */
 export function loadConfig(): HookConfig {
-  const config =
+  const user =
     readConfigObject(CONFIG_PATH) ??
     (CONFIG_PATH === FALLBACK_CONFIG_PATH
       ? null
       : readConfigObject(FALLBACK_CONFIG_PATH));
-  if (config === null) return DEFAULT_CONFIG;
+  const project = readConfigObject(
+    join(process.cwd(), '.cennad', 'config.json'),
+  );
+  if (user === null && project === null) return DEFAULT_CONFIG;
+
+  const config = mergeConfigLayers(user, project);
   return {
     ratio: pickRatio(config.ratio),
     intervention_strength: pickStrength(config.intervention_strength),

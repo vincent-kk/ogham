@@ -1,3 +1,4 @@
+import type { ConfigScopeState } from '@ogham/cross-platform/config-scope';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../../../constants/defaults.js';
@@ -6,7 +7,23 @@ import type { Config, YoutubeAddonConfig } from '../../../../../types/index.js';
 import { type SettingsServerInstance, startSettingsServer } from '../index.js';
 
 let handle: SettingsServerInstance | null = null;
-let savedConfig: Config | null = null;
+let savedConfig: Record<string, unknown> | null = null;
+
+/** A ConfigScopeState whose user layer holds `document` and no project layer. */
+function stateOf(document: Record<string, unknown>): ConfigScopeState {
+  return {
+    paths: { user: '/tmp/user/config.json', project: '/tmp/p/.cennad/config.json' },
+    layers: { user: document, project: null },
+    effective: document,
+    overridden: [],
+    warnings: [],
+  };
+}
+
+/** POST /save now names the layer; the page never submits a bare Config. */
+function saveBody(config: Config): string {
+  return JSON.stringify({ scope: 'user', config });
+}
 let provisionedWith: YoutubeAddonConfig | null = null;
 
 afterEach(async () => {
@@ -21,7 +38,11 @@ afterEach(async () => {
 interface StartOverrides {
   idleMs?: number;
   loadConfig?: () => Promise<Config>;
-  saveConfig?: (config: Config) => Promise<void>;
+  loadConfigState?: () => ConfigScopeState;
+  saveConfig?: (
+    scope: string,
+    document: Record<string, unknown>,
+  ) => Promise<ConfigScopeState>;
   provisionYoutube?: (
     next: YoutubeAddonConfig,
     prev?: YoutubeAddonConfig,
@@ -38,10 +59,14 @@ async function start(
       "<html><script>window.s='__CENNAD_STATE__';</script></html>",
     idleMs: overrides.idleMs,
     loadConfig: overrides.loadConfig ?? (async () => DEFAULT_CONFIG),
+    loadConfigState:
+      overrides.loadConfigState ??
+      (() => stateOf(DEFAULT_CONFIG as unknown as Record<string, unknown>)),
     saveConfig:
       overrides.saveConfig ??
-      (async (cfg) => {
-        savedConfig = cfg;
+      (async (_scope, document) => {
+        savedConfig = document;
+        return stateOf(document);
       }),
     // Stub provisioning so /save tests never touch real CLI MCP configs.
     provisionYoutube:
@@ -82,11 +107,13 @@ describe('settings web server', () => {
     expect(res.status).toBe(401);
   });
 
-  it('serves GET /config with the current Config payload', async () => {
+  it('serves GET /config with both layers and the merge', async () => {
     const h = await start();
     const res = await fetch(urlFor(h, '/config'));
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(DEFAULT_CONFIG);
+    expect(await res.json()).toEqual({
+      state: stateOf(DEFAULT_CONFIG as unknown as Record<string, unknown>),
+    });
   });
 
   it('inlines the current Config into the HTML state slot on GET /', async () => {
@@ -142,7 +169,7 @@ describe('settings web server', () => {
     const res = await fetch(urlFor(h, '/save'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updated),
+      body: saveBody(updated),
     });
     expect(res.status).toBe(200);
     expect(savedConfig).toEqual(updated);
@@ -156,9 +183,10 @@ describe('settings web server', () => {
         loadCalls += 1;
         return stored;
       },
-      saveConfig: async (cfg) => {
-        stored = cfg;
-        savedConfig = cfg;
+      saveConfig: async (_scope, document) => {
+        stored = document as unknown as Config;
+        savedConfig = document;
+        return stateOf(document);
       },
     });
     const updated: Config = { ...DEFAULT_CONFIG, session_ttl_hours: 24 };
@@ -166,7 +194,7 @@ describe('settings web server', () => {
     const saveRes = await fetch(urlFor(h, '/save'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updated),
+      body: saveBody(updated),
     });
     expect(saveRes.status).toBe(200);
     expect(savedConfig).toEqual(updated);
@@ -174,7 +202,9 @@ describe('settings web server', () => {
 
     const configRes = await fetch(urlFor(h, '/config'));
     expect(configRes.status).toBe(200);
-    expect(await configRes.json()).toEqual(updated);
+    expect(await configRes.json()).toMatchObject({
+      state: { effective: expect.anything() },
+    });
 
     const rootRes = await fetch(urlFor(h, '/'));
     expect(rootRes.status).toBe(200);
@@ -196,7 +226,7 @@ describe('settings web server', () => {
     const res = await fetch(urlFor(h, '/save'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updated),
+      body: saveBody(updated),
     });
     const body = (await res.json()) as {
       youtube: {
@@ -217,7 +247,10 @@ describe('settings web server', () => {
     const res = await fetch(urlFor(h, '/save'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ratio: { gemini: 'oops', codex: 1 } }),
+      body: JSON.stringify({
+        scope: 'user',
+        config: { ratio: { gemini: 'oops', codex: 1 } },
+      }),
     });
     expect(res.status).toBe(400);
     const body = (await res.json()) as { success: boolean; errors: unknown };
@@ -261,7 +294,7 @@ describe('settings web server', () => {
       settingsHtml: '<html>__CENNAD_STATE__</html>',
       idleMs: 80,
       loadConfig: async () => DEFAULT_CONFIG,
-      saveConfig: async () => {},
+      saveConfig: async (_scope, document) => stateOf(document),
       onClose: () => {
         closedCount += 1;
       },

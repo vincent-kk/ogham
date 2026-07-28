@@ -1,8 +1,29 @@
-import { CONFIG_PATH } from '../../../constants/paths.js';
-import { atomicWrite } from '../../../lib/atomicWrite.js';
-import { type Config, ConfigSchema } from '../../../types/index.js';
+import {
+  buildConfigScopeState,
+  writeConfigLayer,
+} from '@ogham/cross-platform/config-scope';
+import type {
+  ConfigLayerPaths,
+  ConfigScope,
+  ConfigScopeState,
+} from '@ogham/cross-platform/config-scope';
 
-export async function saveConfig(config: Config): Promise<void> {
-  const validated = ConfigSchema.parse(config);
-  await atomicWrite(CONFIG_PATH, `${JSON.stringify(validated, null, 2)}\n`);
+import { configLayers } from '../utils/configLayers.js';
+
+/**
+ * Persist one config layer and return the state the caller should render.
+ *
+ * The document is written as given. Validation belongs to the caller because
+ * a project layer holds only the keys it overrides and cannot satisfy the
+ * strict schema alone — what the settings page validates is the merged
+ * preview. The user layer always lands in the active `CENNAD_HOME`, never in
+ * the read-only fallback that `loadConfig` may have read from.
+ */
+export async function saveConfig(
+  scope: ConfigScope,
+  document: Record<string, unknown>,
+  layers: ConfigLayerPaths = configLayers(),
+): Promise<ConfigScopeState> {
+  writeConfigLayer(layers, scope, document);
+  return buildConfigScopeState(layers);
 }

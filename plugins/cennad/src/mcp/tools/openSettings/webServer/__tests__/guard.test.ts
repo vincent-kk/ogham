@@ -18,7 +18,13 @@ async function start(): Promise<SettingsServerInstance> {
   handle = await startSettingsServer({
     settingsHtml: '<html>__CENNAD_STATE__</html>',
     loadConfig: async () => DEFAULT_CONFIG,
-    saveConfig: async () => {},
+    saveConfig: async (_scope, document) => ({
+      paths: { user: '/tmp/user/config.json', project: null },
+      layers: { user: document, project: null },
+      effective: document,
+      overridden: [],
+      warnings: [],
+    }),
     // Stub provisioning so a passing /save never touches real CLI MCP configs.
     provisionYoutube: async () => ({
       claude: { ok: true, action: 'unchanged' },
@@ -107,7 +113,7 @@ describe('settings server guard', () => {
         'content-type': 'application/json',
         origin: `http://127.0.0.1:${h.port}`,
       },
-      body: JSON.stringify(DEFAULT_CONFIG),
+      body: JSON.stringify({ scope: 'user', config: DEFAULT_CONFIG }),
     });
     expect(res.status).toBe(200);
   });

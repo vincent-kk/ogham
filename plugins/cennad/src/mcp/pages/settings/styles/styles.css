@@ -1134,3 +1134,34 @@ input[type='range']:focus-visible {
   outline: none;
   border-color: var(--border-hi);
 }
+
+/* Scope UI — user/project namespaces.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". cennad's config is
+   edited as a whole document per layer, so there is no per-field badge here —
+   the toggle names the file, and the hint shows its path. */
+
+.scope-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.scope-toggle {
+  display: flex;
+  gap: 14px;
+}
+
+.scope-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.scope-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.72;
+  word-break: break-all;
+}

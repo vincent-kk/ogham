@@ -1507,13 +1507,70 @@
     return path + '?token=' + encodeURIComponent(token);
   }
 
+  // --- config scope (user / project) ---------------------------------------
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". This page is minified
+  // but never bundled, so it cannot import the shared merge helpers — it uses
+  // the per-layer state the server already computed.
+  var scopeState = {
+    paths: { user: '', project: null },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var scope = 'user';
+
+  function adoptScopeState(next) {
+    if (!next || typeof next !== 'object') return;
+    scopeState = next;
+    // Open on the layer that is currently deciding, so pressing Save without
+    // touching the toggle rewrites the file the config already came from.
+    scope = scopeState.layers && scopeState.layers.project ? 'project' : 'user';
+    renderScope();
+  }
+
+  function renderScope() {
+    var host = document.getElementById('config_scope');
+    if (!host) return;
+    host.textContent = '';
+    [
+      ['user', 'User', 'Applies to every project you open.'],
+      ['project', 'Project', 'Overrides User for this project only.'],
+    ].forEach(function (option) {
+      var label = document.createElement('label');
+      label.className = 'scope-option';
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.disabled = option[0] === 'project' && !scopeState.paths.project;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        renderScope();
+      });
+      var text = document.createElement('span');
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+      if (option[0] === scope) {
+        var hint = document.getElementById('scope_hint');
+        if (hint)
+          hint.textContent =
+            scopeState.paths.project || scope === 'user'
+              ? option[2] + ' — ' + (scopeState.paths[scope] || '')
+              : 'No project root is available, so only User can be edited.';
+      }
+    });
+  }
+
   function tryInlineState() {
     var raw = window.__CENNAD_STATE__;
-    if (raw && typeof raw === 'object' && raw.ratio) {
-      applyConfig(raw);
-      return true;
-    }
-    return false;
+    if (!raw || typeof raw !== 'object') return false;
+    if (raw.scope) adoptScopeState(raw.scope);
+    var config = raw.config && raw.config.ratio ? raw.config : null;
+    if (config === null) return false;
+    applyConfig(config);
+    return true;
   }
 
   async function fetchProviderStatus() {
@@ -1552,8 +1609,9 @@
     try {
       var res = await fetch(withToken('/config'));
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      var cfg = await res.json();
-      applyConfig(cfg);
+      var body = await res.json();
+      adoptScopeState(body.state);
+      applyConfig(body.state.effective);
       setStatus('', '');
     } catch (err) {
       setStatus('error', 'Failed to load config: ' + err.message);
@@ -1576,13 +1634,14 @@
       var res = await fetch(withToken('/save'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cfg),
+        body: JSON.stringify({ scope: scope, config: cfg }),
       });
       var body = await res.json();
       if (!res.ok || body.success === false) {
         setStatus('error', body.message || 'Save failed', body.errors);
         return;
       }
+      adoptScopeState(body.state);
       setStatus('success', 'Saved.');
       if (closeAfter) {
         try {

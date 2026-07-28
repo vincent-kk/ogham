@@ -1,10 +1,15 @@
 import { type Server, createServer } from 'node:http';
 
+import type {
+  ConfigScope,
+  ConfigScopeState,
+} from '@ogham/cross-platform/config-scope';
 import { generateToken } from '@ogham/http-kit/token';
 
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
 import {
   loadConfig as loadConfigDefault,
+  loadConfigState as loadConfigStateDefault,
   saveConfig as saveConfigDefault,
 } from '../../../../core/configManager/index.js';
 import {
@@ -23,7 +28,11 @@ export interface StartSettingsServerOptions {
   settingsHtml: string;
   idleMs?: number;
   loadConfig?: () => Promise<Config>;
-  saveConfig?: (config: Config) => Promise<void>;
+  loadConfigState?: () => ConfigScopeState;
+  saveConfig?: (
+    scope: ConfigScope,
+    document: Record<string, unknown>,
+  ) => Promise<ConfigScopeState>;
   provisionYoutube?: (
     next: YoutubeAddonConfig,
     prev?: YoutubeAddonConfig,
@@ -45,6 +54,7 @@ export async function startSettingsServer(
   const idleMs = options.idleMs ?? SETTINGS_SERVER_IDLE_MS;
   const token = generateToken();
   const loadConfigImpl = options.loadConfig ?? loadConfigDefault;
+  const loadConfigStateImpl = options.loadConfigState ?? loadConfigStateDefault;
   const saveConfigImpl = options.saveConfig ?? saveConfigDefault;
   let currentConfig: Config | null = null;
 
@@ -53,9 +63,13 @@ export async function startSettingsServer(
     return currentConfig;
   }
 
-  async function saveAndReloadConfig(config: Config): Promise<void> {
-    await saveConfigImpl(config);
+  async function saveAndReloadConfig(
+    scope: ConfigScope,
+    document: Record<string, unknown>,
+  ): Promise<ConfigScopeState> {
+    const state = await saveConfigImpl(scope, document);
     currentConfig = await loadConfigImpl();
+    return state;
   }
 
   async function closeServer(): Promise<void> {
@@ -94,6 +108,7 @@ export async function startSettingsServer(
     token,
     settingsHtml: options.settingsHtml,
     loadConfig: loadCurrentConfig,
+    loadConfigState: loadConfigStateImpl,
     saveConfig: saveAndReloadConfig,
     provisionYoutube:
       options.provisionYoutube ??
