@@ -3,6 +3,9 @@
 ## Requirements
 
 - canonical 15개 built-in rule만 등록한다.
+- rule 기본 severity는 roster가 직접 적지 않고 `constants/builtinRuleSeverities`
+  정본에서 읽는다. `createDefaultConfig`가 같은 상수를 읽으므로 config를 가진
+  프로젝트와 갖지 않은 프로젝트가 서로 다른 severity를 갖지 않는다.
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로
   평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag,
@@ -111,4 +114,4 @@
 
 ## Last Updated
 
-2026-07-28 — organ 접근을 소비자 위치로 판정하고, DETAIL 면책 선언을 organ과 fractal 대상 모두에 연결했다.
+2026-07-28 — rule 기본 severity를 `constants/builtinRuleSeverities` 정본에서 읽는다. organ 접근은 소비자 위치로 판정하고, DETAIL 면책 선언을 organ과 fractal 대상 모두에 연결한다.

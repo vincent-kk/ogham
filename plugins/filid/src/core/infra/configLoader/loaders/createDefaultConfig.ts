@@ -1,20 +1,8 @@
 import { getDefaultAdapterIds } from '../../../../adapters/index.js';
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
+import { BUILTIN_RULE_SEVERITIES } from '../../../../constants/builtinRuleSeverities.js';
 
 import type { FilidConfig } from './configSchemas.js';
-
-const ERROR_RULE_IDS = new Set([
-  'circular-dependency',
-  'detail-document-contract',
-  'intent-document-contract',
-  'max-depth',
-  'organ-no-intentmd',
-  'pure-function-isolation',
-  'spec-contract-link',
-  'spec-document-case-cap',
-  'spec-fragmentation',
-  'test-record-case-cap',
-]);
 
 export function createDefaultConfig(
   language?: string,
@@ -25,10 +13,7 @@ export function createDefaultConfig(
   const rules = Object.fromEntries(
     Object.values(BUILTIN_RULE_IDS).map((ruleId) => [
       ruleId,
-      {
-        enabled: true,
-        severity: ERROR_RULE_IDS.has(ruleId) ? 'error' : 'warning',
-      },
+      { enabled: true, severity: BUILTIN_RULE_SEVERITIES[ruleId] },
     ]),
   ) as FilidConfig['rules'];
   return {

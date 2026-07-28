@@ -188,13 +188,18 @@ describe('rule-engine', () => {
       expect(rule.check(ctx)).toHaveLength(1);
     });
 
-    it('should pass when organ has no INTENT.md', () => {
+    it('should pass when an organ-named organ has no INTENT.md', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
-      const node = makeNode({ type: 'organ', hasIntentMd: false });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
+      // organ 이름 가드가 아니라 분류 가드가 유일한 침묵 사유가 되도록 이름을 맞춘다.
+      const node = makeNode({
+        path: '/root/utils',
+        name: 'utils',
+        type: 'organ',
+        hasIntentMd: false,
+      });
+      const ctx: RuleContext = { node, tree: makeTree([node]) };
       expect(rule.check(ctx)).toHaveLength(0);
     });
 

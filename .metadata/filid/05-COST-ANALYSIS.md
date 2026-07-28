@@ -72,7 +72,7 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 1.0의 도구는 AST 파싱을 하지 않는다. 비용은 두 가지가 지배한다.
 
-1. **snapshot 생성** — 디렉터리 traversal과 구조 판정에 쓰인 파일 내용의 SHA-256. `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`이 모두 같은 snapshot을 소비하므로 한 번만 만든다. traversal은 git-ignored 경로를 걸러내기 위해 `git ls-files`를 **scan당 한 번** spawn한다 — 경로당이 아니라 스캔당이며, 결과 집합은 그 스캔 동안 재사용된다. 걸러낸 경로만큼 이후 단계의 입력이 줄어들지만, 순비용의 방향은 측정하지 않았다.
+1. **snapshot 생성** — 디렉터리 traversal과 구조 판정에 쓰인 파일 내용의 SHA-256. `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`이 모두 같은 snapshot을 소비하므로 한 번만 만든다. traversal은 git-ignored 경로를 걸러내기 위해 `git ls-files`를 **traversal당 한 번** spawn한다 — 경로당이 아니며, 결과 집합은 그 traversal 동안 재사용된다. 한 snapshot은 tree scan과 adapter discovery를 합쳐 여러 traversal을 돈다. 걸러낸 경로만큼 이후 단계의 입력이 줄어들지만, 순비용의 방향은 측정하지 않았다.
 2. **lexical scan** — 어댑터가 의존성·진입점·case를 세는 단일 패스. 정규식 기반 전체 파싱이 아니라 문자열·주석·괄호 nesting만 구분한다.
 
 `project_init`, `rule_docs_sync`, `open_settings`, `review_state`는 snapshot을 필요로 하지 않는다.

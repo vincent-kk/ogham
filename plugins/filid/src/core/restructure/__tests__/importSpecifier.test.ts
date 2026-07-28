@@ -10,6 +10,7 @@ import type {
 } from '../../../types/fractal.js';
 import { buildImportRewrites } from '../imports/buildImportRewrites.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
+import { stripPathExtension } from '../specifiers/stripPathExtension.js';
 import { validateImportRewrites } from '../validator/validateImportRewrites.js';
 
 const PATHS = {
@@ -21,6 +22,9 @@ const PATHS = {
   SOURCE: '/root/lib/logger.ts',
   TARGET: '/root/shared/logger.ts',
   DIRECTORY_INDEX: '/root/lib/index.ts',
+  SOURCE_DIRECTORY: '/root/lib',
+  TARGET_DIRECTORY: '/root/shared',
+  NESTED_CONSUMER: '/root/lib/deep/consumer.ts',
 } as const;
 
 function node(path: string, name: string, depth: number): FractalNode {
@@ -57,9 +61,10 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
         [PATHS.ROOT, node(PATHS.ROOT, 'root', 0)],
         [PATHS.FEATURE_A, node(PATHS.FEATURE_A, 'featureA', 1)],
         [PATHS.FEATURE_B, node(PATHS.FEATURE_B, 'featureB', 1)],
+        [PATHS.SOURCE_DIRECTORY, node(PATHS.SOURCE_DIRECTORY, 'lib', 1)],
       ]),
       depth: 1,
-      totalNodes: 3,
+      totalNodes: 4,
     },
     dependencyGraph: {
       nodePaths: [PATHS.ROOT, PATHS.FEATURE_A, PATHS.FEATURE_B],
@@ -206,6 +211,37 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     expect(plan.unresolved).toEqual([]);
     expect(plan.moves).toHaveLength(1);
     expect(plan.moves[0]?.affectedImports).toHaveLength(1);
+  });
+
+  it('treats a dot-only segment as a relative marker, not an extension', () => {
+    expect(stripPathExtension('..')).toBe('..');
+    expect(stripPathExtension('../..')).toBe('../..');
+    expect(stripPathExtension('.')).toBe('.');
+    expect(stripPathExtension('/root/lib/.gitignore')).toBe(
+      '/root/lib/.gitignore',
+    );
+  });
+
+  it('leaves a bare parent-directory specifier unsupported', () => {
+    // '..' 은 path-like 판정에서 탈락해야 한다. 통과시키면 stripPathExtension이
+    // '..' 을 이름+확장자로 읽어 '../../shared.' 같은 specifier를 만들어 낸다.
+    const result = buildImportRewrites(
+      snapshotWith([
+        {
+          sourceFile: PATHS.NESTED_CONSUMER,
+          rawSpecifier: '..',
+          resolvedPath: PATHS.SOURCE_DIRECTORY,
+        },
+      ]),
+      PATHS.SOURCE_DIRECTORY,
+      PATHS.TARGET_DIRECTORY,
+      [PATHS.NESTED_CONSUMER],
+    );
+
+    expect(result.rewrites).toEqual([]);
+    expect(result.decisionReasons).toEqual([
+      RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED,
+    ]);
   });
 
   it('still rejects a bare package specifier', () => {

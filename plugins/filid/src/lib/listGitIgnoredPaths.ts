@@ -9,8 +9,10 @@
  * a repository with `node_modules/` still answers in milliseconds. `-z`
  * output is never quoted, so entries need no unescaping.
  *
- * Returns nothing when git is absent or the root sits outside a work tree.
- * An unavailable git must never shrink what a scan reports.
+ * Returns nothing when git is absent, when the root sits outside a work tree,
+ * or when git refuses the query — it exits non-zero if the root is itself
+ * inside an ignored directory. An unavailable git must never shrink what a
+ * scan reports.
  */
 import { spawnCliSync } from '@ogham/cross-platform/spawn';
 

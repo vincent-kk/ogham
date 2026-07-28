@@ -195,6 +195,8 @@ finding은 해소책 둘을 함께 제시한다: INTENT.md를 지워 organ으로
 
 `severity`가 `error`가 아니라 `warning`인 것은 ADR-11의 연장이다 — 분류는 서술이고, 승격 자체는 정당한 행위다. 규칙이 묻는 것은 "이 승격이 의도한 것인가"이지 "이것이 금지 상태인가"가 아니다.
 
+위 표를 포함해 이 문서의 모든 severity는 `constants/builtinRuleSeverities`가 정본이다. rule roster와 `createDefaultConfig`가 같은 상수를 읽으므로, config를 손으로 쓴 프로젝트와 `project_init`이 만든 프로젝트가 서로 다른 severity를 갖는 일은 없다. 프로젝트 config의 `rules.<id>.severity`만이 이를 덮어쓴다.
+
 **훅은 이것을 차단하지 않는다.** `PreToolUse` write gate는 INTENT.md 줄 수와 DETAIL.md append-only만 판정하며, organ 여부는 입력으로 받지 않는다. 승격은 `structure_validate` finding으로 보고된다.
 
 ### peer file (`zero-peer-file`)

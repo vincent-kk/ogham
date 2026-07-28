@@ -102,6 +102,18 @@ const SNAPSHOT: ProjectSnapshot = {
   createdAt: '2026-07-28T00:00:00.000Z',
 };
 
+/** The actor landed the unit somewhere the plan never named: its planned path is empty. */
+const SNAPSHOT_AFTER_WRONG_LANDING: ProjectSnapshot = {
+  ...SNAPSHOT,
+  tree: {
+    ...SNAPSHOT.tree,
+    nodes: new Map([
+      ...SNAPSHOT.tree.nodes,
+      [PATHS.LIB, node(PATHS.LIB, 'lib', NODE_TYPES.ORGAN, 1)],
+    ]),
+  },
+};
+
 function planWithOrganName(organNameHint: string) {
   return createRestructurePlan(SNAPSHOT, {
     path: PATHS.ROOT,
@@ -143,6 +155,28 @@ describe('restructure plan partitions requests that need no move', () => {
     expect(findings.map((finding) => finding.code)).not.toContain(
       RESTRUCTURE_VALIDATION_CODES.SOURCE_STILL_PRESENT,
     );
+  });
+
+  it('reports target-missing when the already-placed unit left its planned path', () => {
+    const findings = validatePlanPostconditions(
+      SNAPSHOT_AFTER_WRONG_LANDING,
+      planWithOrganName('lib'),
+    ).findings;
+
+    expect(findings.map((finding) => finding.code)).toContain(
+      RESTRUCTURE_VALIDATION_CODES.TARGET_MISSING,
+    );
+  });
+
+  it('adds no instruction finding while the unit sits where the plan says', () => {
+    const findings = validatePlanPostconditions(
+      SNAPSHOT,
+      planWithOrganName('lib'),
+    ).findings;
+
+    // 이 fixture는 snapshot 수준 finding을 이미 낸다. alreadyPlaced 검사가
+    // 그 위에 아무것도 얹지 않아야 한다는 것이 여기서 확인할 내용이다.
+    expect(findings.every((finding) => !finding.sourcePath)).toBe(true);
   });
 
   it('still routes a real relocation to moves', () => {

@@ -1,4 +1,5 @@
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
+import { BUILTIN_RULE_SEVERITIES } from '../../../../constants/builtinRuleSeverities.js';
 import { LEGACY_CRITERIA_LEDGER_RULE } from '../../../../constants/legacyCriteriaLedger.js';
 import type { Rule, RuleOverride } from '../../../../types/rules.js';
 import type { AllowedPeerOverride } from '../../../infra/configLoader/index.js';
@@ -19,9 +20,11 @@ import { applyOverrides } from './applyOverrides.js';
 /**
  * Builds the canonical Filid 1.0 rule roster.
  *
- * The positional parameters remain during the MCP migration seam. Entry-point
- * and route-name parameters are intentionally ignored because adapters now own
- * those facts.
+ * Severity is read from `BUILTIN_RULE_SEVERITIES` rather than written here, so
+ * this roster and the default config cannot answer differently for the same
+ * rule. The positional parameters remain during the MCP migration seam.
+ * Entry-point and route-name parameters are intentionally ignored because
+ * adapters now own those facts.
  */
 export function loadBuiltinRules(
   overrides?: Record<string, RuleOverride>,
@@ -36,7 +39,8 @@ export function loadBuiltinRules(
       name: 'INTENT Document Contract',
       description: 'INTENT documents satisfy the FCA document contract.',
       category: 'documentation',
-      severity: 'error',
+      severity:
+        BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.INTENT_DOCUMENT_CONTRACT],
       enabled: true,
       scope: 'documents',
       granularity: 'node',
@@ -47,7 +51,8 @@ export function loadBuiltinRules(
       name: 'DETAIL Document Contract',
       description: 'DETAIL documents describe a current public contract.',
       category: 'documentation',
-      severity: 'error',
+      severity:
+        BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.DETAIL_DOCUMENT_CONTRACT],
       enabled: true,
       scope: 'documents',
       granularity: 'node',
@@ -58,7 +63,7 @@ export function loadBuiltinRules(
       name: 'Organ No INTENT',
       description: 'Organ nodes do not own an independent INTENT document.',
       category: 'structure',
-      severity: 'warning',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD],
       enabled: true,
       scope: 'nodes',
       granularity: 'node',
@@ -69,7 +74,7 @@ export function loadBuiltinRules(
       name: 'Entry Point Surface',
       description: 'Public entry-point surfaces are exactly enumerable.',
       category: 'module',
-      severity: 'warning',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.ENTRY_POINT_SURFACE],
       enabled: true,
       scope: 'entry-points',
       granularity: 'node',
@@ -81,7 +86,7 @@ export function loadBuiltinRules(
       description:
         'Every fractal boundary has an adapter-reported entry point.',
       category: 'module',
-      severity: 'warning',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.MODULE_ENTRY_POINT],
       enabled: true,
       scope: 'entry-points',
       granularity: 'node',
@@ -92,7 +97,7 @@ export function loadBuiltinRules(
       name: 'Max Depth',
       description: 'The fractal tree remains within its configured depth.',
       category: 'structure',
-      severity: 'error',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.MAX_DEPTH],
       enabled: true,
       scope: 'nodes',
       granularity: 'node',
@@ -103,7 +108,7 @@ export function loadBuiltinRules(
       name: 'Circular Dependency',
       description: 'The snapshot dependency graph contains no cycle.',
       category: 'dependency',
-      severity: 'error',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY],
       enabled: true,
       scope: 'dag',
       granularity: 'project',
@@ -114,7 +119,8 @@ export function loadBuiltinRules(
       name: 'Pure Function Isolation',
       description: 'Pure-function nodes do not depend on stateful fractals.',
       category: 'dependency',
-      severity: 'error',
+      severity:
+        BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION],
       enabled: true,
       scope: 'dag',
       granularity: 'node',
@@ -125,7 +131,7 @@ export function loadBuiltinRules(
       name: 'Zero Peer File',
       description: 'Fractal roots contain only files with an allowed FCA role.',
       category: 'structure',
-      severity: 'warning',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.ZERO_PEER_FILE],
       enabled: true,
       scope: 'nodes',
       granularity: 'node',
@@ -136,7 +142,8 @@ export function loadBuiltinRules(
       name: 'External Import Boundary',
       description: 'Dependencies cross module boundaries through entry points.',
       category: 'dependency',
-      severity: 'error',
+      severity:
+        BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.EXTERNAL_IMPORT_BOUNDARY],
       enabled: true,
       scope: 'boundaries',
       granularity: 'project',
@@ -159,7 +166,8 @@ export function loadBuiltinRules(
       name: 'Spec Document Case Cap',
       description: 'Each spec document stays within its semantic case cap.',
       category: 'verification',
-      severity: 'error',
+      severity:
+        BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.SPEC_DOCUMENT_CASE_CAP],
       enabled: true,
       scope: 'verification',
       granularity: 'project',
@@ -170,7 +178,7 @@ export function loadBuiltinRules(
       name: 'Test Record Case Cap',
       description: 'Each test record stays within its semantic case cap.',
       category: 'verification',
-      severity: 'error',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.TEST_RECORD_CASE_CAP],
       enabled: true,
       scope: 'verification',
       granularity: 'project',
@@ -181,7 +189,7 @@ export function loadBuiltinRules(
       name: 'Spec Fragmentation',
       description: 'Spec documents are not split to evade the case cap.',
       category: 'verification',
-      severity: 'error',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.SPEC_FRAGMENTATION],
       enabled: true,
       scope: 'verification',
       granularity: 'project',
@@ -192,7 +200,7 @@ export function loadBuiltinRules(
       name: 'Spec Contract Link',
       description: 'Multiple spec documents link to explicit contract groups.',
       category: 'verification',
-      severity: 'warning',
+      severity: BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.SPEC_CONTRACT_LINK],
       enabled: true,
       scope: 'verification',
       granularity: 'project',
@@ -203,7 +211,8 @@ export function loadBuiltinRules(
       name: LEGACY_CRITERIA_LEDGER_RULE.NAME,
       description: LEGACY_CRITERIA_LEDGER_RULE.DESCRIPTION,
       category: LEGACY_CRITERIA_LEDGER_RULE.CATEGORY,
-      severity: LEGACY_CRITERIA_LEDGER_RULE.SEVERITY,
+      severity:
+        BUILTIN_RULE_SEVERITIES[BUILTIN_RULE_IDS.LEGACY_CRITERIA_LEDGER],
       enabled: true,
       scope: LEGACY_CRITERIA_LEDGER_RULE.SCOPE,
       granularity: LEGACY_CRITERIA_LEDGER_RULE.GRANULARITY,

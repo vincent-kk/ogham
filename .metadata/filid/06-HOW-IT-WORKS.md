@@ -174,7 +174,7 @@ projectRoot
     ▼
 2. 디렉터리 traversal (fs.readdirSync withFileTypes 재귀)
    → SCAN_SKIP_DIRS / exclude glob 적용
-   → git이 무시하면서 추적하지도 않는 경로 제외 (scan당 git 1회)
+   → git이 무시하면서 추적하지도 않는 경로 제외 (traversal당 git 1회)
    → maxDepth는 traversal 절단이 아니라 검증 한계로 적용
      (초과 node도 진단 대상에 남는다)
     │
@@ -213,9 +213,9 @@ legacy ledger가 존재하면 그 내용도 hash 입력에 포함된다 — ledg
 
 빌드 캐시는 소스가 아니다. 그것이 트리에 남으면 `zero-peer-file` 같은 규칙이 `tsconfig.*.tsbuildinfo`를 계속 잡고, config의 allowed-peer 목록이 새 산출물마다 한 줄씩 자라는 두더지잡기가 된다.
 
-판정은 git에게 맡긴다. `git ls-files --others --ignored --exclude-standard --directory -z`를 **scan당 한 번** 호출해 결과를 집합으로 들고, traversal의 모든 후보가 그 집합을 조회한다. `--others`가 미추적 항목만 반환하므로 "무시됨 **그리고** 미추적"이 구조적으로 보장된다 — force-add된 파일은 index에 있어 애초에 나오지 않으므로 별도 교차검증이 필요 없다. `--directory`는 통째로 무시된 디렉터리를 슬래시 하나로 접어, `node_modules/`가 있는 저장소도 밀리초 안에 답한다.
+판단은 git에게 맡긴다. `git ls-files --others --ignored --exclude-standard --directory -z`를 호출해 결과를 집합으로 들고, traversal의 모든 후보가 그 집합을 조회한다. filter는 traversal마다 한 번 만들어 그 traversal 동안 재사용한다 — 경로당이 아니다. 한 snapshot에는 tree scan·adapter source discovery·verification discovery의 traversal이 있어 호출은 그 수만큼 일어난다. `--others`가 미추적 항목만 반환하므로 "무시됨 **그리고** 미추적"이 구조적으로 보장된다 — force-add된 파일은 index에 있어 애초에 나오지 않으므로 별도 교차검증이 필요 없다. `--directory`는 통째로 무시된 디렉터리를 슬래시 하나로 접어, `node_modules/`가 있는 저장소도 밀리초 안에 답한다.
 
-ADR-01이 glob 의존을 제거한 상태이므로 `.gitignore` 문법을 직접 해석하지 않는다. git이 없거나 work tree 밖이면 집합이 비고 필터는 상시 false가 되어, ignore 필터가 없던 때와 **동일한** 스캔이 된다. git의 부재가 보고 범위를 조용히 줄이는 일은 없다.
+ADR-01이 glob 의존을 제거한 상태이므로 `.gitignore` 문법을 직접 해석하지 않는다. git이 없거나, work tree 밖이거나, 스캔 루트 자체가 무시된 디렉터리 안이어서 git이 질의를 거부하면 집합이 비고 필터는 상시 false가 되어, ignore 필터가 없던 때와 **동일한** 스캔이 된다. git의 부재가 보고 범위를 조용히 줄이는 일은 없다.
 
 ---
 

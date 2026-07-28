@@ -17,9 +17,10 @@
 - rewrite 결과는 소비자가 쓰던 확장자 표기를 보존한다. core는 어느 확장자가
   유효한지 알지 못하며, 원래 specifier의 표기를 그대로 되돌려 준다.
 - 계산된 target이 source와 같으면 옮길 것이 없다. 그런 instruction은
-  `moves`가 아니라 `alreadyPlaced`로 분리한다. `moves`는 실행 가능한 재배치만
-  담고, postcondition은 `moves`만 순회하므로 "source 부재"와 "target 존재"가
-  같은 경로에 동시에 요구되는 모순이 생기지 않는다.
+  `moves`가 아니라 `alreadyPlaced`로 분리한다. postcondition은 두 갈래를
+  다르게 본다 — `moves`에는 source 부재까지, `alreadyPlaced`에는 source 부재만
+  뺀 나머지 전부를 요구한다. 그래야 "source 부재"와 "target 존재"가 같은 경로에
+  동시에 요구되지 않으면서, 계획 밖 경로에 착지한 유닛도 통과하지 못한다.
 - 요청을 조용히 버리지 않는다. 이미 제자리인 유닛도 계산된 LCA·basis·consumer와
   남은 required artifact를 그대로 실은 instruction으로 돌려준다.
 - validation은 post-execution snapshot만으로 exact target, source 부재,
@@ -39,15 +40,17 @@
 ImportRewriteBuildResult` — source를 exact하게 가리키는 path-like
   evidence만 target 기준으로 변환하고 나머지는 decision reason으로 반환.
 - `stripPathExtension(path): string` — 마지막 세그먼트의 확장자 하나를 제거한
-  경로. 디렉터리 구분자와 dot-prefixed 이름은 건드리지 않는다.
+  경로. 디렉터리 구분자, dot-prefixed 이름과 dot만으로 이루어진 상대 마커는
+  건드리지 않는다.
 - `specifierDenotesPath(consumerFile, rawSpecifier, resolvedPath): boolean` —
   path-like specifier가 stem 기준으로 resolved file을 가리키는지 판정.
 - `applySpecifierExtension(candidate, rawSpecifier): string` — 계산된 specifier에
   원래 specifier의 확장자 표기를 되돌려 준다.
 - `validatePlanPreconditions(snapshot, plan): PlanValidationResult` — project
   root와 snapshot hash 불일치를 finding으로 반환.
-- `validatePlanPostconditions(snapshot, plan): PlanValidationResult` — 계획된
-  move와 post snapshot의 구조·boundary·DAG 불일치를 finding으로 반환.
+- `validatePlanPostconditions(snapshot, plan): PlanValidationResult` — `moves`와
+  `alreadyPlaced` 양쪽, 그리고 post snapshot의 boundary·DAG 불일치를 finding으로
+  반환.
 
 ## Acceptance Criteria
 
@@ -71,7 +74,8 @@ ImportRewriteBuildResult` — source를 exact하게 가리키는 path-like
 
 - 계산된 target이 source와 같은 instruction은 `alreadyPlaced`에만 들어가고
   `moves`에는 없다.
-- 그 계획의 postcondition은 `source-still-present`를 내지 않는다.
+- 그 계획의 postcondition은 `source-still-present`를 내지 않되, 유닛이 계획된
+  경로에 없으면 `target-missing`을 낸다.
 - `summary.moveCount`는 그런 요청을 세지 않고 `alreadyPlacedCount`가 센다.
 - decision이 필요한 요청은 target이 source와 같아도 `unresolved`에 남는다.
 
@@ -83,5 +87,6 @@ ImportRewriteBuildResult` — source를 exact하게 가리키는 path-like
 
 ## Last Updated
 
-2026-07-28 — specifier stem 판정으로 생태계 확장자 관례 아래 exact import
-rewrite를 지원하고, 옮길 것 없는 요청을 `alreadyPlaced`로 분리한다.
+2026-07-28 — `alreadyPlaced`도 source 부재만 면제하고 exact target·node
+type·artifact·import rewrite를 요구하며, dot만으로 이루어진 상대 마커를
+확장자로 읽지 않는다.

@@ -31,7 +31,7 @@ interface FilidConfigV2 {
 
 - `loadConfig(projectRoot)` — v2 config 또는 in-memory migrated v1, warnings와 diagnostics를 반환한다.
 - `migrateConfigV1(input)` — source를 쓰지 않고 대응 필드와 discarded key 목록을 반환한다.
-- `createDefaultConfig(language?, adapterIds?)` — 14개 built-in rule과 auto adapter mode를 가진 v2 config를 만든다.
+- `createDefaultConfig(language?, adapterIds?)` — 15개 built-in rule을 roster 기본 severity 그대로 실은 v2 config를 auto adapter mode로 만든다. severity 정본은 `constants/builtinRuleSeverities`이며 이 함수는 그것을 옮겨 적을 뿐이다.
 - `initProject(projectRoot, options)` — 부재한 config만 생성하며 기존 파일을 덮어쓰지 않는다.
 - `syncRuleDocs(projectRoot, selection, options)` — managed rule channel을 동기화한다.
 - `getRuleDocsStatus(projectRoot, pluginRoot?)` — mutation 없이 active host target 상태를 반환한다.
@@ -71,4 +71,4 @@ interface FilidConfigV2 {
 
 ## Last Updated
 
-2026-07-28 — rule docs manifest가 4개 required 엔트리로 바뀌어 legacy 승계와 orphan 회수 계약을 명시했다.
+2026-07-28 — `createDefaultConfig`가 자체 severity 집합을 버리고 rule roster와 같은 `constants/builtinRuleSeverities` 정본을 읽는다.

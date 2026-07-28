@@ -22,6 +22,7 @@ import {
   resolveMaxDepth,
   writeConfig,
 } from '../../../core/infra/configLoader/index.js';
+import { loadBuiltinRules } from '../../../core/rules/ruleEngine/index.js';
 
 function writeRawConfig(root: string, raw: unknown): string {
   const dir = join(root, '.filid');
@@ -63,12 +64,11 @@ describe('config-loader v2', () => {
     );
   });
 
-  it('keeps the established hard-rule severities', () => {
+  it('seeds every rule with the builtin roster severity', () => {
     const config = createDefaultConfig();
 
-    expect(config.rules['organ-no-intentmd']?.severity).toBe('error');
-    expect(config.rules['circular-dependency']?.severity).toBe('error');
-    expect(config.rules['zero-peer-file']?.severity).toBe('warning');
+    for (const rule of loadBuiltinRules())
+      expect(config.rules[rule.id]?.severity).toBe(rule.severity);
   });
 
   it('returns null when config does not exist', () => {
