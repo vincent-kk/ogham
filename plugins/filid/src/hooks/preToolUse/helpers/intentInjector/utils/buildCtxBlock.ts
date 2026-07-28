@@ -1,9 +1,12 @@
-import * as path from 'node:path';
+import { portableJoin } from '@ogham/cross-platform/compat/join';
+import { normalize } from '@ogham/cross-platform/paths/normalize';
+import { portableRelative } from '@ogham/cross-platform/paths/relative';
 
 import {
   DETAIL_MD,
   INTENT_MD,
 } from '../../../../../constants/documentFiles.js';
+import { PORTABLE_PATH_MARKERS } from '../../../../../constants/pathMarkers.js';
 
 /**
  * Build the [filid:ctx] injection text for first visit to a directory.
@@ -22,8 +25,9 @@ export function buildCtxBlock(
 
   // Intent line — point to owning fractal's INTENT.md, not organ's
   const ownerRelDir =
-    path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
-  const intentPath = path.join(ownerRelDir, INTENT_MD).replace(/\\/g, '/');
+    normalize(portableRelative(boundary, ownerDir)) ||
+    PORTABLE_PATH_MARKERS.CURRENT;
+  const intentPath = normalize(portableJoin(ownerRelDir, INTENT_MD));
   lines.push(`intent: ${intentPath}`);
 
   if (intentContent !== undefined) {
@@ -36,14 +40,14 @@ export function buildCtxBlock(
   const chainIntents = chain
     .filter((d) => d !== ownerDir && intents.get(d))
     .map((d) =>
-      path.join(path.relative(boundary, d), INTENT_MD).replace(/\\/g, '/'),
+      normalize(portableJoin(portableRelative(boundary, d), INTENT_MD)),
     );
 
   if (chainIntents.length > 0) lines.push(`chain: ${chainIntents.join(' > ')}`);
 
   // Detail hint (check owning fractal for DETAIL.md too)
   if (details.get(ownerDir)) {
-    const detailPath = path.join(ownerRelDir, DETAIL_MD).replace(/\\/g, '/');
+    const detailPath = normalize(portableJoin(ownerRelDir, DETAIL_MD));
     lines.push(`detail: ${detailPath}`);
   }
 

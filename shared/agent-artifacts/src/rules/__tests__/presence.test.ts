@@ -17,8 +17,8 @@ import { inspectRuleDocumentPresence } from "../status/inspectRuleDocumentPresen
 import { inspectTrustedRuleDocumentPresence } from "../status/inspectTrustedRuleDocumentPresence.js";
 
 const DOCUMENT: RuleDocumentSelector = {
-  filename: "filid_fca-policy.md",
-  legacyFilenames: ["fca.md"],
+  filename: "filid_fractal-boundaries.md",
+  legacyFilenames: ["filid_fca-policy.md"],
 };
 
 describe("rule document presence", () => {
@@ -34,7 +34,7 @@ describe("rule document presence", () => {
     roots.push(root);
     const directoryPath = join(root, ".claude", "rules");
     mkdirSync(directoryPath, { recursive: true });
-    writeFileSync(join(directoryPath, "fca.md"), "# policy\n");
+    writeFileSync(join(directoryPath, "filid_fca-policy.md"), "# policy\n");
     const target: DirectoryRuleTarget = {
       kind: "directory",
       root,
@@ -43,8 +43,8 @@ describe("rule document presence", () => {
     };
 
     const expected = {
-      target: join(directoryPath, "fca.md"),
-      displayTarget: ".claude/rules/fca.md",
+      target: join(directoryPath, "filid_fca-policy.md"),
+      displayTarget: ".claude/rules/filid_fca-policy.md",
       deployed: true,
     };
     expect(

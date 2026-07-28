@@ -11,7 +11,7 @@ import {
   applyOverrides,
   evaluateRules,
   loadBuiltinRules,
-} from '../../../core/rules/ruleEngine/ruleEngine.js';
+} from '../../../core/rules/ruleEngine/index.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 
 function makeNode(overrides: Partial<FractalNode>): FractalNode {
@@ -20,10 +20,15 @@ function makeNode(overrides: Partial<FractalNode>): FractalNode {
     name: 'foo',
     type: 'fractal',
     parent: 'packages',
+    parentFractalPath: 'packages',
     children: [],
+    childFractalPaths: [],
     organs: [],
+    organPaths: [],
     hasIntentMd: true,
     hasDetailMd: false,
+    entryPoints: [],
+    peerFiles: [],
     hasIndex: false,
     hasMain: false,
     depth: 2,
@@ -78,10 +83,10 @@ describe('rule-engine exempt (Commit B)', () => {
     it('applyOverrides keeps rule.check pure when exempt is absent', () => {
       const rules = loadBuiltinRules();
       const overridden = applyOverrides(rules, {
-        [BUILTIN_RULE_IDS.NAMING_CONVENTION]: { enabled: false },
+        [BUILTIN_RULE_IDS.MAX_DEPTH]: { enabled: false },
       });
       const target = overridden.find(
-        (r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION,
+        (r) => r.id === BUILTIN_RULE_IDS.MAX_DEPTH,
       );
       expect(target?.enabled).toBe(false);
     });
@@ -92,12 +97,12 @@ describe('rule-engine exempt (Commit B)', () => {
       const allowedNode = makeNode({
         path: 'packages/foo',
         hasIndex: true,
-        metadata: { peerFiles: ['CLAUDE.md'] },
+        peerFiles: ['CLAUDE.md'],
       });
       const disallowedNode = makeNode({
         path: 'src/deep',
         hasIndex: true,
-        metadata: { peerFiles: ['CLAUDE.md'] },
+        peerFiles: ['CLAUDE.md'],
       });
       const rules = loadBuiltinRules(undefined, [
         { basename: 'CLAUDE.md', paths: ['packages/**'] },
@@ -112,13 +117,13 @@ describe('rule-engine exempt (Commit B)', () => {
       expect(zpf.map((v) => v.path)).toEqual(['src/deep']);
     });
 
-    it('treats bare string entries as globally allowed (backward-compat)', () => {
+    it('treats an entry without paths as allowed at every boundary', () => {
       const node = makeNode({
         path: 'src/any',
         hasIndex: true,
-        metadata: { peerFiles: ['type.ts'] },
+        peerFiles: ['type.ts'],
       });
-      const rules = loadBuiltinRules(undefined, ['type.ts']);
+      const rules = loadBuiltinRules(undefined, [{ basename: 'type.ts' }]);
       const result = evaluateRules(treeOf([node]), rules);
       const zpf = result.violations.filter(
         (v) => v.ruleId === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
@@ -130,7 +135,7 @@ describe('rule-engine exempt (Commit B)', () => {
       const node = makeNode({
         path: 'src/any',
         hasIndex: true,
-        metadata: { peerFiles: ['LICENSE'] },
+        peerFiles: ['LICENSE'],
       });
       const rules = loadBuiltinRules(undefined, [{ basename: 'LICENSE' }]);
       const result = evaluateRules(treeOf([node]), rules);
@@ -138,6 +143,45 @@ describe('rule-engine exempt (Commit B)', () => {
         (v) => v.ruleId === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
       );
       expect(zpf).toHaveLength(0);
+    });
+
+    it('applies an adapter-scoped peer override only to matching nodes', () => {
+      const matching = makeNode({
+        path: 'src/matching',
+        entryPoints: [
+          {
+            path: 'src/matching/public.entry',
+            kind: 'module',
+            adapterId: 'target-adapter',
+            surface: 'enumerated',
+          },
+        ],
+        peerFiles: ['LICENSE'],
+      });
+      const different = makeNode({
+        path: 'src/different',
+        entryPoints: [
+          {
+            path: 'src/different/public.entry',
+            kind: 'module',
+            adapterId: 'other-adapter',
+            surface: 'enumerated',
+          },
+        ],
+        peerFiles: ['LICENSE'],
+      });
+      const rules = loadBuiltinRules(undefined, [
+        { basename: 'LICENSE', adapterId: 'target-adapter' },
+      ]);
+
+      const result = evaluateRules(treeOf([matching, different]), rules);
+      const zeroPeer = result.violations.filter(
+        (violation) => violation.ruleId === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
+      );
+
+      expect(zeroPeer.map((violation) => violation.path)).toEqual([
+        'src/different',
+      ]);
     });
   });
 });

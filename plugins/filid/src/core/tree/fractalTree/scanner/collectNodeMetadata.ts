@@ -1,90 +1,124 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
+import { pathForCompare } from '@ogham/cross-platform/paths';
+
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
+import type { IgnoreFilter } from '../../../../lib/createIgnoreFilter.js';
+import type { StructureAdapter } from '../../../../types/adapters.js';
 import type { ScanOptions } from '../../../../types/scan.js';
-import { classifyNode } from '../../organClassifier/organClassifier.js';
+import { classifyNode } from '../../organClassifier/index.js';
 import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
 
-/**
- * Build immediate-children map and collect NodeEntry metadata for every directory.
- */
-export function collectNodeMetadata(
+export async function collectNodeMetadata(
   allDirs: string[],
   rootPath: string,
   opts: Required<ScanOptions>,
-  frameworkReservedArr: string[],
-): { nodeEntries: NodeEntry[]; childrenMap: Map<string, string[]> } {
-  const dirSet = new Set(allDirs);
-
-  // Pre-compute immediate children map: O(n) instead of O(n²) per-entry lookups
-  const childrenMap = new Map<string, string[]>();
-  for (const absPath of allDirs) childrenMap.set(absPath, []);
-
-  for (const absPath of allDirs) {
-    const parentDir = dirname(absPath);
-    if (parentDir && childrenMap.has(parentDir))
-      childrenMap.get(parentDir)!.push(absPath);
+  adapters: readonly StructureAdapter[],
+  isIgnored: IgnoreFilter = () => false,
+): Promise<{ nodeEntries: NodeEntry[]; childrenMap: Map<string, string[]> }> {
+  const childrenMap = new Map<string, string[]>(
+    allDirs.map((path) => [path, []]),
+  );
+  for (const path of allDirs) {
+    const parentPath = dirname(path);
+    childrenMap.get(parentPath)?.push(path);
   }
 
-  const nodeEntries: NodeEntry[] = [];
-  const maxDepth = opts.maxDepth;
+  const nodeEntries = await Promise.all(
+    allDirs.map(async (path): Promise<NodeEntry | null> => {
+      const relativePath = relative(rootPath, path);
+      const depth =
+        relativePath === '' ? 0 : relativePath.split(/[\\/]/).length;
+      if (depth > opts.maxDepth) return null;
+      const name = path === rootPath ? basename(rootPath) : basename(path);
+      const hasIntentMd = existsSync(join(path, INTENT_MD));
+      const hasDetailMd = existsSync(join(path, DETAIL_MD));
+      const peerFiles = readdirSync(path, { withFileTypes: true })
+        .filter(
+          (entry) =>
+            entry.isFile() &&
+            !entry.name.startsWith('.') &&
+            !isIgnored(join(path, entry.name)),
+        )
+        .map((entry) => entry.name)
+        .sort();
+      const entryPoints = (
+        await Promise.all(
+          adapters.map((adapter) =>
+            adapter.findEntryPoints(
+              path,
+              opts.entryPointOverrides?.[adapter.id],
+            ),
+          ),
+        )
+      )
+        .flat()
+        .filter(
+          (entryPoint) =>
+            !opts.enforceStructureOwnership ||
+            opts.structureOwnership.get(pathForCompare(entryPoint.path)) ===
+              entryPoint.adapterId,
+        )
+        .filter(
+          (entryPoint, index, entries) =>
+            entries.findIndex(
+              (candidate) =>
+                pathForCompare(candidate.path) ===
+                  pathForCompare(entryPoint.path) &&
+                candidate.adapterId === entryPoint.adapterId,
+            ) === index,
+        )
+        .sort((left, right) => left.path.localeCompare(right.path));
+      const frameworkReservedFiles: string[] = [];
+      for (const peerFile of peerFiles) {
+        const absolutePeerPath = join(path, peerFile);
+        if (
+          (
+            await Promise.all(
+              adapters.map((adapter) =>
+                adapter.isFrameworkOwnedPeer(absolutePeerPath),
+              ),
+            )
+          ).some(Boolean)
+        )
+          frameworkReservedFiles.push(peerFile);
+      }
+      const children = childrenMap.get(path) ?? [];
+      return {
+        path,
+        name,
+        type: classifyNode({
+          dirName: name,
+          hasIntentMd,
+          hasDetailMd,
+          hasFractalChildren: children.length > 0,
+          isLeafDirectory: children.length === 0,
+          entryPoints,
+          additionalOrganNames: opts.additionalOrganNames,
+        }),
+        hasIntentMd,
+        hasDetailMd,
+        entryPoints,
+        peerFiles,
+        eponymousFile:
+          peerFiles.find((file) => file.replace(/\.[^.]+$/, '') === name) ??
+          null,
+        frameworkReservedFiles,
+        hasIndex: entryPoints.some(
+          (entryPoint) => entryPoint.kind === 'module',
+        ),
+        hasMain: entryPoints.some(
+          (entryPoint) => entryPoint.kind === 'executable',
+        ),
+      };
+    }),
+  );
 
-  for (const absPath of allDirs) {
-    const rel = relative(rootPath, absPath);
-    const depth = rel === '' ? 0 : rel.split(/[\\/]/).length;
-    if (depth > maxDepth) continue;
-
-    const name = absPath === rootPath ? basename(rootPath) : basename(absPath);
-    const hasIntentMd = existsSync(join(absPath, INTENT_MD));
-    const hasDetailMd = existsSync(join(absPath, DETAIL_MD));
-    const hasIndex =
-      existsSync(join(absPath, 'index.ts')) ||
-      existsSync(join(absPath, 'index.tsx')) ||
-      existsSync(join(absPath, 'index.js')) ||
-      existsSync(join(absPath, 'index.mjs')) ||
-      existsSync(join(absPath, 'index.cjs'));
-    const hasMain =
-      existsSync(join(absPath, 'main.ts')) ||
-      existsSync(join(absPath, 'main.js'));
-
-    // Enumerate peer files (non-directory, non-dot-file entries)
-    const dirEntries = readdirSync(absPath, { withFileTypes: true });
-    const peerFiles = dirEntries
-      .filter((e) => e.isFile() && !e.name.startsWith('.'))
-      .map((e) => e.name);
-
-    // Detect eponymous file (dirname === filename sans extension, max 1)
-    const eponymousFile =
-      peerFiles.find((f) => f.replace(/\.[^.]+$/, '') === name) ?? null;
-
-    const children = childrenMap.get(absPath) ?? [];
-    const hasFractalChildren = children.some((d) => dirSet.has(d));
-    const isLeafDirectory = children.length === 0;
-
-    const type = classifyNode({
-      dirName: name,
-      hasIntentMd,
-      hasDetailMd,
-      hasFractalChildren,
-      isLeafDirectory,
-      hasIndex,
-      additionalOrganNames: opts.additionalOrganNames,
-    });
-
-    nodeEntries.push({
-      path: absPath,
-      name,
-      type,
-      hasIntentMd,
-      hasDetailMd,
-      hasIndex,
-      hasMain,
-      peerFiles,
-      eponymousFile,
-      frameworkReservedFiles: frameworkReservedArr,
-    });
-  }
-
-  return { nodeEntries, childrenMap };
+  return {
+    nodeEntries: nodeEntries.filter(
+      (entry): entry is NodeEntry => entry !== null,
+    ),
+    childrenMap,
+  };
 }

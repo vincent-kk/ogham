@@ -1,38 +1,42 @@
-# tools -- MCP 도구 핸들러
+# tools — nine-tool protocol handlers
 
 ## Purpose
 
-19개 FCA-AI MCP 도구의 비즈니스 로직 핸들러를 모은 fractal. 각 도구는 독립 sub-fractal로 구현되며 `mcp/server/server.ts`에서 등록되어 MCP 프로토콜을 통해 호출된다.
+Filid 1.0의 project/config/scan/context/plan/validation/review 동작을 정확히
+9개 독립 sub-fractal로 노출한다.
 
 ## Structure
 
-- 19개 sub-fractal: `astAnalyze`, `astGrepSearch`, `astGrepReplace`, `cacheManage`, `configPatchValidate`, `coverageVerify`, `debtManage`, `docCompress`, `driftDetect`, `fractalNavigate`, `fractalScan`, `lcaResolve`, `openSettings`, `projectInit`, `reviewManage`, `ruleDocsSync`, `ruleQuery`, `structureValidate`, `testMetrics`
-- `utils/` organ: 도구 간 공유되는 파일 시스템 가드(`fsGuard`) 등
-- 각 sub-fractal은 `handle*` 함수 하나를 주요 runtime export로 둔다
+| Tool fractal                                                  | Role              |
+| ------------------------------------------------------------- | ----------------- |
+| `projectInit`, `ruleDocsSync`, `openSettings`                  | 초기화와 설정     |
+| `fractalScan`, `contextResolve`, `restructurePlan`             | FCA 증거와 계획   |
+| `structureValidate`, `verificationScan`, `reviewState`         | 검증과 review 상태 |
+| `utils/`                                                      | shared host guards |
 
 ## Conventions
 
-- 도구 응답: `toolResult()` / `toolError()` 래퍼 사용
-- Zod 스키마로 모든 입력 검증
-- I/O 경계는 `utils/fsGuard.ts`에서 공통화
+- 각 handler는 core 공개 entry point를 오케스트레이션한다.
+- 고정 input/status/detail/action 값은 constants object enum을 사용한다.
+- MCP 출력은 server의 16 KiB artifact envelope를 통과한다.
 
 ## Boundaries
 
 ### Always do
 
-- 새 도구 추가 시 sub-fractal + `INTENT.md` + barrel 생성
-- `handle*` 네이밍으로 runtime export 유지
+- tool마다 INTENT, DETAIL, named barrel과 단일 `handle*` runtime export 유지
+- project source를 읽기 전 normalized root와 snapshot을 한 번만 생성
 
 ### Ask first
 
-- 기존 도구 입력 스키마 변경 (클라이언트 호환성 영향)
-- 새 `utils/` organ 파일 추가
+- 9개 목록, input schema, persistence 또는 status 의미 변경
 
 ### Never do
 
-- 도구 sub-fractal 간 직접 import (공통 로직은 `../../core/`로 이동)
-- 응답을 raw 객체로 반환 (래퍼 필수)
+- 범용 AST/search/edit, file move, import rewrite 또는 review fix 추가
+- tool sub-fractal 사이 직접 import
+- core 판단을 MCP handler에 복제
 
 ## Dependencies
 
-- `../../core/`, `../../ast/`, `../../metrics/`, `../../compress/`, `../../types/`
+- `../../core/`, `../../adapters/`, `../../types/`, `../../constants/`

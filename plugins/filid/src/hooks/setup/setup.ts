@@ -20,19 +20,10 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-  getCacheDir,
-  isPruneDue,
-  isSessionPruneDue,
-  markPruneRun,
-  markSessionPruneRun,
-  pruneOldSessions,
-  pruneStaleCacheDirs,
-  removeSessionFiles,
-} from '../../core/infra/cacheManager/cacheManager.js';
+import { getCacheDir, isPruneDue, isSessionPruneDue, markPruneRun, markSessionPruneRun, pruneOldSessions, pruneStaleCacheDirs, removeSessionFiles } from '../../core/infra/cacheManager/caches/sessionCache.js';
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
-import { isFcaProject } from '../shared/shared.js';
+import { isFcaProject } from '../shared/utils/isFcaProject.js';
 import { validateCwd } from '../utils/validateCwd.js';
 
 import { hasIntentMdInTree } from './utils/hasIntentMdInTree.js';

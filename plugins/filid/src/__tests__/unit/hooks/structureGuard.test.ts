@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { guardStructure } from '../../../hooks/preToolUse/helpers/structureGuard/structureGuard.js';
+import { guardStructure } from '../../../hooks/preToolUse/helpers/structureGuard/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 const baseInput: PreToolUseInput = {

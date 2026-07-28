@@ -1,79 +1,39 @@
 # enrich-docs — Tables
 
-Consolidated lookup tables for the INTENT.md enrichment skill. Load this file when you need argument defaults, MCP tool signatures, agent roles, or the comparison against `update`. For the workflow itself see [SKILL.md](./SKILL.md); for detailed per-stage implementation see [reference.md](./reference.md).
-
-## Difference from update
-
-Both skills touch INTENT.md, but they occupy different triggers and detection models. Use this table to pick the right one.
-
-| Skill         | Trigger               | Detection                 | Incremental gate                                   | Invocation                           |
-| ------------- | --------------------- | ------------------------- | -------------------------------------------------- | ------------------------------------ |
-| `update`      | Branch git diff       | Rule violations           | Hash-based (mcp__plugin_filid_tools__cache_manage) | Internal (`user_invocable: false`)   |
-| `enrich-docs` | Target directory path | Quality smell (heuristic) | None (quality re-eval)                             | User-facing (`user_invocable: true`) |
-
-Practical guidance:
-
-- Pick `update` when you just edited code and need docs/tests to catch up on the diff.
-- Pick `enrich-docs` when the INTENT.md content itself is thin or boilerplate-heavy, regardless of recent edits.
+Lookup tables for [SKILL.md](./SKILL.md). The detailed evidence and validation
+contract is in [reference.md](./reference.md).
 
 ## Available MCP Tools
 
-Only tools directly called by this skill are listed. `context-manager` owns its own reads via the Read/Glob tools — they are not documented here.
+| Tool                                          | Stage      | Purpose                                          | Input                                                       |
+| --------------------------------------------- | ---------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| `mcp__plugin_filid_tools__fractal_scan`       | Evidence   | Snapshot-backed node paths and document presence | `{ path, detail: "paths", maxDepth? }`                      |
+| `mcp__plugin_filid_tools__context_resolve`    | Evidence   | Minimal owner-to-root document references        | `{ path, targetPath }`                                      |
+| `mcp__plugin_filid_tools__structure_validate` | Validation | Canonical document and node findings             | `{ path, mode: "project", scopes: ["documents", "nodes"] }` |
 
-| Tool                                          | Stage | Purpose                                          | Signature summary                                                               |
-| --------------------------------------------- | ----- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReportDto`                                                    |
-| `mcp__plugin_filid_tools__doc_compress`       | 7     | 50-line limit enforcement                        | `{ mode, filePath, content }` → `{ compacted?, summary?, meta?, cap_applies? }` |
-| `mcp__plugin_filid_tools__structure_validate` | 7     | Structural rule check on the enriched module     | `{ path }` → `{ report, rulesApplied, rulesSkipped, configWarnings }`           |
-
-Full tool signatures and return-type schemas live in [reference.md Sections 2 and 7](./reference.md#section-2--discovery).
-
-## Agents
-
-| Agent             | Capability            | Role in this skill                                        |
-| ----------------- | --------------------- | --------------------------------------------------------- |
-| `context-manager` | Write (INTENT/DETAIL) | Stage 6 — rewrites flagged axes using real source context |
-
-No other agent is used. `context-manager` is the only write-capable agent the skill invokes, and it never runs without an upstream plan from Stage 4.
+All three return the common Filid envelope. A non-`ok` status remains visible in
+the report and is never converted into a successful audit.
 
 ## Options
 
-| Option             | Type    | Default   | Description                                         |
-| ------------------ | ------- | --------- | --------------------------------------------------- |
-| `path`             | string  | cwd       | Target directory root                               |
-| `--depth`          | integer | unlimited | Max child-directory depth to audit                  |
-| `--min-quality`    | integer | `70`      | Score threshold separating RICH from SPARSE         |
-| `--skip-rich`      | flag    | on        | Exclude RICH files from the plan (default behavior) |
-| `--dry-run`        | flag    | off       | Emit plan and exit without writing                  |
-| `--auto-approve`   | flag    | off       | Skip Stage 5 approval gate                          |
-| `--include-detail` | flag    | off       | Also audit and enrich DETAIL.md                     |
+| Option             | Type    | Default | Description                                              |
+| ------------------ | ------- | ------- | -------------------------------------------------------- |
+| `path`             | string  | cwd     | Project subtree to audit                                 |
+| `--depth`          | integer | `10`\*  | `max-depth` rule threshold; not a traversal limit        |
+| `--min-quality`    | integer | `70`    | RICH/SPARSE threshold                                    |
+| `--dry-run`        | flag    | off     | Display the evidence-backed plan without writes          |
+| `--auto-approve`   | flag    | off     | Treat invocation as prior approval of the displayed plan |
+| `--include-detail` | flag    | off     | Include DETAIL.md contract quality                       |
 
-Options are LLM-interpreted hints, not strict CLI flags. Natural language works equally well — e.g. "RICH은 건너뛰고 core만" instead of `--skip-rich packages/filid/src/core`.
-
-### Quality threshold guidance
-
-- `--min-quality 60` — relaxed, enriches only the clearly empty/boilerplate files
-- `--min-quality 70` (default) — balanced, catches sparse sections
-- `--min-quality 80` — strict, treats moderately populated INTENT.md as SPARSE
-- `--min-quality 90` — nearly every file becomes SPARSE; use only for a deep cleanup pass
-
-### Depth guidance
-
-Depth restricts how many nested fractal boundaries below `path` are in scope:
-
-- `--depth 1` — audit only the immediate directory
-- `--depth 3` — covers most single-package audits
-- unlimited (default) — recurses until no fractal children remain
+\* The project's configured `structure.maxDepth` when set, otherwise `10`. The
+scan itself always traverses the full tree; this value only decides when a node
+counts as a `max-depth` violation.
 
 ## Terminal Stage Markers
 
-Emit exactly one of the following strings in the final report so the Tier-2b anti-yield contract can detect completion:
-
-| Marker                                   | Meaning                                  |
-| ---------------------------------------- | ---------------------------------------- |
-| `Enrich-docs complete: N files enriched` | Normal success with one or more rewrites |
-| `Enrich-docs dry-run complete`           | `--dry-run` exit without writes          |
-| `Enrich-docs skipped: all RICH`          | Nothing above the min-quality threshold  |
-| `Enrich-docs cancelled`                  | User chose `cancel` at the approval gate |
-
-Register these markers in `.omc/research/terminal-markers.json` per the Tier-2b anti-yield contract.
+| Marker                                   | Meaning                  |
+| ---------------------------------------- | ------------------------ |
+| `Enrich-docs complete: N files enriched` | Approved edits validated |
+| `Enrich-docs dry-run complete`           | Plan shown; no writes    |
+| `Enrich-docs skipped: all RICH`          | Nothing required editing |
+| `Enrich-docs cancelled`                  | Approval was declined    |

@@ -1,157 +1,142 @@
 # restructure — Reference Documentation
 
-Detailed workflow, MCP tool call signatures, and output format templates for the fractal structure restructuring skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+Detailed plan, approval, external execution, and postcondition contract for
+[SKILL.md](./SKILL.md).
 
-## Section 1 — Analysis & Proposal
+## Section 1 — Placement Requests
 
-`fractal-architect` runs the first three MCP calls **in parallel** (no dependencies):
+Each request maps directly to the public `RestructurePlanInput` contract:
 
-```
-// Parallel batch — fire all three simultaneously:
-mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
-// Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
-// Size guard: oversized results return { truncated: true, reportPath, summary } — grep reportPath for details
-
-mcp__plugin_filid_tools__drift_detect({ path: "<target-path>" })
-// Returns: { drifts: DriftItem[], total: number }
-
-mcp__plugin_filid_tools__rule_query({ action: "list", path: "<target-path>" })
-// Returns: { rules: Rule[] }
-```
-
-After `mcp__plugin_filid_tools__drift_detect` completes, call `mcp__plugin_filid_tools__lca_resolve` for each move candidate (requires `mcp__plugin_filid_tools__drift_detect` output to identify reclassification targets):
-
-```
-// Sequential — after mcp__plugin_filid_tools__drift_detect:
-mcp__plugin_filid_tools__lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
-// Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
+```text
+{
+  path: "<project-path>",
+  requests: [{
+    sourcePath: "<existing-unit-path>",
+    consumerPaths?: ["<consumer-path>", "..."],
+    contractIntent?: "independent" | "internal" | "unknown",
+    organNameHint?: "<name-hint>"
+  }]
+}
 ```
 
-After analysis, `fractal-architect` generates a structured YAML proposal:
+Use placement requests explicitly supplied by the user or copied from a previous
+Filid finding. Do not infer an `independent` or `internal` contract from a name.
+Omitted `consumerPaths` are resolved by the snapshot dependency graph.
 
-```yaml
-restructure-plan:
-  target: src/
-  generated: '2026-02-22T00:00:00Z'
-  actions:
-    - type: move
-      source: src/components/AuthModal
-      target: src/features/auth/components/AuthModal
-      reason: fractal module incorrectly placed under organ directory
-    - type: rename
-      source: src/utils/user_helper.ts
-      target: src/utils/userHelper.ts
-      reason: naming convention violation — camelCase is the default (HOL-N001)
-    - type: create-index
-      target: src/features/auth
-      reason: fractal node missing index.ts barrel export
-    - type: reclassify
-      path: src/shared/state
-      from: organ
-      to: fractal
-      reason: Contains state management logic; organ classification is incorrect
+Call:
+
+```text
+mcp__plugin_filid_tools__restructure_plan(<RestructurePlanInput>)
 ```
 
-## Section 2 — Plan Review & Approval
+The tool is read-only. It returns a summary plus an artifact for the full plan
+regardless of plan size. The artifact stores a common `ToolPayload`; read its
+`.data` as the `RestructurePlan`. Verify that the artifact SHA-256 matches the
+envelope before using it.
 
-In `--dry-run` mode, print the plan and exit without changes:
+The plan contains exact `sourcePath -> targetPath` moves, target node type,
+placement basis, consumers, lowest common fractal path, required artifacts,
+affected import rewrites, `alreadyPlaced` entries, and unresolved decisions. A
+non-`ok` status or a non-empty `unresolved` list must be shown as unresolved and
+cannot be executed.
 
-```
-[DRY RUN] Restructuring Plan — 4 actions:
-  MOVE       src/components/AuthModal → src/features/auth/components/AuthModal
-  RENAME     src/utils/UserHelper.ts → src/utils/user-helper.ts
-  CREATE     src/features/auth/index.ts (barrel export)
-  RECLASSIFY src/shared/state: organ → fractal
-No changes applied. Remove --dry-run to execute.
-```
+`alreadyPlaced` holds requests whose computed target equals their current path.
+They carry the same computed evidence as a move but nothing to execute, so they
+are excluded from `moves` and from postcondition validation — a postcondition
+would otherwise demand that one path be both absent and present. `summary`
+counts them under `alreadyPlacedCount`, separate from `moveCount`.
 
-<!-- [INTERACTIVE] AskUserQuestion: Stage 2 restructure plan approval -->
+## Section 2 — Precondition Validation
 
-Without `--auto-approve`, request explicit user confirmation:
+Before presenting a plan for approval, call:
 
-```
-Apply the above restructuring plan?
-Affected files: N  |  Import path updates: N
-[y/N]
-```
-
-Proceed to Stage 3 when the user enters 'y' or `--auto-approve` is set.
-
-## Section 3 — Execution
-
-`restructurer` applies actions in this priority order:
-
-1. `reclassify` (metadata changes only, no file moves)
-2. `move` (file system changes)
-3. `rename` (file system changes)
-4. `create-index` (new file creation)
-5. `create-main` (new file creation)
-6. `split` / `merge` (compound operations)
-
-After each move or rename, import paths are updated immediately:
-
-```
-affectedFiles = grep("<old-path>", all_source_files)
-for file in affectedFiles:
-  edit(file, replace("<old-import>", "<new-import>"))
+```text
+mcp__plugin_filid_tools__structure_validate({
+  path: "<project-path>",
+  mode: "plan-precondition",
+  planPath: "<absolute-plan-artifact-path>"
+})
 ```
 
-Example generated index.ts:
+Read the validation data from the returned result or, when the payload exceeds
+the inline envelope budget, from its artifact.
 
-```typescript
-// src/features/auth/index.ts
-export { AuthModal } from './components/AuthModal';
-export { useAuth } from './hooks/useAuth';
-export type { AuthUser, AuthState } from './types';
+The plan is executable only when the response status is `ok` and its validation
+data is valid. A stale snapshot, missing source, invalid artifact, or unresolved
+decision returns to planning; never work around it with an ad-hoc move.
+
+## Section 3 — Approval
+
+Display each exact move and its:
+
+- Current path
+- Target path
+- target Type
+- placement Basis and LCA
+- required INTENT/DETAIL/entry-point artifacts
+- import rewrites
+
+Also display the plan ID, snapshot hash, precondition result, and total affected
+files. `--dry-run` prints this material and ends without changes.
+
+Without `--auto-approve`, require explicit approval of this exact plan.
+`--auto-approve` is prior authorization for the exact validated artifact; it
+does not authorize unresolved decisions or a changed plan.
+
+## Section 4 — External Execution
+
+Filid MCP never moves files and never rewrites imports. After approval, the
+calling environment performs ordinary file operations outside MCP:
+
+1. Update the affected fractal DETAIL.md contracts before code or moves.
+2. Update INTENT.md before changing a public boundary.
+3. Create every plan `requiredArtifact`.
+4. Apply each exact `sourcePath -> targetPath` move.
+5. Apply only the listed import rewrites.
+
+Use the environment's cross-platform path/file helpers. Do not construct paths by
+splitting on `/` or `\`. Preserve unrelated working-tree changes and stop on a
+partial operation instead of silently inventing a recovery plan.
+
+Record which plan instruction produced each filesystem change. The skill does
+not expose generic move or import-rewrite capability through MCP.
+
+## Section 5 — Postcondition Validation
+
+Call the same validator against the same artifact after all approved external
+operations:
+
+```text
+mcp__plugin_filid_tools__structure_validate({
+  path: "<project-path>",
+  mode: "plan-postcondition",
+  planPath: "<absolute-plan-artifact-path>"
+})
 ```
 
-## Section 4 — Validation
+Read the postcondition results from the returned result or, when the payload
+exceeds the inline envelope budget, from its artifact. Treating an absent inline
+`data` as "nothing failed" would turn a failed move into a false pass.
 
-After `restructurer` completes, `fractal-architect` validates with `mcp__plugin_filid_tools__structure_validate`.
+Success requires `status: "ok"` and valid postconditions for source absence,
+target presence, required artifacts, imports, boundary rules, and dependency DAG.
+Do not substitute a project-mode validation for this exact-plan check.
 
+## Section 6 — Report
+
+Report the plan ID/hash, artifact path/hash, approval mode, each executed move,
+required documents and entry points, import rewrites, and pre/post validation
+outcomes. A failed postcondition is a failed restructure, even when file
+operations completed.
+
+End a successful execution with:
+
+```text
+Restructure complete: <N> moves applied
 ```
-mcp__plugin_filid_tools__structure_validate({ path: "<target-path>" })
-// Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
-// (passed / violations live at report.result)
-```
 
-Validation checks:
+End a dry run with:
 
-- All imports are resolvable
-- No orphaned files (unreferenced after moves)
-- All fractal nodes have index.ts
-- No organ directories contain fractal children
-- No naming convention violations
-
-### Final Execution Report Format
-
-```
-## Restructure Complete — <target path>
-
-### Actions Executed
-| Action | Source | Target / Result | Status |
-|--------|--------|----------------|--------|
-| move | src/components/AuthModal | src/features/auth/components/AuthModal | ✓ |
-| rename | src/utils/UserHelper.ts | src/utils/user-helper.ts | ✓ |
-| create-index | src/features/auth/index.ts | — | ✓ |
-| reclassify | src/shared/state | fractal | ✓ |
-
-### Import Path Updates
-| File | Old Import | New Import |
-|------|------------|------------|
-| src/app.ts | ../components/AuthModal | ../features/auth/components/AuthModal |
-
-### Validation Result
-mcp__plugin_filid_tools__structure_validate: PASS
-- All imports resolvable: ✓
-- No orphaned files: ✓
-- All fractal nodes have index.ts: ✓
-- Organ directory rules satisfied: ✓
-
-### Summary
-- Files moved: N
-- Files renamed: N
-- Files created: N
-- Import paths updated: N
-- Validation: PASS
+```text
+Restructure dry-run complete
 ```

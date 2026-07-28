@@ -1,6 +1,6 @@
 import { bench, describe } from 'vitest';
 
-import { handleUserPromptSubmit } from '../../../hooks/userPromptSubmit/userPromptSubmit.js';
+import { handleUserPromptSubmit } from '../../../hooks/userPromptSubmit/index.js';
 import { generateUserPromptInput } from '../fixtures/generator.js';
 
 // pre-generate inputs per tier

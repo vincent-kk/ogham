@@ -1,183 +1,107 @@
-# resolve — Reference Documentation
+# resolve — Reference
 
-Output format templates and detailed workflow reference for the fix request resolution skill.
+## §1 `justifications.md` template
 
-## justifications.md Format
+Written to `REVIEW_DIR/justifications.md`. This file is the sole record of what was accepted and why anything was declined. It is never committed.
 
 ```markdown
 ---
-resolve_commit_sha: <base_sha captured at Step 4 start (pre-fix HEAD)>
-resolved_at: <ISO 8601>
-branch: <branch name>
-total_fixes: <total fix count>
-accepted: <accepted count>
-rejected: <rejected count>
+branch: <branch>
+base_ref: <base ref>
+resolve_commit_sha: <SHA captured before any correction landed>
+accepted: <n>
+rejected: <m>
+unapplied: <k>
 ---
 
-# Justifications — <branch name>
+# FCA Resolve — <branch>
 
-**Date**: <ISO 8601>
-**Accepted Fixes**: N / M
-**Rejected Fixes**: K
+## Accepted
 
----
+### FIX-001: <rule at path>
 
-## JUST-001: FIX-<ID> Rejection
+- **Path**: `<project-relative path>`
+- **Rule**: <FCA rule or DETAIL requirement>
+- **Delegated to**: main-agent | filid:restructure | <plugin:skill>
+- **Applied**: yes | no
+- **Change**: <one line naming what moved or changed, or `none observed`>
 
-- **Original Fix**: <fix title and description>
-- **Severity**: <severity>
-- **Path**: `<file path>`
-- **Rule Violated**: <rule>
-- **Developer Decision**: REJECTED
-- **Developer's Justification**: "<raw justification text>"
-- **Refined ADR**: "<structured ADR text>"
-- **Debt Created**: `.filid/debt/<debt-file-name>.md`
+## Rejected
 
----
+### FIX-002: <rule at path>
+
+- **Path**: `<project-relative path>`
+- **Rule**: <FCA rule or DETAIL requirement>
+- **Context**: <the situation that makes the finding contentious>
+- **Decision**: <what was decided instead, stated as a choice>
+- **Consequences**: <what this costs and what now has to stay true>
 ```
 
-> **Note**: `justifications.md` is a local inter-stage communication file. It is NOT committed to git. It lives in `.filid/review/<branch>/` which is gitignored. `filid:revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter. Explicitly `git add`-ing a gitignored path overrides the exclusion — never stage this file.
+`resolve_commit_sha` is load-bearing. `revalidate` diffs `resolve_commit_sha..HEAD`; a value read after the commit yields an empty delta and a false PASS.
 
-## ADR Refinement Guidelines
+## §2 ADR refinement rules
 
-Transform raw developer justification into structured ADR format:
+A raw justification becomes an ADR only when all three parts are present.
 
-```
-ADR-<date>: <concise decision title>
-Context: <original fix request + rule violated + current metric value>
-Decision: <what was decided and why>
-Consequences: <technical debt created, future impact, estimated resolution>
-```
+- **Context** — the concrete condition, not a preference. "This organ is imported by two fractals in different subtrees" qualifies; "this feels fine" does not.
+- **Decision** — what is being done _instead of_ the recommended action. A decision that restates the finding is not a decision.
+- **Consequences** — what the project now accepts. This is the part `revalidate` judges: a rejection with no stated cost is unconstitutional.
 
-**Refinement rules**:
+Reject-the-rejection cases, reported back to the developer for a second pass:
 
-1. Preserve the developer's core reasoning — do not alter intent
-2. Add structural context (rule, metric, fractal path)
-3. Include estimated resolution timeframe if mentioned
-4. Reference the created debt file ID
+| Symptom                                   | Why it fails                |
+| ----------------------------------------- | --------------------------- |
+| "Out of scope for this PR"                | Timing is not a rationale   |
+| "Pre-existing"                            | Age is not a rationale      |
+| "Will fix later"                          | No decision, no consequence |
+| Consequences section restates the Context | Nothing was accepted        |
 
-## Fix Item Types
+## §3 Delegation brief format
 
-Each fix item in `fix-requests.md` has an optional `type` field that determines how the `filid:resolve` skill processes it:
+One brief per accepted item routed to the **main agent**. Hand it out verbatim; the executor never reads `fix-requests.md` itself.
 
-| Type               | Default | Handler                      | Description                                                                                                                  |
-| ------------------ | ------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `code-fix`         | yes     | `code-surgeon` subagent      | Standard code patch (inline edit)                                                                                            |
-| `promote`          | no      | `Skill("filid:promote")`     | test.ts → spec.ts promotion (3+12 compliance)                                                                                |
-| `restructure`      | no      | `Skill("filid:restructure")` | Module split/reorganization (LCOM4 >= 2)                                                                                     |
-| `harvest-required` | no      | NONE — aborts resolve        | Oracle gap (unharvested spike / claim INSUFFICIENT-EVIDENCE) — human-gated `/filid:harvest` interview, never auto-dispatched |
-
-When `type` is absent, the item is treated as `code-fix`. Any `harvest-required` item aborts resolve before dispatch (see SKILL.md Step 2 harvest gate) — it marks a missing oracle, and re-review is required after the harvest updates `.filid/criteria.md`.
-
-### Fix Item Format by Type
-
-`fix-requests.md` carries blocking items only (severity >= MEDIUM) — LOW items are advisory and stay in `review-report.md` → `## Advisory Notes`, so they never reach resolve.
-
-**code-fix** (default):
-
-```markdown
-### FIX-001: Unguarded config dereference in validator.ts
-
-- **Severity**: MEDIUM
-- **Path**: `src/core/validator.ts`
-- **Rule**: error-handling
-- **Type**: code-fix
-- **Consequence**: Hook crashes with a TypeError on projects without `.filid/config.json`
-- **Action**: Guard the config access on line 12 with a null check
-- **Patch**: (inline diff)
+```text
+Apply FIX-NNN.
+Path:     <absolute path>
+Rule:     <FCA rule or DETAIL requirement>
+Problem:  <Consequence line from the fix request>
+Required: <Recommended Action line from the fix request>
+Bounds:   Change only what the required action names. Do not reformat
+          neighbouring code, do not rename unrelated symbols, do not edit
+          INTENT.md or DETAIL.md.
 ```
 
-**promote**:
+Routing:
 
-```markdown
-### FIX-002: test.ts promotion candidate (stable, over-large)
+| Item shape                                    | Executor             |
+| --------------------------------------------- | -------------------- |
+| In-file correction (import, export, contract) | main agent           |
+| File or directory placement                   | `/filid:restructure` |
+| Document content                              | `/filid:enrich-docs` |
 
-- **Severity**: MEDIUM
-- **Path**: `src/core/__tests__/unit/parser.test.ts`
-- **Rule**: promote candidate (18 cases; consolidate to <= 15 in a spec.ts)
-- **Type**: promote
-- **Action**: Promote the stable test.ts to a parameterized spec.ts (<= 15 cases). A test.ts is exempt from the 3+12 cap; this is an advisory consolidation, not a rule violation.
-```
+A `structure` perspective item that names a target path is a placement item. Route it rather than editing paths by hand — `restructure` is the only thing that verifies the postconditions.
 
-**restructure**:
+The two skill rows never receive the brief above — its Bounds clause forbids exactly what those skills exist to do. Each takes its own documented input:
 
-```markdown
-### FIX-003: Module cohesion below threshold
+| Route                | Receives                                                                                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/filid:restructure` | a placement request — the item's source path, plus any target, consumers, or intent the fix request names                                                             |
+| `/filid:enrich-docs` | the owning fractal path only. It has no parameter for a per-item action and re-derives its edit plan from snapshot evidence — the same call shape `pull-request` uses |
 
-- **Severity**: HIGH
-- **Path**: `src/core/validator.ts`
-- **Rule**: LCOM4 >= 2 (current: 3)
-- **Type**: restructure
-- **Action**: Split module into focused sub-modules
-```
+Turning a free-text Recommended Action into `restructure`'s placement-request shape is a judgment call for the invoking agent; state the mapping you chose in the terminal output.
 
-### Dispatch Sequence
+## §4 Severity gate
 
-1. **Phase 4a**: All `code-fix` items dispatched to `code-surgeon` in parallel
-2. **Phase 4b**: After code fixes complete, `filid:promote` and `filid:restructure` items processed sequentially via their respective skills
-3. Structural fix failures are **non-blocking** — logged and skipped
+| Severity  | Behaviour                                                     |
+| --------- | ------------------------------------------------------------- |
+| `error`   | Must be decided. Skipping is not an option.                   |
+| `warning` | May be deferred; a deferral is still recorded as a rejection. |
 
-## Accepted Fix Output Format
+Under `--auto` every item is accepted regardless of severity, and no rejection section is written.
 
-Accepted fixes are applied directly to source files via parallel `code-surgeon` subagents (code-fix type) or via skill invocations (promote/restructure type). After all handlers complete, report results:
+## §5 What this skill does not do
 
-```markdown
-### FIX-<ID>: <title> — APPLIED
-
-**Path**: `<file path>`
-**Change**: <brief description of what was changed>
-**Status**: Modified ✓
-```
-
-## AskUserQuestion Patterns
-
-### Fix Item Selection
-
-Present each fix with severity context:
-
-```
-Question: "FIX-001: spec.ts 3+12 rule violation (HIGH)"
-Options:
-  - Accept: "Apply the recommended split"
-  - Reject: "Defer with justification"
-```
-
-### Justification Collection
-
-For rejected items, collect free text:
-
-```
-Question: "Why are you rejecting FIX-001? Provide your justification."
-Options:
-  - (free text input via "Other" option)
-```
-
-## MCP Tool Usage
-
-| Tool                                     | Action             | When                               |
-| ---------------------------------------- | ------------------ | ---------------------------------- |
-| `mcp__plugin_filid_tools__review_manage` | `normalize-branch` | Step 1: branch detection           |
-| `mcp__plugin_filid_tools__debt_manage`   | `create`           | Step 5: for each rejected fix item |
-
-## `mcp__plugin_filid_tools__debt_manage`(create) Input Schema
-
-```json
-{
-  "action": "create",
-  "projectRoot": "<project root>",
-  "debtItem": {
-    "fractal_path": "src/features/auth",
-    "file_path": "src/features/auth/validator.ts",
-    "created_at": "2026-02-22T00:00:00Z",
-    "review_branch": "feature/issue-6",
-    "original_fix_id": "FIX-002",
-    "severity": "HIGH",
-    "rule_violated": "LCOM4 >= 2",
-    "metric_value": "LCOM4=3",
-    "title": "validator.ts module cohesion — split deferred",
-    "original_request": "<original FIX-002 request text>",
-    "developer_justification": "Sprint deadline in 2 days...",
-    "refined_adr": "ADR-2026-02-22: validator.ts module split deferred..."
-  }
-}
-```
+- It does not author corrections. It states the requirement and delegates.
+- It does not create debt records; 1.0 has no debt ledger.
+- It does not push. `pipeline` pushes between `resolve` and `revalidate`.
+- It does not re-run the review. `revalidate` re-measures.

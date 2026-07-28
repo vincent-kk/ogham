@@ -1,42 +1,33 @@
-# configLoader -- .filid/config.json 로딩, 프로젝트 초기화
+# configLoader — config v2 and managed rule documents
 
 ## Purpose
 
-.filid/config.json 로딩, 프로젝트 초기화, 규칙 문서 동기화.
+adapter-aware `.filid/config.json` v2의 검증·비파괴 migration·승인 저장과 managed rule document 동기화를 소유한다.
 
 ## Structure
 
-```
-configLoader/
-  configLoader.ts      facade (loaders/ + utils/ 공개 재수출)
-  index.ts              barrel (configLoader.ts 재수출)
-  loaders/              organ — 함수별 단일-파일 로더
-    configSchemas.ts (Zod SSoT), configTypes.ts, manifestTypes.ts (RuleDoc* 타입)
-    loadConfig / writeConfig / createDefaultConfig / loadRuleOverrides
-    validateConfigPatch / resolveLanguage / resolveMaxDepth / initProject
-    loadRuleDocsManifest.ts
-    syncRuleDocs.ts        공유 project rule manager 결과 호환 매핑
-    getRuleDocsStatus.ts   공유 read-only 상태를 기존 UI 계약으로 매핑
-    createFilidRuleManager / resolveFilidRuleTarget / loadManagedRuleDocuments
-  utils/                organ — 공유 private 헬퍼
-    resolveGitRoot.ts, resolvePluginRoot.ts
-    formatIssuePath.ts, getAt.ts, deleteAt.ts, parseWithAllowlistWarn.ts
-    exemptSanitize.ts, routePatternSanitize.ts
-    computeFileSha256.ts / computeTextSha256.ts
-```
+- `loaders/` organ — v2 schema/types, v1 migration, load/write/init와 rule-doc facade
+- `utils/` organ — project/plugin root, strict sanitize와 hash helpers
+- `index.ts` — enumerated public boundary, 이 fractal의 유일한 공개 표면
 
 ## Boundaries
 
 ### Always do
 
-- 변경 후 관련 테스트 업데이트
-- 공개 API 시그니처 또는 `RuleDoc*` 타입 변경 시 `DETAIL.md`를 먼저 갱신할 것
+- load는 source config를 쓰지 않고 migration diagnostics를 반환
+- write는 validated v2 config만 project root에 저장
+- managed target은 shared rule manager에 위임
 
 ### Ask first
 
-- 공개 API 시그니처 변경
+- v2 schema, migration discard policy 또는 managed owner 주소 변경
 
 ### Never do
 
-- 모듈 경계 외부 로직 인라인
-- loaders/ 또는 utils/ 내부에 INTENT.md 추가
+- load 중 자동 migration write
+- programming-language 의미를 config core에서 해석
+- loaders/ 또는 utils/에 INTENT.md 추가
+
+## Dependencies
+
+- Zod, adapter registry IDs, agent-artifacts와 host path utilities

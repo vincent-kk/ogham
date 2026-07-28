@@ -11,6 +11,7 @@ import { join } from 'node:path';
 
 import { expect, test } from '@playwright/test';
 
+import { BUILTIN_RULE_IDS } from '../src/constants/builtinRuleIds.js';
 import type { FilidConfig } from '../src/core/infra/configLoader/loaders/configSchemas.js';
 import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
 
@@ -100,13 +101,14 @@ test('serves the built page with injected state and rejects a missing token', as
   await expect(page.locator('#project-chip')).toHaveText(projectDir);
   // Fresh project: no config yet — the page must say saving will create it.
   await expect(page.locator('#init-note')).toBeVisible();
-  // All 8 built-in scanner rules render as editable rows.
-  await expect(page.locator('#rules-list .ruleitem')).toHaveCount(8);
+  await expect(page.locator('#rules-list .ruleitem')).toHaveCount(
+    Object.values(BUILTIN_RULE_IDS).length,
+  );
   // Rule-doc management renders only when there are optional docs to select;
   // a required-only catalog hides the whole section (nothing to manage).
-  if (OPTIONAL_RULES.length === 0) 
+  if (OPTIONAL_RULES.length === 0)
     await expect(page.locator('#rule-docs-section')).toBeHidden();
-   else {
+  else {
     await expect(page.locator('#rule-docs-required .docrow')).toHaveCount(
       MANIFEST.rules.filter((r) => r.required).length,
     );
@@ -123,7 +125,7 @@ test('full save round-trip persists every edited config field to disk', async ({
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
-  await page.locator('#rule-naming-convention-enabled').uncheck();
+  await page.locator('#rule-module-entry-point-enabled').uncheck();
   await page
     .locator('[data-rule-severity="max-depth"]')
     .selectOption('warning');
@@ -141,8 +143,9 @@ test('full save round-trip persists every edited config field to disk', async ({
   await page.getByText('Structure exceptions').click();
   await page
     .locator('#additional-allowed')
-    .fill('notes.md\n{"basename": "cli.ts", "paths": ["src/**"]}');
-  await page.locator('#additional-entry-points').fill('page.tsx');
+    .fill('manifest.file\n{"basename": "NOTICE", "paths": ["packages/**"]}');
+  await page.locator('#additional-entry-points').fill('module.entry');
+  await page.locator('#additional-organ-names').fill('plans');
 
   await page.getByRole('button', { name: 'Save & Close' }).click();
   await expect(page.locator('#status')).toContainText('Saved');
@@ -152,16 +155,19 @@ test('full save round-trip persists every edited config field to disk', async ({
   expect(out.summary?.configWritten).toBe(true);
 
   const config = readConfig(projectDir);
-  expect(config.rules['naming-convention'].enabled).toBe(false);
+  expect(config.rules['module-entry-point'].enabled).toBe(false);
   expect(config.rules['max-depth'].severity).toBe('warning');
   expect(config.rules['zero-peer-file'].exempt).toEqual(['src/legacy/**']);
   expect(config.language).toBe('Korean');
-  expect(config.scan?.maxDepth).toBe(7);
-  expect(config['additional-allowed']).toEqual([
-    'notes.md',
-    { basename: 'cli.ts', paths: ['src/**'] },
+  expect(config.structure?.maxDepth).toBe(7);
+  expect(config.structure?.additionalAllowedPeers).toEqual([
+    { basename: 'manifest.file' },
+    { basename: 'NOTICE', paths: ['packages/**'] },
   ]);
-  expect(config['additional-entry-points']).toEqual(['page.tsx']);
+  expect(Object.values(config.structure?.entryPointOverrides ?? {})).toEqual([
+    ['module.entry'],
+  ]);
+  expect(config.structure?.additionalOrganNames).toEqual(['plans']);
 });
 
 test('plain Save settles the long-poll (window stays open)', async ({
@@ -179,7 +185,7 @@ test('plain Save settles the long-poll (window stays open)', async ({
   // differing from "Save & Close" only by not closing the window.
   const out = await waiting;
   expect(out.status).toBe('saved');
-  expect(readConfig(projectDir).scan?.maxDepth).toBe(7);
+  expect(readConfig(projectDir).structure?.maxDepth).toBe(7);
 });
 
 test('rule docs render deployment state and the save syncs .claude/rules', async ({
@@ -294,7 +300,9 @@ test('client validation blocks the save and recovers after the fix', async ({
 
   const out = await waiting;
   expect(out.status).toBe('saved');
-  expect(readConfig(projectDir)['additional-allowed']).toEqual(['notes.md']);
+  expect(readConfig(projectDir).structure?.additionalAllowedPeers).toEqual([
+    { basename: 'notes.md' },
+  ]);
 });
 
 test('close without saving resolves closed and leaves no config behind', async ({

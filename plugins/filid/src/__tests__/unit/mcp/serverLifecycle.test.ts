@@ -13,10 +13,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   getCacheDir,
   sessionIdHash,
-} from '../../../core/infra/cacheManager/cacheManager.js';
-import { bootSweep } from '../../../mcp/server/bootSweep.js';
-import { cleanupOwnSessionCache } from '../../../mcp/server/cleanupOwnSessionCache.js';
-import { registerShutdown } from '../../../mcp/server/registerShutdown.js';
+} from '../../../core/infra/cacheManager/index.js';
+import { bootSweep } from '../../../mcp/server/lifecycle/bootSweep.js';
+import { cleanupOwnSessionCache } from '../../../mcp/server/lifecycle/cleanupOwnSessionCache.js';
+import { registerShutdown } from '../../../mcp/server/lifecycle/registerShutdown.js';
 
 let tempDir: string;
 let savedSessionId: string | undefined;

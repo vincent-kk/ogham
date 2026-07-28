@@ -1,5 +1,5 @@
-import { initProject } from '../../../core/infra/configLoader/configLoader.js';
-import type { InitResult } from '../../../core/infra/configLoader/configLoader.js';
+import { initProject } from '../../../core/infra/configLoader/index.js';
+import type { InitResult } from '../../../core/infra/configLoader/index.js';
 
 export interface ProjectInitInput {
   path: string;
@@ -8,6 +8,8 @@ export interface ProjectInitInput {
    * freshly created `.filid/config.json`; omit for English.
    */
   language?: string;
+  /** Adapter IDs to enable explicitly. Omit to use automatic detection. */
+  adapterIds?: string[];
 }
 
 /**
@@ -27,5 +29,8 @@ export function handleProjectInit(args: unknown): InitResult {
 
   if (!input.path) throw new Error('path is required');
 
-  return initProject(input.path, input.language);
+  return initProject(input.path, {
+    language: input.language,
+    adapterIds: input.adapterIds,
+  });
 }

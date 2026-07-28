@@ -1,21 +1,38 @@
-# fractalScan -- 프로젝트 프랙탈 스캔 도구
+# fractalScan — snapshot tree summary
 
 ## Purpose
 
-프로젝트 프랙탈 스캔 도구.
+등록 adapter로 하나의 project snapshot을 만들고 기본적으로 작은 FCA tree
+summary를 공통 envelope로 반환한다.
+
+## Structure
+
+- `fractalScan.ts` — snapshot과 summary/path/full projection
+- `utils/` — snapshot을 summary/path/full DTO로 투영하는 flat organ
+- `index.ts` — named handler export
+
+## Conventions
+
+- default detail은 `summary`, full payload는 envelope budget에 맡긴다.
+- tree Map은 MCP data로 직접 노출하지 않고 flat node DTO로 변환한다.
 
 ## Boundaries
 
 ### Always do
 
-- 변경 후 관련 테스트 업데이트
-- MCP 응답은 `ScanReportDto`로 변환 후 반환 (in-process `FractalTree` 직접 노출 금지)
+- config와 adapter registry를 통해 snapshot을 한 번 생성
+- unsupported/indeterminate diagnostics와 status 보존
 
 ### Ask first
 
-- 공개 API 시그니처 변경
+- detail projection 또는 summary count 의미 변경
 
 ### Never do
 
-- 모듈 경계 외부 로직 인라인
-- in-process `FractalTree`를 MCP 응답으로 직접 노출 (DTO의 `tree.nodes` 배열 사용)
+- 별도 scan-specific overflow file 작성
+- project source/config 수정
+- 언어 확장자나 entry filename 추측
+
+## Dependencies
+
+- core projectSnapshot, adapters와 common tool envelope

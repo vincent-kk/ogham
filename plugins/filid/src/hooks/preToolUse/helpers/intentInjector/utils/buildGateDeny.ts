@@ -1,7 +1,7 @@
 import {
-  GATE_RETRY_GUIDANCE,
-  GUIDE_BLOCK,
-} from '../../../../../constants/agentContext.js';
+  HOOK_GATE_RETRY_GUIDANCE,
+  HOOK_GUIDE_BLOCK,
+} from '../../../../../constants/hookContext.js';
 import type { HookOutput } from '../../../../../types/hooks.js';
 
 /**
@@ -16,9 +16,9 @@ export function buildGateDeny(
   guideNeeded: boolean,
 ): HookOutput {
   const parts: string[] = [];
-  if (guideNeeded) parts.push(GUIDE_BLOCK);
+  if (guideNeeded) parts.push(HOOK_GUIDE_BLOCK);
   parts.push(
-    `[filid:gate] First mutation in module '${ownerRelDir}' before its INTENT rules were delivered this session. ${GATE_RETRY_GUIDANCE}`,
+    `[filid:gate] First mutation in module '${ownerRelDir}' before its INTENT rules were delivered this session. ${HOOK_GATE_RETRY_GUIDANCE}`,
   );
   parts.push(ctxBlock);
   return {

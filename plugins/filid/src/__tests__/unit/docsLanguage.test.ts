@@ -14,14 +14,14 @@ const FORBIDDEN_JOINT_CAP =
 const FORBIDDEN_APPEND_ONLY_ONLY =
   /(?:append-only\s+(?:only|is\s+the\s+only|growth\s+is\s+the\s+only)|append-only가?\s*유일|only\s+restriction\s+(?:is|on)\s+(?:append-only|DETAIL))/i;
 
+const INTENT_CAP_DESCRIPTION = /INTENT\.md at 50 lines or fewer/;
+const DETAIL_APPEND_DESCRIPTION = /append-only DETAIL\.md/;
+
 const GUIDE_SCOPE = [
-  'agents/qa-reviewer.md',
-  'agents/engineering-architect.md',
-  'agents/operations-sre.md',
   'skills/cross-review/phases/evidence.md',
   'skills/cross-review/contracts.md',
   'skills/cross-review/templates.md',
-  'src/constants/agentContext.ts',
+  'src/constants/hookContext.ts',
 ];
 
 const SCOPE = [
@@ -29,25 +29,11 @@ const SCOPE = [
   'src/core/DETAIL.md',
   'src/core/rules/documentValidator/INTENT.md',
   'templates/hooks/README.md',
-  'agents/qa-reviewer.md',
-  'agents/engineering-architect.md',
-  'agents/operations-sre.md',
-  'agents/adjudicator.md',
 ];
-
-const WHITELIST = ['agents/knowledge-manager.md', 'agents/context-manager.md'];
 
 describe('docs-language: cap-rule expression hygiene', () => {
   it('forbids joint INTENT/DETAIL cap expression in cascade-source scope files', () => {
     for (const rel of SCOPE) {
-      const path = resolve(repoRoot, rel);
-      const content = readFileSync(path, 'utf-8');
-      expect(content, `file=${rel}`).not.toMatch(FORBIDDEN_JOINT_CAP);
-    }
-  });
-
-  it('whitelist references in knowledge-manager/context-manager are unaffected', () => {
-    for (const rel of WHITELIST) {
       const path = resolve(repoRoot, rel);
       const content = readFileSync(path, 'utf-8');
       expect(content, `file=${rel}`).not.toMatch(FORBIDDEN_JOINT_CAP);
@@ -74,7 +60,7 @@ describe('docs-language: cap-rule expression hygiene', () => {
       resolve(repoRoot, 'templates/hooks/README.md'),
       'utf-8',
     );
-    expect(hooksReadme).toMatch(/INTENT\.md\(50-line cap\)/);
-    expect(hooksReadme).toMatch(/DETAIL\.md\(append-only\)/);
+    expect(hooksReadme).toMatch(INTENT_CAP_DESCRIPTION);
+    expect(hooksReadme).toMatch(DETAIL_APPEND_DESCRIPTION);
   });
 });

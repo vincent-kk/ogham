@@ -1,17 +1,20 @@
 import { z } from 'zod';
 
 import {
+  type ConfigDiagnostic,
   type FilidConfig,
   FilidConfigSchema,
   type RuleDocStatusEntry,
   type RuleDocSyncResult,
-} from '../../../../core/infra/configLoader/configLoader.js';
+} from '../../../../core/infra/configLoader/index.js';
 
 /** State injected into the settings page as `__FILID_STATE__`. */
 export interface SettingsPageState {
   projectRoot: string;
   configExists: boolean;
   config: FilidConfig;
+  configDiagnostics: ConfigDiagnostic[];
+  structureAdapterId: string;
   ruleDocs: {
     entries: RuleDocStatusEntry[];
     autoDeployed: RuleDocStatusEntry[];
@@ -25,13 +28,15 @@ export interface SettingsPageState {
  * state and `resync` lists drifted-but-kept ids to overwrite with the
  * current template.
  */
-export const SaveBodySchema = z.object({
-  config: FilidConfigSchema,
-  ruleDocs: z.object({
-    selections: z.record(z.string(), z.boolean()),
-    resync: z.array(z.string()),
-  }),
-});
+export const SaveBodySchema = z
+  .object({
+    config: FilidConfigSchema,
+    ruleDocs: z.object({
+      selections: z.record(z.string(), z.boolean()),
+      resync: z.array(z.string()),
+    }),
+  })
+  .strict();
 export type SaveBody = z.infer<typeof SaveBodySchema>;
 
 /** Summary carried by a `saved` settle event and the tool response. */

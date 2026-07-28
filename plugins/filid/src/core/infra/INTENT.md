@@ -1,32 +1,39 @@
-# infra -- 인프라 모듈
+# infra — host persistence boundary
 
 ## Purpose
 
-캐시 관리, 프로젝트 해시, 변경 큐, 설정 로더 등 FCA-AI 인프라 기능을 제공한다.
+config, cache와 content-addressed ephemeral tool artifact의 host I/O를
+소유한다.
 
 ## Structure
 
-| 모듈           | 역할                                         |
-| -------------- | -------------------------------------------- |
-| `cacheManager` | 세션/프롬프트 캐시, 프랙탈 맵 관리           |
-| `projectHash`  | 프로젝트 구조 해시 계산                      |
-| `changeQueue`  | 변경 기록 큐                                 |
-| `configLoader` | `.filid/config.json` 로딩 및 프로젝트 초기화 |
+| Module          | Role                                            |
+| --------------- | ----------------------------------------------- |
+| `artifactStore` | 16 KiB envelope overflow와 always artifact 저장 |
+| `cacheManager`  | 세션/프롬프트 cache 관리                        |
+| `configLoader`  | config v2와 managed rule document I/O           |
+
+## Conventions
+
+- machine path는 portable API로 계산하고 실제 filesystem effect만 host edge에 둔다.
+- artifact는 compact JSON, SHA-256 content address와 atomic rename을 사용한다.
 
 ## Boundaries
 
 ### Always do
 
-- 캐시 파일은 `getCacheDir()` 경로에만 저장
+- cache는 `getCacheDir()`, tool artifact는 plugin cache `artifacts/` 아래만 저장
+- source tree와 ephemeral artifact 경계를 분리
 
 ### Ask first
 
-- 캐시 디렉토리 구조 변경
+- cache/artifact 디렉터리나 retention 계약 변경
 
 ### Never do
 
-- 프로젝트 소스 코드 직접 수정
+- 프로젝트 source 또는 장기 설계 원장을 artifact store에서 수정
+- artifact 존재를 영구 보존으로 표현
 
 ## Dependencies
 
-- `../../lib/`, `../../types/`
+- `../../types/`, `../../constants/`, `@ogham/cross-platform`

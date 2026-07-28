@@ -16,11 +16,11 @@ vi.mock('node:fs', async (importOriginal) => {
 
 // Mock cache-manager to control getCacheDir and pruneOldSessions
 vi.mock(
-  '../../../core/infra/cacheManager/cacheManager.js',
+  '../../../core/infra/cacheManager/caches/sessionCache.js',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('../../../core/infra/cacheManager/cacheManager.js')
+        typeof import('../../../core/infra/cacheManager/caches/sessionCache.js')
       >();
     return {
       ...actual,
@@ -36,7 +36,7 @@ const { processSetup } = await import('../../../hooks/setup/setup.js');
 const { existsSync: mockExistsSync, mkdirSync: mockMkdirSync } =
   await import('node:fs');
 const { getCacheDir, pruneOldSessions, removeSessionFiles } =
-  await import('../../../core/infra/cacheManager/cacheManager.js');
+  await import('../../../core/infra/cacheManager/caches/sessionCache.js');
 
 const testWorkspace = resolve('/tmp/test-workspace');
 

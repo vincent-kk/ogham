@@ -36,25 +36,23 @@ afterEach(() => {
   rmSync(root, { recursive: true, force: true });
 });
 
-describe('handleUserPromptSubmit — spike banner cache bypass', () => {
+describe('handleUserPromptSubmit — session-first context', () => {
   it('keeps the session-first gate on normal branches (second prompt is silent)', () => {
     makeProject('main');
     expect(submit()).toContain('[filid:lang]');
     expect(submit()).toBe('');
   });
 
-  it('joins the session-first pointer and the spike banner on the first prompt', () => {
+  it('keeps spike branches on the same session-first FCA context', () => {
     makeProject('spike/poc');
     const first = submit();
     expect(first).toContain('[filid:lang]');
-    expect(first).toContain('[filid:spike] SPIKE MODE');
+    expect(first).not.toContain('[filid:spike]');
   });
 
-  it('re-injects the spike banner on EVERY prompt, bypassing the session cache', () => {
+  it('keeps the second spike-branch prompt silent', () => {
     makeProject('spike/poc');
     submit();
-    const second = submit();
-    expect(second).not.toContain('[filid:lang]');
-    expect(second).toContain('[filid:spike] SPIKE MODE');
+    expect(submit()).toBe('');
   });
 });

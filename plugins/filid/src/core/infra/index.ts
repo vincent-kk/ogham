@@ -1,6 +1,79 @@
 // barrel -- re-exports all public APIs
 
-export * from './cacheManager/cacheManager.js';
-export * from './changeQueue/changeQueue.js';
-export * from './configLoader/configLoader.js';
-export * from './projectHash/projectHash.js';
+export {
+  materializeToolEnvelope,
+  writeArtifactAtomic,
+} from './artifactStore/index.js';
+export {
+  commitVisit,
+  cwdHash,
+  fcaMapPath,
+  getCacheDir,
+  getLastRunHash,
+  getPluginRoot,
+  hasGuideInjected,
+  hasPromptContext,
+  incrementTurn,
+  isFirstInSession,
+  isPruneDue,
+  isSessionPruneDue,
+  markGuideInjected,
+  markPruneRun,
+  markSessionInjected,
+  markSessionPruneRun,
+  pruneOldSessions,
+  pruneStaleCacheDirs,
+  readBoundary,
+  readDelivered,
+  readFractalMap,
+  readPromptContext,
+  readTurn,
+  removeFractalMap,
+  removeSessionFiles,
+  saveRunHash,
+  sessionIdHash,
+  writeBoundary,
+  writePromptContext,
+} from './cacheManager/index.js';
+export type {
+  DeliveredState,
+  FractalMap,
+  VisitArgs,
+  VisitDecision,
+  VisitScope,
+} from './cacheManager/index.js';
+export {
+  AllowedPeerOverrideSchema,
+  FilidConfigSchema,
+  RuleOverrideSchema,
+  createDefaultConfig,
+  getRuleDocsStatus,
+  initProject,
+  loadConfig,
+  loadRuleDocsManifest,
+  loadRuleOverrides,
+  migrateConfigV1,
+  resolveLanguage,
+  resolveMaxDepth,
+  resolvePluginRoot,
+  syncRuleDocs,
+  validateConfigPatch,
+  writeConfig,
+} from './configLoader/index.js';
+export type {
+  AllowedPeerOverride,
+  ConfigDiagnostic,
+  ConfigMigrationResult,
+  ConfigPatchIssue,
+  ConfigPatchValidation,
+  FilidConfig,
+  InitProjectOptions,
+  InitResult,
+  LoadConfigResult,
+  RuleDocEntry,
+  RuleDocStatusEntry,
+  RuleDocSyncResult,
+  RuleDocsManifest,
+  RuleDocsStatus,
+  SyncRuleDocsOptions,
+} from './configLoader/index.js';

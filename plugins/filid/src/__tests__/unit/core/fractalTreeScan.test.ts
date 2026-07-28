@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -7,7 +7,53 @@ import { describe, expect, it } from 'vitest';
 import {
   scanProject,
   shouldExclude,
-} from '../../../core/tree/fractalTree/fractalTree.js';
+} from '../../../core/tree/fractalTree/index.js';
+import type { StructureAdapter } from '../../../types/adapters.js';
+
+const arbitraryEntryAdapter: StructureAdapter = {
+  id: 'arbitrary-entry',
+  async detect() {
+    return { confidence: 1, evidence: ['test fixture'] };
+  },
+  async discoverSourceFiles() {
+    return [];
+  },
+  async findEntryPoints(directoryPath) {
+    const path = join(directoryPath, 'module.entry');
+    return existsSync(path)
+      ? [
+          {
+            path,
+            kind: 'module',
+            adapterId: this.id,
+            surface: 'enumerated',
+          },
+        ]
+      : [];
+  },
+  async inspectEntryPoint(entryPointPath) {
+    return {
+      entryPoint: {
+        path: entryPointPath,
+        kind: 'module',
+        adapterId: this.id,
+        surface: 'enumerated',
+      },
+      exportedNames: [],
+      hasDirectDeclarations: false,
+      certainty: 'exact',
+    };
+  },
+  async extractDependencies() {
+    return [];
+  },
+  async isFrameworkOwnedPeer() {
+    return false;
+  },
+  async suggestEntryPointPath(directoryPath) {
+    return join(directoryPath, 'module.entry');
+  },
+};
 
 describe('fractal-tree', () => {
   describe('shouldExclude', () => {
@@ -76,12 +122,13 @@ describe('fractal-tree', () => {
     });
 
     it('should classify additionalOrganNames dirs as organ end-to-end', async () => {
-      // A nesting content compartment defaults to fractal on structure alone;
-      // the config-supplied name is what makes it an organ, and it must
-      // survive the bottom-up correctNodeTypes pass too.
+      // A module index makes `skills` a fractal on structure alone; the
+      // config-supplied name overrides that, and the override must survive the
+      // bottom-up correctNodeTypes pass too. Without the index there would be
+      // nothing to override — an undeclared directory is already an organ.
       setup({
         '.': ['INTENT.md'],
-        skills: [],
+        skills: ['index.ts'],
         'skills/preview': ['SKILL.md'],
         // The real shape a nested references/ takes in this repo.
         'skills/preview/references': [],
@@ -92,10 +139,11 @@ describe('fractal-tree', () => {
       try {
         const bare = await scanProject(tmpDir);
         expect(bare.nodes.get(join(tmpDir, 'skills'))!.type).toBe('fractal');
+        // Markdown-only compartments declare no contract, so they need no
+        // config entry to stay organ — a subdirectory does not promote them.
         expect(
           bare.nodes.get(join(tmpDir, 'skills', 'preview', 'references'))!.type,
-        ).toBe('fractal');
-        // A leaf compartment needs no name entry — priority 6 covers it.
+        ).toBe('organ');
         expect(bare.nodes.get(join(tmpDir, 'leaf-refs'))!.type).toBe('organ');
 
         const tree = await scanProject(tmpDir, {
@@ -145,16 +193,24 @@ describe('fractal-tree', () => {
       }
     });
 
-    it('should detect index.ts presence', async () => {
+    it('uses adapter-reported entry points without assuming a filename', async () => {
       setup({
-        '.': ['INTENT.md', 'index.ts'],
+        '.': ['module.entry'],
       });
 
       try {
-        const tree = await scanProject(tmpDir);
+        const tree = await scanProject(tmpDir, {
+          structureAdapters: [arbitraryEntryAdapter],
+        });
         const root = tree.nodes.get(tmpDir);
 
-        expect(root!.hasIndex).toBe(true);
+        expect(root?.type).toBe('fractal');
+        expect(root?.entryPoints).toEqual([
+          expect.objectContaining({
+            path: join(tmpDir, 'module.entry'),
+            adapterId: 'arbitrary-entry',
+          }),
+        ]);
       } finally {
         teardown();
       }

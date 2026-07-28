@@ -1,163 +1,164 @@
 # cross-review — Output Templates
 
-Canonical output formats for review artifacts and the PR comment. The chairperson reads this file before writing `review-report.md` and `fix-requests.md`; `mcp__plugin_filid_tools__review_manage(format-pr-comment)` consumes these conventions when assembling PR comments.
+## `session.md`
 
-## Review Report Format (`review-report.md`)
+```markdown
+---
+branch: <branch>
+base_ref: <base ref>
+source_hash: <prepared source hash>
+review_directory: <absolute path returned by review_state>
+changed_files_count: <n>
+created_at: <ISO 8601>
+---
+
+## Changed Files
+
+| Path | Change | Owning Fractal |
+| ---- | ------ | -------------- |
+```
+
+## Evidence Artifacts
+
+Use the exact layouts in `phases/evidence.md` for `verification.md` and
+`structure-check.md`. Both files must carry matching source and snapshot hashes.
+
+## Perspective Opinions
+
+`opinions/contract.md`, `opinions/structure.md`, and
+`opinions/verification.md` use the Opinion Contract in `contracts.md`.
+`opinions/adversarial.md` uses the Arbitration Contract.
+
+## `review-report.md`
 
 ```markdown
 ---
 verdict: APPROVED | REQUEST_CHANGES | INCONCLUSIVE
 branch: <branch>
 base_ref: <base ref>
-run_id: <normalized>@<short sha>
-committee: [<persona-id>, ...]
+source_hash: <prepared source hash>
+snapshot_hash: <shared snapshot hash or unavailable>
+perspectives: [contract, structure, verification]
 generated_at: <ISO 8601>
 ---
 
-# Code Review Report — <branch>
+# FCA Cross-Review — <branch>
 
-**Date**: <ISO 8601> · **Scope**: <branch|pr|commit> · **Base**: <base ref>
-**Verdict**: APPROVED | APPROVED (with notes) | REQUEST_CHANGES | INCONCLUSIVE
+## Scope
 
-## Committee Positions
+<changed files and owning fractals>
 
-| Persona               | State     | Confidence | Blocking findings |
-| --------------------- | --------- | ---------- | ----------------- |
-| Engineering Architect | SYNTHESIS | 0.9        | 1                 |
+## Evidence Status
 
-## Technical Verification Results
+| Evidence     | Status   | Hash   | Diagnostics |
+| ------------ | -------- | ------ | ----------- |
+| Snapshot     | <status> | <hash> | <summary>   |
+| Structure    | <status> | <hash> | <summary>   |
+| Verification | <status> | <hash> | <summary>   |
 
-<copy the Code Metrics / Structure & Dependency / Debt Status tables
-from verification.md>
+## Perspective Results
+
+| Perspective | State | Findings | Checked | Gaps |
+| ----------- | ----- | -------- | ------- | ---- |
 
 ## Arbitration Log
 
-One entry per arbitration event, in order:
+| Candidate | Verdict | Evidence | Reason |
+| --------- | ------- | -------- | ------ |
 
-- **Dedup**: `<path>+<rule>` raised by <persona A> (HIGH) and
-  <persona B> (MEDIUM) → kept HIGH (confidence tiebreak: <n>)
-- **Verified**: FIX-candidate `<path>:<line>` → CONFIRMED — <one-line
-  evidence>
-- **Dismissed (REFUTED)**: `<path>+<rule>` raised by <persona> —
-  <refuting evidence, quoted line or rule scope>
-- **VETO**: <persona> vetoed on <basis> → basis CONFIRMED, VETO stands
-  (or: basis REFUTED, VETO dismissed)
-- `critical_security_override: true` (when applied)
-- **Forced ABSTAIN**: <persona> — worker failed
+## Confirmed FCA Findings
 
-## Claim Verdicts
+| ID  | Severity | Path | Rule | Consequence | Action |
+| --- | -------- | ---- | ---- | ----------- | ------ |
 
-> Omit when verification.md lists no in-scope acceptance claims.
-> Aggregation is worst-wins across non-ABSTAIN personas; non-PASS rows
-> also appear as folded blocking fix items (FAIL → HIGH code-fix,
-> INSUFFICIENT-EVIDENCE → MEDIUM harvest-required).
+## Refuted Candidates
 
-| Claim   | Scope    | Verdict                             | Evidence             |
-| ------- | -------- | ----------------------------------- | -------------------- |
-| CLM-001 | `<path>` | PASS / FAIL / INSUFFICIENT-EVIDENCE | <artifact reference> |
-
-## Advisory Notes
-
-> Omit when no advisory (LOW) items exist. Advisory items never block —
-> an APPROVED verdict with entries below is presented as **APPROVED
-> (with notes)** (presentation only; the frontmatter verdict stays
-> APPROVED).
-
-| ID      | Path     | Rule   | Consequence | Raised by | Ledger count |
-| ------- | -------- | ------ | ----------- | --------- | ------------ |
-| ADV-001 | `<path>` | <rule> | <one line>  | <persona> | <N>/3        |
-
-> Entries whose ledger count reached 3 carry a `promoted to debt <id>`
-> annotation in the Consequence column.
+| ID  | Refuting Evidence | Reason |
+| --- | ----------------- | ------ |
 
 ## Final Verdict
 
-**<VERDICT>** — N blocking fix items (see `fix-requests.md`), M advisory
-notes, K findings dismissed as refuted.
+**<VERDICT>** — <one sentence derived from contracts.md>.
 ```
 
-Solo path note: the adjudicator tags each fix_item with a `perspective`; Committee Positions becomes a six-row per-lens coverage table (a lens with no findings shows its `Checked:` line).
+For `INCONCLUSIVE`, keep every section, name the missing or inconsistent
+evidence, and do not present unresolved rows as findings.
 
-### INCONCLUSIVE Variant
+## `fix-requests.md`
 
-When the verdict is `INCONCLUSIVE` (majority committee failure or evidence unavailable), still write `review-report.md` — the pipeline and `format-pr-comment` need a consistent frontmatter `verdict`. Keep the frontmatter and header, include Committee Positions (with `N/A (failed)` rows) and a single Arbitration Log entry naming the trigger, and omit the other sections. `fix-requests.md` is NOT written.
-
-## Fix Requests Format (`fix-requests.md`)
-
-`fix-requests.md` carries the **surviving blocking partition only** (severity >= MEDIUM, post-verification); advisory items live exclusively in `review-report.md` → `## Advisory Notes`.
-
-````markdown
-# Fix Requests — <branch>
-
-**Generated**: <ISO 8601>
-**Total Items**: N (structure: S, code quality: Q) — blocking only; M advisory notes in review-report.md
-
----
-
-## FIX-001: <title>
-
-- **Severity**: MEDIUM | HIGH | CRITICAL
-- **Source**: structure | code-quality | acceptance-claim
-- **Type**: code-fix | promote | restructure | harvest-required
-- **Path**: `<file path>`
-- **Rule**: <violated rule>
-- **Current**: <current value>
-- **Consequence**: <what concretely breaks if left unaddressed>
-- **Verification**: CONFIRMED | PLAUSIBLE — <verifier evidence>
-- **Raised by**: <persona name>
-- **Recommended Action**: <description>
-- **Code Patch**:
-  ```typescript
-  // suggested fix (omit if structural — describe action instead)
-  ```
-````
-
-Type tokens are bare words (never `filid:`-prefixed):
-
-- `code-fix` — inline code patch (default when omitted)
-- `promote` — stable `test.ts` → `spec.ts` consolidation (advisory; a `.test.ts` is exempt from the 3+12 cap, so this is not a rule violation). A `spec.ts` over the 15-case cap is remedied by `code-fix`/`restructure` (split / parameterize), not promote.
-- `restructure` — LCOM4 >= 2 or structural drift → module reorganization
-- `harvest-required` — oracle gap, not a code defect (never dispatched to code-surgeon): resolved via `/filid:harvest` (spike) or by supplying the claim's `observable` evidence (merge track), then re-running `/filid:cross-review`
-
-### Harvest-Required Variant (unharvested spike branch)
-
-When reviewing a `spike/*` branch without a current harvest manifest (SKILL.md Step 1 guard), skip all later steps and write directly:
-
-- `review-report.md` — standard header, `verdict: REQUEST_CHANGES`, a `## Claim Verdicts` section with the single row `ALL | <branch> | INSUFFICIENT-EVIDENCE | no current harvest manifest`, and one Arbitration Log entry `Harvest guard: manifest <missing|stale>`.
-- `fix-requests.md` — exactly one item:
-
-  ```markdown
-  ## FIX-001: Harvest the spike before merge-track entry
-
-  - **Severity**: MEDIUM
-  - **Source**: acceptance-claim
-  - **Type**: harvest-required
-  - **Path**: `.filid/harvest/<normalized-branch>/manifest.json`
-  - **Rule**: spike-harvest-gate
-  - **Current**: manifest missing or stale (head moved past harvested sha)
-  - **Consequence**: spike decisions remain unharvested — no oracle exists
-    to judge this work, and merge-track entry is blocked
-  - **Raised by**: Step 1 harvest guard
-  - **Recommended Action**: Run /filid:harvest (keep/discard/defer
-    interview), then re-run /filid:cross-review
-  ```
-
-## Advisory Ledger Format (`.filid/review/advisory-ledger.md`)
-
-Project-level, shared across branches — outside per-branch cleanup scope. One row per advisory key, updated in place in SKILL.md Step 5:
+Write this file only when the verdict is `REQUEST_CHANGES`. It contains confirmed
+FCA findings only:
 
 ```markdown
-# Advisory Ledger
+# FCA Fix Requests — <branch>
 
-| key           | path     | rule   | count | first_seen | last_seen_branch | last_run_id | status           | debt_id   |
-| ------------- | -------- | ------ | ----- | ---------- | ---------------- | ----------- | ---------------- | --------- |
-| <path>+<rule> | `<path>` | <rule> | <N>   | <ISO 8601> | <normalized>     | <run id>    | open \| promoted | <id or —> |
+## FIX-001: <rule at path>
+
+- **Severity**: error | warning
+- **Perspective**: contract | structure | verification
+- **Path**: `<project-relative path>`
+- **Rule**: <FCA rule or DETAIL requirement>
+- **Evidence**: <canonical artifact section or file:line>
+- **Consequence**: <specific broken contract or boundary>
+- **Recommended Action**: <bounded correction>
 ```
 
-- `key` uses the same `path + rule` dedup key as fix_items.
-- `count` increments at most once per run: a row whose `last_run_id` equals the current `session.md` `run_id` is skipped.
-- At `count` 3 with `status: open`: promote via `mcp__plugin_filid_tools__debt_manage(action: "create", projectRoot, debtItem: { severity: "LOW", original_fix_id: <ADV-id>, ... })`, set `status: promoted`, record `debt_id`. Promoted rows are never re-counted — the ledger never becomes an unbounded backlog.
+Cross-review never edits project files and never embeds an automatic patch.
 
-## PR Comment Format
+## PR Comment
 
-Use `mcp__plugin_filid_tools__review_manage(action: "format-pr-comment")` — it reads `review-report.md` (+ `fix-requests.md` when present), lifts the report frontmatter into a `| Field | Value |` table rendered _outside_ the collapsible sections (between the `## Code Review Governance — <verdict>` header and the first `<details>`), wraps each artifact in a `<details>` sections with the raw frontmatter stripped from the report body, handles the 50,000-char limit, and returns ready-to-post markdown. Post via `gh pr comment --body-file`; when a `Code Review Governance` comment already exists, edit it in place (`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id>`).
+Posted only when the branch has a pull request. The verdict table stays **outside**
+the collapsible sections so the result reads without expanding anything; everything
+bulky is folded.
+
+```markdown
+## Code Review Governance — <verdict>
+
+| Field        | Value                                           |
+| ------------ | ----------------------------------------------- |
+| Verdict      | <APPROVED \| REQUEST_CHANGES \| INCONCLUSIVE>   |
+| Branch       | `<branch>`                                      |
+| Base         | `<base ref>`                                    |
+| Snapshot     | `<snapshot hash, or unavailable>`               |
+| Perspectives | contract · structure · verification             |
+| Findings     | <c> confirmed · <r> refuted · <i> indeterminate |
+| Generated    | <ISO 8601>                                      |
+
+<details><summary>Confirmed FCA findings (<c>)</summary>
+
+<the Confirmed FCA Findings table from review-report.md, or `None`>
+
+</details>
+
+<details><summary>Perspective results and arbitration</summary>
+
+<the Perspective Results and Arbitration Log tables from review-report.md>
+
+</details>
+
+<details><summary>Unresolved evidence</summary>
+
+<the gaps that forced INCONCLUSIVE>
+
+</details>
+
+> Full report: `<REVIEW_DIR>/review-report.md`
+```
+
+Rules:
+
+- Strip the report's raw frontmatter from any body copied into a `<details>` block — the table above already carries those fields.
+- Omit a `<details>` block whose content would be empty, except `Confirmed FCA findings`, which is always present so a reader sees a zero count rather than a missing section.
+- Keep the comment within the host's comment size limit. When it would exceed, keep the table and the confirmed-findings block, replace the remainder with the report pointer, and say that the rest was truncated.
+- A comment carrying the `## Code Review Governance` heading is this skill's own. Update that comment in place rather than adding a second one, so a re-run leaves one comment per branch.
+
+## Terminal Output
+
+After a successful seal, emit exactly:
+
+```text
+Review verdict: APPROVED
+```
+
+or the corresponding `REQUEST_CHANGES` / `INCONCLUSIVE` value. Before seal, no
+terminal verdict marker is valid.

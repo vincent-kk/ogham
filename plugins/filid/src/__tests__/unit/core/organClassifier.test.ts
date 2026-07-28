@@ -4,7 +4,7 @@ import {
   KNOWN_ORGAN_DIR_NAMES,
   classifyNode,
   isInfraOrgDirectoryByPattern,
-} from '../../../core/tree/organClassifier/organClassifier.js';
+} from '../../../core/tree/organClassifier/index.js';
 
 describe('organ-classifier', () => {
   describe('isInfraOrgDirectoryByPattern', () => {
@@ -222,6 +222,9 @@ describe('organ-classifier', () => {
     });
 
     it('an unlisted name is unaffected by additionalOrganNames', () => {
+      // The module index is what makes `payments` a fractal; listing an
+      // unrelated name must not take that away. Without the index there would
+      // be nothing to preserve — an undeclared directory is already an organ.
       expect(
         classifyNode({
           dirName: 'payments',
@@ -229,6 +232,14 @@ describe('organ-classifier', () => {
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
+          entryPoints: [
+            {
+              path: '/project/payments/index.ts',
+              kind: 'module',
+              adapterId: 'ecmascript',
+              surface: 'enumerated',
+            },
+          ],
           additionalOrganNames: ['plans'],
         }),
       ).toBe('fractal');

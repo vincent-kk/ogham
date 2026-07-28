@@ -2,7 +2,7 @@
 
 ## Purpose
 
-임의 파일 경로에서 출발해 가장 가까운 `package.json`을 "boundary"로 찾고, boundary까지의 디렉토리 체인 + 각 디렉토리의 `INTENT.md`/`DETAIL.md` 유무를 수집한다. `hooks/intentInjector`와 `mcp/fractalNavigate`가 컨텍스트 체인 주입에 사용한다.
+임의 파일 경로에서 출발해 가장 가까운 `package.json`을 "boundary"로 찾고, boundary까지의 디렉토리 체인 + 각 디렉토리의 `INTENT.md`/`DETAIL.md` 유무를 수집한다. `hooks/preToolUse/helpers/intentInjector`가 컨텍스트 체인 주입에 사용한다.
 
 ## Structure
 

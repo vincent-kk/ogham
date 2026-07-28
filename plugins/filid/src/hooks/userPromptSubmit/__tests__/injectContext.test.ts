@@ -4,10 +4,8 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import {
-  createDefaultConfig,
-  writeConfig,
-} from '../../../core/infra/configLoader/configLoader.js';
+import { createDefaultConfig } from '../../../core/infra/configLoader/loaders/createDefaultConfig.js';
+import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import { buildMinimalContext } from '../utils/buildMinimalContext.js';
 
 describe('buildMinimalContext', () => {
@@ -19,8 +17,8 @@ describe('buildMinimalContext', () => {
       rmSync(dir, { recursive: true, force: true });
   });
 
-  const RULE_FILE = 'filid_fca-policy.md';
-  const LEGACY_FILE = 'fca.md';
+  const RULE_FILE = 'filid_fractal-boundaries.md';
+  const LEGACY_FILE = 'filid_fca-policy.md';
 
   function makeProject(options: {
     deployFca: boolean;
@@ -51,7 +49,7 @@ describe('buildMinimalContext', () => {
     expect(context).not.toContain('Project rule docs');
   });
 
-  it('falls back to legacy fca.md when new filename is absent', () => {
+  it('falls back to legacy filid_fca-policy.md when new filename is absent', () => {
     const projectRoot = makeProject({ deployFca: true, legacy: true });
 
     const context = buildMinimalContext(projectRoot);

@@ -1,22 +1,29 @@
-# setup — Directory Scan (Phase 1)
+# setup — Snapshot Scan
 
-> Detail reference for Phase 1 of /filid:setup. See [../SKILL.md](../SKILL.md) for the skill overview and phase chaining.
+> Reference for Phase 2 of `/filid:setup`.
 
-Call `mcp__plugin_filid_tools__fractal_scan` to retrieve the complete project hierarchy by scanning the filesystem.
+Create the post-initialization snapshot projection:
 
+```text
+mcp__plugin_filid_tools__fractal_scan({
+  path: "<target-path>",
+  detail: "paths"
+})
 ```
-mcp__plugin_filid_tools__fractal_scan({ path: "<target-path>" })
-```
 
-The response is a `ScanReportDto` containing:
+`detail: "paths"` returns the node paths, classifications, document state, and
+entry-point counts needed by setup without loading the full snapshot. The
+summary remains available even when detailed data is persisted as an artifact.
 
-- `tree.nodes`: **flat array** of FractalNode objects (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)
-- `tree.root`: root directory path
-- `tree.totalNodes`: total node count
-- `modules`: optional ModuleInfo list (empty unless `includeModuleInfo: true`)
+Treat a returned artifact as the canonical full payload for this call. Read
+only the fields needed to prepare the setup report. Do not load unrelated
+snapshot evidence into context.
 
-Build an internal working list of all directories from `tree.nodes` for Phase 2 classification (e.g. `tree.nodes.map(...)`, `tree.nodes.filter(...)`).
+Preserve these conditions in the working set:
 
-> **Note**: Do NOT use `mcp__plugin_filid_tools__fractal_navigate(action: "tree")` for scanning — that tool builds a tree only from a pre-supplied `entries` array and does not read the filesystem.
+- `status` and diagnostics, including `unsupported` or `indeterminate`
+- project root and snapshot hash
+- adapter IDs and certainty
+- node path, type, INTENT/DETAIL state, and entry-point count
 
-> **Important**: `tree.nodes` in the `mcp__plugin_filid_tools__fractal_scan` response contains **all** directories, including those nested inside organ nodes. In Phase 2, always iterate over the full `tree.nodes` array. Traversing only `children` from the root node will miss fractal nodes that live inside organ boundaries.
+This phase is read-only. It never edits project source or configuration.

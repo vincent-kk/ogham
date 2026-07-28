@@ -1,8 +1,6 @@
-import { ChangeQueue } from '../../../core/infra/changeQueue/changeQueue.js';
 import type {
   PostToolUseInput,
   PreToolUseInput,
-  SubagentStartInput,
   UserPromptSubmitInput,
 } from '../../../types/hooks.js';
 
@@ -126,19 +124,6 @@ export function generatePostToolUseInput(tier: Tier): PostToolUseInput {
 }
 
 /**
- * SubagentStart 입력 생성
- */
-export function generateSubagentInput(agentType: string): SubagentStartInput {
-  return {
-    cwd: '/workspace',
-    session_id: 'bench-session',
-    hook_event_name: 'SubagentStart',
-    agent_type: agentType,
-    agent_id: `agent-${agentType}-bench`,
-  };
-}
-
-/**
  * UserPromptSubmit 입력 생성
  */
 export function generateUserPromptInput(tier: Tier): UserPromptSubmitInput {
@@ -164,16 +149,3 @@ export function generateUserPromptInput(tier: Tier): UserPromptSubmitInput {
 /**
  * ChangeQueue 생성 (지정된 변경 수로 채운 상태)
  */
-export function generateChangeQueue(changeCount: number): ChangeQueue {
-  const queue = new ChangeQueue();
-  const changeTypes = ['created', 'modified', 'deleted'] as const;
-
-  for (let i = 0; i < changeCount; i++)
-    queue.enqueue({
-      filePath: `/workspace/src/module-${i % 20}/file-${i}.ts`,
-      changeType: changeTypes[i % changeTypes.length],
-      timestamp: Date.now() - i * 1000,
-    });
-
-  return queue;
-}

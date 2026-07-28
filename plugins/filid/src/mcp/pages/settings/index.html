@@ -36,10 +36,9 @@
         >
           <h2 class="section-title" id="rule-docs-title">Rule documents</h2>
           <p class="section-help">
-            Guideline documents are deployed to the active host target shown
-            on each item. Checked items stay applied; unchecked items are
-            removed on save. Required documents are always deployed and kept
-            up to date.
+            Guideline documents are deployed to the active host target shown on
+            each item. Checked items stay applied; unchecked items are removed
+            on save. Required documents are always deployed and kept up to date.
           </p>
           <div id="rule-docs-unavailable" class="warning-inline" hidden>
             Plugin root could not be resolved — rule document management is
@@ -124,7 +123,7 @@
             <span class="section-summary__label">
               <span class="section-title">Structure exceptions</span>
               <span class="section-summary__hint"
-                >allowed peer files · entry points · route patterns</span
+                >allowed peer files · entry points · organ names</span
               >
             </span>
             <svg
@@ -143,9 +142,8 @@
             </svg>
           </summary>
           <p class="section-help">
-            Optional allowlists consumed by <code>zero-peer-file</code>,
-            <code>module-entry-point</code>, and <code>naming-convention</code>.
-            One entry per line; leave blank to keep defaults.
+            Optional structure overrides. One entry per line; leave blank to
+            keep defaults.
           </p>
           <label class="field" for="additional-allowed">
             <span>Additional allowed peer files</span>
@@ -153,7 +151,7 @@
               id="additional-allowed"
               rows="3"
               spellcheck="false"
-              placeholder='notes.md&#10;{"basename": "setup.ts", "paths": ["src/cli/**"]}'
+              placeholder='manifest.file&#10;{"basename": "NOTICE", "paths": ["packages/**"]}'
             ></textarea>
             <small class="help">
               A bare file name applies globally; a JSON object restricts it to
@@ -171,20 +169,20 @@
               id="additional-entry-points"
               rows="2"
               spellcheck="false"
-              placeholder="page.tsx&#10;route.ts"
+              placeholder="module.entry&#10;command.entry"
             ></textarea>
           </label>
-          <label class="field" for="additional-route-patterns">
-            <span>Additional route patterns</span>
+          <label class="field" for="additional-organ-names">
+            <span>Additional organ names</span>
             <textarea
-              id="additional-route-patterns"
+              id="additional-organ-names"
               rows="2"
               spellcheck="false"
-              placeholder="^\(.+\)$"
+              placeholder="plans&#10;examples"
             ></textarea>
             <small class="help">
-              Regex patterns exempting framework directory names, e.g. route
-              groups.
+              Directory basenames that should be classified as organ
+              compartments.
             </small>
           </label>
         </details>

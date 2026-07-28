@@ -1,40 +1,62 @@
 # 07. FCA-AI 규칙 레퍼런스
 
-> filid 플러그인이 시행하는 모든 FCA-AI 규칙, 상수, 임계값의 종합 레퍼런스.
+> `@ogham/filid` 1.0이 시행하는 모든 규칙, 상수, 임계값의 종합 레퍼런스. 이 문서가 규칙 의미의 원장이며, 사용자에게 배포되는 canonical 규칙 문서는 `plugins/filid/templates/rules/` 아래 4개다.
+
+---
+
+## 배포되는 규칙 문서
+
+| 문서                            | 담는 규칙                                                                  | 로딩                         |
+| ------------------------------- | -------------------------------------------------------------------------- | ---------------------------- |
+| `filid_fractal-boundaries.md`   | 노드 분류, 진입점 표면, organ 접근·면책, zero-peer, DAG·깊이·pure-function | 상시                         |
+| `filid_module-documents.md`     | INTENT/DETAIL 계약, 50줄 cap, 면책 항목 문법                               | `paths:` INTENT.md/DETAIL.md |
+| `filid_verification-records.md` | spec-document/test-record 역할, 15·32 cap, 세는 법, 계약 링크              | `paths:` 테스트 글롭         |
+| `filid_code-placement.md`       | LCA 배치, 계획 사전·사후조건, 문서 선행 워크플로                           | 상시                         |
+
+4개 모두 `required` 다 — filid 규칙은 부분 채택 대상이 아니라서 `manifest.json` 에 optional 엔트리가
+없고 setup 체크박스 UI 에는 아무것도 렌더되지 않는다.
+
+## 제품 경계
+
+filid 가 소유하는 것: INTENT/DETAIL 문서 계약과 최소 context chain, fractal/organ/pure-function/hybrid
+분류, 진입점 표면·외부 import 경계·의존성 DAG, 최저 공통 fractal 배치와 읽기 전용
+`sourcePath → targetPath` 계획, 검증 문서 역할·파일 cap·분할·계약 링크, FCA 범위 cross-review 증거.
+
+filid 가 소유하지 **않는** 것: 함수 분할, 네이밍, 파일 크기, 순환 복잡도, LCOM4, 커버리지 품질,
+fail-first 실천, 범용 AST 편집, 파일 이동, import rewrite, commit, push, pull request. 앞의 여섯은
+코드 작성 품질 영역이라 seiri 등 별도 규칙 세트가 담당하고, 뒤의 여섯은 실행 행위다 — restructure
+도구는 계획하고 검증할 뿐, 변경은 외부 행위자가 수행한다.
 
 ---
 
 ## 상수 테이블
 
-| 상수명                   | 값              | 정의 위치                        | 용도                       |
-| ------------------------ | --------------- | -------------------------------- | -------------------------- |
-| `INTENT_MD_LINE_LIMIT`   | `50`            | `core/document-validator.ts:8`   | INTENT.md 최대 줄 수       |
-| `KNOWN_KNOWN_ORGAN_DIR_NAMES`  | 9개 문자열 배열 | `core/organ-classifier.ts:4-14`  | Organ 디렉토리 식별        |
-| `TEST_THRESHOLD`         | `15`            | `metrics/decision-tree.ts:4`     | 3+12 규칙 테스트 상한      |
-| `CC_THRESHOLD`           | `15`            | `metrics/decision-tree.ts:7`     | Cyclomatic Complexity 상한 |
-| `LCOM4_SPLIT_THRESHOLD`  | `2`             | `metrics/decision-tree.ts:10`    | LCOM4 분할 기준            |
-| `DEFAULT_STABILITY_DAYS` | `90`            | `metrics/promotion-tracker.ts:4` | 테스트 승격 안정 기간 (일) |
-| `THRESHOLD` (3+12)       | `15`            | `metrics/three-plus-twelve.ts:4` | spec 파일별 테스트 상한    |
-| `MAX_PEER_FILE_COUNT`    | `3`             | `core/rule-engine.ts`            | 프랙탈 루트 허용 peer file 상한 |
-| `ALLOWED_FRACTAL_ROOT_FILES` | 9개 파일명 Set | `core/rule-engine.ts`        | peer file 카운트 제외 허용 파일 목록 |
+| 상수명                          | 값         | 정의 위치                             | 용도                         |
+| ------------------------------- | ---------- | ------------------------------------- | ---------------------------- |
+| `INTENT_MD_LINE_LIMIT`          | `50`       | `constants/documentValidation.ts`     | INTENT.md 최대 줄 수         |
+| `BOUNDARY_KEYWORDS`             | 정규식 3개 | `constants/documentValidation.ts`     | 3-tier 경계 섹션 탐지        |
+| `KNOWN_ORGAN_DIR_NAMES`         | 15개 이름  | `constants/organNames.ts`             | organ 디렉터리 식별          |
+| `SPEC_DOCUMENT_CASE_CAP`        | `15`       | `constants/verificationThresholds.ts` | spec-document 파일당 상한    |
+| `TEST_RECORD_CASE_CAP`          | `32`       | `constants/verificationThresholds.ts` | test-record 파일당 상한      |
+| `DEFAULT_SCAN_OPTIONS.maxDepth` | `10`       | `constants/scanDefaults.ts`           | 기본 트리 깊이 한계          |
+| `TOOL_INLINE_BUDGET_BYTES`      | `16384`    | `constants/toolEnvelope.ts`           | MCP inline 반환 예산 (UTF-8) |
+| `SCAN_RESULT_MAX_CHARS`         | `30000`    | `constants/scanDefaults.ts`           | scan 직렬화 payload 예산     |
 
-### KNOWN_KNOWN_ORGAN_DIR_NAMES 전체 목록
+CC, LCOM4, 테스트 안정 기간, peer file 개수 상한 상수는 1.0에 존재하지 않는다. 해당 규칙 자체가 제거되었다.
+
+### KNOWN_ORGAN_DIR_NAMES 전체 목록
 
 ```typescript
-const KNOWN_KNOWN_ORGAN_DIR_NAMES: readonly string[] = [
-  'components', // UI 컴포넌트
-  'utils', // 유틸리티 함수
-  'types', // 타입 정의
-  'hooks', // React/프레임워크 훅
-  'helpers', // 헬퍼 함수
-  'lib', // 라이브러리 래퍼
-  'styles', // 스타일시트
-  'assets', // 정적 자원
-  'constants', // 상수 정의
-] as const;
+// base (shared/UI)
+'components', 'utils', 'types', 'hooks', 'helpers',
+'lib', 'styles', 'assets', 'constants',
+// test/infra
+'test', 'tests', 'spec', 'specs', 'fixtures', 'e2e',
 ```
 
-### BOUNDARY_KEYWORDS (INTENT.md 3-tier 검증)
+`references`, `docs`, `plans` 같은 docs-as-code compartment 이름은 **의도적으로 빠져 있다.** 이 목록에 이름을 넣으면 같은 이름의 실제 코드 모듈이 조용히 organ으로 재분류되어 적용되어야 할 규칙이 사라진다. 프로젝트는 `.filid/config.json`의 `structure.additionalOrganNames`로 직접 선언한다. 선언되지 않은 compartment도 문서와 module index가 없으면 분류 기본값이 이미 organ이므로, 등록은 "index가 있어도 organ으로 취급한다"를 강제할 때만 필요하다.
+
+### BOUNDARY_KEYWORDS
 
 ```typescript
 const BOUNDARY_KEYWORDS = {
@@ -44,206 +66,255 @@ const BOUNDARY_KEYWORDS = {
 } as const;
 ```
 
-> 정의 위치: `core/document-validator.ts:7-11`
+### 확실성 3분법
+
+```typescript
+const ANALYSIS_CERTAINTIES = {
+  EXACT: "exact",
+  INDETERMINATE: "indeterminate",
+  UNSUPPORTED: "unsupported",
+} as const;
+```
+
+**`indeterminate`와 `unsupported`는 절대 PASS로 변환되지 않는다.** 어댑터가 정확히 측정하지 못한 규칙은 통과가 아니라 불확실성 finding을 낸다.
 
 ---
 
-## 규칙 매트릭스
+## 내장 규칙 15개
 
-### 문서 규칙
+| Rule ID                    | category      | severity | scope        | granularity | 소유 증거                          |
+| -------------------------- | ------------- | -------- | ------------ | ----------- | ---------------------------------- |
+| `intent-document-contract` | documentation | error    | documents    | node        | INTENT parser                      |
+| `detail-document-contract` | documentation | error    | documents    | node        | DETAIL parser                      |
+| `organ-no-intentmd`        | structure     | warning  | nodes        | node        | node classification + organ names  |
+| `entry-point-surface`      | module        | warning  | entry-points | node        | StructureAdapter                   |
+| `module-entry-point`       | module        | warning  | entry-points | node        | StructureAdapter                   |
+| `max-depth`                | structure     | error    | nodes        | node        | tree                               |
+| `circular-dependency`      | dependency    | error    | dag          | project     | dependency graph                   |
+| `pure-function-isolation`  | dependency    | error    | dag          | node        | dependency graph                   |
+| `zero-peer-file`           | structure     | warning  | nodes        | node        | adapter peer roles                 |
+| `external-import-boundary` | dependency    | error    | boundaries   | project     | dependency graph + entry point     |
+| `spec-document-case-cap`   | verification  | error    | verification | project     | VerificationAdapter                |
+| `test-record-case-cap`     | verification  | error    | verification | project     | VerificationAdapter                |
+| `spec-fragmentation`       | verification  | error    | verification | project     | DETAIL groups + verification files |
+| `spec-contract-link`       | verification  | warning  | verification | project     | DETAIL groups + adapter marker     |
+| `legacy-criteria-ledger`   | documentation | warning  | documents    | project     | ProjectSnapshot legacy evidence    |
 
-| 규칙명             | 대상      | 조건                                   | 액션       | 심각도             |
-| ------------------ | --------- | -------------------------------------- | ---------- | ------------------ |
-| line-limit         | INTENT.md | 줄 수 > 50                             | Write 차단 | `error`            |
-| missing-boundaries | INTENT.md | Always do/Ask first/Never do 섹션 누락 | 경고 주입  | `warning`          |
-| append-only        | DETAIL.md | 기존 내용 유지 + 끝에만 추가           | Write 차단 | `error`            |
-| structure-guard    | INTENT.md | Organ 디렉토리 내 생성 시도            | Write 차단 | `error` (implicit) |
+`granularity: project` 규칙은 snapshot당 한 번, `node` 규칙은 대상 노드마다 한 번 평가된다.
 
-### 메트릭 규칙
+**위 표의 severity는 `constants/builtinRuleSeverities`가 정본이다.** rule roster와 `createDefaultConfig`가 그 하나를 함께 읽으므로, 도구가 경로에 따라 서로 다른 기본값을 답하는 일은 없다.
 
-| 규칙명          | 대상        | 조건                             | 액션                | 근거                               |
-| --------------- | ----------- | -------------------------------- | ------------------- | ---------------------------------- |
-| 3+12 rule       | `*.spec.ts` | 테스트 케이스 > 15               | 위반 보고           | basic 3 + complex 12 = 15          |
-| LCOM4 split     | 클래스/모듈 | LCOM4 >= 2                       | `split` 권고        | SRP 위반, 하위 프랙탈 추출         |
-| CC compress     | 함수/모듈   | CC > 15 (LCOM4 = 1)              | `compress` 권고     | 높은 응집도이지만 복잡한 제어 흐름 |
-| CC parameterize | 함수/모듈   | CC <= 15 (LCOM4 = 1, tests > 15) | `parameterize` 권고 | 중복 테스트 병합                   |
-| promotion       | `*.test.ts` | 90일 안정 + 실패 이력 없음       | `spec.ts`로 승격    | 안정된 테스트의 정규화             |
+**프로젝트 config가 적은 값은 언제나 이긴다.** `.filid/config.json`의 `rules.<id>`에 severity나 enable이 있으면 그 값이 실효값이다. 이는 표를 덮어쓰는 사고가 아니라 **그 프로젝트의 선택**이며, filid는 config에 적힌 severity를 되돌리지 않는다 — `project_init`은 기존 config를 덮어쓰지 않고, 재시드하는 도구도 없다. 따라서 config를 가진 프로젝트의 실효 severity는 위 표가 아니라 그 프로젝트의 config이며, 표는 config가 그 규칙을 언급하지 않을 때의 값이다. 오래된 `project_init`이 만든 config가 지금 표와 다른 severity를 담고 있다면 그것도 그대로 유지된다.
 
-### 구조 규칙 (내장 규칙 엔진)
+### 1.0에서 제거된 규칙
 
-| 규칙명                   | 대상              | 조건                                                       | 액션        | 심각도    |
-| ------------------------ | ----------------- | ---------------------------------------------------------- | ----------- | --------- |
-| naming-convention        | 모든 노드         | 디렉토리명이 kebab-case/camelCase가 아닌 경우              | 경고        | `warning` |
-| organ-no-intentmd        | organ 노드        | INTENT.md가 존재하는 경우                                  | 오류 보고   | `error`   |
-| index-barrel-pattern     | fractal/hybrid    | index.ts에 직접 선언이 있는 경우 (순수 barrel 아님)        | 경고        | `warning` |
-| module-entry-point       | fractal/hybrid    | index.ts 또는 main.ts가 없는 경우                          | 경고        | `warning` |
-| max-depth                | 모든 노드         | 트리 깊이 > maxDepth (기본 10)                             | 오류 보고   | `error`   |
-| circular-dependency      | 모든 노드         | 순환 의존 감지 (placeholder)                               | 오류 보고   | `error`   |
-| pure-function-isolation  | pure-function     | fractal 모듈을 import하는 경우                             | 오류 보고   | `error`   |
-| zero-peer-file           | fractal/hybrid    | 허용 파일 외 peer file > MAX_PEER_FILE_COUNT (3)           | 경고        | `warning` |
-
-### ALLOWED_FRACTAL_ROOT_FILES 전체 목록
-
-```typescript
-const ALLOWED_FRACTAL_ROOT_FILES = new Set([
-  'index.ts', 'index.js', 'index.tsx', 'index.mjs', 'index.cjs',
-  'main.ts', 'main.js',
-  'INTENT.md', 'DETAIL.md',
-]);
-```
-
-> dot-file (`.eslintrc`, `.gitignore` 등)은 스캔 시 제외되어 peer file로 카운트되지 않음.
+| 제거된 규칙            | 사유                                              |
+| ---------------------- | ------------------------------------------------- |
+| `naming-convention`    | 이름은 Seiri 소유. FCA 판정의 자동 gate가 아니다. |
+| `index-barrel-pattern` | `entry-point-surface`가 열거 가능성으로 대체      |
+| CC / LCOM4 / file-size | 코드 품질 지표는 filid의 개념 소유가 아니다       |
+| coverage 규칙          | 테스트 품질은 Seiri 소유                          |
+| 3+12 테스트 규칙       | spec 15 / test-record 32의 역할 구분으로 대체     |
+| test → spec 승격       | 두 문서 역할 사이에 승격 관계가 없다              |
 
 ---
 
 ## 분류 우선순위
 
-디렉토리 노드 분류 알고리즘 (`core/organ-classifier.ts:classifyNode`):
+**분류는 서술이지 규범이 아니다.** 분류기는 디스크에 있는 파일만 관찰한다. 문서도 module index도 선언하지 않은 디렉터리는 독립 계약을 주장한 적이 없으므로 `organ`이다. 무엇이 fractal이어야 *하는가*는 분류 기본값이 아니라 규칙 결과다 — 소유 subtree 밖에서 소비되는 organ을 `external-import-boundary`가 소비자 경로를 증거로 보고하고, 반대 방향인 "organ 이름인데 INTENT.md 하나로 fractal이 된" 디렉터리를 `organ-no-intentmd`가 보고한다. 두 규칙이 분류의 양쪽 오차를 나눠 맡으므로 분류기 자체는 서술에 머문다.
+
+`classifyNode(ClassifyInput)`는 다음 순서로 결정한다.
 
 ```
-우선순위 1: INTENT.md 존재 → fractal (명시적 선언)
-우선순위 2: KNOWN_ORGAN_DIR_NAMES 패턴 매칭 → organ
-우선순위 3: 사이드이펙트 없음 → pure-function
-우선순위 4: 기본값 → fractal (INTENT.md 추가 필요)
+1. INTENT.md 존재                             → fractal (명시적 선언)
+2. DETAIL.md 존재                             → fractal (문서화된 모듈 경계)
+3. __name__ 또는 .name infrastructure 패턴    → organ
+4. known organ name 또는 additionalOrganNames → organ (이름이 구조를 이긴다)
+5. 어댑터가 kind: "module" 진입점 보고        → fractal
+6. fractal child 없는 leaf directory          → organ
+7. 어댑터가 무부작용·stateless 확정           → pure-function
+8. 그 밖에                                     → organ (기본값)
 ```
 
-### NodeType 분류 체계
+**5단계는 `kind: "module"`만 읽는다.** `executable`·`framework` 진입점과 config `structure.entryPointOverrides`로 주입된 경로는 분류를 바꾸지 못한다. 그 구분이 없으면 `SKILL.md` 같은 markdown-as-implementation이 산문 디렉터리를 fractal로 만들어, 코드용으로 쓰인 규칙을 산문에 적용하게 된다. override는 진입점 표면(`entry-point-surface`)의 입력이지 분류 입력이 아니다.
 
-| 타입            | 의미             | 특징                                        |
-| --------------- | ---------------- | ------------------------------------------- |
-| `fractal`       | 독립 도메인 경계 | INTENT.md 보유, 하위 프랙탈/organ 포함 가능 |
-| `organ`         | 리프 레벨 부속품 | INTENT.md 금지, 특정 디렉토리명 패턴        |
-| `pure-function` | 순수 함수 모듈   | 사이드이펙트 없음, 독립적                   |
+**6단계가 순수성보다 앞선다.** 따라서 `pure-function`은 하위 디렉터리를 가진 노드에서만 나온다. leaf compartment는 그 안의 무엇도 부작용이 없더라도 organ이다 — 이름 붙일 만한 격리는 모듈에 대한 주장이고, 그 주장을 한 적 없는 leaf에는 적용하지 않는다.
+
+**8단계가 organ인 것이 설계다.** 기본값을 fractal로 두면 아직 FCA가 아닌 코드베이스의 모든 디렉터리에 "INTENT.md를 추가하라"는 요구가 자동 생성되고, 분류가 "하위 디렉터리가 우연히 있는지" 같은 우발적 사실에 좌우된다.
+
+`hybrid`는 자동 분류하지 않는다. 점진적 이행을 위해 수동으로만 지정한다. 어댑터가 순수성을 판단할 수 없으면 `unsupported`로 남기며 추측으로 PASS시키지 않는다.
+
+organ 아래에서도 traversal은 중단되지 않는다. organ 안에 문서나 module index를 가진 하위 디렉터리가 있으면 organ의 자식이 아니라 **독립 fractal로 재분류된다.**
 
 ---
 
 ## 검증 규칙 상세
 
-### INTENT.md 검증 (`validateIntentMd`)
+### INTENT.md (`intent-document-contract`)
 
-1. **줄 수 제한**: `countLines(content) > 50` → `error`
-   - 빈 문자열 = 0줄, 후행 개행 무시
-2. **3-tier 경계**: 3개 섹션 전부 존재해야 함 → 누락 시 `warning`
-   - `### Always do` 또는 `## Always do` (대소문자 무시)
-   - `### Ask first` 또는 `## Ask first`
-   - `### Never do` 또는 `## Never do`
+1. **줄 수**: `countLines(content) > 50` → `error`. 빈 문자열은 0줄, 후행 개행 무시.
+2. **3-tier 경계**: `Always do` / `Ask first` / `Never do` 세 섹션이 모두 있어야 한다.
+3. 섹션 heading은 영어로 유지한다 — validator의 machine-readable anchor다. 서술 내용은 `[filid:lang]`이 지정한 언어를 따른다.
+4. 50줄에 근접한다는 것은 모듈을 더 작은 프랙탈로 분해하라는 신호다. **한도를 올리지 않는다.**
 
-### DETAIL.md 검증 (`validateDetailMd`)
+### DETAIL.md (`detail-document-contract`)
 
-1. **Append-only 감지**: `detectAppendOnly(oldContent, newContent)`
-   - 기존 줄이 모두 동일하게 유지되고 새 줄만 끝에 추가 → `error`
-   - 재구조화(restructure) 요구
+필수 섹션은 넷이다.
 
-### Organ Guard (`guardOrganWrite`)
+```md
+## Requirements
 
-1. **대상**: `Write` 도구로 INTENT.md 생성 시
-2. **검사**: 경로의 모든 부모 세그먼트가 `KNOWN_ORGAN_DIR_NAMES`에 포함되는지
-3. **결과**: Organ 디렉토리 내부면 차단 + 이유 메시지
+## API Contracts
+
+## Acceptance Criteria
+
+## Last Updated
+```
+
+`## Acceptance Criteria` 아래 그룹은 그 DETAIL.md 안에서 고유한 안정 ID를 갖는다.
+
+```md
+### AC-structure-placement — Shared unit placement
+
+- Observable: ...
+- Expected: ...
+```
+
+DETAIL.md는 append-only 이력이 아니다. 갱신할 때마다 현재 상태로 재구성한다. 누락되거나 중복된 acceptance group ID는 거부된다.
+
+### organ 보호 (`organ-no-intentmd`)
+
+organ 노드에는 INTENT.md를 두지 않는다. 독립 문서가 필요하면 `fractal`로 재분류한다.
+
+**규칙은 "조용히 승격된 organ"을 본다.** 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`인 노드는 실제 snapshot에 존재할 수 없다. 그 조합을 술어로 쓰면 규칙은 영원히 발화하지 않는다. 그래서 판정 대상은 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우다 — DETAIL.md도 module 진입점도 없는 상태.
+
+| 조건                                   | 판정               |
+| -------------------------------------- | ------------------ |
+| organ 이름 + INTENT.md만               | `warning`          |
+| organ 이름 + INTENT.md + DETAIL.md     | 통과 (의도된 승격) |
+| organ 이름 + INTENT.md + module 진입점 | 통과 (의도된 승격) |
+| organ 이름이 아닌 디렉터리 + INTENT.md | 통과               |
+
+finding은 해소책 둘을 함께 제시한다: INTENT.md를 지워 organ으로 되돌리거나, DETAIL.md와 진입점을 더해 승격을 완결한다.
+
+`severity`가 `error`가 아니라 `warning`인 것은 ADR-11의 연장이다 — 분류는 서술이고, 승격 자체는 정당한 행위다. 규칙이 묻는 것은 "이 승격이 의도한 것인가"이지 "이것이 금지 상태인가"가 아니다.
+
+**훅은 이것을 차단하지 않는다.** `PreToolUse` write gate는 INTENT.md 줄 수와 DETAIL.md append-only만 판정하며, organ 여부는 입력으로 받지 않는다. 승격은 `structure_validate` finding으로 보고된다.
+
+### peer file (`zero-peer-file`)
+
+1.0의 허용 집합은 하드코딩된 목록이 아니라 노드마다 계산된다.
+
+- `INTENT.md`, `DETAIL.md`
+- **어댑터가 보고한** 진입점 파일의 basename
+- eponymous 파일 1개 (디렉터리명과 같은 이름, 예: `auth/auth.ts`)
+- 감지된 framework 예약 파일
+- `.filid/config.json`의 `additional-allowed` (문자열이면 전역, 객체면 `paths` glob이 일치할 때만)
+
+core가 진입점 파일명을 알지 못하므로, 이 규칙은 어댑터 증거 없이는 판정하지 않는다.
+
+### 경계 (`external-import-boundary`)
+
+fractal을 대상으로 할 때:
+
+- 외부 소비자는 대상 fractal의 **진입점만** 참조한다.
+- 같은 fractal 내부 파일은 local barrel을 경유하지 않고 구체 내부 파일을 직접 참조한다. local `index.ts`는 외부 경계이지 내부 라우팅 계층이 아니다.
+- 형제 fractal은 형제의 진입점을 참조하며 **부모 barrel로 우회하지 않는다.** 부모 barrel이 나를 재노출하므로 그 경로는 순환이다.
+
+**검증 파일은 이 규칙의 판정 대상이 아니다.** 어댑터가 검증 파일로 보고한 소비자의 import는 대상이 organ이든 fractal 내부이든 위반을 내지 않고, cycle adjacency에서도 빠진다. 검증은 대상을 확인하는 행위이지 런타임 의존이 아니며, 내부 단위를 검사하려면 내부에 닿아야 한다 — 이를 위해 진입점을 넓히면 소비자가 테스트뿐인 공개 심볼이 생겨 공개 계약이 오염된다. 어느 파일이 검증인지는 어댑터 증거이며 core는 파일명 패턴을 모른다.
+
+organ을 대상으로 할 때는 판정 기준 자체가 다르다. **organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유하라"를 적용할 대상이 없다.** 대신 소비자가 어디에 앉아 있는지로 판정한다.
+
+| 소비자 위치             | 참조 경로             | 판정                                |
+| ----------------------- | --------------------- | ----------------------------------- |
+| 소유 fractal subtree 안 | organ 파일 직접       | 통과 — LCA 배치가 만드는 정상 형태  |
+| 밖                      | 소유 fractal의 진입점 | 통과                                |
+| 밖                      | organ 파일 직접       | 위반 — 선언된 면책이 있을 때만 통과 |
+
+edge는 organ을 소유 fractal로 승격한 뒤라 organ 정체성이 없으므로, 규칙은 `evidence.resolvedPath`에서 `resolveOwningOrganPath(organPaths, ownerPath, filePath)`로 복구한다 — 소유자 안에 있으면서 그 파일을 담는 **가장 깊은** organ이다.
+
+finding은 organ 경로와 소유자를 함께 밝히고 해소책 셋을 제시한다: organ을 fractal로 승격 · 소비자들의 lowest common fractal로 이동 · 소유자 DETAIL.md에 면책 선언.
+
+#### 경계 면책 (`## Boundary Exemptions`)
+
+면책은 **소유 프랙탈의 DETAIL.md에 조건부로** 선언한다. 보편 문서 계약을 늘리지 않기 위해, 면책이 실제로 필요한 프랙탈만 이 섹션을 갖는다. 섹션이 없는 것이 정상이며 그 자체로는 위반이 아니다.
+
+```md
+## Boundary Exemptions
+
+### <organ path> — <short title>
+
+- **Consumers**: <경로 또는 glob, barrel 경유면 `entry-point`>
+- **Direct import**: allowed | not allowed
+- **Reason**: <barrel이 이 소비자를 서비스할 수 없는 이유, 또는 organ이 소비자들의 lowest common fractal로 이동하지 않은 이유>
+```
+
+면책이 인정되는 조건은 넷이며 모두 만족해야 한다.
+
+1. 선언된 organ path가 실제 대상 organ과 일치한다 (소유자 기준 절대 경로로 정규화되어 비교된다).
+2. `Direct import: allowed`다.
+3. 소비자 경로가 `Consumers` glob에 매치된다.
+4. `Reason`이 비어 있지 않다.
+
+**`Reason`이 비면 면책이 아니라 미충족 계약이다.** 위반이 그대로 남고 `detail-document-contract` finding이 하나 더 붙는다. 직접 import 면책의 표준 사례는 훅 번들이다 — 배럴을 import하면 번들러가 배럴이 재수출하는 모듈 전체를 끌어온다.
+
+### DAG (`circular-dependency`)
+
+snapshot의 실제 의존 그래프에서 닫힌 directed cycle을 반환한다. placeholder PASS는 없다. 그래프를 만들 수 없는 파일이 cycle 결론에 영향을 줄 수 있으면 전체 결과는 `indeterminate`다.
+
+**소유 subtree 안의 organ 참조는 cycle adjacency에서 빠진다.** 자식 fractal이 부모 소유 organ을 참조하면 organ이 부모로 승격되면서 `부모 → 자식 → 부모` 왕복이 생기는데, 이것은 런타임 순환이 아니라 승격 인공물이다. edge 자체는 **보존한다** — `restructure_plan`이 incoming edge로 소비자를 계산하므로, 지우면 LCA 배치가 내부 소비자에 눈이 먼다.
 
 ---
 
-## 에이전트 역할 제한
+## 검증 문서 모델
 
-| 에이전트          | 도구 제한                  | 범위                           |
-| ----------------- | -------------------------- | ------------------------------ |
-| `architect`       | Write, Edit, Bash **금지** | 읽기 전용 — 분석, 설계, 계획만 |
-| `qa-reviewer`     | Write, Edit, Bash **금지** | 읽기 전용 — 리뷰, 분석, 보고만 |
-| `implementer`     | 제한 없음 (범위 제한)      | DETAIL.md 범위 내 코드만 수정    |
-| `context-manager` | 제한 없음 (범위 제한)      | INTENT.md, DETAIL.md 문서만 수정 |
+core는 파일명이나 확장자가 아니라 **역할**을 안다.
 
-### ROLE_RESTRICTIONS 메시지 (`hooks/agent-enforcer.ts:11-20`)
+| 역할            | 파일당 cap | 프로젝트 총량 | 성격                            |
+| --------------- | ---------- | ------------- | ------------------------------- |
+| `spec-document` | **15**     | 제한 없음     | 현재 실행 가능한 계약           |
+| `test-record`   | **32**     | 제한 없음     | QA·회귀·장애 재현·스펙 히스토리 |
 
-```typescript
-const ROLE_RESTRICTIONS: Record<string, string> = {
-  architect:
-    'ROLE RESTRICTION: You are an Architect agent. You MUST NOT use Write or Edit tools. ...',
-  'qa-reviewer':
-    'ROLE RESTRICTION: You are a QA/Reviewer agent. You MUST NOT use Write or Edit tools. ...',
-  implementer:
-    'ROLE RESTRICTION: You are an Implementer agent. You MUST only implement within the scope defined by DETAIL.md. ...',
-  'context-manager':
-    'ROLE RESTRICTION: You are a Context Manager agent. You may only edit INTENT.md and DETAIL.md documents. ...',
-};
-```
+- "3 basic + 12 complex" 분할은 규칙이 아니다. 권장 형태일 뿐이며 gate는 총합만 본다.
+- cap을 넘으면 **coverage를 지우지 않고 파일을 나눈다.** coverage가 cap보다 우선한다.
+- test-record는 시간이 지나 spec-document로 승격되지 않는다.
 
----
+### case 계산 규칙
 
-## 의사결정 트리 파이프라인
+| 입력                                        | 계산                   |
+| ------------------------------------------- | ---------------------- |
+| 일반 case 선언, skip, todo                  | 각각 1                 |
+| 정적으로 열거된 parameterized rows          | 행 수만큼              |
+| 정적 parameterized suite 안의 case          | suite row 수를 곱함    |
+| property test 선언                          | 생성 시행과 무관하게 1 |
+| 동적 table, 사용자 wrapper, 해석 불가 alias | `indeterminate`        |
 
-```
-입력: { testCount, lcom4, cyclomaticComplexity }
+### 여러 spec-document (`spec-fragmentation`, `spec-contract-link`)
 
-testCount <= 15 ──────────────→ ok (조치 불필요)
-       │ > 15
-       ▼
-LCOM4 >= 2 ───────────────────→ split (SRP 위반, 하위 프랙탈 추출)
-       │ < 2 (= 1)
-       ▼
-CC > 15 ──────────────────────→ compress (메서드 추출, 전략 패턴, 조건 평탄화)
-       │ <= 15
-       ▼
-parameterize ─────────────────→ 중복 에지케이스 테스트를 데이터 기반 테스트로 병합
-```
+한 소유 프랙탈에 spec-document가 여러 개면 다음을 모두 만족해야 한다.
 
-### DecisionAction 타입
+1. 그 프랙탈에 DETAIL.md가 있다.
+2. 모든 spec-document가 하나 이상의 DETAIL acceptance group ID를 선언한다.
+3. 서로 다른 파일의 ID 집합이 겹치지 않는다.
+4. 선언된 ID가 실제 DETAIL.md에 존재한다.
 
-```typescript
-type DecisionAction = 'split' | 'compress' | 'parameterize' | 'ok';
-```
+같은 계약 그룹을 `part1`, `part2`처럼 나눈 경우가 `spec-fragmentation` 위반이다.
 
----
-
-## 테스트 분류 기준
-
-### basic vs complex 테스트
-
-| 분류      | 기준                                | 설명                          |
-| --------- | ----------------------------------- | ----------------------------- |
-| `basic`   | `describe` 깊이 <= 1 내 `it`/`test` | 최상위 describe 직하의 테스트 |
-| `complex` | `describe` 깊이 >= 2 내 `it`/`test` | 중첩 describe 내부의 테스트   |
-
-### 파일 유형 판별
-
-| 패턴                       | 분류   | 3+12 규칙 적용 |
-| -------------------------- | ------ | -------------- |
-| `*.spec.ts` / `*.spec.tsx` | `spec` | O (적용)       |
-| `*.test.ts` / `*.test.tsx` | `test` | X (무시)       |
-
-> `check312Rule`은 `spec` 파일만 평가한다. `test` 파일은 필터링되어 제외.
-
----
-
-## 승격 기준 (test → spec)
-
-| 조건          | 기준값       | 설명           |
-| ------------- | ------------ | -------------- |
-| `stableDays`  | >= 90 (기본) | 연속 안정 일수 |
-| `lastFailure` | `null`       | 실패 이력 없음 |
-
-두 조건을 모두 만족해야 `eligible: true`.
+계약 연결 토큰은 `filid:contract <acceptance-group-id>`다. core는 토큰과 ID만 알고, 각 VerificationAdapter가 해당 언어의 주석이나 metadata에서 토큰을 추출한다. 한 파일에서 토큰을 반복해 여러 group을 선언할 수 있다.
 
 ---
 
 ## Hook 이벤트별 규칙 적용
 
-| Hook 이벤트                 | 적용 규칙                   | 차단 가능     |
-| --------------------------- | --------------------------- | ------------- |
-| `PreToolUse` (Write\|Edit)  | INTENT.md 검증, Organ Guard | O             |
-| `PostToolUse` (Write\|Edit) | Change Queue 기록           | X (항상 통과) |
-| `SubagentStart` (\*)        | 에이전트 역할 제한 주입     | X (항상 통과) |
-| `UserPromptSubmit` (\*)     | FCA-AI 규칙 리마인더 주입   | X (항상 통과) |
+| Hook 이벤트                      | 적용 내용                                            | 차단 가능     |
+| -------------------------------- | ---------------------------------------------------- | ------------- |
+| `SessionStart`                   | 세션 캐시 초기화, FCA 프로젝트 감지                  | X (항상 통과) |
+| `UserPromptSubmit`               | 턴당 visit map 리셋, 세션 첫 FCA 규칙 포인터         | X (항상 통과) |
+| `PreToolUse` (Read\|Write\|Edit) | 소유 모듈 INTENT 체인 전달, INTENT/DETAIL write gate | O             |
 
-### Context Injector 주입 내용 (~200자)
+차단은 `permissionDecision: 'deny'`로 **해당 도구 호출 하나만** 막는다. 턴은 중단되지 않는다.
 
-```
-[FCA-AI] Active in: {cwd}
-Rules:
-- INTENT.md: max 50 lines, must include 3-tier boundary sections
-- DETAIL.md: no append-only growth, must restructure on updates
-- Organ directories (...) must NOT have INTENT.md
-- Test files: max 15 cases per spec.ts (3 basic + 12 complex)
-- LCOM4 >= 2 → split module, CC > 15 → compress/abstract
-```
+1.0에는 `SubagentStart` 역할 제한 훅과 `PostToolUse` change tracking이 없다. legacy `.filid/criteria.md` 발견도 hook deny가 아니라 `structure_validate`의 `legacy-criteria-ledger` finding으로 보고된다.
 
 ---
 
@@ -251,4 +322,5 @@ Rules:
 
 - [01-ARCHITECTURE.md](./01-ARCHITECTURE.md) — 규칙이 아키텍처에서 차지하는 위치
 - [02-BLUEPRINT.md](./02-BLUEPRINT.md) — 각 규칙의 구현 모듈
-- [06-HOW-IT-WORKS.md](./06-HOW-IT-WORKS.md) — 규칙이 Hook 파이프라인에서 실행되는 방식
+- [06-HOW-IT-WORKS.md](./06-HOW-IT-WORKS.md) — 규칙이 파이프라인에서 실행되는 방식
+- [08-API-SURFACE.md](./08-API-SURFACE.md) — 규칙 결과 DTO

@@ -3,11 +3,18 @@ import { describe, expect, it } from 'vitest';
 import {
   countLines,
   detectAppendOnly,
+  parseBoundaryExemptions,
+  validateDetailAcceptanceGroups,
   validateDetailMd,
   validateIntentMd,
-} from '../../../core/rules/documentValidator/documentValidator.js';
+} from '../../../core/rules/documentValidator/index.js';
+import * as documentValidator from '../../../core/rules/documentValidator/index.js';
 
 describe('document-validator', () => {
+  it('does not expose a legacy criteria ledger validator', () => {
+    expect('validateCriteriaMd' in documentValidator).toBe(false);
+  });
+
   describe('countLines', () => {
     it('should count lines correctly', () => {
       expect(countLines('')).toBe(0);
@@ -109,9 +116,84 @@ describe('document-validator', () => {
 
   describe('validateDetailMd', () => {
     it('should pass for valid DETAIL.md', () => {
-      const content = '# Spec\n## Requirements\n- Feature A\n';
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- `feature(): void`',
+        '## Acceptance Criteria',
+        '### AC-feature — Feature behavior',
+        '- The feature is observable.',
+        '## Last Updated',
+        '2026-07-26',
+      ].join('\n');
       const result = validateDetailMd(content);
       expect(result.valid).toBe(true);
+    });
+
+    it('should extract stable acceptance groups', () => {
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- `feature(): void`',
+        '## Acceptance Criteria',
+        '### AC-feature — Feature behavior',
+        '- The feature is observable.',
+        '## Last Updated',
+        '2026-07-26',
+      ].join('\n');
+
+      expect(validateDetailAcceptanceGroups(content)).toEqual({
+        groups: [
+          {
+            id: 'AC-feature',
+            title: 'Feature behavior',
+            line: 7,
+          },
+        ],
+        violations: [],
+      });
+    });
+
+    it('should reject a DETAIL.md without required sections or groups', () => {
+      const result = validateDetailMd('# Spec\n## Requirements\n- Feature A\n');
+
+      expect(result.valid).toBe(false);
+      expect(result.violations).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ rule: 'missing-section' }),
+        ]),
+      );
+    });
+
+    it('should reject duplicate acceptance group IDs', () => {
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- `feature(): void`',
+        '## Acceptance Criteria',
+        '### AC-feature — First behavior',
+        '- The first behavior is observable.',
+        '### AC-feature — Second behavior',
+        '- The second behavior is observable.',
+        '## Last Updated',
+        '2026-07-26',
+      ].join('\n');
+
+      const result = validateDetailMd(content);
+
+      expect(result.valid).toBe(false);
+      expect(result.violations).toContainEqual(
+        expect.objectContaining({
+          rule: 'duplicate-id',
+          severity: 'error',
+        }),
+      );
     });
 
     it('should fail when append-only pattern detected', () => {
@@ -160,6 +242,87 @@ describe('document-validator', () => {
 
     it('should not flag when old content is empty (initial creation)', () => {
       expect(detectAppendOnly('', 'new content')).toBe(false);
+    });
+  });
+
+  describe('parseBoundaryExemptions', () => {
+    const exemptionSection = (
+      reason: string,
+      directImport = 'allowed',
+      consumers = '`**/src/hooks/**`',
+    ) =>
+      [
+        '## Organ Exemptions',
+        '',
+        '### shared — hook bundle isolation',
+        '',
+        `- **Consumers**: ${consumers}`,
+        `- **Direct import**: ${directImport}`,
+        `- **Reason**: ${reason}`,
+      ].join('\n');
+
+    it('returns nothing when the conditional section is absent', () => {
+      expect(parseBoundaryExemptions('## Requirements\n\n- none\n')).toEqual({
+        exemptions: [],
+        violations: [],
+      });
+    });
+
+    it('parses organ path, consumers, direct import and reason', () => {
+      const result = parseBoundaryExemptions(
+        exemptionSection('The barrel drags every re-export into the bundle.'),
+      );
+
+      expect(result.violations).toEqual([]);
+      expect(result.exemptions).toHaveLength(1);
+      expect(result.exemptions[0]).toMatchObject({
+        targetPath: 'shared',
+        title: 'hook bundle isolation',
+        consumers: ['**/src/hooks/**'],
+        directImport: true,
+        reason: 'The barrel drags every re-export into the bundle.',
+      });
+    });
+
+    it('treats an empty reason as an unmet contract', () => {
+      const result = parseBoundaryExemptions(exemptionSection('   '));
+
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]).toMatchObject({
+        rule: 'missing-field',
+        severity: 'error',
+      });
+    });
+
+    it('reads entry-point consumers and a withheld direct import', () => {
+      const result = parseBoundaryExemptions(
+        exemptionSection(
+          'Stays put for LCA reasons.',
+          'not allowed',
+          'entry-point',
+        ),
+      );
+
+      expect(result.exemptions[0]).toMatchObject({
+        consumers: ['entry-point'],
+        directImport: false,
+      });
+    });
+
+    it('surfaces exemptions and their violations through validateDetailMd', () => {
+      const content = [
+        '## Requirements',
+        '## API Contracts',
+        '## Acceptance Criteria',
+        '### AC-one — First',
+        '## Last Updated',
+        '2026-07-28',
+        exemptionSection(''),
+      ].join('\n');
+      const result = validateDetailMd(content);
+
+      expect(result.boundaryExemptions).toHaveLength(1);
+      expect(result.valid).toBe(false);
     });
   });
 });

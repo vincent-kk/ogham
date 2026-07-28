@@ -1,13 +1,14 @@
+import { portableBasename, portableJoin } from '@ogham/cross-platform/paths';
 import { describe, expect, it } from 'vitest';
 
 import {
   validateDependencies,
   validateNode,
   validateStructure,
-} from '../../../core/rules/fractalValidator/fractalValidator.js';
-import { buildFractalTree } from '../../../core/tree/fractalTree/fractalTree.js';
-import type { NodeEntry } from '../../../core/tree/fractalTree/fractalTree.js';
-import type { CategoryType } from '../../../types/fractal.js';
+} from '../../../core/rules/fractalValidator/index.js';
+import { buildFractalTree } from '../../../core/tree/fractalTree/index.js';
+import type { NodeEntry } from '../../../core/tree/fractalTree/index.js';
+import type { CategoryType, DependencyGraph } from '../../../types/fractal.js';
 import type { Rule, RuleContext } from '../../../types/rules.js';
 
 const entry = (
@@ -19,10 +20,29 @@ const entry = (
   hasMain = false,
 ): NodeEntry => ({
   path,
-  name: path.split('/').pop()!,
+  name: portableBasename(path),
   type,
   hasIntentMd,
   hasDetailMd,
+  entryPoints: hasIndex
+    ? [
+        {
+          path: portableJoin(path, 'public.entry'),
+          kind: 'module',
+          adapterId: 'fixture',
+          surface: 'enumerated',
+        },
+      ]
+    : hasMain
+      ? [
+          {
+            path: portableJoin(path, 'executable.entry'),
+            kind: 'executable',
+            adapterId: 'fixture',
+            surface: 'enumerated',
+          },
+        ]
+      : [],
   hasIndex,
   hasMain,
 });
@@ -43,13 +63,13 @@ describe('fractal-validator', () => {
       expect(Array.isArray(report.result.violations)).toBe(true);
     });
 
-    it('should detect organ with INTENT.md as violation', () => {
+    it('should detect an organ-named directory promoted by INTENT.md alone', () => {
       const tree = buildFractalTree([
         entry('/app', 'fractal', true, false, true),
         {
           path: '/app/utils',
           name: 'utils',
-          type: 'organ',
+          type: 'fractal',
           hasIntentMd: true,
           hasDetailMd: false,
         },
@@ -60,7 +80,7 @@ describe('fractal-validator', () => {
         (v) => v.ruleId === 'organ-no-intentmd',
       );
       expect(violation).toBeDefined();
-      expect(violation!.severity).toBe('error');
+      expect(violation!.severity).toBe('warning');
       expect(violation!.path).toBe('/app/utils');
     });
 
@@ -251,7 +271,7 @@ describe('fractal-validator', () => {
   });
 
   describe('validateDependencies', () => {
-    it('should return empty array for tree with no cycles', () => {
+    it('should report missing dependency evidence for a legacy tree', () => {
       const tree = buildFractalTree([
         entry('/app', 'fractal', true, false, true),
         entry('/app/auth', 'fractal', true, false, true),
@@ -259,13 +279,61 @@ describe('fractal-validator', () => {
       ]);
 
       const violations = validateDependencies(tree);
-      expect(violations).toHaveLength(0);
+      expect(violations).toEqual([
+        expect.objectContaining({
+          ruleId: 'circular-dependency',
+          severity: 'warning',
+          path: tree.root,
+          certainty: 'indeterminate',
+        }),
+      ]);
     });
 
-    it('should return violations for an empty tree', () => {
+    it('should report missing dependency evidence for an empty legacy tree', () => {
       const tree = buildFractalTree([]);
       const violations = validateDependencies(tree);
-      expect(violations).toHaveLength(0);
+      expect(violations).toEqual([
+        expect.objectContaining({
+          ruleId: 'circular-dependency',
+          severity: 'warning',
+          certainty: 'indeterminate',
+        }),
+      ]);
+    });
+
+    it('reports cycles from the actual dependency graph', () => {
+      const graph: DependencyGraph = {
+        nodePaths: ['/app/left', '/app/right'],
+        edges: [],
+        cycles: [['/app/left', '/app/right']],
+        certainty: 'exact',
+      };
+
+      expect(validateDependencies(graph)).toEqual([
+        expect.objectContaining({
+          ruleId: 'circular-dependency',
+          severity: 'error',
+          path: '/app/left',
+        }),
+      ]);
+    });
+
+    it('keeps an indeterminate graph out of PASS', () => {
+      const graph: DependencyGraph = {
+        nodePaths: ['/app'],
+        edges: [],
+        cycles: [],
+        certainty: 'indeterminate',
+      };
+
+      expect(validateDependencies(graph)).toEqual([
+        expect.objectContaining({
+          ruleId: 'circular-dependency',
+          severity: 'warning',
+          path: '/app',
+          certainty: 'indeterminate',
+        }),
+      ]);
     });
   });
 });

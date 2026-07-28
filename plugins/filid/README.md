@@ -1,8 +1,10 @@
 # @ogham/filid
 
-A Claude Code plugin that automatically manages project structure and documentation.
+A Claude Code plugin that keeps a codebase's module boundaries and contract documents honest.
 
-As codebases grow, AI agents lose context, documentation drifts from code, and directory structures lose consistency. filid solves this through automated rule enforcement based on **Fractal Context Architecture (FCA-AI)**.
+As a codebase grows, AI agents lose context, documents drift from code, and directory structures lose their shape. filid answers exactly that, and only that, through **Fractal Context Architecture (FCA-AI)**: it owns `INTENT.md` and `DETAIL.md`, checks the fractal/organ structure and its dependency DAG, decides where a shared unit belongs, and reviews a change against that evidence.
+
+It is deliberately not a general code-quality tool. Naming, function size, cyclomatic complexity, cohesion metrics, test quality and coverage belong elsewhere — filid reports what it can prove about structure and contracts, and says `indeterminate` instead of guessing.
 
 ---
 
@@ -18,7 +20,7 @@ claude plugin marketplace add https://github.com/vincent-kk/ogham
 claude plugin install filid
 ```
 
-All components (Skills, MCP, Agents, Hooks) register automatically. No manual configuration needed.
+Skills, the MCP server, and hooks register automatically. No manual configuration needed.
 
 ### For Development (Local Setup)
 
@@ -27,191 +29,178 @@ All components (Skills, MCP, Agents, Hooks) register automatically. No manual co
 yarn install
 
 # Build the plugin
-cd plugins/filid
-yarn build          # TypeScript compile + bundling
+yarn filid build
 
 # Load in Claude Code
 claude --plugin-dir ./plugins/filid
 ```
 
-Building produces two outputs:
+Building produces:
 
-- `bridge/mcp-server.cjs` — MCP server (18 analysis tools)
-- `bridge/*.mjs` — 4 hook scripts (automatic rule enforcement)
+- `bridge/mcp-server.cjs` — MCP server (9 tools)
+- `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 3 hook scripts
+- `public/settings.html` — the settings UI served by `open_settings`
+
+There is no native dependency and no global module lookup: the plugin installs and runs with only the MCP SDK and Zod at runtime.
 
 ---
 
 ## How to Use
 
-filid skills are **LLM prompts**, not CLI commands. You invoke them in Claude Code as natural language conversations. Flags like `--fix` are hints the LLM understands, but plain language works just as well.
+filid skills are **LLM prompts**, not CLI commands. Invoke them in Claude Code as natural language; plain sentences work as well as flags.
 
-### Initialize a Project
+### Initialize a project
 
 ```
 /filid:setup
 /filid:setup ./packages/my-app
 ```
 
-Scans directories and generates `INTENT.md` boundary documents for each module. Utility directories like `components/`, `utils/` (organs) are automatically skipped.
+Writes `.filid/config.json`, deploys the managed FCA rule document, takes a structure snapshot, and proposes the `INTENT.md` / `DETAIL.md` files that are missing. It does not edit your existing documents.
 
-### Find and Fix Violations
+### Audit the project
 
 ```
 /filid:scan
 /filid:scan src/core 쪽만 봐줘
-/filid:scan 고칠 수 있는 건 고쳐줘
 ```
 
-Detects INTENT.md exceeding 50 lines, missing boundary sections, INTENT.md in organ directories, etc.
+The single full-project audit: node classification, document contracts, entry-point surface, external import boundaries, the real dependency DAG, and verification-document caps — all against one snapshot.
 
-### Sync Documentation After Code Changes
-
-```
-/filid:sync
-/filid:sync 바뀌는 것만 미리 보여줘
-/filid:sync critical 이상만 처리해줘
-```
-
-Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Uses `drift-detect` MCP tool internally.
-
-### Full Project Structure Check
+### Ask a scoped question
 
 ```
-/filid:structure-review
-/filid:structure-review 3단계만 실행해줘
+/filid:context-query src/core/restructure
+/filid:guide organ 디렉터리엔 뭘 두면 돼?
 ```
 
-Scans the **entire project** across 6 stages: boundary check → document validation → dependency analysis → test metrics → complexity assessment → final verdict.
+`context-query` resolves a path to its owning fractal and the minimal owner-to-root document chain, then answers within three rounds. `guide` explains the current tree and placement rules without changing anything.
 
-> Use for periodic structural health checks or before/after large refactors. Running this on every PR is expensive — use `filid:cross-review` instead.
-
-### AI Code Review (per PR)
-
-The most powerful feature. A multi-persona consensus committee reviews only the **files changed in this PR**.
+### Improve the documents
 
 ```
-# Review current branch
+/filid:enrich-docs src/core
+```
+
+Improves `INTENT.md` / `DETAIL.md` from snapshot-backed evidence. You approve before any edit; structure is validated afterwards.
+
+### Move code to where it belongs
+
+```
+/filid:restructure src/shared/formatDate.ts
+```
+
+Produces a read-only placement plan — `sourcePath → targetPath`, the basis for each move, the required documents and entry points, and the exact import rewrites. filid never moves your files: you (or an agent) execute the plan, and filid then verifies the postconditions exactly. A move that lands somewhere other than the plan is a FAIL even if it works.
+
+### Review a change
+
+```
 /filid:cross-review
-
-# Review a specific PR
-/filid:cross-review https://github.com/owner/repo/pull/123
-
-# Force restart (discard previous review)
-/filid:cross-review 처음부터 다시 해줘
-
-# After review — handle fix requests
-/filid:resolve
-
-# After fixes — final verdict
-/filid:revalidate
+/filid:cross-review --base origin/main
 ```
 
-**Flow:**
+Three independent perspectives — contract, structure, verification — review the committed change in parallel, then an adversarial arbiter rules every blocking finding `CONFIRMED | REFUTED | INDETERMINATE`. Refuted findings drop out of the verdict but stay in the arbitration log. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and is explicitly scoped to FCA — it is not a security, product, or UX review.
 
-1. **`/filid:cross-review`** — Structure check (diff) → committee election → technical verification → consensus → review report
-2. **`/filid:resolve`** — Accept or reject each fix request (with justification for rejections)
-3. **`/filid:revalidate`** — Final PASS/FAIL verdict after fixes
-
-Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
-
-> **`filid:structure-review` vs `filid:cross-review` at a glance:**
->
-> - `filid:structure-review` — full project scan (periodic health check)
-> - `filid:cross-review` — changed files only + multi-persona review (use on every PR)
-
-### Spike & Harvest (exploratory work)
-
-When the acceptance criteria are not known yet, explore on a `spike/*` branch: doc-hygiene write blocks (INTENT.md 50-line cap, DETAIL.md append-only) are suspended there, and a per-prompt banner tracks the spike's age and unharvested decisions.
+### Migrate legacy document names
 
 ```
-# Probe freely
-git checkout -b spike/my-idea
-
-# When the probing is done — keep/discard/defer interview
-/filid:harvest
+/filid:migrate
 ```
 
-`/filid:harvest` records kept decisions as PASS/FAIL-judgeable claims in `.filid/criteria.md`; later reviews judge those claims, and the pipeline refuses merge-track entry for any spike that has not been harvested.
-
-### Learn About FCA-AI
-
-```
-/filid:guide
-/filid:guide fractal 구조에 대해 알려줘
-/filid:context-query organ 디렉토리에서 뭘 할 수 있어?
-```
-
-### Improve Module Structure
-
-```
-/filid:restructure ./src/core
-/filid:promote
-```
+Moves `CLAUDE.md` → `INTENT.md` and `SPEC.md` → `DETAIL.md` through a portable, dry-run-first script, then validates the result.
 
 ---
 
 ## What Runs Automatically
 
-With the plugin active, these hooks fire **without user intervention**:
+Three hooks fire without user intervention:
 
-| When                   | What                                  | Why                                                              |
-| ---------------------- | ------------------------------------- | ---------------------------------------------------------------- |
-| Writing/editing a file | Checks INTENT.md 50-line limit        | Prevents document bloat                                          |
-| Writing/editing a file | Blocks INTENT.md in organ directories | Prevents unnecessary docs in utility folders                     |
-| Sub-agent starting     | Injects role restrictions             | Prevents agents from overstepping (e.g., architect editing code) |
-| User submits a prompt  | Injects FCA-AI rule context           | Ensures agents are aware of rules while working                  |
+| Event              | What                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| `SessionStart`     | Initializes the session cache and detects whether this is an FCA project              |
+| `UserPromptSubmit` | Resets the per-turn visit map and points at the FCA rules once per session            |
+| `PreToolUse`       | Delivers the owning module's INTENT chain, and gates `INTENT.md` / `DETAIL.md` writes |
 
-When a block occurs, a message explaining the reason is displayed. No action needed.
+A blocked write explains its reason and denies only that one tool call — your turn continues.
 
 ---
 
 ## Skills Reference
 
-| Skill                     | Scope             | What it does                                               |
-| ------------------------- | ----------------- | ---------------------------------------------------------- |
-| `/filid:setup`            | —                 | Initialize FCA-AI in a project                             |
-| `/filid:scan`             | Full project      | Detect rule violations (with optional auto-fix)            |
-| `/filid:sync`             | Full project      | Sync documentation with code changes                       |
-| `/filid:structure-review` | **Full project**  | 6-stage structural health check — periodic or pre-refactor |
-| `/filid:promote`          | —                 | Promote stable tests to spec                               |
-| `/filid:context-query`    | —                 | Q&A about project structure                                |
-| `/filid:guide`            | —                 | FCA-AI guidance on any topic                               |
-| `/filid:restructure`      | —                 | Module refactoring guide with migration steps              |
-| `/filid:cross-review`     | **Changed files** | Multi-persona governance code review — use on every PR     |
-| `/filid:resolve`          | —                 | Resolve fix requests from a review                         |
-| `/filid:revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
-| `/filid:harvest`          | —                 | Spike harvest interview — record acceptance claims         |
+| Skill                  | What it does                                                              |
+| ---------------------- | ------------------------------------------------------------------------- |
+| `/filid:setup`         | Initialize config and rule documents; propose missing INTENT/DETAIL       |
+| `/filid:scan`          | The single full-project FCA audit                                         |
+| `/filid:context-query` | Resolve a path to its owner fractal and minimal document chain            |
+| `/filid:guide`         | Explain the current tree, classifications, and placement rules            |
+| `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval       |
+| `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions |
+| `/filid:cross-review`  | Three-perspective FCA review with adversarial arbitration                 |
+| `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                  |
+| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR               |
+| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications      |
+| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL          |
+| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support           |
 
 ---
 
 ## Key Rules
 
-Core rules enforced by filid:
+15 built-in rules, each backed by evidence filid can actually produce:
 
-| Rule                       | Threshold                                            | Enforcement         |
-| -------------------------- | ---------------------------------------------------- | ------------------- |
-| INTENT.md line limit       | 50 lines max                                         | Hook (auto-block)   |
-| 3-tier boundary sections   | "Always do" / "Ask first" / "Never do" required      | Hook (warning)      |
-| Organ directory protection | No INTENT.md in `components`, `utils`, `types`, etc. | Hook (auto-block)   |
-| Test density               | Max 15 per spec.ts (3 core + 12 edge)                | MCP analysis        |
-| Module cohesion            | LCOM4 >= 2 triggers split recommendation             | MCP + decision tree |
-| Circular dependencies      | Acyclic graph (DAG) required                         | Core validation     |
+| Rule                       | What it checks                                                    |
+| -------------------------- | ----------------------------------------------------------------- |
+| `intent-document-contract` | INTENT.md ≤ 50 lines with the three boundary sections             |
+| `detail-document-contract` | DETAIL.md required sections and acceptance groups                 |
+| `organ-no-intentmd`        | No INTENT.md inside an organ directory                            |
+| `entry-point-surface`      | The entry point's public surface can be enumerated                |
+| `module-entry-point`       | Every fractal / hybrid node has an entry point                    |
+| `max-depth`                | Configured tree depth                                             |
+| `circular-dependency`      | No cycle in the real dependency graph                             |
+| `pure-function-isolation`  | `pure-function` nodes import no fractal or hybrid module          |
+| `zero-peer-file`           | No stray peer file at a fractal root                              |
+| `external-import-boundary` | External consumers import the entry point, never internals        |
+| `spec-document-case-cap`   | ≤ 15 semantic cases per spec document                             |
+| `test-record-case-cap`     | ≤ 32 semantic cases per test record                               |
+| `spec-fragmentation`       | One contract group is not split across spec files to dodge a cap  |
+| `spec-contract-link`       | Multiple spec documents declare distinct DETAIL acceptance groups |
+| `legacy-criteria-ledger`   | Reports a legacy `.filid/criteria.md` and its DETAIL.md target    |
+
+A rule an adapter cannot measure exactly returns an `indeterminate` finding — never a PASS.
+
+---
+
+## MCP Tools
+
+| Tool                 | Role                                               |
+| -------------------- | -------------------------------------------------- |
+| `project_init`       | Initialize FCA in a project                        |
+| `rule_docs_sync`     | Sync the managed rule documents                    |
+| `open_settings`      | Open the settings UI                               |
+| `fractal_scan`       | Inspect the snapshot tree                          |
+| `context_resolve`    | Owner fractal and INTENT/DETAIL path chain         |
+| `restructure_plan`   | Decide placement; returns a plan artifact          |
+| `structure_validate` | Validate a project, or a plan's pre/postconditions |
+| `verification_scan`  | Judge spec-document / test-record contracts        |
+| `review_state`       | cross-review bookkeeping                           |
+
+Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.
 
 ---
 
 ## Development
 
 ```bash
-yarn dev            # TypeScript watch mode
-yarn test           # Vitest watch
-yarn test:run       # Single run
-yarn typecheck      # Type checking only
-yarn build          # tsc + esbuild (mcp-server + hooks)
+yarn filid test:run     # Single run (CI)
+yarn filid typecheck    # Type checking only
+yarn filid build        # rules + pages + mcp + hooks + plugin adapters
+yarn filid build:plugin # pages + mcp + hooks only — fast hook/MCP loop
+yarn filid test:e2e     # settings page Playwright e2e
 ```
 
 ### Tech Stack
 
-TypeScript 5.7 (+ Compiler API), @modelcontextprotocol/sdk, fast-glob, esbuild, Vitest, Zod
+TypeScript 5.7, @modelcontextprotocol/sdk, Zod, esbuild, Vitest, Playwright
 
 ---
 
@@ -219,16 +208,16 @@ TypeScript 5.7 (+ Compiler API), @modelcontextprotocol/sdk, fast-glob, esbuild, 
 
 For technical details, see the [`.metadata/`](../../.metadata/filid/) directory:
 
-| Document                                                       | Content                                                        |
-| -------------------------------------------------------------- | -------------------------------------------------------------- |
-| [ARCHITECTURE](../../.metadata/filid/01-ARCHITECTURE.md)       | Design philosophy, 4-layer architecture, ADRs                  |
-| [BLUEPRINT](../../.metadata/filid/02-BLUEPRINT.md)             | Technical blueprint for 30+ modules                            |
-| [LIFECYCLE](../../.metadata/filid/03-LIFECYCLE.md)             | Skill workflows, agent collaboration, hook timeline            |
-| [USAGE](../../.metadata/filid/04-USAGE.md)                     | Config file structure, MCP/Hook JSON examples, troubleshooting |
-| [COST-ANALYSIS](../../.metadata/filid/05-COST-ANALYSIS.md)     | Hook overhead, bundle size, context token costs                |
-| [HOW-IT-WORKS](../../.metadata/filid/06-HOW-IT-WORKS.md)       | AST engine, decision tree, MCP routing                         |
-| [RULES-REFERENCE](../../.metadata/filid/07-RULES-REFERENCE.md) | Full rule catalog with constants and thresholds                |
-| [API-SURFACE](../../.metadata/filid/08-API-SURFACE.md)         | Public API reference (33 functions + 30 types)                 |
+| Document                                                       | Content                                              |
+| -------------------------------------------------------------- | ---------------------------------------------------- |
+| [ARCHITECTURE](../../.metadata/filid/01-ARCHITECTURE.md)       | Design philosophy, layering, ADRs                    |
+| [BLUEPRINT](../../.metadata/filid/02-BLUEPRINT.md)             | Module-by-module technical blueprint                 |
+| [LIFECYCLE](../../.metadata/filid/03-LIFECYCLE.md)             | Skill workflows and hook timeline                    |
+| [USAGE](../../.metadata/filid/04-USAGE.md)                     | Config structure, MCP/Hook examples, troubleshooting |
+| [COST-ANALYSIS](../../.metadata/filid/05-COST-ANALYSIS.md)     | Hook overhead, bundle size, context token costs      |
+| [HOW-IT-WORKS](../../.metadata/filid/06-HOW-IT-WORKS.md)       | Adapters, snapshot, DAG, MCP routing                 |
+| [RULES-REFERENCE](../../.metadata/filid/07-RULES-REFERENCE.md) | Full rule catalog with constants and thresholds      |
+| [API-SURFACE](../../.metadata/filid/08-API-SURFACE.md)         | MCP tool contracts and core DTOs                     |
 
 [Korean documentation (README-ko_kr.md)](./README-ko_kr.md) is also available.
 

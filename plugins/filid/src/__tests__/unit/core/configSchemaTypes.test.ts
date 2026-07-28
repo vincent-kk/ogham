@@ -1,42 +1,42 @@
-/**
- * @file configSchemaTypes.test.ts
- * @description Type-level contract tests for Commits A + B (v0.4.0 Schema Validation).
- *
- * Verifies:
- *  - FilidConfig retains its original top-level shape after becoming a zod
- *    `z.infer` alias (structural equivalence to the prior interface).
- *  - RuleOverride gains the optional `exempt?: string[]` field.
- *  - `additional-allowed` entries are now the `AllowedEntry` union
- *    (string or `{basename, paths?}` object) — strings remain backward-compatible.
- *  - The public facade re-exports FilidConfigSchema / RuleOverrideSchema /
- *    AllowedEntrySchema so Commits B/D can consume them without duplication.
- *
- * SSoT anchor for AC12, AC3, and plan §3 rows A/B.
- */
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import {
-  type AllowedEntry,
-  AllowedEntrySchema,
+  type AllowedPeerOverride,
+  AllowedPeerOverrideSchema,
   type FilidConfig,
   FilidConfigSchema,
   RuleOverrideSchema,
-} from '../../../core/infra/configLoader/configLoader.js';
+} from '../../../core/infra/configLoader/index.js';
 import type { RuleOverride, RuleSeverity } from '../../../types/rules.js';
 
-describe('config-schema-types (Commits A + B)', () => {
-  it('FilidConfig retains the original top-level shape', () => {
-    expectTypeOf<FilidConfig['version']>().toEqualTypeOf<string>();
+describe('config-schema-types v2', () => {
+  it('exposes the v2 adapter and structure contract', () => {
+    expectTypeOf<FilidConfig['version']>().toEqualTypeOf<'2.0'>();
     expectTypeOf<FilidConfig['language']>().toEqualTypeOf<string | undefined>();
-    expectTypeOf<FilidConfig['additional-allowed']>().toEqualTypeOf<
-      AllowedEntry[] | undefined
+    expectTypeOf<FilidConfig['adapters']>().toEqualTypeOf<{
+      mode: 'auto' | 'explicit';
+      enabled: string[];
+    }>();
+    expectTypeOf<FilidConfig['structure']>().toEqualTypeOf<
+      | {
+          maxDepth?: number;
+          additionalOrganNames?: string[];
+          additionalAllowedPeers?: AllowedPeerOverride[];
+          entryPointOverrides?: Record<string, string[]>;
+        }
+      | undefined
     >();
     expectTypeOf<FilidConfig>().toMatchTypeOf<{
-      version: string;
+      version: '2.0';
+      adapters: { mode: 'auto' | 'explicit'; enabled: string[] };
       rules: Record<string, RuleOverride>;
       language?: string;
-      'additional-allowed'?: AllowedEntry[];
-      scan?: { maxDepth?: number };
+      structure?: {
+        maxDepth?: number;
+        additionalOrganNames?: string[];
+        additionalAllowedPeers?: AllowedPeerOverride[];
+        entryPointOverrides?: Record<string, string[]>;
+      };
     }>();
   });
 
@@ -52,36 +52,42 @@ describe('config-schema-types (Commits A + B)', () => {
     >();
   });
 
-  it('AllowedEntry is a union of string and {basename, paths?}', () => {
-    const s: AllowedEntry = 'type.ts';
-    const o: AllowedEntry = { basename: 'CLAUDE.md', paths: ['packages/**'] };
-    const o2: AllowedEntry = { basename: 'LICENSE' };
-    expectTypeOf(s).toMatchTypeOf<AllowedEntry>();
-    expectTypeOf(o).toMatchTypeOf<AllowedEntry>();
-    expectTypeOf(o2).toMatchTypeOf<AllowedEntry>();
+  it('AllowedPeerOverride names a peer and optional scope and adapter', () => {
+    const override: AllowedPeerOverride = {
+      basename: 'manifest.file',
+      paths: ['packages/**'],
+      adapterId: 'custom',
+    };
+    expectTypeOf(override).toMatchTypeOf<AllowedPeerOverride>();
+    expect(AllowedPeerOverrideSchema.parse(override)).toEqual(override);
   });
 
-  it('additional-organ-names is a top-level string array', () => {
-    expectTypeOf<FilidConfig['additional-organ-names']>().toEqualTypeOf<
-      string[] | undefined
-    >();
+  it('parses structure customizations only under structure', () => {
     const parsed = FilidConfigSchema.parse({
-      version: '1.0',
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: [] },
       rules: {},
-      'additional-organ-names': ['docs', 'plans'],
+      structure: {
+        additionalOrganNames: ['docs', 'plans'],
+        entryPointOverrides: { custom: ['module.entry'] },
+      },
     });
-    expect(parsed['additional-organ-names']).toEqual(['docs', 'plans']);
-    // Placement: nested under a rule it must be rejected, not passed through.
-    expect(() =>
-      RuleOverrideSchema.parse({ 'additional-organ-names': ['docs'] }),
-    ).toThrow();
+    expect(parsed.structure?.additionalOrganNames).toEqual(['docs', 'plans']);
+    expect(parsed.structure?.entryPointOverrides).toEqual({
+      custom: ['module.entry'],
+    });
+    expect(() => FilidConfigSchema.parse({ ...parsed, extra: true })).toThrow();
   });
 
   it('schemas are exported from the public loader facade', () => {
     expectTypeOf(FilidConfigSchema.parse).toBeFunction();
     expectTypeOf(RuleOverrideSchema.parse).toBeFunction();
-    expectTypeOf(AllowedEntrySchema.parse).toBeFunction();
-    const sample = FilidConfigSchema.parse({ version: '1.0', rules: {} });
+    expectTypeOf(AllowedPeerOverrideSchema.parse).toBeFunction();
+    const sample = FilidConfigSchema.parse({
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+    });
     expectTypeOf(sample).toMatchTypeOf<FilidConfig>();
   });
 });

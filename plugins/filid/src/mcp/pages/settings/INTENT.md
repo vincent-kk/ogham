@@ -1,6 +1,6 @@
 ## Purpose
 
-`open_settings` 도구가 기동하는 설정 페이지 프런트엔드. `.filid/config.json` (8 규칙 enabled/severity/exempt, language, scan.maxDepth, additional-\* 배열)과 현재 host target의 rule doc 적용 상태를 한 폼에서 편집한다. 웹 폼이므로 배포 상태를 pre-check 로 표시할 수 있어 CLI 체크박스의 재선택 강제 결함이 없다.
+`open_settings` 도구가 기동하는 설정 페이지 프런트엔드. config v2의 adapter 선택, 규칙 override, language, structure 설정과 현재 host target의 rule doc 상태를 한 폼에서 편집한다.
 
 ## Structure
 
@@ -28,6 +28,7 @@
 - 모든 사용자 노출 텍스트(`index.html`·`app.js` 라벨·힌트·메시지)는 영문만 사용 — `[filid:lang]` 무관
 - 모든 인터랙션 요소에 라벨·focus-visible 상태, 44px 이상 터치 타깃
 - 폼 필드 구조 변경 시 서버 저장 스키마(`settingsTypes.ts`)와 동기
+- 화면에 노출하지 않은 adapter·structure 설정은 저장 시 보존
 
 ### Ask first
 

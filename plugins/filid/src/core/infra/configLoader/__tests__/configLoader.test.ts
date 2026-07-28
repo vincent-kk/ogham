@@ -9,7 +9,7 @@ import {
   createDefaultConfig,
   initProject,
   writeConfig,
-} from '../configLoader.js';
+} from '../index.js';
 
 describe('writeConfig', () => {
   const tempDirs: string[] = [];
@@ -57,9 +57,14 @@ describe('createDefaultConfig — language seeding', () => {
     expect(Object.keys(config)).not.toContain('language');
   });
 
-  it('orders language between version and rules', () => {
+  it('orders language directly after version, ahead of adapters and rules', () => {
     const config = createDefaultConfig('Japanese');
-    expect(Object.keys(config)).toEqual(['version', 'language', 'rules']);
+    expect(Object.keys(config)).toEqual([
+      'version',
+      'language',
+      'adapters',
+      'rules',
+    ]);
   });
 });
 
@@ -76,7 +81,7 @@ describe('initProject — language seeding', () => {
     tempDirs.push(repoRoot);
     execSync('git init', { cwd: repoRoot, stdio: 'ignore' });
 
-    const result = initProject(repoRoot, 'Korean');
+    const result = initProject(repoRoot, { language: 'Korean' });
     expect(result.configCreated).toBe(true);
 
     const written = JSON.parse(

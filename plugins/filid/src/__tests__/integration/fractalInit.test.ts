@@ -7,13 +7,13 @@ import { describe, expect, it } from 'vitest';
 import {
   validateDetailMd,
   validateIntentMd,
-} from '../../core/rules/documentValidator/documentValidator.js';
+} from '../../core/rules/documentValidator/index.js';
 import {
   buildFractalTree,
   findNode,
   getDescendants,
-} from '../../core/tree/fractalTree/fractalTree.js';
-import { classifyNode } from '../../core/tree/organClassifier/organClassifier.js';
+} from '../../core/tree/fractalTree/index.js';
+import { classifyNode } from '../../core/tree/organClassifier/index.js';
 
 describe('fractal-init pipeline', () => {
   // Simulate a project with fractal/organ structure
@@ -87,11 +87,27 @@ describe('fractal-init pipeline', () => {
     expect(classifyNode({ ...organInput('auth'), hasIntentMd: true })).toBe(
       'fractal',
     );
+    // Holding fractal children is not a declaration — only a document or a
+    // module index makes a directory a fractal.
     expect(
       classifyNode({
         ...organInput('payment'),
         hasFractalChildren: true,
         isLeafDirectory: false,
+      }),
+    ).toBe('organ');
+    expect(
+      classifyNode({
+        ...organInput('payment'),
+        isLeafDirectory: false,
+        entryPoints: [
+          {
+            path: '/project/payment/index.ts',
+            kind: 'module',
+            adapterId: 'ecmascript',
+            surface: 'enumerated',
+          },
+        ],
       }),
     ).toBe('fractal');
   });
@@ -136,7 +152,18 @@ describe('fractal-init pipeline', () => {
   });
 
   it('should validate DETAIL.md structure', () => {
-    const specContent = '# Module Spec\n\n## API\n\n- `function foo(): void`\n';
+    const specContent = [
+      '# Module Spec',
+      '## Requirements',
+      '- Provide foo.',
+      '## API Contracts',
+      '- `function foo(): void`',
+      '## Acceptance Criteria',
+      '### AC-foo — Foo contract',
+      '- Calling foo completes without an error.',
+      '## Last Updated',
+      '2026-07-26',
+    ].join('\n');
     const validation = validateDetailMd(specContent);
 
     expect(validation.valid).toBe(true);

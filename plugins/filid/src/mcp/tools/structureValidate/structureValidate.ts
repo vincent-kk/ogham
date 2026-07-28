@@ -1,76 +1,35 @@
 import {
-  loadConfig,
-  resolveMaxDepth,
-} from '../../../core/infra/configLoader/configLoader.js';
-import { validateStructure } from '../../../core/rules/fractalValidator/fractalValidator.js';
-import {
-  getActiveRules,
-  loadBuiltinRules,
-} from '../../../core/rules/ruleEngine/ruleEngine.js';
-import { scanProject } from '../../../core/tree/fractalTree/fractalTree.js';
-import type { ValidationReport } from '../../../types/report.js';
+  STRUCTURE_PLAN_PATH_REQUIRED_MESSAGE,
+  STRUCTURE_VALIDATION_MODES,
+  STRUCTURE_VALIDATION_SCOPE_VALUES,
+} from '../../../constants/mcpContracts.js';
+import type {
+  StructureValidateData,
+  StructureValidateSummary,
+} from '../../../types/report.js';
+import type { RuleScope } from '../../../types/rules.js';
+import type { ToolPayload } from '../../../types/toolEnvelope.js';
+
+import { validatePlanMode } from './handlers/validatePlanMode.js';
+import { validateProjectMode } from './handlers/validateProjectMode.js';
+
+type StructureValidationMode =
+  (typeof STRUCTURE_VALIDATION_MODES)[keyof typeof STRUCTURE_VALIDATION_MODES];
 
 export interface StructureValidateInput {
   path: string;
-  rules?: string[];
+  mode?: StructureValidationMode;
+  scopes?: RuleScope[];
+  planPath?: string;
 }
 
-export interface StructureValidateResult {
-  report: ValidationReport;
-  timestamp: string;
-  rulesApplied: number;
-  rulesSkipped: number;
-  /**
-   * Warnings emitted by `loadConfig` while parsing `.filid/config.json`
-   * (strict schema violations, dropped unknown keys, invalid exempt globs).
-   * Empty when the config is absent or strictly valid.
-   */
-  configWarnings: string[];
-}
-
-/**
- * Read-only fractal structure validation. Auto-remediation is not supported —
- * structural fixes go through the `restructurer` agent under `/filid:restructure`
- * or `/filid:sync`.
- */
 export async function handleStructureValidate(
-  args: unknown,
-): Promise<StructureValidateResult> {
-  const input = args as StructureValidateInput;
-
-  if (!input.path) throw new Error('path is required');
-
-  const { config, warnings: configWarnings } = loadConfig(input.path);
-  const overrides = config?.rules ?? {};
-  const allRules = loadBuiltinRules(
-    overrides,
-    config?.['additional-allowed'],
-    config?.['additional-entry-points'],
-    config?.['additional-route-patterns'],
-  );
-  const activeRules = getActiveRules(allRules);
-
-  let rulesToApply = activeRules;
-  let rulesSkipped = 0;
-
-  if (input.rules && input.rules.length > 0) {
-    const ruleIdSet = new Set(input.rules);
-    rulesToApply = activeRules.filter((r) => ruleIdSet.has(r.id));
-    rulesSkipped = activeRules.length - rulesToApply.length;
-  }
-
-  const maxDepth = resolveMaxDepth(config);
-  const tree = await scanProject(input.path, {
-    maxDepth,
-    additionalOrganNames: config?.['additional-organ-names'],
-  });
-  const report = validateStructure(tree, rulesToApply, { maxDepth });
-
-  return {
-    report,
-    timestamp: new Date().toISOString(),
-    rulesApplied: rulesToApply.length,
-    rulesSkipped,
-    configWarnings,
-  };
+  input: StructureValidateInput,
+): Promise<ToolPayload<StructureValidateSummary, StructureValidateData>> {
+  const mode = input.mode ?? STRUCTURE_VALIDATION_MODES.PROJECT;
+  const scopes = input.scopes ?? STRUCTURE_VALIDATION_SCOPE_VALUES;
+  if (mode === STRUCTURE_VALIDATION_MODES.PROJECT)
+    return validateProjectMode(input.path, scopes);
+  if (!input.planPath) throw new Error(STRUCTURE_PLAN_PATH_REQUIRED_MESSAGE);
+  return validatePlanMode(input.path, input.planPath, mode, scopes);
 }

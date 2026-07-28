@@ -1,409 +1,85 @@
-# pull-request — Reference Documentation
+# pull-request — Reference
 
-Detailed workflow, git/gh command signatures, base branch detection algorithm, PR body templates, and error handling for the FCA-aware PR generator skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+## §1 Abort and block messages
 
-## Section 0 — Prerequisites & Validation
+Emit these verbatim; the pipeline matches on the first line.
 
-Verify preconditions before PR creation. All checks run sequentially before Stage 1.
+**Stage 0 — dirty worktree**
 
-### 0.1 Git Repository Check
-
-```bash
-git rev-parse --is-inside-work-tree
+```text
+Pull request aborted: the worktree has uncommitted non-document changes.
+Commit or stash them first. Only INTENT.md / DETAIL.md may be dirty, because
+Stage 1 is their sole committer.
 ```
 
-- Success → proceed to next check
-- Failure → abort: "Not a git repository. Run inside a git repository."
+**Stage 0 — dirty documents with `--skip-enrich`**
 
-### 0.2 Current Branch Check
-
-```bash
-CURRENT_BRANCH=$(git branch --show-current)
+```text
+Pull request aborted: INTENT.md / DETAIL.md are dirty and --skip-enrich was
+passed, so nothing will commit them. Drop --skip-enrich or commit the documents
+yourself.
 ```
 
-- `main` or `master` → abort: "Cannot create PR directly from main/master. Switch to a feature branch."
-- Empty string (detached HEAD) → abort: "Detached HEAD state. Check out a branch first."
-- Otherwise → proceed to next check
+**Stage 0 — no commits ahead of base**
 
-### 0.3 Uncommitted Changes Check
-
-```bash
-git status --porcelain
+```text
+Pull request aborted: the branch has no commits ahead of <BASE_REF>.
 ```
 
-Parse the output to distinguish change types:
+**Stage 1 — document sync failed**
 
-- **Non-FCA-document changes present** (files other than `INTENT.md` or `DETAIL.md` are staged or unstaged) → abort: "Uncommitted changes detected. Commit or stash non-FCA changes before running."
-- **Only INTENT.md / DETAIL.md changes present** (every dirty file matches `**/INTENT.md` or `**/DETAIL.md`) → proceed to next check (Stage 1 will commit these after sync). **Exception**: when `--skip-update` is active, treat this as "non-FCA-document changes present" and abort with "Uncommitted FCA-document changes detected; drop `--skip-update` or commit them first." — Stage 1 is the only step that commits these files.
-- **No output (clean worktree)** → proceed to next check
-
-### 0.4 GitHub CLI Authentication Check
-
-```bash
-gh auth status
+```text
+BLOCKED: FCA document sync failed. The PR is the last point where INTENT.md and
+DETAIL.md currency is enforced, so PR creation stops here.
+Fix the reported documents, or re-run with --skip-enrich to record an explicit
+exception.
 ```
 
-- Success → proceed to Stage 1
-- Failure → set `GH_AUTH = false` flag. Continue through Stage 3, then save PR body locally in Stage 4 with manual instructions.
+**Stage 2 — base unresolvable**
 
-## Section 1 — FCA Context Sync
-
-### Execution
-
-```
-Skill("filid:update")
+```text
+Pull request aborted: could not resolve a base ref. Pass --base explicitly.
 ```
 
-`filid:update` internally runs Stage 0 (Change Detection) → Stage 1 (Scan) → Stage 2 (Sync) → Stage 3 (Doc & Test Update) → Stage 4 (Finalize). `filid:pull-request` only checks the overall success/failure of this flow.
+## §2 Base resolution order
 
-- **Input**: None (`filid:update` auto-detects from the current branch)
-- **Success condition**: `filid:update` completes without errors
-- **Failure handling**: Print the following and block PR creation
+1. `--base REF` when supplied.
+2. The remote HEAD default branch (`git symbolic-ref refs/remotes/origin/HEAD`).
+3. `origin/main`.
+4. `origin/master`.
 
-```
-## `filid:pull-request` — BLOCKED
+Each candidate is verified with `git rev-parse --verify` before use. The first one that resolves wins. Nothing further is guessed.
 
-FCA context document sync failed.
+## §3 PR body layout
 
-**Failure reason**: <update error message>
-
-### Resolution
-1. Try manual sync with `/filid:update --force`
-2. Fix the issue, then re-run `/filid:pull-request`
-```
-
-### `--skip-update` Behavior
-
-Skip Stage 1 entirely and proceed to Stage 2. Print:
-
-```
-[SKIPPED] FCA context sync (--skip-update)
-```
-
-## Section 2 — Base Branch Resolution
-
-### 2.1 Explicit Specification (`--base=<ref>`)
-
-```bash
-git rev-parse --verify <ref>
-```
-
-- Success → `BASE_REF = <ref>` confirmed
-- Failure → abort: "Specified base ref '`<ref>`' not found."
-
-### 2.2 Auto-Detection Algorithm
-
-When `--base` is unspecified, resolve the base branch as follows:
-
-```bash
-DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | awk '/HEAD branch/ {print $NF}')
-# Fallback: empty or "(unknown)" → probe origin/main then origin/master
-if [ -z "$DEFAULT_BRANCH" ] || [ "$DEFAULT_BRANCH" = "(unknown)" ]; then
-  if   git rev-parse --verify origin/main   >/dev/null 2>&1; then DEFAULT_BRANCH=main
-  elif git rev-parse --verify origin/master >/dev/null 2>&1; then DEFAULT_BRANCH=master
-  else abort "Cannot auto-detect base branch. Specify --base explicitly."
-  fi
-fi
-BASE_REF="origin/$DEFAULT_BRANCH"
-```
-
-### Edge Cases
-
-| Scenario                                    | Handling                                   |
-| ------------------------------------------- | ------------------------------------------ |
-| No main / master on origin                  | Error: "Specify `--base` explicitly"       |
-| `git merge-base` fails (no common ancestor) | Error: "No common ancestor with $BASE_REF" |
-| Remote (origin) not configured              | Error: "No remote repository configured"   |
-
-### 2.3 Output
-
-```
-Base branch resolved: <BASE_REF> (method: explicit | auto-detected)
-Merge base: <commit-hash-short>
-Commits ahead: <N>
-```
-
-## Section 3 — Change Analysis & PR Body Generation
-
-### 3.1 Collecting Changes
-
-```bash
-# Diff statistics
-git diff <BASE_REF>..HEAD --stat
-
-# File list with status (A=added, M=modified, D=deleted, R=renamed)
-git diff <BASE_REF>..HEAD --name-status
-
-# Full diff (for body generation)
-git diff <BASE_REF>..HEAD
-
-# Commit history (for intent extraction)
-git log <BASE_REF>..HEAD --oneline --no-decorate
-
-# Detailed commit messages (for Summary generation)
-git log <BASE_REF>..HEAD --format="%s%n%b" --no-decorate
-
-# FCA context document changes (for Architecture Changes section)
-git diff <BASE_REF>..HEAD -- "**/INTENT.md" "**/DETAIL.md"
-```
-
-When no changes exist (`git diff --name-status` output is empty):
-
-```
-No changes detected. The base branch (<BASE_REF>) and current branch are identical.
-```
-
-### 3.2 Directory Grouping
-
-Group changed files by module/directory:
-
-```
-changed_files grouped by:
-  Level 1: Package (packages/filid, packages/syncpoint, etc.)
-  Level 2: Source directory (src/core, src/mcp, src/hooks, etc.)
-  Level 3: Feature module (subdirectories)
-```
-
-### 3.3 Auto-Generated PR Title
-
-PR title MUST be written in English regardless of the `--title` option.
-
-When `--title` is unspecified:
-
-1. Extract common prefix from commit messages (feat, fix, refactor, docs, chore, test)
-2. Combine most frequent prefix + change scope summary (in English)
-3. Truncate to 70 characters
-
-Pattern:
-
-```
-{prefix}({scope}): {summary}
-```
-
-Examples:
-
-- `feat(filid): add "filid:pull-request" skill for automated PR generation`
-- `fix(syncpoint): resolve backup path resolution on macOS`
-
-Falls back to first commit message line (truncated to 70 chars) when prefix extraction fails.
-
-### 3.4 PR Body Template
-
-Generate a 4-section structure. Print "No relevant changes" for any section with no applicable changes.
+Three sections, always present, in this order. An empty section carries the single word `None`.
 
 ```markdown
-## Summary
+## Architecture
 
-<!-- Summarize all changes in 3-5 lines. Optimize for human readability -->
+<FCA-visible changes: fractals added, moved, or reclassified; INTENT.md /
+DETAIL.md commits made by Stage 1; entry-point or boundary changes.>
 
-- Core purpose of this PR (why this change is needed)
-- Summary of change scope
-- Affected modules/features
+## Code
 
-## Architecture Changes (FCA Context Diff)
+<Behavioral changes grouped by owning fractal, one line each.>
 
-<!-- Analyze changes to FCA context documents (INTENT.md, DETAIL.md) -->
-<!-- Context docs are committed in the PR; focus on "design intent" here -->
+## Test
 
-- What architectural decisions changed
-- Module structure/boundary changes
-- New contracts or interface changes
-
-## Code Changes
-
-<!-- Group code changes by module/file with development intent -->
-
-### {module/directory}
-
-- **{filename}**: Change description
-  - Intent: Why this change was needed
-
-## Test Plan
-
-<!-- Verification steps and test checklist for reviewers -->
-
-- [ ] {Test scenario 1}: brief description of what to verify
-- [ ] {Test scenario 2}: brief description of what to verify
-- [ ] {Edge case 1}: brief description of edge case verification
-- [ ] {Error case 1}: brief description of error handling verification
-
-<details>
-<summary>Detailed Scenarios (Given-When-Then)</summary>
-
-- **{Test scenario 1}**
-  - **Given**: {preconditions}
-  - **When**: {action}
-  - **Then**: {expected result}
-
-- **{Test scenario 2}**
-  - **Given**: {preconditions}
-  - **When**: {action}
-  - **Then**: {expected result}
-
-</details>
-
----
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+<spec-document and test-record changes, with the case-count delta when it
+moved.>
 ```
 
-### 3.5 Section Generation Rules
+Rules:
 
-**Summary**:
+- The title is English and follows the repository commit-subject convention.
+- Body prose follows `[filid:lang]`. Identifiers, paths, commands, and rule IDs stay in their original form.
+- Never paste a raw diff. Reference paths instead.
+- Never invent a rationale that is not in the commits or the FCA documents.
 
-- Analyze all commit messages to derive core purpose
-- Extract file count and insertion/deletion line counts from `git diff --stat`
-- Generate affected module list from changed directory paths
-- 3-5 lines, human readability first
+## §4 What this skill does not do
 
-**Architecture Changes**:
-
-- Check FCA context document changes via `git diff <BASE_REF>..HEAD -- "**/INTENT.md" "**/DETAIL.md"`
-- If INTENT.md/DETAIL.md diff exists, describe specific changes
-- If new directories created or modules moved/split, describe structural changes
-- If `index.ts` or public export changed, describe interface changes
-- No applicable changes: "No relevant changes"
-
-**Code Changes**:
-
-- Group each file from `git diff --name-status` by directory
-- For each file: analyze `git diff <BASE_REF>..HEAD -- <file>`
-- Summarize what changed + why (development intent)
-- Extract intent from commit messages associated with each file
-- **Scale threshold**: ≤30 changed files → file-level detail; >30 files → directory-level summary with key files only
-
-**Test Plan**:
-
-- Top-level: bulleted checklist of verification steps (actionable for reviewers)
-- Include happy path + edge cases + error cases as checklist items
-- Detailed Given-When-Then scenarios inside a collapsible `<details>` block
-- Reflect existing test changes when test files are also modified
-- Write precisely for downstream automated test code generation
-
-### 3.6 Language Rules
-
-- PR title: English (always, including auto-generated and user-provided titles)
-- PR body: Use the language specified by the `[filid:lang]` tag in system context (configured in `.filid/config.json`). If no tag is present, follow the system's language setting; default to English.
-- Exceptions (keep original form):
-  - Code inside code blocks
-  - Filenames, variable names, function names, type names
-  - CLI commands and option flags
-  - Technical abbreviations (FCA, PR, API, MCP, AST, LCOM4, CC, etc.)
-  - Commit prefixes (feat, fix, refactor, etc.)
-
-## Section 4 — PR Publication
-
-Stage 4 first writes the generated body to `.filid/pr-draft/<branch>.md` (the `Write` tool creates parent directories). Every publication path consumes that file via `--body-file`, deletes it after a successful `gh pr create` / `gh pr edit`, and keeps it on failure paths for manual use.
-
-### 4.1 GitHub CLI Auth Re-check
-
-When `GH_AUTH = false` was set in Stage 0, keep the body file and display:
-
-```
-## `filid:pull-request` — Manual PR Required
-
-GitHub CLI authentication not verified. PR body saved locally.
-
-**Saved to**: .filid/pr-draft/<branch>.md
-
-### Manual PR Creation
-1. Run `gh auth login` to authenticate
-2. Re-run `/filid:pull-request`
-
-Or copy the file contents and create the PR manually on GitHub web.
-
-→ END execution (Stages 4.2~4.4 skipped).
-```
-
-### 4.2 Existing PR Check
-
-```bash
-gh pr list --head <CURRENT_BRANCH> --state open --json number,title
-```
-
-- If an open PR exists: confirm with `AskUserQuestion`
-
-```
-An open PR #<N> already exists for this branch: "<title>"
-Replace the existing PR body entirely?
-- Overwrite: Replace PR body with newly generated content
-- Skip: Exit without updating
-```
-
-- Overwrite selected → `gh pr edit <N> --body-file .filid/pr-draft/<branch>.md`, then emit the §4.5 report (status: updated), delete the body file, and END — §4.3/§4.4 are create-path only
-- Skip selected → keep the body file, print its path, and exit
-- No existing PR → continue to §4.3
-
-### 4.3 Remote Push
-
-```bash
-# Check if remote tracking branch exists
-git ls-remote --heads origin <CURRENT_BRANCH>
-
-# Push if missing
-git push -u origin <CURRENT_BRANCH>
-```
-
-### 4.4 PR Creation
-
-```bash
-gh pr create \
-  --base <BASE_REF> \
-  --title "<title>" \
-  --body-file .filid/pr-draft/<branch>.md
-```
-
-Append `--draft` when the option is set. On success, delete `.filid/pr-draft/<branch>.md`; on failure, keep it and print the §5 error format.
-
-### 4.5 Final Report
-
-```
-## `filid:pull-request` — Complete
-
-**PR**: <PR URL>
-**Title**: <title>
-**Base**: <BASE_REF> ← <CURRENT_BRANCH>
-**Status**: created | updated (draft)
-
-### Stages Summary
-| Stage | Status | Detail |
-|-------|--------|--------|
-| 0. Prerequisites | PASS | All preconditions met |
-| 1. FCA Sync | DONE / SKIPPED | update completed |
-| 2. Base Resolution | DONE | <BASE_REF> (auto / explicit) |
-| 3. Body Generation | DONE | <N> files, <M> modules analyzed |
-| 4. PR Publication | DONE | <PR URL> |
-```
-
-## Section 5 — Error Handling
-
-### Error-Action Map by Stage
-
-| Stage             | Error                          | Action                                                    |
-| ----------------- | ------------------------------ | --------------------------------------------------------- |
-| 0 (Prerequisites) | Not a git repo                 | "Not a git repository" → abort                            |
-| 0                 | On main/master branch          | "Cannot create PR from main/master" → abort               |
-| 0                 | Detached HEAD                  | "Check out a branch first" → abort                        |
-| 0                 | Non-FCA uncommitted changes    | "Commit or stash non-FCA changes before running" → abort  |
-| 0                 | gh CLI not authenticated       | Set `GH_AUTH = false`, continue through Stage 3           |
-| 1                 | update failure                 | Print BLOCKED message → abort                             |
-| 2                 | `--base` ref not found         | "Specified ref not found" → abort                         |
-| 2                 | No auto-detect candidates      | "Specify `--base` explicitly" → abort                     |
-| 2                 | Remote (origin) not configured | "No remote repository configured" → abort                 |
-| 3                 | Empty diff (no changes)        | "No changes detected" → abort                             |
-| 4                 | `gh auth` not authenticated    | Keep body file + manual instructions (§4.1)               |
-| 4                 | Existing PR update rejected    | Keep body file, print its path, exit                      |
-| 4                 | `git push` failure             | Print push error → abort (body file kept)                 |
-| 4                 | `gh pr create` failure         | Print error — body stays at `.filid/pr-draft/<branch>.md` |
-
-### Common Error Output Format
-
-```
-## `filid:pull-request` — ERROR
-
-**Stage**: <N> (<Stage Name>)
-**Error**: <error description>
-
-### Resolution
-<specific resolution steps>
-```
+- It does not run `cross-review`. Chain that separately, or use `pipeline`.
+- It does not push. The branch must already be pushed, or `gh` will report the failure and Stage 4 falls back to saving the body locally.
+- It does not edit source code. Stage 1 touches documents only.
+- It does not create or resolve debt records. Rejections are recorded by `resolve` in `justifications.md`.

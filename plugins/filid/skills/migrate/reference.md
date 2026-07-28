@@ -56,6 +56,19 @@ Renames planned: 7
 Conflicts (skipped): 1
 ```
 
+### Early exits
+
+Phase 1 can terminate the run before Phases 2-4 ever print. Both exits are
+success (`exit 0`), not errors:
+
+| Condition                                    | Message                                                      |
+| -------------------------------------------- | ------------------------------------------------------------ |
+| No `CLAUDE.md` and no `SPEC.md` found        | `Nothing to migrate. No CLAUDE.md or SPEC.md files found.`   |
+| Every candidate is a conflict (0 renameable) | `No files to rename (all have conflicts). Resolve manually.` |
+
+Report the message as-is. In the second case the conflict list from Phase 1 is
+the actionable output — resolve each directory by hand, then re-run.
+
 ---
 
 ## Phase 2 — Rename
@@ -161,14 +174,22 @@ Committed: abc1234
 
 ---
 
-## LLM Integration
+## Workflow Integration
 
-The LLM should:
+The workflow must:
 
 1. **Dry-run first**: Always run without `--execute` first
 2. **Report**: Show the script output to the user
-3. **Confirm**: Ask the user before running with `--execute`
-4. **Post-validate** (optional): Run `mcp__plugin_filid_tools__structure_validate` MCP tool after execution
+3. **Use the execution gate**: Only run mutations when the invocation explicitly
+   includes `--execute`; never promote a dry run to execution automatically
+4. **Post-validate**: After execution call
+   `mcp__plugin_filid_tools__structure_validate` with `mode: "project"` and
+   scopes `documents`, `nodes`, and `entry-points`
+
+The common envelope status, diagnostics, and findings are reported verbatim.
+Read the findings from the returned result or, when the payload exceeds the
+inline envelope budget, from its artifact — an absent inline `data` is not an
+empty finding set. A non-`ok` result is not presented as a verified migration.
 
 ### Resolving the script path
 
@@ -188,8 +209,7 @@ To undo the migration:
 ```bash
 # If auto-committed, revert the commit
 git revert <commit-sha>
-
-# Or reset entirely
-git reset HEAD~1
-git checkout .
 ```
+
+Without an auto-commit, reverse only the rename and reference-update paths shown
+by the migration report. Do not reset unrelated working-tree changes.

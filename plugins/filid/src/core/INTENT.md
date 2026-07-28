@@ -1,44 +1,46 @@
-# core — 핵심 비즈니스 로직
+# core — language-neutral FCA engine
 
 ## Purpose
 
-FCA-AI 핵심 알고리즘 구현. 트리 구축, 규칙 평가, 드리프트 감지, 의존성 분석, 커버리지 검증, PR 요약 생성을 7개 sub-fractal로 분리하여 제공한다.
+등록된 어댑터 증거를 FCA snapshot, 규칙 결과, 최소 context와 읽기 전용 restructure plan으로 변환한다.
 
 ## Structure
 
-| sub-fractal       | 포함 모듈                                                                       |
-| ----------------- | ------------------------------------------------------------------------------- |
-| `tree/`           | `fractalTree`, `organClassifier`, `boundaryDetector`                            |
-| `rules/`          | `ruleEngine` (8 규칙), `fractalValidator`, `documentValidator`, `driftDetector` |
-| `analysis/`       | `projectAnalyzer`, `dependencyGraph`, `lcaCalculator`                           |
-| `module/`         | `indexAnalyzer`, `moduleMainAnalyzer`                                           |
-| `infra/`          | `cacheManager`, `projectHash`, `changeQueue`, `configLoader`                    |
-| `coverageVerify/` | `usageTracker`, `testCoverageChecker`, `importResolver`                         |
-| `prSummary/`      | PR 요약 parsers/aggregators/renderers                                           |
+| Sub-fractal        | Role                                               |
+| ------------------ | -------------------------------------------------- |
+| `tree/`            | node discovery, owner와 classification             |
+| `rules/`           | 문서 parser와 15개 FCA policy rule                 |
+| `analysis/`        | dependency graph와 multi-consumer LCA              |
+| `verification/`    | spec-document/test-record 분석과 contract link     |
+| `projectSnapshot/` | tree·DAG·verification의 content-addressed snapshot |
+| `contextResolver/` | owner-to-root INTENT/DETAIL 경로 chain             |
+| `restructure/`     | read-only placement plan과 pre/postcondition       |
+| `infra/`           | config, cache와 ephemeral artifact persistence     |
 
 ## Conventions
 
-- 외부 I/O 허용: `fractalTree`, `ruleEngine`, `cacheManager`, `projectHash`, `configLoader`, `importResolver`, `usageTracker`, `testCoverageChecker`
-- 그 외 모듈은 순수 함수 지향 (입력 → 출력, 사이드 이펙트 없음)
-- sub-fractal 간 직접 import 금지: `core/index.ts` 배럴 경유
+- 판단 우선순위: 1. 확실한 증거 2. 경계 보존 3. 자동화 범위
+- sibling fractal은 각 entry point로 import하고 local barrel은 내부 routing에 쓰지 않는다.
+- filesystem write는 config 승인 저장, cache와 artifact edge에만 둔다.
 
 ## Boundaries
 
 ### Always do
 
-- 새 규칙 추가 시 `rules/ruleEngine/ruleEngine.ts`의 `loadBuiltinRules`에 등록
-- 공개 함수는 `core/index.ts`와 `src/index.ts`에 모두 re-export
+- adapter certainty와 dependency evidence를 결과에 보존
+- 문서·boundary·DAG·verification rule을 동일 snapshot에 대해 평가
 
 ### Ask first
 
-- 내장 규칙 임계값 변경 (LCOM4 ≥ 2, CC > 15, 500줄)
-- `classifyNode` 우선순위 로직 변경
+- node classification 우선순위나 15개 built-in rule 의미 변경
+- snapshot, context 또는 restructure 공개 DTO 변경
 
 ### Never do
 
-- `mcp/`, `hooks/`, `ast/`, `metrics/`, `compress/` 모듈 역방향 import
-- `KNOWN_ORGAN_DIR_NAMES` 이름 기반 분류를 신규 코드 기본 전략으로 사용
+- 언어 확장자, entry filename, framework 또는 test-call 문법 추측
+- project source 이동, import rewrite 또는 review fix 실행
+- unsupported/indeterminate를 PASS로 변환
 
 ## Dependencies
 
-- `../types/`, `../ast/`, `../constants/`, `fast-glob`
+- `../types/`, `../constants/`와 주입된 adapter registry
