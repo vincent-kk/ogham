@@ -16,7 +16,7 @@
 - 의존성 없는 vanilla JS, SVG 아이콘만 (이모지 금지)
 - 서버 발급 토큰을 `location.search` 에서 읽어 모든 POST 에 `?token=` 부착
 - rule doc 체크박스는 `deployed` pre-check, drift 는 `[UPDATE]` 배지 + 재동기 체크, 대상은 공유 manager 의 `displayTarget`
-- 저장 레이어는 `config_scope` 토글이 정해 `/save` 본문의 `scope` 로 간다. config 를 소유한 세 섹션에 `data-config-path`, 상속 상태는 `data-scope-state` — 계약 정본은 `@ogham/cross-platform` 의 `DETAIL.md` "설정 페이지 계약"
+- 저장 레이어는 헤더 브레드크럼의 `config_scope` 토글이 정해 `/save` 본문의 `scope` 로 간다. config 를 소유한 세 섹션에 `data-config-path`, 상속 상태는 `data-scope-state` — 계약 정본은 `@ogham/cross-platform` 의 `DETAIL.md` "설정 페이지 계약"
 - 이 페이지는 minify 만 거치고 번들되지 않으므로 공유 모듈을 import 하지 않는다. 서버가 계산해 넘긴 `overridden` 목록만 쓴다
 - 상태 배지는 채도 아닌 treatment (모노 대문자 + 박스) 로 구분
 - 저장 성공 시 "Claude Code 로 복귀" 안내 후 탭 자동 닫기 (long-poll 재개 신호)

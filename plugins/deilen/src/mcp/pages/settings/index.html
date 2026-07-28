@@ -42,28 +42,30 @@
             </svg>
           </span>
           <span class="brand-name">deilen</span>
-          <span class="brand-tag">/ settings</span>
+          <span class="brand-tag">/ settings /</span>
+          <div
+            class="scope-crumb"
+            id="config_scope"
+            role="radiogroup"
+            aria-label="Which layer to save the config in"
+          >
+            <label class="scope-option"
+              ><input type="radio" name="config_scope" value="user" /><span
+                >User</span
+              ></label
+            >
+            <label class="scope-option"
+              ><input type="radio" name="config_scope" value="project" /><span
+                >Project</span
+              ></label
+            >
+          </div>
         </div>
         <p class="lede">
           Theme, behavior, renderers, and size limits for the viewer.
         </p>
-      </header>
-
-      <div class="scope-bar">
-        <div class="radio-row" id="config_scope">
-          <label class="radio"
-            ><input type="radio" name="config_scope" value="user" /><span
-              >User</span
-            ></label
-          >
-          <label class="radio"
-            ><input type="radio" name="config_scope" value="project" /><span
-              >Project</span
-            ></label
-          >
-        </div>
         <p class="scope-hint" id="scope_hint"></p>
-      </div>
+      </header>
 
       <form id="form" class="form" novalidate>
         <section class="section">

@@ -491,24 +491,85 @@ input[type="number"]::-webkit-inner-spin-button {
   color: var(--danger);
 }
 
-/* Scope UI — user/project namespaces.
+/* Scope crumb — the masthead's third breadcrumb names the layer being edited.
    Contract: cross-platform DETAIL.md "설정 페이지 계약". The badge and the
    clear button are injected by app.js into every [data-config-path]; what
-   decides whether they show is [data-scope-state] alone. */
+   decides whether they show is [data-scope-state] alone.
+   --seal is the brand glyph's alone (DESIGN.md), so the crumb reads in ink.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
 
-.scope-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 0 16px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
+.scope-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
-.scope-hint {
-  margin: 0;
-  font-size: 0.82rem;
+.scope-option {
+  cursor: pointer;
+  font-size: 14px;
   color: var(--text-muted);
+  /* Vertical padding lifts the pointer target to 44px; the negative margin
+     cancels it so the crumb still sits on the brand baseline. */
+  padding: 11px 4px;
+  margin: -11px 0;
+  transition: color var(--transition);
+}
+
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color var(--transition);
+}
+
+.scope-option:hover {
+  color: var(--text);
+}
+
+.scope-option input:checked + span {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* The label carries the pointer, so not-allowed goes on the span the disabled
+   input actually covers — reaching the label would need :has(). */
+.scope-option input:disabled + span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Meaning on the left, path on the right — the sentence keeps the lede's
+   left edge while the file it names sits at the header's right edge. */
+.scope-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.scope-hint__path {
+  text-align: right;
   word-break: break-all;
 }
 

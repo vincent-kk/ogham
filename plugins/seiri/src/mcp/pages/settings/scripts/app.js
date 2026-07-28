@@ -233,6 +233,10 @@
   ];
 
   function renderScope() {
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = elements.scopeToggle.contains(document.activeElement);
     elements.scopeToggle.textContent = '';
     SCOPE_OPTIONS.forEach(function (option) {
       var label = element('label', 'scope-option');
@@ -254,8 +258,20 @@
     var chosen = SCOPE_OPTIONS.filter(function (option) {
       return option[0] === scope;
     })[0];
-    elements.scopeHint.textContent =
-      chosen[2] + ' — ' + scopeState.paths[scope];
+    // Two nodes rather than one string: what the layer means keeps the
+    // section's left edge while the file it writes sits at the right, and CSS
+    // cannot pull the two ends of a single text node apart.
+    elements.scopeHint.textContent = '';
+    elements.scopeHint.appendChild(
+      element('span', 'scope-hint__meaning', chosen[2]),
+    );
+    elements.scopeHint.appendChild(
+      element('span', 'scope-hint__path', scopeState.paths[scope]),
+    );
+
+    if (!hadFocus) return;
+    var focused = elements.scopeToggle.querySelector('input:checked');
+    if (focused) focused.focus();
   }
 
   /**

@@ -11,23 +11,20 @@
       <header class="masthead">
         <div class="brand">
           <span class="brand-name">cennad</span>
-          <span class="brand-tag">/ settings</span>
+          <span class="brand-tag">/ settings /</span>
+          <div
+            id="config_scope"
+            class="scope-crumb"
+            role="radiogroup"
+            aria-label="Which layer to save the config in"
+          ></div>
         </div>
         <p class="lede">
           Routing, intervention, and provider defaults for codex (OpenAI),
           antigravity (Google), and Anthropic (claude) dispatch.
         </p>
-      </header>
-
-      <div class="scope-bar">
-        <div
-          id="config_scope"
-          class="scope-toggle"
-          role="radiogroup"
-          aria-label="Which layer to save the config in"
-        ></div>
         <p id="scope_hint" class="scope-hint"></p>
-      </div>
+      </header>
 
       <form id="form" class="form" novalidate>
         <section class="section">

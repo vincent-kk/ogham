@@ -465,6 +465,10 @@
   function renderScope() {
     var host = document.getElementById("config_scope");
     if (!host) return;
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
     host.textContent = "";
     [
       ["user", "User", "Applies wherever you work."],
@@ -487,10 +491,41 @@
       label.appendChild(radio);
       label.appendChild(text);
       host.appendChild(label);
-      if (option[0] === configScope)
-        document.getElementById("scope_hint").textContent =
-          option[2] + " — " + (scopeState.paths[configScope] || "");
+      if (option[0] === configScope) renderScopeHint(option[2]);
     });
+    if (!hadFocus) return;
+    var focused = host.querySelector("input:checked");
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the title row: what the chosen layer means on the
+   * left, the file it writes on the right. Two nodes rather than one string,
+   * so the path can sit at the card's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = document.getElementById("scope_hint");
+    if (!hint) return;
+    hint.textContent = "";
+    hint.appendChild(scopeHintPart("scope-hint__meaning", meaning));
+    hint.appendChild(
+      scopeHintPart("scope-hint__path", scopeState.paths[configScope] || ""),
+    );
+  }
+
+  /**
+   * @param {string} className Class naming which half of the hint this is.
+   * @param {string} text Content of that half.
+   * @returns {HTMLSpanElement} Span ready to append to the hint line.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement("span");
+    part.className = className;
+    part.textContent = text;
+    return part;
   }
 
   renderScope();

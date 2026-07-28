@@ -67,10 +67,24 @@ body {
   animation: card-enter var(--t-page) both;
 }
 
+/* The title row carries the scope crumb as its last breadcrumb segment, so the
+   spacing below the heading belongs to the row rather than to the heading. */
+.page-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
 .page-title {
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 20px;
+}
+
+.page-title__sep {
+  color: var(--gray-400);
+  font-weight: 400;
 }
 
 /* Warning Banner */
@@ -767,32 +781,92 @@ details[open] .advanced-toggle::after {
   }
 }
 
-/* Scope UI — user/project namespaces.
+/* Scope crumb — the title row's last breadcrumb names the layer being edited.
    Contract: cross-platform DETAIL.md "설정 페이지 계약". Credentials are never
-   layered; this toggle governs config.json alone. */
+   layered; this toggle governs config.json alone. The tab bar below is a
+   different axis — Cloud / On-premise is the deployment, not the layer.
+   Selection reads as an underline, never as hue: --primary is the brand blue
+   and stays on the focus ring alone.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
 
-.scope-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.scope-toggle {
-  display: flex;
-  gap: 14px;
+.scope-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .scope-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   cursor: pointer;
+  font-size: 14px;
+  color: var(--gray-600);
+  /* 22px line box + 11px of padding on each side is the 44px pointer target;
+     the line height is stated rather than inherited because this page leaves
+     line-height at normal. The negative margin cancels the padding, leaving
+     the crumb on the title baseline. */
+  line-height: 22px;
+  padding: 11px 4px;
+  margin: -11px 0;
+  transition: color var(--t);
 }
 
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color var(--t);
+}
+
+.scope-option:hover {
+  color: var(--gray-800);
+}
+
+.scope-option input:checked + span {
+  color: var(--gray-800);
+  border-bottom-color: var(--gray-800);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* The label carries the pointer, so not-allowed goes on the span the disabled
+   input actually covers — reaching the label would need :has(). */
+.scope-option input:disabled + span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Meaning on the left, path on the right — the sentence keeps the title's left
+   edge while the file it names sits at the card's right edge. */
 .scope-hint {
-  margin: 0;
-  font-size: 0.78rem;
-  opacity: 0.72;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: -12px 0 20px;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+/* space-between only reaches the right edge while both halves share a line; a
+   long path wraps to its own line, where the auto margin is what keeps it
+   at the right edge. */
+.scope-hint__path {
+  margin-left: auto;
+  text-align: right;
   word-break: break-all;
 }

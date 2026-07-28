@@ -112,6 +112,16 @@ body {
   color: var(--fg-muted);
 }
 
+/* The brand column is already two rows deep and the card is 560px wide, so the
+   scope crumb rides the sub line rather than the name — set beside the name it
+   would collide with the rate badge the head pushes to the far edge. */
+.brand__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .badge {
   font-size: 12px;
   font-weight: 600;
@@ -448,32 +458,92 @@ code {
   }
 }
 
-/* Scope UI — user/project namespaces.
+/* Scope crumb — the card head's breadcrumb names the layer being edited.
    Contract: cross-platform DETAIL.md "설정 페이지 계약". The api_key is never
-   layered; this toggle governs config.json alone. */
+   layered; this toggle governs config.json alone.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
 
-.scope-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.scope-toggle {
-  display: flex;
-  gap: 14px;
+.scope-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .scope-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   cursor: pointer;
+  /* 13px, not the 14px of the other pages: the crumb shares a line with
+     brand__sub at 12.5px and a larger size breaks that row. */
+  font-size: 13px;
+  color: var(--fg-muted);
+  /* 22px line box + 11px of padding on each side is the 44px pointer target;
+     the line height is stated rather than inherited so the arithmetic does not
+     move with the font size. The negative margin cancels the padding, leaving
+     the crumb on the brand__sub baseline. */
+  line-height: 22px;
+  padding: 11px 4px;
+  margin: -11px 0;
+  transition: color 0.15s ease;
 }
 
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color 0.15s ease;
+}
+
+.scope-option:hover {
+  color: var(--fg);
+}
+
+.scope-option input:checked + span {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* The label carries the pointer, so not-allowed goes on the span the disabled
+   input actually covers — reaching the label would need :has(). */
+.scope-option input:disabled + span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Meaning on the left, path on the right. The padding matches the card head's
+   inset so the hint lines up with the brand above and the form below. */
 .scope-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   margin: 0;
-  font-size: 0.78rem;
-  opacity: 0.72;
+  padding: 10px 24px 0;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+/* space-between only reaches the right edge while both halves share a line. At
+   this card width the path usually wraps to its own line, where the auto
+   margin is what keeps it there. */
+.scope-hint__path {
+  margin-left: auto;
+  text-align: right;
   word-break: break-all;
 }

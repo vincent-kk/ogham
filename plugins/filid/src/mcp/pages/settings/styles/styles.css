@@ -656,34 +656,84 @@ input[type='number']::-webkit-inner-spin-button {
   }
 }
 
-/* Scope UI — user/project namespaces.
+/* Scope crumb — the masthead's third breadcrumb names the layer being edited.
    Contract: cross-platform DETAIL.md "설정 페이지 계약". No clear-override
    button: filid's project layer is a committed file the team owns, so removing
-   it is a git operation rather than a settings click. */
+   it is a git operation rather than a settings click.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
 
-.scope-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.scope-toggle {
-  display: flex;
-  gap: 14px;
+.scope-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .scope-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   cursor: pointer;
+  font-size: 14px;
+  color: var(--fg-muted);
+  /* Vertical padding lifts the pointer target to 44px; the negative margin
+     cancels it so the crumb still sits on the brand baseline. */
+  padding: 11px 4px;
+  margin: -11px 0;
+  transition: color var(--transition);
 }
 
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color var(--transition);
+}
+
+.scope-option:hover {
+  color: var(--fg);
+}
+
+.scope-option input:checked + span {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* The label carries the pointer, so not-allowed goes on the span the disabled
+   input actually covers — reaching the label would need :has(). */
+.scope-option input:disabled + span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Meaning on the left, path on the right — the sentence keeps the lede's
+   left edge while the file it names sits at the header's right edge. */
 .scope-hint {
-  margin: 0;
-  font-size: 0.78rem;
-  opacity: 0.72;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--fg-faint);
+}
+
+.scope-hint__path {
+  text-align: right;
   word-break: break-all;
 }
 

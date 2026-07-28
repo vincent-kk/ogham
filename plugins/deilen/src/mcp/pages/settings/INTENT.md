@@ -17,6 +17,7 @@
 
 - 사용자 입력은 빌드 후 inlined `__DEILEN_STATE__` 만 신뢰 (escape 는 백엔드 책임)
 - 모든 fetch 는 `?token=` 부착, POST body 는 `{ scope, config }` JSON
+- 스코프 토글은 masthead 브레드크럼의 세 번째 마디(`.scope-crumb`)다. 라디오 `<input>` 은 DOM 에 남기고 시각적으로만 감춘다 — 화살표 키 탐색이 거기서 나온다. 선택 표시는 밑줄, `--seal` 은 브랜드 글리프 전용
 - 필드 래퍼는 `data-config-path` dot path 를 갖고, 상속 상태는 같은 요소의 `data-scope-state`(`own`/`inherited`/`overridden`)로만 표현한다. 배지·해제 버튼 노출은 CSS 가 결정한다
 - project 스코프 제출은 재정의된 키만 담는다. 키를 빼는 것이 곧 재정의 해제이므로 별도 라우트가 없다
 - 외부 CDN·동봉 폰트 금지

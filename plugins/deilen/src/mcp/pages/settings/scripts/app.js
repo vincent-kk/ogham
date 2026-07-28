@@ -146,17 +146,45 @@ function markOverridden(element) {
   applyScopeBadges();
 }
 
+/** One hint fragment; CSS pushes __meaning left and __path right. */
+function scopeHintPart(className, text) {
+  const part = document.createElement("span");
+  part.className = className;
+  part.textContent = text;
+  return part;
+}
+
+/** Say what the selected layer means, then name the file it writes to. */
+function renderScopeHint(projectAvailable) {
+  const hint = $("scope_hint");
+  hint.textContent = "";
+  if (!projectAvailable) {
+    hint.appendChild(
+      scopeHintPart(
+        "scope-hint__meaning",
+        "No project root is available, so only user settings can be edited.",
+      ),
+    );
+    return;
+  }
+  hint.appendChild(
+    scopeHintPart(
+      "scope-hint__meaning",
+      scope === "project"
+        ? "Project settings override user settings"
+        : "User settings apply to every project",
+    ),
+  );
+  hint.appendChild(scopeHintPart("scope-hint__path", state.paths[scope]));
+}
+
 function renderScope() {
   const projectAvailable = state.paths.project !== null;
   for (const radio of document.querySelectorAll('input[name="config_scope"]')) {
     radio.checked = radio.value === scope;
     if (radio.value === "project") radio.disabled = !projectAvailable;
   }
-  $("scope_hint").textContent = projectAvailable
-    ? scope === "project"
-      ? `Project settings override user settings — ${state.paths.project}`
-      : `User settings apply to every project — ${state.paths.user}`
-    : "No project root is available, so only user settings can be edited.";
+  renderScopeHint(projectAvailable);
 
   populate(
     scope === "user" ? (state.layers.user ?? {}) : (state.effective ?? {}),

@@ -3,13 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atlassian Configuration</title>
+    <title>Atlassian · settings</title>
     <link href="./styles/styles.css" rel="stylesheet" />
   </head>
   <body>
     <div class="container">
       <div class="card">
-        <h1 class="page-title">Atlassian Configuration</h1>
+        <header class="page-head">
+          <h1 class="page-title">
+            Atlassian <span class="page-title__sep">/</span> settings
+            <span class="page-title__sep">/</span>
+          </h1>
+          <div
+            id="config_scope"
+            class="scope-crumb"
+            role="radiogroup"
+            aria-label="Which layer to save the connection in"
+          ></div>
+        </header>
+        <p id="scope_hint" class="scope-hint"></p>
 
         <div class="warning-banner is-hidden" id="warning-banner">
           <span class="warning-icon">&#9888;</span>
@@ -21,16 +33,6 @@
           <button class="tab-btn" data-tab="on-premise">
             On-premise (Separate Endpoints)
           </button>
-        </div>
-
-        <div class="scope-bar">
-          <div
-            id="config_scope"
-            class="scope-toggle"
-            role="radiogroup"
-            aria-label="Which layer to save the connection in"
-          ></div>
-          <p id="scope_hint" class="scope-hint"></p>
         </div>
 
         <form id="settings-form" novalidate>

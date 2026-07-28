@@ -62,6 +62,10 @@
   function renderScope() {
     var host = $('config_scope');
     if (!host) return;
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
     host.textContent = '';
     [
       ['user', 'User', 'Applies to every workspace you open.'],
@@ -84,10 +88,53 @@
       label.appendChild(radio);
       label.appendChild(text);
       host.appendChild(label);
-      if (option[0] === scope)
-        $('scope_hint').textContent =
-          option[2] + ' — ' + (scopeState.paths[scope] || '');
+      if (option[0] === scope) renderScopeHint(option[2]);
     });
+    if (!hadFocus) return;
+    var focused = host.querySelector('input:checked');
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the lede: what the chosen layer means on the left,
+   * the file it writes on the right. Two nodes rather than one string, so the
+   * path can sit at the header's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = $('scope_hint');
+    if (!hint) return;
+    hint.textContent = '';
+    var unavailable = scope === 'project' && !scopeState.paths.project;
+    hint.appendChild(
+      scopeHintPart(
+        'scope-hint__meaning',
+        unavailable
+          ? 'No project root is available, so only User can be edited.'
+          : meaning,
+      ),
+    );
+    if (unavailable) return;
+    hint.appendChild(
+      scopeHintPart('scope-hint__path', scopeState.paths[scope] || ''),
+    );
+  }
+
+  /**
+   * Builds one span of the hint line.
+   *
+   * @param {string} className Class that decides which edge the part sits on.
+   * @param {string} text Plain text; never markup — this page assigns
+   *   textContent only.
+   * @returns {HTMLSpanElement} The detached span, ready to append.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement('span');
+    part.className = className;
+    part.textContent = text;
+    return part;
   }
 
   renderScope();

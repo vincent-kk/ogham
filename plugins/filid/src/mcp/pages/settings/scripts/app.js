@@ -39,6 +39,10 @@
 
   function renderScope() {
     var host = $('config_scope');
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
     host.textContent = '';
     SCOPE_OPTIONS.forEach(function (option) {
       var label = document.createElement('label');
@@ -64,8 +68,41 @@
     var chosen = SCOPE_OPTIONS.filter(function (option) {
       return option[0] === scope;
     })[0];
-    $('scope_hint').textContent =
-      chosen[2] + ' — ' + (scopeState.paths[scope] || '');
+    renderScopeHint(chosen[2]);
+    if (!hadFocus) return;
+    var focused = host.querySelector('input:checked');
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the lede: what the chosen layer means on the left,
+   * the file it writes on the right. Two nodes rather than one string, so the
+   * path can sit at the header's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = $('scope_hint');
+    hint.textContent = '';
+    hint.appendChild(scopeHintPart('scope-hint__meaning', meaning));
+    hint.appendChild(
+      scopeHintPart('scope-hint__path', scopeState.paths[scope] || ''),
+    );
+  }
+
+  /**
+   * Builds one half of the hint line.
+   *
+   * @param {string} className Which half this is — meaning or path.
+   * @param {string} text User-visible content, inserted as text never markup.
+   * @returns {HTMLSpanElement} The span, not yet attached to the document.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement('span');
+    part.className = className;
+    part.textContent = text;
+    return part;
   }
 
   /**

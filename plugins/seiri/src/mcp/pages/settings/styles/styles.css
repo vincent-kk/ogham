@@ -551,33 +551,88 @@ code {
 }
 
 /* Scope UI — user/project namespaces.
-   Contract: cross-platform DETAIL.md "설정 페이지 계약". No clear-override
-   button here: seiri's project layer is a committed file the team owns, so
-   removing it is a git operation rather than a settings click. */
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". This toggle stays in
+   the Intervention section rather than the masthead: it decides the dial alone,
+   and the Rules section has no layer at all. Lifting it to the header would
+   make the placement claim a scope it does not have.
+   No clear-override button: seiri's project layer is a committed file the team
+   owns, so removing it is a git operation rather than a settings click.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
 
 .scope-bar {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 18px;
 }
 
 .scope-toggle {
-  display: flex;
+  display: inline-flex;
+  align-items: baseline;
   gap: 12px;
 }
 
 .scope-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   cursor: pointer;
+  font-size: 14px;
+  color: var(--fg-muted);
+  /* Vertical padding lifts the pointer target to 44px. Only the bottom half is
+     cancelled — this block stands on its own rather than on a brand baseline,
+     so the room above is wanted; the negative left margin keeps the first
+     option flush with the section's text edge. */
+  padding: 11px 4px;
+  margin: 0 0 -11px -4px;
+  transition: color var(--transition);
 }
 
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color var(--transition);
+}
+
+.scope-option:hover {
+  color: var(--fg);
+}
+
+.scope-option input:checked + span {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* Meaning on the left, path on the right. The path is not right-aligned inside
+   its own box: this is section width rather than header width, so a ragged
+   right edge here would pull the eye off the dial below. */
 .scope-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   margin: 0;
   font-size: 0.78rem;
   opacity: 0.72;
+}
+
+.scope-hint__path {
   word-break: break-all;
 }
 
