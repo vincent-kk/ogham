@@ -2,8 +2,7 @@
 
 ## Purpose
 
-등록 adapter로 하나의 project snapshot을 만들고 기본적으로 작은 FCA tree
-summary를 공통 envelope로 반환한다.
+등록 adapter로 하나의 project snapshot을 만들고 기본적으로 작은 FCA tree summary를 공통 envelope로 반환한다.
 
 ## Structure
 

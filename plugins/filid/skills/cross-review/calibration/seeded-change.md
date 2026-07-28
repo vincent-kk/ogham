@@ -1,7 +1,6 @@
 # Calibration Fixture — Seeded FCA Violations
 
-Start from `clean-change.md` and apply its clean implementation update. On
-`calib/run-c`, make these two additional changes.
+Start from `clean-change.md` and apply its clean implementation update. On `calib/run-c`, make these two additional changes.
 
 Overwrite `src/index.ts`:
 
@@ -21,5 +20,4 @@ Independent documentation inside a test organ.
 
 The new document violates the organ document boundary.
 
-`run-c` must end `REQUEST_CHANGES` with both seeded errors confirmed. General
-implementation observations are out of scope.
+`run-c` must end `REQUEST_CHANGES` with both seeded errors confirmed. General implementation observations are out of scope.

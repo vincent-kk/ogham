@@ -1,7 +1,6 @@
 # Calibration Fixture — Clean FCA Change
 
-This base tree and change are sound by construction. `run-a` must end
-`APPROVED` with no confirmed findings.
+This base tree and change are sound by construction. `run-a` must end `APPROVED` with no confirmed findings.
 
 ## Base Tree
 
@@ -235,5 +234,4 @@ export function slugify(input: string): string {
 }
 ```
 
-The change preserves contracts, entry surfaces, node placement, dependency
-direction, and verification-document policy.
+The change preserves contracts, entry surfaces, node placement, dependency direction, and verification-document policy.

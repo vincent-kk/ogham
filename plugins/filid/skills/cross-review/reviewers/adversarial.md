@@ -2,9 +2,7 @@
 
 ## Deliverable
 
-Write exactly `REVIEW_DIR/opinions/adversarial.md` using the Arbitration Contract
-in `contracts.md`. Begin with an `INDETERMINATE` skeleton. Do not edit any
-perspective opinion or project file.
+Write exactly `REVIEW_DIR/opinions/adversarial.md` using the Arbitration Contract in `contracts.md`. Begin with an `INDETERMINATE` skeleton. Do not edit any perspective opinion or project file.
 
 ## Inputs
 
@@ -34,5 +32,4 @@ perspective opinion or project file.
 - A warning remains a finding when confirmed.
 - Every candidate receives exactly one decision.
 
-If a new potential FCA concern appears during arbitration, put it in `gaps` and
-finish `INDETERMINATE`; do not smuggle it into `decisions`.
+If a new potential FCA concern appears during arbitration, put it in `gaps` and finish `INDETERMINATE`; do not smuggle it into `decisions`.

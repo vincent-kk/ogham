@@ -11,13 +11,9 @@ mcp__plugin_filid_tools__fractal_scan({
 })
 ```
 
-`detail: "paths"` returns the node paths, classifications, document state, and
-entry-point counts needed by setup without loading the full snapshot. The
-summary remains available even when detailed data is persisted as an artifact.
+`detail: "paths"` returns the node paths, classifications, document state, and entry-point counts needed by setup without loading the full snapshot. The summary remains available even when detailed data is persisted as an artifact.
 
-Treat a returned artifact as the canonical full payload for this call. Read
-only the fields needed to prepare the setup report. Do not load unrelated
-snapshot evidence into context.
+Treat a returned artifact as the canonical full payload for this call. Read only the fields needed to prepare the setup report. Do not load unrelated snapshot evidence into context.
 
 Preserve these conditions in the working set:
 

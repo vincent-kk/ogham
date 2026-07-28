@@ -3,19 +3,16 @@
 ## Requirements
 
 - 모든 file 또는 optional normalized file subset을 같은 snapshot에서 분석한다.
-- spec-document 15, test-record 32, fragmentation과 DETAIL group link를
-  role별 요약으로 반환한다.
+- spec-document 15, test-record 32, fragmentation과 DETAIL group link를 role별 요약으로 반환한다.
 - unsupported/indeterminate count와 discovery를 violation 없는 PASS로 숨기지 않는다.
 - scan은 project source와 verification document를 변경하지 않는다.
 
 ## API Contracts
 
 - Input: `{ path, filePaths?, detail?: 'summary' | 'files' }`.
-- Summary의 `specDocument`와 `testRecord`는 각각 `fileCount`,
-  `knownCaseCount`, `caseCap`을 가지며 서로의 case를 합산하지 않는다.
+- Summary의 `specDocument`와 `testRecord`는 각각 `fileCount`, `knownCaseCount`, `caseCap`을 가지며 서로의 case를 합산하지 않는다.
 - Summary는 `fragmentationCount`, 전체 `violationCount`와 certainty를 가진다.
-- `utils/summarizeVerificationRole.ts`는 한 role의 file/known-case/cap
-  projection만 계산하고 summary builder가 이를 조합한다.
+- `utils/summarizeVerificationRole.ts`는 한 role의 file/known-case/cap projection만 계산하고 summary builder가 이를 조합한다.
 - `detail: files` data는 filtered file analyses와 violations를 포함한다.
 - file filter가 snapshot evidence에 없는 path를 가리키면 diagnostic을 반환한다.
 

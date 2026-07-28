@@ -2,8 +2,7 @@
 
 ## Purpose
 
-config, cache와 content-addressed ephemeral tool artifact의 host I/O를
-소유한다.
+config, cache와 content-addressed ephemeral tool artifact의 host I/O를 소유한다.
 
 ## Structure
 

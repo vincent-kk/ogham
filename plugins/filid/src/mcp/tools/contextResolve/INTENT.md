@@ -2,8 +2,7 @@
 
 ## Purpose
 
-하나의 project snapshot에서 target owner와 owner-to-root INTENT/DETAIL 경로
-chain만 반환해 최소 FCA context 탐색을 제공한다.
+하나의 project snapshot에서 target owner와 owner-to-root INTENT/DETAIL 경로 chain만 반환해 최소 FCA context 탐색을 제공한다.
 
 ## Structure
 

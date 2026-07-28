@@ -1,8 +1,6 @@
 # Filid Hooks Reference
 
-Filid registers three Claude Code lifecycle hooks. They deliver FCA context and
-protect INTENT.md/DETAIL.md contracts without assigning agent roles or changing
-behavior by Git branch.
+Filid registers three Claude Code lifecycle hooks. They deliver FCA context and protect INTENT.md/DETAIL.md contracts without assigning agent roles or changing behavior by Git branch.
 
 ## Hook Overview
 
@@ -14,8 +12,7 @@ behavior by Git branch.
 
 The hook build also emits shared host runners:
 
-- `bridge/run-agy.mjs` translates agy payloads to and from the Claude hook
-  contract.
+- `bridge/run-agy.mjs` translates agy payloads to and from the Claude hook contract.
 - `bridge/run-hook.cmd` starts `libs/run.cjs` reliably on Windows.
 - `libs/run.cjs` starts each Claude hook with the current Node executable.
 
@@ -23,31 +20,21 @@ The hook build also emits shared host runners:
 
 ### SessionStart
 
-`setup` detects whether the current project uses FCA, initializes session state,
-and re-arms context delivery after a startup, resume, clear, or compaction.
-Non-FCA projects pass through without mutation.
+`setup` detects whether the current project uses FCA, initializes session state, and re-arms context delivery after a startup, resume, clear, or compaction. Non-FCA projects pass through without mutation.
 
 ### UserPromptSubmit
 
-`userPromptSubmit` resets the per-turn visit map, advances the context-delivery
-turn counter, and supplies the session's FCA pointer when required. Its behavior
-does not depend on the current branch and it never emits a spike-mode banner.
+`userPromptSubmit` resets the per-turn visit map, advances the context-delivery turn counter, and supplies the session's FCA pointer when required. Its behavior does not depend on the current branch and it never emits a spike-mode banner.
 
 ### PreToolUse
 
 `preToolUse` orchestrates three concerns for `Read`, `Write`, and `Edit`:
 
-1. Intent delivery injects the nearest INTENT.md body, parent chain, DETAIL.md
-   hint, and changed visit map before work proceeds in a module.
-2. Document validation keeps INTENT.md at 50 lines or fewer, requires
-   `### Always do`, `### Ask first`, and `### Never do`, and rejects
-   append-only DETAIL.md growth.
+1. Intent delivery injects the nearest INTENT.md body, parent chain, DETAIL.md hint, and changed visit map before work proceeds in a module.
+2. Document validation keeps INTENT.md at 50 lines or fewer, requires `### Always do`, `### Ask first`, and `### Never do`, and rejects append-only DETAIL.md growth.
 3. Structure guarding reports organ placement and dependency-boundary risks.
 
-The INTENT.md and DETAIL.md write gates are branch-independent. Spike branches,
-reflogs, harvest manifests, and `.filid/criteria.md` do not bypass them. A legacy
-`.filid/criteria.md` ledger is reported by `structure_validate`; hooks do not
-deny a tool call merely because that ledger exists.
+The INTENT.md and DETAIL.md write gates are branch-independent. Spike branches, reflogs, harvest manifests, and `.filid/criteria.md` do not bypass them. A legacy `.filid/criteria.md` ledger is reported by `structure_validate`; hooks do not deny a tool call merely because that ledger exists.
 
 ## Registration
 
@@ -96,12 +83,10 @@ deny a tool call merely because that ledger exists.
 }
 ```
 
-Root host manifests and `bridge/*` are generated artifacts. Change the canonical
-manifest or TypeScript entry sources, then run:
+Root host manifests and `bridge/*` are generated artifacts. Change the canonical manifest or TypeScript entry sources, then run:
 
 ```bash
 yarn filid build:hooks
 ```
 
-The official hook build emits the three lifecycle bundles and shared runners,
-and removes the retired `bridge/agent-enforcer.mjs` bundle.
+The official hook build emits the three lifecycle bundles and shared runners, and removes the retired `bridge/agent-enforcer.mjs` bundle.

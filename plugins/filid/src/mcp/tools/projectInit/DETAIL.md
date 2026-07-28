@@ -2,18 +2,15 @@
 
 ## Requirements
 
-- Resolve the requested project root and create `.filid/config.json` only when
-  it does not exist.
+- Resolve the requested project root and create `.filid/config.json` only when it does not exist.
 - Create config version 2 with automatic adapter selection by default.
-- When adapter IDs are supplied, create explicit adapter selection preserving
-  their order.
+- When adapter IDs are supplied, create explicit adapter selection preserving their order.
 - Keep rule-document synchronization outside this tool.
 
 ## API Contracts
 
 - Input: `{ path?: string, language?: string, adapterIds?: string[] }`.
-- Output uses the common envelope; summary reports whether the config was
-  created and its absolute path.
+- Output uses the common envelope; summary reports whether the config was created and its absolute path.
 - Existing configuration is never overwritten.
 
 ## Acceptance Criteria

@@ -61,13 +61,9 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
-`path` is the only scoping knob this tool has. Passing `PROJECT_ROOT` here is the
-whole-project comparison `reference.md` §1 forbids: two items in the same run
-would each claim the other's improvement.
+`path` is the only scoping knob this tool has. Passing `PROJECT_ROOT` here is the whole-project comparison `reference.md` §1 forbids: two items in the same run would each claim the other's improvement.
 
-Read the findings from the returned result or, when the payload exceeds the
-inline envelope budget, from its artifact. Reading an absent inline `data` as
-"the finding is gone" is how this step produces a false `resolved`.
+Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact. Reading an absent inline `data` as "the finding is gone" is how this step produces a false `resolved`.
 
 Derive each item's status from the matrix in `reference.md` §1. A status is derived from measured evidence only. Never mark an item resolved because the file appears in the delta.
 
@@ -96,14 +92,11 @@ A rejection that fails any of the three is `unconstitutional` and counts as an o
 
 Write `REVIEW_DIR/re-validate.md` from the template in `reference.md` §3.
 
-Immediately continue to Step 7. Cleanup is Step 8 and runs last, because
-releasing the state deletes this file and Step 7 still needs it.
+Immediately continue to Step 7. Cleanup is Step 8 and runs last, because releasing the state deletes this file and Step 7 still needs it.
 
 ## Step 7 — Publish the Verdict to the Pull Request
 
-Determine whether the current branch has a pull request, through whatever
-pull-request access the host provides. No tool is named here on purpose: this
-step states the requirement, and the executing agent uses whatever access it has.
+Determine whether the current branch has a pull request, through whatever pull-request access the host provides. No tool is named here on purpose: this step states the requirement, and the executing agent uses whatever access it has.
 
 | Situation                          | Action                                                   |
 | ---------------------------------- | -------------------------------------------------------- |
@@ -112,8 +105,7 @@ step states the requirement, and the executing agent uses whatever access it has
 | Pull-request access is unavailable | Skip; record `pr-comment: unavailable`                   |
 | Posting fails                      | Skip; record `pr-comment: failed` with the reason        |
 
-Compose the comment from the `re-validate.md` Step 6 just wrote. A missing,
-unavailable, or failed comment never changes the verdict and never fails the run.
+Compose the comment from the `re-validate.md` Step 6 just wrote. A missing, unavailable, or failed comment never changes the verdict and never fails the run.
 
 ## Step 8 — Release the state on PASS
 
@@ -148,8 +140,6 @@ PR comment: <posted|updated|none|unavailable|failed>
 - Status comes from re-measurement, never from the delta's file list alone.
 - `indeterminate` evidence never yields `PASS`.
 - The baseline is `resolve_commit_sha` from `justifications.md`, never `HEAD~1` and never the review base.
-- Cleanup happens only on `PASS`, only with literal `confirm: true`, and only
-  after the pull-request comment step has run.
-- This skill never edits source, never commits, and never pushes. The only
-  pull-request action is posting or updating its own verdict comment.
+- Cleanup happens only on `PASS`, only with literal `confirm: true`, and only after the pull-request comment step has run.
+- This skill never edits source, never commits, and never pushes. The only pull-request action is posting or updating its own verdict comment.
 - A branch without a pull request is a normal outcome, not a failure.

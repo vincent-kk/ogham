@@ -2,8 +2,7 @@
 
 ## Purpose
 
-한 `ProjectSnapshot`에서 source의 목표 위치, required artifact, import rewrite
-후보와 실행 전후 검증 결과를 산출한다. project source는 변경하지 않는다.
+한 `ProjectSnapshot`에서 source의 목표 위치, required artifact, import rewrite 후보와 실행 전후 검증 결과를 산출한다. project source는 변경하지 않는다.
 
 ## Structure
 
@@ -44,5 +43,4 @@
 
 ## Dependencies
 
-- `../analysis/lcaCalculator/`, `../../types/`, `../../constants/`,
-  `@ogham/cross-platform`
+- `../analysis/lcaCalculator/`, `../../types/`, `../../constants/`, `@ogham/cross-platform`

@@ -10,11 +10,9 @@ plugin: filid
 
 # context-query — Minimal FCA Context
 
-Answer a focused ownership, boundary, public-contract, or placement-context
-question from the smallest relevant document chain.
+Answer a focused ownership, boundary, public-contract, or placement-context question from the smallest relevant document chain.
 
-See [reference.md](./reference.md) for evidence selection, the three-round
-budget, and response shape.
+See [reference.md](./reference.md) for evidence selection, the three-round budget, and response shape.
 
 ## When to Use
 
@@ -23,8 +21,7 @@ budget, and response shape.
 - locating the nearest DETAIL.md contract
 - checking placement context without loading the whole project
 
-Use `/filid:guide` for a project-wide human-readable map and `/filid:scan` for
-a complete audit.
+Use `/filid:guide` for a project-wide human-readable map and `/filid:scan` for a complete audit.
 
 ## Workflow
 
@@ -39,21 +36,17 @@ mcp__plugin_filid_tools__context_resolve({
 })
 ```
 
-If the target is outside the project, has no owner, or returns diagnostics,
-report that evidence and do not guess.
+If the target is outside the project, has no owner, or returns diagnostics, report that evidence and do not guess.
 
 ### Round 2 — Read Minimal Documents
 
-Read only the returned INTENT.md or nearest DETAIL.md references needed for the
-question. Do not load sibling, cousin, or unrelated ancestor documents.
+Read only the returned INTENT.md or nearest DETAIL.md references needed for the question. Do not load sibling, cousin, or unrelated ancestor documents.
 
 ### Round 3 — Answer
 
-Answer in the returned output language. Name the owner, cite every document
-path used, and state certainty and diagnostics.
+Answer in the returned output language. Name the owner, cite every document path used, and state certainty and diagnostics.
 
-If the evidence cannot fit the budget, report what is known and list the
-unread referenced paths. Do not fall back to a broad project scan.
+If the evidence cannot fit the budget, report what is known and list the unread referenced paths. Do not fall back to a broad project scan.
 
 ## MCP Surface
 
@@ -64,7 +57,6 @@ unread referenced paths. Do not fall back to a broad project scan.
 ## Invariants
 
 - One resolution call per question.
-- Document references are loaded selectively; content is not requested from
-  the tool.
+- Document references are loaded selectively; content is not requested from the tool.
 - The chain order is owner toward root.
 - Diagnostics and uncertain ownership remain visible.

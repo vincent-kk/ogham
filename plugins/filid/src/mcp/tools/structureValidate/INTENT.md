@@ -2,8 +2,7 @@
 
 ## Purpose
 
-같은 project snapshot을 대상으로 scope-filtered FCA project rule 또는
-restructure plan의 실행 전후 조건을 read-only로 검증한다.
+같은 project snapshot을 대상으로 scope-filtered FCA project rule 또는 restructure plan의 실행 전후 조건을 read-only로 검증한다.
 
 ## Structure
 

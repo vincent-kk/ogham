@@ -3,27 +3,21 @@
 ## Requirements
 
 - `SessionStart` 입력을 받아 캐시 디렉터리와 로거 경로를 준비한다.
-- `source`가 `compact` 또는 `clear`이면 세션 epoch를 리셋한다. `resume`과
-  `startup`은 대상이 아니다 — 컨텍스트가 살아 있으므로 전달 기록을 버리면
-  같은 규칙을 두 번 주입하게 된다.
+- `source`가 `compact` 또는 `clear`이면 세션 epoch를 리셋한다. `resume`과 `startup`은 대상이 아니다 — 컨텍스트가 살아 있으므로 전달 기록을 버리면 같은 규칙을 두 번 주입하게 된다.
 - INTENT.md 자동 탐지로 `.filid/` 마커를 만든다.
 - 만료 세션과 stale 캐시를 정리한다.
-- `.claude/rules/`를 건드리지 않는다. 규칙 배포는 `/filid:setup` 스킬과
-  `rule_docs_sync` 도구의 책임이다.
-- 어떤 실패도 훅을 중단시키지 않는다. 진단은 남기되 `continue: true`를
-  반환한다.
+- `.claude/rules/`를 건드리지 않는다. 규칙 배포는 `/filid:setup` 스킬과 `rule_docs_sync` 도구의 책임이다.
+- 어떤 실패도 훅을 중단시키지 않는다. 진단은 남기되 `continue: true`를 반환한다.
 
 ## API Contracts
 
-- `processSetup(input: SessionStartInput): HookOutput` — 초기화 결과와
-  세션 컨텍스트 문자열.
+- `processSetup(input: SessionStartInput): HookOutput` — 초기화 결과와 세션 컨텍스트 문자열.
 
 ## Acceptance Criteria
 
 ### AC-setup-epoch — 컨텍스트 소실에만 epoch를 리셋한다
 
-- `source`가 `compact`/`clear`이면 delivered·turn·guide·fmap 마커가
-  제거된다.
+- `source`가 `compact`/`clear`이면 delivered·turn·guide·fmap 마커가 제거된다.
 - `resume`/`startup`에서는 기존 전달 기록이 보존된다.
 
 ### AC-setup-rule-isolation — 규칙 파일 불가침
