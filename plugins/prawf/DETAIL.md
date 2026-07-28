@@ -7,7 +7,7 @@
 - 플러그인은 `skills` 만으로 로드되어야 한다 — `mcpServers`·`hooks`·빌드 산출물 없음. `validate-plugin` 이 `.claude-plugin/plugin.json` 에 대해 통과해야 한다.
 - 페르소나 id, 산출물 파일명, axis id, verdict/status enum 은 `agents/*.md`, `skills/peer-review/orchestration.md`, `skills/peer-review/prompt-templates.md`, `skills/peer-review/templates.md`, 그리고 각 `SKILL.md` 에서 동일해야 한다.
 - verdict 는 게이트 이상에서 미해결인 **soundness** finding 만의 순수 함수여야 한다 (게이트 = `--gate`, 기본 `major` — accept 를 차단할 수 있는 최저 severity). 게이트 미만 미해결 finding 은 advisory 로 `review-report.md` 의 Advisory Notes 섹션에 보존되며, advisory 가 비어 있지 않은 accept 는 본문에서 "accept (with notes)" 로 표기한다(frontmatter·터미널 마커는 `accept` 그대로). 치명 결함 override 는 게이트와 무관하다. 중요성(`impact-assessor`)은 advisory 이며 verdict 를 Minor Revision 이상으로 올리지 못한다.
-- 모든 스킬의 산출물 베이스 경로는 단일 WORKDIR 규약을 따른다: 우선순위 `--workdir <dir>` > 환경변수 `PRAWF_WORKDIR` > 기본값 `./.prawf`. 해석 규칙의 단일 출처는 `skills/_shared/operations/resolve_workdir.md` 이며 4개 스킬이 공유한다.
+- 모든 스킬의 산출물 베이스 경로는 단일 WORKDIR 규약을 따른다: 우선순위 `--workdir <dir>` > 환경변수 `PRAWF_WORKDIR` > 기본값 `./.prawf`. 해석 규칙의 단일 출처는 `skills/.shared/operations/resolve_workdir.md` 이며 4개 스킬이 공유한다.
 
 ## API Contracts
 

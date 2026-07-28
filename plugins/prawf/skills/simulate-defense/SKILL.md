@@ -36,7 +36,7 @@ Rehearse the live defense. The committee asks the questions a real panel would a
 
 ### Phase 0 — Resolve questions (direct + optional spawn)
 
-First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); session outputs go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`, reusing a prior review's directory when present.
+First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../.shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); session outputs go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`, reusing a prior review's directory when present.
 
 1. If a `qa-sheet.md` from a prior `/prawf:peer-review` is supplied or found, load its anticipated questions directly — no spawning needed.
 2. Otherwise, take the paper, run P0-lite (detect profile, normalize to `paper-normalized.md`), and spawn a LIGHT panel of soundness reviewers as standalone `Task`s (no team is needed for question generation) in **question-only mode**: adapt the `../peer-review/prompt-templates.md` §1 prompt to ask each reviewer for ONLY its `anticipated_question` set (one per axis concern), returned inline in the Task response — strip §1's PRIMARY DELIVERABLE / file-write REMINDER lines and substitute `GATE` with `major` (no verdict is derived in this mode); they do NOT write a `findings/round-1-<axis>.md` file. Then spawn `rebuttal-strategist` (passing the collected questions in its spawn prompt) to refine and classify each question as `good | bad | cringy`.

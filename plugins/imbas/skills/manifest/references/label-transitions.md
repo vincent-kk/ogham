@@ -26,7 +26,7 @@ Reference for label state changes at pipeline phase boundaries. Skills that call
 ### Jira
 
 - **Add/Remove labels**: `[OP: edit_issue] issue_ref=<ref>`, update `labels` field. If `edit_issue` does full-replace, read existing labels first via `[OP: get_issue]`.
-- **Transition status** (two-step — transition IDs must not be hardcoded, see `_shared/operations/transition_issue.md`):
+- **Transition status** (two-step — transition IDs must not be hardcoded, see `.shared/operations/transition_issue.md`):
   1. `[OP: get_transitions] issue_ref=<ref>` → find the transition id whose target matches `<status>`.
   2. `[OP: transition_issue] issue_ref=<ref>, transition.id=<matched_id>`.
   - On failure (HTTP 400/403/404): log warning, continue pipeline. Label is still applied.

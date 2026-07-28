@@ -71,12 +71,12 @@ To force re-download when a cached file exists, pass `force: true`.
 
 ## Auth Recovery
 
-No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth_check.md`](../_shared/auth_check.md).
+No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth-check.md`](../.shared/auth-check.md).
 
 ## References
 
-- `../_shared/auth_check.md` — Pre-flight authentication check
-- `../_shared/error-handling.md` — HTTP error handling protocol
-- `../_shared/mcp-tools.md` — Available MCP tools (uses `mcp__plugin_atlassian_tools__fetch` with `method: "GET"` and `accept_format: "raw"`)
+- `../.shared/auth-check.md` — Pre-flight authentication check
+- `../.shared/error-handling.md` — HTTP error handling protocol
+- `../.shared/mcp-tools.md` — Available MCP tools (uses `mcp__plugin_atlassian_tools__fetch` with `method: "GET"` and `accept_format: "raw"`)
 - `references/download-flow.md` — Detailed download and upload specs
 - `references/errors.md` — Download-specific error handling

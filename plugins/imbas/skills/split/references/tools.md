@@ -13,8 +13,8 @@
 
 | Operation                                                    | Usage                                      |
 | ------------------------------------------------------------ | ------------------------------------------ |
-| [`[OP: get_issue]`](../../_shared/operations/get_issue.md)   | Verify Epic existence when --epic provided |
-| [`[OP: search_jql]`](../../_shared/operations/search_jql.md) | Search for existing related Stories/Epics  |
+| [`[OP: get_issue]`](../../.shared/operations/get_issue.md)   | Verify Epic existence when --epic provided |
+| [`[OP: search_jql]`](../../.shared/operations/search_jql.md) | Search for existing related Stories/Epics  |
 
 The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
 

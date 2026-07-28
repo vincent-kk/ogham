@@ -20,7 +20,7 @@ const EXPOSED = ["search", "query", "download", "setup"];
 describe("exposed skills", () => {
   it("exposes exactly the 4 designed skills", () => {
     const dirs = readdirSync(SKILLS, { withFileTypes: true })
-      .filter((d) => d.isDirectory() && !d.name.startsWith("_"))
+      .filter((d) => d.isDirectory() && !d.name.startsWith("."))
       .map((d) => d.name)
       .filter((name) => existsSync(join(SKILLS, name, "SKILL.md")));
     expect(dirs.sort()).toEqual([...EXPOSED].sort());
@@ -46,9 +46,9 @@ describe("exposed skills", () => {
     );
   });
 
-  it("ships the lazy _shared references", () => {
-    expect(existsSync(join(SKILLS, "_shared", "mcp-tools.md"))).toBe(true);
-    expect(existsSync(join(SKILLS, "_shared", "eutils.md"))).toBe(true);
+  it("ships the lazy .shared references", () => {
+    expect(existsSync(join(SKILLS, ".shared", "mcp-tools.md"))).toBe(true);
+    expect(existsSync(join(SKILLS, ".shared", "eutils.md"))).toBe(true);
   });
 });
 
@@ -68,9 +68,9 @@ describe("paper-search-expert agent", () => {
     expect(fm).toContain("Read");
   });
 
-  it("ships the generation + rerank methodology references in _shared (SSoT)", () => {
-    expect(existsSync(join(SKILLS, "_shared", "query-strategy.md"))).toBe(true);
-    expect(existsSync(join(SKILLS, "_shared", "rerank.md"))).toBe(true);
+  it("ships the generation + rerank methodology references in .shared (SSoT)", () => {
+    expect(existsSync(join(SKILLS, ".shared", "query-strategy.md"))).toBe(true);
+    expect(existsSync(join(SKILLS, ".shared", "rerank.md"))).toBe(true);
   });
 
   it("keeps agents/ flat — no subdirectories (plugin loader requirement)", () => {

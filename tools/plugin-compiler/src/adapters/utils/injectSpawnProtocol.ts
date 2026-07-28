@@ -1,5 +1,5 @@
 /** Persona directory inside every Codex skill-variant tree (under the skills root). */
-export const PERSONA_SUBDIR = "_shared/personas";
+export const PERSONA_SUBDIR = ".shared/personas";
 
 /**
  * Does this skill-file body actually instruct spawning a persona subagent for
@@ -21,7 +21,7 @@ export function containsPersonaSpawn(
  * protocol: since Codex has no `subagent_type` registry, a
  * `subagent_type: "<plugin>:<id>"` spawn must instead start a `multi_agent`
  * subagent that first reads the relocated persona and adopts it. The persona path
- * is skill-relative (`../…/_shared/personas`), computed from how deep the file
+ * is skill-relative (`../…/.shared/personas`), computed from how deep the file
  * sits under `skills/`, so it holds wherever the spawn instruction lives. The
  * block goes right after YAML frontmatter (or at the very top for sub-docs) so
  * the rule is read before any spawn step. Deterministic for a given

@@ -17,7 +17,7 @@
                                        (추천만; 전이는 Dispatcher)
      ↓ (참조)
 [Skill]      search · query · download · setup
-                └ lazy: _shared/{mcp-tools,eutils,query-strategy,rerank}.md
+                └ lazy: .shared/{mcp-tools,eutils,query-strategy,rerank}.md
      ↓ (mcp_*)
 [MCP]        paper_search · mesh_lookup · fetch_fulltext · setup · auth_check  (결정론·계약)
      ↓ (HTTP)
@@ -30,7 +30,7 @@
 
 **핵심 원리**: 비결정 LLM(Agent)을 결정적 상태머신(Dispatcher) + 결정적 실행(MCP)이 감싼다. 검색 도메인의 하드 규칙(10k cap·POST 전환·rate·query lint)은 LLM이 아닌 deterministic service에 둔다.
 
-**역할 분담(SSoT)**: agent=추론(WHAT) · skill=절차(HOW) · MCP=계약(I/O). 검색식 방법론·재랭킹 기준은 `skills/_shared/{query-strategy,rerank}.md`(agent가 Read로 로드)가, 오케스트레이션 절차는 `search` SKILL.md가, 도구 I/O 계약은 MCP + `_shared/mcp-tools.md`가, E-utilities db·필드·제약은 `_shared/eutils.md`(lazy)가 단독 소유한다. agent는 물리적으로 1개이되 생성/재랭킹의 **prompt·schema·평가기준을 분리**해 self-bias를 억제한다. 상세 [agents.md](./agents.md) · [spec.md](./spec.md).
+**역할 분담(SSoT)**: agent=추론(WHAT) · skill=절차(HOW) · MCP=계약(I/O). 검색식 방법론·재랭킹 기준은 `skills/.shared/{query-strategy,rerank}.md`(agent가 Read로 로드)가, 오케스트레이션 절차는 `search` SKILL.md가, 도구 I/O 계약은 MCP + `.shared/mcp-tools.md`가, E-utilities db·필드·제약은 `.shared/eutils.md`(lazy)가 단독 소유한다. agent는 물리적으로 1개이되 생성/재랭킹의 **prompt·schema·평가기준을 분리**해 self-bias를 억제한다. 상세 [agents.md](./agents.md) · [spec.md](./spec.md).
 
 ## Dispatcher 구현 결정
 
@@ -59,7 +59,7 @@ plugins/entrez/
 │   ├── query/SKILL.md                   # 자연어 → PubMed 검색식만 (검색 X)
 │   ├── download/SKILL.md                # PMID/PMCID → OA PDF + 비OA 링크
 │   ├── setup/SKILL.md                   # web UI 설정 안내
-│   └── _shared/                         # skill lazy 공유 리소스 (agent 참조 포함)
+│   └── .shared/                         # skill lazy 공유 리소스 (agent 참조 포함)
 │       ├── mcp-tools.md                 # 도구 I/O 계약 미러 (SSoT: MCP)
 │       ├── eutils.md                    # E-utilities db·필드·제약 (lazy)
 │       ├── query-strategy.md            # 생성 모드 — QueryRole 다중 검색식 방법론 (SSoT)

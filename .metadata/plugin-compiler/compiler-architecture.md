@@ -73,7 +73,7 @@ agy 의 declared 레이어는 **어떤 형식으로도 플러그인을 로드하
 
 - **agy `hooks.json`** (루트, `buildAgyHooks`): Claude `PreToolUse` → agy named-group(`{"<plugin>":{"PreToolUse":[…]}}`). 핸들러 `node bridge/run-agy.mjs PreToolUse bridge/<handler>.mjs` — 러너가 agy camelCase stdin ↔ Claude 계약을 번역하고 `{decision:deny}` 를 역변환. **게이팅(deny) 훅만 방출**(주입 채널은 agy injectSteps 미렌더로 死코드). filid·imbas·maencof.
 - **Codex `.codex-plugin/hooks.json`** (`buildCodexHooks`): Claude 훅 전체 복사 + read 잡는 PreToolUse matcher(`Read|Write|Edit`)에 `|Bash` 추가 — Codex 가 셸로 직렬화하는 단순 읽기(`cat`/`head`)를 `parseBashRead` 로 `Read` 승격. Claude `hooks/hooks.json` **바이트 불변**. filid·imbas.
-- **Codex `.codex-plugin/skills/` 트리** (`buildCodexSkills`): Codex 엔 `subagent_type` 레지스트리가 없다 → 스폰 스킬을 self-load 형("subagent 띄워 `../_shared/personas/<id>.md` 채택")으로 재작성 + 전 스킬 copy-all(발견이 REPLACE) + 페르소나 복사. Codex 매니페스트 `skills` 를 이 dir 로 재지정. Claude `skills/` **바이트 불변**. entrez·filid·imbas·r-statistics(prawf 는 이미 self-load — 무변환).
+- **Codex `.codex-plugin/skills/` 트리** (`buildCodexSkills`): Codex 엔 `subagent_type` 레지스트리가 없다 → 스폰 스킬을 self-load 형("subagent 띄워 `../.shared/personas/<id>.md` 채택")으로 재작성 + 전 스킬 copy-all(발견이 REPLACE) + 페르소나 복사. Codex 매니페스트 `skills` 를 이 dir 로 재지정. Claude `skills/` **바이트 불변**. entrez·filid·imbas·r-statistics(prawf 는 이미 self-load — 무변환).
 
 ## 4. 도구 (`tools/plugin-compiler`)
 

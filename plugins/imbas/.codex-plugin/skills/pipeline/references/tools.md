@@ -9,13 +9,13 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 `Agent`), do this instead — everything else about the step stays the same:
 
 1. Spawn a `multi_agent` subagent.
-2. Make its FIRST action to Read `../../_shared/personas/<id>.md` and adopt that persona
+2. Make its FIRST action to Read `../../.shared/personas/<id>.md` and adopt that persona
    definition in full as its operating contract.
 3. Then carry out the original spawn's prompt, inputs, and output contract
    verbatim.
 
 `<id>` is the text after `imbas:` in the original `subagent_type` value
-(e.g. `subagent_type: "imbas:reviewer"` → read `../../_shared/personas/reviewer.md`).
+(e.g. `subagent_type: "imbas:reviewer"` → read `../../.shared/personas/reviewer.md`).
 
 # Tools Used & Agent Spawn
 
@@ -48,21 +48,21 @@ The LLM resolves which tool to use at runtime. Read the linked operation files f
 
 | Operation                                                                  | Phase | Usage                                                        |
 | -------------------------------------------------------------------------- | ----- | ------------------------------------------------------------ |
-| [`[OP: get_confluence]`](../../_shared/operations/get_confluence.md)       | 1     | Fetch Confluence page when source is a URL                   |
-| [`[OP: search_confluence]`](../../_shared/operations/search_confluence.md) | 1     | Resolve references to other Confluence pages                 |
-| [`[OP: get_issue]`](../../_shared/operations/get_issue.md)                 | 0, 2  | Verify --parent issue existence and detect type (Epic/Story) |
-| [`[OP: search_jql]`](../../_shared/operations/search_jql.md)               | 2, 3  | Search for existing related Stories/Epics                    |
-| [`[OP: get_transitions]`](../../_shared/operations/get_transitions.md)     | 2.5   | Get available transitions for Done processing                |
+| [`[OP: get_confluence]`](../../.shared/operations/get_confluence.md)       | 1     | Fetch Confluence page when source is a URL                   |
+| [`[OP: search_confluence]`](../../.shared/operations/search_confluence.md) | 1     | Resolve references to other Confluence pages                 |
+| [`[OP: get_issue]`](../../.shared/operations/get_issue.md)                 | 0, 2  | Verify --parent issue existence and detect type (Epic/Story) |
+| [`[OP: search_jql]`](../../.shared/operations/search_jql.md)               | 2, 3  | Search for existing related Stories/Epics                    |
+| [`[OP: get_transitions]`](../../.shared/operations/get_transitions.md)     | 2.5   | Get available transitions for Done processing                |
 
 ### Write Operations
 
 | Operation                                                                | Phase    | Usage                                                 |
 | ------------------------------------------------------------------------ | -------- | ----------------------------------------------------- |
-| [`[OP: create_issue]`](../../_shared/operations/create_issue.md)         | 2.5, 3.5 | Create Epic, Story, Task, Sub-task issues             |
-| [`[OP: create_link]`](../../_shared/operations/create_link.md)           | 2.5, 3.5 | Create blocks, split-into, relates-to links           |
-| [`[OP: edit_issue]`](../../_shared/operations/edit_issue.md)             | 2.5      | Update issue fields after creation (if needed)        |
-| [`[OP: transition_issue]`](../../_shared/operations/transition_issue.md) | 2.5      | Transition status (horizontal split: original → Done) |
-| [`[OP: add_comment]`](../../_shared/operations/add_comment.md)           | 3.5      | Post B→A feedback comments to Story issues            |
+| [`[OP: create_issue]`](../../.shared/operations/create_issue.md)         | 2.5, 3.5 | Create Epic, Story, Task, Sub-task issues             |
+| [`[OP: create_link]`](../../.shared/operations/create_link.md)           | 2.5, 3.5 | Create blocks, split-into, relates-to links           |
+| [`[OP: edit_issue]`](../../.shared/operations/edit_issue.md)             | 2.5      | Update issue fields after creation (if needed)        |
+| [`[OP: transition_issue]`](../../.shared/operations/transition_issue.md) | 2.5      | Transition status (horizontal split: original → Done) |
+| [`[OP: add_comment]`](../../.shared/operations/add_comment.md)           | 3.5      | Post B→A feedback comments to Story issues            |
 
 ---
 

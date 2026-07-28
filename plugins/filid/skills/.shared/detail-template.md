@@ -36,14 +36,35 @@ and this file is the defect.
 ## Rules
 
 - All four headings are **required**; a missing one is an `error`.
-- Current state, not an append-only history. Restructure to the currently
-  intended behavior on every update rather than appending a changelog.
+- The contract sections are current state, not an append-only ledger.
+  Restructure them to the currently intended behavior on every update; a
+  superseded clause is removed rather than left beside its replacement.
+- History belongs in the conditional `## History` section below — never mixed
+  into the contract sections, and never in `INTENT.md`.
 - Acceptance groups use `### <group-id> — <title>`, and their IDs are unique
   within the document. These IDs are the oracle a spec-document binds to.
 - No line cap.
 - Headings stay in English; descriptive content follows `[filid:lang]`,
   defaulting to English. Identifiers, paths, and rule IDs keep their original
   form.
+
+## Conditional section — History
+
+Present only when a change is worth remembering. It is the one place a module's
+documents record the past; `INTENT.md` and the code never do.
+
+```markdown
+## History
+
+- <ISO date> — <what the contract decided or reversed, and why>
+```
+
+Newest entry first, below the contract sections and above `## Last Updated`.
+`## Last Updated` names the most recent change; this section keeps the earlier
+ones still worth carrying, and an entry that no longer informs a present
+decision is dropped rather than archived deeper. An entry accompanies the
+contract change that produced it — an edit that only appends one is the
+append-only pattern the validator rejects.
 
 ## Conditional section — Boundary Exemptions
 

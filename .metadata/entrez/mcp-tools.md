@@ -2,14 +2,14 @@
 
 도메인 무지·stateless 실행 레이어. **5종**(+ `paper_search` 대량용 async 트리오). 등록은 `src/mcp/server/lifecycle/createServer.ts`에서 `server.registerTool(name, {description, inputSchema, annotations}, wrapHandler(handler))` (deilen 패턴). `inputSchema`는 `src/types/`의 **zod** 로 정의하고 도구 입력 검증에 재사용한다. **모든 외부 HTTP는 `core/httpClient` 경유**(핸들러에서 `fetch` 직접 호출 금지) — atlassian httpClient 차용(fetch + retry + 429 backoff + **auto-POST** + **SSRF** eutils allowlist). 문자열 리터럴은 전부 `types/enums.ts`(`as const`)·`constants/{messages,defaults,paths}.ts`에서 import(인라인 금지).
 
-| 도구 | 핸들러 | 역할 |
-|------|--------|------|
-| `paper_search` | `tools/paperSearch/paperSearch.ts` | ESearch(count probe)→segment→union→dedup (동기·소량) |
-| `paper_search_start` / `_status` / `_results` | `tools/paperSearch/operations/{startJob,pollJob,readJob}.ts` | 대량 검색 async job (start→status 폴링→results) |
-| `mesh_lookup` | `tools/meshLookup/meshLookup.ts` | MeSH Descriptor/SCR/entry 매핑 (`db=mesh`) |
-| `fetch_fulltext` | `tools/fetchFulltext/fetchFulltext.ts` | PMC OA 본문(PDF/XML/TAR) 다운로드 |
-| `setup` | `tools/setup/setup.ts` | web UI 설정 (상세 [setup.md](./setup.md)) |
-| `auth_check` | `tools/authCheck/authCheck.ts` | config 확인 + EInfo 도달성 + rate 표시 |
+| 도구                                          | 핸들러                                                       | 역할                                                 |
+| --------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
+| `paper_search`                                | `tools/paperSearch/paperSearch.ts`                           | ESearch(count probe)→segment→union→dedup (동기·소량) |
+| `paper_search_start` / `_status` / `_results` | `tools/paperSearch/operations/{startJob,pollJob,readJob}.ts` | 대량 검색 async job (start→status 폴링→results)      |
+| `mesh_lookup`                                 | `tools/meshLookup/meshLookup.ts`                             | MeSH Descriptor/SCR/entry 매핑 (`db=mesh`)           |
+| `fetch_fulltext`                              | `tools/fetchFulltext/fetchFulltext.ts`                       | PMC OA 본문(PDF/XML/TAR) 다운로드                    |
+| `setup`                                       | `tools/setup/setup.ts`                                       | web UI 설정 (상세 [setup.md](./setup.md))            |
+| `auth_check`                                  | `tools/authCheck/authCheck.ts`                               | config 확인 + EInfo 도달성 + rate 표시               |
 
 > **enum 정본** `src/types/enums.ts`: `Db`·`FetchMode`·`CapStrategy`·`QueryRole`·`Breadth`·`DateField`·`DateType`·`SortOrder`·`RecordField`·`FulltextFormat`·`UnavailableReason`·`OaStatus`·`MeshMatch`·`JobStatus`·`ExpansionSource`·`RateLimit`·`ErrorCode`. 내부 어댑터 조립용: `EutilFn`·`RetMode`·`HttpMethod`·`FieldTag`. 아래 TS 인터페이스는 모두 이 enum을 참조한다. 검색식 **본문**(`SearchQuery.term`)은 데이터이므로 enum 아님(예외 — 코드 조립용 `FieldTag` 만 상수).
 
@@ -23,32 +23,32 @@ agent가 생성한 `QueryRole` 다중 검색식(`queries[]`)을 받아 **결정�
 
 ```ts
 interface PaperSearchInput {
-  queries: SearchQuery[];          // agent가 생성한 QueryRole 다중 검색식 (1+)
-  db?: Db;                         // 기본 Db.PUBMED (단일 db)
-  fetchMode?: FetchMode;           // IDS_ONLY | SUMMARY | ABSTRACTS | FULL, 기본 SUMMARY
-  capStrategy?: CapStrategy;       // WARN | DATE_SEGMENT | ABORT, 기본 DATE_SEGMENT
-  dateRange?: DateRange;           // 검색 한정 (segmentation 과 별개)
-  dateField?: DateField;           // 10k segmentation 기준 필드, 기본 DateField.PUBLICATION(dp)
-  maxRecords?: number;             // operationBudget: union 상한 (초과 시 partial=true)
-  batchSize?: number;              // EFetch/ESummary 배치, 기본 200 (실무 200~500)
-  fields?: RecordField[];          // PaperRecord 투영 (미지정=fetchMode 기본 집합)
-  sort?: SortOrder;                // RELEVANCE | PUB_DATE | FIRST_AUTHOR ...
+  queries: SearchQuery[]; // agent가 생성한 QueryRole 다중 검색식 (1+)
+  db?: Db; // 기본 Db.PUBMED (단일 db)
+  fetchMode?: FetchMode; // IDS_ONLY | SUMMARY | ABSTRACTS | FULL, 기본 SUMMARY
+  capStrategy?: CapStrategy; // WARN | DATE_SEGMENT | ABORT, 기본 DATE_SEGMENT
+  dateRange?: DateRange; // 검색 한정 (segmentation 과 별개)
+  dateField?: DateField; // 10k segmentation 기준 필드, 기본 DateField.PUBLICATION(dp)
+  maxRecords?: number; // operationBudget: union 상한 (초과 시 partial=true)
+  batchSize?: number; // EFetch/ESummary 배치, 기본 200 (실무 200~500)
+  fields?: RecordField[]; // PaperRecord 투영 (미지정=fetchMode 기본 집합)
+  sort?: SortOrder; // RELEVANCE | PUB_DATE | FIRST_AUTHOR ...
   includeQueryTranslation?: boolean; // PubMed QueryTranslation 포함, 기본 true
-  cursor?: string;                 // ids_only 페이지네이션 토큰 (대량 결과 분할 수신)
+  cursor?: string; // ids_only 페이지네이션 토큰 (대량 결과 분할 수신)
 }
 
 interface SearchQuery {
-  term: string;                    // PubMed 검색식 본문 (데이터; enum 아님)
-  role: QueryRole;                 // ATM_BROAD | MESH_EXPLODED | MESH_NOEXP | TIAB_SYNONYM | ALL_FIELDS | SIMILAR
-  breadth?: Breadth;               // BROAD | NARROW (recall 게이트 참고)
-  rationale?: string;              // agent 근거 (SearchManifest audit 용)
-  seedPmids?: string[];            // role=SIMILAR 일 때 ELink Similar Articles seed
+  term: string; // PubMed 검색식 본문 (데이터; enum 아님)
+  role: QueryRole; // ATM_BROAD | MESH_EXPLODED | MESH_NOEXP | TIAB_SYNONYM | ALL_FIELDS | SIMILAR
+  breadth?: Breadth; // BROAD | NARROW (recall 게이트 참고)
+  rationale?: string; // agent 근거 (SearchManifest audit 용)
+  seedPmids?: string[]; // role=SIMILAR 일 때 ELink Similar Articles seed
 }
 
 interface DateRange {
-  from?: string;                   // "YYYY/MM/DD" | "YYYY"
+  from?: string; // "YYYY/MM/DD" | "YYYY"
   to?: string;
-  type?: DateType;                 // pdat | edat | mdat (datetype 파라미터)
+  type?: DateType; // pdat | edat | mdat (datetype 파라미터)
 }
 ```
 
@@ -56,46 +56,46 @@ interface DateRange {
 
 ```ts
 interface PaperSearchOutput {
-  per_query: PerQueryResult[];     // 각 검색식 개별 통계 (count·translation·capped)
-  union: UnionResult;              // 합집합·dedup 결과
-  segments: DateSegment[];         // 10k 초과로 분할된 날짜 버킷
-  warnings: SearchWarning[];       // cap·espell·lint 경고 (비치명)
-  errors: SearchError[];           // 치명·재시도불가 오류
-  partial: boolean;                // maxRecords/budget/실패로 전수 미달성
-  missing_pmids: string[];         // ID는 확보했으나 메타 fetch 실패한 PMID
-  failed_batches: FailedBatch[];   // 배치 단위 실패 (부분 복구 후 잔여)
+  per_query: PerQueryResult[]; // 각 검색식 개별 통계 (count·translation·capped)
+  union: UnionResult; // 합집합·dedup 결과
+  segments: DateSegment[]; // 10k 초과로 분할된 날짜 버킷
+  warnings: SearchWarning[]; // cap·espell·lint 경고 (비치명)
+  errors: SearchError[]; // 치명·재시도불가 오류
+  partial: boolean; // maxRecords/budget/실패로 전수 미달성
+  missing_pmids: string[]; // ID는 확보했으나 메타 fetch 실패한 PMID
+  failed_batches: FailedBatch[]; // 배치 단위 실패 (부분 복구 후 잔여)
   reproducibility: ReproducibilityRef; // SearchManifest 참조 (재현·디버깅)
-  cursor?: string;                 // 다음 페이지 토큰 (있으면 미완)
+  cursor?: string; // 다음 페이지 토큰 (있으면 미완)
 }
 
 interface PerQueryResult {
   query: string;
   query_role: QueryRole;
-  count: number;                   // ESearch Count (probe 결과)
-  translation?: string;            // PubMed QueryTranslation (ATM 변환 결과)
-  capped: boolean;                 // Count > 10000 (10k 상한 초과)
-  segmented: boolean;              // 이 검색식이 날짜 분할로 처리됨
-  retrieved: number;               // 실제 retrieve 한 건수
+  count: number; // ESearch Count (probe 결과)
+  translation?: string; // PubMed QueryTranslation (ATM 변환 결과)
+  capped: boolean; // Count > 10000 (10k 상한 초과)
+  segmented: boolean; // 이 검색식이 날짜 분할로 처리됨
+  retrieved: number; // 실제 retrieve 한 건수
 }
 
 interface UnionResult {
   records: PaperRecord[];
-  total_unique: number;            // dedup 후 유일 레코드 수
-  dedup_collisions: number;        // 복합키 충돌로 병합된 건수
+  total_unique: number; // dedup 후 유일 레코드 수
+  dedup_collisions: number; // 복합키 충돌로 병합된 건수
 }
 
 interface PaperRecord {
-  pmid: string;                    // primary key (PubMed 내부 dedup 기준)
-  doi?: string;                    // 형제 plugin 병합 시 secondary key
-  pmcid?: string;                  // PMC 본문 연결 (fetch_fulltext 입력)
+  pmid: string; // primary key (PubMed 내부 dedup 기준)
+  doi?: string; // 형제 plugin 병합 시 secondary key
+  pmcid?: string; // PMC 본문 연결 (fetch_fulltext 입력)
   title: string;
-  abstract?: string;               // fetchMode ABSTRACTS | FULL 일 때만
-  authors: Author[];               // 구조화 (문자열 합치기 금지)
+  abstract?: string; // fetchMode ABSTRACTS | FULL 일 때만
+  authors: Author[]; // 구조화 (문자열 합치기 금지)
   journal?: string;
   year?: number;
-  mesh?: string[];                 // MeSH descriptor 목록
-  hit_by: string[];                // 이 레코드를 맞춘 SearchQuery.term[]
-  query_role: QueryRole[];         // 맞춘 role[] (recall 기여 추적)
+  mesh?: string[]; // MeSH descriptor 목록
+  hit_by: string[]; // 이 레코드를 맞춘 SearchQuery.term[]
+  query_role: QueryRole[]; // 맞춘 role[] (recall 기여 추적)
   expansion_source?: ExpansionSource; // SIMILAR 등 확장 경유 시 출처 표시
 }
 
@@ -104,26 +104,40 @@ interface Author {
   foreName?: string;
   initials?: string;
   orcid?: string;
-  collective?: string;             // CollectiveName (단체 저자)
+  collective?: string; // CollectiveName (단체 저자)
 }
 
 interface DateSegment {
-  field: DateField;                // 분할 기준 (dp | edat | crdt)
+  field: DateField; // 분할 기준 (dp | edat | crdt)
   from: string;
   to: string;
-  count: number;                   // 이 버킷의 ESearch Count
-  capped: boolean;                 // 버킷이 또 10k 초과 (재귀 분할 필요)
+  count: number; // 이 버킷의 ESearch Count
+  capped: boolean; // 버킷이 또 10k 초과 (재귀 분할 필요)
 }
 
-interface SearchWarning { code: string; message: string; query_role?: QueryRole; }
-interface SearchError { code: ErrorCode; message: string; retryable: boolean; query?: string; }
-interface FailedBatch { retstart: number; retmax: number; pmidCount: number; reason: string; }
+interface SearchWarning {
+  code: string;
+  message: string;
+  query_role?: QueryRole;
+}
+interface SearchError {
+  code: ErrorCode;
+  message: string;
+  retryable: boolean;
+  query?: string;
+}
+interface FailedBatch {
+  retstart: number;
+  retmax: number;
+  pmidCount: number;
+  reason: string;
+}
 
 interface ReproducibilityRef {
-  manifestPath: string;            // SearchManifest(JSON) 위치 — spec.md 참조
-  searchPlanVersion: string;       // 검색 계획 버전
-  fetchedPmidChecksum: string;     // retrieve 한 PMID 집합 체크섬 (snapshot)
-  webEnv?: string;                 // History WebEnv (~1시간 만료; 재현은 checksum 우선)
+  manifestPath: string; // SearchManifest(JSON) 위치 — spec.md 참조
+  searchPlanVersion: string; // 검색 계획 버전
+  fetchedPmidChecksum: string; // retrieve 한 PMID 집합 체크섬 (snapshot)
+  webEnv?: string; // History WebEnv (~1시간 만료; 재현은 checksum 우선)
   queryKey?: string;
 }
 ```
@@ -147,24 +161,34 @@ interface ReproducibilityRef {
 수천~만 건은 MCP 동기 타임아웃을 넘기므로 **job** 으로 분리한다(동기 핸들러는 소량 fast-path). `core/searchJob` 가 레지스트리·진행률·cursor 관리.
 
 ```ts
-type PaperSearchStartInput = PaperSearchInput;          // 동일 입력
+type PaperSearchStartInput = PaperSearchInput; // 동일 입력
 interface PaperSearchStartOutput {
   jobId: string;
-  status: JobStatus;                                    // 보통 QUEUED
-  estimate?: { totalCount: number; segments: number };  // count_probe 기반 추정
+  status: JobStatus; // 보통 QUEUED
+  estimate?: { totalCount: number; segments: number }; // count_probe 기반 추정
 }
 
-interface PaperSearchStatusInput { jobId: string; }
+interface PaperSearchStatusInput {
+  jobId: string;
+}
 interface PaperSearchStatusOutput {
   jobId: string;
-  status: JobStatus;                                    // QUEUED | RUNNING | SUCCEEDED | PARTIAL | FAILED | CANCELLED
-  progress?: { fetched: number; total: number; currentSegment?: number; segments: number };
+  status: JobStatus; // QUEUED | RUNNING | SUCCEEDED | PARTIAL | FAILED | CANCELLED
+  progress?: {
+    fetched: number;
+    total: number;
+    currentSegment?: number;
+    segments: number;
+  };
   partial?: boolean;
   error?: SearchError;
 }
 
-interface PaperSearchResultsInput { jobId: string; cursor?: string; }
-type PaperSearchResultsOutput = PaperSearchOutput;      // 동기와 동일 페이로드 (cursor 로 분할 수신)
+interface PaperSearchResultsInput {
+  jobId: string;
+  cursor?: string;
+}
+type PaperSearchResultsOutput = PaperSearchOutput; // 동기와 동일 페이로드 (cursor 로 분할 수신)
 ```
 
 - 진행률은 MCP progress 로도 피드백(Dispatcher 가 사용자에게 표시).
@@ -179,24 +203,30 @@ type PaperSearchResultsOutput = PaperSearchOutput;      // 동기와 동일 페�
 ```ts
 interface MeshLookupInput {
   terms: string[];
-  includeScopeNote?: boolean;      // scopeNote 포함, 기본 true
-  includeScr?: boolean;            // Supplementary Concept Record 매핑 포함, 기본 true
+  includeScopeNote?: boolean; // scopeNote 포함, 기본 true
+  includeScr?: boolean; // Supplementary Concept Record 매핑 포함, 기본 true
 }
 
-interface MeshLookupOutput { mappings: MeshMapping[]; }
+interface MeshLookupOutput {
+  mappings: MeshMapping[];
+}
 
 interface MeshMapping {
-  input: string;                   // 원 용어
-  matched: MeshMatch;              // DESCRIPTOR | SCR | ENTRY_TERM | NONE
+  input: string; // 원 용어
+  matched: MeshMatch; // DESCRIPTOR | SCR | ENTRY_TERM | NONE
   descriptorName?: string;
-  descriptorUi?: string;           // MeSH UI (예: "D000086382")
-  treeNumbers?: string[];          // 계층 트리 번호 (explosion 범위 판단)
-  entryTerms?: string[];           // 동의어·진입어 (tiab 합성 재료)
+  descriptorUi?: string; // MeSH UI (예: "D000086382")
+  treeNumbers?: string[]; // 계층 트리 번호 (explosion 범위 판단)
+  entryTerms?: string[]; // 동의어·진입어 (tiab 합성 재료)
   scopeNote?: string;
-  scrMappings?: ScrMapping[];      // SCR → 매핑 Descriptor (보충개념)
+  scrMappings?: ScrMapping[]; // SCR → 매핑 Descriptor (보충개념)
 }
 
-interface ScrMapping { scrName: string; scrUi: string; mappedDescriptors: string[]; }
+interface ScrMapping {
+  scrName: string;
+  scrUi: string;
+  mappedDescriptors: string[];
+}
 ```
 
 - `mesh` 는 **MCP 로만** 노출(별도 스킬 없음). agent 의 생성 모드가 직접 호출.
@@ -210,10 +240,10 @@ PMC Open Access 본문을 다운로드. 흐름: `ids[]`(PMID/PMCID 혼재 허용
 
 ```ts
 interface FetchFulltextInput {
-  ids: string[];                   // PMID 또는 PMCID (혼재 허용)
-  formats?: FulltextFormat[];      // PDF | XML | TAR, 기본 [FulltextFormat.PDF]
-  outDir?: string;                 // 저장 경로 (미지정=config 기본)
-  overwrite?: boolean;             // 기존 파일 덮어쓰기, 기본 false
+  ids: string[]; // PMID 또는 PMCID (혼재 허용)
+  formats?: FulltextFormat[]; // PDF | XML | TAR, 기본 [FulltextFormat.PDF]
+  outDir?: string; // 저장 경로 (미지정=config 기본)
+  overwrite?: boolean; // 기존 파일 덮어쓰기, 기본 false
 }
 
 interface FetchFulltextOutput {
@@ -226,16 +256,16 @@ interface DownloadedItem {
   pmid?: string;
   format: FulltextFormat;
   path: string;
-  sha256: string;                  // 무결성·재현
+  sha256: string; // 무결성·재현
   bytes: number;
-  oaStatus: OaStatus;              // oa.fcgi 판별 결과
-  license?: string;                // OA license (예: "CC BY") — ⚠️ PMCID≠재배포 가능, 확인 필수
+  oaStatus: OaStatus; // oa.fcgi 판별 결과
+  license?: string; // OA license (예: "CC BY") — ⚠️ PMCID≠재배포 가능, 확인 필수
 }
 
 interface UnavailableItem {
-  id: string;                      // 입력 id (PMID/PMCID)
-  reason: UnavailableReason;       // NO_PMCID | NOT_OA | NOT_FOUND | FETCH_FAILED
-  format?: FulltextFormat;         // per-format 실패 시 해당 포맷
+  id: string; // 입력 id (PMID/PMCID)
+  reason: UnavailableReason; // NO_PMCID | NOT_OA | NOT_FOUND | FETCH_FAILED
+  format?: FulltextFormat; // per-format 실패 시 해당 포맷
   links: { doi?: string; publisher?: string }; // 비OA LinkOut/DOI 대체 링크
 }
 ```
@@ -248,17 +278,24 @@ interface UnavailableItem {
 ## `setup` / `auth_check`
 
 ```ts
-interface SetupInput { mode?: "ui" | "headless"; } // 상세 절차·UI 는 setup.md
-interface SetupOutput { url?: string; status: "serving" | "saved"; }
+interface SetupInput {
+  mode?: "ui" | "headless";
+} // 상세 절차·UI 는 setup.md
+interface SetupOutput {
+  url?: string;
+  status: "serving" | "saved";
+}
 // api_key → credentials.json (0o600), 그 외(tool·email·기본값) → config.json
 
-interface AuthCheckInput { probeEInfo?: boolean; }   // 기본 true
+interface AuthCheckInput {
+  probeEInfo?: boolean;
+} // 기본 true
 interface AuthCheckOutput {
-  reachable: boolean;              // EInfo 도달 성공 여부
-  hasApiKey: boolean;              // 키 존재만 (값 노출 금지)
-  rateLimit: RateLimit;            // RATE_3PS(키 없음) | RATE_10PS(키 있음)
-  toolEmailConfigured: boolean;    // tool+email 필수 파라미터 구성 여부
-  dbList?: string[];               // EInfo 가 반환한 db 목록
+  reachable: boolean; // EInfo 도달 성공 여부
+  hasApiKey: boolean; // 키 존재만 (값 노출 금지)
+  rateLimit: RateLimit; // RATE_3PS(키 없음) | RATE_10PS(키 있음)
+  toolEmailConfigured: boolean; // tool+email 필수 파라미터 구성 여부
+  dbList?: string[]; // EInfo 가 반환한 db 목록
 }
 ```
 
@@ -268,13 +305,13 @@ interface AuthCheckOutput {
 
 ## 도구 annotations
 
-| 도구 | readOnly | destructive | idempotent | async |
-|------|:-:|:-:|:-:|:-:|
-| `paper_search` | true | false | false | ✅(대량) |
-| `mesh_lookup` | true | false | true | false |
-| `fetch_fulltext` | false | false | true | 선택 |
-| `setup` | false | false | false | false |
-| `auth_check` | true | false | true | false |
+| 도구             | readOnly | destructive | idempotent |  async   |
+| ---------------- | :------: | :---------: | :--------: | :------: |
+| `paper_search`   |   true   |    false    |   false    | ✅(대량) |
+| `mesh_lookup`    |   true   |    false    |    true    |  false   |
+| `fetch_fulltext` |  false   |    false    |    true    |   선택   |
+| `setup`          |  false   |    false    |   false    |  false   |
+| `auth_check`     |   true   |    false    |    true    |  false   |
 
 - `paper_search_start`/`_status`/`_results` 는 `paper_search` 의 async 표면 — annotations 상속(`_status`/`_results` 는 readOnly·idempotent, `_start` 는 비idempotent).
 - `paper_search` 는 readOnly(서버 상태 불변)이나 union 비결정 입력 순서·History 만료로 **비idempotent**.
@@ -293,7 +330,7 @@ interface AuthCheckOutput {
 - **retmax 명시 필수**: 모든 호출에 명시(기본 20 의존 금지).
 - **batchSize**: EFetch/ESummary 실무 200~500(retmax 10000 가능하나 XML 크기·timeout 위험).
 - **대량작업 시간대**: 미 동부 21:00~05:00 또는 주말 권장(NCBI 가이드).
-- **EutilFn/RetMode/HttpMethod/FieldTag** 등 어댑터 조립 상수는 `enums.ts`. db·필드·제약 본문은 lazy `_shared/eutils.md`.
+- **EutilFn/RetMode/HttpMethod/FieldTag** 등 어댑터 조립 상수는 `enums.ts`. db·필드·제약 본문은 lazy `.shared/eutils.md`.
 
 ## 보안
 

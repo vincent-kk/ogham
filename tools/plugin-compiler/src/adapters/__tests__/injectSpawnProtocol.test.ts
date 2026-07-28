@@ -75,18 +75,18 @@ describe("injectSpawnProtocol", () => {
       "cross-review/SKILL.md",
       "filid",
     );
-    expect(depth1).toContain("`../_shared/personas/<id>.md`");
+    expect(depth1).toContain("`../.shared/personas/<id>.md`");
 
     const depth2 = injectSpawnProtocol(
       FRONTMATTER,
       "a/references/tools.md",
       "filid",
     );
-    expect(depth2).toContain("`../../_shared/personas/<id>.md`");
+    expect(depth2).toContain("`../../.shared/personas/<id>.md`");
 
     const depth0 = injectSpawnProtocol(FRONTMATTER, "top.md", "filid");
-    expect(depth0).toContain("`_shared/personas/<id>.md`");
-    expect(depth0).not.toContain("`../_shared/personas");
+    expect(depth0).toContain("`.shared/personas/<id>.md`");
+    expect(depth0).not.toContain("`../.shared/personas");
   });
 
   it("names the plugin in the injected rule", () => {

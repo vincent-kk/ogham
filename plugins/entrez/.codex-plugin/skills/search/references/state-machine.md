@@ -50,4 +50,4 @@ Terminate recall = `recallIter ≤ 4` AND (growth <5% OR cap OR user stop) AND b
 - Agent repeats the same broad query: force a different `QueryRole`.
 - 429 streak past `rateRetry`: `FAILED` (suggest off-peak: US Eastern 21:00–05:00 / weekends).
 
-Methodology SSoT: `../../_shared/query-strategy.md` (generation) and `../../_shared/rerank.md` (rerank). Tool contracts: `../../_shared/mcp-tools.md`.
+Methodology SSoT: `../../.shared/query-strategy.md` (generation) and `../../.shared/rerank.md` (rerank). Tool contracts: `../../.shared/mcp-tools.md`.

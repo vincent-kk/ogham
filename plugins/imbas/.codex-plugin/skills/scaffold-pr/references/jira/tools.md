@@ -4,7 +4,7 @@
 
 | Operation                                                     | Usage                                          |
 | ------------------------------------------------------------- | ---------------------------------------------- |
-| [`[OP: get_issue]`](../../../_shared/operations/get_issue.md) | Fetch issue details including `subtasks` array |
+| [`[OP: get_issue]`](../../../.shared/operations/get_issue.md) | Fetch issue details including `subtasks` array |
 
 The LLM resolves which tool to use at runtime. Read the linked operation file for REST fallback details.
 

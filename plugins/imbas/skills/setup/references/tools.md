@@ -14,10 +14,10 @@
 
 | Operation                                                                          | Usage                                      |
 | ---------------------------------------------------------------------------------- | ------------------------------------------ |
-| [`[OP: get_projects]`](../../_shared/operations/get_projects.md)                   | List available Jira projects for selection |
-| [`[OP: get_issue_types]`](../../_shared/operations/get_issue_types.md)             | Fetch issue types for selected project     |
-| [`[OP: get_issue_type_fields]`](../../_shared/operations/get_issue_type_fields.md) | Fetch required fields per issue type       |
-| [`[OP: get_link_types]`](../../_shared/operations/get_link_types.md)               | Fetch available issue link types           |
+| [`[OP: get_projects]`](../../.shared/operations/get_projects.md)                   | List available Jira projects for selection |
+| [`[OP: get_issue_types]`](../../.shared/operations/get_issue_types.md)             | Fetch issue types for selected project     |
+| [`[OP: get_issue_type_fields]`](../../.shared/operations/get_issue_type_fields.md) | Fetch required fields per issue type       |
+| [`[OP: get_link_types]`](../../.shared/operations/get_link_types.md)               | Fetch available issue link types           |
 
 The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
 
@@ -33,7 +33,7 @@ The LLM resolves which tool to use at runtime. Read the linked operation files f
 
 | Tool                                                         | Source    | Usage                                                    |
 | ------------------------------------------------------------ | --------- | -------------------------------------------------------- |
-| [`[OP: auth_check]`](../../_shared/operations/auth_check.md) | Atlassian | Verify Atlassian connectivity and retrieve user identity |
+| [`[OP: auth_check]`](../../.shared/operations/auth_check.md) | Atlassian | Verify Atlassian connectivity and retrieve user identity |
 | `which gh`                                                   | Bash      | Check if GitHub CLI is installed                         |
 | `gh auth status`                                             | Bash      | Check GitHub CLI authentication status                   |
 

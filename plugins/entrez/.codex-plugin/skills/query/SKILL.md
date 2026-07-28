@@ -19,13 +19,13 @@ spawns a subagent with `subagent_type: "entrez:<id>"` (via `Task` or
 `Agent`), do this instead — everything else about the step stays the same:
 
 1. Spawn a `multi_agent` subagent.
-2. Make its FIRST action to Read `../_shared/personas/<id>.md` and adopt that persona
+2. Make its FIRST action to Read `../.shared/personas/<id>.md` and adopt that persona
    definition in full as its operating contract.
 3. Then carry out the original spawn's prompt, inputs, and output contract
    verbatim.
 
 `<id>` is the text after `entrez:` in the original `subagent_type` value
-(e.g. `subagent_type: "entrez:reviewer"` → read `../_shared/personas/reviewer.md`).
+(e.g. `subagent_type: "entrez:reviewer"` → read `../.shared/personas/reviewer.md`).
 
 # query — PubMed query generation (no search)
 
@@ -39,6 +39,6 @@ Produce a `QueryRole` query set for a topic and stop. This is stage ① only —
 
 ## Notes
 
-- Methodology SSoT: [`query-strategy.md`](../_shared/query-strategy.md) (`_shared`).
-- Field-tag pitfalls (quotes/wildcards reduce recall): [`../_shared/eutils.md`](../_shared/eutils.md).
+- Methodology SSoT: [`query-strategy.md`](../.shared/query-strategy.md) (`.shared`).
+- Field-tag pitfalls (quotes/wildcards reduce recall): [`../.shared/eutils.md`](../.shared/eutils.md).
 - To actually run the queries and get records, use the `search` skill.

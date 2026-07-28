@@ -19,13 +19,13 @@ spawns a subagent with `subagent_type: "entrez:<id>"` (via `Task` or
 `Agent`), do this instead — everything else about the step stays the same:
 
 1. Spawn a `multi_agent` subagent.
-2. Make its FIRST action to Read `../_shared/personas/<id>.md` and adopt that persona
+2. Make its FIRST action to Read `../.shared/personas/<id>.md` and adopt that persona
    definition in full as its operating contract.
 3. Then carry out the original spawn's prompt, inputs, and output contract
    verbatim.
 
 `<id>` is the text after `entrez:` in the original `subagent_type` value
-(e.g. `subagent_type: "entrez:reviewer"` → read `../_shared/personas/reviewer.md`).
+(e.g. `subagent_type: "entrez:reviewer"` → read `../.shared/personas/reviewer.md`).
 
 # search — recall-first literature search (Dispatcher)
 
@@ -51,7 +51,7 @@ Drive the state machine to a terminal state (`COMPLETE` / `FAILED` / `BLOCKED_NE
 
 ## Guards (never loop forever)
 
-`recallIter ≤ 4`, `rateRetry ≤ 5`, and `operationBudget` (maxRequests / maxRecords / maxWallMs). Any breach → `FAILED` with partial results + the manifest. Full transition table: [references/state-machine.md](references/state-machine.md). Modes: [references/modes.md](references/modes.md). Tool contracts: [`../_shared/mcp-tools.md`](../_shared/mcp-tools.md). E-utilities facts (load lazily when debugging queries): [`../_shared/eutils.md`](../_shared/eutils.md).
+`recallIter ≤ 4`, `rateRetry ≤ 5`, and `operationBudget` (maxRequests / maxRecords / maxWallMs). Any breach → `FAILED` with partial results + the manifest. Full transition table: [references/state-machine.md](references/state-machine.md). Modes: [references/modes.md](references/modes.md). Tool contracts: [`../.shared/mcp-tools.md`](../.shared/mcp-tools.md). E-utilities facts (load lazily when debugging queries): [`../.shared/eutils.md`](../.shared/eutils.md).
 
 ## Boundaries
 

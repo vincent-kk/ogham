@@ -38,10 +38,10 @@ Read these from the entrez plugin with the Read tool **at mode entry**; do not c
 
 | Reference                          | When            | Owns                                           |
 | ---------------------------------- | --------------- | ---------------------------------------------- |
-| `skills/_shared/query-strategy.md` | generation      | QueryRole spectrum, ESpell, recall gate (SSoT) |
-| `skills/_shared/rerank.md`         | rerank          | scoring + ordering-only rule (SSoT)            |
-| `skills/_shared/mcp-tools.md`      | either          | tool I/O contracts                             |
-| `skills/_shared/eutils.md`         | query debugging | db / field-tag facts + 🔴 constraints          |
+| `skills/.shared/query-strategy.md` | generation      | QueryRole spectrum, ESpell, recall gate (SSoT) |
+| `skills/.shared/rerank.md`         | rerank          | scoring + ordering-only rule (SSoT)            |
+| `skills/.shared/mcp-tools.md`      | either          | tool I/O contracts                             |
+| `skills/.shared/eutils.md`         | query debugging | db / field-tag facts + 🔴 constraints          |
 
 The methodology body lives in those references, not here — they are the single source of truth. This file is the operating contract.
 

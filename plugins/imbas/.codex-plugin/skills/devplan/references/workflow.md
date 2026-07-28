@@ -9,13 +9,13 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 `Agent`), do this instead — everything else about the step stays the same:
 
 1. Spawn a `multi_agent` subagent.
-2. Make its FIRST action to Read `../../_shared/personas/<id>.md` and adopt that persona
+2. Make its FIRST action to Read `../../.shared/personas/<id>.md` and adopt that persona
    definition in full as its operating contract.
 3. Then carry out the original spawn's prompt, inputs, and output contract
    verbatim.
 
 `<id>` is the text after `imbas:` in the original `subagent_type` value
-(e.g. `subagent_type: "imbas:reviewer"` → read `../../_shared/personas/reviewer.md`).
+(e.g. `subagent_type: "imbas:reviewer"` → read `../../.shared/personas/reviewer.md`).
 
 # Workflow
 

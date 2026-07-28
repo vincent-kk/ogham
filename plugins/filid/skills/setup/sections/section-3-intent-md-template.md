@@ -7,7 +7,7 @@ From the `fractal_scan(detail: "paths")` result and document findings from
 these files; it does not author or overwrite them.
 
 Each proposed INTENT.md must later satisfy
-[`../../_shared/intent-template.md`](../../_shared/intent-template.md) — its
+[`../../.shared/intent-template.md`](../../.shared/intent-template.md) — its
 heading set, the 50-line cap, and the language rule. Do not restate that
 template here; setup proposes the file, and the template is defined once.
 

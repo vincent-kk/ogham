@@ -94,14 +94,14 @@ This prevents fetching the entire issue (100K+ chars) when only a specific comme
 
 ## Auth Recovery
 
-No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth_check.md`](../_shared/auth_check.md).
+No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth-check.md`](../.shared/auth-check.md).
 
 ## References
 
-- `../_shared/auth_check.md` — Pre-flight authentication check
-- `../_shared/error-handling.md` — HTTP error handling protocol
-- `../_shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
-- `../_shared/mcp-tools.md` — Available MCP tools and usage
+- `../.shared/auth-check.md` — Pre-flight authentication check
+- `../.shared/error-handling.md` — HTTP error handling protocol
+- `../.shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
+- `../.shared/mcp-tools.md` — Available MCP tools and usage
 - `tools/<domain>/schema.md` — Domain-specific endpoint schemas (lazy load on demand)
 - `tools/issue/field-formatting.md` — ADF vs Wiki markup, user/date/select field formatting
 - `tools/issue/examples.md` — Issue create and update examples
