@@ -19,8 +19,8 @@ describe('buildMinimalContext', () => {
       rmSync(dir, { recursive: true, force: true });
   });
 
-  const RULE_FILE = 'filid_fca-policy.md';
-  const LEGACY_FILE = 'fca.md';
+  const RULE_FILE = 'filid_fractal-boundaries.md';
+  const LEGACY_FILE = 'filid_fca-policy.md';
 
   function makeProject(options: {
     deployFca: boolean;

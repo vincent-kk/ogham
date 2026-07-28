@@ -41,7 +41,7 @@ const VALID_BODY: SaveBody = {
     adapters: { mode: 'auto', enabled: [] },
     rules: {},
   },
-  ruleDocs: { selections: { 'filid_fca-policy': true }, resync: [] },
+  ruleDocs: { selections: { 'filid_fractal-boundaries': true }, resync: [] },
 };
 
 let handle: SettingsServerInstance | null = null;

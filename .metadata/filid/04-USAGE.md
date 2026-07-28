@@ -75,7 +75,7 @@ yarn filid bench:run      # 벤치마크
 
 ### 생성물 편집 금지
 
-`bridge/`, `public/`, `.codex-plugin/`, 루트 `plugin.json`, `mcp_config.json`, `hooks.json`, `AGENTS.md`, `src/version.ts`는 생성물이다. 손으로 고치지 않고 생성기를 고친다. 특히 루트 `AGENTS.md`의 원본은 `plugins/filid/templates/rules/filid_fca-policy.md`이며, 해시가 `templates/rules/manifest.json`에 기록된다.
+`bridge/`, `public/`, `.codex-plugin/`, 루트 `plugin.json`, `mcp_config.json`, `hooks.json`, `AGENTS.md`, `src/version.ts`는 생성물이다. 손으로 고치지 않고 생성기를 고친다. 특히 루트 `AGENTS.md`의 원본은 `plugins/filid/templates/rules/`의 규칙 문서 4개(`filid_fractal-boundaries.md`, `filid_module-documents.md`, `filid_verification-records.md`, `filid_code-placement.md`)이며, 각각의 해시가 `templates/rules/manifest.json`에 기록된다. Codex는 디렉토리가 아니라 단일 지시 파일만 읽으므로 4개 문서가 `AGENTS.md` 안에서 파일명으로 구분된 marker 구간이 된다.
 
 ---
 

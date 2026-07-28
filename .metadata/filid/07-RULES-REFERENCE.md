@@ -1,6 +1,31 @@
 # 07. FCA-AI 규칙 레퍼런스
 
-> `@ogham/filid` 1.0이 시행하는 모든 규칙, 상수, 임계값의 종합 레퍼런스. 규칙 의미의 원장은 [vnext-redesign-plan.md](./vnext-redesign-plan.md) 이고, 사용자에게 배포되는 canonical 규칙 문서는 `plugins/filid/templates/rules/filid_fca-policy.md` 다.
+> `@ogham/filid` 1.0이 시행하는 모든 규칙, 상수, 임계값의 종합 레퍼런스. 규칙 의미의 원장은 [vnext-redesign-plan.md](./vnext-redesign-plan.md) 이고, 사용자에게 배포되는 canonical 규칙 문서는 `plugins/filid/templates/rules/` 아래 4개다.
+
+---
+
+## 배포되는 규칙 문서
+
+| 문서                            | 담는 규칙                                                                  | 로딩                         |
+| ------------------------------- | -------------------------------------------------------------------------- | ---------------------------- |
+| `filid_fractal-boundaries.md`   | 노드 분류, 진입점 표면, organ 접근·면책, zero-peer, DAG·깊이·pure-function | 상시                         |
+| `filid_module-documents.md`     | INTENT/DETAIL 계약, 50줄 cap, 면책 항목 문법                               | `paths:` INTENT.md/DETAIL.md |
+| `filid_verification-records.md` | spec-document/test-record 역할, 15·32 cap, 세는 법, 계약 링크              | `paths:` 테스트 글롭         |
+| `filid_code-placement.md`       | LCA 배치, 계획 사전·사후조건, 문서 선행 워크플로                           | 상시                         |
+
+4개 모두 `required` 다 — filid 규칙은 부분 채택 대상이 아니라서 `manifest.json` 에 optional 엔트리가
+없고 setup 체크박스 UI 에는 아무것도 렌더되지 않는다.
+
+## 제품 경계
+
+filid 가 소유하는 것: INTENT/DETAIL 문서 계약과 최소 context chain, fractal/organ/pure-function/hybrid
+분류, 진입점 표면·외부 import 경계·의존성 DAG, 최저 공통 fractal 배치와 읽기 전용
+`sourcePath → targetPath` 계획, 검증 문서 역할·파일 cap·분할·계약 링크, FCA 범위 cross-review 증거.
+
+filid 가 소유하지 **않는** 것: 함수 분할, 네이밍, 파일 크기, 순환 복잡도, LCOM4, 커버리지 품질,
+fail-first 실천, 범용 AST 편집, 파일 이동, import rewrite, commit, push, pull request. 앞의 여섯은
+코드 작성 품질 영역이라 seiri 등 별도 규칙 세트가 담당하고, 뒤의 여섯은 실행 행위다 — restructure
+도구는 계획하고 검증할 뿐, 변경은 외부 행위자가 수행한다.
 
 ---
 

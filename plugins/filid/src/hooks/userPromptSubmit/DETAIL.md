@@ -12,6 +12,9 @@
 - `handleUserPromptSubmit(input): HookOutput` — map reset과 turn 증가 후 session-first context 결과를 반환한다.
 - 반환값은 항상 `continue: true`이며 user prompt를 차단하지 않는다.
 - prompt context cache가 이미 존재하면 추가 context 없이 통과한다.
+- 규칙 배포 여부는 대표 규칙 문서 `filid_fractal-boundaries.md` 하나로 판정한다. 4개 규칙 문서는 전부 required이고 한 번의 sync로 함께 배포되므로 대표 문서의 존재가 나머지를 함의한다. 형제 문서는 대표 문서 본문이 지목한다.
+- 대표 문서의 legacy 주소는 `filid_fca-policy.md`(4개 규칙이 대체한 단일 통합 정책 문서) 하나다. 이 주소가 남아 있는 설치본은 upgrade 중간 상태이며 다음 sync 의 owned orphan 스윕이 회수한다. 접두사 이전 이름 `fca.md`는 더 이상 취급하지 않는다 — `syncRuleDocs` 가 손대지 않을 주소를 훅이 active 로 보고하면 안 되기 때문이다.
+- 함께 배포되는 형제 문서는 다른 이름을 가진 적이 없어 legacy 주소가 없다.
 
 ## Acceptance Criteria
 
@@ -27,4 +30,4 @@
 
 ## Last Updated
 
-2026-07-27 — spike banner를 제거한 session-first 1.0 계약으로 재구성했다.
+2026-07-28 — 규칙 문서가 4개로 분할되어 대표 문서 포인터와 legacy 주소 사슬을 계약에 명시했다.

@@ -16,9 +16,9 @@ import {
   syncRuleDocs,
 } from '../../../core/infra/configLoader/configLoader.js';
 
-const REQUIRED_ID = 'filid_fca-policy';
-const REQUIRED_FILE = 'filid_fca-policy.md';
-const LEGACY_FILE = 'fca.md';
+const REQUIRED_ID = 'filid_fractal-boundaries';
+const REQUIRED_FILE = 'filid_fractal-boundaries.md';
+const LEGACY_FILE = 'filid_fca-policy.md';
 const REQUIRED_CONTENT = '# FCA Rules Template';
 
 function sha256(content: string): string {
