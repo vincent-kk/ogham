@@ -145,20 +145,21 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
     );
   }
 
-  it('input.depth takes precedence over config.scan.maxDepth', async () => {
+  it('input.maxDepth takes precedence over config.scan.maxDepth', async () => {
     writeScanConfig(3);
     const result = await handleFractalScan({
       path: tmpRoot,
-      depth: 1,
+      maxDepth: 1,
       detail: FRACTAL_SCAN_DETAILS.FULL,
     });
     const data = getFullData(result);
 
     expect(data.validation.scanOptions?.maxDepth).toBe(1);
+    // The threshold moved; the tree did not. maxDepth is not a traversal limit.
     expect(data.snapshot.tree.depth).toBeGreaterThan(1);
   });
 
-  it('config.scan.maxDepth is used when input.depth is omitted', async () => {
+  it('config.scan.maxDepth is used when input.maxDepth is omitted', async () => {
     writeScanConfig(1);
     const result = await handleFractalScan({
       path: tmpRoot,

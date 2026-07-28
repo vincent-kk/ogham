@@ -32,6 +32,12 @@ export const TOOL_ARTIFACT_TEXT_ENCODING = 'utf8';
 export const TOOL_ARTIFACT_EPHEMERAL = true as const;
 
 export const TOOL_ERROR_DIAGNOSTIC_CODE = 'tool-execution-error';
+/**
+ * Input rejected by the tool's schema. Distinct from execution failure: the
+ * caller can fix this one by resending, and it says nothing about whether the
+ * ecosystem is supported — which is what the shared `unsupported` status means.
+ */
+export const TOOL_INPUT_DIAGNOSTIC_CODE = 'tool-input-invalid';
 export const TOOL_ARTIFACT_DIAGNOSTIC_CODE = 'tool-diagnostics-in-artifact';
 export const TOOL_ARTIFACT_DIAGNOSTIC_MESSAGE =
   'Full diagnostics are available in the referenced artifact.';

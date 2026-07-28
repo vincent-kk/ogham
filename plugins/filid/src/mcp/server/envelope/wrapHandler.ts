@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import { type ZodTypeAny } from 'zod';
 
 import type { McpToolName } from '../../../constants/mcpToolNames.js';
+import { TOOL_INPUT_DIAGNOSTIC_CODE } from '../../../constants/toolEnvelope.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
 
 import { toolError } from './toolError.js';
@@ -31,10 +32,17 @@ export function wrapHandler<Schema extends ZodTypeAny, Summary, Data>(
   | { content: Array<{ type: 'text'; text: string }> }
 > {
   return async (args: unknown, extra?: HandlerExtra) => {
+    // Two failure classes, two diagnostic codes. Sharing one catch reported a
+    // caller's malformed argument with the same code as an engine fault, and
+    // the caller could not tell which one it had hit.
+    let input: z.output<Schema>;
     try {
-      const input = await schema.parseAsync(args);
-      const result = await fn(input, extra);
-      return toolResult(toolName, result);
+      input = await schema.parseAsync(args);
+    } catch (error) {
+      return toolError(error, TOOL_INPUT_DIAGNOSTIC_CODE);
+    }
+    try {
+      return toolResult(toolName, await fn(input, extra));
     } catch (error) {
       return toolError(error);
     }

@@ -23,12 +23,12 @@ export interface ToolSnapshotContext {
 
 export async function createToolSnapshot(
   path: string,
-  depth?: number,
+  maxDepthOverride?: number,
 ): Promise<ToolSnapshotContext> {
   const root = projectRoot(path);
   const loaded = loadConfig(root);
   const config = loaded.config ?? createDefaultConfig();
-  const maxDepth = resolveMaxDepth(config, depth);
+  const maxDepth = resolveMaxDepth(config, maxDepthOverride);
   const rules = getActiveRules(
     loadBuiltinRules(config.rules, config.structure?.additionalAllowedPeers),
   );

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { STRUCTURE_VALIDATION_MODES } from '../../constants/mcpContracts.js';
 import { MCP_TOOL_NAMES, McpToolName } from '../../constants/mcpToolNames.js';
-import { TOOL_ERROR_DIAGNOSTIC_CODE } from '../../constants/toolEnvelope.js';
+import { TOOL_INPUT_DIAGNOSTIC_CODE } from '../../constants/toolEnvelope.js';
 import { createServer } from '../../mcp/server/lifecycle/createServer.js';
 
 const EXPECTED_TOOL_NAMES = [
@@ -108,9 +108,36 @@ describe('Filid 1.0 MCP tool surface', () => {
       const schema = tools.tools.find(
         ({ name }) => name === McpToolName.REVIEW_STATE,
       )?.inputSchema;
-      expect(JSON.stringify(schema)).toContain(
-        JSON.stringify({ type: 'boolean', const: true }),
+      // Match the property, not a JSON substring: field descriptions are part
+      // of the advertised schema and would break an exact-serialization check.
+      expect(schema).toMatchObject({
+        properties: { confirm: { type: 'boolean', const: true } },
+      });
+    } finally {
+      await connection.close();
+    }
+  });
+
+  it('describes every advertised input field of every tool', async () => {
+    const connection = await connectTestClient();
+    try {
+      const { tools } = await connection.client.listTools();
+      const undescribed = tools.flatMap(({ name, inputSchema }) =>
+        Object.entries(
+          (inputSchema.properties ?? {}) as Record<
+            string,
+            { description?: string }
+          >,
+        )
+          .filter(([, property]) => !property.description?.trim())
+          .map(([field]) => `${name}.${field}`),
       );
+
+      // The MCP surface is the whole contract an LLM caller ever sees. A bare
+      // field name is where `maxDepth` got read as a traversal limit.
+      expect(undescribed).toEqual([]);
+      // Guard bites: the sweep actually visited fields.
+      expect(tools).toHaveLength(EXPECTED_TOOL_NAMES.length);
     } finally {
       await connection.close();
     }
@@ -178,8 +205,10 @@ describe('Filid 1.0 MCP tool surface', () => {
         typeof content.text !== 'string'
       )
         throw new Error('expected text content');
+      // A rejected argument is the caller's to fix, and carries its own code —
+      // TOOL_ERROR_DIAGNOSTIC_CODE stays reserved for handler execution faults.
       expect(JSON.parse(content.text)).toMatchObject({
-        diagnostics: [{ code: TOOL_ERROR_DIAGNOSTIC_CODE }],
+        diagnostics: [{ code: TOOL_INPUT_DIAGNOSTIC_CODE }],
       });
     } finally {
       await connection.close();

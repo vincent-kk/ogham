@@ -29,11 +29,50 @@ afterEach(() => {
 
 describe('ecmascript verification adapter', () => {
   it('classifies spec and test files by verification role', async () => {
-    expect(await ecmascriptVerificationAdapter.classify('/p/a.spec.ts')).toBe(
+    const root = project();
+    const spec = write(root, 'a.spec.ts', "it('works', () => {});");
+    const test = write(root, 'a.test.js', "it('works', () => {});");
+
+    expect(await ecmascriptVerificationAdapter.classify(spec)).toBe(
       'spec-document',
     );
-    expect(await ecmascriptVerificationAdapter.classify('/p/a.test.js')).toBe(
+    expect(await ecmascriptVerificationAdapter.classify(test)).toBe(
       'test-record',
+    );
+  });
+
+  it('denies the role to a candidate holding no verification cases', async () => {
+    const root = project();
+    const impostor = write(
+      root,
+      'src/impostor.spec.ts',
+      "import { a } from '../other/internal/deep.js';\nexport const b = a + 1;\n",
+    );
+    write(root, 'src/real.spec.ts', "it('works', () => {});");
+
+    // Renaming production code to *.spec.ts must not buy a boundary exemption.
+    expect(await ecmascriptVerificationAdapter.classify(impostor)).toBe(
+      'unsupported',
+    );
+    expect(await ecmascriptVerificationAdapter.discover(root)).not.toContain(
+      impostor,
+    );
+  });
+
+  it('keeps a candidate whose case count is indeterminate', async () => {
+    const root = project();
+    const dynamic = write(
+      root,
+      'src/dynamic.spec.ts',
+      "it.each(loadRows())('row', () => {});",
+    );
+
+    // Uncountable is not the same as absent.
+    expect(await ecmascriptVerificationAdapter.classify(dynamic)).toBe(
+      'spec-document',
+    );
+    expect(await ecmascriptVerificationAdapter.discover(root)).toContain(
+      dynamic,
     );
   });
 
@@ -114,6 +153,7 @@ describe('ecmascript verification adapter', () => {
         '/* filid:contract AC-delete */',
         "const ignored = 'filid:contract AC-string';",
         '// filid:contract AC-create',
+        "it('holds a case, as a spec-document must', () => {});",
       ].join('\n'),
     );
 

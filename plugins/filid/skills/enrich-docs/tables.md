@@ -7,7 +7,7 @@ contract is in [reference.md](./reference.md).
 
 | Tool                                          | Stage      | Purpose                                          | Input                                                       |
 | --------------------------------------------- | ---------- | ------------------------------------------------ | ----------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_scan`       | Evidence   | Snapshot-backed node paths and document presence | `{ path, detail: "paths", depth? }`                         |
+| `mcp__plugin_filid_tools__fractal_scan`       | Evidence   | Snapshot-backed node paths and document presence | `{ path, detail: "paths", maxDepth? }`                      |
 | `mcp__plugin_filid_tools__context_resolve`    | Evidence   | Minimal owner-to-root document references        | `{ path, targetPath }`                                      |
 | `mcp__plugin_filid_tools__structure_validate` | Validation | Canonical document and node findings             | `{ path, mode: "project", scopes: ["documents", "nodes"] }` |
 

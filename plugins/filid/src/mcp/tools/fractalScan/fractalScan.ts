@@ -11,14 +11,15 @@ import { buildScanResult } from './utils/buildScanResult.js';
 
 export interface FractalScanInput {
   path: string;
-  depth?: number;
+  /** Max-depth RULE threshold override — never a traversal limit. */
+  maxDepth?: number;
   detail?: (typeof FRACTAL_SCAN_DETAILS)[keyof typeof FRACTAL_SCAN_DETAILS];
 }
 
 export async function handleFractalScan(
   input: FractalScanInput,
 ): Promise<ToolPayload<FractalScanSummary, FractalScanData>> {
-  const context = await createToolSnapshot(input.path, input.depth);
+  const context = await createToolSnapshot(input.path, input.maxDepth);
   const validation = validateStructure(context.snapshot, context.rules, {
     maxDepth: context.maxDepth,
   });

@@ -42,6 +42,12 @@
   object JSON Schema로 광고한다.
 - 광고된 제약을 위반한 실제 `tools/call`도 SDK raw error가 아니라
   `isError: true`인 Filid 공통 error envelope를 반환한다.
+- 입력 검증 실패는 `tool-input-invalid`, 핸들러 실행 실패는
+  `tool-execution-error` 진단 코드를 쓴다. 두 실패가 코드를 공유하면 호출자가
+  자기 인자를 고쳐야 하는지 엔진 결함인지 구분할 수 없다.
+- 모든 도구 input schema는 필드마다 `.describe()`를 갖는다. MCP 표면이 LLM
+  호출자에게는 유일한 계약이므로 이름만으로 의미가 서지 않는 필드
+  (`fractal_scan.maxDepth` 같은 규칙 임계값)는 설명이 계약의 일부다.
 
 ### AC-server-lifecycle — host 안전성
 
@@ -49,4 +55,4 @@
 
 ## Last Updated
 
-2026-07-27 — SDK 입력 오류도 공통 envelope로 격리하는 이중 schema 경계를 명시했다.
+2026-07-28 — 입력 오류와 실행 오류의 진단 코드를 분리하고 도구 schema 필드 설명을 계약에 넣었다.

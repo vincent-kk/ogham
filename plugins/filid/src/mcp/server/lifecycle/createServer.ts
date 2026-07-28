@@ -22,59 +22,119 @@ import {
   handleStructureValidate,
   handleVerificationScan,
 } from '../../tools/index.js';
-
+import { wrapHandler } from '../envelope/wrapHandler.js';
 import { handleOpenSettingsTool } from '../handlers/handleOpenSettingsTool.js';
 import { handleProjectInitTool } from '../handlers/handleProjectInitTool.js';
 import { handleRuleDocsSyncTool } from '../handlers/handleRuleDocsSyncTool.js';
 import { deferInputValidation } from '../utils/deferInputValidation.js';
-import { wrapHandler } from '../envelope/wrapHandler.js';
+
+const PROJECT_ROOT_DESCRIPTION =
+  'Absolute path inside the project. The project root is resolved upward from it.';
 
 const PROJECT_INIT_INPUT_SCHEMA = z.object({
-  path: z.string().optional(),
-  language: z.string().optional(),
-  adapterIds: z.array(z.string().min(1)).min(1).optional(),
+  path: z.string().optional().describe(PROJECT_ROOT_DESCRIPTION),
+  language: z
+    .string()
+    .optional()
+    .describe('Output language tag for generated documents, e.g. "ko".'),
+  adapterIds: z
+    .array(z.string().min(1))
+    .min(1)
+    .optional()
+    .describe('Ecosystem adapter IDs to enable, e.g. ["ecmascript"].'),
 });
 
 const RULE_DOCS_SYNC_INPUT_SCHEMA = z.object({
-  action: z.nativeEnum(RULE_DOC_ACTIONS),
-  path: z.string(),
+  action: z
+    .nativeEnum(RULE_DOC_ACTIONS)
+    .describe(
+      'status reports deployment state; manifest lists managed rules; sync writes them.',
+    ),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
   selections: z
     .union([z.record(z.string(), z.boolean()), z.string()])
-    .nullish(),
-  resync: z.union([z.array(z.string()), z.string()]).nullish(),
+    .nullish()
+    .describe('sync only: rule ID to enabled flag. Omit to deploy all.'),
+  resync: z
+    .union([z.array(z.string()), z.string()])
+    .nullish()
+    .describe('sync only: rule IDs to overwrite even when already deployed.'),
 });
 
 const OPEN_SETTINGS_INPUT_SCHEMA = z.object({
-  path: z.string().optional(),
-  waitSeconds: z.number().positive().optional(),
+  path: z.string().optional().describe(PROJECT_ROOT_DESCRIPTION),
+  waitSeconds: z
+    .number()
+    .positive()
+    .optional()
+    .describe('How long to wait for the browser form to be submitted.'),
 });
 
 const FRACTAL_SCAN_INPUT_SCHEMA = z.object({
-  path: z.string(),
-  depth: z.number().int().nonnegative().optional(),
-  detail: z.nativeEnum(FRACTAL_SCAN_DETAILS).optional(),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  maxDepth: z
+    .number()
+    .int()
+    .nonnegative()
+    .optional()
+    .describe(
+      'Overrides the configured max-depth RULE THRESHOLD — not a traversal ' +
+        'limit. The tree is always walked in full; lowering this only makes ' +
+        'more nodes violate the depth rule. Omit it to use the project config.',
+    ),
+  detail: z
+    .nativeEnum(FRACTAL_SCAN_DETAILS)
+    .optional()
+    .describe(
+      'summary (default) returns counts only; paths adds node paths and ' +
+        'classification basis; full adds snapshot evidence.',
+    ),
 });
 
 const CONTEXT_RESOLVE_INPUT_SCHEMA = z.object({
-  path: z.string(),
-  targetPath: z.string(),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  targetPath: z
+    .string()
+    .describe(
+      'Absolute path whose owning fractal and INTENT/DETAIL chain to resolve.',
+    ),
 });
 
 const RESTRUCTURE_PLAN_INPUT_SCHEMA = z.object({
-  path: z.string(),
-  requests: z.array(
-    z.object({
-      sourcePath: z.string(),
-      consumerPaths: z.array(z.string()).optional(),
-      contractIntent: z.nativeEnum(CONTRACT_INTENTS).optional(),
-      organNameHint: z.string().optional(),
-    }),
-  ),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  requests: z
+    .array(
+      z.object({
+        sourcePath: z.string().describe('Absolute path of the unit to place.'),
+        consumerPaths: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Known consumers. Omit to derive them from snapshot evidence.',
+          ),
+        contractIntent: z
+          .nativeEnum(CONTRACT_INTENTS)
+          .optional()
+          .describe(
+            'Whether the unit should land as a child fractal or an organ.',
+          ),
+        organNameHint: z
+          .string()
+          .optional()
+          .describe(
+            'Proposed organ name. Unnamed groups stop the plan for a human.',
+          ),
+      }),
+    )
+    .describe('Placement requests evaluated against one shared snapshot.'),
 });
 
 const STRUCTURE_VALIDATION_COMMON_SCHEMA = {
-  path: z.string(),
-  scopes: z.array(z.nativeEnum(STRUCTURE_VALIDATION_SCOPES)).optional(),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  scopes: z
+    .array(z.nativeEnum(STRUCTURE_VALIDATION_SCOPES))
+    .optional()
+    .describe('Rule scopes to evaluate. Omit to evaluate all six.'),
 };
 
 const STRUCTURE_VALIDATE_INPUT_SCHEMA = z.union([
@@ -97,19 +157,39 @@ const STRUCTURE_VALIDATE_INPUT_SCHEMA = z.union([
 
 const STRUCTURE_VALIDATE_ADVERTISED_INPUT_SCHEMA = z.object({
   ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
-  mode: z.nativeEnum(STRUCTURE_VALIDATION_MODES).optional(),
-  planPath: z.string().optional(),
+  mode: z
+    .nativeEnum(STRUCTURE_VALIDATION_MODES)
+    .optional()
+    .describe(
+      'project (default) validates the tree; the plan modes check a ' +
+        'restructure plan before and after an external actor performs it.',
+    ),
+  planPath: z
+    .string()
+    .optional()
+    .describe('Absolute plan artifact path. Required by both plan modes.'),
 });
 
 const VERIFICATION_SCAN_INPUT_SCHEMA = z.object({
-  path: z.string(),
-  filePaths: z.array(z.string()).optional(),
-  detail: z.nativeEnum(VERIFICATION_SCAN_DETAILS).optional(),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  filePaths: z
+    .array(z.string())
+    .optional()
+    .describe('Restrict the scan to these files. Omit to scan the project.'),
+  detail: z
+    .nativeEnum(VERIFICATION_SCAN_DETAILS)
+    .optional()
+    .describe(
+      'summary (default) returns role counts and caps; files adds per-file evidence.',
+    ),
 });
 
 const REVIEW_STATE_COMMON_SCHEMA = {
-  projectRoot: z.string(),
-  branchName: z.string().min(1),
+  projectRoot: z.string().describe('Absolute project root path.'),
+  branchName: z
+    .string()
+    .min(1)
+    .describe('Branch the review state is keyed by.'),
 };
 
 const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
@@ -138,10 +218,25 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
 
 const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
   ...REVIEW_STATE_COMMON_SCHEMA,
-  action: z.nativeEnum(REVIEW_STATE_ACTIONS),
-  baseRef: z.string().min(1).optional(),
-  force: z.boolean().optional(),
-  confirm: z.literal(true).optional(),
+  action: z
+    .nativeEnum(REVIEW_STATE_ACTIONS)
+    .describe(
+      'prepare opens or resumes a run; checkpoint re-checks source identity; ' +
+        'seal finalizes the verdict; cleanup deletes this branch state.',
+    ),
+  baseRef: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Comparison base ref. Required by prepare.'),
+  force: z
+    .boolean()
+    .optional()
+    .describe('prepare only: discard existing unsealed artifacts first.'),
+  confirm: z
+    .literal(true)
+    .optional()
+    .describe('cleanup only: required, since cleanup deletes artifacts.'),
 });
 
 const MCP_SERVER_INFO = {

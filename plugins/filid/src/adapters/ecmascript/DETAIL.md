@@ -24,6 +24,11 @@
   해석 불가 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - 지원 불가능한 alias·동적 표현은 unsupported/indeterminate evidence를 남긴다.
 - verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
+- verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.**
+  `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도
+  없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을
+  `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은
+  증거가 아니다.
 
 ## API Contracts
 
@@ -67,6 +72,16 @@
 - 동적 table, alias와 알 수 없는 문법은 indeterminate이며 skip, todo와
   property declaration은 각각 1 case다.
 
+### AC-ecmascript-verification-role — 내용이 역할을 확정한다
+
+- `.spec`/`.test` 접미사와 지원 확장자를 가진 파일만 후보가 된다.
+- 후보 중 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`이며
+  `discover()` 결과에서 빠진다 — 따라서 boundary·DAG 면제를 받지 못한다.
+- case를 담은 후보는 종전대로 `.spec` → `spec-document`,
+  `.test` → `test-record`다.
+- count가 `indeterminate`인 후보는 verification으로 남는다. 셀 수 없는 것과
+  없는 것은 다르다.
+
 ## Last Updated
 
-2026-07-28 — config entry override를 module이 아닌 kind로 분리해 분류 입력에서 제외했다.
+2026-07-28 — verification role 판정을 접미사 후보 + 내용 확정으로 좁혀 개명만으로 얻는 면제를 없앴다.

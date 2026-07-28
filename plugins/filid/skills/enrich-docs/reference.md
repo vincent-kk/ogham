@@ -12,15 +12,18 @@ inside a project containing `.filid/config.json`, and call:
 mcp__plugin_filid_tools__fractal_scan({
   path: "<target-path>",
   detail: "paths",
-  depth: <optional-depth>
+  maxDepth: <optional --depth value>
 })
 ```
+
+The skill's `--depth` flag maps to the tool's `maxDepth` input — the flag keeps
+its short name, the tool input says what it does.
 
 The response is a common Filid envelope. Stop before editing when `status` is not
 `ok`; report its diagnostics instead of treating incomplete adapter evidence as a
 clean snapshot.
 
-The snapshot tree is always built to full depth — `--depth` sets the `max-depth`
+The snapshot tree is always built to full depth — `maxDepth` sets the `max-depth`
 rule threshold, not a traversal limit — so on a large project this payload can
 exceed the inline envelope budget, in which case it is persisted and `data` is
 not inline. Treat a returned artifact as the canonical full payload for this call

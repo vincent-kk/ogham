@@ -17,21 +17,10 @@ verdict.
 
 ## References
 
-Resolve files relative to this `SKILL.md`:
-
-- `specification.md` — the public contract specification: requirements the run
-  must satisfy and the review-report frontmatter contract;
-- `contracts.md` — scope, state lifecycle, evidence, opinions, arbitration,
-  verdict derivation;
-- `phases/evidence.md` — exact snapshot-backed MCP calls and evidence layouts;
-- `reviewers/contract.md`, `reviewers/structure.md`,
-  `reviewers/verification.md` — independent perspectives;
-- `reviewers/adversarial.md` — candidate arbitration;
-- `templates.md` — canonical artifacts;
-- `reference.md` — index of the files above and the tool-purpose table;
-- `calibration/` — reviewer regression fixtures.
-
-Read `specification.md`, `contracts.md`, and `templates.md` before starting.
+Resolve files relative to this `SKILL.md`. Read `specification.md`,
+`contracts.md`, and `templates.md` before starting. `reference.md` indexes every
+other file in this skill and maps each task to the file that answers it; the
+steps below name the file each one needs at its point of use.
 
 ## Scope
 

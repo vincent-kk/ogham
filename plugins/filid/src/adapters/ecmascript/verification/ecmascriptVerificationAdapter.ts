@@ -1,32 +1,12 @@
 import { readFileSync } from 'node:fs';
-import { basename, extname } from 'node:path';
 
-import type {
-  VerificationAdapter,
-  VerificationRole,
-} from '../../../types/adapters.js';
-import {
-  ECMASCRIPT_ADAPTER_ID,
-  SOURCE_EXTENSIONS,
-} from '../structure/ecmascriptConventions.js';
+import type { VerificationAdapter } from '../../../types/adapters.js';
+import { ECMASCRIPT_ADAPTER_ID } from '../structure/ecmascriptConventions.js';
 import { ecmascriptStructureAdapter } from '../structure/ecmascriptStructureAdapter.js';
 
+import { classifyVerificationPath } from './classifyVerificationPath.js';
 import { countSemanticCases } from './countSemanticCases.js';
 import { extractContractGroupIds } from './extractContractGroupIds.js';
-
-function classifyVerificationPath(
-  filePath: string,
-): VerificationRole | 'unsupported' {
-  const extension = extname(filePath);
-  if (
-    !SOURCE_EXTENSIONS.includes(extension as (typeof SOURCE_EXTENSIONS)[number])
-  )
-    return 'unsupported';
-  const stem = basename(filePath, extension);
-  if (stem.endsWith('.spec')) return 'spec-document';
-  if (stem.endsWith('.test')) return 'test-record';
-  return 'unsupported';
-}
 
 export const ecmascriptVerificationAdapter: VerificationAdapter = {
   id: ECMASCRIPT_ADAPTER_ID,

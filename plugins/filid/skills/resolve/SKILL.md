@@ -44,7 +44,7 @@ Use `data.reviewDirectory` as `REVIEW_DIR`; **never derive a directory name.**
 
 ## Step 2 — Read the fix requests
 
-Parse each `## FIX-NNN:` block from `fix-requests.md`. Every block carries Severity, Perspective, Path, Rule, Evidence, Consequence, and Recommended Action (schema in the cross-review `templates.md`).
+Parse each `## FIX-NNN:` block from `fix-requests.md`. Every block carries Severity, Perspective, Path, Rule, Evidence, Consequence, and Recommended Action (schema in `../cross-review/templates.md`, which produced the file).
 
 Do not invent items and do not merge two findings into one decision.
 

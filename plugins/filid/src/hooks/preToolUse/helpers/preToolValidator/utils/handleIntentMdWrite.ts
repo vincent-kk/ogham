@@ -1,4 +1,3 @@
-import { INTENT_MD_LINE_LIMIT } from '../../../../../constants/documentValidation.js';
 import { DENY_RETRY_GUIDANCE } from '../../../../../constants/hookDefaults.js';
 import { validateIntentMd } from '../../../../../core/rules/documentValidator/validators/validateIntentMd.js';
 import type { HookOutput } from '../../../../../types/hooks.js';
@@ -14,10 +13,12 @@ export function handleIntentMdWrite(content: string): HookOutput {
       continue: true,
       hookSpecificOutput: {
         permissionDecision: 'deny',
-        permissionDecisionReason:
-          `INTENT.md write rejected: ${errors}. Add the missing 3-tier ` +
-          `sections (Always do / Ask first / Never do) and keep it under ` +
-          `${INTENT_MD_LINE_LIMIT} lines. ${DENY_RETRY_GUIDANCE}`,
+        // Name only what failed. `validateIntentMd` raises `error` for the
+        // line limit alone — the 3-tier check is a warning and never reaches
+        // here — so the old blanket "add the 3-tier sections" instruction
+        // named a cause this branch cannot have, and buried the real one.
+        // Each violation message already states its own remedy.
+        permissionDecisionReason: `INTENT.md write rejected: ${errors} ${DENY_RETRY_GUIDANCE}`,
       },
     };
   }
