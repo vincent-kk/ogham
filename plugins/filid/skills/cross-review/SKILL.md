@@ -36,10 +36,14 @@ Cross-review judges FCA evidence only:
 
 - INTENT.md, DETAIL.md, and public contract alignment;
 - node classification, entry points, external boundaries, and dependency DAG;
-- spec-document and test-record policy.
+- lowest-common-fractal placement and approved restructure-plan postconditions;
+- spec-document and test-record policy, including counting certainty.
 
 Do not report general code quality, product behavior, security, style,
 performance, or unrelated pre-existing findings.
+
+The verdict is explicitly FCA-scoped: it certifies the FCA contract and
+structure of the change, not its correctness, security, or product fit.
 
 ## Step 1 — Resolve Source and Prepare State
 

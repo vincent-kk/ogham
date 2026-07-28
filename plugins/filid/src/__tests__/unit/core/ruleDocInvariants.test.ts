@@ -76,7 +76,9 @@ describe('shipped rule documents', () => {
     const declared = loadRuleDocsManifest(packageRoot).rules;
 
     expect(existsSync(join(rulesDir, RETIRED_DOC))).toBe(false);
-    expect(declared.some((entry) => entry.filename === RETIRED_DOC)).toBe(false);
+    expect(declared.some((entry) => entry.filename === RETIRED_DOC)).toBe(
+      false,
+    );
     // Its `filid_` prefix is what lets the owned-orphan sweep retire an already
     // deployed copy, so no manifest legacy address is needed to migrate it.
     expect(RETIRED_DOC.startsWith('filid_')).toBe(true);
@@ -86,7 +88,9 @@ describe('shipped rule documents', () => {
     const PRECEDENCE = /^> \*\*Precedence\*\*:/m;
 
     expect(
-      shipped.filter((doc) => !PRECEDENCE.test(doc.text)).map((doc) => doc.name),
+      shipped
+        .filter((doc) => !PRECEDENCE.test(doc.text))
+        .map((doc) => doc.name),
     ).toEqual([]);
     expect(PRECEDENCE.test('# Rule\n\nbody with no chain')).toBe(false);
   });
@@ -97,9 +101,9 @@ describe('shipped rule documents', () => {
     expect(
       shipped.filter((doc) => !GROUNDING.test(doc.text)).map((doc) => doc.name),
     ).toEqual([]);
-    expect(GROUNDING.test('This rule rests on properties every codebase has')).toBe(
-      true,
-    );
+    expect(
+      GROUNDING.test('This rule rests on properties every codebase has'),
+    ).toBe(true);
     expect(GROUNDING.test('a rule with no grounding sentence')).toBe(false);
   });
 
@@ -114,7 +118,9 @@ describe('shipped rule documents', () => {
 
     expect(broken).toEqual([]);
     // One half alone does not satisfy it.
-    expect(/is wrong for you if:/.test('This rule is working if: x')).toBe(false);
+    expect(/is wrong for you if:/.test('This rule is working if: x')).toBe(
+      false,
+    );
   });
 
   it('gives conditional documents the frontmatter key the harness reads', () => {

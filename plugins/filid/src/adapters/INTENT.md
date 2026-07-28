@@ -25,6 +25,7 @@
 - candidate 선택과 evidence 탐지를 분리해 snapshot에서 detect를 반복하지 않음
 - entry point override의 파일명 의미는 대상 adapter 안에서만 해석
 - source discovery는 Node 20 `readdir` recursion으로 구현
+- 요청됐으나 등록되지 않은 adapter ID는 config warning이 아니라 validation finding으로 반환
 
 ### Ask first
 
@@ -34,6 +35,7 @@
 ### Never do
 
 - core rule이나 MCP DTO에 생태계 리터럴을 밀어 넣기
+- 새 생태계 adapter 추가가 core type, policy rule 또는 MCP schema 변경을 요구하게 만들기
 - native parser, 전역 npm module 또는 `fast-glob` 요구
 - unsupported 증거를 PASS로 변환
 

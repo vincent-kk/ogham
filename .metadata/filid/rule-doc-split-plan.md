@@ -6,13 +6,13 @@
 
 ## 결정 사항 (확정)
 
-| 항목               | 결정                                                                 |
-| ------------------ | -------------------------------------------------------------------- |
-| 파일 수            | 4개 (내용은 6분할 체제와 동일, 전부 required 이므로 파일 수를 제한)  |
-| required 정책      | 4개 전부 `required: true`                                            |
-| 구 파일 회수       | `filid_fca-policy.md` 는 owned orphan 스윕으로 자동 삭제 (아래 근거) |
-| `fca.md` 마이그레이션 | `filid_fractal-boundaries.md` 엔트리가 `legacyFilename` 승계        |
-| 훅 포인터          | 대표 문서 1개 유지 + 대표 문서가 형제 문서를 본문에서 지목            |
+| 항목                  | 결정                                                                 |
+| --------------------- | -------------------------------------------------------------------- |
+| 파일 수               | 4개 (내용은 6분할 체제와 동일, 전부 required 이므로 파일 수를 제한)  |
+| required 정책         | 4개 전부 `required: true`                                            |
+| 구 파일 회수          | `filid_fca-policy.md` 는 owned orphan 스윕으로 자동 삭제 (아래 근거) |
+| `fca.md` 마이그레이션 | `filid_fractal-boundaries.md` 엔트리가 `legacyFilename` 승계         |
+| 훅 포인터             | 대표 문서 1개 유지 + 대표 문서가 형제 문서를 본문에서 지목           |
 
 ### 구 파일 회수 근거 (스키마 변경 불필요)
 
@@ -49,17 +49,18 @@
 
 ```markdown
 [---
-paths:                          ← 조건부 문서만. `globs:` 는 금지(하니스가 무시하고 상시 로드로 바뀜)
-  - '<glob>'
----]
+paths: ← 조건부 문서만. `globs:` 는 금지(하니스가 무시하고 상시 로드로 바뀜)
+
+- '<glob>'
+  ---]
 
 # <제목>
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
-                                ← B1: /^> \*\*Precedence\*\*:/m
+> ← B1: /^> \*\*Precedence\*\*:/m
 
 <요지 1–2문장> This rule rests on a property every codebase has: <최소 전제>.
-                                ← B5: /\brests on (a property|properties)\b/i
+← B5: /\brests on (a property|properties)\b/i
 
 **Tradeoff:** <선택> **Applies when:** <활성 조건>
 
@@ -74,7 +75,7 @@ Ask yourself: "<자기점검 질문>"
 ---
 
 **This rule is working if:** <관찰 가능한 성공 신호> **This rule is wrong for you if:** <정직한 적용 제외>
-                                ← B6: `This rule is working if:` + `is wrong for you if:`
+← B6: `This rule is working if:` + `is wrong for you if:`
 ```
 
 ---
@@ -83,39 +84,39 @@ Ask yourself: "<자기점검 질문>"
 
 ### 생성 (4)
 
-| 경로                                                        | 책임                            | 로딩                  | 예상 |
-| ----------------------------------------------------------- | ------------------------------- | --------------------- | ---- |
-| `plugins/filid/templates/rules/filid_fractal-boundaries.md`  | 노드가 무엇이고 어떻게 건너는가 | 상시                  | ~110 |
-| `plugins/filid/templates/rules/filid_module-documents.md`    | INTENT/DETAIL 문서 계약         | `paths:` INTENT/DETAIL | ~60  |
-| `plugins/filid/templates/rules/filid_verification-records.md`| 검증 문서 역할과 상한           | `paths:` 테스트 글롭  | ~55  |
-| `plugins/filid/templates/rules/filid_code-placement.md`      | 어디에 두고 어떤 순서로 바꾸는가 | 상시                  | ~50  |
+| 경로                                                          | 책임                             | 로딩                   | 예상 |
+| ------------------------------------------------------------- | -------------------------------- | ---------------------- | ---- |
+| `plugins/filid/templates/rules/filid_fractal-boundaries.md`   | 노드가 무엇이고 어떻게 건너는가  | 상시                   | ~110 |
+| `plugins/filid/templates/rules/filid_module-documents.md`     | INTENT/DETAIL 문서 계약          | `paths:` INTENT/DETAIL | ~60  |
+| `plugins/filid/templates/rules/filid_verification-records.md` | 검증 문서 역할과 상한            | `paths:` 테스트 글롭   | ~55  |
+| `plugins/filid/templates/rules/filid_code-placement.md`       | 어디에 두고 어떤 순서로 바꾸는가 | 상시                   | ~50  |
 
 ### 삭제 (1)
 
-| 경로                                                | 사유                     |
-| --------------------------------------------------- | ------------------------ |
-| `plugins/filid/templates/rules/filid_fca-policy.md` | 위 4개로 대체            |
+| 경로                                                | 사유          |
+| --------------------------------------------------- | ------------- |
+| `plugins/filid/templates/rules/filid_fca-policy.md` | 위 4개로 대체 |
 
 ### 수정
 
-| 경로                                                          | 변경                                              |
-| -------------------------------------------------------------- | ------------------------------------------------- |
-| `plugins/filid/templates/rules/manifest.json`                   | 엔트리 1 → 4                                      |
-| `plugins/filid/templates/rules/README.md`                       | 예시 manifest 와 "규칙 추가" 절차 갱신            |
-| `plugins/filid/src/constants/ruleDocs.ts`                       | 단일 상수 → 대표 문서 + legacy 목록               |
-| `plugins/filid/src/hooks/userPromptSubmit/utils/inspectFcaPolicy.ts` | legacy 배열 확장                             |
-| `plugins/filid/src/hooks/userPromptSubmit/DETAIL.md`            | 포인터 계약 갱신 (코드보다 먼저)                  |
-| `plugins/filid/src/core/infra/configLoader/DETAIL.md`           | rule-doc 엔트리 수·legacy 계약 갱신 (코드보다 먼저) |
-| `plugins/filid/src/__tests__/unit/hooks/userPromptSubmitContext.test.ts` | 리터럴 어서션 7곳                       |
-| `plugins/filid/src/hooks/userPromptSubmit/__tests__/injectContext.test.ts` | `RULE_FILE` 상수                      |
-| `plugins/filid/src/__tests__/unit/core/configRuleDocuments.test.ts` | `REQUIRED_ID` / `REQUIRED_FILE`                |
-| `plugins/filid/src/__tests__/unit/core/ruleDocsChannel.test.ts`  | 픽스처 엔트리                                     |
-| `plugins/filid/src/__tests__/unit/core/ruleDocsCompatibility.test.ts` | orphan 스윕 + legacy 승계 케이스 추가        |
-| `plugins/filid/src/mcp/tools/openSettings/webServer/__tests__/webServer.test.ts` | `ruleDocs.selections` 키           |
-| `plugins/filid/src/mcp/tools/ruleDocsSync/__tests__/ruleDocsSync.test.ts` | "filid 는 fca-policy 하나만 배포" 주석 2곳   |
-| `.metadata/filid/04-USAGE.md`                                   | 78행 AGENTS.md 원본 문장                          |
-| `.metadata/filid/07-RULES-REFERENCE.md`                         | 3행 canonical 규칙 문서 경로                      |
-| `.claude/rules/`                                                | 재배포 산출물 (T4 에서 도구가 씀)                 |
+| 경로                                                                             | 변경                                                |
+| -------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `plugins/filid/templates/rules/manifest.json`                                    | 엔트리 1 → 4                                        |
+| `plugins/filid/templates/rules/README.md`                                        | 예시 manifest 와 "규칙 추가" 절차 갱신              |
+| `plugins/filid/src/constants/ruleDocs.ts`                                        | 단일 상수 → 대표 문서 + legacy 목록                 |
+| `plugins/filid/src/hooks/userPromptSubmit/utils/inspectFcaPolicy.ts`             | legacy 배열 확장                                    |
+| `plugins/filid/src/hooks/userPromptSubmit/DETAIL.md`                             | 포인터 계약 갱신 (코드보다 먼저)                    |
+| `plugins/filid/src/core/infra/configLoader/DETAIL.md`                            | rule-doc 엔트리 수·legacy 계약 갱신 (코드보다 먼저) |
+| `plugins/filid/src/__tests__/unit/hooks/userPromptSubmitContext.test.ts`         | 리터럴 어서션 7곳                                   |
+| `plugins/filid/src/hooks/userPromptSubmit/__tests__/injectContext.test.ts`       | `RULE_FILE` 상수                                    |
+| `plugins/filid/src/__tests__/unit/core/configRuleDocuments.test.ts`              | `REQUIRED_ID` / `REQUIRED_FILE`                     |
+| `plugins/filid/src/__tests__/unit/core/ruleDocsChannel.test.ts`                  | 픽스처 엔트리                                       |
+| `plugins/filid/src/__tests__/unit/core/ruleDocsCompatibility.test.ts`            | orphan 스윕 + legacy 승계 케이스 추가               |
+| `plugins/filid/src/mcp/tools/openSettings/webServer/__tests__/webServer.test.ts` | `ruleDocs.selections` 키                            |
+| `plugins/filid/src/mcp/tools/ruleDocsSync/__tests__/ruleDocsSync.test.ts`        | "filid 는 fca-policy 하나만 배포" 주석 2곳          |
+| `.metadata/filid/04-USAGE.md`                                                    | 78행 AGENTS.md 원본 문장                            |
+| `.metadata/filid/07-RULES-REFERENCE.md`                                          | 3행 canonical 규칙 문서 경로                        |
+| `.claude/rules/`                                                                 | 재배포 산출물 (T4 에서 도구가 씀)                   |
 
 ---
 
@@ -125,14 +126,14 @@ Ask yourself: "<자기점검 질문>"
 
 ### 1. `filid_fractal-boundaries.md` — 6절, 상시
 
-| 절 | 굵은 격언(초안)                                                | 원문 출처                    |
-| -- | --------------------------------------------------------------- | ---------------------------- |
-| 1  | Classification comes from files that exist, not from intent.     | `:31-38`, `:40-63`, `:75-77` |
-| 2  | Classification describes; it never prescribes.                   | `:64-74`                     |
-| 3  | A fractal is crossed through its entry point, never around it.   | `:113-123`, `:149-155`       |
-| 4  | A fractal root holds documents and entry points — not code.      | `:142-147`                   |
-| 5  | Organ access is judged by where the consumer sits.               | `:157-186` (표 포함)         |
-| 6  | The graph is acyclic and depth is a toll.                        | `:125-140`                   |
+| 절  | 굵은 격언(초안)                                                | 원문 출처                    |
+| --- | -------------------------------------------------------------- | ---------------------------- |
+| 1   | Classification comes from files that exist, not from intent.   | `:31-38`, `:40-63`, `:75-77` |
+| 2   | Classification describes; it never prescribes.                 | `:64-74`                     |
+| 3   | A fractal is crossed through its entry point, never around it. | `:113-123`, `:149-155`       |
+| 4   | A fractal root holds documents and entry points — not code.    | `:142-147`                   |
+| 5   | Organ access is judged by where the consumer sits.             | `:157-186` (표 포함)         |
+| 6   | The graph is acyclic and depth is a toll.                      | `:125-140`                   |
 
 - 1절에 노드 타입 표(`:33-38`), 6단계 우선순위, `entryPointOverrides` 가 분류가 아니라
   `entry-point-surface` 를 먹인다는 단서(`:51-57`), 기본 organ 이름 목록(`:75-77`)을 모두 담는다.
@@ -153,18 +154,18 @@ frontmatter:
 ```yaml
 ---
 paths:
-  - 'INTENT.md'
-  - 'DETAIL.md'
+  - "INTENT.md"
+  - "DETAIL.md"
 ---
 ```
 
-| 절 | 굵은 격언(초안)                                            | 원문 출처            |
-| -- | ------------------------------------------------------------ | -------------------- |
-| 1  | INTENT records the boundary; DETAIL records the contract.    | `:229-236`, `:240-245` |
-| 2  | INTENT is at most 50 lines and names its three boundaries.   | `:97-99`             |
-| 3  | An organ has no INTENT — independent docs mean a fractal.    | `:108-111`           |
-| 4  | DETAIL is current state, not an append-only history.         | `:103-106`, `:243-247` |
-| 5  | An exemption without a reason is a disabled rule in costume. | `:248-267`           |
+| 절  | 굵은 격언(초안)                                              | 원문 출처              |
+| --- | ------------------------------------------------------------ | ---------------------- |
+| 1   | INTENT records the boundary; DETAIL records the contract.    | `:229-236`, `:240-245` |
+| 2   | INTENT is at most 50 lines and names its three boundaries.   | `:97-99`               |
+| 3   | An organ has no INTENT — independent docs mean a fractal.    | `:108-111`             |
+| 4   | DETAIL is current state, not an append-only history.         | `:103-106`, `:243-247` |
+| 5   | An exemption without a reason is a disabled rule in costume. | `:248-267`             |
 
 - 4절에 수용 그룹 ID 안정성(`:106`)과 `legacy-criteria-ledger` 미자동삭제(`:246-247`)를 포함한다.
 - 5절은 `Organ Exemptions` 코드 블록(`:254-263`)을 **펜스 안에** 그대로 유지한다. 원문에서 이 펜스가
@@ -177,13 +178,13 @@ frontmatter는 `plugins/seiri/templates/rules/seiri_test-validity.md:1-18` 의 �
 (`*.test.*`, `*.spec.*`, `*_test.*`, `*_spec.*`, `test_*.*`, `*Test.*`, `*Tests.*`, `*Spec.*`,
 `conftest.py`, `__tests__`, `test`, `tests`, `spec`, `specs`, `e2e`). `globs:` 로 쓰지 말 것.
 
-| 절 | 굵은 격언(초안)                                                 | 원문 출처   |
-| -- | ----------------------------------------------------------------- | ----------- |
-| 1  | Verification files hold roles, not ranks.                         | `:210-213`  |
-| 2  | A spec-document holds 15 cases; a test-record holds 32 per file.  | `:188-195`  |
-| 3  | What cannot be counted is indeterminate, never a pass.            | `:215-221`  |
-| 4  | Never remove coverage to meet a cap.                              | `:223-225`  |
-| 5  | Multiple spec-documents bind to distinct DETAIL groups.           | `:197-206`  |
+| 절  | 굵은 격언(초안)                                                  | 원문 출처  |
+| --- | ---------------------------------------------------------------- | ---------- |
+| 1   | Verification files hold roles, not ranks.                        | `:210-213` |
+| 2   | A spec-document holds 15 cases; a test-record holds 32 per file. | `:188-195` |
+| 3   | What cannot be counted is indeterminate, never a pass.           | `:215-221` |
+| 4   | Never remove coverage to meet a cap.                             | `:223-225` |
+| 5   | Multiple spec-documents bind to distinct DETAIL groups.          | `:197-206` |
 
 - 2절에 test-record 의 프로젝트 전체 총량 무제한(`:195`)을 명시한다 — 상한이 파일당임을 놓치면
   커버리지를 깎는 오독이 생긴다.
@@ -192,13 +193,13 @@ frontmatter는 `plugins/seiri/templates/rules/seiri_test-validity.md:1-18` 의 �
 
 ### 4. `filid_code-placement.md` — 5절, 상시
 
-| 절 | 굵은 격언(초안)                                                | 원문 출처   |
-| -- | ---------------------------------------------------------------- | ----------- |
-| 1  | Shared code sits at the lowest common fractal of its consumers.  | `:271-273`  |
-| 2  | An organ cannot be a lowest common ancestor.                     | `:275`      |
-| 3  | No evidence for a name means a decision is required, not invented.| `:276-277`  |
-| 4  | Planning is read-only; the postcondition demands the exact target.| `:278-284`  |
-| 5  | The document changes before the code does.                       | `:310-320`  |
+| 절  | 굵은 격언(초안)                                                    | 원문 출처  |
+| --- | ------------------------------------------------------------------ | ---------- |
+| 1   | Shared code sits at the lowest common fractal of its consumers.    | `:271-273` |
+| 2   | An organ cannot be a lowest common ancestor.                       | `:275`     |
+| 3   | No evidence for a name means a decision is required, not invented. | `:276-277` |
+| 4   | Planning is read-only; the postcondition demands the exact target. | `:278-284` |
+| 5   | The document changes before the code does.                         | `:310-320` |
 
 - 3절은 `shared` / `common` 을 지어내지 말고 `requiresDecision: true` 를 세우라는 원문 규범을 유지한다.
 - 5절은 Development Workflow 7단계를 불릿으로 옮기고, "경고도 findings 로 센다"(`:319`)를 유지한다.
@@ -206,13 +207,13 @@ frontmatter는 `plugins/seiri/templates/rules/seiri_test-validity.md:1-18` 의 �
 
 ### 이관·삭제 (43줄)
 
-| 원문                          | 처리                                                                       |
-| ----------------------------- | -------------------------------------------------------------------------- |
-| `:15-29` Product Boundary     | `plugins/filid/INTENT.md` 로 이관 — 프로젝트 규칙이 아니라 제품 범위 선언   |
-| `:79-91` Adapter Boundary     | `plugins/filid/src/adapters/INTENT.md` 로 이관. 단 `:89` 의 "indeterminate/unsupported 를 PASS 로 바꾸지 말 것"은 문서 1 §6 과 문서 3 §3 에 인라인 유지 |
-| `:286-300` Cross-review Scope | `plugins/filid/skills/cross-review/SKILL.md` 로 이관                        |
-| `:302-308` Structure Principles | **삭제** — 문서 1·4 의 요약 중복                                          |
-| `:1-13` 머리말                | 각 문서 인트로로 분산 (요약 4불릿은 재사용하지 않는다)                      |
+| 원문                            | 처리                                                                                                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:15-29` Product Boundary       | `plugins/filid/INTENT.md` 로 이관 — 프로젝트 규칙이 아니라 제품 범위 선언                                                                               |
+| `:79-91` Adapter Boundary       | `plugins/filid/src/adapters/INTENT.md` 로 이관. 단 `:89` 의 "indeterminate/unsupported 를 PASS 로 바꾸지 말 것"은 문서 1 §6 과 문서 3 §3 에 인라인 유지 |
+| `:286-300` Cross-review Scope   | `plugins/filid/skills/cross-review/SKILL.md` 로 이관                                                                                                    |
+| `:302-308` Structure Principles | **삭제** — 문서 1·4 의 요약 중복                                                                                                                        |
+| `:1-13` 머리말                  | 각 문서 인트로로 분산 (요약 4불릿은 재사용하지 않는다)                                                                                                  |
 
 ---
 
@@ -351,7 +352,7 @@ FCA 워크플로에 따라 **DETAIL 을 코드보다 먼저** 고친다.
 
    ```ts
    /** The rule document the hook reports the project's status from. */
-   export const PRIMARY_RULE_DOC = 'filid_fractal-boundaries.md';
+   export const PRIMARY_RULE_DOC = "filid_fractal-boundaries.md";
 
    /**
     * Addresses this document has had before, newest first. `filid_fca-policy.md`
@@ -359,7 +360,7 @@ FCA 워크플로에 따라 **DETAIL 을 코드보다 먼저** 고친다.
     * Siblings deployed alongside the primary doc need no legacy chain — they
     * never existed under another name.
     */
-   export const LEGACY_RULE_DOCS = ['filid_fca-policy.md', 'fca.md'] as const;
+   export const LEGACY_RULE_DOCS = ["filid_fca-policy.md", "fca.md"] as const;
    ```
 
    `FILID_SECTION_NAMESPACE` 와 `ruleDocMarkers()` 는 그대로 둔다.
@@ -370,10 +371,10 @@ FCA 워크플로에 따라 **DETAIL 을 코드보다 먼저** 고친다.
    import {
      LEGACY_RULE_DOCS,
      PRIMARY_RULE_DOC,
-   } from '../../../constants/ruleDocs.js';
+   } from "../../../constants/ruleDocs.js";
    // ...
    return inspectTrustedRuleDocumentPresence(
-     { owner: 'filid', target },
+     { owner: "filid", target },
      { filename: PRIMARY_RULE_DOC, legacyFilenames: [...LEGACY_RULE_DOCS] },
    );
    ```
@@ -448,6 +449,7 @@ grep -rn "FCA_POLICY_RULE_DOC\|filid_fca-policy" plugins/filid/src
 
    기대: 종료 코드 0. `bridge/` 재생성, `build:compile-plugin` 이 루트 `AGENTS.md` ·
    `.codex-plugin/` 을 4개 문서 기준으로 재생성.
+
 4. 이 저장소에 재배포한다 — `mcp__plugin_filid_tools__rule_docs_sync` 를 호출한다
    (`syncRuleDocs` 는 setup 표면에서만 호출해야 하므로 직접 실행하지 않는다).
 5. 배포 결과를 확인한다.

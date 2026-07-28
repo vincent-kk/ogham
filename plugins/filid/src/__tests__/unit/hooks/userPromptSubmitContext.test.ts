@@ -25,7 +25,8 @@ vi.mock('node:fs', async (importOriginal) => {
     const normalized = toPosixPath(p);
     if (normalized.endsWith('.filid')) return true;
     if (normalized.endsWith('.filid/config.json')) return true;
-    if (normalized.endsWith('.claude/rules/filid_fractal-boundaries.md')) return true;
+    if (normalized.endsWith('.claude/rules/filid_fractal-boundaries.md'))
+      return true;
     if (normalized.includes('/prompt-context-')) return false;
     return false;
   });
