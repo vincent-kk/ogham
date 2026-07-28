@@ -15,6 +15,12 @@
   entry override를 해당 adapter에 전달한다.
 - config `maxDepth`는 validation 한계이며 snapshot tree traversal을 자르지
   않는다.
+- DETAIL.md가 `## Organ Exemptions`를 선언하면 그 항목을
+  `node.documentEvidence.organExemptions`에 보존한다. `organPath`는 소유
+  프랙탈 기준으로 정규화한 절대 경로이며, rule engine은 다시 파일을 읽지
+  않고 이 evidence만 읽는다.
+- dependency graph는 non-organ owner path와 함께 organ path 목록도 받아,
+  owner subtree 안의 owned-organ 참조를 cycle adjacency에서 제외한다.
 - 동일 bytes와 구조는 프로젝트 absolute root 및 mtime과 무관하게 같은
   hash이고 file content 또는 구조 입력 변경은 hash를 바꾼다.
 - root `.filid/criteria.md`가 없으면 `legacyCriteriaLedger`는 `null`이다.
@@ -56,6 +62,12 @@
   root `.filid/criteria.md`와 root `DETAIL.md`를 가리킨다.
 - collector는 ledger를 삭제하거나 DETAIL로 자동 변환하지 않는다.
 
+### AC-snapshot-organ-exemptions — 선언된 면책 evidence
+
+- `## Organ Exemptions`가 없는 DETAIL.md는 `organExemptions`를 만들지 않는다.
+- 선언이 있으면 organ path를 소유 프랙탈 기준 절대 경로로 정규화해 보존하고
+  그 변경이 snapshot hash를 바꾼다.
+
 ### AC-snapshot-certainty — 불확실성 보존
 
 - unresolved local dependency가 있으면 graph certainty가 indeterminate다.
@@ -65,4 +77,4 @@
 
 ## Last Updated
 
-2026-07-27 — legacy criteria ledger evidence와 content hash 계약을 추가했다.
+2026-07-28 — organ 면책 evidence와 graph organ path 입력을 계약에 추가했다.

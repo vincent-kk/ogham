@@ -1998,22 +1998,22 @@ yarn plugin:adapters
 
   배포 드리프트가 실재했다. 작업 0이 canonical 원본만 고치고 재배포하지 않아 `.claude/rules/filid_fca-policy.md`가 158줄 v0.8.x 그대로였다 — 이 저장소에서 일하는 에이전트들이 세션 내내 stale 규칙(`index-barrel-pattern`, LCOM4, 3+12)을 읽고 있었다. **canonical rule 문서를 고치면 `build:rules` + `rule_docs_sync`까지가 한 단위다.**
 
-**남은 수정 대상**
+**수정 대상 (전부 완료, 2026-07-28)**
 
 - `src/core/tree/organClassifier/` — 우선순위 사다리를 6단계로 축소. 기본값을 `fractal`에서 `organ`으로 뒤집고, 분류 입력을 `kind: "module"` entry point로 한정한다.
-- `src/adapters/ecmascript/structure/findEntryPoints.ts` — module index와 config override로 주입된 경로를 서로 다른 `kind`로 보고한다.
-- `src/core/rules/ruleEngine/utils/checkExternalImportBoundary.ts` — 대상이 organ이면 소비자 위치로 판정한다. 현재 이 함수에는 **면책 경로가 아예 없다** — `isExempt` 호출이 없어 config의 `exempt`가 이 규칙에서 무시된다.
-- `src/core/analysis/dependencyGraph/` — 소유 subtree 안의 organ 참조를 부모 fractal edge로 승격하지 않는다. cycle 오판의 원인이다.
-- `src/core/rules/documentValidator/` — DETAIL.md의 조건부 `## Organ Exemptions` 섹션을 파싱한다. acceptance group과 같은 `### <organ path> — <title>` 형태이므로 기존 파서를 재사용한다. **없는 것이 정상이며 면책을 선언할 때만 존재한다.** `Reason`이 비면 면책이 아니라 미충족 계약이다.
+- `src/adapters/ecmascript/structure/findEntryPoints.ts` — module index와 config override로 주입된 경로를 서로 다른 `kind`로 보고한다. override는 `kind: 'executable'` / `surface: 'enumerated'`다. `framework`를 쓰면 surface가 `opaque`로 파생되어 정당한 override마다 영구적인 `entry-point-surface` 경고가 생기는데, override는 그 규칙의 입력이지 위반 원인이 아니다.
+- `src/core/rules/ruleEngine/utils/checkExternalImportBoundary.ts` — 대상이 organ이면 소비자 위치로 판정한다. edge는 organ을 소유 fractal로 승격한 뒤라 organ 정체성이 없으므로 `evidence.resolvedPath`에서 복구한다. 면책은 `isOrganExemptionGranted`가 소유 프랙탈 DETAIL 선언에서만 인정한다.
+- `src/core/analysis/dependencyGraph/` — 소유 subtree 안의 organ 참조를 **edge로는 보존하되 cycle adjacency에서 제외한다.** 제거하면 LCA 배치가 쓰는 소비자 증거가 사라진다. 모듈이 이미 same-owner edge에 쓰던 정책과 같은 형태다.
+- `src/core/rules/documentValidator/` — DETAIL.md의 조건부 `## Organ Exemptions` 섹션을 파싱한다. acceptance group과 같은 `### <organ path> — <title>` 형태지만 organ path에는 `/`가 오므로 ID 문자 집합은 공유하지 않는다. **없는 것이 정상이며 면책을 선언할 때만 존재한다.** `Reason`이 비면 면책이 아니라 미충족 계약이다.
 - `.filid/config.json` — `structure.entryPointOverrides.ecmascript`에서 `SKILL.md`를 제거한다.
 
 **검증**
 
-- 재스캔에서 `external-import-boundary`가 소유 subtree 안의 organ 참조를 내지 않는다.
-- `src/hooks -> src/hooks/preToolUse -> src/hooks` cycle이 사라진다.
-- `skills/setup`과 `skills/cross-review`가 organ으로 분류되고 INTENT/DETAIL·entry-point·zero-peer finding을 내지 않는다.
-- 소유 subtree **밖**에서 organ을 직접 참조하는 fixture는 여전히 위반으로 잡히고, DETAIL에 면책을 선언하면 통과한다. 규칙이 느슨해진 것이 아니라 대상이 바뀐 것임을 보이는 fail-first가 양쪽 다 필요하다.
-- 훅 경로가 면책 선언으로 통과하고, 선언을 지우면 다시 위반이 된다.
+- 재스캔에서 `external-import-boundary`가 소유 subtree 안의 organ 참조를 내지 않는다. — 충족(630 → 200, 그중 organ 대상은 17건이며 전부 소유 subtree 밖 소비자다).
+- `src/hooks -> src/hooks/preToolUse -> src/hooks` cycle이 사라진다. — 충족.
+- `skills/setup`과 `skills/cross-review`가 organ으로 분류되고 INTENT/DETAIL·entry-point·zero-peer finding을 내지 않는다. — 작업 12의 분류 사다리 단계에서 충족했다(skills finding 10 → 0).
+- 소유 subtree **밖**에서 organ을 직접 참조하는 fixture는 여전히 위반으로 잡히고, DETAIL에 면책을 선언하면 통과한다. 규칙이 느슨해진 것이 아니라 대상이 바뀐 것임을 보이는 fail-first가 양쪽 다 필요하다. — 충족.
+- 훅 경로가 면책 선언으로 통과하고, 선언을 지우면 다시 위반이 된다. — **이 저장소에는 해당 경로가 남지 않는다.** 훅이 직접 import하는 organ(`src/lib`, `src/constants`, `hooks/shared`)은 모두 훅 자신이 속한 subtree 안에 있어 소비자 위치 규칙만으로 통과한다. 면책이 필요한 것은 소유 subtree를 **넘는** 직접 참조뿐이다. 왕복 증명은 실제 위반 경로(`ruleEngine/utils` ← `src/__tests__`)에 일시 프로브를 걸어 수행하고 되돌렸다.
 
 ## Acceptance Criteria
 

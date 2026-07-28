@@ -4,6 +4,7 @@ import type {
 } from '../../../types/documents.js';
 
 import { validateDetailAcceptanceGroups } from './acceptanceGroups/validateDetailAcceptanceGroups.js';
+import { parseOrganExemptions } from './organExemptions/parseOrganExemptions.js';
 
 /**
  * Detect pure append-only changes.
@@ -39,7 +40,8 @@ export function validateDetailMd(
 ): DetailMdValidation {
   const violations: DocumentViolation[] = [];
   const acceptance = validateDetailAcceptanceGroups(content);
-  violations.push(...acceptance.violations);
+  const organExemptions = parseOrganExemptions(content);
+  violations.push(...acceptance.violations, ...organExemptions.violations);
 
   // Detect append-only (when previous content is provided)
   if (oldContent !== undefined && detectAppendOnly(oldContent, content))
@@ -54,5 +56,6 @@ export function validateDetailMd(
     valid: violations.every((v) => v.severity !== 'error'),
     violations,
     acceptanceGroups: acceptance.groups,
+    organExemptions: organExemptions.exemptions,
   };
 }

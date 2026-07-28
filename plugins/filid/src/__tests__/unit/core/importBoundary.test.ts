@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { checkExternalImportBoundary } from '../../../core/rules/ruleEngine/utils/checkExternalImportBoundary.js';
+import type { OrganExemptionDeclaration } from '../../../types/documents.js';
 import type {
   DependencyEvidence,
   DependencyGraph,
@@ -212,5 +213,183 @@ describe('external-import-boundary', () => {
     );
 
     expect(violations).toEqual([]);
+  });
+});
+
+const organNode: FractalNode = {
+  ...leftNode,
+  path: '/project/left/utils',
+  name: 'utils',
+  type: 'organ',
+  parent: '/project/left',
+  parentFractalPath: '/project/left',
+  entryPoints: [],
+  depth: 2,
+};
+
+function organOwner(exemptions?: OrganExemptionDeclaration[]): FractalNode {
+  return {
+    ...leftNode,
+    organs: ['/project/left/utils'],
+    organPaths: ['/project/left/utils'],
+    ...(exemptions
+      ? {
+          documentEvidence: {
+            intentPath: '/project/left/INTENT.md',
+            detailPath: '/project/left/DETAIL.md',
+            status: 'valid',
+            findings: [],
+            organExemptions: exemptions,
+          },
+        }
+      : {}),
+  };
+}
+
+const nestedNode: FractalNode = {
+  ...leftNode,
+  path: '/project/left/nested',
+  name: 'nested',
+  parent: '/project/left',
+  parentFractalPath: '/project/left',
+  entryPoints: [
+    {
+      path: '/project/left/nested/entry.ts',
+      kind: 'module',
+      adapterId: 'fixture',
+      surface: 'enumerated',
+    },
+  ],
+  depth: 2,
+};
+
+function checkOrganBoundary(
+  owner: FractalNode,
+  fromFractalPath: string,
+  dependencyEvidence: DependencyEvidence,
+) {
+  const nodes = new Map(tree.nodes);
+  nodes.set(owner.path, owner);
+  nodes.set(organNode.path, organNode);
+  nodes.set(nestedNode.path, nestedNode);
+  return checkExternalImportBoundary({
+    snapshot: {
+      ...snapshot,
+      tree: { ...tree, nodes },
+      dependencyGraph: {
+        ...snapshot.dependencyGraph,
+        edges: [
+          {
+            fromFractalPath,
+            toFractalPath: owner.path,
+            evidence: [dependencyEvidence],
+          },
+        ],
+      },
+    },
+  });
+}
+
+const organImport = evidence(
+  '/project/right/source.ts',
+  '../left/utils/helper.js',
+  '/project/left/utils/helper.ts',
+);
+
+function exemption(
+  overrides: Partial<OrganExemptionDeclaration> = {},
+): OrganExemptionDeclaration {
+  return {
+    organPath: '/project/left/utils',
+    title: 'hook bundle',
+    consumers: ['**/project/right/**'],
+    directImport: true,
+    reason: 'The barrel would pull every re-exported module into the bundle.',
+    line: 12,
+    ...overrides,
+  };
+}
+
+describe('external-import-boundary — organ access by consumer location', () => {
+  it('allows a descendant fractal to import an owned organ file directly', () => {
+    const violations = checkOrganBoundary(
+      organOwner(),
+      '/project/left/nested',
+      evidence(
+        '/project/left/nested/source.ts',
+        '../utils/helper.js',
+        '/project/left/utils/helper.ts',
+      ),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it('rejects a direct organ import from outside the owner subtree', () => {
+    const violations = checkOrganBoundary(
+      organOwner(),
+      '/project/right',
+      organImport,
+    );
+
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatchObject({
+      ruleId: 'external-import-boundary',
+      path: '/project/right/source.ts',
+    });
+  });
+
+  it('allows an outside direct import declared in the owner DETAIL exemptions', () => {
+    const violations = checkOrganBoundary(
+      organOwner([exemption()]),
+      '/project/right',
+      organImport,
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it('rejects an exemption whose reason is empty', () => {
+    const violations = checkOrganBoundary(
+      organOwner([exemption({ reason: '   ' })]),
+      '/project/right',
+      organImport,
+    );
+
+    expect(violations).toHaveLength(1);
+  });
+
+  it('rejects an exemption that does not allow direct import', () => {
+    const violations = checkOrganBoundary(
+      organOwner([exemption({ directImport: false })]),
+      '/project/right',
+      organImport,
+    );
+
+    expect(violations).toHaveLength(1);
+  });
+
+  it('rejects an exemption whose consumers do not cover this importer', () => {
+    const violations = checkOrganBoundary(
+      organOwner([exemption({ consumers: ['**/project/other/**'] })]),
+      '/project/right',
+      organImport,
+    );
+
+    expect(violations).toHaveLength(1);
+  });
+
+  it('still rejects a sibling import of a concrete file that no organ owns', () => {
+    const violations = checkOrganBoundary(
+      organOwner([exemption({ consumers: ['**'] })]),
+      '/project/right',
+      evidence(
+        '/project/right/source.ts',
+        '../left/internal.js',
+        '/project/left/internal.ts',
+      ),
+    );
+
+    expect(violations).toHaveLength(1);
   });
 });

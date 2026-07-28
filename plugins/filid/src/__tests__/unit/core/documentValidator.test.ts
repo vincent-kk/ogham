@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   countLines,
   detectAppendOnly,
+  parseOrganExemptions,
   validateDetailAcceptanceGroups,
   validateDetailMd,
   validateIntentMd,
@@ -241,6 +242,87 @@ describe('document-validator', () => {
 
     it('should not flag when old content is empty (initial creation)', () => {
       expect(detectAppendOnly('', 'new content')).toBe(false);
+    });
+  });
+
+  describe('parseOrganExemptions', () => {
+    const exemptionSection = (
+      reason: string,
+      directImport = 'allowed',
+      consumers = '`**/src/hooks/**`',
+    ) =>
+      [
+        '## Organ Exemptions',
+        '',
+        '### shared — hook bundle isolation',
+        '',
+        `- **Consumers**: ${consumers}`,
+        `- **Direct import**: ${directImport}`,
+        `- **Reason**: ${reason}`,
+      ].join('\n');
+
+    it('returns nothing when the conditional section is absent', () => {
+      expect(parseOrganExemptions('## Requirements\n\n- none\n')).toEqual({
+        exemptions: [],
+        violations: [],
+      });
+    });
+
+    it('parses organ path, consumers, direct import and reason', () => {
+      const result = parseOrganExemptions(
+        exemptionSection('The barrel drags every re-export into the bundle.'),
+      );
+
+      expect(result.violations).toEqual([]);
+      expect(result.exemptions).toHaveLength(1);
+      expect(result.exemptions[0]).toMatchObject({
+        organPath: 'shared',
+        title: 'hook bundle isolation',
+        consumers: ['**/src/hooks/**'],
+        directImport: true,
+        reason: 'The barrel drags every re-export into the bundle.',
+      });
+    });
+
+    it('treats an empty reason as an unmet contract', () => {
+      const result = parseOrganExemptions(exemptionSection('   '));
+
+      expect(result.violations).toHaveLength(1);
+      expect(result.violations[0]).toMatchObject({
+        rule: 'missing-field',
+        severity: 'error',
+      });
+    });
+
+    it('reads entry-point consumers and a withheld direct import', () => {
+      const result = parseOrganExemptions(
+        exemptionSection(
+          'Stays put for LCA reasons.',
+          'not allowed',
+          'entry-point',
+        ),
+      );
+
+      expect(result.exemptions[0]).toMatchObject({
+        consumers: ['entry-point'],
+        directImport: false,
+      });
+    });
+
+    it('surfaces exemptions and their violations through validateDetailMd', () => {
+      const content = [
+        '## Requirements',
+        '## API Contracts',
+        '## Acceptance Criteria',
+        '### AC-one — First',
+        '## Last Updated',
+        '2026-07-28',
+        exemptionSection(''),
+      ].join('\n');
+      const result = validateDetailMd(content);
+
+      expect(result.organExemptions).toHaveLength(1);
+      expect(result.valid).toBe(false);
     });
   });
 });

@@ -64,6 +64,11 @@ export async function createProjectSnapshot(
       .map((node) => node.path),
     dependencies.references,
     dependencies.certainty,
+    {
+      organPaths: [...tree.nodes.values()]
+        .filter((node) => node.type === 'organ')
+        .map((node) => node.path),
+    },
   );
   const verificationClaims = await collectVerificationClaims(
     root,

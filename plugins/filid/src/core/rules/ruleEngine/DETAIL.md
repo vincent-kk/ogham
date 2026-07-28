@@ -12,6 +12,18 @@
   평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를
   평가하고 root DETAIL migration target을 suggestion으로 반환한다.
+- `external-import-boundary`는 대상이 organ 파일이면 진입점 경유가 아니라
+  **소비자 위치**로 판정한다. organ은 진입점을 갖지 않으므로 경유할 대상이
+  없다.
+
+  | 소비자 위치         | 참조 경로            | 판정                             |
+  | ------------------- | -------------------- | -------------------------------- |
+  | 소유 프랙탈 subtree | organ 구체 파일 직접 | 통과                             |
+  | subtree 밖          | organ 구체 파일 직접 | 위반 — 선언된 면책이 있으면 통과 |
+
+- 면책은 소유 프랙탈 DETAIL.md의 `## Organ Exemptions` 선언에서 온다. 대상
+  organ이 일치하고, `Direct import`가 allowed이며, consumer glob이 소비 파일에
+  매치하고, `Reason`이 비어 있지 않을 때만 통과시킨다.
 
 ## API Contracts
 
@@ -40,6 +52,15 @@
 - legacy criteria evidence가 없으면 rule이 통과하고, 있으면 ledger path에서
   violation과 root DETAIL migration suggestion을 한 번 반환한다.
 
+### AC-rules-organ-boundary — 소비자 위치 기준 organ 접근
+
+- 소유 프랙탈 subtree 안의 fractal이 그 프랙탈 소유 organ 파일을 직접
+  참조하면 통과한다.
+- subtree 밖에서의 직접 참조는 위반이며, organ을 소유하지 않은 구체 파일
+  참조는 기존 진입점 규칙 그대로 위반으로 남는다.
+- 소유 프랙탈 DETAIL.md의 유효한 면책 선언이 있으면 통과하고, reason 부재·
+  direct import 미허용·consumer 불일치는 통과시키지 않는다.
+
 ### AC-rules-granularity — 중복 없는 평가
 
 - project rule finding은 tree node 수와 무관하게 한 번만 생성된다.
@@ -51,4 +72,4 @@
 
 ## Last Updated
 
-2026-07-27 — legacy ledger migration을 포함한 snapshot-aware 15-rule 계약으로 갱신했다.
+2026-07-28 — organ 접근을 소비자 위치로 판정하고 DETAIL 면책 선언을 boundary rule에 연결했다.

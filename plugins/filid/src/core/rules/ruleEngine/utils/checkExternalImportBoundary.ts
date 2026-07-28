@@ -10,6 +10,9 @@ import type {
   ProjectSnapshot,
 } from '../../../../types/fractal.js';
 import type { RuleViolation } from '../../../../types/rules.js';
+import { resolveOwningOrganPath } from '../../../analysis/dependencyGraph/index.js';
+
+import { isOrganExemptionGranted } from './isOrganExemptionGranted.js';
 
 const RULE_ID = 'external-import-boundary';
 
@@ -33,6 +36,14 @@ function hasEntryPoint(node: FractalNode, path: string): boolean {
  *
  * External owners use the target entry point directly. Internal implementation
  * files use concrete peers, while an entry point may expose its own internals.
+ *
+ * An organ has no entry point, so "route through the entry point" cannot apply
+ * to it — organ access is judged by where the consumer sits instead. Inside the
+ * owner's subtree a direct import is the shape LCA placement produces and is
+ * allowed; outside it needs an exemption declared in the owner's DETAIL.md.
+ *
+ * The edge has already promoted the organ to its owning fractal, so the organ
+ * identity is recovered from `evidence.resolvedPath`.
  */
 export function checkExternalImportBoundary(context: {
   snapshot: ProjectSnapshot;
@@ -50,6 +61,26 @@ export function checkExternalImportBoundary(context: {
     if (!sourceNode || !targetNode) continue;
 
     for (const evidence of edge.evidence) {
+      const organPath = resolveOwningOrganPath(
+        targetNode.organPaths,
+        targetNode.path,
+        evidence.resolvedPath,
+      );
+      if (organPath !== null) {
+        if (isPathWithin(targetNode.path, evidence.sourceFile)) continue;
+        if (isOrganExemptionGranted(targetNode, organPath, evidence.sourceFile))
+          continue;
+        violations.push({
+          ruleId: RULE_ID,
+          severity: 'error',
+          message: `Import "${evidence.rawSpecifier}" reaches organ "${organPath}" from outside its owner "${targetNode.path}".`,
+          path: evidence.sourceFile,
+          suggestion:
+            'Promote the organ to a fractal, move it to its consumers lowest common fractal, or declare the exemption with a reason under "## Organ Exemptions" in the owner DETAIL.md.',
+        });
+        continue;
+      }
+
       const sameOwner = samePath(sourceNode.path, targetNode.path);
       const sourceIsEntryPoint = hasEntryPoint(sourceNode, evidence.sourceFile);
       const targetIsEntryPoint = hasEntryPoint(

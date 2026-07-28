@@ -235,6 +235,59 @@ describe('dependency-graph', () => {
       );
     });
 
+    it('keeps an owned-organ reference as evidence without making it a cycle edge', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/hooks/index.ts',
+          rawSpecifier: './pre/pre.js',
+          resolvedPath: '/project/hooks/pre/pre.ts',
+          kind: 're-export',
+        },
+        {
+          sourceFile: '/project/hooks/pre/pre.ts',
+          rawSpecifier: '../shared/shared.js',
+          resolvedPath: '/project/hooks/shared/shared.ts',
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        ['/project/hooks', '/project/hooks/pre'],
+        references,
+        'exact',
+        { organPaths: ['/project/hooks/shared'] },
+      );
+
+      expect(graph.cycles).toEqual([]);
+      expect(graph.edges).toHaveLength(2);
+    });
+
+    it('still reports a cycle when a child imports the parent entry point', () => {
+      const references: DependencyReference[] = [
+        {
+          sourceFile: '/project/hooks/index.ts',
+          rawSpecifier: './pre/pre.js',
+          resolvedPath: '/project/hooks/pre/pre.ts',
+          kind: 're-export',
+        },
+        {
+          sourceFile: '/project/hooks/pre/pre.ts',
+          rawSpecifier: '../index.js',
+          resolvedPath: '/project/hooks/index.ts',
+          kind: 'static',
+        },
+      ];
+
+      const graph = buildDependencyGraph(
+        ['/project/hooks', '/project/hooks/pre'],
+        references,
+        'exact',
+        { organPaths: ['/project/hooks/shared'] },
+      );
+
+      expect(graph.cycles).toHaveLength(1);
+    });
+
     it('aggregates and sorts evidence for the same owner pair', () => {
       const references: DependencyReference[] = [
         {

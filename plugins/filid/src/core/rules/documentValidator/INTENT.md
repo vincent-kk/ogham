@@ -9,6 +9,7 @@ INTENT.md(50줄 제한)의 3-tier 경계와 DETAIL.md(append-only 방지)의 현
 - `validateIntentMd.ts` — 50줄 제한 + 3-tier boundary 존재 검사
 - `validateDetailMd.ts` — append-only와 acceptance group 검사 조합
 - `acceptanceGroups/` — 필수 section과 안정 group ID 검사 organ
+- `organExemptions/` — 조건부 `## Organ Exemptions` 선언 파서 organ
 - `countLines.ts` — 줄 수 계산
 
 ## Boundaries

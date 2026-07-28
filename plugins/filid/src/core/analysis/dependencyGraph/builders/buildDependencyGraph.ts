@@ -9,14 +9,45 @@ import { detectCycles } from '../detectCycles.js';
 
 import { canonicalizeNodePaths } from './canonicalizeNodePaths.js';
 import { resolveOwnerPath } from './resolveOwnerPath.js';
+import { resolveOwningOrganPath } from './resolveOwningOrganPath.js';
+
+interface DependencyGraphOptions {
+  /** Classified organ paths; enables owned-organ cycle exclusion when supplied. */
+  organPaths?: readonly string[];
+}
+
+/**
+ * Is this a reference to an organ the target owner owns, made from inside that
+ * owner's own subtree?
+ *
+ * Such a reference is internal to the owner, not a dependency pointing at it.
+ * Counting it as an edge makes the normal FCA shape — a parent barrel
+ * re-exporting a child that reads a parent-owned organ — look like a cycle.
+ */
+function isOwnedOrganReference(
+  organPaths: readonly string[],
+  toFractalPath: string,
+  evidence: DependencyEvidence,
+): boolean {
+  if (organPaths.length === 0) return false;
+  if (resolveOwnerPath([toFractalPath], evidence.sourceFile) === null)
+    return false;
+  return (
+    resolveOwningOrganPath(organPaths, toFractalPath, evidence.resolvedPath) !==
+    null
+  );
+}
 
 export function buildDependencyGraph(
   nodePaths: readonly string[],
   references: readonly DependencyReference[],
   certainty: AnalysisCertainty = 'exact',
+  options: DependencyGraphOptions = {},
 ): DependencyGraph {
   const sortedNodePaths = canonicalizeNodePaths(nodePaths);
+  const organPaths = options.organPaths ?? [];
   const grouped = new Map<string, DependencyGraphEdge>();
+  const cycleEdgeKeys = new Set<string>();
   let graphCertainty = certainty;
 
   for (const reference of references) {
@@ -50,6 +81,8 @@ export function buildDependencyGraph(
     };
     edge.evidence.push(evidence);
     grouped.set(key, edge);
+    if (!isOwnedOrganReference(organPaths, toFractalPath, evidence))
+      cycleEdgeKeys.add(key);
   }
 
   const edges = [...grouped.values()]
@@ -73,6 +106,11 @@ export function buildDependencyGraph(
     cycles: [],
     certainty: graphCertainty,
   };
-  graph.cycles = detectCycles(graph);
+  graph.cycles = detectCycles({
+    ...graph,
+    edges: edges.filter((edge) =>
+      cycleEdgeKeys.has(`${edge.fromFractalPath}\0${edge.toFractalPath}`),
+    ),
+  });
   return graph;
 }

@@ -23,6 +23,7 @@ ProjectSnapshot의 문서, node, entry, boundary, DAG, verification과 legacy mi
 - built-in ID를 canonical 15개 집합과 일치
 - thrown check와 unsupported evidence를 PASS가 아닌 finding으로 변환
 - exemption/allowed scope를 portable path identity로 판정
+- organ 대상 boundary는 소비자 위치로 판정하고 면책은 소유 프랙탈 DETAIL 선언에서만 인정
 - external consumer가 사용할 수 있도록 named facade에서만 export
 - legacy criteria ledger를 project당 한 번 판정하고 root DETAIL target을 안내
 

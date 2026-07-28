@@ -1,7 +1,8 @@
 import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem/read/utf8';
-import { portableJoin } from '@ogham/cross-platform/paths';
+import { portableIsAbsolute, portableJoin } from '@ogham/cross-platform/paths';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
+import type { OrganExemptionDeclaration } from '../../../types/documents.js';
 import type {
   DocumentContractFinding,
   FractalTree,
@@ -13,6 +14,22 @@ import {
   validateDetailMd,
   validateIntentMd,
 } from '../../rules/documentValidator/index.js';
+
+/**
+ * Resolve each declared organ path against the fractal that declared it, so the
+ * rule engine compares absolute paths without re-reading the document.
+ */
+function normalizeExemptions(
+  ownerPath: string,
+  exemptions: readonly OrganExemptionDeclaration[],
+): OrganExemptionDeclaration[] {
+  return exemptions.map((exemption) => ({
+    ...exemption,
+    organPath: portableIsAbsolute(exemption.organPath)
+      ? exemption.organPath
+      : portableJoin(ownerPath, exemption.organPath),
+  }));
+}
 
 export interface CollectedDocumentEvidence {
   detailDocuments: DetailContractDocument[];
@@ -51,14 +68,21 @@ export function collectDocumentEvidence(
         severity: 'error',
       });
 
+    let organExemptions: OrganExemptionDeclaration[] | undefined;
     if (detailContent !== null) {
       filePaths.push(detailPath);
+      const detail = validateDetailMd(detailContent);
       findings.push(
-        ...validateDetailMd(detailContent).violations.map((finding) => ({
+        ...detail.violations.map((finding) => ({
           document: 'detail' as const,
           ...finding,
         })),
       );
+      if (detail.organExemptions.length > 0)
+        organExemptions = normalizeExemptions(
+          node.path,
+          detail.organExemptions,
+        );
       if (node.type !== 'organ')
         detailDocuments.push({
           ownerFractalPath: node.path,
@@ -87,6 +111,7 @@ export function collectDocumentEvidence(
           ? 'violations'
           : 'valid',
       findings,
+      ...(organExemptions ? { organExemptions } : {}),
     };
     diagnostics.push(
       ...findings.map((finding) => ({

@@ -12,6 +12,17 @@ import {
   SOURCE_EXTENSIONS,
 } from './ecmascriptConventions.js';
 
+/**
+ * Kind reported for a path the project injected through config
+ * `entryPointOverrides`.
+ *
+ * Never `module`: classification reads that kind alone, so a module override
+ * would let one config line turn any directory into a fractal. Never
+ * `framework` either — that derives `surface: 'opaque'`, which would make every
+ * legitimate override a standing `entry-point-surface` warning.
+ */
+const DECLARED_OVERRIDE_KIND = 'executable' as const;
+
 function findNearestPackage(directoryPath: string): string | null {
   let current = directoryPath;
   for (;;) {
@@ -72,9 +83,9 @@ export function findEntryPoints(
     const extension = extname(name);
     const stem = basename(name, extension);
     let kind: EntryPointDescriptor['kind'] | null = null;
-    if (overrides.includes(name)) kind = 'module';
-    else if ((MODULE_ENTRY_BASENAMES as readonly string[]).includes(stem))
+    if ((MODULE_ENTRY_BASENAMES as readonly string[]).includes(stem))
       kind = 'module';
+    else if (overrides.includes(name)) kind = DECLARED_OVERRIDE_KIND;
     else if ((EXECUTABLE_ENTRY_BASENAMES as readonly string[]).includes(stem))
       kind = 'executable';
     else if (

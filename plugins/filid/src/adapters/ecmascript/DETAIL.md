@@ -4,8 +4,14 @@
 
 - adapter는 현재 생태계 source file과 package/framework evidence를 탐지한다.
 - module, executable과 framework entry point를 exact path와 adapter ID로 보고한다.
-- config가 이 adapter에 전달한 exact peer filename은 module entry override로
-  해석한다.
+- config가 이 adapter에 전달한 exact peer filename은 declared entry override로
+  해석하며 **`kind: 'module'`로 보고하지 않는다.** module은 adapter가 스스로
+  알아본 module index에만 쓰는 kind이고, 분류기는 그 kind 하나만 읽는다.
+  override가 module이면 config 한 줄이 디렉터리를 fractal로 바꿔버린다.
+- override는 `kind: 'executable'`, `surface: 'enumerated'`로 보고한다.
+  `framework`는 surface를 `opaque`로 끌어내려 정당한 override마다 영구적인
+  `entry-point-surface` 경고를 만든다 — override는 그 규칙의 입력이지
+  위반 원인이 아니다.
 - entry point의 named exports, direct declarations와 certainty를 lexical scan으로 판정한다.
 - static/dynamic import와 re-export 중 project-internal dependency를 추출하고
   local specifier를 정규화한다.
@@ -40,6 +46,8 @@
 
 - module·executable·framework entry point를 구분하고 named surface를 검사한다.
 - 다른 adapter ID의 override와 섞지 않고 전달된 exact filename만 인식한다.
+- override로 주입된 경로는 `module`이 아닌 kind로 보고하고, 같은 호출에서
+  실제 module index는 계속 `module`로 보고한다.
 - 주석과 문자열 안의 가짜 import/export를 무시한다.
 - 외부 package import는 project DAG를 indeterminate로 만들지 않으며
   해석되지 않은 local import는 숨기지 않는다.
@@ -56,4 +64,4 @@
 
 ## Last Updated
 
-2026-07-27 — project dependency 경계와 adapter별 entry override를 명시했다.
+2026-07-28 — config entry override를 module이 아닌 kind로 분리해 분류 입력에서 제외했다.

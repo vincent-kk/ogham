@@ -88,7 +88,9 @@ describe('ecmascript structure adapter', () => {
       await ecmascriptStructureAdapter.findEntryPoints(directory, [
         'public.ts',
       ]),
-    ).toEqual([expect.objectContaining({ path: configured, kind: 'module' })]);
+    ).toEqual([
+      expect.objectContaining({ path: configured, kind: 'executable' }),
+    ]);
   });
 
   it('reports framework-owned entry points from package evidence', async () => {
@@ -178,5 +180,29 @@ describe('ecmascript structure adapter', () => {
     );
     expect(inspection.hasDirectDeclarations).toBe(true);
     expect(inspection.certainty).toBe('exact');
+  });
+
+  it('reports a config-injected entry override as a non-module kind', async () => {
+    const root = project();
+    write(root, 'surface.ts', 'export const surface = true;');
+
+    const entries = await ecmascriptStructureAdapter.findEntryPoints(root, [
+      'surface.ts',
+    ]);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].kind).not.toBe('module');
+    expect(entries[0].surface).toBe('enumerated');
+  });
+
+  it('still reports a recognized module index as a module entry', async () => {
+    const root = project();
+    write(root, 'index.ts', 'export const value = true;');
+
+    const entries = await ecmascriptStructureAdapter.findEntryPoints(root, [
+      'surface.ts',
+    ]);
+
+    expect(entries.map((entry) => entry.kind)).toEqual(['module']);
   });
 });

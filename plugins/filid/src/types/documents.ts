@@ -76,6 +76,32 @@ export interface DetailMdValidation {
   violations: DocumentViolation[];
   /** Stable acceptance groups extracted from the current document */
   acceptanceGroups: DetailAcceptanceGroup[];
+  /** Organ exemptions this fractal declares (empty when the section is absent) */
+  organExemptions: OrganExemptionDeclaration[];
+}
+
+/**
+ * One `## Organ Exemptions` entry in a DETAIL.md.
+ *
+ * The section is conditional: only a fractal that actually grants an exemption
+ * carries it. `reason` is load-bearing — an empty one is an unmet contract, not
+ * a granted exemption.
+ */
+export interface OrganExemptionDeclaration {
+  /** Organ path exactly as declared; normalized against the owner when stored */
+  organPath: string;
+  title: string;
+  /** Consumer globs, or the literal `entry-point` for barrel-only access */
+  consumers: string[];
+  /** True only for an explicit `Direct import: allowed` */
+  directImport: boolean;
+  reason: string;
+  line: number;
+}
+
+export interface OrganExemptionValidation {
+  exemptions: OrganExemptionDeclaration[];
+  violations: DocumentViolation[];
 }
 
 export interface DetailAcceptanceGroup {

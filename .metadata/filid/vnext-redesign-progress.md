@@ -11,8 +11,8 @@
 
 ## 현재 상태
 
-- 진행 중: 작업 10(감사·최종 검증)과 작업 11(merge-track 5스킬 재작성)
-- 완료: 작업 0–9
+- 진행 중: 작업 10(감사·최종 검증)의 잔여 finding 분류
+- 완료: 작업 0–9, 작업 11, 작업 12
 - **계획 개정 (2026-07-28)**: 소유자 판단으로 merge-track 절차
   `pull-request` → `cross-review` → `resolve` → `revalidate`와 이를 잇는
   `pipeline`을 필수 부속으로 되살린다. 유지 스킬 8 → **12**, AC-19 갱신,
@@ -38,7 +38,7 @@
   확인됐다. `persistSave → writeConfig`(v2 strict schema)와
   `buildSettingsState → loadConfig`(`adapters`·`structure` 판독) 경로가
   동작하므로 AC-24(`config-wizard` 없이 config 관리 완결)의 단위 근거가 섰다.
-- 최종 검증 대기: `yarn filid test:e2e`(Playwright) 미실행
+- 해소됨(2026-07-28): `yarn filid test:e2e`를 처음 실행했다 — 6 passed / 2 skipped, exit 0.
 - 작업 10 이월: `initProject(projectRoot, options?: string |
 InitProjectOptions)`의 문자열 호환 shim 제거 (저장소 규칙 — 리팩터 완료
   후 호환 shim 제거)
@@ -803,6 +803,60 @@ boundary`. 즉 상당수가 **organ(`constants/`, `types/`) 직접 import**,
 skills 오탐이 완전히 사라졌다(AC-25의 스캔 수준 근거). 남은 630건은 대상 3(organ 소비자 위치 판정)이 처리할 몫이며 아직 손대지 않았다.
 
 **남은 대상 5개**: `findEntryPoints`의 kind 분리, `checkExternalImportBoundary`의 organ 판정과 면책, `dependencyGraph`의 organ edge 승격 제외, `documentValidator`의 `Organ Exemptions` 파서, `.filid/config.json`의 `SKILL.md` 제거.
+
+### 작업 12 완료 — organ 경계와 면책 (6/6)
+
+**fail-first**: 네 파일에 12개 케이스를 먼저 추가해 8건이 RED임을 확인했다. `importBoundary.test.ts`의 "소유 subtree 안 organ 직접 참조는 통과" 케이스는 처음에 **공허하게 통과**했다 — fixture에 `/project/left/nested` 노드가 없어 `checkExternalImportBoundary`가 edge를 통째로 건너뛰었기 때문이다. 노드를 추가해 진짜 RED로 만든 뒤 진행했다. 나머지 4건(소유 밖 직접 참조, reason 부재, direct import 미허용, consumer 불일치)과 graph·adapter의 대조군 2건은 처음부터 GREEN이며, 변경 후에도 GREEN이어야 "규칙이 느슨해진 게 아니라 대상이 바뀌었다"가 증명된다.
+
+**변경**:
+
+- `findEntryPoints` — config override를 `kind: 'executable'` / `surface: 'enumerated'`로 보고한다. module index 인식이 먼저 오므로 `index.ts`는 계속 `module`이다. `framework`를 고르지 않은 이유는 계획 원장에 적었다.
+- `resolveOwningOrganPath(organPaths, ownerPath, filePath)` — `filePath`를 담으면서 `ownerPath` 안에 있는 가장 깊은 organ. organ이 fractal의 조상일 수도 있으므로 owner 안 containment를 요구한다. `dependencyGraph` 진입점에서 공개해 graph와 rule engine이 같은 판정을 쓴다.
+- `buildDependencyGraph(..., { organPaths })` — owned-organ 참조를 edge로는 보존하되 cycle adjacency에서만 뺀다. 삭제하지 않은 이유는 `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다 — 지우면 LCA 배치가 내부 소비자에 눈이 먼다.
+- `checkExternalImportBoundary` — organ 대상이면 소비자 위치로 판정하고, 소유 subtree 밖이면 면책을 조회한다. finding 메시지는 organ 경로와 소유자를 함께 밝히고 세 가지 해소책(fractal 승격 / LCA 이동 / 면책 선언)을 제시한다.
+- `parseOrganExemptions` + `isOrganExemptionGranted` — 파서는 `documentValidator/organExemptions/` organ에 두고, consumer 매칭은 기존 `isExempt` glob을 재사용한다. 면책 인정 조건 넷(organ 일치·direct import 허용·consumer 매치·reason 비어있지 않음)은 각각 테스트가 붙어 있다.
+- `collectDocumentEvidence` — 선언된 organ path를 소유 프랙탈 기준 절대 경로로 정규화해 `node.documentEvidence.organExemptions`에 보존한다. 이미 hash 입력에 든 필드라 snapshot hash 계약이 자동으로 따라온다.
+- `.filid/config.json` — `entryPointOverrides.ecmascript`의 `SKILL.md`를 제거했다. 참고로 이 override는 이미 무효였다 — `findEntryPoints`가 `SOURCE_EXTENSIONS` 필터를 먼저 적용하고 `.md`는 그 목록에 없다. 진행 원장 「원인 2」가 지목한 기전은 실제로는 동작하지 않았고, skills 오탐을 만든 것은 분류 기본값 하나였다.
+
+**검증**: `yarn filid typecheck` exit 0 · `yarn filid test:run` 78 files / **825 passed** / 7 skipped, exit 0 · `yarn filid build` exit 0(훅 번들 가드 통과) · `yarn filid test:e2e` **첫 실행, 6 passed / 2 skipped**(skip 2건은 optional rule이 없을 때 건너뛰도록 파일 상단에 사유가 적힌 조건부 skip) · `yarn plugin:adapters:check` — filid stale 0(보고된 stale 1건은 `plugins/imbas/.codex-plugin/skills/pipeline/references/blocker-report.md`로 이 작업과 무관한 다른 플러그인) · `git diff --check` exit 0 · 최종 `rg` 게이트의 잔여 매치는 전부 "의존하지 않는다" 선언, 제거된 도구 oracle, 훅 번들 가드 자체다.
+
+**자체 재스캔 실측** (`build:mcp` 후 새 번들을 stdio로 직접 구동):
+
+| 지표         | 작업 12 이전 | 분류 사다리 후 | 최종    |
+| ------------ | ------------ | -------------- | ------- |
+| findingCount | 832          | 707            | **278** |
+| passed       | 1175         | 1193           | 1201    |
+
+`passed`는 finding 수가 아니라 rule 평가 횟수라 트리 노드 수에 따라 흔들린다. `test:e2e`를 돌린 뒤 재측정하면 1209인데, Playwright가 만드는 gitignore 대상 `plugins/filid/test-results/`가 노드로 잡히기 때문이다. 위 값은 깨끗한 트리 기준이며 findingCount 278은 양쪽에서 같다.
+| `external-import-boundary` | 708 | 630 | **200** |
+| `circular-dependency` | 3 | 2 | **1** |
+| `zero-peer-file` | 59 | 28 | 28 |
+| `entry-point-surface` | 22 | 22 | 22 |
+| `detail-document-contract` | 20 | 15 | 15 |
+| `module-entry-point` | 9 | 4 | 4 |
+
+**면책 왕복을 실제 데이터로 증명**했다. `ruleEngine/DETAIL.md`에 `## Organ Exemptions`로 `utils` ← `**/src/__tests__/**`를 일시 선언하고 세 번 재스캔했다.
+
+| 상태                    | findingCount | organ 대상 | 비고                                            |
+| ----------------------- | ------------ | ---------- | ----------------------------------------------- |
+| 선언 없음               | 278          | 17         | 기준선                                          |
+| 유효한 선언             | 276          | 15         | 정확히 대상 2건만 통과                          |
+| 같은 선언, reason 빈 값 | 279          | 17         | 위반 복귀 + `detail-document-contract` 1건 추가 |
+
+프로브는 되돌렸다. 이 저장소에 남은 organ 위반 17건 중 15건이 `src/__tests__`가 내부 organ을 직접 찌르는 형태인데, 옳은 해소는 면책 선언이 아니라 테스트 콜로케이션이거나 진입점 경유다 — 저장소 소유자 판단이므로 작업 12에서 결정하지 않았다.
+
+**남은 cycle 1건의 원인을 특정했다.** `src -> src/mcp/server -> src`이며 organ 인공물이 **아니다**. `src/mcp/server/createServer.ts`가 `src/version.ts`(= `src`의 root peer)를 import해 `src/mcp/server -> src` edge가 생기고, `src/__tests__/**`(= `src` 소유 organ)가 `src/mcp/server/*`를 import해 반대 방향 edge가 생긴다. `version.ts`는 아무것도 import하지 않으므로 런타임 순환은 없다. 이것은 organ 참조가 아니라 **조상 peer file 참조**의 승격이므로 작업 12의 범위(AC-27) 밖이다. 확장할지는 별도 spec 결정이다.
+
+**프로덕션 boundary 위반 2건은 면책 대상이 아니라 import 오류다.** `ruleEngine/loadBuiltinRules.ts`와 `utils/checkZeroPeerFile.ts`가 `configLoader/loaders/configSchemas.js`에서 `AllowedPeerOverride`를 직접 가져오는데, 같은 심볼이 `configLoader` 진입점에 이미 있다. 규칙이 제 일을 한 것이며 수정은 작업 10의 finding 해소 몫으로 남긴다.
+
+**계획 이탈**:
+
+- `findEntryPoints`의 override kind로 `framework` 대신 `executable`을 골랐다. 계획은 "서로 다른 kind"만 요구하고 어느 것인지는 열어 뒀는데, `framework`는 `surface: 'opaque'`를 파생시켜 정당한 override마다 `entry-point-surface` 경고를 영구적으로 만든다. 계획이 override를 "`entry-point-surface`의 입력"이라고 규정한 것과 모순되므로 enumerated를 보존하는 쪽을 택했다. 사유를 계획 원장과 adapter DETAIL에 적었다.
+- `dependencyGraph`에서 organ edge를 제거하지 않고 cycle adjacency에서만 뺐다. 계획 문구는 "부모 fractal edge로 승격하지 않는다"인데, 승격 자체를 없애면 `restructure_plan`의 소비자 계산 증거가 사라진다. 모듈 INTENT가 이미 same-owner edge에 같은 정책을 쓰고 있어 그 형태를 따랐다.
+- `ecmascriptStructureAdapter.test.ts`의 기존 케이스 "interprets only exact configured peer names as entry overrides"에서 `kind: 'module'` 기대를 `'executable'`로 바꿨다. 그 케이스의 주제(정확한 이름만 인식)는 그대로이고 kind는 부수 단언이었다. 계약 변경에 따른 갱신이며 green-washing이 아니다.
+- 공개 DTO 두 곳을 넓혔다: `DetailMdValidation.organExemptions`와 `FractalDocumentEvidence.organExemptions`. 후자는 `snapshotStructureInput`이 이미 `documentEvidence`를 hash 입력에 넣고 있어 hash 계약이 자동으로 따라온다. `ProjectSnapshot`의 최상위 필드는 늘리지 않았다.
+
+- 상태: 완료.
 
 ## 최종 Acceptance Criteria
 
