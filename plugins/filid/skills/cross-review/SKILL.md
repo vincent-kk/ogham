@@ -13,7 +13,7 @@ plugin: filid
 Run this skill as one continuous operation. Intermediate evidence and reviewer
 files are internal artifacts; do not ask whether to continue between phases.
 Yield only for an unrecoverable source-state error or after a sealed terminal
-verdict.
+verdict and its pull-request delivery.
 
 ## References
 
@@ -205,11 +205,34 @@ mcp__plugin_filid_tools__review_state({
 })
 ```
 
-The run is complete only when status is `ok` and disposition is `sealed`. Then
-emit exactly:
+The run is complete only when status is `ok` and disposition is `sealed`.
+
+Immediately continue to Step 6.
+
+## Step 6 — Publish the Verdict to the Pull Request
+
+Determine whether the current branch has a pull request, through whatever
+pull-request access the host provides. No tool is named here on purpose: this
+step states the requirement, and the executing agent uses whatever access it
+has.
+
+| Situation                          | Action                                                 |
+| ---------------------------------- | ------------------------------------------------------ |
+| The branch has a pull request      | Post the comment from `templates.md` — one per branch  |
+| The branch has no pull request     | Skip; record `pr-comment: none` in the terminal output |
+| Pull-request access is unavailable | Skip; record `pr-comment: unavailable`                 |
+| Posting fails                      | Skip; record `pr-comment: failed` with the reason      |
+
+A missing, unavailable, or failed comment never changes the verdict and never
+fails the run — the sealed report is the record, and the comment is a delivery of
+it. This step runs after the seal so the comment can only ever describe a sealed
+verdict.
+
+Then emit exactly:
 
 ```text
 Review verdict: <APPROVED|REQUEST_CHANGES|INCONCLUSIVE>
+PR comment: <posted|updated|none|unavailable|failed>
 ```
 
 ## Options
@@ -224,8 +247,10 @@ Review verdict: <APPROVED|REQUEST_CHANGES|INCONCLUSIVE>
 
 - Exactly three FCA perspectives plus one adversarial arbitration.
 - One snapshot identity across scan, structure, and verification evidence.
-- No project source edits, file moves, import rewrites, commits, pushes, or PR
-  operations.
-- No terminal verdict before a successful review-state seal.
+- No project source edits, file moves, import rewrites, commits, or pushes. The
+  only pull-request action is posting or updating this skill's own verdict
+  comment; nothing about the pull request's state is changed.
+- No terminal verdict before a successful review-state seal, and no comment
+  before it either.
 - Output language follows `[filid:lang]`; paths, identifiers, and rule IDs remain
   unchanged.

@@ -86,7 +86,46 @@ verdict: PASS | FAIL | INCONCLUSIVE
 <One paragraph: what closed, what is open, and what the next action is.>
 ```
 
-## §4 Failure handling
+## §4 PR comment format
+
+Posted only when the branch has a pull request. The verdict table stays
+**outside** the collapsible section so the result reads without expanding
+anything.
+
+```markdown
+## Re-validation — <✅ PASS | ❌ FAIL | ⚠️ INCONCLUSIVE>
+
+| Field    | Value                                                            |
+| -------- | ---------------------------------------------------------------- |
+| Verdict  | <PASS \| FAIL \| INCONCLUSIVE>                                   |
+| Branch   | `<branch>`                                                       |
+| Baseline | `<resolve_commit_sha>` → `<head_sha>`                            |
+| Accepted | <r> resolved · <u> unresolved · <k> unapplied · <i> inconclusive |
+| Rejected | <n> constitutional · <c> unconstitutional                        |
+
+<details><summary>Accepted items (<n>)</summary>
+
+<the Accepted Items table from re-validate.md>
+
+</details>
+
+<details><summary>Rejections</summary>
+
+<the Rejections table and its per-part judgement>
+
+</details>
+
+> Full report: `<REVIEW_DIR>/re-validate.md`
+```
+
+Rules:
+
+- Strip the raw frontmatter from any body copied into a `<details>` block — the table above already carries those fields.
+- Keep the comment within the host's comment size limit. When it would exceed, keep the table, replace the folded blocks with the report pointer, and say that the rest was truncated.
+- A comment carrying the `## Re-validation` heading is this skill's own. Update it in place rather than adding a second one, so repeated cycles leave one comment per branch.
+- On `PASS` the review directory is deleted in Step 8, so the report pointer names a path that no longer exists. Keep it anyway — it tells a reader where the record lived, and the comment itself carries the verdict.
+
+## §5 Failure handling
 
 | Situation                                    | Action                                                       |
 | -------------------------------------------- | ------------------------------------------------------------ |
@@ -95,9 +134,9 @@ verdict: PASS | FAIL | INCONCLUSIVE
 | Empty delta with accepted items              | Every accepted item is `unapplied`; verdict `FAIL`.          |
 | `review_state` disposition `missing`         | Abort. The review directory was removed before revalidation. |
 
-## §5 What this skill does not do
+## §6 What this skill does not do
 
 - It does not edit source, commit, or push.
 - It does not re-run `cross-review`. A new review is a new cycle.
 - It does not resolve debt records; 1.0 has no debt ledger.
-- It does not post a PR comment unless `--comment` is passed.
+- It does not post a PR comment when the branch has no pull request, and it does not open one.

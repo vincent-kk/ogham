@@ -105,6 +105,53 @@ FCA findings only:
 
 Cross-review never edits project files and never embeds an automatic patch.
 
+## PR Comment
+
+Posted only when the branch has a pull request. The verdict table stays **outside**
+the collapsible sections so the result reads without expanding anything; everything
+bulky is folded.
+
+```markdown
+## Code Review Governance — <verdict>
+
+| Field        | Value                                           |
+| ------------ | ----------------------------------------------- |
+| Verdict      | <APPROVED \| REQUEST_CHANGES \| INCONCLUSIVE>   |
+| Branch       | `<branch>`                                      |
+| Base         | `<base ref>`                                    |
+| Snapshot     | `<snapshot hash, or unavailable>`               |
+| Perspectives | contract · structure · verification             |
+| Findings     | <c> confirmed · <r> refuted · <i> indeterminate |
+| Generated    | <ISO 8601>                                      |
+
+<details><summary>Confirmed FCA findings (<c>)</summary>
+
+<the Confirmed FCA Findings table from review-report.md, or `None`>
+
+</details>
+
+<details><summary>Perspective results and arbitration</summary>
+
+<the Perspective Results and Arbitration Log tables from review-report.md>
+
+</details>
+
+<details><summary>Unresolved evidence</summary>
+
+<the gaps that forced INCONCLUSIVE>
+
+</details>
+
+> Full report: `<REVIEW_DIR>/review-report.md`
+```
+
+Rules:
+
+- Strip the report's raw frontmatter from any body copied into a `<details>` block — the table above already carries those fields.
+- Omit a `<details>` block whose content would be empty, except `Confirmed FCA findings`, which is always present so a reader sees a zero count rather than a missing section.
+- Keep the comment within the host's comment size limit. When it would exceed, keep the table and the confirmed-findings block, replace the remainder with the report pointer, and say that the rest was truncated.
+- A comment carrying the `## Code Review Governance` heading is this skill's own. Update that comment in place rather than adding a second one, so a re-run leaves one comment per branch.
+
 ## Terminal Output
 
 After a successful seal, emit exactly:

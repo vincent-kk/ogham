@@ -3,7 +3,8 @@
 ## Requirements
 
 - The sequence is Scope/State → Snapshot Evidence → three parallel FCA
-  perspectives → adversarial arbitration → report and seal.
+  perspectives → adversarial arbitration → report and seal → pull-request
+  delivery.
 - `review_state` owns branch keying, committed source identity, resume, cache,
   seal, and explicit cleanup. Skill text never derives or rewrites its paths.
 - Evidence uses only `fractal_scan`, project-mode `structure_validate`, and
@@ -19,6 +20,11 @@
   branch-scoped review artifacts managed by `review_state`.
 - A terminal verdict is legal only after `review-report.md` exists and
   `review_state(action: "seal")` succeeds.
+- The sealed verdict is delivered as a pull-request comment when the branch has
+  a pull request, and is not delivered when it has none. The comment carries a
+  verdict table outside its collapsible sections, stays within the host's comment
+  size limit, and replaces this skill's previous comment rather than accumulating.
+  A comment that cannot be posted never alters the verdict.
 - Calibration fixtures contain FCA findings only and are rerun after changes to
   finding scope, arbitration, or verdict derivation.
 
@@ -49,5 +55,5 @@ Opinion, arbitration, finding, and verdict schemas are defined in
 
 ## Last Updated
 
-2026-07-27 — Defined three FCA evidence perspectives and content-addressed
-review-state sealing.
+2026-07-29 — Added pull-request delivery of the sealed verdict, gated on the
+branch having a pull request.

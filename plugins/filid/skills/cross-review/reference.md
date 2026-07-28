@@ -1,16 +1,16 @@
 # cross-review — Reference Index
 
-| File                        | Contents                                                                         |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| `specification.md`          | Public contract specification: run requirements and review-report frontmatter    |
-| `contracts.md`              | Scope, state lifecycle, evidence identity, opinion schema, arbitration, verdicts |
-| `templates.md`              | Canonical session, evidence, opinion, report, and fix-request layouts            |
-| `phases/evidence.md`        | Exact snapshot-backed evidence collection                                        |
-| `reviewers/contract.md`     | Contract perspective instructions                                                |
-| `reviewers/structure.md`    | Structure perspective instructions                                               |
-| `reviewers/verification.md` | Verification perspective instructions                                            |
-| `reviewers/adversarial.md`  | Candidate arbitration instructions                                               |
-| `calibration/`              | Clean, warning-only, seeded, and contract-change regression fixtures             |
+| File                        | Contents                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `specification.md`          | Public contract specification: run requirements and review-report frontmatter     |
+| `contracts.md`              | Scope, state lifecycle, evidence identity, opinion schema, arbitration, verdicts  |
+| `templates.md`              | Canonical session, evidence, opinion, report, fix-request, and PR comment layouts |
+| `phases/evidence.md`        | Exact snapshot-backed evidence collection                                         |
+| `reviewers/contract.md`     | Contract perspective instructions                                                 |
+| `reviewers/structure.md`    | Structure perspective instructions                                                |
+| `reviewers/verification.md` | Verification perspective instructions                                             |
+| `reviewers/adversarial.md`  | Candidate arbitration instructions                                                |
+| `calibration/`              | Clean, warning-only, seeded, and contract-change regression fixtures              |
 
 ## Cross-Reference Map
 
@@ -18,6 +18,7 @@
 - Starting or resuming a run → `contracts.md` → Review-State Lifecycle
 - Collecting tool evidence → `phases/evidence.md`
 - Writing an opinion → `contracts.md` → Opinion Contract
+- Delivering the verdict to a pull request → `templates.md` → PR Comment
 - Resolving disagreement → `contracts.md` → Arbitration Contract
 - Deriving a verdict → `contracts.md` → Verdict Derivation
 - Writing artifacts → `templates.md`
