@@ -35,7 +35,7 @@ You received real reviewer comments from a venue and must respond. Unlike `/praw
 
 ### Step 1 — Inputs & comment normalization (chair, direct)
 
-First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); all outputs go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
+First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../.shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); all outputs go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
 
 1. Take the paper and the external review comments (a file or pasted text). If either is missing, ask the user — this is the one valid yield point.
 2. Normalize the paper into `paper-normalized.md` (reuse if it already exists).

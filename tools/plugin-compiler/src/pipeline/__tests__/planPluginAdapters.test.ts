@@ -208,7 +208,7 @@ describe("planPluginAdapters", () => {
     expect(paths).toContain(".codex-plugin/skills/resolve/SKILL.md");
     expect(paths).toContain(".codex-plugin/skills/resolve/contracts.md");
     expect(paths).toContain(
-      ".codex-plugin/skills/_shared/personas/code-surgeon.md",
+      ".codex-plugin/skills/.shared/personas/code-surgeon.md",
     );
 
     const manifest = files.find((f) =>

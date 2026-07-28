@@ -16,7 +16,7 @@ import {
  * adding a name, verify (a) its persona spawns depend on the `subagent_type`
  * registry Codex lacks (so the injected protocol drives the load), and (b) its
  * skills reach their own sibling/persona files by paths that survive relocation
- * — a `${CLAUDE_PLUGIN_ROOT}`/Glob fallback or a `../_shared/` ref (copied along),
+ * — a `${CLAUDE_PLUGIN_ROOT}`/Glob fallback or a `../.shared/` ref (copied along),
  * NOT an actionable `../../agents/` persona path.
  *
  * - filid, imbas: registry spawns; live E2E confirmed (codex-cli 0.144.6) —
@@ -24,7 +24,7 @@ import {
  *   doc pointers, self-satisfied by the self-loaded persona (not an actionable
  *   load path).
  * - entrez, r-statistics: registry spawns, no actionable `../../agents/` path;
- *   sibling refs via `../_shared/` (copied along) or none. Static-verified.
+ *   sibling refs via `../.shared/` (copied along) or none. Static-verified.
  */
 const VARIANT_ENABLED_PLUGINS = new Set([
   "filid",
@@ -52,7 +52,7 @@ export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
  * `null` when it does not qualify. Every skill file is copied (discovery is
  * REPLACE, so the manifest can only point at a complete dir); spawn-bearing files
  * are rewritten to self-load their persona; each `agents/<id>.md` is dropped at
- * `_shared/personas/<id>.md`. Output is sorted by path for deterministic,
+ * `.shared/personas/<id>.md`. Output is sorted by path for deterministic,
  * idempotent re-emission. Claude's own `skills/` is never read from here (facts
  * carry the pristine source), so re-runs never double-inject.
  */

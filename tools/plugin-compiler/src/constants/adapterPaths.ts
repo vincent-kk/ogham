@@ -39,8 +39,8 @@ export const AGY_HOOKS_PATH = "hooks.json";
  * skills spawn subagents by `subagent_type: "<plugin>:<id>"` — a registry Codex
  * lacks. `buildCodexSkills` copies every skill file here (skill discovery is
  * REPLACE, so the whole dir must be present once the manifest points at it),
- * rewrites the spawn skills to self-load `_shared/personas/<id>.md`, and drops
- * each `agents/<id>.md` at `_shared/personas/<id>.md`. Claude keeps using
+ * rewrites the spawn skills to self-load `.shared/personas/<id>.md`, and drops
+ * each `agents/<id>.md` at `.shared/personas/<id>.md`. Claude keeps using
  * `skills/` unchanged. Lives under Codex's own convention dir so it collides with
  * neither `skills/` nor `.codex-plugin/{plugin,hooks}.json`.
  */

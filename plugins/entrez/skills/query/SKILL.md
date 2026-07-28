@@ -20,6 +20,6 @@ Produce a `QueryRole` query set for a topic and stop. This is stage ① only —
 
 ## Notes
 
-- Methodology SSoT: [`query-strategy.md`](../_shared/query-strategy.md) (`_shared`).
-- Field-tag pitfalls (quotes/wildcards reduce recall): [`../_shared/eutils.md`](../_shared/eutils.md).
+- Methodology SSoT: [`query-strategy.md`](../.shared/query-strategy.md) (`.shared`).
+- Field-tag pitfalls (quotes/wildcards reduce recall): [`../.shared/eutils.md`](../.shared/eutils.md).
 - To actually run the queries and get records, use the `search` skill.

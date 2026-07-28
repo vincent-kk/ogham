@@ -78,7 +78,7 @@ document absent         MISSING
 The default `min-quality` is 70. RICH documents are never edited.
 
 When `--include-detail` is present, score DETAIL.md against the required section
-set in [`../_shared/detail-template.md`](../_shared/detail-template.md).
+set in [`../.shared/detail-template.md`](../.shared/detail-template.md).
 DETAIL.md has no line cap, but every edit must restructure it as the current
 contract rather than append history.
 
@@ -126,7 +126,7 @@ For each approved item, give the LLM writer:
 - output language and snapshot hash.
 
 For INTENT.md, preserve the English anchors and the 50-line cap defined in
-[`../_shared/intent-template.md`](../_shared/intent-template.md).
+[`../.shared/intent-template.md`](../.shared/intent-template.md).
 
 Body text follows the resolved project language. For a public-boundary change,
 update INTENT.md before implementation; for
@@ -143,7 +143,7 @@ Validate each edited INTENT.md directly before invoking Filid:
 4. no unapproved document changed.
 
 Validate each edited DETAIL.md against the required section set in
-[`../_shared/detail-template.md`](../_shared/detail-template.md).
+[`../.shared/detail-template.md`](../.shared/detail-template.md).
 
 Then call:
 

@@ -2,7 +2,7 @@
 
 1종. `agents/paper-search-expert.md`. `search`(Dispatcher 겸)가 `Task(subagent_type: "entrez:paper-search-expert")`로 호출. 에이전트는 **MCP를 직접 호출**한다(r-statistics `r-expert`가 `run_r`를 부르듯, entrez 에이전트는 `mesh_lookup`·`paper_search`를 직접 부른다). 상태 전이는 Dispatcher가 담당하고, 에이전트는 추론 산출물(검색식 또는 랭킹)만 반환한다.
 
-핵심 원칙: **물리 1 에이전트 + 내부 2모드 논리 분리**. 한 에이전트가 검색 생성(WHAT)과 재랭킹(RANK)을 모두 맡되, 모드별로 prompt·출력 schema·평가기준을 분리한다. 검색식 방법론과 재랭킹 기준의 SSoT는 에이전트가 아니라 `skills/_shared/{query-strategy,rerank}.md`이며(중복 방지 — [spec.md](./spec.md) SSoT 표; `agents/`는 서브디렉토리 불가라 `_shared`에 둔다), 도구 I/O 계약은 [mcp-tools.md](./mcp-tools.md)가 단독 소유한다.
+핵심 원칙: **물리 1 에이전트 + 내부 2모드 논리 분리**. 한 에이전트가 검색 생성(WHAT)과 재랭킹(RANK)을 모두 맡되, 모드별로 prompt·출력 schema·평가기준을 분리한다. 검색식 방법론과 재랭킹 기준의 SSoT는 에이전트가 아니라 `skills/.shared/{query-strategy,rerank}.md`이며(중복 방지 — [spec.md](./spec.md) SSoT 표; `agents/`는 서브디렉토리 불가라 `.shared`에 둔다), 도구 I/O 계약은 [mcp-tools.md](./mcp-tools.md)가 단독 소유한다.
 
 ## frontmatter 형식
 
@@ -25,7 +25,7 @@ maxTurns: 15
 | ---------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`     | `paper-search-expert`                                                                | L4 정본 명칭.                                                                                                                                                                                                                                                                                                                                   |
 | `model`    | `sonnet`                                                                             | 두 모드 모두 schema-구속 작업(생성=구조화 검색식 목록, 재랭킹=pre-score된 top-N 채점)이라 발산 추론 부담이 작다. recall 안전망은 LLM이 아니라 **구조적 장치**(mesh_lookup MCP·`QueryRole` 스펙트럼·ESpell·결정론 union)가 보장하므로, 고빈도·저지연 실행자인 `r-expert`(sonnet) 역할에 더 가깝다. opus는 비채택(비용·반복 지연 대비 이득 작음). |
-| `tools`    | `Read`, `mcp_mesh_lookup`, `mcp_paper_search`(+ async `_start`/`_status`/`_results`) | `Read`=참조 문서(`skills/_shared/query-strategy.md`·`rerank.md`)·전달 컨텍스트 로드. `mesh_lookup`+`paper_search`(동기·대량 async 표면)만 — `fetch_fulltext`는 download 스킬 소관이라 미부여(검색·랭킹 책임 격리). `Bash`/`Grep`/`Glob` 미부여(파일시스템 작업 없음).                                                                           |
+| `tools`    | `Read`, `mcp_mesh_lookup`, `mcp_paper_search`(+ async `_start`/`_status`/`_results`) | `Read`=참조 문서(`skills/.shared/query-strategy.md`·`rerank.md`)·전달 컨텍스트 로드. `mesh_lookup`+`paper_search`(동기·대량 async 표면)만 — `fetch_fulltext`는 download 스킬 소관이라 미부여(검색·랭킹 책임 격리). `Bash`/`Grep`/`Glob` 미부여(파일시스템 작업 없음).                                                                           |
 | `maxTurns` | `15`                                                                                 | recall 루프 상한과 정렬: `recallIter≤4` × (mesh_lookup + paper_search + union 점검) + 검색식 emit + 여유. `operationBudget`(maxRequests·maxRecords·maxWallMs)과 이중 가드. 재랭킹 모드는 보통 1~3턴으로 종료.                                                                                                                                   |
 
 ## 단일 에이전트 · 내부 2모드
@@ -34,8 +34,8 @@ Dispatcher가 hand-off의 `mode` 필드로 분기시킨다. 두 모드는 **같�
 
 | 모드                 | 지향      | 질문                               | 입력                       | 출력 schema                                   | reference(SSoT)                    |
 | -------------------- | --------- | ---------------------------------- | -------------------------- | --------------------------------------------- | ---------------------------------- |
-| **생성**(generation) | recall    | WHAT을 어떻게 빠짐없이 검색할까    | topic + meshHints          | `{queries[]{term, role, breadth, rationale}}` | `skills/_shared/query-strategy.md` |
-| **재랭킹**(rerank)   | precision | 후보 중 무엇이 정보요구에 부합하나 | pre-score된 후보 records[] | `{ranked[]{pmid, score, reason}}`             | `skills/_shared/rerank.md`         |
+| **생성**(generation) | recall    | WHAT을 어떻게 빠짐없이 검색할까    | topic + meshHints          | `{queries[]{term, role, breadth, rationale}}` | `skills/.shared/query-strategy.md` |
+| **재랭킹**(rerank)   | precision | 후보 중 무엇이 정보요구에 부합하나 | pre-score된 후보 records[] | `{ranked[]{pmid, score, reason}}`             | `skills/.shared/rerank.md`         |
 
 ## 생성 모드 (WHAT · recall)
 
@@ -109,7 +109,7 @@ interface RerankOutput {
 
 - **호출**: Dispatcher가 `Task(subagent_type: "entrez:paper-search-expert")`로 모드를 지정해 호출. 상태 전이는 Dispatcher가 소유([dispatcher.md](./dispatcher.md)).
 - **MCP 직접 호출**: 에이전트가 `mcp_mesh_lookup`·`mcp_paper_search`를 직접 부른다. `paper_search` 내부의 결정론 단계(query_lint→count_probe→date_segment→fetch_ids→fetch_records(POST·batch)→partial_recovery)는 **코드 소관**이라 에이전트가 관여하지 않는다 — 에이전트는 `queries[]`를 주고 `union`을 받는다.
-- **참조 로드**: `Read`로 `skills/_shared/query-strategy.md`(생성)·`skills/_shared/rerank.md`(재랭킹)를 로드해 방법론을 적용한다. 방법론 본문은 에이전트 정의가 아니라 reference가 SSoT. (`agents/`는 서브디렉토리 불가 — 로더가 `agents/*.md`를 전부 에이전트로 취급 — 이므로 참조는 `skills/_shared/`에 둔다.)
+- **참조 로드**: `Read`로 `skills/.shared/query-strategy.md`(생성)·`skills/.shared/rerank.md`(재랭킹)를 로드해 방법론을 적용한다. 방법론 본문은 에이전트 정의가 아니라 reference가 SSoT. (`agents/`는 서브디렉토리 불가 — 로더가 `agents/*.md`를 전부 에이전트로 취급 — 이므로 참조는 `skills/.shared/`에 둔다.)
 
 ## hand-off 계약 (immutable · audit)
 

@@ -28,4 +28,4 @@ Configure the NCBI identifiers (`tool`, `email`) and optional `api_key`, and ver
 
 ## Recovery
 
-`auth_check` is the pre-flight and the recovery entry point (rate issues, missing identifiers). See [`../_shared/mcp-tools.md`](../_shared/mcp-tools.md).
+`auth_check` is the pre-flight and the recovery entry point (rate issues, missing identifiers). See [`../.shared/mcp-tools.md`](../.shared/mcp-tools.md).

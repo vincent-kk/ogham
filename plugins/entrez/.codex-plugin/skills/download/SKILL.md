@@ -22,5 +22,5 @@ Fetch full text for PMIDs/PMCIDs (or records from a prior `search`). Principle: 
 
 ## Notes
 
-- The tool resolves PMID → PMCID (idconv), checks OA/license, and resolves legacy OA package links to PMC AWS Open Data HTTPS URLs. Missing PDF/XML links fall back to `tgz`; set `extractFromTgz` to extract the requested PDF/XML member. Contract: [`../_shared/mcp-tools.md`](../_shared/mcp-tools.md).
+- The tool resolves PMID → PMCID (idconv), checks OA/license, and resolves legacy OA package links to PMC AWS Open Data HTTPS URLs. Missing PDF/XML links fall back to `tgz`; set `extractFromTgz` to extract the requested PDF/XML member. Contract: [`../.shared/mcp-tools.md`](../.shared/mcp-tools.md).
 - Files are written only inside the declared `outDir` (path-escape is refused).

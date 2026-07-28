@@ -1,6 +1,6 @@
 # entrez — 스킬
 
-**원칙**: 스킬 = 노출되는 **라우팅 인터페이스**(`SKILL.md` description이 상시 컨텍스트 점유). "모듈 입도 ≠ 스킬 입도" — 소스 모듈은 잘게 쪼개도 노출은 **4개**로 최소화하고, 검색식 방법론·E-utilities 제약은 lazy `references/`·`_shared/`로 격리. 스킬은 마크다운 only(소스코드 없음) — filid/imbas 패턴.
+**원칙**: 스킬 = 노출되는 **라우팅 인터페이스**(`SKILL.md` description이 상시 컨텍스트 점유). "모듈 입도 ≠ 스킬 입도" — 소스 모듈은 잘게 쪼개도 노출은 **4개**로 최소화하고, 검색식 방법론·E-utilities 제약은 lazy `references/`·`.shared/`로 격리. 스킬은 마크다운 only(소스코드 없음) — filid/imbas 패턴.
 
 ## SKILL.md frontmatter (filid/imbas 형식)
 
@@ -40,12 +40,12 @@ skills/search/
 ```
 
 - `search`만 `complexity: complex` → `SKILL.md` 상단에 Dispatcher anti-yield preamble(상태머신 무인 진행).
-- progressive disclosure: `SKILL.md`는 얇게, 실행 시 `references/*`와 `_shared/{필요한 것}`만 로드.
+- progressive disclosure: `SKILL.md`는 얇게, 실행 시 `references/*`와 `.shared/{필요한 것}`만 로드.
 
-## \_shared/ (lazy, plugin 공통)
+## .shared/ (lazy, plugin 공통)
 
 ```
-skills/_shared/
+skills/.shared/
 ├── mcp-tools.md       # 5종 도구 I/O 계약 요약 (SSoT는 → mcp-tools.md)
 ├── eutils.md          # E-utilities db·필드 태그·🔴 10k cap·POST 전환·rate·History 만료 (lazy)
 ├── query-strategy.md  # 생성 모드 방법론 SSoT (QueryRole·ESpell·recall 게이트) — agent가 로드
@@ -53,7 +53,7 @@ skills/_shared/
 ```
 
 - `eutils.md`는 검색식 lint·`SEARCH` 내부 단계 디버깅 시에만 로드(상시 컨텍스트 점유 회피).
-- **중복 방지 SSoT**: I/O 계약 단독 소유 = MCP + `_shared/mcp-tools.md`, E-utilities db·필드·제약 단독 소유 = `_shared/eutils.md`, 검색식 방법론·재랭킹 기준 단독 소유 = `_shared/{query-strategy,rerank}.md`(agent가 로드 — [agents.md](./agents.md)), 오케스트레이션 절차 단독 소유 = `search/SKILL.md`.
+- **중복 방지 SSoT**: I/O 계약 단독 소유 = MCP + `.shared/mcp-tools.md`, E-utilities db·필드·제약 단독 소유 = `.shared/eutils.md`, 검색식 방법론·재랭킹 기준 단독 소유 = `.shared/{query-strategy,rerank}.md`(agent가 로드 — [agents.md](./agents.md)), 오케스트레이션 절차 단독 소유 = `search/SKILL.md`.
 
 ## query / download / setup (thin)
 
@@ -69,8 +69,8 @@ skills/_shared/
 ## progressive disclosure (lazy 로딩)
 
 - 노출 비용 = description × 상시 로드. 4개만 노출, 나머지는 호출 시 lazy.
-- 로드 순서: `SKILL.md`(얇음) → 분기에 따라 `references/{state-machine|intent|modes}.md` → 도구 호출 직전 `_shared/{mcp-tools|eutils}.md`.
-- agent 리소스(`_shared/query-strategy.md`·`_shared/rerank.md`)는 노출 스킬이 아니라 `paper-search-expert`가 모드 진입 시 로드([agents.md](./agents.md)). `agents/`는 서브디렉토리 불가라 `_shared`에 둔다.
+- 로드 순서: `SKILL.md`(얇음) → 분기에 따라 `references/{state-machine|intent|modes}.md` → 도구 호출 직전 `.shared/{mcp-tools|eutils}.md`.
+- agent 리소스(`.shared/query-strategy.md`·`.shared/rerank.md`)는 노출 스킬이 아니라 `paper-search-expert`가 모드 진입 시 로드([agents.md](./agents.md)). `agents/`는 서브디렉토리 불가라 `.shared`에 둔다.
 
 ## Agent ↔ Skill ↔ MCP 경계
 

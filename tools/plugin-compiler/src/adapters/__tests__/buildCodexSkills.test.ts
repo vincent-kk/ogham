@@ -95,20 +95,20 @@ describe("buildCodexSkills", () => {
     const files = buildCodexSkills(VARIANT)!;
     const skill = find(files, ".codex-plugin/skills/cross-review/SKILL.md");
     expect(skill?.content).toContain("<!-- codex-persona-spawn");
-    expect(skill?.content).toContain("`../_shared/personas/<id>.md`");
+    expect(skill?.content).toContain("`../.shared/personas/<id>.md`");
     // original frontmatter + body survive
     expect(skill?.content.startsWith("---\nname: x\n---\n")).toBe(true);
     expect(skill?.content).toContain('subagent_type: "filid:code-surgeon"');
   });
 
-  it("drops every persona under _shared/personas/", () => {
+  it("drops every persona under .shared/personas/", () => {
     const files = buildCodexSkills(VARIANT)!;
     expect(
-      find(files, ".codex-plugin/skills/_shared/personas/code-surgeon.md")
+      find(files, ".codex-plugin/skills/.shared/personas/code-surgeon.md")
         ?.content,
     ).toBe("PERSONA-A");
     expect(
-      find(files, ".codex-plugin/skills/_shared/personas/adjudicator.md")
+      find(files, ".codex-plugin/skills/.shared/personas/adjudicator.md")
         ?.content,
     ).toBe("PERSONA-B");
   });

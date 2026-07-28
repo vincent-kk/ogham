@@ -24,7 +24,7 @@
 | [architecture.md](./architecture.md) | 3-Layer 아키텍처, 디렉토리 구조, FCA·코드 규약, atlassian httpClient 차용                                      |
 | [spec.md](./spec.md)                 | 컴포넌트 책임, RAG ①②③ 데이터 흐름, SSoT 경계, dedup·재현성, 비채택 결정                                       |
 | [mcp-tools.md](./mcp-tools.md)       | MCP 도구 5종 스펙 (`paper_search`·`mesh_lookup`·`fetch_fulltext`·`setup`·`auth_check`) + TypeScript 인터페이스 |
-| [skills.md](./skills.md)             | 노출 스킬 4종 (`search`·`query`·`download`·`setup`) + `_shared/` lazy 리소스                                   |
+| [skills.md](./skills.md)             | 노출 스킬 4종 (`search`·`query`·`download`·`setup`) + `.shared/` lazy 리소스                                   |
 | [agents.md](./agents.md)             | 에이전트 `paper-search-expert` ×1 (생성/재랭킹 내부 2모드) + `references/`                                     |
 | [dispatcher.md](./dispatcher.md)     | `search` 스킬 상태머신, intent 분류, `SEARCH` 내부 단계, 실행 모드                                             |
 | [setup.md](./setup.md)               | `setup` web UI 설정, credentials/config 분리, `auth_check` reachability                                        |
@@ -36,7 +36,7 @@
 [Dispatcher]  search 스킬 — 상태머신 오케스트레이션 (intent 분류 + 전이 + interactive/--auto)
 [Agent]       paper-search-expert ×1 — 생성 모드(WHAT·recall) / 재랭킹 모드(RANK·precision)
 [Skill]       search · query · download · setup
-                 └ lazy: _shared/{mcp-tools,eutils,query-strategy,rerank}.md
+                 └ lazy: .shared/{mcp-tools,eutils,query-strategy,rerank}.md
 [MCP]         paper_search · mesh_lookup · fetch_fulltext · setup · auth_check  (결정론·계약)
 [HTTP]        atlassian httpClient (fetch + retry + 429 backoff + auto-POST + SSRF eutils allowlist)
 [NCBI]        E-utilities: ESearch → EFetch/ESummary/ESpell/ELink (단일 호스트 + db)

@@ -19,13 +19,13 @@ spawns a subagent with `subagent_type: "r-statistics:<id>"` (via `Task` or
 `Agent`), do this instead — everything else about the step stays the same:
 
 1. Spawn a `multi_agent` subagent.
-2. Make its FIRST action to Read `../_shared/personas/<id>.md` and adopt that persona
+2. Make its FIRST action to Read `../.shared/personas/<id>.md` and adopt that persona
    definition in full as its operating contract.
 3. Then carry out the original spawn's prompt, inputs, and output contract
    verbatim.
 
 `<id>` is the text after `r-statistics:` in the original `subagent_type` value
-(e.g. `subagent_type: "r-statistics:reviewer"` → read `../_shared/personas/reviewer.md`).
+(e.g. `subagent_type: "r-statistics:reviewer"` → read `../.shared/personas/reviewer.md`).
 
 > **EXECUTION MODEL (Tier-2a Anti-Yield)**: Run the pipeline as a SINGLE CONTINUOUS OPERATION. After each agent (`Task`) returns or an MCP tool completes, IMMEDIATELY chain the next step in the same turn. State transitions are internal — never ask the user which state to resume from. Large agent outputs (SAP, R results, validator findings) are working data; summarize them to the user only at a checkpoint, not after every step.
 >

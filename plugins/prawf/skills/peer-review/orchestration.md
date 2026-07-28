@@ -33,7 +33,7 @@ ADJ ADJUDICATE chair              dedup → finalize finding status → verdict 
 
 ### P0 — Profile & Normalize (chair)
 
-0. **Resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md): `--workdir` > `PRAWF_WORKDIR` > `./.prawf`. All deliverables go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
+0. **Resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../.shared/operations/resolve_workdir.md): `--workdir` > `PRAWF_WORKDIR` > `./.prawf`. All deliverables go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
 1. **Detect type & field** → load a [field profile](./field-profiles.md). Priority: `--profile` override (a built-in or a user-authored `<WORKDIR>/profiles/<name>.yaml` custom profile) > P0 auto-detection of a built-in (default) > universal fallback. A custom yaml is selected only by naming it with `--profile`; it is never auto-detected (see [field-profiles §5](./field-profiles.md)).
 2. **Validate the profile**: confirm the loaded profile's minimum schema (required keys, axis-reference consistency, presence of `severity_examples`). **The mandatory soundness axes (argument, methodology, integrity) cannot be turned off via `disabled_axes`** — only statistics, causality, and bias may be conditionally disabled, and only when accompanied by an `absorb_map`. A profile that violates this is rejected and the universal fallback is used instead.
 3. **Normalize input**: convert PDF/LaTeX/markdown input into **`paper-normalized.md`** (a normalized snapshot to which the chair assigns line numbers). Every Reviewer cites the **`§<section>¶<paragraph>` and line numbers of this snapshot**, not the original — this establishes a shared coordinate system.
@@ -135,7 +135,7 @@ The **gate** is the lowest severity that can block acceptance: `--gate <critical
 
 ## 5. Deliverable Contracts
 
-All paths are relative to `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` (resolved in P0 via [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)).
+All paths are relative to `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` (resolved in P0 via [`[OP: resolve_workdir]`](../.shared/operations/resolve_workdir.md)).
 
 | File                         | Author                                   |
 | ---------------------------- | ---------------------------------------- |

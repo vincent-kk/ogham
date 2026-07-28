@@ -7,7 +7,7 @@ contract and whose scan evidence reports no DETAIL.md. Setup does not create or
 overwrite the file.
 
 Each proposed DETAIL.md must later satisfy
-[`../../_shared/detail-template.md`](../../_shared/detail-template.md) — its
+[`../../.shared/detail-template.md`](../../.shared/detail-template.md) — its
 required heading set, the acceptance-group shape, and the language rule. Do not
 restate that template here.
 

@@ -41,11 +41,11 @@ const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const skillsDir = join(packageRoot, 'skills');
 
 /**
- * A directory under `skills/` whose name starts with `_` is a shared
+ * A directory under `skills/` whose name starts with `.` is a shared
  * compartment, not a skill — it ships no `SKILL.md` and is not user-invocable.
  * Everything else counts against the twelve.
  */
-const COMPARTMENT_PREFIX = '_';
+const COMPARTMENT_PREFIX = '.';
 
 function skillsDirEntries(): string[] {
   return readdirSync(skillsDir, { withFileTypes: true })

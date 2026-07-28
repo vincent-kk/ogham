@@ -34,7 +34,7 @@ You are the **chair / handling editor** (see `../../agents/chair.md`). You run t
 > - `profiles/<name>.yaml` — built-in field-profile data (empirical-science, cs-ml, math-theory, humanities-qualitative)
 > - `templates.md` — `review-report.md` / `qa-sheet.md` / `rebuttal.md` output formats
 > - `prompt-templates.md` — literal spawn-prompt templates per persona
-> - `../_shared/operations/resolve_workdir.md` — WORKDIR / REVIEW_DIR resolution (shared by all skills)
+> - `../.shared/operations/resolve_workdir.md` — WORKDIR / REVIEW_DIR resolution (shared by all skills)
 > - `../../agents/<persona-id>.md` — the 10 persona agents
 
 ## When to Use
@@ -47,7 +47,7 @@ You are the **chair / handling editor** (see `../../agents/chair.md`). You run t
 
 ### Step 1 — P0: Profile & Normalize (chair, direct)
 
-First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); every deliverable below lands under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
+First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../.shared/operations/resolve_workdir.md) (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); every deliverable below lands under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
 
 1. Read the paper (PDF / LaTeX / markdown). If no paper is provided, this is the one valid place to ask the user.
 2. **Detect type & field** and load the field profile. Priority: `--profile` override (a built-in or a custom `<WORKDIR>/profiles/<name>.yaml`) > **P0 auto-detection of a built-in (default)** > universal fallback. A custom yaml is reached only via `--profile`, never auto-detected. Read `field-profiles.md` for the schema and the four built-ins under `profiles/`.

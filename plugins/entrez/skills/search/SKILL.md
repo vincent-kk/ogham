@@ -32,7 +32,7 @@ Drive the state machine to a terminal state (`COMPLETE` / `FAILED` / `BLOCKED_NE
 
 ## Guards (never loop forever)
 
-`recallIter ≤ 4`, `rateRetry ≤ 5`, and `operationBudget` (maxRequests / maxRecords / maxWallMs). Any breach → `FAILED` with partial results + the manifest. Full transition table: [references/state-machine.md](references/state-machine.md). Modes: [references/modes.md](references/modes.md). Tool contracts: [`../_shared/mcp-tools.md`](../_shared/mcp-tools.md). E-utilities facts (load lazily when debugging queries): [`../_shared/eutils.md`](../_shared/eutils.md).
+`recallIter ≤ 4`, `rateRetry ≤ 5`, and `operationBudget` (maxRequests / maxRecords / maxWallMs). Any breach → `FAILED` with partial results + the manifest. Full transition table: [references/state-machine.md](references/state-machine.md). Modes: [references/modes.md](references/modes.md). Tool contracts: [`../.shared/mcp-tools.md`](../.shared/mcp-tools.md). E-utilities facts (load lazily when debugging queries): [`../.shared/eutils.md`](../.shared/eutils.md).
 
 ## Boundaries
 
