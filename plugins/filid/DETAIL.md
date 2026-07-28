@@ -15,7 +15,9 @@
 ## API Contracts
 
 - 공개 MCP 도구는 `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`의 9개다.
-- 사용자 스킬은 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `cross-review`, `migrate`의 8개다.
+- 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
+- merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `pull-request/reference.md` §3, 리뷰 보고서와 fix 요청은 `cross-review/templates.md`, 수용/거부 기록은 `resolve/reference.md` §1, 재검증 결과는 `revalidate/reference.md` §3이 정의하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
+- 단계 간 중간 산출물은 `.filid/review/<branch>/`에 파일로 남기고 다음 단계와 서브에이전트에는 **경로만** 전달한다. 대형 변경에서 컨텍스트가 터지지 않게 하는 장치이며 이 파일들은 커밋하지 않는다.
 - 모든 큰 MCP 결과는 16 KiB inline 예산의 공통 envelope를 거쳐 검증 가능한 임시 artifact로 전달한다.
 - managed rule 문서의 host target 선택과 동기화는 `@ogham/agent-artifacts`에 위임하며 Filid owner 주소 밖의 사용자 내용을 보존한다.
 - 설정 schema 2.0은 adapter mode와 enabled IDs, rule overrides, 언어 중립 구조 옵션을 정의한다. v1은 메모리에서 변환하고 명시적 저장 전까지 원본을 쓰지 않는다.
@@ -24,8 +26,8 @@
 
 ### AC-root-surface — 1.0 공개 표면
 
-- MCP 도구는 정확히 9개, 사용자 스킬은 정확히 8개다.
-- 제거된 AST·메트릭·PR lifecycle 기능은 등록되거나 배포되지 않는다.
+- MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개이며 각각 독립 oracle이 고정한다.
+- 제거된 AST·메트릭 도구와 스킬 7개(`ast-fallback`, `config-wizard`, `harvest`, `promote`, `structure-review`, `sync`, `update`)는 등록되거나 배포되지 않는다.
 
 ### AC-root-independence — 독립 실행
 
@@ -39,4 +41,4 @@
 
 ## Last Updated
 
-2026-07-26 — 승인된 Filid 1.0 Plan of Record에 맞춰 제품 계약을 재정의했다.
+2026-07-28 — 스킬 표면을 실제 12개로 정정하고 merge-track 형식 계약과 `.filid/review` 중간 산출물 규약을 명시했다.

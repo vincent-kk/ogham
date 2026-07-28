@@ -4,7 +4,7 @@
  *
  * Rule은 순수 함수 `check`를 통해 RuleViolation[] 을 반환하는 구조이다.
  */
-import { RULE_SCOPES } from '../constants/ruleScopes.js';
+import type { RULE_SCOPES } from '../constants/ruleScopes.js';
 
 import type {
   AnalysisCertainty,

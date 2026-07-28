@@ -44,11 +44,11 @@ export function resolveConsumerPaths(
 ): ConsumerPathResolution {
   const reasons = new Set<RestructureDecisionReason>();
   let paths: string[];
-  if (requestedPaths) {
+  if (requestedPaths)
     paths = requestedPaths.map((path) =>
       portableResolve(snapshot.projectRoot, path),
     );
-  } else {
+  else {
     if (snapshot.dependencyGraph.certainty !== ANALYSIS_CERTAINTIES.EXACT)
       reasons.add(
         RESTRUCTURE_DECISION_REASONS.DEPENDENCY_EVIDENCE_INDETERMINATE,

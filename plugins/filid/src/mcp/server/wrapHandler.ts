@@ -1,4 +1,5 @@
-import { type ZodTypeAny, z } from 'zod';
+import type { z } from 'zod';
+import { type ZodTypeAny } from 'zod';
 
 import type { McpToolName } from '../../constants/mcpToolNames.js';
 import type { ToolPayload } from '../../types/toolEnvelope.js';

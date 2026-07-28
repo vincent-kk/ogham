@@ -111,7 +111,7 @@ describe('hook bundle smoke tests', () => {
     if (cwd) rmSync(cwd, { recursive: true, force: true });
   });
 
-  for (const { name, buildInput } of HOOK_CASES) {
+  for (const { name, buildInput } of HOOK_CASES)
     it(`${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`, () => {
       const bundle = portableResolve(BRIDGE_DIR, `${name}.mjs`);
       expect(existsSync(bundle)).toBe(true);
@@ -128,5 +128,4 @@ describe('hook bundle smoke tests', () => {
         /Dynamic require|Cannot find module|^Error:/m,
       );
     });
-  }
 });

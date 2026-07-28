@@ -1,4 +1,5 @@
-import { type ZodTypeAny, z } from 'zod';
+import type { z } from 'zod';
+import { type ZodTypeAny } from 'zod';
 
 /**
  * Keep the advertised schema while forwarding invalid input to wrapHandler.

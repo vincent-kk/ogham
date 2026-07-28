@@ -175,7 +175,7 @@ plugins/filid/
 │   ├── types/                 # 언어 중립 공개 DTO (organ)
 │   ├── constants/             # rule·verification·envelope 상수 (organ)
 │   └── lib/                   # 작은 runtime utility (organ)
-├── skills/                    # 8개 사용자 workflow
+├── skills/                    # 12개 사용자 workflow (merge-track 5 포함)
 ├── scripts/                   # rules · pages · mcp · hooks · plugin 생성
 ├── templates/                 # 문서 템플릿과 managed rule canonical source
 ├── libs/                      # cross-platform Node 러너 (run.cjs)

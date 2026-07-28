@@ -1,4 +1,4 @@
-import {
+import type {
   CONTRACT_INTENTS,
   PLACEMENT_BASES,
   REQUIRED_ARTIFACT_ROLES,

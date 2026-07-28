@@ -5,7 +5,7 @@
  * FractalTree는 프로젝트 디렉토리를 계층적 노드 그래프로 표현하며,
  * 각 노드(FractalNode)는 자신의 분류 타입(CategoryType)과 부모/자식 관계를 보유한다.
  */
-import { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
+import type { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
 
 import type { OrganExemptionDeclaration } from './documents.js';
 import type { VerificationProjectAnalysis } from './verification.js';

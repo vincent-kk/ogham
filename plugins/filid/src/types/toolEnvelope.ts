@@ -1,4 +1,4 @@
-import {
+import type {
   TOOL_ARTIFACT_EPHEMERAL,
   TOOL_MEDIA_TYPES,
   TOOL_PERSISTENCE,
