@@ -9,6 +9,7 @@ import type {
   SyncRuleDocsOptions,
 } from './manifestTypes.js';
 import { mapRuleSyncResult } from './mapRuleSyncResult.js';
+import { retireOtherScopeRuleDocs } from './retireOtherScopeRuleDocs.js';
 
 /**
  * Synchronise the host's rule-document channel with the desired selection.
@@ -34,9 +35,15 @@ import { mapRuleSyncResult } from './mapRuleSyncResult.js';
  * It is safe to call repeatedly (idempotent relative to the selection +
  * resync inputs).
  *
+ * Which config layer receives the documents is `opts.scope`. Naming one is a
+ * placement decision, so the sync writes that layer and then withdraws the
+ * owned documents from the other, reporting them in `result.otherScope`.
+ * Omitting it deploys to `project` and leaves the user layer untouched — a
+ * headless caller that never chose a layer must not erase a global deployment.
+ *
  * @param projectRoot - Target project (git root resolved internally)
  * @param selection - Rule ids the user has explicitly opted into; required rules are enforced from the manifest
- * @param opts - Optional resync ids and plugin root override
+ * @param opts - Optional config layer, resync ids and plugin root override
  */
 export function syncRuleDocs(
   projectRoot: string,
@@ -72,7 +79,7 @@ export function syncRuleDocs(
     return result;
   }
 
-  const manager = createFilidRuleManager(projectRoot);
+  const manager = createFilidRuleManager(projectRoot, opts.scope);
   if (manager === null) {
     result.skipped.push({
       id: '*',
@@ -96,7 +103,20 @@ export function syncRuleDocs(
         .map((entry) => entry.id),
     );
     const plan = manager.plan({ documents, desired, replaceDrift });
-    return mapRuleSyncResult(manager.apply(plan), manifest);
+    const synced = mapRuleSyncResult(manager.apply(plan), manifest);
+
+    // Retirement runs after the write, never before: reversed, a failure
+    // between the two steps leaves the rules deployed in neither layer.
+    const retired =
+      opts.scope === undefined
+        ? null
+        : retireOtherScopeRuleDocs(
+            projectRoot,
+            opts.scope,
+            documents,
+            manifest,
+          );
+    return retired === null ? synced : { ...synced, otherScope: retired };
   } catch (err) {
     result.skipped.push({
       id: '*',

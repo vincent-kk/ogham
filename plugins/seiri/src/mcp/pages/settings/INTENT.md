@@ -18,8 +18,7 @@
 - 드리프트 행은 최신 배포 템플릿으로 교체하는 선택을 **행마다 기본 체크**한다. 사용자가 체크를 해제하면 로컬 편집을 보존하며, 일괄 덮어쓰기는 없다.
 - 선택이 바뀔 때마다 `/plan` 을 다시 불러 diff·revision 을 갱신한다.
 - 고급 정보는 접이식 `<details>` 안에 둔다.
-- 다이얼은 user/project 두 계층 중 하나에 저장한다. 토글은 `config_scope`, 필드 소유자는 `data-config-path`, 상속 상태는 `data-scope-state` — 계약 정본은 `@ogham/cross-platform` 의 `DETAIL.md` "설정 페이지 계약".
-- **토글은 Intervention 섹션 안에 둔다.** 다른 설정 페이지는 헤더 브레드크럼으로 올리지만, 여기서는 다이얼 하나만 지배하고 Rules 섹션에는 계층 개념이 없다 — 헤더로 올리면 배치가 범위를 넘겨 말한다. 표현(밑줄 treatment)은 다른 페이지와 같다.
+- **헤더 브레드크럼의 `config_scope` 토글이 페이지 전역을 정한다** — 다이얼이 저장되는 계층과 규칙 문서가 배포되는 채널을 같은 선택이 결정한다. 필드 소유자는 `data-config-path`, 상속 상태는 `data-scope-state` — 계약 정본은 `@ogham/cross-platform` 의 `DETAIL.md` "설정 페이지 계약".
 - **재정의 해제 버튼은 두지 않는다.** project 계층은 팀이 커밋으로 소유하는 파일이라, 없애는 일은 설정 클릭이 아니라 git 작업이다.
 
 ## Boundaries

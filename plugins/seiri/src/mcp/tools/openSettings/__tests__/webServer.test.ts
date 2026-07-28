@@ -107,7 +107,12 @@ beforeEach(async () => {
         layers: { user: null, project: null },
         overridden: [],
       },
-      ruleDocs: { entries: [], pluginRootResolved: true },
+      ruleDocs: {
+        entries: [],
+        pluginRootResolved: true,
+        scope: 'project',
+        displayTarget: null,
+      },
     }),
     planSave: (payload) =>
       planRuleDocs(workspace, plugin, selected(payload), {

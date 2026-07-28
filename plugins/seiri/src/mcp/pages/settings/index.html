@@ -11,15 +11,21 @@
       <header class="masthead">
         <div class="brand">
           <span class="brand-name">seiri</span>
-          <span class="brand-tag">code authoring rules</span>
+          <span class="brand-tag">/ settings /</span>
+          <div
+            id="config_scope"
+            class="scope-crumb"
+            role="radiogroup"
+            aria-label="Which layer holds the rules and the dial"
+          ></div>
         </div>
         <p class="lede">
           Rules you select are written to
-          <code data-rules-target>the active host rule channel</code> in this
-          repository, where the harness loads them at the start of every
-          session. Nothing is written until you save, and you can see the exact
-          change first.
+          <code data-rules-target>the active host rule channel</code>, where the
+          harness loads them at the start of every session. The layer above
+          decides which channel — and nothing is written until you save.
         </p>
+        <p id="scope_hint" class="scope-hint"></p>
         <p class="root" id="project-root"></p>
       </header>
 
@@ -38,15 +44,6 @@
           Changes how much seiri says at the start of a session. It never
           changes the rule documents themselves.
         </p>
-        <div class="scope-bar">
-          <div
-            id="config_scope"
-            class="scope-toggle"
-            role="radiogroup"
-            aria-label="Which layer to save the dial in"
-          ></div>
-          <p id="scope_hint" class="scope-hint"></p>
-        </div>
         <div data-config-path="intervention">
           <div
             id="dial"

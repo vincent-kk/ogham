@@ -73,7 +73,7 @@
     root: document.getElementById('project-root'),
     rules: document.getElementById('rules-list'),
     dial: document.getElementById('dial'),
-    scopeToggle: document.getElementById('config_scope'),
+    scopeCrumb: document.getElementById('config_scope'),
     scopeHint: document.getElementById('scope_hint'),
     facts: document.getElementById('facts'),
     preview: document.getElementById('preview'),
@@ -236,8 +236,8 @@
     // Rebuilding the group drops the focused radio, and the inputs are clipped
     // from view — losing focus here would leave arrow-key users with no cursor
     // and nothing on screen to say where it went.
-    var hadFocus = elements.scopeToggle.contains(document.activeElement);
-    elements.scopeToggle.textContent = '';
+    var hadFocus = elements.scopeCrumb.contains(document.activeElement);
+    elements.scopeCrumb.textContent = '';
     SCOPE_OPTIONS.forEach(function (option) {
       var label = element('label', 'scope-option');
       var radio = document.createElement('input');
@@ -252,7 +252,7 @@
       });
       label.appendChild(radio);
       label.appendChild(element('span', null, option[1]));
-      elements.scopeToggle.appendChild(label);
+      elements.scopeCrumb.appendChild(label);
     });
 
     var chosen = SCOPE_OPTIONS.filter(function (option) {
@@ -270,7 +270,7 @@
     );
 
     if (!hadFocus) return;
-    var focused = elements.scopeToggle.querySelector('input:checked');
+    var focused = elements.scopeCrumb.querySelector('input:checked');
     if (focused) focused.focus();
   }
 
@@ -351,18 +351,76 @@
     unchanged: '·',
   };
 
+  /**
+   * Name the documents a save would withdraw from the layer that was not
+   * chosen. Saving moves rules rather than copying them, and the layer being
+   * emptied may be the user one — shared by every project — so the removal is
+   * stated before it happens rather than reported after.
+   *
+   * @param {{scope: string, displayTarget: string, filenames: string[]}} report
+   *   The other layer's deployment, as `/plan` reported it.
+   * @returns {HTMLElement} The block, not yet attached to the document.
+   */
+  function renderScopeMove(report) {
+    var count = report.filenames.length;
+    var block = element('div', 'scope-move');
+    block.appendChild(
+      element(
+        'p',
+        'scope-move-head',
+        count +
+          (count === 1 ? ' rule is' : ' rules are') +
+          ' still deployed at the ' +
+          report.scope +
+          ' layer. Saving removes ' +
+          (count === 1 ? 'it' : 'them') +
+          ' there.',
+      ),
+    );
+    block.appendChild(element('p', 'scope-move-path', report.displayTarget));
+
+    var list = element('div', 'diff');
+    report.filenames.forEach(function (filename) {
+      var row = element('div', 'diff-row');
+      row.setAttribute('data-action', 'remove');
+      row.appendChild(element('span', 'diff-mark', MARKS.remove));
+      row.appendChild(element('span', 'diff-file', filename));
+      row.appendChild(
+        element('span', 'diff-note', 'removed from ' + report.scope),
+      );
+      list.appendChild(row);
+    });
+    block.appendChild(list);
+    return block;
+  }
+
+  /**
+   * Say on the button what the save will actually do. A move is not the same
+   * act as a write, and the label is the last thing read before the click.
+   *
+   * @param {boolean} moving Whether the other layer would be emptied.
+   */
+  function syncSaveLabel(moving) {
+    elements.save.textContent = moving ? 'Save & move rules' : 'Save';
+  }
+
   function renderPreview(result) {
     elements.preview.textContent = '';
     var outcomes = (result.outcomes || []).filter(function (outcome) {
       return outcome.action !== 'unchanged';
     });
+    var moving = result.otherScope || null;
+    syncSaveLabel(moving !== null);
 
-    if (outcomes.length === 0) {
+    if (outcomes.length === 0 && moving === null) {
       elements.preview.appendChild(
         element('p', 'empty', 'Nothing would change.'),
       );
       return;
     }
+
+    if (moving !== null) elements.preview.appendChild(renderScopeMove(moving));
+    if (outcomes.length === 0) return;
 
     var list = element('div', 'diff');
     outcomes.forEach(function (outcome) {

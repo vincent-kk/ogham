@@ -10,9 +10,11 @@ import { createRuleDocumentRequest } from '../utils/createRuleDocumentRequest.js
 import { createRulePlanRevision } from '../utils/createRulePlanRevision.js';
 import { createSeiriRuleManager } from '../utils/createSeiriRuleManager.js';
 import { mapRuleSyncResult } from '../utils/mapRuleSyncResult.js';
+import { retireOtherScopeRules } from '../utils/retireOtherScopeRules.js';
 
 /**
- * Reconcile the active host's rule channel with the user's selection.
+ * Reconcile the chosen layer's rule channel with the user's selection, then
+ * empty the other layer of this owner's documents.
  *
  * Only setup surfaces call this — the settings page's save handler, or
  * the `rule_docs_sync` tool as a headless fallback. Session hooks never
@@ -29,9 +31,10 @@ export function applyRuleDocs(
   selection: Iterable<string>,
   opts: SyncRuleDocsOptions = {},
 ): RuleDocSyncResult {
+  const scope = opts.scope ?? 'project';
   const manifest = loadManifest(pluginRoot);
   const documents = loadManagedRuleDocuments(pluginRoot, manifest);
-  const manager = createSeiriRuleManager(projectRoot);
+  const manager = createSeiriRuleManager(projectRoot, scope);
   if (manager === null)
     return {
       applied: false,
@@ -77,10 +80,17 @@ export function applyRuleDocs(
     (outcome) => outcome.action === 'conflict',
   );
   const nextPlan = manager.plan(request);
-  return mapRuleSyncResult({
+  const result = mapRuleSyncResult({
     applied: !applyConflicted,
     outcomes: applied.outcomes,
     manifest,
     revision: createRulePlanRevision(nextPlan),
   });
+
+  // The old copies go only once the new ones are on disk, and only when the
+  // write actually landed — retiring after a conflict would leave the rules
+  // at neither layer.
+  if (applyConflicted) return result;
+  const otherScope = retireOtherScopeRules(projectRoot, documents, scope);
+  return otherScope === null ? result : { ...result, otherScope };
 }

@@ -444,6 +444,30 @@ code {
   color: var(--fg-faint);
 }
 
+/* Withdrawal from the layer that was not chosen. It sits above the diff
+   because it is the consequence a reader is least expecting: a save here
+   empties another channel, and the user layer it may empty is shared by
+   every project. Marked by a rule and weight rather than a colour — the
+   page distinguishes by treatment, not by hue. */
+
+.scope-move {
+  border-left: 2px solid var(--border-hi);
+  padding-left: 12px;
+  margin-bottom: 14px;
+}
+
+.scope-move-head {
+  margin: 0 0 4px;
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.scope-move-path {
+  margin: 0 0 10px;
+  color: var(--fg-faint);
+  word-break: break-all;
+}
+
 /* actions & status */
 
 .actions {
@@ -550,24 +574,16 @@ code {
   }
 }
 
-/* Scope UI — user/project namespaces.
-   Contract: cross-platform DETAIL.md "설정 페이지 계약". This toggle stays in
-   the Intervention section rather than the masthead: it decides the dial alone,
-   and the Rules section has no layer at all. Lifting it to the header would
-   make the placement claim a scope it does not have.
+/* Scope crumb — the masthead's third breadcrumb names the layer being edited.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". The layer decides two
+   things here: which file holds the dial, and which channel the rule documents
+   are deployed to — so it belongs to the page rather than to one section.
    No clear-override button: seiri's project layer is a committed file the team
    owns, so removing it is a git operation rather than a settings click.
    The radio inputs stay in the DOM and are only clipped from view: arrow-key
    navigation and the radiogroup semantics come from them. */
 
-.scope-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-
-.scope-toggle {
+.scope-crumb {
   display: inline-flex;
   align-items: baseline;
   gap: 12px;
@@ -577,12 +593,10 @@ code {
   cursor: pointer;
   font-size: 14px;
   color: var(--fg-muted);
-  /* Vertical padding lifts the pointer target to 44px. Only the bottom half is
-     cancelled — this block stands on its own rather than on a brand baseline,
-     so the room above is wanted; the negative left margin keeps the first
-     option flush with the section's text edge. */
+  /* Vertical padding lifts the pointer target to 44px; the negative margin
+     cancels it so the crumb still sits on the brand baseline. */
   padding: 11px 4px;
-  margin: 0 0 -11px -4px;
+  margin: -11px 0;
   transition: color var(--transition);
 }
 
@@ -618,16 +632,14 @@ code {
   border-radius: 2px;
 }
 
-/* Meaning on the left, path on the right. The path is not right-aligned inside
-   its own box: this is section width rather than header width, so a ragged
-   right edge here would pull the eye off the dial below. */
+/* Two lines rather than a row: an absolute path is long enough that setting it
+   beside the sentence wraps it anyway, and a wrapped right-aligned path reads
+   worse than a plain second line. */
 .scope-hint {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  margin: 0;
+  flex-direction: column;
+  gap: 2px;
+  margin: 10px 0 0;
   font-size: 0.78rem;
   opacity: 0.72;
 }

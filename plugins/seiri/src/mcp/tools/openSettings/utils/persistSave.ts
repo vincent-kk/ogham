@@ -11,6 +11,10 @@ import { selectedIds } from './selectedIds.js';
  * This is one of only two places that write rule files — the other is the
  * `rule_docs_sync` tool used headlessly. Both are reached by an explicit
  * user action; nothing on a session path writes here.
+ *
+ * `body.scope` is one decision governing two things: the dial's file and the
+ * rule channel. Splitting them across two toggles would ask the user the same
+ * question twice and let the answers disagree.
  */
 export function persistSave(
   projectRoot: string,
@@ -20,6 +24,7 @@ export function persistSave(
   const ruleDocs = applyRuleDocs(projectRoot, pluginRoot, selectedIds(body), {
     resync: body.ruleDocs.resync,
     revision: body.ruleDocs.revision ?? null,
+    scope: body.scope,
   });
   if (!ruleDocs.applied)
     return {

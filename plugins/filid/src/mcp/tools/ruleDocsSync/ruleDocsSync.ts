@@ -9,6 +9,8 @@
  *   - `sync`   — synchronise the active host target to the provided selection.
  *     Drifted optional rules are left untouched unless their id appears in
  *     the `resync` input; drifted required rules are always overwritten.
+ *     Always the project layer: no user has picked a layer on this path, and
+ *     a sync that assumed one would retire the other layer's global rules.
  *   - `manifest` — return the raw manifest (id/filename/required/title/desc)
  *     for skill UI rendering.
  *

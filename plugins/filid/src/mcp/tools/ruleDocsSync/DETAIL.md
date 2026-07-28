@@ -5,6 +5,7 @@
 - status, manifest, sync만 지원하고 setup workflow의 managed rule 문서만 다룬다.
 - required rule은 항상 배포하고 optional drift overwrite는 명시된 resync만 허용한다.
 - project source와 config를 수정하지 않는다.
+- 배포 레이어는 project 고정이다. 이 도구는 headless/CI fallback이라 사용자가 레이어를 고른 적이 없고, 레이어를 가정한 sync가 반대편의 전역 규칙을 회수하면 안 된다. 레이어 선택은 설정 페이지 저장 경로만 내린다.
 - 결과는 공통 envelope에서 action별 작은 summary와 필요 시 data로 반환한다.
 - plugin root를 해석하지 못한 status/manifest는 성공으로 오인하지 않도록 안정된 diagnostic과 `unsupported` status를 반환한다.
 
@@ -29,6 +30,10 @@
 - action과 핵심 count는 artifact 유무와 관계없이 summary에 남는다.
 - plugin root 미해석 status/manifest는 empty diagnostics의 `ok`가 아니다.
 
+## History
+
+- 2026-07-27 — plugin root 미해석 상태의 unsupported envelope 계약을 추가.
+
 ## Last Updated
 
-2026-07-27 — plugin root 미해석 상태의 unsupported envelope 계약을 추가.
+2026-07-29 — rule 문서가 config 레이어를 따라 배포되기 시작하면서, 이 도구는 project 레이어 고정임을 명시했다.

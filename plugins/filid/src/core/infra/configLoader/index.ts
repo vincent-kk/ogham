@@ -28,6 +28,7 @@ export { validateConfigPatch } from './loaders/validateConfigPatch.js';
 export { writeConfig } from './loaders/writeConfig.js';
 
 export type {
+  RetiredScopeReport,
   RuleDocEntry,
   RuleDocStatusEntry,
   RuleDocSyncResult,

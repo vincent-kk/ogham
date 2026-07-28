@@ -1,24 +1,33 @@
 import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts/rules/status';
 
+import type { SeiriConfigScope } from '../../../types/config.js';
 import type { RuleDocStatus } from '../../../types/manifest.js';
 import { loadManagedRuleDocuments } from '../loaders/loadManagedRuleDocuments.js';
 import { loadManifest } from '../loaders/loadManifest.js';
 import { resolveSeiriRuleTarget } from '../utils/resolveSeiriRuleTarget.js';
 
 /**
- * Snapshot every manifest rule against the active host's rule channel.
+ * Snapshot every manifest rule against one layer's rule channel.
  *
  * The filesystem is the only thing consulted: a rule is selected because
  * its file is on disk, never because a config said so. That is what keeps
  * the checkbox UI honest after a user deletes a file by hand.
+ *
+ * @param projectRoot Anchor for the project channel.
+ * @param pluginRoot Root the manifest and templates are read from.
+ * @param scope Which layer to inspect; `project` by default, so a session
+ *   hook that has not been taught about layers keeps reporting the channel
+ *   every existing deployment sits in.
+ * @returns One entry per shipped rule, in manifest order.
  */
 export function getRuleDocsStatus(
   projectRoot: string,
   pluginRoot: string,
+  scope: SeiriConfigScope = 'project',
 ): RuleDocStatus[] {
   const manifest = loadManifest(pluginRoot);
   const documents = loadManagedRuleDocuments(pluginRoot, manifest);
-  const target = resolveSeiriRuleTarget(projectRoot);
+  const target = resolveSeiriRuleTarget(projectRoot, scope);
 
   if (target === null)
     return manifest.rules.map((entry) => ({

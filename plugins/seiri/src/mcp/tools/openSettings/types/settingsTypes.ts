@@ -4,6 +4,7 @@ import { INTERVENTION_LEVELS } from '../../../../constants/intervention.js';
 import type {
   ConfigScopeSnapshot,
   SeiriConfig,
+  SeiriConfigScope,
 } from '../../../../types/config.js';
 import type {
   RuleDocStatus,
@@ -22,6 +23,18 @@ export interface SettingsPageState {
   ruleDocs: {
     entries: RuleDocStatus[];
     pluginRootResolved: boolean;
+    /**
+     * The layer `entries` were inspected against — the same toggle that
+     * decides where the dial is stored, because a rule set that follows one
+     * layer and a dial that follows another would need two decisions from
+     * the user for one question.
+     */
+    scope: SeiriConfigScope;
+    /**
+     * Absolute channel path that layer writes into, or `null` when the
+     * runtime host has no rule channel at all.
+     */
+    displayTarget: string | null;
   };
 }
 

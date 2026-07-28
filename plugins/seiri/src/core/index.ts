@@ -13,6 +13,7 @@ export {
 } from './infra/configLoader/index.js';
 export {
   applyRuleDocs,
+  getRuleDocsChannel,
   getRuleDocsStatus,
   loadManifest,
   planRuleDocs,
