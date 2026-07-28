@@ -1,6 +1,7 @@
 import {
   mkdtempSync,
   mkdirSync,
+  readFileSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -134,6 +135,32 @@ describe("writeConfigLayer", () => {
     expect(() =>
       writeConfigLayer({ user: layers.user, project: null }, "project", {}),
     ).toThrow(/no project root/);
+  });
+
+  it("drops an unsafe key instead of persisting one the merge will ignore", () => {
+    // Reaching here needs a hand-edited file or a crafted POST — but once the
+    // key is on disk it is stuck: the merge drops it, and a settings page only
+    // ever sends the keys it knows about, so nothing can clear it again.
+    const document = JSON.parse(
+      '{"__proto__":{"polluted":"x"},"theme":"dark"}',
+    ) as Record<string, unknown>;
+
+    writeConfigLayer(layers, "user", document);
+
+    expect(readFileSync(layers.user, "utf8")).not.toContain("__proto__");
+    expect(readConfigLayers(layers).user).toEqual({ theme: "dark" });
+  });
+
+  it("drops an unsafe key nested below the top level", () => {
+    const document = JSON.parse(
+      '{"renderers":{"constructor":1,"mermaid":true}}',
+    ) as Record<string, unknown>;
+
+    writeConfigLayer(layers, "user", document);
+
+    expect(readConfigLayers(layers).user).toEqual({
+      renderers: { mermaid: true },
+    });
   });
 
   it.skipIf(process.platform === "win32")(

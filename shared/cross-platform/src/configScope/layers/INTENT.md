@@ -17,11 +17,11 @@ user와 project 두 config 레이어 파일의 좌표를 정하고, 읽고, 쓰�
 
 ## Conventions
 
-- 형제 모듈은 진입점으로 소비한다: `../merge/index.js`,
-  `../../paths/index.js`, `../../filesystem/index.js`.
-- 좌표 계산과 디스크 조회를 분리한다. `resolveConfigLayers`는 파일 존재를
-  보지 않는다.
-- 원문 문서는 정화하지 않는다. `FORBIDDEN_KEYS`는 경고만 남기고 그대로 둔다.
+- 형제 모듈은 진입점으로 소비한다: `../merge`, `../../paths`, `../../filesystem`.
+- 좌표 계산과 디스크 조회를 분리한다 — `resolveConfigLayers`는 파일을 안 본다.
+- 읽기는 원문을 보존하고 `FORBIDDEN_KEYS`에 경고만 남긴다(UI가 파일 내용을
+  그대로 보여줘야 하므로). 쓰기는 그 키를 버린다 — 한번 들어가면 정상 경로로는
+  빠져나올 길이 없다.
 
 ## Boundaries
 

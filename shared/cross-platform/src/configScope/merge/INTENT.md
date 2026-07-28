@@ -1,16 +1,16 @@
 ## Purpose
 
-두 config 레이어를 합치고, 무엇이 재정의되었는지 세고, 재정의를 지운다. 값의
-의미는 모른다 — plain object와 그 밖의 값만 구분하는 순수 문서 연산이다.
+두 config 레이어를 합치고, 재정의를 세고 지우고, 쓰기 전 위험 키를 턴다. 값의
+의미는 모른다 — plain object와 그 밖만 구분하는 순수 문서 연산이다.
 
 ## Structure
 
 | File                     | Role                                |
 | ------------------------ | ----------------------------------- |
-| `index.ts`               | public barrel                       |
 | `mergeConfigLayers.ts`   | user 위에 project를 재귀 병합       |
 | `listOverriddenPaths.ts` | project 리프의 dot path 열거        |
 | `clearConfigPaths.ts`    | dot path 목록 삭제                  |
+| `stripForbiddenKeys.ts`  | 쓰기 전 위험 키 제거                |
 | `utils/isPlainObject.ts` | 순수 객체 판정 3단                  |
 | `utils/forbiddenKeys.ts` | 프로토타입을 건드리는 키 목록       |
 | `utils/removePath.ts`    | segment 열 하나 삭제와 빈 상위 정리 |
@@ -39,9 +39,10 @@
 
 ### Never do
 
-- node 내장 모듈 import. 이 모듈은 브라우저 설정 페이지 번들과 훅 번들에
-  동시에 들어간다. `__tests__/pureImports.test.ts`가 이를 강제한다.
-- 레이어 원문 정화. 걸러내는 지점은 병합 한 곳이며, 읽기 계층은 원문을 보존한다.
+- node 내장 모듈 import. 브라우저 설정 페이지 번들과 훅 번들에 동시에 들어간다.
+  `__tests__/pureImports.test.ts`가 이를 강제한다.
+- `stripForbiddenKeys`와 `mergeConfigLayers`의 재귀 범위를 다르게 두기 — 쓰기와
+  병합이 "위험한 키"를 서로 다르게 정의하게 된다.
 
 ## Dependencies
 

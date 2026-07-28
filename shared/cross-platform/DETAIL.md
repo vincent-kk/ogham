@@ -82,6 +82,9 @@ clearConfigPaths(
   source: Record<string, unknown>,
   paths: readonly string[],
 ): Record<string, unknown>;
+stripForbiddenKeys(
+  document: Record<string, unknown>,
+): Record<string, unknown>;
 ```
 
 user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
@@ -98,9 +101,16 @@ user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
 
 병합은 `__proto__` / `constructor` / `prototype` 키를 버린다. 입력이 디스크의
 JSON이고 `JSON.parse`가 `__proto__`를 own key로 만들기 때문에 실제 벡터다.
-레이어 원문은 정화하지 않고 그대로 노출하며, 해당 키를 발견하면 `warnings`에만
-남긴다 — 걸러내는 지점을 병합 한 곳으로 모아야 "파일에는 있는데 왜 안 먹지"의
-원인이 흩어지지 않는다.
+
+`writeConfigLayer`도 쓰기 전에 같은 키를 턴다(`stripForbiddenKeys`). 한번 파일에
+들어가면 정상 경로로는 빠져나올 길이 없기 때문이다 — 병합은 매번 버리고, 설정
+페이지는 자기가 아는 키만 보내며, 저장된 문서를 펴서 되쓰는 저장 경로는 오히려
+그 키를 보존한다. 두 함수의 재귀 범위는 같다: plain object 안으로만 들어가고
+배열은 건드리지 않는다.
+
+읽기는 정화하지 않는다. 레이어 원문을 그대로 노출하고 해당 키를 발견하면
+`warnings`에만 남긴다 — 손편집으로 들어온 키를 UI가 감추면 "파일에는 있는데 왜
+안 먹지"의 답이 사라진다.
 
 레이어 각각은 스키마 검증하지 않는다. 병합 결과 하나만 소비자의 스키마로
 검증한다. project 레이어는 재정의된 키만 담은 부분 문서라 단독으로는 strict
