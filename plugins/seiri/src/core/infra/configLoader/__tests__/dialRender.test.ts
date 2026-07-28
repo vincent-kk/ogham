@@ -9,6 +9,7 @@ function state(overrides: Partial<InterventionState> = {}): InterventionState {
     effective: 'advisory',
     source: 'default',
     baseline: null,
+    user: null,
     runtime: null,
     warnings: [],
     ...overrides,

@@ -143,6 +143,11 @@ POST /api/config
 | 상속 상태      | 같은 요소에 `data-scope-state="inherited" \| "overridden" \| "own"` |
 | 배지·해제 버튼 | 표시 여부는 CSS가 `[data-scope-state=...]`로 결정                   |
 
+해제 버튼은 project 레이어가 **부분 문서**인 곳에만 둔다. 키를 빼는 것이 곧
+해제이기 때문이다. project 레이어가 커밋된 단일 결정인 곳(seiri)은 배지만
+두고 해제는 git 작업으로 남긴다 — 팀이 소유한 파일을 설정 클릭으로 지우게
+하는 것이 잘못된 affordance다.
+
 `paths.project`가 `null`이면 Project 라디오는 `disabled`이고 이유를 한 줄
 표시한다.
 

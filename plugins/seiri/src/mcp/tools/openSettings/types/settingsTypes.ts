@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 import { INTERVENTION_LEVELS } from '../../../../constants/intervention.js';
-import type { SeiriConfig } from '../../../../types/config.js';
+import type {
+  ConfigScopeSnapshot,
+  SeiriConfig,
+} from '../../../../types/config.js';
 import type {
   RuleDocStatus,
   RuleDocSyncResult,
@@ -10,8 +13,12 @@ import type {
 /** State injected into the settings page as `__SEIRI_STATE__`. */
 export interface SettingsPageState {
   projectRoot: string;
+  /** True when the project layer holds a dial — what the page edits by default. */
   configExists: boolean;
+  /** The dial in effect across both stored layers. */
   config: SeiriConfig;
+  /** Per-layer dials and which one is overriding, for the scope toggle. */
+  scope: ConfigScopeSnapshot;
   ruleDocs: {
     entries: RuleDocStatus[];
     pluginRootResolved: boolean;
@@ -27,6 +34,12 @@ export interface SettingsPageState {
  * lets the page show the diff before anything lands.
  */
 export const SaveBodySchema = z.object({
+  /**
+   * Which layer the dial lands in. Required rather than defaulted: the page
+   * always knows, and a silent default would write the wrong file when a
+   * caller forgets.
+   */
+  scope: z.enum(['user', 'project']),
   config: z.object({ intervention: z.enum(INTERVENTION_LEVELS) }),
   ruleDocs: z.object({
     selections: z.record(z.string(), z.boolean()),

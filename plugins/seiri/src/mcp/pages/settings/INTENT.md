@@ -18,6 +18,8 @@
 - 드리프트 행은 최신 배포 템플릿으로 교체하는 선택을 **행마다 기본 체크**한다. 사용자가 체크를 해제하면 로컬 편집을 보존하며, 일괄 덮어쓰기는 없다.
 - 선택이 바뀔 때마다 `/plan` 을 다시 불러 diff·revision 을 갱신한다.
 - 고급 정보는 접이식 `<details>` 안에 둔다.
+- 다이얼은 user/project 두 계층 중 하나에 저장한다. 토글은 `config_scope`, 필드 소유자는 `data-config-path`, 상속 상태는 `data-scope-state` — 계약 정본은 `@ogham/cross-platform` 의 `DETAIL.md` "설정 페이지 계약".
+- **재정의 해제 버튼은 두지 않는다.** project 계층은 팀이 커밋으로 소유하는 파일이라, 없애는 일은 설정 클릭이 아니라 git 작업이다.
 
 ## Boundaries
 

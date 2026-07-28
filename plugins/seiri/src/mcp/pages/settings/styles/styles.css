@@ -549,3 +549,55 @@ code {
     padding: 24px 16px 64px;
   }
 }
+
+/* Scope UI — user/project namespaces.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". No clear-override
+   button here: seiri's project layer is a committed file the team owns, so
+   removing it is a git operation rather than a settings click. */
+
+.scope-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.scope-toggle {
+  display: flex;
+  gap: 12px;
+}
+
+.scope-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.scope-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.72;
+  word-break: break-all;
+}
+
+.scope-badge {
+  display: none;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  opacity: 0.72;
+}
+
+[data-scope-state='inherited'] > .scope-badge,
+[data-scope-state='overridden'] > .scope-badge {
+  display: block;
+}
+
+[data-scope-state='inherited'] > .scope-badge::before {
+  content: 'Inherited from your user settings';
+}
+
+[data-scope-state='overridden'] > .scope-badge::before {
+  content: 'Set by this project — overrides your user settings';
+  opacity: 1;
+}

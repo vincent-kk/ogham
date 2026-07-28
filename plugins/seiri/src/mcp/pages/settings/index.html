@@ -38,12 +38,24 @@
           Changes how much seiri says at the start of a session. It never
           changes the rule documents themselves.
         </p>
-        <div
-          id="dial"
-          class="dial"
-          role="radiogroup"
-          aria-labelledby="dial-heading"
-        ></div>
+        <div class="scope-bar">
+          <div
+            id="config_scope"
+            class="scope-toggle"
+            role="radiogroup"
+            aria-label="Which layer to save the dial in"
+          ></div>
+          <p id="scope_hint" class="scope-hint"></p>
+        </div>
+        <div data-config-path="intervention">
+          <div
+            id="dial"
+            class="dial"
+            role="radiogroup"
+            aria-labelledby="dial-heading"
+          ></div>
+          <span class="scope-badge"></span>
+        </div>
       </section>
 
       <details class="section section--collapsible">

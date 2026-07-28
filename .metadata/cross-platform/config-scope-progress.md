@@ -13,8 +13,8 @@
 | 1 — configScope/merge  | 완료    | vitest 43 pass                       |
 | 2 — configScope/layers | 완료    | vitest 71 pass (누적), typecheck 0   |
 | 3 — 배럴·subpath·문서  | 완료    | build ok, 전체 362 pass, 런타임 확인 |
-| 4 — deilen (정본)      | 진행 중 | —                                    |
-| 5 — seiri              | 대기    | —                                    |
+| 4 — deilen (정본)      | 완료    | vitest 143 pass, typecheck 0, lint 0 |
+| 5 — seiri              | 진행 중 | —                                    |
 | 6 — filid              | 대기    | —                                    |
 | 7 — cennad             | 대기    | —                                    |
 | 8 — imbas              | 대기    | —                                    |

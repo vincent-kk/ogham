@@ -42,6 +42,7 @@ function body(
   overrides: Partial<PreviewRuleDocs> = {},
 ): SaveBody & { ruleDocs: PreviewRuleDocs } {
   return {
+    scope: 'project',
     config: { intervention: 'advisory' },
     ruleDocs: { selections: { [RULE_ID]: true }, resync: [], ...overrides },
   };
@@ -101,6 +102,11 @@ beforeEach(async () => {
       projectRoot: workspace,
       configExists: false,
       config: { intervention: 'advisory' },
+      scope: {
+        paths: { user: '/tmp/user/config.json', project: '/tmp/project/config.json' },
+        layers: { user: null, project: null },
+        overridden: [],
+      },
       ruleDocs: { entries: [], pluginRootResolved: true },
     }),
     planSave: (payload) =>

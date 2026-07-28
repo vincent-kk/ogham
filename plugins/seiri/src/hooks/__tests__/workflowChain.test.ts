@@ -35,7 +35,7 @@ describe('workflow state chain', () => {
     const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-chain-'));
     tempDirs.push(repoRoot);
     mkdirSync(join(repoRoot, '.git'));
-    writeConfig(repoRoot, { intervention });
+    writeConfig(repoRoot, 'project', { intervention });
     return repoRoot;
   }
 

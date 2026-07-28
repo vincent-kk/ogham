@@ -41,7 +41,7 @@ describe('rule_docs_sync config action', () => {
 
   it('reports the dial without touching anything', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'standard' });
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
 
     const result = call(repoRoot);
     expect(result.op).toBe('get');
@@ -55,7 +55,7 @@ describe('rule_docs_sync config action', () => {
 
   it('turns the valve and states the posture that is now in effect', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'advisory' });
+    writeConfig(repoRoot, 'project', { intervention: 'advisory' });
 
     const result = call(repoRoot, { config_op: 'set', intervention: 'strict' });
     expect(result.changed).toBe(true);
@@ -70,7 +70,7 @@ describe('rule_docs_sync config action', () => {
 
   it('restores the baseline on clear, and says when there was nothing to clear', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'standard' });
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
     call(repoRoot, { config_op: 'set', intervention: 'advisory' });
 
     const cleared = call(repoRoot, { config_op: 'clear' });
@@ -85,7 +85,7 @@ describe('rule_docs_sync config action', () => {
 
   it('carries the election line for the effective dial, and stays silent at advisory', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'standard' });
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
 
     const strict = call(repoRoot, { config_op: 'set', intervention: 'strict' });
     expect(strict.posture).toContain(ELECTION_STRICT_LINE);

@@ -41,7 +41,7 @@ describe('subagent status re-injection', () => {
     const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-subagent-'));
     tempDirs.push(repoRoot);
     mkdirSync(join(repoRoot, '.git'));
-    writeConfig(repoRoot, { intervention });
+    writeConfig(repoRoot, 'project', { intervention });
     if (deploy) applyRuleDocs(repoRoot, pluginRoot, [anchor?.id ?? '']);
     return repoRoot;
   }

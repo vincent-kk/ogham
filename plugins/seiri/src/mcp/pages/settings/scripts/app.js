@@ -59,10 +59,22 @@
     (state.config && state.config.intervention) || DIAL_STANDARD;
   var previewRevision = null;
 
+  // Which layer a save lands in. Opens on the layer that is currently
+  // deciding, so pressing Save without touching the toggle rewrites the file
+  // the dial already came from rather than silently creating a second one.
+  var scopeState = state.scope || {
+    paths: { user: '', project: '' },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var scope = scopeState.layers.project === null ? 'user' : 'project';
+
   var elements = {
     root: document.getElementById('project-root'),
     rules: document.getElementById('rules-list'),
     dial: document.getElementById('dial'),
+    scopeToggle: document.getElementById('config_scope'),
+    scopeHint: document.getElementById('scope_hint'),
     facts: document.getElementById('facts'),
     preview: document.getElementById('preview'),
     status: document.getElementById('status'),
@@ -80,6 +92,7 @@
 
   function body() {
     return {
+      scope: scope,
       config: { intervention: intervention },
       ruleDocs: {
         selections: selections,
@@ -183,9 +196,7 @@
       refreshPreview();
     });
     label.appendChild(overwrite);
-    label.appendChild(
-      element('span', null, 'Use the latest shipped version'),
-    );
+    label.appendChild(element('span', null, 'Use the latest shipped version'));
     block.appendChild(label);
     return block;
   }
@@ -214,6 +225,55 @@
       card.appendChild(text);
       elements.dial.appendChild(card);
     });
+  }
+
+  var SCOPE_OPTIONS = [
+    ['user', 'User', 'Applies to every project you open.'],
+    ['project', 'Project', 'Committed with the repository; outranks User.'],
+  ];
+
+  function renderScope() {
+    elements.scopeToggle.textContent = '';
+    SCOPE_OPTIONS.forEach(function (option) {
+      var label = element('label', 'scope-option');
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        applyScopeBadges();
+        renderScope();
+      });
+      label.appendChild(radio);
+      label.appendChild(element('span', null, option[1]));
+      elements.scopeToggle.appendChild(label);
+    });
+
+    var chosen = SCOPE_OPTIONS.filter(function (option) {
+      return option[0] === scope;
+    })[0];
+    elements.scopeHint.textContent =
+      chosen[2] + ' — ' + scopeState.paths[scope];
+  }
+
+  /**
+   * Mark every [data-config-path] with where its value came from. There is no
+   * clear-override button here: seiri's project layer is a committed file the
+   * team owns, so removing it is a git operation, not a settings click.
+   */
+  function applyScopeBadges() {
+    var owners = document.querySelectorAll('[data-config-path]');
+    var i;
+    for (i = 0; i < owners.length; i += 1) {
+      var path = owners[i].getAttribute('data-config-path');
+      var overriding = scopeState.overridden.indexOf(path) !== -1;
+      owners[i].setAttribute(
+        'data-scope-state',
+        scope === 'user' ? 'own' : overriding ? 'overridden' : 'inherited',
+      );
+    }
   }
 
   function renderFacts() {
@@ -397,6 +457,8 @@
   elements.root.textContent = state.projectRoot;
   renderRules();
   renderDial();
+  renderScope();
+  applyScopeBadges();
   renderFacts();
   renderRuleTargets();
   refreshPreview();

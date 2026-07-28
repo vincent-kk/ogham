@@ -27,7 +27,7 @@ export function persistSave(
       ruleDocs,
     };
 
-  writeConfig(projectRoot, body.config);
+  writeConfig(projectRoot, body.scope, body.config);
   return {
     configWritten: true,
     ruleDocs,

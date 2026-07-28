@@ -36,7 +36,7 @@ describe('bash failure chain', () => {
     const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-signals-'));
     tempDirs.push(repoRoot);
     mkdirSync(join(repoRoot, '.git'));
-    writeConfig(repoRoot, { intervention });
+    writeConfig(repoRoot, 'project', { intervention });
     return repoRoot;
   }
 

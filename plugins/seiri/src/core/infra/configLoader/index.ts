@@ -1,9 +1,11 @@
 export { clearRuntime } from './loaders/clearRuntime.js';
 export { createDefaultConfig } from './loaders/createDefaultConfig.js';
 export { loadConfig } from './loaders/loadConfig.js';
+export { loadConfigScope } from './loaders/loadConfigScope.js';
 export { loadIntervention } from './loaders/loadIntervention.js';
 export { writeConfig } from './loaders/writeConfig.js';
 export { writeRuntime } from './loaders/writeRuntime.js';
+export { configLayers } from './utils/configLayers.js';
 export { describeDial } from './utils/describeDial.js';
 export { isInterventionLevel } from './utils/isInterventionLevel.js';
 export { renderElectionLine } from './utils/renderElectionLine.js';
