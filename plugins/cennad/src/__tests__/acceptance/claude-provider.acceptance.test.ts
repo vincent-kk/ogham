@@ -75,6 +75,7 @@ describe('[acceptance] claude config data model (D1/D2/D3/D6)', () => {
   it('default model_map.claude is the tier -> {model, effort} spec', async () => {
     const { DEFAULT_CONFIG } = await load(CONSTANTS);
     expect(DEFAULT_CONFIG.model_map.claude).toEqual({
+      apex: { model: 'opus[1m]', effort: 'ultracode' },
       high: { model: 'opus', effort: 'max' },
       mid: { model: 'opus', effort: 'high' },
       low: { model: 'sonnet', effort: 'high' },
@@ -114,7 +115,12 @@ describe('[acceptance] claude config data model (D1/D2/D3/D6)', () => {
 });
 
 describe('[acceptance] claude model x effort caps (D3 / section 3)', () => {
-  it('CLAUDE_EFFORT_LEVELS is the ordered 5-level scale, excluding ultracode', async () => {
+  // `ultracode` is the top of this scale, not a separate switch: the CLI takes it
+  // as an --effort value (measured 2026-07-28 — an unrecognised value warns and
+  // falls back to the default, `ultracode` does neither, and the child session
+  // reports "Ultracode is on"). It ranks above `max` because it adds multi-agent
+  // orchestration on top of the deepest single-agent setting.
+  it('CLAUDE_EFFORT_LEVELS puts ultracode at the top of the ordered scale', async () => {
     const { CLAUDE_EFFORT_LEVELS } = await load(CONSTANTS);
     expect(CLAUDE_EFFORT_LEVELS).toEqual([
       'low',
@@ -122,7 +128,14 @@ describe('[acceptance] claude model x effort caps (D3 / section 3)', () => {
       'high',
       'xhigh',
       'max',
+      'ultracode',
     ]);
+  });
+
+  it('ClaudeEffortSchema accepts ultracode so config can store it', async () => {
+    const { ClaudeEffortSchema } = await load(TYPES);
+    expect(ClaudeEffortSchema.safeParse('ultracode').success).toBe(true);
+    expect(ClaudeEffortSchema.safeParse('ultra').success).toBe(false);
   });
 
   it('CLAUDE_MODEL_ALIASES offers the curated alias set', async () => {
@@ -135,22 +148,37 @@ describe('[acceptance] claude model x effort caps (D3 / section 3)', () => {
       expect(CLAUDE_MODEL_ALIASES, alias).toContain(alias);
   });
 
-  it('MODEL_EFFORT_SETS encodes per-model caps (sonnet skips xhigh, haiku none)', async () => {
+  // Caps follow the model each alias resolves to, measured 2026-07-28 via
+  // `modelUsage.canonicalModel`: opus/opus[1m] → claude-opus-5, sonnet/sonnet[1m]
+  // → claude-sonnet-5, fable/best → claude-fable-5, haiku → claude-haiku-4-5.
+  // The Claude 5 family carries the whole ladder, so sonnet is no longer the
+  // xhigh exception it was in the 4.6 generation; haiku has no effort axis at all
+  // (the API rejects effort there), which is why its set stays empty.
+  it('MODEL_EFFORT_SETS encodes per-model caps (haiku has no effort axis)', async () => {
     const { MODEL_EFFORT_SETS } = await load(CONSTANTS);
     expect(
       MODEL_EFFORT_SETS,
       'MODEL_EFFORT_SETS not exported yet',
     ).toBeDefined();
-    expect(MODEL_EFFORT_SETS.opus).toEqual([
-      'low',
-      'medium',
-      'high',
-      'xhigh',
-      'max',
-    ]);
-    expect(MODEL_EFFORT_SETS.sonnet).toEqual(['low', 'medium', 'high', 'max']);
-    expect(MODEL_EFFORT_SETS.sonnet).not.toContain('xhigh');
+    const fullLadder = ['low', 'medium', 'high', 'xhigh', 'max', 'ultracode'];
+    for (const alias of ['opus', 'opus[1m]', 'sonnet', 'sonnet[1m]', 'fable'])
+      expect(MODEL_EFFORT_SETS[alias], alias).toEqual(fullLadder);
+
     expect(MODEL_EFFORT_SETS.haiku).toEqual([]);
+  });
+
+  // The CLI takes `--effort ultracode` for every alias, haiku included, so the gate
+  // is cennad's to hold: a model with no effort support is the one place the top
+  // mode is withheld, and any model that has an effort axis at all offers it.
+  it('offers ultracode wherever a model has an effort axis at all', async () => {
+    const { MODEL_EFFORT_SETS } = await load(CONSTANTS);
+    for (const [alias, set] of Object.entries<readonly string[]>(
+      MODEL_EFFORT_SETS,
+    ))
+      expect(
+        set.length === 0 || set[set.length - 1] === 'ultracode',
+        alias,
+      ).toBe(true);
   });
 });
 
@@ -158,9 +186,9 @@ describe('[acceptance] claude-code CLI invocation contract (section 3 / D5 / D7)
   let handle: ReturnType<typeof installFakeBinary>;
   let restorePath: () => void;
 
-  // Fake `claude`: emulates `claude -p ... --output-format json` by printing a
-  // single result object whose `result` is the argv it received, so the spec
-  // can assert exactly which flags the dispatcher sent.
+  // Fake `claude`: emulates `claude -p ... --output-format stream-json` by printing
+  // a result event whose `result` is the argv it received, so the spec can assert
+  // exactly which flags the dispatcher sent.
   const FAKE_CLAUDE = `#!/usr/bin/env node
 const args = process.argv.slice(2);
 const i = args.indexOf('--session-id');
@@ -177,8 +205,10 @@ process.exit(0);
       sessionId: 'claude-acc-session',
       cwd: process.cwd(),
       flags: { permission_mode: 'acceptEdits' },
-      spawnTimeoutMs: 10_000,
+      idleTimeoutMs: 5_000,
+      hardCapMs: 10_000,
       modelMap: {
+        apex: { model: 'opus[1m]', effort: 'max' },
         high: { model: 'opus', effort: 'max' },
         mid: { model: 'opus', effort: 'high' },
         low: { model: 'haiku' },
@@ -213,7 +243,8 @@ process.exit(0);
     const sent: string[] = JSON.parse(result.response);
 
     expect(sent).toContain('-p');
-    expect(sent[sent.indexOf('--output-format') + 1]).toBe('json');
+    expect(sent[sent.indexOf('--output-format') + 1]).toBe('stream-json');
+    expect(sent).toContain('--verbose');
     expect(sent[sent.indexOf('--session-id') + 1]).toBe('claude-acc-session');
     expect(sent[sent.indexOf('--permission-mode') + 1]).toBe('acceptEdits');
     expect(sent[sent.indexOf('--model') + 1]).toBe('opus');

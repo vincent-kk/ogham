@@ -39,4 +39,15 @@ describe("osTimeout", () => {
     stubPlatform("win32");
     expect(osTimeout(1667)).toBe(5001);
   });
+
+  // A tier cap is a ceiling the caller chose; r-statistics' 2-minute R budget is
+  // not — one opts out by name, the other keeps the startup allowance whatever its
+  // size. Scale cannot be inferred from the number.
+  it("keeps the exact ms on win32 only when scaling is off", () => {
+    stubPlatform("win32");
+    expect(osTimeout(600_000, false)).toBe(600_000);
+    expect(osTimeout(500, false)).toBe(500);
+    expect(osTimeout(120_000)).toBe(360_000);
+    expect(osTimeout(600_000)).toBe(1_800_000);
+  });
 });

@@ -43,6 +43,7 @@ export const CodexTierConfigSchema = z.object({
 export type CodexTierConfig = z.infer<typeof CodexTierConfigSchema>;
 
 export const CodexModelMapSchema = z.object({
+  apex: CodexTierConfigSchema,
   high: CodexTierConfigSchema,
   mid: CodexTierConfigSchema,
   low: CodexTierConfigSchema,
@@ -74,14 +75,19 @@ export const ClaudeFlagsSchema = z.object({
 });
 export type ClaudeFlags = z.infer<typeof ClaudeFlagsSchema>;
 
-// claude-code reasoning effort scale (excludes ultracode, which is a separate
-// swarm setting, not an --effort value).
+// claude-code effort scale, low → highest. `ultracode` is the top of it, not a
+// separate switch: the CLI takes it as an --effort value (measured 2026-07-28 —
+// an unrecognised value warns and falls back to the default, `ultracode` does
+// neither, and the child session reports "Ultracode is on"). It ranks above `max`
+// because it adds multi-agent orchestration on top of the deepest single-agent
+// setting. Which models may be given it is `MODEL_EFFORT_SETS`, not this enum.
 export const ClaudeEffortSchema = z.enum([
   'low',
   'medium',
   'high',
   'xhigh',
   'max',
+  'ultracode',
 ]);
 export type ClaudeEffort = z.infer<typeof ClaudeEffortSchema>;
 
@@ -94,6 +100,7 @@ export const ClaudeTierConfigSchema = z.object({
 export type ClaudeTierConfig = z.infer<typeof ClaudeTierConfigSchema>;
 
 export const ClaudeModelMapSchema = z.object({
+  apex: ClaudeTierConfigSchema,
   high: ClaudeTierConfigSchema,
   mid: ClaudeTierConfigSchema,
   low: ClaudeTierConfigSchema,
@@ -113,6 +120,7 @@ export const AntigravityTierConfigSchema = z.object({
 export type AntigravityTierConfig = z.infer<typeof AntigravityTierConfigSchema>;
 
 export const AntigravityModelMapSchema = z.object({
+  apex: AntigravityTierConfigSchema,
   high: AntigravityTierConfigSchema,
   mid: AntigravityTierConfigSchema,
   low: AntigravityTierConfigSchema,
@@ -126,7 +134,11 @@ export interface DispatchOptions<F = unknown, M = AntigravityModelMap> {
   sessionId: string;
   cwd: string;
   flags: F;
-  spawnTimeoutMs: number;
+  // Liveness limits, resolved from config by the MCP tool. idleTimeoutMs is the
+  // no-output ceiling (every CLI streams events, so a thinking model keeps
+  // resetting it); hardCapMs is the absolute stop for the resolved tier.
+  idleTimeoutMs: number;
+  hardCapMs: number;
   // Tier→model map, injected by the MCP tool for providers that resolve concrete
   // models from config (antigravity's AntigravityModelMap, claude's ClaudeModelMap).
   // codex ignores it.

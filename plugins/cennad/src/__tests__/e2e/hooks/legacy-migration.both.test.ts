@@ -7,9 +7,11 @@ import { writeConfigFixture, writeCounter } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerA } from '../helpers/hookRunnerLayerA.js';
 import { runHookLayerB } from '../helpers/hookRunnerLayerB.js';
+import { HOST_PID, claimHostSession } from '../helpers/hostSession.js';
 
 describe('legacy ratio migration (both layers)', () => {
   beforeEach(async () => {
+    claimHostSession();
     await rm(CENNAD_HOME, { recursive: true, force: true });
     await writeConfigFixture('legacy');
   });
@@ -23,7 +25,7 @@ describe('legacy ratio migration (both layers)', () => {
   });
 
   it('Layer A injectDynamic shows the migrated target ratio from config', async () => {
-    await writeCounter({ parent_pid: process.ppid, codex: 1, antigravity: 1 });
+    await writeCounter({ parent_pid: HOST_PID, codex: 1, antigravity: 1 });
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
@@ -42,7 +44,7 @@ describe('legacy ratio migration (both layers)', () => {
   });
 
   it('Layer B injectDynamic with counter shows the migrated target', async () => {
-    await writeCounter({ parent_pid: process.pid, codex: 1, antigravity: 1 });
+    await writeCounter({ parent_pid: HOST_PID, codex: 1, antigravity: 1 });
     const result = runHookLayerB('injectDynamic');
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {

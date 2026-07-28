@@ -114,6 +114,25 @@ describe('resolveTranscript', () => {
     expect(await resolveTranscript(CWD, Date.now() + 60_000)).toBeNull();
   });
 
+  // A turn that answered nothing appends only its USER_INPUT, leaving the previous
+  // turn's DONE as the last one in the file — and the file's mtime fresh.
+  it('rejects a DONE response that precedes the newest user turn', async () => {
+    await seedMap({ [CWD]: CONV });
+    await seedTranscript(
+      CONV,
+      [
+        doneEntry('previous turn answer'),
+        JSON.stringify({
+          source: 'USER',
+          type: 'USER_INPUT',
+          status: 'DONE',
+          content: 'this turn prompt',
+        }),
+      ].join('\n'),
+    );
+    expect(await resolveTranscript(CWD, 0)).toBeNull();
+  });
+
   it('returns null when the DONE entry content is empty', async () => {
     await seedMap({ [CWD]: CONV });
     await seedTranscript(CONV, doneEntry(''));

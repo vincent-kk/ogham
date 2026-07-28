@@ -42,19 +42,25 @@ describe('DEFAULT_CONFIG', () => {
     });
   });
 
+  // apex is the "carry out the work" tier, so it takes the top of the scale:
+  // `ultracode` runs the child as a multi-agent orchestrator. high keeps `max` —
+  // the deepest single-agent setting — so the two tiers differ in kind, not degree.
   it('defaults model_map.claude to per-tier {model, effort}', () => {
     expect(DEFAULT_CONFIG.model_map.claude).toEqual({
+      apex: { model: 'opus[1m]', effort: 'ultracode' },
       high: { model: 'opus', effort: 'max' },
       mid: { model: 'opus', effort: 'high' },
       low: { model: 'sonnet', effort: 'high' },
     });
   });
 
-  // Tiers ride codex's 5.6 split — sol (frontier) for high, terra (balanced) for
-  // mid/low at different efforts.
+  // Tiers ride codex's 5.6 split — sol (frontier) for apex/high, terra (balanced)
+  // for mid/low at different efforts. ultra is sol's delegating effort, the one
+  // apex exists for.
   // app.js DEFAULT_CODEX_MODEL_MAP mirrors this value — keep in sync.
   it('defaults model_map.codex to per-tier {model, effort}', () => {
     expect(DEFAULT_CONFIG.model_map.codex).toEqual({
+      apex: { model: 'gpt-5.6-sol', effort: 'ultra' },
       high: { model: 'gpt-5.6-sol', effort: 'max' },
       mid: { model: 'gpt-5.6-terra', effort: 'high' },
       low: { model: 'gpt-5.6-terra', effort: 'medium' },
@@ -65,10 +71,20 @@ describe('DEFAULT_CONFIG', () => {
   // into "model (effort)".
   it('defaults model_map.antigravity to per-tier {model, effort}', () => {
     expect(DEFAULT_CONFIG.model_map.antigravity).toEqual({
-      high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+      apex: { model: 'Gemini 3.1 Pro', effort: 'High' },
+      high: { model: 'Gemini 3.1 Pro', effort: 'Low' },
       mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
       low: { model: 'Gemini 3.5 Flash', effort: 'Low' },
     });
+  });
+
+  // app.js DEFAULT_IDLE_TIMEOUT_MS / DEFAULT_HARD_CAP_MS mirror these — keep in sync.
+  it('caps rise with the tier and stay above the shared idle limit', () => {
+    const { idle_ms: idle, hard_cap_ms: caps } = DEFAULT_CONFIG.timeouts;
+    expect(caps.apex).toBeGreaterThan(caps.high);
+    expect(caps.high).toBeGreaterThan(caps.mid);
+    expect(caps.mid).toBeGreaterThan(caps.low);
+    expect(caps.low).toBeGreaterThan(idle);
   });
 });
 

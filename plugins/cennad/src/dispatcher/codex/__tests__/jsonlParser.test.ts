@@ -8,6 +8,7 @@ describe('parseCodexStream', () => {
       threadId: null,
       resolvedModel: null,
       response: null,
+      errorMessage: null,
     });
   });
 
@@ -71,5 +72,25 @@ describe('parseCodexStream', () => {
     const parsed = parseCodexStream(stdout);
     expect(parsed.threadId).toBe('nested-tid');
     expect(parsed.resolvedModel).toBe('mid-model');
+  });
+
+  // Shape of a real usage-limit run: the reason lives here, never in stderr.
+  it('extracts the failure reason from error and turn.failed events', () => {
+    const stdout = [
+      JSON.stringify({ type: 'thread.started', thread_id: 'tid' }),
+      JSON.stringify({ type: 'turn.started' }),
+      JSON.stringify({
+        type: 'error',
+        message: "You've hit your usage limit.",
+      }),
+      JSON.stringify({
+        type: 'turn.failed',
+        error: { message: 'You’ve hit your usage limit. Try again later.' },
+      }),
+    ].join('\n');
+    const parsed = parseCodexStream(stdout);
+    expect(parsed.threadId).toBe('tid');
+    expect(parsed.response).toBeNull();
+    expect(parsed.errorMessage).toContain('usage limit');
   });
 });

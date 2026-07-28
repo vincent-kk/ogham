@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const PROVIDERS = ['antigravity', 'codex', 'claude'] as const;
 export const Tier = {
+  Apex: 'apex',
   High: 'high',
   Mid: 'mid',
   Low: 'low',
@@ -12,6 +13,7 @@ export const ErrorCode = {
   Auth: 'auth',
   Disabled: 'disabled',
   Network: 'network',
+  Timeout: 'timeout',
   CliError: 'cli_error',
   Unknown: 'unknown',
 } as const;

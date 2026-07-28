@@ -13,7 +13,11 @@ export interface DispatchInternal {
   options: ConversationOptions;
   existingRef: string | null;
   supportedOptions: ReadonlySet<keyof ConversationOptions>;
-  spawnTimeoutMs: number;
+  idleTimeoutMs: number;
+  hardCapMs: number;
+  // What the tier resolved to, used when the stream names no model — codex
+  // reports one only sometimes, and a null here gets stored as a tier label.
+  tierModel: string | null;
 }
 
 export async function dispatch(
@@ -25,9 +29,11 @@ export async function dispatch(
   );
   const spawnResult = await spawnCodex(input.argv, {
     cwd: input.cwd,
-    timeoutMs: input.spawnTimeoutMs,
+    timeoutMs: input.hardCapMs,
+    idleTimeoutMs: input.idleTimeoutMs,
   });
   const parsed = parseCodexStream(spawnResult.stdout);
+  const resolvedModel = parsed.resolvedModel ?? input.tierModel;
   const resolvedRef = input.existingRef ?? parsed.threadId ?? '';
   const failed = spawnResult.spawnError !== null || spawnResult.exitCode !== 0;
 
@@ -38,12 +44,30 @@ export async function dispatch(
       error: mapError({
         exitCode: spawnResult.exitCode,
         stderr: spawnResult.stderr,
+        cliMessage: parsed.errorMessage,
         spawnError: spawnResult.spawnError,
         abortedByCaller: spawnResult.abortedByCaller,
       }),
       externalSessionRef: resolvedRef,
       ignoredOptions,
-      resolvedModel: parsed.resolvedModel,
+      resolvedModel,
+    };
+
+  // codex can report a failed turn and still exit 0, with the reason only in the
+  // stream. A turn that produced no message and named a reason is that case; an
+  // `error` event beside a delivered answer is a notice and keeps the success.
+  if (parsed.response === null && parsed.errorMessage !== null)
+    return {
+      status: 'failure',
+      response: null,
+      error: mapError({
+        exitCode: spawnResult.exitCode,
+        stderr: spawnResult.stderr,
+        cliMessage: parsed.errorMessage,
+      }),
+      externalSessionRef: resolvedRef,
+      ignoredOptions,
+      resolvedModel,
     };
 
   if (input.existingRef === null && !parsed.threadId)
@@ -56,7 +80,7 @@ export async function dispatch(
       },
       externalSessionRef: '',
       ignoredOptions,
-      resolvedModel: parsed.resolvedModel,
+      resolvedModel,
     };
 
   return {
@@ -65,6 +89,6 @@ export async function dispatch(
     error: null,
     externalSessionRef: resolvedRef,
     ignoredOptions,
-    resolvedModel: parsed.resolvedModel,
+    resolvedModel,
   };
 }

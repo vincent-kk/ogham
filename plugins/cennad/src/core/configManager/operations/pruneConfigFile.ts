@@ -50,6 +50,21 @@ export async function pruneConfigFile(): Promise<PruneResult> {
     return { config: DEFAULT_CONFIG, pruned: false };
   }
 
+  // The pre-liveness wall-clock ceiling is not migrated: it capped total runtime,
+  // while the new limits are a no-output window plus a per-tier ceiling, so
+  // carrying the number across would misstate what the user chose. Dropping it
+  // does widen their ceiling, which is worth saying out loud once here rather
+  // than letting the value disappear on the next write.
+  if (
+    typeof rawParsed === 'object' &&
+    rawParsed !== null &&
+    'spawn_timeout_ms' in rawParsed
+  )
+    logger.warn(
+      'legacy spawn_timeout_ms dropped — liveness limits now come from timeouts.idle_ms and timeouts.hard_cap_ms; review them in /cennad:setup',
+      { previous: (rawParsed as Record<string, unknown>).spawn_timeout_ms },
+    );
+
   const cleaned = parsed.data;
   if (deepEqual(cleaned, rawParsed)) return { config: cleaned, pruned: false };
 

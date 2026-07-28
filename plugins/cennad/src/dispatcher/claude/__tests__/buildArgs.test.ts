@@ -19,7 +19,8 @@ function baseArgs(
     sessionId: 'sess-1',
     cwd: '/tmp',
     flags,
-    spawnTimeoutMs: 1000,
+    idleTimeoutMs: 500,
+    hardCapMs: 1000,
   };
 }
 
@@ -27,13 +28,14 @@ const after = (argv: string[], flag: string): string | undefined =>
   argv[argv.indexOf(flag) + 1];
 
 describe('buildStartArgs', () => {
-  it('sends -p/json/session-id/model/effort/permission-mode + isolation flags', () => {
+  it('sends -p/stream-json/session-id/model/effort/permission-mode + isolation flags', () => {
     const argv = buildStartArgs(baseArgs({ permission_mode: 'acceptEdits' }), {
       model: 'opus',
       effort: 'max',
     });
     expect(argv).toContain('-p');
-    expect(after(argv, '--output-format')).toBe('json');
+    expect(after(argv, '--output-format')).toBe('stream-json');
+    expect(argv).toContain('--verbose');
     expect(after(argv, '--session-id')).toBe('sess-1');
     expect(after(argv, '--permission-mode')).toBe('acceptEdits');
     expect(after(argv, '--model')).toBe('opus');
@@ -68,6 +70,8 @@ describe('buildResumeArgs', () => {
     };
     const argv = buildResumeArgs(args, { model: 'opus', effort: 'max' });
     expect(after(argv, '--resume')).toBe('prior-id');
+    expect(after(argv, '--output-format')).toBe('stream-json');
+    expect(argv).toContain('--verbose');
     expect(argv).not.toContain('--session-id');
     expect(argv).toContain('--strict-mcp-config');
     expect(argv).toContain('--safe-mode');

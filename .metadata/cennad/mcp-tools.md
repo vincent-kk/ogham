@@ -17,7 +17,7 @@ MCP 서버 이름: `tools`. 도구는 3개. 모든 도구는 `wrapHandler` 로 �
 z.object({
   provider: z.enum(["codex", "antigravity", "claude"]),
   prompt: z.string().min(1),
-  tier: z.enum(["high", "mid", "low"]).optional(),
+  tier: z.enum(["apex", "high", "mid", "low"]).optional(),
 });
 ```
 
@@ -27,7 +27,7 @@ z.object({
 | `prompt`   | O    | —                               |
 | `tier`     | X    | `config.default_tier[provider]` |
 
-`tier` 는 생략 시 provider 별 `config.default_tier` 가 적용된다 (`/setup` UI 에서 codex/antigravity/claude 각각 설정, 기본 `mid`). 명시하면 그 tier 로 override 한다. tier 가 높을수록 상위 모델·effort 라 비용·rate-limit 이 가파르게 오른다 (`rate_limit` / `budget_exhausted` 의 주원인).
+`tier` 는 생략 시 provider 별 `config.default_tier` 가 적용된다 (`/setup` UI 에서 codex/antigravity/claude 각각 설정, 기본 `mid`). 명시하면 그 tier 로 override 한다. tier 가 높을수록 상위 모델·effort 라 비용·rate-limit 이 가파르게 오르고(`rate_limit` / `budget_exhausted` 의 주원인), 동시에 `config.timeouts.hard_cap_ms[tier]` 로 실행 허용 시간도 함께 넓어진다. `apex` 는 provider 가 다단계·다파일 작업을 자율 수행해야 할 때만 쓴다.
 
 비활성화된 provider 로 호출하면 `error.code: 'disabled'` 응답을 즉시 반환한다.
 
@@ -71,7 +71,7 @@ antigravity 의 `sandbox` 는 하위호환용으로 항상 false 취급 — `--s
 z.object({
   session_id: z.string().uuid(),
   prompt: z.string().min(1),
-  tier: z.enum(["high", "mid", "low"]).optional(), // 생략 시 SessionMeta.tier → default_tier
+  tier: z.enum(["apex", "high", "mid", "low"]).optional(), // 생략 시 SessionMeta.tier → default_tier
 });
 ```
 
@@ -103,6 +103,7 @@ z.object({
 - `unknown`: 세션이 현재 프로젝트에 없음 (cwd 불일치 포함).
 - `disabled`: provider 가 config 에서 비활성화됨.
 - `budget_exhausted` / `rate_limit` / `auth` / `network` / `cli_error`: 외부 CLI 실패.
+- `timeout`: idle 한도 또는 tier hard cap 이 발동해 CLI 를 중단시킴 (재시도가 아니라 상위 tier·작업 축소가 처방).
 
 ## 3. `open_settings`
 
@@ -152,6 +153,7 @@ interface ConversationResponse {
       | "rate_limit"
       | "auth"
       | "network"
+      | "timeout"
       | "cli_error"
       | "disabled"
       | "unknown";
@@ -181,7 +183,7 @@ interface ConversationResponse {
 
 **cwd 생명주기**: start 성공 → cwd 유지. start timeout → cwd 삭제. resume timeout → cwd 유지(대화 히스토리 보호).
 
-**모델 해석**: `config.model_map.antigravity` 의 `{ high, mid, low }` 매핑으로 tier 를 구체적 모델명으로 변환한다.
+**모델 해석**: `config.model_map.antigravity` 의 `{ apex, high, mid, low }` 매핑으로 tier 를 구체적 모델명으로 변환한다.
 
 ## 도구 설명 컨벤션
 

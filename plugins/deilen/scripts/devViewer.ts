@@ -55,7 +55,7 @@ const SAMPLE = [
   '  viewerPage --> lineComment["라인 코멘트"]',
   '  viewerPage --> overallNote["전체 노트"]',
   '  lineComment --> collect["collect_feedback"]',
-  '  overallNote --> collect',
+  "  overallNote --> collect",
   '  collect --> conversation["Claude 대화"]',
   '  conversation --> revise["문서 수정"]',
   "  revise --> renderTool",

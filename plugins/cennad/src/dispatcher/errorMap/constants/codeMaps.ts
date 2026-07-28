@@ -8,9 +8,12 @@ export const EXIT_CODE_MAP: Record<number, ErrorCode> = {
   127: ErrorCode.CliError,
 };
 
+// ETIMEDOUT here is this dispatcher's own liveness stop (idle limit or tier
+// ceiling) raised by utils/timeoutError.ts — never a socket failure, which the
+// CLI reports through stderr and classify() matches as `network` there.
 export const SPAWN_ERROR_MAP: Record<string, ErrorCode> = {
   ENOENT: ErrorCode.CliError,
   ECONNRESET: ErrorCode.Network,
-  ETIMEDOUT: ErrorCode.Network,
+  ETIMEDOUT: ErrorCode.Timeout,
   ENOTFOUND: ErrorCode.Network,
 };

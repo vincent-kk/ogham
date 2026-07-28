@@ -2,7 +2,7 @@
 name: crosscheck
 description: '[cennad] Cross-validate a prompt by dispatching it in parallel to every enabled provider (codex, antigravity, claude), then synthesize their answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user_invocable: true
-argument-hint: '[--tier high|mid|low] [--no-converge] -- "prompt"'
+argument-hint: '[--tier apex|high|mid|low] [--no-converge] -- "prompt"'
 ---
 
 # crosscheck
@@ -17,7 +17,7 @@ Send the SAME prompt to every enabled provider in parallel — one background `c
 
 ## Arguments
 
-- `--tier high|mid|low` — only when the user asked; the same tier goes to every provider, and each resolves it from its own config (see the provider skills' Tier sections).
+- `--tier apex|high|mid|low` — only when the user asked; the same tier goes to every provider, and each resolves it from its own config (see the provider skills' Tier sections). Cost multiplies by the participant count here, so do not raise the tier on your own judgment the way a single-provider dispatch does — `apex` across three providers is three long autonomous runs at once.
 - `--no-converge` — synthesize the first round only.
 - `-- "prompt"` — the prompt (required).
 
@@ -38,7 +38,7 @@ In ONE message, spawn one `cennad:courier` per participant (Agent tool, backgrou
 ```
 operation: start
 provider: <codex | antigravity | claude>
-tier: <high|mid|low>        # only when --tier was given
+tier: <apex|high|mid|low>   # only when --tier was given
 refine: false
 prompt:
 <the prompt, verbatim>

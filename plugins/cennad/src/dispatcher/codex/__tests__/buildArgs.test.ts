@@ -14,6 +14,7 @@ import { buildStartArgs } from '../utils/buildStartArgs.js';
 const READ_ONLY: CodexFlags = { yolo: false, sandbox: 'read-only' };
 
 const MODEL_MAP: CodexModelMap = {
+  apex: { model: 'gpt-5.6-sol', effort: 'ultra' },
   high: { model: 'gpt-5.6-sol', effort: 'max' },
   mid: { model: 'gpt-5.6-terra', effort: 'medium' },
   low: { model: 'gpt-5.6-luna', effort: 'medium' },
@@ -31,7 +32,8 @@ function startWith(
     sessionId: 's',
     cwd: '/tmp',
     flags,
-    spawnTimeoutMs: 10000,
+    idleTimeoutMs: 5000,
+    hardCapMs: 10000,
     modelMap,
   };
   return buildStartArgs(opts, resolveCodexTier(tier, modelMap));
@@ -50,7 +52,8 @@ function resumeWith(
     cwd: '/tmp',
     flags,
     externalSessionRef: 'thread-id',
-    spawnTimeoutMs: 10000,
+    idleTimeoutMs: 5000,
+    hardCapMs: 10000,
     modelMap,
   };
   return buildResumeArgs(opts, resolveCodexTier(tier, modelMap));

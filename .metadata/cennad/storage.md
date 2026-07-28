@@ -76,7 +76,16 @@ interface Config {
     // 기본: { high: { model: "opus", effort: "max" }, mid: { model: "opus", effort: "high" }, low: { model: "sonnet", effort: "high" } }
   };
   session_ttl_hours: number; // 기본 72
-  spawn_timeout_ms: number; // 기본 600000
+  timeouts: {
+    idle_ms: number; // 기본 600000 — 마지막 출력 이후 무활동 상한 (청크마다 리셋)
+    hard_cap_ms: {
+      // tier 별 절대 상한
+      apex: number; // 기본 21600000 (6h)
+      high: number; // 기본 7200000 (2h)
+      mid: number; // 기본 3600000 (1h)
+      low: number; // 기본 1800000 (30m)
+    };
+  };
   artifacts: { enabled: boolean; location: "project" | "user" };
   preamble: { codex: string; antigravity: string; claude: string };
   recency_factor: {

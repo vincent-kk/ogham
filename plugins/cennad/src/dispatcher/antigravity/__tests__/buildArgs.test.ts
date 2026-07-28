@@ -21,7 +21,8 @@ function startArgs(
     sessionId: 's',
     cwd: '/tmp',
     flags,
-    spawnTimeoutMs: 10000,
+    idleTimeoutMs: 5000,
+    hardCapMs: 10000,
   };
   return buildStartArgs(opts, model);
 }
@@ -29,6 +30,7 @@ function startArgs(
 function resumeArgs(
   flags: AntigravityFlags,
   model: string | null = null,
+  externalSessionRef = '/tmp/cwd',
 ): string[] {
   const opts: DispatchResumeOptions<AntigravityFlags> = {
     prompt: 'hi',
@@ -37,16 +39,26 @@ function resumeArgs(
     sessionId: 's',
     cwd: '/tmp',
     flags,
-    externalSessionRef: '/tmp/cwd',
-    spawnTimeoutMs: 10000,
+    externalSessionRef,
+    idleTimeoutMs: 5000,
+    hardCapMs: 10000,
   };
   return buildResumeArgs(opts, model);
 }
 
 describe('antigravity buildStartArgs', () => {
-  it('starts with -p <prompt> and no --output-format', () => {
-    expect(startArgs(OFF).slice(0, 2)).toEqual(['-p', 'hi']);
-    expect(startArgs(OFF)).not.toContain('--output-format');
+  it('starts with -p <prompt> and streams its output', () => {
+    expect(startArgs(OFF).slice(0, 4)).toEqual([
+      '-p',
+      'hi',
+      '--output-format',
+      'stream-json',
+    ]);
+  });
+
+  it('sends the tier ceiling as --print-timeout so agy drops its own 5m default', () => {
+    const args = startArgs(OFF);
+    expect(args[args.indexOf('--print-timeout') + 1]).toBe('10s');
   });
 
   it('omits permission flags when both are off', () => {
@@ -80,10 +92,40 @@ describe('antigravity buildStartArgs', () => {
   });
 });
 
+describe('antigravity buildResumeArgs — session targeting', () => {
+  // agy exposes its conversation id in the stream-json output, so a session
+  // recorded after that resumes exactly, from any cwd.
+  it('resumes a recorded conversation id with --conversation', () => {
+    const args = resumeArgs(OFF, null, 'd8012e6e-ff19-4e8c-9041-3d1b8b97708d');
+    expect(args[args.indexOf('--conversation') + 1]).toBe(
+      'd8012e6e-ff19-4e8c-9041-3d1b8b97708d',
+    );
+    expect(args).not.toContain('--continue');
+  });
+
+  // Sessions started before that recorded the isolated cwd as their ref; those
+  // keep resuming through --continue (most recent conversation in that cwd).
+  it('falls back to --continue for a legacy cwd ref', () => {
+    const args = resumeArgs(OFF, null, '/tmp/antigravity-cwd/legacy-session');
+    expect(args).toContain('--continue');
+    expect(args).not.toContain('--conversation');
+  });
+});
+
 describe('antigravity buildResumeArgs', () => {
-  it('starts with --continue -p <prompt> and no --output-format', () => {
-    expect(resumeArgs(OFF).slice(0, 3)).toEqual(['--continue', '-p', 'hi']);
-    expect(resumeArgs(OFF)).not.toContain('--output-format');
+  it('starts with --continue -p <prompt> and streams its output', () => {
+    expect(resumeArgs(OFF).slice(0, 5)).toEqual([
+      '--continue',
+      '-p',
+      'hi',
+      '--output-format',
+      'stream-json',
+    ]);
+  });
+
+  it('carries the tier ceiling as --print-timeout on resume too', () => {
+    const args = resumeArgs(OFF);
+    expect(args[args.indexOf('--print-timeout') + 1]).toBe('10s');
   });
 
   it('appends --model=<name> when a model name is given', () => {

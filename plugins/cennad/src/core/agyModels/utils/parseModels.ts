@@ -1,6 +1,4 @@
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord } from '../../../utils/isRecord.js';
 
 const ANSI_PATTERN = new RegExp(
   `${String.fromCharCode(27)}\\[[0-9;]*[A-Za-z]`,

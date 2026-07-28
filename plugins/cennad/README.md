@@ -53,7 +53,7 @@ cennad never installs or logs in for you. When auth is missing the failure respo
 /setup
 ```
 
-Opens a local web UI to configure provider ratio (target % per provider, plus a per-provider enable toggle), intervention strength (`-2` … `+2`), keyword routing hints, per-tier model mapping (antigravity model, claude model + effort), and default options per provider. The UI runs on `127.0.0.1` with a one-time token and auto-shuts down after 5 minutes idle.
+Opens a local web UI to configure provider ratio (target % per provider, plus a per-provider enable toggle), intervention strength (`-2` … `+2`), keyword routing hints, per-tier model + effort mapping for all three providers, CLI liveness limits, and default options per provider. The UI runs on `127.0.0.1` with a one-time token and auto-shuts down after 5 minutes idle.
 
 ### Delegating to Codex
 
@@ -182,13 +182,16 @@ Sessions are project-scoped: `continue_conversation` from a different `cwd` retu
 
 ## Tiers
 
-Each provider exposes three tier aliases. Codex and Claude map each tier to a `{model, effort}` pair stored in config (`model_map.codex`, `model_map.claude`). Antigravity serves multiple model families, so each tier maps to a model full-name you pick in `/setup` (from the live `agy models` list), stored in `model_map.antigravity`. All three are selectable per tier in `/setup`.
+Each provider exposes four tier aliases. Codex and Claude map each tier to a `{model, effort}` pair stored in config (`model_map.codex`, `model_map.claude`). Antigravity serves multiple model families, so each tier maps to a model full-name you pick in `/setup` (from the live `agy models` list), stored in `model_map.antigravity`. All three are selectable per tier in `/setup`.
 
-| tier   | meaning                                                                        |
-| ------ | ------------------------------------------------------------------------------ |
-| `high` | provider's most capable model (antigravity: the model you mapped to this tier) |
-| `mid`  | balanced model                                                                 |
-| `low`  | fastest / cheapest model                                                       |
+| tier   | meaning                                                                           |
+| ------ | --------------------------------------------------------------------------------- |
+| `apex` | the provider carries out the work itself: repo-wide changes, long autonomous runs |
+| `high` | judgment spanning several files or competing constraints                          |
+| `mid`  | the default — one module's worth of implementation, review, or explanation        |
+| `low`  | one lookup, one conversion — fastest / cheapest model                             |
+
+Tiers are picked from what the provider must DO, not from how hard the topic sounds. `apex` is the costliest and holds a rate-limit slot longest, so it is for scope and autonomy only.
 
 Codex's reasoning-effort scale runs `low < medium < high < xhigh < max < ultra`, and **which levels a model accepts differs per model** — `ultra` is exclusive to the 5.6 frontier line, while the 5.5/5.4 line tops out at `xhigh`. Unlike claude-code, codex rejects an unsupported effort outright instead of downgrading it, so `/setup` offers only the levels the selected model advertises (read live from `codex debug models`). Defaults reserve the frontier model for `high` and separate `mid` from `low` by effort on the same balanced model: `high` = `gpt-5.6-sol` (frontier) at `max`, `mid` = `gpt-5.6-terra` (balanced) at `high`, `low` = `gpt-5.6-terra` at `medium`. Leaving a tier's model or effort blank omits the flag, so your own `~/.codex/config.toml` decides that dimension.
 

@@ -47,16 +47,19 @@ export function mergeModelMap(raw: unknown): unknown {
   const rawClaude = isPlainObject(raw.claude) ? raw.claude : {};
   return {
     codex: {
+      apex: mergeTierConfig(rawCodex.apex, defaults.codex.apex),
       high: mergeTierConfig(rawCodex.high, defaults.codex.high),
       mid: mergeTierConfig(rawCodex.mid, defaults.codex.mid),
       low: mergeTierConfig(rawCodex.low, defaults.codex.low),
     },
     antigravity: {
+      apex: mergeTierConfig(rawAntigravity.apex, defaults.antigravity.apex),
       high: mergeTierConfig(rawAntigravity.high, defaults.antigravity.high),
       mid: mergeTierConfig(rawAntigravity.mid, defaults.antigravity.mid),
       low: mergeTierConfig(rawAntigravity.low, defaults.antigravity.low),
     },
     claude: {
+      apex: mergeTierConfig(rawClaude.apex, defaults.claude.apex),
       high: mergeTierConfig(rawClaude.high, defaults.claude.high),
       mid: mergeTierConfig(rawClaude.mid, defaults.claude.mid),
       low: mergeTierConfig(rawClaude.low, defaults.claude.low),

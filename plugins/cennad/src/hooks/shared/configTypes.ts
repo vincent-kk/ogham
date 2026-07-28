@@ -15,10 +15,7 @@ export type Ratio = {
 export type InterventionStrength = -2 | -1 | 0 | 1 | 2;
 
 export type CodexSandboxMode =
-  | 'read-only'
-  | 'workspace-write'
-  | 'danger-full-access'
-  | 'off';
+  'read-only' | 'workspace-write' | 'danger-full-access' | 'off';
 
 export interface CodexFlags {
   yolo: boolean;
@@ -31,10 +28,7 @@ export interface AntigravityFlags {
 }
 
 export type ClaudePermissionMode =
-  | 'acceptEdits'
-  | 'auto'
-  | 'dontAsk'
-  | 'bypassPermissions';
+  'acceptEdits' | 'auto' | 'dontAsk' | 'bypassPermissions';
 
 export interface ClaudeFlags {
   permission_mode: ClaudePermissionMode;

@@ -25,6 +25,9 @@ describe('mergeModelMap', () => {
     expect(mergeModelMap(raw)).toEqual({
       codex: defaults.codex,
       antigravity: {
+        // No apex on disk — a config written before the tier existed keeps its own
+        // tiers and takes the default for the new one.
+        apex: defaults.antigravity.apex,
         high: { model: 'Gemini 3.1 Pro', effort: 'High' },
         mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
         low: { model: 'GPT-OSS 120B' },

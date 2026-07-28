@@ -104,7 +104,7 @@ agy 가 non-TTY 환경에서 stdout 을 무음 drop 하는 버그:
 
 ### 모델 해석
 
-- `resolveAntigravityModel(tier, map)`: config `model_map.antigravity` (high/mid/low) 에서 구체 모델명 해석.
+- `resolveAntigravityModel(tier, map)`: config `model_map.antigravity` (apex/high/mid/low) 에서 구체 모델명 해석.
 - map 없음 → `-m` 생략, agy 기본값 사용.
 - 모델명 하드코딩 없음 — 전적으로 config 에 위임.
 
@@ -125,7 +125,7 @@ agy 가 non-TTY 환경에서 stdout 을 무음 drop 하는 버그:
 
 ### 모델·effort 해석
 
-- `config.model_map.claude` (high/mid/low) → `{ model, effort }` 해석.
+- `config.model_map.claude` (apex/high/mid/low) → `{ model, effort }` 해석.
 - env override: `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT`.
 
 ## model_map.antigravity
@@ -148,7 +148,7 @@ codex 는 reasoning effort 매핑을 쓰며 `model_map` 에 등장하지 않는�
 
 ## model_map.claude
 
-config 의 `model_map.claude` 는 tier → `{ model, effort }` 매핑이다. model aliases: `opus`, `sonnet`, `haiku`, `fable`, `best`, `opus[1m]`, `sonnet[1m]`. effort 스케일: `low < medium < high < xhigh < max`. 모델별 effort 상한: opus/fable/best/opus[1m] = 전체 5단계; sonnet/sonnet[1m] = low/medium/high/max (xhigh 없음); haiku = effort 없음.
+config 의 `model_map.claude` 는 tier → `{ model, effort }` 매핑이다. model aliases: `opus`, `sonnet`, `haiku`, `fable`, `best`, `opus[1m]`, `sonnet[1m]`. effort 스케일: `low < medium < high < xhigh < max < ultracode` — 최상단은 깊이가 아니라 멀티에이전트 오케스트레이션 모드다. 모델별 상한은 alias 가 해석되는 모델을 따른다: Claude 5 계열(opus·sonnet·fable·best 및 `[1m]` 변형) = 6단계 전부; haiku = effort 축 없음. claude-code 는 미지원 단계를 조용히 낮추므로 게이트는 settings UI 의 `MODEL_EFFORT_SETS` 뿐이다. 기본값은 apex 만 `ultracode`.
 
 ```json
 {

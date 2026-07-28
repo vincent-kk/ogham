@@ -5,12 +5,12 @@ import type {
 } from '../../../types/index.js';
 import type { ResolvedClaudeTier } from '../operations/resolveTier.js';
 
-// claude -p <prompt> --output-format json --resume <ref> --permission-mode <m>
-//   --model <model> [--effort <e>] [--fallback-model <chain>]
+// claude -p <prompt> --output-format stream-json --verbose --resume <ref>
+//   --permission-mode <m> --model <model> [--effort <e>] [--fallback-model <chain>]
 //   --strict-mcp-config --safe-mode
 //
 // <ref> is the externalSessionRef recorded at start (the cennad sessionId).
-// Isolation flags are always attached, exactly as on start.
+// Isolation and output-format flags are always attached, exactly as on start.
 export function buildResumeArgs(
   args: DispatchResumeOptions<ClaudeFlags, ClaudeModelMap>,
   resolved: ResolvedClaudeTier,
@@ -19,7 +19,8 @@ export function buildResumeArgs(
     '-p',
     args.prompt,
     '--output-format',
-    'json',
+    'stream-json',
+    '--verbose',
     '--resume',
     args.externalSessionRef,
     '--permission-mode',

@@ -20,7 +20,7 @@ codex-cli (`codex exec` / `codex exec resume`) 어댑터. JSONL 이벤트 스트
 - tier→`{model, effort}` 는 `config.model_map.codex` 단독; env override `CENNAD_CODEX_<TIER>_MODEL`/`_EFFORT`; 미해결 차원은 플래그 생략 → 사용자 `~/.codex/config.toml` 이 결정
 - effort 스케일 `low<medium<high<xhigh<max<ultra`; 지원 집합은 모델마다 다름 (`core/codexModels` 카탈로그)
 - `flags.yolo=true` → `--yolo`; 아니고 `flags.sandbox !== 'off'` → `--sandbox <mode>` (config 단독 결정)
-- JSONL stdout: `thread.started`/`session_id` 변종 허용(업스트림 rename 대비); 응답은 마지막 `agent.message`/`agent.complete`/`item.completed (agent_message)` 텍스트
+- JSONL stdout: `thread.started`/`session_id` 변종 허용(업스트림 rename 대비); 응답은 마지막 `agent.message`/`agent.complete`/`item.completed (agent_message)` 텍스트. exit 0 이어도 **응답이 없고 `errorMessage` 가 있으면 실패** — codex 는 `turn.failed` 를 내고도 0 으로 끝날 수 있고, 답변과 함께 온 `error` 이벤트는 공지일 뿐 성공을 뒤집지 않는다. `resolvedModel` 은 스트림이 지목한 모델 우선, 없으면 tier 해석 모델 — codex 는 모델명을 항상 싣지는 않아 이 fallback 이 없으면 세션 기록에 tier 라벨이 남는다
 
 ## Boundaries
 
