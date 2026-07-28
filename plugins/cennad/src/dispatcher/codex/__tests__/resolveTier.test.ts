@@ -4,6 +4,7 @@ import type { CodexModelMap } from '../../../types/index.js';
 import { resolveCodexTier } from '../operations/resolveTier.js';
 
 const MAP: CodexModelMap = {
+  apex: { model: 'gpt-5.6-sol', effort: 'ultra' },
   high: { model: 'gpt-5.6-sol', effort: 'max' },
   mid: { model: 'gpt-5.6-terra', effort: 'medium' },
   low: { model: 'gpt-5.6-luna', effort: 'medium' },

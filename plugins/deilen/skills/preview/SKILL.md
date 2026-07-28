@@ -15,18 +15,20 @@ Preview the document Claude just produced as a readable local page. The user rea
 
 2. **Show the structure, don't narrate it.** The page renders Mermaid, math, and highlighted code — so any passage that explains a relation (a flow, a sequence, a hierarchy, a state machine, a schedule, a proportion, a trade-off) belongs in a diagram with one sentence naming its takeaway, not in prose alone. Diagram choice, sizing, and viewer constraints: **[references/visuals.md](references/visuals.md)**. This is a bias for bodies you are composing; a body that must stay verbatim (step 1) is never rewritten — say which passages a diagram would carry and let the user ask.
 
-3. **Render.** Call `mcp__plugin_deilen_tools__render_viewer` with `{ content | path, title? }` (exactly one of `content`/`path`). It returns `{ session_id, url, status }` immediately. Give the user the `url` (the page also opens automatically) and tell them to select text or use a block's **+** to leave comments, paste or drop image screenshots, then choose **Revise & reopen**, **Continue in chat** (works even with no comments), or **Close**.
+3. **Parse Mermaid before render.** If the body contains mermaid fences: when `mermaid` (and `jsdom`) resolve from this plugin's `mmdcheck.mjs` (walk upward from the script file), run each fence through `mermaid.parse()` first — execute the in-tree **[references/mmdcheck.mjs](references/mmdcheck.mjs)** with an absolute markdown path (do not copy the script to `/tmp`), and fix any rejection before opening the viewer (a syntax error otherwise becomes a quiet `diagram failed to render` badge). If either package does not resolve, skip the check and say so in one line. Reserved flowchart node ids and other constraints: **[references/visuals.md](references/visuals.md)**.
 
-4. **Collect.** Call `mcp__plugin_deilen_tools__collect_feedback` with `{ session_id }` — omit `wait_seconds` so the configured default applies. The single call covers the whole review: it blocks until the user submits, then returns their feedback. `status: "pending"` means the wait elapsed with no submission — don't call again; tell the user to say the word once they have submitted, then wait for their message (their submission is held for you).
+4. **Render.** Call `mcp__plugin_deilen_tools__render_viewer` with `{ content | path, title? }` (exactly one of `content`/`path`). It returns `{ session_id, url, status }` immediately. Give the user the `url` (the page also opens automatically) and tell them to select text or use a block's **+** to leave comments, paste or drop image screenshots, then choose **Revise & reopen**, **Continue in chat** (works even with no comments), or **Close**.
 
-5. **Act on the intent.** The feedback opens with a directive naming the button the user pressed:
+5. **Collect.** Call `mcp__plugin_deilen_tools__collect_feedback` with `{ session_id }` — omit `wait_seconds` so the configured default applies. The single call covers the whole review: it blocks until the user submits, then returns their feedback. `status: "pending"` means the wait elapsed with no submission — don't call again; tell the user to say the word once they have submitted, then wait for their message (their submission is held for you).
+
+6. **Act on the intent.** The feedback opens with a directive naming the button the user pressed:
    - **Revise** → apply the comments and re-render, iterating until the user continues in chat or closes. Mechanics: **[references/revise-loop.md](references/revise-loop.md)**.
    - **Discuss** → answer or discuss the comments in the conversation; don't silently rewrite the document unless the user asks.
    - **Dismiss / no comments** → acknowledge briefly and continue.
 
    Attached images arrive as image blocks; read them as visual context. Honor `[resolved]` markers as lower priority.
 
-6. **Clean up (optional).** A submitted review already closes its session; only call `mcp__plugin_deilen_tools__close_viewer` with `{ session_id }` if you stopped polling before the user submitted.
+7. **Clean up (optional).** A submitted review already closes its session; only call `mcp__plugin_deilen_tools__close_viewer` with `{ session_id }` if you stopped polling before the user submitted.
 
 ## Notes
 

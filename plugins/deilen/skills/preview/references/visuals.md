@@ -31,14 +31,15 @@ A diagram earns its place by removing a paragraph. Skip it for a single fact, a 
 
 - One question per diagram. Past roughly 12 nodes or 7 lifelines, split by layer or phase rather than shrinking labels.
 - Lead with a sentence that states the takeaway ("retries live on the transport path only"), then the diagram. The point then survives even when the diagram does not render.
-- Name nodes with domain words instead of `A`/`B`: the fenced source is what a reader sees whenever rendering is off or broken.
+- Name nodes with domain words instead of `A`/`B`: the fenced source is what a reader sees whenever rendering is off or broken. Prefer a non-reserved id plus a quoted label when the domain word is a Mermaid keyword — e.g. `interp["interpolate"]`, not a bare `interpolate` node id.
 
 ## Viewer constraints
 
 - Mermaid runs in the browser with `securityLevel: "strict"` — `click` interactions are disabled and HTML tags in labels are encoded rather than rendered, except `<br/>`, which mermaid always treats as a line break. Keep labels plain text, and quote any label with punctuation: `auth["Auth: token exchange"]`.
+- Flowchart **reserved node ids** (bare id fails to parse against the bundled mermaid): `interpolate`, `end`, `graph`, `subgraph`, `style`, `linkStyle`, `class`, `classDef`, `flowchart`. Safe-looking words such as `normalize`, `default`, `click`, `call`, and `href` currently parse as ids — still prefer a descriptive id + quoted label when unsure. The lock test re-checks this list against whatever mermaid is installed.
 - The diagram follows the page's light/dark theme. Hardcoded fills and strokes can disappear under the other theme, so encode emphasis with shape, `subgraph` grouping, or edge style instead of color.
-- A syntax error replaces the diagram with a `diagram failed to render` badge, leaving the source visible — so favor a type you can write correctly over the one that fits in theory.
-- The `-beta` suffix is the stability signal: a keyword that only parses with it is still moving between minor releases. As of mermaid 11.16 that covers `radar-beta`, `swimlane-beta`, `cynefin-beta`, `railroad-beta`, `venn-beta`, `treeView-beta`, and `wardley-beta` — keep them out of a document that has to render. `block`, `packet`, `sankey`, `xychart`, and `ishikawa` have graduated far enough to parse either way.
+- A syntax error replaces the diagram with a `diagram failed to render` badge, leaving the source visible — so favor a type you can write correctly over the one that fits in theory, and run the pre-render parse gate in the preview skill before the user sees the page.
+- The `-beta` suffix is the stability signal: a keyword that only parses with it is still moving between minor releases. Currently that covers `radar-beta`, `swimlane-beta`, `cynefin-beta`, `railroad-beta`, `venn-beta`, `treeView-beta`, and `wardley-beta` — keep them out of a document that has to render. `block`, `packet`, `sankey`, `xychart`, and `ishikawa` have graduated far enough to parse either way.
 - The user can turn the Mermaid renderer off in `/deilen:setup`, in which case the fenced source stays on the page as text — one more reason for readable labels.
 - A diagram is a single comment anchor; the user cannot point inside it. One point per diagram keeps their feedback unambiguous.
 - Math renders through KaTeX (`$…$`, `$$…$$`) and code fences highlight from their language tag — use both instead of ASCII-art formulas or untagged fences.

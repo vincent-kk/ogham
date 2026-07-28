@@ -144,6 +144,75 @@ code {
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
+/* Spinners fight the monospace field styling and are useless for values typed
+   in minutes; the min/max attributes still bound what is accepted. */
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ───────────────────── Collapsible limits ───────────────────── */
+
+.limits {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+
+.limits-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.limits-summary::-webkit-details-marker {
+  display: none;
+}
+
+.limits-summary:focus-visible {
+  outline: none;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.limits-summary-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.limits-summary-label::before {
+  content: '+ ';
+}
+
+.limits[open] .limits-summary-label::before {
+  content: '− ';
+}
+
+.limits-summary-value {
+  font-size: 12px;
+  color: var(--fg-faint);
+  text-align: right;
+}
+
+.limits-body {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
 /* ───────────────────── Routing ratio panel ───────────────────── */
 
 .ratio-panel {
@@ -336,13 +405,23 @@ code {
   padding: 8px 16px 4px;
 }
 
+/* The bar is only a positioning context: it must not clip, or the handles that
+   straddle a boundary would be cut in half. */
 .ratio-bar {
   position: relative;
   height: 30px;
+  overflow: visible;
+}
+
+/* The pill lives here, and clipping gives every segment its corners — no segment
+   needs to know whether it is first, last, or the only one. */
+.ratio-bar-track {
+  position: absolute;
+  inset: 0;
   border-radius: 999px;
   background: var(--muted);
   border: 1px solid var(--border);
-  overflow: visible;
+  overflow: hidden;
 }
 
 .ratio-bar-segment {
@@ -352,31 +431,30 @@ code {
   background: var(--muted-hi);
 }
 
-.ratio-bar-segment:first-child {
-  border-radius: 999px 0 0 999px;
-}
-
-.ratio-bar-segment:last-child {
-  border-radius: 0 999px 999px 0;
-}
-
-.ratio-bar-segment[data-provider='codex'] {
+/* Shade is a property of the position, not of the provider that happens to fill
+   it: keying these by provider name is what scrambled the gradient the first time
+   the card order changed. `data-provider` stays on the segment for reading the
+   DOM, and decides nothing here. */
+.ratio-bar-segment[data-rank='0'] {
   background: color-mix(in srgb, var(--fg) 22%, var(--muted));
 }
 
-.ratio-bar-segment[data-provider='antigravity'] {
+.ratio-bar-segment[data-rank='1'] {
   background: color-mix(in srgb, var(--fg) 15%, var(--muted));
 }
 
-.ratio-bar-segment[data-provider='claude'] {
+.ratio-bar-segment[data-rank='2'] {
   background: color-mix(in srgb, var(--fg) 9%, var(--muted));
 }
 
+/* Taller than the track so the grip reads as a lever laid over the bar rather
+   than a slot cut into it; the bg-coloured border keeps it separated at any
+   segment colour. */
 .ratio-bar-handle {
   position: absolute;
   top: 50%;
-  width: 18px;
-  height: 30px;
+  width: 12px;
+  height: 36px;
   transform: translate(-50%, -50%);
   border: 2px solid var(--bg);
   border-radius: 999px;

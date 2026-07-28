@@ -1,4 +1,5 @@
 import type { HookCounter } from '../../shared/configTypes.js';
+import { hostPid } from '../../shared/hostPid.js';
 import { isPlainObject } from '../../shared/isPlainObject.js';
 import { COUNTER_PATH } from '../../shared/paths.js';
 import { safeReadJson } from '../../shared/safeReadJson.js';
@@ -11,7 +12,7 @@ export function loadCounter(): HookCounter {
     return { codex: 0, antigravity: 0, claude: 0, is_stale: false };
   const recorded =
     typeof config.parent_pid === 'number' ? config.parent_pid : null;
-  if (recorded !== null && recorded !== process.ppid)
+  if (recorded !== null && recorded !== hostPid())
     return { codex: 0, antigravity: 0, claude: 0, is_stale: true };
   return {
     codex: asNonNegInt(config.codex),

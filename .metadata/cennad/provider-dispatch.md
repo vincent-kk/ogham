@@ -12,13 +12,14 @@ interface ConversationOptions {
 
 interface DispatchOptions<F> {
   prompt: string;
-  tier: "high" | "mid" | "low";
+  tier: "apex" | "high" | "mid" | "low";
   options: ConversationOptions; // 기본 {}
   sessionId: string; // cennad UUID (메타 키)
   cwd: string;
   flags: F;
   modelMap?: AntigravityModelMap;
-  spawnTimeoutMs?: number;
+  idleTimeoutMs: number; // 무출력 상한 (CLI 출력 청크마다 리셋)
+  hardCapMs: number; // 해석된 tier 의 절대 상한
 }
 
 interface Dispatcher<F> {
@@ -84,13 +85,14 @@ function resolveCodexTier(
 
 effort 스케일은 `low < medium < high < xhigh < max < ultra` 이며 **지원 집합은 모델마다 다르다** — `ultra` 는 `gpt-5.6-sol`/`gpt-5.6-terra` 전용이고 `gpt-5.5`/`gpt-5.4` 계열은 `xhigh` 가 상한이다. claude-code 와 달리 codex 는 미지원 effort 를 조용히 낮추지 않고 `invalid_request_error` 로 실패시키므로, 모델과 effort 는 반드시 짝으로 해석하고 settings UI 가 모델별 선택지를 제한한다.
 
-기본 매핑은 frontier 모델을 `high` 에만 할당하고, `mid` 와 `low` 는 같은 balanced 모델(`gpt-5.6-terra`)을 effort 로 가른다.
+기본 매핑은 frontier 모델(`gpt-5.6-sol`)을 `apex`/`high` 에 할당하고, `mid` 와 `low` 는 같은 balanced 모델(`gpt-5.6-terra`)을 effort 로 가른다.
 
-| tier   | 기본 모델       | 기본 effort | 역할                   |
-| ------ | --------------- | ----------- | ---------------------- |
-| `high` | `gpt-5.6-sol`   | `max`       | frontier               |
-| `mid`  | `gpt-5.6-terra` | `high`      | balanced everyday work |
-| `low`  | `gpt-5.6-terra` | `medium`    | 동일 모델, 낮은 effort |
+| tier   | 기본 모델       | 기본 effort | 역할                            |
+| ------ | --------------- | ----------- | ------------------------------- |
+| `apex` | `gpt-5.6-sol`   | `ultra`     | frontier + 자동 task delegation |
+| `high` | `gpt-5.6-sol`   | `max`       | frontier                        |
+| `mid`  | `gpt-5.6-terra` | `high`      | balanced everyday work          |
+| `low`  | `gpt-5.6-terra` | `medium`    | 동일 모델, 낮은 effort          |
 
 ### core/codexModels — 모델 카탈로그 캐시
 
@@ -145,7 +147,7 @@ function resolveAntigravityModel(
 // {model, effort} 를 "model (effort)" 로 재조합 — effort 없으면 model 만.
 ```
 
-`config.model_map.antigravity` 는 `{ high, mid, low }` per-tier 매핑. 사용 가능한 모델 전체 이름은 settings UI 드롭다운에서 확인한다.
+`config.model_map.antigravity` 는 `{ apex, high, mid, low }` per-tier 매핑. agy 최상위는 `Gemini 3.1 Pro` 이므로 apex/high 가 그 모델을 effort(`High`/`Low`)로 가른다. 사용 가능한 모델 전체 이름은 settings UI 드롭다운에서 확인한다.
 
 ### core/agyModels — 모델 캐시
 
@@ -172,13 +174,16 @@ function resolveAntigravityModel(
 
 Tier → `{ model, effort }` 를 `config.model_map.claude` 에서 해결. 환경변수 `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT` 로 재정의 가능.
 
+`ultracode` 는 스케일의 최상단이며 깊이가 아니라 **모드**다 — 멀티에이전트 오케스트레이션을 켠다. CLI 는 이것을 `--effort` 값으로 받는다(2026-07-28 실측: 인식 못 하는 값은 경고 후 기본값으로 떨어지는데 `ultracode` 는 둘 다 아니고, 자식 세션이 "Ultracode is on" 을 보고한다). **모델별 게이트는 settings UI 뿐이다** — claude-code 는 어떤 모델에도 어떤 값이든 받고 감당 못 하는 단계는 조용히 낮추므로(haiku + `--effort ultracode` 도 경고 없음), 잘못된 짝은 에러가 아니라 무성한 다운그레이드로 끝난다. 그래서 UI 가 `MODEL_EFFORT_SETS` 로 선택지를 원천 제한한다.
+
 ```typescript
 // model aliases: opus, sonnet, haiku, fable, best, opus[1m], sonnet[1m]
-// effort scale: low < medium < high < xhigh < max
-// per-model effort caps:
-//   opus / fable / best / opus[1m]  → all 5
-//   sonnet / sonnet[1m]              → low / medium / high / max (xhigh 없음)
-//   haiku                            → effort 없음 (플래그 생략)
+// effort scale: low < medium < high < xhigh < max < ultracode
+// per-model effort caps (alias → 해석 모델, 2026-07-28 실측):
+//   opus, opus[1m] → claude-opus-5      | sonnet, sonnet[1m] → claude-sonnet-5
+//   fable, best    → claude-fable-5     | haiku              → claude-haiku-4-5
+//   Claude 5 계열은 전 단계 지원 → 위 6개 전부 (sonnet 도 xhigh 포함)
+//   haiku          → effort 없음 (플래그 생략)
 function resolveClaudeModel(
   tier: Tier,
   map: ClaudeModelMap | undefined,
@@ -189,7 +194,39 @@ function resolveClaudeModel(
 }
 ```
 
-기본 매핑: `high={opus,max}`, `mid={opus,high}`, `low={sonnet,high}`.
+기본 매핑: `apex={opus[1m],ultracode}`, `high={opus,max}`, `mid={opus,high}`, `low={sonnet,high}`. apex 만 `ultracode` 를 쓴다 — 그 tier 는 "설명이 아니라 수행"이 기준이라 오케스트레이션 모드가 맞고, high 는 단일 에이전트 최심도(`max`)로 남는다.
+
+## Liveness timeout — 세 dispatcher 공통
+
+종료 기준은 **경과 시간이 아니라 무출력**이다. `spawnCli` 에 `idleTimeoutMs`(마지막 stdout/stderr 청크 이후 상한, 청크마다 리셋)와 `timeoutMs`(= 해석된 tier 의 `hard_cap_ms`)를 함께 넘기고, 먼저 발동한 쪽이 자식을 SIGKILL 한다. `SpawnResult.timeoutKind` (`idle` | `wall`)를 `dispatcher/utils/timeoutError.ts` 가 서로 다른 `ETIMEDOUT` 메시지로 바꾼다 — "멈춘 프로세스"와 "tier 예산 소진"은 사용자에게 다른 사건이다. 두 경우 모두 errorMap 이 `timeout` 으로 분류한다 — CLI 가 stderr 로 보고하는 소켓 `ETIMEDOUT`(→ `network`)과 달리 처방이 재시도가 아니라 상위 tier·작업 축소이기 때문이다.
+
+이 판정이 성립하려면 CLI 가 작업 중에도 출력을 흘려야 한다:
+
+| provider    | 스트리밍 플래그                         | liveness 신호               |
+| ----------- | --------------------------------------- | --------------------------- |
+| codex       | `--json` (기존)                         | JSONL 이벤트                |
+| claude      | `--output-format stream-json --verbose` | `system/thinking_tokens` 등 |
+| antigravity | `--output-format stream-json`           | `step_update`               |
+
+antigravity 는 추가로 `--print-timeout <tier cap>` 을 받는다. agy 자체 기본이 5분이라 이를 넘기지 않으면 상위 tier 의 장시간 실행이 agy 쪽에서 잘린다.
+
+세 래퍼 모두 `spawnCli` 에 두 옵션을 더 넘긴다. `scaleWindowsTimeout: false` — 두 한도는 config 가 고른 상한이고 cap 은 자식(`--print-timeout`)에게도 가므로, Windows 기동분 ×3 을 적용하면 자식 쪽 사본이 먼저 발동한다. `maxOutputChars: MAX_CLI_OUTPUT_CHARS`(8 MiB) — apex 상한 아래 몇 시간짜리 스트림이 하나의 JS 문자열로 무한히 커지면 stdout 리스너 안에서 V8 문자열 한계에 닿고, 그 예외는 try/catch 밖이라 서버 프로세스가 함께 죽는다. 상한을 넘기면 head 를 버리고 안내 한 줄을 붙여 tail(= 결과가 있는 쪽)을 남긴다.
+
+## 실패 사유의 출처 — stderr 가 전부가 아니다
+
+`mapError` 는 `stderr` 외에 `cliMessage`(CLI 가 구조화 출력으로 보고한 실패 사유)를 받는다. codex 가 그 사례다: usage limit 으로 실패한 turn 은 exit 1 이지만 stderr 에는 `Reading additional input from stdin...` 만 남고, 진짜 이유는 stdout JSONL 의 `error` / `turn.failed` 이벤트에 있다. `jsonlParser` 가 이를 `errorMessage` 로 뽑아 넘기지 않으면 `classify` 는 `unknown` 을 반환하고 사용자는 stdin 안내를 실패 이유로 받는다. 분류는 `cliMessage + stderr` 합본에 적용되고, 메시지 우선순위는 `cliMessage` → `spawnError.message` → `stderr` 다 — 앞의 둘은 실패에 대한 진술이고 stderr 는 그때 마침 남아 있던 출력이다. 그래서 타임아웃 문구(어느 한도가 걸렸는지)가 stderr 의 안내에 가려지지 않는다.
+
+세 provider 가 같은 구멍을 갖는다:
+
+- **codex**: exit 1 뿐 아니라 **exit 0 + `turn.failed`** 도 실패다. 응답이 없고 `errorMessage` 만 있으면 실패로 정규화하고, 답변과 함께 온 `error` 이벤트는 공지로 보아 성공을 유지한다.
+- **claude**: 0 이 아닌 exit 에서도 stdout 의 result 이벤트를 읽어(`cliFailureMessage`) `cliMessage` 로 넘긴다 — 사용량 한도는 stderr 를 비운 채 종료한다.
+- **agy**: exit 0 이어도 `event:"result"` 가 `status:"ERROR"` 면 `findAgyError` 문구로 실패이고, transcript 복구를 시도하지 않는다(낡은 답변 방지).
+
+## agy 세션 지목 — conversation id
+
+stream-json 의 `init`·`result` 이벤트가 `conversation_id` 를 싣는다. start 는 그것을 `externalSessionRef` 로 기록하고, resume 은 `--conversation <id>` 로 그 대화를 정확히 지목한다 — **다른 cwd 에서도 이전 turn 의 문맥이 유지된다**(2026-07-28 실측). conversation id 를 얻지 못한 세션(빈 stdout 을 transcript 로 복구한 run)은 cwd 를 ref 로 남기고 `--continue`(그 디렉터리의 최근 대화)로 재개하므로, cwd 격리 자체는 유지된다. 판별은 `buildResumeArgs` 의 UUID 정규식 하나이며 cwd ref 는 경로라 매치되지 않는다.
+
+그런 세션도 영구히 cwd ref 로 남지는 않는다: resume 이 스트림에서 id 를 받으면 `DispatchResult.externalSessionRef` 로 승격해 돌려주고 `continue_conversation` 이 session store 에 반영한다. 승격하지 않으면 매 턴 "그 디렉터리의 최근 대화"를 겨냥하므로, 같은 cwd 에서 다른 것이 한 번 돌면 세션이 조용히 다른 대화를 가리킨다.
 
 ## Envelope 빌더 — `dispatcher/entities/envelope.ts`
 
@@ -212,15 +249,16 @@ function buildResponse(args: {
 
 ## Error mapping — `dispatcher/errorMap.ts`
 
-| 신호                                   | code                          |
-| -------------------------------------- | ----------------------------- |
-| exit 127 / `ENOENT`                    | `cli_error` (CLI not on PATH) |
-| exit 42 (codex bad args)               | `cli_error`                   |
-| exit 73 (lock busy)                    | `cli_error`                   |
-| HTTP 401 / 403 in stderr               | `auth`                        |
-| HTTP 429 in stderr                     | `rate_limit`                  |
-| `ECONNRESET`, `ETIMEDOUT`, `ENOTFOUND` | `network`                     |
-| 그 외                                  | `unknown`                     |
+| 신호                                           | code                          |
+| ---------------------------------------------- | ----------------------------- |
+| exit 127 / `ENOENT`                            | `cli_error` (CLI not on PATH) |
+| exit 42 (codex bad args)                       | `cli_error`                   |
+| exit 73 (lock busy)                            | `cli_error`                   |
+| HTTP 401 / 403 in stderr                       | `auth`                        |
+| HTTP 429 in stderr                             | `rate_limit`                  |
+| stderr 의 `ECONNRESET`/`ETIMEDOUT`/`ENOTFOUND` | `network`                     |
+| spawn 단계 `ETIMEDOUT` (liveness 정지)         | `timeout`                     |
+| 그 외                                          | `unknown`                     |
 
 codex / antigravity / claude 세 provider 가 동일한 errorMap 을 공유한다.
 

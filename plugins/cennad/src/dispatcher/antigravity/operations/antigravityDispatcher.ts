@@ -48,7 +48,8 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
     const model = resolveAntigravityModel(args.tier, args.modelMap);
     const since = Date.now();
     const callResult = await callAgy(cwd, buildStartArgs(args, model), {
-      timeoutMs: args.spawnTimeoutMs,
+      timeoutMs: args.hardCapMs,
+      idleTimeoutMs: args.idleTimeoutMs,
       since,
     });
     if (callResult.status === 'failure' && callResult.timedOut)
@@ -57,7 +58,10 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       status: callResult.status,
       response: callResult.response,
       error: callResult.error,
-      externalSessionRef: cwd,
+      // agy's own conversation id when the stream carried it — resume then targets
+      // that conversation directly. Without it (older agy, or a run recovered from
+      // the transcript) the isolated cwd remains the ref and resume uses --continue.
+      externalSessionRef: callResult.conversationId ?? cwd,
       ignoredOptions,
       resolvedModel: model,
     };
@@ -69,13 +73,14 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       args.options,
       supportedOptions,
     );
-    // ensureCwd(sessionId) is deterministic, so this equals the stored
-    // externalSessionRef that start() recorded — single durable session cwd.
+    // The cwd is where agy runs, not the session ref: a ref recorded before agy
+    // reported conversation ids is that cwd, a newer one is the id itself.
     const cwd = await ensureCwd(args.sessionId);
     const model = resolveAntigravityModel(args.tier, args.modelMap);
     const since = Date.now();
     const callResult = await callAgy(cwd, buildResumeArgs(args, model), {
-      timeoutMs: args.spawnTimeoutMs,
+      timeoutMs: args.hardCapMs,
+      idleTimeoutMs: args.idleTimeoutMs,
       since,
     });
     // Unlike start(), do NOT delete the cwd on resume timeout: it holds this
@@ -85,7 +90,10 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       status: callResult.status,
       response: callResult.response,
       error: callResult.error,
-      externalSessionRef: args.externalSessionRef,
+      // Promote a legacy cwd ref the moment the stream names the conversation;
+      // without it every later resume keeps aiming at "the newest conversation in
+      // this directory", which anything else running there can take over.
+      externalSessionRef: callResult.conversationId ?? args.externalSessionRef,
       ignoredOptions,
       resolvedModel: model,
     };

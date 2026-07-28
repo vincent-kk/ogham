@@ -119,7 +119,11 @@ describe('mapError', () => {
     ).toBe(ErrorCode.RateLimit);
   });
 
-  it('still maps a bare spawn timeout (no provider signal) to network', () => {
+  // A spawn-level ETIMEDOUT is this dispatcher's own liveness stop (idle or tier
+  // ceiling), not a socket failure — the remedy is a higher tier or a smaller
+  // task, so it must not be reported as a network blip. An ETIMEDOUT the CLI
+  // printed to stderr stays `network`; that one really is the socket.
+  it('maps a bare spawn timeout (no provider signal) to timeout', () => {
     const err = Object.assign(new Error('timed out'), { code: 'ETIMEDOUT' });
     expect(
       mapError({
@@ -127,7 +131,7 @@ describe('mapError', () => {
         stderr: '',
         spawnError: err as NodeJS.ErrnoException,
       }).code,
-    ).toBe(ErrorCode.Network);
+    ).toBe(ErrorCode.Timeout);
   });
 
   it('maps a caller-aborted retry storm to rate_limit', () => {

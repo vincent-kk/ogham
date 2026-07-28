@@ -8,7 +8,14 @@
     claude: { value: 33, enabled: true },
   };
   var DEFAULT_SESSION_TTL_HOURS = 72;
-  var DEFAULT_SPAWN_TIMEOUT_MS = 10 * 60 * 1000;
+  var DEFAULT_IDLE_TIMEOUT_MS = 10 * 60 * 1000;
+  var DEFAULT_HARD_CAP_MS = {
+    apex: 6 * 60 * 60 * 1000,
+    high: 2 * 60 * 60 * 1000,
+    mid: 60 * 60 * 1000,
+    low: 30 * 60 * 1000,
+  };
+  var MINUTE_MS = 60 * 1000;
   var DEFAULT_OPTION_FLAGS = {
     codex: { yolo: false, sandbox: 'workspace-write' },
     // headless agy auto-denies permission-gated tools; skip to let them run,
@@ -25,17 +32,20 @@
     claude: 'mid',
   };
   var DEFAULT_CLAUDE_MODEL_MAP = {
+    apex: { model: 'opus[1m]', effort: 'ultracode' },
     high: { model: 'opus', effort: 'max' },
     mid: { model: 'opus', effort: 'high' },
     low: { model: 'sonnet', effort: 'high' },
   };
   var DEFAULT_CODEX_MODEL_MAP = {
+    apex: { model: 'gpt-5.6-sol', effort: 'ultra' },
     high: { model: 'gpt-5.6-sol', effort: 'max' },
     mid: { model: 'gpt-5.6-terra', effort: 'high' },
     low: { model: 'gpt-5.6-terra', effort: 'medium' },
   };
   var DEFAULT_ANTIGRAVITY_MODEL_MAP = {
-    high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+    apex: { model: 'Gemini 3.1 Pro', effort: 'High' },
+    high: { model: 'Gemini 3.1 Pro', effort: 'Low' },
     mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
     low: { model: 'Gemini 3.5 Flash', effort: 'Low' },
   };
@@ -49,10 +59,16 @@
   var RATIO_MAX = 100;
   var SESSION_TTL_HOURS_MIN = 1;
   var SESSION_TTL_HOURS_MAX = 720;
-  var SPAWN_TIMEOUT_MS_MIN = 1000;
-  var SPAWN_TIMEOUT_MS_MAX = 1800000;
+  // Both limits are entered in minutes; the ceiling reaches a full day so an
+  // agentic apex run is never cut short by the form's own bounds.
+  var TIMEOUT_MIN_MINUTES = 1;
+  var IDLE_MAX_MINUTES = 120;
+  var HARD_CAP_MAX_MINUTES = 1440;
 
-  var PROVIDERS = ['codex', 'antigravity', 'claude'];
+  // Screen order, not an arbitrary list: the ratio bar divides providers in this
+  // order, so it has to match the order the provider cards appear in index.html
+  // (a settingsPage spec pins the two together).
+  var PROVIDERS = ['claude', 'codex', 'antigravity'];
   var CODEX_SANDBOX_MODES = [
     'read-only',
     'workspace-write',
@@ -75,14 +91,24 @@
     'opus[1m]',
     'sonnet[1m]',
   ];
-  var CLAUDE_EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max'];
+  // `ultracode` tops the scale — a mode (multi-agent orchestration), not a depth.
+  // This list and the sets below are the only guard: claude-code takes any level
+  // for any model and silently skips one the model cannot honour.
+  var CLAUDE_EFFORT_LEVELS = [
+    'low',
+    'medium',
+    'high',
+    'xhigh',
+    'max',
+    'ultracode',
+  ];
   var MODEL_EFFORT_SETS = {
-    opus: ['low', 'medium', 'high', 'xhigh', 'max'],
-    'opus[1m]': ['low', 'medium', 'high', 'xhigh', 'max'],
-    fable: ['low', 'medium', 'high', 'xhigh', 'max'],
-    best: ['low', 'medium', 'high', 'xhigh', 'max'],
-    sonnet: ['low', 'medium', 'high', 'max'],
-    'sonnet[1m]': ['low', 'medium', 'high', 'max'],
+    opus: ['low', 'medium', 'high', 'xhigh', 'max', 'ultracode'],
+    'opus[1m]': ['low', 'medium', 'high', 'xhigh', 'max', 'ultracode'],
+    fable: ['low', 'medium', 'high', 'xhigh', 'max', 'ultracode'],
+    best: ['low', 'medium', 'high', 'xhigh', 'max', 'ultracode'],
+    sonnet: ['low', 'medium', 'high', 'xhigh', 'max', 'ultracode'],
+    'sonnet[1m]': ['low', 'medium', 'high', 'xhigh', 'max', 'ultracode'],
     haiku: [],
   };
   // Mirror src/constants/codexModels.ts — keep in sync. The live catalog from
@@ -91,6 +117,8 @@
   // agy variants are model-specific labels, not a shared scale; this ordering only
   // guides clampEffort's fallback when a model switch drops the current variant.
   var AGY_EFFORT_SCALE = ['Low', 'Medium', 'High', 'Thinking'];
+  // Mirror src/constants/agyModels.ts — keep in sync (a settingsPage spec pins it).
+  var AGY_VARIANT_SUFFIXES = ['high', 'medium', 'low', 'thinking'];
   var CODEX_FALLBACK_MODEL_EFFORT_SETS = {
     'gpt-5.6-sol': ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'],
     'gpt-5.6-terra': ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'],
@@ -101,7 +129,7 @@
   };
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
   var RECENCY_LEVELS = ['off', 'auto', 'strict'];
-  var TIERS = ['high', 'mid', 'low'];
+  var TIERS = ['apex', 'high', 'mid', 'low'];
   var YOUTUBE_LANGUAGES = ['en', 'ko'];
 
   var STRENGTH_LABELS = {
@@ -119,6 +147,16 @@
     return document.querySelector(sel);
   }
 
+  // Every per-tier control is `<prefix>-<tier>`, so the tier list is the only
+  // place a new tier has to be declared.
+  function tierSelects(prefix) {
+    var map = {};
+    TIERS.forEach(function (tier) {
+      map[tier] = $('#' + prefix + '-' + tier);
+    });
+    return map;
+  }
+
   var form = $('#form');
   var status = $('#status');
   var saveBtn = $('#save');
@@ -126,10 +164,13 @@
   var cancelBtn = $('#cancel');
   var ratioWarn = $('#ratio-warn');
   var ratioBar = $('#ratio-bar');
+  var ratioBarTrack = $('#ratio-bar-track');
   var strength = $('#strength');
   var strengthLabel = $('#strength-label');
   var ttl = $('#ttl');
-  var spawnTimeoutMs = $('#spawn-timeout-ms');
+  var idleTimeoutMin = $('#idle-timeout-min');
+  var limitsSummary = $('#limits-summary');
+  var hardCapInputs = tierSelects('hard-cap');
 
   // Per-provider element groups.
   var refs = {};
@@ -153,43 +194,19 @@
   var codexSandboxWrap = $('#codex-sandbox-wrap');
   var codexSandboxHint = $('#codex-sandbox-hint');
   var codexFullAccessWarning = $('#codex-full-access-warning');
-  var modelCodex = {
-    high: $('#model-codex-high'),
-    mid: $('#model-codex-mid'),
-    low: $('#model-codex-low'),
-  };
-  var effortCodex = {
-    high: $('#effort-codex-high'),
-    mid: $('#effort-codex-mid'),
-    low: $('#effort-codex-low'),
-  };
+  var modelCodex = tierSelects('model-codex');
+  var effortCodex = tierSelects('effort-codex');
 
   // antigravity-specific controls.
   var antigravitySandbox = $('#antigravity-sandbox');
   var antigravitySkipPerms = $('#antigravity-skip-perms');
-  var modelAntigravity = {
-    high: $('#model-antigravity-high'),
-    mid: $('#model-antigravity-mid'),
-    low: $('#model-antigravity-low'),
-  };
-  var effortAntigravity = {
-    high: $('#effort-antigravity-high'),
-    mid: $('#effort-antigravity-mid'),
-    low: $('#effort-antigravity-low'),
-  };
+  var modelAntigravity = tierSelects('model-antigravity');
+  var effortAntigravity = tierSelects('effort-antigravity');
 
   // claude-specific controls.
   var claudeBypassWarning = $('#claude-bypass-warning');
-  var modelClaude = {
-    high: $('#model-claude-high'),
-    mid: $('#model-claude-mid'),
-    low: $('#model-claude-low'),
-  };
-  var effortClaude = {
-    high: $('#effort-claude-high'),
-    mid: $('#effort-claude-mid'),
-    low: $('#effort-claude-low'),
-  };
+  var modelClaude = tierSelects('model-claude');
+  var effortClaude = tierSelects('effort-claude');
 
   // Artifacts + youtube controls.
   var artifactsEnabled = $('#artifacts-enabled');
@@ -339,19 +356,27 @@
     return boundaries;
   }
 
+  // Segments go inside the clipping track, handles above it. Keeping the two out
+  // of one parent is what makes the segment corners independent of how many
+  // handles exist — the track's own radius shapes whatever it contains.
   function clearRatioBar() {
-    while (ratioBar.firstChild) ratioBar.removeChild(ratioBar.firstChild);
+    while (ratioBarTrack.firstChild)
+      ratioBarTrack.removeChild(ratioBarTrack.firstChild);
+    var handles = ratioBar.querySelectorAll('.ratio-bar-handle');
+    for (var i = 0; i < handles.length; i += 1)
+      ratioBar.removeChild(handles[i]);
   }
 
   function renderRatioSegments(active) {
     var left = 0;
-    active.forEach(function (p) {
+    active.forEach(function (p, index) {
       var segment = document.createElement('div');
       segment.className = 'ratio-bar-segment';
       segment.setAttribute('data-provider', p);
+      segment.setAttribute('data-rank', String(index));
       segment.style.left = left + '%';
       segment.style.width = ratioState[p].value + '%';
-      ratioBar.appendChild(segment);
+      ratioBarTrack.appendChild(segment);
       left += ratioState[p].value;
     });
   }
@@ -738,6 +763,77 @@
     syncClaudeBypassWarning();
   }
 
+  // Config stores milliseconds; the form takes minutes. Both directions convert
+  // here so no other code carries the factor.
+  // Never renders 0: the inputs start at 1 minute, so a sub-minute value written by
+  // hand would show as 0 and save back as the default, losing the setting silently.
+  // Showing 1 is still a rewrite, but a visible one.
+  function minutesFromMs(raw, fallbackMs) {
+    var ms = Number(raw);
+    return Math.max(1, Math.round((ms > 0 ? ms : fallbackMs) / MINUTE_MS));
+  }
+
+  function msFromMinutes(raw, fallbackMs, maxMinutes) {
+    var minutes = Math.floor(Number(raw));
+    if (!(minutes >= TIMEOUT_MIN_MINUTES)) return fallbackMs;
+    return Math.min(minutes, maxMinutes) * MINUTE_MS;
+  }
+
+  // Minutes read badly past an hour, and the panel is collapsed by default — the
+  // summary is the only place most users ever see these values.
+  function humanMinutes(minutes) {
+    var value = Number(minutes) || 0;
+    if (value < 60) return value + ' min';
+    var hours = value / 60;
+    return (Number.isInteger(hours) ? hours : hours.toFixed(1)) + ' h';
+  }
+
+  function renderTimeoutSummary() {
+    var ceilings = TIERS.map(function (tier) {
+      return humanMinutes(hardCapInputs[tier].value);
+    });
+    limitsSummary.textContent =
+      'idle ' +
+      humanMinutes(idleTimeoutMin.value) +
+      ' · ceilings ' +
+      ceilings.join(' / ');
+  }
+
+  function applyTimeouts(raw) {
+    var src = raw && typeof raw === 'object' ? raw : {};
+    var caps =
+      src.hard_cap_ms && typeof src.hard_cap_ms === 'object'
+        ? src.hard_cap_ms
+        : {};
+    idleTimeoutMin.value = minutesFromMs(src.idle_ms, DEFAULT_IDLE_TIMEOUT_MS);
+    TIERS.forEach(function (tier) {
+      hardCapInputs[tier].value = minutesFromMs(
+        caps[tier],
+        DEFAULT_HARD_CAP_MS[tier],
+      );
+    });
+    renderTimeoutSummary();
+  }
+
+  function buildTimeouts() {
+    var caps = {};
+    TIERS.forEach(function (tier) {
+      caps[tier] = msFromMinutes(
+        hardCapInputs[tier].value,
+        DEFAULT_HARD_CAP_MS[tier],
+        HARD_CAP_MAX_MINUTES,
+      );
+    });
+    return {
+      idle_ms: msFromMinutes(
+        idleTimeoutMin.value,
+        DEFAULT_IDLE_TIMEOUT_MS,
+        IDLE_MAX_MINUTES,
+      ),
+      hard_cap_ms: caps,
+    };
+  }
+
   function applyArtifacts(raw) {
     var src = raw && typeof raw === 'object' ? raw : DEFAULT_ARTIFACTS;
     artifactsEnabled.checked = Boolean(src.enabled);
@@ -807,10 +903,44 @@
   // trailing "(variant)" into model + effort so the UI can offer a model dropdown and a
   // per-model effort dropdown, mirroring codex/claude. dispatch recomposes them back
   // into this form since agy carries the variant inside the model name.
+  // agy spells a model two ways and both carry the variant: a display name puts it
+  // in parentheses ("Gemini 3.6 Flash (High)"), the catalog slug appends it
+  // ("gemini-3.6-flash-high"). Splitting both keeps the form's two axes — model and
+  // effort — meaningful; without this every slug lands whole in the model dropdown
+  // and every effort select reads "(no effort)". A tail that is not a known variant
+  // (the version in `claude-sonnet-4-6`) stays part of the base.
+  // Mirrors AGY_VARIANT_SUFFIXES in src/constants/agyModels.ts.
+  // Both spellings return the variant as AGY_EFFORT_SCALE spells it: the effort
+  // axis, the value saved to config and clampEffort's ranking all compare as plain
+  // strings, so a lowercase slug variant would match nothing in the scale and every
+  // model switch would fall to the catalog's last variant. joinAgyName lowercases
+  // again when it rebuilds a slug, so what agy receives is unchanged.
+  function canonicalAgyVariant(variant) {
+    var text = String(variant || '').trim();
+    for (var i = 0; i < AGY_EFFORT_SCALE.length; i += 1)
+      if (AGY_EFFORT_SCALE[i].toLowerCase() === text.toLowerCase())
+        return AGY_EFFORT_SCALE[i];
+    return text;
+  }
+
   function parseAgyModel(fullName) {
-    var match = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(String(fullName || ''));
-    if (match) return { model: match[1].trim(), effort: match[2].trim() };
-    return { model: String(fullName || '').trim(), effort: '' };
+    var name = String(fullName || '').trim();
+    var match = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(name);
+    if (match)
+      return { model: match[1].trim(), effort: canonicalAgyVariant(match[2]) };
+    if (name.indexOf(' ') === -1)
+      for (var i = 0; i < AGY_VARIANT_SUFFIXES.length; i += 1) {
+        var suffix = '-' + AGY_VARIANT_SUFFIXES[i];
+        if (
+          name.length > suffix.length &&
+          name.slice(-suffix.length) === suffix
+        )
+          return {
+            model: name.slice(0, name.length - suffix.length),
+            effort: canonicalAgyVariant(AGY_VARIANT_SUFFIXES[i]),
+          };
+      }
+    return { model: name, effort: '' };
   }
 
   function agyModelBases() {
@@ -879,11 +1009,42 @@
     });
   }
 
+  // Config stores the name agy would accept on its own. A bare base is not one —
+  // agy answers "--model gemini-3.6-flash requires --effort" — and the settings
+  // page is served from disk while the MCP server only reloads on restart, so a
+  // base written here can reach a dispatcher from an older build that sends it
+  // unchanged. Joining on save keeps the stored value valid for either build.
+  // Mirrors joinName in dispatcher/antigravity/operations/modelAlias.ts.
+  function joinAgyName(model, effort) {
+    var name = String(model || '').trim();
+    var variant = String(effort || '').trim();
+    if (!variant || parseAgyModel(name).effort) return name;
+    return name.indexOf(' ') !== -1
+      ? name + ' (' + variant + ')'
+      : name + '-' + variant.toLowerCase();
+  }
+
+  // The effort select is disabled for two different reasons, and they call for
+  // opposite handling: the catalog could not be read (keep the stored effort — it
+  // is still the user's setting), or this model genuinely has no variants (drop it,
+  // or dispatch would rebuild "<model>-high" and agy would reject the name).
+  function keptAgyEffort(tier, base) {
+    var stored = antigravityModelMap[tier].effort;
+    if (agyModels.length === 0) return stored;
+    // A base the catalog does not list says nothing about its variants — a config
+    // written in display form ("Gemini 3.1 Pro") never matches a slug catalog, and
+    // dropping its effort would collapse apex and high onto the same incomplete
+    // name. Only a base the catalog DOES list, with no variants, loses its effort.
+    if (agyModelBases().indexOf(base) < 0) return stored;
+    return agyEffortSet(base).length > 0 ? stored : '';
+  }
+
   function onAgyModelChange(tier) {
     var sel = effortAntigravity[tier];
+    var model = modelAntigravity[tier].value;
     antigravityModelMap[tier].effort =
-      sel && !sel.disabled ? sel.value : antigravityModelMap[tier].effort;
-    bindAgyEffortOptions(tier, modelAntigravity[tier].value);
+      sel && !sel.disabled ? sel.value : keptAgyEffort(tier, model);
+    bindAgyEffortOptions(tier, model);
     renderProviderSummary('antigravity');
   }
 
@@ -1054,12 +1215,18 @@
         ag[tier] && typeof ag[tier] === 'object'
           ? ag[tier]
           : DEFAULT_ANTIGRAVITY_MODEL_MAP[tier];
+      // Split whatever spelling is on disk back into the form's two axes: a
+      // stored name may already carry its variant (a catalog slug, or a display
+      // name in parentheses), and left whole it would sit outside the model list
+      // with its effort select dead.
+      var stored =
+        typeof t.model === 'string'
+          ? t.model
+          : DEFAULT_ANTIGRAVITY_MODEL_MAP[tier].model;
+      var split = parseAgyModel(stored);
       antigravityModelMap[tier] = {
-        model:
-          typeof t.model === 'string'
-            ? t.model
-            : DEFAULT_ANTIGRAVITY_MODEL_MAP[tier].model,
-        effort: typeof t.effort === 'string' ? t.effort : '',
+        model: split.model,
+        effort: split.effort || (typeof t.effort === 'string' ? t.effort : ''),
       };
     });
     var cl = src.claude && typeof src.claude === 'object' ? src.claude : {};
@@ -1138,7 +1305,7 @@
     strength.value = String(cfg.intervention_strength);
     applyKeywords(cfg.keywords);
     ttl.value = cfg.session_ttl_hours;
-    spawnTimeoutMs.value = cfg.spawn_timeout_ms;
+    applyTimeouts(cfg.timeouts);
     applyOptionFlags(cfg.option_flags);
     applyArtifacts(cfg.artifacts);
     applyPreamble(cfg.preamble);
@@ -1212,8 +1379,17 @@
         modelAntigravity[tier],
         effortAntigravity[tier],
         agyEffortSet,
-        antigravityModelMap[tier].effort,
+        keptAgyEffort(tier, modelAntigravity[tier].value),
       );
+      antigravity[tier].model = joinAgyName(
+        antigravity[tier].model,
+        antigravity[tier].effort,
+      );
+      // The joined name already carries the variant, so a separate effort is not
+      // just redundant — a dispatcher from an older build appends it a second time
+      // ("gemini-3.6-flash-medium (medium)"), which agy rejects. The page re-derives
+      // both axes from the name when it loads, so nothing is lost by dropping it.
+      delete antigravity[tier].effort;
       claude[tier] = buildTierConfig(
         modelClaude[tier],
         effortClaude[tier],
@@ -1285,13 +1461,7 @@
           Math.floor(Number(ttl.value) || DEFAULT_SESSION_TTL_HOURS),
         ),
       ),
-      spawn_timeout_ms: Math.max(
-        SPAWN_TIMEOUT_MS_MIN,
-        Math.min(
-          SPAWN_TIMEOUT_MS_MAX,
-          Math.floor(Number(spawnTimeoutMs.value) || DEFAULT_SPAWN_TIMEOUT_MS),
-        ),
-      ),
+      timeouts: buildTimeouts(),
       artifacts: buildArtifacts(),
       preamble: {
         codex: String(refs.codex.preamble.value || ''),
@@ -1489,6 +1659,10 @@
     toggleAdvancedPanel(youtubeAdvancedToggle, youtubeAdvancedPanel);
   });
   strength.addEventListener('input', updateStrengthLabel);
+  idleTimeoutMin.addEventListener('input', renderTimeoutSummary);
+  TIERS.forEach(function (tier) {
+    hardCapInputs[tier].addEventListener('input', renderTimeoutSummary);
+  });
   codexYolo.addEventListener('change', syncCodexSandboxInert);
   document
     .querySelectorAll('#codex-sandbox-radio input[type="radio"]')

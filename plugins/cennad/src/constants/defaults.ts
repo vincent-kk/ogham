@@ -26,18 +26,28 @@ export const DEFAULT_CONFIG: Config = {
   },
   model_map: {
     // codex's 5.6 line splits by role: sol = frontier, terra = balanced everyday.
-    // high jumps to sol; mid and low ride terra at different efforts.
+    // apex and high both ride sol; ultra is sol's delegating effort, the reason
+    // apex exists. mid and low ride terra at different efforts.
     codex: {
+      apex: { model: 'gpt-5.6-sol', effort: 'ultra' },
       high: { model: 'gpt-5.6-sol', effort: 'max' },
       mid: { model: 'gpt-5.6-terra', effort: 'high' },
       low: { model: 'gpt-5.6-terra', effort: 'medium' },
     },
+    // agy tops out at Gemini 3.1 Pro, so apex and high split it by effort the way
+    // codex splits terra.
     antigravity: {
-      high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+      apex: { model: 'Gemini 3.1 Pro', effort: 'High' },
+      high: { model: 'Gemini 3.1 Pro', effort: 'Low' },
       mid: { model: 'Gemini 3.5 Flash', effort: 'Medium' },
       low: { model: 'Gemini 3.5 Flash', effort: 'Low' },
     },
+    // apex takes the 1M-context opus: an agentic run reads far more than one turn,
+    // and `ultracode` — the top of the scale — makes that run a multi-agent
+    // orchestration rather than a deeper single agent. high keeps `max`, so the two
+    // tiers differ in kind, not degree.
     claude: {
+      apex: { model: 'opus[1m]', effort: 'ultracode' },
       high: { model: 'opus', effort: 'max' },
       mid: { model: 'opus', effort: 'high' },
       low: { model: 'sonnet', effort: 'high' },
@@ -49,7 +59,15 @@ export const DEFAULT_CONFIG: Config = {
     claude: 'mid',
   },
   session_ttl_hours: 72,
-  spawn_timeout_ms: 10 * 60 * 1000,
+  timeouts: {
+    idle_ms: 10 * 60 * 1000,
+    hard_cap_ms: {
+      apex: 6 * 60 * 60 * 1000,
+      high: 2 * 60 * 60 * 1000,
+      mid: 60 * 60 * 1000,
+      low: 30 * 60 * 1000,
+    },
+  },
   artifacts: {
     enabled: false,
     location: 'project',

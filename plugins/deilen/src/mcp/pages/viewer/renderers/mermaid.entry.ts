@@ -1,6 +1,7 @@
 import mermaid from "mermaid";
 
 import { Theme } from "../../../../types/enums.js";
+import { attachExpandButton } from "./expandButton.js";
 
 function isDark(): boolean {
   const theme = document.documentElement.getAttribute("data-theme");
@@ -26,6 +27,7 @@ export async function renderAll(): Promise<void> {
     try {
       const { svg } = await mermaid.render(`deilen-mermaid-${i}`, src);
       node.innerHTML = svg;
+      attachExpandButton(node);
     } catch {
       const badge = document.createElement("div");
       badge.className = "render-error";

@@ -71,7 +71,8 @@ export async function handleStartConversation(
     options,
     sessionId,
     cwd,
-    spawnTimeoutMs: config.spawn_timeout_ms,
+    idleTimeoutMs: config.timeouts.idle_ms,
+    hardCapMs: config.timeouts.hard_cap_ms[tier],
   };
   let result: DispatchResult;
   if (input.provider === 'codex')

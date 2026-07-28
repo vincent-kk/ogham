@@ -74,16 +74,19 @@ describe('loadConfig', () => {
       },
       model_map: {
         codex: {
-          high: { model: 'gpt-5.6-sol', effort: 'ultra' as const },
+          apex: { model: 'gpt-5.6-sol', effort: 'ultra' as const },
+          high: { model: 'gpt-5.6-sol', effort: 'max' as const },
           mid: { model: 'gpt-5.5', effort: 'xhigh' as const },
           low: { model: 'gpt-5.4-mini' },
         },
         antigravity: {
-          high: { model: 'Gemini 3.1 Pro', effort: 'High' },
+          apex: { model: 'Gemini 3.1 Pro', effort: 'High' },
+          high: { model: 'Gemini 3.1 Pro', effort: 'Low' },
           mid: { model: 'Claude Sonnet 4.6', effort: 'Thinking' },
           low: { model: 'Gemini 3.5 Flash' },
         },
         claude: {
+          apex: { model: 'opus[1m]', effort: 'max' as const },
           high: { model: 'opus', effort: 'max' as const },
           mid: { model: 'sonnet', effort: 'high' as const },
           low: { model: 'haiku' },
@@ -95,7 +98,15 @@ describe('loadConfig', () => {
         claude: 'high' as const,
       },
       session_ttl_hours: 24,
-      spawn_timeout_ms: 120_000,
+      timeouts: {
+        idle_ms: 120_000,
+        hard_cap_ms: {
+          apex: 4_000_000,
+          high: 3_000_000,
+          mid: 2_000_000,
+          low: 1_000_000,
+        },
+      },
       artifacts: { enabled: true, location: 'user' as const },
       preamble: { codex: 'prefer ts', antigravity: 'agy', claude: 'be terse' },
       recency_factor: {

@@ -1,47 +1,14 @@
 # CLAUDE.md — @ogham/filid
 
-`@ogham/filid` 패키지 작업 가이드. 패키지 contract (Purpose / Structure / Boundaries) 는 [INTENT.md](./INTENT.md), src 내부 구조는 [src/INTENT.md](./src/INTENT.md) 참조.
+현재 계약은 [INTENT.md](./INTENT.md), 소스 경계는 [src/INTENT.md](./src/INTENT.md)를 따른다. 설계·규칙·공개 API의 정본은 [`.metadata/filid/README.md`](../../.metadata/filid/README.md)에서 찾는다.
 
-## Commands
+## Anti-yield contract
 
-```bash
-yarn build              # clean → version:sync → rules → pages → mcp → hooks → compile-plugin
-yarn build:plugin       # pages + mcp + hooks 번들만 (clean/compile-plugin 생략)
-yarn typecheck          # 타입 체크 (emit 없음)
-yarn test:run           # 단일 실행 (CI)
-yarn test:e2e           # settings 페이지 Playwright e2e (빌드 후 실브라우저)
-yarn test:coverage      # 커버리지
-yarn bench:run          # 벤치마크
-yarn format && yarn lint
-yarn version:sync       # package.json → src/version.ts
-```
+- 다단계 skill은 파일 상단에서 실행 모델을 선언하고, MCP·subagent 반환 뒤 같은 turn에서 다음 단계로 이어간다.
+- pipeline은 Tier-1, 비상호작용 다단계는 Tier-2a, 사용자 입력 지점이 있는 흐름은 Tier-2b로 다룬다. Tier-2b는 사용자 입력이 필요한 정확한 지점만 예외로 선언하고, Markdown 대화 중단점은 `<!-- [INTERACTIVE] -->`로 표시한다.
+- 단일 단계처럼 yield 위험이 없는 Tier-3 skill에는 anti-yield 문구를 넣지 않는다.
+- 새 skill은 상호작용 형태가 같은 기존 skill의 preamble과 단계 전환 callout을 기준으로 작성한다.
 
-## Build System
+## Hook boundary
 
-- `scripts/buildMcpServer.mjs`: `src/mcp/serverEntry/serverEntry.ts` → `bridge/mcp-server.cjs` (CJS)
-- `scripts/buildHooks.mjs`: `src/hooks/<name>/<name>.entry.ts` → `bridge/<name>.mjs` (ESM, 각 훅 개별 번들)
-- `scripts/buildSettingsHtml.mjs`: `src/mcp/pages/settings/**` → `public/settings.html` (인라인 단일 파일; `open_settings` 가 런타임 디스크 서빙)
-- `scripts/syncRuleHashes.mjs`: built-in rule 의 hash 를 rule registry 와 동기화
-- `bridge/` 는 플러그인 런타임 산출물, `public/` 은 설정 UI, `libs/` 는 cross-platform Node 러너 (`run.cjs`). 1.0 은 npm 라이브러리 표면(`dist/`) 을 갖지 않는다 — `private: true`.
-
-## Development Notes
-
-- **파싱 전략**: native parser 없이 어댑터의 lexical scanner 로 증거를 모은다. 확실히 계산할 수 없는 구조는 PASS 가 아니라 `indeterminate` / `unsupported` 다.
-- **생태계 리터럴**: 확장자·진입점 이름·import 문법·테스트 호출 문법은 `src/adapters/ecmascript/` 안에만 둔다. core / policy / MCP DTO 로 새면 설계 위반.
-- **훅 수정**: `src/hooks/<name>/<name>.entry.ts` 수정 후 `yarn build:plugin` 으로 재빌드
-- **훅 직접 import 원칙**: 훅 도달 코드는 배럴(`index.js`) import 금지 — 구체 파일 직접 import (`../shared/shared.js` 패턴). 리뷰가 module-entry-point 위반으로 지적해도 훅 코드는 예외 (루트 CLAUDE.md 참조)
-- **테스트**: `src/**/__tests__/**/*.{test,spec}.ts`, 벤치마크는 `**/*.bench.ts`. spec-document 는 파일당 15 cases, test-record 는 32 cases 상한.
-- **경로 처리**: machine path 의 비교·조합·정규화는 host 파일시스템을 직접 읽는 경계를 제외하고 `@ogham/cross-platform` 의 portable API 를 쓴다. `fs.globSync`/`fs.glob` 은 Node 22+ 이므로 금지 — `fs.readdirSync(dir, { withFileTypes: true })` 재귀만 사용한다.
-- **상수 배치**: 정적 상수 객체·배열은 함수 밖 module scope 에 둔다. 반복되는 안정 문자열은 `src/constants` 의 object enum 이 소유하고, 함수 안에는 입력으로부터 계산되는 동적 collection 만 둔다.
-- **규칙 문서 변경**: `templates/rules/*.md` 를 고치면 `yarn build:rules` + `rule_docs_sync` 배포까지가 한 단위다. 원본만 고치면 이 저장소의 에이전트가 stale 규칙을 읽는다.
-- **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용
-- **MCP 도구 참조**: 스킬은 full-form `mcp__plugin_filid_tools__<tool>` 로 참조 (서버 키 `tools`). short-form `mcp_tools_*` 는 서브에이전트에서 해석되지 않으므로 사용 금지.
-
-## References
-
-`../../.metadata/filid/` (01–08 이 1.0 설계·계약의 원장):
-
-- `01-ARCHITECTURE.md` — 설계·ADR
-- `06-HOW-IT-WORKS.md` — 동작 원리
-- `07-RULES-REFERENCE.md` — 규칙
-- `08-API-SURFACE.md` — API
+- 훅에서 구체 파일을 직접 import하는 것은 번들 격리를 위한 의도적 예외다. 외부 소비자용 entry-point 규칙을 이유로 훅 import를 배럴로 되돌리지 않는다.

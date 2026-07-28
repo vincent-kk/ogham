@@ -6,6 +6,7 @@ import { mapError } from '../../errorMap/index.js';
 import { computeIgnoredOptions } from '../../utils/computeIgnoredOptions.js';
 import { spawnClaude } from '../operations/spawn.js';
 
+import { cliFailureMessage } from './cliFailureMessage.js';
 import { parseResult } from './parseResult.js';
 
 export interface ClaudeDispatchInternal {
@@ -14,7 +15,8 @@ export interface ClaudeDispatchInternal {
   options: ConversationOptions;
   externalSessionRef: string;
   supportedOptions: ReadonlySet<keyof ConversationOptions>;
-  spawnTimeoutMs: number;
+  idleTimeoutMs: number;
+  hardCapMs: number;
   resolvedModel: string;
 }
 
@@ -27,7 +29,8 @@ export async function dispatch(
   );
   const spawnResult = await spawnClaude(input.argv, {
     cwd: input.cwd,
-    timeoutMs: input.spawnTimeoutMs,
+    timeoutMs: input.hardCapMs,
+    idleTimeoutMs: input.idleTimeoutMs,
   });
   const failed = spawnResult.spawnError !== null || spawnResult.exitCode !== 0;
 
@@ -38,6 +41,7 @@ export async function dispatch(
       error: mapError({
         exitCode: spawnResult.exitCode,
         stderr: spawnResult.stderr,
+        cliMessage: cliFailureMessage(spawnResult.stdout),
         spawnError: spawnResult.spawnError,
         abortedByCaller: spawnResult.abortedByCaller,
       }),

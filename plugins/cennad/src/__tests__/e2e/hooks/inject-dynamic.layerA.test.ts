@@ -6,9 +6,11 @@ import { CENNAD_HOME } from '../../../constants/paths.js';
 import { writeCounter, writeRawCounter } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerA } from '../helpers/hookRunnerLayerA.js';
+import { HOST_PID, claimHostSession } from '../helpers/hostSession.js';
 
 describe('injectDynamic (Layer A)', () => {
   beforeEach(async () => {
+    claimHostSession();
     await rm(CENNAD_HOME, { recursive: true, force: true });
   });
 
@@ -22,7 +24,7 @@ describe('injectDynamic (Layer A)', () => {
 
   it('with counter — one condensed state line plus the strength nudge', async () => {
     await writeCounter({
-      parent_pid: process.ppid,
+      parent_pid: HOST_PID,
       codex: 7,
       antigravity: 3,
     });

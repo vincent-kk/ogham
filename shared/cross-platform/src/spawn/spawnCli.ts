@@ -10,6 +10,7 @@ interface SpawnState {
   stdout: string;
   stderr: string;
   timedOut: boolean;
+  timeoutKind: "wall" | "idle" | undefined;
   abortedByCaller: boolean;
   spawnError: Error | undefined;
   settled: boolean;
@@ -20,6 +21,8 @@ interface SpawnState {
 interface SpawnHandle {
   child: ChildProcess;
   timer: ReturnType<typeof setTimeout> | null;
+  idleTimer: ReturnType<typeof setTimeout> | null;
+  idleTimeoutMs: number | undefined;
   stdoutDecoder: StringDecoder;
   stderrDecoder: StringDecoder;
   normalize: boolean;
@@ -27,6 +30,23 @@ interface SpawnHandle {
   options: SpawnOptions;
   resolve: (result: SpawnResult) => void;
   onAbortListener: (() => void) | undefined;
+}
+
+const OUTPUT_TRUNCATED_NOTICE =
+  "[cross-platform] earlier output dropped: size cap reached";
+
+// Bounds one stream without losing its end: a CLI's result sits in the last lines,
+// and a partial line left at the front fails JSON parsing, which every consumer here
+// already skips. The notice replaces the previous one on each overrun, so exactly one
+// survives.
+function appendCapped(
+  current: string,
+  chunk: string,
+  max: number | undefined,
+): string {
+  const next = current + chunk;
+  if (max === undefined || next.length <= max) return next;
+  return `${OUTPUT_TRUNCATED_NOTICE}\n${next.slice(next.length - max)}`;
 }
 
 /** Idempotent kill (at most once). Windows tree-kills; POSIX group-kills when detached. */
@@ -63,30 +83,73 @@ function settle(
   if (state.settled) return;
   state.settled = true;
   if (handle.timer) clearTimeout(handle.timer);
+  if (handle.idleTimer) clearTimeout(handle.idleTimer);
   if (state.timeoutSettleTimer) clearTimeout(state.timeoutSettleTimer);
   const { onAbortListener } = handle;
   if (onAbortListener)
     handle.options.signal?.removeEventListener("abort", onAbortListener);
-  state.stdout += handle.stdoutDecoder.end();
-  state.stderr += handle.stderrDecoder.end();
+  const { maxOutputChars } = handle.options;
+  state.stdout = appendCapped(
+    state.stdout,
+    handle.stdoutDecoder.end(),
+    maxOutputChars,
+  );
+  state.stderr = appendCapped(
+    state.stderr,
+    handle.stderrDecoder.end(),
+    maxOutputChars,
+  );
   handle.resolve({
     code,
     stdout: handle.normalize ? normalizeEol(state.stdout) : state.stdout,
     stderr: handle.normalize ? normalizeEol(state.stderr) : state.stderr,
     timedOut: state.timedOut,
+    timeoutKind: state.timeoutKind,
     spawnError: state.spawnError,
     abortedByCaller: state.abortedByCaller,
   });
 }
 
-function onAbort(handle: SpawnHandle, state: SpawnState): void {
-  if (state.settled || state.abortedByCaller) return;
-  state.abortedByCaller = true;
+function fireTimeout(
+  handle: SpawnHandle,
+  state: SpawnState,
+  kind: "wall" | "idle",
+): void {
+  if (state.settled || state.timedOut || state.abortedByCaller) return;
+  state.timedOut = true;
+  state.timeoutKind = kind;
   killChild(handle, state);
   state.timeoutSettleTimer = setTimeout(
     () => settle(handle, state, null),
     1000,
   );
+}
+
+/** Restart the idle countdown — called on spawn and on every output chunk. */
+function touchIdle(handle: SpawnHandle, state: SpawnState): void {
+  const { idleTimeoutMs } = handle;
+  if (idleTimeoutMs === undefined || state.settled) return;
+  if (handle.idleTimer) clearTimeout(handle.idleTimer);
+  handle.idleTimer = setTimeout(
+    () => fireTimeout(handle, state, "idle"),
+    idleTimeoutMs,
+  );
+}
+
+// Disarms both limits: a child killed here is not going to emit again, so an idle
+// timer left armed would fire during the settle delay and relabel this abort as a
+// timeout. One settle timer only — overwriting an armed one orphans it.
+function onAbort(handle: SpawnHandle, state: SpawnState): void {
+  if (state.settled || state.abortedByCaller) return;
+  state.abortedByCaller = true;
+  if (handle.timer) clearTimeout(handle.timer);
+  if (handle.idleTimer) clearTimeout(handle.idleTimer);
+  killChild(handle, state);
+  if (state.timeoutSettleTimer === null)
+    state.timeoutSettleTimer = setTimeout(
+      () => settle(handle, state, null),
+      1000,
+    );
 }
 
 export function spawnCli(
@@ -96,8 +159,15 @@ export function spawnCli(
 ): Promise<SpawnResult> {
   const encoding = options.encoding ?? "utf8";
   const normalize = options.normalizeEol !== false;
+  const scaleForWindows = options.scaleWindowsTimeout !== false;
   const timeoutMs =
-    options.timeoutMs !== undefined ? osTimeout(options.timeoutMs) : undefined;
+    options.timeoutMs !== undefined
+      ? osTimeout(options.timeoutMs, scaleForWindows)
+      : undefined;
+  const idleTimeoutMs =
+    options.idleTimeoutMs !== undefined
+      ? osTimeout(options.idleTimeoutMs, scaleForWindows)
+      : undefined;
   const useDetached = options.detached === true && process.platform !== "win32";
 
   return new Promise((resolve) => {
@@ -123,6 +193,7 @@ export function spawnCli(
       stdout: "",
       stderr: "",
       timedOut: false,
+      timeoutKind: undefined,
       abortedByCaller: false,
       spawnError: undefined,
       settled: false,
@@ -132,6 +203,8 @@ export function spawnCli(
     const handle: SpawnHandle = {
       child,
       timer: null,
+      idleTimer: null,
+      idleTimeoutMs,
       stdoutDecoder,
       stderrDecoder,
       normalize,
@@ -144,15 +217,9 @@ export function spawnCli(
     const onAbortListener = () => onAbort(handle, state);
     handle.onAbortListener = onAbortListener;
     handle.timer = timeoutMs
-      ? setTimeout(() => {
-          state.timedOut = true;
-          killChild(handle, state);
-          state.timeoutSettleTimer = setTimeout(
-            () => settle(handle, state, null),
-            1000,
-          );
-        }, timeoutMs)
+      ? setTimeout(() => fireTimeout(handle, state, "wall"), timeoutMs)
       : null;
+    touchIdle(handle, state);
 
     if (options.signal)
       if (options.signal.aborted) onAbortListener();
@@ -167,23 +234,23 @@ export function spawnCli(
     });
 
     child.stdout?.on("data", (chunk: Buffer) => {
-      state.stdout += stdoutDecoder.write(chunk);
+      touchIdle(handle, state);
+      state.stdout = appendCapped(
+        state.stdout,
+        stdoutDecoder.write(chunk),
+        options.maxOutputChars,
+      );
     });
     child.stderr?.on("data", (chunk: Buffer) => {
+      touchIdle(handle, state);
       const text = stderrDecoder.write(chunk);
-      state.stderr += text;
+      state.stderr = appendCapped(state.stderr, text, options.maxOutputChars);
       if (
         !state.settled &&
         !state.abortedByCaller &&
         options.onStderr?.(text, state.stderr) === true
-      ) {
-        state.abortedByCaller = true;
-        killChild(handle, state);
-        state.timeoutSettleTimer = setTimeout(
-          () => settle(handle, state, null),
-          1000,
-        );
-      }
+      )
+        onAbort(handle, state);
     });
 
     if (options.input !== undefined && child.stdin) {

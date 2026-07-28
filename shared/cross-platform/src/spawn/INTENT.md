@@ -12,14 +12,16 @@
 | `spawnCliSync.ts`    | spawn.sync 기반 동기 변형 (블로킹)                       |
 | `spawnDetached.ts`   | fire-and-forget detached 데몬 (unref, 미추적, no-throw)  |
 | `execCli.ts`         | `spawnCli` thin alias (이름 호환성)                      |
-| `osTimeout.ts`       | win32 ×3, floor 5000ms                                   |
+| `osTimeout.ts`       | win32 ×3 (floor 5000ms), 호출자 opt-out 가능             |
 | `resolveLauncher.ts` | win32: bin → cmd.exe 우회 launcher (.exe 직접/shim→node) |
 | `parseCmdShim.ts`    | `.cmd`/`.bat` shim → node entry 파서 (pure, win32 path)  |
 
 ## Conventions
 
-- timeoutMs 미지정 시 timeout 없음.
+- timeoutMs 미지정 시 timeout 없음. win32 는 프로세스 기동분을 흡수하려 `timeoutMs`·`idleTimeoutMs` 를 ×3 하는데, `scaleWindowsTimeout: false` 면 준 값을 그대로 쓴다 — 호출자가 스스로 고른 상한이거나 같은 값을 자식에게도 넘기는 경우(값 크기로는 구분할 수 없다).
+- `idleTimeoutMs` (미지정 시 없음): 마지막 출력 이후 무활동 상한 — stdout/stderr 청크마다 리셋되므로 계속 출력하는 자식은 살아남는다. `timeoutMs`(wall-clock 상한)와 독립이며 먼저 발동한 쪽이 kill; `SpawnResult.timeoutKind` 가 `wall`/`idle` 을 구분한다.
 - normalizeEol 기본 true; false 면 raw stdout/stderr.
+- `maxOutputChars` (미지정 시 무제한): 스트림별 보관 상한 — 넘치면 head 를 버리고 안내 한 줄을 앞에 붙여 tail(=CLI 가 결과를 싣는 쪽)을 남긴다.
 - stdin 은 `options.input` 으로 단일 chunk; 미지정 시 stdin 즉시 닫힘.
 - win32: `.cmd`/`.bat` 은 `resolveLauncher` 가 node entry 추출 → `process.execPath` 직접 spawn (cmd.exe 우회 = 멀티라인 개행 보존); 해석 실패 시 cross-spawn fallback.
 - `detached` (POSIX 전용, 기본 off): 자식을 프로세스그룹 리더로 만들어 timeout/abort 시 그룹(손자 포함)을 SIGKILL; win32(taskkill /T)·`spawnCliSync` 는 무시. `kill(-0)` 자기그룹 자살 방지 위해 pid>1 가드 + ESRCH 시 단일 kill 폴백.

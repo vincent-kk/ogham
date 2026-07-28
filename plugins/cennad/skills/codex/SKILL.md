@@ -2,7 +2,7 @@
 name: codex
 description: '[cennad] Delegate to OpenAI Codex CLI via cennad. Use for heavy code generation/refactoring, sandboxed shell work, or independent second opinions from a different model family. Trigger: "ask codex", "codex 호출", "코덱스에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--tier high|mid|low] [--no-refine] -- "prompt"'
+argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refine] -- "prompt"'
 ---
 
 # codex
@@ -17,7 +17,7 @@ Run a Codex CLI conversation off-thread: spawn the `cennad:courier` agent in the
 ## Arguments
 
 - `--continue <session_id>` — resume an existing cennad session. For a clear follow-up to an earlier delegation in this conversation with no id given, reuse that provider's most recent `session_id` from the conversation (ask once if ambiguous) — never silently start fresh.
-- `--tier high|mid|low` — only when the user asked for one (see Tier).
+- `--tier apex|high|mid|low` — overrides the tier this skill would otherwise pick (see Tier).
 - `--no-refine` — single dispatch, no refinement.
 - `-- "prompt"` — the prompt (required).
 
@@ -31,7 +31,7 @@ Spawn `cennad:courier` (Agent tool, background — never poll or wait; the compl
 operation: start            # `continue` when --continue was given
 provider: codex             # start only
 session_id: <id>            # continue only
-tier: <high|mid|low>        # only when the user asked
+tier: <apex|high|mid|low>   # start only — on continue, omit unless the user asked
 refine: true                # false when --no-refine
 prompt:
 <the prompt, verbatim>
@@ -45,4 +45,11 @@ When the courier's completion notification arrives, deliver — never spawn a se
 
 ## Tier
 
-Capability labels only — the concrete model/effort mapping lives in cennad config (`/cennad:setup`); never name one here. `mid` for normal work, `low` for clearly simple tasks, `high` only with a specific reason `mid` is insufficient (steep rate-limit/budget cost). Omit unless the user asked: defaults and mid-session tier continuity are cennad's job.
+Capability labels only — the concrete model/effort mapping lives in cennad config (`/cennad:setup`); never name one here. A user-supplied `--tier` always wins. Otherwise pick from what the provider must DO, not from how hard the topic sounds:
+
+- `low` — one lookup, one conversion, a short summary: retrieval or formatting, no design judgment.
+- `mid` — the default. One module's worth of implementation, review, or explanation, where the shape of the answer is already clear from the prompt.
+- `high` — judgment spanning several files or competing constraints: a design call, a root-cause hunt, a tradeoff with no obvious winner.
+- `apex` — the provider must carry out the work rather than describe it: a repository-wide refactor or migration, a task whose file list it has to discover for itself, or anything meant to keep going autonomously for tens of minutes. Costliest tier and the one that holds a rate-limit slot longest — choose it for scope and autonomy, never for topic difficulty alone.
+
+Send nothing on `--continue` unless the user asked: cennad restores the session's own tier, and changing it mid-thread swaps the model under the conversation.

@@ -33,16 +33,27 @@ if (mode === 'success') {
 process.exit(2);
 `;
 
+const FAKE_AGY = `#!/usr/bin/env node
+process.stdout.write(JSON.stringify({ event: 'result', result: { conversation_id: '11111111-2222-4333-8444-555555555555', status: 'SUCCESS', response: 'agy resumed' } }) + '\\n');
+process.exit(0);
+`;
+
 let handle: ReturnType<typeof installFakeBinary>;
+let agyHandle: ReturnType<typeof installFakeBinary>;
 let restorePath: () => void;
+let restoreAgyPath: () => void;
 
 beforeAll(() => {
   handle = installFakeBinary('codex', FAKE_CODEX);
+  agyHandle = installFakeBinary('agy', FAKE_AGY);
   restorePath = prependToPath(handle.dir);
+  restoreAgyPath = prependToPath(agyHandle.dir);
 });
 
 afterAll(() => {
+  restoreAgyPath();
   restorePath();
+  agyHandle.cleanup();
   handle.cleanup();
 });
 
@@ -100,6 +111,30 @@ describe('handleContinueConversation', () => {
     const updated = await getSession(hash, session.session_id);
     expect(updated?.turn_count).toBe(2);
     expect(updated?.external_session_ref).toBe('tid-resume');
+  });
+
+  // agy names its conversation on every turn. A session that started before it did
+  // — or recovered from the transcript — holds the isolated cwd instead, and only a
+  // stored promotion makes the next resume target that conversation by name.
+  it('stores the conversation id a resume promotes over a legacy cwd ref', async () => {
+    const session = await createSession({
+      provider: 'antigravity',
+      cwd: process.cwd(),
+      externalSessionRef: '/legacy/agy/cwd',
+      model: 'Gemini 3.1 Pro',
+    });
+
+    const result = await handleContinueConversation({
+      session_id: session.session_id,
+      prompt: 'follow up',
+    });
+
+    expect(result.status).toBe('success');
+    const hash = getProjectHash(process.cwd());
+    const updated = await getSession(hash, session.session_id);
+    expect(updated?.external_session_ref).toBe(
+      '11111111-2222-4333-8444-555555555555',
+    );
   });
 
   it('still increments turn_count when the dispatcher fails (attempt tracking)', async () => {

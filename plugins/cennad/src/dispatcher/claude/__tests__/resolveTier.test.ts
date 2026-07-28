@@ -4,6 +4,7 @@ import type { ClaudeModelMap } from '../../../types/index.js';
 import { resolveClaudeTier } from '../operations/resolveTier.js';
 
 const MAP: ClaudeModelMap = {
+  apex: { model: 'opus[1m]', effort: 'max' },
   high: { model: 'opus', effort: 'max' },
   mid: { model: 'sonnet', effort: 'high' },
   low: { model: 'haiku' },

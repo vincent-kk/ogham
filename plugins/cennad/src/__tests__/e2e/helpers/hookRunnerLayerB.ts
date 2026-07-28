@@ -54,8 +54,12 @@ export function runHookLayerB(
   const bridgeDir = process.env.CENNAD_E2E_BRIDGE;
   if (!bridgeDir) throw new Error('CENNAD_E2E_BRIDGE not set');
 
+  // hooks.json launches every hook as `node libs/run.cjs bridge/<name>.mjs`, so
+  // the hook runs one process below the host. Spawning the bundle directly hides
+  // anything that depends on that hop — process.ppid above all.
   const script = resolve(bridgeDir, `${name}.mjs`);
-  const result = spawnSync(process.execPath, [script], {
+  const runner = resolve(bridgeDir, '..', 'libs', 'run.cjs');
+  const result = spawnSync(process.execPath, [runner, script], {
     cwd: opts.cwd,
     env: { ...process.env, ...(opts.env ?? {}) },
     input: opts.input,
