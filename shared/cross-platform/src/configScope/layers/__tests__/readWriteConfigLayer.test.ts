@@ -138,4 +138,20 @@ describe("writeConfigLayer", () => {
       expect(statSync(layers.user).mode & 0o777).toBe(0o600);
     },
   );
+
+  it.skipIf(process.platform === "win32")(
+    "applies an owner-only directory mode when asked",
+    () => {
+      writeConfigLayer(
+        layers,
+        "project",
+        { theme: "dark" },
+        { directoryMode: 0o700 },
+      );
+
+      expect(statSync(join(layers.project as string, "..")).mode & 0o777).toBe(
+        0o700,
+      );
+    },
+  );
 });
