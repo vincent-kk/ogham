@@ -7,13 +7,14 @@
 
 ## Structure
 
-| Path         | Role                                            |
-| ------------ | ----------------------------------------------- |
-| `index.ts`   | named public barrel                             |
-| `planner/`   | flat placement와 plan summary 계산 organ        |
-| `imports/`   | flat exact path-like import rewrite 계산 organ  |
-| `validator/` | flat snapshot 기반 pre/postcondition 검사 organ |
-| `__tests__/` | 15-case contract spec와 32-case test-record     |
+| Path          | Role                                            |
+| ------------- | ----------------------------------------------- |
+| `index.ts`    | named public barrel                             |
+| `planner/`    | flat placement와 plan summary 계산 organ        |
+| `imports/`    | flat exact path-like import rewrite 계산 organ  |
+| `specifiers/` | flat specifier stem·확장자 표기 판정 organ      |
+| `validator/`  | flat snapshot 기반 pre/postcondition 검사 organ |
+| `__tests__/`  | 15-case contract spec와 32-case test-record     |
 
 ## Conventions
 

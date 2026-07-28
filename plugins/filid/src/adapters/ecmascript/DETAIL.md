@@ -3,6 +3,10 @@
 ## Requirements
 
 - adapter는 현재 생태계 source file과 package/framework evidence를 탐지한다.
+- source discovery는 git이 무시하고 추적하지도 않는 파일을 제외한다. 이 결과가
+  dependency와 verification evidence의 입력이므로, 무시되는 build 산출물이
+  discovery에 남으면 DAG와 verification 계약이 산출물을 대상으로 판정한다.
+  git이 없거나 project root가 work tree 밖이면 제외 없이 전부 탐지한다.
 - module, executable과 framework entry point를 exact path와 adapter ID로 보고한다.
 - config가 이 adapter에 전달한 exact peer filename은 declared entry override로
   해석하며 **`kind: 'module'`로 보고하지 않는다.** module은 adapter가 스스로
@@ -50,6 +54,8 @@
 
 - package 또는 지원 source evidence가 있으면 양수 confidence를 반환한다.
 - 알 수 없는 파일만 있는 project는 ownership을 주장하지 않는다.
+- git이 무시하는 source file은 `discoverSourceFiles()` 결과에 없고, ignore
+  pattern에 걸려도 추적되는 파일은 남는다. git이 없으면 전부 남는다.
 
 ### AC-ecmascript-structure — entry와 dependency
 
@@ -84,4 +90,4 @@
 
 ## Last Updated
 
-2026-07-28 — verification role 판정을 접미사 후보 + 내용 확정으로 좁혀 개명만으로 얻는 면제를 없앴다.
+2026-07-28 — verification role 판정을 접미사 후보 + 내용 확정으로 좁히고, source discovery에서 git이 무시하는 경로를 제외했다.

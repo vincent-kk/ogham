@@ -86,7 +86,7 @@ const ANALYSIS_CERTAINTIES = {
 | -------------------------- | ------------- | -------- | ------------ | ----------- | ---------------------------------- |
 | `intent-document-contract` | documentation | error    | documents    | node        | INTENT parser                      |
 | `detail-document-contract` | documentation | error    | documents    | node        | DETAIL parser                      |
-| `organ-no-intentmd`        | structure     | error    | nodes        | node        | node classification                |
+| `organ-no-intentmd`        | structure     | warning  | nodes        | node        | node classification + organ names  |
 | `entry-point-surface`      | module        | warning  | entry-points | node        | StructureAdapter                   |
 | `module-entry-point`       | module        | warning  | entry-points | node        | StructureAdapter                   |
 | `max-depth`                | structure     | error    | nodes        | node        | tree                               |
@@ -117,7 +117,7 @@ const ANALYSIS_CERTAINTIES = {
 
 ## 분류 우선순위
 
-**분류는 서술이지 규범이 아니다.** 분류기는 디스크에 있는 파일만 관찰한다. 문서도 module index도 선언하지 않은 디렉터리는 독립 계약을 주장한 적이 없으므로 `organ`이다. 무엇이 fractal이어야 *하는가*는 분류 기본값이 아니라 규칙 결과다 — 소유 subtree 밖에서 소비되는 organ을 `external-import-boundary`가 소비자 경로를 증거로 보고한다.
+**분류는 서술이지 규범이 아니다.** 분류기는 디스크에 있는 파일만 관찰한다. 문서도 module index도 선언하지 않은 디렉터리는 독립 계약을 주장한 적이 없으므로 `organ`이다. 무엇이 fractal이어야 *하는가*는 분류 기본값이 아니라 규칙 결과다 — 소유 subtree 밖에서 소비되는 organ을 `external-import-boundary`가 소비자 경로를 증거로 보고하고, 반대 방향인 "organ 이름인데 INTENT.md 하나로 fractal이 된" 디렉터리를 `organ-no-intentmd`가 보고한다. 두 규칙이 분류의 양쪽 오차를 나눠 맡으므로 분류기 자체는 서술에 머문다.
 
 `classifyNode(ClassifyInput)`는 다음 순서로 결정한다.
 
@@ -180,7 +180,22 @@ DETAIL.md는 append-only 이력이 아니다. 갱신할 때마다 현재 상태�
 
 ### organ 보호 (`organ-no-intentmd`)
 
-organ 노드에는 INTENT.md를 두지 않는다. 독립 문서가 필요하면 `fractal`로 재분류한다. `PreToolUse` 훅이 write 시점에 차단한다.
+organ 노드에는 INTENT.md를 두지 않는다. 독립 문서가 필요하면 `fractal`로 재분류한다.
+
+**규칙은 "조용히 승격된 organ"을 본다.** 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`인 노드는 실제 snapshot에 존재할 수 없다. 그 조합을 술어로 쓰면 규칙은 영원히 발화하지 않는다. 그래서 판정 대상은 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우다 — DETAIL.md도 module 진입점도 없는 상태.
+
+| 조건                                   | 판정               |
+| -------------------------------------- | ------------------ |
+| organ 이름 + INTENT.md만               | `warning`          |
+| organ 이름 + INTENT.md + DETAIL.md     | 통과 (의도된 승격) |
+| organ 이름 + INTENT.md + module 진입점 | 통과 (의도된 승격) |
+| organ 이름이 아닌 디렉터리 + INTENT.md | 통과               |
+
+finding은 해소책 둘을 함께 제시한다: INTENT.md를 지워 organ으로 되돌리거나, DETAIL.md와 진입점을 더해 승격을 완결한다.
+
+`severity`가 `error`가 아니라 `warning`인 것은 ADR-11의 연장이다 — 분류는 서술이고, 승격 자체는 정당한 행위다. 규칙이 묻는 것은 "이 승격이 의도한 것인가"이지 "이것이 금지 상태인가"가 아니다.
+
+**훅은 이것을 차단하지 않는다.** `PreToolUse` write gate는 INTENT.md 줄 수와 DETAIL.md append-only만 판정하며, organ 여부는 입력으로 받지 않는다. 승격은 `structure_validate` finding으로 보고된다.
 
 ### peer file (`zero-peer-file`)
 

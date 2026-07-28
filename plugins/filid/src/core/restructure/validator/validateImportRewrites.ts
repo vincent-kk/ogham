@@ -1,8 +1,4 @@
-import {
-  portableDirname,
-  portableResolve,
-  samePath,
-} from '@ogham/cross-platform/paths';
+import { samePath } from '@ogham/cross-platform/paths';
 
 import {
   RESTRUCTURE_VALIDATION_CODES,
@@ -14,6 +10,7 @@ import type {
   MoveInstruction,
   PlanValidationFinding,
 } from '../../../types/restructure.js';
+import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
 
 function hasRewriteEvidence(
   snapshot: ProjectSnapshot,
@@ -24,11 +21,9 @@ function hasRewriteEvidence(
       (evidence) =>
         samePath(evidence.sourceFile, rewrite.consumerPath) &&
         evidence.rawSpecifier === rewrite.requiredSpecifier &&
-        samePath(
-          portableResolve(
-            portableDirname(evidence.sourceFile),
-            evidence.rawSpecifier,
-          ),
+        specifierDenotesPath(
+          evidence.sourceFile,
+          evidence.rawSpecifier,
           evidence.resolvedPath,
         ),
     ),

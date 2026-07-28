@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
+import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ecmascriptStructureAdapter } from '../../../adapters/ecmascript/index.js';
@@ -55,6 +56,19 @@ describe('ecmascript structure adapter', () => {
 
     expect(await ecmascriptStructureAdapter.discoverSourceFiles(root)).toEqual([
       source,
+    ]);
+  });
+
+  it('discovers a force-added source file but not a git-ignored one', async () => {
+    const root = project();
+    const tracked = write(root, 'generated/pinned.ts', 'export {};');
+    write(root, 'generated/output.ts', 'export {};');
+    write(root, '.gitignore', 'generated/\n');
+    spawnCliSync('git', ['init', '--quiet'], { cwd: root });
+    spawnCliSync('git', ['add', '-f', 'generated/pinned.ts'], { cwd: root });
+
+    expect(await ecmascriptStructureAdapter.discoverSourceFiles(root)).toEqual([
+      tracked,
     ]);
   });
 

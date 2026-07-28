@@ -29,7 +29,10 @@ import { handleRuleDocsSyncTool } from '../handlers/handleRuleDocsSyncTool.js';
 import { deferInputValidation } from '../utils/deferInputValidation.js';
 
 const PROJECT_ROOT_DESCRIPTION =
-  'Absolute path inside the project. The project root is resolved upward from it.';
+  'Absolute path used as-is as the root of this call — nothing is resolved ' +
+  'upward, so passing a subdirectory scopes the work to that subtree. Project ' +
+  'config (.filid/config.json) is the exception: it is always read from the ' +
+  'enclosing git repository root.';
 
 const PROJECT_INIT_INPUT_SCHEMA = z.object({
   path: z.string().optional().describe(PROJECT_ROOT_DESCRIPTION),

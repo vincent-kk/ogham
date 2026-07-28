@@ -4,6 +4,7 @@ import { basename, dirname, join, relative } from 'node:path';
 import { pathForCompare } from '@ogham/cross-platform/paths';
 
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
+import type { IgnoreFilter } from '../../../../lib/createIgnoreFilter.js';
 import type { StructureAdapter } from '../../../../types/adapters.js';
 import type { ScanOptions } from '../../../../types/scan.js';
 import { classifyNode } from '../../organClassifier/index.js';
@@ -14,6 +15,7 @@ export async function collectNodeMetadata(
   rootPath: string,
   opts: Required<ScanOptions>,
   adapters: readonly StructureAdapter[],
+  isIgnored: IgnoreFilter = () => false,
 ): Promise<{ nodeEntries: NodeEntry[]; childrenMap: Map<string, string[]> }> {
   const childrenMap = new Map<string, string[]>(
     allDirs.map((path) => [path, []]),
@@ -33,7 +35,12 @@ export async function collectNodeMetadata(
       const hasIntentMd = existsSync(join(path, INTENT_MD));
       const hasDetailMd = existsSync(join(path, DETAIL_MD));
       const peerFiles = readdirSync(path, { withFileTypes: true })
-        .filter((entry) => entry.isFile() && !entry.name.startsWith('.'))
+        .filter(
+          (entry) =>
+            entry.isFile() &&
+            !entry.name.startsWith('.') &&
+            !isIgnored(join(path, entry.name)),
+        )
         .map((entry) => entry.name)
         .sort();
       const entryPoints = (

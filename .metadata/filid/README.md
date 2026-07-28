@@ -86,8 +86,8 @@
 
 | 항목           | 값                                                                                                                                                          |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 버전           | 1.0.0 (`private: true` — npm 라이브러리 표면 없음)                                                                                                          |
-| 소스 파일      | 395개 `.ts` (테스트 제외) + 73개 테스트 파일                                                                                                                |
+| 버전           | 0.9.0-beta.1 (`private: true` — npm 라이브러리 표면 없음)                                                                                                   |
+| 소스 파일      | 391개 `.ts` (테스트 제외) + 75개 테스트 파일                                                                                                                |
 | 런타임 의존    | 2개 (`@modelcontextprotocol/sdk`, `zod`) — native 바이너리 0                                                                                                |
 | MCP 도구       | **9개** — project_init, rule_docs_sync, open_settings, fractal_scan, context_resolve, restructure_plan, structure_validate, verification_scan, review_state |
 | 내장 규칙      | **15개** ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#내장-규칙-15개))                                                                                     |
@@ -96,5 +96,5 @@
 | 에이전트       | **0개** (cross-review는 고정 3관점 + 적대적 판정)                                                                                                           |
 | Hook 이벤트    | **3개** — SessionStart, UserPromptSubmit, PreToolUse(Read\|Write\|Edit)                                                                                     |
 | Hook 브리지    | 4개 (setup.mjs, user-prompt-submit.mjs, pre-tool-use.mjs, run-agy.mjs)                                                                                      |
-| 번들 크기      | 472,991 B (MCP 396,740 + 훅 3개 46,689 + settings UI 26,157 + 러너)                                                                                         |
+| 번들 크기      | 475,798 B (MCP 399,800 + 훅 3개 46,436 + settings UI 26,157 + 러너)                                                                                         |
 | MCP 반환 예산  | 16 KiB — 초과분은 artifact로 이동                                                                                                                           |

@@ -30,7 +30,13 @@ export async function createToolSnapshot(
   const config = loaded.config ?? createDefaultConfig();
   const maxDepth = resolveMaxDepth(config, maxDepthOverride);
   const rules = getActiveRules(
-    loadBuiltinRules(config.rules, config.structure?.additionalAllowedPeers),
+    loadBuiltinRules(
+      config.rules,
+      config.structure?.additionalAllowedPeers,
+      undefined,
+      undefined,
+      config.structure?.additionalOrganNames,
+    ),
   );
   const snapshot = await createProjectSnapshot(
     root,

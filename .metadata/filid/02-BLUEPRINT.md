@@ -14,7 +14,7 @@ src/
 ├── adapters/    2 sub     생태계 증거 수집 (registry, ecmascript)
 ├── core/        8 sub     언어 중립 FCA 엔진
 ├── mcp/         4 sub     9개 도구와 설정 페이지의 host boundary
-└── hooks/       4 sub     3개 수명주기 + shared organ
+└── hooks/       5 sub     3개 수명주기 + shared organ
 ```
 
 의존 방향은 `core → adapters` 이며 역방향 edge는 0이다. 자세한 근거는 [01-ARCHITECTURE](./01-ARCHITECTURE.md#레이어와-의존성-방향) 참조.
@@ -259,15 +259,18 @@ validatePlanPostconditions(snapshot, plan)    → PlanValidationResult
 
 organ 구성:
 
-| organ        | 역할                                                                  |
-| ------------ | --------------------------------------------------------------------- |
-| `planner/`   | consumer 해석, contract intent, unit kind, target 후보, 필수 artifact |
-| `imports/`   | exact path-like evidence일 때만 portable relative rewrite 산출        |
-| `validator/` | 사전·사후조건 검사와 구조화된 finding                                 |
+| organ         | 역할                                                                  |
+| ------------- | --------------------------------------------------------------------- |
+| `planner/`    | consumer 해석, contract intent, unit kind, target 후보, 필수 artifact |
+| `imports/`    | exact path-like evidence일 때만 portable relative rewrite 산출        |
+| `specifiers/` | specifier stem 판정과 소비자 확장자 표기 복원                         |
+| `validator/`  | 사전·사후조건 검사와 구조화된 finding                                 |
 
-세 organ은 **flat leaf**다. 그 아래 `helpers/`를 만들지 않고 분리 함수 파일을 organ에 평탄하게 둔다 — FCA organ leaf 규칙이 helper 하위 배치 기본보다 우선한다.
+네 organ은 **flat leaf**다. 그 아래 `helpers/`를 만들지 않고 분리 함수 파일을 organ에 평탄하게 둔다 — FCA organ leaf 규칙이 helper 하위 배치 기본보다 우선한다.
 
-**핵심 계약**: 프로젝트 파일을 쓰거나 옮기지 않는다. 불확실한 contract, 이름, adapter entry shape, graph 또는 specifier는 추측하지 않고 unresolved reason으로 남긴다. alias나 runtime-extension mapping처럼 어댑터 의미가 필요한 rewrite는 계산하지 않는다.
+`specifiers/`는 `imports/`와 `validator/` 둘의 소비 대상이므로 두 organ의 lowest common fractal인 `restructure` 아래에 놓였다. specifier가 resolved file을 가리키는지는 마지막 세그먼트의 확장자를 제거한 stem으로 판정하고, 산출된 specifier에는 소비자가 쓰던 표기를 되돌려 준다 — 판정과 복원이 한 곳에 있어야 계획과 사후조건이 같은 기준을 쓴다.
+
+**핵심 계약**: 프로젝트 파일을 쓰거나 옮기지 않는다. 불확실한 contract, 이름, adapter entry shape, graph 또는 specifier는 추측하지 않고 unresolved reason으로 남긴다. 확장자 표기 차이는 순수 lexical 연산이라 core가 처리하지만, alias 해석처럼 **어댑터 의미**가 필요한 rewrite는 계산하지 않는다.
 
 ---
 

@@ -12,6 +12,12 @@
   평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를
   평가하고 root DETAIL migration target을 suggestion으로 반환한다.
+- `organ-no-intentmd`는 **조용히 승격된 organ**을 보고한다. 분류 1단계가
+  `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`는 실제
+  snapshot에서 성립할 수 없다. 대신 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는
+  config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된
+  경우 — DETAIL.md도 module 진입점도 없는 상태 — 를 `warning`으로 낸다.
+  둘 중 하나라도 있으면 승격이 의도된 것이므로 침묵한다.
 - `external-import-boundary`는 대상이 organ 파일이면 진입점 경유가 아니라
   **소비자 위치**로 판정한다. organ은 진입점을 갖지 않으므로 경유할 대상이
   없다.
@@ -61,6 +67,14 @@
   exact가 아니면 pure-function-isolation이 uncertainty finding을 남긴다.
 - legacy criteria evidence가 없으면 rule이 통과하고, 있으면 ledger path에서
   violation과 root DETAIL migration suggestion을 한 번 반환한다.
+
+### AC-rules-organ-promotion — 조용히 승격된 organ 보고
+
+- organ 이름 디렉터리가 INTENT.md만 갖고 fractal이면 `organ-no-intentmd`
+  `warning`이 나오고, 승격 취소와 진입점 추가 두 해소책을 제시한다.
+- 같은 디렉터리에 DETAIL.md 또는 module 진입점이 있으면 침묵한다.
+- organ 이름이 아닌 디렉터리는 INTENT.md가 있어도 침묵한다.
+- config `additionalOrganNames`로 선언된 이름도 built-in 이름과 같게 취급한다.
 
 ### AC-rules-organ-boundary — 소비자 위치 기준 organ 접근
 

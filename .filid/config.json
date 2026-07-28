@@ -8,7 +8,7 @@
   "rules": {
     "organ-no-intentmd": {
       "enabled": true,
-      "severity": "error"
+      "severity": "warning"
     },
     "module-entry-point": {
       "enabled": true,

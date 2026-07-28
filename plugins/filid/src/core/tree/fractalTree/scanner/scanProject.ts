@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 
 import { createAdapterRegistry } from '../../../../adapters/index.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scanDefaults.js';
+import { createIgnoreFilter } from '../../../../lib/createIgnoreFilter.js';
 import type { FractalTree } from '../../../../types/fractal.js';
 import type { ScanOptions } from '../../../../types/scan.js';
 import { buildFractalTree } from '../treeBuilder/buildFractalTree.js';
@@ -23,12 +24,14 @@ export async function scanProject(
     ...options,
     structureAdapters,
   };
-  const allDirs = await discoverDirectories(absoluteRoot, opts);
+  const isIgnored = createIgnoreFilter(absoluteRoot);
+  const allDirs = await discoverDirectories(absoluteRoot, opts, isIgnored);
   const { nodeEntries, childrenMap } = await collectNodeMetadata(
     allDirs,
     absoluteRoot,
     opts,
     structureAdapters,
+    isIgnored,
   );
   return buildFractalTree(
     correctNodeTypes(nodeEntries, childrenMap, opts.additionalOrganNames),

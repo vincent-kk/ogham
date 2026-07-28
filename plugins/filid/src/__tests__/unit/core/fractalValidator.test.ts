@@ -63,13 +63,13 @@ describe('fractal-validator', () => {
       expect(Array.isArray(report.result.violations)).toBe(true);
     });
 
-    it('should detect organ with INTENT.md as violation', () => {
+    it('should detect an organ-named directory promoted by INTENT.md alone', () => {
       const tree = buildFractalTree([
         entry('/app', 'fractal', true, false, true),
         {
           path: '/app/utils',
           name: 'utils',
-          type: 'organ',
+          type: 'fractal',
           hasIntentMd: true,
           hasDetailMd: false,
         },
@@ -80,7 +80,7 @@ describe('fractal-validator', () => {
         (v) => v.ruleId === 'organ-no-intentmd',
       );
       expect(violation).toBeDefined();
-      expect(violation!.severity).toBe('error');
+      expect(violation!.severity).toBe('warning');
       expect(violation!.path).toBe('/app/utils');
     });
 

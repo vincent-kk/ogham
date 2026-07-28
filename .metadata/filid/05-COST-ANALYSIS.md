@@ -14,7 +14,7 @@
 | ------------------------ | ------------------ | ------------------- | ------- | --------- |
 | `setup.mjs`              | `SessionStart`     | `*`                 | 30초    | 9,492 B   |
 | `user-prompt-submit.mjs` | `UserPromptSubmit` | `*`                 | 5초     | 11,666 B  |
-| `pre-tool-use.mjs`       | `PreToolUse`       | `Read\|Write\|Edit` | 10초    | 25,377 B  |
+| `pre-tool-use.mjs`       | `PreToolUse`       | `Read\|Write\|Edit` | 10초    | 25,278 B  |
 
 `run-hook.cmd`(54 B, Windows shim)와 `run-agy.mjs`(3,351 B, agy host 러너)는 훅이 아니라 러너다. 실행 진입은 `libs/run.cjs`가 담당한다.
 
@@ -60,7 +60,7 @@
 | 항목        | 값                                                |
 | ----------- | ------------------------------------------------- |
 | 번들 형식   | CJS, minified                                     |
-| 번들 크기   | **397,259 B (≈388 KB)** (`bridge/mcp-server.cjs`) |
+| 번들 크기   | **399,800 B (≈390 KB)** (`bridge/mcp-server.cjs`) |
 | 외부 의존성 | **없음** — external 처리 대상이 0개다             |
 | 기동 방식   | `node bridge/mcp-server.cjs` → stdio transport    |
 
@@ -72,7 +72,7 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 1.0의 도구는 AST 파싱을 하지 않는다. 비용은 두 가지가 지배한다.
 
-1. **snapshot 생성** — 디렉터리 traversal과 구조 판정에 쓰인 파일 내용의 SHA-256. `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`이 모두 같은 snapshot을 소비하므로 한 번만 만든다.
+1. **snapshot 생성** — 디렉터리 traversal과 구조 판정에 쓰인 파일 내용의 SHA-256. `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`이 모두 같은 snapshot을 소비하므로 한 번만 만든다. traversal은 git-ignored 경로를 걸러내기 위해 `git ls-files`를 **scan당 한 번** spawn한다 — 경로당이 아니라 스캔당이며, 결과 집합은 그 스캔 동안 재사용된다. 걸러낸 경로만큼 이후 단계의 입력이 줄어들지만, 순비용의 방향은 측정하지 않았다.
 2. **lexical scan** — 어댑터가 의존성·진입점·case를 세는 단일 패스. 정규식 기반 전체 파싱이 아니라 문자열·주석·괄호 nesting만 구분한다.
 
 `project_init`, `rule_docs_sync`, `open_settings`, `review_state`는 snapshot을 필요로 하지 않는다.
@@ -112,16 +112,16 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 | 파일                            | 크기                    | 형식 |
 | ------------------------------- | ----------------------- | ---- |
-| `bridge/mcp-server.cjs`         | 397,259 B               | CJS  |
-| `bridge/pre-tool-use.mjs`       | 25,377 B                | ESM  |
+| `bridge/mcp-server.cjs`         | 399,800 B               | CJS  |
+| `bridge/pre-tool-use.mjs`       | 25,278 B                | ESM  |
 | `bridge/user-prompt-submit.mjs` | 11,666 B                | ESM  |
 | `bridge/setup.mjs`              | 9,492 B                 | ESM  |
 | `bridge/run-agy.mjs`            | 3,351 B                 | ESM  |
 | `bridge/run-hook.cmd`           | 54 B                    | cmd  |
 | `public/settings.html`          | 26,157 B                | HTML |
-| **합계**                        | **473,356 B (≈462 KB)** |      |
+| **합계**                        | **475,798 B (≈465 KB)** |      |
 
-훅 3개 합계는 46,535 B다. `dist/` 라이브러리 산출물은 1.0에 존재하지 않는다.
+훅 3개 합계는 46,436 B다. `dist/` 라이브러리 산출물은 1.0에 존재하지 않는다.
 
 ---
 

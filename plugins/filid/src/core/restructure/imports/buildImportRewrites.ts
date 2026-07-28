@@ -4,7 +4,6 @@ import {
   portableIsAbsolute,
   portableJoin,
   portableRelative,
-  portableResolve,
   samePath,
 } from '@ogham/cross-platform/paths';
 
@@ -19,6 +18,8 @@ import type {
   ImportRewriteBuildResult,
   RestructureDecisionReason,
 } from '../../../types/restructure.js';
+import { applySpecifierExtension } from '../specifiers/applySpecifierExtension.js';
+import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
 
 function isAtOrWithin(parentPath: string, targetPath: string): boolean {
   if (samePath(parentPath, targetPath)) return true;
@@ -28,15 +29,6 @@ function isAtOrWithin(parentPath: string, targetPath: string): boolean {
     comparable !== PORTABLE_PATH_MARKERS.PARENT &&
     !comparable.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX) &&
     !portableIsAbsolute(relative)
-  );
-}
-
-function isPathLikeSpecifier(specifier: string): boolean {
-  const comparable = pathForCompare(specifier);
-  return (
-    portableIsAbsolute(specifier) ||
-    comparable.startsWith(PORTABLE_PATH_MARKERS.CURRENT_PREFIX) ||
-    comparable.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX)
   );
 }
 
@@ -61,15 +53,11 @@ export function buildImportRewrites(
         samePath(evidence.resolvedPath, sourcePath) ||
         (sourceIsDirectory && isAtOrWithin(sourcePath, evidence.resolvedPath));
       if (!referencesSource) continue;
-      const exactPathLike =
-        isPathLikeSpecifier(evidence.rawSpecifier) &&
-        samePath(
-          portableResolve(
-            portableDirname(evidence.sourceFile),
-            evidence.rawSpecifier,
-          ),
-          evidence.resolvedPath,
-        );
+      const exactPathLike = specifierDenotesPath(
+        evidence.sourceFile,
+        evidence.rawSpecifier,
+        evidence.resolvedPath,
+      );
       if (!exactPathLike) {
         reasons.add(RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED);
         continue;
@@ -81,9 +69,9 @@ export function buildImportRewrites(
             targetPath,
             portableRelative(sourcePath, evidence.resolvedPath),
           );
-      let requiredSpecifier = portableRelative(
-        portableDirname(evidence.sourceFile),
-        relocatedPath,
+      let requiredSpecifier = applySpecifierExtension(
+        portableRelative(portableDirname(evidence.sourceFile), relocatedPath),
+        evidence.rawSpecifier,
       );
       const comparableRequired = pathForCompare(requiredSpecifier);
       if (

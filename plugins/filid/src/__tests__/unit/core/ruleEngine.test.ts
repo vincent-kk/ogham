@@ -120,17 +120,72 @@ describe('rule-engine', () => {
     });
   });
 
+  // `type: 'organ' && hasIntentMd` cannot occur in a real snapshot —
+  // classification step 1 turns any directory holding INTENT.md into a
+  // fractal. The rule therefore reports the reachable shape instead: an
+  // organ-NAMED directory promoted to fractal by INTENT.md alone.
   describe('organ-no-intentmd rule', () => {
-    it('should fail when organ has INTENT.md', () => {
+    const organNamedNode = (overrides: Partial<FractalNode> = {}) =>
+      makeNode({
+        path: '/root/utils',
+        name: 'utils',
+        type: 'fractal',
+        hasIntentMd: true,
+        ...overrides,
+      });
+
+    it('reports an organ-named directory promoted by INTENT.md alone', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
-      const node = makeNode({ type: 'organ', hasIntentMd: true });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
+      const node = organNamedNode();
+      const ctx: RuleContext = { node, tree: makeTree([node]) };
       const violations = rule.check(ctx);
       expect(violations).toHaveLength(1);
-      expect(violations[0].severity).toBe('error');
+      expect(violations[0].severity).toBe('warning');
+    });
+
+    it('stays silent when the promotion also declared DETAIL.md', () => {
+      const rule = loadBuiltinRules().find(
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
+      )!;
+      const node = organNamedNode({ hasDetailMd: true });
+      const ctx: RuleContext = { node, tree: makeTree([node]) };
+      expect(rule.check(ctx)).toHaveLength(0);
+    });
+
+    it('stays silent when the promotion also declared a module entry point', () => {
+      const rule = loadBuiltinRules().find(
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
+      )!;
+      const node = organNamedNode({
+        entryPoints: [
+          {
+            path: '/root/utils/index.ts',
+            kind: 'module',
+            adapterId: 'ecmascript',
+            surface: 'enumerated',
+          },
+        ],
+      });
+      const ctx: RuleContext = { node, tree: makeTree([node]) };
+      expect(rule.check(ctx)).toHaveLength(0);
+    });
+
+    it('honours a config-declared additional organ name', () => {
+      const rule = loadBuiltinRules(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        ['references'],
+      ).find((r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD)!;
+      const node = organNamedNode({
+        path: '/root/references',
+        name: 'references',
+      });
+      const ctx: RuleContext = { node, tree: makeTree([node]) };
+      expect(rule.check(ctx)).toHaveLength(1);
     });
 
     it('should pass when organ has no INTENT.md', () => {
@@ -143,7 +198,7 @@ describe('rule-engine', () => {
       expect(rule.check(ctx)).toHaveLength(0);
     });
 
-    it('should pass when fractal has INTENT.md', () => {
+    it('should pass when a non-organ-named fractal has INTENT.md', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
@@ -290,12 +345,15 @@ describe('rule-engine', () => {
     });
 
     it('should leave non-overridden rules unchanged', () => {
+      const baseline = loadBuiltinRules().find(
+        (r) => r.id === 'organ-no-intentmd',
+      )!;
       const rules = loadBuiltinRules({
         'max-depth': { enabled: false },
       });
       const organ = rules.find((r) => r.id === 'organ-no-intentmd');
       expect(organ?.enabled).toBe(true);
-      expect(organ?.severity).toBe('error');
+      expect(organ?.severity).toBe(baseline.severity);
     });
 
     it('should return default rules when overrides is undefined', () => {
@@ -315,14 +373,19 @@ describe('rule-engine', () => {
     it('should wrap check to override violation severity', () => {
       const rules = loadBuiltinRules();
       const applied = applyOverrides(rules, {
-        'organ-no-intentmd': { severity: 'warning' },
+        'organ-no-intentmd': { severity: 'error' },
       });
       const rule = applied.find((r) => r.id === 'organ-no-intentmd')!;
-      expect(rule.severity).toBe('warning');
-      const node = makeNode({ type: 'organ', hasIntentMd: true });
+      expect(rule.severity).toBe('error');
+      const node = makeNode({
+        path: '/root/utils',
+        name: 'utils',
+        type: 'fractal',
+        hasIntentMd: true,
+      });
       const tree = makeTree([node]);
       const violations = rule.check({ node, tree });
-      expect(violations[0]?.severity).toBe('warning');
+      expect(violations[0]?.severity).toBe('error');
     });
   });
 });

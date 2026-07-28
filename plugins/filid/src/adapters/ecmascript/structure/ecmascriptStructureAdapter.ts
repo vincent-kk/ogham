@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 
+import { createIgnoreFilter } from '../../../lib/createIgnoreFilter.js';
 import type {
   EntryPointInspection,
   StructureAdapter,
@@ -16,6 +17,7 @@ import { findEntryPoints } from './findEntryPoints.js';
 import { scanLexicalTokens } from './scanLexicalTokens.js';
 
 function discoverEcmascriptFiles(projectRoot: string): string[] {
+  const isIgnored = createIgnoreFilter(projectRoot);
   const files: string[] = [];
   const visit = (directoryPath: string): void => {
     const entries = readdirSync(directoryPath, { withFileTypes: true }).sort(
@@ -23,6 +25,7 @@ function discoverEcmascriptFiles(projectRoot: string): string[] {
     );
     for (const entry of entries) {
       const path = join(directoryPath, entry.name);
+      if (isIgnored(path)) continue;
       if (entry.isDirectory()) {
         if (!EXCLUDED_DIRECTORY_NAMES.has(entry.name)) visit(path);
         continue;

@@ -24,6 +24,7 @@
 - framework convention은 package evidence와 exact peer path로 보고
 - adapter별 entry override를 exact peer filename으로만 해석
 - Node 20-compatible recursive filesystem traversal 사용
+- source discovery에서 git이 무시하는 경로를 `lib/createIgnoreFilter`로 제외
 
 ### Ask first
 
@@ -35,7 +36,8 @@
 - `@ast-grep/napi`, TypeScript compiler API 또는 global module 탐색 요구
 - 생태계 상수를 core/constants로 이동
 - 동적 구문을 exact로 가장
+- `.gitignore` 문법을 직접 해석하거나 git 부재를 discovery 실패로 취급
 
 ## Dependencies
 
-- `../../types/`, Node filesystem/path APIs
+- `../../types/`, `../../lib/` ignore filter, Node filesystem/path APIs

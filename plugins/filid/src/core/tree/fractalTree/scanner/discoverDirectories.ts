@@ -1,6 +1,7 @@
 import { readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 
+import type { IgnoreFilter } from '../../../../lib/createIgnoreFilter.js';
 import type { ScanOptions } from '../../../../types/scan.js';
 
 import { shouldExclude } from './shouldExclude.js';
@@ -8,6 +9,7 @@ import { shouldExclude } from './shouldExclude.js';
 export async function discoverDirectories(
   rootPath: string,
   opts: Required<ScanOptions>,
+  isIgnored: IgnoreFilter = () => false,
 ): Promise<string[]> {
   const root = resolve(rootPath);
   const directories = [root];
@@ -27,6 +29,7 @@ export async function discoverDirectories(
       if (!isDirectory) continue;
       const relativePath = relative(root, path).split(sep).join('/');
       if (shouldExclude(relativePath, opts)) continue;
+      if (isIgnored(path)) continue;
       directories.push(path);
       visit(path, depth + 1);
     }

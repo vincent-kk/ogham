@@ -2,8 +2,6 @@ import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import { LEGACY_CRITERIA_LEDGER_RULE } from '../../../../constants/legacyCriteriaLedger.js';
 import type { Rule, RuleOverride } from '../../../../types/rules.js';
 import type { AllowedPeerOverride } from '../../../infra/configLoader/index.js';
-
-import { applyOverrides } from './applyOverrides.js';
 import { checkDependencyCycles } from '../utils/checkDependencyCycles.js';
 import { checkDocumentContract } from '../utils/checkDocumentContract.js';
 import { checkEntryPointSurface } from '../utils/checkEntryPointSurface.js';
@@ -15,6 +13,8 @@ import { checkOrganNoIntentMd } from '../utils/checkOrganNoIntentmd.js';
 import { checkPureFunctionIsolation } from '../utils/checkPureFunctionIsolation.js';
 import { checkVerificationPolicy } from '../utils/checkVerificationPolicy.js';
 import { checkZeroPeerFile } from '../utils/checkZeroPeerFile.js';
+
+import { applyOverrides } from './applyOverrides.js';
 
 /**
  * Builds the canonical Filid 1.0 rule roster.
@@ -28,6 +28,7 @@ export function loadBuiltinRules(
   additionalAllowed?: AllowedPeerOverride[],
   _additionalEntryPoints?: string[],
   _additionalRoutePatterns?: string[],
+  additionalOrganNames?: string[],
 ): Rule[] {
   const rules: Rule[] = [
     {
@@ -57,11 +58,11 @@ export function loadBuiltinRules(
       name: 'Organ No INTENT',
       description: 'Organ nodes do not own an independent INTENT document.',
       category: 'structure',
-      severity: 'error',
+      severity: 'warning',
       enabled: true,
       scope: 'nodes',
       granularity: 'node',
-      check: checkOrganNoIntentMd,
+      check: checkOrganNoIntentMd(additionalOrganNames),
     },
     {
       id: BUILTIN_RULE_IDS.ENTRY_POINT_SURFACE,

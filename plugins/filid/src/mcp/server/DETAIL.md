@@ -48,6 +48,10 @@
 - 모든 도구 input schema는 필드마다 `.describe()`를 갖는다. MCP 표면이 LLM
   호출자에게는 유일한 계약이므로 이름만으로 의미가 서지 않는 필드
   (`fractal_scan.maxDepth` 같은 규칙 임계값)는 설명이 계약의 일부다.
+- 도구 공통 project path 설명은 실제 root 해석과 일치한다. 공급된 절대 경로는
+  그대로 이 호출의 root가 되고 상향 탐색은 없다. `.filid/config.json`만 git
+  저장소 루트에서 읽힌다. 설명이 상향 해석을 주장하면 호출자는 하위 디렉터리를
+  넘겨 scope를 좁히는 동작을 예측할 수 없다.
 
 ### AC-server-lifecycle — host 안전성
 
@@ -55,4 +59,4 @@
 
 ## Last Updated
 
-2026-07-28 — 입력 오류와 실행 오류의 진단 코드를 분리하고 도구 schema 필드 설명을 계약에 넣었다.
+2026-07-28 — 입력 오류와 실행 오류의 진단 코드를 분리하고, 도구 schema 필드 설명과 공통 project path 설명의 정확성을 계약에 넣었다.
