@@ -4,8 +4,9 @@
 
 - canonical 15개 built-in rule만 등록한다.
 - rule 기본 severity는 roster가 직접 적지 않고 `constants/builtinRuleSeverities`
-  정본에서 읽는다. `createDefaultConfig`가 같은 상수를 읽으므로 config를 가진
-  프로젝트와 갖지 않은 프로젝트가 서로 다른 severity를 갖지 않는다.
+  정본에서 읽는다. `createDefaultConfig`도 같은 상수를 읽으므로 두 경로가 서로
+  다른 기본값을 답하지 않는다. 프로젝트 config가 적은 severity는 그 프로젝트의
+  선택이며 `applyOverrides`를 통해 언제나 우선한다.
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로
   평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag,

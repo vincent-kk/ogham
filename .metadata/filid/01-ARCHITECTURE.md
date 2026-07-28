@@ -375,7 +375,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-29 | 소스 확장자를 그대로 적을 수 없는 생태계(`.js`로 참조되는 `.ts`, 확장자 생략)에서도 import rewrite가 exact evidence로 산출된다                                                                   | [08](./08-API-SURFACE.md)                           |
 | AC-30 | git이 무시하면서 추적하지 않는 경로는 snapshot 증거에 들어가지 않고, git이 답하지 못하면 필터 이전과 동일하게 스캔한다                                                                           | [06](./06-HOW-IT-WORKS.md)                          |
 | AC-31 | 계산된 target이 source와 같은 요청은 `alreadyPlaced`로 분리되어 `moves`에 없고, 그 계획의 postcondition은 `source-still-present`를 내지 않되 유닛이 계획된 경로에 없으면 `target-missing`을 낸다 | [08](./08-API-SURFACE.md)                           |
-| AC-32 | rule roster와 `createDefaultConfig`가 같은 severity 정본을 읽어, config 없는 프로젝트와 `project_init` 프로젝트의 규칙 severity가 규칙 참조표와 일치한다                                         | [07](./07-RULES-REFERENCE.md)                       |
+| AC-32 | rule roster와 `createDefaultConfig`가 같은 severity 정본을 읽는다. 프로젝트 config에 적힌 severity는 그 프로젝트의 선택으로 유지되며, 어떤 도구도 그것을 재시드하지 않는다                       | [07](./07-RULES-REFERENCE.md)                       |
 
 ---
 
