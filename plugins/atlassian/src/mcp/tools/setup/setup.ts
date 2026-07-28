@@ -1,5 +1,6 @@
 import {
   loadConfig,
+  loadConfigScope,
   loadCredentials,
   saveConfig,
   saveCredentials,
@@ -24,6 +25,7 @@ export async function handleSetup(params: SetupParams): Promise<SetupResult> {
       context: {
         settingsHtml: loadSettingsHtml(),
         loadConfig,
+        loadConfigScope,
         saveConfig,
         loadCredentials,
         saveCredentials,

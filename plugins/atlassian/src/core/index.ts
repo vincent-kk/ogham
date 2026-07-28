@@ -1,4 +1,10 @@
-export { loadConfig, saveConfig, mergeConfig } from "./configManager/index.js";
+export {
+  loadConfig,
+  loadConfigScope,
+  saveConfig,
+  mergeConfig,
+  configLayers,
+} from "./configManager/index.js";
 export {
   loadCredentials,
   saveCredentials,

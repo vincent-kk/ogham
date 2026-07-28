@@ -140,7 +140,11 @@ export async function handleSubmit(
     }
   }
 
-  await ctx.saveConfig(newConfig);
+  // The page names the layer; connection setup defaults to `user` because a
+  // site and account are a person's, and only a repository that deliberately
+  // points elsewhere writes the project layer.
+  const scope = readScope(data);
+  await ctx.saveConfig(scope, newConfig);
   await ctx.saveCredentials(newCredentials);
 
   sendJson(res, 200, {
@@ -150,4 +154,12 @@ export async function handleSubmit(
 
   // "Save & Close" (closeAfter) tears down the server; plain "Save" keeps it up.
   if (rawBody.closeAfter !== false) void ctx.closeServer();
+}
+
+/** The layer the page asked for, defaulting to the personal one. */
+function readScope(data: unknown): 'user' | 'project' {
+  if (typeof data !== 'object' || data === null) return 'user';
+  return (data as { scope?: unknown }).scope === 'project'
+    ? 'project'
+    : 'user';
 }

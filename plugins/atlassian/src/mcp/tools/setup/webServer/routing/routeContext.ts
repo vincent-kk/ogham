@@ -1,4 +1,9 @@
 import type {
+  ConfigScope,
+  ConfigScopeState,
+} from "@ogham/cross-platform/config-scope";
+
+import type {
   AtlassianConfig,
   Credentials,
   ServiceCredentials,
@@ -13,7 +18,12 @@ export interface RouteContext {
   token: string;
   settingsHtml: string;
   loadConfig: () => Promise<AtlassianConfig>;
-  saveConfig: (config: AtlassianConfig) => Promise<void>;
+  /** Both layers plus the merge, for the page's scope toggle. */
+  loadConfigScope: () => ConfigScopeState;
+  saveConfig: (
+    scope: ConfigScope,
+    config: Partial<AtlassianConfig>,
+  ) => Promise<ConfigScopeState>;
   loadCredentials: () => Promise<Credentials>;
   saveCredentials: (credentials: Credentials) => Promise<void>;
   testConnection: (params: {

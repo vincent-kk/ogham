@@ -451,6 +451,50 @@
     el.hidden = true;
   }
 
+  // --- Config scope (user / project) ---
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". Credentials are never
+  // layered — they stay user-only — so this toggle governs the config file
+  // alone: the site URL and account a repository points at.
+  var scopeState = (state && state.scope) || {
+    paths: { user: "", project: null },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var configScope = scopeState.layers.project === null ? "user" : "project";
+
+  function renderScope() {
+    var host = document.getElementById("config_scope");
+    if (!host) return;
+    host.textContent = "";
+    [
+      ["user", "User", "Applies wherever you work."],
+      ["project", "Project", "This repository only; overrides User."],
+    ].forEach(function (option) {
+      var label = document.createElement("label");
+      label.className = "scope-option";
+      var radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "config_scope";
+      radio.value = option[0];
+      radio.checked = option[0] === configScope;
+      radio.disabled = option[0] === "project" && !scopeState.paths.project;
+      radio.addEventListener("change", function () {
+        configScope = option[0];
+        renderScope();
+      });
+      var text = document.createElement("span");
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+      if (option[0] === configScope)
+        document.getElementById("scope_hint").textContent =
+          option[2] + " — " + (scopeState.paths[configScope] || "");
+    });
+  }
+
+  renderScope();
+
   // --- Save (validate -> test connection -> save) ---
   function onSubmit(closeAfter) {
     if (!validateForm()) return;
@@ -464,6 +508,7 @@
 
     var data = collectFormData();
     data.closeAfter = closeAfter;
+    data.scope = configScope;
     setLoading(true);
     hideStatusMessage();
     showStatusMessage(true, "Testing connection...");

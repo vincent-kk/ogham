@@ -33,6 +33,9 @@ export async function handleGetRoot(
         }
       : {}),
     deployment_type: hasOnPremSite ? "onprem" : "cloud",
+    // Which layer the form writes. The page picks; `user` is the sensible
+    // default because a site and account belong to a person, not a checkout.
+    scope: ctx.loadConfigScope(),
   };
 
   const html = ctx.settingsHtml.replace(

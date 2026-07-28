@@ -44,7 +44,20 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
     settingsHtml:
       "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
     loadConfig: vi.fn().mockResolvedValue({}),
-    saveConfig: vi.fn().mockResolvedValue(undefined),
+    loadConfigScope: vi.fn().mockReturnValue({
+      paths: { user: "/tmp/user/config.json", project: null },
+      layers: { user: null, project: null },
+      effective: {},
+      overridden: [],
+      warnings: [],
+    }),
+    saveConfig: vi.fn().mockResolvedValue({
+      paths: { user: "/tmp/user/config.json", project: null },
+      layers: { user: null, project: null },
+      effective: {},
+      overridden: [],
+      warnings: [],
+    }),
     loadCredentials: vi.fn().mockResolvedValue({}),
     saveCredentials: vi.fn().mockResolvedValue(undefined),
     testConnection: vi
@@ -445,7 +458,7 @@ describe("createRouteHandler", () => {
 
     await postJson(withToken(baseUrl, "/submit"), VALID_JIRA_FORM);
 
-    const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[0];
+    const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[1];
     expect(Array.isArray(savedConfig?.jira)).toBe(true);
     expect(savedConfig?.jira?.[0]?.base_url).toBe("https://test.atlassian.net");
   });
@@ -474,7 +487,7 @@ describe("createRouteHandler", () => {
     });
 
     expect(res.status).toBe(200);
-    const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[0];
+    const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[1];
     expect(savedConfig?.jira?.[0]?.api_version_override).toBe("3");
   });
 });
