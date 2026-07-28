@@ -15,11 +15,13 @@ obtain approval, let the LLM edit only that plan, and validate the result.
 
 ## Resource Index
 
-| File                           | Purpose                                           |
-| ------------------------------ | ------------------------------------------------- |
-| [reference.md](./reference.md) | Evidence, approval, edit, and validation contract |
-| [tables.md](./tables.md)       | Tool and option lookup                            |
-| [examples.md](./examples.md)   | Invocation and report examples                    |
+| File                                                         | Purpose                                           |
+| ------------------------------------------------------------ | ------------------------------------------------- |
+| [reference.md](./reference.md)                               | Evidence, approval, edit, and validation contract |
+| [tables.md](./tables.md)                                     | Tool and option lookup                            |
+| [examples.md](./examples.md)                                 | Invocation and report examples                    |
+| [\_shared/intent-template.md](../_shared/intent-template.md) | INTENT.md heading set, cap, and rules             |
+| [\_shared/detail-template.md](../_shared/detail-template.md) | DETAIL.md required sections and acceptance groups |
 
 ## When to Use
 

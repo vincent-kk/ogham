@@ -6,15 +6,10 @@ Propose DETAIL.md only for a fractal whose public boundary needs a documented
 contract and whose scan evidence reports no DETAIL.md. Setup does not create or
 overwrite the file.
 
-Each proposed DETAIL.md must later include these English headings:
-
-- `## Requirements`
-- `## API Contracts`
-- `## Last Updated`
-
-Its descriptive content follows the snapshot's output language. The document
-describes current intended behavior, acceptance groups, and scope boundaries;
-it is not an append-only history.
+Each proposed DETAIL.md must later satisfy
+[`../../_shared/detail-template.md`](../../_shared/detail-template.md) — its
+required heading set, the acceptance-group shape, and the language rule. Do not
+restate that template here.
 
 The proposal entry contains the node path, proposed document path, observed
 entry-point state, and the evidence that a public contract is required. If the

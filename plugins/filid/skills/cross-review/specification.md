@@ -52,8 +52,3 @@
 
 Opinion, arbitration, finding, and verdict schemas are defined in
 `contracts.md`. Output layouts are defined in `templates.md`.
-
-## Last Updated
-
-2026-07-29 — Added pull-request delivery of the sealed verdict, gated on the
-branch having a pull request.

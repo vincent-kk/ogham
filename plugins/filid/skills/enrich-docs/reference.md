@@ -77,10 +77,10 @@ document absent         MISSING
 
 The default `min-quality` is 70. RICH documents are never edited.
 
-When `--include-detail` is present, score DETAIL.md using its required
-`Requirements`, `API Contracts`, and `Last Updated` sections. DETAIL.md has no
-line cap, but every edit must restructure it as the current contract rather than
-append history.
+When `--include-detail` is present, score DETAIL.md against the required section
+set in [`../_shared/detail-template.md`](../_shared/detail-template.md).
+DETAIL.md has no line cap, but every edit must restructure it as the current
+contract rather than append history.
 
 ## Section 3 — Edit Plan
 
@@ -125,21 +125,11 @@ For each approved item, give the LLM writer:
 - the bounded implementation evidence;
 - output language and snapshot hash.
 
-For INTENT.md, preserve these English anchors exactly:
+For INTENT.md, preserve the English anchors and the 50-line cap defined in
+[`../_shared/intent-template.md`](../_shared/intent-template.md).
 
-```text
-## Purpose
-## Structure
-## Conventions
-## Boundaries
-### Always do
-### Ask first
-### Never do
-## Dependencies
-```
-
-Body text follows the resolved project language and the file stays within 50
-lines. For a public-boundary change, update INTENT.md before implementation; for
+Body text follows the resolved project language. For a public-boundary change,
+update INTENT.md before implementation; for
 all contract changes, update DETAIL.md before implementation. This workflow edits
 only the approved documents and does not move source files.
 
@@ -152,8 +142,8 @@ Validate each edited INTENT.md directly before invoking Filid:
 3. named paths and symbols exist in the evidence read for the edit;
 4. no unapproved document changed.
 
-Validate each edited DETAIL.md for `## Requirements`, `## API Contracts`, and
-`## Last Updated`.
+Validate each edited DETAIL.md against the required section set in
+[`../_shared/detail-template.md`](../_shared/detail-template.md).
 
 Then call:
 

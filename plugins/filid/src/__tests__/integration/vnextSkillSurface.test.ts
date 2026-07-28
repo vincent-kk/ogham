@@ -40,11 +40,30 @@ const REMOVED_SKILL_NAMES = [
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const skillsDir = join(packageRoot, 'skills');
 
-function shippedSkillNames(): string[] {
+/**
+ * A directory under `skills/` whose name starts with `_` is a shared
+ * compartment, not a skill — it ships no `SKILL.md` and is not user-invocable.
+ * Everything else counts against the twelve.
+ */
+const COMPARTMENT_PREFIX = '_';
+
+function skillsDirEntries(): string[] {
   return readdirSync(skillsDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
+}
+
+function shippedSkillNames(): string[] {
+  return skillsDirEntries().filter(
+    (name) => !name.startsWith(COMPARTMENT_PREFIX),
+  );
+}
+
+function compartmentNames(): string[] {
+  return skillsDirEntries().filter((name) =>
+    name.startsWith(COMPARTMENT_PREFIX),
+  );
 }
 
 describe('Filid 1.0 skill surface', () => {
@@ -73,5 +92,22 @@ describe('Filid 1.0 skill surface', () => {
     );
 
     expect(missing).toEqual([]);
+  });
+
+  it('keeps shared compartments out of the skill surface', () => {
+    const compartments = compartmentNames();
+
+    // A compartment holds shared material, never a user-invocable entry point.
+    for (const name of compartments)
+      expect(readdirSync(join(skillsDir, name))).not.toContain('SKILL.md');
+
+    // Guard bites: the filter must exclude by prefix, not by absence of
+    // SKILL.md — otherwise a real skill that lost its entry document would be
+    // silently reclassified as a compartment instead of failing the check above.
+    for (const name of compartments)
+      expect(name.startsWith(COMPARTMENT_PREFIX)).toBe(true);
+    expect(
+      shippedSkillNames().some((name) => compartments.includes(name)),
+    ).toBe(false);
   });
 });
