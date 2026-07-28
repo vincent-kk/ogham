@@ -39,7 +39,17 @@ const STATE: SettingsPageState = {
     warnings: [],
   },
   structureAdapterId: 'test-adapter',
-  ruleDocs: { entries: [], autoDeployed: [], pluginRootResolved: true },
+  ruleDocs: {
+    layers: {
+      user: { entries: [], autoDeployed: [], displayTarget: '/tmp/user/rules' },
+      project: {
+        entries: [],
+        autoDeployed: [],
+        displayTarget: '/tmp/project/.claude/rules',
+      },
+    },
+    pluginRootResolved: true,
+  },
 };
 
 // An opaque save payload for transport round-trip checks — `persistSave` is

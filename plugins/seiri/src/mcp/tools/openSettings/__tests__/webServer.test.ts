@@ -103,15 +103,20 @@ beforeEach(async () => {
       configExists: false,
       config: { intervention: 'advisory' },
       scope: {
-        paths: { user: '/tmp/user/config.json', project: '/tmp/project/config.json' },
+        paths: {
+          user: '/tmp/user/config.json',
+          project: '/tmp/project/config.json',
+        },
         layers: { user: null, project: null },
         overridden: [],
       },
       ruleDocs: {
-        entries: [],
         pluginRootResolved: true,
         scope: 'project',
-        displayTarget: null,
+        layers: {
+          user: { entries: [], displayTarget: null },
+          project: { entries: [], displayTarget: null },
+        },
       },
     }),
     planSave: (payload) =>

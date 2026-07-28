@@ -11,6 +11,19 @@ import type {
   RuleDocSyncResult,
 } from '../../../../types/manifest.js';
 
+/** One layer's rule-document snapshot, as that layer's channel reports it. */
+export interface RuleDocLayerState {
+  /** Per-rule status inspected against this layer's channel. */
+  entries: RuleDocStatus[];
+  /**
+   * Absolute channel path this layer writes into, or `null` when the runtime
+   * host has no rule channel. Resolved here rather than in the page: under a
+   * Codex host the channel is a section inside `AGENTS.md`, so a page joining
+   * a channel to a filename would render a path that does not exist.
+   */
+  displayTarget: string | null;
+}
+
 /** State injected into the settings page as `__SEIRI_STATE__`. */
 export interface SettingsPageState {
   projectRoot: string;
@@ -21,20 +34,19 @@ export interface SettingsPageState {
   /** Per-layer dials and which one is overriding, for the scope toggle. */
   scope: ConfigScopeSnapshot;
   ruleDocs: {
-    entries: RuleDocStatus[];
     pluginRootResolved: boolean;
     /**
-     * The layer `entries` were inspected against — the same toggle that
-     * decides where the dial is stored, because a rule set that follows one
-     * layer and a dial that follows another would need two decisions from
-     * the user for one question.
+     * The layer the page is showing — the same toggle that decides where the
+     * dial is stored, because a rule set that follows one layer and a dial
+     * that follows another would need two decisions for one question.
      */
     scope: SeiriConfigScope;
     /**
-     * Absolute channel path that layer writes into, or `null` when the
-     * runtime host has no rule channel at all.
+     * Both layers, so moving the toggle can redraw from state already in hand.
+     * A page holding only the active layer would keep showing the channel it
+     * just left until the next round trip.
      */
-    displayTarget: string | null;
+    layers: { user: RuleDocLayerState; project: RuleDocLayerState };
   };
 }
 

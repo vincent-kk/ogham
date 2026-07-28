@@ -57,6 +57,9 @@
         dirty = true;
         renderScope();
         applyScopeBadges();
+        // The toggle decides where rule documents deploy, so the rows that
+        // name the channel are stale the moment it moves.
+        renderRuleDocs();
       });
       var text = document.createElement('span');
       text.textContent = option[1];
@@ -212,27 +215,51 @@
     return li;
   }
 
-  (function renderRuleDocs() {
-    var docs = state.ruleDocs;
-    if (!docs.pluginRootResolved) {
+  // Both layers arrive up front so the toggle can redraw without a round trip.
+  // The server resolves each channel because on a Codex host it is an owned
+  // section of AGENTS.md rather than a directory — a path this page cannot
+  // assemble from a channel and a filename.
+  var EMPTY_LAYER = { entries: [], autoDeployed: [], displayTarget: null };
+  var ruleLayers = (state.ruleDocs && state.ruleDocs.layers) || {
+    user: EMPTY_LAYER,
+    project: EMPTY_LAYER,
+  };
+
+  /**
+   * Draw the rule documents for the layer the toggle currently names, and
+   * redraw on every change of it. Each layer carries its own deployment state
+   * and its own channel, so these are not the same rows with a different path.
+   */
+  function renderRuleDocs() {
+    if (!state.ruleDocs.pluginRootResolved) {
       $('rule-docs-unavailable').hidden = false;
       return;
     }
-    // No optional docs to select → the required doc auto-deploys server-side,
-    // so there is nothing to manage here. Hide the whole section.
-    if (!docs.entries || docs.entries.length === 0) {
-      $('rule-docs-section').hidden = true;
-      return;
-    }
+    var docs = ruleLayers[scope] || EMPTY_LAYER;
+    var required = docs.autoDeployed || [];
+    var optional = docs.entries || [];
+
+    var targets = document.querySelectorAll('[data-rules-target]');
+    for (var t = 0; t < targets.length; t++)
+      targets[t].textContent =
+        docs.displayTarget || 'the active host rule channel';
+    // Required documents belong on screen even when no checkbox does: the
+    // toggle decides which channel they deploy to, and these rows are the
+    // only place that answer appears.
+    $('rule-docs-section').hidden =
+      required.length === 0 && optional.length === 0;
+
     var requiredList = $('rule-docs-required');
     var optionalList = $('rule-docs-optional');
-    docs.autoDeployed.forEach(function (entry) {
+    requiredList.textContent = '';
+    optionalList.textContent = '';
+    required.forEach(function (entry) {
       requiredList.appendChild(docRow(entry, true));
     });
-    docs.entries.forEach(function (entry) {
+    optional.forEach(function (entry) {
       optionalList.appendChild(docRow(entry, false));
     });
-  })();
+  }
 
   // --- render: structural rules -------------------------------------------
   function ruleItem(id, override) {
@@ -565,6 +592,18 @@
             parts.push('updated ' + docs.updated.join(', '));
           if (docs.removed && docs.removed.length)
             parts.push('removed ' + docs.removed.join(', '));
+          // filid has no dry run, so a move between layers is reported after
+          // the fact rather than confirmed before it.
+          if (docs.otherScope && docs.otherScope.filenames.length)
+            parts.push(
+              'withdrew ' +
+                docs.otherScope.filenames.join(', ') +
+                ' from the ' +
+                docs.otherScope.scope +
+                ' layer (' +
+                docs.otherScope.displayTarget +
+                ')',
+            );
           var summary =
             'Saved' + (parts.length ? ' — ' + parts.join('; ') : '') + '.';
           busy(btn, false);
@@ -600,6 +639,7 @@
 
   renderScope();
   applyScopeBadges();
+  renderRuleDocs();
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();

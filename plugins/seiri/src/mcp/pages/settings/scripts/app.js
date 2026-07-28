@@ -40,7 +40,30 @@
     },
   ];
 
-  var entries = state.ruleDocs.entries || [];
+  // Which layer a save lands in. Opens on the layer that is currently
+  // deciding, so pressing Save without touching the toggle rewrites the file
+  // the dial already came from rather than silently creating a second one.
+  var scopeState = state.scope || {
+    paths: { user: '', project: '' },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var scope = scopeState.layers.project === null ? 'user' : 'project';
+
+  // Both layers arrive up front so moving the toggle can redraw without a
+  // round trip. The server resolves each channel, because on a Codex host it
+  // is a section inside AGENTS.md rather than a directory of files.
+  var EMPTY_LAYER = { entries: [], displayTarget: null };
+  var ruleLayers = state.ruleDocs.layers || {
+    user: EMPTY_LAYER,
+    project: EMPTY_LAYER,
+  };
+
+  function layerState() {
+    return ruleLayers[scope] || EMPTY_LAYER;
+  }
+
+  var entries = layerState().entries || [];
   var anyDeployed = entries.some(function (entry) {
     return entry.deployed;
   });
@@ -58,16 +81,6 @@
   var intervention =
     (state.config && state.config.intervention) || DIAL_STANDARD;
   var previewRevision = null;
-
-  // Which layer a save lands in. Opens on the layer that is currently
-  // deciding, so pressing Save without touching the toggle rewrites the file
-  // the dial already came from rather than silently creating a second one.
-  var scopeState = state.scope || {
-    paths: { user: '', project: '' },
-    layers: { user: null, project: null },
-    overridden: [],
-  };
-  var scope = scopeState.layers.project === null ? 'user' : 'project';
 
   var elements = {
     root: document.getElementById('project-root'),
@@ -247,6 +260,7 @@
       radio.checked = option[0] === scope;
       radio.addEventListener('change', function () {
         scope = option[0];
+        useLayer();
         applyScopeBadges();
         renderScope();
       });
@@ -305,41 +319,32 @@
     });
   }
 
+  /**
+   * Name the channel the selected layer writes into. The server resolves it,
+   * so this stays true on a host whose channel is a section in a file rather
+   * than a directory of them.
+   */
   function renderRuleTargets() {
-    var targets = entries
-      .map(function (entry) {
-        return entry.activeDisplayTarget;
-      })
-      .filter(function (target, index, all) {
-        return target && all.indexOf(target) === index;
-      });
-    var label =
-      targets.length === 1
-        ? targets[0]
-        : (function () {
-            var first = targets[0] || '';
-            var slash = Math.max(
-              first.lastIndexOf('/'),
-              first.lastIndexOf('\\'),
-            );
-            var directory = first.slice(0, slash + 1);
-            var sharesDirectory =
-              directory &&
-              targets.every(function (target) {
-                var remainder = target.slice(directory.length);
-                return (
-                  target.indexOf(directory) === 0 &&
-                  remainder.indexOf('/') === -1 &&
-                  remainder.indexOf('\\') === -1
-                );
-              });
-            return sharesDirectory
-              ? directory
-              : targets.join(', ') || 'the active host rule channel';
-          })();
+    var layer = layerState();
+    var label = layer.displayTarget || 'the active host rule channel';
     elements.ruleTargets.forEach(function (node) {
       node.textContent = label;
     });
+  }
+
+  /**
+   * Point the page at the layer the toggle now names. The rule list, the
+   * channel label and the diff all answer "where do these rules go", so
+   * leaving any of them behind shows one layer's answer under the other's
+   * name. Only the preview needs the server — that judgment is not the
+   * page's to make.
+   */
+  function useLayer() {
+    entries = layerState().entries || [];
+    renderRules();
+    renderRuleTargets();
+    previewRevision = null;
+    refreshPreview();
   }
 
   var MARKS = {

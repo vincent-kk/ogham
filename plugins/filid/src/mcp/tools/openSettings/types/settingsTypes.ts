@@ -9,6 +9,18 @@ import {
   type RuleDocSyncResult,
 } from '../../../../core/infra/configLoader/index.js';
 
+/** One layer's rule document deployment, as the page renders it. */
+export interface RuleDocsLayerSnapshot {
+  entries: RuleDocStatusEntry[];
+  autoDeployed: RuleDocStatusEntry[];
+  /**
+   * Absolute path to this layer's channel, or `null` on a host with none.
+   * Each entry's own `displayTarget` is relative to this root, which the page
+   * has no other way to name — `rules/x.md` alone reads as a project path.
+   */
+  displayTarget: string | null;
+}
+
 /** State injected into the settings page as `__FILID_STATE__`. */
 export interface SettingsPageState {
   projectRoot: string;
@@ -18,9 +30,18 @@ export interface SettingsPageState {
   /** Per-layer raw documents and which dot paths the project layer overrode. */
   scope: ConfigScopeState;
   structureAdapterId: string;
+  /**
+   * Both layers, because the page has no server round-trip between opening and
+   * saving — the scope toggle switches which snapshot it renders. Resolving
+   * the channel on the page instead is not an option: on Codex the channel is
+   * an owned section of `AGENTS.md`, not a directory, so channel + filename
+   * would be a path that does not exist.
+   */
   ruleDocs: {
-    entries: RuleDocStatusEntry[];
-    autoDeployed: RuleDocStatusEntry[];
+    layers: {
+      user: RuleDocsLayerSnapshot;
+      project: RuleDocsLayerSnapshot;
+    };
     pluginRootResolved: boolean;
   };
 }

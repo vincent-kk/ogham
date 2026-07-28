@@ -12,6 +12,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { getRuleDocsStatus } from '../../../core/infra/configLoader/loaders/getRuleDocsStatus.js';
 import { resolveFilidRuleTarget } from '../../../core/infra/configLoader/loaders/resolveFilidRuleTarget.js';
 import { syncRuleDocs } from '../../../core/infra/configLoader/loaders/syncRuleDocs.js';
 
@@ -140,5 +141,27 @@ describe('rule document scope', () => {
     expect(existsSync(join(projectRulesDir(), REQUIRED_FILE))).toBe(true);
     expect(existsSync(join(userRulesDir(), REQUIRED_FILE))).toBe(true);
     expect(result.otherScope).toBeUndefined();
+  });
+
+  it('reports the status of the layer it is asked about', () => {
+    syncRuleDocs(projectRoot, [], { pluginRoot, scope: 'user' });
+
+    const user = getRuleDocsStatus(projectRoot, pluginRoot, 'user');
+    const project = getRuleDocsStatus(projectRoot, pluginRoot, 'project');
+
+    expect(user.autoDeployed[0]?.deployed).toBe(true);
+    expect(user.autoDeployed[0]?.target).toBe(
+      join(userRulesDir(), REQUIRED_FILE),
+    );
+    expect(project.autoDeployed[0]?.deployed).toBe(false);
+    expect(project.autoDeployed[0]?.target).toBe(
+      join(projectRulesDir(), REQUIRED_FILE),
+    );
+  });
+
+  it('reads the project layer when no scope is named', () => {
+    expect(getRuleDocsStatus(projectRoot, pluginRoot)).toStrictEqual(
+      getRuleDocsStatus(projectRoot, pluginRoot, 'project'),
+    );
   });
 });

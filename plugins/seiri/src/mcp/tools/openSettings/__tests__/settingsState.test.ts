@@ -6,17 +6,21 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { loadManifest } from '../../../../core/ruleDocs/loaders/loadManifest.js';
+import { applyRuleDocs } from '../../../../core/ruleDocs/sync/applyRuleDocs.js';
 import { buildSettingsState } from '../utils/buildSettingsState.js';
 
 const pluginRoot = fileURLToPath(new URL('../../../../../', import.meta.url));
+const anchor = loadManifest(pluginRoot).rules[0];
 const userRulesDir = join(process.env.CLAUDE_CONFIG_DIR ?? '', 'rules');
 
 /**
- * The layer the settings page opens on, and the rule channel that layer
- * writes into.
+ * The layer the settings page opens on, and what it knows about the layer it
+ * did not open on.
  *
  * One toggle governs both the dial's file and the rule channel, so the state
- * has to name a single layer rather than one per axis.
+ * names a single active layer — and carries both, because flipping the toggle
+ * must not leave the page showing the channel it just left.
  */
 describe('settings state layer', () => {
   const tempDirs: string[] = [];
@@ -42,15 +46,12 @@ describe('settings state layer', () => {
     return repoRoot;
   }
 
-  it('opens on the project layer and names its rule channel', () => {
+  it('opens on the project layer when the project stores a dial', () => {
     const repoRoot = seedRepo('advisory');
 
     const state = buildSettingsState(repoRoot, pluginRoot);
 
     expect(state.ruleDocs.scope).toBe('project');
-    expect(state.ruleDocs.displayTarget).toBe(
-      join(repoRoot, '.claude', 'rules'),
-    );
   });
 
   it('opens on the user layer when the project stores no dial', () => {
@@ -60,16 +61,34 @@ describe('settings state layer', () => {
 
     expect(state.configExists).toBe(false);
     expect(state.ruleDocs.scope).toBe('user');
-    expect(state.ruleDocs.displayTarget).toBe(userRulesDir);
   });
 
-  it('snapshots rule deployment at the layer it opened on', () => {
-    const repoRoot = seedRepo(null);
-    mkdirSync(userRulesDir, { recursive: true });
+  it('names each layer its own channel, not the active one twice', () => {
+    const repoRoot = seedRepo('advisory');
 
     const state = buildSettingsState(repoRoot, pluginRoot);
 
-    for (const entry of state.ruleDocs.entries)
+    expect(state.ruleDocs.layers.project.displayTarget).toBe(
+      join(repoRoot, '.claude', 'rules'),
+    );
+    expect(state.ruleDocs.layers.user.displayTarget).toBe(userRulesDir);
+  });
+
+  it('snapshots both layers so the toggle needs no round trip', () => {
+    const repoRoot = seedRepo('advisory');
+    applyRuleDocs(repoRoot, pluginRoot, [anchor.id], { scope: 'user' });
+
+    const state = buildSettingsState(repoRoot, pluginRoot);
+    const deployedAt = (scope: 'user' | 'project'): boolean =>
+      state.ruleDocs.layers[scope].entries.find(
+        (entry) => entry.id === anchor.id,
+      )?.deployed === true;
+
+    // Opened on project, yet the user layer's deployment is already known.
+    expect(state.ruleDocs.scope).toBe('project');
+    expect(deployedAt('user')).toBe(true);
+    expect(deployedAt('project')).toBe(false);
+    for (const entry of state.ruleDocs.layers.user.entries)
       expect(entry.target.startsWith(userRulesDir)).toBe(true);
   });
 });

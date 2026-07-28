@@ -36,7 +36,8 @@ interface FilidConfigV2 {
 - `createDefaultConfig(language?, adapterIds?)` — 15개 built-in rule을 roster 기본 severity 그대로 실은 v2 config를 auto adapter mode로 만든다. severity 정본은 `constants/builtinRuleSeverities`이며 이 함수는 그것을 옮겨 적을 뿐이다.
 - `initProject(projectRoot, options)` — 부재한 config만 생성하며 기존 파일을 덮어쓰지 않는다.
 - `syncRuleDocs(projectRoot, selection, options)` — `options.scope`가 정한 레이어의 managed rule channel을 동기화하고, 회수한 반대편 문서를 `result.otherScope`로 보고한다.
-- `getRuleDocsStatus(projectRoot, pluginRoot?)` — mutation 없이 project 레이어의 active host target 상태를 반환한다. 레이어 인자를 아직 받지 않으므로 `user`로 저장한 뒤의 상태 조회는 project 채널을 본다.
+- `getRuleDocsStatus(projectRoot, pluginRoot?, scope?)` — mutation 없이 지정한 레이어의 active host target 상태를 반환한다. 기본값은 `project`.
+- `getRuleDocsChannel(projectRoot, scope?)` — 그 레이어가 쓰는 채널의 절대 경로. 항목별 `displayTarget`은 레이어 루트 기준 상대 경로라 `rules/x.md`만으로는 어느 루트인지 말하지 못한다.
 - `loadRuleDocsManifest(pluginRoot)` / `resolvePluginRoot(pluginRoot?)` — canonical manifest와 설치 root를 해석한다.
 
 ## Acceptance Criteria
@@ -69,6 +70,7 @@ interface FilidConfigV2 {
 - 레이어를 바꿔 저장하면 문서는 새 레이어에만 남고, 회수한 파일명이 `result.otherScope`에 실린다. 회수할 것이 없으면 필드 자체가 없다.
 - 반대편 회수는 `filid_` 소유 주소만 건드린다. 같은 디렉터리의 다른 owner 문서는 살아남는다.
 - 레이어를 명시하지 않은 sync 뒤에도 반대편 레이어의 문서는 그대로다.
+- 상태 조회는 레이어별로 갈린다. `user`에 배포한 뒤 `user` 조회는 배포됨, `project` 조회는 미배포를 보고한다.
 
 ## Boundary Exemptions
 
@@ -80,8 +82,9 @@ interface FilidConfigV2 {
 
 ## History
 
+- 2026-07-29 — rule 문서 배포 레이어를 config 레이어와 같은 축으로 묶었다. 설정 페이지 토글이 이미 결정하는 값을 그대로 흘려보내면 사용자가 같은 질문에 두 번 답하지 않는다.
 - 2026-07-28 — `createDefaultConfig`가 자체 severity 집합을 버리고 rule roster와 같은 `constants/builtinRuleSeverities` 정본을 읽는다.
 
 ## Last Updated
 
-2026-07-29 — rule 문서 배포 레이어를 config 레이어와 같은 축으로 묶었다. 설정 페이지 토글이 이미 결정하는 값을 그대로 흘려보내면 사용자가 같은 질문에 두 번 답하지 않는다.
+2026-07-29 — 상태 조회도 레이어를 받는다. 배포는 레이어를 따르는데 조회가 한 채널만 보면, 토글이 정한 답을 화면이 틀리게 말한다.

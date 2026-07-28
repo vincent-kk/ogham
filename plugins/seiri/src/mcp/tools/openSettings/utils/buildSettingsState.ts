@@ -8,16 +8,24 @@ import {
   getRuleDocsStatus,
 } from '../../../../core/ruleDocs/index.js';
 import type { SeiriConfigScope } from '../../../../types/config.js';
-import type { SettingsPageState } from '../types/settingsTypes.js';
+import type {
+  RuleDocLayerState,
+  SettingsPageState,
+} from '../types/settingsTypes.js';
 
 /**
  * Assemble the state the settings page renders from: both stored dial
  * layers, the dial they resolve to, and a filesystem snapshot of every
- * rule doc at the layer the page opens on.
+ * rule doc at each layer.
  *
  * `config` is the effective dial rather than one layer's, so the page opens
  * showing what is actually in force. `scope` is what lets the toggle say
  * which layer said so.
+ *
+ * Both layers are snapshotted, which costs a second pass over the rule
+ * channel: the toggle decides where rules are deployed, so it has to redraw
+ * the answer the moment it moves, and a page that had to ask the server first
+ * would show the layer it just left in the meantime.
  *
  * Checkboxes are pre-checked from `deployed`, not from stored preferences,
  * so deleting a rule file by hand is reflected the next time the page opens
@@ -47,10 +55,23 @@ export function buildSettingsState(
         : { intervention: dial.effective },
     scope,
     ruleDocs: {
-      entries: getRuleDocsStatus(projectRoot, pluginRoot, active),
       pluginRootResolved: true,
       scope: active,
-      displayTarget: getRuleDocsChannel(projectRoot, active),
+      layers: {
+        user: ruleDocLayer(projectRoot, pluginRoot, 'user'),
+        project: ruleDocLayer(projectRoot, pluginRoot, 'project'),
+      },
     },
+  };
+}
+
+function ruleDocLayer(
+  projectRoot: string,
+  pluginRoot: string,
+  scope: SeiriConfigScope,
+): RuleDocLayerState {
+  return {
+    entries: getRuleDocsStatus(projectRoot, pluginRoot, scope),
+    displayTarget: getRuleDocsChannel(projectRoot, scope),
   };
 }

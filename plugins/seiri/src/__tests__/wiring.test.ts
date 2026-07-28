@@ -100,13 +100,42 @@ describe('wiring', () => {
     expect(setupSkill).toContain('resync, revision');
   });
 
-  it('renders shared host targets without a hardcoded Claude label', () => {
+  it('takes host rule targets from the server rather than assembling them', () => {
     const page = read('src', 'mcp', 'pages', 'settings', 'index.html');
     const app = read('src', 'mcp', 'pages', 'settings', 'scripts', 'app.js');
+    const state = read(
+      'src',
+      'mcp',
+      'tools',
+      'openSettings',
+      'utils',
+      'buildSettingsState.ts',
+    );
     expect(page).toContain('data-rules-target');
+    // Both the per-rule line and the channel label arrive already resolved.
+    // On a Codex host the channel is a section inside AGENTS.md, so a page
+    // that joined a channel to a filename would print a path that is not one.
     expect(app).toContain('entry.displayTarget');
-    expect(app).toContain('entry.activeDisplayTarget');
+    expect(app).toContain('layer.displayTarget');
+    expect(state).toContain('getRuleDocsChannel');
     expect(`${page}\n${app}`).not.toContain('.claude/rules/');
+  });
+
+  it('re-reads the switched layer from state the server already shipped', () => {
+    const app = read('src', 'mcp', 'pages', 'settings', 'scripts', 'app.js');
+    expect(app).toContain('state.ruleDocs.layers');
+    // The toggle's own handler is the only thing that moves the layer, so the
+    // redraw has to hang off it rather than off page load.
+    expect(app).toContain('useLayer();');
+    // Flipping the toggle redraws the list, the channel label and the diff.
+    // Leaving any of the three behind shows one layer's answer under the
+    // other layer's name.
+    for (const call of [
+      'renderRules()',
+      'renderRuleTargets()',
+      'refreshPreview()',
+    ])
+      expect(app.slice(app.indexOf('function useLayer'))).toContain(call);
   });
 
   it('offers exactly the dial positions the config accepts', () => {

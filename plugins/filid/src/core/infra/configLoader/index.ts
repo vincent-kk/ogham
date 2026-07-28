@@ -36,6 +36,7 @@ export type {
   RuleDocsStatus,
   SyncRuleDocsOptions,
 } from './loaders/manifestTypes.js';
+export { getRuleDocsChannel } from './loaders/getRuleDocsChannel.js';
 export { getRuleDocsStatus } from './loaders/getRuleDocsStatus.js';
 export { loadRuleDocsManifest } from './loaders/loadRuleDocsManifest.js';
 export { syncRuleDocs } from './loaders/syncRuleDocs.js';

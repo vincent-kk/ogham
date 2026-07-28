@@ -9,6 +9,7 @@ import { FILID_ARTIFACT_OWNER } from '../../../../constants/ruleDocs.js';
 import type { RetiredScopeReport, RuleDocsManifest } from './manifestTypes.js';
 import { mapRuleSyncResult } from './mapRuleSyncResult.js';
 import { resolveFilidRuleTarget } from './resolveFilidRuleTarget.js';
+import { ruleChannelPath } from './ruleChannelPath.js';
 
 /**
  * Withdraw filid's rule documents from the layer that was not chosen, so a
@@ -52,10 +53,5 @@ export function retireOtherScopeRuleDocs(
   const filenames = mapRuleSyncResult(applied, manifest).removed;
   if (filenames.length === 0) return null;
 
-  return {
-    scope,
-    displayTarget:
-      target.kind === 'directory' ? target.directoryPath : target.effectivePath,
-    filenames,
-  };
+  return { scope, displayTarget: ruleChannelPath(target), filenames };
 }
