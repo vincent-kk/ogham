@@ -48,7 +48,7 @@ describe("config-loader", () => {
 
   it("writeConfig creates directory and writes valid JSON", () => {
     const config = createDefaultConfig("/tmp/vault", "my-vault");
-    writeConfig(testDir, config);
+    writeConfig(testDir, 'project', config);
     const loaded = loadConfig(testDir);
     expect(loaded).not.toBeNull();
     expect(loaded!.vaults[0].name).toBe("my-vault");
