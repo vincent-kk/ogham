@@ -356,6 +356,18 @@ code {
     box-shadow var(--transition);
 }
 
+/* Spinners fight the monospace field styling; min/max still bound values. */
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .field select {
   cursor: pointer;
   appearance: none;

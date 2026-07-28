@@ -164,6 +164,18 @@ body {
     box-shadow var(--t);
 }
 
+/* Spinners fight the field styling; min/max attributes still bound values. */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @keyframes focus-glow {
   from {
     box-shadow: 0 0 0 0 rgba(0, 82, 204, 0.3);
