@@ -1,38 +1,27 @@
 import type { ServerResponse } from "node:http";
 import type { RouteContext } from "../routing/routeContext.js";
-import { buildStatus } from "../utils/buildStatus.js";
-import { buildEditableSitesState } from "../utils/buildEditableSitesState.js";
+import { buildFormState } from "../utils/buildFormState.js";
 import { escapeJsonForHtml } from "@ogham/http-kit/html";
 
 export async function handleGetRoot(
   ctx: RouteContext,
   res: ServerResponse,
 ): Promise<void> {
-  const config = await ctx.loadConfig();
+  const configByScope = await ctx.loadConfigByScope();
   const credentials = await ctx.loadCredentials();
-  const status = buildStatus(config);
-
-  const jiraSites = config.jira ?? [];
-  const confSites = config.confluence ?? [];
-  const hasJira = jiraSites.length > 0;
-  const hasConf = confSites.length > 0;
-  const hasOnPremSite =
-    jiraSites.some((s) => !s.is_cloud) || confSites.some((s) => !s.is_cloud);
 
   const stateData = {
-    ...status,
-    ...(hasJira
-      ? { jira: buildEditableSitesState(jiraSites, credentials.jira) }
-      : {}),
-    ...(hasConf
-      ? {
-          confluence: buildEditableSitesState(
-            confSites,
-            credentials.confluence,
-          ),
-        }
-      : {}),
-    deployment_type: hasOnPremSite ? "onprem" : "cloud",
+    ...buildFormState(configByScope.project, credentials),
+    // Which layer the form writes. The page picks; `user` is the sensible
+    // default because a site and account belong to a person, not a checkout.
+    scope: ctx.loadConfigScope(),
+    // One prefill view per layer, so moving the toggle re-seats the form on
+    // the sites that layer actually names. The top-level fields above are
+    // `configByScope.project` under the names the page already reads.
+    configByScope: {
+      user: buildFormState(configByScope.user, credentials),
+      project: buildFormState(configByScope.project, credentials),
+    },
   };
 
   const html = ctx.settingsHtml.replace(

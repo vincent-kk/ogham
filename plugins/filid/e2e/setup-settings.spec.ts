@@ -9,7 +9,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { expect, test } from '@playwright/test';
+import { type Page, expect, test } from '@playwright/test';
 
 import { BUILTIN_RULE_IDS } from '../src/constants/builtinRuleIds.js';
 import type { FilidConfig } from '../src/core/infra/configLoader/loaders/configSchemas.js';
@@ -20,6 +20,10 @@ import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
 const PKG_ROOT = process.cwd();
 process.env.OGHAM_NO_BROWSER = '1';
 process.env.CLAUDE_PLUGIN_ROOT = PKG_ROOT;
+// The user layer is a real deployment channel now, so a save on that layer
+// writes rule files. Point the host state root at a tmp dir: without this the
+// suite would deploy into (and retire from) the developer's own ~/.claude.
+process.env.CLAUDE_CONFIG_DIR = mkdtempSync(join(tmpdir(), 'filid-e2e-state-'));
 
 const TEMPLATES = join(PKG_ROOT, 'templates', 'rules');
 
@@ -56,6 +60,20 @@ async function openSession(dir: string): Promise<string> {
 
 function longPoll(dir: string) {
   return handleOpenSettings({ path: dir, waitSeconds: 20 });
+}
+
+/**
+ * Point the page at the project layer before saving.
+ *
+ * A project with no config yet opens on the user layer — that is the layer
+ * currently deciding. Assertions that read `<projectDir>/.filid/config.json`
+ * have to say so rather than inherit whichever layer the toggle defaulted to.
+ */
+async function selectProjectLayer(page: Page): Promise<void> {
+  // The radio itself is clipped from view; its label is the click target.
+  await page
+    .locator('#config_scope label.scope-option', { hasText: 'Project' })
+    .click();
 }
 
 function readConfig(dir: string): FilidConfig {
@@ -104,18 +122,42 @@ test('serves the built page with injected state and rejects a missing token', as
   await expect(page.locator('#rules-list .ruleitem')).toHaveCount(
     Object.values(BUILTIN_RULE_IDS).length,
   );
-  // Rule-doc management renders only when there are optional docs to select;
-  // a required-only catalog hides the whole section (nothing to manage).
-  if (OPTIONAL_RULES.length === 0)
-    await expect(page.locator('#rule-docs-section')).toBeHidden();
-  else {
-    await expect(page.locator('#rule-docs-required .docrow')).toHaveCount(
-      MANIFEST.rules.filter((r) => r.required).length,
-    );
-    await expect(page.locator('#rule-docs-optional .docrow')).toHaveCount(
-      OPTIONAL_RULES.length,
-    );
-  }
+  // Required documents render even with no checkbox to offer: the scope toggle
+  // decides which channel they deploy to, and these rows carry that answer.
+  await expect(page.locator('#rule-docs-section')).toBeVisible();
+  await expect(page.locator('#rule-docs-required .docrow')).toHaveCount(
+    MANIFEST.rules.filter((r) => r.required).length,
+  );
+  await expect(page.locator('#rule-docs-optional .docrow')).toHaveCount(
+    OPTIONAL_RULES.length,
+  );
+});
+
+test('the scope toggle redraws the rule channel it deploys to', async ({
+  page,
+}) => {
+  const url = await openSession(projectDir);
+  await page.goto(url);
+
+  const channel = page.locator('[data-rules-target]').first();
+  const firstRow = page.locator('#rule-docs-required .docrow code').first();
+  // The radio itself is clipped from view; its label is the click target.
+  const layer = (name: string) =>
+    page.locator('#config_scope label.scope-option', { hasText: name });
+
+  await layer('Project').click();
+  await expect(channel).toHaveText(join(projectDir, '.claude', 'rules'));
+  await expect(firstRow).toHaveText(
+    join('.claude', 'rules', REQUIRED_RULE.filename),
+  );
+
+  // The user layer is a different channel entirely — not the same path with a
+  // different prefix, which is why the page never assembles it itself.
+  await layer('User').click();
+  await expect(channel).toHaveText(
+    join(process.env.CLAUDE_CONFIG_DIR ?? '', 'rules'),
+  );
+  await expect(firstRow).toHaveText(join('rules', REQUIRED_RULE.filename));
 });
 
 test('full save round-trip persists every edited config field to disk', async ({
@@ -125,6 +167,7 @@ test('full save round-trip persists every edited config field to disk', async ({
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
+  await selectProjectLayer(page);
   await page.locator('#rule-module-entry-point-enabled').uncheck();
   await page
     .locator('[data-rule-severity="max-depth"]')
@@ -177,6 +220,7 @@ test('plain Save settles the long-poll (window stays open)', async ({
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
+  await selectProjectLayer(page);
   await page.locator('#max-depth').fill('7');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.locator('#status')).toContainText('Saved');
@@ -283,6 +327,7 @@ test('client validation blocks the save and recovers after the fix', async ({
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
+  await selectProjectLayer(page);
   await page.getByText('Structure exceptions').click();
   await page.locator('#additional-allowed').fill('{not valid json');
   await page.getByRole('button', { name: 'Save & Close' }).click();

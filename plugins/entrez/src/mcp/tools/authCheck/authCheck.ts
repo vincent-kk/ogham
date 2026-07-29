@@ -1,3 +1,5 @@
+import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+
 import { EutilFn, RetMode } from "../../../types/enums.js";
 import type { HttpDeps } from "../../../types/http.js";
 import type { AuthCheckInput, AuthCheckOutput } from "../../../types/tool.js";
@@ -12,7 +14,8 @@ import { extractHost } from "../../../utils/url.js";
 import { NCBI_SERVICE_HOST } from "../../../constants/defaults.js";
 
 export interface AuthCheckOptions {
-  configPath?: string;
+  /** Override both config layer paths. Tests use it to stay off the real home. */
+  configLayers?: ConfigLayerPaths;
   credentialsPath?: string;
   fetchImpl?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
@@ -39,7 +42,7 @@ export async function runAuthCheck(
   input: AuthCheckInput = {},
   options: AuthCheckOptions = {},
 ): Promise<AuthCheckOutput> {
-  const config = await loadConfig(options.configPath);
+  const config = await loadConfig(options.configLayers);
   const credentials = await loadCredentials(options.credentialsPath);
 
   const configured = config !== null;

@@ -1507,13 +1507,138 @@
     return path + '?token=' + encodeURIComponent(token);
   }
 
+  // --- config scope (user / project) ---------------------------------------
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". This page is minified
+  // but never bundled, so it cannot import the shared merge helpers — it uses
+  // the per-layer state the server already computed.
+  var scopeState = {
+    paths: { user: '', project: null },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var scope = 'user';
+  // One normalized document per layer, so moving the toggle re-seats the form
+  // without a round trip. The server normalizes both — this page knows neither
+  // the schema nor the defaults, and a merge assembled here would put a value
+  // on screen that nothing obeys.
+  var configByScope = null;
+
+  /**
+   * The document the chosen layer prefills from.
+   *
+   * @returns {object|null} The view for the current scope, or null when the
+   *   server sent no per-layer views — the `/config` fallback path.
+   */
+  function viewForScope() {
+    if (configByScope === null) return null;
+    return configByScope[scope] || null;
+  }
+
+  /** Re-seat the whole form on the layer the toggle now names. */
+  function applyScopeConfig() {
+    var view = viewForScope();
+    if (view !== null) applyConfig(view);
+  }
+
+  function adoptScopeState(next) {
+    if (!next || typeof next !== 'object') return;
+    scopeState = next;
+    // Open on the layer that is currently deciding, so pressing Save without
+    // touching the toggle rewrites the file the config already came from.
+    scope = scopeState.layers && scopeState.layers.project ? 'project' : 'user';
+    renderScope();
+  }
+
+  function renderScope() {
+    var host = document.getElementById('config_scope');
+    if (!host) return;
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
+    host.textContent = '';
+    [
+      ['user', 'User', 'Applies to every project you open.'],
+      ['project', 'Project', 'Overrides User for this project only.'],
+    ].forEach(function (option) {
+      var label = document.createElement('label');
+      label.className = 'scope-option';
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.disabled = option[0] === 'project' && !scopeState.paths.project;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        applyScopeConfig();
+        renderScope();
+      });
+      var text = document.createElement('span');
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+      if (option[0] === scope) renderScopeHint(option[2]);
+    });
+    if (!hadFocus) return;
+    var focused = host.querySelector('input:checked');
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the lede: what the chosen layer means on the left,
+   * the file it writes on the right. Two nodes rather than one string, so the
+   * path can sit at the header's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = document.getElementById('scope_hint');
+    if (!hint) return;
+    hint.textContent = '';
+    var unavailable = scope === 'project' && !scopeState.paths.project;
+    hint.appendChild(
+      scopeHintPart(
+        'scope-hint__meaning',
+        unavailable
+          ? 'No project root is available, so only User can be edited.'
+          : meaning,
+      ),
+    );
+    if (unavailable) return;
+    hint.appendChild(
+      scopeHintPart('scope-hint__path', scopeState.paths[scope] || ''),
+    );
+  }
+
+  /**
+   * Builds one half of the hint line.
+   *
+   * @param {string} className Which half this is — meaning or path.
+   * @param {string} text User-visible content, inserted as text never markup.
+   * @returns {HTMLSpanElement} The span, not yet attached to the document.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement('span');
+    part.className = className;
+    part.textContent = text;
+    return part;
+  }
+
   function tryInlineState() {
     var raw = window.__CENNAD_STATE__;
-    if (raw && typeof raw === 'object' && raw.ratio) {
-      applyConfig(raw);
-      return true;
-    }
-    return false;
+    if (!raw || typeof raw !== 'object') return false;
+    if (raw.configByScope) configByScope = raw.configByScope;
+    // Adopting the state picks the layer, so the view to seat is settled by
+    // the time the form is filled.
+    if (raw.scope) adoptScopeState(raw.scope);
+    var config =
+      viewForScope() || (raw.config && raw.config.ratio ? raw.config : null);
+    if (config === null) return false;
+    applyConfig(config);
+    return true;
   }
 
   async function fetchProviderStatus() {
@@ -1552,8 +1677,12 @@
     try {
       var res = await fetch(withToken('/config'));
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      var cfg = await res.json();
-      applyConfig(cfg);
+      var body = await res.json();
+      adoptScopeState(body.state);
+      // Reached only when the inline slot was missing. `/config` carries the
+      // raw merge and no per-layer views, so the toggle cannot re-seat the
+      // form on this path — it stays on what is in effect.
+      applyConfig(body.state.effective);
       setStatus('', '');
     } catch (err) {
       setStatus('error', 'Failed to load config: ' + err.message);
@@ -1576,13 +1705,14 @@
       var res = await fetch(withToken('/save'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cfg),
+        body: JSON.stringify({ scope: scope, config: cfg }),
       });
       var body = await res.json();
       if (!res.ok || body.success === false) {
         setStatus('error', body.message || 'Save failed', body.errors);
         return;
       }
+      adoptScopeState(body.state);
       setStatus('success', 'Saved.');
       if (closeAfter) {
         try {

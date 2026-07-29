@@ -1,5 +1,6 @@
 export {
   loadConfig,
+  loadConfigScope,
   writeConfig,
   createDefaultConfig,
 } from "./configLoader/index.js";

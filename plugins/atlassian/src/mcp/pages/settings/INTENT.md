@@ -19,6 +19,7 @@ Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음. 로컬 H
 - JS-HTML 바인딩은 id 대신 data-field 속성 사용
 - 서버 발급 토큰을 `location.search` 에서 읽어 `/submit` 요청에 `?token=` 부착
 - 각 파일 500라인 미만 유지
+- `#config_scope` 라디오(user/project)가 편집 대상 계층을 정한다 — 폼은 `configByScope[scope]` 로 다시 앉고 저장은 그 계층만 덮어쓴다. 현재 결정 중인 계층으로 열리며(`scope.layers.project` 부재 시 user), project 파일이 없으면 해당 옵션은 disabled
 
 ## Boundaries
 

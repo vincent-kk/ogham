@@ -14,13 +14,20 @@
       <header class="masthead">
         <div class="brand">
           <span class="brand-name">filid</span>
-          <span class="brand-tag">/ settings</span>
+          <span class="brand-tag">/ settings /</span>
+          <div
+            id="config_scope"
+            class="scope-crumb"
+            role="radiogroup"
+            aria-label="Which layer to save the config in"
+          ></div>
         </div>
         <p class="lede">
           FCA-AI architecture settings for
           <code id="project-chip" title="Project root"></code> — structural
           rules, rule documents, and scan behavior.
         </p>
+        <p id="scope_hint" class="scope-hint"></p>
       </header>
 
       <div id="init-note" class="note" hidden>
@@ -36,9 +43,11 @@
         >
           <h2 class="section-title" id="rule-docs-title">Rule documents</h2>
           <p class="section-help">
-            Guideline documents are deployed to the active host target shown on
-            each item. Checked items stay applied; unchecked items are removed
-            on save. Required documents are always deployed and kept up to date.
+            Guideline documents are deployed to
+            <code data-rules-target>the active host rule channel</code>, chosen
+            by the layer above — switching it moves these documents when you
+            save. Checked items stay applied; unchecked items are removed on
+            save. Required documents are always deployed and kept up to date.
           </p>
           <div id="rule-docs-unavailable" class="warning-inline" hidden>
             Plugin root could not be resolved — rule document management is
@@ -58,7 +67,11 @@
           </div>
         </section>
 
-        <section class="section" aria-labelledby="rules-title">
+        <section
+          class="section"
+          aria-labelledby="rules-title"
+          data-config-path="rules"
+        >
           <h2 class="section-title" id="rules-title">Structural rules</h2>
           <p class="section-help">
             Per-rule enforcement for <code>/filid:scan</code> and session hooks.
@@ -68,9 +81,14 @@
             <span>rule</span><span>enabled</span><span>severity</span>
           </div>
           <ul id="rules-list" class="rulelist"></ul>
+          <span class="scope-badge"></span>
         </section>
 
-        <section class="section" aria-labelledby="general-title">
+        <section
+          class="section"
+          aria-labelledby="general-title"
+          data-config-path="language"
+        >
           <h2 class="section-title" id="general-title">General</h2>
           <div class="field-grid">
             <label class="field" for="language">
@@ -116,9 +134,13 @@
               <small class="error" data-error-for="max-depth" hidden></small>
             </label>
           </div>
+          <span class="scope-badge"></span>
         </section>
 
-        <details class="section section--collapsible">
+        <details
+          class="section section--collapsible"
+          data-config-path="structure"
+        >
           <summary class="section-summary">
             <span class="section-summary__label">
               <span class="section-title">Structure exceptions</span>
@@ -185,6 +207,7 @@
               compartments.
             </small>
           </label>
+          <span class="scope-badge"></span>
         </details>
 
         <div class="actions">

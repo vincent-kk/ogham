@@ -1134,3 +1134,82 @@ input[type='range']:focus-visible {
   outline: none;
   border-color: var(--border-hi);
 }
+
+/* Scope crumb — the masthead's third breadcrumb names the layer being edited.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". cennad's config is
+   edited as a whole document per layer, so there is no per-field badge here —
+   the crumb names the layer, and the hint under the lede shows its path.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
+
+.scope-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.scope-option {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--fg-muted);
+  /* Vertical padding lifts the pointer target to 44px; the negative margin
+     cancels it so the crumb still sits on the brand baseline. */
+  padding: 11px 4px;
+  margin: -11px 0;
+  transition: color var(--transition);
+}
+
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color var(--transition);
+}
+
+.scope-option:hover {
+  color: var(--fg);
+}
+
+.scope-option input:checked + span {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* The label carries the pointer, so not-allowed goes on the span the disabled
+   input actually covers — reaching the label would need :has(). */
+.scope-option input:disabled + span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Two lines rather than a row: an absolute path is long enough that setting it
+   beside the sentence wraps it anyway, and a wrapped right-aligned path reads
+   worse than a plain second line. */
+.scope-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--fg-faint);
+}
+
+.scope-hint__path {
+  word-break: break-all;
+}

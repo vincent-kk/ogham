@@ -47,6 +47,18 @@
       "types": "./dist/paths/state/pluginCache.d.ts",
       "import": "./dist/paths/state/pluginCache.js"
     },
+    "./config-scope": {
+      "types": "./dist/configScope/index.d.ts",
+      "import": "./dist/configScope/index.js"
+    },
+    "./config-scope/merge": {
+      "types": "./dist/configScope/merge/index.d.ts",
+      "import": "./dist/configScope/merge/index.js"
+    },
+    "./config-scope/layers": {
+      "types": "./dist/configScope/layers/index.d.ts",
+      "import": "./dist/configScope/layers/index.js"
+    },
     "./filesystem": {
       "types": "./dist/filesystem/index.d.ts",
       "import": "./dist/filesystem/index.js"

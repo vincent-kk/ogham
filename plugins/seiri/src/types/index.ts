@@ -5,11 +5,13 @@ export type {
   InterventionWarning,
   LoadConfigResult,
   SeiriConfig,
+  SeiriConfigScope,
 } from './config.js';
 export type {
   RuleDocAction,
   RuleDocEntry,
   RuleDocOutcome,
+  RuleDocScopeReport,
   RuleDocStatus,
   RuleDocSyncResult,
   RuleDocsManifest,

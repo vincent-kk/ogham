@@ -7,6 +7,13 @@ import {
 export const FILID_SECTION_NAMESPACE = 'FILID';
 
 /**
+ * Owner handed to the shared rule manager. It decides which addresses filid
+ * may write or retire, so every manager filid builds — for either config
+ * layer — must name the same one.
+ */
+export const FILID_ARTIFACT_OWNER = 'filid';
+
+/**
  * The rule document the hook reports the project's status from.
  *
  * All four rule documents are required and deploy in one sync, so the presence of

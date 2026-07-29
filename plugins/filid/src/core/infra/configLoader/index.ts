@@ -19,6 +19,11 @@ export type {
 export { createDefaultConfig } from './loaders/createDefaultConfig.js';
 export { initProject } from './loaders/initProject.js';
 export { loadConfig } from './loaders/loadConfig.js';
+export {
+  type ConfigByScope,
+  loadConfigByScope,
+} from './loaders/loadConfigByScope.js';
+export { loadConfigScope } from './loaders/loadConfigScope.js';
 export { migrateConfigV1 } from './loaders/migrateConfigV1.js';
 export { loadRuleOverrides } from './loaders/loadRuleOverrides.js';
 export { resolveLanguage } from './loaders/resolveLanguage.js';
@@ -27,6 +32,7 @@ export { validateConfigPatch } from './loaders/validateConfigPatch.js';
 export { writeConfig } from './loaders/writeConfig.js';
 
 export type {
+  RetiredScopeReport,
   RuleDocEntry,
   RuleDocStatusEntry,
   RuleDocSyncResult,
@@ -34,6 +40,7 @@ export type {
   RuleDocsStatus,
   SyncRuleDocsOptions,
 } from './loaders/manifestTypes.js';
+export { getRuleDocsChannel } from './loaders/getRuleDocsChannel.js';
 export { getRuleDocsStatus } from './loaders/getRuleDocsStatus.js';
 export { loadRuleDocsManifest } from './loaders/loadRuleDocsManifest.js';
 export { syncRuleDocs } from './loaders/syncRuleDocs.js';

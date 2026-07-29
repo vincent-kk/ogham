@@ -272,11 +272,17 @@ export function createServer(): McpServer {
   server.registerTool(
     McpToolName.CONFIG_SET,
     {
-      description: 'Update config.json fields',
+      description:
+        'Update config fields in one layer. scope "project" writes <cwd>/.imbas/config.json (per-workspace, overrides user); scope "user" writes the global config that every workspace inherits.',
       inputSchema: z.object({
         // Config values are heterogeneous (string, number, object) — z.unknown()
         // allows any JSON value. Handler validates via dot-path resolution.
         updates: z.record(z.string(), z.unknown()),
+        scope: z
+          .enum(['user', 'project'])
+          .describe(
+            'Which config layer to write. Required: both are valid targets.',
+          ),
         project_root: projectRootInput,
       }),
       annotations: {

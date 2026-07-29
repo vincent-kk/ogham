@@ -5,7 +5,21 @@ import { startSetupServer } from "../webServer/webServer.js";
 const mockContext = {
   settingsHtml: "<html>__SETTINGS_STATE__</html>",
   loadConfig: vi.fn().mockResolvedValue({}),
-  saveConfig: vi.fn().mockResolvedValue(undefined),
+  loadConfigByScope: vi.fn().mockResolvedValue({ user: {}, project: {} }),
+  loadConfigScope: vi.fn().mockReturnValue({
+    paths: { user: "/tmp/user/config.json", project: null },
+    layers: { user: null, project: null },
+    effective: {},
+    overridden: [],
+    warnings: [],
+  }),
+  saveConfig: vi.fn().mockResolvedValue({
+    paths: { user: "/tmp/user/config.json", project: null },
+    layers: { user: null, project: null },
+    effective: {},
+    overridden: [],
+    warnings: [],
+  }),
   loadCredentials: vi.fn().mockResolvedValue({}),
   saveCredentials: vi.fn().mockResolvedValue(undefined),
   testConnection: vi

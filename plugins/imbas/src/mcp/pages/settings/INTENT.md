@@ -15,6 +15,7 @@
 - 디자인은 cennad `pages/settings` 를 따른다 — `shell/masthead/section` 골격, 헤어라인 섹션 구분, 전면 모노스페이스, 흰색 primary 버튼, 하단 actions + aria-live status
 - provider 선택은 패널 안 provider row 라디오(아이콘 + 설명 + 가용성 상태 — cennad Providers 행 문법); 선택에 따라 project 필드와 provider별 고급 `<details>` 섹션이 전환
 - 고급/부가 설정(Defaults, Jira advanced, GitHub advanced)은 접이식 `<details>` 로 구성
+- `#config_scope` 라디오(user/project)가 편집 대상 계층을 정한다 — 폼은 `configByScope[scope]` 로 다시 앉고 `/save` 는 `scope` 를 실어 그 계층만 덮어쓴다. 현재 결정 중인 계층으로 열리며(`scope.layers.project` 부재 시 user), project 파일이 없으면 해당 옵션은 disabled. `#scope_hint` 가 선택된 계층의 적용 범위를 설명
 - 미노출 값(`version`, `defaults.codebase`, 비활성 provider 섹션)은 주입 상태를 그대로 보존해 재전송
 - GitHub 라벨 프로비저닝 의사는 `options.provision_labels` 체크박스로 저장 페이로드에 동승 (config 아님)
 - 서버 발급 토큰을 `location.search` 에서 읽어 모든 POST 에 `?token=` 부착

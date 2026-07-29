@@ -13,6 +13,7 @@
 ## Conventions
 
 - 외부 CDN·이미지 의존 금지 (빌드 시 단일 HTML); token 은 URL 쿼리 `?token=<...>` 에서 읽어 동일 origin XHR 에 재전달; POST body 는 항상 `Content-Type: application/json`; CSS 변수로 다크 모드 토큰화
+- `#config_scope` 라디오(user/project)가 편집 대상 계층을 정한다 — 폼은 `/config` 가 준 `configByScope[scope]` 로 다시 앉고 `/save` 는 `scope` 를 실어 그 계층만 덮어쓴다. 현재 결정 중인 계층으로 열리며, project 파일이 없으면 해당 옵션은 disabled
 - tier 는 `apex`/`high`/`mid`/`low` 4종이며 provider 마다 4행 모두 노출 — apex 도 다른 tier 와 동등하게 임의 model/effort 를 매핑할 수 있다 (기본값만 최상위)
 - "CLI liveness limits" 섹션: 기본값으로 충분한 설정이라 `<details class="limits">` 로 **접힌 채** 두고, summary 우측에 현재 유효값을 사람이 읽는 단위로 표시한다(`renderTimeoutSummary`). 내용은 idle(무출력) 1개 + tier 별 ceiling 4개, **분 단위 입력**이며 `minutesFromMs`/`msFromMinutes` 한 쌍만 ms 변환을 안다. 저장 형식은 `timeouts.{idle_ms, hard_cap_ms.<tier>}` (구 `spawn_timeout_ms` 는 폐기)
 - `input[type='number']` 는 spinner 를 제거한다(`appearance: textfield` + `::-webkit-*-spin-button`) — 범위는 `min`/`max` 속성과 저장 시 클램프가 지킨다
@@ -45,5 +46,4 @@
 
 ## Dependencies
 
-- **빌드 시점**: `scripts/buildSettingsHtml.mjs` (`node:fs`, `node:path` 빌트인만)
-- **런타임**: 브라우저 native API (`fetch`, `FormData`, DOM) — 외부 라이브러리 없음
+- **빌드 시점**: `scripts/buildSettingsHtml.mjs` (`node:fs`·`node:path` 빌트인만) · **런타임**: 브라우저 native API (`fetch`, `FormData`, DOM) — 외부 라이브러리 없음

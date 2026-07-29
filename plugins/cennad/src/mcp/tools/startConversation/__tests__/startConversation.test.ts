@@ -121,7 +121,7 @@ describe('handleStartConversation', () => {
   });
 
   it('rejects a disabled provider without dispatching or persisting a session', async () => {
-    await saveConfig({
+    await saveConfig('user', {
       ...DEFAULT_CONFIG,
       ratio: {
         ...DEFAULT_CONFIG.ratio,

@@ -8,6 +8,8 @@ import type {
 } from "../../../types/setup.js";
 import {
   loadConfig,
+  loadConfigByScope,
+  loadConfigScope,
   loadCredentials,
   saveConfig,
   saveCredentials,
@@ -32,6 +34,8 @@ export async function handleSetup(
       context: {
         settingsHtml: loadSettingsHtml(),
         loadConfig,
+        loadConfigByScope,
+        loadConfigScope,
         loadCredentials,
         saveConfig,
         saveCredentials,

@@ -1,3 +1,5 @@
+import type { SeiriConfigScope } from './config.js';
+
 /** Single entry in templates/rules/manifest.json. */
 export interface RuleDocEntry {
   id: string;
@@ -64,12 +66,7 @@ export interface RuleDocStatus {
 
 /** What a sync would do, or did do, to one rule doc. */
 export type RuleDocAction =
-  | 'copy'
-  | 'remove'
-  | 'update'
-  | 'unchanged'
-  | 'drift'
-  | 'skip';
+  'copy' | 'remove' | 'update' | 'unchanged' | 'drift' | 'skip';
 
 /** One line of a sync plan or sync report. */
 export interface RuleDocOutcome {
@@ -81,6 +78,26 @@ export interface RuleDocOutcome {
 }
 
 /**
+ * Owned rule documents found at one layer's channel.
+ *
+ * Only ever describes the layer a sync did *not* target, which is why the
+ * field carrying it is named for the other scope rather than the chosen one.
+ */
+export interface RuleDocScopeReport {
+  /** The layer these documents sit in. */
+  scope: SeiriConfigScope;
+  /**
+   * Absolute path of that layer's rule channel — the directory a Claude host
+   * fills, or the instruction file a Codex host writes its owned section
+   * into. Absolute rather than layer-relative because the two layers have
+   * different roots: `rules` alone would not say which one.
+   */
+  displayTarget: string;
+  /** Filenames of this owner's documents found there, never another owner's. */
+  filenames: readonly string[];
+}
+
+/**
  * Result of planning or applying a sync. `applied` distinguishes a
  * dry-run preview from a report of writes that actually happened.
  */
@@ -89,6 +106,13 @@ export interface RuleDocSyncResult {
   outcomes: RuleDocOutcome[];
   /** Opaque target + intent revision returned by preview and successful apply. */
   revision?: string;
+  /**
+   * Owned rule documents still deployed at the layer that was not chosen.
+   * A preview lists what saving would remove; an apply lists what it removed.
+   * Absent when the other layer has no rule channel or holds nothing of this
+   * owner's — there is no move to warn about.
+   */
+  otherScope?: RuleDocScopeReport;
 }
 
 /** Options shared by the plan and apply paths. */
@@ -106,4 +130,12 @@ export interface SyncRuleDocsOptions {
   revision?: string | null;
   /** Override for the plugin root (defaults to the host's plugin root). */
   pluginRoot?: string;
+  /**
+   * Which layer the rule documents are deployed to. `project` — the default,
+   * because every existing deployment sits there — writes the repository
+   * channel; `user` writes the host state root, where the rules reach every
+   * project. Switching layers moves the documents rather than copying them:
+   * see `otherScope` on the result for what a save would remove, or removed.
+   */
+  scope?: SeiriConfigScope;
 }

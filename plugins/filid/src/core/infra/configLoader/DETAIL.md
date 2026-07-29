@@ -9,6 +9,8 @@
 - 기존 organ, depth, allowed peer와 entry point 설정은 대응하는 v2 필드로 옮긴다. naming, route, complexity, promotion 설정은 진단 후 버린다.
 - config discovery는 git/project root를 기준으로 하며 plugin 설치 경로를 project fallback으로 사용하지 않는다.
 - managed rule 문서는 host가 실제로 읽는 target을 `@ogham/agent-artifacts`로 동기화하고 Filid owner 주소 밖의 내용을 보존한다.
+- rule 문서 배포 레이어는 config 레이어와 같은 축이다. `project`는 `<gitRoot>` 채널에, `user`는 호스트 상태 루트(`~/.claude/rules/`)에 쓴다. 레이어를 지정하지 않은 호출은 `project`로 해석한다.
+- 레이어를 명시한 sync는 선택한 레이어에 먼저 쓴 다음 반대편 레이어의 `filid_` 소유 문서를 회수한다. 순서가 뒤집히면 중간 실패가 규칙이 어느 레이어에도 없는 상태를 남긴다. 레이어를 명시하지 않은 호출은 배치를 결정한 적이 없으므로 반대편을 건드리지 않는다.
 - required rule drift는 복구하고 optional rule drift는 명시적 resync에서만 덮어쓴다.
 - template 또는 plugin root를 읽지 못하면 throw 대신 진단과 skipped 상태로 저하한다.
 
@@ -33,8 +35,9 @@ interface FilidConfigV2 {
 - `migrateConfigV1(input)` — source를 쓰지 않고 대응 필드와 discarded key 목록을 반환한다.
 - `createDefaultConfig(language?, adapterIds?)` — 15개 built-in rule을 roster 기본 severity 그대로 실은 v2 config를 auto adapter mode로 만든다. severity 정본은 `constants/builtinRuleSeverities`이며 이 함수는 그것을 옮겨 적을 뿐이다.
 - `initProject(projectRoot, options)` — 부재한 config만 생성하며 기존 파일을 덮어쓰지 않는다.
-- `syncRuleDocs(projectRoot, selection, options)` — managed rule channel을 동기화한다.
-- `getRuleDocsStatus(projectRoot, pluginRoot?)` — mutation 없이 active host target 상태를 반환한다.
+- `syncRuleDocs(projectRoot, selection, options)` — `options.scope`가 정한 레이어의 managed rule channel을 동기화하고, 회수한 반대편 문서를 `result.otherScope`로 보고한다.
+- `getRuleDocsStatus(projectRoot, pluginRoot?, scope?)` — mutation 없이 지정한 레이어의 active host target 상태를 반환한다. 기본값은 `project`.
+- `getRuleDocsChannel(projectRoot, scope?)` — 그 레이어가 쓰는 채널의 절대 경로. 항목별 `displayTarget`은 레이어 루트 기준 상대 경로라 `rules/x.md`만으로는 어느 루트인지 말하지 못한다.
 - `loadRuleDocsManifest(pluginRoot)` / `resolvePluginRoot(pluginRoot?)` — canonical manifest와 설치 root를 해석한다.
 
 ## Acceptance Criteria
@@ -61,6 +64,14 @@ interface FilidConfigV2 {
 - manifest 엔트리는 `legacyFilename`을 선언하지 않는다. 접두사 이전 이름 `fca.md`는 오래전에 은퇴해 더 이상 승계 대상이 아니다.
 - manifest에서 사라진 구 문서 `filid_fca-policy.md`는 `filid_` 접두사 기반 owned orphan 스윕이 회수한다. 별도의 마이그레이션 경로를 두지 않는다.
 
+### AC-rule-docs-scope — 배포 레이어
+
+- `scope: 'user'`는 호스트 상태 루트 아래로, `scope: 'project'`는 `<gitRoot>/.claude/rules`로 해석한다. 인자를 생략한 해석은 `project`와 같은 값이다.
+- 레이어를 바꿔 저장하면 문서는 새 레이어에만 남고, 회수한 파일명이 `result.otherScope`에 실린다. 회수할 것이 없으면 필드 자체가 없다.
+- 반대편 회수는 `filid_` 소유 주소만 건드린다. 같은 디렉터리의 다른 owner 문서는 살아남는다.
+- 레이어를 명시하지 않은 sync 뒤에도 반대편 레이어의 문서는 그대로다.
+- 상태 조회는 레이어별로 갈린다. `user`에 배포한 뒤 `user` 조회는 배포됨, `project` 조회는 미배포를 보고한다.
+
 ## Boundary Exemptions
 
 ### loaders — Hook bundle direct import
@@ -69,6 +80,11 @@ interface FilidConfigV2 {
 - **Direct import**: allowed
 - **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
 
+## History
+
+- 2026-07-29 — rule 문서 배포 레이어를 config 레이어와 같은 축으로 묶었다. 설정 페이지 토글이 이미 결정하는 값을 그대로 흘려보내면 사용자가 같은 질문에 두 번 답하지 않는다.
+- 2026-07-28 — `createDefaultConfig`가 자체 severity 집합을 버리고 rule roster와 같은 `constants/builtinRuleSeverities` 정본을 읽는다.
+
 ## Last Updated
 
-2026-07-28 — `createDefaultConfig`가 자체 severity 집합을 버리고 rule roster와 같은 `constants/builtinRuleSeverities` 정본을 읽는다.
+2026-07-29 — 상태 조회도 레이어를 받는다. 배포는 레이어를 따르는데 조회가 한 채널만 보면, 토글이 정한 답을 화면이 틀리게 말한다.

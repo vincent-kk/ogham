@@ -11,14 +11,14 @@
 
 ## set-project <KEY>
 
-1. Call `mcp__plugin_imbas_tools__config_set` with `{ "defaults.project_ref": "<KEY>" }`.
+1. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "defaults.project_ref": "<KEY>" }` and `scope: "project"` — a default project key belongs to the workspace that has it.
 2. Execute cache population flow (Step 5 of Init Workflow) for the new project key.
 3. Display confirmation with new default project.
 
 ## set-language <field> <lang>
 
 1. Validate field is one of: `documents`, `skills`, `issue_content`, `reports`.
-2. Call `mcp__plugin_imbas_tools__config_set` with `{ "language.<field>": "<lang>" }`.
+2. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "language.<field>": "<lang>" }` and `scope: "user"` — language is a personal preference unless the user asks to pin it for the repository.
 3. Display updated language settings.
 
 ## refresh-cache [KEY]
@@ -32,7 +32,7 @@
 1. Validate provider is one of: `jira`, `github`, `local`.
 2. Run health check for the target provider's dependencies.
    - If dependencies not met → display warning and confirm with user.
-3. Call `mcp__plugin_imbas_tools__config_set` with `{ "provider": "<PROVIDER>" }`.
+3. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "provider": "<PROVIDER>" }` and `scope: "project"` — the tracker a repository files issues into is a property of that repository.
 4. If switching to `local` from a remote provider:
    - Display banner: "Switching to local will not migrate existing remote issues. Export manually before changing provider."
 5. If switching to a remote provider:
@@ -51,7 +51,7 @@
 ### labels edit
 
 1. Call `mcp__plugin_imbas_tools__open_settings` (absolute `project_root`) — the settings page's Labels section edits all six values with the current values prefilled. Dispatch on `status` as in the init workflow (Step 3).
-2. Headless fallback: call `mcp__plugin_imbas_tools__config_set` with an updated `labels` section from chat-provided values.
+2. Headless fallback: call `mcp__plugin_imbas_tools__config_set` with an updated `labels` section from chat-provided values, and `scope: "project"` — labels are provisioned against one repository's tracker.
 3. Display confirmation with updated values.
 
 ### labels provision (GitHub only)

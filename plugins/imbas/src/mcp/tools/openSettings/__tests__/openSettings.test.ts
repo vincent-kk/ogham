@@ -99,6 +99,7 @@ describe('open_settings tool', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        scope: 'project',
         config: submitted,
         options: { provision_labels: false },
       }),

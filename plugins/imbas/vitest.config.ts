@@ -5,5 +5,6 @@ export default defineConfig({
     include: ['src/**/__tests__/**/*.test.ts'],
     exclude: ['**/fixtures/**'],
     globals: true,
+    setupFiles: ['./vitest.setup.ts'],
   },
 });

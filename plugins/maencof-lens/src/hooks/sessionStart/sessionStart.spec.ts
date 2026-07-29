@@ -24,7 +24,7 @@ beforeEach(() => {
   workDir = mkdtempSync(join(tmpdir(), "lens-ss-cwd-"));
   vault = mkdtempSync(join(tmpdir(), "lens-ss-vault-"));
   const config = createDefaultConfig(vault, "test-vault");
-  writeConfig(workDir, config);
+  writeConfig(workDir, 'project', config);
 });
 
 afterEach(() => {

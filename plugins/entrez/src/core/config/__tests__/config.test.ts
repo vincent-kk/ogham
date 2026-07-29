@@ -22,13 +22,13 @@ afterEach(async () => {
 
 describe("config load/save", () => {
   it("returns null when config is absent (not configured)", async () => {
-    expect(await loadConfig(join(dir, "config.json"))).toBeNull();
+    expect(await loadConfig({ user: join(dir, "config.json"), project: null })).toBeNull();
   });
 
   it("round-trips config with defaults applied", async () => {
     const p = join(dir, "config.json");
-    await saveConfig({ tool: "t", email: "e@x.com" }, p);
-    const cfg = await loadConfig(p);
+    await saveConfig("user", { tool: "t", email: "e@x.com" }, { user: p, project: null });
+    const cfg = await loadConfig({ user: p, project: null });
     expect(cfg?.tool).toBe("t");
     expect(cfg?.default_db).toBe("pubmed");
     expect(cfg?.date_tag).toBe(true);
@@ -41,7 +41,7 @@ describe("config load/save", () => {
     "writes config.json with 0o600 permissions",
     async () => {
       const p = join(dir, "config.json");
-      await saveConfig({ tool: "t", email: "e@x.com" }, p);
+      await saveConfig("user", { tool: "t", email: "e@x.com" }, { user: p, project: null });
       const s = await stat(p);
       expect(s.mode & 0o777).toBe(0o600);
     },
@@ -55,7 +55,7 @@ describe("config load/save", () => {
       const p = join(dir, "config.json");
       await writeFile(p, JSON.stringify({ tool: "t", email: "e@x.com" }));
       await chmod(p, 0o644);
-      await loadConfig(p);
+      await loadConfig({ user: p, project: null });
       expect((await stat(p)).mode & 0o077).toBe(0);
     },
   );

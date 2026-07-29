@@ -8,13 +8,36 @@
   // Tab identifiers — shared with json-import.js via window.__settingsApp.TABS
   var TABS = { CLOUD: "cloud", ON_PREMISE: "on-premise" };
 
-  // State
+  // State — this page's own UI bookkeeping. It never carries server data.
   var state = {
     tab: TABS.CLOUD,
     editMode: false,
     loading: false,
     cloudSiteCount: 1,
   };
+
+  /**
+   * Reads the state document the server substituted into the page.
+   *
+   * @returns {object|null} The parsed document, or null when the slot was
+   *   never replaced — the page opened outside the settings server — or its
+   *   contents are not valid JSON.
+   */
+  function readInjectedState() {
+    var raw = window.__SETTINGS_STATE__;
+    if (!raw || raw === "__SETTINGS_STATE__") return null;
+    try {
+      return typeof raw === "string" ? JSON.parse(raw) : raw;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Parsed once, at load, because two readers need it at different times: the
+  // edit-mode prefill on DOMContentLoaded and the scope toggle below, which is
+  // derived while this script runs. Parsing per reader is what once left the
+  // toggle reading a field nobody filled.
+  var injected = readInjectedState();
 
   // --- Animation Helper ---
   function animateIn(el) {
@@ -33,21 +56,12 @@
   });
 
   function initApp() {
-    var raw = window.__SETTINGS_STATE__;
-    if (!raw || raw === "__SETTINGS_STATE__") return;
-
-    var parsed;
-    try {
-      parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-    } catch (_) {
-      return;
-    }
-
-    if (!parsed || !parsed.configured) return;
+    capturePristineFields();
+    if (!injected || !injected.configured) return;
 
     state.editMode = true;
     showWarningBanner();
-    prefillForm(parsed);
+    prefillForm(viewForScope());
   }
 
   function showWarningBanner() {
@@ -55,8 +69,50 @@
     if (banner) animateIn(banner);
   }
 
+  /**
+   * Drop every site row a previous prefill added.
+   *
+   * The first row is markup the page ships with; the rest are appended per
+   * configured site. Re-seating on another layer without this would stack the
+   * two layers' sites in one list.
+   */
+  function resetSiteEntries() {
+    var container = document.getElementById("cloud-sites-container");
+    if (!container) return;
+    while (container.children.length > 1)
+      container.removeChild(container.lastElementChild);
+    state.cloudSiteCount = 1;
+  }
+
+  // The values the markup ships with, captured before anything is prefilled.
+  // They are the floor a layer that configures nothing falls back to — without
+  // them, switching to an empty layer would leave the other layer's values on
+  // screen under its name.
+  var pristineFields = [];
+
+  /** Snapshot every field's shipped value. Runs once, before the first fill. */
+  function capturePristineFields() {
+    pristineFields = [];
+    document.querySelectorAll("[data-field]").forEach(function (el) {
+      pristineFields.push({ el: el, value: el.value, checked: el.checked });
+    });
+  }
+
+  /** Put every surviving field back to its shipped value. */
+  function restorePristineFields() {
+    for (var i = 0; i < pristineFields.length; i++) {
+      var entry = pristineFields[i];
+      // Fields inside site rows a previous fill added are already detached.
+      if (!entry.el.isConnected) continue;
+      entry.el.value = entry.value;
+      entry.el.checked = entry.checked;
+    }
+  }
+
   function prefillForm(data) {
     var dt = data.deployment_type || "cloud";
+    resetSiteEntries();
+    restorePristineFields();
     activateTab(dt === "onprem" ? TABS.ON_PREMISE : TABS.CLOUD);
 
     if (dt === "cloud" && data.jira) {
@@ -451,6 +507,97 @@
     el.hidden = true;
   }
 
+  // --- Config scope (user / project) ---
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". Credentials are never
+  // layered — they stay user-only — so this toggle governs the config file
+  // alone: the site URL and account a repository points at.
+  var scopeState = (injected && injected.scope) || {
+    paths: { user: "", project: null },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var configScope = scopeState.layers.project === null ? "user" : "project";
+
+  /**
+   * The prefill view the chosen layer edits.
+   *
+   * @returns {object} That layer's view, or the effective one when the server
+   *   sent no per-layer views.
+   */
+  function viewForScope() {
+    var byScope = injected && injected.configByScope;
+    return (byScope && byScope[configScope]) || injected || {};
+  }
+
+  function renderScope() {
+    var host = document.getElementById("config_scope");
+    if (!host) return;
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
+    host.textContent = "";
+    [
+      ["user", "User", "Applies wherever you work."],
+      ["project", "Project", "This repository only; overrides User."],
+    ].forEach(function (option) {
+      var label = document.createElement("label");
+      label.className = "scope-option";
+      var radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "config_scope";
+      radio.value = option[0];
+      radio.checked = option[0] === configScope;
+      radio.disabled = option[0] === "project" && !scopeState.paths.project;
+      radio.addEventListener("change", function () {
+        configScope = option[0];
+        prefillForm(viewForScope());
+        renderScope();
+      });
+      var text = document.createElement("span");
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+      if (option[0] === configScope) renderScopeHint(option[2]);
+    });
+    if (!hadFocus) return;
+    var focused = host.querySelector("input:checked");
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the title row: what the chosen layer means on the
+   * left, the file it writes on the right. Two nodes rather than one string,
+   * so the path can sit at the card's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = document.getElementById("scope_hint");
+    if (!hint) return;
+    hint.textContent = "";
+    hint.appendChild(scopeHintPart("scope-hint__meaning", meaning));
+    hint.appendChild(
+      scopeHintPart("scope-hint__path", scopeState.paths[configScope] || ""),
+    );
+  }
+
+  /**
+   * @param {string} className Class naming which half of the hint this is.
+   * @param {string} text Content of that half.
+   * @returns {HTMLSpanElement} Span ready to append to the hint line.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement("span");
+    part.className = className;
+    part.textContent = text;
+    return part;
+  }
+
+  renderScope();
+
   // --- Save (validate -> test connection -> save) ---
   function onSubmit(closeAfter) {
     if (!validateForm()) return;
@@ -464,6 +611,7 @@
 
     var data = collectFormData();
     data.closeAfter = closeAfter;
+    data.scope = configScope;
     setLoading(true);
     hideStatusMessage();
     showStatusMessage(true, "Testing connection...");

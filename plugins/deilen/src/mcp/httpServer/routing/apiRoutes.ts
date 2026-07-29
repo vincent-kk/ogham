@@ -32,10 +32,10 @@ const sessionOf = (url: URL): string => url.searchParams.get("session") ?? "";
 const STATIC_ROUTES: Record<string, RouteHandler> = {
   "GET /api/viewer": ({ context, url, response, onError }) =>
     void handleGetViewerData(context, url, response).catch(onError),
-  "GET /settings": ({ context, response, onError }) =>
-    void handleGetSettings(context, response).catch(onError),
-  "GET /api/config": ({ context, response, onError }) =>
-    void handleGetConfig(context, response).catch(onError),
+  "GET /settings": ({ context, response }) =>
+    handleGetSettings(context, response),
+  "GET /api/config": ({ context, response }) =>
+    handleGetConfig(context, response),
   "POST /api/config": ({ context, request, response, onError }) =>
     void handleSaveConfig(context, request, response).catch(onError),
   "POST /api/feedback": ({ context, url, request, response, onError }) =>

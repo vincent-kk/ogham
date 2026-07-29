@@ -14,12 +14,15 @@ const manifest = JSON.parse(
 const packageEntryTargets = new Set(
   Object.values(manifest.exports).map(({ import: target }) =>
     normalizeImportTarget(
-      target.replace("./dist/", "").replace(/\.js$/, ".ts"),
+      target.replace(/^\.\/dist\//, "").replace(/\.js$/, ".ts"),
     ),
   ),
 );
 
 const boundarySources = [
+  "configScope/layers/operations/resolveConfigLayers.ts",
+  "configScope/layers/operations/writeConfigLayer.ts",
+  "configScope/layers/utils/readLayer.ts",
   "hooks/error/errorLogPath.ts",
   "hostPaths/absolute/toAbsoluteRoot.ts",
   "paths/state/hostStateRoot.ts",

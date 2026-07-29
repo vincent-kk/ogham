@@ -14,13 +14,20 @@
       <header class="masthead">
         <div class="brand">
           <span class="brand-name">imbas</span>
-          <span class="brand-tag">/ settings</span>
+          <span class="brand-tag">/ settings /</span>
+          <div
+            id="config_scope"
+            class="scope-crumb"
+            role="radiogroup"
+            aria-label="Which layer to save the config in"
+          ></div>
         </div>
         <p class="lede">
           Issue-pipeline settings for
           <code id="project-chip" title="Project root"></code> — provider,
           project reference, lifecycle labels, and defaults.
         </p>
+        <p id="scope_hint" class="scope-hint"></p>
       </header>
 
       <div id="init-note" class="note" hidden>

@@ -22,20 +22,48 @@ const EMPTY_SYNC = {
 const STATE: SettingsPageState = {
   projectRoot: '/tmp/project',
   configExists: true,
-  config: {
-    version: '2.0',
-    adapters: { mode: 'auto', enabled: [] },
-    rules: {},
+  configByScope: {
+    user: {
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+    },
+    project: {
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+    },
   },
   configDiagnostics: [],
+  scope: {
+    paths: {
+      user: '/tmp/user/config.json',
+      project: '/tmp/project/.filid/config.json',
+    },
+    layers: { user: null, project: null },
+    effective: {},
+    overridden: [],
+    warnings: [],
+  },
   structureAdapterId: 'test-adapter',
-  ruleDocs: { entries: [], autoDeployed: [], pluginRootResolved: true },
+  ruleDocs: {
+    layers: {
+      user: { entries: [], autoDeployed: [], displayTarget: '/tmp/user/rules' },
+      project: {
+        entries: [],
+        autoDeployed: [],
+        displayTarget: '/tmp/project/.claude/rules',
+      },
+    },
+    pluginRootResolved: true,
+  },
 };
 
 // An opaque save payload for transport round-trip checks — `persistSave` is
 // mocked, so the selection key is never deployed. Use the always-present
 // required rule id rather than a phantom optional one.
 const VALID_BODY: SaveBody = {
+  scope: 'project',
   config: {
     version: '2.0',
     adapters: { mode: 'auto', enabled: [] },
@@ -118,11 +146,14 @@ describe('filid settings web server', () => {
   it('escapes </script> inside inlined state fields', async () => {
     const malicious: SettingsPageState = {
       ...STATE,
-      config: {
-        version: '2.0',
-        adapters: { mode: 'auto', enabled: [] },
-        rules: {},
-        language: '</script><script>alert(1)</script>',
+      configByScope: {
+        ...STATE.configByScope,
+        project: {
+          version: '2.0',
+          adapters: { mode: 'auto', enabled: [] },
+          rules: {},
+          language: '</script><script>alert(1)</script>',
+        },
       },
     };
     const h = await start({ loadState: () => malicious });

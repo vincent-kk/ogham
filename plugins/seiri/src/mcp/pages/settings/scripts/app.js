@@ -40,29 +40,82 @@
     },
   ];
 
-  var entries = state.ruleDocs.entries || [];
-  var anyDeployed = entries.some(function (entry) {
-    return entry.deployed;
-  });
+  // Which layer a save lands in. Opens on the layer that is currently
+  // deciding, so pressing Save without touching the toggle rewrites the file
+  // the dial already came from rather than silently creating a second one.
+  var scopeState = state.scope || {
+    paths: { user: '', project: '' },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var scope = scopeState.layers.project === null ? 'user' : 'project';
 
-  // A project that has deployed nothing gets the recommended set offered;
-  // one that already chose gets its own choices back, read from disk. That
-  // way deleting a rule file by hand is respected rather than re-applied.
+  // Both layers arrive up front so moving the toggle can redraw without a
+  // round trip. The server resolves each channel, because on a Codex host it
+  // is a section inside AGENTS.md rather than a directory of files.
+  var EMPTY_LAYER = { entries: [], displayTarget: null };
+  var ruleLayers = state.ruleDocs.layers || {
+    user: EMPTY_LAYER,
+    project: EMPTY_LAYER,
+  };
+
+  function layerState() {
+    return ruleLayers[scope] || EMPTY_LAYER;
+  }
+
+  var entries = [];
   var selections = {};
   var resync = {};
-  entries.forEach(function (entry) {
-    selections[entry.id] = anyDeployed ? entry.deployed : entry.recommended;
-    resync[entry.id] = Boolean(entry.deployed && !entry.inSync);
-  });
 
-  var intervention =
-    (state.config && state.config.intervention) || DIAL_STANDARD;
+  /**
+   * Seat the rule list on the layer the toggle names.
+   *
+   * A layer that has deployed nothing gets the recommended set offered; one
+   * that already chose gets its own choices back, read from disk — a rule
+   * file deleted by hand is respected rather than re-applied. The two
+   * channels hold different deployments, so the boxes are rebuilt rather than
+   * carried across; carrying them would tick the other channel's answer.
+   */
+  function seatLayer() {
+    entries = layerState().entries || [];
+    var anyDeployed = entries.some(function (entry) {
+      return entry.deployed;
+    });
+    selections = {};
+    resync = {};
+    entries.forEach(function (entry) {
+      selections[entry.id] = anyDeployed ? entry.deployed : entry.recommended;
+      resync[entry.id] = Boolean(entry.deployed && !entry.inSync);
+    });
+  }
+
+  /**
+   * The dial the chosen layer decides.
+   *
+   * `user` answers from its own file alone; `project` inherits the user value
+   * where it says nothing, because that is what would actually be in force.
+   * The session valve is absent on purpose — a tool call sets it for one
+   * session and it is not an editable layer.
+   *
+   * @returns {string} The dial position, or the default when no layer sets one.
+   */
+  function dialForScope() {
+    var own = scopeState.layers[scope];
+    if (own && own.intervention) return own.intervention;
+    var inherited = scope === 'user' ? null : scopeState.layers.user;
+    return (inherited && inherited.intervention) || DIAL_STANDARD;
+  }
+
+  seatLayer();
+  var intervention = dialForScope();
   var previewRevision = null;
 
   var elements = {
     root: document.getElementById('project-root'),
     rules: document.getElementById('rules-list'),
     dial: document.getElementById('dial'),
+    scopeCrumb: document.getElementById('config_scope'),
+    scopeHint: document.getElementById('scope_hint'),
     facts: document.getElementById('facts'),
     preview: document.getElementById('preview'),
     status: document.getElementById('status'),
@@ -80,6 +133,7 @@
 
   function body() {
     return {
+      scope: scope,
       config: { intervention: intervention },
       ruleDocs: {
         selections: selections,
@@ -183,9 +237,7 @@
       refreshPreview();
     });
     label.appendChild(overwrite);
-    label.appendChild(
-      element('span', null, 'Use the latest shipped version'),
-    );
+    label.appendChild(element('span', null, 'Use the latest shipped version'));
     block.appendChild(label);
     return block;
   }
@@ -216,6 +268,72 @@
     });
   }
 
+  var SCOPE_OPTIONS = [
+    ['user', 'User', 'Applies to every project you open.'],
+    ['project', 'Project', 'Committed with the repository; outranks User.'],
+  ];
+
+  function renderScope() {
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = elements.scopeCrumb.contains(document.activeElement);
+    elements.scopeCrumb.textContent = '';
+    SCOPE_OPTIONS.forEach(function (option) {
+      var label = element('label', 'scope-option');
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        useLayer();
+        applyScopeBadges();
+        renderScope();
+      });
+      label.appendChild(radio);
+      label.appendChild(element('span', null, option[1]));
+      elements.scopeCrumb.appendChild(label);
+    });
+
+    var chosen = SCOPE_OPTIONS.filter(function (option) {
+      return option[0] === scope;
+    })[0];
+    // Two nodes rather than one string: what the layer means keeps the
+    // section's left edge while the file it writes sits at the right, and CSS
+    // cannot pull the two ends of a single text node apart.
+    elements.scopeHint.textContent = '';
+    elements.scopeHint.appendChild(
+      element('span', 'scope-hint__meaning', chosen[2]),
+    );
+    elements.scopeHint.appendChild(
+      element('span', 'scope-hint__path', scopeState.paths[scope]),
+    );
+
+    if (!hadFocus) return;
+    var focused = elements.scopeCrumb.querySelector('input:checked');
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Mark every [data-config-path] with where its value came from. There is no
+   * clear-override button here: seiri's project layer is a committed file the
+   * team owns, so removing it is a git operation, not a settings click.
+   */
+  function applyScopeBadges() {
+    var owners = document.querySelectorAll('[data-config-path]');
+    var i;
+    for (i = 0; i < owners.length; i += 1) {
+      var path = owners[i].getAttribute('data-config-path');
+      var overriding = scopeState.overridden.indexOf(path) !== -1;
+      owners[i].setAttribute(
+        'data-scope-state',
+        scope === 'user' ? 'own' : overriding ? 'overridden' : 'inherited',
+      );
+    }
+  }
+
   function renderFacts() {
     elements.facts.textContent = '';
     var facts = [
@@ -229,41 +347,34 @@
     });
   }
 
+  /**
+   * Name the channel the selected layer writes into. The server resolves it,
+   * so this stays true on a host whose channel is a section in a file rather
+   * than a directory of them.
+   */
   function renderRuleTargets() {
-    var targets = entries
-      .map(function (entry) {
-        return entry.activeDisplayTarget;
-      })
-      .filter(function (target, index, all) {
-        return target && all.indexOf(target) === index;
-      });
-    var label =
-      targets.length === 1
-        ? targets[0]
-        : (function () {
-            var first = targets[0] || '';
-            var slash = Math.max(
-              first.lastIndexOf('/'),
-              first.lastIndexOf('\\'),
-            );
-            var directory = first.slice(0, slash + 1);
-            var sharesDirectory =
-              directory &&
-              targets.every(function (target) {
-                var remainder = target.slice(directory.length);
-                return (
-                  target.indexOf(directory) === 0 &&
-                  remainder.indexOf('/') === -1 &&
-                  remainder.indexOf('\\') === -1
-                );
-              });
-            return sharesDirectory
-              ? directory
-              : targets.join(', ') || 'the active host rule channel';
-          })();
+    var layer = layerState();
+    var label = layer.displayTarget || 'the active host rule channel';
     elements.ruleTargets.forEach(function (node) {
       node.textContent = label;
     });
+  }
+
+  /**
+   * Point the page at the layer the toggle now names. The dial, the rule
+   * list, the channel label and the diff all answer "what does this layer
+   * say", so leaving any of them behind shows one layer's answer under the
+   * other's name. Only the preview needs the server — that judgment is not
+   * the page's to make.
+   */
+  function useLayer() {
+    seatLayer();
+    intervention = dialForScope();
+    renderRules();
+    renderDial();
+    renderRuleTargets();
+    previewRevision = null;
+    refreshPreview();
   }
 
   var MARKS = {
@@ -275,18 +386,76 @@
     unchanged: '·',
   };
 
+  /**
+   * Name the documents a save would withdraw from the layer that was not
+   * chosen. Saving moves rules rather than copying them, and the layer being
+   * emptied may be the user one — shared by every project — so the removal is
+   * stated before it happens rather than reported after.
+   *
+   * @param {{scope: string, displayTarget: string, filenames: string[]}} report
+   *   The other layer's deployment, as `/plan` reported it.
+   * @returns {HTMLElement} The block, not yet attached to the document.
+   */
+  function renderScopeMove(report) {
+    var count = report.filenames.length;
+    var block = element('div', 'scope-move');
+    block.appendChild(
+      element(
+        'p',
+        'scope-move-head',
+        count +
+          (count === 1 ? ' rule is' : ' rules are') +
+          ' still deployed at the ' +
+          report.scope +
+          ' layer. Saving removes ' +
+          (count === 1 ? 'it' : 'them') +
+          ' there.',
+      ),
+    );
+    block.appendChild(element('p', 'scope-move-path', report.displayTarget));
+
+    var list = element('div', 'diff');
+    report.filenames.forEach(function (filename) {
+      var row = element('div', 'diff-row');
+      row.setAttribute('data-action', 'remove');
+      row.appendChild(element('span', 'diff-mark', MARKS.remove));
+      row.appendChild(element('span', 'diff-file', filename));
+      row.appendChild(
+        element('span', 'diff-note', 'removed from ' + report.scope),
+      );
+      list.appendChild(row);
+    });
+    block.appendChild(list);
+    return block;
+  }
+
+  /**
+   * Say on the button what the save will actually do. A move is not the same
+   * act as a write, and the label is the last thing read before the click.
+   *
+   * @param {boolean} moving Whether the other layer would be emptied.
+   */
+  function syncSaveLabel(moving) {
+    elements.save.textContent = moving ? 'Save & move rules' : 'Save';
+  }
+
   function renderPreview(result) {
     elements.preview.textContent = '';
     var outcomes = (result.outcomes || []).filter(function (outcome) {
       return outcome.action !== 'unchanged';
     });
+    var moving = result.otherScope || null;
+    syncSaveLabel(moving !== null);
 
-    if (outcomes.length === 0) {
+    if (outcomes.length === 0 && moving === null) {
       elements.preview.appendChild(
         element('p', 'empty', 'Nothing would change.'),
       );
       return;
     }
+
+    if (moving !== null) elements.preview.appendChild(renderScopeMove(moving));
+    if (outcomes.length === 0) return;
 
     var list = element('div', 'diff');
     outcomes.forEach(function (outcome) {
@@ -397,6 +566,8 @@
   elements.root.textContent = state.projectRoot;
   renderRules();
   renderDial();
+  renderScope();
+  applyScopeBadges();
   renderFacts();
   renderRuleTargets();
   refreshPreview();
