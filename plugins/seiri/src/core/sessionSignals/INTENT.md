@@ -9,8 +9,8 @@
 ```
 index.ts   barrel (외부 소비자 전용 — 훅은 organ 을 직접 import)
 record/    organ — recordBashFailure · recordBashSuccess · recordWorkflowState · consumeWorkflowState
-store/     organ — readSignals · writeSignals (`.seiri/session-signals.json`)
-utils/     organ — hashCommand · resolveSignalsPath · isWorkflowSignal
+store/     organ — readSignals · writeSignals · withSignalsLock (`.seiri/session-signals.json`)
+utils/     organ — hashCommand · resolveSignalsPath · isWorkflowSignal · acquireSignalsLock
 ```
 
 ## Conventions
@@ -20,6 +20,7 @@ utils/     organ — hashCommand · resolveSignalsPath · isWorkflowSignal
 - 읽기는 절대 throw 하지 않는다. 손상·타 세션 파일은 빈 상태로 시작한다.
 - 카운터는 **명령별**이고 추적 수에 상한이 있다 — 스크래치패드지 로그가 아니다.
 - 워크플로우 상태는 **로드마다 재무장, 1회 소비**한다. 매 턴 되풀이하면 배너가 되고, 배너는 무시당한다.
+- 읽기-수정-쓰기는 **`withSignalsLock` 으로 직렬화**한다. 훅은 각각 별도 프로세스라 한 메시지의 병렬 도구 호출이 같은 파일에 동시 도달하고, 락이 없으면 늦게 쓰는 쪽이 읽은 적 없는 필드를 지운다. 락을 못 얻으면 그대로 진행한다 — 훅은 턴을 막지 못한다.
 
 ## Boundaries
 

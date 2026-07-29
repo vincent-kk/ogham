@@ -10,19 +10,34 @@ export const RUNTIME_FILE = 'runtime.json';
 /** Failure-chain counters inside {@link CONFIG_DIR}. Untracked, session-scoped. */
 export const SIGNALS_FILE = 'session-signals.json';
 
+/**
+ * Lock directory inside {@link CONFIG_DIR}, held across a read-modify-write
+ * of {@link SIGNALS_FILE}.
+ *
+ * A directory rather than a file because `mkdir` fails atomically when the
+ * name is taken, which is the whole test-and-set. Hook processes are
+ * separate `node` runs, so nothing in-process can serialise them.
+ */
+export const SIGNALS_LOCK_DIR = 'session-signals.lock';
+
 /** Ignore file that keeps {@link UNTRACKED_CONFIG_FILES} out of commits. */
 export const IGNORE_FILE = '.gitignore';
 
 /**
  * Members of {@link CONFIG_DIR} that must never reach a commit.
  *
- * Both are session state: a dial someone lowered for one afternoon, and
- * counters that mean nothing outside the session that wrote them. Letting
- * either ride along in a commit would erode the team's declared baseline,
- * so `.seiri/.gitignore` lists them and travels with the directory rather
- * than editing the repository's root ignore file.
+ * All three are session state: a dial someone lowered for one afternoon,
+ * counters that mean nothing outside the session that wrote them, and a
+ * lock that outlives its holder only when a hook was killed mid-write.
+ * Letting any ride along in a commit would erode the team's declared
+ * baseline, so `.seiri/.gitignore` lists them and travels with the
+ * directory rather than editing the repository's root ignore file.
  */
-export const UNTRACKED_CONFIG_FILES = [RUNTIME_FILE, SIGNALS_FILE] as const;
+export const UNTRACKED_CONFIG_FILES = [
+  RUNTIME_FILE,
+  SIGNALS_FILE,
+  SIGNALS_LOCK_DIR,
+] as const;
 
 /** Harness-owned directory that auto-loads instruction files. */
 export const CLAUDE_DIR = '.claude';
