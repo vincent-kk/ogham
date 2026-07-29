@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pluginCache } from "../../../paths/index.js";
+import { pluginCache, portableJoin } from "../../../paths/index.js";
 import { resolveConfigLayers } from "../index.js";
 
 describe("resolveConfigLayers", () => {
@@ -10,7 +10,9 @@ describe("resolveConfigLayers", () => {
       projectRoot: "/repo",
     });
 
-    expect(user).toBe(`${pluginCache("deilen")}/config.json`);
+    // pluginCache는 호스트 의존 값이라 구분자가 플랫폼마다 다르다. 기대값도
+    // 같은 방식으로 이어 붙인다 — 리터럴 `/`를 쓰면 Windows에서만 깨진다.
+    expect(user).toBe(portableJoin(pluginCache("deilen"), "config.json"));
   });
 
   it("anchors the project layer under a dot directory named for the plugin", () => {
