@@ -1,9 +1,11 @@
 import { pathForCompare, portableResolve } from '@ogham/cross-platform/paths';
 
 import { resolveAdapters } from '../../adapters/index.js';
+import { ALL_SNAPSHOT_AXES } from '../../constants/snapshotAxes.js';
 import type { AdapterRegistry } from '../../types/adapters.js';
 import type {
   ProjectSnapshot,
+  SnapshotAxisSelection,
   SnapshotDiagnostic,
 } from '../../types/fractal.js';
 import { buildDependencyGraph } from '../analysis/dependencyGraph/index.js';
@@ -24,11 +26,27 @@ import { resolveSnapshotOwner } from './evidence/resolveSnapshotOwner.js';
 import { snapshotStructureInput } from './evidence/snapshotStructureInput.js';
 import { computeSnapshotHash } from './snapshotHash/computeSnapshotHash.js';
 
+/** Options narrowing what a snapshot collects. */
+export interface CreateProjectSnapshotOptions {
+  /** Axes to collect; any axis left out is collected. */
+  axes?: Partial<SnapshotAxisSelection>;
+}
+
+/**
+ * Assemble one read-only evidence snapshot of a project.
+ * @param projectRoot Directory the snapshot describes.
+ * @param registry Adapter registry supplying ecosystem facts.
+ * @param config Loaded config v2 — selects adapters and output language.
+ * @param options Axis selection; omitting it collects every axis.
+ * @returns The snapshot, whose `collectedAxes` reports what was gathered.
+ */
 export async function createProjectSnapshot(
   projectRoot: string,
   registry: AdapterRegistry,
   config: FilidConfig,
+  options: CreateProjectSnapshotOptions = {},
 ): Promise<ProjectSnapshot> {
+  const axes: SnapshotAxisSelection = { ...ALL_SNAPSHOT_AXES, ...options.axes };
   const root = portableResolve(projectRoot);
   const enabledIds =
     config.adapters.mode === 'explicit' ? config.adapters.enabled : undefined;
@@ -53,42 +71,61 @@ export async function createProjectSnapshot(
     enforceStructureOwnership: true,
   });
   const documents = collectDocumentEvidence(tree);
-  const entryPoints = await collectEntryPointSurfaces(
-    tree,
-    adapterResolution.adapters,
-  );
-  const dependencies = await collectDependencyReferences(adapterResolution);
-  const verificationClaims = await collectVerificationClaims(
-    root,
-    selectedAdapters.verification,
-  );
+  const entryPoints = axes.entrySurfaces
+    ? await collectEntryPointSurfaces(tree, adapterResolution.adapters)
+    : { diagnostics: [], filePaths: [] };
+  const dependencies = axes.dependencies
+    ? await collectDependencyReferences(adapterResolution)
+    : {
+        certainty: 'unsupported' as const,
+        diagnostics: [],
+        filePaths: [],
+        references: [],
+      };
+  const verificationClaims = axes.verification
+    ? await collectVerificationClaims(root, selectedAdapters.verification)
+    : {
+        adapters: [],
+        diagnostics: [],
+        discoveredPathsByAdapter: new Map<string, readonly string[]>(),
+        certainty: 'unsupported' as const,
+      };
   const verificationAdapters = verificationClaims.adapters;
   // Verification is resolved before the graph: its file list decides which
   // references leave the cycle adjacency. It reads the tree and documents only,
   // so nothing here depends on the graph.
-  const verification = await analyzeVerification({
-    projectRoot: root,
-    adapters: verificationAdapters,
-    ownerFractalPath(filePath) {
-      return resolveSnapshotOwner(tree, filePath) ?? root;
-    },
-    detailDocuments: documents.detailDocuments,
-    discoveredPathsByAdapter: verificationClaims.discoveredPathsByAdapter,
-    discoveryCertainty: verificationClaims.certainty,
-  });
-  const dependencyGraph = buildDependencyGraph(
-    [...tree.nodes.values()]
-      .filter((node) => node.type !== 'organ')
-      .map((node) => node.path),
-    dependencies.references,
-    dependencies.certainty,
-    {
-      organPaths: [...tree.nodes.values()]
-        .filter((node) => node.type === 'organ')
-        .map((node) => node.path),
-      verificationPaths: verification.files.map((file) => file.path),
-    },
-  );
+  const verification = axes.verification
+    ? await analyzeVerification({
+        projectRoot: root,
+        adapters: verificationAdapters,
+        ownerFractalPath(filePath) {
+          return resolveSnapshotOwner(tree, filePath) ?? root;
+        },
+        detailDocuments: documents.detailDocuments,
+        discoveredPathsByAdapter: verificationClaims.discoveredPathsByAdapter,
+        discoveryCertainty: verificationClaims.certainty,
+      })
+    : { files: [], violations: [], certainty: 'unsupported' as const };
+  const dependencyGraph = axes.dependencies
+    ? buildDependencyGraph(
+        [...tree.nodes.values()]
+          .filter((node) => node.type !== 'organ')
+          .map((node) => node.path),
+        dependencies.references,
+        dependencies.certainty,
+        {
+          organPaths: [...tree.nodes.values()]
+            .filter((node) => node.type === 'organ')
+            .map((node) => node.path),
+          verificationPaths: verification.files.map((file) => file.path),
+        },
+      )
+    : {
+        nodePaths: [],
+        edges: [],
+        cycles: [],
+        certainty: 'unsupported' as const,
+      };
   const legacyCriteriaLedger = collectLegacyCriteriaLedger(root);
   const adapterDiagnostics: SnapshotDiagnostic[] =
     adapterResolution.diagnostics.map(({ code, message, path }) => ({
@@ -111,6 +148,8 @@ export async function createProjectSnapshot(
       ),
     ),
   ].sort();
+  const isEveryAxis =
+    axes.entrySurfaces && axes.dependencies && axes.verification;
   const snapshotHash = computeSnapshotHash(
     root,
     [
@@ -126,6 +165,9 @@ export async function createProjectSnapshot(
       dependencyGraph,
       verification,
       diagnostics,
+      // A full-axis snapshot keeps the hash it had before axes existed; only a
+      // narrowed one adds the selection, so the two cannot collide.
+      ...(isEveryAxis ? [] : [axes]),
     ],
   );
 
@@ -140,6 +182,7 @@ export async function createProjectSnapshot(
     verification,
     legacyCriteriaLedger,
     diagnostics,
+    collectedAxes: axes,
     createdAt: new Date().toISOString(),
   };
 }

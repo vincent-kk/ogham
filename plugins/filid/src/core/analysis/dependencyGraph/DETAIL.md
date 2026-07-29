@@ -10,11 +10,13 @@
 - 분석 불가능한 dependency가 있으면 certainty를 indeterminate로 보존한다.
 - Windows/POSIX path identity는 portable 비교로 판정하며 case/separator alias를 중복 owner나 별도 cycle node로 만들지 않는다.
 - cycle은 정렬된 strongly-connected component label이 아니라 첫 owner가 마지막에 반복되는 실제 directed closed route다. 각 cyclic component는 결정론적인 대표 route 하나를 반환한다.
+- owner·organ 후보 정렬은 조회 함수가 아니라 **호출자**가 소유한다. 조회는 참조 하나마다 수만 번 일어나고 후보 목록은 그 사이 바뀌지 않으므로, 조회마다 목록을 복사·정렬하면 비용이 후보 수와 참조 수의 곱으로 커진다. 정렬 결과는 같으므로 반환 graph는 달라지지 않는다.
 
 ## API Contracts
 
 - `buildDependencyGraph(nodePaths, evidence, certainty, options?): DependencyGraph` — 정렬된 edge, cycle과 certainty를 반환한다. `options.organPaths`를 주면 owner subtree 안의 owned-organ 참조를, `options.verificationPaths`를 주면 검증 파일이 만든 참조를 cycle adjacency에서 제외한다.
-- `resolveOwningOrganPath(organPaths, ownerPath, filePath): string | null` — `filePath`를 직접 담고 있으면서 `ownerPath` 안에 있는 가장 깊은 organ 경로. boundary rule이 organ 대상 여부와 면책 조회 키를 같은 규칙으로 얻는다.
+- `resolveOwningOrganPath(organPathsDeepestFirst, ownerPath, filePath): string | null` — `filePath`를 직접 담고 있으면서 `ownerPath` 안에 있는 가장 깊은 organ 경로. boundary rule이 organ 대상 여부와 면책 조회 키를 같은 규칙으로 얻는다. 첫 인자는 `sortPathsDeepestFirst`로 정렬해 넘긴다 — 정렬되지 않은 목록을 주면 가장 깊은 organ 대신 먼저 만난 organ을 반환한다.
+- `sortPathsDeepestFirst(paths): string[]` — 후보를 길이 내림차순으로 한 번 정렬한다. owner·organ 조회의 전제를 만드는 유일한 지점이다.
 - `detectCycles(graph): string[][]` — cyclic component마다 실제 edge로 연결되고 시작 owner로 닫히는 안정된 대표 경로 배열을 반환한다.
 - legacy `buildDAG`, `topologicalSort`, `getDirectDependencies`는 작업 8 정리 전 characterization 호환만 유지한다.
 
@@ -38,6 +40,12 @@
 
 - unresolved internal dependency가 있으면 graph는 indeterminate다.
 
+### AC-dag-lookup-cost — 조회는 후보 수에 곱해지지 않는다
+
+- 같은 경로를 여러 참조가 가리켜도 owner 해석은 경로마다 한 번만 계산한다.
+- 후보 정렬은 graph 구성 1회당 1회다.
+- 이 최적화 전후의 edge, cycle과 certainty는 동일하다.
+
 ## Last Updated
 
-2026-07-28 — owned-organ 참조를 cycle adjacency에서 제외하고 `resolveOwningOrganPath`를 공개했다.
+2026-07-29 — 후보 정렬 책임을 호출자로 옮기고 owner 해석 조회 비용을 계약에 넣었다.

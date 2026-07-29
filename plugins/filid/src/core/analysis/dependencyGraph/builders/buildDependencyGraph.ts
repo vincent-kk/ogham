@@ -10,6 +10,7 @@ import { detectCycles } from '../cycles/detectCycles.js';
 import { canonicalizeNodePaths } from './canonicalizeNodePaths.js';
 import { resolveOwnerPath } from './resolveOwnerPath.js';
 import { resolveOwningOrganPath } from './resolveOwningOrganPath.js';
+import { sortPathsDeepestFirst } from './sortPathsDeepestFirst.js';
 
 interface DependencyGraphOptions {
   /** Classified organ paths; enables owned-organ cycle exclusion when supplied. */
@@ -31,21 +32,40 @@ interface DependencyGraphOptions {
  * Such a reference is internal to the owner, not a dependency pointing at it.
  * Counting it as an edge makes the normal FCA shape — a parent barrel
  * re-exporting a child that reads a parent-owned organ — look like a cycle.
+ *
+ * The organ lookup scans every candidate, so its result is memoised on the
+ * owner and resolved path it depends on.
  */
 function isOwnedOrganReference(
-  organPaths: readonly string[],
+  organPathsDeepestFirst: readonly string[],
   toFractalPath: string,
   evidence: DependencyEvidence,
+  organByOwnerAndFile: Map<string, string | null>,
 ): boolean {
-  if (organPaths.length === 0) return false;
+  if (organPathsDeepestFirst.length === 0) return false;
   if (resolveOwnerPath([toFractalPath], evidence.sourceFile) === null)
     return false;
-  return (
-    resolveOwningOrganPath(organPaths, toFractalPath, evidence.resolvedPath) !==
-    null
+  const key = `${toFractalPath}\0${evidence.resolvedPath}`;
+  const cached = organByOwnerAndFile.get(key);
+  if (cached !== undefined) return cached !== null;
+  const organPath = resolveOwningOrganPath(
+    organPathsDeepestFirst,
+    toFractalPath,
+    evidence.resolvedPath,
   );
+  organByOwnerAndFile.set(key, organPath);
+  return organPath !== null;
 }
 
+/**
+ * Aggregate adapter dependency references into owner-level edges and cycles.
+ * @param nodePaths Non-organ owner paths that can appear as graph nodes.
+ * @param references Adapter-reported references; an unresolved one makes the
+ * graph indeterminate rather than silently dropping out.
+ * @param certainty Starting certainty from the reference collector.
+ * @param options Organ and verification paths excluded from cycle adjacency.
+ * @returns Sorted edges with evidence, representative cycle routes and certainty.
+ */
 export function buildDependencyGraph(
   nodePaths: readonly string[],
   references: readonly DependencyReference[],
@@ -53,25 +73,34 @@ export function buildDependencyGraph(
   options: DependencyGraphOptions = {},
 ): DependencyGraph {
   const sortedNodePaths = canonicalizeNodePaths(nodePaths);
-  const organPaths = options.organPaths ?? [];
+  // Sorted once per graph, not once per lookup: owner resolution runs for every
+  // reference, and the candidate list does not change between them.
+  const nodePathsDeepestFirst = sortPathsDeepestFirst(sortedNodePaths);
+  const organPathsDeepestFirst = sortPathsDeepestFirst(
+    options.organPaths ?? [],
+  );
   const verificationPaths = new Set(options.verificationPaths ?? []);
   const grouped = new Map<string, DependencyGraphEdge>();
   const cycleEdgeKeys = new Set<string>();
+  const ownerByPath = new Map<string, string | null>();
+  const organByOwnerAndFile = new Map<string, string | null>();
   let graphCertainty = certainty;
+
+  const resolveOwnerCached = (targetPath: string): string | null => {
+    const cached = ownerByPath.get(targetPath);
+    if (cached !== undefined) return cached;
+    const owner = resolveOwnerPath(nodePathsDeepestFirst, targetPath);
+    ownerByPath.set(targetPath, owner);
+    return owner;
+  };
 
   for (const reference of references) {
     if (reference.resolvedPath === null) {
       if (graphCertainty === 'exact') graphCertainty = 'indeterminate';
       continue;
     }
-    const fromFractalPath = resolveOwnerPath(
-      sortedNodePaths,
-      reference.sourceFile,
-    );
-    const toFractalPath = resolveOwnerPath(
-      sortedNodePaths,
-      reference.resolvedPath,
-    );
+    const fromFractalPath = resolveOwnerCached(reference.sourceFile);
+    const toFractalPath = resolveOwnerCached(reference.resolvedPath);
     if (!fromFractalPath || !toFractalPath) {
       if (graphCertainty === 'exact') graphCertainty = 'indeterminate';
       continue;
@@ -91,7 +120,12 @@ export function buildDependencyGraph(
     edge.evidence.push(evidence);
     grouped.set(key, edge);
     if (
-      !isOwnedOrganReference(organPaths, toFractalPath, evidence) &&
+      !isOwnedOrganReference(
+        organPathsDeepestFirst,
+        toFractalPath,
+        evidence,
+        organByOwnerAndFile,
+      ) &&
       !verificationPaths.has(evidence.sourceFile)
     )
       cycleEdgeKeys.add(key);

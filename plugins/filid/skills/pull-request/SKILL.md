@@ -2,7 +2,7 @@
 name: pull-request
 user_invocable: true
 description: '[filid:pull-request] Bring the branch FCA documents up to date through enrich-docs, then open a structured GitHub pull request from the branch changes.'
-argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE]'
+argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve]'
 version: '1.0.0'
 complexity: complex
 plugin: filid
@@ -27,11 +27,25 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 1. Resolve absolute `PROJECT_ROOT`.
 2. Read the current branch. A detached or empty branch name is an unrecoverable input error.
 3. The branch must have at least one commit not on the base ref.
-4. Worktree state:
-   - clean → pass;
-   - only `INTENT.md` / `DETAIL.md` dirty → pass (Stage 1 is their sole committer);
-   - any other dirty file → abort with the Stage 0 message in `reference.md`.
-   - With `--skip-enrich`, dirty FCA documents also abort — nothing will commit them.
+4. Worktree state — ask the tool, do not classify by hand:
+
+   ```text
+   mcp__plugin_filid_tools__review_state({
+     action: "assess",
+     projectRoot: PROJECT_ROOT,
+     branchName: BRANCH
+   })
+   ```
+
+   Act on `summary.worktreeDisposition` (`reference.md` §5 explains the classes):
+
+   | `worktreeDisposition`                         | Stage 0       |
+   | --------------------------------------------- | ------------- |
+   | `clean` · `documents-only` · `generated-only` | pass          |
+   | `source-dirty`                                | abort with §1 |
+
+   Report the paths in `data.assessment.worktree.source` with the abort message. A build artifact is never a reason to refuse a PR, and generated paths are never staged here. With `--skip-enrich`, `documents-only` also aborts — nothing will commit them.
+
 5. `gh auth status` — on failure set `GH_AUTH = false`, continue through Stage 3, and save the body locally in Stage 4.
 
 ## Stage 1 — FCA Document Sync
@@ -50,7 +64,10 @@ Skipped entirely when `--skip-enrich` is passed.
 
    Collect the distinct `ownerFractalPath` values. This is the audit scope — **do not enrich the whole tree.** PR scope and document scope must match.
 
-3. Invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. In an orchestrated run (`pipeline`) append `--auto-approve`; standalone runs keep the skill's own approval step.
+3. Invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. Append `--auto-approve`
+   **exactly when this skill received it** — never by inferring that a pipeline is running.
+   An orchestrator that wants unattended document sync passes the flag; without it,
+   enrich-docs keeps its own approval step and a standalone run stays interactive.
 4. On enrich-docs failure, print the BLOCKED message (`reference.md` §1) and exit. `--skip-enrich` bypasses this stage.
 5. If `git status --porcelain` now reports changes, stage **only** `INTENT.md` / `DETAIL.md` paths and commit:
 
@@ -58,7 +75,7 @@ Skipped entirely when `--skip-enrich` is passed.
 docs(filid): sync INTENT.md / DETAIL.md via enrich-docs
 ```
 
-Non-document modifications left by Stage 1 surface as a Stage 0 abort on the next run. That is the intended contract, not a defect.
+Source modifications left by Stage 1 surface as a Stage 0 abort on the next run. That is the intended contract, not a defect. Generated paths do not — they are classified, not staged.
 
 ## Stage 2 — Base Branch Resolution
 
@@ -80,17 +97,19 @@ Use `--base` when given. Otherwise resolve in the order documented in `reference
 
 ## Options
 
-| Option          | Type   | Default | Effect                              |
-| --------------- | ------ | ------- | ----------------------------------- |
-| `--base REF`    | string | auto    | Base branch for the diff and the PR |
-| `--skip-enrich` | flag   | off     | Skip Stage 1 document sync          |
-| `--draft`       | flag   | off     | Create the PR as a draft            |
-| `--title TITLE` | string | auto    | PR title; generated when omitted    |
+| Option           | Type   | Default | Effect                                                       |
+| ---------------- | ------ | ------- | ------------------------------------------------------------ |
+| `--base REF`     | string | auto    | Base branch for the diff and the PR                          |
+| `--skip-enrich`  | flag   | off     | Skip Stage 1 document sync                                   |
+| `--auto-approve` | flag   | off     | Forwarded to `enrich-docs`, which then writes without asking |
+| `--draft`        | flag   | off     | Create the PR as a draft                                     |
+| `--title TITLE`  | string | auto    | PR title; generated when omitted                             |
 
 ## Invariants
 
-- This skill never edits source code. Stage 1 changes documents only, through `enrich-docs`, which carries its own approval and validation.
+- This skill never edits source code. Stage 1 changes documents only, through `enrich-docs`, which validates what it writes and asks for approval unless `--auto-approve` was forwarded.
 - Only `INTENT.md` / `DETAIL.md` are staged by this skill. Any other staged path is a defect.
+- Generated paths are classified so the cycle can continue, never staged and never committed. Committing build output stays the developer's call.
 - Document sync failure blocks PR creation. `--skip-enrich` is the only bypass, and it is recorded in the terminal output.
 - Base resolution never guesses silently; an unresolvable base is an error.
 

@@ -1,4 +1,7 @@
-import type { FractalTree, ProjectSnapshot } from '../../../../types/fractal.js';
+import type {
+  FractalTree,
+  ProjectSnapshot,
+} from '../../../../types/fractal.js';
 import type {
   Rule,
   RuleContext,

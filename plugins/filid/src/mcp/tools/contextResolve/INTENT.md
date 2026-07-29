@@ -7,6 +7,7 @@
 ## Structure
 
 - `contextResolve.ts` — snapshot 생성, core context resolution과 envelope payload
+- `utils/` organ — summary 투영, chain 범위 diagnostic scoping과 비교 fractal 해석
 - `index.ts` — named handler export
 
 ## Conventions
@@ -20,7 +21,8 @@
 
 - config와 adapter registry로 snapshot을 한 번 생성
 - project 밖 target과 incomplete owner chain을 명시적으로 거부
-- snapshot diagnostics를 envelope에 보존
+- chain 범위 snapshot diagnostics를 보존하고 제외 건수를 summary로 보고
+- chain 경로를 summary에 실어 payload overflow와 무관하게 인라인 유지
 
 ### Ask first
 

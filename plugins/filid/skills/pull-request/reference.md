@@ -4,12 +4,13 @@
 
 Emit these verbatim; the pipeline matches on the first line.
 
-**Stage 0 — dirty worktree**
+**Stage 0 — dirty source worktree**
 
 ```text
-Pull request aborted: the worktree has uncommitted non-document changes.
-Commit or stash them first. Only INTENT.md / DETAIL.md may be dirty, because
-Stage 1 is their sole committer.
+Pull request aborted: the worktree has uncommitted source changes.
+Commit or stash them first. Only INTENT.md / DETAIL.md and declared generated
+paths may be dirty — Stage 1 is the documents' sole committer, and generated
+paths are never staged here.
 ```
 
 **Stage 0 — dirty documents with `--skip-enrich`**
@@ -83,3 +84,24 @@ Rules:
 - It does not push. The branch must already be pushed, or `gh` will report the failure and Stage 4 falls back to saving the body locally.
 - It does not edit source code. Stage 1 touches documents only.
 - It does not create or resolve debt records. Rejections are recorded by `resolve` in `justifications.md`.
+
+## §5 Dirty path classification
+
+`review_state({action: "assess"})` performs the classification. This section explains what it returns; it is not a procedure to run by hand. Reproducing it in prose was how two runs on the same tree could disagree.
+
+The tool reads `structure.generatedPaths` from the project config and sorts every path `git status` reports into three classes — **first match wins**:
+
+| Test, in order                                           | Class     | Meaning                    |
+| -------------------------------------------------------- | --------- | -------------------------- |
+| Basename is `INTENT.md` or `DETAIL.md`                   | document  | Stage 1 commits it         |
+| Path matches a `generatedPaths` entry, or sits under one | generated | build output, never staged |
+| Anything else                                            | source    | a real change              |
+
+`summary.worktreeDisposition` reports what the classes add up to: `clean`, `documents-only`, `generated-only`, or `source-dirty`. `data.assessment.worktree` carries the three path lists.
+
+What the tool guarantees:
+
+- Patterns match segment by segment; `*` matches exactly one segment. There is no `**` and no partial-segment wildcard, so a pattern names one path shape.
+- `generatedPaths` covers artifacts the build writes **and the repository tracks**. Ignored output never reaches `git status`, so it needs no entry.
+- An empty list makes every non-document path source — the conservative default, not a misconfiguration to work around.
+- The classification decides whether the cycle continues. It never decides what gets committed: only documents are ever staged by this skill.

@@ -6,6 +6,7 @@ import {
   REVIEW_STATE_ERROR_MESSAGES,
 } from '../../../constants/reviewState.js';
 
+import { assessReviewState } from './handlers/assessReviewState.js';
 import { cleanupReviewState } from './handlers/cleanupReviewState.js';
 import { prepareReviewState } from './handlers/prepareReviewState.js';
 import { readReviewCheckpoint } from './handlers/readReviewCheckpoint.js';
@@ -15,6 +16,11 @@ import type {
   ReviewStatePayload,
 } from './state/reviewStateTypes.js';
 
+/**
+ * Dispatch one review_state action.
+ * @param args Unvalidated tool input; shape is checked here before dispatch.
+ * @returns The common payload; which fields carry meaning depends on the action.
+ */
 export async function handleReviewState(
   args: unknown,
 ): Promise<ReviewStatePayload> {
@@ -57,5 +63,13 @@ export async function handleReviewState(
       if (input.confirm !== true)
         throw new Error(REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED);
       return cleanupReviewState(input);
+    case REVIEW_STATE_ACTIONS.ASSESS:
+      return assessReviewState({
+        ...input,
+        action: REVIEW_STATE_ACTIONS.ASSESS,
+        ...(typeof candidate.hasPullRequest === 'boolean'
+          ? { hasPullRequest: candidate.hasPullRequest }
+          : {}),
+      });
   }
 }

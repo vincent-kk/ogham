@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import type {
   DependencyEvidence,
   FractalNode,
@@ -86,6 +87,7 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: '2026-07-28T00:00:00.000Z',
   };
 }

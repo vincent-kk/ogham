@@ -35,6 +35,11 @@ export interface FractalScanSummary {
   nodesByType: Partial<Record<NodeType, number>>;
   violationCount: number;
   certainty: AnalysisCertainty;
+  /**
+   * Diagnostics dropped because they concern nodes the name filter excluded.
+   * Absent when no filter narrowed the query.
+   */
+  diagnosticsOutOfScope?: number;
 }
 
 export interface FractalScanPathEntry {
@@ -43,6 +48,11 @@ export interface FractalScanPathEntry {
   hasIntentMd: boolean;
   hasDetailMd: boolean;
   entryPointCount: number;
+  /**
+   * Names this node's entry points export, deduplicated. Absent when no
+   * adapter inspected the surface — an empty array means inspected and empty.
+   */
+  exportedNames?: string[];
 }
 
 export interface FractalScanPathsData {
@@ -61,8 +71,23 @@ export interface ContextResolveSummary {
   targetPath: string;
   ownerFractalPath: string;
   chainLength: number;
+  /**
+   * Owner-to-root fractal paths. Carried in the summary because an overflowing
+   * payload moves `data` to an artifact while the summary stays inline.
+   */
+  chainPaths: string[];
   nearestDetailPath: string | null;
   outputLanguage: string;
+  /**
+   * Snapshot diagnostics dropped because their path sits outside the resolved
+   * chain. Zero when every diagnostic was in scope.
+   */
+  diagnosticsOutOfScope: number;
+  /**
+   * Lowest fractal owning every `comparePaths` entry, or `null` when no common
+   * owner could be settled. Absent when the caller requested no comparison.
+   */
+  lowestCommonFractalPath?: string | null;
 }
 
 export type ContextResolveData = ContextResolution;

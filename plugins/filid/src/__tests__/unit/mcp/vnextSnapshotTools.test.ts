@@ -20,6 +20,7 @@ import {
   RESTRUCTURE_NODE_TYPES,
   RESTRUCTURE_SCHEMA_VERSION,
 } from '../../../constants/restructure.js';
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import {
   TOOL_PERSISTENCE,
   TOOL_STATUSES,
@@ -158,6 +159,7 @@ const SNAPSHOT: ProjectSnapshot = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-27T00:00:00.000Z',
 };
 
@@ -234,6 +236,31 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
         expect.objectContaining({ path: FEATURE_ROOT }),
       ],
     });
+  });
+
+  it('narrows scan diagnostics to the nodes a name filter kept', async () => {
+    mockedCreateToolSnapshot.mockResolvedValueOnce({
+      ...TOOL_CONTEXT,
+      diagnostics: [
+        { code: 'in-feature', message: 'inside', path: SOURCE_PATH },
+        {
+          code: 'outside-feature',
+          message: 'elsewhere in the project',
+          path: `${PROJECT_ROOT}/other.unit`,
+        },
+      ],
+    });
+
+    const result = await handleFractalScan({
+      path: PROJECT_ROOT,
+      detail: FRACTAL_SCAN_DETAILS.PATHS,
+      nameFilter: 'feature',
+    });
+
+    expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      'in-feature',
+    ]);
+    expect(result.summary.diagnosticsOutOfScope).toBe(1);
   });
 
   it('resolves only the owner-to-root context chain', async () => {

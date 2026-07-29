@@ -3,6 +3,9 @@
 ## Requirements
 
 - 등록된 structure/verification adapter와 config v2로 하나의 `ProjectSnapshot`을 만든다.
+- 호출자는 수집할 증거 축(entry surface, dependency, verification)을 고를 수 있고 기본값은 전부 수집이다. tree와 문서 증거는 축이 아니라 언제나 수집한다 — 나머지 축이 그 위에서만 의미를 갖기 때문이다.
+- 수집하지 않은 축은 빈 값에 `unsupported` certainty로 남고, 무엇을 수집했는지는 `collectedAxes`가 말한다. 빈 결과와 미수집을 구분하는 근거는 이 필드 하나이며, 이를 읽지 않고 축을 신뢰하는 소비자는 계약을 어긴 것이다.
+- 축 선택은 snapshot hash 입력에 포함한다. 축이 다른 두 snapshot이 같은 hash를 갖지 않는다.
 - snapshot은 tree, owner-level dependency graph, verification, adapter IDs, diagnostics, output language, legacy criteria evidence와 content-derived hash를 함께 가진다.
 - ambiguous/unsupported ownership, unresolved local dependency와 문서 위반은 숨기지 않는다.
 - structure/verification detect와 discovery는 adapter마다 한 번 수행하고 portable absolute path claim으로 정규화해 분석에 전달한다.
@@ -16,7 +19,8 @@
 
 ## API Contracts
 
-- `createProjectSnapshot(projectRoot, registry, config): Promise<ProjectSnapshot>` — read-only snapshot을 생성한다.
+- `createProjectSnapshot(projectRoot, registry, config, options?): Promise<ProjectSnapshot>` — read-only snapshot을 생성한다. `options.axes`로 축을 부분 지정하면 지정하지 않은 축은 수집한다.
+- `SnapshotAxisSelection` — `entrySurfaces`, `dependencies`, `verification` 세 boolean. `ProjectSnapshot.collectedAxes`에 그대로 실린다.
 - `computeSnapshotHash(projectRoot, filePaths, inputs?)` — 정렬된 relative path, content와 supplemental input의 SHA-256을 반환한다.
 - graph evidence는 source file, raw specifier와 resolved target을 보존한다.
 
@@ -48,6 +52,13 @@
 - `## Boundary Exemptions`가 없는 DETAIL.md는 `boundaryExemptions`를 만들지 않는다.
 - 선언이 있으면 organ path를 소유 프랙탈 기준 절대 경로로 정규화해 보존하고 그 변경이 snapshot hash를 바꾼다.
 
+### AC-snapshot-axes — 선택된 증거 축
+
+- 축을 지정하지 않은 호출은 세 축을 모두 수집하고 `collectedAxes`가 전부 true다.
+- `dependencies: false`면 `dependencyGraph`가 빈 그래프에 `unsupported` certainty이고 `collectedAxes.dependencies`가 false다. `verification: false`도 같은 방식이다.
+- `entrySurfaces: false`면 node에 `entryPointSurfaces`가 없다.
+- 축이 다른 두 snapshot은 다른 hash를 갖는다. 기본 축 호출의 hash는 축 선택을 도입하기 전과 같은 값이다.
+
 ### AC-snapshot-certainty — 불확실성 보존
 
 - unresolved local dependency가 있으면 graph certainty가 indeterminate다.
@@ -56,4 +67,4 @@
 
 ## Last Updated
 
-2026-07-28 — 경계 면책 evidence와 graph organ path 입력을 계약에 추가했다.
+2026-07-29 — 증거 축 선택과 `collectedAxes`를 계약에 추가했다.

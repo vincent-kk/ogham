@@ -2,37 +2,41 @@
 
 ## §1 Entry-point detection
 
-Detection reads `REVIEW_DIR` — obtained from `review_state`, never derived — and the PR state. The **first** matching row wins; do not evaluate further rows.
+`review_state({action: "assess"})` performs the detection and returns `summary.entryStage`. This table documents what it decides; it is not a probe sequence to run by hand. The **first** matching row wins.
 
-| Priority | Probe                                               | Meaning                                      |
-| -------- | --------------------------------------------------- | -------------------------------------------- |
-| 1        | `REVIEW_DIR/re-validate.md` exists                  | The cycle already closed                     |
-| 2        | `REVIEW_DIR/justifications.md` + unpushed commits   | Corrections landed but are not on the remote |
-| 3        | `REVIEW_DIR/justifications.md`, working tree pushed | Ready to judge                               |
-| 4        | `REVIEW_DIR/fix-requests.md` exists                 | A review demanded changes                    |
-| 5        | `gh pr view` exit 0                                 | A PR exists but has no review                |
-| 6        | none of the above                                   | No PR yet                                    |
+| Priority | Probe                                 | `entryStage` |
+| -------- | ------------------------------------- | ------------ |
+| 1        | `REVIEW_DIR/re-validate.md` exists    | `complete`   |
+| 2        | `REVIEW_DIR/justifications.md` exists | `revalidate` |
+| 3        | `REVIEW_DIR/fix-requests.md` exists   | `resolve`    |
+| 4        | `hasPullRequest` was passed as true   | `review`     |
+| 5        | none of the above                     | `pr-create`  |
 
-Row 1 reports the recorded verdict and ends. Re-running a closed cycle requires `--from=review --force`.
+`complete` reports the recorded verdict and ends. Re-running a closed cycle requires `--from=review --force`.
 
-Unpushed detection: `git rev-list --count @{upstream}..HEAD`. No upstream means the branch was never pushed — treat as unpushed.
+Push state is a separate fact, not a stage: `summary.unpushedCommits` counts commits ahead of the upstream and is `null` when the branch has no upstream — never pushed. At the `revalidate` entry, push when that count is above zero or null.
+
+`hasPullRequest` comes from the caller because filid owns no PR operations. Omitting it reads as "no PR", which sends a branch with an unreviewed PR to `pr-create` — pass it.
 
 ## §2 Resume rules
 
 - Re-running `/filid:pipeline` after any stop is safe. Detection re-enters at the correct stage.
 - `--from` overrides detection but never reorders the stages after it.
 - `--force` applies to the review stage only: it makes `cross-review` prepare a fresh state rather than reusing a cached sealed one. It does not delete corrections already committed.
-- A resumed run repeats `review_state(checkpoint)` — a `stale` disposition after corrections is expected, not an error.
+- A resumed run repeats `review_state(assess)`. It reads no state file, so a resumed run never reports a stale review as an error; the stages that do care — `resolve` and `revalidate` — run their own `checkpoint`.
 
 ## §3 Per-stage failure handling
 
 **`pr-create`**
 
-| Failure                     | Pipeline action                                        |
-| --------------------------- | ------------------------------------------------------ |
-| Dirty non-document worktree | Stop. Report the abort message verbatim.               |
-| Document sync blocked       | Stop. Documents are the PR's precondition.             |
-| `gh` unauthenticated        | Continue — the body is saved locally; report the path. |
+| Failure                    | Pipeline action                                               |
+| -------------------------- | ------------------------------------------------------------- |
+| Dirty **source** worktree  | Stop. Report the abort message verbatim.                      |
+| Dirty generated paths only | Continue — `pr-create` classifies them and never stages them. |
+| Document sync blocked      | Stop. Documents are the PR's precondition.                    |
+| `gh` unauthenticated       | Continue — the body is saved locally; report the path.        |
+
+Generated paths are the ones declared in `structure.generatedPaths`; the classification table is `pull-request/reference.md` §5. A build artifact left in the tree is not a reason to stop a cycle that has not started.
 
 **`review`**
 

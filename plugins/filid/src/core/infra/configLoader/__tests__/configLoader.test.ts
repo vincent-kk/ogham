@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   createDefaultConfig,
   initProject,
+  loadConfig,
   writeConfig,
 } from '../index.js';
 
@@ -88,5 +89,30 @@ describe('initProject — language seeding', () => {
       readFileSync(result.filePath.config, 'utf8'),
     ) as { language?: string };
     expect(written.language).toBe('Korean');
+  });
+});
+
+describe('structure.generatedPaths — build artifact declaration', () => {
+  const tempDirs: string[] = [];
+  const declared = ['plugins/*/bridge', 'dist'];
+
+  afterEach(() => {
+    for (const dir of tempDirs.splice(0))
+      rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('round-trips declared generated paths through strict validation', () => {
+    const repoRoot = mkdtempSync(join(tmpdir(), 'filid-generated-paths-'));
+    tempDirs.push(repoRoot);
+    execSync('git init', { cwd: repoRoot, stdio: 'ignore' });
+
+    const config = createDefaultConfig();
+    config.structure = { generatedPaths: declared };
+    writeConfig(repoRoot, 'project', config);
+
+    const loaded = loadConfig(repoRoot);
+
+    expect(loaded.config?.structure?.generatedPaths).toEqual(declared);
+    expect(loaded.warnings).toEqual([]);
   });
 });

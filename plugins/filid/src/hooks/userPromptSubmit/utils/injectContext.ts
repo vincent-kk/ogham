@@ -15,8 +15,14 @@
  * Callers (see `userPromptSubmit.ts`) are responsible for the
  * validateCwd + isFcaProject gate before invoking `injectContext`.
  */
-import { hasPromptContext, writePromptContext } from '../../../core/infra/cacheManager/caches/promptContextCache.js';
-import { isFirstInSession, markSessionInjected } from '../../../core/infra/cacheManager/caches/sessionCache.js';
+import {
+  hasPromptContext,
+  writePromptContext,
+} from '../../../core/infra/cacheManager/caches/promptContextCache.js';
+import {
+  isFirstInSession,
+  markSessionInjected,
+} from '../../../core/infra/cacheManager/caches/sessionCache.js';
 import type { HookOutput } from '../../../types/hooks.js';
 
 import { buildMinimalContext } from './buildMinimalContext.js';

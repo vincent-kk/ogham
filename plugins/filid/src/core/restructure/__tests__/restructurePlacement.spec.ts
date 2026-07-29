@@ -23,6 +23,7 @@ import {
   RESTRUCTURE_DECISION_REASONS,
   RESTRUCTURE_NODE_TYPES,
 } from '../../../constants/restructure.js';
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
   PlacementRequest,
@@ -311,6 +312,7 @@ function makeSnapshot(
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: CREATED_AT,
   };
 }

@@ -89,8 +89,18 @@ const FRACTAL_SCAN_INPUT_SCHEMA = z.object({
     .nativeEnum(FRACTAL_SCAN_DETAILS)
     .optional()
     .describe(
-      'summary (default) returns counts only; paths adds node paths and ' +
-        'classification basis; full adds snapshot evidence.',
+      'summary (default) returns counts only; paths adds node paths, ' +
+        'classification basis and entry-point export names; full adds ' +
+        'snapshot evidence.',
+    ),
+  nameFilter: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'Directory name matched exactly, narrowing the paths projection to ' +
+        'nodes with that name — answers "where does this organ name appear ' +
+        'across the tree?". Summary counts still describe the whole tree.',
     ),
 });
 
@@ -100,6 +110,15 @@ const CONTEXT_RESOLVE_INPUT_SCHEMA = z.object({
     .string()
     .describe(
       'Absolute path whose owning fractal and INTENT/DETAIL chain to resolve.',
+    ),
+  comparePaths: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Paths whose lowest common fractal to resolve — the placement question ' +
+        '"where does code shared between these consumers belong?". Returns ' +
+        'null when no single fractal owns them all. Omit to resolve only the ' +
+        'target chain.',
     ),
 });
 
@@ -217,6 +236,12 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     action: z.literal(REVIEW_STATE_ACTIONS.CLEANUP),
     confirm: z.literal(true),
   }),
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
+    action: z.literal(REVIEW_STATE_ACTIONS.ASSESS),
+    baseRef: z.string().min(1).optional(),
+    hasPullRequest: z.boolean().optional(),
+  }),
 ]);
 
 const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
@@ -225,7 +250,16 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .nativeEnum(REVIEW_STATE_ACTIONS)
     .describe(
       'prepare opens or resumes a run; checkpoint re-checks source identity; ' +
-        'seal finalizes the verdict; cleanup deletes this branch state.',
+        'seal finalizes the verdict; cleanup deletes this branch state; ' +
+        'assess reports where the merge-track cycle resumes and how the dirty ' +
+        'worktree classifies, without reading or writing review state.',
+    ),
+  hasPullRequest: z
+    .boolean()
+    .optional()
+    .describe(
+      'assess only: whether a pull request exists. Supplied by the caller — ' +
+        'this tool performs no PR operations. Omitted means no PR.',
     ),
   baseRef: z
     .string()

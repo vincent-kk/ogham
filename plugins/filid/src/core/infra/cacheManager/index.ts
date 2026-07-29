@@ -18,10 +18,7 @@ export {
   removeSessionFiles,
   sessionIdHash,
 } from './caches/sessionCache.js';
-export {
-  readBoundary,
-  writeBoundary,
-} from './caches/boundaryCache.js';
+export { readBoundary, writeBoundary } from './caches/boundaryCache.js';
 export {
   commitVisit,
   fcaMapPath,
@@ -35,18 +32,7 @@ export type {
   VisitDecision,
   VisitScope,
 } from './caches/fractalMapCache.js';
-export {
-  readDelivered,
-} from './caches/deliveredCache.js';
-export {
-  incrementTurn,
-  readTurn,
-} from './caches/turnCounter.js';
-export {
-  getLastRunHash,
-  saveRunHash,
-} from './caches/runHashCache.js';
-export {
-  hasGuideInjected,
-  markGuideInjected,
-} from './caches/guideCache.js';
+export { readDelivered } from './caches/deliveredCache.js';
+export { incrementTurn, readTurn } from './caches/turnCounter.js';
+export { getLastRunHash, saveRunHash } from './caches/runHashCache.js';
+export { hasGuideInjected, markGuideInjected } from './caches/guideCache.js';

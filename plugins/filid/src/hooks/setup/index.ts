@@ -1,3 +1,1 @@
-export {
-  processSetup,
-} from './setup.js';
+export { processSetup } from './setup.js';

@@ -6,12 +6,12 @@ Filid 1.0의 project/config/scan/context/plan/validation/review 동작을 정확
 
 ## Structure
 
-| Tool fractal                                           | Role               |
-| ------------------------------------------------------ | ------------------ |
-| `projectInit`, `ruleDocsSync`, `openSettings`          | 초기화와 설정      |
-| `fractalScan`, `contextResolve`, `restructurePlan`     | FCA 증거와 계획    |
-| `structureValidate`, `verificationScan`, `reviewState` | 검증과 review 상태 |
-| `utils/`                                               | shared host guards |
+| Tool fractal                                           | Role                              |
+| ------------------------------------------------------ | --------------------------------- |
+| `projectInit`, `ruleDocsSync`, `openSettings`          | 초기화와 설정                     |
+| `fractalScan`, `contextResolve`, `restructurePlan`     | FCA 증거와 계획                   |
+| `structureValidate`, `verificationScan`, `reviewState` | 검증과 review 상태                |
+| `utils/`                                               | shared host guards와 진단 scoping |
 
 ## Conventions
 

@@ -13,9 +13,7 @@ interface OpenSettingsToolExtra {
   signal?: AbortSignal;
 }
 
-type OpenSettingsSummary = Awaited<
-  ReturnType<typeof handleOpenSettings>
->;
+type OpenSettingsSummary = Awaited<ReturnType<typeof handleOpenSettings>>;
 
 const EMPTY_DIAGNOSTICS: [] = [];
 
@@ -24,10 +22,7 @@ export async function handleOpenSettingsTool(
   extra?: OpenSettingsToolExtra,
 ): Promise<ToolPayload<OpenSettingsSummary, never>> {
   const root = projectRoot(input.path);
-  const output = await handleOpenSettings(
-    { ...input, path: root },
-    extra,
-  );
+  const output = await handleOpenSettings({ ...input, path: root }, extra);
 
   return {
     projectRoot: root,

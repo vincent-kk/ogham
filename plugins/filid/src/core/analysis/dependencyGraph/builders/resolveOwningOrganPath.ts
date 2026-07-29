@@ -20,20 +20,23 @@ function contains(parentPath: string, childPath: string): boolean {
  * owner is required — otherwise a file in `skills/setup/` would report the
  * enclosing `skills/` organ as its owner's compartment.
  *
+ * @param organPathsDeepestFirst Organ candidates ordered by descending path
+ *   length — pass them through `sortPathsDeepestFirst`. An unordered list
+ *   returns the first enclosing organ rather than the deepest.
+ * @param ownerPath Fractal that must contain the organ.
+ * @param filePath Path whose owning organ is wanted.
  * @returns the organ path, or `null` when `filePath` is an owner peer rather
  *   than an organ member.
  */
 export function resolveOwningOrganPath(
-  organPaths: readonly string[],
+  organPathsDeepestFirst: readonly string[],
   ownerPath: string,
   filePath: string,
 ): string | null {
   return (
-    [...organPaths]
-      .sort((left, right) => right.length - left.length)
-      .find(
-        (organPath) =>
-          contains(ownerPath, organPath) && contains(organPath, filePath),
-      ) ?? null
+    organPathsDeepestFirst.find(
+      (organPath) =>
+        contains(ownerPath, organPath) && contains(organPath, filePath),
+    ) ?? null
   );
 }

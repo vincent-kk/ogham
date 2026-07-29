@@ -1,5 +1,4 @@
 import type { Rule, RuleOverride } from '../../../../types/rules.js';
-
 import { remapSeverity } from '../utils/remapSeverity.js';
 import { wrapExempt } from '../utils/wrapExempt.js';
 
