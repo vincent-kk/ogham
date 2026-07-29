@@ -1,4 +1,5 @@
 import { readSignals } from '../store/readSignals.js';
+import { withSignalsLock } from '../store/withSignalsLock.js';
 import { writeSignals } from '../store/writeSignals.js';
 import { hashCommand } from '../utils/hashCommand.js';
 
@@ -16,10 +17,12 @@ export function recordBashSuccess(
   sessionId: string,
   command: string,
 ): void {
-  const signals = readSignals(projectRoot, sessionId);
-  const hash = hashCommand(command);
-  if (signals.counts[hash] === undefined) return;
+  withSignalsLock(projectRoot, () => {
+    const signals = readSignals(projectRoot, sessionId);
+    const hash = hashCommand(command);
+    if (signals.counts[hash] === undefined) return;
 
-  delete signals.counts[hash];
-  writeSignals(projectRoot, signals);
+    delete signals.counts[hash];
+    writeSignals(projectRoot, signals);
+  });
 }

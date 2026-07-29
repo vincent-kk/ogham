@@ -1,5 +1,6 @@
 import { FAILURE_CHAIN_THRESHOLD } from '../../../constants/failureChain.js';
 import { readSignals } from '../store/readSignals.js';
+import { withSignalsLock } from '../store/withSignalsLock.js';
 import { writeSignals } from '../store/writeSignals.js';
 import { hashCommand } from '../utils/hashCommand.js';
 
@@ -17,15 +18,17 @@ export function recordBashFailure(
   sessionId: string,
   command: string,
 ): boolean {
-  const signals = readSignals(projectRoot, sessionId);
-  const hash = hashCommand(command);
-  const count = (signals.counts[hash] ?? 0) + 1;
-  signals.counts[hash] = count;
+  return withSignalsLock(projectRoot, () => {
+    const signals = readSignals(projectRoot, sessionId);
+    const hash = hashCommand(command);
+    const count = (signals.counts[hash] ?? 0) + 1;
+    signals.counts[hash] = count;
 
-  const announce =
-    count >= FAILURE_CHAIN_THRESHOLD && !signals.announced.includes(hash);
-  if (announce) signals.announced.push(hash);
+    const announce =
+      count >= FAILURE_CHAIN_THRESHOLD && !signals.announced.includes(hash);
+    if (announce) signals.announced.push(hash);
 
-  writeSignals(projectRoot, signals);
-  return announce;
+    writeSignals(projectRoot, signals);
+    return announce;
+  });
 }

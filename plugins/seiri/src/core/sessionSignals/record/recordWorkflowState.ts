@@ -2,6 +2,7 @@ import { SKILL_ID_PREFIX } from '../../../constants/plugin.js';
 import { WORKFLOW_SKILLS } from '../../../constants/workflowChain.js';
 import type { WorkflowSkill } from '../../../constants/workflowChain.js';
 import { readSignals } from '../store/readSignals.js';
+import { withSignalsLock } from '../store/withSignalsLock.js';
 import { writeSignals } from '../store/writeSignals.js';
 
 /**
@@ -23,10 +24,12 @@ export function recordWorkflowState(
   const skill = chainMember(skillId);
   if (skill === undefined) return false;
 
-  const signals = readSignals(projectRoot, sessionId);
-  signals.workflow = { skill, announced: false };
-  writeSignals(projectRoot, signals);
-  return true;
+  return withSignalsLock(projectRoot, () => {
+    const signals = readSignals(projectRoot, sessionId);
+    signals.workflow = { skill, announced: false };
+    writeSignals(projectRoot, signals);
+    return true;
+  });
 }
 
 function chainMember(skillId: unknown): WorkflowSkill | undefined {

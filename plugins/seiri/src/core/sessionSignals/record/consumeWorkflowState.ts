@@ -1,5 +1,6 @@
 import type { WorkflowSkill } from '../../../constants/workflowChain.js';
 import { readSignals } from '../store/readSignals.js';
+import { withSignalsLock } from '../store/withSignalsLock.js';
 import { writeSignals } from '../store/writeSignals.js';
 
 /**
@@ -14,11 +15,13 @@ export function consumeWorkflowState(
   projectRoot: string,
   sessionId: string,
 ): WorkflowSkill | undefined {
-  const signals = readSignals(projectRoot, sessionId);
-  const pending = signals.workflow;
-  if (pending === undefined || pending.announced) return undefined;
+  return withSignalsLock(projectRoot, () => {
+    const signals = readSignals(projectRoot, sessionId);
+    const pending = signals.workflow;
+    if (pending === undefined || pending.announced) return undefined;
 
-  signals.workflow = { ...pending, announced: true };
-  writeSignals(projectRoot, signals);
-  return pending.skill;
+    signals.workflow = { ...pending, announced: true };
+    writeSignals(projectRoot, signals);
+    return pending.skill;
+  });
 }
