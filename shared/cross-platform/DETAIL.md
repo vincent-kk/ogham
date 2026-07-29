@@ -82,10 +82,10 @@ clearConfigPaths(
   source: Record<string, unknown>,
   paths: readonly string[],
 ): Record<string, unknown>;
-stripForbiddenKeys(
-  document: Record<string, unknown>,
-): Record<string, unknown>;
 ```
+
+`stripForbiddenKeys`는 이 subpath로 노출하지 않는다. `writeConfigLayer`가 쓰기
+직전에 내부적으로 호출하는 단계이며, 소비자가 직접 부를 자리는 없다.
 
 user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
 `<projectRoot>/.<pluginName>/config.json`이며 project가 user를 재정의한다.
@@ -169,6 +169,13 @@ user 위에 병합한 결과)를 보여준다. project에서 그 레이어가 �
 저장 문서도 **고른 그 문서에서 출발한다** — 병합 결과에서 출발하면 user 저장이
 project의 재정의를 user 파일에 구워 넣는다. 떠나는 레이어의 미저장 편집은
 따라오지 않는다.
+
+`seiri`는 세 번째 형태다. 편집 대상이 한 키짜리 다이얼이라 병합할 문서가 없고,
+서버가 `effective` 없는 자체 스냅샷을 실어 보내면 페이지가
+`layers[scope] ?? layers.user ?? 기본 다이얼` 순으로 유효값을 정한다. 값 하나에
+레이어를 합치는 단계를 두는 것이 오히려 군더더기라 택한 형태이며, "페이지가
+레이어 원문을 합치지 않는다"는 위 규칙은 그대로 지킨다 — 고르는 것은 문서가
+아니라 이미 정규화된 값 하나다.
 
 `filid`와 `seiri`에서는 이 토글이 config 파일뿐 아니라 **규칙 문서가 배포되는
 채널**까지 정한다. user는 호스트 상태 루트(`~/.claude/rules/`), project는 저장소
@@ -264,10 +271,19 @@ portable 경로 함수도 `compat/basename`, `compat/join`,
 root 진단 의미를 유지하면서 Node builtin만 사용한다. 범용 `spawnCli`,
 `cross-spawn`, executable discovery를 import graph에 포함하지 않는다.
 
-## Last Updated
-
-2026-07-29 — 설정 페이지가 scope마다 폼을 다시 채우는 `configByScope` 규약 추가.
+## History
 
 2026-07-29 — user/project 두 네임스페이스를 병합해 읽는 `config-scope` 추가.
+설정 페이지가 계층마다 폼을 다시 앉히도록 `configByScope` 규약을 함께 정했다.
+병합을 서버가 전담하는 쪽을 택한 이유는, 런타임과 설정 페이지가 각자 합치면
+"보이는 값"과 "먹는 값"이 갈라지기 때문이다.
 
 2026-07-26 — agent artifact 프리미티브와 hook용 목적별 entry point 추가.
+훅 번들이 aggregate 진입점을 잡으면 재노출 그래프를 통째로 끌어오므로,
+목적별 subpath를 따로 냈다.
+
+## Last Updated
+
+2026-07-29 — `config-scope`의 `merge`·`layers` 연산을 각 fractal의 `operations/`
+organ으로 내리고, 소비자 없는 `FORBIDDEN_KEYS`·`isPlainObject` 재노출을 공개
+표면에서 거뒀다.

@@ -16,7 +16,7 @@ import {
 import type { LensConfig } from "../configSchema/configSchema.js";
 import { CONFIG_VERSION, DEFAULT_LAYERS } from "../defaults/defaults.js";
 
-import { configLayers } from "./configLayers.js";
+import { configLayers } from "./utils/configLayers.js";
 
 /**
  * Load the config in effect: the user layer with the project layer over it.

@@ -6,8 +6,6 @@ export {
 } from "./layers/index.js";
 export {
   clearConfigPaths,
-  FORBIDDEN_KEYS,
-  isPlainObject,
   listOverriddenPaths,
   mergeConfigLayers,
 } from "./merge/index.js";

@@ -4,11 +4,11 @@ config 파일의 읽기, 쓰기, 기본값 생성을 담당하는 설정 로더.
 
 ## Structure
 
-| File              | Role                                       |
-| ----------------- | ------------------------------------------ |
-| `configLoader.ts` | load(병합) · loadConfigScope · write(단일) |
-| `configLayers.ts` | 두 레이어 좌표 해석                        |
-| `index.ts`        | barrel                                     |
+| File                    | Role                                       |
+| ----------------------- | ------------------------------------------ |
+| `configLoader.ts`       | load(병합) · loadConfigScope · write(단일) |
+| `utils/configLayers.ts` | 두 레이어 좌표 해석                        |
+| `index.ts`              | barrel                                     |
 
 ## Conventions
 

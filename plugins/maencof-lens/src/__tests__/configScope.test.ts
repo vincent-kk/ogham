@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { configLayers } from "../config/configLoader/configLayers.js";
+import { configLayers } from "../config/configLoader/utils/configLayers.js";
 import {
   loadConfig,
   loadConfigScope,

@@ -1,4 +1,4 @@
-import { removePath } from "./utils/removePath.js";
+import { removePath } from "../utils/removePath.js";
 
 /**
  * dot path 목록을 지운 새 문서를 반환한다.

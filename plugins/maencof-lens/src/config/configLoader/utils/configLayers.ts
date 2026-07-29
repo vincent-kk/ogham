@@ -1,7 +1,7 @@
 import { resolveConfigLayers } from "@ogham/cross-platform/config-scope";
 import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
 
-import { CONFIG_DIR, CONFIG_FILE } from "../defaults/defaults.js";
+import { CONFIG_DIR, CONFIG_FILE } from "../../defaults/index.js";
 
 /**
  * Both config files' absolute paths for a project.

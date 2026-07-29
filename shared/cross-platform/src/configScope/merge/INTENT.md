@@ -5,15 +5,15 @@
 
 ## Structure
 
-| File                     | Role                                |
-| ------------------------ | ----------------------------------- |
-| `mergeConfigLayers.ts`   | user 위에 project를 재귀 병합       |
-| `listOverriddenPaths.ts` | project 리프의 dot path 열거        |
-| `clearConfigPaths.ts`    | dot path 목록 삭제                  |
-| `stripForbiddenKeys.ts`  | 쓰기 전 위험 키 제거                |
-| `utils/isPlainObject.ts` | 순수 객체 판정 3단                  |
-| `utils/forbiddenKeys.ts` | 프로토타입을 건드리는 키 목록       |
-| `utils/removePath.ts`    | segment 열 하나 삭제와 빈 상위 정리 |
+| File                                | Role                                |
+| ----------------------------------- | ----------------------------------- |
+| `operations/mergeConfigLayers.ts`   | user 위에 project를 재귀 병합       |
+| `operations/listOverriddenPaths.ts` | project 리프의 dot path 열거        |
+| `operations/clearConfigPaths.ts`    | dot path 목록 삭제                  |
+| `operations/stripForbiddenKeys.ts`  | 쓰기 전 위험 키 제거                |
+| `utils/isPlainObject.ts`            | 순수 객체 판정 3단                  |
+| `utils/forbiddenKeys.ts`            | 프로토타입을 건드리는 키 목록       |
+| `utils/removePath.ts`               | segment 열 하나 삭제와 빈 상위 정리 |
 
 ## Conventions
 
@@ -46,5 +46,4 @@
 
 ## Dependencies
 
-- 내부: 없음.
-- 외부: 없음.
+- 내부·외부 모두 없음.

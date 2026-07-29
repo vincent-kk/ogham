@@ -34,7 +34,7 @@
 
 ### Ask first
 
-- `ConfigScopeState` 필드 변경. 설정 페이지 8곳의 wire 계약이다.
+- `ConfigScopeState` 필드 변경. 설정 페이지 7곳의 wire 계약이다.
 - 레이어를 셋 이상으로 늘리기.
 
 ### Never do
@@ -45,5 +45,4 @@
 
 ## Dependencies
 
-- 내부: `filesystem`, `paths`.
-- 외부: 없음.
+- 내부: `filesystem`, `paths`. 외부: 없음.

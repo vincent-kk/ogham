@@ -1,5 +1,5 @@
-import { listOverriddenPaths, mergeConfigLayers } from "../merge/index.js";
-import type { ConfigLayerPaths, ConfigScopeState } from "../types/types.js";
+import { listOverriddenPaths, mergeConfigLayers } from "../../merge/index.js";
+import type { ConfigLayerPaths, ConfigScopeState } from "../../types/types.js";
 
 import { readConfigLayers } from "./readConfigLayers.js";
 

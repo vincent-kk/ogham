@@ -1,6 +1,6 @@
-export { clearConfigPaths } from "./clearConfigPaths.js";
-export { listOverriddenPaths } from "./listOverriddenPaths.js";
-export { mergeConfigLayers } from "./mergeConfigLayers.js";
-export { stripForbiddenKeys } from "./stripForbiddenKeys.js";
+export { clearConfigPaths } from "./operations/clearConfigPaths.js";
+export { listOverriddenPaths } from "./operations/listOverriddenPaths.js";
+export { mergeConfigLayers } from "./operations/mergeConfigLayers.js";
+export { stripForbiddenKeys } from "./operations/stripForbiddenKeys.js";
 export { FORBIDDEN_KEYS } from "./utils/forbiddenKeys.js";
 export { isPlainObject } from "./utils/isPlainObject.js";

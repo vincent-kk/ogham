@@ -1,6 +1,9 @@
-import type { ConfigLayerDocuments, ConfigLayerPaths } from "../types/types.js";
+import type {
+  ConfigLayerDocuments,
+  ConfigLayerPaths,
+} from "../../types/types.js";
 
-import { readLayer } from "./utils/readLayer.js";
+import { readLayer } from "../utils/readLayer.js";
 
 /**
  * 두 레이어 파일을 읽어 원문 문서와 경고를 돌려준다. 던지지 않는다.

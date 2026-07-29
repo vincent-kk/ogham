@@ -1,4 +1,4 @@
-export { buildConfigScopeState } from "./buildConfigScopeState.js";
-export { readConfigLayers } from "./readConfigLayers.js";
-export { resolveConfigLayers } from "./resolveConfigLayers.js";
-export { writeConfigLayer } from "./writeConfigLayer.js";
+export { buildConfigScopeState } from "./operations/buildConfigScopeState.js";
+export { readConfigLayers } from "./operations/readConfigLayers.js";
+export { resolveConfigLayers } from "./operations/resolveConfigLayers.js";
+export { writeConfigLayer } from "./operations/writeConfigLayer.js";

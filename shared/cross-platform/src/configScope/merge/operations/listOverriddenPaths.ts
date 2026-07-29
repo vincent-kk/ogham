@@ -1,5 +1,5 @@
-import { FORBIDDEN_KEYS } from "./utils/forbiddenKeys.js";
-import { isPlainObject } from "./utils/isPlainObject.js";
+import { FORBIDDEN_KEYS } from "../utils/forbiddenKeys.js";
+import { isPlainObject } from "../utils/isPlainObject.js";
 
 /**
  * project 레이어에서 값을 가진 리프의 dot path를 열거한다.

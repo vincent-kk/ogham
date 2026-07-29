@@ -1,8 +1,8 @@
-import { pluginCache, portableJoin } from "../../paths/index.js";
+import { pluginCache, portableJoin } from "../../../paths/index.js";
 import type {
   ConfigLayerPaths,
   ResolveConfigLayersOptions,
-} from "../types/types.js";
+} from "../../types/types.js";
 
 /**
  * 두 레이어 파일의 절대 경로를 정한다. 파일 존재 여부는 보지 않는다 —

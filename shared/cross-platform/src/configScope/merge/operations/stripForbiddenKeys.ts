@@ -1,5 +1,5 @@
-import { FORBIDDEN_KEYS } from "./utils/forbiddenKeys.js";
-import { isPlainObject } from "./utils/isPlainObject.js";
+import { FORBIDDEN_KEYS } from "../utils/forbiddenKeys.js";
+import { isPlainObject } from "../utils/isPlainObject.js";
 
 /**
  * A copy of the document without the keys the merge would refuse to honour.

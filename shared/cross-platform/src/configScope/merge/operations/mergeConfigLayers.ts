@@ -1,5 +1,5 @@
-import { FORBIDDEN_KEYS } from "./utils/forbiddenKeys.js";
-import { isPlainObject } from "./utils/isPlainObject.js";
+import { FORBIDDEN_KEYS } from "../utils/forbiddenKeys.js";
+import { isPlainObject } from "../utils/isPlainObject.js";
 
 /**
  * user 레이어 위에 project 레이어를 재귀 병합한다.

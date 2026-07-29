@@ -1,10 +1,10 @@
 import {
   ensureDirectorySync,
   writeFileAtomicallySync,
-} from "../../filesystem/index.js";
-import { portableDirname } from "../../paths/index.js";
-import { stripForbiddenKeys } from "../merge/index.js";
-import type { ConfigLayerPaths, ConfigScope } from "../types/types.js";
+} from "../../../filesystem/index.js";
+import { portableDirname } from "../../../paths/index.js";
+import { stripForbiddenKeys } from "../../merge/index.js";
+import type { ConfigLayerPaths, ConfigScope } from "../../types/types.js";
 
 /**
  * 한 레이어 파일을 원자적으로 교체하고 쓴 경로를 반환한다.

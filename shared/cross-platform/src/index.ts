@@ -1,8 +1,6 @@
 export {
   buildConfigScopeState,
   clearConfigPaths,
-  FORBIDDEN_KEYS,
-  isPlainObject,
   listOverriddenPaths,
   mergeConfigLayers,
   readConfigLayers,
