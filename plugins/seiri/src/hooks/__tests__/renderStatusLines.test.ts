@@ -39,6 +39,7 @@ function dial(
     effective,
     source: effective === 'advisory' ? 'default' : 'baseline',
     baseline: effective === 'advisory' ? null : effective,
+    user: null,
     runtime: null,
     warnings: [],
     ...overrides,

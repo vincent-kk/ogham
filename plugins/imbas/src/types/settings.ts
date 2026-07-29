@@ -2,6 +2,7 @@
  * @file settings.ts
  * @description Zod schemas and types for the open_settings page contract
  */
+import type { ConfigScopeState } from '@ogham/cross-platform/config-scope';
 import { z } from 'zod';
 
 import { ImbasConfigSchema } from './config.js';
@@ -31,17 +32,32 @@ export type SettingsBootstrap = z.infer<typeof SettingsBootstrapSchema>;
 export interface SettingsPageState {
   projectRoot: string;
   configExists: boolean;
-  config: ImbasConfig;
+  /**
+   * The config each layer resolves to. The page seats its form — and starts
+   * its save document — from the one the toggle names, so a save under `user`
+   * never carries the project layer's overrides back into the user file.
+   * `project` is the effective merge; `user` is that layer alone.
+   */
+  configByScope: {
+    user: ImbasConfig;
+    project: ImbasConfig;
+  };
+  /** Per-layer raw documents and the dot paths the project layer overrode. */
+  scope: ConfigScopeState;
   suggestedLocalKey: string;
   bootstrap: SettingsBootstrap;
 }
 
 /**
- * POST /save body. `config` replaces `.imbas/config.json` wholesale;
- * `options` carries page-level intents that are not config (e.g. GitHub
- * label provisioning, executed by the setup skill after save).
+ * POST /save body. `config` replaces the named layer wholesale; `options`
+ * carries page-level intents that are not config (e.g. GitHub label
+ * provisioning, executed by the setup skill after save).
+ *
+ * `scope` is required rather than defaulted: the page always knows which
+ * layer it is editing, and a silent default would write the wrong file.
  */
 export const SettingsSaveBodySchema = z.object({
+  scope: z.enum(['user', 'project']),
   config: ImbasConfigSchema,
   options: z
     .object({ provision_labels: z.boolean().default(false) })

@@ -30,7 +30,7 @@ describe('writeConfig', () => {
     const config = createDefaultConfig();
     config.language = 'ko';
 
-    writeConfig(nestedDir, config);
+    writeConfig(nestedDir, 'project', config);
 
     const rootConfigPath = join(repoRoot, '.filid', 'config.json');
     const nestedConfigPath = join(nestedDir, '.filid', 'config.json');

@@ -1,10 +1,16 @@
 import { type Server, createServer } from 'node:http';
 
+import type {
+  ConfigScope,
+  ConfigScopeState,
+} from '@ogham/cross-platform/config-scope';
 import { generateToken } from '@ogham/http-kit/token';
 
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
 import {
-  loadConfig as loadConfigDefault,
+  type ConfigByScope,
+  loadConfigByScope as loadConfigByScopeDefault,
+  loadConfigState as loadConfigStateDefault,
   saveConfig as saveConfigDefault,
 } from '../../../../core/configManager/index.js';
 import {
@@ -22,8 +28,17 @@ import { createRouteHandler } from './routing/routes.js';
 export interface StartSettingsServerOptions {
   settingsHtml: string;
   idleMs?: number;
-  loadConfig?: () => Promise<Config>;
-  saveConfig?: (config: Config) => Promise<void>;
+  /**
+   * How this server reads config. The merged view handlers use is derived
+   * from it, so this is the only config read to override — two seams would
+   * let a caller stub one and get the real file through the other.
+   */
+  loadConfigByScope?: () => Promise<ConfigByScope>;
+  loadConfigState?: () => ConfigScopeState;
+  saveConfig?: (
+    scope: ConfigScope,
+    document: Record<string, unknown>,
+  ) => Promise<ConfigScopeState>;
   provisionYoutube?: (
     next: YoutubeAddonConfig,
     prev?: YoutubeAddonConfig,
@@ -44,18 +59,30 @@ export async function startSettingsServer(
 
   const idleMs = options.idleMs ?? SETTINGS_SERVER_IDLE_MS;
   const token = generateToken();
-  const loadConfigImpl = options.loadConfig ?? loadConfigDefault;
+  const loadConfigByScopeImpl =
+    options.loadConfigByScope ?? loadConfigByScopeDefault;
+  const loadConfigStateImpl = options.loadConfigState ?? loadConfigStateDefault;
   const saveConfigImpl = options.saveConfig ?? saveConfigDefault;
   let currentConfig: Config | null = null;
 
   async function loadCurrentConfig(): Promise<Config> {
-    currentConfig = await loadConfigImpl();
+    currentConfig = (await loadConfigByScopeImpl()).project;
     return currentConfig;
   }
 
-  async function saveAndReloadConfig(config: Config): Promise<void> {
-    await saveConfigImpl(config);
-    currentConfig = await loadConfigImpl();
+  async function loadCurrentConfigByScope(): Promise<ConfigByScope> {
+    const byScope = await loadConfigByScopeImpl();
+    currentConfig = byScope.project;
+    return byScope;
+  }
+
+  async function saveAndReloadConfig(
+    scope: ConfigScope,
+    document: Record<string, unknown>,
+  ): Promise<ConfigScopeState> {
+    const state = await saveConfigImpl(scope, document);
+    currentConfig = (await loadConfigByScopeImpl()).project;
+    return state;
   }
 
   async function closeServer(): Promise<void> {
@@ -94,6 +121,8 @@ export async function startSettingsServer(
     token,
     settingsHtml: options.settingsHtml,
     loadConfig: loadCurrentConfig,
+    loadConfigByScope: loadCurrentConfigByScope,
+    loadConfigState: loadConfigStateImpl,
     saveConfig: saveAndReloadConfig,
     provisionYoutube:
       options.provisionYoutube ??

@@ -4,10 +4,13 @@ import { sendJson } from "@ogham/http-kit/response";
 
 import type { RouteContext } from "../routing/routeContext.js";
 
-/** GET /api/config — return the current Config as JSON. */
-export async function handleGetConfig(
+/**
+ * GET /api/config — return both config layers, the merge, and what the project
+ * layer overrode. The page needs all four to draw the scope toggle and badges.
+ */
+export function handleGetConfig(
   context: RouteContext,
   response: ServerResponse,
-): Promise<void> {
-  sendJson(response, 200, { ok: true, config: await context.loadConfig() });
+): void {
+  sendJson(response, 200, { ok: true, state: context.loadConfigState() });
 }

@@ -1,3 +1,5 @@
+import type { ConfigScope } from '@ogham/cross-platform/config-scope';
+
 /** Single entry in templates/rules/manifest.json. */
 export interface RuleDocEntry {
   id: string;
@@ -22,6 +24,16 @@ export interface RuleDocsManifest {
   rules: RuleDocEntry[];
 }
 
+/** Owned documents withdrawn from the layer the caller did not choose. */
+export interface RetiredScopeReport {
+  /** The layer they were withdrawn from — never the one just written. */
+  scope: ConfigScope;
+  /** Channel the documents were removed from, shown to the user as-is. */
+  displayTarget: string;
+  /** Filenames actually removed; the field is absent when this list is empty. */
+  filenames: string[];
+}
+
 /** Report returned by syncRuleDocs. */
 export interface RuleDocSyncResult {
   copied: string[];
@@ -36,6 +48,13 @@ export interface RuleDocSyncResult {
    * not request resync, or the hash could not be computed. */
   drift: string[];
   skipped: Array<{ id: string; reason: string }>;
+  /**
+   * What the sync withdrew from the other layer so the documents live in one
+   * place. Present only when the caller named a scope AND something was
+   * actually removed — a caller that named no layer made no placement
+   * decision, and an empty move is not worth reporting.
+   */
+  otherScope?: RetiredScopeReport;
 }
 
 /** Per-rule status snapshot used by the setup checkbox UI. */
@@ -94,4 +113,15 @@ export interface SyncRuleDocsOptions {
   resync?: Iterable<string>;
   /** Override for the plugin root (defaults to the host's plugin root). */
   pluginRoot?: string;
+  /**
+   * Which layer the documents are deployed to — the same choice that decides
+   * where the config is written, so the user answers it once. `user` targets
+   * the host state root, `project` the repository channel.
+   *
+   * Naming a layer is a placement decision: the sync writes it and then
+   * withdraws the owned documents from the other layer, reporting them in
+   * `otherScope`. Omitting it deploys to `project` and leaves the user layer
+   * alone, so a headless call cannot silently erase a global deployment.
+   */
+  scope?: ConfigScope;
 }

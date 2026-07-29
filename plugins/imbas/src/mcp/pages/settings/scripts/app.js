@@ -38,13 +38,112 @@
     return;
   }
 
-  var config = state.config;
+  // One normalized config per layer, so moving the toggle re-seats the form
+  // without a round trip. The server normalizes both — this page knows neither
+  // the schema nor its defaults.
+  var configByScope = state.configByScope || { user: {}, project: {} };
+  // The layer currently being edited. `applyScopeConfig` re-points it.
+  var config = {};
   var bootstrap = state.bootstrap || {};
 
   // --- header ------------------------------------------------------------
   $('project-chip').textContent = state.projectRoot;
   $('project-chip').title = state.projectRoot;
   if (!state.configExists) $('init-note').hidden = false;
+
+  // --- config scope (user / project) ---------------------------------------
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". This page is minified
+  // but never bundled, so it cannot import the shared merge helpers — it only
+  // needs to name the layer it is writing.
+  var scopeState = state.scope || {
+    paths: { user: '', project: null },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  // Open on the layer that is currently deciding, so pressing Save without
+  // touching the toggle rewrites the file the config already came from.
+  var scope = scopeState.layers.project === null ? 'user' : 'project';
+
+  function renderScope() {
+    var host = $('config_scope');
+    if (!host) return;
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
+    host.textContent = '';
+    [
+      ['user', 'User', 'Applies to every workspace you open.'],
+      ['project', 'Project', 'Committed with the repository; overrides User.'],
+    ].forEach(function (option) {
+      var label = document.createElement('label');
+      label.className = 'scope-option';
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.disabled = option[0] === 'project' && !scopeState.paths.project;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        applyScopeConfig();
+        renderScope();
+      });
+      var text = document.createElement('span');
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+      if (option[0] === scope) renderScopeHint(option[2]);
+    });
+    if (!hadFocus) return;
+    var focused = host.querySelector('input:checked');
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the lede: what the chosen layer means on the left,
+   * the file it writes on the right. Two nodes rather than one string, so the
+   * path can sit at the header's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = $('scope_hint');
+    if (!hint) return;
+    hint.textContent = '';
+    var unavailable = scope === 'project' && !scopeState.paths.project;
+    hint.appendChild(
+      scopeHintPart(
+        'scope-hint__meaning',
+        unavailable
+          ? 'No project root is available, so only User can be edited.'
+          : meaning,
+      ),
+    );
+    if (unavailable) return;
+    hint.appendChild(
+      scopeHintPart('scope-hint__path', scopeState.paths[scope] || ''),
+    );
+  }
+
+  /**
+   * Builds one span of the hint line.
+   *
+   * @param {string} className Class that decides which edge the part sits on.
+   * @param {string} text Plain text; never markup — this page assigns
+   *   textContent only.
+   * @returns {HTMLSpanElement} The detached span, ready to append.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement('span');
+    part.className = className;
+    part.textContent = text;
+    return part;
+  }
+
+  renderScope();
 
   // --- provider radios + availability hints ------------------------------
   function providerHint(name) {
@@ -76,63 +175,80 @@
   }
 
   var radios = form.querySelectorAll('input[name="provider"]');
-  for (var r = 0; r < radios.length; r++) {
-    radios[r].checked = radios[r].value === config.provider;
+  for (var r = 0; r < radios.length; r++)
     radios[r].addEventListener('change', syncProviderBlocks);
+
+  /** Tick the provider the chosen layer names. */
+  function prefillProvider() {
+    for (var i = 0; i < radios.length; i++)
+      radios[i].checked = radios[i].value === config.provider;
   }
 
   // --- project reference -------------------------------------------------
-  (function renderProjectRef() {
-    var ref = config.defaults.project_ref || '';
+  // The Jira project list comes from the session bootstrap, not from either
+  // config layer, so it is populated once — re-running it on every toggle
+  // would stack duplicate options.
+  (function populateProjectOptions() {
     var projects = bootstrap.jira_projects || [];
-    if (projects.length > 0) {
-      $('jira-select-wrap').hidden = false;
-      var select = $('jira-project-select');
-      var blank = document.createElement('option');
-      blank.value = '';
-      blank.textContent = '— pick a project —';
-      select.appendChild(blank);
-      projects.forEach(function (p) {
-        var opt = document.createElement('option');
-        opt.value = p.key;
-        opt.textContent = p.name ? p.key + ' — ' + p.name : p.key;
-        select.appendChild(opt);
-      });
-      select.addEventListener('change', function () {
-        if (select.value) $('jira-project-key').value = select.value;
-      });
-    }
-    if (config.provider === 'jira' && ref) $('jira-project-key').value = ref;
-    if (config.provider === 'local' && ref) $('local-key').value = ref;
-    if (!$('local-key').value) $('local-key').value = state.suggestedLocalKey;
+    if (projects.length === 0) return;
+    $('jira-select-wrap').hidden = false;
+    var select = $('jira-project-select');
+    var blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = '— pick a project —';
+    select.appendChild(blank);
+    projects.forEach(function (p) {
+      var opt = document.createElement('option');
+      opt.value = p.key;
+      opt.textContent = p.name ? p.key + ' — ' + p.name : p.key;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', function () {
+      if (select.value) $('jira-project-key').value = select.value;
+    });
+  })();
 
-    var repo =
+  /** Seat the project-reference fields on the chosen layer. */
+  function prefillProjectRef() {
+    var ref = (config.defaults || {}).project_ref || '';
+    $('jira-project-key').value = config.provider === 'jira' ? ref : '';
+    $('local-key').value =
+      config.provider === 'local' && ref ? ref : state.suggestedLocalKey;
+    $('github-repo').value =
       (config.github && config.github.repo) ||
       (config.provider === 'github' ? ref : '') ||
       bootstrap.github_repo ||
       '';
-    if (repo) $('github-repo').value = repo;
-  })();
+  }
 
   // --- labels & languages & defaults -------------------------------------
   function prefillGroup(attr, source) {
     var inputs = form.querySelectorAll('[' + attr + ']');
     for (var i = 0; i < inputs.length; i++) {
       var key = inputs[i].getAttribute(attr);
-      if (source && source[key] !== undefined && source[key] !== null)
-        inputs[i].value = String(source[key]);
+      var value = source ? source[key] : undefined;
+      // Assigned either way: a layer that omits a key has to clear what the
+      // other layer left in the field.
+      inputs[i].value =
+        value === undefined || value === null ? '' : String(value);
     }
   }
-  prefillGroup('data-label-key', config.labels);
-  prefillGroup('data-lang-key', config.language);
-  prefillGroup('data-model-key', config.defaults.llm_model);
-  prefillGroup('data-limit-key', config.defaults.subtask_limits);
+
+  /** Seat the label, language, model and limit groups on the chosen layer. */
+  function prefillGroups() {
+    var defaults = config.defaults || {};
+    prefillGroup('data-label-key', config.labels);
+    prefillGroup('data-lang-key', config.language);
+    prefillGroup('data-model-key', defaults.llm_model);
+    prefillGroup('data-limit-key', defaults.subtask_limits);
+  }
 
   // --- Jira advanced maps -------------------------------------------------
-  (function renderJiraMaps() {
-    if (config.jira && config.jira.base_url)
-      $('jira-base-url').value = config.jira.base_url;
+  /** Redraw the Jira maps from the chosen layer; the groups are its values. */
+  function renderJiraMaps() {
+    $('jira-base-url').value = (config.jira && config.jira.base_url) || '';
     var host = $('jira-maps');
+    host.textContent = '';
     JIRA_MAPS.forEach(function (map) {
       var values = (config.jira && config.jira[map.key]) || {};
       // An empty map would render as an orphan group title — skip it.
@@ -162,16 +278,17 @@
       group.appendChild(grid);
       host.appendChild(group);
     });
-  })();
+  }
 
   // --- GitHub advanced ----------------------------------------------------
-  (function renderGithubAdvanced() {
+  /** Redraw the GitHub advanced block from the chosen layer. */
+  function renderGithubAdvanced() {
     var github = config.github || {};
-    if (github.defaultLabels && github.defaultLabels.length)
-      $('github-default-labels').value = github.defaultLabels.join('\n');
+    $('github-default-labels').value = (github.defaultLabels || []).join('\n');
 
     var active = github.linkTypes || GITHUB_LINK_TYPES;
     var host = $('github-link-types');
+    host.textContent = '';
     GITHUB_LINK_TYPES.forEach(function (name) {
       var label = document.createElement('label');
       var box = document.createElement('input');
@@ -182,9 +299,24 @@
       label.appendChild(document.createTextNode(name));
       host.appendChild(label);
     });
-  })();
+  }
 
-  syncProviderBlocks();
+  /**
+   * Re-seat every config-backed field on the layer the toggle now names.
+   * Session-supplied values — the Jira project list, the detected repo — are
+   * not part of it: they belong to neither layer.
+   */
+  function applyScopeConfig() {
+    config = configByScope[scope] || {};
+    prefillProvider();
+    prefillProjectRef();
+    prefillGroups();
+    renderJiraMaps();
+    renderGithubAdvanced();
+    syncProviderBlocks();
+  }
+
+  applyScopeConfig();
 
   // --- dirty tracking ------------------------------------------------------
   form.addEventListener('input', function () {
@@ -378,7 +510,7 @@
       language: collectGroup('data-lang-key'),
       defaults: {
         project_ref: projectRef,
-        codebase: config.defaults.codebase || null,
+        codebase: (config.defaults || {}).codebase || null,
         llm_model: collectGroup('data-model-key'),
         subtask_limits: subtaskLimits,
       },
@@ -411,7 +543,11 @@
     var btn = closeAfter ? saveCloseBtn : saveBtn;
     busy(btn, true, 'Saving…');
     setStatus('info', 'Validating and saving…');
-    post('/save', { config: next, options: { provision_labels: provision } })
+    post('/save', {
+      scope: scope,
+      config: next,
+      options: { provision_labels: provision },
+    })
       .then(function (r) {
         return r.json().then(function (res) {
           return { status: r.status, res: res };

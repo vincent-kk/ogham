@@ -26,7 +26,7 @@ describe('buildMinimalContext', () => {
   }): string {
     const projectRoot = mkdtempSync(join(tmpdir(), 'filid-inject-context-'));
     tempDirs.push(projectRoot);
-    writeConfig(projectRoot, createDefaultConfig());
+    writeConfig(projectRoot, 'project', createDefaultConfig());
     if (options.deployFca) {
       const rulesDir = join(projectRoot, '.claude', 'rules');
       mkdirSync(rulesDir, { recursive: true });

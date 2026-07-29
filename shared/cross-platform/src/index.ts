@@ -1,3 +1,19 @@
+export {
+  buildConfigScopeState,
+  clearConfigPaths,
+  listOverriddenPaths,
+  mergeConfigLayers,
+  readConfigLayers,
+  resolveConfigLayers,
+  writeConfigLayer,
+} from "./configScope/index.js";
+export type {
+  ConfigLayerDocuments,
+  ConfigLayerPaths,
+  ConfigScope,
+  ConfigScopeState,
+  ResolveConfigLayersOptions,
+} from "./configScope/index.js";
 export { env } from "./env/index.js";
 export { normalizeEol } from "./eol/index.js";
 export { hostStateRoot, paths, resolveContainedPath } from "./paths/index.js";

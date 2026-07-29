@@ -25,7 +25,9 @@
   // --- prefill from injected state ---------------------------------------
   function setValue(id, value) {
     var el = $(id);
-    if (el && value !== undefined && value !== null) el.value = value;
+    // Assigned either way: a layer that says nothing about a field has to
+    // clear what the other layer left in it.
+    if (el) el.value = value === undefined || value === null ? "" : value;
   }
 
   function fillPathSuggestions(list) {
@@ -50,23 +52,40 @@
     syncWindowVisibility();
   }
 
-  (function prefill() {
-    setValue("base_url", DEFAULT_BASE);
+  /**
+   * The prefill view the chosen layer edits.
+   *
+   * @returns {object} That layer's view, or the effective one when the server
+   *   sent no per-layer views.
+   */
+  function activeView() {
+    if (!state) return {};
+    var byScope = state.configByScope;
+    return (byScope && byScope[configScope]) || state;
+  }
+
+  /** Seat the config-backed fields on the layer the toggle names. */
+  function prefillConfig() {
+    var view = activeView();
+    setValue("email", view.email);
+    setValue("default_db", view.default_db || "pubmed");
+    setValue("base_url", view.base_url || DEFAULT_BASE);
+    setValue("output_path", view.output_path);
+    prefillWindow(view.default_window_days);
+    var dateTag = $("date_tag");
+    if (dateTag) dateTag.checked = view.date_tag === true;
+  }
+
+  // The api key and the download-path suggestions belong to neither layer —
+  // the key lives in the separate credentials file and the suggestions come
+  // from the host. They are seated once, and the toggle leaves them alone.
+  (function prefillOnce() {
     if (!state) {
-      syncWindowVisibility();
       updateRateBadge();
       return;
     }
     fillPathSuggestions(state.path_suggestions);
-    setValue("email", state.email);
-    setValue("default_db", state.default_db || "pubmed");
-    if (state.base_url) setValue("base_url", state.base_url);
-    setValue("output_path", state.output_path);
     if (state.api_key) apiKeyInput.value = MASK;
-    prefillWindow(state.default_window_days);
-    var dateTag = $("date_tag");
-    if (dateTag && typeof state.date_tag === "boolean")
-      dateTag.checked = state.date_tag;
     updateRateBadge();
   })();
 
@@ -240,6 +259,88 @@
   });
 
   // --- save --------------------------------------------------------------
+  // --- Config scope (user / project) ---
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". The api_key is never
+  // layered — it stays user-only — so this toggle governs config.json alone.
+  var scopeState = (state && state.scope) || {
+    paths: { user: "", project: null },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  var configScope = scopeState.layers.project === null ? "user" : "project";
+
+  function renderScope() {
+    var host = document.getElementById("config_scope");
+    if (!host) return;
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
+    host.textContent = "";
+    [
+      ["user", "User", "Applies wherever you work."],
+      ["project", "Project", "This repository only; overrides User."],
+    ].forEach(function (option) {
+      var label = document.createElement("label");
+      label.className = "scope-option";
+      var radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "config_scope";
+      radio.value = option[0];
+      radio.checked = option[0] === configScope;
+      radio.disabled = option[0] === "project" && !scopeState.paths.project;
+      radio.addEventListener("change", function () {
+        configScope = option[0];
+        prefillConfig();
+        renderScope();
+      });
+      var text = document.createElement("span");
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+      if (option[0] === configScope) renderScopeHint(option[2]);
+    });
+    if (!hadFocus) return;
+    var focused = host.querySelector("input:checked");
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the card head: what the chosen layer means on the
+   * left, the file it writes on the right. Two nodes rather than one string,
+   * so the path can sit at the head's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = document.getElementById("scope_hint");
+    if (!hint) return;
+    hint.textContent = "";
+    hint.appendChild(scopeHintPart("scope-hint__meaning", meaning));
+    hint.appendChild(
+      scopeHintPart("scope-hint__path", scopeState.paths[configScope] || ""),
+    );
+  }
+
+  /**
+   * @param {string} className Class naming which half of the hint this is.
+   * @param {string} text Content of that half.
+   * @returns {HTMLSpanElement} Span ready to append to the hint line.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement("span");
+    part.className = className;
+    part.textContent = text;
+    return part;
+  }
+
+  renderScope();
+  // Seated after the toggle picks a layer: which view fills the form is the
+  // toggle's answer, so the fields wait for it.
+  prefillConfig();
+
   function doSubmit(closeAfter) {
     if (!localValidate()) {
       setStatus("error", "Fix the highlighted fields, then save.");
@@ -250,6 +351,7 @@
     setStatus("info", "Validating and saving…");
     var body = collect();
     body.closeAfter = closeAfter;
+    body.scope = configScope;
     post("/submit", body)
       .then(function (r) {
         return r.json().then(function (res) {

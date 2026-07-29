@@ -67,10 +67,24 @@ body {
   animation: card-enter var(--t-page) both;
 }
 
+/* The title row carries the scope crumb as its last breadcrumb segment, so the
+   spacing below the heading belongs to the row rather than to the heading. */
+.page-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
 .page-title {
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 20px;
+}
+
+.page-title__sep {
+  color: var(--gray-400);
+  font-weight: 400;
 }
 
 /* Warning Banner */
@@ -162,6 +176,18 @@ body {
   transition:
     border-color var(--t),
     box-shadow var(--t);
+}
+
+/* Spinners fight the field styling; min/max attributes still bound values. */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 @keyframes focus-glow {
@@ -753,4 +779,88 @@ details[open] .advanced-toggle::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Scope crumb — the title row's last breadcrumb names the layer being edited.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". Credentials are never
+   layered; this toggle governs config.json alone. The tab bar below is a
+   different axis — Cloud / On-premise is the deployment, not the layer.
+   Selection reads as an underline, never as hue: --primary is the brand blue
+   and stays on the focus ring alone.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
+
+.scope-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.scope-option {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--gray-600);
+  /* 22px line box + 11px of padding on each side is the 44px pointer target;
+     the line height is stated rather than inherited because this page leaves
+     line-height at normal. The negative margin cancels the padding, leaving
+     the crumb on the title baseline. */
+  line-height: 22px;
+  padding: 11px 4px;
+  margin: -11px 0;
+  transition: color var(--t);
+}
+
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color var(--t);
+}
+
+.scope-option:hover {
+  color: var(--gray-800);
+}
+
+.scope-option input:checked + span {
+  color: var(--gray-800);
+  border-bottom-color: var(--gray-800);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* The label carries the pointer, so not-allowed goes on the span the disabled
+   input actually covers — reaching the label would need :has(). */
+.scope-option input:disabled + span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Two lines rather than a row: an absolute path is long enough that setting it
+   beside the sentence wraps it anyway, and a wrapped right-aligned path reads
+   worse than a plain second line. */
+.scope-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: -12px 0 20px;
+  font-size: 12px;
+  color: var(--gray-600);
+}
+
+.scope-hint__path {
+  word-break: break-all;
 }

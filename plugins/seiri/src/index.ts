@@ -10,6 +10,7 @@ export {
 } from './core/infra/configLoader/index.js';
 export {
   applyRuleDocs,
+  getRuleDocsChannel,
   getRuleDocsStatus,
   loadManifest,
   planRuleDocs,
@@ -38,10 +39,12 @@ export type {
   RuleDocAction,
   RuleDocEntry,
   RuleDocOutcome,
+  RuleDocScopeReport,
   RuleDocStatus,
   RuleDocSyncResult,
   RuleDocsManifest,
   SeiriConfig,
+  SeiriConfigScope,
   SessionSignals,
   SyncRuleDocsOptions,
 } from './types/index.js';

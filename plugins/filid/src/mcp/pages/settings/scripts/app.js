@@ -18,6 +18,151 @@
   var dirty = false;
   var saved = false;
 
+  // --- config scope (user / project) ---------------------------------------
+  // Contract: cross-platform DETAIL.md "설정 페이지 계약". This page is minified
+  // but never bundled (see buildSettingsHtml.mjs), so it cannot import the
+  // shared merge helpers — it only needs the overridden-path list the server
+  // already computed.
+  var scopeState = (state && state.scope) || {
+    paths: { user: '', project: '' },
+    layers: { user: null, project: null },
+    overridden: [],
+  };
+  // Opens on the layer that is currently deciding, so pressing Save without
+  // touching the toggle rewrites the file the config already came from.
+  var scope = scopeState.layers.project === null ? 'user' : 'project';
+
+  // One normalized config per layer, so moving the toggle re-seats the form
+  // without a round trip. The server normalizes both — this page has neither
+  // the schema nor the defaults, and it is also what `collectConfig` starts
+  // from, so a save under User never carries the project's overrides back
+  // into the user file.
+  var configByScope = (state && state.configByScope) || {
+    user: {},
+    project: {},
+  };
+
+  /**
+   * The config document the chosen layer edits.
+   *
+   * @returns {object} That layer's normalized config.
+   */
+  function activeConfig() {
+    return configByScope[scope] || {};
+  }
+
+  /**
+   * The adapter whose entry-point overrides this layer's form edits. Layers
+   * may enable different adapters, so it is read per layer with the server's
+   * effective answer as the floor.
+   *
+   * @returns {string} The structure adapter id.
+   */
+  function adapterId() {
+    var adapters = activeConfig().adapters || {};
+    return (
+      (adapters.enabled && adapters.enabled[0]) || state.structureAdapterId
+    );
+  }
+
+  var SCOPE_OPTIONS = [
+    ['user', 'User', 'Applies to every project you open.'],
+    ['project', 'Project', 'Committed with the repository; outranks User.'],
+  ];
+
+  function renderScope() {
+    var host = $('config_scope');
+    // Rebuilding the group drops the focused radio, and the inputs are clipped
+    // from view — losing focus here would leave arrow-key users with no cursor
+    // and nothing on screen to say where it went.
+    var hadFocus = host.contains(document.activeElement);
+    host.textContent = '';
+    SCOPE_OPTIONS.forEach(function (option) {
+      var label = document.createElement('label');
+      label.className = 'scope-option';
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'config_scope';
+      radio.value = option[0];
+      radio.checked = option[0] === scope;
+      radio.addEventListener('change', function () {
+        scope = option[0];
+        dirty = true;
+        renderScope();
+        applyScopeBadges();
+        // Everything below answers "what does this layer say" — the form
+        // fields, the rule list, and the channel the rule documents deploy
+        // to. Leaving any of them behind shows one layer under the other's
+        // name.
+        applyScopeConfig();
+        renderRuleDocs();
+      });
+      var text = document.createElement('span');
+      text.textContent = option[1];
+      label.appendChild(radio);
+      label.appendChild(text);
+      host.appendChild(label);
+    });
+
+    var chosen = SCOPE_OPTIONS.filter(function (option) {
+      return option[0] === scope;
+    })[0];
+    renderScopeHint(chosen[2]);
+    if (!hadFocus) return;
+    var focused = host.querySelector('input:checked');
+    if (focused) focused.focus();
+  }
+
+  /**
+   * Writes the line under the lede: what the chosen layer means on the left,
+   * the file it writes on the right. Two nodes rather than one string, so the
+   * path can sit at the header's right edge without dragging the sentence
+   * along with it.
+   *
+   * @param {string} meaning One-line description of the chosen layer.
+   */
+  function renderScopeHint(meaning) {
+    var hint = $('scope_hint');
+    hint.textContent = '';
+    hint.appendChild(scopeHintPart('scope-hint__meaning', meaning));
+    hint.appendChild(
+      scopeHintPart('scope-hint__path', scopeState.paths[scope] || ''),
+    );
+  }
+
+  /**
+   * Builds one half of the hint line.
+   *
+   * @param {string} className Which half this is — meaning or path.
+   * @param {string} text User-visible content, inserted as text never markup.
+   * @returns {HTMLSpanElement} The span, not yet attached to the document.
+   */
+  function scopeHintPart(className, text) {
+    var part = document.createElement('span');
+    part.className = className;
+    part.textContent = text;
+    return part;
+  }
+
+  /**
+   * Mark each config-owning section with where its value came from. No
+   * clear-override button: filid's project layer is a committed file the team
+   * owns, so removing it is a git operation rather than a settings click.
+   */
+  function applyScopeBadges() {
+    var owners = document.querySelectorAll('[data-config-path]');
+    for (var i = 0; i < owners.length; i++) {
+      var path = owners[i].getAttribute('data-config-path');
+      var overriding = scopeState.overridden.some(function (entry) {
+        return entry === path || entry.indexOf(path + '.') === 0;
+      });
+      owners[i].setAttribute(
+        'data-scope-state',
+        scope === 'user' ? 'own' : overriding ? 'overridden' : 'inherited',
+      );
+    }
+  }
+
   if (!state) {
     setStatus(
       'error',
@@ -106,27 +251,51 @@
     return li;
   }
 
-  (function renderRuleDocs() {
-    var docs = state.ruleDocs;
-    if (!docs.pluginRootResolved) {
+  // Both layers arrive up front so the toggle can redraw without a round trip.
+  // The server resolves each channel because on a Codex host it is an owned
+  // section of AGENTS.md rather than a directory — a path this page cannot
+  // assemble from a channel and a filename.
+  var EMPTY_LAYER = { entries: [], autoDeployed: [], displayTarget: null };
+  var ruleLayers = (state.ruleDocs && state.ruleDocs.layers) || {
+    user: EMPTY_LAYER,
+    project: EMPTY_LAYER,
+  };
+
+  /**
+   * Draw the rule documents for the layer the toggle currently names, and
+   * redraw on every change of it. Each layer carries its own deployment state
+   * and its own channel, so these are not the same rows with a different path.
+   */
+  function renderRuleDocs() {
+    if (!state.ruleDocs.pluginRootResolved) {
       $('rule-docs-unavailable').hidden = false;
       return;
     }
-    // No optional docs to select → the required doc auto-deploys server-side,
-    // so there is nothing to manage here. Hide the whole section.
-    if (!docs.entries || docs.entries.length === 0) {
-      $('rule-docs-section').hidden = true;
-      return;
-    }
+    var docs = ruleLayers[scope] || EMPTY_LAYER;
+    var required = docs.autoDeployed || [];
+    var optional = docs.entries || [];
+
+    var targets = document.querySelectorAll('[data-rules-target]');
+    for (var t = 0; t < targets.length; t++)
+      targets[t].textContent =
+        docs.displayTarget || 'the active host rule channel';
+    // Required documents belong on screen even when no checkbox does: the
+    // toggle decides which channel they deploy to, and these rows are the
+    // only place that answer appears.
+    $('rule-docs-section').hidden =
+      required.length === 0 && optional.length === 0;
+
     var requiredList = $('rule-docs-required');
     var optionalList = $('rule-docs-optional');
-    docs.autoDeployed.forEach(function (entry) {
+    requiredList.textContent = '';
+    optionalList.textContent = '';
+    required.forEach(function (entry) {
       requiredList.appendChild(docRow(entry, true));
     });
-    docs.entries.forEach(function (entry) {
+    optional.forEach(function (entry) {
       optionalList.appendChild(docRow(entry, false));
     });
-  })();
+  }
 
   // --- render: structural rules -------------------------------------------
   function ruleItem(id, override) {
@@ -197,19 +366,29 @@
     return li;
   }
 
-  (function renderRules() {
+  /**
+   * Draw the structural rules the chosen layer configures. The list is
+   * rebuilt rather than patched: two layers may name different rule sets.
+   */
+  function renderRules() {
     var list = $('rules-list');
-    Object.keys(state.config.rules).forEach(function (id) {
-      list.appendChild(ruleItem(id, state.config.rules[id] || {}));
+    list.textContent = '';
+    var rules = activeConfig().rules || {};
+    Object.keys(rules).forEach(function (id) {
+      list.appendChild(ruleItem(id, rules[id] || {}));
     });
-  })();
+  }
 
   // --- prefill: general & structure exceptions ----------------------------
-  (function prefill() {
-    if (state.config.language) $('language').value = state.config.language;
-    var structure = state.config.structure || {};
-    if (typeof structure.maxDepth === 'number')
-      $('max-depth').value = String(structure.maxDepth);
+  /** Seat the general and structure fields on the chosen layer's config. */
+  function prefillConfig() {
+    var config = activeConfig();
+    $('language').value = config.language || '';
+    var structure = config.structure || {};
+    // Assigned either way: a layer that sets no depth must clear the value the
+    // other layer left in the field.
+    $('max-depth').value =
+      typeof structure.maxDepth === 'number' ? String(structure.maxDepth) : '';
 
     var allowed = structure.additionalAllowedPeers || [];
     $('additional-allowed').value = allowed
@@ -227,12 +406,24 @@
       .join('\n');
     var entryPointOverrides = structure.entryPointOverrides || {};
     $('additional-entry-points').value = (
-      entryPointOverrides[state.structureAdapterId] || []
+      entryPointOverrides[adapterId()] || []
     ).join('\n');
     $('additional-organ-names').value = (
       structure.additionalOrganNames || []
     ).join('\n');
-  })();
+  }
+
+  /**
+   * Re-seat every config-backed field on the layer the toggle now names.
+   * The rule list is part of it: which rules exist is a config question, and
+   * two layers can answer it differently.
+   */
+  function applyScopeConfig() {
+    renderRules();
+    prefillConfig();
+  }
+
+  applyScopeConfig();
 
   // --- dirty tracking ------------------------------------------------------
   form.addEventListener('input', function () {
@@ -343,7 +534,7 @@
   }
 
   function collectConfig() {
-    var config = JSON.parse(JSON.stringify(state.config));
+    var config = JSON.parse(JSON.stringify(activeConfig()));
     config.version = '2.0';
     config.rules = {};
 
@@ -391,9 +582,8 @@
 
     var entryPoints = lines('additional-entry-points');
     var entryPointOverrides = structure.entryPointOverrides || {};
-    if (entryPoints.length)
-      entryPointOverrides[state.structureAdapterId] = entryPoints;
-    else delete entryPointOverrides[state.structureAdapterId];
+    if (entryPoints.length) entryPointOverrides[adapterId()] = entryPoints;
+    else delete entryPointOverrides[adapterId()];
     if (Object.keys(entryPointOverrides).length)
       structure.entryPointOverrides = entryPointOverrides;
     else delete structure.entryPointOverrides;
@@ -436,7 +626,11 @@
     var btn = closeAfter ? saveCloseBtn : saveBtn;
     busy(btn, true, 'Saving…');
     setStatus('info', 'Validating and saving…');
-    post('/save', { config: config, ruleDocs: collectRuleDocs() })
+    post('/save', {
+      scope: scope,
+      config: config,
+      ruleDocs: collectRuleDocs(),
+    })
       .then(function (r) {
         return r.json().then(function (res) {
           return { status: r.status, res: res };
@@ -455,6 +649,18 @@
             parts.push('updated ' + docs.updated.join(', '));
           if (docs.removed && docs.removed.length)
             parts.push('removed ' + docs.removed.join(', '));
+          // filid has no dry run, so a move between layers is reported after
+          // the fact rather than confirmed before it.
+          if (docs.otherScope && docs.otherScope.filenames.length)
+            parts.push(
+              'withdrew ' +
+                docs.otherScope.filenames.join(', ') +
+                ' from the ' +
+                docs.otherScope.scope +
+                ' layer (' +
+                docs.otherScope.displayTarget +
+                ')',
+            );
           var summary =
             'Saved' + (parts.length ? ' — ' + parts.join('; ') : '') + '.';
           busy(btn, false);
@@ -487,6 +693,10 @@
         busy(btn, false);
       });
   }
+
+  renderScope();
+  applyScopeBadges();
+  renderRuleDocs();
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();

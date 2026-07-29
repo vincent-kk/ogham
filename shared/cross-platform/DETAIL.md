@@ -50,6 +50,172 @@ requireAbsoluteRoot(value: string): string;
 
 POSIX와 Windows 절대 경로 문자열을 현재 실행 OS와 무관하게 정규화한다.
 
+### `@ogham/cross-platform/config-scope`
+
+```ts
+type ConfigScope = "user" | "project";
+
+resolveConfigLayers(options: {
+  pluginName: string;
+  projectRoot: string | null;
+  fileName?: string;
+  projectDirName?: string;
+  userDir?: string;
+}): ConfigLayerPaths;
+readConfigLayers(paths: ConfigLayerPaths): ConfigLayerDocuments;
+writeConfigLayer(
+  paths: ConfigLayerPaths,
+  scope: ConfigScope,
+  document: Record<string, unknown>,
+  options?: { fileMode?: number; directoryMode?: number },
+): string;
+buildConfigScopeState(paths: ConfigLayerPaths): ConfigScopeState;
+
+mergeConfigLayers(
+  base: Record<string, unknown> | null,
+  override: Record<string, unknown> | null,
+): Record<string, unknown>;
+listOverriddenPaths(
+  override: Record<string, unknown> | null,
+): readonly string[];
+clearConfigPaths(
+  source: Record<string, unknown>,
+  paths: readonly string[],
+): Record<string, unknown>;
+```
+
+`stripForbiddenKeys`는 이 subpath로 노출하지 않는다. `writeConfigLayer`가 쓰기
+직전에 내부적으로 호출하는 단계이며, 소비자가 직접 부를 자리는 없다.
+
+user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
+`<projectRoot>/.<pluginName>/config.json`이며 project가 user를 재정의한다.
+
+레이어 읽기는 throw하지 않는다. 부재와 손상은 모두 `null`이고 손상만
+`warnings`를 남긴다. project 레이어 쓰기 요청인데 경로가 `null`이면 던진다 —
+조용히 user에 쓰지 않는다.
+
+병합은 재귀이며 배열·원시값·`null`은 override가 **통째로** 교체한다. 배열을
+인덱스 단위로 병합하지 않으므로 project 레이어가 목록을 줄일 수 있다. 병합은
+입력 둘 다 변형하지 않고 새 객체를 반환한다. 다만 얕은 복사라 override가
+건드리지 않은 중첩 객체는 base와 참조를 공유한다.
+
+병합은 `__proto__` / `constructor` / `prototype` 키를 버린다. 입력이 디스크의
+JSON이고 `JSON.parse`가 `__proto__`를 own key로 만들기 때문에 실제 벡터다.
+
+`writeConfigLayer`도 쓰기 전에 같은 키를 턴다(`stripForbiddenKeys`). 한번 파일에
+들어가면 정상 경로로는 빠져나올 길이 없기 때문이다 — 병합은 매번 버리고, 설정
+페이지는 자기가 아는 키만 보내며, 저장된 문서를 펴서 되쓰는 저장 경로는 오히려
+그 키를 보존한다. 두 함수의 재귀 범위는 같다: plain object 안으로만 들어가고
+배열은 건드리지 않는다.
+
+읽기는 정화하지 않는다. 레이어 원문을 그대로 노출하고 해당 키를 발견하면
+`warnings`에만 남긴다 — 손편집으로 들어온 키를 UI가 감추면 "파일에는 있는데 왜
+안 먹지"의 답이 사라진다.
+
+레이어 각각은 스키마 검증하지 않는다. 병합 결과 하나만 소비자의 스키마로
+검증한다. project 레이어는 재정의된 키만 담은 부분 문서라 단독으로는 strict
+스키마를 통과할 수 없다.
+
+`projectRoot` 해석은 호출자 책임이다. 앵커 규칙이 플러그인마다 다르므로
+(git root / repo root / 인자 cwd) 해석된 절대 경로를 넘긴다.
+
+`config-scope/merge`는 node 내장을 import하지 않는다. 브라우저 설정 페이지
+번들과 훅 번들의 공용 경계이며, `merge/__tests__/pureImports.test.ts`가 이를
+강제한다. 파일 I/O가 필요 없는 소비자는 루트 배럴 대신 이 subpath를 쓴다.
+
+### 설정 페이지 계약
+
+두 네임스페이스를 구분해 편집하는 화면은 각 플러그인이 자기 페이지에서
+구현한다. 공유 UI 패키지를 두지 않으므로 **이 절이 7곳의 정본**이고,
+`plugins/deilen/src/mcp/pages/settings/`가 참조 구현이다.
+
+```
+GET  /api/config
+  → { ok: true, state: ConfigScopeState }
+
+POST /api/config
+  body { scope: "user" | "project", config: Record<string, unknown> }
+  → { ok: true, state: ConfigScopeState } | { ok: false, message, errors? }
+```
+
+`scope: "user"`는 전체 필드를 담은 완결 문서를 보낸다. `scope: "project"`는
+재정의된 키만 담으며, 키를 빼는 것이 곧 재정의 해제다 — 별도 clear 라우트를
+두지 않는다. 응답은 항상 갱신된 상태를 돌려줘 클라이언트가 재조회 없이 배지를
+다시 그린다.
+
+저장 검증은 제출 레이어를 저장된 반대편 레이어 위에 병합한 미리보기 결과를
+소비자 스키마로 확인하고, 통과할 때만 파일을 쓴다.
+
+스코프 토글은 페이지 헤더의 브레드크럼 세 번째 마디에 둔다 —
+`<플러그인> / settings / User Project`. 선택은 밑줄로 표시하고 채도로 표시하지
+않는다. 라디오 `<input>`은 DOM에 남기고 시각적으로만 감춘다 — 화살표 키 탐색과
+radiogroup 시맨틱이 거기서 나온다.
+
+선택된 레이어가 무엇을 뜻하는지와 그 절대 경로는 헤더 마지막에 **두 줄**로
+둔다(`.scope-hint__meaning` · `.scope-hint__path`). 한 줄에 좌우로 벌리면 절대
+경로가 대개 접혀 오른쪽 정렬이 도리어 어그러진다.
+
+토글을 옮기면 폼은 그 레이어의 값으로 **다시 채워진다**. `user`는 user 레이어
+단독을 그 플러그인의 기본값 위에 얹은 문서를, `project`는 effective(project를
+user 위에 병합한 결과)를 보여준다. project에서 그 레이어가 말하지 않은 필드는
+상속된 유효값이 앉고 출처는 `data-scope-state`가 말한다 — 기본값으로 되돌리면
+전체 문서를 쓰는 페이지에서 user 설정이 기본값으로 덮인다.
+
+병합은 서버가 한다. 페이지는 서버가 준 두 문서 중 **고르기만** 한다 — 레이어
+원문을 페이지가 합치면 스키마를 모르는 쪽이 무엇을 이길지 정하게 된다. 스키마를
+가진 서버가 레이어마다 정규화해 `configByScope: { user, project }`로 실어 보내는
+것이 기본이고, `deilen`처럼 번들되어 기본값을 스스로 아는 페이지는
+`ConfigScopeState`의 `layers.user`와 `effective`를 그대로 골라 쓴다. 어느 쪽이든
+저장 문서도 **고른 그 문서에서 출발한다** — 병합 결과에서 출발하면 user 저장이
+project의 재정의를 user 파일에 구워 넣는다. 떠나는 레이어의 미저장 편집은
+따라오지 않는다.
+
+`seiri`는 세 번째 형태다. 편집 대상이 한 키짜리 다이얼이라 병합할 문서가 없고,
+서버가 `effective` 없는 자체 스냅샷을 실어 보내면 페이지가
+`layers[scope] ?? layers.user ?? 기본 다이얼` 순으로 유효값을 정한다. 값 하나에
+레이어를 합치는 단계를 두는 것이 오히려 군더더기라 택한 형태이며, "페이지가
+레이어 원문을 합치지 않는다"는 위 규칙은 그대로 지킨다 — 고르는 것은 문서가
+아니라 이미 정규화된 값 하나다.
+
+`filid`와 `seiri`에서는 이 토글이 config 파일뿐 아니라 **규칙 문서가 배포되는
+채널**까지 정한다. user는 호스트 상태 루트(`~/.claude/rules/`), project는 저장소
+채널이다. 규칙이 한 곳에만 존재해야 호스트가 같은 규칙을 두 번 읽지 않으므로,
+저장은 선택한 레이어에 **먼저 쓴 뒤** 반대편의 소유 문서를 거둬들인다 — 순서가
+뒤집히면 중간 실패가 어느 레이어에도 규칙이 없는 상태를 남긴다. 거둬들일 목록은
+저장 전에 보여준다.
+
+설정 페이지는 두 형태 중 하나다. 어느 쪽이든 스코프 토글은 반드시 있다.
+
+**A. 문서 단위** — 페이지가 레이어 하나의 문서 전체를 편집한다
+(`atlassian`, `cennad`, `entrez`, `imbas`). 필드별 재정의 개념이 없으므로
+토글과 경로 힌트만 둔다.
+
+| 요소        | 규약                                                    |
+| ----------- | ------------------------------------------------------- |
+| 스코프 토글 | `<input name="config_scope" value="user" \| "project">` |
+| 경로 힌트   | 뜻과 절대 경로를 두 줄로 표시                           |
+
+**B. 필드 단위** — project 레이어가 부분 문서이고 필드마다 재정의를 켜고 끈다
+(`deilen`, `filid`, `seiri`). 위에 더해:
+
+| 요소           | 규약                                                                |
+| -------------- | ------------------------------------------------------------------- |
+| 필드 식별      | 소유 요소에 `data-config-path="renderers.mermaid"` (dot path)       |
+| 상속 상태      | 같은 요소에 `data-scope-state="inherited" \| "overridden" \| "own"` |
+| 배지·해제 버튼 | 표시 여부는 CSS가 `[data-scope-state=...]`로 결정                   |
+
+해제 버튼은 project 레이어가 **부분 문서**인 곳에만 둔다. 키를 빼는 것이 곧
+해제이기 때문이다. project 레이어가 커밋된 단일 결정인 곳(`seiri`, `filid`)은
+배지만 두고 해제는 git 작업으로 남긴다 — 팀이 소유한 파일을 설정 클릭으로
+지우게 하는 것이 잘못된 affordance다.
+
+`data-config-path`의 세밀도는 페이지가 정한다. `deilen`은 필드마다, `filid`는
+config를 소유한 섹션마다 붙이고 배지는 prefix로 판정한다 — 깊게 중첩된 config를
+필드마다 쪼개는 비용이 그 값어치를 하지 않는 경우다.
+
+`paths.project`가 `null`이면 Project 라디오는 `disabled`이고 이유를 한 줄
+표시한다.
+
 ### `@ogham/cross-platform/filesystem`
 
 ```ts
@@ -105,6 +271,19 @@ portable 경로 함수도 `compat/basename`, `compat/join`,
 root 진단 의미를 유지하면서 Node builtin만 사용한다. 범용 `spawnCli`,
 `cross-spawn`, executable discovery를 import graph에 포함하지 않는다.
 
-## Last Updated
+## History
+
+2026-07-29 — user/project 두 네임스페이스를 병합해 읽는 `config-scope` 추가.
+설정 페이지가 계층마다 폼을 다시 앉히도록 `configByScope` 규약을 함께 정했다.
+병합을 서버가 전담하는 쪽을 택한 이유는, 런타임과 설정 페이지가 각자 합치면
+"보이는 값"과 "먹는 값"이 갈라지기 때문이다.
 
 2026-07-26 — agent artifact 프리미티브와 hook용 목적별 entry point 추가.
+훅 번들이 aggregate 진입점을 잡으면 재노출 그래프를 통째로 끌어오므로,
+목적별 subpath를 따로 냈다.
+
+## Last Updated
+
+2026-07-29 — `config-scope`의 `merge`·`layers` 연산을 각 fractal의 `operations/`
+organ으로 내리고, 소비자 없는 `FORBIDDEN_KEYS`·`isPlainObject` 재노출을 공개
+표면에서 거뒀다.

@@ -5,6 +5,7 @@ export default defineConfig({
     include: ['src/**/__tests__/**/*.{test,spec}.ts'],
     exclude: ['**/fixtures/**'],
     globals: true,
+    setupFiles: ['./vitest.setup.ts'],
     // Integration tests shell out to real git many times per case; on slow
     // Windows CI runners each spawn is costly (PATH scan + process create),
     // so the aggregate can exceed Vitest's 5s test / 10s hook defaults.

@@ -16,12 +16,23 @@ const DEFAULT_CONFIG = ImbasConfigSchema.parse({});
 const STATE: SettingsPageState = {
   projectRoot: '/tmp/project',
   configExists: true,
-  config: DEFAULT_CONFIG,
+  configByScope: { user: DEFAULT_CONFIG, project: DEFAULT_CONFIG },
+  scope: {
+    paths: {
+      user: '/tmp/user/config.json',
+      project: '/tmp/project/.imbas/config.json',
+    },
+    layers: { user: null, project: null },
+    effective: {},
+    overridden: [],
+    warnings: [],
+  },
   suggestedLocalKey: 'PROJECT',
   bootstrap: { providers: { jira: true } },
 };
 
 const VALID_BODY = {
+  scope: 'project',
   config: DEFAULT_CONFIG,
   options: { provision_labels: false },
 };
@@ -107,11 +118,14 @@ describe('imbas settings web server', () => {
   it('escapes </script> inside inlined state fields', async () => {
     const malicious: SettingsPageState = {
       ...STATE,
-      config: {
-        ...DEFAULT_CONFIG,
-        labels: {
-          ...DEFAULT_CONFIG.labels,
-          managed: '</script><script>alert(1)</script>',
+      configByScope: {
+        ...STATE.configByScope,
+        project: {
+          ...DEFAULT_CONFIG,
+          labels: {
+            ...DEFAULT_CONFIG.labels,
+            managed: '</script><script>alert(1)</script>',
+          },
         },
       },
     };

@@ -444,6 +444,30 @@ code {
   color: var(--fg-faint);
 }
 
+/* Withdrawal from the layer that was not chosen. It sits above the diff
+   because it is the consequence a reader is least expecting: a save here
+   empties another channel, and the user layer it may empty is shared by
+   every project. Marked by a rule and weight rather than a colour — the
+   page distinguishes by treatment, not by hue. */
+
+.scope-move {
+  border-left: 2px solid var(--border-hi);
+  padding-left: 12px;
+  margin-bottom: 14px;
+}
+
+.scope-move-head {
+  margin: 0 0 4px;
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.scope-move-path {
+  margin: 0 0 10px;
+  color: var(--fg-faint);
+  word-break: break-all;
+}
+
 /* actions & status */
 
 .actions {
@@ -548,4 +572,99 @@ code {
   body {
     padding: 24px 16px 64px;
   }
+}
+
+/* Scope crumb — the masthead's third breadcrumb names the layer being edited.
+   Contract: cross-platform DETAIL.md "설정 페이지 계약". The layer decides two
+   things here: which file holds the dial, and which channel the rule documents
+   are deployed to — so it belongs to the page rather than to one section.
+   No clear-override button: seiri's project layer is a committed file the team
+   owns, so removing it is a git operation rather than a settings click.
+   The radio inputs stay in the DOM and are only clipped from view: arrow-key
+   navigation and the radiogroup semantics come from them. */
+
+.scope-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.scope-option {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--fg-muted);
+  /* Vertical padding lifts the pointer target to 44px; the negative margin
+     cancels it so the crumb still sits on the brand baseline. */
+  padding: 11px 4px;
+  margin: -11px 0;
+  transition: color var(--transition);
+}
+
+.scope-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scope-option > span {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color var(--transition);
+}
+
+.scope-option:hover {
+  color: var(--fg);
+}
+
+.scope-option input:checked + span {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+
+.scope-option input:focus-visible + span {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* Two lines rather than a row: an absolute path is long enough that setting it
+   beside the sentence wraps it anyway, and a wrapped right-aligned path reads
+   worse than a plain second line. */
+.scope-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  opacity: 0.72;
+}
+
+.scope-hint__path {
+  word-break: break-all;
+}
+
+.scope-badge {
+  display: none;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  opacity: 0.72;
+}
+
+[data-scope-state='inherited'] > .scope-badge,
+[data-scope-state='overridden'] > .scope-badge {
+  display: block;
+}
+
+[data-scope-state='inherited'] > .scope-badge::before {
+  content: 'Inherited from your user settings';
+}
+
+[data-scope-state='overridden'] > .scope-badge::before {
+  content: 'Set by this project — overrides your user settings';
+  opacity: 1;
 }

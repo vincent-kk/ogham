@@ -54,7 +54,7 @@ export function createRouteHandler(
     if (path === '/' && req.method === 'GET')
       handleGetRoot(ctx, res).catch(onError);
     else if (path === '/config' && req.method === 'GET')
-      handleGetConfig(ctx, res).catch(onError);
+      handleGetConfig(ctx, res);
     else if (path === '/provider-status' && req.method === 'GET')
       handleGetProviderStatus(res).catch(onError);
     else if (path === '/save' && req.method === 'POST')

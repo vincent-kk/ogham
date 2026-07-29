@@ -4,12 +4,25 @@ import { escapeJsonForHtml } from '@ogham/http-kit/html';
 
 import type { RouteContext } from '../routing/routeContext.js';
 
+/**
+ * GET / — the settings page with its state inlined.
+ *
+ * The page gets one document per layer, the per-layer state the scope toggle
+ * needs, and the merged config. `config` and `configByScope.project` are the
+ * same document: `configByScope` is what the toggle prefills from, and
+ * `config` stays a top-level key because the page's `/config` fallback path
+ * still hydrates from it.
+ */
 export async function handleGetRoot(
   ctx: RouteContext,
   res: ServerResponse,
 ): Promise<void> {
-  const config = await ctx.loadConfig();
-  const inlineState = escapeJsonForHtml(config);
+  const configByScope = await ctx.loadConfigByScope();
+  const inlineState = escapeJsonForHtml({
+    config: configByScope.project,
+    configByScope,
+    scope: ctx.loadConfigState(),
+  });
   const html = ctx.settingsHtml.replace(
     /["']__CENNAD_STATE__["']/,
     inlineState,

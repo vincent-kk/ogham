@@ -1,4 +1,5 @@
 export { loadManifest } from './loaders/loadManifest.js';
+export { getRuleDocsChannel } from './status/getRuleDocsChannel.js';
 export { getRuleDocsStatus } from './status/getRuleDocsStatus.js';
 export { applyRuleDocs } from './sync/applyRuleDocs.js';
 export { planRuleDocs } from './sync/planRuleDocs.js';

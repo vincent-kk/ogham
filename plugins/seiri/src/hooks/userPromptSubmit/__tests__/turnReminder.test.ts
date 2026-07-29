@@ -33,7 +33,7 @@ describe('per-turn dispatch reminder', () => {
     const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-turn-'));
     tempDirs.push(repoRoot);
     mkdirSync(join(repoRoot, '.git'));
-    writeConfig(repoRoot, { intervention });
+    writeConfig(repoRoot, 'project', { intervention });
     return repoRoot;
   }
 

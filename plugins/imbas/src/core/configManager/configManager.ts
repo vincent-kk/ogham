@@ -3,38 +3,87 @@
  * @description Config.json CRUD with dot-path access
  * @see skills/setup/references/init-workflow.md
  */
-import { join } from 'node:path';
+import {
+  buildConfigScopeState,
+  mergeConfigLayers,
+  readConfigLayers,
+  writeConfigLayer,
+} from '@ogham/cross-platform/config-scope';
+import type {
+  ConfigScope,
+  ConfigScopeState,
+} from '@ogham/cross-platform/config-scope';
 
-import { CONFIG_FILENAME, IMBAS_ROOT_DIRNAME } from '../../constants/index.js';
-import { readJson, writeJson } from '../../lib/fileIo.js';
 import { ImbasConfigSchema } from '../../types/config.js';
 import type { ImbasConfig } from '../../types/config.js';
 import { setNested } from '../../utils/index.js';
 
+import { configLayers } from './utils/configLayers.js';
+
 /**
- * Load config.json from cwd/.imbas/config.json.
- * Returns validated defaults if the file does not exist.
+ * The config in effect: the user layer with the project layer laid over it.
+ *
+ * Only the merged result is validated — a project layer holds just the keys
+ * it overrides and cannot satisfy the schema alone. Both layers absent is the
+ * normal first-run state and yields validated defaults.
  */
 export async function loadConfig(cwd: string): Promise<ImbasConfig> {
-  const filePath = join(cwd, IMBAS_ROOT_DIRNAME, CONFIG_FILENAME);
-  try {
-    return await readJson(filePath, ImbasConfigSchema);
-  } catch (err) {
-    const msg = (err as Error).message;
-    if (msg.includes('Failed to read file'))
-      // File missing — return defaults
-      return ImbasConfigSchema.parse({}) as unknown as ImbasConfig;
-
-    throw err;
-  }
+  return (await loadConfigByScope(cwd)).project;
 }
 
-/** Atomically write config.json */
+/** The config each layer resolves to, as the settings page needs it. */
+export interface ConfigByScope {
+  /** What the user layer decides on its own; the project file is not read. */
+  readonly user: ImbasConfig;
+  /** What is actually in force — the project layer laid over the user one. */
+  readonly project: ImbasConfig;
+}
+
+/**
+ * Both views of the config, for a page that shows one layer at a time.
+ *
+ * Each view goes through the same parse, so both arrive complete: the schema
+ * fills every key neither layer named, which is what lets the form open on
+ * the user layer without empty fields.
+ *
+ * @param cwd Anchor for the project layer.
+ * @returns Both views. `project` is what `loadConfig` returns.
+ */
+export async function loadConfigByScope(cwd: string): Promise<ConfigByScope> {
+  const documents = readConfigLayers(configLayers(cwd));
+  const parse = (document: Record<string, unknown> | null): ImbasConfig =>
+    ImbasConfigSchema.parse(document ?? {}) as unknown as ImbasConfig;
+  return {
+    user: parse(documents.user),
+    project: parse(mergeConfigLayers(documents.user, documents.project)),
+  };
+}
+
+/**
+ * Both layers plus the merge, for callers that need to show which file said
+ * what rather than just what is in effect.
+ */
+export function loadConfigScope(cwd: string): ConfigScopeState {
+  return buildConfigScopeState(configLayers(cwd));
+}
+
+/**
+ * Atomically write one config layer.
+ *
+ * The scope is required rather than defaulted: a silent default would write
+ * the wrong file when a caller forgets, and both layers are equally valid
+ * targets.
+ */
 export async function saveConfig(
   cwd: string,
+  scope: ConfigScope,
   config: ImbasConfig,
 ): Promise<void> {
-  await writeJson(join(cwd, IMBAS_ROOT_DIRNAME, CONFIG_FILENAME), config);
+  writeConfigLayer(
+    configLayers(cwd),
+    scope,
+    config as unknown as Record<string, unknown>,
+  );
 }
 
 /**

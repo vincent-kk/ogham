@@ -41,7 +41,7 @@ describe('intervention dial', () => {
 
   it('lets the runtime valve override the committed baseline', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'standard' });
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
     writeRuntime(repoRoot, 'advisory');
 
     expect(loadIntervention(repoRoot)).toMatchObject({
@@ -54,7 +54,7 @@ describe('intervention dial', () => {
 
   it('uses the baseline when no valve has been turned', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'strict' });
+    writeConfig(repoRoot, 'project', { intervention: 'strict' });
 
     expect(loadIntervention(repoRoot)).toMatchObject({
       effective: 'strict',
@@ -78,7 +78,7 @@ describe('intervention dial', () => {
 
   it('returns to the baseline once the valve is cleared', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'standard' });
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
     writeRuntime(repoRoot, 'advisory');
 
     expect(clearRuntime(repoRoot)).toBe(true);
@@ -101,7 +101,7 @@ describe('intervention dial', () => {
 
   it('writes the ignore file at setup time, before any valve is turned', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'standard' });
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
 
     const ignore = readFileSync(join(repoRoot, '.seiri', '.gitignore'), 'utf8');
     expect(ignore).toContain('runtime.json');
@@ -121,7 +121,7 @@ describe('intervention dial', () => {
 
   it('falls back to the baseline when the valve is damaged, and says which file', () => {
     const repoRoot = seedRepo();
-    writeConfig(repoRoot, { intervention: 'standard' });
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
     writeFileSync(join(repoRoot, '.seiri', 'runtime.json'), '{ oops', 'utf8');
 
     const state = loadIntervention(repoRoot);

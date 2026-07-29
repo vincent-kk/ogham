@@ -1,20 +1,33 @@
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { writeConfigLayer } from '@ogham/cross-platform/config-scope';
 
-import { CONFIG_FILE } from '../../../../constants/files.js';
-import type { SeiriConfig } from '../../../../types/config.js';
+import type {
+  SeiriConfig,
+  SeiriConfigScope,
+} from '../../../../types/config.js';
 import { ensureSeiriDir } from '../../../utils/ensureSeiriDir.js';
-import { writeAtomically } from '../../../utils/writeAtomically.js';
+import { configLayers } from '../utils/configLayers.js';
 
 /**
- * Persist the dial to `<repoRoot>/.seiri/config.json` and return the path
- * written. Routes through `ensureSeiriDir`, so the ignore file that keeps
- * `runtime.json` and the session signals out of commits exists from the
- * first write to `.seiri/` — setup time — rather than waiting for a
- * session to turn the runtime valve. Called only from the settings-page
- * save handler; nothing on a session path writes config.
+ * Persist the dial to one layer and return the path written.
+ *
+ * The project layer routes through `ensureSeiriDir` first, so the ignore
+ * file that keeps `runtime.json` and the session signals out of commits
+ * exists from the first write to `.seiri/` — setup time — rather than
+ * waiting for a session to turn the runtime valve. The user layer needs no
+ * such file: it lives under the host state root, outside any repository.
+ *
+ * Called only from the settings-page save handler; nothing on a session
+ * path writes config.
  */
-export function writeConfig(projectRoot: string, config: SeiriConfig): string {
-  const path = portableJoin(ensureSeiriDir(projectRoot), CONFIG_FILE);
-  writeAtomically(path, `${JSON.stringify(config, null, 2)}\n`);
-  return path;
+export function writeConfig(
+  projectRoot: string,
+  scope: SeiriConfigScope,
+  config: SeiriConfig,
+): string {
+  if (scope === 'project') ensureSeiriDir(projectRoot);
+  return writeConfigLayer(
+    configLayers(projectRoot),
+    scope,
+    config as unknown as Record<string, unknown>,
+  );
 }

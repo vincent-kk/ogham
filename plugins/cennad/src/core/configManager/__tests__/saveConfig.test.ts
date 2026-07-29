@@ -26,7 +26,7 @@ describe('saveConfig', () => {
         claude: { value: 75, enabled: true },
       },
     };
-    await saveConfig(config);
+    await saveConfig('user', config);
     const written = JSON.parse(await readFile(CONFIG_PATH, 'utf8'));
     expect(written).toEqual(config);
   });
@@ -36,7 +36,7 @@ describe('saveConfig', () => {
       ...DEFAULT_CONFIG,
       session_ttl_hours: 12,
     };
-    await saveConfig(config);
+    await saveConfig('user', config);
     expect(await loadConfig()).toEqual(config);
   });
 
@@ -53,19 +53,22 @@ describe('saveConfig', () => {
         },
       },
     };
-    await saveConfig(config);
+    await saveConfig('user', config);
     expect((await loadConfig()).model_map.claude.apex).toEqual({
       model: 'opus[1m]',
       effort: 'ultracode',
     });
   });
 
-  it('rejects invalid input via the Zod schema', async () => {
-    await expect(
-      saveConfig({
-        ...DEFAULT_CONFIG,
-        session_ttl_hours: -1,
-      } as Config),
-    ).rejects.toThrow();
+  it('writes a partial document without validating it', async () => {
+    // saveConfig is the persistence primitive and does not validate: a project
+    // layer carries only the keys it overrides and cannot satisfy the strict
+    // schema alone. The settings handler validates the merged preview and
+    // refuses to call this when that fails.
+    await saveConfig('user', { session_ttl_hours: 24 });
+
+    expect(JSON.parse(await readFile(CONFIG_PATH, 'utf8'))).toEqual({
+      session_ttl_hours: 24,
+    });
   });
 });

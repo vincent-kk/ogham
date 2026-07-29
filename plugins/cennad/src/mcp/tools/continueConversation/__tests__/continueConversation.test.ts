@@ -159,7 +159,7 @@ describe('handleContinueConversation', () => {
   });
 
   it('rejects resume when the session provider is disabled', async () => {
-    await saveConfig({
+    await saveConfig('user', {
       ...DEFAULT_CONFIG,
       ratio: {
         ...DEFAULT_CONFIG.ratio,

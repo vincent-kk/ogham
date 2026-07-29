@@ -11,6 +11,10 @@ import {
 const TEST_DIR = join(tmpdir(), "atlassian-test-config-" + Date.now());
 const CONFIG_PATH = join(TEST_DIR, "config.json");
 
+/** Layers whose user file is CONFIG_PATH and whose project layer is absent. */
+const LAYERS = { user: CONFIG_PATH, project: null };
+const MISSING = { user: join(TEST_DIR, "missing.json"), project: null };
+
 beforeEach(async () => {
   await mkdir(TEST_DIR, { recursive: true });
 });
@@ -22,7 +26,7 @@ afterEach(async () => {
 describe("config-manager", () => {
   describe("loadConfig", () => {
     it("returns empty config when file does not exist", async () => {
-      const config = await loadConfig(join(TEST_DIR, "missing.json"));
+      const config = await loadConfig(MISSING);
       expect(config).toEqual({});
     });
 
@@ -39,7 +43,7 @@ describe("config-manager", () => {
         ],
       };
       await writeFile(CONFIG_PATH, JSON.stringify(data), "utf-8");
-      const config = await loadConfig(CONFIG_PATH);
+      const config = await loadConfig(LAYERS);
       expect(config.jira?.[0]?.base_url).toBe("https://test.atlassian.net");
     });
 
@@ -52,7 +56,7 @@ describe("config-manager", () => {
         ],
       };
       await writeFile(CONFIG_PATH, JSON.stringify(data), "utf-8");
-      const config = await loadConfig(CONFIG_PATH);
+      const config = await loadConfig(LAYERS);
       expect(config.jira?.[0]?.is_cloud).toBe(true);
       expect(config.jira?.[0]?.ssl_verify).toBe(true);
       expect(config.jira?.[0]?.timeout).toBe(30000);
@@ -64,7 +68,7 @@ describe("config-manager", () => {
         JSON.stringify({ jira: [{ base_url: "not-a-url" }] }),
         "utf-8",
       );
-      await expect(loadConfig(CONFIG_PATH)).rejects.toThrow();
+      await expect(loadConfig(LAYERS)).rejects.toThrow();
     });
   });
 
@@ -80,8 +84,8 @@ describe("config-manager", () => {
           },
         ],
       };
-      await saveConfig(config, CONFIG_PATH);
-      const loaded = await loadConfig(CONFIG_PATH);
+      await saveConfig("user", config, LAYERS);
+      const loaded = await loadConfig(LAYERS);
       expect(loaded.jira?.[0]?.base_url).toBe("https://test.atlassian.net");
     });
 
@@ -97,8 +101,8 @@ describe("config-manager", () => {
           },
         ],
       };
-      await saveConfig(config, CONFIG_PATH);
-      const loaded = await loadConfig(CONFIG_PATH);
+      await saveConfig("user", config, LAYERS);
+      const loaded = await loadConfig(LAYERS);
       expect(loaded.jira?.[0]?.api_version_override).toBe("3");
     });
   });

@@ -9,12 +9,15 @@
 - `__DEILEN_STATE__` 주입은 `escapeJsonForHtml`.
 - `/api/image` 의 이미지 소스 목록(viewer.md 파싱 결과)은 세션별 소형 캐시(삽입순 상한 16, 서버 close 시 flush) — viewer.md 는 세션 생성 후 불변이므로 안전.
 - 뷰어 state 에 `config.last_intent` 주입(저장된 제출 선호; 버튼 외형엔 미반영). 설정 저장(`POST /api/config`)은 폼 밖 `last_intent` 를 기존 값으로 merge-보존.
+- 설정은 `user`·`project` 두 레이어다. `GET /api/config` 와 `GET /settings` 는 두 레이어 원문과 병합 결과를 함께 담은 `ConfigScopeState` 를 싣고, `POST /api/config` 는 대상 레이어를 본문의 `scope` 로 받아 그 레이어만 덮어쓴다. 저장 문서는 고른 레이어에서 출발한다 — 병합 결과에서 출발하면 `user` 저장이 project 재정의를 user 파일에 구워 넣는다.
 
 ## API Contracts
 
 - `ensureHttpServer(workspace?: string): Promise<HttpServerInstance>` — 기동 또는 재사용+touch. `workspace` 는 호출자가 이미 해석한 프로젝트 루트(생략 시 `projectRoot()` 로 해석); 이미 떠 있으면 무시된다(프로세스당 1 workspace).
 - `getHttpServer(): HttpServerInstance | null`.
 - `HttpServerInstance`: `{ baseUrl, port, token, viewerUrl(sid), settingsUrl(), touch(), close() }`.
+- `GET /api/config` → `{ ok: true, state: ConfigScopeState }`. `state.layers.{user,project}` 는 각 레이어 원문(부재·손상 모두 `null`), `state.effective` 는 병합 결과, `state.paths` 는 두 레이어의 절대 경로다.
+- `POST /api/config` 본문은 `{ scope: "user" | "project", config: object }`. `scope` 는 기본값이 없다 — 두 레이어 모두 유효한 대상이라 조용한 기본값은 반대편 파일을 쓰게 만든다. 형태가 어긋나면 400 `Body must be { scope: "user" | "project", config: object }`, `project` 인데 프로젝트 경로가 없으면 400. 성공 응답은 `{ ok: true, state: ConfigScopeState }` 로 저장 후 상태를 돌려준다.
 
 ## Routes
 

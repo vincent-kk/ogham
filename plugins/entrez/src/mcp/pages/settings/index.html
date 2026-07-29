@@ -30,13 +30,22 @@
           </span>
           <div class="brand__text">
             <h1 class="brand__name">entrez</h1>
-            <p class="brand__sub">PubMed search — one-time setup</p>
+            <div class="brand__meta">
+              <p class="brand__sub">PubMed search /</p>
+              <div
+                id="config_scope"
+                class="scope-crumb"
+                role="radiogroup"
+                aria-label="Which layer to save the settings in"
+              ></div>
+            </div>
           </div>
         </div>
         <span id="rate-badge" class="badge" title="Effective NCBI rate limit"
           >3 req/s</span
         >
       </header>
+      <p id="scope_hint" class="scope-hint"></p>
 
       <form id="setup-form" novalidate>
         <fieldset class="group">

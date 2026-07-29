@@ -83,7 +83,7 @@ describe('config-loader v2', () => {
     mkdirSync(join(tmpDir, '.filid'), { recursive: true });
     writeFileSync(join(tmpDir, '.filid', 'keep.txt'), 'keep', 'utf8');
 
-    writeConfig(tmpDir, createDefaultConfig());
+    writeConfig(tmpDir, 'project', createDefaultConfig());
 
     expect(existsSync(join(tmpDir, '.filid', 'config.json'))).toBe(true);
     expect(readFileSync(join(tmpDir, '.filid', 'keep.txt'), 'utf8')).toBe(
@@ -100,7 +100,7 @@ describe('config-loader v2', () => {
       entryPointOverrides: { ecmascript: ['custom.entry'] },
     };
 
-    writeConfig(tmpDir, config);
+    writeConfig(tmpDir, 'project', config);
 
     expect(loadConfig(tmpDir)).toEqual({
       config,
@@ -145,7 +145,7 @@ describe('config-loader v2', () => {
       enabled: false,
       severity: 'warning',
     };
-    writeConfig(tmpDir, config);
+    writeConfig(tmpDir, 'project', config);
 
     expect(loadRuleOverrides(tmpDir)['organ-no-intentmd']).toEqual({
       enabled: false,
@@ -156,7 +156,7 @@ describe('config-loader v2', () => {
   it('preserves custom rule overrides', () => {
     const config = createDefaultConfig();
     config.rules['custom-rule'] = { enabled: true, severity: 'info' };
-    writeConfig(tmpDir, config);
+    writeConfig(tmpDir, 'project', config);
 
     expect(loadConfig(tmpDir).config?.rules['custom-rule']).toEqual({
       enabled: true,
@@ -185,7 +185,7 @@ describe('config-loader v2', () => {
   it('round-trips a zero max depth', () => {
     const config = createDefaultConfig();
     config.structure = { maxDepth: 0 };
-    writeConfig(tmpDir, config);
+    writeConfig(tmpDir, 'project', config);
 
     expect(resolveMaxDepth(loadConfig(tmpDir).config)).toBe(0);
   });
@@ -233,7 +233,7 @@ describe('config-loader v2', () => {
   it('does not overwrite an existing config', () => {
     const config = createDefaultConfig();
     config.language = 'keep';
-    writeConfig(tmpDir, config);
+    writeConfig(tmpDir, 'project', config);
 
     expect(initProject(tmpDir, { language: 'replace' }).configCreated).toBe(
       false,

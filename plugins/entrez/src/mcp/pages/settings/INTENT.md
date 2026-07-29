@@ -17,6 +17,7 @@ NCBI E-utilities 설정 폼 페이지(개발자 도구 스타일, 라이트/다�
 - masked api_key(`••••`)는 미변경 의미 — 그대로 전송.
 - NCBI `tool`은 폼에 없음(서버가 상수 주입). 검색 윈도우는 상대 일수 `default_window_days`(미설정=무제한, recall 보존).
 - 다운로드 경로는 서버 주입 `path_suggestions`(OS별 홈 기준) datalist 자동완성 — 브라우저 디렉토리 선택기는 실제 경로 미노출로 불가.
+- `#config_scope` 라디오(user/project)가 편집 대상 계층을 정한다 — 폼은 `configByScope[scope]` 로 다시 앉고 저장은 그 계층만 덮어쓴다. 현재 결정 중인 계층으로 열리며(`scope.layers.project` 부재 시 user), project 파일이 없으면 해당 옵션은 disabled.
 
 ## Boundaries
 

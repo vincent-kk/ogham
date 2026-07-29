@@ -1,4 +1,5 @@
 import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts/rules/status';
+import type { ConfigScope } from '@ogham/cross-platform/config-scope';
 import { resolveContainedPath } from '@ogham/cross-platform/paths/contained';
 
 import { createLogger } from '../../../../lib/logger.js';
@@ -30,10 +31,16 @@ const log = createLogger('config-loader');
  *
  * No `.filid/config.json` inspection is performed — rule doc state is never
  * mirrored into the config.
+ *
+ * @param projectRoot Anchor for the project channel.
+ * @param pluginRoot Override for the plugin root; the host channel otherwise.
+ * @param scope Which layer to inspect. `project` by default, so a caller that
+ *   has not been taught about layers keeps reading the repository channel.
  */
 export function getRuleDocsStatus(
   projectRoot: string,
   pluginRoot?: string,
+  scope: ConfigScope = 'project',
 ): RuleDocsStatus {
   const root = resolvePluginRoot(pluginRoot);
   if (root === null)
@@ -63,7 +70,7 @@ export function getRuleDocsStatus(
     };
   }
 
-  const target = resolveFilidRuleTarget(projectRoot);
+  const target = resolveFilidRuleTarget(projectRoot, scope);
   if (target === null)
     return {
       entries: [],
