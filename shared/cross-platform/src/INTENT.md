@@ -15,6 +15,7 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 | `hostRegistry/` | 호스트 테이블과 명시적 호스트 해석    |
 | `hostPaths/`    | 런타임 프로젝트/플러그인 좌표         |
 | `instructions/` | 마커 문서 순수 문자열 연산            |
+| `configScope/`  | user·project 설정 계층 해석·병합·쓰기 |
 | `spawn/`        | 외부 CLI 실행                         |
 | 그 밖의 `*/`    | 훅·바이너리·shim·launcher 호환 어댑터 |
 

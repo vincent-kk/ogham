@@ -6,7 +6,7 @@ Shared infrastructure modules for MCP tools: config, auth, environment detection
 
 | Directory              | Role                                                 |
 | ---------------------- | ---------------------------------------------------- |
-| `configManager/`       | Load/save config.json with Zod validation            |
+| `configManager/`       | user·project 두 계층 설정 해석·저장 (Zod 검증)       |
 | `authManager/`         | Credential storage (plain JSON), header injection    |
 | `environmentResolver/` | Cloud/Server detection, URL normalization            |
 | `httpClient/`          | Fetch wrapper with retry, SSRF guard, auth injection |
@@ -17,6 +17,7 @@ Shared infrastructure modules for MCP tools: config, auth, environment detection
 - 각 인프라 관심사는 독립 sub-fractal로 분리
 - 인증 헤더는 `authManager`만 생성, 직접 조합 금지
 - HTTP 요청은 반드시 `httpClient`를 통해 실행
+- 설정은 계층별로 다룬다 — `loadConfig`는 병합된 유효 설정, `loadConfigByScope`/`loadConfigScope`는 계층별 값과 재정의 상태, `configLayers`는 두 계층의 경로를 준다. 저장은 대상 계층을 명시해야 하며, 계층 원시값은 `@ogham/cross-platform/config-scope`가 소유
 
 ## Dependencies
 
