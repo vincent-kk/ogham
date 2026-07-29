@@ -14,7 +14,7 @@ const manifest = JSON.parse(
 const packageEntryTargets = new Set(
   Object.values(manifest.exports).map(({ import: target }) =>
     normalizeImportTarget(
-      target.replace("./dist/", "").replace(/\.js$/, ".ts"),
+      target.replace(/^\.\/dist\//, "").replace(/\.js$/, ".ts"),
     ),
   ),
 );
