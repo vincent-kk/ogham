@@ -44,6 +44,16 @@ setTimeout(() => { process.exit(0); }, sleepMs);
 const IDLE_TIMEOUT_MS = 250;
 const HARD_CAP_MS = 120_000;
 
+// 이 스위트가 죽이는 agy는 antigravity-cwd/<sessionId>를 cwd로 쥐고 있고,
+// Windows는 프로세스가 완전히 사라질 때까지 그 핸들을 놓지 않아 teardown의 rm이
+// EPERM으로 튄다. 재시도가 그 창을 넘긴다 — 프로덕션 cleanupCwdOnTimeout과 같은 정책.
+const RM_OPTIONS = {
+  recursive: true,
+  force: true,
+  maxRetries: 3,
+  retryDelay: 100,
+} as const;
+
 let handle: ReturnType<typeof installFakeBinary>;
 let restorePath: () => void;
 
@@ -55,15 +65,15 @@ beforeAll(() => {
 afterAll(async () => {
   restorePath();
   handle.cleanup();
-  await rm(CENNAD_HOME, { recursive: true, force: true });
+  await rm(CENNAD_HOME, RM_OPTIONS);
 });
 
 beforeEach(async () => {
-  await rm(CENNAD_HOME, { recursive: true, force: true });
+  await rm(CENNAD_HOME, RM_OPTIONS);
 });
 
 afterEach(async () => {
-  await rm(CENNAD_HOME, { recursive: true, force: true });
+  await rm(CENNAD_HOME, RM_OPTIONS);
 });
 
 function sleep(ms: number): Promise<void> {
