@@ -10,7 +10,10 @@ import type {
   ProjectSnapshot,
 } from '../../../../types/fractal.js';
 import type { RuleViolation } from '../../../../types/rules.js';
-import { resolveOwningOrganPath } from '../../../analysis/dependencyGraph/index.js';
+import {
+  resolveOwningOrganPath,
+  sortPathsDeepestFirst,
+} from '../../../analysis/dependencyGraph/index.js';
 
 import { isBoundaryExemptionGranted } from './isBoundaryExemptionGranted.js';
 
@@ -68,11 +71,12 @@ export function checkExternalImportBoundary(context: {
       samePath(node.path, edge.toFractalPath),
     );
     if (!sourceNode || !targetNode) continue;
+    const organPathsDeepestFirst = sortPathsDeepestFirst(targetNode.organPaths);
 
     for (const evidence of edge.evidence) {
       if (verificationPaths.has(evidence.sourceFile)) continue;
       const organPath = resolveOwningOrganPath(
-        targetNode.organPaths,
+        organPathsDeepestFirst,
         targetNode.path,
         evidence.resolvedPath,
       );

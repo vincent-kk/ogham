@@ -44,6 +44,7 @@ const StructureConfigSchema = z
     entryPointOverrides: z
       .record(z.string(), z.array(z.string().min(1)))
       .optional(),
+    generatedPaths: z.array(z.string().min(1)).optional(),
   })
   .strict();
 

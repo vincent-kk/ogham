@@ -1,4 +1,7 @@
-import type { DependencyGraph, FractalTree } from '../../../../types/fractal.js';
+import type {
+  DependencyGraph,
+  FractalTree,
+} from '../../../../types/fractal.js';
 import type { RuleViolation } from '../../../../types/rules.js';
 
 export function validateDependencies(

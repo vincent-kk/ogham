@@ -7,7 +7,7 @@
 ## Structure
 
 - `fractalScan.ts` — snapshot과 summary/path/full projection
-- `utils/` — snapshot을 summary/path/full DTO로 투영하는 flat organ
+- `utils/` — snapshot을 summary/path/full DTO로 투영하고 이름으로 좁히는 flat organ
 - `index.ts` — named handler export
 
 ## Conventions

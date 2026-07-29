@@ -5,7 +5,7 @@
 - 정확히 9개 도구 sub-fractal을 노출한다: `projectInit`, `ruleDocsSync`, `openSettings`, `fractalScan`, `contextResolve`, `restructurePlan`, `structureValidate`, `verificationScan`, `reviewState`.
 - 각 handler는 공통 `ToolPayload` 의미를 따르고 16 KiB inline 예산 안에서 응답한다. 초과분은 artifact로 나간다.
 - 도구는 프로젝트 파일을 이동·수정하지 않는다. `restructurePlan`은 계획과 사후조건만 반환한다.
-- `utils/` organ은 도구 간 공유 helper를 담으며 그 자체로 공개 표면이 아니다.
+- `utils/` organ은 도구 간 공유 helper를 담으며 그 자체로 공개 표면이 아니다. snapshot 생성과, 좁은 질의에서 프로젝트 전체 diagnostics를 질의 범위로 줄이는 scoping이 여기 있다.
 
 ## API Contracts
 

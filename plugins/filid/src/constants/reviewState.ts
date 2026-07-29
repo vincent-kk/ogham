@@ -33,6 +33,10 @@ export const REVIEW_STATE_GIT = {
 export const REVIEW_STATE_GIT_ARGUMENTS = {
   DIFF_COMMITTED_PATHS: ['--name-only', '-z', '--no-renames'],
   HEAD_TREE: ['-rz', '--full-tree'],
+  STATUS_PORCELAIN: ['status', '--porcelain', '-z'],
+  UPSTREAM_COUNT: ['rev-list', '--count', '@{upstream}..HEAD'],
+  REMOTE_HEAD: ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD'],
+  VERIFY_REF: ['rev-parse', '--verify', '--quiet'],
 } as const;
 
 export const REVIEW_STATE_ACTIONS = {
@@ -40,7 +44,47 @@ export const REVIEW_STATE_ACTIONS = {
   CHECKPOINT: 'checkpoint',
   SEAL: 'seal',
   CLEANUP: 'cleanup',
+  ASSESS: 'assess',
 } as const;
+
+/** Where a merge-track cycle resumes, read from files and git state alone. */
+export const REVIEW_ENTRY_STAGES = {
+  PR_CREATE: 'pr-create',
+  REVIEW: 'review',
+  RESOLVE: 'resolve',
+  REVALIDATE: 'revalidate',
+  COMPLETE: 'complete',
+} as const;
+
+/** Class a single dirty path falls into; the first matching test wins. */
+export const WORKTREE_PATH_CLASSES = {
+  DOCUMENT: 'document',
+  GENERATED: 'generated',
+  SOURCE: 'source',
+} as const;
+
+/** Summary of the classes present in a dirty worktree. */
+export const WORKTREE_DISPOSITIONS = {
+  CLEAN: 'clean',
+  DOCUMENTS_ONLY: 'documents-only',
+  GENERATED_ONLY: 'generated-only',
+  SOURCE_DIRTY: 'source-dirty',
+} as const;
+
+/** Base refs tried in order once the remote HEAD lookup fails. */
+export const REVIEW_BASE_REF_CANDIDATES = [
+  'origin/main',
+  'origin/master',
+] as const;
+
+/** Segment wildcard in `structure.generatedPaths`; matches exactly one segment. */
+export const GENERATED_PATH_WILDCARD = '*';
+
+/** Separator for the repository-relative paths git reports. */
+export const REVIEW_PATH_SEGMENT_SEPARATOR = '/';
+
+/** Git status codes whose record is followed by the rename or copy source. */
+export const RENAME_STATUS_CODES = ['R', 'C'] as const;
 
 export const REVIEW_STATE_ACTION_VALUES = Object.values(REVIEW_STATE_ACTIONS);
 
@@ -76,6 +120,8 @@ export const REVIEW_STATE_FILE_NAMES = {
   VERIFICATION_STRUCTURE_PARTIAL: 'verification.structure-half.partial.md',
   STRUCTURE_CHECK: 'structure-check.md',
   FIX_REQUESTS: 'fix-requests.md',
+  JUSTIFICATIONS: 'justifications.md',
+  RE_VALIDATE: 're-validate.md',
 } as const;
 
 export const REVIEW_STATE_STALE_ARTIFACT_FILE_NAMES = [

@@ -1,4 +1,8 @@
-import type { Rule, RuleContext, RuleViolation } from '../../../../types/rules.js';
+import type {
+  Rule,
+  RuleContext,
+  RuleViolation,
+} from '../../../../types/rules.js';
 
 /**
  * 단일 규칙을 단일 노드에 적용한다.

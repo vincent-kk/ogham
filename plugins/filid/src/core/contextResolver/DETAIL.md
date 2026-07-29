@@ -10,6 +10,7 @@
 ## API Contracts
 
 - `resolveContext(snapshot, targetPath): ContextResolution` — owner, chain, nearest DETAIL과 output language를 반환한다.
+- `isPathWithin(rootPath, targetPath): boolean` — portable containment 판정. chain 범위로 증거를 좁히는 MCP 계층이 소비한다.
 - project 밖 target 또는 소유 node를 결정할 수 없는 target은 throw한다.
 
 ## Acceptance Criteria
@@ -26,4 +27,4 @@
 
 ## Last Updated
 
-2026-07-27 — snapshot 기반 최소 context 계약을 정의했다.
+2026-07-29 — containment 판정을 공개 표면에 추가했다.

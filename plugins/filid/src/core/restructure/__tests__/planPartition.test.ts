@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import { RESTRUCTURE_VALIDATION_CODES } from '../../../constants/restructure.js';
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import type { FractalNode, ProjectSnapshot } from '../../../types/fractal.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
@@ -99,6 +100,7 @@ const SNAPSHOT: ProjectSnapshot = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-28T00:00:00.000Z',
 };
 

@@ -1,3 +1,1 @@
-export {
-  handleUserPromptSubmit,
-} from './userPromptSubmit.js';
+export { handleUserPromptSubmit } from './userPromptSubmit.js';

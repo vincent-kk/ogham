@@ -22,6 +22,14 @@ const INTENT_FILE_NAME = 'INTENT.md';
 const ENTRY_POINT_FILE_NAME = 'index.ts';
 const CONFIG_DIRECTORY_NAME = '.filid';
 const CONFIG_FILE_NAME = 'config.json';
+const FILTERED_ORGAN_NAME = 'operations';
+const PATH_ENTRY_KEYS = [
+  'entryPointCount',
+  'hasDetailMd',
+  'hasIntentMd',
+  'path',
+  'type',
+];
 
 function getFullData(
   result: ToolPayload<FractalScanSummary, FractalScanData>,
@@ -206,13 +214,20 @@ describe('fractal-scan tool — detail projections', () => {
     const data = getPathsData(result);
 
     expect(data.nodes.length).toBe(result.summary.totalNodes);
-    expect(Object.keys(data.nodes[0]).sort()).toEqual([
-      'entryPointCount',
-      'hasDetailMd',
-      'hasIntentMd',
-      'path',
-      'type',
-    ]);
+    expect(Object.keys(data.nodes[0]).sort()).toEqual(PATH_ENTRY_KEYS);
+  });
+
+  it('leaves export names out of an unfiltered projection', async () => {
+    const result = await handleFractalScan({
+      path: import.meta.dirname,
+      detail: FRACTAL_SCAN_DETAILS.PATHS,
+    });
+
+    expect(
+      getPathsData(result).nodes.every(
+        (node) => node.exportedNames === undefined,
+      ),
+    ).toBe(true);
   });
 
   it('full detail uses the common payload without a scan-specific report path', async () => {
@@ -318,5 +333,90 @@ describe('fractal-scan tool — additional-organ-names wiring', () => {
     });
 
     expect(typeOf(getFullData(result), 'skills')).toBe(NODE_TYPES.FRACTAL);
+  });
+});
+
+describe('fractal-scan tool — entry names and name filter', () => {
+  let tmpRoot: string;
+
+  beforeEach(() => {
+    tmpRoot = portableJoin(
+      tmpdir(),
+      `filid-name-filter-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    );
+    mkdirSync(tmpRoot, { recursive: true });
+    writeFileSync(portableJoin(tmpRoot, INTENT_FILE_NAME), '# root', 'utf8');
+    for (const feature of ['featureA', 'featureB']) {
+      const featureRoot = portableJoin(tmpRoot, feature);
+      mkdirSync(portableJoin(featureRoot, FILTERED_ORGAN_NAME), {
+        recursive: true,
+      });
+      writeFileSync(
+        portableJoin(featureRoot, INTENT_FILE_NAME),
+        `# ${feature}`,
+        'utf8',
+      );
+      writeFileSync(
+        portableJoin(featureRoot, ENTRY_POINT_FILE_NAME),
+        `export { runStep } from './${FILTERED_ORGAN_NAME}/runStep.js';\n`,
+        'utf8',
+      );
+      writeFileSync(
+        portableJoin(featureRoot, FILTERED_ORGAN_NAME, 'runStep.ts'),
+        'export function runStep(): number {\n  return 1;\n}\n',
+        'utf8',
+      );
+    }
+  });
+
+  afterEach(() => {
+    rmSync(tmpRoot, { recursive: true, force: true });
+  });
+
+  it('narrows the paths projection to directories carrying the name', async () => {
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.PATHS,
+      nameFilter: FILTERED_ORGAN_NAME,
+    });
+    const data = getPathsData(result);
+
+    expect(data.nodes.map((node) => node.path).sort()).toEqual([
+      portableJoin(tmpRoot, 'featureA', FILTERED_ORGAN_NAME),
+      portableJoin(tmpRoot, 'featureB', FILTERED_ORGAN_NAME),
+    ]);
+  });
+
+  it('keeps summary counts describing the whole tree under a filter', async () => {
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.PATHS,
+      nameFilter: FILTERED_ORGAN_NAME,
+    });
+
+    expect(result.summary.totalNodes).toBeGreaterThan(
+      getPathsData(result).nodes.length,
+    );
+  });
+
+  it('returns an empty node list when the name matches nothing', async () => {
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.PATHS,
+      nameFilter: 'no-such-directory',
+    });
+
+    expect(getPathsData(result).nodes).toEqual([]);
+  });
+
+  it('carries the export names of an inspected entry point', async () => {
+    const result = await handleFractalScan({
+      path: tmpRoot,
+      detail: FRACTAL_SCAN_DETAILS.PATHS,
+      nameFilter: 'featureA',
+    });
+    const [node] = getPathsData(result).nodes;
+
+    expect(node?.exportedNames).toContain('runStep');
   });
 });

@@ -17,10 +17,7 @@ export {
   KNOWN_ORGAN_DIR_NAMES,
 } from './tree/organClassifier/index.js';
 export type { ClassifyInput } from './tree/organClassifier/index.js';
-export {
-  buildChain,
-  findBoundary,
-} from './tree/boundaryDetector/index.js';
+export { buildChain, findBoundary } from './tree/boundaryDetector/index.js';
 export type { ChainResult } from './tree/boundaryDetector/index.js';
 
 // rules
@@ -55,7 +52,7 @@ export {
   computeSnapshotHash,
   createProjectSnapshot,
 } from './projectSnapshot/index.js';
-export { resolveContext } from './contextResolver/index.js';
+export { isPathWithin, resolveContext } from './contextResolver/index.js';
 export {
   findLowestCommonFractal,
   resolveOwningFractal,

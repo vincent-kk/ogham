@@ -2,6 +2,7 @@ import { portableJoin } from '@ogham/cross-platform/paths';
 import { describe, expect, it } from 'vitest';
 
 import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import {
   evaluateRules,
   loadBuiltinRules,
@@ -21,6 +22,7 @@ const SNAPSHOT_BASE = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-27T00:00:00.000Z',
 };
 

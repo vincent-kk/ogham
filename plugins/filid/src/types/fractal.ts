@@ -181,6 +181,19 @@ export interface LegacyCriteriaLedgerEvidence {
   targetDetailPath: string;
 }
 
+/**
+ * Which evidence axes a snapshot was asked to collect. Tree and document
+ * evidence are not axes — the others only mean anything on top of them.
+ */
+export interface SnapshotAxisSelection {
+  /** Entry-point export surfaces on each node. */
+  entrySurfaces: boolean;
+  /** Dependency references and the owner-level DAG. */
+  dependencies: boolean;
+  /** spec-document and test-record analysis. */
+  verification: boolean;
+}
+
 export interface ProjectSnapshot {
   schemaVersion: 1;
   projectRoot: string;
@@ -192,6 +205,12 @@ export interface ProjectSnapshot {
   verification: VerificationProjectAnalysis;
   legacyCriteriaLedger: LegacyCriteriaLedgerEvidence | null;
   diagnostics: SnapshotDiagnostic[];
+  /**
+   * What this snapshot actually collected. An axis reported false carries an
+   * empty value with `unsupported` certainty — read this before trusting an
+   * empty graph or verification result as evidence of absence.
+   */
+  collectedAxes: SnapshotAxisSelection;
   createdAt: string;
 }
 

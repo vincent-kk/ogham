@@ -10,6 +10,7 @@ import {
   RESTRUCTURE_UNIT_KINDS,
   RESTRUCTURE_VALIDATION_CODES,
 } from '../../../constants/restructure.js';
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import type {
   DependencyGraph,
   ProjectSnapshot,
@@ -283,6 +284,7 @@ function makeSnapshot(
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: CREATED_AT,
   };
 }

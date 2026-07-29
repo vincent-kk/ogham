@@ -1,7 +1,6 @@
 import { rmSync } from 'node:fs';
 
-import type {
-  REVIEW_STATE_ACTIONS} from '../../../../constants/reviewState.js';
+import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_ERROR_MESSAGES,

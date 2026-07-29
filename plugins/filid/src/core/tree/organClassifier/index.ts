@@ -3,6 +3,4 @@ export {
   classifyNode,
   isInfraOrgDirectoryByPattern,
 } from './organClassifier.js';
-export type {
-  ClassifyInput,
-} from './organClassifier.js';
+export type { ClassifyInput } from './organClassifier.js';

@@ -1,3 +1,1 @@
-export {
-  validatePreToolUse,
-} from './preToolValidator.js';
+export { validatePreToolUse } from './preToolValidator.js';

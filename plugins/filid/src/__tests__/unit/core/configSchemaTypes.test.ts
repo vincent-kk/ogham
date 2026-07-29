@@ -23,6 +23,7 @@ describe('config-schema-types v2', () => {
           additionalOrganNames?: string[];
           additionalAllowedPeers?: AllowedPeerOverride[];
           entryPointOverrides?: Record<string, string[]>;
+          generatedPaths?: string[];
         }
       | undefined
     >();
@@ -36,6 +37,7 @@ describe('config-schema-types v2', () => {
         additionalOrganNames?: string[];
         additionalAllowedPeers?: AllowedPeerOverride[];
         entryPointOverrides?: Record<string, string[]>;
+        generatedPaths?: string[];
       };
     }>();
   });

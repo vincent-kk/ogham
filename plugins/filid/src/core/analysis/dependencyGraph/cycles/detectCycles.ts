@@ -1,4 +1,7 @@
-import type { DependencyDAG, DependencyGraph } from '../../../../types/fractal.js';
+import type {
+  DependencyDAG,
+  DependencyGraph,
+} from '../../../../types/fractal.js';
 
 import { findCycles } from './findCycles.js';
 

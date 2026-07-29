@@ -8,6 +8,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { createAdapterRegistry } from '../../../adapters/index.js';
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import { createDefaultConfig } from '../../infra/configLoader/index.js';
 import { createProjectSnapshot } from '../../projectSnapshot/index.js';
@@ -266,6 +267,7 @@ describe('context resolver', () => {
       verification: { files: [], violations: [], certainty: 'exact' },
       legacyCriteriaLedger: null,
       diagnostics: [],
+      collectedAxes: ALL_SNAPSHOT_AXES,
       createdAt: '2026-07-27T00:00:00.000Z',
     };
 

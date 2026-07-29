@@ -2,7 +2,6 @@ import type {
   DetailMdValidation,
   DocumentViolation,
 } from '../../../../types/documents.js';
-
 import { validateDetailAcceptanceGroups } from '../acceptanceGroups/validateDetailAcceptanceGroups.js';
 import { parseBoundaryExemptions } from '../boundaryExemptions/parseBoundaryExemptions.js';
 

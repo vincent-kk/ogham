@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import { checkExternalImportBoundary } from '../../../core/rules/ruleEngine/utils/checkExternalImportBoundary.js';
 import type { BoundaryExemptionDeclaration } from '../../../types/documents.js';
 import type {
@@ -98,6 +99,7 @@ const snapshot: ProjectSnapshot = {
   verification: { files: [], violations: [], certainty: 'exact' },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-27T00:00:00.000Z',
 };
 

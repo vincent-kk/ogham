@@ -145,6 +145,15 @@
         "paths": ["**/plugins/seiri/src/hooks/instructionsLoaded"]
       }
     ],
-    "entryPointOverrides": {}
+    "entryPointOverrides": {},
+    "generatedPaths": [
+      "plugins/*/bridge",
+      "plugins/*/public",
+      "plugins/*/.codex-plugin",
+      "plugins/*/hooks",
+      "plugins/*/plugin.json",
+      "plugins/*/mcp_config.json",
+      "plugins/*/hooks.json"
+    ]
   }
 }

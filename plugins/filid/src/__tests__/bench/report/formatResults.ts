@@ -65,8 +65,7 @@ export function parseBenchOutput(jsonPath: string): BenchResult[] {
 
       const testRecord = test as Record<string, unknown>;
       const benchData = testRecord.benchData as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
 
       if (!benchData) continue;
 
