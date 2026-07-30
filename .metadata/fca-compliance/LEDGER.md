@@ -2,7 +2,7 @@
 
 > **이어서 작업하려면 [HANDOFF.md](./HANDOFF.md) 를 먼저 읽는다.** 다음 착수 지점, 확립된 처방 5가지, 실측으로 얻은 함정, 검증 절차가 거기 정리되어 있다.
 
-계획: [PLAN.md](./PLAN.md). 기준 실측 792건 → **현재 615건**.
+계획: [PLAN.md](./PLAN.md). 기준 실측 792건 → **현재 414건, 그중 error 1건**.
 
 한 줄에 하나: 무엇이 어디에 반영되었고 무엇으로 검증했는가.
 
@@ -22,11 +22,11 @@
 | imbas        |     100 |     0 |      55 | 완료                          |
 | maencof      |     366 |     0 |     186 | 완료                          |
 | cennad       |      50 |     1 |       6 | 완료 — 순환 1 잔존(아래 사유) |
-| (plugins 밖) |       4 |    17 |     138 | **다음 차례 — T11**           |
+| (plugins 밖) |       4 |     0 |     135 | 완료                          |
 
-**`plugins/` 10개 중 9개가 error 0 이고 cennad 만 순환 1건이 남았다.** 완료한 10개는 전부 `typecheck` + `test:run` 통과를 확인했다.
+**저장소 전체 error 는 1건이다** — cennad 순환뿐이고 나머지 413건은 warning 이다. 손댄 워크스페이스는 전부 `typecheck` + `test:run` 으로 기준선 불변을 확인했고, 마지막에 저장소 전체를 돌렸다: `yarn typecheck` 14 workspaces clean, `yarn test:run` **601 files / 4985 tests 통과**(598 passed·3 skipped / 4965 passed·20 skipped).
 
-`(plugins 밖)` 은 `plugins/` 아래가 아닌 모든 경로(`mcp-servers/`·`shared/`·`tools/`·`scripts/`)를 한 칸에 모은 것이다. 착수 전 칸의 4 는 더 좁은 루트 스코프만 센 값이라 error 17 과 같은 기준이 아니다.
+`(plugins 밖)` 은 `plugins/` 아래가 아닌 모든 경로(`mcp-servers/`·`shared/`·`tools/`·`scripts/`)를 한 칸에 모은 것이다. 착수 전 칸의 4 는 더 좁은 루트 스코프만 센 값이라 같은 기준이 아니다.
 
 ## DETAIL 필수 여부 — 실측
 
@@ -40,9 +40,12 @@
 
 ## 다음 착수 지점
 
-**T11 — `plugins/` 밖 (error 17, 전부 `external-import-boundary`)**. 대상은 `mcp-servers/`·`shared/`·`tools/`·`scripts/` 다.
+**error 작업은 끝났다.** 남은 것은 판단이 필요한 항목뿐이고, 착수 전에 사용자 결정을 받는다.
 
-그 뒤 남는 판단거리: cennad 순환 1건(아래 잔존 표), 그리고 warning 계열(`detail-document-contract` 다수·`entry-point-surface` wildcard 배럴·`zero-peer-file`).
+1. **cennad 순환 1건** — 유일한 error. 아래 잔존 표에 사유가 있다. 어떤 해법도 기능 변경이거나 테스트 레이아웃 이동이라 형식 작업 범위를 넘는다.
+2. **`detail-document-contract` 203건** — 도구 기본값이 fractal 마다 DETAIL 을 요구하는 것이고 규칙 산문은 DETAIL 없는 fractal 을 전제한다(아래 절). 작성·severity 하향·경로 면제 중 무엇을 택할지 결정이 필요하다.
+3. **`zero-peer-file` 126건 · `module-entry-point` 21건 · `entry-point-surface` 50건** — 전자 둘은 구현 파일을 organ 으로 옮기고 배럴을 두는 구조 작업, 후자는 wildcard 배럴을 named export 로 전개하는 작업이다.
+4. **`test-record-case-cap` 7건** — 전부 dynamic table 로 `indeterminate` 다. 정적화하면 커버리지가 줄어 손대지 않았다.
 
 ## 완료
 
@@ -141,8 +144,18 @@
 
 **면책 위치를 두 번 틀렸다.** ① 파일 target 을 import specifier 의 `.js` 로 적어 10건이 무시되었다 — 파서는 디스크 경로와 비교하므로 `.ts` 여야 한다. ② `remindExpiredBuffer` 는 INTENT 가 없어 organ 으로 보이지만 `index.ts` 가 있어 fractal 이다. 부모 DETAIL 에 쓴 면책이 인식되지 않아 자기 DETAIL 로 옮겼다.
 
+### T11 — `plugins/` 밖 (error 17 → 0)
+
+17건 전부 `shared/cross-platform`(16)과 `shared/http-kit`(1)의 `external-import-boundary` 였다.
+
+- **코드 2건.** `readModeIfExists` 는 `filesystem/locking/helpers/` 에 있었지만 소비자가 `filesystem/mutation/writeFileAtomicallySync.ts` 하나뿐이었다 — 배치 규칙대로 소비자 쪽 `filesystem/helpers/` 로 옮겨 경계를 없앴다. `http-kit` 의 `guard/inspectRequest.ts` 는 형제 배럴 경유로 교정(토큰 배럴은 함수 2개, 둘 다 이미 `node:crypto` 사용 → 번들 비용 0).
+- **면책 14건.** `paths`(state) · `paths/compat`(operations·portableResolve·portableRelative) · `instructions`(구간 연산 5개) · `hostRegistry`(registry·resolveHostDescriptor). 배럴 경유가 문법적으로 가능해도 면책이 맞다 — 이 패키지의 `exports` 맵이 concrete 파일을 서브패스로 노출하고 각 INTENT 가 이미 "hook 은 목적별 단일 entry 만 import 한다" 를 선언한다. `instructions/read`·`write` 는 부모 배럴이 자신을 재노출하므로 경유하면 순환도 된다.
+- `paths/compat/INTENT.md` 의 Structure 파일명이 kebab-case 로 적혀 실제 camelCase 와 어긋난 이름 함정도 고쳤다.
+- 검증: `yarn crossPlatform test:run` 52 files / 376 tests(불변), `@ogham/http-kit` 7 files / 47 tests, `yarn typecheck` 14 workspaces clean.
+
 ## 재사용할 사실
 
+- **공유 패키지의 `exports` 맵이 concrete 파일을 서브패스로 노출하면 그 패키지 안의 배럴 경유는 설계 위반이다.** 훅 크기 가드를 받는 소비자를 위해 일부러 lean 진입점을 만든 것이므로, 내부 소비자도 같은 이유로 concrete 경로를 쓴다 — 이때 처방은 배럴 교정이 아니라 면책이다. `package.json` 의 `exports` 와 대상 fractal 의 INTENT 를 근거로 확인한다.
 - **면책 heading 의 파일 target 은 디스크의 실제 확장자(`.ts`)여야 한다.** import specifier 의 `.js` 를 그대로 옮기면 파서가 경로를 찾지 못하고 조용히 무시된다. organ target(`operations` 등)은 확장자가 없어 영향이 없으므로, 같은 배치에서 organ 면책만 통하고 파일 면책만 남는 증상으로 나타난다.
 - **`INTENT.md`·`DETAIL.md` 가 없어도 `index.ts` 가 있으면 module index 로 fractal 로 분류된다.** 면책은 그 디렉터리 자신의 DETAIL 에 써야 하고 부모 DETAIL 에 쓰면 인식되지 않는다(maencof `remindExpiredBuffer`).
 - **면책 target·consumer·verdict 은 코드 스팬으로 쓴다** — 현행 `filid_module-documents` §6 이 그렇게 요구하고, 스팬이 있으면 prettier 가 `__tests__` 를 `**tests**` 로 바꾸는 훼손도 막힌다. bare 값도 읽히지만 스팬이 안전한 기본값이다.
@@ -165,13 +178,13 @@
 
 ## 잔존 (사유 포함)
 
-| 플러그인     | 규칙                   | 건수 | 사유                                                                                                                                 |
-| ------------ | ---------------------- | ---: | ------------------------------------------------------------------------------------------------------------------------------------ |
-| prawf        | `module-entry-point`   |    1 | 플러그인 루트에 어댑터 진입점이 없음. filid 는 config exempt 로 처리 — T12 사용자 확인                                               |
-| r-statistics | `module-entry-point`   |    1 | 위와 동일                                                                                                                            |
-| r-statistics | `test-record-case-cap` |    1 | `rulesetMetaSync.test.ts` 가 동적 테이블 사용. 정적화하면 커버리지가 줄어 손대지 않음                                                |
-| r-statistics | spec 계열 3건          |    3 | `indeterminate` — 증거 부족이지 위반 아님. 규칙상 pass 로 바꾸지 않는다                                                              |
-| seiri        | `module-entry-point`   |    2 | 플러그인 루트와 `templates/`(마크다운 자산). 후자는 index 를 둘 성질이 아니다                                                        |
-| cennad       | `circular-dependency`  |    1 | `src → mcp/server → src`. 닫는 엣지는 e2e Layer A 하네스, 되돌아오는 엣지는 `createServer → version.ts`. 배송 그래프에는 순환이 없다 |
-| cennad       | `entry-point-surface`  |    4 | wildcard 배럴 4개. named 전개로 해소 가능하나 심볼 수가 많아 별도 배치로 미룸                                                        |
-| cennad       | `module-entry-point`   |    2 | 플러그인 루트와 `hooks/`(훅 매핑 설정 노드)                                                                                          |
+| 플러그인     | 규칙                   | 건수 | 사유                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | ---------------------- | ---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prawf        | `module-entry-point`   |    1 | 플러그인 루트에 어댑터 진입점이 없음. filid 는 config exempt 로 처리 — T12 사용자 확인                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| r-statistics | `module-entry-point`   |    1 | 위와 동일                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| r-statistics | `test-record-case-cap` |    1 | `rulesetMetaSync.test.ts` 가 동적 테이블 사용. 정적화하면 커버리지가 줄어 손대지 않음                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| r-statistics | spec 계열 3건          |    3 | `indeterminate` — 증거 부족이지 위반 아님. 규칙상 pass 로 바꾸지 않는다                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| seiri        | `module-entry-point`   |    2 | 플러그인 루트와 `templates/`(마크다운 자산). 후자는 index 를 둘 성질이 아니다                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| cennad       | `circular-dependency`  |    1 | **저장소의 유일한 error.** `src → mcp/server → src`. 닫는 엣지는 `src/__tests__/e2e/helpers/mcpClientLayerA.ts` 가 `createServer` 를 가져가는 것이고, 되돌아오는 엣지는 `mcp/server/lifecycle/createServer.ts → version.ts` 다. 이 하네스는 케이스가 없어 검증 파일로 인식되지 않아 일반 소스로 취급된다 — 규칙 자체는 검증 파일 참조가 순환을 닫지 않는다고 쓴다. 배송 그래프에는 순환이 없다. 해법은 (a) 하네스를 `src` 밖으로 이동, (b) `createServer` 가 VERSION 을 인자로 받게 변경 — 둘 다 형식 작업 범위를 넘으므로 사용자 판단 항목 |
+| cennad       | `entry-point-surface`  |    4 | wildcard 배럴 4개. named 전개로 해소 가능하나 심볼 수가 많아 별도 배치로 미룸                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| cennad       | `module-entry-point`   |    2 | 플러그인 루트와 `hooks/`(훅 매핑 설정 노드)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
