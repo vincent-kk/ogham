@@ -41,11 +41,23 @@
 - `/api/image`: viewer.md 가 참조한 `file://` 이미지만 서빙(문서 멤버십 = allowlist, 임의 경로 차단) + 표시 확장자 화이트리스트(png/jpg/jpeg/gif/webp/svg) + `realpath` regular-file + `max_image_mb` 캡.
 - token 미검증 401, 미지원 Content-Type 415, 미지원 경로 404.
 
-## Acceptance
+## Acceptance Criteria
+
+### AC-http-serving — 문서 서빙
 
 - 문서 페이지가 가독 HTML 로 렌더된다.
-- 잘못된 token 은 401, 알 수 없는 세션은 404.
+- 잘못된 token 은 401, 알 수 없는 세션은 404 다.
+
+### AC-http-lifecycle — 수명주기
+
 - idle 초과 시 서버가 종료되고 다음 `render_viewer` 가 재기동한다.
-- `complete` 제출 시 세션이 `closed` 되어, 이후(동시 제출 포함) 제출은 409 로 거부된다.
-- `complete` 제출의 `intent`(revise/discuss)은 `config.last_intent` 로 best-effort 영속(실패해도 제출 성공).
-- `/api/ping` 은 serving 세션만 200; closed·없는 세션은 404 (캐시된 페이지의 submit 비활성 게이트).
+- `/api/ping` 은 serving 세션만 200 이고 closed·미존재 세션은 404 다(캐시된 페이지의 submit 비활성 게이트).
+
+### AC-feedback-submission — 제출 종결성
+
+- `complete` 제출 시 세션이 `closed` 되어 이후 제출은(동시 제출 포함) 409 로 거부된다.
+- `complete` 제출의 `intent`(revise/discuss)는 `config.last_intent` 로 best-effort 영속되며 실패해도 제출은 성공한다.
+
+## Last Updated
+
+2026-07-30 — acceptance 항목을 acceptance group 형식으로 정리했다(내용 변경 없음).
