@@ -6,7 +6,7 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { tryProjectRoot } from "@ogham/cross-platform/host-paths";
 
-import { createLensServer } from "../server/server.js";
+import { createLensServer } from "../server/index.js";
 
 function resolveConfigRoot(): string | null {
   return process.env["MAENCOF_LENS_CONFIG_ROOT"] ?? tryProjectRoot();

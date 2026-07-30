@@ -12,7 +12,7 @@ import { dirname, join } from "node:path";
 import { MetadataStore, READ_REINDEX_CAP } from "@ogham/maencof";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GraphCache } from "../vault/graphCache/graphCache.js";
+import { GraphCache } from "../vault/graphCache/index.js";
 
 interface ShardedNode {
   id: string;

@@ -8,7 +8,7 @@ import { Layer, toNodeId } from "@ogham/maencof";
 import type { KnowledgeGraph, KnowledgeNode } from "@ogham/maencof";
 import { describe, expect, it } from "vitest";
 
-import { handleLensContext } from "../tools/lensContext/lensContext.js";
+import { handleLensContext } from "../tools/lensContext/index.js";
 
 const VAULT_LAYERS = [2, 3, 4, 5];
 

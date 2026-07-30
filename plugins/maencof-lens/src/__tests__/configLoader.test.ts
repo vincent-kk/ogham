@@ -7,8 +7,8 @@ import {
   loadConfig,
   writeConfig,
   createDefaultConfig,
-} from "../config/configLoader/configLoader.js";
-import { LensConfigSchema } from "../config/configSchema/configSchema.js";
+} from "../config/configLoader/index.js";
+import { LensConfigSchema } from "../config/configSchema/index.js";
 
 describe("config-loader", () => {
   let testDir: string;

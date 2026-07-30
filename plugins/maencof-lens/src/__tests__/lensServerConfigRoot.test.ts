@@ -27,7 +27,7 @@ vi.mock("@modelcontextprotocol/sdk/server/mcp.js", () => ({
 }));
 
 async function callStatus(configRoot: string | null): Promise<ToolResponse> {
-  const { createLensServer } = await import("../mcp/server/server.js");
+  const { createLensServer } = await import("../mcp/server/index.js");
   createLensServer(configRoot);
   const status = handlers.get(McpToolName.STATUS);
   if (!status) throw new Error("status tool was not registered");

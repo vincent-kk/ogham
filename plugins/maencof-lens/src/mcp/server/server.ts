@@ -2,18 +2,18 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { KgContextScope } from "@ogham/maencof";
 import { z } from "zod";
 
-import { loadConfig } from "../../config/configLoader/configLoader.js";
+import { loadConfig } from "../../config/configLoader/index.js";
 import { McpToolName } from "../../constants/mcpToolNames.js";
-import { handleLensContext } from "../../tools/lensContext/lensContext.js";
-import { handleLensNavigate } from "../../tools/lensNavigate/lensNavigate.js";
-import { handleLensRead } from "../../tools/lensRead/lensRead.js";
-import { handleLensSearch } from "../../tools/lensSearch/lensSearch.js";
-import { handleLensStatus } from "../../tools/lensStatus/lensStatus.js";
-import { GraphCache } from "../../vault/graphCache/graphCache.js";
-import { VaultRouter } from "../../vault/vaultRouter/vaultRouter.js";
+import { handleLensContext } from "../../tools/lensContext/index.js";
+import { handleLensNavigate } from "../../tools/lensNavigate/index.js";
+import { handleLensRead } from "../../tools/lensRead/index.js";
+import { handleLensSearch } from "../../tools/lensSearch/index.js";
+import { handleLensStatus } from "../../tools/lensStatus/index.js";
+import { GraphCache } from "../../vault/graphCache/index.js";
+import { VaultRouter } from "../../vault/vaultRouter/index.js";
 import { VERSION } from "../../version.js";
 
-import { toolError, toolResult } from "../shared/shared.js";
+import { toolError, toolResult } from "../shared/index.js";
 
 export function createLensServer(configRoot: string | null) {
   const config = configRoot === null ? null : loadConfig(configRoot);

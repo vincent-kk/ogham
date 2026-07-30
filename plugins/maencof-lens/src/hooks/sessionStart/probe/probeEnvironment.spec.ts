@@ -1,3 +1,4 @@
+// filid:contract AC-probe-environment
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { probeEnvironment } from "./probeEnvironment.js";
