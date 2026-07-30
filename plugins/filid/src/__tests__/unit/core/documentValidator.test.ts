@@ -284,6 +284,28 @@ describe('document-validator', () => {
       });
     });
 
+    it('reads a code-span target path and direct import without their backticks', () => {
+      const result = parseBoundaryExemptions(
+        [
+          '## Boundary Exemptions',
+          '',
+          '### `__tests__` — verification reaches internals',
+          '',
+          '- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`',
+          '- **Direct import**: `allowed`',
+          '- **Reason**: formatter가 `__tests__`를 강조 문법으로 바꾼다.',
+        ].join('\n'),
+      );
+
+      expect(result.violations).toEqual([]);
+      expect(result.exemptions[0]).toMatchObject({
+        targetPath: '__tests__',
+        consumers: ['**/src/hooks/**', '**/__tests__/**'],
+        directImport: true,
+        reason: 'formatter가 `__tests__`를 강조 문법으로 바꾼다.',
+      });
+    });
+
     it('treats an empty reason as an unmet contract', () => {
       const result = parseBoundaryExemptions(exemptionSection('   '));
 

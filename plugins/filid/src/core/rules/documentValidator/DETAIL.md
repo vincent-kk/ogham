@@ -8,6 +8,8 @@
 - criteria ledger나 branch mode 문서는 이 validator의 계약이 아니다.
 - DETAIL.md의 `## Boundary Exemptions`는 조건부 section이다. 없는 것이 정상 이며 면책을 실제로 선언하는 프랙탈만 갖는다. `## Organ Exemptions`는 같은 문법의 legacy 별칭으로 계속 인정한다.
 - 면책 항목은 acceptance group과 같은 `### <target path> — <title>` 형태이며 `Consumers`, `Direct import`, `Reason` 필드를 갖는다. target path에는 `/`가 올 수 있으므로 acceptance group의 ID 문자 집합과 heading 규칙을 공유하지 않는다. target은 organ 경로일 수도, fractal 내부 경로일 수도 있다.
+- target path, 각 consumer 항목과 `Direct import` 값은 code span으로 감쌀 수 있고, 파서는 감싼 backtick을 벗긴 값을 읽는다. markdown formatter가 `__tests__`를 강조 문법으로 바꿔 버리므로 code span이 이름을 원문 그대로 지키는 유일한 표기이며, backtick이 없는 표기도 계속 읽는다.
+- `Reason`은 산문이라 code span을 벗기지 않는다. 그 안의 backtick은 저자가 쓴 그대로 남는다.
 - `Reason`이 비면 면책이 아니라 미충족 계약이므로 error다.
 
 ## API Contracts
@@ -33,6 +35,7 @@
 - section이 없는 DETAIL.md는 면책 0개와 violation 0개를 낸다.
 - 선언된 항목에서 target path, title, consumers, direct import와 reason을 추출하고 `validateDetailMd` 결과에 함께 노출한다.
 - `## Organ Exemptions` heading도 같은 문법의 legacy 별칭으로 파싱한다.
+- ``### `__tests__` — ...`` 처럼 code span으로 감싼 target path에서 backtick을 벗긴 `__tests__`를 추출한다. consumer 항목과 `` `allowed` `` 도 같게 다룬다.
 - `Consumers: entry-point`는 배럴 경유 접근을 뜻하며 direct import를 열지 않는다.
 - `Reason`이 비면 error를 내고 문서는 valid가 아니다.
 
@@ -51,4 +54,4 @@
 
 ## Last Updated
 
-2026-07-28 — 면책 파서를 `## Boundary Exemptions`로 일반화하고 legacy heading을 별칭으로 인정한다.
+2026-07-30 — 면책 선언의 target path·consumers·direct import를 code span으로 감싸도 읽는다. markdown formatter가 `__tests__`를 훼손하는 것을 저자가 막을 수 있는 표기를 파서가 지원한다.

@@ -4,6 +4,8 @@ import type {
   DocumentViolation,
 } from '../../../../types/documents.js';
 
+import { unwrapCodeSpan } from './unwrapCodeSpan.js';
+
 const SECTION_HEADING = '## Boundary Exemptions';
 /** Address this section had before it covered fractal targets as well as organs. */
 const LEGACY_SECTION_HEADING = '## Organ Exemptions';
@@ -19,12 +21,12 @@ function fieldValue(line: string): [string, string] | null {
 function consumerList(raw: string): string[] {
   return raw
     .split(',')
-    .map((entry) => entry.trim().replace(/^`|`$/g, ''))
+    .map(unwrapCodeSpan)
     .filter((entry) => entry.length > 0);
 }
 
 /**
- * Read the conditional `## Organ Exemptions` section of a DETAIL.md.
+ * Read the conditional `## Boundary Exemptions` section of a DETAIL.md.
  *
  * Absence is the normal case: a fractal that grants no exemption carries no
  * section, and that produces no violation. `Reason` is the load-bearing field —
@@ -32,7 +34,10 @@ function consumerList(raw: string): string[] {
  * reason is reported as an unmet contract rather than a granted exemption.
  *
  * The entry heading shares the acceptance-group shape but not its ID charset:
- * an organ path contains separators.
+ * an organ path contains separators. Every identifier this reads — the target
+ * path, each consumer, the direct-import verdict — may arrive inside a code span,
+ * because that is what stops a markdown formatter from rewriting a name like
+ * `__tests__`. `Reason` is prose and keeps its backticks.
  */
 export function parseBoundaryExemptions(
   content: string,
@@ -55,7 +60,7 @@ export function parseBoundaryExemptions(
     const heading = ENTRY_HEADING.exec(line);
     if (heading) {
       current = {
-        targetPath: heading[1],
+        targetPath: unwrapCodeSpan(heading[1]),
         title: heading[2],
         consumers: [],
         directImport: false,
@@ -71,7 +76,8 @@ export function parseBoundaryExemptions(
     const [name, value] = field;
     if (name === 'Consumers') current.consumers = consumerList(value);
     else if (name === 'Direct import')
-      current.directImport = value.toLowerCase() === DIRECT_IMPORT_ALLOWED;
+      current.directImport =
+        unwrapCodeSpan(value).toLowerCase() === DIRECT_IMPORT_ALLOWED;
     else current.reason = value;
   }
 

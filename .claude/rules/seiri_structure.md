@@ -43,4 +43,4 @@ Ask yourself: "What part of this file keeps attracting changes — and is it the
 
 ---
 
-**This rule is working if:** following a call chain rarely reverses direction; finding code takes few hops; splits land at seams reviewers recognize without explanation. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be (see seiri_context-efficiency §1).
+**This rule is working if:** following a call chain rarely reverses direction; finding code takes few hops; splits land at seams reviewers recognize without explanation. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be (see `seiri_context-efficiency` §1).

@@ -20,6 +20,7 @@ INTENT.md(50줄 제한)의 3-tier 경계와 DETAIL.md(append-only 방지)의 현
 - acceptance group ID는 문서 내에서 유일해야 하며, 이 ID가 verification contract의 oracle이 된다.
 - `## Boundary Exemptions`는 조건부 section이다. 부재는 위반이 아니고, 존재하면서 `Reason`이 비면 위반이다.
 - 구 이름 `## Organ Exemptions`도 같은 문법으로 계속 읽는다.
+- 면책 선언에서 읽는 경로·값은 code span을 벗겨 비교한다. markdown formatter가 `__tests__`를 강조 문법으로 바꾸는 것을 막으려 감싼 backtick이 target을 훼손해서는 안 된다.
 
 ## Boundaries
 
