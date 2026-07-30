@@ -155,6 +155,9 @@
 
 ## 재사용할 사실
 
+- **배럴 경유 교정은 번들을 거의 늘리지 않는다 — esbuild 가 재노출 배럴을 tree-shake 하기 때문이다.** 커밋된 `bridge/`·`public/` 50개를 기준선으로 전 플러그인을 재빌드해 비교한 결과: **훅 번들 22개는 전부 바이트 동일**, MCP 번들은 9/10 바이트 동일, maencof 만 490613 → 490623(**+10 bytes**, +0.002%)였다. 이 +10 이 실제 변경분임을 갈라내는 절차는 ① 3회 연속 빌드가 바이트 동일(결정적) ② main 소스로 빌드하면 커밋된 490613 을 정확히 재현(커밋 산출물이 stale 하지 않음) ③ HEAD 소스는 490623. 내용 확인은 `require()` 수 190개 동일 + 문자열 집합 diff 가 minifier 식별자 리네임(`Cr`→`Tr` 등)뿐이었다.
+- **훅 번들이 바이트 동일한 이유는 훅 처방이 문서 전용이었기 때문이다.** 면책 선언은 코드를 건드리지 않으므로 훅 그래프가 그대로다. 이 선택은 숫자로도 정당화된다 — maencof `user-prompt-submit.mjs` 는 42428 / 43008 bytes 로 **여유가 580 bytes 뿐**이다(session-start 45056/57344, post-tool-use 8108/12288, pre-tool-use 9056/12288). 이 번들을 배럴 경유로 바꿨다면 가드가 깨졌을 것이다.
+- **`bridge/run-hook.cmd` 는 커밋본이 LF, 빌드 산출물이 CRLF 라 재빌드마다 +2 bytes 로 보인다.** 손대지 않은 플러그인에서도 같으므로 선재 사항이며 코드 변화가 아니다.
 - **공유 패키지의 `exports` 맵이 concrete 파일을 서브패스로 노출하면 그 패키지 안의 배럴 경유는 설계 위반이다.** 훅 크기 가드를 받는 소비자를 위해 일부러 lean 진입점을 만든 것이므로, 내부 소비자도 같은 이유로 concrete 경로를 쓴다 — 이때 처방은 배럴 교정이 아니라 면책이다. `package.json` 의 `exports` 와 대상 fractal 의 INTENT 를 근거로 확인한다.
 - **면책 heading 의 파일 target 은 디스크의 실제 확장자(`.ts`)여야 한다.** import specifier 의 `.js` 를 그대로 옮기면 파서가 경로를 찾지 못하고 조용히 무시된다. organ target(`operations` 등)은 확장자가 없어 영향이 없으므로, 같은 배치에서 organ 면책만 통하고 파일 면책만 남는 증상으로 나타난다.
 - **`INTENT.md`·`DETAIL.md` 가 없어도 `index.ts` 가 있으면 module index 로 fractal 로 분류된다.** 면책은 그 디렉터리 자신의 DETAIL 에 써야 하고 부모 DETAIL 에 쓰면 인식되지 않는다(maencof `remindExpiredBuffer`).
