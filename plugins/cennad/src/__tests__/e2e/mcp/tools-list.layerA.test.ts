@@ -27,6 +27,7 @@ describe('MCP tools/list (Layer A)', () => {
       'continue_conversation',
       'open_settings',
       'start_conversation',
+      'stop_conversation',
     ]);
   });
 

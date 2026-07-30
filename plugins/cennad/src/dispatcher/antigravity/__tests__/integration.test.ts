@@ -12,6 +12,10 @@ import {
 } from 'vitest';
 
 import {
+  installFakeBinary,
+  prependToPath,
+} from '../../../__tests__/fixtures/fakeBinary.js';
+import {
   AGY_HOME,
   AGY_LAST_CONVERSATIONS_PATH,
   CENNAD_HOME,
@@ -22,10 +26,6 @@ import type {
   AntigravityFlags,
   DispatchOptions,
 } from '../../../types/index.js';
-import {
-  installFakeBinary,
-  prependToPath,
-} from '../../../__tests__/fixtures/fakeBinary.js';
 import { antigravityDispatcher } from '../index.js';
 
 const FLAGS: AntigravityFlags = { sandbox: false, skip_permissions: false };
@@ -62,6 +62,9 @@ if (mode === 'success') {
 } else if (mode === 'error-exit-zero') {
   process.stdout.write(JSON.stringify({ event: 'result', result: { status: 'ERROR', error: 'invalid model selection' } }) + '\\n');
   process.exit(0);
+} else if (mode === 'hang') {
+  process.stdout.write(JSON.stringify({ event: 'step_update', step_update: { step_index: 0, state: 'RUNNING' } }) + '\\n');
+  setInterval(() => {}, 1000);
 } else if (mode === 'empty-stdout') {
   process.exit(0);
 } else if (mode === 'empty-stdout-stderr') {
@@ -123,6 +126,26 @@ function baseOptions(): DispatchOptions<AntigravityFlags> {
 }
 
 describe('antigravityDispatcher.start', () => {
+  // A stopped agy leaves a truncated stream. The transcript fallback that
+  // rescues an empty stdout must not run here — it would return the PREVIOUS
+  // turn's answer as this turn's success.
+  it('returns cancelled when the caller aborts a running CLI', async () => {
+    process.env.CENNAD_FAKE_AGY_MODE = 'hang';
+    const caller = new AbortController();
+    setTimeout(() => caller.abort(), 200);
+
+    const result = await antigravityDispatcher.start({
+      ...baseOptions(),
+      idleTimeoutMs: 3000,
+      hardCapMs: 3000,
+      signal: caller.signal,
+    });
+
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('cancelled');
+    expect(result.response).toBeNull();
+  });
+
   it('returns success, parses the streamed result event, and records the conversation id as ref', async () => {
     process.env.CENNAD_FAKE_AGY_MODE = 'success';
     const result = await antigravityDispatcher.start(baseOptions());

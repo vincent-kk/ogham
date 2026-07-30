@@ -2,7 +2,10 @@ import type { Provider } from '../../types/index.js';
 
 /** One provider CLI run this server process spawned and has not yet settled. */
 export interface ActiveRun {
-  /** cennad session UUID — the ledger key, unique per in-flight run. */
+  /**
+   * cennad session UUID this run belongs to. Not an identity: two concurrent
+   * runs can name the same session, so a stop filtered by it may match several.
+   */
   sessionId: string;
   /** Which CLI is running, so a stop can target one provider. */
   provider: Provider;

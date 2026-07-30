@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { MCP_TOOL_NAMES } from '../../../constants/mcpToolNames.js';
 import {
   type LayerBClient,
   makeLayerBClient,
@@ -45,13 +46,16 @@ describe('Hook bundle guards (Layer B)', () => {
 });
 
 describe('MCP bundle handshake (Layer B)', () => {
-  it('mcp-server.cjs spawn completes initialize handshake and lists 3 tools', async () => {
+  it('mcp-server.cjs spawn completes initialize handshake and lists every registered tool', async () => {
     const handle: LayerBClient = await makeLayerBClient();
     try {
       const info = handle.client.getServerVersion();
       expect(info?.name).toBe('tools');
       const { tools } = await handle.client.listTools();
-      expect(tools.length).toBe(3);
+      // Derived, not a literal: the tool list itself is asserted by name in
+      // tools-list.layerB. What this guard adds is that the BUNDLE exposes as
+      // many as the source declares — a count that drifts silently otherwise.
+      expect(tools.length).toBe(MCP_TOOL_NAMES.length);
     } finally {
       await handle.close();
     }

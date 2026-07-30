@@ -11,7 +11,7 @@
 
 ## API Contracts
 
-- **MCP 도구 3종**(서버 이름 `tools`): `start_conversation`, `continue_conversation`, `open_settings`.
+- **MCP 도구 4종**(서버 이름 `tools`): `start_conversation`, `continue_conversation`, `stop_conversation`, `open_settings`.
 - **훅 2종**: SessionStart 정적 정책, UserPromptSubmit 라이브 상태.
 - **스킬 5종**: `codex`, `antigravity`, `claude`, `crosscheck`, `setup`.
 - **에이전트 1종**: `courier` — 백그라운드 위임 러너.
@@ -37,4 +37,4 @@
 
 ## Last Updated
 
-2026-07-30 — 플러그인 루트 계약을 문서화했다.
+2026-07-31 — MCP 도구를 4종으로 갱신했다(`stop_conversation` 추가). 위임한 CLI 는 위임을 요청한 에이전트와 수명이 묶이지 않으므로, 중단 표면이 별도로 필요하다.

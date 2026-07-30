@@ -6,7 +6,7 @@ import { handleStopConversation } from '../stopConversation.js';
 
 function seed(sessionId: string, provider: Provider): () => void {
   const abort = vi.fn();
-  runLedger.set(sessionId, {
+  runLedger.add({
     sessionId,
     provider,
     startedAt: performance.now(),

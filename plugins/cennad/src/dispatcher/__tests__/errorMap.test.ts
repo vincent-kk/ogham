@@ -150,6 +150,22 @@ describe('mapError', () => {
     );
   });
 
+  // The code and the message have to agree. Classifying past the buffered text
+  // and then quoting it as the reason hands the caller "429 rate limit" as the
+  // explanation for a stop the caller itself ordered.
+  it('states the stop as the reason instead of quoting buffered output', () => {
+    const result = mapError({
+      exitCode: -1,
+      stderr: '429 rate limit, retrying',
+      cliMessage: 'waiting on the model',
+      cancelled: true,
+    });
+    expect(result.code).toBe(ErrorCode.Cancelled);
+    expect(result.message).not.toContain('429');
+    expect(result.message).not.toContain('waiting on the model');
+    expect(result.message).toContain('stopped');
+  });
+
   // A stop lands mid-stream, so whatever the CLI had printed is still in the
   // buffer. Classifying that text would report the reason the run was going
   // slowly instead of the reason it ended.

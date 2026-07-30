@@ -6,7 +6,7 @@ import type { ActiveRun } from '../types.js';
 
 function seed(sessionId: string, provider: ActiveRun['provider']): () => void {
   const abort = vi.fn();
-  runLedger.set(sessionId, {
+  runLedger.add({
     sessionId,
     provider,
     startedAt: performance.now(),
