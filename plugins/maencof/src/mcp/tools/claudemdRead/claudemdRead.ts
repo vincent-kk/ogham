@@ -2,7 +2,7 @@
  * @file claudemdRead.ts
  * @description claudemd_read 도구 핸들러 — CWD의 호스트 지침 문서에서 maencof 섹션 읽기
  */
-import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/index.js';
 import type { ClaudeMdReadResult } from '../../../types/mcp.js';
 
 /**

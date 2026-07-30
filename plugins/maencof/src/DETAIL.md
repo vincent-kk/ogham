@@ -40,3 +40,11 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 
 - 세션 마감은 MCP 서버 수명주기가 소유한다: 매 턴 UserPromptSubmit `session-touch` 가 `lastActivityAt`/`usageSnapshot` 을 기록하고, 서버 shutdown(동기 정밀)·다음 부팅 bootSweep(보장)이 `sweepStaleSessions` 로 레코드를 마감하며 workIndex 당일 digest 를 재생성한다(`buildDailyDigest`).
 - 세션 종료 기록은 sessionStore 전용이다 — `.maencof-meta/sessions/*.md` 나 dailynote .md 에는 기록하지 않는다.
+
+## Boundary Exemptions
+
+### `version.ts` — Generated version constant has no entry point
+
+- **Consumers**: `**/src/**`
+- **Direct import**: `allowed`
+- **Reason**: 생성기(`scripts/injectVersion.mjs`)가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 `src → mcp → mcp/server → src` 순환이 되고, SessionStart 훅 소비자는 배럴 경유가 번들 크기 가드에 걸린다.

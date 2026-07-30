@@ -10,7 +10,7 @@ import { portableRelative } from '@ogham/cross-platform/compat';
 import { z } from 'zod';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
-import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/index.js';
 import { handleClaudeMdMerge } from '../../tools/claudemdMerge/index.js';
 import { handleClaudeMdRead } from '../../tools/claudemdRead/index.js';
 import { handleClaudeMdRemove } from '../../tools/claudemdRemove/index.js';

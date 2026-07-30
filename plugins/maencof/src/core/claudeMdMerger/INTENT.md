@@ -6,7 +6,7 @@
 
 ## Structure
 
-- `index.ts` — 순수 barrel (기존 raw filePath API·타입·마커 재노출)
+- `index.ts` — 순수 barrel (raw filePath API·project instruction manager·타입·마커 재노출)
 - `types/` organ — 공개 타입 (MergeResult)
 - `operations/` organ — exact-path 호환 래퍼와 project instruction manager 조립
 

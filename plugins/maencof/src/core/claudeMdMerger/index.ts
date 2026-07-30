@@ -6,4 +6,5 @@ export { mergeMaencofSection } from './operations/mergeMaencofSection.js';
 export { readMaencofSection } from './operations/readMaencofSection.js';
 export { removeMaencofSection } from './operations/removeMaencofSection.js';
 export { ClaudeMdMerger } from './operations/claudeMdMerger.js';
+export { createProjectInstructionManager } from './operations/createProjectInstructionManager.js';
 export type { MergeResult } from './types/types.js';
