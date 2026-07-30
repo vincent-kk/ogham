@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
-import { pluginCache } from '@ogham/cross-platform/paths';
+import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
 
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';

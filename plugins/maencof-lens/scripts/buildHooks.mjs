@@ -47,9 +47,10 @@ const ESM_CJS_REQUIRE_BANNER =
   "import { createRequire as __cpCreateRequire } from 'node:module';\n" +
   "const require = __cpCreateRequire(import.meta.url);\n";
 
-await Promise.all(
-  hookEntries.map(({ name, entry }) =>
-    esbuild.build({
+const hookBuilds = await Promise.all(
+  hookEntries.map(async ({ name, entry }) => ({
+    name,
+    result: await esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
       platform: "node",
@@ -59,12 +60,13 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      metafile: true,
       banner: { js: ESM_CJS_REQUIRE_BANNER },
       alias: {
         "@ogham/maencof": resolve(root, "../maencof/src"),
       },
     }),
-  ),
+  })),
 );
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
@@ -110,7 +112,38 @@ const FORBIDDEN_PATTERNS = [
 // hook-safe maencof export is introduced and reviewed.
 const FORBIDDEN_ALIAS_PATTERNS = [/@ogham\/maencof\b/, /\bscanVault\b/];
 
-const violations = [];
+// Barrel entry points of @ogham/cross-platform. A hook must reach the concrete
+// module it needs rather than a barrel: the barrel puts every re-exported module
+// in the bundle's input graph, and what tree-shaking happens to drop today it
+// keeps the moment one of those modules gains a side effect. The output-string
+// guards below cannot see this — only the metafile input graph can.
+// KNOWN GAP — the SessionStart graph already reaches six barrels today, all
+// through `config/configLoader` -> `@ogham/cross-platform/config-scope`:
+//   paths/index.js · paths/paths.js · paths/compat/index.js ·
+//   hostRegistry/index.js · filesystem/locking/index.js · instructions/index.js
+// Closing them means either breaking `configScope/layers/INTENT.md`'s stated
+// convention ("형제 모듈은 진입점으로 소비한다: ../merge, ../../paths,
+// ../../filesystem") or changing what the hook loads — a design decision, not a
+// build-script one. The bundle sits at 8.8 KB against a 40 KB cap, so it is not
+// urgent. Those six are deliberately absent below so this guard stays green;
+// it exists to stop the graph widening any further.
+const FORBIDDEN_INPUTS = [
+  "cross-platform/dist/filesystem/read/index.js",
+  "cross-platform/dist/spawn/index.js",
+  "cross-platform/dist/index.js",
+  "agent-artifacts/dist/index.js",
+];
+
+const violations = hookBuilds.flatMap(({ name, result }) =>
+  Object.keys(result.metafile.inputs).flatMap((input) => {
+    const normalizedInput = input.replaceAll("\\", "/");
+    return FORBIDDEN_INPUTS.flatMap((forbidden) =>
+      normalizedInput.includes(forbidden)
+        ? [`  ${name}.mjs: forbidden input graph ${forbidden}`]
+        : [],
+    );
+  }),
+);
 
 for (const { name } of hookEntries) {
   const file = resolve(root, `bridge/${name}.mjs`);

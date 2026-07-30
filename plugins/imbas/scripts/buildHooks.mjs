@@ -64,9 +64,10 @@ const ESM_CJS_REQUIRE_BANNER =
   "import { createRequire as __cpCreateRequire } from 'node:module';\n" +
   'const require = __cpCreateRequire(import.meta.url);\n';
 
-await Promise.all(
-  hookEntries.map(({ name, entry }) =>
-    esbuild.build({
+const hookBuilds = await Promise.all(
+  hookEntries.map(async ({ name, entry }) => ({
+    name,
+    result: await esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
       platform: 'node',
@@ -76,9 +77,10 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      metafile: true,
       banner: { js: ESM_CJS_REQUIRE_BANNER },
     }),
-  ),
+  })),
 );
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
@@ -141,7 +143,30 @@ const FORBIDDEN_PATTERNS = [
 // allowed — @ogham/cross-platform/self-probe pulls cross-spawn (CJS) into the
 // setup (SessionStart) bundle, which produces that shim during ESM bundling.
 
-const violations = [];
+// Barrel entry points of @ogham/cross-platform. A hook must reach the concrete
+// module it needs (`paths/plugin-cache`, `host-registry/hosts`, …) rather than a
+// barrel: the barrel puts every re-exported module in the bundle's input graph,
+// and what tree-shaking happens to drop today it keeps the moment one of those
+// modules gains a side effect. FORBIDDEN_PATTERNS below reads the emitted output
+// and cannot see this — only the metafile input graph can.
+const FORBIDDEN_INPUTS = [
+  'cross-platform/dist/paths/index.js',
+  'cross-platform/dist/paths/paths.js',
+  'cross-platform/dist/paths/compat/index.js',
+  'cross-platform/dist/hostRegistry/index.js',
+  'cross-platform/dist/filesystem/read/index.js',
+];
+
+const violations = hookBuilds.flatMap(({ name, result }) =>
+  Object.keys(result.metafile.inputs).flatMap((input) => {
+    const normalizedInput = input.replaceAll('\\', '/');
+    return FORBIDDEN_INPUTS.flatMap((forbidden) =>
+      normalizedInput.includes(forbidden)
+        ? [`  ${name}.mjs: forbidden input graph ${forbidden}`]
+        : [],
+    );
+  }),
+);
 
 const guardedBundles = [
   ...hookEntries,
