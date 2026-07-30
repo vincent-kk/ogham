@@ -13,7 +13,7 @@
 - `pathForCompare` — 비교용 separator·case 정규화.
 - `samePath` — 경로 동등성 비교.
 - `isWindowsLikePath` · `isPosixLikePath` — 플레이버 판별.
-- `operations/` organ — 목적별 portable 연산.
+- `operations/` organ — 목적별 portable 연산. 패키지는 이 중 `portableBasename`·`portableDirname`·`portableJoin`·`portableResolve`·`portableIsAbsolute`·`pathForCompare` 를 `./compat/*` 서브패스로 각각 노출한다.
 
 ## Acceptance Criteria
 
@@ -29,9 +29,9 @@
 
 ### `operations` — Lean single-purpose entry
 
-- **Consumers**: `**/src/hostPaths/**`, `**/src/paths/operations/**`
+- **Consumers**: `**/src/hostPaths/**`, `**/src/paths/operations/**`, `**/src/configScope/**`
 - **Direct import**: `allowed`
-- **Reason**: 이 패키지는 concrete 파일을 서브패스로 노출하는 lean 소비를 전제한다(`paths/normalize`·`paths/relative`). 같은 이유로 패키지 내부 소비자도 필요한 한 연산만 가져간다 — `compat` 배럴을 거치면 `paths/contained` 같은 단일 목적 진입점이 플레이버 판별·비교 함수 전체를 함께 싣게 된다.
+- **Reason**: 이 패키지는 concrete 파일을 서브패스로 노출하는 lean 소비를 전제한다(`paths/normalize`·`paths/relative`). 같은 이유로 패키지 내부 소비자도 필요한 한 연산만 가져간다 — `compat` 배럴을 거치면 `paths/contained` 같은 단일 목적 진입점이 플레이버 판별·비교 함수 전체를 함께 싣게 된다. `configScope/layers` 는 훅 도달 그래프에 실려 크기 가드를 받으므로 같은 제약이 걸린다.
 
 ### `portableResolve.ts` — Lean single-purpose entry
 

@@ -1,4 +1,4 @@
-import { readUtf8FileIfExistsSync } from "../../../filesystem/index.js";
+import { readUtf8FileIfExistsSync } from "../../../filesystem/read/readUtf8FileIfExistsSync.js";
 import { isPlainObject } from "../../merge/index.js";
 
 import { findForbiddenKeys } from "./findForbiddenKeys.js";

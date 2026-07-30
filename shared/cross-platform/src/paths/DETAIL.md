@@ -29,7 +29,7 @@
 
 ### `state` — Lean single-purpose entry
 
-- **Consumers**: `**/src/hooks/**`
+- **Consumers**: `**/src/hooks/**`, `**/src/configScope/**`
 - **Direct import**: `allowed`
 - **Reason**: 이 패키지의 `exports` 맵은 `paths/plugin-cache`·`paths/state-root` 처럼 concrete 파일을 서브패스로 노출한다. 훅 도달 코드는 크기 가드를 받으므로 필요한 한 함수만 가져가야 하고, `paths` 배럴을 거치면 `env-paths` 를 포함한 aggregate 그래프 전체가 번들에 끌려 들어온다. `INTENT.md` 의 "hook 은 필요한 단일 목적 subpath 만 import 한다" 가 같은 계약을 이미 선언한다.
 

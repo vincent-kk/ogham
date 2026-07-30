@@ -194,6 +194,18 @@
     "./compat/resolve": {
       "types": "./dist/paths/compat/operations/portableResolve.d.ts",
       "import": "./dist/paths/compat/operations/portableResolve.js"
+    },
+    "./compat/dirname": {
+      "types": "./dist/paths/compat/operations/portableDirname.d.ts",
+      "import": "./dist/paths/compat/operations/portableDirname.js"
+    },
+    "./filesystem/mutation/ensure-directory": {
+      "types": "./dist/filesystem/mutation/ensureDirectorySync.d.ts",
+      "import": "./dist/filesystem/mutation/ensureDirectorySync.js"
+    },
+    "./filesystem/mutation/write-atomic": {
+      "types": "./dist/filesystem/mutation/writeFileAtomicallySync.d.ts",
+      "import": "./dist/filesystem/mutation/writeFileAtomicallySync.js"
     }
   },
   "main": "dist/index.js",

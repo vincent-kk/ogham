@@ -13,7 +13,7 @@
 
 ## API Contracts
 
-패키지 `exports` 가 선언하는 진입은 배럴 `./filesystem`, 목적별 판독 셋(`./filesystem/read/utf8`·`./filesystem/read/bytes`·`./filesystem/read/directory`), 그리고 자식 fractal 배럴 `./filesystem/hook-io` 다. `./filesystem/read` 묶음 진입은 의도적으로 없다.
+패키지 `exports` 가 선언하는 진입은 배럴 `./filesystem`, 목적별 판독 셋(`./filesystem/read/utf8`·`./filesystem/read/bytes`·`./filesystem/read/directory`), 목적별 쓰기 둘(`./filesystem/mutation/ensure-directory`·`./filesystem/mutation/write-atomic`), 그리고 자식 fractal 배럴 `./filesystem/hook-io` 다. `./filesystem/read`·`./filesystem/mutation` 묶음 진입은 의도적으로 없다 — 배럴을 거치면 판독이나 교체 한 줄에 `locking/` 그래프가 함께 실린다.
 
 - `readUtf8FileIfExistsSync(path)` — UTF-8 텍스트 또는 `null`. `./filesystem/read/utf8` 로도 노출된다.
 - `readFileIfExistsSync(path)` — `Uint8Array` 또는 `null`. `./filesystem/read/bytes` 로도 노출된다.
@@ -59,9 +59,15 @@
 
 ## Boundary Exemptions
 
+### `mutation` — Hook bundle lean entry
+
+- **Consumers**: `**/src/configScope/**`
+- **Direct import**: `allowed`
+- **Reason**: `configScope/layers` 는 훅 도달 그래프에 실린다. 레이어 한 장을 원자적으로 교체하자고 `filesystem` 배럴을 거치면 `locking/`(대기·quarantine·`node:crypto`)까지 번들 입력 그래프에 들어온다. 크기 가드는 tree-shaking 이 지운 뒤를 보므로 그 유입을 볼 수 없다. `configScope/layers/INTENT.md` 가 같은 계약을 선언한다.
+
 ### `read` — Hook bundle lean entry
 
-- **Consumers**: `plugins/filid/src/**`, `plugins/seiri/src/**`, `shared/agent-artifacts/src/**`
+- **Consumers**: `plugins/filid/src/**`, `plugins/seiri/src/**`, `shared/agent-artifacts/src/**`, `**/src/configScope/**`
 - **Direct import**: `allowed`
 - **Reason**: 이 organ 의 파일들은 `filesystem/read/utf8`·`read/bytes`·`read/directory` 서브패스로 패키지가 직접 선언한 진입이고, 소비자는 크기 가드를 받는 훅 도달 코드다. `filesystem` 배럴을 거치면 판독 한 줄에 `locking/`(대기·quarantine·`node:crypto`)과 `mutation/` 그래프가 함께 실린다. `INTENT.md` 의 "읽기 전용 hook 은 `filesystem/read/*` 목적별 entry 만 import 한다" 가 같은 계약을 선언한다.
 

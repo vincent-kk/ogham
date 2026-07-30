@@ -117,16 +117,20 @@ const FORBIDDEN_ALIAS_PATTERNS = [/@ogham\/maencof\b/, /\bscanVault\b/];
 // in the bundle's input graph, and what tree-shaking happens to drop today it
 // keeps the moment one of those modules gains a side effect. The output-string
 // guards below cannot see this — only the metafile input graph can.
-// KNOWN GAP — the SessionStart graph already reaches six barrels today, all
-// through `config/configLoader` -> `@ogham/cross-platform/config-scope`:
-//   paths/index.js · paths/paths.js · paths/compat/index.js ·
-//   hostRegistry/index.js · filesystem/locking/index.js · instructions/index.js
-// Closing them means either breaking `configScope/layers/INTENT.md`'s stated
-// convention ("형제 모듈은 진입점으로 소비한다: ../merge, ../../paths,
-// ../../filesystem") or changing what the hook loads — a design decision, not a
-// build-script one. The bundle sits at 8.8 KB against a 40 KB cap, so it is not
-// urgent. Those six are deliberately absent below so this guard stays green;
-// it exists to stop the graph widening any further.
+// Barrel entry points. A hook must reach the concrete module it needs: a barrel
+// puts every re-exported module in the bundle's input graph, and what
+// tree-shaking happens to drop today it keeps the moment one of those modules
+// gains a side effect. The output-string guards below cannot see this — only the
+// metafile input graph can.
+// KNOWN GAP — the SessionStart graph is 531 input modules wide because it loads
+// `@ogham/maencof`'s `core/claudeMdMerger`, which pulls the whole
+// `@ogham/agent-artifacts` instructions + transactions graph. That chain is what
+// reaches paths/index.js, paths/paths.js, paths/compat/index.js,
+// hostRegistry/index.js, filesystem/index.js, filesystem/locking/index.js and
+// instructions/index.js — not this plugin's own imports. Narrowing it means
+// changing what the hook loads, so those seven are deliberately absent below.
+// The bundle sits at 8.8 KB against a 40 KB cap; this guard exists to stop the
+// graph widening past what it already carries.
 const FORBIDDEN_INPUTS = [
   "cross-platform/dist/filesystem/read/index.js",
   "cross-platform/dist/spawn/index.js",
