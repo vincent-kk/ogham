@@ -37,18 +37,14 @@ Canonical order:
 pr-create → review → resolve → revalidate
 ```
 
-Two flags are not optional here, because both stages would otherwise stop for input:
-`pr-create` always gets `--auto-approve` (the `enrich-docs` approval step) and `resolve`
-always gets `--auto` (the per-item decision prompts). Use `/filid:pull-request` or
-`/filid:resolve` directly when those decisions are wanted.
+Two flags are not optional here, because both stages would otherwise stop for input: `pr-create` always gets `--auto-approve` (the `enrich-docs` approval step) and `resolve` always gets `--auto` (the per-item decision prompts). Use `/filid:pull-request` or `/filid:resolve` directly when those decisions are wanted.
 
 ## Step 1 — Assess the branch
 
 Two commands, in this order. Do not skip the first.
 
 1. Run `gh pr view` and keep its exit code. Exit 0 means a pull request exists.
-2. Pass that as `hasPullRequest` — filid owns no PR operations, so the tool cannot
-   determine it:
+2. Pass that as `hasPullRequest` — filid owns no PR operations, so the tool cannot determine it:
 
 ```text
 mcp__plugin_filid_tools__review_state({
@@ -59,12 +55,9 @@ mcp__plugin_filid_tools__review_state({
 })
 ```
 
-**Omitting `hasPullRequest` reads as "no PR".** A branch that already has an unreviewed
-PR then enters `pr-create` instead of `review`, where the existing-PR overwrite
-confirmation stops the run for input — the one place this pipeline yields by accident.
+**Omitting `hasPullRequest` reads as "no PR".** A branch that already has an unreviewed PR then enters `pr-create` instead of `review`, where the existing-PR overwrite confirmation stops the run for input — the one place this pipeline yields by accident.
 
-One call answers the review directory, the entry point, the base ref and the push state.
-Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name.
+One call answers the review directory, the entry point, the base ref and the push state. Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name.
 
 ## Step 2 — Determine the entry point
 
@@ -118,6 +111,5 @@ Result: <verdict or stop reason>
 
 - The pipeline never calls an MCP tool other than `review_state`, and never edits a file.
 - Stage order is fixed. `--from` selects an entry, never a reordering.
-- `resolve` always runs with `--auto` and `pr-create` always with `--auto-approve` here. A
-  stage that stops for input has not been handed the flag that suppresses it.
+- `resolve` always runs with `--auto` and `pr-create` always with `--auto-approve` here. A stage that stops for input has not been handed the flag that suppresses it.
 - The pipeline does not end at `resolve`. Reaching `resolve` and stopping is a defect, not a completion.

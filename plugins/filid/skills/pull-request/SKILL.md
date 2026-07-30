@@ -64,10 +64,7 @@ Skipped entirely when `--skip-enrich` is passed.
 
    Collect the distinct `ownerFractalPath` values. This is the audit scope — **do not enrich the whole tree.** PR scope and document scope must match.
 
-3. Invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. Append `--auto-approve`
-   **exactly when this skill received it** — never by inferring that a pipeline is running.
-   An orchestrator that wants unattended document sync passes the flag; without it,
-   enrich-docs keeps its own approval step and a standalone run stays interactive.
+3. Invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
 4. On enrich-docs failure, print the BLOCKED message (`reference.md` §1) and exit. `--skip-enrich` bypasses this stage.
 5. If `git status --porcelain` now reports changes, stage **only** `INTENT.md` / `DETAIL.md` paths and commit:
 

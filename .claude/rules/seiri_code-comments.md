@@ -12,7 +12,7 @@ A comment is the one thing in a file nothing checks: no compiler reads it, no te
 
 - No changelog lines, no dated notes, no "previously" or "used to", no commented-out predecessor kept for reference. Nothing verifies any of it, so it rots silently and then misleads with the authority of a comment.
 - History that must be kept goes where this repository keeps it — the version-control trail, a changelog, a decision record, a module document beside the code. Not in the source.
-- An edit that leaves a comment behind has published a false statement. Change the behavior, rewrite the sentence describing the old one; delete the code, delete its comment with it.
+- Change the behavior, rewrite the sentence describing the old one; delete the code, delete its comment with it. A comment left behind is a published false statement.
 
 Ask yourself: "Reading only this comment, would I describe the code as it is today?"
 
@@ -20,7 +20,7 @@ Ask yourself: "Reading only this comment, would I describe the code as it is tod
 
 **The signature says what the types are; the comment says what they mean.**
 
-- Write it in the documentation-comment form the language provides — the one its own tooling and editors already read — and fill every slot that form defines: each parameter, what comes back, and what the function is for.
+- Write it in the documentation-comment form the language provides, and fill every slot that form defines: each parameter, what comes back, and what the function is for.
 - Say what the caller cannot see from the signature: what makes an argument valid, the conditions under which the call fails, the effect it has beyond its return value.
 - Do not restate the signature in prose. A parameter documented as "the id" earned nothing; a parameter documented by what makes it acceptable earned its line.
 

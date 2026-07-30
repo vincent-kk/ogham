@@ -1,5 +1,4 @@
 <!-- FILID:START:filid_fractal-boundaries.md -->
-
 # Fractal Boundaries
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
@@ -23,8 +22,8 @@ Companion rules: `filid_module-documents.md` for the INTENT and DETAIL contracts
 
 - Resolve in this strict order: (1) `INTENT.md` present → fractal; (2) `DETAIL.md` present → fractal; (3) double-underscore-wrapped or dot-prefixed infrastructure name → organ; (4) directory name in the configured known organ list → organ; (5) a registered adapter reports a module index → fractal; (6) a leaf directory with no fractal children → organ; (7) an adapter proves both statelessness and no side effects → pure-function; (8) otherwise → organ.
 - Step 5 reads one signal: a module index. Of the entry points an adapter reports, only a module entry classifies. An executable, framework or manifest entry, and any path injected by the config `entryPointOverrides`, never turns a directory into a fractal — they feed the entry-point surface, not classification. Without that split, markdown-as-implementation such as a skill document would make a directory a fractal and subject prose to rules written for code.
-- Step 6 comes before purity on purpose, so `pure-function` is only ever reached by a directory that has children. A leaf compartment is an organ even when nothing in it has an effect: isolation worth naming is a claim about a module, and a leaf that never declared one has not made it.
-- Step 8 is organ on purpose. A directory that declares neither a document nor an index has never claimed an independent contract. Defaulting to fractal manufactures "add a boundary document" demands and makes classification depend on incidentals — whether a directory happens to have a subdirectory, for instance.
+- Step 6 comes before purity on purpose, so `pure-function` is only ever reached by a directory that has children: a leaf that never claimed isolation is an organ even when nothing in it has an effect.
+- Step 8 is organ on purpose: a directory that declares neither a document nor an index has never claimed an independent contract, and defaulting to fractal would manufacture "add a boundary document" demands from incidentals — whether a directory happens to have a subdirectory, for instance.
 - Default organ names are `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`, `fixtures` and `e2e`. Docs-as-code compartment names such as `references`, `docs` or `plans` are deliberately absent — shipping one here would silently reclassify a real code module of that name as an organ. Config extends this list through `structure.additionalOrganNames`.
 
 Ask yourself: "Which step in the order decided this — and does the file it names actually exist?"
@@ -96,14 +95,10 @@ Ask yourself: "Can I order these modules so every reference points one way — a
 <!-- FILID:END:filid_fractal-boundaries.md -->
 
 <!-- FILID:START:filid_module-documents.md -->
-
 ---
-
 paths:
-
-- 'INTENT.md'
-- 'DETAIL.md'
-
+  - 'INTENT.md'
+  - 'DETAIL.md'
 ---
 
 # Module Documents
@@ -169,9 +164,9 @@ Ask yourself: "Is this sentence what holds now, or how it came to hold — and i
 
 **`Reason` is the load-bearing field.**
 
-- `Boundary Exemptions` is conditional: present only when this fractal actually grants one. A fractal with no exemption never carries the section, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose. `## Organ Exemptions` is the same syntax under this section's former name and is still read.
+- `Boundary Exemptions` is conditional: present only when this fractal actually grants one, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose. `## Organ Exemptions` is the same syntax under this section's former name and is still read.
 - The target is an organ path or a path inside this fractal — a consumer that cannot route through the entry point needs the same escape hatch either way. A path names itself and everything under it.
-- Write the target path, each consumer and the direct-import verdict inside a code span. A markdown formatter reads a bare `__tests__` as emphasis and writes the heading back as `**tests**`, which silently points the exemption at a path that does not exist; the span is what survives the formatter, and the parser strips it before comparing. A bare value is still read, so the span costs nothing and is the safe default. `Reason` is prose and keeps its own backticks.
+- Write the target path, each consumer and the direct-import verdict inside a code span. A markdown formatter reads a bare `__tests__` as emphasis and writes the heading back as `**tests**`, silently pointing the exemption at a path that does not exist; the span survives the formatter, and the parser strips it before comparing. A bare value is still read, so the span costs nothing and is the safe default. `Reason` is prose and keeps its own backticks.
 - An entry uses the acceptance-group shape, so one parser reads both:
 
 ```md
@@ -195,27 +190,23 @@ Ask yourself: "Would someone who has never seen this code understand why the exe
 <!-- FILID:END:filid_module-documents.md -->
 
 <!-- FILID:START:filid_verification-records.md -->
-
 ---
-
 paths:
-
-- '_.test._'
-- '_.spec._'
-- '_\_test._'
-- '_\_spec._'
-- 'test__._'
-- '_Test._'
-- '_Tests._'
-- '_Spec._'
-- 'conftest.py'
-- '**tests**'
-- 'test'
-- 'tests'
-- 'spec'
-- 'specs'
-- 'e2e'
-
+  - '*.test.*'
+  - '*.spec.*'
+  - '*_test.*'
+  - '*_spec.*'
+  - 'test_*.*'
+  - '*Test.*'
+  - '*Tests.*'
+  - '*Spec.*'
+  - 'conftest.py'
+  - '__tests__'
+  - 'test'
+  - 'tests'
+  - 'spec'
+  - 'specs'
+  - 'e2e'
 ---
 
 # Verification Records
@@ -282,7 +273,6 @@ Ask yourself: "Which acceptance group does this file answer for — and does a s
 <!-- FILID:END:filid_verification-records.md -->
 
 <!-- FILID:START:filid_code-placement.md -->
-
 # Code Placement
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
@@ -337,10 +327,8 @@ Before implementation that touches a fractal:
 
 - Identify every affected fractal.
 - Update each affected DETAIL contract, and INTENT when a public interface or boundary changes.
-- For new behavior or a fix, write a check and watch it fail for the intended reason.
-- Implement the minimum change.
-- Run scoped verification and the structural scan — warnings count as findings.
-- Record the result and any deviation from the plan before moving to the next review seam.
+- Implement the minimum change; for new behavior or a fix, first write a check and watch it fail for the intended reason.
+- Run scoped verification and the structural scan — warnings count as findings — and record the result and any deviation from the plan before the next review seam.
 
 Ask yourself: "Did the contract change before the code, or am I about to write it up afterwards?"
 
@@ -350,7 +338,6 @@ Ask yourself: "Did the contract change before the code, or am I about to write i
 <!-- FILID:END:filid_code-placement.md -->
 
 <!-- SEIRI:START:seiri_agent-legible.md -->
-
 # Agent-Legible Code
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -387,7 +374,7 @@ Ask yourself: "What would someone reasonably assume from this name — and is th
 
 **When a direct call and an indirect mechanism are equally capable, choose direct.**
 
-- Indirection the architecture or framework demands is not yours to remove — label it (rule 1) and move on.
+- Indirection the architecture or framework demands is not yours to remove — label it (§1) and move on.
 
 Ask yourself: "Can a reader follow this reference with plain text search?"
 
@@ -405,7 +392,6 @@ Ask yourself: "Can I state what this file does without opening a second file?"
 <!-- SEIRI:END:seiri_agent-legible.md -->
 
 <!-- SEIRI:START:seiri_public-contract.md -->
-
 # Public Contract
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -452,27 +438,23 @@ Ask yourself: "What breaks at runtime if I change this export's shape — and wo
 <!-- SEIRI:END:seiri_public-contract.md -->
 
 <!-- SEIRI:START:seiri_test-validity.md -->
-
 ---
-
 paths:
-
-- '_.test._'
-- '_.spec._'
-- '_\_test._'
-- '_\_spec._'
-- 'test__._'
-- '_Test._'
-- '_Tests._'
-- '_Spec._'
-- 'conftest.py'
-- '**tests**'
-- 'test'
-- 'tests'
-- 'spec'
-- 'specs'
-- 'e2e'
-
+  - '*.test.*'
+  - '*.spec.*'
+  - '*_test.*'
+  - '*_spec.*'
+  - 'test_*.*'
+  - '*Test.*'
+  - '*Tests.*'
+  - '*Spec.*'
+  - 'conftest.py'
+  - '__tests__'
+  - 'test'
+  - 'tests'
+  - 'spec'
+  - 'specs'
+  - 'e2e'
 ---
 
 # Test Validity
@@ -532,7 +514,7 @@ Ask yourself: "Which test breaks if I remove this line?"
 
 **A suite that only ever grows is drifting toward noise.**
 
-- If this repository declares a per-file or per-suite limit, follow that limit. Otherwise apply the direction only: a test file that keeps growing is a signal to split by behavior or to merge duplicates into a parameterized form.
+- A per-file or per-suite limit this repository declares wins. The direction otherwise: a test file that keeps growing is a signal to split by behavior or to merge duplicates into a parameterized form.
 - Never delete or omit a needed test to satisfy tidiness — coverage outranks curation. Curate by merging and splitting, not by discarding.
 
 Ask yourself: "Is this file accumulating cases, or organizing them?"
@@ -543,7 +525,6 @@ Ask yourself: "Is this file accumulating cases, or organizing them?"
 <!-- SEIRI:END:seiri_test-validity.md -->
 
 <!-- SEIRI:START:seiri_reuse-first.md -->
-
 # Reuse First
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -602,7 +583,6 @@ Ask yourself: "If this file grows one more export, should it split?"
 <!-- SEIRI:END:seiri_reuse-first.md -->
 
 <!-- SEIRI:START:seiri_naming.md -->
-
 # Naming
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -649,7 +629,6 @@ Ask yourself: "From this file's name, can I find the file it serves?"
 <!-- SEIRI:END:seiri_naming.md -->
 
 <!-- SEIRI:START:seiri_structure.md -->
-
 # Structure
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -671,7 +650,7 @@ Ask yourself: "Can I order these units so every reference points one way?"
 
 **Nest to expose structure, not to file things away.**
 
-- Every directory level is a hop a reader pays on every visit. If this repository declares a depth limit, follow it; otherwise apply the direction: when following one call chain means descending many levels, flatten.
+- Every directory level is a hop a reader pays on every visit. When following one call chain means descending many levels, flatten.
 - A directory with one child is a corridor, not a room — collapse it.
 
 Ask yourself: "Does each level of this path tell the reader something?"
@@ -680,8 +659,8 @@ Ask yourself: "Does each level of this path tell the reader something?"
 
 **Two different smells, two different moves.**
 
-- When parts of a unit do not share state or purpose, the unit is several units: split it. If this repository (or its architecture tooling) declares a cohesion measure and threshold, follow those; otherwise split where the seams already show.
-- When one unit branches beyond what a reader can simulate, compress: extract steps, replace condition ladders with tables or dispatch, name the phases. If a complexity threshold is declared, follow it; otherwise let "can I simulate this in my head?" be the trigger.
+- When parts of a unit do not share state or purpose, the unit is several units: split it where the seams already show.
+- When one unit branches beyond what a reader can simulate, compress: extract steps, replace condition ladders with tables or dispatch, name the phases. The trigger is "can I simulate this in my head?"
 
 Ask yourself: "Am I looking at two things glued, or one thing tangled?"
 
@@ -689,7 +668,7 @@ Ask yourself: "Am I looking at two things glued, or one thing tangled?"
 
 **A file that keeps growing is announcing a boundary.**
 
-- If this repository declares a file-size limit, follow it. Otherwise apply the direction: recurring growth in one file means a responsibility wants out — split along the responsibility seam, not at an arbitrary line count.
+- Recurring growth in one file means a responsibility wants out — split along the responsibility seam, not at an arbitrary line count.
 
 Ask yourself: "What part of this file keeps attracting changes — and is it the same part I opened it for?"
 
@@ -699,7 +678,6 @@ Ask yourself: "What part of this file keeps attracting changes — and is it the
 <!-- SEIRI:END:seiri_structure.md -->
 
 <!-- SEIRI:START:seiri_function-boundaries.md -->
-
 # Function Boundaries
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -742,7 +720,7 @@ Ask yourself: "Can I name what this file exports without opening it — and can 
 
 **Extraction is not relocation to the same shelf.**
 
-- Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it, in a satellite called `utils/` or `helpers/` while its only claim is "these serve the function above" — named for the topic once the set has one (`seiri_naming` §3).
+- Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it — `utils/` or `helpers/` while their only claim is "these serve the function above", renamed for the topic once the set has one (`seiri_naming` §3).
 - The path states which function is served and which serves. A row of peers states nothing (`seiri_structure` §2).
 
 Ask yourself: "From the path alone, can I tell the entry point from its helpers?"
@@ -753,7 +731,6 @@ Ask yourself: "From the path alone, can I tell the entry point from its helpers?
 <!-- SEIRI:END:seiri_function-boundaries.md -->
 
 <!-- SEIRI:START:seiri_context-efficiency.md -->
-
 # Context Efficiency
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -797,7 +774,6 @@ Ask yourself: "What new fact will this read give me that the last one didn't?"
 <!-- SEIRI:END:seiri_context-efficiency.md -->
 
 <!-- SEIRI:START:seiri_cognitive-discipline.md -->
-
 # Cognitive Discipline
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -875,7 +851,6 @@ Saying "probably / should / seems to" about your own change · declaring success
 <!-- SEIRI:END:seiri_cognitive-discipline.md -->
 
 <!-- SEIRI:START:seiri_code-comments.md -->
-
 # Code Comments
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -890,7 +865,7 @@ A comment is the one thing in a file nothing checks: no compiler reads it, no te
 
 - No changelog lines, no dated notes, no "previously" or "used to", no commented-out predecessor kept for reference. Nothing verifies any of it, so it rots silently and then misleads with the authority of a comment.
 - History that must be kept goes where this repository keeps it — the version-control trail, a changelog, a decision record, a module document beside the code. Not in the source.
-- An edit that leaves a comment behind has published a false statement. Change the behavior, rewrite the sentence describing the old one; delete the code, delete its comment with it.
+- Change the behavior, rewrite the sentence describing the old one; delete the code, delete its comment with it. A comment left behind is a published false statement.
 
 Ask yourself: "Reading only this comment, would I describe the code as it is today?"
 
@@ -898,7 +873,7 @@ Ask yourself: "Reading only this comment, would I describe the code as it is tod
 
 **The signature says what the types are; the comment says what they mean.**
 
-- Write it in the documentation-comment form the language provides — the one its own tooling and editors already read — and fill every slot that form defines: each parameter, what comes back, and what the function is for.
+- Write it in the documentation-comment form the language provides, and fill every slot that form defines: each parameter, what comes back, and what the function is for.
 - Say what the caller cannot see from the signature: what makes an argument valid, the conditions under which the call fails, the effect it has beyond its return value.
 - Do not restate the signature in prose. A parameter documented as "the id" earned nothing; a parameter documented by what makes it acceptable earned its line.
 

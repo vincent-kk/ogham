@@ -10,3 +10,10 @@ plugins/*/targets/
 # the format-on-stop hook runs from here, so a package-level ignore file is
 # never consulted.
 plugins/*/templates/rules/
+
+# AGENTS.md embeds verbatim copies of those same rule templates between
+# <!-- FILID/SEIRI:START/END --> markers (the Codex instructions channel).
+# Prettier parses the embedded `paths:` frontmatter globs as markdown emphasis
+# and rewrites `*.test.*` into `_.test._`, silently corrupting the deployed
+# rules — the file is byte-owned by the rule-docs sync.
+AGENTS.md

@@ -8,7 +8,7 @@
       "title": "Agent-Legible Code",
       "description": "Make invisible wiring, repeated blocks, name traps, and indirection legible at the point where they bite.",
       "recommended": true,
-      "templateHash": "3ba4537bac24fe01de1b5766c548d1142d2404b0648cf8ed51f0ba5d39d66ef1"
+      "templateHash": "5f3b95e7f4e94491ad23ce87bbbf3407b90e546b34e3432c7bc7c9f56912f0c3"
     },
     {
       "id": "seiri_code-comments",
@@ -16,7 +16,7 @@
       "title": "Code Comments",
       "description": "Comments carry the current spec and never its history; declarations take the language's own documentation form.",
       "recommended": true,
-      "templateHash": "5d0e1da9a103c6e9439a33c422cf5ad8b7113bc2bd8bda7f076e9cc7719586eb"
+      "templateHash": "255ffd1beddda2543711ca0a8fd43d31fd3e844a20acc8f9e3107de3f69b72c8"
     },
     {
       "id": "seiri_public-contract",
@@ -32,7 +32,7 @@
       "title": "Test Validity",
       "description": "A passing test is evidence only if it could have failed — fail first, verify the artifact you changed, curate suites.",
       "recommended": true,
-      "templateHash": "b97d624d61995d6e5db984a15e351060556856a04feec3a5eeccb60c0111ea2e"
+      "templateHash": "77c8b1a6742d1f3281d9a3c57aefb433179c3fef75fa4e3c5990588bc1a1a85d"
     },
     {
       "id": "seiri_reuse-first",
@@ -56,7 +56,7 @@
       "title": "Structure",
       "description": "Direction-only structure rules: dependencies form a DAG, depth is a toll, cohesion splits and complexity compresses.",
       "recommended": false,
-      "templateHash": "1f0d2d1ca80fe62a63696ef0bcbd7c724d367020de08b71841feb8b20a3ebfb3"
+      "templateHash": "603ed8f53433f484b8a1a0d77a9ea99fc661bf5eedabc9f028ac04a366bae67d"
     },
     {
       "id": "seiri_function-boundaries",
@@ -64,7 +64,7 @@
       "title": "Function Boundaries",
       "description": "Functions compute from their parameters, effects stay at the edge, and one file exports one function.",
       "recommended": false,
-      "templateHash": "32bdedeebec07f84532c5fc55a01ab0fa1ed23050a61e028a63187ca8923b1c1"
+      "templateHash": "7e3c45868b55505c142bd357fa855035a784cbcfa76e0f84112152fbc936a810"
     },
     {
       "id": "seiri_context-efficiency",

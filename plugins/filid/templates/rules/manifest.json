@@ -8,7 +8,7 @@
       "required": true,
       "title": "Fractal Boundaries",
       "description": "Node classification, entry-point surfaces, organ access, exemptions, and the acyclic dependency graph.",
-      "templateHash": "f293d01cfb666f40cb149415fcf6a47add6ba41b1b473dc7b7097008a6123394"
+      "templateHash": "ef1141ddedae0c9838893bf5cd333d4236a5d9e8c9c8d23717d2ff59190686fa"
     },
     {
       "id": "filid_module-documents",
@@ -16,7 +16,7 @@
       "required": true,
       "title": "Module Documents",
       "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the current-state contract ledger, the single history section, and organ exemption entries.",
-      "templateHash": "bd30c1f9b8e29ce8f0dff3d51c9ea59891557c1973f8a0652392ca726454be10"
+      "templateHash": "a559d1327a7d548cef9d15d4912b14cc9a4d146d2d1f5d5854acf2e660428c02"
     },
     {
       "id": "filid_verification-records",
@@ -32,7 +32,7 @@
       "required": true,
       "title": "Code Placement",
       "description": "Lowest-common-fractal placement, restructure plan preconditions and postconditions, and the document-before-code workflow.",
-      "templateHash": "f363fa3cc169a0b1f2196ebc9ce8c1f33fb1ee750b377c86d08d9028eb6b2b95"
+      "templateHash": "ff3d5460517de54033eeee35b86467c683e2e9c328388a8a56495f60c6608115"
     }
   ]
 }

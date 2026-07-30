@@ -67,9 +67,9 @@ Ask yourself: "Is this sentence what holds now, or how it came to hold — and i
 
 **`Reason` is the load-bearing field.**
 
-- `Boundary Exemptions` is conditional: present only when this fractal actually grants one. A fractal with no exemption never carries the section, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose. `## Organ Exemptions` is the same syntax under this section's former name and is still read.
+- `Boundary Exemptions` is conditional: present only when this fractal actually grants one, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose. `## Organ Exemptions` is the same syntax under this section's former name and is still read.
 - The target is an organ path or a path inside this fractal — a consumer that cannot route through the entry point needs the same escape hatch either way. A path names itself and everything under it.
-- Write the target path, each consumer and the direct-import verdict inside a code span. A markdown formatter reads a bare `__tests__` as emphasis and writes the heading back as `**tests**`, which silently points the exemption at a path that does not exist; the span is what survives the formatter, and the parser strips it before comparing. A bare value is still read, so the span costs nothing and is the safe default. `Reason` is prose and keeps its own backticks.
+- Write the target path, each consumer and the direct-import verdict inside a code span. A markdown formatter reads a bare `__tests__` as emphasis and writes the heading back as `**tests**`, silently pointing the exemption at a path that does not exist; the span survives the formatter, and the parser strips it before comparing. A bare value is still read, so the span costs nothing and is the safe default. `Reason` is prose and keeps its own backticks.
 - An entry uses the acceptance-group shape, so one parser reads both:
 
 ```md

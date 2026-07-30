@@ -52,10 +52,8 @@ Before implementation that touches a fractal:
 
 - Identify every affected fractal.
 - Update each affected DETAIL contract, and INTENT when a public interface or boundary changes.
-- For new behavior or a fix, write a check and watch it fail for the intended reason.
-- Implement the minimum change.
-- Run scoped verification and the structural scan — warnings count as findings.
-- Record the result and any deviation from the plan before moving to the next review seam.
+- Implement the minimum change; for new behavior or a fix, first write a check and watch it fail for the intended reason.
+- Run scoped verification and the structural scan — warnings count as findings — and record the result and any deviation from the plan before the next review seam.
 
 Ask yourself: "Did the contract change before the code, or am I about to write it up afterwards?"
 

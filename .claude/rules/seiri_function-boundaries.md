@@ -40,7 +40,7 @@ Ask yourself: "Can I name what this file exports without opening it — and can 
 
 **Extraction is not relocation to the same shelf.**
 
-- Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it, in a satellite called `utils/` or `helpers/` while its only claim is "these serve the function above" — named for the topic once the set has one (`seiri_naming` §3).
+- Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it — `utils/` or `helpers/` while their only claim is "these serve the function above", renamed for the topic once the set has one (`seiri_naming` §3).
 - The path states which function is served and which serves. A row of peers states nothing (`seiri_structure` §2).
 
 Ask yourself: "From the path alone, can I tell the entry point from its helpers?"
