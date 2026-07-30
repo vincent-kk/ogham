@@ -2,7 +2,7 @@
 
 ## Purpose
 
-vault 경로 해석 + in-memory KnowledgeGraph 캐시 보관. read-path freshness gating은 middlewares/freshnessGuard에 위임.
+vault 경로 해석 + in-memory KnowledgeGraph 캐시 보관. read-path freshness gating은 [`middlewares`](../middlewares/INTENT.md)의 `ensureFreshGraphNonBlocking`이 소유하며, 호출자는 그쪽을 직접 쓴다 — 여기서 감싸면 두 모듈이 서로를 참조해 순환이 된다.
 
 ## Boundaries
 
@@ -20,5 +20,5 @@ vault 경로 해석 + in-memory KnowledgeGraph 캐시 보관. read-path freshnes
 ### Never do
 
 - 모듈 외부에서 cachedGraph / cacheVaultPath 직접 조작
-- ensureFreshGraph가 in-flight rebuild를 await
+- middlewares 재노출·래핑 (freshness gating 호출자는 middlewares를 직접 쓴다)
 - vault 경로를 환경변수 / 호스트 워크스페이스 루트 외 경로에서 가져오기 (claude 외 호스트에서 `process.cwd()` 폴백 금지)

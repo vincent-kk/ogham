@@ -1,10 +1,11 @@
+// filid:contract AC-frontmatter-parsing
 /**
  * @file yamlParser.spec.ts
  * @description parseYamlFrontmatter 유닛 테스트
  */
 import { describe, expect, it } from 'vitest';
 
-import { parseYamlFrontmatter } from '../../../core/yamlParser/index.js';
+import { parseYamlFrontmatter } from '../index.js';
 
 describe('parseYamlFrontmatter', () => {
   it('인라인 배열을 올바르게 파싱한다', () => {

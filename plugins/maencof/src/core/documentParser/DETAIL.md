@@ -26,6 +26,11 @@
 
 - wikilink 와 markdown link 가 같은 결과 형태로 추출된다.
 
+### AC-frontmatter-extraction — frontmatter 분리
+
+- frontmatter 블록과 본문이 분리되어 반환된다.
+- frontmatter 가 없거나 닫히지 않은 문서에서 throw 없이 본문 전체를 본문으로 돌려준다.
+
 ## Boundary Exemptions
 
 ### `operations` — Hook bundle direct import

@@ -1,10 +1,11 @@
+// filid:contract AC-frontmatter-extraction
 /**
  * @file extractFrontmatter.spec.ts
  * @description extractFrontmatter 유닛 테스트
  */
 import { describe, expect, it } from 'vitest';
 
-import { extractFrontmatter } from '../../../core/documentParser/index.js';
+import { extractFrontmatter } from '../index.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

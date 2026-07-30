@@ -14,7 +14,7 @@ SIBLING 은 물질화하지 않는다 — node.path 폴더 멤버십의 O(k²) �
 - `types/` organ — 공개 타입 (GraphBuilderOptions/GraphBuildResult)
 - `operations/` organ — 그래프 조립·런타임 맵 (buildGraph/buildAdjacencyList/deriveSiblingEdges/detectOrphans/hydrateRuntimeMaps/rebuildEdgeDerivedMaps + private buildEdgePairMaps, 함수 1개/파일)
 - `invertedIndex/` organ — 역 인덱스 (tokenizeForInvertedIndex 단일 출처 + add/remove/build, 함수 1개/파일)
-- `builders/` organ — 엣지 빌더 (tree=계층/relationship/domain/crossLayer)
+- `builders/` 하위 fractal — 엣지 타입별 빌더 (tree=계층/relationship/domain/crossLayer)
 
 ## Boundaries
 

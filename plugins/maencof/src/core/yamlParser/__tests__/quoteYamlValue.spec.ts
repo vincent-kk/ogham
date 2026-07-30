@@ -1,3 +1,4 @@
+// filid:contract AC-yaml-serialization
 /**
  * @file quoteYamlValue.spec.ts
  * @description quoteYamlValue 유닛 테스트
@@ -8,7 +9,7 @@ import {
   parseScalarValue,
   parseYamlFrontmatter,
   quoteYamlValue,
-} from '../../../core/yamlParser/index.js';
+} from '../index.js';
 
 // ─── quoteYamlValue ───────────────────────────────────────────────────────────
 
