@@ -7,7 +7,7 @@ import { projectRoot } from '@ogham/cross-platform/host-paths';
 import {
   getConfigValue,
   loadConfig,
-} from '../../../core/configManager/configManager.js';
+} from '../../../core/configManager/index.js';
 
 export interface ConfigGetInput {
   field?: string;

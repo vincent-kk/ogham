@@ -6,9 +6,9 @@ import { existsSync, readdirSync } from 'node:fs';
 
 import { projectRoot } from '@ogham/cross-platform/host-paths';
 
-import { loadConfig } from '../../../core/configManager/configManager.js';
-import { getRunDir, getRunsDir } from '../../../core/paths/paths.js';
-import { loadRunState } from '../../../core/stateManager/stateManager.js';
+import { loadConfig } from '../../../core/configManager/index.js';
+import { getRunDir, getRunsDir } from '../../../core/paths/index.js';
+import { loadRunState } from '../../../core/stateManager/index.js';
 
 export interface RunListInput {
   project_ref?: string;

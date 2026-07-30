@@ -11,7 +11,7 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { processContextInjector } from '../hooks/contextInjector/contextInjector.js';
+import { processContextInjector } from '../hooks/contextInjector/index.js';
 import type { UserPromptSubmitInput } from '../types/hooks.js';
 
 const dirs: string[] = [];

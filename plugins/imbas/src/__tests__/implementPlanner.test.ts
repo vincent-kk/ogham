@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildImplementPlan } from '../core/implementPlanner/implementPlanner.js';
+import { buildImplementPlan } from '../core/implementPlanner/index.js';
 import { renderImplementPlanReport } from '../core/implementPlanner/reportRenderer.js';
 import type {
   DevplanManifest,

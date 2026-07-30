@@ -5,7 +5,7 @@ import {
   toolError,
   toolResult,
   wrapHandler,
-} from '../mcp/shared/shared.js';
+} from '../mcp/shared/index.js';
 
 describe('MCP shared utilities', () => {
   describe('toolResult', () => {

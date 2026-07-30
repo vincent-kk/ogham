@@ -5,11 +5,11 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handleManifestGet } from '../../mcp/tools/manifestGet/manifestGet.js';
-import { handleManifestSave } from '../../mcp/tools/manifestSave/manifestSave.js';
-import { handleManifestValidate } from '../../mcp/tools/manifestValidate/manifestValidate.js';
-import { handleRunCreate } from '../../mcp/tools/runCreate/runCreate.js';
-import { handleRunTransition } from '../../mcp/tools/runTransition/runTransition.js';
+import { handleManifestGet } from '../../mcp/tools/manifestGet/index.js';
+import { handleManifestSave } from '../../mcp/tools/manifestSave/index.js';
+import { handleManifestValidate } from '../../mcp/tools/manifestValidate/index.js';
+import { handleRunCreate } from '../../mcp/tools/runCreate/index.js';
+import { handleRunTransition } from '../../mcp/tools/runTransition/index.js';
 import {
   DevplanManifestSchema,
   type ManifestSummary,

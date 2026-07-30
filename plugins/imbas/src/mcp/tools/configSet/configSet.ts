@@ -8,7 +8,7 @@ import {
   applyConfigUpdates,
   loadConfig,
   saveConfig,
-} from '../../../core/configManager/configManager.js';
+} from '../../../core/configManager/index.js';
 
 export interface ConfigSetInput {
   updates: Record<string, unknown>;

@@ -4,10 +4,10 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handleManifestGet } from '../../mcp/tools/manifestGet/manifestGet.js';
-import { handleManifestPlan } from '../../mcp/tools/manifestPlan/manifestPlan.js';
-import { handleManifestSave } from '../../mcp/tools/manifestSave/manifestSave.js';
-import { handleManifestValidate } from '../../mcp/tools/manifestValidate/manifestValidate.js';
+import { handleManifestGet } from '../../mcp/tools/manifestGet/index.js';
+import { handleManifestPlan } from '../../mcp/tools/manifestPlan/index.js';
+import { handleManifestSave } from '../../mcp/tools/manifestSave/index.js';
+import { handleManifestValidate } from '../../mcp/tools/manifestValidate/index.js';
 import type { ManifestSummary } from '../../types/manifest.js';
 
 // --- helpers ---

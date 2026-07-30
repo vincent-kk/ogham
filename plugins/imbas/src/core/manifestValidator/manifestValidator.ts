@@ -8,8 +8,8 @@ import type {
   StoriesManifest,
 } from '../../types/manifest.js';
 import { findDuplicates } from '../../utils/index.js';
-import { loadManifest } from '../manifestParser/manifestParser.js';
-import type { ManifestType } from '../manifestParser/manifestParser.js';
+import { loadManifest } from '../manifestParser/index.js';
+import type { ManifestType } from '../manifestParser/index.js';
 
 export interface ValidationResult {
   valid: boolean;

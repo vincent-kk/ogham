@@ -7,7 +7,7 @@ import {
   getImbasRoot,
   getProjectDir,
   getRunDir,
-} from '../core/paths/paths.js';
+} from '../core/paths/index.js';
 
 describe('paths', () => {
   const cwd = '/home/user/myproject';

@@ -4,8 +4,8 @@
  */
 import { projectRoot } from '@ogham/cross-platform/host-paths';
 
-import { validateManifest } from '../../../core/manifestValidator/manifestValidator.js';
-import { getRunDir } from '../../../core/paths/paths.js';
+import { validateManifest } from '../../../core/manifestValidator/index.js';
+import { getRunDir } from '../../../core/paths/index.js';
 
 export interface ManifestValidateInput {
   project_ref: string;

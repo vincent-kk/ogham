@@ -8,7 +8,7 @@ import {
   loadConfig,
   loadConfigScope,
   saveConfig,
-} from '../core/configManager/configManager.js';
+} from '../core/configManager/index.js';
 import { ImbasConfigSchema } from '../types/config.js';
 import type { ImbasConfig } from '../types/config.js';
 
