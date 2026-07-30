@@ -1,4 +1,4 @@
-import { verifyToken } from "../token/verifyToken.js";
+import { verifyToken } from "../token/index.js";
 
 import { LOOPBACK_HOST, LOOPBACK_ORIGIN } from "./patterns.js";
 import type { GuardOptions, GuardVerdict } from "./types.js";

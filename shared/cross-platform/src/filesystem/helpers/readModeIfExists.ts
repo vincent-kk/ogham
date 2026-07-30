@@ -1,6 +1,6 @@
 import { statSync } from "node:fs";
 
-import { hasCode } from "../../helpers/hasCode.js";
+import { hasCode } from "./hasCode.js";
 
 export function readModeIfExists(path: string): number | undefined {
   try {

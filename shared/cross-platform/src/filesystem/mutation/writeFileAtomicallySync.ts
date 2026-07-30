@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 
 import { portableDirname } from "../../paths/index.js";
-import { readModeIfExists } from "../locking/helpers/readModeIfExists.js";
+import { readModeIfExists } from "../helpers/readModeIfExists.js";
 import type { AtomicWriteOptions } from "../types/types.js";
 import { ensureDirectorySync } from "./ensureDirectorySync.js";
 import { removeFileIfExistsSync } from "./removeFileIfExistsSync.js";
