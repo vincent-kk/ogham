@@ -13,7 +13,7 @@ import {
 import {
   installFakeBinary,
   prependToPath,
-} from '../../../../dispatcher/__tests__/fakeBinary.js';
+} from '../../../../__tests__/fixtures/fakeBinary.js';
 import { handleContinueConversation } from '../continueConversation.js';
 
 const FAKE_CODEX = `#!/usr/bin/env node

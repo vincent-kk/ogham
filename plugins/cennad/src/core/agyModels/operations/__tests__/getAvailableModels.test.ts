@@ -18,7 +18,7 @@ import {
 import {
   installFakeBinary,
   prependToPath,
-} from '../../../../dispatcher/__tests__/fakeBinary.js';
+} from '../../../../__tests__/fixtures/fakeBinary.js';
 import { getAvailableModels } from '../getAvailableModels.js';
 
 const FAKE_AGY_SUCCESS = `#!/usr/bin/env node

@@ -59,3 +59,21 @@
 
 <response>
 ```
+
+## Acceptance Criteria
+
+### AC-opt-in-only — 명시적 동의
+
+- 호출자가 opt-in 하지 않으면 아무 파일도 쓰지 않는다.
+
+### AC-success-only — 성공 응답만 미러링
+
+- 실패한 `ConversationResponse` 는 artifact 로 남지 않는다.
+
+### AC-raw-prompt-preserved — 원본 프롬프트 보존
+
+- 합성된 프롬프트가 raw 와 다를 때 둘 다 기록되어, 무엇이 실제로 CLI 에 갔는지 확인할 수 있다.
+
+## Last Updated
+
+2026-07-30 — 기존 계약을 acceptance group 으로 명시했다(내용 변경 없음).

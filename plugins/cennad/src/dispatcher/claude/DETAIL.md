@@ -29,3 +29,22 @@
 - start 는 `-p`/`--output-format stream-json`/`--verbose`/`--session-id`/`--model`/`--effort`/`--permission-mode` + `--strict-mcp-config`/`--safe-mode` 를 보내고 `--resume` 는 보내지 않는다. `externalSessionRef` = 주입한 sessionId.
 - effort 미지원 tier(haiku)는 `--effort` 를 보내지 않는다.
 - resume 은 `--resume <ref>` 를 보내고 `externalSessionRef` 를 보존한다.
+
+## Acceptance Criteria
+
+### AC-session-isolation — 부모 세션 격리
+
+- 모든 호출에 `--strict-mcp-config` 와 `--safe-mode` 가 붙어 부모 Claude 세션의 MCP·훅·CLAUDE.md 가 상속되지 않는다.
+
+### AC-session-ref — 세션 참조
+
+- start 가 주입한 `--session-id` 가 그대로 `externalSessionRef` 가 된다.
+- resume 이 `--resume <ref>` 로 같은 대화를 이어가고 ref 를 보존한다.
+
+### AC-effort-support — effort 전달
+
+- effort 를 지원하지 않는 tier 에는 `--effort` 를 보내지 않는다.
+
+## Last Updated
+
+2026-07-30 — 기존 계약을 acceptance group 으로 명시했다(내용 변경 없음).

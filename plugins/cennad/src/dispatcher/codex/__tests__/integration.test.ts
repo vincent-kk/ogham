@@ -16,7 +16,7 @@ import type {
 import {
   installFakeBinary,
   prependToPath,
-} from '../../__tests__/fakeBinary.js';
+} from '../../../__tests__/fixtures/fakeBinary.js';
 import { codexDispatcher } from '../index.js';
 
 const FLAGS_READ_ONLY: CodexFlags = { yolo: false, sandbox: 'read-only' };

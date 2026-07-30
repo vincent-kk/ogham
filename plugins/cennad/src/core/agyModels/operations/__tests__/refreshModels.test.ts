@@ -17,7 +17,7 @@ import {
 import {
   installFakeBinary,
   prependToPath,
-} from '../../../../dispatcher/__tests__/fakeBinary.js';
+} from '../../../../__tests__/fixtures/fakeBinary.js';
 import { refreshModels } from '../refreshModels.js';
 
 const FIXED_NOW = 1700000000000;
