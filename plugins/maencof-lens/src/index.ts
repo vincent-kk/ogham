@@ -15,10 +15,7 @@ export {
   LensConfigSchema,
   VaultConfigSchema,
 } from "./config/configSchema/index.js";
-export type {
-  LensConfig,
-  VaultConfig,
-} from "./config/configSchema/index.js";
+export type { LensConfig, VaultConfig } from "./config/configSchema/index.js";
 export {
   DEFAULT_LAYERS,
   CONFIG_DIR,
