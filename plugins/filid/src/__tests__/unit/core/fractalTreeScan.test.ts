@@ -84,6 +84,51 @@ describe('fractal-tree', () => {
         shouldExclude('other-dir', { exclude: ['**/custom-dir/**'] }),
       ).toBe(false);
     });
+
+    it('should apply a **/-prefixed pattern at any depth', () => {
+      // The built-in list declares `**/scripts/**`, so a nested scripts/ is
+      // already meant to be excluded — the prefix has to reach past the root.
+      expect(shouldExclude('plugins/demo/scripts', {})).toBe(true);
+      expect(shouldExclude('plugins/demo/scripts/build', {})).toBe(true);
+      expect(shouldExclude('plugins/demo/node_modules/pkg', {})).toBe(true);
+      expect(shouldExclude('plugins/demo/src', {})).toBe(false);
+    });
+
+    it('should keep a pattern without the **/ prefix anchored at the root', () => {
+      const options = { exclude: ['only-root/**'] };
+
+      expect(shouldExclude('only-root', options)).toBe(true);
+      expect(shouldExclude('only-root/nested', options)).toBe(true);
+      expect(shouldExclude('plugins/demo/only-root', options)).toBe(false);
+    });
+
+    it('should match a multi-segment pattern as a contiguous run', () => {
+      const options = { exclude: ['**/src/generated/**'] };
+
+      expect(shouldExclude('plugins/demo/src/generated', options)).toBe(true);
+      expect(shouldExclude('plugins/demo/src/generated/api', options)).toBe(
+        true,
+      );
+      expect(shouldExclude('plugins/demo/src', options)).toBe(false);
+      expect(shouldExclude('plugins/demo/generated', options)).toBe(false);
+    });
+
+    it('should exclude config-supplied directory names at any depth', () => {
+      const options = { additionalExcludedDirectories: ['skills'] };
+
+      expect(shouldExclude('skills', options)).toBe(true);
+      expect(shouldExclude('plugins/demo/skills', options)).toBe(true);
+      expect(shouldExclude('plugins/demo/skills/craft', options)).toBe(true);
+      expect(shouldExclude('plugins/demo/src', options)).toBe(false);
+      expect(shouldExclude('plugins/demo/skills', {})).toBe(false);
+    });
+
+    it('should keep the built-in patterns when config names are supplied', () => {
+      const options = { additionalExcludedDirectories: ['skills'] };
+
+      expect(shouldExclude('node_modules', options)).toBe(true);
+      expect(shouldExclude('.metadata', options)).toBe(true);
+    });
   });
 
   describe('scanProject', () => {
@@ -153,6 +198,34 @@ describe('fractal-tree', () => {
         expect(
           tree.nodes.get(join(tmpDir, 'skills', 'preview', 'references'))!.type,
         ).toBe('organ');
+      } finally {
+        teardown();
+      }
+    });
+
+    it('should drop additionalExcludedDirectories names from the tree', async () => {
+      setup({
+        '.': ['INTENT.md'],
+        src: ['index.ts'],
+        'plugins/demo/skills/craft/scripts': ['probe.mjs'],
+      });
+
+      try {
+        const bare = await scanProject(tmpDir);
+        expect(bare.nodes.has(join(tmpDir, 'plugins', 'demo', 'skills'))).toBe(
+          true,
+        );
+
+        const tree = await scanProject(tmpDir, {
+          additionalExcludedDirectories: ['skills'],
+        });
+        expect(tree.nodes.has(join(tmpDir, 'plugins', 'demo', 'skills'))).toBe(
+          false,
+        );
+        expect(
+          tree.nodes.has(join(tmpDir, 'plugins', 'demo', 'skills', 'craft')),
+        ).toBe(false);
+        expect(tree.nodes.has(join(tmpDir, 'src'))).toBe(true);
       } finally {
         teardown();
       }

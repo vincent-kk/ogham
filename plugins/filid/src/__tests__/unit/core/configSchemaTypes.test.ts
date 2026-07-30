@@ -22,6 +22,7 @@ describe('config-schema-types v2', () => {
           maxDepth?: number;
           additionalOrganNames?: string[];
           additionalAllowedPeers?: AllowedPeerOverride[];
+          additionalExcludedDirectories?: string[];
           entryPointOverrides?: Record<string, string[]>;
           generatedPaths?: string[];
         }
@@ -36,6 +37,7 @@ describe('config-schema-types v2', () => {
         maxDepth?: number;
         additionalOrganNames?: string[];
         additionalAllowedPeers?: AllowedPeerOverride[];
+        additionalExcludedDirectories?: string[];
         entryPointOverrides?: Record<string, string[]>;
         generatedPaths?: string[];
       };
@@ -79,6 +81,28 @@ describe('config-schema-types v2', () => {
       custom: ['module.entry'],
     });
     expect(() => FilidConfigSchema.parse({ ...parsed, extra: true })).toThrow();
+  });
+
+  it('round-trips structure.additionalExcludedDirectories verbatim', () => {
+    const parsed = FilidConfigSchema.parse({
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+      structure: { additionalExcludedDirectories: ['skills', '.metadata'] },
+    });
+
+    expect(parsed.structure?.additionalExcludedDirectories).toEqual([
+      'skills',
+      '.metadata',
+    ]);
+    expect(() =>
+      FilidConfigSchema.parse({
+        version: '2.0',
+        adapters: { mode: 'auto', enabled: [] },
+        rules: {},
+        structure: { additionalExcludedDirectories: [''] },
+      }),
+    ).toThrow();
   });
 
   it('schemas are exported from the public loader facade', () => {

@@ -11,6 +11,7 @@
 - structure/verification detect와 discovery는 adapter마다 한 번 수행하고 portable absolute path claim으로 정규화해 분석에 전달한다.
 - tree entry evidence는 확정된 structure ownership만 사용하고 adapter별 entry override를 해당 adapter에 전달한다.
 - config `maxDepth`는 validation 한계이며 snapshot tree traversal을 자르지 않는다.
+- config `structure.additionalExcludedDirectories`는 tree scan과 adapter ownership 해석에 **같은 실행에서 같은 값으로** 전달한다. 한쪽만 받으면 node가 아닌 파일이 dependency 증거에 남아 graph certainty를 미확정으로 만든다 — 두 소비처가 갈리지 않게 하는 것이 이 orchestration의 책임이다.
 - DETAIL.md가 `## Boundary Exemptions`를 선언하면 그 항목을 `node.documentEvidence.boundaryExemptions`에 보존한다. `targetPath`는 소유 프랙탈 기준으로 정규화한 절대 경로이며, rule engine은 다시 파일을 읽지 않고 이 evidence만 읽는다.
 - dependency graph는 non-organ owner path와 함께 organ path 목록도 받아, owner subtree 안의 owned-organ 참조를 cycle adjacency에서 제외한다.
 - 동일 bytes와 구조는 프로젝트 absolute root 및 mtime과 무관하게 같은 hash이고 file content 또는 구조 입력 변경은 hash를 바꾼다.
@@ -32,6 +33,7 @@
 - source ownership 충돌과 분석 실패가 PASS로 사라지지 않는다.
 - 분석은 snapshot 수집 중 확정한 detect/discovery를 다시 읽지 않는다.
 - configured max depth를 넘는 node도 tree와 validation evidence에 남는다.
+- 제외 디렉터리를 선언한 config는 그 디렉터리를 tree node에서도, dependency 증거에서도 빼고, 남은 미해결 참조가 없으면 graph certainty가 `exact`다.
 
 ### AC-snapshot-hash — Content-derived identity
 
@@ -67,4 +69,4 @@
 
 ## Last Updated
 
-2026-07-29 — 증거 축 선택과 `collectedAxes`를 계약에 추가했다.
+2026-07-30 — 제외 디렉터리를 tree scan과 ownership 해석에 같은 값으로 전달하는 계약을 추가했다.

@@ -79,7 +79,7 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       '/project',
       [structureAdapter('known', 1, ['/project/known.source'])],
-      [filePath],
+      { requestedPaths: [filePath] },
     );
 
     expect(result.ownership.has(filePath)).toBe(false);
@@ -97,7 +97,7 @@ describe('adapter registry', () => {
         structureAdapter('first', 0.8, [filePath]),
         structureAdapter('second', 0.8, [filePath]),
       ],
-      [filePath],
+      { requestedPaths: [filePath] },
     );
 
     expect(result.ownership.has(filePath)).toBe(false);
@@ -118,7 +118,7 @@ describe('adapter registry', () => {
         structureAdapter('secondary', 0.4, [filePath]),
         structureAdapter('primary', 0.9, [filePath]),
       ],
-      [filePath],
+      { requestedPaths: [filePath] },
     );
 
     expect(result.ownership.get(filePath)?.adapter.id).toBe('primary');
@@ -135,11 +135,52 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       root,
       [structureAdapter('portable', 1, [ownedPath])],
-      [requestedAlias],
+      { requestedPaths: [requestedAlias] },
     );
 
     expect(result.ownership).toHaveLength(1);
     expect(result.unsupportedPaths).toEqual([]);
     expect([...result.ownership.values()][0]?.adapter.id).toBe('portable');
+  });
+
+  it('drops a discovered path under an excluded directory name without a diagnostic', async () => {
+    const owned = '/project/src/keep.source';
+    const excluded = '/project/src/skills/drop.source';
+
+    const result = await resolveAdapters(
+      '/project',
+      [structureAdapter('known', 1, [owned, excluded])],
+      { excludedDirectoryNames: ['skills'] },
+    );
+
+    expect([...result.ownership.keys()]).toEqual([owned]);
+    expect(result.unsupportedPaths).toEqual([]);
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it('applies the exclusion to explicitly requested paths', async () => {
+    const excluded = '/project/src/skills/drop.source';
+
+    const result = await resolveAdapters(
+      '/project',
+      [structureAdapter('known', 1, [excluded])],
+      { requestedPaths: [excluded], excludedDirectoryNames: ['skills'] },
+    );
+
+    expect(result.ownership.size).toBe(0);
+    expect(result.unsupportedPaths).toEqual([]);
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it('matches an excluded name only below the project root', async () => {
+    const owned = '/skills/project/src/keep.source';
+
+    const result = await resolveAdapters(
+      '/skills/project',
+      [structureAdapter('known', 1, [owned])],
+      { excludedDirectoryNames: ['skills'] },
+    );
+
+    expect([...result.ownership.keys()]).toEqual([owned]);
   });
 });

@@ -51,9 +51,12 @@ export async function createProjectSnapshot(
   const enabledIds =
     config.adapters.mode === 'explicit' ? config.adapters.enabled : undefined;
   const selectedAdapters = await resolveSnapshotAdapters(registry, enabledIds);
+  const additionalExcludedDirectories =
+    config.structure?.additionalExcludedDirectories;
   const adapterResolution = await resolveAdapters(
     root,
     selectedAdapters.structure,
+    { excludedDirectoryNames: additionalExcludedDirectories },
   );
   const structureAdapters = adapterResolution.adapters;
   const structureOwnership = new Map(
@@ -65,6 +68,7 @@ export async function createProjectSnapshot(
   const tree = await scanProject(root, {
     maxDepth: Number.MAX_SAFE_INTEGER,
     additionalOrganNames: config.structure?.additionalOrganNames,
+    additionalExcludedDirectories,
     structureAdapters,
     entryPointOverrides: config.structure?.entryPointOverrides,
     structureOwnership,

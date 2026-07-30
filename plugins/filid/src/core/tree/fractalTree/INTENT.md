@@ -15,7 +15,7 @@ Node 20 filesystem recursion과 StructureAdapter metadata로 `FractalTree`를 �
 - `treeBuilder/`는 순수하고 filesystem 접근은 `scanner/`에만 둔다.
 - `NodeEntry`는 adapter evidence를 보존하고 `FractalNode`가 public tree를 표현한다.
 - reclassification은 deepest-first로 한 번 수행한다.
-- exclusion은 두 층이다: `ScanOptions.exclude` pattern과 git이 무시하는 경로. 후자는 `lib/createIgnoreFilter`를 scan 시작에 한 번 만들어 directory와 peer file에 같은 기준으로 적용한다. git이 추적하는 파일은 무시 대상이 아니다.
+- exclusion은 세 층이다: `ScanOptions.exclude` pattern, config가 공급하는 디렉토리 이름, git이 무시하는 경로. 앞의 둘은 한 matcher가 segment 단위로 판정하고, 마지막은 `lib/createIgnoreFilter`를 scan 시작에 한 번 만들어 directory와 peer file에 같은 기준으로 적용한다. git이 추적하는 파일은 무시 대상이 아니다.
 
 ## Boundaries
 
