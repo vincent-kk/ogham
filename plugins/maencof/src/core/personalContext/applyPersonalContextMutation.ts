@@ -18,7 +18,7 @@ import type {
   PersonalStateIntensity,
   PersonalTopic,
 } from '../../types/personalContext.js';
-import { sanitizeSegment } from '../filenameSlug/filenameSlug.js';
+import { sanitizeSegment } from '../filenameSlug/index.js';
 
 import { evictTopicsOverCap } from './evictTopicsOverCap.js';
 import { isStateActive } from './isStateActive.js';

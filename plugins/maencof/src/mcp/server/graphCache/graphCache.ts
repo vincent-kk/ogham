@@ -12,7 +12,7 @@ import { home } from '@ogham/cross-platform/paths';
 import { MetadataStore } from '../../../core/indexer/index.js';
 import { invalidateQueryCache } from '../../../search/queryEngine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
-import { ensureFreshGraphNonBlocking } from '../middlewares/freshnessGuard.js';
+import { ensureFreshGraphNonBlocking } from '../middlewares/index.js';
 
 /** Blocked prefixes for global config path access */
 const BLOCKED_PREFIXES = [

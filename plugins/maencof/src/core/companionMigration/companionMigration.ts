@@ -19,16 +19,14 @@ import type { CompanionSectionMinimal } from '../../types/companionGuard.js';
 import { getCompanionSchemaVersion } from '../../types/companionGuard.js';
 import { backupPathFor } from '../backupPath/index.js';
 import { assertTurnBudget } from '../companionBudget/index.js';
-import { normalizeCompanionIdentity } from '../companionNormalize/normalizeCompanionIdentity.js';
-import { toIsoDatetime } from '../companionNormalize/toIsoDatetime.js';
+import {
+  normalizeCompanionIdentity,
+  toIsoDatetime,
+} from '../companionNormalize/index.js';
 import { appendErrorLogSafe } from '../errorLog/index.js';
 
 export type CompanionMigrationReason =
-  | 'no-file'
-  | 'already-current'
-  | 'invalid'
-  | 'migrated'
-  | 'error';
+  'no-file' | 'already-current' | 'invalid' | 'migrated' | 'error';
 
 export interface CompanionMigrationResult {
   migrated: boolean;

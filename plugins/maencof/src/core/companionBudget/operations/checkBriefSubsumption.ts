@@ -4,7 +4,7 @@
  * 의미 초과(brief ⊄ detail)는 완전 자동 판정 불가라 저작자 확인에 위임한다.
  */
 import type { CompanionSectionMinimal } from '../../../types/companionGuard.js';
-import { resolveSectionText } from '../../turnContext/renderIdentitySection.js';
+import { resolveSectionText } from '../../turnContext/index.js';
 import type { BriefSubsumptionResult } from '../types/types.js';
 
 import { codePointLength } from './codePointLength.js';

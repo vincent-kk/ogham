@@ -8,6 +8,8 @@ KG 스냅샷·동반자 identity 로부터 압축 XML turn 컨텍스트(`buildTu
 
 - `build.ts` — `buildTurnContext` (조립 진입점)
 - `buildL1CoreBlock.ts` — SessionStart 1회용 `<l1-core-full>` 전체 본문 블록 (매 턴은 gist 만)
+- `buildSessionIdentityBlock.ts` — 세션 identity 블록
+- `renderIdentitySection.ts` — identity 섹션 렌더와 섹션 텍스트 정규화(`resolveSectionText`)
 - `readIndexMetadata.ts` · `readCachedNodesArray.ts` · `readCompanionIdentity.ts` · `readL1Summary.ts` — 캐시/소스 read
 - `buildCompanionIdentityTag.ts` · `compressMarkdown.ts` · `extractGist.ts` — 직렬화/압축
 - `index.ts` — 배럴

@@ -60,8 +60,8 @@ export {
 } from './core/weightCalculator/index.js';
 export type { WeightCalcResult } from './core/weightCalculator/index.js';
 
-export { runAccumulativeActivation } from './core/spreadingActivation/accumulativeActivation.js';
-export type { AccumulativeActivationParams } from './core/spreadingActivation/accumulativeActivation.js';
+export { runAccumulativeActivation } from './core/spreadingActivation/index.js';
+export type { AccumulativeActivationParams } from './core/spreadingActivation/index.js';
 
 export {
   CommunityDetector,
@@ -83,8 +83,8 @@ export {
 } from './core/claudeMdMerger/index.js';
 export type { MergeResult } from './core/claudeMdMerger/index.js';
 
-export { deduplicateContent } from './core/contentDedup/contentDedup.js';
-export type { DeduplicateResult } from './core/contentDedup/contentDedup.js';
+export { deduplicateContent } from './core/contentDedup/index.js';
+export type { DeduplicateResult } from './core/contentDedup/index.js';
 
 // Search modules
 export {

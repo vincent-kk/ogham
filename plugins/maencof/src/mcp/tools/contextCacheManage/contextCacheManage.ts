@@ -16,7 +16,7 @@ import {
   writePinnedNodes,
   writeTurnContext,
 } from '../../../core/cacheManager/index.js';
-import { buildTurnContext } from '../../../core/turnContext/build.js';
+import { buildTurnContext } from '../../../core/turnContext/index.js';
 
 export const contextCacheManageInputSchema = {
   action: z

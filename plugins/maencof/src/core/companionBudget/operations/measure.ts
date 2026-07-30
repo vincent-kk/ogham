@@ -6,7 +6,7 @@ import type { CompanionSectionMinimal } from '../../../types/companionGuard.js';
 import {
   renderIdentitySection,
   selectSections,
-} from '../../turnContext/renderIdentitySection.js';
+} from '../../turnContext/index.js';
 import type { BudgetResult } from '../types/types.js';
 
 import { codePointLength } from './codePointLength.js';

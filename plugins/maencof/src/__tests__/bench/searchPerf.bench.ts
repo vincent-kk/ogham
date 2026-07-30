@@ -8,7 +8,7 @@ import {
   buildGraph,
   hydrateRuntimeMaps,
 } from '../../core/graphBuilder/index.js';
-import { runAccumulativeActivation } from '../../core/spreadingActivation/accumulativeActivation.js';
+import { runAccumulativeActivation } from '../../core/spreadingActivation/index.js';
 import { resolveSeedNodes } from '../../search/queryEngine/index.js';
 import { Layer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
