@@ -1,4 +1,4 @@
-import { resolveContainedPath } from "@ogham/cross-platform/paths/contained";
+import { resolveContainedPath } from "@ogham/cross-platform";
 
 import type { SectionArtifactTarget } from "../types/targetTypes.js";
 import { effectiveInstructionFile } from "./effectiveInstructionFile.js";

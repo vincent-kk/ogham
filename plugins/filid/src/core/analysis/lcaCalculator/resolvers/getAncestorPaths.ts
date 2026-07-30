@@ -1,4 +1,4 @@
-import { samePath } from '@ogham/cross-platform/paths';
+import { samePath } from '@ogham/cross-platform';
 
 import type { FractalNode, FractalTree } from '../../../../types/fractal.js';
 

@@ -2,7 +2,7 @@
  * @file settings.ts
  * @description Zod schemas and types for the open_settings page contract
  */
-import type { ConfigScopeState } from '@ogham/cross-platform/config-scope';
+import type { ConfigScopeState } from '@ogham/cross-platform';
 import { z } from 'zod';
 
 import { ImbasConfigSchema } from './config.js';

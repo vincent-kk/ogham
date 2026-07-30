@@ -39,5 +39,5 @@ handlers/      GET / · POST /plan · POST /save · POST /close · readSaveBody
 
 ## Dependencies
 
-- `node:http` · `@ogham/http-kit/{guard,token,body,html,response}` — `inspectRequest`, `generateToken`, `parseBody`, `describeBodyError`, `escapeJsonForHtml`, `sendJson`
+- `node:http` · `@ogham/http-kit` — `inspectRequest`, `generateToken`, `parseBody`, `describeBodyError`, `escapeJsonForHtml`, `sendJson`
 - `../types/settingsTypes` — save/plan 스키마·settle 타입 · `src/constants/{http,plugin}` · `src/types/manifest`

@@ -1,4 +1,4 @@
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';

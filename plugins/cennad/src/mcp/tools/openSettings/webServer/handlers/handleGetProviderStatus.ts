@@ -1,6 +1,6 @@
 import type { ServerResponse } from 'node:http';
 
-import { sendJson } from '@ogham/http-kit/response';
+import { sendJson } from '@ogham/http-kit';
 
 import { getAvailableModels } from '../../../../../core/agyModels/index.js';
 import { getCodexModels } from '../../../../../core/codexModels/index.js';

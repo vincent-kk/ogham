@@ -12,7 +12,7 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { generateWindowsCmd } from '@ogham/cross-platform/shim';
+import { generateWindowsCmd } from '@ogham/cross-platform';
 import * as esbuild from 'esbuild';
 import { mkdir, readFile, stat } from 'fs/promises';
 
@@ -56,8 +56,8 @@ const hookEntries = [
 ];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
-// of X is not supported"). cross-spawn (CJS, pulled via @ogham/cross-platform/
-// self-probe) calls require('child_process') at load time, so without this
+// of X is not supported"). cross-spawn (CJS, pulled by the
+// @ogham/cross-platform selfProbe export) calls require('child_process') at load time, so without this
 // banner the bundle crashes on import. createRequire from node:module restores
 // a working require for CJS deps inlined into ESM.
 const ESM_CJS_REQUIRE_BANNER =
@@ -65,7 +65,7 @@ const ESM_CJS_REQUIRE_BANNER =
   'const require = __cpCreateRequire(import.meta.url);\n';
 
 await Promise.all(
-  hookEntries.map(({ name, entry }) =>
+  hookEntries.map(async ({ name, entry }) =>
     esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
@@ -138,9 +138,10 @@ const FORBIDDEN_PATTERNS = [
   /\bgenerateWindowsCmd\b/,
 ];
 // NOTE: `Dynamic require of ...` esbuild CJS-shim string is intentionally
-// allowed — @ogham/cross-platform/self-probe pulls cross-spawn (CJS) into the
+// allowed — `selfProbe` from @ogham/cross-platform pulls cross-spawn (CJS) into the
 // setup (SessionStart) bundle, which produces that shim during ESM bundling.
 
+// `sideEffects: false` lets root-barrel-only inputs shake out; emitted bytes and patterns remain the regression guards.
 const violations = [];
 
 const guardedBundles = [

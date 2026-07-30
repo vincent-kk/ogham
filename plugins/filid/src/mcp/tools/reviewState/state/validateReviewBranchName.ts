@@ -1,4 +1,4 @@
-import { portableIsAbsolute } from '@ogham/cross-platform/compat';
+import { portableIsAbsolute } from '@ogham/cross-platform';
 
 import {
   REVIEW_STATE_CONTROL_CHARACTER_PATTERN,

@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 
 import { CLAUDE_DIR, RULES_DIR } from '../../../constants/files.js';
 import { findRepoRoot } from '../../utils/findRepoRoot.js';

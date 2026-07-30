@@ -3,9 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const { spawnDetachedMock } = vi.hoisted(() => ({
   spawnDetachedMock: vi.fn(),
 }));
-vi.mock("@ogham/cross-platform/spawn", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@ogham/cross-platform/spawn")>();
+vi.mock("@ogham/cross-platform", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@ogham/cross-platform")>();
   return { ...actual, spawnDetached: spawnDetachedMock };
 });
 

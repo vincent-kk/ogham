@@ -1,8 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
-import { portableJoin } from '@ogham/cross-platform/paths';
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+import { portableJoin, spawnCliSync } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FRACTAL_SCAN_DETAILS } from '../../../constants/mcpContracts.js';
@@ -47,10 +46,8 @@ function getPathsData(
   return result.data as FractalScanPathsData;
 }
 
-vi.mock('@ogham/cross-platform/spawn', async () => {
-  const actual = await vi.importActual<
-    typeof import('@ogham/cross-platform/spawn')
-  >('@ogham/cross-platform/spawn');
+vi.mock('@ogham/cross-platform', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ogham/cross-platform')>();
   return { ...actual, spawnCliSync: vi.fn(actual.spawnCliSync) };
 });
 

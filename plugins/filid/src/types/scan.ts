@@ -22,6 +22,12 @@ export interface ScanOptions {
    * `.filid/config.json` 의 `additional-organ-names` 가 공급한다. 기본값: []
    */
   additionalOrganNames?: readonly string[];
+  /**
+   * 내장 exclude pattern에 더해 스캔에서 제외할 디렉토리 이름.
+   * `.filid/config.json` 의 `additionalExcludedDirectories` 가 공급하며,
+   * 같은 값이 adapter source discovery 에도 전달된다. 기본값: []
+   */
+  additionalExcludedDirectories?: readonly string[];
   /** Structure evidence providers. Defaults to the registered initial adapters. */
   structureAdapters?: readonly StructureAdapter[];
   /** Adapter-specific entry names passed through without core interpretation. */

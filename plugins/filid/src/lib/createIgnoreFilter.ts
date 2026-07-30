@@ -15,7 +15,7 @@ import {
   pathForCompare,
   portableDirname,
   portableResolve,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 import { listGitIgnoredPaths } from './listGitIgnoredPaths.js';
 

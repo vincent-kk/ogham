@@ -14,26 +14,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./body": {
-      "types": "./dist/body/index.d.ts",
-      "import": "./dist/body/index.js"
-    },
-    "./guard": {
-      "types": "./dist/guard/index.d.ts",
-      "import": "./dist/guard/index.js"
-    },
-    "./html": {
-      "types": "./dist/html/index.d.ts",
-      "import": "./dist/html/index.js"
-    },
-    "./response": {
-      "types": "./dist/response/index.d.ts",
-      "import": "./dist/response/index.js"
-    },
-    "./token": {
-      "types": "./dist/token/index.d.ts",
-      "import": "./dist/token/index.js"
     }
   },
   "main": "dist/index.js",

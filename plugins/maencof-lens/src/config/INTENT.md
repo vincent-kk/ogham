@@ -30,9 +30,9 @@
 
 - 순환 의존성 도입
 - 설정 파일에 직접 접근하지 않고 configLoader를 우회
-- 계층 경로·병합 규칙을 이 모듈에서 재구현 — `@ogham/cross-platform/config-scope` 가 소유
+- 계층 경로·병합 규칙을 이 모듈에서 재구현 — `@ogham/cross-platform` 가 소유
 
 ## Dependencies
 
-- `@ogham/cross-platform/config-scope` — `resolveConfigLayers`·`buildConfigScopeState` (계층 경로와 병합)
+- `@ogham/cross-platform` — `resolveConfigLayers`·`buildConfigScopeState` (계층 경로와 병합)
 - `zod` — 설정 스키마 검증

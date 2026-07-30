@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { logHookFailure } from '@ogham/cross-platform/error-log/write';
+import { logHookFailure } from '@ogham/cross-platform';
 
 import { HookName } from '../../constants/hooks.js';
 import { EMPTY_RESULT, PLUGIN_NAME } from '../../constants/plugin.js';

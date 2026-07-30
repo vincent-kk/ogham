@@ -1,4 +1,4 @@
-import type { ConfigScopeState } from '@ogham/cross-platform/config-scope';
+import type { ConfigScopeState } from '@ogham/cross-platform';
 import { z } from 'zod';
 
 import {

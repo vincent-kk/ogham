@@ -1,7 +1,7 @@
 import type {
   ManagedRuleDocument,
   RuleDocumentRequest,
-} from '@ogham/agent-artifacts/rules';
+} from '@ogham/agent-artifacts';
 
 export function createRuleDocumentRequest(
   documents: readonly ManagedRuleDocument[],

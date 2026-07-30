@@ -1,4 +1,4 @@
-import { portableDirname, samePath } from '@ogham/cross-platform/paths';
+import { portableDirname, samePath } from '@ogham/cross-platform';
 
 import { RESTRUCTURE_UNIT_KINDS } from '../../../constants/restructure.js';
 import type { FractalNode, ProjectSnapshot } from '../../../types/fractal.js';

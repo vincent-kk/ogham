@@ -1,12 +1,10 @@
-import type { SectionMarkers } from "@ogham/cross-platform/instructions/read";
+import type { SectionMarkers } from "@ogham/cross-platform";
 
 import type { SectionArtifactTarget } from "../../../targets/index.js";
 import type { InstructionBackup } from "../../../types/instructions.js";
 
 export type HookInstructionConflictReason =
-  | "malformed-markers"
-  | "duplicate-markers"
-  | "multiple-candidates";
+  "malformed-markers" | "duplicate-markers" | "multiple-candidates";
 
 export interface HookInstructionSectionOptions {
   readonly target: SectionArtifactTarget;

@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 
 import { RUNTIME_FILE } from '../../../../constants/files.js';
 import type { InterventionLevel } from '../../../../types/config.js';

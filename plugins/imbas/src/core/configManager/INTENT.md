@@ -21,7 +21,7 @@ config 의 dot-path 기반 접근 및 관리. user(호스트 상태 루트)와 p
 
 ### Always do
 
-- 파일 I/O는 `@ogham/cross-platform/config-scope` 경유
+- 파일 I/O는 `@ogham/cross-platform` 경유
 - 두 레이어 모두 부재는 정상 상태 — 검증된 기본값을 돌려준다
 
 ### Ask first

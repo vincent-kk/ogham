@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform/compat/join';
+import { portableJoin } from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
 import type { ContextDocumentRef } from '../../../types/context.js';

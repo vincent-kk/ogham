@@ -1,8 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
-import { pluginRoot } from '@ogham/cross-platform/host-paths';
+import {
+  pluginRoot,
+  portableDirname,
+  portableJoin,
+} from '@ogham/cross-platform';
 
 import { PUBLIC_DIR, SETTINGS_HTML } from '../../../../constants/files.js';
 import { INJECTION_PREFIX } from '../../../../constants/plugin.js';

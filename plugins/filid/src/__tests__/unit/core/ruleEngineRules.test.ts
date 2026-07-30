@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform/paths';
+import { portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
 import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';

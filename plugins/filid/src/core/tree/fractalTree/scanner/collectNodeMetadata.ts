@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { pathForCompare } from '@ogham/cross-platform/paths';
+import { pathForCompare } from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import type { IgnoreFilter } from '../../../../lib/createIgnoreFilter.js';
@@ -55,8 +55,12 @@ export async function collectNodeMetadata(
       )
         .flat()
         .filter(
+          // A manifest is a declaration file, not a discovered source file, so
+          // it never enters the ownership map the snapshot builds. Enforcing
+          // ownership on it would drop the entry on the snapshot path only.
           (entryPoint) =>
             !opts.enforceStructureOwnership ||
+            entryPoint.kind === 'manifest' ||
             opts.structureOwnership.get(pathForCompare(entryPoint.path)) ===
               entryPoint.adapterId,
         )

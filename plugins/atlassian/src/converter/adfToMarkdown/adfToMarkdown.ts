@@ -1,4 +1,4 @@
-import { convertBlock } from "./convertBlock.js";
+import { convertBlock } from "./operations/convertBlock.js";
 import type { AdfNode } from "../types/adfNode.js";
 
 /** Convert an ADF document or node to Markdown */

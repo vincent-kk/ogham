@@ -1,4 +1,4 @@
-import type { ConfigScopeState } from '@ogham/cross-platform/config-scope';
+import type { ConfigScopeState } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../../../constants/defaults.js';

@@ -3,18 +3,16 @@ import {
   mergeConfigLayers,
   readConfigLayers,
   writeConfigLayer,
-} from "@ogham/cross-platform/config-scope";
-import type {
-  ConfigScope,
-  ConfigScopeState,
-} from "@ogham/cross-platform/config-scope";
+  type ConfigScope,
+  type ConfigScopeState,
+} from "@ogham/cross-platform";
 
 import {
   isValidLensConfig,
   normalizeLensConfig,
 } from "../configSchema/guard/configGuard.js";
-import type { LensConfig } from "../configSchema/configSchema.js";
-import { CONFIG_VERSION, DEFAULT_LAYERS } from "../defaults/defaults.js";
+import type { LensConfig } from "../configSchema/index.js";
+import { CONFIG_VERSION, DEFAULT_LAYERS } from "../defaults/index.js";
 
 import { configLayers } from "./utils/configLayers.js";
 

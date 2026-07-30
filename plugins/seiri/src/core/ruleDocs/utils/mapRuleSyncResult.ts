@@ -1,4 +1,4 @@
-import type { ArtifactOutcome } from '@ogham/agent-artifacts/transactions';
+import type { ArtifactOutcome } from '@ogham/agent-artifacts';
 
 import type {
   RuleDocAction,

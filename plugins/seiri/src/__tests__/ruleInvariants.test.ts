@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
+import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
 import { loadManifest } from '../core/ruleDocs/loaders/loadManifest.js';
@@ -60,8 +60,7 @@ describe('rule invariants (filid/seiri boundary + D8 idiom contract)', () => {
       },
     ]);
     expect(
-      rules.find((rule) => rule.name === 'seiri_function-boundaries.md')
-        ?.text,
+      rules.find((rule) => rule.name === 'seiri_function-boundaries.md')?.text,
     ).toContain(
       "each helper's implementation body must be 8 lines or fewer; its declaration or signature and enclosing braces do not count",
     );

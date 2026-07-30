@@ -10,7 +10,7 @@ seiri 가 소유하는 세 상태의 구현: 개입 강도 다이얼, 호스트 
 index.ts        barrel
 utils/          organ — findRepoRoot · computeFileSha256 · writeAtomically
                         · ensureSeiriDir
-infra/          configLoader (다이얼 2계층)
+infra/          configLoader (다이얼 3계층)
 ruleDocs/       매니페스트 · 배포 상태 · plan/apply · 드리프트 판정
 sessionSignals/ 실패 연쇄 카운터 (세션 스코프, 비추적)
 ```

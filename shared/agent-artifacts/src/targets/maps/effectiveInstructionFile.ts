@@ -1,4 +1,4 @@
-import { readUtf8FileIfExistsSync } from "@ogham/cross-platform/filesystem/read/utf8";
+import { readUtf8FileIfExistsSync } from "@ogham/cross-platform";
 
 export function effectiveInstructionFile(
   overridePath: string,

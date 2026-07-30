@@ -1,4 +1,4 @@
-import type { ManagedRuleDocument } from '@ogham/agent-artifacts/rules';
+import type { ManagedRuleDocument } from '@ogham/agent-artifacts';
 
 import type { SeiriConfigScope } from '../../../types/config.js';
 import type { RuleDocScopeReport } from '../../../types/manifest.js';

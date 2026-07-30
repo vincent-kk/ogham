@@ -3,11 +3,11 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-import { portableResolve } from '@ogham/cross-platform/compat/resolve';
 import {
   listDirectoryIfExistsSync,
+  portableResolve,
   readUtf8FileIfExistsSync,
-} from '@ogham/cross-platform/filesystem';
+} from '@ogham/cross-platform';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const HOOK_EVENT_NAME = {

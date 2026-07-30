@@ -1,6 +1,8 @@
-import { portableIsAbsolute } from '@ogham/cross-platform/compat/is-absolute';
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
-import { portableRelative } from '@ogham/cross-platform/paths/relative';
+import {
+  pathForCompare,
+  portableIsAbsolute,
+  portableRelative,
+} from '@ogham/cross-platform';
 
 import type { FractalTree } from '../../../types/fractal.js';
 

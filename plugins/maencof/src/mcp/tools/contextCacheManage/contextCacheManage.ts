@@ -5,7 +5,7 @@
  */
 import { resolve } from 'node:path';
 
-import { tryProjectRoot } from '@ogham/cross-platform/host-paths';
+import { tryProjectRoot } from '@ogham/cross-platform';
 import { z } from 'zod';
 
 import { MAX_PINNED_NODES } from '../../../constants/performance.js';
@@ -16,7 +16,7 @@ import {
   writePinnedNodes,
   writeTurnContext,
 } from '../../../core/cacheManager/index.js';
-import { buildTurnContext } from '../../../core/turnContext/build.js';
+import { buildTurnContext } from '../../../core/turnContext/index.js';
 
 export const contextCacheManageInputSchema = {
   action: z

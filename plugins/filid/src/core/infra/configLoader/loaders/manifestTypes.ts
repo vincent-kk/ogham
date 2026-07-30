@@ -1,4 +1,4 @@
-import type { ConfigScope } from '@ogham/cross-platform/config-scope';
+import type { ConfigScope } from '@ogham/cross-platform';
 
 /** Single entry in templates/rules/manifest.json. */
 export interface RuleDocEntry {

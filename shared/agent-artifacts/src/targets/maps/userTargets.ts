@@ -1,4 +1,4 @@
-import { hostStateRoot } from "@ogham/cross-platform/paths/state-root";
+import { hostStateRoot } from "@ogham/cross-platform";
 
 import type {
   ArtifactTargetSet,

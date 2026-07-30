@@ -1,5 +1,5 @@
-import type { ArtifactHost } from '@ogham/agent-artifacts/project';
-import { resolveRuntimeHost } from '@ogham/cross-platform/host-registry/runtime';
+import type { ArtifactHost } from '@ogham/agent-artifacts';
+import { resolveRuntimeHost } from '@ogham/cross-platform';
 
 export function resolveSeiriArtifactHost(
   env: Readonly<Record<string, string | undefined>> = process.env,

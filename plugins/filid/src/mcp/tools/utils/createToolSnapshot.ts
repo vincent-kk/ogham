@@ -1,4 +1,4 @@
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import { createAdapterRegistry } from '../../../adapters/index.js';
 import { SNAPSHOT_TOOL_DIAGNOSTIC_CODES } from '../../../constants/mcpContracts.js';

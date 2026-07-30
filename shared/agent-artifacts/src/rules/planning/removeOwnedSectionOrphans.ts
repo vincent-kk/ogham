@@ -1,7 +1,4 @@
-import {
-  removeSection,
-  sectionMarkers,
-} from "@ogham/cross-platform/instructions";
+import { removeSection, sectionMarkers } from "@ogham/cross-platform";
 
 import { findOwnedRuleSections } from "../helpers/findOwnedRuleSections.js";
 import type { SectionRulePlanningState } from "../types/sectionPlanning.js";

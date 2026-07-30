@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
+import { pluginCache } from '@ogham/cross-platform';
 
 import { cwdHash } from './cwdHash.js';
 

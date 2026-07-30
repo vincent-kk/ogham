@@ -5,18 +5,20 @@
 
 ## Structure
 
-| Path         | Role                                   |
-| ------------ | -------------------------------------- |
-| `index.ts`   | target 타입과 aggregate 해석 공개 배럴 |
-| `targets.ts` | target 타입과 aggregate 호환 facade    |
-| `maps/`      | scope × artifact 목적별 단일 resolver  |
-| `types/`     | facade 순환을 막는 target 계약 organ   |
+| Path         | Role                                       |
+| ------------ | ------------------------------------------ |
+| `index.ts`   | 내부 호환 barrel·패키지 루트 재노출 source |
+| `targets.ts` | target 타입과 aggregate 호환 facade        |
+| `maps/`      | scope × artifact 목적별 단일 resolver      |
+| `types/`     | facade 순환을 막는 target 계약 organ       |
 
 ## Conventions
 
 - Codex의 비어 있지 않은 `AGENTS.override.md`가 `AGENTS.md`보다 우선한다.
 - project root는 절대 경로, user root는 host state root로만 해석한다.
-- hook은 목적별 package subpath로 다른 artifact graph를 배제한다.
+- 외부 hook은 `@ogham/agent-artifacts` 루트에서 목적별 resolver만 고른다.
+- `sideEffects: false` tree-shaking과 emitted byte·output forbidden-pattern
+  guard가 선택하지 않은 artifact graph의 hook 번들 기여를 막는다.
 - `maps/`는 facade가 아니라 `types/`의 내부 계약을 직접 사용한다.
 
 ## Boundaries
@@ -39,4 +41,4 @@
 
 ## Dependencies
 
-- `@ogham/cross-platform`의 목적별 path·read entry point.
+- 외부 `@ogham/cross-platform` 루트의 path·read 심볼.

@@ -2,7 +2,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import { join } from "node:path";
 
-import { RequestTooLargeError } from "@ogham/http-kit/body";
+import { RequestTooLargeError } from "@ogham/http-kit";
 
 import {
   ALLOWED_IMAGE_MIME,

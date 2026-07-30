@@ -1,7 +1,4 @@
-import {
-  type SectionMarkers,
-  sectionMarkers,
-} from '@ogham/cross-platform/instructions/read';
+import { type SectionMarkers, sectionMarkers } from '@ogham/cross-platform';
 
 /** Namespace owning filid's spans of a host instruction file. */
 export const FILID_SECTION_NAMESPACE = 'FILID';

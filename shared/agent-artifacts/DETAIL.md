@@ -22,24 +22,17 @@
 
 ## API Contracts
 
-### Package entry points
+### Package entry point
 
-`@ogham/agent-artifacts`는 루트와 `project`, `user`, `rules`,
-`rules/status`, `rules/presence`, `rules/presence/trusted`, `instructions`,
-`instructions/hook`, `instructions/hook/status`, `instructions/hook/apply`,
-`mcp`, `targets`, `transactions` 서브패스를 제공한다.
-모든 entry point는 이름 있는 심벌만 명시적으로 재수출한다.
-`rules/presence`처럼 hook용 진입점은 목적에 필요 없는 manager·planning·apply
-모듈을 import graph에 포함하지 않는다.
+`@ogham/agent-artifacts`는 패키지 루트 하나만 공개하며 현재 도달 가능한 80개
+심볼을 구체 소유 파일에서 이름으로 재수출한다. `sideEffects: false`를 유지해
+hook 소비자도 같은 루트를 쓰면서 비기여 manager·planning·apply 모듈을 번들에서
+제거한다.
 
-대상 해석도 hook이 aggregate target set을 번들하지 않도록 아래 목적별
-entry point를 제공한다.
-
-```text
-targets/project/rules          targets/user/rules
-targets/project/instructions   targets/user/instructions
-targets/project/mcp            targets/user/mcp
-```
+`HookInstructionSnapshot`은 hook instruction 판독의 중간 단계 타입이라 루트
+계약에서 뺐다. 공개 계약 타입은 `types/` organ이 소유하는데 이 타입은 거기
+속하지 않고, 공개 심볼 어느 시그니처에도 나타나지 않는다. 파일은 그대로 두고
+루트 재수출만 멈춘다.
 
 ### Scope and manager types
 
@@ -64,7 +57,7 @@ interface ArtifactManager {
 }
 ```
 
-프로젝트/사용자 생성자 구현은 각 scope entry point에 위치한다. 사용자 옵션에는
+프로젝트/사용자 생성자 구현은 각 scope 프랙털에 위치한다. 사용자 옵션에는
 프로젝트 루트나 임의 사용자 루트 속성을 추가하지 않는다.
 `resolveProjectTargets`와 `resolveUserTargets`는 기존 계약을 유지하되 목적별
 resolver의 결과를 조합만 한다.
@@ -96,16 +89,16 @@ target에 섹션이 없으면 active target은 effective 파일, active source/h
 null, `active`는 false다. Directory 규칙은 저장과 활성 facts가 같다.
 Planning은 canonical-first stored inspection으로 relocation을 판단한다.
 `inspectRuleDocumentStatus(options, documents)`는 같은 상태 엔진만 사용하는
-`rules/status` read-only 진입점으로, 크기 제한이 있는 hook에서 hash와
-drift 상태는 유지하면서 계획·적용 코드를 번들하지 않게 한다.
+read-only API로, 크기 제한이 있는 hook에서 hash와 drift 상태는 유지하면서
+계획·적용 코드를 번들하지 않게 한다.
 `inspectRuleDocumentPresence(options, selector)`는 `filename`과 선택적
 `legacyFilenames`만 받아 단일 문서가 현재 호스트의 effective channel에
 배포됐는지와 그 표시 대상만 반환하는 hook 전용 계약이다. 가려진 section
-후보는 effective target의 `deployed: false`로 보고한다. `rules/presence`
-서브패스는 ID·본문 검증, hash, 다중 문서 상태, 계획·적용 코드를 재수출하지
+후보는 effective target의 `deployed: false`로 보고한다. 이 함수는 ID·본문
+검증, hash, 다중 문서 상태, 계획·적용 코드를 실행하지 않는다.
+`inspectTrustedRuleDocumentPresence`는 플러그인에 정적으로 내장되고 테스트된
+고정 owner·selector만 받는 hook 전용 API이며 런타임 식별자 검증도 import하지
 않는다.
-`rules/presence/trusted`는 플러그인에 정적으로 내장되고 테스트된 고정 owner·selector만
-받는 hook 전용 진입점이며 런타임 식별자 검증도 import하지 않는다.
 `plan(request)`와 `apply(plan)`은 directory/section 채널에서 같은 사실표를
 사용한다. 기존 이름과 현재 이름이 함께 있으면 현재 이름이 상태의 정본이다.
 Section relocation은 모든 managed current/legacy marker를 제거한 뒤 effective
@@ -119,12 +112,13 @@ Directory의 legacy-only drift는 본문 바이트를 바꾸지 않고 current �
 `replaceDrift`, 선택적 `backup: "none" | "sibling"`을 가진다.
 `content: null`은 소유 구간 제거를 뜻한다.
 
-`instructions/hook`은 크기 제한 훅이 이미 해석된 section target을 검사하고
-동기화하는 호환 진입점이다. 읽기만 하는 훅은 `instructions/hook/status`,
-쓰는 훅은 `instructions/hook/apply`를 사용해 상대 목적의 코드를 import
-graph에서 제외한다. 두 API 모두 범용 manager, plan, revision, lock을
-포함하지 않는다. marker 충돌과 복수 후보는 쓰지 않고 거부하며, 적용은
-marker 밖 바이트를 보존하고 실제 기존 파일 변경에만 sibling backup을 만든다.
+Hook instruction API는 크기 제한 훅이 이미 해석된 section target을 검사하고
+동기화한다. 읽기는 `inspectHookInstructionSection`, 쓰기는
+`applyHookInstructionSection`을 사용하며 `sideEffects: false` 기반 tree-shaking으로
+상대 목적의 코드를 번들에서 제외한다. 두 API 모두 범용 manager, plan,
+revision, lock을 실행하지 않는다. marker 충돌과 복수 후보는 쓰지 않고
+거부하며, 적용은 marker 밖 바이트를 보존하고 실제 기존 파일 변경에만 sibling
+backup을 만든다.
 `effective` placement는 가려진 section을 유효 후보로 재배치하고
 `existing-or-effective`는 유일한 기존 후보를 유지한다.
 
@@ -146,6 +140,11 @@ Claude 사용자 정의 적용은 먼저 add를 시도한다. 같은 이름이 �
 absent 결과만 성공으로 정규화한다. Codex 사용자 CLI의 단일 명령 적용 계약은
 바꾸지 않는다.
 
+## History
+
+2026-07-26 — Claude 사용자 MCP 인자 순서와 멱등 재조정 계약을 추가했다.
+
 ## Last Updated
 
-2026-07-26 — Claude 사용자 MCP 인자 순서와 멱등 재조정 계약 추가.
+2026-07-30 — 공개 주소를 패키지 루트 하나로 통합하고 기존 80개 심볼 계약을
+유지했다.

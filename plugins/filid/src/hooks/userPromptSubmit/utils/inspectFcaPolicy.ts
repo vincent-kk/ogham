@@ -1,9 +1,9 @@
 import {
   type RuleDocumentPresence,
   inspectTrustedRuleDocumentPresence,
-} from '@ogham/agent-artifacts/rules/presence/trusted';
-import { resolveProjectRuleTarget } from '@ogham/agent-artifacts/targets/project/rules';
-import { resolveRuntimeHost } from '@ogham/cross-platform/host-registry/runtime';
+  resolveProjectRuleTarget,
+} from '@ogham/agent-artifacts';
+import { resolveRuntimeHost } from '@ogham/cross-platform';
 
 import {
   LEGACY_RULE_DOCS,

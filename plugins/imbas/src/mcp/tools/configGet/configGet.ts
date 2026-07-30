@@ -2,12 +2,12 @@
  * @file configGet.ts
  * @description Read config.json
  */
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import {
   getConfigValue,
   loadConfig,
-} from '../../../core/configManager/configManager.js';
+} from '../../../core/configManager/index.js';
 
 export interface ConfigGetInput {
   field?: string;

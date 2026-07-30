@@ -10,7 +10,7 @@
  * at build time. The `Dynamic require of` shim signature is also rejected to
  * prevent the filid 0.4.0 module-init crash regression.
  */
-import { generateWindowsCmd } from "@ogham/cross-platform/shim";
+import { generateWindowsCmd } from "@ogham/cross-platform";
 import * as esbuild from "esbuild";
 import { mkdir, readFile, stat } from "fs/promises";
 import { dirname, resolve } from "node:path";
@@ -39,8 +39,8 @@ const MAX_HOOK_BYTES = 40 * 1024;
 const hookEntries = [{ name: "session-start", entry: "sessionStart" }];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
-// of X is not supported"). cross-spawn (CJS, pulled via @ogham/cross-platform/
-// self-probe) calls require('child_process') at load time, so without this
+// of X is not supported"). cross-spawn (CJS, pulled by the
+// @ogham/cross-platform selfProbe export) calls require('child_process') at load time, so without this
 // banner the bundle crashes on import. createRequire from node:module restores
 // a working require for CJS deps inlined into ESM.
 const ESM_CJS_REQUIRE_BANNER =
@@ -48,7 +48,7 @@ const ESM_CJS_REQUIRE_BANNER =
   "const require = __cpCreateRequire(import.meta.url);\n";
 
 await Promise.all(
-  hookEntries.map(({ name, entry }) =>
+  hookEntries.map(async ({ name, entry }) =>
     esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
@@ -99,7 +99,7 @@ const FORBIDDEN_PATTERNS = [
   /\bgenerateWindowsCmd\b/,
 ];
 // NOTE: `Dynamic require of ...` esbuild CJS-shim string is allowed —
-// @ogham/cross-platform/self-probe pulls cross-spawn (CJS) into the
+// `selfProbe` from @ogham/cross-platform pulls cross-spawn (CJS) into the
 // session-start bundle, which produces that shim during ESM bundling.
 // The filid 0.4.0 module-init crash signature was a different failure
 // mode (require evaluated at module-init time, not the lazy shim).
@@ -110,6 +110,7 @@ const FORBIDDEN_PATTERNS = [
 // hook-safe maencof export is introduced and reviewed.
 const FORBIDDEN_ALIAS_PATTERNS = [/@ogham\/maencof\b/, /\bscanVault\b/];
 
+// `sideEffects: false` lets root-barrel-only inputs shake out; emitted bytes and patterns remain the regression guards.
 const violations = [];
 
 for (const { name } of hookEntries) {

@@ -1,11 +1,9 @@
 import {
   copyFileSync,
   writeUtf8FileSync,
-} from "@ogham/cross-platform/filesystem/hook-io";
-import {
   mergeSection,
   removeSection,
-} from "@ogham/cross-platform/instructions/write";
+} from "@ogham/cross-platform";
 
 import { readHookInstructionSnapshot } from "../status/readHookInstructionSnapshot.js";
 import type {

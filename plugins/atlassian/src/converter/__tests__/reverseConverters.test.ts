@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { adfToMarkdown, storageToMarkdown } from "../index.js";
-import { stripTagsFallback } from "../storageToMarkdown/stripTagsFallback.js";
+import { stripTagsFallback } from "../storageToMarkdown/operations/stripTagsFallback.js";
 
 describe("storageToMarkdown", () => {
   it("renders tables and structured macros as markdown", () => {

@@ -16,7 +16,7 @@
 
 ## Conventions
 
-- 레이어 좌표는 `@ogham/cross-platform/config-scope` 의 `resolveConfigLayers` 가 정한다. user 는 `pluginCache('deilen')`, project 는 `<workspace>/.deilen/`.
+- 레이어 좌표는 `@ogham/cross-platform` 의 `resolveConfigLayers` 가 정한다. user 는 `pluginCache('deilen')`, project 는 `<workspace>/.deilen/`.
 - 우선순위는 `user < project`. 병합은 `mergeConfigLayers` 하나만 쓴다.
 - 검증은 병합 결과에만 건다. project 는 재정의된 키만 담은 부분 문서라 단독으로 strict 스키마를 통과할 수 없다.
 - 쓰기는 `writeConfigLayer` (`fileMode` 0o600, `directoryMode` 0o700), 2-space JSON + trailing newline.
@@ -43,5 +43,5 @@
 
 ## Dependencies
 
-- `@ogham/cross-platform/config-scope`, `@ogham/cross-platform/host-paths`
+- `@ogham/cross-platform`
 - `../../types/config` (`Config`, `ConfigSchema`), `../../constants`, `../../lib`

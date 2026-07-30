@@ -31,4 +31,4 @@ esbuild CJS 번들 진입점. `node bridge/mcp-server.cjs` 실행 시 MCP 서버
 
 ## Dependencies
 
-- `../server/lifecycle/startServer.js` — `startServer`
+- `../server/index.js` — `startServer` (형제 fractal 은 배럴로만 건넌다)

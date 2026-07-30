@@ -43,5 +43,5 @@
 
 - `node:fs` (`existsSync`)
 - `node:path` (현재 host filesystem walk-up)
-- `@ogham/cross-platform/compat/basename`
+- `@ogham/cross-platform`
 - `../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)

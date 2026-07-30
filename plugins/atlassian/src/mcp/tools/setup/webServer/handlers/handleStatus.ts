@@ -1,6 +1,6 @@
 import type { ServerResponse } from "node:http";
 import type { RouteContext } from "../routing/routeContext.js";
-import { sendJson } from "@ogham/http-kit/response";
+import { sendJson } from "@ogham/http-kit";
 import { buildStatus } from "../utils/buildStatus.js";
 
 export async function handleStatus(

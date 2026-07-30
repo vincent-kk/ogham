@@ -1,7 +1,4 @@
-import {
-  readSection,
-  sectionMarkers,
-} from "@ogham/cross-platform/instructions";
+import { readSection, sectionMarkers } from "@ogham/cross-platform";
 
 export function findOwnedRuleSections(
   source: string,

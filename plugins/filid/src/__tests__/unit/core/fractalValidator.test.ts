@@ -1,4 +1,4 @@
-import { portableBasename, portableJoin } from '@ogham/cross-platform/paths';
+import { portableBasename, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
 import {

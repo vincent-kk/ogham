@@ -40,10 +40,10 @@
 - `continue: false` 반환
 - branch·spike·harvest 배너 주입
 - 훅 번들에 zod import (번들 크기 예산 초과 — `readHookConfig` 패턴 사용)
-- 번들 metafile에 범용 manager·planning·apply·transaction graph 포함
+- 번들 출력에 범용 manager·planning·apply·transaction 코드 포함
 
 ## Dependencies
 
-- `@ogham/agent-artifacts/rules/presence/trusted`, `@ogham/agent-artifacts/targets/project/rules`
+- `@ogham/agent-artifacts`
 - `../../core/infra/cacheManager/`
 - `../shared/`, `../utils/validateCwd.js`

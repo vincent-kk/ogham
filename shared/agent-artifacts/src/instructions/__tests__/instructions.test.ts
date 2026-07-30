@@ -9,10 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import {
-  readSection,
-  sectionMarkers,
-} from "@ogham/cross-platform/instructions";
+import { readSection, sectionMarkers } from "@ogham/cross-platform";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { SectionArtifactTarget } from "../../targets/index.js";

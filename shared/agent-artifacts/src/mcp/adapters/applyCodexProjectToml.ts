@@ -1,4 +1,4 @@
-import { readUtf8FileIfExistsSync } from "@ogham/cross-platform/filesystem";
+import { readUtf8FileIfExistsSync } from "@ogham/cross-platform";
 
 import type {
   McpApplyOptions,

@@ -4,15 +4,13 @@
  * @see skills/setup/references/init-workflow.md
  */
 import {
+  type ConfigScope,
+  type ConfigScopeState,
   buildConfigScopeState,
   mergeConfigLayers,
   readConfigLayers,
   writeConfigLayer,
-} from '@ogham/cross-platform/config-scope';
-import type {
-  ConfigScope,
-  ConfigScopeState,
-} from '@ogham/cross-platform/config-scope';
+} from '@ogham/cross-platform';
 
 import { ImbasConfigSchema } from '../../types/config.js';
 import type { ImbasConfig } from '../../types/config.js';

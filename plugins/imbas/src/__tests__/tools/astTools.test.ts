@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { handleAstAnalyze } from '../../mcp/tools/astAnalyze/astAnalyze.js';
-import { handleAstSearch } from '../../mcp/tools/astSearch/astSearch.js';
+import { handleAstAnalyze } from '../../mcp/tools/astAnalyze/index.js';
+import { handleAstSearch } from '../../mcp/tools/astSearch/index.js';
 
 // Mock ast-grep-shared module — default: napi unavailable
-vi.mock('../../ast/astGrepShared/astGrepShared.js', () => ({
+vi.mock('../../ast/astGrepShared/index.js', () => ({
   getSgModule: vi.fn().mockResolvedValue(null),
   getSgLoadError: vi.fn().mockReturnValue('Cannot find module @ast-grep/napi'),
   isSgAvailable: vi.fn().mockReturnValue(false),
@@ -18,9 +18,9 @@ vi.mock('../../ast/astGrepShared/astGrepShared.js', () => ({
 }));
 
 // Also mock the direct imports in dependency-extractor and cyclomatic-complexity
-vi.mock('../../ast/dependencyExtractor/dependencyExtractor.js', async () => {
+vi.mock('../../ast/dependencyExtractor/index.js', async () => {
   const { getSgModule, getSgLoadError } =
-    await import('../../ast/astGrepShared/astGrepShared.js');
+    await import('../../ast/astGrepShared/index.js');
   return {
     extractDependencies: async () => {
       const sg = await getSgModule();
@@ -36,9 +36,9 @@ vi.mock('../../ast/dependencyExtractor/dependencyExtractor.js', async () => {
   };
 });
 
-vi.mock('../../ast/cyclomaticComplexity/cyclomaticComplexity.js', async () => {
+vi.mock('../../ast/cyclomaticComplexity/index.js', async () => {
   const { getSgModule, getSgLoadError } =
-    await import('../../ast/astGrepShared/astGrepShared.js');
+    await import('../../ast/astGrepShared/index.js');
   return {
     calculateComplexity: async () => {
       const sg = await getSgModule();

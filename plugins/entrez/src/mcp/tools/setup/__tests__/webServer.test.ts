@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
-import { env } from "@ogham/cross-platform/env";
+import { env } from "@ogham/cross-platform";
 
 import { startSetupServer } from "../webServer/index.js";
 import type { SetupStatus } from "../webServer/utils/buildStatus.js";

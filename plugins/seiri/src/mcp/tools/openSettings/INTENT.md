@@ -23,13 +23,14 @@ webServer/       sub-fractal — HTTP 서버, 가드, 라우팅, 핸들러
 - **`/plan` 과 `/save` 는 같은 본문 스키마와 같은 판정을 쓴다** — 미리보기가 save 가 하지 않을 일을 약속하면 미리보기가 없느니만 못하다.
 - 본문의 `scope` 는 **결정 하나**다 — 다이얼이 저장되는 레이어와 규칙이 배포되는 레이어를 함께 정한다. 축을 둘로 가르면 같은 질문을 두 번 묻고 두 답이 어긋날 수 있다.
 - 브라우저는 `/plan` revision 을 `/save` 에 왕복하고 stale 응답을 다시 검토한다.
+- 공유 패키지는 package root에서 named import한다. 미사용 export는 `sideEffects: false` tree-shaking으로 제거하고, 훅 번들은 `scripts/build-hooks.mjs`의 emitted-byte cap·`FORBIDDEN_PATTERNS`로 출력 회귀를 검증한다.
 
 ## Boundaries
 
 ### Always do
 
 - 저장은 core (`writeConfig`·`applyRuleDocs`) 경유.
-- 프로젝트 루트는 `host-paths` 의 `projectRoot(path?)` 로 해석.
+- 프로젝트 루트는 `@ogham/cross-platform` package root의 `projectRoot(path?)` 로 해석.
 
 ### Ask first
 

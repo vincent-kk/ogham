@@ -39,4 +39,4 @@ deilen 의 MCP 도구 4개를 담는 fractal 컨테이너. 각 도구는 자체 
 ## Dependencies
 
 - `../../core`, `../httpServer`, `../shared`, `../../types`, `../../constants`, `../../utils`
-- `@modelcontextprotocol/sdk` (타입), `@ogham/cross-platform/host-paths` (projectRoot)
+- `@modelcontextprotocol/sdk` (타입), `@ogham/cross-platform` (projectRoot)

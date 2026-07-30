@@ -1,10 +1,6 @@
 import { existsSync } from 'node:fs';
 
-import {
-  portableDirname,
-  portableJoin,
-  samePath,
-} from '@ogham/cross-platform/compat';
+import { portableDirname, portableJoin, samePath } from '@ogham/cross-platform';
 
 import { GIT_DIR } from '../../constants/files.js';
 

@@ -1,4 +1,4 @@
-import { pathForCompare, portableResolve } from '@ogham/cross-platform/paths';
+import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
 import type {
   AdapterClaim,
@@ -8,17 +8,59 @@ import type {
   StructureAdapter,
 } from '../../types/adapters.js';
 
+const PATH_SEPARATOR = /[\\/]/;
+
 interface ClaimedAdapter {
   adapter: StructureAdapter;
   claim: AdapterClaim;
   files: Map<string, string>;
 }
 
+/** Per-call narrowing of what ownership resolution judges. */
+export interface ResolveAdaptersOptions {
+  /** Paths to judge instead of the adapters' own discovery results. */
+  requestedPaths?: readonly string[];
+  /**
+   * Directory names dropped before ownership is decided. A name matches only
+   * below `projectRoot`, so a root that happens to sit inside a directory of
+   * that name keeps its files.
+   */
+  excludedDirectoryNames?: readonly string[];
+}
+
+/**
+ * Build a predicate that reports whether a path sits under an excluded
+ * directory. Only the directory segments below the project root are inspected —
+ * the filename is not a directory, and the root's own segments are not the
+ * project's structure.
+ * @param projectRoot Absolute root every candidate path is measured against.
+ * @param excludedDirectoryNames Directory names to drop; empty disables the filter.
+ * @returns Predicate over absolute candidate paths.
+ */
+function createExclusionFilter(
+  projectRoot: string,
+  excludedDirectoryNames: readonly string[],
+): (absolutePath: string) => boolean {
+  if (excludedDirectoryNames.length === 0) return () => false;
+  const excluded = new Set(excludedDirectoryNames);
+  const rootSegmentCount = projectRoot
+    .split(PATH_SEPARATOR)
+    .filter(Boolean).length;
+  return (absolutePath) =>
+    absolutePath
+      .split(PATH_SEPARATOR)
+      .filter(Boolean)
+      .slice(rootSegmentCount, -1)
+      .some((segment) => excluded.has(segment));
+}
+
 export async function resolveAdapters(
   projectRoot: string,
   adapters: readonly StructureAdapter[],
-  requestedPaths?: readonly string[],
+  options: ResolveAdaptersOptions = {},
 ): Promise<AdapterResolution> {
+  const { requestedPaths, excludedDirectoryNames = [] } = options;
+  const isExcluded = createExclusionFilter(projectRoot, excludedDirectoryNames);
   const detected = await Promise.all(
     adapters.map(async (adapter) => ({
       adapter,
@@ -37,6 +79,7 @@ export async function resolveAdapters(
       const files = new Map<string, string>();
       for (const path of await adapter.discoverSourceFiles(projectRoot)) {
         const absolutePath = portableResolve(projectRoot, path);
+        if (isExcluded(absolutePath)) continue;
         const key = pathForCompare(absolutePath);
         if (!files.has(key)) files.set(key, absolutePath);
       }
@@ -47,6 +90,7 @@ export async function resolveAdapters(
   for (const path of requestedPaths ??
     claimed.flatMap(({ files }) => [...files.values()])) {
     const absolutePath = portableResolve(projectRoot, path);
+    if (isExcluded(absolutePath)) continue;
     const key = pathForCompare(absolutePath);
     if (!requested.has(key)) requested.set(key, absolutePath);
   }

@@ -1,18 +1,17 @@
 /**
  * @file graphCache.ts
  * @description Vault path resolution + in-memory graph cache.
- * Read-path freshness gating is delegated to middlewares/freshness-guard;
- * background rebuild lifecycle to middlewares/background-rebuild.
+ * Read-path freshness gating lives in middlewares/freshnessGuard and background
+ * rebuild lifecycle in middlewares/backgroundRebuild; callers reach those
+ * directly — wrapping them here would make the two modules import each other.
  */
 import { resolve } from 'node:path';
 
-import { tryProjectRoot } from '@ogham/cross-platform/host-paths';
-import { home } from '@ogham/cross-platform/paths';
+import { home, tryProjectRoot } from '@ogham/cross-platform';
 
 import { MetadataStore } from '../../../core/indexer/index.js';
 import { invalidateQueryCache } from '../../../search/queryEngine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
-import { ensureFreshGraphNonBlocking } from '../middlewares/freshnessGuard.js';
 
 /** Blocked prefixes for global config path access */
 const BLOCKED_PREFIXES = [
@@ -56,16 +55,6 @@ export async function loadGraphIfNeeded(
     cacheVaultPath = vaultPath;
   }
   return graph;
-}
-
-/**
- * Read-path freshness 가드 thin wrapper.
- * 절대 in-flight rebuild를 await하지 않는다 — middlewares/freshness-guard가 즉시 그래프 reference를 반환한다.
- */
-export async function ensureFreshGraph(
-  vaultPath: string,
-): Promise<KnowledgeGraph | null> {
-  return ensureFreshGraphNonBlocking(vaultPath);
 }
 
 export function invalidateCache(): void {

@@ -34,20 +34,20 @@ describe('MCP server tool registration', () => {
   });
 
   it('registers all expected tools via registerTool', async () => {
-    const { createServer } = await import('../mcp/server/server.js');
+    const { createServer } = await import('../mcp/server/index.js');
     createServer();
     expect(registeredTools).toHaveLength(EXPECTED_TOOLS.length);
   });
 
   it('registers exactly the expected tool names', async () => {
-    const { createServer } = await import('../mcp/server/server.js');
+    const { createServer } = await import('../mcp/server/index.js');
     createServer();
     const sorted = [...registeredTools].sort();
     expect(sorted).toEqual([...EXPECTED_TOOLS].sort());
   });
 
   it('never calls server.tool() — only registerTool()', async () => {
-    const { createServer } = await import('../mcp/server/server.js');
+    const { createServer } = await import('../mcp/server/index.js');
     createServer();
     expect(toolCallCount).toBe(0);
   });

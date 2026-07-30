@@ -1,6 +1,8 @@
-import { inspectHookInstructionSection } from '@ogham/agent-artifacts/instructions/hook/status';
-import { resolveProjectInstructionTarget } from '@ogham/agent-artifacts/targets/project/instructions';
-import { resolveHostDescriptor } from '@ogham/cross-platform/host-registry/descriptor';
+import {
+  inspectHookInstructionSection,
+  resolveProjectInstructionTarget,
+} from '@ogham/agent-artifacts';
+import { resolveHostDescriptor } from '@ogham/cross-platform';
 
 import {
   MAENCOF_END_MARKER,

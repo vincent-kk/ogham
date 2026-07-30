@@ -40,4 +40,4 @@ Read | Write | Edit 공용 방문 파이프라인. 전달 모델("규칙이 live
 ## Dependencies
 
 - `../../core/infra/cacheManager/` (`commitVisit`, `readFractalMap`, `readDelivered`, `readTurn`), `../../core/tree/boundaryDetector/` (`buildChain`)
-- `../shared/`, `../utils/` (`validateCwd`, `readHookConfig`, `visitScope`), `@ogham/cross-platform/paths`
+- `../shared/`, `../utils/` (`validateCwd`, `readHookConfig`, `visitScope`), `@ogham/cross-platform`

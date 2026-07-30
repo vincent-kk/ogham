@@ -1,4 +1,5 @@
-import { pluginCache, portableJoin } from "../../../paths/index.js";
+import { portableJoin } from "../../../paths/compat/operations/portableJoin.js";
+import { pluginCache } from "../../../paths/state/pluginCache.js";
 import type {
   ConfigLayerPaths,
   ResolveConfigLayersOptions,

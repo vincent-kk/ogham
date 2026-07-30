@@ -49,6 +49,36 @@
 
 `version:sync` 는 `package.json` 버전을 `plugin.json` 에만 동기화한다(`src/version.ts` 없음). 루트 `scripts/injectVersion.mjs` 는 `src/` 부재 시 version 파일 생성을 건너뛴다. 버전 bump 후에는 `yarn prawf version:sync` 로 `plugin.json` 을 갱신한다.
 
+## Acceptance Criteria
+
+### AC-manifest-skills-only — 순수 마크다운 표면
+
+- `.claude-plugin/plugin.json` 에 `mcpServers`·`hooks` 키가 없고 `agents` 필드도 없다 (agents 는 런타임 자동 발견).
+- `validate-plugin` 이 매니페스트에 대해 통과한다.
+- 저장소에 `bridge/`·`src/version.ts` 가 없으며 `version:sync` 는 `plugin.json` 만 갱신한다.
+
+### AC-identifier-consistency — 식별자 단일성
+
+- 페르소나 id 10개가 `agents/*.md` 파일명과 `skills/peer-review/orchestration.md`·`prompt-templates.md`·`templates.md`·각 `SKILL.md` 에서 동일하다.
+- axis id, `verdict`·`gate`·`severity`·`status`·`impact`·`external_verification` enum 값이 위 문서 전체에서 동일하다.
+- 산출물 파일명이 4개 스킬의 명세와 일치한다.
+
+### AC-verdict-gate-purity — verdict 순수성
+
+- verdict 는 게이트(`--gate`, 기본 `major`) 이상에서 미해결인 soundness finding 만의 함수다.
+- 게이트 미만 미해결 finding 은 `review-report.md` 의 Advisory Notes 에만 나타나고 verdict 를 바꾸지 않는다.
+- `impact-assessor` 의 중요성 판정은 verdict 를 `minor-revision` 이상으로 올리지 못한다.
+- consequence 를 명명하지 못한 finding 의 severity 는 `minor` 를 넘지 않는다.
+
+### AC-workdir-resolution — 산출물 경로 규약
+
+- WORKDIR 해석 우선순위가 `--workdir <dir>` > `PRAWF_WORKDIR` > `./.prawf` 이며, 해석 규칙의 정의는 `skills/.shared/operations/resolve_workdir.md` 한 곳에만 있다.
+- 4개 스킬이 같은 `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` 를 공유한다.
+
+## History
+
+- 2026-06-11 — peer-review 스킬 오케스트레이션·프롬프트·템플릿을 개선하고 calibration fixture 세트(`skills/peer-review/calibration/`)를 도입했다.
+
 ## Last Updated
 
-2026-06-11 — peer-review 스킬 오케스트레이션·프롬프트·템플릿 개선, calibration fixture 세트(`skills/peer-review/calibration/`) 추가, agent 명세 보강.
+2026-07-30 — 계약을 검증 가능한 acceptance group 4개로 명시했다.

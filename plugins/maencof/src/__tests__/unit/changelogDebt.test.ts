@@ -2,7 +2,7 @@
  * @file changelogDebt.test.ts
  * @description runChangelogDebt / detectWatchedChanges / parsePorcelainZ 유닛 테스트 — MCP bootSweep concern
  */
-import { spawnCli } from '@ogham/cross-platform/spawn';
+import { spawnCli } from '@ogham/cross-platform';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CHANGELOG_PENDING_MAX_CHANGES } from '../../constants/changelog.js';
@@ -16,7 +16,8 @@ import {
   runChangelogDebt,
 } from '../../hooks/utils/changelogDebt/index.js';
 
-vi.mock('@ogham/cross-platform/spawn', () => ({
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
   spawnCli: vi.fn(),
 }));
 

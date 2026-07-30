@@ -1,7 +1,7 @@
 import {
   type FakeBinaryHandle,
   installFakeBinary,
-} from '../../../dispatcher/__tests__/fakeBinary.js';
+} from '../../fixtures/fakeBinary.js';
 
 import {
   CLAUDE_FAKE_SCRIPT,

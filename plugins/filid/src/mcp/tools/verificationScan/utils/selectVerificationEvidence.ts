@@ -1,4 +1,4 @@
-import { pathForCompare, portableResolve } from '@ogham/cross-platform/paths';
+import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
 import type {
   VerificationFileAnalysis,

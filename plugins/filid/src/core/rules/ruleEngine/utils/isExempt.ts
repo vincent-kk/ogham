@@ -11,7 +11,7 @@
  * function always returns a boolean, so callers can trust it without defensive
  * try/catch (AC10a).
  */
-import { pathForCompare } from '@ogham/cross-platform/paths';
+import { pathForCompare } from '@ogham/cross-platform';
 
 import { globToRegExp } from '../../../../lib/globToRegexp.js';
 import { isDynamicGlob } from '../../../../lib/isDynamicGlob.js';

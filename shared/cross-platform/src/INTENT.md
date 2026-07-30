@@ -9,7 +9,7 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 
 | Path            | Role                                  |
 | --------------- | ------------------------------------- |
-| `index.ts`      | 하위 entry point의 이름 있는 재노출   |
+| `index.ts`      | 구체 소유 파일의 이름 있는 재노출     |
 | `filesystem/`   | 읽기·원자 쓰기·잠금·symlink 검사      |
 | `paths/`        | 상태 루트와 portable 경로 연산        |
 | `hostRegistry/` | 호스트 테이블과 명시적 호스트 해석    |
@@ -21,7 +21,8 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 
 ## Conventions
 
-- 각 하위 디렉터리는 자체 `INTENT.md`와 `index.ts`가 있는 fractal이다.
+- 패키지 외부 소비자는 `@ogham/cross-platform` 루트만 import한다.
+- 루트 배럴은 구체 소유 파일에서 공개 심볼을 이름으로 재노출한다.
 - 하위 fractal은 상대의 entry point만 소비하며 의존성 그래프를 DAG로 유지한다.
 - `hostRegistry`는 내부 의존이 없는 leaf다.
 
@@ -29,7 +30,7 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 
 ### Always do
 
-- 새 하위 fractal을 루트 `index.ts`와 package exports에 함께 노출한다.
+- 새 공개 심볼을 루트 `index.ts`에 이름으로 추가하고 package exports는 유지한다.
 - 시스템 호출과 순수 정책을 분리한다.
 
 ### Ask first
@@ -40,9 +41,9 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 ### Never do
 
 - 루트 `index.ts`에 선언 구현.
-- 소비자가 하위 내부 파일을 entry point 우회해 import.
+- 패키지 외부 소비자가 하위 파일을 deep import.
 
 ## Dependencies
 
-- 내부: 공개 하위 fractal.
+- 내부: 하위 fractal과 공개 심볼의 구체 소유 파일.
 - 외부: 각 하위 fractal이 자체 소유.

@@ -1,6 +1,6 @@
-export { inspectRequest } from "./inspectRequest.js";
+export { inspectRequest } from "./operations/inspectRequest.js";
 export type {
   GuardOptions,
   GuardVerdict,
   GuardRejectionCode,
-} from "./types.js";
+} from "./operations/types.js";

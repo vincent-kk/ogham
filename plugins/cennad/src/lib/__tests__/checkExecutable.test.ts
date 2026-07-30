@@ -16,7 +16,8 @@ const { resultRef, spawnCli } = vi.hoisted(() => ({
   spawnCli: vi.fn(),
 }));
 
-vi.mock('@ogham/cross-platform', () => ({
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
   spawnCli: (...args: unknown[]) => {
     spawnCli(...args);
     return Promise.resolve(resultRef.value);

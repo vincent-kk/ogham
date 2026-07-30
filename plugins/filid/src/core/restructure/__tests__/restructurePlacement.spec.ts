@@ -12,7 +12,7 @@ import {
   pathForCompare,
   portableJoin,
   portableRelative,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';

@@ -1,4 +1,4 @@
-import { writeFileAtomicallySync } from '@ogham/cross-platform/filesystem';
+import { writeFileAtomicallySync } from '@ogham/cross-platform';
 
 import {
   REVIEW_STATE_JSON_INDENT,

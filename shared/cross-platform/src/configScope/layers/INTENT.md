@@ -17,7 +17,8 @@ user와 project 두 config 레이어 파일의 좌표를 정하고, 읽고, 쓰�
 
 ## Conventions
 
-- 형제 모듈은 진입점으로 소비한다: `../merge`, `../../paths`, `../../filesystem`.
+- `../merge`는 진입점으로, `../../paths`·`../../filesystem`은 concrete 모듈로
+  소비한다 — 이 그래프는 훅 번들에 실리므로 배럴 유입이 크기 가드를 깨뜨린다.
 - 좌표 계산과 디스크 조회를 분리한다 — `resolveConfigLayers`는 파일을 안 본다.
 - 읽기는 원문을 보존하고 `FORBIDDEN_KEYS`에 경고만 남긴다(UI가 파일 내용을
   그대로 보여줘야 하므로). 쓰기는 그 키를 버린다 — 한번 들어가면 정상 경로로는

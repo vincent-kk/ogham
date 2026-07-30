@@ -40,7 +40,7 @@ imbas 플러그인 소스 코드 루트. 기획문서 검증→분할→개발 �
 
 - types/ 외부에서 Zod 스키마 직접 정의
 - 전역 상태(global mutable state) 사용
-- 계층 경로 해석·병합 규칙 재구현 — `@ogham/cross-platform/config-scope` 가 소유
+- 계층 경로 해석·병합 규칙 재구현 — `@ogham/cross-platform` 가 소유
 
 ## Dependencies
 

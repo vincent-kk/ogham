@@ -1,4 +1,4 @@
-import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem/read/utf8';
+import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import type { RuleDocsManifest } from '../../../types/manifest.js';
 import { resolveManifestPath } from '../utils/resolveManifestPath.js';

@@ -50,3 +50,29 @@ interface InsightInjectorResult {
 3. **소비 전 크래시** → 파일은 디스크에 남으며, 다음 세션의 SessionStart 가 다시 pick up 한다. TTL 없음; one-shot + self-cleaning.
 
 `insightInjector` 는 `config.category_filter` 에서 `allowed-categories` 만 읽어 배너에 투영할 뿐, 위 파이프라인과는 독립적이다. 이 분리가 깨지면 (예: 인젝터가 pending 파일을 읽거나 삭제) SessionStart 소비자와 레이스 컨디션이 생기므로 절대 도입하지 말 것.
+
+## Acceptance Criteria
+
+### AC-no-pending-file-access — pending 파일 무접근
+
+- 이 fractal 이 `pending-insight-notification.json` 을 읽지도 쓰지도 지우지도 않는다.
+
+### AC-limit-reached-banner — 한도 도달 배너
+
+- 세션 캡처 수가 max 에 도달하면 `status="limit-reached"` 배너가 나간다.
+
+### AC-no-unsupported-fields — 미지원 필드 부재
+
+- 출력에 top-level `message`·`hookMessage` 가 없다.
+
+## Boundary Exemptions
+
+### `insightInjector.ts` — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`
+- **Direct import**: `allowed`
+- **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. UserPromptSubmit orchestrator 가 이 파일을 직접 가져오는 것이 설계된 형태이고, 배럴 경유는 43008 바이트 캡을 잠식한다.
+
+## Last Updated
+
+2026-07-30 — acceptance group 을 채우고 훅 직접 import 면책을 선언했다.

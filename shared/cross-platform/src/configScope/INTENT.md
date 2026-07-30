@@ -1,14 +1,13 @@
 ## Purpose
 
-플러그인 설정을 `user`(사용자 전역)와 `project`(프로젝트 로컬) 두 네임스페이스로
-나눠 각각 읽고 쓰게 하고, 소비자에게는 project가 user를 재정의한 단일 병합
-결과를 준다. 프로젝트마다 다른 설정을 허용하기 위한 계층이다.
+플러그인 설정을 `user`와 `project` 네임스페이스로 나눠 읽고 쓰며, 소비자에게는
+project가 user를 재정의한 단일 병합 결과를 준다.
 
 ## Structure
 
 | Path       | Role                                   |
 | ---------- | -------------------------------------- |
-| `index.ts` | 하위 entry point의 이름 있는 재노출    |
+| `index.ts` | 내부 barrel·패키지 루트 재노출 source  |
 | `types/`   | 레이어 좌표·문서·상태 타입 organ       |
 | `merge/`   | 순수 문서 연산 (병합·재정의 열거·삭제) |
 | `layers/`  | 파일 좌표 해석·읽기·쓰기·상태 조립     |
@@ -29,8 +28,9 @@
 - 병합은 언제나 `mergeConfigLayers`로 한다. 런타임과 설정 페이지가 다르게
   합치면 "보이는 값"과 "먹는 값"이 갈라진다. 읽기와 병합 사이에 낄 단계가
   없는 소비자는 `buildConfigScopeState` 하나로 끝낸다.
-- 브라우저 번들과 훅 번들은 `config-scope/merge` subpath만 import한다.
-  루트 배럴은 파일 I/O와 `env-paths` 그래프를 끌어온다.
+- 외부 브라우저·hook 소비자는 패키지 루트에서 필요한 순수 merge 심볼만
+  import한다. `sideEffects: false` tree-shaking과 emitted byte·output
+  forbidden-pattern guard가 파일 I/O·`env-paths`의 출력 기여를 막는다.
 
 ### Ask first
 

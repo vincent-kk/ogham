@@ -2,7 +2,7 @@
  * @file foldDaily.test.ts
  * @description foldDaily unit tests — fold base discovery and fold-commit with restore
  */
-import { spawnCli } from '@ogham/cross-platform/spawn';
+import { spawnCli } from '@ogham/cross-platform';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { formatDate } from '../../core/dateFormat/index.js';
@@ -12,7 +12,8 @@ import {
   tryFoldCommit,
 } from '../../hooks/utils/vaultCommitter/helpers/foldDaily/index.js';
 
-vi.mock('@ogham/cross-platform/spawn', () => ({
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
   spawnCli: vi.fn(),
 }));
 

@@ -1,4 +1,4 @@
-import { portableResolve } from '@ogham/cross-platform/paths';
+import { portableResolve } from '@ogham/cross-platform';
 
 import {
   CONTRACT_INTENTS,

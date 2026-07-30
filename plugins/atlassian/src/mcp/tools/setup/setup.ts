@@ -13,7 +13,7 @@ import type {
 } from "../../../types/index.js";
 import { loadSettingsHtml } from "./utils/loadSettingsHtml.js";
 import { testConnection } from "../../../core/index.js";
-import { openBrowser } from "@ogham/cross-platform/launcher";
+import { openBrowser } from "@ogham/cross-platform";
 import { startSetupServer } from "./webServer/index.js";
 
 /** Setup tool handler — launches local web server for auth configuration */

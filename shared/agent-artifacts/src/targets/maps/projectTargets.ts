@@ -1,4 +1,4 @@
-import { requireAbsoluteRoot } from "@ogham/cross-platform/host-paths/absolute-root";
+import { requireAbsoluteRoot } from "@ogham/cross-platform";
 
 import type {
   ArtifactTargetSet,

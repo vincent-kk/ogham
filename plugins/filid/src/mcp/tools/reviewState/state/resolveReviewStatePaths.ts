@@ -1,4 +1,4 @@
-import { resolveContainedPath } from '@ogham/cross-platform/paths';
+import { resolveContainedPath } from '@ogham/cross-platform';
 
 import {
   REVIEW_STATE_DIRECTORY_NAMES,

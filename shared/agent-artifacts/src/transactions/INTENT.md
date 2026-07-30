@@ -37,4 +37,4 @@
 
 ## Dependencies
 
-- `@ogham/cross-platform/filesystem`.
+- `@ogham/cross-platform`.

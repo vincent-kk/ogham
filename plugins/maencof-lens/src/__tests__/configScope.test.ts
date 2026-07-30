@@ -9,7 +9,7 @@ import {
   loadConfig,
   loadConfigScope,
   writeConfig,
-} from "../config/configLoader/configLoader.js";
+} from "../config/configLoader/index.js";
 
 let projectRoot: string;
 let userDir: string;

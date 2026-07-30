@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 
-import { parseEsummary } from "../esummary.js";
-import { parseElink } from "../elink.js";
-import { parseIdConv } from "../idconv.js";
+import { parseEsummary } from "../operations/esummary.js";
+import { parseElink } from "../operations/elink.js";
+import { parseIdConv } from "../operations/idconv.js";
 import { ESUMMARY_JSON, ELINK_JSON, IDCONV_JSON } from "./fixtures.js";
 
 describe("parseEsummary", () => {

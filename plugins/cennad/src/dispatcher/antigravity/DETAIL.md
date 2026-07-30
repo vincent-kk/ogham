@@ -50,6 +50,26 @@ agy 데이터 경로·transcript 스키마 지식을 한 모듈에 가둔다. ag
 - transcript 경로·스키마는 agy 비문서화 내부 구조(agy 1.1.5 기준)다. 완료 대화의 최종 답은 `PLANNER_RESPONSE.content`(1.1.5 실측). JSONL 폐기(SQLite 전환) 시 복구가 `null` → `cli_error` 로 안전하게 실패한다.
 - 멀티바이트 경계 손상이 드물게 남을 수 있다 (빈 응답보다는 우월).
 
+## Acceptance Criteria
+
+### AC-cwd-isolation — 세션 cwd 격리
+
+- 세션마다 `runtime/antigravity-cwd/<sessionId>/` 에서 실행된다.
+- 다른 세션의 작업 디렉터리를 공유하지 않는다.
+
+### AC-session-ref-promotion — 대화 참조 승격
+
+- 스트림이 conversation id 를 실어 주면 그것이 `externalSessionRef` 가 된다.
+- id 를 못 얻은 세션만 cwd 격리에 기대 재개하고, 이후 어느 턴에서든 id 가 오면 그 자리에서 ref 를 승격한다.
+
+### AC-empty-output-classification — 빈 출력 분류
+
+- 빈 출력이 `cli_error` 로 분류되고 stderr 가 메시지에 반영된다.
+
+## History
+
+- 2026-07-23 — agy 1.1.5 headless 권한 auto-deny 대응: `skip_permissions` 기본 true, 빈 출력 `cli_error` 에 stderr 반영, 복구 계약을 "완료 대화의 마지막 `PLANNER_RESPONSE.content`" 로 명문화했다(스키마 드리프트 오해 정정). 배경은 `.metadata/cennad/agy-upstream-watch.md` 참조.
+
 ## Last Updated
 
-2026-07-23 — agy 1.1.5 headless 권한 auto-deny 대응: `skip_permissions` 기본 true, 빈 출력 `cli_error` 에 stderr 반영, 복구 계약을 "완료 대화의 마지막 `PLANNER_RESPONSE.content`" 로 명문화(스키마 드리프트 오해 정정). `.metadata/cennad/agy-upstream-watch.md` 참조.
+2026-07-30 — 기존 계약을 acceptance group 으로 명시하고 이전 기록을 `History` 로 옮겼다.

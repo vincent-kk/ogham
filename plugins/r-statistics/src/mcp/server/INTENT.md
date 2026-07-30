@@ -14,7 +14,7 @@ MCP `tools` 서버 lifecycle 모듈. 도구 4개를 등록하고 stdio 로 기�
 ## Conventions
 
 - 모든 `registerTool` 콜백은 `wrapHandler` 로 감쌈 (throw 흡수)
-- 도구 등록명 kebab-case, 심볼·파일 camelCase
+- 도구 등록명 snake_case(`constants/mcpToolNames.ts` 단일 출처), 심볼·파일 camelCase
 - 기동 시 prune 실패해도 부팅 계속
 
 ## Boundaries

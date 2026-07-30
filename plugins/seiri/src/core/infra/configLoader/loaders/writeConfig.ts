@@ -1,4 +1,4 @@
-import { writeConfigLayer } from '@ogham/cross-platform/config-scope';
+import { writeConfigLayer } from '@ogham/cross-platform';
 
 import type {
   SeiriConfig,

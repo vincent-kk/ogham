@@ -1,8 +1,8 @@
-import { buildConfigScopeState } from '@ogham/cross-platform/config-scope';
-import type {
-  ConfigLayerPaths,
-  ConfigScopeState,
-} from '@ogham/cross-platform/config-scope';
+import {
+  type ConfigLayerPaths,
+  type ConfigScopeState,
+  buildConfigScopeState,
+} from '@ogham/cross-platform';
 
 import { configLayers } from '../utils/configLayers.js';
 

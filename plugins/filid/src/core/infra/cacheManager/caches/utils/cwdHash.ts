@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { portableResolve } from '@ogham/cross-platform/compat/resolve';
+import { portableResolve } from '@ogham/cross-platform';
 
 /**
  * Project key for a workspace. The path is canonicalised through the portable

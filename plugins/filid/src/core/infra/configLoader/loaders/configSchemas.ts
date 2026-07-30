@@ -41,6 +41,7 @@ const StructureConfigSchema = z
     maxDepth: z.number().nonnegative().finite().optional(),
     additionalOrganNames: z.array(z.string().min(1)).optional(),
     additionalAllowedPeers: z.array(AllowedPeerOverrideSchema).optional(),
+    additionalExcludedDirectories: z.array(z.string().min(1)).optional(),
     entryPointOverrides: z
       .record(z.string(), z.array(z.string().min(1)))
       .optional(),

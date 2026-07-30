@@ -6,7 +6,7 @@
 
 | File                       | Role                                   |
 | -------------------------- | -------------------------------------- |
-| `index.ts`                 | 공개 배럴                              |
+| `index.ts`                 | package root 재노출용 내부 배럴        |
 | `types.ts`                 | `Host`, `KnownHost`, descriptor        |
 | `registry.ts`              | `HOSTS`와 marker env의 순수 데이터     |
 | `hostFromMarker.ts`        | MCP marker 판별                        |
@@ -20,9 +20,11 @@
 - marker가 있으면 훅 신호보다 우선하며 미인식 marker는 `unknown`이다.
 - 신호가 없으면 Claude, 서로 다른 훅 신호가 겹치면 `unknown`이다.
 - agy의 Claude 상태 채널 차용은 명시적 테이블 행으로 유지한다.
-- hook은 host ID에는 `host-registry/runtime`, 좌표에는
-  `host-registry/descriptor`, 비교 상수에는 `host-registry/hosts` 단일 목적
-  entry를 사용한다.
+- 외부 소비자는 host 관련 심볼을 `@ogham/cross-platform` 루트에서만 import한다.
+- 패키지 내부 `paths/state`는 표와 좌표 소유권을 재사용하려고 concrete
+  operation을 직접 import한다.
+- hook 격리는 `sideEffects: false` tree-shaking 뒤 emitted byte cap과
+  `FORBIDDEN_PATTERNS` 출력 검사로 검증한다.
 
 ## Boundaries
 

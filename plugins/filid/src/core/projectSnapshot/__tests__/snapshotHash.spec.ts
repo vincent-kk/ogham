@@ -4,7 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { computeSnapshotHash } from '../index.js';
 import { normalizeSnapshotHashInput } from '../snapshotHash/normalizeSnapshotHashInput.js';
 
-vi.mock('@ogham/cross-platform/filesystem/read/bytes', () => ({
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
   readFileIfExistsSync: vi.fn(() => Buffer.from('same-content')),
 }));
 

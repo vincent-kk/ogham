@@ -6,12 +6,12 @@ Markdown 텍스트를 ADF(Atlassian Document Format) JSON 문서로 변환하는
 
 ## Structure
 
-| 파일               | 역할                                             |
-| ------------------ | ------------------------------------------------ |
-| `markdownToAdf.ts` | 진입점 — doc 루트 노드 조립 및 빈 입력 처리      |
-| `renderBlocks.ts`  | MarkdownBlock 배열을 ADF 블록 노드로 변환        |
-| `renderInline.ts`  | 인라인 토큰을 마크가 적용된 ADF text 노드로 변환 |
-| `index.ts`         | 배럴 — `markdownToAdf` 단일 재수출               |
+| 파일                         | 역할                                             |
+| ---------------------------- | ------------------------------------------------ |
+| `markdownToAdf.ts`           | 진입점 — doc 루트 노드 조립 및 빈 입력 처리      |
+| `operations/renderBlocks.ts` | MarkdownBlock 배열을 ADF 블록 노드로 변환        |
+| `operations/renderInline.ts` | 인라인 토큰을 마크가 적용된 ADF text 노드로 변환 |
+| `index.ts`                   | 배럴 — `markdownToAdf` 단일 재수출               |
 
 ## Boundaries
 

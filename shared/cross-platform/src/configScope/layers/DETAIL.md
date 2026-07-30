@@ -12,7 +12,7 @@
 
 ## API Contracts
 
-`@ogham/cross-platform/config-scope/layers` 가 이 fractal의 진입점이다.
+외부 소비자는 `@ogham/cross-platform` 패키지 루트에서 이 API를 가져온다.
 
 ```ts
 resolveConfigLayers(options: ResolveConfigLayersOptions): ConfigLayerPaths;
@@ -72,4 +72,5 @@ project 경로는 `null` 이고, 그 상태는 "이 워크스페이스에는 pro
 
 ## Last Updated
 
-2026-07-29 — 공개 연산 4개를 `operations/` organ으로 내리고 이 문서를 신설.
+2026-07-30 — 외부 공개 주소를 패키지 루트로 통합하면서 레이어 연산 계약을
+그대로 유지했다.

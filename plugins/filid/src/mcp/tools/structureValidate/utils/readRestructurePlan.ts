@@ -1,5 +1,7 @@
-import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem/read/utf8';
-import { portableIsAbsolute } from '@ogham/cross-platform/paths';
+import {
+  portableIsAbsolute,
+  readUtf8FileIfExistsSync,
+} from '@ogham/cross-platform';
 import { z } from 'zod';
 
 import { STRUCTURE_VALIDATION_ERROR_MESSAGES } from '../../../../constants/mcpContracts.js';

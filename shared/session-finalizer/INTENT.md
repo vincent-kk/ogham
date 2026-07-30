@@ -11,8 +11,9 @@
 
 ## Conventions
 
+- 소비자는 `@ogham/session-finalizer` 패키지 루트만 import한다.
 - onShutdown 은 동기·경량만 (SIGKILL grace ~400ms 실측; git·async 절단은 index.lock 잔존 위험) — 무거운 완결은 detached finalizer 로 grace 밖 위임
-- detached 스폰은 `@ogham/cross-platform/spawn` 의 spawnDetached 경유 (child_process 직접 금지)
+- detached 스폰은 `@ogham/cross-platform` 의 spawnDetached 경유 (child_process 직접 금지)
 - registerShutdownFinalizer 는 프로세스당 1회 (once 가드) — 이중 등록 무시
 - runFinalizer 의 task 는 self-absorbing (내부 흡수, throw 금지) — exit(0) 은 항상 실행
 
@@ -36,4 +37,4 @@
 
 ## Dependencies
 
-- 내부: `@ogham/cross-platform/spawn` (spawnDetached).
+- 내부: `@ogham/cross-platform` (spawnDetached).

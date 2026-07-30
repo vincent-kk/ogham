@@ -16,7 +16,7 @@ Claude Code 훅 진입점. 이벤트마다 하나의 디렉토리(`sessionStart`
 ### Always do
 
 - 헬퍼·공유 관심사·core 는 concrete 경로로 import (배럴 `index.js` 금지 — 훅 번들 비대)
-- 공유 패키지도 기능별 direct subpath를 사용하고 build graph guard로 aggregate 재유입을 막는다
+- 공유 패키지는 package root에서 named import한다. `sideEffects: false` tree-shaking 뒤 emitted bytes와 `FORBIDDEN_PATTERNS`를 검사해 출력 격리를 보장한다
 - 각 관심사를 `safeConcern` 으로 격리; orchestrator 는 얇게 유지
 
 ### Ask first

@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { projectRoot } from "@ogham/cross-platform/host-paths";
+import { projectRoot } from "@ogham/cross-platform";
 
 import { MAX_COLLECT_WAIT_SECONDS } from "../../../constants/defaults.js";
 import { loadConfig } from "../../../core/configManager/index.js";

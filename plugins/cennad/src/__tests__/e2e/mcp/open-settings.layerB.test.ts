@@ -2,6 +2,7 @@ import { rm } from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { CENNAD_HOME } from '../../../constants/paths.js';
 import { readConfig } from '../helpers/diskAssert.js';
 import { parseToolCallText } from '../helpers/envelopeShape.js';
@@ -76,13 +77,21 @@ describe('open_settings (Layer B)', () => {
     expect(root.status).toBe(200);
     expect(root.body.toLowerCase()).toContain('<html');
 
+    // `/config` answers with the scope envelope, and it reports what the files
+    // hold rather than the schema defaults — `beforeEach` wiped CENNAD_HOME, so
+    // the merge is empty through the spawned bundle too.
     const cfg = await httpGet(buildPath(out.url, '/config'));
     expect(cfg.status).toBe(200);
-    const cfgJson = JSON.parse(cfg.body) as Record<string, unknown>;
+    const cfgJson = JSON.parse(cfg.body) as {
+      state: { effective: Record<string, unknown> };
+    };
+    expect(cfgJson.state.effective).toEqual({});
 
+    // `/save` names the layer and carries a complete document; the page's form
+    // is seated on `DEFAULT_CONFIG` on a wiped home.
     const save = await httpPostJson(buildPath(out.url, '/save'), {
-      ...cfgJson,
-      intervention_strength: -1,
+      scope: 'user',
+      config: { ...DEFAULT_CONFIG, intervention_strength: -1 },
     });
     expect(save.status).toBe(200);
     const disk = await readConfig();

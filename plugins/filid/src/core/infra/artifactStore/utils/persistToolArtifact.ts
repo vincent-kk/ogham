@@ -1,11 +1,11 @@
 import { createHash } from 'node:crypto';
 
-import { assertNoSymlinkDescendantsSync } from '@ogham/cross-platform/filesystem';
 import {
+  assertNoSymlinkDescendantsSync,
+  pluginCache,
   portableResolve,
   resolveContainedPath,
-} from '@ogham/cross-platform/paths';
-import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
+} from '@ogham/cross-platform';
 
 import type { McpToolName } from '../../../../constants/mcpToolNames.js';
 import {

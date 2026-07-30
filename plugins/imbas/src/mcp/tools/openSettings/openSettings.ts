@@ -1,5 +1,4 @@
-import { projectRoot } from '@ogham/cross-platform/host-paths';
-import { openBrowser } from '@ogham/cross-platform/launcher';
+import { openBrowser, projectRoot } from '@ogham/cross-platform';
 
 import type {
   SettingsBootstrap,

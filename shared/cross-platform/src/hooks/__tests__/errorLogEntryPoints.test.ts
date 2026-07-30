@@ -11,16 +11,27 @@ const packageRoot = resolve(
 const hooksRoot = resolve(packageRoot, "src", "hooks");
 
 describe("error log entry points", () => {
-  it("separates display-path reads from log writes", () => {
+  it("root-exports display-path reads and log writes concretely", () => {
     const manifest = JSON.parse(
       readFileSync(resolve(packageRoot, "package.json"), "utf8"),
-    ) as { exports: Record<string, unknown> };
+    ) as { exports: Record<string, unknown>; sideEffects: boolean };
+    const rootSource = readFileSync(
+      resolve(packageRoot, "src", "index.ts"),
+      "utf8",
+    );
 
-    expect(manifest.exports).toHaveProperty("./error-log/path");
-    expect(manifest.exports).toHaveProperty("./error-log/write");
+    expect(Object.keys(manifest.exports)).toEqual([".", "./agy-runner/main"]);
+    expect(manifest.sideEffects).toBe(false);
+    expect(rootSource).toContain(
+      'export { errorLogPath } from "./hooks/error/errorLogPath.js";',
+    );
+    expect(rootSource).toContain(
+      'export { logHookFailure } from "./hooks/error/logHookFailure.js";',
+    );
+    expect(rootSource).not.toContain('from "./hooks/errorLog.js"');
   });
 
-  it("keeps the compatibility module as a pure barrel", () => {
+  it("keeps the internal compatibility entry point as a pure named barrel", () => {
     const path = resolve(hooksRoot, "errorLog.ts");
     expect(existsSync(path)).toBe(true);
     const source = readFileSync(path, "utf8");

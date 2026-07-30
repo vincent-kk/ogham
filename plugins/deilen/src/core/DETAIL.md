@@ -32,10 +32,23 @@
 ### projectHash
 
 - `getProjectHash(cwd): string` (sha256 12-hex).
-- 세션 토큰(`generateToken`/`verifyToken`)은 공유 `@ogham/http-kit/token` 으로 이관.
+- 세션 토큰(`generateToken`/`verifyToken`)은 공유 `@ogham/http-kit` 으로 이관.
 
-## Acceptance
+## Acceptance Criteria
 
-- resolver 의 모든 해소 경로가 `settle()` 단일 통과 — 타이머·abort 리스너 페어링.
-- 손상된 config/세션 파일은 throw 하지 않고 안전 기본값으로 degrade.
-- `pruneExpired` 가 만료 세션만 제거.
+### AC-resolver-single-settle — long-poll 해소 단일화
+
+- resolver 의 모든 해소 경로가 `settle()` 을 단 한 번 통과한다 — 타이머와 abort 리스너가 짝을 이뤄 해제된다.
+
+### AC-state-degradation — 손상 상태 복원력
+
+- 손상된 config·세션 파일은 throw 하지 않고 안전 기본값으로 degrade 한다.
+
+### AC-session-scope-and-ttl — 스코프와 만료
+
+- 다른 `project_hash` 의 세션 조회는 `null` 이다.
+- `pruneExpired` 가 만료 세션만 제거한다.
+
+## Last Updated
+
+2026-07-30 — acceptance 항목을 acceptance group 형식으로 정리했다(내용 변경 없음).

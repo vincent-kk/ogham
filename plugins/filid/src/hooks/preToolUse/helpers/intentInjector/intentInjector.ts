@@ -1,5 +1,4 @@
-import { normalize } from '@ogham/cross-platform/paths/normalize';
-import { portableRelative } from '@ogham/cross-platform/paths/relative';
+import { normalize, portableRelative } from '@ogham/cross-platform';
 
 import {
   CTX_TTL_TURNS_DEFAULT,

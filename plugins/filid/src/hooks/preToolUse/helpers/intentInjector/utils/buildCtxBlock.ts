@@ -1,6 +1,8 @@
-import { portableJoin } from '@ogham/cross-platform/compat/join';
-import { normalize } from '@ogham/cross-platform/paths/normalize';
-import { portableRelative } from '@ogham/cross-platform/paths/relative';
+import {
+  normalize,
+  portableJoin,
+  portableRelative,
+} from '@ogham/cross-platform';
 
 import {
   DETAIL_MD,

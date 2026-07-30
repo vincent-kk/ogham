@@ -1,4 +1,4 @@
-import { readFileIfExistsSync } from "@ogham/cross-platform/filesystem/read/bytes";
+import { readFileIfExistsSync } from "@ogham/cross-platform";
 
 import type { DirectoryRuleTarget } from "../../targets/index.js";
 import type {

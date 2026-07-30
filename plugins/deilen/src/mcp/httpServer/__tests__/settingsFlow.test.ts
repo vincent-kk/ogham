@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import type { ConfigScopeState } from "@ogham/cross-platform/config-scope";
+import type { ConfigScopeState } from "@ogham/cross-platform";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { handleOpenSettings } from "../../tools/openSettings/openSettings.js";

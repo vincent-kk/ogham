@@ -3,7 +3,7 @@ import { readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { resetProjectRoot } from "@ogham/cross-platform/host-paths";
+import { resetProjectRoot } from "@ogham/cross-platform";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DataFormat } from "../../../../types/enums.js";

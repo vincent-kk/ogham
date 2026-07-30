@@ -12,7 +12,7 @@ import {
   mergeSection,
   readSection,
   sectionMarkers,
-} from "@ogham/cross-platform/instructions";
+} from "@ogham/cross-platform";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SectionArtifactTarget } from "../../targets/index.js";
@@ -30,9 +30,8 @@ const { atomicWriteSpy, inspectionRace } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@ogham/cross-platform/filesystem", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@ogham/cross-platform/filesystem")>();
+vi.mock("@ogham/cross-platform", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@ogham/cross-platform")>();
   return {
     ...actual,
     writeFileAtomicallySync: (

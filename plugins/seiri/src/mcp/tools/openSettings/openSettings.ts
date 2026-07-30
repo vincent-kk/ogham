@@ -1,6 +1,4 @@
-import { pluginRoot } from '@ogham/cross-platform/host-paths';
-import { projectRoot } from '@ogham/cross-platform/host-paths';
-import { openBrowser } from '@ogham/cross-platform/launcher';
+import { openBrowser, pluginRoot, projectRoot } from '@ogham/cross-platform';
 
 import { Route } from '../../../constants/http.js';
 

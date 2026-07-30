@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
+import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
 import { DORMANT_HOOKS, HookName, HostTool } from '../constants/hooks.js';
@@ -55,21 +55,23 @@ describe('wiring', () => {
     const buildScript = read('scripts', 'build-hooks.mjs');
     for (const name of Object.values(HookName))
       expect(buildScript).toContain(`name: '${name}'`);
-    expect(buildScript).toContain('metafile: true');
-    expect(buildScript).toContain('FORBIDDEN_INPUT_FRAGMENTS');
-    for (const fragment of [
-      '/hooks/errorLog.',
-      '/paths/index.',
-      '/paths/paths.',
-      '/paths/compat/index.',
-      '/hostRegistry/index.',
-      '/rules/planning/',
-      '/rules/adapters/',
-      '/transactions/',
-      '/filesystem/locking/',
-      '/filesystem/mutation/',
+    // Isolation is guarded on emitted output, not on the input graph: with
+    // `sideEffects: false` a root-barrel import contributes zero bytes, so an
+    // input-graph check flags addresses that cost nothing. A byte cap plus
+    // patterns that survive minification is what actually catches a regression.
+    expect(buildScript).toContain('maxBytes');
+    expect(buildScript).toContain('FORBIDDEN_PATTERNS');
+    for (const pattern of [
+      'fast-glob',
+      'ZodError',
+      // Written as a regex literal in the script, so its slash is escaped —
+      // match the package scope alone rather than the escaped form.
+      '@modelcontextprotocol',
+      'XDG_CONFIG_HOME',
+      'cross-spawn',
+      'generateWindowsCmd',
     ])
-      expect(buildScript).toContain(fragment);
+      expect(buildScript).toContain(pattern);
   });
 
   it('declares the state slot the server rewrites', () => {

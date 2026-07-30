@@ -6,10 +6,7 @@
 // "설정 페이지 계약" (config_scope / data-config-path / data-scope-state), and
 // the other plugins' settings pages mirror this structure.
 
-import {
-  clearConfigPaths,
-  listOverriddenPaths,
-} from "@ogham/cross-platform/config-scope/merge";
+import { clearConfigPaths, listOverriddenPaths } from "@ogham/cross-platform";
 
 const injected = window.__DEILEN_STATE__ || {};
 const token = injected.token || "";

@@ -14,11 +14,11 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 
 ## Conventions
 
-- 외부 npm 모듈 import 금지 (`node:fs`, `node:path`, `node:os`, `node:crypto`와 cross-platform 단일 목적 entry만)
+- 외부 npm 모듈 import 금지 (`node:*`와 `@ogham/cross-platform` package root의 named export만 사용)
 - `src/core/`, `src/types/` import 금지 — zod / MCP SDK 가 번들에 빨리면 cap 위반
 - shared path/config mirror 는 `src/constants/paths.ts` 정책과 일치 유지: 기본 `pluginCache('cennad')`, non-blank `CENNAD_CONFIG_PATH` override, `CLAUDE_PLUGIN_DATA`/`CLAUDE_PLUGIN_DADA` 무시
-- config 는 core 와 같은 2계층(user < project)을 `config-scope/merge` 로 합친다. project 루트는 `process.cwd()` — 호스트가 워크스페이스 안에서 훅을 띄우고, 제대로 해석하려면 host-paths 그래프가 10 KB 번들로 딸려온다
-- plugin cache와 host 판별은 aggregate가 아닌 목적별 subpath를 사용
+- config 는 core 와 같은 2계층(user < project)을 package root의 `mergeConfigLayers` 로 합친다. project 루트는 호스트가 훅을 띄운 `process.cwd()` 를 쓴다
+- 공유 package root의 미사용 export는 `sideEffects: false`와 tree-shaking으로 제거하고, `scripts/buildHooks.mjs`의 emitted-byte cap과 `FORBIDDEN_PATTERNS`로 실제 출력 회귀를 막는다
 - 세션 동일성은 `hostPid()` (CLAUDE_PID) 로 판정 — 훅은 `libs/run.cjs` 아래에서 실행되어 `process.ppid` 가 러너를 가리킨다
 - 엔트리는 try/catch → 항상 `{ continue: true }` 출력 후 `process.exit(0)`
 - 응답 JSON: `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }`
@@ -44,5 +44,5 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 
 ## Dependencies
 
-- `node:*` builtins only
+- `@ogham/cross-platform` package root와 `node:*` builtins only
 - esbuild 진입: `<name>/build/<name>.entry.ts`

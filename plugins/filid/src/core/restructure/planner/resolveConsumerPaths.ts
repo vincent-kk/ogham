@@ -4,7 +4,7 @@ import {
   portableRelative,
   portableResolve,
   samePath,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';

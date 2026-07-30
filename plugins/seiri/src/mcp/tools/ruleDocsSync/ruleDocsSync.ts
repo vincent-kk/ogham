@@ -1,5 +1,4 @@
-import { pluginRoot } from '@ogham/cross-platform/host-paths';
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { pluginRoot, projectRoot } from '@ogham/cross-platform';
 
 import {
   applyRuleDocs,

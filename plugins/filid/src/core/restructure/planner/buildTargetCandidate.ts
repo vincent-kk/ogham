@@ -2,7 +2,7 @@ import {
   portableBasename,
   portableIsAbsolute,
   portableJoin,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
 import {

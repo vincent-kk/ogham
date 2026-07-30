@@ -55,12 +55,34 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 
 ## Acceptance Criteria
 
+### AC-claude-intact — Claude 무결손
+
+- Claude 소비 파일의 git diff 0 (도구 실행 전후).
+
+### AC-regeneration-determinism — 재생성 결정성
+
 - `yarn plugin:adapters` 2회 연속 실행 시 2회째 전 파일 `unchanged` (현재 322 파일 — 매니페스트 20 + agy MCP 9 + 마켓플레이스 1 + **agy hooks.json 3** + **Codex hooks.json 2** + **Codex 스킬 변이 287** (filid 71 + entrez 12 + r-statistics 58 + imbas 146)).
+- `yarn plugin:adapters:check` 가 어댑터 손편집·정본 변경 후 미재생성을 exit 1 로 검출.
+- 루트 `plugin.json` 과 `.codex-plugin/plugin.json` 은 **바이트 동일** — `planPluginAdapters` 스펙이 고정한다.
+
+### AC-emission-scope — 어댑터 방출 범위
+
 - Codex `.codex-plugin/skills/**` 는 옵트인(allowlist) + `agents/` + `subagent_type: "<p>:<id>"` 스폰 스킬을 가진 플러그인에만 방출(현재 filid·entrez·r-statistics·imbas). 스폰 지시 스킬만 self-load 프로토콜 주입(현재 14곳: filid cross-review·resolve·scan/reference, entrez search·query, r-statistics analyze, imbas split·pipeline·validate·devplan 각 workflow+tools), 나머지는 바이트 복사, `agents/*` 는 `.shared/personas/` 로 복사. **Claude `skills/`·`agents/` git diff 0.**
 - agy `hooks.json` 은 PreToolUse 보유 플러그인에만 방출된다(현재 filid·imbas·maencof 3곳; cennad·maencof-lens 는 PreToolUse 없어 미생성).
 - Codex `.codex-plugin/hooks.json` 은 read 잡는 PreToolUse matcher 를 가진 플러그인에만 방출된다(현재 filid·imbas 2곳; maencof 는 `*` matcher 라 Bash 이미 발화 → 미생성).
-- `yarn plugin:adapters:check` 가 어댑터 손편집·정본 변경 후 미재생성을 exit 1 로 검출.
-- 루트 `plugin.json` 과 `.codex-plugin/plugin.json` 은 **바이트 동일** — `planPluginAdapters` 스펙이 고정한다.
+
+### AC-compat-diagnostics — 호환성 진단
+
 - 훅 5종 플러그인(cennad·filid·imbas·maencof·maencof-lens)에서 `codex-read-matcher` 외 진단 0 (filid·imbas 는 `Read|Write|Edit` matcher 로 warning 1 씩 예상).
-- Claude 소비 파일의 git diff 0 (도구 실행 전후).
-- 스펙 통과 — 순수 변환(adapters·lint·cli·utils)과 I/O 계약(pipeline·facts)을 `yarn plugin-compiler test:run` 이 검증. `applyFiles` 의 check 모드는 어떤 쓰기도 하지 않음이 스펙으로 고정된다.
+
+### AC-ci-trigger-coverage — CI 트리거 커버리지
+
+- 정본(`skills/`·`agents/`·`.claude-plugin/**`·`.mcp.json`·`hooks/hooks.json`)과 어댑터 7종의 경로가 전부 `.github/workflows/ci.yml` 의 `paths` 필터에 걸린다. 어느 한쪽이 빠지면 그 변경은 CI 를 띄우지 않아 `plugin:adapters:check` 가 desync 를 잡을 기회를 잃는다 — 특히 어댑터의 다수는 `.codex-plugin/skills/**` 의 **마크다운**이라 확장자 기준 필터로는 걸리지 않는다. `push`·`pull_request` 두 목록은 동일하다(GitHub Actions 가 YAML 앵커를 지원하지 않아 중복이 강제된다). `src/__tests__/ciTriggerCoverage.test.ts` 가 고정한다.
+
+### AC-spec-suite — 스펙 통과
+
+- 순수 변환(adapters·lint·cli·utils)과 I/O 계약(pipeline·facts)을 `yarn plugin-compiler test:run` 이 검증. `applyFiles` 의 check 모드는 어떤 쓰기도 하지 않음이 스펙으로 고정된다.
+
+## Last Updated
+
+2026-07-30 — 수락 기준을 안정 ID 를 가진 AC 그룹으로 묶고 계약 상태 일자를 명시했다.

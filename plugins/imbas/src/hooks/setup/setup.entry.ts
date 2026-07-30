@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { errorLogPath, logHookFailure } from '@ogham/cross-platform/error-log';
-import { selfProbe } from '@ogham/cross-platform/self-probe';
+import { errorLogPath, logHookFailure, selfProbe } from '@ogham/cross-platform';
 
 import { createLogger } from '../../lib/logger.js';
 import { readStdin } from '../../lib/stdin.js';

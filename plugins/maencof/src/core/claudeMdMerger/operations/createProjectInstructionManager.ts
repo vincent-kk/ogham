@@ -1,9 +1,9 @@
 import {
   type InstructionSectionManager,
   createInstructionSectionManager,
-} from '@ogham/agent-artifacts/instructions';
-import { resolveProjectInstructionTarget } from '@ogham/agent-artifacts/targets/project/instructions';
-import { resolveRuntimeHost } from '@ogham/cross-platform/host-registry';
+  resolveProjectInstructionTarget,
+} from '@ogham/agent-artifacts';
+import { resolveRuntimeHost } from '@ogham/cross-platform';
 
 import {
   MAENCOF_END_MARKER,

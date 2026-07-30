@@ -14,6 +14,7 @@
 
 ## Conventions
 
+- 패키지 외부 소비자는 `@ogham/session-finalizer` 루트만 import한다.
 - `operations/` 파일은 1함수/파일(one-function-per-file) 원칙 준수
 - once 보장은 모듈 스코프 변수(`registered`, `ran`)로 구현 — 클래스·싱글턴 객체 도입 금지
 - `operations/` → `constants/` 는 상대경로 직접 import (배럴 우회)
@@ -38,4 +39,4 @@
 ## Dependencies
 
 - 내부: `constants/finalizeFlag.ts` (`operations/` → `constants/`)
-- 외부: `@ogham/cross-platform/spawn` (`registerShutdownFinalizer` 만 사용)
+- 외부: `@ogham/cross-platform` (`registerShutdownFinalizer` 만 사용)

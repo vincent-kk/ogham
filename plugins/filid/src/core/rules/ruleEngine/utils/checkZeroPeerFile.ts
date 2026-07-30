@@ -1,4 +1,4 @@
-import { portableBasename } from '@ogham/cross-platform/paths';
+import { portableBasename } from '@ogham/cross-platform';
 
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';

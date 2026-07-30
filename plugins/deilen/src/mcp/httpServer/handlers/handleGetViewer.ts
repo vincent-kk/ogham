@@ -1,7 +1,6 @@
 import type { ServerResponse } from "node:http";
 
-import { escapeJsonForHtml } from "@ogham/http-kit/html";
-import { sendJson } from "@ogham/http-kit/response";
+import { escapeJsonForHtml, sendJson } from "@ogham/http-kit";
 
 import {
   getSession,

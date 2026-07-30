@@ -1,0 +1,47 @@
+import type { ConvertFormat } from "../../types/index.js";
+import { adfToMarkdown } from "../adfToMarkdown/index.js";
+import { markdownToAdf } from "../markdownToAdf/index.js";
+import { storageToMarkdown } from "../storageToMarkdown/index.js";
+import { markdownToStorage } from "../markdownToStorage/index.js";
+import { markdownToWiki } from "../markdownToWiki/index.js";
+
+/** Unified conversion function: convert between supported formats */
+export function convert(
+  from: ConvertFormat,
+  to: ConvertFormat,
+  content: string,
+): string {
+  if (from === to) return content;
+
+  const key = `${from}>${to}`;
+
+  switch (key) {
+    case "adf>markdown":
+      return adfToMarkdown(JSON.parse(content)) ?? "";
+
+    case "markdown>adf":
+      return JSON.stringify(markdownToAdf(content));
+
+    case "storage>markdown":
+      return storageToMarkdown(content);
+
+    case "markdown>storage":
+      return markdownToStorage(content);
+
+    case "markdown>wiki":
+      return markdownToWiki(content);
+
+    case "adf>storage": {
+      const md = adfToMarkdown(JSON.parse(content)) ?? "";
+      return markdownToStorage(md);
+    }
+
+    case "storage>adf": {
+      const md = storageToMarkdown(content);
+      return JSON.stringify(markdownToAdf(md));
+    }
+
+    default:
+      throw new Error(`Unsupported conversion: ${from} > ${to}`);
+  }
+}

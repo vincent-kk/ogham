@@ -1,4 +1,4 @@
-import { saveConfig } from '../../../../core/configManager/configManager.js';
+import { saveConfig } from '../../../../core/configManager/index.js';
 import type {
   SettingsSaveBody,
   SettingsSaveSummary,

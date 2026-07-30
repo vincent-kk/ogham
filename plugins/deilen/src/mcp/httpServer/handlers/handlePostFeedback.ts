@@ -1,7 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { RequestTooLargeError, parseBody } from "@ogham/http-kit/body";
-import { sendJson } from "@ogham/http-kit/response";
+import { RequestTooLargeError, parseBody, sendJson } from "@ogham/http-kit";
 
 import { saveFeedback } from "../../../core/feedbackStore/index.js";
 import {

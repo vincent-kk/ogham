@@ -4,15 +4,12 @@
  */
 import { join } from 'node:path';
 
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import { CACHED_AT_FILENAME } from '../../../constants/index.js';
-import {
-  isCacheExpired,
-  loadCache,
-} from '../../../core/cacheManager/cacheManager.js';
-import { loadConfig } from '../../../core/configManager/configManager.js';
-import { getCacheDir } from '../../../core/paths/paths.js';
+import { isCacheExpired, loadCache } from '../../../core/cacheManager/index.js';
+import { loadConfig } from '../../../core/configManager/index.js';
+import { getCacheDir } from '../../../core/paths/index.js';
 import { readJson } from '../../../lib/fileIo.js';
 import { CachedAtSchema } from '../../../types/cache.js';
 import type { CacheType } from '../../../types/cache.js';

@@ -2,7 +2,7 @@ import { createReadStream } from "node:fs";
 import type { ServerResponse } from "node:http";
 import { extname } from "node:path";
 
-import { sendJson } from "@ogham/http-kit/response";
+import { sendJson } from "@ogham/http-kit";
 
 import type { RouteContext } from "../routing/routeContext.js";
 

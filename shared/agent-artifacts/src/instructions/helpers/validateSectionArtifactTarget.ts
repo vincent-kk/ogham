@@ -1,9 +1,9 @@
-import { requireAbsoluteRoot } from "@ogham/cross-platform/host-paths";
 import {
+  requireAbsoluteRoot,
   portableRelative,
   resolveContainedPath,
   samePath,
-} from "@ogham/cross-platform/paths";
+} from "@ogham/cross-platform";
 
 import type { SectionArtifactTarget } from "../../targets/index.js";
 

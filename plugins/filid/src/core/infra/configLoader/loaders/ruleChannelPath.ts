@@ -1,7 +1,7 @@
 import type {
   DirectoryRuleTarget,
   SectionArtifactTarget,
-} from '@ogham/agent-artifacts/targets';
+} from '@ogham/agent-artifacts';
 
 /**
  * The one address a rule target writes to, whichever shape it has.

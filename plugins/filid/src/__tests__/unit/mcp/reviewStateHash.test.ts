@@ -1,12 +1,12 @@
 import { chmodSync, mkdtempSync, rmSync, utimesSync } from 'node:fs';
 
-import { writeFileAtomicallySync } from '@ogham/cross-platform/filesystem';
 import {
   portableJoin,
   resolveContainedPath,
+  spawnCliSync,
   tmp,
-} from '@ogham/cross-platform/paths';
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+  writeFileAtomicallySync,
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {

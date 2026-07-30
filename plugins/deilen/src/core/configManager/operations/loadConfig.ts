@@ -1,8 +1,8 @@
 import {
   mergeConfigLayers,
   readConfigLayers,
-} from "@ogham/cross-platform/config-scope";
-import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+  type ConfigLayerPaths,
+} from "@ogham/cross-platform";
 
 import { DEFAULT_CONFIG } from "../../../constants/defaults.js";
 import { logger } from "../../../lib/logger.js";

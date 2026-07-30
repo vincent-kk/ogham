@@ -3,7 +3,7 @@ import { basename } from 'node:path';
 import {
   loadConfigByScope,
   loadConfigScope,
-} from '../../../../core/configManager/configManager.js';
+} from '../../../../core/configManager/index.js';
 import type {
   SettingsBootstrap,
   SettingsPageState,

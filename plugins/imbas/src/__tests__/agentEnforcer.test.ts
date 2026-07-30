@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { processAgentEnforcer } from '../hooks/agentEnforcer/agentEnforcer.js';
+import { processAgentEnforcer } from '../hooks/agentEnforcer/index.js';
 import type { SubagentStartInput } from '../types/hooks.js';
 
 function makeInput(agentType: string | undefined): SubagentStartInput {

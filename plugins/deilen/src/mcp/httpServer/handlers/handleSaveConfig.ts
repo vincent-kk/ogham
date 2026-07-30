@@ -1,9 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { mergeConfigLayers } from "@ogham/cross-platform/config-scope";
-import type { ConfigScope } from "@ogham/cross-platform/config-scope";
-import { parseBody } from "@ogham/http-kit/body";
-import { sendJson } from "@ogham/http-kit/response";
+import { mergeConfigLayers, type ConfigScope } from "@ogham/cross-platform";
+
+import { parseBody, sendJson } from "@ogham/http-kit";
 
 import { ConfigSchema } from "../../../types/config.js";
 import type { RouteContext } from "../routing/routeContext.js";

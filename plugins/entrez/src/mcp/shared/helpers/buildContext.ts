@@ -1,4 +1,4 @@
-import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+import type { ConfigLayerPaths } from "@ogham/cross-platform";
 
 import type { Db } from "../../../types/enums.js";
 import type { EntrezConfig, EntrezCredentials } from "../../../types/config.js";

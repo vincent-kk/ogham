@@ -5,7 +5,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { PROJECT_ROOT_ARG_DESCRIPTION } from "@ogham/cross-platform/host-paths";
+import { PROJECT_ROOT_ARG_DESCRIPTION } from "@ogham/cross-platform";
 import { z } from "zod";
 
 import { McpToolName } from "../../constants/mcpToolNames.js";

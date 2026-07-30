@@ -1,4 +1,4 @@
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
+import { pathForCompare } from '@ogham/cross-platform';
 
 import { canonicalizeNodePaths } from '../builders/canonicalizeNodePaths.js';
 

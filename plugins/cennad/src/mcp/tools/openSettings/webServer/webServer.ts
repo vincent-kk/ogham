@@ -1,10 +1,7 @@
 import { type Server, createServer } from 'node:http';
 
-import type {
-  ConfigScope,
-  ConfigScopeState,
-} from '@ogham/cross-platform/config-scope';
-import { generateToken } from '@ogham/http-kit/token';
+import type { ConfigScope, ConfigScopeState } from '@ogham/cross-platform';
+import { generateToken } from '@ogham/http-kit';
 
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
 import {

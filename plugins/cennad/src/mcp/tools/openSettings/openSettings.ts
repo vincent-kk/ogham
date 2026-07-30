@@ -1,6 +1,6 @@
 import { rm } from 'node:fs/promises';
 
-import { openBrowser } from '@ogham/cross-platform/launcher';
+import { openBrowser } from '@ogham/cross-platform';
 
 import { SETTINGS_SERVER_PATH } from '../../../constants/paths.js';
 import { pruneConfigFile } from '../../../core/configManager/index.js';

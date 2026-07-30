@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+import { spawnCliSync } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
@@ -14,10 +14,8 @@ import {
   writeConfig,
 } from '../../../core/infra/configLoader/index.js';
 
-vi.mock('@ogham/cross-platform/spawn', async () => {
-  const actual = await vi.importActual<
-    typeof import('@ogham/cross-platform/spawn')
-  >('@ogham/cross-platform/spawn');
+vi.mock('@ogham/cross-platform', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ogham/cross-platform')>();
   return { ...actual, spawnCliSync: vi.fn(actual.spawnCliSync) };
 });
 

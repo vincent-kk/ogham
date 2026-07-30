@@ -1,4 +1,4 @@
-import { portableBasename } from '@ogham/cross-platform/compat/basename';
+import { portableBasename } from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
 import { WORKTREE_DISPOSITIONS } from '../../../../constants/reviewState.js';

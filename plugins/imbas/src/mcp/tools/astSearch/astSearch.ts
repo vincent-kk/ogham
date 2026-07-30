@@ -4,7 +4,7 @@
  */
 import { readFileSync } from 'node:fs';
 
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import {
   collectFiles,

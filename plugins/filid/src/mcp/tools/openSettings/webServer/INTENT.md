@@ -39,5 +39,5 @@
 
 ## Dependencies
 
-- `node:http` · `@ogham/http-kit/{guard,token,body,html,response}` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
+- `node:http` · `@ogham/http-kit` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
 - `../../../../core/infra/configLoader` — 저장 core (`writeConfig`, `syncRuleDocs`)

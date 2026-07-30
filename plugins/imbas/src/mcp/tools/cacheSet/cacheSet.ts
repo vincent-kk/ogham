@@ -4,10 +4,10 @@
  */
 import { join } from 'node:path';
 
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
-import { saveCache } from '../../../core/cacheManager/cacheManager.js';
-import { getCacheDir } from '../../../core/paths/paths.js';
+import { saveCache } from '../../../core/cacheManager/index.js';
+import { getCacheDir } from '../../../core/paths/index.js';
 import type { CacheType } from '../../../types/cache.js';
 
 export interface CacheSetInput {

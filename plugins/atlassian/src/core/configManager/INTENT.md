@@ -38,9 +38,9 @@ Atlassian 설정 파일의 로드·저장·병합. user(플러그인 데이터 �
 
 ## Dependencies
 
-| 대상                                 | 이유                                       |
-| ------------------------------------ | ------------------------------------------ |
-| `../../types/`                       | `AtlassianConfig`, `AtlassianConfigSchema` |
-| `../../constants/`                   | `PLUGIN_DATA_DIR` user 레이어 루트         |
-| `@ogham/cross-platform/config-scope` | 레이어 좌표·읽기·쓰기·병합                 |
-| `../../lib/fileIo`                   | `readJson`, `writeJson`                    |
+| 대상                    | 이유                                       |
+| ----------------------- | ------------------------------------------ |
+| `../../types/`          | `AtlassianConfig`, `AtlassianConfigSchema` |
+| `../../constants/`      | `PLUGIN_DATA_DIR` user 레이어 루트         |
+| `@ogham/cross-platform` | 레이어 좌표·읽기·쓰기·병합                 |
+| `../../lib/fileIo`      | `readJson`, `writeJson`                    |

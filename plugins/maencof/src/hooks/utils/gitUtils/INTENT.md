@@ -16,7 +16,7 @@ vault 커밋용 git 프리미티브 — repo 판별, scope 기반 staging(민감
 
 ### Always do
 
-- `@ogham/cross-platform/spawn`의 spawnCli 경유 git 실행 (child_process 직접 사용 금지)
+- `@ogham/cross-platform`의 spawnCli 경유 git 실행 (child_process 직접 사용 금지)
 - staging pathspec에 SENSITIVE_EXCLUDE_PATH_SPECS 동반
 
 ### Ask first

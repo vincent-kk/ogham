@@ -11,4 +11,4 @@
 
 ## Hook boundary
 
-- 훅에서 구체 파일을 직접 import하는 것은 번들 격리를 위한 의도적 예외다. 외부 소비자용 entry-point 규칙을 이유로 훅 import를 배럴로 되돌리지 않는다.
+- 공유 패키지는 훅에서도 패키지 루트만 import하고 `sideEffects: false` 기반 tree-shaking을 번들 가드로 확인한다. Filid 내부 concrete import는 각 프랙털 경계를 따르며 공유 패키지 subpath 예외로 취급하지 않는다.

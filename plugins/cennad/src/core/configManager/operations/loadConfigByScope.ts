@@ -1,4 +1,4 @@
-import type { ConfigLayerPaths } from '@ogham/cross-platform/config-scope';
+import type { ConfigLayerPaths } from '@ogham/cross-platform';
 
 import type { Config } from '../../../types/index.js';
 import { configLayers } from '../utils/configLayers.js';

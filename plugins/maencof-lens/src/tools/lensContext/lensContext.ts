@@ -1,7 +1,7 @@
 import { handleKgContext } from "@ogham/maencof";
 import type { KgContextScope, KnowledgeGraph, SubLayer } from "@ogham/maencof";
 
-import { computeEffectiveLayers } from "../../filter/layerGuard/layerGuard.js";
+import { computeEffectiveLayers } from "../../filter/layerGuard/index.js";
 
 export interface LensContextInput {
   vault?: string;

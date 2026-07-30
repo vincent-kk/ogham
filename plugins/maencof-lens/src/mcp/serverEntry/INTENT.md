@@ -22,4 +22,4 @@ esbuild 진입점. config 루트를 해석하고 stdio 트랜스포트를 통해
 
 - 순환 의존성 도입
 - organ 경계를 넘는 직접 import
-- config 루트를 `process.cwd()` 로 폴백 (`@ogham/cross-platform/host-paths` 계약 위반)
+- config 루트를 `process.cwd()` 로 폴백 (`@ogham/cross-platform` 계약 위반)

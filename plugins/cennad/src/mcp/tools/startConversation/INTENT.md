@@ -41,7 +41,7 @@
 
 - `../../../core/sessionStore` — `createSession` (세션 메타 영속화)
 - `../../../core/counterManager` — `incrementCounter` (제공자별 호출 횟수 증가)
-- `../../../core/projectHash` — cwd 기반 프로젝트 식별자 (cwd 는 `@ogham/cross-platform/host-paths` 의 `projectRoot(input.project_root)` 로 해석)
+- `../../../core/projectHash` — cwd 기반 프로젝트 식별자 (cwd 는 `@ogham/cross-platform` 의 `projectRoot(input.project_root)` 로 해석)
 - `../../../core/configManager` — `loadConfig` (ratio/preamble/recency_factor/option_flags/default_tier/artifacts 등 조회; tier 생략 시 `default_tier[provider]` fallback, `options` 는 항상 `{}`)
 - `../../../dispatcher` — `dispatchers` (공급자별 CLI 호출), `buildResponse` (envelope 생성)
 - `../../../types` — `ConversationResponse`, `Provider`, `Tier`, `ConversationOptions`

@@ -3,8 +3,8 @@ import { rmSync } from 'node:fs';
 import {
   assertNoSymlinkDescendantsSync,
   removeFileIfExistsSync,
-} from '@ogham/cross-platform/filesystem';
-import { resolveContainedPath } from '@ogham/cross-platform/paths';
+  resolveContainedPath,
+} from '@ogham/cross-platform';
 
 import {
   REVIEW_STATE_STALE_ARTIFACT_DIRECTORY_NAMES,

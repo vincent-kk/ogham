@@ -1,4 +1,4 @@
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+import { spawnCliSync } from '@ogham/cross-platform';
 
 import { createLogger } from '../../../../lib/logger.js';
 

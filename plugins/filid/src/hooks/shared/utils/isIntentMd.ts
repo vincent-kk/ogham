@@ -1,4 +1,4 @@
-import { portableBasename } from '@ogham/cross-platform/compat/basename';
+import { portableBasename } from '@ogham/cross-platform';
 
 import { INTENT_MD } from '../../../constants/documentFiles.js';
 

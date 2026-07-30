@@ -14,17 +14,18 @@
 
 ## API Contracts
 
-세 개의 진입점을 `package.json` `exports` 로 낸다. 소비자는 필요한 표면만 잡는다.
+외부 소비자는 `@ogham/cross-platform` 패키지 루트 하나에서 이 fractal의 공개
+심볼을 가져온다. `index.ts`, `merge/`, `layers/`의 중간 배럴은 패키지 내부 조직과
+루트 재노출을 위해 남아 있으며 `package.json`의 별도 공개 주소가 아니다.
 
-| Subpath                              | 노출                                                                                                                                                        |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@ogham/cross-platform/config-scope` | `resolveConfigLayers`·`readConfigLayers`·`writeConfigLayer`·`buildConfigScopeState`·`mergeConfigLayers`·`listOverriddenPaths`·`clearConfigPaths` + 타입 5종 |
-| `.../config-scope/merge`             | 위 병합 3종 + `stripForbiddenKeys`·`FORBIDDEN_KEYS`·`isPlainObject` (자세한 계약은 `merge/DETAIL.md`)                                                       |
-| `.../config-scope/layers`            | 위 레이어 4종 (자세한 계약은 `layers/DETAIL.md`)                                                                                                            |
+- 레이어 4종 — `resolveConfigLayers`·`readConfigLayers`·`writeConfigLayer`·`buildConfigScopeState`
+- 병합 6종 — `mergeConfigLayers`·`listOverriddenPaths`·`clearConfigPaths`·
+  `stripForbiddenKeys`·`FORBIDDEN_KEYS`·`isPlainObject`
+- 타입 5종 — `ConfigScope`·`ConfigLayerPaths`·`ConfigLayerDocuments`·
+  `ConfigScopeState`·`ResolveConfigLayersOptions`
 
-`stripForbiddenKeys`·`FORBIDDEN_KEYS`·`isPlainObject` 는 `merge` subpath에만
-있다. 형제 fractal `layers/` 가 소비하므로 그 자리에 정당하며, 이 배럴이나 패키지
-루트로는 올리지 않는다 — 그 위에는 소비자가 없다.
+`stripForbiddenKeys`·`FORBIDDEN_KEYS`·`isPlainObject` 는 기존 공개 계약을 유지하기
+위해 패키지 루트에서도 재노출한다. 소비처 없는 export 정리는 별도 후속 작업이다.
 
 ```ts
 type ConfigScope = "user" | "project";
@@ -55,10 +56,11 @@ type ConfigScopeState = {
 - 읽기와 병합 사이에 낄 단계가 없는 소비자는 `buildConfigScopeState` 하나를
   부른다.
 
-### SCOPE-2 — 번들 경계가 subpath로 갈린다
+### SCOPE-2 — 루트 import가 번들 경계를 지킨다
 
-- 브라우저 설정 페이지 번들과 훅 번들은 `config-scope/merge` 만 import한다.
-  루트 배럴은 파일 I/O와 `env-paths` 그래프를 끌어온다.
+- 브라우저 설정 페이지와 훅은 패키지 루트에서 필요한 심볼만 import한다.
+- 패키지의 `sideEffects: false`와 emitted-byte·출력 금지 패턴 가드가 비기여
+  재노출 그래프가 최종 번들에 남지 않음을 확인한다.
 - `merge` 하위에는 node 내장 import가 없다. `merge/__tests__/pureImports.test.ts`
   가 이를 회귀로 고정한다.
 
@@ -72,5 +74,5 @@ type ConfigScopeState = {
 
 ## Last Updated
 
-2026-07-29 — 세 subpath의 공개 표면을 이 문서로 확정하고,
-`FORBIDDEN_KEYS`·`isPlainObject` 를 `merge` subpath 전용으로 되돌렸다.
+2026-07-30 — 외부 공개 주소를 패키지 루트로 통합하고 기존 병합 심볼 계약을
+그 루트에서 유지했다.

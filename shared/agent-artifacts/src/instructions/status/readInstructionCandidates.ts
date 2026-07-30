@@ -1,6 +1,8 @@
-import { readUtf8FileIfExistsSync } from "@ogham/cross-platform/filesystem";
-import { readSection } from "@ogham/cross-platform/instructions";
-import { samePath } from "@ogham/cross-platform/paths";
+import {
+  readUtf8FileIfExistsSync,
+  readSection,
+  samePath,
+} from "@ogham/cross-platform";
 
 import { resolveInstructionMarkers } from "../helpers/resolveInstructionMarkers.js";
 import type {

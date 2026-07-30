@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import type { Server } from "node:http";
 
-import { generateToken } from "@ogham/http-kit/token";
+import { generateToken } from "@ogham/http-kit";
 
 import type { SetupServerHandle } from "../../../../types/index.js";
 import { createRouteHandler } from "./routing/routes.js";

@@ -2,14 +2,14 @@
  * @file manifestGet.ts
  * @description Load manifest with summary
  */
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import {
   getImplementPlanSummary,
   getManifestSummary,
   loadManifest,
-} from '../../../core/manifestParser/manifestParser.js';
-import { getRunDir } from '../../../core/paths/paths.js';
+} from '../../../core/manifestParser/index.js';
+import { getRunDir } from '../../../core/paths/index.js';
 
 export interface ManifestGetInput {
   project_ref: string;

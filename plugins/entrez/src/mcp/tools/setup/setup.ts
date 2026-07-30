@@ -1,4 +1,4 @@
-import { openBrowser } from "@ogham/cross-platform/launcher";
+import { openBrowser } from "@ogham/cross-platform";
 
 import type {
   SetupParams,

@@ -1,6 +1,5 @@
-import { projectRoot } from "@ogham/cross-platform/host-paths";
+import { projectRoot, openBrowser } from "@ogham/cross-platform";
 
-import { openBrowser } from "@ogham/cross-platform/launcher";
 import { ensureHttpServer } from "../../httpServer/index.js";
 
 export interface OpenSettingsInput {

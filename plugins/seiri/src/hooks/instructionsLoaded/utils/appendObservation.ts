@@ -1,7 +1,6 @@
 import { appendFileSync, mkdirSync, statSync, truncateSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform/compat/join';
-import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
+import { pluginCache, portableJoin } from '@ogham/cross-platform';
 
 import { OBSERVATION_LOG } from '../../../constants/files.js';
 import { PLUGIN_NAME } from '../../../constants/plugin.js';

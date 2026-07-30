@@ -42,4 +42,4 @@ utils/     organ — hashCommand · resolveSignalsPath · isWorkflowSignal · ac
 
 ## Dependencies
 
-- `../utils/`, `../../constants/`, `@ogham/cross-platform/compat`
+- `../utils/`, `../../constants/`, `@ogham/cross-platform`

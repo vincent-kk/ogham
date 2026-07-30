@@ -1,8 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { mergeConfigLayers } from '@ogham/cross-platform/config-scope/merge';
-import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
+import { mergeConfigLayers, pluginCache } from '@ogham/cross-platform';
 
 import { findConfigRoot } from './findConfigRoot.js';
 

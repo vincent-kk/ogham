@@ -6,7 +6,7 @@
 
 ## Structure
 
-- `configLoader/` — 다이얼 2계층 (`config.json` 기준선 + `runtime.json` 밸브)
+- `configLoader/` — 다이얼 3계층 (user `config.json` + 프로젝트 `.seiri/config.json` + `runtime.json` 밸브)
 - `index.ts` — barrel
 
 ## Conventions

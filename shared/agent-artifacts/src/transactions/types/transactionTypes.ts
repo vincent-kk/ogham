@@ -1,4 +1,4 @@
-import type { FileLockOptions } from "@ogham/cross-platform/filesystem";
+import type { FileLockOptions } from "@ogham/cross-platform";
 
 export interface FileChange {
   readonly targetPath: string;

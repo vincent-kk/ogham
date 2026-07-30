@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform/compat/join';
+import { portableJoin } from '@ogham/cross-platform';
 
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {

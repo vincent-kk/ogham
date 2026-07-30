@@ -1,15 +1,13 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 
 import {
-  readUtf8FileIfExistsSync,
-  writeFileAtomicallySync,
-} from '@ogham/cross-platform/filesystem';
-import {
   portableJoin,
+  readUtf8FileIfExistsSync,
   resolveContainedPath,
+  spawnCliSync,
   tmp,
-} from '@ogham/cross-platform/paths';
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+  writeFileAtomicallySync,
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {

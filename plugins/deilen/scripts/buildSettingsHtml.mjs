@@ -5,6 +5,7 @@
  * mcp/httpServer. Mirrors buildViewerHtml.mjs.
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { builtinModules } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,6 +23,11 @@ const css = (
   await esbuild.transform(cssSource, { loader: "css", minify: true })
 ).code.trim();
 
+// Root barrels are side-effect-free; resolve unused Node re-exports as externals so browser tree-shaking can remove them.
+const nodeExternals = [
+  ...builtinModules,
+  ...builtinModules.map((name) => `node:${name}`),
+];
 const bundled = await esbuild.build({
   entryPoints: [join(pageDir, "scripts/app.js")],
   bundle: true,
@@ -30,6 +36,7 @@ const bundled = await esbuild.build({
   target: "es2020",
   minify: true,
   write: false,
+  external: nodeExternals,
 });
 const js = bundled.outputFiles[0].text.trim();
 

@@ -37,5 +37,5 @@
 
 ## Dependencies
 
-- `@ogham/http-kit/{guard,token,body,html,response}` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
+- `@ogham/http-kit` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
 - `../../../../types/setup` · `../../../../constants/defaults`(`SETUP_AUTO_SHUTDOWN_MS`)

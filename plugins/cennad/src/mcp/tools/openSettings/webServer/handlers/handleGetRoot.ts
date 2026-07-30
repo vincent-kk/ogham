@@ -1,6 +1,6 @@
 import type { ServerResponse } from 'node:http';
 
-import { escapeJsonForHtml } from '@ogham/http-kit/html';
+import { escapeJsonForHtml } from '@ogham/http-kit';
 
 import type { RouteContext } from '../routing/routeContext.js';
 

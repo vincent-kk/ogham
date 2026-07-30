@@ -4,7 +4,7 @@ import type { ServerResponse } from "node:http";
 import { extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { sendJson } from "@ogham/http-kit/response";
+import { sendJson } from "@ogham/http-kit";
 
 import { DISPLAY_IMAGE_MIME_BY_EXT } from "../../../constants/defaults.js";
 import {

@@ -1,5 +1,4 @@
-import { requireAbsoluteRoot } from "@ogham/cross-platform/host-paths";
-import { portableDirname } from "@ogham/cross-platform/paths";
+import { requireAbsoluteRoot, portableDirname } from "@ogham/cross-platform";
 
 import type {
   CreateResolvedInstructionSectionManagerOptions,

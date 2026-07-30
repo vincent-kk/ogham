@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import {
   portableDirname as dirname,
   portableJoin as join,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { createAdapterRegistry } from '../../../adapters/index.js';

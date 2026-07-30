@@ -3,5 +3,5 @@ export {
   toolError,
   mapReplacer,
   wrapHandler,
-} from "./toolResponse.js";
-export { buildFetchContext } from "./buildFetchContext.js";
+} from "./helpers/toolResponse.js";
+export { buildFetchContext } from "./helpers/buildFetchContext.js";

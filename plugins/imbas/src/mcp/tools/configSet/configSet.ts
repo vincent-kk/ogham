@@ -2,13 +2,13 @@
  * @file configSet.ts
  * @description Update config.json fields
  */
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import {
   applyConfigUpdates,
   loadConfig,
   saveConfig,
-} from '../../../core/configManager/configManager.js';
+} from '../../../core/configManager/index.js';
 
 export interface ConfigSetInput {
   updates: Record<string, unknown>;

@@ -16,4 +16,4 @@ Claude Code 플러그인 모노레포. 사용자용 카탈로그는 [README.md](
 
 - `agents/`는 런타임이 자동 발견한다. 원본 `.claude-plugin/plugin.json`에도 `agents` 필드를 추가하지 않는다.
 - agent·skill의 MCP 참조는 `mcp__plugin_<plugin>_tools__<tool>` 전체 이름을 쓴다. `mcp_tools_*` 축약형은 서브에이전트의 도구 grant에서 해석되지 않는다.
-- 훅 도달 코드는 배럴을 거치지 않고 구체 파일을 직접 import한다. esbuild가 배럴의 전체 재노출 그래프를 끌어오며 typecheck가 번들 비대를 잡지 못하므로, 훅 변경 뒤 패키지의 번들 크기·금지 모듈 가드를 실행한다.
+- 공유 패키지는 훅에서도 패키지 루트만 import한다. 각 패키지의 `sideEffects: false`가 비기여 재노출을 제거하며, 플러그인 내부 모듈은 기존 concrete 경계를 유지한다. 훅 변경 뒤에는 번들 크기·출력 금지 패턴 가드를 실행한다.

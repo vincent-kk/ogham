@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-import { parseEspell } from "../espell.js";
-import { parseOa } from "../oaService.js";
+import { parseEspell } from "../operations/espell.js";
+import { parseOa } from "../operations/oaService.js";
 import { OaStatus } from "../../../types/enums.js";
 import {
   ESPELL_XML,

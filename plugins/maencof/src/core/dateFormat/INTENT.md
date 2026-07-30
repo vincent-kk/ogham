@@ -6,8 +6,8 @@
 
 ## Structure
 
-- `index.ts` — barrel (공개 API: formatDate/formatTime)
-- `operations/` organ — 포맷 순수 함수 (formatDate/formatTime, 함수 1개/파일)
+- `index.ts` — barrel (공개 API: formatDate/formatTime/isDateInWindow)
+- `operations/` organ — 포맷·구간 판정 순수 함수 (formatDate/formatTime/isDateInWindow, 함수 1개/파일)
 
 ## Boundaries
 

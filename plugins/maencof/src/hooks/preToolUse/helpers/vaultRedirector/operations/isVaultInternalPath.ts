@@ -4,10 +4,12 @@
  */
 import { isAbsolute } from 'node:path';
 
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
-import { portableResolve } from '@ogham/cross-platform/compat/resolve';
-import { normalize } from '@ogham/cross-platform/paths/normalize';
-import { portableRelative } from '@ogham/cross-platform/paths/relative';
+import {
+  normalize,
+  pathForCompare,
+  portableRelative,
+  portableResolve,
+} from '@ogham/cross-platform';
 
 import { INTERNAL_DIRS } from './internalDirs.js';
 

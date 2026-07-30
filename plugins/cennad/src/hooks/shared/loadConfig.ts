@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { mergeConfigLayers } from '@ogham/cross-platform/config-scope/merge';
+import { mergeConfigLayers } from '@ogham/cross-platform';
 
 import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 

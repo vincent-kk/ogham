@@ -1,5 +1,4 @@
-import { normalize } from '@ogham/cross-platform/paths/normalize';
-import { portableRelative } from '@ogham/cross-platform/paths/relative';
+import { normalize, portableRelative } from '@ogham/cross-platform';
 
 import { PORTABLE_PATH_MARKERS } from '../../../../../constants/pathMarkers.js';
 import { readBoundary } from '../../../../../core/infra/cacheManager/caches/boundaryCache.js';

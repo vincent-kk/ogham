@@ -4,19 +4,20 @@ Windows/POSIX path 문자열을 현재 실행 OS와 독립적으로 판별, 조�
 
 ## Structure
 
-| File                  | Role                          |
-| --------------------- | ----------------------------- |
-| `index.ts`            | public barrel                 |
-| `operations/`         | 목적별 portable 연산 organ    |
-| `portable-*.ts`       | basename/dirname/join adapter |
-| `path-for-compare.ts` | 비교용 separator/case 정규화  |
-| `same-path.ts`        | path 동등성 비교              |
-| `api-for.ts`          | 내부 path API 선택 helper     |
+| File                | Role                                   |
+| ------------------- | -------------------------------------- |
+| `index.ts`          | public barrel                          |
+| `operations/`       | 목적별 portable 연산 organ             |
+| `portable*.ts`      | basename/dirname/join/resolve/relative |
+| `pathForCompare.ts` | 비교용 separator/case 정규화           |
+| `samePath.ts`       | path 동등성 비교                       |
+| `is*LikePath.ts`    | Windows/POSIX 플레이버 판별            |
+| `apiFor.ts`         | 내부 path API 선택 helper              |
 
 ## Conventions
 
 - public 함수는 파일당 하나만 둔다.
-- `api-for.ts`는 내부 helper이며 barrel export 하지 않는다.
+- `apiFor.ts`는 내부 helper이며 barrel export 하지 않는다.
 - 명시적 플레이버 신호(드라이브 레터, UNC, POSIX absolute) 가 있는 입력은 host 와 무관하게 `path.win32` / `path.posix` 로 결정적 처리.
 - 신호가 없는 상대 경로는 host CWD 보간이 필요하므로 native `path` 로 위임 — 결과 separator 는 host-dependent.
 

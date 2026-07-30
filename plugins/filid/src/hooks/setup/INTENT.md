@@ -42,7 +42,7 @@
 
 ## Dependencies
 
-- `@ogham/cross-platform/{self-probe/hook,error-log/path,error-log/write}`
+- `@ogham/cross-platform`
 - `../../core/infra/cacheManager/` (`getCacheDir`, `removeSessionFiles`, prune 게이트/실행기 일체)
 - `../../lib/logger.js` (`createLogger`, `setLogDir`)
 - `../../constants/scanDefaults.js` (`SCAN_SKIP_DIRS`), `../../constants/documentFiles.js` (`INTENT_MD`)

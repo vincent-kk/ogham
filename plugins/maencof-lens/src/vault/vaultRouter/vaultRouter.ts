@@ -1,7 +1,7 @@
 import type {
   LensConfig,
   VaultConfig,
-} from "../../config/configSchema/configSchema.js";
+} from "../../config/configSchema/index.js";
 
 /**
  * Multi-vault name→config resolution.

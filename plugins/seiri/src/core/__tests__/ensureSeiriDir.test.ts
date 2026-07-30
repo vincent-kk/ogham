@@ -9,7 +9,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { UNTRACKED_CONFIG_FILES } from '../../constants/files.js';

@@ -1,5 +1,4 @@
-import { resolveHostDescriptor } from '@ogham/cross-platform/host-registry/descriptor';
-import { HOSTS } from '@ogham/cross-platform/host-registry/hosts';
+import { HOSTS, resolveHostDescriptor } from '@ogham/cross-platform';
 
 import type { HookProvider } from './providerOrder.js';
 

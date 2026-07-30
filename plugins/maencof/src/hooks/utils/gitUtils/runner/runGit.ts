@@ -2,8 +2,7 @@
  * @file runGit.ts
  * @description Run git, retrying with backoff while another process holds .git/index.lock.
  */
-import type { SpawnResult } from '@ogham/cross-platform/spawn';
-import { spawnCli } from '@ogham/cross-platform/spawn';
+import { type SpawnResult, spawnCli } from '@ogham/cross-platform';
 
 import {
   GIT_EXEC_TIMEOUT_MS,

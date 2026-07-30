@@ -1,4 +1,4 @@
-import type { ArtifactApplyResult } from '@ogham/agent-artifacts/transactions';
+import type { ArtifactApplyResult } from '@ogham/agent-artifacts';
 
 import type { RuleDocSyncResult, RuleDocsManifest } from './manifestTypes.js';
 

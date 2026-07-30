@@ -17,7 +17,7 @@
 
 - npm publish 금지 (`private: true`); 소비자 `devDependencies` 에 `workspace:^` 로만.
 - esbuild inline 전제 → 소비자 `external` 배열에 본 패키지를 넣지 말 것.
-- 소비는 서브패스 deep import (`@ogham/http-kit/body` 등), 루트 배럴 경유 지양.
+- 소비자는 `@ogham/http-kit` 패키지 루트만 import한다.
 - 검증 순서는 loopback host → token → POST origin → POST content-type.
 - 토큰 비교는 항상 `verifyToken`의 timing-safe 비교를 사용.
 - `parseBody` 는 선언 길이 + 수신 바이트를 검사하고 초과 시 배수 후 reject.

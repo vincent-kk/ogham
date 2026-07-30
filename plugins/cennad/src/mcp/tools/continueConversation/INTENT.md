@@ -42,7 +42,7 @@
 - `../../../core/sessionStore` — `getSession`, `updateSession`
 - `../../../core/counterManager` — `incrementCounter`
 - `../../../core/projectHash` — `getProjectHash`
-- `@ogham/cross-platform/host-paths` — `projectRoot` (세션 조회용 프로젝트 루트 해석)
+- `@ogham/cross-platform` — `projectRoot` (세션 조회용 프로젝트 루트 해석)
 - `../../../dispatcher` — `dispatchers`, `buildResponse` (`envelope.js`)
 - `../../../types` — `ConversationResponse`
 - `../../../utils/isoNow.ts` — `isoNow`

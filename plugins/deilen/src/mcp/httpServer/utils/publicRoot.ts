@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { pluginRoot } from "@ogham/cross-platform/host-paths";
+import { pluginRoot } from "@ogham/cross-platform";
 
 let cached: string | null = null;
 

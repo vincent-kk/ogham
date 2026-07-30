@@ -1,6 +1,5 @@
-import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts/rules/status';
-import type { ConfigScope } from '@ogham/cross-platform/config-scope';
-import { resolveContainedPath } from '@ogham/cross-platform/paths/contained';
+import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts';
+import { type ConfigScope, resolveContainedPath } from '@ogham/cross-platform';
 
 import { createLogger } from '../../../../lib/logger.js';
 import { resolvePluginRoot } from '../utils/resolvePluginRoot.js';

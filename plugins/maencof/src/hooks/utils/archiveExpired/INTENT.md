@@ -12,7 +12,7 @@ MCP bootSweep 관심사. L4 `04_Action/` 의 아카이브 불변식을 매 부�
 
 ## Conventions
 
-- 훅 번들 격리: Node builtin(`node:fs/promises`·`node:path`), tree-shake 가능한 `@ogham/cross-platform/paths`(`normalize`), core 순수 함수 `documentParser/operations/extractLinks`(위키링크 파싱 정본)만 사용. zod·fast-glob 미의존 — 경량 자체 구현.
+- 훅 번들 격리: Node builtin(`node:fs/promises`·`node:path`), tree-shake 가능한 `@ogham/cross-platform`(`normalize`), core 순수 함수 `documentParser/operations/extractLinks`(위키링크 파싱 정본)만 사용. zod·fast-glob 미의존 — 경량 자체 구현.
 - `operations/`·`utils/` concrete 파일 직접 import (배럴 없음)
 - 대상은 `04_Action` 구조만 — archive 하위 `digested/`·`harvested/`·`legacy-l3-cve/` 제외
 

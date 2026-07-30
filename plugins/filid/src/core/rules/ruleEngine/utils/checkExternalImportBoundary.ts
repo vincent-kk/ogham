@@ -3,7 +3,7 @@ import {
   portableIsAbsolute,
   portableRelative,
   samePath,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 import type {
   FractalNode,

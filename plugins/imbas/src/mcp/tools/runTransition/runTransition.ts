@@ -2,14 +2,14 @@
  * @file runTransition.ts
  * @description Typed phase transition (start/complete/escape)
  */
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
-import { getRunDir } from '../../../core/paths/paths.js';
+import { getRunDir } from '../../../core/paths/index.js';
 import {
   applyTransition,
   loadRunState,
   saveRunState,
-} from '../../../core/stateManager/stateManager.js';
+} from '../../../core/stateManager/index.js';
 import {
   type RunTransition,
   RunTransitionSchema,

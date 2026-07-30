@@ -33,4 +33,4 @@
 ## Dependencies
 
 - `../../../core/configManager` — `loadConfig`·`applyConfigUpdates`·`saveConfig`
-- `@ogham/cross-platform/host-paths` — `projectRoot`
+- `@ogham/cross-platform` — `projectRoot`

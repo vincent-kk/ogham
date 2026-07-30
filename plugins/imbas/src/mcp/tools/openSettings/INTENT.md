@@ -23,7 +23,7 @@
 
 ### Always do
 
-- 프로젝트 루트는 `@ogham/cross-platform/host-paths` 의 `projectRoot(project_root?)` 로 해석
+- 프로젝트 루트는 `@ogham/cross-platform` 의 `projectRoot(project_root?)` 로 해석
 - 저장은 반드시 `core/configManager` 의 `saveConfig` 를 경유 (스키마 검증 후)
 
 ### Ask first
@@ -39,4 +39,4 @@
 ## Dependencies
 
 - `../../../core/configManager` — `loadConfig`, `saveConfig`; `../../../types/settings.js` — 페이지 계약 스키마/타입 (Zod 는 types/ 에만 — imbas src 규약)
-- `@ogham/cross-platform/{host-paths,launcher}`, `@ogham/http-kit/{guard,token}`
+- `@ogham/cross-platform`, `@ogham/http-kit`

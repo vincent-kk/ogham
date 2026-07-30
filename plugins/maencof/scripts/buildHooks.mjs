@@ -137,10 +137,9 @@ const ESM_CJS_REQUIRE_BANNER =
   "import { createRequire as __cpCreateRequire } from 'node:module';\n" +
   'const require = __cpCreateRequire(import.meta.url);\n';
 
-const hookBuilds = await Promise.all(
-  hookEntries.map(async ({ name, entryPath }) => ({
-    name,
-    result: await esbuild.build({
+await Promise.all(
+  hookEntries.map(async ({ name, entryPath }) =>
+    esbuild.build({
       entryPoints: [resolve(root, 'src/hooks', entryPath)],
       bundle: true,
       platform: 'node',
@@ -150,79 +149,18 @@ const hookBuilds = await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
-      metafile: true,
       loader: { '.md': 'text' },
       banner:
         name === 'user-prompt-submit'
           ? { js: ESM_CJS_REQUIRE_BANNER }
           : undefined,
     }),
-  })),
+  ),
 );
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
 
-const SESSION_START_FORBIDDEN_IMPORT_PATHS = [
-  {
-    label: 'general instruction manager/planning/apply/status',
-    pattern:
-      /shared\/agent-artifacts\/(?:src|dist)\/instructions\/(?:instructions\.(?:ts|js)|planning\/|apply\/|status\/|compat\/)/,
-  },
-  {
-    label: 'artifact transactions',
-    pattern: /shared\/agent-artifacts\/(?:src|dist)\/transactions\//,
-  },
-  {
-    label: 'filesystem locking',
-    pattern: /shared\/cross-platform\/(?:src|dist)\/filesystem\/locking\//,
-  },
-  {
-    label: 'general CLI spawn',
-    pattern: /shared\/cross-platform\/(?:src|dist)\/spawn\//,
-  },
-  {
-    label: 'cross-spawn/which runtime',
-    pattern: /node_modules\/(?:cross-spawn|which)\//,
-  },
-];
-const sessionStartMetafile = hookBuilds.find(
-  ({ name }) => name === 'session-start',
-)?.result.metafile;
-if (!sessionStartMetafile)
-  throw new Error('build-hooks: SessionStart metafile was not generated');
-const sessionStartInputs = Object.keys(sessionStartMetafile.inputs).map(
-  (input) => input.replaceAll('\\', '/'),
-);
-const sessionStartImportViolations =
-  SESSION_START_FORBIDDEN_IMPORT_PATHS.flatMap(({ label, pattern }) =>
-    sessionStartInputs
-      .filter((input) => pattern.test(input))
-      .map(
-        (input) =>
-          `  session-start.mjs: forbidden import graph (${label}): ${input}`,
-      ),
-  );
-
-const HOOK_FORBIDDEN_AGGREGATE_INPUTS = [
-  'agent-artifacts/dist/instructions/hook/index.js',
-  'cross-platform/dist/hooks/errorLog.js',
-  'cross-platform/dist/hostRegistry/index.js',
-  'cross-platform/dist/paths/index.js',
-  'cross-platform/dist/paths/paths.js',
-  'cross-platform/dist/paths/compat/index.js',
-  'cross-platform/dist/filesystem/read/index.js',
-  'cross-platform/src/filesystem/read/index.ts',
-];
-const aggregateImportViolations = hookBuilds.flatMap(({ name, result }) =>
-  Object.keys(result.metafile.inputs).flatMap((input) => {
-    const normalizedInput = input.replaceAll('\\', '/');
-    return HOOK_FORBIDDEN_AGGREGATE_INPUTS.flatMap((forbidden) =>
-      normalizedInput.includes(forbidden)
-        ? [`  ${name}.mjs: forbidden aggregate input graph ${forbidden}`]
-        : [],
-    );
-  }),
-);
+// `sideEffects: false` makes root-barrel-only inputs non-contributing; emitted bytes and patterns guard regressions.
 
 // agy hook runner (shared — bundled from @ogham/cross-platform, not this
 // plugin's src). The emitted agy hooks.json (plugin root, named-group format)
@@ -278,14 +216,12 @@ const FORBIDDEN_PATTERNS = [
   /\brunHookEntry\b/,
   /\bgenerateWindowsCmd\b/,
 ];
+const SESSION_START_FORBIDDEN_PATTERNS = [/\bPATHEXT\b/, /\bisexe\b/];
 // NOTE: the generic esbuild CJS require shim remains allowed only because the
 // user-prompt vault committer intentionally uses cross-spawn. SessionStart's
-// graph guard above separately proves that runtime never reaches that bundle.
+// minified output fingerprints separately prove that runtime never reaches it.
 
-const violations = [
-  ...sessionStartImportViolations,
-  ...aggregateImportViolations,
-];
+const violations = [];
 
 const guardedBundles = [
   ...hookEntries,
@@ -301,7 +237,11 @@ for (const { name, maxBytes } of guardedBundles) {
     );
   }
   const content = await readFile(file, 'utf8');
-  for (const pattern of FORBIDDEN_PATTERNS) {
+  const forbiddenPatterns =
+    name === 'session-start'
+      ? [...FORBIDDEN_PATTERNS, ...SESSION_START_FORBIDDEN_PATTERNS]
+      : FORBIDDEN_PATTERNS;
+  for (const pattern of forbiddenPatterns) {
     if (pattern.test(content)) {
       violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
     }

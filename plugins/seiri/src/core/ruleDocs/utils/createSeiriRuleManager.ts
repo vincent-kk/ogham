@@ -1,7 +1,7 @@
 import {
   type RuleDocumentManager,
   createRuleDocumentManager,
-} from '@ogham/agent-artifacts/rules';
+} from '@ogham/agent-artifacts';
 
 import type { SeiriConfigScope } from '../../../types/config.js';
 

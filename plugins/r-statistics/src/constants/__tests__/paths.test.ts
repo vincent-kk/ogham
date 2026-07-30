@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { resetProjectRoot } from "@ogham/cross-platform/host-paths";
+import { resetProjectRoot } from "@ogham/cross-platform";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {

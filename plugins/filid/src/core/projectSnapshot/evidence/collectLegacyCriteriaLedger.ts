@@ -1,5 +1,8 @@
-import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem/read/utf8';
-import { portableJoin, portableResolve } from '@ogham/cross-platform/paths';
+import {
+  portableJoin,
+  portableResolve,
+  readUtf8FileIfExistsSync,
+} from '@ogham/cross-platform';
 
 import { DETAIL_MD } from '../../../constants/documentFiles.js';
 import { LEGACY_CRITERIA_LEDGER_PATH_COMPONENTS } from '../../../constants/legacyCriteriaLedger.js';

@@ -10,13 +10,13 @@
  * L4 archiveExpired(이동, 가역, 자동)와 대칭: L5는 알림, 비가역 처리는 사용자.
  *
  * **Hook isolation 준수**: hook 번들에 들어가므로 Node builtin과 tree-shake 가능한
- * `@ogham/cross-platform/paths`만 사용한다.
+ * `@ogham/cross-platform` 루트만 사용한다.
  * SessionStart concern은 동기이므로 readdirSync/readFileSync로 처리한다.
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { normalize } from '@ogham/cross-platform/paths/normalize';
+import { normalize } from '@ogham/cross-platform';
 
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 

@@ -1,5 +1,7 @@
-import { resolveConfigLayers } from '@ogham/cross-platform/config-scope';
-import type { ConfigLayerPaths } from '@ogham/cross-platform/config-scope';
+import {
+  type ConfigLayerPaths,
+  resolveConfigLayers,
+} from '@ogham/cross-platform';
 
 import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/files.js';
 import { findRepoRoot } from '../../../utils/findRepoRoot.js';

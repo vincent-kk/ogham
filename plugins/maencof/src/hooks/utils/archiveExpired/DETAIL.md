@@ -17,4 +17,4 @@
 - export: `runArchiveExpired(cwd: string): Promise<ArchiveExpiredResult>` — 정방향 후 역방향 백필을 순차 실행해 결과를 병합.
 - operations: `archiveExpiredForward(cwd, today): Promise<string[]>` (archived), `backfillMissingStubs(cwd, today): Promise<string[]>` (backfilled).
 - 독립 bridge 없음 — MCP `bootSweep` 이 vaultCommitter 앞에서 호출(이동·스텁·백필 결과를 그 커밋에 포함).
-- 의존: `isMaencofVault` (게이트), `operations/` (정방향·역방향 I/O), `utils/` (파싱·스텁 빌드), `core/documentParser/operations/extractLinks` (위키링크 파싱 정본 — concrete import), `@ogham/cross-platform/paths` (`normalize` — vault 상대 경로 separator 정규화). 그 외 Node builtin 뿐.
+- 의존: `isMaencofVault` (게이트), `operations/` (정방향·역방향 I/O), `utils/` (파싱·스텁 빌드), `core/documentParser/operations/extractLinks` (위키링크 파싱 정본 — concrete import), `@ogham/cross-platform` (`normalize` — vault 상대 경로 separator 정규화). 그 외 Node builtin 뿐.

@@ -3,7 +3,7 @@ import {
   pathForCompare,
   portableIsAbsolute,
   portableRelative,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 const PATH_TOKEN_CHARACTER = /[A-Za-z0-9_.-]/;
 

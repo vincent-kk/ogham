@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeEffectiveLayers,
   filterResultsByLayer,
-} from "../filter/layerGuard/layerGuard.js";
+} from "../filter/layerGuard/index.js";
 
 describe("computeEffectiveLayers", () => {
   it("returns vault layers when no tool filter", () => {

@@ -43,4 +43,4 @@
 ## Dependencies
 
 - `../../../core` (rRuntime·workspace·commandGate·jobStore), `../../../constants`, `../../../lib/atomicWrite`, `../../../types`, `../../../utils`
-- `@ogham/cross-platform/host-paths` (`rememberProjectRoot`)
+- `@ogham/cross-platform` (`rememberProjectRoot`)

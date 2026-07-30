@@ -46,7 +46,7 @@
 | Export                                     | Contract                                                                                           |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
 | `loadConfig(projectRoot)`                  | Baseline 계층만: `{ config \| null, path, warning? }`. 절대 throw 하지 않음.                       |
-| `loadIntervention(projectRoot)`            | 두 계층: `{ effective, source, baseline, runtime, warnings }`. 절대 throw 하지 않음.               |
+| `loadIntervention(projectRoot)`            | 세 계층: `{ effective, source, baseline, user, runtime, warnings }`. 절대 throw 하지 않음.         |
 | `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 쓴 경로를 반환.                           |
 | `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                   |
 | `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                 |
@@ -61,6 +61,31 @@
 
 범위 밖: 아키텍처 강제, 에이전트 오케스트레이션, 작업 분해, 지식 관리, 알림, 상태 표시, 코드 검색·분석 도구. seiri 가 소유하는 것은 컨텍스트 — 저장소의 진실도, 모델의 판단도 아니다.
 
+## Acceptance Criteria
+
+### AC-context-only — 소유 범위
+
+- 어떤 도구도 코드 읽기·검색·분석 기능을 노출하지 않는다.
+- 어떤 훅도 차단 결정을 반환하지 않는다.
+
+### AC-rule-body-not-injected — 규칙 본문 비주입
+
+- 훅 주입에 배포된 규칙 문서 본문이 복제되지 않는다. 이름과 상태만 나간다.
+
+### AC-dial-precedence — 다이얼 우선순위
+
+- 유효 다이얼이 `runtime ?? project ?? user ?? standard` 로 정해지고 출처가 함께 보고된다.
+- advisory 에서 SessionStart·SubagentStart·UserPromptSubmit 주입이 모두 침묵한다.
+
+### AC-deployment-consent — 배포 동의
+
+- 규칙 파일 쓰기가 사용자의 명시적 확인 뒤에만 일어난다.
+- 드리프트한 파일은 `resync` 에 id 가 명시될 때만 덮어쓰인다.
+
+### AC-tool-surface-fixed — 도구 표면
+
+- 등록 도구가 정확히 2개이며 새 요구는 기존 도구의 action 으로 흡수된다.
+
 ## Last Updated
 
-2026-07-27
+2026-07-30 — 계약을 검증 가능한 acceptance group 으로 명시하고 `loadIntervention` 의 계층 수를 실제(3계층)에 맞췄다.

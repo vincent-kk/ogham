@@ -1,6 +1,6 @@
 import { portableIsAbsolute } from "../compat/operations/portableIsAbsolute.js";
-import { portableRelative } from "../compat/portableRelative.js";
-import { portableResolve } from "../compat/portableResolve.js";
+import { portableRelative } from "../compat/operations/portableRelative.js";
+import { portableResolve } from "../compat/operations/portableResolve.js";
 
 export function resolveContainedPath(
   root: string,

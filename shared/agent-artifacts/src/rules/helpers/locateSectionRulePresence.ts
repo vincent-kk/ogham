@@ -1,8 +1,8 @@
-import { readUtf8FileIfExistsSync } from "@ogham/cross-platform/filesystem/read/utf8";
 import {
+  readUtf8FileIfExistsSync,
   readSection,
   sectionMarkers,
-} from "@ogham/cross-platform/instructions/read";
+} from "@ogham/cross-platform";
 
 import type { SectionArtifactTarget } from "../../targets/index.js";
 import type {

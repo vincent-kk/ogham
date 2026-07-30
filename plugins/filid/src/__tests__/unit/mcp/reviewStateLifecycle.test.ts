@@ -3,16 +3,14 @@ import { mkdtempSync, rmSync, symlinkSync } from 'node:fs';
 import {
   ensureDirectorySync,
   listDirectoryIfExistsSync,
-  readUtf8FileIfExistsSync,
-  writeFileAtomicallySync,
-} from '@ogham/cross-platform/filesystem';
-import {
   portableDirname,
   portableJoin,
+  readUtf8FileIfExistsSync,
   resolveContainedPath,
+  spawnCliSync,
   tmp,
-} from '@ogham/cross-platform/paths';
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+  writeFileAtomicallySync,
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {

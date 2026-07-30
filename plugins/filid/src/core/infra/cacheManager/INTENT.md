@@ -43,4 +43,4 @@ hook의 session, prompt context, boundary, turn-scoped fractal map과 INTENT del
 
 ## Dependencies
 
-- `@ogham/cross-platform`의 `compat/resolve`·`paths/plugin-cache` deep import, `constants/infraDefaults.ts`, `lib/logger.ts`, node 내장 `crypto`·`fs`·`path`
+- `@ogham/cross-platform` package root의 `portableResolve`·`pluginCache` named export (`sideEffects: false` tree-shaking; 훅 출력은 `scripts/buildHooks.mjs`의 emitted-byte cap·`FORBIDDEN_PATTERNS`로 검증), `constants/infraDefaults.ts`, `lib/logger.ts`, node 내장 `crypto`·`fs`·`path`

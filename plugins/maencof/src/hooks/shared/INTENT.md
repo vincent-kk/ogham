@@ -22,4 +22,4 @@
 
 ## Dependencies
 
-- `@ogham/agent-artifacts/instructions/hook/status`, `@ogham/agent-artifacts/targets/project/instructions`, `@ogham/cross-platform/host-registry/descriptor`.
+- `@ogham/agent-artifacts`, `@ogham/cross-platform`.

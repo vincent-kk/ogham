@@ -5,7 +5,7 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { generateRunId } from '../core/runIdGenerator/runIdGenerator.js';
+import { generateRunId } from '../core/runIdGenerator/index.js';
 
 const dirs: string[] = [];
 

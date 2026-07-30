@@ -14,7 +14,7 @@
  * inside an ignored directory. An unavailable git must never shrink what a
  * scan reports.
  */
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+import { spawnCliSync } from '@ogham/cross-platform';
 
 const LIST_IGNORED_ARGUMENTS = [
   'ls-files',

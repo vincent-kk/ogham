@@ -8,6 +8,8 @@
 - 하루 1커밋 정책: `fold_daily`(기본 true) 가 켜져 있으면 당일의 연속된 자동 커밋을 `git reset --soft` 로 하나로 접은 뒤 재커밋한다 (`helpers/foldDaily`). 수동 커밋은 폴딩 경계로 작동하며 절대 접지 않는다.
 - UserPromptSubmit 은 사용자의 프롬프트가 설정된 `skip_patterns` 중 하나와 매칭될 때만 트리거된다. 미설정 시 기본 패턴은 `/clear`.
 - 어떠한 경로에서도 서버 부팅 / 프롬프트 처리를 블록하지 않는다. 항상 `{ continue: true }` 반환.
+- 커밋은 `--no-verify` 로 한다. 이는 "훅을 건너뛰지 말 것"이라는 사용자 전역 원칙에 대한 명시적 예외이며 세 근거 위에 선다. (1) **재귀 차단** — 사용자의 pre-commit 훅이 vault 파일을 쓰거나 읽는 경우 vaultCommitter 가 그 훅을 실행시키면 훅이 다시 vault 를 고쳐 무한 루프가 된다. (2) **자동 커밋 의미 유지** — BootSweep / 프롬프트 트리거는 사용자가 손대지 않은 상태에서 발생하므로 pre-commit 이 대화형 입력을 요구하면 서버 부팅 경로가 막혀 background-job 보장이 깨진다. (3) **opt-in 봉쇄** — 기능 자체가 `enabled=true` 에서만 켜지므로 예외가 사용자 리포지토리 전체로 번지지 않는다.
+- `--no-verify` 를 떼려면 두 조건이 먼저 성립해야 한다 — vault 파일을 쓰지 않는 pre-commit 환경 보장, 그리고 사용자 훅이 vault 를 수정했는지 감지해 재귀를 끊는 loop-detector 구현.
 
 ## API Contracts
 
@@ -45,12 +47,36 @@
 - `.git/index.lock` 존재 시: mtime 이 `INDEX_LOCK_STALE_MS`(30분) 미만이면 live 로 존중해 skip, 초과면 stale(SIGKILL 절단 잔존)로 판정해 로그 기록 후 회수(unlink)하고 진행 — 절단 사고가 커밋 게이트를 영구 차단하지 못하게 한다. 회수 경합(동시 unlink)은 ENOENT 무시로 멱등, 이후 git 자체 lock 이 쓰기를 재직렬화. 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도. 잔여 리스크: 30분 초과 장기 수동 git 작업(중단된 rebase 등)은 오판 가능 — 로그로 추적.
 - 폴딩: HEAD 부터 당일+자동 커밋을 걷어 BASE 를 찾고, `git reset --soft BASE` → re-stage → commit. 자동 커밋 판정은 `AUTO_COMMIT_SUBJECT_MARKERS` includes 매칭(레거시 `*_session_wrap` 및 은퇴한 vault 로컬 스크립트의 subject 포함) + `message_template` 정적 접두부 startsWith 매칭. 재커밋 실패 시 `git reset --soft ORIG_HEAD` 로 복구. root 도달·탐색 상한(`FOLD_SCAN_MAX_COMMITS`) 초과 시 폴딩을 포기하고 일반 커밋한다.
 
-## Policy — `--no-verify` rationale (Y1 Option A, 승인 완료 2026-04-16)
+## Acceptance Criteria
 
-repo 소유자는 2026-04-16 자 Y1 정책 결정에서 **Option A — Keep `--no-verify`** 를 승인했다. 이 결정은 user-level global CLAUDE.md 의 "Never skip hooks" 기본 원칙에 대한 명시적 예외이며, 다음 근거에 기반한다:
+### AC-opt-in-only — opt-in 전용
 
-1. **재귀 루프 방지.** 사용자의 pre-commit hook 이 vault 파일 자체를 쓰거나 읽는 경우, vaultCommitter 가 pre-commit 을 실행시키면 그 hook 이 또다시 vault 를 수정해 무한 루프로 발전할 수 있다. `--no-verify` 는 이 경로의 재귀를 끊는다.
-2. **자동 커밋 의미 유지.** BootSweep / `/clear` 트리거는 사용자가 손을 대지 않은 상태에서 발생한다. pre-commit 이 대화형 입력을 요구하면 서버 부팅 경로가 블록될 수 있어 background-job 보장이 깨진다.
-3. **opt-in 전용.** 기능 자체가 `.maencof-meta/vault-commit.json::enabled=true` 에 의해서만 활성화되므로, 예외가 사용자 전체 리포지토리로 번지지 않는다.
+- `enabled` 가 true 가 아니면 커밋이 일어나지 않는다.
 
-이 결정을 되돌리려면 (a) vault 파일을 쓰지 않는 pre-commit 환경을 보장하고, (b) loop-detector (사용자 hook 이 vault 를 수정했는지 detect → 재귀 중단) 를 새로 구현한 뒤 본 훅에서 `--no-verify` 를 제거해야 한다.
+### AC-never-blocks — 비차단
+
+- 어떤 실패 경로에서도 `{ continue: true }` 를 반환한다.
+
+### AC-sensitive-exclude — 민감 경로 제외
+
+- 모든 staging 호출에 민감 exclude pathspec 이 동반된다.
+
+### AC-manual-commit-not-folded — 수동 커밋 보존
+
+- 수동 커밋은 폴딩 경계로 작동하고 접히지 않는다.
+
+## Boundary Exemptions
+
+### `operations` — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`
+- **Direct import**: `allowed`
+- **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. 배럴을 거치면 config 파싱·프롬프트 판별·커밋 오케스트레이션과 폴딩까지 전부 번들에 끌려 들어와 가드를 넘긴다 — UserPromptSubmit 은 43008 바이트 안에서 컨텍스트 주입까지 해야 한다.
+
+## History
+
+- 2026-04-16 — repo 소유자가 `--no-verify` 유지(Y1 Option A)를 승인했다. 대안은 사용자 pre-commit 훅을 그대로 태우는 것이었으나, vault 를 건드리는 훅이 재귀를 만들고 대화형 훅이 부팅 경로를 막는다는 점이 결정적이었다. 예외 범위는 opt-in 기능 안으로 한정하는 조건이 붙었다.
+
+## Last Updated
+
+2026-07-30 — 계약 절에 `--no-verify` 근거와 해제 조건을 두고, 승인 사실은 `## History` 로 옮겼다.

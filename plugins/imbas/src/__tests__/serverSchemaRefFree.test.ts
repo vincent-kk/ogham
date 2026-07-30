@@ -36,7 +36,7 @@ vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
 
 beforeAll(async () => {
   vi.resetModules();
-  const { createServer } = await import('../mcp/server/server.js');
+  const { createServer } = await import('../mcp/server/index.js');
   createServer();
 });
 

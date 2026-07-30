@@ -1,5 +1,5 @@
 import { parseMarkdownBlocks } from "../markdownParsing/parseBlocks.js";
-import { renderBlocksToWiki } from "./renderBlocks.js";
+import { renderBlocksToWiki } from "./operations/renderBlocks.js";
 
 export function markdownToWiki(markdown: string): string {
   if (!markdown) return "";

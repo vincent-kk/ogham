@@ -1,4 +1,4 @@
-import { readUtf8FileIfExistsSync } from "@ogham/cross-platform/filesystem";
+import { readUtf8FileIfExistsSync } from "@ogham/cross-platform";
 
 import type { SectionArtifactTarget } from "../../targets/index.js";
 import type { ArtifactRevision } from "../../types/artifacts.js";

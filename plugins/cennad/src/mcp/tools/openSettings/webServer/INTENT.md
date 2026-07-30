@@ -43,6 +43,6 @@
 ## Dependencies
 
 - `node:http`, `node:url`
-- `@ogham/http-kit/{guard,token,body,html,response}` (inspectRequest·generateToken·parseBody·escapeJsonForHtml·sendJson)
+- `@ogham/http-kit` (inspectRequest·generateToken·parseBody·escapeJsonForHtml·sendJson)
 - `../../../core/{configManager,youtubeMcp,agyModels,codexModels}` (loadConfig, saveConfig, provisionYoutube, 모델 카탈로그)
 - `../../../types/index.ts` (`ConfigSchema`)

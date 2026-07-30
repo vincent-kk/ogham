@@ -2,8 +2,8 @@
  * @file build.ts
  * @description Build the compressed XML turn context. stale 정보는 인덱서 내부 상태로 격리되어 노출하지 않는다.
  */
-import { readPinnedNodes } from '../cacheManager/operations/readPinnedNodes.js';
-import type { PinnedNode } from '../cacheManager/types/types.js';
+import { readPinnedNodes } from '../cacheManager/index.js';
+import type { PinnedNode } from '../cacheManager/index.js';
 
 import { buildCompanionIdentityTag } from './buildCompanionIdentityTag.js';
 import { readCompanionIdentity } from './readCompanionIdentity.js';

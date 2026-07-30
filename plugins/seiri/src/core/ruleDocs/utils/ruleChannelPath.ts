@@ -1,7 +1,7 @@
 import type {
   DirectoryRuleTarget,
   SectionArtifactTarget,
-} from '@ogham/agent-artifacts/targets';
+} from '@ogham/agent-artifacts';
 
 /**
  * Absolute path of the channel a resolved rule target writes into.

@@ -40,7 +40,7 @@ HTTP GET/POST/PUT/PATCH/DELETE를 통합 처리하는 MCP 툴 핸들러. ADF 자
 
 ## Dependencies
 
-- `@ogham/cross-platform/host-paths` — `rememberProjectRoot`
+- `@ogham/cross-platform` — `rememberProjectRoot`
 - `core/httpClient` — `executeRequest`
 - `types/index` — `FetchContext`, `McpResponse`, `FetchParams`, `AssetFetchParams`
 - `converter/index` — ADF/Storage/Wiki ↔ Markdown 변환 (utils 경유)

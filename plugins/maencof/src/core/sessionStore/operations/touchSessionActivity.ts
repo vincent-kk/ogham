@@ -7,7 +7,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 
 import type { SessionDayLog } from '../../../types/session.js';
-import { formatDate } from '../../dateFormat/operations/formatDate.js';
+import { formatDate } from '../../dateFormat/index.js';
 
 import { getSessionsDir } from './getSessionsDir.js';
 import { readDayLog } from './readDayLog.js';

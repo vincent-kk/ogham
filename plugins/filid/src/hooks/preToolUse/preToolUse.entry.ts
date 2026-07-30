@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { normalizeCodexToolUse } from '@ogham/cross-platform/codex-hooks';
-import { logHookFailure } from '@ogham/cross-platform/error-log/write';
+import { logHookFailure, normalizeCodexToolUse } from '@ogham/cross-platform';
 
 import { createLogger } from '../../lib/logger.js';
 import { readStdin } from '../../lib/stdin.js';

@@ -1,7 +1,4 @@
-import type {
-  ConfigScope,
-  ConfigScopeState,
-} from "@ogham/cross-platform/config-scope";
+import type { ConfigScope, ConfigScopeState } from "@ogham/cross-platform";
 
 import type { Config } from "../../../types/config.js";
 

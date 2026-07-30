@@ -5,7 +5,7 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { validateManifest } from '../core/manifestValidator/manifestValidator.js';
+import { validateManifest } from '../core/manifestValidator/index.js';
 import type { DevplanManifest, StoriesManifest } from '../types/manifest.js';
 
 const dirs: string[] = [];

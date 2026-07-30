@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
-import { portableResolve } from '@ogham/cross-platform/compat/resolve';
+import { portableResolve } from '@ogham/cross-platform';
 import { bench, describe } from 'vitest';
 
 const DIST_DIR = portableResolve(

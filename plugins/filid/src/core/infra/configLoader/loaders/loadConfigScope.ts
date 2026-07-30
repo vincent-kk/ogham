@@ -1,7 +1,7 @@
 import {
   type ConfigScopeState,
   buildConfigScopeState,
-} from '@ogham/cross-platform/config-scope';
+} from '@ogham/cross-platform';
 
 import { configLayers } from '../utils/configLayers.js';
 

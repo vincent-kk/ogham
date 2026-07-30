@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
 
-import { readFileIfExistsSync } from '@ogham/cross-platform/filesystem/read/bytes';
-import { pathForCompare, portableResolve } from '@ogham/cross-platform/paths';
+import {
+  pathForCompare,
+  portableResolve,
+  readFileIfExistsSync,
+} from '@ogham/cross-platform';
 
 import { normalizeSnapshotHashInput } from './normalizeSnapshotHashInput.js';
 import { resolveHashFile } from './resolveHashFile.js';

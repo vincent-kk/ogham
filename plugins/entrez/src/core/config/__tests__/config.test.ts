@@ -3,7 +3,7 @@ import { mkdtemp, rm, stat, writeFile, chmod } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { env } from "@ogham/cross-platform/env";
+import { env } from "@ogham/cross-platform";
 
 import { loadConfig } from "../operations/loadConfig.js";
 import { saveConfig } from "../operations/saveConfig.js";
@@ -22,12 +22,18 @@ afterEach(async () => {
 
 describe("config load/save", () => {
   it("returns null when config is absent (not configured)", async () => {
-    expect(await loadConfig({ user: join(dir, "config.json"), project: null })).toBeNull();
+    expect(
+      await loadConfig({ user: join(dir, "config.json"), project: null }),
+    ).toBeNull();
   });
 
   it("round-trips config with defaults applied", async () => {
     const p = join(dir, "config.json");
-    await saveConfig("user", { tool: "t", email: "e@x.com" }, { user: p, project: null });
+    await saveConfig(
+      "user",
+      { tool: "t", email: "e@x.com" },
+      { user: p, project: null },
+    );
     const cfg = await loadConfig({ user: p, project: null });
     expect(cfg?.tool).toBe("t");
     expect(cfg?.default_db).toBe("pubmed");
@@ -41,7 +47,11 @@ describe("config load/save", () => {
     "writes config.json with 0o600 permissions",
     async () => {
       const p = join(dir, "config.json");
-      await saveConfig("user", { tool: "t", email: "e@x.com" }, { user: p, project: null });
+      await saveConfig(
+        "user",
+        { tool: "t", email: "e@x.com" },
+        { user: p, project: null },
+      );
       const s = await stat(p);
       expect(s.mode & 0o777).toBe(0o600);
     },

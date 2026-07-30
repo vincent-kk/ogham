@@ -38,4 +38,4 @@
 
 ## Dependencies
 
-- `targets`, `transactions`, `@ogham/cross-platform/spawn`, `smol-toml`.
+- `targets`, `transactions`, `@ogham/cross-platform`, `smol-toml`.

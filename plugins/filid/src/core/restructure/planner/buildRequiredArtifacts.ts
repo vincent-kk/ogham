@@ -3,7 +3,7 @@ import {
   portableIsAbsolute,
   portableJoin,
   portableRelative,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
 import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';

@@ -1,7 +1,7 @@
 import { type Server, createServer } from "node:http";
 
-import { projectRoot } from "@ogham/cross-platform/host-paths";
-import { generateToken } from "@ogham/http-kit/token";
+import { projectRoot } from "@ogham/cross-platform";
+import { generateToken } from "@ogham/http-kit";
 
 import {
   configLayers,

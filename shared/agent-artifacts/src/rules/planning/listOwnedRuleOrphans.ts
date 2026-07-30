@@ -1,4 +1,4 @@
-import { listDirectoryIfExistsSync } from "@ogham/cross-platform/filesystem";
+import { listDirectoryIfExistsSync } from "@ogham/cross-platform";
 
 import type { DirectoryRuleTarget } from "../../targets/index.js";
 

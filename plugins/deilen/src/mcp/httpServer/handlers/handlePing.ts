@@ -1,6 +1,6 @@
 import type { ServerResponse } from "node:http";
 
-import { sendJson } from "@ogham/http-kit/response";
+import { sendJson } from "@ogham/http-kit";
 
 import { getSession } from "../../../core/sessionStore/index.js";
 import { SessionStatus } from "../../../types/enums.js";

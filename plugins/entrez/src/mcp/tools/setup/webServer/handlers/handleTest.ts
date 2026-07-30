@@ -1,7 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import { describeBodyError, parseBody } from "@ogham/http-kit/body";
-import { sendJson } from "@ogham/http-kit/response";
+import { describeBodyError, parseBody, sendJson } from "@ogham/http-kit";
 
 import type { RouteContext } from "../routing/routeContext.js";
 import { SetupFormDataSchema } from "../../../../../types/setup.js";

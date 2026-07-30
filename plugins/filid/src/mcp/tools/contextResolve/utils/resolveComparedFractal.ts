@@ -1,4 +1,4 @@
-import { portableResolve } from '@ogham/cross-platform/compat/resolve';
+import { portableResolve } from '@ogham/cross-platform';
 
 import { findLowestCommonFractal } from '../../../../core/index.js';
 import type { ProjectSnapshot } from '../../../../types/fractal.js';

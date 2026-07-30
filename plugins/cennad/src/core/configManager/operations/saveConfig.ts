@@ -1,12 +1,10 @@
 import {
+  type ConfigLayerPaths,
+  type ConfigScope,
+  type ConfigScopeState,
   buildConfigScopeState,
   writeConfigLayer,
-} from '@ogham/cross-platform/config-scope';
-import type {
-  ConfigLayerPaths,
-  ConfigScope,
-  ConfigScopeState,
-} from '@ogham/cross-platform/config-scope';
+} from '@ogham/cross-platform';
 
 import { configLayers } from '../utils/configLayers.js';
 

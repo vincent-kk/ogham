@@ -9,9 +9,12 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 
-import { listDirectoryIfExistsSync } from '@ogham/cross-platform/filesystem';
-import { portableIsAbsolute, portableJoin } from '@ogham/cross-platform/paths';
-import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
+import {
+  listDirectoryIfExistsSync,
+  pluginCache,
+  portableIsAbsolute,
+  portableJoin,
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';

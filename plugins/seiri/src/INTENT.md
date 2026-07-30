@@ -10,7 +10,7 @@
 | ------------ | ----------------------------------------------------- |
 | `index.ts`   | 공개 API 배럴 (named re-export 만)                    |
 | `version.ts` | 자동 생성 버전 상수 (직접 수정 금지)                  |
-| `core/`      | 다이얼 2계층 · 규칙 배포/상태/드리프트 · 세션 신호    |
+| `core/`      | 다이얼 3계층 · 규칙 배포/상태/드리프트 · 세션 신호    |
 | `mcp/`       | MCP 서버 + 도구 2개 + 설정 페이지 자산                |
 | `hooks/`     | SessionStart · PostToolUse · SubagentStart (+dormant) |
 | `constants/` | 공유 상수 organ (경로 리터럴 · 다이얼 · 도구 이름)    |
@@ -19,9 +19,9 @@
 ## Conventions
 
 - ESM (`"type": "module"`), import 확장자 `.js`.
-- 경로 조합·비교는 `@ogham/cross-platform/compat` 경유 — 네이티브 `node:path` 금지. 프로젝트 신원이 경로에서 나오므로 러너마다 달라지면 안 된다.
+- 경로 조합·비교는 `@ogham/cross-platform` 경유 — 네이티브 `node:path` 금지. 프로젝트 신원이 경로에서 나오므로 러너마다 달라지면 안 된다.
 - `hostPaths` 는 MCP 전용 — 훅은 호스트가 주는 `CLAUDE_PLUGIN_ROOT` 와 cwd 를 쓴다.
-- 훅 도달 코드는 배럴이 아니라 concrete 파일을 직접 import 한다.
+- 훅 도달 코드는 플러그인 내부 배럴이 아니라 concrete 파일을 직접 import 한다. 공유 패키지는 루트에서 가져온다.
 - `version.ts` 는 `yarn version:sync` 로만 갱신.
 
 ## Boundaries

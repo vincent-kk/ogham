@@ -3,7 +3,7 @@
 ## Requirements
 
 - `@ogham/http-kit`은 로컬 HTTP 서버의 요청 검사, 세션 토큰, 제한된 JSON 본문 파싱, HTML-safe JSON 직렬화, JSON 응답 전송을 단일 workspace에서 제공한다.
-- 공개 서브패스는 `guard`, `token`, `body`, `html`, `response`이며 소비자는 각 서브패스 entry point를 사용한다.
+- 공개 주소는 `@ogham/http-kit` 루트 하나이며 12개 공개 심볼을 이름으로 재수출한다.
 - `guard`는 loopback host → token → POST origin → POST content-type 순서로 검사하고 응답을 직접 보내지 않는다.
 - `token`은 16바이트 난수의 32자 hex 토큰을 발급하고 같은 길이의 UTF-8 버퍼를 timing-safe 방식으로 비교한다.
 - `body`는 기본 1MB 상한을 선언 길이와 실제 수신 바이트 모두에 적용하고, 초과 요청을 배수한 뒤 거부한다.
@@ -12,7 +12,7 @@
 
 ## API Contracts
 
-### `@ogham/http-kit/guard`
+### Request guard
 
 ```ts
 inspectRequest(options: GuardOptions): GuardVerdict;
@@ -23,14 +23,14 @@ type GuardRejectionCode;
 
 거부 verdict는 `ok: false`, HTTP `status`, machine-readable `code`, `message`를 함께 제공한다.
 
-### `@ogham/http-kit/token`
+### Token
 
 ```ts
 generateToken(): string;
 verifyToken(expected: string, provided: string): boolean;
 ```
 
-### `@ogham/http-kit/body`
+### Body
 
 ```ts
 parseBody(req: IncomingMessage, maxBytes?: number): Promise<unknown>;
@@ -39,15 +39,22 @@ const MAX_BODY_BYTES: number;
 class RequestTooLargeError extends Error;
 ```
 
-### `@ogham/http-kit/html` and `@ogham/http-kit/response`
+### HTML and response
 
 ```ts
 escapeJsonForHtml(value: unknown): string;
 sendJson(res: ServerResponse, status: number, body: unknown): void;
 ```
 
-루트 `@ogham/http-kit` entry point는 모든 서브패스의 공개 심볼을 재수출한다.
+루트 entry point는 위 공개 심볼을 구체 소유 파일에서 이름으로 재수출하며,
+`sideEffects: false`를 유지해 소비자 번들에서 비기여 모듈을 제거한다.
+
+## History
+
+2026-07-26 — `http-guard`의 guard/token 계약을 동작 변경 없이
+`http-kit`으로 통합했다.
 
 ## Last Updated
 
-2026-07-26 — `http-guard`의 guard/token 계약을 동작 변경 없이 `http-kit`으로 통합.
+2026-07-30 — 공개 주소를 패키지 루트 하나로 통합하고 이름 있는 심볼 집합을
+유지했다.

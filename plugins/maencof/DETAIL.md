@@ -14,8 +14,8 @@
 
 `claudemd_merge`, `claudemd_read`, `claudemd_remove` MCP 도구 이름과 응답 스키마는 유지한다. 도구와 호스트 인식 경로 판독은 project target으로 Claude의 기존 후보와 Codex의 유효 `AGENTS*.md` 후보를 선택한다.
 
-SessionStart의 기존 지침 작성은 현재 vault 초기화·버전 갱신 호환성 때문에 남겨 둔다. 이 경로는 `@ogham/agent-artifacts/instructions/hook`과 목적별 project instruction target만 가져와 범용 manager의 plan·revision·lock 그래프를 훅 번들에서 제외한다. 새 제품별 writer의 선례가 아니며, MCP·공개 호환 API는 계속 범용 공유 manager를 사용한다.
+SessionStart의 기존 지침 작성은 현재 vault 초기화·버전 갱신 호환성 때문에 남겨 둔다. 이 경로는 `@ogham/agent-artifacts` 패키지 루트에서 경량 API를 가져오고 목적별 project instruction target만 사용한다. `sideEffects: false`와 출력 번들 가드가 범용 manager의 plan·revision·lock 그래프가 훅 번들에 남지 않음을 확인한다. 새 제품별 writer의 선례가 아니며, MCP·공개 호환 API는 계속 범용 공유 manager를 사용한다.
 
 ## Last Updated
 
-2026-07-26 — 지침 관리를 `@ogham/agent-artifacts`에 위임하는 계약 선언.
+2026-07-30 — 공유 패키지 루트 import와 출력 번들 가드 계약을 반영했다.

@@ -1,4 +1,4 @@
-import { samePath } from '@ogham/cross-platform/paths';
+import { samePath } from '@ogham/cross-platform';
 
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';

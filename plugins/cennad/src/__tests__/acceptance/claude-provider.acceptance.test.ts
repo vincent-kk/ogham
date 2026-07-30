@@ -22,7 +22,7 @@ import { CENNAD_HOME } from '../../constants/index.js';
 import {
   installFakeBinary,
   prependToPath,
-} from '../../dispatcher/__tests__/fakeBinary.js';
+} from '../fixtures/fakeBinary.js';
 
 // Variable-path dynamic import: a `string`-typed argument stops tsc from
 // resolving the module (or its yet-to-exist exports), keeping `typecheck` green

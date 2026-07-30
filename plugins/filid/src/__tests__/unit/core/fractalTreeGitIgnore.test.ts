@@ -2,7 +2,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { spawnCliSync } from '@ogham/cross-platform/spawn';
+import { spawnCliSync } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { checkZeroPeerFile } from '../../../core/rules/ruleEngine/utils/checkZeroPeerFile.js';

@@ -1,8 +1,6 @@
-import {
-  ensureDirectorySync,
-  writeFileAtomicallySync,
-} from "../../../filesystem/index.js";
-import { portableDirname } from "../../../paths/index.js";
+import { ensureDirectorySync } from "../../../filesystem/mutation/ensureDirectorySync.js";
+import { writeFileAtomicallySync } from "../../../filesystem/mutation/writeFileAtomicallySync.js";
+import { portableDirname } from "../../../paths/compat/operations/portableDirname.js";
 import { stripForbiddenKeys } from "../../merge/index.js";
 import type { ConfigLayerPaths, ConfigScope } from "../../types/types.js";
 

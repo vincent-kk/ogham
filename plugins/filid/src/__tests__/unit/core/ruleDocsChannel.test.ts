@@ -14,7 +14,7 @@ import {
   mergeSection,
   readSection,
   sectionMarkers,
-} from '@ogham/cross-platform/instructions';
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ruleDocMarkers } from '../../../constants/ruleDocs.js';

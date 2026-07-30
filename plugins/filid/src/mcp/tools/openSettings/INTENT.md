@@ -25,7 +25,7 @@
 
 ### Always do
 
-- 프로젝트 루트는 `@ogham/cross-platform/host-paths` 의 `projectRoot(path?)` 로 해석
+- 프로젝트 루트는 `@ogham/cross-platform` 의 `projectRoot(path?)` 로 해석
 - 저장은 반드시 configLoader core (`writeConfig`/`syncRuleDocs`) 를 경유
 - v1 로드는 in-memory migration diagnostics와 함께 표시하되 저장은 v2만 허용
 
@@ -43,5 +43,5 @@
 ## Dependencies
 
 - `../../../core/infra/configLoader` — `loadConfig`, `writeConfig`, `getRuleDocsStatus`, `syncRuleDocs`, `createDefaultConfig`
-- `@ogham/cross-platform/{host-paths,launcher}` — `projectRoot`, `pluginRoot`, `openBrowser`
-- `@ogham/http-kit/{guard,token}` — 요청 가드, 토큰
+- `@ogham/cross-platform` — `projectRoot`, `pluginRoot`, `openBrowser`
+- `@ogham/http-kit` — 요청 가드, 토큰

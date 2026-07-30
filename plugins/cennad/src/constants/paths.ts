@@ -1,7 +1,7 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-import { pluginCache } from '@ogham/cross-platform/paths';
+import { pluginCache } from '@ogham/cross-platform';
 
 export function resolveCennadHome(
   configPath: string | undefined = process.env.CENNAD_CONFIG_PATH,

@@ -3,7 +3,10 @@ export {
   getDefaultAdapterIds,
 } from './registry/createAdapterRegistry.js';
 export type { InitialAdapters } from './registry/createAdapterRegistry.js';
-export { resolveAdapters } from './registry/resolveAdapters.js';
+export {
+  resolveAdapters,
+  type ResolveAdaptersOptions,
+} from './registry/resolveAdapters.js';
 export {
   ECMASCRIPT_ADAPTER_ID,
   ecmascriptStructureAdapter,

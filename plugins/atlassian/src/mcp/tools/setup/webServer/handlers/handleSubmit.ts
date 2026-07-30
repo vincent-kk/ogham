@@ -7,8 +7,8 @@ import type {
 } from "../../../../../types/index.js";
 import { SetupFormDataSchema } from "../../../../../types/index.js";
 import { resolveEnvironment } from "../../../../../core/index.js";
-import { sendJson } from "@ogham/http-kit/response";
-import { describeBodyError, parseBody } from "@ogham/http-kit/body";
+import { sendJson, describeBodyError, parseBody } from "@ogham/http-kit";
+
 import { buildCredentials } from "../utils/buildCredentials.js";
 import { restoreMaskedValues } from "../utils/restoreMaskedValues.js";
 
@@ -157,9 +157,7 @@ export async function handleSubmit(
 }
 
 /** The layer the page asked for, defaulting to the personal one. */
-function readScope(data: unknown): 'user' | 'project' {
-  if (typeof data !== 'object' || data === null) return 'user';
-  return (data as { scope?: unknown }).scope === 'project'
-    ? 'project'
-    : 'user';
+function readScope(data: unknown): "user" | "project" {
+  if (typeof data !== "object" || data === null) return "user";
+  return (data as { scope?: unknown }).scope === "project" ? "project" : "user";
 }

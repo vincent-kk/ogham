@@ -49,10 +49,23 @@
 - task list: `<li class="deilen-task-item[ checked]" data-source-line><span class="deilen-task-checkbox[ checked]"></span>…</li>` (체크 시각화는 CSS)
 - raw HTML 블록: 첫 여는 태그에 `data-source-line`/`data-source-end` 주입 — 뷰어 anchorTargets(직계 자식 수집)가 그대로 인식. 내부 예약 class/data-\* 는 raw 유래 에서 등장 불가.
 
-## Acceptance
+## Acceptance Criteria
+
+### AC-render-markers — 클라이언트 표식 생성
 
 - 표/코드/mermaid/inline·display 수식/task list 표식이 각각 정확히 생성된다.
-- 모든 markdown 블록에 `data-source-line` 이 부여되고, raw HTML 블록은 첫 여는 태그에 부여된다.
 - `<details><summary>` 블록이 구조 그대로 렌더되고 `open` 속성이 보존된다.
-- `<script>`(내용 포함), `onload=` 류 핸들러, `javascript:` URL(엔티티 난독화 포함), HTML 주석, raw 유래 `class="deilen-*"`/`data-source-line` 위조가 출력에서 제거된다.
+
+### AC-source-anchors — 원본 라인 앵커
+
+- 모든 markdown 블록에 `data-source-line` 이 부여되고, raw HTML 블록은 첫 여는 태그에 부여된다.
+
+### AC-sanitize-xss — 유일 방어층으로서의 정제
+
+- `<script>`(내용 포함), `onload=` 류 핸들러, `javascript:` URL(엔티티 난독화 포함), HTML 주석이 출력에서 제거된다.
+- raw 유래 `class="deilen-*"`/`data-source-line` 위조가 제거된다.
 - 미완성 태그의 잔여 `<` 가 이스케이프되어 후속 마크업을 삼키지 못한다.
+
+## Last Updated
+
+2026-07-30 — acceptance 항목을 acceptance group 형식으로 정리했다(내용 변경 없음).

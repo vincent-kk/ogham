@@ -1,10 +1,10 @@
-import { portableIsAbsolute } from '@ogham/cross-platform/compat/is-absolute';
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
 import {
   normalize,
+  pathForCompare,
+  portableIsAbsolute,
   portableRelative,
   portableResolve,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 export interface HashFile {
   absolutePath: string;

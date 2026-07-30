@@ -1,4 +1,4 @@
-import { projectRoot } from "@ogham/cross-platform/host-paths";
+import { projectRoot } from "@ogham/cross-platform";
 
 import { getProjectHash } from "../../../core/projectHash/index.js";
 import {

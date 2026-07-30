@@ -1,8 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
-import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem/read/utf8';
-import { portableJoin } from '@ogham/cross-platform/paths';
+import { portableJoin, readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';

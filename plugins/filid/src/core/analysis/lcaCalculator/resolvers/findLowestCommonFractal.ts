@@ -1,4 +1,4 @@
-import { pathForCompare } from '@ogham/cross-platform/paths';
+import { pathForCompare } from '@ogham/cross-platform';
 
 import { NODE_TYPES } from '../../../../constants/nodeTypes.js';
 import type { FractalNode, FractalTree } from '../../../../types/fractal.js';

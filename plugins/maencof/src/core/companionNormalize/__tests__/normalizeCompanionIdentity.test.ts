@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeCompanionIdentity } from '../normalizeCompanionIdentity.js';
+import { normalizeCompanionIdentity } from '../operations/normalizeCompanionIdentity.js';
 
 function v1(overrides?: Record<string, unknown>) {
   return {

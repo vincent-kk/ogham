@@ -1,7 +1,4 @@
-import {
-  sectionMarkers,
-  type SectionMarkers,
-} from "@ogham/cross-platform/instructions";
+import { sectionMarkers, type SectionMarkers } from "@ogham/cross-platform";
 
 import type {
   CreateInstructionSectionManagerOptions,

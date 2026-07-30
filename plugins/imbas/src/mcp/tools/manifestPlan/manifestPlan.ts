@@ -2,11 +2,11 @@
  * @file manifestPlan.ts
  * @description Execution plan from devplan manifest
  */
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
-import { planExecution } from '../../../core/executionPlanner/executionPlanner.js';
-import { loadManifest } from '../../../core/manifestParser/manifestParser.js';
-import { getRunDir } from '../../../core/paths/paths.js';
+import { planExecution } from '../../../core/executionPlanner/index.js';
+import { loadManifest } from '../../../core/manifestParser/index.js';
+import { getRunDir } from '../../../core/paths/index.js';
 
 export interface ManifestPlanInput {
   project_ref: string;

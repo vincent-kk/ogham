@@ -2,7 +2,7 @@
  * @file claudemdRemove.ts
  * @description claudemd_remove 도구 핸들러 — CWD의 호스트 지침 문서에서 maencof 섹션 제거
  */
-import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/index.js';
 import type {
   ClaudeMdRemoveInput,
   ClaudeMdRemoveResult,

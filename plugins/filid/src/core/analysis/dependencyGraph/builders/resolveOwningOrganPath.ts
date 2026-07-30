@@ -1,6 +1,8 @@
-import { portableIsAbsolute } from '@ogham/cross-platform/compat/is-absolute';
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
-import { portableRelative } from '@ogham/cross-platform/paths/relative';
+import {
+  pathForCompare,
+  portableIsAbsolute,
+  portableRelative,
+} from '@ogham/cross-platform';
 
 function contains(parentPath: string, childPath: string): boolean {
   const remainder = portableRelative(parentPath, childPath);

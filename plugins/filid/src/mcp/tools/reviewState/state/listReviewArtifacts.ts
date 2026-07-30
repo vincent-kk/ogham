@@ -1,5 +1,7 @@
-import { listDirectoryIfExistsSync } from '@ogham/cross-platform/filesystem';
-import { resolveContainedPath } from '@ogham/cross-platform/paths';
+import {
+  listDirectoryIfExistsSync,
+  resolveContainedPath,
+} from '@ogham/cross-platform';
 
 export function listReviewArtifacts(reviewDirectory: string): string[] {
   return listDirectoryIfExistsSync(reviewDirectory)

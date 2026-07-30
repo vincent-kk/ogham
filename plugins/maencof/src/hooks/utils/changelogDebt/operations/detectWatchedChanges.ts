@@ -2,7 +2,7 @@
  * @file detectWatchedChanges.ts
  * @description 감시 경로(WATCHED_PATHS)의 미기록 git 변경을 조회한다.
  */
-import { spawnCli } from '@ogham/cross-platform/spawn';
+import { spawnCli } from '@ogham/cross-platform';
 
 import {
   CHANGELOG_EXCLUDE,

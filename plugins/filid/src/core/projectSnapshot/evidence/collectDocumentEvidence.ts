@@ -1,5 +1,8 @@
-import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem/read/utf8';
-import { portableIsAbsolute, portableJoin } from '@ogham/cross-platform/paths';
+import {
+  portableIsAbsolute,
+  portableJoin,
+  readUtf8FileIfExistsSync,
+} from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
 import type { BoundaryExemptionDeclaration } from '../../../types/documents.js';

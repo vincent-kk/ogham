@@ -1,7 +1,4 @@
-import type {
-  ConfigScope,
-  ConfigScopeState,
-} from '@ogham/cross-platform/config-scope';
+import type { ConfigScope, ConfigScopeState } from '@ogham/cross-platform';
 
 import type { ConfigByScope } from '../../../../../core/configManager/index.js';
 import type { YoutubeProvisionSummary } from '../../../../../core/youtubeMcp/index.js';

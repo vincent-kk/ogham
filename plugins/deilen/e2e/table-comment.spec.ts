@@ -1,3 +1,4 @@
+// filid:contract AC-table-comment-highlight
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

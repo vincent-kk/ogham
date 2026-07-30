@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
+import { pathForCompare } from '@ogham/cross-platform';
 
 export function isAncestorPath(
   filePath: string,

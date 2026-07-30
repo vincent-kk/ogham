@@ -1,4 +1,4 @@
-import { requireAbsoluteRoot } from '@ogham/cross-platform/host-paths';
+import { requireAbsoluteRoot } from '@ogham/cross-platform';
 
 import {
   REVIEW_STATE_ACTIONS,

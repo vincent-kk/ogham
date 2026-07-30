@@ -4,7 +4,7 @@ import {
   portableIsAbsolute,
   portableResolve,
   samePath,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
 

@@ -1,4 +1,4 @@
-import { pluginRoot as hostPluginRoot } from '@ogham/cross-platform/host-paths';
+import { pluginRoot as hostPluginRoot } from '@ogham/cross-platform';
 
 /** Resolve the plugin root from caller argument or the host's plugin-root channel. */
 export function resolvePluginRoot(pluginRoot?: string): string | null {

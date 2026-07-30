@@ -3,7 +3,7 @@
  * @description esbuild entry point for SessionStart hook.
  * Bundled to bridge/session-start.mjs.
  */
-import { errorLogPath, logHookFailure } from "@ogham/cross-platform/error-log";
+import { errorLogPath, logHookFailure } from "@ogham/cross-platform";
 
 import { probeEnvironment } from "./probe/probeEnvironment.js";
 import { runSessionStart } from "./sessionStart.js";

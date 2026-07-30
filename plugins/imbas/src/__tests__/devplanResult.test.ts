@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyTransition,
   createRunState,
-} from '../core/stateManager/stateManager.js';
+} from '../core/stateManager/index.js';
 import { type RunState, RunStateSchema } from '../types/state.js';
 
 function freshState(): RunState {

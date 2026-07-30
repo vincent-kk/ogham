@@ -2,7 +2,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
-import { portableJoin } from '@ogham/cross-platform/paths';
+import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createAdapterRegistry } from '../../../adapters/index.js';

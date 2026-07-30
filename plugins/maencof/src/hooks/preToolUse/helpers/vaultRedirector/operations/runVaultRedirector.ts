@@ -5,7 +5,7 @@
  */
 import { relative, resolve } from 'node:path';
 
-import { normalize } from '@ogham/cross-platform/paths/normalize';
+import { normalize } from '@ogham/cross-platform';
 
 import { VAULT_REDIRECTOR_TOOL_GUIDANCE as TOOL_GUIDANCE } from '../../../../../constants/vaultRedirector.js';
 import { isMaencofVault } from '../../../../shared/isMaencofVault.js';

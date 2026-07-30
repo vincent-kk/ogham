@@ -3,7 +3,7 @@ import { executeRequest } from "../core/httpClient/httpClient.js";
 import type { HttpClientConfig, RequestOptions } from "../types/index.js";
 
 // Mock ssrf-guard to skip DNS resolution in tests
-vi.mock("../core/httpClient/ssrfGuard.js", () => ({
+vi.mock("../core/httpClient/operations/ssrfGuard.js", () => ({
   validateUrl: vi.fn().mockResolvedValue(undefined),
   isPrivateIp: vi.fn().mockReturnValue(false),
 }));

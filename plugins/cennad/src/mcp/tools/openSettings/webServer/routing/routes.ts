@@ -1,7 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { inspectRequest } from '@ogham/http-kit/guard';
-import { sendJson } from '@ogham/http-kit/response';
+import { inspectRequest, sendJson } from '@ogham/http-kit';
 
 import { handleClose } from '../handlers/handleClose.js';
 import { handleGetConfig } from '../handlers/handleGetConfig.js';

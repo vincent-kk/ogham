@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { acquireSignalsLock } from '../utils/acquireSignalsLock.js';

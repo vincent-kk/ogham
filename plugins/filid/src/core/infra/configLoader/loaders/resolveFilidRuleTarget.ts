@@ -1,10 +1,10 @@
-import type {
-  DirectoryRuleTarget,
-  SectionArtifactTarget,
-} from '@ogham/agent-artifacts/targets';
-import { resolveProjectRuleTarget } from '@ogham/agent-artifacts/targets/project/rules';
-import { resolveUserRuleTarget } from '@ogham/agent-artifacts/targets/user/rules';
-import type { ConfigScope } from '@ogham/cross-platform/config-scope';
+import {
+  type DirectoryRuleTarget,
+  type SectionArtifactTarget,
+  resolveProjectRuleTarget,
+  resolveUserRuleTarget,
+} from '@ogham/agent-artifacts';
+import type { ConfigScope } from '@ogham/cross-platform';
 
 import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 

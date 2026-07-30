@@ -1,4 +1,4 @@
-import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+import type { ConfigLayerPaths } from "@ogham/cross-platform";
 
 import { EutilFn, RetMode } from "../../../types/enums.js";
 import type { HttpDeps } from "../../../types/http.js";

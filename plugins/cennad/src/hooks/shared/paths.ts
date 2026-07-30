@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
+import { pluginCache } from '@ogham/cross-platform';
 
 // Hook bundles cannot import core path constants without pulling in heavier
 // dependencies; keep this mirror aligned with src/constants/paths.ts.

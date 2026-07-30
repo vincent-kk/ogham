@@ -18,7 +18,7 @@ import {
 import {
   installFakeBinary,
   prependToPath,
-} from '../../../../dispatcher/__tests__/fakeBinary.js';
+} from '../../../../__tests__/fixtures/fakeBinary.js';
 import type { CodexModel } from '../../../../types/index.js';
 import { getCodexModels } from '../getCodexModels.js';
 

@@ -2,8 +2,8 @@ import {
   type McpCliRunResult,
   type McpCliRunner,
   createMcpServerManager,
-} from '@ogham/agent-artifacts/mcp';
-import { resolveUserMcpTarget } from '@ogham/agent-artifacts/targets/user/mcp';
+  resolveUserMcpTarget,
+} from '@ogham/agent-artifacts';
 
 import { logger } from '../../../lib/logger.js';
 import type { YoutubeAddonLanguage } from '../../../types/index.js';

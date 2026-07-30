@@ -1,27 +1,27 @@
 ## Purpose
 
-상위 Ogham 패키지가 파일을 안전하게 읽고 교체하기 위한 동기식 시스템 호출
-경계다.
+상위 Ogham 패키지가 파일을 안전하게 읽고 교체하기 위한 동기식 시스템 호출 경계다.
 
 ## Structure
 
-| Path         | Role                             |
-| ------------ | -------------------------------- |
-| `index.ts`   | 전체 공개 배럴                   |
-| `read/`      | 목적별 판독 함수 organ           |
-| `hookIo/`    | 기존 hook용 일반 write/copy 경계 |
-| `mutation/`  | 디렉터리·파일 변경 함수 organ    |
-| `locking/`   | owner-token 잠금 fractal         |
-| `safety/`    | descendant symlink 검사 organ    |
-| `helpers/`   | 단일 책임 내부 함수 organ        |
-| `types/`     | 파일 옵션과 잠금 결과 타입 organ |
-| `__tests__/` | 동작·구조 계약 테스트 organ      |
+| Path         | Role                                     |
+| ------------ | ---------------------------------------- |
+| `index.ts`   | 내부 aggregate barrel·루트 재노출 source |
+| `read/`      | 목적별 판독 함수 organ                   |
+| `hookIo/`    | 기존 hook용 일반 write/copy 경계         |
+| `mutation/`  | 디렉터리·파일 변경 함수 organ            |
+| `locking/`   | owner-token 잠금 fractal                 |
+| `safety/`    | descendant symlink 검사 organ            |
+| `helpers/`   | 단일 책임 내부 함수 organ                |
+| `types/`     | 파일 옵션과 잠금 결과 타입 organ         |
+| `__tests__/` | 동작·구조 계약 테스트 organ              |
 
 ## Conventions
 
 - "없음"만 `null`, `[]`, `false`로 낮추고 권한/형식 오류는 throw한다.
 - 공개 함수와 내부 보조 함수 모두 파일당 하나만 선언한다.
-- 읽기 전용 hook은 `filesystem/read/*` 목적별 entry만 import한다.
+- 외부 소비자는 패키지 루트만 쓰고, 같은 패키지 subtree는 `read/`·`mutation/`·`helpers/` concrete 파일을 직접 import할 수 있다.
+- hook 격리는 `sideEffects: false` tree-shaking과 emitted byte·output forbidden-pattern guard로 검증한다.
 - 파일은 같은 디렉터리의 고유 임시 파일을 rename해 교체한다.
 - 잠금은 원자적 lock-directory, owner token, stale quarantine을 사용한다.
 - 신뢰한 root 자체는 허용하고 그 아래 기존 symlink segment만 거부한다.
@@ -46,5 +46,4 @@
 
 ## Dependencies
 
-- 내부: `paths` entry point.
-- 외부: Node `fs`, `crypto`.
+- 내부 `paths` concrete 모듈, 외부 Node `fs`·`crypto`.

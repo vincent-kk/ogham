@@ -9,7 +9,7 @@ import { getProjectHash } from '../../../../core/projectHash/index.js';
 import {
   installFakeBinary,
   prependToPath,
-} from '../../../../dispatcher/__tests__/fakeBinary.js';
+} from '../../../../__tests__/fixtures/fakeBinary.js';
 import { handleStartConversation } from '../startConversation.js';
 
 const FAKE_CODEX = `#!/usr/bin/env node

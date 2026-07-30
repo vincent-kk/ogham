@@ -9,8 +9,7 @@ import {
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
-import { spawnCli } from '@ogham/cross-platform/spawn';
+import { portableDirname, portableJoin, spawnCli } from '@ogham/cross-platform';
 import { afterAll, describe, expect, it } from 'vitest';
 
 /**

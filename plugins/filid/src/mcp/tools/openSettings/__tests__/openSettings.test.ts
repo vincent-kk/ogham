@@ -12,7 +12,10 @@ vi.mock('../utils/loadSettingsHtml.js', () => ({
 }));
 
 const openBrowser = vi.hoisted(() => vi.fn());
-vi.mock('@ogham/cross-platform/launcher', () => ({ openBrowser }));
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
+  openBrowser,
+}));
 
 let projectDir: string | null = null;
 let lastUrl: string | null = null;

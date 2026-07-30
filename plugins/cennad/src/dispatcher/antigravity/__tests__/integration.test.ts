@@ -25,7 +25,7 @@ import type {
 import {
   installFakeBinary,
   prependToPath,
-} from '../../__tests__/fakeBinary.js';
+} from '../../../__tests__/fixtures/fakeBinary.js';
 import { antigravityDispatcher } from '../index.js';
 
 const FLAGS: AntigravityFlags = { sandbox: false, skip_permissions: false };

@@ -1,4 +1,4 @@
-import { tryProjectRoot } from '@ogham/cross-platform/host-paths';
+import { tryProjectRoot } from '@ogham/cross-platform';
 
 import {
   isPruneDue,

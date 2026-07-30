@@ -1,7 +1,7 @@
 import { handleKgNavigate } from "@ogham/maencof";
 import type { KnowledgeGraph } from "@ogham/maencof";
 
-import { computeEffectiveLayers } from "../../filter/layerGuard/layerGuard.js";
+import { computeEffectiveLayers } from "../../filter/layerGuard/index.js";
 
 export interface LensNavigateInput {
   vault?: string;

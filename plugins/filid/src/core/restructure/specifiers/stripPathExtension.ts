@@ -1,4 +1,4 @@
-import { portableBasename } from '@ogham/cross-platform/paths';
+import { portableBasename } from '@ogham/cross-platform';
 
 const DOT_SEGMENT = /^\.+$/;
 

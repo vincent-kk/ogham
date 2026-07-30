@@ -39,4 +39,4 @@
 
 ## Dependencies
 
-- `@ogham/cross-platform/{compat,paths,error-log}`
+- `@ogham/cross-platform`

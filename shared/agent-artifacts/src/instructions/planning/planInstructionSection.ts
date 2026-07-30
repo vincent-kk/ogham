@@ -1,8 +1,4 @@
-import {
-  mergeSection,
-  removeSection,
-} from "@ogham/cross-platform/instructions";
-import { samePath } from "@ogham/cross-platform/paths";
+import { mergeSection, removeSection, samePath } from "@ogham/cross-platform";
 
 import { createRevision } from "../../transactions/index.js";
 import type { ArtifactOutcome } from "../../types/artifacts.js";

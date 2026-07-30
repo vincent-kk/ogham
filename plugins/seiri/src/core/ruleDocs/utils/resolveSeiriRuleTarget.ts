@@ -1,9 +1,9 @@
-import type {
-  DirectoryRuleTarget,
-  SectionArtifactTarget,
-} from '@ogham/agent-artifacts/targets';
-import { resolveProjectRuleTarget } from '@ogham/agent-artifacts/targets/project/rules';
-import { resolveUserRuleTarget } from '@ogham/agent-artifacts/targets/user/rules';
+import {
+  type DirectoryRuleTarget,
+  type SectionArtifactTarget,
+  resolveProjectRuleTarget,
+  resolveUserRuleTarget,
+} from '@ogham/agent-artifacts';
 
 import type { SeiriConfigScope } from '../../../types/config.js';
 import { findRepoRoot } from '../../utils/findRepoRoot.js';

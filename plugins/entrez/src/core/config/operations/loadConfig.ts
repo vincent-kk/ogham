@@ -3,8 +3,8 @@ import { chmod, stat } from "node:fs/promises";
 import {
   mergeConfigLayers,
   readConfigLayers,
-} from "@ogham/cross-platform/config-scope";
-import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+  type ConfigLayerPaths,
+} from "@ogham/cross-platform";
 
 import type { EntrezConfig } from "../../../types/config.js";
 import { EntrezConfigSchema } from "../../../types/config.js";

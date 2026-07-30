@@ -2,7 +2,7 @@
  * @file claudemdMerge.ts
  * @description claudemd_merge 도구 핸들러 — CWD의 호스트 지침 문서에 maencof 섹션 삽입/업데이트
  */
-import { createProjectInstructionManager } from '../../../core/claudeMdMerger/operations/createProjectInstructionManager.js';
+import { createProjectInstructionManager } from '../../../core/claudeMdMerger/index.js';
 import type {
   ClaudeMdMergeInput,
   ClaudeMdMergeResult,

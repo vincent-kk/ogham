@@ -6,7 +6,7 @@
 - 모든 핸들러는 `wrapHandler` 로 감싸 throw 흡수 + `extra`(signal) 전달.
 - 장수 HTTP 서버를 호스팅하되, 무거운 렌더러는 `public/assets/` 자산으로만 서빙(번들 미포함).
 
-## Tools
+## API Contracts
 
 | Tool               | Input                                                   | Output                                                       |
 | ------------------ | ------------------------------------------------------- | ------------------------------------------------------------ |
@@ -30,8 +30,21 @@
 - `public/viewer.html`, `public/settings.html` — esbuild inline(런타임 로드).
 - `public/assets/{highlight,mermaid,katex}.js` + `katex.css` + woff2 — lazy 렌더러 자산.
 
-## Acceptance
+## Acceptance Criteria
 
-- 4개 도구가 등록되고 envelope 가 일관된다.
-- `mcp-server.cjs` 에 무거운 렌더러가 번들되지 않는다(빌드 가드).
+### AC-tool-registration — 도구 등록 일관성
+
+- 도구 4개가 등록되고 응답 envelope 가 일관된다.
+- 모든 `registerTool` 콜백이 `wrapHandler` 를 거친다.
+
+### AC-bundle-guard — 번들 격리
+
+- `mcp-server.cjs` 에 mermaid·katex·highlight 가 번들되지 않는다(빌드 가드가 강제).
+
+### AC-viewer-serving — 뷰어 서빙
+
 - 뷰어 HTML 이 `__DEILEN_STATE__` 주입과 함께 서빙된다.
+
+## Last Updated
+
+2026-07-30 — `Tools` 표를 `API Contracts` 로, acceptance 항목을 acceptance group 으로 정리했다(내용 변경 없음).

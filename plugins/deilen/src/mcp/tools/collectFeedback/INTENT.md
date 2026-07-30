@@ -37,4 +37,4 @@
 ## Dependencies
 
 - `../../../core` (config·feedbackStore·projectHash·sessionStore), `../../httpServer`, `../../shared`, `../../../constants`
-- `node:fs/promises`, `@modelcontextprotocol/sdk` (타입), `@ogham/cross-platform/host-paths` (projectRoot)
+- `node:fs/promises`, `@modelcontextprotocol/sdk` (타입), `@ogham/cross-platform` (projectRoot)

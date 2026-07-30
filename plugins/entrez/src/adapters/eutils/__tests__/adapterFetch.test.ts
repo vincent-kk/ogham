@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 
-import { esearch } from "../esearch.js";
-import { efetch } from "../efetch.js";
-import { esummary } from "../esummary.js";
-import { espell } from "../espell.js";
-import { elink } from "../elink.js";
-import { idconv } from "../idconv.js";
-import { oaService } from "../oaService.js";
+import { esearch } from "../operations/esearch.js";
+import { efetch } from "../operations/efetch.js";
+import { esummary } from "../operations/esummary.js";
+import { espell } from "../operations/espell.js";
+import { elink } from "../operations/elink.js";
+import { idconv } from "../operations/idconv.js";
+import { oaService } from "../operations/oaService.js";
 import type { HttpDeps } from "../../../types/http.js";
 import { Db, SortOrder, DateType } from "../../../types/enums.js";
 import {

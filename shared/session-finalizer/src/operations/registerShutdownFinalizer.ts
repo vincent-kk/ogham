@@ -1,4 +1,4 @@
-import { spawnDetached } from "@ogham/cross-platform/spawn";
+import { spawnDetached } from "@ogham/cross-platform";
 
 import { DEFAULT_FINALIZE_FLAG } from "../constants/finalizeFlag.js";
 

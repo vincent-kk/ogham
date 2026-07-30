@@ -1,5 +1,4 @@
-import { resolveContainedPath } from "@ogham/cross-platform/paths/contained";
-import { hostStateRoot } from "@ogham/cross-platform/paths/state-root";
+import { resolveContainedPath, hostStateRoot } from "@ogham/cross-platform";
 
 import type {
   SectionArtifactTarget,

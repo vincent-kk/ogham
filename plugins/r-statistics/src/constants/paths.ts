@@ -1,7 +1,6 @@
 import { join } from "node:path";
 
-import { pluginRoot, projectRoot } from "@ogham/cross-platform/host-paths";
-import { pluginCache } from "@ogham/cross-platform/paths";
+import { pluginRoot, projectRoot, pluginCache } from "@ogham/cross-platform";
 
 // Host-aware state root via the shared pluginCache (claude → ~/.claude, codex →
 // ~/.codex). Never hardcode ~/.claude here — see cross-platform paths/INTENT.md.

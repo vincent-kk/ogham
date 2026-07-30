@@ -5,7 +5,7 @@
  */
 import { join } from "node:path";
 
-import { pluginCache } from "@ogham/cross-platform/paths";
+import { pluginCache } from "@ogham/cross-platform";
 
 /** Root data directory for the entrez plugin. */
 export const PLUGIN_DATA_DIR = pluginCache("entrez");

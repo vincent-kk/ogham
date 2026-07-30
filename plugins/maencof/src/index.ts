@@ -3,7 +3,163 @@
  * @description @ogham/maencof 공개 API 엔트리포인트
  */
 
-export * from './types/index.js';
+export {
+  CHANGELOG_EXCLUDE,
+  CHANGELOG_PENDING_MAX_CHANGES,
+  CHANGELOG_STATE_FILE,
+  CompanionIdentitySchema,
+  CompanionIdentityV1Schema,
+  CompanionInjectEnum,
+  CompanionPersonalitySchema,
+  CompanionSectionSchema,
+  DEFAULT_DIALOGUE_CONFIG,
+  DEFAULT_INSIGHT_CONFIG,
+  DEFAULT_INSIGHT_STATS,
+  DIALOGUE_DISABLE_ENV,
+  DialogueConfigSchema,
+  dirFromLayer,
+  DomainSchema,
+  EDGE_TYPE,
+  EXPECTED_ARCHITECTURE_VERSION,
+  FrontmatterSchema,
+  getCompanionSchemaVersion,
+  InsightCategoryFilterSchema,
+  InsightConfigSchema,
+  isLayer1Path,
+  isValidCompanionIdentity,
+  KgContextScope,
+  L1_VERIFICATION_INTENSITY,
+  L1ChangeReasonSchema,
+  L3_SUBDIR,
+  L5_SUBDIR,
+  Layer,
+  LAYER_DIR,
+  LAYER1_PREFIX,
+  layerFromDir,
+  LifeDomainEnum,
+  PersonSchema,
+  RelationshipTypeEnum,
+  SYMMETRIC_RELATIONSHIPS,
+  toNodeId,
+  TOOL_CATEGORY_MAP,
+  WATCHED_PATHS,
+} from './types/index.js';
+export type {
+  ActivationResult,
+  ActivityCategory,
+  ActivityEntry,
+  ActivityReadInput,
+  ActivityReadResult,
+  AdjacencyList,
+  AgentAccessMatrix,
+  AgentExecutionResult,
+  AgentOperation,
+  AgentRole,
+  AgentUsageEntry,
+  AutoFixAction,
+  AutonomyLevel,
+  CaptureInsightInput,
+  ChangelogPendingScan,
+  ChangelogState,
+  CompanionCoreMinimal,
+  CompanionIdentity,
+  CompanionIdentityMinimal,
+  CompanionIdentityV1,
+  CompanionInject,
+  CompanionPersonality,
+  CompanionSection,
+  CompanionSectionMinimal,
+  ConfigBackup,
+  ConfigHealthItem,
+  ConfigHealthReport,
+  ConfigHealthSeverity,
+  ConfigIssueCategory,
+  ConfigTarget,
+  DailyDigest,
+  DataSourceConfig,
+  DataSourceType,
+  DiagnosticCategory,
+  DiagnosticItem,
+  DiagnosticResult,
+  DiagnosticSeverity,
+  DialogueConfig,
+  DisabledRegistry,
+  DisabledRegistryEntry,
+  DispatchEvent,
+  DispatchInput,
+  Domain,
+  EchoConfig,
+  EdgeType,
+  Frontmatter,
+  FrontmatterParseResult,
+  HookConcernResult,
+  InsightCategoryFilter,
+  InsightConfig,
+  InsightStats,
+  InterviewQuestion,
+  KgContextInput,
+  KgContextResult,
+  KgNavigateInput,
+  KgNavigateResult,
+  KgSearchInput,
+  KgSearchResult,
+  KgStatusInput,
+  KgStatusResult,
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+  L1AmendmentRecord,
+  L1ChangeReason,
+  L3SubLayer,
+  L5SubLayer,
+  LayerPermission,
+  LifecycleAction,
+  LifecycleActionConfig,
+  LifecycleActionType,
+  LifecycleConfig,
+  LifecycleDispatchResult,
+  LifecycleEvent,
+  LifeDomain,
+  LinkDirection,
+  MaencofCreateInput,
+  MaencofCrudResult,
+  MaencofDeleteInput,
+  MaencofMoveInput,
+  MaencofReadInput,
+  MaencofReadResult,
+  MaencofUpdateInput,
+  ManageMode,
+  ManageResult,
+  MergedHookOutput,
+  MigrationAction,
+  MigrationOp,
+  MigrationPlan,
+  MigrationResult,
+  MigrationWAL,
+  MigrationWALEntry,
+  NodeId,
+  PendingInsightCapture,
+  PendingInsightNotification,
+  Person,
+  RelationshipType,
+  RemindConfig,
+  ReverseIndex,
+  SerializedGraph,
+  SessionDayLog,
+  SessionRecord,
+  SessionSummary,
+  SetupProgress,
+  SetupStep,
+  SkillLifecycleAction,
+  SkillUsageEntry,
+  SourceType,
+  SubLayer,
+  TransitionDirective,
+  UsageStats,
+  WorkHistoryReadInput,
+  WorkHistoryReadResult,
+  WorkPeriodSummary,
+} from './types/index.js';
 export { VERSION } from './version.js';
 
 // Core modules
@@ -60,8 +216,8 @@ export {
 } from './core/weightCalculator/index.js';
 export type { WeightCalcResult } from './core/weightCalculator/index.js';
 
-export { runAccumulativeActivation } from './core/spreadingActivation/accumulativeActivation.js';
-export type { AccumulativeActivationParams } from './core/spreadingActivation/accumulativeActivation.js';
+export { runAccumulativeActivation } from './core/spreadingActivation/index.js';
+export type { AccumulativeActivationParams } from './core/spreadingActivation/index.js';
 
 export {
   CommunityDetector,
@@ -83,8 +239,8 @@ export {
 } from './core/claudeMdMerger/index.js';
 export type { MergeResult } from './core/claudeMdMerger/index.js';
 
-export { deduplicateContent } from './core/contentDedup/contentDedup.js';
-export type { DeduplicateResult } from './core/contentDedup/contentDedup.js';
+export { deduplicateContent } from './core/contentDedup/index.js';
+export type { DeduplicateResult } from './core/contentDedup/index.js';
 
 // Search modules
 export {
@@ -140,10 +296,11 @@ export type {
   CurrentFileInfo,
 } from './core/indexer/incrementalTracker/index.js';
 
-// MCP modules
+// MCP modules — `createServer`/`startServer` 는 노출하지 않는다. 실행 진입점은
+// esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 만드는 `bridge/mcp-server.cjs`
+// 이고, 이 배럴이 `mcp/server` 를 끌어오면 `server.ts → version.ts` 참조와 맞물려
+// src → mcp → mcp/server → src 의존 순환이 된다.
 export {
-  createServer,
-  startServer,
   removeBacklinks,
   getBacklinks,
   toolResult,

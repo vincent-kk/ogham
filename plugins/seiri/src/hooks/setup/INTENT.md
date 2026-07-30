@@ -41,4 +41,4 @@
 
 - `../../core/ruleDocs/status/getRuleDocsStatus.js` (concrete)
 - `../../core/infra/configLoader/` — `loadIntervention` · `describeDial` · `renderPostureLines` · `renderElectionLine` (concrete)
-- `@ogham/cross-platform/error-log`
+- `@ogham/cross-platform`

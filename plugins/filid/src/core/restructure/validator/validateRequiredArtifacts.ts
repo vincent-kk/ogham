@@ -1,4 +1,4 @@
-import { portableJoin, samePath } from '@ogham/cross-platform/paths';
+import { portableJoin, samePath } from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
 import {

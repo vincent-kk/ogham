@@ -81,7 +81,8 @@ vi.mock('../../mcp/tools/kgBuild/index.js', () => ({
 const { registerShutdownFinalizerMock } = vi.hoisted(() => ({
   registerShutdownFinalizerMock: vi.fn(),
 }));
-vi.mock('@ogham/session-finalizer', () => ({
+vi.mock('@ogham/session-finalizer', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/session-finalizer')>()),
   registerShutdownFinalizer: registerShutdownFinalizerMock,
 }));
 

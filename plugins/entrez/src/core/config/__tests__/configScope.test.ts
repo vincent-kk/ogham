@@ -2,10 +2,8 @@ import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
+import { type ConfigLayerPaths, env } from "@ogham/cross-platform";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-import { env } from "@ogham/cross-platform/env";
 
 import { loadConfig } from "../operations/loadConfig.js";
 import { loadConfigScope } from "../operations/loadConfigScope.js";

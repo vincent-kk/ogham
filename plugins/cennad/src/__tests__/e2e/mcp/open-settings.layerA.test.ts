@@ -2,6 +2,7 @@ import { rm } from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { CENNAD_HOME } from '../../../constants/paths.js';
 import { readConfig } from '../helpers/diskAssert.js';
 import { parseToolCallText } from '../helpers/envelopeShape.js';
@@ -76,18 +77,39 @@ describe('open_settings (Layer A)', () => {
     expect(root.body.toLowerCase()).toContain('<html');
     // Inline state slot replaced with the current config JSON.
     expect(root.body).toContain('"ratio"');
-    expect(root.body).toContain('"value":34');
+    expect(root.body).toContain(`"value":${DEFAULT_CONFIG.ratio.codex.value}`);
 
+    // `/config` answers with the scope envelope — both layers, their paths and
+    // the merge — because the page draws the scope toggle from it. The form
+    // hydrates from `state.effective`.
     const cfg = await httpGet(buildPath(out.url, '/config'));
     expect(cfg.status).toBe(200);
     const cfgJson = JSON.parse(cfg.body) as {
-      ratio: { codex: { value: number } };
-      intervention_strength: number;
+      state: {
+        paths: { user: string; project: string | null };
+        layers: { user: Record<string, unknown> | null };
+        effective: { ratio: { codex: { value: number } } };
+      };
     };
-    expect(cfgJson.ratio.codex.value).toBe(34);
+    expect(cfgJson.state).toMatchObject({
+      paths: expect.any(Object),
+      layers: expect.any(Object),
+      effective: expect.any(Object),
+    });
+    // `/config` reports what the files hold, not the schema defaults —
+    // `mergeWithDefaults` belongs to the read path. `beforeEach` wipes
+    // CENNAD_HOME, so the merge is empty here; the defaulted view is the one
+    // inlined into the page above (`"value":34`).
+    expect(cfgJson.state.effective).toEqual({});
 
-    const saveBody = { ...cfgJson, intervention_strength: 2 };
-    const save = await httpPostJson(buildPath(out.url, '/save'), saveBody);
+    // `/save` names the layer it writes, and a user payload is a **complete**
+    // document — validation runs on the merged preview against the strict
+    // schema. On a wiped home the page's form is seated on `DEFAULT_CONFIG`,
+    // so that is what a Save from this state submits.
+    const save = await httpPostJson(buildPath(out.url, '/save'), {
+      scope: 'user',
+      config: { ...DEFAULT_CONFIG, intervention_strength: 2 },
+    });
     expect(save.status).toBe(200);
     const disk = await readConfig();
     expect(disk?.intervention_strength).toBe(2);

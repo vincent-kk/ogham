@@ -27,7 +27,7 @@ export type CategoryType = NodeType;
 
 export interface EntryPointDescriptor {
   path: string;
-  kind: 'module' | 'executable' | 'framework';
+  kind: 'module' | 'executable' | 'framework' | 'manifest';
   adapterId: string;
   surface: 'enumerated' | 'opaque' | 'unsupported';
 }

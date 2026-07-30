@@ -1,4 +1,4 @@
-import { samePath } from '@ogham/cross-platform/paths';
+import { samePath } from '@ogham/cross-platform';
 
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import { RESTRUCTURE_UNIT_KINDS } from '../../../constants/restructure.js';

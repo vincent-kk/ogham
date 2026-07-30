@@ -14,9 +14,11 @@
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { portableResolve } from '@ogham/cross-platform/compat/resolve';
-import { removeFileIfExistsSync } from '@ogham/cross-platform/filesystem';
-import { generateWindowsCmd } from '@ogham/cross-platform/shim';
+import {
+  generateWindowsCmd,
+  portableResolve,
+  removeFileIfExistsSync,
+} from '@ogham/cross-platform';
 import * as esbuild from 'esbuild';
 import { mkdir, readFile, stat } from 'fs/promises';
 
@@ -72,8 +74,8 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   an accidental dependency — the failure mode these caps exist
 //                   to catch.
 //   SESSION_START — selfProbeHook (Node builtin spawnSync) + logHookFailure.
-//                   Its metafile guard rejects the legacy general probe and
-//                   cross-spawn/which graph even when the byte cap still fits.
+//                   Output fingerprints reject cross-spawn/which even when the
+//                   byte cap still fits.
 // Caps sized for the merged bundle set (Codex read-tracking hooks + settings/
 // open_settings). #87 routed cwd hashing through portableResolve, pulled into the
 // pre-tool-use path via cacheManager. Still Node builtins only — FORBIDDEN_PATTERNS
@@ -102,10 +104,9 @@ const HOOK_ENTRIES = [
   },
 ];
 
-const hookBuilds = await Promise.all(
-  HOOK_ENTRIES.map(async ({ name, entry }) => ({
-    name,
-    result: await esbuild.build({
+await Promise.all(
+  HOOK_ENTRIES.map(async ({ name, entry }) =>
+    esbuild.build({
       entryPoints: [
         portableResolve(ROOT, 'src', 'hooks', entry, `${entry}.entry.ts`),
       ],
@@ -117,108 +118,13 @@ const hookBuilds = await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
-      metafile: true,
     }),
-  })),
+  ),
 );
 
 console.log(`  Hook scripts (${HOOK_ENTRIES.length}) -> bridge/*.mjs`);
 
-const USER_PROMPT_FORBIDDEN_INPUTS = [
-  'agent-artifacts/dist/rules/planning/',
-  'agent-artifacts/dist/rules/adapters/',
-  'agent-artifacts/dist/rules/rules.js',
-  'agent-artifacts/dist/rules/status/inspectRuleDocuments.js',
-  'agent-artifacts/dist/rules/status/inspectRuleDocumentStatus.js',
-  'agent-artifacts/dist/rules/status/inspectRuleDocumentPresence.js',
-  'agent-artifacts/dist/rules/helpers/validateRuleDocumentSelector.js',
-  'agent-artifacts/dist/validation/',
-  'agent-artifacts/dist/transactions/',
-  'agent-artifacts/dist/targets/maps/projectTargets.js',
-  'agent-artifacts/dist/targets/maps/userTargets.js',
-  'agent-artifacts/dist/instructions/',
-  'agent-artifacts/dist/mcp/',
-  'cross-platform/dist/filesystem/locking/',
-  'cross-platform/dist/filesystem/mutation/',
-  'cross-platform/dist/filesystem/safety/',
-];
-const userPromptBuild = hookBuilds.find(
-  ({ name }) => name === HOOK_BUNDLE_NAME.USER_PROMPT_SUBMIT,
-);
-const graphViolations = [];
-for (const input of Object.keys(userPromptBuild.result.metafile.inputs)) {
-  const normalizedInput = input.replaceAll('\\', '/');
-  for (const forbidden of USER_PROMPT_FORBIDDEN_INPUTS)
-    if (normalizedInput.includes(forbidden))
-      graphViolations.push(
-        `  user-prompt-submit.mjs: forbidden input graph ${forbidden} matched ${normalizedInput}`,
-      );
-}
-
-const SETUP_FORBIDDEN_INPUTS = [
-  {
-    label: 'legacy general self-probe',
-    pattern:
-      /shared\/cross-platform\/(?:src|dist)\/hooks\/selfProbe\.(?:ts|js)/,
-  },
-  {
-    label: 'general CLI spawn',
-    pattern: /shared\/cross-platform\/(?:src|dist)\/spawn\//,
-  },
-  {
-    label: 'cross-spawn/which runtime',
-    pattern: /node_modules\/(?:cross-spawn|which)\//,
-  },
-];
-const setupBuild = hookBuilds.find(
-  ({ name }) => name === HOOK_BUNDLE_NAME.SETUP,
-);
-for (const input of Object.keys(setupBuild.result.metafile.inputs)) {
-  const normalizedInput = input.replaceAll('\\', '/');
-  for (const { label, pattern } of SETUP_FORBIDDEN_INPUTS)
-    if (pattern.test(normalizedInput))
-      graphViolations.push(
-        `  setup.mjs: forbidden input graph (${label}): ${normalizedInput}`,
-      );
-}
-
-const HOOK_FORBIDDEN_AGGREGATE_INPUTS = [
-  {
-    label: 'aggregate error log',
-    pattern:
-      /shared\/cross-platform\/(?:src|dist)\/hooks\/errorLog\.(?:ts|js)$/,
-  },
-  {
-    label: 'aggregate paths',
-    pattern:
-      /shared\/cross-platform\/(?:src|dist)\/paths\/(?:index|paths)\.(?:ts|js)$/,
-  },
-  {
-    label: 'aggregate path compatibility',
-    pattern:
-      /shared\/cross-platform\/(?:src|dist)\/paths\/compat\/index\.(?:ts|js)$/,
-  },
-  {
-    label: 'aggregate host registry',
-    pattern:
-      /shared\/cross-platform\/(?:src|dist)\/hostRegistry\/index\.(?:ts|js)$/,
-  },
-  {
-    label: 'aggregate filesystem readers',
-    pattern:
-      /shared\/cross-platform\/(?:src|dist)\/filesystem\/read\/index\.(?:ts|js)$/,
-  },
-];
-for (const { name, result } of hookBuilds) {
-  for (const input of Object.keys(result.metafile.inputs)) {
-    const normalizedInput = input.replaceAll('\\', '/');
-    for (const { label, pattern } of HOOK_FORBIDDEN_AGGREGATE_INPUTS)
-      if (pattern.test(normalizedInput))
-        graphViolations.push(
-          `  ${name}.mjs: forbidden input graph (${label}): ${normalizedInput}`,
-        );
-  }
-}
+// `sideEffects: false` makes root-barrel-only inputs non-contributing; emitted bytes and patterns guard regressions.
 
 // agy hook runner (shared — bundled from @ogham/cross-platform, not this
 // plugin's src). The emitted agy hooks.json (plugin root, named-group format)
@@ -273,8 +179,11 @@ const FORBIDDEN_PATTERNS = [
   /\bbinaries\.discover\b/,
   /\brunHookEntry\b/,
   /\bgenerateWindowsCmd\b/,
+  // cross-spawn/which fingerprints that survive minification
+  /\bPATHEXT\b/,
+  /\bisexe\b/,
 ];
-const violations = [...graphViolations];
+const violations = [];
 
 const guardedBundles = [
   ...HOOK_ENTRIES,

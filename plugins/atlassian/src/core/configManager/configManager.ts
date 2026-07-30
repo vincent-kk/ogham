@@ -5,12 +5,10 @@ import {
   mergeConfigLayers,
   readConfigLayers,
   writeConfigLayer,
-} from "@ogham/cross-platform/config-scope";
-import type {
-  ConfigLayerPaths,
-  ConfigScope,
-  ConfigScopeState,
-} from "@ogham/cross-platform/config-scope";
+  type ConfigLayerPaths,
+  type ConfigScope,
+  type ConfigScopeState,
+} from "@ogham/cross-platform";
 
 import { AtlassianConfigSchema } from "../../types/index.js";
 import type { AtlassianConfig } from "../../types/index.js";

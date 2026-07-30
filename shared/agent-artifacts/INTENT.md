@@ -24,7 +24,7 @@
 ## Conventions
 
 - 판단 우선순위: 1. 사용자 콘텐츠 보존 2. 소유권 격리 3. 호스트 호환성.
-- 소비자는 루트 또는 명시적 서브패스 entry point만 사용한다.
+- 소비자는 `@ogham/agent-artifacts` 패키지 루트만 사용한다.
 - 프로젝트와 사용자 범위는 서로 다른 생성자 타입으로 구분한다.
 - package-root module-entry 검사는 실제 `src/index.ts` 배치를 명시적으로 예외 처리한다.
 

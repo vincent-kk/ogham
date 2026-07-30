@@ -16,12 +16,12 @@ utils/     organ — 매니페스트·host·레이어 대상·공유 결과 매�
 
 ## Conventions
 
-- 좁은 shared subpath가 Codex stored/active facts를 보존하고 plan/apply는 manager에 위임한다.
+- `@ogham/agent-artifacts` package root의 named export가 Codex stored/active facts를 보존하고 plan/apply는 manager에 위임한다. 미사용 export는 `sideEffects: false` tree-shaking으로 제거하며, 훅 출력은 `scripts/build-hooks.mjs`의 emitted-byte cap·`FORBIDDEN_PATTERNS`로 검증한다.
 - `loadManifest` 는 throw 한다 — 깨진 매니페스트는 사용자 상태가 아니라 빌드 결함(`sync-rule-hashes` 누락)이다. 세션 경로 소비자가 이를 흡수한다.
 - 드리프트는 **덮지 않는다.** `resync` 에 id 가 명시된 규칙만 덮어쓴다.
 - 레이어는 **옮기지 복사하지 않는다.** 양쪽에 남으면 호스트가 같은 규칙을 두 번 읽고 사본이 갈릴 때 어느 쪽이 이기는지 말할 수 없다. `otherScope` 가 미리보기에는 잃을 것을, 적용 결과에는 실제로 지운 것을 싣는다.
 - 마커 밖 사용자 텍스트와 다른 소유자의 아티팩트는 그대로 보존한다.
-- 경로·파일 처리는 공유 패키지를 거치며 이 모듈에서 시스템 호출하지 않는다.
+- 경로·파일 처리는 공유 package root의 named export를 거치며 이 모듈에서 시스템 호출하지 않는다.
 
 ## Boundaries
 

@@ -10,8 +10,8 @@
  *
  * 기존 raw filePath API를 공유 instruction manager에 연결하는 호환 래퍼.
  */
-import { createResolvedInstructionSectionManager } from '@ogham/agent-artifacts/instructions';
-import { readUtf8FileIfExistsSync } from '@ogham/cross-platform/filesystem';
+import { createResolvedInstructionSectionManager } from '@ogham/agent-artifacts';
+import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import {
   MAENCOF_END_MARKER,

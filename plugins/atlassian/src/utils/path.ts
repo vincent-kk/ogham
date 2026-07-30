@@ -1,5 +1,5 @@
 import { relative, resolve, isAbsolute } from "node:path";
-import { projectRoot } from "@ogham/cross-platform/host-paths";
+import { projectRoot } from "@ogham/cross-platform";
 import { TEMP_DIR_NAME } from "../constants/index.js";
 
 /** Validate a save path: reject traversal and always resolve under {projectRoot}/{TEMP_DIR_NAME}/ */

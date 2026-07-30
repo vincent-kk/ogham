@@ -1,4 +1,4 @@
-import type { McpCliRunResult, McpCliRunner } from '@ogham/agent-artifacts/mcp';
+import type { McpCliRunResult, McpCliRunner } from '@ogham/agent-artifacts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { logger } from '../../../../lib/logger.js';

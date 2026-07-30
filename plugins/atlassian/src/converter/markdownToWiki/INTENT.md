@@ -6,12 +6,12 @@ Markdown 텍스트를 Jira Wiki Markup 문자열로 변환하는 순수 함수 �
 
 ## Structure
 
-| 파일                | 역할                                                                   |
-| ------------------- | ---------------------------------------------------------------------- |
-| `markdownToWiki.ts` | 진입점 — `markdownToWiki(md): string`                                  |
-| `renderBlocks.ts`   | MarkdownBlock 배열을 Wiki 블록 문자열로 변환                           |
-| `renderInline.ts`   | 인라인 토큰을 Wiki 인라인 마크업으로 변환 + 리터럴 특수문자 이스케이프 |
-| `index.ts`          | 배럴 — `markdownToWiki` 단일 재수출                                    |
+| 파일                         | 역할                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `markdownToWiki.ts`          | 진입점 — `markdownToWiki(md): string`                                  |
+| `operations/renderBlocks.ts` | MarkdownBlock 배열을 Wiki 블록 문자열로 변환                           |
+| `operations/renderInline.ts` | 인라인 토큰을 Wiki 인라인 마크업으로 변환 + 리터럴 특수문자 이스케이프 |
+| `index.ts`                   | 배럴 — `markdownToWiki` 단일 재수출                                    |
 
 ## Boundaries
 

@@ -5,11 +5,12 @@
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
-import { applyHookInstructionSection } from '@ogham/agent-artifacts/instructions/hook/apply';
-import { inspectHookInstructionSection } from '@ogham/agent-artifacts/instructions/hook/status';
-import { resolveProjectInstructionTarget } from '@ogham/agent-artifacts/targets/project/instructions';
-import { portableBasename } from '@ogham/cross-platform/compat/basename';
-import { resolveHostDescriptor } from '@ogham/cross-platform/host-registry/descriptor';
+import {
+  applyHookInstructionSection,
+  inspectHookInstructionSection,
+  resolveProjectInstructionTarget,
+} from '@ogham/agent-artifacts';
+import { portableBasename, resolveHostDescriptor } from '@ogham/cross-platform';
 
 import { EXPECTED_ARCHITECTURE_VERSION } from '../../../../constants/architecture.js';
 import { buildDefaultDirective } from '../../../../constants/directiveTemplate.js';
@@ -22,7 +23,7 @@ import {
   META_SKILL_TAG,
 } from '../../../../constants/sessionStart.js';
 import { readChangelogState } from '../../../../core/changelogState/operations/readChangelogState.js';
-import { normalizeCompanionIdentity } from '../../../../core/companionNormalize/normalizeCompanionIdentity.js';
+import { normalizeCompanionIdentity } from '../../../../core/companionNormalize/operations/normalizeCompanionIdentity.js';
 import { isDialogueInjectionDisabled } from '../../../../core/dialogueConfig/operations/isDialogueInjectionDisabled.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { autoAdjustSensitivity } from '../../../../core/insightStats/operations/autoAdjustSensitivity.js';

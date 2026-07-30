@@ -1,8 +1,4 @@
-import {
-  portableDirname,
-  portableJoin,
-  samePath,
-} from '@ogham/cross-platform/paths';
+import { portableDirname, portableJoin, samePath } from '@ogham/cross-platform';
 
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 

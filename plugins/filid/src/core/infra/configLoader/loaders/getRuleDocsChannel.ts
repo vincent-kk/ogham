@@ -1,4 +1,4 @@
-import type { ConfigScope } from '@ogham/cross-platform/config-scope';
+import type { ConfigScope } from '@ogham/cross-platform';
 
 import { resolveFilidRuleTarget } from './resolveFilidRuleTarget.js';
 import { ruleChannelPath } from './ruleChannelPath.js';

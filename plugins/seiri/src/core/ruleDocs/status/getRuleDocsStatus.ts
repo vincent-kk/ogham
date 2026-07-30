@@ -1,4 +1,4 @@
-import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts/rules/status';
+import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts';
 
 import type { SeiriConfigScope } from '../../../types/config.js';
 import type { RuleDocStatus } from '../../../types/manifest.js';

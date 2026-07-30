@@ -4,7 +4,11 @@ import type {
   TestConnectionParams,
 } from "../../types/index.js";
 import { CONNECTION_TEST_TIMEOUT } from "../../constants/index.js";
-import { resolveEnvironment, getApiVersion, executeRequest } from "../index.js";
+import {
+  resolveEnvironment,
+  getApiVersion,
+} from "../environmentResolver/index.js";
+import { executeRequest } from "../httpClient/index.js";
 import { buildAuthHeader } from "../../utils/index.js";
 
 function getTestEndpoint(

@@ -1,5 +1,7 @@
-import { requireAbsoluteRoot } from "@ogham/cross-platform/host-paths/absolute-root";
-import { resolveContainedPath } from "@ogham/cross-platform/paths/contained";
+import {
+  requireAbsoluteRoot,
+  resolveContainedPath,
+} from "@ogham/cross-platform";
 
 import type {
   FileMcpTarget,

@@ -5,7 +5,7 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import {
   MANIFEST_FILE_MAP,
@@ -15,8 +15,8 @@ import {
   buildImplementPlan,
   renderImplementPlanReport,
 } from '../../../core/implementPlanner/index.js';
-import { loadManifest } from '../../../core/manifestParser/manifestParser.js';
-import { getRunDir } from '../../../core/paths/paths.js';
+import { loadManifest } from '../../../core/manifestParser/index.js';
+import { getRunDir } from '../../../core/paths/index.js';
 import { writeJson } from '../../../lib/fileIo.js';
 
 export interface ManifestImplementPlanInput {

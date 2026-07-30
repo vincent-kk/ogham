@@ -4,14 +4,14 @@
  */
 import { join } from 'node:path';
 
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
 import {
   getImplementPlanSummary,
   getManifestSummary,
-} from '../../../core/manifestParser/manifestParser.js';
-import { getRunDir } from '../../../core/paths/paths.js';
+} from '../../../core/manifestParser/index.js';
+import { getRunDir } from '../../../core/paths/index.js';
 import { writeJson } from '../../../lib/fileIo.js';
 import {
   DevplanManifestSchema,

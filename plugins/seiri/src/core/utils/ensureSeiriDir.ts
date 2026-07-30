@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 
 import {
   CONFIG_DIR,

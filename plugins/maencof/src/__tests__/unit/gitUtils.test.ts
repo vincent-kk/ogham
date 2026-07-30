@@ -6,7 +6,7 @@ import { mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { spawnCli } from '@ogham/cross-platform/spawn';
+import { spawnCli } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GIT_LOCK_RETRY_DELAYS_MS } from '../../constants/performance.js';
@@ -18,7 +18,8 @@ import {
   stagedTopLevels,
 } from '../../hooks/utils/gitUtils/index.js';
 
-vi.mock('@ogham/cross-platform/spawn', () => ({
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
   spawnCli: vi.fn(),
 }));
 

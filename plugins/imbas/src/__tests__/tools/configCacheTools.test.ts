@@ -4,10 +4,10 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handleCacheGet } from '../../mcp/tools/cacheGet/cacheGet.js';
-import { handleCacheSet } from '../../mcp/tools/cacheSet/cacheSet.js';
-import { handleConfigGet } from '../../mcp/tools/configGet/configGet.js';
-import { handleConfigSet } from '../../mcp/tools/configSet/configSet.js';
+import { handleCacheGet } from '../../mcp/tools/cacheGet/index.js';
+import { handleCacheSet } from '../../mcp/tools/cacheSet/index.js';
+import { handleConfigGet } from '../../mcp/tools/configGet/index.js';
+import { handleConfigSet } from '../../mcp/tools/configSet/index.js';
 
 // --- helpers ---
 

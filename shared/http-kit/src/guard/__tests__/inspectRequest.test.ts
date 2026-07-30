@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { inspectRequest } from "../inspectRequest.js";
+import { inspectRequest } from "../operations/inspectRequest.js";
 
 const base = {
   host: "127.0.0.1:8123",

@@ -45,5 +45,5 @@
 ## Dependencies
 
 - `node:http`, `node:fs`, `node:path`, `node:url`
-- `@ogham/http-kit/{guard,token,body,html,response}` (inspectRequest·generateToken·parseBody·escapeJsonForHtml·sendJson), `@ogham/cross-platform/host-paths` (pluginRoot·projectRoot)
+- `@ogham/http-kit` (inspectRequest·generateToken·parseBody·escapeJsonForHtml·sendJson), `@ogham/cross-platform` (pluginRoot·projectRoot)
 - `../../core/{configManager,projectHash,sessionStore}`, `../../render` (서버측 base 렌더)

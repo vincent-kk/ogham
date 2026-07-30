@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 
 import { RULES_DIR, TEMPLATES_DIR } from '../../../constants/files.js';
 

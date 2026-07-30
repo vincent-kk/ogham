@@ -2,10 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import {
-  mergeSection,
-  sectionMarkers,
-} from "@ogham/cross-platform/instructions";
+import { mergeSection, sectionMarkers } from "@ogham/cross-platform";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type {

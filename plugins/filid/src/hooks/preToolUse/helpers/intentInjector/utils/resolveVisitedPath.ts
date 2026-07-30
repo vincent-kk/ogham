@@ -1,5 +1,4 @@
-import { portableIsAbsolute } from '@ogham/cross-platform/compat/is-absolute';
-import { portableResolve } from '@ogham/cross-platform/compat/resolve';
+import { portableIsAbsolute, portableResolve } from '@ogham/cross-platform';
 
 import { PORTABLE_PATH_MARKERS } from '../../../../../constants/pathMarkers.js';
 

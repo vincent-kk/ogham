@@ -39,5 +39,5 @@
 
 ## Dependencies
 
-- `node:http` · `@ogham/http-kit/{guard,token,body,html,response}` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
+- `node:http` · `@ogham/http-kit` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
 - `src/types/settings.js` — `SettingsSaveBodySchema`, settle 타입

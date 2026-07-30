@@ -1,6 +1,6 @@
 import { existsSync, rmdirSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 
 import { CONFIG_DIR, SIGNALS_LOCK_DIR } from '../../../constants/files.js';
 import { findRepoRoot } from '../../utils/findRepoRoot.js';

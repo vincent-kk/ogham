@@ -3,7 +3,7 @@ import {
   readFileIfExistsSync,
   removeFileIfExistsSync,
   writeFileAtomicallySync,
-} from "@ogham/cross-platform/filesystem";
+} from "@ogham/cross-platform";
 
 import type { FileChange } from "../types/transactionTypes.js";
 

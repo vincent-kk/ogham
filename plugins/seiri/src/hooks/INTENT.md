@@ -17,10 +17,10 @@ instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 
 ## Conventions
 
-- **배럴 import 금지** — concrete 파일만 쓰며 빌드 cap·metafile이 aggregate/planning/apply/transaction 재유입을 막는다.
+- **플러그인 내부 배럴 import 금지** — concrete 파일만 쓰며, 번들 byte cap 과 출력 패턴 검사가 aggregate/planning/apply/transaction 재유입을 막는다.
 - 검증 런타임(zod 등)·MCP SDK·glob 엔진을 훅 번들에 들이지 않는다.
 - Active rules와 drift는 현재 호스트의 effective target에서 읽히는 규칙만 센다.
-- `@ogham/cross-platform/host-paths` 를 소비하지 않는다 — 호스트가 훅에 `CLAUDE_PLUGIN_ROOT` 와 세션 cwd 를 이미 준다. 경로 조합은 `compat` 경유.
+- `projectRoot`·`pluginRoot` 해석은 쓰지 않는다 — 호스트가 훅에 `CLAUDE_PLUGIN_ROOT` 와 세션 cwd 를 이미 준다. 경로 조합은 portable 연산 경유.
 - 진입점은 `<name>/<name>.entry.ts`. `build-hooks.mjs` 의 `hookEntries` 가 빌드하고, 활성 훅은 같은 이름으로 `hooks/hooks.json` 에 등록한다 — `DORMANT_HOOKS`(constants) 는 빌드되나 미등록 (wiring 이 강제). 번들 하나가 이벤트 여럿에 등록될 수 있다 — 이름은 번들 기준이지 등록 수가 아니다.
 
 ## Boundaries

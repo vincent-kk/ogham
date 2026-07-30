@@ -1,6 +1,8 @@
-import { resolveConfigLayers } from "@ogham/cross-platform/config-scope";
-import type { ConfigLayerPaths } from "@ogham/cross-platform/config-scope";
-import { tryProjectRoot } from "@ogham/cross-platform/host-paths";
+import {
+  resolveConfigLayers,
+  type ConfigLayerPaths,
+  tryProjectRoot,
+} from "@ogham/cross-platform";
 
 import { PLUGIN_DATA_DIR } from "../../../constants/paths.js";
 

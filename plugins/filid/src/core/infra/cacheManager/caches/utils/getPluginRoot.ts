@@ -1,4 +1,4 @@
-import { pluginCache } from '@ogham/cross-platform/paths/plugin-cache';
+import { pluginCache } from '@ogham/cross-platform';
 
 export function getPluginRoot(): string {
   return pluginCache('filid');

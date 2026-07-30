@@ -9,6 +9,7 @@
 - 기존 organ, depth, allowed peer와 entry point 설정은 대응하는 v2 필드로 옮긴다. naming, route, complexity, promotion 설정은 진단 후 버린다.
 - config discovery는 git/project root를 기준으로 하며 plugin 설치 경로를 project fallback으로 사용하지 않는다.
 - `structure.generatedPaths`는 빌드가 만드는 project-relative 경로 패턴 목록이다. 세그먼트 단위로 비교하며 `*`는 한 세그먼트에 대응한다. loader는 이 값을 검증·보존만 하고 해석하지 않는다 — 소비자는 merge-track 스킬이며, 이 비대칭은 의도된 것이다. 값이 없으면 생성물 판정이 없는 것과 같다.
+- `structure.additionalExcludedDirectories`는 스캔에서 제외할 디렉터리 **이름** 목록이다. 내장 제외 집합에 더해지며, tree scan과 adapter source discovery 양쪽이 같은 값을 받는다 — 한쪽만 적용하면 노드가 아닌 파일이 의존성 증거에 남아 미해결 참조가 된다. 이름 단위 비교라 경로 어디에 나타나도 걸린다. loader는 검증·보존만 하고 경로로 해석하지 않는다.
 - managed rule 문서는 host가 실제로 읽는 target을 `@ogham/agent-artifacts`로 동기화하고 Filid owner 주소 밖의 내용을 보존한다.
 - rule 문서 배포 레이어는 config 레이어와 같은 축이다. `project`는 `<gitRoot>` 채널에, `user`는 호스트 상태 루트(`~/.claude/rules/`)에 쓴다. 레이어를 지정하지 않은 호출은 `project`로 해석한다.
 - 레이어를 명시한 sync는 선택한 레이어에 먼저 쓴 다음 반대편 레이어의 `filid_` 소유 문서를 회수한다. 순서가 뒤집히면 중간 실패가 규칙이 어느 레이어에도 없는 상태를 남긴다. 레이어를 명시하지 않은 호출은 배치를 결정한 적이 없으므로 반대편을 건드리지 않는다.
@@ -27,6 +28,7 @@ interface FilidConfigV2 {
     maxDepth?: number;
     additionalOrganNames?: string[];
     additionalAllowedPeers?: AllowedPeerOverride[];
+    additionalExcludedDirectories?: string[];
     entryPointOverrides?: Record<string, string[]>;
     generatedPaths?: string[];
   };
@@ -53,6 +55,11 @@ interface FilidConfigV2 {
 
 - `structure.generatedPaths`를 담은 config가 strict 검증을 통과하고 값이 round-trip한다.
 - loader는 경로를 정규화·해석하지 않고 선언된 문자열 그대로 보존한다.
+
+### AC-config-excluded-directories — 스캔 제외 디렉터리 선언
+
+- `structure.additionalExcludedDirectories`를 담은 config가 strict 검증을 통과하고 값이 round-trip한다.
+- loader는 이름을 경로로 해석하거나 정규화하지 않고 선언된 문자열 그대로 보존한다.
 
 ### AC-config-migration — 비파괴 migration
 
@@ -89,10 +96,11 @@ interface FilidConfigV2 {
 
 ## History
 
+- 2026-07-30 — 스캔 제외 디렉터리를 config가 선언한다. 내장 제외 집합은 생태계 관례를 담는 자리이므로 저장소별 이름(`skills` 등)을 거기 넣으면 같은 이름을 실제 코드로 쓰는 다른 저장소의 증거가 조용히 사라진다. 제외 대상은 저장소마다 다른 열린 집합이라 `additional-*` 계열 키로 받는다.
 - 2026-07-29 — 빌드 산출물 경로를 config가 선언한다. merge-track이 dirty worktree를 소스와 생성물로 가르려면 판정 근거가 프로젝트마다 달라 하드코딩할 수 없고, `.gitignore`는 커밋되는 산출물을 설명하지 못한다.
 - 2026-07-29 — rule 문서 배포 레이어를 config 레이어와 같은 축으로 묶었다. 설정 페이지 토글이 이미 결정하는 값을 그대로 흘려보내면 사용자가 같은 질문에 두 번 답하지 않는다.
 - 2026-07-28 — `createDefaultConfig`가 자체 severity 집합을 버리고 rule roster와 같은 `constants/builtinRuleSeverities` 정본을 읽는다.
 
 ## Last Updated
 
-2026-07-29 — `structure.generatedPaths`를 schema 2.0에 추가했다.
+2026-07-30 — `structure.additionalExcludedDirectories`를 schema 2.0에 추가했다.

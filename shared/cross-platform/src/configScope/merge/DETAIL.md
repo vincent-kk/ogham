@@ -11,7 +11,7 @@
 
 ## API Contracts
 
-`@ogham/cross-platform/config-scope/merge` 가 이 fractal의 진입점이다.
+외부 소비자는 `@ogham/cross-platform` 패키지 루트에서 이 API를 가져온다.
 
 ```ts
 mergeConfigLayers(
@@ -32,12 +32,10 @@ FORBIDDEN_KEYS: readonly string[];
 isPlainObject(value: unknown): value is Record<string, unknown>;
 ```
 
-`FORBIDDEN_KEYS` 와 `isPlainObject` 는 이 진입점에서만 노출한다. 형제 fractal
-`layers/` 가 소비하므로 정당하며, 상위 `config-scope` 나 패키지 루트 배럴로는
-올리지 않는다 — 그 위에는 소비자가 없다.
+`FORBIDDEN_KEYS` 와 `isPlainObject` 는 형제 fractal `layers/` 가 직접 소비하고,
+기존 공개 계약을 보존하기 위해 패키지 루트에서도 재노출한다.
 
 `stripForbiddenKeys` 는 `layers/writeConfigLayer` 가 쓰기 직전에 부르는 단계다.
-상위 `config-scope` subpath는 이 심볼을 노출하지 않는다.
 
 병합 우선순위는 `user < project`. 배열·원시값·`null` 은 override가 통째로
 교체한다 — 인덱스 단위로 병합하면 project 레이어가 목록을 줄일 수 없다.
@@ -79,4 +77,5 @@ isPlainObject(value: unknown): value is Record<string, unknown>;
 
 ## Last Updated
 
-2026-07-29 — 공개 연산 4개를 `operations/` organ으로 내리고 이 문서를 신설.
+2026-07-30 — 외부 공개 주소를 패키지 루트로 통합하면서 병합 심볼 계약을
+그대로 유지했다.

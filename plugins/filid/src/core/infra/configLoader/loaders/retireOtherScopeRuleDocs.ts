@@ -1,8 +1,8 @@
 import {
   type ManagedRuleDocument,
   createRuleDocumentManager,
-} from '@ogham/agent-artifacts/rules';
-import type { ConfigScope } from '@ogham/cross-platform/config-scope';
+} from '@ogham/agent-artifacts';
+import type { ConfigScope } from '@ogham/cross-platform';
 
 import { FILID_ARTIFACT_OWNER } from '../../../../constants/ruleDocs.js';
 

@@ -1,4 +1,4 @@
-import { withFileLockSync } from "@ogham/cross-platform/filesystem";
+import { withFileLockSync } from "@ogham/cross-platform";
 
 import type {
   ApplyFilePlanResult,

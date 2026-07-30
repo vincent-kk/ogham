@@ -1,4 +1,4 @@
-import { portableJoin, portableResolve } from '@ogham/cross-platform/paths';
+import { portableJoin, portableResolve } from '@ogham/cross-platform';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RULE_DOC_ACTIONS } from '../../../constants/mcpContracts.js';

@@ -33,4 +33,4 @@
 
 ## Dependencies
 
-- `../../../core` (projectHash·sessionStore), `@ogham/cross-platform/host-paths` (projectRoot)
+- `../../../core` (projectHash·sessionStore), `@ogham/cross-platform` (projectRoot)

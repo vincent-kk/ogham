@@ -1,4 +1,4 @@
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
+import { pathForCompare } from '@ogham/cross-platform';
 
 import { isPathWithin } from '../../../core/index.js';
 import type { ToolDiagnostic } from '../../../types/toolEnvelope.js';

@@ -14,6 +14,7 @@ esbuild 가 `bridge/mcp-server.cjs` 로 번들링하는 MCP 서버 진입점. `s
 - 비즈니스 로직 금지 — 진입점 역할만 수행
 - top-level await 회피 (`.catch` 체인 사용)
 - 예외는 `console.error` (stderr) 후 `process.exit(1)` 로 종료
+- 서버 identity 주입 지점 — `VERSION` 을 읽어 `startServer` 에 넘긴다 (`mcp/server` 는 `src` 루트를 참조하지 않는다)
 
 ## Boundaries
 
@@ -33,4 +34,5 @@ esbuild 가 `bridge/mcp-server.cjs` 로 번들링하는 MCP 서버 진입점. `s
 ## Dependencies
 
 - `../server` — `startServer`
+- `../../version.js` — `VERSION` (생성 상수, `src/DETAIL.md` 면책)
 - `node:process` — `process.exit`

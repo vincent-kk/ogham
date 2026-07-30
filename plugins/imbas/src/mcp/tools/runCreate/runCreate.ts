@@ -5,19 +5,19 @@
 import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import {
   DEVPLAN_PIPELINE_SOURCE,
   SOURCE_FILENAME,
   SUPPLEMENTS_DIRNAME,
 } from '../../../constants/index.js';
-import { getRunsDir } from '../../../core/paths/paths.js';
-import { generateRunId } from '../../../core/runIdGenerator/runIdGenerator.js';
+import { getRunsDir } from '../../../core/paths/index.js';
+import { generateRunId } from '../../../core/runIdGenerator/index.js';
 import {
   createRunState,
   saveRunState,
-} from '../../../core/stateManager/stateManager.js';
+} from '../../../core/stateManager/index.js';
 
 export interface RunCreateInput {
   project_ref: string;

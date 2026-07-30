@@ -2,7 +2,7 @@ import {
   pathForCompare,
   portableResolve,
   samePath,
-} from '@ogham/cross-platform/paths';
+} from '@ogham/cross-platform';
 
 /**
  * Assert `targetPath` resolves under `parentDir`; return the resolved target

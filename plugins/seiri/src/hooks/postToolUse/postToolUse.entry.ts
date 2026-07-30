@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { logHookFailure } from '@ogham/cross-platform/error-log/write';
+import { logHookFailure } from '@ogham/cross-platform';
 
 import { HookName } from '../../constants/hooks.js';
 import { EMPTY_RESULT, PLUGIN_NAME } from '../../constants/plugin.js';
@@ -15,8 +15,7 @@ import { processToolOutcome } from './postToolUse.js';
 let result: HookOutput = EMPTY_RESULT;
 try {
   const input = JSON.parse(await readStdin()) as
-    | PostToolUseInput
-    | PostToolUseFailureInput;
+    PostToolUseInput | PostToolUseFailureInput;
   result = processToolOutcome(input);
 } catch (error) {
   // This runs after every shell command. Failing loudly here would turn

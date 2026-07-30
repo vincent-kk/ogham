@@ -1,4 +1,4 @@
-import { portableBasename } from '@ogham/cross-platform/compat/basename';
+import { portableBasename } from '@ogham/cross-platform';
 
 import type { FractalNode } from '../../../../types/fractal.js';
 

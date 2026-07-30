@@ -1,4 +1,4 @@
-import { projectRoot } from "@ogham/cross-platform/host-paths";
+import { projectRoot, openBrowser } from "@ogham/cross-platform";
 
 import { loadConfig } from "../../../core/configManager/index.js";
 import { getProjectHash } from "../../../core/projectHash/index.js";
@@ -10,7 +10,7 @@ import { logger } from "../../../lib/logger.js";
 import { SessionStatus } from "../../../types/enums.js";
 import type { RenderOptions } from "../../../types/renderOptions.js";
 import { isoNow } from "../../../utils/isoNow.js";
-import { openBrowser } from "@ogham/cross-platform/launcher";
+
 import { randomId } from "../../../utils/randomId.js";
 import { ensureHttpServer } from "../../httpServer/index.js";
 

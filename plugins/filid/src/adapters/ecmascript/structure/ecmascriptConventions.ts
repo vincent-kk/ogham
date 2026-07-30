@@ -14,6 +14,9 @@ export const SOURCE_EXTENSIONS = [
 export const MODULE_ENTRY_BASENAMES = ['index'] as const;
 export const EXECUTABLE_ENTRY_BASENAMES = ['main'] as const;
 
+/** Manifest whose `exports`/`main`/`bin` declare a package's public surface. */
+export const MANIFEST_ENTRY_FILENAME = 'package.json';
+
 export const EXCLUDED_DIRECTORY_NAMES = new Set([
   '.git',
   '.next',

@@ -18,6 +18,7 @@
     "name": "Vincent K. Kelvin",
     "email": "lunox273@gmail.com"
   },
+  "sideEffects": false,
   "type": "module",
   "files": [
     "bridge",

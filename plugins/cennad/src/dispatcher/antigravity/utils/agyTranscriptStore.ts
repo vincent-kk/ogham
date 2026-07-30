@@ -1,7 +1,6 @@
 import { readFile, stat } from 'node:fs/promises';
 
-import { normalizeEol } from '@ogham/cross-platform';
-import { samePath } from '@ogham/cross-platform/paths';
+import { normalizeEol, samePath } from '@ogham/cross-platform';
 
 import {
   AGY_LAST_CONVERSATIONS_PATH,

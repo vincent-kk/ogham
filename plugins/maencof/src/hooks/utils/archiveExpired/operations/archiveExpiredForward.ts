@@ -5,7 +5,7 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { normalize } from '@ogham/cross-platform/paths/normalize';
+import { normalize } from '@ogham/cross-platform';
 
 import { buildStubDocument } from '../utils/buildStubDocument.js';
 import { listMarkdownFiles } from '../utils/listMarkdownFiles.js';

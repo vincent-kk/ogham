@@ -2,8 +2,8 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { RouteContext } from "../routing/routeContext.js";
 import type { ConnectionTestResult } from "../../../../../types/index.js";
 import { SetupFormDataSchema } from "../../../../../types/index.js";
-import { sendJson } from "@ogham/http-kit/response";
-import { describeBodyError, parseBody } from "@ogham/http-kit/body";
+import { sendJson, describeBodyError, parseBody } from "@ogham/http-kit";
+
 import { buildCredentials } from "../utils/buildCredentials.js";
 
 export async function handleTest(

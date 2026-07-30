@@ -1,4 +1,4 @@
-import { logHookFailure } from "@ogham/cross-platform/error-log";
+import { logHookFailure } from "@ogham/cross-platform";
 
 export interface EnvironmentProbe {
   nodeOk: boolean;

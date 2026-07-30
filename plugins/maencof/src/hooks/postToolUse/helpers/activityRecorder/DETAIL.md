@@ -47,3 +47,29 @@ path 가 다음 prefix 중 하나로 시작하면 skip 한다:
 - **`context_cache_manage`**: pin/unpin/refresh 는 휘발성 캐시 작업으로 볼트 상태 변화가 아니므로 제외.
 
 추가하려면 (a) `TOOL_CATEGORY_MAP` 에 카테고리 추가, (b) `hooks.json` matcher 에 도구명 추가, (c) 이 섹션 갱신.
+
+## Acceptance Criteria
+
+### AC-self-reference-excluded — 자기참조 제외
+
+- 위 exclusion prefix 로 시작하는 경로가 활동 로그에 기록되지 않는다.
+
+### AC-append-only — 덧붙이기 전용
+
+- 기존 활동 로그 라인이 수정되거나 덮어써지지 않는다.
+
+### AC-always-continue — 항상 통과
+
+- 볼트 아님·미매핑 도구·오류 어느 경로에서도 `{ continue: true }` 를 반환한다.
+
+## Boundary Exemptions
+
+### `activityRecorder.ts` — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`
+- **Direct import**: `allowed`
+- **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. PostToolUse orchestrator 가 이 관심사를 직접 가져오며, 그 번들의 캡은 12288 바이트라 배럴 경유의 여유가 없다.
+
+## Last Updated
+
+2026-07-30 — acceptance group 을 채우고 훅 직접 import 면책을 선언했다.

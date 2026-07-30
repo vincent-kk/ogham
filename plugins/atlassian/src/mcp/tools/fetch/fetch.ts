@@ -1,4 +1,4 @@
-import { rememberProjectRoot } from "@ogham/cross-platform/host-paths";
+import { rememberProjectRoot } from "@ogham/cross-platform";
 import { executeRequest } from "../../../core/httpClient/index.js";
 import type {
   FetchContext,

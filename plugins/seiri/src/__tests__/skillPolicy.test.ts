@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { portableDirname, portableJoin } from '@ogham/cross-platform/compat';
+import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
 import { SHIPPED_SKILLS } from '../constants/budgets.js';

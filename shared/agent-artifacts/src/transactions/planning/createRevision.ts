@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { readFileIfExistsSync } from "@ogham/cross-platform/filesystem";
+import { readFileIfExistsSync } from "@ogham/cross-platform";
 
 export function createRevision(paths: readonly string[]): string {
   const hash = createHash("sha256");

@@ -31,4 +31,4 @@
 
 ## Dependencies
 
-- `../../httpServer`, `@ogham/cross-platform/launcher` (`openBrowser`), `@ogham/cross-platform/host-paths` (projectRoot)
+- `../../httpServer`, `@ogham/cross-platform` (`openBrowser`, `projectRoot`)

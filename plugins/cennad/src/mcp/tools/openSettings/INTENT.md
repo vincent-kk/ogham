@@ -34,7 +34,7 @@
 ### Never do
 
 - `127.0.0.1` 외 주소로 바인딩
-- token 발급/검증 로직을 별도 위치에서 재구현 (`@ogham/http-kit/token` 만 사용)
+- token 발급/검증 로직을 별도 위치에서 재구현 (`@ogham/http-kit` 만 사용)
 - state 파일을 직접 수정하거나 다른 프로세스의 핸들을 신뢰
 
 ## Dependencies
@@ -42,7 +42,7 @@
 - `node:fs/promises` — `rm` (state 파일 삭제)
 - `../../../constants/paths` — `SETTINGS_SERVER_PATH`
 - `./utils/loadSettingsHtml` — `loadSettingsHtml` (`public/settings.html` 런타임 로드)
-- `@ogham/cross-platform/launcher` — `openBrowser` (OS별 브라우저 기동)
-- `@ogham/cross-platform/host-paths` — `pluginRoot` (`public/` 자산 탐색 기준점)
+- `@ogham/cross-platform` — `openBrowser` (OS별 브라우저 기동)
+- `@ogham/cross-platform` — `pluginRoot` (`public/` 자산 탐색 기준점)
 - `./utils/persistState` — `persistState` (state 파일 원자적 기록)
 - `./webServer` — `startSettingsServer`, `SettingsServerInstance`

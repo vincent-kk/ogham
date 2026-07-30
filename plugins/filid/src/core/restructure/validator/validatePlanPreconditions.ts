@@ -1,4 +1,4 @@
-import { samePath } from '@ogham/cross-platform/paths';
+import { samePath } from '@ogham/cross-platform';
 
 import {
   RESTRUCTURE_VALIDATION_CODES,

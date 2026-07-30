@@ -14,11 +14,12 @@ MCP 서버 + 22개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
 ### Ask first
 
 - 새 도구 추가 시 types/mcp.ts 입출력 타입 정의 필요 여부
-- 그래프 캐시 무효화 전략 또는 ensureFreshGraph 로직 변경
+- 그래프 캐시 무효화 전략 또는 `ensureFreshGraphNonBlocking` 로직 변경
 - BLOCKED_PREFIXES 목록 변경 (보안 영향)
 
 ### Never do
 
 - 도구 핸들러에서 파일 I/O 직접 수행 (core/ 모듈 위임)
+- `index.ts` 배럴에서 `server/`·`serverEntry/` 재노출 (실행 진입점이지 라이브러리 API 가 아니고, `server.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → mcp/server → src` 순환이 된다)
 - serverEntry.ts에 서버 로직 추가 (esbuild 진입점 — startServer 전 runCompanionMigration 1회만 허용)
 - getVaultPath() 우회 또는 vault 경로 하드코딩

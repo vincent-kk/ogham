@@ -4,6 +4,7 @@ export { buildL1CoreBlock } from './buildL1CoreBlock.js';
 export { buildSessionIdentityBlock } from './buildSessionIdentityBlock.js';
 export {
   renderIdentitySection,
+  resolveSectionText,
   selectSections,
 } from './renderIdentitySection.js';
 export type { RenderSectionOptions } from './renderIdentitySection.js';

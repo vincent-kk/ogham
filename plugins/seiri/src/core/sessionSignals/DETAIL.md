@@ -57,9 +57,9 @@
 
 ## Boundary Exemptions
 
-### record/ — 훅 번들은 배럴을 통과할 수 없다
+### record — 훅 번들은 배럴을 통과할 수 없다
 
-- **Consumers**: `src/hooks/postToolUse/`, `src/hooks/userPromptSubmit/`
+- **Consumers**: `**/src/hooks/postToolUse/**`, `**/src/hooks/userPromptSubmit/**`
 - **Direct import**: allowed
 - **Reason**: 훅은 esbuild 번들로 배송되고 크기 가드를 받는다. `index.ts` 를 거치면 배럴이 재노출하는 그래프 전체가 번들에 끌려 들어와 가드를 넘긴다. typecheck 는 이 비대를 잡지 못하고 `build:hooks` 의 가드만 잡으므로, 배럴 경유는 선택지가 아니라 빌드 실패다. 배럴은 훅 밖 소비자 전용이며, 그래서 `recordWorkflowState` 와 `consumeWorkflowState` 는 배럴에 오르지 않는다.
 

@@ -34,7 +34,7 @@ function productionTypeScriptFiles(directory: string): readonly string[] {
 }
 
 describe("agent-artifacts package architecture", () => {
-  it("provides every documented module entry point as a pure named barrel", () => {
+  it("provides the public root and every internal entry point as pure named barrels", () => {
     for (const relativePath of entryPoints) {
       const path = resolve(sourceRoot, relativePath);
       expect(existsSync(path), relativePath).toBe(true);
@@ -42,39 +42,35 @@ describe("agent-artifacts package architecture", () => {
 
       const source = readFileSync(path, "utf8");
       expect(isPureNamedBarrel(source), relativePath).toBe(true);
+      if (relativePath !== "index.ts") continue;
+
+      const rootTargets = [...source.matchAll(/\bfrom\s+["']([^"']+)["']/g)]
+        .map((match) => match[1])
+        .filter((target): target is string => target !== undefined);
+      expect(rootTargets.length).toBeGreaterThan(0);
+      for (const target of rootTargets) {
+        expect(target, target).toMatch(/^\.\//);
+        expect(target, target).toMatch(/\.js$/);
+        expect(target, target).not.toMatch(/\/index\.js$/);
+        expect(
+          existsSync(resolve(dirname(path), target.replace(/\.js$/, ".ts"))),
+          target,
+        ).toBe(true);
+      }
     }
   });
 
-  it("exposes only the named root and planned subpaths", () => {
+  it("publishes only the named root package address", () => {
     const manifest = JSON.parse(
       readFileSync(resolve(packageRoot, "package.json"), "utf8"),
     ) as {
       dependencies: Record<string, string>;
       exports: Record<string, unknown>;
+      sideEffects: boolean;
     };
 
-    expect(Object.keys(manifest.exports)).toEqual([
-      ".",
-      "./project",
-      "./user",
-      "./rules",
-      "./rules/presence",
-      "./rules/presence/trusted",
-      "./rules/status",
-      "./instructions",
-      "./instructions/hook",
-      "./instructions/hook/status",
-      "./instructions/hook/apply",
-      "./mcp",
-      "./targets",
-      "./targets/project/rules",
-      "./targets/project/instructions",
-      "./targets/project/mcp",
-      "./targets/user/rules",
-      "./targets/user/instructions",
-      "./targets/user/mcp",
-      "./transactions",
-    ]);
+    expect(Object.keys(manifest.exports)).toEqual(["."]);
+    expect(manifest.sideEffects).toBe(false);
     expect(manifest.dependencies).toMatchObject({
       "@ogham/cross-platform": "workspace:^",
       "smol-toml": "^1.6.1",
@@ -90,9 +86,16 @@ describe("agent-artifacts package architecture", () => {
   });
 
   it("routes sibling fractal imports through their entry points", () => {
-    const violations = productionTypeScriptFiles(sourceRoot).flatMap((path) =>
-      findSiblingBoundaryImports(sourceRoot, path, readFileSync(path, "utf8")),
-    );
+    const publicRoot = resolve(sourceRoot, "index.ts");
+    const violations = productionTypeScriptFiles(sourceRoot)
+      .filter((path) => path !== publicRoot)
+      .flatMap((path) =>
+        findSiblingBoundaryImports(
+          sourceRoot,
+          path,
+          readFileSync(path, "utf8"),
+        ),
+      );
 
     expect(violations).toEqual([]);
   });

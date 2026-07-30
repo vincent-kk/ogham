@@ -5,12 +5,12 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { projectRoot } from '@ogham/cross-platform/host-paths';
+import { projectRoot } from '@ogham/cross-platform';
 
 import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
-import { loadConfig } from '../../../core/configManager/configManager.js';
-import { getRunDir, getRunsDir } from '../../../core/paths/paths.js';
-import { loadRunState } from '../../../core/stateManager/stateManager.js';
+import { loadConfig } from '../../../core/configManager/index.js';
+import { getRunDir, getRunsDir } from '../../../core/paths/index.js';
+import { loadRunState } from '../../../core/stateManager/index.js';
 
 export interface RunGetInput {
   project_ref?: string;

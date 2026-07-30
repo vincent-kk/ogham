@@ -21,7 +21,7 @@ utils/      organ — readDialFile · configLayers · resolveConfigPath · resol
 - 읽기는 **절대 throw 하지 않는다.** 부재는 정상 상태, 손상은 건너뛰고 `warnings` 가 파일을 지목한다 — 그래야 조용한 오버라이드가 없다.
 - 두 계층은 같은 한 키짜리 객체라 `readDialFile` 하나로 파싱한다.
 - 검증은 손으로 짠 predicate — 훅 경로라 검증 런타임을 들일 수 없다.
-- project 계층 경로는 저장소 루트 기준(`findRepoRoot`)이라 워크트리끼리 밸브가 안 샌다. user 계층 좌표는 `@ogham/cross-platform/config-scope` 가 정한다. 조합·비교는 `cross-platform/compat` 경유 (네이티브 `node:path` 금지).
+- project 계층 경로는 저장소 루트 기준(`findRepoRoot`)이라 워크트리끼리 밸브가 안 샌다. user 계층 좌표는 `@ogham/cross-platform` 가 정한다. 조합·비교는 `@ogham/cross-platform` 의 portable 연산 경유 (네이티브 `node:path` 금지).
 
 ## Boundaries
 
@@ -44,4 +44,4 @@ utils/      organ — readDialFile · configLayers · resolveConfigPath · resol
 
 ## Dependencies
 
-- `../../utils/`, `../../../constants/`, `@ogham/cross-platform/compat`
+- `../../utils/`, `../../../constants/`, `@ogham/cross-platform`

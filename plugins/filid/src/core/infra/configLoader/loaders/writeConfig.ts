@@ -1,5 +1,4 @@
-import { writeConfigLayer } from '@ogham/cross-platform/config-scope';
-import type { ConfigScope } from '@ogham/cross-platform/config-scope';
+import { type ConfigScope, writeConfigLayer } from '@ogham/cross-platform';
 
 import { createLogger } from '../../../../lib/logger.js';
 import { configLayers } from '../utils/configLayers.js';

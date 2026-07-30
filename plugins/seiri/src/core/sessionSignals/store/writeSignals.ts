@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform/compat';
+import { portableJoin } from '@ogham/cross-platform';
 
 import { TRACKED_COMMANDS_CAP } from '../../../constants/failureChain.js';
 import { SIGNALS_FILE } from '../../../constants/files.js';

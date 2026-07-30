@@ -1,3 +1,3 @@
-export { readSection } from "../readSection.js";
-export { sectionMarkers } from "../sectionMarkers.js";
-export type { SectionMarkers } from "../types.js";
+export { readSection } from "../operations/readSection.js";
+export { sectionMarkers } from "../operations/sectionMarkers.js";
+export type { SectionMarkers } from "../operations/types.js";

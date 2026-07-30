@@ -3,7 +3,7 @@
 ## Requirements
 
 - 모든 파일·경로·CLI 시스템 호출은 상위 공유 패키지가 재사용할 수 있는
-  이름 있는 서브패스 API로 제공한다.
+  이름 있는 루트 API로 제공한다.
 - 사용자 상태 루트는 호출자가 선택한 임의 경로가 아니라 명시적 host와
   `CLAUDE_CONFIG_DIR`/`CODEX_HOME` 환경 계약으로만 해석한다.
 - 프로젝트 출력 경로는 절대 루트, lexical containment, 기존 descendant
@@ -14,7 +14,7 @@
 
 ## API Contracts
 
-### `@ogham/cross-platform/host-registry`
+### Host registry
 
 ```ts
 resolveRuntimeHost(
@@ -25,7 +25,7 @@ resolveRuntimeHost(
 미인식 marker 또는 서로 충돌하는 훅 신호는 `unknown`이며 Claude로 추측하지
 않는다.
 
-### `@ogham/cross-platform/paths`
+### Paths
 
 ```ts
 hostStateRoot(
@@ -38,11 +38,10 @@ resolveContainedPath(root: string, ...segments: string[]): string;
 `resolveContainedPath`는 절대 root만 받고 절대 segment, `..` component,
 다른 drive 및 root 밖 결과를 거부한다.
 
-번들 크기 제한 소비자는 전체 배럴 대신 `paths/contained`,
-`paths/state-root`, `paths/normalize`, `paths/relative`와
-`host-paths/absolute-root` 단일 목적 entry point를 사용한다.
+모든 소비자는 패키지 루트를 사용한다. `sideEffects: false`와 이름 있는 구체
+파일 재노출이 비기여 경로 연산을 번들에서 제거한다.
 
-### `@ogham/cross-platform/host-paths`
+### Host paths
 
 ```ts
 requireAbsoluteRoot(value: string): string;
@@ -50,7 +49,7 @@ requireAbsoluteRoot(value: string): string;
 
 POSIX와 Windows 절대 경로 문자열을 현재 실행 OS와 무관하게 정규화한다.
 
-### `@ogham/cross-platform/config-scope`
+### Config scope
 
 ```ts
 type ConfigScope = "user" | "project";
@@ -84,8 +83,12 @@ clearConfigPaths(
 ): Record<string, unknown>;
 ```
 
-`stripForbiddenKeys`는 이 subpath로 노출하지 않는다. `writeConfigLayer`가 쓰기
-직전에 내부적으로 호출하는 단계이며, 소비자가 직접 부를 자리는 없다.
+`FORBIDDEN_KEYS`, `isPlainObject`, `stripForbiddenKeys`, `paths` facade는 루트
+계약에서 뺐다. 앞의 셋은 `./config-scope/merge` 하위 주소로만 닿던 병합 하위
+단계이고, `mergeConfigLayers`와 `writeConfigLayer`가 이미 그 단계를 적용한다.
+`paths`는 같은 경로 함수 8개를 묶은 두 번째 주소라, import 하면 개별 함수 81 B
+대신 8개 전부인 3,007 B를 retain 한다. 네 심볼 모두 파일은 그대로 두고 루트
+재수출만 멈춘다 — 패키지 내부 소비는 계속 concrete 파일을 쓴다.
 
 user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
 `<projectRoot>/.<pluginName>/config.json`이며 project가 user를 재정의한다.
@@ -119,9 +122,9 @@ JSON이고 `JSON.parse`가 `__proto__`를 own key로 만들기 때문에 실제 
 `projectRoot` 해석은 호출자 책임이다. 앵커 규칙이 플러그인마다 다르므로
 (git root / repo root / 인자 cwd) 해석된 절대 경로를 넘긴다.
 
-`config-scope/merge`는 node 내장을 import하지 않는다. 브라우저 설정 페이지
-번들과 훅 번들의 공용 경계이며, `merge/__tests__/pureImports.test.ts`가 이를
-강제한다. 파일 I/O가 필요 없는 소비자는 루트 배럴 대신 이 subpath를 쓴다.
+설정 병합 구현은 node 내장을 import하지 않는다. 브라우저 설정 페이지 번들과
+훅 번들의 공용 경계이며, `merge/__tests__/pureImports.test.ts`가 이를 강제한다.
+소비자는 다른 공개 함수와 마찬가지로 패키지 루트에서 가져온다.
 
 ### 설정 페이지 계약
 
@@ -216,7 +219,7 @@ config를 소유한 섹션마다 붙이고 배지는 prefix로 판정한다 — 
 `paths.project`가 `null`이면 Project 라디오는 `disabled`이고 이유를 한 줄
 표시한다.
 
-### `@ogham/cross-platform/filesystem`
+### Filesystem and hook helpers
 
 ```ts
 readUtf8FileIfExistsSync(path: string): string | null;
@@ -245,33 +248,24 @@ quarantine 이름으로 atomic rename한 프로세스만 정리하며 owner toke
 `assertNoSymlinkDescendantsSync`는 신뢰 경계인 `root` 자체가 아니라
 `root`부터 `targetPath`까지 이미 존재하는 descendant segment를 검사한다.
 
-한 종류의 읽기만 필요한 제한 훅은 `filesystem/read/utf8`,
-`filesystem/read/bytes`, `filesystem/read/directory` 직접 진입점을 사용한다.
-`filesystem/read` aggregate 진입점은 제공하지 않으며, 이 경로들은 다른
-read helper의 tree-shaking에 기대지 않는다.
+제한 훅도 패키지 루트에서 필요한 읽기·쓰기·host·section·error-log·portable
+경로 심볼만 import한다. 이름 있는 구체 파일 재노출과 `sideEffects: false`가
+나머지 구현을 출력에서 제거하며, 번들 바이트 캡과 출력 금지 패턴이 회귀를
+검출한다. 일반 UTF-8 write와 sibling copy는 기존 hook 동작을 보존하고, 범용
+artifact apply는 계속 atomic write와 lock을 사용한다.
 
-`@ogham/cross-platform/filesystem/hook-io`는 기존 hook 동작을 보존하기 위한
-일반 UTF-8 write와 sibling copy만 제공한다. 이 경량 API는 hook bundle 전용
-호환 경계이며, 범용 artifact apply는 계속 atomic write와 lock을 사용한다.
-
-`@ogham/cross-platform/host-registry/runtime`,
-`@ogham/cross-platform/instructions/read`, `instructions/write`는 각각 runtime
-host 판별, section 판독, section 변경에 필요한 함수만 노출한다.
-
-훅의 단일 사실 조회는 `host-registry/descriptor`, `paths/plugin-cache`,
-`error-log/path`, `error-log/write`를 사용한다. 기존 aggregate 진입점은
-호환용으로 유지하지만 새 제한 훅의 import 경계로 사용하지 않는다.
-portable 경로 함수도 `compat/basename`, `compat/join`,
-`compat/is-absolute`, `compat/path-for-compare`, `compat/resolve` 직접
-진입점을 제공한다.
 `logHookFailure`의 파일 I/O는 best-effort이며 기록 실패를 호출 훅에 던지지
 않는다.
 
-`@ogham/cross-platform/self-probe/hook`은 SessionStart의 node/git/PATH/plugin
-root 진단 의미를 유지하면서 Node builtin만 사용한다. 범용 `spawnCli`,
-`cross-spawn`, executable discovery를 import graph에 포함하지 않는다.
+`selfProbeHook`은 SessionStart의 node/git/PATH/plugin root 진단 의미를
+유지하면서 Node builtin만 사용한다. tree-shaken 출력에는 범용 `spawnCli`,
+`cross-spawn`, executable discovery가 포함되지 않는다.
 
 ## History
+
+2026-07-30 — 공개 주소를 패키지 루트 하나와 agy runner 빌드 진입점으로
+통합했다. `sideEffects: false`와 출력 번들 가드가 목적별 subpath의 격리 역할을
+대신한다.
 
 2026-07-29 — user/project 두 네임스페이스를 병합해 읽는 `config-scope` 추가.
 설정 페이지가 계층마다 폼을 다시 앉히도록 `configByScope` 규약을 함께 정했다.
@@ -284,6 +278,4 @@ root 진단 의미를 유지하면서 Node builtin만 사용한다. 범용 `spaw
 
 ## Last Updated
 
-2026-07-29 — `config-scope`의 `merge`·`layers` 연산을 각 fractal의 `operations/`
-organ으로 내리고, 소비자 없는 `FORBIDDEN_KEYS`·`isPlainObject` 재노출을 공개
-표면에서 거뒀다.
+2026-07-30 — 공개 주소를 루트로 통합하고 기존 123개 심볼 계약을 유지했다.

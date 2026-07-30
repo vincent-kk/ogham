@@ -1,7 +1,4 @@
-import {
-  removeSection,
-  sectionMarkers,
-} from "@ogham/cross-platform/instructions";
+import { removeSection, sectionMarkers } from "@ogham/cross-platform";
 
 import type { ManagedRuleDocument } from "../../types/rules.js";
 import type { LocatedRuleDocument } from "../types/internal.js";

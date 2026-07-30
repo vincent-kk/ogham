@@ -15,13 +15,14 @@
 | `src/configScope/`  | user/project 설정 레이어 해석과 병합     |
 | `src/instructions/` | 마커 구간의 순수 문자열 연산             |
 | `src/spawn/`        | 외부 CLI 실행 단일 진입점                |
+| `src/binaries/`     | 외부 바이너리 탐지와 설치 안내           |
 | 그 밖의 `src/*`     | 훅, shim, launcher 및 호스트 어댑터      |
 
 ## Conventions
 
 - 패키지는 `private: true`이며 workspace 의존성으로만 소비한다.
 - 상위 계층은 `node:fs`, `node:path`, `node:os`, `node:child_process` 대신
-  이 패키지의 공개 서브패스를 사용한다.
+  이 패키지 루트만 import한다.
 - 경로는 native와 Windows/POSIX 문자열 fixture에서 같은 의미를 가져야 한다.
 
 ## Boundaries
@@ -29,7 +30,7 @@
 ### Always do
 
 - 일반 외부 CLI는 `spawnCli()`를 사용하고 stdout은 `normalizeEol()`로
-  정규화한다. `self-probe/hook`의 무출력 진단 실행만 Node builtin을 쓴다.
+  정규화한다. `selfProbeHook()`의 무출력 진단 실행만 Node builtin을 쓴다.
 - 사용자 파일 교체는 sibling 임시 파일과 atomic rename을 사용한다.
 - 프로젝트 하위 출력은 절대 루트, containment, symlink 검사를 거친다.
 

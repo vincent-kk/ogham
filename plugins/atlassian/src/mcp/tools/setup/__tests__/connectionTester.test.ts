@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../../../core/index.js", () => ({
+// 모킹 대상은 `connectionTester` 가 실제로 import 하는 형제 배럴이다. core 부모 배럴을
+// 모킹하면 형제 fractal 의 실제 구현이 그대로 로드되어 이 파일이 모킹하지 않은 의존까지
+// 끌려온다 — 부모 배럴 경유는 sibling 재노출이라 의존 순환이기도 하다.
+vi.mock("../../../../core/environmentResolver/index.js", () => ({
   resolveEnvironment: vi.fn(),
   getApiVersion: vi.fn(),
+}));
+vi.mock("../../../../core/httpClient/index.js", () => ({
   executeRequest: vi.fn(),
 }));
 vi.mock("../../../../utils/index.js", () => ({
@@ -13,8 +18,8 @@ import { testConnection } from "../../../../core/connectionTester/connectionTest
 import {
   resolveEnvironment,
   getApiVersion,
-  executeRequest,
-} from "../../../../core/index.js";
+} from "../../../../core/environmentResolver/index.js";
+import { executeRequest } from "../../../../core/httpClient/index.js";
 import { buildAuthHeader } from "../../../../utils/index.js";
 
 const mockResolveEnvironment = vi.mocked(resolveEnvironment);

@@ -1,3 +1,4 @@
+// filid:contract AC-stale-detection
 import {
   mkdirSync,
   mkdtempSync,
@@ -10,7 +11,7 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { handleLensStatus } from "../../tools/lensStatus/lensStatus.js";
+import { handleLensStatus } from "../../tools/lensStatus/index.js";
 import { detectStale } from "./staleDetector.js";
 
 let vault: string;

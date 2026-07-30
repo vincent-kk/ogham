@@ -13,7 +13,10 @@ import { handleOpenSettings } from '../openSettings.js';
 // pops a real tab. Mocked the way filid and imbas already mock it; the
 // assertions below read the URL from the handler's own result, never the tab.
 const openBrowser = vi.hoisted(() => vi.fn());
-vi.mock('@ogham/cross-platform/launcher', () => ({ openBrowser }));
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
+  openBrowser,
+}));
 
 async function closeViaHttp(url: string): Promise<void> {
   try {

@@ -2,7 +2,7 @@
  * @file readMaencofSection.ts
  * @description 전달받은 정확한 지침 파일에서 maencof 섹션만 읽기.
  */
-import { createResolvedInstructionSectionManager } from '@ogham/agent-artifacts/instructions';
+import { createResolvedInstructionSectionManager } from '@ogham/agent-artifacts';
 
 import {
   MAENCOF_END_MARKER,

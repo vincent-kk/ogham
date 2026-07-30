@@ -1,4 +1,4 @@
-import { pathForCompare } from '@ogham/cross-platform/compat/path-for-compare';
+import { pathForCompare } from '@ogham/cross-platform';
 
 export function canonicalizeNodePaths(nodePaths: readonly string[]): string[] {
   const canonicalByIdentity = new Map<string, string>();

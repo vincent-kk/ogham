@@ -4,24 +4,25 @@ MCP 서버 인스턴스 생성, 3개 도구 등록, stdio transport 연결을 �
 
 ## Structure
 
-| File              | Role                                                     |
-| ----------------- | -------------------------------------------------------- |
-| `createServer.ts` | `McpServer` 인스턴스 생성 + 3개 도구 `registerTool` 등록 |
-| `startServer.ts`  | `StdioServerTransport` 생성 후 `server.connect` 호출     |
-| `index.ts`        | barrel                                                   |
+| File                        | Role                                                     |
+| --------------------------- | -------------------------------------------------------- |
+| `lifecycle/createServer.ts` | `McpServer` 인스턴스 생성 + 3개 도구 `registerTool` 등록 |
+| `lifecycle/startServer.ts`  | `StdioServerTransport` 생성 후 `server.connect` 호출     |
+| `index.ts`                  | barrel                                                   |
 
 ## Conventions
 
 - 모든 `registerTool` 콜백은 `wrapHandler` 로 감쌈 (비정상 throw 흡수)
 - transport 는 stdio 만 사용 — stderr 로그만 허용, stdout 직접 쓰기 금지
 - 도구 입력 스키마는 `zod` 로 정의 (MCP SDK 가 자동 검증)
+- 서버 버전은 인자로 받는다 — 이 fractal 은 `version.ts` 를 읽지 않는다 (읽으면 `src` 로 되돌아가는 엣지가 생겨 순환)
 
 ## Boundaries
 
 ### Always do
 
 - `registerTool` 콜백을 `wrapHandler` 로 감싸기
-- 서버 이름을 `'tools'` 로 고정 (`.mcp.json` 과 일치)
+- 서버 이름을 `'tools'` 로 고정 (`.mcp.json` 과 일치), 버전은 호출자가 넘긴 값 사용
 
 ### Ask first
 

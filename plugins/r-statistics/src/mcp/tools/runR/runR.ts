@@ -1,4 +1,4 @@
-import { rememberProjectRoot } from "@ogham/cross-platform/host-paths";
+import { rememberProjectRoot } from "@ogham/cross-platform";
 
 import {
   DEFAULT_TIMEOUT_MS,

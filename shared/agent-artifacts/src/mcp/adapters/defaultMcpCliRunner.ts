@@ -1,4 +1,4 @@
-import { spawnCli } from "@ogham/cross-platform/spawn";
+import { spawnCli } from "@ogham/cross-platform";
 
 import type { McpCliRunResult } from "../../types/mcp.js";
 

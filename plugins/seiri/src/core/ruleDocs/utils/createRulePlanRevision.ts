@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import type { RuleDocumentPlan } from '@ogham/agent-artifacts/rules';
+import type { RuleDocumentPlan } from '@ogham/agent-artifacts';
 
 export function createRulePlanRevision(plan: RuleDocumentPlan): string {
   return createHash('sha256')

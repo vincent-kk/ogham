@@ -1,4 +1,4 @@
-import { assertNoSymlinkDescendantsSync } from '@ogham/cross-platform/filesystem';
+import { assertNoSymlinkDescendantsSync } from '@ogham/cross-platform';
 
 import type { ReviewStatePaths } from './reviewStateTypes.js';
 

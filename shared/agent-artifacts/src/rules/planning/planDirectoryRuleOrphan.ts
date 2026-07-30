@@ -1,4 +1,4 @@
-import { resolveContainedPath } from "@ogham/cross-platform/paths";
+import { resolveContainedPath } from "@ogham/cross-platform";
 
 import type { DirectoryRuleTarget } from "../../targets/index.js";
 import { createRevision } from "../../transactions/index.js";

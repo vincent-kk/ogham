@@ -1,4 +1,4 @@
-import { resolveContainedPath } from "@ogham/cross-platform/paths/contained";
+import { resolveContainedPath } from "@ogham/cross-platform";
 
 import type { DirectoryRuleTarget } from "../../targets/index.js";
 import type { RuleDocumentSelector } from "../../types/rules.js";
