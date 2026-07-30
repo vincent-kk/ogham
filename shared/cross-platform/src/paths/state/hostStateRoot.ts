@@ -2,7 +2,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 import type { KnownHost } from "../../hostRegistry/index.js";
-import { HOSTS } from "../../hostRegistry/registry.js";
+import { HOSTS } from "../../hostRegistry/index.js";
 
 export function hostStateRoot(
   host: KnownHost,

@@ -5,9 +5,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { McpToolName } from '../../../constants/mcpToolNames.js';
-import { handleActivityRead } from '../../tools/activityRead/index.js';
-import { registerReadTool } from '../middlewares/index.js';
+import { McpToolName } from '../../../../constants/mcpToolNames.js';
+import { handleActivityRead } from '../../../tools/activityRead/index.js';
+import { registerReadTool } from '../../middlewares/index.js';
 
 export function registerActivityReadTools(server: McpServer): void {
   registerReadTool(

@@ -2,7 +2,7 @@
  * @file domain.ts
  * @description 동일 domain 태그 노드 쌍 간 DOMAIN 엣지(약한 cross-layer 연결, weight=0.3) 생성.
  */
-import type { KnowledgeEdge, KnowledgeNode } from '../../../types/graph.js';
+import type { KnowledgeEdge, KnowledgeNode } from '../../../../types/graph.js';
 
 /**
  * 동일 domain 태그를 가진 노드 간 DOMAIN 엣지 생성 (cross-layer 연결).

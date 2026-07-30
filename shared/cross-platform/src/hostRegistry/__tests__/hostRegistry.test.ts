@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { hostFromMarker } from "../hostFromMarker.js";
-import { HOSTS } from "../registry.js";
-import { resolveHostDescriptor } from "../resolveHostDescriptor.js";
+import { hostFromMarker } from "../operations/hostFromMarker.js";
+import { HOSTS } from "../operations/registry.js";
+import { resolveHostDescriptor } from "../operations/resolveHostDescriptor.js";
 import { resolveRuntimeHost } from "../runtime/resolveRuntimeHost.js";
 
 describe("hostFromMarker", () => {

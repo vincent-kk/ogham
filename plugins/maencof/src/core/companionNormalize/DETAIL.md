@@ -29,7 +29,7 @@
 
 ## Boundary Exemptions
 
-### `normalizeCompanionIdentity.ts` — Hook bundle direct import
+### `operations` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`

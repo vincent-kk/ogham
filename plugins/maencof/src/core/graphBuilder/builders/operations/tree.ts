@@ -4,8 +4,8 @@
  * SIBLING 은 물질화하지 않는다 — node.path 가 이미 보유한 폴더 멤버십의 O(k²) 전개이므로
  * 런타임 맵 구성 시점에 파생한다 (operations/deriveSiblingEdges.ts).
  */
-import type { NodeId } from '../../../types/common.js';
-import type { KnowledgeEdge, KnowledgeNode } from '../../../types/graph.js';
+import type { NodeId } from '../../../../types/common.js';
+import type { KnowledgeEdge, KnowledgeNode } from '../../../../types/graph.js';
 
 /**
  * 노드 경로를 디렉토리별로 그룹화한다.

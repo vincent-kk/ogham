@@ -10,10 +10,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { TURN_IDENTITY_CHAR_BUDGET } from '../../../constants/companionIdentity.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
-import { handleCompanionEdit } from '../../tools/companionEdit/index.js';
-import { registerReadTool } from '../middlewares/index.js';
+import { TURN_IDENTITY_CHAR_BUDGET } from '../../../../constants/companionIdentity.js';
+import { McpToolName } from '../../../../constants/mcpToolNames.js';
+import { handleCompanionEdit } from '../../../tools/companionEdit/index.js';
+import { registerReadTool } from '../../middlewares/index.js';
 
 export function registerCompanionTools(server: McpServer): void {
   registerReadTool(

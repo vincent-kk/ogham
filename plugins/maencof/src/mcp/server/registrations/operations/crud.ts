@@ -6,17 +6,20 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { McpToolName } from '../../../constants/mcpToolNames.js';
+import { McpToolName } from '../../../../constants/mcpToolNames.js';
 import {
   captureInsightInputSchema,
   handleCaptureInsight,
-} from '../../tools/maencofCaptureInsight/index.js';
-import { handleMaencofCreate } from '../../tools/maencofCreate/index.js';
-import { handleMaencofDelete } from '../../tools/maencofDelete/index.js';
-import { handleMaencofMove } from '../../tools/maencofMove/index.js';
-import { handleMaencofRead } from '../../tools/maencofRead/index.js';
-import { handleMaencofUpdate } from '../../tools/maencofUpdate/index.js';
-import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
+} from '../../../tools/maencofCaptureInsight/index.js';
+import { handleMaencofCreate } from '../../../tools/maencofCreate/index.js';
+import { handleMaencofDelete } from '../../../tools/maencofDelete/index.js';
+import { handleMaencofMove } from '../../../tools/maencofMove/index.js';
+import { handleMaencofRead } from '../../../tools/maencofRead/index.js';
+import { handleMaencofUpdate } from '../../../tools/maencofUpdate/index.js';
+import {
+  registerMutateTool,
+  registerReadTool,
+} from '../../middlewares/index.js';
 
 export function registerCrudTools(server: McpServer): void {
   // ─── create (mutate) ───────────────────────────────────────

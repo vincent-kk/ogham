@@ -5,12 +5,12 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { McpToolName } from '../../../constants/mcpToolNames.js';
+import { McpToolName } from '../../../../constants/mcpToolNames.js';
 import {
   contextCacheManageInputSchema,
   handleContextCacheManage,
-} from '../../tools/contextCacheManage/index.js';
-import { registerReadTool } from '../middlewares/index.js';
+} from '../../../tools/contextCacheManage/index.js';
+import { registerReadTool } from '../../middlewares/index.js';
 
 export function registerCacheTools(server: McpServer): void {
   registerReadTool(

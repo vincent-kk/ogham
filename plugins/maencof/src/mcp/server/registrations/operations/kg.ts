@@ -7,21 +7,21 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { KgContextScope } from '../../../constants/kgContext.js';
-import { McpToolName } from '../../../constants/mcpToolNames.js';
-import { handleBoundaryCreate } from '../../tools/boundaryCreate/index.js';
-import { handleKgContext } from '../../tools/kgContext/index.js';
-import { handleKgNavigate } from '../../tools/kgNavigate/index.js';
-import { handleKgSearch } from '../../tools/kgSearch/index.js';
-import { handleKgStatus } from '../../tools/kgStatus/index.js';
-import { handleKgSuggestLinks } from '../../tools/kgSuggestLinks/index.js';
-import { handleKgTimeline } from '../../tools/kgTimeline/index.js';
-import { loadGraphIfNeeded } from '../graphCache/index.js';
+import { KgContextScope } from '../../../../constants/kgContext.js';
+import { McpToolName } from '../../../../constants/mcpToolNames.js';
+import { handleBoundaryCreate } from '../../../tools/boundaryCreate/index.js';
+import { handleKgContext } from '../../../tools/kgContext/index.js';
+import { handleKgNavigate } from '../../../tools/kgNavigate/index.js';
+import { handleKgSearch } from '../../../tools/kgSearch/index.js';
+import { handleKgStatus } from '../../../tools/kgStatus/index.js';
+import { handleKgSuggestLinks } from '../../../tools/kgSuggestLinks/index.js';
+import { handleKgTimeline } from '../../../tools/kgTimeline/index.js';
+import { loadGraphIfNeeded } from '../../graphCache/index.js';
 import {
   rebuildAndInvalidate,
   registerMutateTool,
   registerReadTool,
-} from '../middlewares/index.js';
+} from '../../middlewares/index.js';
 
 /** updated 시간창(since/until, inclusive) 공유 Zod 프래그먼트 — kg_search/context/recent 재사용 */
 const timeWindowFields = {

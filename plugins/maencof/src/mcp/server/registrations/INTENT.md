@@ -6,11 +6,11 @@
 
 ## Structure
 
-- `crud.ts` · `kg.ts` — 문서 CRUD · 지식 그래프 도구 등록
-- `claudeMd.ts` — 호스트 지침(project instruction) 도구 등록
-- `companion.ts` · `personalContext.ts` — 동반자 identity · personal context 도구 등록
-- `activity.ts` · `workHistory.ts` — 활동·작업 이력 읽기 도구 등록
-- `cache.ts` — 컨텍스트 캐시 도구 등록
+- `operations/crud.ts` · `operations/kg.ts` — 문서 CRUD · 지식 그래프 도구 등록
+- `operations/claudeMd.ts` — 호스트 지침(project instruction) 도구 등록
+- `operations/companion.ts` · `operations/personalContext.ts` — 동반자 identity · personal context 도구 등록
+- `operations/activity.ts` · `operations/workHistory.ts` — 활동·작업 이력 읽기 도구 등록
+- `operations/cache.ts` — 컨텍스트 캐시 도구 등록
 - `index.ts` — barrel
 
 ## Boundaries

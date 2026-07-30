@@ -1,6 +1,6 @@
-import { hostFromMarker } from "../hostFromMarker.js";
-import { HOST_MARKER_ENV, HOSTS } from "../registry.js";
-import type { Host, KnownHost } from "../types.js";
+import { hostFromMarker } from "../operations/hostFromMarker.js";
+import { HOST_MARKER_ENV, HOSTS } from "../operations/registry.js";
+import type { Host, KnownHost } from "../operations/types.js";
 
 export function resolveRuntimeHost(
   env: Readonly<Record<string, string | undefined>>,

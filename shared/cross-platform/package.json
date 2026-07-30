@@ -40,8 +40,8 @@
       "import": "./dist/paths/operations/normalize.js"
     },
     "./paths/relative": {
-      "types": "./dist/paths/compat/portableRelative.d.ts",
-      "import": "./dist/paths/compat/portableRelative.js"
+      "types": "./dist/paths/compat/operations/portableRelative.d.ts",
+      "import": "./dist/paths/compat/operations/portableRelative.js"
     },
     "./paths/plugin-cache": {
       "types": "./dist/paths/state/pluginCache.d.ts",
@@ -96,12 +96,12 @@
       "import": "./dist/hostRegistry/runtime/resolveRuntimeHost.js"
     },
     "./host-registry/descriptor": {
-      "types": "./dist/hostRegistry/resolveHostDescriptor.d.ts",
-      "import": "./dist/hostRegistry/resolveHostDescriptor.js"
+      "types": "./dist/hostRegistry/operations/resolveHostDescriptor.d.ts",
+      "import": "./dist/hostRegistry/operations/resolveHostDescriptor.js"
     },
     "./host-registry/hosts": {
-      "types": "./dist/hostRegistry/registry.d.ts",
-      "import": "./dist/hostRegistry/registry.js"
+      "types": "./dist/hostRegistry/operations/registry.d.ts",
+      "import": "./dist/hostRegistry/operations/registry.js"
     },
     "./instructions": {
       "types": "./dist/instructions/index.d.ts",
@@ -176,24 +176,24 @@
       "import": "./dist/paths/compat/index.js"
     },
     "./compat/basename": {
-      "types": "./dist/paths/compat/portableBasename.d.ts",
-      "import": "./dist/paths/compat/portableBasename.js"
+      "types": "./dist/paths/compat/operations/portableBasename.d.ts",
+      "import": "./dist/paths/compat/operations/portableBasename.js"
     },
     "./compat/join": {
-      "types": "./dist/paths/compat/portableJoin.d.ts",
-      "import": "./dist/paths/compat/portableJoin.js"
+      "types": "./dist/paths/compat/operations/portableJoin.d.ts",
+      "import": "./dist/paths/compat/operations/portableJoin.js"
     },
     "./compat/is-absolute": {
       "types": "./dist/paths/compat/operations/portableIsAbsolute.d.ts",
       "import": "./dist/paths/compat/operations/portableIsAbsolute.js"
     },
     "./compat/path-for-compare": {
-      "types": "./dist/paths/compat/pathForCompare.d.ts",
-      "import": "./dist/paths/compat/pathForCompare.js"
+      "types": "./dist/paths/compat/operations/pathForCompare.d.ts",
+      "import": "./dist/paths/compat/operations/pathForCompare.js"
     },
     "./compat/resolve": {
-      "types": "./dist/paths/compat/portableResolve.d.ts",
-      "import": "./dist/paths/compat/portableResolve.js"
+      "types": "./dist/paths/compat/operations/portableResolve.d.ts",
+      "import": "./dist/paths/compat/operations/portableResolve.js"
     }
   },
   "main": "dist/index.js",

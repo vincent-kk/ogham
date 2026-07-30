@@ -10,7 +10,7 @@ import {
   type CompanionIdentityMinimal,
   type CompanionSectionMinimal,
   getCompanionSchemaVersion,
-} from '../../types/companionGuard.js';
+} from '../../../types/companionGuard.js';
 
 type Inject = CompanionSectionMinimal['inject'];
 

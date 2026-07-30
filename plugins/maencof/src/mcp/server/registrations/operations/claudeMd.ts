@@ -9,13 +9,16 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { portableRelative } from '@ogham/cross-platform/compat';
 import { z } from 'zod';
 
-import { McpToolName } from '../../../constants/mcpToolNames.js';
-import { createProjectInstructionManager } from '../../../core/claudeMdMerger/index.js';
-import { handleClaudeMdMerge } from '../../tools/claudemdMerge/index.js';
-import { handleClaudeMdRead } from '../../tools/claudemdRead/index.js';
-import { handleClaudeMdRemove } from '../../tools/claudemdRemove/index.js';
-import { getVaultPath } from '../graphCache/index.js';
-import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
+import { McpToolName } from '../../../../constants/mcpToolNames.js';
+import { createProjectInstructionManager } from '../../../../core/claudeMdMerger/index.js';
+import { handleClaudeMdMerge } from '../../../tools/claudemdMerge/index.js';
+import { handleClaudeMdRead } from '../../../tools/claudemdRead/index.js';
+import { handleClaudeMdRemove } from '../../../tools/claudemdRemove/index.js';
+import { getVaultPath } from '../../graphCache/index.js';
+import {
+  registerMutateTool,
+  registerReadTool,
+} from '../../middlewares/index.js';
 
 export function registerClaudeMdTools(server: McpServer): void {
   // ─── claudemd_merge (mutate) ───────────────────────────────────────

@@ -7,5 +7,52 @@
  * 참조하므로 재노출은 src → mcp → mcp/server → src 의존 순환이 된다.
  * serverEntry 는 `../server/index.js` 를 형제 배럴로 직접 가져간다.
  */
-export * from './shared/index.js';
-export * from './tools/index.js';
+export {
+  getBacklinks,
+  mapReplacer,
+  removeBacklinks,
+  toolError,
+  toolResult,
+} from './shared/index.js';
+
+export {
+  buildStemIndex,
+  captureInsightInputSchema,
+  contextCacheManageInputSchema,
+  handleActivityRead,
+  handleBoundaryCreate,
+  handleCaptureInsight,
+  handleClaudeMdMerge,
+  handleClaudeMdRead,
+  handleClaudeMdRemove,
+  handleCompanionEdit,
+  handleContextCacheManage,
+  handleKgBuild,
+  handleKgContext,
+  handleKgNavigate,
+  handleKgSearch,
+  handleKgStatus,
+  handleKgSuggestLinks,
+  handleKgTimeline,
+  handleMaencofCreate,
+  handleMaencofDelete,
+  handleMaencofMove,
+  handleMaencofRead,
+  handleMaencofUpdate,
+  handlePersonalContextCapture,
+  handleWorkHistory,
+  InsightCategoryEnum,
+  personalContextCaptureInputSchema,
+  resolveAndAttachLinks,
+  selectContextCandidates,
+} from './tools/index.js';
+export type {
+  BoundaryCreateInput,
+  BoundaryCreateResult,
+  CaptureInsightArgs,
+  InsightCategory,
+  KgBuildInput,
+  KgBuildParseFailure,
+  KgBuildResult,
+  PersonalContextCaptureArgs,
+} from './tools/index.js';

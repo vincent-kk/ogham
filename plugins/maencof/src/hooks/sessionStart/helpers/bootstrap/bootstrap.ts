@@ -22,7 +22,7 @@ import {
   META_SKILL_TAG,
 } from '../../../../constants/sessionStart.js';
 import { readChangelogState } from '../../../../core/changelogState/operations/readChangelogState.js';
-import { normalizeCompanionIdentity } from '../../../../core/companionNormalize/normalizeCompanionIdentity.js';
+import { normalizeCompanionIdentity } from '../../../../core/companionNormalize/operations/normalizeCompanionIdentity.js';
 import { isDialogueInjectionDisabled } from '../../../../core/dialogueConfig/operations/isDialogueInjectionDisabled.js';
 import { appendErrorLogSafe } from '../../../../core/errorLog/operations/appendErrorLogSafe.js';
 import { autoAdjustSensitivity } from '../../../../core/insightStats/operations/autoAdjustSensitivity.js';

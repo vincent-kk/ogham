@@ -16,6 +16,25 @@ MCP `inputSchema`는 flat leaf-primitive only `z.object`다 — 모든 비-core 
 
 `project_root`는 flat MCP `inputSchema`와 `RunTransitionSchema`의 4개 action 스키마 **양쪽 모두**에 선언해야 한다 — zod object 는 미선언 키를 strip 하므로 한쪽만 선언하면 핸들러가 값을 보지 못한다. 핸들러는 `projectRoot(parsed.project_root)`로 워크스페이스를 해석한다.
 
+## Acceptance Criteria
+
+### AC-ref-free-schema — $ref 없는 스키마
+
+- `run_transition` 의 MCP `inputSchema` 가 방출하는 JSON Schema 에 `$ref` 가 0건이다 — flat leaf-primitive 를 유지하는 이유가 이것이다.
+
+### AC-per-action-validation — action 별 검증
+
+- flat 스키마만으로는 통과하는 잘못된 조합(예: `escape_phase` 에 `escape_code` 누락)이 `RunTransitionSchema.parse` 에서 거부되어 MCP `isError: true` 로 나타난다.
+- 올바른 payload 는 flat 스키마와 `RunTransitionSchema` 양쪽을 모두 통과한다.
+
+### AC-project-root-reaches-handler — project_root 도달
+
+- `project_root` 를 넘긴 호출에서 핸들러가 그 값으로 워크스페이스를 해석한다 — 두 스키마 중 한쪽에만 선언되면 zod 가 값을 strip 하므로 이 항목이 그 회귀를 잡는다.
+
+### AC-blocked-holds-phase — BLOCKED 는 전진하지 않는다
+
+- `complete_phase` 를 `result="BLOCKED"` 로 호출하면 해당 phase 는 완료로 기록되지만 `current_phase` 는 그대로다.
+
 ## Last Updated
 
-2026-07-10
+2026-07-30 — 수락 기준을 `### AC-*` 그룹으로 추가했다(계약 내용 변경 없음).

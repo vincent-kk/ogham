@@ -1,5 +1,5 @@
 import { portableIsAbsolute } from "../../paths/compat/operations/portableIsAbsolute.js";
-import { portableResolve } from "../../paths/compat/portableResolve.js";
+import { portableResolve } from "../../paths/compat/operations/portableResolve.js";
 import { expandAbsoluteRootHome } from "./expandAbsoluteRootHome.js";
 
 export function toAbsoluteRoot(value: string): string | null {

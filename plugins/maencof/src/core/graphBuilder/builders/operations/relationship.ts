@@ -2,8 +2,8 @@
  * @file relationship.ts
  * @description Person frontmatter 기반 RELATIONSHIP 엣지 생성. 대칭 관계는 양방향, 비대칭은 단방향.
  */
-import type { KnowledgeEdge, KnowledgeNode } from '../../../types/graph.js';
-import { SYMMETRIC_RELATIONSHIPS } from '../../../types/person.js';
+import type { KnowledgeEdge, KnowledgeNode } from '../../../../types/graph.js';
+import { SYMMETRIC_RELATIONSHIPS } from '../../../../types/person.js';
 
 /**
  * Person frontmatter가 있는 노드 쌍 간 RELATIONSHIP 엣지 생성.

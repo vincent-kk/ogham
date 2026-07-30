@@ -6,10 +6,10 @@
 
 ## Structure
 
-- `tree.ts` — 디렉토리 계층 기반 PARENT_OF / CHILD_OF 엣지 + 디렉토리 맵
-- `relationship.ts` — Person frontmatter 기반 RELATIONSHIP 엣지 (대칭은 양방향, 비대칭은 단방향)
-- `domain.ts` — 동일 domain 태그 쌍 간 DOMAIN 엣지 (약한 cross-layer 연결, 양방향)
-- `crossLayer.ts` — L5-Boundary 노드에서 `connected_layers` 내 태그 겹침 노드로 CROSS_LAYER 엣지
+- `operations/tree.ts` — 디렉토리 계층 기반 PARENT_OF / CHILD_OF 엣지 + 디렉토리 맵
+- `operations/relationship.ts` — Person frontmatter 기반 RELATIONSHIP 엣지 (대칭은 양방향, 비대칭은 단방향)
+- `operations/domain.ts` — 동일 domain 태그 쌍 간 DOMAIN 엣지 (약한 cross-layer 연결, 양방향)
+- `operations/crossLayer.ts` — L5-Boundary 노드에서 `connected_layers` 내 태그 겹침 노드로 CROSS_LAYER 엣지
 - `index.ts` — barrel
 
 ## Boundaries

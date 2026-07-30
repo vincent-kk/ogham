@@ -8,12 +8,12 @@
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import { McpToolName } from '../../../constants/mcpToolNames.js';
+import { McpToolName } from '../../../../constants/mcpToolNames.js';
 import {
   handlePersonalContextCapture,
   personalContextCaptureInputSchema,
-} from '../../tools/personalContextCapture/index.js';
-import { registerReadTool } from '../middlewares/index.js';
+} from '../../../tools/personalContextCapture/index.js';
+import { registerReadTool } from '../../middlewares/index.js';
 
 export function registerPersonalContextTools(server: McpServer): void {
   registerReadTool(

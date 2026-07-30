@@ -1,4 +1,4 @@
-export { mergeSection } from "../mergeSection.js";
-export { removeSection } from "../removeSection.js";
-export { sectionMarkers } from "../sectionMarkers.js";
-export type { SectionMarkers } from "../types.js";
+export { mergeSection } from "../operations/mergeSection.js";
+export { removeSection } from "../operations/removeSection.js";
+export { sectionMarkers } from "../operations/sectionMarkers.js";
+export type { SectionMarkers } from "../operations/types.js";

@@ -2,9 +2,9 @@ export {
   CLAUDE_INSTRUCTIONS_FILE,
   CODEX_INSTRUCTIONS_FILE,
   INSTRUCTIONS_FILES,
-} from "./files.js";
-export { mergeSection } from "./mergeSection.js";
-export { readSection } from "./readSection.js";
-export { removeSection } from "./removeSection.js";
-export { sectionMarkers } from "./sectionMarkers.js";
-export type { SectionMarkers } from "./types.js";
+} from "./operations/files.js";
+export { mergeSection } from "./operations/mergeSection.js";
+export { readSection } from "./operations/readSection.js";
+export { removeSection } from "./operations/removeSection.js";
+export { sectionMarkers } from "./operations/sectionMarkers.js";
+export type { SectionMarkers } from "./operations/types.js";

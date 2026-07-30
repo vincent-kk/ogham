@@ -1,7 +1,7 @@
 import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-import { findIndexMarker } from "./findMarker.js";
+import { findIndexMarker } from "./operations/findMarker.js";
 
 export interface StaleInfo {
   isStale: boolean;
