@@ -5,39 +5,29 @@
 ## 현재 위치
 
 - 브랜치: `refactor/plugins-fca-compliance` (main 에서 분기, 워킹트리 깨끗)
-- 커밋 13개. 마지막: `36704f47 refactor(imbas): cross fractals through barrels`
 - 목표: `plugins/` 전 플러그인의 FCA **error 0**. 기능은 바꾸지 않는다 — 바뀌는 것은 파일 위치, import 경로, 배럴 재노출 형태, 문서뿐이다.
 
-### 플러그인 상태 (error 기준)
+### 플러그인 상태 (error 기준, `structure_validate(path=<저장소 루트>)` 6 스코프 실측)
 
-| 플러그인      | error | 비고                                                    |
-| ------------- | ----: | ------------------------------------------------------- |
-| prawf         |     0 | 완료                                                    |
-| r-statistics  |     0 | 완료                                                    |
-| deilen        |     0 | 완료                                                    |
-| entrez        |     0 | 완료                                                    |
-| seiri         |     0 | 완료                                                    |
-| atlassian     |     0 | 완료                                                    |
-| maencof-lens  |     0 | 완료                                                    |
-| cennad        |     1 | 순환 1 — e2e 하네스가 닫는 것, 배송 그래프엔 없음(잔존) |
-| **imbas**     | **5** | **다음 차례 — 아래 목록이 전부다**                      |
-| **maencof**   |  ~146 | 최대 작업량. 서브배치 필요                              |
-| (root 스코프) |     4 | 마지막                                                  |
+| 플러그인     |   error | 비고                                                    |
+| ------------ | ------: | ------------------------------------------------------- |
+| prawf        |       0 | 완료                                                    |
+| r-statistics |       0 | 완료                                                    |
+| deilen       |       0 | 완료                                                    |
+| entrez       |       0 | 완료                                                    |
+| seiri        |       0 | 완료                                                    |
+| atlassian    |       0 | 완료                                                    |
+| maencof-lens |       0 | 완료                                                    |
+| imbas        |       0 | 완료                                                    |
+| cennad       |       1 | 순환 1 — e2e 하네스가 닫는 것, 배송 그래프엔 없음(잔존) |
+| **maencof**  | **146** | **다음 차례. 최대 작업량 — 서브배치 필요**              |
+| (plugins 밖) |      17 | 마지막. 전부 `external-import-boundary`                 |
 
 `detail-document-contract` 는 **warning 으로 낮췄다**(`.filid/config.json`). 도구 기본값이 fractal 마다 DETAIL 을 error 로 요구했지만 `filid_module-documents.md §6` 은 DETAIL 없는 fractal 을 전제한다 — 산문과 기본값이 어긋난 것이었다. 그래서 DETAIL 은 **면책을 선언해야 할 때만** 만든다.
 
-## T9 — imbas: 남은 error 5건 (전부)
-
-1. **순환 1** — `src → src/mcp → …`. 원인은 `src/index.ts` 의 `mcp` 재노출과 `mcp/server/server.ts` 의 `version.ts` 참조가 맞물린 것. 처방: 배럴에서 `mcp` 재노출 제거(아래 "처방 B").
-2. **organ-reach 1** — `src/hooks/contextInjector/contextInjector.ts` → `../../core/paths/utils/projectDirName.js`. 처방: `src/core/paths/DETAIL.md` 에 `utils` 훅 면책(처방 C).
-3. **version 2** — `src/mcp/server/server.ts`, `src/mcp/tools/imbasPing/imbasPing.ts` 의 `version.js` 참조. 처방: `src/DETAIL.md` 에 `version.ts` 면책(처방 D).
-4. **테스트 상한 1** — `src/__tests__/schemas.test.ts` 가 46 케이스(상한 32). 처방: describe 경계로 분할(처방 E).
-
-기준선: `yarn imbas test:run` → **32 files / 304 tests**. 어떤 단계 뒤에도 이 숫자가 그대로여야 한다.
-
 ## T10 — maencof (최대 작업량, 서브배치로)
 
-실측 분포(배럴 교정 전 기준):
+실측 분포:
 
 - `external-import-boundary` 137 — 갈래별로 처방이 다르다:
   - **hook 56** — importer 가 `src/hooks/**`. 배럴로 바꾸면 번들 캡 위반이다. **면책 선언만**(처방 C).
@@ -135,13 +125,13 @@ typecheck 와 test 는 **동시 실행하지 않는다**. `bridge/`·`public/`·
 
 세션 스크래치패드에 있던 것들이다. 다음 세션에서는 없으므로 필요하면 이 문서의 설명대로 다시 만든다.
 
-| 스크립트                | 용도                                                        |
-| ----------------------- | ----------------------------------------------------------- |
-| `rewrite-to-barrel.mjs` | 처방 A. eponymous 참조 → 배럴 참조, `hooks/` 제외           |
-| `move-into-organ.mjs`   | fractal 루트 구현 파일 → organ 이동 + specifier 해석 재작성 |
-| `split-tests.mjs`       | 처방 E. describe 경계로 테스트 파일 분할                    |
-| `errors-only.mjs`       | 스캔 아티팩트에서 error 만 플러그인·규칙별 집계             |
-| `classify-bypass.mjs`   | boundary error 를 hook / version / barrel 갈래로 분류       |
-| `exemption-owners.mjs`  | organ-reach error 에서 DETAIL 이 필요한 소유 fractal 목록   |
+| 스크립트                | 용도                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `rewrite-to-barrel.mjs` | 처방 A. eponymous 참조 → 배럴 참조, `hooks/` 제외                                                             |
+| `move-into-organ.mjs`   | fractal 루트 구현 파일 → organ 이동 + specifier 해석 재작성                                                   |
+| `split-tests.mjs`       | 처방 E. describe 경계로 테스트 파일 분할                                                                      |
+| `errors-only.mjs`       | 스캔 아티팩트를 severity·규칙별로 집계 (`--list` 로 error 경로)                                               |
+| `by-plugin.mjs`         | 같은 아티팩트를 플러그인별 error/warning 로 집계, 인자로 플러그인 하나의 규칙별 분포                          |
+| `classify-bypass.mjs`   | boundary error 를 hook / version / organ-reach / barrel 갈래로 분류하고 organ-reach 의 소유 fractal 목록 출력 |
 
 `structure_validate` 는 큰 결과를 아티팩트 JSON 으로 남기고 경로를 돌려준다. 위 집계 스크립트는 그 경로를 인자로 받는다.

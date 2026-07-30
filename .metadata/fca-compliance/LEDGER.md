@@ -2,27 +2,31 @@
 
 > **이어서 작업하려면 [HANDOFF.md](./HANDOFF.md) 를 먼저 읽는다.** 다음 착수 지점, 확립된 처방 5가지, 실측으로 얻은 함정, 검증 절차가 거기 정리되어 있다.
 
-계획: [PLAN.md](./PLAN.md). 기준 실측 792건(2026-07-30) → **현재 599건**.
+계획: [PLAN.md](./PLAN.md). 기준 실측 792건 → **현재 615건**.
 
 한 줄에 하나: 무엇이 어디에 반영되었고 무엇으로 검증했는가.
 
 ## 현재 상태 (2026-07-30 재실측)
 
-| 플러그인      | 착수 전 | 현재 | 상태                                   |
-| ------------- | ------: | ---: | -------------------------------------- |
-| prawf         |       2 |    1 | 완료 — error 0                         |
-| r-statistics  |      20 |    2 | 완료 — error 0                         |
-| deilen        |      33 |    1 | 완료 — error 0                         |
-| entrez        |      47 |    3 | 완료 — error 0                         |
-| seiri         |      47 |    2 | 완료 — error 0                         |
-| cennad        |      50 |    7 | 완료 — error 1(순환, 아래 사유)        |
-| atlassian     |      55 |    3 | 완료 — error 0                         |
-| maencof-lens  |      68 |   19 | 완료 — error 0 (잔여는 DETAIL warning) |
-| **imbas**     |     100 |   13 | **진행 중 — error 5 남음**             |
-| **maencof**   |     366 |  362 | 미착수 (서브배치 T10a–T10e 로 쪼갤 것) |
-| (root 스코프) |       4 |    4 | 미착수 — T11                           |
+측정 기준은 `structure_validate(path=<저장소 루트>)` 6 스코프 전체다. 이 표 이전에 적혀 있던 총계 599 는 더 좁은 스코프 조합에서 나온 값이라 아래 숫자와 비교하지 않는다.
 
-완료한 6개는 전부 `typecheck` + `test:run` 통과를 확인했다. 미착수 4개는 코드를 건드리지 않았다.
+| 플러그인     | 착수 전 |   error | warning | 상태                               |
+| ------------ | ------: | ------: | ------: | ---------------------------------- |
+| prawf        |       2 |       0 |       1 | 완료                               |
+| r-statistics |      20 |       0 |       2 | 완료                               |
+| deilen       |      33 |       0 |       1 | 완료                               |
+| entrez       |      47 |       0 |       3 | 완료                               |
+| seiri        |      47 |       0 |       2 | 완료                               |
+| atlassian    |      55 |       0 |       3 | 완료                               |
+| maencof-lens |      68 |       0 |      24 | 완료                               |
+| imbas        |     100 |       0 |      55 | 완료                               |
+| cennad       |      50 |       1 |       6 | 완료 — 순환 1 잔존(아래 사유)      |
+| **maencof**  |     366 | **146** |     216 | **다음 차례 — 서브배치 T10a–T10e** |
+| (plugins 밖) |       4 |      17 |     138 | 미착수 — T11                       |
+
+완료한 9개는 전부 `typecheck` + `test:run` 통과를 확인했다. 미착수 2개는 코드를 건드리지 않았다.
+
+`(plugins 밖)` 은 `plugins/` 아래가 아닌 모든 경로(`mcp-servers/`·`shared/`·`tools/`·`scripts/`)를 한 칸에 모은 것이다. 착수 전 칸의 4 는 더 좁은 루트 스코프만 센 값이라 error 17 과 같은 기준이 아니다.
 
 ## DETAIL 필수 여부 — 실측
 
@@ -36,9 +40,9 @@
 
 ## 다음 착수 지점
 
-**T9 — imbas.** 배럴 교정은 끝났고 error 5건이 남았다. 정확한 목록·처방·기준선은 [HANDOFF.md](./HANDOFF.md) 의 "T9" 절에 있다.
+**T10 — maencof.** error 146건이고 분포는 실측으로 확인했다: `external-import-boundary` 137 · `intent-document-contract` 3 · `spec-contract-link` 3 · `circular-dependency` 2 · `test-record-case-cap` 1. 서브배치 순서와 갈래별 처방은 [HANDOFF.md](./HANDOFF.md) 의 "T10" 절에 있다.
 
-이후 **T10 maencof (error ~146, 서브배치 필요)**, **T11 root 스코프 (4건)**.
+이후 **T11 — `plugins/` 밖 (error 17, 전부 `external-import-boundary`)**.
 
 ## 완료
 
@@ -116,10 +120,13 @@
 - spec 4개에 `filid:contract` 마커. 형제 spec 이 같은 그룹을 주장하지 않도록 `staleDetector` 에 `AC-marker-priority` 를 분리 정의했다.
 - 검증: typecheck 통과 → 13 files / 73 tests 통과(변경 전과 동일) → `structure_validate` boundaries·dag·verification 0 failed.
 
-### T9 — imbas (진행 중, 100 → 13, error 5 남음)
+### T9 — imbas (100 → error 0, warning 55)
 
-- 형제 배럴 교정 완료(`rewrite-to-barrel.mjs`, 20개 파일). 검증: typecheck 통과 → 32 files / 304 tests 통과(변경 전과 동일).
-- 남은 error 5건과 각 처방은 [HANDOFF.md](./HANDOFF.md) 에 있다.
+- 형제 배럴 교정(`rewrite-to-barrel.mjs`, 20개 파일). 검증: typecheck 통과 → 32 files / 304 tests 통과(변경 전과 동일).
+- `src/index.ts` 의 `mcp/` 재노출 제거로 `src → mcp → mcp/server → src` 순환 해소. 배럴 소비자가 워크스페이스에 0건임을 실측한 뒤 진행했고(`@ogham/imbas` importer 없음, `src` 안에서 루트 배럴을 import 하는 파일 없음), 이유를 파일 헤더에 남겼다.
+- DETAIL 2개 신설 — `src`(생성된 `version.ts` 직접 참조 면책 + 배럴 표면 계약), `src/core/paths`(세그먼트 거부 계약 + `utils` organ 훅 면책). `contextInjector` 는 17KB 번들 가드를 받아 배럴 경유가 빌드 실패이므로 면책이 유일한 해법이다.
+- `src/__tests__/schemas.test.ts`(46 케이스, 상한 32)를 검증 대상 `types/` 모듈별로 4개로 분할 — state 12 · config 13 · manifest 17 · cache 4. 원본 삭제 전 `it()` 46→46 · `describe` 11→11 을 기계적으로 대조했다.
+- 검증: typecheck 무출력 통과 → **35 files / 304 tests** 통과(파일만 +3, 케이스 수 동일) → `build:plugin` 훅 번들 가드 통과(`mcp-server.cjs` 312903 bytes 불변) → `structure_validate` boundaries·dag 116 passed / 0 failed, documents·nodes·entry-points 54건 전부 warning, verification 4건 전부 indeterminate.
 
 ## 재사용할 사실
 
