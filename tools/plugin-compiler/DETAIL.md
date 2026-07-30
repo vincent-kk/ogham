@@ -60,6 +60,7 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - agy `hooks.json` 은 PreToolUse 보유 플러그인에만 방출된다(현재 filid·imbas·maencof 3곳; cennad·maencof-lens 는 PreToolUse 없어 미생성).
 - Codex `.codex-plugin/hooks.json` 은 read 잡는 PreToolUse matcher 를 가진 플러그인에만 방출된다(현재 filid·imbas 2곳; maencof 는 `*` matcher 라 Bash 이미 발화 → 미생성).
 - `yarn plugin:adapters:check` 가 어댑터 손편집·정본 변경 후 미재생성을 exit 1 로 검출.
+- **CI 트리거 커버리지** — 정본(`skills/`·`agents/`·`.claude-plugin/**`·`.mcp.json`·`hooks/hooks.json`)과 어댑터 7종의 경로가 전부 `.github/workflows/ci.yml` 의 `paths` 필터에 걸린다. 어느 한쪽이 빠지면 그 변경은 CI 를 띄우지 않아 `plugin:adapters:check` 가 desync 를 잡을 기회를 잃는다 — 특히 어댑터의 다수는 `.codex-plugin/skills/**` 의 **마크다운**이라 확장자 기준 필터로는 걸리지 않는다. `push`·`pull_request` 두 목록은 동일하다(GitHub Actions 가 YAML 앵커를 지원하지 않아 중복이 강제된다). `src/__tests__/ciTriggerCoverage.test.ts` 가 고정한다.
 - 루트 `plugin.json` 과 `.codex-plugin/plugin.json` 은 **바이트 동일** — `planPluginAdapters` 스펙이 고정한다.
 - 훅 5종 플러그인(cennad·filid·imbas·maencof·maencof-lens)에서 `codex-read-matcher` 외 진단 0 (filid·imbas 는 `Read|Write|Edit` matcher 로 warning 1 씩 예상).
 - Claude 소비 파일의 git diff 0 (도구 실행 전후).
