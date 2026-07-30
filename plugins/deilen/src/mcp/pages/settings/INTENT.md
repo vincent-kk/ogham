@@ -6,12 +6,13 @@
 
 ## Structure
 
-| Path                | Role                                         |
-| ------------------- | -------------------------------------------- |
-| `index.html`        | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯  |
-| `styles/styles.css` | 테마(light/dark/auto) 토큰·타이포            |
-| `scripts/app.js`    | state hydrate·폼 populate·`/api/config` POST |
-| `index.ts`          | 빌드 입력 표식 (`export {}`)                 |
+| Path                       | Role                                         |
+| -------------------------- | -------------------------------------------- |
+| `index.html`               | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯  |
+| `styles/styles.css`        | 테마(light/dark/auto) 토큰·타이포            |
+| `scripts/app.js`           | state hydrate·폼 populate·`/api/config` POST |
+| `scripts/scopeDocument.js` | 재정의된 dot path 만 담은 project 문서 조립  |
+| `index.ts`                 | 빌드 입력 표식 (`export {}`)                 |
 
 ## Conventions
 
@@ -39,6 +40,7 @@
 
 - `eval`·inline 핸들러·외부 origin fetch
 - 빌드 산출물(`public/settings.html`) 직접 수정
+- `@ogham/*` 패키지 import — 배럴이 Node 전용 모듈을 재노출해 esbuild 가 브라우저 번들에서 그 그래프까지 파싱한다
 
 ## Dependencies
 

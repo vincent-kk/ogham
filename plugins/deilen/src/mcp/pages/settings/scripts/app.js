@@ -6,7 +6,7 @@
 // "설정 페이지 계약" (config_scope / data-config-path / data-scope-state), and
 // the other plugins' settings pages mirror this structure.
 
-import { clearConfigPaths, listOverriddenPaths } from "@ogham/cross-platform";
+import { projectDocument } from "./scopeDocument.js";
 
 const injected = window.__DEILEN_STATE__ || {};
 const token = injected.token || "";
@@ -90,10 +90,7 @@ function collect() {
 function documentForScope() {
   const full = collect();
   if (scope === "user") return full;
-  const notOverridden = listOverriddenPaths(full).filter(
-    (path) => !overridden.has(path),
-  );
-  return clearConfigPaths(full, notOverridden);
+  return projectDocument(full, overridden);
 }
 
 function fieldElements() {
