@@ -140,10 +140,11 @@ export type {
   CurrentFileInfo,
 } from './core/indexer/incrementalTracker/index.js';
 
-// MCP modules
+// MCP modules — `createServer`/`startServer` 는 노출하지 않는다. 실행 진입점은
+// esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 만드는 `bridge/mcp-server.cjs`
+// 이고, 이 배럴이 `mcp/server` 를 끌어오면 `server.ts → version.ts` 참조와 맞물려
+// src → mcp → mcp/server → src 의존 순환이 된다.
 export {
-  createServer,
-  startServer,
   removeBacklinks,
   getBacklinks,
   toolResult,

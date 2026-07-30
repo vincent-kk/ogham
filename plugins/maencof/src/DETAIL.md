@@ -21,7 +21,7 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 - Types: EdgeType에 `DOMAIN` 추가, KnowledgeNode에 `mentioned_persons`/`outboundLinks` 필드, KnowledgeGraph에 `EdgeTypeMap`
 - Search: query, assembleContext, QueryEngine, ContextAssembler, deriveContextSeeds (kg_context 자연어 분해 — 단어 OR + 인접 2-gram phrase 시드)
 - Index: MetadataStore, IncrementalTracker, computeIncrementalChangeSet
-- MCP: createServer, startServer, tool handlers (maencof*\*, kg*\_, boundary\_\_, claudemd*\*, activity*\*, workHistory)
+- MCP: tool handlers (maencof*\*, kg*\_, boundary\_\_, claudemd*\*, activity*\*, workHistory) + shared 헬퍼. `createServer`/`startServer` 는 노출하지 않는다 — 실행 진입점은 esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 만드는 `bridge/mcp-server.cjs` 이고, 배럴이 `mcp/server` 를 끌어오면 `server.ts → version.ts` 참조와 맞물려 `src → mcp → mcp/server → src` 순환이 된다
 - Types: 전체 타입 re-export (types/index.ts)
 
 ## Architecture Version
@@ -47,4 +47,4 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 
 - **Consumers**: `**/src/**`
 - **Direct import**: `allowed`
-- **Reason**: 생성기(`scripts/injectVersion.mjs`)가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 `src → mcp → mcp/server → src` 순환이 되고, SessionStart 훅 소비자는 배럴 경유가 번들 크기 가드에 걸린다.
+- **Reason**: 생성기(`scripts/injectVersion.mjs`)가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 하위 fractal 이 조상 배럴의 공개 표면 전체에 의존하게 되고, SessionStart 훅 소비자는 배럴 경유가 번들 크기 가드에 걸려 아예 불가능하다.
