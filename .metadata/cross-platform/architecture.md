@@ -75,6 +75,5 @@ configScope/
 페이지는 9.3 KB 브라우저 번들에 node 내장 0개, filid 훅은 기존 상한
 (pre-tool-use 25887/32768) 안에서, cennad 훅은 9768/10240 으로 통과한다.
 
-공개 계약과 설정 페이지 규약은 [`shared/cross-platform/DETAIL.md`](../../shared/cross-platform/DETAIL.md),
-전환 이력과 계획 대비 편차는
-[`config-scope-progress.md`](./config-scope-progress.md) 가 소유한다.
+공개 계약과 설정 페이지 규약은
+[`shared/cross-platform/DETAIL.md`](../../shared/cross-platform/DETAIL.md) 가 소유한다.

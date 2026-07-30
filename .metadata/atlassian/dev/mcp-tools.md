@@ -10,12 +10,12 @@
 
 The MCP layer exposes 4 tools under a single server named `"tools"`:
 
-| Tool | Type | Description |
-|---|---|---|
-| `fetch` | HTTP | All HTTP operations (GET/POST/PUT/PATCH/DELETE) via `method` param |
-| `convert` | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion |
-| `auth_check` | Local | Authentication status check with optional live connectivity test |
-| `setup` | Local | Local web server for auth/connection setup |
+| Tool         | Type  | Description                                                        |
+| ------------ | ----- | ------------------------------------------------------------------ |
+| `fetch`      | HTTP  | All HTTP operations (GET/POST/PUT/PATCH/DELETE) via `method` param |
+| `convert`    | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion             |
+| `auth_check` | Local | Authentication status check with optional live connectivity test   |
+| `setup`      | Local | Local web server for auth/connection setup                         |
 
 **Design principle**: MCP has zero domain knowledge. It does not know what a "Jira issue" or "Confluence page" is. It executes `(method, path, params, body)` tuples as HTTP requests.
 
@@ -28,19 +28,19 @@ All HTTP tools return the same envelope:
 ```typescript
 interface McpResponse {
   success: boolean;
-  status: number;           // HTTP status code
-  data: unknown;            // API response body (on success)
+  status: number; // HTTP status code
+  data: unknown; // API response body (on success)
   error?: {
-    code: string;           // e.g., "UNAUTHORIZED", "RATE_LIMITED"
+    code: string; // e.g., "UNAUTHORIZED", "RATE_LIMITED"
     message: string;
     retryable: boolean;
-    reauth_required?: boolean;  // 401 only: triggers auth form
-    details?: unknown;          // Original API error
+    reauth_required?: boolean; // 401 only: triggers auth form
+    details?: unknown; // Original API error
   };
   pagination?: {
     hasMore: boolean;
-    nextCursor?: string;    // Cloud cursor
-    startAt?: number;       // Server offset
+    nextCursor?: string; // Cloud cursor
+    startAt?: number; // Server offset
     total?: number;
   };
 }
@@ -54,19 +54,19 @@ interface McpResponse {
 
 Unified HTTP tool supporting all methods via the `method` parameter.
 
-| Category | Parameter | Type | Required | Description |
-|---|---|---|---|---|
-| **Skill-injected** | `method` | `"GET" \| "POST" \| "PUT" \| "PATCH" \| "DELETE"` | Y | HTTP method |
-| | `endpoint` | `string` | Y | API path (e.g., `/rest/api/3/issue/PROJ-123`) |
-| | `body` | `object` | N | Request body (POST/PUT/PATCH only) |
-| | `query_params` | `Record<string, string>` | N | URL query parameters |
-| | `expand` | `string[]` | N | Response expansion fields (GET only) |
-| | `headers` | `Record<string, string>` | N | Additional request headers |
-| | `accept_format` | `"json" \| "raw"` | N | Response format (default: `"json"`, GET only) |
-| | `content_type` | `string` | N | Body content type override (POST only) |
-| | `content_format` | `"json" \| "markdown"` | N | Body content format hint (POST/PUT/PATCH only) |
-| **MCP auto-injected** | `base_url` | `string` | — | From config, prepended to endpoint |
-| | `Authorization` | `string` | — | From stored credentials |
+| Category              | Parameter        | Type                                              | Required | Description                                    |
+| --------------------- | ---------------- | ------------------------------------------------- | -------- | ---------------------------------------------- |
+| **Skill-injected**    | `method`         | `"GET" \| "POST" \| "PUT" \| "PATCH" \| "DELETE"` | Y        | HTTP method                                    |
+|                       | `endpoint`       | `string`                                          | Y        | API path (e.g., `/rest/api/3/issue/PROJ-123`)  |
+|                       | `body`           | `object`                                          | N        | Request body (POST/PUT/PATCH only)             |
+|                       | `query_params`   | `Record<string, string>`                          | N        | URL query parameters                           |
+|                       | `expand`         | `string[]`                                        | N        | Response expansion fields (GET only)           |
+|                       | `headers`        | `Record<string, string>`                          | N        | Additional request headers                     |
+|                       | `accept_format`  | `"json" \| "raw"`                                 | N        | Response format (default: `"json"`, GET only)  |
+|                       | `content_type`   | `string`                                          | N        | Body content type override (POST only)         |
+|                       | `content_format` | `"json" \| "markdown"`                            | N        | Body content format hint (POST/PUT/PATCH only) |
+| **MCP auto-injected** | `base_url`       | `string`                                          | —        | From config, prepended to endpoint             |
+|                       | `Authorization`  | `string`                                          | —        | From stored credentials                        |
 
 **Method-specific behavior**:
 
@@ -85,22 +85,22 @@ Unified HTTP tool supporting all methods via the `method` parameter.
 
 **Not an HTTP tool.** Pure local conversion function.
 
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `from` | `"markdown" \| "adf" \| "storage" \| "wiki"` | Y | Source format |
-| `to` | `"markdown" \| "adf" \| "storage" \| "wiki"` | Y | Target format |
-| `content` | `string` | Y | Content to convert |
+| Parameter | Type                                         | Required | Description        |
+| --------- | -------------------------------------------- | -------- | ------------------ |
+| `from`    | `"markdown" \| "adf" \| "storage" \| "wiki"` | Y        | Source format      |
+| `to`      | `"markdown" \| "adf" \| "storage" \| "wiki"` | Y        | Target format      |
+| `content` | `string`                                     | Y        | Content to convert |
 
 **Supported conversions**:
 
-| From | To | Use Case |
-|---|---|---|
-| markdown | adf | Writing to Jira Cloud (issue description, comments) |
-| markdown | storage | Writing to Confluence (page body) |
-| markdown | wiki | Writing to Jira Server/DC |
-| adf | markdown | Reading from Jira Cloud |
-| storage | markdown | Reading from Confluence |
-| wiki | markdown | Reading from Jira Server/DC |
+| From     | To       | Use Case                                            |
+| -------- | -------- | --------------------------------------------------- |
+| markdown | adf      | Writing to Jira Cloud (issue description, comments) |
+| markdown | storage  | Writing to Confluence (page body)                   |
+| markdown | wiki     | Writing to Jira Server/DC                           |
+| adf      | markdown | Reading from Jira Cloud                             |
+| storage  | markdown | Reading from Confluence                             |
+| wiki     | markdown | Reading from Jira Server/DC                         |
 
 **ADF node type support**: heading, paragraph, bulletList, orderedList, codeBlock, blockquote, table, rule, mention, emoji, mediaGroup/mediaSingle, panel, expand, inlineCard/blockCard, status
 
@@ -114,30 +114,32 @@ Unified HTTP tool supporting all methods via the `method` parameter.
 
 **Not an HTTP tool.** Inspects stored credentials and optionally performs a live connectivity probe. Source of truth: `src/types/auth_check.ts`.
 
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `connection_test` | `boolean` | N | When `true`, issues a live request to the Atlassian instance (Jira: `/rest/api/*/myself`, Confluence: `/rest/api/user/current`) to validate the credentials end-to-end. Default: `false`. |
+| Parameter         | Type      | Required | Description                                                                                                                                                                               |
+| ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `connection_test` | `boolean` | N        | When `true`, issues a live request to the Atlassian instance (Jira: `/rest/api/*/myself`, Confluence: `/rest/api/user/current`) to validate the credentials end-to-end. Default: `false`. |
 
 **Returns** (Zod-validated):
 
 ```typescript
 interface AuthCheckResult {
-  authenticated: boolean;          // True when at least one configured service has valid credentials
+  authenticated: boolean; // True when at least one configured service has valid credentials
   services: {
-    jira?: AuthCheckServiceEntry[];        // Array — supports multi-site
-    confluence?: AuthCheckServiceEntry[];  // Array — supports multi-site
+    jira?: AuthCheckServiceEntry[]; // Array — supports multi-site
+    confluence?: AuthCheckServiceEntry[]; // Array — supports multi-site
   };
 }
 
 interface AuthCheckServiceEntry {
   configured: boolean;
   base_url?: string;
-  connection?: {                   // Populated only when connection_test=true
+  connection?: {
+    // Populated only when connection_test=true
     success: boolean;
     message: string;
     latency_ms?: number;
   };
-  user?: {                         // Populated when connection succeeds against Jira /myself
+  user?: {
+    // Populated when connection succeeds against Jira /myself
     displayName?: string;
     emailAddress?: string;
   } | null;
@@ -159,12 +161,12 @@ interface AuthCheckServiceEntry {
 
 **Not an HTTP tool.** Launches a local web server for auth configuration.
 
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `mode` | `"new" \| "edit"` | N | Setup mode (default: `"new"`) |
-| `prefill` | `object` | N | Pre-filled form values |
+| Parameter | Type              | Required | Description                   |
+| --------- | ----------------- | -------- | ----------------------------- |
+| `mode`    | `"new" \| "edit"` | N        | Setup mode (default: `"new"`) |
+| `prefill` | `object`          | N        | Pre-filled form values        |
 
-**Behavior**: Starts a local HTTP server on `127.0.0.1` (dynamic port), opens the auth setup form in the user's browser. See [auth-ui.md](auth-ui.md) for form design.
+**Behavior**: Starts a local HTTP server on `127.0.0.1` (dynamic port), opens the auth setup form in the user's browser. See [auth-ui.md](../auth-ui.md) for form design.
 
 **Returns**: Connection test results and saved config status.
 
@@ -176,23 +178,24 @@ interface AuthCheckServiceEntry {
 
 ### Two Models
 
-| Model | Platform | Mechanism |
-|---|---|---|
-| Cursor-based | Cloud | `nextPageToken` in response → pass as query param |
-| Offset-based | Server/DC | `startAt` + `maxResults` → increment `startAt` |
+| Model        | Platform  | Mechanism                                         |
+| ------------ | --------- | ------------------------------------------------- |
+| Cursor-based | Cloud     | `nextPageToken` in response → pass as query param |
+| Offset-based | Server/DC | `startAt` + `maxResults` → increment `startAt`    |
 
 ### Processing Strategy: Skill-controlled + MCP auto-detection
 
 ```typescript
 interface PaginationConfig {
-  mode: "cursor" | "offset" | "auto";  // auto: decided by is_cloud
-  max_results?: number;                 // Per-page limit (default: 50)
-  cursor?: string;                      // Cursor mode: next page token
-  start_at?: number;                    // Offset mode: start position
+  mode: "cursor" | "offset" | "auto"; // auto: decided by is_cloud
+  max_results?: number; // Per-page limit (default: 50)
+  cursor?: string; // Cursor mode: next page token
+  start_at?: number; // Offset mode: start position
 }
 ```
 
 **Flow**:
+
 1. Skill optionally includes `pagination` parameter in `fetch` call
 2. `mode: "auto"` → MCP decides based on `is_cloud` config
 3. MCP extracts `nextPageToken`, `startAt`, `total` from response
@@ -216,12 +219,12 @@ Skill ──(endpoint, body, headers — NO tokens)──> MCP
                                               Authorization: Bearer xxx
 ```
 
-| Auth Type | Platform | Header |
-|---|---|---|
-| Basic (Cloud) | Cloud | `Basic base64(email:api_token)` |
+| Auth Type      | Platform  | Header                            |
+| -------------- | --------- | --------------------------------- |
+| Basic (Cloud)  | Cloud     | `Basic base64(email:api_token)`   |
 | Basic (Server) | Server/DC | `Basic base64(username:password)` |
-| PAT | Server/DC | `Bearer {personal_token}` |
-| OAuth 2.0 | Both | `Bearer {access_token}` |
+| PAT            | Server/DC | `Bearer {personal_token}`         |
+| OAuth 2.0      | Both      | `Bearer {access_token}`           |
 
 ---
 
@@ -232,9 +235,9 @@ Skill ──(endpoint, body, headers — NO tokens)──> MCP
 ```typescript
 interface RetryPolicy {
   max_retries: 3;
-  base_delay_ms: 1000;              // First retry: 1s
-  backoff_multiplier: 2;            // Exponential: 1s -> 2s -> 4s
-  max_delay_ms: 10000;              // Max wait: 10s
+  base_delay_ms: 1000; // First retry: 1s
+  backoff_multiplier: 2; // Exponential: 1s -> 2s -> 4s
+  max_delay_ms: 10000; // Max wait: 10s
   retry_on: [429, 500, 502, 503, 504];
 }
 ```
@@ -244,15 +247,15 @@ interface RetryPolicy {
 
 ### Error Code Mapping
 
-| HTTP Status | `error.code` | `retryable` | Description |
-|---|---|---|---|
-| 400 | `BAD_REQUEST` | false | Parameter validation error |
-| 401 | `UNAUTHORIZED` | false | Auth failed (triggers reauth flow) |
-| 403 | `FORBIDDEN` | false | Insufficient permissions |
-| 404 | `NOT_FOUND` | false | Resource does not exist |
-| 409 | `CONFLICT` | false | Version conflict (Confluence page etc.) |
-| 429 | `RATE_LIMITED` | true | Rate limit exceeded |
-| 500-504 | `SERVER_ERROR` | true | Server-side errors |
+| HTTP Status | `error.code`   | `retryable` | Description                             |
+| ----------- | -------------- | ----------- | --------------------------------------- |
+| 400         | `BAD_REQUEST`  | false       | Parameter validation error              |
+| 401         | `UNAUTHORIZED` | false       | Auth failed (triggers reauth flow)      |
+| 403         | `FORBIDDEN`    | false       | Insufficient permissions                |
+| 404         | `NOT_FOUND`    | false       | Resource does not exist                 |
+| 409         | `CONFLICT`     | false       | Version conflict (Confluence page etc.) |
+| 429         | `RATE_LIMITED` | true        | Rate limit exceeded                     |
+| 500-504     | `SERVER_ERROR` | true        | Server-side errors                      |
 
 ### Read-Only Mode
 
@@ -289,6 +292,7 @@ Error responses that might contain token information must mask all credential va
 ### `search` Tool Non-existence
 
 There is NO dedicated `search` tool. Search operations use the `fetch` tool:
+
 - Jira search (Cloud): `fetch` (method: POST) — `POST /rest/api/3/search/jql` with JQL in body
 - Jira search (Server): `fetch` (method: GET) — `GET /rest/api/2/search?jql=...`
 - Confluence search: `fetch` (method: GET) — `GET /wiki/rest/api/content/search?cql=...`

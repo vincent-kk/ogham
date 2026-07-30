@@ -27,7 +27,7 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 
 ## 현재 상태 · 남은 작업
 
-> TODO·transition-plan·backlog·stage4·c4-3 원장의 잔존 내용 흡수 (2026-07-21). 실측 로그 정본: [m2](./m2-measurement-log.md)·[stage5](./stage5-measurement-log.md)·[stage6](./stage6-codex-multiagent.md).
+> TODO·transition-plan·backlog·stage4·c4-3 원장의 잔존 내용 흡수 (2026-07-21). 실측 로그 정본: [stage6](./stage6-codex-multiagent.md).
 
 **완료 (착수 가능 절차 전부):**
 
@@ -41,10 +41,10 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 
 **남은 작업 (전부 외부 차단 — 우리 코드로 완료 불가):**
 
-- **머지 후 라이브 게이트**: main 머지 후 마켓플레이스 실설치로 Claude 무영향 재확인. Codex 축은 2026-07-22 에 **상태 경로 E2E 만 라이브 종료**(codex-cli 0.145.0 — 실설치 + `codex exec` 로 훅·MCP 양 채널이 `~/.codex/plugins/<pkg>` 로 수렴, `~/.claude` 누수 0. 상세: [TODO.md](./TODO.md) §Codex 라이브 E2E). 나머지 도구노출·훅 trust UX 는 여전히 미확인.
+- **머지 후 라이브 게이트**: main 머지 후 마켓플레이스 실설치로 Claude 무영향 재확인. Codex 축은 2026-07-22 에 **상태 경로 E2E 만 라이브 종료**(codex-cli 0.145.0 — 실설치 + `codex exec` 로 훅·MCP 양 채널이 `~/.codex/plugins/<pkg>` 로 수렴, `~/.claude` 누수 0). 나머지 도구노출·훅 trust UX 는 여전히 미확인.
 - **agy 업스트림 대기**: (F4) agy 1.1.2 가 PreInvocation `injectSteps` 를 렌더하지 않아 컨텍스트 주입 훅 무가치 — 어댑터·러너는 준비됨, agy 가 렌더하면 emit 만 추가. (L2) `agy plugin install` 이 MCP 안 뜨는 위치(`~/.gemini/config/plugins/`)에 설치 → `~/.agents/plugins/<pkg>/` 수동 복사(README 안내). 둘 다 agy CLI 수정 전까지 우리 쪽 해결 불가.
 - **Codex 플랫폼 한계(고지)**: 셸 read 추적 불완전(복합 파이프/grep — `codex-read-matcher` 린트가 표면화), 스킬 본문 full-form 도구명 불일치(E1 — `AGENTS.md`/서술형 완화 여지). 모델의 Bash 파일편집 우회는 3-호스트 공통 guardrail 한계.
-- **훅/MCP 상태 경로 호스트 정합성 심화 검토** — 1차 봉합(위)에 더해 2026-07-22 에 ① Claude 훅 env **직접 실측 종료**(`CLAUDE_` 접두만 주입 ⇒ un-prefixed `PLUGIN_DATA` = Codex 판별자 안전 확정)와 ② **호스트 레지스트리 분리**(`hostRegistry` — 호스트 지식 단일 진실원, `paths` 에서 호스트 리터럴 제거, agy 가 명시적 행으로)를 완료. ③ **정식 per-plugin data dir 은 쓰지 않기로 종료**(원래부터 의도된 설계 — 그 경로는 `<plugin>-<marketplace>` 로 install-source 마다 갈려 재설치 시 자격증명이 유실되고, Codex 는 MCP 에 값을 안 줘 채널이 분리된다. 근거는 `paths/INTENT.md`) ④ 힌트 문자열이 `errorLogPath(pkg)` 보간으로 전환 ⑤ 상태경로 **전수 감사 우회 0건** ⑥ **agy 훅 env 실측**(1.1.5 — 추가 변수는 `ANTIGRAVITY_CONVERSATION_ID` 하나, 상태 채널 없음). **이 이슈는 전 항목 종료** — 기록 정본: [TODO.md](./TODO.md).
+- **훅/MCP 상태 경로 호스트 정합성 심화 검토** — 1차 봉합(위)에 더해 2026-07-22 에 ① Claude 훅 env **직접 실측 종료**(`CLAUDE_` 접두만 주입 ⇒ un-prefixed `PLUGIN_DATA` = Codex 판별자 안전 확정)와 ② **호스트 레지스트리 분리**(`hostRegistry` — 호스트 지식 단일 진실원, `paths` 에서 호스트 리터럴 제거, agy 가 명시적 행으로)를 완료. ③ **정식 per-plugin data dir 은 쓰지 않기로 종료**(원래부터 의도된 설계 — 그 경로는 `<plugin>-<marketplace>` 로 install-source 마다 갈려 재설치 시 자격증명이 유실되고, Codex 는 MCP 에 값을 안 줘 채널이 분리된다. 근거는 `paths/INTENT.md`) ④ 힌트 문자열이 `errorLogPath(pkg)` 보간으로 전환 ⑤ 상태경로 **전수 감사 우회 0건** ⑥ **agy 훅 env 실측**(1.1.5 — 추가 변수는 `ANTIGRAVITY_CONVERSATION_ID` 하나, 상태 채널 없음). **이 이슈는 전 항목 종료.**
 
 **운영 함정 (재개·머지 시):**
 
@@ -60,11 +60,9 @@ ogham 플러그인의 **Claude 산출물을 무수정 정본**으로 두고, `to
 | [compiler-architecture.md](./compiler-architecture.md)     | in-place 어댑터 아키텍처 — 파일 지형·생성 규칙·도구 구조·검증                                   |
 | [migration-playbook.md](./migration-playbook.md)           | 적용 절차 — 플러그인별 스텝·실측 게이트 G1–G8·설치 채널·알려진 격차                             |
 | [sessionend-refactor.md](./sessionend-refactor.md)         | ADR — SessionEnd → MCP 수명주기 이관(완료·유지, 호스트 이벤트 채널 의존 제거)                   |
-| [m2-measurement-log.md](./m2-measurement-log.md)           | 실측 로그 — M2 호스트 실측(V1–V4·C4 근거)                                                       |
-| [stage5-measurement-log.md](./stage5-measurement-log.md)   | 실측 로그 — Stage 5(Codex 파일도구·agy 게이팅·emitter 배선)                                     |
 | [stage6-codex-multiagent.md](./stage6-codex-multiagent.md) | 실측 로그 — Codex 네이티브 multi_agent 위원회 이식 검증(스킬 변이 근거)                         |
 
-사용법(CLI)은 [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md) 가 소유한다. 구 세션-복원 TODO·전환 계획(transition-plan)·경로/규칙 의뢰서(stage4-\*)·백로그(backlog-d-e)·C4-3 설계서는 작업 완료로 이 README §현재 상태·남은 작업 에 흡수·은퇴했다(상세 이력은 git). 현행 [TODO.md](./TODO.md) 는 그 덤프가 아니라 **훅/MCP 상태 경로 심화 검토 전용** 이슈 추적기로 신규 작성됐다(다음 세션). 구 체제 문서(ir-schema·case-studies·implementation-plan·reproduction·usage)는 재배치 설계와 함께 은퇴 — git 이력(`6378169a`) 참조.
+사용법(CLI)은 [`tools/plugin-compiler/DETAIL.md`](../../tools/plugin-compiler/DETAIL.md) 가 소유한다. 구 세션-복원 TODO·전환 계획(transition-plan)·경로/규칙 의뢰서(stage4-\*)·백로그(backlog-d-e)·C4-3 설계서는 작업 완료로 이 README §현재 상태·남은 작업 에 흡수·은퇴했다(상세 이력은 git). 구 체제 문서(ir-schema·case-studies·implementation-plan·reproduction·usage)는 재배치 설계와 함께 은퇴 — git 이력(`6378169a`) 참조.
 
 ## 용어
 

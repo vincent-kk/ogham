@@ -28,7 +28,6 @@
 | [agents.md](./agents.md)             | 에이전트 `paper-search-expert` ×1 (생성/재랭킹 내부 2모드) + `references/`                                     |
 | [dispatcher.md](./dispatcher.md)     | `search` 스킬 상태머신, intent 분류, `SEARCH` 내부 단계, 실행 모드                                             |
 | [setup.md](./setup.md)               | `setup` web UI 설정, credentials/config 분리, `auth_check` reachability                                        |
-| [roadmap.md](./roadmap.md)           | E-utilities 제약 대응 구현 디테일 / 이후 항목                                                                  |
 
 ## 3-Layer 한눈에
 

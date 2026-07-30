@@ -127,7 +127,6 @@ T1 실측의 스크래치는 **baseline(`config.json`) 자체가 standard** 였�
 
 - 방법론 원류: [d7-dispatch.md](./d7-dispatch.md) (§1 무개입 · §2 관측 층위 · §5 격리 · §6 함정) · [d7-results.md](./d7-results.md) (프록시 하니스의 한계 서술)
 - 확정 설계: [02-ARCHITECTURE.md](../02-ARCHITECTURE.md) §4(훅·다이얼·페이로드 실측) · §5(조건부 로드·파서 실측)
-- 잔여 작업 목록: [TODO.md](../TODO.md) "실하니스 잔여"
 
 ---
 

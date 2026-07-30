@@ -38,4 +38,3 @@ Claude Code 플러그인. Claude 가 생성한 markdown 문서를 로컬 HTTP �
 | [web-ui.md](./web-ui.md)                       | 문서 뷰어 페이지 + 설정 UI + 라우트 + 보안                           |
 | [skills.md](./skills.md)                       | `setup`, `preview` 스킬 (preview 의 1회 호출 수거 절차 포함)         |
 | [storage.md](./storage.md)                     | `~/.claude/plugins/deilen/` 디스크 레이아웃 + config 스키마          |
-| [roadmap.md](./roadmap.md)                     | 단계별 구현 순서                                                     |

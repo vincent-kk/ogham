@@ -29,4 +29,3 @@ Claude Code 플러그인. Codex CLI / Antigravity CLI(`agy`) / Claude CLI 를 Cl
 | [web-ui.md](./web-ui.md)                         | 로컬 설정 웹 UI (codex / antigravity / Anthropic 3-lane, per-provider 토글·슬라이더, claude permission-mode·모델·effort 드롭다운 포함) |
 | [provider-dispatch.md](./provider-dispatch.md)   | codex-cli / claude-cli / agy (Antigravity CLI) 호출 매핑                                                                               |
 | [agy-upstream-watch.md](./agy-upstream-watch.md) | agy 업스트림 결함(#76, #7) 추적 — 워크어라운드 해제 조건 + 검증 로그 + 재검증 절차                                                     |
-| [roadmap.md](./roadmap.md)                       | 단계별 구현 순서                                                                                                                       |

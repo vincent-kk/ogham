@@ -21,7 +21,6 @@
 | [dispatcher.md](./dispatcher.md)     | 상태머신 오케스트레이션, intent 분류, 실행 모드                                                       |
 | [assert-rules.md](./assert-rules.md) | `assert_analysis_plan` 표준 룰셋 (기법별 가정 매핑)                                                   |
 | [spec.md](./spec.md)                 | 컴포넌트 책임, 데이터 흐름, 비채택 결정                                                               |
-| [roadmap.md](./roadmap.md)           | 남은 구현 디테일 / 이후 항목                                                                          |
 
 ## 3-Layer 한눈에
 
