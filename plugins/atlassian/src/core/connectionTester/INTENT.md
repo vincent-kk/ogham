@@ -33,9 +33,10 @@ Jira/Confluence 인스턴스에 실제 HTTP 요청을 보내 연결 가능 여�
 
 ## Dependencies
 
-| 대상               | 이유                                                               |
-| ------------------ | ------------------------------------------------------------------ |
-| `../../types/`     | `ConnectionTestResult`, `HttpClientConfig`, `TestConnectionParams` |
-| `../../constants/` | `CONNECTION_TEST_TIMEOUT`                                          |
-| `../index`         | `resolveEnvironment`, `getApiVersion`, `executeRequest`            |
-| `../../utils/`     | `buildAuthHeader`                                                  |
+| 대상                      | 이유                                                               |
+| ------------------------- | ------------------------------------------------------------------ |
+| `../../types/`            | `ConnectionTestResult`, `HttpClientConfig`, `TestConnectionParams` |
+| `../../constants/`        | `CONNECTION_TEST_TIMEOUT`                                          |
+| `../environmentResolver/` | `resolveEnvironment`, `getApiVersion` (형제 배럴 직접 경유)        |
+| `../httpClient/`          | `executeRequest` (형제 배럴 직접 경유)                             |
+| `../../utils/`            | `buildAuthHeader`                                                  |
