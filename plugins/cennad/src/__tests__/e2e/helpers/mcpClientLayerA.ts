@@ -2,6 +2,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 
 import { createServer } from '../../../mcp/server/index.js';
+import { VERSION } from '../../../version.js';
 
 export interface LayerAClient {
   client: Client;
@@ -11,7 +12,7 @@ export interface LayerAClient {
 export async function makeLayerAClient(): Promise<LayerAClient> {
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
-  const server = createServer();
+  const server = createServer(VERSION);
   const client = new Client({ name: 'cennad-e2e-layerA', version: '0.0.0' });
   await Promise.all([
     server.connect(serverTransport),

@@ -34,16 +34,16 @@
 - 배송되는 그래프(`mcp/serverEntry → mcp/server → version.ts`)에 순환이 없다.
 - `src/index.ts` 가 `mcp/` 를 재노출하지 않는다.
 
-**남는 판정 하나**: 구조 스캔은 `src → mcp/server → src` 순환을 계속 보고한다. 닫는 엣지는 e2e Layer A 하네스(`__tests__/e2e/helpers/mcpClientLayerA.ts` → `mcp/server`)이고 되돌아오는 엣지는 `createServer.ts` → `version.ts` 다. 검증 파일의 참조는 순환을 닫지 않는다는 것이 규칙의 취지지만, 어댑터는 테스트 케이스를 담은 파일만 검증으로 인식하고 케이스 없는 헬퍼는 일반 소스로 본다. 하네스를 없애지 않고 이 엣지를 지울 방법은 없으며, `version.ts` 는 생성기가 `src/` 루트에 고정하므로 organ 으로 내릴 수도 없다.
+**서버 identity 는 주입된다**: `createServer(version)`·`startServer(version)` 은 버전을 인자로 받고 `mcp/server` 안에서 `version.ts` 를 읽지 않는다. 실행 경로에서는 `mcp/serverEntry` 가, 테스트에서는 e2e Layer A 하네스가 `VERSION` 을 넘긴다. 이렇게 두는 이유는 `mcp/server` 가 `src` 루트를 참조하면 하네스의 `src → mcp/server` 엣지와 맞물려 의존 순환이 되기 때문이다 — 하네스는 케이스가 없어 어댑터가 검증 파일로 인식하지 않으므로 그 엣지는 사라지지 않는다.
 
 ## Boundary Exemptions
 
-### version.ts — Generated version constant has no entry point
+### `version.ts` — Generated version constant has no entry point
 
 - **Consumers**: `**/src/**`
-- **Direct import**: allowed
-- **Reason**: `version.ts` 는 생성기가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 배럴을 경유시키면 `src → mcp → server → src` 순환이 생기므로, 이 참조는 경계를 넘는 대신 면책을 받는다.
+- **Direct import**: `allowed`
+- **Reason**: 생성기가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 하위 fractal 이 조상 배럴의 공개 표면 전체에 의존하게 되고, 훅 도달 코드는 배럴 경유가 번들 크기 가드에 걸려 아예 불가능하다.
 
 ## Last Updated
 
-2026-07-30 — 레이어 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.
+2026-07-30 — 레이어 계약과 서버 identity 주입을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.

@@ -4,14 +4,21 @@ import { z } from 'zod';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { ProviderSchema, TierSchema } from '../../../types/conversation.js';
-import { VERSION } from '../../../version.js';
 import { wrapHandler } from '../../shared/index.js';
 import { handleContinueConversation } from '../../tools/continueConversation/index.js';
 import { handleOpenSettings } from '../../tools/openSettings/index.js';
 import { handleStartConversation } from '../../tools/startConversation/index.js';
 
-export function createServer(): McpServer {
-  const server = new McpServer({ name: 'tools', version: VERSION });
+/**
+ * MCP 서버 인스턴스를 만들고 3개 도구를 등록한다.
+ *
+ * @param version 호스트에 보고할 서버 버전. `src/version.ts` 의 `VERSION` 을
+ *   호출자가 넘긴다 — 이 fractal 이 직접 읽으면 `src` 로 되돌아가는 의존 엣지가
+ *   생겨 e2e 하네스의 `src → mcp/server` 엣지와 순환을 만든다.
+ * @returns 도구가 등록된, 아직 transport 에 연결되지 않은 서버.
+ */
+export function createServer(version: string): McpServer {
+  const server = new McpServer({ name: 'tools', version });
 
   server.registerTool(
     McpToolName.START_CONVERSATION,
