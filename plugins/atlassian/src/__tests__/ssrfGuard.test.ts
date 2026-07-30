@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { isPrivateIp } from "../utils/index.js";
-import { validateUrl } from "../core/httpClient/ssrfGuard.js";
+import { validateUrl } from "../core/httpClient/operations/ssrfGuard.js";
 
 vi.mock("node:dns/promises", () => ({
   resolve: vi.fn(async (host: string) => {

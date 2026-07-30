@@ -1,4 +1,4 @@
-export { convert } from "./convert.js";
+export { convert } from "./operations/convert.js";
 export { adfToMarkdown } from "./adfToMarkdown/index.js";
 export { markdownToAdf } from "./markdownToAdf/index.js";
 export { storageToMarkdown } from "./storageToMarkdown/index.js";

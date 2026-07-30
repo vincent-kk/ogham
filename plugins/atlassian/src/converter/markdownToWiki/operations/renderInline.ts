@@ -1,7 +1,7 @@
 import {
   tokenizeInlineMarkdown,
   type InlineToken,
-} from "../markdownParsing/tokenizeInline.js";
+} from "../../markdownParsing/tokenizeInline.js";
 
 const WIKI_SPECIAL_RE = /\\?[[\]{}|*_^~!+-]/g;
 

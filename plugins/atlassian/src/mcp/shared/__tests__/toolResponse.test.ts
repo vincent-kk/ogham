@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { wrapHandler, toolError } from "../toolResponse.js";
+import { wrapHandler, toolError } from "../helpers/toolResponse.js";
 
 type ToolResponse = {
   content: { type: "text"; text: string }[];

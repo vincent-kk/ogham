@@ -1,4 +1,4 @@
-import type { AdfNode } from "../types/adfNode.js";
+import type { AdfNode } from "../../types/adfNode.js";
 import { applyMarks } from "./applyMarks.js";
 
 export function convertInline(node: AdfNode): string {

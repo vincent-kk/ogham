@@ -1,5 +1,5 @@
 import { resolve as dnsResolve } from "node:dns/promises";
-import { isPrivateIp } from "../../utils/index.js";
+import { isPrivateIp } from "../../../utils/index.js";
 
 /** Validate a URL against SSRF attack vectors */
 export async function validateUrl(

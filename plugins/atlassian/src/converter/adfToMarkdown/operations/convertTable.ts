@@ -1,4 +1,4 @@
-import type { AdfNode } from "../types/adfNode.js";
+import type { AdfNode } from "../../types/adfNode.js";
 
 export function convertTable(
   rows: AdfNode[],

@@ -1,4 +1,4 @@
-import { tokenizeInlineMarkdown } from "../markdownParsing/tokenizeInline.js";
+import { tokenizeInlineMarkdown } from "../../markdownParsing/tokenizeInline.js";
 
 export function escapeXml(text: string): string {
   return text

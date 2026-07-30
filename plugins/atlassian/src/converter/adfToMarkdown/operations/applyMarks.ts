@@ -1,4 +1,4 @@
-import type { AdfNode } from "../types/adfNode.js";
+import type { AdfNode } from "../../types/adfNode.js";
 
 export function applyMarks(text: string, marks?: AdfNode["marks"]): string {
   if (!marks || marks.length === 0) return text;

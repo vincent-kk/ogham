@@ -1,6 +1,6 @@
-import { parseHtml } from "./parseHtml.js";
-import { renderStorageNode } from "./renderStorageNode.js";
-import { stripTagsFallback } from "./stripTagsFallback.js";
+import { parseHtml } from "./operations/parseHtml.js";
+import { renderStorageNode } from "./operations/renderStorageNode.js";
+import { stripTagsFallback } from "./operations/stripTagsFallback.js";
 
 /** Convert Confluence Storage Format XHTML to Markdown */
 export function storageToMarkdown(storageXhtml: string): string {

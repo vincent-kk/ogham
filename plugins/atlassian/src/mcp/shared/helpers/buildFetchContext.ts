@@ -1,8 +1,8 @@
-import type { FetchContext, HttpClientConfig } from "../../types/index.js";
-import { loadConfig } from "../../core/configManager/index.js";
-import { getAuthHeader } from "../../core/authManager/index.js";
-import { getApiVersion } from "../../core/index.js";
-import { resolveSiteConfig } from "../../utils/index.js";
+import type { FetchContext, HttpClientConfig } from "../../../types/index.js";
+import { loadConfig } from "../../../core/configManager/index.js";
+import { getAuthHeader } from "../../../core/authManager/index.js";
+import { getApiVersion } from "../../../core/index.js";
+import { resolveSiteConfig } from "../../../utils/index.js";
 
 /** Build FetchContext (HttpClientConfig + service + apiVersion) for a fetch call. */
 export async function buildFetchContext(

@@ -14,7 +14,7 @@ import {
   DEFAULT_TIMEOUT,
 } from "../../constants/index.js";
 import { buildUrl, extractHostname } from "../../utils/index.js";
-import { validateUrl } from "./ssrfGuard.js";
+import { validateUrl } from "./operations/ssrfGuard.js";
 
 function getErrorCode(status: number): string {
   return (

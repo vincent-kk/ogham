@@ -1,5 +1,5 @@
-import type { AdfNode } from "../types/adfNode.js";
-import { tokenizeInlineMarkdown } from "../markdownParsing/tokenizeInline.js";
+import type { AdfNode } from "../../types/adfNode.js";
+import { tokenizeInlineMarkdown } from "../../markdownParsing/tokenizeInline.js";
 
 function makeMarkedText(
   text: string,

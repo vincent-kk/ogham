@@ -11,6 +11,10 @@ Pure local format conversion: ADF/Storage Format <-> Markdown. Zero dependency o
 | `storageToMarkdown/` | Confluence Storage XHTML → Markdown           |
 | `markdownToStorage/` | Markdown → Confluence Storage XHTML           |
 | `markdownToWiki/`    | Markdown → Jira Wiki Markup (Server/DC v2)    |
+| `markdownParsing/`   | 공용 블록·인라인 파서 (organ)                 |
+| `types/`             | `AdfNode` 타입 (organ)                        |
+| `operations/`        | `convert` — 포맷 쌍을 골라 위임하는 진입 함수 |
+| `index.ts`           | 배럴                                          |
 
 ## Conventions
 

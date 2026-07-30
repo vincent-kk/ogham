@@ -1,4 +1,4 @@
-import type { MarkdownBlock } from "../markdownParsing/parseBlocks.js";
+import type { MarkdownBlock } from "../../markdownParsing/parseBlocks.js";
 import { escapeXml, renderInlineToStorage } from "./renderInline.js";
 
 function renderCodeBlock(

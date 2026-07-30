@@ -4,11 +4,11 @@
 
 ## Structure
 
-| 파일            | 역할                                         |
-| --------------- | -------------------------------------------- |
-| `httpClient.ts` | `executeRequest` — 재시도·인증·타임아웃 처리 |
-| `ssrfGuard.ts`  | `validateUrl` — DNS 해석 기반 SSRF 방어      |
-| `index.ts`      | barrel export                                |
+| 파일                      | 역할                                         |
+| ------------------------- | -------------------------------------------- |
+| `httpClient.ts`           | `executeRequest` — 재시도·인증·타임아웃 처리 |
+| `operations/ssrfGuard.ts` | `validateUrl` — DNS 해석 기반 SSRF 방어      |
+| `index.ts`                | barrel export                                |
 
 ## Boundaries
 

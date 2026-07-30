@@ -1,5 +1,5 @@
 import { parseMarkdownBlocks } from "../markdownParsing/parseBlocks.js";
-import { renderBlocksToAdf } from "./renderBlocks.js";
+import { renderBlocksToAdf } from "./operations/renderBlocks.js";
 import type { AdfNode } from "../types/adfNode.js";
 
 /** Convert Markdown text to an ADF document */

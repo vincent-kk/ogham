@@ -1,4 +1,4 @@
-import type { AdfNode } from "../types/adfNode.js";
+import type { AdfNode } from "../../types/adfNode.js";
 import { convertInline } from "./convertInline.js";
 import { convertTable } from "./convertTable.js";
 

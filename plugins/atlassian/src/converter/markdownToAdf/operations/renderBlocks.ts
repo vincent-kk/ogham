@@ -1,5 +1,5 @@
-import type { MarkdownBlock } from "../markdownParsing/parseBlocks.js";
-import type { AdfNode } from "../types/adfNode.js";
+import type { MarkdownBlock } from "../../markdownParsing/parseBlocks.js";
+import type { AdfNode } from "../../types/adfNode.js";
 import { renderInlineToAdf } from "./renderInline.js";
 
 function makeParagraph(text: string): AdfNode {

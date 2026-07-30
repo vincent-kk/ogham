@@ -1,9 +1,9 @@
-import type { ConvertFormat } from "../types/index.js";
-import { adfToMarkdown } from "./adfToMarkdown/index.js";
-import { markdownToAdf } from "./markdownToAdf/index.js";
-import { storageToMarkdown } from "./storageToMarkdown/index.js";
-import { markdownToStorage } from "./markdownToStorage/index.js";
-import { markdownToWiki } from "./markdownToWiki/index.js";
+import type { ConvertFormat } from "../../types/index.js";
+import { adfToMarkdown } from "../adfToMarkdown/index.js";
+import { markdownToAdf } from "../markdownToAdf/index.js";
+import { storageToMarkdown } from "../storageToMarkdown/index.js";
+import { markdownToStorage } from "../markdownToStorage/index.js";
+import { markdownToWiki } from "../markdownToWiki/index.js";
 
 /** Unified conversion function: convert between supported formats */
 export function convert(

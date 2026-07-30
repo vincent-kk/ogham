@@ -1,4 +1,4 @@
-import type { MarkdownBlock } from "../markdownParsing/parseBlocks.js";
+import type { MarkdownBlock } from "../../markdownParsing/parseBlocks.js";
 import { renderInlineToWiki } from "./renderInline.js";
 
 function renderTable(rows: string[][]): string {
