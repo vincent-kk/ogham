@@ -1,24 +1,26 @@
 # plugins FCA 준수화 — 진행 원장
 
+> **이어서 작업하려면 [HANDOFF.md](./HANDOFF.md) 를 먼저 읽는다.** 다음 착수 지점, 확립된 처방 5가지, 실측으로 얻은 함정, 검증 절차가 거기 정리되어 있다.
+
 계획: [PLAN.md](./PLAN.md). 기준 실측 792건(2026-07-30) → **현재 599건**.
 
 한 줄에 하나: 무엇이 어디에 반영되었고 무엇으로 검증했는가.
 
 ## 현재 상태 (2026-07-30 재실측)
 
-| 플러그인         | 착수 전 | 현재 | 상태                                   |
-| ---------------- | ------: | ---: | -------------------------------------- |
-| prawf            |       2 |    1 | 완료 — error 0                         |
-| r-statistics     |      20 |    2 | 완료 — error 0                         |
-| deilen           |      33 |    1 | 완료 — error 0                         |
-| entrez           |      47 |    3 | 완료 — error 0                         |
-| seiri            |      47 |    2 | 완료 — error 0                         |
-| cennad           |      50 |    7 | 완료 — error 1(순환, 아래 사유)        |
-| atlassian        |      55 |    3 | 완료 — error 0                         |
-| **maencof-lens** |      68 |   66 | 미착수                                 |
-| **imbas**        |     100 |   96 | 미착수                                 |
-| **maencof**      |     366 |  362 | 미착수 (서브배치 T10a–T10e 로 쪼갤 것) |
-| (root 스코프)    |       4 |    4 | 미착수 — T11                           |
+| 플러그인      | 착수 전 | 현재 | 상태                                   |
+| ------------- | ------: | ---: | -------------------------------------- |
+| prawf         |       2 |    1 | 완료 — error 0                         |
+| r-statistics  |      20 |    2 | 완료 — error 0                         |
+| deilen        |      33 |    1 | 완료 — error 0                         |
+| entrez        |      47 |    3 | 완료 — error 0                         |
+| seiri         |      47 |    2 | 완료 — error 0                         |
+| cennad        |      50 |    7 | 완료 — error 1(순환, 아래 사유)        |
+| atlassian     |      55 |    3 | 완료 — error 0                         |
+| maencof-lens  |      68 |   19 | 완료 — error 0 (잔여는 DETAIL warning) |
+| **imbas**     |     100 |   13 | **진행 중 — error 5 남음**             |
+| **maencof**   |     366 |  362 | 미착수 (서브배치 T10a–T10e 로 쪼갤 것) |
+| (root 스코프) |       4 |    4 | 미착수 — T11                           |
 
 완료한 6개는 전부 `typecheck` + `test:run` 통과를 확인했다. 미착수 4개는 코드를 건드리지 않았다.
 
@@ -34,13 +36,9 @@
 
 ## 다음 착수 지점
 
-**T8 — maencof-lens (66건).** 다음 차례. 단 DETAIL 24건은 위 "DETAIL 필수 여부" 결정이 선행한다.
+**T9 — imbas.** 배럴 교정은 끝났고 error 5건이 남았다. 정확한 목록·처방·기준선은 [HANDOFF.md](./HANDOFF.md) 의 "T9" 절에 있다.
 
-- `external-import-boundary` 32건 — 대부분 `@ogham/maencof` 를 소비하는 경로다. **maencof 는 워크스페이스 내부 소비자가 있는 유일한 배럴**이므로(maencof-lens 의 `src/tools/lens*/` 4곳), 그 배럴에서 심볼을 빼는 방향은 금지다.
-- `spec-contract-link` 4건 — e2e spec 에 `filid:contract <AC-id>` 마커 + 루트 DETAIL 의 AC 그룹 정의(deilen T3 방식).
-- `zero-peer-file` 4건 · `circular-dependency` 1건 · `module-entry-point` 1건 · `entry-point-surface` 1건.
-
-이후 **T9 imbas (96건)**, **T10 maencof (362건, 서브배치 필요)**, **T11 root 스코프 (4건)**.
+이후 **T10 maencof (error ~146, 서브배치 필요)**, **T11 root 스코프 (4건)**.
 
 ## 완료
 
@@ -109,6 +107,19 @@
 - 검증: `yarn atlassian typecheck` 통과 → `test:run` 392 tests 통과(모든 단계에서 동일) → `structure_validate` 780 passed / 3 failed(전부 warning).
 
 **연쇄 수정 1건**: 형제 배럴 교정이 `setup/__tests__/connectionTester.test.ts` 10건을 깨뜨렸다. 이 테스트가 core **부모 배럴**을 모킹해 그 경유라는 구현 세부에 결합돼 있었기 때문이다. **assertion 은 건드리지 않고 모킹 대상 경로만** 실제 의존으로 옮겼다.
+
+### T8 — maencof-lens (66 → 19, error 0)
+
+- 형제 fractal 의 eponymous 파일 직접 참조 28건을 배럴 경유로 교정(`rewrite-to-barrel.mjs`, `hooks/` 제외).
+- `src/index.ts` 의 `createLensServer` 재노출 제거로 `src → mcp/server → src` 순환 해소(배럴 소비자 0건 확인 후).
+- DETAIL.md 5개 신설: `src`(version.ts 면책), `config/configSchema`(guard organ 면책), `config/configLoader`·`vault/staleDetector`(훅 면책), `hooks/sessionStart`.
+- spec 4개에 `filid:contract` 마커. 형제 spec 이 같은 그룹을 주장하지 않도록 `staleDetector` 에 `AC-marker-priority` 를 분리 정의했다.
+- 검증: typecheck 통과 → 13 files / 73 tests 통과(변경 전과 동일) → `structure_validate` boundaries·dag·verification 0 failed.
+
+### T9 — imbas (진행 중, 100 → 13, error 5 남음)
+
+- 형제 배럴 교정 완료(`rewrite-to-barrel.mjs`, 20개 파일). 검증: typecheck 통과 → 32 files / 304 tests 통과(변경 전과 동일).
+- 남은 error 5건과 각 처방은 [HANDOFF.md](./HANDOFF.md) 에 있다.
 
 ## 재사용할 사실
 
