@@ -1,35 +1,14 @@
 /**
  * @file index.ts
  * @description @ogham/imbas public API entry point
+ *
+ * `mcp/` 는 재노출하지 않는다 — `mcp/server/server.ts` 가 `version.ts` 를
+ * 참조하므로 재노출은 src → mcp → mcp/server → src 의존 순환이 된다.
+ * MCP 서버는 esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 조립한다.
  */
 
 export * from './types/index.js';
 export { VERSION } from './version.js';
-
-// MCP modules
-export {
-  createServer,
-  startServer,
-  toolResult,
-  toolError,
-  mapReplacer,
-  wrapHandler,
-  handleImbasPing,
-  handleRunCreate,
-  handleRunGet,
-  handleRunTransition,
-  handleRunList,
-  handleManifestGet,
-  handleManifestSave,
-  handleManifestValidate,
-  handleManifestPlan,
-  handleConfigGet,
-  handleConfigSet,
-  handleCacheGet,
-  handleCacheSet,
-  handleAstSearch,
-  handleAstAnalyze,
-} from './mcp/index.js';
 
 // Core modules
 export {
