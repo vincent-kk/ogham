@@ -32,17 +32,11 @@
 
 ## Boundary Exemptions
 
-### `registry.ts` — Lean single-purpose entry
+### `operations` — Lean single-purpose entry
 
 - **Consumers**: `**/src/paths/state/**`
 - **Direct import**: `allowed`
-- **Reason**: `paths/state` 의 파일들은 `paths/state-root`·`paths/plugin-cache` 서브패스로 직접 노출되고 훅 크기 가드를 받는다. `hostRegistry` 배럴을 거치면 runtime 판별과 marker 판별 그래프까지 함께 실린다. `INTENT.md` 의 "hook 은 목적별 단일 entry 를 사용한다" 가 같은 계약을 이미 선언한다.
-
-### `resolveHostDescriptor.ts` — Lean single-purpose entry
-
-- **Consumers**: `**/src/paths/state/**`
-- **Direct import**: `allowed`
-- **Reason**: 위와 같다. 이 파일은 `host-registry/descriptor` 서브패스로도 직접 노출된다.
+- **Reason**: `paths/state` 의 파일들은 `paths/state-root`·`paths/plugin-cache` 서브패스로 직접 노출되고, 그 그래프는 cennad `injectStatic`·`injectDynamic` 훅 번들에 실려 크기·모듈 가드를 받는다. `hostRegistry` 배럴을 거치면 runtime 판별과 marker 판별 그래프까지 함께 끌려 들어와 `build:plugin` 의 hook bundle isolation 가드가 실패한다 — 배럴 경유는 선택지가 아니라 빌드 실패다. 대상은 `registry.ts`(`host-registry/hosts`)와 `resolveHostDescriptor.ts`(`host-registry/descriptor`)이며 둘 다 자기 서브패스로도 직접 노출된다. `INTENT.md` 의 "hook 은 목적별 단일 entry 를 사용한다" 가 같은 계약을 이미 선언한다.
 
 ## Last Updated
 

@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import { resolveHostDescriptor } from "../../hostRegistry/index.js";
+import { resolveHostDescriptor } from "../../hostRegistry/operations/resolveHostDescriptor.js";
 
 export function stateRoot(): string {
   const host = resolveHostDescriptor(process.env);
