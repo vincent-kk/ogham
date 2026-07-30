@@ -1,8 +1,8 @@
-# sessionStart
+# bootstrap
 
 ## Purpose
 
-세션 시작 훅. 호스트 project 지침 초기화, 볼트 검증, 설정 프로비저닝.
+SessionStart 의 실제 작업 헬퍼. 호스트 project 지침 초기화, 볼트 검증, 설정 프로비저닝. 이벤트 디스패처는 부모 [`sessionStart`](../../INTENT.md) 이고 여기가 아니다.
 
 ## Boundaries
 

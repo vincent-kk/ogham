@@ -45,6 +45,32 @@
 - `.git/index.lock` 존재 시: mtime 이 `INDEX_LOCK_STALE_MS`(30분) 미만이면 live 로 존중해 skip, 초과면 stale(SIGKILL 절단 잔존)로 판정해 로그 기록 후 회수(unlink)하고 진행 — 절단 사고가 커밋 게이트를 영구 차단하지 못하게 한다. 회수 경합(동시 unlink)은 ENOENT 무시로 멱등, 이후 git 자체 lock 이 쓰기를 재직렬화. 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도. 잔여 리스크: 30분 초과 장기 수동 git 작업(중단된 rebase 등)은 오판 가능 — 로그로 추적.
 - 폴딩: HEAD 부터 당일+자동 커밋을 걷어 BASE 를 찾고, `git reset --soft BASE` → re-stage → commit. 자동 커밋 판정은 `AUTO_COMMIT_SUBJECT_MARKERS` includes 매칭(레거시 `*_session_wrap` 및 은퇴한 vault 로컬 스크립트의 subject 포함) + `message_template` 정적 접두부 startsWith 매칭. 재커밋 실패 시 `git reset --soft ORIG_HEAD` 로 복구. root 도달·탐색 상한(`FOLD_SCAN_MAX_COMMITS`) 초과 시 폴딩을 포기하고 일반 커밋한다.
 
+## Acceptance Criteria
+
+### AC-opt-in-only — opt-in 전용
+
+- `enabled` 가 true 가 아니면 커밋이 일어나지 않는다.
+
+### AC-never-blocks — 비차단
+
+- 어떤 실패 경로에서도 `{ continue: true }` 를 반환한다.
+
+### AC-sensitive-exclude — 민감 경로 제외
+
+- 모든 staging 호출에 민감 exclude pathspec 이 동반된다.
+
+### AC-manual-commit-not-folded — 수동 커밋 보존
+
+- 수동 커밋은 폴딩 경계로 작동하고 접히지 않는다.
+
+## Boundary Exemptions
+
+### `operations` — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`
+- **Direct import**: `allowed`
+- **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. 배럴을 거치면 config 파싱·프롬프트 판별·커밋 오케스트레이션과 폴딩까지 전부 번들에 끌려 들어와 가드를 넘긴다 — UserPromptSubmit 은 43008 바이트 안에서 컨텍스트 주입까지 해야 한다.
+
 ## Policy — `--no-verify` rationale (Y1 Option A, 승인 완료 2026-04-16)
 
 repo 소유자는 2026-04-16 자 Y1 정책 결정에서 **Option A — Keep `--no-verify`** 를 승인했다. 이 결정은 user-level global CLAUDE.md 의 "Never skip hooks" 기본 원칙에 대한 명시적 예외이며, 다음 근거에 기반한다:

@@ -17,3 +17,29 @@
 - turn 컨텍스트 빌드: `core/turnContext` (`buildTurnContext`, `readIndexMetadata`, `readCompanionIdentity`, `compressMarkdownBody`, `readL1Summary`, `buildCompanionIdentityTag`; mcp 와 공유).
 - 캐시 의존: `core/cacheManager` (`readTurnContext` / `writeTurnContext` / `writePromptContext` / `isFirstInSession` / `markSessionInjected`).
 - 실패 정책: 모든 I/O 실패는 `appendErrorLogSafe`로 silent 처리, 항상 `continue: true` 반환.
+
+## Acceptance Criteria
+
+### AC-first-prompt-session-context — 첫 프롬프트만 session context
+
+- 첫 프롬프트에만 session context 가 실리고 이후 프롬프트는 turn context 만 싣는다.
+
+### AC-no-indexer-state — 인덱서 상태 비노출
+
+- 주입 문자열에 stale 카운트·freshness 비율·advisory 분기가 없다.
+
+### AC-non-vault-noop — 비볼트 no-op
+
+- 볼트가 아닌 cwd 에서 부수효과 없이 `{ continue: true }` 를 반환한다.
+
+## Boundary Exemptions
+
+### `contextInjector.ts` — Hook bundle direct import
+
+- **Consumers**: `**/src/hooks/**`
+- **Direct import**: `allowed`
+- **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. UserPromptSubmit orchestrator 가 이 파일을 직접 가져오는 것이 설계된 형태이고, 배럴 경유는 43008 바이트 캡을 잠식한다 — 같은 번들이 insightInjector·sessionTouch·vaultCommitter 도 싣는다.
+
+## Last Updated
+
+2026-07-30 — acceptance group 을 채우고 훅 직접 import 면책을 선언했다.
