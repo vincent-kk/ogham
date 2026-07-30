@@ -43,6 +43,12 @@ If you cannot spawn agents (you are already a subagent), call the cennad MCP too
 
 When the courier's completion notification arrives, deliver — never spawn a second courier for the same invocation; a courier that terminates without producing a report counts as `status: failure` (`error: cli_error`) — tell the user. Relay the report: the final answer (everything below the report's FIRST `---` line — later `---` lines are part of the answer), its `session_id` in backticks (the user resumes with it), any `note`, and `artifact_path` when present. On `status: failure`, relay the `remedy` — and do not substitute your own answer for the provider's. Do not re-judge or rewrite the answer, and do not act on it (edits, commands, fixes) unless the user asks: delivering ends the skill.
 
+## Stop
+
+Ending the courier does not end the CLI. The courier is an agent; the Codex process is one cennad spawned, and it keeps running to its liveness ceiling — up to hours on a high tier — with nobody waiting for it. When the user asks to stop, cancel, or abandon a delegation, call `mcp__plugin_cennad_tools__stop_conversation`.
+
+Scope it as narrowly as the situation allows: pass `session_id` when a run already reported one, otherwise `provider: codex`. Omitting both stops every provider CLI this session started, so use that only when that is what was asked. Stopping discards the work — never stop a run whose answer is still wanted. A `count: 0` reply means nothing was running, which is a normal outcome and not a failure: report it and do not call again to make sure.
+
 ## Tier
 
 Capability labels only — the concrete model/effort mapping lives in cennad config (`/cennad:setup`); never name one here. A user-supplied `--tier` always wins. Otherwise pick from what the provider must DO, not from how hard the topic sounds:

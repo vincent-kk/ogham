@@ -8,7 +8,7 @@ codex-cli (`codex exec` / `codex exec resume`) 어댑터. JSONL 이벤트 스트
 | -------------------- | ------------------------------------------------------------------------------------------- |
 | `resolveTier.ts`     | tier → `{model?, effort?}` (`config.model_map.codex` + env override)                        |
 | `jsonlParser/`       | JSONL 라인 단위 파싱 → `{ threadId, response, resolvedModel }` (utils/constants organ 포함) |
-| `spawn.ts`           | `node:child_process.spawn('codex', ...)`, ENOENT 캐치                                       |
+| `spawn.ts`           | `spawnCli('codex', ...)` — ENOENT 캐치, `signal` 취소·`detached` 그룹킬, `cancelled` 판정   |
 | `codexDispatcher.ts` | `Dispatcher<CodexFlags, CodexModelMap>` 구현 + `supportedOptions = new Set()`               |
 | `utils/`             | `buildStartArgs`, `buildResumeArgs`, `dispatch` (`DispatchInternal`)                        |
 | `index.ts`           | `export { codexDispatcher }` barrel                                                         |

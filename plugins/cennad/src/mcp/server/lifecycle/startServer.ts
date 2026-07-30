@@ -1,7 +1,9 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { registerShutdownFinalizer } from '@ogham/session-finalizer';
 
 import { loadConfig } from '../../../core/configManager/index.js';
 import { pruneExpired } from '../../../core/sessionStore/index.js';
+import { stopRuns } from '../../../dispatcher/index.js';
 import { logger } from '../../../lib/logger.js';
 
 import { createServer } from './createServer.js';
@@ -14,6 +16,17 @@ import { createServer } from './createServer.js';
  */
 export async function startServer(version: string): Promise<void> {
   const server = createServer(version);
+  // A provider CLI is not this process's dependent: on POSIX it is reparented
+  // and keeps running when the server goes away, so leaving without killing it
+  // is what strands it until a liveness limit expires. `stopRuns` is a
+  // synchronous group-kill, which is all the ~400ms the host grants before
+  // SIGKILL allows.
+  registerShutdownFinalizer({
+    ctx: process.cwd(),
+    onShutdown: () => {
+      stopRuns();
+    },
+  });
   try {
     const config = await loadConfig();
     const removed = await pruneExpired(config.session_ttl_hours);

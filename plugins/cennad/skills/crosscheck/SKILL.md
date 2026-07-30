@@ -63,6 +63,12 @@ Add an `## Artifacts` section listing any `artifact_path` present in the reports
 
 Rendering the synthesis ends the skill: do not execute `## Action checklist` items unless the user asks.
 
+## Stop
+
+Ending a courier does not end the CLI it launched. Each provider process keeps running to its liveness ceiling with nobody waiting for it, and a crosscheck holds several of them at once. When the user asks to stop, call `mcp__plugin_cennad_tools__stop_conversation`.
+
+Omitting both filters stops every participant, which is usually what "stop the crosscheck" means. To drop one participant and let the others finish, pass `provider`. Stopping discards that participant's work — a stopped run yields no viewpoint, so treat it as a missing viewpoint in synthesis rather than a failed one. A `count: 0` reply means those runs had already finished, which is normal and not a failure.
+
 ## Convergence round
 
 If `## Conflicting` holds a decision-changing disagreement (accepting one side would change a recommended action, architecture, priority, safety call, or checklist item), run ONE round per **[references/convergence.md](references/convergence.md)**. Skip it — without loading the file — when the responses already agree, the conflict does not change the final direction, only one viewpoint survived, or `--no-converge` was passed.

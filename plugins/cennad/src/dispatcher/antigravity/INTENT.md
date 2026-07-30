@@ -22,6 +22,8 @@ Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cw
 - 응답: `parseJsonOutput` 가 stream-json 의 마지막 `event:"result"` (`result.status === 'SUCCESS'` 일 때 `result.response`) 를 읽는다. 스트림이 `status:"ERROR"` 를 실으면(exit 0 이어도) `findAgyError` 문구로 실패 처리하고, 빈 stdout(agy #76: non-TTY 긴 응답에서 비결정적 드롭) 일 때만 `resolveTranscript`→`agyTranscriptStore` 가 brain transcript 에서 읽기 전용 복구 — **마지막 USER_INPUT 이후의 DONE 응답만** 인정(그 앞의 것은 이전 턴 답변)
 - 모델: agy 는 **완전한 이름 하나**만 받고 두 표기의 혼합을 거부한다 — `Gemini 3.6 Flash (High)` ok, `gemini-3.6-flash-high` ok, `gemini-3.6-flash` + `--effort high` ok, `gemini-3.6-flash-medium (High)` **거부**. `modelAlias` 는 이미 완전한 이름(괄호 포함, 또는 slug 인데 `AGY_VARIANT_SUFFIXES` 로 끝남)은 그대로 보내고, base 에 effort 를 이을 때는 base 표기를 따른다 — 표시명은 `base (Variant)`, slug 는 `base-variant`. `externalSessionRef` = conversation id, 없으면 cwd
 
+- spawn 은 `signal`(호출자 취소) + `detached: true`(agy 가 띄운 브라우저·도구까지 그룹킬). 중단이면 `cancelled` 로 즉시 실패 처리하고 **transcript 복구를 시도하지 않는다** — 잘린 스트림에 그 폴백을 걸면 이전 턴 답변이 이번 턴 성공으로 돌아온다
+
 ## Boundaries
 
 ### Always do

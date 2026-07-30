@@ -1,6 +1,6 @@
 # MCP Tools — `tools` server
 
-MCP 서버 이름: `tools`. 도구는 3개. 모든 도구는 `wrapHandler` 로 감싸 표준 에러 응답을 보장한다.
+MCP 서버 이름: `tools`. 도구는 4개. 모든 도구는 `wrapHandler` 로 감싸 표준 에러 응답을 보장한다.
 
 이 문서의 `<CENNAD_HOME>` 은 기본 `~/.claude/plugins/cennad` 이며,
 `CENNAD_CONFIG_PATH` 가 설정되면 해당 디렉터리를 뜻한다.
@@ -103,9 +103,51 @@ z.object({
 - `unknown`: 세션이 현재 프로젝트에 없음 (cwd 불일치 포함).
 - `disabled`: provider 가 config 에서 비활성화됨.
 - `budget_exhausted` / `rate_limit` / `auth` / `network` / `cli_error`: 외부 CLI 실패.
+- `cancelled`: 호출자 취소 또는 `stop_conversation` 으로 실행이 중단됨 (재시도가 아니라 재위임이 처방 — 프로세스는 이미 죽었다).
 - `timeout`: idle 한도 또는 tier hard cap 이 발동해 CLI 를 중단시킴 (재시도가 아니라 상위 tier·작업 축소가 처방).
 
-## 3. `open_settings`
+## 3. `stop_conversation`
+
+실행 중인 provider CLI 를 강제 종료한다. 위임을 띄운 에이전트를 닫아도 CLI 는 죽지 않으므로(별개 프로세스), 취소 신호가 닿지 않는 상황의 수동 탈출구다.
+
+### 입력 스키마
+
+```typescript
+z.object({
+  session_id: z.string().uuid().optional(), // 특정 세션만
+  provider: ProviderSchema.optional(), // 해당 provider 만
+});
+```
+
+둘 다 optional 이며 함께 주면 AND. 둘 다 생략하면 이 서버 프로세스의 실행 전부가 대상이다. 실행 중인 호출의 `session_id` 는 아직 반환되지 않았으므로 대개 알 수 없다 — 그때는 `provider` 로 좁히거나 필터 없이 부른다.
+
+### 동작
+
+1. dispatcher 원장(`activeRuns`)에서 필터에 맞는 in-flight 실행을 고른다.
+2. 각 실행의 abort 를 발화 → spawn 이 프로세스 그룹 SIGKILL (CLI 가 만든 자식 포함).
+3. 죽인 목록을 반환. 대상이 없으면 `count: 0` 과 그 이유를 담은 정상 응답.
+
+원장은 이 MCP 서버 프로세스(= 이 Claude 세션)가 띄운 실행만 담는다. 다른 세션의 CLI 는 보이지 않고 죽일 수도 없다. 종료된 호출은 `error.code: 'cancelled'` envelope 으로 돌아가며, 진행 중이던 작업과 부분 출력은 회수되지 않는다.
+
+### 출력
+
+```typescript
+{
+  stopped: Array<{
+    session_id: string,
+    provider: 'codex' | 'antigravity' | 'claude',
+    elapsed_ms: number,
+  }>,
+  count: number,
+  message: string,
+}
+```
+
+### Annotations
+
+`readOnlyHint: false, destructiveHint: true, idempotentHint: true`
+
+## 4. `open_settings`
 
 설정용 로컬 웹 UI 를 기동한다.
 
@@ -155,6 +197,7 @@ interface ConversationResponse {
       | "network"
       | "timeout"
       | "cli_error"
+      | "cancelled"
       | "disabled"
       | "unknown";
     message: string;

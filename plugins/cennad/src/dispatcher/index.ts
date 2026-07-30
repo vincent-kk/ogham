@@ -1,3 +1,5 @@
+export { stopRuns } from './activeRuns/stopRuns.js';
+export type { StopFilter, StoppedRun } from './activeRuns/types.js';
 export { antigravityDispatcher } from './antigravity/index.js';
 export { claudeDispatcher } from './claude/index.js';
 export { codexDispatcher } from './codex/index.js';

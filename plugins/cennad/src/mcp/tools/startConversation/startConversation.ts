@@ -28,8 +28,18 @@ export interface StartConversationInput {
   project_root?: string;
 }
 
+/**
+ * 새 외부 LLM 대화를 시작하고 응답 envelope 을 만든다.
+ *
+ * @param input MCP 도구 입력 (`snake_case` 키 그대로).
+ * @param signal 호출자 취소 신호. abort 되면 실행 중인 provider CLI 를 프로세스
+ *   그룹째 종료하고 `error.code='cancelled'` 로 돌아온다. 취소된 호출도 세션
+ *   기록은 남긴다 — 외부 CLI 가 이미 대화를 만들었을 수 있어 재개 경로를 지킨다.
+ * @returns 성공·실패 모두 `ConversationResponse`.
+ */
 export async function handleStartConversation(
   input: StartConversationInput,
+  signal?: AbortSignal,
 ): Promise<ConversationResponse> {
   const startedAt = performance.now();
   const config = await loadConfig();
@@ -73,6 +83,7 @@ export async function handleStartConversation(
     cwd,
     idleTimeoutMs: config.timeouts.idle_ms,
     hardCapMs: config.timeouts.hard_cap_ms[tier],
+    signal,
   };
   let result: DispatchResult;
   if (input.provider === 'codex')

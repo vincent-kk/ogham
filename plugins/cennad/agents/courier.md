@@ -56,6 +56,7 @@ Never retry, switch provider, or fall back — routing belongs to the caller. Ma
 - `disabled` — enable the provider in `/cennad:setup`, then retry
 - `rate_limit` / `budget_exhausted` — pause and retry, or use another provider's skill
 - `timeout` — the provider was still running when a limit fired; `error.message` names which one (no output for N ms, or the tier's ceiling) — relay it and suggest a higher tier or a narrower task, never a plain retry
+- `cancelled` — the run was stopped on purpose: the caller cancelled the request, or someone called the stop tool. The CLI is already dead and its work is gone. Report it and end; never retry, never start a fresh session to recover the answer, and never treat it as a provider fault. Remedy: re-run the delegation if it is still wanted
 - `network` / `cli_error` / `unknown` — relay `error.message` verbatim as the remedy
 
 ## Report

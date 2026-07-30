@@ -13,6 +13,11 @@
 - `claude/` — `claude -p` 어댑터. 부모 Claude 세션 간섭을 막는 격리 플래그를 항상 부착한다.
 - `antigravity/` — `agy -p` 어댑터. 세션마다 격리된 cwd 에서 실행한다.
 - `errorMap/` — 실패 신호 → `ErrorCode` 단일 매핑.
+- `activeRuns/` — 실행 중 CLI 원장(organ). 내부 소비자는 `withActiveRun` 으로 spawn 을 감싸고, 외부 소비자(`mcp/tools/stopConversation`, `mcp/server/lifecycle/startServer`)는 `index.ts` 가 재노출한 `stopRuns` 만 잡는다.
+
+### activeRuns organ 유지 사유
+
+원장의 유일한 쓰기 주체가 이 fractal 이라 자식 fractal 로 승격하지 않는다. `withActiveRun` 은 provider 어댑터 세 곳이 spawn 직전에 부르는 내부 계약이고, 바깥이 필요로 하는 것은 `stopRuns` 하나뿐이다. 원장을 dispatcher 밖으로 옮기면 "무엇이 실행 중인가"를 spawn 하지 않는 모듈이 소유하게 되고, 어댑터가 자기 상태를 남의 fractal 에 기록하러 나가야 한다. 외부 소비는 엔트리포인트 경유로 제한하고 organ 파일 직접 import 는 허용하지 않는다.
 
 ## Acceptance Criteria
 
@@ -24,6 +29,12 @@
 ### AC-cli-via-cross-platform — CLI 호출 경유
 
 - `child_process` 직접 호출이 0건이다.
+
+### AC-run-cancellable — 실행 중 CLI 취소 가능
+
+- 세 provider 모두 spawn 을 `withActiveRun` 으로 감싸 원장에 등록한다.
+- 호출자 signal abort 또는 `stopRuns` 는 CLI 를 프로세스 그룹째 SIGKILL 한다 (`detached: true`).
+- 취소로 끝난 호출은 `error.code === 'cancelled'` 로 돌아온다 — retry storm 의 `rate_limit` 과 구분된다.
 
 ## Last Updated
 

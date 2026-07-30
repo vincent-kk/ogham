@@ -1,4 +1,5 @@
 import type { ConversationError } from '../../../types/index.js';
+import { withActiveRun } from '../../activeRuns/withActiveRun.js';
 import { mapError } from '../../errorMap/index.js';
 import { spawnAgy } from '../operations/spawn.js';
 
@@ -22,6 +23,11 @@ export interface CallAgyOptions {
   timeoutMs?: number;
   idleTimeoutMs?: number;
   since: number;
+  // cennad session UUID — the key this run is filed under while it is in flight,
+  // so `stop_conversation` can name it.
+  sessionId: string;
+  // The caller's cancellation signal, when the MCP request carried one.
+  signal?: AbortSignal;
 }
 
 export async function callAgy(
@@ -29,11 +35,34 @@ export async function callAgy(
   argv: string[],
   options: CallAgyOptions,
 ): Promise<AgyCallResult> {
-  const result = await spawnAgy(argv, {
-    cwd,
-    timeoutMs: options.timeoutMs,
-    idleTimeoutMs: options.idleTimeoutMs,
-  });
+  const result = await withActiveRun(
+    {
+      sessionId: options.sessionId,
+      provider: 'antigravity',
+      callerSignal: options.signal,
+    },
+    (signal) =>
+      spawnAgy(argv, {
+        cwd,
+        timeoutMs: options.timeoutMs,
+        idleTimeoutMs: options.idleTimeoutMs,
+        signal,
+      }),
+  );
+  // Before every other branch: a stopped run's stream is a truncated one, and
+  // the transcript fallback below would hand back the PREVIOUS turn's answer as
+  // this turn's success.
+  if (result.cancelled)
+    return {
+      status: 'failure',
+      response: null,
+      error: mapError({
+        exitCode: result.exitCode,
+        stderr: result.stderr,
+        cancelled: true,
+      }),
+      conversationId: findAgyConversationId(result.stdout),
+    };
   if (result.spawnError !== null || result.exitCode !== 0)
     return {
       status: 'failure',

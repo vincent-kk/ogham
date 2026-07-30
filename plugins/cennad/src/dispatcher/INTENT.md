@@ -6,6 +6,7 @@ codex-cli / agy / claude 호출 본체. MCP 도구 핸들러에서 받은 `Dispa
 
 | Path                   | Role                                                                       |
 | ---------------------- | -------------------------------------------------------------------------- |
+| `activeRuns/`          | 실행 중 CLI 원장 — `withActiveRun` 등록, `stopRuns` 강제종료 (organ)       |
 | `entities/envelope.ts` | `buildResponse` — DispatchResult + 메타 → ConversationResponse             |
 | `errorMap/`            | exit code / stderr / Node 에러 → `ErrorCode` 매핑 (utils + constants)      |
 | `utils/`               | `computeIgnoredOptions` + `composePrompt` (recency_policy + preamble) 공유 |
@@ -17,7 +18,7 @@ codex-cli / agy / claude 호출 본체. MCP 도구 핸들러에서 받은 `Dispa
 
 - `supportedOptions` 는 모든 dispatcher 비어 있음 — 모든 키는 `ignoredOptions` 로 보고
 - 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 `DispatchOptions.flags` 채널 — config 단독, MCP input 노출 금지
-- 외부 CLI 호출은 `node:child_process.spawn` 직접 사용 (의존성 추가 없음)
+- 외부 CLI 호출은 `@ogham/cross-platform` 의 `spawnCli` 경유; 항상 `detached: true` (손자까지 그룹킬)
 - 환경 변수: codex 상속만; claude 는 `--strict-mcp-config --safe-mode` 항상 부착 (부모 세션 MCP·훅·CLAUDE.md 격리)
 - prompt prefix 합성은 MCP tool 진입에서 `composePrompt` 1회 — dispatcher 는 합성 후 문자열만 받음
 

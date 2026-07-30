@@ -15,6 +15,7 @@ export const ErrorCode = {
   Network: 'network',
   Timeout: 'timeout',
   CliError: 'cli_error',
+  Cancelled: 'cancelled',
   Unknown: 'unknown',
 } as const;
 

@@ -8,6 +8,7 @@ import { wrapHandler } from '../../shared/index.js';
 import { handleContinueConversation } from '../../tools/continueConversation/index.js';
 import { handleOpenSettings } from '../../tools/openSettings/index.js';
 import { handleStartConversation } from '../../tools/startConversation/index.js';
+import { handleStopConversation } from '../../tools/stopConversation/index.js';
 
 /**
  * MCP 서버 인스턴스를 만들고 3개 도구를 등록한다.
@@ -105,6 +106,39 @@ export function createServer(version: string): McpServer {
       },
     },
     wrapHandler(handleContinueConversation),
+  );
+
+  server.registerTool(
+    McpToolName.STOP_CONVERSATION,
+    {
+      description:
+        'Force-stop provider CLI calls this session started and that are still running. ' +
+        'Ending the agent or skill that made the call does NOT stop the CLI — it keeps running until a ' +
+        'liveness limit expires (up to hours on a high tier), which is what this tool exists to prevent. ' +
+        'The kill is immediate and covers the processes the CLI spawned in turn: work in progress is lost ' +
+        'and no partial output is returned, so call it when the answer is no longer wanted. ' +
+        'A count of 0 means nothing matched — already finished, or started by another session — not an error.',
+      inputSchema: {
+        session_id: z
+          .string()
+          .uuid()
+          .optional()
+          .describe(
+            'Stop only this session. A session_id is known only after a call returns, so a call that is ' +
+              'still running usually cannot be named this way — filter by provider, or omit both to stop everything.',
+          ),
+        provider: ProviderSchema.optional().describe(
+          "Stop only this provider's running calls. Use it to stop one participant while parallel calls to " +
+            'the other providers keep going.',
+        ),
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+      },
+    },
+    wrapHandler(handleStopConversation),
   );
 
   server.registerTool(

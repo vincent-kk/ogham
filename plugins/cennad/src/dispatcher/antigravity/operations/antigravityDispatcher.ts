@@ -51,6 +51,8 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       timeoutMs: args.hardCapMs,
       idleTimeoutMs: args.idleTimeoutMs,
       since,
+      sessionId: args.sessionId,
+      signal: args.signal,
     });
     if (callResult.status === 'failure' && callResult.timedOut)
       void cleanupCwdOnTimeout(cwd);
@@ -82,6 +84,8 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       timeoutMs: args.hardCapMs,
       idleTimeoutMs: args.idleTimeoutMs,
       since,
+      sessionId: args.sessionId,
+      signal: args.signal,
     });
     // Unlike start(), do NOT delete the cwd on resume timeout: it holds this
     // session's agy conversation history. Removing it would make a later

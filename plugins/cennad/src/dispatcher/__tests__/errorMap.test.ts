@@ -143,4 +143,24 @@ describe('mapError', () => {
       }).code,
     ).toBe(ErrorCode.RateLimit);
   });
+
+  it('maps a stopped run to cancelled', () => {
+    expect(mapError({ exitCode: -1, stderr: '', cancelled: true }).code).toBe(
+      ErrorCode.Cancelled,
+    );
+  });
+
+  // A stop lands mid-stream, so whatever the CLI had printed is still in the
+  // buffer. Classifying that text would report the reason the run was going
+  // slowly instead of the reason it ended.
+  it('reports cancelled even when the buffered output looks like a rate limit', () => {
+    expect(
+      mapError({
+        exitCode: -1,
+        stderr: '429 rate limit, retrying',
+        abortedByCaller: true,
+        cancelled: true,
+      }).code,
+    ).toBe(ErrorCode.Cancelled);
+  });
 });

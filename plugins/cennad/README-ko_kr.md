@@ -2,7 +2,7 @@
 
 > **`cogair` 에서 이름이 변경되었습니다.** 이 플러그인은 이전에 `cogair` 로 제공되었습니다. 이름 변경으로 기존 `/cogair:*` 스킬, `cogair` MCP 서버, 그리고 `~/.claude/plugins/cogair/` 의 디스크 설정은 더 이상 적용되지 않습니다 — 자동 마이그레이션은 없습니다. `cennad` 로 다시 설치한 뒤 `/cennad:setup` 을 실행해 프로바이더 비율·키워드·옵션을 다시 설정하세요.
 
-Claude 가 필요에 따라 **OpenAI Codex CLI**, **Google Antigravity CLI**, 또는 **Anthropic Claude CLI** 로 작업을 위임할 수 있게 해주는 Claude Code 플러그인입니다. MCP 도구 3개, 사용자 호출 가능 스킬 5개, 백그라운드 디스패치 에이전트 1개, 라이프사이클 훅 2개로 구성됩니다.
+Claude 가 필요에 따라 **OpenAI Codex CLI**, **Google Antigravity CLI**, 또는 **Anthropic Claude CLI** 로 작업을 위임할 수 있게 해주는 Claude Code 플러그인입니다. MCP 도구 4개, 사용자 호출 가능 스킬 5개, 백그라운드 디스패치 에이전트 1개, 라이프사이클 훅 2개로 구성됩니다.
 
 `atlassian` 이나 `filid` 가 도메인 지식을 캡슐화한다면, cennad 는 **위임 표면(delegation surface)** 입니다. 다른 모델 패밀리가 더 적합한 작업(무거운 코드 → codex, 실시간 웹 검색 → antigravity, 추론·리뷰 → claude)에서 Claude 가 위임을 결정하면, 플러그인이 세션 관리·비율 추적·세션별 호출 카운터를 처리합니다.
 
@@ -111,7 +111,7 @@ Claude Code session
    ├── Agent "courier"                          provider 대화를 오프스레드로 실행
    │       │
    │       ▼
-   ├── MCP "tools" 서버                          Layer 2 (logic) — 3 MCP 도구
+   ├── MCP "tools" 서버                          Layer 2 (logic) — 4 MCP 도구
    │       │
    │       ▼
    ├── Dispatcher (codex / antigravity / claude)  외부 CLI spawn + 출력 파싱
@@ -130,6 +130,7 @@ Claude Code session
 | ----------------------- | --------------------------------------------------------------------------- |
 | `start_conversation`    | `codex` / `antigravity` / `claude` 를 spawn 해 정규화된 envelope 응답 반환. |
 | `continue_conversation` | `session_id` 로 기존 세션 재개 (project-hash 단위 격리).                    |
+| `stop_conversation`     | 이 세션이 띄운 provider CLI 를 손자 프로세스까지 강제 종료.                 |
 | `open_settings`         | 로컬 설정 UI 를 띄우고 일회용 토큰이 포함된 URL 을 반환.                    |
 
 ### 스킬
@@ -224,7 +225,7 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod.
 | [README](../../.metadata/cennad/README.md)                       | 스펙 인덱스 + 핵심 결정                    |
 | [spec](../../.metadata/cennad/spec.md)                           | 책임 분리·데이터 흐름·비채택 사항          |
 | [architecture](../../.metadata/cennad/architecture.md)           | 모듈 트리·의존 방향·빌드 파이프라인        |
-| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP 도구 (입력 스키마·동작·envelope)     |
+| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 4 MCP 도구 (입력 스키마·동작·envelope)     |
 | [skills](../../.metadata/cennad/skills.md)                       | 스킬 본문 + courier 위임 매핑              |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit 주입       |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli 호출 매트릭스 |

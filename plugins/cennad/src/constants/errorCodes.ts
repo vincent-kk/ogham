@@ -13,5 +13,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.Timeout]:
     'Provider was stopped by a liveness limit — raise the tier or narrow the task.',
   [ErrorCode.CliError]: 'External CLI failed to execute.',
+  [ErrorCode.Cancelled]:
+    'Run was stopped before it finished — by a cancelled request or by stop_conversation. Nothing was retried.',
   [ErrorCode.Unknown]: 'Unclassified failure.',
 };

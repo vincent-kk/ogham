@@ -29,6 +29,8 @@ export const codexDispatcher: Dispatcher<CodexFlags, CodexModelMap> = {
       supportedOptions,
       idleTimeoutMs: args.idleTimeoutMs,
       hardCapMs: args.hardCapMs,
+      sessionId: args.sessionId,
+      signal: args.signal,
       tierModel: resolved.model ?? null,
     });
   },
@@ -44,6 +46,8 @@ export const codexDispatcher: Dispatcher<CodexFlags, CodexModelMap> = {
       supportedOptions,
       idleTimeoutMs: args.idleTimeoutMs,
       hardCapMs: args.hardCapMs,
+      sessionId: args.sessionId,
+      signal: args.signal,
       tierModel: resolved.model ?? null,
     });
   },

@@ -1,3 +1,9 @@
+import { randomUUID } from 'node:crypto';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import {
   afterAll,
   afterEach,
@@ -8,18 +14,27 @@ import {
   it,
 } from 'vitest';
 
+import {
+  installFakeBinary,
+  prependToPath,
+} from '../../../__tests__/fixtures/fakeBinary.js';
 import type {
   CodexFlags,
   CodexModelMap,
   DispatchOptions,
 } from '../../../types/index.js';
-import {
-  installFakeBinary,
-  prependToPath,
-} from '../../../__tests__/fixtures/fakeBinary.js';
 import { codexDispatcher } from '../index.js';
 
 const FLAGS_READ_ONLY: CodexFlags = { yolo: false, sandbox: 'read-only' };
+
+// Stands in for the tools a real provider starts on its own; the fake codex
+// binary spawns it so a cancellation has a grandchild to reach.
+const GRANDCHILD_SCRIPT = fileURLToPath(
+  new URL(
+    '../../../__tests__/fixtures/longLivedGrandchild.mjs',
+    import.meta.url,
+  ),
+);
 
 const MODEL_MAP: CodexModelMap = {
   apex: { model: 'gpt-5.6-sol', effort: 'ultra' },
@@ -66,6 +81,18 @@ if (mode === 'success') {
 } else if (mode === 'no-thread-id') {
   emit({ type: 'item.completed', item: { type: 'agent_message', text: 'no thread' } });
   process.exit(0);
+} else if (mode === 'hang') {
+  emit({ type: 'thread.started', thread_id: 'thread-uuid-fake' });
+  setInterval(() => {}, 1000);
+} else if (mode === 'hang-with-grandchild') {
+  emit({ type: 'thread.started', thread_id: 'thread-uuid-fake' });
+  const grandchild = require('node:child_process').spawn(
+    process.execPath,
+    [process.env.CENNAD_FAKE_GRANDCHILD_SCRIPT],
+    { stdio: 'ignore' },
+  );
+  require('node:fs').writeFileSync(process.env.CENNAD_FAKE_GRANDCHILD_PIDFILE, String(grandchild.pid));
+  setInterval(() => {}, 1000);
 } else if (mode === 'success-with-model') {
   emit({ type: 'thread.started', thread_id: 'thread-uuid-fake' });
   emit({ type: 'turn.started', model: 'gpt-5.6-streamed' });
@@ -92,6 +119,8 @@ afterAll(() => {
 beforeEach(() => {
   delete process.env.CENNAD_FAKE_CODEX_MODE;
   delete process.env.CENNAD_FAKE_CODEX_THREAD;
+  delete process.env.CENNAD_FAKE_GRANDCHILD_SCRIPT;
+  delete process.env.CENNAD_FAKE_GRANDCHILD_PIDFILE;
 });
 
 function baseOptions(): DispatchOptions<CodexFlags, CodexModelMap> {
@@ -135,6 +164,74 @@ describe('codexDispatcher.start', () => {
     expect(result.status).toBe('success');
     expect(result.response).toContain('fake codex response');
   });
+
+  // Without the signal reaching the spawn, this run would sit there until the
+  // hard cap fires and come back as `timeout` — which is the leak this wiring
+  // exists to close.
+  it('returns cancelled when the caller aborts a running CLI', async () => {
+    process.env.CENNAD_FAKE_CODEX_MODE = 'hang';
+    const caller = new AbortController();
+    setTimeout(() => caller.abort(), 200);
+
+    const result = await codexDispatcher.start({
+      ...baseOptions(),
+      idleTimeoutMs: 3000,
+      hardCapMs: 3000,
+      signal: caller.signal,
+    });
+
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('cancelled');
+  });
+
+  // The leak this wiring closes is not the CLI alone: a provider runs shells and
+  // tools of its own, and killing only the process cennad launched leaves those
+  // behind holding the same work. POSIX-only — Windows reaps the tree through
+  // `taskkill /T`, which this fake cannot exercise.
+  it.skipIf(process.platform === 'win32')(
+    'kills the processes the CLI spawned, not just the CLI',
+    async () => {
+      const pidFile = join(
+        tmpdir(),
+        `cennad-gc-${process.pid}-${randomUUID()}.pid`,
+      );
+      process.env.CENNAD_FAKE_CODEX_MODE = 'hang-with-grandchild';
+      process.env.CENNAD_FAKE_GRANDCHILD_SCRIPT = GRANDCHILD_SCRIPT;
+      process.env.CENNAD_FAKE_GRANDCHILD_PIDFILE = pidFile;
+      const caller = new AbortController();
+
+      const run = codexDispatcher.start({
+        ...baseOptions(),
+        idleTimeoutMs: 10_000,
+        hardCapMs: 10_000,
+        signal: caller.signal,
+      });
+      while (!existsSync(pidFile)) await new Promise((r) => setTimeout(r, 20));
+      const grandchildPid = Number(readFileSync(pidFile, 'utf8'));
+
+      caller.abort();
+      expect((await run).error?.code).toBe('cancelled');
+
+      let alive = true;
+      for (let i = 0; i < 50 && alive; i += 1)
+        try {
+          process.kill(grandchildPid, 0);
+          await new Promise((r) => setTimeout(r, 40));
+        } catch {
+          alive = false;
+        }
+      // Never leave an orphan behind when this regresses.
+      try {
+        process.kill(grandchildPid, 'SIGKILL');
+      } catch {
+        /* already reaped */
+      }
+      rmSync(pidFile, { force: true });
+
+      expect(alive).toBe(false);
+    },
+    20_000,
+  );
 
   it('maps HTTP 401 stderr to an auth failure', async () => {
     process.env.CENNAD_FAKE_CODEX_MODE = 'auth-stderr';

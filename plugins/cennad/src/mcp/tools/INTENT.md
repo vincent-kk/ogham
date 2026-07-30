@@ -1,6 +1,6 @@
 ## Purpose
 
-MCP 도구 3개(`start_conversation`, `continue_conversation`, `open_settings`)를 묶는 컨테이너 fractal. 각 도구는 독립 서브-fractal로 분리된다.
+MCP 도구 4개(`start_conversation`, `continue_conversation`, `stop_conversation`, `open_settings`)를 묶는 컨테이너 fractal. 각 도구는 독립 서브-fractal로 분리된다.
 
 ## Structure
 
@@ -8,13 +8,14 @@ MCP 도구 3개(`start_conversation`, `continue_conversation`, `open_settings`)�
 | ----------------------- | --------------------------------------- |
 | `startConversation/`    | 새 외부 LLM 세션 시작                   |
 | `continueConversation/` | 기존 세션 이어 호출 (project_hash 검증) |
+| `stopConversation/`     | 실행 중인 provider CLI 강제 종료        |
 | `openSettings/`         | 설정 웹 UI 기동 (일회용 토큰 인증)      |
 
 ## Conventions
 
 - 도구마다 `INTENT.md` + `index.ts` 보유 (독립 서브-fractal)
 - 입력 키는 `snake_case` (외부 LLM 인터페이스 일관성)
-- 응답은 `ConversationResponse` 표준 envelope
+- 대화 도구의 응답은 `ConversationResponse` 표준 envelope. 조작 도구(`stopConversation`, `openSettings`)는 자체 shape
 - 도구 이름은 `<verb>_<noun>` snake_case
 
 ## Boundaries

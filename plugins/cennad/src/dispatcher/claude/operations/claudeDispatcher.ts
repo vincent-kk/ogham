@@ -31,6 +31,8 @@ export const claudeDispatcher: Dispatcher<ClaudeFlags, ClaudeModelMap> = {
       supportedOptions,
       idleTimeoutMs: args.idleTimeoutMs,
       hardCapMs: args.hardCapMs,
+      sessionId: args.sessionId,
+      signal: args.signal,
       resolvedModel: resolved.model,
     });
   },
@@ -46,6 +48,8 @@ export const claudeDispatcher: Dispatcher<ClaudeFlags, ClaudeModelMap> = {
       supportedOptions,
       idleTimeoutMs: args.idleTimeoutMs,
       hardCapMs: args.hardCapMs,
+      sessionId: args.sessionId,
+      signal: args.signal,
       resolvedModel: resolved.model,
     });
   },

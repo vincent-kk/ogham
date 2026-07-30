@@ -2,6 +2,7 @@ import type {
   ConversationOptions,
   DispatchResult,
 } from '../../../types/index.js';
+import { withActiveRun } from '../../activeRuns/withActiveRun.js';
 import { mapError } from '../../errorMap/index.js';
 import { computeIgnoredOptions } from '../../utils/computeIgnoredOptions.js';
 import { parseCodexStream } from '../jsonlParser/index.js';
@@ -15,6 +16,11 @@ export interface DispatchInternal {
   supportedOptions: ReadonlySet<keyof ConversationOptions>;
   idleTimeoutMs: number;
   hardCapMs: number;
+  // cennad session UUID — the key this run is filed under while it is in flight,
+  // so `stop_conversation` can name it.
+  sessionId: string;
+  // The caller's cancellation signal, when the MCP request carried one.
+  signal?: AbortSignal;
   // What the tier resolved to, used when the stream names no model — codex
   // reports one only sometimes, and a null here gets stored as a tier label.
   tierModel: string | null;
@@ -27,15 +33,40 @@ export async function dispatch(
     input.options,
     input.supportedOptions,
   );
-  const spawnResult = await spawnCodex(input.argv, {
-    cwd: input.cwd,
-    timeoutMs: input.hardCapMs,
-    idleTimeoutMs: input.idleTimeoutMs,
-  });
+  const spawnResult = await withActiveRun(
+    {
+      sessionId: input.sessionId,
+      provider: 'codex',
+      callerSignal: input.signal,
+    },
+    (signal) =>
+      spawnCodex(input.argv, {
+        cwd: input.cwd,
+        timeoutMs: input.hardCapMs,
+        idleTimeoutMs: input.idleTimeoutMs,
+        signal,
+      }),
+  );
   const parsed = parseCodexStream(spawnResult.stdout);
   const resolvedModel = parsed.resolvedModel ?? input.tierModel;
   const resolvedRef = input.existingRef ?? parsed.threadId ?? '';
   const failed = spawnResult.spawnError !== null || spawnResult.exitCode !== 0;
+
+  // Before the generic failure branch: a stopped run's stream is a truncated
+  // one, and reading it would report whatever it was doing as the reason.
+  if (spawnResult.cancelled)
+    return {
+      status: 'failure',
+      response: null,
+      error: mapError({
+        exitCode: spawnResult.exitCode,
+        stderr: spawnResult.stderr,
+        cancelled: true,
+      }),
+      externalSessionRef: resolvedRef,
+      ignoredOptions,
+      resolvedModel,
+    };
 
   if (failed)
     return {

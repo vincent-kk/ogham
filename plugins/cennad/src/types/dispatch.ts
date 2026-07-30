@@ -139,6 +139,10 @@ export interface DispatchOptions<F = unknown, M = AntigravityModelMap> {
   // resetting it); hardCapMs is the absolute stop for the resolved tier.
   idleTimeoutMs: number;
   hardCapMs: number;
+  // Cancellation channel, injected by the MCP tool from the request's own signal.
+  // Its abort tree-kills the CLI instead of leaving it to run out a liveness
+  // limit; absent, only the limits and `stopRuns` can end the run.
+  signal?: AbortSignal;
   // Tier→model map, injected by the MCP tool for providers that resolve concrete
   // models from config (antigravity's AntigravityModelMap, claude's ClaudeModelMap).
   // codex ignores it.

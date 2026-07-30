@@ -14,6 +14,31 @@ describe('wrapHandler', () => {
     });
   });
 
+  // The SDK aborts this signal when the host cancels the request. Dropping it
+  // here is what leaves a spawned CLI running with nobody waiting for it.
+  it('hands the request signal to the handler', async () => {
+    const controller = new AbortController();
+    let received: AbortSignal | undefined;
+    const wrapped = wrapHandler(async (_n: number, signal?: AbortSignal) => {
+      received = signal;
+      return {};
+    });
+
+    await wrapped(1, { signal: controller.signal });
+
+    expect(received).toBe(controller.signal);
+  });
+
+  it('still runs when the caller passes no request context', async () => {
+    const wrapped = wrapHandler(async (_n: number, signal?: AbortSignal) => ({
+      hasSignal: signal !== undefined,
+    }));
+    const r = await wrapped(1);
+    expect(
+      JSON.parse((r as { content: { text: string }[] }).content[0].text),
+    ).toEqual({ hasSignal: false });
+  });
+
   it('returns toolError when handler throws', async () => {
     const wrapped = wrapHandler(async () => {
       throw new Error('handler failure');

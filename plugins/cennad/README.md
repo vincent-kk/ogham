@@ -2,7 +2,7 @@
 
 > **Renamed from `cogair`.** This plugin was previously published as `cogair`. With the rename, the old `/cogair:*` skills, the `cogair` MCP server, and the on-disk settings at `~/.claude/plugins/cogair/` no longer apply — there is no automatic migration. Reinstall as `cennad` and run `/cennad:setup` to reconfigure your provider ratio, keywords, and options.
 
-A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI**, **Google Antigravity CLI**, or **Anthropic Claude CLI** through three MCP tools, five user-invocable skills, a background dispatch agent, and two lifecycle hooks.
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI**, **Google Antigravity CLI**, or **Anthropic Claude CLI** through four MCP tools, five user-invocable skills, a background dispatch agent, and two lifecycle hooks.
 
 Where `atlassian` or `filid` encapsulate domain knowledge, cennad is a **delegation surface**: Claude decides when another model family fits better (heavy code → codex; live web search → antigravity) and the plugin handles session bookkeeping, ratio tracking, and per-session call counters.
 
@@ -111,7 +111,7 @@ Claude Code session
    ├── Agent "courier"                          runs the provider conversation off-thread
    │       │
    │       ▼
-   ├── MCP "tools" server                       Layer 2 (logic) — 3 MCP tools
+   ├── MCP "tools" server                       Layer 2 (logic) — 4 MCP tools
    │       │
    │       ▼
    ├── Dispatcher (codex / antigravity / claude)  spawn external CLI + parse output
@@ -130,6 +130,7 @@ The dispatch skills never call the MCP tools in the main session: each spawns a 
 | ----------------------- | ------------------------------------------------------------------------------- |
 | `start_conversation`    | Spawn `codex`, `antigravity`, or `claude` with a prompt and return an envelope. |
 | `continue_conversation` | Resume an existing session by `session_id` (project-hash-scoped).               |
+| `stop_conversation`     | Force-stop running provider CLIs this session started, their children included. |
 | `open_settings`         | Start the local settings UI and return its URL with a one-time token.           |
 
 ### Skills
@@ -224,7 +225,7 @@ For technical details and design rationale, see [`.metadata/cennad/`](../../.met
 | [README](../../.metadata/cennad/README.md)                       | Spec index + core decisions                     |
 | [spec](../../.metadata/cennad/spec.md)                           | Responsibilities, data flow, non-goals          |
 | [architecture](../../.metadata/cennad/architecture.md)           | Module tree + dependency direction + build flow |
-| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP tools (input schema, behavior, envelope)  |
+| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 4 MCP tools (input schema, behavior, envelope)  |
 | [skills](../../.metadata/cennad/skills.md)                       | Skill body + courier dispatch mapping           |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli invocation matrix  |

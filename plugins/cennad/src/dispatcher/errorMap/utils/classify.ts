@@ -10,9 +10,16 @@ export interface MapErrorInput {
   cliMessage?: string | null;
   spawnError?: NodeJS.ErrnoException | null;
   abortedByCaller?: boolean;
+  // The run was stopped on purpose — a cancelled MCP request or stop_conversation.
+  // Distinct from `abortedByCaller`, which the retry-storm detector also raises.
+  cancelled?: boolean;
 }
 
 export function classify(input: MapErrorInput): ErrorCode {
+  // First, ahead of every text scan: a stop lands mid-stream, so the buffered
+  // output still describes whatever the run was doing. Reading it would report
+  // that instead of the stop.
+  if (input.cancelled) return ErrorCode.Cancelled;
   if (EXIT_CODE_MAP[input.exitCode]) return EXIT_CODE_MAP[input.exitCode];
   const reported = `${input.cliMessage ?? ''}\n${input.stderr}`;
   if (/\b(401|403)\b/.test(reported)) return ErrorCode.Auth;

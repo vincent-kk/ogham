@@ -24,7 +24,7 @@
 
 - `getSession(projectHash, session_id)` 가 `null` → `error.code='unknown'` 즉시 반환
 - 세션 provider 가 비활성(`ratio[provider].enabled=false`) → `error.code='disabled'` 즉시 반환 (resume·카운터 없음)
-- resume 후 성공/실패 무관 `last_used_at`, `turn_count` 갱신 (호출 카운트 반영)
+- resume 후 성공/실패/취소 무관 `last_used_at`, `turn_count` 갱신 (호출 카운트 반영; 취소는 `error.code='cancelled'`)
 - dispatcher 가 반환한 `external_session_ref` 를 그대로 세션에 반영 (빈 문자열이면 기존 ref 유지) — agy 는 레거시 cwd ref 를 conversation id 로 승격시켜 돌려준다
 
 ### Ask first

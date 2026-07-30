@@ -1,6 +1,7 @@
 export const McpToolName = {
   START_CONVERSATION: 'start_conversation',
   CONTINUE_CONVERSATION: 'continue_conversation',
+  STOP_CONVERSATION: 'stop_conversation',
   OPEN_SETTINGS: 'open_settings',
 } as const;
 

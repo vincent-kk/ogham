@@ -26,8 +26,18 @@ export interface ContinueConversationInput {
   project_root?: string;
 }
 
+/**
+ * 기존 외부 LLM 세션을 이어 호출하고 응답 envelope 을 만든다.
+ *
+ * @param input MCP 도구 입력 (`snake_case` 키 그대로).
+ * @param signal 호출자 취소 신호. abort 되면 실행 중인 provider CLI 를 프로세스
+ *   그룹째 종료하고 `error.code='cancelled'` 로 돌아온다. 취소된 턴도 세션 메타
+ *   갱신은 기존과 동일하게 수행한다.
+ * @returns 성공·실패 모두 `ConversationResponse`.
+ */
 export async function handleContinueConversation(
   input: ContinueConversationInput,
+  signal?: AbortSignal,
 ): Promise<ConversationResponse> {
   const startedAt = performance.now();
   const cwd = projectRoot(input.project_root);
@@ -93,6 +103,7 @@ export async function handleContinueConversation(
     externalSessionRef: session.external_session_ref,
     idleTimeoutMs: config.timeouts.idle_ms,
     hardCapMs: config.timeouts.hard_cap_ms[tier],
+    signal,
   };
   let result: DispatchResult;
   if (session.provider === 'antigravity')

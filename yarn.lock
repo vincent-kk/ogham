@@ -1090,6 +1090,7 @@ __metadata:
     "@ogham/agent-artifacts": "workspace:^"
     "@ogham/cross-platform": "workspace:^"
     "@ogham/http-kit": "workspace:^"
+    "@ogham/session-finalizer": "workspace:^"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^4.1.10"
     esbuild: "npm:^0.24.0"
