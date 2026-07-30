@@ -14,6 +14,7 @@ import {
 } from './ecmascriptConventions.js';
 import { extractDependencyReferences } from './extractDependencyReferences.js';
 import { findEntryPoints } from './findEntryPoints.js';
+import { inspectManifestEntry } from './inspectManifestEntry.js';
 import { scanLexicalTokens } from './scanLexicalTokens.js';
 
 function discoverEcmascriptFiles(projectRoot: string): string[] {
@@ -145,6 +146,8 @@ export const ecmascriptStructureAdapter: StructureAdapter = {
       adapterId: ECMASCRIPT_ADAPTER_ID,
       surface: 'enumerated',
     };
+    if (entryPoint.kind === 'manifest')
+      return { entryPoint, ...inspectManifestEntry(entryPointPath) };
     return { entryPoint, ...inspectEntryPointSource(entryPointPath) };
   },
   async extractDependencies(filePath) {

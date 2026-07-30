@@ -89,6 +89,101 @@ describe('ecmascript structure adapter', () => {
     );
   });
 
+  it('reports the directory own package.json as a manifest entry point', async () => {
+    const root = project();
+    const manifest = write(
+      root,
+      'package.json',
+      JSON.stringify({
+        name: 'demo',
+        exports: { '.': './dist/index.js', './guard': './dist/guard.js' },
+      }),
+    );
+
+    const entryPoints = await ecmascriptStructureAdapter.findEntryPoints(root);
+
+    expect(entryPoints).toEqual([
+      expect.objectContaining({
+        path: manifest,
+        kind: 'manifest',
+        surface: 'enumerated',
+      }),
+    ]);
+  });
+
+  it('does not report an ancestor package.json as this directory manifest', async () => {
+    const root = project();
+    write(root, 'package.json', JSON.stringify({ name: 'demo' }));
+    write(root, 'src/index.ts', 'export const value = 1;');
+
+    const entryPoints = await ecmascriptStructureAdapter.findEntryPoints(
+      join(root, 'src'),
+    );
+
+    expect(entryPoints.map(({ kind }) => kind)).toEqual(['module']);
+  });
+
+  it('inspects a manifest surface through its exports map', async () => {
+    const root = project();
+    const manifest = write(
+      root,
+      'package.json',
+      JSON.stringify({
+        name: 'demo',
+        main: './dist/index.js',
+        exports: { './guard': './dist/guard.js', '.': './dist/index.js' },
+      }),
+    );
+
+    const inspection =
+      await ecmascriptStructureAdapter.inspectEntryPoint(manifest);
+
+    expect(inspection.exportedNames).toEqual(['.', './guard']);
+    expect(inspection.certainty).toBe('exact');
+    expect(inspection.hasDirectDeclarations).toBe(false);
+  });
+
+  it('falls back to a single manifest entry when only main is declared', async () => {
+    const root = project();
+    const manifest = write(
+      root,
+      'package.json',
+      JSON.stringify({ name: 'demo', main: 'dist/index.js' }),
+    );
+
+    const inspection =
+      await ecmascriptStructureAdapter.inspectEntryPoint(manifest);
+
+    expect(inspection.exportedNames).toEqual(['.']);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('reports an empty exact surface for a manifest declaring none', async () => {
+    const root = project();
+    const manifest = write(
+      root,
+      'package.json',
+      JSON.stringify({ name: 'demo', private: true }),
+    );
+
+    const inspection =
+      await ecmascriptStructureAdapter.inspectEntryPoint(manifest);
+
+    expect(inspection.exportedNames).toEqual([]);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('reports an indeterminate surface for an unreadable manifest', async () => {
+    const root = project();
+    const manifest = write(root, 'package.json', '{ not json');
+
+    const inspection =
+      await ecmascriptStructureAdapter.inspectEntryPoint(manifest);
+
+    expect(inspection.exportedNames).toEqual([]);
+    expect(inspection.certainty).toBe('indeterminate');
+  });
+
   it('interprets only exact configured peer names as entry overrides', async () => {
     const root = project();
     const configured = write(root, 'module/public.ts', 'export {};');

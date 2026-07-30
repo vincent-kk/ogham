@@ -55,8 +55,12 @@ export async function collectNodeMetadata(
       )
         .flat()
         .filter(
+          // A manifest is a declaration file, not a discovered source file, so
+          // it never enters the ownership map the snapshot builds. Enforcing
+          // ownership on it would drop the entry on the snapshot path only.
           (entryPoint) =>
             !opts.enforceStructureOwnership ||
+            entryPoint.kind === 'manifest' ||
             opts.structureOwnership.get(pathForCompare(entryPoint.path)) ===
               entryPoint.adapterId,
         )

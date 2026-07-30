@@ -8,6 +8,7 @@ import {
   EXECUTABLE_ENTRY_BASENAMES,
   FRAMEWORK_ENTRY_BASENAMES,
   FRAMEWORK_PACKAGES,
+  MANIFEST_ENTRY_FILENAME,
   MODULE_ENTRY_BASENAMES,
   SOURCE_EXTENSIONS,
 } from './ecmascriptConventions.js';
@@ -106,6 +107,18 @@ export function findEntryPoints(
       surface: kind === 'framework' ? 'opaque' : 'enumerated',
     });
   }
+
+  // This directory's own manifest only. `findNearestPackage` walks up for
+  // framework evidence, which is a different question — an ancestor's manifest
+  // declares that package's surface, not this directory's.
+  const manifestPath = join(directoryPath, MANIFEST_ENTRY_FILENAME);
+  if (existsSync(manifestPath))
+    descriptors.push({
+      path: manifestPath,
+      kind: 'manifest',
+      adapterId: ECMASCRIPT_ADAPTER_ID,
+      surface: 'enumerated',
+    });
 
   return descriptors;
 }

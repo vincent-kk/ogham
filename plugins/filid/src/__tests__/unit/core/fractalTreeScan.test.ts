@@ -203,6 +203,57 @@ describe('fractal-tree', () => {
       }
     });
 
+    it('should report a manifest entry without classifying on it', async () => {
+      setup({
+        // The root manifest is what makes the adapter claim this fixture.
+        '.': ['INTENT.md', 'package.json'],
+        // Declared fractal whose only entry declaration is its manifest — the
+        // shape every package root in this repository has.
+        'packages/declared': ['INTENT.md', 'package.json'],
+        // Same manifest, no boundary document: it must stay an organ.
+        'packages/bare': ['package.json'],
+      });
+
+      try {
+        const tree = await scanProject(tmpDir);
+        const declared = tree.nodes.get(join(tmpDir, 'packages', 'declared'))!;
+        const bare = tree.nodes.get(join(tmpDir, 'packages', 'bare'))!;
+
+        expect(declared.type).toBe('fractal');
+        expect(declared.entryPoints.map(({ kind }) => kind)).toEqual([
+          'manifest',
+        ]);
+        expect(bare.type).toBe('organ');
+        expect(bare.entryPoints.map(({ kind }) => kind)).toEqual(['manifest']);
+      } finally {
+        teardown();
+      }
+    });
+
+    it('should keep a manifest entry when ownership is enforced', async () => {
+      // The snapshot path enforces ownership, and the ownership map is built
+      // from discovered source files — a manifest is never in it.
+      setup({
+        '.': ['INTENT.md', 'package.json'],
+        'packages/declared': ['INTENT.md', 'package.json'],
+      });
+
+      try {
+        const tree = await scanProject(tmpDir, {
+          enforceStructureOwnership: true,
+          structureOwnership: new Map(),
+        });
+
+        expect(
+          tree.nodes
+            .get(join(tmpDir, 'packages', 'declared'))!
+            .entryPoints.map(({ kind }) => kind),
+        ).toEqual(['manifest']);
+      } finally {
+        teardown();
+      }
+    });
+
     it('should drop additionalExcludedDirectories names from the tree', async () => {
       setup({
         '.': ['INTENT.md'],
