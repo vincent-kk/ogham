@@ -10,21 +10,21 @@
 
 측정 기준은 `structure_validate(path=<저장소 루트>)` 6 스코프 전체다. 이 표 이전에 적혀 있던 총계 599 는 더 좁은 스코프 조합에서 나온 값이라 아래 숫자와 비교하지 않는다.
 
-| 플러그인     | 착수 전 |   error | warning | 상태                               |
-| ------------ | ------: | ------: | ------: | ---------------------------------- |
-| prawf        |       2 |       0 |       1 | 완료                               |
-| r-statistics |      20 |       0 |       2 | 완료                               |
-| deilen       |      33 |       0 |       1 | 완료                               |
-| entrez       |      47 |       0 |       3 | 완료                               |
-| seiri        |      47 |       0 |       2 | 완료                               |
-| atlassian    |      55 |       0 |       3 | 완료                               |
-| maencof-lens |      68 |       0 |      24 | 완료                               |
-| imbas        |     100 |       0 |      55 | 완료                               |
-| cennad       |      50 |       1 |       6 | 완료 — 순환 1 잔존(아래 사유)      |
-| **maencof**  |     366 | **146** |     216 | **다음 차례 — 서브배치 T10a–T10e** |
-| (plugins 밖) |       4 |      17 |     138 | 미착수 — T11                       |
+| 플러그인     | 착수 전 | error | warning | 상태                          |
+| ------------ | ------: | ----: | ------: | ----------------------------- |
+| prawf        |       2 |     0 |       1 | 완료                          |
+| r-statistics |      20 |     0 |       2 | 완료                          |
+| deilen       |      33 |     0 |       1 | 완료                          |
+| entrez       |      47 |     0 |       3 | 완료                          |
+| seiri        |      47 |     0 |       2 | 완료                          |
+| atlassian    |      55 |     0 |       3 | 완료                          |
+| maencof-lens |      68 |     0 |      24 | 완료                          |
+| imbas        |     100 |     0 |      55 | 완료                          |
+| maencof      |     366 |     0 |     186 | 완료                          |
+| cennad       |      50 |     1 |       6 | 완료 — 순환 1 잔존(아래 사유) |
+| (plugins 밖) |       4 |    17 |     138 | **다음 차례 — T11**           |
 
-완료한 9개는 전부 `typecheck` + `test:run` 통과를 확인했다. 미착수 2개는 코드를 건드리지 않았다.
+**`plugins/` 10개 중 9개가 error 0 이고 cennad 만 순환 1건이 남았다.** 완료한 10개는 전부 `typecheck` + `test:run` 통과를 확인했다.
 
 `(plugins 밖)` 은 `plugins/` 아래가 아닌 모든 경로(`mcp-servers/`·`shared/`·`tools/`·`scripts/`)를 한 칸에 모은 것이다. 착수 전 칸의 4 는 더 좁은 루트 스코프만 센 값이라 error 17 과 같은 기준이 아니다.
 
@@ -40,9 +40,9 @@
 
 ## 다음 착수 지점
 
-**T10 — maencof.** error 146건이고 분포는 실측으로 확인했다: `external-import-boundary` 137 · `intent-document-contract` 3 · `spec-contract-link` 3 · `circular-dependency` 2 · `test-record-case-cap` 1. 서브배치 순서와 갈래별 처방은 [HANDOFF.md](./HANDOFF.md) 의 "T10" 절에 있다.
+**T11 — `plugins/` 밖 (error 17, 전부 `external-import-boundary`)**. 대상은 `mcp-servers/`·`shared/`·`tools/`·`scripts/` 다.
 
-이후 **T11 — `plugins/` 밖 (error 17, 전부 `external-import-boundary`)**.
+그 뒤 남는 판단거리: cennad 순환 1건(아래 잔존 표), 그리고 warning 계열(`detail-document-contract` 다수·`entry-point-surface` wildcard 배럴·`zero-peer-file`).
 
 ## 완료
 
@@ -128,8 +128,27 @@
 - `src/__tests__/schemas.test.ts`(46 케이스, 상한 32)를 검증 대상 `types/` 모듈별로 4개로 분할 — state 12 · config 13 · manifest 17 · cache 4. 원본 삭제 전 `it()` 46→46 · `describe` 11→11 을 기계적으로 대조했다.
 - 검증: typecheck 무출력 통과 → **35 files / 304 tests** 통과(파일만 +3, 케이스 수 동일) → `build:plugin` 훅 번들 가드 통과(`mcp-server.cjs` 312903 bytes 불변) → `structure_validate` boundaries·dag 116 passed / 0 failed, documents·nodes·entry-points 54건 전부 warning, verification 4건 전부 indeterminate.
 
+### T10 — maencof (366 → error 0, warning 186)
+
+여섯 배치로 끊었다. 매 배치 `typecheck` → `test:run` 을 돌렸고 케이스 수는 처음부터 끝까지 1265 로 같다(파일 수만 143 → 144).
+
+- **T10a 배럴 교정(14건)** — 형제 fractal 의 concrete 파일 직접 참조를 배럴 경유로. 심볼 8종 중 7종은 이미 배럴에 있었고 `resolveSectionText` 만 `core/turnContext` 배럴에 이름을 추가했다(외부 소비자 존재 → 실질 공개 심볼). `core/turnContext/INTENT.md` Structure 누락 2줄도 채웠다.
+- **T10b organ·version(10건)** — organ-reach 8건은 전부 소유자 배럴 경유로 풀렸다(면책 0건). `createProjectInstructionManager` 만 `core/claudeMdMerger` 배럴에 추가(외부 소비자 4곳). `version.ts` 2건은 `src/DETAIL.md` 면책.
+- **T10c 훅 면책(113건)** — 소유 fractal 30곳의 DETAIL 에 Boundary Exemption 선언, 코드 무변경. 신설 DETAIL 25개(core 12 + hooks 13), 기존 DETAIL 5개에 누락 섹션 보완. `hooks/index.ts` 4건은 자녀 배럴 경유로 교정(이 배럴은 훅 번들 진입점이 아니므로 번들 제약 없음).
+- **T10d 순환 2건** — `graphCache ↔ middlewares` 는 `ensureFreshGraph` 라는 **소비자 0건 pass-through 래퍼**가 닫고 있었고 제거로 해소. `src → mcp → mcp/server → src` 는 `mcp/index.ts` 의 `export * from './server/index.js'` 를 빼서 해소했다 — `mcp/server` 는 실행 진입점이고 `serverEntry` 가 형제 배럴을 직접 쓰므로 소비자가 없다. maencof-lens 는 도구 핸들러만 가져가므로 무영향(typecheck + 13 files / 73 tests 로 확인).
+- **T10e INTENT 3건** — `core/graphBuilder/builders`·`mcp/server/registrations`·`hooks/sessionStart/helpers/remindExpiredBuffer`. 셋 다 `index.ts` 때문에 fractal 로 분류되는데 부모 INTENT 는 organ 이라 부르고 있었다. 부모 표현도 하위 fractal 로 고쳤다.
+- **T10f 검증 계약** — `vaultCommitter.test.ts`(38 케이스)를 관심사 경계로 23/15 로 분할. spec 3개를 검증 대상 fractal 의 `__tests__` 로 이동하고 `core/yamlParser/DETAIL.md` 를 신설해 형제 spec 이 서로 다른 acceptance group 을 주장하게 했다.
+
+**면책 위치를 두 번 틀렸다.** ① 파일 target 을 import specifier 의 `.js` 로 적어 10건이 무시되었다 — 파서는 디스크 경로와 비교하므로 `.ts` 여야 한다. ② `remindExpiredBuffer` 는 INTENT 가 없어 organ 으로 보이지만 `index.ts` 가 있어 fractal 이다. 부모 DETAIL 에 쓴 면책이 인식되지 않아 자기 DETAIL 로 옮겼다.
+
 ## 재사용할 사실
 
+- **면책 heading 의 파일 target 은 디스크의 실제 확장자(`.ts`)여야 한다.** import specifier 의 `.js` 를 그대로 옮기면 파서가 경로를 찾지 못하고 조용히 무시된다. organ target(`operations` 등)은 확장자가 없어 영향이 없으므로, 같은 배치에서 organ 면책만 통하고 파일 면책만 남는 증상으로 나타난다.
+- **`INTENT.md`·`DETAIL.md` 가 없어도 `index.ts` 가 있으면 module index 로 fractal 로 분류된다.** 면책은 그 디렉터리 자신의 DETAIL 에 써야 하고 부모 DETAIL 에 쓰면 인식되지 않는다(maencof `remindExpiredBuffer`).
+- **면책 target·consumer·verdict 은 코드 스팬으로 쓴다** — 현행 `filid_module-documents` §6 이 그렇게 요구하고, 스팬이 있으면 prettier 가 `__tests__` 를 `**tests**` 로 바꾸는 훼손도 막힌다. bare 값도 읽히지만 스팬이 안전한 기본값이다.
+- **`spec-contract-link` 은 spec 파일의 소유 fractal DETAIL 에서 acceptance group 을 찾는다.** 위반 메시지가 어느 문서를 봤는지 그대로 알려 준다. spec 을 `src/__tests__/` 에 모아 두면 `src/DETAIL.md` 가 하위 도메인 계약까지 들고 있어야 하므로, 검증 대상 fractal 의 `__tests__` 에 두는 편이 맞다(vitest include 가 `__tests__` 스코프인지 먼저 확인할 것).
+- **pass-through 래퍼가 순환을 닫는 흔한 패턴.** `A` 가 `B` 의 함수를 그대로 넘기는 얇은 래퍼를 노출하고 `B` 는 `A` 를 쓰면 순환이다. 래퍼 소비자가 0건이면 제거가 정답이고(maencof `graphCache.ensureFreshGraph`), 소비자가 있으면 호출자를 `B` 로 직접 보낸다.
+- **컨테이너 배럴에서 실행 진입점을 빼면 순환이 풀린다.** `mcp/index.ts` 가 `server/` 를 재노출하면 `server.ts → version.ts` 와 맞물려 순환이 되는데, `server/` 는 실행 진입점이지 라이브러리 API 가 아니고 `serverEntry` 가 형제 배럴을 직접 쓰므로 재노출 소비자가 애초에 없다. 배럴에서 무엇을 뺄 수 있는지는 **심볼별 소비자 실측**으로 판단한다.
 - **Boundary Exemption 의 `Consumers` 는 `**/` 접두 glob 이어야 인식된다.** `scripts/devViewer.ts` 로 적으면 면책이 적용되지 않고, `**/scripts/devViewer.ts` 로 적어야 통과한다. 훅 면책은 `**/src/hooks/**`, 테스트 면책은 `**/__tests__/**`.
 - **면책 헤딩의 target 은 trailing slash 없는 단일 경로여야 한다.** `### loaders/ · utils/ — ...` 처럼 둘을 묶거나 `### record/ —` 처럼 슬래시를 붙이면 경로로 해석되지 않는다. organ 이 둘이면 헤딩을 둘로 나눈다: `### loaders — ...`, `### utils — ...`.
 - **fractal 컨테이너의 배럴은 하위 fractal 의 배럴을 재노출해야 한다.** `export { x } from './setup/setup.js'` 는 하위 모듈 경계를 넘는 위반이고, `'./setup/index.js'` 가 맞다.
