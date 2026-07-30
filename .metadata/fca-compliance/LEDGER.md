@@ -2,7 +2,7 @@
 
 > **이어서 작업하려면 [HANDOFF.md](./HANDOFF.md) 를 먼저 읽는다.** 다음 착수 지점, 확립된 처방 5가지, 실측으로 얻은 함정, 검증 절차가 거기 정리되어 있다.
 
-계획: [PLAN.md](./PLAN.md). 기준 실측 792건 → **현재 414건, 그중 error 1건**.
+계획: [PLAN.md](./PLAN.md). 기준 실측 792건 → **현재 413건, 전부 warning — error 0**.
 
 한 줄에 하나: 무엇이 어디에 반영되었고 무엇으로 검증했는가.
 
@@ -10,21 +10,21 @@
 
 측정 기준은 `structure_validate(path=<저장소 루트>)` 6 스코프 전체다. 이 표 이전에 적혀 있던 총계 599 는 더 좁은 스코프 조합에서 나온 값이라 아래 숫자와 비교하지 않는다.
 
-| 플러그인     | 착수 전 | error | warning | 상태                          |
-| ------------ | ------: | ----: | ------: | ----------------------------- |
-| prawf        |       2 |     0 |       1 | 완료                          |
-| r-statistics |      20 |     0 |       2 | 완료                          |
-| deilen       |      33 |     0 |       1 | 완료                          |
-| entrez       |      47 |     0 |       3 | 완료                          |
-| seiri        |      47 |     0 |       2 | 완료                          |
-| atlassian    |      55 |     0 |       3 | 완료                          |
-| maencof-lens |      68 |     0 |      24 | 완료                          |
-| imbas        |     100 |     0 |      55 | 완료                          |
-| maencof      |     366 |     0 |     186 | 완료                          |
-| cennad       |      50 |     1 |       6 | 완료 — 순환 1 잔존(아래 사유) |
-| (plugins 밖) |       4 |     0 |     135 | 완료                          |
+| 플러그인     | 착수 전 | error | warning | 상태 |
+| ------------ | ------: | ----: | ------: | ---- |
+| prawf        |       2 |     0 |       1 | 완료 |
+| r-statistics |      20 |     0 |       2 | 완료 |
+| deilen       |      33 |     0 |       1 | 완료 |
+| entrez       |      47 |     0 |       3 | 완료 |
+| seiri        |      47 |     0 |       2 | 완료 |
+| atlassian    |      55 |     0 |       3 | 완료 |
+| maencof-lens |      68 |     0 |      24 | 완료 |
+| imbas        |     100 |     0 |      55 | 완료 |
+| maencof      |     366 |     0 |     186 | 완료 |
+| cennad       |      50 |     0 |       6 | 완료 |
+| (plugins 밖) |       4 |     0 |     135 | 완료 |
 
-**저장소 전체 error 는 1건이다** — cennad 순환뿐이고 나머지 413건은 warning 이다. 손댄 워크스페이스는 전부 `typecheck` + `test:run` 으로 기준선 불변을 확인했고, 마지막에 저장소 전체를 돌렸다: `yarn typecheck` 14 workspaces clean, `yarn test:run` **601 files / 4985 tests 통과**(598 passed·3 skipped / 4965 passed·20 skipped).
+**저장소 전체 error 0** — 413건 전부 warning 이다. 손댄 워크스페이스는 전부 `typecheck` + `test:run` 으로 기준선 불변을 확인했고, 저장소 전체도 돌렸다: `yarn typecheck` 14 workspaces clean, `yarn test:run` **601 files / 4985 tests 통과**(598 passed·3 skipped / 4965 passed·20 skipped).
 
 `(plugins 밖)` 은 `plugins/` 아래가 아닌 모든 경로(`mcp-servers/`·`shared/`·`tools/`·`scripts/`)를 한 칸에 모은 것이다. 착수 전 칸의 4 는 더 좁은 루트 스코프만 센 값이라 같은 기준이 아니다.
 
@@ -40,9 +40,9 @@
 
 ## 다음 착수 지점
 
-**error 작업은 끝났다.** 남은 것은 판단이 필요한 항목뿐이고, 착수 전에 사용자 결정을 받는다.
+**error 는 0 이 되었다.** 남은 것은 판단이 필요한 항목뿐이고, 착수 전에 사용자 결정을 받는다.
 
-1. **cennad 순환 1건** — 유일한 error. 아래 잔존 표에 사유가 있다. 어떤 해법도 기능 변경이거나 테스트 레이아웃 이동이라 형식 작업 범위를 넘는다.
+1. **cennad `open-settings` e2e 실패 2건 (이 작업과 무관한 선재 사항, 미해결)** — `GET /config` 응답에 `ratio` 키가 없어 layerA 는 undefined 접근, layerB 는 그 body 로 저장해 400 을 받는다. 두 번의 실측으로 갈라냈다: 이 브랜치의 `http-kit/guard` 변경을 되돌려도 동일, `plugins/cennad` 를 main 소스로 되돌려도 동일 — **main 에서도 깨져 있다**. `vitest.config.ts` 의 `exclude` 가 `src/__tests__/e2e/**` 를 기본 `test:run` 에서 빼기 때문에 드러나지 않았다(116개 중 18개가 e2e, 기본 실행은 98개). 원인은 설정 웹서버의 `/config` 핸들러 payload 이며 FCA 작업과 별개 과제다.
 2. **`detail-document-contract` 203건** — 도구 기본값이 fractal 마다 DETAIL 을 요구하는 것이고 규칙 산문은 DETAIL 없는 fractal 을 전제한다(아래 절). 작성·severity 하향·경로 면제 중 무엇을 택할지 결정이 필요하다.
 3. **`zero-peer-file` 126건 · `module-entry-point` 21건 · `entry-point-surface` 50건** — 전자 둘은 구현 파일을 organ 으로 옮기고 배럴을 두는 구조 작업, 후자는 wildcard 배럴을 named export 로 전개하는 작업이다.
 4. **`test-record-case-cap` 7건** — 전부 dynamic table 로 `indeterminate` 다. 정적화하면 커버리지가 줄어 손대지 않았다.
@@ -153,6 +153,16 @@
 - `paths/compat/INTENT.md` 의 Structure 파일명이 kebab-case 로 적혀 실제 camelCase 와 어긋난 이름 함정도 고쳤다.
 - 검증: `yarn crossPlatform test:run` 52 files / 376 tests(불변), `@ogham/http-kit` 7 files / 47 tests, `yarn typecheck` 14 workspaces clean.
 
+### T12 — cennad 순환 (error 1 → 0, 저장소 전체 error 0)
+
+순환은 `src → mcp/server → src` 였다. 두 엣지를 갈라 보면 닫는 엣지는 e2e Layer A 하네스이고 되돌아오는 엣지는 `lifecycle/createServer.ts → version.ts` 였다. 하네스 쪽은 지울 수 없고(케이스가 없어 어댑터가 검증 파일로 인식하지 않는다), `version.ts` 도 내릴 수 없다(공유 생성기가 `src/` 루트에 고정). 그래서 되돌아오는 엣지를 없앴다.
+
+- `createServer(version)`·`startServer(version)` 이 버전을 인자로 받고, 주입은 `mcp/serverEntry`(실행)와 하네스(테스트)가 한다. `seiri_function-boundaries` §1 이 그대로 처방하는 형태다. 호스트에 보고되는 name·version 값은 불변.
+- **공개 API 가 아님을 실측한 뒤 진행했다** — `src/index.ts` 가 `mcp/` 를 노출하지 않고 `mcp/index.js` 소비자도, `@ogham/cennad` 외부 소비자도 0건이다. `mcp/server/INTENT.md` 의 "Ask first: 공개 API 시그니처 변경" 은 걸리지 않는다.
+- 리팩터이므로 특성 테스트를 먼저 세웠다: `e2e/mcp/server-info.layerA.test.ts` 가 클라이언트가 보는 `{name:'tools', version:VERSION}` 을 고정한다. 변경 전 통과 → 변경 후 통과(주입이 배선되지 않으면 깨진다).
+- 문서를 코드보다 먼저 맞췄다: `src/DETAIL.md`(순환 잔존 문단 → identity 주입 계약), `mcp/server/INTENT.md`(Structure 경로를 `lifecycle/` 로 교정 + 주입 규약), `mcp/serverEntry/INTENT.md`, `src/index.ts` 주석.
+- 검증: typecheck 통과 → `test:run` 98 files / 742 tests(불변) → `test:e2e:run` 61 passed / 3 skipped → `build:plugin` 가드 통과, MCP 번들 371112 → 371116(+4 bytes) → `structure_validate(cennad)` **status ok, 128 passed / 0 failed** → 저장소 루트 전 스코프 **error 0**.
+
 ## 재사용할 사실
 
 - **배럴 경유 교정은 번들을 거의 늘리지 않는다 — esbuild 가 재노출 배럴을 tree-shake 하기 때문이다.** 커밋된 `bridge/`·`public/` 50개를 기준선으로 전 플러그인을 재빌드해 비교한 결과: **훅 번들 22개는 전부 바이트 동일**, MCP 번들은 9/10 바이트 동일, maencof 만 490613 → 490623(**+10 bytes**, +0.002%)였다. 이 +10 이 실제 변경분임을 갈라내는 절차는 ① 3회 연속 빌드가 바이트 동일(결정적) ② main 소스로 빌드하면 커밋된 490613 을 정확히 재현(커밋 산출물이 stale 하지 않음) ③ HEAD 소스는 490623. 내용 확인은 `require()` 수 190개 동일 + 문자열 집합 diff 가 minifier 식별자 리네임(`Cr`→`Tr` 등)뿐이었다.
@@ -181,13 +191,13 @@
 
 ## 잔존 (사유 포함)
 
-| 플러그인     | 규칙                   | 건수 | 사유                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------ | ---------------------- | ---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| prawf        | `module-entry-point`   |    1 | 플러그인 루트에 어댑터 진입점이 없음. filid 는 config exempt 로 처리 — T12 사용자 확인                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| r-statistics | `module-entry-point`   |    1 | 위와 동일                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| r-statistics | `test-record-case-cap` |    1 | `rulesetMetaSync.test.ts` 가 동적 테이블 사용. 정적화하면 커버리지가 줄어 손대지 않음                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| r-statistics | spec 계열 3건          |    3 | `indeterminate` — 증거 부족이지 위반 아님. 규칙상 pass 로 바꾸지 않는다                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| seiri        | `module-entry-point`   |    2 | 플러그인 루트와 `templates/`(마크다운 자산). 후자는 index 를 둘 성질이 아니다                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| cennad       | `circular-dependency`  |    1 | **저장소의 유일한 error.** `src → mcp/server → src`. 닫는 엣지는 `src/__tests__/e2e/helpers/mcpClientLayerA.ts` 가 `createServer` 를 가져가는 것이고, 되돌아오는 엣지는 `mcp/server/lifecycle/createServer.ts → version.ts` 다. 이 하네스는 케이스가 없어 검증 파일로 인식되지 않아 일반 소스로 취급된다 — 규칙 자체는 검증 파일 참조가 순환을 닫지 않는다고 쓴다. 배송 그래프에는 순환이 없다. 해법은 (a) 하네스를 `src` 밖으로 이동, (b) `createServer` 가 VERSION 을 인자로 받게 변경 — 둘 다 형식 작업 범위를 넘으므로 사용자 판단 항목 |
-| cennad       | `entry-point-surface`  |    4 | wildcard 배럴 4개. named 전개로 해소 가능하나 심볼 수가 많아 별도 배치로 미룸                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| cennad       | `module-entry-point`   |    2 | 플러그인 루트와 `hooks/`(훅 매핑 설정 노드)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 플러그인     | 규칙                   | 건수 | 사유                                                                                                                                                                                                                                      |
+| ------------ | ---------------------- | ---: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prawf        | `module-entry-point`   |    1 | 플러그인 루트에 어댑터 진입점이 없음. filid 는 config exempt 로 처리 — T12 사용자 확인                                                                                                                                                    |
+| r-statistics | `module-entry-point`   |    1 | 위와 동일                                                                                                                                                                                                                                 |
+| r-statistics | `test-record-case-cap` |    1 | `rulesetMetaSync.test.ts` 가 동적 테이블 사용. 정적화하면 커버리지가 줄어 손대지 않음                                                                                                                                                     |
+| r-statistics | spec 계열 3건          |    3 | `indeterminate` — 증거 부족이지 위반 아님. 규칙상 pass 로 바꾸지 않는다                                                                                                                                                                   |
+| seiri        | `module-entry-point`   |    2 | 플러그인 루트와 `templates/`(마크다운 자산). 후자는 index 를 둘 성질이 아니다                                                                                                                                                             |
+| cennad       | `open-settings` e2e    |    2 | **FCA 와 무관한 선재 실패, 미해결.** `GET /config` 응답에 `ratio` 키가 없다. main 소스로 되돌려도 동일하게 실패하고, `vitest.config.ts` 의 `exclude` 가 e2e 를 기본 `test:run` 에서 빼기 때문에 드러나지 않았다 — 위 "다음 착수 지점" 1번 |
+| cennad       | `entry-point-surface`  |    4 | wildcard 배럴 4개. named 전개로 해소 가능하나 심볼 수가 많아 별도 배치로 미룸                                                                                                                                                             |
+| cennad       | `module-entry-point`   |    2 | 플러그인 루트와 `hooks/`(훅 매핑 설정 노드)                                                                                                                                                                                               |

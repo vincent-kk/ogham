@@ -5,16 +5,15 @@
 ## 현재 위치
 
 - 브랜치: `refactor/plugins-fca-compliance` (main 에서 분기, 워킹트리 깨끗)
-- **error 작업은 끝났다.** 저장소 전체 error 1건(cennad 순환)만 남았고 나머지 413건은 warning 이다.
-- 기능은 바꾸지 않았다 — 바뀐 것은 파일 위치, import 경로, 배럴 재노출 형태, 문서뿐이다.
+- **error 작업은 끝났다. 저장소 전체 FCA error 0** — 남은 413건은 전부 warning 이다.
+- 기능은 바꾸지 않았다. 유일한 시그니처 변경은 cennad `createServer`/`startServer` 의 버전 주입이며 호스트에 보고되는 값은 특성 테스트로 고정했다.
 
 ### 상태 (`structure_validate(path=<저장소 루트>)` 6 스코프 실측)
 
-| 스코프       | error | warning | 비고                                                                        |
-| ------------ | ----: | ------: | --------------------------------------------------------------------------- |
-| cennad       |     1 |       6 | 순환 1 — 아래 "남은 일" 1번                                                 |
-| 나머지 9개   |     0 |     272 | prawf·r-statistics·deilen·entrez·seiri·atlassian·maencof-lens·imbas·maencof |
-| (plugins 밖) |     0 |     135 | `shared/`·`mcp-servers/`·`tools/`·`scripts/`                                |
+| 스코프       | error | warning | 비고                                         |
+| ------------ | ----: | ------: | -------------------------------------------- |
+| plugins 10개 |     0 |     278 | 전부 완료                                    |
+| (plugins 밖) |     0 |     135 | `shared/`·`mcp-servers/`·`tools/`·`scripts/` |
 
 전체 검증: `yarn typecheck` 14 workspaces clean · `yarn test:run` **601 files / 4985 tests 통과**(598 passed·3 skipped / 4965 passed·20 skipped).
 
@@ -22,7 +21,7 @@
 
 착수 전에 결정을 받는다. 실측 근거는 LEDGER 의 "다음 착수 지점"·"잔존" 절에 있다.
 
-1. **cennad 순환 1건** — 저장소의 유일한 error. 닫는 엣지가 e2e Layer A 하네스(`src/__tests__/e2e/helpers/mcpClientLayerA.ts`)이고 배송 그래프에는 순환이 없다. 해법은 (a) 하네스를 `src` 밖으로 이동, (b) `createServer` 가 VERSION 을 인자로 받게 변경 — 둘 다 형식 작업 범위를 넘는다.
+1. **cennad `open-settings` e2e 실패 2건 (FCA 와 무관한 선재 사항, 미해결)** — `GET /config` 응답에 `ratio` 키가 없다. main 소스로 되돌려도 동일하게 실패하며, `vitest.config.ts` 의 `exclude` 가 `src/__tests__/e2e/**` 를 기본 `test:run` 에서 빼기 때문에 드러나지 않았다(116개 중 18개가 e2e). e2e 스위트는 `yarn cennad test:e2e:run` 으로 따로 돌린다.
 2. **`detail-document-contract` 203건** — 작성 / severity 하향 / 경로 면제 중 선택.
 3. **`zero-peer-file` 126건 · `module-entry-point` 21건** — 구현 파일을 organ 으로 옮기고 배럴을 두는 구조 작업.
 4. **`entry-point-surface` 50건** — wildcard 배럴을 named export 로 전개.
