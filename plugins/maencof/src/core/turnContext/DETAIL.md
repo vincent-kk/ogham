@@ -34,43 +34,43 @@
 
 ## Boundary Exemptions
 
-### `build.js` — Hook bundle direct import
+### `build.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. 배럴을 거치면 read·압축·렌더 전체가 번들에 끌려 들어와 가드를 넘긴다 — 배럴 경유는 선택지가 아니라 빌드 실패다.
 
-### `buildL1CoreBlock.js` — Hook bundle direct import
+### `buildL1CoreBlock.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: 위와 같다. SessionStart 만 이 블록을 쓰고 매 턴 경로는 쓰지 않으므로, 배럴로 묶으면 매 턴 번들에도 전체 본문 조립이 실린다.
 
-### `buildSessionIdentityBlock.js` — Hook bundle direct import
+### `buildSessionIdentityBlock.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: 위와 같다.
 
-### `readCachedNodesArray.js` — Hook bundle direct import
+### `readCachedNodesArray.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: 위와 같다.
 
-### `readCompanionIdentity.js` — Hook bundle direct import
+### `readCompanionIdentity.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: 위와 같다.
 
-### `readIndexMetadata.js` — Hook bundle direct import
+### `readIndexMetadata.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: 위와 같다.
 
-### `renderIdentitySection.js` — Hook bundle direct import
+### `renderIdentitySection.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`

@@ -36,13 +36,13 @@
 
 ## Boundary Exemptions
 
-### `readPersonalContext.js` — Hook bundle direct import
+### `readPersonalContext.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. 배럴을 거치면 `applyPersonalContextMutation` 을 포함한 재노출 그래프 전체가 번들에 끌려 들어오는데, 그 함수는 MCP 전용이라 훅에 들어갈 이유가 없다.
 
-### `renderPersonalContextBlock.js` — Hook bundle direct import
+### `renderPersonalContextBlock.ts` — Hook bundle direct import
 
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
