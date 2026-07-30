@@ -4,12 +4,12 @@ import {
   type Db,
   type SortOrder,
   type DateType,
-} from "../../types/enums.js";
-import type { HttpDeps } from "../../types/http.js";
-import type { EsearchResult } from "../../types/eutils.js";
-import { ErrorCode } from "../../types/enums.js";
-import { buildBaseUrl } from "../../core/sourceResolver/index.js";
-import { httpRequest } from "../../core/httpClient/index.js";
+} from "../../../types/enums.js";
+import type { HttpDeps } from "../../../types/http.js";
+import type { EsearchResult } from "../../../types/eutils.js";
+import { ErrorCode } from "../../../types/enums.js";
+import { buildBaseUrl } from "../../../core/sourceResolver/index.js";
+import { httpRequest } from "../../../core/httpClient/index.js";
 
 export interface EsearchArgs {
   db: Db;

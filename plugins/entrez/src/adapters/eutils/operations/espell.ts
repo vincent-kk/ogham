@@ -1,8 +1,8 @@
-import { EutilFn, ErrorCode, type Db } from "../../types/enums.js";
-import type { HttpDeps } from "../../types/http.js";
-import { buildBaseUrl } from "../../core/sourceResolver/index.js";
-import { httpRequest } from "../../core/httpClient/index.js";
-import { parseXml, textOf } from "../../lib/xmlParse.js";
+import { EutilFn, ErrorCode, type Db } from "../../../types/enums.js";
+import type { HttpDeps } from "../../../types/http.js";
+import { buildBaseUrl } from "../../../core/sourceResolver/index.js";
+import { httpRequest } from "../../../core/httpClient/index.js";
+import { parseXml, textOf } from "../../../lib/xmlParse.js";
 
 export interface EspellArgs {
   db: Db;

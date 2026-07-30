@@ -1,8 +1,8 @@
-import { ErrorCode } from "../../types/enums.js";
-import type { HttpDeps } from "../../types/http.js";
-import type { IdConvResult, IdConvMapping } from "../../types/eutils.js";
-import { IDCONV_BASE } from "../../constants/defaults.js";
-import { httpRequest } from "../../core/httpClient/index.js";
+import { ErrorCode } from "../../../types/enums.js";
+import type { HttpDeps } from "../../../types/http.js";
+import type { IdConvResult, IdConvMapping } from "../../../types/eutils.js";
+import { IDCONV_BASE } from "../../../constants/defaults.js";
+import { httpRequest } from "../../../core/httpClient/index.js";
 
 export interface IdConvArgs {
   ids: string[];

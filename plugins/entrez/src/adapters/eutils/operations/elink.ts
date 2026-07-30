@@ -1,8 +1,8 @@
-import { EutilFn, RetMode, ErrorCode, Db } from "../../types/enums.js";
-import type { HttpDeps } from "../../types/http.js";
-import type { ElinkResult } from "../../types/eutils.js";
-import { buildBaseUrl } from "../../core/sourceResolver/index.js";
-import { httpRequest } from "../../core/httpClient/index.js";
+import { EutilFn, RetMode, ErrorCode, Db } from "../../../types/enums.js";
+import type { HttpDeps } from "../../../types/http.js";
+import type { ElinkResult } from "../../../types/eutils.js";
+import { buildBaseUrl } from "../../../core/sourceResolver/index.js";
+import { httpRequest } from "../../../core/httpClient/index.js";
 
 export interface ElinkArgs {
   seedPmids: string[];

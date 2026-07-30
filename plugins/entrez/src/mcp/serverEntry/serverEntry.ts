@@ -4,7 +4,7 @@
  * stdio mode. Bundled into bridge/mcp-server.cjs and invoked by Claude Code via
  * `node bridge/mcp-server.cjs`.
  */
-import { startServer } from "../server/lifecycle/startServer.js";
+import { startServer } from "../server/index.js";
 
 startServer().catch((err: unknown) => {
   process.stderr.write(`entrez MCP server error: ${String(err)}\n`);

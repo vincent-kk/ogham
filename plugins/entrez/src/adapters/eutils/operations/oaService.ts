@@ -1,9 +1,9 @@
-import { OaStatus, ErrorCode } from "../../types/enums.js";
-import type { HttpDeps } from "../../types/http.js";
-import type { OaRecord, OaFormatLink } from "../../types/eutils.js";
-import { OA_SERVICE_BASE } from "../../constants/defaults.js";
-import { httpRequest } from "../../core/httpClient/index.js";
-import { parseXml, asArray, textOf } from "../../lib/xmlParse.js";
+import { OaStatus, ErrorCode } from "../../../types/enums.js";
+import type { HttpDeps } from "../../../types/http.js";
+import type { OaRecord, OaFormatLink } from "../../../types/eutils.js";
+import { OA_SERVICE_BASE } from "../../../constants/defaults.js";
+import { httpRequest } from "../../../core/httpClient/index.js";
+import { parseXml, asArray, textOf } from "../../../lib/xmlParse.js";
 
 export interface OaArgs {
   pmcid: string;

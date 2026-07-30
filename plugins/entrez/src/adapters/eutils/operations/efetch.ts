@@ -1,9 +1,9 @@
-import { EutilFn, RetMode, ErrorCode, type Db } from "../../types/enums.js";
-import type { HttpDeps } from "../../types/http.js";
-import type { PaperRecord, Author } from "../../types/record.js";
-import { buildBaseUrl } from "../../core/sourceResolver/index.js";
-import { httpRequest } from "../../core/httpClient/index.js";
-import { parseXml, asArray, textOf, collectText } from "../../lib/xmlParse.js";
+import { EutilFn, RetMode, ErrorCode, type Db } from "../../../types/enums.js";
+import type { HttpDeps } from "../../../types/http.js";
+import type { PaperRecord, Author } from "../../../types/record.js";
+import { buildBaseUrl } from "../../../core/sourceResolver/index.js";
+import { httpRequest } from "../../../core/httpClient/index.js";
+import { parseXml, asArray, textOf, collectText } from "../../../lib/xmlParse.js";
 
 export interface EfetchArgs {
   db: Db;

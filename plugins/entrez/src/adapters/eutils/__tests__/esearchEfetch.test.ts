@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-import { parseEsearch } from "../esearch.js";
-import { parseEfetch } from "../efetch.js";
+import { parseEsearch } from "../operations/esearch.js";
+import { parseEfetch } from "../operations/efetch.js";
 import { ESEARCH_JSON, EFETCH_XML } from "./fixtures.js";
 
 describe("parseEsearch", () => {

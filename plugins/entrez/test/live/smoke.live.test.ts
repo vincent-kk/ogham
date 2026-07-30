@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { esearch } from "../../src/adapters/eutils/esearch.js";
+import { esearch } from "../../src/adapters/eutils/index.js";
 import { Db } from "../../src/types/enums.js";
 import {
   EUTILS_HOST,
