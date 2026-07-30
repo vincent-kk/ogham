@@ -40,12 +40,12 @@
 
 ## 다음 착수 지점
 
-**error 는 0 이 되었다.** 남은 것은 판단이 필요한 항목뿐이고, 착수 전에 사용자 결정을 받는다.
+**error 는 0 이고 알려진 테스트 실패도 0 이다.** 남은 것은 판단이 필요한 warning 뿐이고, 착수 전에 사용자 결정을 받는다.
 
-1. **cennad `open-settings` e2e 실패 2건 (이 작업과 무관한 선재 사항, 미해결)** — `GET /config` 응답에 `ratio` 키가 없어 layerA 는 undefined 접근, layerB 는 그 body 로 저장해 400 을 받는다. 두 번의 실측으로 갈라냈다: 이 브랜치의 `http-kit/guard` 변경을 되돌려도 동일, `plugins/cennad` 를 main 소스로 되돌려도 동일 — **main 에서도 깨져 있다**. `vitest.config.ts` 의 `exclude` 가 `src/__tests__/e2e/**` 를 기본 `test:run` 에서 빼기 때문에 드러나지 않았다(116개 중 18개가 e2e, 기본 실행은 98개). 원인은 설정 웹서버의 `/config` 핸들러 payload 이며 FCA 작업과 별개 과제다.
-2. **`detail-document-contract` 203건** — 도구 기본값이 fractal 마다 DETAIL 을 요구하는 것이고 규칙 산문은 DETAIL 없는 fractal 을 전제한다(아래 절). 작성·severity 하향·경로 면제 중 무엇을 택할지 결정이 필요하다.
-3. **`zero-peer-file` 126건 · `module-entry-point` 21건 · `entry-point-surface` 50건** — 전자 둘은 구현 파일을 organ 으로 옮기고 배럴을 두는 구조 작업, 후자는 wildcard 배럴을 named export 로 전개하는 작업이다.
-4. **`test-record-case-cap` 7건** — 전부 dynamic table 로 `indeterminate` 다. 정적화하면 커버리지가 줄어 손대지 않았다.
+1. **`detail-document-contract` 203건** — 도구 기본값이 fractal 마다 DETAIL 을 요구하는 것이고 규칙 산문은 DETAIL 없는 fractal 을 전제한다(아래 절). 작성·severity 하향·경로 면제 중 무엇을 택할지 결정이 필요하다.
+2. **`zero-peer-file` 126건 · `module-entry-point` 21건 · `entry-point-surface` 50건** — 전자 둘은 구현 파일을 organ 으로 옮기고 배럴을 두는 구조 작업, 후자는 wildcard 배럴을 named export 로 전개하는 작업이다.
+3. **`test-record-case-cap` 7건** — 전부 dynamic table 로 `indeterminate` 다. 정적화하면 커버리지가 줄어 손대지 않았다.
+4. **`plugins/cennad` 의 e2e 를 기본 `test:run` 에서 제외한 채 둘 것인가** — 이번에 계약 드리프트를 2건 숨긴 원인이다. 아래 T13 참조.
 
 ## 완료
 
@@ -163,8 +163,20 @@
 - 문서를 코드보다 먼저 맞췄다: `src/DETAIL.md`(순환 잔존 문단 → identity 주입 계약), `mcp/server/INTENT.md`(Structure 경로를 `lifecycle/` 로 교정 + 주입 규약), `mcp/serverEntry/INTENT.md`, `src/index.ts` 주석.
 - 검증: typecheck 통과 → `test:run` 98 files / 742 tests(불변) → `test:e2e:run` 61 passed / 3 skipped → `build:plugin` 가드 통과, MCP 번들 371112 → 371116(+4 bytes) → `structure_validate(cennad)` **status ok, 128 passed / 0 failed** → 저장소 루트 전 스코프 **error 0**.
 
+### T13 — cennad `open-settings` e2e 선재 실패 2건 해소
+
+T12 검증 중 발견한, **이 브랜치와 무관한 선재 실패**였다. 두 번의 실측으로 갈라냈다: 이 브랜치의 `http-kit/guard` 변경을 되돌려도 동일하게 실패하고, `plugins/cennad` 를 main 소스로 되돌려도 동일하게 실패 — main 에서도 깨져 있었다.
+
+원인은 **테스트 드리프트**다. scope 설정 리팩터가 `/config`·`/save` 계약을 바꿨는데 e2e 가 갱신되지 않았다. 계약을 세 곳에서 교차 확인했다 — `routeContext.ts` 가 `loadConfigState` 를 "Both layers plus the merge" 로 선언, 소비자 `pages/settings/scripts/app.js` 가 `body.state` → `body.state.effective` 를 읽고, `handleSave` 는 `{ scope, config }` 만 받아 병합 preview 를 strict 스키마로 검증한다. 단위 테스트는 이미 이 계약으로 작성돼 통과하고 있었다. **프로덕션 코드가 옳고 테스트가 낡았다.**
+
+- `/config` 단정을 봉투(`state.paths`·`state.layers`·`state.effective`)로 교정. `beforeEach` 가 `CENNAD_HOME` 을 지우므로 `state.effective` 는 `{}` 이고, 이 단정이 "`/config` 는 파일이 담은 것을 보고하며 스키마 기본값은 read path 소관" 계약을 고정한다(기본값 뷰는 root HTML inline state 단정이 잡는다).
+- `/save` body 를 `{ scope: 'user', config: { ...DEFAULT_CONFIG, ... } }` 로 교정. 최상위 12개 필드에 기본값이 없어 partial 문서는 400 이고, 지워진 홈에서 페이지 폼이 앉는 값이 `DEFAULT_CONFIG` 이므로 이것이 실제 Save 가 보내는 문서다.
+- root HTML 단정의 리터럴 `"value":34` 를 `DEFAULT_CONFIG.ratio.codex.value` 파생으로 바꿨다.
+- 검증: 고친 단정이 tautology 가 아님을 프로브로 확인(`handleGetConfig` 에서 `state` 봉투를 없애면 layerA 실패 → 원복) → `test:e2e:run` **17 files / 63 tests 통과**(이전 2 failed) → `test:run` 98/742 불변 → 저장소 전체 typecheck·test·error 0 유지.
+
 ## 재사용할 사실
 
+- **기본 `test:run` 에서 제외된 스위트는 계약 드리프트를 조용히 쌓는다.** cennad 는 `vitest.config.ts` 의 `exclude` 로 `src/__tests__/e2e/**` 를 빼고 별도 config(`test:e2e:run`)로 돌린다 — 116개 테스트 파일 중 18개가 그 안에 있어서, `/config`·`/save` 계약이 바뀐 뒤에도 2건이 깨진 채 방치됐다. **플러그인을 검증할 때는 `test:run` 만 보지 말고 `package.json` 의 test 스크립트 전체와 vitest config 의 `exclude` 를 확인한다.** cennad e2e globalSetup 은 `yarn build:plugin` 을 돌리므로 실행 뒤 `bridge/` 가 항상 dirty 해진다.
 - **배럴 경유 교정은 번들을 거의 늘리지 않는다 — esbuild 가 재노출 배럴을 tree-shake 하기 때문이다.** 커밋된 `bridge/`·`public/` 50개를 기준선으로 전 플러그인을 재빌드해 비교한 결과: **훅 번들 22개는 전부 바이트 동일**, MCP 번들은 9/10 바이트 동일, maencof 만 490613 → 490623(**+10 bytes**, +0.002%)였다. 이 +10 이 실제 변경분임을 갈라내는 절차는 ① 3회 연속 빌드가 바이트 동일(결정적) ② main 소스로 빌드하면 커밋된 490613 을 정확히 재현(커밋 산출물이 stale 하지 않음) ③ HEAD 소스는 490623. 내용 확인은 `require()` 수 190개 동일 + 문자열 집합 diff 가 minifier 식별자 리네임(`Cr`→`Tr` 등)뿐이었다.
 - **훅 번들이 바이트 동일한 이유는 훅 처방이 문서 전용이었기 때문이다.** 면책 선언은 코드를 건드리지 않으므로 훅 그래프가 그대로다. 이 선택은 숫자로도 정당화된다 — maencof `user-prompt-submit.mjs` 는 42428 / 43008 bytes 로 **여유가 580 bytes 뿐**이다(session-start 45056/57344, post-tool-use 8108/12288, pre-tool-use 9056/12288). 이 번들을 배럴 경유로 바꿨다면 가드가 깨졌을 것이다.
 - **`bridge/run-hook.cmd` 는 커밋본이 LF, 빌드 산출물이 CRLF 라 재빌드마다 +2 bytes 로 보인다.** 손대지 않은 플러그인에서도 같으므로 선재 사항이며 코드 변화가 아니다.
@@ -191,13 +203,13 @@
 
 ## 잔존 (사유 포함)
 
-| 플러그인     | 규칙                   | 건수 | 사유                                                                                                                                                                                                                                      |
-| ------------ | ---------------------- | ---: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| prawf        | `module-entry-point`   |    1 | 플러그인 루트에 어댑터 진입점이 없음. filid 는 config exempt 로 처리 — T12 사용자 확인                                                                                                                                                    |
-| r-statistics | `module-entry-point`   |    1 | 위와 동일                                                                                                                                                                                                                                 |
-| r-statistics | `test-record-case-cap` |    1 | `rulesetMetaSync.test.ts` 가 동적 테이블 사용. 정적화하면 커버리지가 줄어 손대지 않음                                                                                                                                                     |
-| r-statistics | spec 계열 3건          |    3 | `indeterminate` — 증거 부족이지 위반 아님. 규칙상 pass 로 바꾸지 않는다                                                                                                                                                                   |
-| seiri        | `module-entry-point`   |    2 | 플러그인 루트와 `templates/`(마크다운 자산). 후자는 index 를 둘 성질이 아니다                                                                                                                                                             |
-| cennad       | `open-settings` e2e    |    2 | **FCA 와 무관한 선재 실패, 미해결.** `GET /config` 응답에 `ratio` 키가 없다. main 소스로 되돌려도 동일하게 실패하고, `vitest.config.ts` 의 `exclude` 가 e2e 를 기본 `test:run` 에서 빼기 때문에 드러나지 않았다 — 위 "다음 착수 지점" 1번 |
-| cennad       | `entry-point-surface`  |    4 | wildcard 배럴 4개. named 전개로 해소 가능하나 심볼 수가 많아 별도 배치로 미룸                                                                                                                                                             |
-| cennad       | `module-entry-point`   |    2 | 플러그인 루트와 `hooks/`(훅 매핑 설정 노드)                                                                                                                                                                                               |
+| 플러그인     | 규칙                   | 건수 | 사유                                                                                   |
+| ------------ | ---------------------- | ---: | -------------------------------------------------------------------------------------- |
+| prawf        | `module-entry-point`   |    1 | 플러그인 루트에 어댑터 진입점이 없음. filid 는 config exempt 로 처리 — T12 사용자 확인 |
+| r-statistics | `module-entry-point`   |    1 | 위와 동일                                                                              |
+| r-statistics | `test-record-case-cap` |    1 | `rulesetMetaSync.test.ts` 가 동적 테이블 사용. 정적화하면 커버리지가 줄어 손대지 않음  |
+| r-statistics | spec 계열 3건          |    3 | `indeterminate` — 증거 부족이지 위반 아님. 규칙상 pass 로 바꾸지 않는다                |
+| seiri        | `module-entry-point`   |    2 | 플러그인 루트와 `templates/`(마크다운 자산). 후자는 index 를 둘 성질이 아니다          |
+| cennad       | (없음)                 |    0 | 선재 `open-settings` e2e 실패 2건은 T13 에서 해소했다                                  |
+| cennad       | `entry-point-surface`  |    4 | wildcard 배럴 4개. named 전개로 해소 가능하나 심볼 수가 많아 별도 배치로 미룸          |
+| cennad       | `module-entry-point`   |    2 | 플러그인 루트와 `hooks/`(훅 매핑 설정 노드)                                            |

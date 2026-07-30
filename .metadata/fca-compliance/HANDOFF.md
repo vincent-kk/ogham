@@ -19,13 +19,13 @@
 
 ## 남은 일 — 전부 사용자 판단 항목
 
-착수 전에 결정을 받는다. 실측 근거는 LEDGER 의 "다음 착수 지점"·"잔존" 절에 있다.
+착수 전에 결정을 받는다. 실측 근거는 LEDGER 의 "다음 착수 지점"·"잔존" 절에 있다. **알려진 테스트 실패는 없다** — T12 검증 중 발견한 cennad `open-settings` e2e 선재 실패 2건은 T13 에서 해소했다.
 
-1. **cennad `open-settings` e2e 실패 2건 (FCA 와 무관한 선재 사항, 미해결)** — `GET /config` 응답에 `ratio` 키가 없다. main 소스로 되돌려도 동일하게 실패하며, `vitest.config.ts` 의 `exclude` 가 `src/__tests__/e2e/**` 를 기본 `test:run` 에서 빼기 때문에 드러나지 않았다(116개 중 18개가 e2e). e2e 스위트는 `yarn cennad test:e2e:run` 으로 따로 돌린다.
-2. **`detail-document-contract` 203건** — 작성 / severity 하향 / 경로 면제 중 선택.
-3. **`zero-peer-file` 126건 · `module-entry-point` 21건** — 구현 파일을 organ 으로 옮기고 배럴을 두는 구조 작업.
-4. **`entry-point-surface` 50건** — wildcard 배럴을 named export 로 전개.
-5. **`test-record-case-cap` 7건** — 전부 dynamic table `indeterminate`. 정적화하면 커버리지가 줄어 손대지 않았다.
+1. **`detail-document-contract` 203건** — 작성 / severity 하향 / 경로 면제 중 선택.
+2. **`zero-peer-file` 126건 · `module-entry-point` 21건** — 구현 파일을 organ 으로 옮기고 배럴을 두는 구조 작업.
+3. **`entry-point-surface` 50건** — wildcard 배럴을 named export 로 전개.
+4. **`test-record-case-cap` 7건** — 전부 dynamic table `indeterminate`. 정적화하면 커버리지가 줄어 손대지 않았다.
+5. **cennad e2e 를 기본 `test:run` 에서 제외한 채 둘 것인가** — 이번에 계약 드리프트 2건을 숨긴 원인이다. 별도 config(`test:e2e:run`)로만 돌아가고 globalSetup 이 `yarn build:plugin` 을 실행한다.
 
 ## 확립된 처방
 
