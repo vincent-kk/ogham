@@ -14,7 +14,7 @@
 | entrez           |      47 |    3 | 완료 — error 0                         |
 | seiri            |      47 |    2 | 완료 — error 0                         |
 | cennad           |      50 |    7 | 완료 — error 1(순환, 아래 사유)        |
-| **atlassian**    |      55 |   55 | **미착수 — 다음 차례**                 |
+| atlassian        |      55 |    3 | 완료 — error 0                         |
 | **maencof-lens** |      68 |   66 | 미착수                                 |
 | **imbas**        |     100 |   96 | 미착수                                 |
 | **maencof**      |     366 |  362 | 미착수 (서브배치 T10a–T10e 로 쪼갤 것) |
@@ -22,14 +22,25 @@
 
 완료한 6개는 전부 `typecheck` + `test:run` 통과를 확인했다. 미착수 4개는 코드를 건드리지 않았다.
 
+## DETAIL 필수 여부 — 실측
+
+`detail-document-contract` 는 **도구 기본값**이지 아키텍처 필연이 아니다.
+
+- `filid/src/core/rules/ruleEngine/utils/checkDocumentContract.ts` 는 `node.type === 'fractal'` 이면 조건 없이 DETAIL 부재를 `error` 로 낸다(organ·pure-function·hybrid 만 제외).
+- 그러나 `filid_module-documents.md §6` 은 면책을 설명하며 "a fractal that needs one and **has no DETAIL.md** adds the document for this purpose" 라고 써서, DETAIL 없는 fractal 의 존재를 전제한다. **산문과 도구 기본값이 어긋나 있다.**
+- `RuleOverride`(`filid/src/types/rules.ts:86`)는 `enabled`·`severity`·`exempt[]` 를 받는다. 현재 `.filid/config.json` 의 `rules` 에 이 규칙 항목이 없어 기본값(error)이 걸린 것이다.
+
+따라서 남은 플러그인의 DETAIL 190개는 **작성하든, severity 를 낮추든, 경로를 면제하든 선택 사항**이다. 결정 전까지 착수하지 않는다.
+
 ## 다음 착수 지점
 
-**T7 — atlassian (55건).** 성격이 앞의 여섯과 다르다: 문서 26건 외에 실제 코드 작업이 있다.
+**T8 — maencof-lens (66건).** 다음 차례. 단 DETAIL 24건은 위 "DETAIL 필수 여부" 결정이 선행한다.
 
-- `zero-peer-file` 19건 — `src/converter/**` 의 렌더러 구현 파일들(`renderBlocks.ts`·`renderInline.ts` 등이 fractal 루트마다 중복 이름으로 존재)을 organ 으로 내려야 한다. entrez `eutils` 이동과 같은 방식(`scratchpad/move-eutils.mjs` 패턴 재사용).
-- `external-import-boundary` 3건 — `connectionTester.ts` 의 `../index.js`(부모 배럴 역참조), `server.ts`·`serverEntry.ts`.
-- `circular-dependency` 2건 — 위 부모 배럴 역참조가 원인. `src/core` 순환은 concrete import 로 풀리지만, `src` 순환은 **atlassian 도 `dist` 를 배포하므로** 배럴 재노출 제거로 풀 수 없다.
-- `test-record-case-cap` 2건(error) — `adfMarkdown.test.ts` 36 케이스, `ssrfGuard.test.ts` 34 케이스. 상한 32. **커버리지를 줄이지 말고 동작별로 파일을 나눈다.**
+- `external-import-boundary` 32건 — 대부분 `@ogham/maencof` 를 소비하는 경로다. **maencof 는 워크스페이스 내부 소비자가 있는 유일한 배럴**이므로(maencof-lens 의 `src/tools/lens*/` 4곳), 그 배럴에서 심볼을 빼는 방향은 금지다.
+- `spec-contract-link` 4건 — e2e spec 에 `filid:contract <AC-id>` 마커 + 루트 DETAIL 의 AC 그룹 정의(deilen T3 방식).
+- `zero-peer-file` 4건 · `circular-dependency` 1건 · `module-entry-point` 1건 · `entry-point-surface` 1건.
+
+이후 **T9 imbas (96건)**, **T10 maencof (362건, 서브배치 필요)**, **T11 root 스코프 (4건)**.
 
 ## 완료
 
@@ -88,6 +99,16 @@
 - 검증: `yarn cennad typecheck` 통과 → `test:run` 98 files / 742 tests 통과(이동 전후 동일) → `structure_validate` 1008 passed / 7 failed.
 
 **정정**: 처음에 `main: dist/index.js` 와 `files: ["dist"]` 를 근거로 "cennad 배럴은 npm 공개 API 이므로 재노출을 뺄 수 없다" 고 판단했는데, 실측하니 이 저장소의 플러그인은 npm 으로 배송되지 않는다. 그 오독으로 `src/DETAIL.md` 에 잘못된 계약을 한 번 써 넣었고 함께 고쳤다.
+
+### T7 — atlassian (55 → 3, error 0)
+
+- `zero-peer-file` 19건 — 구현 파일을 organ 으로 이동: converter 5개 fractal → `operations/`, `converter/convert.ts` → `operations/`, `mcp/shared` → `helpers/`, `core/httpClient/ssrfGuard.ts` → `operations/`. import specifier 40개는 해석해서 재작성했고 INTENT 구조 표 8개를 맞췄다.
+- `circular-dependency` 2건 · `external-import-boundary` 3건 — 형제 fractal 을 부모 배럴 대신 각자의 배럴로 건너게 교정(`connectionTester` → environmentResolver·httpClient, `serverEntry` → `../server/index.js`), `src/index.ts` 의 `mcp` 재노출 제거.
+- `test-record-case-cap` 2건 — 두 테스트 파일을 describe 경계로 4개로 나눴다. **36 files/392 tests → 38 files/392 tests, 케이스 수 동일.**
+- DETAIL.md 26개 신설.
+- 검증: `yarn atlassian typecheck` 통과 → `test:run` 392 tests 통과(모든 단계에서 동일) → `structure_validate` 780 passed / 3 failed(전부 warning).
+
+**연쇄 수정 1건**: 형제 배럴 교정이 `setup/__tests__/connectionTester.test.ts` 10건을 깨뜨렸다. 이 테스트가 core **부모 배럴**을 모킹해 그 경유라는 구현 세부에 결합돼 있었기 때문이다. **assertion 은 건드리지 않고 모킹 대상 경로만** 실제 의존으로 옮겼다.
 
 ## 재사용할 사실
 
