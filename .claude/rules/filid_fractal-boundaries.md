@@ -33,7 +33,7 @@ Ask yourself: "Which step in the order decided this — and does the file it nam
 
 - Traversal continues inside organs: a nested directory with its own documents or module index is reclassified as its own fractal.
 - `hybrid` is never auto-assigned. An unsupported purity analysis is not proof of purity — an unproven node stays an organ.
-- What a node *should* be is a rule result, not a classification. An organ consumed from outside its owner's subtree has an external boundary, and that is reported with the consumer paths as evidence rather than by silently reclassifying it. Keeping the two apart is what lets a non-FCA codebase be adopted: the scan names the fractals that are missing instead of assuming them.
+- What a node _should_ be is a rule result, not a classification. An organ consumed from outside its owner's subtree has an external boundary, and that is reported with the consumer paths as evidence rather than by silently reclassifying it. Keeping the two apart is what lets a non-FCA codebase be adopted: the scan names the fractals that are missing instead of assuming them.
 
 Ask yourself: "Am I reading what the tree says, or what I wish it said?"
 

@@ -74,13 +74,20 @@ never carries the section.
 ```markdown
 ## Boundary Exemptions
 
-### <target path> — <short title>
+### `<target path>` — <short title>
 
 - **Consumers**: <paths or globs, or `entry-point` when access is through the barrel>
-- **Direct import**: allowed | not allowed
+- **Direct import**: `allowed` | `not allowed`
 - **Reason**: <why the barrel cannot serve these consumers, or why the unit has
   not moved to its consumers' lowest common fractal>
 ```
+
+The target path, each consumer and the direct-import verdict go inside a code
+span. A markdown formatter reads a bare `__tests__` as emphasis and writes the
+heading back as `**tests**`, which silently points the exemption at a path that
+does not exist; the parser strips the span before comparing, so wrapping costs
+nothing and a bare value is still read. `Reason` is prose and keeps its own
+backticks.
 
 A missing or empty `Reason` is an unmet contract, not a granted exemption.
 `## Organ Exemptions` is the same syntax under this section's former name and is

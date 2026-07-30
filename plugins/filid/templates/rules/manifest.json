@@ -8,7 +8,7 @@
       "required": true,
       "title": "Fractal Boundaries",
       "description": "Node classification, entry-point surfaces, organ access, exemptions, and the acyclic dependency graph.",
-      "templateHash": "27c0c0c2a2d5f01e3f5f41197bae7e78b6254a72eba5e936952bdac87766456a"
+      "templateHash": "d1ce9a8ea265707e2c2458db630d265f040ee6a41d32a8d6dcb8ccaccd4a1c8c"
     },
     {
       "id": "filid_module-documents",
@@ -16,7 +16,7 @@
       "required": true,
       "title": "Module Documents",
       "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the current-state contract ledger, the single history section, and organ exemption entries.",
-      "templateHash": "fc3531e180088ed2c7c68206eacd2c4043dbfba45e29334c6c594cb5fa0c2e16"
+      "templateHash": "bd30c1f9b8e29ce8f0dff3d51c9ea59891557c1973f8a0652392ca726454be10"
     },
     {
       "id": "filid_verification-records",

@@ -1,5 +1,4 @@
 <!-- FILID:START:filid_fractal-boundaries.md -->
-
 # Fractal Boundaries
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
@@ -95,14 +94,10 @@ Ask yourself: "Can I order these modules so every reference points one way — a
 <!-- FILID:END:filid_fractal-boundaries.md -->
 
 <!-- FILID:START:filid_module-documents.md -->
-
 ---
-
 paths:
-
-- 'INTENT.md'
-- 'DETAIL.md'
-
+  - 'INTENT.md'
+  - 'DETAIL.md'
 ---
 
 # Module Documents
@@ -170,15 +165,16 @@ Ask yourself: "Is this sentence what holds now, or how it came to hold — and i
 
 - `Boundary Exemptions` is conditional: present only when this fractal actually grants one. A fractal with no exemption never carries the section, and a fractal that needs one and has no `DETAIL.md` adds the document for this purpose. `## Organ Exemptions` is the same syntax under this section's former name and is still read.
 - The target is an organ path or a path inside this fractal — a consumer that cannot route through the entry point needs the same escape hatch either way. A path names itself and everything under it.
+- Write the target path, each consumer and the direct-import verdict inside a code span. A markdown formatter reads a bare `__tests__` as emphasis and writes the heading back as `**tests**`, which silently points the exemption at a path that does not exist; the span is what survives the formatter, and the parser strips it before comparing. A bare value is still read, so the span costs nothing and is the safe default. `Reason` is prose and keeps its own backticks.
 - An entry uses the acceptance-group shape, so one parser reads both:
 
 ```md
 ## Boundary Exemptions
 
-### <target path> — <short title>
+### `<target path>` — <short title>
 
 - **Consumers**: <paths or globs, or `entry-point` when access is through the barrel>
-- **Direct import**: allowed | not allowed
+- **Direct import**: `allowed` | `not allowed`
 - **Reason**: <why the barrel cannot serve these consumers, or why the unit has not
   moved to its consumers' lowest common fractal>
 ```
@@ -193,27 +189,23 @@ Ask yourself: "Would someone who has never seen this code understand why the exe
 <!-- FILID:END:filid_module-documents.md -->
 
 <!-- FILID:START:filid_verification-records.md -->
-
 ---
-
 paths:
-
-- '_.test._'
-- '_.spec._'
-- '_\_test._'
-- '_\_spec._'
-- 'test__._'
-- '_Test._'
-- '_Tests._'
-- '_Spec._'
-- 'conftest.py'
-- '**tests**'
-- 'test'
-- 'tests'
-- 'spec'
-- 'specs'
-- 'e2e'
-
+  - '*.test.*'
+  - '*.spec.*'
+  - '*_test.*'
+  - '*_spec.*'
+  - 'test_*.*'
+  - '*Test.*'
+  - '*Tests.*'
+  - '*Spec.*'
+  - 'conftest.py'
+  - '__tests__'
+  - 'test'
+  - 'tests'
+  - 'spec'
+  - 'specs'
+  - 'e2e'
 ---
 
 # Verification Records
@@ -280,7 +272,6 @@ Ask yourself: "Which acceptance group does this file answer for — and does a s
 <!-- FILID:END:filid_verification-records.md -->
 
 <!-- FILID:START:filid_code-placement.md -->
-
 # Code Placement
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults. On conflict, the higher source wins and this rule yields.
@@ -348,7 +339,6 @@ Ask yourself: "Did the contract change before the code, or am I about to write i
 <!-- FILID:END:filid_code-placement.md -->
 
 <!-- SEIRI:START:seiri_agent-legible.md -->
-
 # Agent-Legible Code
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -403,7 +393,6 @@ Ask yourself: "Can I state what this file does without opening a second file?"
 <!-- SEIRI:END:seiri_agent-legible.md -->
 
 <!-- SEIRI:START:seiri_public-contract.md -->
-
 # Public Contract
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -416,7 +405,7 @@ What a module exports is a promise to every present and future consumer. This ru
 
 **An export with no consumer carries a stated intent — or gets removed.**
 
-- Remove leftover your change added or orphaned; leave a pre-existing one for a deliberate cleanup (seiri_reuse-first §3). Usage is tool-checkable; intent you must write.
+- Remove leftover your change added or orphaned; leave a pre-existing one for a deliberate cleanup (`seiri_reuse-first` §3). Usage is tool-checkable; intent you must write.
 
 Ask yourself: "Who consumes this — and if no one yet, where did I say so?"
 
@@ -440,7 +429,7 @@ Ask yourself: "If I renamed every internal file, would any consumer break?"
 
 **A file the framework calls by convention is public surface, even though no import names it.**
 
-- Routes, pages, handlers, plugin manifests: treat changes to their exported shape as contract changes, and label the convention that invokes them (seiri_agent-legible §1).
+- Routes, pages, handlers, plugin manifests: treat changes to their exported shape as contract changes, and label the convention that invokes them (`seiri_agent-legible` §1).
 
 Ask yourself: "What breaks at runtime if I change this export's shape — and would any import have warned me?"
 
@@ -450,27 +439,23 @@ Ask yourself: "What breaks at runtime if I change this export's shape — and wo
 <!-- SEIRI:END:seiri_public-contract.md -->
 
 <!-- SEIRI:START:seiri_test-validity.md -->
-
 ---
-
 paths:
-
-- '_.test._'
-- '_.spec._'
-- '_\_test._'
-- '_\_spec._'
-- 'test__._'
-- '_Test._'
-- '_Tests._'
-- '_Spec._'
-- 'conftest.py'
-- '**tests**'
-- 'test'
-- 'tests'
-- 'spec'
-- 'specs'
-- 'e2e'
-
+  - '*.test.*'
+  - '*.spec.*'
+  - '*_test.*'
+  - '*_spec.*'
+  - 'test_*.*'
+  - '*Test.*'
+  - '*Tests.*'
+  - '*Spec.*'
+  - 'conftest.py'
+  - '__tests__'
+  - 'test'
+  - 'tests'
+  - 'spec'
+  - 'specs'
+  - 'e2e'
 ---
 
 # Test Validity
@@ -541,7 +526,6 @@ Ask yourself: "Is this file accumulating cases, or organizing them?"
 <!-- SEIRI:END:seiri_test-validity.md -->
 
 <!-- SEIRI:START:seiri_reuse-first.md -->
-
 # Reuse First
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -600,7 +584,6 @@ Ask yourself: "If this file grows one more export, should it split?"
 <!-- SEIRI:END:seiri_reuse-first.md -->
 
 <!-- SEIRI:START:seiri_naming.md -->
-
 # Naming
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -621,7 +604,7 @@ Ask yourself: "What style do my neighbors already use?"
 
 **A reader should predict the content from the name alone.**
 
-- Name by what the unit does or holds, not when it was added or who owns it. An honest name that needs "and" is two units (seiri_reuse-first §5); a vague honest name means a vague responsibility — fix the unit.
+- Name by what the unit does or holds, not when it was added or who owns it. An honest name that needs "and" is two units (`seiri_reuse-first` §5); a vague honest name means a vague responsibility — fix the unit.
 
 Ask yourself: "Reading only this name, what would I expect inside — and is that what's inside?"
 
@@ -637,7 +620,7 @@ Ask yourself: "Could a stranger guess what does NOT belong in this file?"
 
 **A file that exists because of another carries that other's base name.**
 
-- Tests, specs, fixtures, and generated companions are named for what they verify or accompany, and rename with their source — a base name that matches nothing is a name trap (seiri_agent-legible §3).
+- Tests, specs, fixtures, and generated companions are named for what they verify or accompany, and rename with their source — a base name that matches nothing is a name trap (`seiri_agent-legible` §3).
 
 Ask yourself: "From this file's name, can I find the file it serves?"
 
@@ -647,7 +630,6 @@ Ask yourself: "From this file's name, can I find the file it serves?"
 <!-- SEIRI:END:seiri_naming.md -->
 
 <!-- SEIRI:START:seiri_structure.md -->
-
 # Structure
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -693,11 +675,10 @@ Ask yourself: "What part of this file keeps attracting changes — and is it the
 
 ---
 
-**This rule is working if:** following a call chain rarely reverses direction; finding code takes few hops; splits land at seams reviewers recognize without explanation. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be (see seiri_context-efficiency §1).
+**This rule is working if:** following a call chain rarely reverses direction; finding code takes few hops; splits land at seams reviewers recognize without explanation. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be (see `seiri_context-efficiency` §1).
 <!-- SEIRI:END:seiri_structure.md -->
 
 <!-- SEIRI:START:seiri_function-boundaries.md -->
-
 # Function Boundaries
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -711,7 +692,7 @@ A function is the smallest unit a reader can hold whole — and the cheapest one
 **The signature is the full list of what a function can see.**
 
 - Compute from arguments. Module state read at call time, ambient config, the clock, the environment: passed in, not reached for.
-- When a dependency genuinely cannot be passed — a framework injects it, a runtime owns it — say so at the function or its file head (seiri_agent-legible §1) instead of reaching through it silently.
+- When a dependency genuinely cannot be passed — a framework injects it, a runtime owns it — say so at the function or its file head (`seiri_agent-legible` §1) instead of reaching through it silently.
 
 Ask yourself: "Given the same arguments, does this return the same thing?"
 
@@ -729,8 +710,8 @@ Ask yourself: "If this ran twice, what would differ the second time — and does
 
 **The file name is the export list.**
 
-- Name a function file for the function it exports, and export that one only (seiri_naming §4). A second export earns its place only when the two cannot be read apart.
-- At most two unexported helpers may share the file, and each helper's implementation body must be 8 lines or fewer; its declaration or signature and enclosing braces do not count. A longer helper is its own file (seiri_structure §3).
+- Name a function file for the function it exports, and export that one only (`seiri_naming` §4). A second export earns its place only when the two cannot be read apart.
+- At most two unexported helpers may share the file, and each helper's implementation body must be 8 lines or fewer; its declaration or signature and enclosing braces do not count. A longer helper is its own file (`seiri_structure` §3).
 - At most three types, newly defined here. Derived types — aliases, narrowings, unions over what already exists — stay with their source. Type-only files (`types.ts`, `types/`) are outside this budget.
 - These counts are defaults; a budget this repository declares wins.
 
@@ -740,8 +721,8 @@ Ask yourself: "Can I name what this file exports without opening it — and can 
 
 **Extraction is not relocation to the same shelf.**
 
-- Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it, in a satellite called `utils/` or `helpers/` while its only claim is "these serve the function above" — named for the topic once the set has one (seiri_naming §3).
-- The path states which function is served and which serves. A row of peers states nothing (seiri_structure §2).
+- Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it, in a satellite called `utils/` or `helpers/` while its only claim is "these serve the function above" — named for the topic once the set has one (`seiri_naming` §3).
+- The path states which function is served and which serves. A row of peers states nothing (`seiri_structure` §2).
 
 Ask yourself: "From the path alone, can I tell the entry point from its helpers?"
 
@@ -751,7 +732,6 @@ Ask yourself: "From the path alone, can I tell the entry point from its helpers?
 <!-- SEIRI:END:seiri_function-boundaries.md -->
 
 <!-- SEIRI:START:seiri_context-efficiency.md -->
-
 # Context Efficiency
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -795,7 +775,6 @@ Ask yourself: "What new fact will this read give me that the last one didn't?"
 <!-- SEIRI:END:seiri_context-efficiency.md -->
 
 <!-- SEIRI:START:seiri_cognitive-discipline.md -->
-
 # Cognitive Discipline
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
@@ -873,7 +852,6 @@ Saying "probably / should / seems to" about your own change · declaring success
 <!-- SEIRI:END:seiri_cognitive-discipline.md -->
 
 <!-- SEIRI:START:seiri_code-comments.md -->
-
 # Code Comments
 
 > **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults. On conflict, the higher source wins and this rule yields.
