@@ -1,7 +1,6 @@
 ---
 name: trace-structure
 user-invocable: true
-disallowed-tools: AskUserQuestion
 description: '[seiri:trace-structure] Map how the code actually connects — call paths, dispatch targets, data flow — before acting on a fast reading. Use when a problem needs deep understanding of polymorphic or highly indirect code.'
 argument-hint: '[the problem or area that needs deep understanding]'
 version: '0.2.0'
@@ -11,7 +10,7 @@ plugin: seiri
 
 # trace-structure — read the connections before judging
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 The first plausible reading of complex code is usually wrong somewhere that matters. Replace inference with traced fact before acting.
 

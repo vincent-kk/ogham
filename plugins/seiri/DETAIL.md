@@ -41,6 +41,11 @@
 - `.seiri/` 에 처음 쓸 때(설정 저장·밸브 조작 어느 쪽이든) `.gitignore` 도 만들어, 그 디렉터리의 untracked 구성원을 나열한다. 저장소 루트 ignore 파일은 절대 편집하지 않는다.
 - 이미 있는 `.gitignore` 는 seiri 가 쓴 것일 때만 손댄다 — 헤더로 판별하고, 빠진 구성원만 덧붙이며 기존 줄은 지우지 않는다. 헤더가 없으면 사용자가 쓴 파일이므로 그대로 둔다. 구성원이 늘어도 기존 프로젝트가 갱신을 받지 못하면, 새 untracked 파일이 커밋에 흘러든다.
 
+### Skill posture
+
+- 스킬 파티션의 정본은 `src/constants/skillPolicy.ts` 다 — 자동 호출 규율 7종, 조건부 질문 플래너 1종(write-plan), 사용자 게이트 5종. `skillPolicy.test.ts` 가 각 스킬의 frontmatter 와 본문 정본 문장을 검사한다.
+- 자동 호출 규율은 자율 판단을 우선한다: 선택이 필요하면 보수적 기본값을 택하고 한 줄로 공개한다. 사용자만 결정할 수 있는 진짜 blocker 는 AskUserQuestion 1회로 묻되, 관례적 체크포인트 질문은 하지 않는다. frontmatter 도구 차단(`disallowed-tools`)은 사용하지 않는다.
+
 ## API Contracts
 
 | Export                                     | Contract                                                                                           |
@@ -86,6 +91,11 @@
 
 - 등록 도구가 정확히 2개이며 새 요구는 기존 도구의 action 으로 흡수된다.
 
+## History
+
+- 2026-07-31 — 자동 호출 스킬의 `disallowed-tools: AskUserQuestion` frontmatter 차단을 산문 정본 문장 검사로 대체. 차단은 턴 스코프(다음 사용자 메시지에 소멸)이고 턴을 끝내며 텍스트로 묻는 것을 막지 못해, 실효가 정당한 멈춤의 형식 격하뿐이었다.
+- 2026-07-30 — 계약을 검증 가능한 acceptance group 으로 명시하고 `loadIntervention` 의 계층 수를 실제(3계층)에 맞췄다.
+
 ## Last Updated
 
-2026-07-30 — 계약을 검증 가능한 acceptance group 으로 명시하고 `loadIntervention` 의 계층 수를 실제(3계층)에 맞췄다.
+2026-07-31 — Requirements 에 Skill posture 절 신설, frontmatter 차단 제거를 History 로 기록.

@@ -1,7 +1,6 @@
 ---
 name: receive-review
 user-invocable: true
-disallowed-tools: AskUserQuestion
 description: '[seiri:receive-review] Verify feedback against the code before implementing it. Use when review feedback arrives, before acting on any of it.'
 argument-hint: '[the feedback]'
 version: '0.1.0'
@@ -11,7 +10,7 @@ plugin: seiri
 
 # receive-review — evaluate, then implement
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 

@@ -1,20 +1,24 @@
 /**
- * How each shipped skill may be invoked, and whether it may interrupt with
- * a question. The partition is the contract `skillPolicy.test.ts` enforces
- * against every `SKILL.md` frontmatter, so a new skill cannot land without
- * a deliberate answer to "who invokes this, and may it ask?" — the same
- * decision-not-accident discipline `SHIPPED_SKILLS` applies to the count.
+ * How each shipped skill may be invoked, and how it handles user questions.
+ * The partition is the contract `skillPolicy.test.ts` enforces against
+ * every `SKILL.md` frontmatter and canonical body clause, so a new skill
+ * cannot land without a deliberate answer to "who invokes this, and when
+ * may it ask?" — the same decision-not-accident discipline `SHIPPED_SKILLS`
+ * applies to the count.
  *
  * Every skill belongs to exactly one list, and the union is `SHIPPED_SKILLS`.
  */
 
 /**
- * Auto-invocable disciplines that must never stop to ask. They run mid-work,
- * where an `AskUserQuestion` popup would break the flow the skill exists to
- * hold; each carries `disallowed-tools: AskUserQuestion` and takes the
- * conservative default instead. A genuine blocker is reported, not asked.
+ * Auto-invocable disciplines that prefer autonomous judgment. They run
+ * mid-work, where a routine question would break the flow the skill exists
+ * to hold; each takes the conservative default and discloses it in one
+ * line. A genuine blocker — a decision only the user can resolve — earns
+ * one crisp `AskUserQuestion`; a routine checkpoint does not. The canonical
+ * body clause carries this contract; no frontmatter tool ban is used, as a
+ * ban is turn-scoped and cannot stop a plain-text question anyway.
  */
-export const AUTO_NO_ASK_SKILLS = [
+export const AUTO_AUTONOMOUS_SKILLS = [
   'execute',
   'implement',
   'receive-review',
@@ -25,10 +29,11 @@ export const AUTO_NO_ASK_SKILLS = [
 ] as const;
 
 /**
- * Auto-invocable, but permitted to ask when the blast radius is large — a
- * broad refactor, a new module or feature — so a wrong planning default does
- * not propagate into execution. Carries neither `disallowed-tools` nor
- * `disable-model-invocation`: the model may invoke it, and it may ask.
+ * Auto-invocable, and permitted to ask proactively when the blast radius is
+ * large — a broad refactor, a new module or feature — so a wrong planning
+ * default does not propagate into execution. Unlike the autonomous
+ * disciplines, its question needs no blocker: planning is the cheap moment
+ * to be wrong, so one focused question is worth the interrupt.
  */
 export const AUTO_CONDITIONAL_ASK_SKILLS = ['write-plan'] as const;
 
@@ -48,6 +53,6 @@ export const USER_GATED_SKILLS = [
 
 /** Every skill the model may invoke on its own — the workflow-chain members. */
 export const AUTO_INVOCABLE_SKILLS = [
-  ...AUTO_NO_ASK_SKILLS,
+  ...AUTO_AUTONOMOUS_SKILLS,
   ...AUTO_CONDITIONAL_ASK_SKILLS,
 ] as const;

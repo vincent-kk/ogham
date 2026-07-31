@@ -1,7 +1,6 @@
 ---
 name: verify
 user-invocable: true
-disallowed-tools: AskUserQuestion
 description: '[seiri:verify] Evidence before claims. Use when about to say done, fixed, or passing — before committing, merging, or moving to the next task.'
 argument-hint: '[the claim to prove]'
 version: '0.1.0'
@@ -11,7 +10,7 @@ plugin: seiri
 
 # verify — run it, read it, then say it
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## The gate
 

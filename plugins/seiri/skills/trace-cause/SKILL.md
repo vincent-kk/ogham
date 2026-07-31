@@ -1,7 +1,6 @@
 ---
 name: trace-cause
 user-invocable: true
-disallowed-tools: AskUserQuestion
 description: '[seiri:trace-cause] Trace a failure to where it started rather than where it surfaced. Use when a test fails, an error is thrown, or a fix did not hold.'
 argument-hint: '[the failing test or symptom]'
 version: '0.1.0'
@@ -11,7 +10,7 @@ plugin: seiri
 
 # trace-cause — fix where it started
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 

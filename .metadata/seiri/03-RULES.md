@@ -6,17 +6,17 @@
 
 ## 상태표
 
-| #   | 파일                            | 형식 층  | 형태              | 상태                        |
-| --- | ------------------------------- | -------- | ----------------- | --------------------------- |
-| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ lite   |
-| S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ lite   |
+| #   | 파일                            | 형식 층  | 형태              | 상태                                  |
+| --- | ------------------------------- | -------- | ----------------- | ------------------------------------- |
+| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ lite                               |
+| S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ lite                               |
 | S3  | `seiri_test-validity.md`        | L4       | 혼합              | ✅ 이관본 · **`paths:` 조건부**(유일) |
-| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ lite   |
-| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite   |
-| S6  | `seiri_structure.md`            | L0·L1    | 방향형            | ✅ 이관본 (방향형)          |
-| S7  | `seiri_context-efficiency.md`   | 6층 예외 | 레시피            | ✅ 통과 (D8 무삭감)         |
-| S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | ✅ 통과 (D8 무삭감)         |
-| S9  | `seiri_decision-trail.md`       | L5       | 템플릿 슬롯       | ⏸ opt-in 확정 · 대조군 대기 |
+| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ lite                               |
+| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite                               |
+| S6  | `seiri_structure.md`            | L0·L1    | 방향형            | ✅ 이관본 (방향형)                    |
+| S7  | `seiri_context-efficiency.md`   | 6층 예외 | 레시피            | ✅ 통과 (D8 무삭감)                   |
+| S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | ✅ 통과 (D8 무삭감)                   |
+| S9  | `seiri_decision-trail.md`       | L5       | 템플릿 슬롯       | ⏸ opt-in 확정 · 대조군 대기           |
 
 **공통 검증**: 전 규칙에 우선순위 사슬·형식 근거·이중 반증 적용. 임계 숫자 0건, 언어 특정 예시 0건, 각 200줄 미만.
 
@@ -104,11 +104,13 @@ execution on the strength of an unfinished interview.
 ## B9. 자동 스킬 계약 — 상태 3·4 전용
 
 ```markdown
-This skill was invoked automatically. Do not ask the user questions. When a
-choice is needed, take the conservative default and state the choice in one line.
+This skill may be invoked automatically. Prefer autonomous judgment: when a
+choice is needed, take the conservative default and say so in one line. A
+genuine blocker — a decision only the user can resolve — earns one crisp
+AskUserQuestion; a routine checkpoint does not.
 ```
 
-- frontmatter `disallowed-tools: AskUserQuestion`
+- frontmatter 도구 차단은 두지 않는다 — 정본 문장 전문을 `skillPolicy.test.ts` 가 검사한다.
 
 ---
 

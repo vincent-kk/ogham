@@ -1,7 +1,6 @@
 ---
 name: execute
 user-invocable: true
-disallowed-tools: AskUserQuestion
 description: '[seiri:execute] Carry a written plan to done without losing your place. Use when an implementation plan exists and the work is to perform it.'
 argument-hint: '[path to the plan]'
 version: '0.1.0'
@@ -11,7 +10,7 @@ plugin: seiri
 
 # execute — the plan governs, the ledger remembers
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 

@@ -1,7 +1,6 @@
 ---
 name: implement
 user-invocable: true
-disallowed-tools: AskUserQuestion
 description: '[seiri:implement] Prove a change with a failure you watched. Use when implementing any feature or bugfix, before writing the implementation.'
 argument-hint: '[the change to make]'
 version: '0.1.0'
@@ -11,7 +10,7 @@ plugin: seiri
 
 # implement — no change without a failure seen first
 
-This skill may be invoked automatically. Do not ask the user questions. When a choice is needed, take the conservative default and say so in one line.
+This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 

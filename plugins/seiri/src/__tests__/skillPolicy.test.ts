@@ -7,21 +7,22 @@ import { describe, expect, it } from 'vitest';
 import { SHIPPED_SKILLS } from '../constants/budgets.js';
 import { WORKFLOW_CHAIN_LINE } from '../constants/postureLines.js';
 import {
+  AUTO_AUTONOMOUS_SKILLS,
   AUTO_CONDITIONAL_ASK_SKILLS,
   AUTO_INVOCABLE_SKILLS,
-  AUTO_NO_ASK_SKILLS,
   USER_GATED_SKILLS,
 } from '../constants/skillPolicy.js';
 import { WORKFLOW_SKILLS } from '../constants/workflowChain.js';
 
 /**
- * The invocation contract every skill's frontmatter must honour. A skill
- * that can be auto-invoked mid-work must not interrupt with a question
- * (`disallowed-tools: AskUserQuestion`); a user-only gate must be off the
- * model's reach (`disable-model-invocation: true`); write-plan is the one
- * auto skill allowed to ask when a change's blast radius is large. Nothing
- * outside this file keeps those facts true, so a dropped frontmatter line
- * or a new skill added with the wrong posture would otherwise pass silently.
+ * The invocation contract every skill must honour. A skill that can be
+ * auto-invoked mid-work prefers autonomous judgment and reserves its one
+ * question for a genuine blocker (the canonical body clause below); a
+ * user-only gate must be off the model's reach (`disable-model-invocation:
+ * true`); write-plan is the one auto skill allowed to ask proactively when
+ * a change's blast radius is large. Nothing outside this file keeps those
+ * facts true, so a dropped clause or a new skill added with the wrong
+ * posture would otherwise pass silently.
  */
 const skillsDir = portableJoin(
   portableDirname(fileURLToPath(import.meta.url)),
@@ -29,6 +30,14 @@ const skillsDir = portableJoin(
   '..',
   'skills',
 );
+
+/**
+ * The exact posture sentence every autonomous discipline carries in its
+ * body. Checked verbatim so wording drift across the seven files is caught
+ * here rather than discovered in behavior.
+ */
+const CANONICAL_AUTONOMY_CLAUSE =
+  'This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.';
 
 function readSkill(name: string): { frontmatter: string; body: string } {
   const text = readFileSync(portableJoin(skillsDir, name, 'SKILL.md'), 'utf8');
@@ -40,7 +49,7 @@ function readSkill(name: string): { frontmatter: string; body: string } {
 describe('skill invocation policy', () => {
   it('classifies every shipped skill exactly once', () => {
     const partitioned = [
-      ...AUTO_NO_ASK_SKILLS,
+      ...AUTO_AUTONOMOUS_SKILLS,
       ...AUTO_CONDITIONAL_ASK_SKILLS,
       ...USER_GATED_SKILLS,
     ].sort();
@@ -56,20 +65,22 @@ describe('skill invocation policy', () => {
     );
   });
 
-  it('blocks questions in the auto-invocable disciplines', () => {
-    for (const name of AUTO_NO_ASK_SKILLS) {
+  it('keeps the auto-invocable disciplines autonomous by default', () => {
+    for (const name of AUTO_AUTONOMOUS_SKILLS) {
       const { frontmatter, body } = readSkill(name);
-      expect(frontmatter).toContain('disallowed-tools: AskUserQuestion');
+      expect(frontmatter).not.toContain('AskUserQuestion');
       expect(frontmatter).not.toContain('disable-model-invocation');
-      // Canonical clause — dropping "the user" is the drift this catches.
-      expect(body).toContain('Do not ask the user questions.');
+      // A complete line, not a substring — substring checks stay green
+      // when an edit corrupts the YAML by merging adjacent lines.
+      expect(frontmatter).toMatch(/^user-invocable: true$/m);
+      expect(body).toContain(CANONICAL_AUTONOMY_CLAUSE);
     }
   });
 
   it('lets the conditional-ask planner be invoked and ask', () => {
     for (const name of AUTO_CONDITIONAL_ASK_SKILLS) {
       const { frontmatter } = readSkill(name);
-      expect(frontmatter).not.toContain('disallowed-tools: AskUserQuestion');
+      expect(frontmatter).not.toContain('AskUserQuestion');
       expect(frontmatter).not.toContain('disable-model-invocation');
     }
   });
