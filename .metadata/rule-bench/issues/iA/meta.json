@@ -1,0 +1,8 @@
+{
+  "id": "iA",
+  "title": "invisible wiring gets a label",
+  "ruleTargets": ["seiri_agent-legible"],
+  "shownTests": ["tests/cli.shown.test.js"],
+  "protectedFiles": ["tests/cli.shown.test.js"],
+  "hiddenTotal": 3
+}

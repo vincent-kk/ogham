@@ -8,7 +8,7 @@
       "title": "Agent-Legible Code",
       "description": "Make invisible wiring, repeated blocks, name traps, and indirection legible at the point where they bite.",
       "recommended": true,
-      "templateHash": "5f3b95e7f4e94491ad23ce87bbbf3407b90e546b34e3432c7bc7c9f56912f0c3"
+      "templateHash": "5056b14f022a19ea28620b6724da2ba6905c4d270ac4d2e6308de04f3ba0917d"
     },
     {
       "id": "seiri_code-comments",
@@ -16,7 +16,7 @@
       "title": "Code Comments",
       "description": "Comments carry the current spec and never its history; declarations take the language's own documentation form.",
       "recommended": true,
-      "templateHash": "255ffd1beddda2543711ca0a8fd43d31fd3e844a20acc8f9e3107de3f69b72c8"
+      "templateHash": "d97274309b7ecf2429fb547a4edccb5f52c994c1a51cfd3cde5935ea8f19a0c4"
     },
     {
       "id": "seiri_public-contract",
@@ -24,7 +24,7 @@
       "title": "Public Contract",
       "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement.",
       "recommended": false,
-      "templateHash": "5064f77888124b98460fa21f06b0b64d412e15793cddfe9fc7156a7104ef4070"
+      "templateHash": "6ec2d24e4269a2b975776410adc71c4338410060b08294161a400f35085b70a2"
     },
     {
       "id": "seiri_test-validity",
@@ -32,7 +32,7 @@
       "title": "Test Validity",
       "description": "A passing test is evidence only if it could have failed — fail first, verify the artifact you changed, curate suites.",
       "recommended": true,
-      "templateHash": "77c8b1a6742d1f3281d9a3c57aefb433179c3fef75fa4e3c5990588bc1a1a85d"
+      "templateHash": "f3ae82612683a7dc407ccbc21dec3b853c34a0d38a64df08ce473821f7fa6e47"
     },
     {
       "id": "seiri_reuse-first",
@@ -40,7 +40,7 @@
       "title": "Reuse First",
       "description": "Search first, compose second, write last — the smallest change that answers the request.",
       "recommended": true,
-      "templateHash": "c661861d92a8a0abfa987b173245abd15bafa529fb53877e761cdeb4469b09b4"
+      "templateHash": "16e3c6328baa0a6adeb5a10f9950e4fd157860a081de7dc8668ffff50918e4ca"
     },
     {
       "id": "seiri_naming",
@@ -48,7 +48,7 @@
       "title": "Naming",
       "description": "Mirror sibling conventions, name one concrete responsibility, and keep grab-bag files out of the tree.",
       "recommended": false,
-      "templateHash": "fd49cab26bde9dd9996cc22f190c7570f827e79441898adb8c62b80d0cd10b03"
+      "templateHash": "1324ebfc3a9ad3343de4c9b8f889c8b0a355ab61bebf10d5238584572c5b5726"
     },
     {
       "id": "seiri_structure",
@@ -56,7 +56,7 @@
       "title": "Structure",
       "description": "Direction-only structure rules: dependencies form a DAG, depth is a toll, cohesion splits and complexity compresses.",
       "recommended": false,
-      "templateHash": "603ed8f53433f484b8a1a0d77a9ea99fc661bf5eedabc9f028ac04a366bae67d"
+      "templateHash": "ea4f854f324784152b5a65b02a5932653a29d1911ba42fcff5e95a0ecf43b7fa"
     },
     {
       "id": "seiri_function-boundaries",
@@ -64,7 +64,7 @@
       "title": "Function Boundaries",
       "description": "Functions compute from their parameters, effects stay at the edge, and one file exports one function.",
       "recommended": false,
-      "templateHash": "7e3c45868b55505c142bd357fa855035a784cbcfa76e0f84112152fbc936a810"
+      "templateHash": "801d4f3508ec2ae2ac866dc446d309da6d6c83cd08d80db9a3a582d24f3f4808"
     },
     {
       "id": "seiri_context-efficiency",
@@ -72,7 +72,7 @@
       "title": "Context Efficiency",
       "description": "Spend session context deliberately: generated artifacts are search-only, capture once, re-read with a reason.",
       "recommended": false,
-      "templateHash": "207e85168f2c0b954055773fdf9c88d5474ebcd731120a1bc50309810a4987b9"
+      "templateHash": "4509428f9069ef1086c8b616e585e21f533a48033c2598e1c731678b484a941a"
     },
     {
       "id": "seiri_cognitive-discipline",
@@ -80,7 +80,7 @@
       "title": "Cognitive Discipline",
       "description": "Evidence over confidence, causes over symptoms — guardrails against rationalization in long agent sessions.",
       "recommended": false,
-      "templateHash": "9caa54763e3a531c53aae5f38682cf9b47e32c154b05bbad31e8b49db9c67849"
+      "templateHash": "07f487ef244eccde3d25050e1cd9f42a4490ea10314437f88e8815d1197a8c97"
     }
   ]
 }

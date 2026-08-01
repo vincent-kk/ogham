@@ -1,0 +1,1 @@
+Both the reports and invoices modules need to render dates as `YYYY-MM-DD`. Add `reportLine(title, date)` to the reports module (returns e.g. `2026-08-01 — Quarterly totals`) and `invoiceHeader(number, date)` to the invoices module (returns e.g. `INV-7 (2026-08-01)`). The failing test is `tests/dates.shown.test.js`.

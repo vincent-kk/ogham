@@ -1,0 +1,8 @@
+{
+  "id": "iG",
+  "title": "cross a sibling fractal through its entry point",
+  "ruleTargets": ["filid_fractal-boundaries"],
+  "shownTests": ["tests/checkout.shown.test.js"],
+  "protectedFiles": ["tests/checkout.shown.test.js"],
+  "hiddenTotal": 3
+}

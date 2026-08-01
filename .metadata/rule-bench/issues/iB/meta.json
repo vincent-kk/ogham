@@ -1,0 +1,8 @@
+{
+  "id": "iB",
+  "title": "barrel exports stay named and minimal",
+  "ruleTargets": ["seiri_public-contract"],
+  "shownTests": ["tests/barrel.shown.test.js"],
+  "protectedFiles": ["tests/barrel.shown.test.js"],
+  "hiddenTotal": 3
+}

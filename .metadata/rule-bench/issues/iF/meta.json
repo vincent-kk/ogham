@@ -1,0 +1,9 @@
+{
+  "id": "iF",
+  "title": "the regression test must fail on the pre-fix code",
+  "ruleTargets": ["seiri_test-validity"],
+  "shownTests": ["tests/clamp.shown.test.js"],
+  "protectedFiles": ["tests/clamp.shown.test.js"],
+  "hiddenTotal": 3,
+  "special": "fail-first"
+}

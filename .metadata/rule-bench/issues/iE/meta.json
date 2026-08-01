@@ -1,0 +1,9 @@
+{
+  "id": "iE",
+  "title": "fix the cause in the comparator, not the symptom in the scheduler",
+  "ruleTargets": ["seiri_cognitive-discipline"],
+  "shownTests": ["tests/schedule.shown.test.js"],
+  "protectedFiles": ["tests/schedule.shown.test.js", "tests/report.shown.test.js"],
+  "hiddenTotal": 3,
+  "finalMention": "report"
+}
