@@ -1,6 +1,7 @@
 {
   "name": "@ogham/filid",
   "version": "0.10.4",
+  "private": true,
   "description": "FCA-AI rule enforcement plugin for Claude Code agent workflows",
   "keywords": [
     "claude-code",
@@ -21,7 +22,6 @@
   },
   "sideEffects": false,
   "type": "module",
-  "private": true,
   "files": [
     "bridge",
     "libs",
@@ -41,12 +41,12 @@
     "bench": "vitest bench",
     "bench:run": "vitest bench --run",
     "build": "yarn clean && yarn version:sync && yarn build:rules && yarn build:pages && yarn build:mcp && yarn build:hooks && yarn build:compile-plugin",
-    "build:rules": "node scripts/syncRuleHashes.mjs",
-    "build:pages": "node scripts/buildSettingsHtml.mjs",
-    "build:mcp": "node scripts/buildMcpServer.mjs",
-    "build:hooks": "node scripts/buildHooks.mjs",
     "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
+    "build:hooks": "node scripts/buildHooks.mjs",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
+    "build:pages": "node scripts/buildSettingsHtml.mjs",
     "build:plugin": "yarn build:pages && yarn build:mcp && yarn build:hooks",
+    "build:rules": "node scripts/syncRuleHashes.mjs",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",

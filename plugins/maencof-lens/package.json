@@ -43,9 +43,9 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn version:sync && yarn build:mcp && yarn build:hooks && yarn build:compile-plugin",
-    "build:mcp": "node scripts/buildMcpServer.mjs",
-    "build:hooks": "node scripts/buildHooks.mjs",
     "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
+    "build:hooks": "node scripts/buildHooks.mjs",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
     "build:plugin": "yarn build:mcp && yarn build:hooks",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",

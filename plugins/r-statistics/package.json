@@ -36,8 +36,8 @@
   "scripts": {
     "build": "yarn clean && yarn version:sync && yarn build:compile && yarn build:mcp && yarn build:compile-plugin",
     "build:compile": "tsc -p tsconfig.build.json",
-    "build:mcp": "node scripts/buildMcpServer.mjs",
     "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
+    "build:mcp": "node scripts/buildMcpServer.mjs",
     "build:plugin": "yarn build:mcp",
     "clean": "rm -rf bridge dist",
     "dev": "tsc --watch",
