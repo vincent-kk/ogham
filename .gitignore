@@ -12,7 +12,7 @@ Thumbs.db
 *.swo
 *.log
 npm-debug.log*
-.omc/
+.plans/
 .claude/worktrees/
 .filid/review
 .filid/pr-draft
