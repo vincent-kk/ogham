@@ -43,7 +43,7 @@ Fields:
 
 ## Adding a new rule doc
 
-1. Write the markdown under `templates/rules/<your-rule>.md`, following the shape the existing four use: a `> **Precedence**:` chain, a "rests on a property/properties" grounding sentence, numbered sections that each close with `Ask yourself:`, and a closing "This rule is working if: / is wrong for you if:" pair. `src/__tests__/unit/core/ruleDocInvariants.test.ts` enforces that skeleton.
+1. Write the markdown under `templates/rules/<your-rule>.md`, following the shape the existing four use: a one-line header blockquote that opens with `> **Precedence**:` and carries the "rests on a property/properties" grounding sentence plus the Applies-when scope, numbered sections of dense imperative prose, and a closing one-line "This rule is working if: / is wrong for you if:" pair. `src/__tests__/unit/core/ruleDocInvariants.test.ts` enforces the machine-checkable parts: the precedence prefix, the grounding sentence, the falsification pair, and the `paths:` frontmatter contract.
 2. Append an entry to `manifest.json`. Use `required: false` if the rule should be opt-in via the checkbox; filid's own four are all `required: true`.
 3. Run `yarn build:rules` to inject `templateHash`. The repo-root `.prettierignore` and `.gitattributes` keep these files byte-stable (no reformatting, LF endings) — that is what makes the hash deterministic, so do not reformat them by hand.
 4. Rebuild the plugin (`yarn build:plugin`) so the bundled MCP server picks up the new handler context.

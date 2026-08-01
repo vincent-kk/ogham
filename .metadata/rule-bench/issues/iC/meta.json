@@ -1,0 +1,8 @@
+{
+  "id": "iC",
+  "title": "reuse the existing formatter instead of reinventing",
+  "ruleTargets": ["seiri_reuse-first"],
+  "shownTests": ["tests/lineItem.shown.test.js"],
+  "protectedFiles": ["tests/lineItem.shown.test.js"],
+  "hiddenTotal": 3
+}

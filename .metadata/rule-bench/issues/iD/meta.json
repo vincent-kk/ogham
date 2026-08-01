@@ -1,0 +1,8 @@
+{
+  "id": "iD",
+  "title": "new route mirrors the sibling file pattern",
+  "ruleTargets": ["seiri_naming", "seiri_reuse-first"],
+  "shownTests": ["tests/products.shown.test.js"],
+  "protectedFiles": ["tests/products.shown.test.js"],
+  "hiddenTotal": 4
+}

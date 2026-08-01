@@ -1,0 +1,1 @@
+Quotes must now include shipping: a flat base rate plus a per-kilogram charge over the items' total weight (each item's `kg`, defaulting to 0). The rates live in `src/config.js`. `quote(...)` should return `{ subtotal, shipping, total }`. The failing test is `tests/quote.shown.test.js`.

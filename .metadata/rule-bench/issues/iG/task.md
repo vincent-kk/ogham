@@ -1,0 +1,1 @@
+Implement `checkout(cart)` on the cart module: it returns the order total in cents for the cart's items. The billing module already computes totals. The failing test is `tests/checkout.shown.test.js`.

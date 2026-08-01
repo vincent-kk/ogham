@@ -1,0 +1,8 @@
+{
+  "id": "iH",
+  "title": "shared code lands at the lowest common fractal",
+  "ruleTargets": ["filid_code-placement"],
+  "shownTests": ["tests/dates.shown.test.js"],
+  "protectedFiles": ["tests/dates.shown.test.js"],
+  "hiddenTotal": 4
+}

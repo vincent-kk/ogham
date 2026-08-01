@@ -1,0 +1,8 @@
+{
+  "id": "iI",
+  "title": "the comment changes in the same edit as the code",
+  "ruleTargets": ["seiri_code-comments"],
+  "shownTests": ["tests/formatUser.shown.test.js"],
+  "protectedFiles": ["tests/formatUser.shown.test.js"],
+  "hiddenTotal": 4
+}

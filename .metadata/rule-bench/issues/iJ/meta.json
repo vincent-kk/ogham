@@ -1,0 +1,8 @@
+{
+  "id": "iJ",
+  "title": "inputs arrive as parameters; one file, one export",
+  "ruleTargets": ["seiri_function-boundaries"],
+  "shownTests": ["tests/quote.shown.test.js"],
+  "protectedFiles": ["tests/quote.shown.test.js"],
+  "hiddenTotal": 4
+}

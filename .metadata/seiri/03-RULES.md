@@ -22,6 +22,8 @@
 
 **재단·배포**: 구조 4종(agent-legible·public-contract·reuse-first·naming)은 lite로 재단, 프로세스 4종(test-validity·structure·context-efficiency·cognitive-discipline)은 full. S1~S8 배포, S9는 대조군 통과 후 opt-in 등재. 근거·수치는 [phase0/](./phase0/).
 
+**v2 압축(2026-08-01)**: 전 10종(+filid 4종)을 압축형으로 재재단 — 골격을 1줄 헤더(B1+목적+B5+B7 병합)와 1줄 B6로 줄이고, Ask-yourself는 reuse-first §1 하나만 유지하며, 레시피·표·D8 관용구·규범 내용은 보존. rule-bench 80런 haiku A/B(R0 무규칙/R1 v1/R2 v2)에서 전 이슈 R2 ≥ R1로 채택 게이트 통과 — 판별 이슈 iC(reuse)는 R0 0% vs R1·R2 100%로 v2가 효능을 보존. 바이트 -24%(전체)·-23%(상시). 하네스·수치는 [../rule-bench/](../rule-bench/).
+
 ---
 
 # 1. 상용구 사전
@@ -31,13 +33,11 @@
 ## B1. 우선순위 사슬 — 모든 규칙의 첫 줄
 
 ```markdown
-> **Precedence**: repository instructions (CLAUDE.md, project rules) >
-> repository conventions > this rule > seiri defaults. On conflict, the
-> higher source wins and this rule yields.
+> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > seiri defaults — the higher source wins.
 ```
 
 **근거**: 공식 — _"두 규칙이 모순되면 Claude는 임의로 하나를 고를 수 있다."_ 텍스트로 못 박는 것 외에 수단이 없습니다.
-**배치**: 제목 바로 아래, 목적 문단보다 **앞**.
+**배치**: 제목 바로 아래. v2부터 한 줄이며, 같은 blockquote 헤더 안에 목적 1문장·B5 형식 근거·B7 스코프 조건문을 이어 붙입니다(별도 문단 금지 — 골격 비용 절감의 핵심).
 
 ## B2. 하방 개방 — 임계가 필요한 규칙
 
@@ -76,9 +76,10 @@ This rule rests on a property every codebase has: <형식 진술>.
 ## B6. 이중 반증 — 각 규칙의 말미
 
 ```markdown
-**This rule is working if:** <관측 가능한 결과 2~3개>
-**This rule is wrong for you if:** <이 규칙을 적용하면 안 되는 관측 가능한 상황>
+**This rule is working if:** <관측 가능한 결과 1~2개>. **This rule is wrong for you if:** <이 규칙을 적용하면 안 되는 관측 가능한 상황>.
 ```
+
+v2부터 한 줄로 씁니다 — 두 문구(`This rule is working if:` · `is wrong for you if:`)는 rule-lint가 검사하는 계약이라 유지합니다.
 
 후자는 seiri 추가분입니다. 규칙이 자기 부적용 조건을 명시하면 모델이 무리하게 적용하지도, 통째로 기각하지도 않습니다.
 

@@ -1,0 +1,5 @@
+{
+  "name": "bench-ic",
+  "private": true,
+  "type": "module"
+}

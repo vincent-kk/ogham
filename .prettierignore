@@ -11,6 +11,12 @@ plugins/*/targets/
 # never consulted.
 plugins/*/templates/rules/
 
+# Rule-bench fixtures and arm rule copies are measurement instruments: oracles
+# grep exact source patterns, and arms/*.md carry the same `paths:` frontmatter
+# Prettier corrupts in AGENTS.md. Reformatting them mid-experiment changes what
+# subjects see between runs.
+.metadata/rule-bench/
+
 # AGENTS.md embeds verbatim copies of those same rule templates between
 # <!-- FILID/SEIRI:START/END --> markers (the Codex instructions channel).
 # Prettier parses the embedded `paths:` frontmatter globs as markdown emphasis

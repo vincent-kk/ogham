@@ -1,0 +1,1 @@
+Add `lineItem(name, cents)` in `src/lineItem.js`: it renders one receipt line such as `Coffee — $4.50` (the item name, an em dash, then the amount). The failing test is `tests/lineItem.shown.test.js`.
