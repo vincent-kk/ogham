@@ -10,7 +10,9 @@ issues/<id>/task.md      shown 과제 본문 — 규칙·측정을 언급하지 
 issues/<id>/hidden/      hidden 오라클 테스트 — 실행 디렉터리에 배치되지 않고 채점 시에만 주입
 issues/<id>/selftest/    naive/(관례 무시 해법) · correct/(관례 존중 해법) — 오라클 판별력 검증용
 issues/<id>/meta.json    shownTests · protectedFiles · hiddenTotal · special 플래그
-arms/R1/                 현행 규칙 14종 사본 · arms/R2/  압축 후보 14종
+arms/R1/                 v1 규칙 14종 사본 · arms/R2/  채택 압축본 14종 · arms/R3/  R2에서 reuse-first Ask-yourself만 제거한 프로브 암
+arms/R2p/, arms/R2r/     4단계 앵커 복원 변형 — R3 기반, 각각 public-contract §2 앵커·reuse-first §1 볼드 테제만 교체(R2r만 채택됨)
+arms/R2b/                5단계 전면 볼드 변형 — 현행 14종의 번호 절 첫 문장 62곳 볼드(게이트 기각, arms에만 잔존)
 prepare.mjs              실행 디렉터리 생성 + 프롬프트 조립
 grade.mjs                채점(+ --selftest 판별력 검증)
 apply-rules-sync.mjs     채택 시 templates → .claude/rules + AGENTS.md 마커 동기화
@@ -30,6 +32,7 @@ results/                 측정 결과 정본
 - shown: 과제 완수(보이는 실패 테스트의 통과 여부). hidden: 관례 존중(다중 assert, 부분 점수 = 통과/전체).
 - 특례 `fail-first`(iF): 에이전트가 추가한 테스트를 pristine 소스에 적용해 **실패해야**(pre-fix red) 하고, 수정본에서 통과해야 한다. assert 3개(존재·prefix-red·fixed-green).
 - 특례 `finalMention`(iE): FINAL.md가 무관 기존 실패(report)를 언급했는지 — hidden 점수 밖의 보조 지표.
+- 고감도 변형: iK(iA에서 형제의 배선 표지 제거)·iL(iB의 배럴을 wildcard 반모범으로 교체) — 포화 원인(모범 형제)을 제거해 R0 대비 판별력을 높인 3단계 추가 이슈.
 
 ## 규칙 개정 게이트 (재사용 절차)
 

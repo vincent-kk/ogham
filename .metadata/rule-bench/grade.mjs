@@ -149,7 +149,7 @@ const flag = (name) => {
 };
 const id = flag('issue') ?? (basename(runDir).match(/^(i[A-Z])-/) ?? [])[1];
 const { issueDir, meta } = loadIssue(id);
-const arm = (basename(runDir).match(/-(R[0-9]+)-t(\d+)$/) ?? [])[1] ?? 'unknown';
+const arm = (basename(runDir).match(/-(R[0-9]+[a-z]*)-t(\d+)$/) ?? [])[1] ?? 'unknown';
 const rep = Number((basename(runDir).match(/-t(\d+)$/) ?? [])[1] ?? 0);
 const row = { issue: id, arm, rep, ...gradeDir(runDir, meta, issueDir) };
 if (meta.finalMention) {

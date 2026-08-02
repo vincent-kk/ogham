@@ -4,7 +4,7 @@
 
 ## 1. Search first, compose second, write last
 
-Evaluate solutions in this strict order:
+**Evaluate solutions in this strict order:**
 
 1. **Reuse** existing shared code — utilities, helpers, modules already here, or libraries already installed.
 2. **Extend safely** — additive only: optional parameters, new exports, wrappers. Preserve current behavior; no silent semantic change to an existing interface.
@@ -14,19 +14,19 @@ Evaluate solutions in this strict order:
 
 ## 2. The smallest code that answers the request
 
-Nothing speculative. Validation at trust boundaries (public APIs, user input, external data) is never speculative — exported symbols cannot enumerate their callers.
+**Nothing speculative.** Validation at trust boundaries (public APIs, user input, external data) is never speculative — exported symbols cannot enumerate their callers.
 
 ## 3. Surgical changes
 
-Every changed line traces to the request. Remove what YOUR change orphaned; leave pre-existing dead code in place, mentioned, not buried in an unrelated diff.
+**Every changed line traces to the request.** Remove what YOUR change orphaned; leave pre-existing dead code in place, mentioned, not buried in an unrelated diff.
 
 ## 4. Work toward a verifiable goal
 
-Restate the task as something checkable before you start: "add validation" becomes "these invalid inputs are rejected, shown by a failing-then-passing check"; "fix the bug" becomes "a reproduction exists, then passes".
+**Restate the task as something checkable before you start:** "add validation" becomes "these invalid inputs are rejected, shown by a failing-then-passing check"; "fix the bug" becomes "a reproduction exists, then passes".
 
 ## 5. One file, one responsibility
 
-A file answers for one thing. If naming it honestly needs "and", it is two files.
+**A file answers for one thing.** If naming it honestly needs "and", it is two files.
 
 ---
 

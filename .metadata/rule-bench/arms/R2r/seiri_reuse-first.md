@@ -4,7 +4,7 @@
 
 ## 1. Search first, compose second, write last
 
-Evaluate solutions in this strict order:
+**Evaluate solutions in this strict order:**
 
 1. **Reuse** existing shared code — utilities, helpers, modules already here, or libraries already installed.
 2. **Extend safely** — additive only: optional parameters, new exports, wrappers. Preserve current behavior; no silent semantic change to an existing interface.
