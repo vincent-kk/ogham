@@ -21,7 +21,7 @@
 
 - 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → hooks → compile-plugin`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`)
-- Agent 는 `courier` 1개 (`cennad:courier`) — 관점(정교화 ≤3콜 · 실패 remedy · tier 의미론)은 courier, 스킬은 행동(파싱→background spawn→릴레이)만 (비블로킹)
+- Agent 는 `courier` 1개 (`cennad:courier`) — provider 스킬 3종이 background spawn 한다. 관점(정교화 ≤3콜 · 실패 remedy · tier 의미론)은 courier, 스킬은 행동(파싱→spawn→릴레이)만. crosscheck 는 정교화가 없어 courier 를 거치지 않고 MCP 도구를 직접 병렬 호출한다
 - E2E 는 이중 레이어 (Layer A in-process + Layer B 번들 stdio); `CENNAD_E2E_REAL_CLI=1` 일 때만 real CLI
 
 ## Boundaries

@@ -1,8 +1,10 @@
+import type { ProgressContext } from './progressHeartbeat.js';
+import { startProgressHeartbeat } from './progressHeartbeat.js';
 import { toolError } from './toolError.js';
 import { toolResult } from './toolResult.js';
 
 /** 요청 컨텍스트에서 이 래퍼가 쓰는 부분 — MCP SDK 가 넘기는 `extra` 의 부분집합. */
-interface RequestContext {
+interface RequestContext extends ProgressContext {
   /**
    * 호스트가 `notifications/cancelled` 를 보내면 SDK 가 abort 시키는 신호.
    * 도구가 외부 CLI 를 띄웠다면 이 신호가 유일한 조기 종료 경로다.
@@ -13,9 +15,12 @@ interface RequestContext {
 /**
  * MCP 도구 핸들러를 감싸 정상 반환은 `toolResult`, throw 는 `toolError` 로 만든다.
  *
- * 두 번째 인자는 SDK 가 요청마다 만드는 컨텍스트이며, 그 안의 취소 신호를 핸들러에
- * 그대로 전달한다 — 이 전달이 빠지면 호스트가 요청을 취소해도 핸들러가 띄운
- * provider CLI 는 아무도 기다리지 않는 채로 liveness 상한까지 계속 돈다.
+ * 두 번째 인자는 SDK 가 요청마다 만드는 컨텍스트다. 그 안의 취소 신호를 핸들러에
+ * 그대로 전달하고 — 이 전달이 빠지면 호스트가 요청을 취소해도 핸들러가 띄운
+ * provider CLI 는 아무도 기다리지 않는 채로 liveness 상한까지 계속 돈다 —
+ * 실행 동안 progress 하트비트를 돌린다. 하트비트가 여기 있는 이유는 모든 도구가
+ * 이 래퍼를 지나가기 때문이다: 도구마다 되풀이하면 하나를 빠뜨리는 순간 그
+ * 도구만 idle 로 잘린다.
  *
  * @param handler 도구 본체. 취소를 다루지 않는 핸들러는 두 번째 인자를 선언하지
  *   않으면 되고, 그 경우에도 감싸는 동작은 같다.
@@ -28,10 +33,13 @@ export function wrapHandler<T>(
   extra?: RequestContext,
 ) => Promise<ReturnType<typeof toolResult> | ReturnType<typeof toolError>> {
   return async (args: T, extra?: RequestContext) => {
+    const stopHeartbeat = startProgressHeartbeat(extra ?? {});
     try {
       return toolResult(await handler(args, extra?.signal));
     } catch (error) {
       return toolError(error);
+    } finally {
+      stopHeartbeat();
     }
   };
 }

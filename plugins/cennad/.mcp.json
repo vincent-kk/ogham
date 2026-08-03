@@ -2,7 +2,8 @@
   "mcpServers": {
     "tools": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"],
+      "timeout": 25200000
     }
   }
 }

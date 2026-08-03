@@ -25,7 +25,7 @@ No other flags: permission and dispatcher options live in `/cennad:setup`.
 
 ## Run
 
-Spawn `cennad:courier` (Agent tool, background — never poll or wait; the completion notification re-invokes you) with:
+Spawn `cennad:courier` (Agent tool, background — never poll or wait; the completion notification re-invokes you). Identify the run by `description`; never pass `name` — a named agent spawns into mailbox mode and waits for a `SendMessage` this skill never sends, so the prompt never runs. The spawn prompt:
 
 ```
 operation: start            # `continue` when --continue was given
