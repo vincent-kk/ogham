@@ -110,13 +110,13 @@ Documents in `03_External/` are classified by:
 
 Layer 5 is the flat unclassified inbox — it has no sub-layers. Cross-layer hubs are not a layer at all but a frontmatter attribute any L1–L4 document can carry, so v2's `boundary` sub-layer has no v3 equivalent and its documents move to where the knowledge belongs.
 
-| v2 | v3 |
-| --- | --- |
-| `05_Context/buffer/x.md`, `sub_layer: buffer` | `05_Context/x.md`, no `sub_layer` |
-| `05_Context/boundary/y.md`, `sub_layer: boundary` | `03_External/structural/y.md`, `sub_layer: structural`, `hub: true` |
-| `boundary_type: project_moc` | `hub_kind: project_moc` (unknown values converge to `cross_domain`) |
-| `connected_layers: [2, 3]` | removed — hubs select targets by tag overlap, not by a layer list |
-| — | `purpose` (required when `hub: true`; filled from `title` when absent) |
+| v2                                                | v3                                                                     |
+| ------------------------------------------------- | ---------------------------------------------------------------------- |
+| `05_Context/buffer/x.md`, `sub_layer: buffer`     | `05_Context/x.md`, no `sub_layer`                                      |
+| `05_Context/boundary/y.md`, `sub_layer: boundary` | `03_External/structural/y.md`, `sub_layer: structural`, `hub: true`    |
+| `boundary_type: project_moc`                      | `hub_kind: project_moc` (unknown values converge to `cross_domain`)    |
+| `connected_layers: [2, 3]`                        | removed — hubs select targets by tag overlap, not by a layer list      |
+| —                                                 | `purpose` (required when `hub: true`; filled from `title` when absent) |
 
 `purpose` is filled rather than left empty on purpose: the v3 schema rejects `hub: true` without it, so a converted document that arrived without one would be unreadable the moment migration finished.
 

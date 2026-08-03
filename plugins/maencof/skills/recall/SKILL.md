@@ -120,13 +120,13 @@ For more detail: `/maencof:recall {query} --detail`
 /maencof:recall <query> [options]
 ```
 
-| Option          | Default | Description                                                                   |
-| --------------- | ------- | ----------------------------------------------------------------------------- |
-| `--summary`     | default | Summary mode (title + 1-2 line summary)                                       |
-| `--detail`      | —       | Detail mode (full content excerpt)                                            |
-| `--layer=N`     | all     | Search a specific Layer only (1-5)                                            |
+| Option          | Default | Description                                                  |
+| --------------- | ------- | ------------------------------------------------------------ |
+| `--summary`     | default | Summary mode (title + 1-2 line summary)                      |
+| `--detail`      | —       | Detail mode (full content excerpt)                           |
+| `--layer=N`     | all     | Search a specific Layer only (1-5)                           |
 | `--sub-layer=X` | none    | Filter by sub-layer: relational/structural/topical (L3 only) |
-| `--limit=N`     | 10      | Maximum number of results                                                     |
+| `--limit=N`     | 10      | Maximum number of results                                    |
 
 ## Usage Examples
 

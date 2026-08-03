@@ -14,8 +14,7 @@ The dashboard reads `.maencof/nodes.json` and `.maencof/edges.json` which serial
 // backend/src/types/graph.ts (authored during Phase 4 Turn 1)
 export type NodeId = string;
 export type Layer = 1 | 2 | 3 | 4 | 5;
-export type SubLayer =
-  'relational' | 'structural' | 'topical';
+export type SubLayer = 'relational' | 'structural' | 'topical';
 
 export interface KnowledgeNode {
   /* fields below */

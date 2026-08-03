@@ -184,7 +184,7 @@ When `--verbose` is specified together with `--quick`, additionally display:
 | `staleNodeCount`          | number  | Stale node count                                                                                                                                |
 | `freshnessPercent`        | number  | Index freshness (%)                                                                                                                             |
 | `rebuildRecommended`      | boolean | Whether full rebuild is recommended                                                                                                             |
-| `subLayerDistribution`    | object  | L3 (relational/structural/topical) node counts                                                                                                                                                          |
+| `subLayerDistribution`    | object  | L3 (relational/structural/topical) node counts                                                                                                  |
 | `linkOrphanCount`         | number  | Nodes with no inbound and no outbound wikilink (LINK) — semantic isolation that total-degree orphan misses because folder SIBLING edges mask it |
 | `linkInboundOrphanCount`  | number  | Nodes never referenced by any wikilink (no inbound LINK)                                                                                        |
 | `linkOutboundOrphanCount` | number  | Nodes that link to nothing (no outbound LINK)                                                                                                   |

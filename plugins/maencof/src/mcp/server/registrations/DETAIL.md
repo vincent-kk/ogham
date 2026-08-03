@@ -17,16 +17,16 @@
 
 여덟 개 등록 함수를 이름으로 재노출한다. 모두 `(server: McpServer): void` 시그니처다.
 
-| Export                         | 등록 도구                                                                                                                                                               |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `registerCrudTools`            | mutate 5 (`create` · `capture_insight` · `update` · `delete` · `move`) + plain read 1 (`read`)                                                                          |
+| Export                         | 등록 도구                                                                                                                                |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `registerCrudTools`            | mutate 5 (`create` · `capture_insight` · `update` · `delete` · `move`) + plain read 1 (`read`)                                           |
 | `registerKgTools`              | fresh read 5 (`kg_search` · `kg_navigate` · `kg_context` · `kg_suggest_links` · `kg_timeline`) + plain read 2 (`kg_status` · `kg_build`) |
-| `registerClaudeMdTools`        | mutate 2 (`claudemd_merge` · `claudemd_remove`) + plain read 1 (`claudemd_read`)                                                                                        |
-| `registerCompanionTools`       | plain read 1 (`companion_edit`)                                                                                                                                         |
-| `registerPersonalContextTools` | plain read 1 (`capture_personal_context`)                                                                                                                               |
-| `registerActivityReadTools`    | plain read 1 (`activity_read`)                                                                                                                                          |
-| `registerCacheTools`           | plain read 1 (`context_cache_manage`)                                                                                                                                   |
-| `registerWorkHistoryTools`     | plain read 1 (`work_history`)                                                                                                                                           |
+| `registerClaudeMdTools`        | mutate 2 (`claudemd_merge` · `claudemd_remove`) + plain read 1 (`claudemd_read`)                                                         |
+| `registerCompanionTools`       | plain read 1 (`companion_edit`)                                                                                                          |
+| `registerPersonalContextTools` | plain read 1 (`capture_personal_context`)                                                                                                |
+| `registerActivityReadTools`    | plain read 1 (`activity_read`)                                                                                                           |
+| `registerCacheTools`           | plain read 1 (`context_cache_manage`)                                                                                                    |
+| `registerWorkHistoryTools`     | plain read 1 (`work_history`)                                                                                                            |
 
 합계 21개. 이 표가 서버의 도구 표면 목록이다.
 
