@@ -25,6 +25,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L2/insights/graph-search-synthesis.md': 2,
       'L2/insights/knowledge-graph-design.md': 1,
       'L2/insights/graph-algorithms-survey.md': 1,
+      'L3/structural/graph-search-hub.md': 1,
     },
   },
   {
@@ -36,6 +37,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L2/insights/spreading-activation-notes.md': 1,
       'L2/insights/personal-memory-systems.md': 1,
       'L2/insights/graph-algorithms-survey.md': 1,
+      'L3/structural/graph-search-hub.md': 1,
     },
   },
   {
@@ -47,6 +49,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L2/insights/spreading-activation-notes.md': 2,
       'L2/insights/ontology-modeling.md': 1,
       'L2/insights/graph-algorithms-survey.md': 1,
+      'L3/structural/graph-search-hub.md': 1,
     },
   },
   {
@@ -54,6 +57,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
     seeds: ['review articles'],
     relevance: {
       'L4/tasks/review-security-articles.md': 2,
+      'L3/structural/security-review-hub.md': 2,
       'L3/clippings/security-article-00.md': 1,
       'L3/clippings/security-article-01.md': 1,
     },
@@ -108,6 +112,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
     relevance: {
       'L2/insights/investment-fomo-psychology.md': 2,
       'L4/tasks/portfolio-rebalance.md': 2,
+      'L5/buf-portfolio-note.md': 1,
     },
   },
   {
@@ -139,6 +144,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L2/insights/spreading-activation-notes.md': 2,
       'L2/insights/knowledge-graph-design.md': 2,
       'L2/insights/graph-search-synthesis.md': 1,
+      'L3/structural/graph-search-hub.md': 1,
     },
   },
   {
@@ -185,6 +191,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L2/insights/graph-search-synthesis.md': 2,
       'L2/insights/spreading-activation-notes.md': 2,
       'L2/insights/ontology-modeling.md': 1,
+      'L3/structural/graph-search-hub.md': 1,
     },
   },
   {
@@ -219,6 +226,70 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
     seeds: ['n3r', '전환'],
     relevance: {
       'L2/insights/n3r-migration-plan.md': 2,
+    },
+  },
+  // ─── 허브 브릿지 (hub 감쇠 인자 · CROSS_LAYER 멀티플라이어 측정) ────────
+  // bm25-reference 는 LINK 가 하나도 없는 고립 노드다. 허브가 유일한 탈출로이므로,
+  // 이 쿼리에서 그래프 클러스터가 올라오는지가 브릿지가 실제로 작동하는지를 판별한다.
+  {
+    id: 'hub-bridge-from-orphan',
+    seeds: ['BM25'],
+    relevance: {
+      'L3/references/bm25-reference.md': 2,
+      'L3/structural/graph-search-hub.md': 2,
+      'L2/insights/graph-search-synthesis.md': 1,
+      'L2/insights/spreading-activation-notes.md': 1,
+      'L4/tasks/implement-search-v2.md': 1,
+    },
+  },
+  // 허브를 직접 시드했을 때 브릿지 대상이 레이어를 가로질러 올라오는지.
+  // 미분류 조각(L5)은 허브가 잇는 대상이긴 하나 실제 자료보다 아래여야 한다.
+  {
+    id: 'hub-cross-layer-span',
+    seeds: ['graph search hub'],
+    relevance: {
+      'L3/structural/graph-search-hub.md': 2,
+      'L2/insights/graph-search-synthesis.md': 2,
+      'L2/insights/spreading-activation-notes.md': 2,
+      'L2/insights/knowledge-graph-design.md': 1,
+      'L2/insights/graph-algorithms-survey.md': 1,
+      'L3/references/hipporag-paper.md': 1,
+      'L3/references/bm25-reference.md': 1,
+      'L4/tasks/implement-search-v2.md': 1,
+    },
+  },
+  {
+    id: 'hub-project-moc',
+    seeds: ['security review hub'],
+    relevance: {
+      'L3/structural/security-review-hub.md': 2,
+      'L4/tasks/review-security-articles.md': 2,
+      'L3/clippings/security-article-00.md': 1,
+      'L3/clippings/security-article-01.md': 1,
+    },
+  },
+  // ─── L5 격리 (L5 감쇠 인자 측정) ───────────────────────────────────────
+  // ontology 조각이 활성을 받은 뒤 그 활성이 무관한 형제 버퍼(graph/portfolio/quote)로
+  // 새어나가면, 실제 L2 지식이 그 아래로 밀린다. L5 감쇠 인자의 직접 측정 지점이다.
+  {
+    id: 'l5-isolation-ontology',
+    seeds: ['ontology'],
+    relevance: {
+      'L2/insights/ontology-modeling.md': 2,
+      'L5/buf-ontology-fragment.md': 1,
+      'L2/insights/knowledge-graph-design.md': 1,
+    },
+  },
+  // 반대 방향 보호: 버퍼를 명시적으로 찾을 때는 여전히 찾을 수 있어야 한다.
+  // 격리가 지나쳐 L5 가 검색에서 사라지면 이 쿼리가 먼저 무너진다.
+  {
+    id: 'l5-inbox-reachable',
+    seeds: ['snippet'],
+    relevance: {
+      'L5/buf-graph-snippet.md': 1,
+      'L5/buf-ontology-fragment.md': 1,
+      'L5/buf-portfolio-note.md': 1,
+      'L5/buf-unsorted-quote.md': 1,
     },
   },
 ];

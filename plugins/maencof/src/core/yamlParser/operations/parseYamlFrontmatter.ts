@@ -40,25 +40,21 @@ export function parseYamlFrontmatter(yaml: string): Record<string, unknown> {
     // 인라인 배열: key: [a, b, c]
     if (valueRaw.startsWith('[') && valueRaw.endsWith(']')) {
       const inner = valueRaw.slice(1, -1);
-      const items = inner
+      result[key] = inner
         .split(',')
-        .map((s) => s.trim().replace(/^["']|["']$/g, ''))
-        .filter((s) => s.length > 0);
-      result[key] = items;
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0)
+        .map(parseScalarValue);
       i++;
       continue;
     }
 
     // 블록 배열: 다음 줄이 "  - item" 패턴
     if (valueRaw === '') {
-      const items: string[] = [];
+      const items: unknown[] = [];
       i++;
       while (i < lines.length && /^\s+-\s+/.test(lines[i])) {
-        const item = lines[i]
-          .replace(/^\s+-\s+/, '')
-          .trim()
-          .replace(/^["']|["']$/g, '');
-        items.push(item);
+        items.push(parseScalarValue(lines[i].replace(/^\s+-\s+/, '').trim()));
         i++;
       }
       if (items.length > 0) result[key] = items;

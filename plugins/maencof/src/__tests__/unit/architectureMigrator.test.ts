@@ -142,7 +142,7 @@ describe('architecture-migrator', () => {
       expect(plan.currentVersion).toBe('1.0.0');
       expect(plan.targetVersion).toBe(EXPECTED_ARCHITECTURE_VERSION);
       expect(plan.operations.length).toBeGreaterThan(0);
-      expect(plan.summary.dirsToCreate).toBeGreaterThanOrEqual(5); // 3 L3 + 2 L5
+      expect(plan.summary.dirsToCreate).toBeGreaterThanOrEqual(3); // 3 L3 (L5는 평면 구조)
       expect(plan.summary.filesToMove).toBe(3); // alice, company-x, react-hooks
 
       // 파일이 실제로 이동되지 않았음을 확인
@@ -212,8 +212,6 @@ describe('architecture-migrator', () => {
         true,
       );
       expect(existsSync(join(testVault, '03_External', 'topical'))).toBe(true);
-      expect(existsSync(join(testVault, '05_Context', 'buffer'))).toBe(true);
-      expect(existsSync(join(testVault, '05_Context', 'boundary'))).toBe(true);
 
       // 파일 이동 확인
       expect(
@@ -319,7 +317,7 @@ describe('architecture-migrator', () => {
 
       const plan = planMigration(testVault);
       expect(plan.summary.filesToMove).toBe(0);
-      expect(plan.summary.dirsToCreate).toBeGreaterThanOrEqual(5);
+      expect(plan.summary.dirsToCreate).toBeGreaterThanOrEqual(3);
 
       const result = executeMigration(testVault, plan);
       expect(result.success).toBe(true);

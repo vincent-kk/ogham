@@ -36,7 +36,9 @@
 
 ### `buildCrossLayerEdges(nodes)`
 
-`subLayer === 'boundary'` 이고 `connectedLayers` 가 비지 않은 노드에서 시작한다. 대상은 `connectedLayers` 가 지목한 레이어의 노드 중 태그가 하나라도 겹치는 것이며, 엣지는 양방향(`weight: 1.0`)이다. boundary 노드 하나당 `MAX_CROSS_LAYER_EDGES_PER_NODE` 에 도달하면 남은 레이어 탐색까지 중단한다. boundary 노드가 없으면 즉시 빈 배열이다.
+`hub === true` 인 노드에서 시작한다. 허브는 레이어와 직교하는 속성이므로 레이어 필터를 두지 않고, 대상은 태그가 하나라도 겹치는 모든 노드이며 엣지는 양방향(`weight: 1.0`)이다. 허브 하나당 `MAX_CROSS_LAYER_EDGES_PER_NODE` 에 도달하면 탐색을 중단한다.
+
+상한에 걸릴 때 어떤 대상이 살아남는지가 입력 배열 순서에 좌우되면 같은 vault 가 스캔 순서에 따라 다른 그래프를 만든다. 후보를 `id` 오름차순으로 정렬한 뒤 자르는 이유다. 허브 노드가 없으면 즉시 빈 배열이다.
 
 ## Acceptance Criteria
 
@@ -58,7 +60,7 @@
 
 ### AC-cross-layer-capped — cross-layer 상한
 
-- boundary 노드당 CROSS_LAYER 확장이 `MAX_CROSS_LAYER_EDGES_PER_NODE` 를 넘지 않는다.
+- 허브 노드당 CROSS_LAYER 확장이 `MAX_CROSS_LAYER_EDGES_PER_NODE` 를 넘지 않으며, 상한에 걸린 대상 선택이 입력 순서와 무관하다.
 
 ### AC-tag-overlap-required — 태그 겹침 요구
 

@@ -9,6 +9,7 @@
 - `needsFreshness` 는 그래프 의존성으로 결정한다. SA·이웃 탐색처럼 그래프를 읽는 도구만 `true` 이고, 그래프와 무관한 도구는 `false` 다 — 무관한 도구에 freshness 를 걸면 매 호출이 인덱스 상태에 묶인다.
 - KG 그래프를 건드리지 않는 쓰기 도구는 mutate 가 아니라 plain read 로 등록한다. `companion_edit` 과 `capture_personal_context` 가 그 경우이며, mutate 로 올리면 그래프 캐시를 무효화해 preview 경로까지 부수효과를 갖는다.
 - 등록 그룹 경계와 read/mutate 승격은 `INTENT.md` 의 "Ask first" 대상이다. 등록 실패를 조용히 삼키지 않는다 — 서버 기동이 도구 부재를 모르면 안 된다.
+- 핸들러가 읽는 입력 필드는 전부 `inputSchema` 에 있어야 한다. Zod 는 스키마에 없는 키를 조용히 버리므로, 누락된 필드는 타입에도 핸들러에도 존재하면서 호출자만 도달하지 못하는 상태가 된다 — 에러 메시지가 실행 불가능한 복구 수단을 안내하는 형태로 드러난다.
 
 ## API Contracts
 
@@ -19,7 +20,7 @@
 | Export                         | 등록 도구                                                                                                                                                               |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `registerCrudTools`            | mutate 5 (`create` · `capture_insight` · `update` · `delete` · `move`) + plain read 1 (`read`)                                                                          |
-| `registerKgTools`              | mutate 1 (`boundary_create`) + fresh read 5 (`kg_search` · `kg_navigate` · `kg_context` · `kg_suggest_links` · `kg_timeline`) + plain read 2 (`kg_status` · `kg_build`) |
+| `registerKgTools`              | fresh read 5 (`kg_search` · `kg_navigate` · `kg_context` · `kg_suggest_links` · `kg_timeline`) + plain read 2 (`kg_status` · `kg_build`) |
 | `registerClaudeMdTools`        | mutate 2 (`claudemd_merge` · `claudemd_remove`) + plain read 1 (`claudemd_read`)                                                                                        |
 | `registerCompanionTools`       | plain read 1 (`companion_edit`)                                                                                                                                         |
 | `registerPersonalContextTools` | plain read 1 (`capture_personal_context`)                                                                                                                               |
@@ -27,11 +28,11 @@
 | `registerCacheTools`           | plain read 1 (`context_cache_manage`)                                                                                                                                   |
 | `registerWorkHistoryTools`     | plain read 1 (`work_history`)                                                                                                                                           |
 
-합계 22개. 이 표가 서버의 도구 표면 목록이다.
+합계 21개. 이 표가 서버의 도구 표면 목록이다.
 
 ### Affected-path 보고 (mutate 전용)
 
-`registerMutateTool` 의 마지막 인자는 stale 기록에 쓸 영향 경로를 만든다. 형태는 세 가지다 — 인자에서 바로 얻는 경로(`update` · `delete`), 결과에서 얻는 경로(`create` · `capture_insight` · `boundary_create`), 그리고 `{ primary, also }` 쌍(`move` — 원본과 대상 둘 다 stale 이다).
+`registerMutateTool` 의 마지막 인자는 stale 기록에 쓸 영향 경로를 만든다. 형태는 세 가지다 — 인자에서 바로 얻는 경로(`update` · `delete`), 결과에서 얻는 경로(`create` · `capture_insight`), 그리고 `{ primary, also }` 쌍(`move` — 원본과 대상 둘 다 stale 이다).
 
 `claudemd_merge` / `claudemd_remove` 는 대상 파일이 호스트별로 달라(Claude=`CLAUDE.md` · Codex=`AGENTS.md`) 호출 시점에 `createProjectInstructionManager(getVaultPath()).inspect().target` 을 vault 상대 경로로 환산한다. 상수로 고정할 수 없는 유일한 경우다.
 
@@ -69,6 +70,14 @@
 
 - `claudemd_merge` · `claudemd_remove` 의 영향 경로가 호출 시점 호스트 해석 결과에서 나온다.
 
+### AC-handler-fields-reach-schema — 핸들러 필드의 스키마 도달
+
+- 핸들러가 읽는 입력 필드가 등록된 `inputSchema` 를 통과해 핸들러까지 전달된다. `update` 의 `frontmatter.unset` 이 대표 사례다.
+
+## History
+
+- 2026-08-03 — `update` 의 `frontmatter.unset` 이 타입·핸들러·에러 메시지에는 있으나 `inputSchema` 에만 없어, 손상된 frontmatter 의 유일한 복구 경로가 호출 불가 상태였다. 스키마에 필드를 올리고 `AC-handler-fields-reach-schema` 로 고정했다.
+
 ## Last Updated
 
-2026-07-30 — 등록 함수별 도구 표면·wrapper 경유 계약·affected-path 형태·공유 시간창 프래그먼트를 문서화했다.
+2026-08-03 — 핸들러 입력 필드가 도구 스키마에 도달해야 한다는 요구사항과 acceptance group 을 추가했다.

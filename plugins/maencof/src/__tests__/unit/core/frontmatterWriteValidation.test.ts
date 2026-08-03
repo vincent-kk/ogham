@@ -2,7 +2,7 @@
  * @file frontmatterWriteValidation.test.ts
  * @description validateFrontmatter() — write-path 객체 단계 검증의 단일 진입점.
  *
- * 3+12 룰: 3 base 통과 + 12 parameterized 거부.
+ * 4 base 통과 + 14 parameterized 거부.
  */
 import { describe, expect, it } from 'vitest';
 
@@ -14,7 +14,7 @@ const baseFm = {
   tags: ['test'],
 };
 
-describe('validateFrontmatter — base accept cases (3)', () => {
+describe('validateFrontmatter — base accept cases', () => {
   it('L3-relational 통과', () => {
     const result = validateFrontmatter({
       ...baseFm,
@@ -28,13 +28,25 @@ describe('validateFrontmatter — base accept cases (3)', () => {
     }
   });
 
-  it('L5-boundary 통과', () => {
+  it('L5(임시 수용소) 통과 — 서브레이어 없이 buffer 필드만', () => {
     const result = validateFrontmatter({
       ...baseFm,
       layer: 5,
-      sub_layer: 'boundary',
-      boundary_type: 'project_moc',
-      connected_layers: [1, 3],
+      buffer_type: 'snippet',
+      promotion_target: 'topical',
+      source_context: '대화 중 멘션',
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  it('L3 허브 통과 — hub 는 레이어 직교 속성', () => {
+    const result = validateFrontmatter({
+      ...baseFm,
+      layer: 3,
+      sub_layer: 'structural',
+      hub: true,
+      hub_kind: 'project_moc',
+      purpose: '제어이론 학습 경로 통합',
     });
     expect(result.ok).toBe(true);
   });
@@ -45,108 +57,80 @@ describe('validateFrontmatter — base accept cases (3)', () => {
   });
 });
 
-describe('validateFrontmatter — write-path reject cases (12 parameterized)', () => {
-  type RejectCase = {
-    name: string;
-    input: Record<string, unknown>;
-    errorContains: string;
-  };
-
-  const cases: RejectCase[] = [
+describe('validateFrontmatter — write-path reject cases (parameterized)', () => {
+  it.each([
     {
       name: 'L4 + sub_layer:topical',
-      input: { ...baseFm, layer: 4, sub_layer: 'topical' },
-      errorContains: 'sub_layer is only valid for Layer 3 or 5',
+      patch: { layer: 4, sub_layer: 'topical' },
+      errorContains: 'sub_layer is only valid for Layer 3',
     },
     {
       name: 'L2 + sub_layer:topical',
-      input: { ...baseFm, layer: 2, sub_layer: 'topical' },
-      errorContains: 'sub_layer is only valid for Layer 3 or 5',
+      patch: { layer: 2, sub_layer: 'topical' },
+      errorContains: 'sub_layer is only valid for Layer 3',
     },
     {
       name: 'L1 + sub_layer:relational',
-      input: { ...baseFm, layer: 1, sub_layer: 'relational' },
-      errorContains: 'sub_layer is only valid for Layer 3 or 5',
+      patch: { layer: 1, sub_layer: 'relational' },
+      errorContains: 'sub_layer is only valid for Layer 3',
     },
     {
-      name: 'L3 + sub_layer:buffer (L5-only)',
-      input: { ...baseFm, layer: 3, sub_layer: 'buffer' },
-      errorContains: 'Layer 3 sub_layer must be relational/structural/topical',
+      name: 'L3 + sub_layer:buffer (폐지된 값)',
+      patch: { layer: 3, sub_layer: 'buffer' },
+      errorContains: 'sub_layer',
     },
     {
-      name: 'L5 + sub_layer:relational (L3-only)',
-      input: { ...baseFm, layer: 5, sub_layer: 'relational' },
-      errorContains: 'Layer 5 sub_layer must be buffer/boundary',
+      name: 'L5 + sub_layer:relational (L5는 서브레이어가 없다)',
+      patch: { layer: 5, sub_layer: 'relational' },
+      errorContains: 'sub_layer is only valid for Layer 3',
     },
     {
       name: 'L4 + sub_layer:structural',
-      input: { ...baseFm, layer: 4, sub_layer: 'structural' },
-      errorContains: 'sub_layer is only valid for Layer 3 or 5',
+      patch: { layer: 4, sub_layer: 'structural' },
+      errorContains: 'sub_layer is only valid for Layer 3',
     },
     {
       name: 'L3A + org_type (exclusive to L3B)',
-      input: {
-        ...baseFm,
-        layer: 3,
-        sub_layer: 'relational',
-        org_type: 'company',
-      },
+      patch: { layer: 3, sub_layer: 'relational', org_type: 'company' },
       errorContains: 'org_type is exclusive to L3B',
     },
     {
       name: 'L3B + person_ref (exclusive to L3A)',
-      input: {
-        ...baseFm,
-        layer: 3,
-        sub_layer: 'structural',
-        person_ref: 'alice',
-      },
+      patch: { layer: 3, sub_layer: 'structural', person_ref: 'alice' },
       errorContains: 'person_ref is exclusive to L3A',
     },
     {
-      name: 'L5-Buffer + boundary_type (exclusive to L5-Boundary)',
-      input: {
-        ...baseFm,
-        layer: 5,
-        sub_layer: 'buffer',
-        boundary_type: 'project_moc',
-      },
-      errorContains: 'boundary_type is exclusive to L5-Boundary',
+      name: 'L3 + buffer_type (L5 전용)',
+      patch: { layer: 3, buffer_type: 'snippet' },
+      errorContains: 'buffer_type is exclusive to Layer 5',
     },
     {
-      name: 'L5-Buffer + connected_layers (exclusive to L5-Boundary)',
-      input: {
-        ...baseFm,
-        layer: 5,
-        sub_layer: 'buffer',
-        connected_layers: [1, 3],
-      },
-      errorContains: 'connected_layers is exclusive to L5-Boundary',
+      name: 'L4 + promotion_target (L5 전용)',
+      patch: { layer: 4, promotion_target: 'topical' },
+      errorContains: 'promotion_target is exclusive to Layer 5',
     },
     {
-      name: 'L5-Boundary + buffer_type (exclusive to L5-Buffer)',
-      input: {
-        ...baseFm,
-        layer: 5,
-        sub_layer: 'boundary',
-        buffer_type: 'inbox',
-      },
-      errorContains: 'buffer_type is exclusive to L5-Buffer',
+      name: 'L2 + source_context (L5 전용)',
+      patch: { layer: 2, source_context: '웹 스크랩' },
+      errorContains: 'source_context is exclusive to Layer 5',
     },
     {
-      name: 'L5-Boundary + promotion_target (exclusive to L5-Buffer)',
-      input: {
-        ...baseFm,
-        layer: 5,
-        sub_layer: 'boundary',
-        promotion_target: 2,
-      },
-      errorContains: 'promotion_target is exclusive to L5-Buffer',
+      name: 'hub=true + purpose 누락',
+      patch: { layer: 3, hub: true, hub_kind: 'synthesis' },
+      errorContains: 'hub requires purpose',
     },
-  ];
-
-  it.each(cases)('rejects $name', ({ input, errorContains }) => {
-    const result = validateFrontmatter(input);
+    {
+      name: 'purpose 만 있고 hub 선언 없음',
+      patch: { layer: 3, purpose: '무언가 통합' },
+      errorContains: 'hub_kind and purpose require hub: true',
+    },
+    {
+      name: 'L5 + hub=true (임시 수용소는 다리가 되지 않는다)',
+      patch: { layer: 5, hub: true, purpose: '통합' },
+      errorContains: 'Layer 5 documents cannot be hubs',
+    },
+  ])('rejects $name', ({ patch, errorContains }) => {
+    const result = validateFrontmatter({ ...baseFm, ...patch });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.errors.some((e) => e.includes(errorContains))).toBe(true);

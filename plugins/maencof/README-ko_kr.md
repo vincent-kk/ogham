@@ -36,7 +36,7 @@ claude --plugin-dir ./plugins/maencof
 
 빌드하면 두 가지 산출물이 생성됩니다:
 
-- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 22개)
+- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 21개)
 - `bridge/*.mjs` — 이벤트 디스패처 4개 (session-start, user-prompt-submit, pre-tool-use, post-tool-use). 각 디스패처가 해당 이벤트의 관심사 핸들러를 한 프로세스에서 실행합니다. 세션 종료 마감(레코드 마감·아카이빙·자동 커밋)은 훅이 아니라 MCP 서버 수명주기(boot sweep + shutdown)가 담당합니다.
 
 > **성능 안내**: maencof는 이벤트당 hook을 1개만 등록합니다. `UserPromptSubmit` 디스패처는 컨텍스트 주입 → lifecycle 액션 → vault 자동 커밋 → insight 배너를 한 프로세스에서 순차 실행합니다 — 관심사마다 node를 띄우는 대신 이벤트당 1회만 띄웁니다. 세션 첫 프롬프트는 추가로 컨텍스트 캐시를 빌드합니다. `hooks.json`의 이벤트별 timeout 값은 kill-switch이지 expected latency가 아니며, 각 관심사는 vault 밖에서 즉시 fast-fail 합니다. git을 실제로 실행하는 경로는 vault 자동 커밋 하나뿐이며, 세 조건이 동시에 충족돼야 동작합니다: vault opt-in (`vault-commit.json::enabled=true`) + 프롬프트가 `/clear` 또는 설정된 `skip_patterns` 중 하나와 매칭 + vault dirty. 즉 사용자가 명시적으로 "이번 세션을 마무리한다"는 신호를 보낸 시점에만 ~1–2s commit 비용이 발생하며, 이는 의도된 동작입니다.
@@ -147,15 +147,17 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activation(SA) 감쇠율이 다릅니다:
 
-| Layer | 이름               | 디렉토리       | SA Decay | 용도                                              |
-| ----- | ------------------ | -------------- | -------- | ------------------------------------------------- |
-| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변                   |
-| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술                              |
-| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료                           |
-| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트                   |
-| L5    | Context            | `05_Context/`  | 0.95     | 미분류 인박스(buffer), 교차 레이어 허브(boundary) |
+| Layer | 이름               | 디렉토리       | SA Decay | 용도                            |
+| ----- | ------------------ | -------------- | -------- | ------------------------------- |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변 |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술            |
+| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료         |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트 |
+| L5    | Context            | `05_Context/`  | 0.45     | 평면 미분류 인박스 (분류 대기)  |
 
-**감쇠율이 낮을수록 더 강하게 지속됩니다.** L1 문서는 검색 시 강하게 활성화되고 오래 유지됩니다. L4 문서는 강화되지 않으면 빠르게 사라집니다.
+**감쇠 인자는 노드가 내보내는 활성량에 곱해지는 값(`A[j] = A[i] · W[i,j] · d`)이라 클수록 넓게 퍼집니다.** 축은 레이어 번호에 단조롭지 않고 U자형입니다 — 정체성 코어(0.5)와 미분류 인박스(0.45)는 좁게 머물고, 외부 지식과 행동 맥락(0.8~0.9)이 활성을 바깥으로 실어 나릅니다. `hub: true` 문서는 레이어 값을 0.95로 덮어씁니다 — 다리는 넓게 퍼져야 하기 때문입니다.
+
+**교차 레이어 허브는 레이어가 아니라 속성입니다.** L1~L4 어느 문서든 `hub: true` + `hub_kind` + `purpose`를 선언할 수 있고, 레이어와 무관하게 태그가 겹치는 모든 노드로 `CROSS_LAYER` 엣지를 만듭니다.
 
 **링크 방향 규칙:** 링크는 기본적으로 하향(L1→L2→L3→L4)합니다. 상향 링크(예: L3→L1)는 명시적 사유가 필요하며, `organize` 실행 시 플래그됩니다.
 

@@ -220,10 +220,10 @@ describe('handleCaptureInsight', () => {
     expect(appendArgs[2]).toBe('unknown');
   });
 
-  it('L5 layer는 buffer 서브레이어로 위임된다', async () => {
+  it('L5 layer는 buffer_type=conversation 으로 위임된다 — 서브레이어 없이', async () => {
     mockHandleMaencofCreate.mockResolvedValue({
       success: true,
-      path: '05_Context/buffer/test.md',
+      path: '05_Context/test.md',
       message: 'Created',
     });
 
@@ -239,7 +239,8 @@ describe('handleCaptureInsight', () => {
     );
 
     const callArgs = mockHandleMaencofCreate.mock.calls[0];
-    expect(callArgs[1].sub_layer).toBe('buffer');
+    expect(callArgs[1].sub_layer).toBeUndefined();
+    expect(callArgs[1].buffer_type).toBe('conversation');
     expect(mockIncrementInsightStats).toHaveBeenCalledWith('/vault', 5);
     const appendArgs = mockAppendPendingCapture.mock.calls[0];
     expect(appendArgs[1].layer).toBe(5);

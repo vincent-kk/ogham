@@ -28,7 +28,7 @@ Refine should walk these dimensions in order. Skip a dimension if the user's ini
 Probe for:
 
 - **Layer scope**: L1 / L2 / L3 / L4 / L5 / all (multi-select OK)
-- **Sub-layer** for L3 (relational, structural, topical) or L5 (buffer, boundary) — if relevant
+- **Sub-layer** for L3 (relational, structural, topical) — if relevant
 - **Time field**: `frontmatter.created`, `frontmatter.updated`, `frontmatter.expires`, file mtime
 - **Entity filter**: by tag, by `mentioned_persons`, by `person_ref`, by path glob
 - **Body content**: wikilinks (graph data), headings, task checkboxes, frontmatter custom fields

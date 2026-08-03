@@ -2,7 +2,7 @@
 
 ## Purpose
 
-maencof 플러그인 소스 루트. 5-Layer Knowledge Model v2 기반 개인 지식 공간 관리자.
+maencof 플러그인 소스 루트. 5-Layer Knowledge Model v3 기반 개인 지식 공간 관리자.
 
 ## Structure
 

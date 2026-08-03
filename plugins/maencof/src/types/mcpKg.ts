@@ -95,7 +95,7 @@ export interface KgNavigateResult {
   siblings: KnowledgeNode[];
   /** 상한 적용 전 형제 총수 — siblings.length 보다 크면 목록이 절단된 것 */
   siblingTotalCount?: number;
-  /** CROSS_LAYER 연결 노드 (L5-Boundary 경유) */
+  /** CROSS_LAYER 연결 노드 (허브 경유) */
   crossLayer?: KnowledgeNode[];
   /** DOMAIN 연결 노드 (동일 domain 태그) */
   domain?: KnowledgeNode[];

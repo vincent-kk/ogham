@@ -32,6 +32,7 @@ export interface VaultVersionInfo {
 /** 마이그레이션 개별 작업 */
 export type MigrationOp =
   | { type: 'create_dir'; path: string }
+  | { type: 'remove_dir'; path: string }
   | { type: 'move_file'; from: string; to: string }
   | {
       type: 'update_frontmatter';
@@ -86,10 +87,7 @@ export interface MigrationResult {
 
 /** 데이터 소스 타입 */
 export type DataSourceType =
-  | 'new-vault'
-  | 'existing-markdown'
-  | 'obsidian-vault'
-  | 'notion-export';
+  'new-vault' | 'existing-markdown' | 'obsidian-vault' | 'notion-export';
 
 /** 데이터 소스 설정 */
 export interface DataSourceConfig {

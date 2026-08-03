@@ -1,7 +1,7 @@
 /**
  * @file maencofMoveSubdirectory.test.ts
  * @description handleMaencofMove target_subdirectory 유닛 테스트 —
- *   서브디렉토리 배치, 레이어 내 재배치, traversal/깊이 거부, buffer 승격.
+ *   서브디렉토리 배치, 레이어 내 재배치, traversal/깊이 거부, L5 승격.
  */
 import {
   access,
@@ -34,9 +34,9 @@ created: 2026-06-01
 updated: 2026-06-01
 tags: [spaced-repetition]
 layer: 5
-sub_layer: buffer
-buffer_type: inbox
-promotion_target: 3
+buffer_type: snippet
+promotion_target: topical
+source_context: "세션 메모"
 ---
 # Fragment
 
@@ -49,14 +49,14 @@ describe('move target_subdirectory', () => {
   beforeEach(async () => {
     vault = await mkdtemp(join(tmpdir(), 'maencof-move-subdir-'));
     await mkdir(join(vault, '04_Action'), { recursive: true });
-    await mkdir(join(vault, '05_Context/buffer'), { recursive: true });
+    await mkdir(join(vault, '05_Context'), { recursive: true });
     await writeFile(
       join(vault, '04_Action/alpha-note.md'),
       ACTION_NOTE,
       'utf-8',
     );
     await writeFile(
-      join(vault, '05_Context/buffer/fragment.md'),
+      join(vault, '05_Context/fragment.md'),
       BUFFER_FRAGMENT,
       'utf-8',
     );
@@ -130,9 +130,9 @@ describe('move target_subdirectory', () => {
     expect(result.message).toContain('Subdirectory depth exceeds limit');
   });
 
-  it('buffer 승격 시 서브디렉토리 배치와 buffer 필드 제거가 함께 동작한다', async () => {
+  it('L5 승격 시 서브디렉토리 배치와 L5 전용 필드 제거가 함께 동작한다', async () => {
     const result = await handleMaencofMove(vault, {
-      path: '05_Context/buffer/fragment.md',
+      path: '05_Context/fragment.md',
       target_layer: 3,
       target_sub_layer: 'topical',
       target_subdirectory: 'clips',
@@ -144,5 +144,6 @@ describe('move target_subdirectory', () => {
     expect(moved).toContain('layer: 3');
     expect(moved).not.toContain('buffer_type');
     expect(moved).not.toContain('promotion_target');
+    expect(moved).not.toContain('source_context');
   });
 });

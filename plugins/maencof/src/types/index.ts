@@ -9,15 +9,15 @@ export type {
   LinkDirection,
   AutonomyLevel,
   SourceType,
-  L3SubLayer,
-  L5SubLayer,
   SubLayer,
+  BufferType,
+  PromotionTarget,
+  HubKind,
 } from './common.js';
 export { Layer, toNodeId } from './common.js';
 export {
   LAYER_DIR,
   L3_SUBDIR,
-  L5_SUBDIR,
   EDGE_TYPE,
   EXPECTED_ARCHITECTURE_VERSION,
   layerFromDir,

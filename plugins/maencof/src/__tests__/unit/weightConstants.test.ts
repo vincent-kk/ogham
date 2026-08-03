@@ -18,8 +18,8 @@ describe('LAYER_DECAY_FACTORS', () => {
     expect(LAYER_DECAY_FACTORS[Layer.L1_CORE]).toBe(0.5);
   });
 
-  it('Layer 5 감쇠 인자는 0.95이다', () => {
-    expect(LAYER_DECAY_FACTORS[Layer.L5_CONTEXT]).toBe(0.95);
+  it('Layer 5 감쇠 인자는 0.45이다 — 미분류 잡음의 격리', () => {
+    expect(LAYER_DECAY_FACTORS[Layer.L5_CONTEXT]).toBe(0.45);
   });
 
   it('Layer 2 감쇠 인자는 0.7이다', () => {
@@ -34,8 +34,8 @@ describe('LAYER_DECAY_FACTORS', () => {
     expect(LAYER_DECAY_FACTORS[Layer.L4_ACTION]).toBe(0.9);
   });
 
-  it('Layer 5 감쇠 인자는 0.95이다', () => {
-    expect(LAYER_DECAY_FACTORS[Layer.L5_CONTEXT]).toBe(0.95);
+  it('Layer 5 감쇠 인자는 0.45이다 — 미분류 잡음의 격리', () => {
+    expect(LAYER_DECAY_FACTORS[Layer.L5_CONTEXT]).toBe(0.45);
   });
 });
 
@@ -45,7 +45,7 @@ describe('getLayerDecay', () => {
     expect(getLayerDecay(Layer.L2_DERIVED)).toBe(0.7);
     expect(getLayerDecay(Layer.L3_EXTERNAL)).toBe(0.8);
     expect(getLayerDecay(Layer.L4_ACTION)).toBe(0.9);
-    expect(getLayerDecay(Layer.L5_CONTEXT)).toBe(0.95);
+    expect(getLayerDecay(Layer.L5_CONTEXT)).toBe(0.45);
   });
 });
 

@@ -2,10 +2,10 @@
   "queries": 7,
   "engines": {
     "qga-context": {
-      "ndcg10": 0.9427,
-      "recall10": 0.9643,
+      "ndcg10": 0.9407,
+      "recall10": 0.9714,
       "mrr": 1,
-      "precisionR": 0.7381
+      "precisionR": 0.7524
     }
   }
 }

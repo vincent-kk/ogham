@@ -84,7 +84,7 @@ Also create the Layer directories and sub-layer subdirectories:
 - `02_Derived/`
 - `03_External/`, `03_External/relational/`, `03_External/structural/`, `03_External/topical/`
 - `04_Action/`
-- `05_Context/`, `05_Context/buffer/`, `05_Context/boundary/`
+- `05_Context/` (flat — Layer 5 has no sub-directories)
 
 Delegate to the `identity-guardian` agent to verify Frontmatter rule compliance for the generated L1 documents via read.
 
@@ -160,7 +160,7 @@ setup skill starts
 ## Acceptance Criteria
 
 - 4 documents in `01_Core/` + `trust-level.json` created.
-- `02_Derived/`, `03_External/` (with `relational/`, `structural/`, `topical/`), `04_Action/`, `05_Context/` (with `buffer/`, `boundary/`) directories created.
+- `02_Derived/`, `03_External/` (with `relational/`, `structural/`, `topical/`), `04_Action/`, `05_Context/` (flat) directories created.
 - Progressive Autonomy Level 0 set.
 - Stage 2 discovery covers all 5 CoreIdentitySchema fields (Name, Interest, Values, Boundary, Style).
 - Companion identity synthesized and saved, or explicitly skipped.

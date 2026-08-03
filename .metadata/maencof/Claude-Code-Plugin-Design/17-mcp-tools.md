@@ -15,7 +15,9 @@ tags:
 layer: design-area-4
 ---
 
-# MCP 도구 명세 — CRUD 5개 + 검색 6개 + 캡처 3개 + CLAUDE.md 3개 + 동반자 1개 + 운영 3개 (총 21개)
+# MCP 도구 명세 — CRUD 5개 + 검색 6개 + 캡처 2개 + CLAUDE.md 3개 + 동반자 1개 + 운영 3개 (총 20개)
+
+> 이 표의 합계와 실제 등록 수(21)가 어긋나면 정본은 `src/mcp/server/registrations/DETAIL.md` 의 등록 표다 — 이 문서는 카테고리 설명이고, 등록부가 서버의 실제 도구 표면이다.
 
 ## 개요
 
@@ -65,7 +67,7 @@ maencof의 MCP 도구는 지식 트리 CRUD, 그래프 검색, 인사이트 캡�
 | threshold    | number   | 0.1    | 발화 임계값                                                               |
 | max_hops     | number   | 5      | 최대 홉 수                                                                |
 | layer_filter | number[] | —      | Layer 필터 (1–5)                                                          |
-| sub_layer    | enum     | —      | 서브레이어 필터 (L3: relational/structural/topical · L5: buffer/boundary) |
+| sub_layer    | enum     | —      | 서브레이어 필터 (L3 전용: relational/structural/topical)                  |
 
 ### kg_context 파라미터
 
@@ -90,12 +92,11 @@ maencof의 MCP 도구는 지식 트리 CRUD, 그래프 검색, 인사이트 캡�
 
 ---
 
-## 3. 캡처 도구 (3)
+## 3. 캡처 도구 (2)
 
 | 도구                       | 설명                                                               | 소비자                                             |
 | -------------------------- | ------------------------------------------------------------------ | -------------------------------------------------- |
 | `capture_insight`          | InsightCategoryFilter 기반 인사이트 캡처                           | 대화 규율(Socratic Elenchus, think, insight skill) |
-| `boundary_create`          | L5-Boundary 전용 문서 생성 경로 (교차 레이어 커넥터)               | `organize`, `knowledge-connector`                  |
 | `capture_personal_context` | 사용자 상태/최근 동향 upsert·해소 ([27](./27-personal-context.md)) | 컴페니언(대화 중 조용히), `personal-status` 스킬   |
 
 ### capture_insight 파라미터
@@ -114,14 +115,6 @@ maencof의 MCP 도구는 지식 트리 CRUD, 그래프 검색, 인사이트 캡�
 - `principle`: 원리/장기 보존 전제. 기본 `accept`. Socratic 또는 think에서 확정된 결론.
 - `refuted_premise`: Socratic Phase 2.5.b에서 기각된 전제. 기본 `reject`.
 - `ephemeral_candidate`: ToT 중간에서 버려진 후보. 기본 `reject`.
-
-### boundary_create 파라미터
-
-| 파라미터      | 타입   | 기본값 | 설명                                            |
-| ------------- | ------ | ------ | ----------------------------------------------- |
-| title         | string | —      | 경계 객체(Boundary) 제목                        |
-| source_layers | array  | —      | 연결 대상 L3 서브레이어 목록 (예: ["3A", "3C"]) |
-| content       | string | —      | 경계 객체 본문                                  |
 
 ### capture_personal_context 파라미터
 
@@ -204,5 +197,5 @@ detail보다 짧지 않은 변경은 거부된다. 파일 직접 편집은 금�
 ```
 
 Socratic Elenchus Phase 2.5.b에서 기각된 전제는 `category=refuted_premise`로 캡처 시도되며,
-기본 정책에서는 거부된다. 사용자가 명시적으로 필터를 열었을 때만 L5-Buffer에 보존된다.
+기본 정책에서는 거부된다. 사용자가 명시적으로 필터를 열었을 때만 Layer 5에 보존된다.
 상세: [18-skills.md §refine](./18-skills.md) | [13-memory-lifecycle.md §5](./13-memory-lifecycle.md).

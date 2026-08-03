@@ -2,7 +2,7 @@
  * @file executeMigration.ts
  * @description WAL(Write-Ahead Log) 기반으로 마이그레이션을 원자적으로 실행한다.
  */
-import { mkdirSync, renameSync } from 'node:fs';
+import { mkdirSync, renameSync, rmdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import type {
@@ -76,6 +76,10 @@ function executeOp(op: MigrationOp, _vaultPath: string): void {
   switch (op.type) {
     case 'create_dir':
       mkdirSync(op.path, { recursive: true });
+      break;
+    case 'remove_dir':
+      // 비어 있을 때만 지운다 — 남은 문서가 있으면 rmdir 이 실패하고 WAL 이 되감는다
+      rmdirSync(op.path);
       break;
     case 'move_file':
       mkdirSync(dirname(op.to), { recursive: true });

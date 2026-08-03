@@ -116,7 +116,7 @@ mcp__plugin_maencof_tools__kg_navigate(
 )
 ```
 
-Display inbound/outbound/parent/child/sibling nodes and ask whether to continue exploring. When the node has CROSS_LAYER edges (via L5-Boundary), highlight them separately as cross-layer connections.
+Display inbound/outbound/parent/child/sibling nodes and ask whether to continue exploring. When the node has CROSS_LAYER edges (created by hub documents), highlight them separately as cross-layer connections.
 
 When `--detail` is specified or the user requests full content, read the document body:
 
@@ -157,7 +157,7 @@ If the user selects a neighbor node as a new seed, re-run from Step 3. After 3 r
 | `seed`             | none (input requested) | Exploration starting point (path or keyword)                                                                                                                                                         |
 | `--hops`           | 5                      | Maximum hop count (1-10)                                                                                                                                                                             |
 | `--layer`          | all                    | Layer filter (1-5, multiple allowed)                                                                                                                                                                 |
-| `--sub-layer`      | none                   | Sub-layer filter: relational/structural/topical (L3), buffer/boundary (L5)                                                                                                                           |
+| `--sub-layer`      | none                   | Sub-layer filter: relational/structural/topical (L3 only)                                                                                                                           |
 | `--detail`         | false                  | Include document body excerpts in results                                                                                                                                                            |
 | `--for-brainstorm` | false                  | Emit 5-8 candidate seeds (title + path + 1-line summary) as ephemeral output for handoff to `think --mode divergent`. Skips Step 5 deep-expansion and Step 6 interactive expansion. No vault writes. |
 

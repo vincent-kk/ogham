@@ -7,7 +7,7 @@
 - 의존 방향은 한쪽이다. `core/` 는 `mcp/` · `hooks/` 에 의존하지 않고, `types/` 는 zod 외 외부 의존성을 갖지 않는다.
 - `version.ts` 는 빌드 시 `scripts/injectVersion.mjs` 가 생성한다. 직접 수정하지 않는다.
 - `bridge/` 산출물은 esbuild 가 만든다. 소스는 `src/hooks/<event>/<event>.entry.ts` 와 `src/mcp/serverEntry/serverEntry.ts` 이며 산출물을 손대지 않는다.
-- vault 아키텍처는 v2(L3 sublayer + L5 buffer/boundary)를 기대한다. 기대 버전과 다른 vault 는 `core/architectureMigrator` 가 v1→v2 로 마이그레이션한다.
+- vault 아키텍처는 v3(L3 sublayer + 평면 L5 임시 수용소 + 레이어 직교 hub 속성)를 기대한다. 기대 버전과 다른 vault 는 `core/architectureMigrator` 가 마이그레이션한다.
 - 세션 마감은 MCP 서버 수명주기가 소유한다. 매 턴 UserPromptSubmit `session-touch` 가 `lastActivityAt` · `usageSnapshot` 을 기록하고, 서버 shutdown(동기 정밀)과 다음 부팅 `bootSweep`(보장)이 `sweepStaleSessions` 로 레코드를 마감하며 workIndex 당일 digest 를 `buildDailyDigest` 로 재생성한다.
 - 세션 종료 기록의 주소는 sessionStore 하나다. `.maencof-meta/sessions/*.md` 나 dailynote `.md` 에는 기록하지 않는다.
 
@@ -15,7 +15,7 @@
 
 ### Entry point (`index.ts`)
 
-- **Types** — `types/index.js` 의 런타임 값과 타입을 이름으로 재노출한다. 스키마(`CompanionIdentitySchema` · `DialogueConfigSchema` · `FrontmatterSchema` · `PersonSchema` 등), 레이어 좌표(`Layer` · `LAYER_DIR` · `L3_SUBDIR` · `L5_SUBDIR` · `dirFromLayer` · `layerFromDir` · `isLayer1Path`), `EDGE_TYPE`, `EXPECTED_ARCHITECTURE_VERSION`, 그리고 도구·훅 입출력 타입 전체.
+- **Types** — `types/index.js` 의 런타임 값과 타입을 이름으로 재노출한다. 스키마(`CompanionIdentitySchema` · `DialogueConfigSchema` · `FrontmatterSchema` · `PersonSchema` 등), 레이어 좌표(`Layer` · `LAYER_DIR` · `L3_SUBDIR` · `dirFromLayer` · `layerFromDir` · `isLayer1Path`), `EDGE_TYPE`, `EXPECTED_ARCHITECTURE_VERSION`, 그리고 도구·훅 입출력 타입 전체.
 - **Version** — `VERSION` (생성 상수).
 - **Core** — `vaultScanner`(`scanVault` · `buildSnapshot` · `computeChangeSet` · `scanIncrementalChanges` · `readVaultFile`), `documentParser`(`parseYamlFrontmatter` · `extractFrontmatter` · `extractLinks` · `parseDocument` · `buildKnowledgeNode` · `parseDocumentFromFile`), `graphBuilder`(`buildGraph` · `buildAdjacencyList` · `detectOrphans`), `dagConverter`(`convertToDAG` · `applyLayerDirectionality`), `weightCalculator`(`calculateWeights` · `computePageRank` · `normalizeWeights` · `getLayerDecay` · `LAYER_DECAY_FACTORS`), `spreadingActivation`(`runAccumulativeActivation`), `communityDetector`(`CommunityDetector` · `detectCommunities`), `claudeMdMerger`(`mergeMaencofSection` · `readMaencofSection` · `removeMaencofSection` · `ClaudeMdMerger` · 마커 2종), `contentDedup`(`deduplicateContent`).
 - **Search** — `queryEngine`(`query` · `resolveSeedNodes` · `deriveContextSeeds` · `QueryEngine` · `invalidateQueryCache`), `contextAssembler`(`assembleContext` · `extractBestSnippet` · `ContextAssembler`).

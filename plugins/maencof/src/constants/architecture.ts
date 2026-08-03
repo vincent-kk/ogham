@@ -1,5 +1,5 @@
 import { Layer } from '../types/common.js';
-import type { EdgeType, L3SubLayer, L5SubLayer } from '../types/common.js';
+import type { EdgeType, SubLayer } from '../types/common.js';
 
 /** 각 레이어의 디렉토리 이름 매핑 */
 export const LAYER_DIR: Record<Layer, string> = {
@@ -10,21 +10,18 @@ export const LAYER_DIR: Record<Layer, string> = {
   [Layer.L5_CONTEXT]: '05_Context',
 };
 
-/** L3 서브레이어 → 디렉토리 이름 매핑 */
-export const L3_SUBDIR: Record<L3SubLayer, string> = {
+/**
+ * L3 서브레이어 → 디렉토리 이름 매핑.
+ * L5 는 서브레이어 없는 평면 구조라 대응하는 맵이 없다 — `05_Context/` 가 곧 자리다.
+ */
+export const L3_SUBDIR: Record<SubLayer, string> = {
   relational: 'relational',
   structural: 'structural',
   topical: 'topical',
 };
 
-/** L5 서브레이어 → 디렉토리 이름 매핑 */
-export const L5_SUBDIR: Record<L5SubLayer, string> = {
-  buffer: 'buffer',
-  boundary: 'boundary',
-};
-
-/** 아키텍처 버전 (v2: L3 서브레이어 + L5 Buffer/Boundary) */
-export const EXPECTED_ARCHITECTURE_VERSION = '2.0.0';
+/** 아키텍처 버전 (v3: L5 평면 임시 수용소 + 레이어 직교 hub 속성) */
+export const EXPECTED_ARCHITECTURE_VERSION = '3.0.0';
 
 /** 그래프 엣지 유형 상수 */
 export const EDGE_TYPE = {

@@ -47,8 +47,9 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
 
   // Step 2.0b: sub-layer 확장 필드 전파
   node.subLayer = fm.sub_layer ?? inferSubLayerFromPath(doc.relativePath);
-  if (fm.connected_layers) node.connectedLayers = fm.connected_layers;
-  if (fm.boundary_type) node.boundaryType = fm.boundary_type;
+  if (fm.hub) node.hub = fm.hub;
+  if (fm.hub_kind) node.hubKind = fm.hub_kind;
+  if (fm.purpose) node.purpose = fm.purpose;
   if (fm.mentioned_persons) node.mentioned_persons = fm.mentioned_persons;
 
   return { success: true, node };

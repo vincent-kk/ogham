@@ -1,6 +1,5 @@
+/** L3 서브레이어 이름 집합 — 서브레이어를 갖는 레이어는 L3 뿐이다. */
 export const L3_SUB_LAYERS = new Set(['relational', 'structural', 'topical']);
-
-export const L5_SUB_LAYERS = new Set(['buffer', 'boundary']);
 
 export const SYMMETRIC_RELATIONSHIPS = [
   'friend',

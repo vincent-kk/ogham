@@ -114,7 +114,7 @@ GET /api/search?mode=backlinks&path=02_Derived/foo.md
      }
 ```
 
-The response shape is `{ mode: 'backlinks'; inbound: SearchHit[]; outbound: SearchHit[]; crossLayer: KnowledgeEdge[] }` — frontend consumers MUST handle this branch separately from the unified `SearchResponse`. Cross-layer edges (via L5-Boundary) returned separately so UI can highlight them.
+The response shape is `{ mode: 'backlinks'; inbound: SearchHit[]; outbound: SearchHit[]; crossLayer: KnowledgeEdge[] }` — frontend consumers MUST handle this branch separately from the unified `SearchResponse`. Cross-layer edges (created by hub documents) returned separately so UI can highlight them.
 
 ---
 

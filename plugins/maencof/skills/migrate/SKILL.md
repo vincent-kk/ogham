@@ -1,9 +1,9 @@
 ---
 name: migrate
 user_invocable: true
-description: '[maencof:migrate] Upgrades the vault from v1 flat 5-Layer layout to v2 with L3 sub-layers and L5 Buffer/Boundary separation, safely preserving and relocating all existing documents.'
+description: '[maencof:migrate] Upgrades the vault architecture to v3 — L3 sub-layers, a flat Layer 5 buffer, and cross-layer hubs as a frontmatter attribute — safely preserving and relocating all existing documents.'
 argument-hint: '[--dry-run] [--rollback]'
-version: '1.0.0'
+version: '2.0.0'
 complexity: medium
 context_layers: []
 orchestrator: migrate skill
@@ -12,13 +12,16 @@ plugin: maencof
 
 # migrate — Vault Architecture Migration
 
-Upgrades the vault directory structure from v1 (flat 5-Layer) to v2 (L3 sub-layers + L5 Buffer/Boundary).
+Upgrades the vault directory structure to v3: L3 sub-layers, a flat Layer 5, and cross-layer hubs carried as a frontmatter attribute instead of a sub-layer.
+
+Two upgrade paths run through the same plan — a v1 vault (flat 5-Layer) needs the L3 split, and a v2 vault additionally needs Layer 5 flattened and its boundary documents converted to hubs. The plan emits only the operations the vault actually needs, so running it on a partially-migrated vault is safe.
 
 ## When to Use This Skill
 
 - After updating the maencof plugin when session-start shows an architecture migration advisory
 - To upgrade from flat `03_External/` to `03_External/{relational,structural,topical}/`
-- To upgrade from flat `05_Context/` to `05_Context/{buffer,boundary}/`
+- To flatten `05_Context/{buffer,boundary}/` back into `05_Context/` (v2 → v3; Layer 5 has no sub-layers)
+- To convert `05_Context/boundary/` MOC documents into L3-structural hubs (`hub: true`)
 
 ## Prerequisites
 
@@ -39,16 +42,16 @@ Check the current architecture version:
 
 - Read `.maencof-meta/version.json` → `architecture_version` field
 - If absent, assume `1.0.0`
-- Compare with expected version (`2.0.0`)
+- Compare with the plugin's expected version — currently `3.0.0`. The canonical value is `EXPECTED_ARCHITECTURE_VERSION` in `src/constants/architecture.ts`; this document is a copy and the constant wins if they disagree.
 - If already up to date: inform user and exit
 
 ### Step 2 — Plan Preview
 
 Generate and display a migration plan WITHOUT executing:
 
-- List all directories to create
-- List all files to move (with L3 classification: relational/structural/topical)
-- Show frontmatter fields to update (`sub_layer`)
+- List all directories to create (L3 sub-layers) and to remove (emptied `05_Context/{buffer,boundary}/`)
+- List all files to move — L3 documents with their classification (relational/structural/topical), Layer 5 buffer documents flattening to `05_Context/`, and boundary documents moving to `03_External/structural/`
+- Show frontmatter fields to update: `sub_layer` for classified L3 documents; `sub_layer` removal for flattened Layer 5 documents; and for each boundary document the conversion to `layer: 3` + `sub_layer: structural` + `hub: true` + `hub_kind` + `purpose`, dropping the retired `boundary_type` and `connected_layers`
 - Display summary counts
 
 Present the plan to the user for review.
@@ -76,10 +79,12 @@ Wait for the user's answer before taking any action.
 
 Execute the plan using WAL (Write-Ahead Log):
 
-1. Create subdirectories under `03_External/` and `05_Context/`
-2. Move L3 documents to classified subdirectories
-3. Update frontmatter `sub_layer` field for moved documents
-4. Update `architecture_version` in `version.json`
+1. Create missing L3 subdirectories under `03_External/` (Layer 5 is flat — it gets none)
+2. Move loose `03_External/` documents into their classified subdirectory and set `sub_layer`
+3. Flatten `05_Context/buffer/` documents into `05_Context/` and remove their `sub_layer`
+4. Move `05_Context/boundary/` documents into `03_External/structural/` and convert them to hubs
+5. Remove the emptied `05_Context/{buffer,boundary}/` directories
+6. Update `architecture_version` in `version.json`
 
 Each operation is recorded in the WAL before execution.
 
@@ -101,13 +106,27 @@ Documents in `03_External/` are classified by:
 3. Tag heuristics (person/people/friend/colleague/mentor → relational; company/organization/team/community → structural)
 4. Default → **topical**
 
+## Layer 5 and Hub Conversion (v2 → v3)
+
+Layer 5 is the flat unclassified inbox — it has no sub-layers. Cross-layer hubs are not a layer at all but a frontmatter attribute any L1–L4 document can carry, so v2's `boundary` sub-layer has no v3 equivalent and its documents move to where the knowledge belongs.
+
+| v2 | v3 |
+| --- | --- |
+| `05_Context/buffer/x.md`, `sub_layer: buffer` | `05_Context/x.md`, no `sub_layer` |
+| `05_Context/boundary/y.md`, `sub_layer: boundary` | `03_External/structural/y.md`, `sub_layer: structural`, `hub: true` |
+| `boundary_type: project_moc` | `hub_kind: project_moc` (unknown values converge to `cross_domain`) |
+| `connected_layers: [2, 3]` | removed — hubs select targets by tag overlap, not by a layer list |
+| — | `purpose` (required when `hub: true`; filled from `title` when absent) |
+
+`purpose` is filled rather than left empty on purpose: the v3 schema rejects `hub: true` without it, so a converted document that arrived without one would be unreadable the moment migration finished.
+
 ## Rollback
 
 If migration fails or produces unexpected results:
 
 - The WAL file at `.maencof-meta/migration-wal.json` records all operations
 - Completed operations can be reversed in order
-- Rollback restores files to their original locations and removes added frontmatter fields
+- Rollback restores files to their original locations, restores the previous frontmatter values, and recreates any directory the migration removed
 
 ## Options
 

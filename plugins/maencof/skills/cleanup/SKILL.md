@@ -48,9 +48,9 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 > See **reference.md § Document Mode** for detailed safety check flows and report format.
 
-### buffer-cleanup mode — L5-Buffer Stale Item Cleanup
+### buffer-cleanup mode — Layer 5 Stale Item Cleanup
 
-1. **Scan** `05_Context/buffer/` for documents older than `--max-age` days (default: 30)
+1. **Scan** `05_Context/` for documents older than `--max-age` days (default: 30)
 2. **List** stale buffer items with creation date, tags, and connection count
 3. **Recommend action** per item: promote (to L2/L3 with sub-layer), archive, or delete
 4. **Execute** after user confirmation — uses `mcp__plugin_maencof_tools__move` (promote) or `mcp__plugin_maencof_tools__delete` (delete). With `--dry-run`, skip execution and report the planned actions only.

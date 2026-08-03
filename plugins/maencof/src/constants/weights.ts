@@ -1,21 +1,32 @@
 import { Layer } from '../types/common.js';
 import type { SubLayer } from '../types/common.js';
 
+/**
+ * 레이어별 SA 감쇠 인자 — 확산식 `A[j] = A[i] · W[i,j] · d` 의 `d` 다.
+ * 노드가 내보내는 활성량에 **곱해지므로 값이 클수록 넓게 퍼진다**(감쇠되는 양이 아니다).
+ * 축은 레이어 번호에 단조롭지 않고 U자형이다 — 정체성 코어와 미분류 임시 수용소라는
+ * 양 극단이 좁게, 중간의 실질 지식이 넓게 퍼진다.
+ */
 export const LAYER_DECAY_FACTORS: Record<Layer, number> = {
   [Layer.L1_CORE]: 0.5,
   [Layer.L2_DERIVED]: 0.7,
   [Layer.L3_EXTERNAL]: 0.8,
   [Layer.L4_ACTION]: 0.9,
-  [Layer.L5_CONTEXT]: 0.95,
+  [Layer.L5_CONTEXT]: 0.45,
 };
 
+/** L3 서브레이어별 감쇠 인자 — 방향은 LAYER_DECAY_FACTORS 와 같다. */
 export const SUBLAYER_DECAY_FACTORS: Record<SubLayer, number> = {
   relational: 0.75,
   structural: 0.8,
   topical: 0.85,
-  buffer: 0.95,
-  boundary: 0.6,
 };
+
+/**
+ * 허브 문서의 감쇠 인자 — 레이어·서브레이어 값을 덮어쓴다.
+ * 다리 역할을 하는 노드가 전파를 막으면 다리가 아니므로 최댓값을 준다.
+ */
+export const HUB_DECAY_FACTOR = 0.95;
 
 export const CYCLE_WEIGHT = 0.1;
 

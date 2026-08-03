@@ -25,15 +25,18 @@ import { buildEvalGraph } from './fixtureVault.js';
 import { liveSearchFn } from './liveSearchFn.js';
 import { measureSearchFn } from './measureSearchFn.js';
 
+/** 스윕 대상 — QgaTuning 의 수치 축만. `decayOf` 는 decaySweep 러너가 소유한다. */
+type NumericTuning = Omit<Required<QgaTuning>, 'decayOf'>;
+
 /** 그리드 축 — 기본값을 반드시 포함해야 기본값 순위 비교가 성립한다 */
-const GRID: Record<keyof QgaTuning, number[]> = {
+const GRID: Record<keyof NumericTuning, number[]> = {
   iterations: [2, 3, 4],
   updateThreshold: [0.001, 0.005, 0.01, 0.02],
   gateFloor: [0.15, 0.3, 0.5],
   alphaBase: [0.85, 1.0],
 };
 
-const DEFAULT_TUNING: Required<QgaTuning> = {
+const DEFAULT_TUNING: NumericTuning = {
   iterations: QGA_ITERATIONS,
   updateThreshold: QGA_UPDATE_THRESHOLD,
   gateFloor: QGA_GATE_FLOOR,
@@ -44,11 +47,11 @@ const DEFAULT_TUNING: Required<QgaTuning> = {
 const SWEEP_SIGNIFICANCE = 0.005;
 
 interface SweepEntry {
-  tuning: Required<QgaTuning>;
+  tuning: NumericTuning;
   metrics: EngineMetrics;
 }
 
-function* gridCombos(): Generator<Required<QgaTuning>> {
+function* gridCombos(): Generator<NumericTuning> {
   for (const iterations of GRID.iterations)
     for (const updateThreshold of GRID.updateThreshold)
       for (const gateFloor of GRID.gateFloor)
@@ -60,7 +63,7 @@ function rankKey(m: EngineMetrics): number {
   return m.ndcg10 * 1e8 + m.recall10 * 1e4 + m.mrr;
 }
 
-function sameTuning(a: Required<QgaTuning>, b: Required<QgaTuning>): boolean {
+function sameTuning(a: NumericTuning, b: NumericTuning): boolean {
   return (
     a.iterations === b.iterations &&
     a.updateThreshold === b.updateThreshold &&

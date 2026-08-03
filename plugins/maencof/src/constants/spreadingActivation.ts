@@ -2,14 +2,22 @@ import type { EdgeType } from '../types/common.js';
 
 import { LINK_WEIGHT_FLOOR } from './weights.js';
 
-/** 엣지 타입별 SA 활성화 멀티플라이어 (확산 시 가중치 보정). */
+/**
+ * 엣지 타입별 SA 활성화 멀티플라이어 (확산 시 가중치 보정).
+ *
+ * 축은 "누가 이 엣지를 주장했는가"다. 사용자가 직접 쓴 `LINK` 가 최강이고, 디렉토리
+ * 계층(`PARENT_OF`/`CHILD_OF`)과 frontmatter 가 명시한 `RELATIONSHIP` 이 뒤를 잇는다.
+ * `CROSS_LAYER` 와 `DOMAIN` 은 태그 겹침에서 기계가 추론한 엣지라 그 아래에 온다 —
+ * 허브가 만드는 다리는 강해야 하지만, 저자가 쓴 링크만큼 강하면 허브가 자기가 색인한
+ * 본문 문서를 밀어낸다(`decaySweep.eval.test.ts` 계측).
+ */
 export const EDGE_TYPE_MULTIPLIER: Record<EdgeType, number> = {
   LINK: 1.0,
   PARENT_OF: 0.8,
   CHILD_OF: 0.8,
   SIBLING: 0.2,
   RELATIONSHIP: 0.7,
-  CROSS_LAYER: 0.6,
+  CROSS_LAYER: 0.45,
   DOMAIN: 0.3,
 };
 

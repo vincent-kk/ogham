@@ -25,7 +25,7 @@ maencof은 4개 계층(Hook, MCP 도구, Skill, Agent)으로 구성된다.
 
 - **SessionStart**:
   - 지식 트리 점검, 인덱스 로드, WAL 복구, Lazy Scheduling
-  - 아키텍처 버전 체크 (L3 sublayer, L5 buffer/boundary 지원 여부)
+  - 아키텍처 버전 체크 (L3 sublayer, 평면 L5, 레이어 직교 hub 속성 지원 여부)
   - Insight 자동 메타프롬프트 빌드 + pending 캡처 알림
   - **Personal-context injection**: companion 존재 시 `.maencof-meta/personal-context.json`의 states/topics를 캡처 지침과 함께 `<personal-context>` 블록으로 주입 — companion identity 직후, L1 앞 ([27 §5.2](./27-personal-context.md))
   - **Meta-skill injection**: `src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md` 본문을 `<maencof-meta-skill>` XML 태그로 감싸 `hookSpecificOutput.additionalContext`로 system context에 주입 (`isDialogueInjectionDisabled()` 확인)
@@ -51,7 +51,7 @@ maencof은 4개 계층(Hook, MCP 도구, Skill, Agent)으로 구성된다.
 ### MCP 도구 — 지식 그래프 핵심 기능
 
 - CRUD 5 + 검색 6 + 캡처 3 + CLAUDE.md 3 + 동반자 1 + 운영 3 = 총 **21개** ([MCP 도구 명세](./17-mcp-tools.md))
-- 신규 카테고리: 캡처(`capture_insight`, `boundary_create`, `capture_personal_context`), CLAUDE.md(`claudemd_merge/read/remove`), 동반자(`companion_edit`), 운영(`activity_read`, `work_history`, `context_cache_manage`)
+- 신규 카테고리: 캡처(`capture_insight`, `capture_personal_context`), CLAUDE.md(`claudemd_merge/read/remove`), 동반자(`companion_edit`), 운영(`activity_read`, `work_history`, `context_cache_manage`)
 
 ### Skill — 사용자 대면 명령
 
@@ -66,7 +66,7 @@ maencof은 4개 계층(Hook, MCP 도구, Skill, Agent)으로 구성된다.
 - `identity-guardian`: Layer 1 보호/갱신
 - `checkup`: 진단 및 복구
 - `configurator`: Project-scope 설정(`.claude/`, `.mcp.json`, `CLAUDE.md`, `.maencof-meta/`) 관리
-- `knowledge-connector`: L3/L5 링크 제안, L5-Boundary 커넥터 관리 (`kg_suggest_links` 경유)
+- `knowledge-connector`: L3/L5 링크 제안, 허브(`hub: true`) 커넥터 관리 (`kg_suggest_links` 경유)
 
 ---
 

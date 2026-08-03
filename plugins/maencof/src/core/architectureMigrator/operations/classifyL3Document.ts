@@ -6,7 +6,7 @@ import {
   ORG_TAGS,
   PERSON_TAGS,
 } from '../../../constants/architectureMigrator.js';
-import type { L3SubLayer } from '../../../types/common.js';
+import type { SubLayer } from '../../../types/common.js';
 
 /**
  * L3 문서를 서브레이어로 분류한다.
@@ -20,7 +20,7 @@ import type { L3SubLayer } from '../../../types/common.js';
 export function classifyL3Document(
   fm: Record<string, unknown>,
   tags: string[],
-): L3SubLayer {
+): SubLayer {
   // Rule 1: person object or person_ref present
   if (fm.person || fm.person_ref) return 'relational';
 

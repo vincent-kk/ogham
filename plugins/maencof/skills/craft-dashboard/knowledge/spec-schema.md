@@ -58,7 +58,7 @@ Defines a logical slice of vault content that one or more panels consume.
 interface DataDomain {
   name: string; // kebab-case; becomes route file name
   layer?: 1 | 2 | 3 | 4 | 5 | 'all';
-  subLayer?: 'relational' | 'structural' | 'topical' | 'buffer' | 'boundary';
+  subLayer?: 'relational' | 'structural' | 'topical';
   fromIndex?: 'graph' | 'files'; // "graph" = .maencof/nodes.json; "files" = direct walk
   fromDomain?: string; // reference another domain (chained transform)
   dateField?: ('created' | 'updated' | 'expires' | 'mtime')[];

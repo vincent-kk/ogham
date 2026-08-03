@@ -5,8 +5,8 @@
 - `move`는 vault 문서를 대상 레이어 디렉토리로 이동한다. WAL 순서(대상 쓰기 → 소스 삭제)로 원자성을 보장한다.
 - 소스가 L1(Core)이면 이동을 거부한다.
 - frontmatter의 `layer`/`updated`를 갱신하고, `target_sub_layer`가 없으면 `sub_layer` 필드를 제거한다.
-- 소스가 L5-Buffer 문서이면 buffer 전용 필드(`buffer_type`, `promotion_target`)를 자동 제거한다(승격 시 잔재 방지).
-- `target_sub_layer`는 L3(relational/structural/topical)·L5(buffer/boundary)에서만 디렉토리 경로에 반영된다.
+- 소스가 L5 문서이고 대상이 L5 가 아니면 L5 전용 필드(`buffer_type` · `promotion_target` · `source_context`)를 자동 제거한다(승격 시 잔재 방지).
+- `target_sub_layer`는 L3(relational/structural/topical)에서만 디렉토리 경로에 반영된다. L5 는 평면 구조라 서브레이어가 없다.
 - `target_subdirectory`는 대상 레이어(서브레이어가 있으면 그 아래) 디렉토리 하위의 중첩 디렉토리를 지정한다.
   - 세그먼트별로 `sanitizeSegment`(core/filenameSlug)로 정규화한다.
   - `..` 세그먼트는 traversal로 거부한다.
@@ -36,3 +36,37 @@
 ### 파일명 유지 규칙
 
 이동 시 파일명은 `basename(path)`을 유지한다. 소스의 중첩 디렉토리는 보존되지 않으며, 대상 배치는 `target_sub_layer`/`target_subdirectory` 조합으로만 결정된다.
+
+## Acceptance Criteria
+
+### AC-wal-order — 원자성 쓰기 순서
+
+- 이동은 대상 쓰기 성공 이후에만 소스를 삭제한다. 대상 쓰기가 실패하면 소스는 그대로 남는다.
+
+### AC-l1-source-rejected — L1 소스 이동 거부
+
+- 소스가 L1(Core) 문서면 이동이 거부되고 어떤 파일도 생성·삭제되지 않는다.
+
+### AC-l5-fields-dropped-on-promotion — 승격 시 L5 전용 필드 제거
+
+- L5 문서를 L5 가 아닌 레이어로 옮기면 `buffer_type` · `promotion_target` · `source_context` 가 대상 frontmatter 에 남지 않는다.
+
+### AC-sub-layer-cleared-without-target — 서브레이어 잔재 제거
+
+- `target_sub_layer` 없이 이동하면 대상 frontmatter 에 `sub_layer` 필드가 남지 않는다.
+
+### AC-subdirectory-guarded — 중첩 디렉토리 방어
+
+- `target_subdirectory` 의 `..` 세그먼트는 거부되고, 깊이가 `MAX_FILENAME_SUBDIR_DEPTH` 를 넘으면 이동이 실패한다.
+
+### AC-vault-containment — vault 봉쇄
+
+- 소스와 대상 경로가 모두 `resolveWithinVault` 를 통과해야 하며, vault 밖으로 해석되는 경로는 이동을 실패시킨다.
+
+### AC-validated-before-write — 쓰기 직전 검증
+
+- 갱신된 frontmatter 가 `validateFrontmatter` 를 통과하지 못하면 대상 파일을 쓰지 않는다.
+
+## Last Updated
+
+2026-08-04 — L5 전용 필드 제거와 서브레이어 잔재 제거를 포함한 이동 계약을 acceptance group 으로 고정했다.

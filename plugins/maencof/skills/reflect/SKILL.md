@@ -36,7 +36,7 @@ Rule of thumb: inspect without side effects → `reflect`; apply transitions →
                                generate analysis report (no file changes)
 ```
 
-**Orchestrator**: the reflect skill calls only the judge module and skips execute. Use `reflect` for a diagnostic report (L5-Boundary health, sub-layer distribution, duplicates, auto-insight stats); use `organize --dry-run` for a plain directive preview immediately before executing.
+**Orchestrator**: the reflect skill calls only the judge module and skips execute. Use `reflect` for a diagnostic report (hub health, sub-layer distribution, duplicates, auto-insight stats); use `organize --dry-run` for a plain directive preview immediately before executing.
 
 ## Workflow
 
@@ -51,7 +51,7 @@ Execute memory-organizer judge logic:
 - Full scan of Layer 3/4/5 (including sub-layer directories)
 - Calculate transition score for each node (access frequency, tags, connection density, confidence)
 - Detect duplicate candidate pairs
-- **L5-Boundary analysis**: Evaluate cross-layer connection effectiveness — identify Boundary nodes with zero CROSS_LAYER edges (misconfigured) or excessive connections (>50 targets)
+- **Hub analysis**: Evaluate cross-layer connection effectiveness — identify hub documents (`hub: true`, any layer) with zero CROSS_LAYER edges (no tag overlap with anything) or capped connections (50 targets)
 
 ### Step 3 — Generate Report
 
@@ -67,13 +67,13 @@ Execute memory-organizer judge logic:
 
 | File | Last Accessed | Expiration | Target Sub-Layer | Recommendation |
 
-### L5-Buffer Promotion Candidates
+### Layer 5 Promotion Candidates
 
 | File | Age (days) | Connections | Recommended Target |
 
-### L5-Boundary Health
+### Hub Health
 
-| Boundary Node | Connected Layers | CROSS_LAYER Edges | Status |
+| Hub Document | Layer | hub_kind | CROSS_LAYER Edges | Status |
 (OK / No edges / Overcrowded)
 
 ### Duplicate Detection
@@ -83,13 +83,13 @@ Execute memory-organizer judge logic:
 ### Sub-Layer Distribution
 
 | Layer | Sub-Layer | Count |
-(L3: relational/structural/topical, L5: buffer/boundary)
+(L3: relational/structural/topical)
 
 ### Summary
 
 - Transition candidates: N
 - Buffer promotion candidates: N
-- Boundary health issues: N
+- Hub health issues: N
 - Duplicate document pairs: N
 - Recommended action: run /maencof:organize
 ```

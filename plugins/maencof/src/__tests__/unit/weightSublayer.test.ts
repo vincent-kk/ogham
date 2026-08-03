@@ -1,3 +1,10 @@
+/**
+ * @file weightSublayer.test.ts
+ * @description getLayerDecay 의 우선순위와 값.
+ *
+ * 감쇠 인자는 확산 시 곱해지는 계수라 클수록 넓게 퍼진다. 축은 U자형이며
+ * 허브는 레이어·서브레이어를 덮어쓴다.
+ */
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -6,36 +13,64 @@ import {
 } from '../../core/weightCalculator/index.js';
 import { Layer } from '../../types/common.js';
 
-describe('getLayerDecay with sub-layer', () => {
-  it('서브레이어 없으면 기존 레이어 감쇠 반환', () => {
-    expect(getLayerDecay(Layer.L3_EXTERNAL)).toBe(0.8);
-    expect(getLayerDecay(Layer.L5_CONTEXT)).toBe(0.95);
-    expect(getLayerDecay(Layer.L1_CORE)).toBe(0.5);
+describe('getLayerDecay — 레이어 축', () => {
+  it.each([
+    [Layer.L1_CORE, 0.5],
+    [Layer.L2_DERIVED, 0.7],
+    [Layer.L3_EXTERNAL, 0.8],
+    [Layer.L4_ACTION, 0.9],
+    [Layer.L5_CONTEXT, 0.45],
+  ])('layer=%d → %f', (layer, expected) => {
+    expect(getLayerDecay(layer)).toBe(expected);
   });
 
-  it('L3A relational → 0.75', () => {
-    expect(getLayerDecay(Layer.L3_EXTERNAL, 'relational')).toBe(0.75);
+  it('U자형이다 — 코어와 임시 수용소가 양 극단에서 가장 좁게 퍼진다', () => {
+    expect(getLayerDecay(Layer.L5_CONTEXT)).toBeLessThan(
+      getLayerDecay(Layer.L1_CORE),
+    );
+    expect(getLayerDecay(Layer.L4_ACTION)).toBeGreaterThan(
+      getLayerDecay(Layer.L1_CORE),
+    );
+  });
+});
+
+describe('getLayerDecay — 서브레이어 축', () => {
+  it.each([
+    ['relational', 0.75],
+    ['structural', 0.8],
+    ['topical', 0.85],
+  ] as const)('L3 %s → %f', (subLayer, expected) => {
+    expect(getLayerDecay(Layer.L3_EXTERNAL, subLayer)).toBe(expected);
+  });
+});
+
+describe('getLayerDecay — 허브 우선순위', () => {
+  it('허브는 레이어 값을 덮어쓴다', () => {
+    expect(getLayerDecay(Layer.L1_CORE, undefined, true)).toBe(0.95);
+    expect(getLayerDecay(Layer.L4_ACTION, undefined, true)).toBe(0.95);
   });
 
-  it('L3B structural → 0.80', () => {
-    expect(getLayerDecay(Layer.L3_EXTERNAL, 'structural')).toBe(0.8);
+  it('허브는 서브레이어 값도 덮어쓴다', () => {
+    expect(getLayerDecay(Layer.L3_EXTERNAL, 'relational', true)).toBe(0.95);
   });
 
-  it('L3C topical → 0.85', () => {
-    expect(getLayerDecay(Layer.L3_EXTERNAL, 'topical')).toBe(0.85);
+  it('hub=false 는 덮어쓰지 않는다', () => {
+    expect(getLayerDecay(Layer.L3_EXTERNAL, 'relational', false)).toBe(0.75);
   });
 
-  it('L5-Buffer → 0.95', () => {
-    expect(getLayerDecay(Layer.L5_CONTEXT, 'buffer')).toBe(0.95);
-  });
-
-  it('L5-Boundary → 0.60', () => {
-    expect(getLayerDecay(Layer.L5_CONTEXT, 'boundary')).toBe(0.6);
+  it('허브가 모든 레이어보다 넓게 퍼진다', () => {
+    const hub = getLayerDecay(Layer.L3_EXTERNAL, undefined, true);
+    for (const layer of [1, 2, 3, 4, 5] as Layer[])
+      expect(hub).toBeGreaterThanOrEqual(getLayerDecay(layer));
   });
 });
 
 describe('SUBLAYER_DECAY_FACTORS', () => {
-  it('5개의 서브레이어 감쇠 인자를 포함한다', () => {
-    expect(Object.keys(SUBLAYER_DECAY_FACTORS)).toHaveLength(5);
+  it('L3 서브레이어 3개만 포함한다', () => {
+    expect(Object.keys(SUBLAYER_DECAY_FACTORS).sort()).toEqual([
+      'relational',
+      'structural',
+      'topical',
+    ]);
   });
 });

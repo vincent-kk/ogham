@@ -71,6 +71,9 @@ function rollbackOp(op: MigrationOp, _vaultPath: string): void {
         // 비어있지 않으면 무시
       }
       break;
+    case 'remove_dir':
+      mkdirSync(op.path, { recursive: true });
+      break;
     case 'move_file':
       if (existsSync(op.to)) {
         mkdirSync(dirname(op.from), { recursive: true });

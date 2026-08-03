@@ -6,11 +6,7 @@ import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
 import { basename, dirname } from 'node:path';
 
-import {
-  L3_SUBDIR,
-  L5_SUBDIR,
-  LAYER_DIR,
-} from '../../../constants/architecture.js';
+import { L3_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
 import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { FRONTMATTER_REGEX } from '../../../constants/regexes.js';
 import {
@@ -20,7 +16,6 @@ import {
 import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { parseYamlFrontmatter } from '../../../core/yamlParser/index.js';
-import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
 import { Layer } from '../../../types/common.js';
 import { validateFrontmatter } from '../../../types/frontmatter.js';
 import type {
@@ -30,7 +25,7 @@ import type {
 
 /**
  * Frontmatter의 layer 필드를 갱신한다.
- * sub_layer, buffer_type, promotion_target 필드도 함께 처리한다.
+ * sub_layer 와 L5 전용 필드(buffer_type · promotion_target · source_context)도 함께 처리한다.
  */
 function updateLayerInFrontmatter(
   content: string,
@@ -60,11 +55,10 @@ function updateLayerInFrontmatter(
     // 대상 layer에 sub_layer가 적용되지 않으면 제거
     yaml = yaml.replace(/\n?^sub_layer:.*$/m, '');
 
-  // L5-Buffer → 다른 레이어 이동 시 buffer 전용 필드 제거
-  if (options?.stripBufferFields) {
-    yaml = yaml.replace(/\n?^buffer_type:.*$/m, '');
-    yaml = yaml.replace(/\n?^promotion_target:.*$/m, '');
-  }
+  // L5 → 다른 레이어 이동 시 L5 전용 필드 제거
+  if (options?.stripBufferFields)
+    for (const field of ['buffer_type', 'promotion_target', 'source_context'])
+      yaml = yaml.replace(new RegExp(`\\n?^${field}:.*$`, 'm'), '');
 
   return content.replace(match[0], `---\n${yaml}\n---\n`);
 }
@@ -162,10 +156,6 @@ export async function handleMaencofMove(
         'Moving a document to Layer 1 requires it to already carry a `gist`. Add one via update first, then move.',
     };
 
-  const sourceSubLayer = nodeResult.success
-    ? nodeResult.node?.subLayer
-    : undefined;
-
   // 같은 레이어이면 서브레이어/서브디렉토리 재배치일 때만 이동 허용
   if (
     nodeResult.success &&
@@ -181,12 +171,11 @@ export async function handleMaencofMove(
 
   // 대상 경로 계산 (서브레이어 + 서브디렉토리 포함)
   const filename = basename(input.path);
-  let subDir = '';
-  if (input.target_sub_layer)
-    if (targetLayerNum === 3 && input.target_sub_layer in L3_SUBDIR)
-      subDir = L3_SUBDIR[input.target_sub_layer as L3SubLayer];
-    else if (targetLayerNum === 5 && input.target_sub_layer in L5_SUBDIR)
-      subDir = L5_SUBDIR[input.target_sub_layer as L5SubLayer];
+  // L3 만 서브레이어를 가지며, L5 는 평면 구조다
+  const subDir =
+    targetLayerNum === 3 && input.target_sub_layer
+      ? (L3_SUBDIR[input.target_sub_layer] ?? '')
+      : '';
 
   let subdirectoryPath = '';
   if (input.target_subdirectory) {
@@ -222,8 +211,10 @@ export async function handleMaencofMove(
     // 없음 → 정상
   }
 
-  // L5-Buffer에서 이동 시 buffer 전용 필드 자동 제거
-  const stripBufferFields = sourceSubLayer === 'buffer';
+  // L5(임시 수용소)에서 벗어나면 L5 전용 필드를 자동 제거한다 (승격 시 잔재 방지)
+  const stripBufferFields =
+    nodeResult.node?.layer === Layer.L5_CONTEXT &&
+    targetLayerNum !== Layer.L5_CONTEXT;
 
   // Frontmatter layer + updated + sub_layer 갱신
   const updatedContent = updateLayerInFrontmatter(content, targetLayerNum, {

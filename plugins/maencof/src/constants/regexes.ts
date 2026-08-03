@@ -21,3 +21,9 @@ export const WORD_BOUNDARY_SPLIT_REGEX = /[\s\-_/\\.,;:!?()[\]{}'"]+/;
 export const YAML_UNSAFE_START = /^[#'"{}[\],&*?|<>=!%@`-]/;
 
 export const YAML_BOOLEAN_NULL = /^(true|false|null|~|yes|no|on|off)$/i;
+
+/**
+ * YAML 스칼라 숫자로 오독될 문자열 판별 — 직렬화 시 인용 필요 여부를 결정한다.
+ * 인용하지 않으면 `"2026"` 태그가 되읽을 때 number 2026 이 되어 왕복이 깨진다.
+ */
+export const YAML_NUMERIC = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;

@@ -58,10 +58,10 @@ export function registerCrudTools(server: McpServer): void {
           .optional()
           .describe('Expiry date YYYY-MM-DD (for Layer 4 and L5 buffer)'),
         sub_layer: z
-          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .enum(['relational', 'structural', 'topical'])
           .optional()
           .describe(
-            'Sub-layer (L3: relational/structural/topical — default topical; L5: buffer/boundary — default buffer, the unclassified inbox; for boundary MOC/hub documents prefer boundary_create)',
+            'Sub-layer for Layer 3 only (relational/structural/topical — default topical). Layer 5 is a flat unclassified buffer and takes no sub-layer.',
           ),
         mentioned_persons: z
           .array(z.string())
@@ -74,6 +74,38 @@ export function registerCrudTools(server: McpServer): void {
           .optional()
           .describe(
             'One-line summary injected into turn context every turn. Required for Layer 1 (create rejects a gist-less L1); optional for other layers. Single keyword/phrase line; capped to 128 code points in the per-turn view.',
+          ),
+        hub: z
+          .boolean()
+          .optional()
+          .describe(
+            'Mark this document as a cross-layer hub (MOC). Hubs are orthogonal to layers — any Layer 1-4 document can be one. Requires purpose. Rejected on Layer 5.',
+          ),
+        hub_kind: z
+          .enum(['project_moc', 'cross_domain', 'synthesis', 'study_hub'])
+          .optional()
+          .describe('Hub document kind. Only valid together with hub=true.'),
+        purpose: z
+          .string()
+          .optional()
+          .describe(
+            'One line stating what this hub integrates. Required when hub=true — it is what kg_context reports without opening the body.',
+          ),
+        buffer_type: z
+          .enum(['snippet', 'conversation', 'unclassified'])
+          .optional()
+          .describe('Layer 5 only. What kind of unclassified item this is.'),
+        promotion_target: z
+          .enum(['relational', 'structural', 'topical', 'L2'])
+          .optional()
+          .describe(
+            'Layer 5 only. Suggested destination when this item is promoted.',
+          ),
+        source_context: z
+          .string()
+          .optional()
+          .describe(
+            'Layer 5 only. Where this item came from (e.g. "대화 중 멘션", "웹 스크랩").',
           ),
       }),
     },
@@ -153,22 +185,40 @@ export function registerCrudTools(server: McpServer): void {
             confidence: z.number().min(0).max(1).optional(),
             schedule: z.string().optional(),
             sub_layer: z
-              .enum([
-                'relational',
-                'structural',
-                'topical',
-                'buffer',
-                'boundary',
-              ])
+              .enum(['relational', 'structural', 'topical'])
               .optional()
               .describe(
-                'Sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+                'Sub-layer for Layer 3 only (relational/structural/topical).',
               ),
             gist: z
               .string()
               .optional()
               .describe(
                 'One-line Layer 1 gist injected into turn context. Required for Layer 1 (update rejects a modification that leaves the L1 gist-less); optional for other layers. Single keyword/phrase line; capped to 128 code points in the per-turn view.',
+              ),
+            hub: z
+              .boolean()
+              .optional()
+              .describe(
+                'Promote or demote this document as a cross-layer hub (MOC). Requires purpose when true; rejected on Layer 5.',
+              ),
+            hub_kind: z
+              .enum(['project_moc', 'cross_domain', 'synthesis', 'study_hub'])
+              .optional()
+              .describe(
+                'Hub document kind. Only valid together with hub=true.',
+              ),
+            purpose: z
+              .string()
+              .optional()
+              .describe(
+                'One line stating what this hub integrates. Required when hub=true.',
+              ),
+            unset: z
+              .array(z.string())
+              .optional()
+              .describe(
+                'Remove these frontmatter fields. Use this to recover a document whose frontmatter fails validation. Protected fields (created, updated, layer, tags) are rejected; blocked entirely on Layer 1.',
               ),
           })
           .optional()
@@ -246,10 +296,10 @@ export function registerCrudTools(server: McpServer): void {
           .optional()
           .describe('Confidence score (for Layer 3→2 transition)'),
         target_sub_layer: z
-          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .enum(['relational', 'structural', 'topical'])
           .optional()
           .describe(
-            'Target sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+            'Target sub-layer for Layer 3 only (relational/structural/topical).',
           ),
         target_subdirectory: z
           .string()

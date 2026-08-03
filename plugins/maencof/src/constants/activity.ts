@@ -22,7 +22,6 @@ export const TOOL_CATEGORY_MAP: Record<string, ActivityCategory> = {
   [McpToolName.KG_BUILD]: 'index',
   [McpToolName.KG_STATUS]: 'index',
   [McpToolName.KG_SUGGEST_LINKS]: 'search',
-  [McpToolName.BOUNDARY_CREATE]: 'document',
   [McpToolName.CLAUDEMD_MERGE]: 'config',
   [McpToolName.CLAUDEMD_READ]: 'config',
   [McpToolName.CLAUDEMD_REMOVE]: 'config',

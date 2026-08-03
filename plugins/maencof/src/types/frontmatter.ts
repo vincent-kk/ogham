@@ -4,18 +4,10 @@
  */
 import { z } from 'zod';
 
-import { L3_SUB_LAYERS, L5_SUB_LAYERS } from '../constants/validationSets.js';
-
 import { PersonSchema } from './person.js';
 
-/** 서브레이어 Zod 스키마 */
-const SubLayerSchema = z.enum([
-  'relational',
-  'structural',
-  'topical',
-  'buffer',
-  'boundary',
-]);
+/** 서브레이어 Zod 스키마 — L3 전용 */
+const SubLayerSchema = z.enum(['relational', 'structural', 'topical']);
 
 /** Frontmatter 기본 스키마 (superRefine 전) */
 const FrontmatterBaseSchema = z.object({
@@ -58,7 +50,7 @@ const FrontmatterBaseSchema = z.object({
   domain_type: z.enum(['life', 'professional']).optional(),
 
   // ─── Sub-layer 확장 필드 ─────────────────────────────────
-  /** 서브레이어 (L3: relational/structural/topical, L5: buffer/boundary) */
+  /** 서브레이어 (L3 전용: relational/structural/topical) */
   sub_layer: SubLayerSchema.optional(),
 
   // L3A (relational) 전용
@@ -83,98 +75,95 @@ const FrontmatterBaseSchema = z.object({
   /** 성숙도 */
   maturity: z.enum(['seed', 'growing', 'mature', 'evergreen']).optional(),
 
-  // L5-Buffer 전용
-  /** 버퍼 유형 */
-  buffer_type: z.enum(['inbox', 'unsorted', 'temp']).optional(),
-  /** 승격 대상 레이어 */
-  promotion_target: z.number().int().min(1).max(4).optional(),
+  // L5 (임시 수용소) 전용
+  /** 미분류 항목의 종류 */
+  buffer_type: z.enum(['snippet', 'conversation', 'unclassified']).optional(),
+  /** 승격 대상 — 레이어 번호가 아니라 서브레이어 이름이다(L3A/3B/3C를 구분해야 승격 규칙이 성립한다) */
+  promotion_target: z
+    .enum(['relational', 'structural', 'topical', 'L2'])
+    .optional(),
+  /** 항목의 출처 서술 (예: "대화 중 멘션", "웹 스크랩") */
+  source_context: z.string().optional(),
 
-  // L5-Boundary 전용
-  /** 경계 객체 유형 */
-  boundary_type: z.string().optional(),
-  /** 연결 레이어 목록 */
-  connected_layers: z.array(z.number().int().min(1).max(5)).optional(),
+  // 허브 — 레이어와 직교하는 속성
+  /** 이 문서가 교차 연결 허브인지 여부 */
+  hub: z.boolean().optional(),
+  /** 허브 문서의 종류 */
+  hub_kind: z
+    .enum(['project_moc', 'cross_domain', 'synthesis', 'study_hub'])
+    .optional(),
+  /** 이 허브가 무엇을 통합하는지 한 줄 서술 (hub=true일 때 필수) */
+  purpose: z.string().optional(),
 });
+
+/** Layer 5(임시 수용소) 에서만 유효한 필드 이름 */
+const L5_ONLY_FIELDS = [
+  'buffer_type',
+  'promotion_target',
+  'source_context',
+] as const;
 
 /** Frontmatter Zod 스키마 */
 export const FrontmatterSchema = FrontmatterBaseSchema.superRefine(
   (data, ctx) => {
     const { layer, sub_layer } = data;
-    if (!sub_layer) return;
 
-    // layer-sublayer 일관성 검증
-    if (layer === 3 && !L3_SUB_LAYERS.has(sub_layer)) {
+    // 서브레이어는 L3 전용 — L5 는 평면 구조라 서브레이어를 갖지 않는다
+    if (sub_layer && layer !== 3)
       ctx.addIssue({
         code: 'custom',
-        message: `Layer 3 sub_layer must be relational/structural/topical, got '${sub_layer}'`,
+        message: `sub_layer is only valid for Layer 3, got layer=${layer}`,
         path: ['sub_layer'],
       });
-      return;
-    }
-    if (layer === 5 && !L5_SUB_LAYERS.has(sub_layer)) {
+
+    // L5 전용 필드는 다른 레이어에서 의미가 없다
+    if (layer !== 5)
+      for (const field of L5_ONLY_FIELDS)
+        if (data[field] !== undefined)
+          ctx.addIssue({
+            code: 'custom',
+            message: `${field} is exclusive to Layer 5 (unclassified buffer)`,
+            path: [field],
+          });
+
+    // 허브는 레이어와 직교하지만, 임시 수용소는 다리가 되지 않는다
+    if (data.hub === true && layer === 5)
       ctx.addIssue({
         code: 'custom',
-        message: `Layer 5 sub_layer must be buffer/boundary, got '${sub_layer}'`,
-        path: ['sub_layer'],
+        message: 'Layer 5 documents cannot be hubs — a buffer is not a bridge',
+        path: ['hub'],
       });
-      return;
-    }
-    if (layer !== 3 && layer !== 5 && sub_layer) {
+
+    // 허브의 존재 이유는 frontmatter 가 답해야 한다 (본문을 열지 않는 소비자를 위해)
+    if (data.hub === true && !data.purpose)
       ctx.addIssue({
         code: 'custom',
-        message: `sub_layer is only valid for Layer 3 or 5, got layer=${layer}`,
-        path: ['sub_layer'],
+        message: 'hub requires purpose — state in one line what this hub joins',
+        path: ['purpose'],
       });
-      return;
-    }
+
+    // 반쪽 선언 차단: 허브 속성만 있고 hub 선언이 없는 문서
+    if (data.hub !== true && (data.hub_kind || data.purpose))
+      ctx.addIssue({
+        code: 'custom',
+        message: 'hub_kind and purpose require hub: true',
+        path: ['hub'],
+      });
 
     // 서브레이어 전용 필드 배타성 검증
-    if (sub_layer === 'relational')
-      if (data.org_type)
-        ctx.addIssue({
-          code: 'custom',
-          message: 'org_type is exclusive to L3B (structural)',
-          path: ['org_type'],
-        });
+    if (sub_layer === 'relational' && data.org_type)
+      ctx.addIssue({
+        code: 'custom',
+        message: 'org_type is exclusive to L3B (structural)',
+        path: ['org_type'],
+      });
 
-    if (sub_layer === 'structural')
-      if (data.person_ref)
-        ctx.addIssue({
-          code: 'custom',
-          message: 'person_ref is exclusive to L3A (relational)',
-          path: ['person_ref'],
-        });
-
-    if (sub_layer === 'buffer') {
-      if (data.boundary_type)
-        ctx.addIssue({
-          code: 'custom',
-          message: 'boundary_type is exclusive to L5-Boundary',
-          path: ['boundary_type'],
-        });
-
-      if (data.connected_layers)
-        ctx.addIssue({
-          code: 'custom',
-          message: 'connected_layers is exclusive to L5-Boundary',
-          path: ['connected_layers'],
-        });
-    }
-    if (sub_layer === 'boundary') {
-      if (data.buffer_type)
-        ctx.addIssue({
-          code: 'custom',
-          message: 'buffer_type is exclusive to L5-Buffer',
-          path: ['buffer_type'],
-        });
-
-      if (data.promotion_target)
-        ctx.addIssue({
-          code: 'custom',
-          message: 'promotion_target is exclusive to L5-Buffer',
-          path: ['promotion_target'],
-        });
-    }
+    if (sub_layer === 'structural' && data.person_ref)
+      ctx.addIssue({
+        code: 'custom',
+        message: 'person_ref is exclusive to L3A (relational)',
+        path: ['person_ref'],
+      });
   },
 );
 
@@ -183,8 +172,7 @@ export type Frontmatter = z.infer<typeof FrontmatterSchema>;
 
 /** validateFrontmatter 결과 (write-path 게이트 + read-path 검증 공용) */
 export type ValidateFrontmatterResult =
-  | { ok: true; data: Frontmatter }
-  | { ok: false; errors: string[] };
+  { ok: true; data: Frontmatter } | { ok: false; errors: string[] };
 
 /**
  * Frontmatter 객체 검증 — read-path와 write-path 공용 단일 진입점.

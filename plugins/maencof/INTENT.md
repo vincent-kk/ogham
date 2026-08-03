@@ -13,7 +13,7 @@
 | `libs/`                      | cross-platform Node 러너                               |
 | `scripts/`                   | esbuild 빌드 스크립트                                  |
 | `bridge/`                    | esbuild 산출물 (커밋)                                  |
-| `templates/`                 | 5-Layer 모델 v2 vault 템플릿                           |
+| `templates/`                 | 5-Layer 모델 v3 vault 템플릿                           |
 | `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                        |
 | `.mcp.json`                  | MCP 서버 등록                                          |
 
@@ -21,7 +21,7 @@
 
 - 빌드(도메인 스크립트 조합): `clean → version:sync → compile → mcp → hooks → compile-plugin`
 - vault 경로는 `MAENCOF_VAULT_PATH` env 또는 호스트 워크스페이스 루트; 둘 다 없으면 throw, 하드코딩 금지
-- 5-Layer 모델 v2 준수 (L1~L5, sublayer 규칙은 `src/INTENT.md`)
+- 5-Layer 모델 v3 준수 (L1~L5). sublayer·hub 교차 규칙의 정본은 `src/types/frontmatter.ts` 의 `FrontmatterSchema` 다
 - 문서 frontmatter 필수 필드: `layer` / `tags` / `created` / `updated` (FrontmatterSchema; `templates/rules/frontmatter-required.md` 와 동기)
 
 ## Boundaries

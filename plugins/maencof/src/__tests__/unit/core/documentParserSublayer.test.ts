@@ -42,8 +42,6 @@ describe('inferSubLayerFromPath', () => {
     ['03_External/relational/alice.md', 'relational'],
     ['03_External/structural/company-x.md', 'structural'],
     ['03_External/topical/react-hooks.md', 'topical'],
-    ['05_Context/buffer/inbox.md', 'buffer'],
-    ['05_Context/boundary/project-moc.md', 'boundary'],
   ] as const)('%s → %s', (path, expected) => {
     expect(inferSubLayerFromPath(path)).toBe(expected);
   });
@@ -52,6 +50,7 @@ describe('inferSubLayerFromPath', () => {
     '03_External/react-hooks.md',
     '01_Core/identity.md',
     '05_Context/meta.md',
+    '05_Context/buffer/inbox.md',
     'random/file.md',
   ])('%s → undefined', (path) => {
     expect(inferSubLayerFromPath(path)).toBeUndefined();
@@ -92,29 +91,23 @@ describe('buildKnowledgeNode sub-layer propagation', () => {
     expect(result.node?.subLayer).toBeUndefined();
   });
 
-  it('connected_layers를 전파한다', () => {
-    // 경량 YAML 파서가 중첩 객체를 지원하지 않으므로 ParsedDocument 직접 생성
-    const doc: ParsedDocument = {
-      relativePath: '05_Context/boundary/moc.md',
-      frontmatter: {
-        success: true,
-        data: {
-          ...baseFm,
-          layer: 5,
-          sub_layer: 'boundary' as const,
-          boundary_type: 'project_moc',
-          connected_layers: [1, 3],
-        },
-        raw: '',
-      },
-      body: '# Test',
-      links: [],
-      mtime: 1000,
-    };
+  it('허브 속성을 전파한다', () => {
+    const doc = parseDocument(
+      '03_External/structural/moc.md',
+      makeMd({
+        ...baseFm,
+        sub_layer: 'structural',
+        hub: true,
+        hub_kind: 'project_moc',
+        purpose: '제어이론 학습 경로 통합',
+      }),
+      1000,
+    );
     const result = buildKnowledgeNode(doc);
     expect(result.success).toBe(true);
-    expect(result.node?.connectedLayers).toEqual([1, 3]);
-    expect(result.node?.boundaryType).toBe('project_moc');
+    expect(result.node?.hub).toBe(true);
+    expect(result.node?.hubKind).toBe('project_moc');
+    expect(result.node?.purpose).toBe('제어이론 학습 경로 통합');
   });
 
   it('person을 전파한다', () => {

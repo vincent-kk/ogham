@@ -79,10 +79,11 @@ export async function handleCaptureInsight(
   if (args.context)
     fullContent = `## Context\n\n${args.context}\n\n${fullContent}`;
 
-  // 4. Delegate to existing create handler (L5 insights land in the buffer inbox)
+  // 4. Delegate to existing create handler. Layer 5 is the flat unclassified
+  //    buffer — it takes no sub-layer.
   const result = await handleMaencofCreate(vaultPath, {
     layer: args.layer as 2 | 5,
-    ...(args.layer === 5 && { sub_layer: 'buffer' as const }),
+    ...(args.layer === 5 && { buffer_type: 'conversation' as const }),
     tags,
     content: fullContent,
     title: args.title,

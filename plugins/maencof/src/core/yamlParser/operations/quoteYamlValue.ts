@@ -8,6 +8,7 @@
  */
 import {
   YAML_BOOLEAN_NULL,
+  YAML_NUMERIC,
   YAML_UNSAFE_START,
 } from '../../../constants/regexes.js';
 
@@ -18,7 +19,8 @@ export function quoteYamlValue(value: string): string {
     value.includes(': ') ||
     value.includes(' #') ||
     YAML_UNSAFE_START.test(value) ||
-    YAML_BOOLEAN_NULL.test(value)
+    YAML_BOOLEAN_NULL.test(value) ||
+    YAML_NUMERIC.test(value)
   ) {
     const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     return `"${escaped}"`;

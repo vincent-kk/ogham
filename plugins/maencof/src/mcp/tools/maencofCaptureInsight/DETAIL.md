@@ -5,14 +5,14 @@
 - `capture_insight` MCP 도구는 auto-insight 레코드를 벌트에 영속화하기 **이전에** `config.category_filter` 를 반드시 적용한다. 금지된 카테고리에 대한 호출은 파일 쓰기 없이 즉시 거절된다.
 - 사용자는 `/maencof:insight --category <key> --accept|--reject` 를 통해 `.maencof-meta/insight-config.json::category_filter.<key>` 를 토글할 수 있다.
 - `insightInjector` 훅은 이 필터에 대한 표면 배너를 노출할 뿐이며 실제 차단은 이 MCP 도구의 책임이다. 따라서 이 파일의 enforcement 로직이 바뀌면 `insightInjector` 의 배너 문구도 동기화해야 한다.
-- 레이어 라우팅: `layer: 2`(내재화된 인사이트/원리)는 `02_Derived/` 루트에, `layer: 5`(미분류 단편)는 반드시 `sub_layer: 'buffer'`로 위임되어 `05_Context/buffer/`에 생성된다. L5 캡처가 `05_Context/` 루트에 떨어지면 organize/cleanup의 buffer 스캔에서 누락되는 고아 문서가 되므로 금지.
+- 레이어 라우팅: `layer: 2`(내재화된 인사이트/원리)는 `02_Derived/` 루트에, `layer: 5`(미분류 단편)는 `buffer_type: 'conversation'` 으로 위임되어 평면 `05_Context/` 에 생성된다. L5 는 서브레이어를 갖지 않으므로 하위 디렉터리를 만들지 않는다.
 
 ## API Contracts
 
 ### Layer routing contract
 
 - 입력 `layer`는 `2 | 5`만 허용한다 (Zod literal union).
-- `layer === 5`이면 `handleMaencofCreate` 위임 시 `sub_layer: 'buffer'`를 함께 전달한다. `layer === 2`는 `sub_layer` 없이 위임한다.
+- `layer === 5`이면 `handleMaencofCreate` 위임 시 `buffer_type: 'conversation'` 을 함께 전달한다. `layer === 2`는 buffer 필드 없이 위임한다. 어느 쪽도 `sub_layer` 를 전달하지 않는다 — L5 는 서브레이어를 갖지 않고, L2 는 서브레이어 대상이 아니다.
 
 ### Rejection contract (category_filter)
 
@@ -38,3 +38,25 @@
 ### Enforcement sites (grep guard)
 
 `rg -n 'category_filter\[' plugins/maencof/src/` 결과는 정확히 1 개의 enforcement site (`maencofCaptureInsight.ts`) 만 반환해야 한다. 이 수가 증가하면 다중 enforcement 로 인한 문서/코드 drift 가능성이 있으므로 DETAIL.md 와 SKILL.md 둘 다 업데이트할 것.
+
+## Acceptance Criteria
+
+### AC-filter-blocks-before-write — 쓰기 이전 차단
+
+- `config.category_filter[category] === false` 인 호출은 `handleMaencofCreate` 를 호출하지 않고, 벌트 파일도 `pending-insight-notification.json` 엔트리도 만들지 않은 채 `success: false` 로 끝난다.
+
+### AC-l5-routes-to-flat-buffer — L5 평면 배치
+
+- `layer: 5` 위임은 `buffer_type: 'conversation'` 을 전달하고 `sub_layer` 를 전달하지 않아, 문서가 `05_Context/` 루트에 생성된다. `layer: 2` 위임은 buffer 필드 없이 `02_Derived/` 루트로 간다.
+
+### AC-single-enforcement-site — 단일 집행 지점
+
+- `category_filter` 를 읽어 차단을 수행하는 지점이 `maencofCaptureInsight.ts` 하나뿐이다.
+
+## History
+
+- 2026-08-04 — L5 재정의로 임시 수용소가 서브레이어 위임을 버리고 평면 배치가 되면서, 위임 필드가 `sub_layer: 'buffer'` 에서 `buffer_type: 'conversation'` 으로 바뀌었다.
+
+## Last Updated
+
+2026-08-04 — 폐기된 `sub_layer: 'buffer'` 위임 진술을 현재 `buffer_type` 계약으로 교체하고, 필터 차단·L5 라우팅·단일 집행 지점을 acceptance group 으로 고정했다.

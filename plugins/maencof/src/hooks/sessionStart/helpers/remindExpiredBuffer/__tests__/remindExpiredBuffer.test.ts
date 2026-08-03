@@ -13,7 +13,7 @@ describe('runRemindExpiredBuffer', () => {
   beforeEach(() => {
     vaultDirectory = mkdtempSync(join(tmpdir(), 'maencof-buffer-'));
     mkdirSync(join(vaultDirectory, '.maencof-meta'), { recursive: true });
-    bufferDirectory = join(vaultDirectory, '05_Context', 'buffer');
+    bufferDirectory = join(vaultDirectory, '05_Context');
     mkdirSync(bufferDirectory, { recursive: true });
   });
 
@@ -38,7 +38,6 @@ describe('runRemindExpiredBuffer', () => {
       'updated: 2020-01-01',
       'tags: [buffer]',
       'layer: 5',
-      'sub_layer: buffer',
       'expires: 2020-06-01',
     ]);
 
@@ -46,10 +45,10 @@ describe('runRemindExpiredBuffer', () => {
 
     expect(result.hookSpecificOutput).toBeDefined();
     const context = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(context).toContain('1 expired L5 buffer');
+    expect(context).toContain('1 expired L5 document');
     expect(context).toContain('/maencof:organize');
     expect(context).toContain('/maencof:cleanup buffer');
-    expect(context).toContain('05_Context/buffer/stale-note.md');
+    expect(context).toContain('05_Context/stale-note.md');
     // reminder only — nothing is deleted; caller keeps the document
   });
 
@@ -59,7 +58,6 @@ describe('runRemindExpiredBuffer', () => {
       'updated: 2026-01-01',
       'tags: [buffer]',
       'layer: 5',
-      'sub_layer: buffer',
       'expires: 2099-12-31',
     ]);
 
@@ -73,7 +71,6 @@ describe('runRemindExpiredBuffer', () => {
       'updated: 2020-01-01',
       'tags: [buffer]',
       'layer: 5',
-      'sub_layer: buffer',
     ]);
 
     const result = runRemindExpiredBuffer(vaultDirectory);

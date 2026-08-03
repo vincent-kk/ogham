@@ -2,7 +2,7 @@
  * @file common.ts
  * @description maencof 공통 타입 — Layer enum, NodeId, EdgeType, LinkDirection, AutonomyLevel, SubLayer.
  *
- * 런타임 상수 (LAYER_DIR / L3_SUBDIR / L5_SUBDIR / EDGE_TYPE / EXPECTED_ARCHITECTURE_VERSION)
+ * 런타임 상수 (LAYER_DIR / L3_SUBDIR / EDGE_TYPE / EXPECTED_ARCHITECTURE_VERSION)
  * 와 helper (layerFromDir / dirFromLayer) 는 constants/architecture.ts 에 위치.
  */
 
@@ -22,14 +22,22 @@ export function toNodeId(path: string): NodeId {
   return path as NodeId;
 }
 
-/** L3 서브레이어 */
-export type L3SubLayer = 'relational' | 'structural' | 'topical';
+/**
+ * 서브레이어 — Layer 3 의 방향성 분할이며, 서브레이어를 갖는 레이어는 L3 뿐이다.
+ * Layer 5 는 서브레이어 없는 평면 임시 수용소이고, 교차 연결 허브는 레이어와
+ * 직교하는 `hub` frontmatter 속성이다.
+ */
+export type SubLayer = 'relational' | 'structural' | 'topical';
 
-/** L5 서브레이어 */
-export type L5SubLayer = 'buffer' | 'boundary';
+/** L5 임시 수용소 항목의 종류 */
+export type BufferType = 'snippet' | 'conversation' | 'unclassified';
 
-/** 서브레이어 유니온 */
-export type SubLayer = L3SubLayer | L5SubLayer;
+/** L5 항목이 승격될 대상 — 서브레이어 이름 또는 레이어 토큰 */
+export type PromotionTarget = SubLayer | 'L2';
+
+/** 허브 문서의 종류 */
+export type HubKind =
+  'project_moc' | 'cross_domain' | 'synthesis' | 'study_hub';
 
 /** 그래프 엣지 유형 */
 export type EdgeType =

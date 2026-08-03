@@ -22,7 +22,7 @@ layer: design-area-2
 - 책임: 디렉토리 순회, 파일 목록 + mtime 수집, 변경 감지
 - 특성: 유일하게 파일시스템 I/O를 직접 수행하는 core 모듈
 - L3 서브디렉토리 인식: `03_External/relational/`(L3A), `03_External/structural/`(L3B), `03_External/topical/`(L3C) 각각을 독립 서브트리로 순회
-- L5 서브디렉토리 인식: `05_Context/buffer/`(L5-Buffer), `05_Context/boundary/`(L5-Boundary) 추가 인식
+- L5 는 서브레이어 없는 평면 구조다. `05_Context/` 경로에서 추론할 서브레이어가 없다
 
 ### C2. Document Parser
 - 책임: Frontmatter 추출, 헤더 기반 섹션 분리, 링크 추출, 키워드 추출
@@ -31,7 +31,7 @@ layer: design-area-2
 ### C3. Graph Builder
 - 책임: 파싱 결과 → 노드(문서) + 엣지(링크, 디렉토리 관계) 통합 그래프 구성
 - 엣지: `LINK`, `PARENT_OF`, `CHILD_OF`, `SIBLING`, `CROSS_LAYER` ([트리-그래프 이중 구조](./03-tree-graph-structure.md))
-- `CROSS_LAYER` 엣지: L5-Boundary 노드가 생성하는 교차 레이어 연결을 표현. `connected_layers` frontmatter 기반으로 L3A/B/C 서브레이어 간 브릿지 엣지 자동 생성
+- `CROSS_LAYER` 엣지: `hub: true` 노드가 생성하는 교차 레이어 연결을 표현. 허브는 레이어와 직교하는 속성이므로 레이어 필터 없이 태그 겹침으로 대상을 정하고, 노드당 상한을 적용한다
 
 ### C4. DAG Converter
 - 책임: 순환(cycle) 탐지 + DAG 변환
@@ -41,7 +41,7 @@ layer: design-area-2
 - 책임: 엣지 가중치(Wu-Palmer, SCS) + 노드 점수(CF, PageRank) 계산
 - Wu-Palmer: 디렉토리 트리 LCS 깊이 기준
 - PageRank: 전체 그래프 노드별 중요도
-- 서브레이어별 차등 감쇠 인자: `sub_layer` frontmatter 기반으로 L3A(0.75), L3B(0.80), L3C(0.85), L5-Buffer(0.95), L5-Boundary(0.60) 적용
+- 감쇠 인자 우선순위: `hub`(0.95) > `sub_layer`(L3A 0.75 · L3B 0.80 · L3C 0.85) > `layer`(L1 0.5 · L2 0.7 · L3 0.8 · L4 0.9 · L5 0.45). 확산식에 곱해지는 계수라 값이 클수록 넓게 퍼진다
 
 ### C6. Spreading Activation Engine
 - 책임: 시드 노드에서 확산 활성화 실행, 관련 노드 탐색

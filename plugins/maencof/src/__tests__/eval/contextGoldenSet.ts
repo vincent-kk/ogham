@@ -55,6 +55,7 @@ export const CONTEXT_GOLDEN_QUERIES: ContextGoldenQuery[] = [
       'L2/insights/knowledge-graph-design.md': 1,
       'L2/insights/graph-algorithms-survey.md': 1,
       'L4/tasks/implement-search-v2.md': 1,
+      'L3/structural/graph-search-hub.md': 1,
     },
   },
   // recall 보호 — 분해·IDF 변경이 기존 다문서 회수(context 의 분산 지향)를 훼손하지 않는지.
@@ -66,6 +67,7 @@ export const CONTEXT_GOLDEN_QUERIES: ContextGoldenQuery[] = [
       'L2/insights/graph-search-synthesis.md': 2,
       'L2/insights/spreading-activation-notes.md': 2,
       'L2/insights/ontology-modeling.md': 1,
+      'L3/structural/graph-search-hub.md': 1,
     },
   },
   {
@@ -73,6 +75,7 @@ export const CONTEXT_GOLDEN_QUERIES: ContextGoldenQuery[] = [
     query: 'review security articles',
     relevance: {
       'L4/tasks/review-security-articles.md': 2,
+      'L3/structural/security-review-hub.md': 2,
       'L3/clippings/security-article-00.md': 1,
       'L3/clippings/security-article-01.md': 1,
     },

@@ -16,7 +16,7 @@ import { incrementUsageStat } from './usageStats.js';
  *
  * - `delete` → primary 한 건 op='delete'.
  * - `move` → primary(src) op='delete', also(dst) op='mutate'.
- * - 나머지(`create` / `update` / `capture_insight` / `boundary_create`) → primary/also 모두 op='mutate'.
+ * - 나머지(`create` / `update` / `capture_insight`) → primary/also 모두 op='mutate'.
  */
 function classifyEntries(
   toolName: string,

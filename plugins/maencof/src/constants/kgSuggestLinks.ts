@@ -3,6 +3,4 @@ export const SUB_LAYER_NAMES: Record<string, string> = {
   relational: 'L3A-Relational',
   structural: 'L3B-Structural',
   topical: 'L3C-Topical',
-  buffer: 'L5-Buffer',
-  boundary: 'L5-Boundary',
 };

@@ -7,7 +7,6 @@
  * Insight x1: `capture_insight`
  * Search x5: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
  * Build x1: kg_build
- * Boundary x1: boundary_create
  * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
  * Companion x1: companion_edit
  * Activity x1: activity_read

@@ -5,18 +5,13 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import {
-  L3_SUBDIR,
-  L5_SUBDIR,
-  LAYER_DIR,
-} from '../../../constants/architecture.js';
+import { L3_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
 import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { deduplicateContent } from '../../../core/contentDedup/index.js';
 import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { quoteYamlValue } from '../../../core/yamlParser/index.js';
 import { Layer } from '../../../types/common.js';
-import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
 import {
   AUTO_GENERATED_FM_KEYS,
   validateFrontmatter,
@@ -47,6 +42,14 @@ function inputToFrontmatterObject(
   if (input.mentioned_persons && input.mentioned_persons.length > 0)
     fm.mentioned_persons = input.mentioned_persons;
   if (input.gist !== undefined) fm.gist = input.gist;
+  if (input.buffer_type !== undefined) fm.buffer_type = input.buffer_type;
+  if (input.promotion_target !== undefined)
+    fm.promotion_target = input.promotion_target;
+  if (input.source_context !== undefined)
+    fm.source_context = input.source_context;
+  if (input.hub !== undefined) fm.hub = input.hub;
+  if (input.hub_kind !== undefined) fm.hub_kind = input.hub_kind;
+  if (input.purpose !== undefined) fm.purpose = input.purpose;
   return fm;
 }
 
@@ -134,6 +137,14 @@ function buildFrontmatter(input: MaencofCreateInput): FrontmatterBuildResult {
     lines.push(`mentioned_persons: ${personsYaml}`);
   }
   if (input.gist) lines.push(`gist: ${quoteYamlValue(input.gist)}`);
+  if (input.buffer_type) lines.push(`buffer_type: ${input.buffer_type}`);
+  if (input.promotion_target)
+    lines.push(`promotion_target: ${input.promotion_target}`);
+  if (input.source_context)
+    lines.push(`source_context: ${quoteYamlValue(input.source_context)}`);
+  if (input.hub) lines.push(`hub: true`);
+  if (input.hub_kind) lines.push(`hub_kind: ${input.hub_kind}`);
+  if (input.purpose) lines.push(`purpose: ${quoteYamlValue(input.purpose)}`);
 
   lines.push('---');
 
@@ -193,15 +204,11 @@ export async function handleMaencofCreate(
     return { success: false, path: '', message: filenameResult.error };
   const { filename } = filenameResult;
 
-  // Sub-layer 디렉토리 결정
-  let subDir = '';
-  if (input.sub_layer) {
-    const layerNum = input.layer as Layer;
-    if (layerNum === 3 && input.sub_layer in L3_SUBDIR)
-      subDir = L3_SUBDIR[input.sub_layer as L3SubLayer];
-    else if (layerNum === 5 && input.sub_layer in L5_SUBDIR)
-      subDir = L5_SUBDIR[input.sub_layer as L5SubLayer];
-  }
+  // Sub-layer 디렉토리 결정 — L3 만 서브레이어를 가지며, L5 는 평면 구조다
+  const subDir =
+    (input.layer as Layer) === 3 && input.sub_layer
+      ? (L3_SUBDIR[input.sub_layer] ?? '')
+      : '';
 
   const relativePath = subDir
     ? `${layerDir}/${subDir}/${filename}`

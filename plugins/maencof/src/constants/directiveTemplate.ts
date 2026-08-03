@@ -18,7 +18,8 @@ export function buildDefaultDirective(
 
 ## Vault
 - Path: ${cwd}
-- Model: 5-Layer (L1:Core / L2:Derived / L3:External[relational,structural,topical] / L4:Action / L5:Context[buffer,boundary])
+- Model: 5-Layer (L1:Core / L2:Derived / L3:External[relational,structural,topical] / L4:Action / L5:Context — flat unclassified buffer)
+- Cross-layer hubs (MOC) are a frontmatter attribute (\`hub\`/\`hub_kind\`/\`purpose\`), not a layer. Any L1-L4 document can be one.
 
 ## Required Rules (MUST)
 
@@ -28,7 +29,7 @@ export function buildDefaultDirective(
 - When modifying vault documents MUST use \`update\`. Do not edit vault markdown files directly with the Edit tool.
 - When learning new information MUST use \`kg_suggest_links\` to check for connection possibilities with existing knowledge.
 - When creating documents MUST specify layer and tags.
-- When new information does NOT clearly fit L2/L3/L4, MUST NOT force a layer — create it with layer 5 + sub_layer 'buffer' (the unclassified inbox). Buffer items are promoted later via /maencof:organize or cleaned via /maencof:cleanup buffer.
+- When new information does NOT clearly fit L2/L3/L4, MUST NOT force a layer — create it with layer 5 (the flat unclassified inbox; no sub_layer). Set \`buffer_type\` and, when known, \`promotion_target\` and \`source_context\`. Layer 5 items are promoted later via /maencof:organize or cleaned via /maencof:cleanup buffer.
 - When creating documents about interactions with people (meetings, conversations, collaborations), MUST include \`mentioned_persons\` parameter in \`create\` with the names of people mentioned. This is separate from \`person_ref\` (L3A-only, identifies who a profile document is about). \`mentioned_persons\` captures anyone mentioned in any document at any layer.
 
 ## Forbidden Rules (FORBIDDEN)
@@ -54,7 +55,7 @@ export function buildDefaultDirective(
 | Update vault documents | update | Edit |
 | Delete vault documents | delete | Bash rm |
 | Move vault documents | move | Bash mv |
-| Create cross-layer MOC/hub | boundary_create | create |
+| Create cross-layer MOC/hub | create with hub: true, hub_kind, purpose | a dedicated boundary tool (removed in v3) |
 | Check vault status | kg_status | ls, find |
 | Assemble context | kg_context | Manual file assembly |
 | Capture insight | capture_insight | create (use dedicated tool) |

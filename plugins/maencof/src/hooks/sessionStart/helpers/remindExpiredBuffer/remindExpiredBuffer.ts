@@ -1,11 +1,11 @@
 /**
  * @file remindExpiredBuffer.ts
- * @description SessionStart remindExpiredBuffer concern — L5 buffer 문서 중 TTL(expires)이
+ * @description SessionStart remindExpiredBuffer concern — L5(임시 수용소) 문서 중 TTL(expires)이
  * 지난 것을 감지해, 세션 시작 시 정리를 촉구하는 알림을 additionalContext로 주입한다.
  *
- * **삭제하지 않는다**: L5 buffer의 만료 처리는 promote(승격) 또는 폐기(discard)라는
+ * **삭제하지 않는다**: L5 문서의 만료 처리는 promote(승격) 또는 폐기(discard)라는
  * *판단*이고 폐기는 비가역이므로, 코어는 알림만 하고 실제 처리는 사용자/스킬
- * (`/maencof:organize`·`/maencof:cleanup buffer`)에 맡긴다. boundary("동의 없이 삭제 금지").
+ * (`/maencof:organize`·`/maencof:cleanup buffer`)에 맡긴다 — 동의 없이 삭제하지 않는다는 원칙.
  *
  * L4 archiveExpired(이동, 가역, 자동)와 대칭: L5는 알림, 비가역 처리는 사용자.
  *
@@ -33,7 +33,7 @@ const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---\n?/;
 const MAX_LISTED_PATHS = 5;
 
 /**
- * L5 buffer의 만료 문서를 감지해, 있으면 정리 촉구 알림을 반환한다.
+ * L5 임시 수용소의 만료 문서를 감지해, 있으면 정리 촉구 알림을 반환한다.
  * 아무것도 삭제하지 않는다 — 알림만.
  */
 export function runRemindExpiredBuffer(
@@ -42,7 +42,7 @@ export function runRemindExpiredBuffer(
   if (!isMaencofVault(currentWorkingDirectory)) return { continue: true };
 
   const today = new Date().toISOString().slice(0, 10);
-  const bufferRoot = join(currentWorkingDirectory, '05_Context', 'buffer');
+  const bufferRoot = join(currentWorkingDirectory, '05_Context');
 
   let expiredRelativePaths: string[];
   try {
@@ -52,7 +52,7 @@ export function runRemindExpiredBuffer(
       today,
     );
   } catch {
-    return { continue: true }; // buffer 디렉토리 없으면 no-op
+    return { continue: true }; // 05_Context 디렉토리 없으면 no-op
   }
 
   if (expiredRelativePaths.length === 0) return { continue: true };
@@ -66,7 +66,7 @@ export function runRemindExpiredBuffer(
   };
 }
 
-/** buffer 루트를 재귀 순회하여 expires가 today보다 과거인 문서의 상대 경로를 모은다. */
+/** 05_Context 루트를 재귀 순회하여 expires가 today보다 과거인 문서의 상대 경로를 모은다. */
 function collectExpiredBufferDocuments(
   bufferRoot: string,
   currentWorkingDirectory: string,
@@ -115,9 +115,9 @@ function buildReminderMessage(expiredRelativePaths: string[]): string {
       ? `\n  … and ${count - MAX_LISTED_PATHS} more`
       : '';
   return [
-    `[maencof] ${count} expired L5 buffer document(s) are past their TTL and were never triaged:`,
+    `[maencof] ${count} expired L5 document(s) are past their TTL and were never triaged:`,
     `${listedPaths}${overflow}`,
     'Suggest the user promote them via /maencof:organize or discard via /maencof:cleanup buffer.',
-    'Do NOT auto-delete — L5 disposal is a user decision (boundary).',
+    'Do NOT auto-delete — L5 disposal is a user decision.',
   ].join('\n');
 }

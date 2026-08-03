@@ -11,7 +11,6 @@ export const McpToolName = {
   KG_STATUS: 'kg_status',
   KG_TIMELINE: 'kg_timeline',
   KG_BUILD: 'kg_build',
-  BOUNDARY_CREATE: 'boundary_create',
   KG_SUGGEST_LINKS: 'kg_suggest_links',
   CLAUDEMD_MERGE: 'claudemd_merge',
   CLAUDEMD_READ: 'claudemd_read',

@@ -4,7 +4,10 @@
  *
  * 재현 특성: LINK 고아율 ≥ 50%, 대형 폴더 SIBLING 클리크(20노드), 허브 태그(security),
  * 다경로 수렴 구조(두 시드 → graph-search-synthesis), 어휘 비중첩 연상 경로(ontology-modeling),
- * 동형이의어 위상(공유 토큰 "image"·"전환"이 무관 도메인 클러스터에 걸침 — IDF 판별 사례).
+ * 동형이의어 위상(공유 토큰 "image"·"전환"이 무관 도메인 클러스터에 걸침 — IDF 판별 사례),
+ * 레이어 직교 허브 2종(CROSS_LAYER 브릿지), 평면 L5 임시 수용소(활성 누출 경로).
+ * 뒤의 두 특성은 감쇠 인자 스윕이 측정할 대상을 만든다 — 이들이 없으면 hub·L5·CROSS_LAYER
+ * 계수는 골든셋에서 발화하지 않고, 값을 바꿔도 지표가 움직이지 않는다.
  * 랜덤 요소 없음 — 실행 간 완전 동일 그래프를 보장한다.
  */
 import {
@@ -13,6 +16,7 @@ import {
 } from '../../core/graphBuilder/index.js';
 import { calculateWeights } from '../../core/weightCalculator/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
+import type { HubKind } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 
 /** 픽스처 문서 정의 (id는 vault-root 상대 경로) */
@@ -23,6 +27,10 @@ interface FixtureDoc {
   tags: string[];
   links?: string[];
   updated?: string;
+  /** 교차 연결 허브 — CROSS_LAYER 엣지의 출발점이 된다 */
+  hub?: boolean;
+  hubKind?: HubKind;
+  purpose?: string;
 }
 
 const SECURITY_ARTICLE_COUNT = 20;
@@ -280,6 +288,56 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     links: ['L2/insights/vault-organization.md'],
     updated: '2026-06-25',
   },
+  // ─── 허브 (레이어 직교) ────────────────────────────────────────────────
+  // CROSS_LAYER 는 태그 겹침으로만 대상을 정하므로, 두 허브는 각자 다른 성격의
+  // 브릿지를 만든다: 좁고 깊은 다리(graph/search, 4개 레이어 횡단)와
+  // 넓고 얕은 다리(security, 20+ 노드 fan-out).
+  {
+    path: 'L3/structural/graph-search-hub.md',
+    title: 'Graph Search Hub',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['graph', 'search'],
+    hub: true,
+    hubKind: 'study_hub',
+    purpose: '그래프 검색 학습 경로 통합',
+  },
+  {
+    path: 'L3/structural/security-review-hub.md',
+    title: 'Security Review Hub',
+    layer: Layer.L3_EXTERNAL,
+    tags: ['security'],
+    hub: true,
+    hubKind: 'project_moc',
+    purpose: '보안 리뷰 대상 자료 통합',
+  },
+  // ─── L5 임시 수용소 (평면) ─────────────────────────────────────────────
+  // 전부 `snippet` 태그를 공유해 한 폴더의 SIBLING 클리크를 이룬다. 실제 클러스터와
+  // 태그가 겹치는 항목(graph/ontology/investment)이 활성을 받았을 때, 그 활성이
+  // 무관한 형제 버퍼로 새어나가는지가 L5 감쇠 인자의 측정 지점이다.
+  {
+    path: 'L5/buf-graph-snippet.md',
+    title: 'Graph Snippet Fragment',
+    layer: Layer.L5_CONTEXT,
+    tags: ['graph', 'snippet'],
+  },
+  {
+    path: 'L5/buf-ontology-fragment.md',
+    title: 'Ontology Fragment',
+    layer: Layer.L5_CONTEXT,
+    tags: ['ontology', 'snippet'],
+  },
+  {
+    path: 'L5/buf-portfolio-note.md',
+    title: 'Portfolio Scratch Note',
+    layer: Layer.L5_CONTEXT,
+    tags: ['investment', 'snippet'],
+  },
+  {
+    path: 'L5/buf-unsorted-quote.md',
+    title: 'Unsorted Quote',
+    layer: Layer.L5_CONTEXT,
+    tags: ['snippet'],
+  },
 ];
 
 function toKnowledgeNode(doc: FixtureDoc): KnowledgeNode {
@@ -295,6 +353,11 @@ function toKnowledgeNode(doc: FixtureDoc): KnowledgeNode {
     accessed_count: 0,
   };
   if (doc.links) node.outboundLinks = doc.links;
+  if (doc.hub) {
+    node.hub = true;
+    node.hubKind = doc.hubKind;
+    node.purpose = doc.purpose;
+  }
   return node;
 }
 

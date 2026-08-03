@@ -1,4 +1,5 @@
 export {
+  HUB_DECAY_FACTOR,
   LAYER_DECAY_FACTORS,
   SUBLAYER_DECAY_FACTORS,
 } from '../../constants/weights.js';

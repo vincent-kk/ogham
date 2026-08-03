@@ -125,7 +125,7 @@ For more detail: `/maencof:recall {query} --detail`
 | `--summary`     | default | Summary mode (title + 1-2 line summary)                                       |
 | `--detail`      | —       | Detail mode (full content excerpt)                                            |
 | `--layer=N`     | all     | Search a specific Layer only (1-5)                                            |
-| `--sub-layer=X` | none    | Filter by sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
+| `--sub-layer=X` | none    | Filter by sub-layer: relational/structural/topical (L3 only) |
 | `--limit=N`     | 10      | Maximum number of results                                                     |
 
 ## Usage Examples
@@ -136,7 +136,7 @@ For more detail: `/maencof:recall {query} --detail`
 /maencof:recall schedule --layer=4
 /maencof:recall core values --layer=1 --detail
 /maencof:recall alice --sub-layer=relational
-/maencof:recall project moc --sub-layer=boundary
+/maencof:recall project moc --sub-layer=structural
 ```
 
 ## Error Handling

@@ -20,7 +20,6 @@ export {
   captureInsightInputSchema,
   contextCacheManageInputSchema,
   handleActivityRead,
-  handleBoundaryCreate,
   handleCaptureInsight,
   handleClaudeMdMerge,
   handleClaudeMdRead,
@@ -47,8 +46,6 @@ export {
   selectContextCandidates,
 } from './tools/index.js';
 export type {
-  BoundaryCreateInput,
-  BoundaryCreateResult,
   CaptureInsightArgs,
   InsightCategory,
   KgBuildInput,

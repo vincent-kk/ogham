@@ -161,7 +161,7 @@ When `--verbose` is specified together with `--quick`, additionally display:
   ```
   Sub-Layer Consistency Issues:
     - 03_External/relational/doc.md has sub_layer: "topical" (expected: "relational")
-    - 05_Context/buffer/old.md has sub_layer: "boundary" (expected: "buffer")
+    - 05_Context/old.md has sub_layer: "topical" (Layer 5 takes no sub_layer)
   ```
 
 ### Recommended Action Matrix (--quick)
@@ -184,7 +184,7 @@ When `--verbose` is specified together with `--quick`, additionally display:
 | `staleNodeCount`          | number  | Stale node count                                                                                                                                |
 | `freshnessPercent`        | number  | Index freshness (%)                                                                                                                             |
 | `rebuildRecommended`      | boolean | Whether full rebuild is recommended                                                                                                             |
-| `subLayerDistribution`    | object  | L3 (relational/structural/topical) and L5 (buffer/boundary) node counts                                                                         |
+| `subLayerDistribution`    | object  | L3 (relational/structural/topical) node counts                                                                                                                                                          |
 | `linkOrphanCount`         | number  | Nodes with no inbound and no outbound wikilink (LINK) — semantic isolation that total-degree orphan misses because folder SIBLING edges mask it |
 | `linkInboundOrphanCount`  | number  | Nodes never referenced by any wikilink (no inbound LINK)                                                                                        |
 | `linkOutboundOrphanCount` | number  | Nodes that link to nothing (no outbound LINK)                                                                                                   |

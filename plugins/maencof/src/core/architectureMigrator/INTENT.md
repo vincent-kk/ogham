@@ -2,7 +2,7 @@
 
 ## Purpose
 
-볼트 아키텍처 버전 마이그레이션 (v1 → v2, L3 서브레이어 + L5 Buffer/Boundary). 구조 변경 시 자동 디렉토리 재배치 수행. 모든 작업은 WAL(Write-Ahead Log) 기반으로 원자적으로 실행되며 실패 시 rollback 을 보장한다.
+볼트 아키텍처 버전 마이그레이션. 목표는 `EXPECTED_ARCHITECTURE_VERSION`(v3 — L3 서브레이어 + 평면 L5, 허브는 레이어가 아닌 속성)이며, 구조 변경 시 자동 디렉토리 재배치를 수행한다. 모든 작업은 WAL(Write-Ahead Log) 기반으로 원자적으로 실행되며 실패 시 rollback 을 보장한다.
 
 ## Structure
 

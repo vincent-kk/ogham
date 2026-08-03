@@ -111,6 +111,21 @@ function updateFrontmatter(
   if (updates.gist !== undefined)
     yaml = patchFrontmatterField(yaml, 'gist', quoteYamlValue(updates.gist));
 
+  if (updates.hub !== undefined)
+    yaml = updates.hub
+      ? patchFrontmatterField(yaml, 'hub', 'true')
+      : removeFrontmatterField(yaml, 'hub');
+
+  if (updates.hub_kind !== undefined)
+    yaml = patchFrontmatterField(yaml, 'hub_kind', updates.hub_kind);
+
+  if (updates.purpose !== undefined)
+    yaml = patchFrontmatterField(
+      yaml,
+      'purpose',
+      quoteYamlValue(updates.purpose),
+    );
+
   return content.replace(match[0], `---\n${yaml}\n---\n`);
 }
 

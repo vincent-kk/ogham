@@ -63,7 +63,7 @@ export function buildGraph(
   const domainEdges = buildDomainEdges(nodes);
   for (const e of domainEdges) edges.push(e);
 
-  // CROSS_LAYER 엣지: L5-Boundary 노드에서 connected_layers 내 태그 겹침 노드로
+  // CROSS_LAYER 엣지: 허브 노드(hub: true)에서 태그 겹침 노드로
   const crossLayerEdges = buildCrossLayerEdges(nodes);
   for (const e of crossLayerEdges) edges.push(e);
 

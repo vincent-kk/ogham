@@ -15,7 +15,7 @@ The dashboard reads `.maencof/nodes.json` and `.maencof/edges.json` which serial
 export type NodeId = string;
 export type Layer = 1 | 2 | 3 | 4 | 5;
 export type SubLayer =
-  'relational' | 'structural' | 'topical' | 'buffer' | 'boundary';
+  'relational' | 'structural' | 'topical';
 
 export interface KnowledgeNode {
   /* fields below */
@@ -57,8 +57,9 @@ interface KnowledgeNode {
   pagerank?: number;
   cf?: number;
   subLayer?: SubLayer;
-  connectedLayers?: number[];
-  boundaryType?: string;
+  hub?: boolean;
+  hubKind?: string;
+  purpose?: string;
   person?: Person;
   domain?: string;
   mentioned_persons?: string[];

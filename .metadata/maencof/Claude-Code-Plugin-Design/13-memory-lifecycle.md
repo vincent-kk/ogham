@@ -35,10 +35,10 @@ layer: design-area-3
 | L3C→L2              | confidence ≥ 0.7 AND accessed_count ≥ 5      | SessionStart 지연 전이 | 명시적 승인 | 자동 전이    |
 | L3A/B/C→삭제        | expires 경과 AND accessed_count = 0          | SessionStart 정리      | 명시적 승인 | 제안 후 확인 |
 | L4→삭제             | 30일 경과 AND 미참조                         | SessionStart 정리      | 자동        | 자동         |
-| L5-Buffer→L3A/B/C   | 사용자 분류 또는 시스템 분류 제안            | organize 스킬          | 명시적 승인 | 제안 후 확인 |
-| L5-Buffer→L2        | 직접 내재화 (이미 처리된 지식)               | organize 스킬          | 명시적 승인 | 자동 전이    |
-| L5-Buffer→삭제      | 30일 경과 AND 미참조                         | SessionStart           | 명시적 승인 | 제안 후 확인 |
-| L3A/B/C→L5-Boundary | 노드가 교차 레이어 커넥터로 지정             | organize 스킬          | 명시적 승인 | 자동         |
+| L5→L3A/B/C   | 사용자 분류 또는 시스템 분류 제안            | organize 스킬          | 명시적 승인 | 제안 후 확인 |
+| L5→L2        | 직접 내재화 (이미 처리된 지식)               | organize 스킬          | 명시적 승인 | 자동 전이    |
+| L5→삭제      | 30일 경과 AND 미참조                         | SessionStart           | 명시적 승인 | 제안 후 확인 |
+| L1~L4 노드 → 허브 승격 | 노드가 교차 레이어 커넥터로 지정        | organize 스킬          | 명시적 승인 | 자동         |
 
 ---
 
@@ -98,7 +98,7 @@ Stop 훅의 `sessionRecap` concern이 세션에서 자동 캡처된 pending insi
 | ephemeral_candidate | (기본 폐기)                           | —          |
 
 `refuted_premise`와 `ephemeral_candidate`는 `InsightCategoryFilter` 기본 정책에서 거부된다.
-사용자가 `/maencof:insight --category refuted --accept`로 필터를 연 경우에만 L5-Buffer에 기록된다.
+사용자가 `/maencof:insight --category refuted --accept`로 필터를 연 경우에만 Layer 5에 기록된다.
 
 ### 제어 스위치
 

@@ -1,7 +1,7 @@
 /**
  * @file kg.ts
- * @description Registers 8 KG tools via the wrapper organ:
- * 1 mutate (boundary_create) + 5 fresh reads (kg_search/navigate/context/suggest_links/timeline)
+ * @description Registers 7 KG tools via the wrapper organ:
+ * 5 fresh reads (kg_search/navigate/context/suggest_links/timeline)
  * + 2 plain reads (kg_status, kg_build).
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -9,7 +9,6 @@ import { z } from 'zod';
 
 import { KgContextScope } from '../../../../constants/kgContext.js';
 import { McpToolName } from '../../../../constants/mcpToolNames.js';
-import { handleBoundaryCreate } from '../../../tools/boundaryCreate/index.js';
 import { handleKgContext } from '../../../tools/kgContext/index.js';
 import { handleKgNavigate } from '../../../tools/kgNavigate/index.js';
 import { handleKgSearch } from '../../../tools/kgSearch/index.js';
@@ -19,7 +18,6 @@ import { handleKgTimeline } from '../../../tools/kgTimeline/index.js';
 import { loadGraphIfNeeded } from '../../graphCache/index.js';
 import {
   rebuildAndInvalidate,
-  registerMutateTool,
   registerReadTool,
 } from '../../middlewares/index.js';
 
@@ -86,10 +84,10 @@ export function registerKgTools(server: McpServer): void {
           .optional()
           .describe('Layer filter (1-5)'),
         sub_layer: z
-          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .enum(['relational', 'structural', 'topical'])
           .optional()
           .describe(
-            'Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)',
+            'Sub-layer filter for Layer 3 (relational/structural/topical).',
           ),
       }),
     },
@@ -164,10 +162,10 @@ export function registerKgTools(server: McpServer): void {
           .optional()
           .describe('Layer filter (1-5)'),
         sub_layer: z
-          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .enum(['relational', 'structural', 'topical'])
           .optional()
           .describe(
-            'Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)',
+            'Sub-layer filter for Layer 3 (relational/structural/topical).',
           ),
         scope: z
           .nativeEnum(KgContextScope)
@@ -225,29 +223,6 @@ export function registerKgTools(server: McpServer): void {
     },
     async (vaultPath, args) => rebuildAndInvalidate(vaultPath, args),
     { needsFreshness: false },
-  );
-
-  // ─── boundary_create (mutate) ────────────────────────────────────
-  registerMutateTool(
-    server,
-    McpToolName.BOUNDARY_CREATE,
-    {
-      description:
-        'Creates a boundary document in 05_Context/boundary/. Boundary documents bridge multiple layers and enable CROSS_LAYER edges.',
-      inputSchema: z.object({
-        title: z.string().describe('Boundary document title'),
-        boundary_type: z
-          .enum(['project_moc', 'cross_domain', 'synthesis'])
-          .describe('Boundary object type'),
-        connected_layers: z
-          .array(z.number().int().min(1).max(5))
-          .min(1)
-          .describe('Connected layer numbers'),
-        tags: z.array(z.string()).min(1).describe('Tag list (at least 1)'),
-      }),
-    },
-    async (vaultPath, args) => handleBoundaryCreate(vaultPath, args),
-    (_args, result) => result.path ?? null,
   );
 
   // ─── kg_suggest_links (fresh read) ───────────────────────────────
@@ -313,7 +288,7 @@ export function registerKgTools(server: McpServer): void {
           .optional()
           .describe('Layer filter (1-5)'),
         sub_layer: z
-          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .enum(['relational', 'structural', 'topical'])
           .optional()
           .describe('Sub-layer filter'),
       }),

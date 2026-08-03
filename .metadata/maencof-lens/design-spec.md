@@ -154,7 +154,7 @@ maencof 본체의 18개 도구 중 **읽기 전용 부분집합**만 노출한�
 - 쓰기 계열: `maencof_create`, `maencof_update`, `maencof_delete`, `maencof_move`
 - 빌드 계열: `kg_build`, `kg_suggest_links`
 - 시스템 계열: `claudemd_merge`, `claudemd_read`, `claudemd_remove`
-- 캡처 계열: `maencof_capture_insight`, `boundary_create`
+- 캡처 계열: `maencof_capture_insight`
 - 캐시 관리: `context_cache_manage`
 - 일일 노트: `dailynote_read`
 

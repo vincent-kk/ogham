@@ -23,7 +23,7 @@ Enforce directory structure compliance with the maencof 5-Layer knowledge model.
 | `02_Derived/`    | 2     | Internalized knowledge                                           |
 | `03_External/`   | 3     | External references                                              |
 | `04_Action/`     | 4     | Action memory                                                    |
-| `05_Context/`    | 5     | Context (buffer: unclassified inbox, boundary: cross-layer hubs) |
+| `05_Context/`    | 5     | Flat unclassified inbox (no sub-directories)                     |
 
 ### R2. Frontmatter layer Field Must Match
 

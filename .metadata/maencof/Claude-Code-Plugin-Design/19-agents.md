@@ -39,7 +39,7 @@ Frontmatter에 `allowed_layers`, `allowed_operations` 명시.
 | memory-organizer | 읽기 | 읽기/쓰기 | 읽기/쓰기 | 읽기/쓰기 | 읽기/쓰기 | 전이/정리 |
 | identity-guardian | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 전용 (L1 보호/갱신 안내) |
 | checkup | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 진단 + Frontmatter 자동수정 (update) |
-| knowledge-connector | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 링크 제안 (`kg_suggest_links` 경유), L5-Boundary 커넥터 관리 |
+| knowledge-connector | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 링크 제안 (`kg_suggest_links` 경유), 허브 커넥터 관리 |
 | configurator | - | - | - | - | - | 프로젝트 설정 파일만 (MCP 관할 외) |
 
 ---

@@ -79,7 +79,7 @@ Phase 2 분해 결과의 합의된 전제가 **실제 합의인지** 검증하�
 | (구 dailynote) | (스킬 폐기, `activity-recorder.mjs` PostToolUse 훅으로 대체) | 활동 로그 기록 (`activity_read`/`work_history`의 원천 데이터)                            |
 | cleanup        | `/maencof:cleanup`                                           | 볼트 잔여물(stale/orphan/broken link) 정리                                               |
 | changelog      | `/maencof:changelog`                                         | 볼트 변경 기록 (changelog-gate + writer 파이프라인)                                      |
-| migrate        | `/maencof:migrate`                                           | 아키텍처 버전 마이그레이션 (예: L3 단일 → L3A/B/C 서브레이어, L5 단일 → buffer/boundary) |
+| migrate        | `/maencof:migrate`                                           | 아키텍처 버전 마이그레이션 (예: L3 단일 → L3A/B/C 서브레이어, L5 서브레이어 → 평면 + 허브 속성) |
 
 ---
 

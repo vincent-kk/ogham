@@ -13,4 +13,4 @@
 - [§5 문서 작성 명세 및 제약 사항](./05-document-specification.md) — 100줄 제한, 상대 경로, YAML Frontmatter 등 문서 작성 규칙
 - [§6 기대 효과](./06-expected-outcomes.md) — 트리-그래프 아키텍처 적용 시 AI 에이전트의 맥락 추론 능력 향상 효과
 - [§7 Layer 3 방향성 확장 모델](./07-l3-directional-expansion.md) — 외부 지식의 3차원 분할 설계 (L3A 관계적/L3B 구조적/L3C 의미론적)
-- [§8 Layer 5 Buffer/Boundary 재정의](./08-l5-redefinition.md) — 미분류 임시 저장소(Buffer)와 경계 객체 계층(Boundary)의 이중 역할 모델
+- [§8 Layer 5 재정의](./08-l5-redefinition.md) — Layer 5를 미분류 임시 수용소로 좁히고, 교차 연결 허브를 레이어 직교 속성으로 분리하는 설계

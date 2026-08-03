@@ -2,7 +2,13 @@
  * @file mcpCrud.ts
  * @description CRUD 도구 입출력 스키마 — create, read, update, delete, move
  */
-import type { Layer, SubLayer } from './common.js';
+import type {
+  BufferType,
+  HubKind,
+  Layer,
+  PromotionTarget,
+  SubLayer,
+} from './common.js';
 import type { ActivationResult, KnowledgeNode } from './graph.js';
 import type { L1ChangeReason } from './l1Amendment.js';
 
@@ -22,12 +28,24 @@ export interface MaencofCreateInput {
   source?: string;
   /** 만료일 YYYY-MM-DD (Layer 4용) */
   expires?: string;
-  /** 서브레이어 (L3: relational/structural/topical, L5: buffer/boundary) */
+  /** 서브레이어 (L3 전용: relational/structural/topical) */
   sub_layer?: SubLayer;
   /** 문서 콘텐츠에서 언급된 인물 목록 (선택, 모든 레이어) */
   mentioned_persons?: string[];
   /** 한 줄 요약 — L1 turn-context gist (선택) */
   gist?: string;
+  /** 미분류 항목의 종류 (L5 전용) */
+  buffer_type?: BufferType;
+  /** 승격 대상 서브레이어 (L5 전용) */
+  promotion_target?: PromotionTarget;
+  /** 항목의 출처 서술 (L5 전용) */
+  source_context?: string;
+  /** 교차 연결 허브 여부 (레이어 직교, L5 제외) */
+  hub?: boolean;
+  /** 허브 문서의 종류 (hub=true일 때만 유효) */
+  hub_kind?: HubKind;
+  /** 이 허브가 무엇을 통합하는지 한 줄 서술 (hub=true일 때 필수) */
+  purpose?: string;
 }
 
 /** `read` 입력 */
@@ -50,6 +68,12 @@ export interface MaencofUpdateFrontmatter {
   sub_layer?: SubLayer;
   /** 한 줄 요약 — L1 turn-context gist (선택) */
   gist?: string;
+  /** 교차 연결 허브 여부 — 기존 문서를 허브로 승격하는 경로 */
+  hub?: boolean;
+  /** 허브 문서의 종류 */
+  hub_kind?: HubKind;
+  /** 이 허브가 무엇을 통합하는지 한 줄 서술 */
+  purpose?: string;
   /**
    * 제거할 frontmatter 필드 이름 목록.
    * 보호 필드(created, updated, layer, tags)는 unset 거부.

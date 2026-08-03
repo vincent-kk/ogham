@@ -45,11 +45,7 @@ maencof의 기억공간을 5개 계층으로 분리하여, 기억의 휘발성·
 │   └── topical/          # L3C: 관심사, 기술, 문헌
 ├── 04_Action/            # Layer 4: Volatile 노드
 │   └── 2026/02/
-├── 05_Context/           # Layer 5: Metadata/Temporary/Bridge 노드
-│   ├── persons/          # 인물 메타데이터 (기존)
-│   ├── domains/          # 도메인 메타데이터 (기존)
-│   ├── buffer/           # L5-Buffer: 미분류 임시
-│   └── boundary/         # L5-Boundary: 경계 객체
+├── 05_Context/           # Layer 5: 미분류 임시 수용소 (평면 — 서브디렉토리 없음)
 └── .maencof-meta/        # 시스템 메타데이터
 ```
 
@@ -61,19 +57,17 @@ maencof의 기억공간을 5개 계층으로 분리하여, 기억의 휘발성·
 
 **Dense cluster (Layer 2)**: `skills/programming/typescript.md` 등. Layer 2 내부 양방향 링크 허용.
 
-**Pointer 노드 (Layer 3A)**: `person-mentor-alice.md` 등. 인물 프로파일, `expertise_domains` 태그. Layer 2 향한 단방향 + L5-Boundary 양방향.
+**Pointer 노드 (Layer 3A)**: `person-mentor-alice.md` 등. 인물 프로파일, `expertise_domains` 태그. Layer 2 향한 단방향 + 허브 양방향.
 
-**Context 노드 (Layer 3B)**: `org-company-x.md` 등. 조직 환경, Ba 맥락. Layer 2 향한 단방향 + L5-Boundary 양방향.
+**Context 노드 (Layer 3B)**: `org-company-x.md` 등. 조직 환경, Ba 맥락. Layer 2 향한 단방향 + 허브 양방향.
 
 **Leaf 노드 (Layer 3C)**: `topic-react-hooks.md` 등. 순수 개념/사실. `confidence`로 내재화 추적. Layer 2 향한 단방향.
 
 **Volatile 노드 (Layer 4)**: `session-2026-02-28.md` 등. 세션 종료 후 Layer 3A/B/C 승격 또는 삭제.
 
-**Metadata 노드 (Layer 5)**: `person-alice.md`, `domain-typescript.md` 등. 인물·도메인·환경 맥락 정보. 다른 레이어 문서들이 참조하는 보조 메타데이터.
+**Temporary 노드 (Layer 5)**: `buf-snippet-2026-03-04.md` 등. 미분류 임시 저장. 만료 가능. 승격 대상 서브레이어 제안. 다른 레이어가 참조하지 않는다.
 
-**Temporary 노드 (L5-Buffer)**: `buf-snippet-2026-03-04.md` 등. 미분류 임시 저장. 만료 가능. 승격 대상 레이어 제안.
-
-**Bridge 노드 (L5-Boundary)**: `bnd-project-dashboard.md` 등. L3A/B/C 교차 연결. 높은 fan-out. 경계 객체 메커니즘으로 서브레이어 간 지식 변환 허브 역할.
+**Bridge 노드 (허브)**: `hub: true` 를 선언한 L1~L4 문서. 레이어와 직교하는 속성이며, 태그가 겹치는 노드들과 `CROSS_LAYER` 로 교차 연결한다. 높은 fan-out.
 
 ---
 

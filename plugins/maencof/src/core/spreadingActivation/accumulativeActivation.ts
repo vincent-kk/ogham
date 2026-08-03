@@ -78,11 +78,11 @@ function effectiveEdgeWeight(
   return floored * EDGE_TYPE_MULTIPLIER[type];
 }
 
-/** 노드의 layer/subLayer 감쇠 (노드 부재 시 0.7) */
+/** 노드의 hub/subLayer/layer 감쇠 (노드 부재 시 0.7) */
 function nodeDecay(graph: KnowledgeGraph, nodeId: NodeId): number {
   const node = graph.nodes.get(nodeId);
   if (!node) return 0.7;
-  return getLayerDecay(node.layer, node.subLayer);
+  return getLayerDecay(node.layer, node.subLayer, node.hub);
 }
 
 /**

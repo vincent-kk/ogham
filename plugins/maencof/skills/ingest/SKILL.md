@@ -58,7 +58,7 @@ Tags are auto-extracted as core keywords from the content.
 ```
 mcp__plugin_maencof_tools__create({
   layer: 3, 4, or 5,
-  sub_layer: "topical" (L3 default; relational/structural if it fits) | "buffer" (L5 default; boundary if it bridges layers),  // omit for L4
+  sub_layer: "topical" (L3 only; relational/structural if it fits),  // omit for L1/L2/L4/L5
   tags: [auto-extracted tags],
   content: {converted markdown},
   title: {title},

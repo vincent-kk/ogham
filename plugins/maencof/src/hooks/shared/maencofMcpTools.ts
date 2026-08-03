@@ -17,7 +17,6 @@ export const MAENCOF_MCP_TOOLS = new Set<McpToolNameValue>([
   McpToolName.DELETE,
   McpToolName.MOVE,
   McpToolName.CAPTURE_INSIGHT,
-  McpToolName.BOUNDARY_CREATE,
   McpToolName.CLAUDEMD_MERGE,
   McpToolName.CLAUDEMD_REMOVE,
 ]);

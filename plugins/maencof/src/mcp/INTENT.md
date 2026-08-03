@@ -1,6 +1,6 @@
 # mcp
 
-MCP 서버 + 22개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
+MCP 서버 + 21개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
 
 ## Boundaries
 
@@ -9,7 +9,7 @@ MCP 서버 + 22개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
 - 도구 입력은 Zod 스키마로 검증
 - server.ts에 도구 등록 후 핸들러를 tools/에 구현
 - shared.ts의 toolResult/toolError 헬퍼 사용
-- 쓰기 도구(create/update/delete/move/capture_insight/boundary_create/kg_build) 성공 시 invalidateCache() 호출
+- 쓰기 도구(create/update/delete/move/capture_insight/kg_build) 성공 시 invalidateCache() 호출
 
 ### Ask first
 

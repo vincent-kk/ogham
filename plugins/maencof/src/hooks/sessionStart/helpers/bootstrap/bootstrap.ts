@@ -593,7 +593,7 @@ function checkArchitectureMismatch(cwd: string, messages: string[]): void {
     if (archVersion !== EXPECTED_ARCHITECTURE_VERSION)
       messages.push(
         `[maencof] Architecture update available (${archVersion} → ${EXPECTED_ARCHITECTURE_VERSION}).` +
-          '\nL3 sub-layers (relational/structural/topical) and L5 sub-layers (buffer/boundary) are now supported.' +
+          '\nLayer 3 sub-layers (relational/structural/topical); Layer 5 is a flat unclassified buffer and cross-layer hubs are a frontmatter attribute.' +
           '\nRun `/maencof:migrate` to upgrade your vault structure.',
       );
   } catch (e) {

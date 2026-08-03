@@ -7,11 +7,7 @@ import type { ActivationResult } from '../../../types/graph.js';
 
 /** 시드 매칭 유형 */
 export type MatchType =
-  | 'path-exact'
-  | 'title-exact'
-  | 'title-word'
-  | 'tag-exact'
-  | 'tag-prefix';
+  'path-exact' | 'title-exact' | 'title-word' | 'tag-exact' | 'tag-prefix';
 
 /** 매칭 품질이 포함된 시드 */
 export interface ScoredSeed {

@@ -36,7 +36,7 @@ claude --plugin-dir ./plugins/maencof
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (22 knowledge tools)
+- `bridge/mcp-server.cjs` — MCP server (21 knowledge tools)
 - `bridge/*.mjs` — 4 event dispatchers (session-start, user-prompt-submit, pre-tool-use, post-tool-use), each running that event's concern handlers in a single process. Session finalization (record close, archiving, auto-commit) lives in the MCP server lifecycle (boot sweep + shutdown), not in a hook.
 
 > **Performance note**: maencof registers one hook per event. The `UserPromptSubmit` dispatcher runs context injection → lifecycle actions → vault auto-commit → the insight banner sequentially in a single process — one node start per event instead of one per concern. The first prompt of a session additionally builds the context cache. The per-event timeouts in `hooks.json` are kill-switches, not expected latency, and every concern fast-fails outside a vault. The only path that runs git is the vault auto-commit, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
@@ -147,15 +147,17 @@ View skill/agent activation status, usage reports, and toggle features on/off.
 
 maencof organizes knowledge into five layers with distinct decay rates for Spreading Activation (SA):
 
-| Layer | Name               | Directory      | SA Decay | Purpose                                                      |
-| ----- | ------------------ | -------------- | -------- | ------------------------------------------------------------ |
-| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | Who you are — protected, rarely changes                      |
-| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | Internalized insights and skills                             |
-| L3    | External Reference | `03_External/` | 0.8      | Bookmarks, citations, external sources                       |
-| L4    | Action Memory      | `04_Action/`   | 0.9      | Volatile task notes, session context                         |
-| L5    | Context            | `05_Context/`  | 0.95     | Buffer inbox (unclassified), boundary hubs (cross-layer MOC) |
+| Layer | Name               | Directory      | SA Decay | Purpose                                 |
+| ----- | ------------------ | -------------- | -------- | --------------------------------------- |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | Who you are — protected, rarely changes |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | Internalized insights and skills        |
+| L3    | External Reference | `03_External/` | 0.8      | Bookmarks, citations, external sources  |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | Volatile task notes, session context    |
+| L5    | Context            | `05_Context/`  | 0.45     | Flat unclassified inbox awaiting triage |
 
-**Lower decay = stronger persistence.** L1 documents activate strongly and stay relevant across searches. L4 documents fade quickly unless reinforced.
+**The decay factor is a multiplier on outgoing activation (`A[j] = A[i] · W[i,j] · d`), so a higher value spreads wider.** The axis is U-shaped, not monotonic: core identity (0.5) and the unclassified inbox (0.45) both stay narrow, while external reference and action memory (0.8–0.9) carry activation outward. A document marked `hub: true` overrides its layer with 0.95 — hubs are meant to bridge.
+
+**Cross-layer hubs are an attribute, not a layer.** Any L1–L4 document can carry `hub: true` with `hub_kind` and `purpose`; it forms `CROSS_LAYER` edges to every tag-overlapping node regardless of layer.
 
 **Link direction rules:** Links flow downward (L1→L2→L3→L4) by default. Upward links (e.g., L3→L1) require explicit justification and are flagged during `organize`.
 
