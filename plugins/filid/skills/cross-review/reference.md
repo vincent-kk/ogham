@@ -10,7 +10,7 @@
 | `reviewers/structure.md`    | Structure perspective instructions                                                |
 | `reviewers/verification.md` | Verification perspective instructions                                             |
 | `reviewers/adversarial.md`  | Candidate arbitration instructions                                                |
-| `calibration/`              | Clean, warning-only, seeded, and contract-change regression fixtures              |
+| `calibration/`              | Clean, warning-only, seeded, contract-change, and gap-channel regression fixtures |
 
 ## Cross-Reference Map
 
@@ -18,6 +18,7 @@
 - Starting or resuming a run → `contracts.md` → Review-State Lifecycle
 - Collecting tool evidence → `phases/evidence.md`
 - Writing an opinion → `contracts.md` → Opinion Contract
+- Deciding whether a fact is a finding or a gap → `contracts.md` → Evidence Identity
 - Delivering the verdict to a pull request → `templates.md` → PR Comment
 - Resolving disagreement → `contracts.md` → Arbitration Contract
 - Deriving a verdict → `contracts.md` → Verdict Derivation

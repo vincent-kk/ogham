@@ -3,7 +3,7 @@ name: cross-review
 user_invocable: true
 description: '[filid:cross-review] Review a committed change from independent FCA contract, structure, and verification perspectives, then adversarially arbitrate every finding.'
 argument-hint: '[--base REF] [--force] [--cleanup]'
-version: '4.0.0'
+version: '4.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -144,11 +144,13 @@ mcp__plugin_filid_tools__review_state({
 
 If disposition is `stale` or `missing`, discard the unsealed artifacts by calling `prepare` once with `force: true`, then restart at Step 2. If identity changes again, stop without a terminal verdict.
 
-Derive the verdict exactly from `contracts.md`:
+Derive the verdict exactly from `contracts.md` — that table is the authority, and these lines are its summary:
 
-- required evidence or a reviewer decision is unresolved → `INCONCLUSIVE`;
+- arbitration unresolved, or a perspective gap that no confirmed finding covers → `INCONCLUSIVE`;
 - at least one confirmed FCA finding → `REQUEST_CHANGES`;
 - all candidates refuted, or no candidates → `APPROVED`.
+
+A perspective gap and a confirmed finding on the same owning fractal and rule are one fact recorded twice. Coverage neutralizes the gap for the verdict only; it stays in the report's `Unresolved Evidence` section marked as not affecting the verdict.
 
 Write `review-report.md` using `templates.md`. For `REQUEST_CHANGES`, also write `fix-requests.md` containing confirmed FCA findings only. For the other verdicts, remove any stale `fix-requests.md` inside this exact `REVIEW_DIR`.
 

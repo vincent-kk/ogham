@@ -26,7 +26,8 @@ Write exactly `REVIEW_DIR/opinions/contract.md` using the Opinion Contract in `c
 - Cite the contract line and conflicting entry or changed line.
 - Report only changed files or their owning fractals.
 - Do not judge general implementation quality or product behavior.
-- Missing required contract evidence is a gap and makes the opinion `INDETERMINATE`; it is not a fabricated finding.
+- Missing required contract evidence is a gap and makes the opinion `INDETERMINATE`; it is not a fabricated finding. An `indeterminate` entry surface the adapter measured and reported is a finding, not a gap — never record the same `path + rule` in both channels.
+- Contract state sourced entirely outside the changed files and their owning fractals is an `Out-of-scope observation`, not a gap, and does not change this opinion's `state`.
 - An empty finding set is valid when `checked` names every inspected contract.
 
 Finish only after `source_hash` and `snapshot_hash` match the evidence files.

@@ -53,6 +53,12 @@ Expose one source fractal for slug generation.
 
 - `slugify(input)` returns a normalized slug string.
 
+## Acceptance Criteria
+
+### AC-fixture-surface — root entry surface
+
+- `index.ts` exports `slugify` and nothing else.
+
 ## Last Updated
 
 2026-07-27
@@ -112,6 +118,12 @@ Own source fractals.
 ## API Contracts
 
 - `index.ts` re-exports `slugify`.
+
+## Acceptance Criteria
+
+### AC-src-surface — child entry surfaces
+
+- Every child fractal is reached through its own entry point, never an internal file.
 
 ## Last Updated
 
@@ -175,6 +187,13 @@ Generate URL-safe slugs without I/O.
 
 - `slugify(input: string): string` is exported from `index.ts`.
 
+## Acceptance Criteria
+
+### AC-slugify-normalization — slug normalization
+
+- Mixed-case input lowercases, separator runs collapse, and edge separators are trimmed.
+- Output never exceeds 64 characters.
+
 ## Last Updated
 
 2026-07-27
@@ -235,3 +254,7 @@ export function slugify(input: string): string {
 ```
 
 The change preserves contracts, entry surfaces, node placement, dependency direction, and verification-document policy.
+
+## Base Tree Conformance
+
+`structure_validate` over the base tree must report zero violations before any run is scored. Every `DETAIL.md` above therefore carries all four required sections — a missing `## Acceptance Criteria` raises a `detail-document-contract` error inside the owning fractal of whatever the branch changes, which lands in scope and defeats `run-a` and `run-g`. Verify the base commit before branching; a fixture whose base already fails is not an oracle.

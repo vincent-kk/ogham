@@ -73,10 +73,17 @@ generated_at: <ISO 8601>
 | ID  | Refuting Evidence | Reason |
 | --- | ----------------- | ------ |
 
+## Unresolved Evidence
+
+| Perspective | Path | Rule | Gap | Covered By | Affects Verdict |
+| ----------- | ---- | ---- | --- | ---------- | --------------- |
+
 ## Final Verdict
 
 **<VERDICT>** — <one sentence derived from contracts.md>.
 ```
+
+`Unresolved Evidence` lists every gap from all four opinions, uncovered rows first. `Covered By` names the `CONFIRMED` finding ID that covers the gap under Verdict Derivation, or `—`; `Affects Verdict` is `yes` only for a row with no coverage. A covered row stays visible and reads `no` — it is recorded, not counted. Write `none` under the heading when no opinion raised a gap.
 
 For `INCONCLUSIVE`, keep every section, name the missing or inconsistent evidence, and do not present unresolved rows as findings.
 
@@ -131,7 +138,7 @@ Posted only when the branch has a pull request. The verdict table stays **outsid
 
 <details><summary>Unresolved evidence</summary>
 
-<the gaps that forced INCONCLUSIVE>
+<the Unresolved Evidence rows whose Affects Verdict is `yes`>
 
 </details>
 

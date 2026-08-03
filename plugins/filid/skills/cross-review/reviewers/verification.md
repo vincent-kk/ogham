@@ -27,6 +27,9 @@ Write exactly `REVIEW_DIR/opinions/verification.md` using the Opinion Contract i
 - Cite the exact role row, file row, or DETAIL link.
 - Never delete or discount a needed case to satisfy a cap.
 - Do not infer framework-specific behavior beyond adapter evidence.
-- `indeterminate` or `unsupported` evidence for a changed verification file is a gap and makes the opinion `INDETERMINATE`.
+- A rule outcome of `indeterminate` — a dynamic table, an unknown wrapper, an ambiguous alias — is a finding. The rule decided it, and `filid_verification-records §3` bars converting it to a pass, not to an unjudgeable run.
+- A gap is evidence you could not obtain at all: an `unsupported` adapter for a changed verification file, or a required evidence row that is absent. Such a gap makes the opinion `INDETERMINATE`.
+- Never record the same `path + rule` in both `findings` and `gaps`.
+- A project-wide certainty whose contributing files all sit outside the changed files and their owning fractals is an `Out-of-scope observation`, not a gap, and does not change this opinion's `state`.
 
 An empty finding set is valid when every changed verification document is listed under `checked`.
