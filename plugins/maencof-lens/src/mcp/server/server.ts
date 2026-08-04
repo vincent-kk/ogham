@@ -51,7 +51,7 @@ export function createLensServer(configRoot: string | null) {
     McpToolName.SEARCH,
     {
       description:
-        "Search vault knowledge via Spreading Activation from seed keywords. Returns ranked references (no content); for assembled multi-document content, prefer the context tool.",
+        "Search vault knowledge via Spreading Activation from seed keywords. Returns ranked references (path/title/tags/gist); include_content=true adds full bodies without needing file access. For assembled multi-document content, prefer the context tool.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         seed: z
@@ -72,13 +72,32 @@ export function createLensServer(configRoot: string | null) {
             ),
         ),
         sub_layer: subLayerField,
+        include_trace: z.optional(
+          z
+            .boolean()
+            .describe(
+              "Include the seed→node hop path per result (default false)",
+            ),
+        ),
+        include_content: z.optional(
+          z
+            .boolean()
+            .describe(
+              "Include full document bodies (default false — references only). Layer-ceiling filtering still applies.",
+            ),
+        ),
       }),
     },
     async (args) => {
       try {
         const vault = resolveVault(args.vault);
         const graph = await graphCache.getGraph(vault.path);
-        const result = await handleLensSearch(graph, args, vault.layers);
+        const result = await handleLensSearch(
+          graph,
+          args,
+          vault.path,
+          vault.layers,
+        );
         return toolResult(result);
       } catch (e) {
         return toolError(String(e instanceof Error ? e.message : e));
@@ -91,7 +110,7 @@ export function createLensServer(configRoot: string | null) {
     McpToolName.CONTEXT,
     {
       description:
-        "Assemble a token-budgeted context block from vault documents matching a query. Prefer this over search + read chains for multi-document content; layer/sub-layer/scope selection applies before the budget is spent.",
+        "Assemble a token-budgeted context block from vault documents matching a query. Prefer this over search + read chains for multi-document content; layer/sub-layer/scope selection applies before the budget is spent. include_content=false returns only the selected document list (path/title/score).",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         query: z
@@ -114,6 +133,13 @@ export function createLensServer(configRoot: string | null) {
             .nativeEnum(KgContextScope)
             .describe(
               "Exploration breadth: 'focused' = close, high-confidence documents; 'balanced' = default; 'broad' = distant associative connections (ideation)",
+            ),
+        ),
+        include_content: z.optional(
+          z
+            .boolean()
+            .describe(
+              "Set false to skip markdown assembly and return only the selected document list as documents (default true)",
             ),
         ),
       }),

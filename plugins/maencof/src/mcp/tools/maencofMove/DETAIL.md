@@ -11,6 +11,7 @@
   - 세그먼트별로 `sanitizeSegment`(core/filenameSlug)로 정규화한다.
   - `..` 세그먼트는 traversal로 거부한다.
   - 깊이는 `MAX_FILENAME_SUBDIR_DEPTH`(constants/filename)를 초과할 수 없다.
+  - 대상 레이어가 `FLAT_LAYERS`(constants/architecture; L1·L5)에 속하면 지정 자체를 거부한다 — 평면 레이어는 중첩 디렉토리를 갖지 않는다.
 - 같은 레이어로의 이동은 `target_sub_layer` 또는 `target_subdirectory`가 지정된 경우에만 허용한다(레이어 내 재배치).
 - 소스와 대상 경로 모두 `resolveWithinVault`(core/pathGuard)로 vault 내부 봉쇄를 검증한다.
 - 쓰기 직전 갱신된 frontmatter를 `validateFrontmatter`로 검증한다(read-path와 동일 스키마).
@@ -23,9 +24,9 @@
 | --------------------- | --------- | -------------------------------------------------- |
 | `path`                | string    | 소스 문서 vault 상대 경로                          |
 | `target_layer`        | 1-5       | 목표 레이어                                        |
-| `reason`              | string?   | 전이 사유 (응답 warnings에 echo)                   |
-| `confidence`          | number?   | L3→L2 전이 신뢰도 (응답 warnings에 echo)           |
-| `target_sub_layer`    | SubLayer? | L3/L5에서만 경로 반영                              |
+| `reason`              | string?   | 전이 사유 (기록·에코 없음 — 호출자 문맥용)         |
+| `confidence`          | number?   | L3→L2 전이 신뢰도 (기록·에코 없음)                 |
+| `target_sub_layer`    | SubLayer? | L3에서만 경로 반영                                 |
 | `target_subdirectory` | string?   | 레이어/서브레이어 아래 중첩 디렉토리 (최대 깊이 2) |
 
 ### Result
@@ -59,6 +60,10 @@
 
 - `target_subdirectory` 의 `..` 세그먼트는 거부되고, 깊이가 `MAX_FILENAME_SUBDIR_DEPTH` 를 넘으면 이동이 실패한다.
 
+### AC-flat-target-rejected — 평면 대상 레이어 서브디렉토리 거부
+
+- `target_layer` 가 `FLAT_LAYERS`(1·5)에 속하면 `target_subdirectory` 지정 시 이동이 실패하고 소스가 보존된다.
+
 ### AC-vault-containment — vault 봉쇄
 
 - 소스와 대상 경로가 모두 `resolveWithinVault` 를 통과해야 하며, vault 밖으로 해석되는 경로는 이동을 실패시킨다.
@@ -67,6 +72,10 @@
 
 - 갱신된 frontmatter 가 `validateFrontmatter` 를 통과하지 못하면 대상 파일을 쓰지 않는다.
 
+## History
+
+- 2026-08-04 — 평면 레이어(L1·L5) 대상의 `target_subdirectory` 를 거부하도록 계약을 좁혔다. 설계가 평면으로 선언한 레이어에 이동 경로만 중첩을 허용하던 불일치의 해소이며, 정본은 `FLAT_LAYERS` 다.
+
 ## Last Updated
 
-2026-08-04 — L5 전용 필드 제거와 서브레이어 잔재 제거를 포함한 이동 계약을 acceptance group 으로 고정했다.
+2026-08-04 — 평면 대상 레이어 서브디렉토리 거부를 계약에 추가했다.

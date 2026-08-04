@@ -12,7 +12,6 @@ import { MAX_PINNED_NODES } from '../../../constants/performance.js';
 import type { PinnedNode } from '../../../core/cacheManager/index.js';
 import {
   readPinnedNodes,
-  readTurnContext,
   writePinnedNodes,
   writeTurnContext,
 } from '../../../core/cacheManager/index.js';
@@ -109,7 +108,7 @@ export async function handleContextCacheManage(
         success: true,
         pinned: true,
         totalPinned: toWrite.length,
-        turnContext,
+        contextChars: turnContext.length,
       };
     }
 
@@ -144,16 +143,18 @@ export async function handleContextCacheManage(
     case 'refresh': {
       const turnContext = buildTurnContext(vault);
       writeTurnContext(vault, turnContext);
-      return { success: true, refreshed: true, turnContext };
+      return {
+        success: true,
+        refreshed: true,
+        contextChars: turnContext.length,
+      };
     }
 
     case 'list': {
       const pinnedNodes = readPinnedNodes(vault);
-      const turnContext = readTurnContext(vault) ?? '(no cached turn context)';
       return {
         success: true,
         pinnedNodes,
-        turnContext,
       };
     }
 

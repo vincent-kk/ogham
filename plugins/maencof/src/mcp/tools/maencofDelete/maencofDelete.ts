@@ -5,6 +5,7 @@
 import { unlink } from 'node:fs/promises';
 import { readFile, stat } from 'node:fs/promises';
 
+import { MAX_DELETE_BACKLINK_WARNINGS } from '../../../constants/thresholds.js';
 import {
   buildKnowledgeNode,
   parseDocument,
@@ -62,13 +63,18 @@ export async function handleMaencofDelete(
 
   // Backlink 경고 확인
   const backlinks = await getBacklinks(vaultPath, input.path);
-  if (backlinks.length > 0 && !input.force)
+  if (backlinks.length > 0 && !input.force) {
+    const listed = backlinks.slice(0, MAX_DELETE_BACKLINK_WARNINGS);
+    const refusalWarnings = listed.map((src) => `Referenced by: ${src}`);
+    if (backlinks.length > listed.length)
+      refusalWarnings.push(`…and ${backlinks.length - listed.length} more`);
     return {
       success: false,
       path: input.path,
       message: `Cannot delete: ${backlinks.length} document(s) reference this document. Use force=true to force deletion.`,
-      warnings: backlinks.map((src) => `Referenced by: ${src}`),
+      warnings: refusalWarnings,
     };
+  }
 
   // 삭제 실행
   await unlink(absolutePath);
@@ -84,7 +90,7 @@ export async function handleMaencofDelete(
   return {
     success: true,
     path: input.path,
-    message: `Document deleted: ${input.path}`,
+    message: 'Document deleted',
     warnings,
   };
 }

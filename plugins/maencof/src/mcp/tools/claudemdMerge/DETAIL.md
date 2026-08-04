@@ -26,7 +26,7 @@
 - `changed` — 계획(dry-run) 또는 적용의 첫 outcome action 이 `copy` · `update` · `relocate` 중 하나일 때 true. `noop` 은 false.
 - `had_existing_section` — 호출 시점에 마커 구간이 이미 있었는지.
 - `backup_path` — 실제 적용에서 백업이 생겼을 때만 존재하는 선택 필드. dry-run 에서는 붙지 않는다.
-- `section_content` — `input.content` 를 trim 한 값. 파일에서 다시 읽지 않는다.
+- 호출자 입력은 에코하지 않는다 — `input.content` 를 되돌려주는 필드는 정보량이 0 인 컨텍스트 비용이다.
 
 ### Registration
 
@@ -46,6 +46,10 @@
 
 - `had_existing_section` 이 적용 이전 `inspect()` 상태를 반영한다.
 
+### AC-no-input-echo — 입력 에코 금지
+
+- 응답에 `input.content` 를 되돌려주는 필드(`section_content` 류)가 없다.
+
 ## Last Updated
 
-2026-07-30 — 호스트 해석 위임·dry-run 무변경·기존 섹션 판정 시점 계약을 문서화했다.
+2026-08-04 — 입력 에코 필드 `section_content` 를 응답 계약에서 제거했다.

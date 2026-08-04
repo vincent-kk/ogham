@@ -130,6 +130,34 @@ describe('move target_subdirectory', () => {
     expect(result.message).toContain('Subdirectory depth exceeds limit');
   });
 
+  it('reason/confidence는 응답 warnings로 에코되지 않는다', async () => {
+    const result = await handleMaencofMove(vault, {
+      path: '04_Action/alpha-note.md',
+      target_layer: 3,
+      target_sub_layer: 'topical',
+      reason: 'internalized',
+      confidence: 0.8,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.warnings).toBeUndefined();
+    expect(result.message).toBe('Moved from 04_Action/alpha-note.md');
+  });
+
+  it('평면 대상 레이어(L5)의 target_subdirectory는 거부하고 소스를 보존한다', async () => {
+    const result = await handleMaencofMove(vault, {
+      path: '04_Action/alpha-note.md',
+      target_layer: 5,
+      target_subdirectory: 'clips',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('flat');
+    await expect(
+      access(join(vault, '04_Action/alpha-note.md')),
+    ).resolves.toBeUndefined();
+  });
+
   it('L5 승격 시 서브디렉토리 배치와 L5 전용 필드 제거가 함께 동작한다', async () => {
     const result = await handleMaencofMove(vault, {
       path: '05_Context/fragment.md',

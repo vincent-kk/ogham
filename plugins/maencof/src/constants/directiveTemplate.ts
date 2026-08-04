@@ -86,7 +86,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - When discovering that existing vault information is outdated, MUST update the document using \`update\`.
 - For temporary task context (meeting notes, debugging sessions, research in progress), MUST create Layer 4 (Action) documents with appropriate \`expires\` dates.
 - When conversation reveals connections between existing documents, MUST use \`kg_suggest_links\` and update documents to add \`[[wikilinks]]\`.
-- To group related documents within a layer, use subdirectories: \`create\` accepts a \`filename\` with a subdirectory prefix (e.g. \`"projects/alpha-status"\`) and \`move\` accepts \`target_subdirectory\` (max 2 levels each).
+- To group related documents within a layer (L2/L3/L4 only — L1 and L5 are flat), use subdirectories: \`create\` accepts a \`filename\` with a subdirectory prefix (e.g. \`"projects/alpha-status"\`) and \`move\` accepts \`target_subdirectory\` (max 2 levels each).
 - When the system advises running \`kg_build\` (stale index advisory), follow the advice promptly.
 - Run \`kg_build\` explicitly only when advised by the system (high stale ratio) or for full PageRank recalculation.
 

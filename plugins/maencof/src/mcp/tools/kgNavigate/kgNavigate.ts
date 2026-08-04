@@ -2,7 +2,10 @@
  * @file kgNavigate.ts
  * @description kg_navigate 도구 핸들러 — 특정 노드의 이웃 조회
  */
-import { MAX_NAVIGATE_SIBLINGS } from '../../../constants/thresholds.js';
+import {
+  MAX_NAVIGATE_NEIGHBORS,
+  MAX_NAVIGATE_SIBLINGS,
+} from '../../../constants/thresholds.js';
 import { toNodeId } from '../../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -185,15 +188,31 @@ export async function handleKgNavigate(
   const crossLayer = [...outCrossLayer, ...inCrossLayer];
   const domain = [...outDomain, ...inDomain];
 
+  // 이웃 목록 상한 — 허브 노드에서 전체 KnowledgeNode 배열이 폭주하지 않게 자르고,
+  // 절단된 목록만 원총수를 neighborTotals 로 보고한다.
+  const neighborTotals: NonNullable<KgNavigateResult['neighborTotals']> = {};
+  const cap = (
+    key: keyof NonNullable<KgNavigateResult['neighborTotals']>,
+    list: KnowledgeNode[],
+  ): KnowledgeNode[] => {
+    if (list.length <= MAX_NAVIGATE_NEIGHBORS) return list;
+    neighborTotals[key] = list.length;
+    return list.slice(0, MAX_NAVIGATE_NEIGHBORS);
+  };
+
+  const cappedCrossLayer = cap('crossLayer', crossLayer);
+  const cappedDomain = cap('domain', domain);
+
   return {
     node,
-    inbound,
-    outbound,
+    inbound: cap('inbound', inbound),
+    outbound: cap('outbound', outbound),
     parent,
-    children,
+    children: cap('children', children),
     siblings,
     siblingTotalCount,
-    crossLayer: crossLayer.length > 0 ? crossLayer : undefined,
-    domain: domain.length > 0 ? domain : undefined,
+    crossLayer: cappedCrossLayer.length > 0 ? cappedCrossLayer : undefined,
+    domain: cappedDomain.length > 0 ? cappedDomain : undefined,
+    ...(Object.keys(neighborTotals).length > 0 && { neighborTotals }),
   };
 }

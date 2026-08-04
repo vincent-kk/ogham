@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-03-04
+updated: 2026-08-04
 tags: [knowledge-layers, 5-layer, directory-structure, graph-characteristics]
 layer: design-area-1
 ---
@@ -18,16 +18,19 @@ maencof의 기억공간을 5개 계층으로 분리하여, 기억의 휘발성·
 
 ## 1. Layer별 정의 + 그래프 특성
 
-| Layer | 이름 | 역할 | 그래프 특성 | 최대 깊이 |
-|-------|------|------|------------|----------|
-| 1 | Core Identity | 네트워크 중심 허브, 최다 인바운드 | **Hub 노드** | 1 (평면) |
-| 2 | Derived Self | Layer 1 구체화, 복잡한 상호 연결 | **Dense cluster** | 3 |
-| 3A | External-Relational | 대인 포인터, TMS 기반 | **Pointer 노드** | 2 |
-| 3B | External-Structural | 조직 맥락, Ba/SECI 기반 | **Context 노드** | 2 |
-| 3C | External-Topical | 의미론적 지식, ANT 기반 | **Leaf 노드** | 2 |
-| 4 | Action | 시간 기반 일시적 활성, 휘발성 | **Volatile 노드** | 2 (YYYY/MM/) |
-| 5-Buf | Buffer | 미분류 임시 저장 | **Temporary 노드** | 2 |
-| 5-Bnd | Boundary | L3 교차 연결 경계 객체 | **Bridge 노드** | 2 |
+| Layer | 이름                | 역할                              | 그래프 특성        | 서브디렉토리 깊이  |
+| ----- | ------------------- | --------------------------------- | ------------------ | ------------------ |
+| 1     | Core Identity       | 네트워크 중심 허브, 최다 인바운드 | **Hub 노드**       | 0 (평면)           |
+| 2     | Derived Self        | Layer 1 구체화, 복잡한 상호 연결  | **Dense cluster**  | ≤2                 |
+| 3A    | External-Relational | 대인 포인터, TMS 기반             | **Pointer 노드**   | 서브레이어 아래 ≤2 |
+| 3B    | External-Structural | 조직 맥락, Ba/SECI 기반           | **Context 노드**   | 서브레이어 아래 ≤2 |
+| 3C    | External-Topical    | 의미론적 지식, ANT 기반           | **Leaf 노드**      | 서브레이어 아래 ≤2 |
+| 4     | Action              | 시간 기반 일시적 활성, 휘발성     | **Volatile 노드**  | ≤2 (YYYY/MM 관례)  |
+| 5     | Context (Buffer)    | 미분류 임시 수용소                | **Temporary 노드** | 0 (평면)           |
+
+서브디렉토리 깊이는 레이어 루트(L3 는 서브레이어 루트) 기준 하위 디렉토리 단계 수다 — 0 은 평면.
+자유 그룹핑 깊이 한도의 정본은 `MAX_FILENAME_SUBDIR_DEPTH`(= 2), 평면 레이어 목록의 정본은 `FLAT_LAYERS`(둘 다 `plugins/maencof/src/constants/`)다.
+Boundary 는 v3 에서 레이어가 아니라 레이어 직교 hub 속성이다 — §3 "Bridge 노드" 참조.
 
 ---
 
@@ -73,12 +76,12 @@ maencof의 기억공간을 5개 계층으로 분리하여, 기억의 휘발성·
 
 ## 4. `.maencof-meta/` 시스템 디렉토리
 
-| 파일 | 역할 |
-|------|------|
-| `backlink-index.json` | 역방향 링크 인덱스 |
-| `trust-level.json` | Progressive Autonomy Level (0-3) |
-| `transition-queue.json` | SessionStart 지연 전이 후보 |
-| `broken-links.json` | 깨진 링크 목록 |
+| 파일                    | 역할                             |
+| ----------------------- | -------------------------------- |
+| `backlink-index.json`   | 역방향 링크 인덱스               |
+| `trust-level.json`      | Progressive Autonomy Level (0-3) |
+| `transition-queue.json` | SessionStart 지연 전이 후보      |
+| `broken-links.json`     | 깨진 링크 목록                   |
 
 `.maencof-meta/`는 사용자가 직접 편집하지 않는다. MCP 도구가 전담 관리한다.
 
@@ -86,10 +89,10 @@ maencof의 기억공간을 5개 계층으로 분리하여, 기억의 휘발성·
 
 ## 5. `.maencof/` 검색 엔진 캐시
 
-| 파일 | 역할 |
-|------|------|
-| `index.json` | 그래프 구조 (노드, 엣지, 인접 리스트) |
-| `weights.json` | 사전 계산 가중치 (엣지별, 노드별) |
-| `snapshot.json` | 마지막 빌드 파일 스냅샷 |
+| 파일            | 역할                                  |
+| --------------- | ------------------------------------- |
+| `index.json`    | 그래프 구조 (노드, 엣지, 인접 리스트) |
+| `weights.json`  | 사전 계산 가중치 (엣지별, 노드별)     |
+| `snapshot.json` | 마지막 빌드 파일 스냅샷               |
 
 `.maencof/` 전체를 삭제해도 원본 마크다운에서 완전 재빌드 가능 (원칙 5).

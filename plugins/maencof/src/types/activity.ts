@@ -20,11 +20,7 @@ export interface ActivityEntry {
 
 /** 이벤트 카테고리 */
 export type ActivityCategory =
-  | 'document'
-  | 'search'
-  | 'index'
-  | 'config'
-  | 'diagnostic';
+  'document' | 'search' | 'index' | 'config' | 'diagnostic';
 
 /** activity_read MCP 입력 */
 export interface ActivityReadInput {
@@ -38,12 +34,14 @@ export interface ActivityReadInput {
 
 /** activity_read MCP 출력 */
 export interface ActivityReadResult {
-  /** 조회된 활동 목록 (날짜별) */
+  /** 조회된 활동 목록 (날짜별, 필터·상한 적용 후) */
   notes: Array<{
     date: string;
     entries: ActivityEntry[];
     entry_count: number;
   }>;
-  /** 총 엔트리 수 */
+  /** 필터 적용 후 매칭 총합 (절단 전) */
   total_entries: number;
+  /** MAX_ACTIVITY_READ_ENTRIES 상한으로 잘렸을 때만 true */
+  truncated?: boolean;
 }

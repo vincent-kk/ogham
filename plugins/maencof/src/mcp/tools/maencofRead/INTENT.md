@@ -10,6 +10,7 @@
 
 - 입력 Zod 스키마 검증
 - core/ 모듈에 로직 위임
+- 응답은 `content`(전문) + `node` 메타만 — SA 관련 문서 확장은 `kg_search`/`kg_context` 소관이라 read 는 `depth`/`include_related` 를 받지 않는다
 
 ### Ask first
 

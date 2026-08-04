@@ -17,13 +17,15 @@ Enforce directory structure compliance with the maencof 5-Layer knowledge model.
 
 ### R1. Directory-to-Layer Mapping
 
-| Directory Prefix | Layer | Description                                                      |
-| ---------------- | ----- | ---------------------------------------------------------------- |
-| `01_Core/`       | 1     | Core Identity Hub                                                |
-| `02_Derived/`    | 2     | Internalized knowledge                                           |
-| `03_External/`   | 3     | External references                                              |
-| `04_Action/`     | 4     | Action memory                                                    |
-| `05_Context/`    | 5     | Flat unclassified inbox (no sub-directories)                     |
+| Directory Prefix | Layer | Description                                   |
+| ---------------- | ----- | --------------------------------------------- |
+| `01_Core/`       | 1     | Core Identity Hub (flat — no sub-directories) |
+| `02_Derived/`    | 2     | Internalized knowledge                        |
+| `03_External/`   | 3     | External references                           |
+| `04_Action/`     | 4     | Action memory                                 |
+| `05_Context/`    | 5     | Flat unclassified inbox (no sub-directories)  |
+
+Grouping subdirectories (max 2 levels) are allowed under `02_Derived/`, `03_External/` (below the sub-layer directory), and `04_Action/`. The flat-layer list and depth limit are canonical in `FLAT_LAYERS` and `MAX_FILENAME_SUBDIR_DEPTH` (plugin `src/constants/`).
 
 ### R2. Frontmatter layer Field Must Match
 
@@ -34,7 +36,7 @@ The Layer inferred from the file path must match the Frontmatter `layer` field.
 layer: 2
 
 # Violation example (02_Derived/skills/programming.md)
-layer: 3  # ERROR: path implies Layer 2 but Frontmatter says Layer 3
+layer: 3 # ERROR: path implies Layer 2 but Frontmatter says Layer 3
 ```
 
 ### R3. Layer 1 Outbound Links Prohibited

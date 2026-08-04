@@ -233,7 +233,7 @@ describe('handleMaencofCreate', () => {
     expect(content).not.toContain('mentioned_persons');
   });
 
-  it('성공 메시지에 태그 목록이 포함된다', async () => {
+  it('성공 메시지는 경로·태그를 재진술하지 않는다', async () => {
     const result = await handleMaencofCreate(vault, {
       layer: 2,
       tags: ['react', 'hooks'],
@@ -242,9 +242,7 @@ describe('handleMaencofCreate', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.message).toContain('tags:');
-    expect(result.message).toContain('react');
-    expect(result.message).toContain('hooks');
+    expect(result.message).toBe('Document created');
   });
 
   it('source와 expires 옵션 필드가 Frontmatter에 포함된다', async () => {

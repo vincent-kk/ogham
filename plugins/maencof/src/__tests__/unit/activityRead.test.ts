@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { MAX_ACTIVITY_READ_ENTRIES } from '../../constants/thresholds.js';
 import { getActivityEventPath } from '../../core/activityLog/index.js';
 import { formatDate } from '../../core/dateFormat/index.js';
 import { handleActivityRead } from '../../mcp/tools/activityRead/activityRead.js';
@@ -144,5 +145,33 @@ describe('handleActivityRead', () => {
 
     const result = handleActivityRead(vaultDir, { date: '2026-06-21' });
     expect(result.notes[0].entries).toHaveLength(2);
+  });
+
+  it('매칭 엔트리가 상한을 넘으면 최근 것만 남기고 truncated를 세운다', () => {
+    const overflow = 50;
+    const many: ActivityEntry[] = Array.from(
+      { length: MAX_ACTIVITY_READ_ENTRIES + overflow },
+      (_, i) => ({
+        time: '09:00',
+        category: 'document',
+        description: `entry-${i}`,
+      }),
+    );
+    writeEvents(vaultDir, '2026-06-21', many);
+
+    const result = handleActivityRead(vaultDir, { date: '2026-06-21' });
+    const returned = result.notes.reduce((sum, n) => sum + n.entries.length, 0);
+    expect(returned).toBe(MAX_ACTIVITY_READ_ENTRIES);
+    expect(result.truncated).toBe(true);
+    expect(result.total_entries).toBe(MAX_ACTIVITY_READ_ENTRIES + overflow);
+    // 경계 날짜는 최근(뒤쪽) 엔트리를 남긴다
+    expect(result.notes[0].entries[0].description).toBe(`entry-${overflow}`);
+  });
+
+  it('상한 이내면 truncated가 실리지 않는다', () => {
+    writeEvents(vaultDir, '2026-06-21', sample);
+
+    const result = handleActivityRead(vaultDir, { date: '2026-06-21' });
+    expect(result.truncated).toBeUndefined();
   });
 });

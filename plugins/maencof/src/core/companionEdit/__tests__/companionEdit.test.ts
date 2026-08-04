@@ -76,6 +76,7 @@ describe('applyCompanionEdit — preview/commit two-step + gates', () => {
     expect(result.backup_path).toBeDefined();
     expect(backups()).toHaveLength(1);
     expect(raw()).toContain('"humor"');
+    expect(result.identity_preview).toBeNull();
   });
 
   it('rejects adding a section whose key already exists', () => {

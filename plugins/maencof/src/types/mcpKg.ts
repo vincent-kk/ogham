@@ -5,7 +5,7 @@
 import type { KgContextScope } from '../constants/kgContext.js';
 
 import type { Layer, SubLayer } from './common.js';
-import type { ActivationResult, KnowledgeNode } from './graph.js';
+import type { KnowledgeNode } from './graph.js';
 
 /** kg_search 입력 */
 export interface KgSearchInput {
@@ -27,6 +27,10 @@ export interface KgSearchInput {
   layer_filter?: Layer[];
   /** 서브레이어 필터 */
   sub_layer?: SubLayer;
+  /** 시드→노드 hop 경로(trace) 포함 여부 (기본 false) */
+  include_trace?: boolean;
+  /** 본문 전문(content) 포함 여부 (기본 false) — 파일 Read 가 막힌 샌드박스 소비자용 */
+  include_content?: boolean;
 }
 
 /** kg_navigate 입력 */
@@ -61,6 +65,8 @@ export interface KgContextInput {
   sub_layer?: SubLayer;
   /** 탐색 폭 (기본 'balanced' — 미지정 시 기존 동작과 동일) */
   scope?: KgContextScope;
+  /** 조립 markdown 포함 여부 (기본 true). false 면 선택 문서 목록(documents)만 반환 */
+  include_content?: boolean;
 }
 
 /** kg_status 입력 */
@@ -69,10 +75,30 @@ export interface KgStatusInput {
   include_orphan_paths?: boolean;
 }
 
+/** kg_search 결과 항목 — ActivationResult 에 노드 참조 메타를 입힌 응답 전용 형태 */
+export interface KgSearchResultItem {
+  /** 문서 경로 (vault 상대) */
+  path: string;
+  /** 활성화 점수 (0.0 ~ 1.0) */
+  score: number;
+  /** 시드로부터의 홉 거리 */
+  hops: number;
+  /** 문서 제목 */
+  title: string;
+  /** frontmatter 태그 */
+  tags: string[];
+  /** 한 줄 요약 (frontmatter gist, 있을 때만) */
+  gist?: string;
+  /** 시드→노드 hop 경로 (include_trace: true 일 때만) */
+  trace?: string[];
+  /** 본문 전문 (include_content: true 이고 파일을 읽을 수 있을 때만) */
+  content?: string;
+}
+
 /** kg_search 응답 */
 export interface KgSearchResult {
   /** 검색 결과 목록 (점수 내림차순) */
-  results: ActivationResult[];
+  results: KgSearchResultItem[];
   /** 검색 소요 시간 (ms) */
   durationMs: number;
   /** 탐색된 총 노드 수 */
@@ -95,22 +121,41 @@ export interface KgNavigateResult {
   siblings: KnowledgeNode[];
   /** 상한 적용 전 형제 총수 — siblings.length 보다 크면 목록이 절단된 것 */
   siblingTotalCount?: number;
+  /** MAX_NAVIGATE_NEIGHBORS 절단이 일어난 이웃 목록의 원총수 — 절단된 키만 실린다 */
+  neighborTotals?: Partial<
+    Record<
+      'inbound' | 'outbound' | 'children' | 'crossLayer' | 'domain',
+      number
+    >
+  >;
   /** CROSS_LAYER 연결 노드 (허브 경유) */
   crossLayer?: KnowledgeNode[];
   /** DOMAIN 연결 노드 (동일 domain 태그) */
   domain?: KnowledgeNode[];
 }
 
+/** kg_context 선택 문서 참조 (include_content: false 모드) */
+export interface KgContextDocumentRef {
+  /** 문서 경로 (vault 상대) */
+  path: string;
+  /** 문서 제목 */
+  title: string;
+  /** 활성화 점수 */
+  score: number;
+}
+
 /** kg_context 응답 */
 export interface KgContextResult {
-  /** 컨텍스트 블록 (마크다운) */
-  context: string;
+  /** 컨텍스트 블록 (마크다운) — content 모드에서만 */
+  context?: string;
+  /** 선택 문서 목록 — include_content: false 모드에서만 */
+  documents?: KgContextDocumentRef[];
   /** 포함된 문서 수 */
   documentCount: number;
-  /** 사용된 토큰 추정치 */
-  estimatedTokens: number;
-  /** 토큰 예산 초과로 제거된 문서 수 */
-  truncatedCount: number;
+  /** 사용된 토큰 추정치 (include_full 스니펫 포함) — content 모드에서만 */
+  estimatedTokens?: number;
+  /** 토큰 예산 초과로 제거된 문서 수 — content 모드에서만 */
+  truncatedCount?: number;
 }
 
 /** kg_status 응답 */

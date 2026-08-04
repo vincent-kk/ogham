@@ -9,11 +9,12 @@
 - 재색인을 실행하지 않는다. 이 패키지는 읽기 전용이라 인덱스가 없으면 없다고 보고할 뿐이다.
 - 볼트 파일시스템에 쓰지 않는다 — 의존은 `handleKgContext` 와 `computeEffectiveLayers` 둘뿐이다.
 - `sub_layer`·`scope` 는 maencof 타입(`SubLayer`, `KgContextScope`)을 그대로 받아 통과시킨다. 값 검증은 서버 스키마와 maencof 핸들러가 소유한다.
+- `include_content` 는 그대로 통과시킨다 — false 면 maencof 가 조립 markdown 없이 선택 문서 목록(`documents`)만 돌려주고, 호출자는 lens `read` 로 선별 조회한다.
 
 ## API Contracts
 
 - `handleLensContext(graph: KnowledgeGraph | null, input: LensContextInput, vaultPath: string, vaultLayers: number[]): Promise<Record<string, unknown>>` — 조합된 컨텍스트 블록. `vaultLayers` 는 해석된 볼트의 layer 상한, `vaultPath` 는 문서 본문을 읽을 볼트 루트.
-- `LensContextInput` — `query`(필수), `vault`·`token_budget`·`include_full`·`layer_filter`·`sub_layer`·`scope`(선택).
+- `LensContextInput` — `query`(필수), `vault`·`token_budget`·`include_full`·`layer_filter`·`sub_layer`·`scope`·`include_content`(선택).
 - `graph` 가 `null` 이거나 maencof 결과에 `error` 가 있으면 `{ error: "Vault index not available. Run kg_build in a maencof session." }` 를 돌려준다 — 원본 에러 문자열은 이 문장으로 대체된다.
 
 ## Acceptance Criteria
@@ -36,4 +37,4 @@
 
 ## Last Updated
 
-2026-07-30 — 레이어 상한 적용과 인덱스 부재 보고 계약을 문서화했다.
+2026-08-05 — `include_content`(경로-만 모드) 통과를 계약에 추가했다.

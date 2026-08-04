@@ -33,8 +33,11 @@ export interface KgBuildResult extends MaencofCrudResult {
   /**
    * 개별 파일 파싱/검증 실패 목록 (있을 때만 포함, non-fatal).
    * write-path 검증 비대칭으로 인해 디스크에 흘러든 손상 frontmatter를 surface한다.
+   * `MAX_KG_BUILD_PARSE_FAILURES` 상한이 적용된다.
    */
   parseFailures?: KgBuildParseFailure[];
+  /** 상한 절단이 일어났을 때만 — 절단 전 실패 총수 */
+  parseFailuresTotal?: number;
 }
 
 /** 빌드 결과: 그래프 + 스캔된 파일 목록 (스냅샷 저장에 재사용) + 파싱 실패 목록 */

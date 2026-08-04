@@ -77,6 +77,33 @@ describe('handleMaencofCreate — filename path resolution', () => {
     expect(result.message).toContain('subdirectory depth');
   });
 
+  it('평면 레이어(L5)의 filename 서브디렉토리 prefix는 거부된다', async () => {
+    const result = await handleMaencofCreate(vault, {
+      layer: 5,
+      tags: ['t'],
+      content: 'body',
+      filename: 'projects/frag',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('flat');
+    // 평면 레이어에 서브디렉토리가 생기지 않아야 함
+    await expect(access(join(vault, '05_Context/projects'))).rejects.toThrow();
+  });
+
+  it('평면 레이어(L1)의 filename 서브디렉토리 prefix는 거부된다', async () => {
+    const result = await handleMaencofCreate(vault, {
+      layer: 1,
+      tags: ['t'],
+      content: 'body',
+      gist: 'g',
+      filename: 'inner/idea',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('flat');
+  });
+
   it('명시적 filename의 ".." traversal 세그먼트는 거부된다', async () => {
     const result = await handleMaencofCreate(vault, {
       layer: 4,

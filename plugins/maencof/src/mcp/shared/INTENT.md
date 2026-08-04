@@ -15,7 +15,7 @@ MCP 도구 공통 유틸리티. toolResult/toolError, backlink 관리.
 ### Always do
 
 - 모든 도구에서 공유
-- Map replacer로 JSON 직렬화
+- Map replacer로 JSON 직렬화 — compact(들여쓰기 없음). 응답은 LLM 컨텍스트로 들어가므로 포맷 개행·들여쓰기가 곧 토큰 비용이다
 
 ### Ask first
 

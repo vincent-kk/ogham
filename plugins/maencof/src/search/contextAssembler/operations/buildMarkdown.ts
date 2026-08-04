@@ -9,7 +9,6 @@ import { itemToMarkdown } from './itemToMarkdown.js';
 export function buildMarkdown(
   selectedItems: ContextItem[],
   truncatedCount: number,
-  includeFull: boolean,
 ): string {
   const lines: string[] = ['## maencof Knowledge Context', ''];
 
@@ -19,10 +18,7 @@ export function buildMarkdown(
       `_${selectedItems.length} document(s) (by score, descending)_`,
       '',
     );
-    for (const item of selectedItems)
-      lines.push(
-        itemToMarkdown(item, includeFull && item.fullContent !== undefined),
-      );
+    for (const item of selectedItems) lines.push(itemToMarkdown(item));
   }
 
   if (truncatedCount > 0)

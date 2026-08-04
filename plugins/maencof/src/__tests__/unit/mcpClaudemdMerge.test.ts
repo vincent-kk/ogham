@@ -81,11 +81,11 @@ describe('handleClaudeMdMerge', () => {
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(false);
   });
 
-  it('section_content에 트리밍된 내용을 반환한다', () => {
+  it('입력 content를 에코하는 필드가 없다', () => {
     const result = handleClaudeMdMerge(testDir, {
       content: '  hello world  ',
     });
 
-    expect(result.section_content).toBe('hello world');
+    expect(result).not.toHaveProperty('section_content');
   });
 });

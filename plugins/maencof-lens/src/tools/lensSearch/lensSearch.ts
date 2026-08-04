@@ -12,11 +12,14 @@ export interface LensSearchInput {
   max_hops?: number;
   layer_filter?: number[];
   sub_layer?: SubLayer;
+  include_trace?: boolean;
+  include_content?: boolean;
 }
 
 export async function handleLensSearch(
   graph: KnowledgeGraph | null,
   input: LensSearchInput,
+  vaultPath: string,
   vaultLayers: number[],
 ): Promise<Record<string, unknown>> {
   const effectiveLayers = computeEffectiveLayers(
@@ -24,15 +27,21 @@ export async function handleLensSearch(
     input.layer_filter,
   );
 
-  const result = await handleKgSearch(graph, {
-    seed: input.seed,
-    max_results: input.max_results,
-    decay: input.decay,
-    threshold: input.threshold,
-    max_hops: input.max_hops,
-    layer_filter: effectiveLayers,
-    sub_layer: input.sub_layer,
-  });
+  const result = await handleKgSearch(
+    graph,
+    {
+      seed: input.seed,
+      max_results: input.max_results,
+      decay: input.decay,
+      threshold: input.threshold,
+      max_hops: input.max_hops,
+      layer_filter: effectiveLayers,
+      sub_layer: input.sub_layer,
+      include_trace: input.include_trace,
+      include_content: input.include_content,
+    },
+    vaultPath,
+  );
 
   if ("error" in result)
     return {

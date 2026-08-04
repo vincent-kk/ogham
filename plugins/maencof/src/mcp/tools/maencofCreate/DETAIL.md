@@ -4,6 +4,7 @@
 
 - `create` 는 새 지식 문서를 대상 레이어 디렉토리에 만든다. 레이어 디렉토리는 `LAYER_DIR`, L3 서브레이어 디렉토리는 `L3_SUBDIR` 가 정본이다.
 - 서브레이어 디렉토리는 L3 에서만 경로에 반영된다. L5 는 평면 구조라 `buffer_type` 이 있어도 하위 디렉토리를 만들지 않는다.
+- L1·L5 는 평면 레이어다 — `filename` 의 서브디렉토리 prefix 를 거부한다. 평면 레이어 목록의 정본은 `FLAT_LAYERS`(constants/architecture)다.
 - `subdirectory` 세그먼트는 `sanitizeSegment` 로 정규화하고, `..` 는 traversal 로 거부하며, 깊이는 `MAX_FILENAME_SUBDIR_DEPTH` 를 넘을 수 없다.
 - 파일명이 주어지지 않으면 `title` → `tags` 순으로 슬러그를 만들고, 모두 비면 타임스탬프로 폴백한다.
 - 최종 경로는 `resolveWithinVault` 로 vault 내부 봉쇄를 검증한다.
@@ -48,6 +49,10 @@
 
 - `subdirectory` 의 `..` 세그먼트는 거부되고, 깊이가 `MAX_FILENAME_SUBDIR_DEPTH` 를 넘으면 생성이 실패한다.
 
+### AC-flat-layer-rejected — 평면 레이어 서브디렉토리 거부
+
+- `layer` 가 `FLAT_LAYERS`(1·5)에 속하는 호출에서 `filename` 이 서브디렉토리 prefix 를 포함하면 생성이 실패하고 파일이 만들어지지 않는다.
+
 ### AC-vault-containment — vault 봉쇄
 
 - 해석된 절대 경로가 vault 밖이면 `resolveWithinVault` 가 막고 파일을 만들지 않는다.
@@ -58,8 +63,9 @@
 
 ## History
 
+- 2026-08-04 — L1·L5 평면 규칙이 설계 문서 선언에서 쓰기 경로 강제로 승격되었다. 규칙 문서(layer-structure)가 error 로 선언한 평면성을 코드가 막지 않던 불일치가 원인이며, 평면 레이어 목록은 `FLAT_LAYERS` 로 단일화했다.
 - 2026-08-04 — L5 재정의로 임시 수용소가 서브레이어를 버리면서, `buffer_type` · `promotion_target` · `source_context` 와 hub 3필드가 조립 대상에 들어오고 서브레이어 디렉토리 결정이 L3 단독 조건이 되었다.
 
 ## Last Updated
 
-2026-08-04 — 도구 fractal 이 소유해야 할 create 출력 계약을 문서로 만들었다.
+2026-08-04 — 평면 레이어(L1·L5) 서브디렉토리 거부를 계약에 추가했다.

@@ -6,7 +6,11 @@ import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
 import { basename, dirname } from 'node:path';
 
-import { L3_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
+import {
+  FLAT_LAYERS,
+  L3_SUBDIR,
+  LAYER_DIR,
+} from '../../../constants/architecture.js';
 import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { FRONTMATTER_REGEX } from '../../../constants/regexes.js';
 import {
@@ -129,6 +133,13 @@ export async function handleMaencofMove(
       message: `Invalid target Layer: ${input.target_layer}`,
     };
 
+  if (input.target_subdirectory && FLAT_LAYERS.includes(targetLayerNum))
+    return {
+      success: false,
+      path: input.path,
+      message: `Layer ${targetLayerNum} is flat — subdirectories are not allowed`,
+    };
+
   // 현재 Layer 파악
   const doc = parseDocument(input.path, content, mtime);
   const nodeResult = buildKnowledgeNode(doc);
@@ -238,16 +249,9 @@ export async function handleMaencofMove(
   await writeFile(newAbsPath, updatedContent, 'utf-8');
   await unlink(srcAbsPath);
 
-  const warnings: string[] = [];
-  if (input.reason) warnings.push(`Transition reason: ${input.reason}`);
-
-  if (input.confidence !== undefined)
-    warnings.push(`Confidence: ${input.confidence}`);
-
   return {
     success: true,
     path: newRelativePath,
-    message: `Document moved: ${input.path} → ${newRelativePath}`,
-    warnings: warnings.length > 0 ? warnings : undefined,
+    message: `Moved from ${input.path}`,
   };
 }

@@ -13,6 +13,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { MAX_DELETE_BACKLINK_WARNINGS } from '../../constants/thresholds.js';
 import { handleMaencofDelete } from '../../mcp/tools/maencofDelete/maencofDelete.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
@@ -106,6 +107,32 @@ describe('handleMaencofDelete', () => {
     expect(result.warnings![0]).toContain('backlink');
   });
 
+  it('backlink 경고는 상한까지만 나열하고 나머지는 요약한다', async () => {
+    await createTestFile('02_Derived/target.md', 2);
+
+    const overflow = 5;
+    const sources = Array.from(
+      { length: MAX_DELETE_BACKLINK_WARNINGS + overflow },
+      (_, i) => `02_Derived/src-${i}.md`,
+    );
+    const metaDir = join(vault, '.maencof-meta');
+    await mkdir(metaDir, { recursive: true });
+    await writeFile(
+      join(metaDir, 'backlink-index.json'),
+      JSON.stringify({ '02_Derived/target.md': sources }),
+      'utf-8',
+    );
+
+    const result = await handleMaencofDelete(vault, {
+      path: '02_Derived/target.md',
+      force: false,
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.warnings).toHaveLength(MAX_DELETE_BACKLINK_WARNINGS + 1);
+    expect(result.warnings!.at(-1)).toContain(`${overflow} more`);
+  });
+
   it('Layer 2 문서가 backlink 없이 정상 삭제된다', async () => {
     await createTestFile('02_Derived/simple.md', 2);
     const result = await handleMaencofDelete(vault, {
@@ -113,6 +140,6 @@ describe('handleMaencofDelete', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.message).toContain('Document deleted');
+    expect(result.message).toBe('Document deleted');
   });
 });

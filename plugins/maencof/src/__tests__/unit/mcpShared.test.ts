@@ -96,6 +96,11 @@ describe('shared.ts', () => {
       expect(parsed.success).toBe(true);
     });
 
+    it('toolResult가 compact JSON을 반환한다 (들여쓰기·개행 없음)', () => {
+      const result = toolResult({ success: true, path: 'test.md' });
+      expect(result.content[0].text).toBe('{"success":true,"path":"test.md"}');
+    });
+
     it('toolError가 isError=true를 포함한 MCP content 포맷을 반환한다', () => {
       const result = toolError(new Error('테스트 에러'));
       expect(result.isError).toBe(true);

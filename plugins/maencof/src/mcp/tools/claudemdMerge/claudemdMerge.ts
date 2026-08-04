@@ -38,6 +38,5 @@ export function handleClaudeMdMerge(
     changed,
     had_existing_section: inspection.status === 'present',
     ...(backupPath === undefined ? {} : { backup_path: backupPath }),
-    section_content: input.content.trim(),
   };
 }

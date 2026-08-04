@@ -15,6 +15,7 @@
 
 - 입력 Zod 스키마 검증
 - core/ 모듈에 로직 위임
+- `include_content: false` 면 조립 markdown 없이 선택 문서 목록(`documents`)만 반환하고, content 모드의 `estimatedTokens` 는 include_full 스니펫까지 합산해 `token_budget` 을 넘기지 않는다
 
 ### Ask first
 

@@ -5,7 +5,11 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { L3_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
+import {
+  FLAT_LAYERS,
+  L3_SUBDIR,
+  LAYER_DIR,
+} from '../../../constants/architecture.js';
 import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { deduplicateContent } from '../../../core/contentDedup/index.js';
 import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
@@ -92,6 +96,10 @@ function resolveFilename(
       .filter((segment) => segment.length > 0);
     if (segments.length === 0)
       return { filename: generateFilename(input.title, input.tags) };
+    if (segments.length > 1 && FLAT_LAYERS.includes(input.layer as Layer))
+      return {
+        error: `Layer ${input.layer} is flat — subdirectories are not allowed`,
+      };
     if (segments.length - 1 > MAX_FILENAME_SUBDIR_DEPTH)
       return {
         error: `Filename subdirectory depth exceeds limit (${MAX_FILENAME_SUBDIR_DEPTH}): ${input.filename}`,
@@ -283,7 +291,7 @@ export async function handleMaencofCreate(
   return {
     success: true,
     path: relativePath,
-    message: `Document created: ${relativePath} | tags: ${input.tags.join(', ')}`,
+    message: 'Document created',
     ...(dedup.warnings.length > 0 && { warnings: dedup.warnings }),
   };
 }

@@ -20,24 +20,13 @@ export function assembleContext(
   graph: KnowledgeGraph,
   options: AssembleOptions = {},
 ): AssembledContext {
-  const {
-    tokenBudget = 2000,
-    includeFull = false,
-    maxFullDocuments = 3,
-  } = options;
+  const { tokenBudget = 2000 } = options;
 
   const allItems = toContextItems(results, graph);
   const { selectedItems, totalTokens, truncatedCount } =
     selectItemsWithinBudget(allItems, tokenBudget);
 
-  // 전문 포함 (상위 N개) — 실제 파일 내용은 MCP 도구 계층에서 주입
-  if (includeFull && selectedItems.length > 0) {
-    const fullCount = Math.min(maxFullDocuments, selectedItems.length);
-    for (let i = 0; i < fullCount; i++)
-      selectedItems[i].fullContent = undefined;
-  }
-
-  const markdown = buildMarkdown(selectedItems, truncatedCount, includeFull);
+  const markdown = buildMarkdown(selectedItems, truncatedCount);
 
   return {
     markdown,

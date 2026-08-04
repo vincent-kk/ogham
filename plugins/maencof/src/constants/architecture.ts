@@ -20,7 +20,17 @@ export const L3_SUBDIR: Record<SubLayer, string> = {
   topical: 'topical',
 };
 
-/** 아키텍처 버전 (v3: L5 평면 임시 수용소 + 레이어 직교 hub 속성) */
+/**
+ * 서브디렉토리를 갖지 않는 평면 레이어. L1 은 파일 10개 이하의 최소 허브라 구조가
+ * 필요 없고, L5 는 구조를 얻는 순간 제2의 분류 체계가 되는 미분류 임시 수용소다.
+ */
+export const FLAT_LAYERS: readonly Layer[] = [Layer.L1_CORE, Layer.L5_CONTEXT];
+
+/**
+ * 아키텍처 버전. v3 의 두 독립 변경: L5 는 서브레이어 없는 평면 임시 수용소가
+ * 되었고, hub 는 레이어가 아닌 직교 frontmatter 속성이 되었다 — hub 는 L1~L4
+ * 문서만 가능하며 L5 는 불가(버퍼는 다리가 되지 않는다).
+ */
 export const EXPECTED_ARCHITECTURE_VERSION = '3.0.0';
 
 /** 그래프 엣지 유형 상수 */

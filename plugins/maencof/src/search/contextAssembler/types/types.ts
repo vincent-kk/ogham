@@ -18,18 +18,12 @@ export interface ContextItem {
   hops: number;
   /** 관계 설명 (시드 기준) */
   relation: string;
-  /** 전문 내용 (include_full 시) */
-  fullContent?: string;
 }
 
 /** 컨텍스트 조립 옵션 */
 export interface AssembleOptions {
   /** 토큰 예산 (기본: 2000) */
   tokenBudget?: number;
-  /** 상위 N개 전문 포함 여부 (기본: false) */
-  includeFull?: boolean;
-  /** 전문 포함 최대 문서 수 (기본: 3) */
-  maxFullDocuments?: number;
 }
 
 /** 컨텍스트 조립 결과 */

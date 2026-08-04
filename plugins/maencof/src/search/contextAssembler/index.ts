@@ -1,5 +1,6 @@
 export { extractBestSnippet } from './operations/extractBestSnippet.js';
 export { assembleContext } from './operations/assembleContext.js';
+export { estimateTokens } from './operations/estimateTokens.js';
 export { ContextAssembler } from './operations/contextAssembler.js';
 export type {
   ContextItem,

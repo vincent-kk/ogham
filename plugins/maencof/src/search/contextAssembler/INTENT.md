@@ -6,7 +6,7 @@
 
 ## Structure
 
-- `index.ts` — 순수 barrel (공개 API: extractBestSnippet/assembleContext/ContextAssembler + 타입)
+- `index.ts` — 순수 barrel (공개 API: extractBestSnippet/assembleContext/estimateTokens/ContextAssembler + 타입)
 - `types/` organ — 공개 타입 (ContextItem/AssembleOptions/AssembledContext)
 - `operations/` organ — 스니펫 추출·컨텍스트 조립 (extractBestSnippet/assembleContext/ContextAssembler + 파이프라인 헬퍼 toContextItems·itemToMarkdown·selectItemsWithinBudget·buildMarkdown·estimateTokens·layerName·describeRelation, 함수 1개/파일)
 

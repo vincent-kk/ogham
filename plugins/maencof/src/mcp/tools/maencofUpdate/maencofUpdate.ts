@@ -358,6 +358,6 @@ export async function handleMaencofUpdate(
   return {
     success: true,
     path: input.path,
-    message: `Document updated: ${input.path}`,
+    message: 'Document updated',
   };
 }

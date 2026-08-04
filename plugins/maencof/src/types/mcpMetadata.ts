@@ -19,8 +19,6 @@ export interface ClaudeMdMergeResult {
   had_existing_section: boolean;
   /** 백업 파일 경로 */
   backup_path?: string;
-  /** 최종 maencof 섹션 내용 */
-  section_content: string;
 }
 
 /** claudemd_read 입력 (파라미터 없음) */

@@ -50,7 +50,7 @@ export function registerCrudTools(server: McpServer): void {
           .string()
           .optional()
           .describe(
-            'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234" (max 2 subdirectory levels, nested under the layer/sub-layer directory)',
+            'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234" (max 2 subdirectory levels, nested under the layer/sub-layer directory). Layers 1 and 5 are flat — subdirectory prefixes are rejected there.',
           ),
         source: z.string().optional().describe('External source (for Layer 3)'),
         expires: z
@@ -134,20 +134,9 @@ export function registerCrudTools(server: McpServer): void {
     McpToolName.READ,
     {
       description:
-        'Reads a document and returns Frontmatter + body. When include_related=true, also includes SA-based related documents.',
+        'Reads a document and returns Frontmatter + body. For related documents use kg_search or kg_context.',
       inputSchema: z.object({
         path: z.string().describe('Document path (relative to vault)'),
-        depth: z
-          .number()
-          .int()
-          .min(1)
-          .max(10)
-          .optional()
-          .describe('SA hop count (default 2)'),
-        include_related: z
-          .boolean()
-          .optional()
-          .describe('Include related documents (default true)'),
       }),
     },
     async (vaultPath, args) => handleMaencofRead(vaultPath, args),
@@ -303,7 +292,7 @@ export function registerCrudTools(server: McpServer): void {
           .string()
           .optional()
           .describe(
-            'Subdirectory under the target layer/sub-layer directory, e.g. "projects" (max 2 levels; ".." rejected). For reorganizing within the same sub-layer, pass target_sub_layer together.',
+            'Subdirectory under the target layer/sub-layer directory, e.g. "projects" (max 2 levels; ".." rejected). Layers 1 and 5 are flat — rejected there. For reorganizing within the same sub-layer, pass target_sub_layer together.',
           ),
       }),
     },

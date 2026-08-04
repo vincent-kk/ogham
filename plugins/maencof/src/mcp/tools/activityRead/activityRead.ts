@@ -4,6 +4,7 @@
  */
 import { existsSync } from 'node:fs';
 
+import { MAX_ACTIVITY_READ_ENTRIES } from '../../../constants/thresholds.js';
 import {
   getActivityEventPath,
   readActivityEvents,
@@ -17,7 +18,7 @@ import type {
 
 /**
  * activity_read 도구 핸들러.
- * 날짜별 활동 이벤트를 조회하고 카테고리 필터링을 적용한다.
+ * 날짜별 활동 이벤트를 조회하고 카테고리 필터링과 응답 엔트리 상한을 적용한다.
  */
 export function handleActivityRead(
   vaultPath: string,
@@ -27,10 +28,7 @@ export function handleActivityRead(
 
   if (input.date) {
     const note = readSingleDay(vaultPath, input.date, category);
-    return {
-      notes: note ? [note] : [],
-      total_entries: note?.entry_count ?? 0,
-    };
+    return buildResult(note ? [note] : [], note?.entry_count ?? 0);
   }
 
   const lastDays = Math.min(Math.max(input.last_days ?? 1, 1), 30);
@@ -45,7 +43,46 @@ export function handleActivityRead(
     }
   }
 
-  return { notes, total_entries: totalEntries };
+  return buildResult(notes, totalEntries);
+}
+
+/**
+ * 응답 엔트리 총수를 `MAX_ACTIVITY_READ_ENTRIES` 로 자른 최종 응답을 조립한다.
+ * 최신 날짜(notes 앞쪽) 우선으로 담고, 상한에 걸리는 날짜는 최근(뒤쪽) 엔트리를
+ * 남긴다. `total_entries` 는 절단 전 매칭 총합을 유지한다.
+ */
+function buildResult(
+  notes: ActivityReadResult['notes'],
+  totalEntries: number,
+): ActivityReadResult {
+  const capped: ActivityReadResult['notes'] = [];
+  let budget = MAX_ACTIVITY_READ_ENTRIES;
+  let truncated = false;
+
+  for (const note of notes) {
+    if (budget <= 0) {
+      truncated = true;
+      break;
+    }
+    if (note.entries.length <= budget) {
+      capped.push(note);
+      budget -= note.entries.length;
+    } else {
+      capped.push({
+        date: note.date,
+        entries: note.entries.slice(-budget),
+        entry_count: budget,
+      });
+      budget = 0;
+      truncated = true;
+    }
+  }
+
+  return {
+    notes: capped,
+    total_entries: totalEntries,
+    ...(truncated && { truncated: true }),
+  };
 }
 
 /** 단일 날짜의 활동 이벤트를 읽고 카테고리 필터를 적용한다 (파일 부재 시 null). */

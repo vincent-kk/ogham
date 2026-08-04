@@ -58,7 +58,7 @@ Documents exceeding 100 lines receive a recommendation to split. Knowledge nodes
 
 ### R4. Directory Naming Rules
 
-Layer subdirectories must be named in kebab-case. Layer root directories are fixed: `01_Core`, `02_Derived`, `03_External`, `04_Action`.
+Layer subdirectories must be named in kebab-case. Layer root directories are fixed: `01_Core`, `02_Derived`, `03_External`, `04_Action`, `05_Context`.
 
 ```
 # Correct examples

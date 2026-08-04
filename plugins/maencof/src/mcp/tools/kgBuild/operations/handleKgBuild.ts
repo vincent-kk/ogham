@@ -12,6 +12,7 @@ import type {
   KgBuildResult,
 } from '../types/types.js';
 
+import { capParseFailures } from './capParseFailures.js';
 import { fullBuild } from './fullBuild.js';
 import { incrementalBuild } from './incrementalBuild.js';
 import { toCurrentFileInfos } from './toCurrentFileInfos.js';
@@ -71,7 +72,7 @@ export async function handleKgBuild(
       edgeCount: graph.edgeCount,
       durationMs,
       incremental: isIncremental,
-      ...(parseFailures.length > 0 && { parseFailures }),
+      ...(parseFailures.length > 0 && capParseFailures(parseFailures)),
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

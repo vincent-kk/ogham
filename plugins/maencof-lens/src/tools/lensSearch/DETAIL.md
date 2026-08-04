@@ -9,11 +9,12 @@
 - `sub_layer` 는 maencof `SubLayer` 타입 그대로 받아 넘긴다. 넓은 타입으로 받아 캐스팅하지 않는다 — 서버 스키마가 `SubLayerSchema` 로 이미 좁혀 주고, 캐스팅은 maencof 가 레이어 모델을 바꿨을 때 이 자리가 침묵하게 만든다.
 - 인덱스 부재는 예외가 아니라 결과 필드다. `error` 를 담은 객체로 재색인 방법을 알린다.
 - 재색인을 실행하지 않고 볼트에 쓰지 않는다 — 의존은 `handleKgSearch` 와 `computeEffectiveLayers` 둘뿐이다.
+- `include_trace`·`include_content` 는 그대로 통과시키고, 본문 읽기는 `vaultPath` 를 maencof 핸들러에 넘겨 위임한다. content 는 `effectiveLayers` 로 걸러진 결과에만 붙으므로 볼트 상한(기본 L2–L5) 밖 문서의 본문이 이 경로로 새지 않는다.
 
 ## API Contracts
 
-- `handleLensSearch(graph: KnowledgeGraph | null, input: LensSearchInput, vaultLayers: number[]): Promise<Record<string, unknown>>` — 랭크된 참조 목록. `vaultLayers` 는 해석된 볼트의 layer 상한.
-- `LensSearchInput` — `seed`(필수, 서버 스키마가 최소 1개를 보장), `vault`·`max_results`·`decay`·`threshold`·`max_hops`·`layer_filter`·`sub_layer`(선택). `sub_layer` 의 타입은 maencof `SubLayer`.
+- `handleLensSearch(graph: KnowledgeGraph | null, input: LensSearchInput, vaultPath: string, vaultLayers: number[]): Promise<Record<string, unknown>>` — 랭크된 참조 목록. `vaultPath` 는 `include_content` 본문 읽기에 쓰는 볼트 루트, `vaultLayers` 는 해석된 볼트의 layer 상한 (lensContext 와 동일 어순).
+- `LensSearchInput` — `seed`(필수, 서버 스키마가 최소 1개를 보장), `vault`·`max_results`·`decay`·`threshold`·`max_hops`·`layer_filter`·`sub_layer`·`include_trace`·`include_content`(선택). `sub_layer` 의 타입은 maencof `SubLayer`.
 - `max_results`·`decay`·`threshold`·`max_hops` 는 기본값을 여기서 정하지 않는다. 미지정이면 `undefined` 그대로 넘어가 maencof 기본값이 적용된다.
 - `graph` 가 `null` 이거나 maencof 결과에 `error` 가 있으면 `{ error: "Vault index not available. Run kg_build in a maencof session." }` 를 돌려준다.
 
@@ -35,10 +36,16 @@
 - `graph` 가 `null` 이면 throw 하지 않고 `error` 필드가 담긴 객체가 나온다.
 - 그 문장이 재색인 수단을 지목한다.
 
+### AC-content-passthrough — 본문 옵션 통과
+
+- `include_content: true` 면 볼트 상한 안 결과에 파일 본문(`content`)이 실리고, 상한 밖(L1 등) 문서는 결과·본문 어느 쪽에도 나타나지 않는다.
+- 옵션 미지정이면 어떤 결과에도 `content` 가 실리지 않는다.
+
 ## History
 
+- 2026-08-05 — maencof kg_search 의 `include_trace`/`include_content` 를 채택했다. 샌드박스 에이전트가 파일 Read 없이 본문을 받게 하는 것이 목적이며, 본문 읽기는 `vaultPath` 전달로 maencof 에 위임하고 레이어 상한은 기존 교집합이 그대로 지킨다.
 - 2026-08-04 — `sub_layer` 를 `string` 수신 + `as SubLayer` 캐스팅에서 `SubLayer` 직접 수신으로 바꿨다. 캐스팅이 maencof 의 v3 서브레이어 축소를 가려, 이 핸들러는 폐기된 값을 계속 받아 노드 비교에서 빈 결과를 돌려주고 있었다.
 
 ## Last Updated
 
-2026-08-04 — `sub_layer` 를 maencof 타입으로 직접 받도록 계약을 좁혔다.
+2026-08-05 — `include_trace`/`include_content` 통과와 `vaultPath` 파라미터를 계약에 추가했다.

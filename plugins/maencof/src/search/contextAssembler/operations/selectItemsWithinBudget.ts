@@ -21,7 +21,7 @@ export function selectItemsWithinBudget(
 
   for (let i = 0; i < allItems.length; i++) {
     const item = allItems[i];
-    const itemTokens = estimateTokens(itemToMarkdown(item, false));
+    const itemTokens = estimateTokens(itemToMarkdown(item));
     if (totalTokens + itemTokens > tokenBudget) {
       truncatedCount = allItems.length - i;
       break;

@@ -11,6 +11,7 @@ export interface LensContextInput {
   layer_filter?: number[];
   sub_layer?: SubLayer;
   scope?: KgContextScope;
+  include_content?: boolean;
 }
 
 export async function handleLensContext(
@@ -33,6 +34,7 @@ export async function handleLensContext(
       layer_filter: effectiveLayers,
       sub_layer: input.sub_layer,
       scope: input.scope,
+      include_content: input.include_content,
     },
     vaultPath,
   );

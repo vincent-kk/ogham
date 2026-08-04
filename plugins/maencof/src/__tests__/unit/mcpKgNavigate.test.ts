@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { MAX_NAVIGATE_NEIGHBORS } from '../../constants/thresholds.js';
 import { handleKgNavigate } from '../../mcp/tools/kgNavigate/kgNavigate.js';
 import { toNodeId } from '../../types/common.js';
 import type {
@@ -214,5 +215,32 @@ describe('handleKgNavigate', () => {
     const result = await handleKgNavigate(graph, { path: 'target.md' });
     expect('error' in result).toBe(false);
     if (!('error' in result)) expect(result.node.path).toBe('target.md');
+  });
+
+  it('이웃 목록이 상한을 넘으면 캡하고 절단된 목록만 원총수를 보고한다', async () => {
+    const overflow = 5;
+    const center = makeNode('hub/center.md');
+    const others = Array.from(
+      { length: MAX_NAVIGATE_NEIGHBORS + overflow },
+      (_, i) => makeNode(`refs/n${i}.md`),
+    );
+    const edges: KnowledgeEdge[] = others.map((n) => ({
+      from: n.id,
+      to: center.id,
+      type: 'LINK' as const,
+      weight: 1.0,
+    }));
+    const graph = makeGraph([center, ...others], edges);
+
+    const result = await handleKgNavigate(graph, { path: 'hub/center.md' });
+    expect('error' in result).toBe(false);
+    if (!('error' in result)) {
+      expect(result.inbound).toHaveLength(MAX_NAVIGATE_NEIGHBORS);
+      expect(result.neighborTotals?.inbound).toBe(
+        MAX_NAVIGATE_NEIGHBORS + overflow,
+      );
+      expect(result.outbound).toHaveLength(0);
+      expect(result.neighborTotals?.outbound).toBeUndefined();
+    }
   });
 });

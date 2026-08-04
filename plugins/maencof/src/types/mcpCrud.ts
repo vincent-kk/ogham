@@ -9,7 +9,7 @@ import type {
   PromotionTarget,
   SubLayer,
 } from './common.js';
-import type { ActivationResult, KnowledgeNode } from './graph.js';
+import type { KnowledgeNode } from './graph.js';
 import type { L1ChangeReason } from './l1Amendment.js';
 
 /** `create` 입력 */
@@ -52,10 +52,6 @@ export interface MaencofCreateInput {
 export interface MaencofReadInput {
   /** 문서 경로 (vault 상대 경로) */
   path: string;
-  /** SA 홉 수 (관련 컨텍스트 깊이, 기본 2) */
-  depth?: number;
-  /** 관련 문서 포함 여부 (기본 true) */
-  include_related?: boolean;
 }
 
 /** `update` 입력 — frontmatter 부분 업데이트 + 필드 제거 */
@@ -139,6 +135,4 @@ export interface MaencofReadResult extends MaencofCrudResult {
   content: string;
   /** 문서 노드 정보 */
   node: KnowledgeNode;
-  /** 관련 문서 (SA 결과) */
-  related?: ActivationResult[];
 }

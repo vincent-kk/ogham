@@ -7,6 +7,7 @@
 - `date` 지정 시 해당 날짜만 조회; 미지정 시 오늘부터 N일 최신순.
 - 파일 부재 시 해당 날짜는 결과에서 제외(단일 date 조회는 빈 notes).
 - 카테고리 필터는 `entries.filter(e => e.category === category)`로 적용.
+- 응답 엔트리 총수는 `MAX_ACTIVITY_READ_ENTRIES`(constants/thresholds)를 넘지 않는다 — 활동 로그는 매 호출 append 되므로 상한 없는 조회는 LLM 컨텍스트를 범람시킨다. 최신 날짜부터 담고, 상한에 걸리는 날짜는 최근(뒤쪽) 엔트리를 남긴다. 잘리면 `truncated: true` 를 세우고 `total_entries` 는 절단 전 매칭 총합을 유지한다.
 
 ## API Contracts
 
@@ -24,10 +25,11 @@
 {
   notes: Array<{
     date: string; // YYYY-MM-DD
-    entries: ActivityEntry[]; // 필터 적용 후
-    entry_count: number;
+    entries: ActivityEntry[]; // 필터·상한 적용 후
+    entry_count: number; // 응답에 실린 수
   }>;
-  total_entries: number; // 전체 합
+  total_entries: number; // 필터 적용 후 매칭 총합 (절단 전)
+  truncated?: boolean; // MAX_ACTIVITY_READ_ENTRIES 로 잘렸을 때만 true
 }
 ```
 
@@ -86,6 +88,10 @@
 
 - `date` 미지정 시 오늘부터 `last_days` 일을 최신 날짜 먼저 반환하며, 같은 날 엔트리는 append 순을 유지한다.
 
+### AC-entry-cap — 응답 엔트리 상한
+
+- 매칭 엔트리가 `MAX_ACTIVITY_READ_ENTRIES` 를 넘으면 응답에 실린 엔트리 합이 상한과 같고 `truncated` 가 true 이며, `total_entries` 는 절단 전 총합을 유지한다. 상한 이내면 `truncated` 는 실리지 않는다.
+
 ## Last Updated
 
-2026-08-04 — 기존 계약(파일 부재·손상 라인·필터·정렬)을 검증 가능한 acceptance group 으로 고정했다.
+2026-08-04 — 응답 엔트리 상한(`MAX_ACTIVITY_READ_ENTRIES`)과 `truncated` 신호를 계약에 추가했다.

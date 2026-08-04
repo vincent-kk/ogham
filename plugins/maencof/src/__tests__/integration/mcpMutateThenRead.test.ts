@@ -86,7 +86,7 @@ describe('mutate → immediate read pipeline', () => {
     });
     expect('error' in search).toBe(false);
     if ('error' in search) return;
-    const hitIds = search.results.map((r) => String(r.nodeId));
+    const hitIds = search.results.map((r) => r.path);
     expect(hitIds).toContain(result.path);
   });
 
@@ -126,7 +126,7 @@ describe('mutate → immediate read pipeline', () => {
     });
     expect('error' in search).toBe(false);
     if ('error' in search) return;
-    const hitIds = search.results.map((r) => String(r.nodeId));
+    const hitIds = search.results.map((r) => r.path);
     expect(hitIds).not.toContain(target.path);
   });
 

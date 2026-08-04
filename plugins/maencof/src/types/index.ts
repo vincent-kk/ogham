@@ -190,8 +190,10 @@ export type {
   MaencofCrudResult,
   MaencofReadResult,
   KgSearchResult,
+  KgSearchResultItem,
   KgNavigateResult,
   KgContextResult,
+  KgContextDocumentRef,
   KgStatusResult,
 } from './mcp.js';
 export { KgContextScope } from '../constants/kgContext.js';

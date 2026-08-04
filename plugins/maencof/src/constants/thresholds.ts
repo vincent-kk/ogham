@@ -8,6 +8,18 @@ export const MAX_LINK_ORPHAN_PATHS = 200;
 /** kg_navigate siblings 응답 기본 상한 — 대형 자동수집 폴더의 이웃 폭주로부터 도구 응답을 보호 (include_all_siblings 로 해제) */
 export const MAX_NAVIGATE_SIBLINGS = 50;
 
+/** kg_navigate 이웃 목록(inbound/outbound/children/crossLayer/domain) 상한 — 허브 노드의 전체 KnowledgeNode 배열 폭주로부터 응답을 보호. 절단 시 neighborTotals 로 원총수를 보고한다 */
+export const MAX_NAVIGATE_NEIGHBORS = 50;
+
+/** activity_read 응답의 총 엔트리 상한 — 활동 로그는 매 호출 append 되므로 무상한 조회는 LLM 컨텍스트를 범람시킨다. 최신 우선으로 자르고 truncated 로 신호한다 */
+export const MAX_ACTIVITY_READ_ENTRIES = 200;
+
+/** kg_build 응답의 parseFailures 목록 상한 — 광범위 손상 시 파일당 한 항목이 무상한으로 쏟아지는 것을 막는다. 절단 시 parseFailuresTotal 로 총수를 보고한다 */
+export const MAX_KG_BUILD_PARSE_FAILURES = 50;
+
+/** delete 거부 응답의 backlink 경고 나열 상한 — 초과분은 요약 한 줄로 대체한다 */
+export const MAX_DELETE_BACKLINK_WARNINGS = 20;
+
 export const STALE_THRESHOLD_PERCENT = 10;
 
 /**

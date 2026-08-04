@@ -15,7 +15,7 @@ export function registerActivityReadTools(server: McpServer): void {
     McpToolName.ACTIVITY_READ,
     {
       description:
-        'Queries the activity log (daily record of vault actions). Supports date, category filter, and last N days lookup. Returns time-ordered entries with category and source path; render to the user as a date-grouped markdown table with Time/Category/Activity/Path columns.',
+        'Queries the activity log (daily record of vault actions). Supports date, category filter, and last N days lookup. Returns time-ordered entries with category and source path, capped at 200 most-recent entries (truncated=true with the pre-cap total when cut); render to the user as a date-grouped markdown table with Time/Category/Activity/Path columns.',
       inputSchema: z.object({
         date: z
           .string()

@@ -297,7 +297,8 @@ export function applyCompanionEdit(
     errors: [],
     warnings,
     turn_budget,
-    identity_preview: parsed.data,
+    // 방금 저장한 내용의 전체 에코는 컨텍스트 낭비 — preview 는 비커밋 경로의 몫이다.
+    identity_preview: null,
     backup_path: backupPath,
   };
 }

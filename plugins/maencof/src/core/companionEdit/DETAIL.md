@@ -37,7 +37,7 @@
 - `errors` — 커밋을 막는 사유(Zod 이슈, 예산 악화, brief 길이 역전).
 - `warnings` — 막지 않는 사유(예산 초과 상태이나 개선 중, 세션 예산 초과).
 - `turn_budget` — `{ total, budget, ok, offenders }`. 편집 **후** 후보 기준이다.
-- `identity_preview` — 후보 identity. 커밋 시에는 저장된 값(`parsed.data`)과 같다.
+- `identity_preview` — 후보 identity. preview 와 커밋 거부 경로에서만 실리고, 커밋 성공 응답에서는 null 이다 — 방금 저장한 내용의 전체 에코는 컨텍스트 낭비다.
 - `backup_path` — 커밋에서만 존재하는 선택 필드.
 
 ### 저장 형식
@@ -70,10 +70,14 @@
 
 - 커밋 경로가 쓰기 전에 백업 파일을 남기고 그 경로를 `backup_path` 로 보고한다.
 
+### AC-commit-no-echo — 커밋 성공 무에코
+
+- `commit: true` 로 저장에 성공한 응답의 `identity_preview` 는 null 이다. preview 와 커밋 거부 응답은 후보 identity 를 유지한다.
+
 ### AC-failure-as-result — 실패의 결과화
 
 - 파일 부재·파싱 실패·필수 필드 누락이 예외 대신 `success: false` + `errors` 로 반환된다.
 
 ## Last Updated
 
-2026-07-30 — preview/commit 2단계·단조 예산 게이트·마지막 섹션 보존·실패 결과화 계약을 문서화했다.
+2026-08-04 — 커밋 성공 응답의 `identity_preview` 전체 에코를 제거했다(null 반환).

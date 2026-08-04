@@ -186,17 +186,17 @@ To explore related documents: /maencof:explore {tag}
 /maencof:remember [content] [--layer <2-5>] [--sub-layer <name>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>] [--filename <[subdir/]name>]
 ```
 
-| Option        | Default              | Description                                                                                                 |
-| ------------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `content`     | conversation context | Content to record                                                                                           |
-| `--layer`     | auto-recommended     | Specify Layer (2-5; L1 not allowed)                                                                         |
-| `--sub-layer` | auto-recommended     | Sub-layer: relational/structural/topical (L3 only; L5 is flat)                                              |
-| `--title`     | auto-generated       | Document title                                                                                              |
-| `--tags`      | auto-extracted       | Tag list (comma-separated)                                                                                  |
-| `--source`    | none                 | External source URL (for L3)                                                                                |
-| `--expires`   | none                 | Expiration date YYYY-MM-DD (for L4 / L5)                                                                    |
-| `--filename`  | auto-generated       | Filename hint; a subdirectory prefix groups related documents, e.g. `projects/alpha-kickoff` (max 2 levels) |
-| `--no-check`  | false                | Skip duplicate check                                                                                        |
+| Option        | Default              | Description                                                                                                                             |
+| ------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `content`     | conversation context | Content to record                                                                                                                       |
+| `--layer`     | auto-recommended     | Specify Layer (2-5; L1 not allowed)                                                                                                     |
+| `--sub-layer` | auto-recommended     | Sub-layer: relational/structural/topical (L3 only; L5 is flat)                                                                          |
+| `--title`     | auto-generated       | Document title                                                                                                                          |
+| `--tags`      | auto-extracted       | Tag list (comma-separated)                                                                                                              |
+| `--source`    | none                 | External source URL (for L3)                                                                                                            |
+| `--expires`   | none                 | Expiration date YYYY-MM-DD (for L4 / L5)                                                                                                |
+| `--filename`  | auto-generated       | Filename hint; a subdirectory prefix groups related documents, e.g. `projects/alpha-kickoff` (max 2 levels; L1/L5 are flat — no prefix) |
+| `--no-check`  | false                | Skip duplicate check                                                                                                                    |
 
 ## Usage Examples
 

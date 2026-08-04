@@ -45,7 +45,7 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_SEARCH,
     {
       description:
-        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords). Returns ranked references (no content) with raw SA tuning parameters; when the goal is assembled multi-document content, prefer kg_context.',
+        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords). Returns ranked references (path/title/tags/gist); include_content=true adds full bodies for consumers that cannot read vault files. When the goal is assembled multi-document context, prefer kg_context.',
       inputSchema: z.object({
         seed: z
           .array(z.string())
@@ -87,13 +87,29 @@ export function registerKgTools(server: McpServer): void {
         sub_layer: SubLayerSchema.optional().describe(
           'Sub-layer filter for Layer 3 (relational/structural/topical).',
         ),
+        include_trace: z
+          .boolean()
+          .optional()
+          .describe(
+            'Include the seed→node hop path per result (default false)',
+          ),
+        include_content: z
+          .boolean()
+          .optional()
+          .describe(
+            'Include full document bodies (default false — references only). For sandboxed consumers that cannot Read vault files.',
+          ),
       }),
     },
-    async (_vaultPath, args, graph) =>
-      handleKgSearch(graph, {
-        ...args,
-        layer_filter: args.layer_filter as (1 | 2 | 3 | 4 | 5)[] | undefined,
-      }),
+    async (vaultPath, args, graph) =>
+      handleKgSearch(
+        graph,
+        {
+          ...args,
+          layer_filter: args.layer_filter as (1 | 2 | 3 | 4 | 5)[] | undefined,
+        },
+        vaultPath,
+      ),
     { needsFreshness: true },
   );
 
@@ -136,7 +152,7 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_CONTEXT,
     {
       description:
-        'Returns a context block assembled from documents relevant to the query within a token budget. Prefer this over kg_search + read chains for multi-document context assembly; layer/sub-layer/scope selection applies before the budget is spent.',
+        'Returns a context block assembled from documents relevant to the query within a token budget. Prefer this over kg_search + read chains for multi-document context assembly; layer/sub-layer/scope selection applies before the budget is spent. include_content=false returns only the selected document list (path/title/score) for callers that will read selectively.',
       inputSchema: z.object({
         query: z
           .string()
@@ -167,6 +183,12 @@ export function registerKgTools(server: McpServer): void {
           .optional()
           .describe(
             "Exploration breadth: 'focused' = close, high-confidence documents (answering a specific question); 'balanced' = default; 'broad' = distant, weakly-linked documents (ideation/brainstorming)",
+          ),
+        include_content: z
+          .boolean()
+          .optional()
+          .describe(
+            'Set false to skip markdown assembly and return only the selected document list as documents (default true)',
           ),
       }),
     },

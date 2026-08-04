@@ -5,6 +5,7 @@
 import { readVaultFile } from '../../../core/vaultScanner/index.js';
 import {
   assembleContext,
+  estimateTokens,
   extractBestSnippet,
 } from '../../../search/contextAssembler/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
@@ -31,43 +32,61 @@ export async function handleKgContext(
 
   const candidates = selectContextCandidates(graph, input);
 
+  // 경로-만 모드 — 조립 markdown 없이 선택 문서 참조만 반환한다
+  if (input.include_content === false) {
+    const documents = candidates.map((r) => {
+      const node = graph.nodes.get(r.nodeId);
+      return {
+        path: String(r.nodeId),
+        title: node?.title ?? String(r.nodeId),
+        score: r.score,
+      };
+    });
+    return { documents, documentCount: documents.length };
+  }
+
   // 컨텍스트 조립
-  const assembled = assembleContext(candidates, graph, {
-    tokenBudget,
-    includeFull,
-  });
+  const assembled = assembleContext(candidates, graph, { tokenBudget });
 
   // Content snippet extraction (B4-lite)
   if (includeFull && vaultRoot && assembled.items.length > 0) {
     const maxFullDocuments = 3;
     const topItems = assembled.items.slice(0, maxFullDocuments);
 
-    await Promise.all(
-      topItems.map(async (item) => {
-        try {
-          const content = await readVaultFile(vaultRoot, item.path);
-          item.fullContent = extractBestSnippet(content, queryTerms);
-        } catch {
-          // File not found or read error — skip snippet
-        }
-      }),
-    );
+    const snippetLines = (
+      await Promise.all(
+        topItems.map(async (item) => {
+          try {
+            const content = await readVaultFile(vaultRoot, item.path);
+            const snippet = extractBestSnippet(content, queryTerms);
+            return snippet
+              ? `\n### ${item.title}\n\`\`\`\n${snippet}\n\`\`\``
+              : null;
+          } catch {
+            // 파일 부재/읽기 실패 문서는 스니펫 없이 넘어간다
+            return null;
+          }
+        }),
+      )
+    ).filter((line): line is string => line !== null);
 
-    // Rebuild markdown with snippets appended
-    const snippetLines: string[] = [];
-    for (const item of topItems)
-      if (item.fullContent)
-        snippetLines.push(
-          `\n### ${item.title}\n\`\`\`\n${item.fullContent}\n\`\`\``,
-        );
-
-    if (snippetLines.length > 0)
+    if (snippetLines.length > 0) {
+      // 스니펫도 예산의 일부다 — 합계가 token_budget 을 넘으면 뒤 스니펫부터 덜어낸다
+      let context = assembled.markdown + '\n' + snippetLines.join('\n');
+      while (snippetLines.length > 0 && estimateTokens(context) > tokenBudget) {
+        snippetLines.pop();
+        context =
+          snippetLines.length > 0
+            ? assembled.markdown + '\n' + snippetLines.join('\n')
+            : assembled.markdown;
+      }
       return {
-        context: assembled.markdown + '\n' + snippetLines.join('\n'),
+        context,
         documentCount: assembled.items.length,
-        estimatedTokens: assembled.estimatedTokens,
+        estimatedTokens: estimateTokens(context),
         truncatedCount: assembled.truncatedCount,
       };
+    }
   }
 
   return {

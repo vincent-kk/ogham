@@ -10,6 +10,7 @@
 - 핀 총수는 `MAX_PINNED_NODES` 를 넘지 못한다. 초과하면 `pinnedAt` 최신순으로 잘라 가장 오래된 핀부터 밀어낸다.
 - 잘못된 입력은 throw 가 아니라 `success: false` + `error` 문자열로 돌려준다 — 미지의 `action` 도 유효 액션 목록과 함께 같은 형태로 거부한다.
 - KG 그래프와 무관하므로 `registerReadTool({ needsFreshness: false })` 로 등록된다. 캐시 파일을 쓰지만 그래프 캐시는 건드리지 않는다.
+- 응답은 turn context 본문을 되돌려주지 않는다. 그 문자열은 매 턴 UserPromptSubmit 주입으로 이미 모델 컨텍스트에 있어 도구 응답의 에코는 순수 중복이다. 재빌드가 일어난 액션은 `contextChars` 로 크기만 보고한다.
 
 ## API Contracts
 
@@ -31,10 +32,12 @@
 
 ### Output by action
 
-- `pin` — 신규: `{ success, pinned: true, totalPinned, turnContext }`. 이미 핀됨: `{ success: true, message, totalPinned }` (재빌드 없음).
+- `pin` — 신규: `{ success, pinned: true, totalPinned, contextChars }`. 이미 핀됨: `{ success: true, message, totalPinned }` (재빌드 없음).
 - `unpin` — 제거: `{ success, unpinned: true, totalPinned }`. 대상 없음: `{ success: true, unpinned: false, reason, totalPinned }` (재빌드 없음).
-- `refresh` — `{ success, refreshed: true, turnContext }`.
-- `list` — `{ success, pinnedNodes, turnContext }`. 캐시가 비었으면 `turnContext` 는 `'(no cached turn context)'`.
+- `refresh` — `{ success, refreshed: true, contextChars }`.
+- `list` — `{ success, pinnedNodes }`.
+
+`contextChars` 는 재빌드된 turn context 의 문자 수다 — 본문 대신 크기만 보고한다.
 
 ### Pinned node shape (`PinnedNode`)
 
@@ -62,6 +65,10 @@
 
 - 필수 필드 누락과 미지의 `action` 이 예외 대신 `success: false` + `error` 로 반환된다.
 
+### AC-no-context-echo — turn context 본문 비반환
+
+- 어느 액션의 응답에도 `turnContext` 본문 필드가 없다. 재빌드가 일어난 `pin`(신규)·`refresh` 는 `contextChars` 숫자만 보고한다.
+
 ## Last Updated
 
-2026-07-30 — vault 경로 해석·핀 멱등/상한·변경 시 재빌드 계약과 액션별 출력 형태를 문서화했다.
+2026-08-04 — 응답에서 turn context 본문 에코를 제거하고 `contextChars` 크기 보고로 대체했다.
