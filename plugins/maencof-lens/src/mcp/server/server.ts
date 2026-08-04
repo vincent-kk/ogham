@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { KgContextScope } from "@ogham/maencof";
+import { KgContextScope, SubLayerSchema } from "@ogham/maencof";
 import { z } from "zod";
 
 import { loadConfig } from "../../config/configLoader/index.js";
@@ -14,6 +14,18 @@ import { VaultRouter } from "../../vault/vaultRouter/index.js";
 import { VERSION } from "../../version.js";
 
 import { toolError, toolResult } from "../shared/index.js";
+
+/**
+ * `search`·`context` 가 공유하는 `sub_layer` 필드.
+ *
+ * 허용값은 maencof 의 `SubLayerSchema` 가 소유한다. 여기에 값을 열거하면 레이어
+ * 모델이 바뀌어도 이 스키마만 남아 폐기된 값을 계속 광고하게 된다.
+ */
+const subLayerField = z.optional(
+  SubLayerSchema.describe(
+    "Sub-layer filter for Layer 3 (relational/structural/topical).",
+  ),
+);
 
 export function createLensServer(configRoot: string | null) {
   const config = configRoot === null ? null : loadConfig(configRoot);
@@ -59,7 +71,7 @@ export function createLensServer(configRoot: string | null) {
               "Layer numbers to include; intersected with the vault's layer ceiling. An empty intersection silently falls back to the full ceiling range instead of erroring.",
             ),
         ),
-        sub_layer: z.optional(z.string()),
+        sub_layer: subLayerField,
       }),
     },
     async (args) => {
@@ -96,13 +108,7 @@ export function createLensServer(configRoot: string | null) {
               "Layer numbers to include; intersected with the vault's layer ceiling. An empty intersection silently falls back to the full ceiling range instead of erroring.",
             ),
         ),
-        sub_layer: z.optional(
-          z
-            .enum(["relational", "structural", "topical", "buffer", "boundary"])
-            .describe(
-              "Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)",
-            ),
-        ),
+        sub_layer: subLayerField,
         scope: z.optional(
           z
             .nativeEnum(KgContextScope)

@@ -11,7 +11,7 @@ export interface LensSearchInput {
   threshold?: number;
   max_hops?: number;
   layer_filter?: number[];
-  sub_layer?: string;
+  sub_layer?: SubLayer;
 }
 
 export async function handleLensSearch(
@@ -31,7 +31,7 @@ export async function handleLensSearch(
     threshold: input.threshold,
     max_hops: input.max_hops,
     layer_filter: effectiveLayers,
-    sub_layer: input.sub_layer as SubLayer | undefined,
+    sub_layer: input.sub_layer,
   });
 
   if ("error" in result)

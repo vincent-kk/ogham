@@ -7,6 +7,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { McpToolName } from '../../../../constants/mcpToolNames.js';
+import { SubLayerSchema } from '../../../../types/frontmatter.js';
 import {
   captureInsightInputSchema,
   handleCaptureInsight,
@@ -57,12 +58,9 @@ export function registerCrudTools(server: McpServer): void {
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .optional()
           .describe('Expiry date YYYY-MM-DD (for Layer 4 and L5 buffer)'),
-        sub_layer: z
-          .enum(['relational', 'structural', 'topical'])
-          .optional()
-          .describe(
-            'Sub-layer for Layer 3 only (relational/structural/topical — default topical). Layer 5 is a flat unclassified buffer and takes no sub-layer.',
-          ),
+        sub_layer: SubLayerSchema.optional().describe(
+          'Sub-layer for Layer 3 only (relational/structural/topical — default topical). Layer 5 is a flat unclassified buffer and takes no sub-layer.',
+        ),
         mentioned_persons: z
           .array(z.string())
           .optional()

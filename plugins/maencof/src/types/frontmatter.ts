@@ -6,8 +6,14 @@ import { z } from 'zod';
 
 import { PersonSchema } from './person.js';
 
-/** 서브레이어 Zod 스키마 — L3 전용 */
-const SubLayerSchema = z.enum(['relational', 'structural', 'topical']);
+/**
+ * 서브레이어 Zod 스키마 — L3 전용. `SubLayer` 타입의 런타임 짝이자 허용값의 정본.
+ *
+ * frontmatter 검증뿐 아니라 MCP 도구의 `sub_layer` 입력 스키마도 여기서 파생한다.
+ * 값 목록을 다른 곳에 리터럴로 다시 적으면 레이어 모델이 바뀔 때 그 자리만 남아
+ * 폐기된 값을 계속 광고한다.
+ */
+export const SubLayerSchema = z.enum(['relational', 'structural', 'topical']);
 
 /** Frontmatter 기본 스키마 (superRefine 전) */
 const FrontmatterBaseSchema = z.object({
@@ -79,9 +85,7 @@ const FrontmatterBaseSchema = z.object({
   /** 미분류 항목의 종류 */
   buffer_type: z.enum(['snippet', 'conversation', 'unclassified']).optional(),
   /** 승격 대상 — 레이어 번호가 아니라 서브레이어 이름이다(L3A/3B/3C를 구분해야 승격 규칙이 성립한다) */
-  promotion_target: z
-    .enum(['relational', 'structural', 'topical', 'L2'])
-    .optional(),
+  promotion_target: z.enum([...SubLayerSchema.options, 'L2']).optional(),
   /** 항목의 출처 서술 (예: "대화 중 멘션", "웹 스크랩") */
   source_context: z.string().optional(),
 

@@ -9,6 +9,7 @@
 - `GraphCache` 는 서버 인스턴스당 하나다. 툴 콜백은 캐시를 새로 만들지 않고 `graphCache.getGraph(vault.path)` 로만 그래프를 얻는다.
 - 핸들러 예외가 MCP 밖으로 새지 않는다. 모든 툴 콜백이 `try`/`catch` 로 감싸 `toolError` 로 변환한다.
 - `layer_filter` 를 입력으로 받는 툴은 `search`·`context` 둘뿐이다. `navigate`·`read`·`status` 스키마에는 그 필드가 없고, 유효 레이어는 볼트 설정 상한(기본 L2–L5)이 된다.
+- `sub_layer` 스키마는 `@ogham/maencof` 의 `SubLayerSchema` 를 그대로 쓴다. 허용값을 여기서 열거하지 않는다 — 레이어 모델은 maencof 가 소유하고, 이 패키지가 목록을 베끼면 모델이 바뀔 때 폐기된 값을 계속 광고하게 된다.
 - 응답 조립은 `mcp/shared` 의 `toolResult`·`toolError` 만 쓴다. 콜백이 MCP content 배열을 손으로 만들지 않는다.
 
 ## API Contracts
@@ -16,6 +17,7 @@
 - `createLensServer(configRoot: string | null): McpServer` — 5개 툴이 등록된 서버 인스턴스. `configRoot` 는 `.maencof-lens/` 를 담은 디렉터리의 절대 경로이거나 `null`. config 를 못 찾아도 throw 하지 않는다.
 - 등록 툴과 필수 입력: `search(seed: string[], 최소 1개)` · `context(query: string)` · `navigate(path: string)` · `read(path: string)` · `status()`. 다섯 툴 모두 optional `vault`(볼트 이름)를 받는다.
 - `search`·`context` 의 `layer_filter` 는 볼트 상한과 교집합되며, 교집합이 비면 에러 없이 상한 전체로 되돌아간다.
+- `search`·`context` 의 `sub_layer` 는 optional `SubLayerSchema` 다. 두 툴이 같은 스키마 인스턴스를 공유하므로 허용값이 서로 갈라질 수 없다.
 - `read` 만 핸들러 결과의 `error` 필드를 `isError` 응답으로 승격한다. `search`·`context`·`navigate` 는 핸들러가 만든 `error` 페이로드를 정상 결과 본문으로 돌려준다.
 - 서버 이름은 `maencof-lens`, 버전은 `version.ts` 의 `VERSION` 이다.
 
@@ -42,6 +44,16 @@
 - 다섯 툴이 같은 `GraphCache` 인스턴스를 통해 그래프를 얻는다.
 - 볼트 경로가 같으면 툴 호출마다 그래프를 다시 로드하지 않는다.
 
+### AC-sublayer-from-maencof — 서브레이어 값 위임
+
+- `search`·`context` 의 `sub_layer` 가 maencof 가 현재 인정하는 서브레이어 값을 받는다.
+- 폐기된 값(v2 의 L5 `buffer`·`boundary`)은 스키마 단계에서 거절된다 — 조용히 빈 결과로 흘러가지 않는다.
+- 이 패키지 소스 어디에도 서브레이어 값 리터럴이 없다.
+
+## History
+
+- 2026-08-04 — `sub_layer` 허용값을 `SubLayerSchema` 위임으로 바꿨다. 이전에는 `context` 가 5종을 직접 열거하고 `search` 는 생 `z.string()` 이었다. v3 가 L5 서브레이어를 없앤 뒤 두 자리 모두 폐기값을 계속 받아들였고, 통과한 값은 노드 비교에서 아무것도 못 맞춰 에러 없이 빈 결과가 됐다.
+
 ## Last Updated
 
-2026-07-30 — 툴 등록 범위, config 부재 지연 처리, 에러 봉투 계약을 문서화했다.
+2026-08-04 — `sub_layer` 값 소유권을 maencof 로 명시하고 acceptance group 을 붙였다.

@@ -5,6 +5,7 @@
 - `index.ts` 가 `@ogham/maencof` 의 유일한 라이브러리 표면이다. 모든 export 를 이름으로 열거하며, 여기 없는 심볼은 계약이 아니다.
 - `createServer` · `startServer` 는 이 표면에 없다. 실행 진입점은 esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 만드는 `bridge/mcp-server.cjs` 이고, 배럴이 `mcp/server` 를 끌어오면 `server.ts → version.ts` 참조와 맞물려 `src → mcp → mcp/server → src` 순환이 된다.
 - 의존 방향은 한쪽이다. `core/` 는 `mcp/` · `hooks/` 에 의존하지 않고, `types/` 는 zod 외 외부 의존성을 갖지 않는다.
+- 서브레이어 허용값은 `types/frontmatter.ts` 의 `SubLayerSchema` 하나가 소유한다. frontmatter 검증도 MCP 도구 스키마도 이 스키마에서 파생하며, 값 목록을 리터럴로 다시 적지 않는다 — `SubLayer` 타입만 좁히고 어딘가의 리터럴을 놓치면 그 자리는 폐기된 값을 계속 광고한다.
 - `version.ts` 는 빌드 시 `scripts/injectVersion.mjs` 가 생성한다. 직접 수정하지 않는다.
 - `bridge/` 산출물은 esbuild 가 만든다. 소스는 `src/hooks/<event>/<event>.entry.ts` 와 `src/mcp/serverEntry/serverEntry.ts` 이며 산출물을 손대지 않는다.
 - vault 아키텍처는 v3(L3 sublayer + 평면 L5 임시 수용소 + 레이어 직교 hub 속성)를 기대한다. 기대 버전과 다른 vault 는 `core/architectureMigrator` 가 마이그레이션한다.
@@ -15,7 +16,8 @@
 
 ### Entry point (`index.ts`)
 
-- **Types** — `types/index.js` 의 런타임 값과 타입을 이름으로 재노출한다. 스키마(`CompanionIdentitySchema` · `DialogueConfigSchema` · `FrontmatterSchema` · `PersonSchema` 등), 레이어 좌표(`Layer` · `LAYER_DIR` · `L3_SUBDIR` · `dirFromLayer` · `layerFromDir` · `isLayer1Path`), `EDGE_TYPE`, `EXPECTED_ARCHITECTURE_VERSION`, 그리고 도구·훅 입출력 타입 전체.
+- **Types** — `types/index.js` 의 런타임 값과 타입을 이름으로 재노출한다. 스키마(`CompanionIdentitySchema` · `DialogueConfigSchema` · `FrontmatterSchema` · `PersonSchema` · `SubLayerSchema` 등), 레이어 좌표(`Layer` · `LAYER_DIR` · `L3_SUBDIR` · `dirFromLayer` · `layerFromDir` · `isLayer1Path`), `EDGE_TYPE`, `EXPECTED_ARCHITECTURE_VERSION`, 그리고 도구·훅 입출력 타입 전체.
+- **Sub-layer 값 목록** — `SubLayerSchema` 는 `SubLayer` 타입의 런타임 짝으로 공개된다. 다른 패키지의 MCP 도구가 `sub_layer` 입력 스키마를 세울 때 이것을 쓰라고 내놓은 것이며, `.options` 로 값 배열을 얻는다.
 - **Version** — `VERSION` (생성 상수).
 - **Core** — `vaultScanner`(`scanVault` · `buildSnapshot` · `computeChangeSet` · `scanIncrementalChanges` · `readVaultFile`), `documentParser`(`parseYamlFrontmatter` · `extractFrontmatter` · `extractLinks` · `parseDocument` · `buildKnowledgeNode` · `parseDocumentFromFile`), `graphBuilder`(`buildGraph` · `buildAdjacencyList` · `detectOrphans`), `dagConverter`(`convertToDAG` · `applyLayerDirectionality`), `weightCalculator`(`calculateWeights` · `computePageRank` · `normalizeWeights` · `getLayerDecay` · `LAYER_DECAY_FACTORS`), `spreadingActivation`(`runAccumulativeActivation`), `communityDetector`(`CommunityDetector` · `detectCommunities`), `claudeMdMerger`(`mergeMaencofSection` · `readMaencofSection` · `removeMaencofSection` · `ClaudeMdMerger` · 마커 2종), `contentDedup`(`deduplicateContent`).
 - **Search** — `queryEngine`(`query` · `resolveSeedNodes` · `deriveContextSeeds` · `QueryEngine` · `invalidateQueryCache`), `contextAssembler`(`assembleContext` · `extractBestSnippet` · `ContextAssembler`).
@@ -55,6 +57,11 @@
 
 - `types/` 가 zod 외 외부 의존성을 갖지 않는다.
 
+### AC-sublayer-single-source — 서브레이어 값 단일 소유
+
+- `types/frontmatter.ts` 밖의 어떤 zod 스키마도 서브레이어 값을 리터럴로 열거하지 않고 `SubLayerSchema` 에서 파생한다.
+- `SubLayerSchema` 가 배럴에 이름으로 올라가 다른 패키지가 가져다 쓸 수 있다.
+
 ### AC-generated-not-handwritten — 생성물 비수정
 
 - `version.ts` 와 `bridge/` 산출물이 생성기 출력과 일치한다.
@@ -75,6 +82,10 @@
 - **Direct import**: `allowed`
 - **Reason**: 생성기(`scripts/injectVersion.mjs`)가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 하위 fractal 이 조상 배럴의 공개 표면 전체에 의존하게 되고, SessionStart 훅 소비자는 배럴 경유가 번들 크기 가드에 걸려 아예 불가능하다.
 
+## History
+
+- 2026-08-04 — `SubLayerSchema` 를 배럴에 올렸다. v3 로 `SubLayer` 를 L3 3종으로 좁혔을 때 이 패키지 안 리터럴은 전부 따라갔지만 `@ogham/maencof-lens` 의 도구 스키마는 남아 `buffer`·`boundary` 를 계속 광고했고, 타입이 좁아진 뒤에야 컴파일이 막혔다. 값 목록을 재기술할 수 있는 한 같은 드리프트가 다시 생기므로 파생 가능한 형태로 공개한다.
+
 ## Last Updated
 
-2026-07-30 — legacy SPEC 형태를 계약 절로 재구성하고, 현재 배럴 표면·생성 산출물·세션 마감 소유권에 acceptance group 을 붙였다.
+2026-08-04 — 서브레이어 값 목록의 단일 소유를 계약으로 적고 `SubLayerSchema` 를 배럴 표면에 추가했다.

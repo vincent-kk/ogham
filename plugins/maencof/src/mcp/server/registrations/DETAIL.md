@@ -10,6 +10,7 @@
 - KG 그래프를 건드리지 않는 쓰기 도구는 mutate 가 아니라 plain read 로 등록한다. `companion_edit` 과 `capture_personal_context` 가 그 경우이며, mutate 로 올리면 그래프 캐시를 무효화해 preview 경로까지 부수효과를 갖는다.
 - 등록 그룹 경계와 read/mutate 승격은 `INTENT.md` 의 "Ask first" 대상이다. 등록 실패를 조용히 삼키지 않는다 — 서버 기동이 도구 부재를 모르면 안 된다.
 - 핸들러가 읽는 입력 필드는 전부 `inputSchema` 에 있어야 한다. Zod 는 스키마에 없는 키를 조용히 버리므로, 누락된 필드는 타입에도 핸들러에도 존재하면서 호출자만 도달하지 못하는 상태가 된다 — 에러 메시지가 실행 불가능한 복구 수단을 안내하는 형태로 드러난다.
+- 도메인 모델이 소유한 값 집합은 등록부에서 리터럴로 열거하지 않고 그 모델의 스키마에서 파생한다. `sub_layer` 가 그 경우이며 `types/frontmatter.ts` 의 `SubLayerSchema` 가 정본이다 — 열거를 복제하면 모델이 좁아져도 이 자리는 폐기된 값을 계속 받는다.
 
 ## API Contracts
 
@@ -44,6 +45,8 @@
 
 `operations/kg.ts` 의 `timeWindowFields`(`since` / `until`, `YYYY-MM-DD`, 양 끝 포함)는 `kg_search` · `kg_context` · `kg_timeline` 세 도구가 공유한다. 시간창 의미를 한 곳에서 정의해 세 도구 설명이 갈라지지 않게 한다.
 
+`sub_layer` 를 받는 네 도구(`create` · `kg_search` · `kg_context` · `kg_timeline`)는 `types/frontmatter.ts` 의 `SubLayerSchema` 를 `.optional().describe(...)` 로 파생해 쓴다. 등록부에 값을 열거하지 않는다 — 설명 문구는 도구마다 달라도 허용값은 레이어 모델 하나에서만 나와야 한다.
+
 ## Acceptance Criteria
 
 ### AC-handlers-not-inlined — 핸들러 비인라인
@@ -76,8 +79,9 @@
 
 ## History
 
+- 2026-08-04 — `sub_layer` 열거를 네 자리에서 지우고 `SubLayerSchema` 파생으로 바꿨다. v3 가 L5 서브레이어를 없앴을 때 이 복제본들은 함께 고쳤지만 같은 복제를 한 `@ogham/maencof-lens` 는 빠졌다. 복제가 가능한 한 다음 모델 변경에서도 같은 자리가 남는다.
 - 2026-08-03 — `update` 의 `frontmatter.unset` 이 타입·핸들러·에러 메시지에는 있으나 `inputSchema` 에만 없어, 손상된 frontmatter 의 유일한 복구 경로가 호출 불가 상태였다. 스키마에 필드를 올리고 `AC-handler-fields-reach-schema` 로 고정했다.
 
 ## Last Updated
 
-2026-08-03 — 핸들러 입력 필드가 도구 스키마에 도달해야 한다는 요구사항과 acceptance group 을 추가했다.
+2026-08-04 — 도메인 모델 소유 값 집합을 등록부에서 복제하지 않는다는 요구사항을 추가하고, `sub_layer` 공유 스키마를 API Contracts 에 적었다.

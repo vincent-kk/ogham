@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 import { KgContextScope } from '../../../../constants/kgContext.js';
 import { McpToolName } from '../../../../constants/mcpToolNames.js';
+import { SubLayerSchema } from '../../../../types/frontmatter.js';
 import { handleKgContext } from '../../../tools/kgContext/index.js';
 import { handleKgNavigate } from '../../../tools/kgNavigate/index.js';
 import { handleKgSearch } from '../../../tools/kgSearch/index.js';
@@ -83,12 +84,9 @@ export function registerKgTools(server: McpServer): void {
           .array(z.number().int().min(1).max(5))
           .optional()
           .describe('Layer filter (1-5)'),
-        sub_layer: z
-          .enum(['relational', 'structural', 'topical'])
-          .optional()
-          .describe(
-            'Sub-layer filter for Layer 3 (relational/structural/topical).',
-          ),
+        sub_layer: SubLayerSchema.optional().describe(
+          'Sub-layer filter for Layer 3 (relational/structural/topical).',
+        ),
       }),
     },
     async (_vaultPath, args, graph) =>
@@ -161,12 +159,9 @@ export function registerKgTools(server: McpServer): void {
           .array(z.number().int().min(1).max(5))
           .optional()
           .describe('Layer filter (1-5)'),
-        sub_layer: z
-          .enum(['relational', 'structural', 'topical'])
-          .optional()
-          .describe(
-            'Sub-layer filter for Layer 3 (relational/structural/topical).',
-          ),
+        sub_layer: SubLayerSchema.optional().describe(
+          'Sub-layer filter for Layer 3 (relational/structural/topical).',
+        ),
         scope: z
           .nativeEnum(KgContextScope)
           .optional()
@@ -287,10 +282,7 @@ export function registerKgTools(server: McpServer): void {
           .array(z.number().int().min(1).max(5))
           .optional()
           .describe('Layer filter (1-5)'),
-        sub_layer: z
-          .enum(['relational', 'structural', 'topical'])
-          .optional()
-          .describe('Sub-layer filter'),
+        sub_layer: SubLayerSchema.optional().describe('Sub-layer filter'),
       }),
     },
     async (_vaultPath, args, graph) =>

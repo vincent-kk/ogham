@@ -38,6 +38,7 @@ export {
   LifeDomainEnum,
   PersonSchema,
   RelationshipTypeEnum,
+  SubLayerSchema,
   SYMMETRIC_RELATIONSHIPS,
   toNodeId,
   TOOL_CATEGORY_MAP,

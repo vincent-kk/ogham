@@ -33,7 +33,7 @@ export type {
   SerializedGraph,
 } from './graph.js';
 
-export { FrontmatterSchema } from './frontmatter.js';
+export { FrontmatterSchema, SubLayerSchema } from './frontmatter.js';
 export type { Frontmatter, FrontmatterParseResult } from './frontmatter.js';
 
 export {

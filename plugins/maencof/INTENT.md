@@ -21,7 +21,7 @@
 
 - 빌드(도메인 스크립트 조합): `clean → version:sync → compile → mcp → hooks → compile-plugin`
 - vault 경로는 `MAENCOF_VAULT_PATH` env 또는 호스트 워크스페이스 루트; 둘 다 없으면 throw, 하드코딩 금지
-- 5-Layer 모델 v3 준수 (L1~L5). sublayer·hub 교차 규칙의 정본은 `src/types/frontmatter.ts` 의 `FrontmatterSchema` 다
+- 5-Layer 모델 v3 준수 (L1~L5). sublayer·hub 교차 규칙의 정본은 `src/types/frontmatter.ts` 의 `FrontmatterSchema` 이고, 서브레이어 허용값의 정본은 같은 파일이 export 하는 `SubLayerSchema` 다 — 패키지 안팎 어느 소비자도 값 목록을 재기술하지 않는다
 - 문서 frontmatter 필수 필드: `layer` / `tags` / `created` / `updated` (FrontmatterSchema; `templates/rules/frontmatter-required.md` 와 동기)
 
 ## Boundaries
