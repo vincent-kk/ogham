@@ -169,7 +169,9 @@ export function registerKgTools(server: McpServer): void {
         include_full: z
           .boolean()
           .optional()
-          .describe('Include full text of top N results (default false)'),
+          .describe(
+            'Include best-matching snippets of the top 3 documents, sized to the remaining token budget (default false)',
+          ),
         ...timeWindowFields,
         layer_filter: z
           .array(z.number().int().min(1).max(5))

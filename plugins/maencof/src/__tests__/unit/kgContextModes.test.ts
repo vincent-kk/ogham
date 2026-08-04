@@ -1,7 +1,7 @@
 /**
  * @file kgContextModes.test.ts
  * @description kg_context 응답 모드 — include_content:false 문서 목록,
- *   include_full 스니펫의 token_budget 계상.
+ *   include_full 스니펫의 token_budget 계상과 잔여 예산 연동 크기.
  */
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -133,6 +133,60 @@ describe('kg_context modes', () => {
       expect(result.context).toBeDefined();
       expect(estimateTokens(result.context!)).toBeLessThanOrEqual(tokenBudget);
       expect(result.estimatedTokens!).toBeLessThanOrEqual(tokenBudget);
+    });
+
+    it('잔여 예산이 넉넉하면 스니펫 상한이 종전 고정 300자를 넘어 자란다', async () => {
+      const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+      nodes.set(
+        toNodeId('omega.md'),
+        makeNode('omega.md', Layer.L2_DERIVED, { title: 'Omega Topic' }),
+      );
+      const graph = buildGraph(nodes, []);
+
+      const body = '---\nlayer: 2\n---\n\n' + 'omega '.repeat(300).trim();
+      await writeFile(join(vault, 'omega.md'), body, 'utf-8');
+
+      const result = await handleKgContext(
+        graph,
+        { query: 'omega', token_budget: 2000, include_full: true },
+        vault,
+      );
+
+      expect('error' in result).toBe(false);
+      if ('error' in result) return;
+      const snippet = result.context!.split('```')[1]?.trim() ?? '';
+      expect(snippet.length).toBeGreaterThan(300);
+      expect(snippet.endsWith('…')).toBe(true);
+    });
+
+    it('잔여 예산이 없으면 include_full이어도 스니펫을 붙이지 않는다', async () => {
+      const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+      for (let i = 1; i <= 6; i++)
+        nodes.set(
+          toNodeId(`theta-${i}.md`),
+          makeNode(`theta-${i}.md`, Layer.L2_DERIVED, {
+            title: `Theta Topic Number ${i} With A Fairly Long Title For Budget Tests`,
+            tags: ['theta', 'budget', 'exhaustion'],
+          }),
+        );
+      const graph = buildGraph(nodes, []);
+
+      for (let i = 1; i <= 6; i++)
+        await writeFile(
+          join(vault, `theta-${i}.md`),
+          '---\nlayer: 2\n---\n\ntheta 본문입니다.',
+          'utf-8',
+        );
+
+      const result = await handleKgContext(
+        graph,
+        { query: 'theta', token_budget: 100, include_full: true },
+        vault,
+      );
+
+      expect('error' in result).toBe(false);
+      if ('error' in result) return;
+      expect(result.context).not.toContain('###');
     });
   });
 });

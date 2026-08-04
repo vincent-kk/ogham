@@ -13,6 +13,16 @@ import type { KgContextInput, KgContextResult } from '../../../types/mcp.js';
 
 import { selectContextCandidates } from './helpers/selectContextCandidates.js';
 
+/** include_full 스니펫 대상 상위 문서 수 */
+const SNIPPET_MAX_DOCUMENTS = 3;
+
+/** 스니펫 문자 상한의 클램프 범위 — 하한은 종전 고정 상한과 같다 */
+const SNIPPET_MIN_CHARS = 300;
+const SNIPPET_MAX_CHARS = 1200;
+
+/** estimateTokens(어절 수 × 1.5)의 토큰→문자 역산 — 한국어 어절(평균 3자+공백) 기준 보수 근사 */
+const SNIPPET_CHARS_PER_TOKEN = 2.5;
+
 /**
  * kg_context 핸들러
  */
@@ -48,17 +58,36 @@ export async function handleKgContext(
   // 컨텍스트 조립
   const assembled = assembleContext(candidates, graph, { tokenBudget });
 
-  // Content snippet extraction (B4-lite)
-  if (includeFull && vaultRoot && assembled.items.length > 0) {
-    const maxFullDocuments = 3;
-    const topItems = assembled.items.slice(0, maxFullDocuments);
+  // Content snippet extraction (B4-lite) — 잔여 예산이 없으면 시도하지 않는다
+  const remainingTokens = tokenBudget - estimateTokens(assembled.markdown);
+  if (
+    includeFull &&
+    vaultRoot &&
+    assembled.items.length > 0 &&
+    remainingTokens > 0
+  ) {
+    const topItems = assembled.items.slice(0, SNIPPET_MAX_DOCUMENTS);
+    // 스니펫 상한은 잔여 예산을 문서 수로 나눠 정한다 — 종전 고정 300자는 하한으로 남는다
+    const snippetMaxLength = Math.min(
+      SNIPPET_MAX_CHARS,
+      Math.max(
+        SNIPPET_MIN_CHARS,
+        Math.floor(
+          (remainingTokens * SNIPPET_CHARS_PER_TOKEN) / topItems.length,
+        ),
+      ),
+    );
 
     const snippetLines = (
       await Promise.all(
         topItems.map(async (item) => {
           try {
             const content = await readVaultFile(vaultRoot, item.path);
-            const snippet = extractBestSnippet(content, queryTerms);
+            const snippet = extractBestSnippet(
+              content,
+              queryTerms,
+              snippetMaxLength,
+            );
             return snippet
               ? `\n### ${item.title}\n\`\`\`\n${snippet}\n\`\`\``
               : null;

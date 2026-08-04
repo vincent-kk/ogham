@@ -28,7 +28,7 @@
 
 ### Result (`MaencofCrudResult`)
 
-- 성공: `{ success: true, path: <vault 상대 경로>, message }`
+- 성공: `{ success: true, path: <vault 상대 경로>, message: 'Document created', warnings? }` — `warnings` 는 content dedup 경고가 있을 때만 실린다.
 - 실패 사유: 잘못된 layer · 파일명 해석 실패 · traversal/깊이 초과 · vault 봉쇄 위반 · frontmatter 검증 실패 · L1 gist 누락 · 대상 경로 중복
 
 ## Acceptance Criteria

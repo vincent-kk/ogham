@@ -229,11 +229,21 @@ describe('B4-lite: extractBestSnippet', () => {
     expect(result).toBe('no matches here');
   });
 
-  it('maxLength 초과 시 truncate', () => {
+  it('maxLength 초과 시 어절 경계에서 자르고 … 표식을 붙인다', () => {
     const longParagraph = 'kubernetes '.repeat(100);
     const content = `short intro\n\n${longParagraph}`;
     const result = extractBestSnippet(content, ['kubernetes'], 50);
-    expect(result.length).toBe(50);
+    expect(result.length).toBeLessThanOrEqual(50);
+    expect(result).toBe('kubernetes kubernetes kubernetes kubernetes …');
+  });
+
+  it('창 후반에 문장 경계가 있으면 문장 경계 절단을 우선한다', () => {
+    const content =
+      'First sentence about kubernetes. Second sentence is here. Third part continues beyond the limit for sure.';
+    const result = extractBestSnippet(content, ['kubernetes'], 70);
+    expect(result).toBe(
+      'First sentence about kubernetes. Second sentence is here. …',
+    );
   });
 
   it('frontmatter 블록은 건너뛴다', () => {
