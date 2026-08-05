@@ -11,14 +11,14 @@
 
 `index.ts` 배럴이 노출하는 공개 심볼은 다음과 같다.
 
-| 심볼                                                                                     | 출처                 |
-| ---------------------------------------------------------------------------------------- | -------------------- |
-| `createRunState` · `loadRunState` · `saveRunState` · `applyTransition`                   | `stateManager/`      |
-| `loadConfig` · `saveConfig` · `updateConfigLayer` · `getConfigValue`                     | `configManager/`     |
-| `loadManifest` · `getManifestSummary` · `getEstimationSummary` · `ManifestType`          | `manifestParser/`    |
-| `validateManifest`                                                                       | `manifestValidator/` |
-| `getImbasRoot` · `getProjectDir` · `getCacheDir` · `getRunsDir` · `getRunDir`            | `paths/`             |
-| `generateRunId`                                                                          | `runIdGenerator/`    |
+| 심볼                                                                            | 출처                 |
+| ------------------------------------------------------------------------------- | -------------------- |
+| `createRunState` · `loadRunState` · `saveRunState` · `applyTransition`          | `stateManager/`      |
+| `loadConfig` · `saveConfig` · `updateConfigLayer` · `getConfigValue`            | `configManager/`     |
+| `loadManifest` · `getManifestSummary` · `getEstimationSummary` · `ManifestType` | `manifestParser/`    |
+| `validateManifest`                                                              | `manifestValidator/` |
+| `getImbasRoot` · `getProjectDir` · `getCacheDir` · `getRunsDir` · `getRunDir`   | `paths/`             |
+| `generateRunId`                                                                 | `runIdGenerator/`    |
 
 - 배럴은 이름을 하나씩 적는다. 와일드카드 재노출은 하위 fractal 의 내부 심볼을 조용히 공개 계약으로 승격시킨다.
 - `configManager` 의 계층 전용 심볼(`loadConfigByScope` · `loadConfigScope` · `ConfigByScope`)은 이 배럴에 없다. 계층을 다루는 소비자는 `core/configManager` 진입점을 직접 지목한다.
