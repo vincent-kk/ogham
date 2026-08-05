@@ -12,7 +12,7 @@
 ```typescript
 export function validateManifest(
   runDir: string,
-  type: 'stories' | 'devplan' | 'implement-plan',
+  type: 'stories' | 'estimation',
 ): Promise<ValidationResult>;
 
 interface ValidationResult {
@@ -29,15 +29,10 @@ interface ValidationResult {
 - error — story `id` 중복, `links[].from` 이 미지의 story ID, `links[].to` 원소가 미지의 story ID.
 - warning — `split_into` 원소가 미지의 ID, `split_from`(non-null)이 미지의 ID.
 
-### devplan
+### estimation
 
-- error — task `id`·task subtask `id`·story subtask `id` 각 집합 안의 중복, `execution_order[].items` 가 세 집합 어디에도 없는 ID 참조.
-- warning — `tasks[].blocks` 가 미지의 **task** ID 참조. subtask ID 는 blocks 의 대상이 아니다.
-
-### implement-plan
-
-- error — `group_id` 중복, 한 item 이 둘 이상의 group 에 등장, `depends_on_groups` 가 미지의 group 참조, 의존 group 의 `level` 이 자기 `level` 이상(레벨 단조성 위반).
-- warning — `edges[].from`·`edges[].to` 가 어느 group 에도 없는 item 참조.
+- error — unit `id` 중복, `units[].deps` 가 미지의 unit ID 참조, `schedule.tracks[].units` 가 미지의 unit 참조, 한 unit 이 둘 이상의 track 에 배치, `rollup.confidence_interval` 하한이 상한 초과.
+- warning — `schedule.milestones[].week` 가 `total_weeks` 초과, `risks[].unit` 이 미지의 unit 참조.
 
 ## Acceptance Criteria
 
@@ -52,12 +47,16 @@ interface ValidationResult {
 
 ### AC-reference-integrity — 참조 무결성
 
-- ID 중복과 끊어진 링크 참조가 각각 별도 `errors` 항목으로 열거된다 — 첫 위반에서 멈추지 않는다.
+- ID 중복과 끊어진 참조(links·deps·tracks)가 각각 별도 `errors` 항목으로 열거된다 — 첫 위반에서 멈추지 않는다.
 
-### AC-level-monotonicity — 레벨 단조성
+### AC-schedule-consistency — 일정 정합성
 
-- implement-plan 에서 group 의 의존 대상이 자기와 같거나 높은 `level` 이면 error 다. 의존은 반드시 더 낮은 level 에 있어야 한다.
+- estimation 에서 한 unit 이 두 track 에 배치되면 error, 마일스톤이 일정 지평을 벗어나면 warning 이다.
+
+## History
+
+- 2026-08-05 — v2: devplan·implement-plan 검증 제거, estimation 검증 신설. 근거는 `.metadata/imbas/spec.md` §4.
 
 ## Last Updated
 
-2026-07-30 — 검증 결과 계약과 타입별 error/warning 분류를 문서화했다.
+2026-08-05 — 검증 타입을 stories·estimation 2종으로 재정의했다.

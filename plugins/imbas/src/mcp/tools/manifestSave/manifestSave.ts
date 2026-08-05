@@ -8,21 +8,20 @@ import { projectRoot } from '@ogham/cross-platform';
 
 import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
 import {
-  getImplementPlanSummary,
+  getEstimationSummary,
   getManifestSummary,
 } from '../../../core/manifestParser/index.js';
 import { getRunDir } from '../../../core/paths/index.js';
 import { writeJson } from '../../../lib/fileIo.js';
 import {
-  DevplanManifestSchema,
-  ImplementPlanManifestSchema,
+  EstimationManifestSchema,
   StoriesManifestSchema,
 } from '../../../types/manifest.js';
 
 export interface ManifestSaveInput {
   project_ref: string;
   run_id: string;
-  type: 'stories' | 'devplan' | 'implement-plan';
+  type: 'stories' | 'estimation';
   manifest?: unknown;
   project_root?: string;
 }
@@ -42,13 +41,7 @@ export async function handleManifestSave(input: ManifestSaveInput) {
     return { path, summary: getManifestSummary(validated) };
   }
 
-  if (input.type === 'devplan') {
-    const validated = DevplanManifestSchema.parse(input.manifest);
-    await writeJson(path, validated);
-    return { path, summary: getManifestSummary(validated) };
-  }
-
-  const validated = ImplementPlanManifestSchema.parse(input.manifest);
+  const validated = EstimationManifestSchema.parse(input.manifest);
   await writeJson(path, validated);
-  return { path, summary: getImplementPlanSummary(validated) };
+  return { path, summary: getEstimationSummary(validated) };
 }

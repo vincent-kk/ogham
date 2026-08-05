@@ -133,10 +133,10 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string(),
         run_id: z.string(),
-        type: z.enum(['stories', 'devplan', 'implement-plan']),
-        // Type-dependent schema (stories vs devplan) — cannot express conditional
+        type: z.enum(['stories', 'estimation']),
+        // Type-dependent schema (stories vs estimation) — cannot express conditional
         // validation in a single MCP inputSchema. Handler validates internally via
-        // StoriesManifestSchema.parse() / DevplanManifestSchema.parse().
+        // StoriesManifestSchema.parse() / EstimationManifestSchema.parse().
         manifest: z.unknown().optional(),
         project_root: projectRootInput,
       }),
@@ -156,7 +156,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string(),
         run_id: z.string(),
-        type: z.enum(['stories', 'devplan', 'implement-plan']),
+        type: z.enum(['stories', 'estimation']),
         project_root: projectRootInput,
       }),
       annotations: {

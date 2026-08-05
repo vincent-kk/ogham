@@ -2,7 +2,7 @@
 
 ## Purpose
 
-stories/devplan 매니페스트 파일 로드 및 요약 생성.
+stories/estimation 매니페스트 파일 로드 및 요약 생성.
 
 ## Boundaries
 

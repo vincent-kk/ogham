@@ -14,7 +14,7 @@ export {
 export {
   loadManifest,
   getManifestSummary,
-  getImplementPlanSummary,
+  getEstimationSummary,
 } from './manifestParser/index.js';
 export type { ManifestType } from './manifestParser/index.js';
 export { validateManifest } from './manifestValidator/index.js';
