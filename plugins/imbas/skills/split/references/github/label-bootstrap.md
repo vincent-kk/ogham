@@ -91,4 +91,4 @@ Bootstrap is idempotent. If a label was successfully created on a previous run t
 
 ## Cache note
 
-The label inventory from Step B1 can be cached in the imbas run state for the duration of the session via `mcp__plugin_imbas_tools__cache_set`. This avoids redundant `gh label list` calls when processing large manifests with many issues.
+The label inventory from Step B1 can be kept in the turn's working memory for the duration of the batch. This avoids redundant `gh label list` calls when processing large manifests with many issues.

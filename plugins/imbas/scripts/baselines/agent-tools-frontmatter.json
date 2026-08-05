@@ -4,6 +4,7 @@
   "_captured_in": "imbas v2 planner-side refactor (engineer removed)",
   "agents": {
     "planner": ["Read", "Grep", "Glob"],
-    "analyst": ["Read", "Grep", "Glob", "Bash"]
+    "analyst": ["Read", "Grep", "Glob", "Bash"],
+    "estimator": ["Read", "Grep", "Glob"]
   }
 }

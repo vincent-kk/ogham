@@ -1,6 +1,6 @@
 # Tools Used — GitHub Provider (read-issue skill)
 
-Loaded when `config.provider === 'github'`. Provider-agnostic imbas MCP tools (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__config_get`, `mcp__plugin_imbas_tools__cache_get`) are documented in `../tools.md` and are used by all providers.
+Loaded when `config.provider === 'github'`. Provider-agnostic imbas MCP tools (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__config_get`) are documented in `../tools.md`; cache files under `.imbas/<KEY>/cache/` are read directly with the Read tool.
 
 ## gh CLI Subcommands
 

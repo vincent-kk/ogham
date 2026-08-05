@@ -74,4 +74,4 @@ Extract lines matching `- [ ] #N` or `- [x] #N`. Build child ref list with check
 
 ### `## Links` section
 
-Parse per the grammar in `manifest/references/github/link-handling.md`. Returns a map of `linkType → [refList]`.
+Parse per the grammar in `split/references/github/link-handling.md`. Returns a map of `linkType → [refList]`.

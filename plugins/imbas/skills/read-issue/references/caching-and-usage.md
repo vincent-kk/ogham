@@ -8,6 +8,5 @@
 
 | Agent      | When               | Purpose                                                       |
 | ---------- | ------------------ | ------------------------------------------------------------- |
-| `analyst`  | Phase 1 (validate) | Reference existing related issues for context                 |
+| `analyst`  | Phase 1 (refine)   | Reference existing related issues for context                 |
 | `planner`  | Phase 2 (split)    | Understand Epic or existing Story context                     |
-| `engineer` | Phase 3 (devplan)  | Check Story comments for additional implementation discussion |
