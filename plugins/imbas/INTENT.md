@@ -1,26 +1,24 @@
 ## Purpose
 
-`@ogham/imbas` 패키지 루트. planning 문서를 Jira / GitHub / local 이슈로 변환하는 파이프라인 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
+`@ogham/imbas` 패키지 루트. 기획 문서를 재구조화·검증하고, manday를 추산하고, Jira / GitHub / local 이슈로 분할·생성하는 기획자 사이드 파이프라인 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
 ## Structure
 
-| Path                         | Role                                           |
-| ---------------------------- | ---------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md) |
-| `agents/`                    | 역할별 에이전트 (analyst, planner, engineer)   |
-| `hooks/`                     | 4개 lifecycle 훅 매핑 (hooks/INTENT.md 참조)   |
-| `skills/`                    | 사용자 스킬 디렉토리                           |
-| `libs/`                      | cross-platform Node 러너                       |
-| `scripts/`                   | esbuild 빌드 스크립트                          |
-| `bridge/` · `public/`        | 빌드 산출물: MCP/훅 번들 · settings UI (커밋)  |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                |
-| `.mcp.json`                  | MCP 서버 등록                                  |
+| Path                         | Role                                              |
+| ---------------------------- | ------------------------------------------------- |
+| `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md)    |
+| `agents/`                    | 역할별 에이전트 (analyst, planner, estimator)     |
+| `skills/`                    | 사용자 스킬 디렉토리                              |
+| `scripts/`                   | esbuild 빌드 스크립트                             |
+| `bridge/` · `public/`        | 빌드 산출물: MCP 번들 · settings UI (커밋)        |
+| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                   |
+| `.mcp.json`                  | MCP 서버 등록                                     |
 
 ## Conventions
 
-- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → hooks → compile-plugin`
-- 파이프라인: validate → split → manifest-stories → devplan → manifest-devplan (state phase 는 validate/split/devplan 3개)
-- provider 추상화 (`jira` / `github` / `local`); 실행 state 는 `.imbas/<KEY>/runs/<id>/` (GitHub ref 는 `owner--repo` 디렉토리로 매핑)
+- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → compile-plugin`
+- 파이프라인: refine → estimate(skip 가능) → split. phase 진행은 `state.json`(MCP 상태머신), 이슈 생성 진행은 stories 매니페스트의 `issue_ref`/`status`
+- provider 추상화 (`jira` / `github` / `local`); 실행 state 는 `.imbas/<KEY>/runs/<id>/` (GitHub ref 는 `owner--repo` 디렉토리로 매핑); Jira 실행은 `[OP:]` 시맨틱 오퍼레이션을 세션의 Atlassian 도구가 결의
 
 ## Boundaries
 

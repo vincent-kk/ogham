@@ -5,6 +5,15 @@
 
 ---
 
+## v1 스펙 (2026-08-05 이관)
+
+| 파일 | 내용 | 상태 |
+|------|------|------|
+| [BLUEPRINT-v1.md](./BLUEPRINT-v1.md) | Blueprint v1.2 — 3 providers, 12 skills, 16 tools 시절의 전체 설계 | Superseded by [`../`](../README.md) v2 스펙 세트 |
+| [specs-v1/](./specs-v1/) | SPEC-agents·skills·tools·media·provider(-jira/-github/-local) 9종 | Superseded — provider 계약은 v2 skills.md·architecture.md로 이동 |
+
+---
+
 ## 외부 분석 리포트 (기존)
 
 | 파일 | 내용 |

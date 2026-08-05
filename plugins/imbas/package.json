@@ -45,7 +45,6 @@
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
-    "lint:specs": "node scripts/check-spec-ref-backlinks.mjs",
     "smoke:github": "CI=1 node scripts/github-mode-smoke.mjs",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
