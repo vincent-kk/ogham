@@ -2,13 +2,12 @@
  * @file runCreate.ts
  * @description Create run directory and initial state.json
  */
-import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
 import { projectRoot } from '@ogham/cross-platform';
 
 import {
-  DEVPLAN_PIPELINE_SOURCE,
   SOURCE_FILENAME,
   SUPPLEMENTS_DIRNAME,
 } from '../../../constants/index.js';
@@ -36,11 +35,9 @@ export async function handleRunCreate(input: RunCreateInput) {
 
   mkdirSync(run_dir, { recursive: true });
 
-  // Copy source file — or create placeholder for devplan-pipeline mode
+  // Copy source file
   const destSource = join(run_dir, SOURCE_FILENAME);
-  if (input.source_file === DEVPLAN_PIPELINE_SOURCE)
-    writeFileSync(destSource, '', 'utf-8');
-  else copyFileSync(input.source_file, destSource);
+  copyFileSync(input.source_file, destSource);
 
   // Copy supplements
   if (input.supplements && input.supplements.length > 0) {

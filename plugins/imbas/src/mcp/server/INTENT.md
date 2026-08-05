@@ -2,7 +2,7 @@
 
 ## Purpose
 
-MCP 서버 생성 및 17개 도구 등록. registerTool 패턴 사용.
+MCP 서버 생성 및 9개 도구 등록. registerTool 패턴 사용.
 
 ## Structure
 

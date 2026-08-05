@@ -3,21 +3,8 @@
  * @description Central type exports for @ogham/imbas
  */
 
-// AST types
-export type { SgModule, NapiLang } from './ast.js';
-
 // MCP types
 export type { McpToolInput, McpToolResult } from './mcp.js';
-
-// Hook types
-export type {
-  HookBaseInput,
-  HookOutput,
-  SessionStartInput,
-  UserPromptSubmitInput,
-  PreToolUseInput,
-  SubagentStartInput,
-} from './hooks.js';
 
 // State types
 export {
@@ -114,21 +101,3 @@ export type {
   DevplanManifest,
   ManifestSummary,
 } from './manifest.js';
-
-// Cache types
-export {
-  ProjectMetaSchema,
-  IssueTypeCacheSchema,
-  LinkTypeCacheSchema,
-  WorkflowCacheSchema,
-  CachedAtSchema,
-  CacheTypeSchema,
-} from './cache.js';
-export type {
-  ProjectMeta,
-  IssueTypeCache,
-  LinkTypeCache,
-  WorkflowCache,
-  CachedAt,
-  CacheType,
-} from './cache.js';

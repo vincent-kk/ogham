@@ -256,7 +256,7 @@ describe('handleRunTransition', () => {
   });
 });
 
-describe('handleRunCreate sentinel source_file', () => {
+describe('handleRunCreate source_file copy', () => {
   let tmpDir: string;
   let cwdSpy: ReturnType<typeof vi.spyOn>;
 
@@ -269,19 +269,7 @@ describe('handleRunCreate sentinel source_file', () => {
     cwdSpy.mockRestore();
   });
 
-  it('creates run with devplan-pipeline sentinel without ENOENT', async () => {
-    const result = await handleRunCreate({
-      project_ref: 'TEST',
-      source_file: 'devplan-pipeline',
-    });
-    expect(result.run_id).toMatch(/^\d{8}-\d{3}$/);
-    expect(result.state.source_file).toBe('devplan-pipeline');
-
-    const { existsSync } = await import('node:fs');
-    expect(existsSync(join(result.run_dir, 'source.md'))).toBe(true);
-  });
-
-  it('still copies real files normally', async () => {
+  it('copies real files normally', async () => {
     const src = writeSourceFile(tmpDir);
     const result = await handleRunCreate({
       project_ref: 'TEST',

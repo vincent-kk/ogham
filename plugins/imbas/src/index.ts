@@ -8,8 +8,6 @@
  */
 
 export {
-  CachedAtSchema,
-  CacheTypeSchema,
   CompletePhaseActionSchema,
   DefaultsConfigSchema,
   DevplanManifestSchema,
@@ -19,19 +17,16 @@ export {
   ExecutionStepSchema,
   FeedbackCommentSchema,
   ImbasConfigSchema,
-  IssueTypeCacheSchema,
   JiraConfigSchema,
   JiraPhaseToWorkflowSchema,
   LabelsConfigSchema,
   LanguageConfigSchema,
   LinkStatusSchema,
-  LinkTypeCacheSchema,
   LlmModelConfigSchema,
   ManifestItemStatusSchema,
   PhaseNameSchema,
   PhasesSchema,
   PhaseStatusSchema,
-  ProjectMetaSchema,
   ProviderSchema,
   RunStateSchema,
   RunTransitionSchema,
@@ -50,63 +45,48 @@ export {
   TransitionItemSchema,
   ValidatePhaseSchema,
   ValidateResultSchema,
-  WorkflowCacheSchema,
 } from './types/index.js';
 export type {
-  CachedAt,
-  CacheType,
   DefaultsConfig,
   DevplanManifest,
   DevplanPhase,
   EscapeCode,
   ExecutionStep,
   FeedbackComment,
-  HookBaseInput,
-  HookOutput,
   ImbasConfig,
-  IssueTypeCache,
   JiraConfig,
   JiraPhaseToWorkflow,
   LabelsConfig,
   LanguageConfig,
   LinkStatus,
-  LinkTypeCache,
   LlmModelConfig,
   ManifestItemStatus,
   ManifestSummary,
   McpToolInput,
   McpToolResult,
-  NapiLang,
   PhaseName,
   Phases,
   PhaseStatus,
-  PreToolUseInput,
-  ProjectMeta,
   Provider,
   RunState,
   RunTransition,
-  SessionStartInput,
   SettingsBootstrap,
   SettingsPageState,
   SettingsSaveBody,
   SettingsSaveSummary,
   SettingsSettleEvent,
-  SgModule,
   SplitPhase,
   StoriesManifest,
   StoryItem,
   StoryLink,
   StorySubtasks,
   StoryVerification,
-  SubagentStartInput,
   SubtaskItem,
   SubtaskLimits,
   TaskItem,
   TransitionItem,
-  UserPromptSubmitInput,
   ValidatePhase,
   ValidateResult,
-  WorkflowCache,
 } from './types/index.js';
 export { VERSION } from './version.js';
 
@@ -121,14 +101,9 @@ export {
   getConfigValue,
   setConfigValue,
   applyConfigUpdates,
-  loadCache,
-  saveCache,
-  isCacheExpired,
-  clearCache,
   loadManifest,
   getManifestSummary,
   validateManifest,
-  planExecution,
   getImbasRoot,
   getProjectDir,
   getCacheDir,
@@ -137,34 +112,6 @@ export {
   generateRunId,
 } from './core/index.js';
 
-// AST modules
-export {
-  getSgModule,
-  isSgAvailable,
-  getSgLoadError,
-  collectFiles,
-  extractDependencies,
-  calculateComplexity,
-} from './ast/index.js';
-export type {
-  ImportInfo,
-  ExportInfo,
-  CallInfo,
-  DependencyInfo,
-  DependencyError,
-} from './ast/index.js';
-export type { CyclomaticResult, CyclomaticError } from './ast/index.js';
-
-// Hook modules
-export { processSetup } from './hooks/index.js';
-
 // Lib modules
-export {
-  createLogger,
-  setLogDir,
-  resetLogger,
-  readStdin,
-  readJson,
-  writeJson,
-} from './lib/index.js';
+export { createLogger, setLogDir, resetLogger, readJson, writeJson } from './lib/index.js';
 export type { Logger } from './lib/index.js';

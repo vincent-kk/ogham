@@ -25,16 +25,10 @@ const PKG_ROOT = join(__dirname, '..', '..');
 const SKILLS_DIR = join(PKG_ROOT, 'skills');
 
 /**
- * Pinned list of skills that were partitioned during the RALPLAN v2
- * local-provider cycle. Phase C1-C5. Keep in sync with
- * .metadata/imbas/specs/SPEC-skills.md.
+ * Pinned list of provider-partitioned skills. Keep in sync with
+ * .metadata/imbas/skills.md.
  */
-const PARTITIONED_SKILLS = [
-  'manifest',
-  'read-issue',
-  'digest',
-  'devplan',
-] as const;
+const PARTITIONED_SKILLS = ['manifest', 'read-issue', 'digest'] as const;
 
 const ANCHOR_LITERAL = '<!-- imbas:constraints-v1 -->';
 

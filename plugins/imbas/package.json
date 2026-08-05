@@ -35,13 +35,12 @@
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && yarn build:pages && yarn build:compile && yarn build:mcp && yarn build:hooks && yarn build:compile-plugin",
+    "build": "yarn clean && yarn version:sync && yarn build:pages && yarn build:compile && yarn build:mcp && yarn build:compile-plugin",
     "build:compile": "tsc -p tsconfig.build.json",
     "build:compile-plugin": "node --import tsx ../../tools/plugin-compiler/src/main.ts sync .",
-    "build:hooks": "node scripts/buildHooks.mjs",
     "build:mcp": "node scripts/buildMcpServer.mjs",
     "build:pages": "node scripts/buildSettingsHtml.mjs",
-    "build:plugin": "yarn build:pages && yarn build:mcp && yarn build:hooks",
+    "build:plugin": "yarn build:pages && yarn build:mcp",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
@@ -57,7 +56,6 @@
     "version:sync": "node ../../scripts/injectVersion.mjs"
   },
   "dependencies": {
-    "@ast-grep/napi": "^0.42.0",
     "@modelcontextprotocol/sdk": "~1.22.0",
     "zod": "^3.23.8"
   },
