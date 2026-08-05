@@ -37,12 +37,12 @@ function defaultConfig(): ImbasConfig {
 describe('getConfigValue', () => {
   it('returns value at dot-path', () => {
     const config = defaultConfig();
-    expect(getConfigValue(config, 'version')).toBe('1.0');
+    expect(getConfigValue(config, 'version')).toBe('2.0');
   });
 
   it('returns nested value at dot-path', () => {
     const config = defaultConfig();
-    expect(getConfigValue(config, 'defaults.llm_model.validate')).toBe(
+    expect(getConfigValue(config, 'defaults.llm_model.refine')).toBe(
       'sonnet',
     );
   });
@@ -58,20 +58,20 @@ describe('getConfigValue', () => {
 describe('setConfigValue', () => {
   it('returns new config with updated value (immutable)', () => {
     const config = defaultConfig();
-    const updated = setConfigValue(config, 'version', '2.0');
-    expect(updated.version).toBe('2.0');
-    expect(config.version).toBe('1.0');
+    const updated = setConfigValue(config, 'version', '9.9');
+    expect(updated.version).toBe('9.9');
+    expect(config.version).toBe('2.0');
   });
 
   it('updates nested dot-path value', () => {
     const config = defaultConfig();
     const updated = setConfigValue(
       config,
-      'defaults.llm_model.devplan',
+      'defaults.llm_model.estimate',
       'haiku',
     );
-    expect(getConfigValue(updated, 'defaults.llm_model.devplan')).toBe('haiku');
-    expect(getConfigValue(config, 'defaults.llm_model.devplan')).toBe('opus');
+    expect(getConfigValue(updated, 'defaults.llm_model.estimate')).toBe('haiku');
+    expect(getConfigValue(config, 'defaults.llm_model.estimate')).toBe('opus');
   });
 
   it('creates intermediate objects when path does not exist', () => {
@@ -84,11 +84,11 @@ describe('setConfigValue', () => {
     const config = defaultConfig();
     const updated = setConfigValue(
       config,
-      'defaults.llm_model.validate',
+      'defaults.llm_model.refine',
       'haiku',
     );
     expect(getConfigValue(updated, 'defaults.llm_model.split')).toBe('sonnet');
-    expect(getConfigValue(updated, 'defaults.llm_model.devplan')).toBe('opus');
+    expect(getConfigValue(updated, 'defaults.llm_model.estimate')).toBe('opus');
   });
 });
 
@@ -97,11 +97,11 @@ describe('applyConfigUpdates', () => {
     const config = defaultConfig();
     const updated = applyConfigUpdates(config, {
       version: '3.0',
-      'defaults.llm_model.validate': 'haiku',
+      'defaults.llm_model.refine': 'haiku',
       'language.documents': 'en',
     });
     expect(updated.version).toBe('3.0');
-    expect(getConfigValue(updated, 'defaults.llm_model.validate')).toBe(
+    expect(getConfigValue(updated, 'defaults.llm_model.refine')).toBe(
       'haiku',
     );
     expect(getConfigValue(updated, 'language.documents')).toBe('en');
@@ -110,18 +110,18 @@ describe('applyConfigUpdates', () => {
   it('is immutable — original unchanged after batch update', () => {
     const config = defaultConfig();
     applyConfigUpdates(config, { version: '9.9' });
-    expect(config.version).toBe('1.0');
+    expect(config.version).toBe('2.0');
   });
 
   it('applies updates sequentially (later values win)', () => {
     const config = defaultConfig();
     const updated = applyConfigUpdates(config, {
-      'defaults.llm_model.validate': 'haiku',
+      'defaults.llm_model.refine': 'haiku',
     });
     const updated2 = applyConfigUpdates(updated, {
-      'defaults.llm_model.validate': 'opus',
+      'defaults.llm_model.refine': 'opus',
     });
-    expect(getConfigValue(updated2, 'defaults.llm_model.validate')).toBe(
+    expect(getConfigValue(updated2, 'defaults.llm_model.refine')).toBe(
       'opus',
     );
   });
@@ -131,9 +131,9 @@ describe('loadConfig', () => {
   it('returns defaults when config file is missing', async () => {
     const cwd = makeTempDir();
     const config = await loadConfig(cwd);
-    expect(config.version).toBe('1.0');
+    expect(config.version).toBe('2.0');
     expect(config.language.documents).toBe('ko');
-    expect(config.defaults.llm_model.devplan).toBe('opus');
+    expect(config.defaults.llm_model.estimate).toBe('opus');
   });
 
   it('loads config from cwd/.imbas/config.json when present', async () => {

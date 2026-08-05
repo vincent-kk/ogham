@@ -47,7 +47,7 @@ export {
   StoryItemSchema,
   StoryLinkSchema,
   StoryVerificationSchema,
-  SubtaskLimitsSchema,
+  EstimationConfigSchema,
   TransitionItemSchema,
   ValidateResultSchema,
 } from './types/index.js';
@@ -95,7 +95,7 @@ export type {
   StoryItem,
   StoryLink,
   StoryVerification,
-  SubtaskLimits,
+  EstimationConfig,
   TransitionItem,
   ValidateResult,
 } from './types/index.js';

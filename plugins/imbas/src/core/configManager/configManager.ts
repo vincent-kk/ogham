@@ -85,7 +85,7 @@ export async function saveConfig(
 }
 
 /**
- * Get a value from config by dot-path (e.g. "defaults.llm_model.validate").
+ * Get a value from config by dot-path (e.g. "defaults.llm_model.refine").
  * Returns undefined if any segment is missing.
  */
 export function getConfigValue(config: ImbasConfig, dotPath: string): unknown {

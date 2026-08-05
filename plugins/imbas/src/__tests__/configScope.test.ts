@@ -71,15 +71,15 @@ describe('config namespaces', () => {
 
   it('merges nested defaults key by key', async () => {
     seed(userConfigPath(), {
-      defaults: { project_ref: 'FROM-USER', llm_model: { validate: 'sonnet' } },
+      defaults: { project_ref: 'FROM-USER', llm_model: { refine: 'sonnet' } },
     });
     seed(join(workspace, '.imbas', 'config.json'), {
-      defaults: { llm_model: { validate: 'opus' } },
+      defaults: { llm_model: { refine: 'opus' } },
     });
 
     const config = await loadConfig(workspace);
     expect(config.defaults.project_ref).toBe('FROM-USER');
-    expect(config.defaults.llm_model.validate).toBe('opus');
+    expect(config.defaults.llm_model.refine).toBe('opus');
   });
 
   it('writes the user layer outside the workspace', async () => {

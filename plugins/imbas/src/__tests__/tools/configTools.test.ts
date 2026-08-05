@@ -112,7 +112,7 @@ describe('handleConfigSet', () => {
       scope: 'project',
       updates: {
         'defaults.project_ref': 'X',
-        'defaults.llm_model.validate': 'opus',
+        'defaults.llm_model.refine': 'opus',
       },
     });
 
@@ -120,7 +120,7 @@ describe('handleConfigSet', () => {
       value: unknown;
     };
     const lm = (await handleConfigGet({
-      field: 'defaults.llm_model.validate',
+      field: 'defaults.llm_model.refine',
     })) as { value: unknown };
     expect(pk.value).toBe('X');
     expect(lm.value).toBe('opus');

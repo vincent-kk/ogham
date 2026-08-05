@@ -13,9 +13,9 @@ describe('ImbasConfigSchema', () => {
     const result = ImbasConfigSchema.safeParse({});
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.data.version).toBe('1.0');
+    expect(result.data.version).toBe('2.0');
     expect(result.data.language.documents).toBe('ko');
-    expect(result.data.defaults.llm_model.devplan).toBe('opus');
+    expect(result.data.defaults.llm_model.estimate).toBe('opus');
     expect(result.data.jira.issue_types.epic).toBe('Epic');
   });
 
@@ -30,8 +30,7 @@ describe('ImbasConfigSchema', () => {
       },
       defaults: {
         project_ref: 'MYPROJ',
-        llm_model: { validate: 'haiku', split: 'haiku', devplan: 'sonnet' },
-        subtask_limits: { max_lines: 100, max_files: 5, review_hours: 2 },
+        llm_model: { refine: 'haiku', estimate: 'sonnet', split: 'haiku' },
       },
     };
     const result = ImbasConfigSchema.safeParse(input);
@@ -39,7 +38,38 @@ describe('ImbasConfigSchema', () => {
     if (!result.success) return;
     expect(result.data.version).toBe('2.0');
     expect(result.data.defaults.project_ref).toBe('MYPROJ');
-    expect(result.data.defaults.llm_model.validate).toBe('haiku');
+    expect(result.data.defaults.llm_model.refine).toBe('haiku');
+  });
+
+  it('fills estimation defaults and preserves overrides', () => {
+    const empty = ImbasConfigSchema.safeParse({});
+    expect(empty.success).toBe(true);
+    if (!empty.success) return;
+    expect(empty.data.estimation.team_size).toBe(2);
+    expect(empty.data.estimation.complexity_baseline).toEqual({
+      S: 1,
+      M: 3,
+      L: 8,
+      XL: 20,
+    });
+    expect(empty.data.estimation.overhead_ratio.test).toBe(0.15);
+    expect(empty.data.estimation.buffer_ratio).toBe(0.2);
+
+    const custom = ImbasConfigSchema.safeParse({
+      estimation: { team_size: 4, buffer_ratio: 0.3 },
+    });
+    expect(custom.success).toBe(true);
+    if (!custom.success) return;
+    expect(custom.data.estimation.team_size).toBe(4);
+    expect(custom.data.estimation.buffer_ratio).toBe(0.3);
+    expect(custom.data.estimation.complexity_baseline.M).toBe(3);
+  });
+
+  it('rejects a non-positive estimation team_size', () => {
+    const result = ImbasConfigSchema.safeParse({
+      estimation: { team_size: 0 },
+    });
+    expect(result.success).toBe(false);
   });
 
   it('defaults provider to jira', () => {
