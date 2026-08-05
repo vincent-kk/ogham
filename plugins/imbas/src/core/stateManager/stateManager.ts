@@ -108,6 +108,19 @@ export function applyTransition(
     }
 
     case 'skip_phases': {
+      // Skipping is still a forward move in the phase order — it needs the
+      // same refine gate as starting the next phase, or current_phase would
+      // advance past a refine that never passed.
+      const refine = state.phases.refine;
+      const refinePassed =
+        refine.status === 'completed' &&
+        (refine.result === 'PASS' || refine.result === 'PASS_WITH_WARNINGS');
+      if (!refinePassed)
+        throw new Error(
+          `Cannot skip phases: refine status is "${refine.status}", result is "${refine.result}". ` +
+            `Expected: refine completed with PASS or PASS_WITH_WARNINGS`,
+        );
+
       const updated = structuredClone(state);
       // Only pending/in_progress phases are skippable; re-skipping a
       // completed/skipped phase is an idempotent no-op (preserves its data).

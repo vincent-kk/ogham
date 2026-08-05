@@ -51,7 +51,7 @@ run_id: 20260406-001
 
 - `## Description` and `## Digest` are English literal section headings. Parsers rely on these as anchors. Do NOT translate them.
 - Description body content follows `config.language.issue_content` (default `ko`).
-- Digest section starts empty and is append-only (see `../workflow.md` Step 5 `add_feedback_comments` and the `digest` skill).
+- Digest section starts empty and is append-only (written by the `digest` skill's local workflow).
 
 ## Omissions by type
 

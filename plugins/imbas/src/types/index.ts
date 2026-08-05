@@ -20,6 +20,8 @@ export {
   StartPhaseActionSchema,
   CompletePhaseActionSchema,
   EscapePhaseActionSchema,
+  SkippablePhaseSchema,
+  SkipPhasesActionSchema,
   RunTransitionSchema,
 } from './state.js';
 export type {

@@ -14,6 +14,9 @@ process.env.OGHAM_NO_BROWSER = '1';
 // developer machine's real ~/.claude/plugins/imbas/config.json leaks into
 // every prefill assertion.
 process.env.CLAUDE_CONFIG_DIR = mkdtempSync(join(tmpdir(), 'imbas-e2e-state-'));
+// An ambient CLAUDE_PLUGIN_ROOT (set when another plugin hosts the session)
+// must not steer asset resolution toward that plugin's public/ directory.
+delete process.env.CLAUDE_PLUGIN_ROOT;
 
 const BOOTSTRAP: SettingsBootstrap = {
   providers: { jira: true, github: false },
@@ -315,4 +318,37 @@ test('a pending call reuses the running session and keeps the same URL', async (
 
   await page.goto(url);
   await expect(page.locator('.brand-name')).toHaveText('imbas');
+});
+
+test('default user scope saves to the user layer, not the project', async ({
+  page,
+}) => {
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+
+  await page.goto(url);
+  // Fresh project → the form opens on the user scope by default.
+  await expect(page.locator('#config_scope input[value="user"]')).toBeChecked();
+  await page.locator('#jira-project-select').selectOption('KAN');
+  await page.getByRole('button', { name: 'Save & Close' }).click();
+  await expect(page.locator('#status')).toContainText('Saved');
+
+  const out = await waiting;
+  expect(out.status).toBe('saved');
+
+  const userConfigPath = join(
+    process.env.CLAUDE_CONFIG_DIR!,
+    'plugins',
+    'imbas',
+    'config.json',
+  );
+  const userConfig = JSON.parse(
+    readFileSync(userConfigPath, 'utf8'),
+  ) as ImbasConfig;
+  expect(userConfig.defaults.project_ref).toBe('KAN');
+  // The project layer stays untouched — the save went to the user file only.
+  expect(existsSync(join(projectDir, '.imbas', 'config.json'))).toBe(false);
+
+  // Clean up the user layer so this test cannot leak into a re-run.
+  rmSync(userConfigPath, { force: true });
 });

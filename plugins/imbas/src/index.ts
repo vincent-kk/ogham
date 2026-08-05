@@ -41,6 +41,8 @@ export {
   RunTransitionSchema,
   SettingsBootstrapSchema,
   SettingsSaveBodySchema,
+  SkippablePhaseSchema,
+  SkipPhasesActionSchema,
   SplitPhaseSchema,
   StartPhaseActionSchema,
   StoriesManifestSchema,

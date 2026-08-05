@@ -346,6 +346,18 @@ describe('escape_phase', () => {
 // --- skip_phases ---
 
 describe('skip_phases', () => {
+  it('rejects skipping estimate before refine has passed', () => {
+    const state = makeState();
+    expect(() =>
+      applyTransition(state, {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'skip_phases',
+        phases: ['estimate'],
+      }),
+    ).toThrow('Cannot skip phases');
+  });
+
   it('marks estimate as skipped and advances current_phase to split', () => {
     const state = withRefineCompleted(makeState());
     const next = applyTransition(state, {

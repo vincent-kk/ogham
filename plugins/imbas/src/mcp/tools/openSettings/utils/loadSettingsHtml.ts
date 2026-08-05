@@ -9,9 +9,11 @@ import { pluginRoot } from '@ogham/cross-platform';
  * the plugin (`package.json:files`) and is read from disk at runtime instead
  * of being inlined into the MCP bundle.
  *
- * Resolution walks up from this module's location until a `public/` directory
- * is found, so it works both in the esbuild CJS bundle (`bridge/`) and when
- * running the TypeScript sources directly (vitest).
+ * Resolution walks up from this module's location first — deterministic for
+ * both the esbuild CJS bundle (`bridge/`) and the TypeScript sources (vitest).
+ * `pluginRoot()` (CLAUDE_PLUGIN_ROOT) is only a fallback: in-process harnesses
+ * inherit the ambient value of whichever plugin hosts the session, so trusting
+ * it first can serve another plugin's settings page.
  */
 let cached: string | null = null;
 
@@ -25,13 +27,6 @@ export function loadSettingsHtml(): string {
 function resolvePublicAsset(name: string): string {
   const candidates: string[] = [];
 
-  const root = pluginRoot();
-  if (root) {
-    const candidate = join(root, 'public', name);
-    candidates.push(candidate);
-    if (existsSync(candidate)) return candidate;
-  }
-
   let dir = dirname(fileURLToPath(import.meta.url));
   for (let depth = 0; depth < 8; depth += 1) {
     const candidate = join(dir, 'public', name);
@@ -40,6 +35,13 @@ function resolvePublicAsset(name: string): string {
     const parent = dirname(dir);
     if (parent === dir) break;
     dir = parent;
+  }
+
+  const root = pluginRoot();
+  if (root) {
+    const candidate = join(root, 'public', name);
+    candidates.push(candidate);
+    if (existsSync(candidate)) return candidate;
   }
 
   throw new Error(

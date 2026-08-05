@@ -112,70 +112,6 @@ For each transition in `manifest.transitions` where `status == "pending"`:
 
 5. Set transition `status = "created"`. Save manifest immediately.
 
-### Devplan type
-
-Follow `execution_order` from manifest (dependency-ordered).
-
-#### Step 1 — create_tasks
-
-For each task in `manifest.tasks` where `status == "pending"`:
-
-1. ```bash
-   gh issue create --repo <owner/repo> \
-     --title "[Task] <title>" \
-     --body "<description>\n\n## Sub-tasks\n\n## Links" \
-     --label type:task --label status:todo \
-     --label <config.labels.managed>
-   ```
-2. Update task: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
-3. `mcp__plugin_imbas_tools__manifest_save` immediately.
-
-#### Step 2 — create_task_subtasks
-
-For each task, for each subtask where `status == "pending"`:
-
-1. ```bash
-   gh issue create --repo <owner/repo> \
-     --title "[Subtask] <title>" \
-     --body "<description>\n\n## Links" \
-     --label type:subtask --label status:todo \
-     --label <config.labels.managed>
-   ```
-2. PATCH parent task body to append `- [ ] <subtask_ref>` under `## Sub-tasks`.
-3. Update subtask: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
-4. `mcp__plugin_imbas_tools__manifest_save` immediately.
-
-#### Step 3 — create_links (task.blocks relations)
-
-For each task, for each `blocked_story_id` in `task.blocks`:
-
-1. Resolve story `issue_ref` from `stories-manifest.json`.
-2. PATCH task body `## Links`: append `- blocks: <story_ref>`.
-3. PATCH story body `## Links`: append `- blocked-by: <task_ref>`.
-4. `mcp__plugin_imbas_tools__manifest_save` immediately.
-
-#### Step 4 — create_story_subtasks
-
-For each entry in `manifest.story_subtasks`, for each subtask where `status == "pending"`:
-
-1. `gh issue create` with `type:subtask` + `<config.labels.managed>` labels, parent ref in body.
-2. PATCH parent story body `## Sub-tasks`: append `- [ ] <subtask_ref>`.
-3. Update subtask: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
-4. `mcp__plugin_imbas_tools__manifest_save` immediately.
-
-#### Step 5 — add_feedback_comments
-
-For each comment in `manifest.feedback_comments` where `status == "pending"`:
-
-1. Parse `owner/repo#N` from `target_ref`.
-2. ```bash
-   echo "<comment body>" | gh issue comment <N> --repo <owner/repo> --body-file -
-   ```
-3. Update comment: `status = "created"`.
-4. `mcp__plugin_imbas_tools__manifest_save` immediately.
-
-IDEMPOTENCY: check `status` and `issue_ref` before creating. If `issue_ref` already exists → run drift check and skip if confirmed present.
-
 ## Drift check snippet
 
 ```bash
@@ -189,7 +125,7 @@ Use in Step 2.5 of the manifest workflow to verify an existing `issue_ref` is st
 
 After all items in Step 4 are created successfully, apply lifecycle labels. See `../label-transitions.md` for the full transition table and idempotency rules.
 
-### Stories type (Phase 2.5)
+### Stories type
 
 1. Load run state via `mcp__plugin_imbas_tools__run_get`.
 2. Load label config via `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
@@ -203,13 +139,3 @@ After all items in Step 4 are created successfully, apply lifecycle labels. See 
      gh issue edit <N> --repo <owner/repo> --add-label <config.labels.review_complete>
      ```
 
-### Devplan type (Phase 3.5)
-
-1. Load label config via `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
-2. Collect all parent story `issue_ref`s from `stories-manifest.json`.
-3. For each parent story `issue_ref`:
-   ```bash
-   gh issue edit <N> --repo <owner/repo> \
-     --remove-label <config.labels.review_complete> \
-     --add-label <config.labels.dev_waiting>
-   ```
