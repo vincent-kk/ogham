@@ -89,19 +89,19 @@ Phase 3 — split
 2. If run not found: display "Run <run-id> not found."
 3. Analyze current state and determine next action:
 
-| Current State                                                                                   | Guidance                                                                  |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| refine.status == "pending"                                                                      | "Run /imbas:refine <source>"                                              |
-| refine.status == "in_progress"                                                                  | "Refine was interrupted. Re-run /imbas:refine <source>"                   |
-| refine.status == "completed", result == "BLOCKED"                                               | "Refine blocked. Fix the source document, then re-run /imbas:refine."     |
-| refine passed && estimate.status == "pending"                                                   | "Run /imbas:estimate --run <run-id> (or /imbas:split to skip estimation)" |
-| estimate.status == "in_progress"                                                                | "Estimate was interrupted. Re-run /imbas:estimate --run <run-id>"         |
-| estimate.status in [completed, skipped] && split.status == "pending"                            | "Run /imbas:split --run <run-id>"                                         |
-| split.status == "in_progress"                                                                   | "Split was interrupted. Re-run /imbas:split --run <run-id>"               |
-| split.status == "escaped", code in [E2-1, E2-2, EC-1, EC-2]                                     | "Split escaped (<code>). Human intervention required. See escape report." |
-| split.status == "escaped", code == "E2-3"                                                       | "Single-Story manifest saved. Re-run /imbas:split --run <run-id> to create." |
-| split.status == "completed", pending_review == true                                             | "Manifest saved but not executed. Re-run /imbas:split --run <run-id>."    |
-| split.status == "completed", pending_review == false && stories pending                         | "Creation partially done. Re-run /imbas:split --run <run-id> to retry."   |
-| split.status == "completed" && all stories created                                              | "Run complete. /imbas:scaffold-pr <issue-ref> to scaffold a draft PR."    |
+| Current State                                                           | Guidance                                                                     |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| refine.status == "pending"                                              | "Run /imbas:refine <source>"                                                 |
+| refine.status == "in_progress"                                          | "Refine was interrupted. Re-run /imbas:refine <source>"                      |
+| refine.status == "completed", result == "BLOCKED"                       | "Refine blocked. Fix the source document, then re-run /imbas:refine."        |
+| refine passed && estimate.status == "pending"                           | "Run /imbas:estimate --run <run-id> (or /imbas:split to skip estimation)"    |
+| estimate.status == "in_progress"                                        | "Estimate was interrupted. Re-run /imbas:estimate --run <run-id>"            |
+| estimate.status in [completed, skipped] && split.status == "pending"    | "Run /imbas:split --run <run-id>"                                            |
+| split.status == "in_progress"                                           | "Split was interrupted. Re-run /imbas:split --run <run-id>"                  |
+| split.status == "escaped", code in [E2-1, E2-2, EC-1, EC-2]             | "Split escaped (<code>). Human intervention required. See escape report."    |
+| split.status == "escaped", code == "E2-3"                               | "Single-Story manifest saved. Re-run /imbas:split --run <run-id> to create." |
+| split.status == "completed", pending_review == true                     | "Manifest saved but not executed. Re-run /imbas:split --run <run-id>."       |
+| split.status == "completed", pending_review == false && stories pending | "Creation partially done. Re-run /imbas:split --run <run-id> to retry."      |
+| split.status == "completed" && all stories created                      | "Run complete. /imbas:scaffold-pr <issue-ref> to scaffold a draft PR."       |
 
 4. Display the guidance message with the exact command to run.

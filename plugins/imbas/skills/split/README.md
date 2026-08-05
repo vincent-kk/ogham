@@ -26,11 +26,11 @@ estimate가 pending이면 분할 전에 건너뛸지(skip_phases) 먼저 묻는�
 
 ## Provider
 
-| provider | 생성 경로                                   |
-| -------- | ------------------------------------------- |
-| `jira`   | `[OP:]` 시맨틱 오퍼레이션 (세션 Atlassian)  |
-| `github` | gh CLI                                      |
-| `local`  | `.imbas/<KEY>/issues/*.md` 마크다운         |
+| provider | 생성 경로                                  |
+| -------- | ------------------------------------------ |
+| `jira`   | `[OP:]` 시맨틱 오퍼레이션 (세션 Atlassian) |
+| `github` | gh CLI                                     |
+| `local`  | `.imbas/<KEY>/issues/*.md` 마크다운        |
 
 provider X로 실행 중일 때 다른 provider의 `references/` 문서는 읽지 않는다.
 

@@ -4,15 +4,15 @@
 
 ## Structure
 
-| Path                         | Role                                              |
-| ---------------------------- | ------------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md)    |
-| `agents/`                    | 역할별 에이전트 (analyst, planner, estimator)     |
-| `skills/`                    | 사용자 스킬 디렉토리                              |
-| `scripts/`                   | esbuild 빌드 스크립트                             |
-| `bridge/` · `public/`        | 빌드 산출물: MCP 번들 · settings UI (커밋)        |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                   |
-| `.mcp.json`                  | MCP 서버 등록                                     |
+| Path                         | Role                                           |
+| ---------------------------- | ---------------------------------------------- |
+| `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md) |
+| `agents/`                    | 역할별 에이전트 (analyst, planner, estimator)  |
+| `skills/`                    | 사용자 스킬 디렉토리                           |
+| `scripts/`                   | esbuild 빌드 스크립트                          |
+| `bridge/` · `public/`        | 빌드 산출물: MCP 번들 · settings UI (커밋)     |
+| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                |
+| `.mcp.json`                  | MCP 서버 등록                                  |
 
 ## Conventions
 

@@ -49,9 +49,15 @@ describe('StoryItemSchema', () => {
   });
 
   it('accepts a nonnegative estimate_manday and rejects negatives', () => {
-    const ok = StoryItemSchema.safeParse({ ...storyBase, estimate_manday: 3.25 });
+    const ok = StoryItemSchema.safeParse({
+      ...storyBase,
+      estimate_manday: 3.25,
+    });
     expect(ok.success).toBe(true);
-    const bad = StoryItemSchema.safeParse({ ...storyBase, estimate_manday: -1 });
+    const bad = StoryItemSchema.safeParse({
+      ...storyBase,
+      estimate_manday: -1,
+    });
     expect(bad.success).toBe(false);
   });
 });

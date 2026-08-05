@@ -112,12 +112,19 @@ Standard section layout (all eight, in this order; an empty section states "None
 
 ```markdown
 ## Background
+
 ## Goals
+
 ## Scope
+
 ## User flows
+
 ## Feature specs
+
 ## Policies
+
 ## Acceptance criteria
+
 ## Non-goals
 ```
 

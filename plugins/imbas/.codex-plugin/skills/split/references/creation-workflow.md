@@ -81,4 +81,7 @@ For each source issue successfully transitioned to Done in Step 10 (any provider
 3. Terminal markers:
    - Failures exist → "Split partial failure: <created> created, <failed> failed. Re-run `/imbas:split --run <run-id>` to retry failed items." (list failed items with error details)
    - All succeeded → "Split complete: <N> issues created. Next: /imbas:scaffold-pr <issue-ref> to scaffold a draft PR, or /imbas:status for the run overview."
+
+```
+
 ```

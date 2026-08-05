@@ -98,12 +98,12 @@ Emit when the pipeline finishes all phases successfully.
 
 ## Results
 
-| Phase              | Result                     | Details                                               |
-| ------------------ | -------------------------- | ----------------------------------------------------- |
-| 1. Refine          | <PASS\|PASS_WITH_WARNINGS> | <blocking_issues> blocking, <warning_issues> warnings |
-| 2. Estimate        | <Estimated\|Skipped>       | <buffered_total> man-days, <total_weeks> weeks        |
-| 3. Split           | Auto-approved              | <N> issues decomposed                                 |
-| 3. Create          | <Created\|Dry-run>         | <N> created, <S> skipped                              |
+| Phase       | Result                     | Details                                               |
+| ----------- | -------------------------- | ----------------------------------------------------- |
+| 1. Refine   | <PASS\|PASS_WITH_WARNINGS> | <blocking_issues> blocking, <warning_issues> warnings |
+| 2. Estimate | <Estimated\|Skipped>       | <buffered_total> man-days, <total_weeks> weeks        |
+| 3. Split    | Auto-approved              | <N> issues decomposed                                 |
+| 3. Create   | <Created\|Dry-run>         | <N> created, <S> skipped                              |
 
 ## Estimation Summary (when not skipped)
 

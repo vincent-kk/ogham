@@ -18,11 +18,11 @@ Claude Code 플러그인. 기획 문서를 **재구조화·검증 → manday 추
 
 ## 문서
 
-| 파일                             | 내용                                                                    |
-| -------------------------------- | ----------------------------------------------------------------------- |
-| [spec.md](./spec.md)             | 책임 분리(4 기능), 데이터 플로우, v1→v2 델타, 비채택 사항               |
-| [architecture.md](./architecture.md) | 계층 구조, src 모듈 트리(축소 후), 빌드 파이프라인, provider 경계   |
-| [skills.md](./skills.md)         | 스킬 9개(user 8 + internal 1) + 에이전트 3개 정의                       |
-| [estimation.md](./estimation.md) | estimate 스킬 심층 설계 — 3뷰 분해, PERT, 일정 산출                     |
-| [mcp-tools.md](./mcp-tools.md)   | MCP 도구 9개 정의 + 제거 8개 근거                                       |
-| [storage.md](./storage.md)       | `.imbas/` 레이아웃, config 2계층, state·매니페스트 스키마               |
+| 파일                                 | 내용                                                              |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| [spec.md](./spec.md)                 | 책임 분리(4 기능), 데이터 플로우, v1→v2 델타, 비채택 사항         |
+| [architecture.md](./architecture.md) | 계층 구조, src 모듈 트리(축소 후), 빌드 파이프라인, provider 경계 |
+| [skills.md](./skills.md)             | 스킬 9개(user 8 + internal 1) + 에이전트 3개 정의                 |
+| [estimation.md](./estimation.md)     | estimate 스킬 심층 설계 — 3뷰 분해, PERT, 일정 산출               |
+| [mcp-tools.md](./mcp-tools.md)       | MCP 도구 9개 정의 + 제거 8개 근거                                 |
+| [storage.md](./storage.md)           | `.imbas/` 레이아웃, config 2계층, state·매니페스트 스키마         |

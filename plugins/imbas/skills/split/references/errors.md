@@ -16,9 +16,9 @@ Provider-specific errors are in `jira/errors.md`, `github/errors.md`, and `local
 
 ## Creation (Steps 8–11)
 
-| Error                                                  | Action                                                                                   |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Error                                                  | Action                                                                                     |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
 | Manifest not found                                     | Display: "No stories-manifest.json found for run `<run-id>`. Run the decomposition first." |
-| No pending items                                       | Display: "All items already created. Nothing to execute."                                |
-| ID resolution fails (no `issue_ref` for referenced ID) | Skip link, log: "Cannot resolve `<ID>` — parent not yet created."                        |
-| Partial failure mid-batch                              | Manifest is saved after each item. Re-run is safe — skips created items.                 |
+| No pending items                                       | Display: "All items already created. Nothing to execute."                                  |
+| ID resolution fails (no `issue_ref` for referenced ID) | Skip link, log: "Cannot resolve `<ID>` — parent not yet created."                          |
+| Partial failure mid-batch                              | Manifest is saved after each item. Re-run is safe — skips created items.                   |

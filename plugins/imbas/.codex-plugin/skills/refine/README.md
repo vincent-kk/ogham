@@ -34,11 +34,11 @@ imbas 파이프라인 Phase 1. 기획 문서를 표준 섹션 구조로 재구�
 
 ## 결과 판정
 
-| 결과                   | 조건                           | 다음 단계                              |
-| ---------------------- | ------------------------------ | -------------------------------------- |
-| **PASS**               | BLOCKING 0건, WARNING 0건      | estimate(선택) 또는 split 진행 가능    |
-| **PASS_WITH_WARNINGS** | BLOCKING 0건, WARNING 1건 이상 | estimate/split 진행 가능 (경고 표시)   |
-| **BLOCKED**            | BLOCKING 1건 이상              | 진행 불가 (refined.md 미생성)          |
+| 결과                   | 조건                           | 다음 단계                            |
+| ---------------------- | ------------------------------ | ------------------------------------ |
+| **PASS**               | BLOCKING 0건, WARNING 0건      | estimate(선택) 또는 split 진행 가능  |
+| **PASS_WITH_WARNINGS** | BLOCKING 0건, WARNING 1건 이상 | estimate/split 진행 가능 (경고 표시) |
+| **BLOCKED**            | BLOCKING 1건 이상              | 진행 불가 (refined.md 미생성)        |
 
 ## 출력
 

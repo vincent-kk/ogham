@@ -63,25 +63,25 @@ yarn workspace @ogham/imbas build
 
 ## 스킬
 
-| 스킬                 | Phase | 역할                                                                       |
-| -------------------- | ----- | -------------------------------------------------------------------------- |
-| `/imbas:setup`       | —     | 브라우저 설정 폼(provider·프로젝트·라벨·언어·모델·estimation) + 캐시 구축 |
-| `/imbas:refine`      | 1     | 표준 8섹션 재구조화 + 5종 검증 게이트                                      |
-| `/imbas:estimate`    | 2     | 3뷰 분해 → 단일 WBS → PERT manday → 팀 규모 일정 (선택 단계)               |
-| `/imbas:split`       | 3     | INVEST 분할 → 승인 게이트 → 멱등 재개 지원 일괄 생성                       |
+| 스킬                 | Phase  | 역할                                                                      |
+| -------------------- | ------ | ------------------------------------------------------------------------- |
+| `/imbas:setup`       | —      | 브라우저 설정 폼(provider·프로젝트·라벨·언어·모델·estimation) + 캐시 구축 |
+| `/imbas:refine`      | 1      | 표준 8섹션 재구조화 + 5종 검증 게이트                                     |
+| `/imbas:estimate`    | 2      | 3뷰 분해 → 단일 WBS → PERT manday → 팀 규모 일정 (선택 단계)              |
+| `/imbas:split`       | 3      | INVEST 분할 → 승인 게이트 → 멱등 재개 지원 일괄 생성                      |
 | `/imbas:scaffold-pr` | 후처리 | 이슈에서 draft PR 골격(브랜치·empty commit·체크리스트) 생성               |
-| `/imbas:pipeline`    | 1–3   | 자동 승인 게이트와 blocker 리포트로 전체 흐름 실행                         |
-| `/imbas:status`      | —     | 런 상태·산출물·재개 안내                                                   |
-| `/imbas:digest`      | —     | 이슈 코멘트 스레드를 압축 요약해 게시                                      |
-| `imbas:read-issue`   | —     | (내부) 이슈+스레드 맥락 구조화                                             |
+| `/imbas:pipeline`    | 1–3    | 자동 승인 게이트와 blocker 리포트로 전체 흐름 실행                        |
+| `/imbas:status`      | —      | 런 상태·산출물·재개 안내                                                  |
+| `/imbas:digest`      | —      | 이슈 코멘트 스레드를 압축 요약해 게시                                     |
+| `imbas:read-issue`   | —      | (내부) 이슈+스레드 맥락 구조화                                            |
 
 ## 에이전트
 
-| 에이전트    | 모델   | 역할                                             |
-| ----------- | ------ | ------------------------------------------------ |
-| `analyst`   | sonnet | 5종 검증 + 문서 재구조화, 역추론 검증            |
-| `planner`   | sonnet | INVEST 이슈 분할                                 |
-| `estimator` | opus   | 컨텍스트 heavy 추산: 3뷰 WBS·PERT·일정           |
+| 에이전트    | 모델   | 역할                                   |
+| ----------- | ------ | -------------------------------------- |
+| `analyst`   | sonnet | 5종 검증 + 문서 재구조화, 역추론 검증  |
+| `planner`   | sonnet | INVEST 이슈 분할                       |
+| `estimator` | opus   | 컨텍스트 heavy 추산: 3뷰 WBS·PERT·일정 |
 
 ## 추산 (Estimation)
 
@@ -97,11 +97,11 @@ estimate 단계는 재구조화된 기획서만으로 "얼마나 걸리는가"�
 
 ## Provider
 
-| Provider | 이슈 생성 경로                                                   |
-| -------- | ---------------------------------------------------------------- |
-| `jira`   | 세션의 Atlassian 도구가 결의하는 `[OP:]` 시맨틱 오퍼레이션       |
-| `github` | `gh` CLI                                                         |
-| `local`  | `.imbas/<KEY>/issues/` 마크다운 파일                             |
+| Provider | 이슈 생성 경로                                             |
+| -------- | ---------------------------------------------------------- |
+| `jira`   | 세션의 Atlassian 도구가 결의하는 `[OP:]` 시맨틱 오퍼레이션 |
+| `github` | `gh` CLI                                                   |
+| `local`  | `.imbas/<KEY>/issues/` 마크다운 파일                       |
 
 imbas는 Atlassian 자격 증명·전송 계층을 소유하지 않는다 — Jira 오퍼레이션은 REST 의도만 기술하고 실행은 세션의 Atlassian 도구가 맡는다.
 

@@ -22,11 +22,11 @@ flowchart TD
 
 ### 1.1 3뷰 분해
 
-| 뷰      | 단위                | 추출 대상                                                        |
-| ------- | ------------------- | ---------------------------------------------------------------- |
-| Page    | 화면(스크린)        | 화면 목록, 화면별 상태(빈/로딩/에러/성공), 반응형·플랫폼 변형    |
-| Feature | 기능(유저 스토리)   | CRUD 흐름, 검색·필터, 권한 분기, 외부 서비스 연동, 알림·메일     |
-| Module  | 도메인·횡단 모듈    | 인증, 결제, 파일 처리, 관리자, 정책 엔진 등 화면에 안 보이는 기반 |
+| 뷰      | 단위              | 추출 대상                                                         |
+| ------- | ----------------- | ----------------------------------------------------------------- |
+| Page    | 화면(스크린)      | 화면 목록, 화면별 상태(빈/로딩/에러/성공), 반응형·플랫폼 변형     |
+| Feature | 기능(유저 스토리) | CRUD 흐름, 검색·필터, 권한 분기, 외부 서비스 연동, 알림·메일      |
+| Module  | 도메인·횡단 모듈  | 인증, 결제, 파일 처리, 관리자, 정책 엔진 등 화면에 안 보이는 기반 |
 
 ### 1.2 Reconciliation
 
@@ -60,27 +60,33 @@ flowchart TD
     {
       "id": "U-1",
       "name": "이메일 로그인",
-      "view_refs": { "page": ["로그인 화면"], "feature": ["이메일 로그인"], "module": ["인증"] },
+      "view_refs": {
+        "page": ["로그인 화면"],
+        "feature": ["이메일 로그인"],
+        "module": ["인증"],
+      },
       "single_view": false,
       "complexity": "M",
       "estimate": { "o": 1.5, "m": 3, "p": 6, "expected": 3.25, "sigma": 0.75 },
       "rationale": "표준 인증 플로우이나 소셜 연동 스펙 미확정으로 P 가중",
-      "deps": []
-    }
+      "deps": [],
+    },
   ],
   "rollup": {
     "sum_expected": 42.5,
     "overhead": { "integration": 4.3, "test": 6.4, "pm": 2.1 },
     "buffered_total": 66.4,
-    "confidence_interval": [55.1, 77.7]
+    "confidence_interval": [55.1, 77.7],
   },
   "schedule": {
     "tracks": [{ "track": 1, "units": ["U-1", "U-3"] }],
     "milestones": [{ "name": "인증 모듈 완료", "week": 3 }],
-    "total_weeks": 8
+    "total_weeks": 8,
   },
   "assumptions": ["소셜 로그인은 Google 1종만", "..."],
-  "risks": [{ "unit": "U-7", "risk": "외부 API 스펙 미확정", "impact": "high" }]
+  "risks": [
+    { "unit": "U-7", "risk": "외부 API 스펙 미확정", "impact": "high" },
+  ],
 }
 ```
 
@@ -90,13 +96,13 @@ flowchart TD
 
 ## 3. Config — `config.estimation`
 
-| 키                          | 기본값                                | 의미                                   |
-| --------------------------- | ------------------------------------- | -------------------------------------- |
-| `team_size`                 | 2                                     | 병렬 트랙 수                           |
-| `available_manday_per_week` | 5                                     | 1인 주당 가용 manday                   |
-| `complexity_baseline`       | `{ "S": 1, "M": 3, "L": 8, "XL": 20 }` | 등급별 기준 manday (M값의 앵커)       |
-| `overhead_ratio`            | `{ "integration": 0.1, "test": 0.15, "pm": 0.05 }` | 합산 후 가산 비율        |
-| `buffer_ratio`              | 0.2                                   | 최종 버퍼                              |
+| 키                          | 기본값                                             | 의미                            |
+| --------------------------- | -------------------------------------------------- | ------------------------------- |
+| `team_size`                 | 2                                                  | 병렬 트랙 수                    |
+| `available_manday_per_week` | 5                                                  | 1인 주당 가용 manday            |
+| `complexity_baseline`       | `{ "S": 1, "M": 3, "L": 8, "XL": 20 }`             | 등급별 기준 manday (M값의 앵커) |
+| `overhead_ratio`            | `{ "integration": 0.1, "test": 0.15, "pm": 0.05 }` | 합산 후 가산 비율               |
+| `buffer_ratio`              | 0.2                                                | 최종 버퍼                       |
 
 - user 계층에 팀 표준을, project 계층에 프로젝트 특성(신규팀 +buffer 등)을 둔다.
 - setup 웹폼의 estimation 섹션에서 편집.

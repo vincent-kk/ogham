@@ -64,17 +64,17 @@ yarn workspace @ogham/imbas build
 
 ## Skills
 
-| Skill                  | Phase | What it does                                                                              |
-| ---------------------- | ----- | ----------------------------------------------------------------------------------------- |
-| `/imbas:setup`         | —     | Browser settings form (provider, project, labels, languages, models, estimation) + caches |
-| `/imbas:refine`        | 1     | Restructures the document into a standard 8-section layout; 5-type validation gate        |
-| `/imbas:estimate`      | 2     | 3-view decomposition → reconciled WBS → PERT man-days → team-sized schedule (optional)    |
-| `/imbas:split`         | 3     | INVEST issue decomposition → approval gate → batch creation with resume                   |
-| `/imbas:scaffold-pr`   | post  | Draft PR skeleton (branch, empty commit, checklist) from an issue                         |
-| `/imbas:pipeline`      | 1–3   | Full flow with auto-approval gates and blocker reports                                    |
-| `/imbas:status`        | —     | Run status, artifact presence, resume guidance                                            |
-| `/imbas:digest`        | —     | Compresses an issue's discussion thread into a posted summary                             |
-| `imbas:read-issue`     | —     | (internal) Structured issue + thread context for other skills                             |
+| Skill                | Phase | What it does                                                                              |
+| -------------------- | ----- | ----------------------------------------------------------------------------------------- |
+| `/imbas:setup`       | —     | Browser settings form (provider, project, labels, languages, models, estimation) + caches |
+| `/imbas:refine`      | 1     | Restructures the document into a standard 8-section layout; 5-type validation gate        |
+| `/imbas:estimate`    | 2     | 3-view decomposition → reconciled WBS → PERT man-days → team-sized schedule (optional)    |
+| `/imbas:split`       | 3     | INVEST issue decomposition → approval gate → batch creation with resume                   |
+| `/imbas:scaffold-pr` | post  | Draft PR skeleton (branch, empty commit, checklist) from an issue                         |
+| `/imbas:pipeline`    | 1–3   | Full flow with auto-approval gates and blocker reports                                    |
+| `/imbas:status`      | —     | Run status, artifact presence, resume guidance                                            |
+| `/imbas:digest`      | —     | Compresses an issue's discussion thread into a posted summary                             |
+| `imbas:read-issue`   | —     | (internal) Structured issue + thread context for other skills                             |
 
 ## Agents
 
@@ -98,11 +98,11 @@ Coefficients live in `config.estimation` (user/project layers) and are editable 
 
 ## Providers
 
-| Provider | Issues created via                                     |
-| -------- | ------------------------------------------------------ |
+| Provider | Issues created via                                                         |
+| -------- | -------------------------------------------------------------------------- |
 | `jira`   | `[OP:]` semantic operations resolved against the session's Atlassian tools |
-| `github` | `gh` CLI                                               |
-| `local`  | Markdown files under `.imbas/<KEY>/issues/`            |
+| `github` | `gh` CLI                                                                   |
+| `local`  | Markdown files under `.imbas/<KEY>/issues/`                                |
 
 imbas owns no Atlassian credentials or transport — Jira operations state REST intent and the session's Atlassian tooling executes it.
 

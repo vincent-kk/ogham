@@ -40,22 +40,23 @@
 
 ```jsonc
 {
-  "provider": "jira",                       // "jira" | "github" | "local"
-  "project": { "key": "PROJ" },             // github: { "repo": "owner/repo" } · local: { "key": "LOCAL" }
+  "provider": "jira", // "jira" | "github" | "local"
+  "project": { "key": "PROJ" }, // github: { "repo": "owner/repo" } · local: { "key": "LOCAL" }
   "language": {
-    "documents": "ko",                      // refined.md·리포트
-    "skills": "en",                         // 스킬/에이전트 파일 (항상 en)
-    "issue_content": "ko",                  // 이슈 title/description
-    "reports": "ko"
+    "documents": "ko", // refined.md·리포트
+    "skills": "en", // 스킬/에이전트 파일 (항상 en)
+    "issue_content": "ko", // 이슈 title/description
+    "reports": "ko",
   },
-  "labels": ["imbas"],                      // 생성 이슈 공통 라벨
-  "estimation": {                           // v2 신규 — estimation.md §3
+  "labels": ["imbas"], // 생성 이슈 공통 라벨
+  "estimation": {
+    // v2 신규 — estimation.md §3
     "team_size": 2,
     "available_manday_per_week": 5,
     "complexity_baseline": { "S": 1, "M": 3, "L": 8, "XL": 20 },
     "overhead_ratio": { "integration": 0.1, "test": 0.15, "pm": 0.05 },
-    "buffer_ratio": 0.2
-  }
+    "buffer_ratio": 0.2,
+  },
 }
 ```
 
@@ -67,11 +68,21 @@
   "project_ref": "PROJ",
   "source_file": "source.md",
   "phases": {
-    "refine":   { "status": "completed", "result": "PASS", "blocking_issues": 0, "warning_issues": 2 },
-    "estimate": { "status": "completed", "estimated_manday": 66.4 },   // skip 시 { "status": "skipped" }
-    "split":    { "status": "in_progress", "stories_created": 4, "pending_review": false }
+    "refine": {
+      "status": "completed",
+      "result": "PASS",
+      "blocking_issues": 0,
+      "warning_issues": 2,
+    },
+    "estimate": { "status": "completed", "estimated_manday": 66.4 }, // skip 시 { "status": "skipped" }
+    "split": {
+      "status": "in_progress",
+      "stories_created": 4,
+      "pending_review": false,
+    },
   },
-  "created_at": "...", "updated_at": "..."
+  "created_at": "...",
+  "updated_at": "...",
 }
 ```
 
@@ -86,15 +97,15 @@
   "items": [
     {
       "id": "S-1",
-      "type": "story",                     // story | task | bug
+      "type": "story", // story | task | bug
       "title": "...",
       "description": "...",
       "links": [{ "type": "relates to", "target": "S-2" }],
-      "estimate_manday": 3.25,             // estimation.json 연계 시 병기 (없으면 null)
-      "issue_ref": "PROJ-123",             // 생성 전 null — 이 필드가 재개 기준
-      "status": "created"                  // pending | created | failed
-    }
-  ]
+      "estimate_manday": 3.25, // estimation.json 연계 시 병기 (없으면 null)
+      "issue_ref": "PROJ-123", // 생성 전 null — 이 필드가 재개 기준
+      "status": "created", // pending | created | failed
+    },
+  ],
 }
 ```
 

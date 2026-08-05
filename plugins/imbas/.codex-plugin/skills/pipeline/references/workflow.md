@@ -159,4 +159,7 @@ Render the COMPLETE template from blocker-report.md:
 - Estimation summary (buffered total, confidence interval, total weeks) when present
 - Accumulated warnings from all phases
 - Next-step guidance: /imbas:scaffold-pr <issue-ref>, /imbas:status <run-id>
+
+```
+
 ```

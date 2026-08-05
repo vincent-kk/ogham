@@ -225,11 +225,11 @@ Turning a spec into a defensible estimate and a clean backlog is tedious and err
 
 **What it provides:**
 
-| Component | Count | Examples                                                                             |
-| --------- | ----- | ------------------------------------------------------------------------------------ |
+| Component | Count | Examples                                                                                    |
+| --------- | ----- | ------------------------------------------------------------------------------------------- |
 | Skills    | 9     | `/imbas:pipeline`, `/imbas:refine`, `/imbas:estimate`, `/imbas:split`, `/imbas:scaffold-pr` |
-| MCP Tools | 9     | `run_transition` (state machine), `manifest_save`/`manifest_validate`, `open_settings` |
-| Agents    | 3     | analyst (sonnet), planner (sonnet), estimator (opus, maxTurns: 80)                   |
+| MCP Tools | 9     | `run_transition` (state machine), `manifest_save`/`manifest_validate`, `open_settings`      |
+| Agents    | 3     | analyst (sonnet), planner (sonnet), estimator (opus, maxTurns: 80)                          |
 
 **Key features:**
 

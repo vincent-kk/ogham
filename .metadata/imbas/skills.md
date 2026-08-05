@@ -70,11 +70,11 @@
 
 ## Agents (3)
 
-| Agent         | Model  | maxTurns | Tools                | 역할                                             | 호출자                  |
-| ------------- | ------ | -------- | -------------------- | ------------------------------------------------ | ----------------------- |
-| **analyst**   | sonnet | 50       | Read, Grep, Glob, Bash | 5종 검증 + 재구조화(P1), 분할 역추론 검증(P3)  | refine, split, pipeline |
-| **planner**   | sonnet | 60       | Read, Grep, Glob     | INVEST Story 분할, 이슈 타입 판정                | split, pipeline         |
-| **estimator** | opus   | 80       | Read, Grep, Glob     | 3뷰 분해, PERT 추정, 일정 배치 (컨텍스트 heavy) | estimate, pipeline      |
+| Agent         | Model  | maxTurns | Tools                  | 역할                                            | 호출자                  |
+| ------------- | ------ | -------- | ---------------------- | ----------------------------------------------- | ----------------------- |
+| **analyst**   | sonnet | 50       | Read, Grep, Glob, Bash | 5종 검증 + 재구조화(P1), 분할 역추론 검증(P3)   | refine, split, pipeline |
+| **planner**   | sonnet | 60       | Read, Grep, Glob       | INVEST Story 분할, 이슈 타입 판정               | split, pipeline         |
+| **estimator** | opus   | 80       | Read, Grep, Glob       | 3뷰 분해, PERT 추정, 일정 배치 (컨텍스트 heavy) | estimate, pipeline      |
 
 - engineer(opus, AST 도구)는 제거. estimator가 heavy 에이전트 슬롯을 대체하되 **코드베이스가 아닌 기획서**를 소비한다.
 - 에이전트 이름은 bare name — 스킬은 `subagent_type: "imbas:<agent>"`로 spawn.

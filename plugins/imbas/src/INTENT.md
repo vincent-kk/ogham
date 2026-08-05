@@ -6,15 +6,15 @@ imbas 플러그인 소스 코드 루트. 기획문서 재구조화·검증 → m
 
 ## Structure
 
-| Directory    | Role                                                        |
-| ------------ | ----------------------------------------------------------- |
-| `constants/` | 파일명·경로·파이프라인·에이전트 상수                        |
-| `utils/`     | 순수 유틸리티 함수 (collections, objects)                   |
-| `types/`     | Zod 스키마 및 타입 정의                                     |
-| `core/`      | 상태·설정·매니페스트 비즈니스 로직                          |
-| `mcp/`       | MCP 서버 및 9개 도구 핸들러 + 설정 페이지 정적 자산         |
-| `lib/`       | 공통 유틸리티 (logger, stdin, fileIo)                       |
-| `providers/` | 이슈 트래커 프로바이더 파싱 로직 (github 등)                |
+| Directory    | Role                                                |
+| ------------ | --------------------------------------------------- |
+| `constants/` | 파일명·경로·파이프라인·에이전트 상수                |
+| `utils/`     | 순수 유틸리티 함수 (collections, objects)           |
+| `types/`     | Zod 스키마 및 타입 정의                             |
+| `core/`      | 상태·설정·매니페스트 비즈니스 로직                  |
+| `mcp/`       | MCP 서버 및 9개 도구 핸들러 + 설정 페이지 정적 자산 |
+| `lib/`       | 공통 유틸리티 (logger, stdin, fileIo)               |
+| `providers/` | 이슈 트래커 프로바이더 파싱 로직 (github 등)        |
 
 ## Conventions
 

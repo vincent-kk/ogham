@@ -21,13 +21,13 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 ## imbas MCP Tools
 
-| Tool                                         | Usage                                                                        |
-| -------------------------------------------- | ---------------------------------------------------------------------------- |
-| `mcp__plugin_imbas_tools__config_get` (declared-only) | Provider, language, labels — invoked from the creation skeleton in SKILL.md |
-| `mcp__plugin_imbas_tools__run_get`           | Load run state, verify preconditions, run selection                          |
-| `mcp__plugin_imbas_tools__run_transition`    | skip_phases(estimate), start_phase/complete_phase/escape_phase(split)        |
-| `mcp__plugin_imbas_tools__manifest_save`     | Save stories-manifest.json (after decomposition and after EACH created item) |
-| `mcp__plugin_imbas_tools__manifest_validate` | Validate manifest structural integrity                                       |
+| Tool                                                  | Usage                                                                        |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `mcp__plugin_imbas_tools__config_get` (declared-only) | Provider, language, labels — invoked from the creation skeleton in SKILL.md  |
+| `mcp__plugin_imbas_tools__run_get`                    | Load run state, verify preconditions, run selection                          |
+| `mcp__plugin_imbas_tools__run_transition`             | skip_phases(estimate), start_phase/complete_phase/escape_phase(split)        |
+| `mcp__plugin_imbas_tools__manifest_save`              | Save stories-manifest.json (after decomposition and after EACH created item) |
+| `mcp__plugin_imbas_tools__manifest_validate`          | Validate manifest structural integrity                                       |
 
 Manifest reads use the Read tool directly on `stories-manifest.json` / `estimation.json` — there is no manifest_get tool.
 
@@ -44,10 +44,10 @@ Creation-stage Jira operations (create_issue, create_link, transition_issue, …
 
 Spawn via the Task tool with the plugin-namespaced type: `subagent_type: "imbas:<agent>"` (e.g., `imbas:analyst`). Bare names are table labels only.
 
-| Agent     | Model                           | Purpose                                                 |
-| --------- | ------------------------------- | ------------------------------------------------------- |
-| `planner` | config.defaults.llm_model.split | INVEST-compliant issue splitting from refined.md        |
-| `analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2])             |
+| Agent     | Model                           | Purpose                                          |
+| --------- | ------------------------------- | ------------------------------------------------ |
+| `planner` | config.defaults.llm_model.split | INVEST-compliant issue splitting from refined.md |
+| `analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2])      |
 
 ### planner Spawn Instructions
 

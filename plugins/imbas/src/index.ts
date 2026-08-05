@@ -125,5 +125,11 @@ export {
 } from './core/index.js';
 
 // Lib modules
-export { createLogger, setLogDir, resetLogger, readJson, writeJson } from './lib/index.js';
+export {
+  createLogger,
+  setLogDir,
+  resetLogger,
+  readJson,
+  writeJson,
+} from './lib/index.js';
 export type { Logger } from './lib/index.js';

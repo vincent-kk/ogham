@@ -6,11 +6,11 @@ The estimation method is deterministic by construction: the same refined.md and 
 
 Decompose the refined document three times, independently — a unit of work missed by one view is caught by another:
 
-| View    | Unit                       | Extract                                                                    |
-| ------- | -------------------------- | -------------------------------------------------------------------------- |
+| View    | Unit                       | Extract                                                                                    |
+| ------- | -------------------------- | ------------------------------------------------------------------------------------------ |
 | Page    | Screen                     | Screen list, per-screen states (empty/loading/error/success), responsive/platform variants |
-| Feature | User-facing capability     | CRUD flows, search/filter, permission branches, external integrations, notifications |
-| Module  | Domain/cross-cutting block | Auth, payments, file handling, admin, policy engines — foundations no screen shows |
+| Feature | User-facing capability     | CRUD flows, search/filter, permission branches, external integrations, notifications       |
+| Module  | Domain/cross-cutting block | Auth, payments, file handling, admin, policy engines — foundations no screen shows         |
 
 ## 2. Reconciliation → Single WBS
 

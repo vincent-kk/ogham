@@ -43,9 +43,9 @@ The LLM resolves which tool to use at runtime. Read the linked operation files f
 
 Spawn via the Task tool with the plugin-namespaced type: `subagent_type: "imbas:<agent>"` (e.g., `imbas:analyst`). Bare names are table labels only.
 
-| Agent     | Model                            | Purpose                                                                                                              |
-| --------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `analyst` | config.defaults.llm_model.refine | Perform 5-type validation, then restructure the document into the standard refined.md layout (unless BLOCKED)        |
+| Agent     | Model                            | Purpose                                                                                                       |
+| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `analyst` | config.defaults.llm_model.refine | Perform 5-type validation, then restructure the document into the standard refined.md layout (unless BLOCKED) |
 
 Spawn instructions:
 

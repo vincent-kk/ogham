@@ -49,7 +49,11 @@ const estimationManifest = {
     {
       id: 'U-1',
       name: 'Login',
-      view_refs: { page: ['login'], feature: ['email-login'], module: ['auth'] },
+      view_refs: {
+        page: ['login'],
+        feature: ['email-login'],
+        module: ['auth'],
+      },
       complexity: 'M',
       estimate: { o: 1, m: 3, p: 5, expected: 3, sigma: 0.67 },
       rationale: 'standard flow',

@@ -27,17 +27,17 @@ imbas (기획자 사이드 이슈 파이프라인)
 
 ## 3. `src/` 모듈 트리 (축소 후)
 
-| Directory    | Role                                             | v2 변경                                          |
-| ------------ | ------------------------------------------------ | ------------------------------------------------ |
-| `constants/` | 파일명·경로·파이프라인·에이전트 상수             | devplan·ast 상수 제거, estimation 추가           |
-| `types/`     | Zod 스키마 (config·state·manifest·estimation·settings) | devplan·implement-plan·cache 스키마 제거, estimation 신규 |
+| Directory    | Role                                                                      | v2 변경                                                            |
+| ------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `constants/` | 파일명·경로·파이프라인·에이전트 상수                                      | devplan·ast 상수 제거, estimation 추가                             |
+| `types/`     | Zod 스키마 (config·state·manifest·estimation·settings)                    | devplan·implement-plan·cache 스키마 제거, estimation 신규          |
 | `core/`      | stateManager · configManager · manifestValidator · runIdGenerator · paths | executionPlanner·implementPlanner·cacheManager·manifestParser 제거 |
-| `mcp/`       | 서버 + 9개 도구 핸들러 + 설정 페이지 자산        | 도구 8개 제거                                    |
-| `lib/`       | logger · stdin · fileIo (atomic write)           | 유지                                             |
-| `providers/` | provider 파싱 로직 (github links 등)             | 유지                                             |
-| `utils/`     | 순수 유틸리티                                    | 유지                                             |
-| ~~`ast/`~~   | —                                                | **삭제** (@ast-grep/napi 의존성과 함께)          |
-| ~~`hooks/`~~ | —                                                | **삭제** (훅 4종 소멸)                           |
+| `mcp/`       | 서버 + 9개 도구 핸들러 + 설정 페이지 자산                                 | 도구 8개 제거                                                      |
+| `lib/`       | logger · stdin · fileIo (atomic write)                                    | 유지                                                               |
+| `providers/` | provider 파싱 로직 (github links 등)                                      | 유지                                                               |
+| `utils/`     | 순수 유틸리티                                                             | 유지                                                               |
+| ~~`ast/`~~   | —                                                                         | **삭제** (@ast-grep/napi 의존성과 함께)                            |
+| ~~`hooks/`~~ | —                                                                         | **삭제** (훅 4종 소멸)                                             |
 
 - 배송 진입점은 MCP 서버 하나: `mcp/serverEntry/serverEntry.ts` → `bridge/mcp-server.cjs`. 훅 번들(`bridge/*.mjs`)과 `libs/run.cjs`는 소멸.
 - Zod 스키마는 `types/`가 단독 소유, 파일 쓰기는 `lib/fileIo` atomic write — v1 규칙 유지.
@@ -54,10 +54,10 @@ clean → version:sync → build:pages(설정 HTML) → build:compile(tsc) → b
 
 ## 5. 의존성
 
-| 구분   | v2                                                   | v1에서 제거                    |
-| ------ | ---------------------------------------------------- | ------------------------------ |
-| 런타임 | `@modelcontextprotocol/sdk ~1.22`, `zod ^3.23`       | `@ast-grep/napi`               |
-| 개발   | `@ogham/cross-platform`, `esbuild`, `typescript`, `vitest`, `@playwright/test`(설정 UI e2e) | — |
+| 구분   | v2                                                                                          | v1에서 제거      |
+| ------ | ------------------------------------------------------------------------------------------- | ---------------- |
+| 런타임 | `@modelcontextprotocol/sdk ~1.22`, `zod ^3.23`                                              | `@ast-grep/napi` |
+| 개발   | `@ogham/cross-platform`, `esbuild`, `typescript`, `vitest`, `@playwright/test`(설정 UI e2e) | —                |
 
 ## 6. Provider 경계 규칙 (유지)
 
