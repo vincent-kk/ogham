@@ -1,6 +1,6 @@
 export {
   loadManifest,
   getManifestSummary,
-  getImplementPlanSummary,
+  getEstimationSummary,
 } from './manifestParser.js';
 export type { ManifestType } from './manifestParser.js';

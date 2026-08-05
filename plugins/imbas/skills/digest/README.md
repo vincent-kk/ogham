@@ -31,7 +31,7 @@ Jira 이슈의 전체 컨텍스트(설명 + 댓글 스레드 + 미디어)를 구
 
 다음 조건을 모두 충족하면 digest를 제안:
 
-- `imbas:manifest`를 통한 Done 전이 발생
+- `imbas:split`을 통한 Done 전이 발생
 - 댓글 3개 이상
 - 작성자 2명 이상
 

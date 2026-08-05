@@ -64,8 +64,8 @@ describe('MCP inputSchema is structurally ref-free', () => {
     ).toBe(false);
   });
 
-  it('all 17 registered tools emit JSON Schemas with zero $ref', () => {
-    expect(captured).toHaveLength(17);
+  it('all 9 registered tools emit JSON Schemas with zero $ref', () => {
+    expect(captured).toHaveLength(9);
     for (const entry of captured) {
       const json = convert(entry.inputSchema);
       expect(
@@ -88,7 +88,7 @@ describe('MCP inputSchema is structurally ref-free', () => {
       project_ref: 'PROJ',
       run_id: 'run-1',
       action: 'start_phase',
-      phase: 'validate',
+      phase: 'refine',
     };
     const mcpResult = entry!.inputSchema.safeParse(payload);
     expect(

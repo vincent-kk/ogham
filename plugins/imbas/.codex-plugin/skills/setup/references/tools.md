@@ -7,8 +7,8 @@
 | `mcp__plugin_imbas_tools__open_settings` | Open the browser settings page and wait for Save (init Step 3; edits the full config) |
 | `mcp__plugin_imbas_tools__config_get`    | Read current config.json (show subcommand, post-save reads)                           |
 | `mcp__plugin_imbas_tools__config_set`    | Update config.json fields (arg-driven subcommands, headless fallback)                 |
-| `mcp__plugin_imbas_tools__cache_get`     | Read Jira metadata cache (show subcommand — displays cache status alongside config)   |
-| `mcp__plugin_imbas_tools__cache_set`     | Write Jira metadata to cache files                                                    |
+
+Cache files (`.imbas/<KEY>/cache/*.json` + `cached_at.json`) are managed directly with Read/Write/Glob — there are no cache MCP tools.
 
 ## Jira Operations ([OP:])
 

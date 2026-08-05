@@ -1,70 +1,52 @@
 # split
 
-imbas 파이프라인 Phase 2. 검증된 문서를 INVEST 원칙에 따라 Jira Story로 분할한다.
+imbas 파이프라인 Phase 3. 재구조화된 기획서를 INVEST 이슈로 분할하고, 승인 게이트를 거쳐 provider(Jira/GitHub/local)에 일괄 생성한다.
 
 ## 개요
 
-Phase 1(validate)에서 통과한 기획 문서를 `planner` 에이전트가 INVEST 원칙에 맞는 Story로 분할하고, 3→1→2 검증 체계로 품질을 확인한다. 크기가 초과되면 수평 분할, 개념적으로 하위 Story가 필요하면 우산 패턴을 적용한다.
+`refined.md`를 `planner` 에이전트가 INVEST 기준으로 분할하고 3→1→2 검증(앵커 링크 → 정합성 → 역추론)과 크기 검사를 적용한다. 사용자가 매니페스트를 승인하면 같은 흐름에서 provider에 이슈·링크·전이를 생성한다. 항목별로 `issue_ref`/`status`를 즉시 기록해 중단 후 재실행이 안전하다(멱등·재개).
 
 ## 사용법
 
 ```
-/imbas:split [--run <run-id>] [--epic <EPIC-KEY>]
+/imbas:split [--run <run-id>] [--epic <EPIC-KEY>] [--dry-run]
 
---run    : 기존 런 ID (생략 시 가장 최근 PASS/PASS_WITH_WARNINGS 런 사용)
---epic   : Epic Jira 키 (생략 시 Epic 생성/선택을 대화형으로 결정)
+--run     : 기존 런 ID (생략 시 최근 적격 런)
+--epic    : Epic 키 (생략 시 생성/선택 질문; jira·github 전용)
+--dry-run : 분할·매니페스트 저장까지만 수행하고 생성 계획을 미리보기
 ```
 
-## 선행 조건
+## 흐름
 
-- `validate.status == "completed"`
-- `validate.result`가 `"PASS"` 또는 `"PASS_WITH_WARNINGS"`
+1. **분할 (Step 1–7)** — 전제조건 확인(refine PASS + estimate 완료/skip), Epic 결정, planner 분할, 3→1→2 검증, 크기 검사(수평 분할·umbrella), 매니페스트 저장·검증
+2. **승인 게이트 (Step 8)** — 실행 요약 제시, 사용자 승인/수정/보류 결정
+3. **생성 (Step 9–11)** — drift 점검, provider별 일괄 생성(항목별 저장), 라벨 적용, 결과 리포트
 
-## 워크플로우
+estimate가 pending이면 분할 전에 건너뛸지(skip_phases) 먼저 묻는다. `estimation.json`이 있으면 Story별 `estimate_manday`가 매겨져 이슈 본문에 병기된다.
 
-1. **Run 로드 및 사전조건 검증**
-2. **Epic 결정** — `--epic` 지정, 기존 Epic 선택, 새 Epic 생성, 또는 없음
-3. **`planner` 에이전트 실행** — INVEST 준수 Story 목록 생성 (User Story + AC 형식)
-4. **3→1→2 검증** (Story별)
-   - [3] 앵커 링크 확인 — 원본 문서 섹션 참조 존재 여부
-   - [1] 일관성 확인 — 문서 목표와의 정합성
-   - [2] 역추론 검증 — `analyst`가 Story를 재조합하여 원본과 비교
-5. **이스케이프 조건 감지** — 필요 시 이스케이프 처리
-6. **크기 확인** — 4가지 기준(범위, 명세 충분성, 독립성, 단일 책임) 초과 시 수평 분할
-7. **stories-manifest.json 생성** — 검증 결과, 크기 확인, 리뷰 플래그 포함
-8. **사용자 리뷰** — 승인 또는 수정 요청
+## Provider
 
-## 이스케이프 코드
+| provider | 생성 경로                                  |
+| -------- | ------------------------------------------ |
+| `jira`   | `[OP:]` 시맨틱 오퍼레이션 (세션 Atlassian) |
+| `github` | gh CLI                                     |
+| `local`  | `.imbas/<KEY>/issues/*.md` 마크다운        |
 
-| 코드     | 의미                           | 후속 조치                           |
-| -------- | ------------------------------ | ----------------------------------- |
-| **E2-1** | 정보 부족                      | 누락 항목 목록, 보충 요청           |
-| **E2-2** | 모순 발견                      | 충돌 지점 명시, 인간 판단 요청      |
-| **E2-3** | 분할 불필요 (이미 적절한 크기) | Phase 3(devplan)으로 직접 진행 가능 |
-| **EC-1** | 이해 불가                      | 범위 동결, 명확화 질의 구성         |
-| **EC-2** | 원본 결함 발견                 | 결함 보고서 생성, 재검증 권고       |
+provider X로 실행 중일 때 다른 provider의 `references/` 문서는 읽지 않는다.
 
 ## 출력
 
-- `stories-manifest.json` → `.imbas/<KEY>/runs/<run-id>/stories-manifest.json`
-
-## 사용 도구
-
-| 도구                                         | 출처             | 용도                             |
-| -------------------------------------------- | ---------------- | -------------------------------- |
-| `mcp__plugin_imbas_tools__run_get`           | imbas MCP        | 런 상태 로드                     |
-| `mcp__plugin_imbas_tools__run_transition`    | imbas MCP        | 단계 전이 (시작/완료/이스케이프) |
-| `mcp__plugin_imbas_tools__manifest_save`     | imbas MCP        | stories-manifest 저장            |
-| `mcp__plugin_imbas_tools__manifest_validate` | imbas MCP        | 매니페스트 유효성 검증           |
-| `[OP: get_issue]`                            | Jira ([OP:])     | Epic 존재 확인                   |
-| `planner`                                    | 에이전트(sonnet) | INVEST Story 분할                |
-| `analyst`                                    | 에이전트(sonnet) | 역추론 검증                      |
+- `stories-manifest.json` — 분할 결과이자 생성 원장 (`issue_ref`/`status`)
+- provider 이슈 (Jira/GitHub/local)
 
 ## 참고 파일
 
-- `references/workflow.md` — 워크플로우 상세
-- `references/preconditions.md` — 선행 조건
-- `references/state-transitions.md` — 상태 전이
-- `references/escape-conditions.md` — 이스케이프 코드 상세
+- `references/preconditions.md` — 전제조건 + estimate skip 흐름
+- `references/workflow.md` — 분할 워크플로우 (Step 1–7)
+- `references/creation-workflow.md` — 생성 워크플로우 (Step 8–11)
+- `references/escape-conditions.md` — 탈출 조건 (E2-x, EC-x)
+- `references/label-transitions.md` — 라이프사이클 라벨 규칙
+- `references/state-transitions.md` — 상태 전이와 출력
+- `references/tools.md` — 사용 도구·에이전트
 - `references/errors.md` — 에러 처리
-- `references/tools.md` — 사용 도구 상세
+- `references/{jira,github,local}/` — provider별 생성 상세

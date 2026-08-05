@@ -18,4 +18,4 @@ GET /rest/api/3/project
 ## Used By
 
 - `setup` — List available projects for selection
-- `cache` — Fetch project metadata for cache
+- `setup` — Fetch project metadata for cache

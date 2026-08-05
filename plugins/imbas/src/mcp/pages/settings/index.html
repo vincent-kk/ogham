@@ -25,7 +25,8 @@
         <p class="lede">
           Issue-pipeline settings for
           <code id="project-chip" title="Project root"></code> — provider,
-          project reference, lifecycle labels, and defaults.
+          project reference, lifecycle labels, defaults, and estimation
+          coefficients.
         </p>
         <p id="scope_hint" class="scope-hint"></p>
       </header>
@@ -218,7 +219,7 @@
                 data-label-key="review_pending"
                 type="text"
               />
-              <small class="help">Phase 2 complete</small>
+              <small class="help">Split decomposition complete</small>
             </label>
             <label class="field" for="label-review_complete">
               <span>review complete</span>
@@ -236,7 +237,7 @@
                 data-label-key="dev_waiting"
                 type="text"
               />
-              <small class="help">Phase 3.5 complete</small>
+              <small class="help">Issue creation complete</small>
             </label>
             <label class="field" for="label-dev_in_progress">
               <span>dev in progress</span>
@@ -324,9 +325,7 @@
           <summary class="section-summary">
             <span class="section-summary__label">
               <span class="section-title">Defaults</span>
-              <span class="section-summary__hint"
-                >agent models · subtask limits</span
-              >
+              <span class="section-summary__hint">agent models</span>
             </span>
             <svg
               class="section-chevron"
@@ -344,11 +343,20 @@
             </svg>
           </summary>
           <div class="field-grid">
-            <label class="field" for="model-validate">
-              <span>validate model</span>
+            <label class="field" for="model-refine">
+              <span>refine model</span>
               <input
-                id="model-validate"
-                data-model-key="validate"
+                id="model-refine"
+                data-model-key="refine"
+                type="text"
+                list="model-options"
+              />
+            </label>
+            <label class="field" for="model-estimate">
+              <span>estimate model</span>
+              <input
+                id="model-estimate"
+                data-model-key="estimate"
                 type="text"
                 list="model-options"
               />
@@ -362,67 +370,184 @@
                 list="model-options"
               />
             </label>
-            <label class="field" for="model-devplan">
-              <span>devplan model</span>
-              <input
-                id="model-devplan"
-                data-model-key="devplan"
-                type="text"
-                list="model-options"
-              />
-            </label>
             <datalist id="model-options">
               <option value="sonnet"></option>
               <option value="opus"></option>
               <option value="haiku"></option>
             </datalist>
-            <label class="field" for="limit-max_lines">
-              <span>subtask max lines</span>
+          </div>
+        </details>
+
+        <details class="section section--collapsible">
+          <summary class="section-summary">
+            <span class="section-summary__label">
+              <span class="section-title">Estimation</span>
+              <span class="section-summary__hint"
+                >team size · complexity baseline · buffers</span
+              >
+            </span>
+            <svg
+              class="section-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <p class="section-help">
+            Coefficients the estimate skill uses to turn a refined planning
+            document into man-days and a schedule.
+          </p>
+          <div class="field-grid">
+            <label class="field" for="est-team_size">
+              <span>team size</span>
               <input
-                id="limit-max_lines"
-                data-limit-key="max_lines"
+                id="est-team_size"
+                data-est-key="team_size"
                 type="number"
                 min="1"
                 step="1"
                 inputmode="numeric"
               />
+              <small class="help">Parallel tracks in the schedule</small>
               <small
                 class="error"
-                data-error-for="limit-max_lines"
+                data-error-for="est-team_size"
                 hidden
               ></small>
             </label>
-            <label class="field" for="limit-max_files">
-              <span>subtask max files</span>
+            <label class="field" for="est-manday_per_week">
+              <span>man-days / week</span>
               <input
-                id="limit-max_files"
-                data-limit-key="max_files"
+                id="est-manday_per_week"
+                data-est-key="available_manday_per_week"
                 type="number"
-                min="1"
-                step="1"
-                inputmode="numeric"
+                min="0.5"
+                step="0.5"
+                inputmode="decimal"
               />
+              <small class="help">Available man-days per person per week</small>
               <small
                 class="error"
-                data-error-for="limit-max_files"
+                data-error-for="est-manday_per_week"
                 hidden
               ></small>
             </label>
-            <label class="field" for="limit-review_hours">
-              <span>review hours</span>
+            <label class="field" for="est-buffer_ratio">
+              <span>buffer ratio</span>
               <input
-                id="limit-review_hours"
-                data-limit-key="review_hours"
+                id="est-buffer_ratio"
+                data-est-key="buffer_ratio"
                 type="number"
-                min="0.1"
-                step="0.1"
+                min="0"
+                step="0.05"
+                inputmode="decimal"
+              />
+              <small class="help">Final buffer applied to the total</small>
+              <small
+                class="error"
+                data-error-for="est-buffer_ratio"
+                hidden
+              ></small>
+            </label>
+            <label class="field" for="est-cx-S">
+              <span>baseline S</span>
+              <input
+                id="est-cx-S"
+                data-est-complexity="S"
+                type="number"
+                min="0.25"
+                step="0.25"
+                inputmode="decimal"
+              />
+              <small class="help">Man-days for an S unit</small>
+              <small class="error" data-error-for="est-cx-S" hidden></small>
+            </label>
+            <label class="field" for="est-cx-M">
+              <span>baseline M</span>
+              <input
+                id="est-cx-M"
+                data-est-complexity="M"
+                type="number"
+                min="0.25"
+                step="0.25"
+                inputmode="decimal"
+              />
+              <small class="help">Man-days for an M unit</small>
+              <small class="error" data-error-for="est-cx-M" hidden></small>
+            </label>
+            <label class="field" for="est-cx-L">
+              <span>baseline L</span>
+              <input
+                id="est-cx-L"
+                data-est-complexity="L"
+                type="number"
+                min="0.25"
+                step="0.25"
+                inputmode="decimal"
+              />
+              <small class="help">Man-days for an L unit</small>
+              <small class="error" data-error-for="est-cx-L" hidden></small>
+            </label>
+            <label class="field" for="est-cx-XL">
+              <span>baseline XL</span>
+              <input
+                id="est-cx-XL"
+                data-est-complexity="XL"
+                type="number"
+                min="0.25"
+                step="0.25"
+                inputmode="decimal"
+              />
+              <small class="help">Man-days for an XL unit</small>
+              <small class="error" data-error-for="est-cx-XL" hidden></small>
+            </label>
+            <label class="field" for="est-oh-integration">
+              <span>overhead: integration</span>
+              <input
+                id="est-oh-integration"
+                data-est-overhead="integration"
+                type="number"
+                min="0"
+                step="0.05"
                 inputmode="decimal"
               />
               <small
                 class="error"
-                data-error-for="limit-review_hours"
+                data-error-for="est-oh-integration"
                 hidden
               ></small>
+            </label>
+            <label class="field" for="est-oh-test">
+              <span>overhead: test</span>
+              <input
+                id="est-oh-test"
+                data-est-overhead="test"
+                type="number"
+                min="0"
+                step="0.05"
+                inputmode="decimal"
+              />
+              <small class="error" data-error-for="est-oh-test" hidden></small>
+            </label>
+            <label class="field" for="est-oh-pm">
+              <span>overhead: pm</span>
+              <input
+                id="est-oh-pm"
+                data-est-overhead="pm"
+                type="number"
+                min="0"
+                step="0.05"
+                inputmode="decimal"
+              />
+              <small class="error" data-error-for="est-oh-pm" hidden></small>
             </label>
           </div>
         </details>

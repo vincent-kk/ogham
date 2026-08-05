@@ -10,7 +10,7 @@ import { getRunDir } from '../../../core/paths/index.js';
 export interface ManifestValidateInput {
   project_ref: string;
   run_id: string;
-  type: 'stories' | 'devplan' | 'implement-plan';
+  type: 'stories' | 'estimation';
   project_root?: string;
 }
 

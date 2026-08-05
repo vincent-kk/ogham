@@ -21,5 +21,5 @@ POST /rest/api/3/issue/{issueIdOrKey}/comment
 
 ## Used By
 
-- `manifest` — Post B→A feedback comments to Story issues
+- `split` — Post estimation/creation notes to issues
 - `digest` — Post formatted digest comment

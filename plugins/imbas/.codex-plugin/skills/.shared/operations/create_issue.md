@@ -33,4 +33,4 @@ POST /rest/api/3/issue
 
 ## Used By
 
-- `manifest` — Batch creation of Epics, Stories, Tasks, Sub-tasks
+- `split` — Batch creation of Epics, Stories, Tasks

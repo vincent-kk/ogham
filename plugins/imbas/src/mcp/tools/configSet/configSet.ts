@@ -4,11 +4,7 @@
  */
 import { projectRoot } from '@ogham/cross-platform';
 
-import {
-  applyConfigUpdates,
-  loadConfig,
-  saveConfig,
-} from '../../../core/configManager/index.js';
+import { updateConfigLayer } from '../../../core/configManager/index.js';
 
 export interface ConfigSetInput {
   updates: Record<string, unknown>;
@@ -22,11 +18,8 @@ export interface ConfigSetInput {
 
 export async function handleConfigSet(input: ConfigSetInput) {
   const cwd = projectRoot(input.project_root);
-  // Updates apply to the effective config, then land in the named layer —
-  // which means writing to `user` while a project layer overrides a field
-  // records the merged value. That is the same thing the settings page does.
-  const config = await loadConfig(cwd);
-  const updated = applyConfigUpdates(config, input.updates);
-  await saveConfig(cwd, input.scope, updated);
-  return updated;
+  // Updates land in the named layer's own document only — values inherited
+  // from the other layer never bake into the file, so later user-layer edits
+  // keep flowing into this workspace.
+  return updateConfigLayer(cwd, input.scope, input.updates);
 }

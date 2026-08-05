@@ -26,7 +26,7 @@ interface RunGetInput {
 
 - MCP `inputSchema` 의 세 필드가 모두 optional 이다 — 인자 없는 호출이 정상 경로다.
 - 최신 실행 선택은 `readdirSync(runsDir).sort()` 의 마지막 항목이다. `run_id` 가 `YYYYMMDD-NNN` 고정폭이라 사전순이 곧 생성순이며, 이 등가는 ID 형식에 의존한다.
-- `manifests_available` — `MANIFEST_FILE_MAP` 의 키(`stories`·`devplan`·`implement-plan`) 중 해당 파일이 실행 디렉터리에 실재하는 것들이다. 파일 내용은 읽지 않으므로 존재 여부만 말한다.
+- `manifests_available` — `MANIFEST_FILE_MAP` 의 키(`stories`·`estimation`) 중 해당 파일이 실행 디렉터리에 실재하는 것들이다. 파일 내용은 읽지 않으므로 존재 여부만 말한다.
 - 실패 — `project_ref` 를 인자로도 설정으로도 얻지 못하면 `project_ref is required (or set defaults.project_ref in config)`; runs 디렉터리가 없으면 `No runs directory found for project: <ref>`; 비어 있으면 `No runs found for project: <ref>`; `state.json` 부재·스키마 불일치는 `loadRunState` 오류로 올라온다.
 - 배럴은 `handleRunGet` 만 노출한다.
 

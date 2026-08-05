@@ -66,7 +66,7 @@ Field reference:
 
 The `imbas:digest` skill is suggested (never auto-executed) when ALL of:
 
-1. `imbas:manifest` closes an issue via `gh issue close --reason completed`.
+1. `imbas:split` closes an issue via `gh issue close --reason completed`.
 2. The issue has ≥ 3 comments.
 3. Comments are from ≥ 2 distinct `author.login` values.
 

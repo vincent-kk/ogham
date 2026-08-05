@@ -1,26 +1,25 @@
 /**
  * @file manifestParser.ts
  * @description Manifest loading + summary generation
- * @see `agents/planner.md` (stories-manifest), `agents/engineer.md` (devplan-manifest)
+ * @see .metadata/imbas/storage.md §4, .metadata/imbas/estimation.md §2.1
  */
 import { join } from 'node:path';
 
 import { MANIFEST_FILE_MAP } from '../../constants/index.js';
 import { readJson } from '../../lib/fileIo.js';
 import {
-  DevplanManifestSchema,
-  ImplementPlanManifestSchema,
+  EstimationManifestSchema,
   StoriesManifestSchema,
 } from '../../types/manifest.js';
 import type {
-  DevplanManifest,
-  ImplementPlanManifest,
-  ImplementPlanSummary,
+  EstimationManifest,
+  EstimationSummary,
   ManifestSummary,
+  ManifestType,
   StoriesManifest,
 } from '../../types/manifest.js';
 
-export type ManifestType = 'stories' | 'devplan' | 'implement-plan';
+export type { ManifestType } from '../../types/manifest.js';
 
 /** Load and validate a manifest file from runDir */
 export async function loadManifest(
@@ -29,16 +28,12 @@ export async function loadManifest(
 ): Promise<StoriesManifest>;
 export async function loadManifest(
   runDir: string,
-  type: 'devplan',
-): Promise<DevplanManifest>;
-export async function loadManifest(
-  runDir: string,
-  type: 'implement-plan',
-): Promise<ImplementPlanManifest>;
+  type: 'estimation',
+): Promise<EstimationManifest>;
 export async function loadManifest(
   runDir: string,
   type: ManifestType,
-): Promise<StoriesManifest | DevplanManifest | ImplementPlanManifest> {
+): Promise<StoriesManifest | EstimationManifest> {
   const filename = MANIFEST_FILE_MAP[type];
   const filePath = join(runDir, filename);
 
@@ -46,66 +41,29 @@ export async function loadManifest(
     const raw = await readJson(filePath, StoriesManifestSchema);
     return raw as StoriesManifest;
   }
-  if (type === 'devplan') {
-    const raw = await readJson(filePath, DevplanManifestSchema);
-    return raw as DevplanManifest;
-  }
-  const raw = await readJson(filePath, ImplementPlanManifestSchema);
-  return raw as ImplementPlanManifest;
+  const raw = await readJson(filePath, EstimationManifestSchema);
+  return raw as EstimationManifest;
 }
 
-/** Generate a ManifestSummary from a loaded stories or devplan manifest */
-export function getManifestSummary(
-  manifest: StoriesManifest | DevplanManifest,
-): ManifestSummary {
-  const items = collectItems(manifest);
+/** Generate a ManifestSummary from a loaded stories manifest */
+export function getManifestSummary(manifest: StoriesManifest): ManifestSummary {
+  const statuses = manifest.stories.map((s) => s.status);
   return {
-    total: items.length,
-    pending: items.filter((s) => s === 'pending').length,
-    created: items.filter((s) => s === 'created').length,
-    failed: items.filter((s) => s === 'failed').length,
+    total: statuses.length,
+    pending: statuses.filter((s) => s === 'pending').length,
+    created: statuses.filter((s) => s === 'created').length,
+    failed: statuses.filter((s) => s === 'failed').length,
   };
 }
 
-/** Generate a summary from a loaded implement-plan manifest */
-export function getImplementPlanSummary(
-  manifest: ImplementPlanManifest,
-): ImplementPlanSummary {
-  let totalItems = 0;
-  let maxLevel = -1;
-  for (const group of manifest.groups) {
-    totalItems += group.items.length;
-    if (group.level > maxLevel) maxLevel = group.level;
-  }
+/** Generate a summary from a loaded estimation manifest */
+export function getEstimationSummary(
+  manifest: EstimationManifest,
+): EstimationSummary {
   return {
-    total_groups: manifest.groups.length,
-    total_items: totalItems,
-    max_level: maxLevel < 0 ? 0 : maxLevel,
-    unresolved: manifest.unresolved.length,
-    cycles_broken: manifest.cycles_broken.length,
-    degraded: manifest.degraded,
+    units: manifest.units.length,
+    sum_expected: manifest.rollup.sum_expected,
+    buffered_total: manifest.rollup.buffered_total,
+    total_weeks: manifest.schedule.total_weeks,
   };
-}
-
-// --- Helpers ---
-
-function collectItems(manifest: StoriesManifest | DevplanManifest): string[] {
-  const statuses: string[] = [];
-
-  if ('stories' in manifest)
-    // StoriesManifest
-    for (const story of manifest.stories) statuses.push(story.status);
-  else {
-    // DevplanManifest
-    for (const task of manifest.tasks) {
-      statuses.push(task.status);
-      for (const subtask of task.subtasks) statuses.push(subtask.status);
-    }
-    for (const ss of manifest.story_subtasks)
-      for (const subtask of ss.subtasks) statuses.push(subtask.status);
-
-    for (const fc of manifest.feedback_comments) statuses.push(fc.status);
-  }
-
-  return statuses;
 }

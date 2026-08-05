@@ -27,26 +27,44 @@ export const LanguageConfigSchema = z.object({
 export type LanguageConfig = z.infer<typeof LanguageConfigSchema>;
 
 export const LlmModelConfigSchema = z.object({
-  validate: z.string().default('sonnet'),
+  refine: z.string().default('sonnet'),
+  estimate: z.string().default('opus'),
   split: z.string().default('sonnet'),
-  devplan: z.string().default('opus'),
 });
 export type LlmModelConfig = z.infer<typeof LlmModelConfigSchema>;
-
-export const SubtaskLimitsSchema = z.object({
-  max_lines: z.number().int().positive().default(200),
-  max_files: z.number().int().positive().default(10),
-  review_hours: z.number().positive().default(1),
-});
-export type SubtaskLimits = z.infer<typeof SubtaskLimitsSchema>;
 
 export const DefaultsConfigSchema = z.object({
   project_ref: z.string().nullable().default(null),
   codebase: z.string().nullable().default(null),
   llm_model: LlmModelConfigSchema.default({}),
-  subtask_limits: SubtaskLimitsSchema.default({}),
 });
 export type DefaultsConfig = z.infer<typeof DefaultsConfigSchema>;
+
+/**
+ * Man-day estimation coefficients consumed by the estimate skill.
+ * @see .metadata/imbas/estimation.md §3
+ */
+export const EstimationConfigSchema = z.object({
+  team_size: z.number().int().positive().default(2),
+  available_manday_per_week: z.number().positive().default(5),
+  complexity_baseline: z
+    .object({
+      S: z.number().positive().default(1),
+      M: z.number().positive().default(3),
+      L: z.number().positive().default(8),
+      XL: z.number().positive().default(20),
+    })
+    .default({}),
+  overhead_ratio: z
+    .object({
+      integration: z.number().nonnegative().default(0.1),
+      test: z.number().nonnegative().default(0.15),
+      pm: z.number().nonnegative().default(0.05),
+    })
+    .default({}),
+  buffer_ratio: z.number().nonnegative().default(0.2),
+});
+export type EstimationConfig = z.infer<typeof EstimationConfigSchema>;
 
 export const JiraIssueTypesSchema = z.object({
   epic: z.string().default('Epic'),
@@ -123,10 +141,11 @@ export const LabelsConfigSchema = z.object({
 export type LabelsConfig = z.infer<typeof LabelsConfigSchema>;
 
 export const ImbasConfigSchema = z.object({
-  version: z.string().default('1.0'),
+  version: z.string().default('2.0'),
   provider: ProviderSchema.default('jira'),
   language: LanguageConfigSchema.default({}),
   defaults: DefaultsConfigSchema.default({}),
+  estimation: EstimationConfigSchema.default({}),
   labels: LabelsConfigSchema.default({}),
   jira: JiraConfigSchema.default({}),
   github: GithubConfigSchema.optional(),

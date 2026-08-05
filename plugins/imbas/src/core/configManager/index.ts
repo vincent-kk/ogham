@@ -4,7 +4,6 @@ export {
   loadConfigByScope,
   loadConfigScope,
   saveConfig,
+  updateConfigLayer,
   getConfigValue,
-  setConfigValue,
-  applyConfigUpdates,
 } from './configManager.js';

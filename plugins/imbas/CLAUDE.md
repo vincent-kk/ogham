@@ -1,9 +1,9 @@
 # CLAUDE.md — @ogham/imbas
 
-현재 계약은 [INTENT.md](./INTENT.md), 소스 경계는 [src/INTENT.md](./src/INTENT.md), provider별 계약은 [`.metadata/imbas/specs/`](../../.metadata/imbas/specs/)를 따른다.
+The current contract is [INTENT.md](./INTENT.md); source boundaries are [src/INTENT.md](./src/INTENT.md); the behavior spec is the [`.metadata/imbas/`](../../.metadata/imbas/README.md) v2 document set (spec·skills·estimation·mcp-tools·storage·architecture).
 
 ## Pipeline continuity
 
-- 다단계 skill은 상단 `EXECUTION MODEL`에서 연속 실행을 선언하고 MCP·subagent·provider 작업의 반환 뒤 같은 turn에서 다음 단계로 이어간다.
-- `manifest-stories` 완료에서 `devplan` 시작으로 넘어가는 경계는 별도 inline callout을 유지한다. 중간 산출물 요약으로 turn을 끝내지 않는다.
-- skill이 provider 하나를 실행할 때 다른 provider의 `references/`를 읽지 않는다. 공통 계약만 provider 중립 경로에 둔다.
+- Multi-stage skills declare continuous execution in their top `EXECUTION MODEL` and, after each MCP, subagent, or provider return, continue to the next stage in the same turn. Never end a turn on an intermediate-artifact summary.
+- The pipeline is `refine → estimate (skippable) → split`. Inside `split`, the decompose → approval-gate → create sequence is one continuous flow: after the user approves the stories manifest, creation starts in the same turn, and per-item `issue_ref`/`status` is recorded immediately after each provider write.
+- When a skill executes one provider it must not read another provider's `references/`. Provider-neutral contracts live only on provider-neutral paths; Jira interactions are expressed as `[OP:<name>]` semantic operations resolved against the session's Atlassian tools.

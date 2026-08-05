@@ -14,9 +14,14 @@ export function handleCompletePhase(
       `Cannot complete phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
     );
 
-  if (phase === 'validate' && action.result === undefined)
+  if (phase === 'refine' && action.result === undefined)
     throw new Error(
-      'complete_phase(validate) requires "result" (PASS | PASS_WITH_WARNINGS | BLOCKED)',
+      'complete_phase(refine) requires "result" (PASS | PASS_WITH_WARNINGS | BLOCKED)',
+    );
+
+  if (phase === 'estimate' && action.estimated_manday === undefined)
+    throw new Error(
+      'complete_phase(estimate) requires "estimated_manday" (buffered total man-days)',
     );
 
   const updated = structuredClone(state);

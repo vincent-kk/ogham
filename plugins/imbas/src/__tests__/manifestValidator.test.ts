@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { validateManifest } from '../core/manifestValidator/index.js';
-import type { DevplanManifest, StoriesManifest } from '../types/manifest.js';
+import type { EstimationManifest, StoriesManifest } from '../types/manifest.js';
 
 const dirs: string[] = [];
 
@@ -30,97 +30,90 @@ function writeStoriesManifest(runDir: string, manifest: StoriesManifest): void {
   );
 }
 
-function writeDevplanManifest(runDir: string, manifest: DevplanManifest): void {
+function writeEstimationManifest(
+  runDir: string,
+  manifest: EstimationManifest,
+): void {
   writeFileSync(
-    join(runDir, 'devplan-manifest.json'),
+    join(runDir, 'estimation.json'),
     JSON.stringify(manifest),
     'utf-8',
   );
 }
 
+function makeStory(id: string, title: string): StoriesManifest['stories'][0] {
+  return {
+    id,
+    title,
+    description: `${title} desc`,
+    type: 'Story',
+    status: 'pending',
+    issue_ref: null,
+    labels: [],
+    verification: {
+      anchor_link: true,
+      coherence: 'PASS',
+      reverse_inference: 'PASS',
+    },
+    size_check: 'PASS',
+    split_from: null,
+    split_into: [],
+    estimate_manday: null,
+  };
+}
+
 const baseStoriesManifest: StoriesManifest = {
+  version: 2,
   batch: 'batch-001',
   run_id: '20240101-001',
   project_ref: 'PROJ',
   epic_ref: null,
   created_at: '2024-01-01T00:00:00.000Z',
-  stories: [
-    {
-      id: 'S-001',
-      title: 'Story 1',
-      description: 'Desc 1',
-      type: 'Story',
-      status: 'pending',
-      issue_ref: null,
-      labels: [],
-      verification: {
-        anchor_link: true,
-        coherence: 'PASS',
-        reverse_inference: 'PASS',
-      },
-      size_check: 'PASS',
-      split_from: null,
-      split_into: [],
-    },
-    {
-      id: 'S-002',
-      title: 'Story 2',
-      description: 'Desc 2',
-      type: 'Story',
-      status: 'pending',
-      issue_ref: null,
-      labels: [],
-      verification: {
-        anchor_link: true,
-        coherence: 'PASS',
-        reverse_inference: 'PASS',
-      },
-      size_check: 'PASS',
-      split_from: null,
-      split_into: [],
-    },
-  ],
+  stories: [makeStory('S-001', 'Story 1'), makeStory('S-002', 'Story 2')],
   links: [],
   transitions: [],
 };
 
-const baseDevplanManifest: DevplanManifest = {
-  batch: 'batch-001',
+function makeUnit(
+  id: string,
+  deps: string[] = [],
+): EstimationManifest['units'][0] {
+  return {
+    id,
+    name: `Unit ${id}`,
+    view_refs: { page: [], feature: [`feat-${id}`], module: [] },
+    single_view: false,
+    complexity: 'M',
+    estimate: { o: 1, m: 3, p: 5, expected: 3, sigma: 0.67 },
+    rationale: 'baseline',
+    deps,
+  };
+}
+
+const baseEstimationManifest: EstimationManifest = {
+  version: 1,
   run_id: '20240101-001',
   project_ref: 'PROJ',
-  epic_ref: null,
+  source: 'refined.md',
   created_at: '2024-01-01T00:00:00.000Z',
-  tasks: [
-    {
-      id: 'T-001',
-      title: 'Task 1',
-      description: 'Task desc',
-      type: 'Task',
-      status: 'pending',
-      issue_ref: null,
-      labels: [],
-      blocks: [],
-      subtasks: [
-        {
-          id: 'ST-001',
-          title: 'Sub 1',
-          description: 'Sub desc',
-          status: 'pending',
-          issue_ref: null,
-          labels: [],
-        },
-      ],
-    },
-  ],
-  story_subtasks: [],
-  feedback_comments: [],
-  execution_order: [
-    { step: 1, action: 'create_tasks', items: ['T-001'] },
-    { step: 2, action: 'create_task_subtasks', items: ['ST-001'] },
-  ],
+  config_used: {},
+  units: [makeUnit('U-1'), makeUnit('U-2', ['U-1'])],
+  rollup: {
+    sum_expected: 6,
+    overhead: { integration: 0.6, test: 0.9, pm: 0.3 },
+    buffered_total: 9.4,
+    confidence_interval: [7.5, 11.2],
+  },
+  schedule: {
+    tracks: [{ track: 1, units: ['U-1', 'U-2'] }],
+    milestones: [{ name: 'done', week: 2 }],
+    total_weeks: 2,
+  },
+  assumptions: [],
+  risks: [],
 };
 
-// --- Basic (3) ---
+// --- Basic ---
 
 describe('validateManifest stories', () => {
   it('valid stories manifest passes with no errors', async () => {
@@ -133,12 +126,12 @@ describe('validateManifest stories', () => {
   });
 });
 
-describe('validateManifest devplan', () => {
-  it('valid devplan manifest passes with no errors', async () => {
+describe('validateManifest estimation', () => {
+  it('valid estimation manifest passes with no errors', async () => {
     const runDir = makeTempDir();
-    writeDevplanManifest(runDir, baseDevplanManifest);
+    writeEstimationManifest(runDir, baseEstimationManifest);
 
-    const result = await validateManifest(runDir, 'devplan');
+    const result = await validateManifest(runDir, 'estimation');
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
@@ -153,7 +146,7 @@ describe('validateManifest missing file', () => {
   });
 });
 
-// --- Complex (12) ---
+// --- Stories errors ---
 
 describe('stories manifest validation errors', () => {
   it('detects duplicate story IDs', async () => {
@@ -238,51 +231,94 @@ describe('stories manifest validation errors', () => {
   });
 });
 
-describe('devplan manifest validation errors', () => {
-  it('detects execution_order referencing invalid IDs', async () => {
+// --- Estimation errors ---
+
+describe('estimation manifest validation errors', () => {
+  it('detects duplicate unit IDs', async () => {
     const runDir = makeTempDir();
-    const manifest: DevplanManifest = {
-      ...baseDevplanManifest,
-      execution_order: [
-        { step: 1, action: 'create_tasks', items: ['T-001', 'T-UNKNOWN'] },
-      ],
+    const manifest: EstimationManifest = {
+      ...baseEstimationManifest,
+      units: [makeUnit('U-1'), makeUnit('U-1')],
+      schedule: { tracks: [], milestones: [], total_weeks: 2 },
     };
-    writeDevplanManifest(runDir, manifest);
+    writeEstimationManifest(runDir, manifest);
 
-    const result = await validateManifest(runDir, 'devplan');
+    const result = await validateManifest(runDir, 'estimation');
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes('"T-UNKNOWN"'))).toBe(true);
-  });
-
-  it('detects duplicate task IDs', async () => {
-    const runDir = makeTempDir();
-    const manifest: DevplanManifest = {
-      ...baseDevplanManifest,
-      tasks: [
-        baseDevplanManifest.tasks[0]!,
-        { ...baseDevplanManifest.tasks[0]!, subtasks: [] },
-      ],
-      execution_order: [],
-    };
-    writeDevplanManifest(runDir, manifest);
-
-    const result = await validateManifest(runDir, 'devplan');
-    expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes('Duplicate task ID'))).toBe(
+    expect(result.errors.some((e) => e.includes('Duplicate unit ID'))).toBe(
       true,
     );
   });
 
-  it('produces warning for task.blocks referencing unknown task ID', async () => {
+  it('detects deps referencing unknown unit IDs', async () => {
     const runDir = makeTempDir();
-    const manifest: DevplanManifest = {
-      ...baseDevplanManifest,
-      tasks: [{ ...baseDevplanManifest.tasks[0]!, blocks: ['T-UNKNOWN'] }],
-      execution_order: [{ step: 1, action: 'create_tasks', items: ['T-001'] }],
+    const manifest: EstimationManifest = {
+      ...baseEstimationManifest,
+      units: [makeUnit('U-1', ['U-404'])],
+      schedule: { tracks: [], milestones: [], total_weeks: 2 },
     };
-    writeDevplanManifest(runDir, manifest);
+    writeEstimationManifest(runDir, manifest);
 
-    const result = await validateManifest(runDir, 'devplan');
-    expect(result.warnings.some((w) => w.includes('T-UNKNOWN'))).toBe(true);
+    const result = await validateManifest(runDir, 'estimation');
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('"U-404"'))).toBe(true);
+  });
+
+  it('detects a unit scheduled in multiple tracks', async () => {
+    const runDir = makeTempDir();
+    const manifest: EstimationManifest = {
+      ...baseEstimationManifest,
+      schedule: {
+        tracks: [
+          { track: 1, units: ['U-1'] },
+          { track: 2, units: ['U-1', 'U-2'] },
+        ],
+        milestones: [],
+        total_weeks: 2,
+      },
+    };
+    writeEstimationManifest(runDir, manifest);
+
+    const result = await validateManifest(runDir, 'estimation');
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.includes('scheduled in multiple tracks')),
+    ).toBe(true);
+  });
+
+  it('detects an inverted confidence interval', async () => {
+    const runDir = makeTempDir();
+    const manifest: EstimationManifest = {
+      ...baseEstimationManifest,
+      rollup: {
+        ...baseEstimationManifest.rollup,
+        confidence_interval: [11.2, 7.5],
+      },
+    };
+    writeEstimationManifest(runDir, manifest);
+
+    const result = await validateManifest(runDir, 'estimation');
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('inverted'))).toBe(true);
+  });
+
+  it('warns for milestones beyond total_weeks and unknown risk units', async () => {
+    const runDir = makeTempDir();
+    const manifest: EstimationManifest = {
+      ...baseEstimationManifest,
+      schedule: {
+        ...baseEstimationManifest.schedule,
+        milestones: [{ name: 'late', week: 5 }],
+      },
+      risks: [{ unit: 'U-404', risk: 'unknown', impact: 'low' }],
+    };
+    writeEstimationManifest(runDir, manifest);
+
+    const result = await validateManifest(runDir, 'estimation');
+    expect(result.valid).toBe(true);
+    expect(result.warnings.some((w) => w.includes('beyond total_weeks'))).toBe(
+      true,
+    );
+    expect(result.warnings.some((w) => w.includes('U-404'))).toBe(true);
   });
 });

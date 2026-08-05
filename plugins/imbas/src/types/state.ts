@@ -1,7 +1,7 @@
 /**
  * @file state.ts
  * @description Zod schemas for imbas pipeline state (state.json)
- * @see skills/validate/references/state-transitions.md, skills/split/references/state-transitions.md
+ * @see .metadata/imbas/storage.md §3 — refine → estimate(skippable) → split
  */
 import { z } from 'zod';
 
@@ -11,11 +11,12 @@ export const PhaseStatusSchema = z.enum([
   'pending',
   'in_progress',
   'completed',
+  'skipped',
   'escaped',
 ]);
 export type PhaseStatus = z.infer<typeof PhaseStatusSchema>;
 
-export const PhaseNameSchema = z.enum(['validate', 'split', 'devplan']);
+export const PhaseNameSchema = z.enum(['refine', 'estimate', 'split']);
 export type PhaseName = z.infer<typeof PhaseNameSchema>;
 
 export const ValidateResultSchema = z.enum([
@@ -36,42 +37,38 @@ export type EscapeCode = z.infer<typeof EscapeCodeSchema>;
 
 // --- Phase Data ---
 
-export const ValidatePhaseSchema = z.object({
+export const RefinePhaseSchema = z.object({
   status: PhaseStatusSchema,
   started_at: z.string().nullable(),
   completed_at: z.string().nullable(),
-  output: z.literal('validation-report.md'),
   result: ValidateResultSchema.nullable(),
   blocking_issues: z.number().int().nonnegative().default(0),
   warning_issues: z.number().int().nonnegative().default(0),
 });
-export type ValidatePhase = z.infer<typeof ValidatePhaseSchema>;
+export type RefinePhase = z.infer<typeof RefinePhaseSchema>;
+
+export const EstimatePhaseSchema = z.object({
+  status: PhaseStatusSchema,
+  started_at: z.string().nullable(),
+  completed_at: z.string().nullable(),
+  estimated_manday: z.number().nonnegative().nullable().default(null),
+});
+export type EstimatePhase = z.infer<typeof EstimatePhaseSchema>;
 
 export const SplitPhaseSchema = z.object({
   status: PhaseStatusSchema,
   started_at: z.string().nullable(),
   completed_at: z.string().nullable(),
-  output: z.literal('stories-manifest.json'),
   stories_created: z.number().int().nonnegative().default(0),
   pending_review: z.boolean().default(true),
   escape_code: EscapeCodeSchema.nullable().default(null),
 });
 export type SplitPhase = z.infer<typeof SplitPhaseSchema>;
 
-export const DevplanPhaseSchema = z.object({
-  status: PhaseStatusSchema,
-  started_at: z.string().nullable(),
-  completed_at: z.string().nullable(),
-  output: z.literal('devplan-manifest.json'),
-  result: ValidateResultSchema.nullable().default(null),
-  pending_review: z.boolean().default(true),
-});
-export type DevplanPhase = z.infer<typeof DevplanPhaseSchema>;
-
 export const PhasesSchema = z.object({
-  validate: ValidatePhaseSchema,
+  refine: RefinePhaseSchema,
+  estimate: EstimatePhaseSchema,
   split: SplitPhaseSchema,
-  devplan: DevplanPhaseSchema,
 });
 export type Phases = z.infer<typeof PhasesSchema>;
 
@@ -87,11 +84,6 @@ export const RunStateSchema = z.object({
   updated_at: z.string(),
   current_phase: PhaseNameSchema,
   phases: PhasesSchema,
-  metadata: z
-    .object({
-      skipped_phases: z.array(PhaseNameSchema).optional(),
-    })
-    .optional(),
 });
 export type RunState = z.infer<typeof RunStateSchema>;
 
@@ -113,6 +105,7 @@ export const CompletePhaseActionSchema = z.object({
   result: ValidateResultSchema.optional(),
   blocking_issues: z.number().int().nonnegative().optional(),
   warning_issues: z.number().int().nonnegative().optional(),
+  estimated_manday: z.number().nonnegative().optional(),
   pending_review: z.boolean().optional(),
   stories_created: z.number().int().nonnegative().optional(),
   project_root: z.string().optional(),
@@ -127,7 +120,7 @@ export const EscapePhaseActionSchema = z.object({
   project_root: z.string().optional(),
 });
 
-export const SkippablePhaseSchema = z.enum(['validate', 'split']);
+export const SkippablePhaseSchema = z.enum(['estimate']);
 
 export const SkipPhasesActionSchema = z.object({
   project_ref: z.string(),

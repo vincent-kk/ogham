@@ -23,4 +23,4 @@ Only include fields that need to change. Unmentioned fields are preserved.
 
 ## Used By
 
-- `manifest` — Update issue fields after creation (e.g., horizontal split)
+- `split` — Update issue fields after creation (e.g., horizontal split)

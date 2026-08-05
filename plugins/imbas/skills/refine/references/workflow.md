@@ -1,0 +1,108 @@
+# refine — Workflow
+
+```
+Step 1 — Run Initialization
+  1. Load config.json via mcp__plugin_imbas_tools__config_get.
+  2. Determine project key: --project argument > config.defaults.project_ref.
+     If neither available → error: "No project key. Run /imbas:setup or pass --project."
+  3. Call mcp__plugin_imbas_tools__run_create with:
+     - project_ref: <determined key>
+     - source_file: <source path>
+     - supplements: <supplement paths array> (if provided)
+     → Returns: run_id, run_dir, initial state
+  4. Side effects of mcp__plugin_imbas_tools__run_create:
+     - Creates .imbas/<KEY>/runs/<YYYYMMDD-NNN>/ directory
+     - Copies source document → source.md (immutable copy principle)
+     - Copies supplements → supplements/ directory
+     - Initializes state.json (current_phase: "refine", all phases: "pending")
+  5. Call mcp__plugin_imbas_tools__run_transition with:
+     - project_ref, run_id, action: "start_phase", phase: "refine"
+     → Sets refine.status = "in_progress", refine.started_at = now()
+
+Step 2 — Document Source Resolution
+  - Local file (*.md, *.txt):
+    - Already copied to source.md by mcp__plugin_imbas_tools__run_create. Read directly.
+  - Confluence URL:
+    - [OP: get_confluence] page_id=<extracted from URL>
+    - Convert response to markdown and save as source.md in run directory.
+    - If page contains embedded media (images, videos):
+      → Display: "Media attachments detected. Run /atlassian:media-analysis to include visual context."
+      → Do NOT auto-invoke media-analysis.
+  - If source contains references to other Confluence pages:
+    - [OP: search_confluence] to resolve references.
+    - Save referenced content as supplements.
+
+Step 3 — analyst Agent Spawn
+  - Spawn agent via Task tool (subagent_type: "imbas:analyst")
+  - Model: config.defaults.llm_model.refine (default: "sonnet")
+  - Input provided to agent:
+    - source.md (full content)
+    - supplements/*.md (all supplement files)
+    - config.json language settings
+  - Agent instructions:
+    "Perform 5-type validation on the provided planning document:
+     1. Contradictions (모순): statements that conflict with each other
+     2. Divergences (이격): requirements that drift from stated goals
+     3. Omissions (누락): missing requirements implied but not stated
+     4. Logical infeasibilities (논리적 불능): technically impossible requirements
+     5. Testability (테스트 가능성): requirements lacking measurable acceptance criteria
+
+     For each issue found, classify as BLOCKING or WARNING:
+     - BLOCKING: prevents meaningful estimation or story splitting (must be resolved first)
+     - WARNING: can proceed but should be addressed
+     Severity boundary: an undecided or ambiguous detail that a single story
+     could absorb with a stated assumption is WARNING, not BLOCKING. Reserve
+     BLOCKING for gaps that leave no reasonable assumption to estimate or
+     split by — the core deliverable is undefined, or two requirements cannot
+     both be built. When uncertain, choose WARNING.
+
+     Then, unless BLOCKING issues exist, RESTRUCTURE the document into refined.md
+     with the standard sections, in config.language.documents:
+       ## Background / ## Goals / ## Scope / ## User flows /
+       ## Feature specs / ## Policies / ## Acceptance criteria / ## Non-goals
+     Rules for refined.md:
+     - Preserve every requirement's meaning — reorganize, deduplicate, and title;
+       never invent requirements. Unclear items go under the section they most
+       plausibly belong to, marked with '> [unclear]' quoting the original text.
+     - WARNING findings are annotated inline as '> [warning] <finding id>'.
+
+     Output: validation-report.md always; refined.md unless BLOCKED."
+  - Agent returns: report + refined document content. Skill saves both to the run directory.
+
+Step 4 — Result Evaluation Gate
+  Parse validation-report.md and determine result:
+
+  - BLOCKING issues exist (count > 0):
+    → result = "BLOCKED"
+    → Display blocking issues list to user
+    → Message: "Refine result: BLOCKED. Resolve the above issues in the source document, then re-run /imbas:refine."
+
+  - No BLOCKING, but WARNING issues exist:
+    → result = "PASS_WITH_WARNINGS"
+    → Display warning issues list to user
+    → Message: "Refine result: PASS_WITH_WARNINGS. refined.md written. Next: /imbas:estimate (optional) or /imbas:split."
+
+  - No issues found:
+    → result = "PASS"
+    → Message: "Refine result: PASS. refined.md written. Next: /imbas:estimate (optional) or /imbas:split."
+
+Step 5 — State Update
+  Call mcp__plugin_imbas_tools__run_transition with:
+  - project_ref, run_id
+  - action: "complete_phase"
+  - phase: "refine"
+  - result: "PASS" | "PASS_WITH_WARNINGS" | "BLOCKED"
+  - blocking_issues: <count>
+  - warning_issues: <count>
+
+  → Sets refine.status = "completed", refine.completed_at = now()
+  → Advances current_phase to "estimate" unless BLOCKED
+
+  Display run summary:
+  - Run ID: <run-id>
+  - Project: <KEY>
+  - Result: <result>
+  - Blocking: <count>, Warnings: <count>
+  - Next step guidance: /imbas:estimate for man-day estimation, or /imbas:split
+    to go straight to issue decomposition (split will offer to skip estimate).
+```

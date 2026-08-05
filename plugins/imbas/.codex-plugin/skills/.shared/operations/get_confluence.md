@@ -24,4 +24,4 @@ GET /wiki/api/v2/pages/{pageId}?body-format=storage
 
 ## Used By
 
-- `validate` — Fetch Confluence page content when source is a URL
+- `refine` — Fetch Confluence page content when source is a URL

@@ -3,7 +3,7 @@
 ## show
 
 1. Call `mcp__plugin_imbas_tools__config_get` (no field — returns full config).
-2. For each configured project key, call `mcp__plugin_imbas_tools__cache_get` with `cache_type: "all"`.
+2. For each configured project key, Read `.imbas/<KEY>/cache/cached_at.json` and list the cache files present (Glob `.imbas/<KEY>/cache/*.json`); TTL is expired when now - cached_at > ttl_hours.
 3. Display:
    - config.json contents (formatted)
    - Cache status per project: cached_at, ttl_expired, available cache types
@@ -46,7 +46,7 @@
 1. Call `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
 2. Display label table:
 
-   Key | Value | Applied When -----------------+------------------+------------------------------- managed | <value> | Issue creation (all types) review_pending | <value> | Phase 2 complete review_complete | <value> | Review approved dev_waiting | <value> | Phase 3.5 complete dev_in_progress | <value> | (external trigger only) dev_done | <value> | (external trigger only)
+   Key | Value | Applied When -----------------+------------------+------------------------------- managed | <value> | Issue creation (all types) review_pending | <value> | Split decomposition complete review_complete | <value> | Review approved dev_waiting | <value> | Issue creation complete dev_in_progress | <value> | (external trigger only) dev_done | <value> | (external trigger only)
 
 ### labels edit
 

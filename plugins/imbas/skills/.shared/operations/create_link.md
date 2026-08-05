@@ -25,4 +25,4 @@ POST /rest/api/3/issueLink
 
 ## Used By
 
-- `manifest` — Create relationships between issues after batch creation
+- `split` — Create relationships between issues after batch creation

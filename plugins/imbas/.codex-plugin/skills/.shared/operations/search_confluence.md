@@ -25,4 +25,4 @@ GET /wiki/rest/api/content/search?cql=...
 
 ## Used By
 
-- `validate` — Resolve references to other Confluence pages
+- `refine` — Resolve references to other Confluence pages

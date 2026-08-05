@@ -4,29 +4,50 @@ Pipeline replaces manual user-review steps with automated quality gates. Each ga
 
 ---
 
-## GATE 1: Validate Result
+## GATE 1: Refine Result
 
-Evaluates the validation-report.md output from `analyst`.
+Evaluates the refine phase output from `analyst`.
 
 ```
 AUTO-PROCEED when:
-  validate.result == "PASS"
-  validate.result == "PASS_WITH_WARNINGS"
+  refine.result == "PASS"
+  refine.result == "PASS_WITH_WARNINGS"
     → Accumulate warnings for final report. Display inline: "Proceeding with N warnings."
 
 STOP when:
-  validate.result == "BLOCKED"
+  refine.result == "BLOCKED"
     → blocking_issues > 0
     → Emit blocker report listing all BLOCKING issues from validation-report.md
 ```
 
-This gate matches the existing validate → split transition rule in state-manager.ts. No behavioral change from the individual skill — validate PASS/PASS_WITH_WARNINGS always allowed split entry.
+This gate matches the state machine's own rule — refine PASS/PASS_WITH_WARNINGS is what allows estimate/split entry.
 
 ---
 
-## GATE 2: Split Quality
+## GATE 2: Estimation Integrity
 
-Replaces `imbas:split` skill Step 7 (interactive user review). This is the key pipeline innovation.
+Evaluated after the `estimator` output is saved. Estimation is informational — the gate checks integrity, not the numbers.
+
+```
+AUTO-PROCEED when:
+  mcp__plugin_imbas_tools__manifest_validate(project_ref, run_id, type: "estimation")
+    returns 0 errors
+  → Warnings (milestone beyond horizon, unknown risk unit) are accumulated
+    for the final report, not blocking.
+
+STOP when:
+  Validation errors exist (duplicate unit IDs, unknown deps, double-scheduled
+  units, inverted confidence interval)
+  → Emit blocker report with the error list. Resume: re-run /imbas:estimate --run <run-id>.
+```
+
+Skipped entirely with `--skip-estimate` (estimate.status = "skipped").
+
+---
+
+## GATE 3: Split Quality
+
+Replaces the `imbas:split` skill's interactive approval gate (creation-workflow Step 8).
 
 ### Auto-Approve Criteria
 
@@ -42,28 +63,24 @@ ALL conditions must be true for auto-approval:
 
 [ ] Every Story passes ALL verification checks:
     [ ] verification.anchor_link == true
-        → Story has explicit reference to source document section
+        → Story has explicit reference to a refined.md section
     [ ] verification.coherence == "PASS"
         → Story content aligns with overall document goals
     [ ] verification.reverse_inference == "PASS"
-        → Reassembled Stories match original document (no loss/mutation/addition)
+        → Reassembled Stories match refined.md (no loss/mutation/addition)
     [ ] size_check == "PASS"
-        → Story scope is appropriate (3-8 expected Subtasks, single domain, independent)
+        → Story scope is appropriate (single domain, independent)
 ```
 
-When all criteria pass:
-
-- Call mcp__plugin_imbas_tools__run_transition(complete_phase, split, pending_review: false, stories_created: N)
-- Proceed to Phase 2.5 (manifest-stories)
+When all criteria pass: proceed to creation (Steps 9–11) IN THE SAME TURN.
 
 ### Special Case: E2-3 (Split Unnecessary)
 
 When `planner` determines the document is already at appropriate Story size:
 
-- Call mcp__plugin_imbas_tools__run_transition(escape_phase, split, escape_code: "E2-3")
-- SKIP Phase 2.5 (manifest-stories) entirely
-- Proceed directly to Phase 3 (devplan)
-- This is permitted by existing state transition rules (split escaped with E2-3 allows devplan entry)
+- A single-Story stories-manifest.json is saved (escape-conditions.md rule)
+- run_transition(escape_phase, split, escape_code: "E2-3")
+- Proceed to creation with the single-Story manifest
 
 ### Stop Conditions
 
@@ -71,127 +88,41 @@ ANY of the following triggers pipeline halt:
 
 ```
 Escape conditions (except E2-3):
-  E2-1 (needs elaboration)
-    → Blocker details: list of missing information items
-    → Resume: supplement the document, then re-run pipeline
-
-  E2-2 (contradiction found)
-    → Blocker details: list of conflict points with quotes
-    → Resume: resolve conflicts in source, then re-run pipeline
-
-  EC-1 (cannot comprehend)
-    → Blocker details: frozen scope + structured queries for clarification
-    → Resume: answer queries, update document, then re-run pipeline
-
-  EC-2 (source defect)
-    → Blocker details: defect report
-    → Resume: fix document, re-validate (/imbas:validate), then re-run pipeline
+  E2-1 (needs elaboration)   → list missing information; resume: supplement the document, re-run
+  E2-2 (contradiction found) → list conflict points; resume: resolve conflicts, re-run
+  EC-1 (cannot comprehend)   → frozen scope + structured queries; resume: answer, update, re-run
+  EC-2 (source defect)       → defect report; resume: fix document, /imbas:refine, re-run
 
 Verification field failures:
-  Any Story with verification.anchor_link == false
-    → List affected Story IDs: "S-001 missing anchor link"
-
-  Any Story with verification.coherence != "PASS"
-    → List affected Story IDs with coherence value: "S-003 coherence=FAIL"
-
-  Any Story with verification.reverse_inference != "PASS"
-    → List affected Story IDs: "S-002 reverse_inference=REVIEW"
-
-  Any Story with size_check != "PASS"
-    → List affected Story IDs: "S-004 size_check=FAIL (too large)"
+  Any Story with anchor_link == false / coherence != "PASS" /
+  reverse_inference != "PASS" / size_check != "PASS"
+  → List affected Story IDs with the failing field and value
 
 Manifest validation errors:
-  → List all validation errors from mcp__plugin_imbas_tools__manifest_validate
+  → List all errors from mcp__plugin_imbas_tools__manifest_validate
 ```
 
 ### Why This Gate is Safe
 
-The auto-approval criteria are strictly more conservative than what a human reviewer checks:
-
-- Anchor links verified → every Story traces to source
-- Coherence verified → no semantic drift
-- Reverse-inference verified → no content lost or invented
-- Size check verified → no oversized Stories
-- Manifest validated → structural integrity confirmed
-
-A human reviewer would typically approve when all these fields are PASS. The pipeline automates exactly this judgment.
-
----
-
-## GATE 3: Devplan Quality
-
-Replaces `imbas:devplan` skill Step 4 (interactive user review).
-
-### Auto-Approve Criteria
-
-ALL conditions must be true:
-
-```
-[ ] Manifest validation passes
-    - mcp__plugin_imbas_tools__manifest_validate(project_ref, run_id, type: "devplan") returns 0 errors
-
-[ ] No items flagged for review
-    - Every Task: needs_review is absent or false
-    - Every Subtask (in tasks[].subtasks and story_subtasks[].subtasks): needs_review is absent or false
-```
-
-When all criteria pass:
-
-- Call mcp__plugin_imbas_tools__run_transition(complete_phase, devplan, pending_review: false)
-- Proceed to Phase 3.5 (manifest-devplan)
-
-### Non-Blocking Notes
-
-These are recorded but do NOT stop the pipeline:
-
-```
-feedback_comments[] present
-  → B→A feedback items exist (Story definition != code reality)
-  → Included in final pipeline report
-  → Will be posted as Jira comments during manifest execution
-  → Non-blocking per "problem space tree unchanged" principle
-
-AST fallback mode activated
-  → @ast-grep/napi not available, using LLM-based analysis
-  → Note in final report: "AST fallback mode — results may be approximate"
-  → Non-blocking: approximate analysis is still useful
-```
-
-### Stop Conditions
-
-```
-Manifest validation errors:
-  → List all validation errors (ID conflicts, broken references, schema issues)
-
-needs_review flagged items:
-  → List each flagged item with reason:
-    "T1 needs_review=true: Subtask cannot satisfy all 4 termination criteria"
-    "S1-ST3 needs_review=true: cross-layer concern (API + DB in one Subtask)"
-```
+The auto-approval criteria are strictly more conservative than what a human reviewer checks: every Story traces to the refined document, no semantic drift, no content lost or invented, no oversized Stories, and the manifest is structurally valid. The pipeline automates exactly that judgment.
 
 ---
 
 ## GATE 4: Execution Result
 
-Evaluated after manifest execution (Phase 2.5 and Phase 3.5).
-
-**General rule (Phase 3.5 / devplan manifest)**: This gate does NOT stop the pipeline because issue writes are irreversible — already-created items cannot be undone. Partial failures are reported and the user is guided to retry via `/imbas:manifest devplan`.
-
-**Exception (Phase 2.5 / stories manifest)**: Failures here DO stop the pipeline because Phase 3 (devplan) requires all Stories to have valid issue_refs. See the EXCEPTION block below.
+Evaluated after provider batch execution.
 
 ```
 SUCCESS:
   All items have status "created" with valid issue_ref
-  → Include in final success report
+  → run_transition complete_phase(split, pending_review: false, stories_created: N)
+  → FINAL completion report
 
-PARTIAL:
+PARTIAL / FAILURE:
   Some items have status "failed"
+  → STOP with partial-failure report
   → List failed items with error details
-  → Suggest: "/imbas:manifest <type> --run <run-id>" to retry (idempotent — skips created items)
-
-EXCEPTION — Phase 2.5 (manifest-stories) failure:
-  If ANY Story fails to create in Phase 2.5, this IS a pipeline stop.
-  Reason: Phase 3 (devplan) requires all Stories to have valid issue_refs.
-  → STOP with blocker report
-  → Resume: "/imbas:manifest stories --run <run-id>" then manual devplan
+  → Resume: "/imbas:split --run <run-id>" — idempotent, retries only missing items
 ```
+
+Issue writes are irreversible — already-created items are never rolled back; the manifest ledger keeps them and the retry skips them.

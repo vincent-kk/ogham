@@ -3,13 +3,12 @@
  * @description Schema + reference integrity validation for manifests
  */
 import type {
-  DevplanManifest,
-  ImplementPlanManifest,
+  EstimationManifest,
+  ManifestType,
   StoriesManifest,
 } from '../../types/manifest.js';
 import { findDuplicates } from '../../utils/index.js';
 import { loadManifest } from '../manifestParser/index.js';
-import type { ManifestType } from '../manifestParser/index.js';
 
 export interface ValidationResult {
   valid: boolean;
@@ -17,7 +16,7 @@ export interface ValidationResult {
   warnings: string[];
 }
 
-/** Validate a manifest file: schema, ID uniqueness, and link reference integrity */
+/** Validate a manifest file: schema, ID uniqueness, and reference integrity */
 export async function validateManifest(
   runDir: string,
   type: ManifestType,
@@ -25,12 +24,10 @@ export async function validateManifest(
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  let manifest: StoriesManifest | DevplanManifest | ImplementPlanManifest;
+  let manifest: StoriesManifest | EstimationManifest;
   try {
     if (type === 'stories') manifest = await loadManifest(runDir, 'stories');
-    else if (type === 'devplan')
-      manifest = await loadManifest(runDir, 'devplan');
-    else manifest = await loadManifest(runDir, 'implement-plan');
+    else manifest = await loadManifest(runDir, 'estimation');
   } catch (err) {
     return {
       valid: false,
@@ -41,11 +38,9 @@ export async function validateManifest(
 
   if (type === 'stories')
     validateStoriesManifest(manifest as StoriesManifest, errors, warnings);
-  else if (type === 'devplan')
-    validateDevplanManifest(manifest as DevplanManifest, errors, warnings);
   else
-    validateImplementPlanManifest(
-      manifest as ImplementPlanManifest,
+    validateEstimationManifest(
+      manifest as EstimationManifest,
       errors,
       warnings,
     );
@@ -96,101 +91,58 @@ function validateStoriesManifest(
   }
 }
 
-// --- Devplan validation ---
+// --- Estimation validation ---
 
-function validateDevplanManifest(
-  manifest: DevplanManifest,
+function validateEstimationManifest(
+  manifest: EstimationManifest,
   errors: string[],
   warnings: string[],
 ): void {
-  // Collect all item IDs
-  const taskIds = manifest.tasks.map((t) => t.id);
-  const subtaskIds = manifest.tasks.flatMap((t) => t.subtasks.map((s) => s.id));
-  const storySubtaskIds = manifest.story_subtasks.flatMap((ss) =>
-    ss.subtasks.map((s) => s.id),
-  );
+  // Unit ID uniqueness
+  const ids = manifest.units.map((u) => u.id);
+  for (const dup of findDuplicates(ids))
+    errors.push(`Duplicate unit ID: "${dup}"`);
 
-  // ID uniqueness within each collection
-  for (const dup of findDuplicates(taskIds))
-    errors.push(`Duplicate task ID: "${dup}"`);
+  const idSet = new Set(ids);
 
-  for (const dup of findDuplicates(subtaskIds))
-    errors.push(`Duplicate task subtask ID: "${dup}"`);
+  // deps reference integrity
+  for (const unit of manifest.units)
+    for (const dep of unit.deps)
+      if (!idSet.has(dep))
+        errors.push(`Unit "${unit.id}" deps references unknown ID: "${dep}"`);
 
-  for (const dup of findDuplicates(storySubtaskIds))
-    errors.push(`Duplicate story subtask ID: "${dup}"`);
-
-  const allIds = new Set([...taskIds, ...subtaskIds, ...storySubtaskIds]);
-
-  // execution_order items reference valid IDs
-  for (const step of manifest.execution_order)
-    for (const item of step.items)
-      if (!allIds.has(item))
+  // schedule tracks: every referenced unit exists, no unit scheduled twice
+  const scheduled = new Map<string, number>();
+  for (const track of manifest.schedule.tracks)
+    for (const unitId of track.units) {
+      if (!idSet.has(unitId))
         errors.push(
-          `execution_order step ${step.step} references unknown ID: "${item}"`,
+          `Schedule track ${track.track} references unknown unit: "${unitId}"`,
         );
-
-  // task.blocks reference valid IDs
-  const taskIdSet = new Set(taskIds);
-  for (const task of manifest.tasks)
-    for (const blockRef of task.blocks)
-      if (!taskIdSet.has(blockRef))
-        warnings.push(
-          `Task "${task.id}" blocks references unknown task ID: "${blockRef}"`,
-        );
-}
-
-// --- Implement Plan validation ---
-
-function validateImplementPlanManifest(
-  manifest: ImplementPlanManifest,
-  errors: string[],
-  warnings: string[],
-): void {
-  const groupIds = manifest.groups.map((g) => g.group_id);
-  for (const dup of findDuplicates(groupIds))
-    errors.push(`Duplicate group_id: "${dup}"`);
-
-  const groupIdSet = new Set(groupIds);
-  const itemIds: string[] = [];
-  const itemIdToGroup = new Map<string, string>();
-
-  for (const group of manifest.groups) {
-    for (const item of group.items) {
-      itemIds.push(item.id);
-      const existing = itemIdToGroup.get(item.id);
-      if (existing !== undefined)
+      const prev = scheduled.get(unitId);
+      if (prev !== undefined)
         errors.push(
-          `Item "${item.id}" appears in multiple groups: "${existing}" and "${group.group_id}"`,
+          `Unit "${unitId}" is scheduled in multiple tracks: ${prev} and ${track.track}`,
         );
-      else itemIdToGroup.set(item.id, group.group_id);
+      else scheduled.set(unitId, track.track);
     }
-    for (const depGroupId of group.depends_on_groups)
-      if (!groupIdSet.has(depGroupId))
-        errors.push(
-          `Group "${group.group_id}" depends_on_groups references unknown group: "${depGroupId}"`,
-        );
-  }
 
-  const itemIdSet = new Set(itemIds);
-  for (const edge of manifest.edges) {
-    if (!itemIdSet.has(edge.from))
-      warnings.push(`Edge from references unknown item: "${edge.from}"`);
+  // milestones within the schedule horizon
+  for (const milestone of manifest.schedule.milestones)
+    if (milestone.week > manifest.schedule.total_weeks)
+      warnings.push(
+        `Milestone "${milestone.name}" (week ${milestone.week}) is beyond total_weeks ${manifest.schedule.total_weeks}`,
+      );
 
-    if (!itemIdSet.has(edge.to))
-      warnings.push(`Edge to references unknown item: "${edge.to}"`);
-  }
+  // risks reference known units
+  for (const risk of manifest.risks)
+    if (!idSet.has(risk.unit))
+      warnings.push(`Risk references unknown unit: "${risk.unit}"`);
 
-  // level monotonicity: a group's level must be > max level of its dependencies
-  const levelByGroup = new Map(
-    manifest.groups.map((g) => [g.group_id, g.level]),
-  );
-  for (const group of manifest.groups)
-    for (const depGroupId of group.depends_on_groups) {
-      const depLevel = levelByGroup.get(depGroupId);
-      if (depLevel !== undefined && depLevel >= group.level)
-        errors.push(
-          `Group "${group.group_id}" (level ${group.level}) depends on "${depGroupId}" (level ${depLevel}) — dependency must be at a strictly lower level`,
-        );
-    }
+  // confidence interval sanity
+  const [lo, hi] = manifest.rollup.confidence_interval;
+  if (lo > hi)
+    errors.push(
+      `rollup.confidence_interval is inverted: [${lo}, ${hi}] — lower bound exceeds upper bound`,
+    );
 }

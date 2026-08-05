@@ -1,87 +1,78 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handleManifestGet } from '../../mcp/tools/manifestGet/index.js';
-import { handleManifestPlan } from '../../mcp/tools/manifestPlan/index.js';
 import { handleManifestSave } from '../../mcp/tools/manifestSave/index.js';
 import { handleManifestValidate } from '../../mcp/tools/manifestValidate/index.js';
-import type { ManifestSummary } from '../../types/manifest.js';
 
 // --- helpers ---
 
 function makeTmpDir(): string {
   const dir = join(
     os.tmpdir(),
-    `imbas-mf-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    `imbas-mt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
 }
 
-function makeRunDir(base: string, projectKey: string, runId: string): string {
-  const dir = join(base, '.imbas', projectKey, 'runs', runId);
-  mkdirSync(dir, { recursive: true });
-  return dir;
-}
-
-const VALID_STORIES_MANIFEST = {
-  batch: 'B1',
-  run_id: 'R001',
+const storiesManifest = {
+  batch: 'batch-001',
+  run_id: '20260101-001',
   project_ref: 'PROJ',
   epic_ref: null,
-  created_at: new Date().toISOString(),
+  created_at: '2026-01-01T00:00:00.000Z',
   stories: [
     {
-      id: 'S-1',
+      id: 'S-001',
       title: 'Story 1',
-      description: 'desc',
-      type: 'Story' as const,
-      status: 'pending' as const,
-      issue_ref: null,
+      description: 'Desc',
+      type: 'Story',
       verification: {
         anchor_link: true,
-        coherence: 'PASS' as const,
-        reverse_inference: 'PASS' as const,
+        coherence: 'PASS',
+        reverse_inference: 'PASS',
       },
-      size_check: 'PASS' as const,
-      split_from: null,
-      split_into: [],
+      size_check: 'PASS',
     },
   ],
-  links: [],
 };
 
-const VALID_DEVPLAN_MANIFEST = {
-  batch: 'B1',
-  run_id: 'R001',
+const estimationManifest = {
+  run_id: '20260101-001',
   project_ref: 'PROJ',
-  epic_ref: null,
-  created_at: new Date().toISOString(),
-  tasks: [
+  source: 'refined.md',
+  created_at: '2026-01-01T00:00:00.000Z',
+  units: [
     {
-      id: 'T-1',
-      title: 'Task 1',
-      description: 'desc',
-      type: 'Task' as const,
-      status: 'pending' as const,
-      issue_ref: null,
-      blocks: [],
-      subtasks: [],
+      id: 'U-1',
+      name: 'Login',
+      view_refs: {
+        page: ['login'],
+        feature: ['email-login'],
+        module: ['auth'],
+      },
+      complexity: 'M',
+      estimate: { o: 1, m: 3, p: 5, expected: 3, sigma: 0.67 },
+      rationale: 'standard flow',
     },
   ],
-  story_subtasks: [],
-  feedback_comments: [],
-  execution_order: [
-    { step: 1, action: 'create_tasks' as const, items: ['T-1'] },
-  ],
+  rollup: {
+    sum_expected: 3,
+    overhead: { integration: 0.3, test: 0.45, pm: 0.15 },
+    buffered_total: 4.7,
+    confidence_interval: [3.6, 5.7],
+  },
+  schedule: {
+    tracks: [{ track: 1, units: ['U-1'] }],
+    milestones: [],
+    total_weeks: 1,
+  },
 };
 
-// --- tests ---
-
-describe('handleManifestGet', () => {
+describe('handleManifestSave + handleManifestValidate', () => {
   let tmpDir: string;
   let cwdSpy: ReturnType<typeof vi.spyOn>;
 
@@ -94,213 +85,127 @@ describe('handleManifestGet', () => {
     cwdSpy.mockRestore();
   });
 
-  it('loads stories manifest and returns summary', async () => {
-    const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
-    writeFileSync(
-      join(runDir, 'stories-manifest.json'),
-      JSON.stringify(VALID_STORIES_MANIFEST),
-    );
-
-    const result = await handleManifestGet({
-      project_ref: 'PROJ',
-      run_id: 'R001',
-      type: 'stories',
-    });
-    expect(result.manifest).toBeDefined();
-    expect((result.summary as ManifestSummary).total).toBe(1);
-    expect((result.summary as ManifestSummary).pending).toBe(1);
-  });
-
-  it('loads devplan manifest and returns summary', async () => {
-    const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
-    writeFileSync(
-      join(runDir, 'devplan-manifest.json'),
-      JSON.stringify(VALID_DEVPLAN_MANIFEST),
-    );
-
-    const result = await handleManifestGet({
-      project_ref: 'PROJ',
-      run_id: 'R001',
-      type: 'devplan',
-    });
-    expect(result.manifest).toBeDefined();
-    expect((result.summary as ManifestSummary).total).toBe(1);
-  });
-
-  it('throws when manifest file is missing', async () => {
-    makeRunDir(tmpDir, 'PROJ', 'R001');
-    await expect(
-      handleManifestGet({
-        project_ref: 'PROJ',
-        run_id: 'R001',
-        type: 'stories',
-      }),
-    ).rejects.toThrow();
-  });
-});
-
-describe('handleManifestSave', () => {
-  let tmpDir: string;
-  let cwdSpy: ReturnType<typeof vi.spyOn>;
-
-  beforeEach(() => {
-    tmpDir = makeTmpDir();
-    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
-  });
-
-  afterEach(() => {
-    cwdSpy.mockRestore();
-  });
-
-  it('saves stories manifest and returns path + summary', async () => {
-    makeRunDir(tmpDir, 'PROJ', 'R001');
+  it('saves a stories manifest with defaults applied and summarizes it', async () => {
     const result = await handleManifestSave({
       project_ref: 'PROJ',
-      run_id: 'R001',
+      run_id: '20260101-001',
       type: 'stories',
-      manifest: VALID_STORIES_MANIFEST,
+      manifest: storiesManifest,
     });
     expect(result.path).toContain('stories-manifest.json');
-    expect((result.summary as ManifestSummary).total).toBe(1);
+    expect(result.summary).toEqual({
+      total: 1,
+      pending: 1,
+      created: 0,
+      failed: 0,
+    });
+
+    const saved = JSON.parse(readFileSync(result.path, 'utf-8'));
+    expect(saved.version).toBe(2);
+    expect(saved.stories[0].estimate_manday).toBeNull();
+
+    const validation = await handleManifestValidate({
+      project_ref: 'PROJ',
+      run_id: '20260101-001',
+      type: 'stories',
+    });
+    expect(validation.valid).toBe(true);
   });
 
-  it('throws when manifest is undefined', async () => {
-    makeRunDir(tmpDir, 'PROJ', 'R001');
+  it('saves an estimation manifest and summarizes rollup/schedule', async () => {
+    const result = await handleManifestSave({
+      project_ref: 'PROJ',
+      run_id: '20260101-001',
+      type: 'estimation',
+      manifest: estimationManifest,
+    });
+    expect(result.path).toContain('estimation.json');
+    expect(result.summary).toEqual({
+      units: 1,
+      sum_expected: 3,
+      buffered_total: 4.7,
+      total_weeks: 1,
+    });
+
+    const validation = await handleManifestValidate({
+      project_ref: 'PROJ',
+      run_id: '20260101-001',
+      type: 'estimation',
+    });
+    expect(validation.valid).toBe(true);
+  });
+
+  it('decodes a JSON-string manifest and saves it like the object form', async () => {
+    const result = await handleManifestSave({
+      project_ref: 'PROJ',
+      run_id: '20260101-001',
+      type: 'estimation',
+      manifest: JSON.stringify(estimationManifest),
+    });
+    expect(result.path).toContain('estimation.json');
+    const saved = JSON.parse(readFileSync(result.path, 'utf-8'));
+    expect(saved.units).toHaveLength(1);
+  });
+
+  it('rejects a non-JSON string manifest without writing', async () => {
     await expect(
       handleManifestSave({
         project_ref: 'PROJ',
-        run_id: 'R001',
+        run_id: '20260101-001',
+        type: 'estimation',
+        manifest: 'not a json document',
+      }),
+    ).rejects.toThrow('manifest string is not valid JSON');
+
+    const path = join(
+      tmpDir,
+      '.imbas',
+      'PROJ',
+      'runs',
+      '20260101-001',
+      'estimation.json',
+    );
+    expect(existsSync(path)).toBe(false);
+  });
+
+  it('rejects a schema-invalid manifest and writes no file', async () => {
+    await expect(
+      handleManifestSave({
+        project_ref: 'PROJ',
+        run_id: '20260101-001',
+        type: 'estimation',
+        manifest: { ...estimationManifest, rollup: undefined },
+      }),
+    ).rejects.toThrow();
+
+    const path = join(
+      tmpDir,
+      '.imbas',
+      'PROJ',
+      'runs',
+      '20260101-001',
+      'estimation.json',
+    );
+    expect(existsSync(path)).toBe(false);
+  });
+
+  it('rejects when manifest payload is missing', async () => {
+    await expect(
+      handleManifestSave({
+        project_ref: 'PROJ',
+        run_id: '20260101-001',
         type: 'stories',
-        manifest: undefined,
       }),
     ).rejects.toThrow('manifest is required');
   });
 
-  it('throws when manifest fails schema validation', async () => {
-    makeRunDir(tmpDir, 'PROJ', 'R001');
-    await expect(
-      handleManifestSave({
-        project_ref: 'PROJ',
-        run_id: 'R001',
-        type: 'stories',
-        manifest: { bad: true },
-      }),
-    ).rejects.toThrow();
-  });
-});
-
-describe('handleManifestValidate', () => {
-  let tmpDir: string;
-  let cwdSpy: ReturnType<typeof vi.spyOn>;
-
-  beforeEach(() => {
-    tmpDir = makeTmpDir();
-    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
-  });
-
-  afterEach(() => {
-    cwdSpy.mockRestore();
-  });
-
-  it('returns valid: true for a correct stories manifest', async () => {
-    const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
-    writeFileSync(
-      join(runDir, 'stories-manifest.json'),
-      JSON.stringify(VALID_STORIES_MANIFEST),
-    );
-
+  it('reports a missing manifest file as a validation result, not an error', async () => {
     const result = await handleManifestValidate({
       project_ref: 'PROJ',
-      run_id: 'R001',
-      type: 'stories',
-    });
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('returns valid: false when manifest file is missing', async () => {
-    makeRunDir(tmpDir, 'PROJ', 'R001');
-    const result = await handleManifestValidate({
-      project_ref: 'PROJ',
-      run_id: 'R001',
+      run_id: '20260101-001',
       type: 'stories',
     });
     expect(result.valid).toBe(false);
-    expect(result.errors.length).toBeGreaterThan(0);
-  });
-
-  it('returns errors for duplicate story IDs', async () => {
-    const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
-    const dupManifest = {
-      ...VALID_STORIES_MANIFEST,
-      stories: [
-        VALID_STORIES_MANIFEST.stories[0],
-        { ...VALID_STORIES_MANIFEST.stories[0] }, // same id S-1
-      ],
-    };
-    writeFileSync(
-      join(runDir, 'stories-manifest.json'),
-      JSON.stringify(dupManifest),
-    );
-
-    const result = await handleManifestValidate({
-      project_ref: 'PROJ',
-      run_id: 'R001',
-      type: 'stories',
-    });
-    expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes('Duplicate story ID'))).toBe(
-      true,
-    );
-  });
-});
-
-describe('handleManifestPlan', () => {
-  let tmpDir: string;
-  let cwdSpy: ReturnType<typeof vi.spyOn>;
-
-  beforeEach(() => {
-    tmpDir = makeTmpDir();
-    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
-  });
-
-  afterEach(() => {
-    cwdSpy.mockRestore();
-  });
-
-  it('generates execution plan from devplan manifest', async () => {
-    const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
-    writeFileSync(
-      join(runDir, 'devplan-manifest.json'),
-      JSON.stringify(VALID_DEVPLAN_MANIFEST),
-    );
-
-    const result = await handleManifestPlan({
-      project_ref: 'PROJ',
-      run_id: 'R001',
-    });
-    expect(result.steps).toHaveLength(1);
-    expect(result.total_pending).toBe(1);
-  });
-
-  it('returns empty steps when all items are already created', async () => {
-    const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
-    const completedManifest = {
-      ...VALID_DEVPLAN_MANIFEST,
-      tasks: [
-        { ...VALID_DEVPLAN_MANIFEST.tasks[0], status: 'created' as const },
-      ],
-    };
-    writeFileSync(
-      join(runDir, 'devplan-manifest.json'),
-      JSON.stringify(completedManifest),
-    );
-
-    const result = await handleManifestPlan({
-      project_ref: 'PROJ',
-      run_id: 'R001',
-    });
-    expect(result.steps).toHaveLength(0);
-    expect(result.total_pending).toBe(0);
+    expect(result.errors[0]).toContain('Schema validation failed');
   });
 });

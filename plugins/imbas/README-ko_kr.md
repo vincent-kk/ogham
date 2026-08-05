@@ -1,344 +1,120 @@
 # @ogham/imbas
 
-제품 기획 문서를 Jira / GitHub Issues / 로컬 마크다운 기반의 구조화된 개발 백로그로 변환하는 Claude Code 플러그인입니다.
+기획자 사이드 제품 개발 워크플로우를 위한 Claude Code 플러그인. 기획 문서를 재구조화·검증하고, manday와 일정을 추산하고, Jira / GitHub Issues / 로컬 마크다운에 잘 짜인 이슈로 분할·생성하며, 개발 인계용 draft PR 골격까지 만들어 준다.
 
-> [English documentation (README.md)](./README.md)
+> [English (README.md)](./README.md)
 
-기획서를 쓰는 건 쉽습니다. 하지만 그걸 의존성, 크기 추정, 실제 구현 근거가 갖춰진 Story/Task/Subtask 백로그로 만드는 건 지루하고 실수가 잦은 작업입니다. imbas는 이 과정을 전문 AI 에이전트가 구동하는 **3단계 파이프라인**으로 자동화합니다.
+스펙을 쓰는 것은 쉽다. 그것을 방어 가능한 견적과 깔끔한 백로그로 바꾸는 일이 지루하고 실수하기 쉽다. imbas는 기획자 워크플로우를 전문 AI 에이전트가 이끄는 **3단계 파이프라인**으로 자동화하고, 개발이 시작되는 지점에서 의도적으로 멈춘다 — 코드 탐색도, 구현 계획도 하지 않는다.
+
+```
+기획 문서
+  → refine    : 표준 구조로 재편 + 5종 정합성 검증
+  → estimate  : 3뷰 WBS + PERT manday + 일정                    (선택)
+  → split     : INVEST 분할 → 승인 → 이슈 생성
+  → scaffold-pr : 이슈별 draft PR 골격                           (후처리)
+```
 
 ---
 
 ## 설치
 
-### Marketplace를 통한 설치 (권장)
+### 마켓플레이스 (권장)
 
 ```bash
-# 1. Marketplace에 저장소 등록
+# 1. 저장소를 마켓플레이스에 추가
 claude plugin marketplace add https://github.com/vincent-kk/ogham
 
 # 2. 플러그인 설치
 claude plugin install imbas
 ```
 
-설치 후 별도 설정 없이 모든 컴포넌트(Skills, MCP, Agents, Hooks)가 자동 등록됩니다.
+모든 구성 요소(Skills, MCP, Agents)가 자동 등록된다. 수동 설정은 필요 없다.
 
-### 개발자용 로컬 설치
+### 개발 환경 (로컬)
 
 ```bash
 # 모노레포 루트에서
 yarn install
-
-# 플러그인 빌드
-cd plugins/imbas
-yarn build          # TypeScript 컴파일 + 번들링
-
-# Claude Code에서 플러그인 로드
-claude --plugin-dir ./plugins/imbas
-```
-
-빌드하면 두 가지 산출물이 생성됩니다:
-
-- `bridge/mcp-server.cjs` — MCP 서버 (파이프라인 도구 16개)
-- `bridge/*.mjs` — Hook 스크립트 4개 (자동 생명주기 관리)
-
----
-
-## 아이디어
-
-제품팀이 기획서를 쓰고, 개발팀이 티켓으로 분해합니다. 이 인수인계 과정에서 맥락이 유실됩니다 — 요구사항이 잘못 해석되고, 엣지 케이스가 누락되고, 의존성이 꼬입니다.
-
-imbas는 기획서와 백로그 사이에 위치합니다. 기획 문서를 읽고, 모순과 빈틈을 검증하고, 인수 기준이 포함된 Story로 분해한 뒤, 실제 코드베이스를 분석하여 구현 가능한 Task와 Subtask를 생성합니다.
-
-핵심 통찰: **Story 분해는 제품 관점의 작업이고, Task 계획은 엔지니어링 관점의 작업입니다.** imbas는 각각에 별도의 전문 에이전트를 사용하므로, 제품 로직과 구현 로직이 서로 오염되지 않습니다.
-
----
-
-## 동작 원리
-
-### 3단계 파이프라인
-
-```
-문서 → [Validate] → [Split] → [Devplan] → Jira 이슈
-           ↓            ↓          ↓
-      Report.md   Stories.json  Devplan.json
-```
-
-**Phase 1 — Validate (검증):** `analyst` 에이전트가 기획서를 읽고 모순, 섹션 간 불일치, 누락된 요구사항, 논리적 불가능성을 검출합니다. 검증 보고서를 생성하며, 차단 이슈가 발견되면 파이프라인이 여기서 중단됩니다 — 기획서를 먼저 수정해야 합니다.
-
-**Phase 2 — Split (분할):** `planner` 에이전트가 검증된 문서를 INVEST 기준을 충족하는 Jira Story로 분해합니다. 각 Story에는:
-
-- User Story 구문 ("As a... I want... So that...")
-- Given/When/Then 인수 기준
-- 3단계 검증: 원본 앵커 링크 → 일관성 검사 → 역추론(Story만으로 원래 요구사항을 재구성할 수 있는가?)
-- 크기 검사 — 너무 큰 Story는 수평 분할
-
-**Phase 3 — Devplan (개발 계획):** `engineer` 에이전트가 Story를 받아 로컬 코드베이스를 탐색(AST 분석)하여 생성합니다:
-
-- Story별 EARS 형식 Subtask (최대 200줄 / 10파일 / 1시간 리뷰 범위)
-- Story 간 공유 Task (N:M 병합점 감지로 추출)
-- 의존성 링크와 실행 순서
-- Story의 모호한 부분에 대한 피드백 코멘트 (제품팀 확인 필요)
-
-각 단계는 매니페스트 파일에 결과를 기록합니다. 매니페스트는 이후 설정된 이슈 트래커에 일괄 실행되어 이슈, 링크, 코멘트를 생성합니다.
-
-### 프로바이더
-
-파이프라인은 프로바이더 독립적입니다. `config.provider`로 백엔드를 선택합니다:
-
-| Provider | 백엔드               | 이슈 참조 형식       |
-| -------- | -------------------- | -------------------- |
-| `jira`   | Atlassian MCP 도구   | `PROJ-123`           |
-| `github` | `gh` CLI (라벨/메타) | `owner/repo#42`      |
-| `local`  | 마크다운 파일        | `S-1`, `T-1`, `ST-1` |
-
-### 상태 머신
-
-모든 실행은 상태 머신(`state.json`)으로 추적되며, 엄격한 전환 규칙이 적용됩니다:
-
-- `imbas:validate` → 항상 시작 가능
-- `imbas:split` → validate가 통과(PASS 또는 PASS_WITH_WARNINGS)한 후에만
-- `imbas:devplan` → split이 완료되고 Story 리뷰가 끝난 후에만
-
-각 단계는 escape(사유 코드와 함께 비정상 종료)하거나 skip할 수 있습니다. 파이프라인은 재개가 가능합니다 — 중단된 경우 `imbas:status resume`로 이어서 진행합니다.
-
-### 작업 디렉토리
-
-모든 상태는 `.imbas/`에 로컬 저장됩니다:
-
-```
-.imbas/
-├── config.json                 # 전역 설정 (언어, LLM 모델, Jira 설정)
-├── <PROJECT_KEY>/
-│   ├── cache/                  # 캐시된 Jira 메타데이터 (24시간 TTL)
-│   │   ├── project-meta.json
-│   │   ├── issue-types.json
-│   │   ├── link-types.json
-│   │   └── workflows.json
-│   └── runs/
-│       └── 20260404-001/       # Run ID: YYYYMMDD-NNN
-│           ├── state.json      # 단계 상태 머신
-│           ├── source.md       # 입력 문서
-│           ├── supplements/    # 보조 파일 (선택)
-│           ├── validation-report.md
-│           ├── stories-manifest.json
-│           └── devplan-manifest.json
-└── .temp/                      # 미디어 분석 작업 디렉토리
+yarn workspace @ogham/imbas build
 ```
 
 ---
 
-## 사용법
-
-imbas 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Claude Code 안에서 자연어로 대화하듯 호출합니다.
-
-### 초기 설정
-
-```
-/imbas:setup
-/imbas:setup set-project PROJ
-```
-
-`.imbas/` 디렉토리를 생성하고, 프로바이더를 선택하고, `config.json`을 설정하고, 프로젝트 메타데이터(이슈 타입, 링크 타입, 워크플로)를 캐싱합니다.
-
-### 전체 파이프라인 실행
-
-```
-/imbas:pipeline ./spec.md
-/imbas:pipeline ./spec.md --project PROJ
-```
-
-validate → split → manifest-stories → devplan → manifest-devplan을 품질 게이트 자동 승인과 함께 일괄 실행합니다. 대부분의 사용자에게 주요 진입점입니다.
-
-### 단계별 개별 실행
-
-더 세밀한 제어가 필요할 때:
-
-```
-# Phase 1: 문서 검증
-/imbas:validate
-
-# Phase 2: Story 분할
-/imbas:split
-
-# Phase 3: 개발 계획 생성
-/imbas:devplan
-```
-
-각 단계는 이전 단계의 출력을 읽어 자체 매니페스트를 작성합니다.
-
-### 매니페스트를 Jira에 실행
-
-```
-/imbas:manifest stories     # Story 이슈 생성
-/imbas:manifest devplan     # Task, Subtask, 링크 생성
-/imbas:manifest stories --dry-run   # 생성 없이 미리보기
-```
-
-매니페스트 실행은 멱등성을 보장합니다 — 재실행 시 이미 생성된 이슈(매니페스트의 `issue_ref`로 추적)는 건너뜁니다.
-
-### 파이프라인 상태 확인
-
-```
-/imbas:status              # 현재 실행 상태
-/imbas:status list         # 프로젝트의 전체 실행 목록
-/imbas:status resume       # 중단된 실행 재개
-```
-
-### 추가 도구
+## 빠른 시작
 
 ```bash
-# Jira 이슈를 구조화된 요약 코멘트로 압축
-/imbas:digest PROJ-123
+# 1. 최초 1회 설정 — provider·프로젝트·라벨·언어·estimation 계수를 브라우저 폼에서
+/imbas:setup
 
-# Jira Story로부터 서브태스크 체크리스트가 포함된 Draft PR 생성
-/imbas:scaffold-pr PROJ-123
+# 2. 기획 문서 재구조화·검증
+/imbas:refine requirements.md
 
-# 미디어 첨부파일 분석 (이미지, 동영상, GIF) — @ogham/atlassian 필요
-/atlassian:media-analysis <url-or-path>
+# 3. (선택) manday·일정 추산
+/imbas:estimate
+
+# 4. 이슈 분할·생성 (승인 게이트 포함)
+/imbas:split
+
+# …또는 전체 흐름을 한 명령으로
+/imbas:pipeline requirements.md
 ```
 
 ---
+
+## 스킬
+
+| 스킬                 | Phase  | 역할                                                                      |
+| -------------------- | ------ | ------------------------------------------------------------------------- |
+| `/imbas:setup`       | —      | 브라우저 설정 폼(provider·프로젝트·라벨·언어·모델·estimation) + 캐시 구축 |
+| `/imbas:refine`      | 1      | 표준 8섹션 재구조화 + 5종 검증 게이트                                     |
+| `/imbas:estimate`    | 2      | 3뷰 분해 → 단일 WBS → PERT manday → 팀 규모 일정 (선택 단계)              |
+| `/imbas:split`       | 3      | INVEST 분할 → 승인 게이트 → 멱등 재개 지원 일괄 생성                      |
+| `/imbas:scaffold-pr` | 후처리 | 이슈에서 draft PR 골격(브랜치·empty commit·체크리스트) 생성               |
+| `/imbas:pipeline`    | 1–3    | 자동 승인 게이트와 blocker 리포트로 전체 흐름 실행                        |
+| `/imbas:status`      | —      | 런 상태·산출물·재개 안내                                                  |
+| `/imbas:digest`      | —      | 이슈 코멘트 스레드를 압축 요약해 게시                                     |
+| `imbas:read-issue`   | —      | (내부) 이슈+스레드 맥락 구조화                                            |
 
 ## 에이전트
 
-imbas는 역할이 제한된 3개의 전문 서브에이전트를 사용합니다:
+| 에이전트    | 모델   | 역할                                   |
+| ----------- | ------ | -------------------------------------- |
+| `analyst`   | sonnet | 5종 검증 + 문서 재구조화, 역추론 검증  |
+| `planner`   | sonnet | INVEST 이슈 분할                       |
+| `estimator` | opus   | 컨텍스트 heavy 추산: 3뷰 WBS·PERT·일정 |
 
-| 에이전트   | 모델   | 역할                                      | 단계                     |
-| ---------- | ------ | ----------------------------------------- | ------------------------ |
-| `analyst`  | Sonnet | 문서 검증 (모순, 빈틈, 불가능성 검출)     | Validate, Split (역추론) |
-| `planner`  | Sonnet | Story 분해 (INVEST 기준, 인수 기준)       | Split                    |
-| `engineer` | Opus   | Task 계획 (코드베이스 탐색, Subtask 생성) | Devplan                  |
+## 추산 (Estimation)
 
-에이전트 역할은 `SubagentStart` Hook을 통해 런타임에 시행됩니다 — 에이전트는 할당된 책임을 넘어설 수 없습니다.
+estimate 단계는 재구조화된 기획서만으로 "얼마나 걸리는가"에 답한다 — 코드베이스는 읽지 않는다:
 
----
+- **3뷰 분해**(페이지/기능/모듈)와 교차 대조 — 한 관점의 사각지대를 다른 관점이 잡는다
+- 설정 가능한 S/M/L/XL 기준값에 앵커된 **단위별 PERT** (`expected = (o + 4m + p) / 6`)
+- 통합/테스트/PM 오버헤드와 버퍼를 얹은 **롤업** → 신뢰 구간이 붙은 총계
+- `team_size` 병렬 트랙 **일정**과 마일스톤, mermaid gantt 리포트
+- 문서가 답하지 않은 것은 전부 명시적 가정으로; σ가 큰 단위는 리스크로 자동 승격
 
-## 자동으로 동작하는 것들
+계수는 `config.estimation`(user/project 계층)에 있으며 설정 폼에서 편집한다.
 
-플러그인이 활성화되면 아래 Hook들이 **사용자 개입 없이** 자동 실행됩니다:
+## Provider
 
-| 언제                    | 무엇을                        | 왜                                          |
-| ----------------------- | ----------------------------- | ------------------------------------------- |
-| 세션 시작 시            | 캐시 디렉토리 + 로깅 초기화   | `.imbas/` 구조 보장                         |
-| 파일 Read/Write/Edit 시 | 도구 입력 검증                | `.imbas/` 상태 파일에 대한 잘못된 조작 방지 |
-| 서브에이전트 시작 시    | 역할 제한 주입                | 에이전트가 할당된 단계를 넘어서는 것 방지   |
-| 사용자 프롬프트 입력 시 | 실행/매니페스트 컨텍스트 주입 | 에이전트가 현재 파이프라인 상태를 인지      |
-| 세션 종료 시            | 자동 정리 없음 (의도적)       | `.imbas/.temp/` 유지됨; 필요 시 수동 정리   |
+| Provider | 이슈 생성 경로                                             |
+| -------- | ---------------------------------------------------------- |
+| `jira`   | 세션의 Atlassian 도구가 결의하는 `[OP:]` 시맨틱 오퍼레이션 |
+| `github` | `gh` CLI                                                   |
+| `local`  | `.imbas/<KEY>/issues/` 마크다운 파일                       |
 
----
+imbas는 Atlassian 자격 증명·전송 계층을 소유하지 않는다 — Jira 오퍼레이션은 REST 의도만 기술하고 실행은 세션의 Atlassian 도구가 맡는다.
 
-## 전체 스킬 목록
+## 아키텍처 노트
 
-| 스킬                    | 사용자 호출 | 설명                                                        |
-| ----------------------- | ----------- | ----------------------------------------------------------- |
-| `/imbas:setup`          | Yes         | `.imbas/` 초기화, 프로젝트 및 Jira 설정                     |
-| `/imbas:pipeline`       | Yes         | 자동 승인 게이트 포함 전체 파이프라인 실행                  |
-| `/imbas:validate`       | Yes         | Phase 1: 문서의 모순과 빈틈 검증                            |
-| `/imbas:split`          | Yes         | Phase 2: 문서를 INVEST Story로 분해                         |
-| `/imbas:devplan`        | Yes         | Phase 3: 코드베이스 기반 Task/Subtask 생성                  |
-| `/imbas:implement-plan` | Yes         | DAG 기반 구현 스케줄 생성 — Story/Task를 병렬 배치로 그룹화 |
-| `/imbas:manifest`       | Yes         | 매니페스트를 Jira에 일괄 실행                               |
-| `/imbas:status`         | Yes         | 실행 상태 확인, 목록, 중단된 실행 재개                      |
-| `/imbas:digest`         | Yes         | 이슈를 구조화된 요약으로 압축                               |
-| `/imbas:scaffold-pr`    | Yes         | Story로부터 서브태스크 포함 Draft PR 생성                   |
-| `/imbas:cache`          | No          | 내부: 프로바이더 메타데이터 캐시 관리 (24시간 TTL)          |
-| `/imbas:read-issue`     | No          | 내부: 이슈 컨텍스트 읽기 및 구조화                          |
+- **Plan-then-execute** — 분할은 매니페스트를 쓰고, 승인 게이트 전에는 provider에 닿지 않는다
+- **매니페스트 = 원장** — 항목별 `issue_ref`/`status`를 생성 즉시 저장해 재실행이 멱등하다
+- **런 기반 상태** — 실행마다 `.imbas/<KEY>/runs/<id>/`, MCP 서버가 강제하는 결정론적 상태머신(`refine → estimate(skip 가능) → split`)
+- **MCP 도구 9개** — 상태머신 4, 매니페스트 검증 2, 설정 계층 2, 설정 웹 UI 1; 산출물 파일은 Read/Write로 직접 다룬다
+- **훅 없음** — 세션 라이프사이클에 아무것도 주입하지 않는다
 
----
+설계 문서: [`.metadata/imbas/`](../../.metadata/imbas/README.md)
 
-## 기대 결과
-
-### 입력
-
-무엇을 만들지 기술한 기획 문서 (Markdown, Confluence 페이지, 또는 Jira 에픽 설명) — 기능, 사용자 흐름, 요구사항, 제약 조건.
-
-### 출력
-
-완전히 구조화된 Jira 백로그:
-
-- **Story** — User Story 구문, Given/When/Then 인수 기준, 검증 메타데이터 포함
-- **Task** — 여러 Story에서 추출된 공통 관심사
-- **Subtask** — 구현 가능한 단위로 범위 제한 (≤200줄, ≤10파일, ≤1시간 리뷰)
-- **Link** — 의존성 인코딩 (blocks, split-into, relates-to)
-- **실행 순서** — 올바른 순서로 이슈를 생성하기 위한 번호 매겨진 단계
-- **피드백 코멘트** — 제품팀 확인이 필요한 모호한 부분 표시
-
-### 검출 항목
-
-검증(Validate) 단계에서:
-
-- **모순(Contradiction)** — A 섹션은 X라고 하는데 B 섹션은 not-X
-- **불일치(Divergence)** — 섹션 간 용어나 범위가 어긋남
-- **누락(Omission)** — 참조는 있지만 명세가 없는 기능/흐름
-- **불가능(Infeasibility)** — 기술적 제약과 충돌하는 요구사항
-
-분할(Split) 단계에서:
-
-- **기능적 완결성 위반** — E2E 레벨에서 독립적으로 테스트할 수 없거나, 테스트 가능성이 없는 Story
-- **의미 손실** — 역추론으로 분해 과정에서 누락된 요구사항이 없는지 검증
-
-개발 계획(Devplan) 단계에서:
-
-- **구현 경로 부재** — 기존 코드 패턴에 매핑할 수 없는 Story
-- **Story 간 중복** — Subtask에 중복되기보다 단일 Task로 추출해야 할 공유 로직
-
----
-
-## 설정
-
-`config.json` 구성:
-
-```jsonc
-{
-  "provider": "jira", // "jira" | "github" | "local"
-  "language": {
-    "documents": "ko", // 원본 문서 언어
-    "skills": "en", // 에이전트 프롬프트 언어
-    "issue_content": "ko", // Jira 이슈 내용 언어
-    "reports": "ko", // 보고서 출력 언어
-  },
-  "defaults": {
-    "project_ref": "PROJ", // 기본 Jira 프로젝트
-    "llm_model": {
-      "validate": "sonnet", // 단계별 모델 지정
-      "split": "sonnet",
-      "devplan": "opus",
-    },
-    "subtask_limits": {
-      "max_lines": 200, // Subtask당 최대 줄 수
-      "max_files": 10, // Subtask당 최대 파일 수
-      "review_hours": 1, // Subtask당 최대 리뷰 시간
-    },
-  },
-}
-```
-
-변경 방법:
-
-```
-/imbas:setup set-language documents en
-/imbas:setup set-project NEWPROJ
-/imbas:setup set-provider github
-```
-
----
-
-## 개발
-
-```bash
-yarn dev            # TypeScript watch 모드
-yarn test           # Vitest watch
-yarn test:run       # 1회 실행
-yarn typecheck      # 타입 체크
-yarn build          # tsc + MCP 서버 + hooks 번들링
-```
-
-### 기술 스택
-
-TypeScript, @modelcontextprotocol/sdk, @ast-grep/napi, esbuild, Vitest, Zod
-
----
-
-## License
+## 라이선스
 
 MIT

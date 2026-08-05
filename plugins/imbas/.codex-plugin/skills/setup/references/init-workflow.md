@@ -51,7 +51,7 @@ Step 3 — Settings Page (browser; the ONLY interactive configuration step)
   the user saves, closes the page, or the wait elapses. The page edits the
   full config in one form: provider, project reference, lifecycle labels
   (with a github-only "provision labels after save" checkbox), languages,
-  llm models, subtask limits, and provider-specific advanced sections.
+  llm models, estimation coefficients, and provider-specific advanced sections.
   The server persists .imbas/config.json on Save — the skill does NOT
   write config in this flow.
 
@@ -77,22 +77,26 @@ Step 4 — GitHub label provisioning (only when summary.provider == "github"
 Step 5 — Cache population (provider-specific, from the saved config)
   Read the saved config via mcp__plugin_imbas_tools__config_get first.
 
+  Cache files are plain JSON managed with the Write tool — write each file,
+  then update `.imbas/<KEY>/cache/cached_at.json` to
+  { "cached_at": <ISO now>, "ttl_hours": 168 }.
+
   [jira]
     1. Create `.imbas/<KEY>/cache/` directory.
     2. Fetch issue types:
        - [OP: get_issue_types] project=<projectKey>
        - For each issue type: [OP: get_issue_type_fields] issue_type_id=<id>
-       - Call mcp__plugin_imbas_tools__cache_set(project_ref, "issue-types", <data>)
+       - Write `.imbas/<KEY>/cache/issue-types.json`
     3. Fetch link types:
        - [OP: get_link_types]
-       - Call mcp__plugin_imbas_tools__cache_set(project_ref, "link-types", <data>)
+       - Write `.imbas/<KEY>/cache/link-types.json`
     4. Store project metadata:
-       - Call mcp__plugin_imbas_tools__cache_set(project_ref, "project-meta", <data>)
+       - Write `.imbas/<KEY>/cache/project-meta.json`
 
   [github]
     1. Bootstrap labels: gh label list --repo <owner/repo> --json name
-    2. Create missing type/status labels if needed (see SPEC-provider-github.md § Cache).
-    3. Cache label inventory via mcp__plugin_imbas_tools__cache_set.
+    2. Create missing type/status labels if needed (references in skills/split/references/github/).
+    3. Write the label inventory to `.imbas/<KEY>/cache/project-meta.json`.
 
   [local]
     1. Create issue directories:
@@ -119,7 +123,7 @@ Step 7 — Result display
        [github]  label inventory cached
        [local]   issue directories created
      - .gitignore: updated (if applicable)
-  2. Suggest next step: "Run /imbas:validate <source> to start Phase 1."
+  2. Suggest next step: "Run /imbas:refine <source> to start Phase 1."
 ```
 
 ## Headless / CI fallback

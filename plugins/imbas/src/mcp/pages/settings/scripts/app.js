@@ -234,13 +234,16 @@
     }
   }
 
-  /** Seat the label, language, model and limit groups on the chosen layer. */
+  /** Seat the label, language, model and estimation groups on the chosen layer. */
   function prefillGroups() {
     var defaults = config.defaults || {};
+    var estimation = config.estimation || {};
     prefillGroup('data-label-key', config.labels);
     prefillGroup('data-lang-key', config.language);
     prefillGroup('data-model-key', defaults.llm_model);
-    prefillGroup('data-limit-key', defaults.subtask_limits);
+    prefillGroup('data-est-key', estimation);
+    prefillGroup('data-est-complexity', estimation.complexity_baseline);
+    prefillGroup('data-est-overhead', estimation.overhead_ratio);
   }
 
   // --- Jira advanced maps -------------------------------------------------
@@ -411,6 +414,16 @@
     return n;
   }
 
+  function nonNegativeNumber(id) {
+    var raw = $(id).value.trim();
+    var n = Number(raw);
+    if (raw === '' || !isFinite(n) || n < 0) {
+      showFieldError(id, 'Enter zero or a positive number.');
+      return null;
+    }
+    return n;
+  }
+
   // --- collect -------------------------------------------------------------
   function collectJiraProjectRef() {
     var projectRef = $('jira-project-key').value.trim() || null;
@@ -440,16 +453,36 @@
     return collectLocalProjectRef();
   }
 
-  function collectSubtaskLimits() {
-    var maxLines = positiveNumber('limit-max_lines', true);
-    var maxFiles = positiveNumber('limit-max_files', true);
-    var reviewHours = positiveNumber('limit-review_hours', false);
-    if (maxLines === null || maxFiles === null || reviewHours === null)
+  function collectEstimation() {
+    var teamSize = positiveNumber('est-team_size', true);
+    var mandayPerWeek = positiveNumber('est-manday_per_week', false);
+    var bufferRatio = nonNegativeNumber('est-buffer_ratio');
+    var cxS = positiveNumber('est-cx-S', false);
+    var cxM = positiveNumber('est-cx-M', false);
+    var cxL = positiveNumber('est-cx-L', false);
+    var cxXL = positiveNumber('est-cx-XL', false);
+    var ohIntegration = nonNegativeNumber('est-oh-integration');
+    var ohTest = nonNegativeNumber('est-oh-test');
+    var ohPm = nonNegativeNumber('est-oh-pm');
+    if (
+      teamSize === null ||
+      mandayPerWeek === null ||
+      bufferRatio === null ||
+      cxS === null ||
+      cxM === null ||
+      cxL === null ||
+      cxXL === null ||
+      ohIntegration === null ||
+      ohTest === null ||
+      ohPm === null
+    )
       return null;
     return {
-      max_lines: maxLines,
-      max_files: maxFiles,
-      review_hours: reviewHours,
+      team_size: teamSize,
+      available_manday_per_week: mandayPerWeek,
+      complexity_baseline: { S: cxS, M: cxM, L: cxL, XL: cxXL },
+      overhead_ratio: { integration: ohIntegration, test: ohTest, pm: ohPm },
+      buffer_ratio: bufferRatio,
     };
   }
 
@@ -501,19 +534,19 @@
     var projectRef = collectProjectRef(provider);
     if (projectRef === null) return null;
 
-    var subtaskLimits = collectSubtaskLimits();
-    if (subtaskLimits === null) return null;
+    var estimation = collectEstimation();
+    if (estimation === null) return null;
 
     var next = {
-      version: config.version || '1.0',
+      version: config.version || '2.0',
       provider: provider,
       language: collectGroup('data-lang-key'),
       defaults: {
         project_ref: projectRef,
         codebase: (config.defaults || {}).codebase || null,
         llm_model: collectGroup('data-model-key'),
-        subtask_limits: subtaskLimits,
       },
+      estimation: estimation,
       labels: collectGroup('data-label-key'),
       jira: collectJiraSection(),
     };

@@ -38,11 +38,20 @@ export async function handleRunList(input: RunListInput) {
     const run_dir = getRunDir(cwd, project_ref, run_id);
     try {
       const state = await loadRunState(run_dir);
+      const phase = state.phases[state.current_phase];
+      // A phase completed with result BLOCKED holds the run in place — report
+      // 'blocked' so the listing does not read as a normal completion.
+      const status =
+        phase.status === 'completed' &&
+        'result' in phase &&
+        phase.result === 'BLOCKED'
+          ? 'blocked'
+          : phase.status;
       runs.push({
         run_id,
         run_dir,
         current_phase: state.current_phase,
-        status: state.phases[state.current_phase].status,
+        status,
         created_at: state.created_at,
         updated_at: state.updated_at,
       });

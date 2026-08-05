@@ -2,12 +2,12 @@
 
 ## Requirements
 
-`run_transition` 도구는 run state의 phase 전이를 수행한다. 4가지 action을 지원한다.
+`run_transition` 도구는 run state의 phase 전이를 수행한다. phase 는 `refine → estimate(skip 가능) → split` 이며 4가지 action을 지원한다.
 
-- `start_phase`: 필수 필드 `phase` ("validate" | "split" | "devplan").
-- `complete_phase`: 필수 필드 `phase`. `result` ("PASS" | "PASS_WITH_WARNINGS" | "BLOCKED")는 스키마상 optional — validate phase 완료 시에는 스킬 관례상 필수로 전달. 선택: `blocking_issues`, `warning_issues`, `pending_review`, `stories_created` (phase="split" 시). `result="BLOCKED"`면 `current_phase`를 전진시키지 않는다.
+- `start_phase`: 필수 필드 `phase` ("refine" | "estimate" | "split"). `estimate` 는 refine 이 PASS 계열로 완료되어야, `split` 은 추가로 estimate 가 completed 또는 skipped 여야 시작된다.
+- `complete_phase`: 필수 필드 `phase`. `refine` 완료는 `result` ("PASS" | "PASS_WITH_WARNINGS" | "BLOCKED") 필수, `estimate` 완료는 `estimated_manday`(음이 아닌 수) 필수 — 둘 다 핸들러 계층(`handleCompletePhase`)이 강제한다. 선택: `blocking_issues`, `warning_issues` (refine), `pending_review`, `stories_created` (split). `result="BLOCKED"`면 `current_phase`를 전진시키지 않는다.
 - `escape_phase`: 필수 필드 `phase="split"`, `escape_code` ("E2-1" | "E2-2" | "E2-3" | "EC-1" | "EC-2").
-- `skip_phases`: 필수 필드 `phases` — "validate" | "split" 만 허용 (min 1; devplan은 skip 불가).
+- `skip_phases`: 필수 필드 `phases` — `"estimate"` 만 허용 (min 1). refine 이 PASS 계열로 완료된 뒤에만 허용된다 — skip 도 phase 순서상의 전진이므로 start 와 같은 refine 게이트를 받는다. skip 된 phase 는 `status: 'skipped'` 로 기록되고 `current_phase` 는 다음 phase 로 전진한다.
 - 4개 action 공통 선택 필드 `project_root`: 워크스페이스 절대경로. Claude Code 에서는 생략하고, 플러그인 설치 디렉토리에서 서버를 띄우는 호스트에서는 전달한다.
 
 ## API Contracts
@@ -24,7 +24,7 @@ MCP `inputSchema`는 flat leaf-primitive only `z.object`다 — 모든 비-core 
 
 ### AC-per-action-validation — action 별 검증
 
-- flat 스키마만으로는 통과하는 잘못된 조합(예: `escape_phase` 에 `escape_code` 누락)이 `RunTransitionSchema.parse` 에서 거부되어 MCP `isError: true` 로 나타난다.
+- flat 스키마만으로는 통과하는 잘못된 조합(예: `skip_phases` 에 `phases: ["refine"]`)이 `RunTransitionSchema.parse` 에서 거부되어 MCP `isError: true` 로 나타난다.
 - 올바른 payload 는 flat 스키마와 `RunTransitionSchema` 양쪽을 모두 통과한다.
 
 ### AC-project-root-reaches-handler — project_root 도달
@@ -35,6 +35,10 @@ MCP `inputSchema`는 flat leaf-primitive only `z.object`다 — 모든 비-core 
 
 - `complete_phase` 를 `result="BLOCKED"` 로 호출하면 해당 phase 는 완료로 기록되지만 `current_phase` 는 그대로다.
 
+### AC-estimate-mandatory-stats — estimate 완료 통계 필수
+
+- `complete_phase(estimate)` 는 `estimated_manday` 없이 거부되고, 값이 있으면 `phases.estimate.estimated_manday` 에 기록된다.
+
 ## Last Updated
 
-2026-07-30 — 수락 기준을 `### AC-*` 그룹으로 추가했다(계약 내용 변경 없음).
+2026-08-05 — v2: phase 집합 refine/estimate/split, skip 대상 estimate 단일화, estimated_manday 계약 추가.

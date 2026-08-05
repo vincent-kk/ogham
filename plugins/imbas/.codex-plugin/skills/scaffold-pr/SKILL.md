@@ -29,7 +29,7 @@ Create a Draft PR from an issue with its sub-tasks rendered as a checklist in th
 
 - To scaffold a PR before starting implementation
 - To create a tracking PR that links an issue to its sub-task checklist
-- As the first step after devplan creates Subtasks for a Story
+- As the handoff step after split creates issues for a plan
 
 ## Arguments
 

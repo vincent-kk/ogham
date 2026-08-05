@@ -8,6 +8,7 @@ import { handleRunCreate } from '../../mcp/tools/runCreate/index.js';
 import { handleRunGet } from '../../mcp/tools/runGet/index.js';
 import { handleRunList } from '../../mcp/tools/runList/index.js';
 import { handleRunTransition } from '../../mcp/tools/runTransition/index.js';
+import type { RunState } from '../../types/state.js';
 
 // --- helpers ---
 
@@ -35,41 +36,39 @@ function makeInitialState(
   run_id: string,
   project_ref: string,
   source_file: string,
-) {
+): RunState {
   const now = new Date().toISOString();
   return {
     run_id,
     project_ref,
     epic_ref: null,
+    source_issue_ref: null,
     source_file,
     created_at: now,
     updated_at: now,
-    current_phase: 'validate',
+    current_phase: 'refine',
     phases: {
-      validate: {
+      refine: {
         status: 'pending',
         started_at: null,
         completed_at: null,
-        output: 'validation-report.md',
         result: null,
         blocking_issues: 0,
         warning_issues: 0,
+      },
+      estimate: {
+        status: 'pending',
+        started_at: null,
+        completed_at: null,
+        estimated_manday: null,
       },
       split: {
         status: 'pending',
         started_at: null,
         completed_at: null,
-        output: 'stories-manifest.json',
         stories_created: 0,
         pending_review: true,
         escape_code: null,
-      },
-      devplan: {
-        status: 'pending',
-        started_at: null,
-        completed_at: null,
-        output: 'devplan-manifest.json',
-        pending_review: true,
       },
     },
   };
@@ -107,7 +106,7 @@ describe('handleRunCreate', () => {
       source_file: src,
     });
     expect(result.state.project_ref).toBe('PROJ');
-    expect(result.state.current_phase).toBe('validate');
+    expect(result.state.current_phase).toBe('refine');
   });
 
   it('copies supplements into run dir supplements/ subdir', async () => {
@@ -123,6 +122,17 @@ describe('handleRunCreate', () => {
     expect(existsSync(join(result.run_dir, 'supplements', 'extra.md'))).toBe(
       true,
     );
+  });
+
+  it('copies the source file into the run directory', async () => {
+    const src = writeSourceFile(tmpDir);
+    const result = await handleRunCreate({
+      project_ref: 'TEST',
+      source_file: src,
+    });
+    const { readFileSync } = await import('node:fs');
+    const content = readFileSync(join(result.run_dir, 'source.md'), 'utf-8');
+    expect(content).toBe('# Test source\n');
   });
 });
 
@@ -209,6 +219,20 @@ describe('handleRunList', () => {
   it('throws when project_ref missing and no config default', async () => {
     await expect(handleRunList({})).rejects.toThrow('project_ref is required');
   });
+
+  it('reports a BLOCKED refine run as blocked, not completed', async () => {
+    const run = join(tmpDir, '.imbas', 'PROJ', 'runs', '20260101-003');
+    const state = makeInitialState('20260101-003', 'PROJ', '/s.md');
+    state.phases.refine.status = 'completed';
+    state.phases.refine.result = 'BLOCKED';
+    writeStateJson(run, state);
+
+    const result = await handleRunList({ project_ref: 'PROJ' });
+    expect(result.runs[0]).toMatchObject({
+      current_phase: 'refine',
+      status: 'blocked',
+    });
+  });
 });
 
 describe('handleRunTransition', () => {
@@ -233,62 +257,60 @@ describe('handleRunTransition', () => {
       project_ref: 'PROJ',
       run_id: '20260101-001',
       action: 'start_phase',
-      phase: 'validate',
+      phase: 'refine',
     });
-    expect(result.phases.validate.status).toBe('in_progress');
+    expect(result.phases.refine.status).toBe('in_progress');
   });
 
-  it('applies skip_phases transition via MCP tool', async () => {
+  it('completes estimate with estimated_manday via MCP tool', async () => {
     const runDir = join(tmpDir, '.imbas', 'PROJ', 'runs', '20260101-001');
     const state = makeInitialState('20260101-001', 'PROJ', '/s.md');
+    state.phases.refine.status = 'completed';
+    state.phases.refine.result = 'PASS';
+    state.phases.estimate.status = 'in_progress';
+    writeStateJson(runDir, state);
+
+    const result = await handleRunTransition({
+      project_ref: 'PROJ',
+      run_id: '20260101-001',
+      action: 'complete_phase',
+      phase: 'estimate',
+      estimated_manday: 42.5,
+    });
+    expect(result.phases.estimate.status).toBe('completed');
+    expect(result.phases.estimate.estimated_manday).toBe(42.5);
+    expect(result.current_phase).toBe('split');
+  });
+
+  it('applies skip_phases for estimate via MCP tool', async () => {
+    const runDir = join(tmpDir, '.imbas', 'PROJ', 'runs', '20260101-001');
+    const state = makeInitialState('20260101-001', 'PROJ', '/s.md');
+    state.phases.refine.status = 'completed';
+    state.phases.refine.result = 'PASS';
     writeStateJson(runDir, state);
 
     const result = await handleRunTransition({
       project_ref: 'PROJ',
       run_id: '20260101-001',
       action: 'skip_phases',
-      phases: ['validate', 'split'],
+      phases: ['estimate'],
     });
-    expect(result.phases.validate.status).toBe('completed');
-    expect(result.phases.split.status).toBe('completed');
-    expect(result.current_phase).toBe('devplan');
-    expect(result.metadata?.skipped_phases).toEqual(['validate', 'split']);
-  });
-});
-
-describe('handleRunCreate sentinel source_file', () => {
-  let tmpDir: string;
-  let cwdSpy: ReturnType<typeof vi.spyOn>;
-
-  beforeEach(() => {
-    tmpDir = makeTmpDir();
-    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+    expect(result.phases.estimate.status).toBe('skipped');
+    expect(result.current_phase).toBe('split');
   });
 
-  afterEach(() => {
-    cwdSpy.mockRestore();
-  });
+  it('rejects skip_phases for refine via schema validation', async () => {
+    const runDir = join(tmpDir, '.imbas', 'PROJ', 'runs', '20260101-001');
+    const state = makeInitialState('20260101-001', 'PROJ', '/s.md');
+    writeStateJson(runDir, state);
 
-  it('creates run with devplan-pipeline sentinel without ENOENT', async () => {
-    const result = await handleRunCreate({
-      project_ref: 'TEST',
-      source_file: 'devplan-pipeline',
-    });
-    expect(result.run_id).toMatch(/^\d{8}-\d{3}$/);
-    expect(result.state.source_file).toBe('devplan-pipeline');
-
-    const { existsSync } = await import('node:fs');
-    expect(existsSync(join(result.run_dir, 'source.md'))).toBe(true);
-  });
-
-  it('still copies real files normally', async () => {
-    const src = writeSourceFile(tmpDir);
-    const result = await handleRunCreate({
-      project_ref: 'TEST',
-      source_file: src,
-    });
-    const { readFileSync } = await import('node:fs');
-    const content = readFileSync(join(result.run_dir, 'source.md'), 'utf-8');
-    expect(content).toBe('# Test source\n');
+    await expect(
+      handleRunTransition({
+        project_ref: 'PROJ',
+        run_id: '20260101-001',
+        action: 'skip_phases',
+        phases: ['refine'],
+      }),
+    ).rejects.toThrow();
   });
 });

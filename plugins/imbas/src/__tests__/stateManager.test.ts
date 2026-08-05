@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  applyTransition,
-  createRunState,
-} from '../core/stateManager/index.js';
+import { applyTransition, createRunState } from '../core/stateManager/index.js';
 import type { RunState } from '../types/state.js';
 
 // --- Helpers ---
@@ -17,7 +14,7 @@ function makeState(overrides?: Partial<RunState>): RunState {
   return { ...base, ...overrides };
 }
 
-function withValidateCompleted(
+function withRefineCompleted(
   state: RunState,
   result: 'PASS' | 'PASS_WITH_WARNINGS' | 'BLOCKED' = 'PASS',
 ): RunState {
@@ -25,11 +22,29 @@ function withValidateCompleted(
     ...state,
     phases: {
       ...state.phases,
-      validate: {
-        ...state.phases.validate,
+      refine: {
+        ...state.phases.refine,
         status: 'completed',
         result,
         completed_at: new Date().toISOString(),
+      },
+    },
+  };
+}
+
+function withEstimate(
+  state: RunState,
+  status: 'completed' | 'skipped' | 'in_progress',
+): RunState {
+  return {
+    ...state,
+    phases: {
+      ...state.phases,
+      estimate: {
+        ...state.phases.estimate,
+        status,
+        completed_at:
+          status === 'in_progress' ? null : new Date().toISOString(),
       },
     },
   };
@@ -49,196 +64,239 @@ function withSplitInProgress(state: RunState): RunState {
   };
 }
 
-function withSplitCompleted(state: RunState, pendingReview = false): RunState {
-  return {
-    ...state,
-    phases: {
-      ...state.phases,
-      split: {
-        ...state.phases.split,
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        pending_review: pendingReview,
-      },
-    },
-  };
-}
-
-function withSplitEscaped(
-  state: RunState,
-  escape_code: 'E2-1' | 'E2-2' | 'E2-3' | 'EC-1' | 'EC-2',
-): RunState {
-  return {
-    ...state,
-    phases: {
-      ...state.phases,
-      split: {
-        ...state.phases.split,
-        status: 'escaped',
-        completed_at: new Date().toISOString(),
-        escape_code,
-      },
-    },
-  };
-}
-
-// --- Basic (3) ---
+// --- createRunState ---
 
 describe('createRunState', () => {
   it('returns valid initial state', () => {
     const state = makeState();
     expect(state.run_id).toBe('20240101-001');
     expect(state.project_ref).toBe('PROJ');
-    expect(state.current_phase).toBe('validate');
-    expect(state.phases.validate.status).toBe('pending');
+    expect(state.current_phase).toBe('refine');
+    expect(state.phases.refine.status).toBe('pending');
+    expect(state.phases.estimate.status).toBe('pending');
+    expect(state.phases.estimate.estimated_manday).toBeNull();
     expect(state.phases.split.status).toBe('pending');
-    expect(state.phases.devplan.status).toBe('pending');
   });
 });
 
-describe('applyTransition start_phase validate', () => {
-  it('always allows starting validate phase', () => {
+// --- start_phase ---
+
+describe('applyTransition start_phase refine', () => {
+  it('always allows starting refine phase', () => {
     const state = makeState();
     const next = applyTransition(state, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
-      phase: 'validate',
+      phase: 'refine',
     });
-    expect(next.phases.validate.status).toBe('in_progress');
-    expect(next.current_phase).toBe('validate');
+    expect(next.phases.refine.status).toBe('in_progress');
+    expect(next.current_phase).toBe('refine');
   });
 });
 
-describe('applyTransition complete_phase validate', () => {
-  it('sets result and issue counts', () => {
-    const state = {
-      ...makeState(),
-      phases: {
-        ...makeState().phases,
-        validate: {
-          ...makeState().phases.validate,
-          status: 'in_progress' as const,
-        },
-      },
-    };
+describe('start_phase estimate', () => {
+  it('succeeds when refine is completed with PASS', () => {
+    const state = withRefineCompleted(makeState(), 'PASS');
     const next = applyTransition(state, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
+      action: 'start_phase',
+      phase: 'estimate',
+    });
+    expect(next.phases.estimate.status).toBe('in_progress');
+  });
+
+  it('fails when refine is not completed', () => {
+    const state = makeState();
+    expect(() =>
+      applyTransition(state, {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'start_phase',
+        phase: 'estimate',
+      }),
+    ).toThrow('refine status is "pending"');
+  });
+
+  it('fails when refine result is BLOCKED', () => {
+    const state = withRefineCompleted(makeState(), 'BLOCKED');
+    expect(() =>
+      applyTransition(state, {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'start_phase',
+        phase: 'estimate',
+      }),
+    ).toThrow('Cannot start phase "estimate"');
+  });
+});
+
+describe('start_phase split', () => {
+  it('succeeds when refine passed and estimate completed', () => {
+    const state = withEstimate(
+      withRefineCompleted(makeState(), 'PASS_WITH_WARNINGS'),
+      'completed',
+    );
+    const next = applyTransition(state, {
+      project_ref: 'PROJ',
+      run_id: '20240101-001',
+      action: 'start_phase',
+      phase: 'split',
+    });
+    expect(next.phases.split.status).toBe('in_progress');
+  });
+
+  it('succeeds when refine passed and estimate skipped', () => {
+    const state = withEstimate(withRefineCompleted(makeState()), 'skipped');
+    const next = applyTransition(state, {
+      project_ref: 'PROJ',
+      run_id: '20240101-001',
+      action: 'start_phase',
+      phase: 'split',
+    });
+    expect(next.phases.split.status).toBe('in_progress');
+  });
+
+  it('fails when refine is not completed', () => {
+    const state = makeState();
+    expect(() =>
+      applyTransition(state, {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'start_phase',
+        phase: 'split',
+      }),
+    ).toThrow('refine status is "pending"');
+  });
+
+  it('fails when estimate is still pending', () => {
+    const state = withRefineCompleted(makeState());
+    expect(() =>
+      applyTransition(state, {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'start_phase',
+        phase: 'split',
+      }),
+    ).toThrow('estimate status is "pending"');
+  });
+
+  it('fails when estimate is in_progress', () => {
+    const state = withEstimate(withRefineCompleted(makeState()), 'in_progress');
+    expect(() =>
+      applyTransition(state, {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'start_phase',
+        phase: 'split',
+      }),
+    ).toThrow('estimate status is "in_progress"');
+  });
+});
+
+// --- complete_phase ---
+
+describe('complete_phase refine', () => {
+  function refineInProgress(): RunState {
+    const base = makeState();
+    return {
+      ...base,
+      phases: {
+        ...base.phases,
+        refine: { ...base.phases.refine, status: 'in_progress' },
+      },
+    };
+  }
+
+  it('sets result and issue counts, advances to estimate', () => {
+    const next = applyTransition(refineInProgress(), {
+      project_ref: 'PROJ',
+      run_id: '20240101-001',
       action: 'complete_phase',
-      phase: 'validate',
+      phase: 'refine',
       result: 'PASS_WITH_WARNINGS',
       blocking_issues: 0,
       warning_issues: 3,
     });
-    expect(next.phases.validate.status).toBe('completed');
-    expect(next.phases.validate.result).toBe('PASS_WITH_WARNINGS');
-    expect(next.phases.validate.blocking_issues).toBe(0);
-    expect(next.phases.validate.warning_issues).toBe(3);
+    expect(next.phases.refine.status).toBe('completed');
+    expect(next.phases.refine.result).toBe('PASS_WITH_WARNINGS');
+    expect(next.phases.refine.warning_issues).toBe(3);
+    expect(next.current_phase).toBe('estimate');
+  });
+
+  it('requires result field', () => {
+    expect(() =>
+      applyTransition(refineInProgress(), {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'complete_phase',
+        phase: 'refine',
+      }),
+    ).toThrow('complete_phase(refine) requires "result"');
+  });
+
+  it('stays on refine when result is BLOCKED', () => {
+    const next = applyTransition(refineInProgress(), {
+      project_ref: 'PROJ',
+      run_id: '20240101-001',
+      action: 'complete_phase',
+      phase: 'refine',
+      result: 'BLOCKED',
+      blocking_issues: 2,
+    });
+    expect(next.phases.refine.status).toBe('completed');
+    expect(next.current_phase).toBe('refine');
+  });
+
+  it('fails when phase is still pending (not in_progress)', () => {
+    expect(() =>
+      applyTransition(makeState(), {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'complete_phase',
+        phase: 'refine',
+        result: 'PASS',
+      }),
+    ).toThrow('expected "in_progress"');
   });
 });
 
-// --- Complex (12) ---
+describe('complete_phase estimate', () => {
+  function estimateInProgress(): RunState {
+    return withEstimate(withRefineCompleted(makeState()), 'in_progress');
+  }
 
-describe('start_phase split', () => {
-  it('succeeds when validate is completed with PASS', () => {
-    const state = withValidateCompleted(makeState(), 'PASS');
-    const next = applyTransition(state, {
+  it('records estimated_manday and advances to split', () => {
+    const next = applyTransition(estimateInProgress(), {
       project_ref: 'PROJ',
       run_id: '20240101-001',
-      action: 'start_phase',
-      phase: 'split',
+      action: 'complete_phase',
+      phase: 'estimate',
+      estimated_manday: 66.4,
     });
-    expect(next.phases.split.status).toBe('in_progress');
+    expect(next.phases.estimate.status).toBe('completed');
+    expect(next.phases.estimate.estimated_manday).toBe(66.4);
+    expect(next.current_phase).toBe('split');
   });
 
-  it('succeeds when validate is completed with PASS_WITH_WARNINGS', () => {
-    const state = withValidateCompleted(makeState(), 'PASS_WITH_WARNINGS');
-    const next = applyTransition(state, {
-      project_ref: 'PROJ',
-      run_id: '20240101-001',
-      action: 'start_phase',
-      phase: 'split',
-    });
-    expect(next.phases.split.status).toBe('in_progress');
-  });
-
-  it('fails when validate is not completed', () => {
-    const state = makeState();
+  it('requires estimated_manday field', () => {
     expect(() =>
-      applyTransition(state, {
+      applyTransition(estimateInProgress(), {
         project_ref: 'PROJ',
         run_id: '20240101-001',
-        action: 'start_phase',
-        phase: 'split',
+        action: 'complete_phase',
+        phase: 'estimate',
       }),
-    ).toThrow('validate phase status is "pending"');
-  });
-
-  it('fails when validate result is BLOCKED', () => {
-    const state = withValidateCompleted(makeState(), 'BLOCKED');
-    expect(() =>
-      applyTransition(state, {
-        project_ref: 'PROJ',
-        run_id: '20240101-001',
-        action: 'start_phase',
-        phase: 'split',
-      }),
-    ).toThrow('validate result is "BLOCKED"');
+    ).toThrow('complete_phase(estimate) requires "estimated_manday"');
   });
 });
 
-describe('start_phase devplan', () => {
-  it('succeeds when split is completed without pending_review', () => {
-    const state = withSplitCompleted(withValidateCompleted(makeState()), false);
-    const next = applyTransition(state, {
-      project_ref: 'PROJ',
-      run_id: '20240101-001',
-      action: 'start_phase',
-      phase: 'devplan',
-    });
-    expect(next.phases.devplan.status).toBe('in_progress');
-  });
-
-  it('succeeds when split escaped with E2-3', () => {
-    const state = withSplitEscaped(withValidateCompleted(makeState()), 'E2-3');
-    const next = applyTransition(state, {
-      project_ref: 'PROJ',
-      run_id: '20240101-001',
-      action: 'start_phase',
-      phase: 'devplan',
-    });
-    expect(next.phases.devplan.status).toBe('in_progress');
-  });
-
-  it('fails when split has pending_review=true', () => {
-    const state = withSplitCompleted(withValidateCompleted(makeState()), true);
-    expect(() =>
-      applyTransition(state, {
-        project_ref: 'PROJ',
-        run_id: '20240101-001',
-        action: 'start_phase',
-        phase: 'devplan',
-      }),
-    ).toThrow('Cannot start phase "devplan"');
-  });
-
-  it('fails when split escaped with non-E2-3 code', () => {
-    const state = withSplitEscaped(withValidateCompleted(makeState()), 'E2-1');
-    expect(() =>
-      applyTransition(state, {
-        project_ref: 'PROJ',
-        run_id: '20240101-001',
-        action: 'start_phase',
-        phase: 'devplan',
-      }),
-    ).toThrow('Cannot start phase "devplan"');
-  });
-});
-
-describe('complete_phase', () => {
-  it('succeeds when phase is in_progress', () => {
-    const state = withSplitInProgress(withValidateCompleted(makeState()));
+describe('complete_phase split', () => {
+  it('applies stories_created and pending_review', () => {
+    const state = withSplitInProgress(
+      withEstimate(withRefineCompleted(makeState()), 'skipped'),
+    );
     const next = applyTransition(state, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
@@ -249,45 +307,17 @@ describe('complete_phase', () => {
     });
     expect(next.phases.split.status).toBe('completed');
     expect(next.phases.split.stories_created).toBe(5);
-  });
-
-  it('fails when phase is still pending (not in_progress)', () => {
-    const state = makeState();
-    expect(() =>
-      applyTransition(state, {
-        project_ref: 'PROJ',
-        run_id: '20240101-001',
-        action: 'complete_phase',
-        phase: 'validate',
-      }),
-    ).toThrow('expected "in_progress"');
-  });
-
-  it('advances current_phase to next phase after completion', () => {
-    const state = {
-      ...makeState(),
-      phases: {
-        ...makeState().phases,
-        validate: {
-          ...makeState().phases.validate,
-          status: 'in_progress' as const,
-        },
-      },
-    };
-    const next = applyTransition(state, {
-      project_ref: 'PROJ',
-      run_id: '20240101-001',
-      action: 'complete_phase',
-      phase: 'validate',
-      result: 'PASS',
-    });
-    expect(next.current_phase).toBe('split');
+    expect(next.phases.split.pending_review).toBe(false);
   });
 });
 
+// --- escape_phase ---
+
 describe('escape_phase', () => {
   it('succeeds for split phase when in_progress', () => {
-    const state = withSplitInProgress(withValidateCompleted(makeState()));
+    const state = withSplitInProgress(
+      withEstimate(withRefineCompleted(makeState()), 'completed'),
+    );
     const next = applyTransition(state, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
@@ -313,61 +343,61 @@ describe('escape_phase', () => {
   });
 });
 
+// --- skip_phases ---
+
 describe('skip_phases', () => {
-  it('marks validate and split as completed with correct defaults', () => {
+  it('rejects skipping estimate before refine has passed', () => {
     const state = makeState();
+    expect(() =>
+      applyTransition(state, {
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'skip_phases',
+        phases: ['estimate'],
+      }),
+    ).toThrow('Cannot skip phases');
+  });
+
+  it('marks estimate as skipped and advances current_phase to split', () => {
+    const state = withRefineCompleted(makeState());
     const next = applyTransition(state, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'skip_phases',
-      phases: ['validate', 'split'],
+      phases: ['estimate'],
     });
-    expect(next.phases.validate.status).toBe('completed');
-    expect(next.phases.validate.result).toBe('PASS');
-    expect(next.phases.validate.blocking_issues).toBe(0);
-    expect(next.phases.validate.warning_issues).toBe(0);
-    expect(next.phases.split.status).toBe('completed');
-    expect(next.phases.split.pending_review).toBe(false);
-    expect(next.phases.split.stories_created).toBe(0);
+    expect(next.phases.estimate.status).toBe('skipped');
+    expect(next.phases.estimate.estimated_manday).toBeNull();
+    expect(next.current_phase).toBe('split');
   });
 
-  it('advances current_phase past all skipped phases', () => {
-    const state = makeState();
+  it('re-skipping a completed estimate is an idempotent no-op', () => {
+    const state = withEstimate(withRefineCompleted(makeState()), 'completed');
     const next = applyTransition(state, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'skip_phases',
-      phases: ['validate', 'split'],
+      phases: ['estimate'],
     });
-    expect(next.current_phase).toBe('devplan');
+    expect(next.phases.estimate.status).toBe('completed');
+    expect(next.current_phase).toBe(state.current_phase);
   });
 
-  it('sets metadata.skipped_phases for auditability', () => {
-    const state = makeState();
-    const next = applyTransition(state, {
-      project_ref: 'PROJ',
-      run_id: '20240101-001',
-      action: 'skip_phases',
-      phases: ['validate', 'split'],
-    });
-    expect(next.metadata?.skipped_phases).toEqual(['validate', 'split']);
-  });
-
-  it('allows start_phase devplan after skip_phases', () => {
-    const state = makeState();
+  it('allows start_phase split after skipping estimate', () => {
+    const state = withRefineCompleted(makeState());
     const skipped = applyTransition(state, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'skip_phases',
-      phases: ['validate', 'split'],
+      phases: ['estimate'],
     });
     const next = applyTransition(skipped, {
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
-      phase: 'devplan',
+      phase: 'split',
     });
-    expect(next.phases.devplan.status).toBe('in_progress');
-    expect(next.current_phase).toBe('devplan');
+    expect(next.phases.split.status).toBe('in_progress');
+    expect(next.current_phase).toBe('split');
   });
 });

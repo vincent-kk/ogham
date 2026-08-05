@@ -21,5 +21,5 @@ Not all transitions are always available — Jira workflow guards may restrict w
 
 ## Used By
 
-- `manifest` — Check available transitions before status change
-- `cache` — Cache workflow transitions
+- `split` — Check available transitions before status change
+- `setup` — Cache workflow transitions (refresh-cache)

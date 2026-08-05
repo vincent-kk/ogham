@@ -52,7 +52,7 @@ When re-running digest on the same issue:
 
 The `imbas:digest` skill is suggested (never auto-executed) when ALL of:
 
-1. `imbas:manifest` calls `[OP: transition_issue]` to move an issue to Done.
+1. `imbas:split` calls `[OP: transition_issue]` to move an issue to Done.
 2. The issue has ≥ 3 comments.
 3. Comments are from ≥ 2 distinct authors.
 

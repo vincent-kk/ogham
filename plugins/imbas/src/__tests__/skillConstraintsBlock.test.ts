@@ -24,18 +24,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(__dirname, '..', '..');
 const SKILLS_DIR = join(PKG_ROOT, 'skills');
 
-/**
- * Pinned list of skills that were partitioned during the RALPLAN v2
- * local-provider cycle. Phase C1-C5. Keep in sync with
- * .metadata/imbas/specs/SPEC-skills.md.
- */
-const PARTITIONED_SKILLS = [
-  'manifest',
-  'read-issue',
-  'digest',
-  'devplan',
-] as const;
-
 const ANCHOR_LITERAL = '<!-- imbas:constraints-v1 -->';
 
 /**
@@ -80,18 +68,19 @@ function stripConstraintsBlock(body: string): string {
   return idx < 0 ? body : body.slice(0, idx);
 }
 
-describe('skill-constraints-block — provider dispatch anchor in partitioned SKILL.md', () => {
-  it.each(PARTITIONED_SKILLS)(
-    '%s SKILL.md contains the imbas:constraints-v1 anchor',
-    (skill) => {
+// The provider-partitioned skill list is written here as a literal so the case
+// count stays statically enumerable (filid_verification-records §3); a
+// module-level identifier makes the table dynamic. Keep in sync with
+// .metadata/imbas/skills.md.
+describe.each(['split', 'read-issue', 'digest'])(
+  'skill-constraints-block — %s provider dispatch anchor',
+  (skill) => {
+    it('SKILL.md contains the imbas:constraints-v1 anchor', () => {
       const content = readSkillMd(skill);
       expect(content).toContain(ANCHOR_LITERAL);
-    },
-  );
+    });
 
-  it.each(PARTITIONED_SKILLS)(
-    '%s anchor block contains a provider dispatch table with jira and local rows',
-    (skill) => {
+    it('anchor block contains a provider dispatch table with jira and local rows', () => {
       const content = readSkillMd(skill);
       const block = extractConstraintsBlock(content);
       expect(block, `no anchor block in ${skill}`).not.toBeNull();
@@ -101,12 +90,9 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       expect(block).toMatch(/`local`/);
       expect(block).toMatch(/references\/jira\/workflow\.md/);
       expect(block).toMatch(/references\/local\/workflow\.md/);
-    },
-  );
+    });
 
-  it.each(PARTITIONED_SKILLS)(
-    '%s anchor block contains a provider dispatch table with github row',
-    (skill) => {
+    it('anchor block contains a provider dispatch table with github row', () => {
       const content = readSkillMd(skill);
       const block = extractConstraintsBlock(content);
       expect(block, `no anchor block in ${skill}`).not.toBeNull();
@@ -114,22 +100,16 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       // Dispatch table must mention github provider and its workflow path.
       expect(block).toMatch(/`github`/);
       expect(block).toMatch(/references\/github\/workflow\.md/);
-    },
-  );
+    });
 
-  it.each(PARTITIONED_SKILLS)(
-    '%s anchor block declares a Constraints section',
-    (skill) => {
+    it('anchor block declares a Constraints section', () => {
       const content = readSkillMd(skill);
       const block = extractConstraintsBlock(content);
       if (!block) throw new Error(`${skill}: missing anchor block`);
       expect(block).toMatch(/^## Constraints$/m);
-    },
-  );
+    });
 
-  it.each(PARTITIONED_SKILLS)(
-    '%s SKILL.md body (outside anchor block) has no raw tracker tool tokens',
-    (skill) => {
+    it('SKILL.md body (outside anchor block) has no raw tracker tool tokens', () => {
       const content = readSkillMd(skill);
       const body = stripFrontmatter(content);
       const bodyOutsideAnchor = stripConstraintsBlock(body);
@@ -138,6 +118,6 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
           bodyOutsideAnchor,
           `${skill}: SKILL.md body contains forbidden tracker token "${token}" outside the anchor block; move it into references/<provider>/**`,
         ).not.toContain(token);
-    },
-  );
-});
+    });
+  },
+);

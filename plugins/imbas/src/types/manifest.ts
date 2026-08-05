@@ -1,11 +1,14 @@
 /**
  * @file manifest.ts
- * @description Zod schemas for imbas manifests (stories + devplan)
- * @see `agents/planner.md` (stories-manifest), `agents/engineer.md` (devplan-manifest)
+ * @description Zod schemas for imbas manifests (stories + estimation)
+ * @see .metadata/imbas/storage.md §4 (stories), .metadata/imbas/estimation.md §2.1 (estimation)
  */
 import { z } from 'zod';
 
 // --- Common ---
+
+export const ManifestTypeSchema = z.enum(['stories', 'estimation']);
+export type ManifestType = z.infer<typeof ManifestTypeSchema>;
 
 export const ManifestItemStatusSchema = z.enum([
   'pending',
@@ -18,7 +21,7 @@ export type ManifestItemStatus = z.infer<typeof ManifestItemStatusSchema>;
 export const LinkStatusSchema = z.enum(['pending', 'created', 'failed']);
 export type LinkStatus = z.infer<typeof LinkStatusSchema>;
 
-// --- Stories Manifest ---
+// --- Stories Manifest (v2) ---
 
 export const StoryVerificationSchema = z.object({
   anchor_link: z.boolean(),
@@ -39,6 +42,8 @@ export const StoryItemSchema = z.object({
   split_from: z.string().nullable().default(null),
   split_into: z.array(z.string()).default([]),
   labels: z.array(z.string()).default([]),
+  // estimation.json 연계 시 해당 unit 의 기대 manday — 없으면 null
+  estimate_manday: z.number().nonnegative().nullable().default(null),
 });
 export type StoryItem = z.infer<typeof StoryItemSchema>;
 
@@ -59,6 +64,7 @@ export const TransitionItemSchema = z.object({
 export type TransitionItem = z.infer<typeof TransitionItemSchema>;
 
 export const StoriesManifestSchema = z.object({
+  version: z.literal(2).default(2),
   batch: z.string(),
   run_id: z.string(),
   project_ref: z.string(),
@@ -70,137 +76,96 @@ export const StoriesManifestSchema = z.object({
 });
 export type StoriesManifest = z.infer<typeof StoriesManifestSchema>;
 
-// --- Devplan Manifest ---
+// --- Estimation Manifest ---
 
-export const SubtaskItemSchema = z.object({
+export const ComplexityGradeSchema = z.enum(['S', 'M', 'L', 'XL']);
+export type ComplexityGrade = z.infer<typeof ComplexityGradeSchema>;
+
+export const EstimationViewRefsSchema = z.object({
+  page: z.array(z.string()).default([]),
+  feature: z.array(z.string()).default([]),
+  module: z.array(z.string()).default([]),
+});
+export type EstimationViewRefs = z.infer<typeof EstimationViewRefsSchema>;
+
+export const EstimationPertSchema = z.object({
+  o: z.number().nonnegative(),
+  m: z.number().nonnegative(),
+  p: z.number().nonnegative(),
+  expected: z.number().nonnegative(),
+  sigma: z.number().nonnegative(),
+});
+export type EstimationPert = z.infer<typeof EstimationPertSchema>;
+
+export const EstimationUnitSchema = z.object({
   id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  status: ManifestItemStatusSchema.default('pending'),
-  issue_ref: z.string().nullable().default(null),
-  labels: z.array(z.string()).default([]),
-  needs_review: z.boolean().optional(),
-});
-export type SubtaskItem = z.infer<typeof SubtaskItemSchema>;
-
-export const TaskItemSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  type: z.literal('Task'),
-  status: ManifestItemStatusSchema.default('pending'),
-  issue_ref: z.string().nullable().default(null),
-  blocks: z.array(z.string()),
-  subtasks: z.array(SubtaskItemSchema).default([]),
-  labels: z.array(z.string()).default([]),
-  needs_review: z.boolean().optional(),
-});
-export type TaskItem = z.infer<typeof TaskItemSchema>;
-
-export const StorySubtasksSchema = z.object({
-  story_id: z.string(),
-  story_ref: z.string().nullable(),
-  subtasks: z.array(SubtaskItemSchema).default([]),
-});
-export type StorySubtasks = z.infer<typeof StorySubtasksSchema>;
-
-export const FeedbackCommentSchema = z.object({
-  target_story: z.string(),
-  target_ref: z.string().nullable(),
-  comment: z.string(),
-  type: z.enum(['mapping_divergence', 'story_split_issue']),
-  status: ManifestItemStatusSchema.default('pending'),
-});
-export type FeedbackComment = z.infer<typeof FeedbackCommentSchema>;
-
-export const ExecutionStepSchema = z.object({
-  step: z.number().int().positive(),
-  action: z.enum([
-    'create_tasks',
-    'create_task_subtasks',
-    'create_links',
-    'create_story_subtasks',
-    'add_feedback_comments',
-  ]),
-  items: z.array(z.string()),
-});
-export type ExecutionStep = z.infer<typeof ExecutionStepSchema>;
-
-export const DevplanManifestSchema = z.object({
-  batch: z.string(),
-  run_id: z.string(),
-  project_ref: z.string(),
-  epic_ref: z.string().nullable(),
-  created_at: z.string(),
-  tasks: z.array(TaskItemSchema).default([]),
-  story_subtasks: z.array(StorySubtasksSchema).default([]),
-  feedback_comments: z.array(FeedbackCommentSchema).default([]),
-  execution_order: z.array(ExecutionStepSchema).default([]),
-});
-export type DevplanManifest = z.infer<typeof DevplanManifestSchema>;
-
-// --- Implement Plan Manifest ---
-
-export const BatchItemKindSchema = z.enum(['Story', 'Task']);
-export type BatchItemKind = z.infer<typeof BatchItemKindSchema>;
-
-export const BatchItemRefSchema = z.object({
-  id: z.string(),
-  kind: BatchItemKindSchema,
-  issue_ref: z.string().nullable(),
+  name: z.string(),
+  view_refs: EstimationViewRefsSchema,
+  single_view: z.boolean().default(false),
+  complexity: ComplexityGradeSchema,
+  estimate: EstimationPertSchema,
   rationale: z.string(),
+  deps: z.array(z.string()).default([]),
 });
-export type BatchItemRef = z.infer<typeof BatchItemRefSchema>;
+export type EstimationUnit = z.infer<typeof EstimationUnitSchema>;
 
-export const BatchGroupSchema = z.object({
-  group_id: z.string(),
-  level: z.number().int().nonnegative(),
-  can_parallel: z.boolean(),
-  items: z.array(BatchItemRefSchema).min(1),
-  depends_on_groups: z.array(z.string()).default([]),
+export const EstimationRollupSchema = z.object({
+  sum_expected: z.number().nonnegative(),
+  overhead: z.object({
+    integration: z.number().nonnegative(),
+    test: z.number().nonnegative(),
+    pm: z.number().nonnegative(),
+  }),
+  buffered_total: z.number().nonnegative(),
+  confidence_interval: z.tuple([
+    z.number().nonnegative(),
+    z.number().nonnegative(),
+  ]),
 });
-export type BatchGroup = z.infer<typeof BatchGroupSchema>;
+export type EstimationRollup = z.infer<typeof EstimationRollupSchema>;
 
-export const BatchEdgeSourceSchema = z.enum([
-  'story_link',
-  'task_blocks',
-  'code_overlap',
-  'manual',
-]);
-export type BatchEdgeSource = z.infer<typeof BatchEdgeSourceSchema>;
-
-export const BatchEdgeSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  source: BatchEdgeSourceSchema,
-  weight: z.number().default(1),
+export const EstimationTrackSchema = z.object({
+  track: z.number().int().positive(),
+  units: z.array(z.string()),
 });
-export type BatchEdge = z.infer<typeof BatchEdgeSchema>;
+export type EstimationTrack = z.infer<typeof EstimationTrackSchema>;
 
-export const BatchCycleBrokenSchema = z.object({
-  nodes: z.array(z.string()),
-  resolution: z.string(),
+export const EstimationMilestoneSchema = z.object({
+  name: z.string(),
+  week: z.number().int().nonnegative(),
 });
-export type BatchCycleBroken = z.infer<typeof BatchCycleBrokenSchema>;
+export type EstimationMilestone = z.infer<typeof EstimationMilestoneSchema>;
 
-export const ImplementPlanSourceSchema = z.enum(['stories', 'devplan']);
-export type ImplementPlanSource = z.infer<typeof ImplementPlanSourceSchema>;
+export const EstimationScheduleSchema = z.object({
+  tracks: z.array(EstimationTrackSchema).default([]),
+  milestones: z.array(EstimationMilestoneSchema).default([]),
+  total_weeks: z.number().int().nonnegative(),
+});
+export type EstimationSchedule = z.infer<typeof EstimationScheduleSchema>;
 
-export const ImplementPlanManifestSchema = z.object({
-  batch: z.string(),
+export const EstimationRiskSchema = z.object({
+  unit: z.string(),
+  risk: z.string(),
+  impact: z.enum(['low', 'medium', 'high']),
+});
+export type EstimationRisk = z.infer<typeof EstimationRiskSchema>;
+
+export const EstimationManifestSchema = z.object({
+  version: z.literal(1).default(1),
   run_id: z.string(),
   project_ref: z.string(),
+  source: z.string(),
   created_at: z.string(),
-  source_manifest: ImplementPlanSourceSchema,
-  groups: z.array(BatchGroupSchema).default([]),
-  edges: z.array(BatchEdgeSchema).default([]),
-  cycles_broken: z.array(BatchCycleBrokenSchema).default([]),
-  unresolved: z.array(z.string()).default([]),
-  degraded: z.boolean().default(false),
+  config_used: z.record(z.string(), z.unknown()).default({}),
+  units: z.array(EstimationUnitSchema),
+  rollup: EstimationRollupSchema,
+  schedule: EstimationScheduleSchema,
+  assumptions: z.array(z.string()).default([]),
+  risks: z.array(EstimationRiskSchema).default([]),
 });
-export type ImplementPlanManifest = z.infer<typeof ImplementPlanManifestSchema>;
+export type EstimationManifest = z.infer<typeof EstimationManifestSchema>;
 
-// --- Manifest Summary ---
+// --- Summaries ---
 
 export interface ManifestSummary {
   total: number;
@@ -209,11 +174,9 @@ export interface ManifestSummary {
   failed: number;
 }
 
-export interface ImplementPlanSummary {
-  total_groups: number;
-  total_items: number;
-  max_level: number;
-  unresolved: number;
-  cycles_broken: number;
-  degraded: boolean;
+export interface EstimationSummary {
+  units: number;
+  sum_expected: number;
+  buffered_total: number;
+  total_weeks: number;
 }

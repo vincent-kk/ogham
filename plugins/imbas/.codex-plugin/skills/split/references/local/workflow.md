@@ -1,0 +1,109 @@
+# Manifest Execution Workflow — Local Provider
+
+This file is loaded by the manifest skill when `config.provider === 'local'`. Provider-agnostic preamble (manifest loading, dry-run preview, user confirmation, result report) lives in `../workflow.md`. This file owns the local-specific execution steps.
+
+## Storage target
+
+All created entities live under:
+
+```
+.imbas/<PROJECT-KEY>/issues/
+├── stories/   → S-<N>.md
+├── tasks/     → T-<N>.md
+└── subtasks/  → ST-<N>.md
+```
+
+`<PROJECT-KEY>` comes from `config.defaults.project_ref`; fallback `LOCAL`. Directory is the source of truth. No `.counter.json` or auxiliary state file.
+
+For ID allocation rules see `id-allocation.md`. For frontmatter schema and body layout see `file-format.md`. For link handling (both sides of a link record each other) see `link-handling.md`.
+
+## Step 2.5 — Drift Check (Local branch)
+
+Local files cannot drift out of band the way Jira issues can, but files may be manually deleted or renamed by the user. For each item where `status == "created"` and `issue_ref` is non-null:
+
+1. Compute expected path from the ID prefix:
+   - `S-*` → `.imbas/<KEY>/issues/stories/<ID>.md`
+   - `T-*` → `.imbas/<KEY>/issues/tasks/<ID>.md`
+   - `ST-*` → `.imbas/<KEY>/issues/subtasks/<ID>.md`
+2. `Glob` the expected path.
+3. Classify:
+   - MATCH: file exists → proceed.
+   - DRIFT_DELETED: file missing → WARN "Local issue `<ID>` was deleted. Reset to pending? [y/N]"
+     - Yes → clear `issue_ref`, set `status = "pending"`. Also reset every
+       `manifest.links` entry referencing the item (by manifest ID or the
+       deleted `issue_ref`) to `status = "pending"`, and `Edit` the counterpart
+       files' frontmatter to drop `links[]` entries pointing at the deleted ID.
+       Phase 4c then re-creates both sides against the re-allocated ID — the
+       scrub is what prevents stale entries when the new ID differs from the
+       old one.
+     - No → mark `status = "skipped"`.
+4. If any drift detected, display summary table and save reconciled manifest via `mcp__plugin_imbas_tools__manifest_save` before Step 3.
+5. Skip entirely for fresh runs (no `issue_ref` anywhere).
+
+## Step 4 — Batch Execution (Local)
+
+CRITICAL invariant: **allocate-then-write per item.** Never pre-compute all IDs before any file is written. For every item:
+
+1. `Glob .imbas/<KEY>/issues/<type>/*.md` to find the current max N.
+2. Derive next ID = `<PREFIX>-(max+1)`.
+3. `Write` the file immediately with full frontmatter + `## Description` body
+   - empty `## Digest` section (see `file-format.md`).
+4. Update manifest item: `status = "created"`, `issue_ref = <ID>`.
+5. `mcp__plugin_imbas_tools__manifest_save` immediately.
+
+This ensures crash recovery leaves no orphan IDs. A mid-batch kill means the next run's Glob will pick up from the highest written file.
+
+### Stories type
+
+#### Phase 4a — Epic (frontmatter field, not a separate file)
+
+Local provider does NOT create a separate Epic file. Epic identity is recorded in each Story's frontmatter `epic:` field. If the manifest has an epic entry:
+
+- Record the epic name/ref as a string (e.g. `auth-rewrite`).
+- Apply to every story created in Phase 4b via `epic: <ref>`.
+- Mark manifest `epic_ref = <ref>` for idempotency.
+
+#### Phase 4b — Item Creation (type-routed)
+
+For each item in `manifest.stories` where `status == "pending"`, route by the
+item's `type` field per `id-allocation.md`: Story → `stories/S-<N>`, Task →
+`tasks/T-<N>`, Subtask → `subtasks/ST-<N>`.
+
+1. Allocate the next ID for the item's type.
+2. `Write .imbas/<KEY>/issues/<type dir>/<ID>.md` per `file-format.md`:
+   - `type: <item.type>`
+   - `title: item.title`
+   - `status: To Do`
+   - Story only: `epic: <epic_ref or null>` plus `verification`, `size_check`,
+     `split_from`, `split_into` from the manifest — other types omit these
+     keys entirely (omissions table in `file-format.md`); Subtask carries
+     `parent` instead.
+   - `## Description` body from `item.description`.
+   - Empty `## Digest` section.
+3. Update the manifest item: `status = "created"`, `issue_ref = "<ID>"`.
+4. `mcp__plugin_imbas_tools__manifest_save` immediately.
+
+#### Phase 4c — Link Creation (bidirectional)
+
+See `link-handling.md`. For each link in `manifest.links` where `status == "pending"`:
+
+- Resolve `from` ID to its file path.
+- For EACH target in `link.to`:
+  1. Resolve target ID to its file path.
+  2. `Edit` the source file's frontmatter `links[]` to append `{type: link.type, to: <target>}`.
+  3. `Edit` the target file's frontmatter `links[]` to append the reverse (e.g. `blocks` → `is blocked by`).
+- Update link status per the 1:N rules (`created` / `partial` / `failed`).
+- Save manifest immediately.
+
+#### Phase 4d — Source Issue Transitions
+
+For each transition in `manifest.transitions` where `status == "pending"`:
+
+1. Resolve `issue_ref`:
+   - If it matches a manifest Story ID → lookup `issue_ref` from stories array.
+   - If it is already an external ref → resolve to file path via ID prefix.
+2. `Read` the target file, parse frontmatter `status`.
+   - If `status` already equals `transition.target_status` → set transition `status = "skipped"`, save manifest immediately. Continue to next.
+3. `Edit` the target file frontmatter: `status: <transition.target_status>`.
+   - On failure → set transition `status = "failed"`, log warning. Save manifest immediately. Continue to next (do NOT block pipeline).
+4. Set transition `status = "created"`. Save manifest immediately.

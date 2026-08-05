@@ -6,19 +6,13 @@ export {
   wrapHandler,
 } from './shared/index.js';
 export {
-  handleImbasPing,
   handleRunCreate,
   handleRunGet,
   handleRunTransition,
   handleRunList,
-  handleManifestGet,
   handleManifestSave,
   handleManifestValidate,
-  handleManifestPlan,
   handleConfigGet,
   handleConfigSet,
-  handleCacheGet,
-  handleCacheSet,
-  handleAstSearch,
-  handleAstAnalyze,
+  handleOpenSettings,
 } from './tools/index.js';
