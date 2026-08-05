@@ -15,7 +15,7 @@ phase 집합이 `refine → estimate(skip 가능) → split`으로 재정의된�
 | `run_create`     | run 디렉토리 + `state.json` 생성                  | source 스냅샷·run_id(`YYYYMMDD-NNN`) 발급                                                                   |
 | `run_get`        | `state.json` 조회 (생략 시 최신 run)              | —                                                                                                           |
 | `run_transition` | 타입 있는 전이 — start / complete / escape / skip | `skip`이 estimate 생략 경로. 통계 필드에 `estimated_manday` 추가, `stories_created` 유지, devplan 필드 제거 |
-| `run_list`       | 프로젝트의 run 목록                               | status 스킬의 기반                                                                                          |
+| `run_list`       | 프로젝트의 run 목록                               | status 스킬의 기반 · BLOCKED 완료로 멈춘 run 은 `blocked` 로 표기                                           |
 
 ### Manifest 검증 (2)
 

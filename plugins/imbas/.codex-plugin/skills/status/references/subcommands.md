@@ -49,7 +49,10 @@ Run ID         | Phase     | Status       | Created
 20260805-002   | split     | in_progress  | 2026-08-05 11:00
 20260805-001   | split     | escaped(E2-1)| 2026-08-05 10:00
 20260804-001   | split     | completed    | 2026-08-04 09:00
+20260803-001   | refine    | blocked      | 2026-08-03 09:00
 ```
+
+- `blocked` is `run_list`'s own marker: the current phase completed with result BLOCKED and the run did not advance. Show it as-is — the fix-and-rerun guidance lives in the run detail view.
 
 3. If no runs: display "No runs found for project <KEY>."
 

@@ -219,6 +219,20 @@ describe('handleRunList', () => {
   it('throws when project_ref missing and no config default', async () => {
     await expect(handleRunList({})).rejects.toThrow('project_ref is required');
   });
+
+  it('reports a BLOCKED refine run as blocked, not completed', async () => {
+    const run = join(tmpDir, '.imbas', 'PROJ', 'runs', '20260101-003');
+    const state = makeInitialState('20260101-003', 'PROJ', '/s.md');
+    state.phases.refine.status = 'completed';
+    state.phases.refine.result = 'BLOCKED';
+    writeStateJson(run, state);
+
+    const result = await handleRunList({ project_ref: 'PROJ' });
+    expect(result.runs[0]).toMatchObject({
+      current_phase: 'refine',
+      status: 'blocked',
+    });
+  });
 });
 
 describe('handleRunTransition', () => {
