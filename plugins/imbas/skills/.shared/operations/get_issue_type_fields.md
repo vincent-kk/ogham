@@ -18,4 +18,4 @@ GET /rest/api/3/issue/createmeta/{projectKey}/issuetypes/{issueTypeId}
 ## Used By
 
 - `setup` — Fetch required fields per issue type
-- `cache` — Cache field metadata
+- `setup` — Cache field metadata

@@ -42,7 +42,7 @@ GET /rest/api/3/issue/{issueIdOrKey}
 
 - `read-issue` — Primary: load issue + comment thread
 - `scaffold-pr` — Fetch issue details including subtasks
-- `manifest` — Drift check to verify remote state
+- `split` — Drift check to verify remote state
 - `split` — Verify Epic existence when `--epic` provided
-- `devplan` — Optional enrichment during code exploration
+- `split` — Optional enrichment during code exploration
 - `digest` — Transitively via `imbas:read-issue`

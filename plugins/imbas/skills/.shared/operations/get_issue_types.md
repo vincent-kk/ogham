@@ -18,4 +18,4 @@ GET /rest/api/3/issuetype/project?projectId={projectId}
 ## Used By
 
 - `setup` — Fetch issue types for selected project
-- `cache` — Cache issue type metadata
+- `setup` — Cache issue type metadata

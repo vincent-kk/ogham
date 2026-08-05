@@ -1,4 +1,4 @@
-# validate — Tools Used & Agent Spawn
+# refine — Tools Used & Agent Spawn
 
 ## Tools Used
 
@@ -9,7 +9,7 @@
 | `mcp__plugin_imbas_tools__config_get`     | Load config.json for language/default project resolution (Step 1) |
 | `mcp__plugin_imbas_tools__run_create`     | Create run directory, copy source, initialize state.json          |
 | `mcp__plugin_imbas_tools__run_get`        | Read current run state for precondition checks (declared-only)    |
-| `mcp__plugin_imbas_tools__run_transition` | start_phase (validate) → complete_phase (validate) with result    |
+| `mcp__plugin_imbas_tools__run_transition` | start_phase (refine) → complete_phase (refine) with result        |
 
 ### Jira Operations ([OP:])
 
@@ -24,13 +24,13 @@ The LLM resolves which tool to use at runtime. Read the linked operation files f
 
 Spawn via the Task tool with the plugin-namespaced type: `subagent_type: "imbas:<agent>"` (e.g., `imbas:analyst`). Bare names are table labels only.
 
-| Agent     | Model                              | Purpose                                                                                          |
-| --------- | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `analyst` | config.defaults.llm_model.validate | Perform 5-type validation (contradictions, divergences, omissions, infeasibilities, testability) |
+| Agent     | Model                            | Purpose                                                                                                              |
+| --------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `analyst` | config.defaults.llm_model.refine | Perform 5-type validation, then restructure the document into the standard refined.md layout (unless BLOCKED)        |
 
 Spawn instructions:
 
 - Provide source.md + all supplements as input context
-- Set language for report output per config.language.reports
-- Agent returns validation-report.md content — skill saves it to the run directory
+- Set language: validation-report per config.language.reports, refined.md per config.language.documents
+- Agent returns validation-report.md and refined.md content — skill saves both to the run directory
 - Agent does NOT have access to pipeline/manifest tools — skill handles all state updates

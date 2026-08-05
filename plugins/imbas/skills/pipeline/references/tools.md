@@ -1,95 +1,35 @@
-# Tools Used & Agent Spawn
-
-Combined tool and agent table for the full pipeline. Aggregates tools from validate, split, manifest, and devplan skills.
-
----
+# Tools Used — Combined
 
 ## imbas MCP Tools
 
-| Tool                                         | Phase          | Usage                                                                                                    |
-| -------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
-| `mcp__plugin_imbas_tools__config_get`        | 0              | Load config.json for project key and settings (Phase 0 Step 0.2)                                         |
-| `mcp__plugin_imbas_tools__run_create`        | 1              | Create run directory, copy source, initialize state.json                                                 |
-| `mcp__plugin_imbas_tools__run_get`           | all            | Read current run state for precondition checks (declared-only)                                           |
-| `mcp__plugin_imbas_tools__run_transition`    | all            | Phase transitions: start, complete, escape                                                               |
-| `mcp__plugin_imbas_tools__manifest_get`      | 3              | Load stories-manifest.json for devplan input                                                             |
-| `mcp__plugin_imbas_tools__manifest_save`     | 2, 3, 2.5, 3.5 | Save manifest after generation and after each Jira item creation                                         |
-| `mcp__plugin_imbas_tools__manifest_validate` | 2, 3           | Validate manifest structural integrity (gate input)                                                      |
-| `mcp__plugin_imbas_tools__manifest_plan`     | 2.5, 3.5       | Generate execution plan for dry-run preview                                                              |
-| `mcp__plugin_imbas_tools__ast_search`        | 3              | AST pattern search via `engineer` spawn; referenced in workflow for sgLoadError handling (declared-only) |
-| `mcp__plugin_imbas_tools__ast_analyze`       | 3              | Dependency graph / complexity analysis via `engineer` spawn (declared-only)                              |
+| Tool                                         | Phases        | Usage                                                                  |
+| -------------------------------------------- | ------------- | ---------------------------------------------------------------------- |
+| `mcp__plugin_imbas_tools__config_get`        | 0             | Option resolution (project, provider, estimation coefficients, labels) |
+| `mcp__plugin_imbas_tools__run_create`        | 1             | Run directory + source snapshot + initial state                        |
+| `mcp__plugin_imbas_tools__run_get` (declared-only) | all     | State reads between phases                                             |
+| `mcp__plugin_imbas_tools__run_transition`    | all           | start/complete/skip/escape phase transitions                           |
+| `mcp__plugin_imbas_tools__manifest_save`     | 2, 3          | estimation.json / stories-manifest.json (validated save, per-item)     |
+| `mcp__plugin_imbas_tools__manifest_validate` | GATE 2, 3     | Estimation and stories manifest integrity                              |
 
----
+Manifest and artifact reads use the Read tool directly (refined.md, estimation.json, stories-manifest.json).
 
-## Jira Operations ([OP:])
+## [OP:] Operations
 
-The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
+| Operation                | Phase | Usage                                    |
+| ------------------------ | ----- | ---------------------------------------- |
+| `[OP: get_confluence]`   | 1     | Confluence URL source                    |
+| `[OP: search_confluence]`| 1     | Referenced pages → supplements           |
+| `[OP: get_issue]`        | 0, 3  | Parent Epic verification; drift checks   |
 
-### Read Operations
-
-| Operation                                                                  | Phase | Usage                                                        |
-| -------------------------------------------------------------------------- | ----- | ------------------------------------------------------------ |
-| [`[OP: get_confluence]`](../../.shared/operations/get_confluence.md)       | 1     | Fetch Confluence page when source is a URL                   |
-| [`[OP: search_confluence]`](../../.shared/operations/search_confluence.md) | 1     | Resolve references to other Confluence pages                 |
-| [`[OP: get_issue]`](../../.shared/operations/get_issue.md)                 | 0, 2  | Verify --parent issue existence and detect type (Epic/Story) |
-| [`[OP: search_jql]`](../../.shared/operations/search_jql.md)               | 2, 3  | Search for existing related Stories/Epics                    |
-| [`[OP: get_transitions]`](../../.shared/operations/get_transitions.md)     | 2.5   | Get available transitions for Done processing                |
-
-### Write Operations
-
-| Operation                                                                | Phase    | Usage                                                 |
-| ------------------------------------------------------------------------ | -------- | ----------------------------------------------------- |
-| [`[OP: create_issue]`](../../.shared/operations/create_issue.md)         | 2.5, 3.5 | Create Epic, Story, Task, Sub-task issues             |
-| [`[OP: create_link]`](../../.shared/operations/create_link.md)           | 2.5, 3.5 | Create blocks, split-into, relates-to links           |
-| [`[OP: edit_issue]`](../../.shared/operations/edit_issue.md)             | 2.5      | Update issue fields after creation (if needed)        |
-| [`[OP: transition_issue]`](../../.shared/operations/transition_issue.md) | 2.5      | Transition status (horizontal split: original → Done) |
-| [`[OP: add_comment]`](../../.shared/operations/add_comment.md)           | 3.5      | Post B→A feedback comments to Story issues            |
-
----
+Creation-stage provider operations are those of the split skill — see `skills/split/references/<provider>/`.
 
 ## Agent Spawn
 
-Spawn via the Task tool with the plugin-namespaced type: `subagent_type: "imbas:<agent>"` (e.g., `imbas:analyst`). Bare names are table labels only.
+Spawn via the Task tool with the plugin-namespaced type (`subagent_type: "imbas:<agent>"`).
 
-| Agent      | Phase | Model  | Purpose                                                                                           | Spawned By          |
-| ---------- | ----- | ------ | ------------------------------------------------------------------------------------------------- | ------------------- |
-| `analyst`  | 1     | sonnet | 5-type document validation (contradictions, divergences, omissions, infeasibilities, testability) | Phase 1 Step 1.3    |
-| `planner`  | 2     | sonnet | INVEST-compliant Story splitting with User Story + AC                                             | Phase 2 Step 2.3    |
-| `analyst`  | 2     | sonnet | Reverse-inference verification (reassemble Stories vs original)                                   | Phase 2 Step 2.4[2] |
-| `engineer` | 3     | opus   | Codebase exploration, EARS Subtask generation, Task extraction                                    | Phase 3 Step 3.2    |
-
-### Agent Access Control
-
-Agents do NOT have access to pipeline state tools. The `imbas:pipeline` skill handles all state updates:
-
-- Agents produce output (reports, manifests, verification results)
-- Pipeline skill interprets output and calls mcp__plugin_imbas_tools__run_transition / mcp__plugin_imbas_tools__manifest_save
-- This preserves Plan-then-Execute: agents plan, pipeline executes
-
-### Model Configuration
-
-Agent models are configurable via config.json:
-
-```json
-{
-  "defaults": {
-    "llm_model": {
-      "validate": "sonnet",
-      "split": "sonnet",
-      "devplan": "opus"
-    }
-  }
-}
-```
-
-Pipeline reads these settings and spawns agents with the configured models.
-
----
-
-## No Agent Spawn
-
-Pipeline does NOT spawn agents for:
-
-- Manifest execution (Phase 2.5, 3.5) — direct Jira operations via [OP:] notation
-- Epic/parent decision — deterministic from --parent argument (resolved in Phase 0)
-- Gate evaluation — `imbas:pipeline` skill evaluates fields directly
+| Agent       | Model                              | Phase | Purpose                                            |
+| ----------- | ---------------------------------- | ----- | -------------------------------------------------- |
+| `analyst`   | config.defaults.llm_model.refine   | 1     | 5-type validation + restructuring                  |
+| `estimator` | config.defaults.llm_model.estimate | 2     | 3-view decomposition, PERT, schedule               |
+| `planner`   | config.defaults.llm_model.split    | 3     | INVEST issue splitting                             |
+| `analyst`   | config.defaults.llm_model.split    | 3     | Reverse-inference verification                     |

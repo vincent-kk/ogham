@@ -28,7 +28,7 @@ const SKILLS_DIR = join(PKG_ROOT, 'skills');
  * Pinned list of provider-partitioned skills. Keep in sync with
  * .metadata/imbas/skills.md.
  */
-const PARTITIONED_SKILLS = ['manifest', 'read-issue', 'digest'] as const;
+const PARTITIONED_SKILLS = ['split', 'read-issue', 'digest'] as const;
 
 const ANCHOR_LITERAL = '<!-- imbas:constraints-v1 -->';
 

@@ -7,10 +7,10 @@ Reference for label state changes at pipeline phase boundaries. Skills that call
 | Event                                                              | Remove                          | Add                             | Jira Extra                                                  |
 | ------------------------------------------------------------------ | ------------------------------- | ------------------------------- | ----------------------------------------------------------- |
 | Issue created                                                      | —                               | `config.labels.managed`         | —                                                           |
-| Phase 2.5 complete (stories-manifest done, `pending_review=true`)  | —                               | `config.labels.review_pending`  | —                                                           |
-| Phase 2.5 complete (stories-manifest done, `pending_review=false`) | —                               | `config.labels.review_complete` | —                                                           |
+| Split decomposition saved (`pending_review=true`)                  | —                               | `config.labels.review_pending`  | —                                                           |
+| Split decomposition saved (`pending_review=false`)                 | —                               | `config.labels.review_complete` | —                                                           |
 | Review approved (`pending_review` → `false`)                       | `config.labels.review_pending`  | `config.labels.review_complete` | —                                                           |
-| Phase 3.5 complete (devplan-manifest done)                         | `config.labels.review_complete` | `config.labels.dev_waiting`     | transition to `config.jira.phase_to_workflow.pipeline_exit` |
+| Issue creation complete (stories created on the provider)          | `config.labels.review_complete` | `config.labels.dev_waiting`     | transition to `config.jira.phase_to_workflow.pipeline_exit` |
 | (external) dev started                                             | `config.labels.dev_waiting`     | `config.labels.dev_in_progress` | —                                                           |
 | (external) dev done                                                | `config.labels.dev_in_progress` | `config.labels.dev_done`        | —                                                           |
 
@@ -45,5 +45,5 @@ Skip add/remove if target state already matches.
 
 Skills that execute label transitions:
 
-1. `manifest` — rows 1 (issue creation), 2–3 (stories post-execution), 5 (devplan post-execution)
+1. `split` — rows 1 (issue creation), 2–3 (post-decomposition), 5 (post-creation)
 2. `pipeline` — row 4 (review approval label swap, after `run_transition(pending_review=false)`)
