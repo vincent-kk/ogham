@@ -1,7 +1,7 @@
 /**
  * @file stateManager.ts
  * @description State.json CRUD + transition validation
- * @see skills/validate/references/state-transitions.md, skills/split/references/state-transitions.md
+ * @see skills/refine/references/state-transitions.md, skills/split/references/state-transitions.md
  */
 import { join } from 'node:path';
 
@@ -29,33 +29,29 @@ export function createRunState(params: {
     source_file: params.source_file,
     created_at: now,
     updated_at: now,
-    current_phase: 'validate',
+    current_phase: 'refine',
     phases: {
-      validate: {
+      refine: {
         status: 'pending',
         started_at: null,
         completed_at: null,
-        output: 'validation-report.md',
         result: null,
         blocking_issues: 0,
         warning_issues: 0,
+      },
+      estimate: {
+        status: 'pending',
+        started_at: null,
+        completed_at: null,
+        estimated_manday: null,
       },
       split: {
         status: 'pending',
         started_at: null,
         completed_at: null,
-        output: 'stories-manifest.json',
         stories_created: 0,
         pending_review: true,
         escape_code: null,
-      },
-      devplan: {
-        status: 'pending',
-        started_at: null,
-        completed_at: null,
-        output: 'devplan-manifest.json',
-        result: null,
-        pending_review: true,
       },
     },
   };
@@ -114,28 +110,18 @@ export function applyTransition(
     case 'skip_phases': {
       const updated = structuredClone(state);
       // Only pending/in_progress phases are skippable; re-skipping a
-      // completed/escaped phase is an idempotent no-op (preserves its data).
+      // completed/skipped phase is an idempotent no-op (preserves its data).
       const applied: typeof action.phases = [];
       for (const phase of action.phases) {
         const status = updated.phases[phase].status;
         if (status !== 'pending' && status !== 'in_progress') continue;
-        updated.phases[phase].status = 'completed';
+        updated.phases[phase].status = 'skipped';
         updated.phases[phase].completed_at = now;
-        if (phase === 'validate') {
-          updated.phases.validate.result = 'PASS';
-          updated.phases.validate.blocking_issues = 0;
-          updated.phases.validate.warning_issues = 0;
-        }
-        if (phase === 'split') {
-          updated.phases.split.pending_review = false;
-          updated.phases.split.stories_created = 0;
-        }
         applied.push(phase);
       }
       if (applied.length > 0) {
         const lastSkipped = applied[applied.length - 1]!;
         updated.current_phase = advancePhase(lastSkipped);
-        updated.metadata = { ...updated.metadata, skipped_phases: applied };
       }
       updated.updated_at = now;
       return updated;

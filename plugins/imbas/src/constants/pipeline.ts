@@ -6,10 +6,13 @@ import type { PhaseName } from '../types/state.js';
 
 /** Ordered sequence of pipeline phases */
 export const PHASE_ORDER: readonly PhaseName[] = [
-  'validate',
+  'refine',
+  'estimate',
   'split',
-  'devplan',
 ] as const;
+
+/** Phases that may be skipped via the skip_phases transition */
+export const SKIPPABLE_PHASES: readonly PhaseName[] = ['estimate'] as const;
 
 /** Environment variable name for debug mode */
 export const DEBUG_ENV_VAR = 'IMBAS_DEBUG';

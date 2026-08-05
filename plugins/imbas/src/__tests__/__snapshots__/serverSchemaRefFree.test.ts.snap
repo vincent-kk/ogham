@@ -15,6 +15,10 @@ exports[`MCP inputSchema is structurally ref-free > snapshot — run_transition 
     "escape_code": {
       "type": "string",
     },
+    "estimated_manday": {
+      "minimum": 0,
+      "type": "number",
+    },
     "pending_review": {
       "type": "boolean",
     },

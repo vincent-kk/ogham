@@ -88,7 +88,7 @@ describe('MCP inputSchema is structurally ref-free', () => {
       project_ref: 'PROJ',
       run_id: 'run-1',
       action: 'start_phase',
-      phase: 'validate',
+      phase: 'refine',
     };
     const mcpResult = entry!.inputSchema.safeParse(payload);
     expect(

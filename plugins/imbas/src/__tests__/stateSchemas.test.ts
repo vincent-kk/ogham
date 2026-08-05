@@ -17,32 +17,29 @@ describe('RunStateSchema', () => {
     source_file: 'requirements.md',
     created_at: '2024-01-01T00:00:00.000Z',
     updated_at: '2024-01-01T00:00:00.000Z',
-    current_phase: 'validate',
+    current_phase: 'refine',
     phases: {
-      validate: {
+      refine: {
         status: 'pending',
         started_at: null,
         completed_at: null,
-        output: 'validation-report.md',
         result: null,
         blocking_issues: 0,
         warning_issues: 0,
+      },
+      estimate: {
+        status: 'pending',
+        started_at: null,
+        completed_at: null,
+        estimated_manday: null,
       },
       split: {
         status: 'pending',
         started_at: null,
         completed_at: null,
-        output: 'stories-manifest.json',
         stories_created: 0,
         pending_review: true,
         escape_code: null,
-      },
-      devplan: {
-        status: 'pending',
-        started_at: null,
-        completed_at: null,
-        output: 'devplan-manifest.json',
-        pending_review: true,
       },
     },
   };
@@ -57,7 +54,7 @@ describe('RunStateSchema', () => {
       ...validState,
       phases: {
         ...validState.phases,
-        validate: { ...validState.phases.validate, status: 'unknown_status' },
+        refine: { ...validState.phases.refine, status: 'unknown_status' },
       },
     };
     const result = RunStateSchema.safeParse(bad);
@@ -65,17 +62,29 @@ describe('RunStateSchema', () => {
   });
 
   it('rejects invalid current_phase', () => {
-    const bad = { ...validState, current_phase: 'nonexistent' };
+    const bad = { ...validState, current_phase: 'validate' };
     const result = RunStateSchema.safeParse(bad);
     expect(result.success).toBe(false);
   });
 
-  it('rejects invalid validate result value', () => {
+  it('rejects invalid refine result value', () => {
     const bad = {
       ...validState,
       phases: {
         ...validState.phases,
-        validate: { ...validState.phases.validate, result: 'INVALID_RESULT' },
+        refine: { ...validState.phases.refine, result: 'INVALID_RESULT' },
+      },
+    };
+    const result = RunStateSchema.safeParse(bad);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects negative estimated_manday', () => {
+    const bad = {
+      ...validState,
+      phases: {
+        ...validState.phases,
+        estimate: { ...validState.phases.estimate, estimated_manday: -1 },
       },
     };
     const result = RunStateSchema.safeParse(bad);
@@ -101,11 +110,12 @@ describe('RunStateSchema', () => {
     }
   });
 
-  it('accepts all valid PhaseStatus values', () => {
+  it('accepts all valid PhaseStatus values including skipped', () => {
     for (const status of [
       'pending',
       'in_progress',
       'completed',
+      'skipped',
       'escaped',
     ] as const) {
       const result = PhaseStatusSchema.safeParse(status);
@@ -122,20 +132,31 @@ describe('RunTransitionSchema (discriminated union)', () => {
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
-      phase: 'validate',
+      phase: 'refine',
     });
     expect(result.success).toBe(true);
   });
 
-  it('parses complete_phase action', () => {
+  it('parses complete_phase action for refine', () => {
     const result = RunTransitionSchema.safeParse({
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'complete_phase',
-      phase: 'validate',
+      phase: 'refine',
       result: 'PASS',
       blocking_issues: 0,
       warning_issues: 2,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('parses complete_phase action for estimate with estimated_manday', () => {
+    const result = RunTransitionSchema.safeParse({
+      project_ref: 'PROJ',
+      run_id: '20240101-001',
+      action: 'complete_phase',
+      phase: 'estimate',
+      estimated_manday: 66.4,
     });
     expect(result.success).toBe(true);
   });
@@ -151,12 +172,34 @@ describe('RunTransitionSchema (discriminated union)', () => {
     expect(result.success).toBe(true);
   });
 
+  it('parses skip_phases for estimate only', () => {
+    const result = RunTransitionSchema.safeParse({
+      project_ref: 'PROJ',
+      run_id: '20240101-001',
+      action: 'skip_phases',
+      phases: ['estimate'],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects skip_phases for non-skippable phases', () => {
+    for (const phase of ['refine', 'split']) {
+      const result = RunTransitionSchema.safeParse({
+        project_ref: 'PROJ',
+        run_id: '20240101-001',
+        action: 'skip_phases',
+        phases: [phase],
+      });
+      expect(result.success).toBe(false);
+    }
+  });
+
   it('rejects invalid action', () => {
     const result = RunTransitionSchema.safeParse({
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'delete_phase',
-      phase: 'validate',
+      phase: 'refine',
     });
     expect(result.success).toBe(false);
   });
@@ -166,7 +209,7 @@ describe('RunTransitionSchema (discriminated union)', () => {
       project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'escape_phase',
-      phase: 'validate',
+      phase: 'refine',
       escape_code: 'E2-1',
     });
     expect(result.success).toBe(false);

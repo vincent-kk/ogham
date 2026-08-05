@@ -3,8 +3,8 @@
  * @description G1 guardrail — asserts skill doc field references resolve to Zod schemas.
  *   Parses only fenced code blocks and backticked table cells in every skill markdown file.
  *   Extracts references to config.language.* and phases.*.<field> and verifies they
- *   exist in LanguageConfigSchema / ValidatePhaseSchema / SplitPhaseSchema /
- *   DevplanPhaseSchema. Fails CI on drift.
+ *   exist in LanguageConfigSchema / RefinePhaseSchema / EstimatePhaseSchema /
+ *   SplitPhaseSchema. Fails CI on drift.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -14,9 +14,9 @@ import { describe, expect, it } from 'vitest';
 
 import { LanguageConfigSchema } from '../types/config.js';
 import {
-  DevplanPhaseSchema,
+  EstimatePhaseSchema,
+  RefinePhaseSchema,
   SplitPhaseSchema,
-  ValidatePhaseSchema,
 } from '../types/state.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -72,9 +72,9 @@ function extractStructuredText(content: string): string {
 
 const LANGUAGE_KEYS = Object.keys(LanguageConfigSchema.shape);
 const PHASE_FIELD_MAP: Record<string, readonly string[]> = {
-  validate: Object.keys(ValidatePhaseSchema.shape),
+  refine: Object.keys(RefinePhaseSchema.shape),
+  estimate: Object.keys(EstimatePhaseSchema.shape),
   split: Object.keys(SplitPhaseSchema.shape),
-  devplan: Object.keys(DevplanPhaseSchema.shape),
 };
 
 describe('G1 skill-doc-sync — schema field references', () => {
@@ -101,7 +101,7 @@ describe('G1 skill-doc-sync — schema field references', () => {
     for (const file of files) {
       const structured = extractStructuredText(readFileSync(file, 'utf8'));
       const matches = structured.matchAll(
-        /phases\.(validate|split|devplan)\.([a-z_]+)/g,
+        /phases\.(refine|estimate|split)\.([a-z_]+)/g,
       );
       for (const m of matches) {
         const phase = m[1];

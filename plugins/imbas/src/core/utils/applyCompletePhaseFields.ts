@@ -5,26 +5,23 @@ export function applyCompletePhaseFields(
   phase: PhaseName,
   action: Extract<RunTransition, { action: 'complete_phase' }>,
 ): void {
-  if (phase === 'validate') {
+  if (phase === 'refine') {
     if (action.result !== undefined)
-      updated.phases.validate.result = action.result;
+      updated.phases.refine.result = action.result;
 
     if (action.blocking_issues !== undefined)
-      updated.phases.validate.blocking_issues = action.blocking_issues;
+      updated.phases.refine.blocking_issues = action.blocking_issues;
 
     if (action.warning_issues !== undefined)
-      updated.phases.validate.warning_issues = action.warning_issues;
+      updated.phases.refine.warning_issues = action.warning_issues;
+  } else if (phase === 'estimate') {
+    if (action.estimated_manday !== undefined)
+      updated.phases.estimate.estimated_manday = action.estimated_manday;
   } else if (phase === 'split') {
     if (action.stories_created !== undefined)
       updated.phases.split.stories_created = action.stories_created;
 
     if (action.pending_review !== undefined)
       updated.phases.split.pending_review = action.pending_review;
-  } else if (phase === 'devplan') {
-    if (action.result !== undefined)
-      updated.phases.devplan.result = action.result;
-
-    if (action.pending_review !== undefined)
-      updated.phases.devplan.pending_review = action.pending_review;
   }
 }

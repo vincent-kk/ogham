@@ -93,6 +93,7 @@ export function createServer(): McpServer {
         result: z.string().optional(),
         blocking_issues: z.number().int().nonnegative().optional(),
         warning_issues: z.number().int().nonnegative().optional(),
+        estimated_manday: z.number().nonnegative().optional(),
         pending_review: z.boolean().optional(),
         stories_created: z.number().int().nonnegative().optional(),
         project_root: projectRootInput,
