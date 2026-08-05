@@ -7,9 +7,8 @@ export {
 export {
   loadConfig,
   saveConfig,
+  updateConfigLayer,
   getConfigValue,
-  setConfigValue,
-  applyConfigUpdates,
 } from './configManager/index.js';
 export {
   loadManifest,

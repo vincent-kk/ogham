@@ -85,6 +85,45 @@ export async function saveConfig(
 }
 
 /**
+ * Apply dot-path updates to one layer's own document and rewrite only that
+ * layer — values inherited from the other layer never bake into the file, so
+ * later edits to that layer keep flowing into the merge.
+ *
+ * The merge the write would produce is validated first: an update that would
+ * leave the next `loadConfig` unable to parse is rejected before touching
+ * disk.
+ *
+ * @param cwd Anchor for the project layer.
+ * @param scope Layer whose document receives the updates.
+ * @param updates Dot-path → value map applied to the layer document.
+ * @returns The effective (merged) config after the write.
+ */
+export async function updateConfigLayer(
+  cwd: string,
+  scope: ConfigScope,
+  updates: Record<string, unknown>,
+): Promise<ImbasConfig> {
+  const layers = configLayers(cwd);
+  const documents = readConfigLayers(layers);
+  let layerDoc: Record<string, unknown> = documents[scope] ?? {};
+  for (const [dotPath, value] of Object.entries(updates))
+    layerDoc = setNested(layerDoc, dotPath.split('.'), value) as Record<
+      string,
+      unknown
+    >;
+
+  const merged =
+    scope === 'user'
+      ? mergeConfigLayers(layerDoc, documents.project)
+      : mergeConfigLayers(documents.user, layerDoc);
+  const effective = ImbasConfigSchema.parse(
+    merged ?? {},
+  ) as unknown as ImbasConfig;
+  writeConfigLayer(layers, scope, layerDoc);
+  return effective;
+}
+
+/**
  * Get a value from config by dot-path (e.g. "defaults.llm_model.refine").
  * Returns undefined if any segment is missing.
  */
@@ -98,29 +137,3 @@ export function getConfigValue(config: ImbasConfig, dotPath: string): unknown {
   return current;
 }
 
-/**
- * Return a new config with the value at dotPath replaced (immutable).
- * Creates intermediate objects as needed.
- */
-export function setConfigValue(
-  config: ImbasConfig,
-  dotPath: string,
-  value: unknown,
-): ImbasConfig {
-  const parts = dotPath.split('.');
-  return setNested(config, parts, value) as ImbasConfig;
-}
-
-/**
- * Apply multiple dot-path updates at once (immutable).
- */
-export function applyConfigUpdates(
-  config: ImbasConfig,
-  updates: Record<string, unknown>,
-): ImbasConfig {
-  let result = config;
-  for (const [dotPath, value] of Object.entries(updates))
-    result = setConfigValue(result, dotPath, value);
-
-  return result;
-}
