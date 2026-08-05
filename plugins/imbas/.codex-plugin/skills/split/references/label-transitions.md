@@ -4,15 +4,15 @@ Reference for label state changes at pipeline phase boundaries. Skills that call
 
 ## Transition Table
 
-| Event                                                              | Remove                          | Add                             | Jira Extra                                                  |
-| ------------------------------------------------------------------ | ------------------------------- | ------------------------------- | ----------------------------------------------------------- |
-| Issue created                                                      | —                               | `config.labels.managed`         | —                                                           |
-| Split decomposition saved (`pending_review=true`)                  | —                               | `config.labels.review_pending`  | —                                                           |
-| Split decomposition saved (`pending_review=false`)                 | —                               | `config.labels.review_complete` | —                                                           |
-| Review approved (`pending_review` → `false`)                       | `config.labels.review_pending`  | `config.labels.review_complete` | —                                                           |
-| Issue creation complete (stories created on the provider)          | `config.labels.review_complete` | `config.labels.dev_waiting`     | transition to `config.jira.phase_to_workflow.pipeline_exit` |
-| (external) dev started                                             | `config.labels.dev_waiting`     | `config.labels.dev_in_progress` | —                                                           |
-| (external) dev done                                                | `config.labels.dev_in_progress` | `config.labels.dev_done`        | —                                                           |
+| Event                                                     | Remove                          | Add                             | Jira Extra                                                  |
+| --------------------------------------------------------- | ------------------------------- | ------------------------------- | ----------------------------------------------------------- |
+| Issue created                                             | —                               | `config.labels.managed`         | —                                                           |
+| Split decomposition saved (`pending_review=true`)         | —                               | `config.labels.review_pending`  | —                                                           |
+| Split decomposition saved (`pending_review=false`)        | —                               | `config.labels.review_complete` | —                                                           |
+| Review approved (`pending_review` → `false`)              | `config.labels.review_pending`  | `config.labels.review_complete` | —                                                           |
+| Issue creation complete (stories created on the provider) | `config.labels.review_complete` | `config.labels.dev_waiting`     | transition to `config.jira.phase_to_workflow.pipeline_exit` |
+| (external) dev started                                    | `config.labels.dev_waiting`     | `config.labels.dev_in_progress` | —                                                           |
+| (external) dev done                                       | `config.labels.dev_in_progress` | `config.labels.dev_done`        | —                                                           |
 
 **Note:** imbas auto-applies rows 1–5 only. Rows 6–7 are define-only (external trigger).
 
