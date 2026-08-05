@@ -25,4 +25,6 @@ Layers fail differently, which is why one claim may not span two: a counterexamp
 - `inferred` — it follows from traced facts, but you did not read the thing itself.
 - `assumed` — neither. Legitimate, and written down precisely so a later reader can attack it.
 
+A mark binds to what the claim is about, not to what you read. A comment, a doc, a commit message is the code described, not the code: reading one firsthand makes "the doc says X" `traced`, while "the code does X" stays `assumed` until the code itself is read. A description is evidence of intent, not of behaviour — where the two disagree, the mismatch is a finding about the description, not a refutation of the code.
+
 An unmarked claim reads as `traced` to whoever comes next. That is the failure this vocabulary exists to prevent — not to grade your confidence, but to keep an assumption from being inherited as a fact.

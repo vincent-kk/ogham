@@ -4,7 +4,7 @@ user-invocable: true
 disable-model-invocation: true
 description: '[seiri:mental-model] Build a model of how the code actually behaves, then attack it — only the claims that survived the code, each marked by how well it is backed. Trigger: "build a mental model", "멘탈모델 만들어줘"'
 argument-hint: '<the question the model must answer>'
-version: '0.1.0'
+version: '0.2.0'
 complexity: moderate
 plugin: seiri
 ---
@@ -17,7 +17,7 @@ You were invoked by the user, so ask what the model is for. A model is not a sum
 
 **1. Name the question, and ask now.** State what the model must answer, and what you would do differently depending on the answer. A model with no question grows until it retells the code. Ask everything you need here — step 2 enters a discipline that does not stop to ask.
 
-**2. Collect facts, not narrative.** Load `/seiri:trace-structure` for the paths this question touches. A fact carries `file:line`; what you did not read is not one.
+**2. Collect facts, not narrative.** Load `/seiri:trace-structure` for the paths this question touches. A fact carries `file:line`; what you did not read is not one. A comment, doc, or commit message you read is a fact about intent, not behaviour (`references/claims.md`).
 
 **3. Write claims that could be wrong.** A claim says what must hold, and what breaks if it does not. Cut every sentence that predicts nothing — that is summary, and summary cannot be checked. Forms and the three layers are in `references/claims.md`.
 

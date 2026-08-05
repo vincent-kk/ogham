@@ -2,6 +2,8 @@
 
 Attacking a claim means going looking for the code that makes it false — not re-reading the code that suggested it. Confirmation is cheap and proves nothing: the code you already read is the code that produced the claim.
 
+The strongest attack is a prediction: if the claim holds, some file you have not opened must look a certain way — a caller, a config, a test — name it, then open it. And count your angles: a claim read off the implementation alone rests on one projection, and one projection fits many models; a caller, a test, or a runtime trace is a second angle at almost no cost.
+
 ## Where the counterexample hides
 
 **Structure claims** — dynamic dispatch that resolves somewhere you did not look; registration by string, filename, or convention; a second implementation of the same interface; a consumer reaching an internal directly rather than through the entry point; generated or vendored code carrying its own copy.
