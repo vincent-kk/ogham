@@ -28,7 +28,7 @@
 
 - 모든 사용자 노출 텍스트(`index.html`·`app.js` 라벨·힌트·메시지)는 영문만 사용 — `[filid:lang]` 무관
 - 모든 인터랙션 요소에 라벨·focus-visible 상태, 44px 이상 터치 타깃
-- 폼 필드 구조 변경 시 서버 저장 스키마(`settingsTypes.ts`)와 동기
+- 폼 필드 구조 변경 시 서버 저장 스키마(`src/types/settings.ts`)와 동기
 
 ### Ask first
 

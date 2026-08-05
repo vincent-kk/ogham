@@ -26,7 +26,8 @@
 
 ### AC-settings-english-only — 영문 전용 UI
 
-- `index.html` 과 `scripts/app.js` 의 사용자 노출 문자열에 비 ASCII 문자가 없다.
+- `index.html` 과 `scripts/app.js` 의 사용자 노출 문자열이 영문(라틴 문자)으로만 쓰였다 — 한글·CJK 등 비라틴 문자가 없다.
+- 조판 문자(`·` · `—` · `…`)는 이 기준의 예외다. 언어가 아니라 활자이므로 영문 전용을 깨지 않는다.
 
 ### AC-settings-no-external-assets — 외부 자산 부재
 

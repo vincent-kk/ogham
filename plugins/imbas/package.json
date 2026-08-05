@@ -22,8 +22,6 @@
     "dist",
     "agents",
     "bridge",
-    "libs",
-    "hooks",
     "skills",
     "public",
     ".claude-plugin",
@@ -31,7 +29,6 @@
     ".codex-plugin",
     ".mcp.json",
     "mcp_config.json",
-    "hooks.json",
     "README.md"
   ],
   "scripts": {

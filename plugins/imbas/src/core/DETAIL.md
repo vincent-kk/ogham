@@ -14,7 +14,7 @@
 | 심볼                                                                                     | 출처                 |
 | ---------------------------------------------------------------------------------------- | -------------------- |
 | `createRunState` · `loadRunState` · `saveRunState` · `applyTransition`                   | `stateManager/`      |
-| `loadConfig` · `saveConfig` · `getConfigValue` · `setConfigValue` · `applyConfigUpdates` | `configManager/`     |
+| `loadConfig` · `saveConfig` · `updateConfigLayer` · `getConfigValue`                     | `configManager/`     |
 | `loadManifest` · `getManifestSummary` · `getEstimationSummary` · `ManifestType`          | `manifestParser/`    |
 | `validateManifest`                                                                       | `manifestValidator/` |
 | `getImbasRoot` · `getProjectDir` · `getCacheDir` · `getRunsDir` · `getRunDir`            | `paths/`             |

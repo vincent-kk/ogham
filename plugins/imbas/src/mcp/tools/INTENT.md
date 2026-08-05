@@ -14,7 +14,7 @@ MCP 도구 핸들러 모음. 각 핸들러는 core 모듈에 위임하는 thin w
 
 ## Conventions
 
-프로젝트 대상 도구(run\*, manifest\*, config\*)는 선택 인자 `project_root`(절대경로)를 받아 `projectRoot()` 로 워크스페이스를 해석한다. Claude Code 에서는 생략 — 서버가 워크스페이스에서 실행되므로 `process.cwd()` 와 동일하다. 플러그인 설치 디렉토리에서 서버를 띄우는 호스트에서는 필수이며, 없으면 해석 실패로 throw 한다.
+9개 도구 전부(run\*, manifest\*, config\*, open_settings)가 선택 인자 `project_root`(절대경로)를 받아 `projectRoot()` 로 워크스페이스를 해석한다. Claude Code 에서는 생략 — 서버가 워크스페이스에서 실행되므로 `process.cwd()` 와 동일하다. 플러그인 설치 디렉토리에서 서버를 띄우는 호스트에서는 필수이며, 없으면 해석 실패로 throw 한다.
 
 ## Boundaries
 

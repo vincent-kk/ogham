@@ -5,11 +5,11 @@
 - 패키지는 기획자 사이드 파이프라인 `refine → estimate(skip 가능) → split` 을 스킬·에이전트·MCP 서버 세 표면으로 배송한다.
 - phase 진행의 정본은 `.imbas/<PROJECT_REF>/runs/<run_id>/state.json` 이고, 이슈 생성 진행의 정본은 stories 매니페스트의 `issue_ref`·`status` 다. 두 정본을 한 곳으로 합치지 않는다.
 - provider 는 `jira` · `github` · `local` 셋이다. 한 스킬 실행이 provider X 를 대상으로 하면 `references/Y/**` 를 읽지 않는다 — provider 별 계약이 서로 새면 실행 결과가 대상 트래커와 어긋난다.
-- `bridge/` · `public/` · `.codex-plugin/` · 루트 `plugin.json` · `hooks.json` 은 빌드 산출물이다. 커밋되지만 손편집하지 않는다.
+- `bridge/` · `public/` · `.codex-plugin/` · 루트 `plugin.json` 은 빌드 산출물이다. 커밋되지만 손편집하지 않는다.
 
 ## API Contracts
 
-- npm 배송 표면은 `package.json` 의 `files` 가 정의한다: `dist` · `agents` · `bridge` · `libs` · `hooks` · `skills` · `public` · `.claude-plugin` · `plugin.json` · `.codex-plugin` · `.mcp.json` · `mcp_config.json` · `hooks.json` · `README.md`.
+- npm 배송 표면은 `package.json` 의 `files` 가 정의한다: `dist` · `agents` · `bridge` · `skills` · `public` · `.claude-plugin` · `plugin.json` · `.codex-plugin` · `.mcp.json` · `mcp_config.json` · `README.md`.
 - 호스트 진입점은 매니페스트다 — `.claude-plugin/plugin.json` 이 Claude Code 표면을, `.mcp.json` 이 MCP 서버 등록을 선언한다. 두 파일이 이 fractal 의 entry point 이며 TypeScript 배럴은 아니다.
 - MCP 런타임 산출물은 `bridge/mcp-server.cjs` 하나이고 원본은 `src/mcp/serverEntry/serverEntry.ts` 다.
 - 빌드 순서는 `clean → version:sync → build:pages → build:compile → build:mcp → build:compile-plugin` 이다. `src/version.ts` 는 `version:sync` 의 산출물이다.

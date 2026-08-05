@@ -24,7 +24,7 @@
 
 - `127.0.0.1` 전용 바인딩 (외부 인터페이스 금지)
 - 모든 요청에서 guard 통과 후 비즈니스 로직 진행
-- 저장 페이로드는 `SaveBodySchema` 로 검증 후 core 함수에 전달
+- 저장 페이로드는 `SettingsSaveBodySchema` 로 검증 후 core 함수에 전달
 
 ### Ask first
 

@@ -3,7 +3,7 @@
 ## Requirements
 
 - 도구 핸들러 9개를 보유한다. 각 핸들러는 `core/` 에 위임하는 thin wrapper 이고 비즈니스 로직을 직접 구현하지 않는다.
-- 프로젝트 대상 도구(`run*` · `manifest*` · `config*`)는 선택 인자 `project_root`(절대경로)를 받아 `projectRoot(input.project_root)` 로 워크스페이스를 해석한다. `process.cwd()` 직접 호출은 플러그인 설치 디렉터리에서 서버를 띄우는 호스트에서 엉뚱한 경로를 가리킨다.
+- 도구 9개 전부(`run*` · `manifest*` · `config*` · `open_settings`)가 선택 인자 `project_root`(절대경로)를 받아 `projectRoot(input.project_root)` 로 워크스페이스를 해석한다. `process.cwd()` 직접 호출은 플러그인 설치 디렉터리에서 서버를 띄우는 호스트에서 엉뚱한 경로를 가리킨다.
 - Claude Code 에서는 `project_root` 를 생략한다 — 서버가 워크스페이스에서 실행되므로 `process.cwd()` 와 같다. 설치 디렉터리에서 띄우는 호스트에서는 필수이며, 없으면 해석 실패로 throw 한다.
 - 핸들러는 `toolResult` · `toolError` 를 직접 부르지 않는다. `wrapHandler` 가 처리한다.
 - 새 핸들러를 더할 때 `server.ts` 등록도 같은 변경에서 수행한다. 등록되지 않은 핸들러는 도구 표면에 없는 죽은 코드다.
@@ -37,7 +37,7 @@
 ### AC-tools-project-root-resolution — 워크스페이스 해석
 
 - `tools/**` 에 `process.cwd()` 직접 호출이 없다.
-- 프로젝트 대상 도구의 inputSchema 에 `project_root` 가 optional 로 존재한다.
+- `server.ts` 의 9개 등록 전부가 inputSchema 에 `project_root` 를 optional 로 선언한다.
 
 ### AC-tools-thin-wrapper — 위임 유지
 
