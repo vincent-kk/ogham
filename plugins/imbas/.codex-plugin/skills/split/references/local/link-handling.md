@@ -28,7 +28,7 @@ For each link operation:
 2. Identify target file path from target ID likewise.
 3. `Edit` source file's frontmatter `links:` YAML array, appending `{type: <source_type>, to: <target_id>}`.
 4. `Edit` target file's frontmatter `links:` YAML array, appending `{type: <reverse_type>, to: <source_id>}` using the mapping table above.
-5. If either Edit fails, report the failure but do NOT roll back the other side. The next `check-bidirectional-links.mjs` run will detect and can repair.
+5. If either Edit fails, report the failure but do NOT roll back the other side. Record the asymmetry in the run report — no automated link checker ships today, so repair is manual until a repair operation exists.
 
 ## Edit location within frontmatter
 
@@ -61,6 +61,6 @@ The manifest link schema allows `link.to` to be an array (`StoryLink.to: z.array
 
 ## Failure modes
 
-- **Source written, target not written**: asymmetric link. Detected by `check-bidirectional-links.mjs`. Repair is a future `imbas:repair-links` operation (out of v1 scope); for now, log and continue.
+- **Source written, target not written**: asymmetric link. No automated checker ships today — repair is a future `imbas:repair-links` operation; for now, log and continue.
 - **Both sides already present**: idempotent — do not append a duplicate entry. Check for exact `{type, to}` match before appending.
 - **Target file does not exist**: same as `ISSUE_NOT_FOUND` in `errors.md`. Abort the link, mark manifest link item `failed`, continue with next.

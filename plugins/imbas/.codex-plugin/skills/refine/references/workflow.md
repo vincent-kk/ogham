@@ -69,6 +69,11 @@ Step 3 — analyst Agent Spawn
      For each issue found, classify as BLOCKING or WARNING:
      - BLOCKING: prevents meaningful estimation or story splitting (must be resolved first)
      - WARNING: can proceed but should be addressed
+     Severity boundary: an undecided or ambiguous detail that a single story
+     could absorb with a stated assumption is WARNING, not BLOCKING. Reserve
+     BLOCKING for gaps that leave no reasonable assumption to estimate or
+     split by — the core deliverable is undefined, or two requirements cannot
+     both be built. When uncertain, choose WARNING.
 
      Then, unless BLOCKING issues exist, RESTRUCTURE the document into refined.md
      with the standard sections, in config.language.documents:

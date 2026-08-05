@@ -18,6 +18,10 @@ Reference for label state changes at pipeline phase boundaries. Skills that call
 
 ## Provider Commands
 
+### Local
+
+The local provider has no label surface: issue files carry their lifecycle in the frontmatter `status` field only, and `config.labels.*` does not apply. Skip every row of the transition table when `config.provider === 'local'`.
+
 ### GitHub
 
 - **Add label**: `gh issue edit <N> --repo <owner/repo> --add-label <label>`

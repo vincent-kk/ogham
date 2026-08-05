@@ -27,6 +27,8 @@ Skip entirely for fresh runs (no `issue_ref` anywhere in the manifest). Otherwis
 - DRIFT_DELETED: entity missing on the provider → offer reset to `pending` or skip.
 - DRIFT_STATE (jira only): entity in unexpected status → offer skip or proceed.
 
+Resetting an item to `pending` also resets every `manifest.links` entry whose `from` or any `to` target references that item (by manifest ID or its old `issue_ref`) back to `status = "pending"` — the re-created entity must get its links back in Step 10, and a link re-apply is idempotent because every provider branch checks for an existing identical link before adding.
+
 If any DRIFT was detected: display the drift summary table and save the reconciled manifest via `mcp__plugin_imbas_tools__manifest_save` before Step 10.
 
 ## Step 10 — Batch Execution — provider-specific
@@ -36,7 +38,7 @@ Route by provider workflow file. Both branches must honor:
 - **Per-item save**: after EACH item, immediately `mcp__plugin_imbas_tools__manifest_save` so re-runs resume cleanly.
 - **Idempotency**: check `status` and `issue_ref` before acting; skip if `issue_ref` already set.
 - **Estimation note**: when a Story carries `estimate_manday`, append a line to the issue description: `Estimated: <n> man-days (imbas)`.
-- **Labels**: apply lifecycle labels per [label-transitions.md](./label-transitions.md).
+- **Labels**: apply lifecycle labels per [label-transitions.md](./label-transitions.md) — jira/github only; the local provider has no label surface.
 
 ### Partial Failure Handling (1:N Links)
 
@@ -81,7 +83,3 @@ For each source issue successfully transitioned to Done in Step 10 (any provider
 3. Terminal markers:
    - Failures exist → "Split partial failure: <created> created, <failed> failed. Re-run `/imbas:split --run <run-id>` to retry failed items." (list failed items with error details)
    - All succeeded → "Split complete: <N> issues created. Next: /imbas:scaffold-pr <issue-ref> to scaffold a draft PR, or /imbas:status for the run overview."
-
-```
-
-```
