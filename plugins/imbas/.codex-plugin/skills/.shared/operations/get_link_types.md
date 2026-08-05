@@ -19,4 +19,4 @@ GET /rest/api/3/issueLinkType
 ## Used By
 
 - `setup` — Fetch available link types
-- `cache` — Cache link type metadata
+- `setup` — Cache link type metadata

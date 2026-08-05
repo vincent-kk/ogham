@@ -217,36 +217,35 @@ Different models have different strengths: Codex excels at heavy code generation
 
 For full documentation, see the [cennad README](./plugins/cennad/README.md) ([Korean](./plugins/cennad/README-ko_kr.md)).
 
-### [`@ogham/imbas`](./plugins/imbas/) — Planning → Issue Pipeline
+### [`@ogham/imbas`](./plugins/imbas/) — Planner-Side Issue Pipeline
 
-A Claude Code plugin that converts planning documents into Jira, GitHub, or local markdown issues through a 3-phase planning pipeline with batch manifest execution.
+A Claude Code plugin for the planner's side of product development: refine a planning document, estimate man-days and a schedule, split the plan into issues on Jira, GitHub, or local markdown, and scaffold draft PRs for handoff.
 
-Translating a strategy doc into well-formed, EARS-style developer tickets is repetitive and error-prone. imbas automates the entire flow — from validating the source plan to creating Stories, Tasks, and Subtasks — while keeping every step provider-agnostic.
+Turning a spec into a defensible estimate and a clean backlog is tedious and error-prone. imbas automates the planner workflow end to end — and deliberately stops where development begins: no code exploration, no implementation planning.
 
 **What it provides:**
 
-| Component | Count | Examples                                                                                  |
-| --------- | ----- | ----------------------------------------------------------------------------------------- |
-| Skills    | 12    | `/imbas:pipeline`, `/imbas:validate`, `/imbas:split`, `/imbas:devplan`, `/imbas:manifest` |
-| MCP Tools | 16    | `run_create`, `manifest_save`, `manifest_implement_plan`, etc.                            |
-| Agents    | 3     | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                         |
-| Hooks     | 4     | setup, pre-tool-use, agent-enforcer, context-injector                                     |
+| Component | Count | Examples                                                                             |
+| --------- | ----- | ------------------------------------------------------------------------------------ |
+| Skills    | 9     | `/imbas:pipeline`, `/imbas:refine`, `/imbas:estimate`, `/imbas:split`, `/imbas:scaffold-pr` |
+| MCP Tools | 9     | `run_transition` (state machine), `manifest_save`/`manifest_validate`, `open_settings` |
+| Agents    | 3     | analyst (sonnet), planner (sonnet), estimator (opus, maxTurns: 80)                   |
 
 **Key features:**
 
-- **Staged pipeline** — validate → split → manifest-stories → devplan → manifest-devplan with checkpoint files between stages
-- **Provider abstraction** — A single skill targets `jira`, `github`, or `local` providers; switching is a config change
-- **Agent separation** — Three role-specialized agents (analyst for validation, planner for splitting, engineer for EARS Subtask generation)
-- **Run-based state** — Each pipeline execution gets a `run_id` and `.imbas/<KEY>/runs/<id>/` directory for resumable, auditable runs
+- **Staged pipeline** — refine → estimate (skippable) → split, with a deterministic state machine and auto-approval gates
+- **Man-day estimation** — 3-view WBS (pages/features/modules), PERT per unit, overhead + buffer rollup, team-sized schedule with a gantt report — from the document alone
+- **Provider abstraction** — A single skill targets `jira`, `github`, or `local`; Jira runs through `[OP:]` semantic operations resolved by the session's Atlassian tools
+- **Manifest as ledger** — per-item `issue_ref`/`status` saved after each creation, so re-runs resume idempotently
 
 ```
-# Initialize imbas configuration
+# Initialize imbas configuration (browser settings form)
 /imbas:setup
 
 # Run the full pipeline on a planning doc
-/imbas:pipeline
+/imbas:pipeline requirements.md
 
-# Check pipeline status
+# Check run status
 /imbas:status
 ```
 

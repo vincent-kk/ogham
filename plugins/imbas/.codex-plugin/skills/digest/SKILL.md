@@ -31,8 +31,8 @@ Compresses an issue's full context (description, comment thread, and attached me
 
 - Before closing a ticket with extensive discussion history
 - When onboarding someone to a long-running issue
-- When imbas:manifest transitions an issue to Done (suggestion trigger)
-- Pre-processing an issue before imbas:validate or imbas:split references it
+- When imbas:split transitions an issue to Done (suggestion trigger)
+- Pre-processing an issue before imbas:refine or imbas:split references it
 
 ## Arguments
 
@@ -49,7 +49,7 @@ Compresses an issue's full context (description, comment thread, and attached me
 
 - [workflow.md](./references/workflow.md) — Provider-agnostic skeleton (Steps 0–5); Step 6 publish is provider-specific
 - [digest-marker.md](./references/digest-marker.md) — Digest Marker Specification (same marker across jira comments, github comments, and local `## Digest` entries)
-- [suggestion-trigger.md](./references/suggestion-trigger.md) — Suggestion Trigger Logic (emitted by `imbas:manifest` on Done transitions, all providers)
+- [suggestion-trigger.md](./references/suggestion-trigger.md) — Suggestion Trigger Logic (emitted by `imbas:split` on Done transitions, all providers)
 - [tools.md](./references/tools.md) — Shared tools (`mcp__plugin_imbas_tools__config_get`) and delegated skills
 - [errors.md](./references/errors.md) — Provider-agnostic error handling
 

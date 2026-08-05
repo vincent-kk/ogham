@@ -36,4 +36,4 @@ GET  /rest/api/2/search?jql=...      # Server/DC
 ## Used By
 
 - `split` — Search for existing related Stories/Epics
-- `devplan` — Optional search for related existing issues
+- `split` — Optional search for related existing issues

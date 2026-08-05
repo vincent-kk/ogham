@@ -1,10 +1,18 @@
 # @ogham/imbas
 
-A Claude Code plugin that converts product specification documents into a structured development backlog on Jira, GitHub Issues, or local markdown files.
+A Claude Code plugin for the planner's side of product development: it refines a planning document, estimates man-days and a schedule, splits the plan into well-formed issues on Jira, GitHub Issues, or local markdown — and scaffolds draft PRs to hand off to development.
 
 > [한국어 문서 (README-ko_kr.md)](./README-ko_kr.md)
 
-Writing specs is easy. Turning them into a well-organized backlog of Stories, Tasks, and Subtasks — with correct dependencies, size estimates, and implementation grounding — is tedious and error-prone. imbas automates this through a **3-phase pipeline** driven by specialized AI agents.
+Writing specs is easy. Turning them into a defensible estimate and a clean backlog is tedious and error-prone. imbas automates the planner workflow as a **3-phase pipeline** driven by specialized AI agents — and deliberately stops where development begins: no code exploration, no implementation planning.
+
+```
+planning document
+  → refine    : restructure into a standard layout + 5-type validation
+  → estimate  : 3-view WBS + PERT man-days + schedule            (optional)
+  → split     : INVEST decomposition → approval → issue creation
+  → scaffold-pr : draft PR skeletons per issue                    (follow-up)
+```
 
 ---
 
@@ -20,324 +28,93 @@ claude plugin marketplace add https://github.com/vincent-kk/ogham
 claude plugin install imbas
 ```
 
-All components (Skills, MCP, Agents, Hooks) register automatically. No manual configuration needed.
+All components (Skills, MCP, Agents) register automatically. No manual configuration needed.
 
 ### For Development (Local Setup)
 
 ```bash
 # From monorepo root
 yarn install
-
-# Build the plugin
-cd plugins/imbas
-yarn build          # TypeScript compile + bundling
-
-# Load in Claude Code
-claude --plugin-dir ./plugins/imbas
-```
-
-Building produces two outputs:
-
-- `bridge/mcp-server.cjs` — MCP server (16 pipeline tools)
-- `bridge/*.mjs` — 4 hook scripts (automatic lifecycle management)
-
----
-
-## The Idea
-
-Product teams write specs. Engineering teams break them down into tickets. This handoff is where context is lost — requirements get misinterpreted, edge cases get missed, and dependencies get tangled.
-
-imbas sits between spec and backlog. It reads your planning document, validates it for contradictions and gaps, decomposes it into Stories with acceptance criteria, then grounds each Story in your actual codebase to generate implementable Tasks and Subtasks.
-
-The key insight: **Story decomposition is a product concern, but Task planning is an engineering concern**. imbas uses separate specialized agents for each, so product logic and implementation logic never contaminate each other.
-
----
-
-## How It Works
-
-### The 3-Phase Pipeline
-
-```
-Document → [Validate] → [Split] → [Devplan] → Jira Issues
-              ↓             ↓           ↓
-         Report.md    Stories.json  Devplan.json
-```
-
-**Phase 1 — Validate:** The `analyst` agent reads your spec and checks for contradictions, divergences between sections, missing requirements, and logical infeasibilities. It produces a validation report. If blocking issues are found, the pipeline stops here — fix the spec first.
-
-**Phase 2 — Split:** The `planner` agent decomposes the validated document into INVEST-compliant Jira Stories. Each Story gets:
-
-- User Story syntax ("As a... I want... So that...")
-- Given/When/Then acceptance criteria
-- A 3-step verification: anchor link back to source → coherence check → reverse inference (can you reconstruct the original requirement from the Stories alone?)
-- Size check — Stories too large get split horizontally
-
-**Phase 3 — Devplan:** The `engineer` agent takes the Stories and explores your local codebase (via AST analysis) to produce:
-
-- EARS-format Subtasks per Story (scoped to max 200 lines / 10 files / 1 hour review)
-- Cross-Story shared Tasks (extracted via N:M merge-point detection)
-- Dependency links and execution order
-- Feedback comments when Stories contain ambiguity that needs product clarification
-
-Each phase writes its output to a manifest file. Manifests are then executed against the configured issue tracker to batch-create issues, links, and comments.
-
-### Providers
-
-The pipeline is provider-agnostic. `config.provider` selects the backend:
-
-| Provider | Backend                | Issue reference      |
-| -------- | ---------------------- | -------------------- |
-| `jira`   | Atlassian MCP tools    | `PROJ-123`           |
-| `github` | `gh` CLI (labels/meta) | `owner/repo#42`      |
-| `local`  | Markdown files         | `S-1`, `T-1`, `ST-1` |
-
-### State Machine
-
-Every run is tracked by a state machine (`state.json`) with strict transition rules:
-
-- `imbas:validate` → always starts
-- `imbas:split` → only after validate passes (PASS or PASS_WITH_WARNINGS)
-- `imbas:devplan` → only after split completes and Stories are reviewed
-
-Phases can be escaped (abnormal termination with a reason code) or skipped. The pipeline is resume-friendly — if interrupted, `imbas:status resume` picks up where it left off.
-
-### Working Directory
-
-All state is stored locally in `.imbas/`:
-
-```
-.imbas/
-├── config.json                 # Global config (languages, LLM models, Jira settings)
-├── <PROJECT_KEY>/
-│   ├── cache/                  # Cached Jira metadata (24h TTL)
-│   │   ├── project-meta.json
-│   │   ├── issue-types.json
-│   │   ├── link-types.json
-│   │   └── workflows.json
-│   └── runs/
-│       └── 20260404-001/       # Run ID: YYYYMMDD-NNN
-│           ├── state.json      # Phase state machine
-│           ├── source.md       # Input document
-│           ├── supplements/    # Supporting files (optional)
-│           ├── validation-report.md
-│           ├── stories-manifest.json
-│           └── devplan-manifest.json
-└── .temp/                      # Media analysis working directory
+yarn workspace @ogham/imbas build
 ```
 
 ---
 
-## How to Use
-
-imbas skills are **LLM prompts**, not CLI commands. You invoke them in Claude Code as natural language conversations.
-
-### Initial Setup
-
-```
-/imbas:setup
-/imbas:setup set-project PROJ
-```
-
-Creates `.imbas/`, selects the provider, sets up `config.json`, and caches project metadata (issue types, link types, workflows).
-
-### Run the Full Pipeline
-
-```
-/imbas:pipeline ./spec.md
-/imbas:pipeline ./spec.md --project PROJ
-```
-
-Runs validate → split → manifest-stories → devplan → manifest-devplan end-to-end with auto-approval at quality gates. This is the primary entry point for most users.
-
-### Run Phases Individually
-
-For more control, run each phase separately:
-
-```
-# Phase 1: Validate the document
-/imbas:validate
-
-# Phase 2: Split into Stories
-/imbas:split
-
-# Phase 3: Generate dev plan
-/imbas:devplan
-```
-
-Each phase reads from the previous phase's output and writes its own manifest.
-
-### Execute Manifests to Jira
-
-```
-/imbas:manifest stories     # Create Story issues
-/imbas:manifest devplan     # Create Tasks, Subtasks, and links
-/imbas:manifest stories --dry-run   # Preview without creating
-```
-
-Manifest execution is idempotent — re-running skips already-created issues (tracked by `issue_ref` in the manifest).
-
-### Check Pipeline Status
-
-```
-/imbas:status              # Current run status
-/imbas:status list         # All runs for a project
-/imbas:status resume       # Resume an interrupted run
-```
-
-### Additional Tools
+## Quick Start
 
 ```bash
-# Compress a Jira issue into a structured summary comment
-/imbas:digest PROJ-123
+# 1. One-time setup — provider, project, labels, languages, estimation
+#    coefficients in a browser form
+/imbas:setup
 
-# Scaffold a Draft PR from a Jira Story with sub-task checklist
-/imbas:scaffold-pr PROJ-123
+# 2. Refine and validate a planning document
+/imbas:refine requirements.md
 
-# Analyze media attachments (images, videos, GIFs) — requires @ogham/atlassian
-/atlassian:media-analysis <url-or-path>
+# 3. (Optional) Estimate man-days and a schedule
+/imbas:estimate
+
+# 4. Split into issues and create them (with an approval gate)
+/imbas:split
+
+# …or run the whole flow in one command
+/imbas:pipeline requirements.md
 ```
 
 ---
+
+## Skills
+
+| Skill                  | Phase | What it does                                                                              |
+| ---------------------- | ----- | ----------------------------------------------------------------------------------------- |
+| `/imbas:setup`         | —     | Browser settings form (provider, project, labels, languages, models, estimation) + caches |
+| `/imbas:refine`        | 1     | Restructures the document into a standard 8-section layout; 5-type validation gate        |
+| `/imbas:estimate`      | 2     | 3-view decomposition → reconciled WBS → PERT man-days → team-sized schedule (optional)    |
+| `/imbas:split`         | 3     | INVEST issue decomposition → approval gate → batch creation with resume                   |
+| `/imbas:scaffold-pr`   | post  | Draft PR skeleton (branch, empty commit, checklist) from an issue                         |
+| `/imbas:pipeline`      | 1–3   | Full flow with auto-approval gates and blocker reports                                    |
+| `/imbas:status`        | —     | Run status, artifact presence, resume guidance                                            |
+| `/imbas:digest`        | —     | Compresses an issue's discussion thread into a posted summary                             |
+| `imbas:read-issue`     | —     | (internal) Structured issue + thread context for other skills                             |
 
 ## Agents
 
-imbas uses 3 specialized subagents, each with constrained roles:
+| Agent       | Model  | Role                                                                 |
+| ----------- | ------ | -------------------------------------------------------------------- |
+| `analyst`   | sonnet | 5-type validation + document restructuring; reverse-inference checks |
+| `planner`   | sonnet | INVEST-compliant issue decomposition                                 |
+| `estimator` | opus   | Context-heavy estimation: 3-view WBS, PERT, schedule                 |
 
-| Agent      | Model  | Role                                                        | Phase                               |
-| ---------- | ------ | ----------------------------------------------------------- | ----------------------------------- |
-| `analyst`  | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
-| `planner`  | Sonnet | Story decomposition (INVEST criteria, acceptance criteria)  | Split                               |
-| `engineer` | Opus   | Task planning (codebase exploration, subtask generation)    | Devplan                             |
+## Estimation
 
-Agent roles are enforced at runtime via the `SubagentStart` hook — agents cannot overstep their assigned responsibilities.
+The estimate phase answers "how long will this take" from the refined document alone — it never reads a codebase:
 
----
+- **3-view decomposition** (pages / features / modules) with cross-view reconciliation, so one view's blind spot is another's catch
+- **PERT per unit** (`expected = (o + 4m + p) / 6`) anchored on configurable S/M/L/XL baselines
+- **Rollup** with integration/test/PM overhead and a buffer ratio → total with a confidence interval
+- **Schedule** on `team_size` parallel tracks with milestones and a mermaid gantt report
+- Every gap becomes an explicit assumption; high-sigma units are auto-promoted to risks
 
-## What Runs Automatically
+Coefficients live in `config.estimation` (user/project layers) and are editable in the settings form.
 
-With the plugin active, these hooks fire **without user intervention**:
+## Providers
 
-| When                   | What                                  | Why                                                  |
-| ---------------------- | ------------------------------------- | ---------------------------------------------------- |
-| Session starts         | Initializes cache directory + logging | Ensures `.imbas/` structure exists                   |
-| Read/Write/Edit a file | Validates tool inputs                 | Prevents invalid operations on `.imbas/` state files |
-| Sub-agent starting     | Injects role restrictions             | Prevents agents from overstepping assigned phase     |
-| User submits a prompt  | Injects run/manifest context          | Agents are aware of current pipeline state           |
-| Session ends           | No auto-cleanup (by design)           | `.imbas/.temp/` persists; clean manually if needed   |
+| Provider | Issues created via                                     |
+| -------- | ------------------------------------------------------ |
+| `jira`   | `[OP:]` semantic operations resolved against the session's Atlassian tools |
+| `github` | `gh` CLI                                               |
+| `local`  | Markdown files under `.imbas/<KEY>/issues/`            |
 
----
+imbas owns no Atlassian credentials or transport — Jira operations state REST intent and the session's Atlassian tooling executes it.
 
-## Skills Reference
+## Architecture Notes
 
-| Skill                   | User-invocable | What it does                                                                           |
-| ----------------------- | -------------- | -------------------------------------------------------------------------------------- |
-| `/imbas:setup`          | Yes            | Initialize `.imbas/`, configure project and Jira settings                              |
-| `/imbas:pipeline`       | Yes            | End-to-end pipeline execution with auto-approval gates                                 |
-| `/imbas:validate`       | Yes            | Phase 1: Validate document for contradictions and gaps                                 |
-| `/imbas:split`          | Yes            | Phase 2: Decompose document into INVEST Stories                                        |
-| `/imbas:devplan`        | Yes            | Phase 3: Generate Tasks/Subtasks grounded in codebase                                  |
-| `/imbas:implement-plan` | Yes            | Build a DAG-based implementation schedule grouping Stories/Tasks into parallel batches |
-| `/imbas:manifest`       | Yes            | Execute manifests to batch-create Jira issues                                          |
-| `/imbas:status`         | Yes            | View run status, list runs, resume interrupted runs                                    |
-| `/imbas:digest`         | Yes            | Compress an issue into a structured summary                                            |
-| `/imbas:scaffold-pr`    | Yes            | Create a Draft PR from a Story with sub-tasks                                          |
-| `/imbas:cache`          | No             | Internal: Manage provider metadata cache (24h TTL)                                     |
-| `/imbas:read-issue`     | No             | Internal: Read and structure issue context                                             |
+- **Plan-then-execute** — decomposition writes a manifest; nothing reaches the provider before the approval gate
+- **Manifest as ledger** — per-item `issue_ref`/`status` is saved after each creation, so re-runs resume idempotently
+- **Run-based state** — each execution gets `.imbas/<KEY>/runs/<id>/` with a deterministic state machine (`refine → estimate(skippable) → split`) enforced by the MCP server
+- **9 MCP tools** — run state machine (4), manifest validation (2), config layers (2), settings web UI (1); artifacts are plain files read/written directly
+- **No hooks** — the plugin injects nothing into your session lifecycle
 
----
-
-## Expected Results
-
-### Input
-
-A planning document (Markdown, Confluence page, or Jira epic description) describing what to build — features, user flows, requirements, constraints.
-
-### Output
-
-A fully structured Jira backlog:
-
-- **Stories** with User Story syntax, Given/When/Then acceptance criteria, and verification metadata
-- **Tasks** for cross-cutting concerns extracted from multiple Stories
-- **Subtasks** scoped to implementable units (≤200 lines, ≤10 files, ≤1 hour review)
-- **Links** encoding dependencies (blocks, split-into, relates-to)
-- **Execution order** — numbered steps for creating issues in the right sequence
-- **Feedback comments** flagging ambiguities that need product team input
-
-### What It Catches
-
-During validation:
-
-- **Contradictions** — section A says X, section B says not-X
-- **Divergences** — terminology or scope drifts between sections
-- **Omissions** — referenced features/flows with no specification
-- **Infeasibilities** — requirements that conflict with technical constraints
-
-During split:
-
-- **Functional violations** — Stories that are not independently testable at the E2E level, or missing testability
-- **Semantic loss** — reverse inference verifies no requirements were dropped during decomposition
-
-During devplan:
-
-- **Missing implementation paths** — Stories that can't be mapped to existing code patterns
-- **Cross-Story overlaps** — shared logic that should be a single Task, not duplicated across Subtasks
-
----
-
-## Configuration
-
-`config.json` supports:
-
-```jsonc
-{
-  "provider": "jira", // "jira" | "github" | "local"
-  "language": {
-    "documents": "ko", // Source document language
-    "skills": "en", // Agent prompt language
-    "issue_content": "ko", // Jira issue content language
-    "reports": "ko", // Report output language
-  },
-  "defaults": {
-    "project_ref": "PROJ", // Default Jira project
-    "llm_model": {
-      "validate": "sonnet", // Model per phase
-      "split": "sonnet",
-      "devplan": "opus",
-    },
-    "subtask_limits": {
-      "max_lines": 200, // Max lines per subtask
-      "max_files": 10, // Max files per subtask
-      "review_hours": 1, // Max review time per subtask
-    },
-  },
-}
-```
-
-Modify via:
-
-```
-/imbas:setup set-language documents en
-/imbas:setup set-project NEWPROJ
-/imbas:setup set-provider github
-```
-
----
-
-## Development
-
-```bash
-yarn dev            # TypeScript watch mode
-yarn test           # Vitest watch
-yarn test:run       # Single run
-yarn typecheck      # Type checking only
-yarn build          # tsc + MCP server + hooks bundling
-```
-
-### Tech Stack
-
-TypeScript, @modelcontextprotocol/sdk, @ast-grep/napi, esbuild, Vitest, Zod
-
----
+Design documents: [`.metadata/imbas/`](../../.metadata/imbas/README.md)
 
 ## License
 

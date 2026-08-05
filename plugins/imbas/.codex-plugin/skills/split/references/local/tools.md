@@ -1,6 +1,6 @@
 # Tools Used — Local Provider
 
-Loaded when `config.provider === 'local'`. Provider-agnostic imbas MCP tools (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__manifest_get`, `mcp__plugin_imbas_tools__manifest_save`, `mcp__plugin_imbas_tools__manifest_plan`) are documented in `../tools.md` and are used by all providers.
+Loaded when `config.provider === 'local'`. Provider-agnostic imbas MCP tools (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__manifest_save`, `mcp__plugin_imbas_tools__manifest_validate`) are documented in `../tools.md` and are used by all providers.
 
 ## Local-only tools (no MCP server)
 

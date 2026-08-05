@@ -23,11 +23,11 @@ imbas를 사용하기 위한 최초 설정을 담당한다. 원격 도구(Atlass
 0. **환경 헬스 체크** — Atlassian MCP / GitHub CLI 가용성 확인 (non-blocking). 누락 도구에 대해 자동 설정 제안.
 1. **Provider 선택** — 헬스 체크 결과에 따라 사용 가능한 provider 표시 (`jira` / `github` / `local`)
 2. **디렉토리 생성** — `.imbas/` 생성, `.imbas/.gitignore` 설정
-3. **프로젝트 참조 선택** — provider별 분기: Jira 프로젝트 / GitHub owner/repo / 로컬 프로젝트 키
-4. **config.json 생성** — provider, 버전, 언어, 기본값, provider별 설정, 미디어 설정 포함
+3. **세션 데이터 프리페치** — Jira 프로젝트 목록 / 감지된 GitHub repo를 웹폼 bootstrap으로 주입
+4. **설정 웹폼** — provider, 프로젝트 참조, 라벨, 언어, 모델, estimation 계수를 한 폼에서 저장
 5. **캐시 구축** — provider별 분기: Jira 메타데이터 / GitHub 라벨 / local은 skip
 6. **.gitignore 보호** — 프로젝트 루트 `.gitignore`에 `.imbas/` 추가
-7. **결과 표시** — 설정 요약 및 다음 단계 안내
+7. **결과 표시** — 설정 요약 및 다음 단계 안내 (`/imbas:refine`)
 
 ## 생성되는 구조
 
@@ -52,9 +52,10 @@ imbas를 사용하기 위한 최초 설정을 담당한다. 원격 도구(Atlass
 
 | 도구                                  | 출처              | 용도                                  |
 | ------------------------------------- | ----------------- | ------------------------------------- |
+| `mcp__plugin_imbas_tools__open_settings` | imbas MCP      | 설정 웹폼 (init·labels edit)          |
 | `mcp__plugin_imbas_tools__config_get` | imbas MCP         | 설정 읽기                             |
-| `mcp__plugin_imbas_tools__config_set` | imbas MCP         | 설정 생성/수정                        |
-| `mcp__plugin_imbas_tools__cache_set`  | imbas MCP         | 캐시 저장                             |
+| `mcp__plugin_imbas_tools__config_set` | imbas MCP         | 설정 생성/수정 (headless 폴백)        |
+| Read / Write / Glob                   | 내장              | `.imbas/<KEY>/cache/*.json` 직접 관리 |
 | `[OP: get_projects]`                  | Jira ([OP:])      | 프로젝트 목록 조회                    |
 | `[OP: get_issue_types]`               | Jira ([OP:])      | 이슈 타입 조회                        |
 | `[OP: get_issue_type_fields]`         | Jira ([OP:])      | 타입별 필수 필드 조회                 |

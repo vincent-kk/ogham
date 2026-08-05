@@ -17,7 +17,7 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 `<id>` is the text after `imbas:` in the original `subagent_type` value
 (e.g. `subagent_type: "imbas:reviewer"` → read `../../.shared/personas/reviewer.md`).
 
-# validate — Workflow
+# refine — Workflow
 
 ```
 Step 1 — Run Initialization
@@ -33,10 +33,10 @@ Step 1 — Run Initialization
      - Creates .imbas/<KEY>/runs/<YYYYMMDD-NNN>/ directory
      - Copies source document → source.md (immutable copy principle)
      - Copies supplements → supplements/ directory
-     - Initializes state.json (current_phase: "validate", all phases: "pending")
+     - Initializes state.json (current_phase: "refine", all phases: "pending")
   5. Call mcp__plugin_imbas_tools__run_transition with:
-     - project_ref, run_id, action: "start_phase", phase: "validate"
-     → Sets validate.status = "in_progress", validate.started_at = now()
+     - project_ref, run_id, action: "start_phase", phase: "refine"
+     → Sets refine.status = "in_progress", refine.started_at = now()
 
 Step 2 — Document Source Resolution
   - Local file (*.md, *.txt):
@@ -53,7 +53,7 @@ Step 2 — Document Source Resolution
 
 Step 3 — analyst Agent Spawn
   - Spawn agent via Task tool (subagent_type: "imbas:analyst")
-  - Model: config.defaults.llm_model.validate (default: "sonnet")
+  - Model: config.defaults.llm_model.refine (default: "sonnet")
   - Input provided to agent:
     - source.md (full content)
     - supplements/*.md (all supplement files)
@@ -67,11 +67,21 @@ Step 3 — analyst Agent Spawn
      5. Testability (테스트 가능성): requirements lacking measurable acceptance criteria
 
      For each issue found, classify as BLOCKING or WARNING:
-     - BLOCKING: prevents meaningful story splitting (must be resolved first)
+     - BLOCKING: prevents meaningful estimation or story splitting (must be resolved first)
      - WARNING: can proceed but should be addressed
 
-     Output: validation-report.md in the run directory."
-  - Agent returns: validation-report.md content. Skill saves to run directory.
+     Then, unless BLOCKING issues exist, RESTRUCTURE the document into refined.md
+     with the standard sections, in config.language.documents:
+       ## Background / ## Goals / ## Scope / ## User flows /
+       ## Feature specs / ## Policies / ## Acceptance criteria / ## Non-goals
+     Rules for refined.md:
+     - Preserve every requirement's meaning — reorganize, deduplicate, and title;
+       never invent requirements. Unclear items go under the section they most
+       plausibly belong to, marked with '> [unclear]' quoting the original text.
+     - WARNING findings are annotated inline as '> [warning] <finding id>'.
+
+     Output: validation-report.md always; refined.md unless BLOCKED."
+  - Agent returns: report + refined document content. Skill saves both to the run directory.
 
 Step 4 — Result Evaluation Gate
   Parse validation-report.md and determine result:
@@ -79,33 +89,34 @@ Step 4 — Result Evaluation Gate
   - BLOCKING issues exist (count > 0):
     → result = "BLOCKED"
     → Display blocking issues list to user
-    → Message: "Validation result: BLOCKED. Resolve the above issues in the source document, then re-run /imbas:validate."
+    → Message: "Refine result: BLOCKED. Resolve the above issues in the source document, then re-run /imbas:refine."
 
   - No BLOCKING, but WARNING issues exist:
     → result = "PASS_WITH_WARNINGS"
     → Display warning issues list to user
-    → Message: "Validation result: PASS_WITH_WARNINGS. Review the warnings above. You may proceed to Phase 2 (/imbas:split)."
+    → Message: "Refine result: PASS_WITH_WARNINGS. refined.md written. Next: /imbas:estimate (optional) or /imbas:split."
 
   - No issues found:
     → result = "PASS"
-    → Message: "Validation result: PASS. Proceed to Phase 2: /imbas:split [--run <run-id>]"
+    → Message: "Refine result: PASS. refined.md written. Next: /imbas:estimate (optional) or /imbas:split."
 
 Step 5 — State Update
   Call mcp__plugin_imbas_tools__run_transition with:
   - project_ref, run_id
   - action: "complete_phase"
-  - phase: "validate"
+  - phase: "refine"
   - result: "PASS" | "PASS_WITH_WARNINGS" | "BLOCKED"
   - blocking_issues: <count>
   - warning_issues: <count>
 
-  → Sets validate.status = "completed", validate.completed_at = now()
-  → Advances current_phase based on result
+  → Sets refine.status = "completed", refine.completed_at = now()
+  → Advances current_phase to "estimate" unless BLOCKED
 
   Display run summary:
   - Run ID: <run-id>
   - Project: <KEY>
   - Result: <result>
   - Blocking: <count>, Warnings: <count>
-  - Next step guidance based on result
+  - Next step guidance: /imbas:estimate for man-day estimation, or /imbas:split
+    to go straight to issue decomposition (split will offer to skip estimate).
 ```

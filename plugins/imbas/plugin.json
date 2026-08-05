@@ -1,7 +1,7 @@
 {
   "name": "imbas",
-  "version": "0.6.1",
-  "description": "Imbas — issue pipeline planning plugin for Claude Code. Validates planning documents, splits them into Stories, generates Subtasks, and batch-creates issues on Jira, GitHub, or local markdown.",
+  "version": "0.7.0",
+  "description": "Imbas — planner-side issue pipeline plugin for Claude Code. Refines planning documents, estimates man-days and schedules, splits plans into issues on Jira, GitHub, or local markdown, and scaffolds draft PRs.",
   "author": {
     "name": "Vincent K. Kelvin"
   },
