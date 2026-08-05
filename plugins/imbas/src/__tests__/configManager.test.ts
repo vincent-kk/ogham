@@ -37,9 +37,7 @@ describe('getConfigValue', () => {
 
   it('returns nested value at dot-path', () => {
     const config = defaultConfig();
-    expect(getConfigValue(config, 'defaults.llm_model.refine')).toBe(
-      'sonnet',
-    );
+    expect(getConfigValue(config, 'defaults.llm_model.refine')).toBe('sonnet');
   });
 
   it('returns undefined for missing path', () => {

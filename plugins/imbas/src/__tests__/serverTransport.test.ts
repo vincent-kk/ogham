@@ -79,7 +79,14 @@ describe('MCP transport — manifest_save', () => {
   });
 
   function savedPath(): string {
-    return join(tmpDir, '.imbas', 'PROJ', 'runs', '20260101-001', 'estimation.json');
+    return join(
+      tmpDir,
+      '.imbas',
+      'PROJ',
+      'runs',
+      '20260101-001',
+      'estimation.json',
+    );
   }
 
   it('advertises manifest as an object-typed argument, not an empty schema', async () => {
@@ -90,7 +97,10 @@ describe('MCP transport — manifest_save', () => {
       tool!.inputSchema as { properties?: Record<string, unknown> }
     ).properties;
     const manifest = properties?.manifest;
-    expect(manifest, 'manifest property missing from emitted schema').toBeDefined();
+    expect(
+      manifest,
+      'manifest property missing from emitted schema',
+    ).toBeDefined();
     const emitted = JSON.stringify(manifest);
     expect(
       emitted,

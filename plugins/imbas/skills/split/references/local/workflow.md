@@ -107,4 +107,3 @@ For each transition in `manifest.transitions` where `status == "pending"`:
 3. `Edit` the target file frontmatter: `status: <transition.target_status>`.
    - On failure → set transition `status = "failed"`, log warning. Save manifest immediately. Continue to next (do NOT block pipeline).
 4. Set transition `status = "created"`. Save manifest immediately.
-

@@ -19,7 +19,9 @@ export async function loadConfig(cwd: string): Promise<ImbasConfig>;
 export async function loadConfigByScope(cwd: string): Promise<ConfigByScope>;
 export function loadConfigScope(cwd: string): ConfigScopeState;
 export async function saveConfig(/* scope 필수 */): Promise<void>;
-export async function updateConfigLayer(/* 계층 원본에 dot-path 적용 */): Promise<ImbasConfig>;
+export async function updateConfigLayer(
+  /* 계층 원본에 dot-path 적용 */
+): Promise<ImbasConfig>;
 export function getConfigValue(config: ImbasConfig, dotPath: string): unknown;
 ```
 
