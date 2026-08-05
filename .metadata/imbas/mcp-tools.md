@@ -21,7 +21,7 @@ phase 집합이 `refine → estimate(skip 가능) → split`으로 재정의된�
 
 | 도구                | 역할                                 | 비고                                                            |
 | ------------------- | ------------------------------------ | --------------------------------------------------------------- |
-| `manifest_save`     | Zod 스키마 검증 후 저장 (전체 교체)  | `type: "stories" \| "estimation"` — devplan/implement-plan 제거 |
+| `manifest_save`     | Zod 스키마 검증 후 저장 (전체 교체)  | `type: "stories" \| "estimation"` — `manifest` 는 객체 또는 그 JSON 문자열 인코딩(object\|string 광고, 핸들러 해독) |
 | `manifest_validate` | 저장된 매니페스트 재검증 (읽기 전용) | split 승인 게이트·pipeline 게이트의 근거                        |
 
 ### Config·Settings (3)

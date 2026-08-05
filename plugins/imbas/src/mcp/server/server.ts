@@ -81,7 +81,7 @@ export function createServer(): McpServer {
     McpToolName.RUN_TRANSITION,
     {
       // Flat leaf-primitive schema to avoid zod-to-json-schema $ref dedup.
-      // Handler validates via RunTransitionSchema.parse(). See manifest_save above.
+      // Handler validates via RunTransitionSchema.parse().
       description: 'Typed phase transition (start/complete/escape/skip)',
       inputSchema: z.object({
         project_ref: z.string(),
@@ -137,7 +137,12 @@ export function createServer(): McpServer {
         // Type-dependent schema (stories vs estimation) — cannot express conditional
         // validation in a single MCP inputSchema. Handler validates internally via
         // StoriesManifestSchema.parse() / EstimationManifestSchema.parse().
-        manifest: z.unknown().optional(),
+        // Declared object|string rather than z.unknown(): an empty emitted schema
+        // makes clients string-serialize the object argument; the handler decodes
+        // the string form back to JSON before validation.
+        manifest: z
+          .union([z.record(z.string(), z.unknown()), z.string()])
+          .optional(),
         project_root: projectRootInput,
       }),
       annotations: {

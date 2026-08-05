@@ -135,6 +135,39 @@ describe('handleManifestSave + handleManifestValidate', () => {
     expect(validation.valid).toBe(true);
   });
 
+  it('decodes a JSON-string manifest and saves it like the object form', async () => {
+    const result = await handleManifestSave({
+      project_ref: 'PROJ',
+      run_id: '20260101-001',
+      type: 'estimation',
+      manifest: JSON.stringify(estimationManifest),
+    });
+    expect(result.path).toContain('estimation.json');
+    const saved = JSON.parse(readFileSync(result.path, 'utf-8'));
+    expect(saved.units).toHaveLength(1);
+  });
+
+  it('rejects a non-JSON string manifest without writing', async () => {
+    await expect(
+      handleManifestSave({
+        project_ref: 'PROJ',
+        run_id: '20260101-001',
+        type: 'estimation',
+        manifest: 'not a json document',
+      }),
+    ).rejects.toThrow('manifest string is not valid JSON');
+
+    const path = join(
+      tmpDir,
+      '.imbas',
+      'PROJ',
+      'runs',
+      '20260101-001',
+      'estimation.json',
+    );
+    expect(existsSync(path)).toBe(false);
+  });
+
   it('rejects a schema-invalid manifest and writes no file', async () => {
     await expect(
       handleManifestSave({
