@@ -27,7 +27,7 @@ Claude 문서를 페이지로 띄우고 라인 피드백을 자동 수거하는 
 
 - 적용 범위: **작성 중인 본문만**. 파일 mirror·제안 diff 는 verbatim 원칙(절차 1)이 우선하며, 다이어그램은 제안까지만.
 - 정량 데이터는 Mermaid 가 아니라 실제 플롯 이미지(`file://`) — `xychart-beta` 는 단순 bar/line 에 beta.
-- 뷰어 제약이 곧 작성 규칙: `securityLevel:"strict"`(click 비활성·라벨 HTML 미지원), 테마 연동(색 하드코딩 금지), 파싱 실패 시 `diagram failed to render` 배지 + 소스 노출, 렌더러 토글 off 시 소스 텍스트 노출, 다이어그램 1개 = 코멘트 앵커 1개.
+- 뷰어 제약이 곧 작성 규칙: `securityLevel:"strict"`(click 비활성·라벨 HTML 미지원), 테마 연동(라벨 색은 테마가 정하므로 기본 무색, 색이 필요하면 `fill`+`color` 를 대비 쌍으로), 파싱 실패 시 `diagram failed to render` 배지 + 소스 노출, 렌더러 토글 off 시 소스 텍스트 노출, 다이어그램 1개 = 코멘트 앵커 1개.
 
 ## `setup`
 
