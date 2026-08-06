@@ -1,6 +1,6 @@
 ---
 name: jira
-user_invocable: false
+user-invocable: false
 description: "Domain router for Jira REST API operations — issue CRUD, JQL search, sprint/board/epic management, workflow transitions, comments, worklogs, attachments, links, watchers, JSM queues/SLA, dev info, and time metrics across 15 tool domains. Main agent executes directly for simple operations; jira agent spawned only for complex multi-step workflows."
 version: "0.1.0"
 complexity: complex

@@ -1,6 +1,6 @@
 ---
 name: guide
-user_invocable: true
+user-invocable: true
 description: '[filid:guide] Explain the current FCA tree, classifications, validation findings, and evidence-based placement rules without changing project structure.'
 argument-hint: '[path]'
 version: '2.0.0'

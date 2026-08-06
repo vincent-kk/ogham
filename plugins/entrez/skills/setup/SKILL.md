@@ -1,6 +1,6 @@
 ---
 name: setup
-user_invocable: true
+user-invocable: true
 description: '[entrez:setup] Configure NCBI tool/email and optional API key via a local web UI; check reachability. Trigger: "entrez setup", "configure pubmed", "set ncbi api key", "entrez 설정"'
 argument-hint: "[--test] [--reset]"
 version: "1.0.0"

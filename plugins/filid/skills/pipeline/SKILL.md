@@ -1,6 +1,6 @@
 ---
 name: pipeline
-user_invocable: true
+user-invocable: true
 description: '[filid:pipeline] Run the full merge-track cycle — pull-request, cross-review, resolve, revalidate — as one continuous operation with entry-point detection and resume support.'
 argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-enrich] [--force] [--title TITLE]'
 version: '1.0.0'

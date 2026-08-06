@@ -1,6 +1,6 @@
 # Skills & Agent — `setup`, `codex`, `antigravity`, `claude`, `crosscheck` + `courier`
 
-플러그인 prefix 미사용. 스킬 디렉토리는 `skills/setup/`, `skills/codex/`, `skills/antigravity/`, `skills/claude/`, `skills/crosscheck/`. SKILL.md 의 `name` 도 prefix 없이. `user_invocable: true`. frontmatter(description · argument-hint · trigger)는 각 SKILL.md 가 정본 — 이 문서에 복제하지 않는다.
+플러그인 prefix 미사용. 스킬 디렉토리는 `skills/setup/`, `skills/codex/`, `skills/antigravity/`, `skills/claude/`, `skills/crosscheck/`. SKILL.md 의 `name` 도 prefix 없이. `user-invocable: true`. frontmatter(description · argument-hint · trigger)는 각 SKILL.md 가 정본 — 이 문서에 복제하지 않는다.
 
 에이전트는 `agents/courier.md` 1개 — 런타임 서브에이전트 타입은 `cennad:courier`. `plugin.json` 에는 `agents` 필드를 추가하지 않는다 (`agents/` 디렉토리 자동 발견).
 

@@ -1,6 +1,6 @@
 ---
 name: revalidate
-user_invocable: true
+user-invocable: true
 description: '[filid:revalidate] Re-measure the post-correction delta against the recorded resolve baseline, judge every rejection justification, and issue the final PASS or FAIL.'
 argument-hint: '[--base REF]'
 version: '1.0.0'

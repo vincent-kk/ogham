@@ -1,6 +1,6 @@
 ---
 name: setup
-user_invocable: true
+user-invocable: true
 description: '[filid:setup] Initialize Filid config and managed rule documents, inspect the resulting FCA snapshot, validate its document boundaries, and propose missing INTENT.md or DETAIL.md work without editing source documents.'
 argument-hint: '[path] [--rules]'
 version: '2.0.0'

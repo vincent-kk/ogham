@@ -5,7 +5,6 @@
  *   2. No skill or agent markdown file references a slash invocation of a REMOVED_SKILLS entry.
  *
  * Update EXPECTED_COUNT and REMOVED_SKILLS as skills are merged or removed.
- * Source of truth: .omc/plans/maencof-skill-portfolio-refactor.md.
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';

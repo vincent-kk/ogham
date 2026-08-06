@@ -1,6 +1,6 @@
 ---
 name: rebuttal
-user_invocable: true
+user-invocable: true
 description: "[prawf:rebuttal] Turn real external reviewer comments into a point-by-point rebuttal letter and a revision checklist. Skips the attack round (the external reviewers already attacked) and runs the prawf defense round directly. Reuses the chair and rebuttal-strategist personas. Triggers: 반박문, 리뷰 응답, rebuttal letter, response to reviewers, point-by-point response, 심사평 대응."
 argument-hint: "[--profile <name>] [--workdir <dir>] [<paper-path>] [<review-comments-path>]"
 version: "1.0.0"

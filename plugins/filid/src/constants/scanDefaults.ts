@@ -12,7 +12,6 @@ export const DEFAULT_SCAN_OPTIONS: Required<ScanOptions> = {
     '**/scripts/**',
     '**/.filid/**',
     '**/.claude/**',
-    '**/.omc/**',
     '**/.metadata/**',
     '**/next/**',
     '**/bridge/**',
@@ -34,7 +33,6 @@ export const SCAN_SKIP_DIRS = new Set([
   'build',
   'coverage',
   '.next',
-  '.omc',
   '.claude',
 ]);
 

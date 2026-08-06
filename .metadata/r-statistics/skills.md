@@ -7,7 +7,7 @@
 ```yaml
 ---
 name: <kebab-case> # 접두 없음 (plugin namespace 자동)
-user_invocable: true
+user-invocable: true
 description: '[r-statistics:<skill>] <한 줄 목적>. Trigger: "<구1>", "<구2>"'
 argument-hint: "[--auto] [--data PATH] ..."
 version: "1.0.0"

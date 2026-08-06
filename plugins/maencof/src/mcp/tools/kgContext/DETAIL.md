@@ -34,5 +34,4 @@
 
 ## Last Updated
 
-2026-08-05 — content/paths 모드와 include_full 스니펫 예산 계상 계약을 문서화했다 (cross-review FIX-012).
-2026-08-05 — include_full 스니펫 상한을 잔여 예산 연동(300~1200자 클램프)으로 바꾸고, 잔여 예산 소진 시 스니펫 생략을 계약에 추가했다.
+2026-08-05 — content/paths 모드와 include_full 스니펫 예산 계상 계약을 문서화했다 (cross-review FIX-012). 2026-08-05 — include_full 스니펫 상한을 잔여 예산 연동(300~1200자 클램프)으로 바꾸고, 잔여 예산 소진 시 스니펫 생략을 계약에 추가했다.

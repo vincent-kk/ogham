@@ -1,6 +1,6 @@
 ---
 name: analyze
-user_invocable: true
+user-invocable: true
 description: '[r-statistics:analyze] Orchestrate a full statistical analysis from data + hypothesis to verified results and reproducible R: classify intent, select a method, gate assumptions, execute via R, validate, and report. Trigger: "analyze this data", "run a hypothesis test", "is this difference significant", "이 데이터 분석해줘", "가설검정 해줘"'
 argument-hint: '[--auto] [--data PATH] [--question "..."]'
 version: "1.0.0"

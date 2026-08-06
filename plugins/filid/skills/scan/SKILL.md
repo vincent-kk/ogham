@@ -1,6 +1,6 @@
 ---
 name: scan
-user_invocable: true
+user-invocable: true
 description: '[filid:scan] Run the single full-project FCA audit across snapshot structure, document and import boundaries, dependency DAG, and verification-document contracts.'
 argument-hint: '[path]'
 version: '2.0.0'

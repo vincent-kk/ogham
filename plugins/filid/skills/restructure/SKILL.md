@@ -1,6 +1,6 @@
 ---
 name: restructure
-user_invocable: true
+user-invocable: true
 description: '[filid:restructure] Create a read-only FCA placement plan, obtain approval, execute it with external file operations, and verify exact postconditions.'
 argument-hint: '[path] <placement requests> [--dry-run] [--auto-approve]'
 version: '1.0.0'

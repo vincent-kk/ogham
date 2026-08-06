@@ -5,7 +5,7 @@
  *   - name matches parent directory name
  *   - description field present
  *   - version matches semver
- *   - user_invocable is a boolean when present
+ *   - user-invocable is a boolean when present
  *   - complexity (when present) is one of: simple | moderate | complex
  *   - plugin equals "imbas"
  *   - Trigger line inside description matches canonical regex /^\s*Trigger:\s+"[^"]+"(,\s+"[^"]+")*$/
@@ -28,7 +28,7 @@ interface Frontmatter {
   name?: string;
   description?: string;
   version?: string;
-  user_invocable?: boolean;
+  'user-invocable'?: boolean;
   complexity?: string;
   plugin?: string;
 }
@@ -49,14 +49,14 @@ function parseFrontmatter(raw: string): {
 
   for (const line of body) {
     if (inDescription)
-      if (/^[a-z_]+:/.test(line)) inDescription = false;
+      if (/^[a-z_-]+:/.test(line)) inDescription = false;
       else {
         descriptionLines.push(line);
         continue;
       }
 
     const m = line.match(
-      /^(name|description|version|user_invocable|complexity|plugin):\s*(.*)$/,
+      /^(name|description|version|user-invocable|complexity|plugin):\s*(.*)$/,
     );
     if (!m) continue;
     const [, key, rawVal] = m;
@@ -65,7 +65,7 @@ function parseFrontmatter(raw: string): {
       inDescription = true;
       continue;
     }
-    if (key === 'user_invocable')
+    if (key === 'user-invocable')
       (fm as Record<string, unknown>)[key] = val === 'true';
     else (fm as Record<string, unknown>)[key] = val;
   }

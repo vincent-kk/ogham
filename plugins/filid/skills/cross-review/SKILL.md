@@ -1,6 +1,6 @@
 ---
 name: cross-review
-user_invocable: true
+user-invocable: true
 description: '[filid:cross-review] Review a committed change from independent FCA contract, structure, and verification perspectives, then adversarially arbitrate every finding.'
 argument-hint: '[--base REF] [--force] [--cleanup]'
 version: '4.1.0'

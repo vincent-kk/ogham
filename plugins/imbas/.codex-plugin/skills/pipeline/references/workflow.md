@@ -108,8 +108,7 @@ ELSE — replicate the `imbas:estimate` skill workflow
 
 ## Phase 3 — SPLIT (decompose + create)
 
-Replicates the `imbas:split` skill workflow with GATE 3 replacing the interactive
-approval gate (split Step 8):
+Replicates the `imbas:split` skill workflow with GATE 3 replacing the interactive approval gate (split Step 8):
 
 ```
 Decompose — skills/split/references/workflow.md Steps 1–7:
@@ -153,8 +152,7 @@ as in split):
 
 Render the COMPLETE template from blocker-report.md:
 
-- Phase results table (refine result + warning count, estimation totals or
-  "skipped", decomposed count, created count)
+- Phase results table (refine result + warning count, estimation totals or "skipped", decomposed count, created count)
 - Created issues list (Epic, issues with refs)
 - Estimation summary (buffered total, confidence interval, total weeks) when present
 - Accumulated warnings from all phases

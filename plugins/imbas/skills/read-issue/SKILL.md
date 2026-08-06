@@ -1,6 +1,6 @@
 ---
 name: read-issue
-user_invocable: false
+user-invocable: false
 description: '[imbas:read-issue] Internal skill. Reads an issue with its full comment thread (Jira), digest entries (local), or GitHub issue thread, reconstructs the conversation context, and returns a structured JSON summary.'
 argument-hint: '<issue-ref> [--depth shallow|full]'
 version: '1.0.0'

@@ -1,6 +1,6 @@
 ---
 name: simulate-defense
-user_invocable: true
+user-invocable: true
 description: "[prawf:simulate-defense] Rehearse a thesis/paper defense. The committee personas pose anticipated questions, the author (you) answers, and the rebuttal-strategist coaches each answer with tactics and evidence to cite. Reuses the prawf review personas. Triggers: 답변 시뮬레이션, 모의 심사, defense simulation, mock defense, Q&A 연습, 예상 질문 연습."
 argument-hint: "[--batch] [--profile <name>] [--workdir <dir>] [<qa-sheet-or-paper-path>]"
 version: "1.0.0"

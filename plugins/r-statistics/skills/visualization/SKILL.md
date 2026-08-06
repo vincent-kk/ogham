@@ -1,6 +1,6 @@
 ---
 name: visualization
-user_invocable: true
+user-invocable: true
 description: '[r-statistics:visualization] Produce publication-ready statistical plots with ggplot2 — distributions, boxplots, scatter/regression, survival curves, forest plots — saved as image artifacts. Trigger: "plot this", "make a boxplot", "show the distribution", "scatter plot", "박스플롯 그려줘", "분포 시각화"'
 argument-hint: "[--kind boxplot|scatter|distribution|survival|forest]"
 version: "1.0.0"

@@ -1,6 +1,6 @@
 ---
 name: pull-request
-user_invocable: true
+user-invocable: true
 description: '[filid:pull-request] Bring the branch FCA documents up to date through enrich-docs, then open a structured GitHub pull request from the branch changes.'
 argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve]'
 version: '1.0.0'

@@ -1,6 +1,6 @@
 ---
 name: context-query
-user_invocable: true
+user-invocable: true
 description: '[filid:context-query] Resolve a target path to its owner fractal and minimal owner-to-root INTENT/DETAIL reference chain, then answer a focused FCA question within three rounds.'
 argument-hint: '<question>'
 version: '2.0.0'

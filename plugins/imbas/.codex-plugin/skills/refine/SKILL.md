@@ -1,6 +1,6 @@
 ---
 name: refine
-user_invocable: true
+user-invocable: true
 description: '[imbas:refine] Phase 1 of the imbas pipeline. Restructures a planning document into the standard section layout and validates it for contradictions, divergences, omissions, infeasibilities, and testability. Produces refined.md + validation-report.md. Trigger: "refine spec", "validate spec", "기획서 정리", "기획서 검증", "문서 재구조화"'
 argument-hint: '<source> [--project KEY] [--supplements PATHS]'
 version: '2.0.0'

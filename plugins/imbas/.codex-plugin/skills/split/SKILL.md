@@ -1,6 +1,6 @@
 ---
 name: split
-user_invocable: true
+user-invocable: true
 description: '[imbas:split] Phase 3 of the imbas pipeline. Splits a refined document into INVEST-compliant issues, then — after an approval gate — batch-creates them on the provider (Jira, GitHub, or local) with dry-run and resume support. Trigger: "split stories", "story 분할", "이슈 쪼개기", "issue 생성", "imbas split"'
 argument-hint: '[--run RUN_ID] [--epic EPIC-KEY] [--dry-run]'
 version: '2.0.0'

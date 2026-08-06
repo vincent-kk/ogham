@@ -30,5 +30,4 @@
 
 ## Last Updated
 
-2026-08-05 — 참조-라인 조립 계약과 estimateTokens 공개를 문서화했다 (cross-review FIX-016).
-2026-08-05 — extractBestSnippet 경계 절단·`…` 표식 계약을 추가하고 기본 상한 표기를 코드(300자)와 일치시켰다.
+2026-08-05 — 참조-라인 조립 계약과 estimateTokens 공개를 문서화했다 (cross-review FIX-016). 2026-08-05 — extractBestSnippet 경계 절단·`…` 표식 계약을 추가하고 기본 상한 표기를 코드(300자)와 일치시켰다.

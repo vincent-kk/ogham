@@ -1,7 +1,7 @@
 ---
 name: setup
 description: '[cennad] Open the local settings UI for ratio, intervention strength, keywords, and defaults. Trigger: "cennad 설정", "open cennad settings", "개입 강도"'
-user_invocable: true
+user-invocable: true
 argument-hint: ''
 ---
 

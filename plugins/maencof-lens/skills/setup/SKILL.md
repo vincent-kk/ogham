@@ -1,6 +1,6 @@
 ---
 name: setup
-user_invocable: true
+user-invocable: true
 description: "[maencof-lens:setup] Initialize and manage .maencof-lens/config.json for read-only vault access configuration. Supports vault registration, removal, default vault switching, and layer filter management through interactive setup or direct subcommands. Run this first before using lookup or brief skills."
 argument-hint: "[init | show | add NAME PATH | set-default NAME | set-layers NAME LAYERS | remove NAME]"
 version: 1.1.0

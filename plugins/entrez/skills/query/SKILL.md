@@ -1,6 +1,6 @@
 ---
 name: query
-user_invocable: true
+user-invocable: true
 description: '[entrez:query] Build a recall-oriented PubMed query set from a topic — no search is run. Trigger: "make a pubmed query", "build a search string", "검색식 만들어", "쿼리만"'
 argument-hint: "[--db pubmed|pmc] <topic>"
 version: "1.0.0"

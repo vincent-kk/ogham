@@ -1,0 +1,20 @@
+{
+  "version": "0.2",
+  "words": [
+    "behaviour",
+    "behavioural",
+    "behaviours",
+    "retellings",
+    "tellings",
+    "unattacked",
+    "unshown"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "**/bridge/**",
+    "**/dist/**",
+    "**/public/**",
+    "**/.codex-plugin/**",
+    "yarn.lock"
+  ]
+}

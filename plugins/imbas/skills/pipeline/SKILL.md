@@ -1,6 +1,6 @@
 ---
 name: pipeline
-user_invocable: true
+user-invocable: true
 description: '[imbas:pipeline] End-to-end pipeline orchestration. Accepts a document/URL and runs refine → estimate → split (decompose + create) with auto-approval at quality gates. Stops with a structured blocker report on any gate failure. Trigger: "pipeline", "full pipeline", "전체 파이프라인", "자동 실행", "한번에 실행"'
 argument-hint: '<source> [--project KEY] [--supplements PATHS] [--parent KEY|new|none] [--skip-estimate] [--stop-at PHASE] [--dry-run] [--strict-drift]'
 version: '2.0.0'

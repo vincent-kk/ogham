@@ -29,13 +29,7 @@ Local files cannot drift out of band the way Jira issues can, but files may be m
 3. Classify:
    - MATCH: file exists → proceed.
    - DRIFT_DELETED: file missing → WARN "Local issue `<ID>` was deleted. Reset to pending? [y/N]"
-     - Yes → clear `issue_ref`, set `status = "pending"`. Also reset every
-       `manifest.links` entry referencing the item (by manifest ID or the
-       deleted `issue_ref`) to `status = "pending"`, and `Edit` the counterpart
-       files' frontmatter to drop `links[]` entries pointing at the deleted ID.
-       Phase 4c then re-creates both sides against the re-allocated ID — the
-       scrub is what prevents stale entries when the new ID differs from the
-       old one.
+     - Yes → clear `issue_ref`, set `status = "pending"`. Also reset every `manifest.links` entry referencing the item (by manifest ID or the deleted `issue_ref`) to `status = "pending"`, and `Edit` the counterpart files' frontmatter to drop `links[]` entries pointing at the deleted ID. Phase 4c then re-creates both sides against the re-allocated ID — the scrub is what prevents stale entries when the new ID differs from the old one.
      - No → mark `status = "skipped"`.
 4. If any drift detected, display summary table and save reconciled manifest via `mcp__plugin_imbas_tools__manifest_save` before Step 3.
 5. Skip entirely for fresh runs (no `issue_ref` anywhere).
@@ -65,19 +59,14 @@ Local provider does NOT create a separate Epic file. Epic identity is recorded i
 
 #### Phase 4b — Item Creation (type-routed)
 
-For each item in `manifest.stories` where `status == "pending"`, route by the
-item's `type` field per `id-allocation.md`: Story → `stories/S-<N>`, Task →
-`tasks/T-<N>`, Subtask → `subtasks/ST-<N>`.
+For each item in `manifest.stories` where `status == "pending"`, route by the item's `type` field per `id-allocation.md`: Story → `stories/S-<N>`, Task → `tasks/T-<N>`, Subtask → `subtasks/ST-<N>`.
 
 1. Allocate the next ID for the item's type.
 2. `Write .imbas/<KEY>/issues/<type dir>/<ID>.md` per `file-format.md`:
    - `type: <item.type>`
    - `title: item.title`
    - `status: To Do`
-   - Story only: `epic: <epic_ref or null>` plus `verification`, `size_check`,
-     `split_from`, `split_into` from the manifest — other types omit these
-     keys entirely (omissions table in `file-format.md`); Subtask carries
-     `parent` instead.
+   - Story only: `epic: <epic_ref or null>` plus `verification`, `size_check`, `split_from`, `split_into` from the manifest — other types omit these keys entirely (omissions table in `file-format.md`); Subtask carries `parent` instead.
    - `## Description` body from `item.description`.
    - Empty `## Digest` section.
 3. Update the manifest item: `status = "created"`, `issue_ref = "<ID>"`.

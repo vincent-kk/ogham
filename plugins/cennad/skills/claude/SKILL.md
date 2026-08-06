@@ -1,7 +1,7 @@
 ---
 name: claude
 description: '[cennad] Delegate to the Anthropic Claude Code CLI via cennad. Use for a fresh Claude instance to handle reasoning, writing, analysis, or review without inheriting this session''s context or customizations. Trigger: "ask claude", "claude 호출", "클로드에게"'
-user_invocable: true
+user-invocable: true
 argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refine] -- "prompt"'
 ---
 

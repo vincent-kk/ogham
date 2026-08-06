@@ -1,6 +1,6 @@
 ---
 name: download
-user_invocable: true
+user-invocable: true
 description: '[atlassian:download] Download and upload file attachments from Jira issues and Confluence pages by direct URL or issue key/page ID metadata lookup. Trigger: "download attachment", "첨부파일 다운로드", "파일 받기", "atlassian download"'
 argument-hint: "<issue-key|page-id|url> [--filename <name>]"
 version: "0.1.0"

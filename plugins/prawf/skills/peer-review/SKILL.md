@@ -1,6 +1,6 @@
 ---
 name: peer-review
-user_invocable: true
+user-invocable: true
 description: "[prawf:peer-review] Run multi-agent academic peer review. The chair profiles and normalizes the paper, then convenes a native Claude Code team: six soundness reviewers attack across axes, the rebuttal-strategist defends, original reviewers re-review, and the chair adjudicates a verdict (Accept / Minor / Major / Reject) plus an anticipated-question sheet. Triggers: 동료평가, peer review, 논문 평가, paper review, soundness review."
 argument-hint: "[--solo] [--profile <name>] [--scope abstract|full] [--workdir <dir>] [--gate critical|major|minor]"
 version: "1.0.0"

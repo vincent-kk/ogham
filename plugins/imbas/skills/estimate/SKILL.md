@@ -1,6 +1,6 @@
 ---
 name: estimate
-user_invocable: true
+user-invocable: true
 description: '[imbas:estimate] Phase 2 (optional) of the imbas pipeline. Decomposes a refined planning document through three views (page/feature/module), reconciles them into a single WBS, applies PERT per unit, and lays out a schedule. Produces estimation.json + estimation-report.md. Trigger: "estimate manday", "견적", "공수 산정", "일정 산출", "manday 추산"'
 argument-hint: '[--run RUN_ID] [--team-size N] [--buffer RATIO]'
 version: '1.0.0'

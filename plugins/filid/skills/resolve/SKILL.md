@@ -1,6 +1,6 @@
 ---
 name: resolve
-user_invocable: true
+user-invocable: true
 description: '[filid:resolve] Decide each cross-review fix request, delegate accepted corrections outward, record rejection justifications, then gate and commit the result.'
 argument-hint: '[--auto] [--base REF]'
 version: '1.0.0'

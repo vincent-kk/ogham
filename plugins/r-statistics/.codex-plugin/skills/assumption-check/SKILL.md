@@ -1,6 +1,6 @@
 ---
 name: assumption-check
-user_invocable: true
+user-invocable: true
 description: '[r-statistics:assumption-check] Run the assumption tests a method requires — normality, homogeneity of variance, independence, multicollinearity, proportional hazards — and emit pass/fail artifacts that feed the analysis gate. Trigger: "check normality", "test the assumptions", "is the variance equal", "정규성 검정", "등분산 검정"'
 argument-hint: "[--method TECHNIQUE]"
 version: "1.0.0"

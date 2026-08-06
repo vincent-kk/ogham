@@ -1,6 +1,6 @@
 ---
 name: auto-fix
-user_invocable: true
+user-invocable: true
 description: "[prawf:auto-fix] After a /prawf:peer-review, apply the auto-fixable revisions directly to the manuscript source. Only mechanical, artifact-backed text edits (clarifications, added statements, notation/citation fixes) are applied; anything needing new data, analysis, or author judgment is listed as manual. Triggers: 자동 수정, 자동수정, auto-fix, 리뷰 수정 적용, apply review fixes, apply fixes."
 argument-hint: "[--dry-run] [--workdir <dir>] [<paper-slug | review-dir>] [<manuscript-path>]"
 version: "1.0.0"
