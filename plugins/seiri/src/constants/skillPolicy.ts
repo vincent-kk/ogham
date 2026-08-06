@@ -48,6 +48,7 @@ export const USER_GATED_SKILLS = [
   'finish',
   'interview',
   'mental-model',
+  'trace-change',
   'setup',
 ] as const;
 

@@ -12,6 +12,10 @@ The strongest attack is a prediction: if the claim holds, some file you have not
 
 **Domain claims** — the name that means something else in this codebase; the field kept alive for exactly one caller; the special case that turns out to carry the main traffic.
 
+## The simulation attack
+
+Take the step-3 toy input and walk it end-to-end through the real paths — no summarized hops: name the function entered, the branch taken, the value carried, at every step. Each hop is a prediction checked against code you may not have read yet, and the first hop the code refuses to take is the counterexample. Prefer it when a claim spans several files, where static reading hides ordering, or when several claims share one path — one walk attacks them all.
+
 ## When the attack fails
 
 Say which attack you ran, and downgrade nothing to certainty. "I looked for callers that skip the check and found none across the 7 call sites" is a result. "The invariant holds" is a different sentence, and you did not earn it.
