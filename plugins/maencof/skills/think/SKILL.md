@@ -1,6 +1,6 @@
 ---
 name: think
-user_invocable: true
+user-invocable: true
 description: '[maencof:think] Resolves ambiguous requirements using Tree of Thoughts with 3 entry modes (default/divergent/review): generates candidates, scores each on mode-specific axes, and selects the optimal approach with full rationale.'
 argument-hint: '[--mode default|divergent|review] [requirement or feature request]'
 version: '1.1.0'

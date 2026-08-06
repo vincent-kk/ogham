@@ -717,7 +717,7 @@ Unless `--no-run-skill` is passed, author a vault skill the user can invoke to l
 ---
 name: run-{{SKILL_SLUG}}
 description: 'Launch the {{DASHBOARD_NAME}} vault dashboard — installs/builds if needed, binds the first free port, and opens it in the browser. Trigger: "run dashboard", "open dashboard", "start {{DASHBOARD_NAME}}".'
-user_invocable: true
+user-invocable: true
 ---
 
 # run-{{SKILL_SLUG}}

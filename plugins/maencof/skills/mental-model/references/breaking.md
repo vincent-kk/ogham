@@ -10,6 +10,10 @@ Attacking a claim means going looking for the shadow that makes it false — not
 
 **Purpose claims** — follow the sacrifices: what was given up names what is protected better than any statement of values; the calendar and the budget against the mission; the thing kept alive that the stated purpose would not keep. When outcomes diverge from the declared purpose persistently, model the outcomes — the declared purpose was somebody's shadow of the subject, not the subject.
 
+## The simulation attack
+
+Take the step-3 scenario and derive the shadows it must have cast if the Form is real — then check walls the claim was not built from: the period before, the audience after, the record nobody cited. A subject that had the chance to cast the predicted shadow and cast a different one is the counterexample; a wall with no light on it is not — name the walls you checked. Prefer this attack when a claim was assembled from tellings rather than events, or when several claims share one story: one walked scenario attacks them all.
+
 ## How each medium distorts
 
 Every projector distorts characteristically, and the distortion is itself evidence:

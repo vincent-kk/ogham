@@ -99,7 +99,7 @@ Generated skill example:
 ```yaml
 ---
 name: slack-digest
-user_invocable: true
+user-invocable: true
 description: Collect latest Slack #dev channel messages, summarize, and save to maencof L4
 version: 1.0.0
 ---

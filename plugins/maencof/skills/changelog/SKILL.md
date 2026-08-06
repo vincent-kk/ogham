@@ -1,6 +1,6 @@
 ---
 name: changelog
-user_invocable: true
+user-invocable: true
 description: '[maencof:changelog] Curates self-change entries into the vault changelog. Reads the pending scan state, detects dirty and committed-but-unrecorded changes since the last curation, writes date-grouped entries, and advances the curation cursor. Non-blocking.'
 argument-hint: ''
 version: '2.0.0'

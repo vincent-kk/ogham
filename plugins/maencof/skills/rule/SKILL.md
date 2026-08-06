@@ -1,6 +1,6 @@
 ---
 name: rule
-user_invocable: true
+user-invocable: true
 description: '[maencof:rule] Adds, edits, or removes AI behavioral rules in .claude/rules/, supporting global and path-conditional rules. Also migrates inline CLAUDE.md rules to dedicated rule files.'
 argument-hint: '[mode] [name]'
 version: '1.1.0'

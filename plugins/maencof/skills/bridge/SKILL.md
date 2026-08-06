@@ -1,6 +1,6 @@
 ---
 name: bridge
-user_invocable: true
+user-invocable: true
 description: '[maencof:bridge] Connects an external service (Slack, Jira, GitHub, Notion) to maencof end-to-end: installs the MCP server, defines data workflows, and auto-generates a ready-to-use integration skill.'
 argument-hint: '[service]'
 version: '1.1.0'

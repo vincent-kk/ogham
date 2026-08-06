@@ -1,6 +1,6 @@
 ---
 name: craft-dashboard
-user_invocable: true
+user-invocable: true
 description: '[maencof:craft-dashboard] Generates or updates a personal vault dashboard from an interactive interview. Defaults to reading .maencof/ graph indexes; falls back to a vault file walk with --vault-index independent.'
 argument-hint: '[create|mutate] [target-dir] [--chart recharts|plotly] [--search fuse|kg|both|off] [--vault-index maencof|independent] [--pin <version>] [--no-run-skill] [--yes]'
 version: '0.1.0'

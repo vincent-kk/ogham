@@ -1,6 +1,6 @@
 ---
 name: migrate
-user_invocable: true
+user-invocable: true
 description: '[maencof:migrate] Upgrades the vault architecture to v3 — L3 sub-layers, a flat Layer 5 buffer, and cross-layer hubs as a frontmatter attribute — safely preserving and relocating all existing documents.'
 argument-hint: '[--dry-run] [--rollback]'
 version: '2.0.0'

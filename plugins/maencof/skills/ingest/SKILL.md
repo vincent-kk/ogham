@@ -1,6 +1,6 @@
 ---
 name: ingest
-user_invocable: true
+user-invocable: true
 description: '[maencof:ingest] Imports content from GitHub issues, Slack messages, or web pages into the vault as structured Layer 3, 4, or 5 documents with frontmatter, tags, and graph connections.'
 argument-hint: '[source] [--layer 3|4|5] [--tags TAGS] [--path PATH]'
 version: '1.0.0'

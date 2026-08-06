@@ -1,6 +1,6 @@
 ---
 name: explore
-user_invocable: true
+user-invocable: true
 description: '[maencof:explore] Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers. Supports --for-brainstorm to hand off candidate seeds to think --mode divergent.'
 argument-hint: '[seed] [--hops 1-10] [--layer 1-5] [--sub-layer NAME] [--detail] [--for-brainstorm]'
 version: '1.1.0'
