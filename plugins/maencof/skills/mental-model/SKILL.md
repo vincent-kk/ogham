@@ -40,7 +40,7 @@ State what the model must answer, and what would be done differently depending o
 
 ### Step 2 — Collect shadows, in two layers
 
-A shadow is an observation with provenance: where it fell, when, who cast it. Collect in two layers. **Deep** — shadows cast before today's question existed: the subject's standing context, kept as skippable background for whoever already knows it. **Narrow** — shadows that touch the question directly; never skippable. Sources, cheapest first:
+A shadow is an observation with provenance: where it fell, when, who cast it. Collect in two layers. **Deep** — the subject's standing context a stranger would need, kept as skippable background for whoever already knows it. **Narrow** — shadows that touch the question directly; never skippable. Sources, cheapest first:
 
 1. **The vault** — records are shadows cast earlier, before today's argument existed. Check `mcp__plugin_maencof_tools__kg_status`; search with `mcp__plugin_maencof_tools__kg_search`, seeding each key concept in the user's working language AND English as separate items; follow `mcp__plugin_maencof_tools__kg_navigate`; read what matters with `mcp__plugin_maencof_tools__read`.
 2. **The conversation and documents at hand.**
@@ -59,11 +59,11 @@ An attack is a prediction: if the Form is real, a wall you have not checked must
 - **Time** — search a period the claim was not built from; subjects drift, and models do not notice on their own.
 - **Independence** — trace each supporting shadow to its projector; three retellings of one account are one shadow.
 
-The third is **Simulation** — walk the step-3 scenario against records it was not built from (`references/breaking.md`). An unattacked claim does not enter the model. Where counterexamples hide, per layer, and how each medium distorts: `references/breaking.md`.
+A third needs no vault: **Simulation** — walk the step-3 scenario against records it was not built from. An unattacked claim does not enter the model. Where counterexamples hide, per layer, how each medium distorts, and the simulation attack: `references/breaking.md`.
 
 ### Step 5 — Report what survived, ordered and marked
 
-Background first, essence second, per-layer claims last — the reader meets the subject before the verdicts. Each claim carries `seen`, `heard`, `inferred`, or `assumed` (`references/claims.md`). Refuted claims stay in the report with what killed them. There is no mark for knowledge: the strongest claim is seen from independent angles and still standing — which is not proof.
+Both background layers first (deep marked skippable), essence second, per-layer claims last — the reader meets the subject before the verdicts, and a Form a refuted claim supported is redrawn before it may lead the report. Each claim carries `seen`, `heard`, `inferred`, or `assumed` (`references/claims.md`). Refuted claims stay in the report with what killed them. There is no mark for knowledge: the strongest claim is seen from independent angles and still standing — which is not proof.
 
 ### Step 6 — Close the loop
 

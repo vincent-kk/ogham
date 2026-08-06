@@ -39,17 +39,17 @@ export const AUTO_CONDITIONAL_ASK_SKILLS = ['write-plan'] as const;
 
 /**
  * User-invoked gates the model may not auto-invoke (`disable-model-invocation:
- * true`). They own the interactive decision points — shaping, requirements,
- * model building, the integration choice, rule deployment — and so may ask
- * freely.
+ * true`). They own the moments the user starts deliberately — shaping,
+ * requirements, model building, the integration choice, rule deployment,
+ * the reader-facing change explanation — and so may ask freely.
  */
 export const USER_GATED_SKILLS = [
   'brainstorm',
   'finish',
   'interview',
   'mental-model',
-  'trace-change',
   'setup',
+  'trace-change',
 ] as const;
 
 /** Every skill the model may invoke on its own — the workflow-chain members. */

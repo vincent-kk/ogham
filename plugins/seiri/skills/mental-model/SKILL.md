@@ -21,9 +21,9 @@ You were invoked by the user, so ask what the model is for. A model is not a sum
 
 **3. Hypothesize the essence, then split it.** Before any list of claims, state the model's core in one piece, with one concrete toy input: "if this model is right, input X takes path Y." Then split it into claims that could be wrong — each says what must hold, and what breaks if it does not. The essence enters the model only through its split claims; the toy input becomes step 4's cheapest weapon. Cut every sentence that predicts nothing — that is summary, and summary cannot be checked. Forms and the three layers are in `references/claims.md`.
 
-**4. Attack each claim.** Go looking for the code that contradicts it: the branch that skips it, the caller that violates it, the state where it stops holding — and run the simulation attack: walk the step-3 input end-to-end through the real paths (`references/breaking.md`). An unattacked claim does not enter the model.
+**4. Attack each claim.** Go looking for the code that contradicts it: the branch that skips it, the caller that violates it, the state where it stops holding — and run the simulation attack: walk the step-3 input end-to-end through the real paths. An unattacked claim does not enter the model. Where the counterexample hides, per layer, and the simulation attack are in `references/breaking.md`.
 
-**5. Report what survived, ordered for understanding.** Background first, essence second, per-layer claims last. Each claim carries `traced` (read it, cite `file:line`), `inferred` (follows from traced facts, not read directly), or `assumed` (neither — written down so it can be attacked later). Refuted claims stay in the report, with what killed them.
+**5. Report what survived, ordered for understanding.** Both background layers first (deep marked skippable), essence second, per-layer claims last — and an essence a refuted claim supported is rewritten before it may lead the report. Each claim carries `traced` (read it, cite `file:line`), `inferred` (follows from traced facts, not read directly), or `assumed` (neither — written down so it can be attacked later). Refuted claims stay in the report, with what killed them.
 
 **6. Close the loop.** Answer the step-1 question from surviving claims only. If they cannot answer it, the model is not done: name the wall still dark and return to step 2 — a model that survived every attack yet answers nothing is a tour, not a model.
 
@@ -33,4 +33,4 @@ You were invoked by the user, so ask what the model is for. A model is not a sum
 - One claim, one layer. A claim spanning structure, behaviour, and domain at once cannot be attacked — a counterexample against one half leaves the other standing.
 - Do not modify files. This skill produces a model.
 - The model lives in this session only. Say so when handing it over, and let the user decide what is worth keeping.
-- Hand off: a model that exposed a defect goes to `/seiri:trace-cause`; one that shapes a change goes to `/seiri:brainstorm`; explaining a change to a reader is `/seiri:trace-change`'s moment.
+- Hand off: a model that exposed a defect goes to `/seiri:trace-cause`. The gates are the user's to invoke — suggest `/seiri:brainstorm` when the model shapes a change, `/seiri:trace-change` when a reader needs the change explained.
