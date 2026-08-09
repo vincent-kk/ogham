@@ -195,6 +195,7 @@ export type {
   KgContextResult,
   KgContextDocumentRef,
   KgStatusResult,
+  SeedResolution,
 } from './mcp.js';
 export { KgContextScope } from '../constants/kgContext.js';
 

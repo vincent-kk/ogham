@@ -11,6 +11,7 @@ import type {
   KgSearchResult,
   KgSearchResultItem,
 } from '../../../types/mcp.js';
+import { toSeedResolution } from '../helpers/toSeedResolution.js';
 
 /**
  * kg_search 핸들러
@@ -77,5 +78,6 @@ export async function handleKgSearch(
     results: items,
     durationMs: Date.now() - startTime,
     exploredNodes: result.exploredNodes,
+    seedResolution: toSeedResolution(result.seedCounts),
   };
 }

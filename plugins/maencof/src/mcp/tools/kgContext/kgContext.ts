@@ -10,6 +10,7 @@ import {
 } from '../../../search/contextAssembler/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import type { KgContextInput, KgContextResult } from '../../../types/mcp.js';
+import { toSeedResolution } from '../helpers/toSeedResolution.js';
 
 import { selectContextCandidates } from './helpers/selectContextCandidates.js';
 
@@ -40,7 +41,8 @@ export async function handleKgContext(
   const includeFull = input.include_full ?? false;
   const queryTerms = input.query.split(/\s+/).filter((t) => t.length > 0);
 
-  const candidates = selectContextCandidates(graph, input);
+  const { candidates, wordSeedCounts } = selectContextCandidates(graph, input);
+  const seedResolution = toSeedResolution(wordSeedCounts);
 
   // 경로-만 모드 — 조립 markdown 없이 선택 문서 참조만 반환한다
   if (input.include_content === false) {
@@ -52,7 +54,7 @@ export async function handleKgContext(
         score: r.score,
       };
     });
-    return { documents, documentCount: documents.length };
+    return { documents, documentCount: documents.length, seedResolution };
   }
 
   // 컨텍스트 조립
@@ -114,6 +116,7 @@ export async function handleKgContext(
         documentCount: assembled.items.length,
         estimatedTokens: estimateTokens(context),
         truncatedCount: assembled.truncatedCount,
+        seedResolution,
       };
     }
   }
@@ -123,5 +126,6 @@ export async function handleKgContext(
     documentCount: assembled.items.length,
     estimatedTokens: assembled.estimatedTokens,
     truncatedCount: assembled.truncatedCount,
+    seedResolution,
   };
 }

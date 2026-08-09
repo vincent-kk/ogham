@@ -292,4 +292,40 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L5/buf-unsorted-quote.md': 1,
     },
   },
+  // ─── compound seed (C안: 원형 우선 + 분해 OR 폴백) ─────────────────────
+  // 태그에 verbatim 으로 존재하는 kebab seed — 원형 우선 경로의 직접 측정 지점.
+  {
+    id: 'kebab-tag-verbatim',
+    seeds: ['weekly-report'],
+    relevance: {
+      'L4/routines/weekly-report-routine.md': 2,
+      'L4/routines/weekly-report-checklist.md': 2,
+    },
+  },
+  // 원형도 없고 분해 AND 도 공집합인 compound seed — OR 폴백 경로의 측정 지점.
+  // routine/checklist 는 서로 다른 문서에만 있어 AND 는 반드시 비고,
+  // OR 가 두 문서를 저득점으로 회수한다.
+  {
+    id: 'compound-fallback-or',
+    seeds: ['routine-checklist'],
+    relevance: {
+      'L4/routines/weekly-report-routine.md': 2,
+      'L4/routines/weekly-report-checklist.md': 2,
+    },
+  },
+  // compound-or 가 다른 티어와 경쟁하는 골든 — compoundOrScore 스윕 축의 관측점.
+  // 'routine-checklist' 는 OR 폴백(compoundOrScore)으로 핵심 문서 2건을,
+  // 'archiv' 는 tag-prefix(0.3)로 관련 문서 1건을 시드한다. 두 시드의 IDF 가
+  // 같아(df 각 1) 0.3 경계에서 순위가 갈리고, 축 값이 지표에 나타난다.
+  // 그레이딩 판단: 명시 개념의 부분 회수(grade 2)가 접두 우연 매칭(grade 1)보다
+  // 진하다 — compound-or 를 tag-prefix 아래로 두지 않는 근거.
+  {
+    id: 'compound-or-vs-prefix-tier',
+    seeds: ['routine-checklist', 'archiv'],
+    relevance: {
+      'L4/routines/weekly-report-routine.md': 2,
+      'L4/routines/weekly-report-checklist.md': 2,
+      'L4/routines/report-archive.md': 1,
+    },
+  },
 ];

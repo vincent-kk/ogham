@@ -107,7 +107,7 @@ describe.skipIf(!VAULT_PATH)('T3 live vault report (read-only)', () => {
       for (const seeds of probes.searches ?? []) {
         const label = JSON.stringify(seeds);
         const seedDiagnostics = resolveSeedNodes(graph, seeds)
-          .sort((a, b) => b.matchScore - a.matchScore)
+          .scored.sort((a, b) => b.matchScore - a.matchScore)
           .slice(0, 5)
           .map(
             (s) =>
@@ -127,7 +127,9 @@ describe.skipIf(!VAULT_PATH)('T3 live vault report (read-only)', () => {
       }
 
       for (const rawQuery of probes.contexts ?? []) {
-        const candidates = selectContextCandidates(graph, { query: rawQuery });
+        const { candidates } = selectContextCandidates(graph, {
+          query: rawQuery,
+        });
         console.log(
           `[t3] context ${JSON.stringify(rawQuery)} top${Math.min(candidates.length, 10)}:`,
         );

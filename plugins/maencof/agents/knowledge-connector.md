@@ -34,7 +34,7 @@ An agent that discovers latent connections between knowledge nodes and creates e
    a. Shared tags between documents in different Layers
    b. Co-referenced concepts (same terms appearing in multiple documents)
    c. Orphan nodes with no inbound/outbound links
-   d. Cross-language recall: pass each concept as separate seed items in BOTH the user's working language and English (they are unioned), since vault docs may be tagged/titled in either language; never combine languages in one item (a multi-word item is AND-matched)
+   d. Cross-language recall: pass each concept as separate seed items in BOTH the user's working language and English (they are unioned), since vault docs may be tagged/titled in either language; never combine languages in one item (a multi-word item is AND-matched); hyphen/underscore-joined tags seen in prior responses may be passed back verbatim as a single item — they are matched raw first
 4. Rank candidates by connection strength (tag overlap + semantic similarity)
 5. Generate connection proposal list
 ```

@@ -144,6 +144,7 @@ export type {
   RelationshipType,
   RemindConfig,
   ReverseIndex,
+  SeedResolution,
   SerializedGraph,
   SessionDayLog,
   SessionRecord,
@@ -253,6 +254,7 @@ export {
 export type {
   QueryOptions,
   QueryResult,
+  ResolvedSeedNodes,
   ScoredSeed,
   MatchType,
 } from './search/queryEngine/index.js';

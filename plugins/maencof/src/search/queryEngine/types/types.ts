@@ -5,15 +5,28 @@
 import type { NodeId } from '../../../types/common.js';
 import type { ActivationResult } from '../../../types/graph.js';
 
-/** 시드 매칭 유형 */
+/** 시드 매칭 유형 — 'compound-or' 는 compound 시드 분해 OR 폴백이 새로 유입시킨 부분 매칭 */
 export type MatchType =
-  'path-exact' | 'title-exact' | 'title-word' | 'tag-exact' | 'tag-prefix';
+  | 'path-exact'
+  | 'title-exact'
+  | 'title-word'
+  | 'tag-exact'
+  | 'tag-prefix'
+  | 'compound-or';
 
 /** 매칭 품질이 포함된 시드 */
 export interface ScoredSeed {
   nodeId: NodeId;
   matchScore: number;
   matchType: MatchType;
+}
+
+/** resolveSeedNodes 결과 — 채택 시드와 시드별 어휘 매칭 계수 */
+export interface ResolvedSeedNodes {
+  /** 매칭 품질이 포함된 시드 노드 목록 */
+  scored: ScoredSeed[];
+  /** 입력 seed 원문 → 어휘 매칭 노드 수 (시드 budget 캡 이전). 0 = 미해석. 키는 첫 등장 순서. */
+  seedCounts: Record<string, number>;
 }
 
 /**
@@ -30,6 +43,8 @@ export interface QgaTuning {
   gateFloor?: number;
   /** 전역 감쇠 스케일 α_base */
   alphaBase?: number;
+  /** compound 분해 OR 폴백 점수 (COMPOUND_OR_MATCH_SCORE 오버라이드) */
+  compoundOrScore?: number;
 }
 
 /** QueryEngine 검색 옵션 */
@@ -62,4 +77,6 @@ export interface QueryResult {
   exploredNodes: number;
   /** 검색 소요 시간 (ms) */
   durationMs: number;
+  /** 입력 seed 원문 → 어휘 매칭 노드 수. 0 = 미해석. 캐시 결과에도 항상 실린다. */
+  seedCounts: Record<string, number>;
 }

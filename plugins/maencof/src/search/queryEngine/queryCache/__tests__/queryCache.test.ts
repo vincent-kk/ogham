@@ -8,7 +8,13 @@ import type { QueryResult } from '../../types/types.js';
 import { QueryCache } from '../queryCache.js';
 
 function mkResult(exploredNodes: number): QueryResult {
-  return { results: [], seedIds: [], exploredNodes, durationMs: 0 };
+  return {
+    results: [],
+    seedIds: [],
+    exploredNodes,
+    durationMs: 0,
+    seedCounts: {},
+  };
 }
 
 const BUILT_AT = 'graph-t';

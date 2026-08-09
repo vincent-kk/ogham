@@ -45,13 +45,13 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_SEARCH,
     {
       description:
-        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords). Returns ranked references (path/title/tags/gist); include_content=true adds full bodies for consumers that cannot read vault files. When the goal is assembled multi-document context, prefer kg_context.',
+        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords). Returns ranked references (path/title/tags/gist); include_content=true adds full bodies for consumers that cannot read vault files. When the goal is assembled multi-document context, prefer kg_context. Response metadata: exploredNodes is the count of nodes visited by SA — 0 means no seed item resolved, so expansion never started. seedResolution is always present: resolved maps each seed item to its lexical match count, and unresolved (present only when some items matched nothing) lists them verbatim — results reflect only resolved items.',
       inputSchema: z.object({
         seed: z
           .array(z.string())
           .min(1)
           .describe(
-            'Seed nodes (paths or keywords); array items are unioned. Use distilled concept keywords, not sentence fragments — drop grammar words (particles, articles, prepositions). Pair ambiguous/generic nouns with a qualifier in one item ("docker image", not bare "image"); multi-word within a single item is AND-matched. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item.',
+            'Seed nodes (paths or keywords); array items are unioned. Use distilled concept keywords, not sentence fragments — drop grammar words (particles, articles, prepositions). Pair ambiguous/generic nouns with a qualifier in one item ("docker image", not bare "image"); multi-word within a single item is AND-matched. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item. A hyphen/underscore-joined item (e.g. "weekly-report") is first matched verbatim against tags/titles; when absent it is split and AND-matched as usual, and only if that also matches nothing are the split tokens OR-matched at reduced weight — so tags seen in responses can be reused as seed items as-is.',
           ),
         max_results: z
           .number()
@@ -152,7 +152,7 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_CONTEXT,
     {
       description:
-        'Returns a context block assembled from documents relevant to the query within a token budget. Prefer this over kg_search + read chains for multi-document context assembly; layer/sub-layer/scope selection applies before the budget is spent. include_content=false returns only the selected document list (path/title/score) for callers that will read selectively.',
+        'Returns a context block assembled from documents relevant to the query within a token budget. Prefer this over kg_search + read chains for multi-document context assembly; layer/sub-layer/scope selection applies before the budget is spent. include_content=false returns only the selected document list (path/title/score) for callers that will read selectively. Response metadata: seedResolution reports derived query words — resolved maps each word to its match count; unresolved lists words that matched no node. An empty result with unresolved words means vocabulary mismatch, not absence from the vault.',
       inputSchema: z.object({
         query: z
           .string()
@@ -250,7 +250,7 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_SUGGEST_LINKS,
     {
       description:
-        'Suggests link candidates from the existing knowledge base for a target document. Two-stage algorithm: tag Jaccard similarity + SA reinforcement.',
+        'Suggests link candidates from the existing knowledge base for a target document. Two-stage algorithm: tag Jaccard similarity + SA reinforcement. Response metadata: candidates_explored of 0 means no seed tag overlapped any document, so exploration never started. When tags are provided, seedResolution maps each input tag to the count of documents carrying it; unresolved lists tags absent from the vault tag vocabulary.',
       inputSchema: z.object({
         path: z
           .string()

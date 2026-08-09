@@ -7,7 +7,7 @@
 ## Structure
 
 - `kgContext.ts` — handleKgContext 핸들러 (조립 + 스니펫)
-- `helpers/` organ — selectContextCandidates (자연어 분해 + SA 후보 선정; 평가 하네스와 공유하는 단일 경로)
+- `helpers/` organ — selectContextCandidates (자연어 분해 + SA 후보 선정 + 단어 시드 계수 보고; 평가 하네스와 공유하는 단일 경로)
 
 ## Boundaries
 

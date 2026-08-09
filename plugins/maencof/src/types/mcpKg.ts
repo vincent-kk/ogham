@@ -95,6 +95,14 @@ export interface KgSearchResultItem {
   content?: string;
 }
 
+/** seed(어휘 입력) 해석 메타데이터 — kg_search/kg_context 는 항상, kg_suggest_links 는 tags 제공 시 싣는다 */
+export interface SeedResolution {
+  /** 해석된 입력 항목 원문 → 어휘 매칭 건수 (kg_search/kg_context: 노드 수, kg_suggest_links: 태그 보유 문서 수) */
+  resolved: Record<string, number>;
+  /** 어떤 노드에도 매칭되지 않은 입력 항목 원문 (입력 순서, 중복 제거) — 전부 해석 시 키 부재 */
+  unresolved?: string[];
+}
+
 /** kg_search 응답 */
 export interface KgSearchResult {
   /** 검색 결과 목록 (점수 내림차순) */
@@ -103,6 +111,8 @@ export interface KgSearchResult {
   durationMs: number;
   /** 탐색된 총 노드 수 */
   exploredNodes: number;
+  /** seed 해석 메타데이터 — 항상 실린다. results 는 resolved seed 만 반영한다. */
+  seedResolution: SeedResolution;
 }
 
 /** kg_navigate 응답 */
@@ -156,6 +166,8 @@ export interface KgContextResult {
   estimatedTokens?: number;
   /** 토큰 예산 초과로 제거된 문서 수 — content 모드에서만 */
   truncatedCount?: number;
+  /** query 파생 단어의 해석 메타데이터 — 두 모드 모두 항상. 2-gram phrase 파생은 제외된다. */
+  seedResolution: SeedResolution;
 }
 
 /** kg_status 응답 */
@@ -239,6 +251,8 @@ export interface KgSuggestLinksResult {
   candidates_explored: number;
   /** 소요 시간 (ms) */
   duration_ms: number;
+  /** 입력 태그 해석 메타데이터 — `tags` 제공 시에만. resolved 값은 태그 보유 문서 수. */
+  seedResolution?: SeedResolution;
 }
 
 /** kg_timeline 입력 */

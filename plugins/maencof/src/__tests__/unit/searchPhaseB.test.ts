@@ -107,7 +107,7 @@ describe('B3: resolveSeedNodes — ScoredSeed classification', () => {
 
   it('경로 매칭은 score 1.0, matchType path-exact', () => {
     const graph = makeClassificationGraph();
-    const seeds = resolveSeedNodes(graph, ['k8s-setup.md']);
+    const seeds = resolveSeedNodes(graph, ['k8s-setup.md']).scored;
     expect(seeds).toHaveLength(1);
     expect(seeds[0]!.matchScore).toBe(1.0);
     expect(seeds[0]!.matchType).toBe('path-exact');
@@ -115,7 +115,7 @@ describe('B3: resolveSeedNodes — ScoredSeed classification', () => {
 
   it('제목 정확 매칭은 score 1.0, matchType title-exact', () => {
     const graph = makeClassificationGraph();
-    const seeds = resolveSeedNodes(graph, ['kubernetes cluster setup']);
+    const seeds = resolveSeedNodes(graph, ['kubernetes cluster setup']).scored;
     const k8sSeed = seeds.find((s) => s.nodeId === toNodeId('k8s-setup.md'));
     expect(k8sSeed).toBeDefined();
     expect(k8sSeed!.matchScore).toBe(1.0);
@@ -124,7 +124,7 @@ describe('B3: resolveSeedNodes — ScoredSeed classification', () => {
 
   it('제목 단어 경계 매칭은 score 0.8, matchType title-word', () => {
     const graph = makeClassificationGraph();
-    const seeds = resolveSeedNodes(graph, ['kubernetes']);
+    const seeds = resolveSeedNodes(graph, ['kubernetes']).scored;
     const k8sSeed = seeds.find((s) => s.nodeId === toNodeId('k8s-setup.md'));
     expect(k8sSeed).toBeDefined();
     expect(k8sSeed!.matchScore).toBe(0.8);
@@ -133,7 +133,7 @@ describe('B3: resolveSeedNodes — ScoredSeed classification', () => {
 
   it('태그 정확 매칭은 score 0.5, matchType tag-exact', () => {
     const graph = makeClassificationGraph();
-    const seeds = resolveSeedNodes(graph, ['kube']);
+    const seeds = resolveSeedNodes(graph, ['kube']).scored;
     const kubeSeed = seeds.find(
       (s) => s.nodeId === toNodeId('kube-related.md'),
     );
@@ -144,7 +144,7 @@ describe('B3: resolveSeedNodes — ScoredSeed classification', () => {
 
   it('태그 prefix 매칭은 score 0.3, matchType tag-prefix', () => {
     const graph = makeClassificationGraph();
-    const seeds = resolveSeedNodes(graph, ['infra']);
+    const seeds = resolveSeedNodes(graph, ['infra']).scored;
     const infraSeed = seeds.find((s) => s.nodeId === toNodeId('k8s-setup.md'));
     expect(infraSeed).toBeDefined();
     expect(infraSeed!.matchScore).toBe(0.3);
@@ -154,7 +154,7 @@ describe('B3: resolveSeedNodes — ScoredSeed classification', () => {
   it('다중 키워드에서 노드별 최고 점수 유지', () => {
     const graph = makeClassificationGraph();
     // 'kubernetes' → title-word(0.8), 'devops' → tag-exact(0.5)
-    const seeds = resolveSeedNodes(graph, ['kubernetes', 'devops']);
+    const seeds = resolveSeedNodes(graph, ['kubernetes', 'devops']).scored;
     const k8sSeed = seeds.find((s) => s.nodeId === toNodeId('k8s-setup.md'));
     expect(k8sSeed!.matchScore).toBe(0.8); // 더 높은 점수 유지
   });

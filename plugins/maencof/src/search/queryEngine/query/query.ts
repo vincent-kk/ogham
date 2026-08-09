@@ -35,8 +35,10 @@ export function query(
   const cached = sharedQueryCache.get(seeds, options, graph.builtAt);
   if (cached) return { ...cached, durationMs: Date.now() - startTime };
 
-  // 시드 노드 결정 (매칭 품질 포함)
-  const scoredSeeds = resolveSeedNodes(graph, seeds);
+  // 시드 노드 결정 (매칭 품질 + 시드별 계수)
+  const { scored: scoredSeeds, seedCounts } = resolveSeedNodes(graph, seeds, {
+    compoundOrScore: options.tuning?.compoundOrScore,
+  });
   const seedIds = scoredSeeds.map((s) => s.nodeId);
 
   let results: ActivationResult[] = [];
@@ -80,6 +82,7 @@ export function query(
     seedIds,
     exploredNodes: results.length,
     durationMs: Date.now() - startTime,
+    seedCounts,
   };
 
   // 캐시 저장

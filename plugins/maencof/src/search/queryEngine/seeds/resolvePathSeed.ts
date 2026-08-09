@@ -1,6 +1,7 @@
 /**
  * @file resolvePathSeed.ts
  * @description 경로 시드를 해석한다 — 정확 노드(score 1.0, path-exact) 또는 폴더 prefix 폴백.
+ * 반환값은 시드가 매칭한 노드 수다 (정확 1 · 폴더 멤버 수 · 부재 0).
  */
 import {
   PATH_PREFIX_MATCH_SCORE,
@@ -17,7 +18,7 @@ export function resolvePathSeed(
   graph: KnowledgeGraph,
   seed: string,
   bestScores: Map<NodeId, ScoredSeed>,
-): void {
+): number {
   const nodeId = toNodeId(seed);
   if (graph.nodes.has(nodeId)) {
     const existing = bestScores.get(nodeId);
@@ -28,7 +29,7 @@ export function resolvePathSeed(
         matchType: 'path-exact',
       });
 
-    return;
+    return 1;
   }
 
   // 정확 노드 부재 → 폴더 prefix 폴백: `seed/` 경계로 시작하는 노드를 폴더 멤버 시드로 채택.
@@ -39,7 +40,7 @@ export function resolvePathSeed(
   for (const [id, node] of graph.nodes)
     if (node.path.startsWith(prefix)) memberIds.push(id);
 
-  if (memberIds.length === 0) return;
+  if (memberIds.length === 0) return 0;
 
   for (const id of capSeedsByPagerank(graph, memberIds, PATH_PREFIX_SEED_CAP)) {
     const existing = bestScores.get(id);
@@ -50,4 +51,6 @@ export function resolvePathSeed(
         matchType: 'tag-exact',
       });
   }
+
+  return memberIds.length;
 }

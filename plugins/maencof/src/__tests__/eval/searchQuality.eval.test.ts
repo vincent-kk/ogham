@@ -10,6 +10,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { query } from '../../search/queryEngine/index.js';
+
 import { LIVE_DEFAULTS } from './evalConstants.js';
 import { buildEvalGraph } from './fixtureVault.js';
 import { GOLDEN_QUERIES } from './goldenSet.js';
@@ -33,5 +35,39 @@ describe('search quality golden set', () => {
 
     console.log('[eval] qga:', JSON.stringify(measured));
     assertMeetsBaseline(BASELINE_URL, 'qga', measured, GOLDEN_QUERIES.length);
+  });
+});
+
+// 개발요청서(maencof-seed-resolution) 수용 기준의 fixture 사상 — 응답 형태 회귀.
+describe('seed resolution regression', () => {
+  const graph = buildEvalGraph();
+
+  it('AND-failed phrase reports itself unresolved', () => {
+    const r = query(graph, ['주간보고 작성 규칙']);
+    expect(r.results).toHaveLength(0);
+    expect(r.exploredNodes).toBe(0);
+    expect(r.seedCounts['주간보고 작성 규칙']).toBe(0);
+  });
+
+  it('resolved seeds carry counts even on full success', () => {
+    const r = query(graph, ['주간보고', '루틴']);
+    expect(r.results.length).toBeGreaterThan(0);
+    expect(r.seedCounts['주간보고']).toBeGreaterThan(0);
+    expect(r.seedCounts['루틴']).toBeGreaterThan(0);
+  });
+
+  it('partial failure marks only dead seeds', () => {
+    const r = query(graph, ['knowledge graph', 'wxyzq']);
+    expect(r.results.length).toBeGreaterThan(0);
+    expect(r.seedCounts['knowledge graph']).toBeGreaterThan(0);
+    expect(r.seedCounts['wxyzq']).toBe(0);
+  });
+
+  it('kebab seed matches verbatim tag holders first', () => {
+    const r = query(graph, ['weekly-report']);
+    expect(r.results.length).toBeGreaterThan(0);
+    const top = String(r.results[0]!.nodeId);
+    expect(top.startsWith('L4/routines/weekly-report-')).toBe(true);
+    expect(r.seedCounts['weekly-report']).toBe(2);
   });
 });

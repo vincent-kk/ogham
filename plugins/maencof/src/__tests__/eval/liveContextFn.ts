@@ -16,7 +16,7 @@ export function liveContextFn(
   tokenBudget = CONTEXT_TOKEN_BUDGET,
 ): ContextFn {
   return (rawQuery) => {
-    const candidates = selectContextCandidates(graph, { query: rawQuery });
+    const { candidates } = selectContextCandidates(graph, { query: rawQuery });
     const assembled = assembleContext(candidates, graph, { tokenBudget });
     return assembled.items.map((item) => item.path);
   };

@@ -8,5 +8,6 @@ export type {
   QgaTuning,
   QueryOptions,
   QueryResult,
+  ResolvedSeedNodes,
   ScoredSeed,
 } from './types/types.js';

@@ -264,6 +264,32 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     ],
     updated: '2026-07-01',
   },
+  // kebab 태그 verbatim 회귀(B3): 태그는 통짜 term, 한국어 제목이라 분해 AND 로는
+  // 절대 잡히지 않는다 — 원형 우선 경로만이 이 두 문서를 살린다. 전용 폴더에 두는
+  // 이유: 기존 L4/tasks 에 섞으면 SIBLING 엣지가 기존 골든 쿼리의 위상을 바꾼다.
+  {
+    path: 'L4/routines/weekly-report-routine.md',
+    title: '주간보고 루틴',
+    layer: Layer.L4_ACTION,
+    tags: ['weekly-report', 'routine'],
+    updated: '2026-02-01',
+  },
+  {
+    path: 'L4/routines/weekly-report-checklist.md',
+    title: '주간보고 체크리스트',
+    layer: Layer.L4_ACTION,
+    tags: ['weekly-report', 'checklist'],
+    updated: '2026-02-02',
+  },
+  // compound-or 스윕의 경쟁 상대: 'archiv' 시드가 tag-prefix(0.3) 티어로 이 문서를
+  // 시드해, OR 폴백 회수분(compoundOrScore)과 0.3 경계에서 순위를 다투게 한다.
+  {
+    path: 'L4/routines/report-archive.md',
+    title: '보고 아카이브',
+    layer: Layer.L4_ACTION,
+    tags: ['report-archive', 'archive'],
+    updated: '2026-02-03',
+  },
   {
     path: 'L4/tasks/portfolio-rebalance.md',
     title: 'Portfolio Rebalance Plan',

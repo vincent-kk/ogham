@@ -25,6 +25,8 @@ import type {
   LinkSuggestion,
 } from '../../../types/mcp.js';
 
+import { resolveInputTags } from './helpers/resolveInputTags.js';
+
 /**
  * kg_suggest_links 핸들러
  *
@@ -39,9 +41,14 @@ export function handleKgSuggestLinks(
   const maxSuggestions = input.max_suggestions ?? 5;
   const minScore = input.min_score ?? 0.2;
 
-  // 그래프가 없거나 비어있으면 빈 결과
+  // 그래프가 없거나 비어있으면 빈 결과 (대조할 어휘가 없어 seedResolution 도 생략)
   if (!graph || graph.nodes.size === 0)
     return { suggestions: [], candidates_explored: 0, duration_ms: 0 };
+
+  // 명시 입력 태그의 해석 메타 — path/content_hint 파생 태그는 보고 대상이 아니다
+  const tagResolution = input.tags?.length
+    ? resolveInputTags(graph, input.tags)
+    : undefined;
 
   // ── 입력 분석: 소스 태그 수집 ──
   const sourceTags = collectSourceTags(graph, input);
@@ -50,6 +57,7 @@ export function handleKgSuggestLinks(
       suggestions: [],
       candidates_explored: 0,
       duration_ms: Date.now() - startTime,
+      ...(tagResolution && { seedResolution: tagResolution }),
     };
 
   // 소스 노드 ID (이미 존재하는 문서인 경우)
@@ -136,6 +144,7 @@ export function handleKgSuggestLinks(
     suggestions: topSuggestions,
     candidates_explored: candidates.length,
     duration_ms: Date.now() - startTime,
+    ...(tagResolution && { seedResolution: tagResolution }),
   };
 }
 

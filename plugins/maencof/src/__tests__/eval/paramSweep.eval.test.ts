@@ -25,8 +25,11 @@ import { buildEvalGraph } from './fixtureVault.js';
 import { liveSearchFn } from './liveSearchFn.js';
 import { measureSearchFn } from './measureSearchFn.js';
 
-/** 스윕 대상 — QgaTuning 의 수치 축만. `decayOf` 는 decaySweep 러너가 소유한다. */
-type NumericTuning = Omit<Required<QgaTuning>, 'decayOf'>;
+/**
+ * 스윕 대상 — QgaTuning 의 SA 수치 축만. `decayOf` 는 decaySweep 러너가,
+ * `compoundOrScore` 는 compoundScoreSweep 러너가 소유한다.
+ */
+type NumericTuning = Omit<Required<QgaTuning>, 'decayOf' | 'compoundOrScore'>;
 
 /** 그리드 축 — 기본값을 반드시 포함해야 기본값 순위 비교가 성립한다 */
 const GRID: Record<keyof NumericTuning, number[]> = {

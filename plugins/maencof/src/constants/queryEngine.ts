@@ -24,3 +24,21 @@ export const PATH_PREFIX_MATCH_SCORE = 0.5;
  * 임계 이하 쿼리는 영향 없음.
  */
 export const KEYWORD_SEED_CAP = 30;
+
+/**
+ * compound(kebab/snake — 공백 없이 `-`/`_` 로 결합된 다토큰) 시드가 원형 완전
+ * 일치에 실패하고 분해 AND 도 공집합일 때, OR 확장이 유입시키는 부분 매칭 노드의
+ * 저득점. AND 가 살아 있으면 기존 다토큰 의미론이 그대로 적용된다. 값의 정본은
+ * compoundScoreSweep eval — 경쟁 골든(compound-or-vs-prefix-tier)에서 0.3 미만은
+ * 접두 우연 매칭(tag-prefix)이 명시 개념의 부분 회수를 앞질러 지표가 하락하고,
+ * 0.3~0.45 는 공최적이라 최저 공최적값을 쓴다. 상대 IDF 노이즈 강등을 되돌리지
+ * 않는 tag-exact(0.5) 미만 상한과 정합한다.
+ */
+export const COMPOUND_OR_MATCH_SCORE = 0.3;
+
+/**
+ * compound 분해 OR 폴백의 union 에 참여하는 토큰의 최소 길이. 1자 토큰(예: "ACT-R" 의
+ * "r")은 prefix 후보가 무제한으로 넓어 폴백을 노이즈로 뒤덮는다 — union 에서만 제외하고,
+ * 전 토큰 보유(full) 판정에는 그대로 참여시켜 기존 다토큰 분류를 보존한다.
+ */
+export const COMPOUND_FALLBACK_MIN_TOKEN_LENGTH = 2;

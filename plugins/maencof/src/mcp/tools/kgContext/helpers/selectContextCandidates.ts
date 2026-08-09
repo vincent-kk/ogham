@@ -1,6 +1,7 @@
 /**
  * @file selectContextCandidates.ts
- * @description 자연어 query 를 시드로 분해하고 SA 후보를 선정한다 (조립 전 단계).
+ * @description 자연어 query 를 시드로 분해해 SA 후보를 선정하고, query 파생 단어별
+ * 매칭 계수(2-gram phrase 파생 제외)를 함께 돌려준다 (조립 전 단계).
  * 핸들러와 평가 하네스(eval liveContextFn)가 공유하는 단일 경로 —
  * 분해 방식 변경이 하네스 측정 범위를 벗어나지 못하게 한다.
  */
@@ -18,13 +19,19 @@ import type {
 } from '../../../../types/graph.js';
 import type { KgContextInput } from '../../../../types/mcp.js';
 
+/** 후보 선정 결과 — SA 후보와 query 파생 단어별 매칭 계수 (2-gram phrase 파생 제외) */
+export interface ContextCandidateSelection {
+  candidates: ActivationResult[];
+  wordSeedCounts: Record<string, number>;
+}
+
 export function selectContextCandidates(
   graph: KnowledgeGraph,
   input: Pick<
     KgContextInput,
     'query' | 'layer_filter' | 'sub_layer' | 'scope' | 'since' | 'until'
   >,
-): ActivationResult[] {
+): ContextCandidateSelection {
   const seeds = deriveContextSeeds(input.query);
   const scopePreset =
     KG_CONTEXT_SCOPE_PRESETS[input.scope ?? KgContextScope.BALANCED];
@@ -46,5 +53,11 @@ export function selectContextCandidates(
       (r) => graph.nodes.get(r.nodeId)?.subLayer === input.sub_layer,
     );
 
-  return candidates;
+  const wordSeedCounts = Object.fromEntries(
+    Object.entries(queryResult.seedCounts).filter(
+      ([seed]) => !seed.includes(' '),
+    ),
+  );
+
+  return { candidates, wordSeedCounts };
 }
