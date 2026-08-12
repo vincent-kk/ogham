@@ -14,9 +14,9 @@
       "id": "seiri_code-comments",
       "filename": "seiri_code-comments.md",
       "title": "Code Comments",
-      "description": "Comments carry the current spec and never its history; declarations take the language's own documentation form.",
+      "description": "Inline comments are a capped last resort; declarations take the language's documentation form and state the current spec, never history.",
       "recommended": true,
-      "templateHash": "d97274309b7ecf2429fb547a4edccb5f52c994c1a51cfd3cde5935ea8f19a0c4"
+      "templateHash": "812212cef9eccac721f861a86caba9b2c7bfc304cb0b9b6d6d92f2a46d97a0c2"
     },
     {
       "id": "seiri_public-contract",
