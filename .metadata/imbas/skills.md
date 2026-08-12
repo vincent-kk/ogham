@@ -40,7 +40,7 @@
 
 - **입력**: 이슈 참조 (jira key / `owner/repo#N` / local ID)
 - **동작**: read-issue로 이슈 맥락 로드 → 브랜치·empty commit·Draft PR 생성, 본문에 하위 작업 체크리스트. 코드 변경 없음.
-- **v2 변경**: 없음 (유지).
+- **v2 변경**: git·gh 절차를 동봉 `scaffold-pr.mjs`(seiri 정본과 바이트 동일 사본, 셸 미사용 argv spawn·단일 JSON 출력·안정 실패 코드)로 위임. LLM 은 이슈 해석과 브랜치·제목·본문·커밋 메시지 파생만 수행하고, 임의 텍스트는 전부 파일(`--title-file`/`--body-file`/`--message-file`) 경유로 전달.
 
 ### `digest` — 이슈 스레드 압축 요약
 

@@ -36,15 +36,13 @@ Jira Story나 GitHub 이슈로부터 서브태스크 체크리스트가 포함�
 
 ## 사용 도구
 
-| 도구                                  | 출처            | 용도                               |
-| ------------------------------------- | --------------- | ---------------------------------- |
-| `imbas:read-issue`                    | imbas 내부 스킬 | 이슈 메타데이터 및 서브태스크 조회 |
-| `mcp__plugin_imbas_tools__config_get` | imbas MCP       | provider 설정 확인                 |
-| `git`                                 | Bash            | 브랜치 및 빈 커밋 생성             |
-| `gh repo view`                        | GitHub CLI      | 기본 브랜치 감지                   |
-| `gh pr create`                        | GitHub CLI      | PR 생성                            |
+| 도구                                  | 출처            | 용도                                           |
+| ------------------------------------- | --------------- | ---------------------------------------------- |
+| `imbas:read-issue`                    | imbas 내부 스킬 | 이슈 메타데이터 및 서브태스크 조회             |
+| `mcp__plugin_imbas_tools__config_get` | imbas MCP       | provider 설정 확인                             |
+| `scripts/scaffold-pr.mjs`             | 동봉 스크립트   | git·gh 절차 전체 (브랜치·빈 커밋·push·PR 생성) |
 
-에이전트 스폰 없음. 스킬이 직접 Git 및 GitHub CLI 명령을 실행한다.
+에이전트 스폰 없음. git·gh 절차는 동봉 `scripts/scaffold-pr.mjs`(seiri 정본과 바이트 동일 사본)가 수행하며, 스킬은 필드 파생(브랜치·제목·커밋 메시지·본문)과 JSON 결과 해석만 담당한다.
 
 ## 참고 파일
 

@@ -46,6 +46,7 @@ Invoked by you:
 | `/seiri:setup`        | Choose which rules this repository uses            |
 | `/seiri:brainstorm`   | Shape a change before writing it                   |
 | `/seiri:interview`    | Turn a vague request into criteria that can fail   |
+| `/seiri:scaffold-pr`  | Open an empty Draft PR before work starts          |
 | `/seiri:finish`       | Decide whether finished work integrates            |
 | `/seiri:mental-model` | Model how the code behaves, then attack the model  |
 | `/seiri:trace-change` | Explain a code change for a reader, layer by layer |

@@ -46,6 +46,7 @@ English: [README.md](./README.md)
 | `/seiri:setup`        | 이 저장소가 쓸 규칙 선택                |
 | `/seiri:brainstorm`   | 코드를 쓰기 전에 변경의 형태를 잡기     |
 | `/seiri:interview`    | 모호한 요청을 실패 가능한 기준으로 변환 |
+| `/seiri:scaffold-pr`  | 작업 시작 전에 빈 Draft PR 열기         |
 | `/seiri:finish`       | 끝난 작업을 통합할지 결정               |
 | `/seiri:mental-model` | 코드 동작의 모델을 세우고 공격해 검증   |
 | `/seiri:trace-change` | 코드 변경을 독자를 위한 계층으로 설명   |

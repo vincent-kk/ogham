@@ -14,17 +14,14 @@ Provider-specific tools are in `jira/tools.md` and `github/tools.md`.
 | ------------------- | ------------------------------------------------ |
 | `/imbas:read-issue` | Step 1: read issue metadata (key, summary, type) |
 
-## Bash Commands (all providers)
+## Script Execution (all providers)
 
-| Command                                | Usage                  |
-| -------------------------------------- | ---------------------- |
-| `gh repo view --json defaultBranchRef` | Detect default branch  |
-| `git rev-parse --verify <branch>`      | Check if branch exists |
-| `git checkout -b <branch>`             | Create new branch      |
-| `git commit --allow-empty`             | Create scaffold commit |
-| `git push -u origin <branch>`          | Push branch to remote  |
-| `gh pr list --head <branch>`           | Check for existing PR  |
-| `gh pr create`                         | Create the PR          |
+| Command                                                                                     | Usage                                                       |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `node .../scaffold-pr.mjs --check`                                                          | Optional preflight: repo root, resolved base, dirty files   |
+| `node .../scaffold-pr.mjs --branch ... --title-file ... --message-file ... --body-file ...` | Branch + empty commit + push + Draft PR; one JSON line back |
+
+Individual `git`/`gh` calls (branch creation, empty commit, push, `pr list`, `pr create`) are internal to `scaffold-pr.mjs` — this skill never issues them directly.
 
 ## Agent Spawn
 

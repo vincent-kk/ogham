@@ -43,8 +43,9 @@
 
 ### Skill posture
 
-- 스킬 파티션의 정본은 `src/constants/skillPolicy.ts` 다 — 자동 호출 규율 7종, 조건부 질문 플래너 1종(write-plan), 사용자 게이트 6종(trace-change 포함). `skillPolicy.test.ts` 가 각 스킬의 frontmatter 와 본문 정본 문장을 검사한다.
+- 스킬 파티션의 정본은 `src/constants/skillPolicy.ts` 다 — 자동 호출 규율 7종, 조건부 질문 플래너 1종(write-plan), 사용자 게이트 7종(scaffold-pr·trace-change 포함). `skillPolicy.test.ts` 가 각 스킬의 frontmatter 와 본문 정본 문장을 검사한다.
 - 자동 호출 규율은 자율 판단을 우선한다: 선택이 필요하면 보수적 기본값을 택하고 한 줄로 공개한다. 사용자만 결정할 수 있는 진짜 blocker 는 AskUserQuestion 1회로 묻되, 관례적 체크포인트 질문은 하지 않는다. frontmatter 도구 차단(`disallowed-tools`)은 사용하지 않는다.
+- scaffold-pr 는 작업 시작 게이트다: 브랜치·빈 커밋·Draft PR 만 만들고 소스 파일은 건드리지 않는다(이슈·티켓 연동 없음). git·gh 시퀀스는 동봉 `scaffold-pr.mjs` 가 결정적으로 수행하고(셸 미사용 argv spawn — 크로스플랫폼), LLM 은 브랜치·제목·본문 결정과 JSON 결과의 안정 실패 코드 해석만 맡는다. finish 가 닫는 브랜치 수명의 반대쪽 끝을 연다.
 
 ## API Contracts
 
@@ -93,10 +94,11 @@
 
 ## History
 
+- 2026-08-12 — 사용자 게이트에 scaffold-pr(빈 Draft PR 스캐폴드) 추가. 이슈 연동과 provider 분기를 걷어낸 작업 시작 게이트로, git·gh 절차 전체를 동봉 `scaffold-pr.mjs`(셸 미사용 argv spawn·안정 실패 코드 JSON)에 위임해 LLM 은 브랜치·제목·본문 결정만 맡도록 축소한 결정.
 - 2026-08-07 — 사용자 게이트에 trace-change(변경의 계층적 설명) 추가, mental-model 을 6단계로 개편. 설명 산출이 이해를 강제한다는 수용 절차(2층위 수집·본질 가설·시뮬레이션 공격·질문 회귀 게이트)를 기존 반증 뼈대에 접목한 결정.
 - 2026-07-31 — 자동 호출 스킬의 `disallowed-tools: AskUserQuestion` frontmatter 차단을 산문 정본 문장 검사로 대체. 차단은 턴 스코프(다음 사용자 메시지에 소멸)이고 턴을 끝내며 텍스트로 묻는 것을 막지 못해, 실효가 정당한 멈춤의 형식 격하뿐이었다.
 - 2026-07-30 — 계약을 검증 가능한 acceptance group 으로 명시하고 `loadIntervention` 의 계층 수를 실제(3계층)에 맞췄다.
 
 ## Last Updated
 
-2026-08-07 — Skill posture 를 사용자 게이트 6종으로 갱신 (trace-change 신설, mental-model 6단계 개편).
+2026-08-12 — Skill posture 를 사용자 게이트 7종으로 갱신 (scaffold-pr 신설, git·gh 절차는 동봉 스크립트로 위임).
