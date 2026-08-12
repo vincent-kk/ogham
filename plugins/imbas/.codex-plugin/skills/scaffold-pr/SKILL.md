@@ -3,7 +3,7 @@ name: scaffold-pr
 user-invocable: true
 description: '[imbas:scaffold-pr] Create a Draft PR from an issue (Story/Task/Bug) with sub-task checklist in the PR body. Scaffolds branch, empty commit, and PR without code changes. Trigger: "scaffold pr", "PR 생성", "draft pr", "이슈 PR"'
 argument-hint: '<issue> [--base BRANCH] [--draft true|false]'
-version: '1.0.0'
+version: '1.1.0'
 complexity: moderate
 plugin: imbas
 ---
@@ -18,8 +18,8 @@ plugin: imbas
 > **HIGH-RISK YIELD POINTS**:
 >
 > - After `/imbas:read-issue` returns — immediately continue to sub-task fetching
-> - After provider sub-task fetch — immediately chain branch creation
-> - After branch + empty commit — immediately chain PR creation in the same turn
+> - After provider sub-task fetch — immediately derive fields and run the scaffold script
+> - After the scaffold script returns — immediately report the PR URL in the same turn
 
 # scaffold-pr — Issue-based Draft PR Scaffolding
 
@@ -61,11 +61,12 @@ Create a Draft PR from an issue with its sub-tasks rendered as a checklist in th
    | `github` | `references/github/workflow.md` |
 
 3. Execute provider-specific steps to fetch sub-tasks.
-4. Execute shared steps (branch creation, empty commit, PR creation) per `references/workflow.md`.
+4. Derive PR fields (branch, title, commit message, body), write them to scratch files, and run the bundled `scripts/scaffold-pr.mjs` per `references/workflow.md` Step 4.
 
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
 - Provider-specific operations (`[OP:]` notation for Jira, `gh` CLI for GitHub) MUST only be invoked from within the matching `references/<provider>/` workflow.
 - This skill MUST NOT modify any source files. Only git branch, empty commit, and PR creation are allowed.
+- The git/gh sequence (branch, empty commit, push, PR) is owned by the bundled `scripts/scaffold-pr.mjs` — byte-identical to the seiri copy. This skill MUST NOT issue those git/gh commands directly.
 - `local` provider is not supported — PR creation requires a GitHub-hosted remote (`gh` CLI). Note: provider=jira also uses `gh` for the PR itself (Jira issue + GitHub code).

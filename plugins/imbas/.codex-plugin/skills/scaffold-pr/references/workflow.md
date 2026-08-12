@@ -33,15 +33,15 @@ Delegated to the provider-specific workflow. Each provider returns a list:
 
 If no sub-tasks found, proceed with an empty list (PR body will note "No sub-tasks found").
 
-## Step 4 — Create branch, commit, and PR
+## Step 4 — Derive fields, write files, run the scaffold script
 
-The remaining shared steps (branch creation, empty commit, PR build + create) all execute as part of Step 4.
+The git/gh sequence (branch, empty commit, push, PR) is owned by the bundled `scaffold-pr.mjs` — byte-identical to the copy the seiri plugin ships. The LLM derives the fields, writes them to scratch files, and runs one command. Never replay the script's internal git/gh steps as raw commands.
 
-### Step 4.1 — Create branch
+> **Script resolution**: resolve through `${CLAUDE_PLUGIN_ROOT}`; when unset, locate with `Glob(**/skills/scaffold-pr/scripts/scaffold-pr.mjs)`. If the script is not found, abort with an error message.
 
-1. Determine `base` branch:
-   - If `--base` provided → use it.
-   - Otherwise → detect repo default branch: `gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`.
+### Step 4.1 — Derive (LLM)
+
+1. Base branch: use `--base` if provided; otherwise omit the flag — the script resolves the repository default.
 2. Map issue type to branch prefix:
 
    | Issue type | Prefix     |
@@ -51,64 +51,18 @@ The remaining shared steps (branch creation, empty commit, PR build + create) al
    | `Task`     | `task/`    |
    | Other      | `feature/` |
 
-3. Branch name: `{prefix}{issue-key}` (e.g., `feature/PROJ-123`, `bug/PROJ-456`).
-   - For GitHub issues: use the naming defined in `github/workflow.md` — `{prefix}{number}` (e.g., `feature/42`; avoids `#` and other special characters).
-4. Check if branch already exists:
+   Branch name: `{prefix}{issue-key}` (e.g., `feature/PROJ-123`). For GitHub issues: `{prefix}{number}` (e.g., `feature/42`) per `github/workflow.md`.
 
-   ```bash
-   git rev-parse --verify <branch-name> 2>/dev/null
+3. PR title: the issue summary, verbatim.
+4. Commit message:
+
+   ```
+   chore: scaffold PR for <issue-key>
+
+   Ref: <issue-url>
    ```
 
-   - If exists → ASK USER: "Branch `<name>` already exists. Use it? (y/n)"
-   - If user confirms → checkout existing branch.
-   - If user declines → STOP.
-
-5. Create and checkout:
-   ```bash
-   git checkout <base> && git pull --ff-only && git checkout -b <branch-name>
-   ```
-
-### Step 4.2 — Create empty commit
-
-Build commit message and create empty commit:
-
-```bash
-git commit --allow-empty -m "<message>"
-```
-
-Commit message format:
-
-```
-chore: scaffold PR for <issue-key>
-
-Ref: <issue-url>
-```
-
-Example:
-
-```
-chore: scaffold PR for PROJ-123
-
-Ref: https://jira.example.com/browse/PROJ-123
-```
-
-### Step 4.3 — Build PR body and create PR
-
-1. Push the branch:
-
-   ```bash
-   git push -u origin <branch-name>
-   ```
-
-2. Check if a PR already exists for this branch:
-
-   ```bash
-   gh pr list --head <branch-name> --json url --jq '.[0].url'
-   ```
-
-   - If PR exists → output existing PR URL and STOP (do not create duplicate).
-
-3. Build PR body from template:
+5. PR body:
 
    ```markdown
    ## Issue
@@ -119,21 +73,32 @@ Ref: https://jira.example.com/browse/PROJ-123
 
    - [ ] [<sub-key>: <sub-summary>](sub-url)
    - [ ] [<sub-key>: <sub-summary>](sub-url)
-         ...
    ```
 
-   If no sub-tasks: replace checklist with `_No sub-tasks found._`
+   If no sub-tasks: replace the checklist with `_No sub-tasks found._`
 
-4. PR title: use issue summary directly.
+### Step 4.2 — Write the field files
 
-5. Determine draft flag:
-   - If `--draft false` → omit `--draft`.
-   - Otherwise (default) → include `--draft`.
+Write three scratch files — arbitrary text never travels inline through a shell hop: `title.txt` (PR title), `message.txt` (commit message), `body.md` (PR body).
 
-6. Create PR:
+### Step 4.3 — Run the script
 
-   ```bash
-   gh pr create --base <base> --title "<issue-summary>" --draft --body "<body>"
-   ```
+```
+node "${CLAUDE_PLUGIN_ROOT}/skills/scaffold-pr/scripts/scaffold-pr.mjs" --branch <branch> --title-file <title.txt> --message-file <message.txt> --body-file <body.md> [--base <base>] [--ready]
+```
 
-7. Output the PR URL to the user.
+`--draft false` from the skill arguments maps to `--ready` (Draft is the script default).
+
+The reply is one JSON line:
+
+- **Success**: `{ok: true, url, branch, base, existing}`. `existing: true` means an open PR for this branch was found and reused — output that URL and stop; no duplicate is created.
+- **Failure**: `{ok: false, code, message, dirtyFiles?}`. Dispatch on `code`:
+
+  | Code                                                                                                        | Action                                                                              |
+  | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+  | `BRANCH_EXISTS`                                                                                             | ASK USER: use existing branch? Yes → rerun with `--reuse-branch`. No → STOP.        |
+  | `DIRTY_TREE`                                                                                                | ASK USER: continue anyway? Yes → rerun with `--allow-dirty`. Never stash or commit. |
+  | `GIT_MISSING` · `NOT_A_REPO` · `GH_MISSING` · `GH_UNAUTHENTICATED` · `BASE_RESOLVE_FAILED`                  | Report the `message` and STOP.                                                      |
+  | `SWITCH_FAILED` · `PULL_FAILED` · `COMMIT_FAILED` · `PUSH_FAILED` · `PR_LOOKUP_FAILED` · `PR_CREATE_FAILED` | Report the underlying stderr from `message` and STOP — no raw-git recovery.         |
+
+Output the PR URL to the user.
