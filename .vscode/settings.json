@@ -1,0 +1,7 @@
+{
+  // Read by the Vitest extension (vitest.explorer); pinning rootConfig skips its
+  // config glob, which would otherwise load all 16 project configs separately and
+  // choke on skills/craft-dashboard/templates/frontend/vite.config.ts — a scaffold
+  // template whose devDependencies are never installed here.
+  "vitest.rootConfig": "./vitest.config.ts"
+}

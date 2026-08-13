@@ -41,8 +41,8 @@ function readRelative(path: string): string {
 describe("domain neutrality contract", () => {
   it("keeps public examples and sample variable names application-neutral", () => {
     const checkedFiles = [
-      "README.md",
-      "README-ko_kr.md",
+      join(pluginRoot, "README.md"),
+      join(pluginRoot, "README-ko_kr.md"),
       ...walkFiles(join(pluginRoot, ".sample")).filter((path) =>
         [".csv", ".md"].includes(extname(path)),
       ),
