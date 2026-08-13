@@ -54,7 +54,7 @@ function runScript(
     windowsHide: true,
   });
   const lastLine = (child.stdout ?? '').trim().split('\n').at(-1) ?? '';
-  let result: Record<string, unknown> | null = null;
+  let result: Record<string, unknown> | null;
   try {
     result = JSON.parse(lastLine) as Record<string, unknown>;
   } catch {
