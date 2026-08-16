@@ -13,10 +13,6 @@ This fixture changes the **base commit**, not the branch. Materialize `clean-cha
 
 Split text into comparable tokens without I/O.
 
-## Structure
-
-- `index.ts` is the public entry; `tokenize.ts` implements it.
-
 ## Conventions
 
 - Keep tokenization deterministic.
@@ -34,10 +30,6 @@ Split text into comparable tokens without I/O.
 ### Never do
 
 - Add effects or ambient state.
-
-## Dependencies
-
-- None.
 ```
 
 `src/tokenize/DETAIL.md`:
@@ -101,7 +93,7 @@ describe('tokenize', () => {
 
 The table comes from a call, not a literal, so the counter cannot enumerate the rows. `test-record-case-cap` is reported `indeterminate` for this file, and the project-wide verification certainty aggregates to `indeterminate` with it.
 
-Update `src/INTENT.md` to list `tokenize/` beside `slugify/` under `Structure` and `Dependencies`, extend `src/DETAIL.md`'s `API Contracts` to state that `index.ts` re-exports `tokenize` as well, and overwrite `src/index.ts`:
+Extend `src/DETAIL.md`'s `API Contracts` to state that `index.ts` re-exports `tokenize` as well, and overwrite `src/index.ts`:
 
 ```typescript
 export { slugify } from './slugify/index.js';

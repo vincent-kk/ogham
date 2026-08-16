@@ -62,4 +62,5 @@ Check document anchors and line counts directly, then call `structure_validate` 
 - No LLM document write occurs before approval.
 - RICH and unapproved files are never rewritten.
 - INTENT.md stays within 50 lines with all three boundary tiers.
+- Derivable content (file, export, or dependency inventories) is never written into documents.
 - Diagnostic or non-exact evidence stays visible; it is not a pass.

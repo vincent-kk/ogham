@@ -20,7 +20,7 @@ and this file is the defect.
 
 ## API Contracts
 
-<the public surface: symbols, shapes, and their guarantees>
+<the guarantees the public surface makes — invariants, failure modes, compatibility promises; the entry point already lists its symbols by name>
 
 ## Acceptance Criteria
 
@@ -44,6 +44,9 @@ and this file is the defect.
 - Acceptance groups use `### <group-id> — <title>`, and their IDs are unique
   within the document. These IDs are the oracle a spec-document binds to.
 - No line cap.
+- No file lists or directory structure. A path token appears only where the
+  contract needs it — an exemption target, an acceptance path — and the
+  snapshot flags one that resolves to nothing.
 - Headings stay in English; descriptive content follows `[filid:lang]`,
   defaulting to English. Identifiers, paths, and rule IDs keep their original
   form.

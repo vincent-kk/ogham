@@ -2,16 +2,7 @@
 
 ## Purpose
 
-INTENT.md(50줄 제한)의 3-tier 경계와 DETAIL.md(append-only 방지)의 현재 계약·acceptance group을 검증한다.
-
-## Structure
-
-- `validators/validateIntentMd.ts` — 50줄 제한 + 3-tier boundary 존재 검사
-- `validators/validateDetailMd.ts` — `detectAppendOnly`와 acceptance group 검사 조합
-- `validators/countLines.ts` — 줄 수 계산
-- `acceptanceGroups/` — 필수 section과 안정 group ID 검사 organ
-- `boundaryExemptions/` — 조건부 `## Boundary Exemptions` 선언 파서 organ
-- `index.ts` — 위 6개 함수를 이름으로 재수출하는 배럴
+INTENT.md(50줄 제한)의 3-tier 경계·derivable 열거와 DETAIL.md(append-only 방지)의 현재 계약·acceptance group을 검증한다.
 
 ## Conventions
 

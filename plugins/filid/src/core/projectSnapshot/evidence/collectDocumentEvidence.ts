@@ -18,6 +18,9 @@ import {
   validateIntentMd,
 } from '../../rules/documentValidator/index.js';
 
+import { detectStaleDocPaths } from './utils/detectStaleDocPaths.js';
+import { detectStructureEnumeration } from './utils/detectStructureEnumeration.js';
+
 /**
  * Resolve each declared organ path against the fractal that declared it, so the
  * rule engine compares absolute paths without re-reading the document.
@@ -63,6 +66,17 @@ export function collectDocumentEvidence(
           ...finding,
         })),
       );
+      findings.push(
+        ...detectStaleDocPaths(intentContent, 'intent', node.path, tree.root),
+      );
+      if (
+        !findings.some(
+          (finding) =>
+            finding.document === 'intent' &&
+            finding.rule === 'derivable-content',
+        )
+      )
+        findings.push(...detectStructureEnumeration(node, intentContent));
     } else if (expected)
       findings.push({
         document: 'intent',
@@ -80,6 +94,9 @@ export function collectDocumentEvidence(
           document: 'detail' as const,
           ...finding,
         })),
+      );
+      findings.push(
+        ...detectStaleDocPaths(detailContent, 'detail', node.path, tree.root),
       );
       if (detail.boundaryExemptions.length > 0)
         boundaryExemptions = normalizeExemptions(

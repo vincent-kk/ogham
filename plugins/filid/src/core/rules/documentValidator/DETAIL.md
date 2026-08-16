@@ -3,6 +3,7 @@
 ## Requirements
 
 - INTENT.md의 50줄 cap과 3-tier boundary heading을 검증한다.
+- INTENT.md에서 한 `## ` 섹션에 경로 토큰 3개 이상이면 `derivable-content` warning을 낸다. code fence 안은 세지 않고, glob(`*` 포함)과 `@` scoped package 이름은 경로가 아니다.
 - DETAIL.md의 append-only 변경을 거부하고 필수 section과 안정 acceptance group ID를 검증한다.
 - acceptance group heading은 `### <stable-id> — <title>` 형태이며 한 문서 안에서 중복될 수 없다.
 - criteria ledger나 branch mode 문서는 이 validator의 계약이 아니다.
@@ -18,6 +19,7 @@
 - `validateDetailMd(content, oldContent?)` — append와 acceptance group을 합친 DETAIL validation result.
 - `validateDetailAcceptanceGroups(content)` — 추출된 groups와 document violations.
 - `parseBoundaryExemptions(content)` — 선언된 면책과 document violations. section이 없으면 빈 결과이며 violation도 없다.
+- `splitMarkdownSections(content)` — fence를 제거한 `## ` 단위 section 분해. `extractPathTokens(text)` — code span 경로 토큰 추출. snapshot evidence의 stale-path·derivable-structure 검사가 재사용한다.
 
 ## Acceptance Criteria
 
@@ -39,9 +41,15 @@
 - `Consumers: entry-point`는 배럴 경유 접근을 뜻하며 direct import를 열지 않는다.
 - `Reason`이 비면 error를 내고 문서는 valid가 아니다.
 
+### AC-intent-derivable — 열거 검출
+
+- 한 `## ` 섹션 본문에 서로 다른 경로 토큰 3개 이상 → `derivable-content` warning 1건, 섹션명이 메시지에 들어간다.
+- 경로 토큰 2개 이하, fence 내부 토큰, `*` 포함 glob, `@` 스코프 패키지는 위반을 만들지 않는다.
+- warning이므로 문서 `valid`는 유지된다.
+
 ### AC-document-surface — 1.0 document surface
 
-- public surface는 INTENT.md와 DETAIL.md validator만 제공한다.
+- public surface는 INTENT.md·DETAIL.md validator와, snapshot evidence가 재사용하는 markdown 분해 유틸(`splitMarkdownSections`, `extractPathTokens`)만 제공한다.
 - `.filid/criteria.md` 전용 validator나 validation type을 노출하지 않는다.
 
 ## Boundary Exemptions
@@ -54,4 +62,4 @@
 
 ## Last Updated
 
-2026-07-30 — 면책 선언의 target path·consumers·direct import를 code span으로 감싸도 읽는다. markdown formatter가 `__tests__`를 훼손하는 것을 저자가 막을 수 있는 표기를 파서가 지원한다.
+2026-08-16 — derivable-content 열거 검출 추가: 한 섹션에 경로 토큰 3개 이상이면 warning. `splitMarkdownSections`·`extractPathTokens`를 공개해 snapshot evidence 검사가 재사용한다.

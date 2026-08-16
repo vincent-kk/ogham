@@ -13,10 +13,6 @@ This base tree and change are sound by construction. `run-a` must end `APPROVED`
 
 Expose one source fractal for slug generation.
 
-## Structure
-
-- `src/` owns the public implementation.
-
 ## Conventions
 
 - Route consumers through named entry points.
@@ -34,10 +30,6 @@ Expose one source fractal for slug generation.
 ### Never do
 
 - Import a child implementation file from outside that child.
-
-## Dependencies
-
-- `src/`
 ```
 
 `DETAIL.md`:
@@ -79,10 +71,6 @@ export { slugify } from './src/index.js';
 
 Own source fractals.
 
-## Structure
-
-- `slugify/` owns slug generation.
-
 ## Conventions
 
 - Import child fractals through their entry points.
@@ -100,10 +88,6 @@ Own source fractals.
 ### Never do
 
 - Re-export child internals.
-
-## Dependencies
-
-- `slugify/`
 ```
 
 `src/DETAIL.md`:
@@ -145,10 +129,6 @@ export { slugify } from './slugify/index.js';
 
 Generate URL-safe slugs without I/O.
 
-## Structure
-
-- `index.ts` is the public entry; `slugify.ts` implements it.
-
 ## Conventions
 
 - Keep transformation deterministic.
@@ -166,10 +146,6 @@ Generate URL-safe slugs without I/O.
 ### Never do
 
 - Add effects or ambient state.
-
-## Dependencies
-
-- None.
 ```
 
 `src/slugify/DETAIL.md`:

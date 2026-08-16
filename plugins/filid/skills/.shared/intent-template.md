@@ -17,10 +17,6 @@ this file is the defect.
 
 <what this fractal owns, and what it explicitly does not>
 
-## Structure
-
-<children, organs, and entry points — real names only>
-
 ## Conventions
 
 <module-specific decision rules a newcomer could not guess>
@@ -38,11 +34,15 @@ this file is the defect.
 ### Never do
 
 - <prohibition this module actually enforces>
-
-## Dependencies
-
-<concrete upstream and downstream boundaries>
 ```
+
+## Conditional sections
+
+- `## Structure` — only to defuse what the tree cannot say: a name trap, a
+  generated-vs-canonical split, a misleading conventional name. Never a file
+  or directory inventory; `ls` already prints that.
+- `## Dependencies` — only for a coupling the package manifest cannot show.
+  Never a dependency roster.
 
 ## Rules
 
@@ -50,15 +50,19 @@ this file is the defect.
   trailing newline, so leave a line of slack when editing.
 - Records only this fractal's own purpose, ownership and boundaries — never a
   copy of an ancestor's.
+- Nothing a tool can derive: no file lists, no export lists, no dependency
+  rosters, no counts of any of these. A path reference that must stay carries
+  its reason beside it.
 - An organ never has one.
-- When a directory's conventional name misleads, say so under `Structure`.
 - Headings stay in English; descriptive content follows `[filid:lang]`,
   defaulting to English. Identifiers, paths, and rule IDs keep their original
   form.
 
 ## Enforcement
 
-Mechanically checked: the 50-line cap (`error`) and the presence of all three
-boundary tiers (`warning`). The remaining headings are contract expectations that
-no rule fails on — a document missing `Conventions` or `Dependencies` passes
-validation while still being incomplete.
+Mechanically checked: the 50-line cap (`error`), the presence of all three
+boundary tiers (`warning`), and three findings against derivable content —
+three or more path tokens in one section (`derivable-content`), a path token
+that resolves to nothing (`stale-path`), and a section naming half or more of
+the node's own children (`derivable-structure`), all `warning`. The remaining
+headings are contract expectations that no rule fails on.

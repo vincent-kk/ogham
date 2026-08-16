@@ -6,6 +6,7 @@ import type {
   DocumentViolation,
   IntentMdValidation,
 } from '../../../../types/documents.js';
+import { detectDerivableEnumeration } from '../derivableContent/detectDerivableEnumeration.js';
 
 import { countLines } from './countLines.js';
 
@@ -13,6 +14,7 @@ import { countLines } from './countLines.js';
  * Validate an INTENT.md document.
  * - 50-line limit
  * - 3-tier boundary presence (Always do / Ask first / Never do)
+ * - derivable enumeration (three or more path tokens in one section)
  */
 export function validateIntentMd(content: string): IntentMdValidation {
   const violations: DocumentViolation[] = [];
@@ -42,6 +44,8 @@ export function validateIntentMd(content: string): IntentMdValidation {
       severity: 'warning',
     });
   }
+
+  violations.push(...detectDerivableEnumeration(content));
 
   return {
     valid: violations.every((v) => v.severity !== 'error'),

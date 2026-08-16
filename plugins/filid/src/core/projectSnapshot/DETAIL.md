@@ -8,6 +8,7 @@
 - 축 선택은 snapshot hash 입력에 포함한다. 축이 다른 두 snapshot이 같은 hash를 갖지 않는다.
 - snapshot은 tree, owner-level dependency graph, verification, adapter IDs, diagnostics, output language, legacy criteria evidence와 content-derived hash를 함께 가진다.
 - ambiguous/unsupported ownership, unresolved local dependency와 문서 위반은 숨기지 않는다.
+- 문서 evidence 수집이 두 파생 검사를 함께 낸다: 문서의 상대 경로 토큰이 node 기준으로도 project root 기준으로도 존재하지 않으면 `stale-path` warning, INTENT 한 섹션이 직계 children(4개 이상일 때) 과반을 나열하면 `derivable-structure` warning. 면책 섹션과 fence 내부는 제외하고, 같은 문서에 `derivable-content`가 있으면 `derivable-structure`를 억제한다.
 - structure/verification detect와 discovery는 adapter마다 한 번 수행하고 portable absolute path claim으로 정규화해 분석에 전달한다.
 - tree entry evidence는 확정된 structure ownership만 사용하고 adapter별 entry override를 해당 adapter에 전달한다.
 - config `maxDepth`는 validation 한계이며 snapshot tree traversal을 자르지 않는다.
@@ -54,6 +55,13 @@
 - `## Boundary Exemptions`가 없는 DETAIL.md는 `boundaryExemptions`를 만들지 않는다.
 - 선언이 있으면 organ path를 소유 프랙탈 기준 절대 경로로 정규화해 보존하고 그 변경이 snapshot hash를 바꾼다.
 
+### AC-evidence-derivable — 문서 이격·열거 증거
+
+- 존재하지 않는 상대 경로 토큰은 node 경로·project root 순으로 해석한 뒤 `stale-path` warning finding이 된다. `## Boundary Exemptions`/`## Organ Exemptions` 섹션은 건너뛴다.
+- INTENT 한 섹션이 직계 children(childFractalPaths+organPaths 기준 4개 이상) 과반 basename을 나열하면 `derivable-structure` warning finding이 된다.
+- 같은 문서에 `derivable-content` finding이 있으면 `derivable-structure`는 내지 않는다.
+- 두 finding은 `checkDocumentContract` 경유로 rule engine violation이 되며 rule roster는 15개 그대로다.
+
 ### AC-snapshot-axes — 선택된 증거 축
 
 - 축을 지정하지 않은 호출은 세 축을 모두 수집하고 `collectedAxes`가 전부 true다.
@@ -69,4 +77,4 @@
 
 ## Last Updated
 
-2026-07-30 — 제외 디렉터리를 tree scan과 ownership 해석에 같은 값으로 전달하는 계약을 추가했다.
+2026-08-16 — 문서 evidence에 stale-path·derivable-structure 파생 검사를 추가했다.

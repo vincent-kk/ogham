@@ -125,7 +125,8 @@ export interface DocumentViolation {
     | 'missing-boundaries'
     | 'missing-section'
     | 'missing-field'
-    | 'duplicate-id';
+    | 'duplicate-id'
+    | 'derivable-content';
   /** Violation description */
   message: string;
   /** Severity level */

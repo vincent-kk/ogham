@@ -44,12 +44,12 @@ Do not read sibling subtrees or an inline full project tree. Record the `snapsho
 
 Score INTENT.md on four independent 25-point axes:
 
-| Axis         | Evidence                                         |
-| ------------ | ------------------------------------------------ |
-| Structure    | Real child, entry point, or implementation names |
-| Conventions  | Concrete module-specific decision rules          |
-| Boundaries   | Non-boilerplate Always/Ask/Never clauses         |
-| Dependencies | Concrete upstream/downstream boundaries          |
+| Axis          | Evidence                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Purpose       | A concrete ownership claim — what this fractal owns and what it refuses                    |
+| Conventions   | Concrete module-specific decision rules                                                    |
+| Boundaries    | Non-boilerplate Always/Ask/Never clauses                                                   |
+| Non-derivable | Only content tools cannot print — decisions, reasons, name traps; an inventory scores zero |
 
 Classify the result:
 
@@ -102,6 +102,8 @@ For each approved item, give the LLM writer:
 
 For INTENT.md, preserve the English anchors and the 50-line cap defined in [`../.shared/intent-template.md`](../.shared/intent-template.md).
 
+For every document, the writer introduces no derivable content: no file or directory inventories, no export or dependency rosters, no counts of these. A path the contract genuinely needs carries its reason beside it.
+
 Body text follows the resolved project language. For a public-boundary change, update INTENT.md before implementation; for all contract changes, update DETAIL.md before implementation. This workflow edits only the approved documents and does not move source files.
 
 ## Section 6 — Validation
@@ -110,7 +112,7 @@ Validate each edited INTENT.md directly before invoking Filid:
 
 1. line count is at most 50;
 2. all English anchors are present;
-3. named paths and symbols exist in the evidence read for the edit;
+3. the edit introduces no derivable enumeration — no file, export or dependency inventory — and any path token it keeps exists in the evidence read for the edit;
 4. no unapproved document changed.
 
 Validate each edited DETAIL.md against the required section set in [`../.shared/detail-template.md`](../.shared/detail-template.md).

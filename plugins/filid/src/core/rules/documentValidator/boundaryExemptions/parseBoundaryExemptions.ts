@@ -4,7 +4,7 @@ import type {
   DocumentViolation,
 } from '../../../../types/documents.js';
 
-import { unwrapCodeSpan } from './unwrapCodeSpan.js';
+import { unwrapCodeSpan } from './utils/unwrapCodeSpan.js';
 
 const SECTION_HEADING = '## Boundary Exemptions';
 /** Address this section had before it covered fractal targets as well as organs. */
