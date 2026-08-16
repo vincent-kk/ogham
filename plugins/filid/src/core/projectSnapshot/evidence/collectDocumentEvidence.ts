@@ -60,23 +60,26 @@ export function collectDocumentEvidence(
 
     if (intentContent !== null) {
       filePaths.push(intentPath);
-      findings.push(
-        ...validateIntentMd(intentContent).violations.map((finding) => ({
-          document: 'intent' as const,
-          ...finding,
-        })),
+      // A section inventorying this node's own children gets the specific
+      // derivable-structure finding; the generic derivable-content yields there.
+      const structureFindings = detectStructureEnumeration(node, intentContent);
+      const enumeratedSections = new Set(
+        structureFindings
+          .map((finding) => finding.section)
+          .filter((section): section is string => section !== undefined),
       );
       findings.push(
+        ...validateIntentMd(intentContent)
+          .violations.filter(
+            (violation) =>
+              violation.rule !== 'derivable-content' ||
+              violation.section === undefined ||
+              !enumeratedSections.has(violation.section),
+          )
+          .map((finding) => ({ document: 'intent' as const, ...finding })),
+        ...structureFindings,
         ...detectStaleDocPaths(intentContent, 'intent', node.path, tree.root),
       );
-      if (
-        !findings.some(
-          (finding) =>
-            finding.document === 'intent' &&
-            finding.rule === 'derivable-content',
-        )
-      )
-        findings.push(...detectStructureEnumeration(node, intentContent));
     } else if (expected)
       findings.push({
         document: 'intent',

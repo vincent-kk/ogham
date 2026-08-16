@@ -127,6 +127,8 @@ export interface DocumentViolation {
     | 'missing-field'
     | 'duplicate-id'
     | 'derivable-content';
+  /** `## ` section title the violation sits in; '' names the preamble. Set by section-scoped rules. */
+  section?: string;
   /** Violation description */
   message: string;
   /** Severity level */

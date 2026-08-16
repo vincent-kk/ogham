@@ -8,7 +8,7 @@
 - 축 선택은 snapshot hash 입력에 포함한다. 축이 다른 두 snapshot이 같은 hash를 갖지 않는다.
 - snapshot은 tree, owner-level dependency graph, verification, adapter IDs, diagnostics, output language, legacy criteria evidence와 content-derived hash를 함께 가진다.
 - ambiguous/unsupported ownership, unresolved local dependency와 문서 위반은 숨기지 않는다.
-- 문서 evidence 수집이 두 파생 검사를 함께 낸다: 문서의 상대 경로 토큰이 node 기준으로도 project root 기준으로도 존재하지 않으면 `stale-path` warning, INTENT 한 섹션이 직계 children(4개 이상일 때) 과반을 나열하면 `derivable-structure` warning. 면책 섹션과 fence 내부는 제외하고, 같은 문서에 `derivable-content`가 있으면 `derivable-structure`를 억제한다.
+- 문서 evidence 수집이 두 파생 검사를 함께 낸다: 존재 주장 형태(말미 `/` 디렉터리 표기 또는 basename에 `.`)이고 home(`~`)·변수(`$`) 표기가 아닌 상대 경로 토큰이 해석 기준 어디에서도 존재하지 않으면 `stale-path` warning, INTENT 한 섹션이 직계 children(4개 이상일 때) 절반 이상을 나열하면 `derivable-structure` warning. 해석 기준은 node 디렉터리부터 project root까지의 조상 체인이되 `..` 포함 토큰은 node 디렉터리 하나뿐이고, 말미 `/` 토큰은 디렉터리로만 충족된다. 면책 섹션·`## History`·`## Last Updated`·`## Dependencies`·fence 내부는 제외하고, 같은 섹션에 `derivable-structure`가 있으면 그 섹션의 `derivable-content`를 대체한다(구체 규칙 우선).
 - structure/verification detect와 discovery는 adapter마다 한 번 수행하고 portable absolute path claim으로 정규화해 분석에 전달한다.
 - tree entry evidence는 확정된 structure ownership만 사용하고 adapter별 entry override를 해당 adapter에 전달한다.
 - config `maxDepth`는 validation 한계이며 snapshot tree traversal을 자르지 않는다.
@@ -57,9 +57,13 @@
 
 ### AC-evidence-derivable — 문서 이격·열거 증거
 
-- 존재하지 않는 상대 경로 토큰은 node 경로·project root 순으로 해석한 뒤 `stale-path` warning finding이 된다. `## Boundary Exemptions`/`## Organ Exemptions` 섹션은 건너뛴다.
-- INTENT 한 섹션이 직계 children(childFractalPaths+organPaths 기준 4개 이상) 과반 basename을 나열하면 `derivable-structure` warning finding이 된다.
-- 같은 문서에 `derivable-content` finding이 있으면 `derivable-structure`는 내지 않는다.
+- 존재 주장 형태의 상대 경로 토큰은 node 디렉터리에서 project root까지 조상 디렉터리 체인으로 해석한 뒤 전부 실패하면 `stale-path` warning finding이 되고, finding 메시지에 섹션명이 들어간다. 존재를 주장하지 않는 토큰(`application/json` 같은 무점 basename·무말미슬래시)과 저장소에서 해석 불가한 위치(`~` 접두 home 표기, `$` 포함 변수 표기)는 검사하지 않는다.
+- `..` 포함 토큰은 저자 상대 표기이므로 node 디렉터리 기준으로만 해석한다 — 조상 기준 재적용은 우연한 충족을 만든다.
+- 말미 `/` 토큰은 같은 이름의 파일로 충족되지 않는다 — 디렉터리 주장은 디렉터리만 충족한다.
+- `## Boundary Exemptions`/`## Organ Exemptions`/`## History`/`## Last Updated`/`## Dependencies` 섹션은 건너뛴다. History·Last Updated는 제거된 경로의 서술 장소이고, Dependencies는 파일 존재 주장이 아닌 결합 주소(컴파일 지정자 포함)를 담는다.
+- 섹션 판정은 제목 문자열 단위다 — 같은 제목의 중복 섹션은 하나의 섹션으로 취급된다.
+- INTENT 한 섹션이 직계 children(childFractalPaths+organPaths 기준 4개 이상) 절반 이상 basename을 나열하면 `derivable-structure` warning finding이 된다.
+- 같은 섹션에서 `derivable-structure`가 발화하면 그 섹션의 `derivable-content`는 내지 않는다 — 다른 섹션의 `derivable-content`는 유지된다.
 - 두 finding은 `checkDocumentContract` 경유로 rule engine violation이 되며 rule roster는 15개 그대로다.
 
 ### AC-snapshot-axes — 선택된 증거 축
@@ -77,4 +81,4 @@
 
 ## Last Updated
 
-2026-08-16 — 문서 evidence에 stale-path·derivable-structure 파생 검사를 추가했다.
+2026-08-16 — stale-path를 존재 주장 형태·조상 체인 해석으로 좁히고, History를 면제하고, derivable-structure를 섹션 단위 구체 규칙 우선으로 바꿨다.

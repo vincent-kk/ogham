@@ -19,6 +19,7 @@ export function detectDerivableEnumeration(
     const where = section.title === '' ? 'the preamble' : `"${section.title}"`;
     violations.push({
       rule: 'derivable-content',
+      section: section.title,
       message: `Section ${where} lists ${tokens.length} path tokens — a derivable inventory. Keep only what the tree cannot say (name traps, generated-vs-canonical), with a reason.`,
       severity: 'warning',
     });

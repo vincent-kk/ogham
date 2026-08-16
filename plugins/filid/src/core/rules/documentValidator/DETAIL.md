@@ -3,7 +3,7 @@
 ## Requirements
 
 - INTENT.md의 50줄 cap과 3-tier boundary heading을 검증한다.
-- INTENT.md에서 한 `## ` 섹션에 경로 토큰 3개 이상이면 `derivable-content` warning을 낸다. code fence 안은 세지 않고, glob(`*` 포함)과 `@` scoped package 이름은 경로가 아니다.
+- INTENT.md에서 한 `## ` 섹션에 경로 토큰 3개 이상이면 `derivable-content` warning을 낸다. 경로 토큰은 `/`를 포함한 공백 없는 code span이다 — 생태계 확장자 목록은 참조하지 않는다(core 언어 중립). code fence 안, glob(`*` 포함), `@` scope 이름, `<placeholder>`, scheme 접두 지정자(`node:`·`https:` 류)는 토큰이 아니다.
 - DETAIL.md의 append-only 변경을 거부하고 필수 section과 안정 acceptance group ID를 검증한다.
 - acceptance group heading은 `### <stable-id> — <title>` 형태이며 한 문서 안에서 중복될 수 없다.
 - criteria ledger나 branch mode 문서는 이 validator의 계약이 아니다.
@@ -19,7 +19,7 @@
 - `validateDetailMd(content, oldContent?)` — append와 acceptance group을 합친 DETAIL validation result.
 - `validateDetailAcceptanceGroups(content)` — 추출된 groups와 document violations.
 - `parseBoundaryExemptions(content)` — 선언된 면책과 document violations. section이 없으면 빈 결과이며 violation도 없다.
-- `splitMarkdownSections(content)` — fence를 제거한 `## ` 단위 section 분해. `extractPathTokens(text)` — code span 경로 토큰 추출. snapshot evidence의 stale-path·derivable-structure 검사가 재사용한다.
+- `splitMarkdownSections(content)` — fence를 제거한 `## ` 단위 section 분해. `extractPathTokens(text)` — 구분자 보유 code span 경로 토큰 추출: 쓰인 형태(말미 `/` 포함)를 보존하고, 말미 `/`만 다른 중복은 등장 순서와 무관하게 디렉터리 표기(`/` 말미)를 우선해 하나로 접는다. snapshot evidence의 stale-path·derivable-structure 검사가 재사용한다.
 
 ## Acceptance Criteria
 
@@ -43,8 +43,8 @@
 
 ### AC-intent-derivable — 열거 검출
 
-- 한 `## ` 섹션 본문에 서로 다른 경로 토큰 3개 이상 → `derivable-content` warning 1건, 섹션명이 메시지에 들어간다.
-- 경로 토큰 2개 이하, fence 내부 토큰, `*` 포함 glob, `@` 스코프 패키지는 위반을 만들지 않는다.
+- 한 `## ` 섹션 본문에 서로 다른 경로 토큰 3개 이상 → `derivable-content` warning 1건, 섹션명이 메시지에 들어가고 violation의 `section` 필드가 섹션 제목(전문(preamble)은 빈 문자열)을 싣는다.
+- 경로 토큰 2개 이하, fence 내부 토큰, `*` 포함 glob, `@` 스코프 이름, `<placeholder>`, scheme 접두 지정자, 구분자 없는 bare 파일명은 위반을 만들지 않는다.
 - warning이므로 문서 `valid`는 유지된다.
 
 ### AC-document-surface — 1.0 document surface
@@ -62,4 +62,4 @@
 
 ## Last Updated
 
-2026-08-16 — derivable-content 열거 검출 추가: 한 섹션에 경로 토큰 3개 이상이면 warning. `splitMarkdownSections`·`extractPathTokens`를 공개해 snapshot evidence 검사가 재사용한다.
+2026-08-16 — 경로 토큰을 언어 중립(구분자 필수)으로 재정의하고 scheme·placeholder 제외와 violation `section` 필드를 추가했다.

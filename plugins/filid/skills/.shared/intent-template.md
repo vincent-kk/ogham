@@ -61,8 +61,13 @@ this file is the defect.
 ## Enforcement
 
 Mechanically checked: the 50-line cap (`error`), the presence of all three
-boundary tiers (`warning`), and three findings against derivable content —
-three or more path tokens in one section (`derivable-content`), a path token
-that resolves to nothing (`stale-path`), and a section naming half or more of
-the node's own children (`derivable-structure`), all `warning`. The remaining
-headings are contract expectations that no rule fails on.
+boundary tiers (`warning`), and three findings against derivable content, all
+`warning` — three or more separator-bearing path tokens (whitespace-free code
+spans containing `/`; bare filenames do not count) in one section
+(`derivable-content`); an existence-asserting token — a `dir/` marker or a
+dotted basename — that resolves to nothing from the node's directory or its
+ancestors (`stale-path`; `## Dependencies`, `## History`, `## Last Updated`
+and exemption sections are not checked); and a section naming half or more of
+the node's own children (`derivable-structure`, which replaces
+`derivable-content` for that section). The remaining headings are contract
+expectations that no rule fails on.

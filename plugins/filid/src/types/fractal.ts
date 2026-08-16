@@ -42,6 +42,8 @@ export interface EntryPointSurfaceEvidence {
 export interface DocumentContractFinding {
   document: 'intent' | 'detail';
   rule: string;
+  /** `## ` section title the finding sits in; '' names the preamble. Set by section-scoped rules. */
+  section?: string;
   message: string;
   severity: 'error' | 'warning';
 }

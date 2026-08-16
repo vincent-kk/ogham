@@ -34,10 +34,13 @@ export function detectStructureEnumeration(
         .filter((basename) => childNames.has(basename)),
     );
     if (mentioned.size * 2 < childNames.size) continue;
+    const where =
+      section.title === '' ? 'The preamble' : `Section "${section.title}"`;
     findings.push({
       document: 'intent',
       rule: 'derivable-structure',
-      message: `Section "${section.title}" names ${mentioned.size} of this node's ${childNames.size} children — a directory listing. Keep only what the tree cannot say.`,
+      section: section.title,
+      message: `${where} names ${mentioned.size} of this node's ${childNames.size} children — a directory listing. Keep only what the tree cannot say.`,
       severity: 'warning',
     });
   }
