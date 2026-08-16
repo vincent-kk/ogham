@@ -27,12 +27,18 @@ describe('routingStance', () => {
     const lines = routingStance(1).join('\n');
     expect(lines).toContain('rather than handling it here');
     expect(lines).toContain('name the part this session must own');
+    expect(lines).toContain('dispatch the remainder');
   });
 
-  it('at +2 closes the exception list instead of asking for a free-form reason', () => {
+  it('at +2 closes the exception list and demands the split', () => {
     const lines = routingStance(2).join('\n');
     expect(lines).toContain('only for one of these');
-    expect(lines).toContain('(2) it needs files, state, or tools');
+    expect(lines).toContain('applies its own edits');
+    expect(lines).toContain('Mixed work is split, not kept');
+    expect(lines).toContain('a plain task request names no worker');
+    expect(lines).toContain('workspace files never qualify');
+    expect(lines).toContain('(4) a dispatch for this same task');
+    expect(lines).not.toContain('(5)');
     expect(lines).toContain('Nothing else is an exception');
     expect(lines).not.toContain('say why in one line');
   });

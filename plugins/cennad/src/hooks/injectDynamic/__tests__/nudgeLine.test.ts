@@ -40,8 +40,9 @@ describe('nudgeLine', () => {
     expect(nudgeLine(1, two)).toContain('Prefer codex or antigravity');
   });
 
-  it('at +2 points at the listed exceptions rather than a free reason', () => {
+  it('at +2 points at the split and the listed exceptions rather than a free reason', () => {
     const line = nudgeLine(2, two);
+    expect(line).toContain('split mixed tasks');
     expect(line).toContain('needs a listed exception');
     expect(line).not.toContain('stated reason');
   });
@@ -51,6 +52,16 @@ describe('nudgeLine', () => {
       const line = nudgeLine(s, two);
       expect(line).toContain('codex or antigravity');
       expect(line).not.toContain('<provider>');
+      expect(line).not.toContain('\n');
+      expect(line.length).toBeLessThanOrEqual(110);
+    }
+  });
+
+  it('keeps the widest provider list within the one-line budget', () => {
+    const widest = ['codex', 'antigravity', 'claude'] as const;
+
+    for (const s of [-2, -1, 0, 1, 2] as const) {
+      const line = nudgeLine(s, widest);
       expect(line).not.toContain('\n');
       expect(line.length).toBeLessThanOrEqual(110);
     }

@@ -12,7 +12,7 @@ const NUDGES = {
   '-1': 'Delegate only when <list> owns most of this work.',
   '0': 'Weigh <list> against handling it here — decide before you start.',
   '1': 'Prefer <list> over handling owned work here.',
-  '2': 'Dispatch owned work to <list>; keeping it here needs a listed exception.',
+  '2': 'Dispatch owned work to <list>; split mixed tasks; keeping one needs a listed exception.',
 } as const;
 
 export function nudgeLine(
