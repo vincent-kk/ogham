@@ -16,7 +16,7 @@
       "title": "Code Comments",
       "description": "Inline comments are a capped last resort; declarations take the language's documentation form and state the current spec, never history.",
       "recommended": true,
-      "templateHash": "812212cef9eccac721f861a86caba9b2c7bfc304cb0b9b6d6d92f2a46d97a0c2"
+      "templateHash": "2fe109856b98c922bdc70b67fc01fa39ad65da75c74968de81ddd867585f54b5"
     },
     {
       "id": "seiri_public-contract",
