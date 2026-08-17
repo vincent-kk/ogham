@@ -288,6 +288,52 @@ describe('ecmascript structure adapter', () => {
     ).toEqual([]);
   });
 
+  it('does not read an identifier named from inside an exported function as a re-export', async () => {
+    const root = project();
+    const source = write(
+      root,
+      'src/source.ts',
+      [
+        'export const assertSafeFromPointer = (from: string): string[] => {',
+        "  const segments = from.split('/');",
+        '  return segments;',
+        '};',
+      ].join('\n'),
+    );
+
+    expect(
+      await ecmascriptStructureAdapter.extractDependencies(source),
+    ).toEqual([]);
+  });
+
+  it('extracts star, namespace and type-only re-export sources', async () => {
+    const root = project();
+    const target = write(root, 'src/target.ts', 'export const value = 1;');
+    const source = write(
+      root,
+      'src/source.ts',
+      [
+        "export * from './target.js';",
+        "export * as forwarded from './target.js';",
+        "export type { Value } from './target.js';",
+      ].join('\n'),
+    );
+
+    const dependencies =
+      await ecmascriptStructureAdapter.extractDependencies(source);
+
+    expect(dependencies.map((item) => item.resolvedPath)).toEqual([
+      target,
+      target,
+      target,
+    ]);
+    expect(dependencies.map((item) => item.kind)).toEqual([
+      're-export',
+      're-export',
+      're-export',
+    ]);
+  });
+
   it('enumerates named exports and detects direct declarations', async () => {
     const root = project();
     const entry = write(

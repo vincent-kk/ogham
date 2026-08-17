@@ -4,6 +4,7 @@ import { dirname, extname, join, resolve } from 'node:path';
 import type { DependencyReference } from '../../../types/adapters.js';
 
 import { SOURCE_EXTENSIONS } from './ecmascriptConventions.js';
+import { matchReExportFrom } from './matchReExportFrom.js';
 import { type LexicalToken, scanLexicalTokens } from './scanLexicalTokens.js';
 
 function resolveSpecifier(
@@ -65,12 +66,10 @@ export function extractDependencyReferences(
       kind = next === '(' ? 'dynamic' : 'static';
       dependency = dependencyStringAfter(tokens, index + 1);
     } else if (token.kind === 'identifier' && token.value === 'export') {
-      const fromIndex = tokens
-        .slice(index + 1)
-        .findIndex((candidate) => candidate.value === 'from');
+      const fromIndex = matchReExportFrom(tokens, index);
       if (fromIndex >= 0) {
         kind = 're-export';
-        dependency = dependencyStringAfter(tokens, index + fromIndex + 2);
+        dependency = dependencyStringAfter(tokens, fromIndex + 1);
       }
     } else if (token.kind === 'identifier' && token.value === 'require') {
       kind = 'static';
