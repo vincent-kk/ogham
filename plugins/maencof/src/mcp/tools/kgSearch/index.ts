@@ -1,1 +1,1 @@
-export * from './kgSearch.js';
+export { handleKgSearch } from './kgSearch.js';

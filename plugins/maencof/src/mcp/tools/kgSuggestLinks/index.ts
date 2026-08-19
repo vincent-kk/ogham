@@ -1,1 +1,1 @@
-export * from './kgSuggestLinks.js';
+export { handleKgSuggestLinks } from './kgSuggestLinks.js';

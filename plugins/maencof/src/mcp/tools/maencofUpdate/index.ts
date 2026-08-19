@@ -1,1 +1,1 @@
-export * from './maencofUpdate.js';
+export { handleMaencofUpdate } from './maencofUpdate.js';

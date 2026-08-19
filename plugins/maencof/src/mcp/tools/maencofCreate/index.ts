@@ -1,1 +1,1 @@
-export * from './maencofCreate.js';
+export { handleMaencofCreate } from './maencofCreate.js';
