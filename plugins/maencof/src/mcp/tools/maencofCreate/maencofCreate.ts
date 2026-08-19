@@ -43,6 +43,7 @@ function inputToFrontmatterObject(
   if (input.title !== undefined) fm.title = input.title;
   if (input.source !== undefined) fm.source = input.source;
   if (input.expires !== undefined) fm.expires = input.expires;
+  if (input.cluster_key !== undefined) fm.cluster_key = input.cluster_key;
   if (input.mentioned_persons && input.mentioned_persons.length > 0)
     fm.mentioned_persons = input.mentioned_persons;
   if (input.gist !== undefined) fm.gist = input.gist;
@@ -140,6 +141,8 @@ function buildFrontmatter(input: MaencofCreateInput): FrontmatterBuildResult {
   if (input.title) lines.push(`title: ${quoteYamlValue(input.title)}`);
   if (input.source) lines.push(`source: ${quoteYamlValue(input.source)}`);
   if (input.expires) lines.push(`expires: ${input.expires}`);
+  if (input.cluster_key)
+    lines.push(`cluster_key: ${quoteYamlValue(input.cluster_key)}`);
   if (input.mentioned_persons && input.mentioned_persons.length > 0) {
     const personsYaml = `[${input.mentioned_persons.map((p) => quoteYamlValue(p)).join(', ')}]`;
     lines.push(`mentioned_persons: ${personsYaml}`);

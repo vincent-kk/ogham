@@ -25,6 +25,7 @@
 | `mentioned_persons`                                   | 비어 있지 않은 배열일 때 | 빈 배열은 싣지 않는다            |
 | `buffer_type` · `promotion_target` · `source_context` | 입력에 있을 때           | L5 전용 — 스키마가 교차 검증한다 |
 | `hub` · `hub_kind` · `purpose`                        | 입력에 있을 때           | hub 는 레이어 직교 속성          |
+| `cluster_key`                                         | 입력에 있을 때           | 증분 문서의 스레드 선언 — 같은 키는 검색에서 대표 1건으로 접힌다 |
 
 ### Result (`MaencofCrudResult`)
 
@@ -68,4 +69,4 @@
 
 ## Last Updated
 
-2026-08-04 — 평면 레이어(L1·L5) 서브디렉토리 거부를 계약에 추가했다.
+2026-08-19 — `cluster_key` 를 조립 대상 선택 필드에 추가했다 (R3).

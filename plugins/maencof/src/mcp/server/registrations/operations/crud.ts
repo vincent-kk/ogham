@@ -58,6 +58,13 @@ export function registerCrudTools(server: McpServer): void {
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .optional()
           .describe('Expiry date YYYY-MM-DD (for Layer 4 and L5 buffer)'),
+        cluster_key: z
+          .string()
+          .min(1)
+          .optional()
+          .describe(
+            'Thread/cluster declaration for incremental records (e.g. "jira-gcc-3903", "works-mail-2026-08-19"). Documents sharing a cluster_key collapse to one representative in kg_search/kg_context; open the full cluster via kg_search { cluster }. Remove with frontmatter.unset.',
+          ),
         sub_layer: SubLayerSchema.optional().describe(
           'Sub-layer for Layer 3 only (relational/structural/topical — default topical). Layer 5 is a flat unclassified buffer and takes no sub-layer.',
         ),
@@ -171,6 +178,13 @@ export function registerCrudTools(server: McpServer): void {
               ),
             confidence: z.number().min(0).max(1).optional(),
             schedule: z.string().optional(),
+            cluster_key: z
+              .string()
+              .min(1)
+              .optional()
+              .describe(
+                'Thread/cluster declaration — documents sharing a cluster_key collapse to one representative in kg_search/kg_context. Remove with unset.',
+              ),
             sub_layer: z
               .enum(['relational', 'structural', 'topical'])
               .optional()

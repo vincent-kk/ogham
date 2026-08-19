@@ -108,6 +108,13 @@ function updateFrontmatter(
   if (updates.sub_layer !== undefined)
     yaml = patchFrontmatterField(yaml, 'sub_layer', updates.sub_layer);
 
+  if (updates.cluster_key !== undefined)
+    yaml = patchFrontmatterField(
+      yaml,
+      'cluster_key',
+      quoteYamlValue(updates.cluster_key),
+    );
+
   if (updates.gist !== undefined)
     yaml = patchFrontmatterField(yaml, 'gist', quoteYamlValue(updates.gist));
 

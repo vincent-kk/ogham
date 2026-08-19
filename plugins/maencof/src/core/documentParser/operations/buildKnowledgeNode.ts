@@ -59,6 +59,7 @@ export function buildKnowledgeNode(
   if (fm.domain) node.domain = fm.domain;
   if (fm.gist) node.gist = fm.gist;
   if (fm.archived) node.archived = fm.archived;
+  if (fm.cluster_key) node.clusterKey = fm.cluster_key;
 
   // Step 2.0b: sub-layer 확장 필드 전파
   node.subLayer = fm.sub_layer ?? inferSubLayerFromPath(doc.relativePath);
