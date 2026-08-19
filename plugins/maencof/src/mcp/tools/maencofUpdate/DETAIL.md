@@ -8,6 +8,7 @@
 - `frontmatter.unset` 은 모든 레이어에서 `created` · `updated` · `layer` · `tags` 를 거부한다 — 데이터 무결성 핵심 필드다.
 - unset 은 set 보다 먼저 처리한다. 같은 키를 set 과 unset 에 함께 주면 set 이 이긴다.
 - 쓰기 직전 `validateFrontmatter` 게이트를 통과해야 한다. 손상된 frontmatter 의 복구 경로는 `frontmatter.unset` 이다.
+- 대상 문서의 노드 구성(`buildKnowledgeNode`)은 `allowNonLayerPath` 옵트아웃을 쓴다 — 레이어 디렉토리 밖 경로 문서도 update 대상이며, 그래프 편입 자격은 색인 경로의 기본 게이트(`isLayerDirPath`) 소관이다.
 - 본문 수정은 `deduplicateContent` 를 거친다.
 
 ## API Contracts
@@ -62,4 +63,4 @@
 
 ## Last Updated
 
-2026-08-19 — `cluster_key` 패치를 frontmatter 계약에 추가했다 (R3).
+2026-08-20 — 노드 구성의 `allowNonLayerPath` 옵트아웃(그래프 편입 게이트의 검증 전용 예외)을 문서화했다.

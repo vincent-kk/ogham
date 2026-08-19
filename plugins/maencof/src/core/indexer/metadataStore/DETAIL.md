@@ -9,6 +9,7 @@
 - `appendStaleEntries` retry 시: load → merge (집합 합집합 보존) → atomic write를 다시 시도.
 - `usageStats` increment는 commutative이며 윈도우가 5ms 이하라 극단 contention에서 +1 손실을 허용한다 (통계 SLA 영향 없음, 명시 문서화).
 - `snapshot` / `graph` / `weights`는 마지막 writer 우선이며 항상 일관 상태를 보장한다.
+- `deserializeGraph` / `deserializeShards` 는 `isLayerDirPath` 를 통과하는 경로의 노드만 편입하고, 탈락 노드를 참조하는 edge 를 함께 제거하며 node/edge count 를 재계산한다 — 직렬화 이후 규칙이 바뀌었거나 오염된 캐시가 레이어 밖 문서를 그래프로 되살리는 것을 막는 역직렬화 방어선이다.
 - 모든 함수 시그니처는 불변 — 호출부(MCP middlewares, kgBuild 등) 영향 0.
 
 ## API Contracts
@@ -28,3 +29,17 @@
 
 - atomic rename 3회 retry 모두 실패 시 throw — 호출자가 retry 정책 결정.
 - load 실패는 silent (빈/기본 결과 반환), 모든 unexpected error는 `appendErrorLogSafe`로 흘림.
+
+## Acceptance Criteria
+
+### AC-commit-marker-first — 커밋 마커 우선
+
+- `graph-meta.json` 이 미완이거나 부재하면 `loadGraph()` 는 부분 샤드를 그래프로 되살리지 않는다 (cache miss 또는 legacy 마이그레이션 경로).
+
+### AC-deserialize-layer-gate — 역직렬화 레이어 게이트
+
+- 캐시에 레이어 디렉토리 밖 경로의 노드가 있어도 역직렬화 결과 그래프에 편입되지 않고, 그 노드를 참조하는 edge 도 남지 않으며 count 가 실제 편입 수와 일치한다.
+
+## Last Updated
+
+2026-08-20 — 역직렬화 레이어 게이트(캐시 재수화의 방어선)를 계약에 추가하고 필수 섹션(Acceptance Criteria · Last Updated)을 보강했다.

@@ -15,6 +15,7 @@
 - 같은 레이어로의 이동은 `target_sub_layer` 또는 `target_subdirectory`가 지정된 경우에만 허용한다(레이어 내 재배치).
 - 소스와 대상 경로 모두 `resolveWithinVault`(core/pathGuard)로 vault 내부 봉쇄를 검증한다.
 - 쓰기 직전 갱신된 frontmatter를 `validateFrontmatter`로 검증한다(read-path와 동일 스키마).
+- 소스 문서의 노드 구성(`buildKnowledgeNode`)은 `allowNonLayerPath` 옵트아웃을 쓴다 — 레이어 디렉토리 밖 경로 문서도 이동 소스가 될 수 있으며, 그래프 편입 자격은 색인 경로의 기본 게이트(`isLayerDirPath`) 소관이다.
 
 ## API Contracts
 
@@ -78,4 +79,4 @@
 
 ## Last Updated
 
-2026-08-04 — 평면 대상 레이어 서브디렉토리 거부를 계약에 추가했다.
+2026-08-20 — 노드 구성의 `allowNonLayerPath` 옵트아웃(그래프 편입 게이트의 검증 전용 예외)을 문서화했다.
