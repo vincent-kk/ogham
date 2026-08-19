@@ -4,6 +4,7 @@
 
 - `kg_suggest_links` 는 소스 태그(기존 문서 `path` 의 태그 + `tags` + `content_hint` 키워드 추출의 합집합)로 태그 Jaccard 후보를 고르고 SA 보강 점수를 더해 상위 N개 연결을 제안한다. 그래프가 없거나 소스 태그가 비면 빈 결과를 돌려준다.
 - `candidates_explored` 는 Jaccard 필터를 통과한 후보 수다 — 0 은 소스 태그가 어떤 문서 태그와도 겹치지 않아 탐색이 시작되지 않았다는 신호다.
+- `archived: true` 후보의 종합 점수(tag_score + SA 보너스)에는 `ARCHIVED_SEED_MULTIPLIER`(0.3)를 곱한다 — 태그만 온전한 증류 후 스텁이 제안 상위를 차지하지 못하게 한다(침강). `tag_score`/`sa_score` 원값 필드는 강등 없이 그대로 보고한다.
 - `input.tags` 가 제공되면 응답 `seedResolution` 이 그 해석 상태를 보고한다 — `resolved` 는 입력 태그→해당 태그 보유 문서 수, `unresolved` 는 볼트 태그 어휘에 없는 입력 태그 원문(미해석 존재 시에만 키 존재). `path`·`content_hint` 파생 태그는 보고 대상이 아니다(경로 태그는 정의상 볼트에 있고, 추출 키워드는 투기 파생). `tags` 미제공이면 필드 자체가 없고, 그래프 부재/빈 인덱스 조기 반환에도 싣지 않는다.
 
 ## API Contracts

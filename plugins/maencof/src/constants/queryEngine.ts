@@ -42,3 +42,12 @@ export const COMPOUND_OR_MATCH_SCORE = 0.3;
  * 전 토큰 보유(full) 판정에는 그대로 참여시켜 기존 다토큰 분류를 보존한다.
  */
 export const COMPOUND_FALLBACK_MIN_TOKEN_LENGTH = 2;
+
+/**
+ * archived: true 문서(증류 후 스텁)의 시드/후보 점수 강등 계수. 본문이 비어도
+ * 태그가 온전한 스텁이 태그 채널 경쟁력으로 정제 지식을 밀어내는 것을 막는다(침강).
+ * 명시 경로 시드(path-exact/path-prefix)에는 적용하지 않는다 — 직접 지목은 존중.
+ * 0.3: tag-exact(0.5)를 kg_suggest_links 기본 min_score(0.2) 아래(0.15)로 보낸다.
+ * 운영 실측 후 조정 여지 있음.
+ */
+export const ARCHIVED_SEED_MULTIPLIER = 0.3;
