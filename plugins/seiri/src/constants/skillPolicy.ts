@@ -29,13 +29,17 @@ export const AUTO_AUTONOMOUS_SKILLS = [
 ] as const;
 
 /**
- * Auto-invocable, and permitted to ask proactively when the blast radius is
- * large — a broad refactor, a new module or feature — so a wrong planning
- * default does not propagate into execution. Unlike the autonomous
- * disciplines, its question needs no blocker: planning is the cheap moment
- * to be wrong, so one focused question is worth the interrupt.
+ * Auto-invocable, and permitted to ask proactively at the one decision
+ * point each names in its body — no blocker required. Both act before
+ * execution, the cheap moment to be wrong, so one focused question is
+ * worth the interrupt: write-plan's on a large blast radius before the
+ * plan is committed, review-plan's on a challenge trigger — delegate the
+ * review to unprejudiced eyes, or proceed on grounding alone.
  */
-export const AUTO_CONDITIONAL_ASK_SKILLS = ['write-plan'] as const;
+export const AUTO_CONDITIONAL_ASK_SKILLS = [
+  'review-plan',
+  'write-plan',
+] as const;
 
 /**
  * User-invoked gates the model may not auto-invoke (`disable-model-invocation:

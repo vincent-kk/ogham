@@ -5,7 +5,7 @@ export type WorkflowSkill = (typeof AUTO_INVOCABLE_SKILLS)[number];
 
 /**
  * Chain membership as a runtime value: the auto-invocable skills, stated
- * literally so a hook bundle carries eight short names and never the
+ * literally so a hook bundle carries nine short names and never the
  * hand-off sentences they key into (constants/workflowStateLines.ts). A
  * literal copy rather than a spread of the skillPolicy arrays because a
  * spread is a statement esbuild will not shake — it would carry the whole
@@ -18,6 +18,7 @@ export const WORKFLOW_SKILLS = [
   'implement',
   'receive-review',
   'request-review',
+  'review-plan',
   'trace-cause',
   'trace-structure',
   'verify',

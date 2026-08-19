@@ -29,4 +29,4 @@ export const TURN_REMINDER_STANDARD =
  * turn, and the moment that decays is the one that arrives late.
  */
 export const TURN_REMINDER_STRICT =
-  "This turn, elect the owning skill by name — a failure → `/seiri:trace-cause` · multi-step work → `/seiri:write-plan` · a plan in hand → `/seiri:execute` · before implementing → `/seiri:implement` · done, fixed, or passing said or heard, yours or the user's → `/seiri:verify` · sending work out → `/seiri:request-review` · feedback arriving → `/seiri:receive-review`. Borderline and small work included; the active rules bind rather than advise.";
+  "This turn, elect the owning skill by name — a failure → `/seiri:trace-cause` · multi-step work → `/seiri:write-plan` · a fresh plan → `/seiri:review-plan` · a reviewed plan — or its stated skip → `/seiri:execute` · before implementing → `/seiri:implement` · done, fixed, or passing said or heard, yours or the user's → `/seiri:verify` · sending work out → `/seiri:request-review` · feedback arriving → `/seiri:receive-review`. Borderline and small work included; the active rules bind rather than advise.";

@@ -63,6 +63,12 @@ describe('workflow state chain', () => {
   it('tells the next turn what the loaded workflow owes', () => {
     const repoRoot = seedRepo();
     load(repoRoot, 'seiri:write-plan');
+    expect(turn(repoRoot)).toContain('/seiri:review-plan');
+  });
+
+  it('hands a reviewed plan onward to execute', () => {
+    const repoRoot = seedRepo();
+    load(repoRoot, 'seiri:review-plan');
     expect(turn(repoRoot)).toContain('/seiri:execute');
   });
 

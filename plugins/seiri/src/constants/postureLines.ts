@@ -17,7 +17,7 @@
  * dispatch on. A bare name is a word; the namespaced one is an address.
  */
 export const WORKFLOW_CHAIN_LINE =
-  'Workflow: `/seiri:write-plan` → `/seiri:execute` → `/seiri:implement` → `/seiri:verify` → `/seiri:request-review`; failures → `/seiri:trace-cause`; indirect code → `/seiri:trace-structure`; review feedback → `/seiri:receive-review`.';
+  'Workflow: `/seiri:write-plan` → `/seiri:review-plan` → `/seiri:execute` → `/seiri:implement` → `/seiri:verify` → `/seiri:request-review`; failures → `/seiri:trace-cause`; indirect code → `/seiri:trace-structure`; review feedback → `/seiri:receive-review`.';
 
 /**
  * Added at `strict`. Widens which moments count as one of the above, and

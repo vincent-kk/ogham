@@ -19,10 +19,10 @@ import { WORKFLOW_SKILLS } from '../constants/workflowChain.js';
  * auto-invoked mid-work prefers autonomous judgment and reserves its one
  * question for a genuine blocker (the canonical body clause below); a
  * user-only gate must be off the model's reach (`disable-model-invocation:
- * true`); write-plan is the one auto skill allowed to ask proactively when
- * a change's blast radius is large. Nothing outside this file keeps those
- * facts true, so a dropped clause or a new skill added with the wrong
- * posture would otherwise pass silently.
+ * true`); the conditional-ask skills act before execution and may ask
+ * proactively at the one decision point each names in its body. Nothing
+ * outside this file keeps those facts true, so a dropped clause or a new
+ * skill added with the wrong posture would otherwise pass silently.
  */
 const skillsDir = portableJoin(
   portableDirname(fileURLToPath(import.meta.url)),
@@ -38,6 +38,14 @@ const skillsDir = portableJoin(
  */
 const CANONICAL_AUTONOMY_CLAUSE =
   'This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.';
+
+/**
+ * The conditional-ask counterpart: the shared sentence every pre-execution
+ * skill carries verbatim, so the class contract stays a checked fact as
+ * membership grows past one. Each skill's body then names its own moment.
+ */
+const CANONICAL_CONDITIONAL_ASK_CLAUSE =
+  'This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line.';
 
 function readSkill(name: string): { frontmatter: string; body: string } {
   const text = readFileSync(portableJoin(skillsDir, name, 'SKILL.md'), 'utf8');
@@ -77,11 +85,13 @@ describe('skill invocation policy', () => {
     }
   });
 
-  it('lets the conditional-ask planner be invoked and ask', () => {
+  it('lets the conditional-ask skills be invoked and ask', () => {
     for (const name of AUTO_CONDITIONAL_ASK_SKILLS) {
-      const { frontmatter } = readSkill(name);
+      const { frontmatter, body } = readSkill(name);
       expect(frontmatter).not.toContain('AskUserQuestion');
       expect(frontmatter).not.toContain('disable-model-invocation');
+      expect(frontmatter).toMatch(/^user-invocable: true$/m);
+      expect(body).toContain(CANONICAL_CONDITIONAL_ASK_CLAUSE);
     }
   });
 

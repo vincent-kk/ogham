@@ -29,7 +29,7 @@ export const ELECTION_STANDARD_LINE =
   "Election: defined workflows govern these moments — a failure appearing, multi-step work starting, review arriving or departing — load the matching seiri workflow before acting. One moment is named: when done, fixed, or passing is said or heard — your claim or the user's — load `/seiri:verify`. Decide after reading — deviations are yours to make, with a stated reason.";
 
 export const ELECTION_STRICT_LINE =
-  "Election contract: these moments have owners — a failure appears → load `/seiri:trace-cause` · multi-step work begins → `/seiri:write-plan` · a plan exists → `/seiri:execute` · before implementing → `/seiri:implement` · done/fixed/passing said or heard, your claim or the user's → `/seiri:verify` · requesting review → `/seiri:request-review` · feedback arrives → `/seiri:receive-review`. Load first, decide after reading — deviations are yours to make, with a stated reason. Matching without loading is a skipped election, not a judgment.";
+  "Election contract: these moments have owners — a failure appears → load `/seiri:trace-cause` · multi-step work begins → `/seiri:write-plan` · a plan lands → `/seiri:review-plan` · a reviewed plan — or its stated skip → `/seiri:execute` · before implementing → `/seiri:implement` · done/fixed/passing said or heard, your claim or the user's → `/seiri:verify` · requesting review → `/seiri:request-review` · feedback arrives → `/seiri:receive-review`. Load first, decide after reading — deviations are yours to make, with a stated reason. Matching without loading is a skipped election, not a judgment.";
 
 /**
  * Dial → election text. `advisory` has no entry — the lookup misses and

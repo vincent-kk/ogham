@@ -79,6 +79,15 @@ describe('per-turn dispatch reminder', () => {
     }
   });
 
+  it('routes a fresh plan through review — and a skip past it — at strict', () => {
+    expect(TURN_REMINDER_STRICT).toContain(
+      'a fresh plan → `/seiri:review-plan`',
+    );
+    expect(TURN_REMINDER_STRICT).toContain(
+      'or its stated skip → `/seiri:execute`',
+    );
+  });
+
   it('never blocks a turn when cwd is missing', () => {
     const output = processUserPromptSubmit({
       cwd: '',

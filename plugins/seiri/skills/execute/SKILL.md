@@ -1,7 +1,7 @@
 ---
 name: execute
 user-invocable: true
-description: '[seiri:execute] Carry a written plan to done without losing your place. Use when an implementation plan exists and the work is to perform it.'
+description: '[seiri:execute] Carry a written plan to done without losing your place. Use when a plan has cleared review — or carries its stated skip — and the work is to perform it.'
 argument-hint: '[path to the plan]'
 version: '0.1.0'
 complexity: moderate

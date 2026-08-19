@@ -10,7 +10,7 @@ plugin: seiri
 
 # write-plan — write it so the session is not needed
 
-This skill may be invoked automatically. For a routine change, take the conservative default and say so in one line. A large blast radius — a broad refactor, a new module or feature — earns one focused question before you commit the plan.
+This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line. The question's moment here: a large blast radius — a broad refactor, a new module or feature — earns it before you commit the plan; a routine change takes the default.
 
 ## Workflow
 
@@ -22,10 +22,10 @@ This skill may be invoked automatically. For a routine change, take the conserva
 
 **4. Declare the interfaces between tasks.** What each task consumes from earlier ones and produces for later ones — exact names, signatures, types. A task's implementer sees only their own task.
 
-**5. Self-review once, fix inline.** Every requirement maps to a task; no placeholder patterns survive; names and signatures agree across tasks. Fix what you find and move on — no re-review loop.
+**5. Self-review once, fix inline.** Every requirement maps to a task; no placeholder patterns survive; names and signatures agree across tasks; every path and symbol the plan claims exists now was confirmed by a tool this session, not recalled. Fix what you find and move on — no re-review loop.
 
 ## Rules
 
 - Save the plan where this repository already keeps them; if no convention exists, state where you put it in one line.
 - Global constraints (versions, naming, platform limits) go in one header section, copied verbatim — every task inherits them.
-- Hand off: performing this plan is `/seiri:execute`'s moment — load it to carry the plan out. A single surgical change does not need a plan.
+- Hand off: a landed plan is `/seiri:review-plan`'s moment — it proves the plan's claims before `/seiri:execute` performs them. A single surgical change does not need a plan.

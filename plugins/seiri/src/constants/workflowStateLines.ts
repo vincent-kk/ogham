@@ -15,7 +15,10 @@ import type { WorkflowSkill } from './workflowChain.js';
  * recording side checks membership against `WORKFLOW_SKILLS` instead.
  */
 export const WORKFLOW_STATE_LINES: Record<WorkflowSkill, string> = {
-  'write-plan': 'A plan was produced — `/seiri:execute` owns its performance.',
+  'write-plan':
+    'A plan was produced — `/seiri:review-plan` proves its claims before `/seiri:execute` performs it.',
+  'review-plan':
+    'The plan was reviewed — cleared or grounded-only, `/seiri:execute` owns it; rework-required re-enters `/seiri:write-plan` for one scoped pass.',
   execute:
     'A plan is being carried out — the claim that it is done is `/seiri:verify`’s to make.',
   implement:
