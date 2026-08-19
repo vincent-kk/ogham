@@ -2,7 +2,7 @@
  * @file types.ts
  * @description queryEngine 공개 타입 — 시드 매칭, 튜닝 오버라이드, 검색 옵션/결과.
  */
-import type { NodeId } from '../../../types/common.js';
+import type { NodeId, SubLayer } from '../../../types/common.js';
 import type { ActivationResult } from '../../../types/graph.js';
 
 /** 시드 매칭 유형 — 'compound-or' 는 compound 시드 분해 OR 폴백이 새로 유입시킨 부분 매칭 */
@@ -59,6 +59,8 @@ export interface QueryOptions {
   maxHops?: number;
   /** Layer 필터 (미지정 시 전체 Layer) */
   layerFilter?: number[];
+  /** 서브레이어 pre-filter — layerFilter 와 같은 위치(SA 후·collapse·절단 전)에서 적용 */
+  subLayerFilter?: SubLayer;
   /** updated 시간창 하한 (YYYY-MM-DD, inclusive; 단독 지정 시 updated_after 의미) */
   since?: string;
   /** updated 시간창 상한 (YYYY-MM-DD, inclusive) */

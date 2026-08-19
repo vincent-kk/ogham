@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildAdjacencyList } from '../../core/graphBuilder/index.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
 import { estimateTokens } from '../../search/contextAssembler/operations/estimateTokens.js';
+import { invalidateQueryCache } from '../../search/queryEngine/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -188,5 +189,51 @@ describe('kg_context modes', () => {
       if ('error' in result) return;
       expect(result.context).not.toContain('###');
     });
+  });
+});
+
+describe('kg_context — cluster collapse 표기 (R4)', () => {
+  beforeEach(() => {
+    // buildGraph 헬퍼가 builtAt 을 고정하므로 파일 내 앞선 쿼리의 캐시가 섞이지 않게 비운다
+    invalidateQueryCache();
+  });
+
+  function makeOmegaClusterGraph(): KnowledgeGraph {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    const members = ['2026-02-01', '2026-02-03', '2026-02-02'].map(
+      (updated, i) =>
+        makeNode(`04_Action/omega-${i}.md`, Layer.L4_ACTION, {
+          title: `Omega Update ${i}`,
+          tags: ['omega'],
+          updated,
+          clusterKey: 'omega-thread',
+        }),
+    );
+    for (const n of members) nodes.set(n.id, n);
+    return buildGraph(nodes, []);
+  }
+
+  it('documents 모드 항목에 clusterKey 와 collapsedCount 가 실린다', async () => {
+    const result = await handleKgContext(makeOmegaClusterGraph(), {
+      query: 'omega',
+      include_content: false,
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    expect(result.documents).toHaveLength(1);
+    expect(result.documents![0]!.path).toBe('04_Action/omega-1.md');
+    expect(result.documents![0]!.clusterKey).toBe('omega-thread');
+    expect(result.documents![0]!.collapsedCount).toBe(2);
+  });
+
+  it('content 모드 markdown 에 접힘·열기 키 표기가 나타난다', async () => {
+    const result = await handleKgContext(makeOmegaClusterGraph(), {
+      query: 'omega',
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    expect(result.context).toContain('(+2 collapsed · cluster: omega-thread)');
   });
 });

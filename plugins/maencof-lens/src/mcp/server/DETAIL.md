@@ -15,7 +15,8 @@
 ## API Contracts
 
 - `createLensServer(configRoot: string | null): McpServer` — 5개 툴이 등록된 서버 인스턴스. `configRoot` 는 `.maencof-lens/` 를 담은 디렉터리의 절대 경로이거나 `null`. config 를 못 찾아도 throw 하지 않는다.
-- 등록 툴과 필수 입력: `search(seed: string[], 최소 1개)` · `context(query: string)` · `navigate(path: string)` · `read(path: string)` · `status()`. 다섯 툴 모두 optional `vault`(볼트 이름)를 받는다.
+- 등록 툴과 필수 입력: `search(seed 또는 cluster 중 정확히 하나)` · `context(query: string)` · `navigate(path: string)` · `read(path: string)` · `status()`. 다섯 툴 모두 optional `vault`(볼트 이름)를 받는다.
+- `search` 의 `seed`(SA 검색)와 `cluster`(접힌 스레드 전체 열거 — SA 없이 updated 최신순)는 상호배타다. 검증과 오류 문구는 maencof 핸들러가 소유하고, cluster 모드 결과에도 볼트 레이어 상한이 적용된다.
 - `search`·`context` 의 `layer_filter` 는 볼트 상한과 교집합되며, 교집합이 비면 에러 없이 상한 전체로 되돌아간다.
 - `search`·`context` 의 `sub_layer` 는 optional `SubLayerSchema` 다. 두 툴이 같은 스키마 인스턴스를 공유하므로 허용값이 서로 갈라질 수 없다.
 - `read` 만 핸들러 결과의 `error` 필드를 `isError` 응답으로 승격한다. `search`·`context`·`navigate` 는 핸들러가 만든 `error` 페이로드를 정상 결과 본문으로 돌려준다.
@@ -50,10 +51,15 @@
 - 폐기된 값(v2 의 L5 `buffer`·`boundary`)은 스키마 단계에서 거절된다 — 조용히 빈 결과로 흘러가지 않는다.
 - 이 패키지 소스 어디에도 서브레이어 값 리터럴이 없다.
 
+### AC-cluster-mode-layer-ceiling — cluster 모드 레이어 상한
+
+- `search { cluster }` 열거 결과에 볼트 레이어 상한 밖(기본 L1) 문서가 나타나지 않는다.
+- `seed` 와 `cluster` 를 함께 주거나 둘 다 생략한 호출은 maencof 검증 오류가 그대로 전파된다.
+
 ## History
 
 - 2026-08-04 — `sub_layer` 허용값을 `SubLayerSchema` 위임으로 바꿨다. 이전에는 `context` 가 5종을 직접 열거하고 `search` 는 생 `z.string()` 이었다. v3 가 L5 서브레이어를 없앤 뒤 두 자리 모두 폐기값을 계속 받아들였고, 통과한 값은 노드 비교에서 아무것도 못 맞춰 에러 없이 빈 결과가 됐다.
 
 ## Last Updated
 
-2026-08-04 — `sub_layer` 값 소유권을 maencof 로 명시하고 acceptance group 을 붙였다.
+2026-08-20 — `search` 의 `seed`/`cluster` 상호배타와 cluster 모드 레이어 상한을 계약에 추가했다.

@@ -1,1 +1,1 @@
-export * from './maencofMove.js';
+export { handleMaencofMove } from './maencofMove.js';

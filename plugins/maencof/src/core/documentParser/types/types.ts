@@ -31,6 +31,15 @@ export interface ParsedDocument {
   mtime: number;
 }
 
+/** buildKnowledgeNode 옵션 */
+export interface BuildKnowledgeNodeOptions {
+  /**
+   * true 면 레이어 밖 경로(서고 등)도 노드 구성을 허용한다 — frontmatter 검증만
+   * 필요한 소비자(read/update/move/delete) 전용. 그래프 삽입 경로는 기본 게이트를 쓴다.
+   */
+  allowNonLayerPath?: boolean;
+}
+
 /** KnowledgeNode 구성 결과 */
 export interface NodeBuildResult {
   /** 성공 여부 */

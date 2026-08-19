@@ -47,6 +47,10 @@
 
 `sub_layer` 를 받는 네 도구(`create` · `kg_search` · `kg_context` · `kg_timeline`)는 `types/frontmatter.ts` 의 `SubLayerSchema` 를 `.optional().describe(...)` 로 파생해 쓴다. 등록부에 값을 열거하지 않는다 — 설명 문구는 도구마다 달라도 허용값은 레이어 모델 하나에서만 나와야 한다.
 
+### 클러스터 파라미터
+
+`kg_search` 는 `seed` 와 `cluster` 를 상호배타로 받는다(정확히 하나 — 검증은 핸들러 몫이고 스키마는 둘 다 optional 로 노출한다). `cluster` 는 접힌 클러스터의 전체 열거 모드로, 설명 문구가 SA 미적용·updated 최신순·200 상한·`clusterSize`/`truncated` 계약을 호출자에게 알린다. `cluster_key` 는 `create` 와 `update` 의 frontmatter 스키마 두 곳에 있으며 제거 경로는 `frontmatter.unset` 이다.
+
 ## Acceptance Criteria
 
 ### AC-handlers-not-inlined — 핸들러 비인라인
@@ -84,4 +88,4 @@
 
 ## Last Updated
 
-2026-08-04 — 도메인 모델 소유 값 집합을 등록부에서 복제하지 않는다는 요구사항을 추가하고, `sub_layer` 공유 스키마를 API Contracts 에 적었다.
+2026-08-20 — `kg_search` 의 `seed`/`cluster` 상호배타와 `cluster_key` 스키마(create·update)를 API Contracts 에 적었다.

@@ -8,7 +8,7 @@ Detailed diagnostic items, report format, auto-fix rules, and the lightweight `-
 | --- | ----------------------------------------------------------------------------------------------------------------------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
 | 1   | **Orphan Node**: nodes with 0 inbound and 0 outbound wikilinks (LINK subgraph), triaged by provenance bucket            | orphan-node         | warning  | partially (`/maencof:suggest` for authored docs; archived stubs and raw clippings are expected states) |
 | 2   | **Stale Index**                                                                                                         | stale-index         | warning  | yes (`/maencof:build --force --reset-cache`)                                                           |
-| 3   | **Broken Link**                                                                                                         | broken-link         | error    | no (manual review required)                                                                            |
+| 3   | **Broken Link** (links into `99_Archive/` whose file exists on disk are archive references — informational, never D3)   | broken-link         | error    | no (manual review required)                                                                            |
 | 4   | **Layer Violation**: mismatch between path directory and Frontmatter layer field                                        | layer-mismatch      | error    | partially                                                                                              |
 | 5   | **Duplicate Document**: document pairs sharing 3+ identical tags with high title similarity                             | duplicate           | warning  | partially                                                                                              |
 | 6   | **Frontmatter Validation**: items failing FrontmatterSchema (Zod) validation                                            | invalid-frontmatter | error    | yes                                                                                                    |
@@ -24,7 +24,7 @@ Delegated to the checkup agent:
 - `mcp__plugin_maencof_tools__kg_status` (`include_orphan_paths: true`) → detect D2 (stale) + D1 orphan buckets (`linkOrphanByLayer` / `linkOrphanArchivedCount` / `linkOrphanPaths`)
 - `Glob "**/*.md"` → collect full file list
 - `mcp__plugin_maencof_tools__read` per file → verify D6 (Frontmatter), D4 (Layer violation), D8 (missing L1 gist)
-- `mcp__plugin_maencof_tools__kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link)
+- `mcp__plugin_maencof_tools__kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link; a target under `99_Archive/` never appears as a graph node — check disk existence instead and classify as informational archive-reference)
 - `mcp__plugin_maencof_tools__kg_suggest_links` on sampled authored orphans → D1 actionability (candidates → `/maencof:suggest`; none → tag first)
 - Tag similarity analysis → detect D5 (duplicate)
 - Read `.maencof-meta/insight-config.json` + `auto-insight-stats.json` → detect D7 (auto-insight health)

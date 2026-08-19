@@ -35,6 +35,7 @@ export class QueryCache {
       threshold: options.threshold,
       maxHops: options.maxHops,
       layerFilter: options.layerFilter,
+      subLayerFilter: options.subLayerFilter,
       since: options.since,
       until: options.until,
       tuning: options.tuning,

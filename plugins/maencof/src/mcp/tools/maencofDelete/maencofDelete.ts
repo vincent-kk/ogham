@@ -51,7 +51,7 @@ export async function handleMaencofDelete(
 
   // Layer 확인 (Layer 1 삭제 금지)
   const doc = parseDocument(input.path, content, mtime);
-  const nodeResult = buildKnowledgeNode(doc);
+  const nodeResult = buildKnowledgeNode(doc, { allowNonLayerPath: true });
 
   if (nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE)
     return {

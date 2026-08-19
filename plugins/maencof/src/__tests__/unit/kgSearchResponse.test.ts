@@ -168,3 +168,81 @@ describe('handleKgSearch — response shape', () => {
     for (const r of result.results) expect(r.content).toBeUndefined();
   });
 });
+
+/** seed-doc 이 같은 clusterKey 스레드 3건 + 무관 문서 1건을 가리키는 그래프. */
+function makeClusterGraph(): KnowledgeGraph {
+  const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+  const seed = makeNode('02_Derived/seed-doc.md', Layer.L2_DERIVED, {
+    title: 'Cluster Seed',
+  });
+  nodes.set(seed.id, seed);
+  const members = ['2026-02-01', '2026-02-03', '2026-02-02'].map((updated, i) =>
+    makeNode(`04_Action/th-${i}.md`, Layer.L4_ACTION, {
+      title: `Thread ${i}`,
+      updated,
+      clusterKey: 'jira-th',
+    }),
+  );
+  const other = makeNode('02_Derived/other.md', Layer.L2_DERIVED, {
+    title: 'Other Doc',
+  });
+  for (const n of [...members, other]) nodes.set(n.id, n);
+  const edges: KnowledgeEdge[] = [...members, other].map((n) => ({
+    from: seed.id,
+    to: n.id,
+    type: 'LINK',
+    weight: 1.0,
+  }));
+  return buildGraph(nodes, edges);
+}
+
+describe('handleKgSearch — cluster collapse and open (R4)', () => {
+  it('seed 검색 응답의 접힌 항목이 clusterKey 와 collapsedCount 를 표기한다', async () => {
+    const result = await handleKgSearch(makeClusterGraph(), {
+      seed: ['02_Derived/seed-doc.md'],
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    const clusterItems = result.results.filter(
+      (r) => r.clusterKey === 'jira-th',
+    );
+    expect(clusterItems).toHaveLength(1);
+    expect(clusterItems[0]!.path).toBe('04_Action/th-1.md');
+    expect(clusterItems[0]!.collapsedCount).toBe(2);
+  });
+
+  it('cluster 열거 모드는 전역 멤버를 updated 내림차순으로 반환한다', async () => {
+    const result = await handleKgSearch(makeClusterGraph(), {
+      cluster: 'jira-th',
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    expect(result.results.map((r) => r.path)).toEqual([
+      '04_Action/th-1.md',
+      '04_Action/th-2.md',
+      '04_Action/th-0.md',
+    ]);
+    for (const r of result.results) {
+      expect(r.score).toBe(0);
+      expect(r.hops).toBe(0);
+      expect(r.clusterKey).toBe('jira-th');
+    }
+    expect(result.cluster).toBe('jira-th');
+    expect(result.clusterSize).toBe(3);
+    expect(result.exploredNodes).toBe(0);
+    expect(result.seedResolution.resolved).toEqual({});
+  });
+
+  it('seed 와 cluster 는 상호 배타이고 둘 다 없어도 오류다', async () => {
+    const both = await handleKgSearch(makeClusterGraph(), {
+      seed: ['x'],
+      cluster: 'jira-th',
+    });
+    expect('error' in both).toBe(true);
+
+    const neither = await handleKgSearch(makeClusterGraph(), {});
+    expect('error' in neither).toBe(true);
+  });
+});

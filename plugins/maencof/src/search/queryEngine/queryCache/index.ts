@@ -1,1 +1,1 @@
-export * from './queryCache.js';
+export { QueryCache } from './queryCache.js';

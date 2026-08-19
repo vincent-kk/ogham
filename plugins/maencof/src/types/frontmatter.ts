@@ -40,6 +40,8 @@ const FrontmatterBaseSchema = z.object({
   archived: z.boolean().optional(),
   /** 정본 원본의 archive 상대 경로 (archived=true일 때 유효) */
   archive_path: z.string().optional(),
+  /** 증분 문서의 스레드 선언 (예: jira-gcc-3903) — 같은 키의 문서들은 검색에서 대표 1건으로 접힌다. 시드·태그 채널과 분리된 별도 필드. */
+  cluster_key: z.string().min(1).optional(),
   /** 내재화 신뢰도 0.0~1.0 (Layer 3→2 전이 기준, 선택) */
   confidence: z.number().min(0).max(1).optional(),
   /** 세션별 참조 횟수 누적 (선택) */

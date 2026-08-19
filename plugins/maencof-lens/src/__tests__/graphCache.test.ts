@@ -103,7 +103,7 @@ describe("GraphCache stale-merge", () => {
   // --- Basic (happy path) ---
 
   it("returns the loaded graph unchanged when no stale entries exist", async () => {
-    writeShardedGraph([makeNode("doc/a.md", "A")]);
+    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
     const g = await cache.getGraph(vaultDir);
     expect(g).not.toBeNull();
     expect(g?.nodes.size).toBe(1);
@@ -111,24 +111,24 @@ describe("GraphCache stale-merge", () => {
 
   it("applies a mutate entry by adding the fresh node parsed from disk", async () => {
     writeShardedGraph([]);
-    writeVaultMarkdown("doc/new.md", {
+    writeVaultMarkdown("02_Derived/new.md", {
       layer: 2,
       created: "2026-01-01",
       updated: "2026-01-01",
       tags: ["note"],
       title: "New",
     });
-    writeStaleEntries([{ path: "doc/new.md", op: "mutate" }]);
+    writeStaleEntries([{ path: "02_Derived/new.md", op: "mutate" }]);
 
     const g = await cache.getGraph(vaultDir);
     expect(g).not.toBeNull();
     const paths = Array.from(g?.nodes.values() ?? []).map((n) => n.path);
-    expect(paths).toContain("doc/new.md");
+    expect(paths).toContain("02_Derived/new.md");
   });
 
   it("applies a delete entry by removing the node from the graph", async () => {
-    writeShardedGraph([makeNode("doc/old.md", "Old")]);
-    writeStaleEntries([{ path: "doc/old.md", op: "delete" }]);
+    writeShardedGraph([makeNode("02_Derived/old.md", "Old")]);
+    writeStaleEntries([{ path: "02_Derived/old.md", op: "delete" }]);
 
     const g = await cache.getGraph(vaultDir);
     expect(g).not.toBeNull();
@@ -141,12 +141,12 @@ describe("GraphCache stale-merge", () => {
     // Pre-load 16 nodes; queue 16 delete ops where the OLDEST entry should be
     // dropped by the cap. After merge, exactly 1 node (the oldest target) survives.
     const nodes = Array.from({ length: 16 }, (_, i) =>
-      makeNode(`doc/n${i}.md`, `N${i}`),
+      makeNode(`02_Derived/n${i}.md`, `N${i}`),
     );
     writeShardedGraph(nodes);
 
     const entries = Array.from({ length: 16 }, (_, i) => ({
-      path: `doc/n${i}.md`,
+      path: `02_Derived/n${i}.md`,
       op: "delete" as const,
     }));
     writeStaleEntries(entries);
@@ -155,12 +155,12 @@ describe("GraphCache stale-merge", () => {
     expect(g).not.toBeNull();
     expect(g?.nodes.size).toBe(1);
     const paths = Array.from(g?.nodes.values() ?? []).map((n) => n.path);
-    expect(paths).toEqual(["doc/n0.md"]);
+    expect(paths).toEqual(["02_Derived/n0.md"]);
   });
 
   it("is idempotent: repeat calls return the same merged reference", async () => {
-    writeShardedGraph([makeNode("doc/k.md", "K")]);
-    writeStaleEntries([{ path: "doc/k.md", op: "delete" }]);
+    writeShardedGraph([makeNode("02_Derived/k.md", "K")]);
+    writeStaleEntries([{ path: "02_Derived/k.md", op: "delete" }]);
 
     const g1 = await cache.getGraph(vaultDir);
     const g2 = await cache.getGraph(vaultDir);
@@ -169,7 +169,7 @@ describe("GraphCache stale-merge", () => {
   });
 
   it("swallows merge failures and still returns the loaded graph", async () => {
-    writeShardedGraph([makeNode("doc/a.md", "A")]);
+    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
     // Malformed stale-nodes.json — loadStaleEntries falls back to empty entries,
     // but even an outright merge throw must not break read availability.
     writeFileSync(
@@ -184,7 +184,7 @@ describe("GraphCache stale-merge", () => {
   });
 
   it("returns null when no graph cache exists, regardless of stale state", async () => {
-    writeStaleEntries([{ path: "doc/x.md", op: "mutate" }]);
+    writeStaleEntries([{ path: "02_Derived/x.md", op: "mutate" }]);
     const g = await cache.getGraph(vaultDir);
     expect(g).toBeNull();
   });
@@ -196,8 +196,8 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
   });
 
   it("complex-2: same stale-nodes.json mtime → loadStaleEntries called only once across two getGraph calls", async () => {
-    writeShardedGraph([makeNode("doc/a.md", "A")]);
-    writeStaleEntries([{ path: "doc/a.md", op: "delete" }]);
+    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
+    writeStaleEntries([{ path: "02_Derived/a.md", op: "delete" }]);
 
     const loadSpy = vi.spyOn(MetadataStore.prototype, "loadStaleEntries");
 
@@ -214,8 +214,11 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
   });
 
   it("complex-3: changed stale-nodes.json mtime → second getGraph re-loads stale entries", async () => {
-    writeShardedGraph([makeNode("doc/a.md", "A"), makeNode("doc/b.md", "B")]);
-    writeStaleEntries([{ path: "doc/a.md", op: "delete" }]);
+    writeShardedGraph([
+      makeNode("02_Derived/a.md", "A"),
+      makeNode("02_Derived/b.md", "B"),
+    ]);
+    writeStaleEntries([{ path: "02_Derived/a.md", op: "delete" }]);
 
     const loadSpy = vi.spyOn(MetadataStore.prototype, "loadStaleEntries");
 
@@ -223,7 +226,7 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
     const callsAfterFirst = loadSpy.mock.calls.length;
 
     // mtime 갱신 — 새 entry 로 stale 파일 재작성 + 명시적 utimes
-    writeStaleEntries([{ path: "doc/b.md", op: "delete" }]);
+    writeStaleEntries([{ path: "02_Derived/b.md", op: "delete" }]);
     const future = new Date(Date.now() + 5_000);
     await utimes(
       join(vaultDir, ".maencof", "stale-nodes.json"),
@@ -239,8 +242,8 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
   });
 
   it("complex-4: 5 concurrent getGraph(vault) calls → loadStaleEntries runs once (in-flight dedup)", async () => {
-    writeShardedGraph([makeNode("doc/a.md", "A")]);
-    writeStaleEntries([{ path: "doc/a.md", op: "delete" }]);
+    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
+    writeStaleEntries([{ path: "02_Derived/a.md", op: "delete" }]);
 
     const loadSpy = vi.spyOn(MetadataStore.prototype, "loadStaleEntries");
     const fresh = new GraphCache();
@@ -260,7 +263,7 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
     // → (a) mtime 비역행, (b) load 가 직전 append 를 항상 포함, (c) graph-cache 가
     //   가드 skip 없이 그 변화를 머지에 반영.
     const seedNodes = Array.from({ length: 5 }, (_, i) =>
-      makeNode(`doc/n${i}.md`, `N${i}`),
+      makeNode(`02_Derived/n${i}.md`, `N${i}`),
     );
     writeShardedGraph(seedNodes);
 
@@ -273,7 +276,7 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
 
     let lastMtime = -Infinity;
     for (let i = 0; i < 5; i++) {
-      const path = `doc/n${i}.md`;
+      const path = `02_Derived/n${i}.md`;
       await store.appendStaleEntries([{ path, op: "delete" }]);
 
       // (a) atomic-rename → mtime advance 비역행

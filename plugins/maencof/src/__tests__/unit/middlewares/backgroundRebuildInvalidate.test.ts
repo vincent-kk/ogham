@@ -22,6 +22,7 @@ import {
 let vaultDir: string;
 
 function writeFrontmatterDoc(relPath: string, layer: number): void {
+  mkdirSync(join(vaultDir, relPath, '..'), { recursive: true });
   writeFileSync(
     join(vaultDir, relPath),
     `---\nlayer: ${layer}\ntags: [t]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# ${relPath}\nbody\n`,
@@ -47,7 +48,7 @@ afterEach(async () => {
 
 describe('triggerBackgroundRebuild', () => {
   it('rebuild 성공 후 캐시가 invalidate되어 다음 read는 disk에서 reload', async () => {
-    writeFrontmatterDoc('a.md', 2);
+    writeFrontmatterDoc('02_Derived/a.md', 2);
 
     // 사전: 임의의 캐시 채움 (가짜 graph reference)
     // loadGraphIfNeeded → 디스크에 인덱스 없음 → null
@@ -66,7 +67,7 @@ describe('triggerBackgroundRebuild', () => {
   });
 
   it('이미 rebuild 진행 중이면 중복 트리거는 no-op (mutex)', async () => {
-    writeFrontmatterDoc('a.md', 2);
+    writeFrontmatterDoc('02_Derived/a.md', 2);
     triggerBackgroundRebuild(vaultDir);
     const first = _peekRebuildInProgress();
     expect(first).not.toBeNull();
@@ -82,9 +83,9 @@ describe('triggerBackgroundRebuild', () => {
 
 describe('triggerBootRebuildIfStale', () => {
   it('stale 엔트리가 있으면 부팅 시 background rebuild를 트리거한다', async () => {
-    writeFrontmatterDoc('a.md', 2);
+    writeFrontmatterDoc('02_Derived/a.md', 2);
     const store = new MetadataStore(vaultDir);
-    await store.appendStaleEntries([{ path: 'a.md', op: 'mutate' }]);
+    await store.appendStaleEntries([{ path: '02_Derived/a.md', op: 'mutate' }]);
 
     await triggerBootRebuildIfStale(vaultDir);
     const inflight = _peekRebuildInProgress();
@@ -93,7 +94,7 @@ describe('triggerBootRebuildIfStale', () => {
   });
 
   it('stale 엔트리가 없으면 no-op (rebuild 미트리거)', async () => {
-    writeFrontmatterDoc('a.md', 2);
+    writeFrontmatterDoc('02_Derived/a.md', 2);
 
     await triggerBootRebuildIfStale(vaultDir);
     expect(_peekRebuildInProgress()).toBeNull();

@@ -52,6 +52,10 @@ export async function handleKgContext(
         path: String(r.nodeId),
         title: node?.title ?? String(r.nodeId),
         score: r.score,
+        ...(r.clusterKey !== undefined && { clusterKey: r.clusterKey }),
+        ...(r.collapsedCount !== undefined && {
+          collapsedCount: r.collapsedCount,
+        }),
       };
     });
     return { documents, documentCount: documents.length, seedResolution };

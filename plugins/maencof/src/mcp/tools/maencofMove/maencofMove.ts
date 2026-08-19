@@ -142,7 +142,7 @@ export async function handleMaencofMove(
 
   // 현재 Layer 파악
   const doc = parseDocument(input.path, content, mtime);
-  const nodeResult = buildKnowledgeNode(doc);
+  const nodeResult = buildKnowledgeNode(doc, { allowNonLayerPath: true });
 
   if (nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE)
     return {

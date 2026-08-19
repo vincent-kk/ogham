@@ -44,6 +44,8 @@ export interface KnowledgeNode {
   domain?: string;
   /** 아카이브 스텁 여부 (frontmatter archived; 정본은 archive_path 에 있음) */
   archived?: boolean;
+  /** 클러스터 키 (frontmatter cluster_key) — kg_search/kg_context 가 같은 키를 대표 1건으로 접는다 */
+  clusterKey?: string;
   /** 문서에서 언급된 인물 목록 (모든 레이어, person_ref와 별개) */
   mentioned_persons?: string[];
   /** 아웃바운드 링크 목록 (vault-root-relative 경로, 빌드 시 document-parser에서 수집) */
@@ -104,8 +106,12 @@ export interface ActivationResult {
   score: number;
   /** 시드로부터의 홉 거리 */
   hops: number;
-  /** 경로 (시드 → 현재 노드) */
+  /** 경로 (시드 → 현재 노드). collapse 로 전역 승계된 대표는 빈 배열 — SA 경로가 성립하지 않는다 */
   path: NodeId[];
+  /** 클러스터 키 — collapse 후에만 존재. kg_search { cluster } 열기 질의의 키 */
+  clusterKey?: string;
+  /** 이 결과에서 대표 뒤로 접힌 활성 멤버 수 — collapse 후, 1건 이상 접혔을 때만 존재 */
+  collapsedCount?: number;
 }
 
 /** 직렬화 가능한 그래프 (legacy 단일 index.json 저장용 — 자동 마이그레이션 경로에서만 사용) */

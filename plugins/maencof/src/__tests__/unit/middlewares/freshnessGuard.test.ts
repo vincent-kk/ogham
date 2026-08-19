@@ -22,8 +22,8 @@ let vaultDir: string;
 
 function writeMinimalGraph(): void {
   const node = {
-    id: 'doc/a.md',
-    path: 'doc/a.md',
+    id: '02_Derived/a.md',
+    path: '02_Derived/a.md',
     title: 'A',
     layer: 2,
     tags: ['t'],
@@ -162,13 +162,13 @@ describe('ensureFreshGraphNonBlocking', () => {
     expect(g1.nodes.size).toBe(1);
 
     // delete stale entry 적용
-    writeStaleEntries([{ path: 'doc/a.md', op: 'delete' }]);
+    writeStaleEntries([{ path: '02_Derived/a.md', op: 'delete' }]);
 
     // ensureFreshGraphNonBlocking → 내부 mergeStaleNodesIntoGraph → invalidateQueryCache 자동
     const g2 = await ensureFreshGraphNonBlocking(vaultDir);
     expect(g2).not.toBeNull();
     if (!g2) throw new Error('graph null after merge');
-    expect(g2.nodes.has('doc/a.md' as NodeId)).toBe(false);
+    expect(g2.nodes.has('02_Derived/a.md' as NodeId)).toBe(false);
     expect(g2.nodes.size).toBe(0);
 
     // 같은 seeds 로 query → cache 가 invalidate 되었으므로 post-merge graph 로 재실행

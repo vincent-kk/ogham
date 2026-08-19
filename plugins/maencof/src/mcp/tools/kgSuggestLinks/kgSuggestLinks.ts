@@ -9,6 +9,7 @@
  */
 import { EDGE_TYPE } from '../../../constants/architecture.js';
 import { SUB_LAYER_NAMES } from '../../../constants/kgSuggestLinks.js';
+import { ARCHIVED_SEED_MULTIPLIER } from '../../../constants/queryEngine.js';
 import { SA_BONUS_WEIGHT } from '../../../constants/weights.js';
 import { runAccumulativeActivation } from '../../../core/spreadingActivation/index.js';
 import {
@@ -117,7 +118,9 @@ export function handleKgSuggestLinks(
 
   for (const { node, tagScore } of candidates) {
     const saScore = saScores.get(node.id) ?? 0;
-    const score = tagScore + saScore * SA_BONUS_WEIGHT;
+    const score =
+      (tagScore + saScore * SA_BONUS_WEIGHT) *
+      (node.archived ? ARCHIVED_SEED_MULTIPLIER : 1);
 
     if (score < minScore) continue;
 

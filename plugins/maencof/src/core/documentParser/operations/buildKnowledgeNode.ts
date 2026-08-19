@@ -7,15 +7,30 @@ import type { Layer } from '../../../types/common.js';
 import { toNodeId } from '../../../types/common.js';
 import type { Frontmatter } from '../../../types/frontmatter.js';
 import type { KnowledgeNode } from '../../../types/graph.js';
-import type { NodeBuildResult, ParsedDocument } from '../types/types.js';
+import { isLayerDirPath } from '../../../types/layer.js';
+import type {
+  BuildKnowledgeNodeOptions,
+  NodeBuildResult,
+  ParsedDocument,
+} from '../types/types.js';
 
 import { inferSubLayerFromPath } from './inferSubLayerFromPath.js';
 
 /**
  * @param doc - 파싱된 문서
+ * @param options - 경로 게이트 옵트아웃 등 구성 옵션
  * @returns KnowledgeNode 구성 결과
  */
-export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
+export function buildKnowledgeNode(
+  doc: ParsedDocument,
+  options?: BuildKnowledgeNodeOptions,
+): NodeBuildResult {
+  if (options?.allowNonLayerPath !== true && !isLayerDirPath(doc.relativePath))
+    return {
+      success: false,
+      error: `Path outside layer directories (not a graph node): ${doc.relativePath}`,
+    };
+
   if (!doc.frontmatter.success || !doc.frontmatter.data)
     return {
       success: false,
@@ -44,6 +59,7 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
   if (fm.domain) node.domain = fm.domain;
   if (fm.gist) node.gist = fm.gist;
   if (fm.archived) node.archived = fm.archived;
+  if (fm.cluster_key) node.clusterKey = fm.cluster_key;
 
   // Step 2.0b: sub-layer 확장 필드 전파
   node.subLayer = fm.sub_layer ?? inferSubLayerFromPath(doc.relativePath);

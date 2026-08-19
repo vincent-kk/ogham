@@ -28,6 +28,8 @@ export interface MaencofCreateInput {
   source?: string;
   /** 만료일 YYYY-MM-DD (Layer 4용) */
   expires?: string;
+  /** 증분 문서의 스레드 선언 — 같은 키의 문서들은 검색에서 대표 1건으로 접힌다 */
+  cluster_key?: string;
   /** 서브레이어 (L3 전용: relational/structural/topical) */
   sub_layer?: SubLayer;
   /** 문서 콘텐츠에서 언급된 인물 목록 (선택, 모든 레이어) */
@@ -62,6 +64,8 @@ export interface MaencofUpdateFrontmatter {
   confidence?: number;
   schedule?: string;
   sub_layer?: SubLayer;
+  /** 증분 문서의 스레드 선언 — 같은 키의 문서들은 검색에서 대표 1건으로 접힌다. 제거는 unset */
+  cluster_key?: string;
   /** 한 줄 요약 — L1 turn-context gist (선택) */
   gist?: string;
   /** 교차 연결 허브 여부 — 기존 문서를 허브로 승격하는 경로 */

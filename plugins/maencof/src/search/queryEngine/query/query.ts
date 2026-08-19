@@ -5,14 +5,21 @@
  * 온라인 검색 계층: 사전 계산된 가중치 + SA로 실시간 검색 수행.
  * 시간 제약: MCP 도구 호출 컨텍스트에서 100ms 이하 목표.
  */
+import { isDateInWindow } from '../../../core/dateFormat/index.js';
 import { runAccumulativeActivation } from '../../../core/spreadingActivation/index.js';
 import type { NodeId } from '../../../types/common.js';
-import type { ActivationResult, KnowledgeGraph } from '../../../types/graph.js';
+import type {
+  ActivationResult,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../../types/graph.js';
 import { resolveSeedNodes } from '../seeds/resolveSeedNodes.js';
 import type { QueryOptions, QueryResult } from '../types/types.js';
 
 import { applyLayerFilter } from './applyLayerFilter.js';
+import { applySubLayerFilter } from './applySubLayerFilter.js';
 import { applyTimeWindow } from './applyTimeWindow.js';
+import { collapseClusters } from './collapseClusters.js';
 import { collectQueryTokens } from './collectQueryTokens.js';
 import { iterationsFromMaxHops } from './iterationsFromMaxHops.js';
 import { sharedQueryCache } from './sharedQueryCache.js';
@@ -64,6 +71,10 @@ export function query(
   if (layerFilter.length > 0)
     results = applyLayerFilter(results, graph, layerFilter);
 
+  // 서브레이어 pre-filter (layerFilter 와 같은 위치 — collapse·절단 전)
+  if (options.subLayerFilter)
+    results = applySubLayerFilter(results, graph, options.subLayerFilter);
+
   // updated 시간창 필터 (slice 이전 — truncation 전에 적용)
   results = applyTimeWindow(results, graph, options.since, options.until);
 
@@ -73,9 +84,18 @@ export function query(
       .filter((s) => s.matchType === 'path-exact')
       .map((s) => s.nodeId),
   );
-  const filtered = results
-    .filter((r) => !pathExactSeedSet.has(r.nodeId))
-    .slice(0, maxResults);
+
+  // 클러스터 collapse (절단 전) — 전역 대표 후보도 활성 필터를 만족해야 한다
+  const isEligible = (node: KnowledgeNode): boolean =>
+    (layerFilter.length === 0 ||
+      (layerFilter as number[]).includes(node.layer as number)) &&
+    (!options.subLayerFilter || node.subLayer === options.subLayerFilter) &&
+    isDateInWindow(node.updated, options.since, options.until);
+  const filtered = collapseClusters(
+    results.filter((r) => !pathExactSeedSet.has(r.nodeId)),
+    graph,
+    isEligible,
+  ).slice(0, maxResults);
 
   const result: QueryResult = {
     results: filtered,

@@ -4,18 +4,7 @@
 
 ## Structure
 
-| Path                         | Role                                                   |
-| ---------------------------- | ------------------------------------------------------ |
-| `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md)         |
-| `agents/`                    | 에이전트 정의 (memory-organizer, identity-guardian 등) |
-| `hooks/`                     | Claude Code 훅 이벤트 매핑                             |
-| `skills/`                    | 사용자 스킬 디렉토리                                   |
-| `libs/`                      | cross-platform Node 러너                               |
-| `scripts/`                   | esbuild 빌드 스크립트                                  |
-| `bridge/`                    | esbuild 산출물 (커밋)                                  |
-| `templates/`                 | 5-Layer 모델 v3 vault 템플릿                           |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                        |
-| `.mcp.json`                  | MCP 서버 등록                                          |
+- `hooks/` 에는 훅 이벤트 매핑 매니페스트만 있다 — 훅 구현체는 `src/hooks/` 가 소유한다. 이름이 겹쳐 구현을 찾는 독자가 먼저 잘못된 쪽을 연다.
 
 ## Conventions
 
@@ -39,8 +28,8 @@
 
 ### Never do
 
-- `.maencof/` 디렉토리 직접 수정 (런타임 캐시)
-- `bridge/` 손편집 / `src/version.ts` 손편집
+- .maencof 직접 수정 — 레포 경로가 아니라 vault 루트 아래에 생기는 런타임 인덱스 캐시 디렉터리다
+- `bridge/` 손편집 / `src/version.ts` 손편집 (둘 다 빌드가 다시 쓰는 산출물)
 
 ## Dependencies
 

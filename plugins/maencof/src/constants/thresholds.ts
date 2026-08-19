@@ -20,6 +20,9 @@ export const MAX_KG_BUILD_PARSE_FAILURES = 50;
 /** delete 거부 응답의 backlink 경고 나열 상한 — 초과분은 요약 한 줄로 대체한다 */
 export const MAX_DELETE_BACKLINK_WARNINGS = 20;
 
+/** kg_search cluster 열거 모드의 멤버 반환 상한 — 전수 반환이 계약이지만 폭주 클러스터로부터 응답을 보호한다. 절단 시 truncated 로 신호하고 clusterSize 로 전역 총원을 보고한다 */
+export const MAX_CLUSTER_ENUMERATION = 200;
+
 export const STALE_THRESHOLD_PERCENT = 10;
 
 /**

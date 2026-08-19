@@ -21,6 +21,7 @@ import { handleKgStatus } from '../../../mcp/tools/kgStatus/index.js';
 let vaultDir: string;
 
 function writeDoc(relPath: string, layer: number): void {
+  mkdirSync(join(vaultDir, relPath, '..'), { recursive: true });
   writeFileSync(
     join(vaultDir, relPath),
     `---\nlayer: ${layer}\ntags: [t]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# ${relPath}\nbody\n`,
@@ -45,7 +46,7 @@ afterEach(() => {
 describe('rebuildAndInvalidate', () => {
   it('build 성공 후 캐시를 invalidate해 후속 read가 갓 빌드된 수치를 반영한다', async () => {
     // state A: 1 doc → disk index
-    writeDoc('a.md', 2);
+    writeDoc('02_Derived/a.md', 2);
     await handleKgBuild(vaultDir, { force: true });
 
     // 캐시를 state A로 채운다 (kg_status 의 loadGraphIfNeeded 경로)
@@ -53,7 +54,7 @@ describe('rebuildAndInvalidate', () => {
     expect(cachedA?.nodeCount).toBe(1);
 
     // 디스크에 2번째 문서 추가 → state B
-    writeDoc('b.md', 2);
+    writeDoc('02_Derived/b.md', 2);
 
     // explicit kg_build 등록부가 수행하는 계약
     const result = await rebuildAndInvalidate(vaultDir, { force: true });
@@ -72,14 +73,14 @@ describe('rebuildAndInvalidate', () => {
     const configDir = join(vaultDir, 'claude-config-isolated');
     process.env.CLAUDE_CONFIG_DIR = configDir;
     try {
-      writeDoc('a.md', 2);
+      writeDoc('02_Derived/a.md', 2);
       await rebuildAndInvalidate(vaultDir, { force: true });
 
       const { readTurnContext } =
         await import('../../../core/cacheManager/index.js');
       expect(readTurnContext(vaultDir)).toContain('nodes="1"');
 
-      writeDoc('b.md', 2);
+      writeDoc('02_Derived/b.md', 2);
       await rebuildAndInvalidate(vaultDir, { force: true });
 
       expect(readTurnContext(vaultDir)).toContain('nodes="2"');

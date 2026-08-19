@@ -1,1 +1,1 @@
-export * from './maencofDelete.js';
+export { handleMaencofDelete } from './maencofDelete.js';

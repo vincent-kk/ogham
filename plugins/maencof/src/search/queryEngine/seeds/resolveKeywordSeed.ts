@@ -4,6 +4,7 @@
  * 적용해 bestScores 에 병합한다. 반환값은 budget 캡 이전의 분류 후보 수다 (0 = 미해석).
  */
 import {
+  ARCHIVED_SEED_MULTIPLIER,
   COMPOUND_FALLBACK_MIN_TOKEN_LENGTH,
   COMPOUND_OR_MATCH_SCORE,
   KEYWORD_SEED_CAP,
@@ -83,7 +84,10 @@ export function resolveKeywordSeed(
         : classifyMatch(node, tokens[0]!);
     scored.push({
       id,
-      score: Math.min(1, score * idfScale),
+      score: Math.min(
+        1,
+        score * idfScale * (node.archived ? ARCHIVED_SEED_MULTIPLIER : 1),
+      ),
       type,
       pagerank: node.pagerank ?? 0,
     });

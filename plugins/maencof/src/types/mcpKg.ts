@@ -9,8 +9,10 @@ import type { KnowledgeNode } from './graph.js';
 
 /** kg_search 입력 */
 export interface KgSearchInput {
-  /** 시드 노드 (경로 또는 키워드) */
-  seed: string[];
+  /** 시드 노드 (경로 또는 키워드). `cluster` 와 상호 배타 — 둘 중 정확히 하나 필수 */
+  seed?: string[];
+  /** 접힌 클러스터 열기 — SA 없이 해당 cluster_key 전역 멤버를 updated 내림차순으로 반환. `seed` 와 상호 배타 */
+  cluster?: string;
   /** 최대 반환 수 (기본 10) */
   max_results?: number;
   /** 감쇠 인자 (기본 0.7) */
@@ -93,6 +95,10 @@ export interface KgSearchResultItem {
   trace?: string[];
   /** 본문 전문 (include_content: true 이고 파일을 읽을 수 있을 때만) */
   content?: string;
+  /** 클러스터 키 — 이 항목이 클러스터 소속일 때. kg_search { cluster } 로 전 멤버를 연다 */
+  clusterKey?: string;
+  /** 이 응답에서 대표 뒤로 접힌 문서 수 (1건 이상 접혔을 때만) — 전역 총원은 cluster 열기의 clusterSize */
+  collapsedCount?: number;
 }
 
 /** seed(어휘 입력) 해석 메타데이터 — kg_search/kg_context 는 항상, kg_suggest_links 는 tags 제공 시 싣는다 */
@@ -111,8 +117,14 @@ export interface KgSearchResult {
   durationMs: number;
   /** 탐색된 총 노드 수 */
   exploredNodes: number;
-  /** seed 해석 메타데이터 — 항상 실린다. results 는 resolved seed 만 반영한다. */
+  /** seed 해석 메타데이터 — 항상 실린다. results 는 resolved seed 만 반영한다. cluster 모드는 `{ resolved: {} }` */
   seedResolution: SeedResolution;
+  /** 열린 클러스터 키 — cluster 모드에서만 */
+  cluster?: string;
+  /** 클러스터 전역 총원 — cluster 모드에서만 */
+  clusterSize?: number;
+  /** MAX_CLUSTER_ENUMERATION 절단이 일어났을 때만 true — cluster 모드 전용 */
+  truncated?: boolean;
 }
 
 /** kg_navigate 응답 */
@@ -152,6 +164,10 @@ export interface KgContextDocumentRef {
   title: string;
   /** 활성화 점수 */
   score: number;
+  /** 클러스터 키 — 이 항목이 클러스터 소속일 때. kg_search { cluster } 로 전 멤버를 연다 */
+  clusterKey?: string;
+  /** 이 응답에서 대표 뒤로 접힌 문서 수 (1건 이상 접혔을 때만) */
+  collapsedCount?: number;
 }
 
 /** kg_context 응답 */

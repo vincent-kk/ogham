@@ -5,6 +5,8 @@
  * 등급: 2=핵심, 1=관련, 0(생략)=무관. 판정 근거는 픽스처의 링크/주제 구조
  * (.metadata/maencof/TOOL/Query-Gated-Accumulative-Spreading-Activation/03장 쿼리 유형 계층).
  * 케이스 추가 시 baseline.json을 같은 커밋에서 재기록한다 (ratchet 규칙 3).
+ * id prefix 규약: `archived-working-*` 는 활성 문서가 정답(스텁은 노이즈),
+ * `archived-archival-*` 는 스텁이 정답 — archivedSweep 러너가 이 prefix 로 클래스를 나눈다.
  */
 
 /** 골든 쿼리 항목 */
@@ -326,6 +328,60 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L4/routines/weekly-report-routine.md': 2,
       'L4/routines/weekly-report-checklist.md': 2,
       'L4/routines/report-archive.md': 1,
+    },
+  },
+  // 클러스터 커버리지 골든 (R4·R7) — 같은 cluster_key 스레드 8건 + 증류본이
+  // 대표 1건으로 접혀야 결정·인접 문서가 top-k 에 남는다. 접힌 멤버(update-01..08)는
+  // 등급 0 이므로 collapse 실패 시 도배로 nDCG 가 무너진다 — 골든 자체가 collapse 를
+  // 측정한다. 'gcc-3903' 시드는 스레드 전원 + 증류본 + 결정을 태그로 활성화한다.
+  {
+    id: 'cluster-collapse-coverage',
+    seeds: ['gcc-3903'],
+    relevance: {
+      'L2/decisions/gcc-3903-retry-decision.md': 2,
+      'L4/works/gcc-3903-digest.md': 2,
+      'L2/decisions/billing-retry-policy.md': 1,
+    },
+  },
+  // 전역 대표 승계 골든 (R4) — 'jira' 시드는 update-01..08 만 활성화하고 증류본
+  // (태그 gcc-3903 뿐)은 활성화하지 않는다. 요청서 계약(대표 = 클러스터 내 updated
+  // 최신)이 지켜지면 비활성 증류본이 대표로 승계된다. 승계 실패 시 update-08
+  // (등급 0)이 1위가 되어 nDCG 0.
+  {
+    id: 'cluster-digest-succession',
+    seeds: ['jira'],
+    relevance: {
+      'L4/works/gcc-3903-digest.md': 2,
+    },
+  },
+  // archived 침강 골든 — working: 스텁 6건(등급 0)이 같은 태그로 경쟁하므로 침강
+  // 실패(계수 상승) 시 스텁 도배로 nDCG 가 무너진다. archival: 스텁만 가진 태그의
+  // 회수 — 계수 0이면 시드 소멸로 recall 0 이 드러난다(축 하한 관측점).
+  {
+    id: 'archived-working-cve-watch',
+    seeds: ['cve-watch'],
+    relevance: {
+      'L2/insights/cve-triage-playbook.md': 2,
+      'L4/advisories/cve-watch-active-01.md': 2,
+      'L4/advisories/cve-watch-active-02.md': 1,
+      'L4/advisories/cve-watch-active-03.md': 1,
+    },
+  },
+  {
+    id: 'archived-working-advisory',
+    seeds: ['advisory'],
+    relevance: {
+      'L4/advisories/cve-watch-active-01.md': 2,
+      'L4/advisories/cve-watch-active-02.md': 2,
+      'L4/advisories/cve-watch-active-03.md': 2,
+    },
+  },
+  {
+    id: 'archived-archival-retro',
+    seeds: ['retro-incident'],
+    relevance: {
+      'L4/advisories/retro-incident-01.md': 2,
+      'L4/advisories/retro-incident-02.md': 2,
     },
   },
 ];

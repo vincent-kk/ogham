@@ -6,11 +6,7 @@ maencof 플러그인 소스 루트. 5-Layer Knowledge Model v3 기반 개인 지
 
 ## Structure
 
-- `core/` — 순수 비즈니스 로직 모듈 (I/O 예외: vaultScanner, insightStats, transitionHistory, errorLog, autonomy, cacheManager, turnContext)
-- `hooks/` — Claude Code 훅 진입점 (esbuild 번들 대상)
-- `mcp/` — MCP 도구 핸들러
-- `types/` — 중앙 타입 정의
-- `constants/` — 공유 상수
+- `core/` 는 순수 비즈니스 로직 소유가 원칙이지만 vault I/O 경계도 여기서 끝난다 — I/O 를 한 층에 몰아두기 위한 결정이며, 예외 모듈 목록은 아래 `Always do` 가 정본이다.
 
 ## Boundaries
 

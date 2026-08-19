@@ -6,12 +6,7 @@
 
 ## Structure
 
-- `operations/crud.ts` · `operations/kg.ts` — 문서 CRUD · 지식 그래프 도구 등록
-- `operations/claudeMd.ts` — 호스트 지침(project instruction) 도구 등록
-- `operations/companion.ts` · `operations/personalContext.ts` — 동반자 identity · personal context 도구 등록
-- `operations/activity.ts` · `operations/workHistory.ts` — 활동·작업 이력 읽기 도구 등록
-- `operations/cache.ts` — 컨텍스트 캐시 도구 등록
-- `index.ts` — barrel
+- 등록 함수는 `operations/` 아래에서 도구 도메인 단위로 갈린다 — 파일 하나가 `createServer()` 가 한 번에 호출하는 등록 단위이고, 도메인이 아니라 파일 크기로 쪼개면 그 호출 목록이 경계 의미를 잃는다. 그룹 경계 변경이 아래 `Ask first` 인 이유다.
 
 ## Boundaries
 

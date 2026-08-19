@@ -58,7 +58,7 @@ afterEach(() => {
 
 describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
   it('mutate entry 는 stale path 의 node 를 새 데이터로 교체한다', async () => {
-    const aOld = makeNode('a.md', 'OLD');
+    const aOld = makeNode('02_Derived/a.md', 'OLD');
     const graph: KnowledgeGraph = {
       nodes: new Map([[aOld.id, aOld]]),
       edges: [],
@@ -68,20 +68,20 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     };
 
     writeMarkdown(
-      'a.md',
+      '02_Derived/a.md',
       `---\nlayer: 2\ntags: [t]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# NEW\nbody\n`,
     );
     const store = new MetadataStore(vaultDir);
-    await store.appendStaleEntries([{ path: 'a.md', op: 'mutate' }]);
+    await store.appendStaleEntries([{ path: '02_Derived/a.md', op: 'mutate' }]);
 
     await mergeStaleNodesIntoGraph(vaultDir, graph);
-    const after = graph.nodes.get('a.md' as NodeId);
+    const after = graph.nodes.get('02_Derived/a.md' as NodeId);
     expect(after?.title).toBe('NEW');
   });
 
   it('outbound edges 가 stale source 기준으로 재계산된다', async () => {
-    const a = makeNode('a.md');
-    const b = makeNode('b.md');
+    const a = makeNode('02_Derived/a.md');
+    const b = makeNode('02_Derived/b.md');
     const graph: KnowledgeGraph = {
       nodes: new Map([
         [a.id, a],
@@ -89,8 +89,8 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
       ]),
       edges: [
         {
-          from: 'a.md' as NodeId,
-          to: 'b.md' as NodeId,
+          from: '02_Derived/a.md' as NodeId,
+          to: '02_Derived/b.md' as NodeId,
           type: 'LINK',
           weight: 0.5,
         },
@@ -102,18 +102,20 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
 
     // a.md 신규 본문이 b.md 를 더 이상 가리키지 않음 → edge 제거되어야 함
     writeMarkdown(
-      'a.md',
+      '02_Derived/a.md',
       `---\nlayer: 2\ntags: [t]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# A\nno links here\n`,
     );
     const store = new MetadataStore(vaultDir);
-    await store.appendStaleEntries([{ path: 'a.md', op: 'mutate' }]);
+    await store.appendStaleEntries([{ path: '02_Derived/a.md', op: 'mutate' }]);
 
     await mergeStaleNodesIntoGraph(vaultDir, graph);
-    expect(graph.edges.find((e) => e.from === 'a.md')).toBeUndefined();
+    expect(
+      graph.edges.find((e) => e.from === '02_Derived/a.md'),
+    ).toBeUndefined();
   });
 
   it('엣지 파생 맵은 graph.edges 로 재구성되되 node-level pageRank 는 유지된다', async () => {
-    const a = makeNode('a.md');
+    const a = makeNode('02_Derived/a.md');
     a.pagerank = 0.42;
     // 의도적으로 graph.edges 와 어긋난 stale 맵(a.md→x)을 부착. merge 후 graph.edges(=[]) 기준으로
     // 재구성되어 phantom 엣지 x 는 사라져야 한다. node-level pageRank 는 그대로여야 한다.
@@ -124,35 +126,43 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
       nodeCount: 1,
       edgeCount: 0,
       edgeWeightMap: new Map([
-        ['a.md' as NodeId, new Map([['x' as NodeId, 0.7]])],
+        ['02_Derived/a.md' as NodeId, new Map([['x' as NodeId, 0.7]])],
       ]),
-      adjacencyList: new Map([['a.md' as NodeId, ['x' as NodeId]]]),
+      adjacencyList: new Map([['02_Derived/a.md' as NodeId, ['x' as NodeId]]]),
     };
 
     writeMarkdown(
-      'a.md',
+      '02_Derived/a.md',
       `---\nlayer: 2\ntags: [t]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# A\nbody\n`,
     );
     const store = new MetadataStore(vaultDir);
-    await store.appendStaleEntries([{ path: 'a.md', op: 'mutate' }]);
+    await store.appendStaleEntries([{ path: '02_Derived/a.md', op: 'mutate' }]);
 
     await mergeStaleNodesIntoGraph(vaultDir, graph);
     // phantom 엣지 a.md→x 가 재구성으로 제거됨 (graph.edges 는 비어 있음)
-    expect(graph.edgeWeightMap?.get('a.md' as NodeId)?.get('x' as NodeId)).toBe(
-      undefined,
-    );
-    expect(graph.adjacencyList?.get('a.md' as NodeId)).toEqual([]);
+    expect(
+      graph.edgeWeightMap?.get('02_Derived/a.md' as NodeId)?.get('x' as NodeId),
+    ).toBe(undefined);
+    expect(graph.adjacencyList?.get('02_Derived/a.md' as NodeId)).toEqual([]);
     // node-level pageRank 는 background rebuild 가 소유 — merge 는 fresh 노드에 pagerank 를
     // 부여하지 않는다(교체된 노드는 다음 전체 rebuild 까지 pagerank 미보유).
-    expect(graph.nodes.get('a.md' as NodeId)?.pagerank).toBeUndefined();
+    expect(
+      graph.nodes.get('02_Derived/a.md' as NodeId)?.pagerank,
+    ).toBeUndefined();
   });
 
   it('delete entry 는 graph nodes / 양방향 incident edges / invertedIndex 모두에서 제거한다', async () => {
-    const a = makeNode('a.md', 'Alpha');
-    const b = makeNode('b.md', 'Beta');
+    const a = makeNode('02_Derived/a.md', 'Alpha');
+    const b = makeNode('02_Derived/b.md', 'Beta');
     const invertedIndex: InvertedIndex = new Map([
-      ['alpha', new Set<NodeId>(['a.md' as NodeId])],
-      ['t', new Set<NodeId>(['a.md' as NodeId, 'b.md' as NodeId])],
+      ['alpha', new Set<NodeId>(['02_Derived/a.md' as NodeId])],
+      [
+        't',
+        new Set<NodeId>([
+          '02_Derived/a.md' as NodeId,
+          '02_Derived/b.md' as NodeId,
+        ]),
+      ],
     ]);
     const graph: KnowledgeGraph = {
       nodes: new Map([
@@ -161,14 +171,14 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
       ]),
       edges: [
         {
-          from: 'a.md' as NodeId,
-          to: 'b.md' as NodeId,
+          from: '02_Derived/a.md' as NodeId,
+          to: '02_Derived/b.md' as NodeId,
           type: 'LINK',
           weight: 1,
         },
         {
-          from: 'b.md' as NodeId,
-          to: 'a.md' as NodeId,
+          from: '02_Derived/b.md' as NodeId,
+          to: '02_Derived/a.md' as NodeId,
           type: 'LINK',
           weight: 1,
         },
@@ -180,23 +190,29 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     };
 
     await mergeStaleNodesIntoGraph(vaultDir, graph, [
-      { path: 'a.md', op: 'delete' },
+      { path: '02_Derived/a.md', op: 'delete' },
     ]);
 
-    expect(graph.nodes.has('a.md' as NodeId)).toBe(false);
+    expect(graph.nodes.has('02_Derived/a.md' as NodeId)).toBe(false);
     expect(
-      graph.edges.find((e) => e.from === 'a.md' || e.to === 'a.md'),
+      graph.edges.find(
+        (e) => e.from === '02_Derived/a.md' || e.to === '02_Derived/a.md',
+      ),
     ).toBeUndefined();
     expect(graph.invertedIndex?.get('alpha')).toBeUndefined();
-    expect(graph.invertedIndex?.get('t')?.has('a.md' as NodeId)).toBe(false);
-    expect(graph.invertedIndex?.get('t')?.has('b.md' as NodeId)).toBe(true);
+    expect(
+      graph.invertedIndex?.get('t')?.has('02_Derived/a.md' as NodeId),
+    ).toBe(false);
+    expect(
+      graph.invertedIndex?.get('t')?.has('02_Derived/b.md' as NodeId),
+    ).toBe(true);
   });
 
   it('mutate entry 는 invertedIndex 의 옛 term 을 제거하고 신 term 을 추가한다', async () => {
-    const aOld = makeNode('a.md', 'Alpha');
+    const aOld = makeNode('02_Derived/a.md', 'Alpha');
     const invertedIndex: InvertedIndex = new Map([
-      ['alpha', new Set<NodeId>(['a.md' as NodeId])],
-      ['t', new Set<NodeId>(['a.md' as NodeId])],
+      ['alpha', new Set<NodeId>(['02_Derived/a.md' as NodeId])],
+      ['t', new Set<NodeId>(['02_Derived/a.md' as NodeId])],
     ]);
     const graph: KnowledgeGraph = {
       nodes: new Map([[aOld.id, aOld]]),
@@ -208,27 +224,29 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     };
 
     writeMarkdown(
-      'a.md',
+      '02_Derived/a.md',
       `---\nlayer: 2\ntags: [renamed]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# Beta\nbody\n`,
     );
 
     await mergeStaleNodesIntoGraph(vaultDir, graph, [
-      { path: 'a.md', op: 'mutate' },
+      { path: '02_Derived/a.md', op: 'mutate' },
     ]);
 
     // 옛 title term 'alpha' 는 사라져야 함 (Set 비면 term 자체 삭제)
     expect(graph.invertedIndex?.get('alpha')).toBeUndefined();
     // 옛 tag 't' 는 사라지고 새 tag 'renamed' 가 등장
     expect(graph.invertedIndex?.get('t')).toBeUndefined();
-    expect(graph.invertedIndex?.get('renamed')?.has('a.md' as NodeId)).toBe(
-      true,
-    );
+    expect(
+      graph.invertedIndex?.get('renamed')?.has('02_Derived/a.md' as NodeId),
+    ).toBe(true);
     // 새 title term 'beta' 가 등장
-    expect(graph.invertedIndex?.get('beta')?.has('a.md' as NodeId)).toBe(true);
+    expect(
+      graph.invertedIndex?.get('beta')?.has('02_Derived/a.md' as NodeId),
+    ).toBe(true);
   });
 
   it('mutate entry 의 ENOENT 는 노드 삭제로 해석되지 않는다 (race 보호)', async () => {
-    const aOld = makeNode('a.md', 'Alpha');
+    const aOld = makeNode('02_Derived/a.md', 'Alpha');
     const graph: KnowledgeGraph = {
       nodes: new Map([[aOld.id, aOld]]),
       edges: [],
@@ -238,9 +256,9 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     };
     // 디스크에 파일을 만들지 않음 → readFile ENOENT
     await mergeStaleNodesIntoGraph(vaultDir, graph, [
-      { path: 'a.md', op: 'mutate' },
+      { path: '02_Derived/a.md', op: 'mutate' },
     ]);
-    expect(graph.nodes.has('a.md' as NodeId)).toBe(true);
+    expect(graph.nodes.has('02_Derived/a.md' as NodeId)).toBe(true);
   });
 });
 
@@ -268,7 +286,7 @@ describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
   });
 
   it('complex-1: mutate 한 건 적용 시 invalidateQueryCache 가 정확히 1회 호출된다', async () => {
-    const aOld = makeNode('a.md', 'OLD');
+    const aOld = makeNode('02_Derived/a.md', 'OLD');
     const graph: KnowledgeGraph = {
       nodes: new Map([[aOld.id, aOld]]),
       edges: [],
@@ -277,17 +295,17 @@ describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
       edgeCount: 0,
     };
     writeMarkdown(
-      'a.md',
+      '02_Derived/a.md',
       `---\nlayer: 2\ntags: [t]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# NEW\nbody\n`,
     );
     await mergeStaleNodesIntoGraph(vaultDir, graph, [
-      { path: 'a.md', op: 'mutate' },
+      { path: '02_Derived/a.md', op: 'mutate' },
     ]);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('complex-2: delete 한 건 적용 시 invalidateQueryCache 가 정확히 1회 호출된다', async () => {
-    const a = makeNode('a.md', 'Alpha');
+    const a = makeNode('02_Derived/a.md', 'Alpha');
     const graph: KnowledgeGraph = {
       nodes: new Map([[a.id, a]]),
       edges: [],
@@ -296,13 +314,13 @@ describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
       edgeCount: 0,
     };
     await mergeStaleNodesIntoGraph(vaultDir, graph, [
-      { path: 'a.md', op: 'delete' },
+      { path: '02_Derived/a.md', op: 'delete' },
     ]);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('complex-3: mutate 가 ENOENT 로 모두 skip 되어 changed=0 인 경우 invalidateQueryCache 호출 0회', async () => {
-    const aOld = makeNode('a.md', 'Alpha');
+    const aOld = makeNode('02_Derived/a.md', 'Alpha');
     const graph: KnowledgeGraph = {
       nodes: new Map([[aOld.id, aOld]]),
       edges: [],
@@ -312,7 +330,7 @@ describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
     };
     // 디스크에 파일 없음 → readFile ENOENT → mutate 모두 skip
     await mergeStaleNodesIntoGraph(vaultDir, graph, [
-      { path: 'a.md', op: 'mutate' },
+      { path: '02_Derived/a.md', op: 'mutate' },
     ]);
     expect(invalidateSpy).toHaveBeenCalledTimes(0);
   });
@@ -320,23 +338,27 @@ describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
   it('complex-4: mutate 직후 query 호출이 pre-merge cache 결과를 반환하지 않는다', async () => {
     // 동일 builtAt 의 in-place mutation 이라도 invalidateQueryCache 가 자동 호출되어
     // 후속 query 가 post-merge graph 구조로 재실행된다.
-    const aOld = makeNode('a.md', 'Alpha');
+    const aOld = makeNode('02_Derived/a.md', 'Alpha');
     const graph: KnowledgeGraph = {
       nodes: new Map([[aOld.id, aOld]]),
       edges: [],
       builtAt: '2026-01-01',
       nodeCount: 1,
       edgeCount: 0,
-      invertedIndex: new Map([['alpha', new Set<NodeId>(['a.md' as NodeId])]]),
+      invertedIndex: new Map([
+        ['alpha', new Set<NodeId>(['02_Derived/a.md' as NodeId])],
+      ]),
     };
 
     // 사전 query 1회 → cache 저장
     const before = queryEngine.query(graph, ['alpha']);
-    expect(before.results.map((r) => r.nodeId)).toContain('a.md' as NodeId);
+    expect(before.results.map((r) => r.nodeId)).toContain(
+      '02_Derived/a.md' as NodeId,
+    );
 
     // delete entry 적용 → invalidate 호출 기대
     await mergeStaleNodesIntoGraph(vaultDir, graph, [
-      { path: 'a.md', op: 'delete' },
+      { path: '02_Derived/a.md', op: 'delete' },
     ]);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
 

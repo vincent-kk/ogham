@@ -1,1 +1,1 @@
-export * from './maencofRead.js';
+export { handleMaencofRead } from './maencofRead.js';
