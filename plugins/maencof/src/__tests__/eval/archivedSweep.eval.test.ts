@@ -181,9 +181,8 @@ async function diagnoseAtDefault(
   graph: KnowledgeGraph,
   queries: GoldenQuery[],
 ): Promise<Array<{ id: string; top10: string[] }>> {
-  const { invalidateQueryCache } = await import(
-    '../../search/queryEngine/index.js'
-  );
+  const { invalidateQueryCache } =
+    await import('../../search/queryEngine/index.js');
   invalidateQueryCache();
   const searchFn = liveSearchFn(graph, LIVE_DEFAULTS);
   const out = queries.map((gq) => ({
