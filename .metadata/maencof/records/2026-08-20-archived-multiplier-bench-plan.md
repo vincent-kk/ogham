@@ -20,15 +20,15 @@
 
 ## 파일 맵
 
-| 경로 | 조치 | 책임 |
-| --- | --- | --- |
-| `src/__tests__/eval/fixtureVault.ts` | 수정 | `FixtureDoc.archived?` + 전달 + cve-watch 경쟁/retro-incident 회수 시나리오 12건 |
-| `src/__tests__/eval/goldenSet.ts` | 수정 | `archived-working-*` 2건 + `archived-archival-*` 1건 추가 |
-| `src/__tests__/eval/baseline.json` | 재기록 | ratchet 기준선 (쿼리 29→32) |
-| `src/__tests__/eval/buildLiveGraph.ts` | 신설 | `liveVault.eval.test.ts`의 `buildLiveGraph` 추출(동작 불변) |
-| `src/__tests__/eval/liveVault.eval.test.ts` | 수정 | 추출된 `buildLiveGraph` import로 교체 |
-| `src/__tests__/eval/archivedSweep.eval.test.ts` | 신설 | 계수 그리드 스윕 러너 — 픽스처 모드(상시) + 실볼트 graded 모드(env 조건) |
-| `~/Soulstream/{falias,tirnanog}/.maencof-meta/eval/archived-golden.json` | 신설(리포 밖) | 실볼트 graded 골든셋 2벌 |
+| 경로                                                                     | 조치          | 책임                                                                             |
+| ------------------------------------------------------------------------ | ------------- | -------------------------------------------------------------------------------- |
+| `src/__tests__/eval/fixtureVault.ts`                                     | 수정          | `FixtureDoc.archived?` + 전달 + cve-watch 경쟁/retro-incident 회수 시나리오 12건 |
+| `src/__tests__/eval/goldenSet.ts`                                        | 수정          | `archived-working-*` 2건 + `archived-archival-*` 1건 추가                        |
+| `src/__tests__/eval/baseline.json`                                       | 재기록        | ratchet 기준선 (쿼리 29→32)                                                      |
+| `src/__tests__/eval/buildLiveGraph.ts`                                   | 신설          | `liveVault.eval.test.ts`의 `buildLiveGraph` 추출(동작 불변)                      |
+| `src/__tests__/eval/liveVault.eval.test.ts`                              | 수정          | 추출된 `buildLiveGraph` import로 교체                                            |
+| `src/__tests__/eval/archivedSweep.eval.test.ts`                          | 신설          | 계수 그리드 스윕 러너 — 픽스처 모드(상시) + 실볼트 graded 모드(env 조건)         |
+| `~/Soulstream/{falias,tirnanog}/.maencof-meta/eval/archived-golden.json` | 신설(리포 밖) | 실볼트 graded 골든셋 2벌                                                         |
 
 ## T1 — 픽스처 archived 시나리오 + 골든 쿼리 + baseline 재기록
 
@@ -112,10 +112,9 @@ decaySweep 미러. vi.mock getter로 상수를 갈아끼운다(운영 타입 불
 
 ```ts
 let activeMultiplier: number | null = null;
-vi.mock('../../constants/queryEngine.js', async (importOriginal) => {
-  const actual = await importOriginal<
-    typeof import('../../constants/queryEngine.js')
-  >();
+vi.mock("../../constants/queryEngine.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../constants/queryEngine.js")>();
   return {
     ...actual,
     get ARCHIVED_SEED_MULTIPLIER(): number {
@@ -142,7 +141,7 @@ vi.mock('../../constants/queryEngine.js', async (importOriginal) => {
 ```ts
 interface LiveBenchQuery {
   id: string;
-  cls: 'working' | 'archival';
+  cls: "working" | "archival";
   seeds: string[];
   /** vault-root 상대 경로 → 등급. liveSearchFn 이 node.path 를 반환하므로 좌표계 동일 */
   relevance: Record<string, 1 | 2>;
@@ -160,7 +159,7 @@ interface LiveBenchGolden {
 
 각 vault의 `.maencof-meta/eval/archived-golden.json` 작성. 절차(볼트당):
 
-1. 경쟁 태그에서 working 시드 선정 — tirnanog: `security`·`cve`·`mcp`·`geeknews` 계열에서 4~6개(태그+제목 토큰 혼합), falias: `portfolio`·`discovery-watch`·`gold` 계열에서 4~5개.
+1. 경쟁 태그에서 working 시드 선정 — tirnanog: `security`·`cve`·`mcp`·`geeknews` 계열에서 4~~6개(태그+제목 토큰 혼합), falias: `portfolio`·`discovery-watch`·`gold` 계열에서 4~~5개.
 2. working 정답 판정: 해당 태그의 **활성** 문서를 frontmatter 열람으로 골라 grade 부여(L2 정제·updated 최근·제목 대표성 우선, 쿼리당 relevance 3~6건). 스텁은 미기재(0).
 3. archival 쿼리 3~4개: 스텁 고유 태그(falias `superseded` 등)·스텁 제목 토큰을 시드로, 해당 스텁 grade 2.
 4. 스키마 자가 검증 후 저장.
@@ -199,4 +198,5 @@ yarn maencof test:run archivedSweep
 - **T2** — `archivedSweep.eval.test.ts` 신설(getter 모듈 스파이 + 그리드 11점 + 클래스 3분 측정 + 축 무결성 2종 + legacy 격리 단언 + 균등합 순위/PROMOTION 보고 + env JSON 리포트). fail-first: getter 무력화 프로브로 축 평탄 red 확인 후 원복 green. 픽스처 곡선: working 0.9656(m≤0.7 평탄, 1.0에서 0.9291로 하락), archival 0(m=0)→1.0(m≥0.05) 계단, legacy 0.9746 전 구간 평탄(격리 증명), 균등합 rank 6/11(0.05~0.7 동률 — 픽스처는 계단 해상도, 연속 판별은 실볼트 몫). **편차 2건**: ① 플랜의 "threshold(0.1) 절벽" 가설은 오류 — `QueryOptions.threshold` 는 v1 은퇴로 무시되는 호환용 파라미터(`types.ts:56`, 캐시 키에만 존재)라 절벽이 없다. 주석 3곳(fixtureVault·goldenSet·러너 헤더)을 실측 서사로 교정. ② vitest 러너가 스윕 console 출력을 표시하지 않아(기존 decay/compound 스윕도 동일) 곡선 열람은 `MAENCOF_EVAL_ARCHIVED_SWEEP_REPORT` JSON 경로가 실질 관례. 검증: typecheck + `yarn eval` 7 passed/1 skipped. 커밋 `127ccc4f`.
 - **T3** — `buildLiveGraph` 추출(신설 파일, liveVault 는 import 소비자로 축소) + 실볼트 graded describe(env 2종 skipIf, 골든 JSON 신뢰 경계 수동 검증, missing relevance 경로 경고+리포트 필드, 골든 파싱을 그래프 빌드 앞으로 — 형식 오류 즉시 실패). 검증: typecheck OK · `yarn eval` 7 passed/1 skipped·테스트 14 passed/2 skipped(env 부재 skip 정상) · cls 오타 프로브가 `invalid archived golden: query[0] (probe): cls must be 'working' | 'archival'` 로 실패 확인. 커밋 `7aa1d1ad`.
 - **T4** — 실볼트 골든 2벌 큐레이션(리포 밖, 각 7쿼리 = working 4 + archival 3): `~/Soulstream/falias/.maencof-meta/eval/archived-golden.json`(시드 portfolio·asset-allocation·dca·gold / discovery-watch·undervalued-candidates·anchor-bias-warning), `~/Soulstream/tirnanog/.maencof-meta/eval/archived-golden.json`(security·mcp·langflow·geeknews / notable·cwe-502·제목 토큰). 판정 기준: L2 정제·현행 운영 문서 grade 2 우선, tag-prefix 채널 후보는 grade 1로 보수화, relevance 태그 보유를 grep 실측으로 전수 확인. 순도 예외 1건(cwe-502 — 활성 7건 미채점, 스텁이 최신 수집분이라 archival 의도 유지)은 골든 note 에 명시. 커밋 없음(개인 데이터 비커밋).
-- **T5** — 3면 스윕 실측 완료(missing relevance 0/0). 곡선: **falias** rank 1/11 — working 0.4281 로 0.30 까지 평탄, 0.40 부터 침식(→1.00 에서 0.2957), archival 은 0.30 에서 0.6934 로 국소 최적(0.05~0.25 는 0.61 대) → **0.3 이 정확히 knee**. **tirnanog** rank 6/11 — 0.05~0.50 완전 동률(W 0.4171 / A 0.2311), 0.70 부터 working 침식 → 0.3 유지에 반대 증거 없음. **픽스처** rank 6/11 — 0.05~0.7 동률 대역. 종합: **현행 0.3 유지 지지** (falias 최적점 일치, 타 2면 최적 대역 내부). 리포트 JSON: scratchpad `falias-sweep.json`·`tirnanog-sweep.json`·`sweep-fixture.json`. 마감 검증: `yarn eval` 7 passed/1 skipped(T3 후 리포 코드 불변) + archivedDemotion 2 passed.
+- **T5** — 3면 스윕 실측 완료(missing relevance 0/0). 곡선: **falias** rank 1/11 — working 0.4281 로 0.30 까지 평탄, 0.40 부터 침식(→1.00 에서 0.2957), archival 은 0.30 에서 0.6934 로 국소 최적(0.05~~0.25 는 0.61 대) → **0.3 이 정확히 knee**. **tirnanog** rank 6/11 — 0.05~~0.50 완전 동률(W 0.4171 / A 0.2311), 0.70 부터 working 침식 → 0.3 유지에 반대 증거 없음. **픽스처** rank 6/11 — 0.05~0.7 동률 대역. 종합: **현행 0.3 유지 지지** (falias 최적점 일치, 타 2면 최적 대역 내부). 리포트 JSON: scratchpad `falias-sweep.json`·`tirnanog-sweep.json`·`sweep-fixture.json`. 마감 검증: `yarn eval` 7 passed/1 skipped(T3 후 리포 코드 불변) + archivedDemotion 2 passed.
+- **T6 (후속: tirnanog archival 원인 추적 + 결정 확정)** — 하네스에 쿼리별 분해(`perQuery`)·현행 계수 top10 진단(`diagnoseAtDefault`, `[A]` 마킹)·그리드 0.35 추가(커밋 `4f66490b`). **원인 확정**: recall 0.3333 은 엔진 결함이 아니라 골든 2쿼리(notable·cwe-502)의 relevance 임의성 — 균일 대량 스텁 후보군(수백 건, tie-break 는 pagerank→id 로 updated 무관)에서 특정 4건 지정은 큐레이션 운을 측정. agentic-title 은 recall 1.0(활성 1위 > 스텁 2·3위 — 침강 질서 정상), working-security 는 top10 스텁 0건(침강력 증명). **수정(rev.2)**: 두 쿼리를 스텁 전용 소규모 태그 `crawl4ai`(활성 0/스텁 4)·`citrix`(활성 0/스텁 3)로 교체, 스텁 전원을 relevance 로 실어 임의성 제거 → 재실행에서 archival recall 0.3333→**1.0**(전 계수, fix-prove). **0.3 확정 근거**: ① 0.3/0.35/0.4 의 3면 쿼리 전수 비교에서 차이는 falias 2쿼리뿐(0.35: discovery-watch +0.016 단일 쿼리 노이즈 — PROMOTION 임계 0.005 를 +0.0003 차로 걸침; 0.4: working-dca −0.027 침식 시작) ② suggest_links 경계(`kgSuggestLinks.ts:125` — `score < minScore` 컷이므로 0.2 접촉이면 통과): 스텁 tag-exact 0.5×m 이 0.3→0.15(마진 0.05), 0.35→0.175(마진 절반), 0.4→0.20(경계 접촉, 제안 재진입) ③ 티어 질서: 0.15 는 활성 tag-prefix(0.3)의 절반 — 역전은 m=0.6 ④ archival 하방은 m=0 에서만 소실(0.05 부터 recall 1.0, 3면 공통). **결정: `ARCHIVED_SEED_MULTIPLIER = 0.3` 고정** — 상수 주석을 확정 서사("운영 실측 후 조정 여지 있음" 제거, 검증 러너·경계값 명시)로 갱신(커밋 `52c7b24f`). 검증: typecheck exit 0 + `yarn eval` 7 passed/1 skipped. 리포트: scratchpad `tirnanog-sweep3.json`·`falias-sweep2.json`·`fixture-sweep2.json`.
