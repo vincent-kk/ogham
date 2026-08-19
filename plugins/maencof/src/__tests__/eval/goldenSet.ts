@@ -5,6 +5,8 @@
  * 등급: 2=핵심, 1=관련, 0(생략)=무관. 판정 근거는 픽스처의 링크/주제 구조
  * (.metadata/maencof/TOOL/Query-Gated-Accumulative-Spreading-Activation/03장 쿼리 유형 계층).
  * 케이스 추가 시 baseline.json을 같은 커밋에서 재기록한다 (ratchet 규칙 3).
+ * id prefix 규약: `archived-working-*` 는 활성 문서가 정답(스텁은 노이즈),
+ * `archived-archival-*` 는 스텁이 정답 — archivedSweep 러너가 이 prefix 로 클래스를 나눈다.
  */
 
 /** 골든 쿼리 항목 */
@@ -350,6 +352,36 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
     seeds: ['jira'],
     relevance: {
       'L4/works/gcc-3903-digest.md': 2,
+    },
+  },
+  // archived 침강 골든 — working: 스텁 6건(등급 0)이 같은 태그로 경쟁하므로 침강
+  // 실패(계수 상승) 시 스텁 도배로 nDCG 가 무너진다. archival: 스텁만 가진 태그의
+  // 회수 — 계수가 threshold 절벽(0.2) 아래로 내려가면 recall 0 이 드러난다.
+  {
+    id: 'archived-working-cve-watch',
+    seeds: ['cve-watch'],
+    relevance: {
+      'L2/insights/cve-triage-playbook.md': 2,
+      'L4/advisories/cve-watch-active-01.md': 2,
+      'L4/advisories/cve-watch-active-02.md': 1,
+      'L4/advisories/cve-watch-active-03.md': 1,
+    },
+  },
+  {
+    id: 'archived-working-advisory',
+    seeds: ['advisory'],
+    relevance: {
+      'L4/advisories/cve-watch-active-01.md': 2,
+      'L4/advisories/cve-watch-active-02.md': 2,
+      'L4/advisories/cve-watch-active-03.md': 2,
+    },
+  },
+  {
+    id: 'archived-archival-retro',
+    seeds: ['retro-incident'],
+    relevance: {
+      'L4/advisories/retro-incident-01.md': 2,
+      'L4/advisories/retro-incident-02.md': 2,
     },
   },
 ];

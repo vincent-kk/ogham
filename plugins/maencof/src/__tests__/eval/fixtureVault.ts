@@ -29,6 +29,8 @@ interface FixtureDoc {
   updated?: string;
   /** 클러스터 키 — 같은 키의 문서들은 검색에서 대표 1건으로 접힌다 (R4 측정용) */
   clusterKey?: string;
+  /** archived 스텁 — 시드 강등 계수 스윕의 발화 경로 (태그 온전, 본문 스텁) */
+  archived?: boolean;
   /** 교차 연결 허브 — CROSS_LAYER 엣지의 출발점이 된다 */
   hub?: boolean;
   hubKind?: HubKind;
@@ -407,6 +409,44 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     tags: ['billing'],
     updated: '2026-01-20',
   },
+  // ─── archived 침강 스윕 (계수 발화 경로) ──────────────────────────────
+  // 수집형 vault 실측의 축소 재현: 같은 태그(cve-watch)에서 스텁 6 : 활성 3이 경쟁하고,
+  // L2 정제 1건이 스텁 위에 서야 한다. retro-incident 는 스텁만 가진 태그 —
+  // tag-exact(0.5)×계수가 threshold(0.1) 아래로 내려가는 0.2 경계에서 회수 절벽을 만든다.
+  // 격리 원칙은 클러스터 블록과 동일: 전용 서브디렉토리(L4/advisories)와 신규 태그만 사용.
+  // 제목·경로에 'archiv' 계열 토큰 금지 — InvertedIndex 는 title/tag 를 구분하지 않아
+  // compound 골든(compound-or-vs-prefix-tier)의 'archiv' df=1 전제를 깨뜨린다.
+  ...Array.from({ length: 6 }, (_, i) => ({
+    path: `L4/advisories/cve-watch-stub-${String(i + 1).padStart(2, '0')}.md`,
+    title: `CVE Watch Stub ${String(i + 1).padStart(2, '0')}`,
+    layer: Layer.L4_ACTION,
+    tags: ['cve-watch', 'advisory'],
+    archived: true,
+    updated: `2026-03-0${i + 1}`,
+  })),
+  ...Array.from({ length: 3 }, (_, i) => ({
+    path: `L4/advisories/cve-watch-active-${String(i + 1).padStart(2, '0')}.md`,
+    title: `CVE Watch Active ${String(i + 1).padStart(2, '0')}`,
+    layer: Layer.L4_ACTION,
+    tags: ['cve-watch', 'advisory'],
+    updated: `2026-03-1${i + 1}`,
+  })),
+  {
+    path: 'L2/insights/cve-triage-playbook.md',
+    title: 'CVE Triage Playbook',
+    layer: Layer.L2_DERIVED,
+    tags: ['cve-watch'],
+    links: ['L4/advisories/cve-watch-active-01.md'],
+    updated: '2026-03-20',
+  },
+  ...Array.from({ length: 2 }, (_, i) => ({
+    path: `L4/advisories/retro-incident-${String(i + 1).padStart(2, '0')}.md`,
+    title: `Retro Incident ${String(i + 1).padStart(2, '0')}`,
+    layer: Layer.L4_ACTION,
+    tags: ['retro-incident'],
+    archived: true,
+    updated: `2026-03-0${i + 1}`,
+  })),
 ];
 
 function toKnowledgeNode(doc: FixtureDoc): KnowledgeNode {
@@ -423,6 +463,7 @@ function toKnowledgeNode(doc: FixtureDoc): KnowledgeNode {
   };
   if (doc.links) node.outboundLinks = doc.links;
   if (doc.clusterKey) node.clusterKey = doc.clusterKey;
+  if (doc.archived) node.archived = true;
   if (doc.hub) {
     node.hub = true;
     node.hubKind = doc.hubKind;
