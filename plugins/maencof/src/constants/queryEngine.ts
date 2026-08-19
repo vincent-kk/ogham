@@ -47,7 +47,9 @@ export const COMPOUND_FALLBACK_MIN_TOKEN_LENGTH = 2;
  * archived: true 문서(증류 후 스텁)의 시드/후보 점수 강등 계수. 본문이 비어도
  * 태그가 온전한 스텁이 태그 채널 경쟁력으로 정제 지식을 밀어내는 것을 막는다(침강).
  * 명시 경로 시드(path-exact/path-prefix)에는 적용하지 않는다 — 직접 지목은 존중.
- * 0.3: tag-exact(0.5)를 kg_suggest_links 기본 min_score(0.2) 아래(0.15)로 보낸다.
- * 운영 실측 후 조정 여지 있음.
+ * 0.3: 스텁 tag-exact(0.5)를 kg_suggest_links 기본 min_score(0.2) 아래(0.15),
+ * 활성 tag-prefix(0.3)의 절반에 둔다 — 스텁은 어떤 활성 채널보다 아래라는 질서.
+ * archivedSweep 3면 스윕(픽스처 + 실볼트 graded 2면) 검증값: working 침식은 0.4,
+ * 제안 경계 접촉도 0.4(0.5×0.4 = min_score), archival 회수 소실은 0에서 시작한다.
  */
 export const ARCHIVED_SEED_MULTIPLIER = 0.3;
