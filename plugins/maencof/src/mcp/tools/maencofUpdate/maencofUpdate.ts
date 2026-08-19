@@ -34,6 +34,59 @@ import type {
 /** unset 거부 대상 — 데이터 무결성 핵심 필드 */
 const PROTECTED_UNSET_FIELDS = new Set(['created', 'updated', 'layer', 'tags']);
 
+/** hub(값-조건 분기)·unset(제거 연산)을 뺀 패치 대상 필드 키 */
+type PatchableFieldKey = Exclude<
+  keyof MaencofUpdateFrontmatter,
+  'hub' | 'unset'
+>;
+
+/**
+ * 문자열 목록을 YAML 인라인 배열로 직렬화한다.
+ *
+ * @param values - 각 원소를 YAML 문자열로 인용할 값 목록.
+ * @returns 인용한 원소를 담은 YAML 인라인 배열.
+ */
+const quoteEach = (values: string[]): string =>
+  `[${values.map((v) => quoteYamlValue(v)).join(', ')}]`;
+
+/**
+ * 필드별 YAML 라인 직렬화 테이블 — 자유 문자열은 인용, 배열은 원소별 인용 인라인,
+ * 숫자·enum·날짜는 비인용. 값 집합 검증은 쓰기 직전 validateFrontmatter 가 맡고
+ * 여기는 표기만 맡는다. 타입에 필드를 더하면 이 테이블이 직렬화기를 컴파일로 강제한다.
+ */
+export const FM_FIELD_SERIALIZERS: {
+  [K in PatchableFieldKey]-?: (
+    value: NonNullable<MaencofUpdateFrontmatter[K]>,
+  ) => string;
+} = {
+  tags: quoteEach,
+  title: quoteYamlValue,
+  layer: String,
+  confidence: String,
+  schedule: quoteYamlValue,
+  sub_layer: (v) => v,
+  cluster_key: quoteYamlValue,
+  gist: quoteYamlValue,
+  hub_kind: (v) => v,
+  purpose: quoteYamlValue,
+  source: quoteYamlValue,
+  expires: (v) => v,
+  mentioned_persons: quoteEach,
+  domain: quoteYamlValue,
+  domain_type: (v) => v,
+  person_ref: quoteYamlValue,
+  trust_level: String,
+  expertise_domains: quoteEach,
+  org_type: (v) => v,
+  membership_status: (v) => v,
+  ba_context: quoteYamlValue,
+  topic_category: quoteYamlValue,
+  maturity: (v) => v,
+  buffer_type: (v) => v,
+  promotion_target: (v) => v,
+  source_context: quoteYamlValue,
+};
+
 /**
  * Frontmatter 블록에서 특정 필드를 갱신한다.
  */
@@ -78,60 +131,22 @@ function updateFrontmatter(
   if (updates.unset)
     for (const key of updates.unset) yaml = removeFrontmatterField(yaml, key);
 
-  if (updates.tags !== undefined)
-    yaml = patchFrontmatterField(
-      yaml,
-      'tags',
-      `[${updates.tags.map((t) => quoteYamlValue(t)).join(', ')}]`,
-    );
+  const patchField = <K extends PatchableFieldKey>(key: K): void => {
+    const value = updates[key];
+    if (value === undefined) return;
+    const serialize = FM_FIELD_SERIALIZERS[key] as (
+      value: NonNullable<MaencofUpdateFrontmatter[K]>,
+    ) => string;
+    yaml = patchFrontmatterField(yaml, key, serialize(value));
+  };
+  for (const key of Object.keys(FM_FIELD_SERIALIZERS) as PatchableFieldKey[])
+    patchField(key);
 
-  if (updates.title !== undefined)
-    yaml = patchFrontmatterField(yaml, 'title', quoteYamlValue(updates.title));
-
-  if (updates.layer !== undefined)
-    yaml = patchFrontmatterField(yaml, 'layer', String(updates.layer));
-
-  if (updates.confidence !== undefined)
-    yaml = patchFrontmatterField(
-      yaml,
-      'confidence',
-      String(updates.confidence),
-    );
-
-  if (updates.schedule !== undefined)
-    yaml = patchFrontmatterField(
-      yaml,
-      'schedule',
-      quoteYamlValue(updates.schedule),
-    );
-
-  if (updates.sub_layer !== undefined)
-    yaml = patchFrontmatterField(yaml, 'sub_layer', updates.sub_layer);
-
-  if (updates.cluster_key !== undefined)
-    yaml = patchFrontmatterField(
-      yaml,
-      'cluster_key',
-      quoteYamlValue(updates.cluster_key),
-    );
-
-  if (updates.gist !== undefined)
-    yaml = patchFrontmatterField(yaml, 'gist', quoteYamlValue(updates.gist));
-
+  // hub 는 값-조건 분기: false 는 키 제거, true 는 패치
   if (updates.hub !== undefined)
     yaml = updates.hub
       ? patchFrontmatterField(yaml, 'hub', 'true')
       : removeFrontmatterField(yaml, 'hub');
-
-  if (updates.hub_kind !== undefined)
-    yaml = patchFrontmatterField(yaml, 'hub_kind', updates.hub_kind);
-
-  if (updates.purpose !== undefined)
-    yaml = patchFrontmatterField(
-      yaml,
-      'purpose',
-      quoteYamlValue(updates.purpose),
-    );
 
   return content.replace(match[0], `---\n${yaml}\n---\n`);
 }

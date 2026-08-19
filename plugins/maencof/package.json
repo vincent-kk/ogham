@@ -58,7 +58,7 @@
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "eval": "vitest run src/__tests__/eval",
-    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "format": "yarn run --top-level prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:run": "vitest run",

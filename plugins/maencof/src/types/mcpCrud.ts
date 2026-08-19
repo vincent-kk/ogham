@@ -9,6 +9,12 @@ import type {
   PromotionTarget,
   SubLayer,
 } from './common.js';
+import type {
+  DomainType,
+  Maturity,
+  MembershipStatus,
+  OrgType,
+} from './frontmatter.js';
 import type { KnowledgeNode } from './graph.js';
 import type { L1ChangeReason } from './l1Amendment.js';
 
@@ -74,6 +80,38 @@ export interface MaencofUpdateFrontmatter {
   hub_kind?: HubKind;
   /** 이 허브가 무엇을 통합하는지 한 줄 서술 */
   purpose?: string;
+  /** 외부 출처 (통상 Layer 3) */
+  source?: string;
+  /** 만료일 YYYY-MM-DD (Layer 4·L5 buffer) */
+  expires?: string;
+  /** 문서에서 언급된 인물 목록 (모든 레이어) */
+  mentioned_persons?: string[];
+  /** Domain 이름 (cross-layer 그룹핑) */
+  domain?: string;
+  /** Domain 유형 */
+  domain_type?: DomainType;
+  /** 인물 참조 키 (L3A 전용) */
+  person_ref?: string;
+  /** 신뢰 수준 0.0~1.0 (L3A) */
+  trust_level?: number;
+  /** 전문 도메인 목록 (L3A) */
+  expertise_domains?: string[];
+  /** 조직 유형 (L3B 전용) */
+  org_type?: OrgType;
+  /** 멤버십 상태 (L3B) */
+  membership_status?: MembershipStatus;
+  /** Ba 컨텍스트 (L3B) */
+  ba_context?: string;
+  /** 주제 카테고리 (L3C) */
+  topic_category?: string;
+  /** 주제 성숙도 (L3C) */
+  maturity?: Maturity;
+  /** 미분류 항목 종류 (L5 전용) */
+  buffer_type?: BufferType;
+  /** 승격 대상 (L5 전용) */
+  promotion_target?: PromotionTarget;
+  /** 항목 출처 서술 (L5 전용) */
+  source_context?: string;
   /**
    * 제거할 frontmatter 필드 이름 목록.
    * 보호 필드(created, updated, layer, tags)는 unset 거부.

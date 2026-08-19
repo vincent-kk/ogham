@@ -126,7 +126,7 @@ tags: [extracted tags]
 source: 'original source URL (if available)'
 ```
 
-`confidence` (internalization 0.0-1.0, initial ~0.3) is not a create parameter — set it after creation via `mcp__plugin_maencof_tools__update` (frontmatter). Rich sub-layer metadata (L3A `person`, L3B `org_type`, etc.) is schema-validated on read but has no MCP write path — do not promise those fields during remember.
+`confidence` (internalization 0.0-1.0, initial ~0.3) is not a create parameter — set it after creation via `mcp__plugin_maencof_tools__update` (frontmatter). Sub-layer scalar metadata (L3A `person_ref`/`trust_level`/`expertise_domains`, L3B `org_type`/`membership_status`/`ba_context`, L3C `topic_category`/`maturity`) is likewise settable only through post-create `update`. The nested L3A `person` object still has no MCP write path — do not promise it during remember.
 
 **L4 Frontmatter**:
 

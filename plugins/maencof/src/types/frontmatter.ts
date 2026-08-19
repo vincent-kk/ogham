@@ -15,12 +15,63 @@ import { PersonSchema } from './person.js';
  */
 export const SubLayerSchema = z.enum(['relational', 'structural', 'topical']);
 
+/** YYYY-MM-DD 날짜 문자열 정본 — frontmatter 날짜 필드와 MCP 도구의 날짜 입력이 파생한다. */
+export const IsoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+/** Domain 유형 허용값 정본. */
+export const DomainTypeSchema = z.enum(['life', 'professional']);
+/** Domain 유형. */
+export type DomainType = z.infer<typeof DomainTypeSchema>;
+
+/** 조직 유형(L3B) 허용값 정본. */
+export const OrgTypeSchema = z.enum([
+  'company',
+  'community',
+  'team',
+  'institution',
+]);
+/** 조직 유형(L3B). */
+export type OrgType = z.infer<typeof OrgTypeSchema>;
+
+/** 멤버십 상태(L3B) 허용값 정본. */
+export const MembershipStatusSchema = z.enum(['active', 'inactive', 'alumni']);
+/** 멤버십 상태(L3B). */
+export type MembershipStatus = z.infer<typeof MembershipStatusSchema>;
+
+/** 주제 성숙도(L3C) 허용값 정본. */
+export const MaturitySchema = z.enum([
+  'seed',
+  'growing',
+  'mature',
+  'evergreen',
+]);
+/** 주제 성숙도(L3C). */
+export type Maturity = z.infer<typeof MaturitySchema>;
+
+/** L5 버퍼 항목 종류 허용값 정본. */
+export const BufferTypeSchema = z.enum([
+  'snippet',
+  'conversation',
+  'unclassified',
+]);
+
+/** L5 승격 대상 허용값 정본 — 서브레이어 이름 또는 'L2'. */
+export const PromotionTargetSchema = z.enum([...SubLayerSchema.options, 'L2']);
+
+/** 허브 문서 종류 허용값 정본. */
+export const HubKindSchema = z.enum([
+  'project_moc',
+  'cross_domain',
+  'synthesis',
+  'study_hub',
+]);
+
 /** Frontmatter 기본 스키마 (superRefine 전) */
 const FrontmatterBaseSchema = z.object({
   /** 최초 생성일 YYYY-MM-DD (변경 금지) */
-  created: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  created: IsoDateSchema,
   /** 마지막 수정일 YYYY-MM-DD (MCP 자동 갱신) */
-  updated: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  updated: IsoDateSchema,
   /** 태그 목록 (최소 1개 필수) */
   tags: z.array(z.string()).min(1),
   /** Layer 속성 (1-5) */
@@ -32,10 +83,7 @@ const FrontmatterBaseSchema = z.object({
   /** 외부 출처 (Layer 3용, 선택) */
   source: z.string().optional(),
   /** 만료일 YYYY-MM-DD (Layer 4용, 선택) */
-  expires: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
+  expires: IsoDateSchema.optional(),
   /** 아카이브 스텁 여부 — L4 만료 후 archiveExpired hook이 설정. 정본은 archive로 이동하고 이 문서는 연결 보존용 경량 스텁이 된다. */
   archived: z.boolean().optional(),
   /** 정본 원본의 archive 상대 경로 (archived=true일 때 유효) */
@@ -55,7 +103,7 @@ const FrontmatterBaseSchema = z.object({
   /** Domain 이름 (모든 레이어, cross-layer 그룹핑용, 선택) */
   domain: z.string().optional(),
   /** Domain 유형 (선택) */
-  domain_type: z.enum(['life', 'professional']).optional(),
+  domain_type: DomainTypeSchema.optional(),
 
   // ─── Sub-layer 확장 필드 ─────────────────────────────────
   /** 서브레이어 (L3 전용: relational/structural/topical) */
@@ -71,9 +119,9 @@ const FrontmatterBaseSchema = z.object({
 
   // L3B (structural) 전용
   /** 조직 유형 */
-  org_type: z.enum(['company', 'community', 'team', 'institution']).optional(),
+  org_type: OrgTypeSchema.optional(),
   /** 멤버십 상태 */
-  membership_status: z.enum(['active', 'inactive', 'alumni']).optional(),
+  membership_status: MembershipStatusSchema.optional(),
   /** Ba 컨텍스트 */
   ba_context: z.string().optional(),
 
@@ -81,13 +129,13 @@ const FrontmatterBaseSchema = z.object({
   /** 주제 카테고리 */
   topic_category: z.string().optional(),
   /** 성숙도 */
-  maturity: z.enum(['seed', 'growing', 'mature', 'evergreen']).optional(),
+  maturity: MaturitySchema.optional(),
 
   // L5 (임시 수용소) 전용
   /** 미분류 항목의 종류 */
-  buffer_type: z.enum(['snippet', 'conversation', 'unclassified']).optional(),
+  buffer_type: BufferTypeSchema.optional(),
   /** 승격 대상 — 레이어 번호가 아니라 서브레이어 이름이다(L3A/3B/3C를 구분해야 승격 규칙이 성립한다) */
-  promotion_target: z.enum([...SubLayerSchema.options, 'L2']).optional(),
+  promotion_target: PromotionTargetSchema.optional(),
   /** 항목의 출처 서술 (예: "대화 중 멘션", "웹 스크랩") */
   source_context: z.string().optional(),
 
@@ -95,9 +143,7 @@ const FrontmatterBaseSchema = z.object({
   /** 이 문서가 교차 연결 허브인지 여부 */
   hub: z.boolean().optional(),
   /** 허브 문서의 종류 */
-  hub_kind: z
-    .enum(['project_moc', 'cross_domain', 'synthesis', 'study_hub'])
-    .optional(),
+  hub_kind: HubKindSchema.optional(),
   /** 이 허브가 무엇을 통합하는지 한 줄 서술 (hub=true일 때 필수) */
   purpose: z.string().optional(),
 });
@@ -107,6 +153,25 @@ const L5_ONLY_FIELDS = [
   'buffer_type',
   'promotion_target',
   'source_context',
+] as const;
+
+/** L3 하위 유형별 중첩 객체 외 전용 metadata와 오류 표기. */
+const L3_SUB_LAYER_FIELD_GROUPS = [
+  {
+    subLayer: 'relational',
+    label: 'L3A (relational)',
+    fields: ['person_ref', 'trust_level', 'expertise_domains'],
+  },
+  {
+    subLayer: 'structural',
+    label: 'L3B (structural)',
+    fields: ['org_type', 'membership_status', 'ba_context'],
+  },
+  {
+    subLayer: 'topical',
+    label: 'L3C (topical)',
+    fields: ['topic_category', 'maturity'],
+  },
 ] as const;
 
 /** Frontmatter Zod 스키마 */
@@ -157,19 +222,16 @@ export const FrontmatterSchema = FrontmatterBaseSchema.superRefine(
       });
 
     // 서브레이어 전용 필드 배타성 검증
-    if (sub_layer === 'relational' && data.org_type)
-      ctx.addIssue({
-        code: 'custom',
-        message: 'org_type is exclusive to L3B (structural)',
-        path: ['org_type'],
-      });
-
-    if (sub_layer === 'structural' && data.person_ref)
-      ctx.addIssue({
-        code: 'custom',
-        message: 'person_ref is exclusive to L3A (relational)',
-        path: ['person_ref'],
-      });
+    for (const group of L3_SUB_LAYER_FIELD_GROUPS) {
+      if (layer === 3 && sub_layer === group.subLayer) continue;
+      for (const field of group.fields)
+        if (data[field] !== undefined)
+          ctx.addIssue({
+            code: 'custom',
+            message: `${field} is exclusive to ${group.label}`,
+            path: [field],
+          });
+    }
   },
 );
 

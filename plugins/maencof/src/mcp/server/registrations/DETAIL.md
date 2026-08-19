@@ -45,7 +45,7 @@
 
 `operations/kg.ts` 의 `timeWindowFields`(`since` / `until`, `YYYY-MM-DD`, 양 끝 포함)는 `kg_search` · `kg_context` · `kg_timeline` 세 도구가 공유한다. 시간창 의미를 한 곳에서 정의해 세 도구 설명이 갈라지지 않게 한다.
 
-`sub_layer` 를 받는 네 도구(`create` · `kg_search` · `kg_context` · `kg_timeline`)는 `types/frontmatter.ts` 의 `SubLayerSchema` 를 `.optional().describe(...)` 로 파생해 쓴다. 등록부에 값을 열거하지 않는다 — 설명 문구는 도구마다 달라도 허용값은 레이어 모델 하나에서만 나와야 한다.
+`sub_layer` 를 받는 여섯 도구(`create` · `update` · `move` · `kg_search` · `kg_context` · `kg_timeline`)는 `types/frontmatter.ts` 의 `SubLayerSchema` 를 `.optional().describe(...)` 로 파생해 쓴다. 같은 원칙이 update 의 frontmatter 하위 스키마 전체로 확장된다 — enum·날짜 값 집합(`HubKindSchema` · `DomainTypeSchema` · `OrgTypeSchema` · `MembershipStatusSchema` · `MaturitySchema` · `BufferTypeSchema` · `PromotionTargetSchema` · `IsoDateSchema`)은 전부 `types/frontmatter.ts` 파생이고, 등록부는 값을 열거하지 않는다. update 의 frontmatter 하위 스키마는 `updateFrontmatterInputSchema` 로 분리되어 있으며, 키 집합이 핸들러 직렬화 테이블과 일치함은 spec(`updateSchemaSurfaceSync.test.ts`)이 고정한다.
 
 ### 클러스터 파라미터
 
@@ -83,9 +83,10 @@
 
 ## History
 
+- 2026-08-20 — update 의 frontmatter 스키마를 표면 전체(편집 가능 16필드 추가)로 넓히며 `updateFrontmatterInputSchema` 로 분리했다. update·move 에 남아 있던 `sub_layer` 리터럴 열거 2곳과 create·update 의 `hub_kind` 리터럴 2곳을 정본 파생으로 교체했다 — 2026-08-04 에 네 자리를 고칠 때 남은 잔여다.
 - 2026-08-04 — `sub_layer` 열거를 네 자리에서 지우고 `SubLayerSchema` 파생으로 바꿨다. v3 가 L5 서브레이어를 없앴을 때 이 복제본들은 함께 고쳤지만 같은 복제를 한 `@ogham/maencof-lens` 는 빠졌다. 복제가 가능한 한 다음 모델 변경에서도 같은 자리가 남는다.
 - 2026-08-03 — `update` 의 `frontmatter.unset` 이 타입·핸들러·에러 메시지에는 있으나 `inputSchema` 에만 없어, 손상된 frontmatter 의 유일한 복구 경로가 호출 불가 상태였다. 스키마에 필드를 올리고 `AC-handler-fields-reach-schema` 로 고정했다.
 
 ## Last Updated
 
-2026-08-20 — `kg_search` 의 `seed`/`cluster` 상호배타와 `cluster_key` 스키마(create·update)를 API Contracts 에 적었다.
+2026-08-20 — update frontmatter 스키마의 정본 파생과 직렬화기 키 동기 계약을 현행화했다.

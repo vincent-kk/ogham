@@ -7,7 +7,17 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { McpToolName } from '../../../../constants/mcpToolNames.js';
-import { SubLayerSchema } from '../../../../types/frontmatter.js';
+import {
+  BufferTypeSchema,
+  DomainTypeSchema,
+  HubKindSchema,
+  IsoDateSchema,
+  MaturitySchema,
+  MembershipStatusSchema,
+  OrgTypeSchema,
+  PromotionTargetSchema,
+  SubLayerSchema,
+} from '../../../../types/frontmatter.js';
 import {
   captureInsightInputSchema,
   handleCaptureInsight,
@@ -21,6 +31,119 @@ import {
   registerMutateTool,
   registerReadTool,
 } from '../../middlewares/index.js';
+
+/**
+ * update 의 frontmatter 하위 스키마 — 키 집합은 핸들러의 FM_FIELD_SERIALIZERS
+ * ∪ {hub, unset} 와 일치해야 하며 updateSchemaSurfaceSync spec 이 고정한다.
+ * 값 집합은 전부 types/frontmatter.ts 정본에서 파생한다.
+ */
+export const updateFrontmatterInputSchema = z.object({
+  tags: z.array(z.string()).optional(),
+  title: z.string().optional(),
+  layer: z
+    .number()
+    .int()
+    .min(1)
+    .max(5)
+    .optional()
+    .describe('Layer change (1-5, use when correcting Layer violations)'),
+  confidence: z.number().min(0).max(1).optional(),
+  schedule: z.string().optional(),
+  cluster_key: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'Thread/cluster declaration — documents sharing a cluster_key collapse to one representative in kg_search/kg_context. Remove with unset.',
+    ),
+  sub_layer: SubLayerSchema.optional().describe(
+    'Sub-layer for Layer 3 only (relational/structural/topical).',
+  ),
+  gist: z
+    .string()
+    .optional()
+    .describe(
+      'One-line Layer 1 gist injected into turn context. Required for Layer 1 (update rejects a modification that leaves the L1 gist-less); optional for other layers. Single keyword/phrase line; capped to 128 code points in the per-turn view.',
+    ),
+  hub: z
+    .boolean()
+    .optional()
+    .describe(
+      'Promote or demote this document as a cross-layer hub (MOC). Requires purpose when true; rejected on Layer 5.',
+    ),
+  hub_kind: HubKindSchema.optional().describe(
+    'Hub document kind. Only valid together with hub=true.',
+  ),
+  purpose: z
+    .string()
+    .optional()
+    .describe(
+      'One line stating what this hub integrates. Required when hub=true.',
+    ),
+  source: z
+    .string()
+    .optional()
+    .describe('External source reference (typically Layer 3).'),
+  expires: IsoDateSchema.optional().describe(
+    'Expiry date YYYY-MM-DD (Layer 4 and L5 buffer).',
+  ),
+  mentioned_persons: z
+    .array(z.string())
+    .optional()
+    .describe('People mentioned in this document (all layers).'),
+  domain: z
+    .string()
+    .optional()
+    .describe('Domain name for cross-layer grouping.'),
+  domain_type: DomainTypeSchema.optional().describe(
+    'Domain kind (life/professional).',
+  ),
+  person_ref: z
+    .string()
+    .optional()
+    .describe('Person reference key (L3A relational only).'),
+  trust_level: z
+    .number()
+    .min(0)
+    .max(1)
+    .optional()
+    .describe('Trust level 0.0-1.0 (L3A relational).'),
+  expertise_domains: z
+    .array(z.string())
+    .optional()
+    .describe('Expertise domain list (L3A relational).'),
+  org_type: OrgTypeSchema.optional().describe(
+    'Organization kind (L3B structural only).',
+  ),
+  membership_status: MembershipStatusSchema.optional().describe(
+    'Membership status (L3B structural).',
+  ),
+  ba_context: z
+    .string()
+    .optional()
+    .describe('Ba context description (L3B structural).'),
+  topic_category: z
+    .string()
+    .optional()
+    .describe('Topic category (L3C topical).'),
+  maturity: MaturitySchema.optional().describe('Topic maturity (L3C topical).'),
+  buffer_type: BufferTypeSchema.optional().describe(
+    'Layer 5 only. What kind of unclassified item this is.',
+  ),
+  promotion_target: PromotionTargetSchema.optional().describe(
+    'Layer 5 only. Suggested destination when promoted (sub-layer name or L2).',
+  ),
+  source_context: z
+    .string()
+    .optional()
+    .describe('Layer 5 only. Where this item came from.'),
+  unset: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Remove these frontmatter fields. Use this to recover a document whose frontmatter fails validation. Protected fields (created, updated, layer, tags) are rejected; blocked entirely on Layer 1.',
+    ),
+});
 
 export function registerCrudTools(server: McpServer): void {
   // ─── create (mutate) ───────────────────────────────────────
@@ -53,11 +176,9 @@ export function registerCrudTools(server: McpServer): void {
             'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234" (max 2 subdirectory levels, nested under the layer/sub-layer directory). Layers 1 and 5 are flat — subdirectory prefixes are rejected there.',
           ),
         source: z.string().optional().describe('External source (for Layer 3)'),
-        expires: z
-          .string()
-          .regex(/^\d{4}-\d{2}-\d{2}$/)
-          .optional()
-          .describe('Expiry date YYYY-MM-DD (for Layer 4 and L5 buffer)'),
+        expires: IsoDateSchema.optional().describe(
+          'Expiry date YYYY-MM-DD (for Layer 4 and L5 buffer)',
+        ),
         cluster_key: z
           .string()
           .min(1)
@@ -86,26 +207,21 @@ export function registerCrudTools(server: McpServer): void {
           .describe(
             'Mark this document as a cross-layer hub (MOC). Hubs are orthogonal to layers — any Layer 1-4 document can be one. Requires purpose. Rejected on Layer 5.',
           ),
-        hub_kind: z
-          .enum(['project_moc', 'cross_domain', 'synthesis', 'study_hub'])
-          .optional()
-          .describe('Hub document kind. Only valid together with hub=true.'),
+        hub_kind: HubKindSchema.optional().describe(
+          'Hub document kind. Only valid together with hub=true.',
+        ),
         purpose: z
           .string()
           .optional()
           .describe(
             'One line stating what this hub integrates. Required when hub=true — it is what kg_context reports without opening the body.',
           ),
-        buffer_type: z
-          .enum(['snippet', 'conversation', 'unclassified'])
-          .optional()
-          .describe('Layer 5 only. What kind of unclassified item this is.'),
-        promotion_target: z
-          .enum(['relational', 'structural', 'topical', 'L2'])
-          .optional()
-          .describe(
-            'Layer 5 only. Suggested destination when this item is promoted.',
-          ),
+        buffer_type: BufferTypeSchema.optional().describe(
+          'Layer 5 only. What kind of unclassified item this is.',
+        ),
+        promotion_target: PromotionTargetSchema.optional().describe(
+          'Layer 5 only. Suggested destination when this item is promoted.',
+        ),
         source_context: z
           .string()
           .optional()
@@ -156,72 +272,14 @@ export function registerCrudTools(server: McpServer): void {
     McpToolName.UPDATE,
     {
       description:
-        'Updates an existing maencof document. The target must already contain a frontmatter block — use create for new documents. The updated field in Frontmatter is automatically refreshed.',
+        'Updates an existing maencof document: body content and/or frontmatter metadata. frontmatter patches any editable field (tags, title, layer, source, expires, domain/person/org/topic fields, L5 buffer fields, hub, gist, ...); unset removes fields. The target must already contain a frontmatter block — use create for new documents. The updated field is refreshed automatically.',
       inputSchema: z.object({
         path: z.string().describe('Document path'),
         content: z
           .string()
           .optional()
           .describe('New content (markdown, preserves existing if omitted)'),
-        frontmatter: z
-          .object({
-            tags: z.array(z.string()).optional(),
-            title: z.string().optional(),
-            layer: z
-              .number()
-              .int()
-              .min(1)
-              .max(5)
-              .optional()
-              .describe(
-                'Layer change (1-5, use when correcting Layer violations)',
-              ),
-            confidence: z.number().min(0).max(1).optional(),
-            schedule: z.string().optional(),
-            cluster_key: z
-              .string()
-              .min(1)
-              .optional()
-              .describe(
-                'Thread/cluster declaration — documents sharing a cluster_key collapse to one representative in kg_search/kg_context. Remove with unset.',
-              ),
-            sub_layer: z
-              .enum(['relational', 'structural', 'topical'])
-              .optional()
-              .describe(
-                'Sub-layer for Layer 3 only (relational/structural/topical).',
-              ),
-            gist: z
-              .string()
-              .optional()
-              .describe(
-                'One-line Layer 1 gist injected into turn context. Required for Layer 1 (update rejects a modification that leaves the L1 gist-less); optional for other layers. Single keyword/phrase line; capped to 128 code points in the per-turn view.',
-              ),
-            hub: z
-              .boolean()
-              .optional()
-              .describe(
-                'Promote or demote this document as a cross-layer hub (MOC). Requires purpose when true; rejected on Layer 5.',
-              ),
-            hub_kind: z
-              .enum(['project_moc', 'cross_domain', 'synthesis', 'study_hub'])
-              .optional()
-              .describe(
-                'Hub document kind. Only valid together with hub=true.',
-              ),
-            purpose: z
-              .string()
-              .optional()
-              .describe(
-                'One line stating what this hub integrates. Required when hub=true.',
-              ),
-            unset: z
-              .array(z.string())
-              .optional()
-              .describe(
-                'Remove these frontmatter fields. Use this to recover a document whose frontmatter fails validation. Protected fields (created, updated, layer, tags) are rejected; blocked entirely on Layer 1.',
-              ),
-          })
+        frontmatter: updateFrontmatterInputSchema
           .optional()
           .describe('Partial Frontmatter update (optional)'),
         change_reason: z
@@ -296,12 +354,9 @@ export function registerCrudTools(server: McpServer): void {
           .max(1)
           .optional()
           .describe('Confidence score (for Layer 3→2 transition)'),
-        target_sub_layer: z
-          .enum(['relational', 'structural', 'topical'])
-          .optional()
-          .describe(
-            'Target sub-layer for Layer 3 only (relational/structural/topical).',
-          ),
+        target_sub_layer: SubLayerSchema.optional().describe(
+          'Target sub-layer for Layer 3 only (relational/structural/topical).',
+        ),
         target_subdirectory: z
           .string()
           .optional()
