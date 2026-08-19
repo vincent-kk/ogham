@@ -18,6 +18,10 @@ export interface ContextItem {
   hops: number;
   /** 관계 설명 (시드 기준) */
   relation: string;
+  /** 클러스터 키 — 이 항목이 클러스터 소속일 때 (kg_search { cluster } 열기 질의의 키) */
+  clusterKey?: string;
+  /** 이 응답에서 대표 뒤로 접힌 문서 수 (1건 이상 접혔을 때만) */
+  collapsedCount?: number;
 }
 
 /** 컨텍스트 조립 옵션 */

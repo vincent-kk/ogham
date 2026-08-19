@@ -3,7 +3,8 @@
 ## Requirements
 
 - `kg_context` 는 쿼리로 후보를 고르고(`helpers/selectContextCandidates`, 상한 20 — 후보와 함께 query 파생 단어별 매칭 계수 `wordSeedCounts` 를 돌려준다) 토큰 예산 안에서 컨텍스트를 조립한다. 조립은 `search/contextAssembler.assembleContext` 에 위임한다.
-- 두 모드를 갖는다: 기본(content) 모드는 조립 markdown(`context`)을, `include_content: false` 는 조립 없이 선택 문서 목록(`documents: { path, title, score }[]`)만 돌려준다 — 파일을 직접 읽을 수 있는 호출자가 선별 조회하는 경로다.
+- 두 모드를 갖는다: 기본(content) 모드는 조립 markdown(`context`)을, `include_content: false` 는 조립 없이 선택 문서 목록(`documents: { path, title, score, clusterKey?, collapsedCount? }[]`)만 돌려준다 — 파일을 직접 읽을 수 있는 호출자가 선별 조회하는 경로다.
+- collapse 표기 전파: 쿼리 엔진이 접은 후보의 `clusterKey`/`collapsedCount` 는 두 모드 모두에 나타난다 — documents 항목 필드로, 조립 markdown 에는 `(+N collapsed · cluster: <key>)` 로. markdown 모드에서도 열기 키가 노출되어야 호출자가 `kg_search { cluster }` 를 만들 수 있다. collapse 의미론의 정본은 `search/queryEngine/DETAIL.md` 다.
 - `include_full: true` 면 상위 최대 3개 문서의 쿼리-매칭 스니펫(`extractBestSnippet`)을 덧붙인다. 스니펫 문자 상한은 잔여 예산(`token_budget` − 목록 markdown 추정치)에 연동해 300~1200자로 클램프하고, 잔여 예산이 0 이하면 스니펫 단계를 건너뛴다. 스니펫도 예산의 일부다 — `estimateTokens` 합계가 `token_budget` 을 넘으면 뒤 스니펫부터 덜어내고, `estimatedTokens` 는 스니펫 포함 최종 컨텍스트 기준으로 보고한다.
 - `layer_filter`·`sub_layer`·`scope` 는 예산 소비 전에 후보 선정 단계에서 적용된다.
 - seed 해석 상태는 두 모드 모두에서 응답 `seedResolution` 이 항상 보고한다 — 대상은 query 파생 **단어**뿐이고 인접 2-gram phrase 파생은 resolved·unresolved 어느 쪽에도 싣지 않는다(투기 파생). `resolved` 는 단어→어휘 매칭 노드 수, `unresolved` 는 미해석 단어 원문(미해석 존재 시에만 키 존재).
@@ -37,8 +38,13 @@
 
 - content·paths 두 모드 모두 `seedResolution` 을 담는다. query 파생 단어 중 미해석분만 `unresolved` 에 실리고, 인접 2-gram phrase 파생은 resolved·unresolved 어디에도 나타나지 않는다.
 
+### AC-collapse-marking — 접힘 표기 전파
+
+- 같은 `clusterKey` 후보가 접힌 경우, documents 모드 항목에 `clusterKey`/`collapsedCount` 가 실리고 content 모드 markdown 에 `(+N collapsed · cluster: <key>)` 표기가 나타난다.
+
 ## History
 
+- 2026-08-20 — collapse 표기 전파(documents 필드 + markdown 표기)를 추가했다 (R4). `sub_layer` 는 쿼리 엔진 `subLayerFilter` 로 이동.
 - 2026-08-05 — include_full 스니펫 상한을 잔여 예산 연동(300~1200자 클램프)으로 바꾸고, 잔여 예산 소진 시 스니펫 생략을 계약에 추가했다.
 - 2026-08-05 — content/paths 모드와 include_full 스니펫 예산 계상 계약을 문서화했다 (cross-review FIX-012).
 

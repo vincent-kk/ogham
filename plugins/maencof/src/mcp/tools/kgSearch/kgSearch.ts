@@ -1,8 +1,11 @@
 /**
  * @file kgSearch.ts
- * @description kg_search 도구 핸들러 — SA 기반 관련 문서 검색.
- * 쿼리 엔진의 ActivationResult 를 참조 메타(path·title·tags·gist)로 매핑한다.
+ * @description kg_search 도구 핸들러 — SA 기반 관련 문서 검색 + cluster 열거 모드.
+ * seed 모드는 쿼리 엔진의 ActivationResult 를 참조 메타(path·title·tags·gist)로 매핑하고
+ * collapse 표기(clusterKey/collapsedCount)를 그대로 노출한다. cluster 모드는 SA 없이
+ * 해당 clusterKey 전역 멤버를 updated 내림차순으로 연다 (다른 필터 미적용, score/hops 0).
  */
+import { MAX_CLUSTER_ENUMERATION } from '../../../constants/thresholds.js';
 import { readVaultFile } from '../../../core/vaultScanner/index.js';
 import { query } from '../../../search/queryEngine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
@@ -10,6 +13,7 @@ import type {
   KgSearchInput,
   KgSearchResult,
   KgSearchResultItem,
+  SeedResolution,
 } from '../../../types/mcp.js';
 import { toSeedResolution } from '../helpers/toSeedResolution.js';
 
@@ -17,7 +21,7 @@ import { toSeedResolution } from '../helpers/toSeedResolution.js';
  * kg_search 핸들러
  *
  * @param graph - 로드된 지식 그래프 (null이면 미빌드 오류 반환)
- * @param input - 도구 입력
+ * @param input - 도구 입력 (`seed` 또는 `cluster` 중 정확히 하나)
  * @param vaultRoot - vault 루트 절대 경로 (include_content 본문 읽기에만 사용)
  */
 export async function handleKgSearch(
@@ -29,39 +33,77 @@ export async function handleKgSearch(
     return {
       error: 'Index not built. Please run /maencof:build first.',
     };
+  if (input.cluster && input.seed && input.seed.length > 0)
+    return { error: 'seed and cluster are mutually exclusive.' };
+  if (!input.cluster && (!input.seed || input.seed.length === 0))
+    return { error: 'Either seed or cluster is required.' };
 
   const startTime = Date.now();
 
-  const result = query(graph, input.seed, {
-    maxResults: input.max_results ?? 10,
-    decay: input.decay ?? 0.7,
-    threshold: input.threshold ?? 0.1,
-    maxHops: input.max_hops ?? 5,
-    layerFilter: input.layer_filter as number[] | undefined,
-    since: input.since,
-    until: input.until,
-  });
+  let items: KgSearchResultItem[];
+  let exploredNodes: number;
+  let seedResolution: SeedResolution;
+  let clusterMeta: Pick<
+    KgSearchResult,
+    'cluster' | 'clusterSize' | 'truncated'
+  > = {};
 
-  // Post-SA sub_layer 필터
-  let filtered = result.results;
-  if (input.sub_layer)
-    filtered = result.results.filter((r) => {
-      const node = graph.nodes.get(r.nodeId);
-      return node?.subLayer === input.sub_layer;
+  if (input.cluster) {
+    const members = [...graph.nodes.values()]
+      .filter((n) => n.clusterKey === input.cluster)
+      .sort(
+        (a, b) =>
+          b.updated.localeCompare(a.updated) || a.path.localeCompare(b.path),
+      );
+    const clusterSize = members.length;
+    const truncated = clusterSize > MAX_CLUSTER_ENUMERATION;
+    items = members.slice(0, MAX_CLUSTER_ENUMERATION).map((n) => ({
+      path: n.path,
+      score: 0,
+      hops: 0,
+      title: n.title,
+      tags: n.tags,
+      ...(n.gist !== undefined && { gist: n.gist }),
+      clusterKey: input.cluster,
+    }));
+    exploredNodes = 0;
+    seedResolution = { resolved: {} };
+    clusterMeta = {
+      cluster: input.cluster,
+      clusterSize,
+      ...(truncated && { truncated }),
+    };
+  } else {
+    const result = query(graph, input.seed!, {
+      maxResults: input.max_results ?? 10,
+      decay: input.decay ?? 0.7,
+      threshold: input.threshold ?? 0.1,
+      maxHops: input.max_hops ?? 5,
+      layerFilter: input.layer_filter as number[] | undefined,
+      subLayerFilter: input.sub_layer,
+      since: input.since,
+      until: input.until,
     });
 
-  const items: KgSearchResultItem[] = filtered.map((r) => {
-    const node = graph.nodes.get(r.nodeId);
-    return {
-      path: String(r.nodeId),
-      score: r.score,
-      hops: r.hops,
-      title: node?.title ?? String(r.nodeId),
-      tags: node?.tags ?? [],
-      ...(node?.gist !== undefined && { gist: node.gist }),
-      ...(input.include_trace === true && { trace: r.path.map(String) }),
-    };
-  });
+    items = result.results.map((r) => {
+      const node = graph.nodes.get(r.nodeId);
+      return {
+        path: String(r.nodeId),
+        score: r.score,
+        hops: r.hops,
+        title: node?.title ?? String(r.nodeId),
+        tags: node?.tags ?? [],
+        ...(node?.gist !== undefined && { gist: node.gist }),
+        ...(input.include_trace === true && { trace: r.path.map(String) }),
+        ...(r.clusterKey !== undefined && { clusterKey: r.clusterKey }),
+        ...(r.collapsedCount !== undefined && {
+          collapsedCount: r.collapsedCount,
+        }),
+      };
+    });
+    exploredNodes = result.exploredNodes;
+    seedResolution = toSeedResolution(result.seedCounts);
+  }
 
   if (input.include_content === true && vaultRoot)
     await Promise.all(
@@ -77,7 +119,8 @@ export async function handleKgSearch(
   return {
     results: items,
     durationMs: Date.now() - startTime,
-    exploredNodes: result.exploredNodes,
-    seedResolution: toSeedResolution(result.seedCounts),
+    exploredNodes,
+    seedResolution,
+    ...clusterMeta,
   };
 }

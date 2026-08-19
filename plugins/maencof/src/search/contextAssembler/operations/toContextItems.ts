@@ -25,6 +25,10 @@ export function toContextItems(
       tags: node.tags,
       hops: result.hops,
       relation: describeRelation(result.hops),
+      ...(result.clusterKey !== undefined && { clusterKey: result.clusterKey }),
+      ...(result.collapsedCount !== undefined && {
+        collapsedCount: result.collapsedCount,
+      }),
     });
   }
 

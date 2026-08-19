@@ -45,13 +45,20 @@ export function registerKgTools(server: McpServer): void {
     McpToolName.KG_SEARCH,
     {
       description:
-        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords). Returns ranked references (path/title/tags/gist); include_content=true adds full bodies for consumers that cannot read vault files. When the goal is assembled multi-document context, prefer kg_context. Response metadata: exploredNodes is the count of nodes visited by SA — 0 means no seed item resolved, so expansion never started. seedResolution is always present: resolved maps each seed item to its lexical match count, and unresolved (present only when some items matched nothing) lists them verbatim — results reflect only resolved items.',
+        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords). Returns ranked references (path/title/tags/gist); include_content=true adds full bodies for consumers that cannot read vault files. When the goal is assembled multi-document context, prefer kg_context. Documents sharing a cluster_key collapse to one representative (the newest updated member) carrying clusterKey and collapsedCount — open the full thread via the cluster parameter. Response metadata: exploredNodes is the count of nodes visited by SA — 0 means no seed item resolved, so expansion never started. seedResolution is always present: resolved maps each seed item to its lexical match count, and unresolved (present only when some items matched nothing) lists them verbatim — results reflect only resolved items.',
       inputSchema: z.object({
         seed: z
           .array(z.string())
           .min(1)
+          .optional()
           .describe(
-            'Seed nodes (paths or keywords); array items are unioned. Use distilled concept keywords, not sentence fragments — drop grammar words (particles, articles, prepositions). Pair ambiguous/generic nouns with a qualifier in one item ("docker image", not bare "image"); multi-word within a single item is AND-matched. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item. A hyphen/underscore-joined item (e.g. "weekly-report") is first matched verbatim against tags/titles; when absent it is split and AND-matched as usual, and only if that also matches nothing are the split tokens OR-matched at reduced weight — so tags seen in responses can be reused as seed items as-is.',
+            'Seed nodes (paths or keywords); array items are unioned. Exactly one of seed or cluster is required. Use distilled concept keywords, not sentence fragments — drop grammar words (particles, articles, prepositions). Pair ambiguous/generic nouns with a qualifier in one item ("docker image", not bare "image"); multi-word within a single item is AND-matched. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item. A hyphen/underscore-joined item (e.g. "weekly-report") is first matched verbatim against tags/titles; when absent it is split and AND-matched as usual, and only if that also matches nothing are the split tokens OR-matched at reduced weight — so tags seen in responses can be reused as seed items as-is.',
+          ),
+        cluster: z
+          .string()
+          .optional()
+          .describe(
+            'Open a collapsed cluster: enumerate ALL documents whose cluster_key equals this value, newest updated first, without SA (score/hops are 0; other filters do not apply; capped at 200 with a truncated flag; clusterSize reports the full member count). Mutually exclusive with seed. Use the clusterKey reported on a collapsed result.',
           ),
         max_results: z
           .number()

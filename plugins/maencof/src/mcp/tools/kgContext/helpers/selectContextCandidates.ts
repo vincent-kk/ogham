@@ -36,22 +36,20 @@ export function selectContextCandidates(
   const scopePreset =
     KG_CONTEXT_SCOPE_PRESETS[input.scope ?? KgContextScope.BALANCED];
 
-  // 쿼리 실행 — 선별(layer/sub_layer/scope)은 예산 소비 전에 적용
+  // 쿼리 실행 — 선별(layer/sub_layer/scope)은 예산 소비 전에 적용.
+  // sub_layer 는 쿼리 엔진 subLayerFilter pre-filter 다 (절단 후 필터 금지).
   const queryResult = query(graph, seeds, {
     maxResults: 20,
     decay: 0.7,
     threshold: scopePreset.threshold,
     maxHops: scopePreset.maxHops,
     layerFilter: input.layer_filter as number[] | undefined,
+    subLayerFilter: input.sub_layer,
     since: input.since,
     until: input.until,
   });
 
-  let candidates = queryResult.results;
-  if (input.sub_layer)
-    candidates = candidates.filter(
-      (r) => graph.nodes.get(r.nodeId)?.subLayer === input.sub_layer,
-    );
+  const candidates = queryResult.results;
 
   const wordSeedCounts = Object.fromEntries(
     Object.entries(queryResult.seedCounts).filter(
