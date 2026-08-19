@@ -5,6 +5,7 @@ import type {
   ToolDiagnostic,
   ToolStatus,
 } from '../../../../types/toolEnvelope.js';
+import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
 
 export function resolveProjectValidationStatus(
   report: ValidationReport,
@@ -16,7 +17,7 @@ export function resolveProjectValidationStatus(
   if (certainties.includes(ANALYSIS_CERTAINTIES.UNSUPPORTED))
     return TOOL_STATUSES.UNSUPPORTED;
   if (
-    diagnostics.length > 0 ||
+    diagnostics.some((d) => !isFindingDiagnostic(d)) ||
     certainties.includes(ANALYSIS_CERTAINTIES.INDETERMINATE)
   )
     return TOOL_STATUSES.INDETERMINATE;

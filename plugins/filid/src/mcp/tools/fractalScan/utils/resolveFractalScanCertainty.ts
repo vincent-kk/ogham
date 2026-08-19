@@ -4,7 +4,14 @@ import type {
   ProjectSnapshot,
 } from '../../../../types/fractal.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
+import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
 
+/**
+ * Resolve whether a fractal scan has usable evidence for every measured axis.
+ * @param snapshot Snapshot whose graph and verification certainty are measured.
+ * @param diagnostics Snapshot and config diagnostics attached to the envelope.
+ * @returns The aggregate certainty after excluding diagnostics that restate findings.
+ */
 export function resolveFractalScanCertainty(
   snapshot: ProjectSnapshot,
   diagnostics: ToolDiagnostic[],
@@ -19,7 +26,7 @@ export function resolveFractalScanCertainty(
   if (
     graphCertainty !== ANALYSIS_CERTAINTIES.EXACT ||
     verificationCertainty !== ANALYSIS_CERTAINTIES.EXACT ||
-    diagnostics.length > 0
+    diagnostics.some((d) => !isFindingDiagnostic(d))
   )
     return ANALYSIS_CERTAINTIES.INDETERMINATE;
   return ANALYSIS_CERTAINTIES.EXACT;

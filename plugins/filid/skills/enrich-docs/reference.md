@@ -16,7 +16,7 @@ mcp__plugin_filid_tools__fractal_scan({
 
 The skill's `--depth` flag maps to the tool's `maxDepth` input — the flag keeps its short name, the tool input says what it does.
 
-The response is a common Filid envelope. Stop before editing when `status` is not `ok`; report its diagnostics instead of treating incomplete adapter evidence as a clean snapshot.
+The response is a common Filid envelope. Stop before editing when `status` is `indeterminate` or `unsupported`; report its diagnostics instead of treating incomplete adapter evidence as a clean snapshot. A `violations` status is the expected input — the document findings it carries are what this skill exists to correct.
 
 The snapshot tree is always built to full depth — `maxDepth` sets the `max-depth` rule threshold, not a traversal limit — so on a large project this payload can exceed the inline envelope budget, in which case it is persisted and `data` is not inline. Treat a returned artifact as the canonical full payload for this call and read the node projection from it; an absent inline `data` is never an empty candidate set.
 
