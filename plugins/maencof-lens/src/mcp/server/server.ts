@@ -51,14 +51,21 @@ export function createLensServer(configRoot: string | null) {
     McpToolName.SEARCH,
     {
       description:
-        "Search vault knowledge via Spreading Activation from seed keywords. Returns ranked references (path/title/tags/gist); include_content=true adds full bodies without needing file access. For assembled multi-document content, prefer the context tool.",
+        "Search vault knowledge via Spreading Activation from seed keywords. Returns ranked references (path/title/tags/gist); include_content=true adds full bodies without needing file access. Documents sharing a cluster_key collapse to one representative carrying clusterKey and collapsedCount — open the full thread via the cluster parameter. For assembled multi-document content, prefer the context tool.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         seed: z
           .array(z.string())
           .min(1)
+          .optional()
           .describe(
-            "Seed keywords; array items are unioned. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item (multi-word within a single item is AND-matched).",
+            "Seed keywords; array items are unioned. Exactly one of seed or cluster is required. For cross-language recall, pass each concept as two separate items — the working-language term and its English equivalent — not combined in one item (multi-word within a single item is AND-matched).",
+          ),
+        cluster: z
+          .string()
+          .optional()
+          .describe(
+            "Open a collapsed cluster: enumerate documents whose cluster_key equals this value, newest updated first, without SA (score/hops are 0). The vault's layer ceiling still applies. Mutually exclusive with seed.",
           ),
         max_results: z.optional(z.number()),
         decay: z.optional(z.number()),
