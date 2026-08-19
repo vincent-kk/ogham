@@ -29,10 +29,6 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 - A delegate's "done" — the diff inspected; the report is a claim, not evidence.
 - "Requirements met" — each requirement checked off against the spec, not inferred from green tests.
 
-## Red flags — stop
-
-"Should work now" · satisfaction voiced before anything ran · citing an earlier run as if it were this one · a green result you have not confirmed exercises the changed code.
-
 ## Rules
 
 - Hand off: substantial work loads `/seiri:request-review` before merging; the integration decision itself belongs to the user — suggest `/seiri:finish`.

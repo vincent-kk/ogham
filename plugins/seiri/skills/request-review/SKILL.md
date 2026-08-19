@@ -22,11 +22,8 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 **4. Never pre-judge findings.** No "don't flag X", no pre-rated severities, no "at most minor". If a finding would be a false positive, let it be raised and answer it with evidence in the loop.
 
-**5. Act on findings in order.** Breaking issues, then simple fixes, then complex ones — each verified individually before the next.
-
 ## Rules
 
-- Push back on wrong findings with reasoning and a check that proves it; deference is not a review outcome.
 - Any capable reviewer serves: a fresh session, a review pipeline, a colleague. The discipline is in what you hand them.
 - A delegated reviewer inherits none of this session's instructions. Name the rule files the work must satisfy and the verification command, in the request itself.
-- Hand off: fixes re-enter through `/seiri:implement`; the re-review closes when its findings do.
+- Hand off: findings enter through `/seiri:receive-review` and fixes through `/seiri:implement`; the re-review closes when its findings do.

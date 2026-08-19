@@ -22,15 +22,9 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 **4. Fix, then prove it.** Run the same command, and confirm the test could have failed: it must fail against pre-fix code, for the bug's own reason. A test that passes with and without the change certifies the bug as handled.
 
-## Red flags — stop
-
-One symptom fixed twice · each fix revealing a new problem · "should work now" without fresh output · a passing run not confirmed to exercise edited code.
-
-Repeated failure of one approach indicts the approach. Reconsider the assumption rather than patching again.
-
 ## Rules
 
-- Cite tool output for every claim. Your reasoning about output is not output.
+- A fix that did not hold reopens step 2 — record the refuted explanation and trace again; never patch the same symptom twice.
 - Change only what the diagnosis requires; mention other findings.
 - Hand off: after a fix, before declaring done, load `/seiri:verify`.
 - Report an unresolved cause plainly — a disclosed dead end beats a plausible fix nobody verified.

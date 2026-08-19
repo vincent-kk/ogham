@@ -24,15 +24,6 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 **5. Clean up under green.** Names, duplication, extraction — without adding behaviour, keeping every check green.
 
-## Rationalizations
-
-| Excuse                         | Reality                                |
-| ------------------------------ | -------------------------------------- |
-| "Too simple to break"          | Simple code breaks; the check is cheap |
-| "I'll add checks after"        | A check born passing proves nothing    |
-| "Already verified it by hand"  | No record, nothing re-runs             |
-| "Deleting the draft wastes it" | Unverified code is the waste           |
-
 ## Rules
 
 - This repository's explicit instructions outrank this sequence.

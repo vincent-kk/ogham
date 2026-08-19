@@ -19,11 +19,11 @@ You were invoked by the user. A diff is ordered for the machine that applies it,
 
 **2. Explore around the change, not the change.** The change means nothing outside the system it lands in. Collect background in two layers: **deep** — the standing system a stranger would need, marked skippable for the familiar; **narrow** — only what this change touches, never skippable. A statement about code carries `file:line`; one you did not read is marked as inference.
 
-**3. Isolate the essence on one concrete example.** The core idea in one piece — what this change makes true that was not true before. No enumeration of edits. Pick one small input and walk it through the system before and after the change; reuse that same example everywhere it can serve.
+**3. Isolate the essence on one concrete example.** The core idea in one piece — what this change makes true that was not true before. No enumeration of edits. Pick one small input and walk it through the system before and after the change.
 
 **4. Walk the details, regrouped.** Ignore file order. Group edits by concept, order groups so each rests only on earlier ones, and give each group: what changed, why, and an evidence excerpt. Where the diff contradicts its stated intent — commit message, PR body, comments — report the mismatch as a finding; never smooth it over.
 
-**5. Check comprehension.** Three to five medium questions answerable only from the substance — no gotchas — with answers at the end. If you cannot derive an answer from your own sections, the explanation is incomplete: return to step 2.
+**5. Check comprehension.** A short quiz answerable only from the substance. If you cannot derive an answer from your own sections, the explanation is incomplete: return to step 2.
 
 ## Rules
 

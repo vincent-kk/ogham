@@ -18,5 +18,3 @@ Convergence stalls in recognisable ways. Let the situation, not a round number, 
 - **The core noun keeps moving** — the same thing picks up three names across rounds. Stop adding features and ask what it fundamentally IS: "Of the names you've used for this, which is the core thing, and which are views of it?"
 - **An answer sounds like habit, not a requirement** — a constraint stated as if self-evident. Test it: "What if the opposite were true? Is that limit measured, or assumed?"
 - **The shape keeps growing** — every answer adds scope. Pull the other way: "What is the simplest version that would still be worth building?"
-
-These are the same three moves a longer interview would reach for; naming the trigger is what lets you reach for them early instead of after ten rounds.
