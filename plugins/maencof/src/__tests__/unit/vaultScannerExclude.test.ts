@@ -25,6 +25,9 @@ beforeAll(async () => {
   await addFile('node_modules/pkg/README.md');
   await addFile('dashboard/node_modules/fastify/docs/Guide.md');
   await addFile('dashboard/frontend/node_modules/typescript/README.md');
+  await addFile('99_Archive/newsletters/stored.md');
+  await addFile('notes-root.md');
+  await addFile('07_Unknown/mystery.md');
 });
 
 afterAll(async () => {
@@ -40,6 +43,15 @@ describe('scanVault default excludes', () => {
       '01_Core/identity.md',
       '04_Action/projects/devlog.md',
     ]);
+  });
+
+  it('레이어 디렉토리 밖(서고·루트·미지 디렉토리) md 를 스캔하지 않는다', async () => {
+    const files = await scanVault(vaultRoot);
+    const paths = files.map((f) => f.relativePath);
+
+    expect(paths).not.toContain('99_Archive/newsletters/stored.md');
+    expect(paths).not.toContain('notes-root.md');
+    expect(paths).not.toContain('07_Unknown/mystery.md');
   });
 
   it('extraExclude 로 추가 디렉토리를 제외할 수 있다', async () => {

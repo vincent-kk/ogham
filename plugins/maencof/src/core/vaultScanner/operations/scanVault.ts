@@ -5,7 +5,10 @@
 import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { VAULT_SCAN_DEFAULT_EXCLUDE as DEFAULT_EXCLUDE } from '../../../constants/vaultScanner.js';
+import {
+  VAULT_SCAN_DEFAULT_EXCLUDE as DEFAULT_EXCLUDE,
+  VAULT_SCAN_LAYER_PATTERNS,
+} from '../../../constants/vaultScanner.js';
 import type { ScannedFile, VaultScanOptions } from '../types/types.js';
 
 /**
@@ -21,7 +24,7 @@ export async function scanVault(
 
   const exclude = [...DEFAULT_EXCLUDE, ...(options?.extraExclude ?? [])];
 
-  const filePaths: string[] = await glob('**/*.md', {
+  const filePaths: string[] = await glob([...VAULT_SCAN_LAYER_PATTERNS], {
     cwd: vaultRoot,
     ignore: exclude,
     followSymbolicLinks: options?.followSymlinks ?? false,

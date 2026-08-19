@@ -36,11 +36,11 @@ afterEach(() => {
 });
 
 function makeMinimalGraph(): KnowledgeGraph {
-  const id = toNodeId('doc/a.md');
+  const id = toNodeId('02_Derived/a.md');
   const nodes = new Map<NodeId, KnowledgeNode>();
   nodes.set(id, {
     id,
-    path: 'doc/a.md',
+    path: '02_Derived/a.md',
     title: 'A',
     layer: 2,
     tags: ['t'],
@@ -141,8 +141,8 @@ describe('MetadataStore.loadGraph 샤드 round-trip', () => {
 describe('MetadataStore.loadGraph legacy 자동 마이그레이션', () => {
   function writeLegacyIndex(): void {
     const node = {
-      id: 'doc/legacy.md',
-      path: 'doc/legacy.md',
+      id: '01_Core/legacy.md',
+      path: '01_Core/legacy.md',
       title: 'Legacy',
       layer: 1,
       tags: [],

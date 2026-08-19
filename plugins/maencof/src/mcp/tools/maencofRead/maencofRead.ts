@@ -55,7 +55,7 @@ export async function handleMaencofRead(
   }
 
   const doc = parseDocument(input.path, content, mtime);
-  const nodeResult = buildKnowledgeNode(doc);
+  const nodeResult = buildKnowledgeNode(doc, { allowNonLayerPath: true });
 
   if (!nodeResult.success || !nodeResult.node)
     return {

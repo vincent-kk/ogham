@@ -160,7 +160,7 @@ export async function handleMaencofUpdate(
 
   // ─── L1 3중 게이트 ─────────────────────────────────────────────
   const doc = parseDocument(input.path, existing, mtime);
-  const nodeResult = buildKnowledgeNode(doc);
+  const nodeResult = buildKnowledgeNode(doc, { allowNonLayerPath: true });
   const isL1 = nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE;
 
   if (isL1) {
