@@ -1,6 +1,6 @@
 {
   "name": "@ogham/filid",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "private": true,
   "description": "FCA-AI rule enforcement plugin for Claude Code agent workflows",
   "keywords": [

@@ -27,10 +27,8 @@
 
 ### AC-stance-strong-split — +2 분할 지시
 
-- `+2` stance 는 분할 지시("Mixed work is split, not kept")와 작업장 사실
-  ("applies its own edits") 라인을 포함한다.
-- 예외 목록은 정확히 4개의 닫힌 집합이다: (1) 명시적 자기지명, (2) 프롬프트로
-  전달 불가한 상태(workspace 파일 제외), (3) 1파일 ~20줄, (4) 동일 과업 dispatch 실패.
+- `+2` stance 는 분할 지시("Mixed work is split, not kept")와 작업장 사실 ("applies its own edits") 라인을 포함한다.
+- 예외 목록은 정확히 4개의 닫힌 집합이다: (1) 명시적 자기지명, (2) 프롬프트로 전달 불가한 상태(workspace 파일 제외), (3) 1파일 ~20줄, (4) 동일 과업 dispatch 실패.
 
 ## Boundary Exemptions
 
@@ -42,10 +40,7 @@
 
 ## History
 
-- 2026-08-16 — `+2` 예외 (1)·(2) 를 좁히고 분할 지시를 추가했다. (1) "asked this
-  session" 은 모든 프롬프트에 성립해 예외 목록을 무력화했고, (2) "files, state, or
-  tools" 는 세션이 길수록 자동 성립했다. 위임 산출물이 조언 텍스트로 인식되는 것을
-  막기 위해 workspace 직접 편집 사실을 명문화했다.
+- 2026-08-16 — `+2` 예외 (1)·(2) 를 좁히고 분할 지시를 추가했다. (1) "asked this session" 은 모든 프롬프트에 성립해 예외 목록을 무력화했고, (2) "files, state, or tools" 는 세션이 길수록 자동 성립했다. 위임 산출물이 조언 텍스트로 인식되는 것을 막기 위해 workspace 직접 편집 사실을 명문화했다.
 
 ## Last Updated
 

@@ -4,7 +4,8 @@
 
 - 모든 file 또는 optional normalized file subset을 같은 snapshot에서 분석한다.
 - spec-document 15, test-record 32, fragmentation과 DETAIL group link를 role별 요약으로 반환한다.
-- unsupported/indeterminate count와 discovery를 violation 없는 PASS로 숨기지 않는다.
+- 문서 계약 finding을 옮긴 diagnostic은 판독 가능한 위반 증거이므로 certainty를 낮추지 않는다.
+- unsupported/indeterminate count와 discovery, 그 밖의 diagnostic을 violation 없는 PASS로 숨기지 않는다.
 - scan은 project source와 verification document를 변경하지 않는다.
 
 ## API Contracts
@@ -28,7 +29,8 @@
 ### AC-verification-certainty — No false PASS
 
 - dynamic/unsupported count 또는 discovery는 `ok`가 아니다.
+- `intent-document-contract`와 `detail-document-contract` diagnostic만 있고 finding이 있으면 `violations`이며 `indeterminate`가 아니다.
 
 ## Last Updated
 
-2026-07-27 — role/cap/fragmentation이 명시된 verification summary 계약.
+2026-08-20 — 문서 계약 finding diagnostic과 불완전 evidence를 구분했다.

@@ -34,7 +34,7 @@ This skill changes documents only. It does not move source files or alter public
 
 ### 1. Build snapshot evidence
 
-Call `fractal_scan` with `detail: "paths"` for the target. Use returned node paths and classifications as the candidate inventory. Stop on non-`ok` status; do not interpret unsupported or indeterminate evidence as a clean audit.
+Call `fractal_scan` with `detail: "paths"` for the target. Use returned node paths and classifications as the candidate inventory. Stop on `indeterminate` or `unsupported` status; do not interpret them as a clean audit. `violations` proceeds — its findings are the work.
 
 ### 2. Resolve minimal context
 

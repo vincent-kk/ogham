@@ -6,7 +6,8 @@
 - project mode는 선택된 FCA scope의 canonical rule만 같은 snapshot에 평가한다.
 - plan mode는 `planPath`의 read-only JSON artifact를 core validator에 전달한다.
 - plan mode는 common envelope가 저장한 full `ToolPayload`의 `.data`를 읽고, 기존 bare-plan artifact도 같은 schema로 읽는 호환성을 유지한다.
-- finding, snapshot diagnostic와 non-exact certainty를 status에 보존한다.
+- finding은 exact evidence 위에서도 `violations` status로 보존한다.
+- 문서 계약 finding을 옮긴 diagnostic은 certainty를 낮추지 않으며, 그 밖의 snapshot diagnostic과 non-exact certainty는 `indeterminate` 또는 `unsupported` status로 보존한다.
 - project source와 plan artifact를 수정하지 않는다.
 
 ## API Contracts
@@ -22,6 +23,7 @@
 
 - 생략 scope는 전체 canonical rule을 실행하고 지정 scope만 정확히 필터한다.
 - violation 또는 indeterminate evidence는 `ok`가 아니다.
+- `intent-document-contract`와 `detail-document-contract` diagnostic만 있고 finding이 있으면 `violations`이며 `indeterminate`가 아니다.
 
 ### AC-validate-plan — Exact execution contract
 
@@ -29,4 +31,4 @@
 
 ## Last Updated
 
-2026-07-27 — full payload 및 bare-plan artifact 호환을 포함한 read-only plan pre/postcondition 계약.
+2026-08-20 — 문서 계약 finding diagnostic과 불완전 evidence를 구분했다.

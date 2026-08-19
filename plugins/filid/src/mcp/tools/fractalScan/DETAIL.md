@@ -10,7 +10,7 @@
 - `nameFilter`는 node 이름 완전 일치로 `paths` 투영을 좁힌다. summary count는 필터와 무관하게 전체 tree를 설명한다.
 - `nameFilter`가 있으면 diagnostics도 살아남은 node 범위로 좁히고 제외 건수를 summary에 보고한다. 좁은 질의의 답이 프로젝트 크기의 payload 뒤에 실려 나가지 않게 하는 장치다.
 - `maxDepth`는 config의 max-depth **규칙 임계값**을 덮어쓸 뿐 탐색 한계가 아니다. tree는 언제나 완전 탐색하므로 이 값을 낮추면 노드 수는 그대로인 채 depth 규칙 위반만 늘어난다. root 밖 path는 허용하지 않는다.
-- unsupported 또는 ambiguous adapter evidence를 diagnostics와 status에 보존한다.
+- 문서 계약 finding을 옮긴 diagnostic은 판독 가능한 위반 증거이므로 certainty를 낮추지 않는다. 그 밖의 unsupported 또는 ambiguous adapter evidence는 diagnostics와 status에 보존한다.
 - scan은 project source와 config를 변경하지 않는다.
 
 ## API Contracts
@@ -39,6 +39,7 @@ interface FractalScanInput {
 ### AC-scan-evidence — adapter 증거
 
 - 미지원 파일과 동률 adapter claim은 PASS로 숨겨지지 않는다.
+- `intent-document-contract`와 `detail-document-contract` diagnostic만 있으면 exact evidence를 indeterminate로 낮추지 않으며, finding이 있으면 `violations`를 반환한다.
 - 동일 snapshot을 structure validation과 context resolution이 재사용할 수 있다.
 
 ### AC-scan-entry-names — 진입점 export 이름
@@ -60,4 +61,4 @@ interface FractalScanInput {
 
 ## Last Updated
 
-2026-07-29 — `paths` 투영에 진입점 export 이름과 node 이름 필터를 추가했다.
+2026-08-20 — 문서 계약 finding diagnostic과 불완전 evidence를 구분했다.
