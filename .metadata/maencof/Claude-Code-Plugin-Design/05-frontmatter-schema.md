@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-03-04
+updated: 2026-08-19
 tags: [frontmatter, yaml, schema, metadata]
 layer: design-area-1
 ---
@@ -39,6 +39,7 @@ MCP 도구와 검색 엔진이 일관되게 파싱·검색·필터링할 수 있
 | `confidence` | number | 내재화 신뢰도 0.0~1.0 (Layer 3→2 전이 기준) |
 | `accessed_count` | number | 세션별 참조 횟수 누적 |
 | `schedule` | string | Lazy Scheduling 표현식 |
+| `cluster_key` | string | 증분 문서의 스레드 선언 (예: `jira-gcc-3903`) — 같은 키의 문서들은 kg_search/kg_context에서 대표 1건으로 접힌다. 시드·태그 채널과 분리된 별도 필드. 제거는 `frontmatter.unset` |
 | `person` | PersonSchema | 인물 참조 (Layer 4/5용) |
 | `domain` | string | 도메인 식별자 (크로스 레이어) |
 | `domain_type` | enum | 도메인 유형 분류 (크로스 레이어) |

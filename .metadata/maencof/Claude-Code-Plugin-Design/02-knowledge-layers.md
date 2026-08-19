@@ -1,7 +1,7 @@
 ---
 created: 2026-02-28
-updated: 2026-08-04
-tags: [knowledge-layers, 5-layer, directory-structure, graph-characteristics]
+updated: 2026-08-19
+tags: [knowledge-layers, 5-layer, directory-structure, graph-characteristics, archive]
 layer: design-area-1
 ---
 
@@ -49,8 +49,30 @@ Boundary 는 v3 에서 레이어가 아니라 레이어 직교 hub 속성이다 
 ├── 04_Action/            # Layer 4: Volatile 노드
 │   └── 2026/02/
 ├── 05_Context/           # Layer 5: 미분류 임시 수용소 (평면 — 서브디렉토리 없음)
+├── 99_Archive/           # 그래프 외 서고 — 인덱싱 대상 아님 (아래 참조)
 └── .maencof-meta/        # 시스템 메타데이터
 ```
+
+### 그래프 외 서고와 경쟁 스펙트럼
+
+검색 소비자가 후보 전체를 읽는 LLM이므로 목적함수는 **토큰 예산 내 클러스터 커버리지**다.
+개별 항목이 질의 대상이 되는가에 따라 경쟁권이 3계급으로 갈린다:
+
+| 계급          | 위치                  | 경쟁권          | 예                             |
+| ------------- | --------------------- | --------------- | ------------------------------ |
+| 간행물/원자료 | `99_Archive/` (서고)  | 0표 — 그래프 밖 | 뉴스레터 수집 원문, 회의 원자료 |
+| 업무 에피소드 | L3/L4 + `cluster_key` | 스레드당 1표    | 메일·Jira·일정 스레드          |
+| 정제 지식     | L1/L2                 | 문서당 1표      | 결정·원칙 문서                 |
+
+"레이어 외 디렉토리는 그래프에서 무시"는 우연(frontmatter 검증 실패)이 아니라 **계약**이다:
+스캔은 레이어 디렉토리 allowlist(`VAULT_SCAN_LAYER_PATTERNS`)로 한정되고, 노드 빌드는
+경로 첫 세그먼트 게이트(`isLayerDirPath`)가 2차로, 인덱스 역직렬화 게이트가 3차로 막는다.
+따라서 **vault 루트의 유효 frontmatter 문서도 그래프에 들어가지 않는다** (allowlist의 의도된 결과).
+`99_Archive/` 문서는 명시 경로 read 로만 접근한다.
+
+vault 서고 `99_Archive/`와 시스템 보관소 `.maencof-meta/archive/`는 **별개 개념**이다 —
+전자는 사용자가 두는 그래프 외 원자료 서고, 후자는 `archiveExpired` 훅이 만료 L4 정본을
+옮기는 시스템 영역(스텁의 `archive_path`가 가리키는 곳)이다.
 
 ---
 

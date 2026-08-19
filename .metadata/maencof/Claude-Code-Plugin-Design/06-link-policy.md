@@ -1,7 +1,7 @@
 ---
 created: 2026-02-28
-updated: 2026-03-04
-tags: [link, backlink-index, relative-path, graph, edge-type]
+updated: 2026-08-19
+tags: [link, backlink-index, relative-path, graph, edge-type, archive-reference]
 layer: design-area-1
 ---
 
@@ -79,3 +79,7 @@ layer: design-area-1
 1. backlink-index.json의 경로를 파일 시스템과 대조
 2. 존재하지 않는 파일 참조 → `.maencof-meta/broken-links.json` 기록
 3. 세션 시작 시 경고 및 수정 제안
+
+**서고 참조 예외**: 대상 경로가 `99_Archive/`로 시작하는 링크는 깨진 링크가 아니라
+**서고 참조**(그래프 외 보관 참조)다 — 파일이 디스크에 존재하면 유효하며, 검증은
+정보성 `archive-reference`로 분류하고 오류로 집계하지 않는다.

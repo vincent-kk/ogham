@@ -1,7 +1,7 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
-tags: [search-engine, overview, dual-persona, spreading-activation]
+updated: 2026-08-19
+tags: [search-engine, overview, dual-persona, spreading-activation, cluster-collapse]
 layer: design-area-2
 ---
 
@@ -52,6 +52,24 @@ AI 에이전트 우선 근거: Claude Code 플러그인 환경에서 직접 상�
 | Layer 인식 | 없음 | Layer별 감쇠 인자 차등 |
 
 상세: [확산 활성화](./10-spreading-activation.md)
+
+---
+
+## 결과 계층 — 클러스터 collapse와 침강
+
+검색 소비자가 LLM이므로 목적함수는 상위 정밀도가 아니라 **토큰 예산 내 클러스터
+커버리지**다 — 같은 스레드 문서 N건은 독립 증거가 아니라 같은 사건의 반복 관측이다.
+`query()`는 SA·필터 뒤, top-k 절단 앞에서 세 후처리를 적용한다:
+
+- **클러스터 collapse**: 같은 `cluster_key`의 결과를 대표 1건으로 접는다. 그룹 점수는
+  활성 멤버의 **max 승계**(sum 금지 — 합산하면 수 프리미엄이 부활한다). 대표는 활성
+  필터를 만족하는 **그래프 전역 멤버 중 `updated` 최신**(결측 시 mtime 폴백) — 증류본이
+  생기면 검색에 활성화되지 않았어도 자동으로 대표를 승계한다. 응답에는 `clusterKey`와
+  접힌 건수(`collapsedCount`)를 표기해 호출자가 `kg_search { cluster }`로 열 수 있게 한다.
+- **`sub_layer` pre-filter**: layer 필터와 같은 위치(collapse·절단 전)에서 적용된다.
+- **`archived` 시드 강등**: `archived: true` 스텁은 시드 매칭·링크 제안 점수에
+  `ARCHIVED_SEED_MULTIPLIER`(0.3)를 곱해 침강시킨다 — 태그만 온전한 스텁이 정제
+  지식을 밀어내지 못하게 한다. 명시 경로 시드(path-exact/prefix)에는 적용하지 않는다.
 
 ---
 

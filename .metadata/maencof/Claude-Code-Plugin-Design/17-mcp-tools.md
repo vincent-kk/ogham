@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-07-09
+updated: 2026-08-19
 tags:
   [
     mcp,
@@ -30,13 +30,16 @@ maencof의 MCP 도구는 지식 트리 CRUD, 그래프 검색, 인사이트 캡�
 
 ## 1. 지식 트리 CRUD 도구 (5)
 
-| 도구     | 설명                           | 주요 파라미터               |
-| -------- | ------------------------------ | --------------------------- |
-| `create` | 새 기억 문서 생성              | layer, tags, content, title |
-| `read`   | 문서 읽기 + 관련 컨텍스트      | path, depth (SA 홉)         |
-| `update` | 기존 문서 수정                 | path, content               |
-| `delete` | 문서 삭제 (backlink 경고 포함) | path, force                 |
-| `move`   | Layer 간 문서 이동 (전이)      | path, target_layer          |
+| 도구     | 설명                           | 주요 파라미터                            |
+| -------- | ------------------------------ | ---------------------------------------- |
+| `create` | 새 기억 문서 생성              | layer, tags, content, title, cluster_key |
+| `read`   | 문서 읽기 + 관련 컨텍스트      | path, depth (SA 홉)                      |
+| `update` | 기존 문서 수정                 | path, content, frontmatter.cluster_key   |
+| `delete` | 문서 삭제 (backlink 경고 포함) | path, force                              |
+| `move`   | Layer 간 문서 이동 (전이)      | path, target_layer                       |
+
+`cluster_key`는 증분 문서(메일·Jira·일정 스레드)의 스레드 선언이다 — 같은 키의 문서들은
+kg_search/kg_context에서 대표 1건으로 접힌다. 제거는 `frontmatter.unset: ['cluster_key']`.
 
 ### CRUD 공통 사후 처리
 
@@ -61,13 +64,19 @@ maencof의 MCP 도구는 지식 트리 CRUD, 그래프 검색, 인사이트 캡�
 
 | 파라미터     | 타입     | 기본값 | 설명                                                                      |
 | ------------ | -------- | ------ | ------------------------------------------------------------------------- |
-| seed         | string[] | —      | 시드 노드 (경로 또는 키워드)                                              |
-| max_results  | number   | 10     | 최대 반환 수                                                              |
+| seed         | string[] | —      | 시드 노드 (경로 또는 키워드). `cluster`와 상호 배타 — 둘 중 하나 필수     |
+| cluster      | string   | —      | 접힌 클러스터 열기 — SA 없이 해당 `cluster_key` 전 멤버를 updated 내림차순 반환 (score/hops 0, 다른 필터 미적용, 상한 200 + `truncated` 표기) |
+| max_results  | number   | 10     | 최대 반환 수 (seed 모드 전용)                                             |
 | decay        | number   | 0.7    | 감쇠 인자                                                                 |
 | threshold    | number   | 0.1    | 발화 임계값                                                               |
 | max_hops     | number   | 5      | 최대 홉 수                                                                |
 | layer_filter | number[] | —      | Layer 필터 (1–5)                                                          |
-| sub_layer    | enum     | —      | 서브레이어 필터 (L3 전용: relational/structural/topical)                  |
+| sub_layer    | enum     | —      | 서브레이어 필터 (L3 전용) — SA 후·collapse 전 pre-filter                  |
+
+응답 collapse: 같은 `cluster_key`의 결과는 대표 1건으로 접히고 항목에 `clusterKey`와
+접힌 건수 `collapsedCount`가 표기된다(대표 = 클러스터 내 `updated` 최신). cluster 모드
+응답은 `cluster`/`clusterSize`/`truncated`를 싣는다. kg_context 결과(documents·조립
+markdown)에도 같은 표기가 전파된다.
 
 ### kg_context 파라미터
 
