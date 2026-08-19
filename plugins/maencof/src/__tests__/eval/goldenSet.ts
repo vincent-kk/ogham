@@ -356,7 +356,7 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
   },
   // archived 침강 골든 — working: 스텁 6건(등급 0)이 같은 태그로 경쟁하므로 침강
   // 실패(계수 상승) 시 스텁 도배로 nDCG 가 무너진다. archival: 스텁만 가진 태그의
-  // 회수 — 계수가 threshold 절벽(0.2) 아래로 내려가면 recall 0 이 드러난다.
+  // 회수 — 계수 0이면 시드 소멸로 recall 0 이 드러난다(축 하한 관측점).
   {
     id: 'archived-working-cve-watch',
     seeds: ['cve-watch'],

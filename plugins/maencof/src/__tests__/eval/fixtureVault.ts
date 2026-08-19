@@ -412,7 +412,8 @@ const FIXTURE_DOCS: FixtureDoc[] = [
   // ─── archived 침강 스윕 (계수 발화 경로) ──────────────────────────────
   // 수집형 vault 실측의 축소 재현: 같은 태그(cve-watch)에서 스텁 6 : 활성 3이 경쟁하고,
   // L2 정제 1건이 스텁 위에 서야 한다. retro-incident 는 스텁만 가진 태그 —
-  // tag-exact(0.5)×계수가 threshold(0.1) 아래로 내려가는 0.2 경계에서 회수 절벽을 만든다.
+  // 계수 0에서 시드가 소멸해 회수가 0으로 떨어지는 축 하한의 관측점이다
+  // (슬롯 경쟁에 의한 침강 판별은 실볼트 graded 모드가 맡는다).
   // 격리 원칙은 클러스터 블록과 동일: 전용 서브디렉토리(L4/advisories)와 신규 태그만 사용.
   // 제목·경로에 'archiv' 계열 토큰 금지 — InvertedIndex 는 title/tag 를 구분하지 않아
   // compound 골든(compound-or-vs-prefix-tier)의 'archiv' df=1 전제를 깨뜨린다.
