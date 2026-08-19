@@ -27,6 +27,8 @@ interface FixtureDoc {
   tags: string[];
   links?: string[];
   updated?: string;
+  /** 클러스터 키 — 같은 키의 문서들은 검색에서 대표 1건으로 접힌다 (R4 측정용) */
+  clusterKey?: string;
   /** 교차 연결 허브 — CROSS_LAYER 엣지의 출발점이 된다 */
   hub?: boolean;
   hubKind?: HubKind;
@@ -364,6 +366,47 @@ const FIXTURE_DOCS: FixtureDoc[] = [
     layer: Layer.L5_CONTEXT,
     tags: ['snippet'],
   },
+  // ─── 클러스터 collapse 측정 (R4·R7) ──────────────────────────────────────
+  // 같은 cluster_key 스레드 8건 + 어휘가 얇은 증류본 1건 + L2 결정 + 인접 주제.
+  // 격리 원칙: 전용 서브디렉토리(L4/works, L2/decisions — SIBLING 클리크 분리)와
+  // 기존 픽스처에 없는 태그(jira/gcc-3903/billing)만 사용해, 코퍼스 확장(IDF 의
+  // N 항)이 기존 골든 케이스를 흔들지 않게 한다. updated 를 하루씩 어긋나게 두어
+  // 대표 선정이 결정적이다. 증류본은 'jira' 태그가 없어 'jira' 시드 질의에서
+  // 활성화되지 않는다 — 전역 대표 승계(succession)의 측정 지점.
+  ...Array.from({ length: 8 }, (_, i) => ({
+    path: `L4/works/gcc-3903-update-${String(i + 1).padStart(2, '0')}.md`,
+    title: `GCC-3903 Update ${String(i + 1).padStart(2, '0')}`,
+    layer: Layer.L4_ACTION,
+    tags: ['jira', 'gcc-3903'],
+    clusterKey: 'jira-gcc-3903',
+    updated: `2026-02-0${i + 1}`,
+  })),
+  {
+    path: 'L4/works/gcc-3903-digest.md',
+    title: 'GCC-3903 Digest',
+    layer: Layer.L4_ACTION,
+    tags: ['gcc-3903'],
+    clusterKey: 'jira-gcc-3903',
+    updated: '2026-02-09',
+  },
+  {
+    path: 'L2/decisions/gcc-3903-retry-decision.md',
+    title: 'GCC-3903 Retry Decision',
+    layer: Layer.L2_DERIVED,
+    tags: ['gcc-3903', 'billing'],
+    links: [
+      'L4/works/gcc-3903-digest.md',
+      'L2/decisions/billing-retry-policy.md',
+    ],
+    updated: '2026-02-10',
+  },
+  {
+    path: 'L2/decisions/billing-retry-policy.md',
+    title: 'Billing Retry Policy',
+    layer: Layer.L2_DERIVED,
+    tags: ['billing'],
+    updated: '2026-01-20',
+  },
 ];
 
 function toKnowledgeNode(doc: FixtureDoc): KnowledgeNode {
@@ -379,6 +422,7 @@ function toKnowledgeNode(doc: FixtureDoc): KnowledgeNode {
     accessed_count: 0,
   };
   if (doc.links) node.outboundLinks = doc.links;
+  if (doc.clusterKey) node.clusterKey = doc.clusterKey;
   if (doc.hub) {
     node.hub = true;
     node.hubKind = doc.hubKind;

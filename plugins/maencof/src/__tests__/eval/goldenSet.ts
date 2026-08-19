@@ -328,4 +328,28 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L4/routines/report-archive.md': 1,
     },
   },
+  // 클러스터 커버리지 골든 (R4·R7) — 같은 cluster_key 스레드 8건 + 증류본이
+  // 대표 1건으로 접혀야 결정·인접 문서가 top-k 에 남는다. 접힌 멤버(update-01..08)는
+  // 등급 0 이므로 collapse 실패 시 도배로 nDCG 가 무너진다 — 골든 자체가 collapse 를
+  // 측정한다. 'gcc-3903' 시드는 스레드 전원 + 증류본 + 결정을 태그로 활성화한다.
+  {
+    id: 'cluster-collapse-coverage',
+    seeds: ['gcc-3903'],
+    relevance: {
+      'L2/decisions/gcc-3903-retry-decision.md': 2,
+      'L4/works/gcc-3903-digest.md': 2,
+      'L2/decisions/billing-retry-policy.md': 1,
+    },
+  },
+  // 전역 대표 승계 골든 (R4) — 'jira' 시드는 update-01..08 만 활성화하고 증류본
+  // (태그 gcc-3903 뿐)은 활성화하지 않는다. 요청서 계약(대표 = 클러스터 내 updated
+  // 최신)이 지켜지면 비활성 증류본이 대표로 승계된다. 승계 실패 시 update-08
+  // (등급 0)이 1위가 되어 nDCG 0.
+  {
+    id: 'cluster-digest-succession',
+    seeds: ['jira'],
+    relevance: {
+      'L4/works/gcc-3903-digest.md': 2,
+    },
+  },
 ];
