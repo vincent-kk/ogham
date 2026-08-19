@@ -18,12 +18,12 @@ MCP 도구와 검색 엔진이 일관되게 파싱·검색·필터링할 수 있
 
 ## 1. 필수 필드
 
-| 필드 | 타입 | 형식 | 설명 |
-|------|------|------|------|
-| `created` | string | YYYY-MM-DD | 최초 생성일. 변경 금지 |
-| `updated` | string | YYYY-MM-DD | 마지막 수정일. MCP 자동 갱신 |
-| `tags` | string[] | 배열 | 중복 감지·검색 기반. 최소 1개 필수 |
-| `layer` | number | 1-5 | 문서의 Layer 속성. 디렉토리와 일치 필요 |
+| 필드      | 타입     | 형식       | 설명                                    |
+| --------- | -------- | ---------- | --------------------------------------- |
+| `created` | string   | YYYY-MM-DD | 최초 생성일. 변경 금지                  |
+| `updated` | string   | YYYY-MM-DD | 마지막 수정일. MCP 자동 갱신            |
+| `tags`    | string[] | 배열       | 중복 감지·검색 기반. 최소 1개 필수      |
+| `layer`   | number   | 1-5        | 문서의 Layer 속성. 디렉토리와 일치 필요 |
 
 검증: Create/Update 시 MCP 도구가 필수 필드 존재 검사. 누락 시 오류 반환.
 
@@ -31,33 +31,33 @@ MCP 도구와 검색 엔진이 일관되게 파싱·검색·필터링할 수 있
 
 ## 2. 선택 필드
 
-| 필드 | 타입 | 용도 |
-|------|------|------|
-| `title` | string | 메타데이터 검색용 제목 |
-| `source` | string | 외부 출처 (Layer 3용) |
-| `expires` | string | 만료일 YYYY-MM-DD (Layer 4용) |
-| `confidence` | number | 내재화 신뢰도 0.0~1.0 (Layer 3→2 전이 기준) |
-| `accessed_count` | number | 세션별 참조 횟수 누적 |
-| `schedule` | string | Lazy Scheduling 표현식 |
-| `cluster_key` | string | 증분 문서의 스레드 선언 (예: `jira-gcc-3903`) — 같은 키의 문서들은 kg_search/kg_context에서 대표 1건으로 접힌다. 시드·태그 채널과 분리된 별도 필드. 제거는 `frontmatter.unset` |
-| `person` | PersonSchema | 인물 참조 (Layer 4/5용) |
-| `domain` | string | 도메인 식별자 (크로스 레이어) |
-| `domain_type` | enum | 도메인 유형 분류 (크로스 레이어) |
-| `sub_layer` | string | 서브레이어 식별 ('relational'\|'structural'\|'topical'; L3 전용) |
-| `person_ref` | string | L5 인물 메타데이터 참조 (L3A용) |
-| `trust_level` | number | 관계 신뢰도 0.0~1.0 (L3A용) |
-| `expertise_domains` | string[] | 해당 인물의 전문 분야 (L3A용) |
-| `org_type` | enum | 조직 유형: company\|community\|team\|institution (L3B용) |
-| `membership_status` | enum | 소속 상태: active\|inactive\|alumni (L3B용) |
-| `ba_context` | string | 조직의 Ba 맥락 설명 (L3B용) |
-| `topic_category` | enum | 주제 유형: interest\|academic\|technology\|literature (L3C용) |
-| `maturity` | enum | 성숙도: raw\|developing\|mature (L3C용) |
-| `buffer_type` | enum | 미분류 항목 종류: snippet\|conversation\|unclassified (L5 전용) |
-| `promotion_target` | enum | 승격 대상: relational\|structural\|topical\|L2 (L5 전용) |
-| `source_context` | string | 항목의 출처 서술 (L5 전용) |
-| `hub` | boolean | 교차 연결 허브 여부 (레이어 직교; L5 제외) |
-| `hub_kind` | enum | 허브 종류: project_moc\|cross_domain\|synthesis\|study_hub |
-| `purpose` | string | 허브가 통합하는 대상 한 줄 서술 (hub=true 시 필수) |
+| 필드                | 타입         | 용도                                                                                                                                                                           |
+| ------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `title`             | string       | 메타데이터 검색용 제목                                                                                                                                                         |
+| `source`            | string       | 외부 출처 (Layer 3용)                                                                                                                                                          |
+| `expires`           | string       | 만료일 YYYY-MM-DD (Layer 4용)                                                                                                                                                  |
+| `confidence`        | number       | 내재화 신뢰도 0.0~1.0 (Layer 3→2 전이 기준)                                                                                                                                    |
+| `accessed_count`    | number       | 세션별 참조 횟수 누적                                                                                                                                                          |
+| `schedule`          | string       | Lazy Scheduling 표현식                                                                                                                                                         |
+| `cluster_key`       | string       | 증분 문서의 스레드 선언 (예: `jira-gcc-3903`) — 같은 키의 문서들은 kg_search/kg_context에서 대표 1건으로 접힌다. 시드·태그 채널과 분리된 별도 필드. 제거는 `frontmatter.unset` |
+| `person`            | PersonSchema | 인물 참조 (Layer 4/5용)                                                                                                                                                        |
+| `domain`            | string       | 도메인 식별자 (크로스 레이어)                                                                                                                                                  |
+| `domain_type`       | enum         | 도메인 유형 분류 (크로스 레이어)                                                                                                                                               |
+| `sub_layer`         | string       | 서브레이어 식별 ('relational'\|'structural'\|'topical'; L3 전용)                                                                                                               |
+| `person_ref`        | string       | L5 인물 메타데이터 참조 (L3A용)                                                                                                                                                |
+| `trust_level`       | number       | 관계 신뢰도 0.0~1.0 (L3A용)                                                                                                                                                    |
+| `expertise_domains` | string[]     | 해당 인물의 전문 분야 (L3A용)                                                                                                                                                  |
+| `org_type`          | enum         | 조직 유형: company\|community\|team\|institution (L3B용)                                                                                                                       |
+| `membership_status` | enum         | 소속 상태: active\|inactive\|alumni (L3B용)                                                                                                                                    |
+| `ba_context`        | string       | 조직의 Ba 맥락 설명 (L3B용)                                                                                                                                                    |
+| `topic_category`    | enum         | 주제 유형: interest\|academic\|technology\|literature (L3C용)                                                                                                                  |
+| `maturity`          | enum         | 성숙도: raw\|developing\|mature (L3C용)                                                                                                                                        |
+| `buffer_type`       | enum         | 미분류 항목 종류: snippet\|conversation\|unclassified (L5 전용)                                                                                                                |
+| `promotion_target`  | enum         | 승격 대상: relational\|structural\|topical\|L2 (L5 전용)                                                                                                                       |
+| `source_context`    | string       | 항목의 출처 서술 (L5 전용)                                                                                                                                                     |
+| `hub`               | boolean      | 교차 연결 허브 여부 (레이어 직교; L5 제외)                                                                                                                                     |
+| `hub_kind`          | enum         | 허브 종류: project_moc\|cross_domain\|synthesis\|study_hub                                                                                                                     |
+| `purpose`           | string       | 허브가 통합하는 대상 한 줄 서술 (hub=true 시 필수)                                                                                                                             |
 
 ---
 
@@ -66,31 +66,31 @@ MCP 도구와 검색 엔진이 일관되게 파싱·검색·필터링할 수 있
 검색 엔진([메타데이터 전략](./12-metadata-strategy.md))의 Phase 1 구조 메타데이터는
 Frontmatter 필드를 직접 활용한다:
 
-| Frontmatter 필드 | 검색 엔진 용도 |
-|-----------------|--------------|
-| `tags` | 키워드 매칭, 중복 감지 (Jaccard) |
-| `layer` | Layer별 감쇠 인자 적용, 필터링 |
-| `created`/`updated` | 시간 기반 정렬, 신선도 판단 |
+| Frontmatter 필드    | 검색 엔진 용도                   |
+| ------------------- | -------------------------------- |
+| `tags`              | 키워드 매칭, 중복 감지 (Jaccard) |
+| `layer`             | Layer별 감쇠 인자 적용, 필터링   |
+| `created`/`updated` | 시간 기반 정렬, 신선도 판단      |
 
 ---
 
 ## 4. Layer-디렉토리 정합성 규칙
 
-| `layer` | `sub_layer` | 올바른 디렉토리 | 불일치 시 |
-|---------|-------------|--------------|----------|
-| 1 | (없음) | `01_Core/` | 경고 (저장은 허용) |
-| 2 | (없음) | `02_Derived/` | 경고 |
-| 3 | relational | `03_External/relational/` | 경고 |
-| 3 | structural | `03_External/structural/` | 경고 |
-| 3 | topical | `03_External/topical/` | 경고 |
-| 3 | (없음) | `03_External/` (레거시) | 경고 + sub_layer 지정 권장 |
-| 4 | (없음) | `04_Action/` | 경고 |
-| 5 | (없음) | `05_Context/` (평면 — 서브레이어 없음) | 경고 |
+| `layer` | `sub_layer` | 올바른 디렉토리                        | 불일치 시                  |
+| ------- | ----------- | -------------------------------------- | -------------------------- |
+| 1       | (없음)      | `01_Core/`                             | 경고 (저장은 허용)         |
+| 2       | (없음)      | `02_Derived/`                          | 경고                       |
+| 3       | relational  | `03_External/relational/`              | 경고                       |
+| 3       | structural  | `03_External/structural/`              | 경고                       |
+| 3       | topical     | `03_External/topical/`                 | 경고                       |
+| 3       | (없음)      | `03_External/` (레거시)                | 경고 + sub_layer 지정 권장 |
+| 4       | (없음)      | `04_Action/`                           | 경고                       |
+| 5       | (없음)      | `05_Context/` (평면 — 서브레이어 없음) | 경고                       |
 
 ## 5. 검증 시점
 
-| 시점 | 검증 내용 |
-|------|----------|
-| Create | 필수 필드 존재, `layer` 유효성, `tags` 비어있지 않음 |
-| Update | `updated` 자동 갱신, 필수 필드 누락 경고 |
+| 시점         | 검증 내용                                             |
+| ------------ | ----------------------------------------------------- |
+| Create       | 필수 필드 존재, `layer` 유효성, `tags` 비어있지 않음  |
+| Update       | `updated` 자동 갱신, 필수 필드 누락 경고              |
 | SessionStart | `expires` 경과 문서 탐지, `confidence` 전이 후보 탐지 |

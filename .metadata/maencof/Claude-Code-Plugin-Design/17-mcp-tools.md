@@ -62,16 +62,16 @@ kg_search/kg_context에서 대표 1건으로 접힌다. 제거는 `frontmatter.u
 
 ### kg_search 파라미터
 
-| 파라미터     | 타입     | 기본값 | 설명                                                                      |
-| ------------ | -------- | ------ | ------------------------------------------------------------------------- |
-| seed         | string[] | —      | 시드 노드 (경로 또는 키워드). `cluster`와 상호 배타 — 둘 중 하나 필수     |
+| 파라미터     | 타입     | 기본값 | 설명                                                                                                                                          |
+| ------------ | -------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| seed         | string[] | —      | 시드 노드 (경로 또는 키워드). `cluster`와 상호 배타 — 둘 중 하나 필수                                                                         |
 | cluster      | string   | —      | 접힌 클러스터 열기 — SA 없이 해당 `cluster_key` 전 멤버를 updated 내림차순 반환 (score/hops 0, 다른 필터 미적용, 상한 200 + `truncated` 표기) |
-| max_results  | number   | 10     | 최대 반환 수 (seed 모드 전용)                                             |
-| decay        | number   | 0.7    | 감쇠 인자                                                                 |
-| threshold    | number   | 0.1    | 발화 임계값                                                               |
-| max_hops     | number   | 5      | 최대 홉 수                                                                |
-| layer_filter | number[] | —      | Layer 필터 (1–5)                                                          |
-| sub_layer    | enum     | —      | 서브레이어 필터 (L3 전용) — SA 후·collapse 전 pre-filter                  |
+| max_results  | number   | 10     | 최대 반환 수 (seed 모드 전용)                                                                                                                 |
+| decay        | number   | 0.7    | 감쇠 인자                                                                                                                                     |
+| threshold    | number   | 0.1    | 발화 임계값                                                                                                                                   |
+| max_hops     | number   | 5      | 최대 홉 수                                                                                                                                    |
+| layer_filter | number[] | —      | Layer 필터 (1–5)                                                                                                                              |
+| sub_layer    | enum     | —      | 서브레이어 필터 (L3 전용) — SA 후·collapse 전 pre-filter                                                                                      |
 
 응답 collapse: 같은 `cluster_key`의 결과는 대표 1건으로 접히고 항목에 `clusterKey`와
 접힌 건수 `collapsedCount`가 표기된다(대표 = 클러스터 내 `updated` 최신). cluster 모드

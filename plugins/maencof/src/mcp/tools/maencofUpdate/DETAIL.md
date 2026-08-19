@@ -14,13 +14,13 @@
 
 ### Frontmatter 패치 (`MaencofUpdateFrontmatter`)
 
-| 연산              | 동작                                                              |
-| ----------------- | ----------------------------------------------------------------- |
-| `unset: string[]` | 키 라인을 제거한다. 보호 필드는 거부, L1 은 연산 자체를 거부한다. |
-| `hub: false`      | `hub` 키를 제거한다                                               |
-| `hub: true`       | `hub: true` 로 패치한다                                           |
-| `hub_kind`        | 값을 패치한다                                                     |
-| `purpose`         | `quoteYamlValue` 로 인용해 패치한다                               |
+| 연산              | 동작                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| `unset: string[]` | 키 라인을 제거한다. 보호 필드는 거부, L1 은 연산 자체를 거부한다.                     |
+| `hub: false`      | `hub` 키를 제거한다                                                                   |
+| `hub: true`       | `hub: true` 로 패치한다                                                               |
+| `hub_kind`        | 값을 패치한다                                                                         |
+| `purpose`         | `quoteYamlValue` 로 인용해 패치한다                                                   |
 | `cluster_key`     | `quoteYamlValue` 로 인용해 패치한다. 제거는 `unset: ['cluster_key']` (보호 필드 아님) |
 
 자동 생성 필드(`AUTO_GENERATED_FM_KEYS` — `created` · `updated` · `tags` · `layer`)는 호출자가 직접 쓰는 대상이 아니다.

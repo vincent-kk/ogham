@@ -11,8 +11,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { buildAdjacencyList } from '../../core/graphBuilder/index.js';
 import { handleKgContext } from '../../mcp/tools/kgContext/kgContext.js';
-import { invalidateQueryCache } from '../../search/queryEngine/index.js';
 import { estimateTokens } from '../../search/contextAssembler/operations/estimateTokens.js';
+import { invalidateQueryCache } from '../../search/queryEngine/index.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

@@ -109,7 +109,9 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     await store.appendStaleEntries([{ path: '02_Derived/a.md', op: 'mutate' }]);
 
     await mergeStaleNodesIntoGraph(vaultDir, graph);
-    expect(graph.edges.find((e) => e.from === '02_Derived/a.md')).toBeUndefined();
+    expect(
+      graph.edges.find((e) => e.from === '02_Derived/a.md'),
+    ).toBeUndefined();
   });
 
   it('엣지 파생 맵은 graph.edges 로 재구성되되 node-level pageRank 는 유지된다', async () => {
@@ -138,13 +140,15 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
 
     await mergeStaleNodesIntoGraph(vaultDir, graph);
     // phantom 엣지 a.md→x 가 재구성으로 제거됨 (graph.edges 는 비어 있음)
-    expect(graph.edgeWeightMap?.get('02_Derived/a.md' as NodeId)?.get('x' as NodeId)).toBe(
-      undefined,
-    );
+    expect(
+      graph.edgeWeightMap?.get('02_Derived/a.md' as NodeId)?.get('x' as NodeId),
+    ).toBe(undefined);
     expect(graph.adjacencyList?.get('02_Derived/a.md' as NodeId)).toEqual([]);
     // node-level pageRank 는 background rebuild 가 소유 — merge 는 fresh 노드에 pagerank 를
     // 부여하지 않는다(교체된 노드는 다음 전체 rebuild 까지 pagerank 미보유).
-    expect(graph.nodes.get('02_Derived/a.md' as NodeId)?.pagerank).toBeUndefined();
+    expect(
+      graph.nodes.get('02_Derived/a.md' as NodeId)?.pagerank,
+    ).toBeUndefined();
   });
 
   it('delete entry 는 graph nodes / 양방향 incident edges / invertedIndex 모두에서 제거한다', async () => {
@@ -152,7 +156,13 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     const b = makeNode('02_Derived/b.md', 'Beta');
     const invertedIndex: InvertedIndex = new Map([
       ['alpha', new Set<NodeId>(['02_Derived/a.md' as NodeId])],
-      ['t', new Set<NodeId>(['02_Derived/a.md' as NodeId, '02_Derived/b.md' as NodeId])],
+      [
+        't',
+        new Set<NodeId>([
+          '02_Derived/a.md' as NodeId,
+          '02_Derived/b.md' as NodeId,
+        ]),
+      ],
     ]);
     const graph: KnowledgeGraph = {
       nodes: new Map([
@@ -185,11 +195,17 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
 
     expect(graph.nodes.has('02_Derived/a.md' as NodeId)).toBe(false);
     expect(
-      graph.edges.find((e) => e.from === '02_Derived/a.md' || e.to === '02_Derived/a.md'),
+      graph.edges.find(
+        (e) => e.from === '02_Derived/a.md' || e.to === '02_Derived/a.md',
+      ),
     ).toBeUndefined();
     expect(graph.invertedIndex?.get('alpha')).toBeUndefined();
-    expect(graph.invertedIndex?.get('t')?.has('02_Derived/a.md' as NodeId)).toBe(false);
-    expect(graph.invertedIndex?.get('t')?.has('02_Derived/b.md' as NodeId)).toBe(true);
+    expect(
+      graph.invertedIndex?.get('t')?.has('02_Derived/a.md' as NodeId),
+    ).toBe(false);
+    expect(
+      graph.invertedIndex?.get('t')?.has('02_Derived/b.md' as NodeId),
+    ).toBe(true);
   });
 
   it('mutate entry 는 invertedIndex 의 옛 term 을 제거하고 신 term 을 추가한다', async () => {
@@ -220,11 +236,13 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     expect(graph.invertedIndex?.get('alpha')).toBeUndefined();
     // 옛 tag 't' 는 사라지고 새 tag 'renamed' 가 등장
     expect(graph.invertedIndex?.get('t')).toBeUndefined();
-    expect(graph.invertedIndex?.get('renamed')?.has('02_Derived/a.md' as NodeId)).toBe(
-      true,
-    );
+    expect(
+      graph.invertedIndex?.get('renamed')?.has('02_Derived/a.md' as NodeId),
+    ).toBe(true);
     // 새 title term 'beta' 가 등장
-    expect(graph.invertedIndex?.get('beta')?.has('02_Derived/a.md' as NodeId)).toBe(true);
+    expect(
+      graph.invertedIndex?.get('beta')?.has('02_Derived/a.md' as NodeId),
+    ).toBe(true);
   });
 
   it('mutate entry 의 ENOENT 는 노드 삭제로 해석되지 않는다 (race 보호)', async () => {
@@ -327,12 +345,16 @@ describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
       builtAt: '2026-01-01',
       nodeCount: 1,
       edgeCount: 0,
-      invertedIndex: new Map([['alpha', new Set<NodeId>(['02_Derived/a.md' as NodeId])]]),
+      invertedIndex: new Map([
+        ['alpha', new Set<NodeId>(['02_Derived/a.md' as NodeId])],
+      ]),
     };
 
     // 사전 query 1회 → cache 저장
     const before = queryEngine.query(graph, ['alpha']);
-    expect(before.results.map((r) => r.nodeId)).toContain('02_Derived/a.md' as NodeId);
+    expect(before.results.map((r) => r.nodeId)).toContain(
+      '02_Derived/a.md' as NodeId,
+    );
 
     // delete entry 적용 → invalidate 호출 기대
     await mergeStaleNodesIntoGraph(vaultDir, graph, [

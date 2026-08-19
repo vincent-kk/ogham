@@ -49,9 +49,9 @@ describe('archive vault exclusion (R1·R2)', () => {
     expect(
       output.graph.nodes.has('99_Archive/valid-frontmatter.md' as NodeId),
     ).toBe(false);
-    expect(output.graph.nodes.has('03_External/topical/live.md' as NodeId)).toBe(
-      true,
-    );
+    expect(
+      output.graph.nodes.has('03_External/topical/live.md' as NodeId),
+    ).toBe(true);
   });
 
   it('99_Archive 발 파싱 실패 노이즈가 0건이다', async () => {

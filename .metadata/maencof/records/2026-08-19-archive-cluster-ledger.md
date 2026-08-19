@@ -3,17 +3,17 @@
 플랜: [2026-08-19-archive-cluster-plan.md](./2026-08-19-archive-cluster-plan.md) (rev.2, verdict cleared)
 규칙: 태스크별 커밋 · fail-first · 문서 선행 · 완료 태스크는 재수행 금지.
 
-| 태스크 | 상태 | 산출/검증 |
-| --- | --- | --- |
-| T0 설계 정본 | 완료 | `00bc3376` — 정본 6장 + 플랜/요청서/원장 커밋 |
-| T1 allowlist+게이트 | 완료 | `bea770f9` — red 19건→green, 전체 158 pass, typecheck 0 |
-| T2 cluster_key | 완료 | red 6건→green, 전체 159 pass, typecheck 0 (quoteYamlValue 무인용 산출로 단언 2건 교정) |
-| T3 collapse+열기 | 완료 | red 5+α→green 22, 전체 160 pass, eval 통과. 발견: 쿼리 캐시 키가 열거식이라 subLayerFilter 누락 → 키에 추가(기존 selectivity 테스트가 검출) |
-| T3b lens | 완료 | `e87e7e18` — cluster 통과 + 상한 후필터(L1 누출 차단), lens 16 파일 green. 편차: graphCache 픽스처 `doc/*`→`02_Derived/*` (T1 게이트 파급) |
-| T4 archived 강등 | 완료 | red 2건→green, 전체 161 pass, eval 통과 (P3 실측 0.4→0.12 재현 테스트 포함) |
-| T5 checkup | 완료 | `344e0904` — D3 예외 3문서 반영, doctorDiagnostics 7건 불변 통과 |
-| T6 골든 2단계 | 완료 | `317fbfcc` — (b1) 픽스처 11건+골든 불변 27쿼리 게이트-활성 eval 통과(격리 기계 증명) → (b2) 골든 2케이스(coverage·succession) + baseline 27→29 재기록(ndcg 0.9758→0.977) 같은 커밋 |
-| T7 최종 검증·버전 | 완료 | filid 스캔(신규 finding 4건 → 문구 교정으로 0건, 잔여는 기존분), maencof 0.13.0(`060deb6e`)·lens 0.9.1(`51f6d5ea`) 빌드+bridge 커밋, 훅 번들 가드 통과. 최종 체인: typecheck 0 · maencof 161 파일 pass · eval 통과 · lens 16 파일 pass |
+| 태스크              | 상태 | 산출/검증                                                                                                                                                                                                                              |
+| ------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T0 설계 정본        | 완료 | `00bc3376` — 정본 6장 + 플랜/요청서/원장 커밋                                                                                                                                                                                          |
+| T1 allowlist+게이트 | 완료 | `bea770f9` — red 19건→green, 전체 158 pass, typecheck 0                                                                                                                                                                                |
+| T2 cluster_key      | 완료 | red 6건→green, 전체 159 pass, typecheck 0 (quoteYamlValue 무인용 산출로 단언 2건 교정)                                                                                                                                                 |
+| T3 collapse+열기    | 완료 | red 5+α→green 22, 전체 160 pass, eval 통과. 발견: 쿼리 캐시 키가 열거식이라 subLayerFilter 누락 → 키에 추가(기존 selectivity 테스트가 검출)                                                                                            |
+| T3b lens            | 완료 | `e87e7e18` — cluster 통과 + 상한 후필터(L1 누출 차단), lens 16 파일 green. 편차: graphCache 픽스처 `doc/*`→`02_Derived/*` (T1 게이트 파급)                                                                                             |
+| T4 archived 강등    | 완료 | red 2건→green, 전체 161 pass, eval 통과 (P3 실측 0.4→0.12 재현 테스트 포함)                                                                                                                                                            |
+| T5 checkup          | 완료 | `344e0904` — D3 예외 3문서 반영, doctorDiagnostics 7건 불변 통과                                                                                                                                                                       |
+| T6 골든 2단계       | 완료 | `317fbfcc` — (b1) 픽스처 11건+골든 불변 27쿼리 게이트-활성 eval 통과(격리 기계 증명) → (b2) 골든 2케이스(coverage·succession) + baseline 27→29 재기록(ndcg 0.9758→0.977) 같은 커밋                                                     |
+| T7 최종 검증·버전   | 완료 | filid 스캔(신규 finding 4건 → 문구 교정으로 0건, 잔여는 기존분), maencof 0.13.0(`060deb6e`)·lens 0.9.1(`51f6d5ea`) 빌드+bridge 커밋, 훅 번들 가드 통과. 최종 체인: typecheck 0 · maencof 161 파일 pass · eval 통과 · lens 16 파일 pass |
 
 ## 수용 기준 최종 대조 (2026-08-20)
 

@@ -28,8 +28,7 @@ function preferOver(
 ): number {
   const byDate = repDate(a).localeCompare(repDate(b));
   if (byDate !== 0) return byDate;
-  const byActive =
-    Number(activeIds.has(a.id)) - Number(activeIds.has(b.id));
+  const byActive = Number(activeIds.has(a.id)) - Number(activeIds.has(b.id));
   if (byActive !== 0) return byActive;
   return a.id < b.id ? 1 : -1;
 }

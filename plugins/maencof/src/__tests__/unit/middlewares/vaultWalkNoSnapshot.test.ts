@@ -44,7 +44,9 @@ describe('walkVaultForExternalChanges', () => {
     writeFileSync(
       join(vaultDir, '.maencof', 'snapshot.json'),
       JSON.stringify({
-        entries: [{ path: '02_Derived/a.md', mtime: stats.mtimeMs, size: stats.size }],
+        entries: [
+          { path: '02_Derived/a.md', mtime: stats.mtimeMs, size: stats.size },
+        ],
         capturedAt: '2026-01-01',
       }),
       'utf-8',
@@ -74,6 +76,9 @@ describe('walkVaultForExternalChanges', () => {
     const stale = JSON.parse(
       await import('node:fs').then((m) => m.readFileSync(stalePath, 'utf-8')),
     ) as { entries: { path: string; op: 'mutate' | 'delete' }[] };
-    expect(stale.entries).toContainEqual({ path: '02_Derived/a.md', op: 'mutate' });
+    expect(stale.entries).toContainEqual({
+      path: '02_Derived/a.md',
+      op: 'mutate',
+    });
   });
 });

@@ -1,7 +1,14 @@
 ---
 created: 2026-02-28
 updated: 2026-08-19
-tags: [search-engine, overview, dual-persona, spreading-activation, cluster-collapse]
+tags:
+  [
+    search-engine,
+    overview,
+    dual-persona,
+    spreading-activation,
+    cluster-collapse,
+  ]
 layer: design-area-2
 ---
 
@@ -30,10 +37,10 @@ layer: design-area-2
 
 ## 이중 사용자 (Dual Persona)
 
-| Persona | 핵심 가치 | 우선순위 |
-|---------|----------|---------|
+| Persona         | 핵심 가치                            | 우선순위    |
+| --------------- | ------------------------------------ | ----------- |
 | **AI 에이전트** | 토큰 절약, 최소 컨텍스트로 최대 맥락 | **Primary** |
-| **사람** | 네비게이션 효율, 관련 문서 빠른 탐색 | Secondary |
+| **사람**        | 네비게이션 효율, 관련 문서 빠른 탐색 | Secondary   |
 
 AI 에이전트 우선 근거: Claude Code 플러그인 환경에서 직접 상호작용하는 것은 AI이다.
 
@@ -42,14 +49,15 @@ AI 에이전트 우선 근거: Claude Code 플러그인 환경에서 직접 상�
 ## BFS→SA 발전 경위
 
 초기 설계(Set1)에서 BFS 2-hop 탐색을 채택했으나 확장성 병목이 확인되었다:
+
 - BFS 2-hop 한계: O(n) 풀 스캔, 1000파일 천장
 - SA 엔진은 가중치 기반 선택적 확산으로 이 병목을 해소한다
 
-| 항목 | BFS 2-hop | SA 엔진 |
-|------|-----------|---------|
-| 탐색 범위 | 고정 2홉 | configurable (감쇠 인자 제어) |
-| 가중치 | 없음 (균일) | 엣지/노드별 차등 |
-| Layer 인식 | 없음 | Layer별 감쇠 인자 차등 |
+| 항목       | BFS 2-hop   | SA 엔진                       |
+| ---------- | ----------- | ----------------------------- |
+| 탐색 범위  | 고정 2홉    | configurable (감쇠 인자 제어) |
+| 가중치     | 없음 (균일) | 엣지/노드별 차등              |
+| Layer 인식 | 없음        | Layer별 감쇠 인자 차등        |
 
 상세: [확산 활성화](./10-spreading-activation.md)
 

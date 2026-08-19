@@ -214,7 +214,10 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
   });
 
   it("complex-3: changed stale-nodes.json mtime → second getGraph re-loads stale entries", async () => {
-    writeShardedGraph([makeNode("02_Derived/a.md", "A"), makeNode("02_Derived/b.md", "B")]);
+    writeShardedGraph([
+      makeNode("02_Derived/a.md", "A"),
+      makeNode("02_Derived/b.md", "B"),
+    ]);
     writeStaleEntries([{ path: "02_Derived/a.md", op: "delete" }]);
 
     const loadSpy = vi.spyOn(MetadataStore.prototype, "loadStaleEntries");

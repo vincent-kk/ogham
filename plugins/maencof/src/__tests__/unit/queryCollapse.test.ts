@@ -35,7 +35,10 @@ function makeNode(
   };
 }
 
-function graphOf(nodes: KnowledgeNode[], edges: KnowledgeEdge[] = []): KnowledgeGraph {
+function graphOf(
+  nodes: KnowledgeNode[],
+  edges: KnowledgeEdge[] = [],
+): KnowledgeGraph {
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const edgeWeightMap = new Map<NodeId, Map<NodeId, number>>();
   for (const edge of edges) {
@@ -62,8 +65,14 @@ const anyNode = (): boolean => true;
 describe('collapseClusters', () => {
   it('그룹 점수는 활성 멤버 max 를 승계하고 updated 최신 멤버가 대표가 된다', () => {
     const graph = graphOf([
-      makeNode('04_Action/t-01.md', { clusterKey: 'th', updated: '2026-02-01' }),
-      makeNode('04_Action/t-02.md', { clusterKey: 'th', updated: '2026-02-05' }),
+      makeNode('04_Action/t-01.md', {
+        clusterKey: 'th',
+        updated: '2026-02-01',
+      }),
+      makeNode('04_Action/t-02.md', {
+        clusterKey: 'th',
+        updated: '2026-02-05',
+      }),
     ]);
     const results = [
       activation('04_Action/t-01.md', 0.9),
@@ -81,8 +90,14 @@ describe('collapseClusters', () => {
 
   it('활성화되지 않은 전역 최신 멤버(증류본)가 대표를 승계한다', () => {
     const graph = graphOf([
-      makeNode('04_Action/t-01.md', { clusterKey: 'th', updated: '2026-02-01' }),
-      makeNode('04_Action/t-02.md', { clusterKey: 'th', updated: '2026-02-02' }),
+      makeNode('04_Action/t-01.md', {
+        clusterKey: 'th',
+        updated: '2026-02-01',
+      }),
+      makeNode('04_Action/t-02.md', {
+        clusterKey: 'th',
+        updated: '2026-02-02',
+      }),
       makeNode('04_Action/digest.md', {
         clusterKey: 'th',
         updated: '2026-02-09',
@@ -105,7 +120,10 @@ describe('collapseClusters', () => {
 
   it('활성 필터를 만족하지 않는 전역 멤버는 대표가 될 수 없다', () => {
     const graph = graphOf([
-      makeNode('04_Action/t-01.md', { clusterKey: 'th', updated: '2026-02-01' }),
+      makeNode('04_Action/t-01.md', {
+        clusterKey: 'th',
+        updated: '2026-02-01',
+      }),
       makeNode('02_Derived/digest.md', {
         clusterKey: 'th',
         layer: Layer.L2_DERIVED,
@@ -140,7 +158,10 @@ describe('collapseClusters', () => {
     ]);
 
     const collapsed = collapseClusters(
-      [activation('04_Action/t-01.md', 0.5), activation('04_Action/t-02.md', 0.4)],
+      [
+        activation('04_Action/t-01.md', 0.5),
+        activation('04_Action/t-02.md', 0.4),
+      ],
       graph,
       anyNode,
     );
@@ -149,7 +170,10 @@ describe('collapseClusters', () => {
   });
 
   it('clusterKey 없는 결과는 그대로 통과한다', () => {
-    const graph = graphOf([makeNode('02_Derived/a.md'), makeNode('02_Derived/b.md')]);
+    const graph = graphOf([
+      makeNode('02_Derived/a.md'),
+      makeNode('02_Derived/b.md'),
+    ]);
     const results = [
       activation('02_Derived/a.md', 0.9),
       activation('02_Derived/b.md', 0.5),

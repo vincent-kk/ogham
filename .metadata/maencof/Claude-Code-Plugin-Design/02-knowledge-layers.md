@@ -1,7 +1,14 @@
 ---
 created: 2026-02-28
 updated: 2026-08-19
-tags: [knowledge-layers, 5-layer, directory-structure, graph-characteristics, archive]
+tags:
+  [
+    knowledge-layers,
+    5-layer,
+    directory-structure,
+    graph-characteristics,
+    archive,
+  ]
 layer: design-area-1
 ---
 
@@ -58,11 +65,11 @@ Boundary 는 v3 에서 레이어가 아니라 레이어 직교 hub 속성이다 
 검색 소비자가 후보 전체를 읽는 LLM이므로 목적함수는 **토큰 예산 내 클러스터 커버리지**다.
 개별 항목이 질의 대상이 되는가에 따라 경쟁권이 3계급으로 갈린다:
 
-| 계급          | 위치                  | 경쟁권          | 예                             |
-| ------------- | --------------------- | --------------- | ------------------------------ |
+| 계급          | 위치                  | 경쟁권          | 예                              |
+| ------------- | --------------------- | --------------- | ------------------------------- |
 | 간행물/원자료 | `99_Archive/` (서고)  | 0표 — 그래프 밖 | 뉴스레터 수집 원문, 회의 원자료 |
-| 업무 에피소드 | L3/L4 + `cluster_key` | 스레드당 1표    | 메일·Jira·일정 스레드          |
-| 정제 지식     | L1/L2                 | 문서당 1표      | 결정·원칙 문서                 |
+| 업무 에피소드 | L3/L4 + `cluster_key` | 스레드당 1표    | 메일·Jira·일정 스레드           |
+| 정제 지식     | L1/L2                 | 문서당 1표      | 결정·원칙 문서                  |
 
 "레이어 외 디렉토리는 그래프에서 무시"는 우연(frontmatter 검증 실패)이 아니라 **계약**이다:
 스캔은 레이어 디렉토리 allowlist(`VAULT_SCAN_LAYER_PATTERNS`)로 한정되고, 노드 빌드는
