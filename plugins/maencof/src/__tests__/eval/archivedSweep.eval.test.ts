@@ -16,14 +16,21 @@
  * 수렴 루프: 골든셋에 사례 추가 → 본 스윕 실행 → 곡선 근거로
  * constants/queryEngine.ts 승격 → `MAENCOF_EVAL_UPDATE_BASELINE=1` 재기록 → 같은
  * 커밋. 상세 리포트는 `MAENCOF_EVAL_ARCHIVED_SWEEP_REPORT=<path>` 지정 시 JSON 기록.
+ *
+ * 실볼트 graded 모드: `MAENCOF_EVAL_VAULT=<vault 경로>` +
+ * `MAENCOF_EVAL_ARCHIVED_GOLDEN=<golden JSON 경로>` 지정 시 같은 그리드를 실코퍼스
+ * 위에서 측정한다. 개인 데이터 비커밋 원칙(liveVault 와 동일): golden JSON 은
+ * vault 안 `.maencof-meta/eval/` 등 리포 밖에 두고 env 로만 주입한다.
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 import { describe, expect, it, vi } from 'vitest';
 
 import { ARCHIVED_SEED_MULTIPLIER } from '../../constants/queryEngine.js';
+import { toNodeId } from '../../types/common.js';
 import type { KnowledgeGraph } from '../../types/graph.js';
 
+import { buildLiveGraph } from './buildLiveGraph.js';
 import type { EngineMetrics, SearchFn } from './engineMetrics.js';
 import { LIVE_DEFAULTS } from './evalConstants.js';
 import { buildEvalGraph } from './fixtureVault.js';
@@ -156,8 +163,18 @@ function format(p: SweepPoint): string {
   );
 }
 
-/** 스윕 결과를 보고하고 공통 무결성(축 생존·기본값 포함·승격 후보)을 단언한다 */
-function reportAndAssert(points: SweepPoint[], label: string): void {
+/**
+ * 스윕 결과를 보고하고 공통 무결성(축 생존·기본값 포함·승격 후보)을 단언한다.
+ *
+ * @param points - 그리드 측정 결과
+ * @param label - 리포트 라벨 (fixture | live)
+ * @param extra - JSON 리포트에 병합할 추가 필드 (실볼트 메타데이터 등)
+ */
+function reportAndAssert(
+  points: SweepPoint[],
+  label: string,
+  extra?: Record<string, unknown>,
+): void {
   // 축 무결성: working·archival 각각에서 계수가 지표를 움직여야 한다 — 평탄하면
   // 모듈 getter 가 엔진에서 떨어졌거나(스파이 탈락) 골든이 발화 경로를 잃은 것이다.
   for (const cls of ['working', 'archival'] as const)
@@ -189,7 +206,7 @@ function reportAndAssert(points: SweepPoint[], label: string): void {
   if (reportPath)
     writeFileSync(
       reportPath,
-      `${JSON.stringify({ label, default: current, currentRank, points }, null, 2)}\n`,
+      `${JSON.stringify({ label, ...extra, default: current, currentRank, points }, null, 2)}\n`,
     );
 }
 
@@ -213,3 +230,98 @@ describe('archived multiplier sweep (fixture)', () => {
     ).toBe(1);
   });
 });
+
+const VAULT_PATH = process.env.MAENCOF_EVAL_VAULT;
+const GOLDEN_PATH = process.env.MAENCOF_EVAL_ARCHIVED_GOLDEN;
+
+/** 실볼트 graded 골든 쿼리 — env 로 주입되는 JSON 의 항목 계약 */
+interface LiveBenchQuery {
+  id: string;
+  /** working = 활성 문서가 정답(스텁은 노이즈), archival = 스텁이 정답 */
+  cls: 'working' | 'archival';
+  seeds: string[];
+  /** vault-root 상대 경로 → 등급. liveSearchFn 이 node.path 를 반환하므로 좌표계 동일 */
+  relevance: Record<string, 1 | 2>;
+}
+
+/** 외부 JSON 의 신뢰 경계 검증 — 형식 위반은 어떤 쿼리가 왜 무효인지로 실패한다 */
+function parseLiveGolden(raw: unknown): LiveBenchQuery[] {
+  const root = raw as { queries?: unknown };
+  if (typeof raw !== 'object' || raw === null || !Array.isArray(root.queries))
+    throw new Error('invalid archived golden: root must be { queries: [...] }');
+  return root.queries.map((entry, index) => {
+    const q = entry as Partial<LiveBenchQuery>;
+    const at = `query[${index}]${typeof q.id === 'string' ? ` (${q.id})` : ''}`;
+    if (typeof q.id !== 'string' || q.id.length === 0)
+      throw new Error(`invalid archived golden: ${at}: id must be a non-empty string`);
+    if (q.cls !== 'working' && q.cls !== 'archival')
+      throw new Error(`invalid archived golden: ${at}: cls must be 'working' | 'archival'`);
+    if (
+      !Array.isArray(q.seeds) ||
+      q.seeds.length === 0 ||
+      !q.seeds.every((s) => typeof s === 'string' && s.length > 0)
+    )
+      throw new Error(`invalid archived golden: ${at}: seeds must be a non-empty string array`);
+    if (
+      typeof q.relevance !== 'object' ||
+      q.relevance === null ||
+      Object.keys(q.relevance).length === 0 ||
+      !Object.values(q.relevance).every((g) => g === 1 || g === 2)
+    )
+      throw new Error(`invalid archived golden: ${at}: relevance must map paths to grade 1 | 2`);
+    return { id: q.id, cls: q.cls, seeds: q.seeds, relevance: q.relevance };
+  });
+}
+
+describe.skipIf(!VAULT_PATH || !GOLDEN_PATH)(
+  'archived multiplier sweep (live vault, graded)',
+  () => {
+    it(
+      'grid-sweeps the multiplier over the injected vault and golden',
+      { timeout: 300_000 },
+      async () => {
+        // 골든 파싱을 그래프 빌드 앞에 — 형식 오류는 vault 스캔 비용 없이 즉시 실패한다
+        const queries = parseLiveGolden(
+          JSON.parse(readFileSync(GOLDEN_PATH!, 'utf8')),
+        );
+        const { graph, parseFailureCount } = await buildLiveGraph(VAULT_PATH!);
+        console.log(
+          `[eval:archived] live: vault ${VAULT_PATH} — nodes ${graph.nodeCount}, parse failures ${parseFailureCount}, golden ${queries.length}`,
+        );
+
+        // relevance 경로 오타·이동 검출 — 그래프에 없는 경로는 지표를 조용히
+        // 왜곡하므로 경고와 리포트로 드러낸다 (살아 있는 코퍼스라 실패는 과민).
+        const missing = queries.flatMap((q) =>
+          Object.keys(q.relevance)
+            .filter((p) => !graph.nodes.has(toNodeId(p)))
+            .map((p) => `${q.id}: ${p}`),
+        );
+        if (missing.length)
+          console.warn(
+            `[eval:archived] live: ${missing.length} relevance paths not in graph:\n  ${missing.join('\n  ')}`,
+          );
+
+        const classes: ClassifiedQueries = {
+          working: queries.filter((q) => q.cls === 'working'),
+          archival: queries.filter((q) => q.cls === 'archival'),
+          legacy: [],
+        };
+        expect(
+          classes.working.length,
+          'live golden must carry working cases',
+        ).toBeGreaterThan(0);
+        expect(
+          classes.archival.length,
+          'live golden must carry archival cases',
+        ).toBeGreaterThan(0);
+
+        const points = await sweepGrid(graph, classes);
+        reportAndAssert(points, 'live', {
+          vault: VAULT_PATH,
+          goldenCount: queries.length,
+          missingRelevancePaths: missing,
+        });
+      },
+    );
+  },
+);
