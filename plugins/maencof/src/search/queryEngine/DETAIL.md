@@ -13,7 +13,7 @@
 - `subLayerFilter` 는 `layerFilter` 와 같은 위치(SA 후·collapse 전)의 pre-filter 다. 소비자(kg_search/kg_context)의 post-slice 필터는 금지 — 절단 후 필터는 `maxResults` 미달을 만든다.
 - `archived: true` 노드는 키워드 시드 채택 점수에 `ARCHIVED_SEED_MULTIPLIER`(0.3)를 곱해 강등한다 — 본문이 빈 스텁이 태그 채널 경쟁력으로 정제 지식을 밀어내지 못하게 한다(침강). path-exact/path-prefix 시드에는 적용하지 않는다 — 직접 지목은 존중된다.
 - `exploredNodes` 는 collapse·절단 이전의 활성 노드 수다(탐색량 지표, 출력량 아님).
-- 캐시는 최종(collapse 포함) 결과를 저장한다. 캐시 키는 (seeds, 열거된 options 필드, builtAt)이다 — 키는 필드 열거식(`queryCache.makeKey`)이므로 **QueryOptions 에 결과에 영향 주는 필드를 추가하면 키에도 반드시 추가한다**. `subLayerFilter` 포함.
+- 캐시는 최종(collapse 포함) 결과를 저장한다. 캐시 키 구성과 무효화 계약의 정본은 `queryCache/DETAIL.md` 다 — 키는 필드 열거식이므로 **QueryOptions 에 결과에 영향 주는 필드를 추가하면 그 열거에도 반드시 추가한다**.
 
 ## API Contracts
 

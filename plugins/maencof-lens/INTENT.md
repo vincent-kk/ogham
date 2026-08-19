@@ -2,17 +2,6 @@
 
 maencof 볼트 지식에 대한 읽기 전용 MCP 접근을 개발 컨텍스트에 제공하는 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
-## Structure
-
-- `src/config/` — `.maencof-lens/config.json` 로더
-- `src/vault/` — 다중 볼트 라우팅 및 그래프 캐싱
-- `src/filter/` — 레이어 필터링 로직
-- `src/tools/` — 5개 MCP 툴 핸들러 (`search`/`context`/`navigate`/`read`/`status`)
-- `src/mcp/` — MCP 서버 설정
-- `src/hooks/` — SessionStart 스킬 가이드 주입
-- `skills/` — 3개 스킬 (setup, lookup, brief)
-- `agents/` — 1개 에이전트 (researcher)
-
 ## Conventions
 
 - 볼트 접근은 읽기 전용; 볼트 파일시스템에 쓰기 금지

@@ -4,13 +4,7 @@ maencof 볼트 지식에 대한 읽기 전용 MCP 접근을 개발 컨텍스트�
 
 ## Structure
 
-- `config/` — `.maencof-lens/config.json` 설정 관리
-- `vault/` — 다중 볼트 라우팅 및 그래프 캐싱
-- `filter/` — 레이어 필터링 로직
-- `tools/` — 5개 MCP 읽기 전용 툴 핸들러
-- `mcp/` — MCP 서버 설정 및 진입점
-- `hooks/` — SessionStart 스킬 가이드 주입
-- `__tests__/` — 단위 테스트 (organ)
+- `__tests__/` 는 더블 언더스코어 이름 때문에 organ 으로 분류된다 — 자체 INTENT 를 두지 않고, 검증 파일이라 내부 모듈을 직접 import 해도 경계 위반이 아니다.
 
 ## Boundaries
 

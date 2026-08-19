@@ -5,7 +5,7 @@
 - `kg_search` 는 시드(경로 또는 키워드)에서 Spreading Activation 으로 관련 문서를 찾아 **참조 메타**를 돌려준다. 쿼리 엔진(`search/queryEngine`)의 `ActivationResult` 는 불변이고, 노드 메타 매핑은 이 핸들러의 몫이다.
 - 기본 응답 항목은 `{ path, score, hops, title, tags, gist? }` 다. hop 체인은 `include_trace: true` 일 때만 `trace` 로, 본문 전문은 `include_content: true` 일 때만 `content` 로 싣는다 — 응답은 LLM 컨텍스트로 들어가므로 기본형은 가볍게 유지한다.
 - seed 해석 상태는 응답 `seedResolution` 이 항상 보고한다 — `resolved` 는 seed 원문→어휘 매칭 노드 수(시드 budget 캡 이전), `unresolved` 는 어떤 노드에도 매칭되지 않은 원문(입력 순서·중복 제거, 미해석 존재 시에만 키 존재). `results` 는 해석된 seed 만 반영하며 내용·점수·순서는 불변이다.
-- `include_content` 의 본문 읽기는 `vaultRoot` 파라미터로 위임받아 `core/vaultScanner.readVaultFile` 로 수행한다. 파일 부재·읽기 실패 문서는 오류 대신 `content` 를 생략한다.
+- `include_content` 의 본문 읽기는 `vaultRoot` 파라미터로 위임받아 `core/vaultScanner` 의 `readVaultFile` 로 수행한다. 파일 부재·읽기 실패 문서는 오류 대신 `content` 를 생략한다.
 - `sub_layer`·`layer_filter`·`since`/`until` 은 전부 쿼리 엔진 옵션으로 전달한다 — `sub_layer` 는 `subLayerFilter` pre-filter 다(핸들러 post-filter 금지: 절단 후 필터는 `max_results` 미달을 만든다).
 - collapse 표기: 쿼리 엔진이 접은 결과의 `clusterKey`/`collapsedCount` 를 항목에 그대로 노출한다. collapse 의미론의 정본은 `search/queryEngine/DETAIL.md` 다.
 - **cluster 열거 모드**: `cluster` 입력이 있으면 SA 없이 해당 `clusterKey` 전역 멤버를 `updated` 내림차순(동률 시 path 사전순)으로 반환한다. `seed` 와 상호 배타(둘 다/둘 다 없음 → `{ error }`). `MAX_CLUSTER_ENUMERATION`(200) 절단 시 `truncated: true`. `max_results`·`layer_filter`·`sub_layer`·`since`/`until`·`include_trace` 는 이 모드에 적용되지 않는다. 항목 score/hops 는 0, `exploredNodes` 는 0, `seedResolution` 은 `{ resolved: {} }`, 응답에 `cluster`·`clusterSize`(전역 총원) 를 싣는다. `include_content` 는 두 모드 공용이다.

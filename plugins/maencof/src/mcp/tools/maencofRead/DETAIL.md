@@ -5,7 +5,7 @@
 - `read` 는 단일 문서를 읽어 원문 전문(`content`)과 파싱된 노드 메타(`node`)를 돌려준다. SA 관련 문서 확장은 이 도구의 몫이 아니다 — `kg_search`/`kg_context` 소관이며, 입력은 `path` 하나뿐이다.
 - 경로는 `resolveWithinVault` 로 vault 봉쇄를 검증하고, 파일 부재·파싱 실패는 예외 대신 `success: false` 결과로 돌려준다.
 - `node` 구성(`buildKnowledgeNode`)은 `allowNonLayerPath` 옵트아웃을 쓴다 — read 는 레이어 디렉토리 밖 경로에도 동작해야 하며, 그래프 편입 자격은 색인 경로의 기본 게이트(`isLayerDirPath`) 소관이다.
-- `01_Core/`(L1) 문서 읽기에는 memory-organizer 의 간접 접근 규칙을 알리는 warning 을 덧붙인다.
+- L1 (vault 레이어 디렉토리 01_Core) 문서 읽기에는 memory-organizer 의 간접 접근 규칙을 알리는 warning 을 덧붙인다.
 
 ## API Contracts
 
@@ -25,7 +25,7 @@
 
 ### AC-l1-warning — L1 간접 접근 경고
 
-- `01_Core/` 경로 읽기의 성공 응답에는 해당 warning 이 실린다.
+- L1 (vault 레이어 디렉토리 01_Core) 경로 읽기의 성공 응답에는 해당 warning 이 실린다.
 
 ## Last Updated
 
