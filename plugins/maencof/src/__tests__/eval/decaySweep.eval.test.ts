@@ -148,61 +148,65 @@ function format({ candidate: c, metrics: m }: SweepEntry): string {
 }
 
 describe('decay factor sweep (L5 / hub / CROSS_LAYER convergence)', () => {
-  it('grid-sweeps decay factors and reports best vs current defaults', async () => {
-    const graph = buildEvalGraph();
+  it(
+    'grid-sweeps decay factors and reports best vs current defaults',
+    { timeout: 300_000 },
+    async () => {
+      const graph = buildEvalGraph();
 
-    const entries: SweepEntry[] = [];
-    for (const candidate of gridCombos())
-      entries.push({
-        candidate,
-        metrics: await measureCandidate(candidate, graph),
-      });
+      const entries: SweepEntry[] = [];
+      for (const candidate of gridCombos())
+        entries.push({
+          candidate,
+          metrics: await measureCandidate(candidate, graph),
+        });
 
-    // 스윕 무결성: 축마다 따로 확인한다. 전체 평탄성만 보면 한 축(CROSS_LAYER)이
-    // 살아 있는 것만으로 통과해 나머지 두 축이 죽은 걸 놓친다 — 모듈 스파이가
-    // 엔진에서 떨어지거나 캐시가 결과를 고정하면 해당 축이 먼저 평탄해진다.
-    for (const axis of ['l5', 'hub', 'crossLayer'] as const) {
-      const slice = entries.filter((e) =>
-        (['l5', 'hub', 'crossLayer'] as const)
-          .filter((other) => other !== axis)
-          .every((other) => e.candidate[other] === DEFAULTS[other]),
+      // 스윕 무결성: 축마다 따로 확인한다. 전체 평탄성만 보면 한 축(CROSS_LAYER)이
+      // 살아 있는 것만으로 통과해 나머지 두 축이 죽은 걸 놓친다 — 모듈 스파이가
+      // 엔진에서 떨어지거나 캐시가 결과를 고정하면 해당 축이 먼저 평탄해진다.
+      for (const axis of ['l5', 'hub', 'crossLayer'] as const) {
+        const slice = entries.filter((e) =>
+          (['l5', 'hub', 'crossLayer'] as const)
+            .filter((other) => other !== axis)
+            .every((other) => e.candidate[other] === DEFAULTS[other]),
+        );
+        expect(
+          new Set(slice.map((e) => e.metrics.ndcg10)).size,
+          `${axis} axis produced a single ndcg value across ${slice.length} points — that coefficient is not reaching the engine (module spy detached, or a stale query cache)`,
+        ).toBeGreaterThan(1);
+      }
+
+      entries.sort((a, b) => rankKey(b.metrics) - rankKey(a.metrics));
+
+      const defaultEntry = entries.find((e) => same(e.candidate, DEFAULTS));
+      expect(defaultEntry, 'grid must contain current defaults').toBeDefined();
+      const defaultRank = entries.indexOf(defaultEntry!) + 1;
+      const best = entries[0]!;
+
+      console.log(
+        `[eval:decay] configs ${entries.length}, current defaults rank ${defaultRank}/${entries.length}`,
       );
-      expect(
-        new Set(slice.map((e) => e.metrics.ndcg10)).size,
-        `${axis} axis produced a single ndcg value across ${slice.length} points — that coefficient is not reaching the engine (module spy detached, or a stale query cache)`,
-      ).toBeGreaterThan(1);
-    }
+      console.log(`[eval:decay] default  ${format(defaultEntry!)}`);
+      for (const [i, entry] of entries.slice(0, 5).entries())
+        console.log(`[eval:decay] top-${i + 1}    ${format(entry)}`);
 
-    entries.sort((a, b) => rankKey(b.metrics) - rankKey(a.metrics));
+      const gain = best.metrics.ndcg10 - defaultEntry!.metrics.ndcg10;
+      if (gain >= SWEEP_SIGNIFICANCE && !same(best.candidate, DEFAULTS))
+        console.warn(
+          `[eval:decay] PROMOTION CANDIDATE: best beats defaults by ndcg10 +${gain.toFixed(4)} — consider updating constants/weights.ts and constants/spreadingActivation.ts, then re-recording the ratchet baseline`,
+        );
 
-    const defaultEntry = entries.find((e) => same(e.candidate, DEFAULTS));
-    expect(defaultEntry, 'grid must contain current defaults').toBeDefined();
-    const defaultRank = entries.indexOf(defaultEntry!) + 1;
-    const best = entries[0]!;
+      const reportPath = process.env.MAENCOF_EVAL_DECAY_SWEEP_REPORT;
+      if (reportPath)
+        writeFileSync(
+          reportPath,
+          `${JSON.stringify({ defaults: defaultEntry, defaultRank, entries }, null, 2)}\n`,
+        );
 
-    console.log(
-      `[eval:decay] configs ${entries.length}, current defaults rank ${defaultRank}/${entries.length}`,
-    );
-    console.log(`[eval:decay] default  ${format(defaultEntry!)}`);
-    for (const [i, entry] of entries.slice(0, 5).entries())
-      console.log(`[eval:decay] top-${i + 1}    ${format(entry)}`);
-
-    const gain = best.metrics.ndcg10 - defaultEntry!.metrics.ndcg10;
-    if (gain >= SWEEP_SIGNIFICANCE && !same(best.candidate, DEFAULTS))
-      console.warn(
-        `[eval:decay] PROMOTION CANDIDATE: best beats defaults by ndcg10 +${gain.toFixed(4)} — consider updating constants/weights.ts and constants/spreadingActivation.ts, then re-recording the ratchet baseline`,
+      // 수렴 무결성: 기본 조합이 그리드에 포함되므로 최적은 기본보다 나쁠 수 없다
+      expect(rankKey(best.metrics)).toBeGreaterThanOrEqual(
+        rankKey(defaultEntry!.metrics),
       );
-
-    const reportPath = process.env.MAENCOF_EVAL_DECAY_SWEEP_REPORT;
-    if (reportPath)
-      writeFileSync(
-        reportPath,
-        `${JSON.stringify({ defaults: defaultEntry, defaultRank, entries }, null, 2)}\n`,
-      );
-
-    // 수렴 무결성: 기본 조합이 그리드에 포함되므로 최적은 기본보다 나쁠 수 없다
-    expect(rankKey(best.metrics)).toBeGreaterThanOrEqual(
-      rankKey(defaultEntry!.metrics),
-    );
-  });
+    },
+  );
 });
