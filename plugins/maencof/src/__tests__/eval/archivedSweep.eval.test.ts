@@ -59,7 +59,9 @@ vi.mock('../../constants/queryEngine.js', async (importOriginal) => {
 });
 
 /** 스윕 축 — 현행 기본값(0.3)을 반드시 포함해야 기본값 순위 비교가 성립한다 */
-const GRID = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.7, 1.0] as const;
+const GRID = [
+  0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.7, 1.0,
+] as const;
 
 /** 기본값 대비 균등합이 이 이상 앞서야 승격 후보로 보고 */
 const SWEEP_SIGNIFICANCE = 0.005;
@@ -74,12 +76,22 @@ interface ClassifiedQueries {
   legacy: GoldenQuery[];
 }
 
+/** 쿼리 하나의 지점 지표 — 클래스 macro 뒤에 숨는 쿼리별 원인 판독용 */
+interface QueryMetric {
+  id: string;
+  cls: 'working' | 'archival';
+  ndcg10: number;
+  recall10: number;
+}
+
 /** 한 계수 지점의 클래스별 지표. legacy 는 해당 클래스가 없으면 null. */
 interface SweepPoint {
   multiplier: number;
   working: EngineMetrics;
   archival: EngineMetrics;
   legacy: EngineMetrics | null;
+  /** working·archival 쿼리별 분해 (legacy 는 제외 — 축과 무관해 부피만 키운다) */
+  perQuery: QueryMetric[];
 }
 
 /** GOLDEN_QUERIES 를 id prefix 규약(goldenSet 헤더)으로 3분한다 */
@@ -97,7 +109,10 @@ function measureQueries(
   queries: GoldenQuery[],
 ): EngineMetrics {
   return measureRankings(
-    queries.map((gq) => ({ ranked: searchFn(gq.seeds), relevance: gq.relevance })),
+    queries.map((gq) => ({
+      ranked: searchFn(gq.seeds),
+      relevance: gq.relevance,
+    })),
   );
 }
 
@@ -115,25 +130,70 @@ async function measureAt(
   graph: KnowledgeGraph,
   classes: ClassifiedQueries,
 ): Promise<SweepPoint> {
-  const { invalidateQueryCache } = await import(
-    '../../search/queryEngine/index.js'
-  );
+  const { invalidateQueryCache } =
+    await import('../../search/queryEngine/index.js');
   activeMultiplier = multiplier;
   invalidateQueryCache();
   try {
     const searchFn = liveSearchFn(graph, LIVE_DEFAULTS);
+    const rank = (queries: GoldenQuery[]) =>
+      queries.map((gq) => ({ gq, ranked: searchFn(gq.seeds) }));
+    const ranked = {
+      working: rank(classes.working),
+      archival: rank(classes.archival),
+    };
+    const macro = (rs: ReturnType<typeof rank>) =>
+      measureRankings(
+        rs.map(({ gq, ranked: r }) => ({ ranked: r, relevance: gq.relevance })),
+      );
+    const per = (rs: ReturnType<typeof rank>, cls: QueryMetric['cls']) =>
+      rs.map(({ gq, ranked: r }) => {
+        const m = measureRankings([{ ranked: r, relevance: gq.relevance }]);
+        return { id: gq.id, cls, ndcg10: m.ndcg10, recall10: m.recall10 };
+      });
     return {
       multiplier,
-      working: measureQueries(searchFn, classes.working),
-      archival: measureQueries(searchFn, classes.archival),
+      working: macro(ranked.working),
+      archival: macro(ranked.archival),
       legacy: classes.legacy.length
         ? measureQueries(searchFn, classes.legacy)
         : null,
+      perQuery: [
+        ...per(ranked.working, 'working'),
+        ...per(ranked.archival, 'archival'),
+      ],
     };
   } finally {
     activeMultiplier = null;
     invalidateQueryCache();
   }
+}
+
+/**
+ * 현행 계수에서 쿼리별 상위 10 경로를 뽑는다 — archived 는 경로 뒤 ` [A]` 마킹.
+ * macro 지표 뒤에 숨은 회수 실패의 원인(어떤 문서가 슬롯을 점유했는지) 판독용.
+ *
+ * @param graph - 측정 그래프
+ * @param queries - 판독할 골든 쿼리
+ * @returns 쿼리별 상위 10 경로 목록
+ */
+async function diagnoseAtDefault(
+  graph: KnowledgeGraph,
+  queries: GoldenQuery[],
+): Promise<Array<{ id: string; top10: string[] }>> {
+  const { invalidateQueryCache } = await import(
+    '../../search/queryEngine/index.js'
+  );
+  invalidateQueryCache();
+  const searchFn = liveSearchFn(graph, LIVE_DEFAULTS);
+  const out = queries.map((gq) => ({
+    id: gq.id,
+    top10: searchFn(gq.seeds).map((p) =>
+      graph.nodes.get(toNodeId(p))?.archived ? `${p} [A]` : p,
+    ),
+  }));
+  invalidateQueryCache();
+  return out;
 }
 
 /** 전체 그리드를 측정한다 — 픽스처·실볼트 모드가 공유하는 스윕 본체 */
@@ -183,9 +243,7 @@ function reportAndAssert(
       `${label}: ${cls} axis produced a single ndcg value across ${points.length} points — the multiplier is not reaching the engine, or the golden lost its observation point`,
     ).toBeGreaterThan(1);
 
-  const current = points.find(
-    (p) => p.multiplier === ARCHIVED_SEED_MULTIPLIER,
-  );
+  const current = points.find((p) => p.multiplier === ARCHIVED_SEED_MULTIPLIER);
   expect(current, 'grid must contain the current default').toBeDefined();
 
   const sorted = [...points].sort((a, b) => rankKey(b) - rankKey(a));
@@ -214,10 +272,14 @@ describe('archived multiplier sweep (fixture)', () => {
   it('grid-sweeps the multiplier and reports per-class curves', async () => {
     const graph = buildEvalGraph();
     const classes = classifyGoldenQueries(GOLDEN_QUERIES);
-    expect(classes.working.length, 'fixture golden must carry working cases')
-      .toBeGreaterThan(0);
-    expect(classes.archival.length, 'fixture golden must carry archival cases')
-      .toBeGreaterThan(0);
+    expect(
+      classes.working.length,
+      'fixture golden must carry working cases',
+    ).toBeGreaterThan(0);
+    expect(
+      classes.archival.length,
+      'fixture golden must carry archival cases',
+    ).toBeGreaterThan(0);
 
     const points = await sweepGrid(graph, classes);
     reportAndAssert(points, 'fixture');
@@ -253,22 +315,30 @@ function parseLiveGolden(raw: unknown): LiveBenchQuery[] {
     const q = entry as Partial<LiveBenchQuery>;
     const at = `query[${index}]${typeof q.id === 'string' ? ` (${q.id})` : ''}`;
     if (typeof q.id !== 'string' || q.id.length === 0)
-      throw new Error(`invalid archived golden: ${at}: id must be a non-empty string`);
+      throw new Error(
+        `invalid archived golden: ${at}: id must be a non-empty string`,
+      );
     if (q.cls !== 'working' && q.cls !== 'archival')
-      throw new Error(`invalid archived golden: ${at}: cls must be 'working' | 'archival'`);
+      throw new Error(
+        `invalid archived golden: ${at}: cls must be 'working' | 'archival'`,
+      );
     if (
       !Array.isArray(q.seeds) ||
       q.seeds.length === 0 ||
       !q.seeds.every((s) => typeof s === 'string' && s.length > 0)
     )
-      throw new Error(`invalid archived golden: ${at}: seeds must be a non-empty string array`);
+      throw new Error(
+        `invalid archived golden: ${at}: seeds must be a non-empty string array`,
+      );
     if (
       typeof q.relevance !== 'object' ||
       q.relevance === null ||
       Object.keys(q.relevance).length === 0 ||
       !Object.values(q.relevance).every((g) => g === 1 || g === 2)
     )
-      throw new Error(`invalid archived golden: ${at}: relevance must map paths to grade 1 | 2`);
+      throw new Error(
+        `invalid archived golden: ${at}: relevance must map paths to grade 1 | 2`,
+      );
     return { id: q.id, cls: q.cls, seeds: q.seeds, relevance: q.relevance };
   });
 }
@@ -316,10 +386,15 @@ describe.skipIf(!VAULT_PATH || !GOLDEN_PATH)(
         ).toBeGreaterThan(0);
 
         const points = await sweepGrid(graph, classes);
+        const diagnosis = await diagnoseAtDefault(graph, [
+          ...classes.working,
+          ...classes.archival,
+        ]);
         reportAndAssert(points, 'live', {
           vault: VAULT_PATH,
           goldenCount: queries.length,
           missingRelevancePaths: missing,
+          diagnosis,
         });
       },
     );
