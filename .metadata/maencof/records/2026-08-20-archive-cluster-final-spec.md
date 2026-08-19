@@ -3,8 +3,8 @@
 그래프 외 서고와 경쟁 단위 교체 — 구현 완료 기준의 현행 계약 정리.
 
 - **버전**: `@ogham/maencof` 0.13.0 · `@ogham/maencof-lens` 0.9.1
-- **브랜치**: `maencof/archive-layer` (12 커밋, 작업 트리 클린)
-- **요청서**: `maencof-archive-cluster-request-2026-08-19.md` (R1~R7) · **플랜**: rev.2 (3자 crosscheck `cleared`)
+- **브랜치**: `maencof/archive-layer`
+- **과정 기록**: 요청서(R1~~R7)·실행 플랜(rev.2, 3자 crosscheck `cleared`)·진행 원장은 최종본 정리로 삭제 — git 이력(`00bc3376`~~`5782c07f`)에서 열람
 - **원칙**: 검색 소비자가 후보 전체를 읽는 LLM이므로, 목적함수는 상위 정밀도가 아니라 **토큰 예산 내 클러스터 커버리지**다.
 
 ---
@@ -13,11 +13,11 @@
 
 판정 기준은 "개별 항목이 질의 대상이 되는가".
 
-| 계급 | 위치 | 경쟁권 | 메커니즘 |
-| --- | --- | --- | --- |
+| 계급          | 위치                       | 경쟁권              | 메커니즘                                               |
+| ------------- | -------------------------- | ------------------- | ------------------------------------------------------ |
 | 간행물/원자료 | vault `99_Archive/` (서고) | **0표 — 그래프 밖** | 스캔 allowlist + 노드 게이트 + 역직렬화 게이트 (R1·R2) |
-| 업무 에피소드 | L3/L4 + `cluster_key` | **스레드당 1표** | 검색 시 클러스터 collapse, max 승계 (R3·R4) |
-| 정제 지식 | L1/L2 | 문서당 1표 | 현행 유지 |
+| 업무 에피소드 | L3/L4 + `cluster_key`      | **스레드당 1표**    | 검색 시 클러스터 collapse, max 승계 (R3·R4)            |
+| 정제 지식     | L1/L2                      | 문서당 1표          | 현행 유지                                              |
 
 부속 규칙: 증류 후 남는 `archived: true` 스텁은 시드 채널에서 **0.3배로 침강**한다 (R5).
 vault 서고 `99_Archive/`와 시스템 보관소 `.maencof-meta/archive/`(만료 L4 정본, `archive_path`의 목적지)는 **별개 개념**이다.
@@ -39,11 +39,11 @@ flowchart LR
     archive["99_Archive · vault 루트<br/>traversal · 절대경로"] -. "세 방어선 전부에서 거부" .- build
 ```
 
-| 방어선 | 위치 | 막는 진입로 |
-| --- | --- | --- |
-| 1차 | 스캔 allowlist `VAULT_SCAN_LAYER_PATTERNS` (`constants/vaultScanner.ts`) | full/incremental 빌드 파일 수집. blocklist가 아니라 allowlist — 낯선 디렉토리도 새지 않는다 |
-| 2차 | 노드 빌드 경로 게이트 `isLayerDirPath` (`types/layer.ts`) | partial reindex 등 스캔 외 노드 생성 경로 |
-| 3차 | 역직렬화 게이트 (`deserializeGraph`·`deserializeShards`) | 변경 이전 인덱스의 잔존 노드, **lens 재수화** — 로드 시 비레이어 노드와 dangling edge를 정화하고 카운트 재계산 |
+| 방어선 | 위치                                                                     | 막는 진입로                                                                                                    |
+| ------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| 1차    | 스캔 allowlist `VAULT_SCAN_LAYER_PATTERNS` (`constants/vaultScanner.ts`) | full/incremental 빌드 파일 수집. blocklist가 아니라 allowlist — 낯선 디렉토리도 새지 않는다                    |
+| 2차    | 노드 빌드 경로 게이트 `isLayerDirPath` (`types/layer.ts`)                | partial reindex 등 스캔 외 노드 생성 경로                                                                      |
+| 3차    | 역직렬화 게이트 (`deserializeGraph`·`deserializeShards`)                 | 변경 이전 인덱스의 잔존 노드, **lens 재수화** — 로드 시 비레이어 노드와 dangling edge를 정화하고 카운트 재계산 |
 
 게이트 판정: `posix.normalize` 정규화 후 첫 세그먼트가 레이어 디렉토리인지 검사. **상향 탈출(`01_Core/../99_Archive/...`)·절대경로·대소문자 불일치는 거부**된다.
 
@@ -58,7 +58,7 @@ flowchart LR
 증분 기록물(메일·Jira·일정)이 자기 스레드를 선언하는 frontmatter 필드. **시드·태그 채널과 완전히 분리**되어 있다 — 시드 매칭에 섞이지 않는다.
 
 ```yaml
-cluster_key: jira-gcc-3903        # 또는 works-mail-2026-08-19
+cluster_key: jira-gcc-3903 # 또는 works-mail-2026-08-19
 ```
 
 - 스키마: `z.string().min(1).optional()` (`FrontmatterSchema`) → 노드 `clusterKey`로 전파, 직렬화 자동 왕복.
@@ -85,11 +85,11 @@ flowchart LR
 
 ### 응답 표기
 
-| 표면 | 표기 |
-| --- | --- |
-| `kg_search` 항목 | `clusterKey` + `collapsedCount`(이 응답에서 접힌 수, ≥1일 때만) |
-| `kg_context` documents 모드 | 항목에 동일 2필드 |
-| `kg_context` 조립 markdown | 헤더 라인에 `(+N collapsed · cluster: <key>)` — markdown만 받는 호출자도 열기 질의를 만들 수 있다 |
+| 표면                        | 표기                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `kg_search` 항목            | `clusterKey` + `collapsedCount`(이 응답에서 접힌 수, ≥1일 때만)                                   |
+| `kg_context` documents 모드 | 항목에 동일 2필드                                                                                 |
+| `kg_context` 조립 markdown  | 헤더 라인에 `(+N collapsed · cluster: <key>)` — markdown만 받는 호출자도 열기 질의를 만들 수 있다 |
 
 ### 명시 열기 — `kg_search { cluster }`
 
@@ -115,11 +115,11 @@ flowchart LR
 
 `archived: true` 스텁(증류 후 태그만 온전한 껍데기)의 점수에 `ARCHIVED_SEED_MULTIPLIER = 0.3`을 곱한다.
 
-| 채널 | 적용 | 효과 |
-| --- | --- | --- |
-| 키워드 시드 (`resolveKeywordSeed`) | `score × idfScale × 0.3` | tag-exact 0.5 → 0.15 |
-| `kg_suggest_links` 종합 점수 | `(tag + SA보너스) × 0.3` | 실측 P3 사례 0.4 → 0.12 < 기본 min_score 0.2 → 탈락 |
-| path-exact / path-prefix 시드 | **미적용** | 직접 지목은 존중 |
+| 채널                               | 적용                     | 효과                                                |
+| ---------------------------------- | ------------------------ | --------------------------------------------------- |
+| 키워드 시드 (`resolveKeywordSeed`) | `score × idfScale × 0.3` | tag-exact 0.5 → 0.15                                |
+| `kg_suggest_links` 종합 점수       | `(tag + SA보너스) × 0.3` | 실측 P3 사례 0.4 → 0.12 < 기본 min_score 0.2 → 탈락 |
+| path-exact / path-prefix 시드      | **미적용**               | 직접 지목은 존중                                    |
 
 `tag_score`/`sa_score` 원값 필드는 강등 없이 보고. 계수는 운영 실측 후 조정 여지를 상수 주석에 남김.
 
@@ -141,13 +141,13 @@ flowchart LR
 
 ### 수용 기준 대조 — 5/5 충족
 
-| # | 기준 | 증거 |
-| --- | --- | --- |
-| 1 | 유효 frontmatter여도 `99_Archive` 그래프 미진입 | `archiveExclusion`(fullBuild) + `knowledgeNodePathGate` + `metadataStoreLayerGate`(재수화) |
-| 2 | `99_Archive`발 파싱 실패 노이즈 0건 | 같은 통합 테스트 `parseFailures` 0 단언 |
-| 3 | 같은 키 8건 → top-10 대표 1건 + 접힌 수 표기 | `queryCollapse`(collapsedCount 7) + 응답 계층 테스트 + 골든 coverage |
-| 4 | archived 시드 후보 상위 배제 | `archivedDemotion` (0.4→0.12 재현) |
-| 5 | 기존 골든셋 ratchet 통과 | (b1) 27쿼리 게이트-활성 eval 통과로 기계 증명 |
+| #   | 기준                                            | 증거                                                                                       |
+| --- | ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1   | 유효 frontmatter여도 `99_Archive` 그래프 미진입 | `archiveExclusion`(fullBuild) + `knowledgeNodePathGate` + `metadataStoreLayerGate`(재수화) |
+| 2   | `99_Archive`발 파싱 실패 노이즈 0건             | 같은 통합 테스트 `parseFailures` 0 단언                                                    |
+| 3   | 같은 키 8건 → top-10 대표 1건 + 접힌 수 표기    | `queryCollapse`(collapsedCount 7) + 응답 계층 테스트 + 골든 coverage                       |
+| 4   | archived 시드 후보 상위 배제                    | `archivedDemotion` (0.4→0.12 재현)                                                         |
+| 5   | 기존 골든셋 ratchet 통과                        | (b1) 27쿼리 게이트-활성 eval 통과로 기계 증명                                              |
 
 ### 최종 체인
 
@@ -157,16 +157,16 @@ typecheck 전 워크스페이스 exit 0 · maencof **161 테스트 파일 pass**
 
 ## 8. API 변경 요약
 
-| 표면 | 변경 |
-| --- | --- |
-| frontmatter | `cluster_key?: string` 신설 |
-| `create` | 입력 `cluster_key` |
-| `update` | 입력 `frontmatter.cluster_key` (제거는 `unset`) |
-| `kg_search` 입력 | `seed` optional화 + `cluster` 신설 (정확히 하나 필수) |
-| `kg_search` 응답 | 항목 `clusterKey?`/`collapsedCount?` · 응답 `cluster?`/`clusterSize?`/`truncated?` |
-| `kg_context` 응답 | documents 항목 동일 2필드 · markdown `(+N collapsed · cluster: <key>)` |
-| lens `search` | `cluster` pass-through (+상한 후필터) |
-| 내부 | `QueryOptions.subLayerFilter` · `ActivationResult.clusterKey?/collapsedCount?` · `MAX_CLUSTER_ENUMERATION` · `ARCHIVED_SEED_MULTIPLIER` |
+| 표면              | 변경                                                                                                                                    |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| frontmatter       | `cluster_key?: string` 신설                                                                                                             |
+| `create`          | 입력 `cluster_key`                                                                                                                      |
+| `update`          | 입력 `frontmatter.cluster_key` (제거는 `unset`)                                                                                         |
+| `kg_search` 입력  | `seed` optional화 + `cluster` 신설 (정확히 하나 필수)                                                                                   |
+| `kg_search` 응답  | 항목 `clusterKey?`/`collapsedCount?` · 응답 `cluster?`/`clusterSize?`/`truncated?`                                                      |
+| `kg_context` 응답 | documents 항목 동일 2필드 · markdown `(+N collapsed · cluster: <key>)`                                                                  |
+| lens `search`     | `cluster` pass-through (+상한 후필터)                                                                                                   |
+| 내부              | `QueryOptions.subLayerFilter` · `ActivationResult.clusterKey?/collapsedCount?` · `MAX_CLUSTER_ENUMERATION` · `ARCHIVED_SEED_MULTIPLIER` |
 
 ## 9. 범위 밖 후속 제안
 
