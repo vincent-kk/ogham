@@ -228,7 +228,7 @@ function renderAnchor(series, archiveRoot, movedCount, today) {
     '',
     series.anchor.description ?? series.title,
     '',
-    `- Archive: \`${dir}\` — this series' bodies live outside the knowledge graph (as of ${today}, ${movedCount} items migrated here).`,
+    `- Archive: \`${dir}\` — this series' bodies live outside the knowledge graph — enumerate them via kg_search { cluster: "${series.key}" } (as of ${today}, ${movedCount} items migrated here).`,
     '- Ingestion: new items in this series land directly under the archive directory above — never in layer directories.',
     '- Reading: this anchor is the lexical entry point; open individual items by explicit path (read/update work on archive paths).',
     `- Distilled documents sharing \`cluster_key: ${series.key}\` stay in the graph and collapse behind one representative.`,

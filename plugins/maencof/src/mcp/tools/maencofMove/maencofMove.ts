@@ -11,13 +11,13 @@ import {
   L3_SUBDIR,
   LAYER_DIR,
 } from '../../../constants/architecture.js';
+import { ARCHIVE_DIR } from '../../../constants/directories.js';
 import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { FRONTMATTER_REGEX } from '../../../constants/regexes.js';
 import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/documentParser/index.js';
-import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { parseYamlFrontmatter } from '../../../core/yamlParser/index.js';
 import { Layer } from '../../../types/common.js';
@@ -67,10 +67,23 @@ function updateLayerInFrontmatter(
   return content.replace(match[0], `---\n${yaml}\n---\n`);
 }
 
+/** target_subdirectory 세그먼트 허용 문자 — 기존 디렉토리 실명과 맞아야 하므로 정규화 대상이 아니다. */
+const SUBDIRECTORY_SEGMENT_PATTERN = /^[A-Za-z0-9가-힣._-]+$/;
+
+/** 대상 레이어 밖으로 새는 첫 세그먼트 — 레이어 실명 + 서고. 대소문자 무관 비교용 소문자 셋. */
+const RESERVED_SUBDIRECTORY_ROOTS: ReadonlySet<string> = new Set(
+  [...Object.values(LAYER_DIR), ARCHIVE_DIR].map((dir) => dir.toLowerCase()),
+);
+
 /**
- * target_subdirectory 입력을 정규화한다.
- * `..` 세그먼트 거부, 세그먼트별 슬러그화, 깊이 제한 — maencofCreate의
- * 명시적 filename 처리와 동일한 규칙을 따른다.
+ * target_subdirectory 입력을 검증한다.
+ *
+ * 파일명 힌트(sanitizeSegment)와 달리 디렉토리 세그먼트는 이미 존재하는 실명과
+ * 맞아야 하므로 정규화하지 않는다 — 세그먼트는 원형 그대로 보존되고, 통과하지
+ * 못하는 입력은 조용한 근사치 대신 에러가 된다.
+ *
+ * @param subdirectory - 도구 입력 원문
+ * @returns 검증된 세그먼트 목록, 또는 거부 사유
  */
 function resolveTargetSubdirectory(
   subdirectory: string,
@@ -83,8 +96,31 @@ function resolveTargetSubdirectory(
 
   const segments = subdirectory
     .split('/')
-    .map(sanitizeSegment)
     .filter((segment) => segment.length > 0);
+
+  const hidden = segments.find((segment) => segment.startsWith('.'));
+  if (hidden !== undefined)
+    return {
+      error: `Invalid target_subdirectory segment "${hidden}": segments must not start with "."`,
+    };
+
+  const invalid = segments.find(
+    (segment) => !SUBDIRECTORY_SEGMENT_PATTERN.test(segment),
+  );
+  if (invalid !== undefined)
+    return {
+      error: `Invalid target_subdirectory segment "${invalid}": only letters, digits, Korean, ".", "_", "-" are allowed`,
+    };
+
+  const first = segments[0];
+  if (
+    first !== undefined &&
+    RESERVED_SUBDIRECTORY_ROOTS.has(first.toLowerCase())
+  )
+    return {
+      error: `target_subdirectory must not start with a layer or archive directory ("${first}"): it resolves under the target layer. The archive (${ARCHIVE_DIR}) lives outside the knowledge graph — move archive files with a filesystem move plus a frontmatter edit instead.`,
+    };
+
   if (segments.length > MAX_FILENAME_SUBDIR_DEPTH)
     return {
       error: `Subdirectory depth exceeds limit (${MAX_FILENAME_SUBDIR_DEPTH}): ${subdirectory}`,

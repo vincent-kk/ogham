@@ -4,6 +4,7 @@
 
 - 스캔은 allowlist 다. 인덱싱 대상은 레이어 디렉토리 패턴(`VAULT_SCAN_LAYER_PATTERNS`, 정본은 `constants/vaultScanner.ts`)에 매칭되는 `.md` 뿐이고, 그 밖의 경로는 제외 목록에 이름이 없어도 스캔되지 않는다. 제외 나열(blocklist)이 아닌 이유: 볼트 서고든 미래에 생길 낯선 디렉토리든, 목록에 없는 경로가 그래프로 새지 않게 하려는 것이다.
 - 볼트 서고(`99_Archive` — 볼트 런타임 디렉토리이지 이 저장소 경로가 아니다)와 볼트 루트 바로 아래의 문서는 frontmatter 가 유효해도 스캔 결과에 없다. 스캔 단계의 정본 판정은 glob 패턴이고, `documentParser` 의 노드 경로 게이트(`isLayerDirPath`)는 스캔을 우회해 들어온 문서를 막는 두 번째 방어선이다 — 둘 중 하나만 고치면 경계가 갈라진다.
+- 서고 열거 스캔(`scanArchive`)은 그래프 인덱싱 스캔(`scanVault`)과 분리된 별도 진입점이다. 대상은 `ARCHIVE_SCAN_PATTERNS`(`99_Archive/**/*.md`) 뿐이고, 결과는 그래프 노드가 되지 않는다 — allowlist 원칙(AC-layer-allowlist-only·AC-archive-not-scanned)은 `scanVault` 에 대해 그대로 유지된다. 두 스캔은 동일한 기본 제외 패턴과 `ScannedFile` 조립(`operations/scanByPatterns`, 내부 헬퍼)을 공유한다.
 - 기본 제외 패턴은 allowlist 안쪽에도 적용되며 중첩 앵커(`**` 프리픽스)를 쓴다. 루트 앵커만 두면 볼트 안 내장 앱의 `node_modules` md 가 새어 들어온다. `extraExclude` 는 여기에 더해지기만 하고 allowlist 를 넓히지 못한다.
 - 파일을 쓰지 않는다. 읽기 전용 스캔이며, core 에서 파일시스템 I/O 를 직접 수행하는 유일한 자리다.
 - 심볼릭 링크는 기본적으로 따라가지 않고, 디렉토리 항목과 dotfile 은 결과에 담기지 않는다.
@@ -12,8 +13,9 @@
 
 ## API Contracts
 
-- barrel `index.ts` — `scanVault` · `buildSnapshot` · `computeChangeSet` · `readVaultFile` · `scanIncrementalChanges` + 타입 `ScannedFile` · `FileSnapshot` · `ChangeSet` · `VaultScanOptions`.
+- barrel `index.ts` — `scanVault` · `scanArchive` · `buildSnapshot` · `computeChangeSet` · `readVaultFile` · `scanIncrementalChanges` + 타입 `ScannedFile` · `FileSnapshot` · `ChangeSet` · `VaultScanOptions`.
 - `scanVault(vaultRoot, options?)` — allowlist 에 매칭된 md 의 `ScannedFile[]`. 경로는 `vaultRoot` 기준 상대이고 `mtime` 은 ms 단위다.
+- `scanArchive(vaultRoot, options?)` — 서고 패턴(`ARCHIVE_SCAN_PATTERNS`)에 매칭된 md 의 `ScannedFile[]`. 경로·정렬·`mtime` 규약은 `scanVault` 와 동일하다.
 - `buildSnapshot(files)` — `FileSnapshot`(relativePath → mtime).
 - `computeChangeSet(previous, current)` — `ChangeSet`(added · modified · deleted · unchanged). `deleted` 만 상대 경로 문자열이다.
 - `scanIncrementalChanges(vaultRoot, previousSnapshot, options?)` — 위 둘의 합성. 빈 스냅샷을 주면 전체가 `added` 다.
@@ -30,6 +32,10 @@
 ### AC-archive-not-scanned — 서고 미스캔
 
 - 볼트 서고 디렉토리(`99_Archive`, 볼트 런타임 경로) 아래의 md 는 frontmatter 가 유효해도 결과에 없다.
+
+### AC-archive-scan-scoped — 서고 전용 스캔
+
+- `scanArchive` 결과에 레이어 디렉토리·vault 루트 문서가 없고, `99_Archive` 하위 md 만 있다.
 
 ### AC-vault-root-not-scanned — 루트 문서 미스캔
 
@@ -54,4 +60,4 @@
 
 ## Last Updated
 
-2026-08-20 — 레이어 디렉토리 allowlist 스캔 계약과 서고·루트 문서 배제를 문서화했다.
+2026-08-21 — 서고 열거 전용 진입점 `scanArchive` 계약을 추가했다 (그래프 인덱싱 스캔과 분리, 조립 공통화는 내부 헬퍼).

@@ -13,6 +13,8 @@ export interface KgSearchInput {
   seed?: string[];
   /** 접힌 클러스터 열기 — SA 없이 해당 cluster_key 전역 멤버를 updated 내림차순으로 반환. `seed` 와 상호 배타 */
   cluster?: string;
+  /** cluster 모드 전용 주제 필터 — 멤버 title·tags 대소문자 무시 부분매칭, 절단 전 적용. seed 모드에는 적용되지 않는다 */
+  match?: string;
   /** 최대 반환 수 (기본 10) */
   max_results?: number;
   /** 감쇠 인자 (기본 0.7) */
@@ -107,6 +109,8 @@ export interface KgSearchResultItem {
   trace?: string[];
   /** 본문 전문 (include_content: true 이고 파일을 읽을 수 있을 때만) */
   content?: string;
+  /** 서고(99_Archive) 멤버 여부 — cluster 열거 모드에서 그래프 노드가 아닌 항목에만 true */
+  archived?: boolean;
   /** 클러스터 키 — 이 항목이 클러스터 소속일 때. kg_search { cluster } 로 전 멤버를 연다 */
   clusterKey?: string;
   /** 이 응답에서 대표 뒤로 접힌 문서 수 (1건 이상 접혔을 때만) — 전역 총원은 cluster 열기의 clusterSize */

@@ -16,7 +16,9 @@ import {
 // CACHE_FILES 는 단일 출처 constants/cacheFiles.ts. 본 모듈은 외부 호환을 위해 re-export 만 한다.
 import { CACHE_FILES } from '../../../../constants/cacheFiles.js';
 import type {
+  ArchiveClusterMember,
   KnowledgeGraph,
+  SerializedArchiveMembers,
   SerializedEdges,
   SerializedGraph,
   SerializedGraphMeta,
@@ -89,9 +91,10 @@ export class MetadataStore {
   }
 
   /**
-   * KnowledgeGraph를 nodes.json + edges.json + graph-meta.json 3 파일로 저장한다.
+   * KnowledgeGraph를 nodes.json + edges.json + archive-members.json + graph-meta.json 샤드로 저장한다.
    *
-   * - 단일 vault lock 안에서 nodes/edges 병렬 쓰기 → graph-meta(commit marker)를 마지막에 쓴다.
+   * - 단일 vault lock 안에서 nodes/edges/archive-members 병렬 쓰기 → graph-meta(commit marker)를 마지막에 쓴다.
+   * - archive-members 샤드는 인덱스 부재 시에도 빈 배열로 항상 기록한다.
    * - 성공 후 legacy index.json 이 남아있으면 best-effort 로 정리한다 (ENOENT swallow).
    * - 모든 쓰기는 atomicWriteJson(tmp + rename)으로 per-file atomicity 보장.
    */
@@ -99,6 +102,9 @@ export class MetadataStore {
     await this.ensureCacheDir();
     const nodes: SerializedNodes = Array.from(graph.nodes.values());
     const edges: SerializedEdges = graph.edges;
+    const archiveMembers: SerializedArchiveMembers = graph.archiveClusterMembers
+      ? Array.from(graph.archiveClusterMembers.values()).flat()
+      : [];
     const meta: SerializedGraphMeta = {
       builtAt: graph.builtAt,
       nodeCount: graph.nodeCount,
@@ -110,6 +116,10 @@ export class MetadataStore {
       await Promise.all([
         atomicWriteJson(join(this.cacheDir, CACHE_FILES.NODES), nodes),
         atomicWriteJson(join(this.cacheDir, CACHE_FILES.EDGES), edges),
+        atomicWriteJson(
+          join(this.cacheDir, CACHE_FILES.ARCHIVE_MEMBERS),
+          archiveMembers,
+        ),
       ]);
       // commit marker — 이 파일이 존재해야 cache 가 commit 된 것으로 간주
       await atomicWriteJson(join(this.cacheDir, CACHE_FILES.GRAPH_META), meta);
@@ -119,7 +129,7 @@ export class MetadataStore {
   }
 
   /**
-   * 3 파일에서 KnowledgeGraph를 로드한다.
+   * 필수 샤드 3 파일(graph-meta/nodes/edges) + 옵셔널 archive-members 샤드에서 KnowledgeGraph를 로드한다.
    *
    * 분기 정책:
    * - graph-meta.json (commit marker) 부재 → 신규 layout 미commit 상태. legacy 마이그레이션 경로 진입.
@@ -128,6 +138,8 @@ export class MetadataStore {
    * - graph-meta.json 존재 → 정상 commit. schemaVersion 검증 후 nodes/edges 병렬 로드.
    *   * schemaVersion ≠ 2 → 알 수 없는 버전, null (호출자가 재빌드 결정).
    *   * commit 후 nodes/edges read 실패는 real I/O 오류로 간주, legacy 로 폴백하지 않고 null.
+   * - archive-members.json 은 옵셔널 샤드 — 존재 시 archiveClusterMembers 로 복원하고,
+   *   부재(구버전 캐시)·손상 시 필드 미설정으로 로드를 계속한다.
    */
   async loadGraph(): Promise<KnowledgeGraph | null> {
     let metaRaw: string;
@@ -155,10 +167,43 @@ export class MetadataStore {
       const edgesArr = JSON.parse(edgesRaw) as SerializedEdges;
       // 디스크 샤드는 nodes/edges 만 보존하므로, 런타임 조회 맵(invertedIndex·adjacency·
       // edgeWeight/Type)을 빌드와 동일 로직으로 재수화해 빌드직후/리로드 동작을 일치시킨다.
-      return hydrateRuntimeMaps(deserializeShards(nodesArr, edgesArr, meta));
+      const graph = hydrateRuntimeMaps(
+        deserializeShards(nodesArr, edgesArr, meta),
+      );
+      const archiveMembers = await this.loadArchiveMembers();
+      if (archiveMembers) graph.archiveClusterMembers = archiveMembers;
+      return graph;
     } catch {
       // commit marker 는 있으나 부속 파일 read/parse 실패 — legacy 로 폴백하지 않고 cache miss
       return null;
+    }
+  }
+
+  /**
+   * archive-members.json 을 clusterKey 그룹 Map 으로 복원한다.
+   *
+   * @returns 복원된 인덱스. 샤드 부재(구버전 캐시)·파싱 실패 시 undefined —
+   *   옵셔널 샤드이므로 그래프 로드는 계속된다.
+   */
+  private async loadArchiveMembers(): Promise<
+    Map<string, ArchiveClusterMember[]> | undefined
+  > {
+    try {
+      const raw = await readFile(
+        join(this.cacheDir, CACHE_FILES.ARCHIVE_MEMBERS),
+        'utf-8',
+      );
+      const arr = JSON.parse(raw) as SerializedArchiveMembers;
+      if (!Array.isArray(arr)) return undefined;
+      const map = new Map<string, ArchiveClusterMember[]>();
+      for (const member of arr) {
+        const list = map.get(member.clusterKey);
+        if (list) list.push(member);
+        else map.set(member.clusterKey, [member]);
+      }
+      return map;
+    } catch {
+      return undefined;
     }
   }
 
@@ -264,9 +309,7 @@ export class MetadataStore {
         'utf-8',
       );
       const parsed = JSON.parse(raw) as
-        | StaleEntries
-        | LegacyStaleNodes
-        | Record<string, unknown>;
+        StaleEntries | LegacyStaleNodes | Record<string, unknown>;
       if (parsed && Array.isArray((parsed as StaleEntries).entries))
         return parsed as StaleEntries;
 

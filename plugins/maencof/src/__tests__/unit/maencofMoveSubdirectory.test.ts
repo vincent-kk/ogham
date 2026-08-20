@@ -174,4 +174,55 @@ describe('move target_subdirectory', () => {
     expect(moved).not.toContain('promotion_target');
     expect(moved).not.toContain('source_context');
   });
+
+  it('언더스코어·대문자 세그먼트를 원형 그대로 보존한다', async () => {
+    const result = await handleMaencofMove(vault, {
+      path: '04_Action/alpha-note.md',
+      target_layer: 2,
+      target_subdirectory: 'My_Project',
+    });
+    expect(result.success).toBe(true);
+    expect(result.path).toBe('02_Derived/My_Project/alpha-note.md');
+    await access(join(vault, '02_Derived/My_Project/alpha-note.md'));
+  });
+
+  it('허용 밖 문자를 담은 세그먼트를 세그먼트 원문과 함께 거부한다', async () => {
+    const result = await handleMaencofMove(vault, {
+      path: '04_Action/alpha-note.md',
+      target_layer: 2,
+      target_subdirectory: 'bad name!',
+    });
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('bad name!');
+    await access(join(vault, '04_Action/alpha-note.md')); // 소스 보존
+  });
+
+  it('레이어 디렉토리로 시작하는 target_subdirectory 를 거부한다', async () => {
+    const result = await handleMaencofMove(vault, {
+      path: '04_Action/alpha-note.md',
+      target_layer: 2,
+      target_subdirectory: '04_Action/projects',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('99_Archive 로 시작하는 target_subdirectory 를 대소문자 무관 거부하고 우회 수단을 안내한다', async () => {
+    const result = await handleMaencofMove(vault, {
+      path: '04_Action/alpha-note.md',
+      target_layer: 4,
+      target_subdirectory: '99_archive/geeknews',
+    });
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('99_Archive');
+    await access(join(vault, '04_Action/alpha-note.md'));
+  });
+
+  it('"." 로 시작하는 세그먼트를 거부한다', async () => {
+    const result = await handleMaencofMove(vault, {
+      path: '04_Action/alpha-note.md',
+      target_layer: 2,
+      target_subdirectory: '.maencof',
+    });
+    expect(result.success).toBe(false);
+  });
 });

@@ -58,7 +58,14 @@ export function registerKgTools(server: McpServer): void {
           .string()
           .optional()
           .describe(
-            'Open a collapsed cluster: enumerate ALL documents whose cluster_key equals this value, newest updated first, without SA (score/hops are 0; other filters do not apply; capped at 200 with a truncated flag; clusterSize reports the full member count). Mutually exclusive with seed. Use the clusterKey reported on a collapsed result.',
+            "Open a collapsed cluster: enumerate documents whose cluster_key equals this value — graph nodes and archived documents (99_Archive) alike; archive entries carry archived:true. Newest updated first, without SA (score/hops are 0). max_results sets the page size (default 50 in this mode, hard cap 200); truncated flags a cut page and clusterSize reports the full member count within the window — page onward with until set to the last item's updated (day-granular, so a same-day boundary may repeat). since/until narrow by updated and match narrows by title/tags substring; other filters do not apply. Mutually exclusive with seed. Use the clusterKey reported on a collapsed result.",
+          ),
+        match: z
+          .string()
+          .min(1)
+          .optional()
+          .describe(
+            'Cluster mode only: case-insensitive substring filter on member title and tags, applied before sorting and truncation — clusterSize reports the filtered total, and truncated still flags a cut page within the match. Combinable with since/until. Not applied in seed mode (narrow topically there via seed items).',
           ),
         max_results: z
           .number()
@@ -66,7 +73,9 @@ export function registerKgTools(server: McpServer): void {
           .min(1)
           .max(100)
           .optional()
-          .describe('Maximum results to return (default 10)'),
+          .describe(
+            'Maximum results to return (seed mode default 10; cluster mode default 50)',
+          ),
         decay: z
           .number()
           .min(0)

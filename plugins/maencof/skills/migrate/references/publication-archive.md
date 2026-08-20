@@ -7,8 +7,9 @@ advisories, news items, digests, …) are scattered across layer directories
 into the formalized structure:
 
 - **Bodies** live under `99_Archive/<series>/` — outside the knowledge graph
-  by design (scan allowlist + node path gate), so they produce zero lexical
-  noise. Explicit-path `read`/`update` still work on them.
+  (not nodes; enumerable via `kg_search { cluster }`) by design (scan
+  allowlist + node path gate), so they produce zero lexical noise.
+  Explicit-path `read`/`update` still work on them.
 - **One clusterseed anchor per series** at `03_External/clusterseeds/<key>.md`
   (`layer: 3` + `sub_layer: clusterseed` — both enforced by FrontmatterSchema)
   is the sole lexical entry point (R11 gate: ranked only when directly

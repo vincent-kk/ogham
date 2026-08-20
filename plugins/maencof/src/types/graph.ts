@@ -64,6 +64,20 @@ export interface KnowledgeEdge {
   weight: number;
 }
 
+/** 서고 클러스터 열거 항목 — 그래프 노드가 아닌 아카이브 문서의 참조 메타 */
+export interface ArchiveClusterMember {
+  /** frontmatter cluster_key — archiveClusterMembers 맵의 키와 동일 값 */
+  clusterKey: string;
+  /** 파일 상대 경로 (vault 루트 기준, 서고 하위) */
+  path: string;
+  /** 문서 제목 (frontmatter title → 첫 헤딩 → 경로 — buildKnowledgeNode 와 동일 파생) */
+  title: string;
+  /** 마지막 수정일 YYYY-MM-DD — cluster 열거 정렬 키 */
+  updated: string;
+  /** Frontmatter 태그 목록 */
+  tags: string[];
+}
+
 /** 전체 지식 그래프 */
 export interface KnowledgeGraph {
   /** 노드 목록 (NodeId → KnowledgeNode) */
@@ -84,6 +98,8 @@ export interface KnowledgeGraph {
   edgeTypeMap?: EdgeTypeMap;
   /** 사전 계산된 역 인덱스 (키워드 시드 O(1) 조회) */
   invertedIndex?: InvertedIndex;
+  /** 서고 cluster_key 열거 인덱스 — 노드·엣지·SA 에 관여하지 않는 병렬 인덱스. kg_search { cluster } 병합 전용 */
+  archiveClusterMembers?: Map<string, ArchiveClusterMember[]>;
 }
 
 /** 인접 리스트 (NodeId → 이웃 NodeId[]) */
@@ -130,6 +146,9 @@ export type SerializedNodes = KnowledgeNode[];
 
 /** edges.json 직렬화 형식 — KnowledgeEdge 배열 */
 export type SerializedEdges = KnowledgeEdge[];
+
+/** archive-members.json 직렬화 형식 — 클러스터별 연속·updated 내림차순 정렬을 보존한 평탄 배열 */
+export type SerializedArchiveMembers = ArchiveClusterMember[];
 
 /** graph-meta.json 직렬화 형식 — cross-file commit marker */
 export interface SerializedGraphMeta {

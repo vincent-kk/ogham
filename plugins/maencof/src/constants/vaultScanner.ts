@@ -1,4 +1,5 @@
 import { LAYER_DIR } from './architecture.js';
+import { ARCHIVE_DIR } from './directories.js';
 
 /**
  * Vault scan 의 기본 제외 glob 패턴.
@@ -21,3 +22,11 @@ export const VAULT_SCAN_DEFAULT_EXCLUDE: readonly string[] = [
 export const VAULT_SCAN_LAYER_PATTERNS: readonly string[] = Object.values(
   LAYER_DIR,
 ).map((dir) => `${dir}/**/*.md`);
+
+/**
+ * 서고 열거 스캔 대상 — 그래프 allowlist(VAULT_SCAN_LAYER_PATTERNS)와 분리 유지.
+ * 여기 매칭된 파일은 그래프 노드가 아니라 cluster 열거 인덱스 재료다.
+ */
+export const ARCHIVE_SCAN_PATTERNS: readonly string[] = [
+  `${ARCHIVE_DIR}/**/*.md`,
+];

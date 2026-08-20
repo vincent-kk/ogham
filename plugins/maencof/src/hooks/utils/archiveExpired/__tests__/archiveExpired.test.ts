@@ -379,4 +379,46 @@ describe('runArchiveExpired', () => {
       'archive_path: "99_Archive/actions/projects/dup-note.md"',
     );
   });
+
+  it('never overwrites an existing archive original (destructive-move guard)', async () => {
+    // 회귀 (2026-08-19 실제 데이터 손실): rename(2)은 목적지를 말없이 덮어쓴다.
+    // 멱등 가드는 *읽기 시점*만 보므로, 두 스윕이 같은 정본을 읽고 통과하면
+    // 뒤늦은 이동이 앞선 스윕이 옮겨둔 정본을 스텁으로 파괴했다.
+    // 여기서는 그 최종 상태(서고에 이미 정본이 있음)를 재현해 파괴가 없음을 고정한다.
+    const originalPath = writeActionDocument(
+      'projects/collide.md',
+      [
+        'created: 2020-01-01',
+        'updated: 2020-01-01',
+        'tags: [project]',
+        'layer: 4',
+        'expires: 2020-06-01',
+        'title: Collide',
+      ],
+      '# Collide\n\nLive body that must not be destroyed.',
+    );
+    const archivePath = writeArchivedDocument(
+      'projects/collide.md',
+      [
+        'created: 2020-01-01',
+        'updated: 2020-01-01',
+        'tags: [project]',
+        'layer: 4',
+        'title: Collide',
+      ],
+      '# Collide\n\nCanonical original already in the archive.',
+    );
+
+    const result = await runArchiveExpired(vaultDirectory);
+
+    // 서고 정본은 그대로 — 덮어쓰지 않는다
+    expect(readFileSync(archivePath, 'utf-8')).toContain(
+      'Canonical original already in the archive.',
+    );
+    // 원위치도 스텁으로 바뀌지 않는다 — 작업 누락(<) 데이터 파괴
+    expect(readFileSync(originalPath, 'utf-8')).toContain(
+      'Live body that must not be destroyed.',
+    );
+    expect(result.archived).not.toContain('04_Action/projects/collide.md');
+  });
 });

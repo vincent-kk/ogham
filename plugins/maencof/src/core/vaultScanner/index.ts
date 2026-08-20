@@ -1,4 +1,5 @@
 export { scanVault } from './operations/scanVault.js';
+export { scanArchive } from './operations/scanArchive.js';
 export { buildSnapshot } from './operations/buildSnapshot.js';
 export { computeChangeSet } from './operations/computeChangeSet.js';
 export { readVaultFile } from './operations/readVaultFile.js';

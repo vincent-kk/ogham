@@ -5,6 +5,8 @@ export const CACHE_FILES = {
   NODES: 'nodes.json',
   /** Sharded: serialized KnowledgeEdge[]. */
   EDGES: 'edges.json',
+  /** Sharded: serialized ArchiveClusterMember[] — optional; absent in pre-0.14 caches. */
+  ARCHIVE_MEMBERS: 'archive-members.json',
   /** Sharded: cross-file commit marker (builtAt/nodeCount/edgeCount/schemaVersion). */
   GRAPH_META: 'graph-meta.json',
   WEIGHTS: 'weights.json',

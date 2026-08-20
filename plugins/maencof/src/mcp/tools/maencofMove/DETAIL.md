@@ -7,8 +7,10 @@
 - frontmatter의 `layer`/`updated`를 갱신하고, `target_sub_layer`가 없으면 `sub_layer` 필드를 제거한다.
 - 소스가 L5 문서이고 대상이 L5 가 아니면 L5 전용 필드(`buffer_type` · `promotion_target` · `source_context`)를 자동 제거한다(승격 시 잔재 방지).
 - `target_sub_layer`는 L3(relational/structural/topical)에서만 디렉토리 경로에 반영된다. L5 는 평면 구조라 서브레이어가 없다.
-- `target_subdirectory`는 대상 레이어(서브레이어가 있으면 그 아래) 디렉토리 하위의 중첩 디렉토리를 지정한다.
-  - 세그먼트별로 `sanitizeSegment`(core/filenameSlug)로 정규화한다.
+- `target_subdirectory`는 대상 레이어(서브레이어가 있으면 그 아래) 디렉토리 하위의 중첩 디렉토리를 지정한다. 입력은 검증한다 — 파일명 힌트와 달리 디렉토리 세그먼트는 이미 존재하는 실명과 맞아야 하므로 정규화(sanitizeSegment)를 적용하지 않는다. 세그먼트는 원형 그대로 대상 경로에 들어간다.
+  - 세그먼트는 `[A-Za-z0-9가-힣._-]+` 만 허용하며, 벗어나면 세그먼트 원문을 담은 에러로 거부한다.
+  - `.` 로 시작하는 세그먼트(`.maencof` 등 런타임 디렉토리 오염 경로)는 거부한다.
+  - 첫 세그먼트가 레이어 디렉토리(`01_Core`~`05_Context`) 또는 서고(`99_Archive`)면 대소문자 무관 거부한다 — 서고 거부 메시지는 `mv` + frontmatter 편집 안내를 담는다.
   - `..` 세그먼트는 traversal로 거부한다.
   - 깊이는 `MAX_FILENAME_SUBDIR_DEPTH`(constants/filename)를 초과할 수 없다.
   - 대상 레이어가 `FLAT_LAYERS`(constants/architecture; L1·L5)에 속하면 지정 자체를 거부한다 — 평면 레이어는 중첩 디렉토리를 갖지 않는다.
@@ -33,7 +35,7 @@
 ### Result
 
 - 성공: `{ success: true, path: <새 상대 경로>, message, warnings? }`
-- 실패 사유: 소스 없음 · L1 소스 · 잘못된 target_layer · 동일 레이어 무의미 이동 · 대상 경로 중복 · traversal/깊이 초과 · frontmatter 검증 실패 · vault 봉쇄 위반
+- 실패 사유: 소스 없음 · L1 소스 · 잘못된 target_layer · 동일 레이어 무의미 이동 · 대상 경로 중복 · 서브디렉토리 검증 실패(traversal · 깊이 초과 · 허용 밖 문자 · `.` 선행 세그먼트 · 레이어/서고 예약 루트) · frontmatter 검증 실패 · vault 봉쇄 위반
 
 ### 파일명 유지 규칙
 
@@ -61,6 +63,22 @@
 
 - `target_subdirectory` 의 `..` 세그먼트는 거부되고, 깊이가 `MAX_FILENAME_SUBDIR_DEPTH` 를 넘으면 이동이 실패한다.
 
+### AC-subdirectory-verbatim — 세그먼트 원형 보존
+
+- `_`·대문자·한글을 포함한 세그먼트가 변형 없이 대상 경로에 보존된다.
+
+### AC-subdirectory-charset — 허용 밖 문자 거부
+
+- `[A-Za-z0-9가-힣._-]+` 를 벗어난 세그먼트(공백·`!` 등)는 세그먼트 원문을 담은 에러로 거부된다.
+
+### AC-reserved-root-rejected — 레이어·서고 루트 거부
+
+- 첫 세그먼트가 레이어 디렉토리(`01_Core`~`05_Context`) 또는 서고(`99_Archive`)면 대소문자 무관 거부하고, 서고는 `mv` + frontmatter 편집 안내를 담는다.
+
+### AC-hidden-segment-rejected — `.` 선행 세그먼트 거부
+
+- `.` 로 시작하는 세그먼트(`.maencof` 등 런타임 디렉토리 오염 경로)는 거부된다.
+
 ### AC-flat-target-rejected — 평면 대상 레이어 서브디렉토리 거부
 
 - `target_layer` 가 `FLAT_LAYERS`(1·5)에 속하면 `target_subdirectory` 지정 시 이동이 실패하고 소스가 보존된다.
@@ -75,8 +93,9 @@
 
 ## History
 
+- 2026-08-21 — `target_subdirectory` 를 정규화(sanitizeSegment)에서 검증·원형 보존으로 전환했다. 디렉토리 세그먼트는 이미 존재하는 실명과 맞아야 하는데 슬러그화가 조용한 근사 경로를 만들던 불일치의 해소다 ([이슈](../../../../docs/issues/2026-08-21-move-target-subdirectory-slug.md)).
 - 2026-08-04 — 평면 레이어(L1·L5) 대상의 `target_subdirectory` 를 거부하도록 계약을 좁혔다. 설계가 평면으로 선언한 레이어에 이동 경로만 중첩을 허용하던 불일치의 해소이며, 정본은 `FLAT_LAYERS` 다.
 
 ## Last Updated
 
-2026-08-20 — 노드 구성의 `allowNonLayerPath` 옵트아웃(그래프 편입 게이트의 검증 전용 예외)을 문서화했다.
+2026-08-21 — `target_subdirectory` 검증 전환 계약(원형 보존 · 문자 검증 · 레이어/서고 루트 거부)을 반영했다.

@@ -12,6 +12,7 @@ import type {
   KgBuildResult,
 } from '../types/types.js';
 
+import { buildArchiveClusterIndex } from './buildArchiveClusterIndex.js';
 import { capParseFailures } from './capParseFailures.js';
 import { fullBuild } from './fullBuild.js';
 import { incrementalBuild } from './incrementalBuild.js';
@@ -52,6 +53,9 @@ export async function handleKgBuild(
       scannedFiles = full.files;
       parseFailures = full.parseFailures;
     }
+
+    // 서고 열거 인덱스 — 스냅샷 추적 밖이라 매 빌드(전체·증분·무변경 공통) 재스캔한다
+    graph.archiveClusterMembers = await buildArchiveClusterIndex(vaultPath);
 
     // 그래프 저장
     await store.saveGraph(graph);

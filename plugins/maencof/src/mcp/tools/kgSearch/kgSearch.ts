@@ -3,9 +3,12 @@
  * @description kg_search 도구 핸들러 — SA 기반 관련 문서 검색 + cluster 열거 모드.
  * seed 모드는 쿼리 엔진의 ActivationResult 를 참조 메타(path·title·tags·gist)로 매핑하고
  * collapse 표기(clusterKey/collapsedCount)를 그대로 노출한다. cluster 모드는 SA 없이
- * 해당 clusterKey 전역 멤버를 updated 내림차순으로 연다 (다른 필터 미적용, score/hops 0).
+ * 해당 clusterKey 전역 멤버를 updated 내림차순으로 연다 — 서고 멤버 병합(archived),
+ * since/until 시간창·match 주제 필터(title·tags 부분매칭) 적용,
+ * max_results 페이지(기본 50·캡 200), 그 외 필터 미적용, score/hops 0.
  */
 import {
+  CLUSTER_ENUMERATION_DEFAULT_PAGE,
   MAX_CLUSTER_ENUMERATION,
   MAX_EXPANDED_CLUSTERS,
 } from '../../../constants/thresholds.js';
@@ -55,23 +58,57 @@ export async function handleKgSearch(
   > = {};
 
   if (input.cluster) {
-    const members = [...graph.nodes.values()]
+    const nodeMembers = [...graph.nodes.values()]
       .filter((n) => n.clusterKey === input.cluster)
+      .map((n) => ({
+        path: n.path,
+        title: n.title,
+        tags: n.tags,
+        updated: n.updated,
+        ...(n.gist !== undefined && { gist: n.gist }),
+      }));
+    const archiveMembers = (
+      graph.archiveClusterMembers?.get(input.cluster) ?? []
+    ).map((m) => ({
+      path: m.path,
+      title: m.title,
+      tags: m.tags,
+      updated: m.updated,
+      archived: true,
+    }));
+
+    const inWindow = (updated: string): boolean =>
+      (input.since === undefined || updated >= input.since) &&
+      (input.until === undefined || updated <= input.until);
+
+    const needle = input.match?.toLowerCase();
+    const matchesTopic = (m: { title: string; tags: string[] }): boolean =>
+      needle === undefined ||
+      m.title.toLowerCase().includes(needle) ||
+      m.tags.some((t) => t.toLowerCase().includes(needle));
+
+    // 불변식: 필터(시간창·match) → 정렬 → 계수(clusterSize) → 절단(pageLimit) 순서 고정.
+    // 절단은 pageLimit 한 곳뿐이고, clusterSize 는 절단 전 필터 통과 총원이다.
+    const members = [...nodeMembers, ...archiveMembers]
+      .filter((m) => inWindow(m.updated) && matchesTopic(m))
       .sort(
         (a, b) =>
           b.updated.localeCompare(a.updated) || a.path.localeCompare(b.path),
       );
     const clusterSize = members.length;
-    const truncated = clusterSize > MAX_CLUSTER_ENUMERATION;
-    items = members.slice(0, MAX_CLUSTER_ENUMERATION).map((n) => ({
-      path: n.path,
-      score: 0,
-      hops: 0,
-      title: n.title,
-      tags: n.tags,
-      ...(n.gist !== undefined && { gist: n.gist }),
-      clusterKey: input.cluster,
-    }));
+    const pageLimit = Math.min(
+      input.max_results ?? CLUSTER_ENUMERATION_DEFAULT_PAGE,
+      MAX_CLUSTER_ENUMERATION,
+    );
+    const truncated = clusterSize > pageLimit;
+    items = members
+      .slice(0, pageLimit)
+      .map(({ updated: _sortKey, ...member }) => ({
+        ...member,
+        score: 0,
+        hops: 0,
+        clusterKey: input.cluster,
+      }));
     exploredNodes = 0;
     seedResolution = { resolved: {} };
     clusterMeta = {

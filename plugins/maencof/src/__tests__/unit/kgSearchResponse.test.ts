@@ -245,6 +245,144 @@ describe('handleKgSearch — cluster collapse and open (R4)', () => {
     const neither = await handleKgSearch(makeClusterGraph(), {});
     expect('error' in neither).toBe(true);
   });
+
+  it('cluster 열거가 서고 멤버를 병합해 archived 플래그와 updated 내림차순으로 반환한다', async () => {
+    // makeClusterGraph(): jira-th 노드 3건 — th-1(2026-02-03) · th-2(2026-02-02) · th-0(2026-02-01)
+    const graph = makeClusterGraph();
+    graph.archiveClusterMembers = new Map([
+      [
+        'jira-th',
+        [
+          {
+            clusterKey: 'jira-th',
+            path: '99_Archive/jira/a-new.md',
+            title: 'Newest archived',
+            updated: '2026-08-19',
+            tags: ['jira'],
+          },
+          {
+            clusterKey: 'jira-th',
+            path: '99_Archive/jira/a-old.md',
+            title: 'Oldest archived',
+            updated: '2020-01-01',
+            tags: [],
+          },
+        ],
+      ],
+    ]);
+    const result = await handleKgSearch(graph, { cluster: 'jira-th' });
+    if ('error' in result) throw new Error(result.error);
+    expect(result.clusterSize).toBe(5);
+    // 병합 정렬: updated 내림차순 — 서고 최신이 선두, 서고 최고(最古)가 말미
+    expect(result.results.map((r) => r.path)).toEqual([
+      '99_Archive/jira/a-new.md',
+      '04_Action/th-1.md',
+      '04_Action/th-2.md',
+      '04_Action/th-0.md',
+      '99_Archive/jira/a-old.md',
+    ]);
+    expect(result.results[0]!.archived).toBe(true);
+    expect(result.results[0]!.title).toBe('Newest archived');
+    // 노드 항목에는 archived 가 실리지 않는다
+    expect(result.results[1]!.archived).toBeUndefined();
+  });
+
+  it('cluster 열거에 since/until 시간창이 병합 목록에 적용되고 clusterSize 는 창 내 총원이다', async () => {
+    const graph = makeClusterGraph();
+    graph.archiveClusterMembers = new Map([
+      [
+        'jira-th',
+        [
+          {
+            clusterKey: 'jira-th',
+            path: '99_Archive/jira/a-new.md',
+            title: 'Newest archived',
+            updated: '2026-08-19',
+            tags: [],
+          },
+          {
+            clusterKey: 'jira-th',
+            path: '99_Archive/jira/a-old.md',
+            title: 'Oldest archived',
+            updated: '2020-01-01',
+            tags: [],
+          },
+        ],
+      ],
+    ]);
+    const result = await handleKgSearch(graph, {
+      cluster: 'jira-th',
+      since: '2026-02-02',
+      until: '2026-03-01',
+    });
+    if ('error' in result) throw new Error(result.error);
+    // 창 내: th-1(02-03)·th-2(02-02)만 — 서고 2건과 th-0(02-01)은 창 밖
+    expect(result.clusterSize).toBe(2);
+    expect(result.results.map((r) => r.path)).toEqual([
+      '04_Action/th-1.md',
+      '04_Action/th-2.md',
+    ]);
+  });
+
+  it('archiveClusterMembers 미존재 그래프(구캐시)에서도 cluster 열거는 기존과 동일하다', async () => {
+    const result = await handleKgSearch(makeClusterGraph(), {
+      cluster: 'jira-th',
+    });
+    if ('error' in result) throw new Error(result.error);
+    expect(result.clusterSize).toBe(3); // 기존 '전역 멤버 updated 내림차순' 케이스와 동일
+  });
+
+  it('cluster 열거는 max_results 미지정 시 기본 페이지(50)로 절단하고 truncated 를 싣는다', async () => {
+    const graph = makeClusterGraph(); // jira-th 노드 3건
+    const bulk = Array.from({ length: 57 }, (_, i) => ({
+      clusterKey: 'jira-th',
+      path: `99_Archive/jira/bulk-${String(i).padStart(3, '0')}.md`,
+      title: `Bulk ${i}`,
+      updated: '2025-01-01',
+      tags: [],
+    }));
+    graph.archiveClusterMembers = new Map([['jira-th', bulk]]);
+    const result = await handleKgSearch(graph, { cluster: 'jira-th' });
+    if ('error' in result) throw new Error(result.error);
+    expect(result.clusterSize).toBe(60);
+    expect(result.results).toHaveLength(50);
+    expect(result.truncated).toBe(true);
+  });
+
+  it('cluster 열거에 max_results 를 지정하면 그 수만큼 반환하고 clusterSize 는 총원을 유지한다', async () => {
+    const graph = makeClusterGraph(); // jira-th 노드 3건
+    const result = await handleKgSearch(graph, {
+      cluster: 'jira-th',
+      max_results: 2,
+    });
+    if ('error' in result) throw new Error(result.error);
+    expect(result.clusterSize).toBe(3);
+    expect(result.results.map((r) => r.path)).toEqual([
+      '04_Action/th-1.md',
+      '04_Action/th-2.md',
+    ]);
+    expect(result.truncated).toBe(true);
+  });
+
+  it('max_results 가 MAX_CLUSTER_ENUMERATION 을 넘어도 200건으로 캡한다', async () => {
+    const graph = makeClusterGraph(); // jira-th 노드 3건
+    const bulk = Array.from({ length: 198 }, (_, i) => ({
+      clusterKey: 'jira-th',
+      path: `99_Archive/jira/bulk-${String(i).padStart(3, '0')}.md`,
+      title: `Bulk ${i}`,
+      updated: '2025-01-01',
+      tags: [],
+    }));
+    graph.archiveClusterMembers = new Map([['jira-th', bulk]]);
+    const result = await handleKgSearch(graph, {
+      cluster: 'jira-th',
+      max_results: 250,
+    });
+    if ('error' in result) throw new Error(result.error);
+    expect(result.clusterSize).toBe(201);
+    expect(result.results).toHaveLength(200);
+    expect(result.truncated).toBe(true);
+  });
 });
 
 /**
