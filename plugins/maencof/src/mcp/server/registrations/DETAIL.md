@@ -49,7 +49,7 @@
 
 ### 클러스터 파라미터
 
-`kg_search` 는 `seed` 와 `cluster` 를 상호배타로 받는다(정확히 하나 — 검증은 핸들러 몫이고 스키마는 둘 다 optional 로 노출한다). `cluster` 는 접힌 클러스터의 전체 열거 모드로, 설명 문구가 SA 미적용·updated 최신순·200 상한·`clusterSize`/`truncated` 계약을 호출자에게 알린다. `cluster_key` 는 `create` 와 `update` 의 frontmatter 스키마 두 곳에 있으며 제거 경로는 `frontmatter.unset` 이다.
+`kg_search` 는 `seed` 와 `cluster` 를 상호배타로 받는다(정확히 하나 — 검증은 핸들러 몫이고 스키마는 둘 다 optional 로 노출한다). `cluster` 는 접힌 클러스터의 전체 열거 모드로, 설명 문구가 SA 미적용·updated 최신순·페이지 크기(기본 50·최대 100)·`offset` 페이징·`clusterSize`/`truncated` 계약을 호출자에게 알린다. `MAX_CLUSTER_ENUMERATION`(200)은 핸들러 내부 방어선이고 `max_results` 스키마 캡(100)에 막혀 어떤 입력으로도 도달할 수 없으므로 설명 문구에 상한으로 적지 않는다 — 도달 불가능한 수를 안내하면 호출자가 실행 불가능한 페이지 크기를 계획한다. `cluster_key` 는 `create` 와 `update` 의 frontmatter 스키마 두 곳에 있으며 제거 경로는 `frontmatter.unset` 이다.
 
 ## Acceptance Criteria
 

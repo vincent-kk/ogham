@@ -17,6 +17,8 @@ export interface KgSearchInput {
   match?: string;
   /** 최대 반환 수 (기본 10) */
   max_results?: number;
+  /** cluster 모드 전용 페이징 시작 위치 — 필터·정렬 후 건너뛸 멤버 수 (기본 0). seed 모드에는 적용되지 않는다 */
+  offset?: number;
   /** 감쇠 인자 (기본 0.7) */
   decay?: number;
   /** 발화 임계값 (기본 0.1) */
@@ -109,6 +111,8 @@ export interface KgSearchResultItem {
   trace?: string[];
   /** 본문 전문 (include_content: true 이고 파일을 읽을 수 있을 때만) */
   content?: string;
+  /** updated 날짜 (YYYY-MM-DD) — cluster 열거 모드에서만. 정렬 키를 그대로 노출한다 */
+  updated?: string;
   /** 서고(99_Archive) 멤버 여부 — cluster 열거 모드에서 그래프 노드가 아닌 항목에만 true */
   archived?: boolean;
   /** 클러스터 키 — 이 항목이 클러스터 소속일 때. kg_search { cluster } 로 전 멤버를 연다 */

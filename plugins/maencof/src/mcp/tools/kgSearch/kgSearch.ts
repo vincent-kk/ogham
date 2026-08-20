@@ -5,7 +5,8 @@
  * collapse 표기(clusterKey/collapsedCount)를 그대로 노출한다. cluster 모드는 SA 없이
  * 해당 clusterKey 전역 멤버를 updated 내림차순으로 연다 — 서고 멤버 병합(archived),
  * since/until 시간창·match 주제 필터(title·tags 부분매칭) 적용,
- * max_results 페이지(기본 50·캡 200), 그 외 필터 미적용, score/hops 0.
+ * max_results 페이지(기본 50)·offset 시작 위치(기본 0, 내부 캡 200), 항목에 정렬 키
+ * updated 포함, 그 외 필터 미적용, score/hops 0.
  */
 import {
   CLUSTER_ENUMERATION_DEFAULT_PAGE,
@@ -100,15 +101,14 @@ export async function handleKgSearch(
       input.max_results ?? CLUSTER_ENUMERATION_DEFAULT_PAGE,
       MAX_CLUSTER_ENUMERATION,
     );
-    const truncated = clusterSize > pageLimit;
-    items = members
-      .slice(0, pageLimit)
-      .map(({ updated: _sortKey, ...member }) => ({
-        ...member,
-        score: 0,
-        hops: 0,
-        clusterKey: input.cluster,
-      }));
+    const offset = input.offset ?? 0;
+    items = members.slice(offset, offset + pageLimit).map((member) => ({
+      ...member,
+      score: 0,
+      hops: 0,
+      clusterKey: input.cluster,
+    }));
+    const truncated = offset + items.length < clusterSize;
     exploredNodes = 0;
     seedResolution = { resolved: {} };
     clusterMeta = {

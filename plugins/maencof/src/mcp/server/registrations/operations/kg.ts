@@ -58,7 +58,7 @@ export function registerKgTools(server: McpServer): void {
           .string()
           .optional()
           .describe(
-            "Open a collapsed cluster: enumerate documents whose cluster_key equals this value — graph nodes and archived documents (99_Archive) alike; archive entries carry archived:true. Newest updated first, without SA (score/hops are 0). max_results sets the page size (default 50 in this mode, hard cap 200); truncated flags a cut page and clusterSize reports the full member count within the window — page onward with until set to the last item's updated (day-granular, so a same-day boundary may repeat). since/until narrow by updated and match narrows by title/tags substring; other filters do not apply. Mutually exclusive with seed. Use the clusterKey reported on a collapsed result.",
+            'Open a collapsed cluster: enumerate documents whose cluster_key equals this value — graph nodes and archived documents (99_Archive) alike; archive entries carry archived:true. Newest updated first, without SA (score/hops are 0). max_results sets the page size (default 50, max 100); truncated flags a cut page and clusterSize reports the filtered total. Each item carries updated (the sort key). Page with offset: repeat the call adding results.length to offset until offset + results.length reaches clusterSize. since/until narrow by updated and match narrows by title/tags substring; other filters do not apply. Mutually exclusive with seed. Use the clusterKey reported on a collapsed result.',
           ),
         match: z
           .string()
@@ -66,6 +66,14 @@ export function registerKgTools(server: McpServer): void {
           .optional()
           .describe(
             'Cluster mode only: case-insensitive substring filter on member title and tags, applied before sorting and truncation — clusterSize reports the filtered total, and truncated still flags a cut page within the match. Combinable with since/until. Not applied in seed mode (narrow topically there via seed items).',
+          ),
+        offset: z
+          .number()
+          .int()
+          .min(0)
+          .optional()
+          .describe(
+            'Cluster mode only: number of filtered, sorted members to skip before the page starts (default 0). The enumeration order (updated desc, then path asc) is deterministic, so offset paging visits every member exactly once. Not applied in seed mode.',
           ),
         max_results: z
           .number()

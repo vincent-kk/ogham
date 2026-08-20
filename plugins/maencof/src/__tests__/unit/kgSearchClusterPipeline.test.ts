@@ -107,6 +107,107 @@ function makePipelineGraph(): KnowledgeGraph {
   return graph;
 }
 
+/**
+ * 'cve' 클러스터 축소판 — 같은 updated(2026-07-24) 서고 7건 + 이전 날짜(2026-07-08) 2건.
+ * 같은 날짜 그룹이 페이지 크기를 초과하는 실측 분포(하루 133건)의 재현이다 —
+ * 날짜 입도 until 커서는 이 경계에서 정지하고, offset 커서는 완주해야 한다.
+ */
+function makeSameDayGraph(): KnowledgeGraph {
+  const graph = buildGraph(new Map(), []);
+  graph.archiveClusterMembers = new Map([
+    [
+      'cve',
+      [
+        ...Array.from({ length: 7 }, (_, i) => ({
+          clusterKey: 'cve',
+          path: `99_Archive/cve/same-${i}.md`,
+          title: `Same-day ${i}`,
+          updated: '2026-07-24',
+          tags: ['cve'],
+        })),
+        ...Array.from({ length: 2 }, (_, i) => ({
+          clusterKey: 'cve',
+          path: `99_Archive/cve/old-${i}.md`,
+          title: `Older ${i}`,
+          updated: '2026-07-08',
+          tags: ['cve'],
+        })),
+      ],
+    ],
+  ]);
+  return graph;
+}
+
+describe('handleKgSearch — cluster offset paging', () => {
+  it('cluster 항목은 노드·서고 멤버 공통으로 정렬 키 updated 를 싣는다', async () => {
+    const result = await handleKgSearch(makePipelineGraph(), {
+      cluster: 'gn',
+      max_results: 3,
+    });
+
+    if ('error' in result) throw new Error(result.error);
+    expect(result.results.map((r) => r.updated)).toEqual([
+      '2026-08-21',
+      '2026-08-20',
+      '2026-08-20',
+    ]);
+    expect(result.results[0]!.archived).toBeUndefined();
+  });
+
+  it('같은 updated 그룹이 페이지 크기를 초과해도 offset 왕복이 전 멤버를 중복 없이 완주한다', async () => {
+    const graph = makeSameDayGraph();
+    const seen: string[] = [];
+    for (const offset of [0, 3, 6]) {
+      const page = await handleKgSearch(graph, {
+        cluster: 'cve',
+        max_results: 3,
+        offset,
+      });
+      if ('error' in page) throw new Error(page.error);
+      expect(page.clusterSize).toBe(9);
+      expect(page.results).toHaveLength(3);
+      expect(page.truncated).toBe(offset < 6 ? true : undefined);
+      seen.push(...page.results.map((r) => r.path));
+    }
+    expect(new Set(seen).size).toBe(9);
+    // 마지막 페이지가 같은 날짜 경계(same-6)를 넘어 이전 날짜로 진행한다
+    expect(seen.slice(6)).toEqual([
+      '99_Archive/cve/same-6.md',
+      '99_Archive/cve/old-0.md',
+      '99_Archive/cve/old-1.md',
+    ]);
+  });
+
+  it('offset 은 match 필터·정렬 이후의 목록에 적용된다', async () => {
+    const result = await handleKgSearch(makePipelineGraph(), {
+      cluster: 'gn',
+      match: '하네스',
+      max_results: 2,
+      offset: 2,
+    });
+
+    if ('error' in result) throw new Error(result.error);
+    expect(result.clusterSize).toBe(4);
+    expect(result.results.map((r) => r.path)).toEqual([
+      '99_Archive/gn/a-tag.md',
+      '99_Archive/gn/a-old.md',
+    ]);
+    expect(result.truncated).toBeUndefined();
+  });
+
+  it('offset 이 clusterSize 이상이면 빈 results·truncated 부재·clusterSize 유지다', async () => {
+    const result = await handleKgSearch(makeSameDayGraph(), {
+      cluster: 'cve',
+      offset: 9,
+    });
+
+    if ('error' in result) throw new Error(result.error);
+    expect(result.results).toEqual([]);
+    expect(result.truncated).toBeUndefined();
+    expect(result.clusterSize).toBe(9);
+  });
+});
+
 describe('handleKgSearch — cluster pipeline contract (filter→sort→count→cut)', () => {
   it('오래된 매칭 항목이 max_results 절단에서 생존하고 최신 비매칭 항목은 자리를 차지하지 않는다', async () => {
     const result = await handleKgSearch(makePipelineGraph(), {
