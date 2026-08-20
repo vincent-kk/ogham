@@ -262,9 +262,18 @@ function buildPlan(vaultPath, config) {
   const ops = [];
   const anomalies = [];
   const collisions = [];
+  // 목표 경로 점유 — casefold 키: 대소문자만 다른 동명 중복(실볼트 실측: cve-/CVE- 혼용)은
+  // 대소문자 무시 파일시스템에서 실행 중 충돌하므로 계획 시점에 collision 으로 잡는다
   const claimedTargets = new Set();
   const movedPairs = [];
+  // 링크 재작성 op 의 경로 보정용 — 이동 op 가 재작성 op 보다 먼저 실행되므로,
+  // 이동 대상 파일의 재작성은 이동 후 경로를 가리켜야 한다. 삭제될 스텁은 제외.
+  const bodyMoveMap = new Map();
+  const deletedRels = new Set();
   const summary = { series: {}, totalOps: 0 };
+  // 볼트 소유 적재 코드의 전환 제안(Phase R)이 소비하는 기계가독 지시 — 시리즈별
+  // 새 적재 목적지·앵커·발견된 적재 스크립트 경로
+  const redirection = [];
   let basenameLinksSkipped = 0;
   let preexistingTargetSkipped = 0;
 
@@ -308,11 +317,14 @@ function buildPlan(vaultPath, config) {
     const bodyTargets = new Map();
     for (const rel of bodies) {
       const target = posix.join(targetDir, basename(rel));
-      if (existsSync(join(vaultPath, target)) || claimedTargets.has(target)) {
+      if (
+        existsSync(join(vaultPath, target)) ||
+        claimedTargets.has(target.toLowerCase())
+      ) {
         collisions.push({ from: rel, target });
         continue;
       }
-      claimedTargets.add(target);
+      claimedTargets.add(target.toLowerCase());
       bodyTargets.set(rel, target);
     }
 
@@ -346,6 +358,7 @@ function buildPlan(vaultPath, config) {
         newValue: series.key,
       });
       movedPairs.push({ from: rel, to: target });
+      bodyMoveMap.set(rel, target);
       stat.move += 1;
     }
     // 스텁이 가리키던 그래프 경로도 새 아카이브 경로로 링크 재작성 대상
@@ -383,15 +396,19 @@ function buildPlan(vaultPath, config) {
     if (series.deleteStubs !== false)
       for (const { rel } of confirmedStubs) {
         ops.push({ type: 'delete_file', path: rel });
+        deletedRels.add(rel);
         stat.stubDelete += 1;
       }
 
     // 앵커 생성 — 선존재는 충돌
     const anchorPath = normalizeRel(series.anchor.path);
-    if (existsSync(join(vaultPath, anchorPath)) || claimedTargets.has(anchorPath)) {
+    if (
+      existsSync(join(vaultPath, anchorPath)) ||
+      claimedTargets.has(anchorPath.toLowerCase())
+    ) {
       collisions.push({ from: '(anchor)', target: anchorPath });
     } else {
-      claimedTargets.add(anchorPath);
+      claimedTargets.add(anchorPath.toLowerCase());
       ensureDirPlanned(posix.dirname(anchorPath));
       const today = new Date().toISOString().slice(0, 10);
       ops.push({
@@ -402,6 +419,12 @@ function buildPlan(vaultPath, config) {
     }
 
     summary.series[series.key] = stat;
+    redirection.push({
+      key: series.key,
+      ingestionTarget: `${targetDir}/`,
+      anchorPath,
+      sourceRefs: Array.isArray(series.sourceRefs) ? series.sourceRefs : [],
+    });
   }
 
   // 링크 재작성 — 레이어 디렉토리 1패스, 파일당 신경로 선존재 시 제외
@@ -414,7 +437,10 @@ function buildPlan(vaultPath, config) {
       movedPairs.flatMap(({ from }) => [from, from.replace(/\.md$/, '')]),
     );
     for (const rel of layerFiles) {
+      if (deletedRels.has(rel)) continue; // 삭제될 스텁 — 재작성 무의미
       const content = readFileSync(join(vaultPath, rel), 'utf-8');
+      // 이동 대상 파일의 재작성은 이동 후 경로에 적용된다 (이동 op 가 선행)
+      const opPath = bodyMoveMap.get(rel) ?? rel;
       let rewrites = 0;
       for (const { from, to } of movedPairs) {
         if (rel === from) continue;
@@ -433,7 +459,7 @@ function buildPlan(vaultPath, config) {
         if (!rewriteEnabled) continue;
         const { count } = replacePathLinks(content, from, to);
         if (count > 0)
-          ops.push({ type: 'rewrite_link', path: rel, from, to, count });
+          ops.push({ type: 'rewrite_link', path: opPath, from, to, count });
         rewrites += count;
       }
       // basename-단독 링크 계수 (경로형이 아닌 타깃만)
@@ -448,7 +474,15 @@ function buildPlan(vaultPath, config) {
   }
 
   summary.totalOps = ops.length;
-  return { ops, summary, anomalies, collisions, basenameLinksSkipped, preexistingTargetSkipped };
+  return {
+    ops,
+    summary,
+    anomalies,
+    collisions,
+    redirection,
+    basenameLinksSkipped,
+    preexistingTargetSkipped,
+  };
 }
 
 function readWal(vaultPath) {
@@ -548,13 +582,19 @@ function rollback(vaultPath) {
   for (const entry of done) {
     const op = entry.op;
     switch (op.type) {
-      case 'create_dir':
-        try {
-          rmdirSync(join(vaultPath, op.path));
-        } catch {
-          // best-effort — 외부 파일이 생겼으면 남겨둔다 (architectureMigrator 동형)
+      case 'create_dir': {
+        // best-effort — 빈 부모 사다리까지 걷어내고, 외부 파일이 생겼으면 멈춘다
+        let cur = op.path;
+        while (cur && cur !== '.') {
+          try {
+            rmdirSync(join(vaultPath, cur));
+          } catch {
+            break;
+          }
+          cur = posix.dirname(cur);
         }
         break;
+      }
       case 'move_file':
         mkdirSync(join(vaultPath, posix.dirname(op.from)), { recursive: true });
         renameSync(join(vaultPath, op.to), join(vaultPath, op.from));
@@ -650,6 +690,7 @@ function main() {
     summary: plan.summary,
     anomalies: plan.anomalies,
     collisions: plan.collisions,
+    redirection: plan.redirection,
     basenameLinksSkipped: plan.basenameLinksSkipped,
     preexistingTargetSkipped: plan.preexistingTargetSkipped,
   };

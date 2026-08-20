@@ -155,14 +155,15 @@ after clearing the WAL — never leave the vault in the partial state.
 2. Verify: `kg_search { seed: [<anchor tag>] }` surfaces the anchor;
    `kg_search { cluster: <key> }` returns anchor + stamped distilled docs;
    moved bodies are absent from the graph.
-3. Redirection report (from --report JSON + config `sourceRefs`): for each
-   vault-owned ingestion path, propose the exact edit that (a) repoints NEW
-   ingestion to `99_Archive/<archiveDir>/` (target dir + frontmatter to keep,
-   `expires` no longer needed) and (b) bumps the anchor's `updated` field —
-   and its one-line summary when meaningful — on each ingestion run: the
-   anchor is a pointer document, and keeping it fresh is the ingestion
-   pipeline's job. Apply only with user approval — these files are vault
-   property.
+3. Redirection: the report's `redirection` section lists, per series,
+   `{ key, ingestionTarget, anchorPath, sourceRefs }`. For each `sourceRefs`
+   entry (the vault-owned ingestion scripts/configs found in Phase D), propose
+   the exact edit that (a) repoints NEW ingestion to `ingestionTarget`
+   (frontmatter kept, `expires` no longer needed) and (b) bumps the anchor's
+   `updated` field — and its one-line summary when meaningful — on each
+   ingestion run: the anchor is a pointer document, and keeping it fresh is
+   the ingestion pipeline's job. Apply only with user approval — these files
+   are vault property.
 4. Propose adding `clusterseed` to the vault CLAUDE.md sub-layer enumeration
    if it lists allowed values.
 5. Recommend `/maencof:checkup` (links into `99_Archive/` classify as

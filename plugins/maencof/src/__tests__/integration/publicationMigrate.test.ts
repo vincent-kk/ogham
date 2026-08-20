@@ -133,6 +133,37 @@ title: Feed Digest 2026 Q1
 
 digest body
 `,
+  '.maencof-meta/archive/04_Action/feed/old/it-003.md': `---
+created: 2025-12-01
+updated: 2025-12-02
+tags: [feed]
+layer: 4
+title: It 003
+---
+
+body 003
+`,
+  '.maencof-meta/archive/04_Action/feed/README.md': `---
+created: 2025-12-01
+updated: 2025-12-01
+tags: [feed]
+layer: 4
+title: Feed Readme
+---
+
+series description, must stay in place
+`,
+  '03_External/topical/feed-digest-2025-q4.md': `---
+created: 2025-10-01
+updated: 2025-10-02
+tags: [feed, digest]
+layer: 3
+expires: 2026-01-01
+title: Feed Digest 2025 Q4
+---
+
+variant key order (expires before title)
+`,
   '02_Derived/note.md': `---
 created: 2026-03-01
 updated: 2026-03-01
@@ -171,11 +202,11 @@ const CONFIG = {
       archiveDir: 'feed',
       moveSources: [
         { dir: '04_Action/feed', filePattern: '^it-' },
-        { dir: '.maencof-meta/archive/04_Action/feed' },
+        { dir: '.maencof-meta/archive/04_Action/feed', recursive: true },
       ],
       stampOnly: [{ dir: '03_External/topical', filePattern: '^feed-digest-' }],
-      excludePatterns: [],
-      sourceRefs: [],
+      excludePatterns: ['^README'],
+      sourceRefs: ['knowledge/feed-adapter.md'],
       deleteStubs: true,
       rewriteLinks: true,
     },
@@ -317,6 +348,8 @@ describe('publication-migrate.mjs — black-box on a fixture vault', () => {
     expect((JSON.parse(walContent!.content) as { status: string }).status).toBe(
       'rolled_back',
     );
+    // 생성했던 디렉토리 사다리도 빈 상태면 걷어낸다 (부모 포함 best-effort)
+    expect(existsSync(join(vault, '99_Archive'))).toBe(false);
   });
 
   it('pre-existing target aborts execute with exit 3', () => {
@@ -362,5 +395,121 @@ describe('publication-migrate.mjs — black-box on a fixture vault', () => {
     );
     const out = lastJson(r.stdout);
     expect(out.preexistingTargetSkipped as number).toBeGreaterThanOrEqual(1);
+  });
+
+  it('report carries a machine-readable redirection section', () => {
+    const reportPath = join(vault, '.maencof-meta/tmp/report.json');
+
+    const r = runScript([
+      vault,
+      '--config',
+      configPath,
+      '--report',
+      reportPath,
+    ]);
+
+    expect(r.status).toBe(0);
+    const report = JSON.parse(readFileSync(reportPath, 'utf-8')) as {
+      redirection: Array<{
+        key: string;
+        ingestionTarget: string;
+        anchorPath: string;
+        sourceRefs: string[];
+      }>;
+    };
+    expect(report.redirection).toEqual([
+      {
+        key: 'feed-thread',
+        ingestionTarget: '99_Archive/feed/',
+        anchorPath: '03_External/clusterseeds/feed-thread.md',
+        sourceRefs: ['knowledge/feed-adapter.md'],
+      },
+    ]);
+    const out = lastJson(r.stdout);
+    expect(JSON.stringify(out.redirection)).toContain(
+      'knowledge/feed-adapter.md',
+    );
+  });
+
+  it('stamping is key-order independent (expires-before-title variant)', () => {
+    runScript([vault, '--config', configPath, '--execute']);
+
+    const variant = readFileSync(
+      join(vault, '03_External/topical/feed-digest-2025-q4.md'),
+      'utf-8',
+    );
+    expect(variant).toContain(
+      '\nlayer: 3\ncluster_key: feed-thread\nexpires: 2026-01-01\n',
+    );
+    expect(variant).toContain('variant key order (expires before title)');
+  });
+
+  it('excludePatterns keeps matching files in place', () => {
+    runScript([vault, '--config', configPath, '--execute']);
+
+    expect(
+      existsSync(join(vault, '.maencof-meta/archive/04_Action/feed/README.md')),
+    ).toBe(true);
+    expect(existsSync(join(vault, '99_Archive/feed/README.md'))).toBe(false);
+  });
+
+  it('recursive moveSources pick up nested files', () => {
+    runScript([vault, '--config', configPath, '--execute']);
+
+    expect(existsSync(join(vault, '99_Archive/feed/it-003.md'))).toBe(true);
+    expect(
+      existsSync(
+        join(vault, '.maencof-meta/archive/04_Action/feed/old/it-003.md'),
+      ),
+    ).toBe(false);
+  });
+
+  it('links inside a moved body are rewritten at its post-move path', () => {
+    // 리허설 실측 결함 재현: 이동 대상끼리의 상호 링크 — 재작성 op 가 이동 전
+    // 경로를 가리키면 이동이 먼저 실행된 뒤 ENOENT 로 실행이 중단된다.
+    writeVaultFile(
+      vault,
+      '04_Action/feed/it-005.md',
+      `---
+created: 2026-01-05
+updated: 2026-01-06
+tags: [feed]
+layer: 4
+title: It 005
+---
+
+See [[04_Action/feed/it-001.md]].
+`,
+    );
+
+    const r = runScript([vault, '--config', configPath, '--execute']);
+
+    expect(r.status).toBe(0);
+    const moved = readFileSync(
+      join(vault, '99_Archive/feed/it-005.md'),
+      'utf-8',
+    );
+    expect(moved).toContain('[[99_Archive/feed/it-001.md]]');
+  });
+
+  it('case-fold duplicate targets are collisions at plan time', () => {
+    // 실볼트 실측: 같은 항목이 소문자/대문자 파일명으로 중복 적재된 사례 —
+    // 대소문자 무시 파일시스템(macOS)에서 실행 중 충돌하므로 계획 시점에 잡는다.
+    writeVaultFile(
+      vault,
+      '04_Action/feed/it-004.md',
+      FIXTURES['04_Action/feed/it-001.md']!,
+    );
+    writeVaultFile(
+      vault,
+      '.maencof-meta/archive/04_Action/feed/It-004.md',
+      FIXTURES['.maencof-meta/archive/04_Action/feed/old/it-003.md']!,
+    );
+
+    const r = runScript([vault, '--config', configPath]);
+
+    expect(r.status).toBe(0);
+    const out = lastJson(r.stdout);
+    expect(JSON.stringify(out.collisions)).toContain('It-004');
   });
 });
