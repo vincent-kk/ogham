@@ -27,6 +27,8 @@ export interface ResolvedSeedNodes {
   scored: ScoredSeed[];
   /** 입력 seed 원문 → 어휘 매칭 노드 수 (시드 budget 캡 이전). 0 = 미해석. 키는 첫 등장 순서. */
   seedCounts: Record<string, number>;
+  /** 시드별 어휘 매칭 후보 집합(시드 budget 캡 이전) — 입력 seeds 와 같은 순서. path/미해석 시드는 빈 집합. 지목(R8) 판정용. */
+  seedMatches: ReadonlySet<NodeId>[];
 }
 
 /**

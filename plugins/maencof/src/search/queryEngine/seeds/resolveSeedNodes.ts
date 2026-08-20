@@ -45,25 +45,31 @@ export function resolveSeedNodes(
   for (const resolved of resolvedKeywordSeeds)
     if (resolved) idfMax = Math.max(idfMax, resolved.idf);
 
+  const seedMatches: ReadonlySet<NodeId>[] = [];
+
   seeds.forEach((seed, i) => {
     if (isPathSeed(seed)) {
       seedCounts[seed] = resolvePathSeed(graph, seed, bestScores);
+      seedMatches.push(new Set());
       return;
     }
     const resolved = resolvedKeywordSeeds[i];
     if (!resolved) {
       seedCounts[seed] = 0;
+      seedMatches.push(new Set());
       return;
     }
     const idfScale = idfMax > 0 && resolved.idf > 0 ? resolved.idf / idfMax : 1;
-    seedCounts[seed] = resolveKeywordSeed(
+    const matchedIds = resolveKeywordSeed(
       graph,
       resolved,
       idfScale,
       bestScores,
       opts?.compoundOrScore,
     );
+    seedCounts[seed] = matchedIds.length;
+    seedMatches.push(new Set(matchedIds));
   });
 
-  return { scored: Array.from(bestScores.values()), seedCounts };
+  return { scored: Array.from(bestScores.values()), seedCounts, seedMatches };
 }

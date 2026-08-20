@@ -20,6 +20,7 @@ import { applyLayerFilter } from './applyLayerFilter.js';
 import { applySubLayerFilter } from './applySubLayerFilter.js';
 import { applyTimeWindow } from './applyTimeWindow.js';
 import { collapseClusters } from './collapseClusters.js';
+import { collectDesignatedIds } from './collectDesignatedIds.js';
 import { collectQueryTokens } from './collectQueryTokens.js';
 import { iterationsFromMaxHops } from './iterationsFromMaxHops.js';
 import { sharedQueryCache } from './sharedQueryCache.js';
@@ -43,7 +44,11 @@ export function query(
   if (cached) return { ...cached, durationMs: Date.now() - startTime };
 
   // 시드 노드 결정 (매칭 품질 + 시드별 계수)
-  const { scored: scoredSeeds, seedCounts } = resolveSeedNodes(graph, seeds, {
+  const {
+    scored: scoredSeeds,
+    seedCounts,
+    seedMatches,
+  } = resolveSeedNodes(graph, seeds, {
     compoundOrScore: options.tuning?.compoundOrScore,
   });
   const seedIds = scoredSeeds.map((s) => s.nodeId);
@@ -91,10 +96,15 @@ export function query(
       (layerFilter as number[]).includes(node.layer as number)) &&
     (!options.subLayerFilter || node.subLayer === options.subLayerFilter) &&
     isDateInWindow(node.updated, options.since, options.until);
+  // 시드 지목 (R8) — 유일 매칭 멤버를 collapse 대표 최우선으로. path-exact 는
+  // 결과 제외 계약이 우선이라 지목에서 차감한다.
+  const designatedIds = collectDesignatedIds(graph, seedMatches);
+  for (const id of pathExactSeedSet) designatedIds.delete(id);
   const filtered = collapseClusters(
     results.filter((r) => !pathExactSeedSet.has(r.nodeId)),
     graph,
     isEligible,
+    designatedIds,
   ).slice(0, maxResults);
 
   const result: QueryResult = {
