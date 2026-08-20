@@ -8,6 +8,8 @@
 - `include_content` 의 본문 읽기는 `vaultRoot` 파라미터로 위임받아 `core/vaultScanner` 의 `readVaultFile` 로 수행한다. 파일 부재·읽기 실패 문서는 오류 대신 `content` 를 생략한다.
 - `sub_layer`·`layer_filter`·`since`/`until` 은 전부 쿼리 엔진 옵션으로 전달한다 — `sub_layer` 는 `subLayerFilter` pre-filter 다(핸들러 post-filter 금지: 절단 후 필터는 `max_results` 미달을 만든다).
 - collapse 표기: 쿼리 엔진이 접은 결과의 `clusterKey`/`collapsedCount` 를 항목에 그대로 노출한다. collapse 의미론의 정본은 `search/queryEngine/DETAIL.md` 다.
+- 접힌 멤버 목록 (R9): 접힌 항목은 쿼리 엔진이 산출한 `collapsedMembers`(접힌 활성 멤버, score 내림차순, 상한 5)를 path 문자열 목록으로 노출한다 — 단 그 항목에 `expansion` 이 있으면 생략한다(중복 토큰 차단).
+- 시드 접촉 클러스터 자동 확장 (R10): 트리거는 `QueryResult.clusterMatches`(시드 어휘 매칭이 캡 이전에 닿은 클러스터) — 해당 접힌 항목에 `expansion` 을 싣는다. 목록은 **대표 자신을 제외한** 클러스터 전역 멤버를 매칭 멤버 우선 → `updated` 내림차순 → path 사전순으로 정렬해 상한 `CLUSTER_EXPANSION_CAP`(10)으로 자르고, 각 항목은 `{ path, title, updated, matched? }`, 초과분은 `expansionOmitted`(남은 수)로 보고한다. 전역 멤버가 대표뿐인 클러스터는 `expansion` 을 싣지 않는다. 한 응답에서 확장되는 클러스터는 결과 순위 상위 `MAX_EXPANDED_CLUSTERS`(5)개까지 — 초과 클러스터는 `collapsedMembers` 경로로 내려간다. `results` 의 순서·점수·구성은 두 필드와 무관하게 불변이다(랭킹 불변 — 평가 하네스 무영향). 멤버 수집은 touched 키 전체에 대한 `graph.nodes` 1패스다.
 - **cluster 열거 모드**: `cluster` 입력이 있으면 SA 없이 해당 `clusterKey` 전역 멤버를 `updated` 내림차순(동률 시 path 사전순)으로 반환한다. `seed` 와 상호 배타(둘 다/둘 다 없음 → `{ error }`). `MAX_CLUSTER_ENUMERATION`(200) 절단 시 `truncated: true`. `max_results`·`layer_filter`·`sub_layer`·`since`/`until`·`include_trace` 는 이 모드에 적용되지 않는다. 항목 score/hops 는 0, `exploredNodes` 는 0, `seedResolution` 은 `{ resolved: {} }`, 응답에 `cluster`·`clusterSize`(전역 총원) 를 싣는다. `include_content` 는 두 모드 공용이다.
 - `graph` 가 null 이면 재색인 안내를 담은 `{ error }` 를 돌려준다.
 
@@ -43,11 +45,19 @@
 
 - 같은 `clusterKey` 문서 여럿이 활성화된 검색 응답에는 그 클러스터의 항목이 1건만 나타나고, 그 항목이 `clusterKey` 와 `collapsedCount` 를 담는다.
 
+### AC-cluster-expansion — 시드 접촉 클러스터 자동 확장
+
+- 시드 매칭이 닿은 클러스터의 항목은 `expansion`(대표 제외 멤버, matched-first → updated 내림차순, 상한 10, 초과 시 `expansionOmitted`)을 싣는다.
+- 전역 멤버가 대표뿐인 클러스터는 `expansion` 을 싣지 않는다. 한 응답의 확장 클러스터는 결과 순위 상위 5개까지이며, 초과분은 `collapsedMembers` 경로를 따른다.
+- 확산으로만 결과에 든 클러스터의 접힌 항목은 `expansion` 없이 `collapsedMembers`(상한 5)만 싣는다.
+- `expansion` 이 있는 항목은 `collapsedMembers` 를 싣지 않는다. `results` 의 순서·점수·구성은 두 필드와 무관하게 불변이다.
+
 ## History
 
+- 2026-08-20 — R9·R10: 접힌 항목의 `collapsedMembers` 표기와 시드 접촉 클러스터 자동 확장(`expansion`)을 추가했다. 확장은 시드가 닿은 클러스터에만 붙는다 — "평소에는 대표(증류본)만, 언급 시에만 내부"라는 사용자 확정 설계. `results` 랭킹 불변으로 평가 하네스와 격리한다.
 - 2026-08-20 — cluster 열거 모드와 collapse 표기를 추가하고 `seed` 를 optional 로 완화했다 (R4). `sub_layer` post-filter 는 쿼리 엔진 `subLayerFilter` 로 이동 — 절단 후 필터의 `max_results` 미달 결함이 함께 해소됐다.
 - 2026-08-05 — 참조 메타 기본 응답과 trace/content 옵션 계약을 문서화했다 (cross-review FIX-011).
 
 ## Last Updated
 
-2026-08-20 — cluster 열거 모드·collapse 표기 계약을 추가했다 (R4).
+2026-08-20 — R9 `collapsedMembers` 표기·R10 클러스터 자동 확장 계약을 추가했다.
