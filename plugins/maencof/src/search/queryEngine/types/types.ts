@@ -83,4 +83,6 @@ export interface QueryResult {
   durationMs: number;
   /** 입력 seed 원문 → 어휘 매칭 노드 수. 0 = 미해석. 캐시 결과에도 항상 실린다. */
   seedCounts: Record<string, number>;
+  /** 시드 어휘 매칭(캡 이전)이 닿은 결과 내 클러스터 → 매칭 멤버 id (R10 트리거). 접촉 없으면 부재. */
+  clusterMatches?: Record<string, NodeId[]>;
 }

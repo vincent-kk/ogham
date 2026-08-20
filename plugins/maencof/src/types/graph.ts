@@ -112,6 +112,8 @@ export interface ActivationResult {
   clusterKey?: string;
   /** 이 결과에서 대표 뒤로 접힌 활성 멤버 수 — collapse 후, 1건 이상 접혔을 때만 존재 */
   collapsedCount?: number;
+  /** 접힌 활성 멤버 id — score 내림차순, 상한 5 (R9). collapsedCount 있을 때만 존재 */
+  collapsedMembers?: NodeId[];
 }
 
 /** 직렬화 가능한 그래프 (legacy 단일 index.json 저장용 — 자동 마이그레이션 경로에서만 사용) */

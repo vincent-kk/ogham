@@ -25,6 +25,9 @@ export const PATH_PREFIX_MATCH_SCORE = 0.5;
  */
 export const KEYWORD_SEED_CAP = 30;
 
+/** 접힌 항목이 싣는 접힌 활성 멤버 id 상한 (R9) — 나머지 수는 collapsedCount 가 보고한다 */
+export const COLLAPSED_MEMBER_LIST_CAP = 5;
+
 /**
  * compound(kebab/snake — 공백 없이 `-`/`_` 로 결합된 다토큰) 시드가 원형 완전
  * 일치에 실패하고 분해 AND 도 공집합일 때, OR 확장이 유입시키는 부분 매칭 노드의

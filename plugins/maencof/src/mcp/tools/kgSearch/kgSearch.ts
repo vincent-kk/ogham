@@ -5,9 +5,13 @@
  * collapse 표기(clusterKey/collapsedCount)를 그대로 노출한다. cluster 모드는 SA 없이
  * 해당 clusterKey 전역 멤버를 updated 내림차순으로 연다 (다른 필터 미적용, score/hops 0).
  */
-import { MAX_CLUSTER_ENUMERATION } from '../../../constants/thresholds.js';
+import {
+  MAX_CLUSTER_ENUMERATION,
+  MAX_EXPANDED_CLUSTERS,
+} from '../../../constants/thresholds.js';
 import { readVaultFile } from '../../../core/vaultScanner/index.js';
 import { query } from '../../../search/queryEngine/index.js';
+import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import type {
   KgSearchInput,
@@ -16,6 +20,8 @@ import type {
   SeedResolution,
 } from '../../../types/mcp.js';
 import { toSeedResolution } from '../helpers/toSeedResolution.js';
+
+import { buildClusterExpansions } from './helpers/buildClusterExpansions.js';
 
 /**
  * kg_search 핸들러
@@ -85,8 +91,34 @@ export async function handleKgSearch(
       until: input.until,
     });
 
+    // R10 — 확장 대상: 결과 순위 상위 MAX_EXPANDED_CLUSTERS 개의 시드 접촉 클러스터
+    const cm = result.clusterMatches;
+    const expandKeys: string[] = [];
+    const representatives = new Map<string, NodeId>();
+    if (cm)
+      for (const r of result.results) {
+        if (r.clusterKey === undefined) continue;
+        if (!representatives.has(r.clusterKey))
+          representatives.set(r.clusterKey, r.nodeId);
+        if (
+          r.clusterKey in cm &&
+          expandKeys.length < MAX_EXPANDED_CLUSTERS &&
+          !expandKeys.includes(r.clusterKey)
+        )
+          expandKeys.push(r.clusterKey);
+      }
+    const expansions = cm
+      ? buildClusterExpansions(
+          graph,
+          Object.fromEntries(expandKeys.map((k) => [k, cm[k]!])),
+          representatives,
+        )
+      : undefined;
+
     items = result.results.map((r) => {
       const node = graph.nodes.get(r.nodeId);
+      const expansion =
+        r.clusterKey !== undefined ? expansions?.get(r.clusterKey) : undefined;
       return {
         path: String(r.nodeId),
         score: r.score,
@@ -99,6 +131,16 @@ export async function handleKgSearch(
         ...(r.collapsedCount !== undefined && {
           collapsedCount: r.collapsedCount,
         }),
+        ...(expansion
+          ? {
+              expansion: expansion.entries,
+              ...(expansion.omitted > 0 && {
+                expansionOmitted: expansion.omitted,
+              }),
+            }
+          : r.collapsedMembers !== undefined && {
+              collapsedMembers: r.collapsedMembers.map(String),
+            }),
       };
     });
     exploredNodes = result.exploredNodes;

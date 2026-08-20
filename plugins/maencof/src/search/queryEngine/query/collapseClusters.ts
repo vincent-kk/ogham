@@ -7,6 +7,7 @@
  * 수는 collapsedCount 로 표기한다.
  * clusterKey 없는 노드는 개별 경쟁을 유지한다. query() 의 절단(slice) 직전 전용.
  */
+import { COLLAPSED_MEMBER_LIST_CAP } from '../../../constants/queryEngine.js';
 import type { NodeId } from '../../../types/common.js';
 import type {
   ActivationResult,
@@ -105,10 +106,15 @@ export function collapseClusters(
           path: [],
         };
     const collapsedCount = repActive ? active.length - 1 : active.length;
+    const collapsedMembers = active
+      .filter((m) => m.nodeId !== base.nodeId)
+      .sort((a, b) => b.score - a.score || (a.nodeId < b.nodeId ? -1 : 1))
+      .slice(0, COLLAPSED_MEMBER_LIST_CAP)
+      .map((m) => m.nodeId);
     collapsed.push({
       ...base,
       clusterKey: entry,
-      ...(collapsedCount > 0 && { collapsedCount }),
+      ...(collapsedCount > 0 && { collapsedCount, collapsedMembers }),
     });
   }
 

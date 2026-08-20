@@ -20,6 +20,7 @@ import { applyLayerFilter } from './applyLayerFilter.js';
 import { applySubLayerFilter } from './applySubLayerFilter.js';
 import { applyTimeWindow } from './applyTimeWindow.js';
 import { collapseClusters } from './collapseClusters.js';
+import { collectClusterMatches } from './collectClusterMatches.js';
 import { collectDesignatedIds } from './collectDesignatedIds.js';
 import { collectQueryTokens } from './collectQueryTokens.js';
 import { iterationsFromMaxHops } from './iterationsFromMaxHops.js';
@@ -107,12 +108,19 @@ export function query(
     designatedIds,
   ).slice(0, maxResults);
 
+  // 시드 접촉 클러스터 보고 (R10) — 확산 전용 클러스터는 담기지 않는다
+  const finalKeys = new Set(
+    filtered.flatMap((r) => (r.clusterKey !== undefined ? [r.clusterKey] : [])),
+  );
+  const clusterMatches = collectClusterMatches(graph, seedMatches, finalKeys);
+
   const result: QueryResult = {
     results: filtered,
     seedIds,
     exploredNodes: results.length,
     durationMs: Date.now() - startTime,
     seedCounts,
+    ...(Object.keys(clusterMatches).length > 0 && { clusterMatches }),
   };
 
   // 캐시 저장
