@@ -17,7 +17,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -55,7 +55,11 @@ function lastJson(stdout: string): Record<string, unknown> {
   return JSON.parse(lines[lines.length - 1]!) as Record<string, unknown>;
 }
 
-/** 볼트 파일 스냅샷 — 상대경로 → { content, mode } (파일만; mtime 은 비교 제외) */
+/**
+ * 볼트 파일 스냅샷 — posix 상대경로 → { content, mode } (파일만; mtime 은 비교 제외).
+ * 키는 `sep` 기반으로 posix 정규화한다 — Windows 에서 native `relative()` 가 만드는
+ * `\` 키는 `WAL_REL` 같은 `/` 리터럴 조회를 빗나가게 한다 (CI run 32348195726).
+ */
 function snapshotVault(
   root: string,
 ): Map<string, { content: string; mode: number }> {
@@ -65,7 +69,7 @@ function snapshotVault(
       const abs = join(dir, entry.name);
       if (entry.isDirectory()) walk(abs);
       else
-        map.set(relative(root, abs), {
+        map.set(relative(root, abs).split(sep).join('/'), {
           content: readFileSync(abs, 'utf-8'),
           mode: statSync(abs).mode & 0o777,
         });
