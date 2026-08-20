@@ -2,7 +2,7 @@
 
 ## Purpose
 
-MCP bootSweep 관심사. L4 `04_Action/` 의 아카이브 불변식을 매 부팅(직전 세션 마무리) 집행한다 — `expires < today` 만료본은 `.maencof-meta/archive/` 로 옮기고(정방향), archive 에만 있고 원위치에 없는 문서는 경량 스텁(frontmatter + 요약 + [[링크]])을 소급 복구한다(역방향). 어느 쪽이든 원위치에 스텁을 남겨 그래프 연결을 유지한다(고아 방지). 의미적 증류(L2 수확)는 `/archive-harvest` 스킬이 별도 수행.
+MCP bootSweep 관심사. L4 `04_Action/` 의 아카이브 불변식을 매 부팅(직전 세션 마무리) 집행한다 — `expires < today` 만료본은 서고 `99_Archive/actions/` 로 옮기고(정방향), archive 에만 있고 원위치에 없는 문서는 경량 스텁(frontmatter + 요약 + [[링크]])을 소급 복구한다(역방향 — legacy `.maencof-meta/archive/04_Action/` 도 읽기 전용으로 순회). 어느 쪽이든 원위치에 스텁을 남겨 그래프 연결을 유지한다(고아 방지). 의미적 증류(L2 수확)는 `/archive-harvest` 스킬이 별도 수행.
 
 ## Structure
 
@@ -14,7 +14,7 @@ MCP bootSweep 관심사. L4 `04_Action/` 의 아카이브 불변식을 매 부�
 
 - 훅 번들 격리: Node builtin(`node:fs/promises`·`node:path`), tree-shake 가능한 `@ogham/cross-platform`(`normalize`), core 순수 함수 `documentParser/operations/extractLinks`(위키링크 파싱 정본)만 사용. zod·fast-glob 미의존 — 경량 자체 구현.
 - `operations/`·`utils/` concrete 파일 직접 import (배럴 없음)
-- 대상은 `04_Action` 구조만 — archive 하위 `digested/`·`harvested/`·`legacy-l3-cve/` 제외
+- 대상은 `04_Action` 구조만 — 쓰기는 서고 `99_Archive/actions/` 단일 목적지
 
 ## Boundaries
 

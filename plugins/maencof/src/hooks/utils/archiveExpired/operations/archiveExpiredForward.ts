@@ -1,6 +1,6 @@
 /**
  * @file archiveExpiredForward.ts
- * @description 정방향 아카이빙 — 04_Action 만료본을 archive로 이동하고 원위치에 스텁을 남긴다.
+ * @description 정방향 아카이빙 — 04_Action 만료본을 서고(99_Archive/actions)로 이동하고 원위치에 스텁을 남긴다.
  */
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -12,8 +12,9 @@ import { listMarkdownFiles } from '../utils/listMarkdownFiles.js';
 import { parseMinimalFrontmatter } from '../utils/parseMinimalFrontmatter.js';
 
 /**
- * `04_Action/` 하위 만료 문서(`expires < today`)를 archive로 이동하고 원위치에 스텁을 남긴다.
- * 이동(rename) 후 스텁 write가 실패하면 원본을 되돌린다(롤백). 개별 실패는 skip.
+ * `04_Action/` 하위 만료 문서(`expires < today`)를 서고 `99_Archive/actions/` 로 이동하고
+ * 원위치에 스텁을 남긴다. 이동(rename) 후 스텁 write가 실패하면 원본을 되돌린다(롤백).
+ * 개별 실패는 skip.
  */
 export async function archiveExpiredForward(
   currentWorkingDirectory: string,
@@ -41,12 +42,11 @@ export async function archiveExpiredForward(
       );
       const archiveAbsolutePath = join(
         currentWorkingDirectory,
-        '.maencof-meta',
-        'archive',
-        '04_Action',
+        '99_Archive',
+        'actions',
         relativePath,
       );
-      const archivePathForFrontmatter = `.maencof-meta/archive/04_Action/${relativePath}`;
+      const archivePathForFrontmatter = `99_Archive/actions/${relativePath}`;
 
       // ① 원본 → archive (이동)
       await mkdir(dirname(archiveAbsolutePath), { recursive: true });

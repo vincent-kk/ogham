@@ -17,13 +17,15 @@ describe('runArchiveExpired', () => {
   let vaultDirectory: string;
   let actionLayerDirectory: string;
   let archiveActionDirectory: string;
+  let legacyArchiveDirectory: string;
 
   beforeEach(() => {
     vaultDirectory = mkdtempSync(join(tmpdir(), 'maencof-archive-'));
     mkdirSync(join(vaultDirectory, '.maencof-meta'), { recursive: true });
     actionLayerDirectory = join(vaultDirectory, '04_Action');
     mkdirSync(actionLayerDirectory, { recursive: true });
-    archiveActionDirectory = join(
+    archiveActionDirectory = join(vaultDirectory, '99_Archive', 'actions');
+    legacyArchiveDirectory = join(
       vaultDirectory,
       '.maencof-meta',
       'archive',
@@ -48,13 +50,29 @@ describe('runArchiveExpired', () => {
     return absolutePath;
   }
 
-  /** archive/04_Action 정본을 직접 배치한다 (원위치 스텁 없이 — 과거 백로그 재현). */
+  /** 신규 루트 99_Archive/actions 에 정본을 직접 배치한다 (원위치 스텁 없이 — 백필 대상 재현). */
   function writeArchivedDocument(
     relativePath: string,
     frontmatterLines: string[],
     body: string,
   ): string {
     const absolutePath = join(archiveActionDirectory, relativePath);
+    mkdirSync(dirname(absolutePath), { recursive: true });
+    writeFileSync(
+      absolutePath,
+      `---\n${frontmatterLines.join('\n')}\n---\n${body}`,
+      'utf-8',
+    );
+    return absolutePath;
+  }
+
+  /** legacy .maencof-meta/archive/04_Action 에 정본을 직접 배치한다 (마이그레이션 전 vault 재현). */
+  function writeLegacyArchivedDocument(
+    relativePath: string,
+    frontmatterLines: string[],
+    body: string,
+  ): string {
+    const absolutePath = join(legacyArchiveDirectory, relativePath);
     mkdirSync(dirname(absolutePath), { recursive: true });
     writeFileSync(
       absolutePath,
@@ -89,7 +107,7 @@ describe('runArchiveExpired', () => {
     const stubContent = readFileSync(originalPath, 'utf-8');
     expect(stubContent).toContain('archived: true');
     expect(stubContent).toContain(
-      'archive_path: ".maencof-meta/archive/04_Action/cve/expired-example.md"',
+      'archive_path: "99_Archive/actions/cve/expired-example.md"',
     );
     expect(stubContent).toContain('tags: [cve, security]'); // tags preserved verbatim
     expect(stubContent).toContain('[[cve/other-item]]'); // wikilinks preserved
@@ -215,7 +233,7 @@ describe('runArchiveExpired', () => {
     const stub = readFileSync(stubPath, 'utf-8');
     expect(stub).toContain('archived: true');
     expect(stub).toContain(
-      'archive_path: ".maencof-meta/archive/04_Action/geeknews/gn-123.md"',
+      'archive_path: "99_Archive/actions/geeknews/gn-123.md"',
     );
     expect(stub).toContain('tags: [geeknews, ai]'); // frontmatter 보존
     expect(stub).toContain('[[03_External/topical/ai-psychosis]]'); // wikilink 보존
@@ -295,5 +313,70 @@ describe('runArchiveExpired', () => {
     ).toBe(true);
     // 정방향이 남긴 스텁을 역방향이 이중 처리하지 않음
     expect(result.backfilled).not.toContain('04_Action/geeknews/gn-new.md');
+  });
+
+  it('backfills from the legacy archive root with the legacy archive_path', async () => {
+    writeLegacyArchivedDocument(
+      'projects/legacy-note.md',
+      [
+        'created: 2026-05-01',
+        'updated: 2026-05-01',
+        'tags: [project]',
+        'layer: 4',
+      ],
+      '# Legacy Note\n\nPre-relocation archive item.\n\nSee [[01_Core/identity]].',
+    );
+
+    const result = await runArchiveExpired(vaultDirectory);
+
+    expect(result.backfilled).toContain('04_Action/projects/legacy-note.md');
+    const stub = readFileSync(
+      join(actionLayerDirectory, 'projects/legacy-note.md'),
+      'utf-8',
+    );
+    expect(stub).toContain(
+      'archive_path: ".maencof-meta/archive/04_Action/projects/legacy-note.md"',
+    );
+    // legacy 정본은 이동 없이 그 자리에 유지된다 (읽기 전용 폴백)
+    expect(
+      existsSync(join(legacyArchiveDirectory, 'projects/legacy-note.md')),
+    ).toBe(true);
+  });
+
+  it('prefers the new archive root when both roots hold the same relative path', async () => {
+    writeArchivedDocument(
+      'projects/dup-note.md',
+      [
+        'created: 2026-05-01',
+        'updated: 2026-05-01',
+        'tags: [project]',
+        'layer: 4',
+      ],
+      '# New Copy',
+    );
+    writeLegacyArchivedDocument(
+      'projects/dup-note.md',
+      [
+        'created: 2026-05-01',
+        'updated: 2026-05-01',
+        'tags: [project]',
+        'layer: 4',
+      ],
+      '# Legacy Copy',
+    );
+
+    const result = await runArchiveExpired(vaultDirectory);
+
+    // 백필은 한 번만 — 신규 루트가 먼저 스텁을 만들고 legacy 순회는 멱등 skip
+    expect(
+      result.backfilled.filter((p) => p === '04_Action/projects/dup-note.md'),
+    ).toHaveLength(1);
+    const stub = readFileSync(
+      join(actionLayerDirectory, 'projects/dup-note.md'),
+      'utf-8',
+    );
+    expect(stub).toContain(
+      'archive_path: "99_Archive/actions/projects/dup-note.md"',
+    );
   });
 });
