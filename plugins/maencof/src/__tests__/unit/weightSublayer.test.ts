@@ -8,6 +8,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  LAYER_DECAY_FACTORS,
   SUBLAYER_DECAY_FACTORS,
   getLayerDecay,
 } from '../../core/weightCalculator/index.js';
@@ -41,6 +42,12 @@ describe('getLayerDecay — 서브레이어 축', () => {
     ['topical', 0.85],
   ] as const)('L3 %s → %f', (subLayer, expected) => {
     expect(getLayerDecay(Layer.L3_EXTERNAL, subLayer)).toBe(expected);
+  });
+
+  it('미등록 서브레이어(clusterseed)는 레이어 값으로 폴백한다', () => {
+    expect(getLayerDecay(Layer.L3_EXTERNAL, 'clusterseed')).toBe(
+      LAYER_DECAY_FACTORS[Layer.L3_EXTERNAL],
+    );
   });
 });
 

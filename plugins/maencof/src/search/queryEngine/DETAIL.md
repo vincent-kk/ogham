@@ -14,7 +14,7 @@
   - `QueryResult.clusterMatches` 는 최종 결과에 존재하는 clusterKey 중 시드 어휘 매칭(캡 이전)이 닿은 키만 담고, 값은 매칭된 멤버 id 다 (R10 트리거 입력) — 확산 전용 클러스터는 키가 없다. 소비자(kg_search)의 확장 조립 계약 정본은 `mcp/tools/kgSearch/DETAIL.md`.
 - 클러스터 전역 멤버 수집은 결과에 등장한 키에 대한 `graph.nodes` 1패스다 — 별도 인덱스를 두지 않는다(partialReindex 등 3개 유지 경로 동기화 비용이 1패스 비용을 넘는다).
 - `subLayerFilter` 는 `layerFilter` 와 같은 위치(SA 후·collapse 전)의 pre-filter 다. 소비자(kg_search/kg_context)의 post-slice 필터는 금지 — 절단 후 필터는 `maxResults` 미달을 만든다.
-- 클러스터 앵커 게이트 (R11): `sub_layer: clusterseed` 노드는 시드로 특정된 경우(키워드 어휘 매칭 채택 또는 path 시드 채택)에만 `results` 에 수록된다 — 확산만으로는 수록되지 않는다. collapse 의 전역 대표 후보 자격은 게이트와 무관하게 유지된다: 클러스터가 다른 멤버로 결과에 들면 비매칭 앵커도 대표로 승계될 수 있다.
+- 클러스터 앵커 게이트 (R11): `sub_layer: clusterseed` 노드는 시드로 특정된 경우(키워드 어휘 매칭 — 시드 budget 캡 이전 — 또는 path 시드 채택)에만 `results` 에 수록된다 — 확산만으로는 수록되지 않는다. collapse 의 전역 대표 후보 자격은 게이트와 무관하게 유지된다: 클러스터가 다른 멤버로 결과에 들면 비매칭 앵커도 대표로 승계될 수 있다.
 - `archived: true` 노드는 키워드 시드 채택 점수에 `ARCHIVED_SEED_MULTIPLIER`(0.3)를 곱해 강등한다 — 본문이 빈 스텁이 태그 채널 경쟁력으로 정제 지식을 밀어내지 못하게 한다(침강). path-exact/path-prefix 시드에는 적용하지 않는다 — 직접 지목은 존중된다.
 - `exploredNodes` 는 collapse·절단 이전의 활성 노드 수다(탐색량 지표, 출력량 아님).
 - 캐시는 최종(collapse 포함) 결과를 저장한다. 캐시 키 구성과 무효화 계약의 정본은 `queryCache/DETAIL.md` 다 — 키는 필드 열거식이므로 **QueryOptions 에 결과에 영향 주는 필드를 추가하면 그 열거에도 반드시 추가한다**.
