@@ -3,7 +3,7 @@ name: execute
 user-invocable: true
 description: '[seiri:execute] Carry a written plan to done without losing your place. Use when a plan has cleared review — or carries its stated skip — and the work is to perform it.'
 argument-hint: '[path to the plan]'
-version: '0.1.0'
+version: '0.2.0'
 complexity: moderate
 plugin: seiri
 ---
@@ -22,7 +22,7 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 **4. Do not pause between tasks to ask whether to continue.** The plan was the approval. Stop only for: a blocker you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete.
 
-**5. Delegate with files, not history.** A delegated task gets its own task text, the interfaces it touches, and the constraints that bind it — never a paste of this session. A subagent inherits none of this session's instructions, so name the rule files the task must satisfy.
+**5. Delegate with files, not history.** A delegated task gets its own task text, the interfaces it touches, and the constraints that bind it — never a paste of this session. A subagent inherits none of this session's instructions, so name the rule files the task must satisfy. The contract binds the return leg too: full output lands in a file and the reply carries a short status — whatever a delegate prints back stays resident in this session. Review arrives from the delegator, never from a reviewer the delegate spawns for itself — that is a second seat on the same diff.
 
 ## Rules
 

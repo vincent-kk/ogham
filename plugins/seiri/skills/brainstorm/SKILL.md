@@ -4,7 +4,7 @@ user-invocable: true
 disable-model-invocation: true
 description: '[seiri:brainstorm] Shape a change before any code is written — what this repository already does, what constrains the solution, what counts as done. Trigger: "brainstorm this", "설계 같이 고민해줘"'
 argument-hint: '<what you are trying to build or change>'
-version: '0.2.0'
+version: '0.3.0'
 complexity: moderate
 plugin: seiri
 ---
@@ -12,6 +12,8 @@ plugin: seiri
 # brainstorm — shape the change before writing it
 
 You were invoked by the user, so ask what the work needs. The goal is a shape worth implementing, not agreement.
+
+A feasibility question — "can X work here", not "what should X be" — takes the spike route instead: state the smallest probe that would answer it in one line, run it in scratch space outside the repository tree, and report the answer with its evidence. The route ends at the answer — anything the probe built is throwaway, and the handoff says so.
 
 ## Workflow
 
@@ -25,6 +27,6 @@ Steps 1 and 4, isolation, and checkability live in `references/shaping.md`. Befo
 ## Rules
 
 - When the request conflicts with what the repository does, say so with the evidence; an open question gets what would settle it named, not a guess.
-- Do not write or modify files here. This skill produces a shape.
+- Do not write or modify repository files. This skill produces a shape — or, on the spike route, an answer.
 - Hand off: an approved shape goes to `/seiri:write-plan` when multi-step, to `/seiri:implement` when it is one surgical change.
 - If the user says to proceed without further questions, stop asking. Write what you have as an artifact, hand it over. Do not modify files or delegate execution on an unfinished interview.
