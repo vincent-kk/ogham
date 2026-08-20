@@ -15,9 +15,14 @@ import {
 } from '../../types/index.js';
 
 describe('SubLayer types', () => {
-  it('SubLayer 는 L3 방향성 3종이다 — 서브레이어를 갖는 레이어는 L3 뿐', () => {
-    const values: SubLayer[] = ['relational', 'structural', 'topical'];
-    expect(values).toHaveLength(3);
+  it('SubLayer 는 L3 방향성 3종 + 클러스터 앵커다 — 서브레이어를 갖는 레이어는 L3 뿐', () => {
+    const values: SubLayer[] = [
+      'relational',
+      'structural',
+      'topical',
+      'clusterseed',
+    ];
+    expect(values).toHaveLength(4);
   });
 
   it('BufferType 은 L5 항목의 종류 3종이다', () => {
@@ -47,11 +52,12 @@ describe('SubLayer types', () => {
 });
 
 describe('L3_SUBDIR', () => {
-  it('3개의 서브레이어 디렉토리를 매핑한다', () => {
+  it('4개의 서브레이어 디렉토리를 매핑한다', () => {
     expect(L3_SUBDIR.relational).toBe('relational');
     expect(L3_SUBDIR.structural).toBe('structural');
     expect(L3_SUBDIR.topical).toBe('topical');
-    expect(Object.keys(L3_SUBDIR)).toHaveLength(3);
+    expect(L3_SUBDIR.clusterseed).toBe('clusterseeds');
+    expect(Object.keys(L3_SUBDIR)).toHaveLength(4);
   });
 });
 

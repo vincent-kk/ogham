@@ -30,7 +30,7 @@ export interface KnowledgeNode {
   pagerank?: number;
   /** CF (Content Frequency) 점수 */
   cf?: number;
-  /** 서브레이어 (L3 전용: relational/structural/topical) */
+  /** 서브레이어 (L3 전용: relational/structural/topical/clusterseed) */
   subLayer?: SubLayer;
   /** 교차 연결 허브 여부 — 레이어와 직교한다. CROSS_LAYER 엣지와 감쇠 인자 상향의 근거. */
   hub?: boolean;

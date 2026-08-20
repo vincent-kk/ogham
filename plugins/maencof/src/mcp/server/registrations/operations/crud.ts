@@ -57,7 +57,7 @@ export const updateFrontmatterInputSchema = z.object({
       'Thread/cluster declaration — documents sharing a cluster_key collapse to one representative in kg_search/kg_context. Remove with unset.',
     ),
   sub_layer: SubLayerSchema.optional().describe(
-    'Sub-layer for Layer 3 only (relational/structural/topical).',
+    'Sub-layer for Layer 3 only (relational/structural/topical/clusterseed — clusterseed = cluster anchor, ranked only when directly seeded).',
   ),
   gist: z
     .string()
@@ -187,7 +187,7 @@ export function registerCrudTools(server: McpServer): void {
             'Thread/cluster declaration for incremental records (e.g. "jira-gcc-3903", "works-mail-2026-08-19"). Documents sharing a cluster_key collapse to one representative in kg_search/kg_context; open the full cluster via kg_search { cluster }. Remove with frontmatter.unset.',
           ),
         sub_layer: SubLayerSchema.optional().describe(
-          'Sub-layer for Layer 3 only (relational/structural/topical — default topical). Layer 5 is a flat unclassified buffer and takes no sub-layer.',
+          'Sub-layer for Layer 3 only (relational/structural/topical/clusterseed — default topical; clusterseed = cluster anchor, ranked only when directly seeded). Layer 5 is a flat unclassified buffer and takes no sub-layer.',
         ),
         mentioned_persons: z
           .array(z.string())
@@ -355,7 +355,7 @@ export function registerCrudTools(server: McpServer): void {
           .optional()
           .describe('Confidence score (for Layer 3→2 transition)'),
         target_sub_layer: SubLayerSchema.optional().describe(
-          'Target sub-layer for Layer 3 only (relational/structural/topical).',
+          'Target sub-layer for Layer 3 only (relational/structural/topical/clusterseed).',
         ),
         target_subdirectory: z
           .string()

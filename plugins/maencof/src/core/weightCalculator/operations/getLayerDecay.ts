@@ -25,8 +25,8 @@ export function getLayerDecay(
 ): number {
   if (hub) return HUB_DECAY_FACTOR;
 
-  if (subLayer && subLayer in SUBLAYER_DECAY_FACTORS)
-    return SUBLAYER_DECAY_FACTORS[subLayer];
+  const subDecay = subLayer ? SUBLAYER_DECAY_FACTORS[subLayer] : undefined;
+  if (subDecay !== undefined) return subDecay;
 
   return LAYER_DECAY_FACTORS[layer] ?? 0.7;
 }

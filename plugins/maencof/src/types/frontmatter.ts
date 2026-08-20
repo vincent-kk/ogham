@@ -13,7 +13,12 @@ import { PersonSchema } from './person.js';
  * 값 목록을 다른 곳에 리터럴로 다시 적으면 레이어 모델이 바뀔 때 그 자리만 남아
  * 폐기된 값을 계속 광고한다.
  */
-export const SubLayerSchema = z.enum(['relational', 'structural', 'topical']);
+export const SubLayerSchema = z.enum([
+  'relational',
+  'structural',
+  'topical',
+  'clusterseed',
+]);
 
 /** YYYY-MM-DD 날짜 문자열 정본 — frontmatter 날짜 필드와 MCP 도구의 날짜 입력이 파생한다. */
 export const IsoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -106,7 +111,7 @@ const FrontmatterBaseSchema = z.object({
   domain_type: DomainTypeSchema.optional(),
 
   // ─── Sub-layer 확장 필드 ─────────────────────────────────
-  /** 서브레이어 (L3 전용: relational/structural/topical) */
+  /** 서브레이어 (L3 전용: relational/structural/topical/clusterseed) */
   sub_layer: SubLayerSchema.optional(),
 
   // L3A (relational) 전용

@@ -25,9 +25,10 @@ export function toNodeId(path: string): NodeId {
 /**
  * 서브레이어 — Layer 3 의 방향성 분할이며, 서브레이어를 갖는 레이어는 L3 뿐이다.
  * Layer 5 는 서브레이어 없는 평면 임시 수용소이고, 교차 연결 허브는 레이어와
- * 직교하는 `hub` frontmatter 속성이다.
+ * 직교하는 `hub` frontmatter 속성이다. `clusterseed` 는 클러스터 앵커 — 시드로
+ * 특정된 경우에만 결과에 수록된다 (queryEngine `applyClusterSeedGate` 참조).
  */
-export type SubLayer = 'relational' | 'structural' | 'topical';
+export type SubLayer = 'relational' | 'structural' | 'topical' | 'clusterseed';
 
 /** L5 임시 수용소 항목의 종류 */
 export type BufferType = 'snippet' | 'conversation' | 'unclassified';

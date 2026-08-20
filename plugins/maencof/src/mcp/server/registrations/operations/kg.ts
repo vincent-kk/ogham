@@ -92,7 +92,7 @@ export function registerKgTools(server: McpServer): void {
           .optional()
           .describe('Layer filter (1-5)'),
         sub_layer: SubLayerSchema.optional().describe(
-          'Sub-layer filter for Layer 3 (relational/structural/topical).',
+          'Sub-layer filter for Layer 3 (relational/structural/topical/clusterseed).',
         ),
         include_trace: z
           .boolean()
@@ -185,7 +185,7 @@ export function registerKgTools(server: McpServer): void {
           .optional()
           .describe('Layer filter (1-5)'),
         sub_layer: SubLayerSchema.optional().describe(
-          'Sub-layer filter for Layer 3 (relational/structural/topical).',
+          'Sub-layer filter for Layer 3 (relational/structural/topical/clusterseed).',
         ),
         scope: z
           .nativeEnum(KgContextScope)

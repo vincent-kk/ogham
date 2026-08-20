@@ -16,6 +16,7 @@ import type {
 import { resolveSeedNodes } from '../seeds/resolveSeedNodes.js';
 import type { QueryOptions, QueryResult } from '../types/types.js';
 
+import { applyClusterSeedGate } from './applyClusterSeedGate.js';
 import { applyLayerFilter } from './applyLayerFilter.js';
 import { applySubLayerFilter } from './applySubLayerFilter.js';
 import { applyTimeWindow } from './applyTimeWindow.js';
@@ -84,6 +85,12 @@ export function query(
   // updated 시간창 필터 (slice 이전 — truncation 전에 적용)
   results = applyTimeWindow(results, graph, options.since, options.until);
 
+  // R11 — 클러스터 앵커 격리: 시드로 특정된 앵커만 결과에 남는다
+  const seedTouchedIds = new Set<NodeId>(scoredSeeds.map((s) => s.nodeId));
+  for (const matched of seedMatches)
+    for (const id of matched) seedTouchedIds.add(id);
+  results = applyClusterSeedGate(results, graph, seedTouchedIds);
+
   // path-exact 시드만 결과에서 제외 (키워드/태그 매칭 시드는 포함)
   const pathExactSeedSet = new Set(
     scoredSeeds
@@ -91,8 +98,10 @@ export function query(
       .map((s) => s.nodeId),
   );
 
-  // 클러스터 collapse (절단 전) — 전역 대표 후보도 활성 필터를 만족해야 한다
+  // 클러스터 collapse (절단 전) — 전역 대표 후보도 활성 필터를 만족해야 한다.
+  // path-exact 제외 노드는 대표 승계로도 부활하지 않는다 (결과 제외 계약의 연장).
   const isEligible = (node: KnowledgeNode): boolean =>
+    !pathExactSeedSet.has(node.id) &&
     (layerFilter.length === 0 ||
       (layerFilter as number[]).includes(node.layer as number)) &&
     (!options.subLayerFilter || node.subLayer === options.subLayerFilter) &&
