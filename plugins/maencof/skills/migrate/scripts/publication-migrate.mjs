@@ -151,21 +151,51 @@ function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** 링크 컨텍스트(`[[`·`](`) 안의 vault-relative 경로만 치환한다. 치환 수 반환. */
+/** 레이어 디렉토리 접두를 뗀 형태 — `04_Action/cve/x.md` → `cve/x.md`. 아니면 null. */
+function stripLayerPrefix(rel) {
+  const m = rel.match(/^(?:0[1-5]_[A-Za-z]+)\/(.+)$/);
+  return m ? m[1] : null;
+}
+
+/**
+ * 한 파일을 가리키는 링크 타깃 표기 변형 — 확장자 유무 × 레이어 접두 유무.
+ * 볼트에는 `[[04_Action/cve/x.md]]`·`[[04_Action/cve/x]]`·`[[cve/x]]` 가 섞여 쓰인다.
+ * 긴 것부터 정렬해 정규식 교체에서 더 구체적인 형태가 먼저 매칭되게 한다.
+ */
+function linkTargetVariants(rel) {
+  const bases = new Set([rel.replace(/\.md$/, '')]);
+  const stripped = stripLayerPrefix(rel);
+  if (stripped) bases.add(stripped.replace(/\.md$/, ''));
+  return [...bases].sort((a, b) => b.length - a.length);
+}
+
+/**
+ * 링크 컨텍스트(`[[`·`](`) 안의 경로만 치환한다. 치환 수 반환.
+ * 대소문자는 무시한다 — 같은 파일을 `CVE-`/`cve-` 로 달리 적은 링크가 실재하고,
+ * 대소문자만 다른 두 파일은 macOS/Windows 파일시스템에서 공존할 수 없다.
+ *
+ * rollback 은 의미를 되돌리되 바이트를 되돌리지는 않는다. 확장자 표기는 원문대로
+ * 보존되므로 정규 형태(`04_Action/cve/x[.md]`)는 그대로 복원되지만, 비정규 표기
+ * (레이어 상대경로·다른 대소문자)는 정규 경로로 수렴한다 — 가리키는 파일은 같다.
+ * 바이트 단위 복원이 필요해지면 op 에 원문 매칭 문자열을 실어야 한다.
+ */
 function replacePathLinks(content, fromRel, toRel) {
   let count = 0;
-  const fromNoExt = fromRel.replace(/\.md$/, '');
   const toNoExt = toRel.replace(/\.md$/, '');
+  const alternation = linkTargetVariants(fromRel).map(escapeRegex).join('|');
   const out = content
-    .replace(new RegExp(`(\\[\\[|\\]\\()${escapeRegex(fromRel)}`, 'g'), (_m, p1) => {
-      count += 1;
-      return `${p1}${toRel}`;
-    })
     .replace(
-      new RegExp(`(\\[\\[)${escapeRegex(fromNoExt)}(?=\\]\\]|\\|)`, 'g'),
-      (_m, p1) => {
+      new RegExp(`(\\[\\[)(?:${alternation})(\\.md)?(?=\\]\\]|\\|)`, 'gi'),
+      (_m, p1, ext) => {
         count += 1;
-        return `${p1}${toNoExt}`;
+        return `${p1}${ext ? toRel : toNoExt}`;
+      },
+    )
+    .replace(
+      new RegExp(`(\\]\\()(?:${alternation})(\\.md)?(?=[)#\\s])`, 'gi'),
+      (_m, p1, ext) => {
+        count += 1;
+        return `${p1}${ext ? toRel : toNoExt}`;
       },
     );
   return { content: out, count };
@@ -439,15 +469,22 @@ function buildPlan(vaultPath, config) {
     for (const rel of layerFiles) {
       if (deletedRels.has(rel)) continue; // 삭제될 스텁 — 재작성 무의미
       const content = readFileSync(join(vaultPath, rel), 'utf-8');
+      // 표기 변형·대소문자를 모두 훑어야 하므로 소문자 사본을 파일당 한 번만 만든다
+      const contentLower = content.toLowerCase();
       // 이동 대상 파일의 재작성은 이동 후 경로에 적용된다 (이동 op 가 선행)
       const opPath = bodyMoveMap.get(rel) ?? rel;
       let rewrites = 0;
       for (const { from, to } of movedPairs) {
         if (rel === from) continue;
-        const hasOld =
-          content.includes(`[[${from}`) ||
-          content.includes(`](${from}`) ||
-          content.includes(`[[${from.replace(/\.md$/, '')}]]`);
+        // 링크 컨텍스트 안에 표기 변형 중 하나라도 있는지 — 정규식 컴파일 전 값싼 선별.
+        // 별칭(`|label`)이 붙은 링크도 통과해야 하므로 닫는 `]]` 를 요구하지 않는다.
+        const hasOld = linkTargetVariants(from).some((v) => {
+          const probe = v.toLowerCase();
+          return (
+            contentLower.includes(`[[${probe}`) ||
+            contentLower.includes(`](${probe}`)
+          );
+        });
         if (!hasOld) continue;
         if (content.includes(to)) {
           preexistingTargetSkipped += 1;
