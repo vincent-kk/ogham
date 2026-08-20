@@ -1,6 +1,7 @@
 ---
 name: checkup
 user-invocable: true
+disable-model-invocation: true
 description: '[maencof:checkup] Runs 8 comprehensive diagnostic checks across the knowledge vault covering broken links, orphan nodes, frontmatter errors, structural inconsistencies, auto-insight system health, and missing L1 gists, then provides prioritized auto-fix suggestions. Use --quick for a lightweight read-only status check that short-circuits to mcp__plugin_maencof_tools__kg_status only (absorbs the former maencof-diagnose skill).'
 argument-hint: '[--fix] [--quick] [--verbose] [--check <item>]'
 version: '1.1.0'
