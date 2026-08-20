@@ -27,6 +27,8 @@ export interface ResolvedSeedNodes {
   scored: ScoredSeed[];
   /** 입력 seed 원문 → 어휘 매칭 노드 수 (시드 budget 캡 이전). 0 = 미해석. 키는 첫 등장 순서. */
   seedCounts: Record<string, number>;
+  /** 시드별 어휘 매칭 후보 집합(시드 budget 캡 이전) — 입력 seeds 와 같은 순서. path/미해석 시드는 빈 집합. 지목(R8) 판정용. */
+  seedMatches: ReadonlySet<NodeId>[];
 }
 
 /**
@@ -81,4 +83,6 @@ export interface QueryResult {
   durationMs: number;
   /** 입력 seed 원문 → 어휘 매칭 노드 수. 0 = 미해석. 캐시 결과에도 항상 실린다. */
   seedCounts: Record<string, number>;
+  /** 시드 어휘 매칭(캡 이전)이 닿은 결과 내 클러스터 → 매칭 멤버 id (R10 트리거). 접촉 없으면 부재. */
+  clusterMatches?: Record<string, NodeId[]>;
 }

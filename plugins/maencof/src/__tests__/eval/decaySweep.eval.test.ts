@@ -65,8 +65,8 @@ vi.mock('../../core/weightCalculator/index.js', async (importOriginal) => {
       const candidate = activeCandidate;
       if (!candidate) return actual.getLayerDecay(layer, subLayer, hub);
       if (hub) return candidate.hub;
-      if (subLayer && subLayer in SUBLAYER_DECAY_FACTORS)
-        return SUBLAYER_DECAY_FACTORS[subLayer];
+      const subDecay = subLayer ? SUBLAYER_DECAY_FACTORS[subLayer] : undefined;
+      if (subDecay !== undefined) return subDecay;
       if (layer === Layer.L5_CONTEXT) return candidate.l5;
       return LAYER_DECAY_FACTORS[layer] ?? 0.7;
     },
@@ -111,9 +111,8 @@ async function measureCandidate(
   candidate: DecayCandidate,
   graph: ReturnType<typeof buildEvalGraph>,
 ): Promise<EngineMetrics> {
-  const { invalidateQueryCache } = await import(
-    '../../search/queryEngine/index.js'
-  );
+  const { invalidateQueryCache } =
+    await import('../../search/queryEngine/index.js');
   const table = EDGE_TYPE_MULTIPLIER as Record<EdgeType, number>;
   const previousMultiplier = table.CROSS_LAYER;
 

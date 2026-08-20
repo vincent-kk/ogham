@@ -36,7 +36,7 @@ export interface MaencofCreateInput {
   expires?: string;
   /** 증분 문서의 스레드 선언 — 같은 키의 문서들은 검색에서 대표 1건으로 접힌다 */
   cluster_key?: string;
-  /** 서브레이어 (L3 전용: relational/structural/topical) */
+  /** 서브레이어 (L3 전용: relational/structural/topical/clusterseed) */
   sub_layer?: SubLayer;
   /** 문서 콘텐츠에서 언급된 인물 목록 (선택, 모든 레이어) */
   mentioned_persons?: string[];

@@ -71,3 +71,19 @@ describe('seed resolution regression', () => {
     expect(r.seedCounts['weekly-report']).toBe(2);
   });
 });
+
+// R8 수용 기준 사상 — 지목 승격(기준 1·4)과 주제어 승계 보존(기준 2).
+describe('cluster seed designation (R8)', () => {
+  const graph = buildEvalGraph();
+
+  it('identifier seed promotes its folded old member to top-1', () => {
+    const r = query(graph, ['update-03'], LIVE_DEFAULTS);
+    expect(String(r.results[0]!.nodeId)).toBe('L4/works/gcc-3903-update-03.md');
+    expect(r.results[0]!.clusterKey).toBe('jira-gcc-3903');
+  });
+
+  it('topic seed keeps digest succession', () => {
+    const r = query(graph, ['jira'], LIVE_DEFAULTS);
+    expect(String(r.results[0]!.nodeId)).toBe('L4/works/gcc-3903-digest.md');
+  });
+});

@@ -15,8 +15,8 @@ export const LAYER_DECAY_FACTORS: Record<Layer, number> = {
   [Layer.L5_CONTEXT]: 0.45,
 };
 
-/** L3 서브레이어별 감쇠 인자 — 방향은 LAYER_DECAY_FACTORS 와 같다. */
-export const SUBLAYER_DECAY_FACTORS: Record<SubLayer, number> = {
+/** L3 서브레이어별 감쇠 인자 — 방향은 LAYER_DECAY_FACTORS 와 같다. 미등록 서브레이어(clusterseed)는 getLayerDecay 의 레이어 폴백을 받는다 — 격리는 앵커 게이트 소관이지 감쇠 소관이 아니다. */
+export const SUBLAYER_DECAY_FACTORS: Partial<Record<SubLayer, number>> = {
   relational: 0.75,
   structural: 0.8,
   topical: 0.85,

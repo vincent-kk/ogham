@@ -218,6 +218,90 @@ describe('collapseClusters', () => {
 
     expect(collapsed[0]!.nodeId).toBe(toNodeId('04_Action/ta.md'));
   });
+
+  it('지목 멤버는 updated 최신이 아니어도 대표가 된다', () => {
+    const graph = graphOf([
+      makeNode('04_Action/t-01.md', {
+        clusterKey: 'th',
+        updated: '2026-02-01',
+      }),
+      makeNode('04_Action/t-02.md', {
+        clusterKey: 'th',
+        updated: '2026-02-05',
+      }),
+    ]);
+    const results = [
+      activation('04_Action/t-01.md', 0.9),
+      activation('04_Action/t-02.md', 0.4),
+    ];
+
+    const collapsed = collapseClusters(
+      results,
+      graph,
+      anyNode,
+      new Set([toNodeId('04_Action/t-01.md')]),
+    );
+
+    expect(collapsed[0]!.nodeId).toBe(toNodeId('04_Action/t-01.md'));
+    expect(collapsed[0]!.score).toBe(0.9);
+    expect(collapsed[0]!.collapsedCount).toBe(1);
+  });
+
+  it('지목 멤버가 둘이면 그중 updated 최신이 대표다', () => {
+    const graph = graphOf([
+      makeNode('04_Action/t-01.md', {
+        clusterKey: 'th',
+        updated: '2026-02-01',
+      }),
+      makeNode('04_Action/t-02.md', {
+        clusterKey: 'th',
+        updated: '2026-02-03',
+      }),
+      makeNode('04_Action/t-03.md', {
+        clusterKey: 'th',
+        updated: '2026-02-05',
+      }),
+    ]);
+    const results = [
+      activation('04_Action/t-01.md', 0.5),
+      activation('04_Action/t-02.md', 0.5),
+      activation('04_Action/t-03.md', 0.5),
+    ];
+
+    const collapsed = collapseClusters(
+      results,
+      graph,
+      anyNode,
+      new Set([toNodeId('04_Action/t-01.md'), toNodeId('04_Action/t-02.md')]),
+    );
+
+    expect(collapsed[0]!.nodeId).toBe(toNodeId('04_Action/t-02.md'));
+  });
+
+  it('지목 멤버가 활성 필터를 만족하지 않으면 대표가 될 수 없다', () => {
+    const graph = graphOf([
+      makeNode('04_Action/t-01.md', {
+        clusterKey: 'th',
+        updated: '2026-02-05',
+      }),
+      makeNode('02_Derived/d.md', {
+        clusterKey: 'th',
+        layer: Layer.L2_DERIVED,
+        updated: '2026-02-01',
+      }),
+    ]);
+    const onlyL4 = (node: KnowledgeNode): boolean =>
+      node.layer === Layer.L4_ACTION;
+
+    const collapsed = collapseClusters(
+      [activation('04_Action/t-01.md', 0.7)],
+      graph,
+      onlyL4,
+      new Set([toNodeId('02_Derived/d.md')]),
+    );
+
+    expect(collapsed[0]!.nodeId).toBe(toNodeId('04_Action/t-01.md'));
+  });
 });
 
 describe('query() 통합 — collapse 는 절단 전, subLayerFilter 는 pre-filter', () => {
@@ -281,5 +365,87 @@ describe('query() 통합 — collapse 는 절단 전, subLayerFilter 는 pre-fil
     expect(result.results).toHaveLength(10);
     for (const r of result.results)
       expect(graph.nodes.get(r.nodeId)?.subLayer).toBe('topical');
+  });
+
+  it('식별자 시드에 유일 매칭된 오래된 멤버가 대표로 승격된다', () => {
+    const old = makeNode('04_Action/th-old.md', {
+      clusterKey: 'th',
+      updated: '2026-02-01',
+      tags: ['tk-77', 'thread'],
+    });
+    const mid = makeNode('04_Action/th-mid.md', {
+      clusterKey: 'th',
+      updated: '2026-02-05',
+      tags: ['thread'],
+    });
+    const digest = makeNode('04_Action/th-digest.md', {
+      clusterKey: 'th',
+      updated: '2026-02-09',
+      tags: ['thread'],
+    });
+    const graph = graphOf([old, mid, digest]);
+
+    const result = query(graph, ['tk-77'], { maxResults: 10 });
+
+    expect(result.results[0]!.nodeId).toBe(toNodeId('04_Action/th-old.md'));
+    expect(result.results[0]!.clusterKey).toBe('th');
+  });
+
+  it('path-exact 시드는 키워드 지목과 겹쳐도 결과 제외가 우선한다', () => {
+    const a = makeNode('04_Action/a.md', {
+      clusterKey: 'th',
+      updated: '2026-02-01',
+      tags: ['tk-88', 'thread'],
+    });
+    const b = makeNode('04_Action/b.md', {
+      clusterKey: 'th',
+      updated: '2026-02-05',
+      tags: ['thread'],
+    });
+    const graph = graphOf(
+      [a, b],
+      [{ from: a.id, to: b.id, type: 'LINK' as const, weight: 1 }],
+    );
+
+    // 'tk-88' 은 a 를 유일 지목하지만, a 는 path-exact 시드라 결과에서 제외된다.
+    const result = query(graph, ['04_Action/a.md', 'tk-88'], {
+      maxResults: 10,
+    });
+
+    expect(
+      result.results.some((r) => r.nodeId === toNodeId('04_Action/a.md')),
+    ).toBe(false);
+    const cluster = result.results.find((r) => r.clusterKey === 'th');
+    expect(cluster?.nodeId).toBe(toNodeId('04_Action/b.md'));
+  });
+
+  it('캡으로 1건만 채택된 주제어 시드는 지목으로 오인되지 않는다', () => {
+    // 'sig' 는 캡 이전 31건 매칭(클러스터 멤버 2건 포함). pagerank 정렬 캡(30)이
+    // 클러스터 멤버 하나를 잘라 채택 집합에는 1건만 남지만, 지목 판정은 캡 이전
+    // 집합 기준이라 성립하지 않는다 — 대표는 updated 최신 전역 멤버.
+    const fillers = Array.from({ length: 29 }, (_, i) =>
+      makeNode(`04_Action/f-${String(i).padStart(2, '0')}.md`, {
+        tags: ['sig'],
+        pagerank: 1,
+      }),
+    );
+    const capped = makeNode('04_Action/th-in-cap.md', {
+      clusterKey: 'th',
+      updated: '2026-02-01',
+      tags: ['sig'],
+      pagerank: 0.5,
+    });
+    const dropped = makeNode('04_Action/th-dropped.md', {
+      clusterKey: 'th',
+      updated: '2026-02-09',
+      tags: ['sig'],
+      pagerank: 0,
+    });
+    const graph = graphOf([...fillers, capped, dropped]);
+
+    const result = query(graph, ['sig'], { maxResults: 40 });
+
+    const cluster = result.results.find((r) => r.clusterKey === 'th');
+    expect(cluster?.nodeId).toBe(toNodeId('04_Action/th-dropped.md'));
   });
 });

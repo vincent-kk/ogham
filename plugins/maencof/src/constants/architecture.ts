@@ -18,6 +18,7 @@ export const L3_SUBDIR: Record<SubLayer, string> = {
   relational: 'relational',
   structural: 'structural',
   topical: 'topical',
+  clusterseed: 'clusterseeds',
 };
 
 /**

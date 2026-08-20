@@ -246,3 +246,145 @@ describe('handleKgSearch — cluster collapse and open (R4)', () => {
     expect('error' in neither).toBe(true);
   });
 });
+
+/**
+ * 시드 접촉 확장 그래프 — 'exp-th' 클러스터 13건. m-00·m-01 만 태그 tk-x 를 갖고
+ * (매칭 2건 → 지목 불성립), 대표는 updated 최신 m-12 로 승계된다.
+ */
+function makeExpansionGraph(): KnowledgeGraph {
+  const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+  for (let i = 0; i < 13; i++) {
+    const n = makeNode(
+      `04_Action/m-${String(i).padStart(2, '0')}.md`,
+      Layer.L4_ACTION,
+      {
+        title: `Member ${i}`,
+        updated: `2026-02-${String(i + 1).padStart(2, '0')}`,
+        clusterKey: 'exp-th',
+        tags: i < 2 ? ['tk-x'] : [],
+      },
+    );
+    nodes.set(n.id, n);
+  }
+  return buildGraph(nodes, []);
+}
+
+/** 접촉 클러스터 6개 그래프 — 각 2멤버가 공유 태그 sigma 로 매칭된다 (지목 불성립). */
+function makeManyTouchedGraph(): KnowledgeGraph {
+  const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+  for (let i = 0; i < 6; i++) {
+    for (const [suffix, updated] of [
+      ['a', '2026-02-01'],
+      ['b', '2026-02-05'],
+    ] as const) {
+      const n = makeNode(`04_Action/c${i}-${suffix}.md`, Layer.L4_ACTION, {
+        title: `C${i} ${suffix}`,
+        updated,
+        clusterKey: `c${i}-th`,
+        tags: ['sigma'],
+      });
+      nodes.set(n.id, n);
+    }
+  }
+  return buildGraph(nodes, []);
+}
+
+describe('handleKgSearch — cluster expansion (R10)', () => {
+  it('시드 접촉 클러스터의 접힌 항목은 expansion 을 matched-first 로 싣는다', async () => {
+    const result = await handleKgSearch(makeExpansionGraph(), {
+      seed: ['tk-x'],
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    const item = result.results.find((r) => r.clusterKey === 'exp-th');
+    expect(item).toBeDefined();
+    expect(item!.path).toBe('04_Action/m-12.md');
+    expect(item!.expansion).toBeDefined();
+    // matched 멤버(updated 열위)가 선두 — matched 그룹 내부는 updated 내림차순
+    expect(item!.expansion![0]).toMatchObject({
+      path: '04_Action/m-01.md',
+      matched: true,
+    });
+    expect(item!.expansion![1]).toMatchObject({
+      path: '04_Action/m-00.md',
+      matched: true,
+    });
+    expect(item!.expansion![2]!.path).toBe('04_Action/m-11.md');
+    expect(item!.expansion![2]!.matched).toBeUndefined();
+    // 상한 10 + 초과분 보고, 대표 자신은 목록에 없다
+    expect(item!.expansion).toHaveLength(10);
+    expect(item!.expansionOmitted).toBe(2);
+    expect(item!.expansion!.some((e) => e.path === '04_Action/m-12.md')).toBe(
+      false,
+    );
+  });
+
+  it('확산 전용 클러스터의 접힌 항목은 collapsedMembers 만 싣는다', async () => {
+    const result = await handleKgSearch(makeClusterGraph(), {
+      seed: ['02_Derived/seed-doc.md'],
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    const item = result.results.find((r) => r.clusterKey === 'jira-th');
+    expect(item).toBeDefined();
+    expect(item!.expansion).toBeUndefined();
+    expect(item!.collapsedMembers).toEqual([
+      '04_Action/th-0.md',
+      '04_Action/th-2.md',
+    ]);
+  });
+
+  it('expansion 이 있으면 collapsedMembers 를 싣지 않는다', async () => {
+    const result = await handleKgSearch(makeExpansionGraph(), {
+      seed: ['tk-x'],
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    const item = result.results.find((r) => r.clusterKey === 'exp-th');
+    expect(item!.expansion).toBeDefined();
+    expect(item!.collapsedMembers).toBeUndefined();
+  });
+
+  it('전역 멤버가 대표뿐인 접촉 클러스터는 expansion 을 싣지 않는다', async () => {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    const solo = makeNode('04_Action/solo.md', Layer.L4_ACTION, {
+      title: 'Solo',
+      clusterKey: 'solo-th',
+      tags: ['tk-solo'],
+    });
+    nodes.set(solo.id, solo);
+
+    const result = await handleKgSearch(buildGraph(nodes, []), {
+      seed: ['tk-solo'],
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    const item = result.results.find((r) => r.clusterKey === 'solo-th');
+    expect(item).toBeDefined();
+    expect(item!.expansion).toBeUndefined();
+    expect(item!.expansionOmitted).toBeUndefined();
+    expect(item!.collapsedMembers).toBeUndefined();
+  });
+
+  it('접촉 클러스터가 상한을 넘으면 결과 상위 5개만 확장된다', async () => {
+    const result = await handleKgSearch(makeManyTouchedGraph(), {
+      seed: ['sigma'],
+    });
+
+    expect('error' in result).toBe(false);
+    if ('error' in result) return;
+    expect(result.results).toHaveLength(6);
+    for (let i = 0; i < 5; i++) {
+      const item = result.results.find((r) => r.clusterKey === `c${i}-th`);
+      expect(item!.expansion, `c${i}-th`).toBeDefined();
+      expect(item!.collapsedMembers, `c${i}-th`).toBeUndefined();
+    }
+    const sixth = result.results.find((r) => r.clusterKey === 'c5-th');
+    expect(sixth!.expansion).toBeUndefined();
+    expect(sixth!.collapsedMembers).toEqual(['04_Action/c5-a.md']);
+  });
+});

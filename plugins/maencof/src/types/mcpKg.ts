@@ -77,6 +77,18 @@ export interface KgStatusInput {
   include_orphan_paths?: boolean;
 }
 
+/** 클러스터 자동 확장(R10) 항목 — 대표 밖 클러스터 멤버의 참조 메타 */
+export interface ClusterExpansionEntry {
+  /** 문서 경로 (vault 상대) */
+  path: string;
+  /** 문서 제목 */
+  title: string;
+  /** updated 날짜 (YYYY-MM-DD) */
+  updated: string;
+  /** 시드 어휘 매칭 멤버일 때만 true — 목록 선두 정렬의 근거 */
+  matched?: boolean;
+}
+
 /** kg_search 결과 항목 — ActivationResult 에 노드 참조 메타를 입힌 응답 전용 형태 */
 export interface KgSearchResultItem {
   /** 문서 경로 (vault 상대) */
@@ -99,6 +111,12 @@ export interface KgSearchResultItem {
   clusterKey?: string;
   /** 이 응답에서 대표 뒤로 접힌 문서 수 (1건 이상 접혔을 때만) — 전역 총원은 cluster 열기의 clusterSize */
   collapsedCount?: number;
+  /** 접힌 활성 멤버 path 목록 (score 내림차순, 상한 5; R9) — expansion 이 있으면 생략 */
+  collapsedMembers?: string[];
+  /** 시드 접촉 클러스터 자동 확장 (R10) — 대표 제외, matched-first → updated 내림차순, 상한 10 */
+  expansion?: ClusterExpansionEntry[];
+  /** expansion 상한 초과분 남은 수 — 초과가 있을 때만 */
+  expansionOmitted?: number;
 }
 
 /** seed(어휘 입력) 해석 메타데이터 — kg_search/kg_context 는 항상, kg_suggest_links 는 tags 제공 시 싣는다 */

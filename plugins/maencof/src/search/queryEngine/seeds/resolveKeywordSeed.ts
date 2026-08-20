@@ -1,7 +1,9 @@
 /**
  * @file resolveKeywordSeed.ts
  * @description 키워드 시드의 후보를 매칭 품질로 분류하고(IDF 스케일 적용) 시드 budget 을
- * 적용해 bestScores 에 병합한다. 반환값은 budget 캡 이전의 분류 후보 수다 (0 = 미해석).
+ * 적용해 bestScores 에 병합한다. 반환값은 budget 캡 이전의 분류 후보 id 목록이다
+ * (빈 목록 = 미해석; 길이가 기존 계수 의미). 캡 이후 채택 집합이 아닌 캡 이전 목록을
+ * 반환해야 지목(R8) 판정이 캡 절단에 오염되지 않는다.
  */
 import {
   ARCHIVED_SEED_MULTIPLIER,
@@ -43,7 +45,7 @@ export function resolveKeywordSeed(
   idfScale: number,
   bestScores: Map<NodeId, ScoredSeed>,
   compoundOrScore: number = COMPOUND_OR_MATCH_SCORE,
-): number {
+): NodeId[] {
   const { seed, tokens, candidateSets, compoundFallback } = resolved;
   const multiToken = tokens.length > 1;
   // compound 시드도 분해 AND 가 우선이다 — AND 가 살아 있으면 기존 다토큰 의미론과
@@ -109,5 +111,5 @@ export function resolveKeywordSeed(
       bestScores.set(id, { nodeId: id, matchScore: score, matchType: type });
   }
 
-  return scored.length;
+  return scored.map((s) => s.id);
 }

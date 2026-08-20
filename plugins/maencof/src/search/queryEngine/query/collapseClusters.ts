@@ -2,10 +2,12 @@
  * @file collapseClusters.ts
  * @description 같은 clusterKey 결과를 대표 1건으로 접는다 — 같은 스레드 N건은 독립
  * 증거가 아니라 같은 사건의 반복 관측이다. 그룹 점수는 활성 멤버 max 승계(sum 은 수
- * 프리미엄을 부활시킨다), 대표는 활성 필터를 만족하는 그래프 전역 멤버 중 updated
- * 최신(증류본 자동 승계 — 결과 밖 멤버도 후보), 접힌 수는 collapsedCount 로 표기한다.
+ * 프리미엄을 부활시킨다), 대표는 시드 지목 멤버 우선, 없으면 활성 필터를 만족하는
+ * 그래프 전역 멤버 중 updated 최신(증류본 자동 승계 — 결과 밖 멤버도 후보), 접힌
+ * 수는 collapsedCount 로 표기한다.
  * clusterKey 없는 노드는 개별 경쟁을 유지한다. query() 의 절단(slice) 직전 전용.
  */
+import { COLLAPSED_MEMBER_LIST_CAP } from '../../../constants/queryEngine.js';
 import type { NodeId } from '../../../types/common.js';
 import type {
   ActivationResult,
@@ -20,12 +22,19 @@ function repDate(node: KnowledgeNode): string {
     : new Date(node.mtime).toISOString().slice(0, 10);
 }
 
-/** 대표 우선순위 — updated 최신 → 활성 멤버 우선 → nodeId 사전순. b 가 우선이면 양수 */
+/**
+ * 대표 우선순위 — 시드 지목 → updated 최신 → 활성 멤버 → nodeId 사전순.
+ * a 가 대표로 유지되면 양수, b 로 교체해야 하면 음수 (동률 불가 — nodeId 가 유일).
+ */
 function preferOver(
   a: KnowledgeNode,
   b: KnowledgeNode,
   activeIds: Set<NodeId>,
+  designatedIds: ReadonlySet<NodeId>,
 ): number {
+  const byDesignated =
+    Number(designatedIds.has(a.id)) - Number(designatedIds.has(b.id));
+  if (byDesignated !== 0) return byDesignated;
   const byDate = repDate(a).localeCompare(repDate(b));
   if (byDate !== 0) return byDate;
   const byActive = Number(activeIds.has(a.id)) - Number(activeIds.has(b.id));
@@ -37,6 +46,7 @@ export function collapseClusters(
   results: ActivationResult[],
   graph: KnowledgeGraph,
   isEligible: (node: KnowledgeNode) => boolean,
+  designatedIds: ReadonlySet<NodeId> = new Set(),
 ): ActivationResult[] {
   const groups = new Map<string, ActivationResult[]>();
   const order: Array<ActivationResult | string> = [];
@@ -76,7 +86,10 @@ export function collapseClusters(
     const activeIds = new Set(active.map((m) => m.nodeId));
     let representative: KnowledgeNode | undefined;
     for (const node of candidates.get(entry) ?? [])
-      if (!representative || preferOver(representative, node, activeIds) < 0)
+      if (
+        !representative ||
+        preferOver(representative, node, activeIds, designatedIds) < 0
+      )
         representative = node;
 
     const maxScore = Math.max(...active.map((m) => m.score));
@@ -93,10 +106,15 @@ export function collapseClusters(
           path: [],
         };
     const collapsedCount = repActive ? active.length - 1 : active.length;
+    const collapsedMembers = active
+      .filter((m) => m.nodeId !== base.nodeId)
+      .sort((a, b) => b.score - a.score || (a.nodeId < b.nodeId ? -1 : 1))
+      .slice(0, COLLAPSED_MEMBER_LIST_CAP)
+      .map((m) => m.nodeId);
     collapsed.push({
       ...base,
       clusterKey: entry,
-      ...(collapsedCount > 0 && { collapsedCount }),
+      ...(collapsedCount > 0 && { collapsedCount, collapsedMembers }),
     });
   }
 

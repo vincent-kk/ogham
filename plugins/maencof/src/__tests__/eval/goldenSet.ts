@@ -354,6 +354,16 @@ export const GOLDEN_QUERIES: GoldenQuery[] = [
       'L4/works/gcc-3903-digest.md': 2,
     },
   },
+  // 시드 직매칭 지목 골든 (R8) — 'update-03' 은 분해 AND({update} ∩ {03})로 클러스터
+  // 내 update-03 하나에만 어휘 매칭된다(유일 지목). R8 이전에는 updated 최신(digest)
+  // 이 대표라 지목 문서가 접혀 회수 불능 — 기준 4: 그 멤버가 top-1.
+  {
+    id: 'cluster-seed-direct-match',
+    seeds: ['update-03'],
+    relevance: {
+      'L4/works/gcc-3903-update-03.md': 2,
+    },
+  },
   // archived 침강 골든 — working: 스텁 6건(등급 0)이 같은 태그로 경쟁하므로 침강
   // 실패(계수 상승) 시 스텁 도배로 nDCG 가 무너진다. archival: 스텁만 가진 태그의
   // 회수 — 계수 0이면 시드 소멸로 recall 0 이 드러난다(축 하한 관측점).

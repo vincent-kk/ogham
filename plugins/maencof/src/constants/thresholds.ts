@@ -23,6 +23,12 @@ export const MAX_DELETE_BACKLINK_WARNINGS = 20;
 /** kg_search cluster 열거 모드의 멤버 반환 상한 — 전수 반환이 계약이지만 폭주 클러스터로부터 응답을 보호한다. 절단 시 truncated 로 신호하고 clusterSize 로 전역 총원을 보고한다 */
 export const MAX_CLUSTER_ENUMERATION = 200;
 
+/** kg_search 시드 접촉 클러스터 자동 확장(R10)의 항목 상한 — 초과분은 expansionOmitted 로 보고한다 */
+export const CLUSTER_EXPANSION_CAP = 10;
+
+/** 한 응답에서 확장되는 클러스터 수 상한 — 광범위 시드의 토큰 폭발 방어선. 초과 클러스터는 collapsedMembers 경로로 내려간다 */
+export const MAX_EXPANDED_CLUSTERS = 5;
+
 export const STALE_THRESHOLD_PERCENT = 10;
 
 /**
