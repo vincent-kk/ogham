@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { PLUGIN_NAME } from '../../../constants/plugin.js';
 import { ToolName } from '../../../constants/toolNames.js';
 import { VERSION } from '../../../version.js';
+import { handleGates } from '../../tools/gates/index.js';
 import { handleOpenSettings } from '../../tools/openSettings/index.js';
 import { handleRuleDocsSync } from '../../tools/ruleDocsSync/index.js';
 import { wrapHandler } from '../serialization/wrapHandler.js';
@@ -11,10 +12,10 @@ import { wrapHandler } from '../serialization/wrapHandler.js';
 /**
  * Assemble the seiri MCP server.
  *
- * Two tools, both about state: which rules are deployed, and where the
- * dial sits. There is deliberately no tool for reading, searching or
- * analysing code — the harness already provides those, and every schema
- * registered here is context spent on every turn whether called or not.
+ * Three tools, all about state: which rules are deployed, where the dial
+ * sits, and whether task gates are met. There is deliberately no tool for
+ * reading, searching or analysing code — the harness already provides those,
+ * and every schema registered here is context spent whether called or not.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: PLUGIN_NAME, version: VERSION });
@@ -86,6 +87,36 @@ export function createServer(): McpServer {
       },
     },
     wrapHandler(handleRuleDocsSync),
+  );
+
+  server.registerTool(
+    ToolName.GATES,
+    {
+      description:
+        'Task gate ledgers under .seiri/tasks/<task>/gates.md. status (counts, next unmet gate with its CHECK verbatim, ABANDON list, met_by_agent, all_met) | abandon (append an ABANDON line — reason required) | record (manual gates only: a gate with a CHECK is proven by running that CHECK in Bash, where the PostToolUse hook records evidence). Reads and writes the ledger only — never runs a command, never creates a ledger (write-plan does), never call from a session hook.',
+      inputSchema: {
+        action: z
+          .enum(['status', 'abandon', 'record'])
+          .describe('Ledger action to perform.'),
+        project_root: z
+          .string()
+          .optional()
+          .describe('Absolute path of the target workspace root.'),
+        task: z.string().nullish().describe('kebab-case task directory name'),
+        gate_id: z.string().nullish().describe('G<n>'),
+        reason: z
+          .string()
+          .nullish()
+          .describe('abandon only; refused when empty'),
+        evidence: z
+          .string()
+          .nullish()
+          .describe(
+            'record only; what you observed — refused for gates with a CHECK',
+          ),
+      },
+    },
+    wrapHandler(handleGates),
   );
 
   return server;

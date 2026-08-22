@@ -23,6 +23,7 @@ export {
   recordBashSuccess,
   resolveSignalsPath,
 } from './core/sessionSignals/index.js';
+export { handleGates } from './mcp/tools/gates/index.js';
 export { VERSION } from './version.js';
 export type {
   HookOutput,

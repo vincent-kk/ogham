@@ -174,6 +174,13 @@ describe('wiring', () => {
       expect(server).toContain(`ToolName.${key}`);
   });
 
+  it('registers exactly one server tool for each declared tool name', () => {
+    const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
+    expect((server.match(/server\.registerTool\(/g) ?? []).length).toBe(
+      Object.keys(ToolName).length,
+    );
+  });
+
   it('ships no agents — the manifest must not claim otherwise', () => {
     const manifest = JSON.parse(
       read('.claude-plugin', 'plugin.json'),
