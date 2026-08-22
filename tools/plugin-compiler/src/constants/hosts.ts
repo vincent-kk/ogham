@@ -1,4 +1,4 @@
-/** Hook events Codex parses from a Claude-format hooks.json (openai/codex hook_config.rs). */
+/** Hook events Codex accepts from a plugin hooks file. */
 export const CODEX_HOOK_EVENTS = [
   "PreToolUse",
   "PermissionRequest",
@@ -10,6 +10,7 @@ export const CODEX_HOOK_EVENTS = [
   "SubagentStart",
   "SubagentStop",
   "Stop",
+  "SessionEnd",
 ] as const;
 
 export const CODEX_HOOK_EVENT_SET: ReadonlySet<string> = new Set(

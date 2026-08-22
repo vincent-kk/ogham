@@ -1,3 +1,4 @@
+import { CODEX_HOOK_EVENT_SET } from "../../constants/hosts.js";
 import type { HookMatcherGroup, PluginFacts } from "../../types/index.js";
 
 const READ_TOOL = "Read";
@@ -16,19 +17,15 @@ function needsBash(matcher: string | undefined): boolean {
 }
 
 /**
- * Rewrite a plugin's Claude hooks into a Codex-specific copy that adds `Bash` to
- * every PreToolUse matcher naming file tools, so Codex fires the hook on a shell
- * read (`cat foo`) — @ogham/cross-platform `parseBashRead` then promotes it to
- * Read for the same handler, recovering the read-context injection that a
- * `Read|Write|Edit` matcher silently loses on Codex (it has no Read tool).
+ * Rewrite a plugin's Claude hooks into a Codex-specific compatible copy.
  *
- * The whole hooks object is copied — Codex reads all its events from this one
- * file once the manifest points at it — and only the matching PreToolUse groups
- * change. Claude keeps using `hooks/hooks.json` unchanged, so it pays no cost.
+ * Unsupported events are omitted. Matching PreToolUse groups gain `Bash`, so a
+ * shell read can be promoted by @ogham/cross-platform to the Claude `Read`
+ * vocabulary. Claude keeps using `hooks/hooks.json` unchanged.
  *
- * Returns null when nothing changes (a `*` matcher already catches Bash, or the
- * plugin has no read-catching matcher), so that plugin's Codex manifest keeps
- * pointing at the shared file and no redundant copy is emitted.
+ * @param facts Canonical Claude plugin facts.
+ * @returns A dedicated Codex hooks object when filtering or matcher rewriting
+ * changes the source, otherwise null so the shared file remains authoritative.
  */
 export function buildCodexHooks(
   facts: PluginFacts,
@@ -38,12 +35,17 @@ export function buildCodexHooks(
 
   let changed = false;
   const rewritten: Record<string, HookMatcherGroup[]> = {};
-  for (const [event, groups] of Object.entries(hooks))
+  for (const [event, groups] of Object.entries(hooks)) {
+    if (!CODEX_HOOK_EVENT_SET.has(event)) {
+      changed = true;
+      continue;
+    }
     rewritten[event] = groups.map((group) => {
       if (event !== "PreToolUse" || !needsBash(group.matcher)) return group;
       changed = true;
       return { ...group, matcher: `${group.matcher}|${BASH_TOOL}` };
     });
+  }
 
   return changed ? { hooks: rewritten } : null;
 }
