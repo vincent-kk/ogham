@@ -18,7 +18,7 @@ This skill may be invoked automatically. It acts before execution — the cheap 
 
 **2. Cut tasks at reviewable seams.** A task is the smallest unit a reviewer could reject while approving its neighbour, and it ends with an independently verifiable deliverable. Fold scaffolding and config into the task whose deliverable needs them.
 
-**3. Write steps a stranger could run.** Exact paths, real code, real commands with expected output. These are plan failures, not shorthand: "TBD" · "add proper error handling" · "similar to task N" · a code step with no code. Each task's commands and expected outputs become its gates: write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md` — 1–4 runnable gates per task, a `## Final` gate for this repository's designated verification. Gate requirement: each gate carries an EXPECT that only a success prints. A task with no gate is a plan failure.
+**3. Write steps a stranger could run.** Exact paths, real code, real commands with expected output. These are plan failures, not shorthand: "TBD" · "add proper error handling" · "similar to task N" · a code step with no code. Each task's commands and expected outputs become its gates: write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md` — 1–4 runnable gates per task, a `## Final` gate for this repository's designated verification. Gate requirement: each gate carries an EXPECT that only a success prints, and every CHECK and EXPECT value is wrapped in a Markdown code span. A task with no gate is a plan failure.
 
 **4. Declare the interfaces between tasks.** What each task consumes from earlier ones and produces for later ones — exact names, signatures, types. A task's implementer sees only their own task.
 

@@ -16,6 +16,23 @@ const FIELD = /^\s+(CHECK|EXPECT|EVIDENCE):\s*(.*)$/;
 /** Explicit gate abandonment declaration. */
 const ABANDON = /^ABANDON:\s*(G\d+)\s*(.*)$/;
 
+/** Strip Markdown's optional padding from code-span contents. */
+function trimCodeSpanPadding(value: string): string {
+  const padded =
+    value.startsWith(' ') && value.endsWith(' ') && /\S/.test(value);
+  return padded ? value.slice(1, -1) : value;
+}
+
+/** Strip a wrapping code span so a Markdown formatter cannot rewrite the value. */
+function unwrapCodeSpan(value: string): string {
+  const trimmed = value.trim();
+  const opening = /^`+/.exec(trimmed)?.[0];
+  const closing = /`+$/.exec(trimmed)?.[0];
+  if (opening === undefined || opening.length !== closing?.length) return value;
+  const inner = trimmed.slice(opening.length, -opening.length);
+  return inner === '' ? value : trimCodeSpanPadding(inner);
+}
+
 /**
  * Parse a gates ledger without rejecting malformed or unknown lines.
  *
@@ -65,8 +82,9 @@ export function parseGatesLedger(text: string): GatesLedger {
     if (fieldMatch !== null && current !== undefined) {
       const field = fieldMatch[1];
       const value = (fieldMatch[2] ?? '').trim();
-      if (field === 'CHECK') current.check = value || undefined;
-      if (field === 'EXPECT') current.expect = value || undefined;
+      if (field === 'CHECK') current.check = unwrapCodeSpan(value) || undefined;
+      if (field === 'EXPECT')
+        current.expect = unwrapCodeSpan(value) || undefined;
       if (field === 'EVIDENCE') {
         current.evidence = value;
         current.evidenceLine = index;

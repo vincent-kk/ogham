@@ -76,6 +76,43 @@ describe('parseGatesLedger', () => {
     expect(ledger.gates.map((gate) => gate.evidence)).toEqual(['yes', 'yes']);
   });
 
+  it('unwraps a wrapping code span without changing its literal value', () => {
+    const ledger = parseGatesLedger(
+      [
+        '- [ ] G1: wrapped fields',
+        '  CHECK: `echo *a*`',
+        '  EXPECT: `*OK*`',
+        '- [ ] G2: nested backticks',
+        '  CHECK: ``echo before-`x`-after``',
+        '  EXPECT: ``value before-`x`-after``',
+        '- [ ] G3: plain fields',
+        '  CHECK: echo plain',
+        '  EXPECT: plain output',
+        '- [ ] G4: mismatched delimiter runs',
+        '  CHECK: `echo mismatch``',
+        '- [ ] G5: empty span',
+        '  CHECK: ``',
+        '- [ ] G6: padded edge backticks',
+        '  CHECK: `` `printf true` ``',
+        '  EXPECT: `` `true` ``',
+      ].join('\n'),
+    );
+
+    expect(
+      ledger.gates.map(({ check, expect }) => ({ check, expect })),
+    ).toEqual([
+      { check: 'echo *a*', expect: '*OK*' },
+      {
+        check: 'echo before-`x`-after',
+        expect: 'value before-`x`-after',
+      },
+      { check: 'echo plain', expect: 'plain output' },
+      { check: '`echo mismatch``', expect: undefined },
+      { check: '``', expect: undefined },
+      { check: '`printf true`', expect: '`true`' },
+    ]);
+  });
+
   it('accepts empty input', () => {
     expect(parseGatesLedger('')).toEqual({
       planRef: undefined,
