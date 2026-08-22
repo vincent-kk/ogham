@@ -7,13 +7,14 @@
 - 훅 도달 코드는 **플러그인 내부 배럴을 import 하지 않는다.** concrete 파일만 쓰며, 번들 byte cap 과 출력 패턴 검사가 재유입을 막는다. 공유 패키지는 `sideEffects: false` 덕에 루트 import 가 출력에 0바이트로 shake 되므로 예외다.
 - 검증 런타임(zod 등)·MCP SDK·glob 엔진을 훅 번들에 들이지 않는다.
 - `projectRoot`·`pluginRoot` 해석은 쓰지 않는다 — 호스트가 `CLAUDE_PLUGIN_ROOT` 와 세션 cwd 를 이미 준다. 경로 조합은 portable 연산 경유다.
+- SessionStart·UserPromptSubmit·SubagentStart는 두 호스트가 공통으로 주는 `cwd`·`session_id`·`hook_event_name`만 동작에 사용하고, Codex의 `turn_id`·`model`·`permission_mode` 같은 추가 필드는 해석하지 않는다.
 - 진입점은 `<name>/<name>.entry.ts` 이며, 활성 훅은 같은 이름으로 `hooks/hooks.json` 에 등록된다. `DORMANT_HOOKS` 는 빌드되되 미등록이며 wiring 테스트가 이를 강제한다.
 
 ## API Contracts
 
 - `processSessionStart` — SessionStart: 활성 규칙·유효 다이얼·드리프트·선출 계약 주입.
 - `processUserPromptSubmit` — UserPromptSubmit: 매 턴 선출 상기 + 워크플로우 상태 1절 + 미충족 원장 환기 1줄.
-- `processToolOutcome` — PostToolUse(+Failure): Bash 실패 연쇄 신호와 Skill 로드 관측; CHECK 일치 시 게이트 판정·원장 기록·판정 1줄.
+- `processToolOutcome` — PostToolUse(+Claude의 Failure): Bash 실패 연쇄 신호와 Claude Skill 로드 관측; CHECK 일치 시 호스트 중립 출력 판정·원장 기록·판정 1줄.
 - `processSubagentStart` — SubagentStart: 상태 요약 축약 재주입.
 - `processInstructionsLoaded` — InstructionsLoaded: 로드 관측(주입 0, dormant).
 
@@ -38,7 +39,12 @@
 ### AC-hooks-wiring — 등록 일치
 
 - 활성 훅 이름이 `hooks/hooks.json` 등록과 일치하고, `DORMANT_HOOKS` 는 미등록으로 남는다.
+- Codex 전용 훅 파일은 지원 이벤트만 가지며 같은 handler bundle을 가리킨다.
+
+### AC-hooks-host-shape — 공통 입력과 출력
+
+- SessionStart·UserPromptSubmit·SubagentStart는 Codex 추가 필드의 유무와 무관하게 같은 상태에서 같은 `hookEventName`과 `additionalContext`를 반환한다.
 
 ## Last Updated
 
-2026-08-22 — 훅 계층 계약에 게이트 판정·원장 기록·미충족 환기를 반영했다.
+2026-08-23 — Codex 공통 입력·출력과 전용 이벤트 wiring 계약을 반영했다.

@@ -1,9 +1,15 @@
-/** Fields every Claude Code hook receives on stdin. */
+/** Fields shared by Claude Code and Codex hook inputs. */
 export interface HookBaseInput {
   cwd: string;
   session_id: string;
   hook_event_name: string;
   transcript_path?: string;
+  /** Codex turn identifier when the host supplies one. */
+  turn_id?: string;
+  /** Active model identifier when the host supplies one. */
+  model?: string;
+  /** Active permission posture when the host supplies one. */
+  permission_mode?: string;
 }
 
 /** SessionStart hook input. */
@@ -28,32 +34,28 @@ export interface UserPromptSubmitInput extends HookBaseInput {
 }
 
 /**
- * PostToolUse input, delivered after a tool call that *succeeded*.
- *
- * `tool_response` for Bash carries `stdout` / `stderr` and no exit code,
- * because reaching this event already means the command exited zero. A
- * non-zero exit arrives as {@link PostToolUseFailureInput} instead.
+ * PostToolUse input. Claude delivers successful Bash output as an object;
+ * Codex delivers both zero and non-zero Bash output as a string on this event.
  */
 export interface PostToolUseInput extends HookBaseInput {
   hook_event_name: 'PostToolUse';
   tool_name: string;
   tool_input?: { command?: unknown; [key: string]: unknown };
-  tool_response?: Record<string, unknown>;
+  tool_response?: unknown;
   /** Present only on a subagent's calls; measured on 2026-08-22. */
   agent_id?: string;
 }
 
 /**
- * PostToolUseFailure input — a separate event from PostToolUse, with a
- * different payload: no `tool_response`, an `error` string carrying the
- * exit code and stderr, and `is_interrupt` when the user stopped the run
- * rather than the command failing on its own.
+ * Claude-only PostToolUseFailure input. Its error can carry an exit header and
+ * output; `is_interrupt` is absent from Codex rather than inferred there.
  */
 export interface PostToolUseFailureInput extends HookBaseInput {
   hook_event_name: 'PostToolUseFailure';
   tool_name: string;
   tool_input?: { command?: unknown; [key: string]: unknown };
   error?: string;
+  /** Whether Claude reports that the user interrupted the command. */
   is_interrupt?: boolean;
   /** Present only on a subagent's calls; measured on 2026-08-22. */
   agent_id?: string;

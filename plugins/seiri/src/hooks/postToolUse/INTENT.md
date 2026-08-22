@@ -8,9 +8,9 @@
 
 - **순서는 다이얼 → Skill → Bash 다.** advisory 면 원장과 세션 상태를 건드리기 전에 빠져나온다.
 - **`Skill` 은 답하지 않는다.** seiri 워크플로우면 마지막 상태만 기록하고 무주입으로 빠진다 — 문구는 다음 턴(userPromptSubmit) 몫이다.
-- **Bash 판정은 다섯 가지다.** exit 0의 증명·불일치, 비-0의 stderr 증명·불일치, stdout 비관측을 각각 met·unmet·unobservable 로 말한다.
+- **Bash 판정은 출력 텍스트와 EXPECT가 정한다.** 매치는 met, 불일치·빈 출력은 unmet, EXPECT 부재는 unjudgeable이며 exit와 이벤트 이름은 판정을 바꾸지 않는다.
 - 같은 CHECK가 여러 작업에 있어도 한 호출의 판정은 한 줄이다. met가 되돌아가면 regression을 밝히고, 서브에이전트 증거는 짧은 `agent_id` 표지를 남긴다.
-- 실패 `error`가 `Exit code N` 외 본문을 싣지 않으면 stdout은 관측할 수 없으므로 원장을 바꾸지 않고 unobservable로 답한다.
+- Claude 객체·실패 error와 Codex 문자열을 같은 `{ text, exit?, interrupted? }` 형태로 정규화한다. Codex에 없는 interrupt·Skill 관측은 추측해 보충하지 않는다.
 - 사용자가 끊은 실행은 판정·카운트하지 않는다. CHECK 불일치는 기존 실패 연쇄로 흐르고, CHECK 일치 실패가 임계에 닿으면 같은 판정 줄에 연쇄 힌트를 합친다.
 - 원장·세션 신호 실패는 fail-open이다. 이미 원장이 바뀌었다면 세션 신호 실패가 판정 줄을 삼키지 않는다.
 

@@ -66,13 +66,11 @@ describe('recordCheckOutcome', () => {
     );
 
     const results = recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: 'starting\n8/8 passed\ncomplete',
-      stderr: '',
+      text: 'starting\n8/8 passed\ncomplete',
     });
 
     expect(results).toHaveLength(1);
-    expect(results[0]?.verdict).toEqual({ kind: 'met', channel: 'output' });
+    expect(results[0]?.verdict).toEqual({ kind: 'met' });
     expect(results[0]?.status).toMatchObject({ met: 1, unmet: 0 });
     expect(readFileSync(path, 'utf8')).toContain(
       '- [x] G1: verification passes\n  CHECK: yarn test\n  EXPECT: 8/8 passed\n  EVIDENCE: 8/8 passed | complete',
@@ -89,9 +87,7 @@ describe('recordCheckOutcome', () => {
     const path = seedTask(root, 'sample-task', before);
 
     const results = recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: '7/8 passed',
-      stderr: '',
+      text: '7/8 passed',
     });
 
     expect(results[0]?.verdict).toEqual({
@@ -116,16 +112,14 @@ describe('recordCheckOutcome', () => {
     );
 
     const results = recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: '15/15 passed',
-      stderr: '',
+      text: '15/15 passed',
     });
 
-    expect(results[0]?.verdict).toEqual({ kind: 'met', channel: 'output' });
+    expect(results[0]?.verdict).toEqual({ kind: 'met' });
     expect(readFileSync(path, 'utf8')).toContain('EVIDENCE: 15/15 passed');
   });
 
-  it('uses exit zero when EXPECT is absent', () => {
+  it('reports an exit-zero gate without EXPECT as unjudgeable', () => {
     const root = makeRepoRoot();
     const path = seedTask(
       root,
@@ -137,35 +131,38 @@ describe('recordCheckOutcome', () => {
     );
 
     const results = recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: '',
-      stderr: '',
+      text: '',
     });
 
-    expect(results[0]?.verdict).toEqual({ kind: 'met', channel: 'output' });
-    expect(readFileSync(path, 'utf8')).toContain('EVIDENCE: exit 0');
+    expect(results[0]?.verdict).toEqual({
+      kind: 'unjudgeable',
+      reason: 'a runnable gate needs an EXPECT that only success prints',
+      regressed: false,
+    });
+    expect(readFileSync(path, 'utf8')).toContain('EVIDENCE: pending');
   });
 
-  it('leaves a no-EXPECT gate unmet on non-zero exit', () => {
+  it('regresses a formerly met no-EXPECT gate as unjudgeable', () => {
     const root = makeRepoRoot();
-    const before = `- [ ] G1: command succeeds
+    const before = `- [x] G1: command succeeds
   CHECK: yarn test
-  EVIDENCE: pending
+  EVIDENCE: old exit proof
 `;
     const path = seedTask(root, 'sample-task', before);
 
     const results = recordCheckOutcome(root, 'yarn test', {
-      kind: 'failure',
-      error: 'Exit code 1\nboom',
+      text: 'boom',
       exit: 1,
     });
 
     expect(results[0]?.verdict).toEqual({
-      kind: 'unmet',
-      reason: 'exit 1',
-      regressed: false,
+      kind: 'unjudgeable',
+      reason: 'a runnable gate needs an EXPECT that only success prints',
+      regressed: true,
     });
-    expect(readFileSync(path, 'utf8')).toBe(before);
+    expect(readFileSync(path, 'utf8')).toContain(
+      '- [ ] G1: command succeeds\n  CHECK: yarn test\n  EVIDENCE: pending (regressed)',
+    );
   });
 
   it('records an expected stderr failure', () => {
@@ -181,14 +178,12 @@ describe('recordCheckOutcome', () => {
     );
 
     const results = recordCheckOutcome(root, 'yarn rejection', {
-      kind: 'failure',
-      error: 'Exit code 1\ninvalid input',
+      text: 'invalid input',
       exit: 1,
     });
 
     expect(results[0]?.verdict).toEqual({
       kind: 'met',
-      channel: 'stderr',
       exit: 1,
     });
     expect(results[0]?.status.met).toBe(1);
@@ -207,20 +202,19 @@ describe('recordCheckOutcome', () => {
     const path = seedTask(root, 'sample-task', before);
 
     const results = recordCheckOutcome(root, 'yarn rejection', {
-      kind: 'failure',
-      error: 'Exit code 1\ndifferent failure',
+      text: 'different failure',
       exit: 1,
     });
 
     expect(results[0]?.verdict).toEqual({
       kind: 'unmet',
-      reason: 'exit 1; EXPECT not in stderr',
+      reason: 'EXPECT "invalid input" not in output (exit 1)',
       regressed: false,
     });
     expect(readFileSync(path, 'utf8')).toBe(before);
   });
 
-  it('reports a bare exit line as unobservable', () => {
+  it('reports an empty output as unmet', () => {
     const root = makeRepoRoot();
     const before = `- [ ] G1: rejects invalid input
   CHECK: yarn rejection
@@ -230,12 +224,15 @@ describe('recordCheckOutcome', () => {
     const path = seedTask(root, 'sample-task', before);
 
     const results = recordCheckOutcome(root, 'yarn rejection', {
-      kind: 'failure',
-      error: 'Exit code 1',
+      text: '',
       exit: 1,
     });
 
-    expect(results[0]?.verdict).toEqual({ kind: 'unobservable' });
+    expect(results[0]?.verdict).toEqual({
+      kind: 'unmet',
+      reason: 'no output (exit 1)',
+      regressed: false,
+    });
     expect(results[0]?.status.unmet).toBe(1);
     expect(readFileSync(path, 'utf8')).toBe(before);
   });
@@ -253,9 +250,7 @@ describe('recordCheckOutcome', () => {
     );
 
     const results = recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: '7/8 passed',
-      stderr: '',
+      text: '7/8 passed',
     });
 
     expect(results[0]?.verdict).toEqual({
@@ -280,9 +275,7 @@ describe('recordCheckOutcome', () => {
     const betaPath = seedTask(root, 'beta-task', ledger);
 
     const results = recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: 'passed',
-      stderr: '',
+      text: 'passed',
     });
 
     expect(results.map((result) => result.task)).toEqual([
@@ -307,9 +300,7 @@ describe('recordCheckOutcome', () => {
     );
 
     const results = recordCheckOutcome(root, 'yarn vitest\nrun', {
-      kind: 'success',
-      stdout: 'passed',
-      stderr: '',
+      text: 'passed',
     });
 
     expect(results).toHaveLength(1);
@@ -332,7 +323,7 @@ describe('recordCheckOutcome', () => {
     const agentResults = recordCheckOutcome(
       root,
       'yarn test',
-      { kind: 'success', stdout: longOutput, stderr: '' },
+      { text: longOutput },
       'aa8d87f5-more',
     );
     const agentEvidence = readFileSync(path, 'utf8')
@@ -345,9 +336,7 @@ describe('recordCheckOutcome', () => {
     expect(agentResults[0]?.status.met_by_agent).toEqual(['G1']);
 
     const driverResults = recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: longOutput,
-      stderr: '',
+      text: longOutput,
     });
     const driverText = readFileSync(path, 'utf8');
     const driverEvidence = driverText
@@ -365,9 +354,7 @@ describe('recordCheckOutcome', () => {
 
     expect(
       recordCheckOutcome(root, 'yarn test', {
-        kind: 'success',
-        stdout: 'passed',
-        stderr: '',
+        text: 'passed',
       }),
     ).toEqual([]);
     expect(existsSync(portableJoin(root, '.seiri', 'tasks'))).toBe(false);
@@ -382,9 +369,7 @@ describe('recordCheckOutcome', () => {
 
     expect(
       recordCheckOutcome(root, 'yarn test', {
-        kind: 'success',
-        stdout: 'passed',
-        stderr: '',
+        text: 'passed',
       }),
     ).toEqual([]);
     expect(readFileSync(path, 'utf8')).toBe(before);
@@ -411,9 +396,7 @@ Plan: plan.md
     const path = seedTask(root, 'sample-task', before);
 
     recordCheckOutcome(root, 'yarn test', {
-      kind: 'success',
-      stdout: 'stable\nfinal',
-      stderr: '',
+      text: 'stable\nfinal',
     });
 
     const beforeLines = before.split('\n');

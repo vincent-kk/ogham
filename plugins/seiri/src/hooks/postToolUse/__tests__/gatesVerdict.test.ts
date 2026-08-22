@@ -114,7 +114,7 @@ describe('PostToolUse gate verdicts', () => {
     expect(readFileSync(path, 'utf8')).toBe(LEDGER);
   });
 
-  it('records designed non-zero evidence matched on stderr', () => {
+  it('records designed non-zero evidence without naming a host channel', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
@@ -129,7 +129,7 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     expect(output.hookSpecificOutput?.additionalContext).toContain(
-      'met — matched on stderr (exit 1 by design)',
+      'met — evidence recorded (1/2, next G2)',
     );
     expect(readFileSync(path, 'utf8')).toMatch(/EVIDENCE: .* \(exit 1\)$/m);
   });
@@ -149,11 +149,11 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     expect(output.hookSpecificOutput?.additionalContext).toContain(
-      'unmet — exit 1; EXPECT not in stderr',
+      'unmet — EXPECT "8/8 passed" not in output (exit 1)',
     );
   });
 
-  it('reports hidden stdout as unobservable without changing the ledger', () => {
+  it('reports an empty failure output as unmet without changing the ledger', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
@@ -168,7 +168,7 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     expect(output.hookSpecificOutput?.additionalContext).toContain(
-      'unobservable — stdout is not visible',
+      'unmet — no output (exit 1)',
     );
     expect(readFileSync(path, 'utf8')).toBe(LEDGER);
   });
@@ -322,7 +322,9 @@ describe('PostToolUse gate verdicts', () => {
     const line =
       processToolOutcome(input).hookSpecificOutput?.additionalContext ?? '';
 
-    expect(line).toContain('unmet — exit 1; EXPECT not in stderr');
+    expect(line).toContain(
+      'unmet — EXPECT "8/8 passed" not in output (exit 1)',
+    );
     expect(line).toContain('trace-cause');
     expect(line).not.toContain('\n');
   });
@@ -375,7 +377,7 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     expect(output.hookSpecificOutput?.additionalContext).toContain(
-      'met — matched on stderr (exit 1 by design)',
+      'met — evidence recorded (1/2, next G2)',
     );
     expect(readFileSync(path, 'utf8')).toContain('- [x] G1');
   });

@@ -46,6 +46,9 @@ export function computeLedgerStatus(
         id: gate.id,
         title: gate.title,
         ...(gate.check === undefined ? {} : { check: gate.check }),
+        ...(gate.check !== undefined && gate.expect === undefined
+          ? { needs_expect: true as const }
+          : {}),
       });
     }
     if (state === 'abandoned') abandoned += 1;

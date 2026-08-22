@@ -32,17 +32,13 @@ export function bashOutcome(
   )
     return EMPTY_RESULT;
 
+  const outcome = toCheckOutcome(input);
+  if (outcome.interrupted) return EMPTY_RESULT;
   const failed = input.hook_event_name === HookEvent.POST_TOOL_USE_FAILURE;
-  if (failed && input.is_interrupt) return EMPTY_RESULT;
 
   let verdicts: RecordedVerdict[];
   try {
-    verdicts = recordCheckOutcome(
-      input.cwd,
-      command,
-      toCheckOutcome(input),
-      input.agent_id,
-    );
+    verdicts = recordCheckOutcome(input.cwd, command, outcome, input.agent_id);
   } catch {
     verdicts = [];
   }

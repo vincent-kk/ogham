@@ -12,8 +12,8 @@
 ### 증거와 기록
 
 - 실행 가능한 게이트는 명령 해시가 일치한 도구 결과만 증거로 쓴다. 수동 기록 API 는 `CHECK` 가 있는 게이트를 거부한다.
-- 성공 출력과 실패 오류는 `EXPECT` 로 판정하며, 관측할 수 없는 실패 stdout 은 원장을 바꾸지 않고 `unobservable` 로 보고한다.
-- 이미 충족한 게이트의 실패한 재실행은 체크를 풀고 `pending (regressed)` 를 기록한다.
+- 실행 가능한 게이트의 증명은 정규화된 출력 텍스트의 `EXPECT` 매치뿐이다. exit와 호스트 이벤트 이름은 판정을 결정하지 않는다.
+- EXPECT가 없으면 `unjudgeable`, 출력이 비면 `unmet — no output`, EXPECT가 불일치하면 `unmet`이다. 이미 충족한 게이트의 non-met 재실행은 종류와 무관하게 체크를 풀고 `pending (regressed)`를 기록한다.
 - 한 작업의 읽기-수정-쓰기는 `gates.lock` 으로 직렬화하고, 락을 얻지 못하면 훅을 막지 않도록 그대로 진행한다.
 - 박스, 증거, 포기는 `gates.md` 안에서만 바뀌며 쓰기는 원자적으로 교체한다.
 
@@ -33,7 +33,8 @@
 ### AC-gates-claim-is-not-proof — 주장은 증명이 아니다
 
 - 체크됐지만 증거가 `pending` 인 게이트는 미충족이다.
-- 충족 게이트의 실패한 재실행은 체크를 풀고 `pending (regressed)` 를 남긴다.
+- CHECK가 있으나 EXPECT가 없는 게이트는 어떤 호스트에서도 충족되지 않는다.
+- 충족 게이트의 unmet·unjudgeable 재실행은 체크를 풀고 `pending (regressed)` 를 남긴다.
 
 ### AC-gates-abandon-visible — 포기는 보인다
 
@@ -83,4 +84,4 @@
 
 ## Last Updated
 
-2026-08-22
+2026-08-23 — 게이트 증명을 호스트 중립 출력 텍스트의 EXPECT 매치로 한정했다.

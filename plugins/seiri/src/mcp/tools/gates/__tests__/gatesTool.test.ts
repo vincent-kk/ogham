@@ -81,6 +81,14 @@ describe('gates MCP tool', () => {
     ]);
     expect(allTasks.tasks.every((task) => !('gates' in task))).toBe(true);
     expect(allTasks.all_met).toBe(false);
+    expect(allTasks.tasks[0]?.unmet_gates).toEqual([
+      {
+        id: 'G2',
+        title: 'tests pass',
+        check: 'yarn test',
+        needs_expect: true,
+      },
+    ]);
 
     const oneTask = handleGates({
       action: 'status',

@@ -93,6 +93,8 @@ export interface TaskLedgerStatus {
     title: string;
     /** Runnable command when present. */
     check?: string;
+    /** Repair signal for a runnable gate that cannot prove success. */
+    needs_expect?: true;
   }>;
   /** Visible abandonment declarations and reasons. */
   abandons: Array<{
@@ -119,33 +121,22 @@ export interface TaskLedger {
   ledger: GatesLedger;
 }
 
-/** Observable result of one CHECK command invocation. */
-export type CheckOutcome =
-  | {
-      /** Successful tool-result discriminator. */
-      kind: 'success';
-      /** Captured standard output. */
-      stdout: string;
-      /** Captured standard error. */
-      stderr: string;
-    }
-  | {
-      /** Failed tool-result discriminator. */
-      kind: 'failure';
-      /** Harness-provided error text containing exit and stderr details. */
-      error: string;
-      /** Process exit code when the harness reports one. */
-      exit: number | undefined;
-    };
+/** Host-neutral observable result of one CHECK command invocation. */
+export interface CheckOutcome {
+  /** Complete output text that can carry EXPECT evidence. */
+  text: string;
+  /** Process exit code when the host exposes one. */
+  exit?: number;
+  /** Explicit user interruption when the host exposes that signal. */
+  interrupted?: boolean;
+}
 
 /** Verdict obtained by comparing one gate with one observable outcome. */
 export type GateVerdict =
   | {
       /** Proof was observed. */
       kind: 'met';
-      /** Output channel that carried the proof. */
-      channel: 'output' | 'stderr';
-      /** Designed non-zero exit carried directly for stderr rendering. */
+      /** Known non-zero exit retained only for evidence decoration. */
       exit?: number;
     }
   | {
@@ -157,8 +148,12 @@ export type GateVerdict =
       regressed: boolean;
     }
   | {
-      /** Required stdout was hidden by a non-zero tool result. */
-      kind: 'unobservable';
+      /** The runnable gate omitted the matcher required to prove success. */
+      kind: 'unjudgeable';
+      /** Stable authoring remedy. */
+      reason: string;
+      /** Whether this execution revoked previously proven evidence. */
+      regressed: boolean;
     };
 
 /** One gate verdict paired with its task and post-write status. */

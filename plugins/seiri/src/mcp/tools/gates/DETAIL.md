@@ -7,6 +7,7 @@
 - `abandon` 은 유효한 작업·게이트와 비어 있지 않은 사유를 기존 원장에 기록하고 갱신 상태를 반환한다.
 - `record` 는 CHECK 없는 수동 게이트와 비어 있지 않은 증거만 기존 원장에 기록한다.
 - 작업 이름과 게이트 ID를 검증한 뒤 core 계약에 위임하며, 프로세스 실행·원장 생성·세션 식별자 처리를 하지 않는다.
+- 실행 가능한 게이트의 증명은 EXPECT 매치다. `status.unmet_gates`는 CHECK가 있으나 EXPECT가 없을 때 `needs_expect: true`를 덧붙인다.
 
 ## API Contracts
 
@@ -28,6 +29,10 @@
 
 - 소문자 kebab-case가 아닌 작업 이름은 원장을 읽거나 쓰기 전에 패턴을 밝힌 오류로 거부한다.
 
+### AC-gates-needs-expect — 실행 가능 게이트 수리 신호
+
+- CHECK가 있으나 EXPECT가 없는 미충족 항목에만 `needs_expect: true`가 나타난다.
+
 ## Last Updated
 
-2026-08-22 — 작업 게이트 원장의 MCP 조회·포기·수동 기록 계약을 정의했다.
+2026-08-23 — EXPECT 없는 실행 가능 게이트의 수리 신호를 상태 계약에 추가했다.

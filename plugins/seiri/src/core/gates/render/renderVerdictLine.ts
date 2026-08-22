@@ -1,8 +1,5 @@
 import { AGENT_MARKER_CHARS } from '../../../constants/gates.js';
-import {
-  AGENT_MET_HINT,
-  UNOBSERVABLE_HINT,
-} from '../../../constants/gatesLines.js';
+import { AGENT_MET_HINT } from '../../../constants/gatesLines.js';
 import type { RecordedVerdict } from '../../../types/gates.js';
 
 /**
@@ -46,19 +43,14 @@ export function renderVerdictLine(
           fragments.push(
             `${prefix} met via agent ${opts.agentId.slice(0, AGENT_MARKER_CHARS)} — ${AGENT_MET_HINT}`,
           );
-        else if (result.verdict.channel === 'stderr')
-          fragments.push(
-            `${prefix} met — matched on stderr (exit ${result.verdict.exit ?? 'non-zero'} by design)`,
-          );
         else
           fragments.push(
             `${prefix} met — evidence recorded (${result.status.met}/${result.status.total}, ${result.status.next ? `next ${result.status.next}` : 'all met'})`,
           );
-      else if (result.verdict.kind === 'unmet')
+      else
         fragments.push(
-          `${prefix} unmet — ${result.verdict.reason}${result.verdict.regressed ? ' (was met — regressed)' : ''}`,
+          `${prefix} ${result.verdict.kind} — ${result.verdict.reason}${result.verdict.regressed ? ' (was met — regressed)' : ''}`,
         );
-      else fragments.push(`${prefix} unobservable — ${UNOBSERVABLE_HINT}`);
     }
     line = fragments.join('; ');
   }

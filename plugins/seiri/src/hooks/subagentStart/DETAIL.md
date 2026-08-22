@@ -10,6 +10,7 @@
 - 규칙 이름만 말한다. 매 스폰마다 본문을 복제하면 SessionStart 가 피하는 이중 비용을 서브에이전트 수만큼 곱한다.
 - 읽기 전용이다 — `.claude/rules/` 와 `.seiri/` 에 쓰지 않는다.
 - stdin 타임아웃(`shared/readStdin`)이 방어선이다. 일부 환경은 훅의 stdin 을 닫지 않으며, 스폰을 막는 훅은 있어서는 안 된다.
+- 동작에 쓰는 입력은 두 호스트 공통의 `cwd`·`session_id`·`hook_event_name`이며 Codex 추가 필드는 결과를 바꾸지 않는다.
 
 ## API Contracts
 
@@ -29,7 +30,8 @@
 ### AC-spawn-non-blocking — 스폰 비차단
 
 - stdin 이 닫히지 않는 환경에서도 타임아웃으로 빠져나와 스폰을 지연시키지 않는다.
+- Codex 추가 필드가 있어도 같은 상태에서 Claude 형태와 같은 `hookEventName`·`additionalContext`를 반환한다.
 
 ## Last Updated
 
-2026-07-30 — 서브에이전트 상태 재주입 계약을 문서화했다.
+2026-08-23 — Codex 공통 입력에서도 같은 축약 상태를 내는 계약을 고정했다.

@@ -1,8 +1,11 @@
 import { FAILURE_CHAIN_THRESHOLD } from './failureChain.js';
 
-/** Remedy shown when failed-command stdout cannot be observed. */
-export const UNOBSERVABLE_HINT =
-  'stdout is not visible after a non-zero exit; make the CHECK exit 0 (append || true) or EXPECT against stderr';
+/** Remedy shown when a runnable gate omitted its success matcher. */
+export const NO_EXPECT_HINT =
+  'a runnable gate needs an EXPECT that only success prints';
+
+/** Reason shown when a host delivered no output text to judge. */
+export const NO_OUTPUT_REASON = 'no output';
 
 /** Follow-up attached to proof written by an agent invocation. */
 export const AGENT_MET_HINT = 'driver re-run clears the marker';

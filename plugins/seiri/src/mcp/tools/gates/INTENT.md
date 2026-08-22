@@ -7,7 +7,7 @@
 ## Conventions
 
 - `status` 는 원장을 읽고, `abandon` 과 `record` 는 기존 원장만 갱신한다.
-- `record` 는 CHECK 없는 수동 게이트에만 허용하고, CHECK 게이트는 Bash 실행과 PostToolUse 훅으로 증명한다.
+- `record` 는 CHECK 없는 수동 게이트에만 허용하고, CHECK 게이트는 Bash 실행 뒤 출력의 EXPECT 매치로만 증명한다.
 - 작업 이름은 소문자 kebab-case 패턴으로 검증해 경로 이탈을 막는다.
 - 도구 참조는 full-form `mcp__plugin_seiri_tools__gates` 를 쓴다.
 
@@ -17,6 +17,7 @@
 
 - 오류를 throw 해 서버의 공통 직렬화 경계가 모델에게 전달하게 할 것.
 - 포기에는 사유를, 수동 기록에는 관측한 증거를 요구할 것.
+- CHECK가 있지만 EXPECT가 없는 미충족 게이트는 `needs_expect: true`로 수리 필요를 드러낼 것.
 
 ### Ask first
 

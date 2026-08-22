@@ -107,10 +107,7 @@ export function recordCheckOutcome(
               });
               changed = true;
             }
-          } else if (
-            result.verdict.kind === 'unmet' &&
-            result.verdict.regressed
-          ) {
+          } else if (result.verdict.regressed) {
             lines = applyGateLines(lines, result.gate, {
               checked: false,
               evidence: EVIDENCE_REGRESSED,

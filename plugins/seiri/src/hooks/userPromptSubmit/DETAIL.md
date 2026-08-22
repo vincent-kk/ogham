@@ -10,6 +10,7 @@
 - 문구는 단계별로 다르다. standard 는 선출 어휘와 `/seiri:verify` 하나, strict 는 전 순간을 이름으로 댄다. 정본은 `constants/turnReminders.ts` 이며 이 훅은 선택·주입만 한다.
 - 순간 → 스킬 순으로 말하고 규칙 상기를 뒤에 싣는다. 이 훅이 닫는 실패가 "순간이 왔는데 스킬이 안 떴다" 이기 때문이다.
 - 프롬프트 본문을 읽지 않는다. 규칙 본문도 복제하지 않는다.
+- 동작에 쓰는 입력은 두 호스트 공통의 `cwd`·`session_id`·`hook_event_name`이며 Codex 추가 필드는 결과를 바꾸지 않는다.
 
 ## API Contracts
 
@@ -30,6 +31,7 @@
 ### AC-no-prompt-read — 프롬프트 비열람
 
 - 주입 내용이 사용자 프롬프트 본문에 의존하지 않는다.
+- Codex 추가 필드가 있어도 같은 상태에서 Claude 형태와 같은 `hookEventName`·`additionalContext`를 반환한다.
 
 ### AC-ledger-reminder-one-line — 원장 환기 한 줄
 
@@ -38,4 +40,4 @@
 
 ## Last Updated
 
-2026-08-22
+2026-08-23 — Codex 공통 입력에서도 같은 턴 상기를 내는 계약을 고정했다.

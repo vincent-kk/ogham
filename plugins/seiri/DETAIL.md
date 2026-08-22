@@ -101,7 +101,7 @@
 
 ## History
 
-- 2026-08-23 — 게이트 판정을 호스트 중립으로 옮긴 결정. 실패를 별도 이벤트로 받고 `tool_response.stdout` 을 읽는 판정은 Claude 하니스의 우연한 형태였고, Codex 에서는 EXPECT 있는 게이트가 영구 unmet·EXPECT 없는 게이트가 거짓 met 이 됐다. 두 호스트가 공유하는 재료는 관측된 출력 텍스트뿐이므로 판정은 EXPECT 매치가 하고 exit code 는 이유·증거만 꾸민다. 실행 가능한 게이트의 EXPECT 는 요건이 된다.
+- 2026-08-23 — 게이트 판정을 호스트 중립으로 옮긴 결정. 실패를 별도 이벤트로 받고 `tool_response.stdout` 을 읽는 판정은 Claude 하니스의 우연한 형태였고, Codex 에서는 EXPECT 있는 게이트가 영구 unmet·EXPECT 없는 게이트가 거짓 met 이 됐다. 두 호스트가 공유하는 재료는 관측된 출력 텍스트뿐이므로 판정은 EXPECT 매치가 하고 exit code 는 이유·증거만 꾸민다. 실행 가능한 게이트의 EXPECT 는 요건이며, 옛 규칙으로 EXPECT 없이 met이 된 원장은 재실행 시 `unjudgeable`로 되돌아간다.
 - 2026-08-22 — 계획 태스크의 실행 가능한 CHECK 를 세션 독립적인 작업별 게이트 원장에 두고 훅이 증거를 판정하며 verify 가 미충족 완료 주장을 execute 로 되돌리도록 한 결정 — 완료를 기억이 아니라 파일의 증명으로 만든다.
 - 2026-08-19 — 조건부 질문 스킬에 review-plan(계획 검토 게이트) 추가, 워크플로우 체인을 write-plan → review-plan → execute 로 확장. 계획은 주장 묶음인데 완료 주장의 verify 에 대응하는 검증 소유자가 없었다는 결정. 같은 세션 접지는 유효하되(심판은 저장소), challenge 는 신선한 눈 흉내 대신 위임 질의 1회 + 인계물 산출로 실체화해 검토 연극을 구조로 제거. execute 의 frontmatter description 도 함께 갱신 — "a plan exists" 가 다이얼 무관 상시 채널(스킬 카탈로그)로 남는 두-주인 문제.
 - 2026-08-12 — 사용자 게이트에 scaffold-pr(빈 Draft PR 스캐폴드) 추가. 이슈 연동과 provider 분기를 걷어낸 작업 시작 게이트로, git·gh 절차 전체를 동봉 `scaffold-pr.mjs`(셸 미사용 argv spawn·안정 실패 코드 JSON)에 위임해 LLM 은 브랜치·제목·본문 결정만 맡도록 축소한 결정.

@@ -79,18 +79,18 @@ function makeResult(
 
 describe('renderVerdictLine', () => {
   it('renders an output match with progress', () => {
-    expect(
-      renderVerdictLine([makeResult({ kind: 'met', channel: 'output' })], {}),
-    ).toBe('payment-refactor G3 met — evidence recorded (4/7, next G5)');
+    expect(renderVerdictLine([makeResult({ kind: 'met' })], {})).toBe(
+      'payment-refactor G3 met — evidence recorded (4/7, next G5)',
+    );
     expect(
       renderVerdictLine(
         [
-          makeResult(
-            { kind: 'met', channel: 'output' },
-            'payment-refactor',
-            'G3',
-            { met: 7, unmet: 0, all_met: true, next: undefined },
-          ),
+          makeResult({ kind: 'met' }, 'payment-refactor', 'G3', {
+            met: 7,
+            unmet: 0,
+            all_met: true,
+            next: undefined,
+          }),
         ],
         {},
       ),
@@ -99,7 +99,7 @@ describe('renderVerdictLine', () => {
 
   it('renders an agent output match', () => {
     expect(
-      renderVerdictLine([makeResult({ kind: 'met', channel: 'output' })], {
+      renderVerdictLine([makeResult({ kind: 'met' })], {
         agentId: 'aa8d87f5-more',
       }),
     ).toBe(
@@ -107,13 +107,10 @@ describe('renderVerdictLine', () => {
     );
   });
 
-  it('renders a designed stderr match with its verdict exit', () => {
-    expect(
-      renderVerdictLine(
-        [makeResult({ kind: 'met', channel: 'stderr', exit: 2 })],
-        {},
-      ),
-    ).toBe('payment-refactor G3 met — matched on stderr (exit 2 by design)');
+  it('renders a met verdict generically even when exit is known', () => {
+    expect(renderVerdictLine([makeResult({ kind: 'met', exit: 2 })], {})).toBe(
+      'payment-refactor G3 met — evidence recorded (4/7, next G5)',
+    );
   });
 
   it('renders an unmet verdict', () => {
@@ -146,9 +143,20 @@ describe('renderVerdictLine', () => {
     ).toBe('payment-refactor G3 unmet — exit 1 (was met — regressed)');
   });
 
-  it('renders an unobservable verdict with a remedy', () => {
-    expect(renderVerdictLine([makeResult({ kind: 'unobservable' })], {})).toBe(
-      'payment-refactor G3 unobservable — stdout is not visible after a non-zero exit; make the CHECK exit 0 (append || true) or EXPECT against stderr',
+  it('renders an unjudgeable verdict with its authoring remedy', () => {
+    expect(
+      renderVerdictLine(
+        [
+          makeResult({
+            kind: 'unjudgeable',
+            reason: 'a runnable gate needs an EXPECT that only success prints',
+            regressed: false,
+          }),
+        ],
+        {},
+      ),
+    ).toBe(
+      'payment-refactor G3 unjudgeable — a runnable gate needs an EXPECT that only success prints',
     );
   });
 
@@ -156,8 +164,8 @@ describe('renderVerdictLine', () => {
     expect(
       renderVerdictLine(
         [
-          makeResult({ kind: 'met', channel: 'output' }, 'alpha-task', 'G1'),
-          makeResult({ kind: 'met', channel: 'output' }, 'beta-task', 'G1'),
+          makeResult({ kind: 'met' }, 'alpha-task', 'G1'),
+          makeResult({ kind: 'met' }, 'beta-task', 'G1'),
         ],
         {},
       ),
@@ -177,12 +185,21 @@ describe('renderVerdictLine', () => {
             'alpha-task',
             'G1',
           ),
-          makeResult({ kind: 'unobservable' }, 'beta-task', 'G2'),
+          makeResult(
+            {
+              kind: 'unjudgeable',
+              reason:
+                'a runnable gate needs an EXPECT that only success prints',
+              regressed: false,
+            },
+            'beta-task',
+            'G2',
+          ),
         ],
         { chainHint: '3rd consecutive; `/seiri:trace-cause` owns it' },
       ),
     ).toBe(
-      'alpha-task G1 unmet — exit 1; beta-task G2 unobservable — stdout is not visible after a non-zero exit; make the CHECK exit 0 (append || true) or EXPECT against stderr (3rd consecutive; `/seiri:trace-cause` owns it)',
+      'alpha-task G1 unmet — exit 1; beta-task G2 unjudgeable — a runnable gate needs an EXPECT that only success prints (3rd consecutive; `/seiri:trace-cause` owns it)',
     );
   });
 });
@@ -212,12 +229,13 @@ describe('renderLedgerReminder', () => {
       'G2',
       { total: 3, met: 2, unmet: 1, next: 'G3' },
     ).status;
-    const complete = makeResult(
-      { kind: 'met', channel: 'output' },
-      'finished-task',
-      'G1',
-      { total: 1, met: 1, unmet: 0, all_met: true, next: undefined },
-    ).status;
+    const complete = makeResult({ kind: 'met' }, 'finished-task', 'G1', {
+      total: 1,
+      met: 1,
+      unmet: 0,
+      all_met: true,
+      next: undefined,
+    }).status;
 
     expect(renderLedgerReminder([first, complete, second])).toBe(
       'Ledgers: payment-refactor 4/7, login-fix 2/3 — `/seiri:execute` owns them.',
@@ -225,12 +243,13 @@ describe('renderLedgerReminder', () => {
   });
 
   it('returns nothing when every ledger is resolved', () => {
-    const complete = makeResult(
-      { kind: 'met', channel: 'output' },
-      'finished-task',
-      'G1',
-      { total: 1, met: 1, unmet: 0, all_met: true, next: undefined },
-    ).status;
+    const complete = makeResult({ kind: 'met' }, 'finished-task', 'G1', {
+      total: 1,
+      met: 1,
+      unmet: 0,
+      all_met: true,
+      next: undefined,
+    }).status;
 
     expect(renderLedgerReminder([complete])).toBeUndefined();
   });

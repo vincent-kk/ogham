@@ -55,7 +55,14 @@ describe('computeLedgerStatus', () => {
       abandoned: 1,
       all_met: false,
       next: 'G2',
-      unmet_gates: [{ id: 'G2', title: 'G2 title', check: 'yarn test' }],
+      unmet_gates: [
+        {
+          id: 'G2',
+          title: 'G2 title',
+          check: 'yarn test',
+          needs_expect: true,
+        },
+      ],
       abandons: [{ id: 'G3', reason: 'out of scope' }],
       met_by_agent: [],
       gates: [
