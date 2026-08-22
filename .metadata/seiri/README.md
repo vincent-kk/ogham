@@ -62,8 +62,9 @@ seiri는 방향만 제시하고, 구체적 임계값은 저장소나 filid가 �
 | [01-CONSTITUTION.md](./01-CONSTITUTION.md) | 설계 사상 · 원칙 P1~P5 · 역할 밖 목록                            | 원장 |
 | [02-ARCHITECTURE.md](./02-ARCHITECTURE.md) | 콘텐츠 5상태 · 저장소 구조 · 명명 규약 · 런타임 · 자기검증       | 원장 |
 | [03-RULES.md](./03-RULES.md)               | 상용구 사전 · 규칙 판정노트 + 정본 링크 (전문은 templates/rules) | 원장 |
+| [04-GATES.md](./04-GATES.md)               | 게이트 원장 — execute 구간의 증명된 완료 (포맷·도구·훅·스킬 계약)      | 원장 |
 
-**읽는 순서**: 처음이면 README → 01 → 02. 규칙을 쓰거나 고칠 때는 03.
+**읽는 순서**: 처음이면 README → 01 → 02. 규칙을 쓰거나 고칠 때는 03. execute 구간을 고칠 때는 04.
 
 ---
 
