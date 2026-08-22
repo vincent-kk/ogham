@@ -50,18 +50,18 @@ imbas를 사용하기 위한 최초 설정을 담당한다. 원격 도구(Atlass
 
 ## 사용 도구
 
-| 도구                                  | 출처              | 용도                                  |
-| ------------------------------------- | ----------------- | ------------------------------------- |
-| `mcp__plugin_imbas_tools__open_settings` | imbas MCP      | 설정 웹폼 (init·labels edit)          |
-| `mcp__plugin_imbas_tools__config_get` | imbas MCP         | 설정 읽기                             |
-| `mcp__plugin_imbas_tools__config_set` | imbas MCP         | 설정 생성/수정 (headless 폴백)        |
-| Read / Write / Glob                   | 내장              | `.imbas/<KEY>/cache/*.json` 직접 관리 |
-| `[OP: get_projects]`                  | Jira ([OP:])      | 프로젝트 목록 조회                    |
-| `[OP: get_issue_types]`               | Jira ([OP:])      | 이슈 타입 조회                        |
-| `[OP: get_issue_type_fields]`         | Jira ([OP:])      | 타입별 필수 필드 조회                 |
-| `[OP: get_link_types]`                | Jira ([OP:])      | 링크 타입 조회                        |
-| `[OP: auth_check]`                    | Atlassian ([OP:]) | 연결 상태 확인 (헬스 체크)            |
-| `which gh` / `gh auth status`         | Bash              | GitHub CLI 설치/인증 확인 (헬스 체크) |
+| 도구                                     | 출처              | 용도                                  |
+| ---------------------------------------- | ----------------- | ------------------------------------- |
+| `mcp__plugin_imbas_tools__open_settings` | imbas MCP         | 설정 웹폼 (init·labels edit)          |
+| `mcp__plugin_imbas_tools__config_get`    | imbas MCP         | 설정 읽기                             |
+| `mcp__plugin_imbas_tools__config_set`    | imbas MCP         | 설정 생성/수정 (headless 폴백)        |
+| Read / Write / Glob                      | 내장              | `.imbas/<KEY>/cache/*.json` 직접 관리 |
+| `[OP: get_projects]`                     | Jira ([OP:])      | 프로젝트 목록 조회                    |
+| `[OP: get_issue_types]`                  | Jira ([OP:])      | 이슈 타입 조회                        |
+| `[OP: get_issue_type_fields]`            | Jira ([OP:])      | 타입별 필수 필드 조회                 |
+| `[OP: get_link_types]`                   | Jira ([OP:])      | 링크 타입 조회                        |
+| `[OP: auth_check]`                       | Atlassian ([OP:]) | 연결 상태 확인 (헬스 체크)            |
+| `which gh` / `gh auth status`            | Bash              | GitHub CLI 설치/인증 확인 (헬스 체크) |
 
 ## 참고 파일
 
