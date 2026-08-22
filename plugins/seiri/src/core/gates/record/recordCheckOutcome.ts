@@ -97,7 +97,7 @@ export function recordCheckOutcome(
         const descending = [...judged].sort(
           (left, right) => right.gate.line - left.gate.line,
         );
-        for (const result of descending) {
+        for (const result of descending)
           if (result.verdict.kind === 'met') {
             const evidence = markAgentEvidence(result.evidence ?? '', agentId);
             if (!result.gate.checked || result.gate.evidence !== evidence) {
@@ -117,7 +117,6 @@ export function recordCheckOutcome(
             });
             changed = true;
           }
-        }
 
         if (changed) writeLedgerLines(current.path, lines);
         const ledger = changed

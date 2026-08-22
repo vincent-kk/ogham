@@ -35,7 +35,7 @@ export function bashOutcome(
   const failed = input.hook_event_name === HookEvent.POST_TOOL_USE_FAILURE;
   if (failed && input.is_interrupt) return EMPTY_RESULT;
 
-  let verdicts: RecordedVerdict[] = [];
+  let verdicts: RecordedVerdict[];
   try {
     verdicts = recordCheckOutcome(
       input.cwd,

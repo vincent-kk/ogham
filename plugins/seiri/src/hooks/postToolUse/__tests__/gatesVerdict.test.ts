@@ -92,7 +92,7 @@ describe('PostToolUse gate verdicts', () => {
     expect(output).not.toHaveProperty('decision');
     const ledger = readFileSync(path, 'utf8');
     expect(ledger).toContain('- [x] G1');
-    expect(ledger).toMatch(/^  EVIDENCE: 8\/8 passed/m);
+    expect(ledger).toMatch(/^ {2}EVIDENCE: 8\/8 passed/m);
   });
 
   it('reports an exit-zero mismatch without changing the ledger', () => {

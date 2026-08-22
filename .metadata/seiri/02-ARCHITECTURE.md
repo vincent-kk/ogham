@@ -205,7 +205,7 @@ yarn build
 yarn build:plugin             # 번들만 재생성 (tsc 없이)
 ```
 
-**`bridge/`는 빌드 산출물이지만 커밋합니다.** `.gitignore`에 `dist/`만 있고 `bridge/`가 없는 이유입니다 — `/plugin install` 직후 빌드 없이 동작해야 합니다(filid ADR-2와 동일).
+**`bridge/`는 빌드 산출물이지만 커밋합니다.** `.gitignore`에 `dist/`만 있고 `bridge/`가 없는 이유입니다 — `/plugin install` 직후 빌드 없이 동작해야 합니다(filid ADR-2와 동일). 다만 **기능 PR에는 싣지 않습니다** — 머지 뒤의 빌드 커밋이 곧 배포이고, 기능 브랜치에서의 dogfooding은 로컬 `yarn build` 뒤에만 성립합니다(2026-08-22).
 
 **`sync-rule-hashes.mjs`가 핵심입니다.** 규칙 파일을 고치면 해시가 자동 갱신되므로 manifest와 실제 파일이 어긋날 수 없습니다. 손으로 해시를 관리하지 않습니다.
 

@@ -21,7 +21,7 @@ export function renderVerdictLine(
     chainHint?: string;
   },
 ): string {
-  let line = '';
+  let line: string;
   const first = results[0];
   const combineMet =
     !opts.agentId &&
@@ -33,15 +33,15 @@ export function renderVerdictLine(
         result.gate.id === first.gate.id && result.verdict.kind === 'met',
     );
 
-  if (combineMet && first !== undefined) {
+  if (combineMet && first !== undefined)
     line = `${first.gate.id} met in ${results
       .map((result) => result.task)
       .join(', ')} — evidence recorded`;
-  } else {
+  else {
     const fragments: string[] = [];
     for (const result of results) {
       const prefix = `${result.task} ${result.gate.id}`;
-      if (result.verdict.kind === 'met') {
+      if (result.verdict.kind === 'met')
         if (opts.agentId)
           fragments.push(
             `${prefix} met via agent ${opts.agentId.slice(0, AGENT_MARKER_CHARS)} — ${AGENT_MET_HINT}`,
@@ -54,13 +54,11 @@ export function renderVerdictLine(
           fragments.push(
             `${prefix} met — evidence recorded (${result.status.met}/${result.status.total}, ${result.status.next ? `next ${result.status.next}` : 'all met'})`,
           );
-      } else if (result.verdict.kind === 'unmet') {
+      else if (result.verdict.kind === 'unmet')
         fragments.push(
           `${prefix} unmet — ${result.verdict.reason}${result.verdict.regressed ? ' (was met — regressed)' : ''}`,
         );
-      } else {
-        fragments.push(`${prefix} unobservable — ${UNOBSERVABLE_HINT}`);
-      }
+      else fragments.push(`${prefix} unobservable — ${UNOBSERVABLE_HINT}`);
     }
     line = fragments.join('; ');
   }

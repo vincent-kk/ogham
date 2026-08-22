@@ -268,7 +268,7 @@ config에 새 필드는 없다 — 다이얼이 seiri가 저장하는 유일한 
 
 ### AC-gates-no-state-outside-ledger — 원장 밖에 상태 없음
 
-- `.seiri/tasks/<name>/`에는 `plan.md`·`gates.md`·일시적 `gates.lock`뿐이다. 포인터·캐시·등록 파일은 없다.
+- seiri가 `.seiri/tasks/<name>/`에서 읽고 쓰는 것은 `plan.md`·`gates.md`·일시적 `gates.lock`뿐이다 — 포인터·캐시·등록 파일은 없다. 같은 디렉토리의 다른 파일(진행 메모·위임 보고 등)은 사용자·위임자의 것이며 seiri는 해석하지 않는다.
 - `.seiri/.gitignore`에 `tasks/`가 더해진다 — 작업 디렉토리 전체가 비추적이다.
 
 ### AC-gates-dial — 다이얼

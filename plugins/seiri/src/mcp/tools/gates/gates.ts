@@ -93,11 +93,11 @@ export function handleGates(input: GatesInput): GatesOutput {
 
   if (input.action === 'status') {
     let tasks: TaskLedgerStatus[];
-    if (input.task == null) {
+    if (input.task == null)
       tasks = listTaskLedgers(root).map(({ task, path, ledger }) =>
         computeLedgerStatus(task, path, ledger),
       );
-    } else {
+    else {
       const task = requireTask(input.task);
       const record = readTaskLedger(root, task);
       if (record === undefined) throw new Error(`No ledger for task "${task}"`);
