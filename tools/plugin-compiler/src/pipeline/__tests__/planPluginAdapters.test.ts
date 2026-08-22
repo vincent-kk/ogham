@@ -166,6 +166,31 @@ describe("planPluginAdapters", () => {
     expect(codex?.content).toContain("Read|Write|Edit|Bash");
   });
 
+  it("filters unsupported events and repoints the Codex manifest", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "seiri" });
+    writeJson("hooks/hooks.json", {
+      hooks: {
+        PostToolUse: [{ matcher: "Bash", hooks: [{ command: "node p.mjs" }] }],
+        PostToolUseFailure: [
+          { matcher: "Bash", hooks: [{ command: "node p.mjs" }] },
+        ],
+      },
+    });
+    const { files } = planPluginAdapters(pluginDirectory);
+    const codexHooks = files.find((file) =>
+      norm(file.absolutePath).endsWith(".codex-plugin/hooks.json"),
+    );
+    expect(codexHooks?.content).toContain('"PostToolUse"');
+    expect(codexHooks?.content).not.toContain('"PostToolUseFailure"');
+
+    const manifest = files.find((file) =>
+      norm(file.absolutePath).endsWith(".codex-plugin/plugin.json"),
+    );
+    expect(manifest?.content).toContain(
+      '"hooks": "./.codex-plugin/hooks.json"',
+    );
+  });
+
   it("omits .codex-plugin/hooks.json when the matcher already catches Bash (`*`)", () => {
     writeJson(".claude-plugin/plugin.json", { name: "maencof" });
     writeJson("hooks/hooks.json", {

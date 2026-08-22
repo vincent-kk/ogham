@@ -8,7 +8,7 @@ export function lintHookEvents(facts: PluginFacts): Diagnostic[] {
       diagnostics.push({
         level: "warning",
         code: "codex-unknown-event",
-        message: `${facts.name}: hooks event "${event}" is not a Codex hook event — Codex ignores it silently`,
+        message: `${facts.name}: hooks event "${event}" is not a Codex hook event — removed from the generated Codex hooks`,
       });
   return diagnostics;
 }

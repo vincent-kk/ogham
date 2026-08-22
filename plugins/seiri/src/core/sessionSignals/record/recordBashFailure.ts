@@ -1,8 +1,8 @@
 import { FAILURE_CHAIN_THRESHOLD } from '../../../constants/failureChain.js';
+import { hashCommand } from '../../utils/hashCommand.js';
 import { readSignals } from '../store/readSignals.js';
 import { withSignalsLock } from '../store/withSignalsLock.js';
 import { writeSignals } from '../store/writeSignals.js';
-import { hashCommand } from '../utils/hashCommand.js';
 
 /**
  * Count one failure of `command`, and answer whether this is the moment

@@ -6,22 +6,12 @@
 
 ## Structure
 
-| Path                         | Role                                                               |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `src/`                       | TypeScript 소스 (fractal 루트)                                     |
-| `templates/rules/`           | 배포되는 규칙 문서 + `manifest.json`                               |
-| `templates/gates/`           | 저장소 게이트 placeholder 골격 (값 없음)                           |
-| `skills/`                    | 스킬 (호출·자동, 작업 주기 전 구간) — 목록 정본은 `SHIPPED_SKILLS` |
-| `hooks/hooks.json`           | 등록 4 · 5 이벤트 (InstructionsLoaded 만 dormant)                  |
-| `libs/run.cjs`               | cross-platform 훅 러너                                             |
-| `scripts/`                   | esbuild 번들 + 규칙 해시 동기화                                    |
-| `bridge/` · `public/`        | 빌드 산출물 (커밋 대상)                                            |
-| `.claude-plugin/plugin.json` | 플러그인 매니페스트 — **`agents` 없음**                            |
+정본과 배포 사본이 함께 커밋되어 트리만으로는 편집 지점을 알 수 없다. 규칙·TypeScript source가 정본이고 build 산출물과 host manifest는 배포 사본이므로 직접 고치지 않는다.
 
 ## Conventions
 
 - 빌드: `clean → version:sync → rules → pages → compile → mcp → hooks → compile-plugin`
-- 규모 목표: MCP 도구 ≤3 · 훅 번들 5 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤4KB (`references/`는 별도) · 규칙 각 <200줄. `src/__tests__/size.test.ts` 가 기계 검사한다.
+- 규모 목표: MCP 도구 ≤3 · 훅 번들 5 · 에이전트 0 · 스킬 `SKILL.md` 각 ≤4KB(부속 reference 문서는 별도) · 규칙 각 <200줄. `src/__tests__/size.test.ts` 가 기계 검사한다.
 - `templates/rules/*.md` 는 raw 바이트로 해시된다 — 루트 `.gitattributes`(LF 고정)와 루트 `.prettierignore`(포매터 차단)가 그 전제를 지킨다.
 
 ## Boundaries

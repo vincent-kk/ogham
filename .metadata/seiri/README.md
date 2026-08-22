@@ -15,7 +15,7 @@ seiri는 **에이전트가 파악하기 좋은 코드 구조를 추종하는** �
 | **제1원칙** | "에이전트가 파악하기 좋은 코드 구조를 추종한다"                                                     |
 | **역할**    | 코드 작성 · 코드 품질 · 개발방법론                                                                  |
 | **전제**    | FCA 비종속 — 단독 동작 가능한 범용                                                                  |
-| **형태**    | `.claude/rules/`에 배포되는 규칙 문서 + 스킬 14종(작업 주기 전 구간 — 02-ARCHITECTURE §3 스킬 지도) |
+| **형태**    | `.claude/rules/`에 배포되는 규칙 문서 + 스킬 16종(작업 주기 전 구간 — 02-ARCHITECTURE §3 스킬 지도) |
 
 ## 왜 필요한가
 
@@ -62,8 +62,9 @@ seiri는 방향만 제시하고, 구체적 임계값은 저장소나 filid가 �
 | [01-CONSTITUTION.md](./01-CONSTITUTION.md) | 설계 사상 · 원칙 P1~P5 · 역할 밖 목록                            | 원장 |
 | [02-ARCHITECTURE.md](./02-ARCHITECTURE.md) | 콘텐츠 5상태 · 저장소 구조 · 명명 규약 · 런타임 · 자기검증       | 원장 |
 | [03-RULES.md](./03-RULES.md)               | 상용구 사전 · 규칙 판정노트 + 정본 링크 (전문은 templates/rules) | 원장 |
+| [04-GATES.md](./04-GATES.md)               | 게이트 원장 — execute 구간의 증명된 완료 (포맷·도구·훅·스킬 계약)      | 원장 |
 
-**읽는 순서**: 처음이면 README → 01 → 02. 규칙을 쓰거나 고칠 때는 03.
+**읽는 순서**: 처음이면 README → 01 → 02. 규칙을 쓰거나 고칠 때는 03. execute 구간을 고칠 때는 04.
 
 ---
 
@@ -72,9 +73,9 @@ seiri는 방향만 제시하고, 구체적 임계값은 저장소나 filid가 �
 | 구성   | 내용                                                   |
 | ------ | ------------------------------------------------------ |
 | 규칙   | 8종 배포 (S1~S8) · S9 opt-in 대기 · 권장 3종 기본 체크 |
-| 스킬   | 14종 (호출 6 · 자동 8, 각 SKILL.md ≤4KB)               |
+| 스킬   | 16종 (호출 7 · 자동 9, 각 SKILL.md ≤4KB)               |
 | 훅     | 번들 5 (등록 4 · dormant 1, 차단 훅 없음)              |
-| MCP    | 도구 2 (open_settings · rule_docs_sync)                |
+| MCP    | 도구 3 (open_settings · rule_docs_sync · gates)        |
 | 다이얼 | advisory floor · standard 기본 · strict                |
 
 규칙의 근거: S1·S2는 무지침 대조군 대비 처치군 반전, S3~S6은 이관 실적(단일샷 대조군은 실패 미재현 — 계측기 부적합), S7·S8은 D8 무삭감 판정에 근거합니다. S9(decision-trail)은 자체 대조군 통과 시 opt-in 등재됩니다. 상세 근거는 [phase0/SYNTHESIS.md](./phase0/SYNTHESIS.md).

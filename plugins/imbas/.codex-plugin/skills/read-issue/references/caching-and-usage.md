@@ -6,7 +6,7 @@
 
 # Agent Usage Patterns
 
-| Agent      | When               | Purpose                                                       |
-| ---------- | ------------------ | ------------------------------------------------------------- |
-| `analyst`  | Phase 1 (refine)   | Reference existing related issues for context                 |
-| `planner`  | Phase 2 (split)    | Understand Epic or existing Story context                     |
+| Agent     | When             | Purpose                                       |
+| --------- | ---------------- | --------------------------------------------- |
+| `analyst` | Phase 1 (refine) | Reference existing related issues for context |
+| `planner` | Phase 2 (split)  | Understand Epic or existing Story context     |

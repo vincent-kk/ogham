@@ -1,5 +1,5 @@
 import type { ConfigScopeState } from '@ogham/cross-platform';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../../../constants/defaults.js';
 import type { ConfigByScope } from '../../../../../core/configManager/index.js';
@@ -42,6 +42,7 @@ afterEach(async () => {
   }
   savedConfig = null;
   provisionedWith = null;
+  vi.useRealTimers();
 });
 
 interface StartOverrides {
@@ -291,13 +292,16 @@ describe('settings web server', () => {
   });
 
   it('keeps the server alive while requests arrive within idleMs', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const h = await start({ idleMs: 200 });
-    await new Promise((r) => setTimeout(r, 120));
+    await vi.advanceTimersByTimeAsync(120);
     const res = await fetch(urlFor(h, '/config'));
     expect(res.status).toBe(200);
-    await new Promise((r) => setTimeout(r, 120));
+    await res.arrayBuffer();
+    await vi.advanceTimersByTimeAsync(120);
     const res2 = await fetch(urlFor(h, '/config'));
     expect(res2.status).toBe(200);
+    await res2.arrayBuffer();
   });
 
   it('invokes onClose when the server shuts down (timer-triggered)', async () => {

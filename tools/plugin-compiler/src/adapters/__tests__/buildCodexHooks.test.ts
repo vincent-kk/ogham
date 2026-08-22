@@ -90,6 +90,28 @@ describe("buildCodexHooks", () => {
     expect(built.hooks.PreToolUse[0].matcher).toBe("Read|Edit|Bash");
   });
 
+  it("filters unsupported events into a dedicated Codex hooks file", () => {
+    const built = buildCodexHooks(
+      facts({
+        hooks: {
+          SessionStart: [{ matcher: "*", hooks: [{ command: "s" }] }],
+          PostToolUseFailure: [{ matcher: "Bash", hooks: [{ command: "f" }] }],
+        },
+      }),
+    ) as { hooks: Record<string, unknown> };
+    expect(built.hooks).toEqual({
+      SessionStart: [{ matcher: "*", hooks: [{ command: "s" }] }],
+    });
+  });
+
+  it("preserves SessionEnd as a supported Codex event", () => {
+    expect(
+      buildCodexHooks(
+        facts({ hooks: { SessionEnd: [{ matcher: "*", hooks: [{}] }] } }),
+      ),
+    ).toBeNull();
+  });
+
   it("does not extend a Read matcher on a non-PreToolUse event", () => {
     expect(
       buildCodexHooks(facts({ hooks: { PostToolUse: [{ matcher: "Read" }] } })),

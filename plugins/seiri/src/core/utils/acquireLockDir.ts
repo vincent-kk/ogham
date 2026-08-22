@@ -13,7 +13,7 @@ const ACQUIRE_TIMEOUT_MS = 500;
 const RETRY_INTERVAL_MS = 5;
 
 /**
- * Take the signals lock, answering whether this caller now holds it.
+ * Take a lock directory, answering whether this caller now holds it.
  *
  * `mkdir` is the whole test-and-set: it fails when the name is already
  * taken, and hook processes are separate `node` runs, so no in-process
@@ -27,7 +27,7 @@ const RETRY_INTERVAL_MS = 5;
  * @param lockPath Directory whose creation is the lock.
  * @returns `true` when the lock was taken, and the caller owes a release.
  */
-export function acquireSignalsLock(lockPath: string): boolean {
+export function acquireLockDir(lockPath: string): boolean {
   const deadline = Date.now() + ACQUIRE_TIMEOUT_MS;
   for (;;)
     try {
@@ -45,6 +45,12 @@ export function acquireSignalsLock(lockPath: string): boolean {
     }
 }
 
+/**
+ * Reclaim an abandoned lock directory once its holder is stale.
+ *
+ * @param lockPath Directory whose age and ownership are checked.
+ * @returns `true` when a stale directory was removed.
+ */
 function dropStale(lockPath: string): boolean {
   try {
     if (Date.now() - statSync(lockPath).mtimeMs < STALE_AFTER_MS) return false;

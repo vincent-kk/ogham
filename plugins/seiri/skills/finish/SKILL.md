@@ -15,6 +15,8 @@ You were invoked by the user, so ask what the decision needs. The integration ch
 
 ## Workflow
 
+**0. Read every ledger.** Call `mcp__plugin_seiri_tools__gates({ action: "status" })`: an unmet ledger means there is nothing to finish yet — report it and stop. Suggest clearing `.seiri/tasks/` for finished work; never delete it yourself.
+
 **1. Verify before offering anything.** Run this repository's designated verification in full. Failing: report what fails and stop — there is nothing to finish yet.
 
 **2. Present the real options, with the branch's state.** Ahead/behind its base, uncommitted files, where it diverged. Then, in one question: integrate into the base branch · push for review · keep as-is · discard.

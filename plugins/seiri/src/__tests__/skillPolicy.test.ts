@@ -108,4 +108,13 @@ describe('skill invocation policy', () => {
     for (const name of USER_GATED_SKILLS)
       expect(WORKFLOW_CHAIN_LINE).not.toContain(name);
   });
+
+  it('requires deterministic EXPECT markers before a plan can execute', () => {
+    expect(readSkill('write-plan').body).toContain(
+      'each gate carries an EXPECT that only a success prints',
+    );
+    expect(readSkill('review-plan').body).toContain(
+      'A runnable gate without EXPECT is rework.',
+    );
+  });
 });

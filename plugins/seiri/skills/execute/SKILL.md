@@ -14,9 +14,11 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## Workflow
 
+**0. Start — or resume — from the ledger.** Call `mcp__plugin_seiri_tools__gates({ action: "status", task })`: it says which gates are met, whichever session wrote them.
+
 **1. Read the plan critically before task one.** Contradictions, gaps that block starting, steps that fight the repository's conventions — report them in one batch, not one interrupt per discovery. Nothing blocking: begin.
 
-**2. Keep a progress ledger beside the plan.** One line per completed task: what landed, where, how it was verified. Conversation memory does not survive compaction — after any resume, trust the ledger and the version history over recollection, and never redo a task the ledger marks complete.
+**2. Close tasks through their gates.** The ledger is `.seiri/tasks/<name>/gates.md`. Closing a task means its gates are met — run each CHECK verbatim in Bash; the PostToolUse hook records the evidence and answers with one verdict line. A delegate's return re-runs its CHECKs here. "All tasks complete" is `status` saying `all_met`. Leaving a gate behind is `abandon` with a reason — never silence.
 
 **3. Per task, follow the steps exactly.** The implement discipline carries each change; verify closes the task; a failure mid-task is trace-cause's job, not a cue to improvise around the plan.
 

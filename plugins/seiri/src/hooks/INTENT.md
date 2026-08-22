@@ -9,8 +9,8 @@ seiri 의 훅 구현 5종. **어느 것도 차단하지 않고 어느 것도 규
 ```
 shared/              organ — stdin · host target 기반 상태 렌더 (두 훅 공용)
 setup/               SessionStart — 상태 요약 주입
-userPromptSubmit/    UserPromptSubmit — 매 턴 선출 상기 + 워크플로우 상태 1절
-postToolUse/         PostToolUse(+Failure) — Bash 실패 연쇄 · Skill 로드 관측
+userPromptSubmit/    UserPromptSubmit — 매 턴 선출 상기 + 워크플로우 상태 1절 + 미충족 원장 환기 1줄
+postToolUse/         PostToolUse(+Failure) — Bash 실패 연쇄 · Skill 로드 관측 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄
 subagentStart/       SubagentStart — 상태 요약 축약 재주입
 instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 ```

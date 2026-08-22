@@ -1,4 +1,4 @@
-# server — MCP 서버 조립 + 도구 2개 등록
+# server — MCP 서버 조립 + 도구 3개 등록
 
 ## Purpose
 
@@ -8,7 +8,7 @@ MCP 서버를 만들고 도구를 등록한다. 등록된 도구 스키마는 �
 
 ```
 index.ts        barrel
-lifecycle/      organ — createServer (서버 생성 + 도구 2개 등록) · startServer (stdio 연결)
+lifecycle/      organ — createServer (서버 생성 + 도구 3개 등록) · startServer (stdio 연결)
 serialization/  organ — toolResult (compact JSON) · wrapHandler (throw → 오류 결과)
 ```
 
@@ -28,7 +28,7 @@ serialization/  organ — toolResult (compact JSON) · wrapHandler (throw → �
 
 ### Ask first
 
-- 도구 추가 (설계 상한 3개, 현재 2개).
+- 도구 추가 (설계 상한 3개, 현재 3개).
 - 응답 직렬화 방식 변경.
 
 ### Never do

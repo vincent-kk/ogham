@@ -8,6 +8,8 @@ import { loadIntervention } from '../../core/infra/configLoader/loaders/loadInte
 import { consumeWorkflowState } from '../../core/sessionSignals/record/consumeWorkflowState.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 
+import { ledgerReminder } from './utils/ledgerReminder.js';
+
 /**
  * UserPromptSubmit: re-raise the skill-dispatch reminder once per turn.
  *
@@ -22,6 +24,9 @@ import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
  * leaves the dispatch rates as they were measured. standard and strict
  * carry different lines: standard reminds, strict widens to borderline work
  * and a named verification.
+ *
+ * @param input Hook payload for the user prompt about to run.
+ * @returns A fail-open reminder result for the active intervention dial.
  */
 export function processUserPromptSubmit(
   input: UserPromptSubmitInput,
@@ -40,6 +45,8 @@ export function processUserPromptSubmit(
   const lines = [`${INJECTION_PREFIX} ${line}`];
   const state = pendingState(input.cwd, input.session_id);
   if (state !== undefined) lines.push(`${INJECTION_PREFIX} ${state}`);
+  const ledger = ledgerReminder(input.cwd);
+  if (ledger !== undefined) lines.push(`${INJECTION_PREFIX} ${ledger}`);
 
   return {
     continue: true,
@@ -59,6 +66,10 @@ export function processUserPromptSubmit(
  *
  * Fails open in both directions: unreadable state costs the clause and
  * never the reminder, and nothing here can stop a turn.
+ *
+ * @param cwd Project working directory containing session state.
+ * @param sessionId Session whose latest workflow signal should be consumed.
+ * @returns The pending workflow clause, or undefined when none is readable.
  */
 function pendingState(cwd: string, sessionId: string): string | undefined {
   try {

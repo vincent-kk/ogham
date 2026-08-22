@@ -1,19 +1,17 @@
-# tools — MCP 도구 2개
+# tools — MCP 도구 3개
 
 ## Purpose
 
-seiri 가 노출하는 도구 전부. 둘 다 **상태를 읽고 쓰는 최소**이며, 코드에 대해서는 아무것도 하지 않는다 — 읽기·검색·분석은 하니스가 이미 제공한다.
+seiri 가 노출하는 도구 전부. 셋 모두 **상태를 읽고 쓰는 최소**이며, 코드에 대해서는 아무것도 하지 않는다 — 읽기·검색·분석은 하니스가 이미 제공한다.
 
 ## Structure
 
-- `openSettings/` — 브라우저 폼 + bounded long-poll (대화형 정본)
-- `ruleDocsSync/` — 같은 일을 하는 헤드리스 폴백 (status·manifest·plan·sync)
-  - 다이얼 `config` action
+설정 페이지가 규칙 배포의 대화형 정본이고, 헤드리스 도구는 브라우저를 열 수 없는 환경의 폴백이다. 둘은 같은 core 계획·적용 함수를 사용해 진입 방식에 따라 판정이 갈라지지 않는다.
 
 ## Conventions
 
-- 두 도구는 같은 core 함수(`planRuleDocs`·`applyRuleDocs`)를 경유한다. 경로가 둘이어도 판정은 하나다.
-- **absorb-first**: 새 요구는 새 도구가 아니라 기존 도구의 action 으로 간다. 다이얼 조작이 첫 사례다 — `config_get`/`config_set` 두 도구 대신 `rule_docs_sync` 의 `config` action 하나. 도구 수는 2로 불변.
+- 규칙 배포 두 도구는 같은 core 함수(`planRuleDocs`·`applyRuleDocs`)를 경유한다. 경로가 둘이어도 판정은 하나다.
+- **absorb-first**: 새 요구는 새 도구가 아니라 기존 도구의 action 으로 간다. 다이얼 조작이 첫 사례다 — `config_get`/`config_set` 두 도구 대신 `rule_docs_sync` 의 `config` action 하나. 도구 수는 3으로 고정 — `gates`는 의미 불일치(규칙 배포 ≠ 작업 상태)로 흡수하지 않은 유일한 예.
 - 다이얼 2계층 중 도구가 쓰는 것은 **런타임 밸브뿐**이다. 기준선은 설정 페이지가 diff 를 보이고 쓴다.
 - 프로젝트 대상 입력은 선택 인자로 절대경로를 받는다 — 호스트에 따라 서버가 워크스페이스를 스스로 알 수 없다.
 - 도구 참조는 문서·스킬에서 full-form `mcp__plugin_seiri_tools__<name>`.
@@ -26,7 +24,7 @@ seiri 가 노출하는 도구 전부. 둘 다 **상태를 읽고 쓰는 최소**
 
 ### Ask first
 
-- 세 번째 도구 추가.
+- 네 번째 도구 추가.
 
 ### Never do
 

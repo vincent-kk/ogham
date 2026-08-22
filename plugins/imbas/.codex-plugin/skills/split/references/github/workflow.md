@@ -138,4 +138,3 @@ After all items in Step 4 are created successfully, apply lifecycle labels. See 
      ```bash
      gh issue edit <N> --repo <owner/repo> --add-label <config.labels.review_complete>
      ```
-

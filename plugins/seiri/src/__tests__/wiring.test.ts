@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
@@ -172,6 +174,54 @@ describe('wiring', () => {
     const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
     for (const key of Object.keys(ToolName))
       expect(server).toContain(`ToolName.${key}`);
+  });
+
+  it('registers exactly one server tool for each declared tool name', () => {
+    const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
+    expect((server.match(/server\.registerTool\(/g) ?? []).length).toBe(
+      Object.keys(ToolName).length,
+    );
+  });
+
+  it('exposes every declared tool from the shipped MCP bundle', async () => {
+    const client = new Client({ name: 'seiri-wiring-test', version: '1.0.0' });
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [portableJoin(packageRoot, 'bridge', 'mcp-server.cjs')],
+    });
+
+    try {
+      await client.connect(transport);
+      const listed = await client.listTools();
+      expect(listed.tools.map(({ name }) => name).sort()).toEqual(
+        Object.values(ToolName).sort(),
+      );
+    } finally {
+      await client.close();
+    }
+  });
+
+  it('routes Codex through hooks without the Claude failure event', () => {
+    const claudeHooks = JSON.parse(read('hooks', 'hooks.json')) as {
+      hooks: Record<string, Array<{ hooks: Array<{ command: string }> }>>;
+    };
+    const codexHooks = JSON.parse(
+      read('.codex-plugin', 'hooks.json'),
+    ) as typeof claudeHooks;
+    const rootManifest = JSON.parse(read('plugin.json')) as {
+      hooks?: string;
+    };
+    const codexManifest = JSON.parse(
+      read('.codex-plugin', 'plugin.json'),
+    ) as typeof rootManifest;
+
+    expect(rootManifest.hooks).toBe('./.codex-plugin/hooks.json');
+    expect(codexManifest.hooks).toBe(rootManifest.hooks);
+    expect(claudeHooks.hooks).toHaveProperty('PostToolUseFailure');
+    expect(codexHooks.hooks).not.toHaveProperty('PostToolUseFailure');
+    expect(codexHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command).toBe(
+      claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command,
+    );
   });
 
   it('ships no agents — the manifest must not claim otherwise', () => {

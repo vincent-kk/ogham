@@ -32,10 +32,7 @@ Markdown links must use relative paths exclusively. Absolute paths and external 
 
 The target file of a `[text](path)` link must exist. Links referencing non-existent files are recorded in `.maencof-meta/broken-links.json`.
 
-Exception — archive references: a target path under `99_Archive/` is out-of-graph
-storage. It never appears as a graph node, so graph-side resolution always misses
-it; the reference is valid as long as the file exists on disk. Classify it as an
-informational archive reference, not a broken link.
+Exception — archive references: a target path under `99_Archive/` is out-of-graph storage. It never appears as a graph node, so graph-side resolution always misses it; the reference is valid as long as the file exists on disk. Classify it as an informational archive reference, not a broken link.
 
 ### R3. Layer Directionality Compliance
 

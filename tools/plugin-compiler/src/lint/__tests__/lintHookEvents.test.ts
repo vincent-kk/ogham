@@ -26,16 +26,24 @@ describe("lintHookEvents", () => {
 
   it("stays silent for events Codex understands", () => {
     expect(
-      lintHookEvents(facts({ hooks: { SessionStart: [], PreToolUse: [] } })),
+      lintHookEvents(
+        facts({
+          hooks: { SessionStart: [], PreToolUse: [], SessionEnd: [] },
+        }),
+      ),
     ).toEqual([]);
   });
 
   it("warns on an event outside the Codex set", () => {
-    const [diagnostic] = lintHookEvents(facts({ hooks: { SessionEnd: [] } }));
+    const [diagnostic] = lintHookEvents(
+      facts({ hooks: { PostToolUseFailure: [] } }),
+    );
     expect(diagnostic).toMatchObject({
       level: "warning",
       code: "codex-unknown-event",
+      message: expect.stringContaining("removed from the generated Codex hooks"),
     });
+    expect(diagnostic.message).not.toContain("ignores it silently");
   });
 
   // --- complex ---
@@ -48,7 +56,9 @@ describe("lintHookEvents", () => {
 
   it("reports one diagnostic per unknown event", () => {
     const diagnostics = lintHookEvents(
-      facts({ hooks: { SessionEnd: [], Notification: [], Stop: [] } }),
+      facts({
+        hooks: { PostToolUseFailure: [], Notification: [], Stop: [] },
+      }),
     );
     expect(diagnostics).toHaveLength(2);
   });

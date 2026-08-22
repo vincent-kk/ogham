@@ -1,10 +1,7 @@
-import { FAILURE_CHAIN_LINE } from '../../constants/failureChain.js';
-import { HookEvent, HostTool } from '../../constants/hooks.js';
+import { HostTool } from '../../constants/hooks.js';
 import { SILENT_INTERVENTION } from '../../constants/intervention.js';
-import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
+import { EMPTY_RESULT } from '../../constants/plugin.js';
 import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
-import { recordBashFailure } from '../../core/sessionSignals/record/recordBashFailure.js';
-import { recordBashSuccess } from '../../core/sessionSignals/record/recordBashSuccess.js';
 import { recordWorkflowState } from '../../core/sessionSignals/record/recordWorkflowState.js';
 import type {
   HookOutput,
@@ -12,14 +9,19 @@ import type {
   PostToolUseInput,
 } from '../../types/hooks.js';
 
+import { bashOutcome } from './utils/bashOutcome.js';
+
 /**
  * Watch two tools and inject at most one line.
  *
  * `Skill` is observed and never answered: loading a seiri workflow records
  * where the session now is, so the next turn can say what that state owes.
- * `Bash` carries the failure chain below. Both are matcher-selected in
- * `hooks.json`, so anything else here is a payload that should not have
- * arrived — it leaves without touching state.
+ * `Bash` carries gate verdicts and the failure chain. Both are
+ * matcher-selected in `hooks.json`, so anything else here is a payload
+ * that should not have arrived — it leaves without touching state.
+ *
+ * @param input Hook payload for a successful or failed tool invocation.
+ * @returns A fail-open hook result with at most one injected context line.
  */
 export function processToolOutcome(
   input: PostToolUseInput | PostToolUseFailureInput,
@@ -37,49 +39,5 @@ export function processToolOutcome(
     return EMPTY_RESULT;
   }
 
-  return bashFailureChain(input);
-}
-
-/**
- * Notice when the same shell command keeps failing, and say so once.
- *
- * Registered under two events because Claude Code splits them: a non-zero
- * exit arrives as `PostToolUseFailure`, a zero exit as `PostToolUse`. One
- * counts, the other forgets — a chain is only a chain while nothing has
- * gone green.
- *
- * The line it can emit is a suggestion and nothing else. seiri owns no
- * decision control here: a red that was written on purpose is
- * indistinguishable from a fix that is not landing, so the text concedes
- * the first case rather than pretending to tell them apart.
- */
-function bashFailureChain(
-  input: PostToolUseInput | PostToolUseFailureInput,
-): HookOutput {
-  const command = input.tool_input?.command;
-  if (
-    input.tool_name !== HostTool.BASH ||
-    typeof command !== 'string' ||
-    command.trim() === ''
-  )
-    return EMPTY_RESULT;
-
-  if (input.hook_event_name !== HookEvent.POST_TOOL_USE_FAILURE) {
-    recordBashSuccess(input.cwd, input.session_id, command);
-    return EMPTY_RESULT;
-  }
-
-  // A run the user stopped says nothing about the command.
-  if (input.is_interrupt) return EMPTY_RESULT;
-
-  if (!recordBashFailure(input.cwd, input.session_id, command))
-    return EMPTY_RESULT;
-
-  return {
-    continue: true,
-    hookSpecificOutput: {
-      hookEventName: input.hook_event_name,
-      additionalContext: `${INJECTION_PREFIX} ${FAILURE_CHAIN_LINE}`,
-    },
-  };
+  return bashOutcome(input);
 }

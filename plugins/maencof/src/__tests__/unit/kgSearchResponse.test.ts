@@ -410,7 +410,7 @@ function makeExpansionGraph(): KnowledgeGraph {
 /** 접촉 클러스터 6개 그래프 — 각 2멤버가 공유 태그 sigma 로 매칭된다 (지목 불성립). */
 function makeManyTouchedGraph(): KnowledgeGraph {
   const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i++)
     for (const [suffix, updated] of [
       ['a', '2026-02-01'],
       ['b', '2026-02-05'],
@@ -423,7 +423,7 @@ function makeManyTouchedGraph(): KnowledgeGraph {
       });
       nodes.set(n.id, n);
     }
-  }
+
   return buildGraph(nodes, []);
 }
 

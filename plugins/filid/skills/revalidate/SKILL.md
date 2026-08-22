@@ -55,15 +55,17 @@ For each accepted item, re-run the measurement that produced the original findin
 
 ```text
 mcp__plugin_filid_tools__structure_validate({
-  path: <owning fractal path, from context_resolve — never PROJECT_ROOT>,
+  path: <current eligible fractal path — never PROJECT_ROOT>,
   mode: "project",
   scopes: [...]
 })
 ```
 
-`path` is the only scoping knob this tool has. Passing `PROJECT_ROOT` here is the whole-project comparison `reference.md` §1 forbids: two items in the same run would each claim the other's improvement.
+Resolve the item first and read `context_resolve.summary.ownerFractalPath` plus the durable `context_resolve.summary.chainPaths`. Start at the owner. When the relevant rule is uncertain only because required evidence lies outside that scan root, retry the remaining owner-to-root ancestors in order. The detailed selection and finding-identity rules are in `reference.md` §1.
 
 Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact. Reading an absent inline `data` as "the finding is gone" is how this step produces a false `resolved`.
+
+Normalize the accepted item's project-relative path and preserve its original `(Rule, Path)` identity at every scope. An exact matching violation stops the search and remains `unresolved` or `unapplied`; do not widen it away. Only `indeterminate` or `unsupported` evidence for that rule permits the next ancestor. The first exact result stops the search, and exact absence resolves the item. Never pass `PROJECT_ROOT`; exhausted uncertain scopes stay `inconclusive`.
 
 Derive each item's status from the matrix in `reference.md` §1. A status is derived from measured evidence only. Never mark an item resolved because the file appears in the delta.
 
