@@ -1,23 +1,18 @@
-# postToolUse — 실패 연쇄 신호 · 워크플로우 관측
+# postToolUse — 게이트 판정 · 실패 연쇄 · 워크플로우 관측
 
 ## Purpose
 
-같은 셸 명령이 초록 없이 연달아 실패하면 **한 줄 제안**을 주입한다. `Skill` 로드는 **관측만** 한다 — 주입 0, 말하는 건 다음 턴. 차단은 어느 쪽도 아니다.
-
-## Structure
-
-- `postToolUse.ts` — `processToolOutcome` (게이팅 → 도구 분기 → 카운트·관측)
-- `postToolUse.entry.ts` — esbuild 번들 진입점 (`bridge/post-tool-use.mjs`)
+실행된 Bash가 작업 원장의 CHECK와 일치하면 관측 가능한 결과를 기록하고 **정확히 한 줄 판정**을 주입한다. 일치하지 않는 연속 실패에는 기존 한 줄 제안을 유지하고, `Skill` 로드는 다음 턴을 위해 관측만 한다. 어느 경로도 차단하지 않는다.
 
 ## Conventions
 
-- **도구 2종 · 이벤트 2개.** matcher 는 `Bash`·`Skill`(정본 `HostTool`, wiring 이 hooks.json 과 대조). 비-0 종료는 `PostToolUseFailure`, 0 종료는 `PostToolUse`(실측) — 앞은 세고 뒤는 잊는다.
+- **순서는 다이얼 → Skill → Bash 다.** advisory 면 원장과 세션 상태를 건드리기 전에 빠져나온다.
 - **`Skill` 은 답하지 않는다.** seiri 워크플로우면 마지막 상태만 기록하고 무주입으로 빠진다 — 문구는 다음 턴(userPromptSubmit) 몫이다.
-- 실패 페이로드엔 `tool_response` 가 없다. 신호는 `error`·`is_interrupt` 로 오며, 사용자가 끊은 실행은 명령에 대해 말해주는 게 없으니 세지 않는다.
-- **다이얼이 먼저다.** advisory 면 상태를 건드리기 전에 빠져나온다.
-- 문구는 fail-first 를 **본문에서 인정한다.** 의도된 red 와 안 먹는 fix 는 페이로드상 구분 불가라, 구분하는 척하지 않고 양쪽을 다 말한다.
-- 명령당 세션 1회만 말한다. 반복은 제안을 잔소리로 만든다.
-- 카운트·상태는 `core/sessionSignals` 소관. 여기는 판정 문구만 갖는다.
+- **Bash 판정은 다섯 가지다.** exit 0의 증명·불일치, 비-0의 stderr 증명·불일치, stdout 비관측을 각각 met·unmet·unobservable 로 말한다.
+- 같은 CHECK가 여러 작업에 있어도 한 호출의 판정은 한 줄이다. met가 되돌아가면 regression을 밝히고, 서브에이전트 증거는 짧은 `agent_id` 표지를 남긴다.
+- 실패 `error`가 `Exit code N` 외 본문을 싣지 않으면 stdout은 관측할 수 없으므로 원장을 바꾸지 않고 unobservable로 답한다.
+- 사용자가 끊은 실행은 판정·카운트하지 않는다. CHECK 불일치는 기존 실패 연쇄로 흐르고, CHECK 일치 실패가 임계에 닿으면 같은 판정 줄에 연쇄 힌트를 합친다.
+- 원장·세션 신호 실패는 fail-open이다. 이미 원장이 바뀌었다면 세션 신호 실패가 판정 줄을 삼키지 않는다.
 
 ## Boundaries
 
@@ -34,10 +29,9 @@
 ### Never do
 
 - `decision` 제어·차단 반환. 신호는 제안이다.
-- 명령 원문·stderr 를 주입 문구에 넣기 — 모델은 이미 그 결과를 봤다.
+- 명령 원문·전체 stderr 를 주입 문구에 넣기 — 모델은 이미 그 결과를 봤다.
 - 배럴 import — 번들이 무거워진다.
 
 ## Dependencies
 
-- `../../core/infra/configLoader/loaders/loadIntervention.js` (concrete)
-- `../../core/sessionSignals/record/` (concrete), `../../constants/`
+- `../../core/gates/record/` · `../../core/gates/render/` — 번들 상한 때문에 필요한 판정·렌더만 concrete import 한다(면제 근거는 gates DETAIL).

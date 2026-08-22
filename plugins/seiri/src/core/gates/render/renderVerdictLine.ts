@@ -24,6 +24,7 @@ export function renderVerdictLine(
   let line = '';
   const first = results[0];
   const combineMet =
+    !opts.agentId &&
     results.length > 1 &&
     first !== undefined &&
     first.verdict.kind === 'met' &&

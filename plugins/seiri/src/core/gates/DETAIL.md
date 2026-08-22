@@ -75,6 +75,12 @@
 - **Direct import**: `allowed`
 - **Reason**: 훅은 esbuild 번들의 바이트 상한을 지켜야 한다. 배럴을 거치면 재노출 그래프 전체가 포함되어 크기 가드를 넘으므로 원장 조회 경로만 직접 가져온다.
 
+### `status/` — 훅 환기는 concrete 상태 계산 경로를 쓴다
+
+- **Consumers**: `**/src/hooks/userPromptSubmit/**`
+- **Direct import**: `allowed`
+- **Reason**: 훅은 esbuild 번들의 바이트 상한을 지켜야 한다. 배럴을 거치면 재노출 그래프 전체가 포함되어 크기 가드를 넘으므로 환기에 필요한 상태 계산만 직접 가져온다.
+
 ## Last Updated
 
 2026-08-22

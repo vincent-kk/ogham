@@ -88,8 +88,82 @@ describe('workflow state chain', () => {
     expect(context.split('\n')).toHaveLength(1);
   });
 
+  it('adds one reminder for one unmet ledger', () => {
+    const repoRoot = seedRepo();
+    const taskDir = join(repoRoot, '.seiri', 'tasks', 'payment-refactor');
+    mkdirSync(taskDir, { recursive: true });
+    writeFileSync(
+      join(taskDir, 'gates.md'),
+      `- [x] G1: unit verification passes
+  EVIDENCE: 8/8 passed
+- [ ] G2: integration verification passes
+  EVIDENCE: pending
+`,
+    );
+
+    const context = turn(repoRoot);
+    expect(context).toContain(
+      'Ledger payment-refactor: 1/2 met — next G2; `/seiri:execute` owns it.',
+    );
+    expect(context.split('\n')).toHaveLength(2);
+  });
+
+  it('adds one aggregate reminder for two unmet ledgers', () => {
+    const repoRoot = seedRepo();
+    const loginDir = join(repoRoot, '.seiri', 'tasks', 'login-fix');
+    const paymentDir = join(repoRoot, '.seiri', 'tasks', 'payment-refactor');
+    mkdirSync(loginDir, { recursive: true });
+    mkdirSync(paymentDir, { recursive: true });
+    writeFileSync(
+      join(loginDir, 'gates.md'),
+      `- [ ] G1: login verification passes
+  EVIDENCE: pending
+`,
+    );
+    writeFileSync(
+      join(paymentDir, 'gates.md'),
+      `- [x] G1: unit verification passes
+  EVIDENCE: 8/8 passed
+- [ ] G2: integration verification passes
+  EVIDENCE: pending
+`,
+    );
+
+    const context = turn(repoRoot);
+    const ledgerLines = context
+      .split('\n')
+      .filter((line) => line.startsWith('[seiri] Ledgers: '));
+    expect(ledgerLines).toEqual([
+      '[seiri] Ledgers: login-fix 0/1, payment-refactor 1/2 — `/seiri:execute` owns them.',
+    ]);
+  });
+
+  it('omits the ledger reminder when every gate is met', () => {
+    const repoRoot = seedRepo();
+    const taskDir = join(repoRoot, '.seiri', 'tasks', 'payment-refactor');
+    mkdirSync(taskDir, { recursive: true });
+    writeFileSync(
+      join(taskDir, 'gates.md'),
+      `- [x] G1: verification passes
+  EVIDENCE: 8/8 passed
+`,
+    );
+
+    const context = turn(repoRoot);
+    expect(context).not.toContain('Ledger');
+    expect(context.split('\n')).toHaveLength(1);
+  });
+
   it('stays silent at advisory and writes no state at all', () => {
     const repoRoot = seedRepo('advisory');
+    const taskDir = join(repoRoot, '.seiri', 'tasks', 'payment-refactor');
+    mkdirSync(taskDir, { recursive: true });
+    writeFileSync(
+      join(taskDir, 'gates.md'),
+      `- [ ] G1: verification passes
+  EVIDENCE: pending
+`,
+    );
     load(repoRoot, 'seiri:write-plan');
     expect(existsSync(join(repoRoot, '.seiri', 'session-signals.json'))).toBe(
       false,
