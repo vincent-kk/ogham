@@ -16,7 +16,7 @@
     "rules"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
+  "hooks": "./.codex-plugin/hooks.json",
   "mcpServers": {
     "seiri": {
       "command": "node",

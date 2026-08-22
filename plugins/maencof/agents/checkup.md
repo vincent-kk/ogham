@@ -71,12 +71,7 @@ Severity: error
 Auto-fix: not possible (requires manual review) — reports broken link list
 ```
 
-Exception — archive references: a link whose target path starts with `99_Archive/`
-is an archive reference (out-of-graph storage), not a broken link. The archive is
-deliberately outside the knowledge graph, so the target never appears as a graph
-node; if the target file exists on disk under `99_Archive/`, classify it as
-informational `archive-reference`, never a D3 error. Only report D3 when the
-archive file itself is missing from disk.
+Exception — archive references: a link whose target path starts with `99_Archive/` is an archive reference (out-of-graph storage), not a broken link. The archive is deliberately outside the knowledge graph, so the target never appears as a graph node; if the target file exists on disk under `99_Archive/`, classify it as informational `archive-reference`, never a D3 error. Only report D3 when the archive file itself is missing from disk.
 
 ### D4. Layer Violation (layer-mismatch)
 

@@ -10,33 +10,33 @@ Plan: plan.md
 ## Task 1 — <task name>
 
 - [ ] G1: <observable result — make it decidable by a stranger>
-  CHECK: <shell command, executed verbatim>
-  EXPECT: <substring | /regex/ that only a success prints>
-  EVIDENCE: pending
+      CHECK: <shell command, executed verbatim>
+      EXPECT: <substring | /regex/ that only a success prints>
+      EVIDENCE: pending
 
 - [ ] G2: <manual gate — only when a command cannot prove it>
-  EVIDENCE: pending
+      EVIDENCE: pending
 
 ## Final
 
 - [ ] G9: this repository's designated verification passes
-  CHECK: <the repository's verification command — from CLAUDE.md>
-  EXPECT: <success marker>
-  EVIDENCE: pending
+      CHECK: <the repository's verification command — from CLAUDE.md>
+      EXPECT: <success marker>
+      EVIDENCE: pending
 
 ABANDON: G2 <reason — only when abandoning a gate>
 ```
 
 ## Ledger rules
 
-| Rule | Contract |
-| --- | --- |
-| Checkbox = claim; EVIDENCE = proof | A checked box with `EVIDENCE: pending` is UNMET. |
-| Verdict | The EXPECT match inside the observed output decides. A runnable gate without EXPECT is never met on any host — an exit code is not proof. |
-| ABANDON | Counts as resolved, remains separately visible, and always carries a reason. |
-| Evidence cap | Store the EXPECT-matching line plus the last non-empty line, at most 200 characters including any suffix. |
-| ID | Use globally unique `G<n>` IDs; `##` headings only group gates. |
-| Plan | `Plan:` is a ledger-relative path for people; tools do not interpret it. |
+| Rule                               | Contract                                                                                                                                  |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Checkbox = claim; EVIDENCE = proof | A checked box with `EVIDENCE: pending` is UNMET.                                                                                          |
+| Verdict                            | The EXPECT match inside the observed output decides. A runnable gate without EXPECT is never met on any host — an exit code is not proof. |
+| ABANDON                            | Counts as resolved, remains separately visible, and always carries a reason.                                                              |
+| Evidence cap                       | Store the EXPECT-matching line plus the last non-empty line, at most 200 characters including any suffix.                                 |
+| ID                                 | Use globally unique `G<n>` IDs; `##` headings only group gates.                                                                           |
+| Plan                               | `Plan:` is a ledger-relative path for people; tools do not interpret it.                                                                  |
 
 ## Authoring rules
 

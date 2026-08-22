@@ -78,4 +78,3 @@ After all items in Step 4 are created successfully, apply lifecycle labels. See 
 3. For each created `issue_ref` in manifest (stories + epic):
    - If `split.pending_review === true`: `[OP: edit_issue] issue_ref=<ref>`, add `<config.labels.review_pending>` to labels.
    - If `split.pending_review === false`: `[OP: edit_issue] issue_ref=<ref>`, add `<config.labels.review_complete>` to labels.
-
