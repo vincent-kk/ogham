@@ -81,7 +81,7 @@ ABANDON: G2 <사유 — 게이트를 포기해야 했을 때만>
 | **체크박스 = 주장, EVIDENCE = 증명** | 박스가 체크됐는데 EVIDENCE가 `pending`이면 **UNMET** — 미체크보다 나쁜 상태로 센다. 이 장치가 잡으려는 실패 모드 그 자체이기 때문이다.            |
 | **판정**                             | `EXPECT`가 있으면 매치가 판정한다(관측 가능한 출력 안에서 — §6). 없으면 exit 0이 판정한다.                                                           |
 | **`ABANDON`**                        | 정직한 포기. `status`는 해결로 세되 목록에 따로 올리고, 보고는 반드시 노출한다. 조용한 범위 축소의 유일한 합법적 대체물.                             |
-| **증거 상한**                        | EXPECT에 매치한 줄 + 마지막 비어 있지 않은 줄, 합쳐 200자. 로그를 붙이지 않는다. 원장은 태스크당 한 화면을 넘기지 않는다 — 자주 다시 읽히므로.      |
+| **증거 상한**                        | EXPECT에 매치한 줄 + 마지막 비어 있지 않은 줄, 합쳐 200자 — `(exit N)`·`(via agent …)` 접미사를 포함한 전체에 적용. 로그를 붙이지 않는다. 원장은 태스크당 한 화면을 넘기지 않는다 — 자주 다시 읽히므로.      |
 | **id**                               | `G<n>`, 원장 안에서 전역 유일. `##` 헤딩은 태스크 묶음이며 `status`가 묶어 보고한다. 파서는 헤딩의 내용을 해석하지 않는다.                            |
 | **`Plan:` 머리줄**                   | 계획 파일의 경로(원장 기준 상대경로). 사람을 위한 줄이며 도구는 해석하지 않는다.                                                                    |
 
@@ -134,7 +134,7 @@ unlazy 러너(`gate-check.mjs`)의 "충족 여부 검사"는 유지되되 셋으
 
 **원장 파일의 쓰기 주체는 셋이다** — `write-plan`(생성), 훅(실행 가능한 게이트의 판정·증거), MCP(`abandon`·수동 `record`). 증거 텍스트가 원장에 사는 이유: `sessionSignals`는 명령 원문·출력·에러 텍스트를 저장하지 않는다는 경계를 갖고, 증거는 바로 그 출력의 발췌다. 증거의 집은 원장 자체이고, 원장 밖에 상태 파일은 없다.
 
-**동시성**: 훅은 독립 프로세스이고 MCP는 상주 프로세스다. 한 원장의 읽기-수정-쓰기는 그 작업의 `gates.lock`(mkdir test-and-set)으로 직렬화한다 — `session-signals.lock`과 동형, 양방향 fail-open.
+**동시성**: 훅은 독립 프로세스이고 MCP는 상주 프로세스다. 한 원장의 읽기-수정-쓰기는 그 작업의 `gates.lock`(mkdir test-and-set)으로 직렬화한다 — `session-signals.lock`과 동형, 양방향 fail-open. 훅도 MCP(`abandon`·`record`)도 락 안에서 원장을 다시 읽고 쓴다 — 낡은 줄 좌표로 쓰는 경쟁을 막는다. 구현은 `core/utils/acquireLockDir`·`core/utils/hashCommand` — sessionSignals와 gates의 공통 조상.
 
 **위임**: 위임된 태스크의 브리프는 자기 게이트 절을 그대로 받는다(`execute` 5단계의 "파일로 위임, 이력 금지"). **실측(2026-08-22, Claude Code 2.1.239, 헤드리스 — `phase0/subagent-hook-payload-2026-08-22.md`)**: 서브에이전트의 Bash에도 PostToolUse·PostToolUseFailure가 발화하고, `session_id`는 부모와 같으며, 페이로드에 `agent_id`·`agent_type`이 실린다(부모 호출엔 없음). 따라서 훅은 위임자의 실행을 구분한다: 기록하되 EVIDENCE에 `(via agent <id 앞 8자>)` 표지를 붙이고, `status`는 `met_by_agent` 목록을 따로 낸다. **드라이버가 다시 돌리면 표지가 사라진다** — "자기 서명은 무가치, 드라이버가 재실행한다"는 규칙이 prose가 아니라 원장의 표지로 보인다. 박스를 뒤집지 않는 쪽은 택하지 않는다 — 드라이버 자신이 서브에이전트인 구성에서 아무것도 뒤집히지 않게 되고, seiri는 실행 주체를 정하지 않기 때문이다.
 
@@ -169,13 +169,13 @@ MCP에 두는 이유 — 반복 상태 갱신이고 스킬 무관 완결 도구�
 | exit 0 · EXPECT 매치 (또는 EXPECT 없음)     | 박스 `[x]`, EVIDENCE = 매치 줄 \| 마지막 줄                            | `[seiri] payment-refactor G3 met — evidence recorded (4/7, next G5)`                                                                      |
 | exit 0 · 불일치                             | 불변 (이미 met였다면 `[ ]`로 되돌리고 EVIDENCE `pending (regressed)`)  | `[seiri] payment-refactor G3 unmet — EXPECT "8/8 passed" not in output`                                                                   |
 | exit≠0 · `error`에 매치                     | 박스 `[x]`, EVIDENCE = 매치 줄 `(exit N)`                              | `[seiri] payment-refactor G3 met — matched on stderr (exit 1 by design)`                                                                  |
-| exit≠0 · 불일치                             | 위와 같은 되돌림 규칙                                                  | `[seiri] payment-refactor G3 unmet — exit 1; EXPECT not in stderr`                                                                        |
-| exit≠0 · EXPECT가 stdout을 겨냥 (관측 불가) | 불변                                                                  | `[seiri] payment-refactor G3 unobservable — stdout is not visible after a non-zero exit; make the CHECK exit 0 (append \|\| true) or EXPECT against stderr` |
+| exit≠0 · `error`에 본문이 있으나 불일치 | 위와 같은 되돌림 규칙                                                  | `[seiri] payment-refactor G3 unmet — exit 1; EXPECT not in stderr`                                                                        |
+| exit≠0 · `error`가 `Exit code N` 줄뿐 (stderr 비어 있음 — 관측 불가) | 불변                                                                  | `[seiri] payment-refactor G3 unobservable — stdout is not visible after a non-zero exit; make the CHECK exit 0 (append \|\| true) or EXPECT against stderr` |
 | 위 어느 경우든 `agent_id`가 있는 호출 | 같은 규칙으로 기록하되 EVIDENCE 끝에 `(via agent aa8d87f5)`            | `[seiri] payment-refactor G3 met via agent aa8d87f5 — driver re-run clears the marker`                                                    |
 
 **판정은 침묵하지 않는다.** CHECK와 일치하는 Bash 호출은 정확히 한 줄의 판정을 돌려받고, 원장은 모델이 듣지 못한 채 바뀌지 않는다. 도구의 결과를 모르면 모델은 성공·실패를 판단할 수 없다.
 
-**여러 작업에 같은 CHECK**: 일치하는 원장 전부에 기록하고 한 줄에 작업 이름을 전부 댄다 — `[seiri] G9 met in payment-refactor, login-fix — evidence recorded`.
+**여러 작업에 같은 CHECK**: 일치하는 원장 전부에 기록하고 한 줄에 작업 이름을 전부 댄다 — `[seiri] G9 met in payment-refactor, login-fix — evidence recorded`. 합치기는 같은 id·전부 met·드라이버 호출일 때만이다 — agent 표지나 unmet 사유가 섞이면 작업별 판정을 `; `로 이어 붙인 한 줄이다.
 
 **되돌림**: 이미 met인 게이트가 다시 실행되어 실패하면 박스를 풀고 증거를 `pending (regressed)`로 바꾼다. 원장은 마지막 실행을 말한다 — 회귀는 보여야 한다.
 
