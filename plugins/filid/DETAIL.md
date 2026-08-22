@@ -6,6 +6,7 @@
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
 - Filid의 cross-review는 계약, 구조, 검증 문서라는 FCA 증거만 판정하며 코드를 수정하지 않는다.
+- `revalidate`는 항목 소유 프랙탈에서 재측정을 시작하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 `context_resolve.summary.chainPaths`의 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다.
 - `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하되 원격 branch를 push하지 않는다. 호출자가 branch를 먼저 push해야 하며, publication 실패는 저장된 body로 복구할 수 있어야 한다.
 - spec-document는 파일당 15 cases, test-record는 파일당 32 cases를 허용하고 두 역할 사이의 promotion 관계를 만들지 않는다.
 - core, policy와 MCP DTO는 언어·확장자·진입점 이름·테스트 프레임워크 호출 문법을 알지 않으며 등록된 어댑터가 생태계 사실을 제공한다.
@@ -47,10 +48,17 @@
 - 코멘트는 판정표를 접힘 밖에 두고 나머지를 접어 호스트 크기 상한 안에 들어가며, 재실행은 브랜치당 코멘트를 하나로 유지한다.
 - 코멘트 실패나 부재가 판정 자체를 바꾸지 않는다.
 
+### AC-root-revalidate-scope — 항목별 재검증 범위
+
+- accepted item의 project-relative Path는 절대 경로로 정규화하고, 각 범위에서 original `(Rule, Path)`와 정확히 일치하는 위반을 집계 수보다 먼저 판정한다.
+- exact 위반이 남으면 즉시 unresolved 또는 unapplied이고 범위를 넓히지 않는다. exact 일치가 없고 관련 증거만 불확실할 때 다음 `chainPaths` 프랙탈로 넓히며, 최초의 exact 부재는 resolved다.
+- PROJECT_ROOT는 재측정 범위로 쓰지 않고, 허용된 모든 프랙탈 범위가 불확실할 때만 inconclusive를 유지한다.
+
 ## History
 
+- 2026-08-22 — 좁은 소비자 범위가 형제 프랙탈 증거를 보지 못해 false-INCONCLUSIVE를 만들지 않도록 revalidate를 owner-to-root 최초 exact 측정으로 바꿨다.
 - 2026-08-22 — `pull-request`의 암묵적 branch push를 제거하고 호출자 책임으로 돌렸다. PR 생성 실패와 push 실패를 한 단계가 함께 숨기지 않게 하기 위한 결정이다.
 
 ## Last Updated
 
-2026-08-22 — push 책임과 merge-track 정본 reference를 현재 계약에 맞췄다.
+2026-08-22 — revalidate의 항목별 범위 확대와 exact 판정 우선순위를 계약으로 고정했다.
