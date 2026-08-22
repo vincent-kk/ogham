@@ -2,7 +2,7 @@
 name: pull-request
 user-invocable: true
 description: '[filid:pull-request] Bring the branch FCA documents up to date through enrich-docs, then open a structured GitHub pull request from the branch changes.'
-argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve]'
+argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push]'
 version: '1.0.0'
 complexity: complex
 plugin: filid
@@ -47,6 +47,7 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
    Report the paths in `data.assessment.worktree.source` with the abort message. A build artifact is never a reason to refuse a PR, and generated paths are never staged here. With `--skip-enrich`, `documents-only` also aborts — nothing will commit them.
 
 5. `gh auth status` — on failure set `GH_AUTH = false`, continue through Stage 3, and save the body locally in Stage 4.
+6. Remote state — `git rev-parse --verify -q refs/remotes/origin/<BRANCH>`; when it resolves, `git rev-list --count origin/<BRANCH>..HEAD`. Set `UNPUSHED = true` when the remote branch is missing or that count is above zero. Not an abort: `--push` is on by default, so Stage 4 pushes the branch before opening the PR; with `--no-push` Stage 4 saves the body instead of calling `gh`, whose own error (`Head sha can't be blank`) never names the cause.
 
 ## Stage 1 — FCA Document Sync
 
@@ -87,24 +88,27 @@ Use `--base` when given. Otherwise resolve in the order documented in `reference
 
 ## Stage 4 — PR Publication
 
-1. `gh pr view` decides create versus update.
-2. <!-- [INTERACTIVE] --> An existing PR requires an explicit overwrite confirmation before its body is replaced.
-3. `--draft` creates a draft PR.
-4. With `GH_AUTH = false`, write the body to `.filid/review/<branch>/pr-body.md` and report the path instead of publishing. The branch segment is required — a flat `.filid/review/pr-body.md` lets a second branch overwrite the first branch's saved body.
+1. `UNPUSHED = true` and `--push` on (the default): run `git push -u origin <BRANCH>` first — a PR opened from a stale remote head would review commits the branch no longer matches. `UNPUSHED = true` and `--push` off (`--no-push`): skip `gh` entirely, save the body as in step 5, and print the §1 unpushed-branch message. `UNPUSHED = false`: continue.
+2. `gh pr view` decides create versus update.
+3. <!-- [INTERACTIVE] --> An existing PR requires an explicit overwrite confirmation before its body is replaced.
+4. `--draft` creates a draft PR.
+5. With `GH_AUTH = false`, write the body to `.filid/review/<branch>/pr-body.md` and report the path instead of publishing. The branch segment is required — a flat `.filid/review/pr-body.md` lets a second branch overwrite the first branch's saved body.
 
 ## Options
 
-| Option           | Type   | Default | Effect                                                       |
-| ---------------- | ------ | ------- | ------------------------------------------------------------ |
-| `--base REF`     | string | auto    | Base branch for the diff and the PR                          |
-| `--skip-enrich`  | flag   | off     | Skip Stage 1 document sync                                   |
-| `--auto-approve` | flag   | off     | Forwarded to `enrich-docs`, which then writes without asking |
-| `--draft`        | flag   | off     | Create the PR as a draft                                     |
-| `--title TITLE`  | string | auto    | PR title; generated when omitted                             |
+| Option           | Type   | Default | Effect                                                                                                              |
+| ---------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| `--base REF`     | string | auto    | Base branch for the diff and the PR                                                                                 |
+| `--skip-enrich`  | flag   | off     | Skip Stage 1 document sync                                                                                          |
+| `--auto-approve` | flag   | off     | Forwarded to `enrich-docs`, which then writes without asking                                                        |
+| `--draft`        | flag   | off     | Create the PR as a draft                                                                                            |
+| `--title TITLE`  | string | auto    | PR title; generated when omitted                                                                                    |
+| `--push`         | flag   | on      | Push an unpushed branch before Stage 4; `--no-push` turns it off, and the run then ends with a saved body, not a PR |
 
 ## Invariants
 
 - This skill never edits source code. Stage 1 changes documents only, through `enrich-docs`, which validates what it writes and asks for approval unless `--auto-approve` was forwarded.
+- `--push` is on by default: an unpushed branch is pushed before the PR opens, and the push is always named in the terminal output — never silent. With `--no-push` the run ends in a saved body and a message naming the cause.
 - Only `INTENT.md` / `DETAIL.md` are staged by this skill. Any other staged path is a defect.
 - Generated paths are classified so the cycle can continue, never staged and never committed. Committing build output stays the developer's call.
 - Document sync failure blocks PR creation. `--skip-enrich` is the only bypass, and it is recorded in the terminal output.
@@ -115,4 +119,5 @@ Use `--base` when given. Otherwise resolve in the order documented in `reference
 ```text
 Pull request: <created|updated|body-saved> <url-or-path>
 Document sync: <committed|no-change|skipped>
+Branch push: <pushed|up-to-date|declined>
 ```

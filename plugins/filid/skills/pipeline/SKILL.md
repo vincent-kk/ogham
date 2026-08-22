@@ -2,7 +2,7 @@
 name: pipeline
 user-invocable: true
 description: '[filid:pipeline] Run the full merge-track cycle — pull-request, cross-review, resolve, revalidate — as one continuous operation with entry-point detection and resume support.'
-argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-enrich] [--force] [--title TITLE]'
+argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-enrich] [--force] [--title TITLE] [--push|--no-push]'
 version: '1.0.0'
 complexity: complex
 plugin: filid
@@ -98,14 +98,15 @@ Result: <verdict or stop reason>
 
 ## Options
 
-| Option          | Type   | Default | Effect                                                   |
-| --------------- | ------ | ------- | -------------------------------------------------------- |
-| `--from STAGE`  | string | auto    | Entry stage: `pr-create`/`review`/`resolve`/`revalidate` |
-| `--base REF`    | string | auto    | Base ref, forwarded to `pr-create` and `review`          |
-| `--draft`       | flag   | off     | Forwarded to `pr-create`                                 |
-| `--skip-enrich` | flag   | off     | Forwarded to `pr-create` — skips document sync           |
-| `--force`       | flag   | off     | Restart the review from a fresh state                    |
-| `--title TITLE` | string | auto    | Forwarded to `pr-create`                                 |
+| Option          | Type   | Default | Effect                                                                                                         |
+| --------------- | ------ | ------- | -------------------------------------------------------------------------------------------------------------- |
+| `--from STAGE`  | string | auto    | Entry stage: `pr-create`/`review`/`resolve`/`revalidate`                                                       |
+| `--base REF`    | string | auto    | Base ref, forwarded to `pr-create` and `review`                                                                |
+| `--draft`       | flag   | off     | Forwarded to `pr-create`                                                                                       |
+| `--skip-enrich` | flag   | off     | Forwarded to `pr-create` — skips document sync                                                                 |
+| `--force`       | flag   | off     | Restart the review from a fresh state                                                                          |
+| `--title TITLE` | string | auto    | Forwarded to `pr-create`                                                                                       |
+| `--push`        | flag   | on      | Forwarded to `pr-create`; `--no-push` turns it off — `pr-create` then saves the body and the cycle stops there |
 
 ## Invariants
 
