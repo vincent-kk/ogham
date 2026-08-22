@@ -11,7 +11,7 @@
 | `index.ts`   | 공개 API 배럴 (named re-export 만)                             |
 | `version.ts` | 자동 생성 버전 상수 (직접 수정 금지)                           |
 | `core/`      | 다이얼 3계층 · 규칙 배포/상태/드리프트 · 세션 신호 · 작업 원장 |
-| `mcp/`       | MCP 서버 + 도구 2개 + 설정 페이지 자산                         |
+| `mcp/`       | MCP 서버 + 도구 3개 + 설정 페이지 자산                         |
 | `hooks/`     | SessionStart · PostToolUse · SubagentStart (+dormant)          |
 | `constants/` | 공유 상수 organ (경로 리터럴 · 다이얼 · 도구 이름)             |
 | `types/`     | 공유 타입 organ                                                |
