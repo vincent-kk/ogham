@@ -73,4 +73,4 @@ The cycle closes only when `revalidate` re-measures the delta against `resolve_c
 
 - It does not measure anything. Every finding comes from a stage.
 - It does not edit files, and it calls no MCP tool other than `review_state`.
-- It does not choose per-item accept/reject — it always passes `--auto`. Use `/filid:resolve` directly for per-item decisions.
+- It does not choose the resolve batch — it always passes `--auto`, which shows the decision sheet, preserves recommendations, auto-selects every decision, and opens no prompt. Use `/filid:resolve` directly for batch overrides and discussion.

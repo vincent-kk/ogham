@@ -37,7 +37,7 @@ Canonical order:
 pr-create → review → resolve → revalidate
 ```
 
-Two flags are not optional here, because both stages would otherwise stop for input: `pr-create` always gets `--auto-approve` (the `enrich-docs` approval step) and `resolve` always gets `--auto` (the per-item decision prompts). Use `/filid:pull-request` or `/filid:resolve` directly when those decisions are wanted.
+Two flags are not optional here, because both stages would otherwise stop for input: `pr-create` always gets `--auto-approve` (the `enrich-docs` approval step) and `resolve` always gets `--auto`. Resolve still prints the complete decision sheet and preserves its recommendations, but auto-selects every decision and opens no prompt. Use `/filid:pull-request` directly for document approval, or `/filid:resolve` directly for batch overrides and discussion.
 
 ## Step 1 — Assess the branch
 
@@ -112,5 +112,5 @@ Result: <verdict or stop reason>
 
 - The pipeline never calls an MCP tool other than `review_state`, and never edits a file.
 - Stage order is fixed. `--from` selects an entry, never a reordering.
-- `resolve` always runs with `--auto` and `pr-create` always with `--auto-approve` here. A stage that stops for input has not been handed the flag that suppresses it.
+- `resolve` always runs with `--auto` and `pr-create` always with `--auto-approve` here. The resolve decision sheet remains visible, but every decision is auto-selected and no batch prompt opens. A stage that stops for input has not been handed the flag that suppresses it.
 - The pipeline does not end at `resolve`. Reaching `resolve` and stopping is a defect, not a completion.
