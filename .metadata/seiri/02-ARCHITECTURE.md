@@ -352,7 +352,9 @@ _"핵심 명사가 두 라운드 불변"_). 수치를 뺀 것은 정확성 손�
 | **SubagentStart** (`*`)         | `bridge/subagent-start.mjs`      | 서브에이전트에 상태 요약 재주입 (렌더 축약판 재사용)      | SessionStart와 동일           | 등록                                 |
 | **InstructionsLoaded**          | `bridge/instructions-loaded.mjs` | 지시 파일 로드 관측 (주입 없음)                           | —                             | **dormant** — 미등록, 재측정 시 복원 |
 
-**실패는 별개 이벤트입니다** (페이로드 실측, Claude Code 2.1.218). 비-0 종료는 `PostToolUse`를 발화시키지 않고 `PostToolUseFailure`로 오며, 그 페이로드에는 `tool_response`가 아예 없고 대신 `error`(exit code + stderr)와 `is_interrupt`가 옵니다. 둘 다 플러그인 훅으로 등록 가능하고 둘 다 `hookSpecificOutput.additionalContext`를 받습니다. 그래서 **번들 하나가 두 이벤트에 등록**됩니다 — 실패에서 세고, 성공에서 잊습니다. 연쇄는 아무것도 green이 되지 않은 동안만 연쇄이기 때문입니다.
+**실패는 Claude 에서만 별개 이벤트입니다** (페이로드 실측 — Claude Code 2.1.218·2.1.240, codex-cli 0.149.0). Claude 는 비-0 종료를 `PostToolUseFailure` 로 보내고 그 페이로드에는 `tool_response` 대신 `error`(= `Exit code N` + 명령 출력 전체)와 `is_interrupt` 가 실립니다. Codex 에는 그 이벤트가 없고 `PostToolUse` 하나가 성공·실패를 모두 나르며, `tool_response` 는 객체가 아니라 **문자열**(모델이 보는 출력)이고 코드모드 exec 은 exit code 를 싣지 않습니다.
+
+**그래서 판정은 출력 텍스트가 합니다** (2026-08-23 개정 — 04-GATES §6). 훅은 세 형태를 `{ text, exit?, interrupted? }` 로 정규화한 뒤 `EXPECT` 매치만으로 판정하고, exit code 는 이유 문구와 증거 접미사에만 씁니다. 이벤트 이름이나 `tool_response` 의 형태에 판정을 걸면 같은 원장이 호스트마다 다르게 읽힙니다 — 실제로 그렇게 되어 있었고(Codex 에서 EXPECT 게이트는 영구 unmet, EXPECT 없는 게이트는 거짓 met), `AC-gates-host-parity` 가 호스트별 페이로드 픽스처로 이를 고정합니다. 호스트 차이가 허용되는 곳은 이벤트·필드가 아예 없는 경우뿐이고, 그 차이는 **보수적 방향으로만**(거짓 met 없음) 나타납니다.
 
 **차단 훅 없음은 불변입니다.** 신규 훅 포함 전부 주입 전용 — decision 제어를 갖지 않고, 실패 시 무주입 fail-open으로 세션을 막지 않습니다. `PreToolUse`·`Stop`은 계속 쓰지 않습니다 — 진실 소유는 저장소 몫(P2).
 **UserPromptSubmit은 상태가 아니라 *주의*를 나릅니다.** _"상태는 세션 중 거의 안 바뀐다"_ 는 상태 재주입 용도에만 성립하는 근거입니다 — 매 턴 리마인더가 나르는 것은 상태가 아니라 스킬 발동·규칙 준수 상기라, 긴 세션·컴팩션으로 흐려지는 주의를 되살립니다. SessionStart(세션당 1회)가 못 잡는 세션 중 드리프트를 매 턴 커버하며, 정적 한 줄이라 지연은 무시 가능합니다. 여전히 비차단·다이얼 게이팅(advisory 침묵)이라 아래 선제 배선 원칙 안에 있습니다. 세션 중 다이얼 조작은 MCP `config` action 경유입니다.

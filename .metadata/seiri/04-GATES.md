@@ -79,7 +79,7 @@ ABANDON: G2 <사유 — 게이트를 포기해야 했을 때만>
 | 규칙                                 | 내용                                                                                                                                              |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **체크박스 = 주장, EVIDENCE = 증명** | 박스가 체크됐는데 EVIDENCE가 `pending`이면 **UNMET** — 미체크보다 나쁜 상태로 센다. 이 장치가 잡으려는 실패 모드 그 자체이기 때문이다.            |
-| **판정**                             | `EXPECT`가 있으면 매치가 판정한다(관측 가능한 출력 안에서 — §6). 없으면 exit 0이 판정한다.                                                           |
+| **판정**                             | 관측된 출력 텍스트 안에서 `EXPECT` 매치가 판정한다(§6). `EXPECT` 없는 실행 가능 게이트는 어느 호스트에서도 met이 되지 않는다 — exit code는 호스트 선택 채널이라 증명이 아니다. |
 | **`ABANDON`**                        | 정직한 포기. `status`는 해결로 세되 목록에 따로 올리고, 보고는 반드시 노출한다. 조용한 범위 축소의 유일한 합법적 대체물.                             |
 | **증거 상한**                        | EXPECT에 매치한 줄 + 마지막 비어 있지 않은 줄, 합쳐 200자 — `(exit N)`·`(via agent …)` 접미사를 포함한 전체에 적용. 로그를 붙이지 않는다. 원장은 태스크당 한 화면을 넘기지 않는다 — 자주 다시 읽히므로.      |
 | **id**                               | `G<n>`, 원장 안에서 전역 유일. `##` 헤딩은 태스크 묶음이며 `status`가 묶어 보고한다. 파서는 헤딩의 내용을 해석하지 않는다.                            |
@@ -156,32 +156,60 @@ MCP에 두는 이유 — 반복 상태 갱신이고 스킬 무관 완결 도구�
 
 ---
 
-# 6. 훅 — PostToolUse / PostToolUseFailure
+# 6. 훅 — 판정은 출력이 한다 (PostToolUse / PostToolUseFailure)
 
 기존 번들 `bridge/post-tool-use.mjs`에 새 분기. 새 훅도, 새 이벤트도 아니다.
 
 **게이팅 순서**: 다이얼(advisory면 기존대로 즉시 반환) → `.seiri/tasks/`가 없거나 비었으면 반환(비용: 디렉토리 존재 확인 하나) → 각 작업의 `gates.md`에서 CHECK 줄을 모아 `tool_input.command`와 대조 → 일치 없으면 기존 실패 연쇄 경로로 → 일치하면 게이트 경로. 일치는 `hashCommand`의 공백 정규화 동치다 — 줄바꿈이 달라도 같은 명령이고, 한 글자라도 다르면 다른 명령이다. `status`가 미충족 게이트의 CHECK 원문을 보여주므로 그대로 복사해 실행하는 것이 자연 경로다.
 
-**관측 가능한 것**: 하니스는 exit 0을 `PostToolUse`(`tool_response`: stdout·stderr)로, exit≠0을 `PostToolUseFailure`(`error`: exit code + stderr, `tool_response` 없음)로 보낸다. 그래서 exit≠0의 stdout은 훅이 볼 수 없다. 이것은 설계의 한계가 아니라 **보고되는 조건**이다 — 아래 다섯째 줄.
+## 호스트가 주는 것은 다르다 (실측 2026-08-23 — `phase0/`)
 
-| 상황                                        | 원장                                                                  | 판정 한 줄 (형태)                                                                                                                         |
-| ------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| exit 0 · EXPECT 매치 (또는 EXPECT 없음)     | 박스 `[x]`, EVIDENCE = 매치 줄 \| 마지막 줄                            | `[seiri] payment-refactor G3 met — evidence recorded (4/7, next G5)`                                                                      |
-| exit 0 · 불일치                             | 불변 (이미 met였다면 `[ ]`로 되돌리고 EVIDENCE `pending (regressed)`)  | `[seiri] payment-refactor G3 unmet — EXPECT "8/8 passed" not in output`                                                                   |
-| exit≠0 · `error`에 매치                     | 박스 `[x]`, EVIDENCE = 매치 줄 `(exit N)`                              | `[seiri] payment-refactor G3 met — matched on stderr (exit 1 by design)`                                                                  |
-| exit≠0 · `error`에 본문이 있으나 불일치 | 위와 같은 되돌림 규칙                                                  | `[seiri] payment-refactor G3 unmet — exit 1; EXPECT not in stderr`                                                                        |
-| exit≠0 · `error`가 `Exit code N` 줄뿐 (stderr 비어 있음 — 관측 불가) | 불변                                                                  | `[seiri] payment-refactor G3 unobservable — stdout is not visible after a non-zero exit; make the CHECK exit 0 (append \|\| true) or EXPECT against stderr` |
-| 위 어느 경우든 `agent_id`가 있는 호출 | 같은 규칙으로 기록하되 EVIDENCE 끝에 `(via agent aa8d87f5)`            | `[seiri] payment-refactor G3 met via agent aa8d87f5 — driver re-run clears the marker`                                                    |
+| | Claude Code | Codex |
+| --- | --- | --- |
+| exit 0 | `PostToolUse` · `tool_response` **객체**(`stdout`·`stderr` 분리) | `PostToolUse` · `tool_response` **문자열**(모델이 보는 출력) |
+| exit≠0 | `PostToolUseFailure` · `error` = `Exit code N` + **명령 출력 전체**(stdout·stderr 합쳐짐) · `tool_response` 없음 | 같은 `PostToolUse` — 실패 전용 이벤트가 **없다** |
+| exit code | 실패 페이로드의 `Exit code N`에서만 | 클래식 셸은 `Exit code: N`, **코드모드 exec은 싣지 않는다** |
+| 중단 | `is_interrupt` | 대응 필드 없음 |
+| 공통 | `cwd` · `session_id` · `tool_name`("Bash") · `tool_input.command` · `agent_id`·`agent_type`(위임 시) | 같음 |
 
-**판정은 침묵하지 않는다.** CHECK와 일치하는 Bash 호출은 정확히 한 줄의 판정을 돌려받고, 원장은 모델이 듣지 못한 채 바뀌지 않는다. 도구의 결과를 모르면 모델은 성공·실패를 판단할 수 없다.
+**두 호스트가 공유하는 유일한 판정 재료는 관측된 출력 텍스트다.** exit code는 호스트 선택 채널이고, 이벤트 이름은 Claude의 우연한 형태다. 판정을 그 둘에 걸면 같은 원장이 호스트마다 다르게 읽힌다 — 실제로 Codex에서 EXPECT 있는 게이트는 영구 unmet, EXPECT 없는 게이트는 항상 met이 됐다(08-23 확인).
+
+## 정규화 — 세 형태를 하나로
+
+훅은 페이로드를 먼저 접는다: `{ text, exit?, interrupted? }`.
+
+- Claude 성공: `text = stdout + '\n' + stderr`, `exit = 0`.
+- Claude 실패: `text = error`, `exit = /Exit code (\d+)/`, `interrupted = is_interrupt`.
+- Codex(문자열): `text = tool_response`, `exit = /Exit code:? (\d+)/`가 있으면 그 값, 없으면 **undefined**.
+- 그 밖의 형태: `text = ''`, `exit = undefined` — 판정은 아래 규칙이 안전한 쪽으로 처리한다.
+
+**exit는 판정하지 않는다.** 이유 문구와 증거 접미사 `(exit N)`에만 쓴다.
+
+## 판정 표 — 모든 호스트에서 같다
+
+| 상황 | 원장 | 판정 한 줄 (형태) |
+| --- | --- | --- |
+| EXPECT 매치 | 박스 `[x]`, EVIDENCE = 매치 줄 \| 마지막 줄 (+`(exit N)` — exit를 알고 0이 아닐 때) | `[seiri] payment-refactor G3 met — evidence recorded (4/7, next G5)` |
+| EXPECT 있음 · 불일치 | 되돌림 규칙 | `[seiri] payment-refactor G3 unmet — EXPECT "8/8 passed" not in output (exit 1)` |
+| EXPECT 있음 · 출력 없음 | 되돌림 규칙 | `[seiri] payment-refactor G3 unmet — no output (exit 1)` |
+| EXPECT 없음 · CHECK 있음 | 되돌림 규칙 | `[seiri] payment-refactor G3 unjudgeable — a runnable gate needs an EXPECT that only success prints` |
+| 위 어느 경우든 `agent_id`가 있는 호출 | 같은 규칙 + EVIDENCE 끝에 `(via agent aa8d87f5)` | `[seiri] payment-refactor G3 met via agent aa8d87f5 — driver re-run clears the marker` |
+
+**exit 0이 더는 증명이 아니다 (08-23 개정).** 예전 규칙은 EXPECT가 없으면 exit 0을 증명으로 삼았다 — Codex 코드모드는 exit를 싣지 않으므로 그 게이트는 호스트에 따라 갈린다. 그래서 **실행 가능한 게이트는 EXPECT를 갖는 것이 요건**이고, 없는 게이트는 어느 호스트에서도 met이 되지 않는다.
+
+**성공은 출력에 남아야 한다.** 표준형은 `<command> && echo <MARKER>` + `EXPECT: <MARKER>`다. `&&`가 실패 시 마커를 막으므로, exit code를 못 보는 호스트에서도 판정이 같다. 자연히 성공에만 나타나는 문자열(`TYPECHECK_OK`, `/Tests\s+\d+ passed/`)도 같은 자격이다.
+
+**`unobservable` 범주는 폐기했다 (08-23).** 근거였던 "exit≠0이면 stdout이 보이지 않는다"가 실측으로 거짓이었다 — 실패 페이로드는 stdout·stderr를 합쳐 싣는다. 출력이 정말 비어 있는 실패는 별도 범주가 아니라 `unmet — no output`이며, 따라서 **met였던 게이트가 조용히 깨져도 되돌림이 적용된다**(옛 설계의 구멍이 함께 닫힌다).
+
+**판정은 침묵하지 않는다.** CHECK와 일치하는 Bash 호출은 정확히 한 줄의 판정을 돌려받고, 원장은 모델이 듣지 못한 채 바뀌지 않는다.
 
 **여러 작업에 같은 CHECK**: 일치하는 원장 전부에 기록하고 한 줄에 작업 이름을 전부 댄다 — `[seiri] G9 met in payment-refactor, login-fix — evidence recorded`. 합치기는 같은 id·전부 met·드라이버 호출일 때만이다 — agent 표지나 unmet 사유가 섞이면 작업별 판정을 `; `로 이어 붙인 한 줄이다.
 
-**되돌림**: 이미 met인 게이트가 다시 실행되어 실패하면 박스를 풀고 증거를 `pending (regressed)`로 바꾼다. 원장은 마지막 실행을 말한다 — 회귀는 보여야 한다.
+**되돌림**: 이미 met인 게이트의 재실행이 met이 아니면(unmet·unjudgeable 모두) 박스를 풀고 증거를 `pending (regressed)`로 바꾼다. 원장은 마지막 실행을 말한다 — 회귀는 보여야 한다.
 
 **실패 연쇄와의 합류**: CHECK 호출은 기존 카운터도 센다. 임계에 닿은 호출에서는 판정 줄이 연쇄 힌트를 품는다 — `G3 unmet — exit 1 (3rd consecutive; /seiri:trace-cause owns it)`. 한 호출에 한 줄.
 
-**`is_interrupt`**: 사용자가 멈춘 실행은 판정하지 않는다(기존 규칙 계승).
+**중단된 실행**: Claude는 `is_interrupt`로 알려주므로 판정하지 않는다. Codex엔 그 필드가 없어 중단은 빈 출력으로 보이고 `unmet — no output`으로 떨어진다 — 허용되는 호스트 차이이며, 방향은 언제나 보수적이다(거짓 met이 아니라 불필요한 unmet).
 
 ---
 
@@ -238,7 +266,7 @@ config에 새 필드는 없다 — 다이얼이 seiri가 저장하는 유일한 
 
 ### AC-gates-verdict-never-silent — 판정은 침묵하지 않는다
 
-- standard↑에서 어느 작업 원장의 CHECK와 일치하는 Bash 호출은 정확히 한 줄의 판정을 주입한다 — met · unmet(이유) · unobservable(처방).
+- standard↑에서 어느 작업 원장의 CHECK와 일치하는 Bash 호출은 정확히 한 줄의 판정을 주입한다 — met · unmet(이유) · unjudgeable(처방).
 - 원장의 박스·EVIDENCE가 바뀐 호출에는 반드시 판정 줄이 있다.
 
 ### AC-gates-evidence-provenance — 증거의 출처
@@ -249,6 +277,7 @@ config에 새 필드는 없다 — 다이얼이 seiri가 저장하는 유일한 
 ### AC-gates-claim-is-not-proof — 주장은 증명이 아니다
 
 - `status`는 체크됐지만 EVIDENCE가 `pending`인 게이트를 unmet으로 센다.
+- CHECK는 있는데 EXPECT가 없는 게이트는 어느 호스트에서도 met이 되지 않는다(`unjudgeable`) — exit 0은 증명이 아니다.
 - 되돌림: met 게이트의 실패한 재실행은 박스를 풀고 `pending (regressed)`를 남긴다.
 
 ### AC-gates-abandon-visible — 포기는 보인다
@@ -270,6 +299,12 @@ config에 새 필드는 없다 — 다이얼이 seiri가 저장하는 유일한 
 
 - seiri가 `.seiri/tasks/<name>/`에서 읽고 쓰는 것은 `plan.md`·`gates.md`·일시적 `gates.lock`뿐이다 — 포인터·캐시·등록 파일은 없다. 같은 디렉토리의 다른 파일(진행 메모·위임 보고 등)은 사용자·위임자의 것이며 seiri는 해석하지 않는다.
 - `.seiri/.gitignore`에 `tasks/`가 더해진다 — 작업 디렉토리 전체가 비추적이다.
+
+### AC-gates-host-parity — 호스트가 판정을 바꾸지 않는다
+
+- 같은 저장소 상태·같은 명령·같은 원장이면 Claude Code와 Codex가 같은 판정 줄과 같은 원장 바이트를 낸다. 판정은 정규화된 출력 텍스트와 `EXPECT`만으로 결정되고, exit code·이벤트 이름·`tool_response`의 형태는 판정에 들어가지 않는다.
+- 허용되는 차이는 호스트에 이벤트나 필드가 없을 때뿐이며(현재: Codex의 `PostToolUseFailure` 부재, `is_interrupt` 부재), 그 차이는 **보수적 방향으로만** 나타난다 — 어떤 호스트에서도 거짓 met은 생기지 않는다.
+- 검증: 호스트별 페이로드 픽스처(claude-success · claude-failure · codex-string · codex-string-with-exit-header · 빈 출력)가 같은 organ을 통과해 같은 판정·같은 원장을 낸다.
 
 ### AC-gates-dial — 다이얼
 
@@ -304,6 +339,9 @@ unlazy의 수치(노력 1.6~3.9배, 배포 전 자가 발견 결함 4~10개)는 
 | 판정 줄·환기 줄의 과잉 여부            | T2·Phase 3 사례 관측                         |
 | 증거 상한(200자)의 적정성              | T2 관측 — 관측 뒤 조정 가능한 유일한 값      |
 | 서브에이전트의 Bash에 훅이 발화하는지   | **실측 완료(2026-08-22)** — 발화함 · `session_id` 동일 · `agent_id`·`agent_type` 실림. §4 위임 절에 반영 |
+| 호스트별 판정 동일성 (Claude ↔ Codex)   | **픽스처 고정** — 호스트별 페이로드 5형태가 같은 판정·같은 원장을 낸다(AC-gates-host-parity). 실사용 확인은 Codex 세션에서 원장 한 개를 돌려 대조 |
+| Codex에서 훅 명령이 실제로 실행되는지   | 미측정 — `${CLAUDE_PLUGIN_ROOT}` 확장 여부. 확장되지 않으면 seiri의 훅은 Codex에서 하나도 돌지 않는다(등록만 됨) |
+| Codex의 Skill 로드 관측 가능 여부       | 미측정 — 관측되지 않으면 D1 워크플로우 상태 절이 Codex에서 비활성(허용 차이로 기록) |
 
 fail-cheap 요건(비차단·제거 가능·저비용·2차 비용 상한)은 설계로 충족된다. "기본 OFF"는 환기·기록 부분만 다이얼로 충족되고 스킬 본문은 다이얼과 무관하다 — 이 한 항은 위 관측이 대신 답한다.
 
