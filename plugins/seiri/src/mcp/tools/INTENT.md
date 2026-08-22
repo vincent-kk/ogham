@@ -6,10 +6,7 @@ seiri 가 노출하는 도구 전부. 셋 모두 **상태를 읽고 쓰는 최�
 
 ## Structure
 
-- `openSettings/` — 브라우저 폼 + bounded long-poll (대화형 정본)
-- `ruleDocsSync/` — 같은 일을 하는 헤드리스 폴백 (status·manifest·plan·sync)
-  - 다이얼 `config` action
-- `gates/` — 작업별 게이트 원장 상태·포기·수동 증거 기록
+설정 페이지가 규칙 배포의 대화형 정본이고, 헤드리스 도구는 브라우저를 열 수 없는 환경의 폴백이다. 둘은 같은 core 계획·적용 함수를 사용해 진입 방식에 따라 판정이 갈라지지 않는다.
 
 ## Conventions
 

@@ -2,19 +2,11 @@
 
 `@ogham/filid` 1.0 패키지 루트. 문서 계약, FCA 구조·DAG 검사, 읽기 전용 배치 계획과 FCA 범위 cross-review를 제공하는 독립 플러그인이다.
 
-함수 분할, 명명, 파일 크기, 복잡도, 커버리지 품질, 일반 AST 편집, 파일 이동, import rewrite, commit·push·PR은 소유하지 않는다. 재구조화 도구는 계획하고 검증하며, 실제 변경은 외부 행위자가 수행한다.
+함수 분할, 명명, 파일 크기, 복잡도, 커버리지 품질, 일반 AST 편집, 파일 이동, import rewrite는 소유하지 않는다. merge-track은 FCA 문서 commit과 PR 생성·갱신을 수행하지만 branch push는 호출자가 책임진다. 재구조화 도구는 계획하고 검증하며, 실제 변경은 외부 행위자가 수행한다.
 
 ## Structure
 
-| Path                  | Role                                                  |
-| --------------------- | ----------------------------------------------------- |
-| `src/`                | 어댑터, FCA core, MCP, 훅 TypeScript canonical source |
-| `skills/`             | 12개 사용자 workflow (merge-track 5 포함)             |
-| `hooks/`              | 생성된 host hook mapping                              |
-| `scripts/`            | rule/page/MCP/hook/plugin 생성 파이프라인             |
-| `bridge/` · `public/` | 커밋되는 MCP·훅·설정 UI 생성물                        |
-| `templates/`          | 문서 템플릿과 managed FCA rule canonical source       |
-| plugin manifests      | plugin-compiler가 만드는 host별 생성물                |
+정본과 배포 사본이 함께 커밋되어 트리만으로는 편집 지점을 알 수 없다. 규칙·MCP·훅·페이지는 canonical source에서 공식 build로 생성되며, manifest와 배포 사본은 직접 고치지 않는다.
 
 ## Conventions
 

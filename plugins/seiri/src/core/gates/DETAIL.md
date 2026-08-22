@@ -57,25 +57,25 @@
 
 ## Boundary Exemptions
 
-### `record/` — 훅 판정은 concrete 기록 경로를 쓴다
+### `record` — 훅 판정은 concrete 기록 경로를 쓴다
 
 - **Consumers**: `**/src/hooks/postToolUse/**`, `**/src/hooks/userPromptSubmit/**`
 - **Direct import**: `allowed`
 - **Reason**: 훅은 esbuild 번들의 바이트 상한을 지켜야 한다. 배럴을 거치면 재노출 그래프 전체가 포함되어 크기 가드를 넘으므로 판정 기록 경로만 직접 가져온다.
 
-### `render/` — 훅 출력은 concrete 렌더 경로를 쓴다
+### `render` — 훅 출력은 concrete 렌더 경로를 쓴다
 
 - **Consumers**: `**/src/hooks/postToolUse/**`, `**/src/hooks/userPromptSubmit/**`
 - **Direct import**: `allowed`
 - **Reason**: 훅은 esbuild 번들의 바이트 상한을 지켜야 한다. 배럴을 거치면 재노출 그래프 전체가 포함되어 크기 가드를 넘으므로 필요한 한 줄 렌더만 직접 가져온다.
 
-### `store/` — 훅 환기는 concrete 저장 경로를 쓴다
+### `store` — 훅 환기는 concrete 저장 경로를 쓴다
 
 - **Consumers**: `**/src/hooks/postToolUse/**`, `**/src/hooks/userPromptSubmit/**`
 - **Direct import**: `allowed`
 - **Reason**: 훅은 esbuild 번들의 바이트 상한을 지켜야 한다. 배럴을 거치면 재노출 그래프 전체가 포함되어 크기 가드를 넘으므로 원장 조회 경로만 직접 가져온다.
 
-### `status/` — 훅 환기는 concrete 상태 계산 경로를 쓴다
+### `status` — 훅 환기는 concrete 상태 계산 경로를 쓴다
 
 - **Consumers**: `**/src/hooks/userPromptSubmit/**`
 - **Direct import**: `allowed`
