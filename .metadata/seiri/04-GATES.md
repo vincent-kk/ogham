@@ -174,6 +174,8 @@ MCP에 두는 이유 — 반복 상태 갱신이고 스킬 무관 완결 도구�
 
 **두 호스트가 공유하는 유일한 판정 재료는 관측된 출력 텍스트다.** exit code는 호스트 선택 채널이고, 이벤트 이름은 Claude의 우연한 형태다. 판정을 그 둘에 걸면 같은 원장이 호스트마다 다르게 읽힌다 — 실제로 Codex에서 EXPECT 있는 게이트는 영구 unmet, EXPECT 없는 게이트는 항상 met이 됐다(08-23 확인).
 
+**실패 연쇄는 원장에 CHECK로 등록된 명령에서만 호스트 동일하다.** 명시적 failure 이벤트와 exit가 없으면 CHECK의 `unmet`을 실패, 전부 `met`을 성공으로 재사용한다. CHECK 밖이거나 `unjudgeable`인 Codex 명령은 실패를 알 수 없으므로 세지도 초기화하지도 않는다 — 거짓 발화와 거짓 성공 대신 침묵을 택하는 허용 차이다.
+
 ## 정규화 — 세 형태를 하나로
 
 훅은 페이로드를 먼저 접는다: `{ text, exit?, interrupted? }`.
@@ -307,6 +309,7 @@ config에 새 필드는 없다 — 다이얼이 seiri가 저장하는 유일한 
 - 같은 저장소 상태·같은 명령·같은 원장이면 Claude Code와 Codex가 같은 판정 줄과 같은 원장 바이트를 낸다. 판정은 정규화된 출력 텍스트와 `EXPECT`만으로 결정되고, exit code·이벤트 이름·`tool_response`의 형태는 판정에 들어가지 않는다.
 - 허용되는 차이는 호스트에 이벤트나 필드가 없을 때뿐이며(현재: Codex의 `PostToolUseFailure` 부재, `is_interrupt` 부재), 그 차이는 **보수적 방향으로만** 나타난다 — 어떤 호스트에서도 거짓 met은 생기지 않는다.
 - 검증: 호스트별 페이로드 픽스처(claude-success · claude-failure · codex-string · codex-string-with-exit-header · 빈 출력)가 같은 organ을 통과해 같은 판정·같은 원장을 낸다.
+- 실패 연쇄는 명시적 failure·exit가 없는 CHECK 호출에서 같은 `unmet` 카운트와 `met` 리셋을 만들며, 판정할 수 없는 Codex 호출은 기존 연쇄 상태를 바꾸지 않는다.
 
 ### AC-gates-dial — 다이얼
 

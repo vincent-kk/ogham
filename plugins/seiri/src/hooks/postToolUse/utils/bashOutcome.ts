@@ -34,7 +34,6 @@ export function bashOutcome(
 
   const outcome = toCheckOutcome(input);
   if (outcome.interrupted) return EMPTY_RESULT;
-  const failed = input.hook_event_name === HookEvent.POST_TOOL_USE_FAILURE;
 
   let verdicts: RecordedVerdict[];
   try {
@@ -43,11 +42,30 @@ export function bashOutcome(
     verdicts = [];
   }
 
+  const anyUnmet = verdicts.some((result) => result.verdict.kind === 'unmet');
+  const allMet =
+    verdicts.length > 0 &&
+    verdicts.every((result) => result.verdict.kind === 'met');
+
+  /** True when failure is known, false when success is known, or undefined. */
+  const failed =
+    input.hook_event_name === HookEvent.POST_TOOL_USE_FAILURE
+      ? true
+      : outcome.exit !== undefined
+        ? outcome.exit !== 0
+        : anyUnmet
+          ? true
+          : allMet
+            ? false
+            : undefined;
+
   let announce = false;
   try {
-    if (failed)
+    if (failed === true)
       announce = recordBashFailure(input.cwd, input.session_id, command);
-    else recordBashSuccess(input.cwd, input.session_id, command);
+    else if (failed === false)
+      recordBashSuccess(input.cwd, input.session_id, command);
+    // Unknown host outcomes leave any existing chain untouched.
   } catch {
     // Failure-chain persistence is optional; a recorded verdict is not.
   }

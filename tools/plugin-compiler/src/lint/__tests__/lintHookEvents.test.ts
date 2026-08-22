@@ -41,7 +41,9 @@ describe("lintHookEvents", () => {
     expect(diagnostic).toMatchObject({
       level: "warning",
       code: "codex-unknown-event",
+      message: expect.stringContaining("removed from the generated Codex hooks"),
     });
+    expect(diagnostic.message).not.toContain("ignores it silently");
   });
 
   // --- complex ---

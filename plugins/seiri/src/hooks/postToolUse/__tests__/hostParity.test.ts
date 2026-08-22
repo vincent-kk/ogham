@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -10,6 +11,8 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { FAILURE_CHAIN_LINE } from '../../../constants/failureChain.js';
+import { CHAIN_HINT } from '../../../constants/gatesLines.js';
 import type { CheckOutcome } from '../../../types/gates.js';
 import type {
   PostToolUseFailureInput,
@@ -188,5 +191,114 @@ describe('PostToolUse host payload parity', () => {
       evidence: 'pending',
       checked: false,
     });
+  });
+
+  it('keeps a codex failure chain at Claude parity for an unmet CHECK', () => {
+    const claudeRoot = seedRepo().root;
+    const codexRoot = seedRepo().root;
+    const claudeInput: PostToolUseFailureInput = {
+      cwd: claudeRoot,
+      session_id: 'session-chain',
+      hook_event_name: 'PostToolUseFailure',
+      tool_name: 'Bash',
+      tool_input: { command: COMMAND },
+      error: 'Exit code 1\nHOST_PARITY_MISSING',
+    };
+    const codexInput = {
+      cwd: codexRoot,
+      session_id: 'session-chain',
+      hook_event_name: 'PostToolUse',
+      tool_name: 'Bash',
+      tool_input: { command: COMMAND },
+      tool_response: 'HOST_PARITY_MISSING',
+    } as PostToolUseInput;
+
+    const claudeContexts = Array.from(
+      { length: 3 },
+      () => processToolOutcome(claudeInput).hookSpecificOutput?.additionalContext,
+    );
+    const codexContexts = Array.from(
+      { length: 3 },
+      () => processToolOutcome(codexInput).hookSpecificOutput?.additionalContext,
+    );
+
+    expect(claudeContexts.map((text) => text?.includes(CHAIN_HINT) ?? false)).toEqual([
+      false,
+      false,
+      true,
+    ]);
+    expect(codexContexts.map((text) => text?.includes(CHAIN_HINT) ?? false)).toEqual([
+      false,
+      false,
+      true,
+    ]);
+    expect(codexContexts[2]).toContain('G1 unmet');
+  });
+
+  it('resets a codex failure chain only after a met CHECK', () => {
+    const { root } = seedRepo();
+    const input = {
+      cwd: root,
+      session_id: 'session-reset',
+      hook_event_name: 'PostToolUse',
+      tool_name: 'Bash',
+      tool_input: { command: COMMAND },
+      tool_response: 'HOST_PARITY_MISSING',
+    } as PostToolUseInput;
+
+    const contexts = [
+      processToolOutcome(input),
+      processToolOutcome(input),
+      processToolOutcome({ ...input, tool_response: 'HOST_PARITY_OK' }),
+      processToolOutcome(input),
+      processToolOutcome(input),
+    ].map((output) => output.hookSpecificOutput?.additionalContext);
+
+    expect(contexts.every((text) => !text?.includes(CHAIN_HINT))).toBe(true);
+  });
+
+  it('leaves codex failure chain state untouched outside the gate ledger', () => {
+    const command = 'yarn outside-ledger';
+    const freshRoot = seedRepo().root;
+    const freshInput = {
+      cwd: freshRoot,
+      session_id: 'session-outside',
+      hook_event_name: 'PostToolUse',
+      tool_name: 'Bash',
+      tool_input: { command },
+      tool_response: 'FAIL',
+    } as PostToolUseInput;
+
+    const freshContexts = Array.from(
+      { length: 3 },
+      () => processToolOutcome(freshInput).hookSpecificOutput?.additionalContext,
+    );
+    expect(freshContexts).toEqual([undefined, undefined, undefined]);
+    expect(
+      existsSync(portableJoin(freshRoot, '.seiri', 'session-signals.json')),
+    ).toBe(false);
+
+    const preservedRoot = seedRepo().root;
+    const claudeInput: PostToolUseFailureInput = {
+      cwd: preservedRoot,
+      session_id: 'session-preserved',
+      hook_event_name: 'PostToolUseFailure',
+      tool_name: 'Bash',
+      tool_input: { command },
+      error: 'Exit code 1\nFAIL',
+    };
+    const codexInput = {
+      ...freshInput,
+      cwd: preservedRoot,
+      session_id: 'session-preserved',
+    };
+    processToolOutcome(claudeInput);
+    processToolOutcome(claudeInput);
+    Array.from({ length: 3 }, () => processToolOutcome(codexInput));
+
+    const preservedContext =
+      processToolOutcome(claudeInput).hookSpecificOutput?.additionalContext;
+    expect(preservedContext).toBeDefined();
+    expect(preservedContext).toContain(FAILURE_CHAIN_LINE);
   });
 });
