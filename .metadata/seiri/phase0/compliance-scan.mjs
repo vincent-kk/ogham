@@ -4,13 +4,13 @@
  *
  * Dispatch rates answered "did a workflow load". This answers the harder
  * half — whether loading it changed anything: did the artifact appear, did
- * a verification actually run before the claim, did the chain run in
- * order. Read-only, Node builtins only, no plugin runtime and no MCP tool:
+ * a verification and ledger status run before the claim, did the chain run
+ * in order. Read-only, Node builtins only, no plugin runtime and no MCP tool:
  * it reads transcripts that already exist and prints what it found.
  *
  * Usage:
  *   node compliance-scan.mjs <transcript.jsonl | directory> [--json]
- *     [--artifact <substring>]   repeatable; default: plan · TODO · ledger
+ *     [--artifact <substring>]   repeatable; default: plan · TODO · ledger · gates
  *     [--verify <substring>]     repeatable; default: test · typecheck ·
  *                                lint · build · vitest · jest · pytest
  *
@@ -34,7 +34,7 @@ const CLAIM_PATTERNS = [
   /(수정|해결)(했습니다|됐습니다|완료)/,
 ];
 
-const DEFAULT_ARTIFACT_HINTS = ["plan", "todo", "ledger"];
+const DEFAULT_ARTIFACT_HINTS = ["plan", "todo", "ledger", "gates"];
 const DEFAULT_VERIFY_HINTS = [
   "test",
   "typecheck",
@@ -132,6 +132,9 @@ function readEvents(file, options) {
 function toolEvent(block, at, options) {
   const { name, input } = block;
 
+  if (name === "mcp__plugin_seiri_tools__gates")
+    return { kind: "gates", at, detail: input.action };
+
   if (
     name === SKILL_TOOL &&
     String(input?.skill ?? "").startsWith(SEIRI_PREFIX)
@@ -167,25 +170,42 @@ function firstClaim(text) {
   return "";
 }
 
-/** The four checks, computed from one run's events. */
+/** The run summary, computed from one transcript's ordered events. */
 function scanRun(file, options) {
   const events = readEvents(file, options);
   const skills = events.filter((event) => event.kind === "skill");
-  const artifacts = events.filter((event) => event.kind === "artifact");
+  const artifacts = [
+    ...new Set(
+      events
+        .filter((event) => event.kind === "artifact")
+        .map((event) => event.detail),
+    ),
+  ];
+  const statusCalls = events.filter(
+    (event) => event.kind === "gates" && event.detail === "status",
+  ).length;
+  const abandons = events.filter(
+    (event) => event.kind === "gates" && event.detail === "abandon",
+  ).length;
 
   return {
     file,
     dispatched: skills.map((event) => event.detail),
-    artifacts: [...new Set(artifacts.map((event) => event.detail))],
+    artifacts,
+    ledger: {
+      present: artifacts.some((path) => path.endsWith("gates.md")),
+      statusCalls,
+      abandons,
+    },
     claims: claimChecks(events),
     order: orderViolations(events),
   };
 }
 
 /**
- * Every completion claim, and whether a verification ran between the last
- * file it changed and the claim itself. A verification older than the
- * change it certifies is the failure this check exists to name.
+ * Every completion claim, whether verification and ledger status ran after
+ * the last changed file, and whether verify was elected. Older evidence is
+ * the failure this check exists to name.
  */
 function claimChecks(events) {
   return events
@@ -195,10 +215,16 @@ function claimChecks(events) {
       const before = events.slice(0, index);
       const lastChange = lastIndexOfKinds(before, ["mutate", "artifact"]);
       const lastVerify = lastIndexOfKinds(before, ["verify-run"]);
+      const lastLedgerStatus = before
+        .map((candidate) =>
+          candidate.kind === "gates" ? candidate.detail : undefined,
+        )
+        .lastIndexOf("status");
       return {
         claim: event.detail,
         at: event.at,
         verifiedFresh: lastVerify > lastChange,
+        ledgerChecked: lastLedgerStatus > lastChange,
         verifyRan: lastVerify >= 0,
         verifyElected: before.some(
           (candidate) =>
@@ -250,10 +276,13 @@ function renderReport(runs) {
     lines.push(
       `artifacts: ${run.artifacts.length === 0 ? "(none)" : run.artifacts.join(", ")}`,
     );
+    lines.push(
+      `ledger: present=${run.ledger.present} status-calls=${run.ledger.statusCalls} abandons=${run.ledger.abandons}`,
+    );
 
     for (const claim of run.claims)
       lines.push(
-        `claim "${claim.claim}" @ ${claim.at}: verify elected=${claim.verifyElected} ran=${claim.verifyRan} fresh=${claim.verifiedFresh}`,
+        `claim "${claim.claim}" @ ${claim.at}: verify elected=${claim.verifyElected} ran=${claim.verifyRan} fresh=${claim.verifiedFresh} ledger=${claim.ledgerChecked}`,
       );
     if (run.claims.length === 0) lines.push("claims: (none)");
 
@@ -269,6 +298,12 @@ function renderReport(runs) {
   );
   lines.push(
     `claims backed by a fresh verification: ${claims.filter((claim) => claim.verifiedFresh).length}/${claims.length}`,
+  );
+  lines.push(
+    `claims preceded by a ledger status: ${claims.filter((claim) => claim.ledgerChecked).length}/${claims.length}`,
+  );
+  lines.push(
+    `abandons: ${runs.reduce((total, run) => total + run.ledger.abandons, 0)}`,
   );
   lines.push(
     `order violations: ${runs.reduce((total, run) => total + run.order.length, 0)}`,

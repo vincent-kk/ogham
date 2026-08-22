@@ -16,7 +16,7 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 **1. Fix the range.** The exact commits or files under review, stated so the reviewer can reproduce the diff. The reviewer sees the work product — never this conversation.
 
-**2. State what the work should do.** The requirements or plan section it answers, verbatim where exact values bind. A reviewer without the target can only review style.
+**2. State what the work should do.** The requirements or plan section it answers, verbatim where exact values bind. A reviewer without the target can only review style. Include the ledger — N of N gates met — and every ABANDON line with its reason.
 
 **3. Name the known risks.** What you are least sure of, what was hard, what you did not test. Sending a reviewer in blind wastes the review.
 

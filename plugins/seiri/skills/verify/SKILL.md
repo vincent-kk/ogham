@@ -14,13 +14,15 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## The gate
 
-**1. Name the command that would prove the claim.** No command names itself — "it should work" identifies nothing.
+**1. Name the command that would prove the claim — for a task on a ledger, that is its gate's CHECK.** No command names itself — "it should work" identifies nothing.
 
 **2. Run it fresh and in full.** Not the cached result, not the subset that passed earlier, and against the artifact you actually changed — verification against the wrong build always passes.
 
 **3. Read the output.** Exit status, failure count, warnings — before any reaction to it.
 
 **4. Claim only what the output shows, citing it.** If it does not support the claim, state the actual result instead. A disclosed failure beats a confident guess.
+
+**5. Ask the ledger.** `mcp__plugin_seiri_tools__gates({ action: "status", task })`: UNMET means the done-claim is `/seiri:execute`'s moment, not this one's. A number in the report is re-measured now or labelled unverified.
 
 ## What proof looks like
 

@@ -25,7 +25,7 @@ export const WORKFLOW_STATE_LINES: Record<WorkflowSkill, string> = {
     'A change was implemented — whether it works is `/seiri:verify`’s answer.',
   'trace-cause': 'A cause was traced — the fix still owes `/seiri:verify`.',
   verify:
-    'Verification ran — substantial work goes out through `/seiri:request-review`.',
+    'Verification ran — an unmet ledger sends the claim back to `/seiri:execute`; substantial work goes out through `/seiri:request-review`.',
   'request-review':
     'Review was requested — what comes back enters `/seiri:receive-review`.',
   'receive-review':

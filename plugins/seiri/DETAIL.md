@@ -26,10 +26,10 @@
 - SessionStart 는 현재 호스트의 effective target에서 실제로 읽히는 활성 규칙 이름, dial 위치, drift 경고, 선출 계약을 주입한다 — 규칙 본문은 주입하지 않는다. 본문은 하니스가 이미 로드한다.
 - 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트된다. 배포된 규칙이 없는 프로젝트는 선출 줄만 받고, `advisory` 에서는 배포 여부와 무관하게 아무것도 받지 않는다.
 - 어떤 실패든 `{ continue: true }` 를 내고 주입하지 않는다. 훅이 세션을 막을 수 없어야 한다.
-- PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다.
+- PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다. 작업 원장의 CHECK 와 일치하는 Bash 결과는 EXPECT 로 판정해 원장에 증거를 기록하고 정확히 한 줄의 게이트 판정을 주입한다.
 - `Skill` 로드는 관측만 한다: seiri 워크플로우면 마지막 상태를 `.seiri/session-signals.json` 에 기록하고 아무것도 주입하지 않는다. 체인 밖 스킬(다른 플러그인, 호출형 게이트)은 상태를 남기지 않는다. 상태는 로드마다 재무장되고 다음 턴이 한 번만 소비한다.
 - SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `advisory` 에서는 전혀 주입하지 않는다. 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트되므로, 배포 0건인 프로젝트의 서브에이전트는 선출 줄 하나만 받는다.
-- UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하고, 아직 말하지 않은 워크플로우 상태가 있으면 한 절을 덧붙인다(읽기 실패는 리마인더만 남기고 넘어간다). dial 로 게이트한다. `advisory` 에서는 침묵; `standard` 는 선출 어휘로 상기하며 done-claim 순간만 `/seiri:verify` 로 명시하고, `strict` 는 순간마다의 소유 스킬을 전부 이름으로 댄다. 프롬프트 본문은 읽지 않는다.
+- UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하고, 아직 말하지 않은 워크플로우 상태가 있으면 한 절을 덧붙인다(읽기 실패는 리마인더만 남기고 넘어간다). dial 로 게이트한다. `advisory` 에서는 침묵; `standard` 는 선출 어휘로 상기하며 done-claim 순간만 `/seiri:verify` 로 명시하고, `strict` 는 순간마다의 소유 스킬을 전부 이름으로 댄다. 프롬프트 본문은 읽지 않는다. 미충족 작업 원장이 있으면 작업 수와 무관하게 `/seiri:execute` 소유의 환기 한 줄을 덧붙인다.
 - InstructionsLoaded 는 구현되어 있으나 `hooks.json` 에 등록되지 않았다 (dormant). Dormant 인 동안에는 실행되지 않으며, 등록되면 훅 페이로드 전체를 보존하고 아무것도 주입하지 않는다.
 
 ### Configuration
@@ -46,6 +46,7 @@
 - 스킬 파티션의 정본은 `src/constants/skillPolicy.ts` 다 — 자동 호출 규율 7종, 조건부 질문 스킬 2종(write-plan·review-plan), 사용자 게이트 7종(scaffold-pr·trace-change 포함). `skillPolicy.test.ts` 가 각 스킬의 frontmatter 와 본문 정본 문장을 검사한다.
 - 자동 호출 규율은 자율 판단을 우선한다: 선택이 필요하면 보수적 기본값을 택하고 한 줄로 공개한다. 사용자만 결정할 수 있는 진짜 blocker 는 AskUserQuestion 1회로 묻되, 관례적 체크포인트 질문은 하지 않는다. frontmatter 도구 차단(`disallowed-tools`)은 사용하지 않는다.
 - review-plan 은 계획 검토 게이트다: 계획은 저장소에 대한 주장 묶음이므로 실행 전에 증명한다. 트리아지를 한 줄로 선언하고(무언 스킵 금지), 현재 상태 주장만 도구로 접지하며(제안 상태의 부재는 정상, 계획의 명령은 읽어서 확인하되 실행 금지), challenge 트리거(광역 변경·비가역 단계·이 세션이 쓰지 않은 계획)가 켜지면 위임/진행을 정확히 한 번 묻는다 — 위임은 request-review 규격 인계물을 만들고 턴을 끝낸다. 판정(cleared·grounded-only·rework-required)은 계획 문서에 기록한다 — 훅 상태는 스킬 이름만 나르므로 산출물이 판정을 나른다. challenge 없이 cleared 없음, 재작업은 1회에 바뀐 주장의 scoped recheck 만.
+- 게이트 원장은 write-plan → review-plan → execute → verify → request-review → finish 를 가로지르는 횡단 관심사이며, 포맷 정본은 `skills/execute/references/gates-format.md` 다.
 - scaffold-pr 는 작업 시작 게이트다: 브랜치·빈 커밋·Draft PR 만 만들고 소스 파일은 건드리지 않는다(이슈·티켓 연동 없음). git·gh 시퀀스는 동봉 `scaffold-pr.mjs` 가 결정적으로 수행하고(셸 미사용 argv spawn — 크로스플랫폼), LLM 은 브랜치·제목·본문 결정과 JSON 결과의 안정 실패 코드 해석만 맡는다. finish 가 닫는 브랜치 수명의 반대쪽 끝을 연다.
 
 ## API Contracts
@@ -91,10 +92,11 @@
 
 ### AC-tool-surface-fixed — 도구 표면
 
-- 등록 도구가 정확히 2개이며 새 요구는 기존 도구의 action 으로 흡수된다.
+- 등록 도구가 정확히 3개이며 새 요구는 기존 도구의 action 으로 흡수된다.
 
 ## History
 
+- 2026-08-22 — 계획 태스크의 실행 가능한 CHECK 를 세션 독립적인 작업별 게이트 원장에 두고 훅이 증거를 판정하며 verify 가 미충족 완료 주장을 execute 로 되돌리도록 한 결정 — 완료를 기억이 아니라 파일의 증명으로 만든다.
 - 2026-08-19 — 조건부 질문 스킬에 review-plan(계획 검토 게이트) 추가, 워크플로우 체인을 write-plan → review-plan → execute 로 확장. 계획은 주장 묶음인데 완료 주장의 verify 에 대응하는 검증 소유자가 없었다는 결정. 같은 세션 접지는 유효하되(심판은 저장소), challenge 는 신선한 눈 흉내 대신 위임 질의 1회 + 인계물 산출로 실체화해 검토 연극을 구조로 제거. execute 의 frontmatter description 도 함께 갱신 — "a plan exists" 가 다이얼 무관 상시 채널(스킬 카탈로그)로 남는 두-주인 문제.
 - 2026-08-12 — 사용자 게이트에 scaffold-pr(빈 Draft PR 스캐폴드) 추가. 이슈 연동과 provider 분기를 걷어낸 작업 시작 게이트로, git·gh 절차 전체를 동봉 `scaffold-pr.mjs`(셸 미사용 argv spawn·안정 실패 코드 JSON)에 위임해 LLM 은 브랜치·제목·본문 결정만 맡도록 축소한 결정.
 - 2026-08-07 — 사용자 게이트에 trace-change(변경의 계층적 설명) 추가, mental-model 을 6단계로 개편. 설명 산출이 이해를 강제한다는 수용 절차(2층위 수집·본질 가설·시뮬레이션 공격·질문 회귀 게이트)를 기존 반증 뼈대에 접목한 결정.
@@ -103,4 +105,4 @@
 
 ## Last Updated
 
-2026-08-19 — Skill posture 를 조건부 질문 2종으로 갱신 (review-plan 신설, 워크플로우 체인 확장).
+2026-08-22 — 게이트 원장의 세션 보고·스킬 자세·도구 표면 계약을 반영했다.

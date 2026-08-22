@@ -75,7 +75,7 @@ seiri는 방향만 제시하고, 구체적 임계값은 저장소나 filid가 �
 | 규칙   | 8종 배포 (S1~S8) · S9 opt-in 대기 · 권장 3종 기본 체크 |
 | 스킬   | 14종 (호출 6 · 자동 8, 각 SKILL.md ≤4KB)               |
 | 훅     | 번들 5 (등록 4 · dormant 1, 차단 훅 없음)              |
-| MCP    | 도구 2 (open_settings · rule_docs_sync)                |
+| MCP    | 도구 3 (open_settings · rule_docs_sync · gates)        |
 | 다이얼 | advisory floor · standard 기본 · strict                |
 
 규칙의 근거: S1·S2는 무지침 대조군 대비 처치군 반전, S3~S6은 이관 실적(단일샷 대조군은 실패 미재현 — 계측기 부적합), S7·S8은 D8 무삭감 판정에 근거합니다. S9(decision-trail)은 자체 대조군 통과 시 opt-in 등재됩니다. 상세 근거는 [phase0/SYNTHESIS.md](./phase0/SYNTHESIS.md).

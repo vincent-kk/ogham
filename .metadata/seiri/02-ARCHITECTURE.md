@@ -59,7 +59,7 @@ filid의 `/filid:setup` → `open_settings` → `rule_docs_sync` 경로를 그�
 | 계층      | seiri                                                       | 비고                                        |
 | --------- | ----------------------------------------------------------- | ------------------------------------------- |
 | **Hook**  | 번들 5 — 등록 4(5개 이벤트) + dormant 1(InstructionsLoaded) | **차단 훅 없음**(P2)                        |
-| **MCP**   | 도구 2~3개                                                  | filid는 15개+. 코드 분석 도구 없음          |
+| **MCP**   | 도구 3개                                                    | filid는 15개+. 코드 분석 도구 없음          |
 | **Skill** | 14개 — 호출 6 · 자동 8 (§3 스킬 지도)                       | 호출형 상시 비용 0, 자동형 description만    |
 | **Agent** | **없음**                                                    | 리뷰는 filid 소관, 오케스트레이션은 역할 밖 |
 
@@ -101,6 +101,7 @@ plugins/seiri/
 │   ├── core/
 │   │   ├── INTENT.md
 │   │   ├── utils/               # findRepoRoot · computeFileSha256 · writeAtomically
+│   │   ├── gates/               # 작업 원장 파서·상태·기록
 │   │   ├── infra/
 │   │   │   └── configLoader/    # 다이얼 2계층 — config.json 기준선(커밋) + runtime.json(비추적)
 │   │   └── ruleDocs/            # 매니페스트 · 상태 · plan/apply · 드리프트 판정
@@ -111,7 +112,8 @@ plugins/seiri/
 │   │   ├── pages/settings/      # 설정 UI 소스
 │   │   └── tools/
 │   │       ├── openSettings/    # 설정 UI 열기 (+ webServer/)
-│   │       └── ruleDocsSync/    # 배포·제거 실행 + config action(다이얼 조회·런타임 set/clear)
+│   │       ├── ruleDocsSync/    # 배포·제거 실행 + config action(다이얼 조회·런타임 set/clear)
+│   │       └── gates/           # 작업 원장 상태·포기·수동 증거 기록
 │   ├── hooks/
 │   │   ├── INTENT.md
 │   │   ├── shared/              # stdin 파싱·출력 계약
@@ -138,7 +140,7 @@ plugins/seiri/
 │   ├── rules/
 │   │   ├── manifest.json        # SSoT
 │   │   └── seiri_*.md           # 배포 규칙 (정본)
-│   └── gates/                   # placeholder 골격 (값 없음)
+│   └── scaffolds/               # placeholder 골격 (값 없음)
 │
 ├── skills/                      # 호출 4 · 자동 8 — 지도는 §3
 │   ├── setup/ · brainstorm/ · interview/ · finish/        # 호출 전용 (상시 0)
@@ -223,7 +225,7 @@ yarn build:plugin             # 번들만 재생성 (tsc 없이)
 | 항목                      | 목표                                           | 근거                                                                                                        |
 | ------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | **상시 주입**             | 훅 렌더 기본 **~7줄** · strict ≤9줄(경고 포함) | 규칙 본문은 하니스 몫 — 선출 라인 포함(D7-E B2 실측)                                                        |
-| **MCP 도구**              | **3개 이하** — 현 2, config는 action 흡수      | 스키마가 상시 컨텍스트 비용                                                                                 |
+| **MCP 도구**              | **3개 이하** — 현 3 — `gates`                  | 스키마가 상시 컨텍스트 비용                                                                                 |
 | **훅**                    | **번들 5** — 등록 4 + dormant 1                | 차단 훅 없음 불변                                                                                           |
 | 규칙                      | 5~9개, 각 **200줄 미만**                       | 공식: 초과 시 _"reduce adherence"_                                                                          |
 | 스킬                      | 각 **≤4KB** (2KB→4KB, D7-E 지시 3)             | SKILL.md만 — 명시 체이닝·문구 여유. 깊은 절차는 호출형의 `references/`로(상시 0). 선례의 1,214줄이 반면교사 |
@@ -302,7 +304,7 @@ seiri는 superpowers의 **대체재**입니다(원장 §0). 대체가 성립하�
   안 하는 실패)은 **규칙에 남습니다**. 스킬 디스패치는 그 인지에 베팅하는 장치라,
   옮기면 실패가 곧 미발화가 됩니다.
 
-**체이닝**: 각 스킬 말미의 `Hand off` 줄이 다음 순간의 스킬을 **`/seiri:<name>` 네임스페이스로 직접 명시**합니다(D7-E 지시 2 — brainstorm→write-plan/implement · write-plan→execute · implement→verify · trace-cause→verify · verify→request-review/finish · receive-review→verify · trace-structure→write-plan). **전이 역시 선출**이라, 훅 상태 체인(D1)이 이를 보강합니다 — PostToolUse가 워크플로우 로드를 세션 신호에 기록하고, 다음 턴 리마인더가 "방금 남긴 것과 다음 소유자"를 1절로 상기합니다(consume-once). sp의 terminal state 봉쇄
+**체이닝**: 각 스킬 말미의 `Hand off` 줄이 다음 순간의 스킬을 **`/seiri:<name>` 네임스페이스로 직접 명시**합니다(D7-E 지시 2 — brainstorm→write-plan/implement · write-plan→execute · implement→verify · trace-cause→verify · verify→request-review/finish · verify→execute(뒷가장자리: 원장 UNMET) · receive-review→verify · trace-structure→write-plan). **전이 역시 선출**이라, 훅 상태 체인(D1)이 이를 보강합니다 — PostToolUse가 워크플로우 로드를 세션 신호에 기록하고, 다음 턴 리마인더가 "방금 남긴 것과 다음 소유자"를 1절로 상기합니다(consume-once). sp의 terminal state 봉쇄
 _"The ONLY skill you invoke…"_ 는 가져오지 않습니다 — 타 플러그인과의 공존을 깨고,
 판단을 몰수합니다(P2).
 
@@ -342,9 +344,9 @@ _"핵심 명사가 두 라운드 불변"_). 수치를 뺀 것은 정확성 손�
 | 이벤트 (matcher)                | 진입점                           | 역할                                                      | 다이얼 게이팅                 | 상태                                 |
 | ------------------------------- | -------------------------------- | --------------------------------------------------------- | ----------------------------- | ------------------------------------ |
 | **SessionStart** (`*`)          | `bridge/setup.mjs`               | 활성 규칙 · 유효 다이얼 · 드리프트 경고 · 발동 폭 라인    | 블록 선택                     | 등록                                 |
-| **UserPromptSubmit** (`*`)      | `bridge/user-prompt-submit.mjs`  | 매 턴 스킬 발동·규칙 준수 상기 1줄 (스킬 축 우선)         | **standard↑** (advisory 침묵) | 등록                                 |
-| **PostToolUseFailure** (`Bash`) | `bridge/post-tool-use.mjs`       | 같은 명령 연쇄 실패를 세고, 임계에서 trace-cause 신호 1줄 | **standard↑** (advisory 침묵) | 등록                                 |
-| **PostToolUse** (`Bash`)        | `bridge/post-tool-use.mjs`       | 성공 — 그 명령의 연쇄를 잊는다 (주입 없음)                | **standard↑** (advisory 침묵) | 등록 (같은 번들)                     |
+| **UserPromptSubmit** (`*`)      | `bridge/user-prompt-submit.mjs`  | 매 턴 스킬 발동·규칙 준수 상기 1줄 + 미충족 원장 환기 1줄 | **standard↑** (advisory 침묵) | 등록                                 |
+| **PostToolUseFailure** (`Bash`) | `bridge/post-tool-use.mjs`       | 같은 명령 연쇄 실패 신호 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄 | **standard↑** (advisory 침묵) | 등록                                 |
+| **PostToolUse** (`Bash`)        | `bridge/post-tool-use.mjs`       | 성공 연쇄 해제 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄 | **standard↑** (advisory 침묵) | 등록 (같은 번들)                     |
 | **SubagentStart** (`*`)         | `bridge/subagent-start.mjs`      | 서브에이전트에 상태 요약 재주입 (렌더 축약판 재사용)      | SessionStart와 동일           | 등록                                 |
 | **InstructionsLoaded**          | `bridge/instructions-loaded.mjs` | 지시 파일 로드 관측 (주입 없음)                           | —                             | **dormant** — 미등록, 재측정 시 복원 |
 
@@ -378,13 +380,14 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 
 ## MCP — 상태기계, 도구상자 아님
 
-### 상태 3종
+### 상태 4종
 
 | 상태          | 내용                                                                        | 담당                      |
 | ------------- | --------------------------------------------------------------------------- | ------------------------- |
 | **설정**      | 다이얼 2계층 — 기준선(`config.json`, 커밋) + 런타임(`runtime.json`, 비추적) | `core/infra/configLoader` |
 | **배포 상태** | 배포된 규칙 + templateHash 대조                                             | `core/ruleDocs`           |
 | **세션 신호** | 실패 연쇄 카운터 등 세션 스코프 상태 (`.seiri/` 비추적 영역)                | `hooks/postToolUse`       |
+| **작업 상태** | `.seiri/tasks/<name>/` 원장                                                  | `core/gates` · [04-GATES](./04-GATES.md) |
 
 **상태 키는 저장소 신원 + 워크트리로 분리합니다**(`core/infra/projectHash`) — 같은 저장소의 워크트리 두 개가 동시 세션을 열어도 섞이지 않아야 합니다.
 
@@ -394,8 +397,9 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 | ---------------- | -------------------------------------------------------------------------------------------- | -------------- |
 | `open_settings`  | 설정 UI 열기                                                                                 | `openSettings` |
 | `rule_docs_sync` | 선택 반영 — diff 제시 → 배포·제거. **+`config` action**: 유효 다이얼 조회 · 런타임 set/clear | `ruleDocsSync` |
+| `gates`          | 작업 원장 status · abandon · 수동 record. 명령 실행·원장 생성 없음                         | —              |
 
-**3번째 도구는 만들지 않습니다** — 다이얼 조회·변경은 absorb-first 규칙(tools INTENT)에 따라 `rule_docs_sync`의 action으로 흡수합니다. 기준선 쓰기는 여전히 setup 표면 전용입니다.
+**3번째 도구는 `gates`입니다** — absorb-first의 유일한 예외(규칙 배포 ≠ 작업 상태). 4번째는 만들지 않습니다.
 
 **코드 분석·검색 도구는 두지 않습니다** — 하니스가 이미 갖고 있습니다. 도구 추가는 규모 목표를 넘기는 결정입니다.
 

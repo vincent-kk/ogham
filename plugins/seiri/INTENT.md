@@ -10,7 +10,7 @@
 | ---------------------------- | ------------------------------------------------------------------ |
 | `src/`                       | TypeScript 소스 (fractal 루트)                                     |
 | `templates/rules/`           | 배포되는 규칙 문서 + `manifest.json`                               |
-| `templates/gates/`           | 저장소 게이트 placeholder 골격 (값 없음)                           |
+| `templates/scaffolds/`       | 저장소 게이트 placeholder 골격 (값 없음)                           |
 | `skills/`                    | 스킬 (호출·자동, 작업 주기 전 구간) — 목록 정본은 `SHIPPED_SKILLS` |
 | `hooks/hooks.json`           | 등록 4 · 5 이벤트 (InstructionsLoaded 만 dormant)                  |
 | `libs/run.cjs`               | cross-platform 훅 러너                                             |

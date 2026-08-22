@@ -14,6 +14,8 @@ English: [README.md](./README.md)
 
 `standard`와 `strict`에서는 매 턴 시작마다 짧은 선출 리마인더도 다시 주입하고, 워크플로우 스킬이 방금 실행됐다면 한 줄 핸드오프 노트 — 무엇을 남겼고 다음 순간은 어느 스킬의 것인지 — 를 덧붙입니다. `advisory`는 턴마다 아무것도 주입하지 않습니다.
 
+계획의 각 태스크에는 `.seiri/tasks/<name>/gates.md`의 실행 가능한 게이트가 있습니다. 각 `CHECK`를 Bash로 그대로 실행하면 PostToolUse 훅이 증거를 기록하고, 원장이 다 차기 전의 완료 주장은 `/seiri:verify`가 `/seiri:execute`로 되돌립니다. 세션이 아니라 작업 이름이 원장을 소유합니다.
+
 ## 설치
 
 ```

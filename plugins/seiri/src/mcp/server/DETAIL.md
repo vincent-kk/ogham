@@ -9,14 +9,14 @@
 
 ## API Contracts
 
-- `lifecycle/` — `createServer`(서버 생성 + 도구 2개 등록), `startServer`(stdio 연결).
+- `lifecycle/` — `createServer`(서버 생성 + 도구 3개 등록), `startServer`(stdio 연결).
 - `serialization/` — `toolResult`(compact JSON), `wrapHandler`(throw → 오류 결과).
 
 ## Acceptance Criteria
 
 ### AC-tool-count — 도구 개수 고정
 
-- 등록 도구가 정확히 2개이고 각각 `wrapHandler` 를 거친다.
+- 등록 도구가 정확히 3개이고 각각 `wrapHandler` 를 거친다.
 
 ### AC-compact-serialization — 응답 크기
 
@@ -24,4 +24,4 @@
 
 ## Last Updated
 
-2026-07-30 — 서버 조립과 직렬화 계약을 문서화했다.
+2026-08-22 — 서버의 도구 3개 등록과 직렬화 계약을 문서화했다.

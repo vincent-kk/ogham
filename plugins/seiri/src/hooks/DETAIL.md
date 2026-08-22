@@ -12,8 +12,8 @@
 ## API Contracts
 
 - `processSessionStart` — SessionStart: 활성 규칙·유효 다이얼·드리프트·선출 계약 주입.
-- `processUserPromptSubmit` — UserPromptSubmit: 매 턴 선출 상기 + 워크플로우 상태 1절.
-- `processToolOutcome` — PostToolUse(+Failure): Bash 실패 연쇄 신호와 Skill 로드 관측.
+- `processUserPromptSubmit` — UserPromptSubmit: 매 턴 선출 상기 + 워크플로우 상태 1절 + 미충족 원장 환기 1줄.
+- `processToolOutcome` — PostToolUse(+Failure): Bash 실패 연쇄 신호와 Skill 로드 관측; CHECK 일치 시 게이트 판정·원장 기록·판정 1줄.
 - `processSubagentStart` — SubagentStart: 상태 요약 축약 재주입.
 - `processInstructionsLoaded` — InstructionsLoaded: 로드 관측(주입 0, dormant).
 
@@ -41,4 +41,4 @@
 
 ## Last Updated
 
-2026-07-30 — 훅 계층 계약을 문서화하고 훅 밖 소비자용 배럴을 명시했다.
+2026-08-22 — 훅 계층 계약에 게이트 판정·원장 기록·미충족 환기를 반영했다.

@@ -14,6 +14,8 @@ What it does inject is the part the files cannot state about themselves: which r
 
 At `standard` and `strict`, it also re-raises a short election reminder at the start of every turn, plus a one-line hand-off note when a workflow skill just ran — what it left behind, and which skill owns the next moment. `advisory` injects nothing per turn.
 
+Each plan task has runnable gates in `.seiri/tasks/<name>/gates.md`. Run each `CHECK` verbatim in Bash and the PostToolUse hook records the evidence; until the ledger is full, `/seiri:verify` sends a done-claim back to `/seiri:execute`. The task name, not the session, owns the ledger.
+
 ## Install
 
 ```
