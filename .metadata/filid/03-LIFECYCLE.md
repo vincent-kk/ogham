@@ -35,6 +35,43 @@
 
 `pipeline`이 주 사용 경로다. 네 단계를 진입점 자동 감지와 함께 한 번에 돈다.
 
+#### resolve decision sheet
+
+`resolve`는 confirmed fix를 하나씩 묻지 않는다. 의사결정 전에 `fix-requests.md` 전체를 파싱하고, severity나 perspective와 별개로 correction을 추천한다.
+
+```
+모든 FIX block 파싱
+       │
+       ▼
+Recommendation 분류
+├─ Apply   → 명백하고 bounded하거나 영향이 작은 correction, 기본 [x]
+└─ Discuss → 제품·공개 API·아키텍처 선택이 필요한 correction, focus [?]
+       │
+       ▼
+전체 decision sheet
+├─ Needs attention (Discuss) 먼저
+└─ Selected by default (Apply) 다음
+       │
+       ▼
+한 batch decision round
+├─ Apply recommended set
+├─ Apply every item
+└─ automatic Other → apply/discuss/skip/reject를 FIX ID로 한 번에 입력
+       │
+       ▼
+모든 discuss 질문에 함께 답변 → 미결 FIX만 한 batch로 재표시
+       │
+       ▼
+모든 skip/reject 사유의 ADR 완전성 검증
+       │
+       ▼
+baseline capture → accepted correction 일괄 위임 → 검증된 ADR 직렬화
+```
+
+`Other` 응답에서 생략한 ID는 sheet의 default를 유지한다. `skip`은 reason을 가진 warning deferral에만 쓰며 error는 apply 또는 reason-bearing reject로 결정한다. unknown ID, error skip, 이유 없는 skip/reject와 불완전한 ADR은 전부 모아 한 번에 다시 요청한다. 이 검증이 끝나기 전에는 baseline을 잡거나 correction을 위임하지 않으며, 이후 rejection 단계는 decision을 다시 열지 않는다.
+
+`--auto`도 전체 sheet를 먼저 출력한다. 원래 Recommendation과 그 이유는 그대로 두고 Decision만 모든 행 `[x] Apply (auto-selected)`로 바꾸며, prompt 없이 baseline과 delegation으로 진행한다. 따라서 pipeline에서도 무엇이 원래 논쟁적이었는지는 보이지만 실행은 멈추지 않는다.
+
 ### 1.0에서 제거된 스킬
 
 | 스킬               | 제거 사유                                                                                                                                  |

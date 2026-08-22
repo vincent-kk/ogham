@@ -272,6 +272,40 @@ snapshot 증거로 INTENT.md / DETAIL.md를 개선한다. **편집 전에 승인
 
 contract·structure·verification 3관점 병렬 리뷰 + adversarial 판정. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 **FCA scope**로 명시된다. PR 코멘트는 사용자가 PR scope를 요청했을 때만 게시한다.
 
+### /filid:resolve
+
+```
+/filid:resolve
+/filid:resolve --auto
+```
+
+interactive 실행은 모든 confirmed fix를 먼저 보여 준다. `Severity`/`Perspective`는 finding의 종류이고, `Recommendation`은 적용 편의와 논쟁성을 따로 판정한다.
+
+```text
+Default | ID      | Severity | Perspective | Recommendation | Path
+[?]     | FIX-004 | error    | structure   | Discuss        | src/api
+[x]     | FIX-001 | warning  | contract    | Apply          | src/index.ts
+```
+
+`Needs attention`이 기본 선택된 자잘한 correction보다 먼저 나온다. 선택지는 **Apply recommended set**과 **Apply every item**이고, ID별 override나 질문은 자동 제공되는 **Other**에 한 번에 적는다.
+
+```text
+apply FIX-001,FIX-003; discuss FIX-004: public API를 유지할 수 있나?;
+skip FIX-006: 이번 warning을 유지할 경계 이유; reject FIX-008: 대안과 비용
+```
+
+생략한 ID는 표시된 default를 유지한다. discussion 답변과 잘못된 directive도 항목별로 왕복하지 않고 미결 항목 전체를 묶어 처리한다. `skip`은 warning에만 허용되고 error는 apply 또는 근거 있는 reject가 필요하다. 모든 skip/reject 사유는 correction 위임 전에 Context/Decision/Consequences가 완전한지 검증된다.
+
+`--auto`는 sheet를 생략하지 않는다. 원래 Recommendation은 보존하고 Decision만 전부 `[x] Apply (auto-selected)`로 표시한 뒤 질문 없이 진행한다.
+
+### /filid:pipeline
+
+```
+/filid:pipeline
+```
+
+`pull-request → cross-review → resolve → revalidate`를 연속 실행한다. resolve에는 항상 `--auto`를 전달하므로 전체 decision sheet는 보이지만 모든 항목이 자동 선택되고 prompt는 없다. 개별 override나 discussion이 필요하면 pipeline 대신 `/filid:resolve`를 직접 실행한다.
+
 ### /filid:migrate
 
 ```

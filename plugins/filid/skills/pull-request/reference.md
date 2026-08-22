@@ -42,6 +42,14 @@ exception.
 Pull request aborted: could not resolve a base ref. Pass --base explicitly.
 ```
 
+**Stage 4 — unpushed branch with `--push` off**
+
+```text
+Pull request body saved: origin has no <BRANCH>, or it is behind HEAD, and
+--push is off (--no-push). Push it (`git push -u origin <BRANCH>`) or re-run
+with --push.
+```
+
 ## §2 Base resolution order
 
 1. `--base REF` when supplied.
@@ -81,7 +89,7 @@ Rules:
 ## §4 What this skill does not do
 
 - It does not run `cross-review`. Chain that separately, or use `pipeline`.
-- It does not push. The branch must already be pushed, or `gh` will report the failure and Stage 4 falls back to saving the body locally.
+- It pushes an unpushed branch — no remote counterpart, or local commits the remote lacks — before opening the PR (`--push`, on by default), and says so in the terminal output. `--no-push` turns it off: the run then ends with the body saved locally and the §1 message; `gh` is not called, because its own error (`Head sha can't be blank`) does not name the cause.
 - It does not edit source code. Stage 1 touches documents only.
 - It does not create or resolve debt records. Rejections are recorded by `resolve` in `justifications.md`.
 

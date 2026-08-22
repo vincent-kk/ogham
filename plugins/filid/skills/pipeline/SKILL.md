@@ -2,7 +2,7 @@
 name: pipeline
 user-invocable: true
 description: '[filid:pipeline] Run the full merge-track cycle — pull-request, cross-review, resolve, revalidate — as one continuous operation with entry-point detection and resume support.'
-argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-enrich] [--force] [--title TITLE]'
+argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-enrich] [--force] [--title TITLE] [--push|--no-push]'
 version: '1.0.0'
 complexity: complex
 plugin: filid
@@ -37,7 +37,7 @@ Canonical order:
 pr-create → review → resolve → revalidate
 ```
 
-Two flags are not optional here, because both stages would otherwise stop for input: `pr-create` always gets `--auto-approve` (the `enrich-docs` approval step) and `resolve` always gets `--auto` (the per-item decision prompts). Use `/filid:pull-request` or `/filid:resolve` directly when those decisions are wanted.
+Two flags are not optional here, because both stages would otherwise stop for input: `pr-create` always gets `--auto-approve` (the `enrich-docs` approval step) and `resolve` always gets `--auto`. Resolve still prints the complete decision sheet and preserves its recommendations, but auto-selects every decision and opens no prompt. Use `/filid:pull-request` directly for document approval, or `/filid:resolve` directly for batch overrides and discussion.
 
 ## Step 1 — Assess the branch
 
@@ -98,18 +98,19 @@ Result: <verdict or stop reason>
 
 ## Options
 
-| Option          | Type   | Default | Effect                                                   |
-| --------------- | ------ | ------- | -------------------------------------------------------- |
-| `--from STAGE`  | string | auto    | Entry stage: `pr-create`/`review`/`resolve`/`revalidate` |
-| `--base REF`    | string | auto    | Base ref, forwarded to `pr-create` and `review`          |
-| `--draft`       | flag   | off     | Forwarded to `pr-create`                                 |
-| `--skip-enrich` | flag   | off     | Forwarded to `pr-create` — skips document sync           |
-| `--force`       | flag   | off     | Restart the review from a fresh state                    |
-| `--title TITLE` | string | auto    | Forwarded to `pr-create`                                 |
+| Option          | Type   | Default | Effect                                                                                                         |
+| --------------- | ------ | ------- | -------------------------------------------------------------------------------------------------------------- |
+| `--from STAGE`  | string | auto    | Entry stage: `pr-create`/`review`/`resolve`/`revalidate`                                                       |
+| `--base REF`    | string | auto    | Base ref, forwarded to `pr-create` and `review`                                                                |
+| `--draft`       | flag   | off     | Forwarded to `pr-create`                                                                                       |
+| `--skip-enrich` | flag   | off     | Forwarded to `pr-create` — skips document sync                                                                 |
+| `--force`       | flag   | off     | Restart the review from a fresh state                                                                          |
+| `--title TITLE` | string | auto    | Forwarded to `pr-create`                                                                                       |
+| `--push`        | flag   | on      | Forwarded to `pr-create`; `--no-push` turns it off — `pr-create` then saves the body and the cycle stops there |
 
 ## Invariants
 
 - The pipeline never calls an MCP tool other than `review_state`, and never edits a file.
 - Stage order is fixed. `--from` selects an entry, never a reordering.
-- `resolve` always runs with `--auto` and `pr-create` always with `--auto-approve` here. A stage that stops for input has not been handed the flag that suppresses it.
+- `resolve` always runs with `--auto` and `pr-create` always with `--auto-approve` here. The resolve decision sheet remains visible, but every decision is auto-selected and no batch prompt opens. A stage that stops for input has not been handed the flag that suppresses it.
 - The pipeline does not end at `resolve`. Reaching `resolve` and stopping is a defect, not a completion.
