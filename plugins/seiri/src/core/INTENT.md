@@ -1,18 +1,19 @@
-# core — 설정 · 규칙 문서 · 세션 신호
+# core — 설정 · 규칙 문서 · 세션 신호 · 작업 상태
 
 ## Purpose
 
-seiri 가 소유하는 세 상태의 구현: 개입 강도 다이얼, 호스트 규칙 배포 상태, 세션 스코프 신호. **진실은 소유하지 않는다** — 코드가 옳은지는 저장소 (테스트·CI·CLAUDE.md)가 답하고, 여기는 맥락만 다룬다.
+seiri 가 소유하는 네 상태의 구현: 개입 강도 다이얼, 호스트 규칙 배포 상태, 세션 스코프 신호, 작업 상태. **진실은 소유하지 않는다** — 코드가 옳은지는 저장소 (테스트·CI·CLAUDE.md)가 답하고, 여기는 맥락과 관측된 증거만 다룬다.
 
 ## Structure
 
 ```
 index.ts        barrel
 utils/          organ — findRepoRoot · computeFileSha256 · writeAtomically
-                        · ensureSeiriDir
+                        · ensureSeiriDir · acquireLockDir · hashCommand
 infra/          configLoader (다이얼 3계층)
 ruleDocs/       매니페스트 · 배포 상태 · plan/apply · 드리프트 판정
 sessionSignals/ 실패 연쇄 카운터 (세션 스코프, 비추적)
+gates/          작업 게이트 원장 (작업 스코프, 비추적)
 ```
 
 ## Conventions
@@ -33,7 +34,7 @@ sessionSignals/ 실패 연쇄 카운터 (세션 스코프, 비추적)
 
 ### Ask first
 
-- 새 상태 종류 추가 (현재 다이얼 + 배포 상태 둘뿐).
+- 새 상태 종류 추가 (현재 다이얼 + 배포 상태 + 세션 신호 + 작업 상태).
 - 공개 시그니처 변경 (MCP·훅 양쪽 소비).
 
 ### Never do

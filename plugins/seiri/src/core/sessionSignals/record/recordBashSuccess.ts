@@ -1,7 +1,7 @@
+import { hashCommand } from '../../utils/hashCommand.js';
 import { readSignals } from '../store/readSignals.js';
 import { withSignalsLock } from '../store/withSignalsLock.js';
 import { writeSignals } from '../store/writeSignals.js';
-import { hashCommand } from '../utils/hashCommand.js';
 
 /**
  * Forget the chain for `command` — it went green.

@@ -10,7 +10,7 @@
 index.ts   barrel (외부 소비자 전용 — 훅은 organ 을 직접 import)
 record/    organ — recordBashFailure · recordBashSuccess · recordWorkflowState · consumeWorkflowState
 store/     organ — readSignals · writeSignals · withSignalsLock (`.seiri/session-signals.json`)
-utils/     organ — hashCommand · resolveSignalsPath · isWorkflowSignal · acquireSignalsLock
+utils/     organ — resolveSignalsPath · isWorkflowSignal
 ```
 
 ## Conventions

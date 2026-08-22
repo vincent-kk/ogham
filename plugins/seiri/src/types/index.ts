@@ -8,6 +8,18 @@ export type {
   SeiriConfigScope,
 } from './config.js';
 export type {
+  AbandonEntry,
+  CheckOutcome,
+  GateEntry,
+  GatesLedger,
+  GateState,
+  GateStatus,
+  GateVerdict,
+  RecordedVerdict,
+  TaskLedger,
+  TaskLedgerStatus,
+} from './gates.js';
+export type {
   RuleDocAction,
   RuleDocEntry,
   RuleDocOutcome,

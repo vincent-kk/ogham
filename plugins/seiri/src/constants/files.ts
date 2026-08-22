@@ -4,6 +4,18 @@ export const CONFIG_DIR = '.seiri';
 /** Configuration file inside {@link CONFIG_DIR}. Committed — the baseline. */
 export const CONFIG_FILE = 'config.json';
 
+/** Session-independent task directories inside {@link CONFIG_DIR}. */
+export const TASKS_DIR = 'tasks';
+
+/** Human-authored implementation plan inside one task directory. */
+export const PLAN_FILE = 'plan.md';
+
+/** Machine-readable task gate ledger inside one task directory. */
+export const GATES_FILE = 'gates.md';
+
+/** Ephemeral lock directory serializing one task ledger mutation. */
+export const GATES_LOCK_DIR = 'gates.lock';
+
 /** Session valve inside {@link CONFIG_DIR}. Untracked — overrides the baseline. */
 export const RUNTIME_FILE = 'runtime.json';
 
@@ -26,17 +38,16 @@ export const IGNORE_FILE = '.gitignore';
 /**
  * Members of {@link CONFIG_DIR} that must never reach a commit.
  *
- * All three are session state: a dial someone lowered for one afternoon,
- * counters that mean nothing outside the session that wrote them, and a
- * lock that outlives its holder only when a hook was killed mid-write.
- * Letting any ride along in a commit would erode the team's declared
- * baseline, so `.seiri/.gitignore` lists them and travels with the
- * directory rather than editing the repository's root ignore file.
+ * The runtime valve, signal counters, and signal lock are session state.
+ * Task ledgers remain local across sessions so work can resume, but they
+ * still never belong in a commit. `.seiri/.gitignore` lists all four and
+ * travels with the directory rather than editing the root ignore file.
  */
 export const UNTRACKED_CONFIG_FILES = [
   RUNTIME_FILE,
   SIGNALS_FILE,
   SIGNALS_LOCK_DIR,
+  `${TASKS_DIR}/`,
 ] as const;
 
 /** Harness-owned directory that auto-loads instruction files. */

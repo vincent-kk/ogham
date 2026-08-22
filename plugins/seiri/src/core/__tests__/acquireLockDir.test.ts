@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { acquireSignalsLock } from '../utils/acquireSignalsLock.js';
+import { acquireLockDir } from '../utils/acquireLockDir.js';
 
 /**
  * The lock's two failure modes, neither of which any other check notices.
@@ -21,6 +21,7 @@ import { acquireSignalsLock } from '../utils/acquireSignalsLock.js';
  */
 const STALE_AFTER_MS = 5_000;
 
+/** Temporary directories created by the lock checks. */
 const createdRoots: string[] = [];
 
 afterAll(() => {
@@ -35,10 +36,10 @@ function makeDir(): string {
   return dir;
 }
 
-describe('acquireSignalsLock', () => {
+describe('acquireLockDir', () => {
   it('takes a lock nobody holds', () => {
     const lockPath = portableJoin(makeDir(), 'signals.lock');
-    expect(acquireSignalsLock(lockPath)).toBe(true);
+    expect(acquireLockDir(lockPath)).toBe(true);
   });
 
   it('gives up on a held lock instead of waiting on it', () => {
@@ -46,7 +47,7 @@ describe('acquireSignalsLock', () => {
     mkdirSync(lockPath);
 
     const startedAt = Date.now();
-    const taken = acquireSignalsLock(lockPath);
+    const taken = acquireLockDir(lockPath);
 
     expect(taken).toBe(false);
     // Bounded: the caller proceeds unserialised rather than stalling a turn.
@@ -59,6 +60,6 @@ describe('acquireSignalsLock', () => {
     const longAgo = new Date(Date.now() - STALE_AFTER_MS * 2);
     utimesSync(lockPath, longAgo, longAgo);
 
-    expect(acquireSignalsLock(lockPath)).toBe(true);
+    expect(acquireLockDir(lockPath)).toBe(true);
   });
 });

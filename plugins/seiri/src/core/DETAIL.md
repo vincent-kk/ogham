@@ -3,8 +3,8 @@
 ## Requirements
 
 - core 는 **진실을 소유하지 않는다.** 코드가 옳은지는 저장소(테스트·CI·CLAUDE.md)가 답하고, 여기는 맥락만 다룬다.
-- 소유 상태는 셋이다: 개입 강도 다이얼, 호스트 규칙 배포 상태, 세션 스코프 신호.
-- 각 상태의 진실은 그 상태를 담는 곳에 있다 — 규칙 배포는 파일시스템, 다이얼은 설정 파일, 세션 신호는 세션 파일이다. 사본을 만들지 않는다.
+- 소유 상태는 넷이다: 개입 강도 다이얼, 호스트 규칙 배포 상태, 세션 스코프 신호, 작업 상태.
+- 각 상태의 진실은 그 상태를 담는 곳에 있다 — 규칙 배포는 파일시스템, 다이얼은 설정 파일, 세션 신호는 세션 파일, 작업 상태는 작업 원장이다. 사본을 만들지 않는다.
 - 훅 도달 코드는 이 계층의 배럴이 아니라 concrete 파일을 직접 import 한다(번들 크기 가드).
 
 ## API Contracts
@@ -12,7 +12,8 @@
 - `infra/configLoader` — 다이얼 2계층(기준선 + 런타임 밸브)의 읽기·쓰기·설명.
 - `ruleDocs` — 매니페스트, 배포 상태, plan/apply, 드리프트 판정.
 - `sessionSignals` — 실패 연쇄 카운터와 워크플로우 상태(세션 스코프, 비추적).
-- `utils/` — `findRepoRoot`, `computeFileSha256`, `writeAtomically`, `ensureSeiriDir`.
+- `gates` — 작업 게이트의 파싱, 증거 기록, 포기와 상태 집계(작업 스코프, 비추적).
+- `utils/` — `findRepoRoot`, `computeFileSha256`, `writeAtomically`, `ensureSeiriDir`, `acquireLockDir`, `hashCommand`.
 
 ## Acceptance Criteria
 
@@ -36,4 +37,4 @@
 
 ## Last Updated
 
-2026-07-30 — core 세 상태의 경계와 organ 직접 접근 면책을 문서화했다.
+2026-08-22 — 작업 상태를 네 번째 경계로 추가하고 공유 락·명령 해시의 위치를 명시했다.

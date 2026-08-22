@@ -12,7 +12,7 @@
 
 - 배포 진입점은 esbuild 산출물이다: MCP 서버(`bridge/mcp-server.cjs`, 원본 `mcp/serverEntry/`)와 훅 번들 4종(`bridge/*.mjs`).
 - `src/index.ts` 는 named re-export 만 담는 공개 배럴이다.
-- 소유 상태는 셋이다: 개입 강도 다이얼(`core/infra/configLoader`), 호스트 규칙 배포 상태(`core/ruleDocs`), 세션 스코프 신호(`core/sessionSignals`).
+- 소유 상태는 넷이다: 개입 강도 다이얼(`core/infra/configLoader`), 호스트 규칙 배포 상태(`core/ruleDocs`), 세션 스코프 신호(`core/sessionSignals`), 작업 상태(`core/gates`).
 
 ## Acceptance Criteria
 
@@ -39,4 +39,4 @@
 
 ## Last Updated
 
-2026-07-30 — 소스 루트 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.
+2026-08-22 — 작업 상태 원장을 네 번째 소유 상태로 추가했다.

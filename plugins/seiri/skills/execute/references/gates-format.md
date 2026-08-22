@@ -46,6 +46,7 @@ ABANDON: G2 <reason — only when abandoning a gate>
 4. Give each task 1–4 runnable gates; zero is underspecified and more than four means two tasks.
 5. Put this repository's designated verification in `## Final`.
 6. Give every number in the final report a CHECK that measures it.
+7. Write CHECK for the repository root. The Bash tool keeps its working directory between calls, so a bare `cd dir && …` strands the next CHECK — use a subshell: `(cd dir && …)`.
 
 ## Task directory
 

@@ -3,8 +3,8 @@ import { existsSync, rmdirSync } from 'node:fs';
 import { portableJoin } from '@ogham/cross-platform';
 
 import { CONFIG_DIR, SIGNALS_LOCK_DIR } from '../../../constants/files.js';
+import { acquireLockDir } from '../../utils/acquireLockDir.js';
 import { findRepoRoot } from '../../utils/findRepoRoot.js';
-import { acquireSignalsLock } from '../utils/acquireSignalsLock.js';
 
 /**
  * Run `mutate` with exclusive access to the signals file and return its
@@ -32,7 +32,7 @@ export function withSignalsLock<T>(projectRoot: string, mutate: () => T): T {
   if (!existsSync(dir)) return mutate();
 
   const lockPath = portableJoin(dir, SIGNALS_LOCK_DIR);
-  const held = acquireSignalsLock(lockPath);
+  const held = acquireLockDir(lockPath);
   try {
     return mutate();
   } finally {

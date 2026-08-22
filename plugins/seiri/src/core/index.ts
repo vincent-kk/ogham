@@ -21,3 +21,11 @@ export {
   resolveRulesDir,
   resolveTemplatePath,
 } from './ruleDocs/index.js';
+export {
+  abandonGate,
+  computeLedgerStatus,
+  isTaskName,
+  listTaskLedgers,
+  readTaskLedger,
+  recordManualEvidence,
+} from './gates/index.js';
