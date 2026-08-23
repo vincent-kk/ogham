@@ -4,6 +4,22 @@
  * normaliser touches are modelled.
  */
 
+/** One context, addition, or removal line preserved from an update hunk. */
+export interface ApplyPatchHunkLine {
+  /** Codex prefix that gives the line its patch meaning. */
+  readonly prefix: " " | "+" | "-";
+  /** Line text after removing the patch prefix. */
+  readonly text: string;
+}
+
+/** One ordered update hunk with its optional search header. */
+export interface ApplyPatchHunk {
+  /** Text after `@@ `, or empty for a bare or implicit hunk. */
+  readonly header: string;
+  /** Context, addition, and removal lines in physical patch order. */
+  readonly lines: ApplyPatchHunkLine[];
+}
+
 /** One file operation carried inside an `apply_patch` command. */
 export interface ApplyPatchOp {
   kind: "add" | "update" | "delete";
@@ -11,6 +27,8 @@ export interface ApplyPatchOp {
   filePath: string;
   /** Rename destination from a single `*** Move to:` in an update section. */
   moveTo?: string;
+  /** Ordered update hunks; empty for add, delete, and bodyless Move. */
+  hunks: ApplyPatchHunk[];
   /** Lines the patch adds (leading `+` stripped). For an add, the whole file. */
   addedLines: string[];
   /** Lines the patch removes (leading `-` stripped). Empty for an add. */
@@ -27,11 +45,36 @@ export interface CodexMoveProvenance {
   sourcePath: string;
   /** File created by the physical Move. */
   destinationPath: string;
+  /** Immutable hunk structure used to project the destination content. */
+  readonly hunks: readonly (Omit<ApplyPatchHunk, "lines"> & {
+    readonly lines: readonly ApplyPatchHunkLine[];
+  })[];
   /** Patch additions, which are a delta rather than complete content. */
   addedLines: readonly string[];
   /** Patch removals used for conservative destination projection. */
   removedLines: readonly string[];
 }
+
+/** Result of projecting ordered apply_patch hunks onto current content. */
+export type ProjectApplyPatchHunksResult =
+  | {
+      /** Projection matched every hunk uniquely. */
+      kind: "exact";
+      /** Complete content after applying every hunk. */
+      content: string;
+    }
+  | {
+      /** A hunk's before-image was absent from the current content. */
+      kind: "stale-source";
+      /** Zero-based index of the first hunk that could not match. */
+      hunkIndex: number;
+    }
+  | {
+      /** A hunk's before-image matched more than one location. */
+      kind: "ambiguous";
+      /** Zero-based index of the first hunk with multiple matches. */
+      hunkIndex: number;
+    };
 
 /** The subset of a Claude hook input this module reads and rewrites. */
 export interface CodexToolUse {

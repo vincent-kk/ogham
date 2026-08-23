@@ -27,13 +27,17 @@ export type { BinaryStatus } from "./binaries/types.js";
 export { normalizeCodexToolUses } from "./codexHooks/normalizeToolUse.js";
 export { parseApplyPatch } from "./codexHooks/parseApplyPatch.js";
 export { parseBashRead } from "./codexHooks/parseBashRead.js";
+export { projectApplyPatchHunks } from "./codexHooks/projectApplyPatchHunks.js";
 export type {
+  ApplyPatchHunk,
+  ApplyPatchHunkLine,
   ApplyPatchOp,
   CodexMoveProvenance,
   CodexToolUse,
   NormalizedCodexToolUse,
   NormalizeCodexToolUsesResult,
   ParseApplyPatchResult,
+  ProjectApplyPatchHunksResult,
 } from "./codexHooks/types.js";
 export { buildConfigScopeState } from "./configScope/layers/operations/buildConfigScopeState.js";
 export { readConfigLayers } from "./configScope/layers/operations/readConfigLayers.js";

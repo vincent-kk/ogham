@@ -275,7 +275,7 @@ describe('pre-tool-use bundle apply_patch policy', () => {
     );
   });
 
-  it('allows bodyless rename and denies modified or protected Moves', () => {
+  it('allows bodyless and exact modified Moves while denying a protected Move', () => {
     const sessionId = `move-${Date.now()}`;
     runPreToolUseBundle(cwd, sessionId, 'Read', {
       file_path: portableResolve(cwd, 'index.ts'),
@@ -293,10 +293,7 @@ describe('pre-tool-use bundle apply_patch policy', () => {
     const modified = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
       command: `*** Begin Patch\n*** Update File: ${ordinarySource}\n*** Move to: ${modifiedTarget}\n@@\n-old\n+new\n*** End Patch`,
     });
-    expect(modified.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(modified.hookSpecificOutput?.permissionDecisionReason).toContain(
-      'Edit the source first',
-    );
+    expect(modified.hookSpecificOutput?.permissionDecision).toBeUndefined();
 
     const protectedSource = portableResolve(cwd, 'INTENT.md');
     const protectedTarget = portableResolve(cwd, 'RENAMED.md');
@@ -306,6 +303,25 @@ describe('pre-tool-use bundle apply_patch policy', () => {
     expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(denied.hookSpecificOutput?.permissionDecisionReason).toContain(
       protectedSource,
+    );
+  });
+
+  it('denies a missing Move source with an explicit built-bundle reason', () => {
+    const sessionId = `move-missing-${Date.now()}`;
+    runPreToolUseBundle(cwd, sessionId, 'Read', {
+      file_path: portableResolve(cwd, 'index.ts'),
+    });
+    const missingSource = portableResolve(cwd, 'src', 'missing.ts');
+    const result = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${missingSource}\n*** Move to: ${portableResolve(cwd, 'src', 'missing-moved.ts')}\n*** End Patch`,
+    });
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      missingSource,
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'does not exist',
     );
   });
 

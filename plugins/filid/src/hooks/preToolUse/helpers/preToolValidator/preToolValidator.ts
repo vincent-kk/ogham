@@ -13,7 +13,10 @@ import { handleDetailMdWrite } from './utils/handleDetailMdWrite.js';
 import { handleIntentMdEdit } from './utils/handleIntentMdEdit.js';
 import { handleIntentMdWrite } from './utils/handleIntentMdWrite.js';
 
-export { projectMoveContent } from './utils/projectMoveContent.js';
+export {
+  projectMoveContent,
+  type MoveProjectionResult,
+} from './utils/projectMoveContent.js';
 
 /**
  * PreToolUse hook logic for INTENT.md/DETAIL.md validation.

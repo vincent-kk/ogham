@@ -58,6 +58,8 @@ export function createESLintConfig(
       rules: {
         // Single-statement if/else bodies omit braces (loops included via "multi").
         curly: ["warn", "multi"],
+        "no-trailing-spaces": "error",
+        "eol-last": ["error", "always"],
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-require-imports": "off",
         "no-fallthrough": "off",

@@ -85,19 +85,16 @@ describe('Codex Move destination projection', () => {
     );
   });
 
-  it('denies a non-bodyless Move even when its replacement is unique', async () => {
+  it('fully validates an exact hunk projection for an INTENT destination', async () => {
     mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
-    writeFileSync(
-      join(tmpDir, 'src', 'draft.md'),
-      '# Feature\n## Purpose\nOld purpose\n## Conventions\n- Stable\n## Boundaries\n### Always do\n- Verify\n### Ask first\n- Ask\n### Never do\n- Bypass\n',
-    );
+    writeFileSync(join(tmpDir, 'src', 'draft.md'), intentWithLineCount(50));
     const result = await runAfterVisitGate(
-      '*** Begin Patch\n*** Update File: src/draft.md\n*** Move to: src/feature/INTENT.md\n@@\n-Old purpose\n+New purpose\n*** End Patch',
+      '*** Begin Patch\n*** Update File: src/draft.md\n*** Move to: src/feature/INTENT.md\n@@\n-Fixture\n+Fixture\n+- overflow\n*** End Patch',
     );
 
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      'Edit the source first',
+      '50-line limit',
     );
   });
 
@@ -116,16 +113,60 @@ describe('Codex Move destination projection', () => {
     expect(context).toContain('import');
   });
 
-  it('denies an ambiguous projection with split-operation guidance', async () => {
+  it('allows an ambiguous ordinary projection when the structure check passes', async () => {
     mkdirSync(join(tmpDir, 'src'), { recursive: true });
     writeFileSync(join(tmpDir, 'src', 'draft.ts'), 'old\nkeep\nold\n');
     const result = await runAfterVisitGate(
       '*** Begin Patch\n*** Update File: src/draft.ts\n*** Move to: src/final.ts\n@@\n-old\n+new\n*** End Patch',
     );
 
+    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
+  });
+
+  it('denies an ambiguous projection for a contract destination', async () => {
+    mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
+    writeFileSync(join(tmpDir, 'src', 'draft.md'), 'old\nkeep\nold\n');
+    const result = await runAfterVisitGate(
+      '*** Begin Patch\n*** Update File: src/draft.md\n*** Move to: src/feature/DETAIL.md\n@@\n-old\n+new\n*** End Patch',
+    );
+
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'contract document needs exact content',
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
       'Edit the source first',
+    );
+  });
+
+  it('denies an approximate projection whose added import closes a cycle', async () => {
+    mkdirSync(join(tmpDir, 'src', 'deep'), { recursive: true });
+    writeFileSync(join(tmpDir, 'src', 'draft.ts'), 'marker\nkeep\nmarker\n');
+    const result = await runAfterVisitGate(
+      '*** Begin Patch\n*** Update File: src/draft.ts\n*** Move to: src/deep/final.ts\n@@\n-marker\n+import { root } from "../";\n*** End Patch',
+    );
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'approximate Move projection',
+    );
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'potential circular dependency',
+    );
+  });
+
+  it('denies a missing Move source with its path', async () => {
+    mkdirSync(join(tmpDir, 'src'), { recursive: true });
+    const result = await runAfterVisitGate(
+      '*** Begin Patch\n*** Update File: src/missing.ts\n*** Move to: src/final.ts\n*** End Patch',
+    );
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'src/missing.ts',
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'does not exist',
     );
   });
 

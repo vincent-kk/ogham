@@ -8,6 +8,8 @@
 - Write/Edit/Delete는 방문 통과 후 문서 gate를 거치고 Write/Edit은 이어서 구조 가드를 실행한다.
 - Delete도 owner 방문 상태를 갱신하며 host가 INTENT.md/DETAIL.md와 같은 파일로 해석하는 대상 삭제는 명시적 사유로 deny한다.
 - `apply_patch` 파싱이 불완전하면 유효 prefix도 실행하지 않고 FCA 프로젝트에서는 parser reason과 유효한 V4A 재발행 안내로 deny하며, 비-FCA 프로젝트에서는 bare allow한다.
+- Move destination projection이 exact면 전체 내용을 검증하고, ambiguous/stale이면 계약 문서는 exact-content 사유로 deny한다. 일반 파일은 source와 모든 추가 line을 합친 import superset으로 구조 위험을 검사해 warning이 있으면 deny하고 없으면 허용한다.
+- Move source를 읽을 수 없으면 source path와 부재 사유를 포함해 destination 종류와 무관하게 deny한다.
 - branch 이름, spike 상태, criteria ledger 또는 agent 역할에 따라 검증을 면제하지 않는다.
 - 비-FCA 프로젝트와 유효하지 않은 cwd는 상태를 변경하지 않고 통과시킨다.
 
@@ -18,6 +20,7 @@
 - INTENT.md/DETAIL.md의 기존 내용이 필요한 검증은 현재 host filesystem에서 best-effort로 읽는다.
 - 방문 deny가 발생하면 validator와 structure guard를 실행하지 않고 해당 deny를 반환한다.
 - batch 결과의 reason과 non-empty additional context는 operation 순서로 결합하며 permission은 deny-wins다.
+- 일반 파일의 ambiguous/stale Move는 Filid 내부 입력의 `codexPatch.projection: 'approximate'`로만 표시한다. shared provenance는 host-neutral 사실만 소유하고 Filid의 검사 상태를 싣지 않는다.
 
 ## Acceptance Criteria
 
@@ -31,7 +34,9 @@
 
 - 첫 operation이 허용되어도 후속 operation의 validator deny 또는 structure warning이 정확한 경로와 함께 최종 결과에 남는다.
 - 어느 operation이든 deny하면 전체 `apply_patch`가 deny되고, 모든 operation의 결과 순서는 입력 순서를 따른다.
-- Move destination은 bodyless source 전체 내용으로만 validator와 structure guard를 실행하며, 수정 본문이 있으면 Edit 후 bodyless Move 재시도를 요구한다.
+- Move destination은 bodyless 또는 고유한 sequential hunk projection이면 exact content로 validator와 structure guard를 실행한다.
+- ambiguous/stale projection은 INTENT.md/DETAIL.md에서 exact content와 bodyless Move 재시도를 요구한다. 일반 파일에서는 source와 모든 추가 line의 superset으로 structure guard를 실행하고 warning을 보수적 deny로 승격하며, 위험이 없으면 허용한다.
+- 존재하지 않는 Move source는 source path와 `does not exist` 사유로 destination 종류와 무관하게 deny한다.
 - 앞선 physical section이 Move source 또는 후속 Edit target과 canonical 동일한 경로를 touch했으면 stale disk projection 대신 patch 분리 실행을 요구한다.
 - Move의 source `Delete`와 destination `Write`도 같은 deny-wins 집계를 거쳐 일반 경로는 허용하고 보호 문서 source rename은 거부한다.
 
@@ -56,4 +61,4 @@
 
 ## Last Updated
 
-2026-08-24 — bodyless Move projection과 canonical prior-path stale gate를 계약화했다.
+2026-08-24 — exact/approximate Move projection, 계약 문서와 missing-source 분기, canonical prior-path stale gate를 계약화했다.

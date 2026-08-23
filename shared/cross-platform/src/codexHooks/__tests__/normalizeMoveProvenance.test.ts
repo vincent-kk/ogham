@@ -27,6 +27,15 @@ describe("normalizeCodexToolUses Move provenance", () => {
       role: "source",
       sourcePath: "src/old.ts",
       destinationPath: "src/new.ts",
+      hunks: [
+        {
+          header: "",
+          lines: [
+            { prefix: "-", text: "old" },
+            { prefix: "+", text: "new" },
+          ],
+        },
+      ],
       addedLines: ["new"],
       removedLines: ["old"],
     });
@@ -35,6 +44,15 @@ describe("normalizeCodexToolUses Move provenance", () => {
       role: "destination",
       sourcePath: "src/old.ts",
       destinationPath: "src/new.ts",
+      hunks: [
+        {
+          header: "",
+          lines: [
+            { prefix: "-", text: "old" },
+            { prefix: "+", text: "new" },
+          ],
+        },
+      ],
       addedLines: ["new"],
       removedLines: ["old"],
     });
@@ -62,6 +80,7 @@ describe("normalizeCodexToolUses Move provenance", () => {
     expect(normalized.toolUses[2].codexPatch).toMatchObject({
       kind: "move",
       role: "destination",
+      hunks: [],
     });
     expect(normalized.toolUses[1].codexPriorTouchedPaths).toEqual([
       "./src/old.ts",

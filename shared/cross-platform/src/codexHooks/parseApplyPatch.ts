@@ -1,4 +1,8 @@
-import type { ApplyPatchOp, ParseApplyPatchResult } from "./types.js";
+import type {
+  ApplyPatchHunkLine,
+  ApplyPatchOp,
+  ParseApplyPatchResult,
+} from "./types.js";
 
 const FILE_HEADER = /^\*\*\* (Add|Update|Delete) File: (.*)$/;
 const ENVIRONMENT_ID_HEADER = "*** Environment ID:";
@@ -116,6 +120,7 @@ function classifyPatchLine(line: string): FileSectionOpen {
     op: {
       kind,
       filePath,
+      hunks: [],
       addedLines: [],
       removedLines: [],
     },
@@ -139,6 +144,14 @@ function finishCurrent(
     return "Update section has no body";
   if (current.kind === "update" && updateHunkState === "explicit-empty")
     return "Update hunk does not contain any lines";
+  if (current.kind === "update") {
+    current.addedLines = current.hunks.flatMap((hunk) =>
+      hunk.lines.filter((line) => line.prefix === "+").map((line) => line.text),
+    );
+    current.removedLines = current.hunks.flatMap((hunk) =>
+      hunk.lines.filter((line) => line.prefix === "-").map((line) => line.text),
+    );
+  }
   return null;
 }
 
@@ -211,6 +224,7 @@ function applyUpdateHunk(
   if (line === "@@" || line.startsWith("@@ ")) {
     if (updateHunkState === "explicit-empty")
       return { ok: false, reason: "Update hunk does not contain any lines" };
+    op.hunks.push({ header: line === "@@" ? "" : line.slice(3), lines: [] });
     return { ok: true, updateHunkState: "explicit-empty" };
   }
   if (line === "*** End of File") {
@@ -234,8 +248,15 @@ function applyUpdateHunk(
       reason: "Update body after End of File needs a new hunk header",
     };
 
-  if (line.startsWith("+")) op.addedLines.push(line.slice(1));
-  else if (line.startsWith("-")) op.removedLines.push(line.slice(1));
+  let hunk = op.hunks.at(-1);
+  if (!hunk) {
+    hunk = { header: "", lines: [] };
+    op.hunks.push(hunk);
+  }
+  let prefix: ApplyPatchHunkLine["prefix"] = " ";
+  if (line.startsWith("+")) prefix = "+";
+  else if (line.startsWith("-")) prefix = "-";
+  hunk.lines.push({ prefix, text: line === "" ? "" : line.slice(1) });
   return { ok: true, updateHunkState: "body" };
 }
 

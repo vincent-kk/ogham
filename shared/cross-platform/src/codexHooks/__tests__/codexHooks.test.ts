@@ -18,6 +18,15 @@ describe("parseApplyPatch", () => {
         {
           kind: "update",
           filePath: "/proj/target.txt",
+          hunks: [
+            {
+              header: "",
+              lines: [
+                { prefix: "-", text: "sentinel_token" },
+                { prefix: "+", text: "REPLACED" },
+              ],
+            },
+          ],
           addedLines: ["REPLACED"],
           removedLines: ["sentinel_token"],
         },
@@ -34,6 +43,15 @@ describe("parseApplyPatch", () => {
           kind: "update",
           filePath: "a.ts",
           moveTo: "b.ts",
+          hunks: [
+            {
+              header: "",
+              lines: [
+                { prefix: "-", text: "old" },
+                { prefix: "+", text: "new" },
+              ],
+            },
+          ],
           addedLines: ["new"],
           removedLines: ["old"],
         },
@@ -48,6 +66,7 @@ describe("parseApplyPatch", () => {
         {
           kind: "add",
           filePath: "/proj/created.txt",
+          hunks: [],
           addedLines: ["brand new file"],
           removedLines: [],
         },
@@ -66,6 +85,7 @@ describe("parseApplyPatch", () => {
         {
           kind: "add",
           filePath: "empty.txt",
+          hunks: [],
           addedLines: [],
           removedLines: [],
         },
@@ -114,6 +134,7 @@ describe("parseApplyPatch", () => {
         {
           kind: "add",
           filePath: "x.md",
+          hunks: [],
           addedLines: ["x"],
           removedLines: [],
         },
@@ -169,6 +190,7 @@ describe("parseApplyPatch", () => {
             {
               kind: "update",
               filePath: "x.md",
+              hunks: expect.any(Array),
               addedLines: testCase.addedLines,
               removedLines: testCase.removedLines,
             },
@@ -187,6 +209,7 @@ describe("parseApplyPatch", () => {
         {
           kind: "delete",
           filePath: "gone.ts",
+          hunks: [],
           addedLines: [],
           removedLines: [],
         },

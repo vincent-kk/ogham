@@ -100,6 +100,7 @@ function normalizeOperation<T extends CodexToolUse>(
       kind: "move" as const,
       sourcePath: operation.filePath,
       destinationPath: operation.moveTo,
+      hunks: operation.hunks,
       addedLines: operation.addedLines,
       removedLines: operation.removedLines,
     };
@@ -164,11 +165,13 @@ function collectPriorTouchedPaths(
   operations: readonly ApplyPatchOp[],
   index: number,
 ): string[] {
-  return operations.slice(0, index).flatMap((operation) =>
-    operation.moveTo
-      ? [operation.filePath, operation.moveTo]
-      : [operation.filePath],
-  );
+  return operations
+    .slice(0, index)
+    .flatMap((operation) =>
+      operation.moveTo
+        ? [operation.filePath, operation.moveTo]
+        : [operation.filePath],
+    );
 }
 
 function passthrough<T extends CodexToolUse>(
