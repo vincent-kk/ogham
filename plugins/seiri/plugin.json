@@ -20,7 +20,9 @@
   "mcpServers": {
     "seiri": {
       "command": "node",
-      "args": ["bridge/mcp-server.cjs"],
+      "args": [
+        "bridge/mcp-server.cjs"
+      ],
       "cwd": ".",
       "env": {
         "OGHAM_HOST": "codex"
