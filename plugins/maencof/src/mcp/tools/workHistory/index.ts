@@ -1,1 +1,1 @@
-export * from './workHistory.js';
+export { handleWorkHistory } from "./workHistory.js";

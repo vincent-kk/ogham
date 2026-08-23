@@ -1,1 +1,1 @@
-export * from './activityRead.js';
+export { handleActivityRead } from "./activityRead.js";
