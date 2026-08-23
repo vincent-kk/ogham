@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { NormalizeCodexToolUsesResult } from '@ogham/cross-platform';
+import type {
+  NormalizedCodexToolUse,
+  NormalizeCodexToolUsesResult,
+} from '@ogham/cross-platform';
 
 import {
   DENY_RETRY_GUIDANCE,
@@ -13,9 +16,15 @@ import { isFcaProject } from '../shared/utils/isFcaProject.js';
 import { validateCwd } from '../utils/validateCwd.js';
 
 import { processVisit } from './helpers/intentInjector/intentInjector.js';
-import { validatePreToolUse } from './helpers/preToolValidator/preToolValidator.js';
+import {
+  projectMoveContent,
+  validatePreToolUse,
+} from './helpers/preToolValidator/preToolValidator.js';
 import { guardStructure } from './helpers/structureGuard/structureGuard.js';
 import { mergeResults } from './utils/mergeResults.js';
+
+/** Filid input after optional Codex normalization metadata is attached. */
+type FilidPreToolUseInput = NormalizedCodexToolUse<PreToolUseInput>;
 
 /**
  * Unified PreToolUse hook orchestrator.
@@ -32,7 +41,7 @@ import { mergeResults } from './utils/mergeResults.js';
  * Branch names and criteria ledgers do not affect hook permission decisions.
  */
 export async function handlePreToolUse(
-  input: PreToolUseInput,
+  input: FilidPreToolUseInput,
 ): Promise<HookOutput> {
   const safeCwd = validateCwd(input.cwd);
   if (safeCwd === null) return { continue: true };
@@ -49,9 +58,22 @@ export async function handlePreToolUse(
   if (visit.hookSpecificOutput?.permissionDecision === 'deny')
     return mergeResults([visit]);
 
-  const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
+  const prepared = prepareMoveDestination(input, safeCwd);
+  if (prepared === null)
+    return mergeResults([
+      visit,
+      denyIndeterminateMove(input.codexPatch!.destinationPath),
+    ]);
+  const effectiveInput = prepared;
+  const filePath =
+    effectiveInput.tool_input.file_path ??
+    effectiveInput.tool_input.path ??
+    '';
   let oldContent: string | undefined;
-  if (input.tool_name !== HOOK_TOOL_NAME.DELETE && isDetailMd(filePath))
+  if (
+    effectiveInput.tool_name !== HOOK_TOOL_NAME.DELETE &&
+    isDetailMd(filePath)
+  )
     try {
       oldContent = readFileSync(resolve(safeCwd, filePath), 'utf-8');
     } catch {
@@ -60,9 +82,35 @@ export async function handlePreToolUse(
 
   return mergeResults([
     visit,
-    validatePreToolUse(input, oldContent),
-    guardStructure(input),
+    validatePreToolUse(effectiveInput, oldContent),
+    guardStructure(effectiveInput),
   ]);
+}
+
+/** Prepare exact destination content for one normalized Move Write. */
+function prepareMoveDestination(
+  input: FilidPreToolUseInput,
+  safeCwd: string,
+): FilidPreToolUseInput | null {
+  const move = input.codexPatch;
+  if (!move || move.role !== 'destination') return input;
+  const content = projectMoveContent(move, safeCwd);
+  if (content === undefined) return null;
+  return { ...input, tool_input: { ...input.tool_input, content } };
+}
+
+/** Convert an indeterminate Move projection into an actionable hook denial. */
+function denyIndeterminateMove(destinationPath: string): HookOutput {
+  return {
+    continue: true,
+    hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
+      permissionDecision: 'deny',
+      permissionDecisionReason:
+        `Cannot project Move destination ${destinationPath}. Edit the source first, ` +
+        `then re-emit a bodyless Move. ${DENY_RETRY_GUIDANCE}`,
+    },
+  };
 }
 
 /** Apply one conservative decision to every logical operation in a tool call. */

@@ -17,6 +17,24 @@ export interface ApplyPatchOp {
   removedLines: string[];
 }
 
+/** Provenance shared by the two logical effects of one Codex Move. */
+export interface CodexMoveProvenance {
+  /** Identifies the normalized operation without inventing a host tool name. */
+  kind: "move";
+  /** Identifies which path effect carries this provenance. */
+  role: "source" | "destination";
+  /** File removed by the physical Move. */
+  sourcePath: string;
+  /** File created by the physical Move. */
+  destinationPath: string;
+  /** Patch additions, which are a delta rather than complete content. */
+  addedLines: readonly string[];
+  /** Patch removals used for conservative destination projection. */
+  removedLines: readonly string[];
+  /** True when an earlier section makes the on-disk source stale. */
+  sourceChangedEarlier: boolean;
+}
+
 /** The subset of a Claude hook input this module reads and rewrites. */
 export interface CodexToolUse {
   tool_name?: string;
@@ -42,8 +60,14 @@ export type NormalizedCodexToolUse<T extends CodexToolUse> = T extends unknown
         tool_name: string;
         tool_input: Record<string, unknown>;
       }
-        ? { tool_name: string; tool_input: Record<string, unknown> }
-        : CodexToolUse)
+        ? {
+            tool_name: string;
+            tool_input: Partial<T["tool_input"]> & Record<string, unknown>;
+          }
+        : CodexToolUse) & {
+        /** Lossless internal provenance for a normalized Codex Move effect. */
+        codexPatch?: CodexMoveProvenance;
+      }
   : never;
 
 /** A batch normalizer result that keeps the physical call for host policy. */

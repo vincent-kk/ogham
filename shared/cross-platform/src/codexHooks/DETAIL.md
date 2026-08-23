@@ -9,6 +9,8 @@
 
 ## API Contracts
 
+Move는 source `Delete`와 destination `Write`의 경로 효과를 유지하되 두 연산에 동일한 typed provenance를 싣는다. destination `Write.content`는 patch delta가 아니라 완전한 대상 내용일 때만 존재한다.
+
 성공한 parser 결과의 `operations`와 성공한 normalizer 결과의 `toolUses`는 타입 수준에서도 non-empty tuple이다. `NormalizedCodexToolUse<T>`는 union 각 member에 distributive하게 적용되어 discriminant와 member별 sibling 필드를 유지하면서 변경되는 `tool_name`과 `tool_input`을 입력 literal subtype에서 분리한다.
 
 `normalizeCodexToolUses(input)`은 원래 입력을 `original`에 보존한다. 올바른 patch는 각 파일 section을 독립 hook 입력으로 만들고, 실패는 `reason`을 가진 `ok: false`로 돌려준다. Update section의 단일 non-empty `*** Move to:`는 source `Delete` 다음 destination `Write`로 펼쳐 양쪽 경로를 guard한다.
@@ -16,6 +18,8 @@
 ## Acceptance Criteria
 
 ### CHN-BATCH — Ordered complete normalization
+
+- Move의 두 연산은 source·destination·role·추가/제거 line provenance를 보존하며, destination의 부분 내용은 `Write.content`에 넣지 않는다.
 
 - update/add/delete가 섞인 patch는 같은 순서의 `Edit`/`Write`/`Delete` 세 연산이 된다.
 - LF와 CRLF 입력은 동일하며 각 연산은 정확한 target path와 원래 sibling 필드를 보존한다.
@@ -36,4 +40,4 @@
 
 ## Last Updated
 
-2026-08-23 — 전체 patch 연산, 공식 Environment ID/hunk grammar, Move 양쪽 guard와 distributive 입력 타입을 계약화했다.
+2026-08-24 — Move provenance와 complete-only `Write.content` 계약을 추가했다.

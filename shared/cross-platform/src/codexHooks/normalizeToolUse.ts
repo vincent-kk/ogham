@@ -50,8 +50,12 @@ export function normalizeCodexToolUses<T extends CodexToolUse>(
     return {
       ok: true,
       original: input,
-      toolUses: parsed.operations.flatMap((operation) =>
-        normalizeOperation(input, operation),
+      toolUses: parsed.operations.flatMap((operation, index, operations) =>
+        normalizeOperation(
+          input,
+          operation,
+          wasSourceChangedEarlier(operations, index, operation.filePath),
+        ),
       ) as [NormalizedCodexToolUse<T>, ...NormalizedCodexToolUse<T>[]],
     };
   }
@@ -80,18 +84,28 @@ export function normalizeCodexToolUses<T extends CodexToolUse>(
 function normalizeOperation<T extends CodexToolUse>(
   input: T,
   operation: ApplyPatchOp,
+  sourceChangedEarlier: boolean,
 ): [NormalizedCodexToolUse<T>, ...NormalizedCodexToolUse<T>[]] {
   const toolInput = {
     ...input.tool_input,
     file_path: operation.filePath,
   };
 
-  if (operation.moveTo)
+  if (operation.moveTo) {
+    const codexPatch = {
+      kind: "move" as const,
+      sourcePath: operation.filePath,
+      destinationPath: operation.moveTo,
+      addedLines: operation.addedLines,
+      removedLines: operation.removedLines,
+      sourceChangedEarlier,
+    };
     return [
       {
         ...input,
         tool_name: "Delete",
         tool_input: toolInput,
+        codexPatch: { ...codexPatch, role: "source" },
       } as unknown as NormalizedCodexToolUse<T>,
       {
         ...input,
@@ -99,10 +113,11 @@ function normalizeOperation<T extends CodexToolUse>(
         tool_input: {
           ...input.tool_input,
           file_path: operation.moveTo,
-          content: operation.addedLines.join("\n"),
         },
+        codexPatch: { ...codexPatch, role: "destination" },
       } as unknown as NormalizedCodexToolUse<T>,
     ];
+  }
 
   if (operation.kind === "add")
     return [
@@ -133,6 +148,27 @@ function normalizeOperation<T extends CodexToolUse>(
       tool_input: toolInput,
     } as unknown as NormalizedCodexToolUse<T>,
   ];
+}
+
+/**
+ * Determine whether a Move source differs from its current on-disk content.
+ *
+ * @param operations - Ordered physical patch sections
+ * @param index - Index of the Move being normalized
+ * @param sourcePath - Move source path
+ * @returns Whether a prior section targeted the source
+ */
+function wasSourceChangedEarlier(
+  operations: readonly ApplyPatchOp[],
+  index: number,
+  sourcePath: string,
+): boolean {
+  return operations
+    .slice(0, index)
+    .some(
+      (operation) =>
+        operation.filePath === sourcePath || operation.moveTo === sourcePath,
+    );
 }
 
 function passthrough<T extends CodexToolUse>(

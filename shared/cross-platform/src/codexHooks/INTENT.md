@@ -14,6 +14,8 @@ Codex의 공식 hook 입력을 Claude 계열 guard가 이해하는 host-neutral 
 
 ### Always do
 
+- Move는 source와 destination provenance를 보존하고, destination의 전체 내용이 확인되지 않은 상태를 `Write.content`로 가장하지 않는다.
+
 - envelope와 모든 section을 끝까지 검증하고 하나라도 불완전하면 판별 가능한 실패를 반환한다.
 - update는 host-valid implicit/explicit hunk를 구분하고, 빈 explicit hunk와 `*** End of File` 뒤의 무표식 body를 거부한다.
 - CRLF와 LF patch에서 같은 연산 순서와 내용을 만든다.

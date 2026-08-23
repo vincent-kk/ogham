@@ -29,6 +29,7 @@ export { parseApplyPatch } from "./codexHooks/parseApplyPatch.js";
 export { parseBashRead } from "./codexHooks/parseBashRead.js";
 export type {
   ApplyPatchOp,
+  CodexMoveProvenance,
   CodexToolUse,
   NormalizedCodexToolUse,
   NormalizeCodexToolUsesResult,

@@ -360,7 +360,7 @@ describe("normalizeCodexToolUses", () => {
     });
     expect(moved.toolUses[1]).toMatchObject({
       tool_name: "Write",
-      tool_input: { file_path: "b.ts", content: "new" },
+      tool_input: { file_path: "b.ts" },
     });
   });
 
