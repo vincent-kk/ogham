@@ -18,9 +18,7 @@ cat("REQUIRED_MISSING:", if (length(rm)) paste(rm, collapse = " ") else "-", "\n
 cat("USECASE_MISSING:",  if (length(um)) paste(um, collapse = " ") else "-", "\n")
 ```
 
-Capture the structured response field `managedLibraryPath` from this call. It
-is the installation target for the rest of the flow; do not derive another
-path from the host, home directory, or environment variables.
+Capture the structured response field `managedLibraryPath` from this call. It is the installation target for the rest of the flow; do not derive another path from the host, home directory, or environment variables.
 
 These lists mirror `REQUIRED_PACKAGES` and `PACKAGE_USE_CASES` in `src/constants/defaults.ts` — keep in sync. `stats` is base R and never missing.
 
@@ -46,9 +44,7 @@ Required-missing packages are always installed — never ask about them. For the
 
 **Not** `run_r`, which blocks `install.packages`. Build **one** command from the union of required-missing ∪ every selected bundle's missing packages ∪ any dynamic packages, de-duplicated. Install into the exact `managedLibraryPath` returned in Step 6.
 
-For a POSIX shell, single-quote the whole path and replace every embedded `'`
-with the shell sequence `'"'"'`. Spaces then remain literal. For example, the
-path `/tmp/R lib/owner's` becomes this assignment:
+For a POSIX shell, single-quote the whole path and replace every embedded `'` with the shell sequence `'"'"'`. Spaces then remain literal. For example, the path `/tmp/R lib/owner's` becomes this assignment:
 
 ```bash
 R_STATISTICS_LIB='/tmp/R lib/owner'"'"'s'
@@ -66,6 +62,4 @@ Show the exact command, explain it, and run via `Bash` only on an explicit "yes"
 
 ## Step 9 — Re-verify
 
-Re-run Step 6 through `run_r`; report the still-missing set per group and
-confirm its response returns the same `managedLibraryPath` captured before the
-install. A changed path is a setup failure, not a successful re-verification.
+Re-run Step 6 through `run_r`; report the still-missing set per group and confirm its response returns the same `managedLibraryPath` captured before the install. A changed path is a setup failure, not a successful re-verification.

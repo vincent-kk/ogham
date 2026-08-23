@@ -16,13 +16,9 @@ choco install r.project
 
 ## R packages
 
-After R is installed, Step 6 checks packages through `run_r`. Capture that
-response's `managedLibraryPath`; it is the only installation target. CRAN ships
-Windows binaries (Rtools usually unneeded). Install packages fresh there; do
-not copy or move an existing `win-library` tree into it.
+After R is installed, Step 6 checks packages through `run_r`. Capture that response's `managedLibraryPath`; it is the only installation target. CRAN ships Windows binaries (Rtools usually unneeded). Install packages fresh there; do not copy or move an existing `win-library` tree into it.
 
-For PowerShell, single-quote the path and double every embedded `'`. Backslashes
-and spaces stay literal. For example:
+For PowerShell, single-quote the path and double every embedded `'`. Backslashes and spaces stay literal. For example:
 
 ```powershell
 $env:R_STATISTICS_LIB = 'C:\R Lib\Owner''s'

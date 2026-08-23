@@ -44,7 +44,7 @@ export function canonicalizeTargetPathSync(
   const suffix: string[] = [];
   let cursor = absoluteTarget;
 
-  while (true) {
+  while (true) 
     try {
       return resolve(realpathSync.native(cursor), ...suffix);
     } catch (error) {
@@ -55,7 +55,7 @@ export function canonicalizeTargetPathSync(
       suffix.unshift(basename(cursor));
       cursor = parent;
     }
-  }
+  
 }
 
 /**
