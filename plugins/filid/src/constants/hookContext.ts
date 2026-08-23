@@ -6,7 +6,7 @@ export const HOOK_GUIDE_BLOCK = [
   '  action: the standing read directive for the intent file above.',
   '  chain: parent INTENT.md paths (nearest > root). Each is a readable file — read to learn parent rules.',
   '  detail: DETAIL.md path. Read BEFORE writing code in this module.',
-  "[filid:gate] — a mutation was blocked once because this module's INTENT.md pointer had not been delivered yet this session. Read the file at the intent: path in the block, then retry the same call (the retry will pass).",
+  "[filid:gate] — a mutation was blocked once because this module's INTENT.md pointer had not been delivered yet this session. Read the file at the intent: path in the block before retrying the same call.",
   '[filid:map] — directories visited this turn (reset on each user prompt), emitted when the visit set changes. /* marks the directory just accessed.',
 ].join('\n');
 
@@ -14,6 +14,6 @@ export const HOOK_GUIDE_BLOCK = [
 export const HOOK_CTX_READ_DIRECTIVE =
   'action: READ the intent file above with the Read tool before your next step in this module — its rules are binding and are not reproduced here.';
 
-/** Tail of the [filid:gate] line: tells the agent which file to read and that the identical retry passes. */
+/** Tail of the [filid:gate] line: tells the agent which file to read and makes that Read a prerequisite of retrying. */
 export const HOOK_GATE_RETRY_GUIDANCE =
-  'Read the file at the intent: path below now, then retry the same call — the retry will pass.';
+  'Read the file at the intent: path below now. Retry the same call only after that Read.';
