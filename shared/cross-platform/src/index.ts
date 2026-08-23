@@ -24,10 +24,16 @@ export { binaries, discover } from "./binaries/discover.js";
 export type { DiscoverOptions } from "./binaries/discover.js";
 export { installHints } from "./binaries/installHints.js";
 export type { BinaryStatus } from "./binaries/types.js";
-export { normalizeCodexToolUse } from "./codexHooks/normalizeToolUse.js";
+export { normalizeCodexToolUses } from "./codexHooks/normalizeToolUse.js";
 export { parseApplyPatch } from "./codexHooks/parseApplyPatch.js";
 export { parseBashRead } from "./codexHooks/parseBashRead.js";
-export type { ApplyPatchOp, CodexToolUse } from "./codexHooks/types.js";
+export type {
+  ApplyPatchOp,
+  CodexToolUse,
+  NormalizedCodexToolUse,
+  NormalizeCodexToolUsesResult,
+  ParseApplyPatchResult,
+} from "./codexHooks/types.js";
 export { buildConfigScopeState } from "./configScope/layers/operations/buildConfigScopeState.js";
 export { readConfigLayers } from "./configScope/layers/operations/readConfigLayers.js";
 export { resolveConfigLayers } from "./configScope/layers/operations/resolveConfigLayers.js";
@@ -50,6 +56,7 @@ export { withFileLockSync } from "./filesystem/locking/operations/withFileLockSy
 export { ensureDirectorySync } from "./filesystem/mutation/ensureDirectorySync.js";
 export { removeFileIfExistsSync } from "./filesystem/mutation/removeFileIfExistsSync.js";
 export { writeFileAtomicallySync } from "./filesystem/mutation/writeFileAtomicallySync.js";
+export { canonicalizeTargetPathSync } from "./filesystem/read/canonicalizeTargetPathSync.js";
 export { listDirectoryIfExistsSync } from "./filesystem/read/listDirectoryIfExistsSync.js";
 export { readFileIfExistsSync } from "./filesystem/read/readFileIfExistsSync.js";
 export { readUtf8FileIfExistsSync } from "./filesystem/read/readUtf8FileIfExistsSync.js";

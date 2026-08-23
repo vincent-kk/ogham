@@ -20,3 +20,38 @@ export interface CodexToolUse {
   tool_name?: string;
   tool_input?: Record<string, unknown>;
 }
+
+/** A parser result that cannot represent a successful empty patch. */
+export type ParseApplyPatchResult =
+  | {
+      ok: true;
+      operations: readonly [ApplyPatchOp, ...ApplyPatchOp[]];
+    }
+  | { ok: false; reason: string };
+
+/**
+ * Preserve caller-owned fields while widening the two fields normalization may
+ * rewrite. Required hook fields remain required; broad dispatcher fields stay
+ * optional.
+ */
+export type NormalizedCodexToolUse<T extends CodexToolUse> = T extends unknown
+  ? Omit<T, "tool_name" | "tool_input"> &
+      (T extends {
+        tool_name: string;
+        tool_input: Record<string, unknown>;
+      }
+        ? { tool_name: string; tool_input: Record<string, unknown> }
+        : CodexToolUse)
+  : never;
+
+/** A batch normalizer result that keeps the physical call for host policy. */
+export type NormalizeCodexToolUsesResult<T extends CodexToolUse> =
+  | {
+      ok: true;
+      original: T;
+      toolUses: readonly [
+        NormalizedCodexToolUse<T>,
+        ...NormalizedCodexToolUse<T>[],
+      ];
+    }
+  | { ok: false; original: T; reason: string };

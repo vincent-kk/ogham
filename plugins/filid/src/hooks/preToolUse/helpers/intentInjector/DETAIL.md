@@ -2,10 +2,10 @@
 
 ## Requirements
 
-- Read/Write/Edit 방문에서 소유 fractal의 INTENT와 상위 chain, DETAIL 힌트를 전달한다.
+- Read/Write/Edit/Delete 방문에서 소유 fractal의 INTENT와 상위 chain, DETAIL 힌트를 전달한다.
 - 전달 상태는 `commitVisit`의 none/stale/fresh 판정과 turn TTL을 따른다.
-- 미전달 소유 fractal의 일반 mutation은 INTENT 본문을 포함한 deny로 한 번 차단한다.
-- INTENT.md/DETAIL.md 자기 문서화는 mutation gate에서 면제하되 문서 validator는 별도로 실행한다.
+- Delete를 포함한 모든 방문은 owner delivery 상태를 갱신하고, 미전달 소유 fractal의 일반 mutation은 INTENT 본문을 포함한 deny로 한 번 차단한다.
+- INTENT.md/DETAIL.md 자기 변경은 mutation gate에서 면제하되 문서 validator의 위생·삭제 보호는 별도로 실행한다.
 - branch, spike 상태, criteria ledger 또는 agent 역할은 방문 판정 입력이 아니다.
 
 ## API Contracts
@@ -20,11 +20,12 @@
 
 - none Read는 ctx를, fresh 재방문은 무출력을, stale 재방문은 soft ctx를 반환한다.
 - 동일 turn의 동일 디렉터리 재방문은 map과 ctx를 중복 방출하지 않는다.
+- Delete 방문도 `commitVisit`을 거쳐 owner 방문과 delivery 상태를 기록한다.
 
 ### AC-visit-gate — branch-independent mutation gate
 
-- 모든 branch에서 미전달 일반 mutation은 한 번 deny되고 동일 재시도는 통과한다.
-- INTENT.md/DETAIL.md mutation과 owner INTENT가 없는 mutation은 방문 gate로 deny하지 않는다.
+- 모든 branch에서 미전달 Write/Edit/Delete 일반 mutation은 한 번 deny되고 동일 재시도는 통과한다.
+- INTENT.md/DETAIL.md mutation과 owner INTENT가 없는 mutation은 방문 gate로 deny하지 않으며 보호 문서 삭제 판단은 validator에 맡긴다.
 
 ## Boundary Exemptions
 
@@ -36,4 +37,4 @@
 
 ## Last Updated
 
-2026-07-27 — spike mode 인자를 제거하고 branch-independent delivery 계약으로 재구성했다.
+2026-08-23 — Delete를 공용 mutation 방문과 owner delivery 상태 계약에 포함했다.

@@ -40,7 +40,7 @@
 
 - SessionStart — bootstrap → lifecycle
 - UserPromptSubmit — contextInjector → lifecycle → insightInjector → session-touch → vaultCommitter(마지막, 부수효과)
-- PreToolUse — `tool_name` 라우팅(`Write|Edit`→layerGuard, `Read|Grep|Glob`→vaultRedirector) + lifecycle
+- PreToolUse — 물리 입력을 순서 있는 논리 호출로 정규화해 `Write|Edit|Delete`→layerGuard, `Read|Grep|Glob`→vaultRedirector 로 모두 라우팅한다. guard 결과는 deny-wins 로 병합하고 lifecycle 은 성공 batch 의 첫 논리 operation 또는 malformed 의 원래 물리 입력으로 정확히 한 번 실행한다. malformed 는 실제 vault 안에서 deny, 밖에서 pass 한다
 - PostToolUse — `MAENCOF_MCP_TOOLS` allowlist 게이트를 통과한 activityRecorder + lifecycle
 
 ## Acceptance Criteria
@@ -109,4 +109,4 @@
 
 ## Last Updated
 
-2026-07-30 — 공유 패키지 root import와 출력 기반 번들 가드를 현행화하고, 번들 entry·MCP lifecycle 직접 도달 면책을 유지했다.
+2026-08-23 — PreToolUse 의 ordered batch 라우팅, Delete 보호, deny-wins, lifecycle matcher 입력과 malformed 범위 판정을 현행화했다.

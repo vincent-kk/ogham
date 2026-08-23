@@ -176,6 +176,21 @@ describe('pre-tool-validator', () => {
     const result = validatePreToolUse(input);
     expect(result.hookSpecificOutput).toBeUndefined();
   });
+
+  it.each(['/app/INTENT.md', '/app/DETAIL.md'])(
+    'should block Delete of protected document %s',
+    (filePath) => {
+      const result = validatePreToolUse({
+        ...baseInput,
+        tool_name: 'Delete',
+        tool_input: { file_path: filePath },
+      });
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+      expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+        'Delete',
+      );
+    },
+  );
 });
 
 describe('isDetailMd', () => {

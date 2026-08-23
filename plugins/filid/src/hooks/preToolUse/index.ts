@@ -1,1 +1,1 @@
-export { handlePreToolUse } from './preToolUse.js';
+export { handlePreToolUse, handlePreToolUseBatch } from './preToolUse.js';

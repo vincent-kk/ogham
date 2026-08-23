@@ -25,7 +25,7 @@ import { visitKey } from './utils/visitKey.js';
 export type { FractalMap };
 
 /**
- * Unified visit pipeline for Read | Write | Edit.
+ * Unified visit pipeline for Read | Write | Edit | Delete.
  *
  * Resolves the owner fractal's delivery state (none | stale | fresh) through
  * the locked `commitVisit` transaction and emits accordingly:
@@ -51,7 +51,8 @@ export function processVisit(input: PreToolUseInput): HookOutput {
   const { filePath, fileDir } = resolveVisitedPath(safeCwd, rawPath);
   const mutation =
     input.tool_name === HOOK_TOOL_NAME.WRITE ||
-    input.tool_name === HOOK_TOOL_NAME.EDIT;
+    input.tool_name === HOOK_TOOL_NAME.EDIT ||
+    input.tool_name === HOOK_TOOL_NAME.DELETE;
   const scope = visitScope(input);
 
   const { cachedBoundary, settled } = isFastPathSettled(

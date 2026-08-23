@@ -1,6 +1,11 @@
 import { parseApplyPatch } from "./parseApplyPatch.js";
 import { parseBashRead } from "./parseBashRead.js";
-import type { CodexToolUse } from "./types.js";
+import type {
+  ApplyPatchOp,
+  CodexToolUse,
+  NormalizedCodexToolUse,
+  NormalizeCodexToolUsesResult,
+} from "./types.js";
 
 /**
  * Rewrite a Codex tool call into the Claude hook-input vocabulary the bundled
@@ -10,63 +15,108 @@ import type { CodexToolUse } from "./types.js";
  * `command`) short-circuits here and is returned untouched — as is any agy or MCP
  * tool call.
  *
- * `apply_patch` → `Write`/`Edit`: Codex sends file edits as
+ * `apply_patch` → `Write`/`Edit`/`Delete`: Codex sends file edits as
  * `{tool_name:"apply_patch", tool_input:{command:<V4A patch>}}` with no `file_path`.
  * An add becomes `Write` (its `+` lines are the whole file); an update becomes
  * `Edit` (`old_string`/`new_string` from the hunk; the handler re-reads the real
- * file on disk to simulate the change). A delete is left as-is — Claude has no
- * delete tool and never PreToolUse-guards deletes either, so nothing is lost.
+ * file on disk to simulate the change). Every file operation becomes a separate
+ * logical hook input; consumers merge their decisions for the physical call.
  *
  * `Bash` → `Read`: Codex has no Read tool, so the model reads files by shelling
  * out (`cat foo.md`). A simple single-file read is rewritten to `Read` so the
  * vault redirector's advisory reaches the model (Codex now injects PreToolUse
  * `additionalContext` — openai/codex #20692, merged 2026-05-05). Only maencof's
- * `*` matcher forwards Bash to a hook; filid/imbas match `Read|Write|Edit`, so
- * this is inert for them and, since Claude reads via the Read tool, effectively
- * Codex-scoped in practice.
+ * `*` matcher forwards Bash to a hook, so this is inert for products whose hook
+ * matcher excludes Bash and effectively Codex-scoped in practice.
  *
- * ponytail: first file op only. A multi-file `apply_patch` guards its first file;
- * per-op iteration is the upgrade path if models start bundling files (they emit
- * one file per patch in practice — measured 2026-07-15).
+ * Multi-file patch order is preserved. Parsing is all-or-nothing so consumers
+ * never mistake a valid prefix for the complete physical operation.
  */
-export function normalizeCodexToolUse<
-  T extends CodexToolUse & { tool_input: Record<string, unknown> },
->(input: T): Omit<T, "tool_input"> & { tool_input: Record<string, unknown> };
-export function normalizeCodexToolUse<T extends CodexToolUse>(input: T): T;
-export function normalizeCodexToolUse(input: CodexToolUse): CodexToolUse {
-  const command = input.tool_input?.["command"];
-  if (typeof command !== "string") return input;
-
+export function normalizeCodexToolUses<T extends CodexToolUse>(
+  input: T,
+): NormalizeCodexToolUsesResult<T> {
   if (input.tool_name === "apply_patch") {
-    const op = parseApplyPatch(command)[0];
-    if (!op || op.kind === "delete") return input;
+    const command = input.tool_input?.["command"];
+    if (typeof command !== "string")
+      return {
+        ok: false,
+        original: input,
+        reason:
+          "Invalid apply_patch command: tool_input.command must be a string",
+      };
 
-    const added = op.addedLines.join("\n");
-    const removed = op.removedLines.join("\n");
-
+    const parsed = parseApplyPatch(command);
+    if (!parsed.ok) return { ...parsed, original: input };
     return {
-      ...input,
-      tool_name: op.kind === "add" ? "Write" : "Edit",
-      tool_input: {
-        ...input.tool_input,
-        file_path: op.filePath,
-        content: added,
-        old_string: removed,
-        new_string: added,
-      },
+      ok: true,
+      original: input,
+      toolUses: parsed.operations.map((operation) =>
+        normalizeOperation(input, operation),
+      ) as [NormalizedCodexToolUse<T>, ...NormalizedCodexToolUse<T>[]],
     };
   }
 
-  if (input.tool_name === "Bash") {
+  const command = input.tool_input?.["command"];
+  if (input.tool_name === "Bash" && typeof command === "string") {
     const filePath = parseBashRead(command);
-    if (!filePath) return input;
+    if (!filePath) return passthrough(input);
 
     return {
-      ...input,
-      tool_name: "Read",
-      tool_input: { ...input.tool_input, file_path: filePath },
+      ok: true,
+      original: input,
+      toolUses: [
+        {
+          ...input,
+          tool_name: "Read",
+          tool_input: { ...input.tool_input, file_path: filePath },
+        } as unknown as NormalizedCodexToolUse<T>,
+      ],
     };
   }
 
-  return input;
+  return passthrough(input);
+}
+
+function normalizeOperation<T extends CodexToolUse>(
+  input: T,
+  operation: ApplyPatchOp,
+): NormalizedCodexToolUse<T> {
+  const toolInput = {
+    ...input.tool_input,
+    file_path: operation.filePath,
+  };
+
+  if (operation.kind === "add")
+    return {
+      ...input,
+      tool_name: "Write",
+      tool_input: { ...toolInput, content: operation.addedLines.join("\n") },
+    } as unknown as NormalizedCodexToolUse<T>;
+
+  if (operation.kind === "update")
+    return {
+      ...input,
+      tool_name: "Edit",
+      tool_input: {
+        ...toolInput,
+        old_string: operation.removedLines.join("\n"),
+        new_string: operation.addedLines.join("\n"),
+      },
+    } as unknown as NormalizedCodexToolUse<T>;
+
+  return {
+    ...input,
+    tool_name: "Delete",
+    tool_input: toolInput,
+  } as unknown as NormalizedCodexToolUse<T>;
+}
+
+function passthrough<T extends CodexToolUse>(
+  input: T,
+): NormalizeCodexToolUsesResult<T> {
+  return {
+    ok: true,
+    original: input,
+    toolUses: [input as unknown as NormalizedCodexToolUse<T>],
+  };
 }

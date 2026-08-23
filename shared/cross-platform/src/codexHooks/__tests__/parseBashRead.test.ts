@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeCodexToolUse } from "../normalizeToolUse.js";
+import { normalizeCodexToolUses } from "../normalizeToolUse.js";
 import { parseBashRead } from "../parseBashRead.js";
 
 describe("parseBashRead", () => {
@@ -37,14 +37,17 @@ describe("parseBashRead", () => {
   });
 });
 
-describe("normalizeCodexToolUse — Bash reads", () => {
+describe("normalizeCodexToolUses — Bash reads", () => {
   it("rewrites a simple shell read to Read with file_path", () => {
-    const out = normalizeCodexToolUse({
+    const result = normalizeCodexToolUses({
       tool_name: "Bash",
       tool_input: { command: "cat 01_Core/identity.md" },
     });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const out = result.toolUses[0];
     expect(out.tool_name).toBe("Read");
-    expect(out.tool_input.file_path).toBe("01_Core/identity.md");
+    expect(out.tool_input?.file_path).toBe("01_Core/identity.md");
   });
 
   it("leaves a non-read or complex Bash command as Bash", () => {
@@ -52,21 +55,30 @@ describe("normalizeCodexToolUse — Bash reads", () => {
       tool_name: "Bash",
       tool_input: { command: "cat notes.md | head" },
     };
-    expect(normalizeCodexToolUse(piped)).toBe(piped);
+    const pipedResult = normalizeCodexToolUses(piped);
+    expect(pipedResult.ok).toBe(true);
+    if (!pipedResult.ok) return;
+    expect(pipedResult.toolUses[0]).toBe(piped);
     const write = {
       tool_name: "Bash",
       tool_input: { command: "printf x >> notes.md" },
     };
-    expect(normalizeCodexToolUse(write)).toBe(write);
+    const writeResult = normalizeCodexToolUses(write);
+    expect(writeResult.ok).toBe(true);
+    if (!writeResult.ok) return;
+    expect(writeResult.toolUses[0]).toBe(write);
   });
 
   it("preserves sibling fields and cwd when promoting to Read", () => {
-    const out = normalizeCodexToolUse({
+    const result = normalizeCodexToolUses({
       cwd: "/vault",
       tool_name: "Bash",
       tool_input: { command: "cat a.md", justification: "keep" },
     });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const out = result.toolUses[0];
     expect(out.cwd).toBe("/vault");
-    expect(out.tool_input.justification).toBe("keep");
+    expect(out.tool_input?.justification).toBe("keep");
   });
 });

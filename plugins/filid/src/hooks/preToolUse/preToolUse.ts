@@ -1,7 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { HOOK_TOOL_NAME } from '../../constants/hookDefaults.js';
+import type { NormalizeCodexToolUsesResult } from '@ogham/cross-platform';
+
+import {
+  DENY_RETRY_GUIDANCE,
+  HOOK_TOOL_NAME,
+} from '../../constants/hookDefaults.js';
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
 import { isDetailMd } from '../shared/utils/isDetailMd.js';
 import { isFcaProject } from '../shared/utils/isFcaProject.js';
@@ -14,8 +19,8 @@ import { mergeResults } from './utils/mergeResults.js';
 
 /**
  * Unified PreToolUse hook orchestrator.
- * Read | Write | Edit all enter the visit pipeline (`processVisit`) first;
- * Write/Edit continue into validation and the structure guard.
+ * Read | Write | Edit | Delete all enter the visit pipeline (`processVisit`)
+ * first; mutations continue into their applicable validators and guards.
  *
  * FCA opt-in gate: projects without a `.filid/` marker or INTENT.md are not
  * governed at all — validation and guards are as opt-in as injection.
@@ -35,7 +40,8 @@ export async function handlePreToolUse(
 
   const mutation =
     input.tool_name === HOOK_TOOL_NAME.WRITE ||
-    input.tool_name === HOOK_TOOL_NAME.EDIT;
+    input.tool_name === HOOK_TOOL_NAME.EDIT ||
+    input.tool_name === HOOK_TOOL_NAME.DELETE;
 
   const visit = processVisit(input);
   if (!mutation) return mergeResults([visit]);
@@ -45,7 +51,7 @@ export async function handlePreToolUse(
 
   const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
   let oldContent: string | undefined;
-  if (isDetailMd(filePath))
+  if (input.tool_name !== HOOK_TOOL_NAME.DELETE && isDetailMd(filePath))
     try {
       oldContent = readFileSync(resolve(safeCwd, filePath), 'utf-8');
     } catch {
@@ -57,4 +63,56 @@ export async function handlePreToolUse(
     validatePreToolUse(input, oldContent),
     guardStructure(input),
   ]);
+}
+
+/** Apply one conservative decision to every logical operation in a tool call. */
+export async function handlePreToolUseBatch(
+  normalized: NormalizeCodexToolUsesResult<PreToolUseInput>,
+): Promise<HookOutput> {
+  if (!normalized.ok) {
+    const safeCwd = validateCwd(normalized.original.cwd);
+    if (safeCwd === null || !isFcaProject(safeCwd)) return { continue: true };
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'deny',
+        permissionDecisionReason:
+          `Cannot inspect every apply_patch file operation: ${normalized.reason}. ` +
+          `split the patch into individual file operations, then retry. ${DENY_RETRY_GUIDANCE}`,
+      },
+    };
+  }
+
+  if (normalized.original.tool_name !== 'apply_patch')
+    return handlePreToolUse(normalized.toolUses[0]);
+
+  const results: HookOutput[] = [];
+  for (const toolUse of normalized.toolUses) {
+    const result = await handlePreToolUse(toolUse);
+    results.push(identifyPatchResult(result, toolUse));
+  }
+  return mergeResults(results);
+}
+
+function identifyPatchResult(
+  result: HookOutput,
+  input: PreToolUseInput,
+): HookOutput {
+  const output = result.hookSpecificOutput;
+  if (!output) return result;
+  const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
+  const marker = `[filid:apply_patch ${filePath}]`;
+  return {
+    ...result,
+    hookSpecificOutput: {
+      ...output,
+      permissionDecisionReason: output.permissionDecisionReason
+        ? `${marker}\n${output.permissionDecisionReason}`
+        : undefined,
+      additionalContext: output.additionalContext
+        ? `${marker}\n${output.additionalContext}`
+        : undefined,
+    },
+  };
 }
