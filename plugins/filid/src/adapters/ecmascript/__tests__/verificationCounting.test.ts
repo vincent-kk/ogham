@@ -110,4 +110,28 @@ describe('ecmascript semantic verification counting', () => {
       ),
     ).toMatchObject({ certainty: 'indeterminate' });
   });
+
+  it('counts static rows behind a type argument list', () => {
+    expect(
+      countSemanticCases(
+        "it.each<{ value: number }>([{ value: 1 }, { value: 2 }])('row', ({ value }) => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('counts static rows behind a type argument list holding a function type', () => {
+    expect(
+      countSemanticCases(
+        "it.each<{ run: (value: number) => void }>([{ run: noop }])('row', ({ run }) => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 1 });
+  });
+
+  it('multiplies cases inside a static parameterized suite with a type argument', () => {
+    expect(
+      countSemanticCases(
+        "describe.each<{ name: string }>([{ name: 'a' }, { name: 'b' }])('suite', () => { it('one', () => {}); });",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
 });

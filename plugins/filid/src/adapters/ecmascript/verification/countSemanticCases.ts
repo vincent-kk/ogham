@@ -97,6 +97,15 @@ class SemanticCaseCounter {
       cursor += 2;
       if (member !== 'each') continue;
 
+      // `it.each<T>([…])` puts a type argument list between `each` and the
+      // call; it carries no rows, and reading it as the table loses the count.
+      if (this.tokens[cursor]?.value === '<') {
+        const typeClose = this.findMatching(cursor, '<', '>');
+        if (typeClose < 0)
+          return { exact: false, count: 0, nextIndex: cursor + 1 };
+        cursor = typeClose + 1;
+      }
+
       const tableStart = this.tokens[cursor];
       if (!tableStart) return { exact: false, count: 0, nextIndex: cursor };
       if (tableStart.value === '(') {
