@@ -2,7 +2,7 @@ import type {
   ApplyPatchHunk,
   ApplyPatchHunkLine,
   ProjectApplyPatchHunksResult,
-} from "./types.js";
+} from "../types.js";
 
 /**
  * Project ordered Codex update hunks onto current content without filesystem I/O.

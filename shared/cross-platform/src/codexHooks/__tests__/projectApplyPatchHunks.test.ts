@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { projectApplyPatchHunks } from "../projectApplyPatchHunks.js";
+import { projectApplyPatchHunks } from "../hunkProjection/projectApplyPatchHunks.js";
 
 describe("projectApplyPatchHunks", () => {
   it("uses surrounding context to identify an otherwise repeated brace", () => {

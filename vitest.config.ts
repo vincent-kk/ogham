@@ -1,7 +1,5 @@
 import { defineConfig } from "vitest/config";
 
-delete process.env.CLAUDE_PLUGIN_ROOT;
-
 export default defineConfig({
   test: {
     projects: [

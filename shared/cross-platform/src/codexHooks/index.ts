@@ -1,6 +1,6 @@
 export { parseApplyPatch } from "./parseApplyPatch.js";
 export { parseBashRead } from "./parseBashRead.js";
-export { projectApplyPatchHunks } from "./projectApplyPatchHunks.js";
+export { projectApplyPatchHunks } from "./hunkProjection/projectApplyPatchHunks.js";
 export { normalizeCodexToolUses } from "./normalizeToolUse.js";
 export type {
   ApplyPatchHunk,

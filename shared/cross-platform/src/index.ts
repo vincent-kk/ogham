@@ -27,7 +27,7 @@ export type { BinaryStatus } from "./binaries/types.js";
 export { normalizeCodexToolUses } from "./codexHooks/normalizeToolUse.js";
 export { parseApplyPatch } from "./codexHooks/parseApplyPatch.js";
 export { parseBashRead } from "./codexHooks/parseBashRead.js";
-export { projectApplyPatchHunks } from "./codexHooks/projectApplyPatchHunks.js";
+export { projectApplyPatchHunks } from "./codexHooks/hunkProjection/projectApplyPatchHunks.js";
 export type {
   ApplyPatchHunk,
   ApplyPatchHunkLine,

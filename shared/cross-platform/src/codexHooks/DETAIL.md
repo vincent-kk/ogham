@@ -20,6 +20,14 @@ Move는 source `Delete`와 destination `Write`의 경로 효과를 유지하되 
 
 `normalizeCodexToolUses(input)`은 원래 입력을 `original`에 보존한다. 올바른 patch는 각 파일 section을 독립 hook 입력으로 만들고, 실패는 `reason`을 가진 `ok: false`로 돌려준다. Update section의 단일 non-empty `*** Move to:`는 source `Delete` 다음 destination `Write`로 펼쳐 양쪽 경로를 guard한다.
 
+## Boundary Exemptions
+
+### `hunkProjection` — 패키지 루트 공개 재노출
+
+- **Consumers**: `../index.ts`
+- **Direct import**: `allowed`
+- **Reason**: 상위 `src` 계약이 패키지 루트 배럴에서 공개 심볼의 구체 소유 파일을 이름으로 재노출하도록 요구하며, 이 경로는 구현 소비가 아니라 패키지 공개 표면 열거다.
+
 ## Acceptance Criteria
 
 ### CHN-BATCH — Ordered complete normalization
