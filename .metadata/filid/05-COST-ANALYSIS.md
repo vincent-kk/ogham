@@ -12,9 +12,9 @@
 
 | 훅                       | 이벤트             | matcher             | timeout | 번들 크기 |
 | ------------------------ | ------------------ | ------------------- | ------- | --------- |
-| `setup.mjs`              | `SessionStart`     | `*`                 | 30초    | 9,492 B   |
-| `user-prompt-submit.mjs` | `UserPromptSubmit` | `*`                 | 5초     | 11,666 B  |
-| `pre-tool-use.mjs`       | `PreToolUse`       | `Read\|Write\|Edit` | 10초    | 25,278 B  |
+| `setup.mjs`              | `SessionStart`     | `*`                 | 30초    | 9,449 B   |
+| `user-prompt-submit.mjs` | `UserPromptSubmit` | `*`                 | 5초     | 12,162 B  |
+| `pre-tool-use.mjs`       | `PreToolUse`       | `Read\|Write\|Edit` | 10초    | 26,949 B  |
 
 `run-hook.cmd`(54 B, Windows shim)와 `run-agy.mjs`(3,351 B, agy host 러너)는 훅이 아니라 러너다. 실행 진입은 `libs/run.cjs`가 담당한다.
 
@@ -31,7 +31,7 @@
 | light         | 16,384 B | `user-prompt-submit.mjs` |
 | run-agy       | 12,288 B | `run-agy.mjs`            |
 
-현재 사용률은 각각 약 19%, 77%, 71%, 27%다. 캡보다 더 강한 방어선은 금지 모듈 가드다 — 훅 도달 코드가 배럴(`index.js`)을 import하면 esbuild가 배럴이 재노출하는 모듈 전체를 훅 번들로 끌어오고, 이 가드가 그것을 잡는다.
+현재 사용률은 각각 약 19%, 82%, 74%, 27%다. 캡보다 더 강한 방어선은 금지 모듈 가드다 — 훅 도달 코드가 배럴(`index.js`)을 import하면 esbuild가 배럴이 재노출하는 모듈 전체를 훅 번들로 끌어오고, 이 가드가 그것을 잡는다.
 
 ### 호출 빈도
 
@@ -49,7 +49,7 @@
 
 ### 전달 캐시
 
-`PreToolUse`는 모듈 규칙을 **매번 보내지 않는다.** `[filid:ctx]` 블록은 그 모듈에서 첫 read/write일 때, 그리고 캐시가 stale해졌을 때만 전달된다. `[filid:map]`은 방문 집합이 바뀔 때만 나온다. 같은 모듈을 연속으로 편집하는 동안 추가 컨텍스트 비용은 0이다.
+`PreToolUse`는 모듈 규칙을 **매번 보내지 않는다.** `[filid:ctx]` 블록은 그 모듈에서 첫 read/write일 때, 그리고 캐시가 stale해졌을 때만 전달된다. `[filid:map]`은 방문 집합이 바뀔 때만 나온다. 같은 모듈을 연속으로 편집하는 동안 추가 컨텍스트 비용은 0이다. `[filid:ctx]`는 cwd 기준 경로와 읽기 지시만 싣는다(≈300 B). INTENT.md 본문은 에이전트가 직접 Read할 때만 컨텍스트에 들어오며, 넓은 작업 턴·stale 재전달(기본 3턴)·서브에이전트 스코프에서 본문이 누적되지 않는다.
 
 ---
 
@@ -85,11 +85,11 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 | 항목      | 값                                      |
 | --------- | --------------------------------------- |
-| 문자 수   | **711자** (7줄, `HOOK_GUIDE_BLOCK`)     |
-| 추정 토큰 | 약 170–190 토큰 (영문 기준 추정치)      |
+| 문자 수   | **930자** (8줄, `HOOK_GUIDE_BLOCK`)     |
+| 추정 토큰 | 약 220–250 토큰 (영문 기준 추정치)      |
 | 주입 빈도 | 모듈별 첫 접근 시 1회 + stale 시 재전달 |
 
-여기에 해당 모듈의 `INTENT.md` 인라인 내용과 부모 체인 경로가 붙는다. INTENT.md가 50줄 상한을 갖는 이유가 여기 있다 — 이 문서는 컨텍스트에 **실제로 실리는** 비용이다.
+여기에 해당 모듈의 `INTENT.md` 경로·읽기 지시와 부모 체인 경로가 붙는다(본문은 싣지 않는다). INTENT.md의 50줄 상한은 에이전트가 그 파일을 Read할 때의 비용 상한이다.
 
 ### MCP 반환 예산
 
@@ -112,16 +112,16 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 | 파일                            | 크기                    | 형식 |
 | ------------------------------- | ----------------------- | ---- |
-| `bridge/mcp-server.cjs`         | 399,800 B               | CJS  |
-| `bridge/pre-tool-use.mjs`       | 25,278 B                | ESM  |
-| `bridge/user-prompt-submit.mjs` | 11,666 B                | ESM  |
-| `bridge/setup.mjs`              | 9,492 B                 | ESM  |
+| `bridge/mcp-server.cjs`         | 416,185 B               | CJS  |
+| `bridge/pre-tool-use.mjs`       | 26,949 B                | ESM  |
+| `bridge/user-prompt-submit.mjs` | 12,162 B                | ESM  |
+| `bridge/setup.mjs`              | 9,449 B                 | ESM  |
 | `bridge/run-agy.mjs`            | 3,351 B                 | ESM  |
 | `bridge/run-hook.cmd`           | 54 B                    | cmd  |
-| `public/settings.html`          | 26,157 B                | HTML |
-| **합계**                        | **475,798 B (≈465 KB)** |      |
+| `public/settings.html`          | 30,263 B                | HTML |
+| **합계**                        | **498,413 B (≈487 KB)** |      |
 
-훅 3개 합계는 46,436 B다. `dist/` 라이브러리 산출물은 1.0에 존재하지 않는다.
+훅 3개 합계는 48,560 B다. `dist/` 라이브러리 산출물은 1.0에 존재하지 않는다.
 
 ---
 

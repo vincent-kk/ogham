@@ -78,7 +78,7 @@ function runPreToolUseBundle(
     input: JSON.stringify({
       cwd,
       session_id: sessionId,
-      hook_event_name: 'PreToolUse',
+      hook_event_name: HOOK_EVENT_NAME.PRE_TOOL_USE,
       tool_name: toolName,
       tool_input: toolInput,
     }),
@@ -171,6 +171,39 @@ describe('hook bundle smoke tests', () => {
         /Dynamic require|Cannot find module|^Error:/m,
       );
     });
+});
+
+describe('pre-tool-use bundle delivery pointer', () => {
+  let cwd: string;
+
+  beforeAll(() => {
+    cwd = mkdtempSync(portableResolve(tmpdir(), 'filid-hook-pointer-'));
+    writeFileSync(
+      portableResolve(cwd, 'package.json'),
+      JSON.stringify({ name: 'pointer-fixture' }),
+    );
+    writeFileSync(
+      portableResolve(cwd, 'INTENT.md'),
+      '## Purpose\nFixture\n## Boundaries\n### Always do\n- Verify\n### Ask first\n- Widen\n### Never do\n- Bypass\n',
+    );
+    writeFileSync(portableResolve(cwd, 'index.ts'), '');
+  });
+
+  afterAll(() => {
+    if (cwd) rmSync(cwd, { recursive: true, force: true });
+  });
+
+  it('delivers the INTENT.md pointer and read directive, never the document body', () => {
+    const first = runPreToolUseBundle(cwd, `pointer-${Date.now()}`, 'Read', {
+      file_path: portableResolve(cwd, 'index.ts'),
+    });
+    const context = first.hookSpecificOutput?.additionalContext ?? '';
+    expect(context).toContain('[filid:ctx]');
+    expect(context).toContain('intent: INTENT.md');
+    expect(context).toContain('action: READ the intent file above');
+    expect(context).not.toContain('## Purpose');
+    expect(context).not.toContain('\n---\n');
+  });
 });
 
 describe('pre-tool-use bundle apply_patch policy', () => {

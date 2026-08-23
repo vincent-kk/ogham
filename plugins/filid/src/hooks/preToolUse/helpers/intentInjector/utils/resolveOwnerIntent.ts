@@ -1,38 +1,19 @@
-import { existsSync, readFileSync } from 'node:fs';
-import * as path from 'node:path';
-
-import { INTENT_MD } from '../../../../../constants/documentFiles.js';
-
 /**
- * Find INTENT.md for a directory: check fileDir first, then walk up the
- * chain to the nearest ancestor with INTENT.md (the owning fractal), and
- * read its content.
+ * Locate the fractal that owns a directory: the nearest directory in the
+ * chain (fileDir first, then its ancestors) whose INTENT.md presence the
+ * chain already recorded. The hook only needs to know that an owner exists
+ * and where — it never reads the document body; the agent does.
+ * @param fileDir Absolute directory of the visited file (equals chain[0]).
+ * @param chain Ancestor directories from fileDir up to the boundary.
+ * @param intents INTENT.md presence per chain directory, as built by buildChain.
+ * @returns `hasOwner` — an INTENT.md governs this directory; `ownerDir` — the owning directory, or fileDir when none was found.
  */
 export function resolveOwnerIntent(
   fileDir: string,
   chain: string[],
   intents: Map<string, boolean>,
-): { intentContent: string | undefined; ownerDir: string } {
-  let intentAbsPath: string | undefined;
-  let ownerDir = fileDir;
-
-  if (existsSync(path.join(fileDir, INTENT_MD)))
-    intentAbsPath = path.join(fileDir, INTENT_MD);
-  else
-    for (let i = 1; i < chain.length; i++)
-      if (intents.get(chain[i])) {
-        intentAbsPath = path.join(chain[i], INTENT_MD);
-        ownerDir = chain[i];
-        break;
-      }
-
-  let intentContent: string | undefined;
-  if (intentAbsPath)
-    try {
-      intentContent = readFileSync(intentAbsPath, 'utf-8');
-    } catch {
-      // ignore
-    }
-
-  return { intentContent, ownerDir };
+): { hasOwner: boolean; ownerDir: string } {
+  for (const dir of chain)
+    if (intents.get(dir)) return { hasOwner: true, ownerDir: dir };
+  return { hasOwner: false, ownerDir: fileDir };
 }

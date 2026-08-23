@@ -3,7 +3,7 @@
 ## Requirements
 
 - 완전한 `apply_patch`의 모든 논리 Write/Edit/Delete operation을 입력 순서대로 기존 per-operation 파이프라인에 보낸다.
-- 각 operation은 방문 전달을 먼저 실행하고, 방문 deny 시 그 operation의 문서 검증과 구조 가드를 중단한다.
+- 각 operation은 방문 전달을 먼저 실행하고, 방문 deny 시 그 operation의 문서 검증과 구조 가드를 중단한다. 방문 deny는 owner INTENT.md 경로와 읽기 지시를 싣고 본문은 싣지 않는다.
 - batch loop는 앞선 deny에도 모든 후속 operation을 실행하며, 하나라도 deny면 전체 물리 호출을 deny한다.
 - Write/Edit/Delete는 방문 통과 후 문서 gate를 거치고 Write/Edit은 이어서 구조 가드를 실행한다.
 - Delete도 owner 방문 상태를 갱신하며 host가 INTENT.md/DETAIL.md와 같은 파일로 해석하는 대상 삭제는 명시적 사유로 deny한다.

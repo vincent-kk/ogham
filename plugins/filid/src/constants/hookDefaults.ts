@@ -7,7 +7,7 @@ export const DENY_RETRY_GUIDANCE =
   'Then retry. If it fails again, STOP and ask the user — do NOT resubmit unchanged.';
 
 /** [filid:ctx] 재전달 TTL 기본값 (턴). `.filid/config.json` injection.ctxTtlTurns로 조정. */
-export const CTX_TTL_TURNS_DEFAULT = 5;
+export const CTX_TTL_TURNS_DEFAULT = 3;
 
 /** INTENT.md Edit을 완전히 투영할 수 없을 때 경고하는 새 줄 수. */
 export const INTENT_EDIT_WARNING_LINE_COUNT = 20;

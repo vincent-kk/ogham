@@ -10,7 +10,10 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import { portableDirname, portableJoin, spawnCli } from '@ogham/cross-platform';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { EVIDENCE_PENDING } from '../../../constants/gates.js';
+import { parseGatesLedger } from '../parse/parseGatesLedger.js';
 
 /** Package root used to locate the hook artifact exercised in production. */
 const packageRoot = portableJoin(
@@ -30,13 +33,13 @@ const SESSION_ID = 'concurrent-gates-probe';
 /** Number of fresh ledger races exercised by the regression test. */
 const ROUNDS = 12;
 
-/** First command written verbatim into the concurrent ledger. */
-const G1_COMMAND = 'yarn verify:g1';
+/** One hook process: the command it reports and the proof that command prints. */
+const GATE_RUNS = [
+  { id: 'G1', command: 'yarn verify:g1', proof: 'G1 passed' },
+  { id: 'G2', command: 'yarn verify:g2', proof: 'G2 passed' },
+] as const;
 
-/** Second command written verbatim into the concurrent ledger. */
-const G2_COMMAND = 'yarn verify:g2';
-
-/** Unmet ledger restored before every concurrent pair. */
+/** Unmet ledger restored before every pair of hook processes. */
 const LEDGER = `# Gates: concurrent-task
 
 - [ ] G1: first verification passes
@@ -58,20 +61,31 @@ afterAll(() => {
     rmSync(root, { recursive: true, force: true });
 });
 
+beforeAll(() => {
+  if (!existsSync(bundlePath))
+    throw new Error(
+      `bridge bundle missing at ${bundlePath} — run \`yarn build:hooks\` before this suite`,
+    );
+});
+
 /**
- * Create a throwaway project with strict dial and one task directory.
+ * Create a throwaway project with strict dial, one task, and a fresh ledger.
  *
- * @returns Project root discovered by the bundled hook.
+ * @returns Project root and the ledger path the bundled hook will rewrite.
  */
-function makeProjectRoot(): string {
+function makeProject(): { root: string; ledgerPath: string } {
   const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-gates-race-'));
   const taskDir = portableJoin(root, '.seiri', 'tasks', 'concurrent-task');
-  const configPath = portableJoin(root, '.seiri', 'config.json');
   createdRoots.push(root);
   mkdirSync(portableJoin(root, '.git'));
   mkdirSync(taskDir, { recursive: true });
-  writeFileSync(configPath, '{"intervention":"strict"}');
-  return root;
+  writeFileSync(
+    portableJoin(root, '.seiri', 'config.json'),
+    '{"intervention":"strict"}',
+  );
+  const ledgerPath = portableJoin(taskDir, 'gates.md');
+  writeFileSync(ledgerPath, LEDGER);
+  return { root, ledgerPath };
 }
 
 /**
@@ -93,41 +107,61 @@ function hookPayload(root: string, command: string, stdout: string): string {
   });
 }
 
-describe('concurrent gate hook writes', () => {
-  it('keeps both gate proofs across concurrent hook processes', async () => {
-    if (!existsSync(bundlePath))
-      throw new Error(
-        `bridge bundle missing at ${bundlePath} — run \`yarn build:hooks\` before this suite`,
-      );
+/**
+ * Read one stored ledger as the outcome a single writer could have produced.
+ *
+ * Fails when the ledger lost a gate, lost a CHECK or EXPECT, or pairs a
+ * checkbox with evidence no single writer would have written beside it —
+ * the damage an unserialised read-modify-write would leave behind.
+ *
+ * @param ledgerPath Absolute path of the ledger both hook processes rewrite.
+ * @returns Identifiers of the gates whose proof survived, in source order.
+ */
+function provenGates(ledgerPath: string): string[] {
+  const { gates } = parseGatesLedger(readFileSync(ledgerPath, 'utf8'));
+  expect(gates.map((gate) => gate.id)).toEqual(GATE_RUNS.map((run) => run.id));
 
-    const root = makeProjectRoot();
-    const ledgerPath = portableJoin(
-      root,
-      '.seiri',
-      'tasks',
-      'concurrent-task',
-      'gates.md',
-    );
-    const lostG1: number[] = [];
-    const lostG2: number[] = [];
+  return GATE_RUNS.flatMap((run, index) => {
+    const gate = gates[index];
+    expect([gate?.check, gate?.expect]).toEqual([run.command, run.proof]);
+    expect(gate?.evidence).toBe(gate?.checked ? run.proof : EVIDENCE_PENDING);
+    return gate?.checked === true ? [run.id] : [];
+  });
+}
+
+describe('gate hook writes', () => {
+  it('records every proof when hook processes do not contend', async () => {
+    const { root, ledgerPath } = makeProject();
+
+    for (const run of GATE_RUNS)
+      await spawnCli('node', [bundlePath], {
+        input: hookPayload(root, run.command, run.proof),
+      });
+
+    expect(provenGates(ledgerPath)).toEqual(['G1', 'G2']);
+  }, 30_000);
+
+  it('leaves a legal single-writer ledger under concurrency', async () => {
+    const { root, ledgerPath } = makeProject();
+    const outcomes: string[][] = [];
 
     for (let round = 0; round < ROUNDS; round += 1) {
       writeFileSync(ledgerPath, LEDGER);
 
-      await Promise.all([
-        spawnCli('node', [bundlePath], {
-          input: hookPayload(root, G1_COMMAND, 'G1 passed'),
-        }),
-        spawnCli('node', [bundlePath], {
-          input: hookPayload(root, G2_COMMAND, 'G2 passed'),
-        }),
-      ]);
+      await Promise.all(
+        GATE_RUNS.map((run) =>
+          spawnCli('node', [bundlePath], {
+            input: hookPayload(root, run.command, run.proof),
+          }),
+        ),
+      );
 
-      const stored = readFileSync(ledgerPath, 'utf8');
-      if (!stored.includes('- [x] G1')) lostG1.push(round);
-      if (!stored.includes('- [x] G2')) lostG2.push(round);
+      outcomes.push(provenGates(ledgerPath));
     }
 
-    expect({ lostG1, lostG2 }).toEqual({ lostG1: [], lostG2: [] });
+    // A serialised round proves both gates; a round that fails open keeps the
+    // last writer's proof. An empty round means no writer's proof survived at
+    // all, which the atomic replacement is supposed to make impossible.
+    expect(outcomes.filter((proven) => proven.length === 0)).toEqual([]);
   }, 60_000);
 });
