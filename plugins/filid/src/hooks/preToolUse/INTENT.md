@@ -14,7 +14,7 @@ PreToolUse 이벤트에서 방문 전달, INTENT/DETAIL write gate와 구조 가
 ## Conventions
 
 - 실행 순서: `validateCwd` → `isFcaProject` → `processVisit` → Write/Edit이면 `validatePreToolUse` → `guardStructure`
-- 방문 deny는 규칙을 전달한 결과이므로 즉시 반환하고 동일 재시도가 나머지 경로를 실행한다.
+- 방문 deny는 규칙 포인터(INTENT.md 경로와 읽기 지시)를 전달한 결과이므로 즉시 반환하고 동일 재시도가 나머지 경로를 실행한다.
 - 기존 content는 DETAIL.md 검증에만 best-effort로 읽는다.
 - `mergeResults` 규칙:
   - `permissionDecision`: 하나라도 deny면 deny (AND); reason은 `\n\n` concat

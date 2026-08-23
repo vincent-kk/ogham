@@ -3,7 +3,7 @@
 ## Requirements
 
 - FCA 프로젝트의 Read, Write, Edit 이벤트를 방문 전달 파이프라인에 먼저 보낸다.
-- 방문 파이프라인의 deny는 INTENT 규칙을 함께 전달하고 현재 mutation만 중단한다.
+- 방문 파이프라인의 deny는 owner INTENT.md 경로와 읽기 지시를 함께 전달하고 현재 mutation만 중단한다.
 - Write/Edit은 방문 통과 후 INTENT.md/DETAIL.md 검증과 구조 가드를 순서대로 실행한다.
 - branch 이름, spike 상태, criteria ledger 또는 agent 역할에 따라 검증을 면제하지 않는다.
 - 비-FCA 프로젝트와 유효하지 않은 cwd는 상태를 변경하지 않고 통과시킨다.

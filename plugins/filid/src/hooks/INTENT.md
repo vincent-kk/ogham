@@ -10,7 +10,7 @@ Claude Code의 SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·Pre
 | ------------------ | ----------------- | ------------------------------------------- |
 | `setup`            | SessionStart      | 캐시 초기화 + INTENT.md 자동 감지 + pruning |
 | `userPromptSubmit` | UserPromptSubmit  | 턴당 fmap reset + 세션 첫 FCA 포인터        |
-| `intentInjector`   | PreToolUse (내부) | INTENT.md 체인·map 주입                     |
+| `intentInjector`   | PreToolUse (내부) | INTENT.md 경로 포인터·chain·map 주입        |
 | `preToolValidator` | PreToolUse (내부) | INTENT/DETAIL write gate                    |
 | `structureGuard`   | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고        |
 | `preToolUse`       | PreToolUse        | 위 3개 서브모듈 오케스트레이션              |

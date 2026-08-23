@@ -30,7 +30,7 @@ The hook build also emits shared host runners:
 
 `preToolUse` orchestrates three concerns for `Read`, `Write`, and `Edit`:
 
-1. Intent delivery injects the nearest INTENT.md body, parent chain, DETAIL.md hint, and changed visit map before work proceeds in a module.
+1. Intent delivery points to the nearest INTENT.md (cwd-relative path plus a read directive), the parent chain, the DETAIL.md hint, and the changed visit map before work proceeds in a module. Document bodies are never inlined; the agent reads them.
 2. Document validation keeps INTENT.md at 50 lines or fewer, requires `### Always do`, `### Ask first`, and `### Never do`, and rejects append-only DETAIL.md growth.
 3. Structure guarding reports organ placement and dependency-boundary risks.
 
