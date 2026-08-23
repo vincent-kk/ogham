@@ -240,11 +240,19 @@ describe("filesystem", () => {
   });
 
   it("preserves non-ENOENT realpath errors", () => {
-    const blocker = join(root, "blocker");
-    writeFileSync(blocker, "not a directory");
+    // A file used as a directory component is ENOTDIR on POSIX but ENOENT on
+    // Windows, so the rethrow branch is driven by an injected error instead.
+    const denied = Object.assign(new Error("denied"), { code: "EACCES" });
+    const realpath = vi.spyOn(realpathSync, "native").mockImplementation(() => {
+      throw denied;
+    });
 
-    expect(() =>
-      canonicalizeTargetPathSync(root, join(blocker, "child.md")),
-    ).toThrow();
+    try {
+      expect(() =>
+        canonicalizeTargetPathSync(root, join(root, "child.md")),
+      ).toThrow(denied);
+    } finally {
+      realpath.mockRestore();
+    }
   });
 });

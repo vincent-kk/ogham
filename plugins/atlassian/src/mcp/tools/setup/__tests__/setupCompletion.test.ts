@@ -153,7 +153,9 @@ describe("setup config path by host", () => {
     const root = mkdtempSync(join(tmpdir(), "atlassian-clean-"));
     roots.push(root);
     const path = resolvedUserPath("codex", {
+      // `os.homedir()` reads HOME on POSIX but USERPROFILE on Windows.
       HOME: root,
+      USERPROFILE: root,
       CODEX_HOME: undefined,
       CLAUDE_CONFIG_DIR: undefined,
     });

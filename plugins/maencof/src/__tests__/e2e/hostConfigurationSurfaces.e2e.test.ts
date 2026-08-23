@@ -13,6 +13,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 
+import { normalize } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createProjectInstructionManager } from '../../core/claudeMdMerger/index.js';
@@ -141,23 +142,22 @@ describe('host configuration surfaces', () => {
       });
 
       // changelog: the same registry paths are the live git pathspec consumer.
+      // git porcelain reports POSIX separators on every platform.
+      const watched = (path: string): string =>
+        normalize(relative(projectRoot, path));
       const changes = await detectWatchedChanges(projectRoot);
-      expect(
-        changes.some((line) => line.includes(relative(projectRoot, agentFile))),
-      ).toBe(true);
+      expect(changes.some((line) => line.includes(watched(agentFile)))).toBe(
+        true,
+      );
       expect(
         changes.some((line) =>
-          line.includes(
-            relative(projectRoot, surface.instructions.effectivePath),
-          ),
+          line.includes(watched(surface.instructions.effectivePath)),
         ),
       ).toBe(true);
       if (ruleFile)
-        expect(
-          changes.some((line) =>
-            line.includes(relative(projectRoot, ruleFile)),
-          ),
-        ).toBe(true);
+        expect(changes.some((line) => line.includes(watched(ruleFile)))).toBe(
+          true,
+        );
     },
   );
 });

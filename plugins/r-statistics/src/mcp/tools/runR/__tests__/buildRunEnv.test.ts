@@ -147,7 +147,9 @@ describe("buildRunEnv", () => {
     const root = mkdtempSync(join(tmpdir(), "r-stats-clean-"));
     try {
       const library = isolatedManagedLibrary("codex", {
+        // `os.homedir()` reads HOME on POSIX but USERPROFILE on Windows.
         HOME: root,
+        USERPROFILE: root,
         CODEX_HOME: undefined,
         CLAUDE_CONFIG_DIR: undefined,
       });
