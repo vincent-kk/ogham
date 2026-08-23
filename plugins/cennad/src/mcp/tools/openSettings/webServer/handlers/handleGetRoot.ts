@@ -1,4 +1,5 @@
 import type { ServerResponse } from 'node:http';
+import { dirname } from 'node:path';
 
 import { escapeJsonForHtml } from '@ogham/http-kit';
 
@@ -18,10 +19,12 @@ export async function handleGetRoot(
   res: ServerResponse,
 ): Promise<void> {
   const configByScope = await ctx.loadConfigByScope();
+  const scope = ctx.loadConfigState();
   const inlineState = escapeJsonForHtml({
     config: configByScope.project,
     configByScope,
-    scope: ctx.loadConfigState(),
+    scope,
+    activeHome: dirname(scope.paths.user),
   });
   const html = ctx.settingsHtml.replace(
     /["']__CENNAD_STATE__["']/,

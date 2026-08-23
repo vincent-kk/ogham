@@ -1,7 +1,7 @@
 /**
  * @file skillPortfolio.test.ts
  * @description Regression guard for the maencof skill portfolio. Asserts:
- *   1. The `skills/` directory contains exactly EXPECTED_COUNT skill directories.
+ *   1. The `skills/` directory contains exactly EXPECTED_COUNT public skill directories.
  *   2. No skill or agent markdown file references a slash invocation of a REMOVED_SKILLS entry.
  *
  * Update EXPECTED_COUNT and REMOVED_SKILLS as skills are merged or removed.
@@ -25,7 +25,7 @@ const EXPECTED_COUNT = 29;
 describe('maencof skill portfolio invariants', () => {
   it(`skills/ contains exactly ${EXPECTED_COUNT} skill directories`, () => {
     const dirs = readdirSync(SKILLS_DIR, { withFileTypes: true }).filter(
-      (entry) => entry.isDirectory(),
+      (entry) => entry.isDirectory() && !entry.name.startsWith('.'),
     );
     expect(dirs.length).toBe(EXPECTED_COUNT);
   });

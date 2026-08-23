@@ -25,9 +25,26 @@ describe('loadCounter', () => {
   });
 
   it('returns the parsed counter when valid', async () => {
-    const counter = { parent_pid: 100, claude: 3, codex: 1, antigravity: 2 };
+    const counter = {
+      host_session_id: 'session-a',
+      claude: 3,
+      codex: 1,
+      antigravity: 2,
+    };
     await writeCounterFile(JSON.stringify(counter));
     expect(await loadCounter()).toEqual(counter);
+  });
+
+  it('migrates a legacy Claude parent_pid while reading', async () => {
+    await writeCounterFile(
+      JSON.stringify({ parent_pid: 100, claude: 3, codex: 1, antigravity: 2 }),
+    );
+    expect(await loadCounter()).toEqual({
+      host_session_id: 'claude-pid:100',
+      claude: 3,
+      codex: 1,
+      antigravity: 2,
+    });
   });
 
   it('returns null on malformed JSON', async () => {

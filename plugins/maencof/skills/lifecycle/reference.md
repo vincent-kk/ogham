@@ -37,7 +37,8 @@ For `PreToolUse` and `PostToolUse` events, use the `matcher` field to filter by 
 
 - **No matcher**: action fires for all tools
 - **With matcher**: pipe-separated tool names (e.g., `"Write|Edit|Bash"`)
-- Matcher values are exact tool name matches
+- Matcher values use one host-neutral vocabulary in both PreToolUse and PostToolUse: Claude `Edit` and Codex `apply_patch` are the same logical edit matcher; all other names (including `Bash` and MCP tools) remain exact identity matches
+- Matcher decisions use `tool_name` only and never infer a tool from success/failure response content
 
 ## Detailed Workflow
 

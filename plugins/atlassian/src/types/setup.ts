@@ -52,18 +52,25 @@ export type SetupFormData = z.infer<typeof SetupFormDataSchema>;
 
 // --- Response schemas ---
 
-export const SetupResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  errors: z
-    .array(
-      z.object({
-        field: z.string(),
-        message: z.string(),
-      }),
-    )
-    .optional(),
-});
+export const SetupResponseSchema = z.discriminatedUnion("success", [
+  z.object({
+    success: z.literal(true),
+    message: z.string(),
+    config_path: z.string().min(1),
+  }),
+  z.object({
+    success: z.literal(false),
+    message: z.string(),
+    errors: z
+      .array(
+        z.object({
+          field: z.string(),
+          message: z.string(),
+        }),
+      )
+      .optional(),
+  }),
+]);
 export type SetupResponse = z.infer<typeof SetupResponseSchema>;
 
 // --- Status schema ---
@@ -107,11 +114,13 @@ export interface SetupParams {
   mode?: "new" | "edit";
 }
 
-export interface SetupResult {
-  success: boolean;
-  message: string;
-  url?: string;
-}
+export type SetupCompletion =
+  | { success: true; message: string; config_path: string }
+  | { success: false; message: string };
+
+export type SetupResult =
+  | (Extract<SetupCompletion, { success: true }> & { url: string })
+  | Extract<SetupCompletion, { success: false }>;
 
 // --- Connection test result ---
 
@@ -130,4 +139,5 @@ export interface SetupServerHandle {
   url: string;
   token: string;
   close: () => Promise<void>;
+  completion: Promise<SetupCompletion>;
 }

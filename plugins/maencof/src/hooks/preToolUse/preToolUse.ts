@@ -24,7 +24,7 @@ export function orchestratePreToolUse(input: DispatchInput): MergedHookOutput {
 /**
  * PreToolUse: one physical call may contain multiple logical operations. Route
  * every operation in order, merge with deny-wins semantics, then run lifecycle
- * once using the first operation as its matcher input.
+ * once using the original physical call as its matcher input.
  */
 export function orchestratePreToolUseBatch(
   normalized: NormalizeCodexToolUsesResult<DispatchInput>,
@@ -52,7 +52,7 @@ export function orchestratePreToolUseBatch(
       );
   }
 
-  const lifecycleInput = normalized.toolUses[0];
+  const lifecycleInput = normalized.original;
   results.push(
     safeConcern(lifecycleInput.cwd, 'lifecycle-dispatcher', () =>
       runLifecycleDispatcher('PreToolUse', lifecycleInput),

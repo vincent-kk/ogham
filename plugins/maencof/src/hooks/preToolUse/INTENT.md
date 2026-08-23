@@ -2,7 +2,7 @@
 
 ## Purpose
 
-PreToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 한 물리 호출을 순서 있는 논리 도구 호출로 정규화해 `tool_name` 으로 라우팅한다 — `Write|Edit|Delete`→layerGuard(차단 가능), `Read|Grep|Glob`→vaultRedirector(권고). 어느 guard 의 deny 든 전체 호출을 차단하고 lifecycleDispatcher 는 물리 호출당 정확히 한 번 실행한다.
+PreToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 한 물리 호출을 순서 있는 논리 도구 호출로 정규화해 guard를 라우팅한다 — `Write|Edit|Delete`→layerGuard(차단 가능), `Read|Grep|Glob`→vaultRedirector(권고). 어느 guard 의 deny 든 전체 호출을 차단하고 lifecycleDispatcher 는 원래 물리 `tool_name`으로 호출당 정확히 한 번 실행한다.
 
 ## Conventions
 
@@ -15,7 +15,7 @@ PreToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 한 물�
 ### Always do
 
 - 논리 호출을 입력 순서대로 모두 guard 에 전달하고 결과를 deny-wins 로 병합
-- 성공 batch 는 첫 논리 operation 을 matcher 입력으로, malformed 는 원래 물리 입력을 사용해 lifecycle 을 정확히 한 번 실행
+- 성공·malformed batch 모두 원래 물리 입력을 사용해 lifecycle 을 정확히 한 번 실행
 - 각 관심사를 `safeConcern` 으로 감싸 격리
 
 ### Ask first
@@ -27,4 +27,4 @@ PreToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 한 물�
 - entry / orchestrator 에 로직 인라인 (helpers 경유)
 - 배럴(index.js) import (훅 번들 비대)
 - 첫 allow 에서 batch 판정을 끝내거나 뒤 operation 의 deny 를 버리기
-- 논리 operation 마다 lifecycle 을 반복하거나 성공 batch 의 첫 operation 이 아닌 입력으로 matcher 를 바꾸기
+- 논리 operation 마다 lifecycle 을 반복하거나 원래 물리 입력 대신 파생 operation/response로 matcher를 바꾸기

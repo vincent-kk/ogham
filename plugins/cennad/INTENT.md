@@ -2,21 +2,6 @@
 
 `@ogham/cennad` 패키지 루트. Codex CLI / Antigravity CLI / Claude CLI 위임용 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
-## Structure
-
-| Path                         | Role                                                         |
-| ---------------------------- | ------------------------------------------------------------ |
-| `src/`                       | TypeScript 소스 (fractal 루트)                               |
-| `scripts/`                   | esbuild 빌드 스크립트                                        |
-| `hooks/`                     | Claude Code 훅 매핑                                          |
-| `skills/`                    | `setup`, `codex`, `antigravity`, `claude`, `crosscheck` 스킬 |
-| `agents/`                    | `courier` — 스킬이 background spawn 하는 위임 실행 에이전트  |
-| `libs/run.cjs`               | cross-platform Node 러너 (filid 동일)                        |
-| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`)                 |
-| `public/settings.html`       | 빌드된 settings UI — 런타임 디스크 서빙 (커밋)               |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                              |
-| `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                                |
-
 ## Conventions
 
 - 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → hooks → compile-plugin`
@@ -28,21 +13,14 @@
 
 ### Always do
 
-- 디스크 경로는 기본 `~/.claude/plugins/cennad/` 하위이며 `CENNAD_CONFIG_PATH` 로 override 가능 (opt-in project artifacts: `<cwd>/.cennad/`)
+- 런타임 상태는 선택된 호스트의 상태 루트 안에서 이 플러그인 전용 영역에 격리한다. 명시적 `CENNAD_CONFIG_PATH` override를 존중하고, 프로젝트 artifact는 opt-in일 때만 프로젝트 로컬 영역에 둔다.
 
 ### Ask first
 
 - 새 빌드 스크립트 추가 (파이프라인 영향)
-- `package.json` 의 `files` 배열 변경 (배포 산출물 범위)
+- 패키지의 배포 산출물 범위 변경
 
 ### Never do
 
-- `dist/` 를 커밋 (`bridge/` · `public/` 는 의도적 커밋 — `package.json:files` 포함)
-- `version.ts` 또는 `.claude-plugin/plugin.json` 의 version 을 손으로 수정 (injectVersion.mjs 만)
-
-## Dependencies
-
-- **런타임**: `@modelcontextprotocol/sdk ~1.22.0`, `zod ^3.23.8`
-- **개발**: `esbuild ^0.24.0`, `typescript ^5.7.2`, `vitest ^4.1.2`, `@types/node ^20.11.0`
-- **환경**: Node.js >= 20, Yarn 4.12 workspaces
-- **빌드 스크립트**: `scripts/buildSettingsHtml.mjs`, `scripts/buildMcpServer.mjs`, `scripts/buildHooks.mjs`, `../../scripts/injectVersion.mjs`
+- 일반 빌드 출력물을 커밋 (배포용 bridge와 settings page 산출물은 의도적으로 커밋한다)
+- 생성기가 소유한 소스 version 또는 플러그인 manifest version을 손으로 수정

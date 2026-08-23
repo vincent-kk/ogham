@@ -1,98 +1,117 @@
 /**
  * @file cwdGuard.test.ts
- * @description CWD 강제화 가드 (getVaultPath) 테스트
+ * @description Direct getVaultPath canonical host-state boundary tests.
  */
-import { homedir } from 'node:os';
-import { resolve } from 'node:path';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
+import { basename, join, relative, resolve } from 'node:path';
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { canonicalizeTargetPathSync } from '@ogham/cross-platform';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-describe('getVaultPath CWD guard', () => {
-  const originalEnv = process.env['MAENCOF_VAULT_PATH'];
+import { getVaultPath } from '../../mcp/server/graphCache/index.js';
 
-  afterEach(() => {
-    if (originalEnv !== undefined)
-      process.env['MAENCOF_VAULT_PATH'] = originalEnv;
-    else delete process.env['MAENCOF_VAULT_PATH'];
+type GuardHost = 'claude' | 'codex';
 
-    vi.unstubAllEnvs();
+let root: string;
+let stateRoots: Record<GuardHost, string>;
+
+beforeEach(() => {
+  root = mkdtempSync(join(tmpdir(), 'maencof-cwd-guard-'));
+  stateRoots = {
+    claude: join(root, 'home', '.claude'),
+    codex: join(root, 'home', '.codex'),
+  };
+  mkdirSync(stateRoots.claude, { recursive: true });
+  mkdirSync(stateRoots.codex, { recursive: true });
+  vi.stubEnv('CLAUDE_CONFIG_DIR', stateRoots.claude);
+  vi.stubEnv('CODEX_HOME', stateRoots.codex);
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  rmSync(root, { recursive: true, force: true });
+});
+
+function setVault(path: string): void {
+  vi.stubEnv('MAENCOF_VAULT_PATH', path);
+}
+
+describe.each(['claude', 'codex'] as const)('%s host state root', (host) => {
+  it('blocks the exact relocated host root', () => {
+    setVault(stateRoots[host]);
+    expect(() => getVaultPath()).toThrow('global config path');
   });
 
-  it('전역 .claude 경로를 차단한다', async () => {
-    const globalClaudePath = resolve(homedir(), '.claude');
-    process.env['MAENCOF_VAULT_PATH'] = globalClaudePath;
-
-    // 동적 import로 getVaultPath를 포함한 createServer를 테스트
-    // getVaultPath는 private이므로 server.ts의 도구 호출을 통해 간접 테스트
-    // 여기서는 로직만 단위 테스트
-    const BLOCKED_PREFIXES = [
-      resolve(homedir(), '.claude'),
-      resolve(homedir(), '.config'),
-    ];
-
-    function getVaultPath(): string {
-      const raw = process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
-      const resolved = resolve(raw);
-      for (const prefix of BLOCKED_PREFIXES)
-        if (resolved.startsWith(prefix))
-          throw new Error(
-            `전역 설정 경로에 대한 접근이 차단되었습니다: ${resolved}`,
-          );
-
-      return resolved;
-    }
-
-    expect(() => getVaultPath()).toThrow('전역 설정 경로');
+  it('blocks descendants of the relocated host root', () => {
+    const descendant = join(stateRoots[host], 'agents', 'nested');
+    mkdirSync(descendant, { recursive: true });
+    setVault(descendant);
+    expect(() => getVaultPath()).toThrow('global config path');
   });
 
-  it('전역 .config 경로를 차단한다', () => {
-    const BLOCKED_PREFIXES = [
-      resolve(homedir(), '.claude'),
-      resolve(homedir(), '.config'),
-    ];
-
-    function getVaultPath(vault: string): string {
-      const resolved = resolve(vault);
-      for (const prefix of BLOCKED_PREFIXES)
-        if (resolved.startsWith(prefix))
-          throw new Error(
-            `전역 설정 경로에 대한 접근이 차단되었습니다: ${resolved}`,
-          );
-
-      return resolved;
-    }
-
-    expect(() => getVaultPath(resolve(homedir(), '.config/claude'))).toThrow(
-      '전역 설정 경로',
+  it('allows a sibling whose name only shares the root prefix', () => {
+    const sibling = `${stateRoots[host]}-project`;
+    mkdirSync(sibling, { recursive: true });
+    setVault(sibling);
+    expect(getVaultPath()).toBe(
+      canonicalizeTargetPathSync(process.cwd(), sibling),
     );
   });
 
-  it('일반 프로젝트 경로는 통과한다', () => {
-    const BLOCKED_PREFIXES = [
-      resolve(homedir(), '.claude'),
-      resolve(homedir(), '.config'),
-    ];
+  it('blocks a relative path that resolves to the host root', () => {
+    setVault(relative(process.cwd(), stateRoots[host]));
+    expect(() => getVaultPath()).toThrow('global config path');
+  });
 
-    function getVaultPath(vault: string): string {
-      const resolved = resolve(vault);
-      for (const prefix of BLOCKED_PREFIXES)
-        if (resolved.startsWith(prefix)) throw new Error('blocked');
+  it('blocks dot-dot traversal into the host root', () => {
+    const traversal = join(
+      stateRoots[host],
+      '..',
+      basename(stateRoots[host]),
+      'agents',
+    );
+    mkdirSync(resolve(traversal), { recursive: true });
+    setVault(traversal);
+    expect(() => getVaultPath()).toThrow('global config path');
+  });
 
-      return resolved;
-    }
+  it('blocks a symlink alias to the host root', () => {
+    const alias = join(root, `${host}-alias`);
+    symlinkSync(stateRoots[host], alias, 'dir');
+    setVault(alias);
+    expect(() => getVaultPath()).toThrow('global config path');
+  });
+});
 
-    expect(() => getVaultPath('/Users/test/project')).not.toThrow();
-    expect(getVaultPath('/Users/test/project')).toBe(
-      resolve('/Users/test/project'),
+describe('legacy global config root', () => {
+  it('continues to block the exact ~/.config root', () => {
+    setVault(join(homedir(), '.config'));
+    expect(() => getVaultPath()).toThrow('global config path');
+  });
+
+  it('continues to block descendants of ~/.config', () => {
+    setVault(join(homedir(), '.config', 'maencof', 'nested'));
+    expect(() => getVaultPath()).toThrow('global config path');
+  });
+});
+
+describe('vault selection defaults', () => {
+  it('allows an ordinary project path', () => {
+    const project = join(root, 'project');
+    mkdirSync(project);
+    setVault(project);
+
+    expect(getVaultPath()).toBe(
+      canonicalizeTargetPathSync(process.cwd(), project),
     );
   });
 
-  it('CWD 기반 기본값이 사용된다', () => {
+  it('uses the current working directory when MAENCOF_VAULT_PATH is absent', () => {
     delete process.env['MAENCOF_VAULT_PATH'];
 
-    const raw = process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
-    const resolved = resolve(raw);
-
-    expect(resolved).toBe(resolve(process.cwd()));
+    expect(getVaultPath()).toBe(
+      canonicalizeTargetPathSync(process.cwd(), process.cwd()),
+    );
   });
 });

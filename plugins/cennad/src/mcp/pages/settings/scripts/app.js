@@ -1630,6 +1630,13 @@
   function tryInlineState() {
     var raw = window.__CENNAD_STATE__;
     if (!raw || typeof raw !== 'object') return false;
+    var activeHome = document.getElementById('active-cennad-home');
+    if (
+      activeHome &&
+      typeof raw.activeHome === 'string' &&
+      raw.activeHome !== ''
+    )
+      activeHome.textContent = raw.activeHome;
     if (raw.configByScope) configByScope = raw.configByScope;
     // Adopting the state picks the layer, so the view to seat is settled by
     // the time the form is filled.

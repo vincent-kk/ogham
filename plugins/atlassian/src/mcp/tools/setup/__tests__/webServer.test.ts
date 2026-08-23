@@ -2,6 +2,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { SetupServerHandle } from "../../../../types/index.js";
 import { startSetupServer } from "../webServer/webServer.js";
 
+const VALID_JIRA_FORM = {
+  deployment_type: "cloud",
+  jira: {
+    base_url: "https://test.atlassian.net",
+    username: "user@test.com",
+    api_token: "mytoken",
+  },
+};
+
 const mockContext = {
   settingsHtml: "<html>__SETTINGS_STATE__</html>",
   loadConfig: vi.fn().mockResolvedValue({}),
@@ -43,13 +52,14 @@ afterEach(async () => {
 describe("startSetupServer", () => {
   // --- basic ---
 
-  it("서버 시작 — { url, close } 반환, url은 http://127.0.0.1:포트 형식", async () => {
+  it("서버 시작 — { url, close, completion } 반환", async () => {
     handle = await startSetupServer({ context: mockContext });
 
     expect(handle.url).toMatch(
       /^http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]+$/,
     );
     expect(typeof handle.close).toBe("function");
+    expect(handle.completion).toBeInstanceOf(Promise);
   });
 
   it("GET / — 200 응답과 HTML 반환", async () => {
@@ -117,5 +127,54 @@ describe("startSetupServer", () => {
 
     expect(setTimeoutSpy).toHaveBeenCalled();
     setTimeoutSpy.mockRestore();
+  });
+
+  it("close before save completes as failure without config_path", async () => {
+    handle = await startSetupServer({ context: mockContext });
+    const completion = handle.completion;
+    await handle.close();
+    handle = null;
+
+    const result = await completion;
+    expect(result.success).toBe(false);
+    expect(result).not.toHaveProperty("config_path");
+  });
+
+  it("failed persistence stays retryable and later success completes once", async () => {
+    vi.mocked(mockContext.saveConfig)
+      .mockRejectedValueOnce(new Error("temporary disk error"))
+      .mockResolvedValue({
+        paths: { user: "/tmp/user/config.json", project: null },
+        layers: { user: null, project: null },
+        effective: {},
+        overridden: [],
+        warnings: [],
+      });
+    handle = await startSetupServer({ context: mockContext });
+    const submitUrl = new URL("/submit", handle.url);
+    submitUrl.searchParams.set("token", handle.token);
+
+    const first = await fetch(submitUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...VALID_JIRA_FORM, closeAfter: false }),
+    });
+    expect(first.status).toBe(500);
+    const stillPending = await Promise.race([
+      handle.completion.then(() => false),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 10)),
+    ]);
+    expect(stillPending).toBe(true);
+
+    const second = await fetch(submitUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...VALID_JIRA_FORM, closeAfter: false }),
+    });
+    expect(second.status).toBe(200);
+    await expect(handle.completion).resolves.toMatchObject({
+      success: true,
+      config_path: "/tmp/user/config.json",
+    });
   });
 });

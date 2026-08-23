@@ -28,6 +28,7 @@ const TEST_TOKEN = "test-token";
 
 type RouteJson = {
   success?: boolean;
+  config_path?: string;
   configured?: boolean;
   results?: unknown[];
   errors?: unknown[];
@@ -75,6 +76,7 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
       .mockResolvedValue({ service: "jira", success: true, message: "OK" }),
     resetTimer: vi.fn(),
     closeServer: vi.fn().mockResolvedValue(undefined),
+    completeSetup: vi.fn(),
     ...overrides,
   } as RouteContext;
 }
@@ -322,8 +324,10 @@ describe("createRouteHandler", () => {
     expect(res.status).toBe(200);
     const data = await readJson(res);
     expect(data.success).toBe(true);
+    expect(data.config_path).toBe("/tmp/user/config.json");
     expect(ctx.saveConfig).toHaveBeenCalledOnce();
     expect(ctx.saveCredentials).toHaveBeenCalledOnce();
+    expect(ctx.completeSetup).toHaveBeenCalledWith("/tmp/user/config.json");
   });
 
   it("POST /submit — 연결 실패 → saveConfig/saveCredentials 절대 호출되지 않음", async () => {
@@ -341,8 +345,10 @@ describe("createRouteHandler", () => {
     expect(res.status).toBe(400);
     const data = await readJson(res);
     expect(data.success).toBe(false);
+    expect(data.config_path).toBeUndefined();
     expect(ctx.saveConfig).not.toHaveBeenCalled();
     expect(ctx.saveCredentials).not.toHaveBeenCalled();
+    expect(ctx.completeSetup).not.toHaveBeenCalled();
   });
 
   it("POST /submit — Zod 유효성 실패 → 400 with errors", async () => {
@@ -357,7 +363,54 @@ describe("createRouteHandler", () => {
     expect(res.status).toBe(400);
     const data = await readJson(res);
     expect(data.success).toBe(false);
+    expect(data.config_path).toBeUndefined();
     expect(Array.isArray(data.errors)).toBe(true);
+    expect(ctx.completeSetup).not.toHaveBeenCalled();
+  });
+
+  it("POST /submit — project scope reports the saved project path", async () => {
+    const ctx = makeContext({
+      saveConfig: vi.fn().mockResolvedValue({
+        paths: {
+          user: "/tmp/user/config.json",
+          project: "/tmp/project/.atlassian/config.json",
+        },
+        layers: { user: null, project: null },
+        effective: {},
+        overridden: [],
+        warnings: [],
+      }),
+    });
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await postJson(withToken(baseUrl, "/submit"), {
+      ...VALID_JIRA_FORM,
+      scope: "project",
+      closeAfter: false,
+    });
+    const data = await readJson(res);
+    expect(data.config_path).toBe("/tmp/project/.atlassian/config.json");
+    expect(ctx.completeSetup).toHaveBeenCalledWith(
+      "/tmp/project/.atlassian/config.json",
+    );
+  });
+
+  it("POST /submit — credential persistence failure exposes no path", async () => {
+    const ctx = makeContext({
+      saveCredentials: vi.fn().mockRejectedValue(new Error("disk full")),
+    });
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await postJson(withToken(baseUrl, "/submit"), {
+      ...VALID_JIRA_FORM,
+      closeAfter: false,
+    });
+    const data = await readJson(res);
+    expect(res.status).toBe(500);
+    expect(data.config_path).toBeUndefined();
+    expect(ctx.completeSetup).not.toHaveBeenCalled();
   });
 
   it("POST /test — Zod 유효성 실패 → 400", async () => {

@@ -6,6 +6,7 @@ import type { HookName, HookResult } from './hookRunnerLayerA.js';
 export interface HookRunOptions {
   env?: Record<string, string>;
   cwd?: string;
+  topology?: 'direct' | 'launcher';
   /**
    * Raw stdin payload, as the host writes it for UserPromptSubmit. Omitted means
    * stdin closes immediately, which is the SessionStart case.
@@ -54,12 +55,12 @@ export function runHookLayerB(
   const bridgeDir = process.env.CENNAD_E2E_BRIDGE;
   if (!bridgeDir) throw new Error('CENNAD_E2E_BRIDGE not set');
 
-  // hooks.json launches every hook as `node libs/run.cjs bridge/<name>.mjs`, so
-  // the hook runs one process below the host. Spawning the bundle directly hides
-  // anything that depends on that hop — process.ppid above all.
+  // Compare the shipped launcher topology with a direct bundle process. Session
+  // identity must remain the same across both instead of depending on ppid.
   const script = resolve(bridgeDir, `${name}.mjs`);
   const runner = resolve(bridgeDir, '..', 'libs', 'run.cjs');
-  const result = spawnSync(process.execPath, [runner, script], {
+  const args = opts.topology === 'direct' ? [script] : [runner, script];
+  const result = spawnSync(process.execPath, args, {
     cwd: opts.cwd,
     env: { ...process.env, ...(opts.env ?? {}) },
     input: opts.input,

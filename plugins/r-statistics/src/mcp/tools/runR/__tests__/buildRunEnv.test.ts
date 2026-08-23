@@ -1,3 +1,9 @@
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { describe, expect, it } from "vitest";
 
 import { Platform } from "../../../../types/enums.js";
@@ -9,6 +15,33 @@ const workspace = {
   artifactsDir: "/tmp/ws_env/artifacts",
   dataDir: "/tmp/ws_env/data",
 };
+
+const packageRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
+
+function isolatedManagedLibrary(
+  host: "claude" | "codex",
+  overrides: Record<string, string | undefined>,
+): string {
+  const script = [
+    'import { buildRunEnv } from "./src/mcp/tools/runR/operations/buildRunEnv.ts";',
+    'const workspace = {workspaceId:"w",dir:"/tmp/w",artifactsDir:"/tmp/w/a",dataDir:"/tmp/w/d"};',
+    'process.stdout.write(buildRunEnv(workspace, 1).R_STATISTICS_LIB ?? "");',
+  ].join("\n");
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    OGHAM_HOST: host,
+    ...overrides,
+  };
+  for (const [key, value] of Object.entries(env))
+    if (value === undefined) delete env[key];
+  const result = spawnSync(
+    process.execPath,
+    ["--import", "tsx", "--input-type=module", "--eval", script],
+    { cwd: packageRoot, env, encoding: "utf8" },
+  );
+  if (result.status !== 0) throw new Error(result.stderr);
+  return result.stdout;
+}
 
 describe("buildRunEnv", () => {
   it("excludes non-allowlisted parent env vars (no secret leakage)", () => {
@@ -80,5 +113,48 @@ describe("buildRunEnv", () => {
     const env = buildRunEnv(workspace, undefined);
     expect(env.PATH).toBe(process.env.PATH);
     expect(env.LANG).toBeDefined();
+  });
+
+  it("uses the exact Claude config root even when it contains spaces", () => {
+    const root = mkdtempSync(join(tmpdir(), "r stats claude "));
+    try {
+      expect(
+        isolatedManagedLibrary("claude", {
+          CLAUDE_CONFIG_DIR: root,
+          CODEX_HOME: undefined,
+        }),
+      ).toContain(root);
+    } finally {
+      rmSync(root, { recursive: true });
+    }
+  });
+
+  it("uses the exact Codex home even when it contains spaces", () => {
+    const root = mkdtempSync(join(tmpdir(), "r stats codex "));
+    try {
+      expect(
+        isolatedManagedLibrary("codex", {
+          CODEX_HOME: root,
+          CLAUDE_CONFIG_DIR: undefined,
+        }),
+      ).toContain(root);
+    } finally {
+      rmSync(root, { recursive: true });
+    }
+  });
+
+  it("a clean Codex home never falls back to .claude", () => {
+    const root = mkdtempSync(join(tmpdir(), "r-stats-clean-"));
+    try {
+      const library = isolatedManagedLibrary("codex", {
+        HOME: root,
+        CODEX_HOME: undefined,
+        CLAUDE_CONFIG_DIR: undefined,
+      });
+      expect(library).toContain(join(root, ".codex"));
+      expect(library).not.toContain(join(root, ".claude"));
+    } finally {
+      rmSync(root, { recursive: true });
+    }
   });
 });

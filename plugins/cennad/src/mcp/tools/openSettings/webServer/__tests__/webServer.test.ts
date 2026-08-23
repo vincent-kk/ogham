@@ -133,6 +133,7 @@ describe('settings web server', () => {
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toContain('"ratio"');
+    expect(html).toContain('"activeHome":"/tmp/user"');
     expect(html).not.toContain('__CENNAD_STATE__');
   });
 

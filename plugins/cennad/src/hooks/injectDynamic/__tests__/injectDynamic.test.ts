@@ -44,10 +44,10 @@ const BASE_CONFIG: HookConfig = {
 };
 
 const ZERO_COUNTER: HookCounter = {
+  status: 'measured',
   codex: 0,
   antigravity: 0,
   claude: 0,
-  is_stale: false,
 };
 
 describe('buildDynamicPayload', () => {
@@ -65,6 +65,32 @@ describe('buildDynamicPayload', () => {
     expect(out.split('\n')[0]).toBe(
       '[cennad] Calls: codex 3 · antigravity 1 · claude 0 (total 4) · under share: antigravity 45pt',
     );
+  });
+
+  it('reports unidentified counts without synthesizing a zero measurement', () => {
+    const out = buildDynamicPayload(
+      BASE_CONFIG,
+      { ...ZERO_COUNTER, status: 'unidentified' },
+      '',
+      'claude',
+    );
+    expect(out.split('\n')[0]).toBe(
+      '[cennad] Delegation counts unavailable (unidentified).',
+    );
+    expect(out).not.toContain('No delegations yet this session.');
+  });
+
+  it('distinguishes a missing counter file from a measured zero', () => {
+    const out = buildDynamicPayload(
+      BASE_CONFIG,
+      { ...ZERO_COUNTER, status: 'missing' },
+      '',
+      'claude',
+    );
+    expect(out.split('\n')[0]).toBe(
+      '[cennad] Delegation counts unavailable (missing).',
+    );
+    expect(out).not.toContain('No delegations yet this session.');
   });
 
   it('stays two lines when nothing in the prompt matches a domain', () => {

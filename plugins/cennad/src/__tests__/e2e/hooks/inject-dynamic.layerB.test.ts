@@ -10,7 +10,10 @@ import {
 } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerB } from '../helpers/hookRunnerLayerB.js';
-import { HOST_PID, claimHostSession } from '../helpers/hostSession.js';
+import {
+  claimHostSession,
+  HOST_SESSION_ID,
+} from '../helpers/hostSession.js';
 
 // Shipped keywords are ASCII, so the non-ASCII substring path only exists for
 // keywords a user configures — this suite configures one rather than leaning on
@@ -23,18 +26,18 @@ describe('injectDynamic (Layer B)', () => {
     await rm(CENNAD_HOME, { recursive: true, force: true });
   });
 
-  it('no counter — "No calls this session yet." + exit 0', () => {
+  it('no counter — reports no session data + exit 0', () => {
     const result = runHookLayerB('injectDynamic');
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No delegations yet this session.'],
+      contextIncludes: ['Delegation counts unavailable (missing).'],
     });
   });
 
-  it('with counter (parent_pid = host pid) — condensed state + nudge', async () => {
+  it('with current-session counter — condensed state + nudge', async () => {
     await writeCounter({
-      parent_pid: HOST_PID,
+      host_session_id: HOST_SESSION_ID,
       codex: 7,
       antigravity: 3,
     });
@@ -69,7 +72,7 @@ describe('injectDynamic (Layer B)', () => {
     });
   });
 
-  it('stale counter (parent_pid mismatch) — treated as 0/0', async () => {
+  it('stale counter (parent_pid mismatch) — reports unavailable', async () => {
     await writeCounter({
       parent_pid: 999999,
       codex: 99,
@@ -79,7 +82,7 @@ describe('injectDynamic (Layer B)', () => {
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No delegations yet this session.'],
+      contextIncludes: ['Delegation counts unavailable (stale).'],
     });
   });
 
@@ -88,5 +91,8 @@ describe('injectDynamic (Layer B)', () => {
     const result = runHookLayerB('injectDynamic');
     expect(result.exitCode).toBe(0);
     expect(result.parsed.continue).toBe(true);
+    expect(result.parsed.additionalContext).toContain(
+      'Delegation counts unavailable (invalid).',
+    );
   });
 });

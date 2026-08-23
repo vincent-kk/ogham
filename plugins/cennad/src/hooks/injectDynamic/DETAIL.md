@@ -2,9 +2,9 @@
 
 ## Requirements
 
-- 매 사용자 프롬프트마다 stdin 의 `prompt`, `runtime/counter.json`, `config.json` 을 읽어 **2–3줄**을 출력한다: 호출 카운트와 점유율 미달 provider 한 줄, 강도별 nudge 한 줄, 키워드가 매치된 턴에만 소유자 지목 한 줄.
+- 매 사용자 프롬프트마다 stdin의 prompt, 세션 카운터 저장소, 구성 저장소를 읽어 **2–3줄**을 출력한다: 호출 카운트와 점유율 미달 provider 한 줄, 강도별 nudge 한 줄, 키워드가 매치된 턴에만 소유자 지목 한 줄.
 - **매 턴 주입이므로 토큰 점유 최소화가 제1 제약이다.** 줄 수를 늘리지 않는다.
-- counter 가 없거나 `parent_pid` 가 현재 호스트와 다르면 0으로 표시한다.
+- 호스트 세션 식별 불가, counter 파일 부재, 세션 불일치·잘못된 counter, 식별된 실제 0회를 서로 다른 상태로 표시한다.
 - counter 는 **읽기 전용**이다 — 리셋은 `counterManager` 의 책임이다.
 - 세션을 차단하지 않는다.
 
@@ -21,8 +21,16 @@
 
 ### AC-counter-readonly — 카운터 읽기 전용
 
-- 훅 실행이 `runtime/counter.json` 을 쓰지 않는다.
-- `parent_pid` 불일치 시 0으로 표시된다.
+- 훅 실행이 세션 카운터 저장 파일을 쓰지 않는다.
+- 식별자가 없거나 디스크 식별자가 다르면 실제 0회 문구를 출력하지 않는다.
+
+### AC-counter-measurement-matrix — 측정 상태 구분
+
+- 식별자 부재, 파일 부재, stale·invalid 자료, 일치하는 식별자의 0/0/0, Claude legacy PID를 서로 구분한다.
+
+### AC-counter-session-topology — 세션 토폴로지
+
+- 명시 세션 식별자를 공유하는 direct bundle과 `libs/run.cjs` 경유 bundle이 동일한 카운트를 출력한다.
 
 ## Boundary Exemptions
 
@@ -40,4 +48,4 @@
 
 ## Last Updated
 
-2026-07-30 — 매 턴 동적 주입의 예산 계약과 e2e in-process 실행 면책을 문서화했다.
+2026-08-23 — 세션 식별·파일 부재·실제 0회를 구분하는 카운터 측정 계약을 추가했다.

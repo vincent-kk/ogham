@@ -1,4 +1,5 @@
 import { ERROR_MESSAGES } from "../../../constants/messages.js";
+import { MANAGED_R_LIB_DIR } from "../../../constants/paths.js";
 import { getJob } from "../../../core/index.js";
 import type {
   RExecutionResult,
@@ -37,5 +38,10 @@ export async function handleGetRJob(input: GetRJobInput): Promise<RunROutput> {
   let result = job.result;
   if (result && input.includeStdout === false) result = stripStreams(result);
 
-  return { jobId: job.jobId, status: job.status, result };
+  return {
+    jobId: job.jobId,
+    status: job.status,
+    managedLibraryPath: MANAGED_R_LIB_DIR,
+    result,
+  };
 }

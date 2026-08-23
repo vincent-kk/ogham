@@ -71,8 +71,8 @@ export interface HookConfig {
 }
 
 export interface HookCounter {
+  status: 'measured' | 'missing' | 'unidentified' | 'stale' | 'invalid';
   codex: number;
   antigravity: number;
   claude: number;
-  is_stale: boolean;
 }

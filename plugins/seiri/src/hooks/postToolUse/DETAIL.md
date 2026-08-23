@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Claude에서는 `Bash`·`Skill`과 `PostToolUse`·`PostToolUseFailure`를 다룬다. Codex 전용 manifest는 지원하지 않는 Failure 이벤트를 빼며 Skill 도구 자체가 없어 그 관측 경로가 발화하지 않는다.
+- Claude에서는 `Bash`·`Skill`과 `PostToolUse`·`PostToolUseFailure`를 다룬다. plugin compiler는 Codex 전용 manifest에서 지원하지 않는 Failure 이벤트와 `Skill` matcher를 제거하므로 비활성 그룹이 남지 않는다.
 - Claude는 성공을 stdout/stderr 객체로 보내므로 정규화된 exit는 0이며, 실패는 `error`·`is_interrupt`로 보낸다. Codex는 성공과 nonzero 모두 `PostToolUse`의 문자열 `tool_response`로 보내며 exit와 interrupt 필드를 주지 않는다.
 - **다이얼이 먼저다.** advisory 면 상태를 건드리기 전에 빠져나온다.
 - `Skill` 로드는 관측만 한다 — 마지막 워크플로우 상태만 기록하고 무주입으로 빠진다. 말하는 건 다음 턴의 몫이다.
@@ -34,6 +34,7 @@
 ### AC-skill-observation-only — 관측 전용
 
 - Claude의 `Skill` 이벤트가 주입 없이 상태 기록만 남긴다. Codex에는 관측 가능한 Skill 도구가 없다.
+- Claude 정본에는 `Skill` matcher가 유지되고 생성된 Codex manifest에는 그 matcher가 없다.
 
 ### AC-once-per-command — 반복 억제
 
@@ -60,4 +61,4 @@
 
 ## Last Updated
 
-2026-08-23 — CHECK 판정을 재사용하는 Codex 실패 연쇄 패리티 계약을 반영했다.
+2026-08-23 — Codex 생성물에서 지원하지 않는 Skill matcher를 compiler가 제거하는 계약을 반영했다.

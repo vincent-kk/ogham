@@ -1,7 +1,7 @@
 ---
 name: instruct
 user-invocable: true
-description: '[maencof:instruct] Adds or modifies AI instructions in CLAUDE.md, splits oversized files into @import modules, and manages CLAUDE.local.md overrides while enforcing the 200-line guideline with automatic backups.'
+description: '[maencof:instruct] Adds or modifies AI instructions in the current host project instruction surface; on Claude it also splits oversized files into @import modules and manages CLAUDE.local.md overrides.'
 argument-hint: '[instruction to add or modify]'
 version: '1.1.0'
 complexity: medium
@@ -10,9 +10,11 @@ orchestrator: configurator
 plugin: maencof
 ---
 
-# instruct — CLAUDE.md Instruction Management
+# instruct — Project Instruction Management
 
-Safely edit and manage CLAUDE.md via conversation. Handles @import splitting, 200-line guideline enforcement, CLAUDE.local.md personal overrides, and automatic backups.
+Safely edit and manage the current host's project instructions via conversation. On Claude, this includes @import splitting, 200-line guideline enforcement, CLAUDE.local.md personal overrides, and automatic backups.
+
+Before resolving any path, load `../.shared/host-configuration.md` and select the current runtime host row. That generated reference is canonical: do not reconstruct host paths or state-root environment overrides inside this skill. On Codex, every CLAUDE.md name in the detailed workflow below means the selected AGENTS instruction target and only the maencof-owned section; do not create Claude-only files and do not apply Claude-only local/import features.
 
 ## When to Use This Skill
 
@@ -24,6 +26,8 @@ Safely edit and manage CLAUDE.md via conversation. Handles @import splitting, 20
 > For file-pattern-specific rules, use `/maencof:rule` instead.
 
 ## Scope
+
+The table below preserves the Claude workflow. Codex scope is the single effective instruction target selected by the shared host reference.
 
 | Area      | Path                                | Write                   |
 | --------- | ----------------------------------- | ----------------------- |

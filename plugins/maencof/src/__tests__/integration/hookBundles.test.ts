@@ -279,4 +279,69 @@ describe('hook bundle smoke tests', () => {
       existsSync(absoluteTarget) ? 'deny' : undefined,
     );
   });
+
+  it.each([
+    ['pre-tool-use', 'PreToolUse', 'Edit', { success: true }, true],
+    ['pre-tool-use', 'PreToolUse', 'apply_patch', { success: true }, true],
+    ['post-tool-use', 'PostToolUse', 'Edit', { success: true }, true],
+    ['post-tool-use', 'PostToolUse', 'apply_patch', { success: true }, true],
+    ['post-tool-use', 'PostToolUse', 'apply_patch', 'failed', true],
+    ['post-tool-use', 'PostToolUse', 'Bash', { success: true }, false],
+  ] as const)(
+    '%s.mjs applies the shared Edit matcher to %s %s (response %#)',
+    (bundleName, event, toolName, toolResponse, shouldMatch) => {
+      const marker = 'HOST_NEUTRAL_LIFECYCLE_MATCHER';
+      mkdirSync(join(vaultDir, '.maencof-meta'), { recursive: true });
+      writeFileSync(
+        join(vaultDir, '.maencof-meta', 'lifecycle.json'),
+        JSON.stringify({
+          version: 1,
+          actions: [
+            {
+              id: `matcher-${event}`,
+              event,
+              matcher: 'Edit',
+              enabled: true,
+              type: 'echo',
+              config: { message: marker },
+              created_by: 'test',
+              created_at: '2026-08-23T00:00:00.000Z',
+            },
+          ],
+        }),
+      );
+
+      const result = spawnSync(
+        process.execPath,
+        [resolve(bridgeDir, `${bundleName}.mjs`)],
+        {
+          input: JSON.stringify({
+            cwd: vaultDir,
+            session_id: `matcher-${event}-${toolName}`,
+            hook_event_name: event,
+            tool_name: toolName,
+            tool_input:
+              toolName === 'apply_patch'
+                ? {
+                    command:
+                      '*** Begin Patch\n*** Update File: L3/target.md\n@@\n-safe\n+safe\n*** End Patch',
+                  }
+                : { file_path: join(vaultDir, 'L3', 'target.md') },
+            tool_response: toolResponse,
+          }),
+          encoding: 'utf8',
+          timeout: 10_000,
+          windowsHide: true,
+        },
+      );
+
+      expect(result.status).toBe(0);
+      const output = JSON.parse(result.stdout) as {
+        hookSpecificOutput?: { additionalContext?: string };
+      };
+      const context = output.hookSpecificOutput?.additionalContext ?? '';
+      if (shouldMatch) expect(context).toContain(marker);
+      else expect(context).not.toContain(marker);
+    },
+  );
 });

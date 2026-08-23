@@ -228,12 +228,15 @@ describe('settings page provider controls', () => {
 
   it('describes user artifacts under the cennad data home', () => {
     const html = readSettingsFile('index.html');
+    const app = readSettingsFile('scripts/app.js');
 
     expect(html).toContain(
       '&lt;active cennad home&gt;/artifacts/&lt;projectHash&gt;/',
     );
-    expect(html).toContain('~/.claude/plugins/cennad/');
+    expect(html).toContain('id="active-cennad-home"');
+    expect(html).not.toContain('~/.claude/plugins/cennad/');
     expect(html).toContain('CENNAD_CONFIG_PATH');
+    expect(app).toContain('raw.activeHome');
   });
 
   it('offers an opt-in Claude user MCP target for the YouTube addon', () => {

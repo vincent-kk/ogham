@@ -18,6 +18,7 @@ import {
   parseToolCallText,
 } from '../helpers/envelopeShape.js';
 import { claudeEnv, codexEnv } from '../helpers/fakeProviderScripts.js';
+import { claimHostSession } from '../helpers/hostSession.js';
 import {
   type FakeProvidersHandle,
   installFakeProviders,
@@ -41,6 +42,7 @@ describe('start_conversation (Layer A)', () => {
   let handle: LayerAClient;
 
   beforeEach(async () => {
+    claimHostSession();
     await rm(CENNAD_HOME, { recursive: true, force: true });
     handle = await makeLayerAClient();
   });

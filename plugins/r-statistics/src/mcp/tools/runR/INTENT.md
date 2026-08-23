@@ -1,17 +1,6 @@
 ## Purpose
 
-`run_r` 도구 핸들러. LLM 이 생성한 R 코드를 격리 워크스페이스에서 헤드리스 Rscript 로 실행하고 아티팩트를 수집한다. 금지 호출 정적 차단 → 데이터 resolve → 실행계약 주입 → sync(대기)/async(폴링) 실행. 실행 안전만 — 통계 정책은 assert 소관.
-
-## Structure
-
-| File                               | Role                                                      |
-| ---------------------------------- | --------------------------------------------------------- |
-| `runR.ts`                          | 핸들러 — 검증·게이트·워크스페이스·잡 오케스트레이션       |
-| `operations/buildWrapperScript.ts` | user 코드를 contract 헤더/푸터로 감싼 래퍼 R 소스 생성    |
-| `operations/resolveDataRefs.ts`    | 입력 데이터 `data/` 복사 + `refs.json` 작성               |
-| `operations/buildRunEnv.ts`        | child 프로세스 env(ARTIFACTS_DIR·SEED·CONTRACT 등) 구성   |
-| `operations/executeRun.ts`         | spawn·디코딩·manifest·아티팩트 수집·상태 분류 → 결과 조립 |
-| `index.ts`                         | barrel                                                    |
+`run_r` 도구 핸들러. 격리된 Rscript 실행과 아티팩트 수집 결과에 setup이 그대로 재사용할 관리형 library 경로를 함께 제공한다.
 
 ## Conventions
 
@@ -21,6 +10,7 @@
 - 모든 잡은 jobStore 에 등록 (사전 실패도 synthetic 잡으로 일관 반환)
 - 데이터 ref 경로는 allow-root(`R_STATISTICS_DATA_ROOT`, 기본 프로젝트 루트) 하위 realpath 만 수용
 - 선택 인자 `project_root`(절대경로)는 핸들러 진입 즉시 `rememberProjectRoot` 로 기억 — allow-root 를 해석하는 깊은 leaf(`inputDataRoot`)가 이를 소비한다 (Claude 에서는 무시되어 기존 CWD 동작 유지)
+- 모든 상태 봉투는 module graph가 확정한 `MANAGED_R_LIB_DIR` 을 노출한다.
 
 ## Boundaries
 
@@ -28,6 +18,7 @@
 
 - `--vanilla` + temp 격리 + 명령 게이트로만 실행
 - timeout 은 `MAX_TIMEOUT_MS` 로 clamp
+- setup에 경로를 다시 계산시키지 않고 `managedLibraryPath`를 반환
 
 ### Ask first
 
@@ -39,8 +30,3 @@
 - 통계 가정·기법 적합성 판단 (assert 소관)
 - ARTIFACTS_DIR 밖 산출물 수용
 - allow-root 밖 데이터 ref 경로 수용 (심링크 탈출 포함)
-
-## Dependencies
-
-- `../../../core` (rRuntime·workspace·commandGate·jobStore), `../../../constants`, `../../../lib/atomicWrite`, `../../../types`, `../../../utils`
-- `@ogham/cross-platform` (`rememberProjectRoot`)

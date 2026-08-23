@@ -18,6 +18,28 @@ export const CODEX_HOOK_EVENT_SET: ReadonlySet<string> = new Set(
 );
 
 /**
+ * Matcher behavior measured from Codex's hook tool vocabulary.
+ *
+ * `Skill` has no Codex tool event, so an exact token cannot fire. `Read` also
+ * has no native tool, but PreToolUse can conservatively observe simple reads
+ * through Bash normalization; keep the source token and add that fallback.
+ * Builders and lint consume this same declaration so adaptation and diagnosis
+ * cannot drift.
+ */
+export const CODEX_HOOK_MATCHER_CAPABILITIES: {
+  readonly toolMatcherEvents: readonly string[];
+  readonly unsupportedExactTools: readonly string[];
+  readonly preToolFallbacks: readonly {
+    source: string;
+    target: string;
+  }[];
+} = {
+  toolMatcherEvents: ["PreToolUse", "PostToolUse"],
+  unsupportedExactTools: ["Skill"],
+  preToolFallbacks: [{ source: "Read", target: "Bash" }],
+};
+
+/**
  * Codex spawns plugin MCP servers with the *session* cwd, not the plugin root
  * (measured on codex-cli 0.144.4) — a relative `args` path then resolves against
  * the user's project, the server dies at initialize, and only the TUI surfaces a
