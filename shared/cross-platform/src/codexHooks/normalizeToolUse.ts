@@ -54,7 +54,7 @@ export function normalizeCodexToolUses<T extends CodexToolUse>(
         normalizeOperation(
           input,
           operation,
-          wasSourceChangedEarlier(operations, index, operation.filePath),
+          collectPriorTouchedPaths(operations, index),
         ),
       ) as [NormalizedCodexToolUse<T>, ...NormalizedCodexToolUse<T>[]],
     };
@@ -84,8 +84,12 @@ export function normalizeCodexToolUses<T extends CodexToolUse>(
 function normalizeOperation<T extends CodexToolUse>(
   input: T,
   operation: ApplyPatchOp,
-  sourceChangedEarlier: boolean,
+  priorTouchedPaths: readonly string[],
 ): [NormalizedCodexToolUse<T>, ...NormalizedCodexToolUse<T>[]] {
+  const normalizedInput =
+    priorTouchedPaths.length === 0
+      ? input
+      : { ...input, codexPriorTouchedPaths: priorTouchedPaths };
   const toolInput = {
     ...input.tool_input,
     file_path: operation.filePath,
@@ -98,17 +102,16 @@ function normalizeOperation<T extends CodexToolUse>(
       destinationPath: operation.moveTo,
       addedLines: operation.addedLines,
       removedLines: operation.removedLines,
-      sourceChangedEarlier,
     };
     return [
       {
-        ...input,
+        ...normalizedInput,
         tool_name: "Delete",
         tool_input: toolInput,
         codexPatch: { ...codexPatch, role: "source" },
       } as unknown as NormalizedCodexToolUse<T>,
       {
-        ...input,
+        ...normalizedInput,
         tool_name: "Write",
         tool_input: {
           ...input.tool_input,
@@ -122,7 +125,7 @@ function normalizeOperation<T extends CodexToolUse>(
   if (operation.kind === "add")
     return [
       {
-        ...input,
+        ...normalizedInput,
         tool_name: "Write",
         tool_input: { ...toolInput, content: operation.addedLines.join("\n") },
       } as unknown as NormalizedCodexToolUse<T>,
@@ -131,7 +134,7 @@ function normalizeOperation<T extends CodexToolUse>(
   if (operation.kind === "update")
     return [
       {
-        ...input,
+        ...normalizedInput,
         tool_name: "Edit",
         tool_input: {
           ...toolInput,
@@ -143,7 +146,7 @@ function normalizeOperation<T extends CodexToolUse>(
 
   return [
     {
-      ...input,
+      ...normalizedInput,
       tool_name: "Delete",
       tool_input: toolInput,
     } as unknown as NormalizedCodexToolUse<T>,
@@ -151,24 +154,21 @@ function normalizeOperation<T extends CodexToolUse>(
 }
 
 /**
- * Determine whether a Move source differs from its current on-disk content.
+ * Collect raw paths touched before one physical patch section.
  *
  * @param operations - Ordered physical patch sections
- * @param index - Index of the Move being normalized
- * @param sourcePath - Move source path
- * @returns Whether a prior section targeted the source
+ * @param index - Index of the operation being normalized
+ * @returns Prior source and Move destination paths in physical order
  */
-function wasSourceChangedEarlier(
+function collectPriorTouchedPaths(
   operations: readonly ApplyPatchOp[],
   index: number,
-  sourcePath: string,
-): boolean {
-  return operations
-    .slice(0, index)
-    .some(
-      (operation) =>
-        operation.filePath === sourcePath || operation.moveTo === sourcePath,
-    );
+): string[] {
+  return operations.slice(0, index).flatMap((operation) =>
+    operation.moveTo
+      ? [operation.filePath, operation.moveTo]
+      : [operation.filePath],
+  );
 }
 
 function passthrough<T extends CodexToolUse>(

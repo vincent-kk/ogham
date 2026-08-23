@@ -28,6 +28,31 @@ async function runAfterVisitGate(command: string) {
   return handlePreToolUseBatch(normalized);
 }
 
+/** Build a valid INTENT document with an exact physical line count. */
+function intentWithLineCount(lineCount: number): string {
+  const required = [
+    '# Feature',
+    '## Purpose',
+    'Fixture',
+    '## Conventions',
+    '- Stable',
+    '## Boundaries',
+    '### Always do',
+    '- Verify',
+    '### Ask first',
+    '- Ask',
+    '### Never do',
+    '- Bypass',
+  ];
+  return [
+    ...required,
+    ...Array.from(
+      { length: lineCount - required.length },
+      (_, index) => `- filler ${index}`,
+    ),
+  ].join('\n');
+}
+
 beforeEach(() => {
   tmpDir = mkdtempSync(join(tmpdir(), 'filid-move-content-'));
   process.env.CLAUDE_CONFIG_DIR = tmpDir;
@@ -60,7 +85,7 @@ describe('Codex Move destination projection', () => {
     );
   });
 
-  it('allows a uniquely projected replacement into a valid INTENT.md', async () => {
+  it('denies a non-bodyless Move even when its replacement is unique', async () => {
     mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
     writeFileSync(
       join(tmpDir, 'src', 'draft.md'),
@@ -70,7 +95,10 @@ describe('Codex Move destination projection', () => {
       '*** Begin Patch\n*** Update File: src/draft.md\n*** Move to: src/feature/INTENT.md\n@@\n-Old purpose\n+New purpose\n*** End Patch',
     );
 
-    expect(result.hookSpecificOutput?.permissionDecision).not.toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'Edit the source first',
+    );
   });
 
   it('checks retained imports at the destination path', async () => {
@@ -98,6 +126,32 @@ describe('Codex Move destination projection', () => {
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
       'Edit the source first',
+    );
+  });
+
+  it('denies an Edit of a destination created earlier in the patch', async () => {
+    mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
+    writeFileSync(join(tmpDir, 'src', 'draft.md'), intentWithLineCount(49));
+    const result = await runAfterVisitGate(
+      '*** Begin Patch\n*** Update File: src/draft.md\n*** Move to: src/feature/INTENT.md\n*** Update File: src/feature/INTENT.md\n@@\n - filler 36\n+- overflow 1\n+- overflow 2\n*** End Patch',
+    );
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'separate apply_patch',
+    );
+  });
+
+  it('denies a Move whose source alias was touched earlier', async () => {
+    mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
+    writeFileSync(join(tmpDir, 'src', 'draft.md'), intentWithLineCount(49));
+    const result = await runAfterVisitGate(
+      '*** Begin Patch\n*** Update File: ./src/draft.md\n@@\n - filler 36\n+- overflow 1\n+- overflow 2\n*** Update File: src/draft.md\n*** Move to: src/feature/INTENT.md\n*** End Patch',
+    );
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'separate apply_patch',
     );
   });
 });

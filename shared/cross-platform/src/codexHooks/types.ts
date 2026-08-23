@@ -31,8 +31,6 @@ export interface CodexMoveProvenance {
   addedLines: readonly string[];
   /** Patch removals used for conservative destination projection. */
   removedLines: readonly string[];
-  /** True when an earlier section makes the on-disk source stale. */
-  sourceChangedEarlier: boolean;
 }
 
 /** The subset of a Claude hook input this module reads and rewrites. */
@@ -65,8 +63,10 @@ export type NormalizedCodexToolUse<T extends CodexToolUse> = T extends unknown
             tool_input: Partial<T["tool_input"]> & Record<string, unknown>;
           }
         : CodexToolUse) & {
-        /** Lossless internal provenance for a normalized Codex Move effect. */
+        /** Path and delta provenance for a normalized Codex Move effect. */
         codexPatch?: CodexMoveProvenance;
+        /** Verbatim targets touched by earlier physical patch sections. */
+        codexPriorTouchedPaths?: readonly string[];
       }
   : never;
 

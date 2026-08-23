@@ -66,7 +66,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   + 3-state TTL delivery + mutation gate deny + scoped fmap
 //                   + pre-tool-validator + structure-guard + FCA opt-in gate).
 //                   36KB keeps a bounded cold-start budget while leaving room
-//                   for guard state and exact Move destination projection.
+//                   for guard state and conservative Move projection.
 //   SESSION_START — selfProbeHook (Node builtin spawnSync) + logHookFailure.
 //                   Output fingerprints reject cross-spawn/which even when the
 //                   byte cap still fits.

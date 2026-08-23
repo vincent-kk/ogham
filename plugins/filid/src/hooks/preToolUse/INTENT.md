@@ -17,7 +17,7 @@ PreToolUse 이벤트에서 하나의 물리 도구 호출을 논리 operation으
 
 ### Always do
 
-- Codex Move destination은 source 전체 내용을 정확히 투영할 수 있을 때만 검증하고, 불확실한 투영은 먼저 source를 Edit하도록 안내하며 거부한다.
+- Codex Move destination은 bodyless Move의 source 전체 내용만 투영하고, 수정 본문이 있거나 앞선 section이 canonical 동일 경로를 touch한 delta는 분리 실행하도록 안내하며 거부한다.
 
 - `validateCwd` 실패 시 즉시 `{ continue: true }` 반환
 - DETAIL.md 편집 시 기존 content를 먼저 읽어 old 인자로 전달

@@ -275,7 +275,7 @@ describe('pre-tool-use bundle apply_patch policy', () => {
     );
   });
 
-  it('allows ordinary Codex rename and denies an INTENT.md source rename', () => {
+  it('allows bodyless rename and denies modified or protected Moves', () => {
     const sessionId = `move-${Date.now()}`;
     runPreToolUseBundle(cwd, sessionId, 'Read', {
       file_path: portableResolve(cwd, 'index.ts'),
@@ -283,15 +283,25 @@ describe('pre-tool-use bundle apply_patch policy', () => {
 
     const ordinarySource = portableResolve(cwd, 'src', 'plain.ts');
     const ordinaryTarget = portableResolve(cwd, 'src', 'renamed.ts');
+    writeFileSync(ordinarySource, 'old\n');
     const allowed = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
-      command: `*** Begin Patch\n*** Update File: ${ordinarySource}\n*** Move to: ${ordinaryTarget}\n@@\n-old\n+new\n*** End Patch`,
+      command: `*** Begin Patch\n*** Update File: ${ordinarySource}\n*** Move to: ${ordinaryTarget}\n*** End Patch`,
     });
     expect(allowed.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const modifiedTarget = portableResolve(cwd, 'src', 'modified.ts');
+    const modified = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${ordinarySource}\n*** Move to: ${modifiedTarget}\n@@\n-old\n+new\n*** End Patch`,
+    });
+    expect(modified.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(modified.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'Edit the source first',
+    );
 
     const protectedSource = portableResolve(cwd, 'INTENT.md');
     const protectedTarget = portableResolve(cwd, 'RENAMED.md');
     const denied = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
-      command: `*** Begin Patch\n*** Update File: ${protectedSource}\n*** Move to: ${protectedTarget}\n@@\n-old\n+new\n*** End Patch`,
+      command: `*** Begin Patch\n*** Update File: ${protectedSource}\n*** Move to: ${protectedTarget}\n*** End Patch`,
     });
     expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(denied.hookSpecificOutput?.permissionDecisionReason).toContain(

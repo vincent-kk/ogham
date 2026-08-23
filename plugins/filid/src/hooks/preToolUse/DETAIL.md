@@ -31,7 +31,8 @@
 
 - 첫 operation이 허용되어도 후속 operation의 validator deny 또는 structure warning이 정확한 경로와 함께 최종 결과에 남는다.
 - 어느 operation이든 deny하면 전체 `apply_patch`가 deny되고, 모든 operation의 결과 순서는 입력 순서를 따른다.
-- Move destination은 bodyless source 또는 유일한 연속 교체에서 계산한 전체 내용으로 validator와 structure guard를 실행하며, 정확한 투영이 불가능하면 Edit 후 Move 재시도를 요구한다.
+- Move destination은 bodyless source 전체 내용으로만 validator와 structure guard를 실행하며, 수정 본문이 있으면 Edit 후 bodyless Move 재시도를 요구한다.
+- 앞선 physical section이 Move source 또는 후속 Edit target과 canonical 동일한 경로를 touch했으면 stale disk projection 대신 patch 분리 실행을 요구한다.
 - Move의 source `Delete`와 destination `Write`도 같은 deny-wins 집계를 거쳐 일반 경로는 허용하고 보호 문서 source rename은 거부한다.
 
 ### AC-pre-tool-document-gate — 일관된 문서 계약
@@ -55,4 +56,4 @@
 
 ## Last Updated
 
-2026-08-23 — ordered apply_patch·Move 집계, terminal-entry Delete 문서 보호, 실행 가능한 파싱 실패 안내를 계약화했다.
+2026-08-24 — bodyless Move projection과 canonical prior-path stale gate를 계약화했다.

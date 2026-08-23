@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type {
-  NormalizedCodexToolUse,
-  NormalizeCodexToolUsesResult,
+import {
+  canonicalizeTargetPathSync,
+  type NormalizedCodexToolUse,
+  type NormalizeCodexToolUsesResult,
 } from '@ogham/cross-platform';
 
 import {
@@ -25,6 +26,11 @@ import { mergeResults } from './utils/mergeResults.js';
 
 /** Filid input after optional Codex normalization metadata is attached. */
 type FilidPreToolUseInput = NormalizedCodexToolUse<PreToolUseInput>;
+
+/** A Move destination prepared for ordinary Write validation. */
+type PreparedMoveInput =
+  | { ok: true; input: FilidPreToolUseInput }
+  | { ok: false; destinationPath: string; stalePath?: string };
 
 /**
  * Unified PreToolUse hook orchestrator.
@@ -59,16 +65,23 @@ export async function handlePreToolUse(
     return mergeResults([visit]);
 
   const prepared = prepareMoveDestination(input, safeCwd);
-  if (prepared === null)
+  if (!prepared.ok)
     return mergeResults([
       visit,
-      denyIndeterminateMove(input.codexPatch!.destinationPath),
+      prepared.stalePath
+        ? denyStalePatchTarget(prepared.stalePath)
+        : denyIndeterminateMove(prepared.destinationPath),
     ]);
-  const effectiveInput = prepared;
+  const effectiveInput = prepared.input;
   const filePath =
     effectiveInput.tool_input.file_path ??
     effectiveInput.tool_input.path ??
     '';
+  if (
+    effectiveInput.tool_name === HOOK_TOOL_NAME.EDIT &&
+    wasTouchedEarlier(effectiveInput, filePath, safeCwd)
+  )
+    return mergeResults([visit, denyStalePatchTarget(filePath)]);
   let oldContent: string | undefined;
   if (
     effectiveInput.tool_name !== HOOK_TOOL_NAME.DELETE &&
@@ -91,12 +104,43 @@ export async function handlePreToolUse(
 function prepareMoveDestination(
   input: FilidPreToolUseInput,
   safeCwd: string,
-): FilidPreToolUseInput | null {
+): PreparedMoveInput {
   const move = input.codexPatch;
-  if (!move || move.role !== 'destination') return input;
+  if (!move || move.role !== 'destination') return { ok: true, input };
+  if (wasTouchedEarlier(input, move.sourcePath, safeCwd))
+    return {
+      ok: false,
+      destinationPath: move.destinationPath,
+      stalePath: move.sourcePath,
+    };
   const content = projectMoveContent(move, safeCwd);
-  if (content === undefined) return null;
-  return { ...input, tool_input: { ...input.tool_input, content } };
+  if (content === undefined)
+    return { ok: false, destinationPath: move.destinationPath };
+  return {
+    ok: true,
+    input: { ...input, tool_input: { ...input.tool_input, content } },
+  };
+}
+
+/**
+ * Compare prior raw patch paths through the host filesystem.
+ *
+ * @param input - Normalized logical operation carrying prior path evidence
+ * @param targetPath - Current source or Edit target path
+ * @param safeCwd - Validated project root for canonical resolution
+ * @returns Whether an earlier physical section touched the same target
+ */
+function wasTouchedEarlier(
+  input: FilidPreToolUseInput,
+  targetPath: string,
+  safeCwd: string,
+): boolean {
+  if (!input.codexPriorTouchedPaths?.length) return false;
+  const canonicalTarget = canonicalizeTargetPathSync(safeCwd, targetPath);
+  return input.codexPriorTouchedPaths.some(
+    (priorPath) =>
+      canonicalizeTargetPathSync(safeCwd, priorPath) === canonicalTarget,
+  );
 }
 
 /** Convert an indeterminate Move projection into an actionable hook denial. */
@@ -109,6 +153,20 @@ function denyIndeterminateMove(destinationPath: string): HookOutput {
       permissionDecisionReason:
         `Cannot project Move destination ${destinationPath}. Edit the source first, ` +
         `then re-emit a bodyless Move. ${DENY_RETRY_GUIDANCE}`,
+    },
+  };
+}
+
+/** Convert a stale disk projection into an actionable split-patch denial. */
+function denyStalePatchTarget(targetPath: string): HookOutput {
+  return {
+    continue: true,
+    hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
+      permissionDecision: 'deny',
+      permissionDecisionReason:
+        `Cannot safely project ${targetPath} after an earlier patch operation touched it. ` +
+        `Use separate apply_patch calls. ${DENY_RETRY_GUIDANCE}`,
     },
   };
 }

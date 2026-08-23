@@ -29,7 +29,6 @@ describe("normalizeCodexToolUses Move provenance", () => {
       destinationPath: "src/new.ts",
       addedLines: ["new"],
       removedLines: ["old"],
-      sourceChangedEarlier: false,
     });
     expect(normalized.toolUses[1].codexPatch).toEqual({
       kind: "move",
@@ -38,18 +37,19 @@ describe("normalizeCodexToolUses Move provenance", () => {
       destinationPath: "src/new.ts",
       addedLines: ["new"],
       removedLines: ["old"],
-      sourceChangedEarlier: false,
     });
+    expect(normalized.toolUses[0].codexPriorTouchedPaths).toBeUndefined();
+    expect(normalized.toolUses[1].codexPriorTouchedPaths).toBeUndefined();
     expect(normalized.toolUses[1].tool_input).toEqual({
       command: expect.any(String),
       file_path: "src/new.ts",
     });
   });
 
-  it("marks a Move whose source was changed earlier in the physical patch", () => {
+  it("preserves prior physical paths verbatim for a later Move", () => {
     const normalized = normalizeCodexToolUses(
       moveInput(
-        "*** Begin Patch\n*** Update File: src/old.ts\n@@\n-before\n+after\n*** Update File: src/old.ts\n*** Move to: src/new.ts\n*** End Patch",
+        "*** Begin Patch\n*** Update File: ./src/old.ts\n@@\n-before\n+after\n*** Update File: src/old.ts\n*** Move to: src/new.ts\n*** End Patch",
       ),
     );
 
@@ -58,12 +58,16 @@ describe("normalizeCodexToolUses Move provenance", () => {
     expect(normalized.toolUses[1].codexPatch).toMatchObject({
       kind: "move",
       role: "source",
-      sourceChangedEarlier: true,
     });
     expect(normalized.toolUses[2].codexPatch).toMatchObject({
       kind: "move",
       role: "destination",
-      sourceChangedEarlier: true,
     });
+    expect(normalized.toolUses[1].codexPriorTouchedPaths).toEqual([
+      "./src/old.ts",
+    ]);
+    expect(normalized.toolUses[2].codexPriorTouchedPaths).toEqual([
+      "./src/old.ts",
+    ]);
   });
 });

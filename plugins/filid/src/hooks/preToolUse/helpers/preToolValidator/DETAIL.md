@@ -11,7 +11,7 @@
 ## API Contracts
 
 - `validatePreToolUse(input, oldContent?): HookOutput` — 문서 대상이 아니면 통과하고 위반 시 현재 도구 호출만 deny한다.
-- `projectMoveContent(move, safeCwd): string | undefined` — source를 읽어 완전한 Move destination을 투영하며 유일한 연속 replacement를 증명할 수 없으면 `undefined`를 반환한다.
+- `projectMoveContent(move, safeCwd): string | undefined` — bodyless Move의 source 전체 내용만 반환하며 수정 본문 또는 읽기 실패는 `undefined`로 유지한다.
 - Delete 입력은 host가 canonicalize한 기존 대상 또는 원래 입력 경로가 INTENT.md/DETAIL.md인지 판정하며 Write/Edit용 content 검증을 실행하지 않는다.
 - Edit의 `replace_all`이 true면 모든 정확 일치 문자열을, 그 외에는 첫 일치만 투영한다.
 - 투영할 수 없는 INTENT.md Edit이 20줄을 넘으면 차단하지 않고 명시적 경고를 제공한다.
@@ -51,4 +51,4 @@
 
 ## Last Updated
 
-2026-08-24 — Move destination projection을 명시적 entry-point contract로 제한했다.
+2026-08-24 — bodyless Move destination projection을 명시적 entry-point contract로 제한했다.

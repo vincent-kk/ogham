@@ -15,6 +15,7 @@ Codex의 공식 hook 입력을 Claude 계열 guard가 이해하는 host-neutral 
 ### Always do
 
 - Move는 source와 destination provenance를 보존하고, destination의 전체 내용이 확인되지 않은 상태를 `Write.content`로 가장하지 않는다.
+- 각 patch operation은 앞선 physical section이 touch한 원문 경로를 보존해 소비자가 filesystem 기준 stale 여부를 판정할 수 있게 한다.
 
 - envelope와 모든 section을 끝까지 검증하고 하나라도 불완전하면 판별 가능한 실패를 반환한다.
 - update는 host-valid implicit/explicit hunk를 구분하고, 빈 explicit hunk와 `*** End of File` 뒤의 무표식 body를 거부한다.
