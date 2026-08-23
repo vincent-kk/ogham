@@ -95,7 +95,9 @@ describe('handlePreToolUse', () => {
     expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
     const reason = denied.hookSpecificOutput?.permissionDecisionReason ?? '';
     expect(reason).toContain('[filid:gate]');
-    expect(reason).toContain('Test project'); // INTENT body inline
+    expect(reason).toContain('intent: INTENT.md');
+    expect(reason).toContain('action: READ the intent file above');
+    expect(reason).not.toContain('Test project');
 
     const retry = await handlePreToolUse(input);
     expect(retry.continue).toBe(true);

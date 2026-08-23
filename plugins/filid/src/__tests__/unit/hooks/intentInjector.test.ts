@@ -99,7 +99,7 @@ describe('processVisit (Read path)', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('first Read in a module → guide + ctx (inline INTENT body) + map', () => {
+  it('first Read in a module → guide + ctx (intent pointer, no body) + map', () => {
     makeRootProject();
     const filePath = join(tmpDir, 'index.ts');
     writeFileSync(filePath, '');
@@ -111,7 +111,9 @@ describe('processVisit (Read path)', () => {
     const ctx = ctxOf(result);
     expect(ctx).toContain('[filid:guide]');
     expect(ctx).toContain('[filid:ctx]');
-    expect(ctx).toContain('Root module');
+    expect(ctx).toContain('intent: INTENT.md');
+    expect(ctx).toContain('action: READ the intent file above');
+    expect(ctx).not.toContain('Root module');
     expect(ctx).toContain('[filid:map]');
     expect(denyOf(result)).toBe(false);
   });
@@ -164,7 +166,7 @@ describe('processVisit (Read path)', () => {
     expect(ctxOf(result)).toContain('detail:');
   });
 
-  it('organ dir → inlines owning fractal INTENT.md; sibling organ later stays ctx-free but map grows once', () => {
+  it('organ dir → points to owning fractal INTENT.md; sibling organ later stays ctx-free but map grows once', () => {
     makeRootProject();
     mkdirSync(join(tmpDir, 'src', 'feature', 'utils'), { recursive: true });
     mkdirSync(join(tmpDir, 'src', 'feature', 'types'), { recursive: true });
@@ -185,7 +187,7 @@ describe('processVisit (Read path)', () => {
       }),
     );
     const ctx1 = ctxOf(first);
-    expect(ctx1).toContain('Feature module');
+    expect(ctx1).not.toContain('Feature module');
     expect(ctx1).toContain('intent: src/feature/INTENT.md');
     expect(ctx1).not.toMatch(/chain:.*src\/feature\/INTENT\.md/);
 
@@ -227,7 +229,7 @@ describe('processVisit (Read path)', () => {
     expect(ctx).toContain('[filid:map]');
   });
 
-  it('TTL expiry → stale: ctx re-delivered without guide', () => {
+  it('TTL expiry (default 3 turns) → fresh at 2 turns, stale at 3: pointer ctx re-delivered without guide', () => {
     makeRootProject();
     const filePath = join(tmpDir, 'index.ts');
     writeFileSync(filePath, '');
@@ -237,16 +239,20 @@ describe('processVisit (Read path)', () => {
       tool_input: { file_path: filePath },
     });
 
-    const turn1 = processVisit(input);
-    expect(ctxOf(turn1)).toContain('[filid:guide]');
+    const turn0 = processVisit(input);
+    expect(ctxOf(turn0)).toContain('[filid:guide]');
 
     removeFractalMap(tmpDir, sessionId);
-    advanceTurns(sessionId, 5); // default ctxTtlTurns = 5 → now stale
+    advanceTurns(sessionId, 2); // stamp + 2 < 3 → fresh
+    expect(ctxOf(processVisit(input))).not.toContain('[filid:ctx]');
 
+    removeFractalMap(tmpDir, sessionId);
+    advanceTurns(sessionId, 1); // stamp + 3 ≥ 3 → stale
     const later = processVisit(input);
     const ctx = ctxOf(later);
     expect(ctx).toContain('[filid:ctx]');
-    expect(ctx).toContain('Root module');
+    expect(ctx).toContain('intent: INTENT.md');
+    expect(ctx).not.toContain('Root module');
     expect(ctx).not.toContain('[filid:guide]');
   });
 
@@ -276,13 +282,118 @@ describe('processVisit (Read path)', () => {
         }),
       );
 
-    expect(ctxOf(readPkg('alpha'))).toContain('alpha source');
-    expect(ctxOf(readPkg('beta'))).toContain('beta source');
+    expect(ctxOf(readPkg('alpha'))).toContain(
+      'intent: packages/alpha/src/INTENT.md',
+    );
+    expect(ctxOf(readPkg('beta'))).toContain(
+      'intent: packages/beta/src/INTENT.md',
+    );
+  });
+
+  it('ctx is a pointer: intent path + read directive, never the INTENT body', () => {
+    makeRootProject();
+    const filePath = join(tmpDir, 'index.ts');
+    writeFileSync(filePath, '');
+
+    const ctx = ctxOf(
+      processVisit(makeInput({ tool_input: { file_path: filePath } })),
+    );
+    expect(ctx).toContain('[filid:ctx] index.ts');
+    expect(ctx).toContain('intent: INTENT.md');
+    expect(ctx).toContain('action: READ the intent file above');
+    expect(ctx).not.toContain('Root module');
+    expect(ctx).not.toContain('\n---\n');
+  });
+
+  it('Read of the owner INTENT.md itself → silent delivery: no ctx, guide kept, next-turn mutation passes', () => {
+    makeRootProject();
+    mkdirSync(join(tmpDir, 'src', 'mod'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, 'src', 'mod', 'INTENT.md'),
+      '## Purpose\nMod\n## Boundaries\nNever do: x\n',
+    );
+    writeFileSync(join(tmpDir, 'src', 'mod', 'x.ts'), '');
+    const sessionId = `session-selfread-${Date.now()}`;
+
+    const readIntent = processVisit(
+      makeInput({
+        session_id: sessionId,
+        tool_input: { file_path: join(tmpDir, 'INTENT.md') },
+      }),
+    );
+    expect(ctxOf(readIntent)).not.toContain('[filid:ctx]');
+    expect(ctxOf(readIntent)).not.toContain('[filid:guide]');
+
+    removeFractalMap(tmpDir, sessionId);
+    advanceTurns(sessionId, 1);
+    const write = processVisit(
+      makeInput({
+        session_id: sessionId,
+        tool_name: 'Write',
+        tool_input: {
+          file_path: join(tmpDir, 'newfile.ts'),
+          content: 'export {};\n',
+        },
+      }),
+    );
+    expect(denyOf(write)).toBe(false);
+    expect(ctxOf(write)).not.toContain('[filid:ctx]');
+
+    // the self-read did not consume the session's one guide
+    const otherModule = processVisit(
+      makeInput({
+        session_id: sessionId,
+        tool_input: { file_path: join(tmpDir, 'src', 'mod', 'x.ts') },
+      }),
+    );
+    expect(ctxOf(otherModule)).toContain('[filid:guide]');
+  });
+
+  it('warmed directory: a new INTENT.md written after a same-turn visit still stamps delivery', () => {
+    makeRootProject();
+    mkdirSync(join(tmpDir, 'src', 'mod'), { recursive: true });
+    writeFileSync(join(tmpDir, 'src', 'mod', 'x.ts'), '');
+    const sessionId = `session-warm-${Date.now()}`;
+
+    // visit the directory first (owner = root) — src/mod is now in this turn's reads
+    processVisit(
+      makeInput({
+        session_id: sessionId,
+        tool_input: { file_path: join(tmpDir, 'src', 'mod', 'x.ts') },
+      }),
+    );
+    const writeIntent = processVisit(
+      makeInput({
+        session_id: sessionId,
+        tool_name: 'Write',
+        tool_input: {
+          file_path: join(tmpDir, 'src', 'mod', 'INTENT.md'),
+          content: '## Purpose\nMod\n',
+        },
+      }),
+    );
+    expect(denyOf(writeIntent)).toBe(false);
+    writeFileSync(join(tmpDir, 'src', 'mod', 'INTENT.md'), '## Purpose\nMod\n');
+
+    // next turn: the module is documented and its author holds the rules — no gate
+    removeFractalMap(tmpDir, sessionId);
+    advanceTurns(sessionId, 1);
+    const writeCode = processVisit(
+      makeInput({
+        session_id: sessionId,
+        tool_name: 'Write',
+        tool_input: {
+          file_path: join(tmpDir, 'src', 'mod', 'y.ts'),
+          content: 'export {};\n',
+        },
+      }),
+    );
+    expect(denyOf(writeCode)).toBe(false);
   });
 });
 
 describe('processVisit (mutation path — deny gate)', () => {
-  it('Write to undelivered module → deny; reason carries guide + inline INTENT body', () => {
+  it('Write to undelivered module → deny; reason carries guide + intent pointer, never the body', () => {
     makeRootProject();
     const filePath = join(tmpDir, 'newfile.ts');
 
@@ -299,7 +410,12 @@ describe('processVisit (mutation path — deny gate)', () => {
     expect(reason).toContain('[filid:gate]');
     expect(reason).toContain('[filid:guide]');
     expect(reason).toContain('[filid:ctx]');
-    expect(reason).toContain('Root module');
+    expect(reason).toContain(
+      'before its INTENT.md pointer was delivered this session',
+    );
+    expect(reason).toContain('intent: INTENT.md');
+    expect(reason).toContain('action: READ the intent file above');
+    expect(reason).not.toContain('Root module');
   });
 
   it('retry after gate deny → passes silently (deny delivered the rules)', () => {
