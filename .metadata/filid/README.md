@@ -96,5 +96,5 @@
 | 에이전트       | **0개** (cross-review는 고정 3관점 + 적대적 판정)                                                                                                           |
 | Hook 이벤트    | **3개** — SessionStart, UserPromptSubmit, PreToolUse(Read\|Write\|Edit)                                                                                     |
 | Hook 브리지    | 4개 (setup.mjs, user-prompt-submit.mjs, pre-tool-use.mjs, run-agy.mjs)                                                                                      |
-| 번들 크기      | 475,798 B (MCP 399,800 + 훅 3개 46,436 + settings UI 26,157 + 러너)                                                                                         |
+| 번들 크기      | 498,413 B (MCP 416,185 + 훅 3개 48,560 + settings UI 30,263 + 러너)                                                                                         |
 | MCP 반환 예산  | 16 KiB — 초과분은 artifact로 이동                                                                                                                           |
