@@ -1,7 +1,7 @@
 ---
 name: rule
 user-invocable: true
-description: '[maencof:rule] Adds, edits, or removes AI behavioral rules in .claude/rules/, supporting global and path-conditional rules. Also migrates inline CLAUDE.md rules to dedicated rule files.'
+description: '[maencof:rule] Manages AI behavioral rules on hosts with a dedicated rule surface and explicitly routes unsupported hosts to project instructions.'
 argument-hint: '[mode] [name]'
 version: '1.1.0'
 complexity: medium
@@ -12,7 +12,9 @@ plugin: maencof
 
 # rule — Behavioral Rule Management
 
-Manage behavioral rules in `.claude/rules/` via conversation. Supports global rules (no `paths`) and conditional rules (`paths` frontmatter with glob patterns).
+Manage behavioral rules via conversation. Claude supports global rules (no `paths`) and conditional rules (`paths` frontmatter with glob patterns) in `.claude/rules/`.
+
+Before resolving any path, load `../.shared/host-configuration.md` and select the current runtime host row. That generated reference is canonical: do not reconstruct host paths inside this skill. If the selected row reports behavioral rules as unsupported, stop the file-rule workflow, report the capability honestly, and offer `/maencof:instruct` for the maencof-owned instruction section. Never substitute command approval rules.
 
 ## When to Use This Skill
 
@@ -23,6 +25,8 @@ Manage behavioral rules in `.claude/rules/` via conversation. Supports global ru
 > For CLAUDE.md changes, use `/maencof:instruct` instead.
 
 ## Scope
+
+The table and workflow below apply only when the selected host exposes the Claude Markdown rule surface.
 
 | Area      | Path                                | Write                        |
 | --------- | ----------------------------------- | ---------------------------- |

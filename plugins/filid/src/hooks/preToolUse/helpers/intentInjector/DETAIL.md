@@ -2,10 +2,10 @@
 
 ## Requirements
 
-- Read/Write/Edit 방문에서 소유 fractal의 INTENT.md 경로, 읽기 지시, 상위 chain 경로와 DETAIL 경로를 hook cwd 기준으로 전달한다. 문서 본문은 전달하지 않는다.
+- Read/Write/Edit/Delete 방문에서 소유 fractal의 INTENT.md 경로, 읽기 지시, 상위 chain 경로와 DETAIL 경로를 hook cwd 기준으로 전달한다. 문서 본문은 전달하지 않는다.
 - 전달 상태는 `commitVisit`의 none/stale/fresh 판정과 turn TTL(기본 3턴, `injection.ctxTtlTurns`)을 따른다.
-- 미전달 소유 fractal의 일반 mutation은 owner INTENT.md 경로와 읽기 지시를 포함한 deny로 한 번 차단한다. deny가 전달을 stamp하므로 동일 재시도는 통과하며, 문구는 읽었다는 증명을 주장하지 않는다.
-- INTENT.md를 대상으로 한 Read/Write/Edit는 그 모듈의 조용한 전달이다: delivery를 stamp하고 ctx·guide를 내지 않으며, 같은 턴에 이미 방문한 디렉터리에서도 fast path를 우회해 stamp한다. `[filid:map]`은 방문 집합이 바뀌면 그대로 방출한다. DETAIL.md 대상 mutation은 gate에서 면제하되 문서 validator는 별도로 실행한다.
+- Delete를 포함한 모든 방문은 owner delivery 상태를 갱신한다. 미전달 소유 fractal의 일반 mutation은 owner INTENT.md 경로와 읽기 지시를 포함한 deny로 한 번 차단한다. deny가 전달을 stamp하므로 동일 재시도는 통과하며, 문구는 읽었다는 증명을 주장하지 않는다.
+- INTENT.md를 대상으로 한 Read/Write/Edit/Delete는 그 모듈의 조용한 전달이다: delivery를 stamp하고 ctx·guide를 내지 않으며, 같은 턴에 이미 방문한 디렉터리에서도 fast path를 우회해 stamp한다. `[filid:map]`은 방문 집합이 바뀌면 그대로 방출한다. DETAIL.md 대상 mutation은 gate에서 면제하되 문서 validator의 위생·삭제 보호는 별도로 실행한다.
 - branch, spike 상태, criteria ledger 또는 agent 역할은 방문 판정 입력이 아니다.
 
 ## API Contracts
@@ -21,6 +21,7 @@
 
 - none Read는 포인터 ctx를, fresh 재방문은 무출력을, stale 재방문은 soft 포인터 ctx를 반환한다. 기본 TTL에서 stamp 후 2턴은 fresh, 3턴째는 stale이다.
 - 동일 turn의 동일 디렉터리 재방문은 map과 ctx를 중복 방출하지 않는다.
+- Delete 방문도 `commitVisit`을 거쳐 owner 방문과 delivery 상태를 기록한다.
 
 ### AC-visit-pointer — 본문 없는 전달
 
@@ -31,8 +32,8 @@
 
 ### AC-visit-gate — branch-independent mutation gate
 
-- 모든 branch에서 미전달 일반 mutation은 한 번 deny되고 동일 재시도는 통과한다.
-- INTENT.md/DETAIL.md mutation과 owner INTENT가 없는 mutation은 방문 gate로 deny하지 않는다.
+- 모든 branch에서 미전달 Write/Edit/Delete 일반 mutation은 한 번 deny되고 동일 재시도는 통과한다.
+- INTENT.md/DETAIL.md mutation과 owner INTENT가 없는 mutation은 방문 gate로 deny하지 않으며 보호 문서 삭제 판단은 validator에 맡긴다.
 
 ## Boundary Exemptions
 
@@ -48,4 +49,4 @@
 
 ## Last Updated
 
-2026-08-23 — 본문 없는 cwd 기준 포인터 전달, INTENT.md 대상 호출의 조용한 전달, TTL 기본값 3턴을 계약으로 고정했다.
+2026-08-24 — 본문 없는 cwd 기준 포인터 전달, INTENT.md 대상 호출의 조용한 전달, TTL 기본값 3턴, Delete 방문·delivery를 계약으로 고정했다.

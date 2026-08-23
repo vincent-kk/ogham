@@ -23,7 +23,12 @@ export interface LifecycleDispatcherInput {
   cwd?: string;
   tool_name?: string;
   tool_input?: Record<string, unknown>;
-  tool_response?: Record<string, unknown>;
+  tool_response?: unknown;
+}
+
+/** Map host-specific physical edit names to the shared lifecycle vocabulary. */
+function normalizeLifecycleToolName(toolName: string): string {
+  return toolName === 'apply_patch' ? 'Edit' : toolName;
 }
 
 /**
@@ -43,29 +48,22 @@ export function runLifecycleDispatcher(
   // Validate event name
   if (!VALID_EVENTS.has(event as LifecycleEvent)) return { continue: true };
 
-  const lifecycleEvent = event as LifecycleEvent;
-
   // Read lifecycle.json
   const config = loadLifecycleConfig(cwd);
-  if (!config || config.actions.length === 0) return { continue: true };
+  if (!config) return { continue: true };
 
-  // Filter matching actions
-  const matching = config.actions.filter((action) =>
-    isActionMatch(action, lifecycleEvent, input.tool_name),
-  );
-
-  if (matching.length === 0) return { continue: true };
-
-  // Execute actions and collect messages
+  // Match and execute each action once without retaining an intermediate list.
   const messages: string[] = [];
-  for (const action of matching) {
+  for (const action of config.actions) {
+    if (!isActionMatch(action, event as LifecycleEvent, input.tool_name))
+      continue;
     const msg = executeAction(action);
     if (msg) messages.push(msg);
   }
 
-  if (messages.length === 0) return { continue: true };
+  if (!messages.length) return { continue: true };
 
-  return buildDispatchResult(lifecycleEvent, messages.join('\n'));
+  return buildDispatchResult(event as LifecycleEvent, messages.join('\n'));
 }
 
 /**
@@ -123,14 +121,17 @@ function isActionMatch(
   if (!action.enabled || action.event !== event) return false;
 
   // For PreToolUse/PostToolUse, check matcher pattern against tool_name
-  if (
-    (event === 'PreToolUse' || event === 'PostToolUse') &&
-    action.matcher &&
-    toolName
-  ) {
-    const matchers = action.matcher.split('|').map((m) => m.trim());
-    return matchers.includes(toolName);
-  }
+  if ((event === 'PreToolUse' || event === 'PostToolUse') && action.matcher)
+    return (
+      !!toolName &&
+      action.matcher
+        .split('|')
+        .some(
+          (matcher) =>
+            normalizeLifecycleToolName(matcher.trim()) ===
+            normalizeLifecycleToolName(toolName),
+        )
+    );
 
   // For PreToolUse/PostToolUse without matcher, match all tools
   return true;

@@ -2,18 +2,12 @@
 
 ## Purpose
 
-Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩, 5분 inactivity 자동 종료. 공유 `@ogham/http-kit` 으로 loopback Host(rebinding 차단)·토큰·CSRF Origin/Content-Type·XSS 방어 라우팅.
+Atlassian setup 도구의 로컬 HTTP 서버 모듈. 저장 성공, 종료, timeout, server error를 MCP completion으로 연결하면서 재시도 가능한 제출 오류는 서버 안에 남긴다.
 
-## Structure
+## Conventions
 
-| 위치           | 역할                                                                     |
-| -------------- | ------------------------------------------------------------------------ |
-| `index.ts`     | 배럴 — `startSetupServer`, `createRouteHandler`, `RouteContext` 노출     |
-| `webServer.ts` | `startSetupServer` — closure 기반 서버 lifecycle                         |
-| `routing/`     | `routes.ts`(shared guard + 경로 디스패치) · `routeContext.ts`(순환 방지) |
-| `constants/`   | `MASK` 등 모듈 내 상수                                                   |
-| `utils/`       | build\* 헬퍼 (one function per file)                                     |
-| `handlers/`    | GET/POST 라우트별 핸들러 함수 (one function per file)                    |
+- 서버 상태와 one-shot completion은 한 `startSetupServer` closure가 소유한다.
+- 라우트는 HTTP 응답을 담당하고, 실제 저장 경로는 config manager 반환값만 사용한다.
 
 ## Boundaries
 
@@ -24,6 +18,7 @@ Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩,
 - 자격증명은 `MASK` 상수로 가린 응답만 외부에 노출
 - `__SETTINGS_STATE__` 주입 시 `escapeJsonForHtml`로 script breakout 차단
 - 외부 consumer는 `index.ts` 배럴로만 접근
+- config와 credentials 저장 뒤에만 성공 completion을 확정
 
 ### Ask first
 
@@ -35,12 +30,4 @@ Atlassian setup 도구의 로컬 HTTP 서버 모듈. 127.0.0.1 전용 바인딩,
 - CORS 와일드카드(`*`) 헤더 활성화
 - 모듈 전역 mutable state 사용
 - 외부 모듈에서 internal 파일(handlers/, utils/)에 직접 접근
-
-## Dependencies
-
-| 대상                 | 이유                                                                      |
-| -------------------- | ------------------------------------------------------------------------- |
-| `node:http`          | HTTP 서버                                                                 |
-| `@ogham/http-kit`    | inspectRequest · generateToken · parseBody · escapeJsonForHtml · sendJson |
-| `../../../../core/`  | `resolveEnvironment`                                                      |
-| `../../../../types/` | `SetupFormDataSchema`, `ServiceCredentials` 등                            |
+- 재시도 가능한 validation/connection/save 오류에서 completion 실패 확정

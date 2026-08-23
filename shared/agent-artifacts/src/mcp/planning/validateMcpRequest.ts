@@ -2,10 +2,7 @@ import type { McpServerRequest } from "../../types/mcp.js";
 import { hasAsciiControlCharacter } from "../../validation/index.js";
 
 export type McpAdapterFlavor =
-  | "claude-project"
-  | "claude-user"
-  | "codex-project"
-  | "codex-user";
+  "claude-project" | "claude-user" | "codex-project" | "codex-user";
 
 export function validateMcpRequest(
   request: McpServerRequest,

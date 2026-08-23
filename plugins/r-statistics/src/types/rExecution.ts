@@ -84,5 +84,6 @@ export interface RExecutionResult {
 export interface RunROutput {
   jobId: string;
   status: JobStatus;
+  managedLibraryPath: string;
   result?: RExecutionResult;
 }

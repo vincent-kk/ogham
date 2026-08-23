@@ -97,6 +97,15 @@ class SemanticCaseCounter {
       cursor += 2;
       if (member !== 'each') continue;
 
+      // `it.each<T>([…])` puts a type argument list between `each` and the
+      // call; it carries no rows, and reading it as the table loses the count.
+      if (this.tokens[cursor]?.value === '<') {
+        const typeClose = this.findMatching(cursor, '<', '>');
+        if (typeClose < 0)
+          return { exact: false, count: 0, nextIndex: cursor + 1 };
+        cursor = typeClose + 1;
+      }
+
       const tableStart = this.tokens[cursor];
       if (!tableStart) return { exact: false, count: 0, nextIndex: cursor };
       if (tableStart.value === '(') {
@@ -111,47 +120,70 @@ class SemanticCaseCounter {
     return null;
   }
 
+  /**
+   * Parse a statically enumerable `each` table at `start`.
+   * @param start - Token index of the table expression
+   * @returns Exact row count for a static array or string table; otherwise `exact: false`
+   */
   private parseStaticRows(start: number): Omit<StaticRows, 'nextIndex'> {
     const token = this.tokens[start];
     if (!token) return { exact: false, count: 0 };
-
-    if (token.value === '[') {
-      const close = this.findMatching(start, '[', ']');
-      if (close < 0) return { exact: false, count: 0 };
-      const raw = this.source.slice(token.start, this.tokens[close].end);
-      if (raw.includes('...')) return { exact: false, count: 0 };
-
-      let count = 0;
-      let segmentHasContent = false;
-      for (let index = start + 1; index < close; index += 1) {
-        const current = this.tokens[index];
-        const topLevelComma =
-          current.value === ',' &&
-          current.bracketDepth === token.bracketDepth + 1 &&
-          current.parenDepth === token.parenDepth &&
-          current.braceDepth === token.braceDepth;
-        if (topLevelComma) {
-          if (segmentHasContent) count += 1;
-          segmentHasContent = false;
-        } else segmentHasContent = true;
-      }
-      if (segmentHasContent) count += 1;
-      return { exact: true, count };
-    }
-
+    if (token.value === '[') return this.countArrayLiteralRows(token, start);
     if (
       (token.kind === 'string' || token.kind === 'template') &&
       this.source[token.start] === '`'
-    ) {
-      if (token.kind === 'template') return { exact: false, count: 0 };
-      const lines = token.value
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-      return { exact: true, count: Math.max(0, lines.length - 1) };
-    }
-
+    )
+      return this.countStringOrTemplateRows(token);
     return { exact: false, count: 0 };
+  }
+
+  /**
+   * Count top-level elements of a `[…]` `each` table.
+   * @param openToken - Opening `[` token
+   * @param start - Index of `openToken`
+   * @returns Exact count, or inexact when the span is unclosed or contains a spread
+   */
+  private countArrayLiteralRows(
+    openToken: LexicalToken,
+    start: number,
+  ): Omit<StaticRows, 'nextIndex'> {
+    const close = this.findMatching(start, '[', ']');
+    if (close < 0) return { exact: false, count: 0 };
+    const raw = this.source.slice(openToken.start, this.tokens[close].end);
+    if (raw.includes('...')) return { exact: false, count: 0 };
+
+    let count = 0;
+    let segmentHasContent = false;
+    for (let index = start + 1; index < close; index += 1) {
+      const current = this.tokens[index];
+      const topLevelComma =
+        current.value === ',' &&
+        current.bracketDepth === openToken.bracketDepth + 1 &&
+        current.parenDepth === openToken.parenDepth &&
+        current.braceDepth === openToken.braceDepth;
+      if (topLevelComma) {
+        if (segmentHasContent) count += 1;
+        segmentHasContent = false;
+      } else segmentHasContent = true;
+    }
+    if (segmentHasContent) count += 1;
+    return { exact: true, count };
+  }
+
+  /**
+   * Count rows in a backtick table passed to `each`.
+   * @param token - String or template token whose source starts with `` ` ``
+   * @returns Exact line-based count for a plain string table; inexact for interpolating templates
+   */
+  private countStringOrTemplateRows(
+    token: LexicalToken,
+  ): Omit<StaticRows, 'nextIndex'> {
+    if (token.kind === 'template') return { exact: false, count: 0 };
+    const lines = token.value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return { exact: true, count: Math.max(0, lines.length - 1) };
   }
 
   private hasInvocation(baseIndex: number): boolean {

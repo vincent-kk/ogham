@@ -1,4 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import { afterEach, beforeEach, describe, it, expect } from "vitest";
 
 import { runPaperSearch } from "../../src/mcp/tools/paperSearch/paperSearch.js";
 import { FetchMode, QueryRole } from "../../src/types/enums.js";
@@ -14,6 +18,16 @@ import {
  * This pins the recall contract against regression.
  */
 describe("@calibration recall — zero loss across a query set", () => {
+  let manifestDir: string;
+
+  beforeEach(async () => {
+    manifestDir = await mkdtemp(join(tmpdir(), "entrez-recall-"));
+  });
+
+  afterEach(async () => {
+    await rm(manifestDir, { recursive: true, force: true });
+  });
+
   // q1 ∪ q2 ∪ q3 = {1..8}; overlaps at 4,5 and 7 must not drop anything.
   const RESULTS: Record<string, string[]> = {
     cancerATM: ["1", "2", "3", "4", "5"],
@@ -34,7 +48,7 @@ describe("@calibration recall — zero loss across a query set", () => {
   }
 
   it("retrieves the entire expected PMID set with no loss", async () => {
-    const ctx = makeCtx(calibrationFetch());
+    const ctx = makeCtx(calibrationFetch(), { manifestDir });
     const out = await runPaperSearch(
       {
         queries: [

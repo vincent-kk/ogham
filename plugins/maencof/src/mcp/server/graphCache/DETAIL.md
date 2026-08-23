@@ -4,7 +4,7 @@
 
 - vault 경로 결정과 in-memory `KnowledgeGraph` 보관, 이 두 가지만 소유한다. read-path freshness gating 은 형제 organ `middlewares` 의 `ensureFreshGraphNonBlocking` 이 소유하고 호출자가 그쪽을 직접 쓴다 — 여기서 감싸면 두 모듈이 서로를 참조해 순환이 된다.
 - vault 경로는 `getVaultPath()` 한 곳에서만 나온다. 해석 순서는 `MAENCOF_VAULT_PATH` 환경변수 → 호스트 워크스페이스 루트(`tryProjectRoot()`) 이고, 둘 다 없으면 환경변수를 세우라는 안내와 함께 throw 한다. Claude 외 호스트에서 `process.cwd()` 로 조용히 폴백하지 않는다 — 잘못된 디렉터리를 vault 로 오인하면 그 자리에 지식 트리를 만든다.
-- 해석된 경로가 `~/.claude` 또는 `~/.config` 로 시작하면 거부한다. 전역 설정 디렉터리를 vault 로 다루면 MCP 도구가 사용자 설정을 문서처럼 쓰고 지운다.
+- 해석된 경로가 공통 host registry의 상태 루트 또는 `~/.config`와 같거나 그 하위면 거부한다. 환경 override를 포함한 root와 target을 canonicalize한 뒤 디렉터리 경계로 비교해 symlink·상대경로·`..` 우회는 막고 이름만 비슷한 sibling은 허용한다. canonicalization 판정 오류는 허용으로 바꾸지 않는다.
 - 그래프 적재는 `MetadataStore.loadGraph()` 로만 한다. 캐시는 (그래프, 그 그래프를 적재한 vault 경로) 한 쌍이며, 요청 경로가 캐시된 경로와 다르면 캐시를 쓰지 않는다.
 - 적재가 `null` 을 돌려주면 캐시하지 않는다. 인덱스가 아직 없는 vault 에서 `null` 을 캐시하면 이후 빌드 결과를 못 보게 된다.
 - `invalidateCache()` 는 그래프 캐시와 `queryCache` 를 함께 비운다. 그래프만 비우면 SA 결과 캐시가 옛 그래프 기준 답을 계속 낸다.
@@ -14,13 +14,13 @@
 
 ### Entry point (`index.ts`)
 
-- `getVaultPath(): string` — 해석 + 차단 검사. 결과는 절대 경로로 정규화된다. 해석 불가 또는 차단 접두사면 throw.
+- `getVaultPath(): string` — 해석 + canonical boundary 차단 검사. 결과는 canonical 절대 경로다. 해석 불가, canonicalization 불가, 차단 root exact/descendant면 throw.
 - `loadGraphIfNeeded(vaultPath): Promise<KnowledgeGraph | null>` — 같은 vault 경로의 캐시가 있으면 그것을, 없으면 디스크에서 적재해 캐시한 뒤 반환. 인덱스가 없으면 `null`.
 - `invalidateCache(): void` — 그래프 캐시 + query 캐시 무효화.
 
-### 차단 접두사
+### 차단 루트
 
-`~/.claude` · `~/.config` (홈 경로는 `@ogham/cross-platform` 의 `home()` 기준). 목록 변경은 보안 영향이 있어 `INTENT.md` 의 "Ask first" 대상이다.
+지원 host의 상태 루트는 `HOSTS`와 `hostStateRoot`에서 파생하고 `~/.config`를 추가한다. 문자열 prefix가 아니라 `relative()` 결과로 exact/descendant만 차단한다.
 
 ### 단일 vault 가정
 
@@ -34,7 +34,8 @@
 
 ### AC-blocked-prefixes — 전역 설정 차단
 
-- 해석 결과가 차단 접두사 아래면 그래프를 적재하지 않고 throw 한다.
+- `~/.claude`, `~/.codex`, `~/.config` exact/descendant와 이들을 가리키는 symlink·상대경로·`..` 입력은 그래프를 적재하기 전에 throw 한다.
+- 이름만 비슷한 sibling과 relocated host root 밖의 정상 프로젝트는 통과한다.
 
 ### AC-cache-keyed-by-vault — vault 별 캐시
 
@@ -50,4 +51,4 @@
 
 ## Last Updated
 
-2026-07-30 — vault 경로 단일 출처·전역 설정 차단·vault 별 캐시 키·query 캐시 동반 무효화 계약을 문서화했다.
+2026-08-23 — 모든 host 상태 루트를 registry에서 파생하고 canonical directory boundary 차단을 계약화했다.

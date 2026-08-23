@@ -9,10 +9,7 @@
  * and MCP boot/shutdown has no user-visible output channel for actions.
  */
 export type LifecycleEvent =
-  | 'SessionStart'
-  | 'UserPromptSubmit'
-  | 'PreToolUse'
-  | 'PostToolUse';
+  'SessionStart' | 'UserPromptSubmit' | 'PreToolUse' | 'PostToolUse';
 
 /** v1 action types (echo, remind only; command reserved for v2) */
 export type LifecycleActionType = 'echo' | 'remind';

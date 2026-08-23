@@ -17,6 +17,7 @@
 - strings, comments와 template text 안의 가짜 syntax를 dependency나 export로 세지 않는다.
 - `import.meta`는 dependency가 아니다. `import` 뒤에 `.`이 오면 메타 속성 참조이므로 뒤따르는 문자열을 specifier로 읽지 않는다. 이를 구분하지 않으면 `join(dirname(fileURLToPath(import.meta.url)), '../..')` 같은 경로 계산이 해석 불가 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - re-export 탐지는 export 절 형태로 한정한다. `export {…} from`과 `export * [as x] from`(각각 `type` 접두 허용)에서 절이 닫히는 바로 그 위치의 `from` 식별자만 재export 키워드다. 위치를 보지 않고 뒤따르는 아무 `from` 토큰이나 채택하면, `from`이라는 파라미터를 쓰는 exported 함수의 다음 문자열 리터럴이 유령 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
+- `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록은 table이 아니다. `it.each<T>([…])`에서 `<…>`를 건너뛰고 그 뒤의 정적 table을 읽는다. 건너뛰지 않으면 정적 배열 리터럴이 동적 table로 잡혀 파일 전체의 case count가 `indeterminate`가 된다 — 타입 인자는 row 수에 아무 영향이 없다.
 - 지원 불가능한 alias·동적 표현은 unsupported/indeterminate evidence를 남긴다.
 - verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
 - verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.** `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을 `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은 증거가 아니다.
@@ -60,6 +61,7 @@
 ### AC-ecmascript-verification — Semantic case evidence
 
 - 정적 parameterized row와 suite multiplier를 exact count에 반영한다.
+- 타입 인자를 동반한 `it.each<T>([…])`의 정적 row도 exact count에 반영한다. 타입 인자 안의 함수 타입도 table 판정을 흐리지 않는다.
 - 동적 table, alias와 알 수 없는 문법은 indeterminate이며 skip, todo와 property declaration은 각각 1 case다.
 
 ### AC-ecmascript-verification-role — 내용이 역할을 확정한다
@@ -71,8 +73,9 @@
 
 ## History
 
+- 2026-08-18 — re-export 탐지를 export 절 형태로 한정했다. `from`은 위치가 키워드를 만든다 — 절 경계 밖의 `from` 식별자는 재export가 아니다.
 - 2026-07-28 — verification role 판정을 접미사 후보 + 내용 확정으로 좁히고, source discovery에서 git이 무시하는 경로를 제외했다.
 
 ## Last Updated
 
-2026-08-18 — re-export 탐지를 export 절 형태로 한정했다. `from`은 위치가 키워드를 만든다 — 절 경계 밖의 `from` 식별자는 재export가 아니다.
+2026-08-23 — `.each`와 호출 괄호 사이의 타입 인자 목록을 건너뛰도록 정적 table 판정을 고쳤다. 타입 인자는 row 수를 바꾸지 않는데도 table을 못 읽게 만들어 파일 전체를 indeterminate로 떨어뜨리고 있었다.

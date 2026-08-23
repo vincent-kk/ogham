@@ -33,7 +33,13 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
     settingsHtml:
       "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
     loadConfig: vi.fn().mockResolvedValue({}),
-    saveConfig: vi.fn().mockResolvedValue(undefined),
+    saveConfig: vi.fn().mockResolvedValue({
+      paths: { user: "/tmp/user/config.json", project: null },
+      layers: { user: null, project: null },
+      effective: {},
+      overridden: [],
+      warnings: [],
+    }),
     loadCredentials: vi.fn().mockResolvedValue({}),
     saveCredentials: vi.fn().mockResolvedValue(undefined),
     testConnection: vi
@@ -41,6 +47,7 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
       .mockResolvedValue({ service: "jira", success: true, message: "OK" }),
     resetTimer: vi.fn(),
     closeServer: vi.fn().mockResolvedValue(undefined),
+    completeSetup: vi.fn(),
     ...overrides,
   } as RouteContext;
 }

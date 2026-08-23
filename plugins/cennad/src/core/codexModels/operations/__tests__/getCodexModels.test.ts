@@ -12,13 +12,13 @@ import {
 } from 'vitest';
 
 import {
-  CENNAD_HOME,
-  CODEX_MODELS_CACHE_PATH,
-} from '../../../../constants/paths.js';
-import {
   installFakeBinary,
   prependToPath,
 } from '../../../../__tests__/fixtures/fakeBinary.js';
+import {
+  CENNAD_HOME,
+  CODEX_MODELS_CACHE_PATH,
+} from '../../../../constants/paths.js';
 import type { CodexModel } from '../../../../types/index.js';
 import { getCodexModels } from '../getCodexModels.js';
 

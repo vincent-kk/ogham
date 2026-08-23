@@ -1,20 +1,20 @@
 #!/usr/bin/env node
-import { logHookFailure, normalizeCodexToolUse } from '@ogham/cross-platform';
+import { logHookFailure, normalizeCodexToolUses } from '@ogham/cross-platform';
 
 import { createLogger } from '../../lib/logger.js';
 import { readStdin } from '../../lib/stdin.js';
 import type { PreToolUseInput } from '../../types/hooks.js';
 
-import { handlePreToolUse } from './preToolUse.js';
+import { handlePreToolUseBatch } from './preToolUse.js';
 
 const log = createLogger('pre-tool-use');
 const raw = await readStdin(2000);
 let result;
 try {
-  // Codex sends file edits as apply_patch; normalise to Write/Edit so the
-  // Claude-vocab guards below fire (no-op on Claude/agy). See codex-hooks.
-  const input = normalizeCodexToolUse(JSON.parse(raw) as PreToolUseInput);
-  result = await handlePreToolUse(input);
+  // Loaded by the PreToolUse hook manifest; every logical patch operation is
+  // normalized here before the product pipeline merges one physical decision.
+  const normalized = normalizeCodexToolUses(JSON.parse(raw) as PreToolUseInput);
+  result = await handlePreToolUseBatch(normalized);
 } catch (e) {
   log.error('hook entry failed', e);
   logHookFailure('filid', 'pre-tool-use', e);

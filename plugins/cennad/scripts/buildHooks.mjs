@@ -7,7 +7,7 @@
  * 10 KB per-bundle cap + a FORBIDDEN_PATTERNS list block known offenders at
  * build time.
  */
-import { mkdir, readFile, stat } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,7 +16,17 @@ import * as esbuild from 'esbuild';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
-await mkdir(resolve(root, 'bridge'), { recursive: true });
+const args = process.argv.slice(2);
+const check = args.includes('--check');
+const outputDirIndex = args.indexOf('--output-dir');
+if (outputDirIndex >= 0 && !args[outputDirIndex + 1])
+  throw new Error('--output-dir requires a path');
+const outputDir =
+  outputDirIndex >= 0
+    ? resolve(root, args[outputDirIndex + 1])
+    : resolve(root, 'bridge');
+
+if (!check) await mkdir(outputDir, { recursive: true });
 
 const LIGHT_HOOK_BYTES = 10 * 1024;
 
@@ -25,23 +35,29 @@ const hookEntries = [
   { name: 'injectDynamic', maxBytes: LIGHT_HOOK_BYTES },
 ];
 
-await Promise.all(
-  hookEntries.map(async ({ name }) =>
-    esbuild.build({
+const buildResults = await Promise.all(
+  hookEntries.map(async ({ name }) => ({
+    name,
+    result: await esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${name}/build/${name}.entry.ts`)],
       bundle: true,
       platform: 'node',
       target: 'node20',
       format: 'esm',
-      outfile: resolve(root, `bridge/${name}.mjs`),
+      outfile: resolve(outputDir, `${name}.mjs`),
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      write: !check,
     }),
-  ),
+  })),
 );
 
-console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
+console.log(
+  check
+    ? `  Hook scripts (${hookEntries.length}) checked -> ${outputDir}`
+    : `  Hook scripts (${hookEntries.length}) -> ${outputDir}`,
+);
 
 const FORBIDDEN_PATTERNS = [
   // Glob family
@@ -83,16 +99,30 @@ const FORBIDDEN_PATTERNS = [
 const violations = [];
 
 for (const { name, maxBytes } of hookEntries) {
-  const file = resolve(root, `bridge/${name}.mjs`);
-  const { size } = await stat(file);
+  const file = resolve(outputDir, `${name}.mjs`);
+  const buildResult = buildResults.find((entry) => entry.name === name).result;
+  let content;
+  if (check) {
+    content = Buffer.from(buildResult.outputFiles[0].contents);
+    let existing = null;
+    try {
+      existing = await readFile(file);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    if (existing === null || !content.equals(existing))
+      violations.push(`  ${name}.mjs: generated output is out of sync`);
+  } else content = await readFile(file);
+
+  const size = content.byteLength;
   if (size > maxBytes) {
     violations.push(
       `  ${name}.mjs: ${size} bytes > ${maxBytes} (${(size / 1024).toFixed(1)} KB > ${(maxBytes / 1024).toFixed(0)} KB)`,
     );
   }
-  const content = await readFile(file, 'utf8');
+  const source = content.toString('utf8');
   for (const pattern of FORBIDDEN_PATTERNS) {
-    if (pattern.test(content)) {
+    if (pattern.test(source)) {
       violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
     }
   }
@@ -109,5 +139,5 @@ if (violations.length > 0) {
 }
 
 console.log(
-  `  Hook bundle guards passed (LIGHT <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
+  `  Hook bundle guards passed (LIGHT <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules${check ? ', generated output in sync' : ''})`,
 );

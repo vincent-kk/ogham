@@ -11,6 +11,7 @@
 - 파일 교체는 sibling 임시 파일을 사용하고, 동시 변경 적용은 owner-token
   lock과 호출자 리비전 검사로 보호할 수 있어야 한다.
 - ENOENT만 정상적인 부재로 취급하고 그 밖의 파일 시스템 오류는 보존한다.
+- 공식 Codex patch 입력은 모든 파일 연산을 보존하며 불완전한 parse를 성공으로 축소하지 않는다.
 
 ## API Contracts
 
@@ -24,6 +25,10 @@ resolveRuntimeHost(
 
 미인식 marker 또는 서로 충돌하는 훅 신호는 `unknown`이며 Claude로 추측하지
 않는다.
+
+### Codex hook normalization
+
+`normalizeCodexToolUses`는 원래 물리 호출과 입력 순서의 non-empty 논리 도구 호출을 함께 반환한다. add/update/delete는 `Write`/`Edit`/`Delete`가 되며, command나 section 하나라도 불완전하면 연산 prefix 대신 명시적 실패가 반환된다. 다른 tool name은 patch-looking command가 있어도 해석하지 않는다.
 
 ### Paths
 
@@ -90,7 +95,7 @@ clearConfigPaths(
 대신 8개 전부인 3,007 B를 retain 한다. 네 심볼 모두 파일은 그대로 두고 루트
 재수출만 멈춘다 — 패키지 내부 소비는 계속 concrete 파일을 쓴다.
 
-user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
+user 레이어는 `pluginCache(pluginName)` 아래의 설정 파일, project 레이어는
 `<projectRoot>/.<pluginName>/config.json`이며 project가 user를 재정의한다.
 
 레이어 읽기는 throw하지 않는다. 부재와 손상은 모두 `null`이고 손상만
@@ -123,7 +128,7 @@ JSON이고 `JSON.parse`가 `__proto__`를 own key로 만들기 때문에 실제 
 (git root / repo root / 인자 cwd) 해석된 절대 경로를 넘긴다.
 
 설정 병합 구현은 node 내장을 import하지 않는다. 브라우저 설정 페이지 번들과
-훅 번들의 공용 경계이며, `merge/__tests__/pureImports.test.ts`가 이를 강제한다.
+훅 번들의 공용 경계이며, `src/configScope/merge/__tests__/pureImports.test.ts`가 이를 강제한다.
 소비자는 다른 공개 함수와 마찬가지로 패키지 루트에서 가져온다.
 
 ### 설정 페이지 계약
@@ -225,6 +230,11 @@ config를 소유한 섹션마다 붙이고 배지는 prefix로 판정한다 — 
 readUtf8FileIfExistsSync(path: string): string | null;
 readFileIfExistsSync(path: string): Uint8Array | null;
 listDirectoryIfExistsSync(path: string): readonly string[];
+canonicalizeTargetPathSync(
+  cwd: string,
+  targetPath: string,
+  options?: { preserveTerminalEntry?: boolean },
+): string;
 ensureDirectorySync(path: string, options?: { mode?: number }): void;
 removeFileIfExistsSync(path: string): boolean;
 writeFileAtomicallySync(
@@ -247,6 +257,9 @@ quarantine 이름으로 atomic rename한 프로세스만 정리하며 owner toke
 
 `assertNoSymlinkDescendantsSync`는 신뢰 경계인 `root` 자체가 아니라
 `root`부터 `targetPath`까지 이미 존재하는 descendant segment를 검사한다.
+`canonicalizeTargetPathSync`는 가장 가까운 기존 ancestor를 host `realpath`로
+해석하고 suffix를 붙인다. terminal entry 보존 옵션은 unlink가 제거할 마지막
+directory entry를 역참조하지 않으면서 symlink ancestor와 case alias를 숨기지 않는다.
 
 제한 훅도 패키지 루트에서 필요한 읽기·쓰기·host·section·error-log·portable
 경로 심볼만 import한다. 이름 있는 구체 파일 재노출과 `sideEffects: false`가
@@ -261,7 +274,17 @@ artifact apply는 계속 atomic write와 lock을 사용한다.
 유지하면서 Node builtin만 사용한다. tree-shaken 출력에는 범용 `spawnCli`,
 `cross-spawn`, executable discovery가 포함되지 않는다.
 
+## Acceptance Criteria
+
+### CP-CODEX-BATCH — Complete hook boundary
+
+- multi-file patch의 모든 target은 순서대로 소비 guard에 전달될 수 있다.
+- malformed patch와 아직 destination을 판정하지 못하는 move patch는 성공한 빈 입력이 아니다.
+- Claude `Write`/`Edit` identity와 기존 단일 파일·Bash read 의미는 유지된다.
+
 ## History
+
+2026-08-23 — 첫 파일만 정규화하던 측정 기반 가정을 폐기했다. 하나의 patch 안에서 뒤쪽 target이 경계를 우회할 수 있으므로 전체 순서 보존과 보수적 parse 실패를 공개 계약으로 정했다.
 
 2026-07-30 — 공개 주소를 패키지 루트 하나와 agy runner 빌드 진입점으로
 통합했다. `sideEffects: false`와 출력 번들 가드가 목적별 subpath의 격리 역할을
@@ -278,4 +301,4 @@ artifact apply는 계속 atomic write와 lock을 사용한다.
 
 ## Last Updated
 
-2026-07-30 — 공개 주소를 루트로 통합하고 기존 123개 심볼 계약을 유지했다.
+2026-08-23 — Codex hook 정규화 계약과 설정 병합 검증 참조를 현재 구조에 맞췄다.

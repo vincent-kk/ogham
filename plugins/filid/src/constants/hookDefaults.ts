@@ -16,6 +16,7 @@ export const HOOK_TOOL_NAME = {
   READ: 'Read',
   WRITE: 'Write',
   EDIT: 'Edit',
+  DELETE: 'Delete',
 } as const;
 
 export const HOOK_EVENT_NAME = {

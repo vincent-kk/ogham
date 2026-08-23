@@ -17,7 +17,7 @@ Send the SAME prompt to every enabled provider in parallel — one `start_conver
 
 ## Arguments
 
-- `--tier apex|high|mid|low` — only when the user asked; the same tier goes to every provider, and each resolves it from its own config (see the provider skills' Tier sections). Cost multiplies by the participant count here, so do not raise the tier on your own judgment the way a single-provider dispatch does — `apex` across three providers is three long autonomous runs at once.
+- `--tier apex|high|mid|low` — only when the user asked; the same tier goes to every provider, and each resolves it from its own config (see the provider skills' Tier sections). Cost multiplies by the participant count here, so do not raise the tier on your own judgment the way a single-provider dispatch does. Treat `high` as sufficient for almost every crosscheck, including difficult ones; use `apex` only when the user explicitly requests it for a truly long-running or exceptionally difficult comparison. `apex` across three providers is three long autonomous runs at once.
 - `--no-converge` — synthesize the first round only.
 - `-- "prompt"` — the prompt (required).
 

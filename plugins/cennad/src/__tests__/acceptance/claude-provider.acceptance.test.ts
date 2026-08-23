@@ -19,10 +19,7 @@ import { rm } from 'node:fs/promises';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { CENNAD_HOME } from '../../constants/index.js';
-import {
-  installFakeBinary,
-  prependToPath,
-} from '../fixtures/fakeBinary.js';
+import { installFakeBinary, prependToPath } from '../fixtures/fakeBinary.js';
 
 // Variable-path dynamic import: a `string`-typed argument stops tsc from
 // resolving the module (or its yet-to-exist exports), keeping `typecheck` green

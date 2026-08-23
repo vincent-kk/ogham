@@ -11,16 +11,16 @@ import {
   it,
 } from 'vitest';
 
+import {
+  installFakeBinary,
+  prependToPath,
+} from '../../../__tests__/fixtures/fakeBinary.js';
 import { CENNAD_HOME } from '../../../constants/paths.js';
 import type {
   AntigravityFlags,
   DispatchOptions,
   DispatchResumeOptions,
 } from '../../../types/index.js';
-import {
-  installFakeBinary,
-  prependToPath,
-} from '../../../__tests__/fixtures/fakeBinary.js';
 import { antigravityDispatcher } from '../index.js';
 
 const FLAGS: AntigravityFlags = { sandbox: false, skip_permissions: false };

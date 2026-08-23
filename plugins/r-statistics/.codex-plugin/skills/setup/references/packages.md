@@ -18,6 +18,8 @@ cat("REQUIRED_MISSING:", if (length(rm)) paste(rm, collapse = " ") else "-", "\n
 cat("USECASE_MISSING:",  if (length(um)) paste(um, collapse = " ") else "-", "\n")
 ```
 
+Capture the structured response field `managedLibraryPath` from this call. It is the installation target for the rest of the flow; do not derive another path from the host, home directory, or environment variables.
+
 These lists mirror `REQUIRED_PACKAGES` and `PACKAGE_USE_CASES` in `src/constants/defaults.ts` — keep in sync. `stats` is base R and never missing.
 
 ## Step 7 — Select use cases (the checkbox step)
@@ -40,10 +42,18 @@ Required-missing packages are always installed — never ask about them. For the
 
 ## Step 8 — Install (consent-gated, terminal)
 
-**Not** `run_r`, which blocks `install.packages`. Build **one** command from the union of required-missing ∪ every selected bundle's missing packages ∪ any dynamic packages, de-duplicated. Install into the r-statistics managed library only; this keeps terminal installs consistent with `run_r`, which prepends `R_STATISTICS_LIB` and sets `R_LIBS_USER` to the same directory:
+**Not** `run_r`, which blocks `install.packages`. Build **one** command from the union of required-missing ∪ every selected bundle's missing packages ∪ any dynamic packages, de-duplicated. Install into the exact `managedLibraryPath` returned in Step 6.
+
+For a POSIX shell, single-quote the whole path and replace every embedded `'` with the shell sequence `'"'"'`. Spaces then remain literal. For example, the path `/tmp/R lib/owner's` becomes this assignment:
 
 ```bash
-Rscript -e 'managed <- file.path(path.expand(Sys.getenv("CLAUDE_CONFIG_DIR", "~/.claude")), "plugins", "r-statistics", "runtime", "r-lib"); dir.create(managed, recursive=TRUE, showWarnings=FALSE); .libPaths(managed); install.packages(c("ggplot2","ggpubr","patchwork"), lib=managed, repos="https://cloud.r-project.org")'
+R_STATISTICS_LIB='/tmp/R lib/owner'"'"'s'
+```
+
+Use that safely quoted assignment on the consented install command:
+
+```bash
+R_STATISTICS_LIB='<POSIX-quoted managedLibraryPath>' Rscript -e 'managed <- Sys.getenv("R_STATISTICS_LIB"); dir.create(managed, recursive=TRUE, showWarnings=FALSE); .libPaths(managed); install.packages(c("ggplot2","ggpubr","patchwork"), lib=managed, repos="https://cloud.r-project.org")'
 ```
 
 Do not copy or move an existing user `win-library`/site-library tree into this directory. Packages should be freshly installed there so compiled dependencies match the active R installation.
@@ -52,4 +62,4 @@ Show the exact command, explain it, and run via `Bash` only on an explicit "yes"
 
 ## Step 9 — Re-verify
 
-Re-run Step 6; report the still-missing set per group.
+Re-run Step 6 through `run_r`; report the still-missing set per group and confirm its response returns the same `managedLibraryPath` captured before the install. A changed path is a setup failure, not a successful re-verification.

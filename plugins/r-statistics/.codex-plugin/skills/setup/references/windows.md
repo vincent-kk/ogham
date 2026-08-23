@@ -16,10 +16,18 @@ choco install r.project
 
 ## R packages
 
-After R is installed, setup checks the required package set. CRAN ships Windows binaries (Rtools usually unneeded). Mind PowerShell quoting — outer double, inner single. Install packages fresh into the r-statistics managed library; do not copy or move an existing `win-library` tree into it, because compiled packages from a different R/Rtools setup can load but crash during shutdown.
+After R is installed, Step 6 checks packages through `run_r`. Capture that response's `managedLibraryPath`; it is the only installation target. CRAN ships Windows binaries (Rtools usually unneeded). Install packages fresh there; do not copy or move an existing `win-library` tree into it.
+
+For PowerShell, single-quote the path and double every embedded `'`. Backslashes and spaces stay literal. For example:
 
 ```powershell
-Rscript -e "managed <- file.path(path.expand(Sys.getenv('CLAUDE_CONFIG_DIR', '~/.claude')), 'plugins', 'r-statistics', 'runtime', 'r-lib'); dir.create(managed, recursive=TRUE, showWarnings=FALSE); .libPaths(managed); install.packages(c('jsonlite','data.table','ggplot2'), lib=managed, repos='https://cloud.r-project.org')"
+$env:R_STATISTICS_LIB = 'C:\R Lib\Owner''s'
+```
+
+Use that safely quoted assignment for the consented install:
+
+```powershell
+$env:R_STATISTICS_LIB = '<PowerShell-quoted managedLibraryPath>'; Rscript -e "managed <- Sys.getenv('R_STATISTICS_LIB'); dir.create(managed, recursive=TRUE, showWarnings=FALSE); .libPaths(managed); install.packages(c('jsonlite','data.table','ggplot2'), lib=managed, repos='https://cloud.r-project.org')"
 ```
 
 Using `.libPaths(managed)` plus `install.packages(..., lib=managed)` ensures the dependency closure lands in the same managed library that `run_r` prepends via `R_STATISTICS_LIB`.

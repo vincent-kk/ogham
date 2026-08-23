@@ -2,13 +2,7 @@
 
 ## Purpose
 
-PostToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 `helpers/activityRecorder`는 `MAENCOF_MCP_TOOLS` allowlist 로 게이트한다(native 도구 기록 방지). 공유 `lifecycleDispatcher`는 항상 실행하고 단일 envelope로 병합한다.
-
-## Structure
-
-- `postToolUse.entry.ts` — 브리지 진입점
-- `postToolUse.ts` — `orchestratePostToolUse` (게이트 + 병합)
-- `helpers/activityRecorder/` — MCP write 도구 사용을 활동 로그(NDJSON)에 기록
+PostToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 `helpers/activityRecorder`는 `MAENCOF_MCP_TOOLS` allowlist 로 게이트한다(native 도구 기록 방지). 공유 `lifecycleDispatcher`는 raw physical tool name을 Pre와 같은 logical matcher로 해석하고 단일 envelope로 병합한다.
 
 ## Conventions
 
@@ -21,6 +15,7 @@ PostToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 `helpers
 
 - 각 관심사를 `safeConcern` 으로 감싸 격리
 - allowlist 게이트로 native 도구 기록 차단
+- lifecycle matcher는 raw `tool_name`만 사용하고 `tool_response`는 판정에서 제외
 
 ### Ask first
 

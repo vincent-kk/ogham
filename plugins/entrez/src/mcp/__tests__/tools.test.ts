@@ -246,7 +246,11 @@ describe(McpToolName.AUTH_CHECK, () => {
   it("reports configured + reachable with the db list", async () => {
     const configPath = join(dir, "config.json");
     const credentialsPath = join(dir, "credentials.json");
-    await saveConfig("user", { tool: "t", email: "e@x.com" }, { user: configPath, project: null });
+    await saveConfig(
+      "user",
+      { tool: "t", email: "e@x.com" },
+      { user: configPath, project: null },
+    );
     await saveCredentials({ api_key: "KEY" }, credentialsPath);
     const fetch = routeFetch(() => ({
       body: JSON.stringify({
@@ -256,7 +260,11 @@ describe(McpToolName.AUTH_CHECK, () => {
 
     const out = await runAuthCheck(
       { probeEInfo: true },
-      { configLayers: { user: configPath, project: null }, credentialsPath, fetchImpl: fetch },
+      {
+        configLayers: { user: configPath, project: null },
+        credentialsPath,
+        fetchImpl: fetch,
+      },
     );
     expect(out.configured).toBe(true);
     expect(out.reachable).toBe(true);
@@ -280,10 +288,17 @@ describe(McpToolName.AUTH_CHECK, () => {
 
   it("skips the EInfo probe when probeEInfo is false", async () => {
     const configPath = join(dir, "config.json");
-    await saveConfig("user", { tool: "t", email: "e@x.com" }, { user: configPath, project: null });
+    await saveConfig(
+      "user",
+      { tool: "t", email: "e@x.com" },
+      { user: configPath, project: null },
+    );
     const out = await runAuthCheck(
       { probeEInfo: false },
-      { configLayers: { user: configPath, project: null }, credentialsPath: join(dir, "none.json") },
+      {
+        configLayers: { user: configPath, project: null },
+        credentialsPath: join(dir, "none.json"),
+      },
     );
     expect(out.configured).toBe(true);
     expect(out.reachable).toBe(false);

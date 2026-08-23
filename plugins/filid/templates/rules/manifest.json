@@ -31,8 +31,8 @@
       "filename": "filid_code-placement.md",
       "required": true,
       "title": "Code Placement",
-      "description": "Lowest-common-fractal placement, restructure plan preconditions and postconditions, and the document-before-code workflow.",
-      "templateHash": "6f8124f282330ef0ce32f5edca10f88246f83d98de7dbd9fc63574aedb6a6218"
+      "description": "Lowest-common-fractal placement, restructure plan preconditions and postconditions, the document-before-code workflow, and PR-seam Filid validation.",
+      "templateHash": "0c65da9afde6bb3871b4bbfbab17d89ef3879c2c93ff7072677d003be4e4f74e"
     }
   ]
 }

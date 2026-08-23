@@ -7,11 +7,11 @@ import { writeConfigFixture, writeCounter } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerA } from '../helpers/hookRunnerLayerA.js';
 import { runHookLayerB } from '../helpers/hookRunnerLayerB.js';
-import { HOST_PID, claimHostSession } from '../helpers/hostSession.js';
+import { HOST_PID, claimLegacyClaudeSession } from '../helpers/hostSession.js';
 
 describe('legacy ratio migration (both layers)', () => {
   beforeEach(async () => {
-    claimHostSession();
+    claimLegacyClaudeSession();
     await rm(CENNAD_HOME, { recursive: true, force: true });
     await writeConfigFixture('legacy');
   });

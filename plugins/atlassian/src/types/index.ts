@@ -53,6 +53,7 @@ export type {
   SetupFormData,
   SetupResponse,
   SetupStatus,
+  SetupCompletion,
   ConnectionTestResult,
   SetupServerHandle,
   TestConnectionParams,

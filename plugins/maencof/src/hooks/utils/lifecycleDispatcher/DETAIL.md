@@ -2,8 +2,10 @@
 
 ## Requirements
 
-- `.maencof-meta/lifecycle.json` 파일의 `actions[]` 중 현재 이벤트·도구에 매칭되는 항목들을 실행하고, 결과 문자열을 하나로 합쳐 Claude Code 이벤트별 올바른 envelope 에 담아 반환한다.
+- vault lifecycle configuration의 `actions` 중 현재 이벤트·도구에 매칭되는 항목들을 실행하고, 결과 문자열을 하나로 합쳐 Claude Code 이벤트별 올바른 envelope 에 담아 반환한다.
 - 매칭 액션이 없거나 vault 가 아닌 경우 `{ continue: true }` 만 반환해야 하며, `message` / `hookMessage` 같은 미지원 필드는 절대 방출하지 않는다.
+- PreToolUse와 PostToolUse는 같은 host-neutral matcher 해석기를 사용한다. physical `apply_patch`만 logical `Edit`으로 정규화하고 `Edit`·`Bash`·MCP 이름 등 나머지는 그대로 비교한다.
+- matcher 양쪽과 관측 tool 이름을 같은 방식으로 정규화한다. 판단은 `tool_name`에만 의존하며 성공·실패 `tool_response` 형태를 읽지 않는다.
 
 ## API Contracts
 
@@ -15,7 +17,7 @@ interface LifecycleDispatcherInput {
   cwd?: string;
   tool_name?: string;
   tool_input?: Record<string, unknown>;
-  tool_response?: Record<string, unknown>;
+  tool_response?: unknown;
 }
 ```
 
@@ -46,6 +48,15 @@ interface LifecycleDispatcherInput {
 
 - 출력에 top-level `message`·`hookMessage` 가 없다.
 
+### AC-host-neutral-tool-matcher — Pre/Post 공통 도구 어휘
+
+- 같은 `Edit` action이 Claude `Edit`와 Codex `apply_patch` Pre/Post에서 각각 한 번 실행된다.
+- `Bash`, MCP 도구명, 불일치 이름은 별칭 부작용 없이 identity 비교한다.
+
+### AC-response-independent-match — response 비의존 판정
+
+- 같은 event와 tool name은 성공·실패·문자열·객체 response 형태와 무관하게 같은 matcher 결과를 낸다.
+
 ## Boundary Exemptions
 
 ### `lifecycleDispatcher.ts` — Hook bundle direct import
@@ -56,4 +67,4 @@ interface LifecycleDispatcherInput {
 
 ## Last Updated
 
-2026-07-30 — 진입점·acceptance group 을 채우고 훅 직접 import 면책을 선언했다.
+2026-08-23 — Pre/Post 공통 logical tool matcher와 response 비의존 판정을 계약화했다.

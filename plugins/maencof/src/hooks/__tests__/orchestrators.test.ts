@@ -5,8 +5,16 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { orchestratePostToolUse } from '../postToolUse/postToolUse.js';
-import { orchestratePreToolUse } from '../preToolUse/preToolUse.js';
+import {
+  orchestratePreToolUse,
+  orchestratePreToolUseBatch,
+} from '../preToolUse/preToolUse.js';
+import { runLifecycleDispatcher } from '../utils/lifecycleDispatcher/lifecycleDispatcher.js';
 import { safeConcern } from '../utils/safeConcern/safeConcern.js';
+
+vi.mock('../utils/lifecycleDispatcher/lifecycleDispatcher.js', () => ({
+  runLifecycleDispatcher: vi.fn(() => ({ continue: true })),
+}));
 
 let vaultDir: string;
 let cacheDir: string;
@@ -15,8 +23,10 @@ beforeEach(() => {
   const tag = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   vaultDir = join(tmpdir(), `maencof-dispatch-${tag}`);
   cacheDir = join(tmpdir(), `maencof-dispatch-cache-${tag}`);
+  mkdirSync(join(vaultDir, '.maencof'), { recursive: true });
   mkdirSync(join(vaultDir, '.maencof-meta'), { recursive: true });
   vi.stubEnv('CLAUDE_CONFIG_DIR', cacheDir);
+  vi.mocked(runLifecycleDispatcher).mockClear();
 });
 
 afterEach(() => {
@@ -52,6 +62,137 @@ describe('orchestratePreToolUse', () => {
     expect(result.continue).toBe(true);
   });
 
+  it('a later L1 operation denies the whole ordered batch and lifecycle runs once', () => {
+    const original = {
+      cwd: vaultDir,
+      tool_name: 'apply_patch',
+      tool_input: { command: 'physical patch' },
+    };
+    const first = {
+      ...original,
+      tool_name: 'Edit',
+      tool_input: { file_path: 'L3/note.md' },
+    };
+    const second = {
+      ...original,
+      tool_name: 'Edit',
+      tool_input: { file_path: '01_Core/identity.md' },
+    };
+
+    const result = orchestratePreToolUseBatch({
+      ok: true,
+      original,
+      toolUses: [first, second],
+    });
+
+    expect(result.continue).toBe(false);
+    expect(result.reason).toContain('01_Core/identity.md');
+    expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
+    expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);
+  });
+
+  it('continues after an initial L1 deny and preserves a later L1 reason', () => {
+    const original = {
+      cwd: vaultDir,
+      tool_name: 'apply_patch',
+      tool_input: { command: 'physical patch' },
+    };
+    const first = {
+      ...original,
+      tool_name: 'Delete',
+      tool_input: { file_path: '01_Core/identity.md' },
+    };
+    const second = {
+      ...original,
+      tool_name: 'Delete',
+      tool_input: { file_path: '01_Core/values.md' },
+    };
+
+    const result = orchestratePreToolUseBatch({
+      ok: true,
+      original,
+      toolUses: [first, second],
+    });
+
+    expect(result.continue).toBe(false);
+    expect(result.reason).toContain('01_Core/identity.md');
+    expect(result.reason).toContain('01_Core/values.md');
+    expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
+    expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);
+  });
+
+  it('Delete of a Layer 1 path uses the mutation guard', () => {
+    const result = orchestratePreToolUse({
+      cwd: vaultDir,
+      tool_name: 'Delete',
+      tool_input: { file_path: '01_Core/identity.md' },
+    });
+
+    expect(result.continue).toBe(false);
+    expect(result.reason).toContain('01_Core/identity.md');
+  });
+
+  it('malformed apply_patch in a vault denies after one lifecycle call with original', () => {
+    const original = {
+      cwd: vaultDir,
+      tool_name: 'apply_patch',
+      tool_input: { command: 'malformed patch' },
+    };
+
+    const result = orchestratePreToolUseBatch({
+      ok: false,
+      original,
+      reason: 'Invalid apply_patch command',
+    });
+
+    expect(result).toMatchObject({
+      continue: false,
+      reason: expect.stringContaining(
+        'maencof cannot inspect this patch inside the vault; re-emit it as a valid V4A patch',
+      ),
+    });
+    expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
+    expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);
+  });
+
+  it('malformed apply_patch outside a vault passes after one lifecycle call with original', () => {
+    const original = {
+      cwd: '/nonexistent/path',
+      tool_name: 'apply_patch',
+      tool_input: { command: 'malformed patch' },
+    };
+
+    const result = orchestratePreToolUseBatch({
+      ok: false,
+      original,
+      reason: 'Invalid apply_patch command',
+    });
+
+    expect(result).toEqual({ continue: true });
+    expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
+    expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);
+  });
+
+  it('malformed apply_patch from a vault subdirectory still denies', () => {
+    const nestedCwd = join(vaultDir, 'L3', 'project');
+    mkdirSync(nestedCwd, { recursive: true });
+    const original = {
+      cwd: nestedCwd,
+      tool_name: 'apply_patch',
+      tool_input: { command: 'malformed patch' },
+    };
+
+    const result = orchestratePreToolUseBatch({
+      ok: false,
+      original,
+      reason: 'Invalid apply_patch command',
+    });
+
+    expect(result.continue).toBe(false);
+    expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
+    expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);
+  });
+
   it('Read of a vault .md emits the redirect advisory (vaultRedirector route)', () => {
     const result = orchestratePreToolUse({
       cwd: vaultDir,
@@ -62,7 +203,7 @@ describe('orchestratePreToolUse', () => {
     expect(result.hookSpecificOutput?.additionalContext).toBeTruthy();
   });
 
-  it('Read of 01_Core never blocks (layerGuard is Write|Edit only)', () => {
+  it('Read of 01_Core never blocks (layerGuard is mutation-only)', () => {
     const result = orchestratePreToolUse({
       cwd: vaultDir,
       tool_name: 'Read',

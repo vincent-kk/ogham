@@ -1,22 +1,13 @@
 ## Purpose
 
-MCP 도구 4종 프랙탈 모음. 도메인 무지·stateless 결정적 실행 레이어. 각 도구는 독립 프랙탈(`{tool}/{tool}.ts` 메인 + `operations/`)로, `createServer` 가 등록한다.
-
-## Structure
-
-| Fractal               | Tool                   | Role                                 |
-| --------------------- | ---------------------- | ------------------------------------ |
-| `runR/`               | `run_r`                | 크로스플랫폼 Rscript 실행 + 아티팩트 |
-| `getRJob/`            | `get_r_job`            | async 잡 상태·결과 폴링              |
-| `cancelRJob/`         | `cancel_r_job`         | 잡 취소                              |
-| `assertAnalysisPlan/` | `assert_analysis_plan` | 통계 hard gate (결정론적)            |
-| `index.ts`            | —                      | barrel — 핸들러 re-export            |
+MCP 도구 4종의 독립 경계를 소유한다. 실행 도구는 안전 실행과 통계 정책을 분리하고 구조화 결과로 setup과 runtime의 관리형 library를 연결한다.
 
 ## Conventions
 
 - 도구 등록명 snake_case, 심볼·파일 camelCase
 - 핸들러는 평문 데이터 반환 (wrapHandler 가 JSON 직렬화)
 - 1함수1파일 operations, 도구 간 직접 import 금지 (core·shared 경유)
+- 구조화 결과의 경로는 constants에서 확정된 runtime 값만 사용
 
 ## Boundaries
 
@@ -32,7 +23,3 @@ MCP 도구 4종 프랙탈 모음. 도메인 무지·stateless 결정적 실행 �
 
 - 도구 핸들러에서 다른 도구 핸들러 직접 호출
 - 통계 정책을 run_r 에, 실행을 assert 에 누설
-
-## Dependencies
-
-- `../../core`, `../../constants`, `../../types`, `../../lib`, `../../utils`

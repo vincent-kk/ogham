@@ -10,7 +10,10 @@ import {
   ERROR_MESSAGES,
   FORBIDDEN_CALL_MESSAGE,
 } from "../../../constants/messages.js";
-import { workspaceScriptPath } from "../../../constants/paths.js";
+import {
+  MANAGED_R_LIB_DIR,
+  workspaceScriptPath,
+} from "../../../constants/paths.js";
 import {
   createJob,
   createWorkspace,
@@ -73,7 +76,12 @@ function failFast(error: RExecutionError, rscriptPath: string): RunROutput {
   createJob({ jobId, workspaceId: "", controller: new AbortController() });
   const result = errorResult(error, rscriptPath);
   updateJob(jobId, JobStatus.Failed, result);
-  return { jobId, status: JobStatus.Failed, result };
+  return {
+    jobId,
+    status: JobStatus.Failed,
+    managedLibraryPath: MANAGED_R_LIB_DIR,
+    result,
+  };
 }
 
 /**
@@ -156,7 +164,7 @@ export async function handleRunR(input: RunRInput): Promise<RunROutput> {
   if ((input.executionMode ?? RunMode.Async) === RunMode.Sync) {
     const { status, result } = await executeRun(runArgs);
     updateJob(jobId, status, result);
-    return { jobId, status, result };
+    return { jobId, status, managedLibraryPath: MANAGED_R_LIB_DIR, result };
   }
 
   void executeRun(runArgs)
@@ -175,5 +183,9 @@ export async function handleRunR(input: RunRInput): Promise<RunROutput> {
         ),
       ),
     );
-  return { jobId, status: JobStatus.Running };
+  return {
+    jobId,
+    status: JobStatus.Running,
+    managedLibraryPath: MANAGED_R_LIB_DIR,
+  };
 }

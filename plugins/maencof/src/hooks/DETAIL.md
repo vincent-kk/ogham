@@ -40,7 +40,7 @@
 
 - SessionStart — bootstrap → lifecycle
 - UserPromptSubmit — contextInjector → lifecycle → insightInjector → session-touch → vaultCommitter(마지막, 부수효과)
-- PreToolUse — `tool_name` 라우팅(`Write|Edit`→layerGuard, `Read|Grep|Glob`→vaultRedirector) + lifecycle
+- PreToolUse — 물리 입력을 순서 있는 논리 호출로 정규화해 `Write|Edit|Delete`→layerGuard, `Read|Grep|Glob`→vaultRedirector 로 모두 라우팅한다. guard 결과는 deny-wins 로 병합하고 lifecycle 은 성공·malformed 모두 원래 물리 입력으로 정확히 한 번 실행한다. malformed 는 실제 vault 안에서 deny, 밖에서 pass 한다
 - PostToolUse — `MAENCOF_MCP_TOOLS` allowlist 게이트를 통과한 activityRecorder + lifecycle
 
 ## Acceptance Criteria
@@ -64,6 +64,11 @@
 ### AC-entry-registered — entry 등록
 
 - 각 이벤트 entry 가 빌드 스크립트의 `entryPath` 목록에 등록되어 대응 번들을 만든다.
+
+### AC-generated-bridge-check — 생성 브리지 동기화
+
+- `scripts/buildHooks.mjs --check` 는 임시 디렉터리에 동일 번들을 만든 뒤 canonical `bridge/` 와 byte-for-byte 비교한다.
+- 누락되거나 오래된 산출물이 하나라도 있으면 canonical 파일을 덮어쓰지 않고 실패한다.
 
 ### AC-no-indexer-state — 인덱서 상태 비노출
 
@@ -109,4 +114,4 @@
 
 ## Last Updated
 
-2026-07-30 — 공유 패키지 root import와 출력 기반 번들 가드를 현행화하고, 번들 entry·MCP lifecycle 직접 도달 면책을 유지했다.
+2026-08-23 — PreToolUse lifecycle의 physical input 경계와 생성 브리지 동기화 검사를 계약화했다.

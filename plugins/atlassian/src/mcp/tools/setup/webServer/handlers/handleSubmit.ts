@@ -143,13 +143,20 @@ export async function handleSubmit(
   // The page names the layer; connection setup defaults to `user` because a
   // site and account are a person's, and only a repository that deliberately
   // points elsewhere writes the project layer.
-  const scope = readScope(data);
-  await ctx.saveConfig(scope, newConfig);
+  const scope = readScope(rawBody);
+  const scopeState = await ctx.saveConfig(scope, newConfig);
   await ctx.saveCredentials(newCredentials);
+
+  const configPath = scopeState.paths[scope];
+  if (!configPath)
+    throw new Error(`The ${scope} configuration scope has no writable path`);
+
+  ctx.completeSetup(configPath);
 
   sendJson(res, 200, {
     success: true,
     message: "Configuration saved successfully",
+    config_path: configPath,
   });
 
   // "Save & Close" (closeAfter) tears down the server; plain "Save" keeps it up.

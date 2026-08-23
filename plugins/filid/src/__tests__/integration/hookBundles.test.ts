@@ -1,5 +1,12 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
@@ -197,4 +204,189 @@ describe('pre-tool-use bundle delivery pointer', () => {
     expect(context).not.toContain('## Purpose');
     expect(context).not.toContain('\n---\n');
   });
+});
+
+describe('pre-tool-use bundle apply_patch policy', () => {
+  let cwd: string;
+
+  beforeAll(() => {
+    cwd = mkdtempSync(portableResolve(tmpdir(), 'filid-hook-batch-'));
+    mkdirSync(portableResolve(cwd, 'src', 'deep'), { recursive: true });
+    mkdirSync(portableResolve(cwd, 'src', 'feature'), { recursive: true });
+    mkdirSync(portableResolve(cwd, 'contract-link'), { recursive: true });
+    writeFileSync(
+      portableResolve(cwd, 'INTENT.md'),
+      '## Purpose\nFixture\n## Boundaries\n### Always do\n- Verify\n### Ask first\n- Widen\n### Never do\n- Bypass\n',
+    );
+    writeFileSync(
+      portableResolve(cwd, 'DETAIL.md'),
+      '## Requirements\n\n- Fixture\n\n## API Contracts\n\n- Stable\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- Verifiable\n\n## Last Updated\n\n2026-08-23\n',
+    );
+    writeFileSync(portableResolve(cwd, 'index.ts'), '');
+    writeFileSync(portableResolve(cwd, 'safe.md'), 'safe');
+    symlinkSync(
+      portableResolve(cwd, 'safe.md'),
+      portableResolve(cwd, 'contract-link', 'INTENT.md'),
+      'file',
+    );
+  });
+
+  afterAll(() => {
+    if (cwd) rmSync(cwd, { recursive: true, force: true });
+  });
+
+  it('checks validator and structure findings that occur only in a later operation', () => {
+    const sessionId = `dr02-${Date.now()}`;
+
+    runPreToolUseBundle(cwd, sessionId, 'Read', {
+      file_path: portableResolve(cwd, 'index.ts'),
+    });
+    const safePath = portableResolve(cwd, 'src', 'safe.ts');
+    const safeSection = `*** Add File: ${safePath}\n+export const safe = true;`;
+    const control = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Environment ID: env-123\n${safeSection}\n*** End Patch`,
+    });
+    expect(control.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const hiddenIntent = portableResolve(cwd, 'src', 'feature', 'INTENT.md');
+    const oversized = Array.from(
+      { length: 51 },
+      (_, index) => `+line ${index + 1}`,
+    ).join('\n');
+    const denied = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n${safeSection}\n*** Add File: ${hiddenIntent}\n${oversized}\n*** End Patch`,
+    });
+    expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(denied.hookSpecificOutput?.permissionDecisionReason).toContain(
+      hiddenIntent,
+    );
+    expect(denied.hookSpecificOutput?.permissionDecisionReason).toContain(
+      '51 lines',
+    );
+
+    const hiddenSource = portableResolve(cwd, 'src', 'deep', 'child.ts');
+    const warned = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command:
+        `*** Begin Patch\n${safeSection}\n*** Add File: ${hiddenSource}\n` +
+        '+import { foo } from "../../";\n+export const child = foo;\n*** End Patch',
+    });
+    const context = warned.hookSpecificOutput?.additionalContext ?? '';
+    expect(context).toContain(hiddenSource);
+    expect(context).toContain('structure-guard');
+    expect(context).toContain('import');
+  });
+
+  it('enforces host-valid empty operations and EOF state in the delivered bundle', () => {
+    const sessionId = `dr02-grammar-${Date.now()}`;
+    runPreToolUseBundle(cwd, sessionId, 'Read', {
+      file_path: portableResolve(cwd, 'index.ts'),
+    });
+
+    const bodylessAdd = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Add File: ${portableResolve(cwd, 'src', 'empty.ts')}\n*** End Patch`,
+    });
+    expect(bodylessAdd.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const contextOnlyUpdate = runPreToolUseBundle(
+      cwd,
+      sessionId,
+      'apply_patch',
+      {
+        command: `*** Begin Patch\n*** Update File: ${portableResolve(cwd, 'index.ts')}\n@@\n unchanged\n*** End Patch`,
+      },
+    );
+    expect(
+      contextOnlyUpdate.hookSpecificOutput?.permissionDecision,
+    ).toBeUndefined();
+
+    const malformedEof = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${portableResolve(cwd, 'index.ts')}\n@@\n-old\n+new\n*** End of File\n-more\n+later\n*** End Patch`,
+    });
+    expect(malformedEof.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(malformedEof.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'End of File',
+    );
+  });
+
+  it('allows bodyless and exact modified Moves while denying a protected Move', () => {
+    const sessionId = `move-${Date.now()}`;
+    runPreToolUseBundle(cwd, sessionId, 'Read', {
+      file_path: portableResolve(cwd, 'index.ts'),
+    });
+
+    const ordinarySource = portableResolve(cwd, 'src', 'plain.ts');
+    const ordinaryTarget = portableResolve(cwd, 'src', 'renamed.ts');
+    writeFileSync(ordinarySource, 'old\n');
+    const allowed = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${ordinarySource}\n*** Move to: ${ordinaryTarget}\n*** End Patch`,
+    });
+    expect(allowed.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const modifiedTarget = portableResolve(cwd, 'src', 'modified.ts');
+    const modified = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${ordinarySource}\n*** Move to: ${modifiedTarget}\n@@\n-old\n+new\n*** End Patch`,
+    });
+    expect(modified.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const protectedSource = portableResolve(cwd, 'INTENT.md');
+    const protectedTarget = portableResolve(cwd, 'RENAMED.md');
+    const denied = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${protectedSource}\n*** Move to: ${protectedTarget}\n*** End Patch`,
+    });
+    expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(denied.hookSpecificOutput?.permissionDecisionReason).toContain(
+      protectedSource,
+    );
+  });
+
+  it('denies a missing Move source with an explicit built-bundle reason', () => {
+    const sessionId = `move-missing-${Date.now()}`;
+    runPreToolUseBundle(cwd, sessionId, 'Read', {
+      file_path: portableResolve(cwd, 'index.ts'),
+    });
+    const missingSource = portableResolve(cwd, 'src', 'missing.ts');
+    const result = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${missingSource}\n*** Move to: ${portableResolve(cwd, 'src', 'missing-moved.ts')}\n*** End Patch`,
+    });
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      missingSource,
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'does not exist',
+    );
+  });
+
+  it.each([
+    ['intent.md', 'INTENT.md'],
+    ['detail.md', 'DETAIL.md'],
+    ['contract-link/INTENT.md', 'safe.md'],
+  ])(
+    'matches host resolution when Delete targets case alias %s',
+    (aliasName, canonicalName) => {
+      const sessionId = `dr02-delete-${canonicalName}-${Date.now()}`;
+      runPreToolUseBundle(cwd, sessionId, 'Read', {
+        file_path: portableResolve(cwd, 'index.ts'),
+      });
+      const aliasPath = portableResolve(cwd, aliasName);
+      const hostResolvesAlias = existsSync(aliasPath);
+      const result = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+        command: `*** Begin Patch\n*** Delete File: ${aliasPath}\n*** End Patch`,
+      });
+
+      expect(result.hookSpecificOutput?.permissionDecision).toBe(
+        hostResolvesAlias ? 'deny' : undefined,
+      );
+      if (hostResolvesAlias) {
+        expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+          'Delete rejected',
+        );
+        expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+          aliasPath,
+        );
+      }
+      expect(existsSync(portableResolve(cwd, canonicalName))).toBe(true);
+    },
+  );
 });

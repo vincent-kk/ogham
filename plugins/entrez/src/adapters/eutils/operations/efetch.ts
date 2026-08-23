@@ -3,7 +3,12 @@ import type { HttpDeps } from "../../../types/http.js";
 import type { PaperRecord, Author } from "../../../types/record.js";
 import { buildBaseUrl } from "../../../core/sourceResolver/index.js";
 import { httpRequest } from "../../../core/httpClient/index.js";
-import { parseXml, asArray, textOf, collectText } from "../../../lib/xmlParse.js";
+import {
+  parseXml,
+  asArray,
+  textOf,
+  collectText,
+} from "../../../lib/xmlParse.js";
 
 export interface EfetchArgs {
   db: Db;
@@ -52,8 +57,7 @@ function parseAbstract(articleNode: Node): string | undefined {
 function parseYear(articleNode: Node): number | undefined {
   const journal = articleNode.Journal as Node | undefined;
   const pubDate = (journal?.JournalIssue as Node | undefined)?.PubDate as
-    | Node
-    | undefined;
+    Node | undefined;
   const year = textOf(pubDate?.Year);
   if (year) return Number(year);
   const medlineDate = textOf(pubDate?.MedlineDate);
@@ -89,9 +93,7 @@ function parseArticle(article: Node): PaperRecord | null {
 
   const authors = asArray<Node>(
     (articleNode.AuthorList as Node | undefined)?.Author as
-      | Node
-      | Node[]
-      | undefined,
+      Node | Node[] | undefined,
   ).map(parseAuthor);
 
   const { doi, pmcid } = parseArticleIds(

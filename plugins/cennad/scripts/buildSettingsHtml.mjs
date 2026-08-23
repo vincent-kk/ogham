@@ -18,7 +18,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const pagesDir = join(root, 'src', 'mcp', 'pages', 'settings');
 const outputDir = join(root, 'public');
-const outputPath = join(outputDir, 'settings.html');
+const outputIndex = process.argv.indexOf('--output');
+if (outputIndex !== -1 && !process.argv[outputIndex + 1])
+  throw new Error('--output requires a path');
+const outputPath =
+  outputIndex === -1
+    ? join(outputDir, 'settings.html')
+    : resolve(process.argv[outputIndex + 1]);
+const checkOnly = process.argv.includes('--check');
 
 async function readPage(...segments) {
   return readFile(join(pagesDir, ...segments), 'utf-8');
@@ -43,6 +50,14 @@ html = html.replace(
   `<script>${appJs}</script>`,
 );
 
-await mkdir(outputDir, { recursive: true });
-await writeFile(outputPath, html, 'utf-8');
-console.log('  settings UI -> public/settings.html');
+if (checkOnly) {
+  const current = await readFile(outputPath, 'utf-8').catch(() => null);
+  if (current !== html) {
+    console.error(`  settings UI out of sync -> ${outputPath}`);
+    process.exitCode = 1;
+  } else console.log(`  settings UI in sync -> ${outputPath}`);
+} else {
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, html, 'utf-8');
+  console.log(`  settings UI -> ${outputPath}`);
+}

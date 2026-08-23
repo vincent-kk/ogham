@@ -2,22 +2,13 @@
 
 `open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 5 분 idle 자동 종료. 공유 `@ogham/http-kit` 으로 loopback Host(rebinding 차단) → one-time token → POST Origin(CSRF) → `application/json` 강제 순 검증.
 
-## Structure
-
-| Path              | Role                                                                                                                                                                             |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `webServer.ts`    | `startSettingsServer` — closure 기반 lifecycle (`{ url, token, close }`)                                                                                                         |
-| `routes.ts`       | `createRouteHandler` — shared guard(host/token/origin/CT) + 경로 디스패치                                                                                                        |
-| `routeContext.ts` | 라우트와 핸들러를 잇는 context 인터페이스                                                                                                                                        |
-| `handlers/`       | GET `/`, `/config`, `/provider-status` (CLI 가용 + `agyModels`·`codexModels` 카탈로그), POST `/save` (저장 후 youtube MCP addon 을 claude·codex·antigravity 에 동기화), `/close` |
-
 ## Conventions
 
 - loopback Host + `?token=<...>` 검증 (rebinding 차단, timing-safe 비교)
 - POST 는 loopback Origin + `Content-Type: application/json` 강제 (CSRF 방어)
 - CORS 헤더 미설정 — 동일 origin only
 - 응답 본문 형태: `{ success: bool, message?, errors?, ...data }`
-- `__CENNAD_STATE__` 슬롯에 `escapeJsonForHtml` 로 직렬화된 Config 주입
+- `__CENNAD_STATE__` 슬롯에 `escapeJsonForHtml` 로 직렬화된 Config, scope, 런타임 active home 주입
 
 ## Boundaries
 
@@ -39,10 +30,3 @@
 - 모듈 전역 mutable state — 항상 closure 반환값으로 lifecycle 노출
 - token 부재 또는 불일치 시 응답에 token 값을 echo
 - 외부 origin 으로 fetch / proxy
-
-## Dependencies
-
-- `node:http`, `node:url`
-- `@ogham/http-kit` (inspectRequest·generateToken·parseBody·escapeJsonForHtml·sendJson)
-- `../../../core/{configManager,youtubeMcp,agyModels,codexModels}` (loadConfig, saveConfig, provisionYoutube, 모델 카탈로그)
-- `../../../types/index.ts` (`ConfigSchema`)

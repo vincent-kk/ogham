@@ -1,13 +1,20 @@
 import type { Counter } from '../../../types/index.js';
-import { getParentPid } from '../../../utils/parentPid.js';
+import { resolveHostSessionIdentity } from '../../../utils/hostSessionIdentity.js';
 
 import { loadCounter } from './loadCounter.js';
 
-export async function getCounter(): Promise<Counter> {
+export async function getCounter(): Promise<Counter | null> {
+  const hostSessionId = resolveHostSessionIdentity();
+  if (hostSessionId === null) return null;
+
   const current = await loadCounter();
-  const ppid = getParentPid();
-  if (!current || current.parent_pid !== ppid)
-    return { parent_pid: ppid, codex: 0, antigravity: 0, claude: 0 };
+  if (!current || current.host_session_id !== hostSessionId)
+    return {
+      host_session_id: hostSessionId,
+      codex: 0,
+      antigravity: 0,
+      claude: 0,
+    };
 
   return current;
 }

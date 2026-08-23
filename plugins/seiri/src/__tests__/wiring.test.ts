@@ -203,7 +203,10 @@ describe('wiring', () => {
 
   it('routes Codex through hooks without the Claude failure event', () => {
     const claudeHooks = JSON.parse(read('hooks', 'hooks.json')) as {
-      hooks: Record<string, Array<{ hooks: Array<{ command: string }> }>>;
+      hooks: Record<
+        string,
+        Array<{ matcher?: string; hooks: Array<{ command: string }> }>
+      >;
     };
     const codexHooks = JSON.parse(
       read('.codex-plugin', 'hooks.json'),
@@ -219,6 +222,16 @@ describe('wiring', () => {
     expect(codexManifest.hooks).toBe(rootManifest.hooks);
     expect(claudeHooks.hooks).toHaveProperty('PostToolUseFailure');
     expect(codexHooks.hooks).not.toHaveProperty('PostToolUseFailure');
+    expect(
+      claudeHooks.hooks.PostToolUse?.some(
+        (group) => group.matcher === HostTool.SKILL,
+      ),
+    ).toBe(true);
+    expect(
+      codexHooks.hooks.PostToolUse?.some(
+        (group) => group.matcher === HostTool.SKILL,
+      ),
+    ).toBe(false);
     expect(codexHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command).toBe(
       claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command,
     );

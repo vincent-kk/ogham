@@ -18,7 +18,7 @@ import { runLifecycleDispatcher } from '../../hooks/utils/lifecycleDispatcher/li
 
 const MARKER = 'MAENCOF_V030_TEST_MARKER_42';
 
-function createVaultWithEchoAction(event: string): string {
+function createVaultWithEchoAction(event: string, matcher?: string): string {
   const dir = join(
     tmpdir(),
     `lifecycle-${event}-${Date.now()}-${Math.random()
@@ -35,6 +35,7 @@ function createVaultWithEchoAction(event: string): string {
         {
           id: 'test-echo',
           event,
+          ...(matcher ? { matcher } : {}),
           enabled: true,
           type: 'echo',
           config: { message: MARKER },
@@ -113,5 +114,67 @@ describe('runLifecycleDispatcher — hook output envelope', () => {
     vaultDir = createVaultWithEchoAction('SessionStart');
     const result = runLifecycleDispatcher('PreToolUse', { cwd: vaultDir });
     expect(result).toEqual({ continue: true });
+  });
+
+  describe('host-neutral tool matcher', () => {
+    it.each([
+      ['PreToolUse', 'Edit', 'Edit'],
+      ['PreToolUse', 'apply_patch', 'Edit'],
+      ['PostToolUse', 'Edit', 'Edit'],
+      ['PostToolUse', 'apply_patch', 'Edit'],
+      ['PreToolUse', 'Edit', 'apply_patch'],
+      ['PostToolUse', 'Bash', 'Bash'],
+      [
+        'PostToolUse',
+        'mcp__plugin_maencof_tools__update',
+        'mcp__plugin_maencof_tools__update',
+      ],
+    ] as const)(
+      '%s maps observed %s to matcher %s',
+      (event, observedTool, matcher) => {
+        vaultDir = createVaultWithEchoAction(event, matcher);
+
+        const result = runLifecycleDispatcher(event, {
+          cwd: vaultDir,
+          tool_name: observedTool,
+        });
+
+        expect(result.hookSpecificOutput?.additionalContext ?? '').toContain(
+          MARKER,
+        );
+      },
+    );
+
+    it.each([
+      undefined,
+      { success: true },
+      { success: false, error: 'denied' },
+      'codex-string-response',
+    ])('ignores tool_response form %# when matching', (toolResponse) => {
+      vaultDir = createVaultWithEchoAction('PostToolUse', 'Edit');
+
+      const result = runLifecycleDispatcher('PostToolUse', {
+        cwd: vaultDir,
+        tool_name: 'apply_patch',
+        tool_response: toolResponse,
+      });
+
+      expect(result.hookSpecificOutput?.additionalContext ?? '').toContain(
+        MARKER,
+      );
+    });
+
+    it.each([undefined, 'Bash', 'apply_patch_extra'])(
+      'does not run an Edit action for unmatched tool %s',
+      (toolName) => {
+        vaultDir = createVaultWithEchoAction('PostToolUse', 'Edit');
+        expect(
+          runLifecycleDispatcher('PostToolUse', {
+            cwd: vaultDir,
+            tool_name: toolName,
+          }),
+        ).toEqual({ continue: true });
+      },
+    );
   });
 });

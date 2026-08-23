@@ -27,11 +27,7 @@ export interface AdapterPlan {
 }
 
 export type FileAction =
-  | "created"
-  | "updated"
-  | "unchanged"
-  | "stale"
-  | "missing";
+  "created" | "updated" | "unchanged" | "stale" | "missing";
 
 export interface FileOutcome {
   absolutePath: string;

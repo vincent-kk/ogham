@@ -65,15 +65,20 @@ export async function writeConfigFixture(name: FixtureName): Promise<void> {
 }
 
 export interface CounterShape {
-  parent_pid: number;
+  host_session_id?: string;
+  parent_pid?: number;
   codex?: number;
   antigravity?: number;
   claude?: number;
 }
 
 export async function writeCounter(c: CounterShape): Promise<void> {
+  if (!c.host_session_id && c.parent_pid === undefined)
+    throw new Error('counter fixture requires a host session identity');
   const full = {
-    parent_pid: c.parent_pid,
+    ...(c.host_session_id
+      ? { host_session_id: c.host_session_id }
+      : { parent_pid: c.parent_pid }),
     codex: c.codex ?? 0,
     antigravity: c.antigravity ?? 0,
     claude: c.claude ?? 0,

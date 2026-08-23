@@ -1,7 +1,7 @@
 ---
 name: configure
 user-invocable: true
-description: '[maencof:configure] Health-checks the full Claude Code environment — MCP servers, skills, agents, rules, hooks, and CLAUDE.md — then routes automatically to the appropriate configuration sub-skill.'
+description: '[maencof:configure] Health-checks the current host environment — MCP servers, skills, agents, rules, hooks, and project instructions — then routes automatically to the appropriate configuration sub-skill.'
 argument-hint: '[component to configure]'
 version: '1.1.0'
 complexity: medium
@@ -12,7 +12,9 @@ plugin: maencof
 
 # configure — Unified Environment Configuration
 
-Scan, diagnose, and manage the entire Claude Code project environment from a single entry point. Routes to specialized sub-skills for resolution.
+Scan, diagnose, and manage the current runtime host's project environment from a single entry point. Routes to specialized sub-skills for resolution.
+
+Before scanning, load `../.shared/host-configuration.md` and select the current runtime host row. Use its instruction, behavioral-rule capability, and project/user agent surfaces exactly; do not reconstruct host paths or state-root environment overrides inside this skill. A Codex `unsupported` rule result is a capability result to route to `/maencof:instruct`, not a missing or healthy directory.
 
 ## When to Use This Skill
 
@@ -31,6 +33,8 @@ Scan, diagnose, and manage the entire Claude Code project environment from a sin
 Rule of thumb: vault does not yet exist → `setup`. Vault exists and something needs tuning → `configure`.
 
 ## Scope
+
+For project instructions, behavioral rules, and agents, the generated shared host reference overrides the Claude examples in this table. The remaining rows keep their existing component-specific routing.
 
 | Area      | Path                                          | Access                                                              |
 | --------- | --------------------------------------------- | ------------------------------------------------------------------- |

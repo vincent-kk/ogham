@@ -1,20 +1,20 @@
 #!/usr/bin/env node
-import { logHookFailure, normalizeCodexToolUse } from '@ogham/cross-platform';
+import { logHookFailure, normalizeCodexToolUses } from '@ogham/cross-platform';
 
 import type { DispatchInput, MergedHookOutput } from '../../types/dispatch.js';
 import { readStdin } from '../shared/readStdin.js';
 import { writeResult } from '../shared/writeResult.js';
 
 import { toPreToolUseEnvelope } from './helpers/denyEnvelope/denyEnvelope.js';
-import { orchestratePreToolUse } from './preToolUse.js';
+import { orchestratePreToolUseBatch } from './preToolUse.js';
 
 const raw = await readStdin();
 let result: MergedHookOutput;
 try {
-  // Codex sends file edits as apply_patch; normalise to Write/Edit so the
-  // layer guard + vault redirector route on tool_name (no-op on Claude/agy).
-  const input = normalizeCodexToolUse(JSON.parse(raw) as DispatchInput);
-  result = orchestratePreToolUse(input);
+  // Codex sends file edits as apply_patch; normalize every logical operation
+  // so guards see the same Write/Edit/Delete vocabulary as Claude and agy.
+  const normalized = normalizeCodexToolUses(JSON.parse(raw) as DispatchInput);
+  result = orchestratePreToolUseBatch(normalized);
 } catch (e) {
   logHookFailure('maencof', 'pre-tool-use', e);
   result = { continue: true };

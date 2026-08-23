@@ -1,20 +1,12 @@
 ## Purpose
 
-`runtime/counter.json` 으로 provider(codex / antigravity / claude) 호출 횟수 추적. 파일의 `parent_pid` 가 현재 세션 PID 와 다르면 카운트를 0/0/0 으로 간주하고 다음 write 시 갱신 — 세션마다 자동 격리.
-
-## Structure
-
-| 파일                             | 역할                                                      |
-| -------------------------------- | --------------------------------------------------------- |
-| `operations/loadCounter.ts`      | 파일 read + `parent_pid` 비교 + 불일치·누락 시 0 fallback |
-| `operations/getCounter.ts`       | `loadCounter` 호출 후 현재 카운트 반환                    |
-| `operations/incrementCounter.ts` | 지정 provider +1 증가 후 `atomicWrite` 저장               |
-| `index.ts`                       | barrel: `getCounter`, `incrementCounter`                  |
+세션 카운터 저장소로 provider(codex / antigravity / claude) 호출 횟수를 추적한다. 호스트가 MCP와 훅에 같이 전달한 식별 채널로만 카운터를 격리하고, 식별자가 없으면 이전 값을 0으로 합성하거나 디스크에 쓰지 않는다.
 
 ## Conventions
 
-- 디스크 JSON 키는 snake_case (`codex`, `antigravity`, `claude`, `parent_pid`)
-- `parent_pid` 미스매치 시 카운트는 0/0 으로 취급하고 다음 write 에서 현재 pid 로 갱신
+- 디스크 JSON 키는 snake_case (`codex`, `antigravity`, `claude`, `host_session_id`)
+- non-blank `CENNAD_HOST_SESSION_ID`를 우선하고, 유효한 `CLAUDE_PID`는 `claude-pid:<pid>`로 정규화한다. 둘 다 없으면 식별 불가다
+- 기존 `parent_pid`는 동일한 Claude PID 세션에서만 읽는 마이그레이션 입력이다. 신규 write는 `host_session_id`만 쓴다
 - +1 은 호출 시도 기준 — CLI 성공·실패 결과와 무관
 - 모든 write 는 `atomicWrite` 경유 (tmp → rename)
 
@@ -22,7 +14,8 @@
 
 ### Always do
 
-- `parent_pid` 불일치 시 `{ codex: 0, antigravity: 0, claude: 0 }` 반환 후 다음 write 에서 pid 갱신
+- 식별된 세션의 기록만 재사용하고, 다른 세션 기록은 다음 write에서 새 식별자로 교체
+- 호스트 세션을 식별할 수 없으면 `incrementCounter`는 카운터 파일을 쓰지 않음
 - `incrementCounter` 는 `loadCounter` → 수정 → `atomicWrite` 순서로 실행
 
 ### Ask first
@@ -33,12 +26,5 @@
 ### Never do
 
 - 락 없이 동시 write — MCP 단일 프로세스 가정 하에 직렬 처리
-- 외부에서 `runtime/counter.json` 직접 mutation
-- `parent_pid` 불일치 상태에서 이전 카운트 값 사용
-
-## Dependencies
-
-- `node:fs/promises`
-- `../../lib/atomicWrite`
-- `../../utils/parentPid`
-- `../../constants/paths` (`COUNTER_PATH`)
+- 외부에서 세션 카운터 저장 파일 직접 mutation
+- 세션 식별 불가 상태에서 이전 카운트 값 사용 또는 디스크 write

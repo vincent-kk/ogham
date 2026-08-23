@@ -90,6 +90,14 @@ describe("buildCodexHooks", () => {
     expect(built.hooks.PreToolUse[0].matcher).toBe("Read|Edit|Bash");
   });
 
+  it("does not interpret non-tool event matchers as tool capabilities", () => {
+    expect(
+      buildCodexHooks(
+        facts({ hooks: { SessionStart: [{ matcher: "Skill", hooks: [{}] }] } }),
+      ),
+    ).toBeNull();
+  });
+
   it("filters unsupported events into a dedicated Codex hooks file", () => {
     const built = buildCodexHooks(
       facts({
@@ -116,5 +124,32 @@ describe("buildCodexHooks", () => {
     expect(
       buildCodexHooks(facts({ hooks: { PostToolUse: [{ matcher: "Read" }] } })),
     ).toBeNull();
+  });
+
+  it("removes a Skill-only group and its empty event on Codex", () => {
+    const built = buildCodexHooks(
+      facts({ hooks: { PostToolUse: [{ matcher: "Skill", hooks: [{}] }] } }),
+    ) as { hooks: Record<string, unknown> };
+    expect(built.hooks).not.toHaveProperty("PostToolUse");
+  });
+
+  it("keeps supported siblings when removing Skill on Codex", () => {
+    const built = buildCodexHooks(
+      facts({
+        hooks: {
+          PostToolUse: [{ matcher: "Bash|Skill", hooks: [{ command: "p" }] }],
+        },
+      }),
+    ) as { hooks: { PostToolUse: [{ matcher: string }] } };
+    expect(built.hooks.PostToolUse[0].matcher).toBe("Bash");
+  });
+
+  it("never mutates the canonical Claude hook facts", () => {
+    const source: HooksFileSource = {
+      hooks: { PostToolUse: [{ matcher: "Bash|Skill" }] },
+    };
+    const before = structuredClone(source);
+    buildCodexHooks(facts(source));
+    expect(source).toEqual(before);
   });
 });

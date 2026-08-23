@@ -35,4 +35,6 @@ export interface RouteContext {
   }) => Promise<ConnectionTestResult>;
   resetTimer: () => void;
   closeServer: () => Promise<void>;
+  /** Settle the MCP setup call after both config and credentials persist. */
+  completeSetup: (configPath: string) => void;
 }
