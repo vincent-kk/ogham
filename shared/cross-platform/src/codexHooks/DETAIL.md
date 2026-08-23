@@ -11,7 +11,7 @@
 
 성공한 parser 결과의 `operations`와 성공한 normalizer 결과의 `toolUses`는 타입 수준에서도 non-empty tuple이다. `NormalizedCodexToolUse<T>`는 union 각 member에 distributive하게 적용되어 discriminant와 member별 sibling 필드를 유지하면서 변경되는 `tool_name`과 `tool_input`을 입력 literal subtype에서 분리한다.
 
-`normalizeCodexToolUses(input)`은 원래 입력을 `original`에 보존한다. 올바른 patch는 각 파일 section을 독립 hook 입력으로 만들고, 실패는 `reason`을 가진 `ok: false`로 돌려준다. `*** Move to:`는 destination guard 계약이 생길 때까지 unsupported 실패다.
+`normalizeCodexToolUses(input)`은 원래 입력을 `original`에 보존한다. 올바른 patch는 각 파일 section을 독립 hook 입력으로 만들고, 실패는 `reason`을 가진 `ok: false`로 돌려준다. Update section의 단일 non-empty `*** Move to:`는 source `Delete` 다음 destination `Write`로 펼쳐 양쪽 경로를 guard한다.
 
 ## Acceptance Criteria
 
@@ -22,6 +22,7 @@
 - 단일 add/update와 Bash 단순 read는 기존 의미를 유지한다.
 - non-empty Environment ID가 있는 유효 patch와 unprefixed empty context line이 있는 update도 같은 연산 결과를 만든다.
 - bodyless Add는 빈 `addedLines`를 가진 한 operation이고, context-only update와 EOF 뒤 새 non-empty hunk도 유효하다.
+- Move update는 source `Delete`와 destination `Write` 두 연산이 이 순서로 생성되며, 빈 destination·중복 Move·Add/Delete section의 Move는 실패한다.
 
 ### CHN-UNKNOWN — Conservative malformed result
 
@@ -35,4 +36,4 @@
 
 ## Last Updated
 
-2026-08-23 — 전체 patch 연산, 공식 Environment ID/hunk grammar와 distributive 입력 타입을 계약화했다.
+2026-08-23 — 전체 patch 연산, 공식 Environment ID/hunk grammar, Move 양쪽 guard와 distributive 입력 타입을 계약화했다.

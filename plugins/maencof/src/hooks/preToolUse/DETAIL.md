@@ -21,6 +21,7 @@
 
 - 첫 operation 이 허용되어도 뒤의 L1 operation 이 거부되면 전체 호출이 deny 되고 뒤 경로의 사유가 남는다.
 - 첫 operation 이 이미 거부돼도 후속 operation을 계속 판정하며, 뒤 L1 경로의 사유도 최종 결과에 남는다.
+- Move의 source `Delete`와 destination `Write`도 같은 순서로 판정해 일반 경로 rename은 허용하고 L1 source rename은 거부한다.
 
 ### AC-delete-layer1 — Delete L1 보호
 
@@ -34,8 +35,8 @@
 
 ### AC-malformed-scope — malformed 범위 판정
 
-- malformed 호출은 실제 maencof vault 안에서 deny 되고 vault 밖에서 pass 된다.
+- malformed 호출은 실제 maencof vault 안에서 유효한 V4A 재발행 안내와 함께 deny 되고 vault 밖에서 pass 된다.
 
 ## Last Updated
 
-2026-08-23 — guard는 logical batch, lifecycle은 original physical tool이라는 공통 matcher 경계를 계약화했다.
+2026-08-23 — guard의 ordered Move batch, malformed V4A 안내와 original physical lifecycle 경계를 계약화했다.

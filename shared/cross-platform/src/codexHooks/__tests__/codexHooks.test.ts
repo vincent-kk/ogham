@@ -23,6 +23,22 @@ describe("parseApplyPatch", () => {
         },
       ],
     });
+    expect(
+      parseApplyPatch(
+        "*** Begin Patch\n*** Update File: a.ts\n*** Move to: b.ts\n@@\n-old\n+new\n*** End Patch",
+      ),
+    ).toEqual({
+      ok: true,
+      operations: [
+        {
+          kind: "update",
+          filePath: "a.ts",
+          moveTo: "b.ts",
+          addedLines: ["new"],
+          removedLines: ["old"],
+        },
+      ],
+    });
   });
 
   it("reads an add as one op whose added lines are the whole file", () => {
@@ -139,7 +155,7 @@ describe("parseApplyPatch", () => {
       },
     ] as const;
 
-    for (const testCase of cases) 
+    for (const testCase of cases)
       expect
         .soft(
           parseApplyPatch(
@@ -158,7 +174,6 @@ describe("parseApplyPatch", () => {
             },
           ],
         });
-    
   });
 
   it("accepts a bodyless delete as one non-empty operation", () => {
@@ -234,8 +249,16 @@ describe("parseApplyPatch", () => {
       "*** Begin Patch\n*** Delete File: x.ts\n-old\n*** End Patch",
     ],
     [
-      "unsupported move",
-      "*** Begin Patch\n*** Update File: a.ts\n*** Move to: b.ts\n@@\n-old\n+new\n*** End Patch",
+      "empty Move destination",
+      "*** Begin Patch\n*** Update File: a.ts\n*** Move to:   \n@@\n-old\n+new\n*** End Patch",
+    ],
+    [
+      "duplicate Move destination",
+      "*** Begin Patch\n*** Update File: a.ts\n*** Move to: b.ts\n*** Move to: c.ts\n@@\n-old\n+new\n*** End Patch",
+    ],
+    [
+      "Move inside Add section",
+      "*** Begin Patch\n*** Add File: a.ts\n*** Move to: b.ts\n+x\n*** End Patch",
     ],
     [
       "valid prefix then malformed section",
@@ -320,6 +343,25 @@ describe("normalizeCodexToolUses", () => {
     expect(out.tool_input?.file_path).toBe("/proj/target.txt");
     expect(out.tool_input?.old_string).toBe("sentinel_token");
     expect(out.tool_input?.new_string).toBe("REPLACED");
+
+    const moved = normalizeCodexToolUses({
+      tool_name: "apply_patch",
+      tool_input: {
+        command:
+          "*** Begin Patch\n*** Update File: a.ts\n*** Move to: b.ts\n@@\n-old\n+new\n*** End Patch",
+      },
+    });
+    expect(moved.ok).toBe(true);
+    if (!moved.ok) return;
+    expect(moved.toolUses).toHaveLength(2);
+    expect(moved.toolUses[0]).toMatchObject({
+      tool_name: "Delete",
+      tool_input: { file_path: "a.ts" },
+    });
+    expect(moved.toolUses[1]).toMatchObject({
+      tool_name: "Write",
+      tool_input: { file_path: "b.ts", content: "new" },
+    });
   });
 
   it("rewrites an add to Write whose content is the whole file", () => {
@@ -366,9 +408,8 @@ describe("normalizeCodexToolUses", () => {
     }
   });
 
-  it.each([undefined, 42])(
-    "rejects apply_patch with missing or non-string command: %s",
-    (command) => {
+  it("rejects apply_patch with missing or non-string command", () => {
+    for (const command of [undefined, 42]) {
       const result = normalizeCodexToolUses({
         tool_name: "apply_patch",
         tool_input: command === undefined ? {} : { command },
@@ -376,25 +417,23 @@ describe("normalizeCodexToolUses", () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.reason).toContain("command");
-    },
-  );
+    }
+  });
 
-  it("returns the parser failure rather than a successful empty batch", () => {
+  it("returns parser failure and does not infer patches from other tools", () => {
     const result = normalizeCodexToolUses({
       tool_name: "apply_patch",
       tool_input: { command: "not really a patch" },
     });
     expect(result.ok).toBe(false);
-  });
 
-  it("does not infer a patch from another tool name", () => {
     const input = {
       tool_name: "custom_patch",
       tool_input: { command: ADD_PATCH },
     };
-    const result = normalizeCodexToolUses(input);
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.toolUses[0]).toBe(input);
+    const passthrough = normalizeCodexToolUses(input);
+    expect(passthrough.ok).toBe(true);
+    if (!passthrough.ok) return;
+    expect(passthrough.toolUses[0]).toBe(input);
   });
 });

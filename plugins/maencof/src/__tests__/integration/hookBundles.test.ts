@@ -196,6 +196,55 @@ describe('hook bundle smoke tests', () => {
     expect(output.hookSpecificOutput?.permissionDecision).toBeUndefined();
   });
 
+  it('pre-tool-use.mjs allows ordinary rename and denies a Layer 1 source rename', () => {
+    const bundle = resolve(bridgeDir, 'pre-tool-use.mjs');
+    const cases = [
+      {
+        name: 'ordinary',
+        command:
+          '*** Begin Patch\n*** Update File: L3/target.md\n*** Move to: L3/renamed.md\n@@\n-safe\n+renamed\n*** End Patch',
+        decision: undefined,
+        deniedPath: undefined,
+      },
+      {
+        name: 'layer-1',
+        command:
+          '*** Begin Patch\n*** Update File: 01_Core/identity.md\n*** Move to: L3/identity.md\n@@\n-identity\n+renamed\n*** End Patch',
+        decision: 'deny',
+        deniedPath: '01_Core/identity.md',
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const result = spawnSync(process.execPath, [bundle], {
+        input: JSON.stringify({
+          cwd: vaultDir,
+          session_id: `move-${testCase.name}`,
+          hook_event_name: 'PreToolUse',
+          tool_name: 'apply_patch',
+          tool_input: { command: testCase.command },
+        }),
+        encoding: 'utf8',
+        timeout: 10_000,
+        windowsHide: true,
+      });
+      expect.soft(result.status, testCase.name).toBe(0);
+      const output = JSON.parse(result.stdout) as {
+        hookSpecificOutput?: {
+          permissionDecision?: string;
+          permissionDecisionReason?: string;
+        };
+      };
+      expect
+        .soft(output.hookSpecificOutput?.permissionDecision, testCase.name)
+        .toBe(testCase.decision);
+      if (testCase.deniedPath)
+        expect(output.hookSpecificOutput?.permissionDecisionReason).toContain(
+          testCase.deniedPath,
+        );
+    }
+  });
+
   it('pre-tool-use.mjs enforces host-valid empty operations and EOF state', () => {
     const bundle = resolve(bridgeDir, 'pre-tool-use.mjs');
     const cases = [

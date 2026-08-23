@@ -34,8 +34,8 @@ type PreparedPatchBody =
  * with `*** Add|Update|Delete File: <path>` and is followed by `@@` hunk headers,
  * ` ` context lines, `-` removals and `+` additions. For an add the `+` lines are
  * the whole file. Parsing is all-or-nothing: an incomplete section cannot hide
- * behind an earlier valid operation. Move directives remain unsupported until
- * both their source and destination can be represented at guard boundaries.
+ * behind an earlier valid operation. One Move destination is retained on its
+ * update so normalization can guard both the source and destination paths.
  */
 export function parseApplyPatch(command: string): ParseApplyPatchResult {
   const prepared = preparePatchBody(command);
@@ -160,8 +160,21 @@ function applySectionLine(
       ok: false,
       reason: "Environment ID must appear once immediately after Begin Patch",
     };
-  if (line.startsWith("*** Move to:"))
-    return { ok: false, reason: "Move to sections are unsupported" };
+  if (line.startsWith("*** Move to:")) {
+    if (current.kind !== "update")
+      return { ok: false, reason: "Move to requires an Update section" };
+    const moveTo = line.slice("*** Move to:".length).trim();
+    if (moveTo === "")
+      return { ok: false, reason: "Move to has an empty target" };
+    if (current.moveTo !== undefined)
+      return { ok: false, reason: "Update section has multiple Move targets" };
+    current.moveTo = moveTo;
+    return {
+      ok: true,
+      updateHunkState:
+        updateHunkState === "implicit-empty" ? "body" : updateHunkState,
+    };
+  }
   if (current.kind === "delete")
     return { ok: false, reason: "Delete section must not have a body" };
   if (current.kind === "add") return applyAddSection(current, line);

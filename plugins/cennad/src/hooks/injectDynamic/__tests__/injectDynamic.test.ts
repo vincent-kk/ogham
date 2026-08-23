@@ -67,17 +67,19 @@ describe('buildDynamicPayload', () => {
     );
   });
 
-  it('reports unidentified counts without synthesizing a zero measurement', () => {
-    const out = buildDynamicPayload(
-      BASE_CONFIG,
-      { ...ZERO_COUNTER, status: 'unidentified' },
-      '',
-      'claude',
+  it('keeps unidentified dynamic turns silent', () => {
+    const outputs = Array.from({ length: 2 }, () =>
+      buildDynamicPayload(
+        BASE_CONFIG,
+        { ...ZERO_COUNTER, status: 'unidentified' },
+        '',
+        'claude',
+      ),
     );
-    expect(out.split('\n')[0]).toBe(
-      '[cennad] Delegation counts unavailable (unidentified).',
+    expect(outputs).toEqual(['', '']);
+    expect(outputs.join('\n')).not.toContain(
+      'Delegation counts unavailable (unidentified).',
     );
-    expect(out).not.toContain('No delegations yet this session.');
   });
 
   it('distinguishes a missing counter file from a measured zero', () => {

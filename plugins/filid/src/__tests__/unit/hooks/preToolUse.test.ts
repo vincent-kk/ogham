@@ -539,9 +539,9 @@ describe('handlePreToolUse', () => {
     );
     const governed = await handlePreToolUseBatch(malformed);
     expect(governed.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(governed.hookSpecificOutput?.permissionDecisionReason).toContain(
-      'split',
-    );
+    const reason = governed.hookSpecificOutput?.permissionDecisionReason ?? '';
+    expect(reason).toContain('Re-emit the patch in V4A form.');
+    expect(reason).not.toContain('retry. Then retry');
 
     const nonFcaDir = join(tmpdir(), `filid-batch-non-fca-${Date.now()}`);
     mkdirSync(join(nonFcaDir, '.git'), { recursive: true });

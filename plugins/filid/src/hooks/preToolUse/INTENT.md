@@ -20,7 +20,7 @@ PreToolUse 이벤트에서 하나의 물리 도구 호출을 논리 operation으
 - `validateCwd` 실패 시 즉시 `{ continue: true }` 반환
 - DETAIL.md 편집 시 기존 content를 먼저 읽어 old 인자로 전달
 - Delete도 mutation 방문을 거치게 하고 host가 INTENT.md/DETAIL.md와 같은 대상으로 해석하는 삭제는 명시적으로 deny
-- 미해석 `apply_patch`는 FCA 프로젝트에서 split/retry 안내와 함께 deny하고 비-FCA 프로젝트에서는 그대로 허용
+- 미해석 `apply_patch`는 FCA 프로젝트에서 parser reason과 유효한 V4A 재발행 안내로 deny하고 비-FCA 프로젝트에서는 그대로 허용
 - branch 이름과 무관하게 동일한 방문·문서 gate를 적용
 
 ### Ask first

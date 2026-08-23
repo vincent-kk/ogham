@@ -7,7 +7,7 @@
 - batch loop는 앞선 deny에도 모든 후속 operation을 실행하며, 하나라도 deny면 전체 물리 호출을 deny한다.
 - Write/Edit/Delete는 방문 통과 후 문서 gate를 거치고 Write/Edit은 이어서 구조 가드를 실행한다.
 - Delete도 owner 방문 상태를 갱신하며 host가 INTENT.md/DETAIL.md와 같은 파일로 해석하는 대상 삭제는 명시적 사유로 deny한다.
-- `apply_patch` 파싱이 불완전하면 유효 prefix도 실행하지 않고 FCA 프로젝트에서는 split/retry 안내와 함께 deny하며, 비-FCA 프로젝트에서는 bare allow한다.
+- `apply_patch` 파싱이 불완전하면 유효 prefix도 실행하지 않고 FCA 프로젝트에서는 parser reason과 유효한 V4A 재발행 안내로 deny하며, 비-FCA 프로젝트에서는 bare allow한다.
 - branch 이름, spike 상태, criteria ledger 또는 agent 역할에 따라 검증을 면제하지 않는다.
 - 비-FCA 프로젝트와 유효하지 않은 cwd는 상태를 변경하지 않고 통과시킨다.
 
@@ -31,6 +31,7 @@
 
 - 첫 operation이 허용되어도 후속 operation의 validator deny 또는 structure warning이 정확한 경로와 함께 최종 결과에 남는다.
 - 어느 operation이든 deny하면 전체 `apply_patch`가 deny되고, 모든 operation의 결과 순서는 입력 순서를 따른다.
+- Move의 source `Delete`와 destination `Write`도 같은 deny-wins 집계를 거쳐 일반 경로는 허용하고 보호 문서 source rename은 거부한다.
 
 ### AC-pre-tool-document-gate — 일관된 문서 계약
 
@@ -40,7 +41,7 @@
 
 ### AC-pre-tool-malformed — 보수적 파싱 실패
 
-- command 결손이나 malformed/unsupported section이 있는 `apply_patch`는 FCA 프로젝트에서 parser reason과 split/retry 안내를 포함해 deny된다.
+- command 결손이나 malformed/unsupported section이 있는 `apply_patch`는 FCA 프로젝트에서 parser reason과 V4A 재발행 안내를 포함해 deny되며 retry 안내를 중복하지 않는다.
 - 같은 파싱 실패는 비-FCA 프로젝트에서 context나 permission envelope 없이 허용된다.
 
 ## Boundary Exemptions
@@ -53,4 +54,4 @@
 
 ## Last Updated
 
-2026-08-23 — ordered apply_patch 집계, terminal-entry Delete 문서 보호, 보수적 파싱 실패 계약을 반영했다.
+2026-08-23 — ordered apply_patch·Move 집계, terminal-entry Delete 문서 보호, 실행 가능한 파싱 실패 안내를 계약화했다.

@@ -275,6 +275,30 @@ describe('pre-tool-use bundle apply_patch policy', () => {
     );
   });
 
+  it('allows ordinary Codex rename and denies an INTENT.md source rename', () => {
+    const sessionId = `move-${Date.now()}`;
+    runPreToolUseBundle(cwd, sessionId, 'Read', {
+      file_path: portableResolve(cwd, 'index.ts'),
+    });
+
+    const ordinarySource = portableResolve(cwd, 'src', 'plain.ts');
+    const ordinaryTarget = portableResolve(cwd, 'src', 'renamed.ts');
+    const allowed = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${ordinarySource}\n*** Move to: ${ordinaryTarget}\n@@\n-old\n+new\n*** End Patch`,
+    });
+    expect(allowed.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const protectedSource = portableResolve(cwd, 'INTENT.md');
+    const protectedTarget = portableResolve(cwd, 'RENAMED.md');
+    const denied = runPreToolUseBundle(cwd, sessionId, 'apply_patch', {
+      command: `*** Begin Patch\n*** Update File: ${protectedSource}\n*** Move to: ${protectedTarget}\n@@\n-old\n+new\n*** End Patch`,
+    });
+    expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(denied.hookSpecificOutput?.permissionDecisionReason).toContain(
+      protectedSource,
+    );
+  });
+
   it.each([
     ['intent.md', 'INTENT.md'],
     ['detail.md', 'DETAIL.md'],

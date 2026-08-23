@@ -9,6 +9,8 @@ export interface ApplyPatchOp {
   kind: "add" | "update" | "delete";
   /** The file the operation targets (verbatim from the `*** … File:` header). */
   filePath: string;
+  /** Rename destination from a single `*** Move to:` in an update section. */
+  moveTo?: string;
   /** Lines the patch adds (leading `+` stripped). For an add, the whole file. */
   addedLines: string[];
   /** Lines the patch removes (leading `-` stripped). Empty for an add. */

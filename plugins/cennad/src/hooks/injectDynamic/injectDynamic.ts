@@ -15,6 +15,7 @@ export function buildDynamicPayload(
 ): string {
   if (!PROVIDER_ORDER.some((p) => config.ratio[p].enabled))
     return '[cennad] No provider enabled — run /cennad:setup.';
+  if (counter.status === 'unidentified') return '';
 
   const electable = electableProviders(config.ratio, self);
   const lanes: RatioLane[] = PROVIDER_ORDER.map((p) => ({

@@ -27,6 +27,7 @@
 ### AC-counter-measurement-matrix — 측정 상태 구분
 
 - 식별자 부재, 파일 부재, stale·invalid 자료, 일치하는 식별자의 0/0/0, Claude legacy PID를 서로 구분한다.
+- 식별자 부재(`unidentified`)는 무정보 동적 payload를 생략하고, `missing|stale|invalid`와 measured 상태는 기존 상태줄을 유지한다.
 
 ### AC-counter-session-topology — 세션 토폴로지
 
@@ -48,4 +49,4 @@
 
 ## Last Updated
 
-2026-08-23 — 세션 식별·파일 부재·실제 0회를 구분하는 카운터 측정 계약을 추가했다.
+2026-08-23 — 세션 식별·파일 부재·실제 0회를 구분하고 unidentified 반복 payload를 생략하는 계약을 추가했다.

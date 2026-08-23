@@ -153,7 +153,9 @@ describe('orchestratePreToolUse', () => {
 
     expect(result).toMatchObject({
       continue: false,
-      reason: 'Invalid apply_patch command',
+      reason: expect.stringContaining(
+        'maencof cannot inspect this patch inside the vault; re-emit it as a valid V4A patch',
+      ),
     });
     expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
     expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);

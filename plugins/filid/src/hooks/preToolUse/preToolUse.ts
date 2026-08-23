@@ -78,8 +78,8 @@ export async function handlePreToolUseBatch(
         hookEventName: 'PreToolUse',
         permissionDecision: 'deny',
         permissionDecisionReason:
-          `Cannot inspect every apply_patch file operation: ${normalized.reason}. ` +
-          `split the patch into individual file operations, then retry. ${DENY_RETRY_GUIDANCE}`,
+          `Cannot inspect every apply_patch file operation: the patch envelope is malformed: ${normalized.reason}. ` +
+          `Re-emit the patch in V4A form. ${DENY_RETRY_GUIDANCE}`,
       },
     };
   }
@@ -107,12 +107,14 @@ function identifyPatchResult(
     ...result,
     hookSpecificOutput: {
       ...output,
-      permissionDecisionReason: output.permissionDecisionReason
-        ? `${marker}\n${output.permissionDecisionReason}`
-        : undefined,
-      additionalContext: output.additionalContext
-        ? `${marker}\n${output.additionalContext}`
-        : undefined,
+      ...(output.permissionDecisionReason
+        ? {
+            permissionDecisionReason: `${marker}\n${output.permissionDecisionReason}`,
+          }
+        : {}),
+      ...(output.additionalContext
+        ? { additionalContext: `${marker}\n${output.additionalContext}` }
+        : {}),
     },
   };
 }

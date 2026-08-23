@@ -246,7 +246,7 @@ Codex 호스트 계약은 공식 [Hooks 문서](https://learn.chatgpt.com/docs/h
 
 ## 5. seiri 수정 독립 검증
 
-rq.md가 별도로 요구한 seiri Codex 수정은 **확인됨**으로 판정한다.
+`.metadata/agent-artifacts/host-parity-audit-request-2026-08-23.md`가 별도로 요구한 seiri Codex 수정은 **확인됨**으로 판정한다.
 
 ### 검증 결과
 
@@ -284,7 +284,7 @@ rq.md가 별도로 요구한 seiri Codex 수정은 **확인됨**으로 판정한
 - **훅 등록:** cennad, filid, maencof, maencof-lens, seiri의 Codex 등록은 모두 존재한다. cennad·maencof·maencof-lens는 `.codex-plugin/plugin.json`이 공유 `hooks/hooks.json`을 가리키며, 전용 `.codex-plugin/hooks.json` 부재만으로 무동작이 아니다.
 - **cennad self-provider 입력:** `PLUGIN_DATA`와 `OGHAM_HOST`를 사용한다. prompt 필드 부재는 안전한 문자열 fallback이며 상태 저장 경로도 host-aware다. 문제는 그 뒤의 PID 동일성이다.
 - **filid의 단순 도구 정규화:** filid Pre 진입점은 Codex 정규화기를 거치고 compiler의 Bash matcher rewrite도 명시돼 있다. 단일 파일 Read/Write/Edit 경로 자체는 보수적이다. 발견 #2는 복수 연산과 삭제의 정보 손실에 한정한다.
-- **maencof activity recorder의 `tool_response`:** recorder는 maencof MCP mutation allowlist에만 호출된다. 공식 Codex 계약상 MCP 응답은 MCP call result JSON이며, 로컬 도구도 `{content:[{type:'text',text:...}]}` 형태를 반환하고 extractor가 이를 처리한다. Bash 문자열 표본을 MCP에 일반화한 rq.md 후보는 기각한다.
+- **maencof activity recorder의 `tool_response`:** recorder는 maencof MCP mutation allowlist에만 호출된다. 공식 Codex 계약상 MCP 응답은 MCP call result JSON이며, 로컬 도구도 `{content:[{type:'text',text:...}]}` 형태를 반환하고 extractor가 이를 처리한다. Bash 문자열 표본을 MCP에 일반화한 `.metadata/agent-artifacts/host-parity-audit-request-2026-08-23.md` 후보는 기각한다.
 - **maencof MCP 지침 도구:** `claudemd_merge/read/remove`라는 레거시 이름과 달리 `createProjectInstructionManager`가 Codex에서 AGENTS 소유 섹션을 선택한다. 발견 #4는 이 패턴을 사용하지 않는 canonical skills에 한정한다.
 - **maencof-lens SessionStart:** 훅은 payload 필드를 판정에 사용하지 않고 호환성 변수로 plugin root를 받는다. 현재 Codex 계약에서 문제를 재현하지 못했다.
 - **seiri PostToolUse:** `tool_response` 객체/문자열 분기, 빈 응답 보수 처리, failure chain과 ledger 경계를 source test와 실제 bridge에서 확인했다. `PostToolUseFailure`의 Claude 전용 분기는 의도된 삼상태다.
@@ -300,7 +300,7 @@ rq.md가 별도로 요구한 seiri Codex 수정은 **확인됨**으로 판정한
 
 - **prawf 협업 의미론:** canonical `peer-review` 스킬은 `TeamCreate`, `Task`, `TeamDelete`, `team_name`, `subagent_type` 의미론을 요구한다. compiler는 prawf를 Codex skill 변환에서 제외하고 “그대로 동작”한다고 가정하지만, Codex 0.149.0의 자연어 subagent 지원이 Claude의 팀 생성·작업 배정·삭제 계약과 정확히 같은지는 live E2E로 측정하지 않았다. 수정 세션은 persona 로딩, 두 리뷰 라운드, 팀 정리까지 실제 Codex에서 검증하고, 동등하지 않으면 호스트 변형 또는 명시적 저하를 선택해야 한다.
 - **cennad provider 스킬:** `codex`, `claude`, `antigravity` provider 스킬은 description으로 에이전트를 찾고 background `Agent` 실행을 요구한다. 현재 Codex spawn 계약의 이름/등록 규칙과 완전히 동등한지 live E2E로 측정하지 않았다. MCP fallback이 명시돼 있어 이번에는 등급을 매기지 않는다.
-- **Claude Code 2.1.241 live payload:** rq.md의 기준은 2.1.239/2.1.240이다. 현재 설치된 2.1.241에서 모든 훅 payload를 다시 캡처하지 않았다. Claude 쪽 평가는 기존 fixture와 기준 계약에 의존한다.
+- **Claude Code 2.1.241 live payload:** `.metadata/agent-artifacts/host-parity-audit-request-2026-08-23.md`의 기준은 2.1.239/2.1.240이다. 현재 설치된 2.1.241에서 모든 훅 payload를 다시 캡처하지 않았다. Claude 쪽 평가는 기존 fixture와 기준 계약에 의존한다.
 - **Codex MCP `tool_response` live capture:** 공식 문서와 로컬 MCP result shape를 확인했지만 신뢰 저장소에 probe hook을 설치해 실제 MCP 응답을 다시 캡처하지 않았다.
 - **plugin hook 설정 live reload:** 이번 조사 중 훅 매니페스트를 변경하지 않았으므로 Codex 0.149.0의 reload 시점은 재측정하지 않았다.
 - **`~/.codex` 실제 파괴적 쓰기:** maencof resolver의 false allow까지만 측정했다. 사용자 설정 디렉터리에 쓰기·삭제하는 위험한 재현은 수행하지 않았다.
@@ -391,7 +391,7 @@ rq.md가 별도로 요구한 seiri Codex 수정은 **확인됨**으로 판정한
 ## 12. 검토 인계 ledger
 
 - 리뷰 범위: 이 보고서 1개 파일. 제품 코드 변경은 범위에 없다.
-- 요구사항 원본: 저장소 루트의 `rq.md`, 특히 §5의 플러그인별 절차와 §7의 보고서 형식.
+- 요구사항 원본: `.metadata/agent-artifacts/host-parity-audit-request-2026-08-23.md`, 특히 §5의 플러그인별 절차와 §7의 보고서 형식.
 - 범위 게이트: 11/11 플러그인에 대해 A–E 적용 가능성을 기록했다.
 - 발견 게이트: 등급 발견 9/9를 표와 대응 개발 요청 DR-01–DR-09에 연결했다.
 - 형식 게이트: 한 줄 결론, 발견 표, 무이상, 미측정, 새 호스트 사실, 같은 필드 소비자 목록 6/6을 포함했다.

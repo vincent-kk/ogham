@@ -19,9 +19,10 @@ Codex의 공식 hook 입력을 Claude 계열 guard가 이해하는 host-neutral 
 - CRLF와 LF patch에서 같은 연산 순서와 내용을 만든다.
 - 소비자가 프로젝트별 범위와 deny 정책을 결정하도록 파싱 결과만 제공한다.
 
+- `*** Move to:`는 source `Delete`와 destination `Write` 두 논리 연산으로 표현해 양쪽 경로를 모두 guard한다.
+
 ### Ask first
 
-- source와 destination을 함께 표현하고 guard할 계약 없이 `*** Move to:`를 지원한다.
 - 복합 shell 표현을 `Read`로 승격하거나 patch 이외의 도구 신호를 추측한다.
 
 ### Never do

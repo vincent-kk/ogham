@@ -50,7 +50,7 @@ export function normalizeCodexToolUses<T extends CodexToolUse>(
     return {
       ok: true,
       original: input,
-      toolUses: parsed.operations.map((operation) =>
+      toolUses: parsed.operations.flatMap((operation) =>
         normalizeOperation(input, operation),
       ) as [NormalizedCodexToolUse<T>, ...NormalizedCodexToolUse<T>[]],
     };
@@ -80,35 +80,59 @@ export function normalizeCodexToolUses<T extends CodexToolUse>(
 function normalizeOperation<T extends CodexToolUse>(
   input: T,
   operation: ApplyPatchOp,
-): NormalizedCodexToolUse<T> {
+): [NormalizedCodexToolUse<T>, ...NormalizedCodexToolUse<T>[]] {
   const toolInput = {
     ...input.tool_input,
     file_path: operation.filePath,
   };
 
+  if (operation.moveTo)
+    return [
+      {
+        ...input,
+        tool_name: "Delete",
+        tool_input: toolInput,
+      } as unknown as NormalizedCodexToolUse<T>,
+      {
+        ...input,
+        tool_name: "Write",
+        tool_input: {
+          ...input.tool_input,
+          file_path: operation.moveTo,
+          content: operation.addedLines.join("\n"),
+        },
+      } as unknown as NormalizedCodexToolUse<T>,
+    ];
+
   if (operation.kind === "add")
-    return {
-      ...input,
-      tool_name: "Write",
-      tool_input: { ...toolInput, content: operation.addedLines.join("\n") },
-    } as unknown as NormalizedCodexToolUse<T>;
+    return [
+      {
+        ...input,
+        tool_name: "Write",
+        tool_input: { ...toolInput, content: operation.addedLines.join("\n") },
+      } as unknown as NormalizedCodexToolUse<T>,
+    ];
 
   if (operation.kind === "update")
-    return {
-      ...input,
-      tool_name: "Edit",
-      tool_input: {
-        ...toolInput,
-        old_string: operation.removedLines.join("\n"),
-        new_string: operation.addedLines.join("\n"),
-      },
-    } as unknown as NormalizedCodexToolUse<T>;
+    return [
+      {
+        ...input,
+        tool_name: "Edit",
+        tool_input: {
+          ...toolInput,
+          old_string: operation.removedLines.join("\n"),
+          new_string: operation.addedLines.join("\n"),
+        },
+      } as unknown as NormalizedCodexToolUse<T>,
+    ];
 
-  return {
-    ...input,
-    tool_name: "Delete",
-    tool_input: toolInput,
-  } as unknown as NormalizedCodexToolUse<T>;
+  return [
+    {
+      ...input,
+      tool_name: "Delete",
+      tool_input: toolInput,
+    } as unknown as NormalizedCodexToolUse<T>,
+  ];
 }
 
 function passthrough<T extends CodexToolUse>(

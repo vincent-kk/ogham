@@ -72,6 +72,12 @@ function orchestrateMalformedPreToolUse(
     ),
   ];
 
-  if (isInsideMaencofVault(cwd)) results.push({ continue: false, reason });
+  if (isInsideMaencofVault(cwd))
+    results.push({
+      continue: false,
+      reason:
+        `${reason}. maencof cannot inspect this patch inside the vault; ` +
+        're-emit it as a valid V4A patch (one `*** … File:` section per file).',
+    });
   return mergeHookOutput('PreToolUse', results);
 }
