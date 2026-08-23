@@ -219,7 +219,7 @@ describe('processVisit (Read path)', () => {
     const turn1 = processVisit(input);
     expect(ctxOf(turn1)).toContain('[filid:ctx]');
 
-    // turn boundary: fmap reset + one turn elapsed (well within TTL 5)
+    // turn boundary: fmap reset + one turn elapsed (within the default TTL of 3)
     removeFractalMap(tmpDir, sessionId);
     advanceTurns(sessionId, 1);
 

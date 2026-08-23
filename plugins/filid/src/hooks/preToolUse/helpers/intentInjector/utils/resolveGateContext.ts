@@ -7,10 +7,15 @@ import { isIntentMd } from '../../../../shared/utils/isIntentMd.js';
 import { resolveOwnerIntent } from './resolveOwnerIntent.js';
 import { visitKey } from './visitKey.js';
 
+/** Owner resolution and gate inputs for one visit, consumed by commitVisit and the output builders. */
 export interface GateContext {
+  /** Absolute directory of the owning fractal; fileDir when no INTENT.md governs the file. */
   ownerDir: string;
+  /** Composite delivery key of the owner; null when there is nothing to deliver. */
   ownerKey: string | null;
+  /** ownerDir relative to the boundary (`.` for the boundary itself) — the gate label and key suffix. */
   ownerRelDir: string;
+  /** True when an undelivered owner must deny this mutation once. */
   gateEligible: boolean;
   /** The call targets an INTENT.md itself: delivery is stamped, no ctx or guide is emitted. */
   selfDelivery: boolean;

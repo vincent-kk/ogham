@@ -1,3 +1,4 @@
+/** Legend prepended once per scope to the first [filid:ctx] or gate deny: what each block and line means. */
 export const HOOK_GUIDE_BLOCK = [
   '[filid:guide]',
   '[filid:ctx] — module boundary pointer, emitted on your first read or write in a module this session and again when it goes stale. It names the rule files; it never contains them.',
@@ -13,5 +14,6 @@ export const HOOK_GUIDE_BLOCK = [
 export const HOOK_CTX_READ_DIRECTIVE =
   'action: READ the intent file above with the Read tool before your next step in this module — its rules are binding and are not reproduced here.';
 
+/** Tail of the [filid:gate] line: tells the agent which file to read and that the identical retry passes. */
 export const HOOK_GATE_RETRY_GUIDANCE =
   'Read the file at the intent: path below now, then retry the same call — the retry will pass.';
