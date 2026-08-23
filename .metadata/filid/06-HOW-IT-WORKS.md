@@ -38,7 +38,7 @@
 │                                                        │
 │  1. context delivery                                   │
 │     ├─ 소유 모듈 첫 접근 → [filid:ctx] 블록            │
-│     │    ├─ INTENT.md 인라인 내용                      │
+│     │    ├─ INTENT.md 경로 + 읽기 지시 (본문 없음)      │
 │     │    ├─ 부모 체인 INTENT.md 경로 (nearest > root)  │
 │     │    └─ DETAIL.md 경로 힌트                        │
 │     ├─ 재방문 → [filid:map]만 갱신 (방문 집합 변화 시)  │
@@ -59,16 +59,18 @@
 
 ### gate 재시도 계약
 
-모듈 규칙이 아직 전달되지 않은 상태에서 첫 mutation이 들어오면, 훅은 그 호출을 한 번 거부하면서 규칙을 함께 실어 보낸다.
+모듈 규칙이 아직 전달되지 않은 상태에서 첫 mutation이 들어오면, 훅은 그 호출을 한 번 거부하면서 읽어야 할 INTENT.md 경로와 읽기 지시를 함께 보낸다.
 
-```
-[filid:gate] First mutation in module 'X' before its INTENT rules were delivered
-             this session. Review the rules below, then retry the same call —
-             the retry will pass.
-[filid:ctx]  ... 규칙 본문 ...
+```text
+[filid:gate] First mutation in module 'X' before its INTENT.md pointer was
+             delivered this session. Read the file at the intent: path below
+             now, then retry the same call — the retry will pass.
+[filid:ctx]  src/x/file.ts
+intent: src/x/INTENT.md
+action: READ the intent file above with the Read tool before your next step in this module — its rules are binding and are not reproduced here.
 ```
 
-**같은 호출을 그대로 재시도하면 통과한다.** 이 설계는 "규칙을 읽지 않은 편집"을 막으면서도 에이전트를 막다른 길에 두지 않는다.
+**같은 호출을 그대로 재시도하면 통과한다.** 이 설계는 규칙의 위치를 모른 채 하는 첫 편집을 한 번 멈춰 세우면서도 에이전트를 막다른 길에 두지 않는다 — 읽었는지는 증명하지 않으며 읽기는 에이전트의 책임이다.
 
 ### Hook 입출력 프로토콜
 

@@ -31,16 +31,17 @@ fail-first 실천, 범용 AST 편집, 파일 이동, import rewrite, commit, pus
 
 ## 상수 테이블
 
-| 상수명                          | 값         | 정의 위치                             | 용도                         |
-| ------------------------------- | ---------- | ------------------------------------- | ---------------------------- |
-| `INTENT_MD_LINE_LIMIT`          | `50`       | `constants/documentValidation.ts`     | INTENT.md 최대 줄 수         |
-| `BOUNDARY_KEYWORDS`             | 정규식 3개 | `constants/documentValidation.ts`     | 3-tier 경계 섹션 탐지        |
-| `KNOWN_ORGAN_DIR_NAMES`         | 15개 이름  | `constants/organNames.ts`             | organ 디렉터리 식별          |
-| `SPEC_DOCUMENT_CASE_CAP`        | `15`       | `constants/verificationThresholds.ts` | spec-document 파일당 상한    |
-| `TEST_RECORD_CASE_CAP`          | `32`       | `constants/verificationThresholds.ts` | test-record 파일당 상한      |
-| `DEFAULT_SCAN_OPTIONS.maxDepth` | `10`       | `constants/scanDefaults.ts`           | 기본 트리 깊이 한계          |
-| `TOOL_INLINE_BUDGET_BYTES`      | `16384`    | `constants/toolEnvelope.ts`           | MCP inline 반환 예산 (UTF-8) |
-| `SCAN_RESULT_MAX_CHARS`         | `30000`    | `constants/scanDefaults.ts`           | scan 직렬화 payload 예산     |
+| 상수명                          | 값         | 정의 위치                             | 용도                              |
+| ------------------------------- | ---------- | ------------------------------------- | --------------------------------- |
+| `INTENT_MD_LINE_LIMIT`          | `50`       | `constants/documentValidation.ts`     | INTENT.md 최대 줄 수              |
+| `BOUNDARY_KEYWORDS`             | 정규식 3개 | `constants/documentValidation.ts`     | 3-tier 경계 섹션 탐지             |
+| `KNOWN_ORGAN_DIR_NAMES`         | 15개 이름  | `constants/organNames.ts`             | organ 디렉터리 식별               |
+| `SPEC_DOCUMENT_CASE_CAP`        | `15`       | `constants/verificationThresholds.ts` | spec-document 파일당 상한         |
+| `TEST_RECORD_CASE_CAP`          | `32`       | `constants/verificationThresholds.ts` | test-record 파일당 상한           |
+| `DEFAULT_SCAN_OPTIONS.maxDepth` | `10`       | `constants/scanDefaults.ts`           | 기본 트리 깊이 한계               |
+| `TOOL_INLINE_BUDGET_BYTES`      | `16384`    | `constants/toolEnvelope.ts`           | MCP inline 반환 예산 (UTF-8)      |
+| `SCAN_RESULT_MAX_CHARS`         | `30000`    | `constants/scanDefaults.ts`           | scan 직렬화 payload 예산          |
+| `CTX_TTL_TURNS_DEFAULT`         | `3`        | `constants/hookDefaults.ts`           | [filid:ctx] stale 재전달 TTL (턴) |
 
 CC, LCOM4, 테스트 안정 기간, peer file 개수 상한 상수는 1.0에 존재하지 않는다. 해당 규칙 자체가 제거되었다.
 

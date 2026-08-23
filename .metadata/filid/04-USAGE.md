@@ -434,9 +434,9 @@ summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `
 
 ### mutation이 한 번 거부됨
 
-**증상**: `[filid:gate] First mutation in module '...' before its INTENT rules were delivered this session.`
+**증상**: `[filid:gate] First mutation in module '...' before its INTENT.md pointer was delivered this session.`
 
-정상 동작이다. 함께 전달된 규칙을 읽고 **같은 호출을 그대로 재시도하면 통과한다.**
+정상 동작이다. 블록의 `intent:` 경로에 있는 INTENT.md를 읽고 **같은 호출을 그대로 재시도하면 통과한다.**
 
 ### 빌드가 훅 크기로 실패
 

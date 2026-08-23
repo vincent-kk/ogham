@@ -339,7 +339,7 @@ T1  사용자 프롬프트 입력
 
 T2  에이전트가 Read/Write/Edit 호출
     └─ PreToolUse (matcher: Read|Write|Edit) → pre-tool-use.mjs
-       ├─ 소유 모듈 첫 접근 → [filid:ctx] 규칙 전달
+       ├─ 소유 모듈 첫 접근 → [filid:ctx] 규칙 포인터 전달
        ├─ 방문 집합 변화 → [filid:map]
        └─ INTENT/DETAIL write → 검증 게이트 (위반 시 deny)
 
