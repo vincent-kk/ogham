@@ -6,7 +6,7 @@
 - `core`는 생태계 리터럴을 알지 못한다. 확장자, 진입점 파일명, import 문법, 테스트 호출 문법은 `adapters/` 안에만 존재한다.
 - `mcp`와 `hooks`는 host 경계이며 정책 판단을 하지 않는다.
 - 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
-- `src/index.ts` npm barrel은 존재하지 않는다. 빌드 대상은 MCP 진입점(CJS)과 훅 진입점(ESM)뿐이다.
+- npm library barrel은 존재하지 않는다. 빌드 대상은 MCP 진입점(CJS)과 훅 진입점(ESM)뿐이다.
 - `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로 고치지 않는다.
 
 ## API Contracts
@@ -40,4 +40,4 @@
 
 ## Last Updated
 
-2026-07-28 — 레이어 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.
+2026-08-23 — npm library barrel 부재 계약에서 존재하지 않는 경로 토큰을 제거했다.

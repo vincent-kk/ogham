@@ -95,7 +95,7 @@ clearConfigPaths(
 대신 8개 전부인 3,007 B를 retain 한다. 네 심볼 모두 파일은 그대로 두고 루트
 재수출만 멈춘다 — 패키지 내부 소비는 계속 concrete 파일을 쓴다.
 
-user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
+user 레이어는 `pluginCache(pluginName)` 아래의 설정 파일, project 레이어는
 `<projectRoot>/.<pluginName>/config.json`이며 project가 user를 재정의한다.
 
 레이어 읽기는 throw하지 않는다. 부재와 손상은 모두 `null`이고 손상만
@@ -128,7 +128,7 @@ JSON이고 `JSON.parse`가 `__proto__`를 own key로 만들기 때문에 실제 
 (git root / repo root / 인자 cwd) 해석된 절대 경로를 넘긴다.
 
 설정 병합 구현은 node 내장을 import하지 않는다. 브라우저 설정 페이지 번들과
-훅 번들의 공용 경계이며, `merge/__tests__/pureImports.test.ts`가 이를 강제한다.
+훅 번들의 공용 경계이며, `src/configScope/merge/__tests__/pureImports.test.ts`가 이를 강제한다.
 소비자는 다른 공개 함수와 마찬가지로 패키지 루트에서 가져온다.
 
 ### 설정 페이지 계약
@@ -301,4 +301,4 @@ artifact apply는 계속 atomic write와 lock을 사용한다.
 
 ## Last Updated
 
-2026-08-23 — Codex hook 정규화를 ordered batch와 명시적 malformed 결과로 확장했다.
+2026-08-23 — Codex hook 정규화 계약과 설정 병합 검증 참조를 현재 구조에 맞췄다.

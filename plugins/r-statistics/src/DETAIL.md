@@ -12,8 +12,8 @@
 ## API Contracts
 
 - 배포 진입점은 esbuild 가 `mcp/serverEntry/` 로부터 만드는 `bridge/mcp-server.cjs` 하나다. `package.json:files` 에 `src`·`dist` 가 없으므로 npm 라이브러리 표면은 존재하지 않는다.
-- `src/index.ts` 는 버전 상수와 `types/` 공개 타입만 이름으로 노출한다. `mcp/` 를 재노출하지 않는다 — `server/lifecycle/createServer.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
-- 서버 수명주기(`createServer`, `startServer`)와 도구 핸들러 4종은 `mcp/` 배럴이 소유한다.
+- `src/index.ts` 는 버전 상수와 `types/` 공개 타입만 이름으로 노출한다. `mcp/` 를 재노출하지 않는다 — `mcp/server/lifecycle/createServer.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
+- 서버 수명주기(`createServer`, `startServer`)와 도구 핸들러는 `mcp/` 배럴이 소유한다.
 
 ## Acceptance Criteria
 
@@ -41,4 +41,4 @@
 
 ## Last Updated
 
-2026-07-30 — 레이어 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.
+2026-08-23 — 서버 수명주기 참조를 현재 소스 위치에 맞췄다.
