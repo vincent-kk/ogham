@@ -13,5 +13,4 @@ export interface FileLockOptions {
 }
 
 export type FileLockResult<T> =
-  | { readonly acquired: true; readonly value: T }
-  | { readonly acquired: false };
+  { readonly acquired: true; readonly value: T } | { readonly acquired: false };

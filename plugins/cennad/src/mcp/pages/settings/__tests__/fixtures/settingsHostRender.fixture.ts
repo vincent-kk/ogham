@@ -2,8 +2,7 @@
 import { startSettingsServer } from '../../../../tools/openSettings/webServer/index.js';
 
 const handle = await startSettingsServer({
-  settingsHtml:
-    "<script>window.__CENNAD_STATE__='__CENNAD_STATE__';</script>",
+  settingsHtml: "<script>window.__CENNAD_STATE__='__CENNAD_STATE__';</script>",
   idleMs: 60_000,
 });
 

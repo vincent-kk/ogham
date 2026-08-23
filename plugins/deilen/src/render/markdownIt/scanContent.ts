@@ -4,9 +4,7 @@ import { BACKSLASH } from "./mathDelimiters.js";
 import { isValidInlineDelim } from "./isValidInlineDelim.js";
 
 export type ContentScan =
-  | { kind: "none" }
-  | { kind: "empty" }
-  | { kind: "found"; index: number };
+  { kind: "none" } | { kind: "empty" } | { kind: "found"; index: number };
 
 /**
  * From `start`, resolve the inline math body: scan for the next unescaped `$`

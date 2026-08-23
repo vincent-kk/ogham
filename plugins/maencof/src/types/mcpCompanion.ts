@@ -5,10 +5,7 @@
 import type { CompanionIdentity, CompanionInject } from './companion.js';
 
 export type CompanionEditOperation =
-  | 'add_section'
-  | 'update_section'
-  | 'remove_section'
-  | 'update_core';
+  'add_section' | 'update_section' | 'remove_section' | 'update_core';
 
 /** section 부분 패치 (add는 key/inject/salience/detail 필수, update는 제공 필드만 병합) */
 export interface CompanionSectionPatch {

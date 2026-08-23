@@ -1,2 +1,2 @@
-export { provisionMissingConfigs } from "./configProvisioner.js";
-export type { ProvisionResult } from "./configProvisioner.js";
+export { provisionMissingConfigs } from './configProvisioner.js';
+export type { ProvisionResult } from './configProvisioner.js';

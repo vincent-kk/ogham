@@ -1,1 +1,1 @@
-export { handleKgStatus } from "./kgStatus.js";
+export { handleKgStatus } from './kgStatus.js';

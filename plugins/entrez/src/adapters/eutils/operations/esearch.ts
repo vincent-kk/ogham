@@ -44,8 +44,7 @@ export function parseEsearch(jsonText: string): EsearchResult {
 
   const warnings: string[] = [];
   const warningList = result.warninglist as
-    | { outputmessages?: string[]; phrasesnotfound?: string[] }
-    | undefined;
+    { outputmessages?: string[]; phrasesnotfound?: string[] } | undefined;
   if (warningList?.outputmessages) warnings.push(...warningList.outputmessages);
   if (warningList?.phrasesnotfound)
     warnings.push(...warningList.phrasesnotfound);

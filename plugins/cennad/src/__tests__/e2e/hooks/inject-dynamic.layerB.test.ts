@@ -10,10 +10,7 @@ import {
 } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerB } from '../helpers/hookRunnerLayerB.js';
-import {
-  claimHostSession,
-  HOST_SESSION_ID,
-} from '../helpers/hostSession.js';
+import { HOST_SESSION_ID, claimHostSession } from '../helpers/hostSession.js';
 
 // Shipped keywords are ASCII, so the non-ASCII substring path only exists for
 // keywords a user configures — this suite configures one rather than leaning on

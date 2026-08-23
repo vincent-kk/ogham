@@ -215,23 +215,21 @@ describe('PostToolUse host payload parity', () => {
 
     const claudeContexts = Array.from(
       { length: 3 },
-      () => processToolOutcome(claudeInput).hookSpecificOutput?.additionalContext,
+      () =>
+        processToolOutcome(claudeInput).hookSpecificOutput?.additionalContext,
     );
     const codexContexts = Array.from(
       { length: 3 },
-      () => processToolOutcome(codexInput).hookSpecificOutput?.additionalContext,
+      () =>
+        processToolOutcome(codexInput).hookSpecificOutput?.additionalContext,
     );
 
-    expect(claudeContexts.map((text) => text?.includes(CHAIN_HINT) ?? false)).toEqual([
-      false,
-      false,
-      true,
-    ]);
-    expect(codexContexts.map((text) => text?.includes(CHAIN_HINT) ?? false)).toEqual([
-      false,
-      false,
-      true,
-    ]);
+    expect(
+      claudeContexts.map((text) => text?.includes(CHAIN_HINT) ?? false),
+    ).toEqual([false, false, true]);
+    expect(
+      codexContexts.map((text) => text?.includes(CHAIN_HINT) ?? false),
+    ).toEqual([false, false, true]);
     expect(codexContexts[2]).toContain('G1 unmet');
   });
 
@@ -271,7 +269,8 @@ describe('PostToolUse host payload parity', () => {
 
     const freshContexts = Array.from(
       { length: 3 },
-      () => processToolOutcome(freshInput).hookSpecificOutput?.additionalContext,
+      () =>
+        processToolOutcome(freshInput).hookSpecificOutput?.additionalContext,
     );
     expect(freshContexts).toEqual([undefined, undefined, undefined]);
     expect(

@@ -5,11 +5,7 @@
  */
 
 type ValidLinkType =
-  | 'blocks'
-  | 'blocked-by'
-  | 'split-from'
-  | 'split-into'
-  | 'relates';
+  'blocks' | 'blocked-by' | 'split-from' | 'split-into' | 'relates';
 
 const VALID_LINK_TYPES = new Set<ValidLinkType>([
   'blocks',

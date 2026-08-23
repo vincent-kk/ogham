@@ -1,11 +1,7 @@
 import type { ArtifactAction } from "../../types/artifacts.js";
 
 export type McpObservedState =
-  | "missing"
-  | "matching"
-  | "drift"
-  | "conflict"
-  | "invalid";
+  "missing" | "matching" | "drift" | "conflict" | "invalid";
 
 export function decideMcpAction(options: {
   readonly observed: McpObservedState;

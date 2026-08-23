@@ -12,13 +12,13 @@ import {
 } from 'vitest';
 
 import {
-  AGY_MODELS_CACHE_PATH,
-  CENNAD_HOME,
-} from '../../../../constants/paths.js';
-import {
   installFakeBinary,
   prependToPath,
 } from '../../../../__tests__/fixtures/fakeBinary.js';
+import {
+  AGY_MODELS_CACHE_PATH,
+  CENNAD_HOME,
+} from '../../../../constants/paths.js';
 import { getAvailableModels } from '../getAvailableModels.js';
 
 const FAKE_AGY_SUCCESS = `#!/usr/bin/env node

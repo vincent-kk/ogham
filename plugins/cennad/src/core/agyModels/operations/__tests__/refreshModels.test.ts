@@ -11,13 +11,13 @@ import {
 } from 'vitest';
 
 import {
-  AGY_MODELS_CACHE_PATH,
-  CENNAD_HOME,
-} from '../../../../constants/paths.js';
-import {
   installFakeBinary,
   prependToPath,
 } from '../../../../__tests__/fixtures/fakeBinary.js';
+import {
+  AGY_MODELS_CACHE_PATH,
+  CENNAD_HOME,
+} from '../../../../constants/paths.js';
 import { refreshModels } from '../refreshModels.js';
 
 const FIXED_NOW = 1700000000000;

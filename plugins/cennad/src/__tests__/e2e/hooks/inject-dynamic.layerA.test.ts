@@ -6,10 +6,7 @@ import { CENNAD_HOME } from '../../../constants/paths.js';
 import { writeCounter, writeRawCounter } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerA } from '../helpers/hookRunnerLayerA.js';
-import {
-  claimHostSession,
-  HOST_SESSION_ID,
-} from '../helpers/hostSession.js';
+import { HOST_SESSION_ID, claimHostSession } from '../helpers/hostSession.js';
 
 describe('injectDynamic (Layer A)', () => {
   beforeEach(async () => {

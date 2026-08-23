@@ -88,10 +88,7 @@ describe('orchestratePreToolUse', () => {
     expect(result.continue).toBe(false);
     expect(result.reason).toContain('01_Core/identity.md');
     expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
-    expect(runLifecycleDispatcher).toHaveBeenCalledWith(
-      'PreToolUse',
-      original,
-    );
+    expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);
   });
 
   it('continues after an initial L1 deny and preserves a later L1 reason', () => {
@@ -121,10 +118,7 @@ describe('orchestratePreToolUse', () => {
     expect(result.reason).toContain('01_Core/identity.md');
     expect(result.reason).toContain('01_Core/values.md');
     expect(runLifecycleDispatcher).toHaveBeenCalledOnce();
-    expect(runLifecycleDispatcher).toHaveBeenCalledWith(
-      'PreToolUse',
-      original,
-    );
+    expect(runLifecycleDispatcher).toHaveBeenCalledWith('PreToolUse', original);
   });
 
   it('Delete of a Layer 1 path uses the mutation guard', () => {

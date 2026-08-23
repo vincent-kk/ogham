@@ -1,1 +1,1 @@
-export { handleKgNavigate } from "./kgNavigate.js";
+export { handleKgNavigate } from './kgNavigate.js';

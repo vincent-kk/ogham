@@ -7,10 +7,7 @@ import { writeConfigFixture, writeCounter } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerA } from '../helpers/hookRunnerLayerA.js';
 import { runHookLayerB } from '../helpers/hookRunnerLayerB.js';
-import {
-  claimLegacyClaudeSession,
-  HOST_PID,
-} from '../helpers/hostSession.js';
+import { HOST_PID, claimLegacyClaudeSession } from '../helpers/hostSession.js';
 
 describe('legacy ratio migration (both layers)', () => {
   beforeEach(async () => {

@@ -1,1 +1,1 @@
-export { handleKgTimeline } from "./kgTimeline.js";
+export { handleKgTimeline } from './kgTimeline.js';

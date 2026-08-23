@@ -2,8 +2,8 @@ export {
   InsightCategoryEnum,
   captureInsightInputSchema,
   handleCaptureInsight,
-} from "./maencofCaptureInsight.js";
+} from './maencofCaptureInsight.js';
 export type {
   InsightCategory,
   CaptureInsightArgs,
-} from "./maencofCaptureInsight.js";
+} from './maencofCaptureInsight.js';

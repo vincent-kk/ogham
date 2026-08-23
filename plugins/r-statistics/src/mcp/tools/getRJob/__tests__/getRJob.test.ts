@@ -24,7 +24,11 @@ describe("get_r_job managed library output", () => {
     createJob({ jobId, workspaceId: "ws", controller: new AbortController() });
     updateJob(jobId, JobStatus.Succeeded, {
       exitCode: 0,
-      stdout: { text: "visible", truncated: false, encodingUsed: Encoding.Utf8 },
+      stdout: {
+        text: "visible",
+        truncated: false,
+        encodingUsed: Encoding.Utf8,
+      },
       stderr: { text: "", truncated: false, encodingUsed: Encoding.Utf8 },
       artifacts: [],
       runtime: { rscriptPath: "Rscript", platform: Platform.Macos },
