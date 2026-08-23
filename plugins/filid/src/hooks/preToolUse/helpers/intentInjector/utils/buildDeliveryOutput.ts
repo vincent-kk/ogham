@@ -6,15 +6,24 @@ import { buildGateDeny } from './buildGateDeny.js';
 import { buildMapBlock } from './buildMapBlock.js';
 
 /**
- * Assemble the post-commitVisit output: gate-deny (undelivered mutation) or
- * the ctx/guide/map blocks for the resolved delivery state.
+ * Assemble the post-commitVisit output: a gate deny for an undelivered
+ * mutation, or the pointer ctx / guide / map blocks for the resolved
+ * delivery state.
+ * @param decision Result of the locked commitVisit transaction.
+ * @param gateEligible True when an undelivered owner must deny this mutation.
+ * @param ownerKey Owner delivery key; null when no INTENT.md governs the file.
+ * @param ownerRelDir Owning fractal directory relative to the boundary (gate label).
+ * @param selfDelivery True when the call targets an INTENT.md itself — delivery is stamped but no ctx or guide is emitted; the map still follows the visit set.
+ * @param relDir Visited directory relative to the boundary, for the map block.
+ * @param ctxBlock Lazy renderer of the [filid:ctx] pointer block.
+ * @returns Hook output carrying a deny, additional context, or nothing.
  */
 export function buildDeliveryOutput(
   decision: VisitDecision,
   gateEligible: boolean,
   ownerKey: string | null,
   ownerRelDir: string,
-  selfAuthoring: boolean,
+  selfDelivery: boolean,
   relDir: string,
   ctxBlock: () => string,
 ): HookOutput {
@@ -25,7 +34,7 @@ export function buildDeliveryOutput(
   if (
     ownerKey !== null &&
     decision.deliveredState !== 'fresh' &&
-    !selfAuthoring
+    !selfDelivery
   ) {
     if (decision.guideNeeded) blocks.push(HOOK_GUIDE_BLOCK);
     blocks.push(ctxBlock());
