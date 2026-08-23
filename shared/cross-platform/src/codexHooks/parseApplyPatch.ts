@@ -25,8 +25,7 @@ type FileSectionOpen =
     };
 
 type PreparedPatchBody =
-  | { ok: false; reason: string }
-  | { ok: true; bodyLines: string[] };
+  { ok: false; reason: string } | { ok: true; bodyLines: string[] };
 
 /**
  * Parse a Codex `apply_patch` command (V4A envelope) into its file operations.
@@ -212,7 +211,10 @@ function applyUpdateHunk(
     !line.startsWith("+") &&
     !line.startsWith("-")
   )
-    return { ok: false, reason: "Update section contains an unrecognized line" };
+    return {
+      ok: false,
+      reason: "Update section contains an unrecognized line",
+    };
   if (updateHunkState === "after-eof")
     return {
       ok: false,
