@@ -6,18 +6,11 @@
 
 /** Claude hook events ogham maps onto agy. SubagentStart has no agy analogue (dropped). */
 export type ClaudeHookEvent =
-  | "SessionStart"
-  | "UserPromptSubmit"
-  | "PreToolUse"
-  | "PostToolUse";
+  "SessionStart" | "UserPromptSubmit" | "PreToolUse" | "PostToolUse";
 
 /** agy lifecycle events. SessionStart/UserPromptSubmit both ride PreInvocation. */
 export type AgyHookEvent =
-  | "PreInvocation"
-  | "PostInvocation"
-  | "PreToolUse"
-  | "PostToolUse"
-  | "Stop";
+  "PreInvocation" | "PostInvocation" | "PreToolUse" | "PostToolUse" | "Stop";
 
 /** Fields agy sends on every hook payload (protojson camelCase). */
 export interface AgyCommonInput {

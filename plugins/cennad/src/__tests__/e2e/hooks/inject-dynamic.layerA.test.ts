@@ -6,7 +6,7 @@ import { CENNAD_HOME } from '../../../constants/paths.js';
 import { writeCounter, writeRawCounter } from '../helpers/diskAssert.js';
 import { assertHookEnvelope } from '../helpers/envelopeShape.js';
 import { runHookLayerA } from '../helpers/hookRunnerLayerA.js';
-import { HOST_PID, claimHostSession } from '../helpers/hostSession.js';
+import { HOST_SESSION_ID, claimHostSession } from '../helpers/hostSession.js';
 
 describe('injectDynamic (Layer A)', () => {
   beforeEach(async () => {
@@ -14,17 +14,17 @@ describe('injectDynamic (Layer A)', () => {
     await rm(CENNAD_HOME, { recursive: true, force: true });
   });
 
-  it('no counter file — "No calls this session yet."', () => {
+  it('no counter file — reports that this session has no data yet', () => {
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No delegations yet this session.'],
+      contextIncludes: ['Delegation counts unavailable (missing).'],
     });
   });
 
-  it('with counter — one condensed state line plus the strength nudge', async () => {
+  it('with current-session counter — one state line plus the strength nudge', async () => {
     await writeCounter({
-      parent_pid: HOST_PID,
+      host_session_id: HOST_SESSION_ID,
       codex: 7,
       antigravity: 3,
     });
@@ -40,7 +40,7 @@ describe('injectDynamic (Layer A)', () => {
     });
   });
 
-  it('stale counter (parent_pid mismatch) — treated as 0/0', async () => {
+  it('stale counter (parent_pid mismatch) — reports an unavailable measurement', async () => {
     await writeCounter({
       parent_pid: 999999,
       codex: 99,
@@ -49,16 +49,16 @@ describe('injectDynamic (Layer A)', () => {
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No delegations yet this session.'],
+      contextIncludes: ['Delegation counts unavailable (stale).'],
     });
   });
 
-  it('corrupt counter — loadCounter fallback yields 0/0 (loader-only)', async () => {
+  it('corrupt counter — reports invalid measurement data', async () => {
     await writeRawCounter('{ this is :: invalid');
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['No delegations yet this session.'],
+      contextIncludes: ['Delegation counts unavailable (invalid).'],
     });
   });
 });

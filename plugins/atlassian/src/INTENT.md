@@ -1,18 +1,8 @@
+# src — Atlassian 소스 경계
+
 ## Purpose
 
-Atlassian plugin source root. 4 MCP tools (fetch + convert + auth_check + setup), core infrastructure, and format converter.
-
-## Structure
-
-| Directory    | Role                                   |
-| ------------ | -------------------------------------- |
-| `types/`     | Zod schemas and type definitions       |
-| `constants/` | Paths, defaults, config constants      |
-| `core/`      | Config, auth, environment, HTTP client |
-| `converter/` | ADF/Storage Format ↔ Markdown          |
-| `mcp/`       | MCP server and 4 tool handlers         |
-| `lib/`       | Logger, file I/O                       |
-| `utils/`     | URL helpers                            |
+Atlassian 플러그인의 소스 루트다. MCP 도구와 공통 인프라, 포맷 변환 경계를 소유한다.
 
 ## Conventions
 
@@ -20,26 +10,20 @@ Atlassian plugin source root. 4 MCP tools (fetch + convert + auth_check + setup)
 - Zod 스키마는 `types/` organ에만 정의
 - camelCase 파일명, ESM `.js` 확장자 import
 
-## Dependencies
-
-- `@modelcontextprotocol/sdk` — MCP 서버 프레임워크
-- `zod` — 런타임 스키마 검증
-- Node.js `fs`, `path` — 설정 파일 I/O
-
 ## Boundaries
 
 ### Always do
 
-- Export new modules through barrel index.ts
-- Use Zod schemas from types/ for validation
+- 새 공개 모듈은 배럴 `index.ts`를 통해 노출
+- 검증에는 `types/`의 Zod 스키마 사용
 
 ### Ask first
 
-- Add new fractal directory
-- Add external dependency
+- 새 fractal 추가
+- 외부 의존성 추가
 
 ### Never do
 
-- Define Zod schemas outside types/
-- Use global mutable state
-- Expose credentials in MCP tool responses
+- `types/` 밖에 Zod 스키마 정의
+- 전역 가변 상태 사용
+- MCP 도구 응답에 자격증명 노출

@@ -2,7 +2,14 @@
  * @file guardLifecycleHooks.test.ts
  * @description maencof 레이어 가드 훅 유닛 테스트 (runLayerGuard).
  */
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -72,6 +79,42 @@ describe('runLayerGuard', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
+  });
+
+  it('symlink와 host case alias가 가리키는 기존 Layer 1 Delete를 차단한다', () => {
+    const coreDir = join(vaultDir, '01_Core');
+    const linkedCore = join(vaultDir, 'core-link');
+    const safeDir = join(vaultDir, 'L3');
+    const safeTarget = join(safeDir, 'target.md');
+    const terminalLink = join(coreDir, 'outside-link.md');
+    mkdirSync(coreDir);
+    mkdirSync(safeDir);
+    writeFileSync(join(coreDir, 'identity.md'), 'identity');
+    writeFileSync(safeTarget, 'safe');
+    symlinkSync(coreDir, linkedCore, 'dir');
+    symlinkSync(safeTarget, terminalLink, 'file');
+
+    const linked = runLayerGuard({
+      tool_name: 'Delete',
+      tool_input: { file_path: join(linkedCore, 'identity.md') },
+      cwd: vaultDir,
+    });
+    expect(linked.continue).toBe(false);
+
+    const caseAlias = join(vaultDir, '01_core', 'identity.md');
+    const aliased = runLayerGuard({
+      tool_name: 'Delete',
+      tool_input: { file_path: caseAlias },
+      cwd: vaultDir,
+    });
+    expect(aliased.continue).toBe(existsSync(caseAlias) ? false : true);
+
+    const terminal = runLayerGuard({
+      tool_name: 'Delete',
+      tool_input: { file_path: terminalLink },
+      cwd: vaultDir,
+    });
+    expect(terminal.continue).toBe(false);
   });
 
   it('파일 경로가 없으면 continue: true를 반환한다', () => {

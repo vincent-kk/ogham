@@ -29,9 +29,7 @@ export function parseOa(xml: string, pmcid: string): OaRecord {
   const records = doc?.OA?.records as Node | undefined;
 
   const errorNode = (records?.error ?? (doc?.OA as Node | undefined)?.error) as
-    | Node
-    | string
-    | undefined;
+    Node | string | undefined;
   if (errorNode) {
     const code =
       typeof errorNode === "object"

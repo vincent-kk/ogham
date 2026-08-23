@@ -1,1 +1,4 @@
-export * from './contextCacheManage.js';
+export {
+  contextCacheManageInputSchema,
+  handleContextCacheManage,
+} from './contextCacheManage.js';

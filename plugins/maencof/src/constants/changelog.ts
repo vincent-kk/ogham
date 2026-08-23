@@ -1,10 +1,6 @@
-export const WATCHED_PATHS = [
-  '01_Core/',
-  '02_Derived/',
-  '.claude/agents/',
-  '.claude/rules/',
-  'CLAUDE.md',
-] as const;
+import { HOST_CONFIGURATION_WATCHED_PATHS } from '../core/hostConfigurationSurfaces/index.js';
+
+export const WATCHED_PATHS = HOST_CONFIGURATION_WATCHED_PATHS;
 
 export const CHANGELOG_EXCLUDE = '02_Derived/changelog/';
 

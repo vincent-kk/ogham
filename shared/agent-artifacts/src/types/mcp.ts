@@ -22,12 +22,7 @@ export interface McpServerRequest {
 }
 
 export type McpFailureKind =
-  | "not-installed"
-  | "spawn"
-  | "timeout"
-  | "exit"
-  | "conflict"
-  | "invalid";
+  "not-installed" | "spawn" | "timeout" | "exit" | "conflict" | "invalid";
 
 export interface McpFailure {
   readonly kind: McpFailureKind;

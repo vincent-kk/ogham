@@ -15,15 +15,26 @@
  * this at build time. session-start carries an inlined meta-skill-body.md
  * payload so it gets the highest cap.
  */
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { generateWindowsCmd } from '@ogham/cross-platform';
 import * as esbuild from 'esbuild';
-import { mkdir, readFile, stat } from 'fs/promises';
+import { mkdir, mkdtemp, readFile, rm, stat } from 'fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
+const checkOnly = process.argv.includes('--check');
+const canonicalBridge = resolve(root, 'bridge');
+const outputBridge = checkOnly
+  ? await mkdtemp(resolve(tmpdir(), 'maencof-hook-build-'))
+  : canonicalBridge;
+
+async function cleanCheckOutput() {
+  if (checkOnly)
+    await rm(outputBridge, { recursive: true, force: true, maxRetries: 3 });
+}
 
 // Meta-skill body budget guard: the SessionStart runtime SKIPS injection when
 // the body exceeds META_SKILL_MAX_CHARS, so an oversized body would ship as a
@@ -57,13 +68,13 @@ const root = resolve(__dirname, '..');
   );
 }
 
-await mkdir(resolve(root, 'bridge'), { recursive: true });
+await mkdir(outputBridge, { recursive: true });
 
 // Windows .cmd shim — invoked from hooks.json on win32 when PATH lacks node.
 // Routes through libs/run.cjs (which uses process.execPath via spawnSync) so
 // the actual hook bundle still executes via the same node binary.
 generateWindowsCmd({
-  outputPath: resolve(root, 'bridge/run-hook.cmd'),
+  outputPath: resolve(outputBridge, 'run-hook.cmd'),
   scriptRelativePath: '../libs/run.cjs',
 });
 console.log('  Windows hook shim -> bridge/run-hook.cmd');
@@ -103,7 +114,10 @@ const SESSION_START_BYTES = 56 * 1024;
 // sweep own session finalization after the SessionEnd hook removal.
 const USER_PROMPT_SUBMIT_BYTES = 42 * 1024;
 const POST_TOOL_USE_BYTES = 12 * 1024;
-const PRE_TOOL_USE_BYTES = 12 * 1024;
+// pre-tool-use bundles the Codex apply_patch normalizer, whose helper-per-branch
+// parser dominates the emitted bytes — pure Node-builtin code carrying no module.
+// FORBIDDEN_PATTERNS below, not this cap, is the isolation guarantee.
+const PRE_TOOL_USE_BYTES = 14 * 1024;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entryPath` is the esbuild entry relative to src/hooks.
@@ -145,7 +159,7 @@ await Promise.all(
       platform: 'node',
       target: 'node20',
       format: 'esm',
-      outfile: resolve(root, `bridge/${name}.mjs`),
+      outfile: resolve(outputBridge, `${name}.mjs`),
       minify: true,
       sourcemap: false,
       treeShaking: true,
@@ -180,7 +194,7 @@ await esbuild.build({
   platform: 'node',
   target: 'node20',
   format: 'esm',
-  outfile: resolve(root, 'bridge/run-agy.mjs'),
+  outfile: resolve(outputBridge, 'run-agy.mjs'),
   minify: true,
   sourcemap: false,
   treeShaking: true,
@@ -229,7 +243,7 @@ const guardedBundles = [
 ];
 
 for (const { name, maxBytes } of guardedBundles) {
-  const file = resolve(root, `bridge/${name}.mjs`);
+  const file = resolve(outputBridge, `${name}.mjs`);
   const { size } = await stat(file);
   if (size > maxBytes) {
     violations.push(
@@ -257,9 +271,49 @@ if (violations.length > 0) {
       'not in hook bundles. See plugins/maencof/src/types/dialogueConfigGuard.ts\n' +
       'and insightGuard.ts for the zod-free guard pattern.',
   );
+  await cleanCheckOutput();
   process.exit(1);
 }
 
 console.log(
   `  Hook bundle guards passed (per-event caps: session-start <= ${SESSION_START_BYTES}, user-prompt-submit <= ${USER_PROMPT_SUBMIT_BYTES}, post-tool-use <= ${POST_TOOL_USE_BYTES}, pre-tool-use <= ${PRE_TOOL_USE_BYTES} bytes, no forbidden modules)`,
 );
+
+if (checkOnly) {
+  const generatedFiles = [
+    'run-hook.cmd',
+    ...hookEntries.map(({ name }) => `${name}.mjs`),
+    'run-agy.mjs',
+  ];
+  const drift = [];
+
+  for (const filename of generatedFiles) {
+    const generated = await readFile(resolve(outputBridge, filename));
+    let canonical;
+    try {
+      canonical = await readFile(resolve(canonicalBridge, filename));
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      ) {
+        drift.push(`${filename}: canonical output is missing`);
+        continue;
+      }
+      await cleanCheckOutput();
+      throw error;
+    }
+    if (!generated.equals(canonical)) drift.push(`${filename}: output drifted`);
+  }
+
+  await cleanCheckOutput();
+  if (drift.length > 0)
+    throw new Error(
+      `Generated hook bridge is stale; run yarn build:hooks:\n${drift.join('\n')}`,
+    );
+  console.log('HOOK_BUNDLES_CHECK_OK');
+} else {
+  console.log('HOOK_BUNDLES_BUILD_OK');
+}

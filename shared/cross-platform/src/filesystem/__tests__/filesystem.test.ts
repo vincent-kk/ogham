@@ -4,6 +4,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   readdirSync,
   rmSync,
   statSync,
@@ -18,6 +19,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   assertNoSymlinkDescendantsSync,
+  canonicalizeTargetPathSync,
   ensureDirectorySync,
   listDirectoryIfExistsSync,
   readFileIfExistsSync,
@@ -186,5 +188,71 @@ describe("filesystem", () => {
         join(realRoot, "escape", "file"),
       ),
     ).toThrow(/symbolic link/i);
+  });
+
+  it("canonicalizes host aliases while optionally preserving the terminal entry", () => {
+    const core = join(root, "01_Core");
+    const linkedCore = join(root, "core-link");
+    const safeDir = join(root, "L3");
+    const safeTarget = join(safeDir, "target.md");
+    const terminalLink = join(root, "terminal-link.md");
+    const protectedDocument = join(root, "INTENT.md");
+    const documentCaseAlias = join(root, "intent.md");
+    mkdirSync(core);
+    mkdirSync(safeDir);
+    writeFileSync(join(core, "identity.md"), "identity");
+    writeFileSync(safeTarget, "safe");
+    writeFileSync(protectedDocument, "contract");
+    symlinkSync(core, linkedCore, "dir");
+    symlinkSync(safeTarget, terminalLink, "file");
+
+    const caseAlias = join(root, "01_core", "identity.md");
+    expect(canonicalizeTargetPathSync(root, caseAlias)).toBe(
+      existsSync(caseAlias)
+        ? realpathSync.native(caseAlias)
+        : join(realpathSync.native(root), "01_core", "identity.md"),
+    );
+    expect(canonicalizeTargetPathSync(root, join(linkedCore, "new.md"))).toBe(
+      join(realpathSync.native(core), "new.md"),
+    );
+    expect(canonicalizeTargetPathSync(root, terminalLink)).toBe(
+      realpathSync.native(safeTarget),
+    );
+    expect(
+      canonicalizeTargetPathSync(root, terminalLink, {
+        preserveTerminalEntry: true,
+      }),
+    ).toBe(join(realpathSync.native(root), "terminal-link.md"));
+    expect(
+      canonicalizeTargetPathSync(root, documentCaseAlias, {
+        preserveTerminalEntry: true,
+      }),
+    ).toBe(
+      existsSync(documentCaseAlias)
+        ? join(realpathSync.native(root), "INTENT.md")
+        : join(realpathSync.native(root), "intent.md"),
+    );
+    expect(
+      canonicalizeTargetPathSync(root, join(linkedCore, "new.md"), {
+        preserveTerminalEntry: true,
+      }),
+    ).toBe(join(realpathSync.native(core), "new.md"));
+  });
+
+  it("preserves non-ENOENT realpath errors", () => {
+    // A file used as a directory component is ENOTDIR on POSIX but ENOENT on
+    // Windows, so the rethrow branch is driven by an injected error instead.
+    const denied = Object.assign(new Error("denied"), { code: "EACCES" });
+    const realpath = vi.spyOn(realpathSync, "native").mockImplementation(() => {
+      throw denied;
+    });
+
+    try {
+      expect(() =>
+        canonicalizeTargetPathSync(root, join(root, "child.md")),
+      ).toThrow(denied);
+    } finally {
+      realpath.mockRestore();
+    }
   });
 });

@@ -2,10 +2,14 @@ import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { normalizeCodexToolUses } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getCacheDir } from '../../../core/infra/cacheManager/index.js';
-import { handlePreToolUse } from '../../../hooks/preToolUse/index.js';
+import {
+  handlePreToolUse,
+  handlePreToolUseBatch,
+} from '../../../hooks/preToolUse/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 const LEGACY_MODE_AUDIT_FILE = 'mode-audit.jsonl';
@@ -377,5 +381,181 @@ describe('handlePreToolUse', () => {
     // Visit pipeline emits the grown map; structure guard warns on the import
     expect(ctx).toContain('[filid:map]');
     expect(ctx).toContain('import');
+  });
+
+  it('batch inspects a later validator deny after an allowed first operation', async () => {
+    mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
+    writeFileSync(join(tmpDir, 'index.ts'), '');
+    await handlePreToolUse(
+      makeInput({
+        tool_name: 'Read',
+        tool_input: { file_path: join(tmpDir, 'index.ts') },
+      }),
+    );
+
+    const safeSection = `*** Add File: ${join(tmpDir, 'src', 'safe.ts')}\n+export const safe = true;`;
+    const safeOnly = normalizeCodexToolUses(
+      makeInput({
+        tool_name: 'apply_patch',
+        tool_input: {
+          command: `*** Begin Patch\n${safeSection}\n*** End Patch`,
+        },
+      }),
+    );
+    const control = await handlePreToolUseBatch(safeOnly);
+    expect(control.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const oversized = Array.from(
+      { length: 51 },
+      (_, index) => `+line ${index + 1}`,
+    ).join('\n');
+    const hiddenPath = join(tmpDir, 'src', 'feature', 'INTENT.md');
+    const combined = normalizeCodexToolUses(
+      makeInput({
+        tool_name: 'apply_patch',
+        tool_input: {
+          command: `*** Begin Patch\n${safeSection}\n*** Add File: ${hiddenPath}\n${oversized}\n*** End Patch`,
+        },
+      }),
+    );
+    const result = await handlePreToolUseBatch(combined);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      hiddenPath,
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      '51 lines',
+    );
+  });
+
+  it('batch exposes a structure warning found only in the second operation', async () => {
+    mkdirSync(join(tmpDir, 'src', 'deep'), { recursive: true });
+    writeFileSync(join(tmpDir, 'index.ts'), '');
+    await handlePreToolUse(
+      makeInput({
+        tool_name: 'Read',
+        tool_input: { file_path: join(tmpDir, 'index.ts') },
+      }),
+    );
+
+    const hiddenPath = join(tmpDir, 'src', 'deep', 'child.ts');
+    const normalized = normalizeCodexToolUses(
+      makeInput({
+        tool_name: 'apply_patch',
+        tool_input: {
+          command:
+            `*** Begin Patch\n*** Add File: ${join(tmpDir, 'src', 'safe.ts')}\n+export const safe = true;\n` +
+            `*** Add File: ${hiddenPath}\n+import { foo } from "../../";\n+export const child = foo;\n*** End Patch`,
+        },
+      }),
+    );
+    const result = await handlePreToolUseBatch(normalized);
+    const context = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(context).toContain(hiddenPath);
+    expect(context).toContain('structure-guard');
+    expect(context).toContain('import');
+  });
+
+  it('batch continues after an initial deny and exposes a later structure warning', async () => {
+    mkdirSync(join(tmpDir, 'src', 'deep'), { recursive: true });
+    const blockedPath = join(tmpDir, 'src', 'blocked.ts');
+    const hiddenPath = join(tmpDir, 'src', 'deep', 'child.ts');
+    const normalized = normalizeCodexToolUses(
+      makeInput({
+        tool_name: 'apply_patch',
+        tool_input: {
+          command:
+            `*** Begin Patch\n*** Add File: ${blockedPath}\n+export const blocked = true;\n` +
+            `*** Add File: ${hiddenPath}\n+import { foo } from "../../";\n+export const child = foo;\n*** End Patch`,
+        },
+      }),
+    );
+
+    const result = await handlePreToolUseBatch(normalized);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      blockedPath,
+    );
+    const context = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(context).toContain(hiddenPath);
+    expect(context).toContain('structure-guard');
+  });
+
+  it('batch routes Delete through the mutation visit gate', async () => {
+    const deletedPath = join(tmpDir, 'src', 'obsolete.ts');
+    const normalized = normalizeCodexToolUses(
+      makeInput({
+        tool_name: 'apply_patch',
+        tool_input: {
+          command: `*** Begin Patch\n*** Delete File: ${deletedPath}\n*** End Patch`,
+        },
+      }),
+    );
+
+    const result = await handlePreToolUseBatch(normalized);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      '[filid:gate]',
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      deletedPath,
+    );
+  });
+
+  it('batch routes a delivered protected Delete through the document validator', async () => {
+    writeFileSync(join(tmpDir, 'index.ts'), '');
+    await handlePreToolUse(
+      makeInput({
+        tool_name: 'Read',
+        tool_input: { file_path: join(tmpDir, 'index.ts') },
+      }),
+    );
+    const intentPath = join(tmpDir, 'INTENT.md');
+    const normalized = normalizeCodexToolUses(
+      makeInput({
+        tool_name: 'apply_patch',
+        tool_input: {
+          command: `*** Begin Patch\n*** Delete File: ${intentPath}\n*** End Patch`,
+        },
+      }),
+    );
+
+    const result = await handlePreToolUseBatch(normalized);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'Delete rejected',
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      intentPath,
+    );
+  });
+
+  it('malformed patch denies in FCA and stays a bare allow outside FCA', async () => {
+    const malformed = normalizeCodexToolUses(
+      makeInput({
+        tool_name: 'apply_patch',
+        tool_input: { command: 'not really a patch' },
+      }),
+    );
+    const governed = await handlePreToolUseBatch(malformed);
+    expect(governed.hookSpecificOutput?.permissionDecision).toBe('deny');
+    const reason = governed.hookSpecificOutput?.permissionDecisionReason ?? '';
+    expect(reason).toContain('Re-emit the patch in V4A form.');
+    expect(reason).not.toContain('retry. Then retry');
+
+    const nonFcaDir = join(tmpdir(), `filid-batch-non-fca-${Date.now()}`);
+    mkdirSync(join(nonFcaDir, '.git'), { recursive: true });
+    try {
+      const outside = normalizeCodexToolUses(
+        makeInput({
+          cwd: nonFcaDir,
+          tool_name: 'apply_patch',
+          tool_input: { command: 'not really a patch' },
+        }),
+      );
+      expect(await handlePreToolUseBatch(outside)).toEqual({ continue: true });
+    } finally {
+      rmSync(nonFcaDir, { recursive: true, force: true });
+    }
   });
 });

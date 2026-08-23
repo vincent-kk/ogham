@@ -6,12 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CENNAD_HOME, COUNTER_PATH } from '../../../constants/paths.js';
 import { getCounter } from '../operations/getCounter.js';
 
-const { ppidRef } = vi.hoisted(() => ({
-  ppidRef: { value: 0 },
+const { identityRef } = vi.hoisted(() => ({
+  identityRef: { value: null as string | null },
 }));
 
-vi.mock('../../../utils/parentPid.js', () => ({
-  getParentPid: () => ppidRef.value,
+vi.mock('../../../utils/hostSessionIdentity.js', () => ({
+  resolveHostSessionIdentity: () => identityRef.value,
 }));
 
 async function writeCounterFile(content: string): Promise<void> {
@@ -22,7 +22,7 @@ async function writeCounterFile(content: string): Promise<void> {
 describe('getCounter', () => {
   beforeEach(async () => {
     await rm(CENNAD_HOME, { recursive: true, force: true });
-    ppidRef.value = 12345;
+    identityRef.value = 'session-a';
   });
 
   afterEach(async () => {
@@ -31,41 +31,41 @@ describe('getCounter', () => {
 
   it('returns a fresh counter when nothing is persisted', async () => {
     expect(await getCounter()).toEqual({
-      parent_pid: 12345,
+      host_session_id: 'session-a',
       claude: 0,
       codex: 0,
       antigravity: 0,
     });
   });
 
-  it('returns the persisted counter when parent_pid matches', async () => {
+  it('returns the persisted counter when host_session_id matches', async () => {
     await writeCounterFile(
       JSON.stringify({
-        parent_pid: 12345,
+        host_session_id: 'session-a',
         claude: 4,
         codex: 2,
         antigravity: 1,
       }),
     );
     expect(await getCounter()).toEqual({
-      parent_pid: 12345,
+      host_session_id: 'session-a',
       claude: 4,
       codex: 2,
       antigravity: 1,
     });
   });
 
-  it('resets to zeros when parent_pid no longer matches', async () => {
+  it('resets to zeros when host_session_id no longer matches', async () => {
     await writeCounterFile(
       JSON.stringify({
-        parent_pid: 99999,
+        host_session_id: 'session-b',
         claude: 7,
         codex: 3,
         antigravity: 2,
       }),
     );
     expect(await getCounter()).toEqual({
-      parent_pid: 12345,
+      host_session_id: 'session-a',
       claude: 0,
       codex: 0,
       antigravity: 0,
@@ -75,10 +75,15 @@ describe('getCounter', () => {
   it('treats invalid counter.json as missing', async () => {
     await writeCounterFile('garbage');
     expect(await getCounter()).toEqual({
-      parent_pid: 12345,
+      host_session_id: 'session-a',
       claude: 0,
       codex: 0,
       antigravity: 0,
     });
+  });
+
+  it('returns unidentified instead of a synthetic zero counter', async () => {
+    identityRef.value = null;
+    expect(await getCounter()).toBeNull();
   });
 });

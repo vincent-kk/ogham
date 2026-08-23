@@ -25,9 +25,7 @@ export interface ToolMeta<TShape extends ZodRawShape> {
 }
 
 export type AffectedPath =
-  | string
-  | null
-  | { primary: string | null; also?: string | null };
+  string | null | { primary: string | null; also?: string | null };
 
 export type GetAffectedPath<TArgs, TResult> = (
   args: TArgs,

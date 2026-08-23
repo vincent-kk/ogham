@@ -7,4 +7,15 @@ export { home } from "./state/home.js";
 export { hostStateRoot } from "./state/hostStateRoot.js";
 export { pluginCache } from "./state/pluginCache.js";
 export { tmp } from "./state/tmp.js";
-export * from "./compat/index.js";
+export {
+  isPosixLikePath,
+  isWindowsLikePath,
+  pathForCompare,
+  portableBasename,
+  portableDirname,
+  portableIsAbsolute,
+  portableJoin,
+  portableRelative,
+  portableResolve,
+  samePath,
+} from "./compat/index.js";

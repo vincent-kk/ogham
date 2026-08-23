@@ -3,6 +3,7 @@
 ## Requirements
 
 - 호스트 project 지침에서 MAENCOF 소유 섹션만 관리한다. 마커 밖 사용자 지침이나 다른 소유자 섹션은 건드리지 않는다.
+- project instruction target은 `hostConfigurationSurfaces`가 교차 검증하는 `@ogham/agent-artifacts` 결과와 같아야 한다. Codex에서는 AGENTS owned section, Claude에서는 기존 CLAUDE.md 후보를 유지한다.
 - `@ogham/agent-artifacts` package root에서 `applyHookInstructionSection`·`inspectHookInstructionSection`·`resolveProjectInstructionTarget`만 named import한다. 범용 manager·plan·revision·lock export는 `sideEffects: false` tree-shaking으로 제거되고, emitted-byte cap과 `FORBIDDEN_PATTERNS`가 실제 출력을 검증한다.
 - 주입은 세션 1회 기준이다: meta-skill 본문, L1 core 전체 본문(`<l1-core-full>`), companion identity 직후의 `<personal-context>` 블록. 매 턴 주입은 gist 만이며 그것은 `contextInjector` 소관이다.
 - 각 관심사는 실패를 격리한다. 예산 초과로 meta-skill 을 건너뛰면 error-log 에 남긴다.
@@ -19,6 +20,7 @@
 ### AC-marker-scoped-write — 마커 범위 쓰기
 
 - 지침 파일에서 MAENCOF 마커 밖 내용이 변경되지 않는다.
+- host configuration registry가 보고한 effective instruction target과 실제 bootstrap target이 같다.
 
 ### AC-session-once-injection — 세션 1회 주입
 
@@ -38,4 +40,4 @@
 
 ## Last Updated
 
-2026-07-30 — 마커 범위·세션 1회 주입 계약과 훅 직접 import 면책을 유지하며 공유 패키지 root import를 현행화했다.
+2026-08-23 — bootstrap instruction target과 host configuration registry의 교차 검증을 계약화했다.

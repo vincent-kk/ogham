@@ -25,32 +25,23 @@ export function createServer(version: string): McpServer {
     McpToolName.START_CONVERSATION,
     {
       description:
-        'Delegate a prompt to an external LLM CLI (codex = code/shell; antigravity = web research & ' +
-        'large context; claude = reasoning/writing/analysis) and return its answer plus a session_id ' +
-        'for follow-ups. The CLI does not inherit this Claude conversation — make the prompt self-contained. ' +
-        'Depending on provider permissions, it may use built-in tools in the spawned working directory.',
+        'Delegate a self-contained prompt to an external LLM CLI and return its answer and session_id. ' +
+        'The CLI can use permitted tools in the working directory but cannot see this conversation.',
       inputSchema: {
         provider: ProviderSchema.describe(
-          "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'antigravity' (Google): live web " +
-            "research, large-context synthesis. 'claude' (Anthropic): reasoning, writing, analysis, " +
-            "and review. A disabled provider returns error.code 'disabled'.",
+          "'codex': code/shell; 'antigravity': web research/large context; " +
+            "'claude': reasoning/writing/review. Disabled providers return error.code 'disabled'.",
         ),
         prompt: z
           .string()
           .min(1)
           .describe(
-            'Self-contained prompt; the CLI has no access to this Claude conversation or its prior turns. ' +
-              'It may access the working directory and repository through built-in tools according to provider permissions.',
+            'Self-contained prompt. The CLI cannot see this conversation, but may use permitted tools and files in the working directory.',
           ),
         tier: TierSchema.optional().describe(
-          'Optional capability/cost tier; omit to use the configured default for ' +
-            'that provider. Higher is stronger but much more likely to hit ' +
-            'rate_limit or budget_exhausted, and it also widens how long the CLI is ' +
-            'allowed to run. Use mid as the normal tier for almost all work; low for ' +
-            'clearly simple tasks; high only with a specific reason to expect mid will ' +
-            'be insufficient — not merely because the task looks complex; apex only for ' +
-            'work that must run autonomously across many steps or files, where the run ' +
-            'is expected to take a long time.',
+          'Optional tier; omit for provider default. Prefer high for most work; use low/mid when bounded. ' +
+            'Use apex only if high cannot handle exceptional difficulty or tens-of-minutes autonomy; ' +
+            'it is slower and limit-prone.',
         ),
         project_root: z
           .string()
@@ -70,29 +61,25 @@ export function createServer(version: string): McpServer {
     McpToolName.CONTINUE_CONVERSATION,
     {
       description:
-        'Continue an external LLM session by session_id, keeping its original provider. ' +
-        'The session_id must come from a start_conversation in the SAME working directory — sessions are ' +
-        'project-scoped, so one from elsewhere returns error.code "unknown".',
+        'Continue a project-scoped session with its original provider. ' +
+        'Use a session_id returned in this working directory.',
       inputSchema: {
         session_id: z
           .string()
           .uuid()
           .describe(
-            'UUID returned by a prior start_conversation in this same working directory.',
+            'Project-scoped UUID returned by start_conversation in this working directory.',
           ),
         prompt: z
           .string()
           .min(1)
           .describe(
-            'Follow-up message; the CLI keeps its own prior turns but still cannot see this Claude conversation.',
+            'Follow-up prompt. The CLI keeps its provider history but cannot see this conversation.',
           ),
         tier: TierSchema.optional().describe(
-          'Optional capability/cost tier for THIS turn; omit to keep the tier the ' +
-            'session started with. Higher is stronger but much more likely to hit ' +
-            'rate_limit or budget_exhausted, and it also widens how long the CLI is ' +
-            'allowed to run. Use mid for normal work, low for clearly simple tasks; ' +
-            'high only with a specific reason to expect mid will be insufficient; apex ' +
-            'only for work that must run autonomously across many steps or files.',
+          'Optional override for this turn; omit to keep session tier. Prefer high for most work; ' +
+            'use low/mid for bounded work. Use apex only when high cannot handle exceptionally difficult ' +
+            'or tens-of-minutes autonomous work.',
         ),
         project_root: z
           .string()
@@ -112,24 +99,18 @@ export function createServer(version: string): McpServer {
     McpToolName.STOP_CONVERSATION,
     {
       description:
-        'Force-stop provider CLI calls this session started and that are still running. ' +
-        'Ending the agent or skill that made the call does NOT stop the CLI — it keeps running until a ' +
-        'liveness limit expires (up to hours on a high tier), which is what this tool exists to prevent. ' +
-        'The kill is immediate and covers the processes the CLI spawned in turn: work in progress is lost ' +
-        'and no partial output is returned, so call it when the answer is no longer wanted. ' +
-        'A count of 0 means nothing matched — already finished, or started by another session — not an error.',
+        'Provider CLIs outlive their caller. Stop matching runs and child processes immediately; ' +
+        'in-progress work is lost. A count of 0 means no running match.',
       inputSchema: {
         session_id: z
           .string()
           .uuid()
           .optional()
           .describe(
-            'Stop only this session. A session_id is known only after a call returns, so a call that is ' +
-              'still running usually cannot be named this way — filter by provider, or omit both to stop everything.',
+            'Stop one session. If an in-flight start has not returned its ID, filter by provider or omit both filters.',
           ),
         provider: ProviderSchema.optional().describe(
-          "Stop only this provider's running calls. Use it to stop one participant while parallel calls to " +
-            'the other providers keep going.',
+          'Stop all running calls for one provider; calls to other providers continue.',
         ),
       },
       annotations: {
@@ -145,8 +126,7 @@ export function createServer(version: string): McpServer {
     McpToolName.OPEN_SETTINGS,
     {
       description:
-        'Open the cennad settings UI in a local browser to configure provider ratio, intervention strength, ' +
-        'routing keywords, defaults, and permission flags. No arguments; returns a localhost URL.',
+        'Open the local cennad settings UI. No arguments; returns a localhost URL.',
       inputSchema: {},
       annotations: {
         readOnlyHint: false,

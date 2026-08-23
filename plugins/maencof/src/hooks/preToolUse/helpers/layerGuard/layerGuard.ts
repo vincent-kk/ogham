@@ -1,8 +1,10 @@
 /**
  * @file layerGuard.ts
- * @description PreToolUse Hook — Warn when modifying Layer 1 (01_Core/) files
+ * @description PreToolUse Hook — Guard Layer 1 (01_Core/) file mutations
  * Guides modification through the identity-guardian agent
  */
+import { canonicalizeTargetPathSync } from '@ogham/cross-platform';
+
 import { isLayer1Path } from '../../../../types/layer.js';
 import { isInsideMaencofVault } from '../../../shared/isMaencofVault.js';
 
@@ -24,7 +26,7 @@ export interface PreToolUseResult {
 
 /**
  * Layer Guard Hook handler.
- * Warns when Write/Edit tools attempt to modify Layer 1 (01_Core/) files.
+ * Blocks Write/Edit/Delete attempts that mutate Layer 1 (01_Core/) files.
  * Always passes through if not in a maencof vault.
  */
 export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
@@ -38,7 +40,10 @@ export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
   const filePath = input.tool_input?.file_path ?? input.tool_input?.path ?? '';
   if (!filePath) return { continue: true };
 
-  if (isLayer1Path(filePath))
+  const canonicalPath = canonicalizeTargetPathSync(cwd, filePath, {
+    preserveTerminalEntry: input.tool_name === 'Delete',
+  });
+  if (isLayer1Path(canonicalPath))
     return {
       continue: false,
       reason: [

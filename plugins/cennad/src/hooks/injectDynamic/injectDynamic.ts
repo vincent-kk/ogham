@@ -15,6 +15,7 @@ export function buildDynamicPayload(
 ): string {
   if (!PROVIDER_ORDER.some((p) => config.ratio[p].enabled))
     return '[cennad] No provider enabled — run /cennad:setup.';
+  if (counter.status === 'unidentified') return '';
 
   const electable = electableProviders(config.ratio, self);
   const lanes: RatioLane[] = PROVIDER_ORDER.map((p) => ({
@@ -25,13 +26,18 @@ export function buildDynamicPayload(
   }));
   const total = lanes.reduce((sum, lane) => sum + lane.count, 0);
 
-  const gap = underShare(lanes);
-  const state =
-    total === 0
-      ? '[cennad] No delegations yet this session.'
-      : `[cennad] Calls: ${lanes
-          .map((lane) => `${lane.name} ${lane.count}`)
-          .join(' · ')} (total ${total})${gap === '' ? '' : ` · ${gap}`}`;
+  let state: string;
+  if (counter.status !== 'measured')
+    state = `[cennad] Delegation counts unavailable (${counter.status}).`;
+  else {
+    const gap = underShare(lanes);
+    state =
+      total === 0
+        ? '[cennad] No delegations yet this session.'
+        : `[cennad] Calls: ${lanes
+            .map((lane) => `${lane.name} ${lane.count}`)
+            .join(' · ')} (total ${total})${gap === '' ? '' : ` · ${gap}`}`;
+  }
 
   if (electable.length === 0)
     return `${state}\nEvery enabled provider is crosscheck-only here; nothing is auto-routed.`;

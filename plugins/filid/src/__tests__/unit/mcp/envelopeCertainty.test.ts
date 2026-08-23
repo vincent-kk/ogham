@@ -112,19 +112,13 @@ function snapshotWithCertainties(
 describe('envelope certainty', () => {
   it('keeps fractal scan exact when diagnostics only restate document findings', () => {
     expect(
-      resolveFractalScanCertainty(
-        EXACT_SNAPSHOT,
-        DOCUMENT_FINDING_DIAGNOSTICS,
-      ),
+      resolveFractalScanCertainty(EXACT_SNAPSHOT, DOCUMENT_FINDING_DIAGNOSTICS),
     ).toBe(ANALYSIS_CERTAINTIES.EXACT);
   });
 
   it('keeps config warnings indeterminate', () => {
     expect(
-      resolveFractalScanCertainty(
-        EXACT_SNAPSHOT,
-        CONFIG_WARNING_DIAGNOSTICS,
-      ),
+      resolveFractalScanCertainty(EXACT_SNAPSHOT, CONFIG_WARNING_DIAGNOSTICS),
     ).toBe(ANALYSIS_CERTAINTIES.INDETERMINATE);
   });
 

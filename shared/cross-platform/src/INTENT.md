@@ -1,23 +1,9 @@
-# cross-platform
+# cross-platform — 공개 OS 호환성 소스 경계
 
 ## Purpose
 
 `src/`는 `@ogham/cross-platform`의 공개 소스 루트다. 하위 fractal의
 OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
-
-## Structure
-
-| Path            | Role                                  |
-| --------------- | ------------------------------------- |
-| `index.ts`      | 구체 소유 파일의 이름 있는 재노출     |
-| `filesystem/`   | 읽기·원자 쓰기·잠금·symlink 검사      |
-| `paths/`        | 상태 루트와 portable 경로 연산        |
-| `hostRegistry/` | 호스트 테이블과 명시적 호스트 해석    |
-| `hostPaths/`    | 런타임 프로젝트/플러그인 좌표         |
-| `instructions/` | 마커 문서 순수 문자열 연산            |
-| `configScope/`  | user·project 설정 계층 해석·병합·쓰기 |
-| `spawn/`        | 외부 CLI 실행                         |
-| 그 밖의 `*/`    | 훅·바이너리·shim·launcher 호환 어댑터 |
 
 ## Conventions
 

@@ -25,7 +25,7 @@
 
 ### AC-sibling-barrel-crossing — 형제 경계 통과
 
-- 하위 fractal 이 부모 배럴(`../index.js`)을 import 하지 않는다.
+- 하위 fractal 이 부모 집합 배럴을 import 하여 형제 경계를 우회하지 않는다.
 
 ### AC-schema-location — 스키마 위치
 
@@ -45,4 +45,4 @@
 
 ## Last Updated
 
-2026-07-30 — 레이어 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.
+2026-08-23 — 형제 경계 수용 기준에서 문서 위치에 종속된 경로 표현을 제거했다.

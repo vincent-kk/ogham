@@ -2,6 +2,10 @@ import { rm } from 'node:fs/promises';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import {
+  installFakeBinary,
+  prependToPath,
+} from '../../../../__tests__/fixtures/fakeBinary.js';
 import { DEFAULT_CONFIG } from '../../../../constants/defaults.js';
 import { CENNAD_HOME } from '../../../../constants/paths.js';
 import { saveConfig } from '../../../../core/configManager/index.js';
@@ -10,10 +14,6 @@ import {
   createSession,
   getSession,
 } from '../../../../core/sessionStore/index.js';
-import {
-  installFakeBinary,
-  prependToPath,
-} from '../../../../__tests__/fixtures/fakeBinary.js';
 import { handleContinueConversation } from '../continueConversation.js';
 
 const FAKE_CODEX = `#!/usr/bin/env node

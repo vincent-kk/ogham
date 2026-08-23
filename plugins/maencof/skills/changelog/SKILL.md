@@ -16,6 +16,8 @@ Curates changes in watched paths into daily changelog documents (`02_Derived/cha
 
 Recording is deferred and retroactive by design. Nothing blocks a session; unrecorded changes are preserved by git and surfaced as a one-line SessionStart advisory until curated.
 
+Before detecting changes, load `../.shared/host-configuration.md`. Copy its complete generated changelog watched pathspec into both git commands below; do not reconstruct host paths or state-root environment overrides inside this skill. The all-host list is intentional so a host switch cannot hide earlier configuration changes.
+
 ## When to Use This Skill
 
 - When the SessionStart advisory reports unrecorded watched-path changes
@@ -24,13 +26,7 @@ Recording is deferred and retroactive by design. Nothing blocks a session; unrec
 
 ## Watched Paths
 
-| Path              | Description                                   |
-| ----------------- | --------------------------------------------- |
-| `01_Core/`        | Core identity documents                       |
-| `02_Derived/`     | Derived knowledge (excludes changelog itself) |
-| `.claude/agents/` | AI agent configuration                        |
-| `.claude/rules/`  | AI behavior rules                             |
-| `CLAUDE.md`       | Project instructions                          |
+The canonical list is the **Changelog watched pathspec** section of `../.shared/host-configuration.md`. Use every entry exactly as generated; changelog output itself remains excluded in Step 2.
 
 ## Changelog Categories
 
@@ -72,13 +68,13 @@ Two complementary sources; exclude anything under `02_Derived/changelog/` from b
 
 ```bash
 VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
-git -C "$VAULT" status --porcelain -- 01_Core/ 02_Derived/ .claude/agents/ .claude/rules/ CLAUDE.md
+git -C "$VAULT" status --porcelain -- <watched-pathspec-from-shared-reference>
 ```
 
 **b. Committed but not yet curated** (only when `lastCuratedAt` is not null):
 
 ```bash
-git -C "$VAULT" log --since="<lastCuratedAt>" --date=short --pretty=format:"%ad %h %s" --name-status -- 01_Core/ 02_Derived/ .claude/agents/ .claude/rules/ CLAUDE.md
+git -C "$VAULT" log --since="<lastCuratedAt>" --date=short --pretty=format:"%ad %h %s" --name-status -- <watched-pathspec-from-shared-reference>
 ```
 
 If both are empty, report "No changes to record.", still perform Step 6 (advance the cursor, clear stale pending), and exit.

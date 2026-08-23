@@ -4,10 +4,14 @@ import type { Counter, Provider } from '../../../types/index.js';
 
 import { getCounter } from './getCounter.js';
 
-export async function incrementCounter(provider: Provider): Promise<Counter> {
+export async function incrementCounter(
+  provider: Provider,
+): Promise<Counter | null> {
   const current = await getCounter();
+  if (current === null) return null;
+
   const next: Counter = {
-    parent_pid: current.parent_pid,
+    host_session_id: current.host_session_id,
     codex: current.codex + (provider === 'codex' ? 1 : 0),
     antigravity: current.antigravity + (provider === 'antigravity' ? 1 : 0),
     claude: current.claude + (provider === 'claude' ? 1 : 0),

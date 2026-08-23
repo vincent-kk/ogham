@@ -84,4 +84,24 @@ describe("lintHookMatchers", () => {
       ),
     ).toEqual([]);
   });
+
+  it("warns when an exact Skill matcher cannot fire on Codex", () => {
+    const diagnostics = lintHookMatchers(
+      facts({ hooks: { PostToolUse: [{ matcher: "Bash|Skill" }] } }),
+    );
+    expect(diagnostics).toContainEqual(
+      expect.objectContaining({
+        level: "warning",
+        code: "codex-unsupported-tool-matcher",
+      }),
+    );
+  });
+
+  it("does not treat a Skill-prefixed tool as the exact Skill matcher", () => {
+    expect(
+      lintHookMatchers(
+        facts({ hooks: { PostToolUse: [{ matcher: "SkillRunner" }] } }),
+      ),
+    ).toEqual([]);
+  });
 });

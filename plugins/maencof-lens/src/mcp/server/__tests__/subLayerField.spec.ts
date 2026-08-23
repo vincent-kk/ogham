@@ -7,7 +7,7 @@
  * `subLayer` 와 문자열 비교만 하므로 아무것도 맞지 않아 에러 없이 빈 결과가 된다.
  * 그래서 거절 여부를 핸들러가 아니라 스키마에서 확인한다.
  */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { ZodObject, ZodRawShape } from "zod";
 
 import { McpToolName } from "../../../constants/mcpToolNames.js";
@@ -42,12 +42,14 @@ const L3_SUB_LAYERS = ["relational", "structural", "topical"];
 const RETIRED_L5_SUB_LAYERS = ["buffer", "boundary"];
 
 describe("sub_layer 입력 스키마", () => {
-  beforeEach(() => {
-    schemas.clear();
+  let collected: Map<string, InputSchema>;
+
+  beforeAll(async () => {
+    collected = await collectSchemas();
   });
 
-  it("search 는 L3 서브레이어를 받고 폐기된 L5 값을 거절한다", async () => {
-    const schema = (await collectSchemas()).get(McpToolName.SEARCH);
+  it("search 는 L3 서브레이어를 받고 폐기된 L5 값을 거절한다", () => {
+    const schema = collected.get(McpToolName.SEARCH);
     expect(schema).toBeDefined();
 
     for (const value of L3_SUB_LAYERS)
@@ -59,8 +61,8 @@ describe("sub_layer 입력 스키마", () => {
       expect(() => schema!.parse({ seed: ["s"], sub_layer: value })).toThrow();
   });
 
-  it("context 는 L3 서브레이어를 받고 폐기된 L5 값을 거절한다", async () => {
-    const schema = (await collectSchemas()).get(McpToolName.CONTEXT);
+  it("context 는 L3 서브레이어를 받고 폐기된 L5 값을 거절한다", () => {
+    const schema = collected.get(McpToolName.CONTEXT);
     expect(schema).toBeDefined();
 
     for (const value of L3_SUB_LAYERS)
@@ -72,8 +74,7 @@ describe("sub_layer 입력 스키마", () => {
       expect(() => schema!.parse({ query: "q", sub_layer: value })).toThrow();
   });
 
-  it("두 툴이 같은 스키마 인스턴스를 공유해 허용값이 갈라질 수 없다", async () => {
-    const collected = await collectSchemas();
+  it("두 툴이 같은 스키마 인스턴스를 공유해 허용값이 갈라질 수 없다", () => {
     const search = collected.get(McpToolName.SEARCH);
     const context = collected.get(McpToolName.CONTEXT);
 

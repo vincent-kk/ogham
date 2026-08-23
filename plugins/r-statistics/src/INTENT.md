@@ -2,17 +2,6 @@
 
 `@ogham/r-statistics` MCP 서버 소스 루트. 도메인 무지 통계 실행 레이어: LLM 이 생성한 R 코드를 헤드리스 Rscript 로 안전 실행하고, 통계 hard gate(assert)를 결정론적으로 강제한다. 설계 명세는 [`.metadata/r-statistics/`](../../../.metadata/r-statistics/).
 
-## Structure
-
-| Directory    | Role                                                      |
-| ------------ | --------------------------------------------------------- |
-| `types/`     | `enums.ts`(object enum) + 실행/assert 인터페이스 (organ)  |
-| `constants/` | paths·defaults·messages (organ)                           |
-| `core/`      | rRuntime / workspace / commandGate / jobStore (실행 기반) |
-| `mcp/`       | MCP 서버 + 도구 4종 + serverEntry                         |
-| `lib/`       | atomicWrite, logger (organ)                               |
-| `utils/`     | isoNow, randomId, sha256File, detectPlatform 등 (organ)   |
-
 ## Conventions
 
 - ESM (`"type": "module"`), import 확장자 `.js`
@@ -38,8 +27,3 @@
 - `version.ts` 직접 수정
 - 통계 정책을 run_r 에, 실행을 assert 에 누설
 - 순환 의존성 도입
-
-## Dependencies
-
-- Node.js >= 20, TypeScript 5.7
-- `@modelcontextprotocol/sdk`, `zod`

@@ -85,52 +85,44 @@ const declaredInternalTargets = new Set([
   ...declaredNestedEntryPointTargets(sourceRoot),
 ]);
 
-const boundarySources = [
-  "configScope/layers/operations/resolveConfigLayers.ts",
-  "configScope/layers/operations/writeConfigLayer.ts",
-  "configScope/layers/utils/readLayer.ts",
-  "hooks/error/errorLogPath.ts",
-  "hostPaths/absolute/toAbsoluteRoot.ts",
-  "paths/state/hostStateRoot.ts",
-  "paths/state/stateRoot.ts",
-] as const;
-
 describe("cross-platform sibling boundaries", () => {
-  it.each(boundarySources)(
-    "%s uses declared sibling entry points",
-    (sourcePath) => {
-      expect(rootReexports.violations).toEqual([]);
+  it.each([
+    "configScope/layers/operations/resolveConfigLayers.ts",
+    "configScope/layers/operations/writeConfigLayer.ts",
+    "configScope/layers/utils/readLayer.ts",
+    "hooks/error/errorLogPath.ts",
+    "hostPaths/absolute/toAbsoluteRoot.ts",
+    "paths/state/hostStateRoot.ts",
+    "paths/state/stateRoot.ts",
+  ])("%s uses declared sibling entry points", (sourcePath) => {
+    expect(rootReexports.violations).toEqual([]);
 
-      const absoluteSourcePath = resolve(sourceRoot, sourcePath);
-      const source = readFileSync(absoluteSourcePath, "utf8");
-      const importerModule = sourcePath.split("/")[0];
-      const violations = [
-        ...source.matchAll(/\bfrom\s+["']([^"']+)["']/g),
-      ].flatMap((match) => {
-        const specifier = match[1];
-        if (!specifier?.startsWith(".")) return [];
+    const absoluteSourcePath = resolve(sourceRoot, sourcePath);
+    const source = readFileSync(absoluteSourcePath, "utf8");
+    const importerModule = sourcePath.split("/")[0];
+    const violations = [
+      ...source.matchAll(/\bfrom\s+["']([^"']+)["']/g),
+    ].flatMap((match) => {
+      const specifier = match[1];
+      if (!specifier?.startsWith(".")) return [];
 
-        const targetPath = relative(
-          sourceRoot,
-          resolve(
-            dirname(absoluteSourcePath),
-            specifier.replace(/\.js$/, ".ts"),
-          ),
-        );
-        const normalizedTargetPath = normalizeImportTarget(targetPath);
-        const targetModule = normalizedTargetPath.split("/")[0];
-        if (
-          targetModule === importerModule ||
-          declaredInternalTargets.has(normalizedTargetPath)
-        )
-          return [];
+      const targetPath = relative(
+        sourceRoot,
+        resolve(dirname(absoluteSourcePath), specifier.replace(/\.js$/, ".ts")),
+      );
+      const normalizedTargetPath = normalizeImportTarget(targetPath);
+      const targetModule = normalizedTargetPath.split("/")[0];
+      if (
+        targetModule === importerModule ||
+        declaredInternalTargets.has(normalizedTargetPath)
+      )
+        return [];
 
-        return [`${sourcePath} -> ${specifier}`];
-      });
+      return [`${sourcePath} -> ${specifier}`];
+    });
 
-      expect(violations).toEqual([]);
-    },
-  );
+    expect(violations).toEqual([]);
+  });
 
   it("normalizes Windows separators before matching declared internal targets", () => {
     expect(

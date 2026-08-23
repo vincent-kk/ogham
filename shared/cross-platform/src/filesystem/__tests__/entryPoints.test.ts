@@ -30,6 +30,9 @@ describe("filesystem package entry points", () => {
     expect(rootSource).toContain(
       'export { readUtf8FileIfExistsSync } from "./filesystem/read/readUtf8FileIfExistsSync.js";',
     );
+    expect(rootSource).toContain(
+      'export { canonicalizeTargetPathSync } from "./filesystem/read/canonicalizeTargetPathSync.js";',
+    );
     expect(
       existsSync(resolve(packageRoot, "src", "filesystem", "index.ts")),
     ).toBe(true);

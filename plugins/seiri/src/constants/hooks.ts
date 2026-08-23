@@ -35,10 +35,10 @@ export const HookName = {
 /**
  * Host tool names the PostToolUse matchers select on.
  *
- * `hooks.json` cannot import this file, so each name is stated twice: once
- * as a matcher there, once as the payload check here — the hook is
- * registered per tool and still verifies what it received. The wiring test
- * keeps the two copies in step.
+ * `hooks.json` cannot import this file, so each name is stated twice: once as
+ * a matcher there, once as the payload check here. `Skill` is a Claude-only
+ * observed tool; the plugin compiler removes it from Codex's generated hook
+ * manifest. The wiring test keeps both host surfaces in step.
  */
 export const HostTool = {
   BASH: 'Bash',

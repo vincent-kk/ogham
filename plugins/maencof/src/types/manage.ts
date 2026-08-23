@@ -5,12 +5,7 @@
 
 /** 관리 모드 */
 export type ManageMode =
-  | 'list'
-  | 'report'
-  | 'enable'
-  | 'disable'
-  | 'delete'
-  | 'create';
+  'list' | 'report' | 'enable' | 'disable' | 'delete' | 'create';
 
 /** 스킬 라이프사이클 액션 */
 export type SkillLifecycleAction = 'enable' | 'disable' | 'reload';

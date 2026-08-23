@@ -6,6 +6,7 @@
 - 검증 순서는 공유 `@ogham/http-kit` 을 따른다: loopback Host(DNS rebinding 차단) → one-time token → POST Origin(CSRF) → `application/json` 강제.
 - 토큰·Origin 검증을 이 모듈에서 재구현하지 않는다.
 - 응답에 토큰을 echo 하지 않는다.
+- `GET /`은 user config layer 경로에서 파생한 active cennad home을 페이지 상태로 주입한다.
 
 ## API Contracts
 
@@ -26,6 +27,10 @@
 
 - 응답 본문에 토큰이 포함되지 않는다.
 
+### AC-active-home-source — 경로 소스 일치
+
+- 페이지가 표시하는 active home은 동일 요청의 `ConfigScopeState.paths.user`와 같은 resolver 결과에서 파생된다.
+
 ## Last Updated
 
-2026-08-23 — 요청 관측 시점 기준의 idle 재설정 계약을 명확히 했다.
+2026-08-23 — idle 재설정과 active cennad home 주입 계약을 명확히 했다.

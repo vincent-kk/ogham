@@ -148,12 +148,7 @@ export {
 export { atomicWrite, checkExecutable, logger } from './lib/index.js';
 export type { AtomicWriteOptions, ExecutableStatus } from './lib/index.js';
 
-export {
-  getParentPid,
-  isFileNotFound,
-  isoNow,
-  isRecord,
-} from './utils/index.js';
+export { isFileNotFound, isoNow, isRecord } from './utils/index.js';
 
 export {
   configLayers,

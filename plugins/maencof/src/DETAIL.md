@@ -8,6 +8,7 @@
 - 서브레이어 허용값은 `types/frontmatter.ts` 의 `SubLayerSchema` 하나가 소유한다. frontmatter 검증도 MCP 도구 스키마도 이 스키마에서 파생하며, 값 목록을 리터럴로 다시 적지 않는다 — `SubLayer` 타입만 좁히고 어딘가의 리터럴을 놓치면 그 자리는 폐기된 값을 계속 광고한다.
 - `version.ts` 는 빌드 시 `scripts/injectVersion.mjs` 가 생성한다. 직접 수정하지 않는다.
 - `bridge/` 산출물은 esbuild 가 만든다. 소스는 `src/hooks/<event>/<event>.entry.ts` 와 `src/mcp/serverEntry/serverEntry.ts` 이며 산출물을 손대지 않는다.
+- `skills/.shared/host-configuration.md` 는 `core/hostConfigurationSurfaces` renderer가 만든다. canonical configuration skill과 changelog 감시는 같은 registry 결과를 소비하며 생성물을 직접 수정하지 않는다.
 - vault 아키텍처는 v3(L3 sublayer + 평면 L5 임시 수용소 + 레이어 직교 hub 속성)를 기대한다. 기대 버전과 다른 vault 는 `core/architectureMigrator` 가 마이그레이션한다.
 - 세션 마감은 MCP 서버 수명주기가 소유한다. 매 턴 UserPromptSubmit `session-touch` 가 `lastActivityAt` · `usageSnapshot` 을 기록하고, 서버 shutdown(동기 정밀)과 다음 부팅 `bootSweep`(보장)이 `sweepStaleSessions` 로 레코드를 마감하며 workIndex 당일 digest 를 `buildDailyDigest` 로 재생성한다.
 - 세션 종료 기록의 주소는 sessionStore 하나다. `.maencof-meta/sessions/*.md` 나 dailynote `.md` 에는 기록하지 않는다.
@@ -33,11 +34,12 @@
 
 ### 생성·번들 산출물
 
-| 산출물                  | 생성기                       | 소스                                 |
-| ----------------------- | ---------------------------- | ------------------------------------ |
-| `src/version.ts`        | `scripts/injectVersion.mjs`  | `package.json` 버전                  |
-| `bridge/<event>.mjs`    | `scripts/buildHooks.mjs`     | `src/hooks/<event>/<event>.entry.ts` |
-| `bridge/mcp-server.cjs` | `scripts/buildMcpServer.mjs` | `src/mcp/serverEntry/serverEntry.ts` |
+| 산출물                                 | 생성기                                      | 소스                                  |
+| -------------------------------------- | ------------------------------------------- | ------------------------------------- |
+| `src/version.ts`                       | `scripts/injectVersion.mjs`                 | `package.json` 버전                   |
+| `bridge/<event>.mjs`                   | `scripts/buildHooks.mjs`                    | `src/hooks/<event>/<event>.entry.ts`  |
+| `bridge/mcp-server.cjs`                | `scripts/buildMcpServer.mjs`                | `src/mcp/serverEntry/serverEntry.ts`  |
+| `skills/.shared/host-configuration.md` | `scripts/syncHostConfigurationReference.ts` | `src/core/hostConfigurationSurfaces/` |
 
 ## Acceptance Criteria
 
@@ -64,7 +66,11 @@
 
 ### AC-generated-not-handwritten — 생성물 비수정
 
-- `version.ts` 와 `bridge/` 산출물이 생성기 출력과 일치한다.
+- `version.ts`, `bridge/` 산출물, shared host-configuration reference가 생성기 출력과 일치한다.
+
+### AC-host-configuration-single-source — host 설정 표면 단일 소유
+
+- canonical configuration skill, MCP instruction manager 교차 검증, changelog 감시가 `hostConfigurationSurfaces` 계약과 일치한다.
 
 ### AC-session-close-owned-by-mcp — 세션 마감 소유권
 
@@ -88,4 +94,4 @@
 
 ## Last Updated
 
-2026-08-04 — 서브레이어 값 목록의 단일 소유를 계약으로 적고 `SubLayerSchema` 를 배럴 표면에 추가했다.
+2026-08-23 — host configuration registry와 생성 skill reference를 생성물 계약에 추가했다.

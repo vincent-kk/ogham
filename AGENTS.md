@@ -190,7 +190,7 @@ A functionally working but different result is a failed restructure. A plan repo
 
 ## 5. The document changes before the code does
 
-Contracts lead; implementations follow. Before implementation that touches a fractal: identify every affected fractal; update each affected DETAIL contract, and INTENT when a public interface or boundary changes; implement the minimum change — for new behavior or a fix, first write a check and watch it fail for the intended reason; run scoped verification and the structural scan (warnings count as findings) and record the result and any deviation from the plan before the next review seam.
+Contracts lead; implementations follow. Before changing a fractal, update DETAIL and update INTENT only when its public boundary changes; for new behavior or a fix, first watch a focused check fail for the intended reason. Run Filid scans and validations once at the pull-request or merge-track seam, after implementation and accepted review fixes. Run them earlier only when explicitly requested; ordinary development checks and edits never trigger them. At the seam, record warnings as findings and note any deviation from the plan.
 
 ---
 

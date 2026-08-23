@@ -31,15 +31,27 @@ describe("meta.yaml ↔ ruleset.ts consistency", () => {
       expect(() => readMeta(technique)).not.toThrow();
   });
 
-  it.each(Object.entries(TECHNIQUE_RULES))(
-    "%s mirrors family + assumption ids in meta.yaml",
-    (technique, rule) => {
-      const yaml = readMeta(technique);
-      expect(scalar(yaml, "technique")).toBe(technique);
-      expect(scalar(yaml, "family")).toBe(rule.family);
-      expect(assumptionIds(yaml)).toEqual(
-        rule.assumptions.map((a) => a.id).sort(),
-      );
-    },
-  );
+  // Driven by the ruleset rather than a mirrored technique list, so a technique
+  // added to TECHNIQUE_RULES is covered without editing this file. Every drift
+  // is collected before asserting, so one run names all of them.
+  it("mirrors family + assumption ids in meta.yaml for every technique", () => {
+    const drift = Object.entries(TECHNIQUE_RULES).flatMap(
+      ([technique, rule]) => {
+        const yaml = readMeta(technique);
+        const expectedAssumptions = rule.assumptions.map((a) => a.id).sort();
+        const problems: string[] = [];
+        if (scalar(yaml, "technique") !== technique)
+          problems.push(`technique=${scalar(yaml, "technique")}`);
+        if (scalar(yaml, "family") !== rule.family)
+          problems.push(`family=${scalar(yaml, "family")} want ${rule.family}`);
+        const ids = assumptionIds(yaml);
+        if (ids.join(",") !== expectedAssumptions.join(","))
+          problems.push(
+            `assumptions=${ids.join("|")} want ${expectedAssumptions.join("|")}`,
+          );
+        return problems.length ? [`${technique}: ${problems.join("; ")}`] : [];
+      },
+    );
+    expect(drift).toEqual([]);
+  });
 });

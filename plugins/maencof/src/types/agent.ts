@@ -28,13 +28,7 @@ export interface LayerPermission {
 
 /** 에이전트 작업 유형 */
 export type AgentOperation =
-  | 'read'
-  | 'create'
-  | 'update'
-  | 'delete'
-  | 'move'
-  | 'link'
-  | 'bulk-modify';
+  'read' | 'create' | 'update' | 'delete' | 'move' | 'link' | 'bulk-modify';
 
 /** 에이전트 접근 매트릭스 */
 export interface AgentAccessMatrix {

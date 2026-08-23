@@ -1,19 +1,10 @@
 ## Purpose
 
-MCP setup tool with local HTTP server for Atlassian auth configuration UI.
-
-## Structure
-
-| Directory           | Role                                                                   |
-| ------------------- | ---------------------------------------------------------------------- |
-| `webServer/`        | node:http server, closure pattern, 5min auto-shutdown                  |
-| `connectionTester/` | Jira/Confluence connection test via core modules                       |
-| `utils/`            | `loadSettingsHtml` — reads `public/settings.html` from disk at runtime |
-| `__tests__/`        | Unit tests for all sub-organs                                          |
+MCP setup tool with a local HTTP UI that completes only after the selected configuration scope is persisted.
 
 ## Conventions
 
-- Server instance via closure/return value `{ url, close }` only
+- Server instance via closure/return value `{ url, close, completion }` only
 - Reuse core modules: configManager, authManager, httpClient, environmentResolver
 - FE code lives in `src/mcp/pages/settings/` — HTTP API interface only
 - Tool name stays `setup` (public MCP interface); only the page/asset layer is named `settings`. Renaming the tool is an interface change — handle separately.
@@ -26,6 +17,7 @@ MCP setup tool with local HTTP server for Atlassian auth configuration UI.
 - Test connection before saving config
 - Auto-shutdown server after 5 minutes of inactivity
 - Bind to 127.0.0.1 only
+- Return `config_path` only after config and credentials persist successfully
 
 ### Ask first
 
@@ -38,3 +30,4 @@ MCP setup tool with local HTTP server for Atlassian auth configuration UI.
 - Use external HTTP frameworks (Express, Koa)
 - Use module-level mutable state
 - Include dev-only code (mock-api.js) in production build
+- Treat server startup alone as completed setup

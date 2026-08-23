@@ -1,1 +1,1 @@
-export * from './sessionStart.js';
+export { orchestrateSessionStart } from './sessionStart.js';

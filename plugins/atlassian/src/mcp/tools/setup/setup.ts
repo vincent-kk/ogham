@@ -42,9 +42,12 @@ export async function handleSetup(params: SetupParams): Promise<SetupResult> {
 
   openBrowser(handle.url);
 
+  const completion = await handle.completion;
+  if (!completion.success) return completion;
+
   return {
-    success: true,
-    message: `Setup server started (${mode} mode). Browser opened automatically.`,
+    ...completion,
+    message: `${completion.message} (${mode} mode).`,
     url: handle.url,
   };
 }

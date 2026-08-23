@@ -19,7 +19,7 @@
 
 ### AC-hooks-readonly — 읽기 전용
 
-- 훅 실행이 `config.json`·`runtime/counter.json` 을 쓰지 않는다.
+- 훅 실행이 구성과 런타임 카운터 파일을 쓰지 않는다.
 
 ### AC-hooks-never-block — 비차단
 
@@ -39,4 +39,4 @@
 
 ## Last Updated
 
-2026-07-30 — 훅 계층 계약과 shared organ 직접 import 면책을 문서화했다.
+2026-08-23 — 읽기 전용 수용 기준을 실제 런타임 파일 소유권에 맞게 표현했다.

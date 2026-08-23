@@ -51,11 +51,11 @@ Scope it as narrowly as the situation allows: pass `session_id` when a run alrea
 
 ## Tier
 
-Capability labels only — the concrete model/effort mapping lives in cennad config (`/cennad:setup`); never name one here. A user-supplied `--tier` always wins. Otherwise pick from what the provider must DO, not from how hard the topic sounds:
+Capability labels only — the concrete model/effort mapping lives in cennad config (`/cennad:setup`); never name one here. A user-supplied `--tier` always wins. Otherwise use `high` for most delegated work, step down only when the scope is clearly bounded, and reserve `apex` for a rare extreme:
 
 - `low` — one lookup, one conversion, a short summary: retrieval or formatting, no design judgment.
-- `mid` — the default. One module's worth of implementation, review, or explanation, where the shape of the answer is already clear from the prompt.
-- `high` — judgment spanning several files or competing constraints: a design call, a root-cause hunt, a tradeoff with no obvious winner.
-- `apex` — the provider must carry out the work rather than describe it: a repository-wide refactor or migration, a task whose file list it has to discover for itself, or anything meant to keep going autonomously for tens of minutes. Costliest tier and the one that holds a rate-limit slot longest — choose it for scope and autonomy, never for topic difficulty alone.
+- `mid` — a clearly bounded implementation, review, or explanation task whose shape is already clear from the prompt.
+- `high` — the default for most work. Use it across several files or competing constraints, for design calls, root-cause hunts, tradeoffs, and difficult implementation; complexity alone does not justify `apex`.
+- `apex` — a rare exception. Use it only when `high` is credibly insufficient because a repository-wide task must run autonomously for tens of minutes or the work is exceptionally difficult at that scale. It is the costliest tier and holds a rate-limit slot longest. When unsure, use `high`.
 
 Send nothing on `--continue` unless the user asked: cennad restores the session's own tier, and changing it mid-thread swaps the model under the conversation.

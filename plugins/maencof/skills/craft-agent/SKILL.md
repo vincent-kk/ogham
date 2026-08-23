@@ -1,7 +1,7 @@
 ---
 name: craft-agent
 user-invocable: true
-description: '[maencof:craft-agent] Creates, edits, validates, or lists Claude Code subagent definitions. Supports four modes: CREATE, EDIT, VALIDATE, and LIST for full agent lifecycle management.'
+description: '[maencof:craft-agent] Creates, edits, validates, or lists subagent definitions for the current host. Supports CREATE, EDIT, VALIDATE, and LIST for full agent lifecycle management.'
 argument-hint: '[request describing what to create/edit/validate/list]'
 version: '2.0.0'
 complexity: complex
@@ -13,6 +13,8 @@ plugin: maencof
 # Craft Agent
 
 > Standalone adaptation of the subagent-constructor concept, bundled for maencof.
+
+Before resolving scope or format, load `../.shared/host-configuration.md` and select the current runtime host row. That generated reference is canonical: do not reconstruct project or user state roots inside this skill. The detailed frontmatter workflow below is the preserved Claude branch. On Codex, use the selected `.toml` directory, load `codex-reference.md`, write standalone TOML with required `name`, `description`, and `developer_instructions`, and validate against that schema instead of Markdown frontmatter.
 
 ## When to Use
 
@@ -66,13 +68,13 @@ Claude automatically invokes this skill when:
 
 **Triggers**: "list agents", "show agents", "inventory agents"
 
-1. **Scan Directories**: Check `~/.claude/agents/` and `.claude/agents/`
+1. **Scan Directories**: Check the project and user agent directories selected by the shared host reference
 2. **Parse Each Agent**: Extract name, description, model, tools
 3. **Display Inventory**: Formatted table of all available agents
 
 ## Quick Reference
 
-### Frontmatter Fields
+### Claude Frontmatter Fields
 
 | Field             | Required | Description                                                                    |
 | ----------------- | -------- | ------------------------------------------------------------------------------ |
@@ -104,7 +106,7 @@ See **reference.md** Section 1 for complete field specifications and interaction
 | Architecture, deep analysis      | `opus`    | Maximum reasoning capability  |
 | Match parent conversation        | `inherit` | Context-appropriate (default) |
 
-### Scope Deployment
+### Claude Scope Deployment
 
 | Location            | Scope                | Priority    |
 | ------------------- | -------------------- | ----------- |
@@ -141,6 +143,10 @@ See **reference.md** Section 1 for complete field specifications and interaction
 Complete specification reference covering all frontmatter fields with interaction rules, full tool catalog, permission mode behaviors, hook event types and handler configuration, memory scopes, validation rules, and mode-specific workflows.
 
 Load when implementing configurations, resolving specification questions, or performing validation.
+
+### codex-reference.md
+
+Official Codex custom-agent TOML schema and validation rules. Load for every Codex CREATE, EDIT, VALIDATE, or LIST operation.
 
 ### examples.md
 
@@ -179,9 +185,9 @@ Before deployment, verify:
 - [ ] `description` field: `<example>` blocks for complex delegation (recommended)
 - [ ] No prompt injection vectors in system prompt
 - [ ] File saved to correct scope directory
-- [ ] File extension is `.md`
+- [ ] File extension matches the selected host (`.md` for Claude, `.toml` for Codex)
 
-## Workflow Example
+## Claude Workflow Example
 
 ```
 User: "Create a subagent that reviews TypeScript code for type safety"
