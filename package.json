@@ -40,6 +40,8 @@
     "rStatistics": "yarn workspace @ogham/r-statistics",
     "run:all": "yarn workspaces foreach -A --topological-dev run",
     "seiri": "yarn workspace @ogham/seiri",
+    "skills:format:frontmatter": "node scripts/formatSkillFrontmatter.mjs plugins",
+    "skills:format:frontmatter:check": "node scripts/formatSkillFrontmatter.mjs plugins --check",
     "sort:packages": "npx sort-package-json '**/package.json'",
     "tag:packages": "./scripts/tagPackages.sh",
     "test": "vitest",
