@@ -1,7 +1,7 @@
 ---
 name: review-plan
 user-invocable: true
-description: '[seiri:review-plan] Prove the plan before performing it. Use when a plan lands, before executing it — a plan is a set of claims about the repository, and claims want evidence.'
+description: 'Prove the plan before performing it. Use when a plan lands, before executing it — a plan is a set of claims about the repository, and claims want evidence.'
 argument-hint: '[path to the plan]'
 version: '0.1.0'
 complexity: moderate

@@ -1,8 +1,9 @@
 ---
 name: setup
 user-invocable: true
-description: "[maencof-lens:setup] Initialize and manage .maencof-lens/config.json for read-only vault access configuration. Supports vault registration, removal, default vault switching, and layer filter management through interactive setup or direct subcommands. Run this first before using lookup or brief skills."
-argument-hint: "[init | show | add NAME PATH | set-default NAME | set-layers NAME LAYERS | remove NAME]"
+disable-model-invocation: true
+description: "Initialize and manage .maencof-lens/config.json — register vaults, switch the default, and set layer filters for read-only access."
+argument-hint: "[init|show|add NAME PATH|set-default NAME|set-layers NAME LAYERS|remove NAME]"
 version: 1.1.0
 complexity: simple
 plugin: maencof-lens

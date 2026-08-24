@@ -2,7 +2,7 @@
 name: setup
 user-invocable: true
 disable-model-invocation: true
-description: "[maencof:setup] Runs the 7-stage maencof onboarding interview. Acts as a 'Professional Counselor' to dynamically understand and construct your Core Identity, values, boundaries, and AI persona through empathetic dialogue."
+description: 'Runs the 7-stage onboarding interview that creates your vault, Core Identity, AI companion persona, and initial index.'
 argument-hint: '[--step STAGE] [--reset]'
 version: '3.0.0'
 complexity: complex

@@ -1,7 +1,7 @@
 ---
 name: verify
 user-invocable: true
-description: '[seiri:verify] Evidence before claims. Use when about to say done, fixed, or passing — before committing, merging, or moving to the next task.'
+description: 'Evidence before claims. Use when about to say done, fixed, or passing — before committing, merging, or moving to the next task.'
 argument-hint: '[the claim to prove]'
 version: '0.1.0'
 complexity: simple

@@ -1,7 +1,7 @@
 ---
 name: receive-review
 user-invocable: true
-description: '[seiri:receive-review] Verify feedback against the code before implementing it. Use when review feedback arrives, before acting on any of it.'
+description: 'Verify feedback against the code before implementing it. Use when review feedback arrives, before acting on any of it.'
 argument-hint: '[the feedback]'
 version: '0.1.0'
 complexity: simple

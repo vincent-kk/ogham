@@ -1,7 +1,7 @@
 ---
 name: instruct
 user-invocable: true
-description: '[maencof:instruct] Adds or modifies AI instructions in the current host project instruction surface; on Claude it also splits oversized files into @import modules and manages CLAUDE.local.md overrides.'
+description: 'Adds or modifies AI instructions in the host project instruction surface; on Claude also splits oversized CLAUDE.md into @import modules and manages CLAUDE.local.md overrides. Use when editing project instructions.'
 argument-hint: '[instruction to add or modify]'
 version: '1.1.0'
 complexity: medium

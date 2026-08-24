@@ -1,7 +1,7 @@
 ---
 name: trace-cause
 user-invocable: true
-description: '[seiri:trace-cause] Trace a failure to where it started rather than where it surfaced. Use when a test fails, an error is thrown, or a fix did not hold.'
+description: 'Trace a failure to where it started rather than where it surfaced. Use when a test fails, an error is thrown, or a fix did not hold.'
 argument-hint: '[the failing test or symptom]'
 version: '0.1.0'
 complexity: moderate

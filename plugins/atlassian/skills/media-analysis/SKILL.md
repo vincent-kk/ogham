@@ -1,7 +1,7 @@
 ---
 name: media-analysis
 user-invocable: true
-description: '[atlassian:media-analysis] Analyze media attachments from Confluence/Jira. Downloads images/videos/GIFs, extracts keyframes via scene-sieve, and runs semantic analysis via `media` agent. Trigger: "analyze media", "media analysis", "미디어 분석", "영상 분석", "키프레임 추출"'
+description: 'Analyze media attachments from Confluence/Jira — downloads images/videos/GIFs, extracts keyframes via scene-sieve, and runs semantic analysis with the media agent. Use when asked to "analyze media" or "미디어 분석".'
 argument-hint: "<url-or-path> [--analyze] [--preset NAME] [--force]"
 version: "1.0.0"
 complexity: moderate

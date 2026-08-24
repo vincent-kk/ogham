@@ -1,7 +1,7 @@
 ---
 name: download
 user-invocable: true
-description: '[entrez:download] Download PMC Open Access full text (PDF/XML/TAR) for PMIDs/PMCIDs; report links for non-OA. Trigger: "download the pdf", "get full text", "전문 받아줘", "pdf 다운로드"'
+description: 'Download PMC Open Access full text (PDF/XML/TAR) for PMIDs/PMCIDs; report publisher links for non-OA. Use when asked to fetch full text or a PDF ("get full text", "전문 받아줘").'
 argument-hint: "[--format pdf|xml|tar] [--out <dir>] <pmid|pmcid ...>"
 version: "1.0.0"
 complexity: simple

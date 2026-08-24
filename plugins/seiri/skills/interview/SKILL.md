@@ -1,8 +1,7 @@
 ---
 name: interview
 user-invocable: true
-disable-model-invocation: true
-description: '[seiri:interview] Turn a vague request into acceptance criteria that can fail — bounded rounds of questions, ending in a written spec. Trigger: "interview me", "pin down the requirements", "요구사항 정리해줘"'
+description: 'Turn a vague request into acceptance criteria that can fail — bounded rounds of questions ending in a written spec.'
 argument-hint: '<the request to pin down>'
 version: '0.2.0'
 complexity: moderate

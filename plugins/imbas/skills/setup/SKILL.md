@@ -1,8 +1,9 @@
 ---
 name: setup
 user-invocable: true
-description: '[imbas:setup] Initialize .imbas/ via the browser settings page (provider, project ref, labels, languages, models, estimation coefficients in one form) and cache provider metadata as plain files. Supports subcommands: init, show, set-project, set-provider, set-language, refresh-cache, clear-temp, labels. Trigger: "setup imbas", "imbas 설정", "imbas init", "imbas labels"'
-argument-hint: '[init | show | set-project KEY | set-provider PROVIDER | set-language FIELD LANG | refresh-cache [KEY] | clear-temp | labels [show|edit|provision|sync]]'
+disable-model-invocation: true
+description: 'Initialize and manage .imbas/ via the browser settings page — provider, project, labels, languages, models, estimation coefficients.'
+argument-hint: '[init|show|set-project KEY|set-provider NAME|labels|refresh-cache|clear-temp]'
 version: '2.0.0'
 complexity: simple
 plugin: imbas

@@ -1,7 +1,7 @@
 ---
 name: cross-review
 user-invocable: true
-description: '[filid:cross-review] Review a committed change from independent FCA contract, structure, and verification perspectives, then adversarially arbitrate every finding.'
+description: 'Review a committed change from independent FCA contract, structure, and verification perspectives, then adversarially arbitrate every finding. Use after a branch has a PR, before resolve.'
 argument-hint: '[--base REF] [--force] [--cleanup]'
 version: '4.1.0'
 complexity: complex

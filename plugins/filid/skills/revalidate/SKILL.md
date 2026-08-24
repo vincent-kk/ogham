@@ -1,7 +1,7 @@
 ---
 name: revalidate
 user-invocable: true
-description: '[filid:revalidate] Re-measure the post-correction delta against the recorded resolve baseline, judge every rejection justification, and issue the final PASS or FAIL.'
+description: 'Re-measure the post-correction delta against the recorded resolve baseline, judge every rejection justification, and issue the final PASS or FAIL. Use after resolve corrections are committed.'
 argument-hint: '[--base REF]'
 version: '1.0.0'
 complexity: complex

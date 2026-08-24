@@ -1,7 +1,7 @@
 ---
 name: personal-status
 user-invocable: true
-description: '[maencof:personal-status] Views, resolves, and toggles the personal context — transient user states and recent personal topics (.maencof-meta/personal-context.json) that the companion weaves into conversation as subtle care.'
+description: 'Views, resolves, and toggles the personal context: transient user states and recent personal topics in .maencof-meta/personal-context.json. Use when inspecting what the companion knows or closing a resolved state.'
 argument-hint: '[--resolve <label>] [--enable|--disable]'
 version: '1.0.0'
 complexity: simple

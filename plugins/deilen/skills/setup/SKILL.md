@@ -1,8 +1,8 @@
 ---
 name: setup
-description: '[deilen] Open the local settings UI to configure theme, auto-open, timeouts, renderer toggles, and size limits. Trigger: "deilen settings", "open deilen settings", "change the viewer theme", "deilen 설정"'
 user-invocable: true
-argument-hint: ""
+disable-model-invocation: true
+description: "Open the local deilen settings page to adjust theme, auto-open, timeouts, renderer toggles, and size limits."
 ---
 
 # setup

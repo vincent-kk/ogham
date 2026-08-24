@@ -1,7 +1,7 @@
 ---
 name: write-plan
 user-invocable: true
-description: '[seiri:write-plan] Write an implementation plan a stranger could execute without this conversation. Use when work spans multiple steps or sittings, before touching code.'
+description: 'Write an implementation plan a stranger could execute without this conversation. Use when work spans multiple steps or sittings, before touching code.'
 argument-hint: '[the spec or goal to plan]'
 version: '0.1.0'
 complexity: moderate

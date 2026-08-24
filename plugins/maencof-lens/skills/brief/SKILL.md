@@ -1,8 +1,8 @@
 ---
 name: brief
 user-invocable: true
-description: "[maencof-lens:brief] Token-budgeted multi-document context assembly from vault via Spreading Activation. Assembles relevant vault documents within a specified token budget for development context injection. Use for broad knowledge loading across multiple documents when working on tasks that require vault reference material — architecture decisions, topic research, or background context gathering."
-argument-hint: "<query> [--budget N] [--vault NAME] [--layer N,...] [--full] [--scope focused|balanced|broad]"
+description: "Assemble a token-budgeted context block from multiple vault documents via Spreading Activation. Use when a task needs broad vault reference material — architecture decisions or topic research."
+argument-hint: "<query> [--budget N] [--vault NAME] [--layer N,...] [--full] [--scope MODE]"
 version: 1.2.0
 complexity: simple
 plugin: maencof-lens

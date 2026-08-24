@@ -1,7 +1,7 @@
 ---
 name: confluence
-user-invocable: false
-description: "Domain router for Confluence REST API operations — page CRUD, CQL search, space/comment/attachment/label/analytics/user management across Cloud V2, Cloud V1, and Server/DC. Main agent executes directly for simple operations; confluence agent spawned only for complex multi-step workflows."
+user-invocable: true
+description: "Routes Confluence REST API operations — page CRUD, CQL search, space/comment/attachment/label/analytics/user management on Cloud and Server/DC. Use for any Confluence read, write, or search request."
 version: "0.1.0"
 complexity: complex
 plugin: atlassian

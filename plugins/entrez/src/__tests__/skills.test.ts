@@ -31,7 +31,7 @@ describe("exposed skills", () => {
       const fm = frontmatter(join(SKILLS, name, "SKILL.md"));
       expect(fm, `${name} name`).toMatch(new RegExp(`name:\\s*${name}\\b`));
       expect(fm, `${name} user-invocable`).toMatch(/user-invocable:\s*true/);
-      expect(fm, `${name} description`).toContain("[entrez:");
+      expect(fm, `${name} description`).toMatch(/description:\s*\S/);
       expect(fm, `${name} plugin`).toMatch(/plugin:\s*entrez/);
       expect(fm, `${name} version`).toMatch(/version:/);
       expect(fm, `${name} complexity`).toMatch(

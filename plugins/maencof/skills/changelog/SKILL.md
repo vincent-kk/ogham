@@ -1,8 +1,7 @@
 ---
 name: changelog
 user-invocable: true
-description: '[maencof:changelog] Curates self-change entries into the vault changelog. Reads the pending scan state, detects dirty and committed-but-unrecorded changes since the last curation, writes date-grouped entries, and advances the curation cursor. Non-blocking.'
-argument-hint: ''
+description: 'Curates self-change entries into the vault changelog from git and scan state, then advances the curation cursor. Use when the SessionStart advisory reports unrecorded watched-path changes or to record changes manually.'
 version: '2.0.0'
 complexity: medium
 context_layers: [2]

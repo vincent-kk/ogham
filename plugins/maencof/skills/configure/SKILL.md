@@ -1,7 +1,7 @@
 ---
 name: configure
 user-invocable: true
-description: '[maencof:configure] Health-checks the current host environment — MCP servers, skills, agents, rules, hooks, and project instructions — then routes automatically to the appropriate configuration sub-skill.'
+description: 'Health-checks the host environment — MCP servers, skills, agents, rules, hooks, instructions — and routes to the right configuration sub-skill. Use when diagnosing config drift or unsure which config skill applies.'
 argument-hint: '[component to configure]'
 version: '1.1.0'
 complexity: medium

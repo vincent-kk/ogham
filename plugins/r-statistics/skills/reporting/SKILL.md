@@ -1,7 +1,7 @@
 ---
 name: reporting
 user-invocable: true
-description: '[r-statistics:reporting] Assemble a statistical report — descriptive Table 1, effect sizes with confidence intervals, multiple-comparison correction — and render it to DOCX/HTML/PDF via Quarto. Trigger: "make a Table 1", "write up the results", "export a report", "effect size", "결과 보고서", "표 1 만들어줘"'
+description: 'Assemble a statistical report — descriptive Table 1, effect sizes with confidence intervals, multiple-comparison correction — and render DOCX/HTML/PDF via Quarto. Use when asked to "make a Table 1", "write up the results", "결과 보고서".'
 argument-hint: "[--format docx|html|pdf]"
 version: "1.0.0"
 complexity: moderate

@@ -1,7 +1,7 @@
 ---
 name: cleanup
 user-invocable: true
-description: '[maencof:cleanup] Deletes vault documents from Layers 2-5 and removes the managed section from CLAUDE.md. Handles both document removal and configuration cleanup safely.'
+description: 'Deletes vault documents (L2-L5), triages stale Layer 5 buffer items, and manages the maencof section of CLAUDE.md. Use when removing documents, cleaning the buffer inbox, or uninstalling the managed section.'
 argument-hint: '[document|claudemd|buffer] [path] [--force] [--dry-run] [--max-age <days>]'
 version: '1.0.0'
 complexity: simple

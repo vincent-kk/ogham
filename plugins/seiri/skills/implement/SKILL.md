@@ -1,7 +1,7 @@
 ---
 name: implement
 user-invocable: true
-description: '[seiri:implement] Prove a change with a failure you watched. Use when implementing any feature or bugfix, before writing the implementation.'
+description: 'Prove a change with a failure you watched. Use when implementing any feature or bugfix, before writing the implementation.'
 argument-hint: '[the change to make]'
 version: '0.1.0'
 complexity: moderate

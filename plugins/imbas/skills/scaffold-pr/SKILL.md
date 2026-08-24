@@ -1,7 +1,7 @@
 ---
 name: scaffold-pr
 user-invocable: true
-description: '[imbas:scaffold-pr] Create a Draft PR from an issue (Story/Task/Bug) with sub-task checklist in the PR body. Scaffolds branch, empty commit, and PR without code changes. Trigger: "scaffold pr", "PR 생성", "draft pr", "이슈 PR"'
+description: 'Creates a Draft PR from a Story/Task/Bug issue with its sub-task checklist in the PR body — branch, empty commit, and PR only, no code changes. Use for "scaffold pr", "draft pr", "이슈 PR".'
 argument-hint: '<issue> [--base BRANCH] [--draft true|false]'
 version: '1.1.0'
 complexity: moderate

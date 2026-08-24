@@ -2,7 +2,7 @@
 name: migrate
 user-invocable: true
 disable-model-invocation: true
-description: '[maencof:migrate] Vault migration dispatcher — presents the available migrations (architecture v3 upgrade, publication → 99_Archive/clusterseed conversion, legacy L4 archive → 99_Archive/actions relocation) and runs only the selected one. Unselected option instructions are never loaded into context.'
+description: 'Vault migration dispatcher — pick one migration (architecture v3, publications, l4-archive) and run only its procedure, with rollback.'
 argument-hint: '[architecture|publications|l4-archive] [--dry-run] [--rollback]'
 version: '3.0.0'
 complexity: medium

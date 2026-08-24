@@ -1,7 +1,7 @@
 ---
 name: request-review
 user-invocable: true
-description: '[seiri:request-review] Hand a reviewer the work, not your session. Use when substantial work is complete, before merging or handing off.'
+description: 'Hand a reviewer the work, not your session. Use when substantial work is complete, before merging or handing off.'
 argument-hint: '[range or scope to review]'
 version: '0.1.0'
 complexity: simple

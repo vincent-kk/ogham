@@ -1,7 +1,7 @@
 ---
 name: reflect
 user-invocable: true
-description: '[maencof:reflect] Generates a read-only vault analysis report identifying layer transition candidates and duplicate documents, without making any filesystem changes. Run before organize to preview recommendations.'
+description: 'Generates a read-only vault analysis report — layer transition candidates, duplicates, hub health, sub-layer distribution — with no filesystem changes. Use to preview what organize would do.'
 argument-hint: '[--layer 3|4|5] [--show-all]'
 version: '1.0.0'
 complexity: medium

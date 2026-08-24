@@ -1,7 +1,7 @@
 ---
 name: craft-skill
 user-invocable: true
-description: '[maencof:craft-skill] Creates, refactors, improves, or fixes Claude Code skills. Supports four modes: CREATE with complexity-aware scaffolding, REFACTOR, IMPROVE, and FIX with automated validation.'
+description: 'Creates, refactors, improves, or fixes Claude Code skills in four modes with complexity-aware scaffolding and automated validation. Use when building a new skill or restructuring, enhancing, or debugging an existing one.'
 argument-hint: '[request describing what to create/refactor/improve/fix]'
 version: '2.0.0'
 complexity: complex

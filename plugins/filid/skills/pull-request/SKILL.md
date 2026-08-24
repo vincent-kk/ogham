@@ -1,7 +1,7 @@
 ---
 name: pull-request
 user-invocable: true
-description: '[filid:pull-request] Bring the branch FCA documents up to date through enrich-docs, then open a structured GitHub pull request from the branch changes.'
+description: 'Sync branch FCA documents through enrich-docs, then open or update a structured GitHub pull request. Use when a branch is ready for a PR with INTENT/DETAIL drift closed first.'
 argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push]'
 version: '1.0.0'
 complexity: complex

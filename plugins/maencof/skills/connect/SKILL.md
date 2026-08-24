@@ -1,7 +1,7 @@
 ---
 name: connect
 user-invocable: true
-description: '[maencof:connect] Registers external data sources (GitHub, Jira, Slack) for maencof ingestion by configuring connection details, auth tokens, and schedules in .maencof-meta/data-sources.json.'
+description: 'Registers external data sources (GitHub, Jira, Slack) for ingestion by writing connection details and schedules to .maencof-meta/data-sources.json. Use when adding, disabling, or reviewing connected sources.'
 argument-hint: '[list|add|remove|disable|enable] [sourceId]'
 version: '1.0.0'
 complexity: medium

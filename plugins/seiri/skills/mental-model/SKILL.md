@@ -1,8 +1,7 @@
 ---
 name: mental-model
 user-invocable: true
-disable-model-invocation: true
-description: '[seiri:mental-model] Build a model of how the code actually behaves, then attack it — only the claims that survived the code, each marked by how well it is backed. Trigger: "build a mental model", "멘탈모델 만들어줘"'
+description: 'Build a model of how the code actually behaves, then attack it — only the claims that survived, each marked by how well it is backed.'
 argument-hint: '<the question the model must answer>'
 version: '0.3.0'
 complexity: moderate

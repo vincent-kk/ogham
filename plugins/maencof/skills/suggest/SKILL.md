@@ -1,7 +1,7 @@
 ---
 name: suggest
 user-invocable: true
-description: '[maencof:suggest] Identifies missing knowledge graph connections using Spreading Activation and Jaccard similarity, recommending new edges to fill structural gaps rather than general graph traversal.'
+description: 'Recommends missing knowledge-graph links using Spreading Activation and Jaccard similarity. Use when linking a new document, expanding connections, or resolving orphan nodes from checkup.'
 argument-hint: '[path|tags|text] [--max 1-20] [--min-score 0.0-1.0]'
 version: '1.0.0'
 complexity: simple

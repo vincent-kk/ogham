@@ -1,7 +1,7 @@
 ---
 name: restructure
 user-invocable: true
-description: '[filid:restructure] Create a read-only FCA placement plan, obtain approval, execute it with external file operations, and verify exact postconditions.'
+description: 'Create a read-only FCA placement plan, obtain approval, execute it via external file operations, and verify exact postconditions. Use when a unit belongs at another fractal or misplacement is flagged.'
 argument-hint: '[path] <placement requests> [--dry-run] [--auto-approve]'
 version: '1.0.0'
 complexity: complex

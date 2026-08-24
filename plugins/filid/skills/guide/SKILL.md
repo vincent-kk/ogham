@@ -1,7 +1,7 @@
 ---
 name: guide
 user-invocable: true
-description: '[filid:guide] Explain the current FCA tree, classifications, validation findings, and evidence-based placement rules without changing project structure.'
+description: 'Explain the current FCA tree, node classifications, validation findings, and evidence-based placement rules, read-only. Use for onboarding to the structure or deciding where a new module belongs.'
 argument-hint: '[path]'
 version: '2.0.0'
 complexity: simple

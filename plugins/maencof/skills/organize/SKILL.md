@@ -1,7 +1,7 @@
 ---
 name: organize
 user-invocable: true
-description: '[maencof:organize] Reorganizes the knowledge vault by promoting or retiring documents across layers. Presents ranked recommendations from the memory-organizer agent and executes moves only after explicit confirmation.'
+description: 'Reorganizes the vault by promoting or retiring documents across layers via the memory-organizer agent, executing moves only after explicit confirmation. Use for memory organization, L5 buffer triage, or applying reflect results.'
 argument-hint: '[--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
 version: '1.0.0'
 complexity: complex

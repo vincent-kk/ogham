@@ -2,7 +2,7 @@
 name: setup
 user-invocable: true
 disable-model-invocation: true
-description: '[seiri:setup] Choose which seiri code-authoring rules this repository uses. Opens a local settings page showing a diff of what saving would change. Trigger: "seiri setup", "seiri 설정"'
+description: 'Choose which seiri code-authoring rules this repository uses; a local settings page shows the diff before anything is written.'
 argument-hint: '[path]'
 version: '0.1.0'
 complexity: simple

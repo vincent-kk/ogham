@@ -1,7 +1,7 @@
 ---
 name: crosscheck
-description: '[cennad] Cross-validate a prompt by dispatching it in parallel to every enabled provider (codex, antigravity, claude), then synthesize their answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user-invocable: true
+description: 'Dispatch one prompt in parallel to every enabled provider (codex, antigravity, claude) and synthesize the answers into a consolidated verdict. Use to cross-validate a claim or answer — "crosscheck" / "교차검증".'
 argument-hint: '[--tier apex|high|mid|low] [--no-converge] -- "prompt"'
 ---
 

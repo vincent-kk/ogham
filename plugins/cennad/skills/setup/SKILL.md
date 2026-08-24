@@ -1,8 +1,8 @@
 ---
 name: setup
-description: '[cennad] Open the local settings UI for ratio, intervention strength, keywords, and defaults. Trigger: "cennad 설정", "open cennad settings", "개입 강도"'
 user-invocable: true
-argument-hint: ''
+disable-model-invocation: true
+description: 'Open the cennad settings UI in your browser to configure providers, ratio, intervention strength, keywords, and defaults.'
 ---
 
 # setup

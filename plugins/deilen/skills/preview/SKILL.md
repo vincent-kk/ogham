@@ -1,8 +1,7 @@
 ---
 name: preview
-description: '[deilen] Preview a markdown document (or plan) as a readable browser page; if the user leaves line-anchored comments, collect them back into the conversation. Trigger: "preview this", "show this in the browser", "open this as a page", "이 문서 페이지로 보여줘"'
 user-invocable: true
-argument-hint: ""
+description: 'Render a markdown document or plan as a readable local page and collect line-anchored comments (with images) back into the conversation. Use when asked to "preview this", "show this in the browser", or "이 문서 페이지로 보여줘".'
 ---
 
 # preview

@@ -1,7 +1,7 @@
 ---
 name: craft-agent
 user-invocable: true
-description: '[maencof:craft-agent] Creates, edits, validates, or lists subagent definitions for the current host. Supports CREATE, EDIT, VALIDATE, and LIST for full agent lifecycle management.'
+description: 'Creates, edits, validates, or lists subagent definitions for the current host (Claude Markdown or Codex TOML). Use when building or maintaining custom agents.'
 argument-hint: '[request describing what to create/edit/validate/list]'
 version: '2.0.0'
 complexity: complex

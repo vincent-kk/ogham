@@ -1,7 +1,8 @@
 ---
 name: migrate
 user-invocable: true
-description: '[filid:migrate] Explicitly migrate legacy CLAUDE.md and SPEC.md names to INTENT.md and DETAIL.md with a portable dry-run-first script and post-validation.'
+disable-model-invocation: true
+description: 'Migrate legacy CLAUDE.md/SPEC.md names to INTENT.md/DETAIL.md via a portable dry-run-first script with post-validation.'
 argument-hint: '[path] [--execute] [--auto-commit]'
 version: '2.0.0'
 complexity: simple

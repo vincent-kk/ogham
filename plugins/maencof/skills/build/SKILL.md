@@ -1,7 +1,7 @@
 ---
 name: build
 user-invocable: true
-description: '[maencof:build] Builds or refreshes the knowledge graph index. Runs incrementally by default to reprocess only changed files, performs a full rebuild when --full or --force is specified, and discards the .maencof cache entirely before rebuilding when --reset-cache is set (absorbs the former maencof-rebuild skill).'
+description: 'Builds or refreshes the knowledge graph index — incremental by default, full with --force, cache-discarding with --reset-cache. Use after adding many documents, on stale-index warnings, or to recover a corrupted index.'
 argument-hint: '[--full] [--force] [--reset-cache] [--no-backup] [--dry-run]'
 version: '1.1.0'
 complexity: medium

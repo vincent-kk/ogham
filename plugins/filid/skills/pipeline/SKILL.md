@@ -1,7 +1,7 @@
 ---
 name: pipeline
 user-invocable: true
-description: '[filid:pipeline] Run the full merge-track cycle — pull-request, cross-review, resolve, revalidate — as one continuous operation with entry-point detection and resume support.'
+description: 'Run the full merge-track cycle — pull-request, cross-review, resolve, revalidate — as one continuous operation with resume support. Use to take a branch from changes to a final review verdict.'
 argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-enrich] [--force] [--title TITLE] [--push|--no-push]'
 version: '1.0.0'
 complexity: complex

@@ -1,7 +1,7 @@
 ---
 name: estimate
 user-invocable: true
-description: '[imbas:estimate] Phase 2 (optional) of the imbas pipeline. Decomposes a refined planning document through three views (page/feature/module), reconciles them into a single WBS, applies PERT per unit, and lays out a schedule. Produces estimation.json + estimation-report.md. Trigger: "estimate manday", "견적", "공수 산정", "일정 산출", "manday 추산"'
+description: 'Optional Phase 2 of the imbas pipeline: decomposes a refined document through three views into a reconciled WBS, applies PERT per unit, and lays out a schedule. Use when asked to estimate man-days — "공수 산정", "견적", "일정 산출".'
 argument-hint: '[--run RUN_ID] [--team-size N] [--buffer RATIO]'
 version: '1.0.0'
 complexity: complex

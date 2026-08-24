@@ -1,7 +1,7 @@
 ---
 name: read-issue
 user-invocable: false
-description: '[imbas:read-issue] Internal skill. Reads an issue with its full comment thread (Jira), digest entries (local), or GitHub issue thread, reconstructs the conversation context, and returns a structured JSON summary.'
+description: 'Internal skill: reads an issue with its full thread (Jira comments, GitHub thread, or local digest entries), reconstructs the conversation context, and returns a structured JSON summary. Called by refine, split, digest and imbas agents.'
 argument-hint: '<issue-ref> [--depth shallow|full]'
 version: '1.0.0'
 complexity: moderate

@@ -1,7 +1,7 @@
 ---
 name: search
 user-invocable: true
-description: '[entrez:search] Recall-first PubMed/PMC literature search — expand a topic into multi-role queries, deterministically union them (zero loss), then rerank. Trigger: "find papers on", "pubmed search", "literature search", "논문 찾아줘", "문헌 검색"'
+description: 'Recall-first PubMed/PMC literature search — expand a topic into multi-role queries, deterministically union them (zero loss), then rerank. Use when asked to find papers or run a literature search ("find papers on", "논문 찾아줘").'
 argument-hint: "[--auto] [--db pubmed|pmc] [--date 2020:2026] <topic>"
 version: "1.0.0"
 complexity: complex

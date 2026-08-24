@@ -1,7 +1,7 @@
 ---
 name: trace-structure
 user-invocable: true
-description: '[seiri:trace-structure] Map how the code actually connects — call paths, dispatch targets, data flow — before acting on a fast reading. Use when a problem needs deep understanding of polymorphic or highly indirect code.'
+description: 'Map how the code actually connects — call paths, dispatch targets, data flow — before acting on a fast reading. Use when a problem needs deep understanding of polymorphic or highly indirect code.'
 argument-hint: '[the problem or area that needs deep understanding]'
 version: '0.2.0'
 complexity: moderate

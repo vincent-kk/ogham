@@ -1,7 +1,7 @@
 ---
 name: refine
 user-invocable: true
-description: '[maencof:refine] Transforms vague or ambiguous input into precise, executable specifications through structured one-question-at-a-time interview loops, clarifying scope and acceptance criteria before implementation begins.'
+description: 'Transforms vague input into a precise, executable specification through one-question-at-a-time interview loops with a Socratic counter-example layer. Use when a request lacks concrete goal, scope, or acceptance criteria.'
 argument-hint: '[initial requirement or idea]'
 version: '1.0.0'
 complexity: medium

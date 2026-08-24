@@ -1,7 +1,8 @@
 ---
 name: setup
 user-invocable: true
-description: '[atlassian:setup] Configure Jira and Confluence authentication and connection settings. Supports Basic Auth, PAT, and OAuth 2.0 for Cloud and Server/DC instances. Auto-triggered on HTTP 401. Trigger: "atlassian setup", "jira 설정", "confluence 연결", "아틀라시안 설정"'
+disable-model-invocation: true
+description: "Configure Jira and Confluence authentication and connection settings — Basic Auth, PAT, and OAuth 2.0 for Cloud and Server/DC."
 argument-hint: "[--test] [--reset]"
 version: "0.1.0"
 complexity: moderate

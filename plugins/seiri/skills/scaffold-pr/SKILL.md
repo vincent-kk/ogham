@@ -2,7 +2,7 @@
 name: scaffold-pr
 user-invocable: true
 disable-model-invocation: true
-description: '[seiri:scaffold-pr] Open an empty Draft PR before work starts — branch, empty commit, placeholder title and body to rewrite as changes land. Trigger: "empty pr", "빈 PR", "scaffold pr", "PR 먼저"'
+description: 'Open an empty Draft PR before work starts — branch, empty commit, placeholder title and body to rewrite as changes land.'
 argument-hint: '[purpose] [--base BRANCH] [--ready]'
 version: '0.1.0'
 complexity: simple

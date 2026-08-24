@@ -1,8 +1,8 @@
 ---
 name: remember
 user-invocable: true
-description: '[maencof:remember] Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter.'
-argument-hint: '[content] [--layer 2-5] [--sub-layer NAME] [--title TITLE] [--tags TAGS] [--source URL] [--expires DATE] [--filename NAME] [--no-check]'
+description: 'Records a concept, insight, or reference into the vault: recommends a layer, extracts tags, deduplicates, and creates a structured document. Use when the user says remember this, save this, 기억해줘, or 기록해.'
+argument-hint: '[content] [--layer 2-5] [--tags TAGS] [--title TITLE]'
 version: '1.0.0'
 complexity: medium
 context_layers: [2, 3, 4, 5]

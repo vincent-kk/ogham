@@ -1,8 +1,8 @@
 ---
 name: pipeline
 user-invocable: true
-description: '[imbas:pipeline] End-to-end pipeline orchestration. Accepts a document/URL and runs refine → estimate → split (decompose + create) with auto-approval at quality gates. Stops with a structured blocker report on any gate failure. Trigger: "pipeline", "full pipeline", "전체 파이프라인", "자동 실행", "한번에 실행"'
-argument-hint: '<source> [--project KEY] [--supplements PATHS] [--parent KEY|new|none] [--skip-estimate] [--stop-at PHASE] [--dry-run] [--strict-drift]'
+description: 'Runs the full imbas pipeline — refine → estimate → split (decompose + create) — from a document or Confluence URL with auto-approval gates; stops with a blocker report on any gate failure. Use for one-shot runs: "전체 파이프라인", "한번에 실행".'
+argument-hint: '<source> [--project KEY] [--skip-estimate] [--stop-at PHASE] [--dry-run]'
 version: '2.0.0'
 complexity: complex
 plugin: imbas

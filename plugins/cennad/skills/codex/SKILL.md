@@ -1,7 +1,7 @@
 ---
 name: codex
-description: '[cennad] Delegate to OpenAI Codex CLI via cennad. Use for heavy code generation/refactoring, sandboxed shell work, or independent second opinions from a different model family. Trigger: "ask codex", "codex 호출", "코덱스에게"'
 user-invocable: true
+description: 'Delegate a prompt to OpenAI Codex CLI off-thread via a background courier. Use for heavy code generation/refactoring, sandboxed shell work, or a second opinion from another model family — "ask codex" / "코덱스에게".'
 argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refine] -- "prompt"'
 ---
 

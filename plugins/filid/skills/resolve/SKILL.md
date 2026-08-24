@@ -1,7 +1,7 @@
 ---
 name: resolve
 user-invocable: true
-description: '[filid:resolve] Present all cross-review fix requests as one recommended batch, delegate accepted corrections outward, record rejection justifications, then gate and commit the result.'
+description: 'Present all cross-review fix requests as one batched decision sheet, delegate accepted corrections, record rejections, then gate and commit. Use after cross-review returns REQUEST_CHANGES.'
 argument-hint: '[--auto] [--base REF]'
 version: '1.0.0'
 complexity: complex

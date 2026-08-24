@@ -1,8 +1,7 @@
 ---
 name: brainstorm
 user-invocable: true
-disable-model-invocation: true
-description: '[seiri:brainstorm] Shape a change before any code is written — what this repository already does, what constrains the solution, what counts as done. Trigger: "brainstorm this", "설계 같이 고민해줘"'
+description: 'Shape a change before any code is written — existing patterns, constraints, and two or three candidate shapes with a recommendation.'
 argument-hint: '<what you are trying to build or change>'
 version: '0.3.0'
 complexity: moderate

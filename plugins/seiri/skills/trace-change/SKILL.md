@@ -1,8 +1,7 @@
 ---
 name: trace-change
 user-invocable: true
-disable-model-invocation: true
-description: '[seiri:trace-change] Produce a layered explanation of a code change — diff, branch, or PR — for a reader whose knowledge you do not assume: two-layer background, the essence on one concrete example, a walkthrough regrouped for understanding, and a comprehension check. Trigger: "explain this change", "변경사항 설명해줘"'
+description: 'Produce a layered explanation of a code change — diff, branch, PR, or staged — with background, essence, walkthrough, comprehension check.'
 argument-hint: '<diff | branch | PR | staged> [who will read it]'
 version: '0.1.0'
 complexity: moderate

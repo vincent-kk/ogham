@@ -1,8 +1,7 @@
 ---
 name: mental-model
 user-invocable: true
-disable-model-invocation: true
-description: '[maencof:mental-model] Reconstructs how a subject actually is — a person, an organization, a system, a plan, or yourself — by triangulating shadows (vault records, documents, statements, observed behavior) into falsifiable claims, attacking each claim, and reporting only the survivors, each marked seen, heard, inferred, or assumed.'
+description: 'Build an attacked, provenance-marked mental model of a person, organization, system, or plan from vault records and observations.'
 argument-hint: '[the question the model must answer]'
 version: '1.1.0'
 complexity: medium

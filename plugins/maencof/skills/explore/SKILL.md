@@ -1,8 +1,8 @@
 ---
 name: explore
 user-invocable: true
-description: '[maencof:explore] Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers. Supports --for-brainstorm to hand off candidate seeds to think --mode divergent.'
-argument-hint: '[seed] [--hops 1-10] [--layer 1-5] [--sub-layer NAME] [--detail] [--for-brainstorm]'
+description: 'Traverses the knowledge graph from a seed using Spreading Activation to uncover hidden connections across layers; --for-brainstorm hands seeds to think --mode divergent. Use for interactive multi-round vault exploration.'
+argument-hint: '[seed] [--hops 1-10] [--layer 1-5] [--detail] [--for-brainstorm]'
 version: '1.1.0'
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

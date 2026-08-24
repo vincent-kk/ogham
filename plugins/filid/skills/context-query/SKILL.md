@@ -1,7 +1,7 @@
 ---
 name: context-query
 user-invocable: true
-description: '[filid:context-query] Resolve a target path to its owner fractal and minimal owner-to-root INTENT/DETAIL reference chain, then answer a focused FCA question within three rounds.'
+description: 'Resolve a path to its owner fractal and minimal INTENT/DETAIL chain, then answer a focused FCA question. Use when asking which fractal owns a file or which boundary contract applies before a change.'
 argument-hint: '<question>'
 version: '2.0.0'
 complexity: simple
