@@ -2,7 +2,7 @@
 name: setup
 user-invocable: true
 disable-model-invocation: true
-description: 'Check whether R/Rscript is installed and, with explicit consent, guide a per-OS install via the system package manager.'
+description: "Check whether R/Rscript is installed and, with explicit consent, guide a per-OS install via the system package manager."
 argument-hint: "[--os windows|macos|linux] [--packages]"
 version: "1.1.0"
 complexity: simple

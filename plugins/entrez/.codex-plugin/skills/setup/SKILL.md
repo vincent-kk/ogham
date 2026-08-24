@@ -2,7 +2,7 @@
 name: setup
 user-invocable: true
 disable-model-invocation: true
-description: 'Configure NCBI tool/email and optional API key via a local web UI, then check reachability.'
+description: "Configure NCBI tool/email and optional API key via a local web UI, then check reachability."
 argument-hint: "[--test] [--reset]"
 version: "1.0.0"
 complexity: simple
