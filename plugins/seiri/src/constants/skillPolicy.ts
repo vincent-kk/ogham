@@ -7,6 +7,8 @@
  * applies to the count.
  *
  * Every skill belongs to exactly one list, and the union is `SHIPPED_SKILLS`.
+ * Catalog visibility and workflow election are separate axes: a user-started
+ * skill can remain visible to the model without joining the workflow chain.
  */
 
 /**
@@ -42,24 +44,27 @@ export const AUTO_CONDITIONAL_ASK_SKILLS = [
 ] as const;
 
 /**
- * User-invoked gates the model may not auto-invoke (`disable-model-invocation:
- * true`). They own the moments the user starts deliberately — shaping,
- * requirements, model building, the work-opening PR shell, the integration
- * choice, rule deployment, the reader-facing change explanation — and so may
- * ask freely.
+ * User-started skills kept in the model catalog so an explicit mention can
+ * resolve to the skill. They do not join the standard workflow chain: the
+ * user's request starts them, and they may ask freely once loaded.
  */
-export const USER_GATED_SKILLS = [
+export const VISIBLE_USER_STARTED_SKILLS = [
   'brainstorm',
   'finish',
   'interview',
   'mental-model',
-  'scaffold-pr',
-  'setup',
   'trace-change',
 ] as const;
 
-/** Every skill the model may invoke on its own — the workflow-chain members. */
-export const AUTO_INVOCABLE_SKILLS = [
+/**
+ * User-only gates hidden from the model catalog with
+ * `disable-model-invocation: true` because running them requires an explicit
+ * slash-command decision.
+ */
+export const HIDDEN_USER_ONLY_SKILLS = ['scaffold-pr', 'setup'] as const;
+
+/** Every skill elected by the standard workflow chain. */
+export const WORKFLOW_INVOCABLE_SKILLS = [
   ...AUTO_AUTONOMOUS_SKILLS,
   ...AUTO_CONDITIONAL_ASK_SKILLS,
 ] as const;

@@ -9,8 +9,9 @@ import { WORKFLOW_CHAIN_LINE } from '../constants/postureLines.js';
 import {
   AUTO_AUTONOMOUS_SKILLS,
   AUTO_CONDITIONAL_ASK_SKILLS,
-  AUTO_INVOCABLE_SKILLS,
-  USER_GATED_SKILLS,
+  HIDDEN_USER_ONLY_SKILLS,
+  VISIBLE_USER_STARTED_SKILLS,
+  WORKFLOW_INVOCABLE_SKILLS,
 } from '../constants/skillPolicy.js';
 import { WORKFLOW_SKILLS } from '../constants/workflowChain.js';
 
@@ -18,11 +19,13 @@ import { WORKFLOW_SKILLS } from '../constants/workflowChain.js';
  * The invocation contract every skill must honour. A skill that can be
  * auto-invoked mid-work prefers autonomous judgment and reserves its one
  * question for a genuine blocker (the canonical body clause below); a
- * user-only gate must be off the model's reach (`disable-model-invocation:
- * true`); the conditional-ask skills act before execution and may ask
- * proactively at the one decision point each names in its body. Nothing
- * outside this file keeps those facts true, so a dropped clause or a new
- * skill added with the wrong posture would otherwise pass silently.
+ * visible user-started skill stays outside workflow election without being
+ * hidden from the model catalog; a hidden user-only gate uses
+ * `disable-model-invocation: true`; the conditional-ask skills act before
+ * execution and may ask proactively at the one decision point each names in
+ * its body. Nothing outside this file keeps those facts true, so a dropped
+ * clause or a new skill added with the wrong posture would otherwise pass
+ * silently.
  */
 const skillsDir = portableJoin(
   portableDirname(fileURLToPath(import.meta.url)),
@@ -55,11 +58,13 @@ function readSkill(name: string): { frontmatter: string; body: string } {
 }
 
 describe('skill invocation policy', () => {
+  // filid:contract AC-skill-visibility
   it('classifies every shipped skill exactly once', () => {
     const partitioned = [
       ...AUTO_AUTONOMOUS_SKILLS,
       ...AUTO_CONDITIONAL_ASK_SKILLS,
-      ...USER_GATED_SKILLS,
+      ...VISIBLE_USER_STARTED_SKILLS,
+      ...HIDDEN_USER_ONLY_SKILLS,
     ].sort();
     expect(partitioned).toEqual([...SHIPPED_SKILLS]);
   });
@@ -69,7 +74,7 @@ describe('skill invocation policy', () => {
   // a stranger; this is the completeness direction it cannot express.
   it('workflow chain membership mirrors the auto-invocable set', () => {
     expect([...WORKFLOW_SKILLS].sort()).toEqual(
-      [...AUTO_INVOCABLE_SKILLS].sort(),
+      [...WORKFLOW_INVOCABLE_SKILLS].sort(),
     );
   });
 
@@ -95,17 +100,28 @@ describe('skill invocation policy', () => {
     }
   });
 
-  it('keeps the user-gated skills off the model', () => {
-    for (const name of USER_GATED_SKILLS) {
+  it('keeps user-started skills visible to the model', () => {
+    for (const name of VISIBLE_USER_STARTED_SKILLS) {
+      const { frontmatter } = readSkill(name);
+      expect(frontmatter).not.toContain('disable-model-invocation');
+      expect(frontmatter).toMatch(/^user-invocable: true$/m);
+    }
+  });
+
+  it('keeps hidden user-only gates off the model', () => {
+    for (const name of HIDDEN_USER_ONLY_SKILLS) {
       const { frontmatter } = readSkill(name);
       expect(frontmatter).toContain('disable-model-invocation: true');
     }
   });
 
-  it('names every auto skill in the workflow chain, and no gate', () => {
-    for (const name of AUTO_INVOCABLE_SKILLS)
+  it('names every workflow skill in the chain, and no user-started skill', () => {
+    for (const name of WORKFLOW_INVOCABLE_SKILLS)
       expect(WORKFLOW_CHAIN_LINE).toContain(name);
-    for (const name of USER_GATED_SKILLS)
+    for (const name of [
+      ...VISIBLE_USER_STARTED_SKILLS,
+      ...HIDDEN_USER_ONLY_SKILLS,
+    ])
       expect(WORKFLOW_CHAIN_LINE).not.toContain(name);
   });
 

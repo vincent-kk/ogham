@@ -43,7 +43,8 @@
 
 ### Skill posture
 
-- 스킬 파티션의 정본은 `src/constants/skillPolicy.ts` 다 — 자동 호출 규율 7종, 조건부 질문 스킬 2종(write-plan·review-plan), 사용자 게이트 7종(scaffold-pr·trace-change 포함). `skillPolicy.test.ts` 가 각 스킬의 frontmatter 와 본문 정본 문장을 검사한다.
+- 스킬 파티션의 정본은 `src/constants/skillPolicy.ts` 다 — 자동 호출 규율 7종, 조건부 질문 스킬 2종(write-plan·review-plan), 모델 목록에 보이는 사용자 시작 스킬 5종, 모델에게 숨기는 사용자 전용 게이트 2종(setup·scaffold-pr). `skillPolicy.test.ts` 가 각 스킬의 frontmatter 와 본문 정본 문장을 검사한다.
+- 모델 목록 노출과 표준 워크플로우 선출은 별개다. 사용자 시작 스킬은 `disable-model-invocation` 없이 존재와 설명을 모델에게 알리되 워크플로우 체인에서는 제외한다. 사용자 전용 게이트만 `disable-model-invocation: true` 로 숨긴다.
 - 자동 호출 규율은 자율 판단을 우선한다: 선택이 필요하면 보수적 기본값을 택하고 한 줄로 공개한다. 사용자만 결정할 수 있는 진짜 blocker 는 AskUserQuestion 1회로 묻되, 관례적 체크포인트 질문은 하지 않는다. frontmatter 도구 차단(`disallowed-tools`)은 사용하지 않는다.
 - review-plan 은 계획 검토 게이트다: 계획은 저장소에 대한 주장 묶음이므로 실행 전에 증명한다. 트리아지를 한 줄로 선언하고(무언 스킵 금지), 현재 상태 주장만 도구로 접지하며(제안 상태의 부재는 정상, 계획의 명령은 읽어서 확인하되 실행 금지), challenge 트리거(광역 변경·비가역 단계·이 세션이 쓰지 않은 계획)가 켜지면 위임/진행을 정확히 한 번 묻는다 — 위임은 request-review 규격 인계물을 만들고 턴을 끝낸다. 판정(cleared·grounded-only·rework-required)은 계획 문서에 기록한다 — 훅 상태는 스킬 이름만 나르므로 산출물이 판정을 나른다. challenge 없이 cleared 없음, 재작업은 1회에 바뀐 주장의 scoped recheck 만.
 - 게이트 원장은 write-plan → review-plan → execute → verify → request-review → finish 를 가로지르는 횡단 관심사이며, 포맷 정본은 `skills/execute/references/gates-format.md` 다.
@@ -100,8 +101,15 @@
 - 호스트에 이벤트나 필드가 없을 때만 차이를 허용하고(Codex 의 `PostToolUseFailure`·`is_interrupt` 부재), 그 차이는 보수적 방향으로만 나타난다 — 어떤 호스트에서도 거짓 met 은 생기지 않는다.
 - 실패 연쇄는 명시적 failure 이벤트, 알려진 exit, CHECK 판정 순으로 근거를 사용한다. 앞의 두 근거가 없는 Codex 호출은 CHECK가 `unmet`이면 실패로 세고 모든 판정이 `met`이면 성공으로 초기화한다. 판정 불가능한 Codex 명령은 기존 실패 카운터를 건드리지 않는다.
 
+### AC-skill-visibility — 모델 목록과 워크플로우 선출 분리
+
+- 모델-visible 사용자 시작 스킬에는 `disable-model-invocation`이 없고, 표준 워크플로우 체인에도 들어가지 않는다.
+- 모델에게 숨기는 사용자 전용 게이트에는 `disable-model-invocation: true`가 있고, 표준 워크플로우 체인에도 들어가지 않는다.
+- 모든 배포 스킬은 자동 호출 규율·조건부 질문·visible 사용자 시작·hidden 사용자 전용 중 정확히 하나에 속한다.
+
 ## History
 
+- 2026-08-24 — 사용자 시작 스킬의 모델 목록 노출과 표준 워크플로우 선출을 분리한 결정. `disable-model-invocation`은 자동 선출만 막는 플래그가 아니라 존재 자체를 모델에게 숨기므로, brainstorm·finish·interview·mental-model·trace-change는 모델-visible로 두고 체인에서는 계속 제외한다. setup·scaffold-pr만 slash-only 게이트로 남는다.
 - 2026-08-23 — 실패 연쇄의 Codex 판정을 이벤트 이름에서 호스트 중립 CHECK 판정으로 확장한 결정. 명시적 failure·exit가 없는 호출은 `unmet`을 실패, 전부 `met`을 성공으로 쓰고, 판정할 수 없으면 거짓 성공으로 기존 카운터를 지우지 않는다.
 - 2026-08-23 — 게이트 판정을 호스트 중립으로 옮긴 결정. 실패를 별도 이벤트로 받고 `tool_response.stdout` 을 읽는 판정은 Claude 하니스의 우연한 형태였고, Codex 에서는 EXPECT 있는 게이트가 영구 unmet·EXPECT 없는 게이트가 거짓 met 이 됐다. 두 호스트가 공유하는 재료는 관측된 출력 텍스트뿐이므로 판정은 EXPECT 매치가 하고 exit code 는 이유·증거만 꾸민다. 실행 가능한 게이트의 EXPECT 는 요건이며, 옛 규칙으로 EXPECT 없이 met이 된 원장은 재실행 시 `unjudgeable`로 되돌아간다.
 - 2026-08-22 — 계획 태스크의 실행 가능한 CHECK 를 세션 독립적인 작업별 게이트 원장에 두고 훅이 증거를 판정하며 verify 가 미충족 완료 주장을 execute 로 되돌리도록 한 결정 — 완료를 기억이 아니라 파일의 증명으로 만든다.
@@ -113,4 +121,4 @@
 
 ## Last Updated
 
-2026-08-23 — 게이트 판정과 실패 연쇄의 호스트 패리티 계약(AC-host-parity)을 반영했다.
+2026-08-24 — 사용자 시작 스킬의 모델-visible 정책을 반영했다.
