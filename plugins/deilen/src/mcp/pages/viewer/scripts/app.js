@@ -1,10 +1,12 @@
 // Viewer entry: hydrate the injected state, mount the rendered HTML,
-// apply theme/typography, enable copy + lazy enhancement, and keep the server
-// alive with a heartbeat.
+// apply theme/typography, enable copy + lazy enhancement, and keep the page's
+// session state current with a heartbeat.
 
 import { initComments, setConnectionState } from "./comments.js";
 import { initCopy } from "./copy.js";
 import { enhance } from "./enhance.js";
+import { startHeartbeat } from "./heartbeat.js";
+import { openLinksInNewTab } from "./links.js";
 
 const state = window.__DEILEN_STATE__ || {};
 const THEME_ORDER = ["auto", "light", "dark"];
@@ -43,50 +45,30 @@ function wireChrome() {
   });
 }
 
-function startHeartbeat() {
-  const interval = state.heartbeat_interval_ms || DEFAULT_HEARTBEAT_MS;
-  let timer = null;
-  const stop = () => {
-    if (timer !== null) {
-      window.clearInterval(timer);
-      timer = null;
-    }
-  };
-  const ping = () => {
-    fetch(
-      `/api/ping?session=${encodeURIComponent(
-        state.session_id || "",
-      )}&token=${encodeURIComponent(state.token || "")}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        keepalive: true,
-      },
-    )
-      .then((response) => {
-        setConnectionState(response.ok ? "alive" : "ended");
-        // Session closed or gone: stop pinging so a stale tab can't keep the
-        // singleton server alive past its idle window.
-        if (!response.ok) stop();
-      })
-      .catch(() => {
-        setConnectionState("offline");
-        stop();
-      });
-  };
-  ping();
-  timer = window.setInterval(ping, interval);
-}
-
 function init() {
   applyDocumentChrome();
   const viewer = document.getElementById("viewer");
-  if (viewer) viewer.innerHTML = state.html || "";
+  if (viewer) {
+    viewer.innerHTML = state.html || "";
+    openLinksInNewTab(viewer);
+  }
   initCopy(state);
   enhance(state.renderers || {});
   initComments(state);
   wireChrome();
-  startHeartbeat();
+  startHeartbeat({
+    ping: () =>
+      fetch(
+        `/api/ping?session=${encodeURIComponent(state.session_id || "")}&token=${encodeURIComponent(state.token || "")}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          keepalive: true,
+        },
+      ),
+    intervalMs: state.heartbeat_interval_ms || DEFAULT_HEARTBEAT_MS,
+    onState: setConnectionState,
+  });
 }
 
 init();

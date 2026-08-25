@@ -1,15 +1,20 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { CONFIG_PATH } from "../../../constants/paths.js";
-import { hasPendingWaiters } from "../../../core/sessionStore/index.js";
+import {
+  closeSession,
+  hasPendingWaiters,
+} from "../../../core/sessionStore/index.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
 import type { ToolExtra } from "../../shared/index.js";
+import { handleCloseViewer } from "../../tools/closeViewer/closeViewer.js";
 import { handleCollectFeedback } from "../../tools/collectFeedback/collectFeedback.js";
 import { handleRenderViewer } from "../../tools/renderViewer/renderViewer.js";
 import { ensureHttpServer, getHttpServer } from "../httpServer.js";
 
 const IDLE_MINUTES = 1;
 const IDLE_MS = IDLE_MINUTES * 60_000;
+const rendered: string[] = [];
 
 beforeAll(async () => {
   await atomicWrite(
@@ -19,16 +24,33 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
+  for (const session_id of rendered.splice(0))
+    await handleCloseViewer({ session_id }).catch(() => undefined);
   vi.useRealTimers();
   await getHttpServer()?.close();
 });
 
 describe("server idle shutdown", () => {
-  it("reaps the singleton after idle_shutdown_minutes of no activity", async () => {
+  it("reaps the singleton after idle_shutdown_minutes when no session is serving", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    await handleRenderViewer({ content: "idle target" });
+    await ensureHttpServer();
     expect(getHttpServer()).not.toBeNull();
 
+    await vi.advanceTimersByTimeAsync(IDLE_MS + 1_000);
+    expect(getHttpServer()).toBeNull();
+  });
+
+  it("stays alive across idle windows while a session is serving, then reaps after close", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const { session_id } = await handleRenderViewer({
+      content: "serving target",
+    });
+    rendered.push(session_id);
+
+    await vi.advanceTimersByTimeAsync(IDLE_MS * 3);
+    expect(getHttpServer()).not.toBeNull();
+
+    await handleCloseViewer({ session_id });
     await vi.advanceTimersByTimeAsync(IDLE_MS + 1_000);
     expect(getHttpServer()).toBeNull();
   });
@@ -47,6 +69,7 @@ describe("server idle shutdown", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const { url } = await handleRenderViewer({ content: "long wait target" });
     const sessionId = new URL(url).pathname.replace("/r/", "");
+    rendered.push(sessionId);
     const extra = {
       signal: new AbortController().signal,
     } as unknown as ToolExtra;
@@ -62,6 +85,7 @@ describe("server idle shutdown", () => {
     // before the waiter it's supposed to observe exists.
     while (!hasPendingWaiters())
       await new Promise((resolve) => setImmediate(resolve));
+    await closeSession(sessionId);
 
     await vi.advanceTimersByTimeAsync(waitSeconds * 1_000 - 1_000);
     expect(getHttpServer()).not.toBeNull();

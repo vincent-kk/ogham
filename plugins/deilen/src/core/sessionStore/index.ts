@@ -9,6 +9,11 @@ export { pruneExpired } from "./persistence/pruneExpired.js";
 export { readViewerMarkdown } from "./persistence/readViewerMarkdown.js";
 export { removeSession } from "./persistence/removeSession.js";
 export {
+  hasServingSessions,
+  registerServing,
+  unregisterServing,
+} from "./registry/servingSessions.js";
+export {
   awaitFeedback,
   closeResolver,
   deliverComplete,

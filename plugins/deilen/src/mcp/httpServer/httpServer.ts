@@ -10,7 +10,10 @@ import {
   saveConfig,
 } from "../../core/configManager/index.js";
 import { getProjectHash } from "../../core/projectHash/index.js";
-import { hasPendingWaiters } from "../../core/sessionStore/index.js";
+import {
+  hasPendingWaiters,
+  hasServingSessions,
+} from "../../core/sessionStore/index.js";
 import { logger } from "../../lib/logger.js";
 
 import { createRouteHandler } from "./routing/routes.js";
@@ -102,10 +105,10 @@ async function startHttpServer(
 
   const armIdleTimer = (): void => {
     idleTimer = setTimeout(() => {
-      // An in-flight collect_feedback wait is activity too, even though it
-      // never calls touch() again after the wait starts — re-arm instead of
-      // closing out from under it.
-      if (hasPendingWaiters()) {
+      // A serving session (a viewer that can still submit) or an in-flight
+      // collect_feedback wait is activity even when no request touches the
+      // listener — a hidden tab's throttled heartbeat must not reap it.
+      if (hasPendingWaiters() || hasServingSessions()) {
         armIdleTimer();
         return;
       }

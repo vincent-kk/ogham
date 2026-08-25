@@ -6,6 +6,7 @@ import { atomicWrite } from "../../../lib/atomicWrite.js";
 import { SessionStatus } from "../../../types/enums.js";
 import type { RenderOptions } from "../../../types/renderOptions.js";
 import { type SessionMeta, SessionMetaSchema } from "../../../types/session.js";
+import { registerServing } from "../registry/servingSessions.js";
 
 export interface CreateSessionInput {
   sessionId: string;
@@ -35,5 +36,6 @@ export async function createSession(
     sessionMetaPath(input.sessionId),
     `${JSON.stringify(meta, null, 2)}\n`,
   );
+  registerServing(input.sessionId);
   return meta;
 }

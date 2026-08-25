@@ -5,7 +5,7 @@
 ## 서버 사양
 
 - 바인딩: `127.0.0.1` 전용. 포트: `config.preferred_port`(기본 0=동적, `server.listen(0,'127.0.0.1')`).
-- 생애: 첫 `render_viewer`/`open_settings` 에서 1회 기동. **세션 생존 = 뷰어 탭 heartbeat**(`POST /api/ping`); 도구 호출·heartbeat 가 모두 `idle_shutdown_minutes`(기본 1분) 동안 단절되면 세션 상태 무관 **폴백 종료**(read-only 탭 닫기·Claude 비정상 종료·`close_viewer` 누락 누수 방지). MCP 종료 시 동반 종료.
+- 생애: 첫 `render_viewer`/`open_settings` 에서 1회 기동. serving 세션이나 collect 대기가 남아 있는 동안 유지하고, 모두 닫힌 뒤 `idle_shutdown_minutes`(기본 1분) 초과 시 종료한다. heartbeat 는 페이지 쪽 세션 상태 확인용이며, MCP 종료 시 서버도 동반 종료한다.
 - one-time token: 기동 시 `crypto.randomBytes(16).toString('hex')` 1개 발급. `/r`·API 라우트에서 검증. **정적 `/assets` 는 면제**(비민감 공개 라이브러리 — 동적 import·폰트 하위요청을 무토큰 허용).
 - CSRF: POST 는 `application/json` 또는 `multipart/form-data` 만 허용.
 - CORS: 와일드카드 금지(동일 origin).

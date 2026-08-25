@@ -6,11 +6,20 @@
 // conversation), or dismiss (close) — that tells Claude what to do next.
 
 import { wireImageCapture } from "./images.js";
+import {
+  clearDraft,
+  deserializeAttachments,
+  loadDraft,
+  pruneDrafts,
+  saveDraft,
+} from "./draftStore.js";
 import { scheduleAutoSave, sendDismiss, submitFeedback } from "./submit.js";
 
 const POPOVER_OFFSET_PX = 8;
 // Let the "Viewer closed" overlay paint before attempting window.close().
 const CLOSE_TAB_DELAY_MS = 500;
+const HOUR_MS = 60 * 60 * 1000;
+const DEFAULT_TTL_HOURS = 72;
 
 let view = {};
 const store = { comments: new Map(), overall: new Map() };
@@ -20,6 +29,10 @@ let popover = null;
 // "connecting" | "alive" | "ended" (session closed) | "offline" (server down)
 let connectionState = "connecting";
 let submitted = false;
+let imagesDropped = false;
+let persistFailed = false;
+let draftGeneration = 0;
+let draftQueue = Promise.resolve();
 
 function getElement(tag, options = {}) {
   const node = document.createElement(tag);
@@ -66,12 +79,95 @@ function nearestAnchor(node) {
 
 function dispatchChange() {
   renderSidebar();
+  persistDraft();
   // Don't fire doomed auto-saves at a closed/dead session; mirror the
   // submit-button disable gate.
   if (connectionState !== "ended" && connectionState !== "offline")
     scheduleAutoSave(view, (status) =>
       buildPayload(status, view.last_intent || "revise"),
     );
+}
+
+// Writes are serialized and generation-guarded: a save that finishes after a
+// later edit, submit, or dismiss must not overwrite or resurrect the draft.
+function persistDraft() {
+  if (submitted) return;
+  draftGeneration += 1;
+  const generation = draftGeneration;
+  const snapshot = {
+    comments: [...store.comments.values()],
+    overall: [...store.overall.values()],
+  };
+  draftQueue = draftQueue
+    .then(() =>
+      saveDraft(view.session_id, snapshot, {
+        shouldWrite: () => generation === draftGeneration && !submitted,
+      }),
+    )
+    .then((result) => {
+      if (result.skipped) return;
+      const changed =
+        result.imagesDropped !== imagesDropped || !result.ok !== persistFailed;
+      imagesDropped = result.imagesDropped;
+      persistFailed = !result.ok;
+      if (changed) updateStatus();
+    })
+    .catch(() => {
+      /* persistence is best-effort */
+    });
+}
+
+function sequenceFrom(ids, prefix) {
+  let highest = 0;
+  for (const id of ids) {
+    const number = Number(
+      id.startsWith(prefix) ? id.slice(prefix.length) : NaN,
+    );
+    if (Number.isInteger(number) && number > highest) highest = number;
+  }
+  return highest;
+}
+
+function fromServerDraft(draft) {
+  return {
+    comments: draft.comments.map((comment) => ({
+      ...comment,
+      attachments: [],
+    })),
+    overall: draft.overall.map((note) => ({ ...note, attachments: [] })),
+    imagesDropped: false,
+  };
+}
+
+function restoreDraft() {
+  try {
+    pruneDrafts((view.session_ttl_hours || DEFAULT_TTL_HOURS) * HOUR_MS);
+    const local = loadDraft(view.session_id);
+    const source = local || (view.draft ? fromServerDraft(view.draft) : null);
+    if (!source) return;
+    for (const comment of source.comments)
+      store.comments.set(comment.id, {
+        id: comment.id,
+        anchor: comment.anchor,
+        text: comment.text,
+        attachments: deserializeAttachments(comment.attachments),
+        resolved: Boolean(comment.resolved),
+      });
+    for (const note of source.overall)
+      store.overall.set(note.id, {
+        id: note.id,
+        text: note.text,
+        attachments: deserializeAttachments(note.attachments),
+      });
+    sequence = sequenceFrom(store.comments.keys(), "c");
+    overallSequence = sequenceFrom(store.overall.keys(), "o");
+    imagesDropped = Boolean(source.imagesDropped);
+    markAnchored();
+    // A draft that came from the server is now the browser's too.
+    if (!local) persistDraft();
+  } catch {
+    /* no persistence available — start empty */
+  }
 }
 
 function buildPayload(status, intent) {
@@ -236,6 +332,22 @@ function commitOpenComposer() {
   } else {
     existing.remove();
   }
+}
+
+function hasDirtyComposer() {
+  const composer = document.querySelector(
+    '#comment-list [data-composer="true"]',
+  );
+  if (!composer) return false;
+  const textarea = composer.querySelector("textarea");
+  return (
+    Boolean(textarea && textarea.value.trim()) ||
+    Boolean(composer.querySelector(".thumb"))
+  );
+}
+
+function hasUnsentWork() {
+  return store.comments.size + store.overall.size > 0 || hasDirtyComposer();
 }
 
 function closeComposer() {
@@ -474,6 +586,11 @@ function updateStatus() {
         status.textContent = parts.length
           ? parts.join(" · ")
           : "No comments yet";
+        if (persistFailed)
+          status.textContent +=
+            " · draft not saved locally (storage unavailable)";
+        else if (imagesDropped)
+          status.textContent += " · images not saved locally (storage full)";
       }
     }
   }
@@ -736,6 +853,8 @@ function setActionsDisabled(disabled) {
 
 function finalizeSubmitted() {
   submitted = true;
+  draftGeneration += 1;
+  clearDraft(view.session_id);
   for (const attachment of allAttachments())
     URL.revokeObjectURL(attachment.url);
 }
@@ -788,7 +907,8 @@ async function dismissViewer() {
     closeTab();
     return;
   }
-  const drafts = store.comments.size + store.overall.size;
+  const drafts =
+    store.comments.size + store.overall.size + (hasDirtyComposer() ? 1 : 0);
   if (drafts) {
     const proceed = await confirmClose(
       `You have ${drafts} unsent comment${drafts === 1 ? "" : "s"}. Close the viewer anyway?`,
@@ -818,6 +938,7 @@ export function setConnectionState(state) {
 export function initComments(viewState) {
   view = viewState || {};
   decorateAnchors();
+  restoreDraft();
   wireSelection();
   document
     .getElementById("add-overall")
@@ -852,5 +973,10 @@ export function initComments(viewState) {
   document
     .getElementById("overlay-close")
     ?.addEventListener("click", dismissViewer);
+  window.addEventListener("beforeunload", (event) => {
+    if (submitted || !hasUnsentWork()) return;
+    event.preventDefault();
+    event.returnValue = true;
+  });
   renderSidebar();
 }

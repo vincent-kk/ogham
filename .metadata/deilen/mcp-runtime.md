@@ -22,9 +22,10 @@ MCP 서버(stdio)가 **장수 HTTP 서버 + long-poll resolver + 세션/이미�
 cennad/atlassian `webServer` 의 idle 패턴(`setTimeout` shutdown + `server.listen(0,'127.0.0.1')`)을 일반화한다.
 
 - **싱글톤**: 모듈 레벨 1 인스턴스. `render_viewer`/`open_settings` 가 기동 요청 시 이미 있으면 재사용 — **중복 `listen` 금지**.
-- **liveness = heartbeat**: 각 뷰어 탭이 `POST /api/ping`(주기 ~30s)으로 세션 생존을 갱신. 서버는 max(마지막 도구 호출, 마지막 ping) 기준으로 idle 판정 — 둘 다 `idle_shutdown_minutes` 초과 시 `server.close()` + 싱글톤 null(세션 active 여부 무관 → Claude 크래시·read-only 탭 닫기에도 종료). 활동 발생 시 타이머 재설정.
+- **liveness = serving 세션**: 이 프로세스가 만든 serving 세션이나 collect 대기가 남아 있는 동안 서버를 유지한다. 모두 닫힌 뒤 마지막 활동으로부터 `idle_shutdown_minutes` 초과 시 `server.close()` + 싱글톤 null. `POST /api/ping`(주기 ~30s)은 페이지 쪽 세션 상태 확인용이다.
 - **인증 경계**: `/r`·API 는 one-time token; 정적 `/assets`(렌더러 chunk/css/폰트)는 **토큰 면제**(비민감 공개 라이브러리, 동적 import·폰트 하위요청 호환).
 - **타이머 `unref()`**: idle 타이머는 `unref()` 해 프로세스 종료를 막지 않음.
+- **stdin EOF = 종료**: 호스트가 신호 없이 stdin 만 닫아도 `registerShutdown` 이 같은 종료 루틴(resolver settle + HTTP close + exit 0)을 탄다 — serving 세션이 리스너를 붙들어 고아 프로세스가 되는 것을 막는다.
 - **graceful shutdown**: stdio transport `close`/`end`, `SIGINT`/`SIGTERM`, `process.on('exit')` → 모든 타이머 clear + pending resolver 를 `server_closing` 으로 settle + `server.close()` + fd 해제.
 
 ## 3. long-poll resolver 레지스트리 (핸들러 누수 차단)

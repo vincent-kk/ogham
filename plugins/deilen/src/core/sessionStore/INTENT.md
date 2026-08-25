@@ -13,6 +13,7 @@
 | `persistence/closeSession.ts`           | meta.json status 를 `closed` 로 갱신                         |
 | `persistence/clearCollectedFeedback.ts` | 수거 완료 후 feedback.json + images 정리, viewer 보존        |
 | `persistence/removeSession.ts`          | 세션 디렉토리 전체 삭제 (TTL/관리용)                         |
+| `registry/servingSessions.ts`           | 이 프로세스가 만든 세션 중 아직 닫히거나 제거되지 않은 것의 process-local 집합 — HTTP 리스너 수명의 근거 |
 | `resolver/feedbackResolver.ts`          | process-global long-poll 레지스트리 (멱등 `settle`)          |
 | `index.ts`                              | barrel                                                       |
 

@@ -17,6 +17,7 @@
 - `clearCollectedFeedback(sessionId): Promise<void>` — `feedback.json` 과 수집 이미지를 정리하고 `viewer.md`·`meta.json` 은 보존(best-effort).
 - `removeSession(sessionId): Promise<void>` — 세션 디렉터리 전체 삭제(TTL·관리용).
 - `pruneExpired(ttlHours): Promise<number>` — 만료 디렉터리 제거 수.
+- registry: `registerServing(sessionId)`, `unregisterServing(sessionId)`, `hasServingSessions(): boolean`. `createSession` 이 영속 직후 등록하고, `closeSession` 은 status 쓰기가 성공했거나 세션이 부재·무효일 때만 해제하며(쓰기 실패 시 등록 유지 — 리스너가 먼저 죽는 쪽이 더 나쁘다), `removeSession`·`pruneExpired` 는 삭제 뒤 해제한다. 다른 프로세스가 만든 세션은 포함하지 않는다.
 - resolver: `awaitFeedback(sessionId, waitSeconds, signal?): Promise<SettleValue>`, `deliverComplete(sessionId, feedback)`, `closeResolver(sessionId)`, `settleAllResolvers()`. `SettleValue.kind ∈ {complete, pending, superseded, closing, aborted}`.
 
 ## Acceptance Criteria
@@ -35,6 +36,11 @@
 
 - `pruneExpired` 가 만료된 세션 디렉터리만 제거하고 제거 수를 돌려준다.
 
+### AC-serving-registry — serving 레지스트리
+
+- 생성 직후 `hasServingSessions()` 가 true, 닫힘·제거·만료 정리 뒤 false 다.
+- 부재 세션의 close 는 false 를 돌려주고 레지스트리를 바꾸지 않는다.
+
 ## Last Updated
 
-2026-07-30 — 세션 영속과 resolver 계약을 문서화했다.
+2026-08-25 — serving 레지스트리(리스너 수명 근거)를 추가했다.

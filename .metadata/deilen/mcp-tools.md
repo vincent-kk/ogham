@@ -78,4 +78,4 @@ settle 결과 매핑(상세 [mcp-runtime.md](./mcp-runtime.md)): `superseded`(�
 
 - 세션은 `project_hash`(cwd 기반) 스코프. 다른 cwd 세션 ID 조회는 `unknown`.
 - 보관: `complete` 수거 시 세션 디렉토리 즉시 정리. 미수거 세션은 `config.session_ttl_hours`(기본 72) 만료 후 다음 MCP 기동 시 정리(백스톱).
-- HTTP 서버는 활성 세션이 있는 동안 유지, 마지막 활동 후 idle(기본 1분) 초과 시 자동 종료.
+- HTTP 서버는 serving 세션이나 collect 대기가 남아 있는 동안 유지하고, 모두 닫힌 뒤 idle(기본 1분) 초과 시 자동 종료한다. heartbeat 는 페이지 쪽 세션 상태 확인용이다.

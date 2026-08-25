@@ -2,12 +2,14 @@ import type { ServerResponse } from "node:http";
 
 import { escapeJsonForHtml, sendJson } from "@ogham/http-kit";
 
+import { readFeedback } from "../../../core/feedbackStore/index.js";
 import {
   getSession,
   readViewerMarkdown,
 } from "../../../core/sessionStore/index.js";
 import { HEARTBEAT_INTERVAL_MS } from "../../../constants/defaults.js";
 import { renderMarkdown } from "../../../render/index.js";
+import { FeedbackStatus } from "../../../types/enums.js";
 import {
   DEILEN_STATE_PLACEHOLDER_PATTERN,
   SESSION_ID_PATTERN,
@@ -35,6 +37,7 @@ export async function handleGetViewer(
     return;
   }
   const config = await context.loadConfig();
+  const feedback = await readFeedback(sessionId);
   const render = renderMarkdown(markdown);
   const overrides = meta.options;
   const state = {
@@ -49,6 +52,15 @@ export async function handleGetViewer(
     content_width_px: overrides?.content_width_px ?? config.content_width_px,
     font_family: config.font_family,
     last_intent: config.last_intent,
+    draft:
+      feedback && feedback.status === FeedbackStatus.InProgress
+        ? {
+            overall: feedback.overall,
+            comments: feedback.comments,
+            updated_at: feedback.updated_at,
+          }
+        : null,
+    session_ttl_hours: config.session_ttl_hours,
     renderers: {
       mermaid: overrides?.renderers?.mermaid ?? config.renderers.mermaid,
       highlight: overrides?.renderers?.highlight ?? config.renderers.highlight,

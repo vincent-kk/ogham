@@ -1,6 +1,6 @@
 ## Purpose
 
-`render_viewer`/`open_settings` 가 공유하는 단일 로컬 HTTP 서버(127.0.0.1). 세션 내내 살아있는 싱글톤으로, 뷰어 HTML·피드백 API·설정 UI 를 서빙하고, heartbeat + 폴백 idle 로 자동 종료해 누수를 차단한다.
+`render_viewer`/`open_settings` 가 공유하는 단일 로컬 HTTP 서버(127.0.0.1). 세션 내내 살아있는 싱글톤으로, 뷰어 HTML·피드백 API·설정 UI 를 서빙하고, serving 세션이 남아 있는 동안 살아 있고, 모두 닫힌 뒤 idle 로 자동 종료해 누수를 차단한다.
 
 ## Structure
 
@@ -19,7 +19,7 @@
 - 세션 토큰 검증 — **`/assets` 는 면제**(비민감 공개 라이브러리)
 - `/api/image` 는 viewer.md 멤버십 + 토큰으로 로컬 `file://` 만 서빙(임의 경로 차단)
 - POST 는 `application/json` 또는 `multipart/form-data` 만(CSRF)
-- 모든 요청·도구 활동이 `touch()` → idle 타이머 리셋; `idle_shutdown_minutes`(기본 1분) 초과 시 `close()`
+- 모든 요청·도구 활동이 `touch()` → idle 타이머 리셋. serving 세션이나 collect 대기가 남아 있으면 재무장만 하고, 둘 다 없을 때 `idle_shutdown_minutes`(기본 1분) 초과 시 `close()`
 - 뷰어 HTML 은 런타임 로드(`public/viewer.html`) — 번들 비대화 회피
 - 세션 스코프 해시는 기동 시 1회 확정 — 호출자가 해석한 프로젝트 루트를 `ensureHttpServer(workspace?)` 로 받고, 부재 시 `projectRoot()` 로 해석(Claude=cwd, 그 외 호스트=`project_root` 인자·프로세스 메모)
 

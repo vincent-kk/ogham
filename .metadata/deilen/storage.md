@@ -31,7 +31,7 @@
 | `auto_open`               | `boolean`                 | `true` | 렌더 시 브라우저 자동 오픈           |
 | `collect_timeout_seconds` | `number`                  | `600`  | 1–600, stdio idle window(30분) 이내  |
 | `session_ttl_hours`       | `number`                  | `72`   | 1–720                                |
-| `idle_shutdown_minutes`   | `number`                  | `1`    | 1–120, 무활동 idle 폴백 종료         |
+| `idle_shutdown_minutes`   | `number`                  | `1`    | 1–120, serving 종료 뒤 idle 회수      |
 | `preferred_port`          | `number`                  | `0`    | 0=동적, 그 외 1024–65535             |
 | `content_width_px`        | `number`                  | `820`  | 480–1600                             |
 | `font_family`             | `string`                  | 시스템 |                                      |
@@ -46,4 +46,4 @@
 - config 부재 시 `constants/defaults.ts` 로 부팅, 첫 저장 시 파일 생성.
 - `config_version` < 현재면 로드가 `configManager/operations/migrateConfig.ts` 스텝을 1회 적용 후 재기록(best-effort); `saveConfig` 는 모든 쓰기에 현재 버전을 스탬프. v0→v1: 구 기본값 45 → 600 승격.
 - 키는 외부 인터페이스이므로 snake_case 유지(코드 식별자 camelCase 와 별개).
-- 뷰어 heartbeat 주기는 상수(~30s); 서버 idle 판정은 max(마지막 도구호출, 마지막 ping) 기준 `idle_shutdown_minutes`.
+- 서버는 serving 세션이나 collect 대기가 남아 있는 동안 유지하고, 모두 닫힌 뒤 `idle_shutdown_minutes` 초과 시 종료한다. 뷰어 heartbeat 주기는 상수(~30s)이며 페이지 쪽 세션 상태 확인용이다.

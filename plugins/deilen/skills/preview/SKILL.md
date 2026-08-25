@@ -27,7 +27,7 @@ Preview the document Claude just produced as a readable local page. The user rea
 
    Attached images arrive as image blocks; read them as visual context. Honor `[resolved]` markers as lower priority.
 
-7. **Clean up (optional).** A submitted review already closes its session; only call `mcp__plugin_deilen_tools__close_viewer` with `{ session_id }` if you stopped polling before the user submitted.
+7. **Clean up (optional).** A submitted review already closes its session, and a `pending` result does not end the review — the page keeps serving until the user submits, so never call `mcp__plugin_deilen_tools__close_viewer` after `pending`. Call it with `{ session_id }` only when the review is abandoned: the user said to stop, or you are re-rendering a different document in its place.
 
 ## Notes
 

@@ -3,6 +3,7 @@ import { readdir, rm, stat } from "node:fs/promises";
 import { SESSIONS_DIR, sessionDir } from "../../../constants/paths.js";
 import { logger } from "../../../lib/logger.js";
 import { isFileNotFound } from "../../../utils/isFileNotFound.js";
+import { unregisterServing } from "../registry/servingSessions.js";
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -24,6 +25,7 @@ export async function pruneExpired(ttlHours: number): Promise<number> {
       if (!info.isDirectory()) continue;
       if (info.mtimeMs < cutoff) {
         await rm(dir, { recursive: true, force: true });
+        unregisterServing(id);
         removed += 1;
       }
     } catch (err) {
