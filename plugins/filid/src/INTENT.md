@@ -8,7 +8,7 @@ Filid 1.0의 canonical TypeScript source. 생태계 어댑터가 사실을 수�
 
 - ESM import와 명시적 named export를 사용한다.
 - 공개 MCP handler는 모두 공통 `ToolPayload` adapter 의미를 가진다.
-- entry point는 MCP와 hook build entry이며 npm library entry는 두지 않는다.
+- 소스 루트의 named entry point는 패키지 버전 식별자만 노출하며, npm manifest에는 library export를 두지 않는다.
 - core/policy/DTO에 확장자, 진입점 이름, 테스트 호출 문법을 두지 않는다.
 
 ## Boundaries

@@ -27,7 +27,7 @@
 ### AC-cache-ephemeral — 임시 상태
 
 - cache 삭제 후 다음 요청은 repository 증거에서 상태를 재구성할 수 있다.
-- `.filid/criteria.md`나 review verdict를 cache의 권위 있는 입력으로 읽지 않는다.
+- 폐기된 legacy criteria ledger나 review verdict를 cache의 권위 있는 입력으로 읽지 않는다.
 
 ### AC-cache-isolation — scope 격리
 
@@ -48,4 +48,4 @@
 
 ## Last Updated
 
-2026-07-27 — mode audit API까지 제거한 1.0 hook delivery cache 경계로 재구성했다.
+2026-08-28 — DETAIL이 유일한 acceptance ledger라는 현재 경계에서 폐기된 legacy 경로 토큰을 제거했다.

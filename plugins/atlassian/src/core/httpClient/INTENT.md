@@ -8,7 +8,7 @@
 
 - SSRF 방어는 호스트 문자열이 아니라 DNS 해석 결과로 판정한다 — 이름 기반 검사만으로는 rebinding 을 막지 못한다.
 - 재시도 대상은 429 와 5xx 뿐이고 지연은 exponential backoff 로 늘린다. 나머지 4xx 는 재시도하지 않는다.
-- 성공·실패 모두 `McpResponse` 봉투로 돌려주고 예외를 호출자에게 전파하지 않는다.
+- HTTP·네트워크 결과는 `McpResponse` 봉투로 돌려준다. SSRF 같은 전송 전 정책 위반은 요청을 보내지 않고 예외로 거부한다.
 - 인증은 `config.auth_header` 한 곳으로만 들어온다 — 호출자가 헤더를 조립하지 않는다.
 
 ## Boundaries
@@ -27,6 +27,6 @@
 
 ### Never do
 
-- `mcp/` 레이어에서 이 모듈을 직접 import (core → mcp 방향 금지)
+- 이 모듈에서 `mcp/` 레이어를 import (core → mcp 역방향 금지)
 - 인증 자격증명을 응답 데이터나 로그에 노출
 - 호출자가 `allow_private_ip` 정책을 명시적으로 전달하지 않은 한 private IP 허용

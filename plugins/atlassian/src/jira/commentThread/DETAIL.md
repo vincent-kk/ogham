@@ -16,6 +16,8 @@
 - `scanCommentThreads(ctx, params, deps)` — `CommentThreadScanResult`.
 - `probeCommentThread(ctx, params, deps)` — `CommentThreadProbeResult`; proposal 유무와 관계없이 `warnings[]` 를 전달한다.
 - `saveCommentThreadProfile(ctx, params, deps)` — `CommentThreadSaveResult`.
+- `defaultCommentThreadDeps` 는 요청, 프로필 읽기·쓰기, 시계를 잇는 운영 기본값이며 숨은 가변 상태를 소유하지 않는다.
+- `CommentThreadDeps` 는 네트워크·파일·시계 효과를 호출자가 대체할 수 있게 하는 주입 경계다. 공개 작업은 주입된 경계 밖에서 효과를 수행하지 않는다.
 
 ## Acceptance Criteria
 
@@ -129,4 +131,4 @@
 
 ## Last Updated
 
-2026-08-28 — reply 플러그인 댓글 스레드 복원 계약을 신설했다.
+2026-08-28 — reply 플러그인 댓글 스레드의 운영 기본 의존성과 효과 주입 경계를 계약화했다.

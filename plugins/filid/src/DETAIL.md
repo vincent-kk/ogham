@@ -6,13 +6,14 @@
 - `core`는 생태계 리터럴을 알지 못한다. 확장자, 진입점 파일명, import 문법, 테스트 호출 문법은 `adapters/` 안에만 존재한다.
 - `mcp`와 `hooks`는 host 경계이며 정책 판단을 하지 않는다.
 - 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
-- npm library barrel은 존재하지 않는다. 빌드 대상은 MCP 진입점(CJS)과 훅 진입점(ESM)뿐이다.
+- 소스 루트 named entry point는 FCA 경계 식별용으로 `VERSION`만 열거하고, npm manifest에는 library export를 선언하지 않는다.
 - `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로 고치지 않는다.
 
 ## API Contracts
 
 - MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
 - 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
+- 소스 루트 entry point의 공개 surface는 생성된 `VERSION` 하나다.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
 
 ## Acceptance Criteria
@@ -24,7 +25,8 @@
 
 ### AC-src-surface — 1.0 표면
 
-- MCP 도구가 정확히 9개 등록되고, npm library entry가 존재하지 않는다.
+- MCP 도구가 정확히 9개 등록된다.
+- 소스 루트 entry point가 `VERSION`만 named export하고 npm manifest에는 library export가 없다.
 
 ### AC-src-generated — 생성물 불가침
 
@@ -32,12 +34,12 @@
 
 ## Boundary Exemptions
 
-### version.ts — Generated version constant has no entry point
+### `version.ts` — Generated version constant is imported directly inside the owner
 
 - **Consumers**: `**/src/**`
 - **Direct import**: allowed
-- **Reason**: `src`는 1.0에서 npm barrel을 갖지 않으므로(ADR-09) 경유할 진입점이 없다. `version.ts`는 `scripts/injectVersion.mjs`가 만드는 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다.
+- **Reason**: 같은 fractal 내부 소비자는 자기 entry point를 경유하지 않고 concrete peer를 직접 참조한다. `version.ts`는 생성된 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다.
 
 ## Last Updated
 
-2026-08-23 — npm library barrel 부재 계약에서 존재하지 않는 경로 토큰을 제거했다.
+2026-08-28 — npm 공개 API와 분리된 소스 FCA entry point의 단일 named export를 명시했다.

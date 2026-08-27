@@ -34,7 +34,7 @@
 ### AC-save-to-path — 응답 본문 저장
 
 - 성공한 GET + `save_to_path` 는 항상 파일을 쓰고 `{ saved_to, size_bytes, content_type }` 을 돌려준다 — JSON 응답이라도 인라인 반환으로 빠지지 않는다.
-- `save_to_path` 는 요청 값 그대로가 아니라 `{projectRoot}/.temp/` 아래로 재해석된다. 호출자는 응답의 `saved_to` 를 그대로 쓰며, 요청에 넣은 경로를 다시 열지 않는다.
+- `save_to_path` 는 요청 값 그대로가 아니라 `projectRoot()` 가 정한 프로젝트 임시 루트 아래로 재해석된다. 호출자는 응답의 `saved_to` 를 그대로 쓰며, 요청에 넣은 경로를 다시 열지 않는다.
 - `expand` 는 인라인 GET 과 동일하게 쿼리에 병합된다. 저장 경로는 `Accept: */*` 로 요청하므로 content negotiation 을 하는 엔드포인트에서는 본문이 인라인 GET 과 다를 수 있다.
 - JSON 이 아닌 200 응답(예: HTML 로그인 페이지)은 바이트 그대로 쓰고 `content_type` 에 실제 헤더 값을 담는다. 호출자는 `content_type` 을 확인한다.
 - 대상 경로에 파일이 이미 있어도 HTTP 요청이 발생하고 파일이 덮어써진다 — `cached` 필드와 `force` 인자는 계약에 없다.
@@ -42,4 +42,4 @@
 
 ## Last Updated
 
-2026-08-27 — save_to_path 저장 계약을 JSON 까지 넓히고 사전 파일 캐시를 제거했다.
+2026-08-28 — save_to_path의 런타임 프로젝트 임시 루트 소유권을 경로 인벤토리 없이 명확히 했다.
