@@ -4,16 +4,16 @@
 
 ## Structure
 
-| Path                                                                | Role                                                 |
-| ------------------------------------------------------------------- | ---------------------------------------------------- |
-| `index.html`                                                        | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯          |
-| `styles/styles.css`                                                 | 테마(light/dark/auto) 토큰·타이포                    |
-| `scripts/app.js`                                                    | 진입점 — state hydrate·마운트·테마·heartbeat         |
-| `scripts/enhance.js`                                                | `/assets/*` lazy import (highlight/mermaid/katex)    |
+| Path                                                                  | Role                                                          |
+| --------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `index.html`                                                          | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯                   |
+| `styles/styles.css`                                                   | 테마(light/dark/auto) 토큰·타이포                             |
+| `scripts/app.js`                                                      | 진입점 — state hydrate·마운트·테마·heartbeat                  |
+| `scripts/enhance.js`                                                  | `/assets/*` lazy import (highlight/mermaid/katex)             |
 | `scripts/{comments,images,submit,copy,draftStore,heartbeat,links}.js` | 코멘트·이미지·피드백 전송·복사·초안 영속·heartbeat·링크 새 탭 |
-| `renderers/*.entry.ts`                                              | 무거운 렌더러 esbuild 진입점 → `public/assets/`      |
-| `renderers/{expandButton,diagramLightbox,lightboxFrame,panZoom}.ts` | 다이어그램 확대 라이트박스 — mermaid chunk 에만 동봉 |
-| `index.ts`                                                          | 빌드 입력 표식 (`export {}`)                         |
+| `renderers/*.entry.ts`                                                | 무거운 렌더러 esbuild 진입점 → `public/assets/`               |
+| `renderers/{expandButton,diagramLightbox,lightboxFrame,panZoom}.ts`   | 다이어그램 확대 라이트박스 — mermaid chunk 에만 동봉          |
+| `index.ts`                                                            | 빌드 입력 표식 (`export {}`)                                  |
 
 ## Conventions
 
