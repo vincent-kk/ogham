@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 의존 방향은 `mcp → core` 한 방향이다. `converter/` 는 둘 어느 쪽도 import 하지 않는 순수 형제 모듈이다.
+- 의존 방향은 `mcp → jira → core` 한 방향이다. `jira/` 는 도메인 레시피 계층으로 `core/`·`utils/`·`types/`·`constants/`·`lib/` 만 import 하고 `mcp/` 를 참조하지 않는다. `converter/` 는 둘 어느 쪽도 import 하지 않는 순수 형제 모듈이다.
 - Cloud 와 Server/DC 차이는 스킬과 MCP 계층에서 흡수한다. agent 와 dispatcher 로 배포 환경 분기를 올리지 않는다.
 - 형제 fractal 은 서로의 배럴을 경유한다. 부모 배럴이 형제를 재노출하므로 그 경로는 의존 순환이다.
 - Zod 스키마는 `types/` organ 에만 정의한다.
@@ -14,7 +14,7 @@
 
 - 실행 진입점은 esbuild 가 `mcp/serverEntry/` 로부터 만드는 `bridge/mcp-server.cjs` 와 빌드된 `public/settings.html` 이다.
 - `src/index.ts` 는 타입체크·테스트가 소비하는 집합 배럴이다. `mcp/` 를 재노출하지 않는다 — `mcp/server/server.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
-- MCP 도구 4종: `fetch`, `convert`, `auth_check`, `setup`.
+- MCP 도구 5종: 범용 `fetch`, `convert`, `auth_check`, `setup` 과 도메인 어댑터 `jira_comment_thread`.
 
 ## Acceptance Criteria
 
@@ -22,6 +22,7 @@
 
 - `core/` 에서 `mcp/` 를 참조하는 import 가 0건이다.
 - `converter/` 에서 `core/`·`mcp/` 를 참조하는 import 가 0건이다.
+- `jira/` 에서 `mcp/` 를 참조하는 import 가 0건이다.
 
 ### AC-sibling-barrel-crossing — 형제 경계 통과
 
@@ -45,4 +46,4 @@
 
 ## Last Updated
 
-2026-08-23 — 형제 경계 수용 기준에서 문서 위치에 종속된 경로 표현을 제거했다.
+2026-08-28 — 도메인 레시피 계층 `jira/` 를 의존 방향에 추가했다.

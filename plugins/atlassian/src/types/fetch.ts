@@ -14,6 +14,8 @@ export interface FetchContext {
    * on non-GET requests. True for Server/Data Center (mandatory in DC 9.0+ XSRF posture).
    */
   requires_xsrf_bypass?: boolean;
+  /** Deployment of the resolved site; `true` for `*.atlassian.net`. Domain adapters gate on it — `fetch` does not read it. */
+  is_cloud?: boolean;
 }
 
 export interface FetchParams {

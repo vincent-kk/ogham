@@ -1,15 +1,16 @@
 ## Purpose
 
-4 MCP tool handlers: fetch (HTTP GET/POST/PUT/PATCH/DELETE), convert (local format), auth_check (auth status), setup (auth config).
+4 generic MCP tool handlers — fetch (HTTP GET/POST/PUT/PATCH/DELETE), convert (local format), auth_check (auth status), setup (auth config) — plus the approved domain adapter jiraCommentThread (Jira DC comment thread recovery).
 
 ## Structure
 
-| Directory    | Role                                  |
-| ------------ | ------------------------------------- |
-| `fetch/`     | HTTP GET/POST/PUT/PATCH/DELETE 핸들러 |
-| `convert/`   | ADF/Storage ↔ Markdown 변환 핸들러    |
-| `setup/`     | 인증 설정 위저드 핸들러               |
-| `authCheck/` | 인증 상태 확인 핸들러                 |
+| Directory            | Role                                                            |
+| -------------------- | --------------------------------------------------------------- |
+| `fetch/`             | HTTP GET/POST/PUT/PATCH/DELETE 핸들러                           |
+| `convert/`           | ADF/Storage ↔ Markdown 변환 핸들러                              |
+| `setup/`             | 인증 설정 위저드 핸들러                                         |
+| `authCheck/`         | 인증 상태 확인 핸들러                                           |
+| `jiraCommentThread/` | Jira DC 댓글 스레드 어댑터 (read · scan · probe · save_profile) |
 
 ## Conventions
 
@@ -21,6 +22,7 @@
 - `mcp/shared/` — `wrapHandler`, `toolResult`, `toolError`
 - `core/` — HTTP 실행, 인증, 설정
 - `converter/` — 포맷 변환 (convert tool만)
+- `jira/` — `readCommentThread`·`scanCommentThreads`·`probeCommentThread`·`saveCommentThreadProfile` (jiraCommentThread tool만)
 
 ## Boundaries
 
@@ -35,4 +37,4 @@
 
 ### Never do
 
-- Embed Jira/Confluence domain knowledge in tool handlers
+- Embed Jira/Confluence domain rules in tool handlers — an adapter calls `src/jira/index.js` and nothing inside `src/jira/commentThread/`

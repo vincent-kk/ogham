@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 도구는 넷이고 각각 독립 fractal 이다. 도메인 지식 없이 일반 HTTP·변환·상태 조회만 한다.
+- 범용 도구는 4종이고 각각 독립 fractal 이다. 도메인 지식 없이 일반 HTTP·변환·상태 조회만 한다. 승인된 도메인 어댑터는 별도 fractal 로 두며 `src/jira/` 의 entry point 만 호출한다.
 - 도구끼리 직접 import 하지 않는다 — 공유가 필요하면 `core` 또는 `shared` 를 경유한다.
 - 외부 HTTP 는 `core/httpClient` 만 수행한다.
 - 자격증명은 응답에 노출하지 않는다.
@@ -13,6 +13,7 @@
 - `convert/` — 순수 로컬 포맷 변환(네트워크 없음).
 - `authCheck/` — 인증 설정 상태 보고와 선택적 연결 테스트.
 - `setup/` — 로컬 HTTP 서버로 인증 설정 UI 제공.
+- `jiraCommentThread/` — Jira DC reply-plugin 댓글 스레드 어댑터(`mode: read | scan | probe | save_profile`); 규칙은 `src/jira/commentThread` 가 소유.
 
 ## Acceptance Criteria
 
@@ -22,8 +23,8 @@
 
 ### AC-no-domain-knowledge — 도메인 무지
 
-- 도구 안에 Jira·Confluence 필드 의미나 워크플로 규칙이 없다.
+- 범용 도구 4종 안에 Jira·Confluence 필드 의미나 워크플로 규칙이 없고, 어댑터 안에는 `src/jira/index.js` 호출 외의 도메인 로직이 없다.
 
 ## Last Updated
 
-2026-08-27 — fetch 의 save_to_path 저장 계약을 반영했다.
+2026-08-28 — 도메인 어댑터 `jiraCommentThread` 를 도구 컨테이너 계약에 추가했다.

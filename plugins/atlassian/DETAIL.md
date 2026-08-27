@@ -3,7 +3,7 @@
 ## Requirements
 
 - Python `mcp-atlassian` 의 네이티브 TypeScript 대체다. Jira·Confluence REST API 를 하나의 플러그인으로 통합한다.
-- **MCP 계층은 도메인 지식을 갖지 않는다.** 도구는 일반 HTTP·변환·상태 조회만 하고, 어떤 필드가 무엇을 뜻하는지는 스킬과 agent 가 안다.
+- **범용 MCP 도구는 도메인 지식을 갖지 않는다.** 승인된 도메인 어댑터는 `src/jira/` entry point 만 호출하고 규칙을 직접 소유하지 않는다.
 - Cloud 와 Server/DC 차이는 스킬과 MCP 계층에서 흡수한다. agent 와 dispatcher 로 배포 환경 분기를 올리지 않는다.
 - Jira·Confluence 교차 도메인 조정은 dispatcher 가 맡는다. agent 끼리 통신하거나 스킬이 다른 스킬을 호출하지 않는다.
 - 모든 outbound 요청은 SSRF 검증을 통과한다.
@@ -13,7 +13,7 @@
 
 ## API Contracts
 
-- **MCP 도구 4종**: `fetch`(HTTP 5메서드 + 포맷 자동 변환), `convert`(로컬 변환), `auth_check`(인증 상태), `setup`(설정 UI).
+- **MCP 도구 5종**: 범용 `fetch`(HTTP 5메서드 + 포맷 자동 변환), `convert`(로컬 변환), `auth_check`(인증 상태), `setup`(설정 UI)과 도메인 어댑터 `jira_comment_thread`.
 - **스킬**: Jira·Confluence 도메인 라우터와 설정·다운로드·미디어 분석.
 - **에이전트 3종**: `jira`, `confluence`, `media`.
 - **변환 계층**: ADF·Storage XHTML·Wiki Markup ↔ Markdown(순수 로컬, Python 레퍼런스 17개 노드 타입).
@@ -22,7 +22,7 @@
 
 ### AC-domain-knowledge-placement — 도메인 지식 위치
 
-- MCP 도구·core 에 Jira·Confluence 필드 의미나 워크플로 규칙이 없다.
+- 범용 MCP 도구·core 에 Jira·Confluence 필드 의미나 워크플로 규칙이 없고, 도메인 어댑터는 `src/jira/` entry point 호출만 한다.
 - 배포 환경(Cloud/Server) 분기가 agent 문서에 없다.
 
 ### AC-ssrf-coverage — SSRF 전면 적용
@@ -41,4 +41,4 @@
 
 ## Last Updated
 
-2026-07-30 — 플러그인 루트 계약을 문서화했다.
+2026-08-28 — 다섯 번째 MCP 도구와 얇은 도메인 어댑터 경계를 반영했다.
