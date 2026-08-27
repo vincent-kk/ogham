@@ -85,7 +85,7 @@ describe('handlePreToolUse', () => {
     expect(result.hookSpecificOutput?.additionalContext).toMatch(/\[filid:/);
   });
 
-  it('Write normal .ts into undelivered module → gate denies once with rules, retry passes', async () => {
+  it('Write normal .ts into undelivered module → injects rules and proceeds', async () => {
     const filePath = join(tmpDir, 'src', 'feature.ts');
     mkdirSync(join(tmpDir, 'src'), { recursive: true });
 
@@ -94,14 +94,17 @@ describe('handlePreToolUse', () => {
       tool_input: { file_path: filePath, content: 'export const x = 1;\n' },
     });
 
-    const denied = await handlePreToolUse(input);
-    expect(denied.continue).toBe(true);
-    expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
-    const reason = denied.hookSpecificOutput?.permissionDecisionReason ?? '';
-    expect(reason).toContain('[filid:gate]');
-    expect(reason).toContain('intent: INTENT.md');
-    expect(reason).toContain('action: READ the intent file above');
-    expect(reason).not.toContain('Test project');
+    const first = await handlePreToolUse(input);
+    expect(first.continue).toBe(true);
+    expect(first.hookSpecificOutput?.permissionDecision).toBeUndefined();
+    expect(first.hookSpecificOutput?.permissionDecisionReason).toBeUndefined();
+    const context = first.hookSpecificOutput?.additionalContext ?? '';
+    expect(context).not.toContain('[filid:gate]');
+    expect(context).toContain('[filid:guide]');
+    expect(context).toContain('[filid:ctx]');
+    expect(context).toContain('intent: INTENT.md');
+    expect(context).toContain('action: READ the intent file above');
+    expect(context).not.toContain('Test project');
 
     const retry = await handlePreToolUse(input);
     expect(retry.continue).toBe(true);
@@ -263,7 +266,7 @@ describe('handlePreToolUse', () => {
     }
   });
 
-  it('gate delivery is terminal: after deny+retry, later Reads emit no unread warning and no re-ctx', async () => {
+  it('soft delivery is terminal: after first mutation, later Reads emit no unread warning and no re-ctx', async () => {
     mkdirSync(join(tmpDir, 'src', 'feature'), { recursive: true });
     writeFileSync(join(tmpDir, 'index.ts'), '');
 
@@ -274,9 +277,11 @@ describe('handlePreToolUse', () => {
         content: 'export const x = 1;\n',
       },
     });
-    const denied = await handlePreToolUse(write);
-    expect(denied.hookSpecificOutput?.permissionDecision).toBe('deny');
-    await handlePreToolUse(write); // retry passes, records the visit
+    const delivered = await handlePreToolUse(write);
+    expect(delivered.hookSpecificOutput?.permissionDecision).toBeUndefined();
+    expect(delivered.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:ctx]',
+    );
 
     const readResult = await handlePreToolUse(
       makeInput({
@@ -286,7 +291,7 @@ describe('handlePreToolUse', () => {
     );
     const ctx = readResult.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).not.toContain('unread-intent');
-    // root module was delivered by the gate → same-session Read stays ctx-free
+    // root module was delivered by the first mutation → same-session Read stays ctx-free
     expect(ctx).not.toContain('[filid:ctx]');
   });
 
@@ -458,7 +463,7 @@ describe('handlePreToolUse', () => {
     expect(context).toContain('import');
   });
 
-  it('batch continues after an initial deny and exposes a later structure warning', async () => {
+  it('batch combines initial soft delivery with a later structure warning', async () => {
     mkdirSync(join(tmpDir, 'src', 'deep'), { recursive: true });
     const blockedPath = join(tmpDir, 'src', 'blocked.ts');
     const hiddenPath = join(tmpDir, 'src', 'deep', 'child.ts');
@@ -474,16 +479,16 @@ describe('handlePreToolUse', () => {
     );
 
     const result = await handlePreToolUseBatch(normalized);
-    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      blockedPath,
-    );
+    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toBeUndefined();
     const context = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(context).toContain('[filid:ctx]');
+    expect(context).toContain(blockedPath);
     expect(context).toContain(hiddenPath);
     expect(context).toContain('structure-guard');
   });
 
-  it('batch routes Delete through the mutation visit gate', async () => {
+  it('batch routes Delete through soft visit delivery', async () => {
     const deletedPath = join(tmpDir, 'src', 'obsolete.ts');
     const normalized = normalizeCodexToolUses(
       makeInput({
@@ -495,13 +500,12 @@ describe('handlePreToolUse', () => {
     );
 
     const result = await handlePreToolUseBatch(normalized);
-    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      '[filid:gate]',
+    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toBeUndefined();
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:ctx]',
     );
-    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      deletedPath,
-    );
+    expect(result.hookSpecificOutput?.additionalContext).toContain(deletedPath);
   });
 
   it('batch routes a delivered protected Delete through the document validator', async () => {

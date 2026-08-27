@@ -53,9 +53,8 @@ type PreparedMoveInput =
  * FCA opt-in gate: projects without a `.filid/` marker or INTENT.md are not
  * governed at all — validation and guards are as opt-in as injection.
  *
- * A visit-gate deny (undelivered-module mutation) short-circuits the
- * orchestration: the deny reason already delivered the module rules, and the
- * identical retry runs the full validator/guard path.
+ * Visit delivery never decides permission; mutation calls continue through
+ * the validator and structure guard in the same invocation.
  *
  * Branch names and criteria ledgers do not affect hook permission decisions.
  */
@@ -73,9 +72,6 @@ export async function handlePreToolUse(
 
   const visit = processVisit(input);
   if (!mutation) return mergeResults([visit]);
-
-  if (visit.hookSpecificOutput?.permissionDecision === 'deny')
-    return mergeResults([visit]);
 
   const prepared = prepareMoveDestination(input, safeCwd);
   if (!prepared.ok) return mergeResults([visit, prepared.denial]);

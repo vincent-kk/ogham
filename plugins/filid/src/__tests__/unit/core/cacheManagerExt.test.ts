@@ -30,7 +30,6 @@ const record = (cwd: string, sessionId: string, readKey: string) =>
       readKey,
       ownerKey: null,
       ttlTurns: 5,
-      gateEligible: false,
     },
   );
 
@@ -92,7 +91,6 @@ describe('cache-manager boundary/fmap extensions', () => {
         readKey: 'src/checkout',
         ownerKey: 'src/checkout',
         ttlTurns: 5,
-        gateEligible: false,
       },
     );
 
@@ -115,7 +113,6 @@ describe('cache-manager boundary/fmap extensions', () => {
         readKey: 'src',
         ownerKey: 'src',
         ttlTurns: 5,
-        gateEligible: false,
       },
     );
 

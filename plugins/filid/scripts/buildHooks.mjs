@@ -63,7 +63,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   user-prompt-submit additionally carries session context.
 //   HEAVY         — guard-heavy orchestration with logHookFailure
 //                   (delivery-state visit pipeline: commitVisit transaction
-//                   + 3-state TTL delivery + mutation gate deny + scoped fmap
+//                   + 3-state TTL soft delivery + scoped fmap
 //                   + pre-tool-validator + structure-guard + FCA opt-in gate).
 //                   36KB keeps a bounded cold-start budget while leaving room
 //                   for guard state and conservative Move projection.
