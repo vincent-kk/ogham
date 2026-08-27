@@ -91,7 +91,7 @@ plugins/atlassian/
 ```json
 {
   "name": "atlassian",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "description": "Atlassian — Jira and Confluence integration plugin for Claude Code. Full REST API access with domain-expert agents.",
   "author": {
     "name": "Vincent K. Kelvin"
