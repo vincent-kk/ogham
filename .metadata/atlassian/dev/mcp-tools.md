@@ -8,16 +8,17 @@
 
 ## 1. Overview
 
-The MCP layer exposes 4 tools under a single server named `"tools"`:
+The MCP layer exposes 5 tools under a single server named `"tools"`:
 
-| Tool         | Type  | Description                                                        |
-| ------------ | ----- | ------------------------------------------------------------------ |
-| `fetch`      | HTTP  | All HTTP operations (GET/POST/PUT/PATCH/DELETE) via `method` param |
-| `convert`    | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion             |
-| `auth_check` | Local | Authentication status check with optional live connectivity test   |
-| `setup`      | Local | Local web server for auth/connection setup                         |
+| Tool                  | Type  | Description                                                                                                  |
+| --------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
+| `fetch`               | HTTP  | All HTTP operations (GET/POST/PUT/PATCH/DELETE) via `method` param                                           |
+| `convert`             | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion                                                       |
+| `auth_check`          | Local | Authentication status check with optional live connectivity test                                             |
+| `setup`               | Local | Local web server for auth/connection setup                                                                   |
+| `jira_comment_thread` | HTTP  | Jira Server/DC comment thread with reply-plugin replies merged server-side (domain adapter over `src/jira/`) |
 
-**Design principle**: MCP has zero domain knowledge. It does not know what a "Jira issue" or "Confluence page" is. It executes `(method, path, params, body)` tuples as HTTP requests.
+**Design principle**: MCP has zero domain knowledge. It does not know what a "Jira issue" or "Confluence page" is. It executes `(method, path, params, body)` tuples as HTTP requests. Approved domain adapters are the one exception: they call a `src/jira/` entry point and hold no rules themselves.
 
 ---
 
@@ -113,7 +114,7 @@ Unified HTTP tool supporting all methods via the `method` parameter.
 
 ### 3.3 `auth_check` — Authentication Status Check
 
-**Not an HTTP tool.** Inspects stored credentials and optionally performs a live connectivity probe. Source of truth: `src/types/auth_check.ts`.
+**Not an HTTP tool.** Inspects stored credentials and optionally performs a live connectivity probe. Source of truth: `src/types/authCheck.ts`.
 
 | Parameter         | Type      | Required | Description                                                                                                                                                                               |
 | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +173,23 @@ interface AuthCheckServiceEntry {
 **Returns**: Connection test results and saved config status.
 
 **Annotations**: `readOnlyHint: false, destructiveHint: false, idempotentHint: false` (writes credentials to local storage; the action is observable side-effect).
+
+---
+
+### 3.5 `jira_comment_thread` — Comment Thread (Server/DC)
+
+| Parameter                    | Mode         | Type     | Description                                                                  |
+| ---------------------------- | ------------ | -------- | ---------------------------------------------------------------------------- |
+| `mode`                       | all          | string   | `read` (default) · `scan` · `probe` · `save_profile`                         |
+| `base_url`                   | all          | string   | Site selector when several Jira sites are configured                         |
+| `issue_key`                  | read         | string   | Issue whose thread to return                                                 |
+| `start_at`, `max_results`    | read         | number   | Present → one page like `fetch`; absent → all pages (cap 1000, warning)      |
+| `expand`                     | read         | string[] | Passed to the comment list request (e.g. `renderedBody`)                     |
+| `jql`, `max_issues`          | scan         | —        | Report issues whose changelog carries `Comment` items (default 100, cap 500) |
+| `sample_issue_key`           | probe        | string   | An issue the user knows has replies                                          |
+| `profile`, `proposal_digest` | save_profile | —        | Exactly the probe's proposal; digest required for `pattern: "changelog"`     |
+
+**Annotations**: `readOnlyHint: false, destructiveHint: true, idempotentHint: false` (`save_profile` can replace `comment-profiles.json` and stamps a new `verifiedAt`).
 
 ---
 

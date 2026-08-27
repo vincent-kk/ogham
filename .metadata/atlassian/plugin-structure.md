@@ -8,156 +8,74 @@
 ## 1. Directory Layout
 
 ```
-packages/atlassian/
+plugins/atlassian/
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin manifest
+├── .codex-plugin/
+│   └── plugin.json              # Codex plugin manifest
 ├── .mcp.json                    # MCP server configuration
 ├── agents/
 │   ├── jira.md                  # Jira domain expert agent
 │   ├── confluence.md            # Confluence domain expert agent
 │   └── media.md                 # Multimodal keyframe analyst (spawned by media-analysis skill)
 ├── skills/
-│   ├── setup/
-│   │   ├── SKILL.md             # Auth/connection setup skill
-│   │   └── references/
-│   │       ├── auth-types.md
-│   │       ├── setup-flow.md
-│   │       └── errors.md
-│   ├── download/
-│   │   ├── SKILL.md             # Attachment download skill
-│   │   └── references/
-│   │       ├── download-flow.md
-│   │       └── errors.md
+│   ├── .shared/                  # Shared MCP naming and workflow references
+│   ├── setup/                    # Auth/connection setup skill
+│   ├── download/                 # Attachment download skill
 │   ├── jira/
 │   │   ├── SKILL.md             # Jira API domain router
 │   │   └── tools/
-│   │       ├── issue/
-│   │       │   ├── schema.md
-│   │       │   ├── field-formatting.md
-│   │       │   └── examples.md
-│   │       ├── search/
-│   │       │   ├── schema.md
-│   │       │   └── jql-guide.md
-│   │       ├── transition/
-│   │       │   └── schema.md
 │   │       ├── comment/
 │   │       │   ├── schema.md
-│   │       │   └── jsm-comment.md
-│   │       ├── agile/
-│   │       │   └── schema.md
-│   │       ├── project/
-│   │       │   └── schema.md
-│   │       ├── field/
-│   │       │   ├── schema.md
-│   │       │   └── custom-field-options.md
-│   │       ├── link/
-│   │       │   └── schema.md
-│   │       ├── worklog/
-│   │       │   └── schema.md
-│   │       ├── attachment/
-│   │       │   └── schema.md
-│   │       ├── user/
-│   │       │   └── schema.md
-│   │       ├── watcher/
-│   │       │   └── schema.md
-│   │       ├── jsm/
-│   │       │   ├── schema.md
-│   │       │   ├── sla-calculation.md
-│   │       │   └── forms.md
-│   │       ├── development-info/
-│   │       │   └── schema.md
-│   │       └── metrics/
-│   │           └── schema.md
-│   ├── confluence/
-│   │   ├── SKILL.md             # Confluence API domain router
-│   │   └── tools/
-│   │       ├── page/
-│   │       │   ├── schema.md
-│   │       │   ├── hierarchy.md
-│   │       │   └── version.md
-│   │       ├── search/
-│   │       │   ├── schema.md
-│   │       │   └── cql-guide.md
-│   │       ├── space/
-│   │       │   └── schema.md
-│   │       ├── comment/
-│   │       │   └── schema.md
-│   │       ├── attachment/
-│   │       │   └── schema.md
-│   │       ├── label/
-│   │       │   └── schema.md
-│   │       ├── analytics/
-│   │       │   └── schema.md
-│   │       └── user/
-│   │           └── schema.md
-│   └── media-analysis/
-│       ├── SKILL.md             # Media download + multimodal analysis skill
-│       ├── scripts/
-│       │   └── probe.mjs        # ffprobe wrapper + preset auto-selection
-│       ├── presets/             # scene-sieve preset definitions
-│       │   ├── index.md
-│       │   ├── short-clip.md
-│       │   ├── medium-video.md
-│       │   ├── long-video.md
-│       │   ├── very-long.md
-│       │   ├── gif.md
-│       │   ├── quick-glance.md
-│       │   ├── detailed.md
-│       │   ├── hq-capture.md
-│       │   ├── inspection.md
-│       │   └── screen-recording.md
-│       └── references/
-│           ├── workflow.md
-│           ├── preset-selection.md
-│           ├── tools.md
-│           └── reference.md
-├── hooks/
-│   └── hooks.json               # Hook configuration
+│   │       │   ├── jsm-comment.md
+│   │       │   └── reply-plugin.md # Server/DC reply-plugin playbook
+│   │       └── ...              # Other Jira REST reference capsules
+│   ├── confluence/              # Confluence API domain router
+│   └── media-analysis/          # Media download + multimodal analysis skill
 ├── bridge/
-│   ├── mcp-server.cjs           # MCP server entry (CJS bundle)
-│   └── setup.mjs                # Setup hook bridge
+│   └── mcp-server.cjs           # Generated MCP server CJS bundle
 ├── src/
 │   ├── index.ts                 # Package entry
 │   ├── version.ts               # Auto-injected version
 │   ├── types/                   # Zod schemas and type definitions
 │   ├── constants/               # Paths, defaults, config constants
+│   ├── jira/
+│   │   └── commentThread/        # Reply-plugin thread domain recipe
+│   │       ├── operations/       # Pure merge and validation operations
+│   │       ├── requests/         # Injected Jira request orchestration
+│   │       ├── profile/          # Per-site profile persistence
+│   │       └── __tests__/        # Fixtures and executable contracts
 │   ├── mcp/
 │   │   ├── server/
 │   │   │   └── server.ts        # MCP server setup + tool registration
-│   │   ├── server-entry/        # CJS entry point bundled into bridge/mcp-server.cjs
-│   │   ├── shared/              # build-fetch-context, tool-response envelope helpers
+│   │   ├── serverEntry/         # CJS entry point bundled into bridge/mcp-server.cjs
+│   │   ├── shared/              # Fetch-context and tool-response helpers
 │   │   ├── pages/
 │   │   │   └── setup/           # HTML setup wizard pages served by the setup tool
 │   │   └── tools/
 │   │       ├── fetch/           # HTTP GET/POST/PUT/PATCH/DELETE tool
 │   │       ├── convert/         # ADF / Storage Format / Wiki ↔ Markdown
-│   │       ├── auth_check/      # Stored-credential probe + optional live connectivity test
-│   │       └── setup/           # Auth setup tool (local web server)
+│   │       ├── authCheck/       # Stored-credential probe + optional live connectivity test
+│   │       ├── setup/           # Auth setup tool (local web server)
+│   │       └── jiraCommentThread/ # Fifth, domain-specific MCP adapter
 │   ├── core/
-│   │   ├── auth-manager/        # Token storage and injection
-│   │   ├── config-manager/      # config.json + credentials.json (plain JSON) management
-│   │   ├── connection-tester/   # Live connectivity probe used by auth_check + setup
-│   │   ├── environment-resolver/ # is_cloud detection, URL normalization
-│   │   └── http-client/         # Fetch wrapper + ssrf-guard, retry, rate limit
-│   ├── converter/
-│   │   ├── adf-to-markdown/
-│   │   ├── markdown-to-adf/
-│   │   ├── markdown-to-storage/
-│   │   ├── markdown-to-wiki/
-│   │   ├── markdown-parsing/    # Shared Markdown AST utilities
-│   │   ├── storage-to-markdown/
-│   │   └── types/
+│   │   ├── authManager/         # Token storage and injection
+│   │   ├── configManager/       # Config and credential persistence
+│   │   ├── connectionTester/    # Live connectivity probe
+│   │   ├── environmentResolver/ # Deployment detection and URL normalization
+│   │   └── httpClient/          # Fetch wrapper, SSRF guard, retry, rate limit
+│   ├── converter/               # ADF, Storage, Wiki and Markdown conversion fractals
 │   ├── lib/
-│   │   ├── file-io.ts           # Local file read/write helpers
+│   │   ├── fileIo.ts            # Local file read/write helpers
 │   │   └── logger.ts            # Structured logger
 │   └── utils/
-│       ├── attach-prefix.ts
+│       ├── attachPrefix.ts
 │       ├── auth.ts              # Auth header injection helpers (no token storage)
 │       ├── ip.ts                # IP / hostname classification (SSRF supporting helper)
-│       ├── jira-url.ts          # Jira issue URL parsing
+│       ├── jiraUrl.ts           # Jira issue URL parsing
 │       ├── path.ts              # Endpoint path normalization
-│       ├── site-resolver.ts     # Multi-site selection (Cloud vs Server/DC)
-│       ├── transform-request.ts # Request body / header transformation
+│       ├── siteResolver.ts      # Multi-site selection (Cloud vs Server/DC)
+│       ├── transformRequest.ts  # Request body / header transformation
 │       └── url.ts               # Generic URL helpers
 ├── CLAUDE.md
 ├── package.json
@@ -179,18 +97,16 @@ packages/atlassian/
     "name": "Vincent K. Kelvin"
   },
   "repository": "https://github.com/vincent-kk/ogham",
-  "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/atlassian",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/atlassian",
   "license": "MIT",
-  "keywords": [
-    "claude-code",
-    "plugin"
-  ],
+  "keywords": ["claude-code", "plugin"],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json"
 }
 ```
 
 **Notes**:
+
 - `skills` points to the skills directory containing all SKILL.md files
 - `mcpServers` points to the MCP server configuration
 - No `agents` field in plugin.json (agents are defined as markdown files in `agents/` directory and discovered by convention)
@@ -204,16 +120,15 @@ packages/atlassian/
   "mcpServers": {
     "tools": {
       "command": "node",
-      "args": [
-        "${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"
-      ]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"]
     }
   }
 }
 ```
 
 **Notes**:
-- Single MCP server named `"tools"` — all 4 tools (fetch, convert, auth_check, setup) are registered under this server
+
+- Single MCP server named `"tools"` — 4 generic tools (fetch, convert, auth_check, setup) and the approved `jira_comment_thread` domain adapter are registered under this server
 - Uses CJS bundle via bridge for Node.js compatibility
 - `${CLAUDE_PLUGIN_ROOT}` is resolved by Claude Code at runtime
 
@@ -274,6 +189,7 @@ packages/atlassian/
 ```
 
 **Security**:
+
 - Plain JSON stored locally — user-editable for manual configuration
 - Secrets (`api_token`, `password`, `personal_token`, `access_token`, `refresh_token`, `client_secret`) are NEVER stored in `config.json`
 - Tokens are NEVER exposed to LLM context
@@ -282,24 +198,9 @@ packages/atlassian/
 
 ## 5. Build Configuration
 
-Following the ogham monorepo conventions:
+[`package.json`](../../plugins/atlassian/package.json) is the canonical script list. The full `build` pipeline is `clean → version:sync → build:pages → build:compile → build:mcp → build:compile-plugin`; focused validation uses `typecheck` and `test:run`.
 
-```json
-{
-  "scripts": {
-    "build": "yarn clean && yarn version:sync && tsc && yarn build:hooks && yarn build:mcp",
-    "build:mcp": "node scripts/buildMcpServer.mjs",
-    "build:hooks": "node scripts/buildHooks.mjs",
-    "clean": "rm -rf dist bridge/*.cjs bridge/*.mjs",
-    "version:sync": "node ../../scripts/injectVersion.mjs",
-    "typecheck": "tsc --noEmit",
-    "test:run": "vitest run",
-    "lint": "eslint src/",
-    "format": "prettier --write ."
-  }
-}
-```
-
-- **tsc**: ESM type-checked output
-- **esbuild**: CJS bundle for MCP server (`bridge/mcp-server.cjs`) and ESM bundles for hooks
+- **tsc**: ESM type-checked output via `build:compile`
+- **esbuild**: CJS bundle for the MCP server via `build:mcp`
+- **plugin compiler**: host-specific plugin output via `build:compile-plugin`
 - **Version**: `src/version.ts` is auto-injected via `scripts/injectVersion.mjs` — never edit directly

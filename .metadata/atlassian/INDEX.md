@@ -10,12 +10,12 @@
 
 This plugin fully replaces the existing `mcp-atlassian` Python MCP server with a native Claude Code Plugin. The key improvements are:
 
-| Problem (Python Server) | Solution (This Plugin) |
-|---|---|
-| 50+ individual MCP tools cause tool bloat and waste LLM context | 1 generic HTTP tool (`fetch` with method param) + `convert` utility + `setup` tool |
-| No domain knowledge — LLM must reconstruct complex workflows every time | Agent layer embeds domain expertise (Jira/Confluence) |
-| Cloud/Server branching leaks into caller | MCP layer absorbs all environment differences |
-| Format conversion (ADF/Wiki/Storage) exposed to caller | MCP layer handles all bidirectional Markdown conversion |
+| Problem (Python Server)                                                 | Solution (This Plugin)                                                 |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 50+ individual MCP tools cause tool bloat and waste LLM context         | 4 generic tools plus the approved `jira_comment_thread` domain adapter |
+| No domain knowledge — LLM must reconstruct complex workflows every time | Agent layer embeds domain expertise (Jira/Confluence)                  |
+| Cloud/Server branching leaks into caller                                | MCP layer absorbs all environment differences                          |
+| Format conversion (ADF/Wiki/Storage) exposed to caller                  | MCP layer handles all bidirectional Markdown conversion                |
 
 ---
 
@@ -39,16 +39,17 @@ Claude Code Main Agent (= Dispatcher, no separate implementation)
             +-- convert     (ADF/Storage/Wiki <-> Markdown)
             +-- auth_check  (authentication status + optional connectivity test)
             +-- setup       (local web server auth setup)
+            +-- jira_comment_thread (Server/DC reply-plugin comment-thread adapter)
 ```
 
 ### Layer Responsibilities
 
-| Layer | Role | Stateful? |
-|---|---|---|
-| **Dispatcher** | Claude Code's built-in agent routing. No custom implementation. Simple tasks use Skills directly; complex workflows spawn Agents. | No |
-| **Agent** | Domain expert with embedded knowledge (field formatting, workflow rules, error recovery). Defines "perspective". | Per-request |
-| **Skill** | API spec capsule + reference docs. SKILL.md provides tool catalog; `tools/` subdirectories provide detailed schemas on-demand. Defines "action". | No (stateless) |
-| **MCP** | Generic HTTP executor + format converter + auth manager. Zero domain knowledge. | No |
+| Layer          | Role                                                                                                                                             | Stateful?      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
+| **Dispatcher** | Claude Code's built-in agent routing. No custom implementation. Simple tasks use Skills directly; complex workflows spawn Agents.                | No             |
+| **Agent**      | Domain expert with embedded knowledge (field formatting, workflow rules, error recovery). Defines "perspective".                                 | Per-request    |
+| **Skill**      | API spec capsule + reference docs. SKILL.md provides tool catalog; `tools/` subdirectories provide detailed schemas on-demand. Defines "action". | No (stateless) |
+| **MCP**        | Four domain-agnostic utilities plus an approved thin adapter that delegates Jira rules to `src/jira/`.                                           | No             |
 
 ### Dependency Direction
 
@@ -84,12 +85,12 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 
 ## 3. Naming Convention
 
-| Target | Rule | Examples |
-|---|---|---|
-| Agent | No prefix | `jira`, `confluence`, `media` |
-| Skill | No prefix | `setup`, `jira`, `confluence`, `download`, `media-analysis` |
-| MCP server name | `tools` | `.mcp.json` key: `"tools"` |
-| MCP tool name | No prefix | `fetch`, `convert`, `auth_check`, `setup` |
+| Target          | Rule      | Examples                                                         |
+| --------------- | --------- | ---------------------------------------------------------------- |
+| Agent           | No prefix | `jira`, `confluence`, `media`                                    |
+| Skill           | No prefix | `setup`, `jira`, `confluence`, `download`, `media-analysis`      |
+| MCP server name | `tools`   | `.mcp.json` key: `"tools"`                                       |
+| MCP tool name   | No prefix | `fetch`, `convert`, `auth_check`, `setup`, `jira_comment_thread` |
 
 ---
 
@@ -97,12 +98,12 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 
 **Core principle**: Cloud/Server branching occurs ONLY in MCP Layer and Skill Layer. Agents and Dispatcher are environment-agnostic.
 
-| Layer | Environment Awareness |
-|---|---|
-| Dispatcher | Agnostic |
-| Agent | Agnostic |
-| Skill | Aware — endpoint path, field name, API version branching |
-| MCP | Aware — `is_cloud` detection, auth method, format conversion |
+| Layer      | Environment Awareness                                        |
+| ---------- | ------------------------------------------------------------ |
+| Dispatcher | Agnostic                                                     |
+| Agent      | Agnostic                                                     |
+| Skill      | Aware — endpoint path, field name, API version branching     |
+| MCP        | Aware — `is_cloud` detection, auth method, format conversion |
 
 ---
 
@@ -110,15 +111,16 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 
 Read documents in the following order for a complete understanding:
 
-| # | Document | Type | Description |
-|---|---|---|---|
-| 1 | [INDEX.md](INDEX.md) | ARCH | This file — overview and reading guide |
-| 2 | [plugin-structure.md](plugin-structure.md) | ARCH | Directory layout, plugin.json, .mcp.json, src/ structure |
-| 3 | [auth-ui.md](auth-ui.md) | ARCH | Setup web server + HTML form design |
-| 4 | [dev/mcp-tools.md](dev/mcp-tools.md) | DEV | 4 MCP tools (fetch/convert/auth_check/setup) |
-| 5 | [dev/skills.md](dev/skills.md) | DEV | 5 Skills + tools/ reference mapping |
-| 6 | [dev/agents.md](dev/agents.md) | DEV | 3 Agents (jira, confluence, media) |
+| #   | Document                                   | Type | Description                                                      |
+| --- | ------------------------------------------ | ---- | ---------------------------------------------------------------- |
+| 1   | [INDEX.md](INDEX.md)                       | ARCH | This file — overview and reading guide                           |
+| 2   | [plugin-structure.md](plugin-structure.md) | ARCH | Directory layout, plugin.json, .mcp.json, src/ structure         |
+| 3   | [auth-ui.md](auth-ui.md)                   | ARCH | Setup web server + HTML form design                              |
+| 4   | [dev/mcp-tools.md](dev/mcp-tools.md)       | DEV  | 5 MCP tools (fetch/convert/auth_check/setup/jira_comment_thread) |
+| 5   | [dev/skills.md](dev/skills.md)             | DEV  | 5 Skills + tools/ reference mapping                              |
+| 6   | [dev/agents.md](dev/agents.md)             | DEV  | 3 Agents (jira, confluence, media)                               |
 
 **Document types**:
+
 - **[ARCH]**: Self-contained architectural document. No external references. Usable independently after source repo removal.
 - **[DEV]**: Development mapping document. May reference original spec files at `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/` for detailed implementation guidance.
