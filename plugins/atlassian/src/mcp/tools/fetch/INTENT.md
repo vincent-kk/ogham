@@ -1,48 +1,35 @@
+# fetch — HTTP 도구 핸들러
+
 ## Purpose
 
-HTTP GET/POST/PUT/PATCH/DELETE를 통합 처리하는 MCP 툴 핸들러. ADF 자동 변환, 응답 본문 파일 저장(save_to_path), Markdown→ADF/Storage/Wiki 변환을 조율한다.
+HTTP GET/POST/PUT/PATCH/DELETE 를 통합 처리하는 MCP 도구 핸들러. ADF 자동 변환, 응답 본문 파일 저장, Markdown → wire 포맷 변환을 조율하며 전송 자체는 소유하지 않는다.
 
-## Structure
+## Conventions
 
-| 파일                      | 역할                                                              |
-| ------------------------- | ----------------------------------------------------------------- |
-| `fetch.ts`                | `handleFetch` — 메서드별 분기, 유틸 조율                          |
-| `index.ts`                | 배럴 — `handleFetch` 재내보내기                                   |
-| `utils/assetFetch.ts`     | GET 응답 본문(바이너리·JSON)을 `save_to_path` 에 저장 — 캐시 없음 |
-| `utils/autoConvertAdf.ts` | GET 응답에서 ADF 필드를 Markdown으로 자동 변환                    |
-| `utils/pickBodyFormat.ts` | service+apiVersion → ADF/Storage/Wiki 결정                        |
-| `utils/renderByFormat.ts` | 선택된 포맷으로 markdown 렌더                                     |
-| `utils/convertBody.ts`    | POST/PUT/PATCH body의 Markdown → wire 포맷 변환                   |
-| `utils/normalizeBody.ts`  | 문자열로 도착한 JSON body를 객체로 파싱 (harness 직렬화 대응)     |
+- 유틸은 이 핸들러 전용이다 — 조율은 여기서 하고 각 단계는 한 단계씩 아래로 내려간다.
+- 요청 body 는 harness 가 문자열로 직렬화해 보낼 수 있으므로, 변환 전에 반드시 정규화 단계를 거친다.
+- endpoint 는 절대 URL 로 도착할 수 있다. base 상대로 축약 → 논리→물리 변환 → prefix 부착 순서를 지켜야 하며, 순서가 바뀌면 DC 경로가 깨진다.
+- 저장 경로는 요청 값 그대로 쓰지 않고 allow-root 기준으로 재해석한다.
 
 ## Boundaries
 
 ### Always do
 
-- 원시 `body`는 `normalizeBody`로 정규화한 뒤 변환·전송한다
-- HTTP 전송은 `core/httpClient`의 `executeRequest`에 위임한다
-- GET + `save_to_path` 조합은 `expand`·`accept_format`을 그대로 넘겨 `assetFetch` 유틸로 라우팅하며, 진입 시 선택 인자 `project_root`를 `rememberProjectRoot`로 시드한다 (저장 경로 allow-root 좌표)
-- GET 응답의 ADF 필드는 `autoConvertAdf`로 자동 Markdown 변환한다
-- 절대 URL endpoint는 `stripBaseUrl`로 base-상대 경로로 축약한 뒤 `transformRequest`(V2 logical → V1/DC physical) → `attachPrefix`(service+버전 prefix) 순으로 처리한다
+- 원시 `body` 는 정규화한 뒤 변환·전송한다
+- HTTP 전송은 `core/httpClient` 의 `executeRequest` 에 위임한다
+- GET + `save_to_path` 조합은 `expand`·`accept_format` 을 그대로 넘겨 저장 유틸로 라우팅하며, 진입 시 선택 인자 `project_root` 를 저장 경로 allow-root 좌표로 시드한다
+- GET 응답의 ADF 필드는 Markdown 으로 자동 변환한다
+- 절대 URL endpoint 는 base 상대로 축약 → 논리→물리 변환 → prefix 부착 순으로 처리한다
 - DC(`ctx.requires_xsrf_bypass`) non-GET 요청에는 `X-Atlassian-Token: no-check` 헤더를 주입한다
 
 ### Ask first
 
 - 새 HTTP 메서드 지원 추가
-- `utils/` 하위 유틸 파일 추가 또는 제거
+- 유틸 파일 추가 또는 제거
 - save_to_path 저장 포맷(pretty JSON·바이트 그대로) 변경
 
 ### Never do
 
 - HTTP 요청을 `executeRequest` 없이 직접 수행하지 않는다
 - Jira / Confluence 도메인 비즈니스 로직(이슈 필드 해석 등)을 포함하지 않는다
-- `utils/` 내 파일을 이 모듈 외부에서 직접 import하지 않는다
-
-## Dependencies
-
-- `@ogham/cross-platform` — `rememberProjectRoot`
-- `core/httpClient` — `executeRequest`
-- `types/index` — `FetchContext`, `McpResponse`, `FetchParams`, `AssetFetchParams`, `BinaryResponseBody`
-- `converter/index` — ADF/Storage/Wiki ↔ Markdown 변환 (utils 경유)
-- `utils/index` — `validateSavePath`, `stripBaseUrl`, `attachPrefix`, `transformRequest`, `detectService` (폴백)
-- `lib/fileIo` — `writeBinary`, `writeJson`
+- 이 모듈의 유틸을 외부에서 직접 import 하지 않는다

@@ -1,42 +1,28 @@
+# mcp — MCP 서버·도구 경계
+
 ## Purpose
 
-MCP server, 4 generic HTTP/utility tools, and approved domain adapters (currently `jira_comment_thread`). Generic tools carry zero domain knowledge — they execute (method, path, params, body) tuples; adapters only call `src/jira/` entry points.
-
-## Structure
-
-| Directory      | Role                                                                                              |
-| -------------- | ------------------------------------------------------------------------------------------------- |
-| `server/`      | MCP server creation and tool registration                                                         |
-| `serverEntry/` | esbuild CJS bundle entry point                                                                    |
-| `shared/`      | MCP tool response formatting (toolResult, toolError, wrapHandler)                                 |
-| `tools/`       | 4 generic tool handlers (fetch, convert, auth_check, setup) + domain adapter `jiraCommentThread/` |
-| `pages/`       | Browser-side UI pages served by tools                                                             |
+MCP 서버, 범용 HTTP/유틸리티 도구 4종, 그리고 승인된 도메인 어댑터(현재 `jira_comment_thread`)를 소유한다. 범용 도구는 도메인 지식 없이 (method, path, params, body) 튜플을 실행할 뿐이고, 어댑터만 도메인 계층의 진입점을 부를 자격을 갖는다.
 
 ## Conventions
 
-- 모든 tool 핸들러는 `wrapHandler`로 감싸 표준 에러 처리
-- tool 응답은 `toolResult` / `toolError` 헬퍼로만 생성
-- Zod 스키마로 입력 검증 후 core 레이어에 위임
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk` — MCP 서버 및 tool 등록
-- `zod` — tool 입력 스키마 검증
-- `core/` — HTTP 실행, 인증, 설정 (단방향 의존)
-- `jira/` — 도메인 레시피 entry point (jiraCommentThread 어댑터만)
+- 모든 도구 핸들러는 `wrapHandler` 로 감싸 표준 에러 처리를 보장한다.
+- 도구 응답은 `toolResult` / `toolError` 헬퍼로만 생성한다.
+- Zod 스키마로 입력을 검증한 뒤 core 계층에 위임한다.
+- 도메인 어댑터는 도구 계층 안에 살지 이 노드 직속이 아니다 — 등록 경로는 범용 도구와 같고, 도메인 호출만 추가로 허용된다.
 
 ## Boundaries
 
 ### Always do
 
-- Register tools via server.registerTool() with Zod schemas
-- Return standard McpResponse envelope from HTTP tools
+- `server.registerTool()` 과 Zod 스키마로 도구 등록
+- HTTP 도구는 표준 `McpResponse` 봉투로 반환
 
 ### Ask first
 
-- Add new MCP tool
+- 새 MCP 도구 추가
 
 ### Never do
 
-- Add domain rules (Jira/Confluence field meaning, merge logic) to generic tools, `shared/` or `server/` — adapters may only call `src/jira/` entry points
-- Expose auth tokens in tool responses
+- 도메인 규칙(Jira/Confluence 필드 의미, 병합 로직)을 범용 도구나 서버·공유 계층에 넣지 않는다 — 어댑터는 도메인 계층의 진입점만 호출한다
+- 인증 토큰을 도구 응답에 노출

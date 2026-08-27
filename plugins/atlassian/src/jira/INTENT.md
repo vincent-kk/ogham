@@ -1,13 +1,16 @@
 [filid:lang:ko]
 
+# jira — Jira 도메인 레시피 계층
+
 ## Purpose
 
-Jira 도메인 레시피 계층. 요청 여러 개를 결정적으로 조합해야 하는 도메인 규칙(현재 `commentThread/` — reply 플러그인 댓글 스레드 복원)을 소유한다. 범용 MCP 도구 4종이 도메인 무지를 유지할 수 있도록, 도메인 지식은 이 fractal 아래에만 둔다.
+요청 여러 개를 결정적으로 조합해야 하는 Jira 도메인 규칙을 소유한다. 범용 MCP 도구 4종이 도메인 무지를 유지할 수 있도록, 도메인 지식은 이 fractal 아래에만 둔다.
 
 ## Conventions
 
-- 자식 fractal 하나가 레시피 하나이며 `index.ts` 배럴로만 노출한다.
-- HTTP 는 주입된 요청 함수(운영: `core/httpClient` 의 `executeRequest`)만 쓴다. 순수 함수는 `operations/`, 요청 함수는 `requests/`, 파일 I/O 는 `profile/` organ 에 둔다.
+- 자식 fractal 하나가 레시피 하나이며 배럴로만 노출한다.
+- 레시피 **내부**는 효과 경계로 갈린다 — 순수 함수, 원격 요청, 파일 I/O 가 각각 별도 organ 에 산다. 이 organ 들은 레시피 안에 있지 이 노드 직속이 아니다.
+- HTTP 는 주입된 요청 함수만 쓴다. 운영 기본값은 `core/httpClient` 의 `executeRequest` 이고, 검증은 가짜 요청 함수를 주입해 수행한다.
 
 ## Boundaries
 
