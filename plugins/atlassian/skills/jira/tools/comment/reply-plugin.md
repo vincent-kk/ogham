@@ -6,7 +6,7 @@ The `read`, `scan`, and `probe` modes never write the profile file. Only an expl
 
 1. Tell the user: standard comments were returned, but this site has no reply-plugin profile yet.
 2. Ask for one issue key that is known to carry replies.
-3. Call `mcp__plugin_atlassian_tools__jira_comment_thread` (Claude/agy) or `mcp__atlassian__jira_comment_thread` (Codex) with `mode: "probe", sample_issue_key`.
+3. Call `mcp__plugin_atlassian_tools__comment_thread` (Claude/agy) or `mcp__atlassian__comment_thread` (Codex) with `mode: "probe", sample_issue_key`.
 4. Show `evidence` (standard total, Comment items, property keys, truncation), `warnings`, `reason`, and `proposal` verbatim, and ask whether to save it.
 5. Only after an explicit yes, call `mode: "save_profile"` with the **unchanged** `proposal` and its `proposal_digest`.
 6. Re-run `read`.

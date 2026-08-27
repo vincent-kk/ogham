@@ -185,7 +185,7 @@ The SKILL.md must include:
 | **issue**            | Issue CRUD, bulk create, changelog                          | get, post, put, delete         |
 | **search**           | JQL-based issue search (Cloud POST / Server GET)            | get, post                      |
 | **transition**       | Issue workflow state transitions                            | get, post                      |
-| **comment**          | Issue comment CRUD + JSM comments + DC reply-plugin threads | get, post, jira_comment_thread |
+| **comment**          | Issue comment CRUD + JSM comments + DC reply-plugin threads | get, post, comment_thread |
 | **agile**            | Board, Sprint, Epic management                              | get, post, put                 |
 | **project**          | Project metadata, components, versions                      | get, post                      |
 | **field**            | Field metadata, custom field options                        | get                            |

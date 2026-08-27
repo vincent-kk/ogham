@@ -188,7 +188,7 @@ export const JiraCommentThreadInputSchema =
     }
   });
 
-/** Validated arguments for one `jira_comment_thread` invocation. */
+/** Validated arguments for one `comment_thread` invocation. */
 export type JiraCommentThreadInput = z.infer<
   typeof JiraCommentThreadInputSchema
 >;

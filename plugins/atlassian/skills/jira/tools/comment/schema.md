@@ -26,7 +26,7 @@ The table uses the Claude/agy full form. On Codex, use `mcp__atlassian__<tool>`.
 | Operation          | MCP Tool                                           | Method | Notes                                                                                                                          |
 | ------------------ | -------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | List (Cloud) / Get | `mcp__plugin_atlassian_tools__fetch`               | GET    | Single comment (`focusedCommentId`) always uses fetch on both deployments                                                      |
-| List (Server/DC)   | `mcp__plugin_atlassian_tools__jira_comment_thread` | —      | `mode: "read"` (default). Returns standard comments plus reply-plugin replies merged from the changelog; see `reply-plugin.md` |
+| List (Server/DC)   | `mcp__plugin_atlassian_tools__comment_thread` | —      | `mode: "read"` (default). Returns standard comments plus reply-plugin replies merged from the changelog; see `reply-plugin.md` |
 | Add                | `mcp__plugin_atlassian_tools__fetch`               | POST   | Use content_format: "markdown"                                                                                                 |
 | Update             | `mcp__plugin_atlassian_tools__fetch`               | PUT    |                                                                                                                                |
 | Delete             | `mcp__plugin_atlassian_tools__fetch`               | DELETE |                                                                                                                                |
@@ -40,7 +40,7 @@ The table uses the Claude/agy full form. On Codex, use `mcp__atlassian__<tool>`.
 
 ## Reply-plugin threads (Server/DC only)
 
-Third-party reply plugins store replies outside the standard comment API. On Server/DC, list comments with `mcp__plugin_atlassian_tools__jira_comment_thread` (Claude/agy) or `mcp__atlassian__jira_comment_thread` (Codex) instead of `fetch`; Cloud sites are rejected by the tool — keep using `fetch` there. JSM customer-visible comments on DC stay on the Service Desk API (`jsm-comment.md`).
+Third-party reply plugins store replies outside the standard comment API. On Server/DC, list comments with `mcp__plugin_atlassian_tools__comment_thread` (Claude/agy) or `mcp__atlassian__comment_thread` (Codex) instead of `fetch`; Cloud sites are rejected by the tool — keep using `fetch` there. JSM customer-visible comments on DC stay on the Service Desk API (`jsm-comment.md`).
 
 | Parameter                    | Mode         | Type     | Description                                                                  |
 | ---------------------------- | ------------ | -------- | ---------------------------------------------------------------------------- |

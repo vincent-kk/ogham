@@ -136,8 +136,8 @@ describe("handleJiraCommentThread", () => {
     });
   });
 
-  it("registers jira_comment_thread as the fifth tool name", () => {
+  it("registers comment_thread as the fifth tool name", () => {
     expect(MCP_TOOL_NAMES).toHaveLength(5);
-    expect(MCP_TOOL_NAMES).toContain("jira_comment_thread");
+    expect(MCP_TOOL_NAMES).toContain("comment_thread");
   });
 });

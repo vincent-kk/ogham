@@ -3,7 +3,7 @@ export const McpToolName = {
   CONVERT: "convert",
   AUTH_CHECK: "auth_check",
   SETUP: "setup",
-  JIRA_COMMENT_THREAD: "jira_comment_thread",
+  COMMENT_THREAD: "comment_thread",
 } as const;
 
 export type McpToolName = (typeof McpToolName)[keyof typeof McpToolName];

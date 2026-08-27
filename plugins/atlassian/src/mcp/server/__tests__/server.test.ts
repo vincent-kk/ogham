@@ -23,7 +23,7 @@ describe("createServer", () => {
     createServer();
 
     const registration = registerTool.mock.calls.find(
-      ([toolName]) => toolName === McpToolName.JIRA_COMMENT_THREAD,
+      ([toolName]) => toolName === McpToolName.COMMENT_THREAD,
     );
 
     expect(registration?.[1].annotations).toEqual({

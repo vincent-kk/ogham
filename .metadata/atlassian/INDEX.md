@@ -12,7 +12,7 @@ This plugin fully replaces the existing `mcp-atlassian` Python MCP server with a
 
 | Problem (Python Server)                                                 | Solution (This Plugin)                                                 |
 | ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 50+ individual MCP tools cause tool bloat and waste LLM context         | 4 generic tools plus the approved `jira_comment_thread` domain adapter |
+| 50+ individual MCP tools cause tool bloat and waste LLM context         | 4 generic tools plus the approved `comment_thread` domain adapter |
 | No domain knowledge — LLM must reconstruct complex workflows every time | Agent layer embeds domain expertise (Jira/Confluence)                  |
 | Cloud/Server branching leaks into caller                                | MCP layer absorbs all environment differences                          |
 | Format conversion (ADF/Wiki/Storage) exposed to caller                  | MCP layer handles all bidirectional Markdown conversion                |
@@ -39,7 +39,7 @@ Claude Code Main Agent (= Dispatcher, no separate implementation)
             +-- convert     (ADF/Storage/Wiki <-> Markdown)
             +-- auth_check  (authentication status + optional connectivity test)
             +-- setup       (local web server auth setup)
-            +-- jira_comment_thread (Server/DC reply-plugin comment-thread adapter)
+            +-- comment_thread (Server/DC reply-plugin comment-thread adapter)
 ```
 
 ### Layer Responsibilities
@@ -90,7 +90,7 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 | Agent           | No prefix | `jira`, `confluence`, `media`                                    |
 | Skill           | No prefix | `setup`, `jira`, `confluence`, `download`, `media-analysis`      |
 | MCP server name | `tools`   | `.mcp.json` key: `"tools"`                                       |
-| MCP tool name   | No prefix | `fetch`, `convert`, `auth_check`, `setup`, `jira_comment_thread` |
+| MCP tool name   | No prefix | `fetch`, `convert`, `auth_check`, `setup`, `comment_thread` |
 
 ---
 
@@ -116,7 +116,7 @@ Read documents in the following order for a complete understanding:
 | 1   | [INDEX.md](INDEX.md)                       | ARCH | This file — overview and reading guide                           |
 | 2   | [plugin-structure.md](plugin-structure.md) | ARCH | Directory layout, plugin.json, .mcp.json, src/ structure         |
 | 3   | [auth-ui.md](auth-ui.md)                   | ARCH | Setup web server + HTML form design                              |
-| 4   | [dev/mcp-tools.md](dev/mcp-tools.md)       | DEV  | 5 MCP tools (fetch/convert/auth_check/setup/jira_comment_thread) |
+| 4   | [dev/mcp-tools.md](dev/mcp-tools.md)       | DEV  | 5 MCP tools (fetch/convert/auth_check/setup/comment_thread) |
 | 5   | [dev/skills.md](dev/skills.md)             | DEV  | 5 Skills + tools/ reference mapping                              |
 | 6   | [dev/agents.md](dev/agents.md)             | DEV  | 3 Agents (jira, confluence, media)                               |
 

@@ -14,7 +14,7 @@
 
 - 실행 진입점은 esbuild 가 `mcp/serverEntry/` 로부터 만드는 `bridge/mcp-server.cjs` 와 빌드된 `public/settings.html` 이다.
 - `src/index.ts` 는 타입체크·테스트가 소비하는 집합 배럴이다. `mcp/` 를 재노출하지 않는다 — `mcp/server/server.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
-- MCP 도구 5종: 범용 `fetch`, `convert`, `auth_check`, `setup` 과 도메인 어댑터 `jira_comment_thread`.
+- MCP 도구 5종: 범용 `fetch`, `convert`, `auth_check`, `setup` 과 도메인 어댑터 `comment_thread`.
 
 ## Acceptance Criteria
 
@@ -46,4 +46,4 @@
 
 ## Last Updated
 
-2026-08-28 — 도메인 레시피 계층 `jira/` 를 의존 방향에 추가했다.
+2026-08-28 — 도메인 어댑터의 공개 MCP 이름을 `comment_thread` 로 단순화했다.

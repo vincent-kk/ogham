@@ -16,7 +16,7 @@ The MCP layer exposes 5 tools under a single server named `"tools"`:
 | `convert`             | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion                                                       |
 | `auth_check`          | Local | Authentication status check with optional live connectivity test                                             |
 | `setup`               | Local | Local web server for auth/connection setup                                                                   |
-| `jira_comment_thread` | HTTP  | Jira Server/DC comment thread with reply-plugin replies merged server-side (domain adapter over `src/jira/`) |
+| `comment_thread` | HTTP  | Jira Server/DC comment thread with reply-plugin replies merged server-side (domain adapter over `src/jira/`) |
 
 **Design principle**: MCP has zero domain knowledge. It does not know what a "Jira issue" or "Confluence page" is. It executes `(method, path, params, body)` tuples as HTTP requests. Approved domain adapters are the one exception: they call a `src/jira/` entry point and hold no rules themselves.
 
@@ -176,7 +176,7 @@ interface AuthCheckServiceEntry {
 
 ---
 
-### 3.5 `jira_comment_thread` — Comment Thread (Server/DC)
+### 3.5 `comment_thread` — Comment Thread (Server/DC)
 
 | Parameter                    | Mode         | Type     | Description                                                                  |
 | ---------------------------- | ------------ | -------- | ---------------------------------------------------------------------------- |

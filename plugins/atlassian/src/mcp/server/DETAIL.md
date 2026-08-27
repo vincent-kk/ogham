@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 서버 인스턴스를 만들고 도구 5개(`fetch`·`convert`·`auth_check`·`setup`·`jira_comment_thread`)를 등록한다.
+- 서버 인스턴스를 만들고 도구 5개(`fetch`·`convert`·`auth_check`·`setup`·`comment_thread`)를 등록한다.
 - stdio transport 로만 통신한다. stdout 직접 쓰기를 하지 않고 로그는 stderr 로만 보낸다.
 - 도구 입력 스키마는 zod 로 정의하고 MCP SDK 가 검증한다.
 - 모든 `registerTool` 콜백은 `wrapHandler` 로 감싼다.
@@ -30,4 +30,4 @@
 
 ## Last Updated
 
-2026-08-28 — `jira_comment_thread` 등록을 반영했다.
+2026-08-28 — 공개 MCP 도구 이름을 `comment_thread` 로 단순화했다.

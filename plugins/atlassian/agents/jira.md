@@ -8,7 +8,7 @@ tools:
   - Grep
   - Glob
   - mcp__plugin_atlassian_tools__fetch
-  - mcp__plugin_atlassian_tools__jira_comment_thread
+  - mcp__plugin_atlassian_tools__comment_thread
   - mcp__plugin_atlassian_tools__auth_check
   - mcp__plugin_atlassian_tools__setup
 maxTurns: 30
@@ -35,7 +35,7 @@ Simple operations (single issue read, single JQL search, single comment add) sho
 
 1. Load the `atlassian:jira` skill for the tool catalog
 2. Read `tools/<domain>/schema.md` under the `atlassian:jira` skill directory for endpoint details
-3. Compose calls to the MCP tool selected by the schema (`fetch` for general HTTP; `jira_comment_thread` for Server/DC comment listing)
+3. Compose calls to the MCP tool selected by the schema (`fetch` for general HTTP; `comment_thread` for Server/DC comment listing)
 4. Use `content_format: "markdown"` when sending description/body content
 
 ## Domain Knowledge

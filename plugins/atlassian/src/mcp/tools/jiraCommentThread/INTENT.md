@@ -4,7 +4,7 @@
 
 ## Purpose
 
-`jira_comment_thread` 도구의 얇은 어댑터. `mode` 로 분기해 도메인 계층의 함수 하나를 부르고 결과를 그대로 돌려준다. Cloud 사이트는 거부한다.
+`comment_thread` 도구의 얇은 어댑터. `mode` 로 분기해 도메인 계층의 함수 하나를 부르고 결과를 그대로 돌려준다. Cloud 사이트는 거부한다.
 
 ## Conventions
 

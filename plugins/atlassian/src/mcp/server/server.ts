@@ -152,9 +152,9 @@ export function createServer(): McpServer {
     wrapHandler(handleSetup),
   );
 
-  // --- jira_comment_thread ---
+  // --- comment_thread ---
   server.registerTool(
-    McpToolName.JIRA_COMMENT_THREAD,
+    McpToolName.COMMENT_THREAD,
     {
       description:
         "[Internal] Do not call directly. Used by the atlassian jira skill only. Jira Server/DC comment thread with third-party reply-plugin replies merged from the changelog (modes: read, scan, probe, save_profile).",

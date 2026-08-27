@@ -128,7 +128,7 @@ plugins/atlassian/
 
 **Notes**:
 
-- Single MCP server named `"tools"` — 4 generic tools (fetch, convert, auth_check, setup) and the approved `jira_comment_thread` domain adapter are registered under this server
+- Single MCP server named `"tools"` — 4 generic tools (fetch, convert, auth_check, setup) and the approved `comment_thread` domain adapter are registered under this server
 - Uses CJS bundle via bridge for Node.js compatibility
 - `${CLAUDE_PLUGIN_ROOT}` is resolved by Claude Code at runtime
 

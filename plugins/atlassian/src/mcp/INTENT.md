@@ -2,7 +2,7 @@
 
 ## Purpose
 
-MCP 서버, 범용 HTTP/유틸리티 도구 4종, 그리고 승인된 도메인 어댑터(현재 `jira_comment_thread`)를 소유한다. 범용 도구는 도메인 지식 없이 (method, path, params, body) 튜플을 실행할 뿐이고, 어댑터만 도메인 계층의 진입점을 부를 자격을 갖는다.
+MCP 서버, 범용 HTTP/유틸리티 도구 4종, 그리고 승인된 도메인 어댑터(현재 `comment_thread`)를 소유한다. 범용 도구는 도메인 지식 없이 (method, path, params, body) 튜플을 실행할 뿐이고, 어댑터만 도메인 계층의 진입점을 부를 자격을 갖는다.
 
 ## Conventions
 

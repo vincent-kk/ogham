@@ -13,7 +13,7 @@ import type {
 export type JiraCommentThreadArgs = JiraCommentThreadInput;
 
 /**
- * Dispatch one `jira_comment_thread` call to the recipe that owns the mode.
+ * Dispatch one `comment_thread` call to the recipe that owns the mode.
  * @param args Validated mode-specific arguments from the MCP server.
  * @param ctx Resolved Jira site context.
  * @returns The selected recipe's result unchanged.
@@ -25,7 +25,7 @@ export async function handleJiraCommentThread(
 ): Promise<unknown> {
   if (ctx.is_cloud === true)
     throw new Error(
-      "jira_comment_thread supports Server/Data Center sites only; use fetch GET /issue/{key}/comment on Cloud.",
+      "comment_thread supports Server/Data Center sites only; use fetch GET /issue/{key}/comment on Cloud.",
     );
   switch (args.mode) {
     case undefined:

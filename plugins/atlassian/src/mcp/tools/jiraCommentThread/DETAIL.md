@@ -4,7 +4,7 @@
 
 - `mode` 기본값은 `read` 다. `read`·`scan`·`probe`·`save_profile` 네 모드가 각각 공개 `jira` entry point의 함수 하나에 대응한다.
 - MCP 프로토콜이 요구하는 최상위 object 스키마를 유지하면서, 같은 Zod 스키마의 mode refinement 가 `read → issue_key`, `scan → jql`, `probe → sample_issue_key`, `save_profile → profile` 을 각각 필수로 검사하고 다른 모드의 필드를 거부한다. `mode` 생략은 `read` 로 검증한다.
-- `ctx.is_cloud === true` 면 요청을 보내지 않고 `Error("jira_comment_thread supports Server/Data Center sites only; use fetch GET /issue/{key}/comment on Cloud.")` 를 던진다.
+- `ctx.is_cloud === true` 면 요청을 보내지 않고 `Error("comment_thread supports Server/Data Center sites only; use fetch GET /issue/{key}/comment on Cloud.")` 를 던진다.
 - 이 fractal 에는 도메인 규칙이 없다 — 분기와 위임뿐이다.
 
 ## API Contracts
@@ -27,4 +27,4 @@
 
 ## Last Updated
 
-2026-08-28 — 어댑터가 내부 경로가 아닌 공개 `jira` entry point 하나만 소비하도록 계약을 정규화했다.
+2026-08-28 — 어댑터의 공개 MCP 이름과 Cloud 거부 오류를 `comment_thread` 로 맞췄다.
