@@ -4,18 +4,18 @@
 
 ## Structure
 
-| File                                    | Role                                                         |
-| --------------------------------------- | ------------------------------------------------------------ |
-| `persistence/createSession.ts`          | viewer.md + meta.json 영속 (status `serving`)                |
-| `persistence/getSession.ts`             | meta.json 로드, `project_hash` 스코프 검증, 불일치 시 `null` |
-| `persistence/readViewerMarkdown.ts`     | viewer.md 원본 읽기, 부재 시 `null`                          |
-| `persistence/pruneExpired.ts`           | `ttlHours` 초과 세션 디렉토리 제거, 제거 수 반환             |
-| `persistence/closeSession.ts`           | meta.json status 를 `closed` 로 갱신                         |
-| `persistence/clearCollectedFeedback.ts` | 수거 완료 후 feedback.json + images 정리, viewer 보존        |
-| `persistence/removeSession.ts`          | 세션 디렉토리 전체 삭제 (TTL/관리용)                         |
+| File                                    | Role                                                                                                     |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `persistence/createSession.ts`          | viewer.md + meta.json 영속 (status `serving`)                                                            |
+| `persistence/getSession.ts`             | meta.json 로드, `project_hash` 스코프 검증, 불일치 시 `null`                                             |
+| `persistence/readViewerMarkdown.ts`     | viewer.md 원본 읽기, 부재 시 `null`                                                                      |
+| `persistence/pruneExpired.ts`           | `ttlHours` 초과 세션 디렉토리 제거, 제거 수 반환                                                         |
+| `persistence/closeSession.ts`           | meta.json status 를 `closed` 로 갱신                                                                     |
+| `persistence/clearCollectedFeedback.ts` | 수거 완료 후 feedback.json + images 정리, viewer 보존                                                    |
+| `persistence/removeSession.ts`          | 세션 디렉토리 전체 삭제 (TTL/관리용)                                                                     |
 | `registry/servingSessions.ts`           | 이 프로세스가 만든 세션 중 아직 닫히거나 제거되지 않은 것의 process-local 집합 — HTTP 리스너 수명의 근거 |
-| `resolver/feedbackResolver.ts`          | process-global long-poll 레지스트리 (멱등 `settle`)          |
-| `index.ts`                              | barrel                                                       |
+| `resolver/feedbackResolver.ts`          | process-global long-poll 레지스트리 (멱등 `settle`)                                                      |
+| `index.ts`                              | barrel                                                                                                   |
 
 ## Conventions
 

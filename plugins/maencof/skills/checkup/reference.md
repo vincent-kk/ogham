@@ -4,16 +4,16 @@ Detailed diagnostic items, report format, auto-fix rules, and the lightweight `-
 
 ## 8 Diagnostic Items
 
-| #   | Item                                                                                                                    | ID                  | Severity | Auto-fixable                                                                                           |
-| --- | ----------------------------------------------------------------------------------------------------------------------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| #   | Item                                                                                                                    | ID                  | Severity | Auto-fixable                                                                                                                      |
+| --- | ----------------------------------------------------------------------------------------------------------------------- | ------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | **Orphan Node**: nodes with 0 inbound and 0 outbound wikilinks (LINK subgraph), triaged by provenance bucket            | orphan-node         | warning  | partially (`mcp__plugin_maencof_tools__kg_suggest_links` for authored docs; archived stubs and raw clippings are expected states) |
-| 2   | **Stale Index**                                                                                                         | stale-index         | warning  | yes (`/maencof:build --force --reset-cache`)                                                           |
-| 3   | **Broken Link** (links into `99_Archive/` whose file exists on disk are archive references — informational, never D3)   | broken-link         | error    | no (manual review required)                                                                            |
-| 4   | **Layer Violation**: mismatch between path directory and Frontmatter layer field                                        | layer-mismatch      | error    | partially                                                                                              |
-| 5   | **Duplicate Document**: document pairs sharing 3+ identical tags with high title similarity                             | duplicate           | warning  | partially                                                                                              |
-| 6   | **Frontmatter Validation**: items failing FrontmatterSchema (Zod) validation                                            | invalid-frontmatter | error    | yes                                                                                                    |
-| 7   | **Auto-Insight Health**: insight-config.json/meta-prompt/stats integrity, orphaned auto-insights, session capture limit | auto-insight-health | warning  | partially (config provisioning)                                                                        |
-| 8   | **Missing L1 Gist**: Layer 1 documents whose frontmatter lacks a non-empty `gist` field                                 | missing-l1-gist     | warning  | no (propose a draft gist ≤128 chars for user review)                                                   |
+| 2   | **Stale Index**                                                                                                         | stale-index         | warning  | yes (`/maencof:build --force --reset-cache`)                                                                                      |
+| 3   | **Broken Link** (links into `99_Archive/` whose file exists on disk are archive references — informational, never D3)   | broken-link         | error    | no (manual review required)                                                                                                       |
+| 4   | **Layer Violation**: mismatch between path directory and Frontmatter layer field                                        | layer-mismatch      | error    | partially                                                                                                                         |
+| 5   | **Duplicate Document**: document pairs sharing 3+ identical tags with high title similarity                             | duplicate           | warning  | partially                                                                                                                         |
+| 6   | **Frontmatter Validation**: items failing FrontmatterSchema (Zod) validation                                            | invalid-frontmatter | error    | yes                                                                                                                               |
+| 7   | **Auto-Insight Health**: insight-config.json/meta-prompt/stats integrity, orphaned auto-insights, session capture limit | auto-insight-health | warning  | partially (config provisioning)                                                                                                   |
+| 8   | **Missing L1 Gist**: Layer 1 documents whose frontmatter lacks a non-empty `gist` field                                 | missing-l1-gist     | warning  | no (propose a draft gist ≤128 chars for user review)                                                                              |
 
 ## Diagnostic Workflow Detail
 
@@ -67,14 +67,14 @@ Delegated to the checkup agent:
 
 Execute AutoFixAction after user confirmation:
 
-| Action                                | Tool                                   | Condition                |
-| ------------------------------------- | -------------------------------------- | ------------------------ |
-| Fill missing Frontmatter fields       | `mcp__plugin_maencof_tools__update`    | D6 items                 |
-| Rebuild stale index                   | `/maencof:build --force --reset-cache` | D2 items                 |
-| Fix layer field based on path         | `mcp__plugin_maencof_tools__update`    | D4 items                 |
+| Action                                | Tool                                          | Condition                |
+| ------------------------------------- | --------------------------------------------- | ------------------------ |
+| Fill missing Frontmatter fields       | `mcp__plugin_maencof_tools__update`           | D6 items                 |
+| Rebuild stale index                   | `/maencof:build --force --reset-cache`        | D2 items                 |
+| Fix layer field based on path         | `mcp__plugin_maencof_tools__update`           | D4 items                 |
 | Suggest links for orphan nodes        | `mcp__plugin_maencof_tools__kg_suggest_links` | D1 authored-bucket items |
-| Provision missing auto-insight config | config-provisioner defaults            | D7 items                 |
-| Propose draft L1 gist (report-only)   | user edits frontmatter after review    | D8 items                 |
+| Provision missing auto-insight config | config-provisioner defaults                   | D7 items                 |
+| Propose draft L1 gist (report-only)   | user edits frontmatter after review           | D8 items                 |
 
 **Layer 1 (01_Core/) exception**: Auto-fix via `mcp__plugin_maencof_tools__update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 4` or edit manually.
 

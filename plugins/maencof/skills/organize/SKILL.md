@@ -24,8 +24,7 @@ Runs the memory-organizer agent to recommend and execute document transitions be
 ## When to Use vs Adjacent Skills
 
 - **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move` after explicit user confirmation. Use when you are ready to apply transitions.
-- **`reflect`** — read-only judge. Produces an analysis report with zero filesystem changes. Use to preview candidates before committing.
-Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose new links → call `mcp__plugin_maencof_tools__kg_suggest_links`.
+- **`reflect`** — read-only judge. Produces an analysis report with zero filesystem changes. Use to preview candidates before committing. Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose new links → call `mcp__plugin_maencof_tools__kg_suggest_links`.
 
 ## Agent Collaboration Sequence
 

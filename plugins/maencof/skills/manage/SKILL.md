@@ -80,7 +80,7 @@ Generate a new custom skill/agent template:
 
 | Tool    | Purpose                                                                                                                                                                                                          |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Read`  | Read `.maencof-meta/disabled-registry.json`                                                                                                                                                                     |
+| `Read`  | Read `.maencof-meta/disabled-registry.json`                                                                                                                                                                      |
 | `Write` | Write `.maencof-meta/disabled-registry.json` (disable/enable operations); create new skill/agent template files in the Execution Area (`{CWD}/.claude/skills/<name>/SKILL.md`, `{CWD}/.claude/agents/<name>.md`) |
 
 > Note: `disabled-registry.json` is a metadata file in `.maencof-meta/` (not a vault document). It is accessed with Read/Write tools, not maencof MCP tools.

@@ -22,9 +22,8 @@ describe("registerShutdown", () => {
     const exit = vi
       .spyOn(process, "exit")
       .mockImplementation((() => undefined) as never);
-    const { registerShutdown } = await import(
-      "../lifecycle/registerShutdown.js"
-    );
+    const { registerShutdown } =
+      await import("../lifecycle/registerShutdown.js");
     const httpServer = await import("../../httpServer/httpServer.js");
     const { ensureHttpServer } = httpServer;
     getHttpServer = httpServer.getHttpServer;
@@ -46,9 +45,8 @@ describe("registerShutdown", () => {
     const exit = vi
       .spyOn(process, "exit")
       .mockImplementation((() => undefined) as never);
-    const { registerShutdown } = await import(
-      "../lifecycle/registerShutdown.js"
-    );
+    const { registerShutdown } =
+      await import("../lifecycle/registerShutdown.js");
     const httpServer = await import("../../httpServer/httpServer.js");
     const { ensureHttpServer } = httpServer;
     getHttpServer = httpServer.getHttpServer;

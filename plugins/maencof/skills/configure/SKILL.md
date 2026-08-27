@@ -67,8 +67,8 @@ Handle legacy format conversion with diff preview and confirmation.
 
 ## Resources
 
-| File           | Content                                                                                                    |
-| -------------- | ---------------------------------------------------------------------------------------------------------- |
+| File           | Content                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------- |
 | `reference.md` | Scan targets, health report format, migration workflow, error handling, acceptance criteria |
 
 ## Options

@@ -11,12 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { renderHostConfigurationReference } from '../../core/hostConfigurationSurfaces/index.js';
 
 const pluginRoot = fileURLToPath(new URL('../../../', import.meta.url));
-const skillNames = [
-  'instruct',
-  'rule',
-  'configure',
-  'changelog',
-];
+const skillNames = ['instruct', 'rule', 'configure', 'changelog'];
 const sharedReferencePath = join(
   pluginRoot,
   'skills',

@@ -204,7 +204,7 @@ vault 지식과 별개로, maencof는 작은 **personal context** — 일시적 
 | `/maencof:ingest`          | 고급     | URL, GitHub, 텍스트에서 가져오기                                                                          |
 | `/maencof:connect`         | 고급     | 외부 데이터 소스 등록                                                                                     |
 | `/maencof:mcp-setup`       | 고급     | 외부 MCP 서버 설치                                                                                        |
-| `/maencof:manage`          | 고급     | Skill/agent activation and lifecycle management                                                        |
+| `/maencof:manage`          | 고급     | Skill/agent activation and lifecycle management                                                           |
 | `/maencof:personal-status` | 고급     | personal-context 열람/해소/토글 (상태 + 최근 동향)                                                        |
 | `/maencof:insight`         | 고급     | 자동 인사이트 캡처 관리                                                                                   |
 | `/maencof:changelog`       | 고급     | 자기 변경 기록 (일별 changelog)                                                                           |

@@ -29,13 +29,13 @@ End-to-end external service integration pipeline. Discovers MCP servers, install
 
 ## Scope
 
-| Area      | Path                                    | Access                             |
-| --------- | --------------------------------------- | ---------------------------------- |
+| Area      | Path                                    | Access                                                                |
+| --------- | --------------------------------------- | --------------------------------------------------------------------- |
 | Execution | `{CWD}/.mcp.json`                       | Inspect; delegate missing server installation to `/maencof:mcp-setup` |
-| Execution | `{CWD}/.claude/settings.json`           | Delegate MCP permissions to `/maencof:mcp-setup`                       |
-| Execution | `{CWD}/.maencof-meta/data-sources.json` | Delegate source registration to `/maencof:connect`                     |
-| Execution | `{CWD}/.claude/skills/{name}/SKILL.md`  | Define and create the workflow skill directly                          |
-| Execution | `{CWD}/.claude/settings.local.json`     | **Never**                          |
+| Execution | `{CWD}/.claude/settings.json`           | Delegate MCP permissions to `/maencof:mcp-setup`                      |
+| Execution | `{CWD}/.maencof-meta/data-sources.json` | Delegate source registration to `/maencof:connect`                    |
+| Execution | `{CWD}/.claude/skills/{name}/SKILL.md`  | Define and create the workflow skill directly                         |
+| Execution | `{CWD}/.claude/settings.local.json`     | **Never**                                                             |
 
 ## Workflow
 
@@ -45,8 +45,8 @@ Inspect installed servers, delegate missing MCP installation, collect the target
 
 ## Resources
 
-| File           | Content                                                                                                                            |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| File           | Content                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------- |
 | `reference.md` | Pipeline, configuration fields, generated skill sample, error handling, acceptance criteria |
 
 ## Options

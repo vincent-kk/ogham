@@ -204,7 +204,7 @@ Alongside vault knowledge, maencof keeps a small **personal context** — transi
 | `/maencof:ingest`          | Advanced | Import from URL, GitHub, or text                                                                     |
 | `/maencof:connect`         | Advanced | Register external data sources                                                                       |
 | `/maencof:mcp-setup`       | Advanced | Install external MCP servers                                                                         |
-| `/maencof:manage`          | Advanced | Skill/agent activation and lifecycle management                                                       |
+| `/maencof:manage`          | Advanced | Skill/agent activation and lifecycle management                                                      |
 | `/maencof:personal-status` | Advanced | View/resolve/toggle the personal context (states + recent topics)                                    |
 | `/maencof:insight`         | Advanced | Auto-insight capture management                                                                      |
 | `/maencof:changelog`       | Advanced | Self-change daily changelog recorder                                                                 |

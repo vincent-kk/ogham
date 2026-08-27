@@ -52,12 +52,12 @@ Show auto-insight capture statistics.
 
 ### Configuration Updates
 
-| Option                              | Config key                 | Value                    |
-| ----------------------------------- | -------------------------- | ------------------------ |
-| `--sensitivity <high|medium|low>`   | `sensitivity`              | supplied level           |
-| `--enable`                          | `enabled`                  | `true`                   |
-| `--disable`                         | `enabled`                  | `false`                  |
-| `--max <N>`                         | `max_captures_per_session` | positive integer `N`     |
+| Option               | Config key                 | Value                |
+| -------------------- | -------------------------- | -------------------- |
+| `--sensitivity <high | medium                     | low>`                | `sensitivity` | supplied level |
+| `--enable`           | `enabled`                  | `true`               |
+| `--disable`          | `enabled`                  | `false`              |
+| `--max <N>`          | `max_captures_per_session` | positive integer `N` |
 
 For any row, read `.maencof-meta/insight-config.json`, update the selected key, write the config, and confirm the applied value.
 

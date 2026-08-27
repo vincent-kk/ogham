@@ -151,13 +151,13 @@ If the user selects a neighbor node as a new seed, re-run from Step 3. After 3 r
 /maencof:explore [seed] [--hops <1-10>] [--layer <1-5>] [--sub-layer <name>] [--detail]
 ```
 
-| Option             | Default                | Description                                                                                                                                                                                          |
-| ------------------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `seed`             | none (input requested) | Exploration starting point (path or keyword)                                                                                                                                                         |
-| `--hops`           | 5                      | Maximum hop count (1-10)                                                                                                                                                                             |
-| `--layer`          | all                    | Layer filter (1-5, multiple allowed)                                                                                                                                                                 |
-| `--sub-layer`      | none                   | Sub-layer filter: relational/structural/topical (L3 only)                                                                                                                                            |
-| `--detail`         | false                  | Include document body excerpts in results                                                                                                                                                            |
+| Option        | Default                | Description                                               |
+| ------------- | ---------------------- | --------------------------------------------------------- |
+| `seed`        | none (input requested) | Exploration starting point (path or keyword)              |
+| `--hops`      | 5                      | Maximum hop count (1-10)                                  |
+| `--layer`     | all                    | Layer filter (1-5, multiple allowed)                      |
+| `--sub-layer` | none                   | Sub-layer filter: relational/structural/topical (L3 only) |
+| `--detail`    | false                  | Include document body excerpts in results                 |
 
 ## Error Handling
 
