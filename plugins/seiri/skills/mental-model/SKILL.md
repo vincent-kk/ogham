@@ -10,15 +10,15 @@ plugin: seiri
 
 # mental-model — teach the system from one principle
 
-A mental model is useful when a reader can predict unseen behavior. Find one principle that explains the code, attack it, then teach what survives. Ask only when scope or audience changes the model; otherwise assume a smart newcomer and say so.
+A mental model lets readers predict unseen behavior. Find one code principle, attack it, then teach what survives. Ask only when scope or audience changes the model; otherwise assume a smart newcomer.
 
 ## Build the model
 
-1. **Frame the question.** State what the reader must decide or predict. Load `/seiri:trace-structure`; trace only the entry points, callers, state, tests, and contracts needed. Comments and docs evidence intent, not runtime behavior.
+1. **Frame the question.** State what the reader must decide or predict. Load `/seiri:trace-structure` and trace only the needed entry points, callers, state, tests, and contracts. Comments and docs show intent, not runtime behavior.
 2. **Propose the predictive core principle.** It must explain several facts and predict one uninspected case. Reject generic praise such as “separation of concerns.” Carry one concrete input with real values through the real end-to-end path; anchor every abstraction to an observable step.
 3. **Deduce the system.** Derive each feature as **premise → consequence → mechanism → observable behavior**. A child belongs only when its parent makes it necessary. Explain why the parts exist and cooperate.
-4. **Attack the model.** Keep each child claim to one falsification dimension—structure, behavior, or domain. Predict a counterexample, then inspect another caller, branch, error path, registration, test, or trace. Simulate the example hop by hop. In the article, show each attack and its remaining limit; keep a refuted claim beside the counterexample that killed it, and rewrite its parent principle.
-5. **Close with transfer.** Ask the reader to predict one unseen case, then reveal the reasoning. If surviving claims cannot answer it and the original question, return to tracing.
+4. **Attack the model.** Test each child claim on one dimension—structure, behavior, or domain. Predict a counterexample, then inspect another caller, branch, error path, registration, test, or trace. Simulate it hop by hop. In the article, show each attack and limit; keep refuted claims beside their counterexamples, and rewrite the parent principle.
+5. **Close with transfer.** Ask the reader to predict one unseen case, then reveal why. If survivors cannot answer it and the original question, return to tracing.
 
 ## Teach it as a visual article
 
@@ -33,7 +33,7 @@ Choose a coherent editorial direction with readable hierarchy, contrast, spacing
 - Mark claims `traced` (code evidence at `path:line`), `inferred` (from traced facts), or `assumed` (ungrounded). A mark describes the claim, not a document about it.
 - Write a self-contained HTML with inline CSS and JavaScript to environment-chosen temporary storage or a scratchpad outside the repository. Name it `YYYY-MM-DD-mental-model-<slug>.html`; return its path.
 - Escape repository text inserted into HTML. Put code in `<pre>` with `white-space: pre` or `pre-wrap`; give diagrams text equivalents and controls accessible labels.
-- Inspect desktop and mobile rendering for flow, contrast, overflow, code wrapping, and interactions. Keep the analyzed repository read-only; write only the external HTML.
+- Check one desktop and one phone viewport for layout, contrast, overflow, and each interaction type once. Fix display defects, then recheck only affected views; avoid exhaustive browser coverage or subject correctness testing. Keep the repository read-only; write only the external HTML.
 - In chat, return one sentence about the model and a link. Do not duplicate the article in Markdown.
 
 Route defects to `/seiri:trace-cause`, future design to `/seiri:brainstorm`, and diffs to `/seiri:trace-change`.

@@ -27,7 +27,7 @@ A diff is ordered for application, not understanding. Build the smallest working
 - Choose a coherent editorial direction with readable hierarchy, contrast, spacing, and code. Use quiet neutrals for page and text, one primary accent for identity, and secondary accents only for meaningful comparison or status. Keep typography, diagrams, code, and controls in one family. Let content choose hues and typefaces; fix no tokens or template. Use cards only when a boundary or comparison benefits from one.
 - Use a small, consistent family of diagrams. Put the example's real values in the visual, show the changed path or same-input delta, and remove any visual that adds no information. Use semantic HTML/CSS or accessible inline SVG, never ASCII.
 - Preserve code whitespace with `<pre><code>` or an equivalent `white-space` rule. Give figures captions, make controls keyboard-usable, and never rely on color alone for meaning.
-- Inspect the finished page at desktop and phone widths. Fix weak contrast, awkward type scale, accidental overflow, cramped mobile composition, and interactions that do not explain their result.
+- Check one desktop and one phone viewport for layout, contrast, overflow, and each interaction type once. Fix display defects, then recheck only affected views; avoid exhaustive browser coverage or subject correctness testing.
 
 ## Evidence and hand-off
 

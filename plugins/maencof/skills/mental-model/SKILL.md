@@ -44,7 +44,7 @@ Choose readable hierarchy, contrast, spacing, and code. Use quiet neutrals, one 
 
 - Write one single self-contained HTML file with inline CSS and JavaScript to a writable filesystem location selected by the current environment for temporary or scratch files; let the environment choose the concrete path and filename.
 - Escape source text inserted into HTML. Put code in `<pre>` with `white-space: pre` or `pre-wrap`.
-- Inspect desktop and mobile rendering for flow, contrast, overflow, code wrapping, and interactions. If no browser or renderer is available, mark rendering unverified in the artifact and handoff; never claim inspection.
+- Check one desktop and one phone viewport for layout, contrast, overflow, and each interaction type once. Fix display defects, then recheck only affected views; avoid exhaustive browser coverage or subject correctness testing. If no browser or renderer is available, mark rendering unverified in the artifact and handoff; never claim inspection.
 - Keep all evidence sources read-only; write only the external HTML unless the user explicitly requests another destination or persistence workflow.
 - In chat, return one sentence about the model and a link. Do not duplicate the article in Markdown.
 - As the final step, open the completed HTML file in the system default browser.
