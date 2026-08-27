@@ -265,15 +265,19 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
   it('resolves only the owner-to-root context chain', async () => {
     const result = await handleContextResolve({
       path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
+      requests: [{ targetPath: SOURCE_PATH }],
     });
     const data = requireData(result.data);
+    const item = data.results[0];
 
-    expect(result.summary.ownerFractalPath).toBe(FEATURE_ROOT);
-    expect(data.chain.map((document) => document.fractalPath)).toEqual([
-      FEATURE_ROOT,
-      PROJECT_ROOT,
-    ]);
+    expect(item).toMatchObject({
+      resolved: true,
+      summary: { ownerFractalPath: FEATURE_ROOT },
+    });
+    if (!item?.resolved) throw new Error('expected resolved context item');
+    expect(
+      item.resolution.chain.map((document) => document.fractalPath),
+    ).toEqual([FEATURE_ROOT, PROJECT_ROOT]);
     expect(result.data).not.toHaveProperty('tree');
   });
 

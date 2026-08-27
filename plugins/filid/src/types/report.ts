@@ -20,6 +20,7 @@ import type { PlanValidationResult, RestructurePlan } from './restructure.js';
 import type { RuleEvaluationResult } from './rules.js';
 import type { RuleScope } from './rules.js';
 import type { ScanOptions } from './scan.js';
+import type { ToolDiagnostic, ToolStatus } from './toolEnvelope.js';
 import type { VerificationProjectAnalysis } from './verification.js';
 
 export type ProjectSnapshotDto = Omit<ProjectSnapshot, 'tree'> & {
@@ -66,31 +67,63 @@ export interface FractalScanFullData {
 
 export type FractalScanData = FractalScanPathsData | FractalScanFullData;
 
+/** Bounded counts for one `context_resolve` batch. */
 export interface ContextResolveSummary {
+  /** Absolute root shared by every request in the batch. */
   projectRoot: string;
+  /** Number of submitted requests. */
+  requestCount: number;
+  /** Requests whose owner chain was resolved, regardless of diagnostics. */
+  resolvedCount: number;
+  /** Requests whose target owner chain could not be resolved. */
+  failedCount: number;
+  /** Requests whose item status is indeterminate. */
+  indeterminateCount: number;
+}
+
+/** Context details retained beside one successful batch item. */
+export interface ContextResolveItemSummary {
+  /** Normalized absolute target path. */
   targetPath: string;
+  /** Closest fractal that owns the target. */
   ownerFractalPath: string;
+  /** Number of owner-to-root document references. */
   chainLength: number;
-  /**
-   * Owner-to-root fractal paths. Carried in the summary because an overflowing
-   * payload moves `data` to an artifact while the summary stays inline.
-   */
+  /** Owner-to-root fractal paths. */
   chainPaths: string[];
+  /** Closest DETAIL document in the chain, when one exists. */
   nearestDetailPath: string | null;
+  /** Project-configured language for generated document content. */
   outputLanguage: string;
-  /**
-   * Snapshot diagnostics dropped because their path sits outside the resolved
-   * chain. Zero when every diagnostic was in scope.
-   */
+  /** Snapshot diagnostics excluded because they sit outside this chain. */
   diagnosticsOutOfScope: number;
-  /**
-   * Lowest fractal owning every `comparePaths` entry, or `null` when no common
-   * owner could be settled. Absent when the caller requested no comparison.
-   */
+  /** Lowest shared owner, or null; absent when comparison was not requested. */
   lowestCommonFractalPath?: string | null;
 }
 
-export type ContextResolveData = ContextResolution;
+/** Ordered outcome for one requested target. */
+export type ContextResolveResult =
+  | {
+      index: number;
+      resolved: true;
+      targetPath: string;
+      status: ToolStatus;
+      summary: ContextResolveItemSummary;
+      resolution: ContextResolution;
+      diagnostics: ToolDiagnostic[];
+    }
+  | {
+      index: number;
+      resolved: false;
+      targetPath: string;
+      status: ToolStatus;
+      diagnostics: ToolDiagnostic[];
+    };
+
+/** Artifact-eligible ordered results for a `context_resolve` batch. */
+export interface ContextResolveData {
+  results: ContextResolveResult[];
+}
 
 export interface RestructurePlanSummary {
   projectRoot: string;

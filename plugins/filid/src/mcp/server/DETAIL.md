@@ -19,6 +19,7 @@
 - `toolError(error)`는 transport 또는 trust-boundary 실패를 `isError: true` 응답으로 변환한다.
 - `wrapHandler(toolName, schema, handler)`는 schema·handler·artifact 오류를 일관된 tool error로 격리한다.
 - `startServer()`는 stdio transport 연결 후 boot cleanup을 수행하고 동기 shutdown handler를 한 번 등록한다.
+- `context_resolve`는 최소 한 item의 `requests` 배열을 받고, 한 shared snapshot에서 입력 순서대로 item 결과를 반환한다.
 
 ## Acceptance Criteria
 
@@ -39,11 +40,16 @@
 - 입력 검증 실패는 `tool-input-invalid`, 핸들러 실행 실패는 `tool-execution-error` 진단 코드를 쓴다. 두 실패가 코드를 공유하면 호출자가 자기 인자를 고쳐야 하는지 엔진 결함인지 구분할 수 없다.
 - 모든 도구 input schema는 필드마다 `.describe()`를 갖는다. MCP 표면이 LLM 호출자에게는 유일한 계약이므로 이름만으로 의미가 서지 않는 필드 (`fractal_scan.maxDepth` 같은 규칙 임계값)는 설명이 계약의 일부다.
 - 도구 공통 project path 설명은 실제 root 해석과 일치한다. 공급된 절대 경로는 그대로 이 호출의 root가 되고 상향 탐색은 없다. `.filid/config.json`만 git 저장소 루트에서 읽힌다. 설명이 상향 해석을 주장하면 호출자는 하위 디렉터리를 넘겨 scope를 좁히는 동작을 예측할 수 없다.
+- `context_resolve.requests`는 `minItems: 1`을 광고하고 각 item의 target과 optional comparison paths를 설명한다. 제거된 scalar `targetPath`와 `comparePaths`는 top-level 입력으로 허용하지 않는다.
 
 ### AC-server-lifecycle — host 안전성
 
 - root 또는 session env가 없어도 server boot와 shutdown이 실패하지 않는다.
 
+## History
+
+- 2026-08-28 — `context_resolve`의 공개 입력을 shared-snapshot `requests[]` batch로 전환했다.
+
 ## Last Updated
 
-2026-07-28 — 입력 오류와 실행 오류의 진단 코드를 분리하고, 도구 schema 필드 설명과 공통 project path 설명의 정확성을 계약에 넣었다.
+2026-08-28

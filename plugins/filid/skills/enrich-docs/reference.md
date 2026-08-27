@@ -22,23 +22,26 @@ The snapshot tree is always built to full depth — `maxDepth` sets the `max-dep
 
 Use `data.nodes` as the authoritative candidate set. Each node contains its normalized path, classification, INTENT/DETAIL presence, and entry-point count. Exclude `organ` nodes because they must not own INTENT.md. A fractal or hybrid node without INTENT.md is `MISSING`.
 
-For every existing or missing document candidate, call:
+For all existing or missing document candidates, call once:
 
 ```text
 mcp__plugin_filid_tools__context_resolve({
   path: "<project-path>",
-  targetPath: "<node-path>"
+  requests: [
+    { targetPath: "<candidate node path 1>" },
+    { targetPath: "<candidate node path 2>" }
+  ]
 })
 ```
 
-`context_resolve` returns document references, not document bodies. Read only:
+The result order and cardinality match the candidate requests. Read `data.results`, or the artifact's results when `data` is absent, and bind each candidate to its same-index result. A failed item remains visible with its diagnostics and is not edited. `context_resolve` returns document references, not document bodies. For each resolved `result`, read only:
 
 - the target INTENT.md or DETAIL.md when present;
-- the owner-to-root `data.chain` document paths;
-- `data.nearestDetailPath` when present;
+- the owner-to-root `result.resolution.chain` document paths;
+- `result.resolution.nearestDetailPath` when present;
 - the target entry point and at most five other implementation files needed to understand the module.
 
-Do not read sibling subtrees or an inline full project tree. Record the `snapshotHash` from the scan summary and the resolved output language for the plan and final report.
+Do not read sibling subtrees or an inline full project tree. Record the `snapshotHash` from the scan summary and each resolved `result.summary.outputLanguage` for the plan and final report.
 
 ## Section 2 — Quality Audit
 

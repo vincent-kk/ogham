@@ -178,7 +178,7 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 | `rule_docs_sync`     | Sync the managed rule documents                    |
 | `open_settings`      | Open the settings UI                               |
 | `fractal_scan`       | Inspect the snapshot tree                          |
-| `context_resolve`    | Owner fractal and INTENT/DETAIL path chain         |
+| `context_resolve`    | Batch owner/document chains from one snapshot      |
 | `restructure_plan`   | Decide placement; returns a plan artifact          |
 | `structure_validate` | Validate a project, or a plan's pre/postconditions |
 | `verification_scan`  | Judge spec-document / test-record contracts        |

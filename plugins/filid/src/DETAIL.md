@@ -12,6 +12,7 @@
 ## API Contracts
 
 - MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
+- `context_resolve`는 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
 - 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
 
@@ -38,6 +39,10 @@
 - **Direct import**: allowed
 - **Reason**: `src`는 1.0에서 npm barrel을 갖지 않으므로(ADR-09) 경유할 진입점이 없다. `version.ts`는 `scripts/injectVersion.mjs`가 만드는 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다.
 
+## History
+
+- 2026-08-28 — 대규모 변경의 반복 snapshot 비용을 없애기 위해 `context_resolve` 공개 DTO를 array-first batch로 바꿨다.
+
 ## Last Updated
 
-2026-08-23 — npm library barrel 부재 계약에서 존재하지 않는 경로 토큰을 제거했다.
+2026-08-28

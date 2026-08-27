@@ -75,6 +75,10 @@ export const SNAPSHOT_TOOL_DIAGNOSTIC_MESSAGES = {
     'Requested path is absent from snapshot verification evidence.',
 } as const;
 
+export const CONTEXT_RESOLVE_DIAGNOSTIC_CODES = {
+  TARGET_UNRESOLVED: 'context-target-unresolved',
+} as const;
+
 export const STRUCTURE_VALIDATION_ERROR_MESSAGES = {
   PLAN_PATH_REQUIRED: STRUCTURE_PLAN_PATH_REQUIRED_MESSAGE,
   PLAN_PATH_ABSOLUTE: 'planPath must be an absolute machine path',
@@ -87,7 +91,8 @@ export const MCP_TOOL_DESCRIPTIONS = {
   RULE_DOCS_SYNC: 'Inspect or synchronize managed Filid rule documents.',
   OPEN_SETTINGS: 'Open the bounded local Filid settings workflow.',
   FRACTAL_SCAN: 'Summarize a snapshot-backed FCA project tree.',
-  CONTEXT_RESOLVE: 'Resolve the minimal owner-to-root document chain.',
+  CONTEXT_RESOLVE:
+    'Resolve ordered owner-to-root document chains from one shared snapshot.',
   RESTRUCTURE_PLAN: 'Create a persisted read-only structure placement plan.',
   STRUCTURE_VALIDATE: 'Validate project structure or plan conditions.',
   VERIFICATION_SCAN: 'Evaluate verification document policy evidence.',

@@ -54,16 +54,19 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 Skipped entirely when `--skip-enrich` is passed.
 
 1. Derive the changed paths: `git diff --name-only <BASE_REF>...HEAD`.
-2. Map each changed path to its owning fractal:
+2. Map all changed paths to their owning fractals with one context_resolve batch:
 
    ```text
    mcp__plugin_filid_tools__context_resolve({
      path: PROJECT_ROOT,
-     targetPath: <changed path>
+     requests: [
+       { targetPath: <changed path 1> },
+       { targetPath: <changed path 2> }
+     ]
    })
    ```
 
-   Collect the distinct `ownerFractalPath` values. This is the audit scope — **do not enrich the whole tree.** PR scope and document scope must match.
+   Read `data.results`, or the artifact results when inline `data` is absent, and preserve changed-path order. Stop and report any failed result instead of silently shrinking scope. Collect the distinct `result.summary.ownerFractalPath` values from resolved items. This is the audit scope — **do not enrich the whole tree.** PR scope and document scope must match.
 
 3. Invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
 4. On enrich-docs failure, print the BLOCKED message (`reference.md` §1) and exit. `--skip-enrich` bypasses this stage.

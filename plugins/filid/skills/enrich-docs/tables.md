@@ -7,7 +7,7 @@ Lookup tables for [SKILL.md](./SKILL.md). The detailed evidence and validation c
 | Tool                                          | Stage      | Purpose                                          | Input                                                       |
 | --------------------------------------------- | ---------- | ------------------------------------------------ | ----------------------------------------------------------- |
 | `mcp__plugin_filid_tools__fractal_scan`       | Evidence   | Snapshot-backed node paths and document presence | `{ path, detail: "paths", maxDepth? }`                      |
-| `mcp__plugin_filid_tools__context_resolve`    | Evidence   | Minimal owner-to-root document references        | `{ path, targetPath }`                                      |
+| `mcp__plugin_filid_tools__context_resolve`    | Evidence   | Batched owner-to-root document references        | `{ path, requests: [{ targetPath }] }`                      |
 | `mcp__plugin_filid_tools__structure_validate` | Validation | Canonical document and node findings             | `{ path, mode: "project", scopes: ["documents", "nodes"] }` |
 
 All three return the common Filid envelope. A non-`ok` status remains visible in the report and is never converted into a successful audit.

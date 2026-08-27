@@ -67,17 +67,17 @@ interface ToolResultEnvelope<Summary, Data> {
 
 ## MCP 도구 9개
 
-| 도구                 | 입력의 핵심                                | 기본 반환                        |
-| -------------------- | ------------------------------------------ | -------------------------------- |
-| `project_init`       | project path, output language, adapter IDs | 생성된 config 경로 요약          |
-| `rule_docs_sync`     | status/sync/manifest, project path         | 배포 상태 요약                   |
-| `open_settings`      | project path, bounded wait                 | saved / closed / pending         |
-| `fractal_scan`       | path, depth, detail                        | summary                          |
-| `context_resolve`    | project path, target path                  | owner와 INTENT/DETAIL 경로 chain |
-| `restructure_plan`   | path, placement requests                   | 요약 + **항상** plan artifact    |
-| `structure_validate` | path, mode, scopes, plan path              | 위반 요약 + 필요 시 artifact     |
-| `verification_scan`  | path, optional file paths, detail          | 15/32/fragmentation 요약         |
-| `review_state`       | prepare/checkpoint/seal/cleanup            | review artifact 상태             |
+| 도구                 | 입력의 핵심                                | 기본 반환                      |
+| -------------------- | ------------------------------------------ | ------------------------------ |
+| `project_init`       | project path, output language, adapter IDs | 생성된 config 경로 요약        |
+| `rule_docs_sync`     | status/sync/manifest, project path         | 배포 상태 요약                 |
+| `open_settings`      | project path, bounded wait                 | saved / closed / pending       |
+| `fractal_scan`       | path, depth, detail                        | summary                        |
+| `context_resolve`    | project path, target requests              | ordered owner/document results |
+| `restructure_plan`   | path, placement requests                   | 요약 + **항상** plan artifact  |
+| `structure_validate` | path, mode, scopes, plan path              | 위반 요약 + 필요 시 artifact   |
+| `verification_scan`  | path, optional file paths, detail          | 15/32/fragmentation 요약       |
+| `review_state`       | prepare/checkpoint/seal/cleanup            | review artifact 상태           |
 
 ### fractal_scan
 
@@ -96,7 +96,12 @@ interface FractalScanInput {
 ```typescript
 interface ContextResolveInput {
   path: string;
+  requests: ContextResolveRequest[];
+}
+
+interface ContextResolveRequest {
   targetPath: string;
+  comparePaths?: string[];
 }
 
 interface ContextDocumentRef {
@@ -114,9 +119,50 @@ interface ContextResolution {
   nearestDetailPath: string | null;
   outputLanguage: string;
 }
+
+interface ContextResolveSummary {
+  projectRoot: string;
+  requestCount: number;
+  resolvedCount: number;
+  failedCount: number;
+  indeterminateCount: number;
+}
+
+interface ContextResolveItemSummary {
+  targetPath: string;
+  ownerFractalPath: string;
+  chainLength: number;
+  chainPaths: string[];
+  nearestDetailPath: string | null;
+  outputLanguage: string;
+  diagnosticsOutOfScope: number;
+  lowestCommonFractalPath?: string | null;
+}
+
+type ContextResolveResult =
+  | {
+      index: number;
+      resolved: true;
+      targetPath: string;
+      status: ToolStatus;
+      summary: ContextResolveItemSummary;
+      resolution: ContextResolution;
+      diagnostics: ToolDiagnostic[];
+    }
+  | {
+      index: number;
+      resolved: false;
+      targetPath: string;
+      status: ToolStatus;
+      diagnostics: ToolDiagnostic[];
+    };
+
+interface ContextResolveData {
+  results: ContextResolveResult[];
+}
 ```
 
-chain 순서는 owner에서 root 방향이다. **문서 본문은 반환하지 않는다.** target이 project root 밖이거나 owner를 결정할 수 없으면 명시적 오류이며 root 문서를 임의 fallback으로 선택하지 않는다.
+`requests`는 최소 1개이며 단일 target도 배열 한 item으로 전달한다. 호출당 document-only snapshot은 한 번만 만들고 `results`는 입력 순서와 cardinality를 보존한다. chain 순서는 owner에서 root 방향이다. **문서 본문은 반환하지 않는다.** target이 project root 밖이거나 owner를 결정할 수 없으면 해당 item은 `resolved: false`이고 다른 성공 item은 유지된다. 하나 이상의 item이 indeterminate이면 top-level status도 `indeterminate`다. 큰 batch의 `data`는 artifact로 이동할 수 있지만 top-level summary는 고정된 count 필드만 가진다.
 
 ### restructure_plan
 

@@ -17,11 +17,11 @@ Call exactly once:
 ```text
 mcp__plugin_filid_tools__context_resolve({
   path: "<project-path>",
-  targetPath: "<target-path>"
+  requests: [{ targetPath: "<target-path>" }]
 })
 ```
 
-The response identifies:
+Read `data.results[0]`; when `data` moved to an artifact, read the same first result there. A resolved result identifies:
 
 - the normalized target
 - the nearest owner fractal
@@ -31,7 +31,7 @@ The response identifies:
 
 The tool returns document references, not document bodies. It also excludes sibling and cousin subtrees by contract.
 
-An ownerless target, a target outside the project, a non-OK status, or diagnostics is not a successful resolution. Report the stable diagnostic instead of guessing ownership.
+An unresolved first result, an ownerless target, a target outside the project, a non-OK item status, or item diagnostics is not a successful resolution. Report the stable diagnostic instead of guessing ownership.
 
 ## Section 3 — Read the Minimum Evidence
 
@@ -67,4 +67,4 @@ Certainty: exact | indeterminate
 Diagnostics: <none or stable codes/messages>
 ```
 
-Answer in `outputLanguage`. Cite file paths for every boundary or contract claim.
+Answer in `data.results[0].summary.outputLanguage` (or its artifact equivalent). Cite file paths for every boundary or contract claim.

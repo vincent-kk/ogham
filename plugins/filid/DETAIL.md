@@ -6,7 +6,7 @@
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
 - Filid의 cross-review는 계약, 구조, 검증 문서라는 FCA 증거만 판정하며 코드를 수정하지 않는다.
-- `revalidate`는 항목 소유 프랙탈에서 재측정을 시작하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 `context_resolve.summary.chainPaths`의 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다.
+- `revalidate`는 항목 소유 프랙탈에서 재측정을 시작하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `context_resolve.data.results[].summary.chainPaths`의 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다.
 - `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하되 원격 branch를 push하지 않는다. 호출자가 branch를 먼저 push해야 하며, publication 실패는 저장된 body로 복구할 수 있어야 한다.
 - Filid의 resolve는 confirmed fix 전체를 한 decision sheet에 모아 severity/perspective와 독립적인 적용 추천을 표시하고, 명백하거나 영향이 작은 수정은 기본 선택한 채 논쟁적인 결정만 전면에 둔다.
 - spec-document는 파일당 15 cases, test-record는 파일당 32 cases를 허용하고 두 역할 사이의 promotion 관계를 만들지 않는다.
@@ -18,6 +18,7 @@
 ## API Contracts
 
 - 공개 MCP 도구는 `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`의 9개다.
+- `context_resolve`는 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
 - merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3, 리뷰 보고서와 fix 요청은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 skill 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
 - interactive resolve는 항목별 질문을 반복하지 않는다. 전체 sheet 뒤 한 batch decision round에서 추천안 일괄 적용, 전체 적용, ID별 적용·논의·warning 생략·근거 있는 거부를 받고, 논의가 남으면 미결 항목만 다시 묶는다. `--auto`도 같은 sheet와 원래 추천을 보여 주되 decision만 전부 자동 선택하고 질문하지 않는다.
@@ -66,10 +67,11 @@
 
 ## History
 
+- 2026-08-28 — 100개 이상의 변경 경로도 한 번의 snapshot으로 해석하도록 `context_resolve`와 shipped caller를 batch 계약으로 전환했다.
 - 2026-08-22 — 자잘한 correction이 논쟁적인 결정을 가리지 않도록 resolve의 항목별 질문을 recommendation 기반 전체 decision sheet와 batch 입력으로 바꿨다.
 - 2026-08-22 — 좁은 소비자 범위가 형제 프랙탈 증거를 보지 못해 false-INCONCLUSIVE를 만들지 않도록 revalidate를 owner-to-root 최초 exact 측정으로 바꿨다.
 - 2026-08-22 — `pull-request`의 암묵적 branch push를 제거하고 호출자 책임으로 돌렸다. PR 생성 실패와 push 실패를 한 단계가 함께 숨기지 않게 하기 위한 결정이다.
 
 ## Last Updated
 
-2026-08-22 — revalidate의 항목별 범위 확대와 exact 판정 우선순위, resolve의 일괄 decision sheet와 recommendation/default 계약을 고정했다.
+2026-08-28

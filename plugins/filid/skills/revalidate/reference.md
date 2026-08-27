@@ -19,23 +19,26 @@ Never invert this table. "The file changed, so it must be fixed" is the failure 
 
 ### Re-measurement scope
 
-Resolve each item's full owner-to-root fractal chain through:
+Resolve every accepted item's full owner-to-root fractal chain in one call:
 
 ```text
 mcp__plugin_filid_tools__context_resolve({
   path: PROJECT_ROOT,
-  targetPath: <item path>
+  requests: [
+    { targetPath: <accepted item path 1> },
+    { targetPath: <accepted item path 2> }
+  ]
 })
 ```
 
-Use `context_resolve.summary.ownerFractalPath` as the first scope. Remove that duplicate from `context_resolve.summary.chainPaths`, then use the remaining paths as the ordered ancestor retry list. The summary fields are load-bearing because detailed `data` may move to an artifact.
+Read `data.results`, or the artifact's results when inline `data` is absent, and map each accepted item to the result at the same index. A failed result is `inconclusive` with its diagnostic. Use each resolved `result.summary.ownerFractalPath` as the first scope. Remove that duplicate from `result.summary.chainPaths`, then use the remaining paths as the ordered ancestor retry list.
 
 Before measuring, normalize the accepted item's project-relative `Path` against `PROJECT_ROOT`. At every scope compare violations by the original normalized `(Rule, Path)` identity — `ruleId` plus absolute violation `path` — never by aggregate counts.
 
 Apply this precedence at each scope:
 
 1. Any exact matching violation stops widening. The item is `unresolved` when its path is in the delta and `unapplied` otherwise.
-2. When no exact match exists but the relevant rule is `indeterminate` or `unsupported` because required evidence lies outside the scan root, retry the next `summary.chainPaths` ancestor.
+2. When no exact match exists but the relevant rule is `indeterminate` or `unsupported` because required evidence lies outside the scan root, retry the next `result.summary.chainPaths` ancestor.
 3. The first exact measurement stops widening. Absence of the matching violation is `resolved`.
 4. If all eligible fractal scopes remain uncertain, the item is `inconclusive`.
 

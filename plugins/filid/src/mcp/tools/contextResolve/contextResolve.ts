@@ -1,6 +1,5 @@
 import { DOCUMENT_ONLY_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
-import { resolveContext } from '../../../core/index.js';
 import type {
   ContextResolveData,
   ContextResolveSummary,
@@ -9,22 +8,29 @@ import type { ToolPayload } from '../../../types/toolEnvelope.js';
 import { createToolSnapshot } from '../utils/createToolSnapshot.js';
 
 import { buildContextResolveSummary } from './utils/buildContextResolveSummary.js';
-import { resolveComparedFractal } from './utils/resolveComparedFractal.js';
-import { scopeDiagnosticsToChain } from './utils/scopeDiagnosticsToChain.js';
+import { collectContextResolveDiagnostics } from './utils/collectContextResolveDiagnostics.js';
+import { resolveContextRequest } from './utils/resolveContextRequest.js';
 
-/** Input accepted by the `context_resolve` tool. */
-export interface ContextResolveInput {
-  path: string;
+/** One target and its optional placement comparison paths. */
+export interface ContextResolveRequest {
+  /** Path whose owner-to-root document chain to resolve. */
   targetPath: string;
-  /** Paths whose lowest common fractal to resolve alongside the chain. */
+  /** Paths whose lowest common fractal to resolve beside this target. */
   comparePaths?: string[];
 }
 
+/** Input accepted by the `context_resolve` tool. */
+export interface ContextResolveInput {
+  /** Absolute project root shared by the whole batch. */
+  path: string;
+  /** One or more ordered requests resolved from one snapshot. */
+  requests: ContextResolveRequest[];
+}
+
 /**
- * Resolve a target's owning fractal and its owner-to-root document chain.
- * @param input Project root, the target to resolve and optional paths to compare.
- * @returns Payload whose summary carries the chain inline, whose diagnostics are
- * narrowed to that chain, and whose status reflects only in-scope evidence.
+ * Resolve ordered target chains from one shared document-only snapshot.
+ * @param input Project root and one or more target requests.
+ * @returns Bounded aggregate plus an ordered result for every request.
  */
 export async function handleContextResolve(
   input: ContextResolveInput,
@@ -35,28 +41,22 @@ export async function handleContextResolve(
   const context = await createToolSnapshot(input.path, {
     axes: DOCUMENT_ONLY_SNAPSHOT_AXES,
   });
-  const resolution = resolveContext(context.snapshot, input.targetPath);
-  const diagnostics = scopeDiagnosticsToChain(context.diagnostics, resolution);
+  const results = input.requests.map((request, index) =>
+    resolveContextRequest(
+      context.snapshot,
+      context.diagnostics,
+      request,
+      index,
+    ),
+  );
+  const isIndeterminate = results.some(
+    (result) => result.status !== TOOL_STATUSES.OK,
+  );
   return {
     projectRoot: context.snapshot.projectRoot,
-    status:
-      diagnostics.scoped.length > 0
-        ? TOOL_STATUSES.INDETERMINATE
-        : TOOL_STATUSES.OK,
-    summary: buildContextResolveSummary({
-      projectRoot: context.snapshot.projectRoot,
-      resolution,
-      diagnosticsOutOfScope: diagnostics.outOfScope,
-      ...(input.comparePaths === undefined
-        ? {}
-        : {
-            lowestCommonFractalPath: resolveComparedFractal(
-              context.snapshot,
-              input.comparePaths,
-            ),
-          }),
-    }),
-    data: resolution,
-    diagnostics: diagnostics.scoped,
+    status: isIndeterminate ? TOOL_STATUSES.INDETERMINATE : TOOL_STATUSES.OK,
+    summary: buildContextResolveSummary(context.snapshot.projectRoot, results),
+    data: { results },
+    diagnostics: collectContextResolveDiagnostics(results),
   };
 }

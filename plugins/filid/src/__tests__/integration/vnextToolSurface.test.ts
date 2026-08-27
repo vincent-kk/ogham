@@ -184,6 +184,37 @@ describe('Filid 1.0 MCP tool surface', () => {
     }
   });
 
+  it('advertises context resolution as a non-empty request batch', async () => {
+    const connection = await connectTestClient();
+    try {
+      const tools = await connection.client.listTools();
+      const schema = tools.tools.find(
+        ({ name }) => name === McpToolName.CONTEXT_RESOLVE,
+      )?.inputSchema;
+      expect(schema).toMatchObject({
+        required: ['path', 'requests'],
+        properties: {
+          requests: {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              required: ['targetPath'],
+              properties: {
+                targetPath: { type: 'string' },
+                comparePaths: { type: 'array' },
+              },
+            },
+          },
+        },
+      });
+      expect(schema?.properties).not.toHaveProperty('targetPath');
+      expect(schema?.properties).not.toHaveProperty('comparePaths');
+    } finally {
+      await connection.close();
+    }
+  });
+
   it('returns invalid project input as a structured Filid error', async () => {
     const connection = await connectTestClient();
     try {
@@ -207,6 +238,39 @@ describe('Filid 1.0 MCP tool surface', () => {
         throw new Error('expected text content');
       // A rejected argument is the caller's to fix, and carries its own code —
       // TOOL_ERROR_DIAGNOSTIC_CODE stays reserved for handler execution faults.
+      expect(JSON.parse(content.text)).toMatchObject({
+        diagnostics: [{ code: TOOL_INPUT_DIAGNOSTIC_CODE }],
+      });
+    } finally {
+      await connection.close();
+    }
+  });
+
+  it('rejects removed scalar context fields beside a request batch', async () => {
+    const connection = await connectTestClient();
+    try {
+      const result = await connection.client.callTool({
+        name: McpToolName.CONTEXT_RESOLVE,
+        arguments: {
+          path: '/project',
+          requests: [{ targetPath: '/project/source.unit' }],
+          targetPath: '/project/source.unit',
+        },
+      });
+      const resultContent = result.content;
+      expect(Array.isArray(resultContent)).toBe(true);
+      if (!Array.isArray(resultContent))
+        throw new Error('expected content array');
+      const content: unknown = resultContent[0];
+      expect(result.isError).toBe(true);
+      expect(content).toMatchObject({ type: 'text' });
+      if (
+        !content ||
+        typeof content !== 'object' ||
+        !('text' in content) ||
+        typeof content.text !== 'string'
+      )
+        throw new Error('expected text content');
       expect(JSON.parse(content.text)).toMatchObject({
         diagnostics: [{ code: TOOL_INPUT_DIAGNOSTIC_CODE }],
       });

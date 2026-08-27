@@ -178,7 +178,7 @@ filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙
 | `rule_docs_sync`     | managed rule 문서 동기화                |
 | `open_settings`      | 설정 UI                                 |
 | `fractal_scan`       | 스냅샷 트리 검사                        |
-| `context_resolve`    | 소유 프랙탈과 INTENT/DETAIL 경로 체인   |
+| `context_resolve`    | 한 스냅샷의 소유/문서 체인 일괄 해석    |
 | `restructure_plan`   | 배치 결정, plan artifact 반환           |
 | `structure_validate` | 프로젝트 또는 계획의 사전·사후조건 검증 |
 | `verification_scan`  | spec-document / test-record 계약 판정   |
