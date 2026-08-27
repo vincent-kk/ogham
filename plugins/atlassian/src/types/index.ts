@@ -31,6 +31,7 @@ export type {
   McpResponse,
   HttpClientConfig,
   RequestOptions,
+  BinaryResponseBody,
 } from "./http.js";
 
 export type { FetchContext, FetchParams, AssetFetchParams } from "./fetch.js";

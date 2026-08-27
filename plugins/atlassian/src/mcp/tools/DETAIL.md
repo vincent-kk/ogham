@@ -9,7 +9,7 @@
 
 ## API Contracts
 
-- `fetch/` — HTTP GET/POST/PUT/PATCH/DELETE 통합 처리, ADF 자동 변환, 바이너리 다운로드.
+- `fetch/` — HTTP GET/POST/PUT/PATCH/DELETE 통합 처리, ADF 자동 변환, 응답 본문 파일 저장(`save_to_path`).
 - `convert/` — 순수 로컬 포맷 변환(네트워크 없음).
 - `authCheck/` — 인증 설정 상태 보고와 선택적 연결 테스트.
 - `setup/` — 로컬 HTTP 서버로 인증 설정 UI 제공.
@@ -26,4 +26,4 @@
 
 ## Last Updated
 
-2026-07-30 — 도구 컨테이너 계약을 문서화했다.
+2026-08-27 — fetch 의 save_to_path 저장 계약을 반영했다.

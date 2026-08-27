@@ -32,7 +32,7 @@
 
 ## Dependencies
 
-- `../../types/index.js` — `McpResponse`, `HttpClientConfig`, `RequestOptions`
+- `../../types/index.js` — `McpResponse`, `HttpClientConfig`, `RequestOptions`, `BinaryResponseBody`
 - `../../constants/index.js` — 재시도·타임아웃 상수
 - `../../utils/index.js` — `buildUrl`, `extractHostname`, `isPrivateIp`
 - `node:dns/promises` — DNS 해석 (ssrfGuard)

@@ -1,7 +1,7 @@
 ---
 name: download
 user-invocable: false
-description: 'Download and upload file attachments on Jira issues and Confluence pages by direct URL or issue key/page ID lookup, with filesystem caching. Use when asked to download an attachment or "첨부파일 다운로드".'
+description: 'Download and upload file attachments on Jira issues and Confluence pages by direct URL or issue key/page ID lookup, saved under .temp/. Use when asked to download an attachment or "첨부파일 다운로드".'
 argument-hint: "<issue-key|page-id|url> [--filename <name>]"
 version: "0.1.0"
 complexity: simple
@@ -51,7 +51,7 @@ Params:
 
 ## Namespace Path Convention
 
-Organize downloads by source context. The directory structure serves as a cache — if the target file already exists, the fetch tool returns it immediately without re-downloading.
+Organize downloads by source context. Every call downloads afresh and overwrites the target — the tool never serves a previously saved file.
 
 | Source                       | save_to_path pattern                    |
 | ---------------------------- | --------------------------------------- |
@@ -59,15 +59,12 @@ Organize downloads by source context. The directory structure serves as a cache 
 | Jira issue + comment `10110` | `.temp/KAN-27_comment-10110/<filename>` |
 | Confluence page ID `12345`   | `.temp/confluence-12345/<filename>`     |
 
-To force re-download when a cached file exists, pass `force: true`.
-
 ## Download Flow
 
 1. Derive namespace from source context (issue key, comment ID, page ID)
 2. Construct `save_to_path`: `.temp/<namespace>/<filename>`
-3. Call fetch — tool auto-checks cache (skips download if file exists)
-4. If cached: returns `{ saved_to, size_bytes, cached: true }`
-5. If not cached: downloads, saves, returns `{ saved_to, size_bytes, content_type }`
+3. Call fetch — the tool always downloads and overwrites the target file
+4. Returns `{ saved_to, size_bytes, content_type }`; `saved_to` is the resolved path under `.temp/`
 
 ## Auth Recovery
 

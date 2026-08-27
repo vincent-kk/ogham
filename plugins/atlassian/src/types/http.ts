@@ -71,3 +71,13 @@ export interface RequestOptions {
   timeout?: number;
   acceptBinary?: boolean;
 }
+
+/**
+ * Envelope `executeRequest` returns in `data` when `acceptBinary` is set and the
+ * response is not `application/json`; JSON bodies are parsed as usual instead.
+ */
+export interface BinaryResponseBody {
+  _binary: true;
+  buffer: ArrayBuffer;
+  contentType: string;
+}

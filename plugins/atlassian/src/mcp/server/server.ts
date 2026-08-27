@@ -46,7 +46,6 @@ export function createServer(): McpServer {
         content_type: z.string().optional(),
         content_format: z.enum(["json", "markdown"]).optional(),
         save_to_path: z.string().optional(),
-        force: z.boolean().optional(),
         project_root: z
           .string()
           .optional()
@@ -72,7 +71,6 @@ export function createServer(): McpServer {
         content_type?: string;
         content_format?: "json" | "markdown";
         save_to_path?: string;
-        force?: boolean;
         project_root?: string;
       }) => {
         const service = args.service ?? detectService(args.endpoint);

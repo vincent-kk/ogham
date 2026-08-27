@@ -475,7 +475,7 @@ Download images, videos, and GIFs from Atlassian sources or local paths, optiona
 ```
 1. Input resolution
    - Detect Atlassian URL (Jira / Confluence attachment) or local path
-   - URL path → reuse `download` skill to fetch + cache under .temp/<namespace>/
+   - URL path → reuse `download` skill to fetch into .temp/<namespace>/ (always fresh, no download cache)
 2. Probe
    - Run scripts/probe.mjs (cross-platform ffprobe wrapper) to get duration, fps, resolution
 3. Image path

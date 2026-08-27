@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { writeBinary } from "../lib/fileIo.js";
+import { writeBinary, writeJson } from "../lib/fileIo.js";
 
 vi.mock("node:fs/promises", () => ({
   readFile: vi.fn(),
   writeFile: vi.fn().mockResolvedValue(undefined),
   mkdir: vi.fn().mockResolvedValue(undefined),
+  chmod: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe("writeBinary", () => {
@@ -36,5 +37,38 @@ describe("writeBinary", () => {
     const writtenData = (writeFile as ReturnType<typeof vi.fn>).mock
       .calls[0][1] as Buffer;
     expect(writtenData).toEqual(Buffer.from([1, 2, 3, 4, 5]));
+  });
+});
+
+describe("writeJson", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("writes pretty JSON with a trailing newline and returns the byte length", async () => {
+    const { mkdir, writeFile } = await import("node:fs/promises");
+
+    const bytes = await writeJson("/tmp/test/TEST-1.json", { key: "TEST-1" });
+
+    expect(mkdir).toHaveBeenCalledWith("/tmp/test", { recursive: true });
+    expect(writeFile).toHaveBeenCalledWith(
+      "/tmp/test/TEST-1.json",
+      '{\n  "key": "TEST-1"\n}\n',
+      { encoding: "utf-8" },
+    );
+    expect(bytes).toBe(22);
+  });
+
+  it("passes mode to writeFile and repairs permissions with chmod", async () => {
+    const { writeFile, chmod } = await import("node:fs/promises");
+
+    await writeJson("/tmp/secret.json", { token: "x" }, { mode: 0o600 });
+
+    expect(writeFile).toHaveBeenCalledWith(
+      "/tmp/secret.json",
+      expect.any(String),
+      { encoding: "utf-8", mode: 0o600 },
+    );
+    expect(chmod).toHaveBeenCalledWith("/tmp/secret.json", 0o600);
   });
 });

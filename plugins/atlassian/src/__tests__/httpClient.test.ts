@@ -192,6 +192,48 @@ describe("http-client", () => {
     expect(result.data).toBeNull();
   });
 
+  it("returns a binary envelope for non-JSON bodies when acceptBinary is set", async () => {
+    const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(bytes, {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      }),
+    );
+
+    const result = await executeRequest(mockConfig, {
+      method: "GET",
+      endpoint: "/rest/api/3/attachment/content/1",
+      acceptBinary: true,
+    });
+
+    const data = result.data as {
+      _binary: boolean;
+      buffer: ArrayBuffer;
+      contentType: string;
+    };
+    expect(data._binary).toBe(true);
+    expect(data.contentType).toBe("image/png");
+    expect(new Uint8Array(data.buffer)).toEqual(bytes);
+  });
+
+  it("still parses JSON bodies when acceptBinary is set", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ key: "TEST-1" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    const result = await executeRequest(mockConfig, {
+      method: "GET",
+      endpoint: "/rest/api/3/issue/TEST-1",
+      acceptBinary: true,
+    });
+
+    expect(result.data).toEqual({ key: "TEST-1" });
+  });
+
   it("handles network errors", async () => {
     // All retry attempts fail immediately with network error
     vi.mocked(fetch).mockRejectedValue(new Error("Network connection failed"));

@@ -54,23 +54,24 @@ interface McpResponse {
 
 Unified HTTP tool supporting all methods via the `method` parameter.
 
-| Category              | Parameter        | Type                                              | Required | Description                                    |
-| --------------------- | ---------------- | ------------------------------------------------- | -------- | ---------------------------------------------- |
-| **Skill-injected**    | `method`         | `"GET" \| "POST" \| "PUT" \| "PATCH" \| "DELETE"` | Y        | HTTP method                                    |
-|                       | `endpoint`       | `string`                                          | Y        | API path (e.g., `/rest/api/3/issue/PROJ-123`)  |
-|                       | `body`           | `object`                                          | N        | Request body (POST/PUT/PATCH only)             |
-|                       | `query_params`   | `Record<string, string>`                          | N        | URL query parameters                           |
-|                       | `expand`         | `string[]`                                        | N        | Response expansion fields (GET only)           |
-|                       | `headers`        | `Record<string, string>`                          | N        | Additional request headers                     |
-|                       | `accept_format`  | `"json" \| "raw"`                                 | N        | Response format (default: `"json"`, GET only)  |
-|                       | `content_type`   | `string`                                          | N        | Body content type override (POST only)         |
-|                       | `content_format` | `"json" \| "markdown"`                            | N        | Body content format hint (POST/PUT/PATCH only) |
-| **MCP auto-injected** | `base_url`       | `string`                                          | —        | From config, prepended to endpoint             |
-|                       | `Authorization`  | `string`                                          | —        | From stored credentials                        |
+| Category              | Parameter        | Type                                              | Required | Description                                                                                                      |
+| --------------------- | ---------------- | ------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Skill-injected**    | `method`         | `"GET" \| "POST" \| "PUT" \| "PATCH" \| "DELETE"` | Y        | HTTP method                                                                                                      |
+|                       | `endpoint`       | `string`                                          | Y        | API path (e.g., `/rest/api/3/issue/PROJ-123`)                                                                    |
+|                       | `body`           | `object`                                          | N        | Request body (POST/PUT/PATCH only)                                                                               |
+|                       | `query_params`   | `Record<string, string>`                          | N        | URL query parameters                                                                                             |
+|                       | `expand`         | `string[]`                                        | N        | Response expansion fields (GET only)                                                                             |
+|                       | `headers`        | `Record<string, string>`                          | N        | Additional request headers                                                                                       |
+|                       | `accept_format`  | `"json" \| "raw"`                                 | N        | Response format (default: `"json"`, GET only)                                                                    |
+|                       | `content_type`   | `string`                                          | N        | Body content type override (POST only)                                                                           |
+|                       | `content_format` | `"json" \| "markdown"`                            | N        | Body content format hint (POST/PUT/PATCH only)                                                                   |
+|                       | `save_to_path`   | `string`                                          | N        | GET only — response body written here, resolved under `.temp/`; returns `{ saved_to, size_bytes, content_type }` |
+| **MCP auto-injected** | `base_url`       | `string`                                          | —        | From config, prepended to endpoint                                                                               |
+|                       | `Authorization`  | `string`                                          | —        | From stored credentials                                                                                          |
 
 **Method-specific behavior**:
 
-- **GET**: `expand` joined as `expand=field1,field2` in query string. ADF auto-converted to Markdown unless `accept_format: "raw"`.
+- **GET**: `expand` joined as `expand=field1,field2` in query string. ADF auto-converted to Markdown unless `accept_format: "raw"`. With `save_to_path`, the body (binary verbatim, JSON pretty-printed after the same ADF conversion) is written to disk instead of returned inline — every call downloads afresh, no cache.
 - **POST**: If `content_format: "markdown"`, body Markdown fields converted to ADF. If `content_type: "multipart/form-data"`, `X-Atlassian-Token: nocheck` auto-added. POST-based searches (JQL Cloud: `POST /rest/api/3/search/jql`) use this method.
 - **PUT/PATCH**: If `content_format: "markdown"`, body converted to ADF (Jira) or Storage Format (Confluence, detected by endpoint).
 - **DELETE**: Returns `{ success: true, status: 204, data: null }` on success.
