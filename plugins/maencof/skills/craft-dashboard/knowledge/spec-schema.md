@@ -1,6 +1,6 @@
 # dashboard-spec.json — Schema
 
-The single source of truth for a generated dashboard. Generated at Phase 3 from refine's output. Read at Phase 4 to scaffold/patch. Lives at `<target>/dashboard-spec.json`.
+The single source of truth for a generated dashboard. Generated at Phase 3 from the interview output. Read at Phase 4 to scaffold or patch. Lives at `<target>/dashboard-spec.json`.
 
 ---
 

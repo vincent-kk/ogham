@@ -63,7 +63,7 @@ After user confirmation, execute AutoFixAction:
 
 When `--quick` is specified, checkup short-circuits to a lightweight index status check:
 
-- Skip the 7-check agent delegation entirely (no file-level scan, no auto-fix)
+- Skip the 8-check agent delegation entirely (no file-level scan, no auto-fix)
 - Call only `mcp__plugin_maencof_tools__kg_status`
 - Render a compact health report (Healthy / Caution / Critical) with sub-layer distribution from the `subLayerDistribution` field
 - With `--verbose`: additionally list stale node paths (up to 10), Layer distribution, and sub-layer consistency warnings
@@ -96,16 +96,6 @@ When `--quick` is specified, checkup short-circuits to a lightweight index statu
 | `--verbose` | false   | In `--quick` mode, include stale node paths, Layer distribution, and sub-layer consistency warnings                                           |
 | `--check`   | all     | Run only specific diagnostic items (full mode only)                                                                                           |
 
-## Usage Examples
-
-```
-/maencof:checkup
-/maencof:checkup --fix
-/maencof:checkup --check broken-link
-/maencof:checkup --quick
-/maencof:checkup --quick --verbose
-```
-
 ## Resources
 
-- **reference.md**: 7 diagnostic items detail, report format template, auto-fix rules, `--quick` mode templates and action matrix
+- **reference.md**: 8 diagnostic items detail, report format template, auto-fix rules, `--quick` mode templates and action matrix

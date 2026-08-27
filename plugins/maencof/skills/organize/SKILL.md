@@ -1,6 +1,6 @@
 ---
 name: organize
-user-invocable: true
+user-invocable: false
 description: 'Reorganizes the vault by promoting or retiring documents across layers via the memory-organizer agent, executing moves only after explicit confirmation. Use for memory organization, L5 buffer triage, or applying reflect results.'
 argument-hint: '[--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
 version: '1.0.0'
@@ -25,9 +25,7 @@ Runs the memory-organizer agent to recommend and execute document transitions be
 
 - **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move` after explicit user confirmation. Use when you are ready to apply transitions.
 - **`reflect`** — read-only judge. Produces an analysis report with zero filesystem changes. Use to preview candidates before committing.
-- **`suggest`** — link discovery via SA + tag Jaccard. Complements organize by proposing new edges (not layer promotions).
-
-Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose new links → `suggest`.
+Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose new links → call `mcp__plugin_maencof_tools__kg_suggest_links`.
 
 ## Agent Collaboration Sequence
 
@@ -53,7 +51,7 @@ Check vault status and stale nodes with the `mcp__plugin_maencof_tools__kg_statu
 
 Run the judge module of the `memory-organizer` agent:
 
-- Scan Layer 3/4/5 files (including sub-layer directories: `relational/`, `structural/`, `topical/`, `buffer/`, `boundary/`)
+- Scan Layer 3/4/5 files (including Layer 3 sub-layer directories: `relational/`, `structural/`, `topical/`)
 - Evaluate access frequency, tag matching, and connection density
 - Generate a list of TransitionDirectives
 - **Layer 5 promotion**: Identify L5 documents that have been categorized (have tags, connections) and recommend promotion to L2/L3 with the appropriate sub-layer, following their `promotion_target` when set

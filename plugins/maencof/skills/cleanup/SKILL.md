@@ -88,17 +88,6 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 | `--dry-run` | false       | Preview without executing (claudemd remove and buffer-cleanup modes) |
 | `--max-age` | 30          | Max age in days for buffer-cleanup mode                              |
 
-## Usage Examples
-
-```
-/maencof:cleanup document 04_Action/expired-task.md
-/maencof:cleanup document 03_External/old-reference.md --force
-/maencof:cleanup claudemd read
-/maencof:cleanup claudemd remove --dry-run
-/maencof:cleanup buffer --max-age 14
-/maencof:cleanup buffer --dry-run
-```
-
 ## Resources
 
 - **reference.md**: Document mode detail (L1 check, backlink flow), CLAUDE.md mode detail, error handling

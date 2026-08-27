@@ -31,45 +31,23 @@ End-to-end external service integration pipeline. Discovers MCP servers, install
 
 | Area      | Path                                    | Access                             |
 | --------- | --------------------------------------- | ---------------------------------- |
-| Execution | `{CWD}/.mcp.json`                       | Delegated → `/maencof:mcp-setup`   |
-| Execution | `{CWD}/.claude/settings.json`           | Delegated → `/maencof:mcp-setup`   |
-| Execution | `{CWD}/.maencof-meta/data-sources.json` | Delegated → `/maencof:connect`     |
-| Execution | `{CWD}/.claude/skills/{name}/SKILL.md`  | Delegated → `/maencof:craft-skill` |
+| Execution | `{CWD}/.mcp.json`                       | Inspect; delegate missing server installation to `/maencof:mcp-setup` |
+| Execution | `{CWD}/.claude/settings.json`           | Delegate MCP permissions to `/maencof:mcp-setup`                       |
+| Execution | `{CWD}/.maencof-meta/data-sources.json` | Delegate source registration to `/maencof:connect`                     |
+| Execution | `{CWD}/.claude/skills/{name}/SKILL.md`  | Define and create the workflow skill directly                          |
 | Execution | `{CWD}/.claude/settings.local.json`     | **Never**                          |
 
 ## Workflow
 
-### Step 1 — Discovery
+Inspect installed servers, delegate missing MCP installation, collect the target/layer/tags/frequency/processing fields, create the workflow skill, delegate source registration, then summarize the created files and offer an end-to-end test.
 
-Read `.mcp.json` to list installed/available servers. Select service to connect.
-
-### Step 2 — MCP Installation
-
-Delegate to `/maencof:mcp-setup` for uninstalled servers.
-
-### Step 3 — Workflow Definition
-
-Define data collection via conversation: target, layer, tags, frequency, processing.
-
-### Step 4 — Auto-Generate Workflow Skill
-
-Delegate to `/maencof:craft-skill` to create a dedicated workflow skill.
-
-### Step 5 — Register Data Source
-
-Delegate to `/maencof:connect` to register the data source.
-
-### Step 6 — Confirmation and Test
-
-Show all created files and offer end-to-end test.
-
-> Load `reference.md` for detailed step workflows, service examples, pipeline diagram, and error handling.
+> Load `reference.md` for the pipeline, configuration fields, generated skill sample, error handling, and acceptance criteria.
 
 ## Resources
 
 | File           | Content                                                                                                                            |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `reference.md` | Pipeline diagram, detailed step workflows, service-specific examples, generated skill samples, error handling, acceptance criteria |
+| `reference.md` | Pipeline, configuration fields, generated skill sample, error handling, acceptance criteria |
 
 ## Options
 

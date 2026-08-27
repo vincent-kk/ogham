@@ -1,33 +1,8 @@
 # mcp-setup — Reference
 
-Detailed step-by-step workflow, JSON examples, token-collection guidance, and the non-developer guide.
+Execution-area file contracts, token-collection guidance, verification, and acceptance criteria.
 
 ## Detailed Workflow
-
-### Step 1 — Check Current Status
-
-Verify registered data sources and already-installed MCP servers.
-
-```
-Current status:
-  Data sources: GitHub (github-main), Slack
-  Installed MCP: (none)
-
-Required MCP servers:
-  - GitHub -> @modelcontextprotocol/server-github (not installed)
-  - Slack  -> @modelcontextprotocol/server-slack  (not installed)
-```
-
-### Step 2 — Select MCP Servers to Install
-
-```
-Which MCP servers would you like to install?
-  [x] @modelcontextprotocol/server-github (GitHub)
-  [x] @modelcontextprotocol/server-slack (Slack)
-  [ ] atlassian-mcp (Jira/Confluence)
-  [ ] notion-mcp (Notion)
-  [ ] Enter manually...
-```
 
 ### Step 3 — Modify Execution Area Files
 
@@ -115,19 +90,6 @@ Installed servers:
 Next steps:
   - Verify after setting token: `/maencof:mcp-setup --verify`
   - Start data ingestion: `/maencof:ingest`
-```
-
-## Guide for Non-developers
-
-This skill involves technical configuration. If the following concepts are unfamiliar, please ask for help:
-
-- MCP (Model Context Protocol): how Claude uses external services
-- API token: authentication key for external services
-- Environment variable: a secure way to store sensitive information
-
-```
-Say "Help me set up GitHub MCP" and
-you will be guided step by step.
 ```
 
 ## Acceptance Criteria

@@ -133,7 +133,7 @@ function checkChangelogDebt(cwd: string, messages: string[]): void {
     const pending = readChangelogState(cwd).pending;
     if (pending && pending.changes.length > 0)
       messages.push(
-        `[maencof] ${pending.changes.length} watched-path change(s) are not yet recorded in the changelog. Run \`/maencof:changelog\` to record them.`,
+        `[maencof] ${pending.changes.length} watched-path change(s) are not yet recorded in the changelog. Use the changelog skill to record them.`,
       );
   } catch (e) {
     appendErrorLogSafe(cwd, {
@@ -182,7 +182,7 @@ function checkScheduleLog(cwd: string, messages: string[]): void {
       };
       if (log.pending && log.pending.length > 0)
         messages.push(
-          `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:organize\` to process.`,
+          `[maencof] ${log.pending.length} pending task(s) found. Use the organize skill to process them.`,
         );
     } catch (e) {
       appendErrorLogSafe(cwd, {
@@ -206,7 +206,7 @@ function checkDataSources(cwd: string, messages: string[]): void {
     const dataSources = JSON.parse(dataSourcesRaw) as { sources?: unknown[] };
     if (!dataSources.sources || dataSources.sources.length === 0)
       messages.push(
-        '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
+        '[maencof] No external data sources connected. Use the connect skill to set one up.',
       );
   } catch (e) {
     appendErrorLogSafe(cwd, {
@@ -215,7 +215,7 @@ function checkDataSources(cwd: string, messages: string[]): void {
       timestamp: new Date().toISOString(),
     });
     messages.push(
-      '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
+      '[maencof] No external data sources connected. Use the connect skill to set one up.',
     );
   }
 }
@@ -248,7 +248,7 @@ function injectAutoInsight(cwd: string, messages: string[]): void {
         .join('\n');
 
       messages.push(
-        `💡 지난 세션에서 ${pending.captures.length}개 인사이트를 자동 캡처했습니다 (L2: ${l2Count}, L5: ${l5Count}):\n${titles}\n/maencof:insight --recent 로 확인하세요.`,
+        `💡 지난 세션에서 ${pending.captures.length}개 인사이트를 자동 캡처했습니다 (L2: ${l2Count}, L5: ${l5Count}):\n${titles}\nReview them with the insight skill's --recent view.`,
       );
 
       deletePendingNotification(cwd);

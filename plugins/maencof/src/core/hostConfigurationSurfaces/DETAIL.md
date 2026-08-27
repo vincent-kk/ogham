@@ -41,7 +41,7 @@
 ### AC-generated-reference-current — 생성 reference 최신성
 
 - `host-surfaces:check`가 renderer와 배포된 shared reference의 byte drift를 실패로 보고한다.
-- 다섯 canonical configuration skill이 shared reference를 로드한다.
+- Four canonical configuration skills load the shared reference.
 
 ## Last Updated
 

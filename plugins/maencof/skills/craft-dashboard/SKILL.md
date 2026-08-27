@@ -106,8 +106,8 @@ Claude automatically invokes this skill when:
 
 After Phase 0, **load exactly one method workflow** and follow it end-to-end:
 
-- `mode == CREATE` → load **methods/create/workflow.md** (and **methods/create/examples.md** on demand)
-- `mode == MUTATE` → load **methods/mutate/workflow.md** (and **methods/mutate/examples.md** on demand)
+- `mode == CREATE` → load **methods/create/workflow.md**
+- `mode == MUTATE` → load **methods/mutate/workflow.md**
 
 Do not preload both. Do not re-implement phases from the wrong workflow.
 
@@ -115,7 +115,7 @@ Do not preload both. Do not re-implement phases from the wrong workflow.
 
 ### Always do
 
-- Run the interview loop inline by adopting `/maencof:refine`'s 5-phase protocol (Read its `SKILL.md`, execute Phases 1-4 in-session) — never invoke `/maencof:refine` as a sub-skill
+- Run the interview loop from `knowledge/refine-protocol.md`, the self-contained shared protocol for CREATE and MUTATE.
 - Treat the vault and `.maencof/` as read-only from the generated dashboard
 - Write only inside `<target>/` (the dashboard output directory) — the sole exception is the one generated run-skill, written to `<vault>/.claude/skills/` after confirmation (see "Ask first")
 - Honor the user's chart/search/vault-index CLI flags over defaults
@@ -148,12 +148,10 @@ Do not preload both. Do not re-implement phases from the wrong workflow.
 
 ```
 craft-dashboard
-   ├── adopts /maencof:refine's protocol in-session (Read SKILL.md, run Phases 1-4)
+   ├── runs the shared interview protocol from knowledge/refine-protocol.md
    ├── reads .maencof/{nodes,edges}.json (read-only) when --vault-index maencof
    └── (optional) imports @ogham/maencof spreading-activation for semantic search
 ```
-
-Slash-skill chaining is not supported inside an active Claude Code skill, so craft-dashboard does NOT invoke `/maencof:refine` as a sub-skill. It reads refine's `SKILL.md` and executes refine's documented 5-phase interview protocol inline. See `methods/create/workflow.md` Phase 2 for the inlined contract.
 
 No other skills are invoked.
 
@@ -179,14 +177,15 @@ No other skills are invoked.
 
 Mode-specific workflows. Load exactly one per session based on Phase 0 outcome.
 
-- **methods/create/** — CREATE pipeline (`workflow.md`, `examples.md`)
-- **methods/mutate/** — MUTATE pipeline (`workflow.md`, `examples.md`)
+- **methods/create/** — CREATE pipeline (`workflow.md`)
+- **methods/mutate/** — MUTATE pipeline (`workflow.md`)
 
 ### knowledge/
 
 Domain knowledge shared by both modes. Load specific files on demand; do not preload.
 
-- **interview-hints.md** — Hint block prepended to refine in Phase 1
+- **interview-hints.md** — Interview dimensions, chart mappings, defaults, and Phase 3 output shape
+- **refine-protocol.md** — Shared CREATE/MUTATE interview mechanics and output boundary
 - **spec-schema.md** — `dashboard-spec.json` schema with examples
 - **vault-indexing.md** — Option D implementation: GraphStore hot-reload, body LRU, stale banner, SA fallback
 - **visualization-catalog.md** — Dimension → chart mapping (Recharts components + Plotly fallback)

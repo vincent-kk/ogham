@@ -262,7 +262,7 @@ export function renderHostConfigurationReference(): string {
 
 # Host Configuration Surfaces
 
-Load this file before instruct, rule, configure, craft-agent, or changelog work. Select the current runtime host and use only that column. A write to a different host's path is not success.
+Load this file before instruct, rule, configure, or changelog work. Select the current runtime host and use only that column. A write to a different host's path is not success.
 
 | Surface | Claude | Codex |
 | --- | --- | --- |
@@ -276,7 +276,6 @@ Load this file before instruct, rule, configure, craft-agent, or changelog work.
 - **instruct**: inspect and mutate the instruction manager's effective target. Preserve all text outside the maencof-owned section and report the actual selected path.
 - **rule**: on Claude, manage the Markdown rule directory. On Codex, report behavioral rules as unsupported and offer the owned AGENTS instruction section instead; do not report success without that explicit route.
 - **configure**: inspect the instruction, rule-support, and agent surfaces from the selected host row. An unsupported rule surface is a capability result, not a healthy directory.
-- **craft-agent**: Claude definitions are Markdown. Codex definitions are standalone TOML with required \`name\`, \`description\`, and \`developer_instructions\` fields; load \`codex-reference.md\` for the Codex schema.
 - **changelog**: use the registry-derived watched pathspec. It includes both hosts so a host switch cannot hide prior configuration changes.
 
 ## Changelog watched pathspec

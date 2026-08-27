@@ -76,7 +76,7 @@ export function buildDefaultDirective(
 
 When auto-insight capture is enabled, monitor the conversation for user insights worth preserving.
 When you detect a meaningful insight during conversation, call \`capture_insight\` to record it.
-Do NOT ask for confirmation — capture proactively. The user can review later via \`/maencof:insight --recent\`.
+Do NOT ask for confirmation — capture proactively. The user can review later with the insight skill's \`--recent\` view.
 After capture, display: 💡 Insight recorded to L{layer}: "{title}"
 Capture criteria and sensitivity are provided via the session meta-prompt at session start.
 
@@ -95,7 +95,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - After creating a document via \`create\`, check whether concept documents exist for each tag used.
 - A concept document is a Layer 3C (topical) document that defines and explains a tag/concept (e.g., \`03_External/topical/distributed-systems.md\` for tag \`distributed-systems\`).
 - If a tag has been used 3+ times across documents but has no concept document, suggest creating one:
-  "Tag '{tag}' is used in {N} documents but has no concept document. Create one with \`/maencof:remember --layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"
+  "Tag '{tag}' is used in {N} documents but has no concept document. Create one with the \`remember\` skill using \`--layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"
 - Use \`kg_search\` with the tag as seed to check for existing concept documents before suggesting.
 - Do NOT auto-create concept documents — always suggest and wait for user confirmation.
 

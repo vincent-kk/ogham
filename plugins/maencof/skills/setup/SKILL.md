@@ -25,7 +25,7 @@ A 7-stage goal-driven dynamic interview for first-time maencof setup or Core Ide
 ## When to Use vs Adjacent Skills
 
 - **`setup`** — one-time onboarding consultation. Runs a 7-stage "Professional Counselor" interview that constructs your Core Identity, synthesizes an AI companion persona, scaffolds Layer directories, and builds the initial index. Re-run a specific stage via `--step` or reset Core Identity via `--reset`.
-- **`configure`** — ongoing configuration router. Scans, health- checks, and delegates to 7 sub-skills (bridge, instruct, rule, lifecycle, craft-skill, craft-agent, checkup) for post-onboarding environment drift.
+- **`configure`** — ongoing configuration router. Scans, health-checks, and delegates to 5 sub-skills (bridge, instruct, rule, lifecycle, checkup) for post-onboarding environment drift.
 
 Rule of thumb: vault does not yet exist, or Core Identity needs reset → `setup`. Vault exists and something needs tuning → `configure`.
 
@@ -46,21 +46,16 @@ Collect the vault absolute path via `AskUserQuestion`. → Use templates T1-1, T
 
 **Goal:** Through natural, empathetic conversation, collect the 5 key dimensions of the `CoreIdentitySchema` defined in `reference.md`. **Tool:** Use `AskUserQuestion` (type: `text` for open-ended, `choice` only when narrowing down is helpful).
 
-**Execution Loop:**
-
-1. **Open:** Start with a broad, empathetic question about their current knowledge management state (e.g., "Welcome. To help you build a space that truly fits your needs, could you tell me a bit about what brings you here and what challenges you're currently facing with your information?").
-2. **Understand & Synthesize:** Analyze the user's free-form response. Infer which schema fields (e.g., Core Values, Primary Interest) are implicitly answered.
-3. **Reflect & Probe:** Provide a brief, professional reflection ("I see, it sounds like you're looking for X because of Y..."). Then, ask a targeted follow-up question to uncover the remaining missing schema fields.
-4. **Complete:** Once you confidently have enough signal for all 5 schema fields (Name, Interest, Values, Boundary, Style), exit the loop and present the summary (T2-DONE).
+Collect all five `CoreIdentitySchema` fields (Name, Interest, Values, Boundary, Style) one question at a time, using the user's answers to target only the remaining fields.
 
 _Crucial:_ Maintain the persona of a professional counselor. Do NOT use medical or clinical terms like "diagnosis" or "patient". Be calm and structured.
 
 ### Stage 3 — AI Companion Proposal (Persona Synthesis)
 
-Synthesize an AI companion persona holistically based on the Stage 2 discovery. → See `reference.md` § Stage 3 for the Synthesis Guidelines. Load **examples.md** § Example 2 for sample output.
+Synthesize an AI companion persona based on the Stage 2 discovery. See `reference.md` § Stage 3 for the schema and per-turn budget contract.
 
 1. **Synthesize Persona**: Holistically design a companion that acts as a perfect partner for the user's stated needs and work style. Fill the v2 companion schema — core fields (`name`, `greeting`) plus uniform `sections` (one per character axis: role, tone, taboos, principles, traits, origin, and any custom axis).
-2. **Propose & Refine**: Present the proposed persona (template T3-1) via `AskUserQuestion` with options:
+2. **Propose & Refine**: Present the proposed persona via `AskUserQuestion` with options:
    - **Use** — Save to `.maencof-meta/companion-identity.json` following the v2 Persistence Schema in reference.md § Stage 3. Enforce the per-turn budget gate (reference.md § Per-turn budget gate — the char cap across all `turn`/`both` sections) BEFORE writing; demote a section to `session` or add a shorter `brief` if it overflows.
    - **Regenerate** — Generate a new persona with a different approach
    - **Skip** — Do not create a companion identity; proceed to next stage

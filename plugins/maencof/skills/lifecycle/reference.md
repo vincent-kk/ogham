@@ -42,25 +42,6 @@ For `PreToolUse` and `PostToolUse` events, use the `matcher` field to filter by 
 
 ## Detailed Workflow
 
-### Step 1 — Display Registered Actions
-
-Read `lifecycle.json` and display current actions:
-
-```
-Current lifecycle actions:
-
-  [Active] greeting (SessionStart)
-    "Hello! Have a great day"
-
-  [Active] commit-reminder (UserPromptSubmit)
-    "Did you write commit messages in English?" (condition: after git ops)
-
-  [Inactive] daily-focus (SessionStart)
-    "Review yesterday's open threads before starting"
-
-Total: 3 actions (2 active, 1 inactive)
-```
-
 ### Step 2 — Identify Intent and Map to Event
 
 | User Expression                       | Mapped Event                   |
@@ -73,26 +54,7 @@ Total: 3 actions (2 active, 1 inactive)
 
 ### Step 3 — Define Action
 
-Collect action configuration:
-
-```
-Defining action:
-
-  Event: SessionStart
-  Type: echo
-  Message: "Hello! Have a great day"
-  Description: "Greeting at session start"
-
-Register this action? [Yes / Edit]
-```
-
-For PreToolUse/PostToolUse, also collect the matcher:
-
-```
-  Matcher (optional): Which tools should trigger this?
-    Example: Write|Edit  (fires only for Write or Edit tools)
-    Leave empty for all tools.
-```
+Collect the event, action type, message, description, and optional condition. For `PreToolUse` and `PostToolUse`, also collect the optional pipe-separated `matcher`.
 
 ### Step 4 — Update lifecycle.json
 
@@ -127,30 +89,12 @@ Lifecycle action registered!
   Status: Active
 
 Applies from the next matching event.
-Instant test: /maencof:lifecycle --test greeting
+Instant test: use the `lifecycle` skill with `--test greeting`.
 ```
 
 ## Agent Collaboration
 
 Executed by the **configurator** agent. The configurator validates action schemas and manages lifecycle.json writes.
-
-## Usage Examples
-
-```
-/maencof:lifecycle add
-/maencof:lifecycle list
-/maencof:lifecycle disable commit-reminder
-/maencof:lifecycle --test greeting
-/maencof:lifecycle remove session-summary
-```
-
-Natural language:
-
-```
-"Greet me when the session starts"
-"Remind me to write tests after every response"
-"Warn me before any Bash command"
-```
 
 ## Error Handling
 

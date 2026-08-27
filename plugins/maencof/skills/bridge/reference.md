@@ -1,6 +1,6 @@
 # bridge — Reference
 
-Detailed workflow, pipeline diagram, service examples, and error handling for the bridge skill.
+Pipeline, workflow configuration, generated-skill contract, and error handling for the bridge skill.
 
 ## Pipeline Diagram
 
@@ -8,10 +8,10 @@ Detailed workflow, pipeline diagram, service examples, and error handling for th
 /maencof:bridge (this skill — orchestrator)
   1. /maencof:mcp-setup     → MCP server installation
   2. /maencof:connect        → Data source registration
-  3. /maencof:craft-skill    → Workflow skill generation
+  3. bridge                   → Workflow skill generation
 ```
 
-Each sub-skill handles its own file writes. Bridge coordinates the pipeline and passes context between steps.
+Each delegated skill handles its own file writes; bridge writes the workflow skill and coordinates the pipeline.
 
 ## Sub-Skill Comparison
 
@@ -23,58 +23,9 @@ Each sub-skill handles its own file writes. Bridge coordinates the pipeline and 
 
 ## Detailed Workflow
 
-### Step 1 — Discovery
+### Workflow Configuration
 
-Read `.mcp.json` to identify installed/available MCP servers:
-
-```
-Installed MCP servers:
-  [Installed] github — @modelcontextprotocol/server-github
-  [Not installed] slack
-  [Not installed] jira
-
-Which service would you like to connect?
-  [ ] Slack
-  [ ] Jira / Confluence (Atlassian)
-  [ ] Notion
-  [ ] Linear
-  [ ] Enter manually...
-```
-
-Already-installed servers skip to workflow definition (Step 3).
-
-### Step 2 — MCP Installation
-
-Delegate to `/maencof:mcp-setup`:
-
-```
-Installing Slack MCP server...
-  → Delegating to /maencof:mcp-setup
-
-Done:
-  - .mcp.json updated
-  - .claude/settings.json permissions added
-  - SLACK_BOT_TOKEN setup instructions provided
-```
-
-### Step 3 — Workflow Definition (Conversational)
-
-```
-How would you like to use Slack?
-
-  "Summarize #dev channel messages daily and save to L4"
-
-Configuration:
-  Channel: #dev
-  Frequency: Every session start
-  Storage layer: L4 (Action Memory, volatile)
-  Tags: slack, dev-updates
-  Processing: Bullet-point summary, markdown format
-
-Proceed? [Yes / Edit]
-```
-
-Configurable fields:
+Collect these fields before writing the workflow skill:
 
 - **Target**: channel, repository, project, board
 - **Layer**: L1–L5 (appropriate for data type)
@@ -84,15 +35,7 @@ Configurable fields:
 
 ### Step 4 — Auto-Generate Workflow Skill
 
-Delegate to `/maencof:craft-skill`:
-
-```
-Generating workflow skill...
-
-  Name: slack-digest
-  Location: {CWD}/.claude/skills/slack-digest/SKILL.md
-  Function: Collect #dev messages → summarize → save to L4
-```
+Write the workflow skill directly at `{CWD}/.claude/skills/{name}/SKILL.md`:
 
 Generated skill example:
 
@@ -120,52 +63,13 @@ version: 1.0.0
 
 Delegate to `/maencof:connect`:
 
-```
-Registering data source...
-
-Done:
-  ID: slack-dev
-  Frequency: Every session
-  Linked skill: slack-digest
-```
-
 ### Step 6 — Confirmation and Test
 
-```
-Bridge setup complete!
-
-Connected services:
-  Slack (#dev) — every session
-    → Run: /maencof:slack-digest
-
-Created files:
-  .mcp.json (slack server added)
-  .claude/settings.json (permissions added)
-  .maencof-meta/data-sources.json (slack-dev registered)
-  .claude/skills/slack-digest/SKILL.md (workflow skill)
-
-Test now? [Yes / Later]
-```
+Summarize the created files and offer an end-to-end test.
 
 ## Agent Collaboration
 
-Executed by the **configurator** agent. Bridge orchestrates three sub-skills in sequence, passing context between each step. When invoked via bridge, the sub-skills (`mcp-setup`, `connect`, `craft-skill`) run under this configurator context — their own `orchestrator` declarations apply only when they are invoked directly/standalone.
-
-## Usage Examples
-
-```
-/maencof:bridge
-/maencof:bridge slack
-/maencof:bridge github
-```
-
-Natural language:
-
-```
-"Connect Jira and set up a sprint summary workflow"
-"Install the Slack MCP and create a daily digest skill"
-"I want to pull GitHub issues into maencof automatically"
-```
+Executed by the **configurator** agent. Bridge delegates installation and registration to `mcp-setup` and `connect`, writes the workflow skill directly, and passes context between each step. The delegated skills run under this configurator context; their own `orchestrator` declarations apply only when invoked directly.
 
 ## Error Handling
 

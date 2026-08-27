@@ -53,7 +53,7 @@ Documents exceeding 100 lines receive a recommendation to split. Knowledge nodes
 ```
 ⚠️ Document exceeds 100 lines (current: {lines} lines)
    Target: {path}
-   Consider splitting: auto-split available via /maencof:organize
+   Consider splitting with the `organize` skill.
 ```
 
 ### R4. Directory Naming Rules
@@ -73,7 +73,7 @@ Layer subdirectories must be named in kebab-case. Layer root directories are fix
 ## Auto-fix
 
 - **R1/R2 violations**: Automatically convert filename to kebab-case (after user confirmation)
-- **R3 violations**: Auto-fix not available; guided splitting via `/maencof:organize` skill
+- **R3 violations**: Auto-fix not available; guided splitting via the `organize` skill
 - **R4 violations**: Automatically convert directory name to kebab-case (after user confirmation)
 
 ## Exceptions

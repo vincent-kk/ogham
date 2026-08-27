@@ -1,6 +1,6 @@
 ---
 name: configure
-user-invocable: true
+user-invocable: false
 description: 'Health-checks the host environment — MCP servers, skills, agents, rules, hooks, instructions — and routes to the right configuration sub-skill. Use when diagnosing config drift or unsure which config skill applies.'
 argument-hint: '[component to configure]'
 version: '1.1.0'
@@ -23,11 +23,11 @@ Before scanning, load `../.shared/host-configuration.md` and select the current 
 - Navigate to the right sub-skill when unsure which to use
 - Migrate legacy configuration formats
 
-> This skill is a **router** — it scans and delegates. It does not directly modify files.
+> This skill scans, delegates, and performs previewed migrations. It modifies files directly only for a confirmed migration.
 
 ## When to Use vs Adjacent Skills
 
-- **`configure`** — ongoing configuration router. Scans, health-checks, and delegates to 7 sub-skills (bridge, instruct, rule, lifecycle, craft-skill, craft-agent, checkup). Call whenever environment drift or a specific config component needs attention after initial onboarding.
+- **`configure`** — ongoing configuration router. Scans, health-checks, and delegates to 5 sub-skills (bridge, instruct, rule, lifecycle, checkup). Call whenever environment drift or a specific config component needs attention after initial onboarding.
 - **`setup`** — one-time onboarding consultation. Runs a 7-stage "Professional Counselor" interview that creates the vault, Core Identity, AI companion, Layer directories, and initial index. Call once per project; `configure` takes over afterwards.
 
 Rule of thumb: vault does not yet exist → `setup`. Vault exists and something needs tuning → `configure`.
@@ -42,8 +42,6 @@ For project instructions, behavioral rules, and agents, the generated shared hos
 | Execution | `{CWD}/.claude/settings.json`                 | Read → sub-skills                                                   |
 | Execution | `{CWD}/CLAUDE.md`                             | Read → `/maencof:instruct`                                          |
 | Execution | `{CWD}/.claude/rules/`                        | Read → `/maencof:rule`                                              |
-| Execution | `{CWD}/.claude/skills/`                       | Read → `/maencof:craft-skill`                                       |
-| Execution | `{CWD}/.claude/agents/`                       | Read → `/maencof:craft-agent`                                       |
 | Execution | `{CWD}/.maencof-meta/lifecycle.json`          | Read → `/maencof:lifecycle`                                         |
 | Execution | `{CWD}/.maencof-meta/companion-identity.json` | Read → `companion_edit` tool / `/maencof:setup --reset --companion` |
 | Execution | `{CWD}/.maencof-meta/` (other)                | Read → `/maencof:checkup`                                           |
@@ -61,25 +59,17 @@ Check all config files/directories for existence, format, and spec compliance.
 
 Display issues by severity (error/warning/info). Skip if clean.
 
-### Step 3 — Identify Intent
-
-Present sub-skill menu or detect intent from natural language.
-
-### Step 4 — Route to Sub-Skill
-
-Delegate to the appropriate skill (bridge, instruct, rule, lifecycle, craft-skill, craft-agent, checkup).
-
-### Step 5 — Migration (when applicable)
+### Step 3 — Migration (when applicable)
 
 Handle legacy format conversion with diff preview and confirmation.
 
-> Load `reference.md` for routing table, health check details, migration guide, and error handling.
+> Load `reference.md` for health check details, migration guidance, and error handling.
 
 ## Resources
 
 | File           | Content                                                                                                    |
 | -------------- | ---------------------------------------------------------------------------------------------------------- |
-| `reference.md` | Scan targets, health report format, routing table, migration workflow, error handling, acceptance criteria |
+| `reference.md` | Scan targets, health report format, migration workflow, error handling, acceptance criteria |
 
 ## Options
 

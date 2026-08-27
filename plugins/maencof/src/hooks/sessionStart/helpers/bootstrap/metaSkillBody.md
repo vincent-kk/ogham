@@ -18,34 +18,22 @@ Apply these rules to every message written for the user:
 
 ## Role → Skill Mapping
 
-- Brainstorming / ideation → `explore --for-brainstorm`, then `think --mode divergent`
+- Brainstorming / ideation → the `explore` skill
 - Insight capture → the `insight` skill plus the `capture_insight` MCP tool
 - User-state awareness → automatic via the `capture_personal_context` MCP tool, guided by the injected `<personal-context>` block; manage it with `personal-status`
-- Spec refinement → `refine`, whose Socratic counter-example phase is included
-- Interview convergence → the Socratic counter-example phase of `refine` (Phase 2.5)
-- Plan review → `think --mode review`
 - Session retrospective → an automatic brief recap as the session wraps up; no explicit invocation exists
 
 ## Flow & Priority
 
-1. Vague or ambiguous input → run `refine` first. If distinct alternatives still remain afterward, run `think --mode default`.
-2. Ideation signals ("idea", "stuck", "brainstorm") → run `explore --for-brainstorm` to gather seed candidates, then `think --mode divergent`. Never start `think` without seeds.
-3. A plan or spec path reference plus "review" / "check" → `think --mode review`.
+1. Vague or ambiguous input → converge scope by asking one question at a time before acting.
+2. Ideation signals ("idea", "stuck", "brainstorm") → use `explore` to gather related material, then develop candidate options in the session.
+3. A plan or spec path plus "review" / "check" → compare it directly with its requirements and evidence. Once scope is clear, proceed with the requested work.
 4. As the session wraps up, surface a brief recap automatically; persist it only when the user explicitly asks. `reflect` is the vault judge, never a session recap.
 5. Insight capture runs automatically through the `capture_insight` MCP tool and the `insight-injector` hook; direct invocation is not required.
 
-## Red Flags
-
-- "Too simple, no skill needed" → simple tasks carry the greatest risk; apply the discipline.
-- "Just implement it directly" → route through `refine` and confirm scope first.
-- "Ask everything at once" → ask one question at a time, as `refine` directs.
-- "Save the ToT candidates" → candidates are ephemeral; persist nothing without explicit user approval.
-- "The user said 'proceed', so it is settled" → confirm the Socratic convergence criteria of `refine` first.
-- "I already know this" → re-invoke the skill and observe; never substitute memory for observation.
-
 ## Persistence Rules
 
-- Ephemeral, never persisted: analysis and interview output from the early `refine` phases, intermediate `think` candidates, raw `explore` results.
-- Durable, persisted only with explicit approval: the final refined prompt from `refine`, the interpretation `think` selected, risks surfaced during review.
-- Principle capture: record Socratic premises from `refine` and Lookahead predictions from `think` with `capture_insight(category=principle)`.
+- Ephemeral, never persisted: intermediate analysis, interview notes, candidate options, and raw `explore` results.
+- Durable, persisted only with explicit approval: a final scoped prompt or plan, a selected interpretation, and risks surfaced during review.
+- Principle capture: record durable premises and validated predictions with `capture_insight(category=principle)`.
 - Insight category defaults: accept `principle`; reject `refuted_premise` and `ephemeral_candidate`.

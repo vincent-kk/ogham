@@ -1,8 +1,8 @@
 ---
 name: explore
-user-invocable: true
-description: 'Traverses the knowledge graph from a seed using Spreading Activation to uncover hidden connections across layers; --for-brainstorm hands seeds to think --mode divergent. Use for interactive multi-round vault exploration.'
-argument-hint: '[seed] [--hops 1-10] [--layer 1-5] [--detail] [--for-brainstorm]'
+user-invocable: false
+description: 'Traverses the knowledge graph from a seed using Spreading Activation to uncover hidden connections across layers. Use for interactive multi-round vault exploration.'
+argument-hint: '[seed] [--hops 1-10] [--layer 1-5] [--detail]'
 version: '1.1.0'
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
@@ -20,7 +20,6 @@ Interactively traverses the knowledge graph using Spreading Activation (SA). Ene
 - When you want to discover hidden connections between pieces of knowledge
 - Divergent exploration in the form of "what is related to this?"
 - When deeper exploration than `/maencof:recall` is needed
-- **Brainstorm seed supply** (`--for-brainstorm`): generate 5-8 candidate seeds and hand them to `think --mode divergent` for ideation. Meta-skill Priority chain: ideation signals → `explore --for-brainstorm` → `think --mode divergent`.
 
 ## When to Use vs Adjacent Skills
 
@@ -149,7 +148,7 @@ If the user selects a neighbor node as a new seed, re-run from Step 3. After 3 r
 > Options are interpreted by the LLM in natural language. Not strict CLI parsing.
 
 ```
-/maencof:explore [seed] [--hops <1-10>] [--layer <1-5>] [--sub-layer <name>] [--detail] [--for-brainstorm]
+/maencof:explore [seed] [--hops <1-10>] [--layer <1-5>] [--sub-layer <name>] [--detail]
 ```
 
 | Option             | Default                | Description                                                                                                                                                                                          |
@@ -159,17 +158,6 @@ If the user selects a neighbor node as a new seed, re-run from Step 3. After 3 r
 | `--layer`          | all                    | Layer filter (1-5, multiple allowed)                                                                                                                                                                 |
 | `--sub-layer`      | none                   | Sub-layer filter: relational/structural/topical (L3 only)                                                                                                                                            |
 | `--detail`         | false                  | Include document body excerpts in results                                                                                                                                                            |
-| `--for-brainstorm` | false                  | Emit 5-8 candidate seeds (title + path + 1-line summary) as ephemeral output for handoff to `think --mode divergent`. Skips Step 5 deep-expansion and Step 6 interactive expansion. No vault writes. |
-
-## Usage Examples
-
-```
-/maencof:explore react
-/maencof:explore 01_Core/identity.md --hops 3
-/maencof:explore machine-learning --layer 3
-/maencof:explore alice --sub-layer relational
-/maencof:explore project goals --detail
-```
 
 ## Error Handling
 
@@ -177,19 +165,3 @@ If the user selects a neighbor node as a new seed, re-run from Step 3. After 3 r
 - **Seed not found**: suggest similar keywords and request re-entry
 - **No results**: suggest increasing hops (`--hops 10`) or trying different keywords
 - **Stale index**: display warning and continue (user choice)
-
-## Quick Reference
-
-```
-# Explore by keyword
-/maencof:explore machine-learning
-
-# Explore from a specific document
-/maencof:explore 01_Core/identity.md
-
-# Layer filter + deep exploration
-/maencof:explore AI --layer 2 --hops 8
-
-# Include detailed body content
-/maencof:explore values --detail
-```

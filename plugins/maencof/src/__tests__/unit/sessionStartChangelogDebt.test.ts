@@ -29,7 +29,7 @@ describe('session-start changelog debt 권고', () => {
     rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3 });
   });
 
-  it('pending 이 있으면 건수와 /maencof:changelog 안내를 표면화한다', () => {
+  it('pending 이 있으면 건수와 non-slash changelog 안내를 표면화한다', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'changelog-state.json'),
       JSON.stringify({
@@ -46,7 +46,8 @@ describe('session-start changelog debt 권고', () => {
     const context = result.hookSpecificOutput?.additionalContext ?? '';
 
     expect(context).toContain('2 watched-path change(s)');
-    expect(context).toContain('/maencof:changelog');
+    expect(context).toContain('changelog skill');
+    expect(context).not.toContain('/maencof:changelog');
   });
 
   it('상태 파일이 없으면 권고를 내지 않는다', () => {

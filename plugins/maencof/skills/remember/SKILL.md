@@ -1,6 +1,6 @@
 ---
 name: remember
-user-invocable: true
+user-invocable: false
 description: 'Records a concept, insight, or reference into the vault: recommends a layer, extracts tags, deduplicates, and creates a structured document. Use when the user says remember this, save this, 기억해줘, or 기록해.'
 argument-hint: '[content] [--layer 2-5] [--tags TAGS] [--title TITLE]'
 version: '1.0.0'
@@ -30,11 +30,7 @@ Extracts knowledge from the current conversation or user input and saves it as a
 
 ### Step 1 — Identify What to Record
 
-Identify the content to record from user input or current conversation context:
-
-- Explicit content: `"remember X"`, `"save Y"`
-- Implicit content: detect important conclusions or insights from the conversation
-- If content is unclear: ask "What would you like to record?"
+Identify the explicit content to record; if it is unclear, ask what the user wants recorded.
 
 ### Step 2 — Determine Layer
 
@@ -69,20 +65,11 @@ Layer 5 is the flat unclassified inbox at `05_Context/` — it has no sub-layers
 
 **Cross-layer hubs are not a layer.** A project MOC or cross-domain hub is any L1–L4 document carrying `hub: true` with `hub_kind` and `purpose`. Create it with `create` at whatever layer the knowledge belongs to — a study hub over external topics is L3-structural, a project MOC is L4. Layer 5 documents cannot be hubs.
 
-If the user specifies `--layer`, use that Layer. Confirm the recommended Layer with the user before proceeding:
-
-```
-"I'll save this to Layer {N} ({name}). Is that correct? (y/n or a different Layer number)"
-```
+If the user specifies `--layer`, use that Layer. Otherwise, confirm the recommended Layer with the user before proceeding.
 
 ### Step 3 — Tag Extraction
 
-Extract 3–5 relevant tags from the content. Rules:
-
-- Core concept/technology names (e.g., `react`, `typescript`, `knowledge-graph`)
-- Domain (e.g., `frontend`, `ai`, `personal-productivity`)
-- Document type (e.g., `tutorial`, `reference`, `insight`)
-- Lowercase English or use hyphens (-)
+Extract 3–5 relevant lowercase English tags, using hyphens for multiword tags.
 
 ### Step 4 — Pre-creation Duplicate Check
 
@@ -96,14 +83,7 @@ mcp__plugin_maencof_tools__kg_search(
 )
 ```
 
-If a similar document is found:
-
-```
-"A similar document exists:
-  - {title} ({path})
-
-Would you like to create a new document or update the existing one? (Create new / Update / Cancel)"
-```
+If a similar document is found, require the user to choose **Create new**, **Update existing**, or **Cancel** before proceeding.
 
 ### Step 5 — Document Creation
 
@@ -166,7 +146,7 @@ Path: {path}
 Layer: {layer_name}
 Tags: {tags}
 
-To explore related documents: /maencof:explore {tag}
+To explore related documents, use the `explore` skill with `{tag}`.
 ```
 
 ## Available MCP Tools
@@ -197,17 +177,6 @@ To explore related documents: /maencof:explore {tag}
 | `--expires`   | none                 | Expiration date YYYY-MM-DD (for L4 / L5)                                                                                                |
 | `--filename`  | auto-generated       | Filename hint; a subdirectory prefix groups related documents, e.g. `projects/alpha-kickoff` (max 2 levels; L1/L5 are flat — no prefix) |
 | `--no-check`  | false                | Skip duplicate check                                                                                                                    |
-
-## Usage Examples
-
-```
-/maencof:remember If you leave the dependency array empty in a React hook, it only runs once on mount
-/maencof:remember https://example.com/paper paper on spreading activation --layer 3
-/maencof:remember PR review due tomorrow --layer 4 --expires 2026-12-31
-/maencof:remember --title "TypeScript Generic Patterns" --tags typescript,generic,pattern
-/maencof:remember overheard idea — spaced repetition for code review, unsure where it fits --layer 5
-/maencof:remember Project Alpha kickoff notes --layer 4 --filename projects/alpha-kickoff
-```
 
 ## Error Handling
 

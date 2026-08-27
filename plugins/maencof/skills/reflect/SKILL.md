@@ -1,6 +1,6 @@
 ---
 name: reflect
-user-invocable: true
+user-invocable: false
 description: 'Generates a read-only vault analysis report — layer transition candidates, duplicates, hub health, sub-layer distribution — with no filesystem changes. Use to preview what organize would do.'
 argument-hint: '[--layer 3|4|5] [--show-all]'
 version: '1.0.0'
@@ -91,7 +91,7 @@ Execute memory-organizer judge logic:
 - Buffer promotion candidates: N
 - Hub health issues: N
 - Duplicate document pairs: N
-- Recommended action: run /maencof:organize
+- Recommended action: use the `organize` skill
 ```
 
 ## MCP Tools (used by memory-organizer.judge)

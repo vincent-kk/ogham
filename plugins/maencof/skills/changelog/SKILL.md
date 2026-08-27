@@ -1,6 +1,6 @@
 ---
 name: changelog
-user-invocable: true
+user-invocable: false
 description: 'Curates self-change entries into the vault changelog from git and scan state, then advances the curation cursor. Use when the SessionStart advisory reports unrecorded watched-path changes or to record changes manually.'
 version: '2.0.0'
 complexity: medium

@@ -1,6 +1,6 @@
 ---
 name: recall
-user-invocable: true
+user-invocable: false
 description: 'Searches the knowledge vault with a natural-language query using Spreading Activation, returning ranked documents across all five layers in one shot. Use when looking up past knowledge on a specific topic.'
 argument-hint: '<query> [--layer N] [--sub-layer NAME] [--summary] [--detail] [--limit N]'
 version: '1.0.0'
@@ -39,8 +39,6 @@ Rule of thumb: know what you want → `recall`. Want to wander → `explore`.
 
 Extract core keywords and intent from user input.
 
-- Natural-language query → list of search keywords: keep distilled concept terms only, dropping grammar words (particles, articles, prepositions)
-- Disambiguate polysemous/generic nouns by binding a qualifier into the same seed item ("docker image", not bare "image") — a multi-word item is AND-matched
 - Cross-language recall: include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
 - Mode detection: `--summary` (summary mode, default) / `--detail` (detail mode)
 - Layer filter detection: `--layer=1` through `--layer=5`
@@ -86,7 +84,7 @@ Found {N} related documents.
 
 2. ...
 
-For more detail: `/maencof:recall {query} --detail`
+For more detail, use the `recall` skill with `{query} --detail`.
 ```
 
 **Detail mode (`--detail`)**:
@@ -128,19 +126,8 @@ For more detail: `/maencof:recall {query} --detail`
 | `--sub-layer=X` | none    | Filter by sub-layer: relational/structural/topical (L3 only) |
 | `--limit=N`     | 10      | Maximum number of results                                    |
 
-## Usage Examples
-
-```
-/maencof:recall react state management patterns
-/maencof:recall project goals --detail
-/maencof:recall schedule --layer=4
-/maencof:recall core values --layer=1 --detail
-/maencof:recall alice --sub-layer=relational
-/maencof:recall project moc --sub-layer=structural
-```
-
 ## Error Handling
 
 - **No index**: guide to run `/maencof:build`
-- **No results**: suggest similar keywords + guide to `/maencof:explore` for interactive exploration
+- **No results**: suggest similar keywords and offer the `explore` skill for interactive exploration
 - **Stale index**: display stale warning and continue
