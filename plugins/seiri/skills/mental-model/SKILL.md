@@ -36,4 +36,6 @@ Choose a coherent editorial direction with readable hierarchy, contrast, spacing
 - Inspect desktop and mobile rendering for flow, contrast, overflow, code wrapping, and interactions. Keep the analyzed repository read-only; write only the external HTML.
 - In chat, return one sentence about the model and a link. Do not duplicate the article in Markdown.
 
-If the model exposes a defect, hand it to `/seiri:trace-cause`. If it shapes a future change, suggest `/seiri:brainstorm`; a request centered on an existing diff belongs to `/seiri:trace-change`.
+Route defects to `/seiri:trace-cause`, future design to `/seiri:brainstorm`, and diffs to `/seiri:trace-change`.
+
+- As the final step, open the completed HTML file in the system default browser.

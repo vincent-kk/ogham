@@ -34,3 +34,4 @@ A diff is ordered for application, not understanding. Build the smallest working
 - Cite consequential code claims with `path:line`. Attribute supplied rationale; label a plausible but unproven bridge **Inference**, and a mismatch noticed while explaining **Finding**.
 - Escape repository text before inserting it into HTML. Stay read-only toward the repository being explained; write only the artifact outside it.
 - Return the comparison, assumed reader, and artifact path in a few lines. Do not duplicate the long explanation in chat.
+- As the final step, open the completed HTML file in the system default browser.

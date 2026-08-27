@@ -47,3 +47,4 @@ Choose readable hierarchy, contrast, spacing, and code. Use quiet neutrals, one 
 - Inspect desktop and mobile rendering for flow, contrast, overflow, code wrapping, and interactions. If no browser or renderer is available, mark rendering unverified in the artifact and handoff; never claim inspection.
 - Keep all evidence sources read-only; write only the external HTML unless the user explicitly requests another destination or persistence workflow.
 - In chat, return one sentence about the model and a link. Do not duplicate the article in Markdown.
+- As the final step, open the completed HTML file in the system default browser.
