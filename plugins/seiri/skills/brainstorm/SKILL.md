@@ -1,31 +1,21 @@
 ---
 name: brainstorm
 user-invocable: true
-description: 'Shape a change before any code is written — existing patterns, constraints, and two or three candidate shapes with a recommendation.'
-argument-hint: '<what you are trying to build or change>'
-version: '0.3.0'
-complexity: moderate
+description: 'Explore and choose a repository-grounded design before implementation. Use when a change has meaningful design alternatives; skip when the path is already clear.'
+argument-hint: '<change to shape>'
+version: '0.4.0'
+complexity: simple
 plugin: seiri
 ---
 
-# brainstorm — shape the change before writing it
+# brainstorm — choose a shape worth implementing
 
-You were invoked by the user, so ask what the work needs. The goal is a shape worth implementing, not agreement.
+Use the lightest process that exposes the real design decision.
 
-A feasibility question — "can X work here", not "what should X be" — takes the spike route instead: state the smallest probe that would answer it in one line, run it in scratch space outside the repository tree, and report the answer with its evidence. The route ends at the answer — anything the probe built is throwaway, and the handoff says so.
+- Inspect existing patterns, constraints, and reusable code before proposing a shape. Distinguish repository evidence from preference.
+- Compare only alternatives with consequential tradeoffs. If one shape clearly fits, recommend it directly instead of manufacturing options.
+- Explain the decisive evidence and tradeoffs, affected boundaries, and how success can be observed. Ask only when an unresolved choice would materially change the design; otherwise disclose a reasonable assumption.
+- When feasibility is uncertain, gather the smallest safe evidence that would settle it.
+- Leave a compact decision record in the form best suited to the task, preserving only material risks or open decisions.
 
-## Workflow
-
-1. **Decompose scope.** If the request names parts that could each succeed or fail on their own, split them before going deeper — refining a project that should be decomposed first wastes the questions.
-2. **Search before shaping.** Find what this repository already has — a utility, a proven pattern, an installed library. "Nothing exists" needs a search behind it.
-3. **State the constraints you found.** Facts that narrow the solution, not preferences — name where you saw each.
-4. **Offer two or three distinct shapes** that differ in what they trade away, costs stated, with your recommendation. Design each unit to be graspable alone, then make the chosen shape something that could fail.
-
-Steps 1 and 4, isolation, and checkability live in `references/shaping.md`. Before handing off, run the spec self-review in `references/self-review.md`.
-
-## Rules
-
-- When the request conflicts with what the repository does, say so with the evidence; an open question gets what would settle it named, not a guess.
-- Do not write or modify repository files. This skill produces a shape — or, on the spike route, an answer.
-- Hand off: an approved shape goes to `/seiri:write-plan` when multi-step, to `/seiri:implement` when it is one surgical change.
-- If the user says to proceed without further questions, stop asking. Write what you have as an artifact, hand it over. Do not modify files or delegate execution on an unfinished interview.
+Hand an approved shape to `/seiri:write-plan` for multi-step work or `/seiri:implement` for a surgical change.
