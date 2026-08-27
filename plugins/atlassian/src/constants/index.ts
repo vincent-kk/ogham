@@ -1,6 +1,7 @@
 export {
   PLUGIN_DATA_DIR,
   CONFIG_PATH,
+  COMMENT_PROFILES_PATH,
   CREDENTIALS_PATH,
   STATE_PATH,
   TEMP_DIR_NAME,
@@ -17,5 +18,8 @@ export {
   ERROR_CODE_MAP,
   SERVER_ERROR_CODE,
   CLOUD_HOSTNAME_PATTERN,
+  SHA256_HEX_PATTERN,
   CONNECTION_TEST_TIMEOUT,
 } from "./defaults.js";
+
+export { McpToolName, MCP_TOOL_NAMES } from "./mcpToolNames.js";

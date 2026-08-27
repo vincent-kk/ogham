@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "id": "10001",
+      "author": { "displayName": "A" },
+      "created": "2026-08-01T09:00:00.000+0000",
+      "body": "root"
+    }
+  ],
+  "changelog": {
+    "histories": [
+      {
+        "id": "20001",
+        "created": "2026-08-01T09:10:00.000+0000",
+        "items": [{ "field": "Comment", "to": null, "toString": "bad null" }]
+      },
+      {
+        "id": "20002",
+        "created": "2026-08-01T09:20:00.000+0000",
+        "items": [{ "field": "Comment", "to": "abc", "toString": "bad text" }]
+      },
+      {
+        "id": "20003",
+        "created": "2026-08-01T09:30:00.000+0000",
+        "items": [
+          { "field": "Comment", "to": "10001", "toString": "actual reply" }
+        ]
+      }
+    ]
+  },
+  "properties": {
+    "10001": {
+      "parentThreadId": 501,
+      "deleted": true,
+      "lastBody": "something else"
+    }
+  },
+  "expect": {
+    "extractionWarnings": 2,
+    "truncationKnown": false,
+    "propertyWarnings": 1,
+    "annotated": false
+  }
+}

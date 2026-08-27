@@ -1,0 +1,43 @@
+{
+  "comments": [
+    {
+      "id": "10001",
+      "author": { "displayName": "A" },
+      "created": "2026-08-01T09:00:00.000+0000",
+      "body": "root"
+    }
+  ],
+  "changelog": {
+    "total": 4,
+    "histories": [
+      {
+        "id": "20013",
+        "created": "2026-08-01T10:00:00.000+0000",
+        "items": [{ "field": "Comment", "to": "10001", "toString": "thirteen" }]
+      },
+      {
+        "id": "20009",
+        "created": "2026-08-01T10:00:00.000+0000",
+        "items": [{ "field": "Comment", "to": "10001", "toString": "nine" }]
+      },
+      {
+        "id": "20011",
+        "created": "2026-08-01T10:00:00.000+0000",
+        "items": [{ "field": "Comment", "to": "10001", "toString": "eleven" }]
+      },
+      {
+        "id": "20020",
+        "created": "2026-08-01T10:00:00.000+0000",
+        "items": [
+          { "field": "Comment", "to": "10001", "toString": "multi zero" },
+          { "field": "Comment", "to": "10001", "toString": "multi one" }
+        ]
+      }
+    ]
+  },
+  "properties": {},
+  "expect": {
+    "orderedReplyIds": ["20009", "20011", "20013", "20020:0", "20020:1"],
+    "multiIds": ["20020:0", "20020:1"]
+  }
+}

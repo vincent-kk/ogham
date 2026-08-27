@@ -14,6 +14,11 @@ export {
   AuthCheckServiceStatusSchema,
   AuthCheckUserInfoSchema,
   BasicCredentialSchema,
+  COMMENT_PROFILE_SCHEMA_VERSION,
+  CommentProfileFileSchema,
+  CommentProfilePatternSchema,
+  CommentProfileSaveInputSchema,
+  CommentProfileSchema,
   ConnectionInfoSchema,
   ConnectionTestResultSchema,
   ConvertDirectionSchema,
@@ -23,9 +28,11 @@ export {
   HttpMethodSchema,
   HttpRequestSchema,
   HttpResponseSchema,
+  JiraCommentThreadInputSchema,
   McpErrorSchema,
   McpResponseSchema,
   PaginationSchema,
+  PropertyKeySchema,
   ServiceConfigSchema,
   ServiceCredentialsSchema,
   SetupFormDataSchema,
@@ -41,6 +48,19 @@ export type {
   AuthCheckServiceEntry,
   AuthCheckServiceStatus,
   AuthCheckUserInfo,
+  CommentProfile,
+  CommentProfileFile,
+  CommentProfilePattern,
+  CommentProfileSaveInput,
+  JiraCommentThreadInput,
+  CommentThreadProbeParams,
+  CommentThreadProbeResult,
+  CommentThreadReadParams,
+  CommentThreadResult,
+  CommentThreadSaveProfileParams,
+  CommentThreadSaveResult,
+  CommentThreadScanParams,
+  CommentThreadScanResult,
   ConnectionInfo,
   ConnectionTestResult,
   ConvertDirection,
@@ -56,6 +76,7 @@ export type {
   McpError,
   McpResponse,
   Pagination,
+  ProbeEvidence,
   RequestOptions,
   ServiceConfig,
   ServiceCredentials,
@@ -66,12 +87,15 @@ export type {
   SetupServerHandle,
   SetupStatus,
   TestConnectionParams,
+  ThreadCompleteness,
+  ThreadEntry,
   TokenPayload,
 } from "./types/index.js";
 
 // Constants
 export {
   CLOUD_HOSTNAME_PATTERN,
+  COMMENT_PROFILES_PATH,
   CONFIG_PATH,
   CONNECTION_TEST_TIMEOUT,
   CREDENTIALS_PATH,
@@ -85,6 +109,7 @@ export {
   RETRY_MAX_RETRIES,
   RETRYABLE_STATUS_CODES,
   SERVER_ERROR_CODE,
+  SHA256_HEX_PATTERN,
   STATE_PATH,
   TEMP_DIR_NAME,
 } from "./constants/index.js";
@@ -117,6 +142,16 @@ export {
   markdownToWiki,
   storageToMarkdown,
 } from "./converter/index.js";
+
+// Jira recipes
+export {
+  defaultCommentThreadDeps,
+  probeCommentThread,
+  readCommentThread,
+  saveCommentThreadProfile,
+  scanCommentThreads,
+} from "./jira/index.js";
+export type { CommentThreadDeps } from "./jira/index.js";
 
 // Utils
 export {

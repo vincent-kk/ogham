@@ -1,0 +1,33 @@
+{
+  "comments": [
+    {
+      "id": "10001",
+      "author": { "displayName": "A" },
+      "created": "2026-08-01T09:00:00.000+0000",
+      "body": "root one"
+    },
+    {
+      "id": "10002",
+      "author": { "displayName": "B" },
+      "created": "2026-08-01T10:00:00.000+0000",
+      "body": "root two"
+    }
+  ],
+  "changelog": {
+    "total": 2,
+    "histories": [
+      {
+        "id": "30001",
+        "created": "2026-08-01T09:30:00.000+0000",
+        "items": [{ "field": "status", "to": "2", "toString": "Done" }]
+      },
+      {
+        "id": "30002",
+        "created": "2026-08-01T09:45:00.000+0000",
+        "items": [{ "field": "assignee", "to": "user", "toString": "User" }]
+      }
+    ]
+  },
+  "properties": {},
+  "expect": { "replyCount": 0, "warnings": 0 }
+}

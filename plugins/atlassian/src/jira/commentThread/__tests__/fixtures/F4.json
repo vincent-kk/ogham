@@ -1,0 +1,19 @@
+{
+  "comments": [
+    {
+      "id": "10001",
+      "author": { "displayName": "A" },
+      "created": "2026-08-01T09:00:00.000+0000",
+      "body": "root one"
+    },
+    {
+      "id": "10002",
+      "author": { "displayName": "B" },
+      "created": "2026-08-01T10:00:00.000+0000",
+      "body": "root two"
+    }
+  ],
+  "changelog": { "total": 0, "histories": [] },
+  "properties": {},
+  "expect": { "rootIds": ["10001", "10002"], "warnings": 0 }
+}

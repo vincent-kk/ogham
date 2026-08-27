@@ -76,3 +76,31 @@ export type {
   AuthCheckServiceEntry,
   AuthCheckResult,
 } from "./authCheck.js";
+
+export {
+  COMMENT_PROFILE_SCHEMA_VERSION,
+  CommentProfileFileSchema,
+  CommentProfilePatternSchema,
+  CommentProfileSaveInputSchema,
+  CommentProfileSchema,
+  JiraCommentThreadInputSchema,
+  PropertyKeySchema,
+} from "./commentThread.js";
+export type {
+  CommentProfile,
+  CommentProfileFile,
+  CommentProfilePattern,
+  CommentProfileSaveInput,
+  JiraCommentThreadInput,
+  CommentThreadProbeParams,
+  CommentThreadProbeResult,
+  CommentThreadReadParams,
+  CommentThreadResult,
+  CommentThreadSaveProfileParams,
+  CommentThreadSaveResult,
+  CommentThreadScanParams,
+  CommentThreadScanResult,
+  ProbeEvidence,
+  ThreadCompleteness,
+  ThreadEntry,
+} from "./commentThread.js";
