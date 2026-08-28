@@ -15,6 +15,7 @@ import type {
   ThreadCompleteness,
 } from "../../types/index.js";
 import { extractHostname } from "../../utils/index.js";
+import { buildNoProfileHint } from "./operations/buildNoProfileHint.js";
 import { detectTruncation } from "./operations/detectTruncation.js";
 import { digestProposal } from "./operations/digestProposal.js";
 import { extractChangelogReplies } from "./operations/extractChangelogReplies.js";
@@ -58,9 +59,6 @@ export const defaultCommentThreadDeps: CommentThreadDeps = {
   saveProfile: saveCommentProfile,
   now: () => new Date(),
 };
-
-const NO_PROFILE_HINT =
-  'No reply-plugin profile for this site. Standard comments only. Run the discovery playbook (skills/jira/tools/comment/reply-plugin.md): ask the user for an issue known to have replies, call mode "probe", and save the proposal only after the user confirms.';
 
 /**
  * Standard comments plus reply-plugin replies merged from the changelog.
@@ -117,7 +115,8 @@ export async function readCommentThread(
         ? { pattern: profile.pattern, verifiedAt: profile.verifiedAt }
         : null,
     };
-    if (profile === null) result.hint = NO_PROFILE_HINT;
+    if (profile === null)
+      result.hint = buildNoProfileHint(hostname, issue, result.thread.length);
     return result;
   }
 

@@ -116,7 +116,20 @@ describe("readCommentThread", () => {
     const result = await readCommentThread(CTX, { issue_key: "GCC-8" }, deps);
 
     expect(result.thread.map((entry) => entry.id)).toEqual(["10001"]);
-    expect(result.hint).toContain("discovery playbook");
+    expect(result.hint).toContain(`No reply-plugin profile for ${HOSTNAME}`);
+    expect(result.hint).toContain('sample_issue_key "GCC-8"');
+    expect(result.hint).toContain('"Thread clues"');
+    expect(result.hint).not.toMatch(/Run the|call mode/);
+
+    const empty = setup([commentRoute("GCC-8", [], 0)]);
+    const emptyResult = await readCommentThread(
+      CTX,
+      { issue_key: "GCC-8" },
+      empty.deps,
+    );
+    expect(emptyResult.thread).toEqual([]);
+    expect(emptyResult.hint).toContain("Nothing to probe on GCC-8");
+    expect(emptyResult.hint).not.toContain("sample_issue_key");
     expect(saveProfile).not.toHaveBeenCalled();
   });
 

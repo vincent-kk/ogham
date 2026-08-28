@@ -11,6 +11,7 @@ Jira Data Center 에 설치된 서드파티 reply 플러그인의 댓글을 표�
 - 효과 경계로 organ 을 가른다 — 순수 병합·판정, 원격 요청, 프로필 파일 I/O 가 서로 다른 곳에 산다. 순수 쪽은 요청 함수와 시각을 인자로 받으므로 가짜 요청만으로 검증된다.
 - 실패 등급은 둘뿐이다: 코멘트 API 실패는 치명, 보강 경로(changelog·property)는 열화되어 warning 으로 남는다.
 - 프로필 파일 하나가 여러 사이트 항목을 담으므로, 저장은 통째 덮어쓰기가 아니라 다른 사이트 항목을 보존하는 병합이다.
+- 프로필 부재 `hint` 는 스킬 문서 `skills/jira/tools/comment/schema.md` 의 "Thread clues" 절을 경로로 가리킨다 — 도메인 코드가 스킬 문서와 맺는 유일한 결합이며, 그 절 제목이나 파일 경로를 바꾸면 `operations/buildNoProfileHint.ts` 의 상수를 함께 바꾼다.
 
 ## Boundaries
 

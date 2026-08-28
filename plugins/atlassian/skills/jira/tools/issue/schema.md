@@ -78,14 +78,14 @@ Create metadata is scoped: enumerate a project's issue types first, then fetch f
 
 ## MCP Tool Mapping
 
-| Operation                         | MCP Tool                             | Method | Notes                                                         |
-| --------------------------------- | ------------------------------------ | ------ | ------------------------------------------------------------- |
-| Get issue                         | `mcp__plugin_atlassian_tools__fetch` | GET    |                                                               |
-| Create issue                      | `mcp__plugin_atlassian_tools__fetch` | POST   |                                                               |
-| Update issue                      | `mcp__plugin_atlassian_tools__fetch` | PUT    |                                                               |
-| Delete issue                      | `mcp__plugin_atlassian_tools__fetch` | DELETE |                                                               |
-| Bulk create                       | `mcp__plugin_atlassian_tools__fetch` | POST   | POST to `/issue/bulk`                                         |
-| Get changelog                     | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/{key}/changelog`                               |
-| Get create metadata (issue types) | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/createmeta/{project}/issuetypes`               |
-| Get create metadata (fields)      | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/createmeta/{project}/issuetypes/{issueTypeId}` |
-| Assign issue                      | `mcp__plugin_atlassian_tools__fetch` | PUT    | PUT to `/issue/{key}/assignee`                                |
+| Operation                         | MCP Tool                             | Method | Notes                                                                                                                        |
+| --------------------------------- | ------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Get issue                         | `mcp__plugin_atlassian_tools__fetch` | GET    | Server/DC: the `comment` field holds standard comments only — read comments via `comment_thread` (`tools/comment/schema.md`) |
+| Create issue                      | `mcp__plugin_atlassian_tools__fetch` | POST   |                                                                                                                              |
+| Update issue                      | `mcp__plugin_atlassian_tools__fetch` | PUT    |                                                                                                                              |
+| Delete issue                      | `mcp__plugin_atlassian_tools__fetch` | DELETE |                                                                                                                              |
+| Bulk create                       | `mcp__plugin_atlassian_tools__fetch` | POST   | POST to `/issue/bulk`                                                                                                        |
+| Get changelog                     | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/{key}/changelog`                                                                                              |
+| Get create metadata (issue types) | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/createmeta/{project}/issuetypes`                                                                              |
+| Get create metadata (fields)      | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/createmeta/{project}/issuetypes/{issueTypeId}`                                                                |
+| Assign issue                      | `mcp__plugin_atlassian_tools__fetch` | PUT    | PUT to `/issue/{key}/assignee`                                                                                               |

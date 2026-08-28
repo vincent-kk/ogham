@@ -237,7 +237,7 @@ export interface CommentThreadResult {
   warnings: string[];
   complete: ThreadCompleteness;
   profile: Pick<CommentProfile, "pattern" | "verifiedAt"> | null;
-  /** Present only when no profile exists for the site — tells the skill to run the discovery playbook. */
+  /** Present only when no profile exists for the site — evidence (hostname, root count, probe sample) plus the pointer to the skill's thread-clue check. */
   hint?: string;
 }
 

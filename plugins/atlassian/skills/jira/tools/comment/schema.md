@@ -23,13 +23,13 @@
 
 The table uses the Claude/agy full form. On Codex, use `mcp__atlassian__<tool>`.
 
-| Operation          | MCP Tool                                           | Method | Notes                                                                                                                          |
-| ------------------ | -------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| List (Cloud) / Get | `mcp__plugin_atlassian_tools__fetch`               | GET    | Single comment (`focusedCommentId`) always uses fetch on both deployments                                                      |
+| Operation          | MCP Tool                                      | Method | Notes                                                                                                                          |
+| ------------------ | --------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| List (Cloud) / Get | `mcp__plugin_atlassian_tools__fetch`          | GET    | Single comment (`focusedCommentId`) always uses fetch on both deployments                                                      |
 | List (Server/DC)   | `mcp__plugin_atlassian_tools__comment_thread` | —      | `mode: "read"` (default). Returns standard comments plus reply-plugin replies merged from the changelog; see `reply-plugin.md` |
-| Add                | `mcp__plugin_atlassian_tools__fetch`               | POST   | Use content_format: "markdown"                                                                                                 |
-| Update             | `mcp__plugin_atlassian_tools__fetch`               | PUT    |                                                                                                                                |
-| Delete             | `mcp__plugin_atlassian_tools__fetch`               | DELETE |                                                                                                                                |
+| Add                | `mcp__plugin_atlassian_tools__fetch`          | POST   | Use content_format: "markdown"                                                                                                 |
+| Update             | `mcp__plugin_atlassian_tools__fetch`          | PUT    |                                                                                                                                |
+| Delete             | `mcp__plugin_atlassian_tools__fetch`          | DELETE |                                                                                                                                |
 
 ## URL Patterns
 
@@ -53,4 +53,19 @@ Third-party reply plugins store replies outside the standard comment API. On Ser
 | `sample_issue_key`           | probe        | string   | An issue the user knows has replies                                          |
 | `profile`, `proposal_digest` | save_profile | —        | Exactly the probe's proposal; digest required for `pattern: "changelog"`     |
 
-`read` returns `{ issue, thread[], warnings[], complete, profile, hint? }`. `complete: false` means the changelog was truncated (replies missing); `"unknown"` means it was unavailable. `hint` is present only when the site has no profile — follow `reply-plugin.md`.
+`read` returns `{ issue, thread[], warnings[], complete, profile, hint? }`. `complete: false` means the changelog was truncated (replies missing); `"unknown"` means it was unavailable. `hint` is present only when the site has no profile — run the check below once, then continue in `reply-plugin.md`.
+
+## Thread clues (Server/DC, `read` returned `hint`)
+
+No profile means only standard comments came back; if the site runs a reply plugin, its replies are missing. Decide once per issue from what is already in context — the check itself sends no request:
+
+| Clue                                                                                                   | Where to look                             |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| The request concerns replies, threads, who answered whom, or the whole conversation (요약·정리·digest) | the user's message                        |
+| A comment reads as an answer to text absent from `thread[]` (quotes an unseen message, "Re:", 위 답글) | `thread[].body`                           |
+| A changelog already fetched for this issue has an item with `field: "Comment"`                         | a prior `fetch … expand=changelog` result |
+| The user names a reply plugin or says replies are missing                                              | the user's message                        |
+
+- Any clue and `thread.length > 0` → call `comment_thread` with `mode: "probe", sample_issue_key: <the issue just read>` once (read-only; nothing is written), then continue at `reply-plugin.md` step 4.
+- No clue → add one sentence to the answer: this site has no reply-plugin profile, so plugin replies (if any) are not included; offer the probe. Do not probe.
+- Run the check at most once per issue per conversation. A non-null `profile` in any later `read` ends it for the site.

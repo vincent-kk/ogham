@@ -6,7 +6,7 @@
 - R2 프로필: 저장 레코드는 `{ pattern, propertyKeys, verifiedAt }`, `save_profile` 입력에서는 `verifiedAt` 을 생략할 수 있고 저장 시각으로 덮어쓴다. 파일 `schemaVersion: 1`, 사이트 키는 hostname. 키 charset `^[A-Za-z0-9_.-]{1,64}$`, 최대 8개이며 probe 제안도 같은 스키마를 만족한다.
 - R3 중첩 표기는 best-effort — property 의 `last_thread_body` 가 존재하고 그 루트의 최신 댓글 본문(정규화)과 같을 때만 `nested`·`deleted` 를 기록하며, 부재·불일치는 warning 으로 남긴다.
 - R4 스캔: `GET /search?jql&expand=changelog&fields=summary` 를 50건씩 페이징해 `Comment` 항목 보유 이슈만 보고한다 — (a)형 전용.
-- R5 열화: changelog 잘림은 `complete: false` + warning, changelog 실패는 `complete: "unknown"`, 코멘트 상한 도달 시 미수집 루트를 orphan 으로 단정하지 않음, scan changelog 부재는 `complete: false`, probe 의 추출·property-key 실패는 `warnings[]` 와 `reason` 에 보존, 프로필 부재는 표준 코멘트 + hint. 페이지 offset 은 요청 크기가 아니라 실제 반환 건수만큼 전진한다.
+- R5 열화: changelog 잘림은 `complete: false` + warning, changelog 실패는 `complete: "unknown"`, 코멘트 상한 도달 시 미수집 루트를 orphan 으로 단정하지 않음, scan changelog 부재는 `complete: false`, probe 의 추출·property-key 실패는 `warnings[]` 와 `reason` 에 보존, 프로필 부재는 표준 코멘트 + hint — hint 는 hostname, 반환된 루트 코멘트 수, probe 에 쓸 `sample_issue_key`(읽은 이슈), 스킬의 "Thread clues" 절 경로를 담고 루트가 0 이면 probe 대상이 없음을 말한다. 페이지 offset 은 요청 크기가 아니라 실제 반환 건수만큼 전진한다.
 - R6 저장: user 계층 `comment-profiles.json` 만, 0o600, 공용 파일 락 아래 `<path>.temp` 원자 교체, 타 사이트 보존, 기존 JSON envelope 가 현재 schema 와 맞지 않으면 덮어쓰지 않음, `pattern: "changelog"` 는 probe 가 발급한 `proposal_digest` 일치 필수.
 - R7 wire 경계: 성공 HTTP 응답도 comment·search·changelog shape 를 런타임 검증한다. 치명적 comment/search shape 오류는 명시적 오류, 보조 changelog shape 오류는 warning 과 `complete: "unknown"` 으로 열화한다.
 
@@ -52,6 +52,8 @@
 ### AC-F8 — 프로필 부재
 
 - 프로필 없음 → 표준 코멘트 + `hint`, 파일 생성 없음.
+- `hint` 는 hostname, `sample_issue_key "<읽은 이슈>"`, `"Thread clues"` 를 담는다. 반환된 루트가 0 이면 `Nothing to probe` 를 담고 `sample_issue_key` 를 담지 않는다.
+- `hint` 는 명령문을 담지 않는다 — 증거(hostname·루트 수·probe sample)와 "Thread clues" 절 포인터만 담고, 다음 행동은 그 절의 규칙이 정한다.
 
 ### AC-F9 — orphan
 
@@ -131,4 +133,4 @@
 
 ## Last Updated
 
-2026-08-28 — reply 플러그인 댓글 스레드의 운영 기본 의존성과 효과 주입 경계를 계약화했다.
+2026-08-28 — 프로필 부재 hint 를 증거와 스킬 단서 절 포인터만 담는 선언문으로 계약화했다.

@@ -4,9 +4,9 @@ The `read`, `scan`, and `probe` modes never write the profile file. Only an expl
 
 ## When `read` returns `hint`
 
-1. Tell the user: standard comments were returned, but this site has no reply-plugin profile yet.
-2. Ask for one issue key that is known to carry replies.
-3. Call `mcp__plugin_atlassian_tools__comment_thread` (Claude/agy) or `mcp__atlassian__comment_thread` (Codex) with `mode: "probe", sample_issue_key`.
+1. Run the "Thread clues" check in `schema.md` once. With no clue, say in one sentence that plugin replies (if any) are not included, offer the probe, and stop here.
+2. Use the issue just read as `sample_issue_key` when it has at least one standard comment. Ask the user for another issue key only when that probe returns `proposal: null` and the user believes replies exist.
+3. Call `mcp__plugin_atlassian_tools__comment_thread` (Claude/agy) or `mcp__atlassian__comment_thread` (Codex) with `mode: "probe", sample_issue_key` — read-only; it never writes the profile.
 4. Show `evidence` (standard total, Comment items, property keys, truncation), `warnings`, `reason`, and `proposal` verbatim, and ask whether to save it.
 5. Only after an explicit yes, call `mode: "save_profile"` with the **unchanged** `proposal` and its `proposal_digest`.
 6. Re-run `read`.

@@ -35,7 +35,7 @@ Simple operations (single issue read, single JQL search, single comment add) sho
 
 1. Load the `atlassian:jira` skill for the tool catalog
 2. Read `tools/<domain>/schema.md` under the `atlassian:jira` skill directory for endpoint details
-3. Compose calls to the MCP tool selected by the schema (`fetch` for general HTTP; `comment_thread` for Server/DC comment listing)
+3. Compose calls to the MCP tool selected by the schema (`fetch` for general HTTP; `comment_thread` for Server/DC comment listing — a response carrying `hint` means run the "Thread clues" check in `tools/comment/schema.md` once before summarizing)
 4. Use `content_format: "markdown"` when sending description/body content
 
 ## Domain Knowledge
