@@ -17,5 +17,6 @@ Use the lightest process that exposes the real design decision.
 - Explain the decisive evidence and tradeoffs, affected boundaries, and how success can be observed. Ask only when an unresolved choice would materially change the design; otherwise disclose a reasonable assumption.
 - When feasibility is uncertain, gather the smallest safe evidence that would settle it.
 - Leave a compact decision record in the form best suited to the task, preserving only material risks or open decisions.
+- Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
 
 Hand an approved shape to `/seiri:write-plan` for multi-step work or `/seiri:implement` for a surgical change.

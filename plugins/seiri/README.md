@@ -35,6 +35,8 @@ Each plan task has runnable gates in `.seiri/tasks/<name>/gates.md`. Run each `C
 
 **Every rule is optional.** There is no required rule and nothing is deployed without an explicit choice.
 
+**Documents follow the session's language.** Plans, gate ledgers, decision records, and clarified scopes are written in the language the harness configures for replies — seiri keeps no language setting of its own. Machine-read markers, identifiers, and code stay verbatim; HTML articles follow their named reader, and PR bodies follow the repository's conventions.
+
 ## Relationship to filid
 
 The two divide by layer. [filid](../filid) owns architecture, thresholds, and review — the numbers and what they mean. seiri owns direction: the principle without the number, so it holds in a repository that has never heard of any particular architecture.

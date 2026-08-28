@@ -9,6 +9,7 @@ import { WORKFLOW_CHAIN_LINE } from '../constants/postureLines.js';
 import {
   AUTO_AUTONOMOUS_SKILLS,
   AUTO_CONDITIONAL_ASK_SKILLS,
+  DOCUMENT_WRITING_SKILLS,
   HIDDEN_USER_ONLY_SKILLS,
   VISIBLE_USER_STARTED_SKILLS,
   WORKFLOW_INVOCABLE_SKILLS,
@@ -49,6 +50,16 @@ const CANONICAL_AUTONOMY_CLAUSE =
  */
 const CANONICAL_CONDITIONAL_ASK_CLAUSE =
   'This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line.';
+
+/**
+ * The document-language sentence every document-writing skill carries
+ * verbatim. Skill templates are English; without this clause a plan
+ * written for a Korean session drifts into the template's language
+ * heading by heading. Checked verbatim so the wording cannot fork across
+ * the four files.
+ */
+const CANONICAL_DOCUMENT_LANGUAGE_CLAUSE =
+  "Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.";
 
 function readSkill(name: string): { frontmatter: string; body: string } {
   const text = readFileSync(portableJoin(skillsDir, name, 'SKILL.md'), 'utf8');
@@ -132,5 +143,18 @@ describe('skill invocation policy', () => {
     expect(readSkill('review-plan').body).toContain(
       'A runnable gate without EXPECT is rework.',
     );
+  });
+
+  // filid:contract AC-document-language
+  it('lists only shipped skills as document writers', () => {
+    for (const name of DOCUMENT_WRITING_SKILLS)
+      expect(SHIPPED_SKILLS).toContain(name);
+  });
+
+  it('makes every document-writing skill follow the session response language', () => {
+    for (const name of DOCUMENT_WRITING_SKILLS)
+      expect(readSkill(name).body).toContain(
+        CANONICAL_DOCUMENT_LANGUAGE_CLAUSE,
+      );
   });
 });

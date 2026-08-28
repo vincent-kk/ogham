@@ -16,5 +16,6 @@ Clarify only enough to proceed without consequential guessing.
 - Ask only questions whose answers could materially change the implementation. Group or sequence them as useful, and stop when the request is actionable.
 - Make and disclose low-risk assumptions when they preserve momentum. Never invent a decision that would materially change scope, behavior, or constraints; leave it open instead.
 - Record the outcome in the lightest useful form. Include intent, observable success, boundaries, and open decisions only when they add information.
+- Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
 
 If the result is ready for implementation, hand it to `/seiri:write-plan` for multi-step work or `/seiri:implement` for a surgical change.

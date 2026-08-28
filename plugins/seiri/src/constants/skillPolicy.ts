@@ -1,3 +1,5 @@
+import type { SHIPPED_SKILLS } from './budgets.js';
+
 /**
  * How each shipped skill may be invoked, and how it handles user questions.
  * The partition is the contract `skillPolicy.test.ts` enforces against
@@ -68,3 +70,22 @@ export const WORKFLOW_INVOCABLE_SKILLS = [
   ...AUTO_AUTONOMOUS_SKILLS,
   ...AUTO_CONDITIONAL_ASK_SKILLS,
 ] as const;
+
+/**
+ * Skills that leave a Markdown document behind — a plan, its review
+ * verdict, a decision record, a clarified scope. A cross-cutting axis, not
+ * a partition: each name also belongs to exactly one invocation list
+ * above. Every member carries the document-language clause
+ * `skillPolicy.test.ts` checks verbatim, so a document follows the
+ * session's response language rather than the language the skill's own
+ * template is written in. Deliberately absent: the gate ledger takes its
+ * rule from `skills/execute/references/gates-format.md`; HTML articles
+ * follow their named reader; PR titles and review hand-offs follow the
+ * repository's conventions. `satisfies` rejects a stranger.
+ */
+export const DOCUMENT_WRITING_SKILLS = [
+  'brainstorm',
+  'clarify-request',
+  'review-plan',
+  'write-plan',
+] as const satisfies readonly (typeof SHIPPED_SKILLS)[number][];

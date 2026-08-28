@@ -25,4 +25,5 @@ This skill may be invoked automatically. It acts before execution — the cheap 
 ## Rules
 
 - The verdict and every finding cite tool output or the reviewer's words — a review's claims are claims too.
+- Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
 - Hand off: a `cleared` or `grounded-only` plan — or a stated skip — is `/seiri:execute`'s moment; `rework-required` hands back to `/seiri:write-plan`.

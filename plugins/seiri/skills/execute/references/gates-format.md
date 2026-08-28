@@ -50,6 +50,7 @@ ABANDON: G2 <reason — only when abandoning a gate>
 7. Put this repository's designated verification in `## Final`.
 8. Give every number in the final report a CHECK that measures it.
 9. Write CHECK for the repository root. The Bash tool keeps its working directory between calls, so a bare `cd dir && …` strands the next CHECK — use a subshell: `(cd dir && …)`.
+10. Write gate statements, `##` headings, and ABANDON reasons in the session's response language — what the harness configures for replies, else the language of the replies. The fixed markers `Plan:`, `G<n>`, `CHECK:`, `EXPECT:`, `EVIDENCE:`, `ABANDON:`, and `## Final` stay verbatim, and so do CHECK and EXPECT values.
 
 ## Task directory
 

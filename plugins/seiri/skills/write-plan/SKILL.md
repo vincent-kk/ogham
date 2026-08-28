@@ -28,4 +28,5 @@ This skill may be invoked automatically. It acts before execution — the cheap 
 
 - Name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`), state it in one line, and save the plan to `.seiri/tasks/<name>/plan.md` — unless this repository's instructions name another place; then the ledger's `Plan:` line points there.
 - Global constraints (versions, naming, platform limits) go in one header section, copied verbatim — every task inherits them.
+- Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
 - Hand off: a landed plan is `/seiri:review-plan`'s moment — it proves the plan's claims before `/seiri:execute` performs them. A single surgical change does not need a plan.
