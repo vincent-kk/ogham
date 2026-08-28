@@ -18,11 +18,11 @@ import {
   scanCommentThreads,
 } from "../../../../jira/index.js";
 import {
-  JiraCommentThreadInputSchema,
+  CommentThreadInputSchema,
   type CommentProfile,
   type FetchContext,
 } from "../../../../types/index.js";
-import { handleJiraCommentThread } from "../jiraCommentThread.js";
+import { handleCommentThread } from "../commentThread.js";
 
 const SERVER_CONTEXT: FetchContext = {
   http: { base_url: "https://jira.example.com" },
@@ -41,7 +41,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("handleJiraCommentThread", () => {
+describe("handleCommentThread", () => {
   it("validates each mode's required and exclusive input fields", () => {
     const invalid = [
       {},
@@ -62,9 +62,9 @@ describe("handleJiraCommentThread", () => {
     ];
 
     for (const input of invalid)
-      expect(JiraCommentThreadInputSchema.safeParse(input).success).toBe(false);
+      expect(CommentThreadInputSchema.safeParse(input).success).toBe(false);
     for (const input of valid)
-      expect(JiraCommentThreadInputSchema.safeParse(input).success).toBe(true);
+      expect(CommentThreadInputSchema.safeParse(input).success).toBe(true);
   });
 
   it("dispatches the default mode to read", async () => {
@@ -76,7 +76,7 @@ describe("handleJiraCommentThread", () => {
       profile: null,
     });
 
-    await handleJiraCommentThread({ issue_key: "GCC-1" }, SERVER_CONTEXT);
+    await handleCommentThread({ issue_key: "GCC-1" }, SERVER_CONTEXT);
 
     expect(mockReadCommentThread).toHaveBeenCalledWith(SERVER_CONTEXT, {
       issue_key: "GCC-1",
@@ -88,7 +88,7 @@ describe("handleJiraCommentThread", () => {
 
   it("rejects Cloud before any recipe is called", async () => {
     await expect(
-      handleJiraCommentThread(
+      handleCommentThread(
         { issue_key: "GCC-1" },
         { ...SERVER_CONTEXT, is_cloud: true },
       ),
@@ -102,7 +102,7 @@ describe("handleJiraCommentThread", () => {
 
   it("requires jql in scan mode", async () => {
     await expect(
-      Reflect.apply(handleJiraCommentThread, undefined, [
+      Reflect.apply(handleCommentThread, undefined, [
         { mode: "scan" },
         SERVER_CONTEXT,
       ]),
@@ -121,7 +121,7 @@ describe("handleJiraCommentThread", () => {
       hostname: "jira.example.com",
     });
 
-    await handleJiraCommentThread(
+    await handleCommentThread(
       {
         mode: "save_profile",
         profile,

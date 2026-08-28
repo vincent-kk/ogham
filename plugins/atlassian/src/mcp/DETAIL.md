@@ -23,7 +23,7 @@
 ### AC-domain-agnostic — 도메인 무지
 
 - 범용 도구 4종(`fetch`·`convert`·`authCheck`·`setup`)과 `shared/`·`server/` 안에 Jira·Confluence 도메인 규칙(필드 의미, 워크플로 지식)이 없다.
-- 도메인 어댑터(`tools/jiraCommentThread/`)는 공개 `jira` entry point의 named export만 호출하며, 병합·판정 규칙을 담은 함수가 어댑터 안에 없다.
+- 도메인 어댑터(`tools/commentThread/`)는 공개 `jira` entry point의 named export만 호출하며, 병합·판정 규칙을 담은 함수가 어댑터 안에 없다.
 
 ### AC-handler-wrapping — 핸들러 래핑
 

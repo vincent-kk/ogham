@@ -1,6 +1,6 @@
 [filid:lang:ko]
 
-# jiraCommentThread — 댓글 스레드 도구 어댑터
+# commentThread — 댓글 스레드 도구 어댑터
 
 ## Purpose
 

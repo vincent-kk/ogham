@@ -57,7 +57,7 @@ plugins/atlassian/
 │   │       ├── convert/         # ADF / Storage Format / Wiki ↔ Markdown
 │   │       ├── authCheck/       # Stored-credential probe + optional live connectivity test
 │   │       ├── setup/           # Auth setup tool (local web server)
-│   │       └── jiraCommentThread/ # Fifth, domain-specific MCP adapter
+│   │       └── commentThread/     # Fifth, domain-specific MCP adapter
 │   ├── core/
 │   │   ├── authManager/         # Token storage and injection
 │   │   ├── configManager/       # Config and credential persistence

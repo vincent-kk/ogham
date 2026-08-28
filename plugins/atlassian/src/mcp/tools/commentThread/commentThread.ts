@@ -4,13 +4,10 @@ import {
   saveCommentThreadProfile,
   scanCommentThreads,
 } from "../../../jira/index.js";
-import type {
-  FetchContext,
-  JiraCommentThreadInput,
-} from "../../../types/index.js";
+import type { FetchContext, CommentThreadInput } from "../../../types/index.js";
 
 /** Tool arguments after zod validation in `server.ts`; `mode` defaults to `read`. */
-export type JiraCommentThreadArgs = JiraCommentThreadInput;
+export type CommentThreadArgs = CommentThreadInput;
 
 /**
  * Dispatch one `comment_thread` call to the recipe that owns the mode.
@@ -19,8 +16,8 @@ export type JiraCommentThreadArgs = JiraCommentThreadInput;
  * @returns The selected recipe's result unchanged.
  * @throws On Cloud sites or when the selected mode lacks a required argument.
  */
-export async function handleJiraCommentThread(
-  args: JiraCommentThreadArgs,
+export async function handleCommentThread(
+  args: CommentThreadArgs,
   ctx: FetchContext,
 ): Promise<unknown> {
   if (ctx.is_cloud === true)

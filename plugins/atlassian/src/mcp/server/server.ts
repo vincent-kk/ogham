@@ -12,7 +12,7 @@ import { McpToolName } from "../../constants/mcpToolNames.js";
 import { VERSION } from "../../version.js";
 import {
   ConvertFormatSchema,
-  JiraCommentThreadInputSchema,
+  CommentThreadInputSchema,
 } from "../../types/index.js";
 import { detectService } from "../../utils/index.js";
 import { wrapHandler, buildFetchContext } from "../shared/index.js";
@@ -21,9 +21,9 @@ import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
 import { handleAuthCheck } from "../tools/authCheck/index.js";
 import {
-  handleJiraCommentThread,
-  type JiraCommentThreadArgs,
-} from "../tools/jiraCommentThread/index.js";
+  handleCommentThread,
+  type CommentThreadArgs,
+} from "../tools/commentThread/index.js";
 
 /**
  * Create and configure the MCP server with all tool registrations.
@@ -158,18 +158,18 @@ export function createServer(): McpServer {
     {
       description:
         "[Internal] Do not call directly. Used by the atlassian jira skill only. Jira Server/DC comment thread with third-party reply-plugin replies merged from the changelog (modes: read, scan, probe, save_profile).",
-      inputSchema: JiraCommentThreadInputSchema,
+      inputSchema: CommentThreadInputSchema,
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,
         idempotentHint: false,
       },
     },
-    wrapHandler(async (args: JiraCommentThreadArgs) => {
+    wrapHandler(async (args: CommentThreadArgs) => {
       const context = await buildFetchContext("jira", args.base_url);
       if (!context)
         throw new Error("No jira configuration found. Run setup first.");
-      return handleJiraCommentThread(args, context);
+      return handleCommentThread(args, context);
     }),
   );
 

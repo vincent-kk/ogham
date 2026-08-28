@@ -83,7 +83,7 @@ export {
   CommentProfilePatternSchema,
   CommentProfileSaveInputSchema,
   CommentProfileSchema,
-  JiraCommentThreadInputSchema,
+  CommentThreadInputSchema,
   PropertyKeySchema,
 } from "./commentThread.js";
 export type {
@@ -91,7 +91,7 @@ export type {
   CommentProfileFile,
   CommentProfilePattern,
   CommentProfileSaveInput,
-  JiraCommentThreadInput,
+  CommentThreadInput,
   CommentThreadProbeParams,
   CommentThreadProbeResult,
   CommentThreadReadParams,

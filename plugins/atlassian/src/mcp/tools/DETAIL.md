@@ -13,7 +13,7 @@
 - `convert/` — 순수 로컬 포맷 변환(네트워크 없음).
 - `authCheck/` — 인증 설정 상태 보고와 선택적 연결 테스트.
 - `setup/` — 로컬 HTTP 서버로 인증 설정 UI 제공.
-- `jiraCommentThread/` — Jira DC reply-plugin 댓글 스레드 어댑터(`mode: read | scan | probe | save_profile`); 규칙은 `src/jira/commentThread` 가 소유.
+- `commentThread/` — Jira DC reply-plugin 댓글 스레드 어댑터(`mode: read | scan | probe | save_profile`); 규칙은 `src/jira/commentThread` 가 소유.
 
 ## Acceptance Criteria
 

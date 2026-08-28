@@ -1,4 +1,4 @@
-# jiraCommentThread — Contract
+# commentThread — Contract
 
 ## Requirements
 
@@ -9,7 +9,7 @@
 
 ## API Contracts
 
-- `handleJiraCommentThread(args, ctx)` — 모드별 결과 객체를 그대로 반환한다(봉투는 `wrapHandler` 가 씌운다).
+- `handleCommentThread(args, ctx)` — 모드별 결과 객체를 그대로 반환한다(봉투는 `wrapHandler` 가 씌운다).
 
 ## Acceptance Criteria
 

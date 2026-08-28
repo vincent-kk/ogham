@@ -43,7 +43,7 @@ export type CommentProfileSaveInput = z.infer<
 >;
 
 /** Flat MCP object shape; the protocol requires `inputSchema.type` to remain `object`. */
-const JiraCommentThreadObjectSchema = z
+const CommentThreadObjectSchema = z
   .object({
     mode: z.enum(["read", "scan", "probe", "save_profile"]).optional(),
     base_url: z.string().url().optional(),
@@ -60,13 +60,11 @@ const JiraCommentThreadObjectSchema = z
   .strict();
 
 /** Fields represented by the MCP-compatible top-level object schema. */
-type JiraCommentThreadObjectInput = z.infer<
-  typeof JiraCommentThreadObjectSchema
->;
+type CommentThreadObjectInput = z.infer<typeof CommentThreadObjectSchema>;
 
 /** Mode-specific field names checked by the schema refinement. */
-type JiraCommentThreadModeField = Exclude<
-  keyof JiraCommentThreadObjectInput,
+type CommentThreadModeField = Exclude<
+  keyof CommentThreadObjectInput,
   "base_url" | "mode"
 >;
 
@@ -78,9 +76,9 @@ type JiraCommentThreadModeField = Exclude<
  * @param mode Effective operation mode.
  */
 function requireModeField(
-  input: JiraCommentThreadObjectInput,
+  input: CommentThreadObjectInput,
   context: z.RefinementCtx,
-  field: JiraCommentThreadModeField,
+  field: CommentThreadModeField,
   mode: string,
 ): void {
   if (input[field] !== undefined) return;
@@ -99,9 +97,9 @@ function requireModeField(
  * @param mode Effective operation mode.
  */
 function rejectModeFields(
-  input: JiraCommentThreadObjectInput,
+  input: CommentThreadObjectInput,
   context: z.RefinementCtx,
-  fields: readonly JiraCommentThreadModeField[],
+  fields: readonly CommentThreadModeField[],
   mode: string,
 ): void {
   for (const field of fields) {
@@ -115,8 +113,8 @@ function rejectModeFields(
 }
 
 /** MCP-compatible object schema with mode-specific required and exclusive fields enforced at validation time. */
-export const JiraCommentThreadInputSchema =
-  JiraCommentThreadObjectSchema.superRefine((input, context) => {
+export const CommentThreadInputSchema = CommentThreadObjectSchema.superRefine(
+  (input, context) => {
     const mode = input.mode ?? "read";
     switch (mode) {
       case "read":
@@ -186,12 +184,11 @@ export const JiraCommentThreadInputSchema =
           mode,
         );
     }
-  });
+  },
+);
 
 /** Validated arguments for one `comment_thread` invocation. */
-export type JiraCommentThreadInput = z.infer<
-  typeof JiraCommentThreadInputSchema
->;
+export type CommentThreadInput = z.infer<typeof CommentThreadInputSchema>;
 
 /** File envelope. `sites` values stay `unknown` here and are parsed one by one so a bad entry cannot poison its neighbours. */
 export const CommentProfileFileSchema = z
