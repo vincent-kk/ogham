@@ -1,0 +1,57 @@
+{
+  "comments": [
+    {
+      "id": "10001",
+      "author": { "displayName": "A" },
+      "created": "2026-08-01T09:00:00.000+0000",
+      "body": "root one"
+    },
+    {
+      "id": "10002",
+      "author": { "displayName": "B" },
+      "created": "2026-08-01T10:00:00.000+0000",
+      "body": "root two"
+    }
+  ],
+  "changelog": {
+    "startAt": 0,
+    "maxResults": 100,
+    "total": 2,
+    "histories": [
+      {
+        "id": "20011",
+        "author": { "displayName": "C" },
+        "created": "2026-08-01T09:30:00.000+0000",
+        "items": [
+          {
+            "field": "Comment",
+            "fieldtype": "jira",
+            "from": null,
+            "to": "10001",
+            "toString": "reply one"
+          }
+        ]
+      },
+      {
+        "id": "20012",
+        "author": { "displayName": "D" },
+        "created": "2026-08-01T09:45:00.000+0000",
+        "items": [
+          {
+            "field": "Comment",
+            "fieldtype": "jira",
+            "from": null,
+            "to": "10001",
+            "toString": "reply two"
+          }
+        ]
+      }
+    ]
+  },
+  "properties": {},
+  "expect": {
+    "rootIds": ["10001", "10002"],
+    "repliesOf": { "10001": ["20011", "20012"], "10002": [] },
+    "warnings": 0
+  }
+}

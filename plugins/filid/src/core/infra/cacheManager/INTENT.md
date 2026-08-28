@@ -4,16 +4,6 @@
 
 hook의 session, prompt context, boundary, turn-scoped fractal map과 INTENT delivery 상태를 임시 저장한다. criteria, spike, agent 역할과 review verdict는 소유하지 않는다.
 
-## Structure
-
-`index.ts`는 함수별 단일-파일 organ인 `caches/`를 이름으로 재수출하는 배럴이다.
-
-- `caches/utils/` · `caches/constants/` — 해시·경로·원자쓰기 유틸과 cache 파일명 상수 organ
-- `caches/sessionCache.ts` · `caches/turnCounter.ts` — 세션 epoch 마커, prune throttle 게이트, 턴 카운터
-- `caches/promptContextCache.ts` · `caches/boundaryCache.ts` · `caches/fractalMapCache.ts` — 프롬프트 컨텍스트, 경계, 턴 스코프 FractalMap
-- `caches/commitVisit.ts` · `caches/fmapLock.ts` · `caches/deliveredCache.ts` — 방문 판정·전달 기록 원자 트랜잭션과 그 lock
-- `caches/runHashCache.ts` · `caches/guideCache.ts` — 스킬 실행 해시, 가이드 주입 마커
-
 ## Conventions
 
 - cache는 성능 최적화다. 삭제되어도 다음 요청이 repository 증거에서 상태를 재구성할 수 있어야 한다.
@@ -40,7 +30,3 @@ hook의 session, prompt context, boundary, turn-scoped fractal map과 INTENT del
 - 모듈 경계 외부 로직 인라인
 - `caches/` organ에 INTENT.md 추가
 - criteria, spike, agent 역할 또는 review verdict 상태 저장
-
-## Dependencies
-
-- `@ogham/cross-platform` package root의 `portableResolve`·`pluginCache` named export (`sideEffects: false` tree-shaking; 훅 출력은 `scripts/buildHooks.mjs`의 emitted-byte cap·`FORBIDDEN_PATTERNS`로 검증), `constants/infraDefaults.ts`, `lib/logger.ts`, node 내장 `crypto`·`fs`·`path`

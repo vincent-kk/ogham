@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Atlassian 플러그인의 소스 루트다. MCP 도구와 공통 인프라, 포맷 변환 경계를 소유한다.
+Atlassian 플러그인의 소스 루트다. MCP 도구와 공통 인프라, 포맷 변환, Jira 도메인 레시피 경계를 소유한다.
 
 ## Conventions
 

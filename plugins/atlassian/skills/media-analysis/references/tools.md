@@ -41,10 +41,9 @@ The agent reads each frame image via the Read tool (multimodal), builds scene de
 
 ## Caching
 
-Two complementary cache layers:
+One cache layer, owned by this skill:
 
-1. **Download cache** (fetch tool): if the target file at `save_to_path` already exists, the fetch tool returns it without HTTP request. Pass `force: true` to re-download.
-2. **Analysis cache** (skill level): if `.temp/<namespace>/<filename>/analysis.json` exists, skip extraction and analysis. Use `--force` flag to re-analyze.
-
+- **Analysis cache** (skill level): if `.temp/<namespace>/<filename>/analysis.json` exists, skip extraction and analysis. Use `--force` flag to re-analyze.
+- The fetch tool itself never caches — every `save_to_path` call downloads afresh and overwrites the file.
 - `.temp/` directory is gitignored
 - No automatic cleanup (no deletion without user consent)

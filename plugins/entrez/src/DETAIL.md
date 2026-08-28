@@ -12,7 +12,7 @@
 ## API Contracts
 
 - 배포 진입점은 esbuild 가 `mcp/serverEntry/` 로부터 만드는 `bridge/mcp-server.cjs` 와 `public/settings.html` 이다.
-- `src/index.ts` 는 버전 상수만 노출한다. `mcp/` 를 재노출하지 않는다 — `server/lifecycle/createServer.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
+- `src/index.ts` 는 버전 상수만 노출한다. `mcp/` 를 재노출하지 않는다 — `mcp/server/lifecycle/createServer.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
 - 서버 수명주기(`createServer`, `startServer`)는 `mcp/` 배럴이 소유한다.
 
 ## Acceptance Criteria
@@ -40,4 +40,4 @@
 
 ## Last Updated
 
-2026-07-30 — 레이어 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.
+2026-08-28 — npm 배럴 제한의 순환 근거를 실재하는 server lifecycle source에 연결했다.

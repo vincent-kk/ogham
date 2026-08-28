@@ -16,7 +16,9 @@ Step 2 — Download (if Atlassian URL)
     - Confluence page 12345: namespace = "confluence-12345"
   - Use atlassian MCP `mcp__plugin_atlassian_tools__fetch` tool: method=GET, accept_format="raw",
     save_to_path=".temp/<namespace>/<filename>"
-  - fetch tool auto-skips download if file already exists (returns cached: true)
+  - fetch tool always downloads and overwrites the file (no download cache)
+  - Record the response's `saved_to` (absolute path under `.temp/`) and use it in
+    later steps instead of reconstructing `.temp/<namespace>/<filename>`
   - If download fails -> error with auth check guidance
 
 Step 3 — Probe and select preset
@@ -34,7 +36,7 @@ Step 3 — Probe and select preset
   - See presets/index.md for the full decision matrix
 
 Step 4 — Image handling (no scene-sieve)
-  - If Atlassian URL: file already at .temp/<namespace>/<filename>
+  - If Atlassian URL: file is at `saved_to` from Step 2
   - If local file: copy to .temp/<namespace>/<filename>
   - Return file path to caller
   - Caller reads the image directly via Read tool (multimodal)

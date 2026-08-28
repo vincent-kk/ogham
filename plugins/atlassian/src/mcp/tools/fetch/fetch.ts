@@ -50,29 +50,29 @@ export async function handleFetch(
 
   switch (method) {
     case "GET": {
-      // Asset fetch: binary download with caching
+      const queryParams = { ...params.query_params };
+      if (params.expand && params.expand.length > 0)
+        queryParams["expand"] = params.expand.join(",");
+      const resolvedQueryParams =
+        Object.keys(queryParams).length > 0 ? queryParams : undefined;
+
+      // Persisted fetch: the body lands at save_to_path instead of the envelope.
       if (params.save_to_path)
         return handleAssetFetch(
           {
             endpoint,
-            query_params: params.query_params,
+            query_params: resolvedQueryParams,
             headers: params.headers,
             save_to_path: params.save_to_path,
-            force: params.force,
+            accept_format: params.accept_format,
           },
           config,
         );
 
-      // Document fetch: JSON API with ADF conversion
-      const queryParams = { ...params.query_params };
-      if (params.expand && params.expand.length > 0)
-        queryParams["expand"] = params.expand.join(",");
-
       const response = await executeRequest(config, {
         method: "GET",
         endpoint,
-        query_params:
-          Object.keys(queryParams).length > 0 ? queryParams : undefined,
+        query_params: resolvedQueryParams,
         headers: params.headers,
       });
 

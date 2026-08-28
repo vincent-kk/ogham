@@ -180,23 +180,23 @@ The SKILL.md must include:
 
 #### Tool Catalog (15 domains)
 
-| Domain               | One-line Description                             | MCP Tools              |
-| -------------------- | ------------------------------------------------ | ---------------------- |
-| **issue**            | Issue CRUD, bulk create, changelog               | get, post, put, delete |
-| **search**           | JQL-based issue search (Cloud POST / Server GET) | get, post              |
-| **transition**       | Issue workflow state transitions                 | get, post              |
-| **comment**          | Issue comment CRUD + JSM comments                | get, post              |
-| **agile**            | Board, Sprint, Epic management                   | get, post, put         |
-| **project**          | Project metadata, components, versions           | get, post              |
-| **field**            | Field metadata, custom field options             | get                    |
-| **link**             | Issue links (internal + remote/external)         | get, post, delete      |
-| **worklog**          | Work time logging                                | get, post              |
-| **attachment**       | Issue attachment upload/metadata                 | get, post              |
-| **user**             | User search and profile lookup                   | get                    |
-| **watcher**          | Issue watcher management                         | get, post, delete      |
-| **jsm**              | JSM SLA, queues, ProForma forms                  | get, put               |
-| **development-info** | Dev info (branch, commit, PR, build)             | get                    |
-| **metrics**          | Issue time metrics (cycle time, status duration) | get                    |
+| Domain               | One-line Description                                        | MCP Tools                      |
+| -------------------- | ----------------------------------------------------------- | ------------------------------ |
+| **issue**            | Issue CRUD, bulk create, changelog                          | get, post, put, delete         |
+| **search**           | JQL-based issue search (Cloud POST / Server GET)            | get, post                      |
+| **transition**       | Issue workflow state transitions                            | get, post                      |
+| **comment**          | Issue comment CRUD + JSM comments + DC reply-plugin threads | get, post, comment_thread |
+| **agile**            | Board, Sprint, Epic management                              | get, post, put                 |
+| **project**          | Project metadata, components, versions                      | get, post                      |
+| **field**            | Field metadata, custom field options                        | get                            |
+| **link**             | Issue links (internal + remote/external)                    | get, post, delete              |
+| **worklog**          | Work time logging                                           | get, post                      |
+| **attachment**       | Issue attachment upload/metadata                            | get, post                      |
+| **user**             | User search and profile lookup                              | get                            |
+| **watcher**          | Issue watcher management                                    | get, post, delete              |
+| **jsm**              | JSM SLA, queues, ProForma forms                             | get, put                       |
+| **development-info** | Dev info (branch, commit, PR, build)                        | get                            |
+| **metrics**          | Issue time metrics (cycle time, status duration)            | get                            |
 
 #### Error Handling (SKILL.md section)
 
@@ -442,7 +442,7 @@ Confluence page updates require `version.number` as a **mandatory parameter**:
 
 ## 6. media-analysis
 
-> **Spec Reference**: `packages/atlassian/skills/media-analysis/SKILL.md` and `packages/atlassian/skills/media-analysis/references/`
+> **Spec Reference**: `plugins/atlassian/skills/media-analysis/SKILL.md` and `plugins/atlassian/skills/media-analysis/references/`
 
 ### Purpose
 
@@ -475,7 +475,7 @@ Download images, videos, and GIFs from Atlassian sources or local paths, optiona
 ```
 1. Input resolution
    - Detect Atlassian URL (Jira / Confluence attachment) or local path
-   - URL path → reuse `download` skill to fetch + cache under .temp/<namespace>/
+   - URL path → reuse `download` skill to fetch into .temp/<namespace>/ (always fresh, no download cache)
 2. Probe
    - Run scripts/probe.mjs (cross-platform ffprobe wrapper) to get duration, fps, resolution
 3. Image path

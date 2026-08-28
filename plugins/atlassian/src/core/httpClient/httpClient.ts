@@ -2,6 +2,7 @@ import type {
   McpResponse,
   HttpClientConfig,
   RequestOptions,
+  BinaryResponseBody,
 } from "../../types/index.js";
 import {
   RETRY_MAX_RETRIES,
@@ -85,7 +86,11 @@ export async function executeRequest(
         const contentType = response.headers.get("content-type") ?? "";
         if (options.acceptBinary && !contentType.includes("application/json")) {
           const buffer = await response.arrayBuffer();
-          data = { _binary: true, buffer, contentType };
+          data = {
+            _binary: true,
+            buffer,
+            contentType,
+          } satisfies BinaryResponseBody;
         } else if (contentType.includes("application/json"))
           data = await response.json();
         else if (status !== 204) data = await response.text();

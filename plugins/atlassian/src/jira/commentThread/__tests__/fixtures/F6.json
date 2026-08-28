@@ -1,0 +1,33 @@
+{
+  "comments": [
+    {
+      "id": "10001",
+      "author": { "displayName": "A" },
+      "created": "2026-08-01T09:00:00.000+0000",
+      "body": "root one"
+    }
+  ],
+  "changelog": {
+    "total": 2,
+    "histories": [
+      {
+        "id": "20011",
+        "created": "2026-08-01T09:30:00.000+0000",
+        "items": [
+          { "field": "Comment", "to": "10001", "toString": "reply one" }
+        ]
+      },
+      {
+        "id": "20012",
+        "created": "2026-08-01T09:45:00.000+0000",
+        "items": [
+          { "field": "Comment", "to": "10001", "toString": "reply two" }
+        ]
+      }
+    ]
+  },
+  "properties": {
+    "10001": { "parentThreadId": 501, "deleted": true, "lastBody": "reply two" }
+  },
+  "expect": { "deletedId": "20012", "nestedId": "20012" }
+}

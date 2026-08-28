@@ -2,7 +2,7 @@
 
 ## Namespace Path Convention
 
-Derive save path from the source context to enable filesystem-based caching:
+Derive save path from the source context:
 
 | Source               | Namespace                        | Example save_to_path                  |
 | -------------------- | -------------------------------- | ------------------------------------- |
@@ -10,7 +10,7 @@ Derive save path from the source context to enable filesystem-based caching:
 | Jira issue + comment | `{issueKey}_comment-{commentId}` | `.temp/KAN-27_comment-10110/demo.mp4` |
 | Confluence page      | `confluence-{pageId}`            | `.temp/confluence-12345/diagram.png`  |
 
-The fetch tool checks if the target file exists before downloading. If it exists, returns `{ saved_to, size_bytes, cached: true }` without making an HTTP request. Pass `force: true` to bypass cache.
+The fetch tool always downloads and overwrites the target file, then returns `{ saved_to, size_bytes, content_type }` — `saved_to` is the resolved path under `.temp/`. There is no download cache.
 
 ## Jira Attachment Download
 

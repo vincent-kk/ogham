@@ -37,5 +37,6 @@ export async function buildFetchContext(
     service,
     apiVersion,
     requires_xsrf_bypass: !siteConfig.is_cloud,
+    is_cloud: siteConfig.is_cloud,
   };
 }

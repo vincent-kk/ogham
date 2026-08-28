@@ -31,3 +31,6 @@ export const CONNECTION_TEST_TIMEOUT = 10_000;
 
 /** Cloud hostname pattern */
 export const CLOUD_HOSTNAME_PATTERN = /\.atlassian\.net$/;
+
+/** Lowercase SHA-256 hexadecimal digest pattern used by bound proposals. */
+export const SHA256_HEX_PATTERN = /^[0-9a-f]{64}$/;

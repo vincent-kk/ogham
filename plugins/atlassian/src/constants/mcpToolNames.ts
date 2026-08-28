@@ -3,6 +3,7 @@ export const McpToolName = {
   CONVERT: "convert",
   AUTH_CHECK: "auth_check",
   SETUP: "setup",
+  COMMENT_THREAD: "comment_thread",
 } as const;
 
 export type McpToolName = (typeof McpToolName)[keyof typeof McpToolName];
