@@ -1,6 +1,6 @@
 # Visualization Catalog
 
-Maps refine's dimensional output to a `PanelKind` from `spec-schema.md`, with the React component template each kind uses.
+Maps the Phase 3 interview dimensions to a `PanelKind` from `spec-schema.md`, with the React component template each kind uses.
 
 Recharts is the default. Plotly fallback noted where Recharts is awkward.
 

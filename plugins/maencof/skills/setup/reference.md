@@ -67,10 +67,6 @@ Now, I would like to propose a dedicated AI partner (Companion) tailored to this
 
 ## Stage 3 — AI Companion Proposal (Synthesis)
 
-### Synthesis Guidelines
-
-Holistically synthesize a companion persona (v2) that balances the user's schema. The persona is a set of uniform `section` objects — one per character axis — so new axes need no code change, only a new section.
-
 Core fields:
 
 - `name`: A comfortable name reflecting the user's values or interests.
@@ -164,28 +160,6 @@ On "Use", save to `.maencof-meta/companion-identity.json` with EXACTLY this stru
 - Write persona content (detail/brief/greeting) in the user's configured language; keys, `inject` values, and timestamps stay as shown.
 - The `role` and `principles` sections above carry a `brief`: it is the shorter form injected every turn, while the full `detail` is used only at session start. Add a `brief` to any long `turn`/`both` section to keep the per-turn budget under the cap (§ Per-turn budget gate). Sections without a `brief` (tone, taboos, traits) fall back to `detail` every turn.
 - After onboarding, incremental edits go through the `companion_edit` MCP tool (preview → commit), never by editing the JSON directly.
-
-### T3-1: Persona Proposal
-
-```
-Based on our understanding, I have structured a partner for you:
-
-- Name: {companion_name}
-- Role: {role}
-- Personality & Approach: {personality_description}
-- Operating Principles:
-  1. {principle_1}
-  2. {principle_2}
-  3. {principle_3}
-- Non-negotiable Rules: {taboos_joined}
-
-Rationale: {origin_story}
-Greeting: "{greeting}"
-
-Would you like to proceed with this partner?
-```
-
-Options: ["Start with this partner (Use)", "Adjust the personality (Regenerate)", "Proceed without a partner (Skip)"]
 
 ## Stage 4 Templates — Scaffolding
 
@@ -303,8 +277,8 @@ We have successfully completed the foundational setup.
 - Index Status: {index_status}
 
 You may now begin your journey.
-- /maencof:remember — Capture new thoughts or information
-- /maencof:recall — Search through your records
+- `remember` skill — Capture new thoughts or information
+- `recall` skill — Search through your records
 - /maencof:checkup — Check the health of your space
 
 I hope this space becomes a place of great insight for you.

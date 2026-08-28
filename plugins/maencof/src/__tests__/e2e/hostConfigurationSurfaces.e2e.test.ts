@@ -1,6 +1,6 @@
 /**
  * @file hostConfigurationSurfaces.e2e.test.ts
- * @description Temp-home/project E2E for instruct, rule, craft-agent, configure, and changelog surfaces.
+ * @description Temp-home/project E2E for instruct, rule, agent, configure, and changelog surfaces.
  */
 import { execFileSync } from 'node:child_process';
 import {
@@ -54,7 +54,7 @@ function writeAgent(
 
 describe('host configuration surfaces', () => {
   it.each(['claude', 'codex'] as const)(
-    '%s joins instruct, rule, craft-agent, configure, and changelog on real consumer paths',
+    '%s exercises instruct, rule, agent, configure, and changelog on real consumer paths',
     async (host) => {
       const root = mkdtempSync(join(tmpdir(), `maencof-${host}-surfaces-`));
       roots.push(root);
@@ -102,7 +102,7 @@ describe('host configuration surfaces', () => {
         expect(surface.changelogPaths).not.toContain('.codex/rules/');
       }
 
-      // craft-agent: each host writes its real project agent format.
+      // Agent surface: each host writes its real project agent format.
       const agentFile = writeAgent(
         surface.agents.projectDirectory,
         surface.agents.extension,

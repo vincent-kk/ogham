@@ -4,35 +4,6 @@ Detailed workflow, examples, and error handling for the rule skill.
 
 ## Detailed Workflow
 
-### Step 1 — Display Current Rules
-
-Scan `.claude/rules/` and display all registered rules:
-
-```
-Current registered rules:
-
-  [Global] general.md — applies to all files
-    └ "Write commit messages in English", "Respond in Korean"
-
-  [Conditional] api-security.md — src/api/**/*.ts, src/api/**/*.tsx
-    └ "Mandatory input validation", "No sensitive data logging"
-
-Total: 2 rule files
-```
-
-If empty: prompt to create the first rule.
-
-### Step 2 — Identify Intent
-
-Present options or detect intent from natural language:
-
-| User Expression                | Action                  |
-| ------------------------------ | ----------------------- |
-| "No console.log in API files"  | Create conditional rule |
-| "Always write tests first"     | Create global rule      |
-| "Delete the api-security rule" | Remove rule             |
-| "Show me all rules"            | List rules              |
-
 ### Step 3 — Define Rule Content and Scope
 
 Collect rule content and determine scope:
@@ -97,23 +68,6 @@ Report the created/modified rule with file path, scope, and entry count.
 ## Agent Collaboration
 
 Executed by the **configurator** agent. The configurator ensures spec compliance, creates backups before modifications, and validates glob patterns.
-
-## Usage Examples
-
-```
-/maencof:rule add
-/maencof:rule list
-/maencof:rule edit api-security
-/maencof:rule remove test-rules
-/maencof:rule show general
-```
-
-Natural language:
-
-```
-"Add a rule: no console.log in production code"
-"Show me all my rules"
-```
 
 ## Error Handling
 

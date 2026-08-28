@@ -50,8 +50,8 @@ export const AUTO_CONDITIONAL_ASK_SKILLS = [
  */
 export const VISIBLE_USER_STARTED_SKILLS = [
   'brainstorm',
+  'clarify-request',
   'finish',
-  'interview',
   'mental-model',
   'trace-change',
 ] as const;

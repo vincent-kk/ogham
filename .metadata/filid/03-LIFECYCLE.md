@@ -163,10 +163,11 @@ verification_scan(path)         → spec/test 역할별 요약
 **트리거**: 수시, `/filid:context-query <path 또는 질문>`
 
 ```
-context_resolve(path, targetPath)
+context_resolve(path, requests: [{ targetPath }])
        │
        ▼
-{ ownerFractalPath, chain[owner → root], nearestDetailPath, outputLanguage }
+data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
+                    nearestDetailPath, outputLanguage }, resolution }
        │
        ▼
 호출자가 필요한 문서만 읽는다 (본문은 반환되지 않는다)
@@ -175,7 +176,7 @@ context_resolve(path, targetPath)
 3라운드 안에 답변. 불가하면 "파악한 내용 + 추가로 필요한 정보"를 보고한다.
 ```
 
-target이 project root 밖이거나 owner를 결정할 수 없으면 명시적 오류다. root 문서를 임의 fallback으로 고르지 않는다.
+여러 target은 한 `requests` 배열에 넣어 하나의 snapshot으로 해석한다. 단일 target도 길이 1의 배열이다. target이 project root 밖이거나 owner를 결정할 수 없으면 해당 result가 명시적으로 실패하며 root 문서를 임의 fallback으로 고르지 않는다.
 
 ---
 

@@ -43,42 +43,7 @@ Otherwise, check the current index status with the `mcp__plugin_maencof_tools__k
 
 ### Step 2 — Run Build
 
-Build pipeline:
-
-```
-1. VaultScanner: collect file list + mtime
-2. DocumentParser: parse Frontmatter + links (changed files only)
-3. GraphBuilder: construct/update graph
-4. DAGConverter: cycle detection + handling
-5. WeightCalculator: calculate weights
-6. MetadataStore: save to .maencof/ JSON
-```
-
 For incremental build: recompute only changed files + 1-hop neighbors. For full/force mode: call `mcp__plugin_maencof_tools__kg_build(force=true)` to reprocess every node.
-
-### Step 3 — Completion Report
-
-```
-Index build complete
-Nodes: 123 | Edges: 456
-Time: 2.3s
-Build type: incremental (12 files updated)
-```
-
-For full rebuilds triggered by `--force` or `--reset-cache`, include before/after deltas when the prior index existed (from `mcp__plugin_maencof_tools__kg_status` snapshot taken in Step 1 before cache reset):
-
-```
-## Rebuild Complete
-
-| Item | Before | After | Change |
-|------|--------|-------|--------|
-| Node count | {before_nodes} | {after_nodes} | {delta_nodes:+d} |
-| Edge count | {before_edges} | {after_edges} | {delta_edges:+d} |
-```
-
-If the change is large (nodes ±20% or more), warn and recommend investigating the cause.
-
-> Note: Layer-by-layer node distribution is not available from `mcp__plugin_maencof_tools__kg_status` / `mcp__plugin_maencof_tools__kg_build` responses. To inspect layer distribution, use `/maencof:checkup --quick --verbose`.
 
 ## Available MCP Tools
 
@@ -109,13 +74,3 @@ If the change is large (nodes ±20% or more), warn and recommend investigating t
 | `--reset-cache` | false   | Discard `.maencof/` cache contents before rebuilding (recovery / migration mode). Implies a full rebuild. |
 | `--no-backup`   | false   | Skip `.maencof/index.json.bak` snapshot when `--reset-cache` is used                                      |
 | `--dry-run`     | false   | Preview changes only; no cache reset and no index write                                                   |
-
-## Usage Examples
-
-```
-/maencof:build
-/maencof:build --full
-/maencof:build --force
-/maencof:build --force --reset-cache
-/maencof:build --dry-run
-```

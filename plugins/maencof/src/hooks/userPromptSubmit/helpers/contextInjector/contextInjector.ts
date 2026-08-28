@@ -61,7 +61,7 @@ function buildSessionContext(cwd: string): string {
     `- Active L4 documents: ${l4Count}`,
     ...(bufferCount > 0
       ? [
-          `- L5 buffer inbox: ${bufferCount} unclassified — triage via /maencof:organize`,
+          `- L5 buffer inbox: ${bufferCount} unclassified — triage with the organize skill`,
         ]
       : []),
     '',

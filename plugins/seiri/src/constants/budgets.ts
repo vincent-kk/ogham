@@ -19,10 +19,10 @@ export const RULE_MAX_LINES = 200;
 /** Skills that ship. A seventeenth is a budget decision, not a detail. */
 export const SHIPPED_SKILLS = [
   'brainstorm',
+  'clarify-request',
   'execute',
   'finish',
   'implement',
-  'interview',
   'mental-model',
   'receive-review',
   'request-review',

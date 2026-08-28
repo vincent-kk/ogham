@@ -31,7 +31,6 @@ const visit = (
   ownerKey: string | null,
   overrides: Partial<{
     ttlTurns: number;
-    gateEligible: boolean;
     silentDelivery: boolean;
   }> = {},
 ) =>
@@ -39,7 +38,6 @@ const visit = (
     readKey,
     ownerKey,
     ttlTurns: 5,
-    gateEligible: false,
     ...overrides,
   });
 
@@ -92,17 +90,18 @@ describe('commitVisit — delivery state', () => {
     expect(decision.reads).toContain('/b\tsrc');
   });
 
-  it('gate deny path: delivery stamped, read NOT recorded, lastMap frozen', () => {
-    const scope = scopeOf('s-gate');
-    const deny = visit(scope, '/b\tmod', '/b\tmod', { gateEligible: true });
-    expect(deny.deliveredState).toBe('none');
-    expect(deny.mapChanged).toBe(false);
-    expect(readFractalMap(CWD, scope).reads).toEqual([]);
-    expect(readDelivered(CWD, 's-gate')).toHaveProperty(['/b\tmod']);
+  it('first delivery records the visit and advances the map in the same transaction', () => {
+    const scope = scopeOf('s-first-visit');
+    const first = visit(scope, '/b\tmod', '/b\tmod');
+    expect(first.deliveredState).toBe('none');
+    expect(first.mapChanged).toBe(true);
+    expect(first.reads).toContain('/b\tmod');
+    expect(readFractalMap(CWD, scope).reads).toEqual(['/b\tmod']);
+    expect(readDelivered(CWD, 's-first-visit')).toHaveProperty(['/b\tmod']);
 
-    // retry: delivered → fresh, gate does not fire, read recorded now
-    const retry = visit(scope, '/b\tmod', '/b\tmod', { gateEligible: true });
+    const retry = visit(scope, '/b\tmod', '/b\tmod');
     expect(retry.deliveredState).toBe('fresh');
+    expect(retry.mapChanged).toBe(false);
     expect(retry.reads).toContain('/b\tmod');
   });
 

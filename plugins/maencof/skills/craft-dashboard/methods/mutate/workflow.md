@@ -6,7 +6,7 @@ MUTATE assumes infrastructure files (`graph-store.ts`, `body-cache.ts`, `search-
 
 ```
 Phase 1  Domain Priming         (delta hint block)
-Phase 2  Delegate to refine     (delta-only questions)
+Phase 2  Interview              (delta-only questions)
 Phase 3  Spec Diff              (new spec → diff vs current)
 Phase 4  Patch                  (surgical file changes, preserve USER-EDIT)
 Phase 5  Rebuild & Hand-off     (incremental build, validate)
@@ -49,24 +49,20 @@ Including the current spec lets the interview skip redundant questions and typic
 
 ---
 
-## Phase 2 — Adopt refine's protocol in-session (delta-only)
+## Phase 2 — Run the shared interview protocol (delta-only)
 
-**Slash-skill chaining is not supported inside an active skill.** Adopt `/maencof:refine`'s LLM-instruction protocol and run it in the current session, with the delta-only constraint applied via the priming file's "Instructions" section.
+Apply the delta-only constraint through the priming file's "Instructions" section.
 
 ### Algorithm
 
 ```
-1. Read `$CLAUDE_PLUGIN_ROOT/skills/refine/SKILL.md`.
-   (Fallback: resolve relative to this skill's repo root if the env var is unset.
-   Absolute paths are environment-specific and MUST NOT be hard-coded here.)
-   The 5-phase contract summary lives in `../../knowledge/refine-protocol.md`
-   — both CREATE and MUTATE reference the same file.
+1. Read `../../knowledge/refine-protocol.md`; it is the self-contained source of truth for the shared interview mechanics.
 2. Read <target>/.dashboard-priming.md as the interview input.
-3. Execute refine's Phase 1 + 2 + 2.5 with the user — capped at 4 questions
+3. Execute Phase 1 + 2 + 2.5 with the user — capped at 4 questions
    total for MUTATE (vs 7 for CREATE). One question per turn.
 4. Probe only the dimensions the user's request affects (e.g., a new panel
    only needs Dimensions + optional Search updates).
-5. Execute refine's Phase 3 — output the delta as a refined prompt with the
+5. Execute Phase 3 — output the delta as a refined prompt with the
    same section headings as CREATE (### Data / ### Dimensions / ### Insight
    Goal / ### Search), but ONLY for changed dimensions.
 6. Write the refined delta to <target>/.dashboard-spec.draft.md.
@@ -80,6 +76,8 @@ If MUTATE's interview exceeds 4 questions, the change is large enough to warrant
 ---
 
 ## Phase 3 — Spec Diff
+
+Required top-level fields (`version`, `vaultIndex`, `refresh`, `title`) stay unchanged from the existing spec. MUTATE never silently drops them.
 
 ### Algorithm
 
@@ -334,12 +332,6 @@ Switch to a fresh CREATE if:
 - The user wants to change the underlying stack (e.g., Recharts → Plotly globally)
 - More than ~50% of panels are being replaced
 - Vault indexing strategy changes (`maencof` ↔ `independent`)
-- refine's question budget exceeds 4 in Phase 2 (matches the Phase 2 cap)
+- The interview requires more than 4 questions in Phase 2
 
 In these cases, recommend: backup current `<target>/`, then re-run with `create` subcommand into a fresh directory.
-
----
-
-## Examples
-
-End-to-end MUTATE walkthroughs live in **examples.md** in this directory. Load when you need a concrete delta pattern.

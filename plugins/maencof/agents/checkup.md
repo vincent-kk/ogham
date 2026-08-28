@@ -48,9 +48,9 @@ Triage (report each bucket separately; never lump into one number):
      anchors the cluster into the vault instead.
   4. Remaining authored documents — actionable. Sample up to 5 via
      mcp__plugin_maencof_tools__kg_suggest_links: candidates found → propose
-     /maencof:suggest for that file; no candidates → propose tagging first.
+     `mcp__plugin_maencof_tools__kg_suggest_links` for that file; no candidates → propose tagging first.
 Severity: warning (buckets 1 and 4); info (buckets 2 and 3)
-Auto-fix: suggest calling /maencof:suggest skill for bucket 4 files
+Auto-fix: call `mcp__plugin_maencof_tools__kg_suggest_links` for bucket 4 files
 ```
 
 ### D2. Stale Index (stale-index)
@@ -90,7 +90,7 @@ Auto-fixable: update Frontmatter layer field to match path (`mcp__plugin_maencof
 ```
 Detection: document pairs sharing 3 or more identical tags with high title similarity
 Severity: warning
-Auto-fix: not possible — reports duplicate pairs and suggests /maencof:organize
+Auto-fix: not possible — reports duplicate pairs and suggests the `organize` skill
 ```
 
 ### D6. Frontmatter Validation (invalid-frontmatter)

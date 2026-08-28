@@ -1,6 +1,6 @@
 ---
 name: lifecycle
-user-invocable: true
+user-invocable: false
 description: 'Attaches custom actions to Claude Code lifecycle events (session start, prompt submit, tool use) via lifecycle.json without touching hooks.json. Use when adding, toggling, or removing greetings, reminders, or tool warnings.'
 argument-hint: '[mode] [id]'
 version: '1.1.0'

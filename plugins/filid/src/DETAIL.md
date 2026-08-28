@@ -12,6 +12,7 @@
 ## API Contracts
 
 - MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
+- `context_resolve`는 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
 - 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
 - 소스 루트 entry point의 공개 surface는 생성된 `VERSION` 하나다.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
@@ -39,6 +40,10 @@
 - **Consumers**: `**/src/**`
 - **Direct import**: allowed
 - **Reason**: 같은 fractal 내부 소비자는 자기 entry point를 경유하지 않고 concrete peer를 직접 참조한다. `version.ts`는 생성된 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다.
+
+## History
+
+- 2026-08-28 — 대규모 변경의 반복 snapshot 비용을 없애기 위해 `context_resolve` 공개 DTO를 array-first batch로 바꿨다.
 
 ## Last Updated
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
@@ -122,40 +122,82 @@ function mockSnapshotContext(diagnostics: ToolDiagnostic[]): void {
   mockedCreateToolSnapshot.mockResolvedValue(context);
 }
 
-describe('context_resolve inline chain and scoped evidence', () => {
-  it('carries the owner-to-root chain in the summary', async () => {
+describe('context_resolve shared-snapshot batch', () => {
+  beforeEach(() => {
+    mockedCreateToolSnapshot.mockReset();
+  });
+
+  it('resolves 100 ordered requests from one snapshot', async () => {
+    mockSnapshotContext([]);
+    const targetPaths = Array.from(
+      { length: 100 },
+      (_, index) => `${FEATURE_ROOT}/source-${index}.unit`,
+    );
+
+    const result = await handleContextResolve({
+      path: PROJECT_ROOT,
+      requests: targetPaths.map((targetPath) => ({ targetPath })),
+    });
+
+    expect(mockedCreateToolSnapshot).toHaveBeenCalledTimes(1);
+    expect(result.summary).toEqual({
+      projectRoot: PROJECT_ROOT,
+      requestCount: 100,
+      resolvedCount: 100,
+      failedCount: 0,
+      indeterminateCount: 0,
+    });
+    expect(result.data?.results).toHaveLength(100);
+    expect(result.data?.results.map(({ targetPath }) => targetPath)).toEqual(
+      targetPaths,
+    );
+  });
+
+  it('keeps the single-request chain in the first resolved item', async () => {
     mockSnapshotContext([]);
 
     const result = await handleContextResolve({
       path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
+      requests: [{ targetPath: SOURCE_PATH }],
     });
+    const item = result.data?.results[0];
 
-    expect(result.summary.chainPaths).toEqual([FEATURE_ROOT, PROJECT_ROOT]);
-    expect(result.summary.chainLength).toBe(2);
+    expect(item).toMatchObject({
+      index: 0,
+      resolved: true,
+      targetPath: SOURCE_PATH,
+      status: TOOL_STATUSES.OK,
+      summary: {
+        ownerFractalPath: FEATURE_ROOT,
+        chainLength: 2,
+        chainPaths: [FEATURE_ROOT, PROJECT_ROOT],
+      },
+    });
+    if (!item?.resolved) throw new Error('expected resolved context item');
+    expect(item.resolution.chain.map(({ fractalPath }) => fractalPath)).toEqual(
+      [FEATURE_ROOT, PROJECT_ROOT],
+    );
   });
 
-  it('drops diagnostics from subtrees outside the chain and counts them', async () => {
-    mockSnapshotContext([OWNER_DIAGNOSTIC, SIBLING_DIAGNOSTIC]);
+  it('scopes item diagnostics and deduplicates their top-level union', async () => {
+    mockSnapshotContext([
+      OWNER_DIAGNOSTIC,
+      SIBLING_DIAGNOSTIC,
+      GLOBAL_DIAGNOSTIC,
+    ]);
 
     const result = await handleContextResolve({
       path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
+      requests: [{ targetPath: SOURCE_PATH }, { targetPath: PEER_PATH }],
     });
 
-    expect(result.diagnostics).toEqual([OWNER_DIAGNOSTIC]);
-    expect(result.summary.diagnosticsOutOfScope).toBe(1);
-  });
-
-  it('keeps diagnostics that carry no path', async () => {
-    mockSnapshotContext([GLOBAL_DIAGNOSTIC, SIBLING_DIAGNOSTIC]);
-
-    const result = await handleContextResolve({
-      path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
-    });
-
-    expect(result.diagnostics).toEqual([GLOBAL_DIAGNOSTIC]);
+    expect(result.diagnostics).toEqual([OWNER_DIAGNOSTIC, GLOBAL_DIAGNOSTIC]);
+    expect(result.summary.indeterminateCount).toBe(2);
+    for (const item of result.data?.results ?? []) {
+      expect(item.diagnostics).toEqual([OWNER_DIAGNOSTIC, GLOBAL_DIAGNOSTIC]);
+      if (!item.resolved) throw new Error('expected resolved context item');
+      expect(item.summary.diagnosticsOutOfScope).toBe(1);
+    }
   });
 
   it('stays ok when only out-of-scope evidence exists', async () => {
@@ -163,51 +205,97 @@ describe('context_resolve inline chain and scoped evidence', () => {
 
     const result = await handleContextResolve({
       path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
+      requests: [{ targetPath: SOURCE_PATH }],
     });
 
     expect(result.status).toBe(TOOL_STATUSES.OK);
-    expect(result.summary.diagnosticsOutOfScope).toBe(1);
+    const item = result.data?.results[0];
+    if (!item?.resolved) throw new Error('expected resolved context item');
+    expect(item.summary.diagnosticsOutOfScope).toBe(1);
   });
 
-  it('resolves the lowest common fractal of compared paths', async () => {
-    mockSnapshotContext([]);
-
-    const sameOwner = await handleContextResolve({
-      path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
-      comparePaths: [SOURCE_PATH, PEER_PATH],
-    });
-    const acrossOwners = await handleContextResolve({
-      path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
-      comparePaths: [SOURCE_PATH, SIBLING_SOURCE_PATH],
-    });
-
-    expect(sameOwner.summary.lowestCommonFractalPath).toBe(FEATURE_ROOT);
-    expect(acrossOwners.summary.lowestCommonFractalPath).toBe(PROJECT_ROOT);
-  });
-
-  it('omits the common fractal field when no comparison was requested', async () => {
+  it('resolves comparison paths independently for each request', async () => {
     mockSnapshotContext([]);
 
     const result = await handleContextResolve({
       path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
+      requests: [
+        {
+          targetPath: SOURCE_PATH,
+          comparePaths: [SOURCE_PATH, PEER_PATH],
+        },
+        {
+          targetPath: SIBLING_SOURCE_PATH,
+          comparePaths: [SOURCE_PATH, SIBLING_SOURCE_PATH],
+        },
+      ],
     });
+    const results = result.data?.results ?? [];
 
-    expect(result.summary).not.toHaveProperty('lowestCommonFractalPath');
+    expect(results[0]).toMatchObject({
+      resolved: true,
+      summary: { lowestCommonFractalPath: FEATURE_ROOT },
+    });
+    expect(results[1]).toMatchObject({
+      resolved: true,
+      summary: { lowestCommonFractalPath: PROJECT_ROOT },
+    });
   });
 
-  it('reports null rather than guessing when a compared path is unowned', async () => {
+  it('distinguishes omitted comparison paths from an unresolved comparison', async () => {
     mockSnapshotContext([]);
 
     const result = await handleContextResolve({
       path: PROJECT_ROOT,
-      targetPath: SOURCE_PATH,
-      comparePaths: [],
+      requests: [
+        { targetPath: SOURCE_PATH },
+        { targetPath: SOURCE_PATH, comparePaths: [] },
+      ],
+    });
+    const results = result.data?.results ?? [];
+
+    expect(results[0]).not.toHaveProperty('summary.lowestCommonFractalPath');
+    expect(results[1]).toMatchObject({
+      resolved: true,
+      summary: { lowestCommonFractalPath: null },
+    });
+  });
+
+  it('keeps successful items when another target cannot be resolved', async () => {
+    mockSnapshotContext([]);
+
+    const result = await handleContextResolve({
+      path: PROJECT_ROOT,
+      requests: [
+        { targetPath: SOURCE_PATH },
+        { targetPath: '/outside/source.unit' },
+        { targetPath: SIBLING_SOURCE_PATH },
+      ],
     });
 
-    expect(result.summary.lowestCommonFractalPath).toBeNull();
+    expect(result.status).toBe(TOOL_STATUSES.INDETERMINATE);
+    expect(result.summary).toEqual({
+      projectRoot: PROJECT_ROOT,
+      requestCount: 3,
+      resolvedCount: 2,
+      failedCount: 1,
+      indeterminateCount: 1,
+    });
+    expect(result.data?.results).toMatchObject([
+      { index: 0, resolved: true, targetPath: SOURCE_PATH },
+      {
+        index: 1,
+        resolved: false,
+        targetPath: '/outside/source.unit',
+        status: TOOL_STATUSES.INDETERMINATE,
+        diagnostics: [
+          {
+            code: 'context-target-unresolved',
+            path: '/outside/source.unit',
+          },
+        ],
+      },
+      { index: 2, resolved: true, targetPath: SIBLING_SOURCE_PATH },
+    ]);
   });
 });

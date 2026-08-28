@@ -46,7 +46,8 @@ describe('runRemindExpiredBuffer', () => {
     expect(result.hookSpecificOutput).toBeDefined();
     const context = result.hookSpecificOutput?.additionalContext ?? '';
     expect(context).toContain('1 expired L5 document');
-    expect(context).toContain('/maencof:organize');
+    expect(context).toContain('organize skill');
+    expect(context).not.toContain('/maencof:organize');
     expect(context).toContain('/maencof:cleanup buffer');
     expect(context).toContain('05_Context/stale-note.md');
     // reminder only — nothing is deleted; caller keeps the document

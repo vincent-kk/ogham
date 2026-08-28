@@ -56,7 +56,7 @@ export async function handleCaptureInsight(
       return {
         success: false,
         path: '',
-        message: `Session capture limit (${config.max_captures_per_session}) reached. Use /maencof:insight --max N to increase.`,
+        message: `Session capture limit (${config.max_captures_per_session}) reached. Use the insight skill with --max N to increase it.`,
       };
   }
 
@@ -66,7 +66,7 @@ export async function handleCaptureInsight(
     return {
       success: false,
       path: '',
-      message: `Category "${category}" is rejected by config.category_filter. Use /maencof:insight --category ${categoryFlag(category)} --accept to allow.`,
+      message: `Category "${category}" is rejected by config.category_filter. Use the insight skill with --category ${categoryFlag(category)} --accept to allow.`,
     };
 
   // 2. Auto-inject auto-insight tag
@@ -102,7 +102,7 @@ export async function handleCaptureInsight(
     const pendingCount = getSessionCaptureCount(vaultPath);
     return {
       ...result,
-      message: `${result.message} Session captures pending review: ${pendingCount} — \`/maencof:insight --recent\` lists them.`,
+      message: `${result.message} Session captures pending review: ${pendingCount} — the insight skill's --recent view lists them.`,
     };
   }
 

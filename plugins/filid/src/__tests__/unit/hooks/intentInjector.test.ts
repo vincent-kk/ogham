@@ -63,9 +63,6 @@ const ctxOf = (r: { hookSpecificOutput?: { additionalContext?: string } }) =>
 const denyOf = (r: {
   hookSpecificOutput?: { permissionDecision?: string };
 }): boolean => r.hookSpecificOutput?.permissionDecision === 'deny';
-const reasonOf = (r: {
-  hookSpecificOutput?: { permissionDecisionReason?: string };
-}) => r.hookSpecificOutput?.permissionDecisionReason ?? '';
 
 beforeEach(() => {
   tmpDir = join(
@@ -392,8 +389,8 @@ describe('processVisit (Read path)', () => {
   });
 });
 
-describe('processVisit (mutation path — deny gate)', () => {
-  it('Write to undelivered module → deny; reason carries guide + intent pointer, never the body', () => {
+describe('processVisit (mutation path — soft delivery)', () => {
+  it('Write to undelivered module → allowed; context carries guide + intent pointer, never the body', () => {
     makeRootProject();
     const filePath = join(tmpDir, 'newfile.ts');
 
@@ -405,20 +402,18 @@ describe('processVisit (mutation path — deny gate)', () => {
     );
 
     expect(result.continue).toBe(true);
-    expect(denyOf(result)).toBe(true);
-    const reason = reasonOf(result);
-    expect(reason).toContain('[filid:gate]');
-    expect(reason).toContain('[filid:guide]');
-    expect(reason).toContain('[filid:ctx]');
-    expect(reason).toContain(
-      'before its INTENT.md pointer was delivered this session',
-    );
-    expect(reason).toContain('intent: INTENT.md');
-    expect(reason).toContain('action: READ the intent file above');
-    expect(reason).not.toContain('Root module');
+    expect(denyOf(result)).toBe(false);
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toBeUndefined();
+    const context = ctxOf(result);
+    expect(context).not.toContain('[filid:gate]');
+    expect(context).toContain('[filid:guide]');
+    expect(context).toContain('[filid:ctx]');
+    expect(context).toContain('intent: INTENT.md');
+    expect(context).toContain('action: READ the intent file above');
+    expect(context).not.toContain('Root module');
   });
 
-  it('retry after gate deny → passes silently (deny delivered the rules)', () => {
+  it('second mutation after first soft delivery → passes silently', () => {
     makeRootProject();
     const filePath = join(tmpDir, 'newfile.ts');
     const sessionId = `session-retry-${Date.now()}`;
@@ -428,7 +423,9 @@ describe('processVisit (mutation path — deny gate)', () => {
       tool_input: { file_path: filePath, content: 'export {};\n' },
     });
 
-    expect(denyOf(processVisit(input))).toBe(true);
+    const first = processVisit(input);
+    expect(denyOf(first)).toBe(false);
+    expect(ctxOf(first)).toContain('[filid:ctx]');
     const retry = processVisit(input);
     expect(denyOf(retry)).toBe(false);
     expect(ctxOf(retry)).not.toContain('[filid:ctx]');
@@ -472,7 +469,7 @@ describe('processVisit (mutation path — deny gate)', () => {
     expect(ctxOf(staleEdit)).toContain('[filid:ctx]');
   });
 
-  it('INTENT.md self-authoring → exempt + marks delivered for that module', () => {
+  it('INTENT.md self-authoring → marks delivered for that module', () => {
     makeRootProject();
     mkdirSync(join(tmpDir, 'src', 'mod'), { recursive: true });
     const sessionId = `session-author-${Date.now()}`;
@@ -503,7 +500,7 @@ describe('processVisit (mutation path — deny gate)', () => {
     expect(ctxOf(writeCode)).not.toContain('[filid:ctx]');
   });
 
-  it('module without any owner INTENT.md → no deny (nothing to deliver)', () => {
+  it('module without any owner INTENT.md → no context (nothing to deliver)', () => {
     // FCA project (marker dir) but no INTENT.md anywhere in the chain
     writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 't' }));
     mkdirSync(join(tmpDir, '.filid'), { recursive: true });
@@ -519,6 +516,7 @@ describe('processVisit (mutation path — deny gate)', () => {
       }),
     );
     expect(denyOf(result)).toBe(false);
+    expect(ctxOf(result)).not.toContain('[filid:ctx]');
   });
 
   it('exposes a single-input visit contract with no branch mode parameter', () => {
@@ -544,18 +542,8 @@ describe('processVisit (mutation path — deny gate)', () => {
         },
       }),
     );
-    // gate delivers rules by deny — retry then passes
-    expect(denyOf(write)).toBe(true);
-    processVisit(
-      makeInput({
-        session_id: sessionId,
-        tool_name: 'Write',
-        tool_input: {
-          file_path: join(tmpDir, 'src', 'feature', 'x.ts'),
-          content: 'export {};\n',
-        },
-      }),
-    );
+    expect(denyOf(write)).toBe(false);
+    expect(ctxOf(write)).toContain('[filid:ctx]');
 
     const read = processVisit(
       makeInput({

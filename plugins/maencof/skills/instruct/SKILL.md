@@ -1,6 +1,6 @@
 ---
 name: instruct
-user-invocable: true
+user-invocable: false
 description: 'Adds or modifies AI instructions in the host project instruction surface; on Claude also splits oversized CLAUDE.md into @import modules and manages CLAUDE.local.md overrides. Use when editing project instructions.'
 argument-hint: '[instruction to add or modify]'
 version: '1.1.0'
@@ -39,33 +39,17 @@ The table below preserves the Claude workflow. Codex scope is the single effecti
 
 ## Workflow
 
-### Step 1 — Analyze Current CLAUDE.md
+### Step 1 — Classify
 
-Read file, count lines, list sections and @imports.
+Read the selected host instruction target and classify the requested change as CLAUDE.md (team), CLAUDE.local.md (personal), or `.claude/rules/` (pattern-based) when those Claude-only surfaces apply.
 
-### Step 2 — Identify Intent
+### Step 2 — Preview and Write
 
-Accept free-form instructions describing the desired change.
+Show a diff and obtain confirmation. Create an automatic backup before writing, and require double confirmation for deletions.
 
-### Step 3 — Classify and Route
+### Step 3 — Size Check and Report
 
-Determine best location: CLAUDE.md (team), CLAUDE.local.md (personal), or .claude/rules/ (pattern-based).
-
-### Step 4 — Preview Changes
-
-Show diff preview and get user confirmation.
-
-### Step 5 — Write File
-
-Create automatic backup, then apply changes. Double-confirm for deletions.
-
-### Step 6 — 200-Line Check
-
-If exceeded, propose @import split or subdirectory CLAUDE.md.
-
-### Step 7 — Summary
-
-Report changes, new line count, and backup location.
+After a Claude instruction edit, apply the 200-line threshold and propose an @import split or subdirectory CLAUDE.md when exceeded. Report the changed target, resulting line count, and backup location.
 
 > Load `reference.md` for detailed step workflows, diff examples, split process, and CLAUDE.md spec.
 

@@ -61,7 +61,7 @@ mcp__plugin_filid_tools__structure_validate({
 })
 ```
 
-Resolve the item first and read `context_resolve.summary.ownerFractalPath` plus the durable `context_resolve.summary.chainPaths`. Start at the owner. When the relevant rule is uncertain only because required evidence lies outside that scan root, retry the remaining owner-to-root ancestors in order. The detailed selection and finding-identity rules are in `reference.md` §1.
+Resolve all accepted item paths first with one context_resolve batch and read `context_resolve.data.results`, or the artifact results when inline `data` is absent. Map results by their stable index. A failed result makes that item `inconclusive`; for each resolved result, start at `result.summary.ownerFractalPath` and retry the remaining `result.summary.chainPaths` ancestors only when required evidence lies outside the current scan root. The detailed selection and finding-identity rules are in `reference.md` §1.
 
 Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact. Reading an absent inline `data` as "the finding is gone" is how this step produces a false `resolved`.
 

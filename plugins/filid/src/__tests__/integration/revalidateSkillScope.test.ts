@@ -33,10 +33,12 @@ function toolCalls(document: string, toolName: string): string[] {
 
 describe('revalidate measurement scope contract', () => {
   it('widens uncertain evidence without hiding an exact surviving finding', () => {
-    expect(skill).toContain('context_resolve.summary.chainPaths');
-    expect(reference).toMatch(/summary\.ownerFractalPath[^\n]+first scope/i);
-    expect(reference.indexOf('summary.ownerFractalPath')).toBeLessThan(
-      reference.indexOf('summary.chainPaths'),
+    expect(skill).toContain('context_resolve.data.results');
+    expect(reference).toMatch(
+      /result\.summary\.ownerFractalPath[^\n]+first scope/i,
+    );
+    expect(reference.indexOf('result.summary.ownerFractalPath')).toBeLessThan(
+      reference.indexOf('result.summary.chainPaths'),
     );
 
     const precedence = reference.slice(
@@ -63,7 +65,9 @@ describe('revalidate measurement scope contract', () => {
     const contextResolveCalls = toolCalls(reference, 'context_resolve');
     expect(contextResolveCalls.length).toBeGreaterThan(0);
     expect(contextResolveCalls).toEqual(
-      expect.arrayContaining([expect.stringMatching(/path:\s*PROJECT_ROOT/)]),
+      expect.arrayContaining([
+        expect.stringMatching(/path:\s*PROJECT_ROOT,[\s\S]+requests:\s*\[/),
+      ]),
     );
 
     const structureValidateCalls = [

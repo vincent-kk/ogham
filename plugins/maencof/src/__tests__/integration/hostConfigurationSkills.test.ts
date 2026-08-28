@@ -1,6 +1,6 @@
 /**
  * @file hostConfigurationSkills.test.ts
- * @description Generated host configuration reference is the five canonical skills' shared source.
+ * @description Generated host configuration reference is the four canonical skills' shared source.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -11,13 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { renderHostConfigurationReference } from '../../core/hostConfigurationSurfaces/index.js';
 
 const pluginRoot = fileURLToPath(new URL('../../../', import.meta.url));
-const skillNames = [
-  'instruct',
-  'rule',
-  'configure',
-  'craft-agent',
-  'changelog',
-];
+const skillNames = ['instruct', 'rule', 'configure', 'changelog'];
 const sharedReferencePath = join(
   pluginRoot,
   'skills',
@@ -32,7 +26,7 @@ describe('canonical host configuration skill reference', () => {
     );
   });
 
-  it('is loaded explicitly by all five configuration skills', () => {
+  it('is loaded explicitly by all four configuration skills', () => {
     for (const skillName of skillNames) {
       const skill = readFileSync(
         join(pluginRoot, 'skills', skillName, 'SKILL.md'),

@@ -120,7 +120,8 @@ describe('injectContext', () => {
     const result = injectContext({ cwd: vaultDir, session_id: 'buffer-test' });
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('L5 buffer inbox: 2 unclassified');
-    expect(ctx).toContain('/maencof:organize');
+    expect(ctx).toContain('organize skill');
+    expect(ctx).not.toContain('/maencof:organize');
   });
 
   it('session context omits buffer inbox line when buffer is empty', () => {

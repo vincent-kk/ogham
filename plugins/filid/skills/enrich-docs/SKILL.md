@@ -38,7 +38,7 @@ Call `fractal_scan` with `detail: "paths"` for the target. Use returned node pat
 
 ### 2. Resolve minimal context
 
-Call `context_resolve` for each candidate. Read only the returned owner-to-root INTENT/DETAIL references, nearest DETAIL, target document, entry point, and a bounded set of implementation files. Exclude organ nodes.
+Call one context_resolve batch with one ordered request per candidate. Map each candidate to `data.results[index]`, reading the artifact when `data` is absent. Read only each resolved result's owner-to-root INTENT/DETAIL references, nearest DETAIL, target document, entry point, and a bounded set of implementation files. Exclude organ nodes and report failed result diagnostics without guessing.
 
 ### 3. Audit and plan
 

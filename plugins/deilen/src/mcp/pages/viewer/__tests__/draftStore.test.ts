@@ -75,9 +75,7 @@ describe("viewer draft storage", () => {
     expect(stored.comments[0].attachments[0].dataUrl).toMatch(
       /^data:image\/png;base64,/,
     );
-    const [attachment] = deserializeAttachments(
-      stored.comments[0].attachments,
-    );
+    const [attachment] = deserializeAttachments(stored.comments[0].attachments);
     expect(attachment.blob.type).toBe("image/png");
     expect(attachment.blob.size).toBe(9);
     expect(await attachment.blob.text()).toBe("png-bytes");

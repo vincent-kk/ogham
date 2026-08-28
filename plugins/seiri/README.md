@@ -43,15 +43,15 @@ The two divide by layer. [filid](../filid) owns architecture, thresholds, and re
 
 Invoked by you:
 
-| Skill                 | Use                                                |
-| --------------------- | -------------------------------------------------- |
-| `/seiri:setup`        | Choose which rules this repository uses            |
-| `/seiri:brainstorm`   | Shape a change before writing it                   |
-| `/seiri:interview`    | Turn a vague request into criteria that can fail   |
-| `/seiri:scaffold-pr`  | Open an empty Draft PR before work starts          |
-| `/seiri:finish`       | Decide whether finished work integrates            |
-| `/seiri:mental-model` | Model how the code behaves, then attack the model  |
-| `/seiri:trace-change` | Explain a code change for a reader, layer by layer |
+| Skill                    | Use                                                  |
+| ------------------------ | ---------------------------------------------------- |
+| `/seiri:setup`           | Choose which rules this repository uses              |
+| `/seiri:brainstorm`      | Choose a repository-grounded design                  |
+| `/seiri:clarify-request` | Clarify a request into an actionable, testable scope |
+| `/seiri:scaffold-pr`     | Open an empty Draft PR before work starts            |
+| `/seiri:finish`          | Decide whether finished work integrates              |
+| `/seiri:mental-model`    | Model how the code behaves, then attack the model    |
+| `/seiri:trace-change`    | Explain a code change for a reader, layer by layer   |
 
 Dispatched automatically when the moment fits:
 

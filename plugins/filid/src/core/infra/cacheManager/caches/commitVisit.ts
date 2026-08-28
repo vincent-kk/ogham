@@ -15,18 +15,12 @@ import { writeAtomic } from './utils/writeAtomic.js';
 export type DeliveredState = 'none' | 'stale' | 'fresh';
 
 export interface VisitArgs {
-  /** Composite visit key recorded in reads (skipped on the gate-deny path). */
+  /** Composite visit key recorded in reads. */
   readKey: string;
   /** Owner-fractal delivery key; null = no owner INTENT (nothing to deliver). */
   ownerKey: string | null;
   /** Main scope: fresh iff (currentTurn - stamp) < ttlTurns. Sub scope is binary. */
   ttlTurns: number;
-  /**
-   * When true and the owner is undelivered, the visit resolves as a gate deny:
-   * delivery + guide are stamped (the deny reason carries them), but the read
-   * is not recorded and lastMap does not advance — a blocked call is no visit.
-   */
-  gateEligible: boolean;
   /**
    * Delivery is stamped but nothing will be emitted (INTENT.md self-authoring:
    * the author has the rules in context by construction). Skips guide marking
@@ -82,15 +76,12 @@ export function commitVisit(
       map,
     );
 
-    const denyPath = args.gateEligible && deliveredState === 'none';
     let mapChanged = false;
-    if (!denyPath) {
-      if (!map.reads.includes(args.readKey)) map.reads.push(args.readKey);
-      const canonical = canonicalOf(map.reads);
-      if (canonical !== (map.lastMap ?? '')) {
-        mapChanged = true;
-        map.lastMap = canonical;
-      }
+    if (!map.reads.includes(args.readKey)) map.reads.push(args.readKey);
+    const canonical = canonicalOf(map.reads);
+    if (canonical !== (map.lastMap ?? '')) {
+      mapChanged = true;
+      map.lastMap = canonical;
     }
 
     writeAtomic(filePath, JSON.stringify(map));

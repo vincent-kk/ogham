@@ -1,6 +1,6 @@
 ---
 name: rule
-user-invocable: true
+user-invocable: false
 description: 'Manages AI behavioral rules in .claude/rules/ on hosts with a rule surface, routing unsupported hosts to project instructions. Use when adding, editing, or removing global or path-conditional rules.'
 argument-hint: '[mode] [name]'
 version: '1.1.0'

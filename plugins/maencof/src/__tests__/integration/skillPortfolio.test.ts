@@ -18,9 +18,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = join(__dirname, '..', '..', '..');
 const SKILLS_DIR = join(PACKAGE_ROOT, 'skills');
 
-const REMOVED_SKILLS = ['rebuild', 'diagnose', 'dailynote'];
-// 28 + mental-model (그림자 삼각측량으로 형상을 추적하는 멘탈모델 구축)
-const EXPECTED_COUNT = 29;
+const REMOVED_SKILLS = [
+  'rebuild',
+  'diagnose',
+  'dailynote',
+  'craft-agent',
+  'craft-skill',
+  'think',
+  'refine',
+  'suggest',
+];
+// Portfolio after removing craft-skill, think, refine, and suggest.
+const EXPECTED_COUNT = 24;
 
 describe('maencof skill portfolio invariants', () => {
   it(`skills/ contains exactly ${EXPECTED_COUNT} skill directories`, () => {

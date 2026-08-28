@@ -5,7 +5,7 @@
 - host hook의 session, prompt context, boundary, fractal map, delivery turn과 guide 상태를 plugin cache에 저장한다.
 - cache는 성능 최적화일 뿐 FCA 판정의 장기 원장이나 acceptance ledger가 아니다.
 - main session과 host가 식별 가능한 subagent scope를 분리한다. 식별 증거가 없으면 보수적으로 main scope로 저하한다.
-- 방문 판정과 delivery 기록은 `commitVisit`의 단일 원자 transaction에서 직렬화한다.
+- 방문 판정, delivery 기록과 map 갱신은 `commitVisit`의 단일 원자 transaction에서 직렬화하며 hook permission은 결정하지 않는다.
 - cache I/O와 정리는 best-effort이며 hook 또는 MCP server lifecycle을 실패시키지 않는다.
 - criteria, spike, agent-role, promotion, debt 또는 review verdict 상태를 소유하지 않는다.
 - review artifact와 큰 MCP payload는 별도 `artifactStore`가 소유한다.
@@ -16,7 +16,7 @@
 - `isFirstInSession`, `markSessionInjected`, `removeSessionFiles` — session epoch 상태를 관리한다.
 - `readPromptContext`, `writePromptContext`, `hasPromptContext` — prompt context cache를 관리한다.
 - `readBoundary`, `writeBoundary`, `readFractalMap`, `removeFractalMap` — 구조 탐색 cache를 관리한다.
-- `commitVisit(cwd, scope, input): VisitDecision` — delivery freshness, map change와 guide 필요 여부를 원자적으로 결정한다.
+- `commitVisit(cwd, scope, input): VisitDecision` — 허용되는 모든 방문의 delivery freshness, map change와 guide 필요 여부를 원자적으로 결정한다.
 - `readTurn`, `incrementTurn`, `hasGuideInjected`, `markGuideInjected` — turn과 guide delivery를 관리한다.
 - `pruneOldSessions`, `pruneStaleCacheDirs` — cache lifecycle cleanup을 best-effort로 수행한다.
 - 공개 함수는 cache miss 또는 I/O 실패 시 안전한 빈 값으로 저하하며 project source를 변경하지 않는다.
@@ -33,6 +33,7 @@
 
 - 판별 가능한 main/subagent scope의 방문과 delivery 상태는 서로 오염되지 않는다.
 - 병렬 방문에서 동일 context/map delivery가 중복 방출되지 않는다.
+- 첫 delivery가 mutation에서 시작해도 같은 호출을 방문 map에 기록한다.
 
 ### AC-cache-lifecycle — 실패 격리
 
@@ -48,4 +49,4 @@
 
 ## Last Updated
 
-2026-08-28 — DETAIL이 유일한 acceptance ledger라는 현재 경계에서 폐기된 legacy 경로 토큰을 제거했다.
+2026-08-28 — `commitVisit`에서 mutation gate 입력을 제거하고 첫 delivery를 포함한 모든 허용 방문을 map에 기록하도록 계약을 단순화했다.

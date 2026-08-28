@@ -1,8 +1,8 @@
-# Interview Hints (Prepended to refine)
+# Interview Hints
 
-This file is the **entire domain knowledge** that craft-dashboard injects into the refine interview at Phase 1. Edit this file to evolve the interview questions — no skill code changes required.
+This file is the **entire domain knowledge** that craft-dashboard injects into the shared interview at Phase 1. Edit this file to evolve the interview dimensions — no skill code changes required.
 
-The block below is wrapped as `[dashboard interview hints]` and given to refine alongside the user's original request.
+The block below is wrapped as `[dashboard interview hints]` and combined with the user's original request.
 
 ---
 
@@ -21,7 +21,7 @@ Stop when those four are unambiguous. Default to 5–7 questions total, hard cap
 
 ## Probe Order (one question at a time)
 
-Refine should walk these dimensions in order. Skip a dimension if the user's initial input already answers it.
+Walk these dimensions in order. Skip a dimension if the user's initial input already answers it.
 
 ### A. Data Domain
 
@@ -32,10 +32,6 @@ Probe for:
 - **Time field**: `frontmatter.created`, `frontmatter.updated`, `frontmatter.expires`, file mtime
 - **Entity filter**: by tag, by `mentioned_persons`, by `person_ref`, by path glob
 - **Body content**: wikilinks (graph data), headings, task checkboxes, frontmatter custom fields
-
-Suggested question template:
-
-> "Which layer(s) should this draw from — all five, or a specific subset?"
 
 ### B. Dimension / Visualization
 
@@ -51,10 +47,6 @@ Probe for the _axis_ the user is mentally using:
 | "calendar", "heatmap", "활동"            | calendar           | calendar heatmap          |
 | "candle", "min/max/median"               | range              | candlestick / box         |
 
-Suggested question template:
-
-> "Time series, distribution, ranking, network, or correlation — which best matches?"
-
 ### C. Insight Goal
 
 Probe the _decision_ not just the _data_:
@@ -66,10 +58,6 @@ Probe the _decision_ not just the _data_:
 
 This shapes annotations (thresholds, color rules, highlight filters).
 
-Suggested question template:
-
-> "What decision will this dashboard help you make?"
-
 ### D. Search
 
 Probe whether search is needed at all, then how:
@@ -79,15 +67,11 @@ Probe whether search is needed at all, then how:
 - **backlinks** — "who links to this?"
 - **semantic** — Spreading Activation, expensive but rich
 
-Suggested question template:
-
-> "Do you need search inside this dashboard? If yes — Obsidian-style title/tag, or semantic 'related notes' too?"
-
 ---
 
 ## Hidden Dimensions to Surface (Socratic 2.5)
 
-When the user's stated goal is clear, refine's Phase 2.5 should probe these implicit assumptions:
+When the user's stated goal is clear, Phase 2.5 should probe these implicit assumptions:
 
 - **Refresh expectation**: live (SSE) or manual reload? (Default live.)
 - **Data scope**: current snapshot or include archived / expired docs?
@@ -99,9 +83,9 @@ Surface only the dimensions the user has not addressed. Do not ask all 5 by defa
 
 ---
 
-## Output Shape (refine writes this)
+## Output Shape
 
-When refine emits its Phase 3 "Refined Prompt", craft-dashboard expects a structure roughly like:
+The Phase 3 "Refined Prompt" uses this structure:
 
 ```markdown
 ## Refined Prompt
@@ -135,12 +119,10 @@ This shape (markdown headings) makes Phase 3 spec transform deterministic.
 
 ---
 
-## Anti-patterns refine should resist
+## Anti-patterns to resist
 
 - **Over-specifying colors**: design tokens come from the user's environment, not the spec
-- **Asking about React components by name**: stay at the dimension level
 - **Suggesting libraries**: stack is already chosen (Recharts default)
-- **Asking 10+ questions**: cap at 7
 
 ---
 

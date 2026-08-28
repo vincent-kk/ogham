@@ -1,6 +1,6 @@
 ---
 name: connect
-user-invocable: true
+user-invocable: false
 description: 'Registers external data sources (GitHub, Jira, Slack) for ingestion by writing connection details and schedules to .maencof-meta/data-sources.json. Use when adding, disabling, or reviewing connected sources.'
 argument-hint: '[list|add|remove|disable|enable] [sourceId]'
 version: '1.0.0'

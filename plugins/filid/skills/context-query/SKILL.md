@@ -32,11 +32,11 @@ Parse a project path and target path from the question, then call:
 ```text
 mcp__plugin_filid_tools__context_resolve({
   path: "<project-path>",
-  targetPath: "<target-path>"
+  requests: [{ targetPath: "<target-path>" }]
 })
 ```
 
-If the target is outside the project, has no owner, or returns diagnostics, report that evidence and do not guess.
+Read `data.results[0]`, or the same result from the artifact when `data` is absent. If it is unresolved, outside the project, ownerless, or carries diagnostics, report that evidence and do not guess.
 
 ### Round 2 — Read Minimal Documents
 
@@ -56,7 +56,7 @@ If the evidence cannot fit the budget, report what is known and list the unread 
 
 ## Invariants
 
-- One resolution call per question.
+- One resolution call with one request item per question.
 - Document references are loaded selectively; content is not requested from the tool.
 - The chain order is owner toward root.
 - Diagnostics and uncertain ownership remain visible.

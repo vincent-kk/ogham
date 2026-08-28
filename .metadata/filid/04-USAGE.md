@@ -341,24 +341,67 @@ interface ToolResultEnvelope<Summary, Data> {
 ### context_resolve
 
 ```json
-{ "path": "/repo", "targetPath": "/repo/src/core/restructure" }
+{
+  "path": "/repo",
+  "requests": [{ "targetPath": "/repo/src/core/restructure" }]
+}
 ```
 
 ```json
 {
-  "ownerFractalPath": "/repo/src/core/restructure",
-  "chain": [
-    {
-      "fractalPath": "...",
-      "intentPath": "...",
-      "detailPath": "...",
-      "documentStatus": "valid"
-    }
-  ],
-  "nearestDetailPath": "...",
-  "outputLanguage": "ko"
+  "status": "ok",
+  "summary": {
+    "projectRoot": "/repo",
+    "requestCount": 1,
+    "resolvedCount": 1,
+    "failedCount": 0,
+    "indeterminateCount": 0
+  },
+  "data": {
+    "results": [
+      {
+        "index": 0,
+        "resolved": true,
+        "targetPath": "/repo/src/core/restructure",
+        "status": "ok",
+        "summary": {
+          "targetPath": "/repo/src/core/restructure",
+          "ownerFractalPath": "/repo/src/core/restructure",
+          "chainLength": 2,
+          "chainPaths": ["/repo/src/core/restructure", "/repo"],
+          "nearestDetailPath": "/repo/src/core/restructure/DETAIL.md",
+          "outputLanguage": "ko",
+          "diagnosticsOutOfScope": 0
+        },
+        "resolution": {
+          "targetPath": "/repo/src/core/restructure",
+          "ownerFractalPath": "/repo/src/core/restructure",
+          "chain": [
+            {
+              "fractalPath": "/repo/src/core/restructure",
+              "intentPath": "/repo/src/core/restructure/INTENT.md",
+              "detailPath": "/repo/src/core/restructure/DETAIL.md",
+              "documentStatus": "valid"
+            },
+            {
+              "fractalPath": "/repo",
+              "intentPath": "/repo/INTENT.md",
+              "detailPath": "/repo/DETAIL.md",
+              "documentStatus": "valid"
+            }
+          ],
+          "nearestDetailPath": "/repo/src/core/restructure/DETAIL.md",
+          "outputLanguage": "ko"
+        },
+        "diagnostics": []
+      }
+    ]
+  },
+  "diagnostics": []
 }
 ```
+
+여러 target은 `requests`에 함께 넣는다. 한 호출은 document-only snapshot을 한 번 만들고 결과 순서와 개수를 보존한다. 일부 target 해석 실패는 해당 `resolved: false` item으로 남고 나머지 성공 결과는 유지된다. 단일 target도 길이 1의 배열을 사용한다.
 
 ### restructure_plan
 

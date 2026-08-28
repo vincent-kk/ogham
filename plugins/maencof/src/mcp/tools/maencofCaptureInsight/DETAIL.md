@@ -3,7 +3,7 @@
 ## Requirements
 
 - `capture_insight` MCP 도구는 auto-insight 레코드를 벌트에 영속화하기 **이전에** `config.category_filter` 를 반드시 적용한다. 금지된 카테고리에 대한 호출은 파일 쓰기 없이 즉시 거절된다.
-- 사용자는 `/maencof:insight --category <key> --accept|--reject` 를 통해 `.maencof-meta/insight-config.json::category_filter.<key>` 를 토글할 수 있다.
+- Users toggle `.maencof-meta/insight-config.json::category_filter.<key>` through the `insight` skill's `--category <key> --accept|--reject` options.
 - `insightInjector` 훅은 이 필터에 대한 표면 배너를 노출할 뿐이며 실제 차단은 이 MCP 도구의 책임이다. 따라서 이 파일의 enforcement 로직이 바뀌면 `insightInjector` 의 배너 문구도 동기화해야 한다.
 - 레이어 라우팅: `layer: 2`(내재화된 인사이트/원리)는 vault-relative `02_Derived` 런타임 루트에, `layer: 5`(미분류 단편)는 `buffer_type: 'conversation'` 으로 위임되어 vault-relative `05_Context` 런타임 루트에 생성된다. 두 이름은 저장소 경로가 아니며 `vaultPath` 가 위치를 정한다. L5 는 서브레이어를 갖지 않는다.
 
@@ -22,7 +22,7 @@
 {
   success: false,
   path: '',
-  message: `Category "${category}" is rejected by config.category_filter. Use /maencof:insight --category ${flag} --accept to allow.`,
+  message: `Category "${category}" is rejected by config.category_filter. Use the insight skill with --category ${flag} --accept to allow.`,
 }
 ```
 

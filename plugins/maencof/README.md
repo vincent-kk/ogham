@@ -124,19 +124,17 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 /maencof:manage
 ```
 
-View skill/agent activation status, usage reports, and toggle features on/off.
+View skill/agent activation status and manage lifecycle operations.
 
 ### Environment Configuration
 
 ```
 /maencof:configure
 /maencof:bridge slack
-/maencof:craft-skill pr-review
 ```
 
 - `configure` — Unified entry point for project configuration (MCP, skills, agents, rules, CLAUDE.md).
 - `bridge` — End-to-end external service integration: install MCP + register data source + generate workflow skill.
-- `craft-skill` / `craft-agent` — Generate custom skills or agents via conversation.
 - `instruct` — Safely edit CLAUDE.md with backup and @import splitting.
 - `rule` — Create, edit, or remove behavioral rules.
 - `lifecycle` — Register dynamic hook actions (echo/remind) triggered by lifecycle events.
@@ -200,28 +198,23 @@ Alongside vault knowledge, maencof keeps a small **personal context** — transi
 | `/maencof:explore`         | Core     | Interactive graph traversal (up to 3 rounds)                                                         |
 | `/maencof:organize`        | Core     | Agent-guided document reorganization                                                                 |
 | `/maencof:reflect`         | Core     | Read-only knowledge health analysis                                                                  |
-| `/maencof:suggest`         | Core     | SA + Jaccard similarity link suggestions                                                             |
 | `/maencof:build`           | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
 | `/maencof:checkup`         | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
 | `/maencof:cleanup`         | Health   | Vault document deletion and CLAUDE.md cleanup                                                        |
 | `/maencof:ingest`          | Advanced | Import from URL, GitHub, or text                                                                     |
 | `/maencof:connect`         | Advanced | Register external data sources                                                                       |
 | `/maencof:mcp-setup`       | Advanced | Install external MCP servers                                                                         |
-| `/maencof:manage`          | Advanced | Skill/agent activation and usage reports                                                             |
+| `/maencof:manage`          | Advanced | Skill/agent activation and lifecycle management                                                      |
 | `/maencof:personal-status` | Advanced | View/resolve/toggle the personal context (states + recent topics)                                    |
 | `/maencof:insight`         | Advanced | Auto-insight capture management                                                                      |
 | `/maencof:changelog`       | Advanced | Self-change daily changelog recorder                                                                 |
 | `/maencof:migrate`         | Advanced | Vault architecture migration                                                                         |
 | `/maencof:configure`       | Config   | Unified environment configuration entry point                                                        |
 | `/maencof:bridge`          | Config   | MCP install + register + workflow skill in one                                                       |
-| `/maencof:craft-skill`     | Config   | Custom skill generator                                                                               |
-| `/maencof:craft-agent`     | Config   | Custom agent generator                                                                               |
 | `/maencof:craft-dashboard` | Config   | Generate or update a personal vault dashboard from an interview                                      |
 | `/maencof:instruct`        | Config   | CLAUDE.md management                                                                                 |
 | `/maencof:rule`            | Config   | Behavioral rule management                                                                           |
 | `/maencof:lifecycle`       | Config   | Lifecycle action management                                                                          |
-| `/maencof:think`           | Analysis | Tree of Thoughts requirement analysis                                                                |
-| `/maencof:refine`          | Analysis | Ambiguous input refinement interview loop                                                            |
 
 ---
 

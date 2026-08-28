@@ -4,8 +4,8 @@ Full pipeline for scaffolding a new vault dashboard from scratch. Load when SKIL
 
 ```
 Phase 1  Domain Priming         (inject interview hints)
-Phase 2  Delegate to refine     (Socratic interview, 5–7 turns, hard cap 7)
-Phase 3  Spec Transform         (refined draft → dashboard-spec.json)
+Phase 2  Interview              (Socratic interview, 5–7 turns, hard cap 7)
+Phase 3  Spec Transform         (interview draft → dashboard-spec.json)
 Phase 4  Scaffold               (templates + spec-driven injections)
 Phase 5  Build & Hand-off       (install, build, validate, generate run-skill, hand-off)
 ```
@@ -39,32 +39,27 @@ Do not echo the priming file to the user as a chat-rendered code block. It is fo
 
 ---
 
-## Phase 2 — Adopt refine's protocol in-session
-
-**Slash-skill chaining is not supported inside an active skill.** Instead, this skill adopts `/maencof:refine`'s LLM-instruction protocol and runs it in the current session.
+## Phase 2 — Run the shared interview protocol
 
 ### Algorithm
 
 ```
-1. Read `$CLAUDE_PLUGIN_ROOT/skills/refine/SKILL.md`.
-   (Fallback: resolve relative to this skill's repo root if the env var is unset.
-   Absolute paths are environment-specific and MUST NOT be hard-coded here.)
-   The 5-phase contract is summarised in "Inlined refine contract" below.
+1. Read `../../knowledge/refine-protocol.md`; it is the self-contained source of truth for the shared interview mechanics.
 2. Read <target>/.dashboard-priming.md as the interview input.
-3. Execute refine's Phase 1 (Input Analysis) on the priming document:
+3. Execute Phase 1 (Input Analysis) on the priming document:
    decompose into Goal, Context, Constraints, Immutable Objects.
-4. Execute refine's Phase 2 + 2.5 (Inquiry Loop + Socratic Elenchus) directly
+4. Execute Phase 2 + 2.5 (Inquiry Loop + Socratic Elenchus) directly
    with the user — one question at a time, total budget 5–7 turns (hard
    cap 7, matching `refine-protocol.md` and `interview-hints.md`).
    Probe order: skip any dimension the user's input already resolves, and
    address the remaining unresolved dimensions in whatever order matches the
    user's mental model. interview-hints.md's A → B → C → D sections are an
    advisory traversal, not a forced sequence.
-5. Execute refine's Phase 3 (Final Generation). The refined prompt MUST use
+5. Execute Phase 3 (Final Generation). The refined prompt MUST use
    the section headings in interview-hints.md "Output Shape" (### Data /
    ### Dimensions / ### Insight Goal / ### Search / optional ### Annotations)
    so Phase 3 transform is deterministic.
-6. Execute refine's Phase 4 (Document Auto-Update): write the refined prompt
+6. Persist the Phase 3 output
    to <target>/.dashboard-spec.draft.md (NOT back to priming.md). The draft's
    format is:
 
@@ -89,7 +84,7 @@ Do not echo the priming file to the user as a chat-rendered code block. It is fo
    If missing: stop and report; do not fabricate.
 ```
 
-### Inlined refine contract (summary)
+### Shared interview contract
 
 See `../../knowledge/refine-protocol.md` for the full shared summary (one question per turn, 5–7 question budget for CREATE (hard cap 7), immutable-object preservation, Phase 3 stop rule, token-budget safety). Both CREATE and MUTATE workflows reference the same file — do not duplicate the contract here.
 
@@ -905,9 +900,3 @@ The generated backend uses chokidar to watch:
 - `<vault>/.maencof/stale-nodes.json` → triggers SSE topic `stale`
 
 Frontend uses TanStack Query and invalidates by topic (see `frontend/src/api/sse.ts` in the template).
-
----
-
-## Examples
-
-End-to-end CREATE walkthroughs (request → refine → spec → scaffold) live in **examples.md** in this directory. Load when you need a concrete pattern for the current request.

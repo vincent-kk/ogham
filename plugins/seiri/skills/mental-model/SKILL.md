@@ -1,35 +1,41 @@
 ---
 name: mental-model
 user-invocable: true
-description: 'Build a model of how the code actually behaves, then attack it — only the claims that survived, each marked by how well it is backed.'
-argument-hint: '<the question the model must answer>'
-version: '0.3.0'
+description: 'Infer and attack the predictive core principle behind a codebase, then teach its concrete deductions in a self-contained visual HTML article. Use to explain how a system works; not for diff review or diagnosis of an observed failure.'
+argument-hint: '<question about how the code behaves> [reader]'
+version: '0.4.0'
 complexity: moderate
 plugin: seiri
 ---
 
-# mental-model — a model you tried to break
+# mental-model — teach the system from one principle
 
-You were invoked by the user, so ask what the model is for. A model is not a summary: it predicts, and the code can refute it. Writing one you never attacked is the failure this skill exists to prevent — a plausible model reads exactly like a correct one.
+A mental model lets readers predict unseen behavior. Find one code principle, attack it, then teach what survives. Ask only when scope or audience changes the model; otherwise assume a smart newcomer.
 
-## Workflow
+## Build the model
 
-**1. Name the question, and ask now.** State what the model must answer, and what you would do differently depending on the answer. A model with no question grows until it retells the code. Ask everything you need here — step 2 enters a discipline that does not stop to ask.
+1. **Frame the question.** State what the reader must decide or predict. Load `/seiri:trace-structure` and trace only the needed entry points, callers, state, tests, and contracts. Comments and docs show intent, not runtime behavior.
+2. **Propose the predictive core principle.** It must explain several facts and predict one uninspected case. Reject generic praise such as “separation of concerns.” Carry one concrete input with real values through the real end-to-end path; anchor every abstraction to an observable step.
+3. **Deduce the system.** Derive each feature as **premise → consequence → mechanism → observable behavior**. A child belongs only when its parent makes it necessary. Explain why the parts exist and cooperate.
+4. **Attack the model.** Test each child claim on one dimension—structure, behavior, or domain. Predict a counterexample, then inspect another caller, branch, error path, registration, test, or trace. Simulate it hop by hop. In the article, show each attack and limit; keep refuted claims beside their counterexamples, and rewrite the parent principle.
+5. **Close with transfer.** Ask the reader to predict one unseen case, then reveal why. If survivors cannot answer it and the original question, return to tracing.
 
-**2. Collect facts in two layers, not narrative.** Load `/seiri:trace-structure` for the paths this question touches. **Deep** — the surrounding system the question sits in, kept as skippable background. **Narrow** — the paths the question touches, where a fact carries `file:line`; what you did not read is not one. A comment, doc, or commit message you read is a fact about intent, not behaviour (`references/claims.md`).
+## Teach it as a visual article
 
-**3. Hypothesize the essence, then split it.** Before any list of claims, state the model's core in one piece, with one concrete toy input: "if this model is right, input X takes path Y." Then split it into claims that could be wrong — each says what must hold, and what breaks if it does not. The essence enters the model only through its split claims; the toy input becomes step 4's cheapest weapon. Cut every sentence that predicts nothing — that is summary, and summary cannot be checked. Forms and the three layers are in `references/claims.md`.
+Lead with the conclusion and the problem that makes it useful. Use a conclusion-first, problem-led voice: conversational but exact, short paragraphs, reader-question transitions, jargon defined at first use, and candid limits and tradeoffs. Let the material choose its headings and rhythm.
 
-**4. Attack each claim.** Go looking for the code that contradicts it: the branch that skips it, the caller that violates it, the state where it stops holding — and run the simulation attack: walk the step-3 input end-to-end through the real paths. An unattacked claim does not enter the model. Where the counterexample hides, per layer, and the simulation attack are in `references/breaking.md`.
+Use visuals as evidence when relationships, structure, sequence, state, or comparison are faster to see than read. Show actual names and values; reuse a small visual language. Prose interprets rather than repeats. A deduction map may help, but let content choose the diagrams. No ASCII or decoration.
 
-**5. Report what survived, ordered for understanding.** Both background layers first (deep marked skippable), essence second, per-layer claims last — and an essence a refuted claim supported is rewritten before it may lead the report. Each claim carries `traced` (read it, cite `file:line`), `inferred` (follows from traced facts, not read directly), or `assumed` (neither — written down so it can be attacked later). Refuted claims stay in the report, with what killed them.
+Choose a coherent editorial direction with readable hierarchy, contrast, spacing, and code. Use quiet neutrals for page and text, one primary accent for identity, and secondary accents only for meaningful comparison or status. Keep typography, diagrams, code, and controls in one family. Let content choose hues and typefaces; fix no tokens or template.
 
-**6. Close the loop.** Answer the step-1 question from surviving claims only. If they cannot answer it, the model is not done: name the wall still dark and return to step 2 — a model that survived every attack yet answers nothing is a tour, not a model.
+## Evidence and artifact
 
-## Rules
+- Mark claims `traced` (code evidence at `path:line`), `inferred` (from traced facts), or `assumed` (ungrounded). A mark describes the claim, not a document about it.
+- Write a self-contained HTML with inline CSS and JavaScript to environment-chosen temporary storage or a scratchpad outside the repository. Name it `YYYY-MM-DD-mental-model-<slug>.html`; return its path.
+- Escape repository text inserted into HTML. Put code in `<pre>` with `white-space: pre` or `pre-wrap`; give diagrams text equivalents and controls accessible labels.
+- Check one desktop and one phone viewport for layout, contrast, overflow, and each interaction type once. Fix display defects, then recheck only affected views; avoid exhaustive browser coverage or subject correctness testing. Keep the repository read-only; write only the external HTML.
+- In chat, return one sentence about the model and a link. Do not duplicate the article in Markdown.
 
-- Surviving an attack is not proof. It means not broken yet; the mark says how hard you tried.
-- One claim, one layer. A claim spanning structure, behaviour, and domain at once cannot be attacked — a counterexample against one half leaves the other standing.
-- Do not modify files. This skill produces a model.
-- The model lives in this session only. Say so when handing it over, and let the user decide what is worth keeping.
-- Hand off: a model that exposed a defect goes to `/seiri:trace-cause`. The gates are the user's to invoke — suggest `/seiri:brainstorm` when the model shapes a change, `/seiri:trace-change` when a reader needs the change explained.
+Route defects to `/seiri:trace-cause`, future design to `/seiri:brainstorm`, and diffs to `/seiri:trace-change`.
+
+- As the final step, open the completed HTML file in the system default browser.

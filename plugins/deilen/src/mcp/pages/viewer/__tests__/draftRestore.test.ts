@@ -151,19 +151,19 @@ describe("viewer draft restoration", () => {
       "from server",
     );
     await vi.waitFor(() =>
-      expect(JSON.parse(localStorage.getItem("deilen:draft:s1")!)).toMatchObject(
-        {
-          comments: [
-            {
-              id: "c1",
-              text: "from server",
-              anchor: { startLine: 2 },
-              attachments: [],
-            },
-          ],
-          overall: [],
-        },
-      ),
+      expect(
+        JSON.parse(localStorage.getItem("deilen:draft:s1")!),
+      ).toMatchObject({
+        comments: [
+          {
+            id: "c1",
+            text: "from server",
+            anchor: { startLine: 2 },
+            attachments: [],
+          },
+        ],
+        overall: [],
+      }),
     );
   });
 

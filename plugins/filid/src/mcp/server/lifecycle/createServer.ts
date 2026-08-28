@@ -104,23 +104,33 @@ const FRACTAL_SCAN_INPUT_SCHEMA = z.object({
     ),
 });
 
-const CONTEXT_RESOLVE_INPUT_SCHEMA = z.object({
-  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
-  targetPath: z
-    .string()
-    .describe(
-      'Absolute path whose owning fractal and INTENT/DETAIL chain to resolve.',
-    ),
-  comparePaths: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Paths whose lowest common fractal to resolve — the placement question ' +
-        '"where does code shared between these consumers belong?". Returns ' +
-        'null when no single fractal owns them all. Omit to resolve only the ' +
-        'target chain.',
-    ),
-});
+const CONTEXT_RESOLVE_INPUT_SCHEMA = z
+  .object({
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    requests: z
+      .array(
+        z.object({
+          targetPath: z
+            .string()
+            .describe(
+              'Absolute path whose owning fractal and INTENT/DETAIL chain to resolve.',
+            ),
+          comparePaths: z
+            .array(z.string())
+            .optional()
+            .describe(
+              'Paths whose lowest common fractal to resolve for this target. ' +
+                'Returns null when no single fractal owns them all. Omit to ' +
+                'resolve only the target chain.',
+            ),
+        }),
+      )
+      .min(1)
+      .describe(
+        'One or more ordered target requests evaluated against one shared snapshot.',
+      ),
+  })
+  .strict();
 
 const RESTRUCTURE_PLAN_INPUT_SCHEMA = z.object({
   path: z.string().describe(PROJECT_ROOT_DESCRIPTION),

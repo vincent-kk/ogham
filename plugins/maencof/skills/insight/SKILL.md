@@ -1,6 +1,6 @@
 ---
 name: insight
-user-invocable: true
+user-invocable: false
 description: 'Manages auto-insight capture: enable/disable, sensitivity, per-category allowlist, and recent capture review. Use when tuning or inspecting what maencof captures automatically.'
 argument-hint: '[--recent] [--stats] [--sensitivity high|medium|low] [--enable|--disable]'
 version: '1.1.0'
@@ -50,35 +50,16 @@ Show auto-insight capture statistics.
 2. Display: total captured, L2 direct, L5 captured, L5→L2 promoted, L5 archived
 3. Calculate precision estimate: promoted / (promoted + archived) if denominator > 0
 
-### --sensitivity <high|medium|low>
+### Configuration Updates
 
-Adjust capture sensitivity.
+| Option               | Config key                 | Value                |
+| -------------------- | -------------------------- | -------------------- |
+| `--sensitivity <high | medium                     | low>`                | `sensitivity` | supplied level |
+| `--enable`           | `enabled`                  | `true`               |
+| `--disable`          | `enabled`                  | `false`              |
+| `--max <N>`          | `max_captures_per_session` | positive integer `N` |
 
-1. Read current config from `.maencof-meta/insight-config.json`
-2. Update `sensitivity` field to the specified level
-3. Write updated config back
-4. Confirm: "Insight capture sensitivity changed to {level}."
-
-### --enable
-
-Enable auto-insight capture.
-
-1. Read config, set `enabled: true`, write config
-2. Confirm: "Auto-insight capture enabled."
-
-### --disable
-
-Disable auto-insight capture.
-
-1. Read config, set `enabled: false`, write config
-2. Confirm: "Auto-insight capture disabled."
-
-### --max <N>
-
-Set maximum captures per session.
-
-1. Read config, set `max_captures_per_session` to N, write config
-2. Confirm: "Maximum captures per session changed to {N}."
+For any row, read `.maencof-meta/insight-config.json`, update the selected key, write the config, and confirm the applied value.
 
 ### --category <principle|refuted|ephemeral> --accept|--reject
 

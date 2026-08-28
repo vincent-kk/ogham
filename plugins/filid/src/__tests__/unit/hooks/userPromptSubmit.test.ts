@@ -40,7 +40,7 @@ describe('handleUserPromptSubmit', () => {
     const sessionId = `session-ups-${Date.now()}`;
 
     // Pre-populate main and subagent fmaps
-    const args = { ownerKey: null, ttlTurns: 5, gateEligible: false };
+    const args = { ownerKey: null, ttlTurns: 5 };
     commitVisit(tempDir, { sessionId }, { ...args, readKey: 'src/a' });
     commitVisit(
       tempDir,

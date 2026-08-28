@@ -1,8 +1,8 @@
 ---
 name: manage
-user-invocable: true
-description: 'Audits, enables, disables, or deletes maencof skills and agents, with usage-frequency reports to spot obsolete entries. Use for skill or agent lifecycle management and usage statistics.'
-argument-hint: '<list|report|disable|enable|delete|create> [name]'
+user-invocable: false
+description: 'Audits, enables, disables, deletes, or scaffolds maencof skills and agents. Use for skill or agent lifecycle management.'
+argument-hint: '<list|disable|enable|delete|create> [name]'
 version: '1.0.0'
 complexity: medium
 context_layers: []
@@ -12,12 +12,11 @@ plugin: maencof
 
 # manage — Skill and Agent Management
 
-Manages the lifecycle of skills and agents in the maencof plugin. Supports usage frequency reporting based on usage-stats.json, as well as disable/enable operations.
+Manages the lifecycle of skills and agents in the maencof plugin, including list, disable, enable, delete, and scaffold operations.
 
 ## When to Use This Skill
 
 - When you want to disable skills you are not using
-- When you want to check skill/agent usage statistics
 - When you want to register a new custom skill
 - "skill management", "agent management", "manage"
 
@@ -30,24 +29,6 @@ Manages the lifecycle of skills and agents in the maencof plugin. Supports usage
 ```
 
 Display a list of all installed skills/agents and their activation status.
-
-### report mode
-
-```
-/maencof:manage report [--days <N>]
-```
-
-Analyze usage-stats.json and generate a usage frequency report:
-
-```markdown
-## Skill/Agent Usage Report (last N days)
-
-| Name     | Call count | Last used  | Status              |
-| -------- | ---------- | ---------- | ------------------- |
-| explore  | 12         | 2026-02-28 | active              |
-| organize | 3          | 2026-02-20 | active              |
-| ingest   | 0          | —          | disable recommended |
-```
 
 ### disable mode
 
@@ -84,19 +65,7 @@ Generate a new custom skill/agent template:
 - Skill: create `{CWD}/.claude/skills/<name>/SKILL.md` (with default template)
 - Agent: create `{CWD}/.claude/agents/<name>.md` (with default template)
 
-> **vs `/maencof:craft-skill` and `/maencof:craft-agent`**: `manage create` generates a minimal template for quick scaffolding. Use `/maencof:craft-skill` or `/maencof:craft-agent` for a full guided workflow with progressive disclosure, complexity tuning, and MCP integration.
-
 ## Workflow
-
-### report mode workflow
-
-```
-1. Read .maencof-meta/usage-stats.json
-2. Apply period filter (--days option)
-3. Aggregate usage frequency
-4. Items with 0 uses -> display "disable recommended"
-5. Output report
-```
 
 ### disable/enable workflow
 
@@ -111,16 +80,15 @@ Generate a new custom skill/agent template:
 
 | Tool    | Purpose                                                                                                                                                                                                          |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Read`  | Read `.maencof-meta/usage-stats.json`, `.maencof-meta/disabled-registry.json`                                                                                                                                    |
+| `Read`  | Read `.maencof-meta/disabled-registry.json`                                                                                                                                                                      |
 | `Write` | Write `.maencof-meta/disabled-registry.json` (disable/enable operations); create new skill/agent template files in the Execution Area (`{CWD}/.claude/skills/<name>/SKILL.md`, `{CWD}/.claude/agents/<name>.md`) |
 
-> Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.maencof-meta/` (not vault documents). They are accessed with Read/Write tools, not maencof MCP tools.
+> Note: `disabled-registry.json` is a metadata file in `.maencof-meta/` (not a vault document). It is accessed with Read/Write tools, not maencof MCP tools.
 >
 > Note: `mcp__plugin_maencof_tools__create` is intentionally excluded here. It creates vault knowledge documents (requires Layer + tags + Frontmatter) and is not suitable for generating plugin structure files such as SKILL.md or agent definitions. Use the `Write` tool for those.
 
 ## Error Handling
 
-- **usage-stats.json missing**: display empty report with note "No usage data found. Stats accumulate after first skill invocations."
 - **disabled-registry.json missing**: treat as empty registry; create on first disable operation
 - **Attempt to delete built-in skill/agent**: "Built-in items cannot be deleted. Use `disable` instead."
 - **Name not found**: "No skill or agent named '{name}' found."

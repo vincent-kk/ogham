@@ -1,9 +1,6 @@
 import { normalize, portableRelative } from '@ogham/cross-platform';
 
-import {
-  CTX_TTL_TURNS_DEFAULT,
-  HOOK_TOOL_NAME,
-} from '../../../../constants/hookDefaults.js';
+import { CTX_TTL_TURNS_DEFAULT } from '../../../../constants/hookDefaults.js';
 import { PORTABLE_PATH_MARKERS } from '../../../../constants/pathMarkers.js';
 import { writeBoundary } from '../../../../core/infra/cacheManager/caches/boundaryCache.js';
 import { commitVisit } from '../../../../core/infra/cacheManager/caches/fractalMapCache.js';
@@ -19,7 +16,7 @@ import { visitScope } from '../../../utils/visitScope.js';
 import { buildCtxBlock } from './utils/buildCtxBlock.js';
 import { buildDeliveryOutput } from './utils/buildDeliveryOutput.js';
 import { isFastPathSettled } from './utils/isFastPathSettled.js';
-import { resolveGateContext } from './utils/resolveGateContext.js';
+import { resolveDeliveryContext } from './utils/resolveDeliveryContext.js';
 import { resolveVisitedPath } from './utils/resolveVisitedPath.js';
 import { visitKey } from './utils/visitKey.js';
 
@@ -30,9 +27,8 @@ export type { FractalMap };
  *
  * Resolves the owner fractal's delivery state (none | stale | fresh) through
  * the locked `commitVisit` transaction and emits accordingly:
- * - none + Read → [filid:ctx] pointing at the owner INTENT.md (cwd-relative path + read directive, never the body)
- * - none + mutation (gate-eligible) → deny whose reason carries the same
- *   pointer block; the identical retry passes (delivery was stamped)
+ * - none → [filid:ctx] pointing at the owner INTENT.md (cwd-relative path +
+ *   read directive, never the body); every tool proceeds
  * - stale → soft [filid:ctx] re-delivery, tool proceeds
  * - fresh → silent
  * [filid:map] is emitted only when the turn's visit set changed. A directory
@@ -52,10 +48,6 @@ export function processVisit(input: PreToolUseInput): HookOutput {
   if (!rawPath) return { continue: true };
   // The resolver derives the parent from the absolute file path portably.
   const { filePath, fileDir } = resolveVisitedPath(safeCwd, rawPath);
-  const mutation =
-    input.tool_name === HOOK_TOOL_NAME.WRITE ||
-    input.tool_name === HOOK_TOOL_NAME.EDIT ||
-    input.tool_name === HOOK_TOOL_NAME.DELETE;
   const scope = visitScope(input);
 
   const { cachedBoundary, settled } = isFastPathSettled(
@@ -79,16 +71,14 @@ export function processVisit(input: PreToolUseInput): HookOutput {
     PORTABLE_PATH_MARKERS.CURRENT;
   const readKey = visitKey(boundary, relDir);
 
-  const { ownerDir, ownerKey, ownerRelDir, gateEligible, selfDelivery } =
-    resolveGateContext(
-      filePath,
-      fileDir,
-      chain,
-      intents,
-      boundary,
-      readKey,
-      mutation,
-    );
+  const { ownerDir, ownerKey, selfDelivery } = resolveDeliveryContext(
+    filePath,
+    fileDir,
+    chain,
+    intents,
+    boundary,
+    readKey,
+  );
 
   const ttlTurns =
     readHookConfig(safeCwd)?.injection?.ctxTtlTurns ?? CTX_TTL_TURNS_DEFAULT;
@@ -97,7 +87,6 @@ export function processVisit(input: PreToolUseInput): HookOutput {
     readKey,
     ownerKey,
     ttlTurns,
-    gateEligible,
     silentDelivery: selfDelivery,
   });
 
@@ -106,9 +95,7 @@ export function processVisit(input: PreToolUseInput): HookOutput {
 
   return buildDeliveryOutput(
     decision,
-    gateEligible,
     ownerKey,
-    ownerRelDir,
     selfDelivery,
     relDir,
     ctxBlock,

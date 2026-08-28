@@ -117,7 +117,7 @@ function buildReminderMessage(expiredRelativePaths: string[]): string {
   return [
     `[maencof] ${count} expired L5 document(s) are past their TTL and were never triaged:`,
     `${listedPaths}${overflow}`,
-    'Suggest the user promote them via /maencof:organize or discard via /maencof:cleanup buffer.',
+    'Suggest the user promote them with the organize skill or discard them via /maencof:cleanup buffer.',
     'Do NOT auto-delete — L5 disposal is a user decision.',
   ].join('\n');
 }
