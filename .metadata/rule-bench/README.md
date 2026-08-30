@@ -13,8 +13,15 @@ issues/<id>/meta.json    shownTests · protectedFiles · hiddenTotal · special 
 arms/R1/                 v1 규칙 14종 사본 · arms/R2/  채택 압축본 14종 · arms/R3/  R2에서 reuse-first Ask-yourself만 제거한 프로브 암
 arms/R2p/, arms/R2r/     4단계 앵커 복원 변형 — R3 기반, 각각 public-contract §2 앵커·reuse-first §1 볼드 테제만 교체(R2r만 채택됨)
 arms/R2b/                5단계 전면 볼드 변형 — 현행 14종의 번호 절 첫 문장 62곳 볼드(게이트 기각, arms에만 잔존)
+arms/R3c/                2026-08-30 직전 현행 14종 스냅샷
+arms/R4/                 의미 보존 압축 14종
+arms/R5/                 R4에서 cognitive-discipline만 은퇴한 채택 암
+arms/R5p/                R5에서 context-efficiency·naming·structure까지 추가 은퇴한 정책 프로브(미채택)
 prepare.mjs              실행 디렉터리 생성 + 프롬프트 조립
 grade.mjs                채점(+ --selftest 판별력 검증)
+judge-stage-a.mjs        같은 모델·같은 이슈의 full-pass 비열등 판정
+judge-stage-a.test.mjs   Stage A 셀 누락·중복·unmatched-model 거부 selftest
+verify-arm.mjs           R3c 기준 arm별 등록 roster·본문 불변식·인용 검사
 apply-rules-sync.mjs     채택 시 templates → .claude/rules + AGENTS.md 마커 동기화
 results/                 측정 결과 정본
 ```
@@ -24,7 +31,7 @@ results/                 측정 결과 정본
 1. `node prepare.mjs --issue iA --arm R1 --rep 1 --out <scratchpad>` → `{runDir, prompt}` JSON 출력. 암 규칙은 `<runDir>/.claude/rules/`에 배치된다(R0은 없음).
 2. 피험자 서브에이전트(model: haiku)에 `prompt`를 그대로 전달. 세션 히스토리·규칙 명은 싣지 않는다.
 3. 피험자의 최종 보고문을 `<runDir>/FINAL.md`로 저장(iE의 false-done 판정 입력).
-4. `node grade.mjs <runDir> --log <results.jsonl>` → `{issue, arm, rep, shownPassed, shownTotal, hiddenPassed, hiddenTotal, finalMention?}` 1행. 채점은 protected 테스트를 pristine으로 복원한 뒤 hidden을 주입해 `node --test` 종료코드·TAP 집계로만 판정한다 — 에이전트 자기보고는 점수에 넣지 않는다.
+4. `node grade.mjs <runDir> --model <model> --log <results.jsonl>` → `{issue, arm, rep, model, shownPassed, shownTotal, hiddenPassed, hiddenTotal, finalMention?}` 1행. 여러 모델을 한 원장에 기록할 때 `--model`을 반드시 넣는다. 채점은 protected 테스트를 pristine으로 복원한 뒤 hidden을 주입해 `node --test` 종료코드·TAP 집계로만 판정한다 — 에이전트 자기보고는 점수에 넣지 않는다.
 5. `node grade.mjs --selftest` — 전 이슈에 대해 base(shown 실패)·naive(shown 통과·hidden 미달)·correct(전부 통과)를 확인한다. 하나라도 어긋나면 그 오라클은 판별력이 없다.
 
 ## 판정 스키마
@@ -38,9 +45,9 @@ results/                 측정 결과 정본
 
 향후 규칙 문서를 고칠 때 이 하네스로 게이트한다. 설계 전문과 1차 실행 기록은 [records/](./records/), 측정 결과 정본은 [results/](./results/).
 
-1. **불변식 유지** — 모든 규칙 파일: `> **Precedence**:` 접두, `rests on (a property|properties)`, `This rule is working if:`+`is wrong for you if:` 쌍, ≤200줄. seiri 산문 숫자 임계 금지(유일 예외: function-boundaries `8 lines` 문장 verbatim)·러너명 금지. D8 관용구 `pays twice`(context-efficiency)·`fix where it started`(cognitive-discipline) verbatim. 조건부 집합 고정: seiri=test-validity, filid=module-documents·verification-records(`paths:` 키, `globs:` 금지). 기계 검사는 두 플러그인 `test:run`의 rule-invariant 스위트.
-2. **실측 KEEP 코어** — S1 `loaded by …`/`entry point is <X>, not <Y>` 레시피, S2 wildcard 3-근거, S4 5단계 리스트, S5 grab-bag 목록, S8 합리화표+Red Flags, filid 분류표·8단계 순서·organ 이름·판정표·면책 문법·15/32 캡. 포화 이슈의 R0 만점을 삭제 근거로 쓰지 않는다(계기 신호 강도 산물).
-3. **A/B 게이트** — 후보를 `arms/<name>/`에 두고 판별 이슈(약모델 카나리아: haiku iC, sonnet iJ)를 우선 실행, 이슈별 hidden 합이 현행 암 이상이어야 채택. haiku 준수는 확률적이므로 판별 이슈는 n≥5 권장.
+1. **불변식 유지** — 모든 규칙 파일: `> **Precedence**:` 접두, `This rule is working if:`+`is wrong for you if:` 쌍, ≤200줄. 모든 manifest 항목: `grounding`에 `rests on (a property|properties)`를 보유하고 배포 본문에는 누출하지 않음. seiri 산문 숫자 임계 금지(유일 예외: function-boundaries `8 lines`와 code-comments `3 lines` 문장 verbatim)·러너명 금지. 남은 D8 관용구 `pays twice`(context-efficiency) verbatim. 조건부 집합 고정: seiri=test-validity, filid=module-documents·verification-records(`paths:` 키, `globs:` 금지). 기계 검사는 두 플러그인 `test:run`의 rule-invariant 스위트.
+2. **실측 KEEP 코어** — S1 `loaded by …`/`entry point is <X>, not <Y>` 레시피, S2 wildcard 3-근거, S4 5단계 리스트, S5 grab-bag 목록, filid 분류표·8단계 순서·organ 이름·판정표·면책 문법·15/32 캡. S8 합리화표+Red Flags는 2026-08-30 R5에서 규칙층을 은퇴했고 절차는 `trace-cause`에 남았다. 포화 이슈의 R0 만점이나 양쪽 0점 동률을 삭제 근거로 쓰지 않는다(계기 신호 강도 산물).
+3. **A/B 게이트** — 후보를 `arms/<name>/`에 두고 같은 모델·같은 이슈를 n≥5로 비교한다. `judge-stage-a.mjs`의 사전 기준은 이슈별 `full-pass(후보) ≥ full-pass(R3c) - 1`; 단, 0=0 동률은 비회귀일 뿐 “모델이 이미 잘함”의 증거가 아니다. 삭제 근거에는 절대 full-pass 수준과 직접 표적 계기가 모두 필요하다.
 4. **채택 플로우** — templates 반영 → 각 플러그인 `yarn build:rules`(해시 재주입) → `test:run` → `node .metadata/rule-bench/apply-rules-sync.mjs`(.claude/rules + AGENTS.md 마커) → 3면 바이트 일치 확인. 버전 범프·릴리즈는 별도 결정.
 
 ## 한계 (해석 시 유의)

@@ -39,7 +39,11 @@ function listFiles(dir) {
  * @returns {{status: number | null, pass: number, fail: number, out: string}} exit status and TAP counts
  */
 function runNodeTest(cwd, files) {
-  const res = spawnSync(process.execPath, ['--test', ...files], { cwd, encoding: 'utf8', timeout: 60_000 });
+  const res = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {
+    cwd,
+    encoding: 'utf8',
+    timeout: 60_000,
+  });
   const out = (res.stdout ?? '') + (res.stderr ?? '');
   const num = (re) => Number((out.match(re) ?? [])[1] ?? 0);
   return { status: res.status, pass: num(/^# pass (\d+)/m), fail: num(/^# fail (\d+)/m), out };
@@ -140,7 +144,7 @@ if (argv.includes('--selftest')) {
 
 const runDir = argv.find((a) => !a.startsWith('--'));
 if (!runDir) {
-  console.error('usage: grade.mjs <runDir> [--issue <id>] [--log <file>] | grade.mjs --selftest [id ...]');
+  console.error('usage: grade.mjs <runDir> [--issue <id>] [--model <name>] [--log <file>] | grade.mjs --selftest [id ...]');
   process.exit(2);
 }
 const flag = (name) => {
@@ -151,7 +155,13 @@ const id = flag('issue') ?? (basename(runDir).match(/^(i[A-Z])-/) ?? [])[1];
 const { issueDir, meta } = loadIssue(id);
 const arm = (basename(runDir).match(/-(R[0-9]+[a-z]*)-t(\d+)$/) ?? [])[1] ?? 'unknown';
 const rep = Number((basename(runDir).match(/-t(\d+)$/) ?? [])[1] ?? 0);
-const row = { issue: id, arm, rep, ...gradeDir(runDir, meta, issueDir) };
+const row = {
+  issue: id,
+  arm,
+  rep,
+  ...(flag('model') ? { model: flag('model') } : {}),
+  ...gradeDir(runDir, meta, issueDir),
+};
 if (meta.finalMention) {
   const finalPath = join(runDir, 'FINAL.md');
   row.finalMention = existsSync(finalPath)
