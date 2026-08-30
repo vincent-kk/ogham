@@ -1,26 +1,28 @@
 ---
 name: review-plan
 user-invocable: true
-description: 'Prove the plan before performing it. Use when a plan lands, before executing it — a plan is a set of claims about the repository, and claims want evidence.'
+description: 'Review a plan against its selected planning method, common invariants, and repository evidence before execution.'
 argument-hint: '[path to the plan]'
 version: '0.1.0'
 complexity: moderate
 plugin: seiri
 ---
 
-# review-plan — the plan is a claim set; prove it before it runs
+# review-plan — respect the method; prove the claims
 
 This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line. The question's moment here is the challenge fork: delegate the review, or proceed on grounding alone.
 
 ## Workflow
 
-**1. Triage out loud.** One line names the depth and why. _Skip_ only a plan that already carries its evidence — requirements mapped to tasks and claims confirmed with recorded tool output. _Ground_ is the default for every plan. _Challenge_ when a trigger holds: the blast radius that lets write-plan ask (a broad refactor, a new module or feature), a hard-to-reverse step (deletion, migration, a public-contract change), or a plan this session did not write — inherited claims have no session evidence at all. A silent skip is the failure mode; a stated one is a judgment.
+**1. Triage out loud.** One line names the depth and why. _Skip_ only a plan that already identifies its planning method and carries reproducible evidence for its current-state claims and requirement coverage. _Ground_ is the default for every plan. _Challenge_ when a trigger holds: a broad refactor, a new module or feature, a hard-to-reverse step (deletion, migration, a public-contract change), or a plan this session did not write. A silent skip is the failure mode; a stated one is a judgment.
 
-**2. Ground every claim.** A plan is claims about the repository: paths, symbols, signatures, commands. Confirm each claim about what exists now with a tool — the file read, the symbol grepped, its consumers swept, requirements mapped to tasks both ways — never from memory or from the plan's own prose. What the plan will create is expected to be absent; only current-state claims can fail grounding. Confirm the plan's commands by reading them, never by rehearsing them — a migration run during review is the damage it was meant to prevent. An unconfirmed claim is a finding, not a footnote. Gates are claims too: each is a result, not an activity; its CHECK produces an EXPECT match in observed output only on success; every number the report will state has a gate that measures it. A runnable gate without EXPECT is rework. A CHECK or EXPECT value outside a Markdown code span where a formatter can rewrite it is rework too. A delegated challenge receives the ledger with the plan.
+**2. Resolve the review contract.** Review the plan against its selected planning method and the common invariants. Confirm the method from the user's request, repository instructions, or the host's skill-selection rules — the plan's own label records the choice but does not grant it authority. Read the selected method before judging its structure. Apply the default method only when no other method was selected. Do not impose the default method's structure on a selected method.
 
-**3. Hand off or proceed** (challenge only). No trigger: record the verdict and move on. A trigger holds: ask the one question — hand the review to unprejudiced eyes, or proceed on grounding alone. Delegation hands the package `/seiri:request-review` demands — scope, the original requirements verbatim, known risks, the rule files that bind — and ends the turn; any capable reviewer serves, and it inherits none of this session's context. Skipping it leaves the verdict `grounded-only`, never a cleared challenge.
+**3. Ground every current-state claim.** Confirm existing paths, symbols, signatures, consumers, and commands with tools — never from memory or the plan's prose. Check requirement coverage in both directions without demanding a particular table or heading. Proposed files are expected to be absent; only claims about what exists now can fail grounding. Read commands but do not rehearse them: a migration run during review is the damage it was meant to prevent. An unconfirmed claim is a finding, not a footnote. When `/seiri:execute` will perform the plan, review its ledger too: every gate states a result rather than an activity, CHECK produces EXPECT only on success, and every reported number has a measuring gate. A runnable gate without EXPECT is rework. A CHECK or EXPECT outside a Markdown code span is rework. A delegated challenge receives the ledger with the plan.
 
-**4. Findings re-enter the plan, once.** Record the verdict in the plan file — `cleared`, `grounded-only`, or `rework-required` — with each finding and its evidence. Fixes land to write-plan's own standard; a wrong approach reopens `/seiri:write-plan`. Rework earns one scoped recheck of the claims it changed, never a second full review.
+**4. Hand off or proceed** (challenge only). No trigger: record the verdict and move on. A trigger holds: ask the one question — hand the review to unprejudiced eyes, or proceed on grounding alone. Delegation hands the package `/seiri:request-review` demands — scope, the original requirements verbatim, known risks, the rule files that bind — and ends the turn; any capable reviewer serves, and it inherits none of this session's context. Skipping it leaves the verdict `grounded-only`, never a cleared challenge.
+
+**5. Return findings to the selected method, once.** Record `cleared`, `grounded-only`, or `rework-required` with every finding and its evidence in the selected method's normal review location; when it has none, use the plan file. Fixes follow that method plus the common invariants. A wrong approach reopens `/seiri:write-plan`; changed claims receive one scoped recheck, never a second full review.
 
 ## Rules
 
