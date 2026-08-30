@@ -53,7 +53,6 @@ export const AUTO_CONDITIONAL_ASK_SKILLS = [
  */
 export const VISIBLE_USER_STARTED_SKILLS = [
   'architect',
-  'brainstorm',
   'clarify-request',
   'finish',
   'mental-model',
@@ -87,7 +86,6 @@ export const WORKFLOW_INVOCABLE_SKILLS = [
  */
 export const DOCUMENT_WRITING_SKILLS = [
   'architect',
-  'brainstorm',
   'clarify-request',
   'review-plan',
   'write-plan',

@@ -36,6 +36,6 @@ Choose a coherent editorial direction with readable hierarchy, contrast, spacing
 - Check one desktop and one phone viewport for layout, contrast, overflow, and each interaction type once. Fix display defects, then recheck only affected views; avoid exhaustive browser coverage or subject correctness testing. Keep the repository read-only; write only the external HTML.
 - In chat, return one sentence about the model and a link. Do not duplicate the article in Markdown.
 
-Route defects to `/seiri:trace-cause`, future design to `/seiri:brainstorm`, and diffs to `/seiri:trace-change`.
+Architecture `/seiri:architect`; plans `/seiri:write-plan`; defects `/seiri:trace-cause`; diffs `/seiri:trace-change`.
 
 - As the final step, open the completed HTML file in the system default browser.

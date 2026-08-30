@@ -49,7 +49,6 @@ English: [README.md](./README.md)
 | ------------------------ | ------------------------------------------------ |
 | `/seiri:setup`           | 이 저장소가 쓸 규칙 선택                         |
 | `/seiri:architect`       | 요구사항·시스템 관점·결정을 지속 가능한 기록으로 |
-| `/seiri:brainstorm`      | 저장소에 맞는 구현 전 설계 선택                  |
 | `/seiri:clarify-request` | 요청을 실행 가능한 검증 범위로 명확화            |
 | `/seiri:scaffold-pr`     | 작업 시작 전에 빈 Draft PR 열기                  |
 | `/seiri:finish`          | 끝난 작업을 통합할지 결정                        |

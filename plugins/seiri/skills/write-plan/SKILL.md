@@ -30,6 +30,7 @@ Regardless of method:
 - Write enough that a capable implementer can proceed without this conversation.
 - Ground claims about the current repository with tools and retain compact evidence a later reviewer can reproduce.
 - Connect every requirement to implementation work and observable verification; do not add work with no requirement.
+- Resolve the implementation direction needed for an executable plan within planning.
 - Leave no unresolved placeholder disguised as a step. A real unresolved decision names its owner and stops the affected work.
 - If `/seiri:execute` will perform the plan, adapt its runnable verification into the gate ledger. Write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`; each gate carries an EXPECT that only a success prints, and every CHECK and EXPECT value stays in a Markdown code span. Keep the ledger's fixed machine format separate from the plan's chosen human format.
 - A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement. When one occurs while planning, write `adr.md` beside the plan. Otherwise do not create it.

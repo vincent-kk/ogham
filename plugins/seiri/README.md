@@ -49,7 +49,6 @@ Invoked by you:
 | ------------------------ | ---------------------------------------------------------- |
 | `/seiri:setup`           | Choose which rules this repository uses                    |
 | `/seiri:architect`       | Preserve durable requirements, system views, and decisions |
-| `/seiri:brainstorm`      | Choose a repository-grounded design                        |
 | `/seiri:clarify-request` | Clarify a request into an actionable, testable scope       |
 | `/seiri:scaffold-pr`     | Open an empty Draft PR before work starts                  |
 | `/seiri:finish`          | Decide whether finished work integrates                    |
