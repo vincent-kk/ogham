@@ -7,7 +7,8 @@
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
 - Filid의 cross-review는 계약, 구조, 검증 문서라는 FCA 증거만 판정하며 코드를 수정하지 않는다.
 - `revalidate`는 항목 소유 프랙탈에서 재측정을 시작하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `context_resolve.data.results[].summary.chainPaths`의 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다.
-- `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하되 원격 branch를 push하지 않는다. 호출자가 branch를 먼저 push해야 하며, publication 실패는 저장된 body로 복구할 수 있어야 한다.
+- `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 중단한다.
+- `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하며, 원격 branch가 뒤처졌으면 기본적으로 push한 뒤 게시한다. `--no-push`와 publication 실패는 branch별로 저장된 body를 남겨 복구할 수 있어야 한다.
 - Filid의 resolve는 confirmed fix 전체를 한 decision sheet에 모아 severity/perspective와 독립적인 적용 추천을 표시하고, 명백하거나 영향이 작은 수정은 기본 선택한 채 논쟁적인 결정만 전면에 둔다.
 - spec-document는 파일당 15 cases, test-record는 파일당 32 cases를 허용하고 두 역할 사이의 promotion 관계를 만들지 않는다.
 - core, policy와 MCP DTO는 언어·확장자·진입점 이름·테스트 프레임워크 호출 문법을 알지 않으며 등록된 어댑터가 생태계 사실을 제공한다.
@@ -27,6 +28,7 @@
 - 모든 큰 MCP 결과는 16 KiB inline 예산의 공통 envelope를 거쳐 검증 가능한 임시 artifact로 전달한다.
 - managed rule 문서의 host target 선택과 동기화는 `@ogham/agent-artifacts`에 위임하며 Filid owner 주소 밖의 사용자 내용을 보존한다.
 - 설정 schema 2.0은 adapter mode와 enabled IDs, rule overrides, 언어 중립 구조 옵션을 정의한다. v1은 메모리에서 변환하고 명시적 저장 전까지 원본을 쓰지 않는다.
+- PR 문서 audit 범위는 모든 변경을 한 `context_resolve` batch로 해석한다. `resolved:true` owner는 config-excluded 이름 아래에서도 유지하고, `resolved:false`인 `context-target-unresolved`는 target이 현재 `HEAD`에 존재할 때만 ownerless non-FCA다. `structure.additionalExcludedDirectories`는 그 ownerless 이유를 명시하며, 그 밖의 실패는 범위를 축소하지 않는다.
 
 ## Acceptance Criteria
 
@@ -51,6 +53,12 @@
 - 코멘트는 판정표를 접힘 밖에 두고 나머지를 접어 호스트 크기 상한 안에 들어가며, 재실행은 브랜치당 코멘트를 하나로 유지한다.
 - 코멘트 실패나 부재가 판정 자체를 바꾸지 않는다.
 
+### AC-root-pr-document-scope — PR 문서 동기화 범위
+
+- 현재 `HEAD`에 존재하는 ownerless 경로는 non-FCA로 보고되며, config-excluded 이름은 그 이유를 보강한다. config-excluded 이름 아래라도 `context_resolve` owner가 있으면 문서 동기화 대상이다.
+- `HEAD`에 없는 unresolved 경로와 `context-target-unresolved` 이외의 실패는 non-FCA로 바뀌지 않고 PR 생성을 중단한다.
+- non-FCA 경로도 PR의 Code/Architecture 분석에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
+
 ### AC-root-revalidate-scope — 항목별 재검증 범위
 
 - accepted item의 project-relative Path는 절대 경로로 정규화하고, 각 범위에서 original `(Rule, Path)`와 정확히 일치하는 위반을 집계 수보다 먼저 판정한다.
@@ -67,6 +75,7 @@
 
 ## History
 
+- 2026-08-31 — repository-level 관리 파일 때문에 FCA owner가 있는 변경까지 PR이 막히지 않도록 config-declared와 existing ownerless 경로를 명시적 non-FCA 문서 범위로 분리했다. 삭제 경로는 자동 제외하지 않아 document drift를 숨기지 않는다.
 - 2026-08-28 — 100개 이상의 변경 경로도 한 번의 snapshot으로 해석하도록 `context_resolve`와 shipped caller를 batch 계약으로 전환했다.
 - 2026-08-22 — 자잘한 correction이 논쟁적인 결정을 가리지 않도록 resolve의 항목별 질문을 recommendation 기반 전체 decision sheet와 batch 입력으로 바꿨다.
 - 2026-08-22 — 좁은 소비자 범위가 형제 프랙탈 증거를 보지 못해 false-INCONCLUSIVE를 만들지 않도록 revalidate를 owner-to-root 최초 exact 측정으로 바꿨다.
@@ -74,4 +83,4 @@
 
 ## Last Updated
 
-2026-08-28
+2026-08-31

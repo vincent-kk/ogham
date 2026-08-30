@@ -46,7 +46,12 @@
   },
   "structure": {
     "additionalOrganNames": ["agents", "references"],
-    "additionalExcludedDirectories": ["skills", ".metadata", "scripts"],
+    "additionalExcludedDirectories": [
+      "skills",
+      ".metadata",
+      ".claude",
+      "scripts"
+    ],
     "additionalAllowedPeers": [
       {
         "basename": "version.ts"

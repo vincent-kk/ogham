@@ -14,6 +14,7 @@ const skillPaths = [
   'skills/revalidate/SKILL.md',
   'skills/revalidate/reference.md',
   'skills/pull-request/SKILL.md',
+  'skills/pull-request/reference.md',
 ] as const;
 const documents = Object.fromEntries(
   skillPaths.map((path) => [
@@ -78,5 +79,27 @@ describe('shipped context_resolve caller contract', () => {
     expect(documents['skills/revalidate/reference.md']).toContain(
       'result.summary.chainPaths',
     );
+  });
+
+  it('keeps non-FCA PR scope exclusions explicit and deletion-safe', () => {
+    const skill = documents['skills/pull-request/SKILL.md'];
+    const reference = documents['skills/pull-request/reference.md'];
+
+    expect(skill).toContain('structure.additionalExcludedDirectories');
+    expect(skill).toContain('context-target-unresolved');
+    expect(skill).toContain('git cat-file -e HEAD:<path>');
+    expect(skill).toContain('resolved: false');
+    expect(reference).toContain('Non-FCA document scope');
+    expect(reference).toContain('deleted or renamed source');
+  });
+
+  it('does not pre-filter config exclusions that retain an enclosing owner', () => {
+    const skill = documents['skills/pull-request/SKILL.md'];
+    const reference = documents['skills/pull-request/reference.md'];
+
+    expect(skill).not.toContain('do not send it to `context_resolve`');
+    expect(skill).toContain('all changed paths');
+    expect(reference).toContain('still FCA-owned');
+    expect(reference).toContain('reason, not an ownership override');
   });
 });
