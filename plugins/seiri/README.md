@@ -39,21 +39,22 @@ Each plan task has runnable gates in `.seiri/tasks/<name>/gates.md`. Run each `C
 
 ## Relationship to filid
 
-The two divide by layer. [filid](../filid) owns architecture, thresholds, and review — the numbers and what they mean. seiri owns direction: the principle without the number, so it holds in a repository that has never heard of any particular architecture.
+The two divide by layer. [filid](../filid) owns enforceable structural boundaries, thresholds, and review — the numbers and what they mean. seiri owns direction: `architect` can preserve architectural intent, but it neither validates nor enforces that architecture. The distinction lets seiri stand alone in a repository that has never heard of any particular architecture.
 
 ## Skills
 
 Invoked by you:
 
-| Skill                    | Use                                                  |
-| ------------------------ | ---------------------------------------------------- |
-| `/seiri:setup`           | Choose which rules this repository uses              |
-| `/seiri:brainstorm`      | Choose a repository-grounded design                  |
-| `/seiri:clarify-request` | Clarify a request into an actionable, testable scope |
-| `/seiri:scaffold-pr`     | Open an empty Draft PR before work starts            |
-| `/seiri:finish`          | Decide whether finished work integrates              |
-| `/seiri:mental-model`    | Model how the code behaves, then attack the model    |
-| `/seiri:trace-change`    | Explain a code change for a reader, layer by layer   |
+| Skill                    | Use                                                        |
+| ------------------------ | ---------------------------------------------------------- |
+| `/seiri:setup`           | Choose which rules this repository uses                    |
+| `/seiri:architect`       | Preserve durable requirements, system views, and decisions |
+| `/seiri:brainstorm`      | Choose a repository-grounded design                        |
+| `/seiri:clarify-request` | Clarify a request into an actionable, testable scope       |
+| `/seiri:scaffold-pr`     | Open an empty Draft PR before work starts                  |
+| `/seiri:finish`          | Decide whether finished work integrates                    |
+| `/seiri:mental-model`    | Model how the code behaves, then attack the model          |
+| `/seiri:trace-change`    | Explain a code change for a reader, layer by layer         |
 
 Dispatched automatically when the moment fits:
 

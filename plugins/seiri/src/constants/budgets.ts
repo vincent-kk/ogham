@@ -16,8 +16,9 @@ export const SKILL_MAX_BYTES = 4096;
  */
 export const RULE_MAX_LINES = 200;
 
-/** Skills that ship. A seventeenth is a budget decision, not a detail. */
+/** Skills that ship. The seventeenth is a deliberate budget decision. */
 export const SHIPPED_SKILLS = [
+  'architect',
   'brainstorm',
   'clarify-request',
   'execute',

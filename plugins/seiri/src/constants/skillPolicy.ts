@@ -52,6 +52,7 @@ export const AUTO_CONDITIONAL_ASK_SKILLS = [
  * user's request starts them, and they may ask freely once loaded.
  */
 export const VISIBLE_USER_STARTED_SKILLS = [
+  'architect',
   'brainstorm',
   'clarify-request',
   'finish',
@@ -85,6 +86,7 @@ export const WORKFLOW_INVOCABLE_SKILLS = [
  * repository's conventions. `satisfies` rejects a stranger.
  */
 export const DOCUMENT_WRITING_SKILLS = [
+  'architect',
   'brainstorm',
   'clarify-request',
   'review-plan',
