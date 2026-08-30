@@ -15,14 +15,16 @@
 | S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite                               |
 | S6  | `seiri_structure.md`            | L0·L1    | 방향형            | ✅ 이관본 (방향형)                    |
 | S7  | `seiri_context-efficiency.md`   | 6층 예외 | 레시피            | ✅ 통과 (D8 무삭감)                   |
-| S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | ✅ 통과 (D8 무삭감)                   |
+| S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | 🪦 은퇴 (2026-08-30, R5)              |
 | S9  | `seiri_decision-trail.md`       | L5       | 템플릿 슬롯       | ⏸ opt-in 확정 · 대조군 대기           |
 
 **공통 검증**: 전 규칙에 우선순위 사슬·형식 근거·이중 반증 적용. 임계 숫자 0건, 언어 특정 예시 0건, 각 200줄 미만.
 
-**재단·배포**: 구조 4종(agent-legible·public-contract·reuse-first·naming)은 lite로 재단, 프로세스 4종(test-validity·structure·context-efficiency·cognitive-discipline)은 full. S1~S8 배포, S9는 대조군 통과 후 opt-in 등재. 근거·수치는 [phase0/](./phase0/).
+**재단·배포**: 구조 4종(agent-legible·public-contract·reuse-first·naming)은 lite로 재단하고, test-validity·structure·context-efficiency는 절차·방향을 보존합니다. 현행 templates는 S1~S7과 후속 `code-comments`·`function-boundaries` 9종을 배포하며, S8은 상시 규칙층에서 은퇴했습니다. S9는 대조군 통과 후 opt-in 등재합니다. 근거·수치는 [phase0/](./phase0/).
 
 **v2 압축(2026-08-01)**: 전 10종(+filid 4종)을 압축형으로 재재단 — 골격을 1줄 헤더(B1+목적+B5+B7 병합)와 1줄 B6로 줄이고, Ask-yourself는 reuse-first §1 하나만 유지하며, 레시피·표·D8 관용구·규범 내용은 보존. rule-bench 80런 haiku A/B(R0 무규칙/R1 v1/R2 v2)에서 전 이슈 R2 ≥ R1로 채택 게이트 통과 — 판별 이슈 iC(reuse)는 R0 0% vs R1·R2 100%로 v2가 효능을 보존. 바이트 -24%(전체)·-23%(상시). 하네스·수치는 [../rule-bench/](../rule-bench/).
+
+**v3 정리(2026-08-30)**: 상위 모델의 기본 행동은 반복 지시하지 않고, 직접 표적 계기에서 비회귀와 높은 절대 통과율을 함께 보인 항목만 제거한다. 포화 R0나 0=0 동률은 삭제 근거로 쓰지 않는다. 이 기준으로 R4 의미 보존 압축을 통과시킨 뒤, `cognitive-discipline`만 상시 규칙층에서 은퇴한 R5를 채택했다. 대응하는 원인 추적 절차는 `trace-cause` 스킬이 계속 소유한다. D8이 제시한 미발화·플러그인 없는 협업자·장기 세션·가역성 위험은 일반적으로 유효하므로 naming·structure·context-efficiency까지 없애는 R5p는 채택하지 않았다. 장기 세션과 컴팩션은 이번 단일샷 벤치의 측정 밖이며, 회귀 시 [R4](../rule-bench/arms/R4/) 또는 [R3c](../rule-bench/arms/R3c/)에서 복원한다. 작성 시점의 B5 근거도 manifest로 옮겨 배포 본문에서 제거했다. 최종 R5는 R3c 대비 전체 45,653→37,685 bytes(-17.5%), 상시 33,743→26,328 bytes(-22.0%)다. 실행 기록은 [2026-08-30 결과](../rule-bench/results/2026-08-30-r4.md)에 둔다.
 
 ---
 
@@ -37,7 +39,7 @@
 ```
 
 **근거**: 공식 — _"두 규칙이 모순되면 Claude는 임의로 하나를 고를 수 있다."_ 텍스트로 못 박는 것 외에 수단이 없습니다.
-**배치**: 제목 바로 아래. v2부터 한 줄이며, 같은 blockquote 헤더 안에 목적 1문장·B5 형식 근거·B7 스코프 조건문을 이어 붙입니다(별도 문단 금지 — 골격 비용 절감의 핵심).
+**배치**: 제목 바로 아래. v2부터 한 줄이며, 같은 blockquote 헤더 안에 목적 1문장·B7 스코프 조건문을 이어 붙입니다(별도 문단 금지 — 골격 비용 절감의 핵심). B5는 v3부터 배포 문서가 아니라 manifest가 소유합니다.
 
 ## B2. 하방 개방 — 임계가 필요한 규칙
 
@@ -65,13 +67,13 @@ existing config, and recent commits. Match what you find. Where no convention
 exists, use the language or framework's idiomatic form.
 ```
 
-## B5. 형식 근거 — 각 규칙의 목적 문단에 1줄
+## B5. 형식 근거 — 각 manifest 항목에 1문장
 
-```markdown
-This rule rests on a property every codebase has: <형식 진술>.
+```json
+"grounding": "This rule rests on a property every codebase has: <형식 진술>."
 ```
 
-**이 문장을 못 쓰면 그 규칙은 값에 기대고 있다는 신호이므로 기각합니다.** 규칙 심사의 실질적 게이트이며, `rule-lint`가 기계 검사합니다.
+**이 문장을 못 쓰면 그 규칙은 값에 기대고 있다는 신호이므로 기각합니다.** 규칙 심사의 실질적 게이트이며, `rule-lint`가 manifest를 기계 검사합니다. 이 작성 시점의 입장 근거는 대상 저장소에 배포하지 않습니다. 런타임 행동을 지시하지 않고 규칙 편입 여부만 판정하기 때문입니다.
 
 ## B6. 이중 반증 — 각 규칙의 말미
 
@@ -200,11 +202,11 @@ Ask yourself: "<행동 앵커>"
 
 **규칙 전문 (정본)**: [`plugins/seiri/templates/rules/seiri_context-efficiency.md`](../../plugins/seiri/templates/rules/seiri_context-efficiency.md). 이 문서는 판정 노트(설계 근거)만 보유합니다 — 규칙 문서를 편집할 때는 정본 파일을 고칩니다.
 
-## S8. `seiri_cognitive-discipline.md`
+## S8. `seiri_cognitive-discipline.md` — 은퇴
 
-**판정 노트**: **6층 예외 2**이자 **유일한 규율 위반형**. 실패 유형 분류에 따라 금지+합리화표+Red Flags가 옳은 형태입니다 — 다른 규칙에 이 형태를 쓰면 역효과라는 실측이 있습니다.
+**판정 노트**: **6층 예외 2**이자 **유일한 규율 위반형**이었습니다. 2026-08-30 R5 벤치에서 이 규칙을 제외해도 `iE` 원인 수정이 luna 5/5, sol 3/3 full-pass였으므로 상시 규칙층에서 은퇴했습니다. 원인 추적 절차와 `fix where it started` 관용구는 `trace-cause` 스킬이 계속 소유합니다. 장기 세션·컴팩션은 측정 밖이므로 회귀가 관찰되면 `arms/R4` 또는 `arms/R3c`에서 복원합니다.
 
-**규칙 전문 (정본)**: [`plugins/seiri/templates/rules/seiri_cognitive-discipline.md`](../../plugins/seiri/templates/rules/seiri_cognitive-discipline.md). 이 문서는 판정 노트(설계 근거)만 보유합니다 — 규칙 문서를 편집할 때는 정본 파일을 고칩니다.
+**과거 전문**: [R3c 기준선](../rule-bench/arms/R3c/seiri_cognitive-discipline.md). 현행 templates에는 배포 파일이 없습니다.
 
 ## S9. `seiri_decision-trail.md` — 편입 미정
 
