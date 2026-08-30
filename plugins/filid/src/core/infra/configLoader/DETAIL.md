@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- `.filid/config.json` schema version은 `2.0`이며 문서 출력 언어, adapter 선택, rule override와 언어 중립 구조 옵션을 관리한다.
+- project config의 schema version은 `2.0`이며 문서 출력 언어, adapter 선택, rule override와 언어 중립 구조 옵션을 관리한다.
 - `language`는 문서 출력 언어일 뿐 프로그래밍 언어 선택값이 아니다.
 - adapter mode `auto`는 등록 adapter claim을 사용하고 `explicit`은 `enabled` ID만 사용한다. explicit의 빈 목록과 미등록 ID는 validation finding이다.
 - v1 config는 메모리에서 v2로 변환하고 `config-migration-required`와 제거된 key 진단을 반환한다. 사용자가 settings 저장을 승인하기 전에는 파일을 쓰지 않는다.
@@ -41,7 +41,7 @@ interface FilidConfigV2 {
 - `initProject(projectRoot, options)` — 부재한 config만 생성하며 기존 파일을 덮어쓰지 않는다.
 - `syncRuleDocs(projectRoot, selection, options)` — `options.scope`가 정한 레이어의 managed rule channel을 동기화하고, 회수한 반대편 문서를 `result.otherScope`로 보고한다.
 - `getRuleDocsStatus(projectRoot, pluginRoot?, scope?)` — mutation 없이 지정한 레이어의 active host target 상태를 반환한다. 기본값은 `project`.
-- `getRuleDocsChannel(projectRoot, scope?)` — 그 레이어가 쓰는 채널의 절대 경로. 항목별 `displayTarget`은 레이어 루트 기준 상대 경로라 `rules/x.md`만으로는 어느 루트인지 말하지 못한다.
+- `getRuleDocsChannel(projectRoot, scope?)` — 그 레이어가 쓰는 채널의 절대 경로. 항목별 `displayTarget`은 레이어 루트 기준 상대 주소라 표시 문자열만으로는 어느 루트인지 말하지 못한다.
 - `loadRuleDocsManifest(pluginRoot)` / `resolvePluginRoot(pluginRoot?)` — canonical manifest와 설치 root를 해석한다.
 
 ## Acceptance Criteria
@@ -76,6 +76,7 @@ interface FilidConfigV2 {
 - template/root read failure는 예외 대신 진단 가능한 저하 결과다.
 - manifest는 4개 rule 문서를 선언하고 전부 `required`다 — filid 규칙은 부분 채택 대상이 아니므로 optional 엔트리가 없고, 체크박스 UI에는 아무것도 렌더되지 않는다.
 - manifest 엔트리는 `legacyFilename`을 선언하지 않는다. 접두사 이전 이름 `fca.md`는 오래전에 은퇴해 더 이상 승계 대상이 아니다.
+- manifest 엔트리는 작성 시점의 편입 근거를 `grounding`에 보유하며, 동기화되는 규칙 본문에는 이를 렌더링하지 않는다.
 - manifest에서 사라진 구 문서 `filid_fca-policy.md`는 `filid_` 접두사 기반 owned orphan 스윕이 회수한다. 별도의 마이그레이션 경로를 두지 않는다.
 
 ### AC-rule-docs-scope — 배포 레이어
@@ -103,4 +104,4 @@ interface FilidConfigV2 {
 
 ## Last Updated
 
-2026-07-30 — `structure.additionalExcludedDirectories`를 schema 2.0에 추가했다.
+2026-08-31 — config와 rule channel의 경로 표현을 실제 레이어 계약으로 정정했다.

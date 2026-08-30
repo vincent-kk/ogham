@@ -14,6 +14,11 @@ export interface RuleDocEntry {
    */
   recommended?: boolean;
   /**
+   * Authoring-time admission gate (design B5): the universal property this
+   * rule rests on. Never rendered into the deployed document.
+   */
+  grounding?: string;
+  /**
    * SHA-256 hex digest of the template shipped in
    * `templates/rules/<filename>`, injected by
    * `scripts/sync-rule-hashes.mjs` at build time. The runtime compares it

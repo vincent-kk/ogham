@@ -10,6 +10,11 @@ export interface RuleDocEntry {
   title: string;
   description: string;
   /**
+   * Authoring-time admission gate (design B5): the universal property this
+   * rule rests on. Never rendered into the deployed document.
+   */
+  grounding?: string;
+  /**
    * SHA-256 hex digest of the template file shipped in
    * `templates/rules/<filename>`. Injected by
    * `plugins/filid/scripts/syncRuleHashes.mjs` at build time; the runtime

@@ -7,80 +7,81 @@
       "filename": "seiri_agent-legible.md",
       "title": "Agent-Legible Code",
       "description": "Make invisible wiring, repeated blocks, name traps, and indirection legible at the point where they bite.",
+      "grounding": "This rule rests on properties every codebase has: code lives in files with names and paths, and symbols are defined and referenced.",
       "recommended": true,
-      "templateHash": "5056b14f022a19ea28620b6724da2ba6905c4d270ac4d2e6308de04f3ba0917d"
+      "templateHash": "c21ba963f19c33f732d2cc1ed672640b68e1d3064b172c1b9cfb094191739fb4"
     },
     {
       "id": "seiri_code-comments",
       "filename": "seiri_code-comments.md",
       "title": "Code Comments",
       "description": "Inline comments are a capped last resort; declarations take the language's documentation form and state the current spec, never history.",
+      "grounding": "This rule rests on properties every codebase has: the language provides a form for comments, and a comment sits beside the code it describes.",
       "recommended": true,
-      "templateHash": "2fe109856b98c922bdc70b67fc01fa39ad65da75c74968de81ddd867585f54b5"
+      "templateHash": "0d2d9770d04aa8fb4dda7ec5d40320764431b36391bc5f810e537406c12aff77"
     },
     {
       "id": "seiri_public-contract",
       "filename": "seiri_public-contract.md",
       "title": "Public Contract",
       "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement.",
+      "grounding": "This rule rests on a property every codebase with a module system has: a distinction exists between what is public and what is internal.",
       "recommended": false,
-      "templateHash": "6ec2d24e4269a2b975776410adc71c4338410060b08294161a400f35085b70a2"
+      "templateHash": "7c38cbd16687b1ebfd12d5090db6872dd9800bfddcf5ded22e4834e05c5347cd"
     },
     {
       "id": "seiri_test-validity",
       "filename": "seiri_test-validity.md",
       "title": "Test Validity",
       "description": "A passing test is evidence only if it could have failed — fail first, verify the artifact you changed, curate suites.",
+      "grounding": "This rule rests on a property every codebase has: a means of verification exists and can be run.",
       "recommended": true,
-      "templateHash": "f3ae82612683a7dc407ccbc21dec3b853c34a0d38a64df08ce473821f7fa6e47"
+      "templateHash": "da9d5f0970f31a7bc6b1b100da6502dd6e7a58225890cbff1f748044a92d1fd0"
     },
     {
       "id": "seiri_reuse-first",
       "filename": "seiri_reuse-first.md",
       "title": "Reuse First",
       "description": "Search first, compose second, write last — the smallest change that answers the request.",
+      "grounding": "This rule rests on a property every codebase has: a change is a diff, and it answers a request.",
       "recommended": true,
-      "templateHash": "946821893b51e57afad5349f4a5255b3c6dd67cdbfab8321afb8aedb752d8e6e"
+      "templateHash": "22304006d5a21df262b3223fc266de96c50c6f88b797e263b71172022d8db20e"
     },
     {
       "id": "seiri_naming",
       "filename": "seiri_naming.md",
       "title": "Naming",
       "description": "Mirror sibling conventions, name one concrete responsibility, and keep grab-bag files out of the tree.",
+      "grounding": "This rule rests on properties every codebase has: files and symbols have names, and an existing style is already present — whatever it is.",
       "recommended": false,
-      "templateHash": "1324ebfc3a9ad3343de4c9b8f889c8b0a355ab61bebf10d5238584572c5b5726"
+      "templateHash": "c3f048061d1dc810d21f047d4c281361c441a93c9ce0fc3c76048bd70f81af11"
     },
     {
       "id": "seiri_structure",
       "filename": "seiri_structure.md",
       "title": "Structure",
       "description": "Direction-only structure rules: dependencies form a DAG, depth is a toll, cohesion splits and complexity compresses.",
+      "grounding": "This rule rests on properties every codebase has: files have sizes and paths, and symbols reference one another.",
       "recommended": false,
-      "templateHash": "ea4f854f324784152b5a65b02a5932653a29d1911ba42fcff5e95a0ecf43b7fa"
+      "templateHash": "2c9ccbd751c825fa14ec2450b54a1489843f67c938019996fd35336170529d43"
     },
     {
       "id": "seiri_function-boundaries",
       "filename": "seiri_function-boundaries.md",
       "title": "Function Boundaries",
       "description": "Functions compute from their parameters, effects stay at the edge, and one file exports one function.",
+      "grounding": "This rule rests on properties every codebase has: functions take inputs and produce outputs, and they live in files with names.",
       "recommended": false,
-      "templateHash": "801d4f3508ec2ae2ac866dc446d309da6d6c83cd08d80db9a3a582d24f3f4808"
+      "templateHash": "d2233bc22af3295afb75b1786d38303dd17023b6e9abea8c22e40fc5af243087"
     },
     {
       "id": "seiri_context-efficiency",
       "filename": "seiri_context-efficiency.md",
       "title": "Context Efficiency",
       "description": "Spend session context deliberately: generated artifacts are search-only, capture once, re-read with a reason.",
+      "grounding": "This rule rests on a property of every session, not of any codebase: context is finite, and reading spends it.",
       "recommended": false,
-      "templateHash": "4509428f9069ef1086c8b616e585e21f533a48033c2598e1c731678b484a941a"
-    },
-    {
-      "id": "seiri_cognitive-discipline",
-      "filename": "seiri_cognitive-discipline.md",
-      "title": "Cognitive Discipline",
-      "description": "Evidence over confidence, causes over symptoms — guardrails against rationalization in long agent sessions.",
-      "recommended": false,
-      "templateHash": "07f487ef244eccde3d25050e1cd9f42a4490ea10314437f88e8815d1197a8c97"
+      "templateHash": "3fde6203b4bf4c49c4966fc4bdfb1568997af9ea82d8650164cd984531269cb6"
     }
   ]
 }

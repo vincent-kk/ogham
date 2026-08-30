@@ -343,14 +343,14 @@ _"핵심 명사가 두 라운드 불변"_). 수치를 뺀 것은 정확성 손�
 
 `hooks/hooks.json` — filid 형식(`libs/run.cjs`를 통해 `bridge/*.mjs` 실행). 등록 정본은 `hooks.json`, dormant 목록은 `DORMANT_HOOKS`(constants)이며 wiring 테스트가 둘을 대조합니다.
 
-| 이벤트 (matcher)                | 진입점                           | 역할                                                      | 다이얼 게이팅                 | 상태                                 |
-| ------------------------------- | -------------------------------- | --------------------------------------------------------- | ----------------------------- | ------------------------------------ |
-| **SessionStart** (`*`)          | `bridge/setup.mjs`               | 활성 규칙 · 유효 다이얼 · 드리프트 경고 · 발동 폭 라인    | 블록 선택                     | 등록                                 |
-| **UserPromptSubmit** (`*`)      | `bridge/user-prompt-submit.mjs`  | 매 턴 스킬 발동·규칙 준수 상기 1줄 + 미충족 원장 환기 1줄 | **standard↑** (advisory 침묵) | 등록                                 |
+| 이벤트 (matcher)                | 진입점                           | 역할                                                                    | 다이얼 게이팅                 | 상태                                 |
+| ------------------------------- | -------------------------------- | ----------------------------------------------------------------------- | ----------------------------- | ------------------------------------ |
+| **SessionStart** (`*`)          | `bridge/setup.mjs`               | 활성 규칙 · 유효 다이얼 · 드리프트 경고 · 발동 폭 라인                  | 블록 선택                     | 등록                                 |
+| **UserPromptSubmit** (`*`)      | `bridge/user-prompt-submit.mjs`  | 매 턴 스킬 발동·규칙 준수 상기 1줄 + 미충족 원장 환기 1줄               | **standard↑** (advisory 침묵) | 등록                                 |
 | **PostToolUseFailure** (`Bash`) | `bridge/post-tool-use.mjs`       | 같은 명령 연쇄 실패 신호 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄 | **standard↑** (advisory 침묵) | 등록                                 |
-| **PostToolUse** (`Bash`)        | `bridge/post-tool-use.mjs`       | 성공 연쇄 해제 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄 | **standard↑** (advisory 침묵) | 등록 (같은 번들)                     |
-| **SubagentStart** (`*`)         | `bridge/subagent-start.mjs`      | 서브에이전트에 상태 요약 재주입 (렌더 축약판 재사용)      | SessionStart와 동일           | 등록                                 |
-| **InstructionsLoaded**          | `bridge/instructions-loaded.mjs` | 지시 파일 로드 관측 (주입 없음)                           | —                             | **dormant** — 미등록, 재측정 시 복원 |
+| **PostToolUse** (`Bash`)        | `bridge/post-tool-use.mjs`       | 성공 연쇄 해제 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄           | **standard↑** (advisory 침묵) | 등록 (같은 번들)                     |
+| **SubagentStart** (`*`)         | `bridge/subagent-start.mjs`      | 서브에이전트에 상태 요약 재주입 (렌더 축약판 재사용)                    | SessionStart와 동일           | 등록                                 |
+| **InstructionsLoaded**          | `bridge/instructions-loaded.mjs` | 지시 파일 로드 관측 (주입 없음)                                         | —                             | **dormant** — 미등록, 재측정 시 복원 |
 
 **실패는 Claude 에서만 별개 이벤트입니다** (페이로드 실측 — Claude Code 2.1.218·2.1.240, codex-cli 0.149.0). Claude 는 비-0 종료를 `PostToolUseFailure` 로 보내고 그 페이로드에는 `tool_response` 대신 `error`(= `Exit code N` + 명령 출력 전체)와 `is_interrupt` 가 실립니다. Codex 에는 그 이벤트가 없고 `PostToolUse` 하나가 성공·실패를 모두 나르며, `tool_response` 는 객체가 아니라 **문자열**(모델이 보는 출력)이고 코드모드 exec 은 exit code 를 싣지 않습니다.
 
@@ -386,12 +386,12 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 
 ### 상태 4종
 
-| 상태          | 내용                                                                        | 담당                      |
-| ------------- | --------------------------------------------------------------------------- | ------------------------- |
-| **설정**      | 다이얼 2계층 — 기준선(`config.json`, 커밋) + 런타임(`runtime.json`, 비추적) | `core/infra/configLoader` |
-| **배포 상태** | 배포된 규칙 + templateHash 대조                                             | `core/ruleDocs`           |
-| **세션 신호** | 실패 연쇄 카운터 등 세션 스코프 상태 (`.seiri/` 비추적 영역)                | `hooks/postToolUse`       |
-| **작업 상태** | `.seiri/tasks/<name>/` 원장                                                  | `core/gates` · [04-GATES](./04-GATES.md) |
+| 상태          | 내용                                                                        | 담당                                     |
+| ------------- | --------------------------------------------------------------------------- | ---------------------------------------- |
+| **설정**      | 다이얼 2계층 — 기준선(`config.json`, 커밋) + 런타임(`runtime.json`, 비추적) | `core/infra/configLoader`                |
+| **배포 상태** | 배포된 규칙 + templateHash 대조                                             | `core/ruleDocs`                          |
+| **세션 신호** | 실패 연쇄 카운터 등 세션 스코프 상태 (`.seiri/` 비추적 영역)                | `hooks/postToolUse`                      |
+| **작업 상태** | `.seiri/tasks/<name>/` 원장                                                 | `core/gates` · [04-GATES](./04-GATES.md) |
 
 **상태 키는 저장소 신원 + 워크트리로 분리합니다**(`core/infra/projectHash`) — 같은 저장소의 워크트리 두 개가 동시 세션을 열어도 섞이지 않아야 합니다.
 
@@ -401,7 +401,7 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 | ---------------- | -------------------------------------------------------------------------------------------- | -------------- |
 | `open_settings`  | 설정 UI 열기                                                                                 | `openSettings` |
 | `rule_docs_sync` | 선택 반영 — diff 제시 → 배포·제거. **+`config` action**: 유효 다이얼 조회 · 런타임 set/clear | `ruleDocsSync` |
-| `gates`          | 작업 원장 status · abandon · 수동 record. 명령 실행·원장 생성 없음                         | —              |
+| `gates`          | 작업 원장 status · abandon · 수동 record. 명령 실행·원장 생성 없음                           | —              |
 
 **3번째 도구는 `gates`입니다** — absorb-first의 유일한 예외(규칙 배포 ≠ 작업 상태). 4번째는 만들지 않습니다.
 
@@ -475,14 +475,14 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 
 ## manifest.json — SSoT
 
-| 필드                    | 용도                                  |
-| ----------------------- | ------------------------------------- |
-| `id`                    | `seiri_<slug>`                        |
-| `filename`              | 소스이자 배포 대상 basename           |
-| `legacyFilename`        | 파일명 변경 시 구 이름                |
-| `required`              | **전부 `false`**                      |
-| `title` · `description` | 설정 UI 체크박스 라벨·설명            |
-| `templateHash`          | `sync-rule-hashes.mjs`가 빌드 시 갱신 |
+| 필드                    | 용도                                   |
+| ----------------------- | -------------------------------------- |
+| `id`                    | `seiri_<slug>`                         |
+| `filename`              | 소스이자 배포 대상 basename            |
+| `recommended`           | 새 저장소에 미리 체크할 제안 여부      |
+| `title` · `description` | 설정 UI 체크박스 라벨·설명             |
+| `grounding`             | 작성 시점 P5 편입 근거 · 배포하지 않음 |
+| `templateHash`          | `sync-rule-hashes.mjs`가 빌드 시 갱신  |
 
 ## 동기화 계약
 
@@ -494,9 +494,13 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 | 드리프트         | `templateHash` 불일치 시 재동기화 여부를 묻습니다 — 로컬 편집을 임의로 덮지 않습니다 |
 | 실패             | 부분 실패 시 무엇이 쓰였고 무엇이 실패했는지 보고. **조용한 실패 금지**              |
 
-## required 정책
+## opt-in 및 recommended 정책
 
-**전부 opt-in.** 규칙 배포는 명시 선택만 받아 무차별 적용을 피합니다. 설정 UI가 **권장 세트**를 기본 체크로 제시합니다 — `agent-legible` · `public-contract` · `test-validity`. (다이얼 기본값은 `standard`이지만 이는 주입 렌더 강도이지 규칙 배포와 별개 축입니다 — 규칙은 여전히 명시 선택 없이 배포되지 않습니다.)
+**전부 opt-in.** 규칙 배포는 명시 선택만 받아 무차별 적용을 피합니다. 아무 규칙도 배포되지 않은 새 저장소에서만 manifest의 `recommended: true` 세트를 기본 체크로 제시합니다.
+
+**Recommended rules:** `agent-legible` · `code-comments` · `test-validity` · `reuse-first`.
+
+다이얼 기본값은 `standard`이지만 이는 주입 렌더 강도이지 규칙 배포와 별개 축입니다 — 규칙은 여전히 명시 선택 없이 배포되지 않습니다.
 
 ---
 
@@ -504,16 +508,16 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 
 **헌법이 문서로만 있으면 드리프트합니다.** 기계 검사로 고정합니다.
 
-| 검사          | 규칙                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------- |
-| 우선순위 사슬 | 모든 규칙 첫 블록에 `> **Precedence**:`                                                                         |
-| **형식 근거** | `rests on a property` **또는** `rests on properties` 1건 이상 — **P5 게이트**. 수는 기대는 형식 개수에 맞춥니다 |
-| 이중 반증     | `This rule is working if:` **와** `is wrong for you if:`                                                        |
-| 크기          | 규칙 ≤200줄, 스킬 `SKILL.md` ≤2KB (`references/`는 무제한)                                                      |
-| **임계 금칙** | 본문에 독립 숫자 임계 금지                                                                                      |
-| **언어 금칙** | 러너명(`npm `·`pytest`·`cargo ` 등) 금지                                                                        |
-| **배선**      | 모든 `templates/rules/*.md`가 manifest 등재 · 모든 `bridge/*.mjs`가 `hooks.json` 등록                           |
-| **해시 최신** | `sync-rule-hashes` 실행 후 diff 없음                                                                            |
+| 검사          | 규칙                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 우선순위 사슬 | 모든 규칙 첫 블록에 `> **Precedence**:`                                                                                  |
+| **형식 근거** | manifest `grounding`에 `rests on a property` **또는** `rests on properties` 1건 이상 — **P5 게이트**. 배포 본문에는 없음 |
+| 이중 반증     | `This rule is working if:` **와** `is wrong for you if:`                                                                 |
+| 크기          | 규칙 ≤200줄, 스킬 `SKILL.md` ≤2KB (`references/`는 무제한)                                                               |
+| **임계 금칙** | 본문에 독립 숫자 임계 금지                                                                                               |
+| **언어 금칙** | 러너명(`npm `·`pytest`·`cargo ` 등) 금지                                                                                 |
+| **배선**      | 모든 `templates/rules/*.md`가 manifest 등재 · 모든 `bridge/*.mjs`가 `hooks.json` 등록                                    |
+| **해시 최신** | `sync-rule-hashes` 실행 후 diff 없음                                                                                     |
 
 ⇒ 이 테스트가 **"우리가 우리 규칙을 지키는가"의 오라클**입니다.
 

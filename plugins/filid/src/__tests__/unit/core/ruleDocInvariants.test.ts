@@ -11,10 +11,10 @@ import { loadRuleDocsManifest } from '../../../core/infra/configLoader/loaders/l
  * A mechanical drift guard on the shipped rule documents, NOT a quality test.
  * It checks only string-level and filesystem-level facts: that the manifest and
  * `templates/rules/` agree in both directions, that stored hashes are fresh
- * (`yarn build:rules` was run), and that every document carries the skeleton the
- * rules are written to — the precedence chain, the format-grounding sentence and
- * the double falsification. Whether a rule is sound is a semantic question this
- * file makes no claim about.
+ * (`yarn build:rules` was run), that the manifest carries the authoring-time
+ * format grounding, and that every deployed document carries the precedence
+ * chain and double falsification. Whether a rule is sound is a semantic question
+ * this file makes no claim about.
  *
  * Numeric thresholds are deliberately NOT banned here. Thresholds are filid's to
  * own; the sibling seiri guard bans them because they belong on this side.
@@ -95,15 +95,16 @@ describe('shipped rule documents', () => {
     expect(PRECEDENCE.test('# Rule\n\nbody with no chain')).toBe(false);
   });
 
-  it('states the format grounding in every document', () => {
+  it('keeps the B5 grounding in the manifest, out of the deployed bytes', () => {
     const GROUNDING = /\brests on (a property|properties)\b/i;
-
-    expect(
-      shipped.filter((doc) => !GROUNDING.test(doc.text)).map((doc) => doc.name),
-    ).toEqual([]);
-    expect(
-      GROUNDING.test('This rule rests on properties every codebase has'),
-    ).toBe(true);
+    const missing = loadRuleDocsManifest(packageRoot)
+      .rules.filter((entry) => !GROUNDING.test(entry.grounding ?? ''))
+      .map((entry) => entry.id);
+    expect(missing).toEqual([]);
+    const leaked = shipped
+      .filter((doc) => GROUNDING.test(doc.text))
+      .map((doc) => doc.name);
+    expect(leaked).toEqual([]);
     expect(GROUNDING.test('a rule with no grounding sentence')).toBe(false);
   });
 

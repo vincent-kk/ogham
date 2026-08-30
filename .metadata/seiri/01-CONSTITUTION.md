@@ -48,9 +48,9 @@ seiri의 설계 원칙. **인식론 / 규범 / 베팅** 3층으로 나눕니다.
 
 > **6층에 매핑되지 않는 규칙은 값에 기대고 있다는 신호이므로 기각합니다.**
 
-이 판정은 기계 검사로 집행됩니다 — 각 규칙 문서는 `rests on a property every codebase has: …` 문장을, 두 층 이상에 기대면 `rests on properties every codebase has: …`를 반드시 포함해야 합니다. **수는 기대는 형식의 개수에 맞춥니다** — 두 층에 기대면서 단수로 쓰면 문장이 형식 하나를 숨깁니다([02-ARCHITECTURE.md](./02-ARCHITECTURE.md) 자기검증 절).
+이 판정은 기계 검사로 집행됩니다 — 각 규칙은 manifest의 `grounding`에 `rests on a property every codebase has: …` 문장을, 두 층 이상에 기대면 `rests on properties every codebase has: …`를 반드시 가져야 합니다. **수는 기대는 형식의 개수에 맞춥니다** — 두 층에 기대면서 단수로 쓰면 문장이 형식 하나를 숨깁니다. 기계 검사는 manifest를 보며, 이 작성 시점의 입장 근거는 배포 규칙 본문에 싣지 않습니다([02-ARCHITECTURE.md](./02-ARCHITECTURE.md) 자기검증 절).
 
-**예외 2건**: `context-efficiency`와 `cognitive-discipline`은 코드가 아니라 **세션의 속성**(컨텍스트 유한성, 주장≠증거)에 기댑니다. 예외를 숨기지 않고 문장으로 명시합니다.
+**예외 1건**: `context-efficiency`는 코드가 아니라 **세션의 속성**(컨텍스트 유한성)에 기댑니다. 예외를 숨기지 않고 문장으로 명시합니다. `cognitive-discipline`은 2026-08-30 R5에서 상시 규칙층을 은퇴하고 원인 추적 절차를 `trace-cause` 스킬에 남겼습니다.
 
 ### 보편화 3기법
 

@@ -2,7 +2,7 @@
 
 `@ogham/filid` 1.0 패키지 루트. 문서 계약, FCA 구조·DAG 검사, 읽기 전용 배치 계획과 FCA 범위 cross-review를 제공하는 독립 플러그인이다.
 
-함수 분할, 명명, 파일 크기, 복잡도, 커버리지 품질, 일반 AST 편집, 파일 이동, import rewrite는 소유하지 않는다. merge-track은 FCA 문서 commit과 PR 생성·갱신을 수행하지만 branch push는 호출자가 책임진다. 재구조화 도구는 계획하고 검증하며, 실제 변경은 외부 행위자가 수행한다.
+함수 분할, 명명, 파일 크기, 복잡도, 커버리지 품질, 일반 AST 편집, 파일 이동, import rewrite는 소유하지 않는다. merge-track은 FCA owner가 있는 변경만 문서 audit하고 non-FCA 범위는 보고하며, PR 게시 전 원격 branch가 뒤처졌으면 기본적으로 push한다. 재구조화 도구는 계획하고 검증하며, 실제 변경은 외부 행위자가 수행한다.
 
 ## Structure
 

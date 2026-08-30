@@ -13,7 +13,7 @@
 ## API Contracts
 
 - `rules/*.md` — 배포 대상 규칙 문서. 각 파일의 id 와 해시가 `rules/manifest.json` 에 등재된다.
-- `rules/manifest.json` — 주입 가능한 규칙 목록. 해시는 `sync-rule-hashes` 가 갱신하며 손으로 적지 않는다.
+- `rules/manifest.json` — 주입 가능한 규칙 목록. `grounding`은 작성 시점의 편입 근거이며 배포 문서에 렌더링하지 않는다. 해시는 `sync-rule-hashes` 가 갱신하며 손으로 적지 않는다.
 - `scaffolds/` — 저장소 게이트 placeholder 골격. 사용자가 값을 채운다.
 
 ## Acceptance Criteria
@@ -22,6 +22,7 @@
 
 - `rules/` 의 파일 집합과 매니페스트 항목 집합이 일치한다.
 - 매니페스트의 해시가 파일의 raw 바이트 해시와 일치한다.
+- 모든 매니페스트 항목이 보편적 형식 근거를 `grounding`에 보유하고 배포 문서에는 반복하지 않는다.
 
 ### AC-byte-stability — 바이트 안정성
 
@@ -37,4 +38,4 @@
 
 ## Last Updated
 
-2026-08-22 — 규칙 템플릿과 값 없는 스캐폴드의 해시 안정성 계약을 문서화했다.
+2026-08-30 — 작성 시점의 규칙 편입 근거를 manifest로 옮겨 배포 본문과 분리했다.
