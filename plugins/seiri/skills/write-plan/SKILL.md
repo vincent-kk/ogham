@@ -1,32 +1,53 @@
 ---
 name: write-plan
 user-invocable: true
-description: 'Write an implementation plan a stranger could execute without this conversation. Use when work spans multiple steps or sittings, before touching code.'
+description: 'Write an implementation plan before multi-step work. Follow a user-, repository-, or host-selected planning method when one applies; otherwise use the minimal default.'
 argument-hint: '[the spec or goal to plan]'
 version: '0.1.0'
 complexity: moderate
 plugin: seiri
 ---
 
-# write-plan — write it so the session is not needed
+# write-plan — choose the method; keep the plan session-independent
 
-This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line. The question's moment here: a large blast radius — a broad refactor, a new module or feature — earns it before you commit the plan; a routine change takes the default.
+This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line. Ask only for a material method conflict or a high-blast-radius choice the method leaves unresolved.
 
-## Workflow
+## Choose the planning method
 
-**1. Map the files first.** Name every file to create or modify, with exact paths, and one responsibility each. Decomposition is decided here, not mid-task.
+Use the first applicable source, in order:
 
-**2. Cut tasks at reviewable seams.** A task is the smallest unit a reviewer could reject while approving its neighbour, and it ends with an independently verifiable deliverable. Fold scaffolding and config into the task whose deliverable needs them.
+1. A planning method explicitly named by the user.
+2. Repository planning instructions or templates.
+3. Another planning skill selected under the host's skill-selection rules.
+4. The default method below.
 
-**3. Write steps a stranger could run.** Exact paths, real code, real commands with expected output. These are plan failures, not shorthand: "TBD" · "add proper error handling" · "similar to task N" · a code step with no code. Each task's commands and expected outputs become its gates: write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md` — 1–4 runnable gates per task, a `## Final` gate for this repository's designated verification. Gate requirement: each gate carries an EXPECT that only a success prints, and every CHECK and EXPECT value is wrapped in a Markdown code span. A task with no gate is a plan failure.
+Higher-precedence instructions bind. A skill is not selected merely because it is installed. Name the method and source in native metadata or `Planning method: <source>`. Follow the selected method's native structure; do not merge it with the default method.
 
-**4. Declare the interfaces between tasks.** What each task consumes from earlier ones and produces for later ones — exact names, signatures, types. A task's implementer sees only their own task.
+## Invariants
 
-**5. Self-review once, fix inline.** Every requirement maps to a task; no placeholder patterns survive; names and signatures agree across tasks; every path and symbol the plan claims exists now was confirmed by a tool this session, not recalled. Fix what you find and move on — no re-review loop.
+Regardless of method:
+
+- Write enough that a capable implementer can proceed without this conversation.
+- Ground claims about the current repository with tools and retain compact evidence a later reviewer can reproduce.
+- Connect every requirement to implementation work and observable verification; do not add work with no requirement.
+- Leave no unresolved placeholder disguised as a step. A real unresolved decision names its owner and stops the affected work.
+- If `/seiri:execute` will perform the plan, adapt its runnable verification into the gate ledger. Write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`; each gate carries an EXPECT that only a success prints, and every CHECK and EXPECT value stays in a Markdown code span. Keep the ledger's fixed machine format separate from the plan's chosen human format.
+- A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement. When one occurs while planning, write `adr.md` beside the plan. Otherwise do not create it.
+- Make the ADR readable without the plan: state the context, decision, reasons, rejected alternatives, and consequences. Keep implementation steps in the plan.
+
+## Default method
+
+Use this only when no other planning method applies:
+
+1. Ground the outcome, constraints, current behavior, and observable success.
+2. Map the change surface with exact confirmed paths; make uncertain locations bounded discovery steps.
+3. Cut independently reviewable outcomes that leave the repository verifiable.
+4. State ordering, dependencies, and consumed interfaces, including contract names, signatures, and types.
+5. Give each outcome executable steps, commands, and expected results. Reject vague placeholders; include code only when it is the contract.
+6. Self-review once for requirement coverage, evidence, boundary names, and placeholders; fix findings inline.
 
 ## Rules
 
-- Name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`), state it in one line, and save the plan to `.seiri/tasks/<name>/plan.md` — unless this repository's instructions name another place; then the ledger's `Plan:` line points there.
-- Global constraints (versions, naming, platform limits) go in one header section, copied verbatim — every task inherits them.
+- Let the selected method or repository choose the plan location. When neither does, name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) and save the default plan to `.seiri/tasks/<name>/plan.md`; the ledger's `Plan:` line points to the actual plan.
 - Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
-- Hand off: a landed plan is `/seiri:review-plan`'s moment — it proves the plan's claims before `/seiri:execute` performs them. A single surgical change does not need a plan.
+- Hand off: a landed plan is `/seiri:review-plan`'s moment — it checks the selected method, common invariants, and repository claims before `/seiri:execute` performs them. A single surgical change does not need a plan.

@@ -145,6 +145,52 @@ describe('skill invocation policy', () => {
     );
   });
 
+  // filid:contract AC-planning-method-selection
+  it('selects a planning method before falling back and preserves its shape', () => {
+    const writePlan = readSkill('write-plan').body;
+    const methodPrecedence = [
+      'A planning method explicitly named by the user.',
+      'Repository planning instructions or templates.',
+      "Another planning skill selected under the host's skill-selection rules.",
+      'The default method below.',
+    ];
+    let previous = -1;
+    for (const source of methodPrecedence) {
+      const current = writePlan.indexOf(source);
+      expect(current).toBeGreaterThan(previous);
+      previous = current;
+    }
+    expect(writePlan).toContain(
+      "Follow the selected method's native structure; do not merge it with the default method.",
+    );
+    expect(writePlan).toContain(
+      'A skill is not selected merely because it is installed.',
+    );
+    expect(writePlan).toContain(
+      'If `/seiri:execute` will perform the plan, adapt its runnable verification into the gate ledger.',
+    );
+    expect(writePlan).toContain(
+      'A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement.',
+    );
+    expect(writePlan).toContain(
+      'When one occurs while planning, write `adr.md` beside the plan. Otherwise do not create it.',
+    );
+    expect(writePlan).toContain(
+      'Make the ADR readable without the plan: state the context, decision, reasons, rejected alternatives, and consequences.',
+    );
+
+    const reviewPlan = readSkill('review-plan').body;
+    expect(reviewPlan).toContain(
+      'Review the plan against its selected planning method and the common invariants.',
+    );
+    expect(reviewPlan).toContain(
+      'Apply the default method only when no other method was selected.',
+    );
+    expect(reviewPlan).toContain(
+      "Do not impose the default method's structure on a selected method.",
+    );
+  });
+
   // filid:contract AC-document-language
   it('lists only shipped skills as document writers', () => {
     for (const name of DOCUMENT_WRITING_SKILLS)

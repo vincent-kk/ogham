@@ -36,9 +36,10 @@ export const AUTO_AUTONOMOUS_SKILLS = [
  * Auto-invocable, and permitted to ask proactively at the one decision
  * point each names in its body — no blocker required. Both act before
  * execution, the cheap moment to be wrong, so one focused question is
- * worth the interrupt: write-plan's on a large blast radius before the
- * plan is committed, review-plan's on a challenge trigger — delegate the
- * review to unprejudiced eyes, or proceed on grounding alone.
+ * worth the interrupt: write-plan's on conflicting planning methods or a
+ * high-blast-radius choice its selected method leaves unresolved;
+ * review-plan's on a challenge trigger — delegate the review to
+ * unprejudiced eyes, or proceed on grounding alone.
  */
 export const AUTO_CONDITIONAL_ASK_SKILLS = [
   'review-plan',
