@@ -4,11 +4,11 @@
 
 adapter-aware config v2의 검증·비파괴 migration·승인 저장과 managed rule document 동기화를 소유한다. config는 user(호스트 상태 루트)와 project(`<gitRoot>/.filid/config.json`) 두 레이어이며 project가 user를 재정의한다.
 
-## Structure
+## Conventions
 
-- `loaders/` organ — v2 schema/types, v1 migration, load(레이어별 `loadConfigByScope` 포함)/write/init와 rule-doc facade
-- `utils/` organ — project/plugin root, strict sanitize와 hash helpers
-- `index.ts` — enumerated public boundary, 이 fractal의 유일한 공개 표면
+- user와 project config는 레이어별 migration을 먼저 끝낸 뒤 병합하고, strict 검증은 병합 결과에만 적용한다.
+- managed rule channel의 실제 주소는 host target resolver가 소유한다. config loader는 scope를 전달하되 host별 경로를 만들지 않는다.
+- loader는 선언된 구조 옵션을 검증·보존하며, scan·merge-track 소비자의 경로 의미를 대신 해석하지 않는다.
 
 ## Boundaries
 
