@@ -8,7 +8,8 @@
       "required": true,
       "title": "Fractal Boundaries",
       "description": "Node classification, entry-point surfaces, organ access, exemptions, and the acyclic dependency graph.",
-      "templateHash": "8ae51ac8539c3e3f2fc2ec39a4a56147aded5b6cd1c55996db9b29bc1bf5be24"
+      "grounding": "This rule rests on properties every codebase has: directories contain files, and files reference one another.",
+      "templateHash": "b3bb8e82f14cab4b73c67143ca617f9e1efd2f5deba1e50d8cd1ad1ae863a459"
     },
     {
       "id": "filid_module-documents",
@@ -16,7 +17,8 @@
       "required": true,
       "title": "Module Documents",
       "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the derivable-content ban, the current-state contract ledger, the single history section, and organ exemption entries.",
-      "templateHash": "af5fa65fee7fd59705a1b885ca2a6249e809b60c1bf5adef98c844acc6482564"
+      "grounding": "This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.",
+      "templateHash": "d3a3fd8a4135d5f6740e744fda1a04b5201330b7c2e389bab2063d1fad982d04"
     },
     {
       "id": "filid_verification-records",
@@ -24,7 +26,8 @@
       "required": true,
       "title": "Verification Records",
       "description": "Spec-document and test-record roles, the 15 and 32 case caps, counting rules, and DETAIL acceptance-group links.",
-      "templateHash": "4fc753422175bb60fcb40ce9376776afa4e4a796e8d491a7d88e3b189b4b80cb"
+      "grounding": "This rule rests on a property every codebase has: verification files exist, and their cases can be counted.",
+      "templateHash": "bf70fd28317a8339ec35aced1b411ffaf6ed84c71e69f9a37bc40955db6f0265"
     },
     {
       "id": "filid_code-placement",
@@ -32,7 +35,8 @@
       "required": true,
       "title": "Code Placement",
       "description": "Lowest-common-fractal placement, restructure plan preconditions and postconditions, the document-before-code workflow, and PR-seam Filid validation.",
-      "templateHash": "0c65da9afde6bb3871b4bbfbab17d89ef3879c2c93ff7072677d003be4e4f74e"
+      "grounding": "This rule rests on properties every codebase has: a unit has a location, and its consumers have locations too.",
+      "templateHash": "43b29eee8f9519716e68dfa7bf1286a6b7ecd8844ef51836ae2e561e226a0915"
     }
   ]
 }

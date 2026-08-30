@@ -6,7 +6,7 @@ paths:
 
 # Module Documents
 
-> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults — the higher source wins. INTENT records the boundary; DETAIL records the current contract and, when a change is worth remembering, the history behind it. This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs. Applies when you are creating or editing an `INTENT.md` or a `DETAIL.md`.
+> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults — the higher source wins. INTENT records the boundary; DETAIL records the current contract and, when a change is worth remembering, the history behind it. Applies when you are creating or editing an `INTENT.md` or a `DETAIL.md`.
 
 ## 1. INTENT records the boundary; DETAIL records the contract
 

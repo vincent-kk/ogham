@@ -76,6 +76,7 @@ interface FilidConfigV2 {
 - template/root read failure는 예외 대신 진단 가능한 저하 결과다.
 - manifest는 4개 rule 문서를 선언하고 전부 `required`다 — filid 규칙은 부분 채택 대상이 아니므로 optional 엔트리가 없고, 체크박스 UI에는 아무것도 렌더되지 않는다.
 - manifest 엔트리는 `legacyFilename`을 선언하지 않는다. 접두사 이전 이름 `fca.md`는 오래전에 은퇴해 더 이상 승계 대상이 아니다.
+- manifest 엔트리는 작성 시점의 편입 근거를 `grounding`에 보유하며, 동기화되는 규칙 본문에는 이를 렌더링하지 않는다.
 - manifest에서 사라진 구 문서 `filid_fca-policy.md`는 `filid_` 접두사 기반 owned orphan 스윕이 회수한다. 별도의 마이그레이션 경로를 두지 않는다.
 
 ### AC-rule-docs-scope — 배포 레이어
@@ -103,4 +104,4 @@ interface FilidConfigV2 {
 
 ## Last Updated
 
-2026-07-30 — `structure.additionalExcludedDirectories`를 schema 2.0에 추가했다.
+2026-08-30 — 규칙의 작성 시점 편입 근거를 manifest 메타데이터로 분리했다.

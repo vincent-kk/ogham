@@ -9,8 +9,9 @@ import { computeFileSha256 } from '../core/utils/computeFileSha256.js';
 
 /**
  * A mechanical drift guard, NOT a quality test. It checks only the things
- * about seiri rules that are string-level facts: the B1/B5/B6 skeleton
- * (precedence chain, format grounding, double falsification — presence only),
+ * about seiri rules that are string-level facts: the B1/B6 deployed skeleton
+ * (precedence chain and double falsification — presence only), manifest-owned
+ * B5 format grounding,
  * the filid/seiri boundary (numeric thresholds belong to filid except for
  * the function-helper and inline-comment readability budgets; test-runner
  * names always belong to the repository), and the D8 shared-idiom contract
@@ -84,20 +85,15 @@ describe('rule invariants (filid/seiri boundary + D8 idiom contract)', () => {
     expect(RUNNER.test('run npm test first')).toBe(true);
   });
 
-  it('D8 shared idioms are present in both the rule and its skill', () => {
+  it('keeps the remaining D8 idiom in both the rule and its skill', () => {
     const read = (rel: string) =>
       readFileSync(portableJoin(packageRoot, rel), 'utf8');
-    // The D8 canon (Phase 4b table): each idiom must appear verbatim in both a
-    // rule and its skill, so a reword in either is a red diff.
+    // The remaining D8 canon idiom must appear verbatim in both its rule and
+    // skill, so a reword in either is a red diff.
     const contracts = [
       {
         idiom: 'pays twice',
         rule: 'templates/rules/seiri_context-efficiency.md',
-        skill: 'skills/trace-cause/SKILL.md',
-      },
-      {
-        idiom: 'fix where it started',
-        rule: 'templates/rules/seiri_cognitive-discipline.md',
         skill: 'skills/trace-cause/SKILL.md',
       },
     ];
@@ -151,22 +147,16 @@ describe('rule invariants (filid/seiri boundary + D8 idiom contract)', () => {
     }
   });
 
-  it('every rule states its B5 format grounding (P5 gate)', () => {
-    // Singular, plural, and the session-scoped variant all satisfy P5 — the
-    // form count matches the number of properties the rule leans on.
+  it('keeps the B5 grounding in the manifest, out of the deployed bytes', () => {
     const GROUNDING = /\brests on (a property|properties)\b/i;
-    const offenders = rules
-      .filter((r) => !GROUNDING.test(r.text))
+    const missing = loadManifest(packageRoot)
+      .rules.filter((r) => !GROUNDING.test(r.grounding ?? ''))
+      .map((r) => r.id);
+    expect(missing).toEqual([]);
+    const leaked = rules
+      .filter((r) => GROUNDING.test(r.text))
       .map((r) => r.name);
-    expect(offenders).toEqual([]);
-    // The guard bites both ways: plural and session variants pass, prose
-    // with no grounding sentence fails.
-    expect(
-      GROUNDING.test('This rule rests on properties every codebase has'),
-    ).toBe(true);
-    expect(
-      GROUNDING.test('rests on a property of every session, not a codebase'),
-    ).toBe(true);
+    expect(leaked).toEqual([]);
     expect(GROUNDING.test('a rule with no grounding sentence')).toBe(false);
   });
 

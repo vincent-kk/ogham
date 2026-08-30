@@ -19,6 +19,7 @@ This directory ships rule documentation templates that the `/filid:setup` skill 
       "required": true,
       "title": "Fractal Boundaries",
       "description": "...",
+      "grounding": "This rule rests on properties every codebase has: ...",
       "templateHash": "<injected by scripts/syncRuleHashes.mjs>"
     }
   ]
@@ -39,12 +40,13 @@ Fields:
 | `legacyFilename` | Optional. A previous address for this same document, migrated on the next sync. Filenames and legacy filenames must be globally unique across entries — two entries claiming one name fails the sync            |
 | `title`          | Short label shown in the `setup` checkbox UI                                                                                                                                                                    |
 | `description`    | One-line summary shown underneath the checkbox                                                                                                                                                                  |
+| `grounding`      | Authoring-time admission rationale: the universal property the rule rests on. Required by the invariant test and never rendered into the deployed document                                                    |
 | `templateHash`   | SHA-256 of the template bytes, injected by `scripts/syncRuleHashes.mjs`. Never hand-write it                                                                                                                    |
 
 ## Adding a new rule doc
 
-1. Write the markdown under `templates/rules/<your-rule>.md`, following the shape the existing four use: a one-line header blockquote that opens with `> **Precedence**:` and carries the "rests on a property/properties" grounding sentence plus the Applies-when scope, numbered sections of dense imperative prose, and a closing one-line "This rule is working if: / is wrong for you if:" pair. `src/__tests__/unit/core/ruleDocInvariants.test.ts` enforces the machine-checkable parts: the precedence prefix, the grounding sentence, the falsification pair, and the `paths:` frontmatter contract.
-2. Append an entry to `manifest.json`. Use `required: false` if the rule should be opt-in via the checkbox; filid's own four are all `required: true`.
+1. Write the markdown under `templates/rules/<your-rule>.md`, following the shape the existing four use: a one-line header blockquote that opens with `> **Precedence**:` and carries the Applies-when scope, numbered sections of dense imperative prose, and a closing one-line "This rule is working if: / is wrong for you if:" pair.
+2. Append an entry to `manifest.json`, including a `grounding` sentence that names the universal property admitting the rule. This rationale is checked at authoring time and is not deployed. Use `required: false` if the rule should be opt-in via the checkbox; filid's own four are all `required: true`. `src/__tests__/unit/core/ruleDocInvariants.test.ts` enforces the manifest grounding, deployed skeleton, and `paths:` frontmatter contract.
 3. Run `yarn build:rules` to inject `templateHash`. The repo-root `.prettierignore` and `.gitattributes` keep these files byte-stable (no reformatting, LF endings) — that is what makes the hash deterministic, so do not reformat them by hand.
 4. Rebuild the plugin (`yarn build:plugin`) so the bundled MCP server picks up the new handler context.
 5. Run `/filid:setup` on a test project — an optional rule appears in the checkbox list, pre-unchecked; a required rule is auto-deployed and reported in the summary instead.
