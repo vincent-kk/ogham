@@ -1,26 +1,25 @@
 ---
-name: mental-model
+name: explain
 user-invocable: true
-description: 'Infer and attack the predictive core principle behind a person, organization, system, plan, or codebase, then teach concrete deductions in a self-contained visual HTML article. Use to explain how a subject works or responds; not for retrieval, diff review, or observed-failure diagnosis.'
+description: 'Explain how a person, organization, system, plan, or codebase works in a self-contained visual HTML article: follow connected evidence until understanding is grounded, then teach the key concepts and their relationships in a problem-first narrative. Use to explain how a subject works or responds; not for retrieval, diff review, or observed-failure diagnosis.'
 argument-hint: '<question about a subject> [reader]'
-version: '2.0.0'
+version: '2.1.0'
 complexity: medium
 context_layers: []
-orchestrator: mental-model skill
+orchestrator: explain skill
 plugin: maencof
 ---
 
-# mental-model — teach any subject from one principle
+# explain — teach concepts and their relationships
 
-A mental model lets a reader predict unseen behavior. Its subject and evidence may live anywhere; the maencof vault is optional, not its boundary. Ask only when scope, audience, or user-only evidence would change the model; otherwise assume a smart newcomer.
+An explanation succeeds when the reader holds the needed concepts, sees how they relate, and can follow the subject's real behavior through them. Its subject and evidence may live anywhere; the maencof vault is optional, not its boundary. Ask only when scope, audience, or user-only evidence would change the article; otherwise assume a smart newcomer.
 
-## Build the model
+## Understand before writing
 
-1. **Frame the question.** State what the reader must decide or predict. Route evidence from the question and subject, then trace only what the answer needs.
-2. **Propose the predictive core principle.** Explain several facts and predict one uninspected case; reject generic praise. Carry one concrete scenario with real names and values through its actual sequence.
-3. **Deduce the subject.** Derive features as **premise → consequence → mechanism → observable behavior**. Keep only children made necessary by their parent; explain interactions.
-4. **Attack the model.** Attack each claim in one dimension—structure, behavior, or purpose. Predict a counterexample and inspect independent evidence not used to build it. A claim survives only after this attack; otherwise it stays pending and cannot support the core or answer. Simulate the scenario end to end; show the attack, limit, and refutation. If the core principle changes, discard dependents and repeat steps 2–4 to rederive and reattack them. After two failed core proposals, stop without a model or HTML: no single principle survived.
-5. **Close with transfer.** Ask the reader to predict one unseen case, then reveal why. If survivors cannot answer it and the original question, gather more evidence.
+1. **Frame the question.** State what the reader must come to understand. Route evidence from the question and subject, then trace only what the answer needs.
+2. **Follow the connections.** Never explain from the pointed-at material alone: follow what it links to — callers, configs, and tests for code; dated actions, outcomes, and independent accounts for people, organizations, and plans; linked records in the vault — until behavior is understood rather than guessed.
+3. **Map the concepts.** List the terms the reader must hold, give each a concrete one-sentence definition, and name its relationships to the others — calls, owns, precedes, constrains, influences. This map is the article's backbone; a concept unrelated to the question is cut.
+4. **Stay concrete.** Carry one real scenario with actual names, values, and dates through its actual sequence; anchor every abstraction to an observable step. A sentence that can name no source, value, or behavior is not ready to be written.
 
 ## Choose evidence for the subject
 
@@ -28,13 +27,13 @@ A mental model lets a reader predict unseen behavior. Its subject and evidence m
 - For code and technical systems, inspect only the needed entry points, callers, state, tests, contracts, and traces; cite code at `path:line`.
 - For people, organizations, and plans, use dated actions, decisions, outcomes, statements, and independent accounts. Retellings of one account are one source.
 - The maencof vault is optional and usable only when available and relevant. Use `kg_search`, `kg_navigate`, and `read` for records. If a vault call fails, mark it unavailable—not negative evidence—and continue with non-vault sources. Use `kg_status` only for an explicit index diagnostic.
-- Use conversation, supplied files, repositories, or authoritative external sources. If only the user can fill a gap, ask once for that evidence; if it stays insufficient, stop without a model or HTML.
+- Use conversation, supplied files, repositories, or authoritative external sources. If only the user can fill a gap, ask once for that evidence; if it stays insufficient, stop without an article.
 
 Mark each claim `traced` (direct evidence with a stable locator: `path:line`, section, URL, dated event, or quotation with speaker, date/turn, and source locator), `inferred` (from traced evidence), or `assumed` (ungrounded). The mark describes the claim, not the reading act.
 
 ## Teach it as a visual article
 
-Lead with the conclusion and useful problem. Be conversational but exact: short paragraphs, reader-question transitions, jargon defined once, and candid limits and tradeoffs. Let the material choose headings.
+Write in the editorial style of [reference.md](reference.md): open with the problem the reader feels, introduce each concept only when the narrative needs it, define terms at first use, make relationships explicit in prose and visible in diagrams, sandwich code with purpose and payoff, and close on honest limits. Let the material choose its headings and rhythm.
 
 Use visuals as evidence when relationships, structure, sequence, state, or comparison are faster to see than read. Show actual names and values; reuse a small visual language and let prose interpret. Give diagrams text equivalents and controls accessible labels. No decoration.
 
@@ -46,5 +45,5 @@ Choose readable hierarchy, contrast, spacing, and code. Use quiet neutrals, one 
 - Escape source text inserted into HTML. Put code in `<pre>` with `white-space: pre` or `pre-wrap`.
 - Check one desktop and one phone viewport for layout, contrast, overflow, and each interaction type once. Fix display defects, then recheck only affected views; avoid exhaustive browser coverage or subject correctness testing. If no browser or renderer is available, mark rendering unverified in the artifact and handoff; never claim inspection.
 - Keep all evidence sources read-only; write only the external HTML unless the user explicitly requests another destination or persistence workflow.
-- In chat, return one sentence about the model and a link. Do not duplicate the article in Markdown.
+- In chat, return one sentence about the article and a link. Do not duplicate the article in Markdown.
 - As the final step, open the completed HTML file in the system default browser.
