@@ -1,6 +1,6 @@
 {
   "name": "@ogham/seiri",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Code authoring quality, review discipline, and development methodology rules for agent-legible codebases",
   "keywords": [
     "claude-code",
