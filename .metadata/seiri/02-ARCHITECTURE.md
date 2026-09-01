@@ -290,7 +290,7 @@ seiri는 superpowers의 **대체재**입니다(원장 §0). 대체가 성립하�
 | 변경 구현 직전             | implement       | 3 자동 |
 | 실패 발생                  | trace-cause     | 3 자동 |
 | 간접·다형 코드의 깊은 이해 | trace-structure | 3 자동 |
-| 코드 동작의 깊은 질문      | mental-model    | 5 호출 |
+| 코드 동작의 깊은 질문      | explain         | 5 호출 |
 | 완료 선언 직전             | verify          | 3 자동 |
 | 머지·핸드오프 전           | request-review  | 3 자동 |
 | 피드백 수신                | receive-review  | 3 자동 |

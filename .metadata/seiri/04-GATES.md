@@ -15,7 +15,7 @@
 | 게이트 파일 (일보다 게이트 먼저)                                | Depth Tree · solo/orchestrated 모드        | 작업 분해(imbas)·오케스트레이션(omc)은 역할 밖 — seiri는 **실행 주체를 정하지 않는다** |
 | 실행 가능한 검사 (`CHECK`/`EXPECT`) · 주장/증거 분리            | Stop 훅                                    | 차단 훅 없음 불변 (02 §4) — 역할은 §7의 뒷가장자리로                                   |
 | 러너의 "충족 여부 검사" (분해해서 — §4)                         | 2^(N-1) 노력 산술                          | unlazy 자신이 "허구"로 판정                                                            |
-| 보고 감사 (숫자는 보고 시점에 재측정) · `ABANDON` (가시적 포기) | 4 패스 (구현·전문가 재독·결함 사냥·다듬기) | `implement`·`cognitive-discipline`·`mental-model`과 중복                               |
+| 보고 감사 (숫자는 보고 시점에 재측정) · `ABANDON` (가시적 포기) | 4 패스 (구현·전문가 재독·결함 사냥·다듬기) | `implement`·`cognitive-discipline`·`explain`과 중복                                    |
 
 **헌법 정합**
 

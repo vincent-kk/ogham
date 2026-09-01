@@ -52,7 +52,7 @@ English: [README.md](./README.md)
 | `/seiri:clarify-request` | 요청을 실행 가능한 검증 범위로 명확화            |
 | `/seiri:scaffold-pr`     | 작업 시작 전에 빈 Draft PR 열기                  |
 | `/seiri:finish`          | 끝난 작업을 통합할지 결정                        |
-| `/seiri:mental-model`    | 코드 동작의 모델을 세우고 공격해 검증            |
+| `/seiri:explain`         | 개념과 관계 중심으로 코드 동작을 설명            |
 | `/seiri:trace-change`    | 코드 변경을 독자를 위한 계층으로 설명            |
 
 순간이 맞으면 자동으로 발동하는 것:

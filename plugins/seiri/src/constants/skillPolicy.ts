@@ -54,8 +54,8 @@ export const AUTO_CONDITIONAL_ASK_SKILLS = [
 export const VISIBLE_USER_STARTED_SKILLS = [
   'architect',
   'clarify-request',
+  'explain',
   'finish',
-  'mental-model',
   'trace-change',
 ] as const;
 
