@@ -1,13 +1,13 @@
 import { HostTool } from '../../constants/hooks.js';
 import { SILENT_INTERVENTION } from '../../constants/intervention.js';
 import { EMPTY_RESULT } from '../../constants/plugin.js';
-import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import { recordWorkflowState } from '../../core/sessionSignals/record/recordWorkflowState.js';
 import type {
   HookOutput,
   PostToolUseFailureInput,
   PostToolUseInput,
 } from '../../types/hooks.js';
+import { loadHookIntervention } from '../shared/loadHookIntervention.js';
 
 import { bashOutcome } from './utils/bashOutcome.js';
 
@@ -28,11 +28,11 @@ export function processToolOutcome(
 ): HookOutput {
   if (!input.cwd || !input.session_id) return EMPTY_RESULT;
 
-  // The dial gates before any state is touched: at the silent floor this
-  // hook costs one config read and writes nothing, which is the state the
-  // dispatch measurements were taken against.
-  if (loadIntervention(input.cwd).effective === SILENT_INTERVENTION)
-    return EMPTY_RESULT;
+  // The dial gates before any workflow state is touched. Off and advisory
+  // cost one config read here and write no workflow state.
+  const intervention = loadHookIntervention(input.cwd);
+  if (intervention === undefined) return EMPTY_RESULT;
+  if (intervention.effective === SILENT_INTERVENTION) return EMPTY_RESULT;
 
   if (input.tool_name === HostTool.SKILL) {
     recordWorkflowState(input.cwd, input.session_id, input.tool_input?.skill);

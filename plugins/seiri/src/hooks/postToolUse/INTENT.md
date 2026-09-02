@@ -6,7 +6,7 @@
 
 ## Conventions
 
-- **순서는 다이얼 → Skill → Bash 다.** advisory 면 원장과 세션 상태를 건드리기 전에 빠져나온다.
+- **순서는 다이얼 → Skill → Bash 다.** off 는 모든 상태 접근 전에 skip하고, advisory 는 원장과 세션 상태를 건드리기 전에 빠져나온다.
 - **`Skill` 은 답하지 않는다.** seiri 워크플로우면 마지막 상태만 기록하고 무주입으로 빠진다 — 문구는 다음 턴(userPromptSubmit) 몫이다.
 - **Bash 판정은 출력 텍스트와 EXPECT가 정한다.** 매치는 met, 불일치·빈 출력은 unmet, EXPECT 부재는 unjudgeable이며 exit와 이벤트 이름은 판정을 바꾸지 않는다.
 - 같은 CHECK가 여러 작업에 있어도 한 호출의 판정은 한 줄이다. met가 되돌아가면 regression을 밝히고, 서브에이전트 증거는 짧은 `agent_id` 표지를 남긴다.
@@ -18,7 +18,7 @@
 
 ### Always do
 
-- 어떤 실패에도 `{ continue: true }` — 매 셸 명령마다 도는 훅이다.
+- 어떤 실패에도 processor는 `{ continue: true }`, 무주입 entry stdout은 빈 문자열 — 매 셸 명령마다 도는 훅이다.
 - 새 문구·새 조건 전에 "의도된 red 를 오발화시키는가"를 먼저 답할 것.
 
 ### Ask first

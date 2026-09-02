@@ -3,8 +3,7 @@ import type { InterventionLevel } from '../../../../types/config.js';
 
 /**
  * D7-E (Arm S): the election line for a dial position. `undefined` at
- * `advisory` — the caller renders silence, keeping that dial position
- * exactly as the dispatch measurements were taken against.
+ * `off` and `advisory`, where callers render no workflow election.
  *
  * Separate from `renderPostureLines` because the two are gated
  * differently: posture lines ride along with the deployed-rule status,

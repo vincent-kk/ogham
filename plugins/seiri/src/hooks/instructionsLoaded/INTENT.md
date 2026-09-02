@@ -15,6 +15,7 @@
 ## Conventions
 
 - **페이로드 전체 저장.** 이벤트별 키가 문서에 없어, 필드를 골라내면 측정 대상을 버린다. 실사용 세션이 스키마를 드러내게 둔다.
+- **off 면 관측도 skip.** 재등록되더라도 skills-only가 계측 파일을 쓰지 않게 config 판정을 먼저 한다.
 - **matcher 미지원·종료코드 무시.** 로드 사유는 페이로드로 오므로 훅에서 분기.
 - 로그는 `pluginCache('seiri')` 경유 — `~/.claude/...` 하드코딩 금지.
 - 레코드마다 `cwd`·`session_id` — 한 파일로 프로젝트·워크트리 사후 분리.
@@ -25,7 +26,7 @@
 ### Always do
 
 - 실패를 삼킨다 — 관측 부작용이 대상 세션을 방해하지 않는다.
-- 출력은 `{ continue: true }` 고정, `hookSpecificOutput` 없음.
+- processor 출력은 `{ continue: true }` 고정이고 `hookSpecificOutput`은 없다. entry stdout은 항상 빈 문자열이다.
 
 ### Ask first
 

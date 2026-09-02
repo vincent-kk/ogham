@@ -8,6 +8,7 @@
   // test is what keeps the two halves from drifting apart.
   var ROUTE = { PLAN: '/plan', SAVE: '/save', CLOSE: '/close' };
   var TOKEN_PARAM = 'token';
+  var DIAL_OFF = 'off';
   var DIAL_ADVISORY = 'advisory';
   var DIAL_STANDARD = 'standard';
   var CONFIG_LABEL = '.seiri/config.json';
@@ -21,16 +22,22 @@
 
   var DIAL_OPTIONS = [
     {
+      value: DIAL_OFF,
+      label: 'Skills only',
+      description:
+        'Skills remain available and can be called explicitly. Hooks add no context, record no session state, and emit no workflow response.',
+    },
+    {
       value: DIAL_ADVISORY,
       label: DIAL_ADVISORY,
       description:
-        'One line at session start naming the active rules. The quiet floor: nothing is asserted that the repository did not ask for.',
+        'Status only: session start names the active rules and any drift, without workflow chaining or per-turn reminders.',
     },
     {
       value: DIAL_STANDARD,
       label: DIAL_STANDARD,
       description:
-        'The default. Also states the dial position, names the workflow that owns each moment — including in subagents, which inherit nothing else — and adds a brief skill-dispatch reminder at the start of every turn.',
+        'States the dial position, names the workflow that owns each moment — including in subagents, which inherit nothing else — and adds a brief skill-dispatch reminder at the start of every turn.',
     },
     {
       value: 'strict',
@@ -103,7 +110,7 @@
     var own = scopeState.layers[scope];
     if (own && own.intervention) return own.intervention;
     var inherited = scope === 'user' ? null : scopeState.layers.user;
-    return (inherited && inherited.intervention) || DIAL_STANDARD;
+    return (inherited && inherited.intervention) || DIAL_OFF;
   }
 
   seatLayer();

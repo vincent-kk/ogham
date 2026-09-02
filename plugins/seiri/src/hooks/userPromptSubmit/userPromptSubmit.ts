@@ -4,9 +4,9 @@ import {
   TURN_REMINDER_STRICT,
 } from '../../constants/turnReminders.js';
 import { WORKFLOW_STATE_LINES } from '../../constants/workflowStateLines.js';
-import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
 import { consumeWorkflowState } from '../../core/sessionSignals/record/consumeWorkflowState.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
+import { loadHookIntervention } from '../shared/loadHookIntervention.js';
 
 import { ledgerReminder } from './utils/ledgerReminder.js';
 
@@ -19,11 +19,10 @@ import { ledgerReminder } from './utils/ledgerReminder.js';
  * restates the core each turn, before the model acts.
  *
  * Injection only, no decision control: the repository owns truth (P2), so
- * this reminds and never blocks. The dial gates it before anything renders
- * — advisory is silent, which keeps a baseline project paying nothing and
- * leaves the dispatch rates as they were measured. standard and strict
- * carry different lines: standard reminds, strict widens to borderline work
- * and a named verification.
+ * this reminds and never blocks. The dial gates it before anything renders:
+ * off disables the hook and advisory keeps this per-turn surface silent.
+ * standard and strict carry different lines: standard reminds, strict
+ * widens to borderline work and a named verification.
  *
  * @param input Hook payload for the user prompt about to run.
  * @returns A fail-open reminder result for the active intervention dial.
@@ -33,7 +32,10 @@ export function processUserPromptSubmit(
 ): HookOutput {
   if (!input.cwd) return EMPTY_RESULT;
 
-  const effective = loadIntervention(input.cwd).effective;
+  const intervention = loadHookIntervention(input.cwd);
+  if (intervention === undefined) return EMPTY_RESULT;
+
+  const effective = intervention.effective;
   const line =
     effective === 'strict'
       ? TURN_REMINDER_STRICT

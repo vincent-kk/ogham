@@ -9,6 +9,7 @@ import type {
   PostToolUseInput,
 } from '../../types/hooks.js';
 import { readStdin } from '../shared/readStdin.js';
+import { writeHookOutput } from '../shared/writeHookOutput.js';
 
 import { processToolOutcome } from './postToolUse.js';
 
@@ -24,4 +25,4 @@ try {
   logHookFailure(PLUGIN_NAME, HookName.POST_TOOL_USE, error);
 }
 
-process.stdout.write(JSON.stringify(result));
+writeHookOutput(result);

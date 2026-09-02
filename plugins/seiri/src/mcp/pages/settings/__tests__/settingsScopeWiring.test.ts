@@ -34,6 +34,20 @@ describe('per-layer values in the settings page', () => {
     expect(useLayer).toContain('renderDial()');
   });
 
+  it('offers skills-only off as the visible default dial position', () => {
+    const app = readSettingsFile('scripts/app.js');
+    const dial = app.slice(
+      app.indexOf('var DIAL_OPTIONS'),
+      app.indexOf('// Which layer a save lands in.'),
+    );
+
+    expect((dial.match(/value:/g) || []).length).toBe(4);
+    expect(app).toContain("var DIAL_OFF = 'off'");
+    expect(dial).toContain('value: DIAL_OFF');
+    expect(dial).toContain("label: 'Skills only'");
+    expect(app).toMatch(/\|\|\s*(DIAL_OFF|'off')/);
+  });
+
   it('rebuilds the checkbox state per layer rather than carrying it across', () => {
     const app = readSettingsFile('scripts/app.js');
 

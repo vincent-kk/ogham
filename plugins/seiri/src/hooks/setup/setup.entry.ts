@@ -5,6 +5,7 @@ import { HookName } from '../../constants/hooks.js';
 import { EMPTY_RESULT, PLUGIN_NAME } from '../../constants/plugin.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import { readStdin } from '../shared/readStdin.js';
+import { writeHookOutput } from '../shared/writeHookOutput.js';
 
 import { processSessionStart } from './setup.js';
 
@@ -18,4 +19,4 @@ try {
   logHookFailure(PLUGIN_NAME, HookName.SETUP, error);
 }
 
-process.stdout.write(JSON.stringify(result));
+writeHookOutput(result);

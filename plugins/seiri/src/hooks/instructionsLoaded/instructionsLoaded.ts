@@ -1,5 +1,6 @@
 import { EMPTY_RESULT } from '../../constants/plugin.js';
 import type { HookOutput, InstructionsLoadedInput } from '../../types/hooks.js';
+import { loadHookIntervention } from '../shared/loadHookIntervention.js';
 
 import { appendObservation } from './utils/appendObservation.js';
 
@@ -19,6 +20,8 @@ import { appendObservation } from './utils/appendObservation.js';
 export function processInstructionsLoaded(
   input: InstructionsLoadedInput,
 ): HookOutput {
+  if (!input.cwd || loadHookIntervention(input.cwd) === undefined)
+    return EMPTY_RESULT;
   appendObservation({ observedAt: new Date().toISOString(), ...input });
   return EMPTY_RESULT;
 }

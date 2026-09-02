@@ -57,10 +57,9 @@ export function applyConfigAction(
   if (op === 'clear') changed = clearRuntime(projectRoot);
 
   const dial = loadIntervention(projectRoot);
-  // Same order as the SessionStart render: the chain first, then the
-  // election line that depends on it. The dial alone gates the election
-  // line (D7-E B1) — at advisory the lookup misses and this channel goes
-  // as silent as the other two.
+  // Same order as SessionStart: the chain first, then its election line.
+  // Off and advisory omit both; describeDial remains because this explicit
+  // tool call must report the state it just applied.
   const election = renderElectionLine(dial.effective);
   return {
     action: 'config',

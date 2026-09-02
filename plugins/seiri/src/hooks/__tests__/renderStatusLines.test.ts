@@ -72,6 +72,23 @@ describe('renderStatusLines', () => {
     expect(renderStatusLines([], dial('advisory'))).toEqual([]);
   });
 
+  it('defensively renders nothing at off even when status is supplied', () => {
+    expect(
+      renderStatusLines(
+        [
+          status({
+            activeInSync: false,
+            deployedHash: 'b'.repeat(64),
+            inSync: false,
+          }),
+        ],
+        dial('off', {
+          warnings: [{ file: '.seiri/config.json', reason: 'not valid JSON' }],
+        }),
+      ),
+    ).toEqual([]);
+  });
+
   it('elects at session start even when the project deployed no rule', () => {
     for (const level of ['standard', 'strict'] as const) {
       const lines = renderStatusLines([], dial(level));

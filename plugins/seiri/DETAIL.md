@@ -24,18 +24,19 @@
 ### Session reporting
 
 - SessionStart 는 현재 호스트의 effective target에서 실제로 읽히는 활성 규칙 이름, dial 위치, drift 경고, 선출 계약을 주입한다 — 규칙 본문은 주입하지 않는다. 본문은 하니스가 이미 로드한다.
-- 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트된다. 배포된 규칙이 없는 프로젝트는 선출 줄만 받고, `advisory` 에서는 배포 여부와 무관하게 아무것도 받지 않는다.
-- 어떤 실패든 `{ continue: true }` 를 내고 주입하지 않는다. 훅이 세션을 막을 수 없어야 한다.
-- PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다. 작업 원장의 CHECK 와 일치하는 Bash 결과는 EXPECT 로 판정해 원장에 증거를 기록하고 정확히 한 줄의 게이트 판정을 주입한다.
+- `off` 는 skills-only 기본값이다. 스킬은 설치·호출 가능한 채로 남지만 모든 훅 processor가 규칙·세션 상태 접근 전에 빠져나오고, entry는 stdout/stderr를 비운다. 정적 manifest 호출과 프로세스 cold start 자체는 남는다.
+- 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트된다. 배포된 규칙이 없는 프로젝트는 `standard` 이상에서 선출 줄만 받고, `advisory` 는 SessionStart 상태만 허용하며 `off` 는 배포 여부와 무관하게 아무것도 받지 않는다.
+- 어떤 실패든 processor에서 `{ continue: true }` 로 귀결되고 주입하지 않는다. 의미 있는 `additionalContext`가 없으면 entry가 stdout을 쓰지 않는다. 훅이 세션을 막거나 no-op 응답을 남길 수 없어야 한다.
+- PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `off` 와 `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다. 작업 원장의 CHECK 와 일치하는 Bash 결과는 EXPECT 로 판정해 원장에 증거를 기록하고 정확히 한 줄의 게이트 판정을 주입한다.
 - `Skill` 로드는 관측만 한다: seiri 워크플로우면 마지막 상태를 `.seiri/session-signals.json` 에 기록하고 아무것도 주입하지 않는다. 체인 밖 스킬(다른 플러그인, 호출형 게이트)은 상태를 남기지 않는다. 상태는 로드마다 재무장되고 다음 턴이 한 번만 소비한다.
-- SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `advisory` 에서는 전혀 주입하지 않는다. 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트되므로, 배포 0건인 프로젝트의 서브에이전트는 선출 줄 하나만 받는다.
-- UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하고, 아직 말하지 않은 워크플로우 상태가 있으면 한 절을 덧붙인다(읽기 실패는 리마인더만 남기고 넘어간다). dial 로 게이트한다. `advisory` 에서는 침묵; `standard` 는 선출 어휘로 상기하며 done-claim 순간만 `/seiri:verify` 로 명시하고, `strict` 는 순간마다의 소유 스킬을 전부 이름으로 댄다. 프롬프트 본문은 읽지 않는다. 미충족 작업 원장이 있으면 작업 수와 무관하게 `/seiri:execute` 소유의 환기 한 줄을 덧붙인다.
+- SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `off` 와 `advisory` 에서는 전혀 주입하지 않는다. `off` 는 규칙 상태도 읽지 않는다. 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트되므로, 배포 0건인 `standard` 이상 프로젝트의 서브에이전트는 선출 줄 하나만 받는다.
+- UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하고, 아직 말하지 않은 워크플로우 상태가 있으면 한 절을 덧붙인다(읽기 실패는 리마인더만 남기고 넘어간다). dial 로 게이트한다. `off` 와 `advisory` 에서는 침묵; `standard` 는 선출 어휘로 상기하며 done-claim 순간만 `/seiri:verify` 로 명시하고, `strict` 는 순간마다의 소유 스킬을 전부 이름으로 댄다. 프롬프트 본문은 읽지 않는다. 미충족 작업 원장이 있으면 작업 수와 무관하게 `/seiri:execute` 소유의 환기 한 줄을 덧붙인다.
 - InstructionsLoaded 는 구현되어 있으나 `hooks.json` 에 등록되지 않았다 (dormant). Dormant 인 동안에는 실행되지 않으며, 등록되면 훅 페이로드 전체를 보존하고 아무것도 주입하지 않는다.
 
 ### Configuration
 
 - Intervention dial 은 `<repoRoot>/.seiri/` 아래 두 계층에만 저장되며, 그곳에는 다른 것을 두지 않는다. `config.json` 은 커밋되는 baseline 이며 셋업 표면만 쓴다. `runtime.json` 은 추적되지 않는 세션 밸브이며 `config` 액션만 쓴다.
-- 실제로 적용되는 dial 은 `runtime ?? baseline ?? standard` 이다. 훅은 실행마다 해석하므로, 변경은 세션 재시작 없이 적용된다.
+- 실제로 적용되는 dial 은 `runtime ?? baseline ?? user ?? off` 이다. 훅은 실행마다 해석하므로, 변경은 세션 재시작 없이 적용된다. 기존 파일의 `advisory`·`standard`·`strict` 값은 그대로 유효하다.
 - Runtime 값이 baseline 과 다르면, dial 이 렌더되는 모든 곳에서 그 사실을 명시한다. 묵시적 override 는 금지한다.
 - 읽기는 절대 throw 하지 않는다. 손상된 계층은 건너뛰고 다음 계층을 적용하며, 무시한 파일을 경고에 명시한다.
 - `.seiri/` 에 처음 쓸 때(설정 저장·밸브 조작 어느 쪽이든) `.gitignore` 도 만들어, 그 디렉터리의 untracked 구성원을 나열한다. 저장소 루트 ignore 파일은 절대 편집하지 않는다.
@@ -87,8 +88,9 @@
 
 ### AC-dial-precedence — 다이얼 우선순위
 
-- 유효 다이얼이 `runtime ?? project ?? user ?? standard` 로 정해지고 출처가 함께 보고된다.
-- advisory 에서 SessionStart·SubagentStart·UserPromptSubmit 주입이 모두 침묵한다.
+- 유효 다이얼이 `runtime ?? project ?? user ?? off` 로 정해지고 출처가 함께 보고된다.
+- `off` 에서 모든 훅이 규칙·세션 상태 접근 전에 빠져나오고 stdout/stderr를 비운다.
+- `advisory` 에서는 SessionStart 상태만 허용하고 SubagentStart·UserPromptSubmit·PostToolUse의 워크플로우 체인·상태 기록은 침묵한다.
 
 ### AC-deployment-consent — 배포 동의
 
@@ -164,6 +166,7 @@
 
 ## History
 
+- 2026-09-03 — `intervention: off`를 skills-only 기본값으로 추가했다. 스킬은 명시 호출할 수 있게 유지하면서 훅의 강제 체이닝·상태 변경을 모두 먼저 건너뛰고, 의미 없는 `{ continue: true }` wire 응답도 stdout에 남기지 않기 위해서다. 기존 저장 값은 그대로 명시적 opt-in으로 존중한다.
 - 2026-09-01 — mental-model 스킬을 explain 으로 개명하고, 중심 원리를 세워 연역·공격하는 방법을 제거했다. 연결된 자료를 따라가 정확히 이해한 뒤 개념-관계 지도를 뼈대로 가르치는 방식이 하나의 원리 방어보다 설명력을 높인다는 판단에서다. 편집 스타일은 동봉 `reference.md` 가 계속 소유한다.
 - 2026-09-01 — mental-model 아티클의 편집 스타일 정본을 스킬 동봉 `reference.md` 로 분리했다. toss.tech 아티클 10편 조사에서 도출한 문제 선행 서사·용어 도입·코드 샌드위치·도해 배치 규칙을 SKILL.md 4KB 예산 밖에서 상세화해, 참조 링크 없이도 같은 편집 스타일로 아티클을 쓰게 하기 위해서다.
 - 2026-08-31 — 독립 `brainstorm` 스킬을 제거했다. 구현 방향은 실행 가능한 계획을 만드는 `write-plan`의 일반 추론으로 선택하고, 그 과정의 구조적 결정은 조건부 `adr.md` 계약에 따라 기록하며, 여러 세션에 남길 아키텍처 작업은 `architect`가 계속 소유하게 해 겹치는 발견 표면을 줄이기 위해서다.
@@ -187,4 +190,4 @@
 
 ## Last Updated
 
-2026-09-01 — mental-model 을 explain 으로 개명하고 설명 방법을 개념-관계 중심으로 재작성했다.
+2026-09-03 — skills-only `off` 다이얼과 wire-level hook skip 계약을 추가했다.

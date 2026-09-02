@@ -13,6 +13,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { FAILURE_CHAIN_LINE } from '../../../constants/failureChain.js';
 import { CHAIN_HINT } from '../../../constants/gatesLines.js';
+import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { CheckOutcome } from '../../../types/gates.js';
 import type {
   PostToolUseFailureInput,
@@ -62,6 +63,7 @@ function seedRepo(): { root: string; path: string } {
   const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-host-parity-'));
   createdRoots.push(root);
   mkdirSync(portableJoin(root, '.git'));
+  writeConfig(root, 'project', { intervention: 'standard' });
   const taskDir = portableJoin(root, '.seiri', 'tasks', 'host-parity');
   mkdirSync(taskDir, { recursive: true });
   const path = portableJoin(taskDir, 'gates.md');

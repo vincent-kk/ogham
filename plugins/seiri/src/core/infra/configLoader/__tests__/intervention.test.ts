@@ -63,17 +63,17 @@ describe('intervention dial', () => {
     });
   });
 
-  it('falls back to standard when the project has neither layer', () => {
+  it('falls back to off when the project has no configured layer', () => {
     expect(loadIntervention(seedRepo())).toMatchObject({
-      effective: 'standard',
+      effective: 'off',
       source: 'default',
       baseline: null,
       runtime: null,
     });
   });
 
-  it('proposes standard as the setup default, above the silent floor', () => {
-    expect(createDefaultConfig()).toEqual({ intervention: 'standard' });
+  it('proposes skills-only off as the setup default', () => {
+    expect(createDefaultConfig()).toEqual({ intervention: 'off' });
   });
 
   it('returns to the baseline once the valve is cleared', () => {
@@ -132,5 +132,19 @@ describe('intervention dial', () => {
     });
     expect(state.warnings).toHaveLength(1);
     expect(state.warnings[0]?.file).toContain('runtime.json');
+  });
+
+  it('falls back to off when the only stored layer is damaged', () => {
+    const repoRoot = seedRepo();
+    mkdirSync(join(repoRoot, '.seiri'), { recursive: true });
+    writeFileSync(join(repoRoot, '.seiri', 'config.json'), '{ oops', 'utf8');
+
+    const state = loadIntervention(repoRoot);
+    expect(state).toMatchObject({
+      effective: 'off',
+      source: 'default',
+      baseline: null,
+    });
+    expect(state.warnings[0]?.file).toContain('config.json');
   });
 });

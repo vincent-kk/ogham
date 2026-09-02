@@ -32,4 +32,4 @@ Deploys the rules you select to the active host's project rule channel, which th
 - Never skip the plan step or omit its revision from sync. Rule files become standing instructions read every session; the user decides what lands before it lands.
 - A rule id left out of `selections` is opted out, which **removes** its deployed file. Say so when a selection would delete something.
 - Pass a rule id in `resync` only when the user asked for that rule's edits to be discarded. Report drift; do not resolve it for them.
-- Offering gate scaffolds follows the dial (`rule_docs_sync({ action: "config" })`): silent at advisory, offered once at standard, urged at strict.
+- Offering gate scaffolds follows the dial (`rule_docs_sync({ action: "config" })`): silent at off and advisory, offered once at standard, urged at strict.

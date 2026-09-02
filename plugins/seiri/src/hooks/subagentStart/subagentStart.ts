@@ -1,8 +1,9 @@
 import { ENV_PLUGIN_ROOT } from '../../constants/env.js';
 import { HookEvent } from '../../constants/hooks.js';
-import { loadIntervention } from '../../core/infra/configLoader/loaders/loadIntervention.js';
+import { EMPTY_RESULT } from '../../constants/plugin.js';
 import { getRuleDocsStatus } from '../../core/ruleDocs/status/getRuleDocsStatus.js';
 import type { HookOutput, SubagentStartInput } from '../../types/hooks.js';
+import { loadHookIntervention } from '../shared/loadHookIntervention.js';
 import { renderStatusLines } from '../shared/renderStatusLines.js';
 
 /**
@@ -19,21 +20,26 @@ import { renderStatusLines } from '../shared/renderStatusLines.js';
  * exists to avoid, multiplied by the number of subagents.
  */
 export function processSubagentStart(input: SubagentStartInput): HookOutput {
+  if (!input.cwd) return EMPTY_RESULT;
+
+  const intervention = loadHookIntervention(input.cwd);
+  if (intervention === undefined) return EMPTY_RESULT;
+
   const pluginRoot = process.env[ENV_PLUGIN_ROOT];
-  if (!pluginRoot || !input.cwd) return { continue: true };
+  if (!pluginRoot) return EMPTY_RESULT;
 
   let lines: string[];
   try {
     lines = renderStatusLines(
       getRuleDocsStatus(input.cwd, pluginRoot),
-      loadIntervention(input.cwd),
+      intervention,
       { compact: true },
     );
   } catch {
-    return { continue: true };
+    return EMPTY_RESULT;
   }
 
-  if (lines.length === 0) return { continue: true };
+  if (lines.length === 0) return EMPTY_RESULT;
 
   return {
     continue: true,

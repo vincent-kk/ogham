@@ -3,6 +3,7 @@
  * semantic constants below derive from.
  */
 export const INTERVENTION = {
+  OFF: 'off',
   ADVISORY: 'advisory',
   STANDARD: 'standard',
   STRICT: 'strict',
@@ -19,26 +20,29 @@ export const INTERVENTION = {
  * derived `InterventionLevel` need the fixed shape a plain array widens away.
  */
 export const INTERVENTION_LEVELS = [
+  INTERVENTION.OFF,
   INTERVENTION.ADVISORY,
   INTERVENTION.STANDARD,
   INTERVENTION.STRICT,
 ] as const;
 
 /**
- * Dial applied when a project has configured nothing of its own — the
- * fallback `loadIntervention` lands on, and the position a fresh setup
- * proposes. `standard` so opting into seiri turns the workflow chain on
- * without a second decision; a project dials down to
- * {@link SILENT_INTERVENTION} to opt back out.
+ * Dial applied when a project has configured nothing of its own. The
+ * hooks stay inert until a project or user explicitly opts into a more
+ * active position; the skills remain available for direct invocation.
  */
-export const DEFAULT_INTERVENTION = INTERVENTION.STANDARD;
+export const DEFAULT_INTERVENTION = INTERVENTION.OFF;
 
 /**
- * The quiet floor: the one position where the hooks add no posture line
- * and write no state. `postToolUse` and the SessionStart dial line gate on
- * this — silence here is what makes the dial a real opt-out rather than a
- * volume knob that never reaches zero, and it is the state the dispatch
- * measurements were taken against. Distinct from {@link DEFAULT_INTERVENTION}:
- * the default is what a project gets, this is what it lowers to.
+ * The position where hook processors stop before reading or writing any
+ * workflow state and hook entry points leave stdout empty.
+ */
+export const DISABLED_INTERVENTION = INTERVENTION.OFF;
+
+/**
+ * The status-only position. Workflow-chain hooks use this threshold to
+ * avoid recording turn and failure state, while SessionStart may still
+ * report rule status. Full hook disablement is
+ * {@link DISABLED_INTERVENTION}.
  */
 export const SILENT_INTERVENTION = INTERVENTION.ADVISORY;

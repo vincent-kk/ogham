@@ -6,7 +6,7 @@
 - 렌더는 `shared/renderStatusLines` 의 `compact` 모드이며 **최대 2줄**(활성 규칙 + 선출 계약)이다. 렌더 로직을 복제하지 않는다 — 부모 렌더가 바뀌면 축약본도 같은 함수에서 나온다.
 - **선출 줄은 규칙 배포와 분리된다.** 게이팅은 다이얼뿐이라 배포 0건이면 활성 규칙 줄만 빠지고 선출 줄은 남는다.
 - 드리프트·저장 파일 경고·우선순위 사슬은 넣지 않는다. 앞의 둘은 부모 몫이고 우선순위는 서브에이전트가 읽는 규칙 파일에 있다.
-- advisory 면 완전 침묵이다.
+- off 면 규칙 상태를 읽기 전에 skip하고, advisory 면 렌더 결과가 비어 있다.
 - 규칙 이름만 말한다. 매 스폰마다 본문을 복제하면 SessionStart 가 피하는 이중 비용을 서브에이전트 수만큼 곱한다.
 - 읽기 전용이다 — `.claude/rules/` 와 `.seiri/` 에 쓰지 않는다.
 - stdin 타임아웃(`shared/readStdin`)이 방어선이다. 일부 환경은 훅의 stdin 을 닫지 않으며, 스폰을 막는 훅은 있어서는 안 된다.
@@ -14,7 +14,7 @@
 
 ## API Contracts
 
-- `processSubagentStart(input: SubagentStartInput): HookOutput` — 축약 상태를 렌더해 주입한다. 어떤 실패에도 `{ continue: true }`.
+- `processSubagentStart(input: SubagentStartInput): HookOutput` — off를 먼저 판정하고 축약 상태를 렌더해 주입한다. 어떤 실패에도 `{ continue: true }`; 무주입 wire stdout은 entry가 생략한다.
 
 ## Acceptance Criteria
 
@@ -25,7 +25,7 @@
 ### AC-election-line-independence — 선출 줄 독립
 
 - 규칙 배포가 0건이어도 선출 줄이 남는다.
-- advisory 에서는 두 줄 모두 나오지 않는다.
+- off 와 advisory 에서는 두 줄 모두 나오지 않고, off는 규칙 상태도 읽지 않는다.
 
 ### AC-spawn-non-blocking — 스폰 비차단
 
@@ -34,4 +34,4 @@
 
 ## Last Updated
 
-2026-08-23 — Codex 공통 입력에서도 같은 축약 상태를 내는 계약을 고정했다.
+2026-09-03 — `off` 조기 skip과 빈 wire stdout 계약을 추가했다.

@@ -4,7 +4,7 @@
 
 - Claude에서는 `Bash`·`Skill`과 `PostToolUse`·`PostToolUseFailure`를 다룬다. plugin compiler는 Codex 전용 manifest에서 지원하지 않는 Failure 이벤트와 `Skill` matcher를 제거하므로 비활성 그룹이 남지 않는다.
 - Claude는 성공을 stdout/stderr 객체로 보내므로 정규화된 exit는 0이며, 실패는 `error`·`is_interrupt`로 보낸다. Codex는 성공과 nonzero 모두 `PostToolUse`의 문자열 `tool_response`로 보내며 exit와 interrupt 필드를 주지 않는다.
-- **다이얼이 먼저다.** advisory 면 상태를 건드리기 전에 빠져나온다.
+- **다이얼이 먼저다.** off 는 모든 상태 접근 전에 skip하고, advisory 는 원장·세션 상태를 건드리기 전에 빠져나온다.
 - `Skill` 로드는 관측만 한다 — 마지막 워크플로우 상태만 기록하고 무주입으로 빠진다. 말하는 건 다음 턴의 몫이다.
 - Bash 페이로드를 먼저 `{ text, exit?, interrupted? }`로 정규화한다. `interrupted === true`면 원장 판정과 실패 카운트를 모두 생략한다.
 - 게이트는 이벤트 이름이나 exit가 아니라 출력 텍스트의 EXPECT 매치로만 판정한다. EXPECT 없음은 `unjudgeable`, 빈 출력은 `unmet — no output`, 불일치는 `unmet`이며 알려진 nonzero exit는 이유와 증거에만 붙는다.
@@ -19,7 +19,7 @@
 
 ## API Contracts
 
-- `processToolOutcome(...)` — 게이팅 → 도구 분기 → 카운트·관측. 어떤 실패에도 `{ continue: true }`.
+- `processToolOutcome(...)` — off 게이팅 → advisory 게이팅 → 도구 분기 → 카운트·관측. 어떤 실패에도 `{ continue: true }`; 무주입 wire stdout은 entry가 생략한다.
 
 ## Acceptance Criteria
 
@@ -42,6 +42,7 @@
 
 ### AC-advisory-silence — 다이얼 게이팅
 
+- off 에서 config 이외의 상태를 읽거나 쓰지 않고 wire stdout도 남기지 않는다.
 - advisory 에서 상태 파일에 쓰지 않고 주입도 하지 않는다.
 
 ### AC-gates-verdict-never-silent — 판정은 침묵하지 않는다
@@ -61,4 +62,4 @@
 
 ## Last Updated
 
-2026-08-23 — Codex 생성물에서 지원하지 않는 Skill matcher를 compiler가 제거하는 계약을 반영했다.
+2026-09-03 — `off` 조기 skip과 no-op wire 침묵을 추가했다.

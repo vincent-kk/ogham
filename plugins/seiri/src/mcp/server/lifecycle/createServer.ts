@@ -61,10 +61,10 @@ export function createServer(): McpServer {
             'For action "config", default get. set stores an untracked session valve that overrides the committed baseline; clear drops it so the baseline applies again. Neither writes the committed baseline — that stays a setup-surface act.',
           ),
         intervention: z
-          .enum(['advisory', 'standard', 'strict'])
+          .enum(['off', 'advisory', 'standard', 'strict'])
           .nullish()
           .describe(
-            'Dial position for config_op "set". advisory silences every conditional signal seiri injects; standard announces the workflow chain; strict also widens borderline moments and puts a verification run behind completion claims.',
+            'Dial position for config_op "set". off keeps skills available while hooks emit and record nothing; advisory reports session status without workflow chaining; standard announces the workflow chain; strict also widens borderline moments and puts a verification run behind completion claims.',
           ),
         selections: z
           .record(z.string(), z.boolean())

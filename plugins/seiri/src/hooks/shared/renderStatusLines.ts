@@ -1,4 +1,7 @@
-import { SILENT_INTERVENTION } from '../../constants/intervention.js';
+import {
+  DISABLED_INTERVENTION,
+  SILENT_INTERVENTION,
+} from '../../constants/intervention.js';
 import { INJECTION_PREFIX } from '../../constants/plugin.js';
 import { describeDial } from '../../core/infra/configLoader/utils/describeDial.js';
 import { renderElectionLine } from '../../core/infra/configLoader/utils/renderElectionLine.js';
@@ -29,6 +32,8 @@ export function renderStatusLines(
   dial: InterventionState,
   options: { compact?: boolean } = {},
 ): string[] {
+  if (dial.effective === DISABLED_INTERVENTION) return [];
+
   const active = statuses.filter((status) => status.active);
   const election = renderElectionLine(dial.effective);
 
@@ -46,9 +51,8 @@ export function renderStatusLines(
   // to hit. Drift and stored-file warnings are the parent's business, and
   // precedence is already in the rule files the subagent can read.
   //
-  // Silence at advisory is the dial's opt-out, not an accident of having
-  // nothing deployed: `renderElectionLine` has no entry there, so a
-  // subagent spawn stays exactly as the dispatch measurements found it.
+  // Compact advisory silence is deliberate, not an accident of having no
+  // rules deployed: `renderElectionLine` has no entry at that position.
   if (options.compact)
     return election === undefined
       ? []

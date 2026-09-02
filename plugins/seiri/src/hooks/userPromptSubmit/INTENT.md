@@ -11,7 +11,7 @@
 
 ## Conventions
 
-- **다이얼이 먼저다.** advisory 면 상태도 안 읽고 주입 없이 빠져나온다.
+- **다이얼이 먼저다.** off 면 모든 상태 접근 전에 skip하고, advisory 면 workflow 상태를 읽지 않고 주입 없이 빠져나온다.
 - **상태 1절은 로드 뒤 한 턴만.** `consumeWorkflowState` 가 1회 소비하고, 읽기·쓰기 실패는 상기만 남긴 채 조용히 지나간다(fail-open).
 - **원장은 작업 수와 무관하게 한 줄이다.** 미충족 원장이 있을 때만 워크플로우 상태 뒤에 붙고, 전부 충족되거나 조회가 실패하면 생략한다.
 - **단계별로 문구가 다르다.** standard 는 선출 어휘 + `/seiri:verify` 하나, strict 는 전 순간을 이름으로 댄다. 정본은 `constants/turnReminders.ts` (`TURN_REMINDER_STANDARD` · `TURN_REMINDER_STRICT`).
@@ -22,7 +22,7 @@
 
 ### Always do
 
-- 어떤 실패에도 `{ continue: true }` — 매 턴 도는 훅이다.
+- 어떤 실패에도 processor는 `{ continue: true }`, 무주입 entry stdout은 빈 문자열 — 매 턴 도는 훅이다.
 - 문구 변경은 `constants/turnReminders.ts` 에서. 여기는 선택·주입만.
 
 ### Ask first

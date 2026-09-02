@@ -28,6 +28,7 @@ instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 ### Always do
 
 - 어떤 실패에도 세션을 막지 않는다 — 최상위 try/catch → `{ continue: true }`.
+- 의미 있는 `additionalContext`가 없으면 wire stdout을 비운다 — no-op 통과 JSON도 세션 응답이다.
 - 실패는 `logHookFailure` 로 기록한다. 조용한 실패 금지.
 
 ### Ask first
@@ -40,3 +41,4 @@ instructionsLoaded/  InstructionsLoaded — 로드 관측, 주입 0 (dormant)
 - 호스트 규칙 채널 쓰기 — 배포는 setup 표면 전담.
 - 배포된 규칙 문서의 내용을 주입에 복제.
 - 차단 훅(`PreToolUse`·`Stop`) 도입 — 진실은 저장소가 소유한다.
+- `off`에서 규칙·세션 상태를 읽거나 쓰기 — config 판정 뒤 즉시 skip한다.

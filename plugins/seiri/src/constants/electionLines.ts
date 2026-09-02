@@ -32,10 +32,8 @@ export const ELECTION_STRICT_LINE =
   "Election contract: these moments have owners — a failure appears → load `/seiri:trace-cause` · multi-step work begins → `/seiri:write-plan` · a plan lands → `/seiri:review-plan` · a reviewed plan — or its stated skip → `/seiri:execute` · before implementing → `/seiri:implement` · done/fixed/passing said or heard, your claim or the user's → `/seiri:verify` · requesting review → `/seiri:request-review` · feedback arrives → `/seiri:receive-review`. Load first, decide after reading — deviations are yours to make, with a stated reason. Matching without loading is a skipped election, not a judgment.";
 
 /**
- * Dial → election text. `advisory` has no entry — the lookup misses and
- * every caller renders silence, keeping that dial position exactly as the
- * dispatch measurements were taken against. A missing entry, not a branch
- * in each caller, is what makes the opt-out hold across channels.
+ * Dial → election text. `off` and `advisory` have no entries, so the
+ * lookup misses and every caller renders no workflow election.
  */
 export const ELECTION_RENDER = {
   [INTERVENTION.STANDARD]: ELECTION_STANDARD_LINE,

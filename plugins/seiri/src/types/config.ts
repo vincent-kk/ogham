@@ -1,6 +1,6 @@
 import type { INTERVENTION_LEVELS } from '../constants/intervention.js';
 
-/** One of the three dial positions. */
+/** One of the four dial positions. */
 export type InterventionLevel = (typeof INTERVENTION_LEVELS)[number];
 
 /**

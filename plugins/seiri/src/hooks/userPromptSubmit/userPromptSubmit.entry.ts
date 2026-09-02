@@ -5,6 +5,7 @@ import { HookName } from '../../constants/hooks.js';
 import { EMPTY_RESULT, PLUGIN_NAME } from '../../constants/plugin.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 import { readStdin } from '../shared/readStdin.js';
+import { writeHookOutput } from '../shared/writeHookOutput.js';
 
 import { processUserPromptSubmit } from './userPromptSubmit.js';
 
@@ -19,4 +20,4 @@ try {
   logHookFailure(PLUGIN_NAME, HookName.USER_PROMPT_SUBMIT, error);
 }
 
-process.stdout.write(JSON.stringify(result));
+writeHookOutput(result);

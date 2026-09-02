@@ -4,6 +4,8 @@
 
 - 훅 5종 중 **어느 것도 차단하지 않고 어느 것도 규칙 본문을 나르지 않는다.** 규칙 파일은 하니스가 이미 로드하므로, 훅이 나르는 것은 파일이 스스로 말할 수 없는 것뿐이다.
 - 어떤 실패에도 세션을 막지 않는다 — 최상위 try/catch 가 `{ continue: true }` 로 빠져나오고, 실패는 `logHookFailure` 로 기록한다. 조용한 실패는 없다.
+- built-in `off`에서는 모든 processor가 규칙·세션 상태보다 다이얼을 먼저 읽고 즉시 빠져나온다. 스킬 설치·명시 호출은 영향을 받지 않는다.
+- processor의 no-op은 `{ continue: true }`지만 entry는 의미 있는 `additionalContext`가 있을 때만 JSON을 쓴다. 그래서 `off`, 관측-only Skill, 평상시 Bash, fail-open 경로의 stdout은 비어 있다.
 - 훅 도달 코드는 **플러그인 내부 배럴을 import 하지 않는다.** concrete 파일만 쓰며, 번들 byte cap 과 출력 패턴 검사가 재유입을 막는다. 공유 패키지는 `sideEffects: false` 덕에 루트 import 가 출력에 0바이트로 shake 되므로 예외다.
 - 검증 런타임(zod 등)·MCP SDK·glob 엔진을 훅 번들에 들이지 않는다.
 - `projectRoot`·`pluginRoot` 해석은 쓰지 않는다 — 호스트가 `CLAUDE_PLUGIN_ROOT` 와 세션 cwd 를 이미 준다. 경로 조합은 portable 연산 경유다.
@@ -27,6 +29,11 @@
 - 모든 훅이 예외 상황에서도 `{ continue: true }` 를 반환한다.
 - 어떤 훅도 `decision` 제어를 반환하지 않는다.
 
+### AC-hooks-off-skip — skills-only wire 침묵
+
+- `off`에서 활성 훅과 dormant 훅이 규칙·세션 상태를 읽거나 쓰지 않는다.
+- `additionalContext`가 없는 결과는 exit 0과 빈 stdout으로 끝나며 통과 JSON을 남기지 않는다.
+
 ### AC-hooks-no-rule-body — 규칙 본문 비복제
 
 - 훅 출력이 규칙 이름만 담고 배포된 문서 본문을 복제하지 않는다.
@@ -47,4 +54,4 @@
 
 ## Last Updated
 
-2026-08-23 — Codex 공통 입력·출력과 전용 이벤트 wiring 계약을 반영했다.
+2026-09-03 — `off` 조기 게이트와 wire-level no-op skip 계약을 추가했다.

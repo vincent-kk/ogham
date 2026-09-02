@@ -9,11 +9,12 @@
 - 레코드마다 `cwd` 와 `session_id` 를 남겨, 한 파일에서 프로젝트·워크트리를 사후 분리할 수 있게 한다.
 - 크기 상한 초과 시 회전이 아니라 절단한다 — "지금 전달되는가" 에는 최근 구간이면 족하다.
 - 실패는 삼킨다. 관측 부작용이 대상 세션을 방해하지 않는다.
+- off에서는 관측 레코드를 쓰지 않고 즉시 skip한다.
 - 로그에 규칙 본문이나 사용자 코드 내용을 저장하지 않는다.
 
 ## API Contracts
 
-- `processInstructionsLoaded(...)` — 관측 레코드를 append 하고 `{ continue: true }` 를 반환한다. `hookSpecificOutput` 은 없다.
+- `processInstructionsLoaded(...)` — off가 아니면 관측 레코드를 append 하고 `{ continue: true }` 를 반환한다. `hookSpecificOutput` 은 없고 entry stdout도 비어 있다.
 - `utils/appendObservation.ts` — JSONL 추가와 크기 상한 적용.
 
 ## Acceptance Criteria
@@ -21,6 +22,7 @@
 ### AC-observation-only — 관측 전용
 
 - 출력에 `hookSpecificOutput` 이 없고 컨텍스트 주입이 0이다.
+- off에서는 관측 로그도 쓰지 않는다.
 
 ### AC-dormant-registration — 미등록 상태 고정
 
@@ -33,4 +35,4 @@
 
 ## Last Updated
 
-2026-07-30 — 관측 계측기의 dormant 상태와 로그 계약을 문서화했다.
+2026-09-03 — `off`에서 관측 파일과 wire 응답을 모두 skip하는 계약을 추가했다.

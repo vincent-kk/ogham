@@ -68,6 +68,23 @@ describe('rule_docs_sync config action', () => {
     expect(result.posture).toContain('baseline: advisory');
   });
 
+  it('accepts off and reports only the explicit dial state', () => {
+    const repoRoot = seedRepo();
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
+
+    const result = call(repoRoot, { config_op: 'set', intervention: 'off' });
+    expect(result.changed).toBe(true);
+    expect(result.dial).toMatchObject({
+      effective: 'off',
+      source: 'runtime',
+    });
+    expect(result.posture).toBe(
+      'Intervention: off (runtime; baseline: standard)',
+    );
+    expect(result.posture).not.toContain('Election');
+    expect(result.posture).not.toContain('Workflow');
+  });
+
   it('restores the baseline on clear, and says when there was nothing to clear', () => {
     const repoRoot = seedRepo();
     writeConfig(repoRoot, 'project', { intervention: 'standard' });

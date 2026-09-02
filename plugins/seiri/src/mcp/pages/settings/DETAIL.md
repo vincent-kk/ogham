@@ -2,7 +2,8 @@
 
 ## Requirements
 
-- 폼은 두 가지를 한 화면에서 정한다: 배포할 규칙 선택과 개입 강도 다이얼.
+- 폼은 두 가지를 한 화면에서 정한다: 배포할 규칙 선택과 훅 workflow mode. mode는 `off`·`advisory`·`standard`·`strict` 네 값이고, 새 설정의 기본 `off`는 `Skills only`로 표시한다.
+- `Skills only`는 스킬 설치·명시 호출을 유지하고 훅 context·상태 변경·wire 응답을 없앤다는 뜻이다. 다른 세 값은 기존 다이얼 의미를 유지한다.
 - `scope`(user/project) 는 결정 하나다 — 다이얼이 저장될 레이어와 규칙이 배포될 레이어를 함께 정한다.
 - 모든 요청에 `?token=` 을 부착한다. 저장 본문은 JSON 이다.
 - `/plan` 이 준 revision 을 `/save` 로 왕복시키고, stale 응답이 오면 다시 검토하게 만든다.
@@ -25,6 +26,11 @@
 
 - 규칙 배포와 다이얼 저장이 같은 `scope` 값을 쓴다.
 
+### AC-skills-only-default — 훅 opt-in
+
+- 새 설정에서 네 mode가 visible label과 도움말을 가진 radio로 표시되고 `Skills only`가 선택된다.
+- 저장 payload는 UI label이 아니라 정본 값 `off`를 쓴다.
+
 ### AC-preview-before-save — 미리보기 선행
 
 - 저장 전에 `/plan` 결과가 화면에 표시된다.
@@ -42,4 +48,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 폼의 스코프·미리보기 계약을 문서화했다.
+2026-09-03 — `Skills only` 기본 mode와 네 값 radio 계약을 추가했다.

@@ -23,6 +23,10 @@ function state(overrides: Partial<InterventionState> = {}): InterventionState {
  * whole pre-emptive wiring is gated on.
  */
 describe('dial render', () => {
+  it('renders no workflow posture at off', () => {
+    expect(renderPostureLines('off')).toEqual([]);
+  });
+
   it('says nothing about the workflow at advisory', () => {
     expect(renderPostureLines('advisory')).toEqual([]);
   });

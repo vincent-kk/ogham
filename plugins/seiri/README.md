@@ -10,9 +10,9 @@ Korean documentation: [README-ko_kr.md](./README-ko_kr.md)
 
 Rules you select are written to `.claude/rules/seiri_*.md`. The harness loads them at the start of every session — seiri does not inject their text, because that would spend the same context twice.
 
-What it does inject is the part the files cannot state about themselves: which rules are active, where the intervention dial sits, and whether any deployed rule has been edited away from the shipped version — plus the **election contract**: when a moment matches a seiri workflow (a failure appearing, multi-step work starting, a plan landing, a done-claim forming, review moving), load that workflow before acting and decide after reading. The election line renders on the dial alone, rules deployed or not. `standard` frames the procedure and names one owner — `/seiri:verify` for done-claims; `strict` names every moment's owning skill outright.
+Hooks are `off` by default. In this **Skills only** mode, every skill remains available for explicit use, while hooks add no context, write no session state, and leave no no-op response on stdout. Existing `advisory`, `standard`, and `strict` settings remain explicit opt-ins.
 
-At `standard` and `strict`, it also re-raises a short election reminder at the start of every turn, plus a one-line hand-off note when a workflow skill just ran — what it left behind, and which skill owns the next moment. `advisory` injects nothing per turn.
+`advisory` reports SessionStart rule status without workflow chaining. At `standard` and `strict`, seiri also supplies the **election contract** and re-raises a short reminder at the start of every turn, plus a one-line hand-off note when a workflow skill just ran. `standard` frames the procedure and names `/seiri:verify` for done-claims; `strict` names every moment's owning skill outright.
 
 Each plan task has runnable gates in `.seiri/tasks/<name>/gates.md`. Run each `CHECK` verbatim in Bash and the PostToolUse hook records the evidence; until the ledger is full, `/seiri:verify` sends a done-claim back to `/seiri:execute`. The task name, not the session, owns the ledger.
 

@@ -34,7 +34,7 @@ describe('dial namespaces', () => {
 
   it('falls back to the default when neither layer has a dial', () => {
     expect(loadIntervention(seedRepo())).toMatchObject({
-      effective: 'standard',
+      effective: 'off',
       source: 'default',
       user: null,
       baseline: null,

@@ -6,6 +6,7 @@
 - 모든 핸들러는 `wrapHandler` 로 감싸 throw 를 오류 결과로 바꾼다.
 - 결과 직렬화는 compact JSON 이다. 컨텍스트로 나가는 바이트를 늘리지 않는다.
 - stdio 가 유일한 transport 다.
+- `rule_docs_sync`의 config action은 `off`·`advisory`·`standard`·`strict` 네 다이얼 값을 받으며, `off`는 skills-only 런타임 밸브다.
 
 ## API Contracts
 
@@ -24,4 +25,4 @@
 
 ## Last Updated
 
-2026-08-22 — 서버의 도구 3개 등록과 직렬화 계약을 문서화했다.
+2026-09-03 — config action의 `off` 다이얼 입력 계약을 추가했다.

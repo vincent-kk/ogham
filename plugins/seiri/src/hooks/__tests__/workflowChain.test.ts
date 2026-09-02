@@ -31,11 +31,14 @@ describe('workflow state chain', () => {
       rmSync(dir, { recursive: true, force: true });
   });
 
-  function seedRepo(intervention: InterventionLevel = 'standard'): string {
+  function seedRepo(
+    intervention: InterventionLevel | null = 'standard',
+  ): string {
     const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-chain-'));
     tempDirs.push(repoRoot);
     mkdirSync(join(repoRoot, '.git'));
-    writeConfig(repoRoot, 'project', { intervention });
+    if (intervention !== null)
+      writeConfig(repoRoot, 'project', { intervention });
     return repoRoot;
   }
 
@@ -169,6 +172,29 @@ describe('workflow state chain', () => {
       false,
     );
     expect(turn(repoRoot)).toBe('');
+  });
+
+  it('keeps an unconfigured repository skill-only by default', () => {
+    const repoRoot = seedRepo(null);
+    load(repoRoot, 'seiri:write-plan');
+    expect(existsSync(join(repoRoot, '.seiri', 'session-signals.json'))).toBe(
+      false,
+    );
+    expect(turn(repoRoot)).toBe('');
+  });
+
+  it('preserves pending workflow state while hooks are off', () => {
+    const repoRoot = seedRepo();
+    const statePath = join(repoRoot, '.seiri', 'session-signals.json');
+    load(repoRoot, 'seiri:write-plan');
+    expect(existsSync(statePath)).toBe(true);
+
+    writeConfig(repoRoot, 'project', { intervention: 'off' });
+    expect(turn(repoRoot)).toBe('');
+    expect(existsSync(statePath)).toBe(true);
+
+    writeConfig(repoRoot, 'project', { intervention: 'standard' });
+    expect(turn(repoRoot)).toContain('/seiri:review-plan');
   });
 
   it('records nothing for a skill outside the workflow chain', () => {

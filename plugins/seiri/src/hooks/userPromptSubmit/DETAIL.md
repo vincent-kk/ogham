@@ -3,7 +3,7 @@
 ## Requirements
 
 - 매 사용자 턴 시작에 한 줄 상기를 주입한다. SessionStart 의 자세는 긴 세션이 밀어내고 컴팩션이 떨구는데, 스킬이 떠야 할 순간이 곧 그 자세가 사라진 순간이기 때문이다.
-- **다이얼이 먼저다.** advisory 면 상태도 읽지 않고 주입 없이 빠져나온다.
+- **다이얼이 먼저다.** off 면 모든 상태 접근 전에 skip하고, advisory 면 workflow 상태를 읽지 않고 주입 없이 빠져나온다.
 - 워크플로우 상태 1절은 로드 뒤 **한 턴만** 나온다. `consumeWorkflowState` 가 1회 소비하고, 읽기·쓰기 실패는 상기만 남긴 채 조용히 지나간다(fail-open).
 - 워크플로우 상태 뒤에 미충족 작업 원장 전체를 한 줄로 환기한다. 단일 작업은 다음 게이트를, 복수 작업은 각 작업의 met/total을 이름 순서로 싣는다.
 - 모든 게이트가 충족·포기됐거나 원장 디렉터리가 없으면 원장 줄을 내지 않는다. 조회·파싱·상태 계산·렌더 실패도 기존 상기만 남기고 fail-open 한다.
@@ -14,13 +14,13 @@
 
 ## API Contracts
 
-- `processUserPromptSubmit(...)` — 게이팅 + 문구 선택 + 상태 1절. 어떤 실패에도 `{ continue: true }`.
+- `processUserPromptSubmit(...)` — off 게이팅 + 문구 선택 + 상태 1절. 어떤 실패에도 `{ continue: true }`; 무주입 wire stdout은 entry가 생략한다.
 
 ## Acceptance Criteria
 
 ### AC-turn-reminder-dial — 단계별 문구
 
-- advisory 에서 아무것도 주입하지 않는다.
+- off 와 advisory 에서 아무것도 주입하지 않으며 off는 상태도 읽지 않는다.
 - standard 와 strict 가 각각 `constants/turnReminders.ts` 의 해당 문구를 쓴다.
 
 ### AC-workflow-state-once — 1회 소비
@@ -40,4 +40,4 @@
 
 ## Last Updated
 
-2026-08-23 — Codex 공통 입력에서도 같은 턴 상기를 내는 계약을 고정했다.
+2026-09-03 — `off` 조기 skip과 빈 wire stdout 계약을 추가했다.
