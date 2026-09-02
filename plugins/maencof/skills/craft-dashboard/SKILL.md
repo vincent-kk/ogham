@@ -1,6 +1,7 @@
 ---
 name: craft-dashboard
 user-invocable: true
+disable-model-invocation: true
 description: 'Generates or updates a personal vault dashboard (Fastify + React) through an interactive interview, reading .maencof/ graph indexes by default. Use when creating or modifying a vault dashboard or visualizing vault activity.'
 argument-hint: '[create|mutate] [target-dir] [--chart recharts|plotly] [--yes]'
 version: '0.1.0'

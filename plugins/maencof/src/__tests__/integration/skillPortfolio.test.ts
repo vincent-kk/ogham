@@ -28,8 +28,8 @@ const REMOVED_SKILLS = [
   'refine',
   'suggest',
 ];
-// Portfolio after removing craft-skill, think, refine, and suggest.
-const EXPECTED_COUNT = 24;
+// Portfolio after adding craft-library as the public library scaffold skill.
+const EXPECTED_COUNT = 25;
 
 describe('maencof skill portfolio invariants', () => {
   it(`skills/ contains exactly ${EXPECTED_COUNT} skill directories`, () => {
