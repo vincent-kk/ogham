@@ -9,7 +9,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { expect, test } from '@playwright/test';
+import { type Page, expect, test } from '@playwright/test';
 
 import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
 
@@ -18,6 +18,9 @@ import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
 const PKG_ROOT = process.cwd();
 process.env.OGHAM_NO_BROWSER = '1';
 process.env.CLAUDE_PLUGIN_ROOT = PKG_ROOT;
+// The page opens on the user layer when a project has no config. Isolate that
+// layer so save tests never read or write the developer's real host config.
+process.env.CLAUDE_CONFIG_DIR = mkdtempSync(join(tmpdir(), 'seiri-e2e-state-'));
 
 // Drive assertions off the shipped manifest, not hard-coded ids/counts.
 interface ManifestEntry {
@@ -46,6 +49,21 @@ async function openSession(dir: string): Promise<string> {
 
 function longPoll(dir: string) {
   return handleOpenSettings({ path: dir, waitSeconds: 20 });
+}
+
+/**
+ * Select the project layer used by assertions against repository files.
+ *
+ * @param page Settings page whose scope radio should change.
+ * @returns Resolves after the rebuilt scope group reports project selected.
+ */
+async function useProjectScope(page: Page): Promise<void> {
+  await page
+    .locator('#config_scope .scope-option', { hasText: 'Project' })
+    .click();
+  await expect(
+    page.locator('#config_scope input[value="project"]'),
+  ).toBeChecked();
 }
 
 function readConfig(dir: string): { intervention?: string } {
@@ -90,8 +108,12 @@ test('serves the built page with injected state and rejects a missing token', as
   await expect(page.locator('#project-root')).toHaveText(projectDir);
   // Every shipped rule renders one selectable card.
   await expect(page.locator('#rules-list .rule')).toHaveCount(RULE_COUNT);
-  // The intervention dial offers its three positions.
-  await expect(page.locator('#dial input[name="intervention"]')).toHaveCount(3);
+  // The intervention dial offers four positions, with skills-only selected.
+  await expect(page.locator('#dial input[name="intervention"]')).toHaveCount(4);
+  await expect(page.locator('#dial input[value="off"]')).toBeChecked();
+  await expect(
+    page.locator('#dial .dial-option').filter({ hasText: 'Skills only' }),
+  ).toBeVisible();
   // A fresh project pre-checks the recommended set, so the plan is non-empty.
   await expect(page.locator('#preview .diff-row').first()).toBeVisible();
 });
@@ -121,6 +143,7 @@ test('save persists the dial and syncs the selected rule docs', async ({
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
+  await useProjectScope(page);
   // Move the dial off its default; keep the recommended rule checked.
   await page.locator('#dial input[value="strict"]').check();
   await page.locator(`#rule-${RECOMMENDED.id}`).check();
@@ -139,6 +162,22 @@ test('save persists the dial and syncs the selected rule docs', async ({
   ).toBe(true);
 });
 
+test('saving the default skills-only mode persists intervention off', async ({
+  page,
+}) => {
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+
+  await page.goto(url);
+  await useProjectScope(page);
+  await expect(page.locator('#dial input[value="off"]')).toBeChecked();
+  await page.locator('#save').click();
+
+  await expect(page.locator('#status')).toContainText('Saved');
+  await expect(waiting).resolves.toMatchObject({ status: 'saved' });
+  expect(readConfig(projectDir).intervention).toBe('off');
+});
+
 test('a drifted rule defaults to the latest shipped version', async ({
   page,
 }) => {
@@ -154,11 +193,14 @@ test('a drifted rule defaults to the latest shipped version', async ({
   const url = await openSession(projectDir);
   const waiting = longPoll(projectDir);
   await page.goto(url);
+  await useProjectScope(page);
 
   const rule = page
     .locator('#rules-list .rule')
     .filter({ has: page.locator(`#rule-${RECOMMENDED.id}`) });
-  await expect(rule.locator('.rule-drift input[type="checkbox"]')).toBeChecked();
+  await expect(
+    rule.locator('.rule-drift input[type="checkbox"]'),
+  ).toBeChecked();
   await expect(
     page.locator('#preview .diff-row[data-action="update"]'),
   ).toContainText(RECOMMENDED.filename);
@@ -173,6 +215,7 @@ test('a stale save replans without writing or settling the session', async ({
 }) => {
   const url = await openSession(projectDir);
   await page.goto(url);
+  await useProjectScope(page);
   await expect(page.locator('#preview .diff-row').first()).toBeVisible();
 
   const rulesDir = join(projectDir, '.claude', 'rules');
