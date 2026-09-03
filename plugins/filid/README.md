@@ -4,7 +4,7 @@ A Claude Code plugin that keeps a codebase's module boundaries and contract docu
 
 As a codebase grows, AI agents lose context, documents drift from code, and directory structures lose their shape. filid answers exactly that, and only that, through **Fractal Context Architecture (FCA-AI)**: it owns `INTENT.md` and `DETAIL.md`, checks the fractal/organ structure and its dependency DAG, decides where a shared unit belongs, and reviews a change against that evidence.
 
-It is deliberately not a general code-quality tool. Naming, function size, cyclomatic complexity, cohesion metrics, test quality and coverage belong elsewhere — filid reports what it can prove about structure and contracts, and says `indeterminate` instead of guessing.
+filid is deliberately not a repository-wide code-quality rule engine. Outside the committed-change scope of cross-review, naming, function size, cyclomatic complexity, cohesion metrics, test quality, and coverage belong elsewhere. Within that scope, cross-review judges defects, security, performance, maintainability, tests, documentation, and FCA evidence; uncertain evidence remains explicit instead of becoming a guess.
 
 ---
 
@@ -99,7 +99,7 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 /filid:cross-review --base origin/main
 ```
 
-Three independent perspectives — contract, structure, verification — review the committed change in parallel, then an adversarial arbiter rules every blocking finding `CONFIRMED | REFUTED | INDETERMINATE`. Refuted findings drop out of the verdict but stay in the arbitration log. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and is explicitly scoped to FCA — it is not a security, product, or UX review.
+Each committed file is reviewed against layered built-in and repository rules, while FCA tool findings join the same candidate set. Every candidate finding is independently verified as `CONFIRMED | REFUTED | INDETERMINATE`; only confirmed findings affect fix requests. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and covers the committed change, not defects outside that scope.
 
 ### Migrate legacy document names
 
@@ -135,7 +135,7 @@ A blocked write explains its reason and denies only that one tool call — your 
 | `/filid:guide`         | Explain the current tree, classifications, and placement rules            |
 | `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval       |
 | `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions |
-| `/filid:cross-review`  | Three-perspective FCA review with adversarial arbitration                 |
+| `/filid:cross-review`  | File-by-file change review with independently verified findings           |
 | `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                  |
 | `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR               |
 | `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications      |

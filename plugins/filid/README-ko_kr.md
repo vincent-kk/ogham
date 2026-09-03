@@ -4,7 +4,7 @@
 
 코드베이스가 커지면 AI 에이전트가 맥락을 잃고, 문서는 코드와 어긋나고, 디렉터리 구조는 형태를 잃습니다. filid는 **프랙탈 아키텍처(FCA-AI)** 로 정확히 그 문제만 다룹니다. `INTENT.md`와 `DETAIL.md`를 소유하고, fractal/organ 구조와 의존성 DAG를 검사하고, 공유 단위가 있어야 할 위치를 결정하고, 그 증거만으로 변경을 리뷰합니다.
 
-범용 코드 품질 도구가 아닙니다. 이름, 함수 크기, 순환 복잡도, 응집도 지표, 테스트 품질과 커버리지는 filid의 소유가 아닙니다. filid는 구조와 계약에 대해 증명할 수 있는 것만 보고하며, 확신할 수 없으면 추측 대신 `indeterminate`를 반환합니다.
+filid는 저장소 전역 코드 품질 규칙 엔진이 아닙니다. cross-review의 커밋 변경 범위 밖에서는 이름, 함수 크기, 순환 복잡도, 응집도 지표, 테스트 품질과 커버리지를 판정하지 않습니다. 그 범위 안에서는 결함·보안·성능·유지보수·테스트·문서·FCA 증거를 함께 검토하고, 불확실한 증거는 추측하지 않고 명시적으로 남깁니다.
 
 ---
 
@@ -99,7 +99,7 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 /filid:cross-review --base origin/main
 ```
 
-contract·structure·verification 세 관점이 커밋된 변경을 병렬로 리뷰한 뒤, 별도의 adversarial 판정자가 모든 blocking finding을 `CONFIRMED | REFUTED | INDETERMINATE`로 판정합니다. REFUTED는 verdict에서 빠지되 arbitration log에 남습니다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 명시적으로 FCA 범위입니다. 보안·제품성·UX 리뷰가 아닙니다.
+커밋된 각 파일을 내장 규칙과 저장소 규칙의 계층형 체크리스트로 리뷰하고, FCA 도구 finding도 같은 후보 집합에 합칩니다. 모든 후보 finding은 `CONFIRMED | REFUTED | INDETERMINATE`로 독립 검증하며, 확인된 finding만 fix request에 반영합니다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이고 커밋된 변경 범위만 판정합니다.
 
 ### legacy 문서명 이관
 
@@ -135,7 +135,7 @@ contract·structure·verification 세 관점이 커밋된 변경을 병렬로 �
 | `/filid:guide`         | 현재 트리·분류·배치 규칙 설명                      |
 | `/filid:enrich-docs`   | 스냅샷 증거 기반 INTENT/DETAIL 개선 (승인 후 편집) |
 | `/filid:restructure`   | 읽기 전용 계획 → 승인 → 외부 실행 → 사후조건 검증  |
-| `/filid:cross-review`  | 3관점 FCA 리뷰와 adversarial 판정                  |
+| `/filid:cross-review`  | 파일별 변경 리뷰와 finding 독립 검증               |
 | `/filid:migrate`       | legacy CLAUDE.md / SPEC.md 이름 이관               |
 | `/filid:pull-request`  | 문서 동기화 후 구조화된 GitHub PR 생성             |
 | `/filid:resolve`       | fix request 수용·거부 결정, 위임, 정당화 기록      |
