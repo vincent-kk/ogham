@@ -27,7 +27,7 @@
 ```
 ┌──────────────┐  ┌───────────────┐  ┌──────────┐  ┌──────────────┐
 │ pull-request │─→│ cross-review  │─→│ resolve  │─→│ revalidate   │
-│ 문서 동기화   │  │ 3관점 + 판정   │  │ 결정·위임 │  │ 재측정·판정   │
+│ 문서 동기화   │  │ 파일 리뷰·검증 │  │ 결정·위임 │  │ 재측정·판정   │
 │ + PR 생성    │  │ fix-requests  │  │ justif.  │  │ PASS/FAIL    │
 └──────────────┘  └───────────────┘  └──────────┘  └──────────────┘
         └────────────────── pipeline (--auto 연속 실행) ──────────────┘
@@ -37,7 +37,7 @@
 
 #### resolve decision sheet
 
-`resolve`는 confirmed fix를 하나씩 묻지 않는다. 의사결정 전에 `fix-requests.md` 전체를 파싱하고, severity나 perspective와 별개로 correction을 추천한다.
+`resolve`는 confirmed fix를 하나씩 묻지 않는다. 의사결정 전에 `fix-requests.md` 전체를 파싱하고, `Severity`와 `Category`라는 finding 사실과 별개로 correction을 추천한다.
 
 ```
 모든 FIX block 파싱
@@ -71,6 +71,8 @@ baseline capture → accepted correction 일괄 위임 → 검증된 ADR 직렬�
 `Other` 응답에서 생략한 ID는 sheet의 default를 유지한다. `skip`은 reason을 가진 warning deferral에만 쓰며 error는 apply 또는 reason-bearing reject로 결정한다. unknown ID, error skip, 이유 없는 skip/reject와 불완전한 ADR은 전부 모아 한 번에 다시 요청한다. 이 검증이 끝나기 전에는 baseline을 잡거나 correction을 위임하지 않으며, 이후 rejection 단계는 decision을 다시 열지 않는다.
 
 `--auto`도 전체 sheet를 먼저 출력한다. 원래 Recommendation과 그 이유는 그대로 두고 Decision만 모든 행 `[x] Apply (auto-selected)`로 바꾸며, prompt 없이 baseline과 delegation으로 진행한다. 따라서 pipeline에서도 무엇이 원래 논쟁적이었는지는 보이지만 실행은 멈추지 않는다.
+
+`fix-requests.md`의 각 block은 Claim을 포함한 원 finding payload를 보존한다. resolve는 canonical FIX ID를 accepted heading에 유지하고, revalidate는 그 ID로 두 artifact를 exactly-one join한다. join이 누락·중복되거나 필드가 부족하면 비-FCA verifier를 실행하지 않고 해당 항목을 `inconclusive`로 둔다.
 
 ### 1.0에서 제거된 스킬
 
@@ -237,41 +239,53 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 
 ---
 
-## cross-review — FCA 증거 기반 다관점 리뷰
+## cross-review — 파일별 변경 리뷰와 독립 검증
 
 **트리거**: 커밋된 변경 또는 PR, `/filid:cross-review [PR URL]`
 
 ```
-Step 1 — Resolve Source and Prepare State
+Step 1 — Resolve Source, Prepare State, and Capture Change Context
 ├── 브랜치/PR 해석, base ref 결정
 ├── review_state(prepare) → fresh | resumable | cached
-│     · 같은 hash의 prepared state → resumable (이어서)
-│     · 같은 hash의 sealed state + report → cached (재사용)
+│     · 같은 hash의 prepared state + review_schema: 5 → resumable (이어서)
+│     · 같은 hash의 sealed state + schema 5 report → cached (재사용)
+│     · schema marker 없음/불일치 → 한 번 force-fresh
 │     · force: true → 캐시 무시하고 fresh
-└── 출력: review state record
+└── PR 본문 또는 commit log의 변경 배경을 session.md에 고정
 
-Step 2 — Collect Snapshot Evidence
-├── 변경 프랙탈의 snapshot 증거만 수집
-└── 읽는 증거는 아래 목록으로 제한된다
+Step 2 — Build Scope, Rules, and Evidence
+├── 변경 파일마다 (path, status) checklist 작성
+├── 생성물·binary·삭제·vendor 제외는 사유와 함께 skipped 처리
+├── 현재 사용자 요구를 USR-NNN으로 고정하고 내장·저장소 규칙과 병합
+├── owning fractal과 churn으로 bounded review group 구성
+└── FCA snapshot 증거와 source/snapshot hash gate 수집
 
-Step 3 — Run Three Independent Perspectives  (병렬, 단일 라운드)
-├── contract     — INTENT/DETAIL/acceptance/public surface
-├── structure    — classification/boundary/DAG/LCA/placement
-└── verification — role/case count/fragmentation/link/certainty
+Step 3 — Review Groups  (최대 8개 병렬)
+├── 각 그룹 reviewer가 파일별 diff 전체와 필요한 호출자·테스트를 읽음
+├── 큰 변경은 코드보다 먼저 Risk Plan 작성
+├── 규칙 checklist 뒤 계획 없는 free sweep 수행
+└── 모든 파일을 reviewed | skipped + reason으로 마감; in-scope gap은 INCONCLUSIVE
 
-Step 4 — Adversarial Arbitration
-├── 모든 blocking finding을 CONFIRMED | PLAUSIBLE | REFUTED로 판정
-└── REFUTED는 verdict에서 제거하되 arbitration log에 남긴다
+Step 4 — Verify Every Candidate
+├── reviewer finding과 FCA finding 행을 path + rule로 중복 제거
+├── 경로별 후보와 같은 USR-NNN catalog로 효율 등급 verifier를 병렬 실행
+└── 후보마다 CONFIRMED | REFUTED | INDETERMINATE 하나를 기록
 
 Step 5 — Checkpoint, Report, and Seal
 ├── review_state(checkpoint) → artifact 목록과 report 경로
+├── coverage와 verification log를 review-report.md에 기록
 ├── verdict: APPROVED | REQUEST_CHANGES | INCONCLUSIVE
-├── review_state(seal) → prepared hash와 report가 있을 때만 sealed
-└── (--scope=pr 요청 시에만) PR 코멘트
+└── review_state(seal) → prepared hash와 report가 있을 때만 sealed
+
+Step 6 — Publish to Pull Request
+└── PR이 있으면 기존 verdict 코멘트를 갱신하고, 없으면 게시하지 않음
 ```
 
-### cross-review가 읽는 증거
+### cross-review 입력과 규칙
 
+- PR 본문 또는 base 이후 commit log에서 고정한 변경 배경
+- 변경 파일별 전체 diff, 현재 파일, 필요한 호출자와 테스트
+- 내장 `default`·`tests`·`documents`·`fca` 규칙과 저장소의 적용 규칙
 - 변경된 프랙탈의 INTENT.md와 DETAIL.md 계약
 - node classification과 owner
 - entry point surface와 외부 import boundary
@@ -281,17 +295,19 @@ Step 5 — Checkpoint, Report, and Seal
 - spec fragmentation과 DETAIL acceptance group link
 - `unsupported` / `indeterminate` 진단
 
-이 밖의 것은 읽지 않는다. 그래서 verdict 제목과 본문에 **FCA scope**를 명시한다.
+verdict는 이 입력으로 확인한 커밋 변경 범위에만 적용된다. 범위 밖에서 발견한 새 우려는 기록할 수 있지만 verdict에는 영향을 주지 않는다.
 
 ### verdict 규칙
 
-| 상황                                                  | verdict           |
-| ----------------------------------------------------- | ----------------- |
-| 명확한 위반                                           | `REQUEST_CHANGES` |
-| evidence가 `indeterminate`이고 merge 안전성 판정 불가 | `INCONCLUSIVE`    |
-| 위반 없음                                             | `APPROVED`        |
+| 상황                                                                 | verdict           |
+| -------------------------------------------------------------------- | ----------------- |
+| source state·hash 불일치 또는 재시도 뒤 필수 artifact 누락           | `INCONCLUSIVE`    |
+| checklist 미마감 또는 변경 파일을 가리키는 reviewer gap              | `INCONCLUSIVE`    |
+| `severity: error` 후보가 `INDETERMINATE`                              | `INCONCLUSIVE`    |
+| `CONFIRMED` 후보가 하나 이상                                         | `REQUEST_CHANGES` |
+| 모든 후보가 `REFUTED`이거나 후보 없음                                | `APPROVED`        |
 
-cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure_plan`이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
+`severity: warning` 후보의 `INDETERMINATE`는 unresolved evidence로 기록하되 verdict에는 영향을 주지 않는다. cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure_plan`이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
 
 ### review state 수명주기
 

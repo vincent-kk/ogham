@@ -270,7 +270,7 @@ snapshot 증거로 INTENT.md / DETAIL.md를 개선한다. **편집 전에 승인
 /filid:cross-review 처음부터 다시 해줘        # force
 ```
 
-contract·structure·verification 3관점 병렬 리뷰 + adversarial 판정. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 **FCA scope**로 명시된다. PR 코멘트는 사용자가 PR scope를 요청했을 때만 게시한다.
+커밋된 파일을 내장 규칙과 저장소 규칙으로 빠짐없이 리뷰하고 FCA 도구 행을 후보에 합친 뒤, 모든 후보를 별도 verifier가 독립 검증한다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 커밋 변경 범위에만 적용된다. 브랜치에 PR이 있으면 기존 verdict 코멘트를 갱신하고, PR이 없으면 게시하지 않는다.
 
 ### /filid:resolve
 
@@ -279,10 +279,10 @@ contract·structure·verification 3관점 병렬 리뷰 + adversarial 판정. ve
 /filid:resolve --auto
 ```
 
-interactive 실행은 모든 confirmed fix를 먼저 보여 준다. `Severity`/`Perspective`는 finding의 종류이고, `Recommendation`은 적용 편의와 논쟁성을 따로 판정한다.
+interactive 실행은 모든 confirmed fix를 먼저 보여 준다. `Severity`와 `Category`는 finding의 사실이고, `Recommendation`은 적용 편의와 논쟁성을 따로 판정한다.
 
 ```text
-Default | ID      | Severity | Perspective | Recommendation | Path
+Default | ID      | Severity | Category  | Recommendation | Path
 [?]     | FIX-004 | error    | structure   | Discuss        | src/api
 [x]     | FIX-001 | warning  | contract    | Apply          | src/index.ts
 ```
