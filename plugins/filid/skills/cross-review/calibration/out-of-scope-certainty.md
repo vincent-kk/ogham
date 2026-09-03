@@ -106,7 +106,7 @@ These keep the base tree internally consistent, so nothing here is a seeded viol
 
 `calib/run-g` changes exactly one file — `src/slugify/slugify.ts`, the clean update from `clean-change.md`. Changed scope is that file and its owning fractal `src/slugify`. Nothing under `src/tokenize/` is touched.
 
-`run-g` must end `APPROVED`, with all three perspectives `COMPLETE` and no gap recorded.
+`run-g` must end `APPROVED`, with every changed checklist entry reviewed, verification complete, and no gap recorded.
 
 ## What This Fixture Regresses
 
@@ -128,4 +128,4 @@ The project-wide `indeterminate` is real, and every source contributing to it si
 
 The last three are the sharp part. They are project-granularity rules, so the adapter attributes them to the **project root** — an ancestor of the changed file — while every fact behind them comes from `src/tokenize/`. Scope is decided by where the certainty was sourced, not by the path the row happens to carry; judging by the attributed path alone would pull the root in and make a clean change unjudgeable. This is the shape that produced the original defect report's third structure gap.
 
-An `INCONCLUSIVE` result on `run-g` means a perspective promoted a project-wide aggregate into its own `gaps` and set `state: INDETERMINATE` from evidence it was never asked to judge. A `REQUEST_CHANGES` result means the out-of-scope row was arbitrated as a candidate. This path is independent of the coverage exception — fixing coverage alone does not close it.
+An `INCONCLUSIVE` result on `run-g` means a reviewer promoted a project-wide aggregate into its own `gaps` and set `state: INDETERMINATE` from evidence it was never asked to judge. A `REQUEST_CHANGES` result means the out-of-scope row became a candidate and verification confirmed it. This fixture isolates source-based scope from candidate verification.

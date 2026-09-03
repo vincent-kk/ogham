@@ -19,6 +19,6 @@ Start from `clean-change.md` and apply its clean implementation update. On `cali
 2026-07-27
 ```
 
-The committed entry point still exports `slugify` and does not export `toSlug`. The contract perspective must raise `contract-entry-mismatch`; arbitration must confirm it from DETAIL.md and `src/slugify/index.ts`.
+The committed entry point still exports `slugify` and does not export `toSlug`. The reviewer must raise `contract-entry-mismatch` in category `contract`; independent verification must confirm it from DETAIL.md and `src/slugify/index.ts`.
 
 `run-d` must end `REQUEST_CHANGES` with exactly this seeded contract finding.

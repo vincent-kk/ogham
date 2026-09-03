@@ -20,4 +20,4 @@ Independent documentation inside a test organ.
 
 The new document violates the organ document boundary.
 
-`run-c` must end `REQUEST_CHANGES` with both seeded errors confirmed. General implementation observations are out of scope.
+`run-c` must end `REQUEST_CHANGES` with both seeded errors in category `structure` and confirmed by independent verification. No other finding is seeded.

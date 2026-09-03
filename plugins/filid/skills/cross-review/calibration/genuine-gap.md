@@ -24,7 +24,7 @@ The file keeps its `.spec` suffix but holds no case. The adapter reads the conte
 
 ## What This Fixture Regresses
 
-`run-e` proves that a covered gap stops forcing `INCONCLUSIVE`. This fixture proves the opposite half — that the normal `INCONCLUSIVE` path still works — and it is the regression that matters most, because the risk of the coverage exception is over-suppression.
+This fixture is the sole calibration path where a reviewer records missing evidence for a changed file. It proves that the normal `gaps → INCONCLUSIVE` path remains active even when the same run also contains a confirmed finding.
 
 The two seeds are chosen to sit at the same address on one axis and differ on the other:
 
@@ -33,6 +33,6 @@ The two seeds are chosen to sit at the same address on one axis and differ on th
 | Confirmed finding on `notes.md` | `src/slugify`  | `zero-peer-file`             |
 | Gap on `tests/slugify.spec.ts`  | `src/slugify`  | verification role unresolved |
 
-Coverage requires **both** to match: the same owning fractal _and_ the same rule, with `rule` compared exactly. Here the fractal matches and the rule does not, so the gap is uncovered and the verdict is `INCONCLUSIVE` despite a confirmed finding being present.
+The confirmed finding does not supply the missing verification-role evidence. The gap therefore remains unresolved and the verdict is `INCONCLUSIVE` despite a confirmed finding being present.
 
-A `REQUEST_CHANGES` result on `run-f` means coverage was implemented as owning-fractal proximity alone, dropping the exact-rule half of the predicate. That regression would silently retire the `INCONCLUSIVE` verdict for any change that happens to carry one confirmed finding.
+A `REQUEST_CHANGES` result on `run-f` means the changed-file evidence gap was suppressed merely because the run also carried a confirmed finding. That regression would silently retire `INCONCLUSIVE` for partially unreviewable changes.

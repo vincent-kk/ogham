@@ -37,6 +37,11 @@ unapplied: <k>
 - **Consequences**: <what this costs and what now has to stay true>
 ```
 
+Every item heading under `## Accepted` copies the canonical `FIX-NNN` from
+`fix-requests.md` exactly; never renumber or synthesize it. The accepted FIX ID
+is the revalidate join key to exactly one canonical fix-request block, which
+remains the source of the complete original finding payload.
+
 `resolve_commit_sha` is load-bearing. `revalidate` diffs `resolve_commit_sha..HEAD`; a value read after the commit yields an empty delta and a false PASS.
 
 ## §2 ADR refinement rules
@@ -58,7 +63,7 @@ Reject-the-rejection cases, reported back to the developer for a second pass:
 
 ## §3 Recommendation rubric
 
-Recommendation describes whether the correction should flow through by default. Severity and Perspective describe the finding; neither decides the recommendation alone. An error can require discussion, and a warning can be an obvious default apply.
+Recommendation describes whether the correction should flow through by default. Severity and Category describe the finding; neither decides the recommendation alone. An error can require discussion, and a warning can be an obvious default apply.
 
 | Signal                       | Recommendation | Default | Presentation        |
 | ---------------------------- | -------------- | ------- | ------------------- |
@@ -79,12 +84,12 @@ Render the whole set before asking anything. Keep FIX order within each group, b
 Total: <n> | Errors: <n> | Warnings: <n> | Apply: <n> | Discuss: <n>
 
 ### Needs attention
-| Default | ID | Severity | Perspective | Recommendation | Path |
+| Default | ID | Severity | Category | Recommendation | Path |
 | ------- | -- | -------- | ----------- | -------------- | ---- |
 | `[?]` | FIX-NNN | error | structure | Discuss | `<path>` |
 
 ### Selected by default
-| Default | ID | Severity | Perspective | Recommendation | Path |
+| Default | ID | Severity | Category | Recommendation | Path |
 | ------- | -- | -------- | ----------- | -------------- | ---- |
 | `[x]` | FIX-NNN | warning | contract | Apply | `<path>` |
 
@@ -138,7 +143,7 @@ Routing:
 | File or directory placement                   | `/filid:restructure` |
 | Document content                              | `/filid:enrich-docs` |
 
-A `structure` perspective item that names a target path is a placement item. Route it rather than editing paths by hand — `restructure` is the only thing that verifies the postconditions.
+A `structure` category item that names a target path is a placement item. Route it rather than editing paths by hand — `restructure` is the only thing that verifies the postconditions.
 
 The two skill rows never receive the brief above — its Bounds clause forbids exactly what those skills exist to do. Each takes its own documented input:
 

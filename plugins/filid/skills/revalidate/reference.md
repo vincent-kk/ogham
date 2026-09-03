@@ -2,7 +2,22 @@
 
 ## §1 Status derivation matrix
 
-One status per accepted item, derived from re-measurement only.
+One status per accepted item. A successfully joined item is derived from
+re-measurement only; a failed join is `inconclusive` before re-measurement.
+
+### Accepted finding join
+
+Read both `justifications.md` and `fix-requests.md`. Parse every canonical FIX
+ID under `## Accepted` and join each accepted FIX ID to exactly one canonical
+fix-request block. The joined block must reconstruct the
+complete original finding payload: Severity, Category, Path, Rule, Claim,
+Evidence, Consequence, and Recommended Action. The accepted FIX ID is the
+stable join key; never infer the match from Path, Rule, order, or title.
+
+An accepted ID that is missing, duplicated in either artifact, matches zero or
+multiple canonical requests, or lacks any required payload field is
+`inconclusive`. Do not re-measure that item, and do not invoke the non-FCA
+verifier for an incomplete or ambiguous join.
 
 | Original finding present? | Item path in delta? | Evidence certainty | Status         |
 | ------------------------- | ------------------- | ------------------ | -------------- |
@@ -16,6 +31,8 @@ One status per accepted item, derived from re-measurement only.
 \* A finding can disappear because a sibling correction removed its cause. That is a genuine resolution; record the observed cause in the report line.
 
 Never invert this table. "The file changed, so it must be fixed" is the failure mode the matrix exists to block.
+
+For Category `bug`, `security`, `performance`, `maintainability`, `test`, or `documentation`, spawn `../cross-review/reviewers/verifier.md` in re-verification mode with the joined complete original finding payload and `git diff <resolve_commit_sha>..HEAD -- <path>`: `CONFIRMED` maps to `resolved`, `REFUTED` maps to `unresolved`, and `INDETERMINATE` maps to `inconclusive`.
 
 ### Re-measurement scope
 
@@ -139,12 +156,13 @@ Rules:
 
 ## §5 Failure handling
 
-| Situation                                    | Action                                                       |
-| -------------------------------------------- | ------------------------------------------------------------ |
-| `justifications.md` missing                  | Report that `resolve` has not run; end without a verdict.    |
-| `resolve_commit_sha` missing or unresolvable | Abort. The baseline cannot be reconstructed after the fact.  |
-| Empty delta with accepted items              | Every accepted item is `unapplied`; verdict `FAIL`.          |
-| `review_state` disposition `missing`         | Abort. The review directory was removed before revalidation. |
+| Situation                                             | Action                                                                      |
+| ----------------------------------------------------- | --------------------------------------------------------------------------- |
+| `justifications.md` missing                           | Report that `resolve` has not run; end without a verdict.                   |
+| Accepted FIX join missing, duplicate, or field-short  | Mark the affected item `inconclusive`; do not invoke a non-FCA verifier.    |
+| `resolve_commit_sha` missing or unresolvable          | Abort. The baseline cannot be reconstructed after the fact.                 |
+| Empty delta with accepted items                       | Joined items are `unapplied`; join failures remain `inconclusive`.          |
+| `review_state` disposition `missing`                  | Abort. The review directory was removed before revalidation.                |
 
 ## §6 What this skill does not do
 

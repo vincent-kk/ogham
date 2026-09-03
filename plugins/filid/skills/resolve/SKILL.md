@@ -44,11 +44,11 @@ Use `data.reviewDirectory` as `REVIEW_DIR`; **never derive a directory name.**
 
 ## Step 2 — Read the fix requests
 
-Parse each `## FIX-NNN:` block from `fix-requests.md`. Every block carries Severity, Perspective, Path, Rule, Evidence, Consequence, and Recommended Action (schema in `../cross-review/templates.md`, which produced the file).
+Parse the canonical FIX ID from each `## FIX-NNN:` heading in `fix-requests.md`, together with the complete original finding fields: Severity, Category, Path, Rule, Claim, Evidence, Consequence, and Recommended Action (schema in `../cross-review/templates.md`, which produced the file).
 
-Do not invent items and do not merge two findings into one decision.
+Do not invent items, renumber a FIX ID, or merge two findings into one decision. Preserve the canonical FIX ID through the decision sheet and the item heading under `justifications.md`'s `## Accepted` section so revalidate can join it back to exactly one original fix request.
 
-Classify each item with the recommendation rubric in `reference.md` §3. Keep Severity and Perspective as finding facts; neither determines Recommendation by itself. Record Recommendation, Default, and a one-sentence recommendation reason for every item. Perform this classification under `--auto` too, because the sheet must preserve which corrections were originally contentious.
+Classify each item with the recommendation rubric in `reference.md` §3. Keep Severity and Category as finding facts; neither determines Recommendation by itself. Record Recommendation, Default, and a one-sentence recommendation reason for every item. Perform this classification under `--auto` too, because the sheet must preserve which corrections were originally contentious.
 
 <!-- resolve:all-fixes-ready -->
 
@@ -119,7 +119,7 @@ There is no separate debt ledger in 1.0. `justifications.md` is the record, and 
 
 ## Step 6 — Write `justifications.md`
 
-Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, with frontmatter `resolve_commit_sha: <base_sha>` — the Step 4 value, **not** current `HEAD`. After the Step 7 commit `HEAD` moves, and the delta must contain only the correction changes.
+Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, with frontmatter `resolve_commit_sha: <base_sha>` — the Step 4 value, **not** current `HEAD`. Copy each accepted item's canonical FIX ID unchanged into that item's heading under `## Accepted`; that ID is revalidate's join key into `fix-requests.md`. After the Step 7 commit `HEAD` moves, and the delta must contain only the correction changes.
 
 ## Step 7 — Gate and commit
 
