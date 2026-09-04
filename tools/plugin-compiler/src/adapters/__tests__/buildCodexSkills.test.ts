@@ -30,6 +30,23 @@ const VARIANT = facts({
   },
 });
 
+const LIFECYCLE_VARIANT = facts({
+  directory: "/repo/plugins/cennad",
+  name: "cennad",
+  manifest: { name: "cennad" },
+  agentFiles: { "courier.md": "COURIER" },
+  skillFiles: {
+    "antigravity/SKILL.md": `<!-- ogham-async-agent:spawn cennad:courier -->
+CLAUDE SPAWN
+<!-- ogham-async-agent:end -->
+shared
+<!-- ogham-async-agent:join cennad:courier -->
+CLAUDE JOIN
+<!-- ogham-async-agent:end -->`,
+    "setup/SKILL.md": "UNCHANGED",
+  },
+});
+
 function find(
   files: CodexSkillFile[],
   path: string,
@@ -72,6 +89,10 @@ describe("emitsCodexSkillVariant", () => {
 
   it("is true for an opted-in plugin with personas and a spawn skill", () => {
     expect(emitsCodexSkillVariant(VARIANT)).toBe(true);
+  });
+
+  it("is true for an explicit lifecycle marker without a plugin allowlist", () => {
+    expect(emitsCodexSkillVariant(LIFECYCLE_VARIANT)).toBe(true);
   });
 });
 
@@ -118,5 +139,25 @@ describe("buildCodexSkills", () => {
     for (const p of paths)
       expect(p.startsWith(".codex-plugin/skills/")).toBe(true);
     expect(paths).toEqual([...paths].sort());
+  });
+
+  it("selects Codex lifecycle text and keeps unmarked sibling skills unchanged", () => {
+    const files = buildCodexSkills(LIFECYCLE_VARIANT)!;
+    const delegated = find(files, ".codex-plugin/skills/antigravity/SKILL.md");
+    expect(delegated?.content).toContain("`spawn_agent`");
+    expect(delegated?.content).toContain("`wait_agent`");
+    expect(delegated?.content).not.toContain("CLAUDE SPAWN");
+    expect(find(files, ".codex-plugin/skills/setup/SKILL.md")?.content).toBe(
+      "UNCHANGED",
+    );
+    expect(
+      find(files, ".codex-plugin/skills/.shared/personas/courier.md")?.content,
+    ).toBe("COURIER");
+  });
+
+  it("fails closed when a lifecycle marker references no persona", () => {
+    expect(() =>
+      buildCodexSkills({ ...LIFECYCLE_VARIANT, agentFiles: {} }),
+    ).toThrow(/courier\.md/);
   });
 });

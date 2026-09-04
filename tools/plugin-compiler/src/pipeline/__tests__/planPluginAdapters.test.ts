@@ -253,4 +253,45 @@ describe("planPluginAdapters", () => {
     );
     expect(contracts?.content).toBe("plain copy");
   });
+
+  it("emits a Codex lifecycle variant for an explicitly marked plugin", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "cennad" });
+    writeFile(
+      "skills/codex/SKILL.md",
+      `<!-- ogham-async-agent:spawn cennad:courier -->
+Claude spawn
+<!-- ogham-async-agent:end -->
+<!-- ogham-async-agent:join cennad:courier -->
+Claude join
+<!-- ogham-async-agent:end -->`,
+    );
+    writeFile("agents/courier.md", "COURIER");
+
+    const { files } = planPluginAdapters(pluginDirectory);
+    const manifest = files.find((file) =>
+      norm(file.absolutePath).endsWith(".codex-plugin/plugin.json"),
+    );
+    const skill = files.find((file) =>
+      norm(file.absolutePath).endsWith(".codex-plugin/skills/codex/SKILL.md"),
+    );
+
+    expect(manifest?.content).toContain('"skills": "./.codex-plugin/skills/"');
+    expect(skill?.content).toContain("`spawn_agent`");
+    expect(skill?.content).toContain("`wait_agent`");
+    expect(skill?.content).not.toContain("Claude spawn");
+  });
+
+  it("reports an invalid lifecycle marker with its own diagnostic", () => {
+    writeJson(".claude-plugin/plugin.json", { name: "cennad" });
+    writeFile(
+      "skills/codex/SKILL.md",
+      `<!-- ogham-async-agent:spawn cennad:courier -->
+Claude spawn without an end marker`,
+    );
+    writeFile("agents/courier.md", "COURIER");
+
+    const { files, diagnostics } = planPluginAdapters(pluginDirectory);
+    expect(files).toEqual([]);
+    expect(diagnostics.at(-1)?.code).toBe("codex-skill-lifecycle");
+  });
 });

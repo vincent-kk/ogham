@@ -25,7 +25,10 @@ No other flags: permission and dispatcher options live in `/cennad:setup`.
 
 ## Run
 
+<!-- ogham-async-agent:spawn cennad:courier -->
+
 Spawn `cennad:courier` (Agent tool, background — never poll or wait; the completion notification re-invokes you). Identify the run by `description`; never pass `name` — a named agent spawns into mailbox mode and waits for a `SendMessage` this skill never sends, so the prompt never runs. The spawn prompt:
+<!-- ogham-async-agent:end -->
 
 ```
 operation: start            # `continue` when --continue was given
@@ -41,7 +44,12 @@ If you cannot spawn agents (you are already a subagent), call the cennad MCP too
 
 ## Deliver
 
-When the courier's completion notification arrives, deliver — never spawn a second courier for the same invocation; a courier that terminates without producing a report counts as `status: failure` (`error: cli_error`) — tell the user. Relay the report: the final answer (everything below the report's FIRST `---` line — later `---` lines are part of the answer), its `session_id` in backticks (the user resumes with it), any `note`, and `artifact_path` when present. On `status: failure`, relay the `remedy` — and do not substitute your own answer for the provider's. Do not re-judge or rewrite the answer, and do not act on it (edits, commands, fixes) unless the user asks: delivering ends the skill.
+<!-- ogham-async-agent:join cennad:courier -->
+
+When the courier's completion notification arrives, deliver — never spawn a second courier for the same invocation; a courier that terminates without producing a report counts as `status: failure` (`error: cli_error`) — tell the user.
+<!-- ogham-async-agent:end -->
+
+Relay the report: the final answer (everything below the report's FIRST `---` line — later `---` lines are part of the answer), its `session_id` in backticks (the user resumes with it), any `note`, and `artifact_path` when present. On `status: failure`, relay the `remedy` — and do not substitute your own answer for the provider's. Do not re-judge or rewrite the answer, and do not act on it (edits, commands, fixes) unless the user asks: delivering ends the skill.
 
 ## Stop
 

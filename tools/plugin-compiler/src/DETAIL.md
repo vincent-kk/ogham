@@ -25,7 +25,7 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - 스트림 분리: 진단(`✗`/`⚠`)은 stderr, 파일별 액션과 `✓ sync:` 요약은 stdout. 진단이 없으면 stderr 에 아무것도 쓰지 않는다. 액션 경로는 어느 OS 에서나 저장소 상대 forward-slash 한 형식이고 `unchanged` 는 줄로 출력하지 않는다.
 - exit 코드: error 수준 진단이 하나라도 있으면 1. `--check` 실행에서 `stale`·`missing` 이 있으면 1. 그 밖에는 0 이며, `--check` 없는 실행의 차이는 쓰기로 해소되므로 종료 코드에 반영되지 않는다.
 - 쓰기 실패: `applyFiles` 가 도중에 실패하면 `ApplyFilesError` 를 잡아 이미 반영된 outcome 을 stdout 으로 보고하고 `apply-io-error` 진단을 stderr 로 쓴 뒤 exit 1 한다. raw stacktrace 는 사용자에게 도달하지 않는다.
-- 자식 fractal 표면: `cli/`(`parseCommand`·`formatDiagnostics`·`formatOutcomes`·`SyncCommand`), `facts/`(`readPluginFacts`·`readMarketplaceFacts`), `adapters/`(빌더 7종과 `emitsCodexSkillVariant`), `lint/`(`lintHookEvents`·`lintHookMatchers`), `pipeline/`(`listPluginDirectories`·`planPluginAdapters`·`planRootAdapters`·`applyFiles`·`ApplyFilesError`).
+- 자식 fractal 표면: `cli/`(`parseCommand`·`formatDiagnostics`·`formatOutcomes`·`SyncCommand`), `facts/`(`readPluginFacts`·`readMarketplaceFacts`), `adapters/`(빌더 7종, `emitsCodexSkillVariant`, lifecycle validation error), `lint/`(`lintHookEvents`·`lintHookMatchers`), `pipeline/`(`listPluginDirectories`·`planPluginAdapters`·`planRootAdapters`·`applyFiles`·`ApplyFilesError`).
 - organ 표면: `types/` 는 정본(source)·facts·계획(plan) 타입, `constants/` 는 Claude 산출물 경로·어댑터 경로·호스트 마커와 이벤트, `utils/` 는 `stableJson`.
 - 어댑터별 생성 규칙과 진단 코드 목록은 패키지 루트 `DETAIL.md` 가 소유한다. 여기서 되풀이하지 않는다.
 

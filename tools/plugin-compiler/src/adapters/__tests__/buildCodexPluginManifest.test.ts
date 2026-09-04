@@ -48,6 +48,27 @@ describe("buildCodexPluginManifest", () => {
     expect(built.skills).toBe("./.codex-plugin/skills/");
   });
 
+  it("points skills at the Codex variant tree for an explicit lifecycle marker", () => {
+    const built = buildCodexPluginManifest(
+      facts({
+        directory: "/repo/plugins/cennad",
+        name: "cennad",
+        manifest: { name: "cennad" },
+        hasSkills: true,
+        agentFiles: { "courier.md": "P" },
+        skillFiles: {
+          "codex/SKILL.md": `<!-- ogham-async-agent:spawn cennad:courier -->
+Claude spawn
+<!-- ogham-async-agent:end -->
+<!-- ogham-async-agent:join cennad:courier -->
+Claude join
+<!-- ogham-async-agent:end -->`,
+        },
+      }),
+    );
+    expect(built.skills).toBe("./.codex-plugin/skills/");
+  });
+
   it("points hooks at the file Claude already consumes", () => {
     expect(buildCodexPluginManifest(facts({ hasHooks: true })).hooks).toBe(
       "./hooks/hooks.json",

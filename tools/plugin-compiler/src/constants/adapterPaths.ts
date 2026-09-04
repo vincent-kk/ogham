@@ -35,14 +35,13 @@ export const CODEX_HOOKS_PATH = ".codex-plugin/hooks.json";
 export const AGY_HOOKS_PATH = "hooks.json";
 
 /**
- * Codex-only skill-variant tree. Emitted only for plugins whose committee/persona
- * skills spawn subagents by `subagent_type: "<plugin>:<id>"` — a registry Codex
- * lacks. `buildCodexSkills` copies every skill file here (skill discovery is
- * REPLACE, so the whole dir must be present once the manifest points at it),
- * rewrites the spawn skills to self-load `.shared/personas/<id>.md`, and drops
- * each `agents/<id>.md` at `.shared/personas/<id>.md`. Claude keeps using
- * `skills/` unchanged. Lives under Codex's own convention dir so it collides with
- * neither `skills/` nor `.codex-plugin/{plugin,hooks}.json`.
+ * Codex-only skill-variant tree. Emitted for an allowlisted persona-registry
+ * spawn or an explicit host-lifecycle marker. `buildCodexSkills` copies every
+ * skill file here (skill discovery is REPLACE), rewrites registry spawns to
+ * self-load `.shared/personas/<id>.md`, selects Codex lifecycle blocks, and drops
+ * each `agents/<id>.md` at `.shared/personas/<id>.md`. Claude keeps using the
+ * canonical `skills/` tree unchanged. Lives under Codex's own convention dir so
+ * it collides with neither `skills/` nor `.codex-plugin/{plugin,hooks}.json`.
  */
 export const CODEX_SKILLS_DIR = ".codex-plugin/skills";
 

@@ -1,6 +1,6 @@
 ## Purpose
 
-facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. Codex 훅은 지원 이벤트와 matcher capability를 명시적으로 적용하며 Claude 정본에는 손대지 않는다.
+facts 를 호스트 어댑터 파일 내용으로 변환한다. Codex 훅 capability와 명시적으로 표시된 skill lifecycle 차이를 생성 사본에만 적용하며 Claude 정본에는 손대지 않는다.
 
 ## Conventions
 
@@ -8,6 +8,7 @@ facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. C
 - 서버명 규칙은 호스트마다 다르다 — `buildCodexMcpServers` 는 서버가 여럿일 때만 `{plugin}-{server}` 로 재명명하고, `buildAgyMcpConfig` 는 원본 서버명을 그대로 쓴다.
 - `${CLAUDE_PLUGIN_ROOT}` 는 `command`·`env` 값에 남아있으면 throw, `args` 접두사일 때만 상대화한다(`buildPortableMcpServer` → `relativizePluginRootPath`).
 - Codex 훅 생성과 lint 는 `constants/hosts.ts` 의 이벤트·matcher capability 선언을 공유한다. 지원하지 않는 exact tool은 제거하고 Pre read fallback은 선언된 경우에만 적용하며, 변경이 없으면 전용 파일을 만들지 않는다.
+- Codex skill lifecycle 변환은 source marker를 opt-in 계약으로 사용한다. 자연어 문구나 특정 플러그인 이름을 추측하지 않고 marker의 phase·plugin·agent persona를 검증한다.
 
 ## Boundaries
 
@@ -16,6 +17,7 @@ facts 를 호스트 어댑터 파일 내용(순수 객체)으로 변환한다. C
 - 키 순서를 코드에서 고정 — 동일 facts 는 바이트 동일 출력(stableJson 전제).
 - 생성 MCP 선언마다 `OGHAM_HOST` 마커를 env 에 병합 (codex/agy).
 - Claude 훅 정본은 그대로 두고, Codex에서 의미가 없는 이벤트·exact tool matcher만 생성 사본에서 제거.
+- Claude skill의 marker 내부 기본 문단은 그대로 두고, Codex variant에서만 explicit spawn/join 문단으로 치환한다. 불완전한 marker나 없는 persona는 조용히 통과시키지 않는다.
 
 ### Ask first
 

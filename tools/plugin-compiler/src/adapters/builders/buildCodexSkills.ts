@@ -1,5 +1,7 @@
 import { CODEX_SKILLS_DIR } from "../../constants/adapterPaths.js";
 import type { CodexSkillFile, PluginFacts } from "../../types/index.js";
+import { adaptAsyncAgentLifecycle } from "../utils/adaptAsyncAgentLifecycle.js";
+import { AsyncAgentLifecycleError } from "../utils/asyncAgentLifecycleError.js";
 import {
   containsPersonaSpawn,
   injectSpawnProtocol,
@@ -7,8 +9,10 @@ import {
 } from "../utils/injectSpawnProtocol.js";
 
 /**
- * Plugins verified relocation-safe for the Codex skill-variant shadow. Emission
- * is per-plugin opt-in — not every `agents/` + `subagent_type` plugin qualifies:
+ * Plugins verified relocation-safe for the persona-registry Codex skill shadow.
+ * This allowlist only governs inferred `subagent_type` adaptation. An explicit
+ * async-agent lifecycle marker is its own author-controlled opt-in and bypasses
+ * the list — not every unmarked `agents/` + `subagent_type` plugin qualifies:
  * a plugin whose worker prompt loads a persona by an actionable bare
  * `../../agents/<id>.md` climb (e.g. prawf: `prompt-templates.md` "Give the
  * persona .md path `../../agents/<id>.md`") BREAKS when its skills move to
@@ -34,12 +38,25 @@ const VARIANT_ENABLED_PLUGINS = new Set([
 ]);
 
 /**
- * Whether this plugin emits a Codex skill variant: opted in, has personas, and
- * has at least one skill that spawns one by `subagent_type`. The manifest builder
- * shares this predicate to decide where `skills` points, so the manifest and the
- * emitted tree never disagree.
+ * Whether this plugin emits a Codex skill variant: either a valid explicit
+ * lifecycle marker exists, or the plugin is allowlisted and has a persona spawn
+ * that needs registry adaptation. The manifest builder shares this predicate so
+ * its `skills` path and the emitted tree never disagree.
  */
 export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
+  let hasLifecycleAdaptation = false;
+  for (const [relativePath, content] of Object.entries(facts.skillFiles)) {
+    const adaptation = adaptAsyncAgentLifecycle(
+      content,
+      relativePath,
+      facts.name,
+    );
+    if (!adaptation) continue;
+    assertPersonasExist(facts, adaptation.personaFiles, relativePath);
+    hasLifecycleAdaptation = true;
+  }
+  if (hasLifecycleAdaptation) return true;
+
   if (!VARIANT_ENABLED_PLUGINS.has(facts.name)) return false;
   if (Object.keys(facts.agentFiles).length === 0) return false;
   return Object.values(facts.skillFiles).some((content) =>
@@ -50,20 +67,27 @@ export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
 /**
  * Build the whole `.codex-plugin/skills/` tree for a variant-emitting plugin, or
  * `null` when it does not qualify. Every skill file is copied (discovery is
- * REPLACE, so the manifest can only point at a complete dir); spawn-bearing files
- * are rewritten to self-load their persona; each `agents/<id>.md` is dropped at
- * `.shared/personas/<id>.md`. Output is sorted by path for deterministic,
- * idempotent re-emission. Claude's own `skills/` is never read from here (facts
- * carry the pristine source), so re-runs never double-inject.
+ * REPLACE, so the manifest can only point at a complete dir); registry-spawn
+ * files self-load their persona and lifecycle-marked files select Codex child
+ * semantics. Each `agents/<id>.md` is dropped at `.shared/personas/<id>.md`.
+ * Output is sorted by path for deterministic, idempotent re-emission. Claude's
+ * own `skills/` is never written here (facts carry the pristine source), so
+ * re-runs never double-inject.
  */
 export function buildCodexSkills(facts: PluginFacts): CodexSkillFile[] | null {
   if (!emitsCodexSkillVariant(facts)) return null;
 
   const files: CodexSkillFile[] = [];
   for (const [relativePath, content] of Object.entries(facts.skillFiles)) {
-    const emitted = containsPersonaSpawn(content, facts.name)
-      ? injectSpawnProtocol(content, relativePath, facts.name)
-      : content;
+    const lifecycle = adaptAsyncAgentLifecycle(
+      content,
+      relativePath,
+      facts.name,
+    );
+    const selectedContent = lifecycle?.content ?? content;
+    const emitted = containsPersonaSpawn(selectedContent, facts.name)
+      ? injectSpawnProtocol(selectedContent, relativePath, facts.name)
+      : selectedContent;
     files.push({
       relativePath: `${CODEX_SKILLS_DIR}/${relativePath}`,
       content: emitted,
@@ -83,4 +107,16 @@ export function buildCodexSkills(facts: PluginFacts): CodexSkillFile[] | null {
         : 0,
   );
   return files;
+}
+
+function assertPersonasExist(
+  facts: PluginFacts,
+  personaFiles: string[],
+  relativeSkillPath: string,
+): void {
+  for (const personaFile of personaFiles)
+    if (!(personaFile in facts.agentFiles))
+      throw new AsyncAgentLifecycleError(
+        `${relativeSkillPath} references missing agents/${personaFile}`,
+      );
 }

@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
+  AsyncAgentLifecycleError,
   buildAgyHooks,
   buildAgyMcpConfig,
   buildCodexHooks,
@@ -88,7 +89,10 @@ export function planPluginAdapters(directory: string): AdapterPlan {
   } catch (error) {
     diagnostics.push({
       level: "error",
-      code: "mcp-variable-args",
+      code:
+        error instanceof AsyncAgentLifecycleError
+          ? "codex-skill-lifecycle"
+          : "mcp-variable-args",
       message: `${facts.name}: ${error instanceof Error ? error.message : String(error)}`,
     });
     return { files: [], diagnostics };

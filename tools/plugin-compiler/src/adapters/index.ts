@@ -8,3 +8,4 @@ export { buildCodexMcpServers } from "./builders/buildCodexMcpServers.js";
 export { buildAgyMcpConfig } from "./builders/buildAgyMcpConfig.js";
 export { buildAgyHooks } from "./builders/buildAgyHooks.js";
 export { buildCodexMarketplace } from "./builders/buildCodexMarketplace.js";
+export { AsyncAgentLifecycleError } from "./utils/asyncAgentLifecycleError.js";
