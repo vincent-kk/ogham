@@ -19,7 +19,7 @@ created_at: <ISO 8601>
 | --- | --- | --- | --- | --- | --- |
 ```
 
-Include every `(path, change)` once. Begin reviewable rows as `pending`; finish each as `reviewed` or `skipped`, with a concrete reason for every skip.
+Include every `(path, change)` once. Begin reviewable rows as `pending`; finish each as `reviewed` or `skipped`, with a concrete reason for every skip. Finalize the checklist by rewriting the whole `## Review Checklist` block in one write, not by in-place substitution.
 
 ## `opinions/review-NN.md`
 
@@ -205,6 +205,7 @@ After a successful seal, emit exactly:
 
 ```text
 Review verdict: APPROVED
+pr-comment: none
 ```
 
-Substitute `REQUEST_CHANGES` or `INCONCLUSIVE` when applicable. Before seal, no terminal verdict marker is valid.
+Substitute `REQUEST_CHANGES` or `INCONCLUSIVE` when applicable, and substitute `posted`, `unavailable`, or `failed: <reason>` for `none` according to Step 6. Before seal, no terminal verdict marker is valid.

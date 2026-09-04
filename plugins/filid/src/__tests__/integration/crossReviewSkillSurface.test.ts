@@ -141,4 +141,27 @@ describe('cross-review v6 skill surface', () => {
     expect(verifier).not.toContain('## Spawn');
     expect(verifier).not.toContain('sonnet');
   });
+
+  it('bounds actor reads and reports publication status in terminal output', () => {
+    for (const instruction of [
+      '`templates.md` owns every persisted artifact and publication format; read it once in Step 2 and reuse it.',
+      '`reviewers/reviewer.md`, `reviewers/verifier.md`, and `rules/*.md` are read by the spawned reviewer and verifier, never by this orchestrator: pass their absolute paths, not their text. Do not list or re-read this skill directory.',
+      'Resolve `BASE_REF` from `--base`; otherwise read the remote list once and try the remote default, `origin/main`, then `origin/master`, and verify the selected ref. Record whether any remote exists and carry it to Step 6; when there is none, Step 6 reports `pr-comment: none` without another call.',
+      'This payload is the authoritative roster: do not open `evidence.md` or re-derive role, owner, churn, or candidate counts with git, find, or sed.',
+      'Instruct the reviewer to read the role file, `templates.md`, and every resolved rule file in one batched command before anything else.',
+      'Validation reads the opinion only; do not re-open the diff or the reviewed source.',
+      'State the assigned candidate count as authoritative. When it is zero and `review-NN.md` lists no findings, instruct the verifier to write the `COMPLETE` artifact with `decisions: []` after reading only `review-NN.md`.',
+    ])
+      expect(skill).toContain(instruction);
+
+    expect(verifier).toContain(
+      'Read the role file and `../templates.md` in one batched command. When the brief assigns zero candidates and `review-NN.md` lists no findings, open no further file.',
+    );
+    expect(templates).toContain(
+      'Finalize the checklist by rewriting the whole `## Review Checklist` block in one write, not by in-place substitution.',
+    );
+    expect(templates).toContain(
+      'Review verdict: APPROVED\npr-comment: none',
+    );
+  });
 });

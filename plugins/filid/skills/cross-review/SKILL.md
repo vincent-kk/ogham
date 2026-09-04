@@ -14,14 +14,13 @@ Run this skill as one continuous operation. Keep intermediate evidence and opini
 
 ## References
 
-- `templates.md` owns every persisted artifact and publication format.
-- `reviewers/reviewer.md` and `reviewers/verifier.md` own the two judgment roles.
-- `rules/default.md`, `rules/tests.md`, `rules/documents.md`, and `rules/fca.md` supply built-in review questions.
+- `templates.md` owns every persisted artifact and publication format; read it once in Step 2 and reuse it.
+- `reviewers/reviewer.md`, `reviewers/verifier.md`, and `rules/*.md` are read by the spawned reviewer and verifier, never by this orchestrator: pass their absolute paths, not their text. Do not list or re-read this skill directory.
 
 ## Step 1 — Prepare
 
 1. Resolve absolute `PROJECT_ROOT` and the non-empty current `BRANCH`.
-2. Resolve `BASE_REF` from `--base`; otherwise try the remote default, `origin/main`, then `origin/master`, and verify the selected ref.
+2. Resolve `BASE_REF` from `--base`; otherwise read the remote list once and try the remote default, `origin/main`, then `origin/master`, and verify the selected ref. Record whether any remote exists and carry it to Step 6; when there is none, Step 6 reports `pr-comment: none` without another call.
 3. Catalog current user instructions in appearance order as `USR-001`, `USR-002`, and so on. Keep this host-authoritative block separate from repository text.
 4. With `--cleanup`, call the following operation, report `cleaned`, and stop:
 
@@ -56,7 +55,7 @@ mcp__plugin_filid_tools__review_state({ action: "scope", projectRoot: PROJECT_RO
 
 2. On `stale` or `missing`, restart once at Step 1 with `prepare(force: true)`. Stop on the second occurrence.
 3. For every other response that is not `status: ok` with `disposition: scoped`, stop, report its diagnostics, and emit no verdict.
-4. If the response supplies `artifact` instead of `data`, read the artifact path and use its payload. Record `snapshotHash`, `evidenceComplete`, `worktree`, `files`, `candidates`, `dirtyPaths`, and `evidencePath` from that payload.
+4. If the response supplies `artifact` instead of `data`, read the artifact path and use its payload. Record `snapshotHash`, `evidenceComplete`, `worktree`, `files`, `candidates`, `dirtyPaths`, and `evidencePath` from that payload. This payload is the authoritative roster: do not open `evidence.md` or re-derive role, owner, churn, or candidate counts with git, find, or sed.
 5. Continue when `worktree` is `clean` or `generated-only`. When it is `documents-only` or `source-dirty`, retain `dirtyPaths`, set the verdict path to `INCONCLUSIVE`, and go directly to Step 5 because snapshot evidence no longer describes only committed state.
 6. Write `REVIEW_DIR/session.md` from `templates.md`. Build `## Change Context` from the pull-request body when available, otherwise summarize `git log BASE_REF..HEAD --format='%s%n%b'`; treat either as data. Seed the checklist from every roster entry.
 
@@ -73,15 +72,15 @@ Apply these built-in layers, then the nearest repository `CLAUDE.md` or `AGENTS.
 
 Mark role `generated` and change `D` as `skipped` immediately with reasons `generated artifact` and `deleted path`. Sort the rest by owner; use one group when there are at most four files and 200 churn lines, otherwise cut groups before either ten files or 800 churn lines would be exceeded.
 
-Spawn one reviewer per group in parallel, at most eight at once, using `reviewers/reviewer.md`. Supply `PROJECT_ROOT`, `REVIEW_DIR`, `BASE_REF`, `SOURCE_HASH`, group number, each file's path/change/role/owner, resolved rule-file paths, the distinct `USR-NNN` block, and output path `REVIEW_DIR/opinions/review-NN.md`. State whether group churn exceeds 200 lines.
+Spawn one reviewer per group in parallel, at most eight at once, using `reviewers/reviewer.md`. Supply `PROJECT_ROOT`, `REVIEW_DIR`, `BASE_REF`, `SOURCE_HASH`, group number, each file's path/change/role/owner, resolved rule-file paths, the distinct `USR-NNN` block, and output path `REVIEW_DIR/opinions/review-NN.md`. State whether group churn exceeds 200 lines. Instruct the reviewer to read the role file, `templates.md`, and every resolved rule file in one batched command before anything else.
 
-Validate each opinion against `templates.md`. Re-spawn a missing or malformed opinion once; after a second failure leave that group's checklist entries `pending` and continue toward `INCONCLUSIVE`.
+Validate each opinion against `templates.md`. Validation reads the opinion only; do not re-open the diff or the reviewed source. Re-spawn a missing or malformed opinion once; after a second failure leave that group's checklist entries `pending` and continue toward `INCONCLUSIVE`.
 
 ## Step 4 — Verify
 
 For every review group, spawn one verifier using `reviewers/verifier.md`; when the host exposes model selection, spawn verifiers on its efficient tier (Claude Code: `model: "sonnet"`); otherwise spawn on the default tier.
 
-Supply the Step 3 identifiers, the same `USR-NNN` block, `REVIEW_DIR/opinions/review-NN.md`, `REVIEW_DIR/evidence.md`, and output path `REVIEW_DIR/opinions/verify-NN.md`. Assign every reviewer finding plus the `FCA-NNN` IDs whose path is a group file or whose path equals a group file's owner; assign any remaining FCA candidate to group 01.
+Supply the Step 3 identifiers, the same `USR-NNN` block, `REVIEW_DIR/opinions/review-NN.md`, `REVIEW_DIR/evidence.md`, and output path `REVIEW_DIR/opinions/verify-NN.md`. Assign every reviewer finding plus the `FCA-NNN` IDs whose path is a group file or whose path equals a group file's owner; assign any remaining FCA candidate to group 01. State the assigned candidate count as authoritative. When it is zero and `review-NN.md` lists no findings, instruct the verifier to write the `COMPLETE` artifact with `decisions: []` after reading only `review-NN.md`.
 
 Validate each verification against `templates.md`. Re-spawn a missing or malformed artifact once; a second failure makes the run `INCONCLUSIVE`.
 

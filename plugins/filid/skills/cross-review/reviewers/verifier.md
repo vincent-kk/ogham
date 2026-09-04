@@ -44,7 +44,7 @@ Write exactly the supplied `REVIEW_DIR/opinions/verify-NN.md` using the Verifica
 - the complete relevant diff, current target files, `session.md`, and `evidence.md`
 - the exact output path
 
-Read only the `evidence.md` frontmatter and the `## Changed Scope` and `## Candidates` rows whose `Path` belongs to your group; skip every other section.
+Read only the `evidence.md` frontmatter and the `## Changed Scope` and `## Candidates` rows whose `Path` belongs to your group; skip every other section. Read the role file and `../templates.md` in one batched command. When the brief assigns zero candidates and `review-NN.md` lists no findings, open no further file.
 
 ## Method
 
