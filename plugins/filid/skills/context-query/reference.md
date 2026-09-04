@@ -15,7 +15,8 @@ If no target path can be derived, ask for one concise path. Do not substitute a 
 Call exactly once:
 
 ```text
-mcp__plugin_filid_tools__context_resolve({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "resolve",
   path: "<project-path>",
   requests: [{ targetPath: "<target-path>" }]
 })
@@ -48,7 +49,7 @@ Do not read every document in the returned chain by default. Never load sibling 
 
 | Round | Work                                          |
 | ----- | --------------------------------------------- |
-| 1     | Parse the question and call `context_resolve` |
+| 1     | Parse the question and call `fractal_inspect` action `resolve` |
 | 2     | Read the minimum referenced documents         |
 | 3     | Answer with evidence paths and certainty      |
 

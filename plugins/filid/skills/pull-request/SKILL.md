@@ -3,7 +3,7 @@ name: pull-request
 user-invocable: true
 description: 'Sync branch FCA documents through enrich-docs, then open or update a structured GitHub pull request. Use when a branch is ready for a PR with INTENT/DETAIL drift closed first.'
 argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push]'
-version: '1.0.0'
+version: '1.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -54,10 +54,11 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 Skipped entirely when `--skip-enrich` is passed.
 
 1. Derive the changed paths: `git diff --name-only <BASE_REF>...HEAD`.
-2. Map all changed paths to their owning fractals with one context_resolve batch:
+2. Map all changed paths to their owning fractals with one `fractal_inspect` `resolve` batch:
 
    ```text
-   mcp__plugin_filid_tools__context_resolve({
+   mcp__plugin_filid_tools__fractal_inspect({
+     action: "resolve",
      path: PROJECT_ROOT,
      requests: [
        { targetPath: <changed path 1> },

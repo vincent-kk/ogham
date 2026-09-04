@@ -5,7 +5,7 @@ import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
 import { SNAPSHOT_TOOL_DIAGNOSTIC_CODES } from '../../../constants/mcpContracts.js';
 import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
-import { resolveProjectValidationStatus } from '../../../mcp/tools/structureValidate/utils/resolveProjectValidationStatus.js';
+import { resolveProjectValidationStatus } from '../../../mcp/tools/fractalInspect/structureValidate/utils/resolveProjectValidationStatus.js';
 import { resolveFractalScanCertainty } from '../../../mcp/tools/utils/resolveFractalScanCertainty.js';
 import { resolveFractalScanStatus } from '../../../mcp/tools/utils/resolveFractalScanStatus.js';
 import { resolveVerificationScanStatus } from '../../../mcp/tools/utils/resolveVerificationScanStatus.js';

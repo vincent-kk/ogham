@@ -65,36 +65,34 @@ interface ToolResultEnvelope<Summary, Data> {
 
 ---
 
-## MCP 도구 9개
+## MCP 도구 4개
 
-| 도구                 | 입력의 핵심                                | 기본 반환                      |
-| -------------------- | ------------------------------------------ | ------------------------------ |
-| `project_init`       | project path, output language, adapter IDs | 생성된 config 경로 요약        |
-| `rule_docs_sync`     | status/sync/manifest, project path         | 배포 상태 요약                 |
-| `open_settings`      | project path, bounded wait                 | saved / closed / pending       |
-| `fractal_scan`       | path, depth, detail                        | summary                        |
-| `context_resolve`    | project path, target requests              | ordered owner/document results |
-| `restructure_plan`   | path, placement requests                   | 요약 + **항상** plan artifact  |
-| `structure_validate` | path, mode, scopes, plan path              | 위반 요약 + 필요 시 artifact   |
-| `verification_scan`  | path, optional file paths, detail          | 15/32/fragmentation 요약       |
-| `review_state`       | prepare/checkpoint/seal/cleanup            | review artifact 상태           |
+| 도구              | action                                                           | 기본 반환                      |
+| ----------------- | ---------------------------------------------------------------- | ------------------------------ |
+| `project_setup`   | init/rules-status/rules-manifest/rules-sync/settings              | config·rules·settings 요약     |
+| `fractal_inspect` | scan/validate/verification/resolve                                | FCA inspection 결과            |
+| `restructure`     | plan/precondition/postcondition                                  | plan 또는 validation 결과      |
+| `review_state`    | prepare/checkpoint/validate/seal/cleanup/assess                   | review artifact 상태           |
 
-### fractal_scan
+### fractal_inspect — scan
 
 ```typescript
-interface FractalScanInput {
+interface FractalInspectScanInput {
+  action: "scan";
   path: string;
-  depth?: number;
+  maxDepth?: number;
   detail?: "summary" | "paths" | "full";
+  nameFilter?: string;
 }
 ```
 
 `summary`만 요청하면 대형 트리를 인라인하지 않는다.
 
-### context_resolve
+### fractal_inspect — resolve
 
 ```typescript
-interface ContextResolveInput {
+interface FractalInspectResolveInput {
+  action: "resolve";
   path: string;
   requests: ContextResolveRequest[];
 }
@@ -164,7 +162,7 @@ interface ContextResolveData {
 
 `requests`는 최소 1개이며 단일 target도 배열 한 item으로 전달한다. 호출당 document-only snapshot은 한 번만 만들고 `results`는 입력 순서와 cardinality를 보존한다. chain 순서는 owner에서 root 방향이다. **문서 본문은 반환하지 않는다.** target이 project root 밖이거나 owner를 결정할 수 없으면 해당 item은 `resolved: false`이고 다른 성공 item은 유지된다. 하나 이상의 item이 indeterminate이면 top-level status도 `indeterminate`다. 큰 batch의 `data`는 artifact로 이동할 수 있지만 top-level summary는 고정된 count 필드만 가진다.
 
-### restructure_plan
+### restructure — plan
 
 ```typescript
 interface PlacementRequest {
@@ -175,6 +173,7 @@ interface PlacementRequest {
 }
 
 interface RestructurePlanInput {
+  action: "plan";
   path: string;
   requests: PlacementRequest[];
 }
@@ -185,15 +184,12 @@ interface RestructurePlanInput {
 - `organNameHint`는 이름 제안일 뿐 LCA와 boundary 사후조건을 바꾸지 못한다.
 - **프로젝트 파일을 쓰거나 옮기지 않는다.** 임시 artifact 저장만 허용한다.
 
-### structure_validate
+### fractal_inspect — validate
 
 ```typescript
-type StructureValidationMode =
-  "project" | "plan-precondition" | "plan-postcondition";
-
-interface StructureValidateInput {
+interface FractalInspectValidateInput {
+  action: "validate";
   path: string;
-  mode?: StructureValidationMode;
   scopes?: Array<
     | "documents"
     | "nodes"
@@ -202,16 +198,28 @@ interface StructureValidateInput {
     | "dag"
     | "verification"
   >;
-  planPath?: string;
 }
 ```
 
-`scopes`를 생략하면 전부 검사한다. plan mode에서는 `planPath`가 필수다. `structure_validate`는 canonical full-payload artifact의 `data`에서 `RestructurePlan`을 읽는다.
+`scopes`를 생략하면 전부 검사한다.
 
-### verification_scan
+### restructure — precondition / postcondition
 
 ```typescript
-interface VerificationScanInput {
+type RestructureValidationInput = {
+  action: "precondition" | "postcondition";
+  path: string;
+  planPath: string;
+};
+```
+
+두 action은 canonical full-payload artifact의 `data`에서 `RestructurePlan`을 읽고 summary에 canonical 여섯 scope를 보고한다.
+
+### fractal_inspect — verification
+
+```typescript
+interface FractalInspectVerificationInput {
+  action: "verification";
   path: string;
   filePaths?: string[];
   detail?: "summary" | "files";
@@ -269,7 +277,7 @@ interface ReviewStateRecord {
 - `cleanup`: 리터럴 `confirm: true` 뒤 branch directory만 제거하고 `cleaned`.
 - **`stale`과 `missing`은 `ok` status가 아니다.** 메시지 파싱 없이 안정적 disposition과 diagnostics로 판정할 수 있다.
 
-### rule_docs_sync
+### project_setup — rules actions
 
 status / manifest에서 plugin root를 해석하지 못한 경우는 `ok`가 아니라 `unsupported`와 안정적 diagnostic을 반환한다.
 
@@ -281,12 +289,12 @@ status / manifest에서 plugin root를 해석하지 못한 경우는 `ok`가 아
 | ------------------------------------- | ---------------------------------------------- |
 | `ast_analyze`                         | 제거 — 일반 코드 품질/AST 분석                 |
 | `ast_grep_search`, `ast_grep_replace` | 제거 — 범용 LLM/검색 도구 영역                 |
-| `fractal_navigate`                    | `fractal_scan` + `context_resolve`로 대체      |
+| `fractal_navigate`                    | `fractal_inspect`의 scan + resolve로 대체      |
 | `doc_compress`                        | 제거 — 입력 content가 토큰을 절약하지 않음     |
-| `test_metrics`                        | `verification_scan`으로 의미 재설계            |
-| `drift_detect`                        | `restructure_plan`으로 대체                    |
+| `test_metrics`                        | `fractal_inspect`의 verification으로 의미 재설계 |
+| `drift_detect`                        | `restructure`의 plan으로 대체                  |
 | `lca_resolve`                         | MCP에서 제거, core의 multi-consumer LCA로 흡수 |
-| `rule_query`                          | `structure_validate`와 rule 문서로 대체        |
+| `rule_query`                          | `fractal_inspect`의 validate와 rule 문서로 대체 |
 | `config_patch_validate`               | settings / project-init 내부 검증으로 흡수     |
 | `coverage_verify`                     | 제거 — 테스트 품질은 Seiri 영역                |
 | `debt_manage`                         | 제거 — FCA core가 아닌 별도 debt workflow      |

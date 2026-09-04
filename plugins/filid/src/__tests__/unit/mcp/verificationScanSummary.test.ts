@@ -7,7 +7,7 @@ import {
   SPEC_DOCUMENT_CASE_CAP,
   TEST_RECORD_CASE_CAP,
 } from '../../../constants/verificationThresholds.js';
-import { buildVerificationScanSummary } from '../../../mcp/tools/verificationScan/utils/buildVerificationScanSummary.js';
+import { buildVerificationScanSummary } from '../../../mcp/tools/fractalInspect/verificationScan/utils/buildVerificationScanSummary.js';
 import type { VerificationScanSummary } from '../../../types/report.js';
 import type {
   VerificationFileAnalysis,

@@ -1,6 +1,6 @@
 ## Purpose
 
-`open_settings` 도구가 기동하는 설정 페이지 프런트엔드. config v2의 adapter 선택, 규칙 override, language, structure 설정과 현재 host target의 rule doc 상태를 한 폼에서 편집한다.
+`project_setup`의 `settings` action이 기동하는 설정 페이지 프런트엔드. config v2의 adapter 선택, 규칙 override, language, structure 설정과 현재 host target의 rule doc 상태를 한 폼에서 편집한다.
 
 ## Structure
 

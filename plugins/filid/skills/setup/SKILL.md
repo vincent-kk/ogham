@@ -4,7 +4,7 @@ user-invocable: true
 disable-model-invocation: true
 description: 'Initialize Filid config and managed rule documents, inspect the FCA snapshot, and propose missing INTENT.md/DETAIL.md work.'
 argument-hint: '[path] [--rules]'
-version: '2.0.0'
+version: '2.1.0'
 complexity: medium
 plugin: filid
 ---
@@ -47,10 +47,10 @@ Resolve the absolute target path for settings and rule-document calls.
 
 ### Phase 1 — Config and Managed Rules
 
-1. Call `mcp__plugin_filid_tools__project_init` with `path`, optional session `language`, and optional non-empty `adapterIds`.
-2. Call `mcp__plugin_filid_tools__rule_docs_sync` with `action: "status"`.
-3. On an interactive local host, call `mcp__plugin_filid_tools__open_settings` with a bounded wait and dispatch on `saved`, `closed`, or `pending`.
-4. In a headless environment, use `rule_docs_sync` actions `manifest`, `status`, and `sync`; do not invent another config editing workflow.
+1. Call `mcp__plugin_filid_tools__project_setup` with `action: "init"`, `path`, optional session `language`, and optional non-empty `adapterIds`.
+2. Call `mcp__plugin_filid_tools__project_setup` with `action: "rules-status"`.
+3. On an interactive local host, call `mcp__plugin_filid_tools__project_setup` with `action: "settings"` and a bounded wait, then dispatch on `saved`, `closed`, or `pending`.
+4. In a headless environment, use `project_setup` actions `rules-manifest`, `rules-status`, and `rules-sync`; do not invent another config editing workflow.
 
 If `--rules` is present, emit the managed-rule summary and stop.
 
@@ -59,7 +59,8 @@ If `--rules` is present, emit the managed-rule summary and stop.
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_scan({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "scan",
   path: "<target-path>",
   detail: "paths"
 })
@@ -72,9 +73,9 @@ Use returned classifications and document states directly. Preserve diagnostics,
 Call:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: "<target-path>",
-  mode: "project",
   scopes: ["documents", "nodes", "entry-points"]
 })
 ```
@@ -95,13 +96,13 @@ Emit the compact setup report from the validation reference and finish. Do not a
 
 ## MCP Surface
 
-| Tool                                          | Purpose                                                       |
-| --------------------------------------------- | ------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__project_init`       | create missing config v2 without overwriting existing config  |
-| `mcp__plugin_filid_tools__rule_docs_sync`     | inspect or synchronize managed rule documents                 |
-| `mcp__plugin_filid_tools__open_settings`      | edit config and managed rules through a bounded local session |
-| `mcp__plugin_filid_tools__fractal_scan`       | inspect the post-initialization snapshot                      |
-| `mcp__plugin_filid_tools__structure_validate` | validate document, node, and entry-point scopes               |
+| Tool + action                                             | Purpose                                                       |
+| --------------------------------------------------------- | ------------------------------------------------------------- |
+| `mcp__plugin_filid_tools__project_setup` `init`           | create missing config v2 without overwriting existing config  |
+| `mcp__plugin_filid_tools__project_setup` `rules-*`        | inspect or synchronize managed rule documents                 |
+| `mcp__plugin_filid_tools__project_setup` `settings`       | edit config and managed rules through a bounded local session |
+| `mcp__plugin_filid_tools__fractal_inspect` `scan`         | inspect the post-initialization snapshot                      |
+| `mcp__plugin_filid_tools__fractal_inspect` `validate`     | validate document, node, and entry-point scopes               |
 
 ## Invariants
 

@@ -6,7 +6,7 @@
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
 - Filid의 cross-review는 `review_state prepare`가 변경 roster·FCA 후보를 선별·청킹·그룹화하고 규칙·diff·brief를 물질화하며, 그룹별 actor가 JSON opinion과 verification을 쓴다. `validate`가 이를 검사하고 `seal`이 검증된 hash만 결정적으로 fold·렌더링한다. 코드는 수정하지 않는다.
-- `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `context_resolve.data.results[].summary.chainPaths`의 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
+- `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 중단한다.
 - `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하며, 원격 branch가 뒤처졌으면 기본적으로 push한 뒤 게시한다. `--no-push`와 publication 실패는 branch별로 저장된 body를 남겨 복구할 수 있어야 한다.
 - Filid의 resolve는 confirmed fix 전체를 한 decision sheet에 모아 Severity/Category와 독립적인 적용 추천을 표시하고, 명백하거나 영향이 작은 수정은 기본 선택한 채 논쟁적인 결정만 전면에 둔다.
@@ -18,8 +18,8 @@
 
 ## API Contracts
 
-- 공개 MCP 도구는 `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`의 9개다.
-- `context_resolve`는 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
+- 공개 MCP 도구는 `project_setup`, `fractal_inspect`, `restructure`, `review_state`의 4개다.
+- `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
 - merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3, review report와 PR comment는 `src/mcp/tools/reviewState/DETAIL.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
 - cross-review의 resumable·cached 산출물은 `review_schema: 7`과 state schema 2를 선언한다. 이전 marker·state는 현재 결과로 반환하지 않고 fresh prepare로 재생성한다.
@@ -30,13 +30,13 @@
 - 모든 큰 MCP 결과는 16 KiB inline 예산의 공통 envelope를 거쳐 검증 가능한 임시 artifact로 전달한다.
 - managed rule 문서의 host target 선택과 동기화는 `@ogham/agent-artifacts`에 위임하며 Filid owner 주소 밖의 사용자 내용을 보존한다.
 - 설정 schema 2.0은 adapter mode와 enabled IDs, rule overrides, 언어 중립 구조 옵션을 정의한다. v1은 메모리에서 변환하고 명시적 저장 전까지 원본을 쓰지 않는다.
-- PR 문서 audit 범위는 모든 변경을 한 `context_resolve` batch로 해석한다. `resolved:true` owner는 config-excluded 이름 아래에서도 유지하고, `resolved:false`인 `context-target-unresolved`는 target이 현재 `HEAD`에 존재할 때만 ownerless non-FCA다. `structure.additionalExcludedDirectories`는 그 ownerless 이유를 명시하며, 그 밖의 실패는 범위를 축소하지 않는다.
+- PR 문서 audit 범위는 모든 변경을 한 `fractal_inspect` `resolve` batch로 해석한다. `resolved:true` owner는 config-excluded 이름 아래에서도 유지하고, `resolved:false`인 `context-target-unresolved`는 target이 현재 `HEAD`에 존재할 때만 ownerless non-FCA다. `structure.additionalExcludedDirectories`는 그 ownerless 이유를 명시하며, 그 밖의 실패는 범위를 축소하지 않는다.
 
 ## Acceptance Criteria
 
 ### AC-root-surface — 1.0 공개 표면
 
-- MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개이며 각각 독립 oracle이 고정한다.
+- MCP 도구는 정확히 4개, 사용자 스킬은 정확히 12개이며 각각 독립 oracle이 고정한다.
 - 제거된 AST·메트릭 도구와 스킬 7개(`ast-fallback`, `config-wizard`, `harvest`, `promote`, `structure-review`, `sync`, `update`)는 등록되거나 배포되지 않는다.
 
 ### AC-root-independence — 독립 실행
@@ -60,7 +60,7 @@
 
 ### AC-root-pr-document-scope — PR 문서 동기화 범위
 
-- 현재 `HEAD`에 존재하는 ownerless 경로는 non-FCA로 보고되며, config-excluded 이름은 그 이유를 보강한다. config-excluded 이름 아래라도 `context_resolve` owner가 있으면 문서 동기화 대상이다.
+- 현재 `HEAD`에 존재하는 ownerless 경로는 non-FCA로 보고되며, config-excluded 이름은 그 이유를 보강한다. config-excluded 이름 아래라도 `fractal_inspect` `resolve` 결과에 owner가 있으면 문서 동기화 대상이다.
 - `HEAD`에 없는 unresolved 경로와 `context-target-unresolved` 이외의 실패는 non-FCA로 바뀌지 않고 PR 생성을 중단한다.
 - non-FCA 경로도 PR의 Code/Architecture 분석에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
 
@@ -80,6 +80,7 @@
 
 ## History
 
+- 2026-09-05 — 같은 lifecycle의 기능을 action으로 묶어 상시 schema 비용을 줄이고 도구 이름을 일관되게 만들기 위해 공개 MCP 표면을 9개에서 4개로 병합했다.
 - 2026-09-04 — cross-review의 선별·청킹·그룹·규칙 해석·diff/brief 생성·JSON 검증·verdict fold·렌더링을 단일 `review_state` lifecycle로 옮겼다. orchestrator가 대형 diff와 opinion 본문을 열지 않아도 재개 가능하고, seal이 검증 후 변조된 판단을 신뢰하지 않게 하기 위한 결정이다.
 - 2026-09-04 — `review_state scope`가 project-relative root `.` 위반을 변경 범위 ancestor matching에서 제외하고, verification certainty는 변경 범위와 교차하는 verification 파일에서만 계산하되 graph certainty는 project-wide로 유지하도록 수정했다.
 - 2026-09-04 — `review_state scope`가 committed 변경 범위의 roster·FCA 후보·working-tree 관측과 canonical `evidence.md`를 한 snapshot에서 만들도록 책임을 옮겼다. 리뷰 프롬프트는 그룹별 판단과 독립 검증에만 집중한다.
@@ -92,4 +93,4 @@
 
 ## Last Updated
 
-2026-09-04
+2026-09-05

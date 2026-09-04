@@ -336,7 +336,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 
 **트레이드오프**: 면책이 규칙을 끄는 우회로가 될 수 있다. 그래서 `Reason`이 load-bearing이다 — 비어 있으면 면책이 아니라 미충족 계약으로 보고된다. 직접 import 면책의 표준 사례는 훅 번들이다.
 
-**파급**: 소유 subtree 안의 organ 참조는 cycle adjacency에서도 빠진다. 자식이 부모 소유 organ을 참조해 생기는 왕복은 승격 인공물이지 런타임 순환이 아니다. edge 자체는 보존한다 — `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다.
+**파급**: 소유 subtree 안의 organ 참조는 cycle adjacency에서도 빠진다. 자식이 부모 소유 organ을 참조해 생기는 왕복은 승격 인공물이지 런타임 순환이 아니다. edge 자체는 보존한다 — `restructure`의 `plan` action이 incoming edge로 소비자를 계산하기 때문이다.
 
 ### ADR-13 — cross-review는 단일 리뷰 패스와 독립 검증을 분리한다
 
@@ -377,7 +377,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-07 | 같은 group을 나눈 여러 spec은 `spec-fragmentation`                                                                                                                                               | [07](./07-RULES-REFERENCE.md)                       |
 | AC-08 | sibling 소비자의 공유 단위는 lowest common fractal의 organ으로 계획된다                                                                                                                          | [06](./06-HOW-IT-WORKS.md)                          |
 | AC-09 | 독립 공개 계약 단위는 fractal과 필수 artifact로 계획된다                                                                                                                                         | [06](./06-HOW-IT-WORKS.md)                          |
-| AC-10 | `restructure_plan`은 프로젝트 tree를 변경하지 않는다                                                                                                                                             | ADR-03                                              |
+| AC-10 | `restructure`의 `plan` action은 프로젝트 tree를 변경하지 않는다                                                                                                                                   | ADR-03                                              |
 | AC-11 | stale snapshot은 plan precondition FAIL                                                                                                                                                          | [06](./06-HOW-IT-WORKS.md)                          |
 | AC-12 | 잘못된 target·entry·import·DAG는 postcondition FAIL                                                                                                                                              | [06](./06-HOW-IT-WORKS.md)                          |
 | AC-13 | 대형 결과는 작은 inline summary와 검증 가능한 artifact path를 반환한다                                                                                                                           | ADR-07 · [08](./08-API-SURFACE.md)                  |
@@ -391,7 +391,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                                                                                                                   | [03](./03-LIFECYCLE.md)                             |
 | AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 위임하며, 수용·거부 결정과 사유가 기록된다                                                                                                          | [03](./03-LIFECYCLE.md)                             |
 | AC-23 | `pipeline --auto`가 pull-request → cross-review → resolve → revalidate를 중단 없이 잇는다                                                                                                        | [03](./03-LIFECYCLE.md)                             |
-| AC-24 | `config-wizard` 없이 `project_init` + `open_settings`만으로 config v2 생성·조회·저장이 완결된다                                                                                                  | [04](./04-USAGE.md)                                 |
+| AC-24 | `config-wizard` 없이 `project_setup`의 `init` + `settings` action만으로 config v2 생성·조회·저장이 완결된다                                                                                       | [04](./04-USAGE.md)                                 |
 | AC-25 | 문서도 module index도 없는 디렉터리는 `organ`이며, override 경로는 분류를 바꾸지 못한다                                                                                                          | ADR-11 · [07](./07-RULES-REFERENCE.md)              |
 | AC-26 | 소유 subtree 안의 organ 직접 참조는 통과, 밖은 위반, `Boundary Exemptions` 선언이 있으면 통과                                                                                                    | ADR-12 · [07](./07-RULES-REFERENCE.md)              |
 | AC-27 | 자식 fractal이 부모 소유 organ을 참조해도 cycle로 판정되지 않는다                                                                                                                                | ADR-12 · [06](./06-HOW-IT-WORKS.md)                 |

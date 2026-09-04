@@ -1,11 +1,14 @@
 import { portableJoin, portableResolve } from '@ogham/cross-platform';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RULE_DOC_ACTIONS } from '../../../constants/mcpContracts.js';
+import {
+  PROJECT_SETUP_ACTIONS,
+  RULE_DOC_ACTIONS,
+} from '../../../constants/mcpContracts.js';
 import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
-import { handleOpenSettingsTool } from '../handlers/handleOpenSettingsTool.js';
-import { handleProjectInitTool } from '../handlers/handleProjectInitTool.js';
-import { handleRuleDocsSyncTool } from '../handlers/handleRuleDocsSyncTool.js';
+import { initProject } from '../../tools/projectSetup/handlers/initProject.js';
+import { openSettingsSession } from '../../tools/projectSetup/handlers/openSettingsSession.js';
+import { syncRuleDocs } from '../../tools/projectSetup/handlers/syncRuleDocs.js';
 
 const RAW_TOOL_HANDLERS = vi.hoisted(() => ({
   handleOpenSettings: vi.fn(),
@@ -13,7 +16,15 @@ const RAW_TOOL_HANDLERS = vi.hoisted(() => ({
   handleRuleDocsSync: vi.fn(),
 }));
 
-vi.mock('../../tools/index.js', () => RAW_TOOL_HANDLERS);
+vi.mock('../../tools/projectSetup/openSettings/index.js', () => ({
+  handleOpenSettings: RAW_TOOL_HANDLERS.handleOpenSettings,
+}));
+vi.mock('../../tools/projectSetup/projectInit/index.js', () => ({
+  handleProjectInit: RAW_TOOL_HANDLERS.handleProjectInit,
+}));
+vi.mock('../../tools/projectSetup/ruleDocsSync/index.js', () => ({
+  handleRuleDocsSync: RAW_TOOL_HANDLERS.handleRuleDocsSync,
+}));
 
 const PROJECT_ROOT_INPUT = 'C:\\workspace\\filid\\nested\\..';
 const PROJECT_ROOT = portableResolve(PROJECT_ROOT_INPUT);
@@ -38,13 +49,15 @@ const SETTINGS_MESSAGE = 'settings result';
 const EMPTY_DIAGNOSTICS: never[] = [];
 
 const PROJECT_INIT_INPUT = {
+  action: PROJECT_SETUP_ACTIONS.INIT,
   path: PROJECT_ROOT_INPUT,
   language: LANGUAGE,
   adapterIds: [ADAPTER_ID],
 };
 const CANONICAL_PROJECT_INIT_INPUT = {
-  ...PROJECT_INIT_INPUT,
   path: PROJECT_ROOT,
+  language: LANGUAGE,
+  adapterIds: [ADAPTER_ID],
 };
 const PROJECT_INIT_OUTPUT = {
   configCreated: true,
@@ -61,7 +74,7 @@ const PROJECT_INIT_PAYLOAD = {
 };
 
 const RULE_STATUS_INPUT = {
-  action: RULE_DOC_ACTIONS.STATUS,
+  action: PROJECT_SETUP_ACTIONS.RULES_STATUS,
   path: PROJECT_ROOT_INPUT,
 };
 const RULE_STATUS_OUTPUT = {
@@ -113,7 +126,7 @@ const UNRESOLVED_RULE_STATUS_PAYLOAD = {
 };
 
 const RULE_MANIFEST_INPUT = {
-  action: RULE_DOC_ACTIONS.MANIFEST,
+  action: PROJECT_SETUP_ACTIONS.RULES_MANIFEST,
   path: PROJECT_ROOT_INPUT,
 };
 const RULE_MANIFEST_OUTPUT = {
@@ -168,7 +181,7 @@ const UNRESOLVED_RULE_MANIFEST_PAYLOAD = {
 };
 
 const RULE_SYNC_INPUT = {
-  action: RULE_DOC_ACTIONS.SYNC,
+  action: PROJECT_SETUP_ACTIONS.RULES_SYNC,
   path: PROJECT_ROOT_INPUT,
   selections: { [OPTIONAL_RULE_ID]: true },
   resync: [OPTIONAL_RULE_ID],
@@ -201,17 +214,20 @@ const RULE_SYNC_PAYLOAD = {
   diagnostics: EMPTY_DIAGNOSTICS,
 };
 const CANONICAL_RULE_SYNC_INPUT = {
-  ...RULE_SYNC_INPUT,
+  action: RULE_DOC_ACTIONS.SYNC,
   path: PROJECT_ROOT,
+  selections: { [OPTIONAL_RULE_ID]: true },
+  resync: [OPTIONAL_RULE_ID],
 };
 
 const OPEN_SETTINGS_INPUT = {
+  action: PROJECT_SETUP_ACTIONS.SETTINGS,
   path: PROJECT_ROOT_INPUT,
   waitSeconds: 10,
 };
 const CANONICAL_OPEN_SETTINGS_INPUT = {
-  ...OPEN_SETTINGS_INPUT,
   path: PROJECT_ROOT,
+  waitSeconds: 10,
 };
 const OPEN_SETTINGS_EXTRA = {
   signal: new AbortController().signal,
@@ -268,9 +284,7 @@ describe('legacy MCP tool payload adapters', () => {
   it('summarizes project initialization at the canonical root', () => {
     RAW_TOOL_HANDLERS.handleProjectInit.mockReturnValue(PROJECT_INIT_OUTPUT);
 
-    expect(handleProjectInitTool(PROJECT_INIT_INPUT)).toEqual(
-      PROJECT_INIT_PAYLOAD,
-    );
+    expect(initProject(PROJECT_INIT_INPUT)).toEqual(PROJECT_INIT_PAYLOAD);
     expect(RAW_TOOL_HANDLERS.handleProjectInit).toHaveBeenCalledWith(
       CANONICAL_PROJECT_INIT_INPUT,
     );
@@ -279,9 +293,7 @@ describe('legacy MCP tool payload adapters', () => {
   it('summarizes rule document status and preserves raw data', () => {
     RAW_TOOL_HANDLERS.handleRuleDocsSync.mockReturnValue(RULE_STATUS_OUTPUT);
 
-    expect(handleRuleDocsSyncTool(RULE_STATUS_INPUT)).toEqual(
-      RULE_STATUS_PAYLOAD,
-    );
+    expect(syncRuleDocs(RULE_STATUS_INPUT)).toEqual(RULE_STATUS_PAYLOAD);
   });
 
   it('reports unresolved rule document status as unsupported', () => {
@@ -289,7 +301,7 @@ describe('legacy MCP tool payload adapters', () => {
       UNRESOLVED_RULE_STATUS_OUTPUT,
     );
 
-    expect(handleRuleDocsSyncTool(RULE_STATUS_INPUT)).toEqual(
+    expect(syncRuleDocs(RULE_STATUS_INPUT)).toEqual(
       UNRESOLVED_RULE_STATUS_PAYLOAD,
     );
   });
@@ -297,9 +309,7 @@ describe('legacy MCP tool payload adapters', () => {
   it('summarizes the rule manifest and preserves raw data', () => {
     RAW_TOOL_HANDLERS.handleRuleDocsSync.mockReturnValue(RULE_MANIFEST_OUTPUT);
 
-    expect(handleRuleDocsSyncTool(RULE_MANIFEST_INPUT)).toEqual(
-      RULE_MANIFEST_PAYLOAD,
-    );
+    expect(syncRuleDocs(RULE_MANIFEST_INPUT)).toEqual(RULE_MANIFEST_PAYLOAD);
   });
 
   it('reports an unresolved rule manifest as unsupported', () => {
@@ -307,24 +317,24 @@ describe('legacy MCP tool payload adapters', () => {
       UNRESOLVED_RULE_MANIFEST_OUTPUT,
     );
 
-    expect(handleRuleDocsSyncTool(RULE_MANIFEST_INPUT)).toEqual(
+    expect(syncRuleDocs(RULE_MANIFEST_INPUT)).toEqual(
       UNRESOLVED_RULE_MANIFEST_PAYLOAD,
     );
   });
 
   it('returns fresh diagnostic arrays without shared mutable entries', () => {
     RAW_TOOL_HANDLERS.handleRuleDocsSync.mockReturnValue(RULE_STATUS_OUTPUT);
-    const resolved = handleRuleDocsSyncTool(RULE_STATUS_INPUT);
+    const resolved = syncRuleDocs(RULE_STATUS_INPUT);
     resolved.diagnostics.push(MUTATED_DIAGNOSTIC);
-    const nextResolved = handleRuleDocsSyncTool(RULE_STATUS_INPUT);
+    const nextResolved = syncRuleDocs(RULE_STATUS_INPUT);
 
     RAW_TOOL_HANDLERS.handleRuleDocsSync.mockReturnValue(
       UNRESOLVED_RULE_STATUS_OUTPUT,
     );
-    const unresolved = handleRuleDocsSyncTool(RULE_STATUS_INPUT);
+    const unresolved = syncRuleDocs(RULE_STATUS_INPUT);
     if (unresolved.diagnostics[0])
       unresolved.diagnostics[0].message = MUTATED_DIAGNOSTIC_MESSAGE;
-    const nextUnresolved = handleRuleDocsSyncTool(RULE_STATUS_INPUT);
+    const nextUnresolved = syncRuleDocs(RULE_STATUS_INPUT);
 
     expect(nextResolved.diagnostics).toEqual([]);
     expect(nextUnresolved.diagnostics).toEqual(
@@ -335,7 +345,7 @@ describe('legacy MCP tool payload adapters', () => {
   it('summarizes rule synchronization counts and preserves raw data', () => {
     RAW_TOOL_HANDLERS.handleRuleDocsSync.mockReturnValue(RULE_SYNC_OUTPUT);
 
-    expect(handleRuleDocsSyncTool(RULE_SYNC_INPUT)).toEqual(RULE_SYNC_PAYLOAD);
+    expect(syncRuleDocs(RULE_SYNC_INPUT)).toEqual(RULE_SYNC_PAYLOAD);
     expect(RAW_TOOL_HANDLERS.handleRuleDocsSync).toHaveBeenCalledWith(
       CANONICAL_RULE_SYNC_INPUT,
     );
@@ -366,7 +376,7 @@ describe('legacy MCP tool payload adapters', () => {
       RAW_TOOL_HANDLERS.handleOpenSettings.mockResolvedValue(raw);
 
       await expect(
-        handleOpenSettingsTool(OPEN_SETTINGS_INPUT, OPEN_SETTINGS_EXTRA),
+        openSettingsSession(OPEN_SETTINGS_INPUT, OPEN_SETTINGS_EXTRA),
       ).resolves.toEqual(payload);
       expect(RAW_TOOL_HANDLERS.handleOpenSettings).toHaveBeenCalledWith(
         CANONICAL_OPEN_SETTINGS_INPUT,

@@ -4,7 +4,7 @@
 
 - `setup` 스킬이 프로젝트 초기 설정에 쓰는 정적 자산을 담는다.
 - `rules/manifest.json`이 주입 가능한 규칙 문서를 선언하며 4개 모두 `required`다.
-- `rules/*.md`는 canonical 원본이다. 고치면 `build:rules`로 해시를 동기화하고 `rule_docs_sync`로 배포하기까지가 한 단위다.
+- `rules/*.md`는 canonical 원본이다. 고치면 `build:rules`로 해시를 동기화하고 `project_setup`의 `rules-sync` action으로 배포하기까지가 한 단위다.
 - 이 디렉터리는 정적 자산이며 런타임 로직을 담지 않는다. 진입점을 갖지 않는다.
 
 ## API Contracts
@@ -23,6 +23,11 @@
 
 - 규칙 문서 4개가 모두 `required`이며 optional 엔트리가 없다.
 
+## History
+
+- 2026-09-05 — managed rule 배포 호출을 `project_setup`의 `rules-sync` action으로 갱신했다.
+- 2026-08-30 — 작성 시점의 규칙 편입 근거를 manifest로 옮겨 배포 본문과 분리했다.
+
 ## Last Updated
 
-2026-08-30 — 작성 시점의 규칙 편입 근거를 manifest로 옮겨 배포 본문과 분리했다.
+2026-09-05

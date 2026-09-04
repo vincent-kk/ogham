@@ -37,9 +37,9 @@ claude --plugin-dir ./plugins/filid
 
 Building produces:
 
-- `bridge/mcp-server.cjs` — MCP server (9 tools)
+- `bridge/mcp-server.cjs` — MCP server (4 tools)
 - `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 3 hook scripts
-- `public/settings.html` — the settings UI served by `open_settings`
+- `public/settings.html` — the settings UI served by `project_setup` action `settings`
 
 There is no native dependency and no global module lookup: the plugin installs and runs with only the MCP SDK and Zod at runtime.
 
@@ -172,17 +172,12 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 
 ## MCP Tools
 
-| Tool                 | Role                                                   |
-| -------------------- | ------------------------------------------------------ |
-| `project_init`       | Initialize FCA in a project                            |
-| `rule_docs_sync`     | Sync the managed rule documents                        |
-| `open_settings`      | Open the settings UI                                   |
-| `fractal_scan`       | Inspect the snapshot tree                              |
-| `context_resolve`    | Batch owner/document chains from one snapshot          |
-| `restructure_plan`   | Decide placement; returns a plan artifact              |
-| `structure_validate` | Validate a project, or a plan's pre/postconditions     |
-| `verification_scan`  | Judge spec-document / test-record contracts            |
-| `review_state`       | Prepare, validate, fold, and render cross-review state |
+| Tool              | Actions                                                          | Role                                                   |
+| ----------------- | ---------------------------------------------------------------- | ------------------------------------------------------ |
+| `project_setup`   | `init`, `rules-status`, `rules-manifest`, `rules-sync`, `settings` | Initialize FCA, manage rules, or open settings         |
+| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                     | Inspect FCA structure, tests, and owner chains         |
+| `restructure`     | `plan`, `precondition`, `postcondition`                            | Plan placement and validate external execution         |
+| `review_state`    | `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`   | Prepare, validate, fold, and render cross-review state |
 
 Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.
 

@@ -2,16 +2,16 @@
 
 ## Purpose
 
-언어 중립 core를 9개의 작은 MCP 도구로 노출한다. 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다.
+언어 중립 core를 4개의 action-dispatched MCP 도구로 노출한다. 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다.
 
 ## Structure
 
 | Path           | Role                                                    |
 | -------------- | ------------------------------------------------------- |
-| `server/`      | 9개 도구 등록, envelope 직렬화와 process lifecycle      |
+| `server/`      | 4개 도구 등록, envelope 직렬화와 process lifecycle      |
 | `serverEntry/` | build가 호출하는 MCP executable entry                   |
 | `tools/`       | project/rule/settings/scan/context/plan/validate/review |
-| `pages/`       | `open_settings`가 제공하는 generated settings UI        |
+| `pages/`       | `project_setup`의 `settings` action이 제공하는 generated settings UI |
 
 ## Conventions
 
@@ -29,7 +29,7 @@
 
 ### Ask first
 
-- 9개 도구 목록, 입력 schema 또는 envelope budget 변경
+- 4개 도구 목록, action/input schema 또는 envelope budget 변경
 - 프로젝트 파일을 쓰는 새 동작 추가
 
 ### Never do

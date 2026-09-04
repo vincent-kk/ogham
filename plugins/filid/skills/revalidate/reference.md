@@ -30,7 +30,8 @@ For Category `bug`, `security`, `performance`, `maintainability`, `test`, or `do
 Resolve every accepted item's full owner-to-root fractal chain in one call:
 
 ```text
-mcp__plugin_filid_tools__context_resolve({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "resolve",
   path: PROJECT_ROOT,
   requests: [
     { targetPath: <accepted item path 1> },

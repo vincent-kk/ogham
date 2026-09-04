@@ -108,7 +108,7 @@ const ANALYSIS_CERTAINTIES = {
 
 **위 표의 severity는 `constants/builtinRuleSeverities`가 정본이다.** rule roster와 `createDefaultConfig`가 그 하나를 함께 읽으므로, 도구가 경로에 따라 서로 다른 기본값을 답하는 일은 없다.
 
-**프로젝트 config가 적은 값은 언제나 이긴다.** `.filid/config.json`의 `rules.<id>`에 severity나 enable이 있으면 그 값이 실효값이다. 이는 표를 덮어쓰는 사고가 아니라 **그 프로젝트의 선택**이며, filid는 config에 적힌 severity를 되돌리지 않는다 — `project_init`은 기존 config를 덮어쓰지 않고, 재시드하는 도구도 없다. 따라서 config를 가진 프로젝트의 실효 severity는 위 표가 아니라 그 프로젝트의 config이며, 표는 config가 그 규칙을 언급하지 않을 때의 값이다. 오래된 `project_init`이 만든 config가 지금 표와 다른 severity를 담고 있다면 그것도 그대로 유지된다.
+**프로젝트 config가 적은 값은 언제나 이긴다.** `.filid/config.json`의 `rules.<id>`에 severity나 enable이 있으면 그 값이 실효값이다. 이는 표를 덮어쓰는 사고가 아니라 **그 프로젝트의 선택**이며, filid는 config에 적힌 severity를 되돌리지 않는다 — `project_setup`의 `init` action은 기존 config를 덮어쓰지 않고, 재시드하는 도구도 없다. 따라서 config를 가진 프로젝트의 실효 severity는 위 표가 아니라 그 프로젝트의 config이며, 표는 config가 그 규칙을 언급하지 않을 때의 값이다. 이전 initialization action이 만든 config가 지금 표와 다른 severity를 담고 있다면 그것도 그대로 유지된다.
 
 ### 1.0에서 제거된 규칙
 
@@ -203,7 +203,7 @@ finding은 해소책 둘을 함께 제시한다: INTENT.md를 지워 organ으로
 
 `severity`가 `error`가 아니라 `warning`인 것은 ADR-11의 연장이다 — 분류는 서술이고, 승격 자체는 정당한 행위다. 규칙이 묻는 것은 "이 승격이 의도한 것인가"이지 "이것이 금지 상태인가"가 아니다.
 
-**훅은 이것을 차단하지 않는다.** `PreToolUse` write gate는 INTENT.md 줄 수와 DETAIL.md append-only만 판정하며, organ 여부는 입력으로 받지 않는다. 승격은 `structure_validate` finding으로 보고된다.
+**훅은 이것을 차단하지 않는다.** `PreToolUse` write gate는 INTENT.md 줄 수와 DETAIL.md append-only만 판정하며, organ 여부는 입력으로 받지 않는다. 승격은 `fractal_inspect`의 `validate` action finding으로 보고된다.
 
 ### peer file (`zero-peer-file`)
 
@@ -266,7 +266,7 @@ finding은 organ 경로와 소유자를 함께 밝히고 해소책 셋을 제시
 
 snapshot의 실제 의존 그래프에서 닫힌 directed cycle을 반환한다. placeholder PASS는 없다. 그래프를 만들 수 없는 파일이 cycle 결론에 영향을 줄 수 있으면 전체 결과는 `indeterminate`다.
 
-**소유 subtree 안의 organ 참조는 cycle adjacency에서 빠진다.** 자식 fractal이 부모 소유 organ을 참조하면 organ이 부모로 승격되면서 `부모 → 자식 → 부모` 왕복이 생기는데, 이것은 런타임 순환이 아니라 승격 인공물이다. edge 자체는 **보존한다** — `restructure_plan`이 incoming edge로 소비자를 계산하므로, 지우면 LCA 배치가 내부 소비자에 눈이 먼다.
+**소유 subtree 안의 organ 참조는 cycle adjacency에서 빠진다.** 자식 fractal이 부모 소유 organ을 참조하면 organ이 부모로 승격되면서 `부모 → 자식 → 부모` 왕복이 생기는데, 이것은 런타임 순환이 아니라 승격 인공물이다. edge 자체는 **보존한다** — `restructure`의 `plan` action이 incoming edge로 소비자를 계산하므로, 지우면 LCA 배치가 내부 소비자에 눈이 먼다.
 
 ---
 
@@ -318,7 +318,7 @@ core는 파일명이나 확장자가 아니라 **역할**을 안다.
 
 차단은 `permissionDecision: 'deny'`로 **해당 도구 호출 하나만** 막는다. 턴은 중단되지 않는다.
 
-1.0에는 `SubagentStart` 역할 제한 훅과 `PostToolUse` change tracking이 없다. legacy `.filid/criteria.md` 발견도 hook deny가 아니라 `structure_validate`의 `legacy-criteria-ledger` finding으로 보고된다.
+1.0에는 `SubagentStart` 역할 제한 훅과 `PostToolUse` change tracking이 없다. legacy `.filid/criteria.md` 발견도 hook deny가 아니라 `fractal_inspect`의 `validate` action이 내는 `legacy-criteria-ledger` finding으로 보고된다.
 
 ---
 

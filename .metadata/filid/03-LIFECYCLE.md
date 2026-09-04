@@ -84,7 +84,7 @@ baseline capture → accepted correction 일괄 위임 → 검증된 ADR 직렬�
 | `harvest`          | acceptance 원장을 DETAIL.md 하나로 통일했으므로(ADR-05) `.filid/criteria.md`에 claim을 수확해 넣을 대상이 없다.                            |
 | `sync`             | 한 스킬이 구조 이동과 문서 갱신을 동시에 하면 어느 쪽이 실패했는지 구분되지 않는다. 구조는 `restructure`, 문서는 `enrich-docs`로 분리했다. |
 | `update`           | 코드 변경 뒤 문서·테스트를 자동 재작성하는 workflow다. 승인 지점이 없어 "무엇이 왜 바뀌었는지"가 남지 않는다. `enrich-docs`가 대체한다.    |
-| `config-wizard`    | config 관리는 `project_init`(생성)과 `open_settings`(조회·수정) 두 MCP 도구가 이미 소유한다.                                               |
+| `config-wizard`    | config 관리는 `project_setup`의 `init`(생성)과 `settings`(조회·수정) action이 이미 소유한다.                                               |
 
 merge-track 네 스킬은 한때 제거 대상이었으나 되살렸다. 다만 모두 제거된 도구(`review_manage`, `debt_manage`, `ast_analyze`, `test_metrics`)와 `code-surgeon` 에이전트에 걸려 있었으므로 **원본 복원이 아니라 9개 도구 표면 위로 재작성**됐다.
 
@@ -104,20 +104,20 @@ merge-track 네 스킬은 한때 제거 대상이었으나 되살렸다. 다만 
 **트리거**: 최초 1회, 또는 `/filid:setup [path]`
 
 ```
-1. project_init(path, language, adapterIds)
+1. project_setup({ action: 'init', path, language, adapterIds })
    → .filid/config.json (schema 2.0) 생성
    → 이미 있으면 덮어쓰지 않는다
        │
        ▼
-2. rule_docs_sync(sync)
+2. project_setup({ action: 'rules-sync', path, selections, resync })
    → managed FCA rule 문서 배포 (templates/rules/ 원본 기준)
        │
        ▼
-3. fractal_scan(path)
+3. fractal_inspect({ action: 'scan', path })
    → snapshot 기반 트리 확인
        │
        ▼
-4. structure_validate(path, scopes: [documents])
+4. fractal_inspect({ action: 'validate', path, scopes: [documents] })
    → 문서 경계 검증
        │
        ▼
@@ -136,10 +136,10 @@ config 저장은 사용자가 승인할 때만 디스크에 기록된다. v1 con
 전체 감사의 **유일한** 진입점이다. 한 snapshot에 대해 모든 scope를 평가한다.
 
 ```
-fractal_scan(path)              → 트리와 분류
+fractal_inspect({ action: 'scan', path }) → 트리와 분류
        │
        ▼
-structure_validate(path, mode: 'project')
+fractal_inspect({ action: 'validate', path })
        ├─ documents      → INTENT 50줄·3-tier, DETAIL 섹션·AC group
        ├─ nodes          → organ-no-intentmd, max-depth, zero-peer-file
        ├─ entry-points   → module-entry-point, entry-point-surface
@@ -148,7 +148,7 @@ structure_validate(path, mode: 'project')
        └─ verification   → 15/32 cap, fragmentation, contract link
        │
        ▼
-verification_scan(path)         → spec/test 역할별 요약
+fractal_inspect({ action: 'verification', path }) → spec/test 역할별 요약
        │
        ▼
 위반 요약 + certainty 보고
@@ -165,7 +165,7 @@ verification_scan(path)         → spec/test 역할별 요약
 **트리거**: 수시, `/filid:context-query <path 또는 질문>`
 
 ```
-context_resolve(path, requests: [{ targetPath }])
+fractal_inspect({ action: 'resolve', path, requests: [{ targetPath }] })
        │
        ▼
 data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
@@ -200,7 +200,7 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 3. LLM이 INTENT.md / DETAIL.md 편집
        │
        ▼
-4. structure_validate(scopes: [documents])로 사후 검증
+4. fractal_inspect({ action: 'validate', path, scopes: [documents] })로 사후 검증
 ```
 
 승인 없이 문서를 고치지 않는다.
@@ -211,13 +211,13 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 
 ```
 1. 읽기 전용 계획 생성
-   restructure_plan({ path, requests: [{ sourcePath, consumerPaths?, contractIntent? }] })
+   restructure({ action: 'plan', path, requests: [{ sourcePath, consumerPaths?, contractIntent? }] })
    → 항상 plan artifact를 남긴다 (persistence: always)
    → 프로젝트 트리는 변경되지 않는다
        │
        ▼
 2. 사전조건 검증
-   structure_validate(mode: 'plan-precondition', planPath)
+   restructure({ action: 'precondition', path, planPath })
    → snapshot hash 일치, unresolved decision 없음
        │
        ▼
@@ -230,7 +230,7 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
        │
        ▼
 5. 사후조건 검증
-   structure_validate(mode: 'plan-postcondition', planPath)
+   restructure({ action: 'postcondition', path, planPath })
    → source 부재, target 존재, node type, 필수 문서, 진입점,
      import rewrite/boundary, DAG, graph certainty
 ```
@@ -304,7 +304,7 @@ state 부재나 source hash 불일치는 seal 실패로 중단하며 terminal ve
 | `CONFIRMED` 후보가 하나 이상                                         | `REQUEST_CHANGES` |
 | 모든 후보가 `REFUTED`이거나 후보 없음                                | `APPROVED`        |
 
-`INDETERMINATE`는 unresolved evidence로 기록하며 pass로 바꾸지 않는다. cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure_plan`이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
+`INDETERMINATE`는 unresolved evidence로 기록하며 pass로 바꾸지 않는다. cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure`의 `plan` action이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
 
 ### review state 수명주기
 
@@ -331,7 +331,7 @@ assess ──→ working tree를 독립적으로 관측
 1. 대상 탐색
 2. **dry-run 우선** — 무엇이 바뀌는지 먼저 보여준다
 3. 이식 가능한 스크립트로 실행
-4. structure_validate로 사후 검증
+4. `fractal_inspect`의 `validate` action으로 사후 검증
 ```
 
 legacy `.filid/criteria.md`는 이 스킬의 대상이 아니다. 자동 변환하지 않고 `legacy-criteria-ledger` finding으로 보고되며, 이관 시점은 사용자가 정한다.

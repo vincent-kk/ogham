@@ -4,11 +4,11 @@ Lookup tables for [SKILL.md](./SKILL.md). The detailed evidence and validation c
 
 ## Available MCP Tools
 
-| Tool                                          | Stage      | Purpose                                          | Input                                                       |
-| --------------------------------------------- | ---------- | ------------------------------------------------ | ----------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_scan`       | Evidence   | Snapshot-backed node paths and document presence | `{ path, detail: "paths", maxDepth? }`                      |
-| `mcp__plugin_filid_tools__context_resolve`    | Evidence   | Batched owner-to-root document references        | `{ path, requests: [{ targetPath }] }`                      |
-| `mcp__plugin_filid_tools__structure_validate` | Validation | Canonical document and node findings             | `{ path, mode: "project", scopes: ["documents", "nodes"] }` |
+| Tool + action                                         | Stage      | Purpose                                          | Input                                                            |
+| ----------------------------------------------------- | ---------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| `mcp__plugin_filid_tools__fractal_inspect` `scan`     | Evidence   | Snapshot-backed node paths and document presence | `{ action: "scan", path, detail: "paths", maxDepth? }`          |
+| `mcp__plugin_filid_tools__fractal_inspect` `resolve`  | Evidence   | Batched owner-to-root document references        | `{ action: "resolve", path, requests: [{ targetPath }] }`        |
+| `mcp__plugin_filid_tools__fractal_inspect` `validate` | Validation | Canonical document and node findings             | `{ action: "validate", path, scopes: ["documents", "nodes"] }` |
 
 All three return the common Filid envelope. A non-`ok` status remains visible in the report and is never converted into a successful audit.
 

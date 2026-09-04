@@ -7,7 +7,8 @@ Detailed evidence, approval, editing, and validation contract for [SKILL.md](./S
 Resolve the requested path without assuming a path separator, confirm that it is inside a project containing `.filid/config.json`, and call:
 
 ```text
-mcp__plugin_filid_tools__fractal_scan({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "scan",
   path: "<target-path>",
   detail: "paths",
   maxDepth: <optional --depth value>
@@ -25,7 +26,8 @@ Use `data.nodes` as the authoritative candidate set. Each node contains its norm
 For all existing or missing document candidates, call once:
 
 ```text
-mcp__plugin_filid_tools__context_resolve({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "resolve",
   path: "<project-path>",
   requests: [
     { targetPath: "<candidate node path 1>" },
@@ -34,7 +36,7 @@ mcp__plugin_filid_tools__context_resolve({
 })
 ```
 
-The result order and cardinality match the candidate requests. Read `data.results`, or the artifact's results when `data` is absent, and bind each candidate to its same-index result. A failed item remains visible with its diagnostics and is not edited. `context_resolve` returns document references, not document bodies. For each resolved `result`, read only:
+The result order and cardinality match the candidate requests. Read `data.results`, or the artifact's results when `data` is absent, and bind each candidate to its same-index result. A failed item remains visible with its diagnostics and is not edited. The `fractal_inspect` `resolve` action returns document references, not document bodies. For each resolved `result`, read only:
 
 - the target INTENT.md or DETAIL.md when present;
 - the owner-to-root `result.resolution.chain` document paths;
@@ -123,9 +125,9 @@ Validate each edited DETAIL.md against the required section set in [`../.shared/
 Then call:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: "<target-path>",
-  mode: "project",
   scopes: ["documents", "nodes"]
 })
 ```

@@ -37,9 +37,9 @@ claude --plugin-dir ./plugins/filid
 
 빌드 산출물은 다음과 같습니다.
 
-- `bridge/mcp-server.cjs` — MCP 서버 (도구 9개)
+- `bridge/mcp-server.cjs` — MCP 서버 (도구 4개)
 - `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 훅 스크립트 3개
-- `public/settings.html` — `open_settings`가 서빙하는 설정 UI
+- `public/settings.html` — `project_setup`의 `settings` action이 서빙하는 설정 UI
 
 native 의존성과 전역 모듈 탐색이 없습니다. 런타임에 필요한 것은 MCP SDK와 Zod뿐입니다.
 
@@ -172,17 +172,12 @@ filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙
 
 ## MCP 도구
 
-| 도구                 | 역할                                    |
-| -------------------- | --------------------------------------- |
-| `project_init`       | 프로젝트 FCA 초기화                     |
-| `rule_docs_sync`     | managed rule 문서 동기화                |
-| `open_settings`      | 설정 UI                                 |
-| `fractal_scan`       | 스냅샷 트리 검사                        |
-| `context_resolve`    | 한 스냅샷의 소유/문서 체인 일괄 해석    |
-| `restructure_plan`   | 배치 결정, plan artifact 반환           |
-| `structure_validate` | 프로젝트 또는 계획의 사전·사후조건 검증 |
-| `verification_scan`  | spec-document / test-record 계약 판정   |
-| `review_state`       | cross-review 준비·검증·fold·렌더링      |
+| 도구              | action                                                           | 역할                                     |
+| ----------------- | ---------------------------------------------------------------- | ---------------------------------------- |
+| `project_setup`   | `init`, `rules-status`, `rules-manifest`, `rules-sync`, `settings` | 프로젝트 FCA 초기화·규칙·설정            |
+| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                     | 구조·verification·소유/문서 체인 검사    |
+| `restructure`     | `plan`, `precondition`, `postcondition`                            | 배치 계획과 외부 실행 사전·사후조건 검증 |
+| `review_state`    | `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`   | cross-review 준비·검증·fold·렌더링       |
 
 모든 도구가 동일한 envelope를 사용합니다. 반환은 작게 유지되며, 16 KiB를 넘으면 content-addressed artifact로 저장하고 경로와 SHA-256으로 참조합니다.
 

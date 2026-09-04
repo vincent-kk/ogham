@@ -2,11 +2,12 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import {
+  FRACTAL_INSPECT_ACTIONS,
   FRACTAL_SCAN_DETAILS,
   MCP_SERVER_NAME,
   MCP_TOOL_DESCRIPTIONS,
-  RULE_DOC_ACTIONS,
-  STRUCTURE_VALIDATION_MODES,
+  PROJECT_SETUP_ACTIONS,
+  RESTRUCTURE_ACTIONS,
   STRUCTURE_VALIDATION_SCOPES,
   VERIFICATION_SCAN_DETAILS,
 } from '../../../constants/mcpContracts.js';
@@ -14,19 +15,17 @@ import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { CONTRACT_INTENTS } from '../../../constants/restructure.js';
 import { REVIEW_STATE_ACTIONS } from '../../../constants/reviewState.js';
 import { VERSION } from '../../../version.js';
+import type { FractalInspectResult } from '../../tools/fractalInspect/index.js';
 import {
-  handleContextResolve,
-  handleFractalScan,
-  handleRestructurePlan,
+  handleFractalInspect,
+  handleProjectSetup,
+  handleRestructure,
   handleReviewState,
-  handleStructureValidate,
-  handleVerificationScan,
 } from '../../tools/index.js';
+import type { ProjectSetupResult } from '../../tools/projectSetup/index.js';
+import type { RestructureResult } from '../../tools/restructure/index.js';
 import type { ReviewStateResult } from '../../tools/reviewState/index.js';
 import { wrapHandler } from '../envelope/wrapHandler.js';
-import { handleOpenSettingsTool } from '../handlers/handleOpenSettingsTool.js';
-import { handleProjectInitTool } from '../handlers/handleProjectInitTool.js';
-import { handleRuleDocsSyncTool } from '../handlers/handleRuleDocsSyncTool.js';
 import { deferInputValidation } from '../utils/deferInputValidation.js';
 
 const PROJECT_ROOT_DESCRIPTION =
@@ -35,185 +34,247 @@ const PROJECT_ROOT_DESCRIPTION =
   'config (.filid/config.json) is the exception: it is always read from the ' +
   'enclosing git repository root.';
 
-const PROJECT_INIT_INPUT_SCHEMA = z.object({
-  path: z.string().optional().describe(PROJECT_ROOT_DESCRIPTION),
-  language: z
-    .string()
-    .optional()
-    .describe('Output language tag for generated documents, e.g. "ko".'),
-  adapterIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .optional()
-    .describe('Ecosystem adapter IDs to enable, e.g. ["ecmascript"].'),
-});
+const INIT_LANGUAGE_SCHEMA = z
+  .string()
+  .optional()
+  .describe(
+    'init only: output language tag for generated documents, e.g. "ko".',
+  );
+const INIT_ADAPTER_IDS_SCHEMA = z
+  .array(z.string().min(1))
+  .min(1)
+  .optional()
+  .describe('init only: ecosystem adapter IDs to enable, e.g. ["ecmascript"].');
+const RULE_SELECTIONS_SCHEMA = z
+  .union([z.record(z.string(), z.boolean()), z.string()])
+  .nullish()
+  .describe('rules-sync only: rule ID to enabled flag. Omit to deploy all.');
+const RULE_RESYNC_SCHEMA = z
+  .union([z.array(z.string()), z.string()])
+  .nullish()
+  .describe(
+    'rules-sync only: rule IDs to overwrite even when already deployed.',
+  );
+const SETTINGS_WAIT_SCHEMA = z
+  .number()
+  .positive()
+  .optional()
+  .describe('settings only: how long to wait for the browser form.');
 
-const RULE_DOCS_SYNC_INPUT_SCHEMA = z.object({
-  action: z
-    .nativeEnum(RULE_DOC_ACTIONS)
-    .describe(
-      'status reports deployment state; manifest lists managed rules; sync writes them.',
-    ),
-  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
-  selections: z
-    .union([z.record(z.string(), z.boolean()), z.string()])
-    .nullish()
-    .describe('sync only: rule ID to enabled flag. Omit to deploy all.'),
-  resync: z
-    .union([z.array(z.string()), z.string()])
-    .nullish()
-    .describe('sync only: rule IDs to overwrite even when already deployed.'),
-});
-
-const OPEN_SETTINGS_INPUT_SCHEMA = z.object({
-  path: z.string().optional().describe(PROJECT_ROOT_DESCRIPTION),
-  waitSeconds: z
-    .number()
-    .positive()
-    .optional()
-    .describe('How long to wait for the browser form to be submitted.'),
-});
-
-const FRACTAL_SCAN_INPUT_SCHEMA = z.object({
-  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
-  maxDepth: z
-    .number()
-    .int()
-    .nonnegative()
-    .optional()
-    .describe(
-      'Overrides the configured max-depth RULE THRESHOLD — not a traversal ' +
-        'limit. The tree is always walked in full; lowering this only makes ' +
-        'more nodes violate the depth rule. Omit it to use the project config.',
-    ),
-  detail: z
-    .nativeEnum(FRACTAL_SCAN_DETAILS)
-    .optional()
-    .describe(
-      'summary (default) returns counts only; paths adds node paths, ' +
-        'classification basis and entry-point export names; full adds ' +
-        'snapshot evidence.',
-    ),
-  nameFilter: z
-    .string()
-    .min(1)
-    .optional()
-    .describe(
-      'Directory name matched exactly, narrowing the paths projection to ' +
-        'nodes with that name — answers "where does this organ name appear ' +
-        'across the tree?". Summary counts still describe the whole tree.',
-    ),
-});
-
-const CONTEXT_RESOLVE_INPUT_SCHEMA = z
-  .object({
-    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
-    requests: z
-      .array(
-        z.object({
-          targetPath: z
-            .string()
-            .describe(
-              'Absolute path whose owning fractal and INTENT/DETAIL chain to resolve.',
-            ),
-          comparePaths: z
-            .array(z.string())
-            .optional()
-            .describe(
-              'Paths whose lowest common fractal to resolve for this target. ' +
-                'Returns null when no single fractal owns them all. Omit to ' +
-                'resolve only the target chain.',
-            ),
-        }),
-      )
-      .min(1)
-      .describe(
-        'One or more ordered target requests evaluated against one shared snapshot.',
-      ),
-  })
-  .strict();
-
-const RESTRUCTURE_PLAN_INPUT_SCHEMA = z.object({
-  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
-  requests: z
-    .array(
-      z.object({
-        sourcePath: z.string().describe('Absolute path of the unit to place.'),
-        consumerPaths: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Known consumers. Omit to derive them from snapshot evidence.',
-          ),
-        contractIntent: z
-          .nativeEnum(CONTRACT_INTENTS)
-          .optional()
-          .describe(
-            'Whether the unit should land as a child fractal or an organ.',
-          ),
-        organNameHint: z
-          .string()
-          .optional()
-          .describe(
-            'Proposed organ name. Unnamed groups stop the plan for a human.',
-          ),
-      }),
-    )
-    .describe('Placement requests evaluated against one shared snapshot.'),
-});
-
-const STRUCTURE_VALIDATION_COMMON_SCHEMA = {
-  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
-  scopes: z
-    .array(z.nativeEnum(STRUCTURE_VALIDATION_SCOPES))
-    .optional()
-    .describe('Rule scopes to evaluate. Omit to evaluate all six.'),
-};
-
-const STRUCTURE_VALIDATE_INPUT_SCHEMA = z.union([
+const PROJECT_SETUP_INPUT_SCHEMA = z.discriminatedUnion('action', [
   z.object({
-    ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
-    mode: z.literal(STRUCTURE_VALIDATION_MODES.PROJECT).optional(),
-    planPath: z.string().optional(),
+    action: z.literal(PROJECT_SETUP_ACTIONS.INIT),
+    path: z.string().optional().describe(PROJECT_ROOT_DESCRIPTION),
+    language: INIT_LANGUAGE_SCHEMA,
+    adapterIds: INIT_ADAPTER_IDS_SCHEMA,
   }),
   z.object({
-    ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
-    mode: z.literal(STRUCTURE_VALIDATION_MODES.PLAN_PRECONDITION),
+    action: z.literal(PROJECT_SETUP_ACTIONS.RULES_STATUS),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  }),
+  z.object({
+    action: z.literal(PROJECT_SETUP_ACTIONS.RULES_MANIFEST),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  }),
+  z.object({
+    action: z.literal(PROJECT_SETUP_ACTIONS.RULES_SYNC),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    selections: RULE_SELECTIONS_SCHEMA,
+    resync: RULE_RESYNC_SCHEMA,
+  }),
+  z.object({
+    action: z.literal(PROJECT_SETUP_ACTIONS.SETTINGS),
+    path: z.string().optional().describe(PROJECT_ROOT_DESCRIPTION),
+    waitSeconds: SETTINGS_WAIT_SCHEMA,
+  }),
+]);
+
+const PROJECT_SETUP_ADVERTISED_INPUT_SCHEMA = z.object({
+  action: z
+    .nativeEnum(PROJECT_SETUP_ACTIONS)
+    .describe(
+      'init creates missing config; rules-status and rules-manifest inspect managed rules; rules-sync writes them; settings opens the bounded local session.',
+    ),
+  path: z
+    .string()
+    .optional()
+    .describe(
+      'Required by the rules-* actions; init and settings default to the enclosing repository root.',
+    ),
+  language: INIT_LANGUAGE_SCHEMA,
+  adapterIds: INIT_ADAPTER_IDS_SCHEMA,
+  selections: RULE_SELECTIONS_SCHEMA,
+  resync: RULE_RESYNC_SCHEMA,
+  waitSeconds: SETTINGS_WAIT_SCHEMA,
+});
+
+const SCAN_MAX_DEPTH_SCHEMA = z
+  .number()
+  .int()
+  .nonnegative()
+  .optional()
+  .describe(
+    'scan only: overrides the configured max-depth RULE THRESHOLD — not a traversal limit. The tree is always walked in full; lowering this only makes more nodes violate the depth rule. Omit it to use project config.',
+  );
+const SCAN_DETAIL_SCHEMA = z
+  .nativeEnum(FRACTAL_SCAN_DETAILS)
+  .optional()
+  .describe(
+    'scan only: summary (default) returns counts; paths adds node evidence; full adds snapshot evidence.',
+  );
+const SCAN_NAME_FILTER_SCHEMA = z
+  .string()
+  .min(1)
+  .optional()
+  .describe(
+    'scan only: exact directory name narrowing the paths projection. Summary counts still describe the whole tree.',
+  );
+const VALIDATION_SCOPES_SCHEMA = z
+  .array(z.nativeEnum(STRUCTURE_VALIDATION_SCOPES))
+  .optional()
+  .describe(
+    'validate only: rule scopes to evaluate. Omit to evaluate all six.',
+  );
+const VERIFICATION_FILE_PATHS_SCHEMA = z
+  .array(z.string())
+  .optional()
+  .describe(
+    'verification only: files to inspect. Omit to scan the whole project.',
+  );
+const VERIFICATION_DETAIL_SCHEMA = z
+  .nativeEnum(VERIFICATION_SCAN_DETAILS)
+  .optional()
+  .describe(
+    'verification only: summary (default) returns role counts and caps; files adds per-file evidence.',
+  );
+const CONTEXT_REQUESTS_SCHEMA = z
+  .array(
+    z.object({
+      targetPath: z
+        .string()
+        .describe(
+          'Absolute path whose owning fractal and INTENT/DETAIL chain to resolve.',
+        ),
+      comparePaths: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Paths whose lowest common fractal to resolve for this target. Returns null when no single fractal owns them all.',
+        ),
+    }),
+  )
+  .min(1)
+  .describe(
+    'resolve only: one or more ordered target requests evaluated against one shared snapshot.',
+  );
+
+const FRACTAL_INSPECT_INPUT_SCHEMA = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal(FRACTAL_INSPECT_ACTIONS.SCAN),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    maxDepth: SCAN_MAX_DEPTH_SCHEMA,
+    detail: SCAN_DETAIL_SCHEMA,
+    nameFilter: SCAN_NAME_FILTER_SCHEMA,
+  }),
+  z.object({
+    action: z.literal(FRACTAL_INSPECT_ACTIONS.VALIDATE),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    scopes: VALIDATION_SCOPES_SCHEMA,
+  }),
+  z.object({
+    action: z.literal(FRACTAL_INSPECT_ACTIONS.VERIFICATION),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    filePaths: VERIFICATION_FILE_PATHS_SCHEMA,
+    detail: VERIFICATION_DETAIL_SCHEMA,
+  }),
+  z
+    .object({
+      action: z.literal(FRACTAL_INSPECT_ACTIONS.RESOLVE),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      requests: CONTEXT_REQUESTS_SCHEMA,
+    })
+    .strict(),
+]);
+
+const FRACTAL_INSPECT_ADVERTISED_INPUT_SCHEMA = z
+  .object({
+    action: z
+      .nativeEnum(FRACTAL_INSPECT_ACTIONS)
+      .describe(
+        'scan summarizes the tree; validate checks FCA structure; verification audits verification documents; resolve returns owner chains.',
+      ),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    detail: z
+      .enum(['summary', 'paths', 'full', 'files'])
+      .optional()
+      .describe(
+        'scan: summary (default) | paths | full. verification: summary (default) | files.',
+      ),
+    maxDepth: SCAN_MAX_DEPTH_SCHEMA,
+    nameFilter: SCAN_NAME_FILTER_SCHEMA,
+    scopes: VALIDATION_SCOPES_SCHEMA,
+    filePaths: VERIFICATION_FILE_PATHS_SCHEMA,
+    requests: CONTEXT_REQUESTS_SCHEMA.optional(),
+  })
+  .passthrough();
+
+const RESTRUCTURE_REQUESTS_SCHEMA = z
+  .array(
+    z.object({
+      sourcePath: z.string().describe('Absolute path of the unit to place.'),
+      consumerPaths: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Known consumers. Omit to derive them from snapshot evidence.',
+        ),
+      contractIntent: z
+        .nativeEnum(CONTRACT_INTENTS)
+        .optional()
+        .describe(
+          'Whether the unit should land as a child fractal or an organ.',
+        ),
+      organNameHint: z
+        .string()
+        .optional()
+        .describe(
+          'Proposed organ name. Unnamed groups stop the plan for a human.',
+        ),
+    }),
+  )
+  .describe('plan only: placement requests evaluated against one snapshot.');
+
+const RESTRUCTURE_INPUT_SCHEMA = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal(RESTRUCTURE_ACTIONS.PLAN),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    requests: RESTRUCTURE_REQUESTS_SCHEMA,
+  }),
+  z.object({
+    action: z.literal(RESTRUCTURE_ACTIONS.PRECONDITION),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
     planPath: z.string(),
   }),
   z.object({
-    ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
-    mode: z.literal(STRUCTURE_VALIDATION_MODES.PLAN_POSTCONDITION),
+    action: z.literal(RESTRUCTURE_ACTIONS.POSTCONDITION),
+    path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
     planPath: z.string(),
   }),
 ]);
 
-const STRUCTURE_VALIDATE_ADVERTISED_INPUT_SCHEMA = z.object({
-  ...STRUCTURE_VALIDATION_COMMON_SCHEMA,
-  mode: z
-    .nativeEnum(STRUCTURE_VALIDATION_MODES)
-    .optional()
+const RESTRUCTURE_ADVERTISED_INPUT_SCHEMA = z.object({
+  action: z
+    .nativeEnum(RESTRUCTURE_ACTIONS)
     .describe(
-      'project (default) validates the tree; the plan modes check a ' +
-        'restructure plan before and after an external actor performs it.',
+      'plan creates a persisted read-only move plan; precondition and postcondition validate it around external execution.',
     ),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  requests: RESTRUCTURE_REQUESTS_SCHEMA.optional(),
   planPath: z
     .string()
     .optional()
-    .describe('Absolute plan artifact path. Required by both plan modes.'),
-});
-
-const VERIFICATION_SCAN_INPUT_SCHEMA = z.object({
-  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
-  filePaths: z
-    .array(z.string())
-    .optional()
-    .describe('Restrict the scan to these files. Omit to scan the project.'),
-  detail: z
-    .nativeEnum(VERIFICATION_SCAN_DETAILS)
-    .optional()
     .describe(
-      'summary (default) returns role counts and caps; files adds per-file evidence.',
+      'precondition, postcondition only: absolute plan artifact path written by plan. Required by both.',
     ),
 });
 
@@ -320,44 +381,19 @@ const MCP_SERVER_INFO = {
   version: VERSION,
 };
 
-const PROJECT_INIT_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.PROJECT_INIT,
-  inputSchema: deferInputValidation(PROJECT_INIT_INPUT_SCHEMA),
+const PROJECT_SETUP_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.PROJECT_SETUP,
+  inputSchema: deferInputValidation(PROJECT_SETUP_ADVERTISED_INPUT_SCHEMA),
 };
 
-const RULE_DOCS_SYNC_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.RULE_DOCS_SYNC,
-  inputSchema: deferInputValidation(RULE_DOCS_SYNC_INPUT_SCHEMA),
+const FRACTAL_INSPECT_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.FRACTAL_INSPECT,
+  inputSchema: deferInputValidation(FRACTAL_INSPECT_ADVERTISED_INPUT_SCHEMA),
 };
 
-const OPEN_SETTINGS_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.OPEN_SETTINGS,
-  inputSchema: deferInputValidation(OPEN_SETTINGS_INPUT_SCHEMA),
-};
-
-const FRACTAL_SCAN_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.FRACTAL_SCAN,
-  inputSchema: deferInputValidation(FRACTAL_SCAN_INPUT_SCHEMA),
-};
-
-const CONTEXT_RESOLVE_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.CONTEXT_RESOLVE,
-  inputSchema: deferInputValidation(CONTEXT_RESOLVE_INPUT_SCHEMA),
-};
-
-const RESTRUCTURE_PLAN_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.RESTRUCTURE_PLAN,
-  inputSchema: deferInputValidation(RESTRUCTURE_PLAN_INPUT_SCHEMA),
-};
-
-const STRUCTURE_VALIDATE_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.STRUCTURE_VALIDATE,
-  inputSchema: deferInputValidation(STRUCTURE_VALIDATE_ADVERTISED_INPUT_SCHEMA),
-};
-
-const VERIFICATION_SCAN_TOOL_CONFIG = {
-  description: MCP_TOOL_DESCRIPTIONS.VERIFICATION_SCAN,
-  inputSchema: deferInputValidation(VERIFICATION_SCAN_INPUT_SCHEMA),
+const RESTRUCTURE_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.RESTRUCTURE,
+  inputSchema: deferInputValidation(RESTRUCTURE_ADVERTISED_INPUT_SCHEMA),
 };
 
 const REVIEW_STATE_TOOL_CONFIG = {
@@ -365,52 +401,31 @@ const REVIEW_STATE_TOOL_CONFIG = {
   inputSchema: deferInputValidation(REVIEW_STATE_ADVERTISED_INPUT_SCHEMA),
 };
 
-const PROJECT_INIT_HANDLER = wrapHandler(
-  McpToolName.PROJECT_INIT,
-  PROJECT_INIT_INPUT_SCHEMA,
-  handleProjectInitTool,
+/** Wrapped project-setup handler registered as the single five-action surface. */
+const PROJECT_SETUP_HANDLER = wrapHandler<
+  typeof PROJECT_SETUP_INPUT_SCHEMA,
+  ProjectSetupResult['summary'],
+  ProjectSetupResult['data']
+>(McpToolName.PROJECT_SETUP, PROJECT_SETUP_INPUT_SCHEMA, (input, extra) =>
+  handleProjectSetup(input, extra),
 );
 
-const RULE_DOCS_SYNC_HANDLER = wrapHandler(
-  McpToolName.RULE_DOCS_SYNC,
-  RULE_DOCS_SYNC_INPUT_SCHEMA,
-  handleRuleDocsSyncTool,
+/** Wrapped fractal-inspection handler registered as the read-only surface. */
+const FRACTAL_INSPECT_HANDLER = wrapHandler<
+  typeof FRACTAL_INSPECT_INPUT_SCHEMA,
+  FractalInspectResult['summary'],
+  FractalInspectResult['data']
+>(McpToolName.FRACTAL_INSPECT, FRACTAL_INSPECT_INPUT_SCHEMA, (input) =>
+  handleFractalInspect(input),
 );
 
-const OPEN_SETTINGS_HANDLER = wrapHandler(
-  McpToolName.OPEN_SETTINGS,
-  OPEN_SETTINGS_INPUT_SCHEMA,
-  handleOpenSettingsTool,
-);
-
-const FRACTAL_SCAN_HANDLER = wrapHandler(
-  McpToolName.FRACTAL_SCAN,
-  FRACTAL_SCAN_INPUT_SCHEMA,
-  handleFractalScan,
-);
-
-const CONTEXT_RESOLVE_HANDLER = wrapHandler(
-  McpToolName.CONTEXT_RESOLVE,
-  CONTEXT_RESOLVE_INPUT_SCHEMA,
-  handleContextResolve,
-);
-
-const RESTRUCTURE_PLAN_HANDLER = wrapHandler(
-  McpToolName.RESTRUCTURE_PLAN,
-  RESTRUCTURE_PLAN_INPUT_SCHEMA,
-  handleRestructurePlan,
-);
-
-const STRUCTURE_VALIDATE_HANDLER = wrapHandler(
-  McpToolName.STRUCTURE_VALIDATE,
-  STRUCTURE_VALIDATE_INPUT_SCHEMA,
-  handleStructureValidate,
-);
-
-const VERIFICATION_SCAN_HANDLER = wrapHandler(
-  McpToolName.VERIFICATION_SCAN,
-  VERIFICATION_SCAN_INPUT_SCHEMA,
-  handleVerificationScan,
+/** Wrapped restructure handler registered as the three-action move surface. */
+const RESTRUCTURE_HANDLER = wrapHandler<
+  typeof RESTRUCTURE_INPUT_SCHEMA,
+  RestructureResult['summary'],
+  RestructureResult['data']
+>(McpToolName.RESTRUCTURE, RESTRUCTURE_INPUT_SCHEMA, (input) =>
+  handleRestructure(input),
 );
 
 /** Wrapped review-state handler registered as the single six-action MCP surface. */
@@ -431,44 +446,19 @@ export function createServer(): McpServer {
   const server = new McpServer(MCP_SERVER_INFO);
 
   server.registerTool(
-    McpToolName.PROJECT_INIT,
-    PROJECT_INIT_TOOL_CONFIG,
-    PROJECT_INIT_HANDLER,
+    McpToolName.PROJECT_SETUP,
+    PROJECT_SETUP_TOOL_CONFIG,
+    PROJECT_SETUP_HANDLER,
   );
   server.registerTool(
-    McpToolName.RULE_DOCS_SYNC,
-    RULE_DOCS_SYNC_TOOL_CONFIG,
-    RULE_DOCS_SYNC_HANDLER,
+    McpToolName.FRACTAL_INSPECT,
+    FRACTAL_INSPECT_TOOL_CONFIG,
+    FRACTAL_INSPECT_HANDLER,
   );
   server.registerTool(
-    McpToolName.OPEN_SETTINGS,
-    OPEN_SETTINGS_TOOL_CONFIG,
-    OPEN_SETTINGS_HANDLER,
-  );
-  server.registerTool(
-    McpToolName.FRACTAL_SCAN,
-    FRACTAL_SCAN_TOOL_CONFIG,
-    FRACTAL_SCAN_HANDLER,
-  );
-  server.registerTool(
-    McpToolName.CONTEXT_RESOLVE,
-    CONTEXT_RESOLVE_TOOL_CONFIG,
-    CONTEXT_RESOLVE_HANDLER,
-  );
-  server.registerTool(
-    McpToolName.RESTRUCTURE_PLAN,
-    RESTRUCTURE_PLAN_TOOL_CONFIG,
-    RESTRUCTURE_PLAN_HANDLER,
-  );
-  server.registerTool(
-    McpToolName.STRUCTURE_VALIDATE,
-    STRUCTURE_VALIDATE_TOOL_CONFIG,
-    STRUCTURE_VALIDATE_HANDLER,
-  );
-  server.registerTool(
-    McpToolName.VERIFICATION_SCAN,
-    VERIFICATION_SCAN_TOOL_CONFIG,
-    VERIFICATION_SCAN_HANDLER,
+    McpToolName.RESTRUCTURE,
+    RESTRUCTURE_TOOL_CONFIG,
+    RESTRUCTURE_HANDLER,
   );
   server.registerTool(
     McpToolName.REVIEW_STATE,

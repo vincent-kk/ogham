@@ -116,15 +116,15 @@ What the tool guarantees:
 
 ## §6 Non-FCA document scope
 
-Stage 1 narrows only the FCA document audit, never the PR change list. Send every changed path through the one `context_resolve` batch, preserve changed-path order, and classify each result with the first applicable row:
+Stage 1 narrows only the FCA document audit, never the PR change list. Send every changed path through the one `fractal_inspect` `resolve` batch, preserve changed-path order, and classify each result with the first applicable row:
 
 | Evidence                                                                                                       | Document scope             | Action                                                                                                                                    |
 | -------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `context_resolve` returns `resolved: true`                                                                     | FCA-owned                  | Keep `result.summary.ownerFractalPath`; a target under a config-excluded directory name is still FCA-owned through its enclosing fractal. |
+| `fractal_inspect` `resolve` returns `resolved: true`                                                           | FCA-owned                  | Keep `result.summary.ownerFractalPath`; a target under a config-excluded directory name is still FCA-owned through its enclosing fractal. |
 | `resolved: false`, every diagnostic is `context-target-unresolved`, and `git cat-file -e HEAD:<path>` succeeds | existing ownerless non-FCA | Report the path and ownerless evidence; use a matching `structure.additionalExcludedDirectories` segment as the config-declared reason.   |
 | The target is absent from `HEAD`, including a deleted or renamed source                                        | unresolved                 | Stop. A base-snapshot owner cannot be inferred from the current tree.                                                                     |
 | Any other failed diagnostic                                                                                    | unresolved                 | Stop and report it verbatim.                                                                                                              |
 
 `additionalExcludedDirectories` entries are directory names, not paths or globs. Compare complete project-relative directory segments; never match the basename or a partial segment. The config match is a reason, not an ownership override, and is consulted only after `resolved: false`. Config-declared and structural ownerless paths are listed in terminal progress and summarized by count in the PR Architecture section. They remain in the Code/Test analysis because non-FCA is a document-ownership verdict, not a request to hide the change.
 
-When every changed path is non-FCA, Stage 1 completes the single `context_resolve` batch, makes no enrich-docs call, and reports `Document sync: no-change`. A failed item is never converted to non-FCA merely because ignoring it would let publication continue.
+When every changed path is non-FCA, Stage 1 completes the single `fractal_inspect` `resolve` batch, makes no enrich-docs call, and reports `Document sync: no-change`. A failed item is never converted to non-FCA merely because ignoring it would let publication continue.

@@ -2,7 +2,7 @@
 
 > Reference for Phase 3 of `/filid:setup`.
 
-Use the classifications returned by `fractal_scan`. Do not reclassify directories with an ad hoc name table or a second navigation workflow.
+Use the classifications returned by `fractal_inspect` action `scan`. Do not reclassify directories with an ad hoc name table or a second navigation workflow.
 
 The canonical priority is:
 

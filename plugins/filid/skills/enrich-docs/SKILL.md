@@ -3,7 +3,7 @@ name: enrich-docs
 user-invocable: true
 description: 'Audit and improve INTENT.md and DETAIL.md from snapshot-backed evidence, with approval before LLM edits and structural validation after. Use when module documents are missing, boilerplate, or stale.'
 argument-hint: '[path] [--depth N] [--min-quality 0-100] [--dry-run] [--auto-approve] [--include-detail]'
-version: '1.0.0'
+version: '1.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -34,11 +34,11 @@ This skill changes documents only. It does not move source files or alter public
 
 ### 1. Build snapshot evidence
 
-Call `fractal_scan` with `detail: "paths"` for the target. Use returned node paths and classifications as the candidate inventory. Stop on `indeterminate` or `unsupported` status; do not interpret them as a clean audit. `violations` proceeds — its findings are the work.
+Call `fractal_inspect` with `action: "scan"` and `detail: "paths"` for the target. Use returned node paths and classifications as the candidate inventory. Stop on `indeterminate` or `unsupported` status; do not interpret them as a clean audit. `violations` proceeds — its findings are the work.
 
 ### 2. Resolve minimal context
 
-Call one context_resolve batch with one ordered request per candidate. Map each candidate to `data.results[index]`, reading the artifact when `data` is absent. Read only each resolved result's owner-to-root INTENT/DETAIL references, nearest DETAIL, target document, entry point, and a bounded set of implementation files. Exclude organ nodes and report failed result diagnostics without guessing.
+Call one `fractal_inspect` `resolve` batch with one ordered request per candidate. Map each candidate to `data.results[index]`, reading the artifact when `data` is absent. Read only each resolved result's owner-to-root INTENT/DETAIL references, nearest DETAIL, target document, entry point, and a bounded set of implementation files. Exclude organ nodes and report failed result diagnostics without guessing.
 
 ### 3. Audit and plan
 
@@ -50,11 +50,11 @@ Show the complete plan before any LLM edit. `--dry-run` ends here without writes
 
 ### 5. Edit approved documents
 
-The LLM edits only approved INTENT.md/DETAIL.md targets using the captured context. INTENT.md keeps the required English headings and 50-line cap; body language follows `context_resolve`. DETAIL.md is restructured as the current contract rather than appended to.
+The LLM edits only approved INTENT.md/DETAIL.md targets using the captured context. INTENT.md keeps the required English headings and 50-line cap; body language follows the `fractal_inspect` `resolve` result. DETAIL.md is restructured as the current contract rather than appended to.
 
 ### 6. Validate and report
 
-Check document anchors and line counts directly, then call `structure_validate` in `project` mode with `documents` and `nodes` scopes. Revert an edited file when its validation is non-`ok` or produces a relevant finding. Report evidence, before/after counts, and validation outcomes.
+Check document anchors and line counts directly, then call `fractal_inspect` with `action: "validate"` and `documents` and `nodes` scopes. Revert an edited file when its validation is non-`ok` or produces a relevant finding. Report evidence, before/after counts, and validation outcomes.
 
 ## Non-negotiable Rules
 

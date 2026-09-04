@@ -7,8 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import {
   FRACTAL_SCAN_DETAILS,
+  RESTRUCTURE_ACTIONS,
   SNAPSHOT_TOOL_DIAGNOSTIC_CODES,
-  STRUCTURE_PLAN_PATH_REQUIRED_MESSAGE,
   STRUCTURE_VALIDATION_MODES,
   VERIFICATION_ROLES,
   VERIFICATION_SCAN_DETAILS,
@@ -24,13 +24,14 @@ import {
   TOOL_PERSISTENCE,
   TOOL_STATUSES,
 } from '../../../constants/toolEnvelope.js';
-import { handleContextResolve } from '../../../mcp/tools/contextResolve/index.js';
-import { handleFractalScan } from '../../../mcp/tools/fractalScan/index.js';
-import { handleRestructurePlan } from '../../../mcp/tools/restructurePlan/index.js';
-import { handleStructureValidate } from '../../../mcp/tools/structureValidate/index.js';
+import { handleContextResolve } from '../../../mcp/tools/fractalInspect/contextResolve/index.js';
+import { handleFractalScan } from '../../../mcp/tools/fractalInspect/fractalScan/index.js';
+import { handleStructureValidate } from '../../../mcp/tools/fractalInspect/structureValidate/index.js';
+import { handleVerificationScan } from '../../../mcp/tools/fractalInspect/verificationScan/index.js';
+import { planRestructure } from '../../../mcp/tools/restructure/handlers/planRestructure.js';
+import { validateRestructurePlan } from '../../../mcp/tools/restructure/handlers/validateRestructurePlan.js';
 import type { ToolSnapshotContext } from '../../../mcp/tools/utils/createToolSnapshot.js';
 import { createToolSnapshot } from '../../../mcp/tools/utils/createToolSnapshot.js';
-import { handleVerificationScan } from '../../../mcp/tools/verificationScan/index.js';
 import type { FractalNode, ProjectSnapshot } from '../../../types/fractal.js';
 import type { RestructurePlanSummary } from '../../../types/report.js';
 import type { RestructurePlan } from '../../../types/restructure.js';
@@ -282,7 +283,7 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
   });
 
   it('returns a read-only restructure payload marked for persistence', async () => {
-    const result = await handleRestructurePlan({
+    const result = await planRestructure({
       path: PROJECT_ROOT,
       requests: [
         {
@@ -338,7 +339,6 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
   it('validates project mode against the same snapshot', async () => {
     const result = await handleStructureValidate({
       path: PROJECT_ROOT,
-      mode: STRUCTURE_VALIDATION_MODES.PROJECT,
     });
 
     expect(result.summary).toMatchObject({
@@ -347,15 +347,6 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
       findingCount: 0,
     });
     expect(result.data).toHaveProperty('result');
-  });
-
-  it('requires a plan artifact path in plan validation modes', async () => {
-    await expect(
-      handleStructureValidate({
-        path: PROJECT_ROOT,
-        mode: STRUCTURE_VALIDATION_MODES.PLAN_PRECONDITION,
-      }),
-    ).rejects.toThrow(STRUCTURE_PLAN_PATH_REQUIRED_MESSAGE);
   });
 
   it('reads an external plan artifact without changing it', async () => {
@@ -368,9 +359,9 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
     mkdirSync(planDirectory, { recursive: true });
     writeFileSync(planPath, planSource, 'utf8');
     try {
-      const result = await handleStructureValidate({
+      const result = await validateRestructurePlan({
+        action: RESTRUCTURE_ACTIONS.PRECONDITION,
         path: PROJECT_ROOT,
-        mode: STRUCTURE_VALIDATION_MODES.PLAN_PRECONDITION,
         planPath,
       });
 
@@ -391,9 +382,9 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
     mkdirSync(planDirectory, { recursive: true });
     writeFileSync(planPath, planSource, 'utf8');
     try {
-      const result = await handleStructureValidate({
+      const result = await validateRestructurePlan({
+        action: RESTRUCTURE_ACTIONS.PRECONDITION,
         path: PROJECT_ROOT,
-        mode: STRUCTURE_VALIDATION_MODES.PLAN_PRECONDITION,
         planPath,
       });
 

@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FRACTAL_SCAN_DETAILS } from '../../../constants/mcpContracts.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scanDefaults.js';
-import { handleFractalScan } from '../../../mcp/tools/fractalScan/index.js';
+import { handleFractalScan } from '../../../mcp/tools/fractalInspect/fractalScan/index.js';
 import type {
   FractalScanData,
   FractalScanFullData,

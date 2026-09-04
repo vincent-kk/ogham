@@ -2,7 +2,7 @@
 
 This directory ships rule documentation templates that the `/filid:setup` skill deploys into a target project's `.claude/rules/` directory.
 
-> **Important — deployment is skill-only.** SessionStart hooks do NOT copy or remove these files. The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/configLoader/loaders/syncRuleDocs.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__rule_docs_sync` MCP tool from the `setup` skill after the user confirms a checkbox selection.
+> **Important — deployment is skill-only.** SessionStart hooks do NOT copy or remove these files. The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/configLoader/loaders/syncRuleDocs.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__project_setup` `rules-sync` action from the `setup` skill after the user confirms a checkbox selection.
 
 ## manifest.json
 
