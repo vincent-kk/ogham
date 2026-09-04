@@ -35,6 +35,7 @@ import { hasAllReviewBriefs } from './utils/hasAllReviewBriefs.js';
 import { loadPrepareReviewRules } from './utils/loadPrepareReviewRules.js';
 import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
 import { resolvePreparedReviewFiles } from './utils/resolvePreparedReviewFiles.js';
+import { retuneReviewGroups } from './utils/retuneReviewGroups.js';
 import { retainReviewGroupValidations } from './utils/retainReviewGroupValidations.js';
 import { writePreparedReviewArtifacts } from './utils/writePreparedReviewArtifacts.js';
 
@@ -62,9 +63,7 @@ export async function prepareReviewState(
   const restored = readReviewState(paths.statePath);
   const existing = restored && !('kind' in restored) ? restored : null;
   const sameIdentity =
-    !input.force &&
-    existing?.sourceHash === source.sourceHash &&
-    existing.effort === settings.effort;
+    !input.force && existing?.sourceHash === source.sourceHash;
 
   if (
     sameIdentity &&
@@ -82,8 +81,13 @@ export async function prepareReviewState(
 
   const canResume =
     sameIdentity && existing.phase === REVIEW_STATE_PHASES.PREPARED;
+  const effortChanged = canResume && existing.effort !== settings.effort;
 
-  if (canResume && hasCompletePreparedArtifacts(paths, existing))
+  if (
+    canResume &&
+    !effortChanged &&
+    hasCompletePreparedArtifacts(paths, existing)
+  )
     return createPreparedReviewPayload({
       action: input.action,
       disposition: REVIEW_STATE_DISPOSITIONS.RESUMABLE,
@@ -95,7 +99,7 @@ export async function prepareReviewState(
 
   if (canResume && existsSync(paths.evidencePath)) {
     const presence = readReviewArtifactPresence(paths, existing);
-    const activeRules = hasAllReviewBriefs(paths, existing)
+    const activeRules = !effortChanged && hasAllReviewBriefs(paths, existing)
       ? []
       : loadPrepareReviewRules(input.projectRoot, settings.pluginRoot)
           .activeRules;
@@ -109,9 +113,12 @@ export async function prepareReviewState(
         });
     if (!presence.diffs)
       assertRenderedUnitsMatchGroups(renderedUnits, existing.groups);
-    writePreparedReviewArtifacts({
+    const preparedGroups = effortChanged
+      ? retuneReviewGroups(existing.groups, settings.rounds)
+      : existing.groups;
+    const groups = writePreparedReviewArtifacts({
       paths,
-      groups: existing.groups,
+      groups: preparedGroups,
       renderedUnits,
       files: existing.scope.files,
       candidates: existing.scope.candidates,
@@ -119,17 +126,23 @@ export async function prepareReviewState(
       sourceHash: existing.sourceHash,
       baseRef: existing.baseRef,
       branchName: existing.branchName,
-      effort: existing.effort,
+      effort: settings.effort,
       createdAt: existing.preparedAt,
       onlyMissingArtifacts: true,
       preserveOpinions: true,
+      rewriteReviewBriefs: effortChanged,
+      rewriteSession: effortChanged,
     });
+    const state = effortChanged
+      ? { ...existing, effort: settings.effort, groups }
+      : existing;
+    if (effortChanged) writeReviewState(paths.statePath, state);
     return createPreparedReviewPayload({
       action: input.action,
       disposition: REVIEW_STATE_DISPOSITIONS.RESUMABLE,
       paths,
       status: TOOL_STATUSES.OK,
-      state: existing,
+      state,
       concurrency: settings.concurrency,
     });
   }

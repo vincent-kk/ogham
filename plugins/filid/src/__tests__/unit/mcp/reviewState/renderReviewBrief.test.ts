@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { renderReviewBrief } from '../../../../mcp/tools/reviewState/brief/renderReviewBrief.js';
 import { checkReviewOpinion } from '../../../../mcp/tools/reviewState/opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../../../../mcp/tools/reviewState/opinion/parseReviewOpinion.js';
+import type { ReviewValidationProblem } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
 import { buildReviewBriefInput } from './helpers/buildReviewBriefInput.js';
 
@@ -16,6 +17,7 @@ describe('renderReviewBrief', () => {
     const output = renderReviewBrief(input);
     const contract = output.match(OUTPUT_CONTRACT_PATTERN)?.[1] ?? '';
     const parsed = parseReviewOpinion(contract);
+    const problems: ReviewValidationProblem[] = [];
 
     expect(parsed.problems).toEqual([]);
     expect(parsed.opinion).not.toBeNull();
@@ -25,8 +27,9 @@ describe('renderReviewBrief', () => {
         round: 1,
         sourceHash: input.sourceHash,
         units: input.group.units,
-      }),
-    ).toEqual([]);
+      }, problems),
+    ).toBe(true);
+    expect(problems).toEqual([]);
     expect(contract).not.toContain('COMPLETE | INDETERMINATE');
     expect(contract).not.toContain('reviewed | skipped');
   });

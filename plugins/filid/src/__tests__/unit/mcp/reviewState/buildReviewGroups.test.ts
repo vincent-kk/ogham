@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildReviewGroups } from '../../../../mcp/tools/reviewState/group/buildReviewGroups.js';
+import { resolveReviewGroupStem } from '../../../../mcp/tools/reviewState/group/utils/resolveReviewGroupStem.js';
 import type { ReviewUnit } from '../../../../mcp/tools/reviewState/state/reviewGroupTypes.js';
 import type { ReviewScopeFile } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
@@ -72,6 +73,15 @@ function makeUnit(
 }
 
 describe('buildReviewGroups', () => {
+  it('collapses explicit locales without collapsing dotted code suffixes', () => {
+    expect(resolveReviewGroupStem('foo.api.ts')).not.toBe(
+      resolveReviewGroupStem('foo.ts'),
+    );
+    expect(resolveReviewGroupStem('foo.ko.json')).toBe(
+      resolveReviewGroupStem('foo.en.json'),
+    );
+  });
+
   it('clamps the small-group shortcut to the configured file cap', () => {
     const units = ['src/a.ts', 'src/b.ts', 'src/c.ts'].map((path) =>
       makeUnit(path, 10),

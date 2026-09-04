@@ -4,6 +4,7 @@ import type {
   CheckVerifyOpinionOptions,
   UncheckedVerifyOpinion,
 } from './uncheckedOpinionTypes.js';
+import type { VerifyOpinion } from './verifyOpinionTypes.js';
 
 /** Verifier completion states admitted by schema seven. */
 const VERIFY_OPINION_STATES = new Set<string>(['COMPLETE', 'INDETERMINATE']);
@@ -20,13 +21,14 @@ const VERIFY_DECISION_VERDICTS = new Set<string>([
  *
  * @param opinion Structurally valid but semantically untrusted opinion.
  * @param options Authoritative group, source, and decision identities.
- * @returns Every contract problem found in deterministic traversal order.
+ * @param problems Mutable sink receiving contract problems in traversal order.
+ * @returns True when semantic checks narrow the opinion to its trusted type.
  */
 export function checkVerifyOpinion(
   opinion: UncheckedVerifyOpinion,
   options: CheckVerifyOpinionOptions,
-): ReviewValidationProblem[] {
-  const problems: ReviewValidationProblem[] = [];
+  problems: ReviewValidationProblem[],
+): opinion is VerifyOpinion {
   if (opinion.schema !== 7)
     problems.push({ code: 'schema-mismatch', detail: 'Expected schema 7.' });
   if (opinion.group !== options.group)
@@ -105,5 +107,5 @@ export function checkVerifyOpinion(
         detail: 'Observation detail must not be blank.',
       });
   }
-  return problems;
+  return problems.length === 0;
 }

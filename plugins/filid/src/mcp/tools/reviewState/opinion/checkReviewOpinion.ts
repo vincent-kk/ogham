@@ -4,6 +4,7 @@ import type {
   CheckReviewOpinionOptions,
   UncheckedReviewOpinion,
 } from './uncheckedOpinionTypes.js';
+import type { ReviewOpinion } from './reviewOpinionTypes.js';
 import { reviewUnitKey } from './utils/reviewUnitKey.js';
 
 /** Reviewer completion states admitted by schema seven. */
@@ -33,13 +34,14 @@ const REVIEW_FILE_RESULTS = new Set<string>(['reviewed', 'skipped']);
  *
  * @param opinion Structurally valid but semantically untrusted opinion.
  * @param options Authoritative group, round, source, and unit identity.
- * @returns Every contract problem found in deterministic traversal order.
+ * @param problems Mutable sink receiving contract problems in traversal order.
+ * @returns True when semantic checks narrow the opinion to its trusted type.
  */
 export function checkReviewOpinion(
   opinion: UncheckedReviewOpinion,
   options: CheckReviewOpinionOptions,
-): ReviewValidationProblem[] {
-  const problems: ReviewValidationProblem[] = [];
+  problems: ReviewValidationProblem[],
+): opinion is ReviewOpinion {
   if (opinion.schema !== 7)
     problems.push({ code: 'schema-mismatch', detail: 'Expected schema 7.' });
   if (opinion.group !== options.group)
@@ -187,5 +189,5 @@ export function checkReviewOpinion(
       detail: 'A present risk plan must not be blank.',
     });
 
-  return problems;
+  return problems.length === 0;
 }

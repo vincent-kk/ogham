@@ -6,6 +6,7 @@ import type { ReviewGroup, ReviewUnit } from '../state/reviewGroupTypes.js';
 
 import { assignCandidatesToGroups } from './assignCandidatesToGroups.js';
 import type { BuildReviewGroupsOptions } from './types/buildReviewGroupsTypes.js';
+import { resolveReviewGroupStem } from './utils/resolveReviewGroupStem.js';
 
 /**
  * Format a zero-based creation index as a one-based group identifier.
@@ -71,15 +72,7 @@ export function buildReviewGroups(
   for (const unit of sorted) {
     const owner = filesByPath.get(unit.path)?.owner ?? null;
     const basename = unit.path.slice(unit.path.lastIndexOf('/') + 1);
-    const extensionIndex = basename.lastIndexOf('.');
-    let stem =
-      extensionIndex > 0 ? basename.slice(0, extensionIndex) : basename;
-    let previousStem = '';
-    while (stem !== previousStem) {
-      previousStem = stem;
-      stem = stem.replace(/\.(?:spec|test|stories)$/i, '');
-      stem = stem.replace(/\.[a-z]{2,3}(?:[-_][a-z]{2})?$/i, '');
-    }
+    const stem = resolveReviewGroupStem(basename);
     const stems = ownerBuckets.get(owner) ?? new Map<string, ReviewUnit[]>();
     const related = stems.get(stem) ?? [];
     related.push(unit);

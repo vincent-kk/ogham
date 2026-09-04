@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { chunkUnits } from '../../../../mcp/tools/reviewState/chunk/chunkUnits.js';
+import { parseDiffHunks } from '../../../../mcp/tools/reviewState/chunk/parseDiffHunks.js';
 import type { ReviewScopeFile } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
 /** Shared reviewable-file fields for chunking fixtures. */
@@ -53,6 +54,18 @@ function renderDiff(path: string, hunks: readonly string[]): string {
 }
 
 describe('chunkUnits', () => {
+  it('ends an empty hunk side immediately before its declared start', () => {
+    const insertion = parseDiffHunks(
+      renderDiff('src/inserted.ts', ['@@ -7,0 +8,2 @@', '+first', '+second']),
+    );
+    const deletion = parseDiffHunks(
+      renderDiff('src/deleted.ts', ['@@ -8,2 +7,0 @@', '-first', '-second']),
+    );
+
+    expect(insertion.hunks[0]).toMatchObject({ oldStart: 7, oldEnd: 6 });
+    expect(deletion.hunks[0]).toMatchObject({ newStart: 7, newEnd: 6 });
+  });
+
   it('keeps exactly 800 churn in one unchunked unit', () => {
     const path = 'src/boundary.ts';
     const chunks = chunkUnits(

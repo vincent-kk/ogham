@@ -4,14 +4,16 @@ import {
   resolveContainedPath,
 } from '@ogham/cross-platform';
 
+import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
+
 import type {
   LoadedReviewRule,
-  ReviewRuleDefinition,
-  ReviewRuleWhen,
 } from './reviewRuleTypes.js';
+import { isBuiltinReviewRuleDefinition } from './utils/isBuiltinReviewRuleDefinition.js';
 
 /** Supported built-in conditional selector values. */
-const SUPPORTED_WHEN = new Set<ReviewRuleWhen>([
+const SUPPORTED_WHEN = new Set<string>([
   'role:verification',
   'role:document',
   'owner',
@@ -24,7 +26,8 @@ const SUPPORTED_WHEN = new Set<ReviewRuleWhen>([
  */
 export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
   if (pluginRoot === null)
-    throw new Error(
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING,
       'Cross-review rule map is missing: plugin root is unavailable.',
     );
   const rulesDirectory = resolveContainedPath(
@@ -37,7 +40,10 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
   assertNoSymlinkDescendantsSync(pluginRoot, mapPath);
   const raw = readUtf8FileIfExistsSync(mapPath);
   if (raw === null)
-    throw new Error(`Cross-review rule map is missing: "${mapPath}".`);
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING,
+      `Cross-review rule map is missing: "${mapPath}".`,
+    );
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -99,10 +105,12 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
     if (
       rule.when !== undefined &&
       (typeof rule.when !== 'string' ||
-        !SUPPORTED_WHEN.has(rule.when as ReviewRuleWhen))
+        !SUPPORTED_WHEN.has(rule.when))
     )
       throw new Error(`Review rule "${rule.id}" has an invalid when selector.`);
-    const definition = rule as unknown as ReviewRuleDefinition;
+    if (!isBuiltinReviewRuleDefinition(rule))
+      throw new Error(`Review rule ${index} has an invalid definition.`);
+    const definition = rule;
     if (ids.has(definition.id))
       throw new Error(
         `Cross-review rule map duplicates id "${definition.id}".`,
@@ -112,7 +120,8 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
     assertNoSymlinkDescendantsSync(rulesDirectory, bodyPath);
     const body = readUtf8FileIfExistsSync(bodyPath);
     if (body === null)
-      throw new Error(
+      throw new ToolDiagnosticError(
+        REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING,
         `Cross-review rule body is missing for "${definition.id}".`,
       );
     return { ...definition, body };

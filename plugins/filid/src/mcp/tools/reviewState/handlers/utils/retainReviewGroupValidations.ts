@@ -7,7 +7,12 @@ import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
  * @returns Deterministic JSON identity for safe validation retention.
  */
 function groupIdentity(group: ReviewGroup): string {
-  const { validated: _validated, units, ...identity } = group;
+  const {
+    rounds: _rounds,
+    validated: _validated,
+    units,
+    ...identity
+  } = group;
   return JSON.stringify({
     ...identity,
     units: units.map(({ diffPath: _diffPath, ...unit }) => unit),
@@ -33,7 +38,14 @@ export function retainReviewGroupValidations(
       ...group,
       validated: validated
         ? {
-            review: validated.review ? { ...validated.review } : null,
+            review: validated.review
+              ? {
+                  ...validated.review,
+                  complete:
+                    validated.review.complete &&
+                    validated.review.round >= group.rounds,
+                }
+              : null,
             verify: validated.verify ? { ...validated.verify } : null,
           }
         : { review: null, verify: null },

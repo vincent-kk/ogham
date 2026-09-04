@@ -28,8 +28,8 @@ export function resolvePrepareSettings(input: PrepareInput) {
   const loaded = loadConfig(input.projectRoot);
   const validationFailure = loaded.warnings.find(
     (warning) =>
-      warning.startsWith('invalid value at ') ||
-      warning.startsWith('config validation failed'),
+      warning.startsWith('invalid value at review') ||
+      warning.startsWith('config validation failed at review'),
   );
   if (validationFailure)
     throw new Error(`config validation failed: ${validationFailure}`);

@@ -8,6 +8,7 @@ import type { ReviewGroup } from '../../../state/reviewGroupTypes.js';
 import type {
   ReviewStatePaths,
   ReviewStateRecord,
+  ReviewValidationProblem,
 } from '../../../state/reviewStateTypes.js';
 import { locateReviewFindings } from '../locateReviewFindings.js';
 import { resolveReviewArtifactPath } from '../resolveReviewArtifactPath.js';
@@ -48,20 +49,27 @@ export async function rebuildPriorReviewOpinion(
         `review round is out of order for group ${input.group.id}`,
       );
     const parsed = parseReviewOpinion(priorBytes);
-    const problems =
-      parsed.opinion === null
-        ? parsed.problems
-        : checkReviewOpinion(parsed.opinion, {
-            group: input.group.id,
-            round: priorRound,
-            sourceHash: input.state.sourceHash,
-            units: input.group.units,
-          });
-    if (parsed.opinion === null || problems.length > 0)
+    if (parsed.opinion === null)
       throw new Error(
         `validated review opinion is invalid for ${input.group.id}`,
       );
-    const checkedOpinion = parsed.opinion as unknown as ReviewOpinion;
+    const problems: ReviewValidationProblem[] = [];
+    if (
+      !checkReviewOpinion(
+        parsed.opinion,
+        {
+          group: input.group.id,
+          round: priorRound,
+          sourceHash: input.state.sourceHash,
+          units: input.group.units,
+        },
+        problems,
+      )
+    )
+      throw new Error(
+        `validated review opinion is invalid for ${input.group.id}`,
+      );
+    const checkedOpinion = parsed.opinion;
     const locatedOpinion: ReviewOpinion = {
       ...checkedOpinion,
       findings: await locateReviewFindings(

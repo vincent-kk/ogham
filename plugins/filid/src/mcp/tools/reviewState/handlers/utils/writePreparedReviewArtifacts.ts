@@ -53,6 +53,10 @@ interface WritePreparedReviewArtifactsInput {
   onlyMissingArtifacts: boolean;
   /** Whether every existing opinion file must remain unchanged. */
   preserveOpinions: boolean;
+  /** Whether existing reviewer briefs must be rendered with current group data. */
+  rewriteReviewBriefs?: boolean;
+  /** Whether the session document must be rendered with current effort data. */
+  rewriteSession?: boolean;
 }
 
 /**
@@ -177,7 +181,11 @@ export function writePreparedReviewArtifacts(
     }
 
     const briefPath = artifactPath(input.paths, group.briefPath);
-    if (!input.onlyMissingArtifacts || !existsSync(briefPath)) {
+    if (
+      input.rewriteReviewBriefs ||
+      !input.onlyMissingArtifacts ||
+      !existsSync(briefPath)
+    ) {
       const groupFiles = group.units.map((unit) => {
         const file = filesByPath.get(unit.path);
         if (!file)
@@ -216,7 +224,11 @@ export function writePreparedReviewArtifacts(
     return group;
   });
 
-  if (!input.onlyMissingArtifacts || !existsSync(input.paths.sessionPath))
+  if (
+    input.rewriteSession ||
+    !input.onlyMissingArtifacts ||
+    !existsSync(input.paths.sessionPath)
+  )
     writeFileAtomicallySync(
       input.paths.sessionPath,
       renderSessionMarkdown({

@@ -15,9 +15,9 @@ import type { ReviewStateRecord } from './reviewStateTypes.js';
 const ReviewHunkSchema = z
   .object({
     oldStart: z.number().int().nonnegative(),
-    oldEnd: z.number().int().nonnegative(),
+    oldEnd: z.number().int().min(-1),
     newStart: z.number().int().nonnegative(),
-    newEnd: z.number().int().nonnegative(),
+    newEnd: z.number().int().min(-1),
   })
   .strict();
 

@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -7,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../constants/reviewState.js';
 import { toolError } from '../../../mcp/server/envelope/toolError.js';
 import { loadPrepareReviewRules } from '../../../mcp/tools/reviewState/handlers/utils/loadPrepareReviewRules.js';
+import { loadRepositoryRules } from '../../../mcp/tools/reviewState/rules/loadRepositoryRules.js';
 
 import { createReviewRulePluginRoot } from './reviewState/helpers/createReviewRulePluginRoot.js';
 
@@ -57,6 +64,34 @@ describe('prepare rule loading errors', () => {
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });
       rmSync(pluginRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('codes a symlinked repository rule map that escapes the project root', () => {
+    const projectRoot = mkdtempSync(join(tmpdir(), 'filid-review-link-'));
+    const externalRoot = mkdtempSync(join(tmpdir(), 'filid-review-external-'));
+    try {
+      mkdirSync(join(projectRoot, '.filid'));
+      const externalMap = join(externalRoot, 'review-rules.json');
+      writeFileSync(externalMap, '{"rules":[]}', 'utf8');
+      symlinkSync(
+        externalMap,
+        join(projectRoot, '.filid', 'review-rules.json'),
+      );
+
+      let thrown: unknown;
+      try {
+        loadRepositoryRules(projectRoot);
+      } catch (error) {
+        thrown = error;
+      }
+
+      expect(thrown).toMatchObject({
+        code: REVIEW_STATE_DIAGNOSTIC_CODES.RULE_PATH_ESCAPE,
+      });
+    } finally {
+      rmSync(projectRoot, { recursive: true, force: true });
+      rmSync(externalRoot, { recursive: true, force: true });
     }
   });
 });

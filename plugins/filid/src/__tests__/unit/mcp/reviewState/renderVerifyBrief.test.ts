@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { renderVerifyBrief } from '../../../../mcp/tools/reviewState/brief/renderVerifyBrief.js';
 import { checkVerifyOpinion } from '../../../../mcp/tools/reviewState/opinion/checkVerifyOpinion.js';
 import { parseVerifyOpinion } from '../../../../mcp/tools/reviewState/opinion/parseVerifyOpinion.js';
+import type { ReviewValidationProblem } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
 import { buildVerifyBriefInput } from './helpers/buildVerifyBriefInput.js';
 
@@ -20,6 +21,7 @@ describe('renderVerifyBrief', () => {
       ...input.findings.map(({ id }) => id),
       ...input.candidates.map(({ id }) => id),
     ];
+    const problems: ReviewValidationProblem[] = [];
 
     expect(parsed.problems).toEqual([]);
     expect(parsed.opinion?.decisions.map(({ findingId }) => findingId)).toEqual(
@@ -30,8 +32,9 @@ describe('renderVerifyBrief', () => {
         group: input.group.id,
         sourceHash: input.sourceHash,
         decisionIds,
-      }),
-    ).toEqual([]);
+      }, problems),
+    ).toBe(true);
+    expect(problems).toEqual([]);
     expect(contract).not.toContain('CONFIRMED | REFUTED | INDETERMINATE');
   });
 

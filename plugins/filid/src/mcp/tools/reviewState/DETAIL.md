@@ -10,7 +10,7 @@
 - `evidence.md`는 schema 7 frontmatter와 Changed Scope, Candidates, Informational, Out-of-scope Observations, Diagnostics를 atomic하게 기록한다. 범위 밖 finding은 source·rule·severity별 count로만 남기고 finding diagnostic은 중복 기록하지 않는다.
 - prepare는 dirty path를 `clean | documents-only | generated-only | source-dirty`로 관측하되 판정하지 않는다. documents-only와 source-dirty도 artifact를 만들고 최종 fold에서 inconclusive가 된다.
 - fresh/force는 branch directory의 stale artifact를 지우고 처음부터 만든다. 같은 hash의 prepared state는 resumable이고 같은 hash의 sealed state와 report가 함께 있을 때만 cached다. schema v1은 prepare에서 fresh로 재생성하고, 다른 action에서는 `missing`과 `review-state-schema-mismatch` 진단으로 처리한다.
-- resumable에서 `evidence.md`와 완전한 state가 있으면 선별·청킹·그룹화를 되살리고 누락된 diff·brief·round-1 skeleton·session만 쓰며 state는 다시 저장하지 않는다. evidence가 없으면 범위 산출부터 다시 만들되 기존 opinion과 validation 기록을 보존한 state를 마지막에 다시 저장한다.
+- resumable에서 `evidence.md`와 완전한 state가 있고 effort가 같으면 선별·청킹·그룹화를 되살리고 누락된 diff·brief·round-1 skeleton·session만 쓰며 state는 다시 저장하지 않는다. effort가 바뀌면 group round와 review brief를 새 effort에 맞춰 다시 쓰되 기존 opinion과 validation 기록을 보존하고, 기록된 round가 새 round 수보다 작으면 review validation의 complete를 false로 낮춘다. evidence가 없으면 범위 산출부터 다시 만들되 기존 opinion과 validation 기록을 보존한 state를 마지막에 다시 저장한다.
 - 파일 role은 generated → deleted source → binary → lockfile → document → verification → source 순서로 결정한다. generated·deleted·binary·lockfile만 skip reason을 가지며 모든 roster 항목은 session에 남는다.
 - review 규칙은 plugin rule map의 `always`, glob `match`, role·owner `when`을 선언 순서대로 적용한다. repository override는 additive이고 `replaces`로 built-in ID를 제거할 수 있으며, 인라인 rule body와 읽어야 할 repository rule path를 구분한다.
 - review glob의 `**/` 접두는 root 파일에도 맞추지만 generated-path matcher의 segment-prefix 계약은 바꾸지 않는다. repository rule file은 project root 안의 non-symlink target이어야 한다.
@@ -21,7 +21,7 @@
 - reviewable unit 없이 candidate만 있으면 rounds 0의 `01` group과 complete empty merged opinion, validation hash, verify brief를 만든다. 둘 다 없으면 group도 없다.
 - group 확정 뒤 각 unit의 diff를 ordinal이 붙은 고유 경로에 쓰고 review brief, round-1 opinion skeleton과 session을 만든다. brief는 group 파일, prior opinion, 전체 roster, candidate, repository rule path, 적용된 rule body와 JSON output contract를 담는다.
 - `validate`는 review·verify JSON의 구조와 배정 범위를 검사하는 유일한 지점이다. 문제는 pass로 바꾸지 않으며, review finding의 위치를 committed source에서 확정하고 round를 결정적으로 병합한다.
-- `seal`은 complete review validation과 결합된 verify validation의 hash가 현재 artifact와 모두 일치하는 group만 신뢰한다. reviewer skip, gap, 누락·변조·미완 validation은 `INCONCLUSIVE` 근거로 남긴다. worktree가 이미 documents-only 또는 source-dirty이면 병합 opinion이 전혀 없어도 같은 fold를 끝까지 실행해 봉인된 `INCONCLUSIVE`를 만든다.
+- `seal`은 complete review validation과 결합된 verify validation의 hash가 현재 artifact와 모두 일치하는 group만 신뢰한다. reviewer skip, gap, 누락·변조·미완 validation은 `INCONCLUSIVE` 근거로 남긴다. worktree가 이미 documents-only 또는 source-dirty이면 reviewer 실행을 건너뛰는 경로를 지원하기 위해 `OPINIONS_MISSING`을 반환하지 않고, 병합 opinion이 전혀 없어도 같은 fold를 끝까지 실행해 봉인된 `INCONCLUSIVE`를 만든다.
 - verdict는 trusted opinion과 verification의 결정적 fold로만 계산한다. 렌더링이 끝난 뒤 state verdict와 sealed phase를 기록하며 이미 sealed인 state는 다시 렌더링하지 않는다.
 - `checkpoint`는 state와 group별 artifact 존재를 읽기만 한다. `assess`는 dirty 경로, entry stage, base ref와 unpushed commit 수를 관측만 하고 state를 읽거나 쓰지 않는다. `cleanup`은 literal `confirm: true` 뒤 해당 branch directory만 지운다.
 
@@ -66,7 +66,7 @@
 ### AC-review-prepare — 결정적 준비와 재개
 
 - 같은 committed content와 effort에서 roster, snapshot hash, group과 artifact path가 결정적이며 state는 모든 prepare artifact 뒤 마지막에 한 번만 나타난다.
-- prepared state는 누락 artifact부터 resume하고 기존 opinion을 덮어쓰지 않는다. sealed state는 matching hash와 report가 있어야 cached이며 cached summary는 state verdict를 복원한다.
+- prepared state는 같은 source hash이면 effort와 무관하게 누락 artifact부터 resume하고 기존 opinion을 덮어쓰지 않는다. effort 변경은 group round와 review brief를 갱신하고 부족한 round의 review validation을 incomplete로 낮춘다. sealed state는 matching hash와 report가 있어야 cached이며 cached summary는 state verdict를 복원한다.
 - crash로 state가 없거나 schema v1이면 stale canonical artifact를 지운 fresh prepare가 되고 malformed v2는 error로 드러난다.
 - evidence와 session frontmatter는 review schema 7을 선언하고 session checklist에 모든 `(path, change)`를 한 번씩 보존한다.
 
@@ -121,4 +121,4 @@
 
 ## Last Updated
 
-2026-09-04 — review_state v7이 선별·청킹·그룹·규칙 해석·JSON 검증·hash handoff·결정적 fold와 canonical 렌더링을 소유하도록 현재 계약을 갱신했다.
+2026-09-05 — 동일 source hash의 effort 변경 재개, review-scoped 설정 오류, 빈 hunk range와 typed rule·opinion 검증 계약을 현재 구현에 맞췄다.

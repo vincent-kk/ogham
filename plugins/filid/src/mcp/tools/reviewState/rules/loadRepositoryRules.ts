@@ -4,10 +4,13 @@ import {
   resolveContainedPath,
 } from '@ogham/cross-platform';
 
+import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
+
 import type {
   LoadedReviewRule,
-  ReviewRuleDefinition,
 } from './reviewRuleTypes.js';
+import { isRepositoryReviewRuleDefinition } from './utils/isRepositoryReviewRuleDefinition.js';
 
 /**
  * Load optional repository review overrides and their contained Markdown bodies.
@@ -15,12 +18,21 @@ import type {
  * @returns Validated overrides in repository declaration order.
  */
 export function loadRepositoryRules(projectRoot: string): LoadedReviewRule[] {
-  const configPath = resolveContainedPath(
-    projectRoot,
-    '.filid',
-    'review-rules.json',
-  );
-  assertNoSymlinkDescendantsSync(projectRoot, configPath);
+  let configPath: string;
+  try {
+    configPath = resolveContainedPath(
+      projectRoot,
+      '.filid',
+      'review-rules.json',
+    );
+    assertNoSymlinkDescendantsSync(projectRoot, configPath);
+  } catch (error) {
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.RULE_PATH_ESCAPE,
+      'Repository review rule map escapes the project root.',
+      { cause: error },
+    );
+  }
   const raw = readUtf8FileIfExistsSync(configPath);
   if (raw === null) return [];
   let parsed: unknown;
@@ -87,7 +99,9 @@ export function loadRepositoryRules(projectRoot: string): LoadedReviewRule[] {
       throw new Error(
         `Repository review rule "${rule.id}" has invalid replacements.`,
       );
-    const definition = rule as unknown as ReviewRuleDefinition;
+    if (!isRepositoryReviewRuleDefinition(rule))
+      throw new Error(`Repository review rule ${index} is invalid.`);
+    const definition = rule;
     if (ids.has(definition.id))
       throw new Error(
         `Repository review rules duplicate active id "${definition.id}".`,
@@ -98,7 +112,8 @@ export function loadRepositoryRules(projectRoot: string): LoadedReviewRule[] {
       bodyPath = resolveContainedPath(projectRoot, definition.file);
       assertNoSymlinkDescendantsSync(projectRoot, bodyPath);
     } catch (error) {
-      throw new Error(
+      throw new ToolDiagnosticError(
+        REVIEW_STATE_DIAGNOSTIC_CODES.RULE_PATH_ESCAPE,
         `Repository review rule "${definition.id}" file escapes the project root.`,
         { cause: error },
       );

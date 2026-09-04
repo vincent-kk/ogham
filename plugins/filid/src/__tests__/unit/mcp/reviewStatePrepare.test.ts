@@ -577,7 +577,7 @@ describe('review_state prepare v7', () => {
     );
   });
 
-  it('uses a changed effort as a fresh review identity', async () => {
+  it('resumes a matching source when effort changes', async () => {
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -595,7 +595,7 @@ describe('review_state prepare v7', () => {
     });
 
     expect(changed.summary).toMatchObject({
-      disposition: REVIEW_STATE_DISPOSITIONS.FRESH,
+      disposition: REVIEW_STATE_DISPOSITIONS.RESUMABLE,
       effort: 'high',
     });
     expect(changed.data.groups?.[0]?.rounds).toBe(3);

@@ -11,7 +11,10 @@ import { checkVerifyOpinion } from '../../opinion/checkVerifyOpinion.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import { parseVerifyOpinion } from '../../opinion/parseVerifyOpinion.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
-import type { ReviewValidatePayload } from '../../state/reviewStateTypes.js';
+import type {
+  ReviewValidatePayload,
+  ReviewValidationProblem,
+} from '../../state/reviewStateTypes.js';
 import { writeReviewState } from '../../state/writeReviewState.js';
 
 import { createValidatePayload } from './createValidatePayload.js';
@@ -69,15 +72,23 @@ export function validateVerifierOpinion(
     });
 
   const parsed = parseVerifyOpinion(verifyBytes);
-  const problems =
-    parsed.opinion === null
-      ? parsed.problems
-      : checkVerifyOpinion(parsed.opinion, {
-          group: group.id,
-          sourceHash: state.sourceHash,
-          decisionIds,
-        });
-  if (parsed.opinion === null || problems.length > 0)
+  const problems: ReviewValidationProblem[] =
+    parsed.opinion === null ? [...parsed.problems] : [];
+  let opinion: VerifyOpinion | null = null;
+  if (
+    parsed.opinion !== null &&
+    checkVerifyOpinion(
+      parsed.opinion,
+      {
+        group: group.id,
+        sourceHash: state.sourceHash,
+        decisionIds,
+      },
+      problems,
+    )
+  )
+    opinion = parsed.opinion;
+  if (opinion === null)
     return createValidatePayload({
       action: input.action,
       paths,
@@ -93,7 +104,6 @@ export function validateVerifierOpinion(
       verifyPath,
     });
 
-  const opinion = parsed.opinion as unknown as VerifyOpinion;
   const confirmed = opinion.decisions.filter(
     ({ verdict }) => verdict === 'CONFIRMED',
   ).length;

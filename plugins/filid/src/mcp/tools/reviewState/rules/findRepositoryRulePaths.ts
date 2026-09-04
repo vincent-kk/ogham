@@ -1,9 +1,10 @@
+import { existsSync } from 'node:fs';
+
 import {
   assertNoSymlinkDescendantsSync,
   listDirectoryIfExistsSync,
   portableDirname,
   portableRelative,
-  readUtf8FileIfExistsSync,
   resolveContainedPath,
   samePath,
 } from '@ogham/cross-platform';
@@ -31,7 +32,7 @@ export function findRepositoryRulePaths(
       if (resolvedNames.has(name)) continue;
       const candidate = resolveContainedPath(directory, name);
       assertNoSymlinkDescendantsSync(projectRoot, candidate);
-      if (readPath(candidate)) {
+      if (existsSync(candidate)) {
         found.add(
           portableRelative(projectRoot, candidate).replaceAll('\\', '/'),
         );
@@ -51,13 +52,4 @@ export function findRepositoryRulePaths(
     found.add(portableRelative(projectRoot, candidate).replaceAll('\\', '/'));
   }
   return [...found];
-}
-
-/**
- * Determine whether a path exists as a readable file without retaining its body.
- * @param path Candidate instruction file.
- * @returns True when the UTF-8 reader found the file.
- */
-function readPath(path: string): boolean {
-  return readUtf8FileIfExistsSync(path) !== null;
 }

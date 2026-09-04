@@ -17,7 +17,7 @@ interface ReviewStateSchemaMismatch {
 /**
  * Read and deeply validate one canonical review-state record.
  * @param statePath Absolute path to the branch state file.
- * @returns The v2 state, a schema-mismatch marker, or null when absent.
+ * @returns The v2 state, a mismatch marker for obsolete or invalid JSON, or null.
  */
 export function readReviewState(
   statePath: string,
@@ -25,7 +25,12 @@ export function readReviewState(
   const content = readUtf8FileIfExistsSync(statePath);
   if (content === null) return null;
 
-  const value = JSON.parse(content) as unknown;
+  let value: unknown;
+  try {
+    value = JSON.parse(content);
+  } catch {
+    return { kind: 'schema-mismatch' };
+  }
   if (
     !value ||
     typeof value !== 'object' ||

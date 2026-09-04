@@ -34,10 +34,10 @@ export function parseDiffHunks(diffText: string): ParsedReviewDiff {
         headerSuffix: match[5] ?? '',
         oldStart,
         oldCount,
-        oldEnd: oldCount === 0 ? oldStart : oldStart + oldCount - 1,
+        oldEnd: oldStart + oldCount - 1,
         newStart,
         newCount,
-        newEnd: newCount === 0 ? newStart : newStart + newCount - 1,
+        newEnd: newStart + newCount - 1,
         lines: [],
         churn: 0,
       };

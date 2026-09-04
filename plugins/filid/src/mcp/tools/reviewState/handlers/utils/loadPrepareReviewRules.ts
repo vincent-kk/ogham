@@ -1,5 +1,3 @@
-import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../../constants/reviewState.js';
-import { ToolDiagnosticError } from '../../../../errors/toolDiagnosticError.js';
 import { loadRepositoryRules } from '../../rules/loadRepositoryRules.js';
 import { loadRuleMap } from '../../rules/loadRuleMap.js';
 
@@ -15,30 +13,8 @@ export function loadPrepareReviewRules(
   projectRoot: string,
   pluginRoot: string | null,
 ) {
-  let rules;
-  try {
-    rules = loadRuleMap(pluginRoot);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const prefix = message.includes('missing')
-      ? REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING
-      : null;
-    if (prefix !== null)
-      throw new ToolDiagnosticError(prefix, message, { cause: error });
-    throw new Error(message, { cause: error });
-  }
-  let overrides;
-  try {
-    overrides = loadRepositoryRules(projectRoot);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const prefix = /escapes the project root|symbolic link/i.test(message)
-      ? REVIEW_STATE_DIAGNOSTIC_CODES.RULE_PATH_ESCAPE
-      : null;
-    if (prefix !== null)
-      throw new ToolDiagnosticError(prefix, message, { cause: error });
-    throw new Error(message, { cause: error });
-  }
+  const rules = loadRuleMap(pluginRoot);
+  const overrides = loadRepositoryRules(projectRoot);
   return {
     rules,
     overrides,

@@ -18,7 +18,10 @@ import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { mergeReviewRounds } from '../../opinion/mergeReviewRounds.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
-import type { ReviewValidatePayload } from '../../state/reviewStateTypes.js';
+import type {
+  ReviewValidatePayload,
+  ReviewValidationProblem,
+} from '../../state/reviewStateTypes.js';
 import { writeReviewState } from '../../state/writeReviewState.js';
 
 import { createValidatePayload } from './createValidatePayload.js';
@@ -68,7 +71,21 @@ export async function validateReviewRound(
       const priorParsed = parseReviewOpinion(priorBytes);
       if (priorParsed.opinion === null)
         throw new Error(`validated review opinion is invalid for ${group.id}`);
-      prior = priorParsed.opinion as unknown as ReviewOpinion;
+      const priorProblems: ReviewValidationProblem[] = [];
+      if (
+        !checkReviewOpinion(
+          priorParsed.opinion,
+          {
+            group: group.id,
+            round: round - 1,
+            sourceHash: state.sourceHash,
+            units: group.units,
+          },
+          priorProblems,
+        )
+      )
+        throw new Error(`validated review opinion is invalid for ${group.id}`);
+      prior = priorParsed.opinion;
     }
   }
 
@@ -108,16 +125,24 @@ export async function validateReviewRound(
     });
 
   const parsed = parseReviewOpinion(content);
-  const problems =
-    parsed.opinion === null
-      ? parsed.problems
-      : checkReviewOpinion(parsed.opinion, {
-          group: group.id,
-          round,
-          sourceHash: state.sourceHash,
-          units: group.units,
-        });
-  if (parsed.opinion === null || problems.length > 0)
+  const problems: ReviewValidationProblem[] =
+    parsed.opinion === null ? [...parsed.problems] : [];
+  let checkedOpinion: ReviewOpinion | null = null;
+  if (
+    parsed.opinion !== null &&
+    checkReviewOpinion(
+      parsed.opinion,
+      {
+        group: group.id,
+        round,
+        sourceHash: state.sourceHash,
+        units: group.units,
+      },
+      problems,
+    )
+  )
+    checkedOpinion = parsed.opinion;
+  if (checkedOpinion === null)
     return createValidatePayload({
       action: input.action,
       paths,
@@ -135,7 +160,6 @@ export async function validateReviewRound(
       verifyBriefPath,
     });
 
-  const checkedOpinion = parsed.opinion as unknown as ReviewOpinion;
   const current: ReviewOpinion = {
     ...checkedOpinion,
     findings: await locateReviewFindings(
