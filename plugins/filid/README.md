@@ -172,10 +172,10 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 
 ## MCP Tools
 
-| Tool              | Actions                                                          | Role                                                   |
-| ----------------- | ---------------------------------------------------------------- | ------------------------------------------------------ |
+| Tool              | Actions                                                            | Role                                                   |
+| ----------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
 | `project_setup`   | `init`, `rules-status`, `rules-manifest`, `rules-sync`, `settings` | Initialize FCA, manage rules, or open settings         |
-| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                     | Inspect FCA structure, tests, and owner chains         |
+| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                      | Inspect FCA structure, tests, and owner chains         |
 | `restructure`     | `plan`, `precondition`, `postcondition`                            | Plan placement and validate external execution         |
 | `review_state`    | `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`   | Prepare, validate, fold, and render cross-review state |
 

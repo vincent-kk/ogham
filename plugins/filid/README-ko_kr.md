@@ -172,10 +172,10 @@ filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙
 
 ## MCP 도구
 
-| 도구              | action                                                           | 역할                                     |
-| ----------------- | ---------------------------------------------------------------- | ---------------------------------------- |
+| 도구              | action                                                             | 역할                                     |
+| ----------------- | ------------------------------------------------------------------ | ---------------------------------------- |
 | `project_setup`   | `init`, `rules-status`, `rules-manifest`, `rules-sync`, `settings` | 프로젝트 FCA 초기화·규칙·설정            |
-| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                     | 구조·verification·소유/문서 체인 검사    |
+| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                      | 구조·verification·소유/문서 체인 검사    |
 | `restructure`     | `plan`, `precondition`, `postcondition`                            | 배치 계획과 외부 실행 사전·사후조건 검증 |
 | `review_state`    | `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`   | cross-review 준비·검증·fold·렌더링       |
 

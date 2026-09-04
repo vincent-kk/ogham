@@ -15,10 +15,38 @@ For round 1, write the path named by the review brief's `output` field. For roun
   "round": 1,
   "state": "COMPLETE",
   "sourceHash": "<state.sourceHash>",
-  "files": [{ "path": "src/a.ts", "change": "M", "chunk": null, "result": "reviewed", "reason": null }],
-  "findings": [{ "id": "R01-001", "severity": "error", "category": "bug", "path": "src/a.ts", "existingCode": "if (items.length = 0) {", "lines": "unknown", "rule": "DEF-1", "message": "<falsifiable defect statement>", "evidence": "src/a.ts:42", "consequence": "<what fails>", "recommendedAction": "<bounded correction>" }],
+  "files": [
+    {
+      "path": "src/a.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "R01-001",
+      "severity": "error",
+      "category": "bug",
+      "path": "src/a.ts",
+      "existingCode": "if (items.length = 0) {",
+      "lines": "unknown",
+      "rule": "DEF-1",
+      "message": "<falsifiable defect statement>",
+      "evidence": "src/a.ts:42",
+      "consequence": "<what fails>",
+      "recommendedAction": "<bounded correction>"
+    }
+  ],
   "checked": ["src/a.ts", "FCA-001"],
-  "gaps": [{ "path": "src/b.ts", "rule": "DEF-4", "detail": "<evidence that could not be obtained>" }],
+  "gaps": [
+    {
+      "path": "src/b.ts",
+      "rule": "DEF-4",
+      "detail": "<evidence that could not be obtained>"
+    }
+  ],
   "riskPlan": null
 }
 ```
@@ -35,8 +63,17 @@ Write the path named by the verifier brief's `output` field with this schema:
   "group": "01",
   "state": "COMPLETE",
   "sourceHash": "<hash>",
-  "decisions": [{ "findingId": "R01-001", "verdict": "CONFIRMED", "evidence": "src/a.ts:42", "reason": "<one falsifiable sentence>" }],
-  "observations": [{ "path": "src/a.ts", "detail": "<verdict-neutral concern>" }],
+  "decisions": [
+    {
+      "findingId": "R01-001",
+      "verdict": "CONFIRMED",
+      "evidence": "src/a.ts:42",
+      "reason": "<one falsifiable sentence>"
+    }
+  ],
+  "observations": [
+    { "path": "src/a.ts", "detail": "<verdict-neutral concern>" }
+  ],
   "checked": ["src/a.ts"]
 }
 ```

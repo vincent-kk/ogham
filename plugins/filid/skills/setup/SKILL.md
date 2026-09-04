@@ -96,13 +96,13 @@ Emit the compact setup report from the validation reference and finish. Do not a
 
 ## MCP Surface
 
-| Tool + action                                             | Purpose                                                       |
-| --------------------------------------------------------- | ------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__project_setup` `init`           | create missing config v2 without overwriting existing config  |
-| `mcp__plugin_filid_tools__project_setup` `rules-*`        | inspect or synchronize managed rule documents                 |
-| `mcp__plugin_filid_tools__project_setup` `settings`       | edit config and managed rules through a bounded local session |
-| `mcp__plugin_filid_tools__fractal_inspect` `scan`         | inspect the post-initialization snapshot                      |
-| `mcp__plugin_filid_tools__fractal_inspect` `validate`     | validate document, node, and entry-point scopes               |
+| Tool + action                                         | Purpose                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------------- |
+| `mcp__plugin_filid_tools__project_setup` `init`       | create missing config v2 without overwriting existing config  |
+| `mcp__plugin_filid_tools__project_setup` `rules-*`    | inspect or synchronize managed rule documents                 |
+| `mcp__plugin_filid_tools__project_setup` `settings`   | edit config and managed rules through a bounded local session |
+| `mcp__plugin_filid_tools__fractal_inspect` `scan`     | inspect the post-initialization snapshot                      |
+| `mcp__plugin_filid_tools__fractal_inspect` `validate` | validate document, node, and entry-point scopes               |
 
 ## Invariants
 

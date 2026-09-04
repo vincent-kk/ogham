@@ -9,10 +9,10 @@
 
 ## API Contracts
 
-| Action | Input | Delegation | Payload |
-| --- | --- | --- | --- |
-| `plan` | `path`, `requests` | placement-plan handler | plan summary + `persistence: always` data |
-| `precondition` | `path`, `planPath` | plan-validation handler | precondition summary + validation result |
+| Action          | Input              | Delegation              | Payload                                   |
+| --------------- | ------------------ | ----------------------- | ----------------------------------------- |
+| `plan`          | `path`, `requests` | placement-plan handler  | plan summary + `persistence: always` data |
+| `precondition`  | `path`, `planPath` | plan-validation handler | precondition summary + validation result  |
 | `postcondition` | `path`, `planPath` | plan-validation handler | postcondition summary + validation result |
 
 ## Acceptance Criteria

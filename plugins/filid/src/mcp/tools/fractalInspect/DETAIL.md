@@ -9,12 +9,12 @@
 
 ## API Contracts
 
-| Action | Input | Delegation | Payload |
-| --- | --- | --- | --- |
-| `scan` | `path`, `maxDepth?`, `detail?`, `nameFilter?` | tree-scan child | tree summary + requested projection |
-| `validate` | `path`, `scopes?` | project validation child | project-mode summary + validation report |
-| `verification` | `path`, `filePaths?`, `detail?` | verification child | role summary + optional file evidence |
-| `resolve` | `path`, `requests` | context-resolution child | bounded batch summary + ordered results |
+| Action         | Input                                         | Delegation               | Payload                                  |
+| -------------- | --------------------------------------------- | ------------------------ | ---------------------------------------- |
+| `scan`         | `path`, `maxDepth?`, `detail?`, `nameFilter?` | tree-scan child          | tree summary + requested projection      |
+| `validate`     | `path`, `scopes?`                             | project validation child | project-mode summary + validation report |
+| `verification` | `path`, `filePaths?`, `detail?`               | verification child       | role summary + optional file evidence    |
+| `resolve`      | `path`, `requests`                            | context-resolution child | bounded batch summary + ordered results  |
 
 ## Acceptance Criteria
 

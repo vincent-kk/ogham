@@ -9,13 +9,13 @@
 
 ## API Contracts
 
-| Action | Input | Delegation | Payload |
-| --- | --- | --- | --- |
-| `init` | `path?`, `language?`, `adapterIds?` | project initialization child | created/config path summary |
-| `rules-status` | `path` | rule-doc status child | action/count summary + raw data |
-| `rules-manifest` | `path` | rule-doc manifest child | action/count summary + raw data |
-| `rules-sync` | `path`, `selections?`, `resync?` | rule-doc sync child | action/change-count summary + raw data |
-| `settings` | `path?`, `waitSeconds?` | settings-session child | saved/closed/pending summary |
+| Action           | Input                               | Delegation                   | Payload                                |
+| ---------------- | ----------------------------------- | ---------------------------- | -------------------------------------- |
+| `init`           | `path?`, `language?`, `adapterIds?` | project initialization child | created/config path summary            |
+| `rules-status`   | `path`                              | rule-doc status child        | action/count summary + raw data        |
+| `rules-manifest` | `path`                              | rule-doc manifest child      | action/count summary + raw data        |
+| `rules-sync`     | `path`, `selections?`, `resync?`    | rule-doc sync child          | action/change-count summary + raw data |
+| `settings`       | `path?`, `waitSeconds?`             | settings-session child       | saved/closed/pending summary           |
 
 ## Acceptance Criteria
 

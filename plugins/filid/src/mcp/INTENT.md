@@ -6,11 +6,11 @@
 
 ## Structure
 
-| Path           | Role                                                    |
-| -------------- | ------------------------------------------------------- |
-| `server/`      | 4개 도구 등록, envelope 직렬화와 process lifecycle      |
-| `serverEntry/` | build가 호출하는 MCP executable entry                   |
-| `tools/`       | project/rule/settings/scan/context/plan/validate/review |
+| Path           | Role                                                                 |
+| -------------- | -------------------------------------------------------------------- |
+| `server/`      | 4개 도구 등록, envelope 직렬화와 process lifecycle                   |
+| `serverEntry/` | build가 호출하는 MCP executable entry                                |
+| `tools/`       | project/rule/settings/scan/context/plan/validate/review              |
 | `pages/`       | `project_setup`의 `settings` action이 제공하는 generated settings UI |
 
 ## Conventions

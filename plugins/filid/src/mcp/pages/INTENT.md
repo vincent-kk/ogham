@@ -4,10 +4,10 @@ MCP 서버가 로컬 HTTP 로 서빙하는 브라우저 페이지의 프런트�
 
 ## Structure
 
-| Path        | Role                                                       |
-| ----------- | ---------------------------------------------------------- |
+| Path        | Role                                                                           |
+| ----------- | ------------------------------------------------------------------------------ |
 | `settings/` | `.filid/config.json` + rule docs 편집 폼 (`project_setup`의 `settings` action) |
-| `index.ts`  | barrel (`export {}` — 정적 자산 모음, 런타임 export 없음)  |
+| `index.ts`  | barrel (`export {}` — 정적 자산 모음, 런타임 export 없음)                      |
 
 ## Conventions
 
