@@ -11,7 +11,7 @@ Plan: plan.md
 
 - [ ] G1: <observable result — make it decidable by a stranger>
       CHECK: `<shell command, executed verbatim>`
-      EXPECT: `<substring | /regex/ that only a success prints>`
+      EXPECT: `<fixed literal substring emitted only when the condition holds>`
       EVIDENCE: pending
 
 - [ ] G2: <manual gate — only when a command cannot prove it>
@@ -38,12 +38,13 @@ ABANDON: G2 <reason — only when abandoning a gate>
 | ID                                 | Use globally unique `G<n>` IDs; `##` headings only group gates.                                                                           |
 | Plan                               | `Plan:` is a ledger-relative path for people; tools do not interpret it.                                                                  |
 | Literal fields                     | Wrap CHECK and EXPECT values in a Markdown code span. Matching edge runs are wrapper syntax; values without them remain compatible.       |
+| Matching                           | EXPECT is a trimmed, case-sensitive literal substring of one output line. Slashes, metacharacters, and flags have no special meaning. No regex mode or legacy-ledger migration is provided. |
 
 ## Authoring rules
 
 1. State an observable result, never an activity.
-2. Give every runnable gate an EXPECT, and pick a string that only a success prints.
-3. Put the success signal in the **output**, not in the exit status: `<command> && echo <MARKER>` with `EXPECT: <MARKER>`. `&&` withholds the marker when the command fails, so a host that never reports an exit code still judges the gate the same way. A naturally success-only string (`TYPECHECK_OK`, `/Tests\s+\d+ passed/`) qualifies too.
+2. Design CHECK and EXPECT together. CHECK tests the actual result condition; EXPECT names a fixed literal string emitted only when that condition holds.
+3. Put the success signal in the **output**: `<assertion command> && echo <MARKER>` with `EXPECT: <MARKER>`. The assertion must fail when the result condition is false; a command that only reports data needs an assertion before `&& echo`. This keeps the marker out of failed checks even when a host exposes no exit code. A fixed success-only string already emitted by the check, such as `TYPECHECK_OK`, qualifies too.
 4. For an expected failure, put the negation inside CHECK — `! grep -rn 'TODO' src && echo NO_TODOS` — instead of expecting the harness to report the failure for you.
 5. Wrap each CHECK and EXPECT value in a Markdown code span. If the value contains backticks, use a longer delimiter run; if it starts and ends with backticks, add one padding space inside each delimiter. Without the span, a formatter can rewrite sequences such as `__x__` and `*x*`, stop command matching, and make the gate disappear silently.
 6. Give each task 1–4 runnable gates; zero is underspecified and more than four means two tasks.

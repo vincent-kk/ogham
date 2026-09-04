@@ -13,6 +13,7 @@
 
 - 배포 진입점은 esbuild 산출물이다: MCP 서버(`bridge/mcp-server.cjs`, 원본 `mcp/serverEntry/`)와 훅 번들 5종(`bridge/*.mjs`).
 - `src/index.ts` 는 named re-export 만 담는 공개 배럴이다.
+- 게이트의 `CHECK` 는 실제 결과 조건을 검사하는 명령이고 `EXPECT` 는 조건 충족 시에만 관측되는 리터럴 성공 문자열이다. 결과 조건의 값은 저장소와 계획이 소유한다.
 - 소유 상태는 넷이다: 개입 강도 다이얼(`core/infra/configLoader`), 호스트 규칙 배포 상태(`core/ruleDocs`), 세션 스코프 신호(`core/sessionSignals`), 작업 상태(`core/gates`).
 
 ## Acceptance Criteria
@@ -39,6 +40,10 @@
 - **Direct import**: allowed
 - **Reason**: `version.ts` 는 생성기가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 배럴을 경유시키면 `src → mcp → server → src` 순환이 생기므로, 이 참조는 경계를 넘는 대신 면책을 받는다.
 
+## History
+
+- 2026-09-05 — 게이트 타입의 EXPECT를 리터럴 성공 문자열로 한정했다. 결과 조건은 CHECK가 검사하여 저장소 정규식을 훅에서 실행하지 않는다.
+
 ## Last Updated
 
-2026-09-03 — skills-only `off`와 wire-level no-op skip을 추가했다.
+2026-09-05 — 게이트 타입의 CHECK/EXPECT 책임을 명시했다.

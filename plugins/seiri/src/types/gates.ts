@@ -6,9 +6,9 @@ export interface GateEntry {
   title: string;
   /** Whether the ledger checkbox is currently selected. */
   checked: boolean;
-  /** Exact runnable command, absent for a manual gate. */
+  /** Exact command that checks the result condition; absent for a manual gate. */
   check?: string;
-  /** Expected output substring or slash-delimited regular expression. */
+  /** Case-sensitive literal output substring emitted only for a met condition. */
   expect?: string;
   /** Current proof excerpt or pending marker. */
   evidence: string;
@@ -59,7 +59,7 @@ export interface GateStatus {
   state: GateState;
   /** Runnable command when the gate is executable. */
   check?: string;
-  /** Expected output matcher when one is declared. */
+  /** Literal success substring when one is declared. */
   expect?: string;
   /** Current proof excerpt or pending marker. */
   evidence: string;

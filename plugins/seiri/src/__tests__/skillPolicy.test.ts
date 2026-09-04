@@ -136,13 +136,28 @@ describe('skill invocation policy', () => {
       expect(WORKFLOW_CHAIN_LINE).not.toContain(name);
   });
 
+  // filid:contract AC-check-expect-pair
   it('requires deterministic EXPECT markers before a plan can execute', () => {
-    expect(readSkill('write-plan').body).toContain(
-      'each gate carries an EXPECT that only a success prints',
-    );
-    expect(readSkill('review-plan').body).toContain(
-      'A runnable gate without EXPECT is rework.',
-    );
+    const writePlan = readSkill('write-plan').body;
+    const reviewPlan = readSkill('review-plan').body;
+    expect
+      .soft(writePlan)
+      .toContain(
+        'CHECK tests the actual result condition and emits a fixed literal EXPECT marker only on success',
+      );
+    expect
+      .soft(reviewPlan)
+      .toContain(
+        'CHECK tests the actual result condition and emits its literal EXPECT marker only on success',
+      );
+    expect
+      .soft(reviewPlan)
+      .toContain(
+        'A command that only reports data needs an assertion before its success marker.',
+      );
+    expect
+      .soft(reviewPlan)
+      .toContain('A runnable gate without EXPECT is rework.');
   });
 
   // filid:contract AC-workflow-entry-validity

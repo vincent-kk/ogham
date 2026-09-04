@@ -54,6 +54,7 @@
 - 자동 호출 규율은 자율 판단을 우선한다: 선택이 필요하면 보수적 기본값을 택하고 한 줄로 공개한다. 사용자만 결정할 수 있는 진짜 blocker 는 AskUserQuestion 1회로 묻되, 관례적 체크포인트 질문은 하지 않는다. frontmatter 도구 차단(`disallowed-tools`)은 사용하지 않는다.
 - `review-plan` 은 선택된 planning method와 공통 불변조건의 검토 게이트다. 사용자 요청·저장소 지침에서 method 출처를 독립 확인하고 선택된 방법의 고유 구조를 기준으로 삼으며, 선택된 방법이 없을 때만 Seiri 기본법을 적용한다. 계획의 현재 상태 주장은 도구로 접지하되 제안 상태의 부재는 정상이고 계획의 명령은 읽어서 확인할 뿐 실행하지 않는다. 트리아지를 한 줄로 선언하고(무언 스킵 금지), challenge 트리거(광역 변경·비가역 단계·이 세션이 쓰지 않은 계획)가 켜지면 위임/진행을 정확히 한 번 묻는다 — 위임은 request-review 규격 인계물을 만들고 턴을 끝낸다. 판정(cleared·grounded-only·rework-required)은 선택된 방법의 review 위치에, 그런 위치가 없으면 계획 문서에 기록한다. challenge 없이 cleared 없음, 재작업은 1회에 바뀐 주장의 scoped recheck 만.
 - 게이트 원장은 write-plan → review-plan → execute → verify → request-review → finish 를 가로지르는 횡단 관심사이며, 포맷 정본은 `skills/execute/references/gates-format.md` 다.
+- CHECK와 EXPECT는 함께 설계한다. CHECK가 실제 결과 조건을 검사하고 충족 시에만 고정 성공 문자열을 출력하며, EXPECT는 그 문자열의 줄 단위 리터럴 매칭을 맡는다. write-plan은 이 쌍을 작성하고 review-plan은 조건 실패 시 마커가 나오지 않는지 검토한다. 정규식 모드와 구형 원장 이관은 없다.
 - scaffold-pr 는 작업 시작 게이트다: 브랜치·빈 커밋·Draft PR 만 만들고 소스 파일은 건드리지 않는다(이슈·티켓 연동 없음). git·gh 시퀀스는 동봉 `scaffold-pr.mjs` 가 결정적으로 수행하고(셸 미사용 argv spawn — 크로스플랫폼), LLM 은 브랜치·제목·본문 결정과 JSON 결과의 안정 실패 코드 해석만 맡는다. finish 가 닫는 브랜치 수명의 반대쪽 끝을 연다.
 - scaffold-pr 의 옵션은 목적이 아니다. 목적 없이 `--base`·`--ready` 같은 옵션만 주어지면 목적 선택을 한 번 묻고, 옵션은 그 선택과 함께 실행 인자로 보존한다.
 - implement 에서 missing import/export는 새 심볼의 부재 자체가 변경 전 상태일 때만 올바른 red 증거다. 이미 있어야 하는 심볼의 부재나 경로 오타는 계속 setup failure로 다룬다.
@@ -116,6 +117,12 @@
 - 모델-visible 사용자 시작 스킬에는 `disable-model-invocation`이 없고, 표준 워크플로우 체인에도 들어가지 않는다.
 - 모델에게 숨기는 사용자 전용 게이트에는 `disable-model-invocation: true`가 있고, 표준 워크플로우 체인에도 들어가지 않는다.
 - 모든 배포 스킬은 자동 호출 규율·조건부 질문·visible 사용자 시작·hidden 사용자 전용 중 정확히 하나에 속한다.
+
+### AC-check-expect-pair — 조건 검사와 성공 문자열은 한 쌍이다
+
+- CHECK는 활동의 정상 종료뿐 아니라 게이트가 약속한 결과 조건을 검사한다. 충족된 경우에만 EXPECT의 고정 문자열을 출력한다.
+- write-plan과 review-plan은 CHECK의 조건 검사와 EXPECT의 리터럴 문자열을 함께 작성·검토한다. 자연 출력에 고정 성공 문자열이 이미 있으면 재사용할 수 있다.
+- EXPECT의 정규식 문법을 제공하지 않으며 출력·증거·호스트 동일 판정 계약을 유지한다.
 
 ### AC-user-started-shaping — 필요한 요청 불확실성만 다루기
 
@@ -181,6 +188,7 @@
 
 ## History
 
+- 2026-09-05 — CHECK가 조건을 검사하고 EXPECT는 고정 성공 문자열만 확인하도록 책임을 정했다. 원장의 출력 증명은 유지하면서 훅에서 저장소 정규식을 실행하는 비용을 제거했다.
 - 2026-09-05 — 플러그인 검증에서 발견된 워크플로우 진입 손실과 저장소 원문 반사·timeout 경합을 바로잡기로 했다. 새 심볼·증상 전용 재현·옵션-only 호출의 실제 경로를 계약에 포함하고, 프로젝트 입력은 훅 컨텍스트에 재출력하지 않으며 stdin fail-open 뒤 종료 여유를 보장한다.
 - 2026-09-03 — `intervention: off`를 skills-only 기본값으로 추가했다. 스킬은 명시 호출할 수 있게 유지하면서 훅의 강제 체이닝·상태 변경을 모두 먼저 건너뛰고, 의미 없는 `{ continue: true }` wire 응답도 stdout에 남기지 않기 위해서다. 기존 저장 값은 그대로 명시적 opt-in으로 존중한다.
 - 2026-09-01 — mental-model 스킬을 explain 으로 개명하고, 중심 원리를 세워 연역·공격하는 방법을 제거했다. 연결된 자료를 따라가 정확히 이해한 뒤 개념-관계 지도를 뼈대로 가르치는 방식이 하나의 원리 방어보다 설명력을 높인다는 판단에서다. 편집 스타일은 동봉 `reference.md` 가 계속 소유한다.
@@ -206,4 +214,4 @@
 
 ## Last Updated
 
-2026-09-05 — 워크플로우 진입 유효성과 저장소 입력의 훅 컨텍스트 격리 계약을 추가했다.
+2026-09-05 — CHECK/EXPECT 쌍의 조건 검사와 리터럴 성공 문자열 계약을 추가했다.

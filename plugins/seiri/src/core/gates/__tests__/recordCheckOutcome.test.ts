@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -124,24 +125,41 @@ describe('recordCheckOutcome', () => {
     expect(JSON.stringify(result?.verdict)).not.toContain(injected);
   });
 
-  it('accepts regex EXPECT', () => {
+  it.each([
+    { passed: 15, total: 15, exit: 0, kind: 'met', evidence: 'CHECK_OK' },
+    { passed: 16, total: 16, exit: 0, kind: 'met', evidence: 'CHECK_OK' },
+    { passed: 15, total: 16, exit: 1, kind: 'unmet', evidence: 'pending' },
+  ])('records a CHECK-owned result for $passed/$total passed', (result) => {
     const root = makeRepoRoot();
+    const command = `"${process.execPath}" -e "const passed = ${result.passed}; const total = ${result.total}; console.log(passed + '/' + total + ' passed'); process.exitCode = passed === total ? 0 : 1" && echo CHECK_OK`;
     const path = seedTask(
       root,
       'sample-task',
       `- [ ] G1: verification passes
-  CHECK: yarn test
-  EXPECT: /\\d+\\/\\d+ passed/
+  CHECK: \`${command}\`
+  EXPECT: \`CHECK_OK\`
   EVIDENCE: pending
 `,
     );
 
-    const results = recordCheckOutcome(root, 'yarn test', {
-      text: '15/15 passed',
+    const observed = spawnSync(command, {
+      cwd: root,
+      shell: true,
+      encoding: 'utf8',
+      timeout: 5_000,
+    });
+    expect(observed.error).toBeUndefined();
+    expect(observed.status).toBe(result.exit);
+    expect(observed.stdout.includes('CHECK_OK')).toBe(result.kind === 'met');
+
+    const results = recordCheckOutcome(root, command, {
+      text: observed.stdout,
     });
 
-    expect(results[0]?.verdict).toEqual({ kind: 'met' });
-    expect(readFileSync(path, 'utf8')).toContain('EVIDENCE: 15/15 passed');
+    expect(results[0]?.verdict.kind).toBe(result.kind);
+    expect(readFileSync(path, 'utf8')).toContain(
+      `EVIDENCE: ${result.evidence}`,
+    );
   });
 
   it('reports an exit-zero gate without EXPECT as unjudgeable', () => {
