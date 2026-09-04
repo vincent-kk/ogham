@@ -9,7 +9,7 @@ import { selectedIds } from './selectedIds.js';
  * preview revision, then write the dial only when reconciliation applied.
  *
  * This is one of only two places that write rule files — the other is the
- * `rule_docs_sync` tool used headlessly. Both are reached by an explicit
+ * `settings` action `sync` headless path. Both are reached by an explicit
  * user action; nothing on a session path writes here.
  *
  * `body.scope` is one decision governing two things: the dial's file and the

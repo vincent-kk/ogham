@@ -2,14 +2,14 @@
 
 ## Purpose
 
-seiri 의 MCP 계층. 나가는 것은 도구 스키마가 아니라 **상태의 렌더**다 — 어떤 규칙이 배포됐고 다이얼이 어디 있는지. 복잡성은 코드 안에 격리하고, 컨텍스트로 나가는 표면은 도구 3개로 고정한다.
+seiri 의 MCP 계층. 나가는 것은 도구 스키마가 아니라 **상태의 렌더**다 — 어떤 규칙이 배포됐고 다이얼이 어디 있는지. 복잡성은 코드 안에 격리하고, 컨텍스트로 나가는 표면은 도구 2개로 고정한다.
 
 ## Structure
 
 ```
 server/       MCP 서버 조립 + 도구 등록
 serverEntry/  stdio 진입점 (bridge/mcp-server.cjs 의 번들 대상)
-tools/        openSettings (대화형) · ruleDocsSync (헤드리스 폴백) · gates (작업 원장)
+tools/        settings (대화형 페이지 + 헤드리스 동기화 + 다이얼) · gates (작업 원장)
 pages/        설정 UI 정적 자산 (빌드가 public/settings.html 로 인라인)
 ```
 

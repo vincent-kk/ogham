@@ -5,63 +5,28 @@ import {
   getRuleDocsStatus,
   loadManifest,
   planRuleDocs,
-} from '../../../core/ruleDocs/index.js';
+} from '../../../../core/ruleDocs/index.js';
 import type {
-  RuleDocStatus,
-  RuleDocSyncResult,
-  RuleDocsManifest,
-} from '../../../types/manifest.js';
-
-import type {
-  ConfigActionResult,
-  ConfigOp,
-} from './utils/applyConfigAction.js';
-import { applyConfigAction } from './utils/applyConfigAction.js';
-
-export type RuleDocsAction = 'status' | 'manifest' | 'plan' | 'sync' | 'config';
-
-export interface RuleDocsSyncInput {
-  action: RuleDocsAction;
-  project_root?: string;
-  /**
-   * Rule id → opt-in flag. Required for `plan` and `sync`; ids absent from
-   * the map count as opted out, which is what removes a deployed file.
-   */
-  selections?: Record<string, boolean> | null;
-  /** Rule ids whose local edits may be discarded. Drift is kept otherwise. */
-  resync?: string[] | null;
-  /** Optional revision returned by `plan`; stale revisions are not applied. */
-  revision?: string | null;
-  /** What the `config` action should do. Defaults to reading the dial. */
-  config_op?: ConfigOp | null;
-  /** Dial position for `config_op: "set"`. */
-  intervention?: string | null;
-}
-
-export type RuleDocsSyncOutput =
-  | { action: 'status'; entries: RuleDocStatus[] }
-  | { action: 'manifest'; manifest: RuleDocsManifest }
-  | { action: 'plan' | 'sync'; result: RuleDocSyncResult; selected: string[] }
-  | ConfigActionResult;
+  SettingsInput,
+  SettingsOutput,
+} from '../types/settingsContract.js';
+import { applyConfigAction } from '../utils/applyConfigAction.js';
 
 /**
  * Inspect or reconcile the active host's rule channel.
  *
- * The settings page is the interactive path; this tool is the headless
- * fallback for hosts without a browser and for scripted setup. Session
- * hooks must never call it — rule files change only by explicit user
- * action.
+ * The settings page is the interactive path; these actions are the headless
+ * path for hosts without a browser and for scripted setup. Session hooks
+ * must never call them — rule files change only by explicit user action.
  *
  * `plan` answers the same question as `sync` without writing, so a caller
  * that cannot render the settings page can still show the diff first.
  *
- * `config` is the dial rather than the rule files, absorbed here instead
- * of becoming a third tool: every registered schema is context spent on
- * every turn, and one more action costs a fraction of one more tool.
+ * `config` is the dial rather than the rule files, but it shares this
+ * settings surface because every registered schema is context spent on
+ * every turn.
  */
-export function handleRuleDocsSync(
-  input: RuleDocsSyncInput,
-): RuleDocsSyncOutput {
+export function syncRuleDocs(input: SettingsInput): SettingsOutput {
   const root = projectRoot(input.project_root);
 
   // Before the plugin-root check: the dial lives in the project, so

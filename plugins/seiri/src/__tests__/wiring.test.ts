@@ -111,7 +111,7 @@ describe('wiring', () => {
       'src',
       'mcp',
       'tools',
-      'openSettings',
+      'settings',
       'utils',
       'buildSettingsState.ts',
     );
@@ -174,6 +174,20 @@ describe('wiring', () => {
     const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
     for (const key of Object.keys(ToolName))
       expect(server).toContain(`ToolName.${key}`);
+  });
+
+  it('registers the unified settings schema', () => {
+    const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
+    expect(server).toContain('ToolName.SETTINGS');
+    expect(server).toContain(
+      ".enum(['open', 'status', 'manifest', 'plan', 'sync', 'config'])",
+    );
+    expect(server).toContain('action: z');
+    expect(server).not.toContain('type: z');
+    expect(server).toContain('wait_seconds: z');
+    expect(server).toContain('revision: z');
+    expect(server).not.toContain('waitSeconds');
+    expect(server).not.toContain('path: z');
   });
 
   it('registers exactly one server tool for each declared tool name', () => {

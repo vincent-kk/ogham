@@ -4,7 +4,7 @@
 
 ### Rule deployment
 
-- 규칙 문서는 `templates/rules/` 에 포함되며 설정 페이지 또는 `rule_docs_sync` 같은 셋업 표면만 배포한다. 세션 훅은 규칙 아티팩트에 쓰지 않는다.
+- 규칙 문서는 `templates/rules/` 에 포함되며 설정 페이지 또는 `settings` 같은 셋업 표면만 배포한다. 세션 훅은 규칙 아티팩트에 쓰지 않는다.
 - 배포 채널은 현재 호스트가 정한다. Claude 는 `<repoRoot>/.claude/rules/<filename>` 파일을 사용하고, Codex 는 유효한 루트 `AGENTS*.md` 에 `SEIRI` 소유 마커 섹션을 사용한다. 같은 공개 함수가 두 채널을 조정한다.
 - Codex 채널은 마커 밖 사용자 텍스트와 다른 소유자의 섹션을 보존하고, 재실행해도 같은 섹션을 중복하지 않는다.
 - Codex 후보 파일에 저장됐지만 override에 가려진 섹션은 stored target/hash/inSync로 UI의 선택·drift·relocate 입력을 보존하되, 별도 effective target/hash/inSync가 없는 한 활성 규칙으로 보고하지 않는다.
@@ -57,19 +57,18 @@
 
 ## API Contracts
 
-| Export                                     | Contract                                                                                           |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `loadConfig(projectRoot)`                  | Baseline 계층만: `{ config \| null, path, warning? }`. 절대 throw 하지 않음.                       |
-| `loadIntervention(projectRoot)`            | 세 계층: `{ effective, source, baseline, user, runtime, warnings }`. 절대 throw 하지 않음.         |
-| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 쓴 경로를 반환.                           |
-| `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                   |
-| `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                 |
-| `loadManifest(pluginRoot)`                 | 잘못된 manifest 또는 없는 `templateHash` 에서 throw.                                               |
-| `getRuleDocsStatus(projectRoot, plugin)`   | 현재 호스트 채널의 규칙별 스냅샷 (`inSync` 포함).                                                  |
-| `planRuleDocs(...)` / `applyRuleDocs(...)` | 동일한 호스트 대상·revision 을 사용; `applied` 로 preview 와 write 를 구분.                        |
-| `open_settings`                            | `{ status: saved \| closed \| pending, url, summary? }`. 대기 시간 상한 있음.                      |
-| `rule_docs_sync`                           | 액션 `status` · `manifest` · `plan` · `sync` · `config`.                                           |
-| `rule_docs_sync` action `config`           | `{ op, changed, dial, posture }`. `set` 은 유효한 `intervention` 필요; baseline 은 절대 쓰지 않음. |
+| Export                                     | Contract                                                                                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `loadConfig(projectRoot)`                  | Baseline 계층만: `{ config \| null, path, warning? }`. 절대 throw 하지 않음.                                                                |
+| `loadIntervention(projectRoot)`            | 세 계층: `{ effective, source, baseline, user, runtime, warnings }`. 절대 throw 하지 않음.                                                  |
+| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 쓴 경로를 반환.                                                                    |
+| `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                                                            |
+| `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                                                          |
+| `loadManifest(pluginRoot)`                 | 잘못된 manifest 또는 없는 `templateHash` 에서 throw.                                                                                        |
+| `getRuleDocsStatus(projectRoot, plugin)`   | 현재 호스트 채널의 규칙별 스냅샷 (`inSync` 포함).                                                                                           |
+| `planRuleDocs(...)` / `applyRuleDocs(...)` | 동일한 호스트 대상·revision 을 사용; `applied` 로 preview 와 write 를 구분.                                                                 |
+| `settings`                                 | `action` 은 `open` · `status` · `manifest` · `plan` · `sync` · `config`; `open` 은 `{ status: saved \| closed \| pending, url, summary? }`. |
+| `settings` `action: config`                | `{ action, op, changed, dial, posture }`. `set` 은 유효한 `intervention` 필요; baseline 은 절대 쓰지 않음.                                  |
 
 ## Scope
 
@@ -99,7 +98,7 @@
 
 ### AC-tool-surface-fixed — 도구 표면
 
-- 등록 도구가 정확히 3개이며 새 요구는 기존 도구의 action 으로 흡수된다.
+- 등록 도구가 정확히 2개이며 새 요구는 기존 도구의 판별 값으로 흡수된다.
 
 ### AC-host-parity — 호스트가 판정을 바꾸지 않는다
 

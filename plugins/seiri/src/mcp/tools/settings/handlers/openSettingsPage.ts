@@ -1,36 +1,22 @@
 import { openBrowser, pluginRoot, projectRoot } from '@ogham/cross-platform';
 
-import { Route } from '../../../constants/http.js';
-
-import type { SaveSummary } from './types/settingsTypes.js';
-import { buildSettingsState } from './utils/buildSettingsState.js';
-import { loadSettingsHtml } from './utils/loadSettingsHtml.js';
-import { persistSave } from './utils/persistSave.js';
-import { planSave } from './utils/planSave.js';
+import { Route } from '../../../../constants/http.js';
+import type {
+  SettingsInput,
+  SettingsOutput,
+  SettingsToolExtra,
+} from '../types/settingsContract.js';
+import { buildSettingsState } from '../utils/buildSettingsState.js';
+import { loadSettingsHtml } from '../utils/loadSettingsHtml.js';
+import { persistSave } from '../utils/persistSave.js';
+import { planSave } from '../utils/planSave.js';
 import {
   type SettingsServerInstance,
   startSettingsServer,
-} from './webServer/index.js';
+} from '../webServer/index.js';
 
 export const DEFAULT_WAIT_SECONDS = 300;
 export const MAX_WAIT_SECONDS = 600;
-
-export interface OpenSettingsInput {
-  path?: string;
-  waitSeconds?: number;
-}
-
-/** The slice of the MCP request extra this handler consumes. */
-export interface OpenSettingsToolExtra {
-  signal?: AbortSignal;
-}
-
-export interface OpenSettingsOutput {
-  status: 'saved' | 'closed' | 'pending';
-  url: string;
-  summary?: SaveSummary;
-  message: string;
-}
 
 interface ActiveServer extends SettingsServerInstance {
   projectRoot: string;
@@ -47,11 +33,11 @@ let currentServer: ActiveServer | null = null;
  * of handing the user a URL and stopping. `pending` keeps the server
  * alive so a repeat call resumes the same session.
  */
-export async function handleOpenSettings(
-  input: OpenSettingsInput,
-  extra?: OpenSettingsToolExtra,
-): Promise<OpenSettingsOutput> {
-  const root = projectRoot(input.path);
+export async function openSettingsPage(
+  input: SettingsInput,
+  extra?: SettingsToolExtra,
+): Promise<SettingsOutput> {
+  const root = projectRoot(input.project_root);
   const plugin = pluginRoot();
   if (plugin === null)
     throw new Error(
@@ -84,13 +70,14 @@ export async function handleOpenSettings(
   // return the token-less origin and never echo it once the flow ends.
   const baseUrl = `${new URL(server.url).origin}${Route.ROOT}`;
   const wait = Math.min(
-    Math.max(input.waitSeconds ?? DEFAULT_WAIT_SECONDS, 1),
+    Math.max(input.wait_seconds ?? DEFAULT_WAIT_SECONDS, 1),
     MAX_WAIT_SECONDS,
   );
   const event = await server.awaitSettled(wait, extra?.signal);
 
   if (event.kind === 'saved')
     return {
+      action: 'open',
       status: 'saved',
       url: baseUrl,
       summary: event.summary,
@@ -99,6 +86,7 @@ export async function handleOpenSettings(
 
   if (event.kind === 'closed')
     return {
+      action: 'open',
       status: 'closed',
       url: baseUrl,
       message:
@@ -106,8 +94,9 @@ export async function handleOpenSettings(
     };
 
   return {
+    action: 'open',
     status: 'pending',
     url: server.url,
-    message: `No submission within ${wait}s. The page is still open — call open_settings again to keep waiting, or proceed with the existing configuration.`,
+    message: `No submission within ${wait}s. The page is still open — call settings with action "open" again to keep waiting, or proceed with the existing configuration.`,
   };
 }

@@ -11,7 +11,7 @@ import { join } from 'node:path';
 
 import { type Page, expect, test } from '@playwright/test';
 
-import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
+import { handleSettings } from '../src/mcp/tools/settings/index.js';
 
 // The tool must not spawn a real tab, and rule-doc state comes from the plugin
 // root (manifest + templates) the MCP host normally injects.
@@ -41,14 +41,25 @@ let activeUrl: string | null = null;
 /** Start a session: a 1s call surfaces the URL (pending), leaving the server
  *  running so the test can attach a browser and a real long-poll. */
 async function openSession(dir: string): Promise<string> {
-  const out = await handleOpenSettings({ path: dir, waitSeconds: 1 });
+  const out = await handleSettings({
+    action: 'open',
+    project_root: dir,
+    wait_seconds: 1,
+  });
+  if (out.action !== 'open') throw new Error('expected open output');
   expect(out.status).toBe('pending');
   activeUrl = out.url;
   return out.url;
 }
 
-function longPoll(dir: string) {
-  return handleOpenSettings({ path: dir, waitSeconds: 20 });
+async function longPoll(dir: string) {
+  const out = await handleSettings({
+    action: 'open',
+    project_root: dir,
+    wait_seconds: 20,
+  });
+  if (out.action !== 'open') throw new Error('expected open output');
+  return out;
 }
 
 /**
@@ -223,9 +234,10 @@ test('a stale save replans without writing or settling the session', async ({
   mkdirSync(rulesDir, { recursive: true });
   writeFileSync(deployed, '# Newer user edit\n', 'utf8');
 
-  const staleWait = handleOpenSettings({
-    path: projectDir,
-    waitSeconds: 1,
+  const staleWait = handleSettings({
+    action: 'open',
+    project_root: projectDir,
+    wait_seconds: 1,
   });
   await page.locator('#save').click();
   await expect(page.locator('#status')).toContainText('preview changed', {
@@ -264,7 +276,12 @@ test('a pending call reuses the running session and keeps the same URL', async (
   page,
 }) => {
   const url = await openSession(projectDir);
-  const again = await handleOpenSettings({ path: projectDir, waitSeconds: 1 });
+  const again = await handleSettings({
+    action: 'open',
+    project_root: projectDir,
+    wait_seconds: 1,
+  });
+  if (again.action !== 'open') throw new Error('expected open output');
   expect(again.status).toBe('pending');
   expect(again.url).toBe(url);
 

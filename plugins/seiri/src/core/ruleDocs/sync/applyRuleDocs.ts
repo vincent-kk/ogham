@@ -17,7 +17,7 @@ import { retireOtherScopeRules } from '../utils/retireOtherScopeRules.js';
  * empty the other layer of this owner's documents.
  *
  * Only setup surfaces call this — the settings page's save handler, or
- * the `rule_docs_sync` tool as a headless fallback. Session hooks never
+ * the `settings` action `sync` headless path. Session hooks never
  * do: every change to a project's rule files is the result of an explicit
  * user action.
  *

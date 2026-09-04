@@ -5,14 +5,13 @@ import { PLUGIN_NAME } from '../../../constants/plugin.js';
 import { ToolName } from '../../../constants/toolNames.js';
 import { VERSION } from '../../../version.js';
 import { handleGates } from '../../tools/gates/index.js';
-import { handleOpenSettings } from '../../tools/openSettings/index.js';
-import { handleRuleDocsSync } from '../../tools/ruleDocsSync/index.js';
+import { handleSettings } from '../../tools/settings/index.js';
 import { wrapHandler } from '../serialization/wrapHandler.js';
 
 /**
  * Assemble the seiri MCP server.
  *
- * Three tools, all about state: which rules are deployed, where the dial
+ * Two tools, all about state: which rules are deployed, where the dial
  * sits, and whether task gates are met. There is deliberately no tool for
  * reading, searching or analysing code — the harness already provides those,
  * and every schema registered here is context spent whether called or not.
@@ -21,39 +20,24 @@ export function createServer(): McpServer {
   const server = new McpServer({ name: PLUGIN_NAME, version: VERSION });
 
   server.registerTool(
-    ToolName.OPEN_SETTINGS,
+    ToolName.SETTINGS,
     {
       description:
-        'Open the local seiri settings page (rule selection + intervention dial) in a browser and wait for the user to save. Returns status: saved (summary included) | closed (nothing changed) | pending (wait elapsed, page still open — call again to keep waiting).',
-      inputSchema: {
-        path: z
-          .string()
-          .optional()
-          .describe('Absolute path of the target workspace root.'),
-        waitSeconds: z
-          .number()
-          .optional()
-          .describe('Bounded wait for the save event (default 300, max 600).'),
-      },
-    },
-    wrapHandler(handleOpenSettings),
-  );
-
-  server.registerTool(
-    ToolName.RULE_DOCS_SYNC,
-    {
-      description:
-        'Headless fallback for the seiri setup skill, plus the intervention dial. Rule actions: status (what is deployed now) | manifest (what ships) | plan (dry-run a selection, writes nothing) | sync (apply it) — prefer open_settings when a browser is available. Dial action: config (read the dial, or turn the session valve up/down for this checkout). Never call from a session hook.',
+        'Unified seiri settings surface. action: open opens the browser page and waits for saved | closed | pending; prefer open when a browser is available. Other actions provide the headless fallback for status, manifest, plan, sync, and the intervention dial through config. Never call from a session hook.',
       inputSchema: {
         action: z
-          .enum(['status', 'manifest', 'plan', 'sync', 'config'])
+          .enum(['open', 'status', 'manifest', 'plan', 'sync', 'config'])
           .describe(
-            'plan previews the same change sync would apply. config reads or moves the intervention dial and touches no rule file.',
+            'Settings action to perform. open starts or resumes the browser settings page. plan previews the same change sync would apply. config reads or moves the intervention dial and touches no rule file.',
           ),
         project_root: z
           .string()
           .optional()
           .describe('Absolute path of the target workspace root.'),
+        wait_seconds: z
+          .number()
+          .optional()
+          .describe('Bounded wait for the save event (default 300, max 600).'),
         config_op: z
           .enum(['get', 'set', 'clear'])
           .nullish()
@@ -86,7 +70,7 @@ export function createServer(): McpServer {
           ),
       },
     },
-    wrapHandler(handleRuleDocsSync),
+    wrapHandler(handleSettings),
   );
 
   server.registerTool(

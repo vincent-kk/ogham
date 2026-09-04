@@ -26,7 +26,7 @@
 ### Ask first
 
 - 새 템플릿 카테고리 추가 (디렉토리 구조 확장).
-- 기존 템플릿 경로 변경 (`setup`·`rule_docs_sync` 로직 영향).
+- 기존 템플릿 경로 변경 (`setup`·`settings` 로직 영향).
 
 ### Never do
 
