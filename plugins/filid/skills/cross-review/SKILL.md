@@ -67,7 +67,7 @@ Apply these built-in layers, then the nearest repository `CLAUDE.md` or `AGENTS.
 | Rule file | Applies when |
 | --- | --- |
 | `rules/default.md` | every reviewable file |
-| `rules/tests.md` | role is `verification` |
+| `rules/tests.md` | role is `verification`, or role is `source` and behavior changed without a visible verification update |
 | `rules/documents.md` | role is `document` |
 | `rules/fca.md` | owner is not null |
 

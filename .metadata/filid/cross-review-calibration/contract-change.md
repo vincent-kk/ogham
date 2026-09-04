@@ -1,6 +1,6 @@
 # Calibration Fixture — Contract Change Mismatch
 
-Start from `clean-change.md` and apply its clean implementation update. On `calib/run-d`, overwrite `src/slugify/DETAIL.md`:
+Start from `clean-change.md` and apply its clean implementation and verification update. On `calib/run-d`, overwrite `src/slugify/DETAIL.md`:
 
 ```markdown
 # slugify contract

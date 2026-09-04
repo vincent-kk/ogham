@@ -1,6 +1,6 @@
 # Calibration Fixture — Out-of-Scope Certainty
 
-This fixture changes the **base commit**, not the branch. Materialize `clean-change.md`'s base tree, then add the files below to `main` and commit them together. Only after that, create `calib/run-g` and apply the clean implementation update from `clean-change.md` — that one file is the entire branch diff.
+This fixture changes the **base commit**, not the branch. Materialize `clean-change.md`'s base tree, then add the files below to `main` and commit them together. Only after that, create `calib/run-g` and apply the clean implementation and verification update from `clean-change.md` — those two files are the entire branch diff.
 
 ## Added to `main`
 
@@ -104,7 +104,7 @@ These keep the base tree internally consistent, so nothing here is a seeded viol
 
 ## Branch
 
-`calib/run-g` changes exactly one file — `src/slugify/slugify.ts`, the clean update from `clean-change.md`. Changed scope is that file and its owning fractal `src/slugify`. Nothing under `src/tokenize/` is touched.
+`calib/run-g` changes exactly two files — `src/slugify/slugify.ts` and `src/slugify/tests/slugify.spec.ts`, the clean implementation and verification update from `clean-change.md`. Changed scope is those files and their owning fractal `src/slugify`. Nothing under `src/tokenize/` is touched.
 
 `run-g` must end `APPROVED`, with every changed checklist entry reviewed, verification complete, and no gap recorded. The scoped review state must report `candidateCount: 0`, `outOfScopeCount: 5`, `statuses.structure: ok`, `statuses.verification: ok`, and `evidenceComplete: true`.
 

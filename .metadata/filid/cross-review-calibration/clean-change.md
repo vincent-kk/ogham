@@ -141,7 +141,7 @@ Generate URL-safe slugs without I/O.
 
 ### Ask first
 
-- Change normalization behavior.
+- Add a second exported transform.
 
 ### Never do
 
@@ -215,7 +215,7 @@ describe('slugify', () => {
 
 ## Clean Change
 
-On `calib/run-a`, overwrite only `src/slugify/slugify.ts`:
+On `calib/run-a`, overwrite `src/slugify/slugify.ts` and add one spec case to `src/slugify/tests/slugify.spec.ts`:
 
 ```typescript
 const MAX_SLUG_LENGTH = 64;
@@ -229,7 +229,15 @@ export function slugify(input: string): string {
 }
 ```
 
-The change preserves contracts, entry surfaces, node placement, dependency direction, and verification-document policy.
+Append this case inside the existing `describe('slugify', ...)` block:
+
+```typescript
+it('trims separators exposed by truncation', () => {
+  expect(slugify(`${'a'.repeat(63)} b`)).toBe('a'.repeat(63));
+});
+```
+
+The change preserves contracts, entry surfaces, node placement, dependency direction, and verification-document policy while keeping verification for the changed behavior visible in the diff.
 
 ## Base Tree Conformance
 

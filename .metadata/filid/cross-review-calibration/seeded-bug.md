@@ -1,6 +1,6 @@
 # Calibration Fixture — Seeded Empty-Boundary Bug
 
-Materialize the base tree from `clean-change.md`. On `calib/run-h`, overwrite only `src/slugify/slugify.ts`:
+Start from `clean-change.md` and apply its clean implementation and verification update. On `calib/run-h`, replace the clean `src/slugify/slugify.ts` rewrite with this seeded bug; the `run-a` spec update remains in the branch diff:
 
 ```typescript
 const MAX_SLUG_LENGTH = 64;

@@ -1,6 +1,6 @@
 # Calibration Fixture — Warning-Only FCA Change
 
-Start from `clean-change.md` and apply its clean implementation update. Then add one file on `calib/run-b`:
+Start from `clean-change.md` and apply its clean implementation and verification update. Then add one file on `calib/run-b`:
 
 `src/slugify/notes.md`:
 

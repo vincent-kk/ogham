@@ -6,15 +6,15 @@
 
 ## Fixtures
 
-| Run | Fixture | Expected verdict | Purpose |
-| --- | --- | --- | --- |
-| `run-a` | `clean-change.md` | `APPROVED` | 올바른 contract, structure, verification과 구현 변경 |
-| `run-b` | `low-only-change.md` | `REQUEST_CHANGES` | canonical warning 하나가 actionable 상태로 남음 |
-| `run-c` | `seeded-change.md` | `REQUEST_CHANGES` | 의도적으로 심은 rule 두 개와 `tests/` fractal 승격에서 파생된 candidate 네 개 |
-| `run-d` | `contract-change.md` | `REQUEST_CHANGES` | public entry와 DETAIL API 불일치 |
-| `run-f` | `genuine-gap.md` | `INCONCLUSIVE` | 변경 파일 증거 누락이 verdict를 보류함 |
-| `run-g` | `out-of-scope-certainty.md` | `APPROVED` | 도구 간 중복을 포함한 범위 밖 certainty 5행이 verdict에 닿지 않음 |
-| `run-h` | `seeded-bug.md` | `REQUEST_CHANGES` | empty-input boundary bug 하나를 독립 확인함 |
+| Run | Fixture | Expected `filesTotal` | Expected verdict | Purpose |
+| --- | --- | ---: | --- | --- |
+| `run-a` | `clean-change.md` | 2 | `APPROVED` | 올바른 contract, structure, 구현과 verification 변경 |
+| `run-b` | `low-only-change.md` | 3 | `REQUEST_CHANGES` | clean change에 더한 canonical warning 하나가 actionable 상태로 남음 |
+| `run-c` | `seeded-change.md` | 4 | `REQUEST_CHANGES` | clean change에 의도적으로 심은 rule 두 개와 `tests/` fractal 승격에서 파생된 candidate 네 개 |
+| `run-d` | `contract-change.md` | 3 | `REQUEST_CHANGES` | clean change에 더한 public entry와 DETAIL API 불일치 |
+| `run-f` | `genuine-gap.md` | 3 | `INCONCLUSIVE` | clean change의 spec update를 대체한 변경 파일 증거 누락이 verdict를 보류함 |
+| `run-g` | `out-of-scope-certainty.md` | 2 | `APPROVED` | clean change 밖 도구 간 중복을 포함한 범위 밖 certainty 5행이 verdict에 닿지 않음 |
+| `run-h` | `seeded-bug.md` | 2 | `REQUEST_CHANGES` | clean change의 구현을 대체한 empty-input boundary bug 하나를 독립 확인함 |
 
 `seeded-violations.md`는 run b, c, d, f, g, h의 answer key다.
 
@@ -31,7 +31,7 @@
 5. scratch root에서 fresh session을 시작한다.
 6. base ref `main`으로 cross-review skill을 실행한다.
 
-`run-g`는 위 2단계에서 fixture 파일을 `main`에 추가한 뒤 base commit을 만들며 branch에는 clean change만 둔다. materialize하기 전에 `out-of-scope-certainty.md`를 읽는다. v6 Step 2 `scope`의 `outOfScopeCount`는 5여야 한다. `structure_validate`의 4행(프로젝트 root 3행과 tokenize test 1행)과 `verification_scan`이 반복하는 tokenize test 1행을 합한 수다. `candidateCount`는 0, `statuses.structure`와 `statuses.verification`은 모두 `ok`, `evidenceComplete`은 `true`여야 하며 최종 verdict는 `APPROVED`다.
+`run-g`는 위 2단계에서 fixture 파일을 `main`에 추가한 뒤 base commit을 만들며 branch에는 두 파일로 이루어진 clean change만 둔다. materialize하기 전에 `out-of-scope-certainty.md`를 읽는다. v6 Step 2 `scope`의 `outOfScopeCount`는 5여야 한다. `structure_validate`의 4행(프로젝트 root 3행과 tokenize test 1행)과 `verification_scan`이 반복하는 tokenize test 1행을 합한 수다. `candidateCount`는 0, `statuses.structure`와 `statuses.verification`은 모두 `ok`, `evidenceComplete`은 `true`여야 하며 최종 verdict는 `APPROVED`다.
 
 보정 문서를 scratch repository로 복사하지 않는다. fixture를 materialize한 session은 정답을 이미 알기 때문에 review를 수행하지 않는다. review state와 snapshot evidence가 같은 committed content를 설명하도록 working tree를 clean하게 유지한다.
 

@@ -1,6 +1,6 @@
 # Calibration Fixture — Genuine Evidence Gap
 
-Start from `clean-change.md` and apply its clean implementation update. On `calib/run-f`, make these two additional changes.
+Start from `clean-change.md` and apply its clean implementation and verification update. On `calib/run-f`, make these two additional changes.
 
 Add `src/slugify/notes.md`:
 
@@ -17,6 +17,8 @@ Overwrite `src/slugify/tests/slugify.spec.ts`:
 ```typescript
 export const SEPARATOR_INPUTS = ['Hello World', '--Hello--'];
 ```
+
+This overwrite replaces the spec case added by the `run-a` clean change.
 
 The file keeps its `.spec` suffix but holds no case. The adapter reads the content, resolves no verification role, and therefore contributes no evidence row at all — the changed verification document is absent from every evidence table. Nothing was measured about it, so nothing can be judged about it.
 

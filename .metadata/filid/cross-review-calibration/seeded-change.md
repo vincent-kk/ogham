@@ -1,6 +1,6 @@
 # Calibration Fixture — Seeded FCA Violations
 
-Start from `clean-change.md` and apply its clean implementation update. On `calib/run-c`, make these two additional changes.
+Start from `clean-change.md` and apply its clean implementation and verification update. On `calib/run-c`, make these two additional changes.
 
 Overwrite `src/index.ts`:
 
