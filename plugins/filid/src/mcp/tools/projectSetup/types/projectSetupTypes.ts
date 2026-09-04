@@ -1,6 +1,5 @@
 import type { PROJECT_SETUP_ACTIONS } from '../../../../constants/mcpContracts.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
-
 import type { OpenSettingsOutput } from '../openSettings/index.js';
 import type { RuleDocsSyncOutput } from '../ruleDocsSync/index.js';
 

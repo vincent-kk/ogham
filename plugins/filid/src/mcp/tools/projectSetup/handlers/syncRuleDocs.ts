@@ -12,11 +12,11 @@ import type {
   ToolDiagnostic,
   ToolPayload,
 } from '../../../../types/toolEnvelope.js';
+import { handleRuleDocsSync } from '../ruleDocsSync/index.js';
 import type {
   ProjectSetupInput,
   RuleDocsSyncData,
 } from '../types/projectSetupTypes.js';
-import { handleRuleDocsSync } from '../ruleDocsSync/index.js';
 
 type RuleDocsActionInput = Extract<
   ProjectSetupInput,

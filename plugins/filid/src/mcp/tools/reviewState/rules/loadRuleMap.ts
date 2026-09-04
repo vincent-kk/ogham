@@ -7,9 +7,7 @@ import {
 import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 
-import type {
-  LoadedReviewRule,
-} from './reviewRuleTypes.js';
+import type { LoadedReviewRule } from './reviewRuleTypes.js';
 import { isBuiltinReviewRuleDefinition } from './utils/isBuiltinReviewRuleDefinition.js';
 
 /** Supported built-in conditional selector values. */
@@ -104,8 +102,7 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
       );
     if (
       rule.when !== undefined &&
-      (typeof rule.when !== 'string' ||
-        !SUPPORTED_WHEN.has(rule.when))
+      (typeof rule.when !== 'string' || !SUPPORTED_WHEN.has(rule.when))
     )
       throw new Error(`Review rule "${rule.id}" has an invalid when selector.`);
     if (!isBuiltinReviewRuleDefinition(rule))

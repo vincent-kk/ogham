@@ -22,12 +22,16 @@ describe('renderReviewBrief', () => {
     expect(parsed.problems).toEqual([]);
     expect(parsed.opinion).not.toBeNull();
     expect(
-      checkReviewOpinion(parsed.opinion!, {
-        group: input.group.id,
-        round: 1,
-        sourceHash: input.sourceHash,
-        units: input.group.units,
-      }, problems),
+      checkReviewOpinion(
+        parsed.opinion!,
+        {
+          group: input.group.id,
+          round: 1,
+          sourceHash: input.sourceHash,
+          units: input.group.units,
+        },
+        problems,
+      ),
     ).toBe(true);
     expect(problems).toEqual([]);
     expect(contract).not.toContain('COMPLETE | INDETERMINATE');

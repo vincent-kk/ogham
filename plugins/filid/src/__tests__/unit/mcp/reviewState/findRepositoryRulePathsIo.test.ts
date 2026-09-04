@@ -2,7 +2,10 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { describe, expect, it, vi } from 'vitest';
+
+import { findRepositoryRulePaths } from '../../../../mcp/tools/reviewState/rules/findRepositoryRulePaths.js';
 
 vi.mock('@ogham/cross-platform', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@ogham/cross-platform')>();
@@ -11,10 +14,6 @@ vi.mock('@ogham/cross-platform', async (importOriginal) => {
     readUtf8FileIfExistsSync: vi.fn(actual.readUtf8FileIfExistsSync),
   };
 });
-
-import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
-
-import { findRepositoryRulePaths } from '../../../../mcp/tools/reviewState/rules/findRepositoryRulePaths.js';
 
 describe('findRepositoryRulePaths I/O', () => {
   it('checks instruction-file existence without reading their bodies', () => {

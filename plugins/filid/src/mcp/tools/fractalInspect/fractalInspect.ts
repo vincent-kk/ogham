@@ -1,12 +1,12 @@
 import { FRACTAL_INSPECT_ACTIONS } from '../../../constants/mcpContracts.js';
 
 import { handleContextResolve } from './contextResolve/index.js';
+import { handleFractalScan } from './fractalScan/index.js';
+import { handleStructureValidate } from './structureValidate/index.js';
 import type {
   FractalInspectInput,
   FractalInspectResult,
 } from './types/fractalInspectTypes.js';
-import { handleFractalScan } from './fractalScan/index.js';
-import { handleStructureValidate } from './structureValidate/index.js';
 import { handleVerificationScan } from './verificationScan/index.js';
 
 /**

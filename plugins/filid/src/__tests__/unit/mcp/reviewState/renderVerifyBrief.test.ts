@@ -28,11 +28,15 @@ describe('renderVerifyBrief', () => {
       decisionIds,
     );
     expect(
-      checkVerifyOpinion(parsed.opinion!, {
-        group: input.group.id,
-        sourceHash: input.sourceHash,
-        decisionIds,
-      }, problems),
+      checkVerifyOpinion(
+        parsed.opinion!,
+        {
+          group: input.group.id,
+          sourceHash: input.sourceHash,
+          decisionIds,
+        },
+        problems,
+      ),
     ).toBe(true);
     expect(problems).toEqual([]);
     expect(contract).not.toContain('CONFIRMED | REFUTED | INDETERMINATE');

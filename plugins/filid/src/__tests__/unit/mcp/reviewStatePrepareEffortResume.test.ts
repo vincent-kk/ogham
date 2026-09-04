@@ -8,8 +8,8 @@ import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
 import { buildReviewOpinion } from './reviewState/helpers/buildReviewOpinion.js';
 import {
-  createReviewStateSealFixture,
   type ReviewStateSealFixture,
+  createReviewStateSealFixture,
 } from './reviewState/helpers/createReviewStateSealFixture.js';
 import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
 import { resolveReviewStateFixtureArtifact } from './reviewState/helpers/resolveReviewStateFixtureArtifact.js';

@@ -10,7 +10,6 @@ import type {
   VerificationScanSummary,
 } from '../../../../types/report.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
-
 import type { ContextResolveInput } from '../contextResolve/index.js';
 import type { FractalScanInput } from '../fractalScan/index.js';
 import type { StructureValidateInput } from '../structureValidate/index.js';

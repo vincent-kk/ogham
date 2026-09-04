@@ -7,8 +7,8 @@ import { REVIEW_STATE_ACTIONS } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
 import {
-  createReviewStateSealFixture,
   type ReviewStateSealFixture,
+  createReviewStateSealFixture,
 } from './reviewState/helpers/createReviewStateSealFixture.js';
 
 /** Temporary Git repository and plugin root used by state-recovery cases. */

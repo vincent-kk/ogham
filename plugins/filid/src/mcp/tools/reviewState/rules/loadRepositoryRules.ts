@@ -7,9 +7,7 @@ import {
 import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 
-import type {
-  LoadedReviewRule,
-} from './reviewRuleTypes.js';
+import type { LoadedReviewRule } from './reviewRuleTypes.js';
 import { isRepositoryReviewRuleDefinition } from './utils/isRepositoryReviewRuleDefinition.js';
 
 /**

@@ -35,8 +35,8 @@ import { hasAllReviewBriefs } from './utils/hasAllReviewBriefs.js';
 import { loadPrepareReviewRules } from './utils/loadPrepareReviewRules.js';
 import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
 import { resolvePreparedReviewFiles } from './utils/resolvePreparedReviewFiles.js';
-import { retuneReviewGroups } from './utils/retuneReviewGroups.js';
 import { retainReviewGroupValidations } from './utils/retainReviewGroupValidations.js';
+import { retuneReviewGroups } from './utils/retuneReviewGroups.js';
 import { writePreparedReviewArtifacts } from './utils/writePreparedReviewArtifacts.js';
 
 /** Prepare input narrowed from the public review-state action union. */
@@ -99,10 +99,11 @@ export async function prepareReviewState(
 
   if (canResume && existsSync(paths.evidencePath)) {
     const presence = readReviewArtifactPresence(paths, existing);
-    const activeRules = !effortChanged && hasAllReviewBriefs(paths, existing)
-      ? []
-      : loadPrepareReviewRules(input.projectRoot, settings.pluginRoot)
-          .activeRules;
+    const activeRules =
+      !effortChanged && hasAllReviewBriefs(paths, existing)
+        ? []
+        : loadPrepareReviewRules(input.projectRoot, settings.pluginRoot)
+            .activeRules;
     const renderedUnits = presence.diffs
       ? []
       : await collectRenderedReviewUnits({

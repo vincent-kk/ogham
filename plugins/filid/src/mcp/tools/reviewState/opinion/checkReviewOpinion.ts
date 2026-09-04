@@ -1,10 +1,10 @@
 import type { ReviewValidationProblem } from '../state/reviewStateTypes.js';
 
+import type { ReviewOpinion } from './reviewOpinionTypes.js';
 import type {
   CheckReviewOpinionOptions,
   UncheckedReviewOpinion,
 } from './uncheckedOpinionTypes.js';
-import type { ReviewOpinion } from './reviewOpinionTypes.js';
 import { reviewUnitKey } from './utils/reviewUnitKey.js';
 
 /** Reviewer completion states admitted by schema seven. */
