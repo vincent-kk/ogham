@@ -1,6 +1,6 @@
 {
   "name": "cennad",
-  "version": "0.10.9",
+  "version": "0.10.10",
   "description": "Cennad — delegate to Codex, Antigravity, or Claude Code CLIs from Claude Code and Codex hosts",
   "author": {
     "name": "Vincent K. Kelvin"
