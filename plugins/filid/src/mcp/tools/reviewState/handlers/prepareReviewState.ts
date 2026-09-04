@@ -119,6 +119,7 @@ export async function prepareReviewState(
     const groups = writePreparedReviewArtifacts({
       paths,
       groups: preparedGroups,
+      previousGroups: existing.groups,
       renderedUnits,
       files: existing.scope.files,
       candidates: existing.scope.candidates,
@@ -197,6 +198,7 @@ export async function prepareReviewState(
   groups = writePreparedReviewArtifacts({
     paths,
     groups,
+    previousGroups: canResume ? existing.groups : [],
     renderedUnits,
     files,
     candidates: collected.candidates,

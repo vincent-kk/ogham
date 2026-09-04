@@ -4,17 +4,19 @@ import type { RenderReviewBriefInput } from '../reviewBriefTypes.js';
 /**
  * Render a semantically valid schema-seven reviewer opinion example.
  * @param input Prepared group and source identity represented by the brief.
+ * @param round One-based reviewer round represented by the example.
  * @returns Pretty JSON whose file assignments satisfy the prepared group.
  */
 export function renderReviewOpinionExample(
   input: RenderReviewBriefInput,
+  round = 1,
 ): string {
   const primaryUnit = input.group.units[0];
   return JSON.stringify(
     {
       schema: REVIEW_OPINION_SCHEMA_VERSION,
       group: input.group.id,
-      round: 1,
+      round,
       state: 'COMPLETE',
       sourceHash: input.sourceHash,
       files: input.group.units.map((unit) => ({

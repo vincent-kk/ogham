@@ -26,9 +26,13 @@ function renderNewRanges(hunks: readonly ReviewHunk[]): string {
 /**
  * Render one deterministic reviewer brief with the full roster kept visible.
  * @param input Group, roster, candidates, and resolved rule bodies.
+ * @param round One-based reviewer round whose opinion path the brief targets.
  * @returns Reviewer Markdown containing the exact v7 output contract.
  */
-export function renderReviewBrief(input: RenderReviewBriefInput): string {
+export function renderReviewBrief(
+  input: RenderReviewBriefInput,
+  round = 1,
+): string {
   const filesByPath = new Map(input.files.map((file) => [file.path, file]));
   const filesTable = renderMarkdownTable(
     [
@@ -100,7 +104,11 @@ export function renderReviewBrief(input: RenderReviewBriefInput): string {
     .sort((left, right) => left.id.localeCompare(right.id))
     .map(({ id, body }) => `### ${id}\n\n${body.trimEnd()}`)
     .join('\n\n');
-  const outputContract = renderReviewOpinionExample(input);
+  const outputContract = renderReviewOpinionExample(input, round);
+  const outputPath =
+    round === 1
+      ? input.group.skeletonPath
+      : `opinions/review-${input.group.id}.r${String(round)}.json`;
   return [
     '---',
     `group: ${input.group.id}`,
@@ -109,7 +117,7 @@ export function renderReviewBrief(input: RenderReviewBriefInput): string {
     `depends_on: ${JSON.stringify(input.group.dependsOn)}`,
     `source_hash: ${input.sourceHash}`,
     `base_ref: ${JSON.stringify(input.baseRef)}`,
-    `output: ${input.group.skeletonPath}`,
+    `output: ${outputPath}`,
     '---',
     '',
     '## Files',
