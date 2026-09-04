@@ -12,7 +12,9 @@ review_directory: <absolute path returned by review_state>
 changed_files_count: <n>
 created_at: <ISO 8601>
 ---
+
 ## Change Context
+
 <concise pull-request or commit-history summary>
 ## Review Checklist
 | Path | Change | Group | Rules | Result | Reason |
@@ -93,8 +95,11 @@ files_reviewed: <integer>
 files_skipped: <integer>
 generated_at: <ISO 8601>
 ---
+
 # Cross-Review — <branch>
+
 ## Scope
+
 <changed files and owners>
 ## Evidence Status
 | Field | Value |
@@ -109,27 +114,27 @@ generated_at: <ISO 8601>
 ## Coverage
 
 | Path | Change | Group | Result | Reason |
-| --- | --- | --- | --- | --- |
+| ---- | ------ | ----- | ------ | ------ |
 
 ## Verification Log
 
 | Candidate | Category | Verdict | Evidence | Reason |
-| --- | --- | --- | --- | --- |
+| --------- | -------- | ------- | -------- | ------ |
 
 ## Confirmed Findings
 
-| ID | Severity | Category | Path | Rule | Consequence | Action |
-| --- | --- | --- | --- | --- | --- | --- |
+| ID  | Severity | Category | Path | Rule | Consequence | Action |
+| --- | -------- | -------- | ---- | ---- | ----------- | ------ |
 
 ## Refuted Candidates
 
-| ID | Category | Refuting Evidence | Reason |
-| --- | --- | --- | --- |
+| ID  | Category | Refuting Evidence | Reason |
+| --- | -------- | ----------------- | ------ |
 
 ## Unresolved Evidence
 
 | Source | Path | Rule | Detail | Affects Verdict |
-| --- | --- | --- | --- | --- |
+| ------ | ---- | ---- | ------ | --------------- |
 
 ## Final Verdict
 
@@ -166,15 +171,15 @@ Post only when the branch has a pull request. Keep the verdict table outside col
 ```markdown
 ## Code Review Governance — <verdict>
 
-| Field | Value |
-| --- | --- |
-| Verdict | <APPROVED \| REQUEST_CHANGES \| INCONCLUSIVE> |
-| Branch | `<branch>` |
-| Base | `<base ref>` |
-| Snapshot | `<snapshot hash, or unavailable>` |
-| Coverage | <r> reviewed · <s> skipped · <t> total |
-| Findings | <c> confirmed · <r> refuted · <i> indeterminate |
-| Generated | <ISO 8601> |
+| Field     | Value                                           |
+| --------- | ----------------------------------------------- |
+| Verdict   | <APPROVED \| REQUEST_CHANGES \| INCONCLUSIVE>   |
+| Branch    | `<branch>`                                      |
+| Base      | `<base ref>`                                    |
+| Snapshot  | `<snapshot hash, or unavailable>`               |
+| Coverage  | <r> reviewed · <s> skipped · <t> total          |
+| Findings  | <c> confirmed · <r> refuted · <i> indeterminate |
+| Generated | <ISO 8601>                                      |
 
 <details><summary>Confirmed findings (<c>)</summary>
 

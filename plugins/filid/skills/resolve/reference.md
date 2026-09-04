@@ -37,10 +37,7 @@ unapplied: <k>
 - **Consequences**: <what this costs and what now has to stay true>
 ```
 
-Every item heading under `## Accepted` copies the canonical `FIX-NNN` from
-`fix-requests.md` exactly; never renumber or synthesize it. The accepted FIX ID
-is the revalidate join key to exactly one canonical fix-request block, which
-remains the source of the complete original finding payload.
+Every item heading under `## Accepted` copies the canonical `FIX-NNN` from `fix-requests.md` exactly; never renumber or synthesize it. The accepted FIX ID is the revalidate join key to exactly one canonical fix-request block, which remains the source of the complete original finding payload.
 
 `resolve_commit_sha` is load-bearing. `revalidate` diffs `resolve_commit_sha..HEAD`; a value read after the commit yields an empty delta and a false PASS.
 

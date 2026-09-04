@@ -36,12 +36,12 @@ mcp__plugin_filid_tools__review_state({ action: "prepare", projectRoot: PROJECT_
 
 Use `data.reviewDirectory` as `REVIEW_DIR` and `data.state.sourceHash` as `SOURCE_HASH`; never derive either value.
 
-| Disposition | Action |
-| --- | --- |
-| `fresh` | Continue to Step 2. |
-| `resumable` | Call `review_state` with `{ action: "checkpoint", projectRoot: PROJECT_ROOT, branchName: BRANCH }`; if `session.md` does not have `review_schema: 6`, restart once with `prepare(force: true)`; otherwise continue at Step 2 when `evidence.md` is missing, at Step 3 for every group whose `opinions/review-NN.md` is missing, at Step 4 for every group whose `opinions/verify-NN.md` is missing, otherwise at Step 5. |
-| `cached` | When both `session.md` and the report have `review_schema: 6`, emit the sealed verdict and stop; otherwise restart once with `prepare(force: true)`. |
-| non-`ok` status | Report diagnostics and stop. |
+| Disposition     | Action                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fresh`         | Continue to Step 2.                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `resumable`     | Call `review_state` with `{ action: "checkpoint", projectRoot: PROJECT_ROOT, branchName: BRANCH }`; if `session.md` does not have `review_schema: 6`, restart once with `prepare(force: true)`; otherwise continue at Step 2 when `evidence.md` is missing, at Step 3 for every group whose `opinions/review-NN.md` is missing, at Step 4 for every group whose `opinions/verify-NN.md` is missing, otherwise at Step 5. |
+| `cached`        | When both `session.md` and the report have `review_schema: 6`, emit the sealed verdict and stop; otherwise restart once with `prepare(force: true)`.                                                                                                                                                                                                                                                                     |
+| non-`ok` status | Report diagnostics and stop.                                                                                                                                                                                                                                                                                                                                                                                             |
 
 Allow only one forced restart for schema, stale, or missing state during the run. A second identity failure stops without a terminal verdict.
 
@@ -63,12 +63,12 @@ mcp__plugin_filid_tools__review_state({ action: "scope", projectRoot: PROJECT_RO
 
 Apply these built-in layers, then the nearest repository `CLAUDE.md` or `AGENTS.md` and applicable `.claude/rules/*.md`:
 
-| Rule file | Applies when |
-| --- | --- |
-| `rules/default.md` | every reviewable file |
-| `rules/tests.md` | role is `verification`, or role is `source` and behavior changed without a visible verification update |
-| `rules/documents.md` | role is `document` |
-| `rules/fca.md` | owner is not null |
+| Rule file            | Applies when                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------ |
+| `rules/default.md`   | every reviewable file                                                                                  |
+| `rules/tests.md`     | role is `verification`, or role is `source` and behavior changed without a visible verification update |
+| `rules/documents.md` | role is `document`                                                                                     |
+| `rules/fca.md`       | owner is not null                                                                                      |
 
 Mark role `generated` and change `D` as `skipped` immediately with reasons `generated artifact` and `deleted path`. Sort the rest by owner; use one group when there are at most four files and 200 churn lines, otherwise cut groups before either ten files or 800 churn lines would be exceeded.
 
@@ -96,13 +96,13 @@ mcp__plugin_filid_tools__review_state({ action: "checkpoint", projectRoot: PROJE
 3. Merge every `review-NN.md` file result into the checklist by `(path, change)`. Do not infer a result for an absent or unmatched row.
 4. Evaluate this table in order:
 
-| Condition (evaluate in order) | Verdict |
-| --- | --- |
-| `evidence.md` has `evidence_complete: false` or `worktree` is `documents-only` or `source-dirty`, or a required artifact is missing after one retry | `INCONCLUSIVE` |
-| any checklist entry is still `pending`, or any review carries a `gaps` entry | `INCONCLUSIVE` |
-| any `error` candidate has verdict `INDETERMINATE` | `INCONCLUSIVE` |
-| any candidate has verdict `CONFIRMED` | `REQUEST_CHANGES` |
-| otherwise | `APPROVED` |
+| Condition (evaluate in order)                                                                                                                       | Verdict           |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `evidence.md` has `evidence_complete: false` or `worktree` is `documents-only` or `source-dirty`, or a required artifact is missing after one retry | `INCONCLUSIVE`    |
+| any checklist entry is still `pending`, or any review carries a `gaps` entry                                                                        | `INCONCLUSIVE`    |
+| any `error` candidate has verdict `INDETERMINATE`                                                                                                   | `INCONCLUSIVE`    |
+| any candidate has verdict `CONFIRMED`                                                                                                               | `REQUEST_CHANGES` |
+| otherwise                                                                                                                                           | `APPROVED`        |
 
 5. Write `review-report.md` from `templates.md`. For `REQUEST_CHANGES`, write `fix-requests.md` with confirmed candidates only; otherwise delete only a stale `fix-requests.md` inside this `REVIEW_DIR`.
 6. Call:
@@ -117,22 +117,22 @@ Continue only when status is `ok` and disposition is `sealed`.
 
 Determine pull-request presence through the host's available access.
 
-| Situation | Action |
-| --- | --- |
-| The branch has a pull request | Post the comment from `templates.md` — one per branch |
-| The branch has no pull request | Skip; record `pr-comment: none` in the terminal output |
-| Pull-request access is unavailable | Skip; record `pr-comment: unavailable` |
-| Posting fails | Skip; record `pr-comment: failed` with the reason |
+| Situation                          | Action                                                 |
+| ---------------------------------- | ------------------------------------------------------ |
+| The branch has a pull request      | Post the comment from `templates.md` — one per branch  |
+| The branch has no pull request     | Skip; record `pr-comment: none` in the terminal output |
+| Pull-request access is unavailable | Skip; record `pr-comment: unavailable`                 |
+| Posting fails                      | Skip; record `pr-comment: failed` with the reason      |
 
 Comment absence or failure never changes the sealed verdict. Emit only the terminal line defined in `templates.md`.
 
 ## Options
 
-| Option | Default | Meaning |
-| --- | --- | --- |
-| `--base REF` | auto | committed comparison base |
-| `--force` | off | clear stale canonical artifacts and prepare fresh state |
-| `--cleanup` | off | delete only this branch's review directory, then stop |
+| Option       | Default | Meaning                                                 |
+| ------------ | ------- | ------------------------------------------------------- |
+| `--base REF` | auto    | committed comparison base                               |
+| `--force`    | off     | clear stale canonical artifacts and prepare fresh state |
+| `--cleanup`  | off     | delete only this branch's review directory, then stop   |
 
 ## Invariants
 

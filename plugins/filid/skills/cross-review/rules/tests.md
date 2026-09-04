@@ -16,4 +16,3 @@ Apply these rules to changed verification files and to changed behavior whose ve
 ## Fixture Independence
 
 - **TST-6 — Production logic duplication**: Does a changed fixture or expected-value helper reproduce the production algorithm closely enough that the same defect can make both sides agree?
-

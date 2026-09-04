@@ -127,20 +127,20 @@ A blocked write explains its reason and denies only that one tool call — your 
 
 ## Skills Reference
 
-| Skill                  | What it does                                                              |
-| ---------------------- | ------------------------------------------------------------------------- |
-| `/filid:setup`         | Initialize config and rule documents; propose missing INTENT/DETAIL       |
-| `/filid:scan`          | The single full-project FCA audit                                         |
-| `/filid:context-query` | Resolve a path to its owner fractal and minimal document chain            |
-| `/filid:guide`         | Explain the current tree, classifications, and placement rules            |
-| `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval       |
-| `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions |
+| Skill                  | What it does                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/filid:setup`         | Initialize config and rule documents; propose missing INTENT/DETAIL                                                                                            |
+| `/filid:scan`          | The single full-project FCA audit                                                                                                                              |
+| `/filid:context-query` | Resolve a path to its owner fractal and minimal document chain                                                                                                 |
+| `/filid:guide`         | Explain the current tree, classifications, and placement rules                                                                                                 |
+| `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval                                                                                            |
+| `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions                                                                                      |
 | `/filid:cross-review`  | Review a committed change file by file against layered rules and changed-scope FCA evidence, then independently verify every candidate with an efficient model |
-| `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                  |
-| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR               |
-| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications      |
-| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL          |
-| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support           |
+| `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                                                                                                       |
+| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR                                                                                                    |
+| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications                                                                                           |
+| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL                                                                                               |
+| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support                                                                                                |
 
 ---
 
@@ -172,16 +172,16 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 
 ## MCP Tools
 
-| Tool                 | Role                                               |
-| -------------------- | -------------------------------------------------- |
-| `project_init`       | Initialize FCA in a project                        |
-| `rule_docs_sync`     | Sync the managed rule documents                    |
-| `open_settings`      | Open the settings UI                               |
-| `fractal_scan`       | Inspect the snapshot tree                          |
-| `context_resolve`    | Batch owner/document chains from one snapshot      |
-| `restructure_plan`   | Decide placement; returns a plan artifact          |
-| `structure_validate` | Validate a project, or a plan's pre/postconditions |
-| `verification_scan`  | Judge spec-document / test-record contracts        |
+| Tool                 | Role                                                       |
+| -------------------- | ---------------------------------------------------------- |
+| `project_init`       | Initialize FCA in a project                                |
+| `rule_docs_sync`     | Sync the managed rule documents                            |
+| `open_settings`      | Open the settings UI                                       |
+| `fractal_scan`       | Inspect the snapshot tree                                  |
+| `context_resolve`    | Batch owner/document chains from one snapshot              |
+| `restructure_plan`   | Decide placement; returns a plan artifact                  |
+| `structure_validate` | Validate a project, or a plan's pre/postconditions         |
+| `verification_scan`  | Judge spec-document / test-record contracts                |
 | `review_state`       | cross-review state, changed-scope roster, and FCA evidence |
 
 Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.

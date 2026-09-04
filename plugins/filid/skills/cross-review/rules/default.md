@@ -46,4 +46,3 @@ Apply these rules to every reviewable file. Each item is a falsifiable question 
 Apply the language's standard traps when checking language-idiomatic defects.
 
 - **DEF-25 — Idiomatic defect**: Does the changed code trigger a documented language-specific trap with a concrete runtime, type, ownership, lifetime, or comparison failure?
-

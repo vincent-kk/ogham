@@ -15,4 +15,3 @@ Apply these rules to changed documentation, module contracts, and rule documents
 ## Executable Examples
 
 - **DOC-5 — Command examples**: Does every changed command example use an existing script or executable and pass flags that the current interface accepts?
-

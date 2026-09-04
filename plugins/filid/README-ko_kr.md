@@ -127,20 +127,20 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 
 ## 스킬 목록
 
-| 스킬                   | 역할                                               |
-| ---------------------- | -------------------------------------------------- |
-| `/filid:setup`         | config·rule 문서 초기화, 누락 INTENT/DETAIL 제안   |
-| `/filid:scan`          | 전체 FCA 감사의 유일한 진입점                      |
-| `/filid:context-query` | 소유 프랙탈과 최소 문서 체인 해석                  |
-| `/filid:guide`         | 현재 트리·분류·배치 규칙 설명                      |
-| `/filid:enrich-docs`   | 스냅샷 증거 기반 INTENT/DETAIL 개선 (승인 후 편집) |
-| `/filid:restructure`   | 읽기 전용 계획 → 승인 → 외부 실행 → 사후조건 검증  |
+| 스킬                   | 역할                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| `/filid:setup`         | config·rule 문서 초기화, 누락 INTENT/DETAIL 제안                                                 |
+| `/filid:scan`          | 전체 FCA 감사의 유일한 진입점                                                                    |
+| `/filid:context-query` | 소유 프랙탈과 최소 문서 체인 해석                                                                |
+| `/filid:guide`         | 현재 트리·분류·배치 규칙 설명                                                                    |
+| `/filid:enrich-docs`   | 스냅샷 증거 기반 INTENT/DETAIL 개선 (승인 후 편집)                                               |
+| `/filid:restructure`   | 읽기 전용 계획 → 승인 → 외부 실행 → 사후조건 검증                                                |
 | `/filid:cross-review`  | 커밋 변경을 파일별 계층 규칙·changed-scope FCA 증거로 리뷰하고 효율 모델로 모든 후보를 독립 검증 |
-| `/filid:migrate`       | legacy CLAUDE.md / SPEC.md 이름 이관               |
-| `/filid:pull-request`  | 문서 동기화 후 구조화된 GitHub PR 생성             |
-| `/filid:resolve`       | fix request 수용·거부 결정, 위임, 정당화 기록      |
-| `/filid:revalidate`    | 교정 delta 재측정과 최종 PASS/FAIL 판정            |
-| `/filid:pipeline`      | merge-track 4단계를 한 번에 실행 (재개 지원)       |
+| `/filid:migrate`       | legacy CLAUDE.md / SPEC.md 이름 이관                                                             |
+| `/filid:pull-request`  | 문서 동기화 후 구조화된 GitHub PR 생성                                                           |
+| `/filid:resolve`       | fix request 수용·거부 결정, 위임, 정당화 기록                                                    |
+| `/filid:revalidate`    | 교정 delta 재측정과 최종 PASS/FAIL 판정                                                          |
+| `/filid:pipeline`      | merge-track 4단계를 한 번에 실행 (재개 지원)                                                     |
 
 ---
 
@@ -182,7 +182,7 @@ filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙
 | `restructure_plan`   | 배치 결정, plan artifact 반환           |
 | `structure_validate` | 프로젝트 또는 계획의 사전·사후조건 검증 |
 | `verification_scan`  | spec-document / test-record 계약 판정   |
-| `review_state`       | cross-review 상태·변경 roster·FCA 증거   |
+| `review_state`       | cross-review 상태·변경 roster·FCA 증거  |
 
 모든 도구가 동일한 envelope를 사용합니다. 반환은 작게 유지되며, 16 KiB를 넘으면 content-addressed artifact로 저장하고 경로와 SHA-256으로 참조합니다.
 

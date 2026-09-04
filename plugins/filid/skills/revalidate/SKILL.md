@@ -33,19 +33,9 @@ mcp__plugin_filid_tools__review_state({
 
 Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name. `missing` aborts. `stale` is expected here — corrections moved the source — and is not an error at this stage.
 
-Read both `REVIEW_DIR/justifications.md` and `REVIEW_DIR/fix-requests.md`. The
-absence of `justifications.md` means `resolve` never ran; report that and end.
-Take `resolve_commit_sha` from the `justifications.md` frontmatter.
+Read both `REVIEW_DIR/justifications.md` and `REVIEW_DIR/fix-requests.md`. The absence of `justifications.md` means `resolve` never ran; report that and end. Take `resolve_commit_sha` from the `justifications.md` frontmatter.
 
-Parse every canonical FIX ID under `## Accepted`, then parse the canonical
-fix-request blocks and their Severity, Category, Path, Rule, Claim, Evidence,
-Consequence, and Recommended Action fields. Join each accepted FIX ID to
-exactly one canonical fix request to reconstruct the
-complete original finding payload. An accepted ID that is missing, duplicated
-in either artifact, matches
-zero or multiple requests, or has any required field missing is
-`inconclusive`. Do not re-measure that item, and in particular do not spawn a
-non-FCA verifier for it.
+Parse every canonical FIX ID under `## Accepted`, then parse the canonical fix-request blocks and their Severity, Category, Path, Rule, Claim, Evidence, Consequence, and Recommended Action fields. Join each accepted FIX ID to exactly one canonical fix request to reconstruct the complete original finding payload. An accepted ID that is missing, duplicated in either artifact, matches zero or multiple requests, or has any required field missing is `inconclusive`. Do not re-measure that item, and in particular do not spawn a non-FCA verifier for it.
 
 ## Step 2 — Extract the delta
 
@@ -59,11 +49,11 @@ An empty delta with accepted items present is a finding, not a pass: it means no
 
 For each accepted item whose Step 1 join succeeded, re-run the measurement that produced the original finding, scoped to the item's owning fractal:
 
-| Category                                                                       | Re-measurement                                                                                                                                                                                                                                                                           |
-| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `contract`                                                                     | `structure_validate` with `scopes: ["documents"]`                                                                                                                                                                                                                                        |
-| `structure`                                                                    | `structure_validate` with `scopes: ["nodes","entry-points","boundaries","dag"]`                                                                                                                                                                                                      |
-| `verification`                                                                 | `verification_scan`, plus `structure_validate` `scopes: ["verification"]`                                                                                                                                                                                                                |
+| Category                                                                        | Re-measurement                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contract`                                                                      | `structure_validate` with `scopes: ["documents"]`                                                                                                                                                                                                                                  |
+| `structure`                                                                     | `structure_validate` with `scopes: ["nodes","entry-points","boundaries","dag"]`                                                                                                                                                                                                    |
+| `verification`                                                                  | `verification_scan`, plus `structure_validate` `scopes: ["verification"]`                                                                                                                                                                                                          |
 | `bug`, `security`, `performance`, `maintainability`, `test`, or `documentation` | Spawn `../cross-review/reviewers/verifier.md` in re-verification mode with the joined complete original finding payload and `git diff <resolve_commit_sha>..HEAD -- <path>`; `CONFIRMED` means `resolved`, `REFUTED` means `unresolved`, and `INDETERMINATE` means `inconclusive`. |
 
 MCP re-measurement applies only to FCA categories.
