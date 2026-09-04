@@ -16,7 +16,7 @@
 - 등록 도구: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
 - `ToolResultEnvelope<Summary, Data>`는 `status`, `summary`, optional `data`, optional `artifact`, `diagnostics`를 가진다.
 - `toolResult(toolName, payload)`는 envelope를 compact MCP text content로 직렬화한다.
-- `toolError(error)`는 transport 또는 trust-boundary 실패를 `isError: true` 응답으로 변환한다.
+- `toolError(error)`는 transport 또는 trust-boundary 실패를 `isError: true` 응답으로 변환한다. 도구 계약이 stable diagnostic code를 가진 typed error를 던지면 그 코드를 보존하고, 그 외 실행 실패만 `tool-execution-error`를 쓴다.
 - `wrapHandler(toolName, schema, handler)`는 schema·handler·artifact 오류를 일관된 tool error로 격리한다.
 - `startServer()`는 stdio transport 연결 후 boot cleanup을 수행하고 동기 shutdown handler를 한 번 등록한다.
 - `context_resolve`는 최소 한 item의 `requests` 배열을 받고, 한 shared snapshot에서 입력 순서대로 item 결과를 반환한다.
@@ -37,7 +37,7 @@
 
 - `tools/list`는 각 도구의 필드와 enum/literal/minimum 제약을 유효한 MCP object JSON Schema로 광고한다.
 - 광고된 제약을 위반한 실제 `tools/call`도 SDK raw error가 아니라 `isError: true`인 Filid 공통 error envelope를 반환한다.
-- 입력 검증 실패는 `tool-input-invalid`, 핸들러 실행 실패는 `tool-execution-error` 진단 코드를 쓴다. 두 실패가 코드를 공유하면 호출자가 자기 인자를 고쳐야 하는지 엔진 결함인지 구분할 수 없다.
+- 입력 검증 실패는 `tool-input-invalid`, 도구 계약이 분류하지 않은 핸들러 실행 실패는 `tool-execution-error` 진단 코드를 쓴다. 도구 계약이 stable diagnostic code를 부여한 실행 실패는 그 코드를 보존한다. 입력 오류와 미분류 엔진 결함이 코드를 공유하면 호출자가 자기 인자를 고쳐야 하는지 엔진 결함인지 구분할 수 없다.
 - 모든 도구 input schema는 필드마다 `.describe()`를 갖는다. MCP 표면이 LLM 호출자에게는 유일한 계약이므로 이름만으로 의미가 서지 않는 필드 (`fractal_scan.maxDepth` 같은 규칙 임계값)는 설명이 계약의 일부다.
 - 도구 공통 project path 설명은 실제 root 해석과 일치한다. 공급된 절대 경로는 그대로 이 호출의 root가 되고 상향 탐색은 없다. `.filid/config.json`만 git 저장소 루트에서 읽힌다. 설명이 상향 해석을 주장하면 호출자는 하위 디렉터리를 넘겨 scope를 좁히는 동작을 예측할 수 없다.
 - `context_resolve.requests`는 `minItems: 1`을 광고하고 각 item의 target과 optional comparison paths를 설명한다. 제거된 scalar `targetPath`와 `comparePaths`는 top-level 입력으로 허용하지 않는다.
@@ -52,4 +52,4 @@
 
 ## Last Updated
 
-2026-08-28
+2026-09-04 — 도구 계약이 소유한 실행 오류 진단 코드를 공통 MCP 오류 경계가 보존하도록 명시했다.

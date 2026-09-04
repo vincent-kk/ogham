@@ -452,7 +452,7 @@ summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `
 }
 ```
 
-`prepare | checkpoint | scope | seal | cleanup | assess`. `scope`는 prepared state에서 커밋 변경 roster와 changed-scope FCA 후보를 모아 canonical `evidence.md`를 쓴다. `cleanup`은 리터럴 `confirm: true`를 요구한다.
+`prepare | checkpoint | validate | seal | cleanup | assess`. `prepare`는 커밋 변경 roster와 FCA 후보를 수집하고 canonical `evidence.md`, group, bounded diff와 brief, JSON opinion 뼈대를 만든다. `validate`는 review round를 검사·병합하고 verifier JSON을 검증하며 hash를 state에 기록한다. `seal`은 그 hash와 source identity를 확인한 뒤 verdict를 fold하고 보고서·fix request·PR 코멘트를 렌더링한다. `cleanup`은 리터럴 `confirm: true`를 요구한다.
 
 ---
 

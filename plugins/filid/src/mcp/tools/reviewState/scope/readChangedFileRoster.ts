@@ -12,7 +12,7 @@ import { parseChangedFileStatuses } from './utils/parseChangedFileStatuses.js';
  * Read the committed changed-file roster and churn from Git.
  * @param projectRoot Absolute repository root for the Git calls.
  * @param baseCommit Merge-base commit stored in prepared review state.
- * @returns Path-sorted A/M/D roster with numeric churn.
+ * @returns Path-sorted A/M/D roster with numeric churn and binary identity.
  */
 export async function readChangedFileRoster(
   projectRoot: string,
@@ -38,6 +38,12 @@ export async function readChangedFileRoster(
     .map(([path, change]) => {
       const counts = churn.get(path);
       if (!counts) throw new Error(`git diff --numstat omitted ${path}`);
-      return { path, change, ...counts };
+      return {
+        path,
+        change,
+        insertions: counts.insertions,
+        deletions: counts.deletions,
+        binary: counts.binary,
+      };
     });
 }

@@ -1,5 +1,3 @@
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -7,6 +5,8 @@ import { STRUCTURE_VALIDATION_MODES } from '../../constants/mcpContracts.js';
 import { MCP_TOOL_NAMES, McpToolName } from '../../constants/mcpToolNames.js';
 import { TOOL_INPUT_DIAGNOSTIC_CODE } from '../../constants/toolEnvelope.js';
 import { createServer } from '../../mcp/server/lifecycle/createServer.js';
+
+import { connectTestClient } from './helpers/connectTestClient.js';
 
 const EXPECTED_TOOL_NAMES = [
   'project_init',
@@ -45,38 +45,15 @@ const INVALID_PROJECT_INIT_INPUT = {
   ...PROJECT_INIT_INPUT,
   adapterIds: [],
 };
-const MCP_TEST_CLIENT_INFO = {
-  name: 'filid-tool-surface-test',
-  version: '0.0.0',
-};
-
-interface ConnectedTestClient {
-  client: Client;
-  close: () => Promise<void>;
-}
-
+/**
+ * Collects the tool names registered while constructing the MCP server.
+ *
+ * @returns Tool names in registration order.
+ */
 function collectRegisteredToolNames(): string[] {
   const registerTool = vi.spyOn(McpServer.prototype, 'registerTool');
   createServer();
   return registerTool.mock.calls.map(([name]) => name);
-}
-
-async function connectTestClient(): Promise<ConnectedTestClient> {
-  const [clientTransport, serverTransport] =
-    InMemoryTransport.createLinkedPair();
-  const server = createServer();
-  const client = new Client(MCP_TEST_CLIENT_INFO);
-  await Promise.all([
-    server.connect(serverTransport),
-    client.connect(clientTransport),
-  ]);
-  return {
-    client,
-    close: async () => {
-      await client.close();
-      await server.close();
-    },
-  };
 }
 
 afterEach(() => {
@@ -118,7 +95,7 @@ describe('Filid 1.0 MCP tool surface', () => {
     }
   });
 
-  it('advertises the review_state scope action', async () => {
+  it('advertises the review_state v7 action fields', async () => {
     const connection = await connectTestClient();
     try {
       const tools = await connection.client.listTools();
@@ -126,7 +103,22 @@ describe('Filid 1.0 MCP tool surface', () => {
         ({ name }) => name === McpToolName.REVIEW_STATE,
       )?.inputSchema;
       expect(schema).toMatchObject({
-        properties: { action: { enum: expect.arrayContaining(['scope']) } },
+        properties: {
+          action: {
+            enum: [
+              'prepare',
+              'checkpoint',
+              'validate',
+              'seal',
+              'cleanup',
+              'assess',
+            ],
+          },
+          effort: { enum: ['low', 'medium', 'high'] },
+          kind: { enum: ['review', 'verify'] },
+          group: { type: 'string' },
+          round: { type: 'integer', minimum: 1 },
+        },
       });
     } finally {
       await connection.close();

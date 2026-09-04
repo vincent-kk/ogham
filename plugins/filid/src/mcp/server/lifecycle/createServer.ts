@@ -22,6 +22,7 @@ import {
   handleStructureValidate,
   handleVerificationScan,
 } from '../../tools/index.js';
+import type { ReviewStateResult } from '../../tools/reviewState/index.js';
 import { wrapHandler } from '../envelope/wrapHandler.js';
 import { handleOpenSettingsTool } from '../handlers/handleOpenSettingsTool.js';
 import { handleProjectInitTool } from '../handlers/handleProjectInitTool.js';
@@ -230,6 +231,7 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     action: z.literal(REVIEW_STATE_ACTIONS.PREPARE),
     baseRef: z.string().min(1),
     force: z.boolean().optional(),
+    effort: z.enum(['low', 'medium', 'high']).optional(),
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
@@ -238,7 +240,10 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
-    action: z.literal(REVIEW_STATE_ACTIONS.SCOPE),
+    action: z.literal(REVIEW_STATE_ACTIONS.VALIDATE),
+    kind: z.enum(['review', 'verify']),
+    group: z.string().regex(/^\d{2,}$/),
+    round: z.number().int().min(1).optional(),
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
@@ -264,8 +269,8 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .nativeEnum(REVIEW_STATE_ACTIONS)
     .describe(
       'prepare opens or resumes a run; checkpoint re-checks source identity; ' +
-        'scope collects changed-scope FCA evidence into evidence.md; ' +
-        'seal finalizes the verdict; cleanup deletes this branch state; ' +
+        'validate checks one review or verification opinion; seal folds and ' +
+        'renders the verdict; cleanup deletes this branch state; ' +
         'assess reports where the merge-track cycle resumes and how the dirty ' +
         'worktree classifies, without reading or writing review state.',
     ),
@@ -285,6 +290,25 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .boolean()
     .optional()
     .describe('prepare only: discard existing unsealed artifacts first.'),
+  effort: z
+    .enum(['low', 'medium', 'high'])
+    .optional()
+    .describe('prepare only: reviewer effort and maximum round count.'),
+  kind: z
+    .enum(['review', 'verify'])
+    .optional()
+    .describe('validate only: opinion kind to validate.'),
+  group: z
+    .string()
+    .regex(/^\d{2,}$/)
+    .optional()
+    .describe('validate only: two-or-more digit review group ID.'),
+  round: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe('review validation only: one-based reviewer round.'),
   confirm: z
     .literal(true)
     .optional()
@@ -389,12 +413,20 @@ const VERIFICATION_SCAN_HANDLER = wrapHandler(
   handleVerificationScan,
 );
 
-const REVIEW_STATE_HANDLER = wrapHandler(
-  McpToolName.REVIEW_STATE,
-  REVIEW_STATE_INPUT_SCHEMA,
-  handleReviewState,
+/** Wrapped review-state handler registered as the single six-action MCP surface. */
+const REVIEW_STATE_HANDLER = wrapHandler<
+  typeof REVIEW_STATE_INPUT_SCHEMA,
+  ReviewStateResult['summary'],
+  ReviewStateResult['data']
+>(McpToolName.REVIEW_STATE, REVIEW_STATE_INPUT_SCHEMA, (input) =>
+  handleReviewState(input),
 );
 
+/**
+ * Creates a Filid MCP server with every supported tool registered.
+ *
+ * @returns A disconnected server ready to attach to an MCP transport.
+ */
 export function createServer(): McpServer {
   const server = new McpServer(MCP_SERVER_INFO);
 

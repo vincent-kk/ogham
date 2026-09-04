@@ -73,17 +73,17 @@ AI 에이전트가 대규모 코드베이스를 다룰 때의 핵심 문제는 �
 
 ### Seiri와의 소유권 경계
 
-| 주제                                   | 개념 소유자 | filid의 구체 책임                          |
-| -------------------------------------- | ----------- | ------------------------------------------ |
-| 한 파일 한 exported function           | Seiri       | 분리 결과가 organ인지 fractal인지 판정     |
-| 함수/파일 분리 방법                    | Seiri       | 분리된 단위의 소유 프랙탈과 목표 경로 결정 |
-| purity/effect boundary                 | Seiri       | `pure-function` 노드의 의존 격리 검사      |
-| 이름·파일 크기·CC·LCOM4                | Seiri       | FCA 자동 gate로 쓰지 않되 변경 리뷰에서는 검사 |
+| 주제                                   | 개념 소유자 | filid의 구체 책임                                    |
+| -------------------------------------- | ----------- | ---------------------------------------------------- |
+| 한 파일 한 exported function           | Seiri       | 분리 결과가 organ인지 fractal인지 판정               |
+| 함수/파일 분리 방법                    | Seiri       | 분리된 단위의 소유 프랙탈과 목표 경로 결정           |
+| purity/effect boundary                 | Seiri       | `pure-function` 노드의 의존 격리 검사                |
+| 이름·파일 크기·CC·LCOM4                | Seiri       | FCA 자동 gate로 쓰지 않되 변경 리뷰에서는 검사       |
 | 테스트 유효성·fail-first·coverage      | Seiri       | 검증 문서 cap을 소유하고 변경 리뷰에서는 유효성 검사 |
-| INTENT/DETAIL                          | filid       | 소유, 검증, 최소 컨텍스트 체인 제공        |
-| fractal/organ/entry point/boundary/DAG | filid       | 소유, 스캔, 위반 판정                      |
-| LCA와 공유 단위 배치                   | filid       | lowest common **fractal** 계산과 목표 경로 |
-| cross-review                           | filid       | 변경 파일 규칙 리뷰, FCA 후보화, 독립 검증 |
+| INTENT/DETAIL                          | filid       | 소유, 검증, 최소 컨텍스트 체인 제공                  |
+| fractal/organ/entry point/boundary/DAG | filid       | 소유, 스캔, 위반 판정                                |
+| LCA와 공유 단위 배치                   | filid       | lowest common **fractal** 계산과 목표 경로           |
+| cross-review                           | filid       | 변경 파일 규칙 리뷰, FCA 후보화, 독립 검증           |
 
 이 연결은 런타임 의존이 아니다. filid는 Seiri API를 호출하지 않으며, Seiri가 설치되지 않은 프로젝트에서도 자체 기능을 모두 수행한다.
 
@@ -167,13 +167,13 @@ native 바이너리 의존과 전역 npm 모듈 탐색은 없다.
 | `build:compile` (`tsc -p tsconfig.build.json`)                              | 제거       | 라이브러리 산출물이 없으므로 컴파일 단계 자체가 불필요                 |
 | MCP 도구 19개 → **9개**                                                     | −10        | [08-API-SURFACE](./08-API-SURFACE.md#10에서-제거된-도구) 대응표        |
 | 사용자 스킬 19개 → **12개**                                                 | −7         | [03-LIFECYCLE](./03-LIFECYCLE.md) 제거 사유표                          |
-| 페르소나 에이전트 14개 → **0개**                                            | −14        | 고정 에이전트 정의 없이 reviewer·verifier를 동적으로 실행 (ADR-13)    |
+| 페르소나 에이전트 14개 → **0개**                                            | −14        | 고정 에이전트 정의 없이 reviewer·verifier를 동적으로 실행 (ADR-13)     |
 | Hook 이벤트 4개 → **3개**                                                   | −1         | `SubagentStart` 역할 제한 훅 제거 (에이전트 계층이 사라짐)             |
 | Hook 모듈 `changeTracker`·`agentEnforcer`                                   | 제거       | `PostToolUse` change tracking과 subagent 역할 강제를 하지 않는다       |
 | `.filid/criteria.md` acceptance 원장                                        | 폐지       | DETAIL.md 단일 원장. 발견 시 `legacy-criteria-ledger` finding (ADR-05) |
 | `.filid/debt.md` 부채 원장                                                  | 폐지       | 거부 사유는 `.filid/review/<branch>/justifications.md` 하나로 통일     |
 | "3 basic + 12 complex" 테스트 규칙과 승격                                   | 폐지       | spec-document 15 / test-record 32 역할 구분 (ADR-06)                   |
-| `naming-convention`·`index-barrel-pattern`·CC·LCOM4·file-size·coverage 규칙 | 제거       | 전역 자동 gate는 소유하지 않고 변경 범위 리뷰만 수행 (ADR-08·13)      |
+| `naming-convention`·`index-barrel-pattern`·CC·LCOM4·file-size·coverage 규칙 | 제거       | 전역 자동 gate는 소유하지 않고 변경 범위 리뷰만 수행 (ADR-08·13)       |
 | canonical 규칙 문서 `filid_fca-policy.md` 1개                               | 4개로 분할 | 로딩 조건이 다른 4개 required 문서                                     |
 
 계약 수준의 파급은 셋이다. **첫째**, 플러그인을 npm 패키지로 import하던 경로가 없다 — 소비 경로는 MCP 도구와 훅뿐이다. **둘째**, 제거된 도구를 호출하던 스킬은 복원이 아니라 9개 도구 위로 재작성됐다. **셋째**, `resolve`는 코드를 쓰지 않는다 — 수용·거부 결정과 기록만 소유하고 적용은 메인 에이전트나 다른 플러그인에 위임하며, 적용되지 않은 수용 항목은 `revalidate`가 `unapplied`로 보고한다.
@@ -350,15 +350,15 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 
 **파급**: ADR-10의 역할 구성을 대체하고 ADR-08의 비소유 경계를 전역 규칙 엔진으로 좁힌다. finding의 단계 간 필드는 `Perspective` 대신 `Category`를 사용한다. v5 `session.md`와 `review-report.md`는 schema marker로 이전 cache를 무효화하고, fix request의 Claim을 포함한 원 finding은 canonical FIX ID로 resolve에서 revalidate까지 이어진다. 비-FCA category의 revalidate는 이 payload를 받은 verifier의 재검증 결과를 따른다.
 
-### ADR-14 — cross-review v6 — `review_state scope`가 변경 범위 증거를 소유한다
+### ADR-14 — cross-review v7 — `review_state`가 결정적 리뷰 공학을 소유한다
 
 **상태**: 채택 (ADR-13 대체)
 
-**결정**: prepared state 뒤에 `review_state(scope)`를 호출한다. 서버는 한 snapshot에서 커밋 변경 파일의 status·owner·role·churn, working-tree disposition, 변경 범위와 교차하는 구조·검증 위반을 수집하고 `FCA-NNN` 후보로 정규화해 canonical `evidence.md`를 쓴다. 스킬은 파일별 규칙 판단, 그룹 구성, verifier 배정, verdict와 게시만 맡는다.
+**결정**: `review_state(prepare)`가 한 snapshot에서 커밋 변경 파일의 status·owner·role·churn, working-tree disposition, 변경 범위의 `FCA-NNN` 후보와 canonical `evidence.md`를 만든다. 이어 파일 선별·청킹·그룹 구성·규칙 해석·diff와 brief 물질화·JSON opinion 뼈대 생성을 결정적으로 수행한다. `validate`는 review와 verify JSON을 검사·병합하고 위치와 hash를 확정하는 유일한 지점이며, `seal`은 검증된 hash만 신뢰해 verdict를 fold하고 보고서와 PR 코멘트를 렌더링한다. 스킬은 Change Context 작성, reviewer·verifier 배정, 게시만 맡는다.
 
-**근거**: v5는 서버가 이미 가진 snapshot 자료를 여러 MCP 호출과 긴 산문 절차로 다시 조립하고, 같은 산출물 형식을 여러 문서와 정규식 테스트에 중복했다. 결정론적 증거 수집을 in-process action으로 옮기면 FCA 검증을 유지하면서 hash 대조·owner 귀속·후보 정규화의 재현성을 높이고 프롬프트를 판단에 집중시킨다.
+**근거**: 규칙 선택·그룹 절단·산출물 검증·판정표 적용을 오케스트레이터가 산문으로 수행하면 실행마다 결과가 달라지고 후속 턴의 컨텍스트 비용이 커진다. 결정적 작업을 도구로 옮기면 FCA 검증을 유지하면서 같은 입력에 같은 그룹·위치·verdict를 만들고 프롬프트를 판단에 집중시킨다.
 
-**결과**: MCP 도구 수는 9개로 유지되고 `review_state`는 여섯 action이 된다. 변경 그룹마다 reviewer 한 명과 효율 모델 verifier 한 명이 디스크의 opinion과 `evidence.md`를 읽으며, 하류가 소비하는 report·fix request·verdict 형식은 유지된다. 절차 산문 고정 테스트는 `scope` 순수 함수·handler 단위 테스트와 작은 스킬 표면 테스트로 대체된다.
+**결과**: MCP 도구 수는 9개로 유지되고 `review_state`는 `prepare | checkpoint | validate | seal | cleanup | assess` 여섯 action을 제공한다. reviewer는 생성된 review brief가 가리키는 bounded diff와 규칙을 읽어 `opinions/review-NN.r<k>.json`을 쓰고, verifier는 `briefs/verify-NN.md`에서 `opinions/verify-NN.json`을 만든다. 하류가 소비하는 report·fix request·verdict 형식은 유지된다.
 
 ---
 
@@ -385,7 +385,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-15 | Seiri가 설치되지 않아도 filid는 모든 자체 기능을 수행한다                                                                                                                                        | 위 소유권 경계표                                    |
 | AC-16 | `@ast-grep/napi`, 전역 npm 탐색, `fast-glob` 없이 build가 성공한다                                                                                                                               | ADR-01 · ADR-09                                     |
 | AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없다                                                                                                                                         | [07](./07-RULES-REFERENCE.md)                       |
-| AC-18 | cross-review finding은 `file:line` 또는 canonical 증거 행을 인용하고, verifier가 `CONFIRMED`한 finding만 fix request가 되며 구조 수정은 exact plan을 쓴다                                    | ADR-14 · [03](./03-LIFECYCLE.md)                    |
+| AC-18 | cross-review finding은 `file:line` 또는 canonical 증거 행을 인용하고, verifier가 `CONFIRMED`한 finding만 fix request가 되며 구조 수정은 exact plan을 쓴다                                        | ADR-14 · [03](./03-LIFECYCLE.md)                    |
 | AC-19 | MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개                                                                                                                                                 | [08](./08-API-SURFACE.md) · [03](./03-LIFECYCLE.md) |
 | AC-20 | core·policy·DTO에는 특정 생태계의 확장자·테스트 호출 리터럴이 없다                                                                                                                               | ADR-02                                              |
 | AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                                                                                                                   | [03](./03-LIFECYCLE.md)                             |

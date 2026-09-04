@@ -1,5 +1,9 @@
 # Default Review Rules
 
+Prefer precision over recall. False positives erode trust; discard a concern unless you can state a reachable failure or degradation path.
+
+Do not report anything a linter, type checker, or formatter already rejects. These rules target defects that remain after routine automated checks.
+
 Apply these rules to every reviewable file. Each item is a falsifiable question about the changed behavior. Map Correctness and Language-Specific findings to `bug`, Security and Configuration findings to `security`, Performance findings to `performance`, and Maintainability findings to `maintainability`.
 
 ## Correctness
@@ -43,6 +47,5 @@ Apply these rules to every reviewable file. Each item is a falsifiable question 
 
 ## Language-Specific Checks
 
-Apply the language's standard traps when checking language-idiomatic defects.
-
-- **DEF-25 — Idiomatic defect**: Does the changed code trigger a documented language-specific trap with a concrete runtime, type, ownership, lifetime, or comparison failure?
+- **DEF-25 — Idiomatic defect**: `rules/lang/*.md` takes precedence when present. Does the changed code trigger a documented language-specific trap with a concrete runtime, type, ownership, lifetime, or comparison failure?
+- **DEF-26 — Obvious typo**: Does an obvious typo in a changed identifier, string, or path cause a reachable behavior failure?

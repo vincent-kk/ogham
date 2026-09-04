@@ -4,12 +4,16 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+/** Package root used to resolve the canonical cross-review skill. */
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
+/** Canonical runtime directory for the cross-review skill. */
 const crossReviewRoot = join(packageRoot, 'skills/cross-review');
+/** Calibration fixtures kept outside the runtime skill tree. */
 const calibrationRoot = join(
   packageRoot,
   '../../.metadata/filid/cross-review-calibration',
 );
+/** Complete v7 cross-review skill surface, relative to its root. */
 const requiredFiles = [
   'SKILL.md',
   'templates.md',
@@ -19,29 +23,47 @@ const requiredFiles = [
   'rules/documents.md',
   'rules/fca.md',
   'rules/tests.md',
-];
-const documents = requiredFiles.map((path) => ({
-  path,
-  content: readFileSync(join(crossReviewRoot, path), 'utf8'),
-}));
+  'rules/rules.json',
+  'rules/lang/ecmascript.md',
+  'rules/lang/workflows.md',
+  'rules/lang/manifests.md',
+  'rules/lang/shell.md',
+] as const;
+/** Text-bearing skill documents used for cross-file assertions. */
+const documents = requiredFiles
+  .filter((path) => path.endsWith('.md'))
+  .map((path) => ({
+    path,
+    content: readFileSync(join(crossReviewRoot, path), 'utf8'),
+  }));
+/** Orchestrator instructions under test. */
 const skill = documents.find(({ path }) => path === 'SKILL.md')?.content ?? '';
+/** Canonical actor-output templates under test. */
 const templates =
   documents.find(({ path }) => path === 'templates.md')?.content ?? '';
+/** Reviewer role instructions under test. */
 const reviewer =
   documents.find(({ path }) => path === 'reviewers/reviewer.md')?.content ?? '';
+/** Verifier role instructions under test. */
 const verifier =
   documents.find(({ path }) => path === 'reviewers/verifier.md')?.content ?? '';
+/** Default reviewer rules whose precedence wording is part of the skill contract. */
+const defaultRules =
+  documents.find(({ path }) => path === 'rules/default.md')?.content ?? '';
+/** Stable calibration fixture proving an indeterminate test surface. */
 const genuineGap = readFileSync(
   join(calibrationRoot, 'genuine-gap.md'),
   'utf8',
 );
 
-describe('cross-review v6 skill surface', () => {
-  it('declares the v6 frontmatter version', () => {
-    expect(skill).toMatch(/^version: '6\.0\.0'$/m);
+describe('cross-review v7 skill surface', () => {
+  it('declares the v7 frontmatter and orchestration schema', () => {
+    expect(skill).toContain("version: '7.0.0'");
+    expect(skill).toContain('review_schema: 7');
+    expect(skill).toContain('--effort low|medium|high');
   });
 
-  it('contains exactly the eight required Markdown files', () => {
+  it('contains exactly the required v7 files', () => {
     const actualFiles = [
       ...readdirSync(crossReviewRoot)
         .filter((name) => name.endsWith('.md'))
@@ -49,15 +71,18 @@ describe('cross-review v6 skill surface', () => {
       ...readdirSync(join(crossReviewRoot, 'reviewers')).map((name) =>
         join(crossReviewRoot, 'reviewers', name),
       ),
-      ...readdirSync(join(crossReviewRoot, 'rules')).map((name) =>
-        join(crossReviewRoot, 'rules', name),
+      ...readdirSync(join(crossReviewRoot, 'rules'))
+        .filter((name) => name !== 'lang')
+        .map((name) => join(crossReviewRoot, 'rules', name)),
+      ...readdirSync(join(crossReviewRoot, 'rules/lang')).map((name) =>
+        join(crossReviewRoot, 'rules/lang', name),
       ),
     ].map((path) => relative(crossReviewRoot, path).replaceAll('\\', '/'));
 
     expect(actualFiles.sort()).toEqual([...requiredFiles].sort());
   });
 
-  it('removes procedural files and keeps calibration outside the skill tree', () => {
+  it('keeps procedural and calibration material outside the skill tree', () => {
     for (const name of [
       'contracts.md',
       'specification.md',
@@ -81,7 +106,17 @@ describe('cross-review v6 skill surface', () => {
     expect(internalCommands).toEqual([]);
   });
 
-  it('preserves the eight-field fix-request block', () => {
+  it('keeps verdict precedence and report rendering out of skill prose', () => {
+    const allText = documents.map(({ content }) => content).join('\n');
+
+    expect(allText).not.toContain('Condition (evaluate in order)');
+    expect(templates).not.toContain('Code Review Governance');
+    expect(templates).toContain(
+      'rendered by `review_state` seal; format is owned by `src/mcp/tools/reviewState/DETAIL.md`',
+    );
+  });
+
+  it('preserves the canonical eight-field fix-request block', () => {
     const fields = [
       'Severity',
       'Category',
@@ -94,58 +129,52 @@ describe('cross-review v6 skill surface', () => {
     ];
 
     for (const field of fields) expect(templates).toContain(`- **${field}**:`);
+    expect(templates).toContain('seal renders it');
   });
 
-  it('keeps re-verification mode before the normal deliverable', () => {
+  it('keeps re-verification mode before the normal verifier deliverable', () => {
     expect(verifier.indexOf('## Re-verification Mode')).toBeGreaterThan(-1);
     expect(verifier.indexOf('## Re-verification Mode')).toBeLessThan(
       verifier.indexOf('## Deliverable'),
     );
+    expect(verifier).toContain('inDiff: false');
   });
 
-  it('defines the ordered verdict table exactly once', () => {
-    const allText = documents.map(({ content }) => content).join('\n');
-    expect(
-      allText.match(
-        /\|\s*Condition \(evaluate in order\)\s*\|\s*Verdict\s*\|/g,
-      ),
-    ).toHaveLength(1);
-  });
-
-  it('requires review_schema 6 in orchestration prose', () => {
-    expect(skill).toContain('review_schema: 6');
-  });
-
-  it('limits each role to its group rows in canonical evidence', () => {
-    const groupRows = 'rows whose `Path` belongs to your group; skip every other section.';
-
-    expect(reviewer).toContain(
-      `Read only the \`evidence.md\` frontmatter and the \`## Changed Scope\`, \`## Candidates\`, and \`## Informational\` ${groupRows}`,
-    );
-    expect(verifier).toContain(
-      `Read only the \`evidence.md\` frontmatter and the \`## Changed Scope\` and \`## Candidates\` ${groupRows}`,
-    );
-  });
-
-  it('stops every unrecognized scope response without a verdict', () => {
-    const branch =
-      'For every other response that is not `status: ok` with `disposition: scoped`, stop, report its diagnostics, and emit no verdict.';
-
-    expect(skill.split(branch)).toHaveLength(2);
-  });
-
-  it('resumes from the first missing review artifact', () => {
-    const artifactRule =
-      'continue at Step 2 when `evidence.md` is missing, at Step 3 for every group whose `opinions/review-NN.md` is missing, at Step 4 for every group whose `opinions/verify-NN.md` is missing, otherwise at Step 5';
-
-    expect(skill).toContain(artifactRule);
-    expect(skill).not.toContain('first incomplete step');
-  });
-
-  it('keeps the verifier model hint only in orchestration prose', () => {
+  it('keeps the verifier model hint only once in orchestration prose', () => {
     expect(skill.match(/sonnet/g)).toHaveLength(1);
     expect(verifier).not.toContain('## Spawn');
     expect(verifier).not.toContain('sonnet');
+  });
+
+  it('gives language-specific review rules explicit precedence', () => {
+    expect(defaultRules).toContain('`rules/lang/*.md` takes precedence');
+  });
+
+  it('makes the orchestrator path-only and gives reviewers a read boundary', () => {
+    expect(skill).toContain(
+      'The orchestrator opens no diff, source, rule, or opinion body; it passes paths.',
+    );
+    expect(reviewer).toContain('## Read boundary');
+    expect(reviewer).toContain(
+      'orchestrator-supplied output path is authoritative',
+    );
+    expect(templates).toContain(
+      'round 2 or later, use the orchestrator-supplied output path',
+    );
+    expect(reviewer).toContain('added or modified lines');
+    expect(reviewer).toContain('type checker or linter');
+  });
+
+  it('describes validation retries and authoritative concurrency', () => {
+    expect(skill).toContain('summary.concurrency');
+    expect(skill).toContain('data.groups[].validated.review.complete');
+    expect(skill).toContain('validated.review.round + 1');
+    expect(skill).toContain(
+      'repeat `validate({ kind: "review", group, round: validated.review.round })` before Step 4',
+    );
+    expect(skill).toContain('validate({ kind: "review", group, round })');
+    expect(skill).toContain('validate({ kind: "verify", group })');
+    expect(skill).toContain('respawn once');
   });
 
   it('uses indeterminate verification evidence for the genuine-gap fixture', () => {
@@ -155,26 +184,10 @@ describe('cross-review v6 skill surface', () => {
     expect(genuineGap).not.toContain('resolves no verification role');
   });
 
-  it('bounds actor reads and reports publication status in terminal output', () => {
-    for (const instruction of [
-      '`templates.md` owns every persisted artifact and publication format; read it once in Step 2 and reuse it.',
-      '`reviewers/reviewer.md`, `reviewers/verifier.md`, and `rules/*.md` are read by the spawned reviewer and verifier, never by this orchestrator: pass their absolute paths, not their text. Do not list or re-read this skill directory.',
-      'Resolve `BASE_REF` from `--base`; otherwise read the remote list once and try the remote default, `origin/main`, then `origin/master`, and verify the selected ref. Record whether any remote exists and carry it to Step 6; when there is none, Step 6 reports `pr-comment: none` without another call.',
-      'This payload is the authoritative roster: do not open `evidence.md` or re-derive role, owner, churn, or candidate counts with git, find, or sed.',
-      'Instruct the reviewer to read the role file, `templates.md`, and every resolved rule file in one batched command before anything else.',
-      'Validation reads the opinion only; do not re-open the diff or the reviewed source.',
-      'State the assigned candidate count as authoritative. When it is zero and `review-NN.md` lists no findings, instruct the verifier to write the `COMPLETE` artifact with `decisions: []` after reading only `review-NN.md`.',
-    ])
-      expect(skill).toContain(instruction);
-
-    expect(verifier).toContain(
-      'Read the role file and `../templates.md` in one batched command. When the brief assigns zero candidates and `review-NN.md` lists no findings, open no further file.',
-    );
-    expect(templates).toContain(
-      'Finalize the checklist by rewriting the whole `## Review Checklist` block in one write, not by in-place substitution.',
-    );
-    expect(templates).toContain(
-      'Review verdict: APPROVED\npr-comment: none',
-    );
+  it('keeps actor and orchestration documents within their line budgets', () => {
+    expect(skill.split('\n').length - 1).toBeLessThanOrEqual(170);
+    expect(templates.split('\n').length - 1).toBeLessThanOrEqual(110);
+    expect(reviewer.split('\n').length - 1).toBeLessThanOrEqual(60);
+    expect(verifier.split('\n').length - 1).toBeLessThanOrEqual(80);
   });
 });

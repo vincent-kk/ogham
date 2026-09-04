@@ -99,7 +99,7 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 /filid:cross-review --base origin/main
 ```
 
-`review_state(scope)` first records the committed-file roster and changed-scope FCA evidence. Each file is then reviewed against layered rules, and an efficient-model verifier independently checks every candidate as `CONFIRMED | REFUTED | INDETERMINATE`. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
+`review_state(prepare)` records the committed-file roster and FCA evidence, then deterministically selects, chunks, groups, and materializes bounded diffs and briefs. Reviewers write JSON opinion rounds against layered rules; `validate` checks and merges them before an efficient-model verifier independently decides every candidate as `CONFIRMED | REFUTED | INDETERMINATE`. `seal` trusts only validated hashes, folds the verdict, and renders the report, fix requests, and PR comment. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
 
 ### Migrate legacy document names
 
@@ -172,17 +172,17 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 
 ## MCP Tools
 
-| Tool                 | Role                                                       |
-| -------------------- | ---------------------------------------------------------- |
-| `project_init`       | Initialize FCA in a project                                |
-| `rule_docs_sync`     | Sync the managed rule documents                            |
-| `open_settings`      | Open the settings UI                                       |
-| `fractal_scan`       | Inspect the snapshot tree                                  |
-| `context_resolve`    | Batch owner/document chains from one snapshot              |
-| `restructure_plan`   | Decide placement; returns a plan artifact                  |
-| `structure_validate` | Validate a project, or a plan's pre/postconditions         |
-| `verification_scan`  | Judge spec-document / test-record contracts                |
-| `review_state`       | cross-review state, changed-scope roster, and FCA evidence |
+| Tool                 | Role                                                   |
+| -------------------- | ------------------------------------------------------ |
+| `project_init`       | Initialize FCA in a project                            |
+| `rule_docs_sync`     | Sync the managed rule documents                        |
+| `open_settings`      | Open the settings UI                                   |
+| `fractal_scan`       | Inspect the snapshot tree                              |
+| `context_resolve`    | Batch owner/document chains from one snapshot          |
+| `restructure_plan`   | Decide placement; returns a plan artifact              |
+| `structure_validate` | Validate a project, or a plan's pre/postconditions     |
+| `verification_scan`  | Judge spec-document / test-record contracts            |
+| `review_state`       | Prepare, validate, fold, and render cross-review state |
 
 Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.
 

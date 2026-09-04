@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+/** Strict schema for one built-in rule override. */
 export const RuleOverrideSchema = z
   .object({
     enabled: z.boolean().optional(),
@@ -8,6 +9,7 @@ export const RuleOverrideSchema = z
   })
   .strict();
 
+/** Strict schema for one allowed peer override. */
 export const AllowedPeerOverrideSchema = z
   .object({
     basename: z.string().min(1),
@@ -16,8 +18,10 @@ export const AllowedPeerOverrideSchema = z
   })
   .strict();
 
+/** Validated allowed peer override value. */
 export type AllowedPeerOverride = z.infer<typeof AllowedPeerOverrideSchema>;
 
+/** Adapter selection policy stored in Filid configuration. */
 const AdapterSelectionSchema = z
   .object({
     mode: z.enum(['auto', 'explicit']),
@@ -36,6 +40,7 @@ const AdapterSelectionSchema = z
       });
   });
 
+/** Optional project structure overrides stored in Filid configuration. */
 const StructureConfigSchema = z
   .object({
     maxDepth: z.number().nonnegative().finite().optional(),
@@ -49,6 +54,25 @@ const StructureConfigSchema = z
   })
   .strict();
 
+/** Optional cross-review execution settings stored in Filid configuration. */
+const ReviewConfigSchema = z
+  .object({
+    effort: z.enum(['low', 'medium', 'high']).optional(),
+    groupChurnLimit: z.number().int().positive().optional(),
+    groupFileLimit: z.number().int().positive().optional(),
+    planChurnLimit: z.number().int().positive().optional(),
+    concurrency: z.number().int().positive().optional(),
+    lockfiles: z.array(z.string().min(1)).optional(),
+  })
+  .strict()
+  .transform((value) => ({
+    ...value,
+    ...(value.lockfiles
+      ? { lockfiles: Array.from(new Set(value.lockfiles)) }
+      : {}),
+  }));
+
+/** Strict schema for the merged Filid v2 configuration. */
 export const FilidConfigSchema = z
   .object({
     version: z.literal('2.0'),
@@ -56,7 +80,9 @@ export const FilidConfigSchema = z
     adapters: AdapterSelectionSchema,
     rules: z.record(z.string(), RuleOverrideSchema),
     structure: StructureConfigSchema.optional(),
+    review: ReviewConfigSchema.optional(),
   })
   .strict();
 
+/** Validated Filid v2 configuration value. */
 export type FilidConfig = z.infer<typeof FilidConfigSchema>;

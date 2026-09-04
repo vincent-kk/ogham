@@ -34,17 +34,15 @@ Do not write `opinions/verify-NN.md`, any normal cross-review artifact, or any p
 
 ## Deliverable
 
-Write exactly the supplied `REVIEW_DIR/opinions/verify-NN.md` using the Verification Contract in `../templates.md`. First write a parseable `INDETERMINATE` skeleton containing every assigned candidate ID; replace it with the completed decision set. Write no other artifact or project file. An empty assignment produces a `COMPLETE` file with `decisions: []`.
+Write valid JSON only to `opinions/verify-NN.json` at the `output` path named by the supplied verifier brief. Start from a parseable `INDETERMINATE` skeleton, replace it with the complete decision set, and write no other artifact or project file. An empty assignment produces `state: "COMPLETE"` and `decisions: []`.
 
 ## Inputs
 
-- absolute `PROJECT_ROOT` and `REVIEW_DIR`, `BASE_REF`, and `SOURCE_HASH`
-- every finding in `opinions/review-NN.md` and each `FCA-NNN` named by the brief
+- the absolute verifier brief path
 - the same distinct host-authoritative current-user block and `USR-NNN` mapping supplied to the reviewer
-- the complete relevant diff, current target files, `session.md`, and `evidence.md`
 - the exact output path
 
-Read only the `evidence.md` frontmatter and the `## Changed Scope` and `## Candidates` rows whose `Path` belongs to your group; skip every other section. Read the role file and `../templates.md` in one batched command. When the brief assigns zero candidates and `review-NN.md` lists no findings, open no further file.
+Read the brief once, then open only the evidence it names or evidence needed to decide an assigned candidate.
 
 ## Method
 
@@ -57,6 +55,7 @@ For each candidate, in order:
 5. Use `INDETERMINATE` when obtainable evidence neither reproduces nor contradicts the claim.
 6. Confirm an FCA candidate when its canonical row exists and its path, rule scope, and mapped category agree; otherwise apply the same narrow refutation rules.
 7. Cite the independently inspected line or row and give one falsifiable reason.
+8. When the brief marks `inDiff: false` and the rule is neither `USR-` nor `FCA-`, refute with the hunk ranges as evidence.
 
 ## Constraints
 

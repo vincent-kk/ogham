@@ -246,31 +246,33 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 ```
 Step 1 — Prepare
 ├── 브랜치·PR과 base ref를 해석하고 현재 사용자 요구를 USR-NNN으로 고정
-├── review_state(prepare) → fresh | resumable | cached
+├── review_state({ action: "prepare", ..., effort }) → fresh | resumable | cached
+├── resumable이면 checkpoint의 산출물 존재 정보로 첫 누락 지점부터 재개
 ├── schema 또는 source identity가 맞지 않으면 한 번만 force-fresh
-└── fresh 또는 유효한 resumable state만 다음 단계로 전달
+└── roster·FCA evidence·group·diff·brief·JSON 뼈대·session을 결정적으로 준비
 
-Step 2 — Scope
-├── review_state({ action: "scope", projectRoot, branchName })를 한 번 호출
-├── 커밋 변경 roster의 status·owner·role·churn과 working-tree disposition 수집
-├── 변경 범위의 구조·검증 위반을 FCA-NNN 후보로 정규화
-└── canonical evidence.md와 session.md checklist를 준비
+Step 2 — Context
+├── prepare의 data.files와 data.groups를 권위 있는 roster로 사용
+├── PR 본문 또는 base 이후 commit log 요약으로 session.md의 pending 문구를 교체
+└── worktree가 documents-only 또는 source-dirty이면 Step 5로 이동
 
-Step 3 — Group and Review  (최대 8개 병렬)
-├── owner와 churn으로 bounded group을 만들고 각 그룹에 reviewer 한 명 배정
-├── reviewer가 파일별 diff·호출자·테스트와 계층형 규칙을 판단
-└── 모든 roster 행을 reviewed | skipped + reason으로 마감
+Step 3 — Review  (최대 summary.concurrency개 병렬)
+├── rounds: 0은 건너뛰고 dependsOn이 끝난 group부터 reviewer를 배정
+├── 생성된 review brief와 USR-NNN을 읽어 opinions/review-NN.r<k>.json을 작성
+├── review_state({ action: "validate", kind: "review", group, round })로 검사·병합
+└── newFindings가 0이면 종료하고, 아니면 effort가 허용하는 다음 round를 실행
 
 Step 4 — Verify
-├── 각 그룹에 효율 등급 verifier 한 명을 배정
-├── reviewer finding과 해당 FCA-NNN 후보를 독립적으로 재현
-└── 후보마다 CONFIRMED | REFUTED | INDETERMINATE 하나를 기록
+├── 각 group의 briefs/verify-NN.md로 효율 등급 verifier 한 명을 배정
+├── merged opinions/review-NN.json의 finding과 FCA-NNN 후보를 독립적으로 재현
+├── 후보마다 CONFIRMED | REFUTED | INDETERMINATE를 opinions/verify-NN.json에 기록
+└── review_state({ action: "validate", kind: "verify", group })로 검사
 
 Step 5 — Verdict and Seal
-├── review_state(checkpoint)로 source identity와 필수 artifact를 재확인
-├── coverage·verification 결과로 APPROVED | REQUEST_CHANGES | INCONCLUSIVE 판정
-├── review-report.md와 필요한 fix-requests.md를 기록
-└── review_state(seal)이 성공한 verdict만 terminal 결과로 인정
+├── review_state({ action: "seal", projectRoot, branchName }) 호출
+├── source identity와 validate가 기록한 artifact hash를 재확인
+├── coverage·verification을 APPROVED | REQUEST_CHANGES | INCONCLUSIVE로 fold
+└── review-report.md·필요한 fix-requests.md·pr-comment.md·session checklist를 렌더링
 
 Step 6 — Publish
 └── PR이 있으면 canonical verdict 코멘트를 갱신하고, 없으면 게시하지 않음
@@ -282,39 +284,42 @@ Step 6 — Publish
 - 변경 파일별 전체 diff, 현재 파일, 필요한 호출자와 테스트
 - 내장 `default`·`tests`·`documents`·`fca` 규칙과 저장소의 적용 규칙
 - 변경된 프랙탈의 INTENT.md와 DETAIL.md 계약
-- `review_state(scope)`가 만든 owner·role·churn roster와 canonical `evidence.md`
+- `review_state(prepare)`가 만든 owner·role·churn roster, group, canonical `evidence.md`
+- 생성된 review·verify brief가 가리키는 bounded diff·규칙·후보
 - 변경 범위의 entry point·외부 import boundary·DAG·verification 후보
 - LCA placement 및 승인된 restructure plan 사후조건
 - `unsupported` / `indeterminate` 진단
 
-verdict는 이 입력으로 확인한 커밋 변경 범위에만 적용된다. 범위 밖에서 발견한 새 우려는 기록할 수 있지만 verdict에는 영향을 주지 않는다.
+오케스트레이터는 diff·source·rule·opinion 본문을 열지 않고 경로만 전달한다. verdict는 이 입력으로 확인한 커밋 변경 범위에만 적용된다. 범위 밖에서 발견한 새 우려는 기록할 수 있지만 verdict에는 영향을 주지 않는다.
 
 ### verdict 규칙
 
+state 부재나 source hash 불일치는 seal 실패로 중단하며 terminal verdict를 만들지 않는다.
+
 | 상황                                                                 | verdict           |
 | -------------------------------------------------------------------- | ----------------- |
-| source state·hash 불일치 또는 재시도 뒤 필수 artifact 누락           | `INCONCLUSIVE`    |
+| evidence 불완전, documents-only/source-dirty, 신뢰 가능한 group 부재 | `INCONCLUSIVE`    |
 | checklist 미마감 또는 변경 파일을 가리키는 reviewer gap              | `INCONCLUSIVE`    |
-| `severity: error` 후보가 `INDETERMINATE`                              | `INCONCLUSIVE`    |
+| 후보가 `INDETERMINATE`                                               | `INCONCLUSIVE`    |
 | `CONFIRMED` 후보가 하나 이상                                         | `REQUEST_CHANGES` |
 | 모든 후보가 `REFUTED`이거나 후보 없음                                | `APPROVED`        |
 
-`severity: warning` 후보의 `INDETERMINATE`는 unresolved evidence로 기록하되 verdict에는 영향을 주지 않는다. cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure_plan`이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
+`INDETERMINATE`는 unresolved evidence로 기록하며 pass로 바꾸지 않는다. cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure_plan`이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
 
 ### review state 수명주기
 
 ```
-prepare ──→ scope ──→ (판단) ──→ checkpoint ──→ seal ──→ cleanup
-   │          │                        │
-   │          │                        ├─ missing   : state 없음
-   │          │                        ├─ stale     : hash 불일치
-   │          │                        ├─ resumable : matching prepared
-   │          │                        └─ cached    : matching sealed + report
-   │          └─ scoped : roster + evidence.md
+prepare ──→ (review → validate)* ──→ verify → validate ──→ seal ──→ cleanup
+   │
+   ├─ fresh     : 새 roster·group·artifact
+   ├─ resumable : checkpoint → 첫 누락 artifact부터 재개
+   ├─ cached    : matching sealed + report, 저장된 verdict 반환
    └─ force: true → 캐시 무시
+
+assess ──→ working tree를 독립적으로 관측
 ```
 
-`stale`과 `missing`은 `ok` status가 아니다. 메시지 파싱 없이 안정적인 disposition과 diagnostics로 판정할 수 있다. `assess`는 working tree를 독립적으로 관측하고, `scope`는 같은 disposition을 증거 payload에 포함한다. `cleanup`은 리터럴 `confirm: true` 뒤에 해당 브랜치 디렉터리만 제거한다.
+`stale`과 `missing`은 `ok` status가 아니다. 메시지 파싱 없이 안정적인 disposition과 diagnostics로 판정할 수 있다. `assess`는 working tree를 독립적으로 관측하고, `prepare`는 같은 disposition을 증거 payload에 포함한다. `cleanup`은 리터럴 `confirm: true` 뒤에 해당 브랜치 디렉터리만 제거한다.
 
 ---
 

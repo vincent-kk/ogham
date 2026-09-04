@@ -6,6 +6,7 @@ import type {
   ReviewScopeViolation,
 } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
+/** Changed-file fixture owned by the domain fractal. */
 const FILES: ReviewScopeFile[] = [
   {
     path: 'src/feature/value.ts',
@@ -14,9 +15,14 @@ const FILES: ReviewScopeFile[] = [
     owner: 'src/domain',
     insertions: 2,
     deletions: 1,
+    binary: false,
+    skipReason: null,
+    rules: [],
+    repositoryRules: [],
   },
 ];
 
+/** Build one structural violation at the requested project-relative path. */
 function violation(path: string): ReviewScopeViolation {
   return {
     source: 'structure',
@@ -49,6 +55,10 @@ describe('selectChangedScopeViolations', () => {
       owner: '.',
       insertions: 1,
       deletions: 0,
+      binary: false,
+      skipReason: null,
+      rules: [],
+      repositoryRules: [],
     };
 
     expect(

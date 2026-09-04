@@ -93,7 +93,7 @@
 | 내장 규칙      | **15개** ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#내장-규칙-15개))                                                                                     |
 | 배포 규칙 문서 | **4개** (fractal-boundaries, module-documents, verification-records, code-placement — 모두 required)                                                        |
 | 스킬           | **12개** — setup, scan, context-query, guide, enrich-docs, restructure, migrate + merge-track 5(pull-request, cross-review, resolve, revalidate, pipeline)  |
-| 에이전트       | **0개** (cross-review는 `review_state(scope)` 증거로 변경 그룹 reviewer와 효율 모델 verifier를 실행)                                                        |
+| 에이전트       | **0개** (cross-review는 `review_state(prepare)` 증거로 변경 그룹 reviewer와 효율 모델 verifier를 실행)                                                      |
 | Hook 이벤트    | **3개** — SessionStart, UserPromptSubmit, PreToolUse(Read\|Write\|Edit)                                                                                     |
 | Hook 브리지    | 4개 (setup.mjs, user-prompt-submit.mjs, pre-tool-use.mjs, run-agy.mjs)                                                                                      |
 | 번들 크기      | 498,413 B (MCP 416,185 + 훅 3개 48,560 + settings UI 30,263 + 러너)                                                                                         |

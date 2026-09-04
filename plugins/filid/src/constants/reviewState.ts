@@ -1,4 +1,5 @@
-export const REVIEW_STATE_SCHEMA_VERSION = 1 as const;
+/** Schema version for persisted review state records. */
+export const REVIEW_STATE_SCHEMA_VERSION = 2 as const;
 export const REVIEW_STATE_HASH_ALGORITHM = 'sha256';
 export const REVIEW_STATE_HASH_ENCODING = 'hex';
 export const REVIEW_STATE_HASH_SEPARATOR = '\0';
@@ -41,13 +42,77 @@ export const REVIEW_STATE_GIT_ARGUMENTS = {
   VERIFY_REF: ['rev-parse', '--verify', '--quiet'],
 } as const;
 
+/** Supported operations on the single `review_state` tool. */
 export const REVIEW_STATE_ACTIONS = {
   PREPARE: 'prepare',
   CHECKPOINT: 'checkpoint',
-  SCOPE: 'scope',
+  VALIDATE: 'validate',
   SEAL: 'seal',
   CLEANUP: 'cleanup',
   ASSESS: 'assess',
+} as const;
+
+/** Review rounds assigned to each supported effort level. */
+export const REVIEW_EFFORT_ROUNDS = {
+  low: 1,
+  medium: 2,
+  high: 3,
+} as const;
+
+/** Effort used when neither the request nor configuration chooses one. */
+export const REVIEW_DEFAULT_EFFORT = 'medium';
+
+/** Maximum review units grouped together by default. */
+export const REVIEW_GROUP_FILE_LIMIT = 10;
+
+/** Maximum total churn in one group and one chunk by default. */
+export const REVIEW_GROUP_CHURN_LIMIT = 800;
+
+/** File-count threshold for the single-group shortcut. */
+export const REVIEW_SMALL_GROUP_FILE_LIMIT = 4;
+
+/** Churn threshold for the single-group shortcut. */
+export const REVIEW_SMALL_GROUP_CHURN_LIMIT = 200;
+
+/** File churn above which a group requires an explicit risk plan. */
+export const REVIEW_PLAN_CHURN_LIMIT = 50;
+
+/** Maximum reviewer groups the orchestrator runs concurrently by default. */
+export const REVIEW_CONCURRENCY = 8;
+
+/** Canonical lockfile basenames skipped by review unless configured otherwise. */
+export const REVIEW_LOCKFILE_BASENAMES = [
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+  'bun.lock',
+  'bun.lockb',
+  'Cargo.lock',
+  'poetry.lock',
+  'Pipfile.lock',
+  'composer.lock',
+  'Gemfile.lock',
+  'go.sum',
+  'gradle.lockfile',
+  'flake.lock',
+  'mix.lock',
+] as const;
+
+/** Schema version required for reviewer and verifier JSON artifacts. */
+export const REVIEW_OPINION_SCHEMA_VERSION = 7 as const;
+
+/** Validation targets accepted by the review-state validate action. */
+export const REVIEW_VALIDATE_KINDS = {
+  REVIEW: 'review',
+  VERIFY: 'verify',
+} as const;
+
+/** Deterministic reasons that make a changed path non-reviewable. */
+export const REVIEW_SKIP_REASONS = {
+  GENERATED: 'generated artifact',
+  DELETED: 'deleted path',
+  BINARY: 'binary content',
+  LOCKFILE: 'lockfile',
 } as const;
 
 /** Where a merge-track cycle resumes, read from files and git state alone. */
@@ -98,26 +163,32 @@ export const REVIEW_STATE_PHASES = {
 
 export const REVIEW_STATE_PHASE_VALUES = Object.values(REVIEW_STATE_PHASES);
 
+/** Lifecycle outcomes returned by review-state handlers. */
 export const REVIEW_STATE_DISPOSITIONS = {
   FRESH: 'fresh',
   RESUMABLE: 'resumable',
   CACHED: 'cached',
   STALE: 'stale',
   MISSING: 'missing',
-  SCOPED: 'scoped',
+  VALIDATED: 'validated',
   SEALED: 'sealed',
   CLEANED: 'cleaned',
 } as const;
 
+/** Artifact subdirectories inside one branch review directory. */
 export const REVIEW_STATE_DIRECTORY_NAMES = {
   FILID: '.filid',
   REVIEW: 'review',
   OPINIONS: 'opinions',
+  DIFFS: 'diffs',
+  BRIEFS: 'briefs',
 } as const;
 
+/** Canonical filenames used by review-state artifacts and rule discovery. */
 export const REVIEW_STATE_FILE_NAMES = {
   STATE: 'review-state.json',
   REPORT: 'review-report.md',
+  PR_COMMENT: 'pr-comment.md',
   EVIDENCE: 'evidence.md',
   SESSION: 'session.md',
   VERIFICATION: 'verification.md',
@@ -127,10 +198,14 @@ export const REVIEW_STATE_FILE_NAMES = {
   FIX_REQUESTS: 'fix-requests.md',
   JUSTIFICATIONS: 'justifications.md',
   RE_VALIDATE: 're-validate.md',
+  RULE_MAP: 'rules.json',
+  REPOSITORY_RULES: '.filid/review-rules.json',
 } as const;
 
+/** Files removed before a fresh review state is prepared. */
 export const REVIEW_STATE_STALE_ARTIFACT_FILE_NAMES = [
   REVIEW_STATE_FILE_NAMES.REPORT,
+  REVIEW_STATE_FILE_NAMES.PR_COMMENT,
   REVIEW_STATE_FILE_NAMES.SESSION,
   REVIEW_STATE_FILE_NAMES.EVIDENCE,
   REVIEW_STATE_FILE_NAMES.VERIFICATION,
@@ -140,34 +215,53 @@ export const REVIEW_STATE_STALE_ARTIFACT_FILE_NAMES = [
   REVIEW_STATE_FILE_NAMES.FIX_REQUESTS,
 ] as const;
 
+/** Directories removed before a fresh review state is prepared. */
 export const REVIEW_STATE_STALE_ARTIFACT_DIRECTORY_NAMES = [
   REVIEW_STATE_DIRECTORY_NAMES.OPINIONS,
+  REVIEW_STATE_DIRECTORY_NAMES.DIFFS,
+  REVIEW_STATE_DIRECTORY_NAMES.BRIEFS,
 ] as const;
 
+/** Stable machine-readable diagnostic codes returned by review-state handlers. */
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   STATE_MISSING: 'review-state-missing',
   SOURCE_HASH_STALE: 'review-source-hash-stale',
   STATE_SEALED: 'review-state-sealed',
   REPORT_MISSING: 'review-report-missing',
+  STATE_SCHEMA_MISMATCH: 'review-state-schema-mismatch',
+  RULE_PATH_ESCAPE: 'review-rule-path-escape',
+  OPINIONS_MISSING: 'review-opinions-missing',
+  OPINION_INVALID: 'review-opinion-invalid',
+  SESSION_MISSING: 'review-session-missing',
+  RULE_MAP_MISSING: 'review-rule-map-missing',
 } as const;
 
+/** Human-readable counterparts for review-state diagnostic codes. */
 export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   STATE_MISSING: 'No prepared review state exists for this branch.',
   SOURCE_HASH_STALE:
     'Committed source content no longer matches the prepared review state.',
   STATE_SEALED: 'A sealed review state cannot be scoped again.',
   REPORT_MISSING: 'The canonical review report is missing.',
+  STATE_SCHEMA_MISMATCH: 'The review state uses an unsupported schema version.',
+  RULE_PATH_ESCAPE: 'A repository review rule escapes the project root.',
+  OPINIONS_MISSING: 'No merged review opinions exist for this review state.',
+  OPINION_INVALID: 'The review opinion is missing or invalid.',
+  SESSION_MISSING: 'The prepared review session artifact is missing.',
+  RULE_MAP_MISSING: 'The cross-review rule map is missing.',
 } as const;
 
 /** Schema version rendered in canonical cross-review evidence. */
-export const REVIEW_EVIDENCE_SCHEMA_VERSION = 6 as const;
+export const REVIEW_EVIDENCE_SCHEMA_VERSION = 7 as const;
 
 /** Maximum dirty paths returned inline by the scope action. */
 export const REVIEW_SCOPE_DIRTY_PATH_LIMIT = 20;
 
+/** Stable input and internal error messages for the review-state boundary. */
 export const REVIEW_STATE_ERROR_MESSAGES = {
   INPUT_OBJECT_REQUIRED: 'review_state input must be an object',
-  ACTION_INVALID: 'action must be prepare, checkpoint, scope, seal, or cleanup',
+  ACTION_INVALID:
+    'action must be prepare, checkpoint, validate, seal, cleanup, or assess',
   PROJECT_ROOT_REQUIRED: 'projectRoot is required',
   BRANCH_NAME_REQUIRED: 'branchName is required',
   BASE_REF_REQUIRED: 'baseRef is required for prepare',

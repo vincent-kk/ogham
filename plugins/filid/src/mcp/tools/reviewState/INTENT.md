@@ -2,43 +2,48 @@
 
 ## Purpose
 
-committed diff content hash, branch-scoped review artifact lifecycle, 변경 범위 FCA 증거 수집과 merge-track 재개 지점의 관측만 관리한다. review 판단, committee 선택, 코드 수정과 PR 동작은 소유하지 않는다.
+committed diff hash와 branch-scoped artifact lifecycle을 기준으로 변경 범위 증거를 수집하고, reviewable unit을 선별·청킹·그룹화하며, 규칙 해석, diff·brief 물질화, opinion 검증, 결정적 verdict fold와 보고서 렌더링, merge-track 재개 관측을 관리한다.
 
 ## Structure
 
-- `reviewState.ts` — prepare/checkpoint/scope/seal/cleanup/assess action dispatch
-- `handlers/` — 여섯 action의 flat effect boundary
-- `hash/` — git evidence와 deterministic content hash organ
-- `state/` — portable review path와 state JSON organ
-- `assess/` — dirty 경로 분류, entry stage와 base ref 해석의 순수 함수 organ
-- `scope/` — changed-file roster와 변경 범위 증거 정규화의 순수 함수 organ
+- `reviewState.ts`·`handlers/` — prepare/checkpoint/validate/seal/cleanup/assess dispatch와 effect boundary
+- `hash/`·`state/` — Git evidence, deterministic hash, portable path와 state JSON
+- `assess/`·`scope/` — 재개 사실 관측과 changed-scope evidence 수집
+- `select/`·`rules/` — review 대상 선별과 built-in·repository 규칙 해석
+- `chunk/`·`group/` — bounded review unit과 deterministic dependency group 생성
+- `diff/`·`brief/` — group별 diff와 reviewer·verifier brief 물질화
+- `opinion/` — review·verify JSON 검증, finding 위치 확정과 round 병합
+- `render/`·`verdict/` — canonical 산출물 렌더링과 순수 verdict fold
 - `index.ts` — named handler export
 
 ## Conventions
 
 - state path는 `.filid/review/<readable-name>-<branch-digest>/review-state.json`이다.
 - hash는 merge-base와 NUL-safe sorted changed-file tree identity로 계산한다.
-- static action/status/file names는 constants가 소유한다.
+- static action·status·artifact 이름과 기본 한도는 constants가 소유한다.
+- state는 prepare 산출물이 모두 기록된 뒤 마지막에 한 번 atomic 저장한다.
 
 ## Boundaries
 
 ### Always do
 
-- prepare/seal에서 현재 committed content hash 재계산
-- cache hit에 sealed state, matching hash와 report 존재를 모두 요구
-- state I/O와 cleanup에 project-contained path와 descendant symlink guard 요구
-- cleanup에 literal `confirm: true` 요구
+- prepare와 seal에서 현재 committed content hash를 재계산한다.
+- 모든 unit과 group에 설정된 file·churn 상한을 적용하고 roster 항목을 빠뜨리지 않는다.
+- validate가 기록한 complete·artifact hash·review hash 결합을 seal의 신뢰 근거로 삼는다.
+- state I/O, artifact path, repository rule path와 cleanup에 project containment와 symlink guard를 요구한다.
+- cleanup에 literal `confirm: true`를 요구한다.
 
 ### Ask first
 
-- state schema, required report 또는 cache-hit 의미 변경
+- state schema, opinion JSON schema, 규칙 맵 형식 또는 렌더링 형식 변경
+- required artifact 또는 cache-hit 의미 변경
 
 ### Never do
 
-- review 의견·verdict 계산, fix 적용, commit/push/PR 수행 — `assess`는 사실만 관측하고 무엇을 중단할지 정하지 않는다
-- working-tree content를 committed blob으로 가장
-- review root 전체를 branch target으로 정규화
+- review finding을 생성하거나 그 진위를 판단하지 않는다. verdict는 opinion 파일의 결정적 fold로만 산출하고, 판단은 opinion·verification 파일을 쓴 actor의 것이다.
+- fix 적용, commit/push/PR을 수행하거나 `assess` 관측을 중단 지시로 바꾸지 않는다.
+- working-tree content를 committed blob으로 가장하거나 review root 전체를 branch target으로 정규화하지 않는다.
 
 ## Dependencies
 
-- cross-platform path/spawn/filesystem, common envelope와 review constants
+- cross-platform path·spawn·filesystem, config loader, common envelope와 review constants

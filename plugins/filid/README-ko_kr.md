@@ -99,7 +99,7 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 /filid:cross-review --base origin/main
 ```
 
-먼저 `review_state(scope)`가 커밋 변경 파일 roster와 changed-scope FCA 증거를 기록합니다. 이어 각 파일을 계층형 규칙으로 리뷰하고, 효율 모델 verifier가 모든 후보를 `CONFIRMED | REFUTED | INDETERMINATE`로 독립 검증합니다. 확인된 finding만 fix request에 반영하며 verdict는 커밋된 변경 범위만 판정합니다.
+먼저 `review_state(prepare)`가 커밋 변경 파일 roster와 FCA 증거를 기록하고 파일을 결정적으로 선별·청킹·그룹화해 bounded diff와 brief를 만듭니다. reviewer는 계층형 규칙에 따른 JSON opinion round를 쓰고, `validate`가 이를 검사·병합한 뒤 효율 모델 verifier가 모든 후보를 `CONFIRMED | REFUTED | INDETERMINATE`로 독립 판정합니다. `seal`은 검증된 hash만 신뢰해 verdict를 fold하고 보고서·fix request·PR 코멘트를 렌더링합니다. 확인된 finding만 fix request에 반영하며 verdict는 커밋된 변경 범위만 판정합니다.
 
 ### legacy 문서명 이관
 
@@ -182,7 +182,7 @@ filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙
 | `restructure_plan`   | 배치 결정, plan artifact 반환           |
 | `structure_validate` | 프로젝트 또는 계획의 사전·사후조건 검증 |
 | `verification_scan`  | spec-document / test-record 계약 판정   |
-| `review_state`       | cross-review 상태·변경 roster·FCA 증거  |
+| `review_state`       | cross-review 준비·검증·fold·렌더링      |
 
 모든 도구가 동일한 envelope를 사용합니다. 반환은 작게 유지되며, 16 KiB를 넘으면 content-addressed artifact로 저장하고 경로와 SHA-256으로 참조합니다.
 

@@ -21,7 +21,7 @@
 filid 가 소유하는 것: INTENT/DETAIL 문서 계약과 최소 context chain, fractal/organ/pure-function/hybrid
 분류, 진입점 표면·외부 import 경계·의존성 DAG, 최저 공통 fractal 배치와 읽기 전용
 `sourcePath → targetPath` 계획, 검증 문서 역할·파일 cap·분할·계약 링크다. cross-review의
-`review_state(scope)`는 커밋 변경 roster와 changed-scope FCA 후보를 canonical `evidence.md`로
+`review_state(prepare)`는 커밋 변경 roster와 changed-scope FCA 후보를 canonical `evidence.md`로
 고정한다. reviewer는 이 범위의 결함·보안·성능·유지보수·테스트·문서를 계층형 규칙으로 판단하고,
 효율 모델 verifier가 모든 후보 finding을 독립 검증한다.
 

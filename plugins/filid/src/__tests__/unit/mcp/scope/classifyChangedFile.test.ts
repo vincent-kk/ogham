@@ -8,7 +8,9 @@ import {
 import { classifyChangedFile } from '../../../../mcp/tools/reviewState/scope/classifyChangedFile.js';
 import type { ReviewChangedFile } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
+/** Absolute fixture root used by changed-file classification cases. */
 const PROJECT_ROOT = '/project';
+/** Minimal owner tree used to classify paths beneath the source fractal. */
 const TREE_ENTRIES: NodeEntry[] = [
   {
     path: PROJECT_ROOT,
@@ -26,8 +28,18 @@ const TREE_ENTRIES: NodeEntry[] = [
   },
 ];
 
-function entry(path: string, change: ReviewChangedFile['change'] = 'M') {
-  return { path, change, insertions: 1, deletions: 1 };
+/**
+ * Build one committed changed-file input for classification.
+ *
+ * @param path Project-relative changed path.
+ * @param change Normalized Git change class.
+ * @returns Complete committed changed-file input.
+ */
+function entry(
+  path: string,
+  change: ReviewChangedFile['change'] = 'M',
+): ReviewChangedFile {
+  return { path, change, insertions: 1, deletions: 1, binary: false };
 }
 
 describe('classifyChangedFile', () => {
