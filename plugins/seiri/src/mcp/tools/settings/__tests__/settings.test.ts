@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
@@ -11,7 +12,9 @@ describe('settings action dispatch', () => {
   const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
 
   beforeAll(() => {
-    process.env.CLAUDE_PLUGIN_ROOT = process.cwd();
+    process.env.CLAUDE_PLUGIN_ROOT = fileURLToPath(
+      new URL('../../../../../', import.meta.url),
+    );
   });
 
   afterAll(() => {
