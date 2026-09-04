@@ -7,7 +7,7 @@ import { handleProjectInit } from '../projectInit/index.js';
 import type {
   ProjectInitSummary,
   ProjectSetupInput,
-} from '../projectSetupTypes.js';
+} from '../types/projectSetupTypes.js';
 
 type ProjectInitActionInput = Extract<
   ProjectSetupInput,

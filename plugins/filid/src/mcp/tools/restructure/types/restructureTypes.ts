@@ -1,14 +1,14 @@
-import type { RESTRUCTURE_ACTIONS } from '../../../constants/mcpContracts.js';
+import type { RESTRUCTURE_ACTIONS } from '../../../../constants/mcpContracts.js';
 import type {
   RestructurePlanData,
   RestructurePlanSummary,
   StructureValidateSummary,
-} from '../../../types/report.js';
+} from '../../../../types/report.js';
 import type {
   PlanValidationResult,
   RestructurePlanInput,
-} from '../../../types/restructure.js';
-import type { ToolPayload } from '../../../types/toolEnvelope.js';
+} from '../../../../types/restructure.js';
+import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 
 /** Action-discriminated input accepted by the public restructure tool. */
 export type RestructureInput =

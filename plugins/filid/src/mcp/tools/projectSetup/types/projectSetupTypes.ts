@@ -1,8 +1,8 @@
-import type { PROJECT_SETUP_ACTIONS } from '../../../constants/mcpContracts.js';
-import type { ToolPayload } from '../../../types/toolEnvelope.js';
+import type { PROJECT_SETUP_ACTIONS } from '../../../../constants/mcpContracts.js';
+import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 
-import type { OpenSettingsOutput } from './openSettings/index.js';
-import type { RuleDocsSyncOutput } from './ruleDocsSync/index.js';
+import type { OpenSettingsOutput } from '../openSettings/index.js';
+import type { RuleDocsSyncOutput } from '../ruleDocsSync/index.js';
 
 /** Action-discriminated input accepted by the public project-setup tool. */
 export type ProjectSetupInput =

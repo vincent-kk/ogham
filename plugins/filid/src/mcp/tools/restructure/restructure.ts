@@ -5,7 +5,7 @@ import { validateRestructurePlan } from './handlers/validateRestructurePlan.js';
 import type {
   RestructureInput,
   RestructureResult,
-} from './restructureTypes.js';
+} from './types/restructureTypes.js';
 
 /**
  * Dispatches one restructure lifecycle action to its focused handler.

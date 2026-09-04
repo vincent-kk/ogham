@@ -12,7 +12,7 @@ import type { StructureValidateSummary } from '../../../../types/report.js';
 import type { PlanValidationResult } from '../../../../types/restructure.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
-import type { RestructureInput } from '../restructureTypes.js';
+import type { RestructureInput } from '../types/restructureTypes.js';
 import { readRestructurePlan } from '../utils/readRestructurePlan.js';
 
 type RestructureValidationInput = Extract<

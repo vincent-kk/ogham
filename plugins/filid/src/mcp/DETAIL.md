@@ -9,14 +9,14 @@
 
 ## API Contracts
 
-- 진입점은 4개 `handle*` 함수와 서버 기동 API를 이름으로 재수출한다.
+- 진입점은 `createServer`와 `startServer`만 이름으로 재수출한다. 네 개 도구(`project_setup`, `fractal_inspect`, `restructure`, `review_state`)는 `createServer` 내부에서 등록된다.
 - 도구 sub-fractal 사이의 직접 import는 없다.
 
 ## Acceptance Criteria
 
 ### AC-mcp-surface — 네 개 도구
 
-- 진입점이 노출하는 도구 handler가 정확히 4개이며 제거된 도구가 없다.
+- 진입점은 `createServer`와 `startServer`만 노출하며, `createServer`가 `project_setup`, `fractal_inspect`, `restructure`, `review_state` 네 개 도구를 등록한다.
 
 ### AC-mcp-no-policy — 판단은 core가 한다
 

@@ -7,7 +7,7 @@ import { syncRuleDocs } from './handlers/syncRuleDocs.js';
 import type {
   ProjectSetupInput,
   ProjectSetupResult,
-} from './projectSetupTypes.js';
+} from './types/projectSetupTypes.js';
 
 /**
  * Dispatches one project-setup action to its focused child adapter.

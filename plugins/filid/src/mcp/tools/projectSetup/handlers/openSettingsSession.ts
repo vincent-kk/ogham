@@ -10,7 +10,7 @@ import { handleOpenSettings } from '../openSettings/index.js';
 import type {
   OpenSettingsSummary,
   ProjectSetupInput,
-} from '../projectSetupTypes.js';
+} from '../types/projectSetupTypes.js';
 
 type OpenSettingsActionInput = Extract<
   ProjectSetupInput,

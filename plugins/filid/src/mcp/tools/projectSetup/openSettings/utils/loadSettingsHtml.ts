@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { resolvePublicAsset } from './resolvePublicAsset';
+import { resolvePublicAsset } from './resolvePublicAsset.js';
 
 /**
  * Memoized settings-page source shared by repeated MCP calls.

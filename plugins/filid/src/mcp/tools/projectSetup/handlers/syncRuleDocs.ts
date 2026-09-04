@@ -15,7 +15,7 @@ import type {
 import type {
   ProjectSetupInput,
   RuleDocsSyncData,
-} from '../projectSetupTypes.js';
+} from '../types/projectSetupTypes.js';
 import { handleRuleDocsSync } from '../ruleDocsSync/index.js';
 
 type RuleDocsActionInput = Extract<

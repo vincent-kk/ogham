@@ -11,7 +11,7 @@ MCP 서버가 로컬 HTTP 로 서빙하는 브라우저 페이지의 프런트�
 
 ## Conventions
 
-- 순수 정적 파일 (HTML/CSS/JS) — 서버 코드는 `src/mcp/tools/openSettings/` 에만 위치
+- 순수 정적 파일 (HTML/CSS/JS) — 서버 코드는 `src/mcp/tools/projectSetup/openSettings/` 에만 위치
 - 빌드 시 `scripts/buildSettingsHtml.mjs` 가 페이지별 단일 HTML 로 인라인 번들 (`public/`)
 - 페이지는 TypeScript 소스를 import 하지 않는 독립 스크립트
 

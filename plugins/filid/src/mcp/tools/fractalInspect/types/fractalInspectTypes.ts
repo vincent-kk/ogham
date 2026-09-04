@@ -1,4 +1,4 @@
-import type { FRACTAL_INSPECT_ACTIONS } from '../../../constants/mcpContracts.js';
+import type { FRACTAL_INSPECT_ACTIONS } from '../../../../constants/mcpContracts.js';
 import type {
   ContextResolveData,
   ContextResolveSummary,
@@ -8,13 +8,13 @@ import type {
   ValidationReport,
   VerificationScanData,
   VerificationScanSummary,
-} from '../../../types/report.js';
-import type { ToolPayload } from '../../../types/toolEnvelope.js';
+} from '../../../../types/report.js';
+import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 
-import type { ContextResolveInput } from './contextResolve/index.js';
-import type { FractalScanInput } from './fractalScan/index.js';
-import type { StructureValidateInput } from './structureValidate/index.js';
-import type { VerificationScanInput } from './verificationScan/index.js';
+import type { ContextResolveInput } from '../contextResolve/index.js';
+import type { FractalScanInput } from '../fractalScan/index.js';
+import type { StructureValidateInput } from '../structureValidate/index.js';
+import type { VerificationScanInput } from '../verificationScan/index.js';
 
 /** Action-discriminated input accepted by the public inspection tool. */
 export type FractalInspectInput =

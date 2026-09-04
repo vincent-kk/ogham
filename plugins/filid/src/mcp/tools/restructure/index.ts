@@ -1,5 +1,2 @@
 export { handleRestructure } from './restructure.js';
-export type {
-  RestructureInput,
-  RestructureResult,
-} from './restructureTypes.js';
+export type { RestructureResult } from './types/restructureTypes.js';
